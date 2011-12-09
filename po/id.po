@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash 4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-10-12 10:08-0400\n"
+"POT-Creation-Date: 2009-11-09 14:08-0500\n"
 "PO-Revision-Date: 2009-03-21 11:40+0700\n"
 "Last-Translator: Arif E. Nugroho <arif_endro@yahoo.com>\n"
 "Language-Team: Indonesian <translation-team-id@lists.sourceforge.net>\n"
@@ -45,21 +45,21 @@ msgstr "%s: %s: harus menggunakan subscript ketika memberikan assosiasi array"
 msgid "%s: cannot create: %s"
 msgstr "%s: tidak dapat membuat: %s"
 
-#: bashline.c:3456
+#: bashline.c:3457
 msgid "bash_execute_unix_command: cannot find keymap for command"
 msgstr "bash_execute_unix_command: tidak dapat menemukan keymap untuk perintah"
 
-#: bashline.c:3542
+#: bashline.c:3543
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr "%s: bukan karakter whitespace (spasi) pertama ditemukan `\"'"
 
-#: bashline.c:3571
+#: bashline.c:3572
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr "tidak menutup '%c' dalam %s"
 
-#: bashline.c:3605
+#: bashline.c:3606
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: hilang pemisah colon"
@@ -320,7 +320,7 @@ msgstr "hanya dapat digunakan dalam sebuah fungsi"
 msgid "cannot use `-f' to make functions"
 msgstr "tidak dapat menggunakan `-f' untuk membuat fungsi"
 
-#: builtins/declare.def:372 execute_cmd.c:4897
+#: builtins/declare.def:372 execute_cmd.c:4905
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: fungsi baca-saja"
@@ -359,7 +359,7 @@ msgstr "%s: bukan dinamically loaded"
 msgid "%s: cannot delete: %s"
 msgstr "%s: tidak dapat menghapus: %s"
 
-#: builtins/evalfile.c:134 builtins/hash.def:169 execute_cmd.c:4754
+#: builtins/evalfile.c:134 builtins/hash.def:169 execute_cmd.c:4762
 #: shell.c:1444
 #, c-format
 msgid "%s: is a directory"
@@ -375,7 +375,8 @@ msgstr "%s: bukan sebuah file umum"
 msgid "%s: file is too large"
 msgstr "%s: file terlalu besar"
 
-#: builtins/evalfile.c:185 execute_cmd.c:4824 shell.c:1454
+#: builtins/evalfile.c:185 builtins/evalfile.c:203 execute_cmd.c:4832
+#: shell.c:1454
 #, c-format
 msgid "%s: cannot execute binary file"
 msgstr "%s: tidak dapat menjalankan berkas binary"
@@ -528,36 +529,41 @@ msgstr "Kesalahan tidak diketahui"
 msgid "expression expected"
 msgstr "diduga sebuah ekspresi"
 
-#: builtins/mapfile.def:241 builtins/read.def:279
+#: builtins/mapfile.def:165
+#, fuzzy, c-format
+msgid "%s: not an indexed array"
+msgstr "%s: bukan sebuah variabel array"
+
+#: builtins/mapfile.def:249 builtins/read.def:279
 #, c-format
 msgid "%s: invalid file descriptor specification"
 msgstr "%s: spesifikasi file deskripsi tidak valid"
 
-#: builtins/mapfile.def:249 builtins/read.def:286
+#: builtins/mapfile.def:257 builtins/read.def:286
 #, c-format
 msgid "%d: invalid file descriptor: %s"
 msgstr "%d: file deskriptor %s tidak valid"
 
-#: builtins/mapfile.def:258 builtins/mapfile.def:296
+#: builtins/mapfile.def:266 builtins/mapfile.def:304
 #, c-format
 msgid "%s: invalid line count"
 msgstr "%s: jumlah baris tidak valid"
 
-#: builtins/mapfile.def:269
+#: builtins/mapfile.def:277
 #, c-format
 msgid "%s: invalid array origin"
 msgstr "%s: asal array tidak valid"
 
-#: builtins/mapfile.def:286
+#: builtins/mapfile.def:294
 #, c-format
 msgid "%s: invalid callback quantum"
 msgstr "%s: nama aksi tidak valid"
 
-#: builtins/mapfile.def:318
+#: builtins/mapfile.def:326
 msgid "empty array variable name"
 msgstr "nama variabel array kosong"
 
-#: builtins/mapfile.def:339
+#: builtins/mapfile.def:347
 msgid "array variable support required"
 msgstr "bantuan array variabel dibutuhkan"
 
@@ -766,11 +772,11 @@ msgstr "%s: bukan sebuah fungsi"
 msgid "shift count"
 msgstr "shift terhitung"
 
-#: builtins/shopt.def:259
+#: builtins/shopt.def:260
 msgid "cannot set and unset shell options simultaneously"
 msgstr "tidak dapat menset dan menunset pilihan shell secara bersamaan"
 
-#: builtins/shopt.def:324
+#: builtins/shopt.def:325
 #, c-format
 msgid "%s: invalid shell option name"
 msgstr "%s: nama pilihan shell tidak valid"
@@ -905,32 +911,32 @@ msgstr "kehabisan waktu menunggu masukan: otomatis-keluar\n"
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr "tidak dapat menyalurkan masukan standar dari /dev/null: %s"
 
-#: execute_cmd.c:1157
+#: execute_cmd.c:1156
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "TIMEFORMAT: `%c': karakter format tidak valid"
 
-#: execute_cmd.c:2061
+#: execute_cmd.c:2069
 msgid "pipe error"
 msgstr "pipe error"
 
-#: execute_cmd.c:4441
+#: execute_cmd.c:4449
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr ""
 "%s: dibatasi: tidak dapat menspesifikasikan '/' dalam nama nama perintah"
 
-#: execute_cmd.c:4532
+#: execute_cmd.c:4540
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: perintah tidak ditemukan"
 
-#: execute_cmd.c:4787
+#: execute_cmd.c:4795
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: interpreter buruk"
 
-#: execute_cmd.c:4936
+#: execute_cmd.c:4944
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "tidak dapat menduplikasikan fd %d ke fd %d"
@@ -1005,7 +1011,7 @@ msgstr "%s: expresi error\n"
 msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: tidak dapat mengakses direktori orang tua"
 
-#: input.c:94 subst.c:4842
+#: input.c:94 subst.c:4845
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "tidak dapat mereset mode nodelay untuk fd %d"
@@ -1026,140 +1032,144 @@ msgstr "simpan bash_input: buffer telah ada untuk fd %d baru"
 msgid "start_pipeline: pgrp pipe"
 msgstr "start_pipeline: pgrp pipe"
 
-#: jobs.c:887
+#: jobs.c:888
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr "forked pid %d terlihat dalam pekerjaan yang sedang berjalan %d"
 
-#: jobs.c:1005
+#: jobs.c:1006
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "menghapus pekerjaan yang terhenti %d dengan proses grup %ld"
 
-#: jobs.c:1110
+#: jobs.c:1111
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
 msgstr "add_process: process %5ld (%s) dalam the_pipeline"
 
-#: jobs.c:1113
+#: jobs.c:1114
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr "add_process: pid %5ld (%s) ditandai dengan tetap hidup"
 
-#: jobs.c:1401
+#: jobs.c:1402
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "describe_pid: %ld: tidak ada pid seperti itu"
 
-#: jobs.c:1416
+#: jobs.c:1417
 #, c-format
 msgid "Signal %d"
 msgstr "sinyal %d"
 
-#: jobs.c:1430 jobs.c:1455
+#: jobs.c:1431 jobs.c:1456
 msgid "Done"
 msgstr "Selesai"
 
-#: jobs.c:1435 siglist.c:123
+#: jobs.c:1436 siglist.c:123
 msgid "Stopped"
 msgstr "Terhenti"
 
-#: jobs.c:1439
+#: jobs.c:1440
 #, c-format
 msgid "Stopped(%s)"
 msgstr "Terhenti(%s)"
 
-#: jobs.c:1443
+#: jobs.c:1444
 msgid "Running"
 msgstr "Berjalan"
 
-#: jobs.c:1457
+#: jobs.c:1458
 #, c-format
 msgid "Done(%d)"
 msgstr "Selesai(%d)"
 
-#: jobs.c:1459
+#: jobs.c:1460
 #, c-format
 msgid "Exit %d"
 msgstr "Keluar %d"
 
-#: jobs.c:1462
+#: jobs.c:1463
 msgid "Unknown status"
 msgstr "Status tidak diketahui"
 
-#: jobs.c:1549
+#: jobs.c:1550
 #, c-format
 msgid "(core dumped) "
 msgstr "(core didump) "
 
-#: jobs.c:1568
+#: jobs.c:1569
 #, c-format
 msgid "  (wd: %s)"
 msgstr "  (wd: %s)"
 
-#: jobs.c:1772
+#: jobs.c:1773
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr "anak setpgid (%ld ke %ld)"
 
-#: jobs.c:2100 nojobs.c:585
+#: jobs.c:2101 nojobs.c:585
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: pid %ld bukan sebuah anak dari shell ini"
 
-#: jobs.c:2327
+#: jobs.c:2328
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for: Tidak ada catatan untuk proses %ld"
 
-#: jobs.c:2603
+#: jobs.c:2604
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: pekerjaan %d terhenti"
 
-#: jobs.c:2825
+#: jobs.c:2826
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: pekerjaan telah selesai"
 
-#: jobs.c:2834
+#: jobs.c:2835
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: pekerjaan %d sudah berjalan di belakang (background)"
 
-#: jobs.c:3498
+#: jobs.c:3056
+msgid "waitchld: turning on WNOHANG to avoid indefinite block"
+msgstr ""
+
+#: jobs.c:3505
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s: baris %d: "
 
-#: jobs.c:3512 nojobs.c:814
+#: jobs.c:3519 nojobs.c:814
 #, c-format
 msgid " (core dumped)"
 msgstr " (core didump)"
 
-#: jobs.c:3524 jobs.c:3537
+#: jobs.c:3531 jobs.c:3544
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(wd sekarang: %s)\n"
 
-#: jobs.c:3569
+#: jobs.c:3576
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: getpgrp gagal"
 
-#: jobs.c:3629
+#: jobs.c:3636
 msgid "initialize_job_control: line discipline"
 msgstr "initialize_job_control: baris disiplin"
 
-#: jobs.c:3639
+#: jobs.c:3646
 msgid "initialize_job_control: setpgid"
 msgstr "initialize_job_control: setpgid"
 
-#: jobs.c:3667
+#: jobs.c:3674
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "tidak dapat menset terminal proses grup (%d)"
 
-#: jobs.c:3672
+#: jobs.c:3679
 msgid "no job control in this shell"
 msgstr "tidak ada pengontrol pekerjaan dalam shell ini"
 
@@ -1314,99 +1324,99 @@ msgstr ""
 msgid "make_redirection: redirection instruction `%d' out of range"
 msgstr "make_redirection: instruksi redireksi `%d' diluar dari jangkauan"
 
-#: parse.y:3116 parse.y:3351
+#: parse.y:3117 parse.y:3353
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "EOF tidak terduga ketika mencari untuk pencocokan `%c'"
 
-#: parse.y:3918
+#: parse.y:3935
 msgid "unexpected EOF while looking for `]]'"
 msgstr "EOF tidak terduga ketika mencari untuk `]]'"
 
-#: parse.y:3923
+#: parse.y:3940
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr "syntax error dalam ekspresi kondisional: tanda `%s' tidak terduga"
 
-#: parse.y:3927
+#: parse.y:3944
 msgid "syntax error in conditional expression"
 msgstr "syntax error dalam ekspresi kondisional"
 
-#: parse.y:4005
+#: parse.y:4022
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr "tanda `%s' tidak terduga, diduga `)'"
 
-#: parse.y:4009
+#: parse.y:4026
 msgid "expected `)'"
 msgstr "diduga `)'"
 
-#: parse.y:4037
+#: parse.y:4054
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr "argumen tidak terduga `%s' ke operator kondisional unary"
 
-#: parse.y:4041
+#: parse.y:4058
 msgid "unexpected argument to conditional unary operator"
 msgstr "argumen tidak terduga untuk operasi unary kondisional"
 
-#: parse.y:4087
+#: parse.y:4104
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr "tanda `%s' tidak terduga, operator binary kondisional diduga"
 
-#: parse.y:4091
+#: parse.y:4108
 msgid "conditional binary operator expected"
 msgstr "operator binary kondisional diduga"
 
-#: parse.y:4113
+#: parse.y:4130
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr "argumen `%s' tidak terduga ke operator binary kondisional"
 
-#: parse.y:4117
+#: parse.y:4134
 msgid "unexpected argument to conditional binary operator"
 msgstr "argumen tidak terduga ke operasi binary kondisional"
 
-#: parse.y:4128
+#: parse.y:4145
 #, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr "tanda `%c' tidak terduga dalam perintah kondisional"
 
-#: parse.y:4131
+#: parse.y:4148
 #, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr "tanda `%s' tidak terduga dalam perintah kondisional"
 
-#: parse.y:4135
+#: parse.y:4152
 #, c-format
 msgid "unexpected token %d in conditional command"
 msgstr "tanda %d tidak terduga dalam perintah kondisional"
 
-#: parse.y:5424
+#: parse.y:5443
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "syntax error didekat tanda `%s' yang tidak terduga"
 
-#: parse.y:5442
+#: parse.y:5461
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "syntax error didekat `%s'"
 
-#: parse.y:5452
+#: parse.y:5471
 msgid "syntax error: unexpected end of file"
 msgstr "syntax error: tidak terduga diakhir dari berkas"
 
-#: parse.y:5452
+#: parse.y:5471
 msgid "syntax error"
 msgstr "syntax error"
 
-#: parse.y:5514
+#: parse.y:5533
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "Gunakan \"%s\" untuk meninggalkan shell.\n"
 
-#: parse.y:5676
+#: parse.y:5695
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "EOF tidak terduga ketika mencari untuk pencocokan ')'"
 
@@ -1722,77 +1732,77 @@ msgstr "Sinyal tidak diketahui #"
 msgid "Unknown Signal #%d"
 msgstr "Sinyal tidak diketahui #%d"
 
-#: subst.c:1320 subst.c:1441
+#: subst.c:1321 subst.c:1442
 #, c-format
 msgid "bad substitution: no closing `%s' in %s"
 msgstr "substitusi buruk: tidak ada penutupan `%s' dalam %s"
 
-#: subst.c:2722
+#: subst.c:2723
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr "%s: tidak dapat meng-assign daftar kedalam anggoya array"
 
-#: subst.c:4739 subst.c:4755
+#: subst.c:4742 subst.c:4758
 msgid "cannot make pipe for process substitution"
 msgstr "tidak dapat membuat pipe untuk proses substitusi"
 
-#: subst.c:4787
+#: subst.c:4790
 msgid "cannot make child for process substitution"
 msgstr "tidak dapat membuat anak untuk proses substitusi"
 
-#: subst.c:4832
+#: subst.c:4835
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "tidak dapat membuka named pipe %s untuk membaca"
 
-#: subst.c:4834
+#: subst.c:4837
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "tidak dapat membukan named pipe %s untuk menulis"
 
-#: subst.c:4852
+#: subst.c:4855
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "tidak dapat menduplikasi nama pipe %s sebagai fd %d"
 
-#: subst.c:5048
+#: subst.c:5051
 msgid "cannot make pipe for command substitution"
 msgstr "tidak dapat membuat pipe untuk perintah substitusi"
 
-#: subst.c:5082
+#: subst.c:5085
 msgid "cannot make child for command substitution"
 msgstr "tidak dapat membuat anak untuk perintah substitusi"
 
-#: subst.c:5099
+#: subst.c:5102
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr "command_substitute: tidak dapat menduplikasikan pipe sebagi fd 1"
 
-#: subst.c:5602
+#: subst.c:5605
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: parameter kosong atau tidak diset"
 
-#: subst.c:5892
+#: subst.c:5895
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: substring expresi < 0"
 
-#: subst.c:6950
+#: subst.c:6953
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: substitusi buruk"
 
-#: subst.c:7030
+#: subst.c:7033
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: tidak dapat meng-assign dengan cara ini"
 
-#: subst.c:7813
+#: subst.c:7824
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "substitusi buruk: tidak ada penutupan \"\" dalam %s"
 
-#: subst.c:8689
+#: subst.c:8705
 #, c-format
 msgid "no match: %s"
 msgstr "tidak cocok: %s"
@@ -1865,46 +1875,46 @@ msgstr "level shell (%d) terlalu tinggi, mereset ke 1"
 msgid "make_local_variable: no function context at current scope"
 msgstr "make_local_variable: tidak ada context fungsi di scope ini"
 
-#: variables.c:3154
+#: variables.c:3159
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: tidak ada context fungsi dalam scope ini"
 
-#: variables.c:3371
+#: variables.c:3376
 #, fuzzy, c-format
 msgid "%s has null exportstr"
 msgstr "%s: parameter kosong atau tidak diset"
 
-#: variables.c:3376 variables.c:3385
+#: variables.c:3381 variables.c:3390
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "karakter %d tidak valid dalam exporstr untuk %s"
 
-#: variables.c:3391
+#: variables.c:3396
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "bukan `=' dalam exportstr untuk %s"
 
-#: variables.c:3830
+#: variables.c:3835
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr ""
 "pop_var_context: kepala dari shell_variables bukan sebuah fungsi cbntext"
 
-#: variables.c:3843
+#: variables.c:3848
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: bukan global_variable context"
 
-#: variables.c:3917
+#: variables.c:3922
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr ""
 "pop_scope: kepala dari shell_variables bukan sebuah scope lingkungan "
 "sementara"
 
-#: variables.c:4673
+#: variables.c:4678
 #, fuzzy, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: tidak dapat membuka: %s"
 
-#: variables.c:4678
+#: variables.c:4683
 #, fuzzy, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%d: file deskriptor %s tidak valid"
@@ -5495,14 +5505,15 @@ msgstr ""
 "    spesifikasi penyelesaian yang terdefinisi."
 
 #: builtins.c:1968
+#, fuzzy
 msgid ""
-"Read lines from the standard input into an array variable.\n"
+"Read lines from the standard input into an indexed array variable.\n"
 "    \n"
-"    Read lines from the standard input into the array variable ARRAY, or "
-"from\n"
-"    file descriptor FD if the -u option is supplied.  The variable MAPFILE "
-"is\n"
-"    the default ARRAY.\n"
+"    Read lines from the standard input into the indexed array variable "
+"ARRAY, or\n"
+"    from file descriptor FD if the -u option is supplied.  The variable "
+"MAPFILE\n"
+"    is the default ARRAY.\n"
 "    \n"
 "    Options:\n"
 "      -n count\tCopy at most COUNT lines.  If COUNT is 0, all lines are "
@@ -5529,7 +5540,9 @@ msgid ""
 "    assigning to it.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success unless an invalid option is given or ARRAY is readonly."
+"    Returns success unless an invalid option is given or ARRAY is readonly "
+"or\n"
+"    not an indexed array."
 msgstr ""
 "Baca baris dari standar masukan kedalam sebuah susunan variabel.\n"
 "    \n"
@@ -5564,7 +5577,7 @@ msgstr ""
 "    Mengembalikan sukses kecuali sebuah pilihan tidak valid diberikan atau "
 "ARRAY adalah baca-saja."
 
-#: builtins.c:2000
+#: builtins.c:2001
 msgid ""
 "Read lines from a file into an array variable.\n"
 "    \n"

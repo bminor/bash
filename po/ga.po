@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash 4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-10-12 10:08-0400\n"
+"POT-Creation-Date: 2009-11-09 14:08-0500\n"
 "PO-Revision-Date: 2009-09-24 23:08+0100\n"
 "Last-Translator: Séamus Ó Ciardhuáin <seoc@iolfree.ie>\n"
 "Language-Team: Irish <gaeilge-gnulinux@lists.sourceforge.net>\n"
@@ -48,22 +48,22 @@ msgstr ""
 msgid "%s: cannot create: %s"
 msgstr "%s: ní féidir cruthú: %s"
 
-#: bashline.c:3456
+#: bashline.c:3457
 msgid "bash_execute_unix_command: cannot find keymap for command"
 msgstr ""
 "bash_execute_unix_command: ní féidir mapa eochrach an ordaithe a aimsiú"
 
-#: bashline.c:3542
+#: bashline.c:3543
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr "%s: ní \" é an chéad charachtar nach spás bán é."
 
-#: bashline.c:3571
+#: bashline.c:3572
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr "Níl \"%c\" dúnta i %s"
 
-#: bashline.c:3605
+#: bashline.c:3606
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: deighilteoir idirstaid ar iarraidh"
@@ -324,7 +324,7 @@ msgstr "Inúsáidte i bhfeidhmeanna amháin. "
 msgid "cannot use `-f' to make functions"
 msgstr "Ní féidir \"-f\" a úsáid chun feidhmeanna a dhéanamh"
 
-#: builtins/declare.def:372 execute_cmd.c:4897
+#: builtins/declare.def:372 execute_cmd.c:4905
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: feidhm inléite amháin"
@@ -364,7 +364,7 @@ msgstr "%s: níl sé luchtaithe go dinimiciúil"
 msgid "%s: cannot delete: %s"
 msgstr "%s: ní féidir scrios: %s"
 
-#: builtins/evalfile.c:134 builtins/hash.def:169 execute_cmd.c:4754
+#: builtins/evalfile.c:134 builtins/hash.def:169 execute_cmd.c:4762
 #: shell.c:1444
 #, c-format
 msgid "%s: is a directory"
@@ -380,7 +380,8 @@ msgstr "%s: ní gnáthchomhad é"
 msgid "%s: file is too large"
 msgstr "%s: tá an comhad ró-mhór"
 
-#: builtins/evalfile.c:185 execute_cmd.c:4824 shell.c:1454
+#: builtins/evalfile.c:185 builtins/evalfile.c:203 execute_cmd.c:4832
+#: shell.c:1454
 #, c-format
 msgid "%s: cannot execute binary file"
 msgstr "%s: ní féidir comhad dénártha a rith"
@@ -531,36 +532,41 @@ msgstr "Earráid neamhaithnid"
 msgid "expression expected"
 msgstr "Ag súil le slonn"
 
-#: builtins/mapfile.def:241 builtins/read.def:279
+#: builtins/mapfile.def:165
+#, fuzzy, c-format
+msgid "%s: not an indexed array"
+msgstr "%s: ní athróg eagair é"
+
+#: builtins/mapfile.def:249 builtins/read.def:279
 #, c-format
 msgid "%s: invalid file descriptor specification"
 msgstr "%s: sonrú neamhbhailí tuairisceora comhaid"
 
-#: builtins/mapfile.def:249 builtins/read.def:286
+#: builtins/mapfile.def:257 builtins/read.def:286
 #, c-format
 msgid "%d: invalid file descriptor: %s"
 msgstr "%d: tuairisceoir comhaid neamhbhailí: %s"
 
-#: builtins/mapfile.def:258 builtins/mapfile.def:296
+#: builtins/mapfile.def:266 builtins/mapfile.def:304
 #, c-format
 msgid "%s: invalid line count"
 msgstr "%s: comhaireamh neamhbhailí línte"
 
-#: builtins/mapfile.def:269
+#: builtins/mapfile.def:277
 #, c-format
 msgid "%s: invalid array origin"
 msgstr "%s: bunphointe neamhbhailí eagair"
 
-#: builtins/mapfile.def:286
+#: builtins/mapfile.def:294
 #, c-format
 msgid "%s: invalid callback quantum"
 msgstr "%s: candam neamhbhailí aisghlaoigh"
 
-#: builtins/mapfile.def:318
+#: builtins/mapfile.def:326
 msgid "empty array variable name"
 msgstr "ainm folamh athróga eagair"
 
-#: builtins/mapfile.def:339
+#: builtins/mapfile.def:347
 msgid "array variable support required"
 msgstr "tacaíocht le hathróga eagair de dhíth"
 
@@ -712,11 +718,11 @@ msgstr "%s: ní feidhm é."
 msgid "shift count"
 msgstr "comhaireamh iomlaoide"
 
-#: builtins/shopt.def:259
+#: builtins/shopt.def:260
 msgid "cannot set and unset shell options simultaneously"
 msgstr "Ní féidir roghanna blaoisce a shocrú agus a dhíshocrú ag an am céanna."
 
-#: builtins/shopt.def:324
+#: builtins/shopt.def:325
 #, c-format
 msgid "%s: invalid shell option name"
 msgstr "%s: ainm neamhbhailí ar rogha blaoisce"
@@ -851,31 +857,31 @@ msgstr "imithe thar am ag feitheamh le hionchur: logáil amach uathoibríoch\n"
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr "Ní féidir an ionchur caighdeánach a atreorú ó /dev/null: %s"
 
-#: execute_cmd.c:1157
+#: execute_cmd.c:1156
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "FORMÁID_AMA: \"%c\": carachtar formáide neamhbhaií."
 
-#: execute_cmd.c:2061
+#: execute_cmd.c:2069
 msgid "pipe error"
 msgstr "earráid phíopa"
 
-#: execute_cmd.c:4441
+#: execute_cmd.c:4449
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: srianta: ní féidir \"/\" a shonrú in ainmneacha ordaithe"
 
-#: execute_cmd.c:4532
+#: execute_cmd.c:4540
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: níor aimsíodh an t-ordú"
 
-#: execute_cmd.c:4787
+#: execute_cmd.c:4795
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: drochléirmhínitheoir"
 
-#: execute_cmd.c:4936
+#: execute_cmd.c:4944
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr ""
@@ -951,7 +957,7 @@ msgstr "%s: earráid sloinn\n"
 msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: ní féidir na máthairchomhadlanna a rochtain."
 
-#: input.c:94 subst.c:4842
+#: input.c:94 subst.c:4845
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr ""
@@ -976,140 +982,144 @@ msgstr ""
 msgid "start_pipeline: pgrp pipe"
 msgstr "start_pipeline: pgrp píopa"
 
-#: jobs.c:887
+#: jobs.c:888
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr "tá an aitheantas an phróisis ghabhlaithe %d sa jab %d atá ag rith"
 
-#: jobs.c:1005
+#: jobs.c:1006
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "Tá an jab stoptha %d leis an ngrúpa próisis %ld á scrios."
 
-#: jobs.c:1110
+#: jobs.c:1111
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
 msgstr "add_process: próiseas %5ld (%s) sa phíblíne"
 
-#: jobs.c:1113
+#: jobs.c:1114
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr "add_process: próiseas %5ld (%s) marcáilte mar fós beo"
 
-#: jobs.c:1401
+#: jobs.c:1402
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "describe_pid: %ld: níl an aitheantóir próisis sin ann."
 
-#: jobs.c:1416
+#: jobs.c:1417
 #, c-format
 msgid "Signal %d"
 msgstr "Comhartha %d"
 
-#: jobs.c:1430 jobs.c:1455
+#: jobs.c:1431 jobs.c:1456
 msgid "Done"
 msgstr "Déanta"
 
-#: jobs.c:1435 siglist.c:123
+#: jobs.c:1436 siglist.c:123
 msgid "Stopped"
 msgstr "Stoptha"
 
-#: jobs.c:1439
+#: jobs.c:1440
 #, c-format
 msgid "Stopped(%s)"
 msgstr "Stoptha(%s)"
 
-#: jobs.c:1443
+#: jobs.c:1444
 msgid "Running"
 msgstr "Ag Rith"
 
-#: jobs.c:1457
+#: jobs.c:1458
 #, c-format
 msgid "Done(%d)"
 msgstr "Déanta(%d)"
 
-#: jobs.c:1459
+#: jobs.c:1460
 #, c-format
 msgid "Exit %d"
 msgstr "Scoir %d"
 
-#: jobs.c:1462
+#: jobs.c:1463
 msgid "Unknown status"
 msgstr "Stádas neamhaithnid"
 
-#: jobs.c:1549
+#: jobs.c:1550
 #, c-format
 msgid "(core dumped) "
 msgstr "(cuimhne dumpáilte)"
 
-#: jobs.c:1568
+#: jobs.c:1569
 #, c-format
 msgid "  (wd: %s)"
 msgstr "  (comhadlann oibre: %s)"
 
-#: jobs.c:1772
+#: jobs.c:1773
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr "setpgid macphróisis (%ld go %ld)"
 
-#: jobs.c:2100 nojobs.c:585
+#: jobs.c:2101 nojobs.c:585
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: níl an próiseas %ld ina mhacphróiseas den bhlaosc seo."
 
-#: jobs.c:2327
+#: jobs.c:2328
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for: níl taifead den phróiseas %ld"
 
-#: jobs.c:2603
+#: jobs.c:2604
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: tá an jab %d stoptha."
 
-#: jobs.c:2825
+#: jobs.c:2826
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: tá an jab críochnaithe."
 
-#: jobs.c:2834
+#: jobs.c:2835
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: tá an jab %d sa chúlra cheana."
 
-#: jobs.c:3498
+#: jobs.c:3056
+msgid "waitchld: turning on WNOHANG to avoid indefinite block"
+msgstr ""
+
+#: jobs.c:3505
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s: líne %d: "
 
-#: jobs.c:3512 nojobs.c:814
+#: jobs.c:3519 nojobs.c:814
 #, c-format
 msgid " (core dumped)"
 msgstr " (cuimhne dumpáilte)"
 
-#: jobs.c:3524 jobs.c:3537
+#: jobs.c:3531 jobs.c:3544
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(comhadlann oibre anois: %s)\n"
 
-#: jobs.c:3569
+#: jobs.c:3576
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: theip ar getpgrp"
 
-#: jobs.c:3629
+#: jobs.c:3636
 msgid "initialize_job_control: line discipline"
 msgstr "initialize_job_control: araíonacht líne"
 
-#: jobs.c:3639
+#: jobs.c:3646
 msgid "initialize_job_control: setpgid"
 msgstr "initialize_job_control: setpgid"
 
-#: jobs.c:3667
+#: jobs.c:3674
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "ní féidir grúpa próisis teirminéil a shocrú (%d)"
 
-#: jobs.c:3672
+#: jobs.c:3679
 msgid "no job control in this shell"
 msgstr "Níl rialú jabanna sa bhlaosc seo."
 
@@ -1265,103 +1275,103 @@ msgstr ""
 msgid "make_redirection: redirection instruction `%d' out of range"
 msgstr "make_redirection: ordú atreoraithe \"%d\" as raon."
 
-#: parse.y:3116 parse.y:3351
+#: parse.y:3117 parse.y:3353
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "Deireadh comhaid gan súil leis agus \"%c\" a mheaitseálann á lorg."
 
-#: parse.y:3918
+#: parse.y:3935
 msgid "unexpected EOF while looking for `]]'"
 msgstr "Deireadh comhaid gan súil leis agus \"]]\" á lorg."
 
-#: parse.y:3923
+#: parse.y:3940
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr ""
 "Earráid chomhréire i slonn coinníollach: comhartha \"%s\" gan suil leis."
 
-#: parse.y:3927
+#: parse.y:3944
 msgid "syntax error in conditional expression"
 msgstr "Earráid chomhréire i slonn coinníollach."
 
-#: parse.y:4005
+#: parse.y:4022
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr "Comhartha \"%s\" gan súil leis; ag súil le \")\"."
 
-#: parse.y:4009
+#: parse.y:4026
 msgid "expected `)'"
 msgstr "Ag súil le \")\""
 
-#: parse.y:4037
+#: parse.y:4054
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr "Argóint \"%s\" gan súil lei go hoibreoir aonártha coinníollach."
 
-#: parse.y:4041
+#: parse.y:4058
 msgid "unexpected argument to conditional unary operator"
 msgstr "Argóint gan súil lei go hoibreoir coinníollach aonártha ."
 
-#: parse.y:4087
+#: parse.y:4104
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr ""
 "Comhartha \"%s\" gan súil leis. Bhíothas ag súil le hoibreoir coinníollach "
 "dénártha."
 
-#: parse.y:4091
+#: parse.y:4108
 msgid "conditional binary operator expected"
 msgstr "Bhíothas ag súil le hoibreoir coinníollach dénártha."
 
-#: parse.y:4113
+#: parse.y:4130
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr "Argóint \"%s\" gan súil lei go hoibreoir dénártha coinníollach."
 
-#: parse.y:4117
+#: parse.y:4134
 msgid "unexpected argument to conditional binary operator"
 msgstr "Argóint gan súil lei go hoibreoir dénártha coinníollach."
 
-#: parse.y:4128
+#: parse.y:4145
 #, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr "Comhartha \"%c\" gan súil leis in ordú coinníollach."
 
-#: parse.y:4131
+#: parse.y:4148
 #, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr "Comhartha \"%s\" gan súil leis in ordú coinníollach."
 
-#: parse.y:4135
+#: parse.y:4152
 #, c-format
 msgid "unexpected token %d in conditional command"
 msgstr "Comhartha %d gan súil leis in ordú coinníollach."
 
-#: parse.y:5424
+#: parse.y:5443
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr ""
 "Earráid chomhréire in aice comhartha \"%s\" nach rabhthas ag súil leis."
 
-#: parse.y:5442
+#: parse.y:5461
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "Earráid chomhréire in aice \"%s\""
 
-#: parse.y:5452
+#: parse.y:5471
 msgid "syntax error: unexpected end of file"
 msgstr "Earráid chomhréire: deireadh comhaid gan súil leis."
 
-#: parse.y:5452
+#: parse.y:5471
 msgid "syntax error"
 msgstr "Earráid chomhréire"
 
-#: parse.y:5514
+#: parse.y:5533
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "Úsáid \"%s\" le scoir den mblaosc.\n"
 
-#: parse.y:5676
+#: parse.y:5695
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "Deireadh comhaid gan súil leis agus \")\" á lorg le meaitseáil."
 
@@ -1677,80 +1687,80 @@ msgstr "Comhartha neamhaithnid #"
 msgid "Unknown Signal #%d"
 msgstr "Comhartha neamhaithnid #%d"
 
-#: subst.c:1320 subst.c:1441
+#: subst.c:1321 subst.c:1442
 #, c-format
 msgid "bad substitution: no closing `%s' in %s"
 msgstr "Drochionadú: níl \"%s\" dúnta i %s"
 
-#: subst.c:2722
+#: subst.c:2723
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr "%s: ní féidir liosta a shannadh go ball eagair."
 
-#: subst.c:4739 subst.c:4755
+#: subst.c:4742 subst.c:4758
 msgid "cannot make pipe for process substitution"
 msgstr "Ní féidir píopa a dhéanamh le haghaidh ionadaíocht próisis."
 
-#: subst.c:4787
+#: subst.c:4790
 msgid "cannot make child for process substitution"
 msgstr "Ní féidir macphróiseas a dhéanamh le haghaidh ionadaíocht próisis."
 
-#: subst.c:4832
+#: subst.c:4835
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "Ní féidir píopa ainmnithe %s a oscailt le haghaidh léamh."
 
-#: subst.c:4834
+#: subst.c:4837
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "Ní féidir píopa ainmnithe %s a oscailt le haghaidh scríofa."
 
-#: subst.c:4852
+#: subst.c:4855
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr ""
 "Ní féidir an píopa ainmnithe %s a dhúbailt mar thuairisceoir comhaid %d."
 
-#: subst.c:5048
+#: subst.c:5051
 msgid "cannot make pipe for command substitution"
 msgstr "Ní féidir píopa a dhéanamh le haghaidh ionadú ordaithe."
 
-#: subst.c:5082
+#: subst.c:5085
 msgid "cannot make child for command substitution"
 msgstr "Ní féidir macphróiseas a dhéanamh le haghaidh ionadú ordaithe."
 
-#: subst.c:5099
+#: subst.c:5102
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr ""
 "command_substitute: ní feidir an píopa a dhúbailt mar thuairisceoir comhaid "
 "1."
 
-#: subst.c:5602
+#: subst.c:5605
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: paraiméadar neamhnitheach nó gan socrú."
 
-#: subst.c:5892
+#: subst.c:5895
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: slonn fotheaghráin < 0"
 
-#: subst.c:6950
+#: subst.c:6953
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: drochionadú"
 
-#: subst.c:7030
+#: subst.c:7033
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: ní féidir sannadh mar seo."
 
-#: subst.c:7813
+#: subst.c:7824
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "drochionadú: níl  \"`\" dúnta i %s"
 
-#: subst.c:8689
+#: subst.c:8705
 #, c-format
 msgid "no match: %s"
 msgstr "gan meaitseáil: %s"
@@ -1823,43 +1833,43 @@ msgstr "Tá an leibhéal blaoisce (%d) ró-ard; á athshocrú go 1."
 msgid "make_local_variable: no function context at current scope"
 msgstr "make_local_variable: níl comhthéacs feidhme sa scóip reatha."
 
-#: variables.c:3154
+#: variables.c:3159
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: níl comhthéacs feidhme sa scóip reatha"
 
-#: variables.c:3371
+#: variables.c:3376
 #, fuzzy, c-format
 msgid "%s has null exportstr"
 msgstr "%s: paraiméadar neamhnitheach nó gan socrú."
 
-#: variables.c:3376 variables.c:3385
+#: variables.c:3381 variables.c:3390
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "Carachtar neamhbhailí %d sa teaghrán easpórtála le haghaidh %s."
 
-#: variables.c:3391
+#: variables.c:3396
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "Níl \"=\" sa teaghrán easpórtála le haghaidh %s."
 
-#: variables.c:3830
+#: variables.c:3835
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr "pop_var_context: ní comhthéacs feidhme é ceann shell_variables"
 
-#: variables.c:3843
+#: variables.c:3848
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: níl comhthéacs global_variables ann"
 
-#: variables.c:3917
+#: variables.c:3922
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr "pop_scope: ní scóip shealadach thimpeallachta é ceann shell_variables"
 
-#: variables.c:4673
+#: variables.c:4678
 #, fuzzy, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: ní féidir oscailt: %s"
 
-#: variables.c:4678
+#: variables.c:4683
 #, fuzzy, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%d: tuairisceoir comhaid neamhbhailí: %s"
@@ -4247,13 +4257,13 @@ msgstr ""
 
 #: builtins.c:1968
 msgid ""
-"Read lines from the standard input into an array variable.\n"
+"Read lines from the standard input into an indexed array variable.\n"
 "    \n"
-"    Read lines from the standard input into the array variable ARRAY, or "
-"from\n"
-"    file descriptor FD if the -u option is supplied.  The variable MAPFILE "
-"is\n"
-"    the default ARRAY.\n"
+"    Read lines from the standard input into the indexed array variable "
+"ARRAY, or\n"
+"    from file descriptor FD if the -u option is supplied.  The variable "
+"MAPFILE\n"
+"    is the default ARRAY.\n"
 "    \n"
 "    Options:\n"
 "      -n count\tCopy at most COUNT lines.  If COUNT is 0, all lines are "
@@ -4280,10 +4290,12 @@ msgid ""
 "    assigning to it.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success unless an invalid option is given or ARRAY is readonly."
+"    Returns success unless an invalid option is given or ARRAY is readonly "
+"or\n"
+"    not an indexed array."
 msgstr ""
 
-#: builtins.c:2000
+#: builtins.c:2001
 msgid ""
 "Read lines from a file into an array variable.\n"
 "    \n"

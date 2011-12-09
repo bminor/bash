@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash 2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-10-12 10:08-0400\n"
+"POT-Creation-Date: 2009-11-09 14:08-0500\n"
 "PO-Revision-Date: 2004-03-17 13:48+0200\n"
 "Last-Translator: Petri Jooste <rkwjpj@puk.ac.za>\n"
 "Language-Team: Afrikaans <i18n@af.org.za>\n"
@@ -44,21 +44,21 @@ msgstr ""
 msgid "%s: cannot create: %s"
 msgstr "%s: kan nie %s skep nie"
 
-#: bashline.c:3456
+#: bashline.c:3457
 msgid "bash_execute_unix_command: cannot find keymap for command"
 msgstr ""
 
-#: bashline.c:3542
+#: bashline.c:3543
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr ""
 
-#: bashline.c:3571
+#: bashline.c:3572
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr ""
 
-#: bashline.c:3605
+#: bashline.c:3606
 #, c-format
 msgid "%s: missing colon separator"
 msgstr ""
@@ -324,7 +324,7 @@ msgstr ""
 msgid "cannot use `-f' to make functions"
 msgstr ""
 
-#: builtins/declare.def:372 execute_cmd.c:4897
+#: builtins/declare.def:372 execute_cmd.c:4905
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: leesalleen-funksie"
@@ -363,7 +363,7 @@ msgstr ""
 msgid "%s: cannot delete: %s"
 msgstr "%s: kan nie %s skep nie"
 
-#: builtins/evalfile.c:134 builtins/hash.def:169 execute_cmd.c:4754
+#: builtins/evalfile.c:134 builtins/hash.def:169 execute_cmd.c:4762
 #: shell.c:1444
 #, c-format
 msgid "%s: is a directory"
@@ -379,7 +379,8 @@ msgstr "%s: kan nie 'n binêre lêer uitvoer nie"
 msgid "%s: file is too large"
 msgstr ""
 
-#: builtins/evalfile.c:185 execute_cmd.c:4824 shell.c:1454
+#: builtins/evalfile.c:185 builtins/evalfile.c:203 execute_cmd.c:4832
+#: shell.c:1454
 #, c-format
 msgid "%s: cannot execute binary file"
 msgstr "%s: kan nie 'n binêre lêer uitvoer nie"
@@ -522,37 +523,42 @@ msgstr "Onbekende fout %d"
 msgid "expression expected"
 msgstr "Bools uitdrukking verwag"
 
-#: builtins/mapfile.def:241 builtins/read.def:279
+#: builtins/mapfile.def:165
+#, fuzzy, c-format
+msgid "%s: not an indexed array"
+msgstr "Veranderlike boom"
+
+#: builtins/mapfile.def:249 builtins/read.def:279
 #, c-format
 msgid "%s: invalid file descriptor specification"
 msgstr ""
 
-#: builtins/mapfile.def:249 builtins/read.def:286
+#: builtins/mapfile.def:257 builtins/read.def:286
 #, c-format
 msgid "%d: invalid file descriptor: %s"
 msgstr ""
 
-#: builtins/mapfile.def:258 builtins/mapfile.def:296
+#: builtins/mapfile.def:266 builtins/mapfile.def:304
 #, fuzzy, c-format
 msgid "%s: invalid line count"
 msgstr "%s: illegal option -- %c\n"
 
-#: builtins/mapfile.def:269
+#: builtins/mapfile.def:277
 #, fuzzy, c-format
 msgid "%s: invalid array origin"
 msgstr "%s: illegal option -- %c\n"
 
-#: builtins/mapfile.def:286
+#: builtins/mapfile.def:294
 #, fuzzy, c-format
 msgid "%s: invalid callback quantum"
 msgstr "Die sein nommer wat was gevang het"
 
-#: builtins/mapfile.def:318
+#: builtins/mapfile.def:326
 #, fuzzy
 msgid "empty array variable name"
 msgstr "Veranderlike boom"
 
-#: builtins/mapfile.def:339
+#: builtins/mapfile.def:347
 msgid "array variable support required"
 msgstr ""
 
@@ -707,11 +713,11 @@ msgstr "%s: leesalleen-funksie"
 msgid "shift count"
 msgstr "Shift"
 
-#: builtins/shopt.def:259
+#: builtins/shopt.def:260
 msgid "cannot set and unset shell options simultaneously"
 msgstr ""
 
-#: builtins/shopt.def:324
+#: builtins/shopt.def:325
 #, c-format
 msgid "%s: invalid shell option name"
 msgstr ""
@@ -853,32 +859,32 @@ msgstr ""
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr ""
 
-#: execute_cmd.c:1157
+#: execute_cmd.c:1156
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr ""
 
-#: execute_cmd.c:2061
+#: execute_cmd.c:2069
 #, fuzzy
 msgid "pipe error"
 msgstr "pypfout: %s"
 
-#: execute_cmd.c:4441
+#: execute_cmd.c:4449
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr ""
 
-#: execute_cmd.c:4532
+#: execute_cmd.c:4540
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: bevel nie gevind nie"
 
-#: execute_cmd.c:4787
+#: execute_cmd.c:4795
 #, fuzzy, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: is 'n gids"
 
-#: execute_cmd.c:4936
+#: execute_cmd.c:4944
 #, fuzzy, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "kan nie fd %d na fd 0 dupliseer nie: %s"
@@ -962,7 +968,7 @@ msgstr "%s: heelgetal-uitdrukking is verwag\n"
 msgid "getcwd: cannot access parent directories"
 msgstr "Kan nie die program uitvoer nie:"
 
-#: input.c:94 subst.c:4842
+#: input.c:94 subst.c:4845
 #, fuzzy, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "kan nie fd %d na fd 0 dupliseer nie: %s"
@@ -981,144 +987,148 @@ msgstr ""
 msgid "start_pipeline: pgrp pipe"
 msgstr ""
 
-#: jobs.c:887
+#: jobs.c:888
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr ""
 
-#: jobs.c:1005
+#: jobs.c:1006
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr ""
 
-#: jobs.c:1110
+#: jobs.c:1111
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
 msgstr ""
 
-#: jobs.c:1113
+#: jobs.c:1114
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr ""
 
-#: jobs.c:1401
+#: jobs.c:1402
 #, fuzzy, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "E108: Geen veranderlike: \"%s\""
 
-#: jobs.c:1416
+#: jobs.c:1417
 #, fuzzy, c-format
 msgid "Signal %d"
 msgstr "Sein kwaliteit:"
 
-#: jobs.c:1430 jobs.c:1455
+#: jobs.c:1431 jobs.c:1456
 msgid "Done"
 msgstr "Klaar"
 
-#: jobs.c:1435 siglist.c:123
+#: jobs.c:1436 siglist.c:123
 #, fuzzy
 msgid "Stopped"
 msgstr "Op gehou"
 
-#: jobs.c:1439
+#: jobs.c:1440
 #, fuzzy, c-format
 msgid "Stopped(%s)"
 msgstr "Op gehou"
 
-#: jobs.c:1443
+#: jobs.c:1444
 #, fuzzy
 msgid "Running"
 msgstr "aktief"
 
-#: jobs.c:1457
+#: jobs.c:1458
 #, c-format
 msgid "Done(%d)"
 msgstr "Klaar(%d)"
 
-#: jobs.c:1459
+#: jobs.c:1460
 #, c-format
 msgid "Exit %d"
 msgstr "Verlaat %d"
 
-#: jobs.c:1462
+#: jobs.c:1463
 msgid "Unknown status"
 msgstr "Onbekende status"
 
-#: jobs.c:1549
+#: jobs.c:1550
 #, fuzzy, c-format
 msgid "(core dumped) "
 msgstr "Kern Ontwikkelaar"
 
-#: jobs.c:1568
+#: jobs.c:1569
 #, fuzzy, c-format
 msgid "  (wd: %s)"
 msgstr "Aktiveer nou dadelik"
 
-#: jobs.c:1772
+#: jobs.c:1773
 #, fuzzy, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr "Fout in die skryf van %s"
 
-#: jobs.c:2100 nojobs.c:585
+#: jobs.c:2101 nojobs.c:585
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr ""
 
-#: jobs.c:2327
+#: jobs.c:2328
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr ""
 
-#: jobs.c:2603
+#: jobs.c:2604
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr ""
 
-#: jobs.c:2825
+#: jobs.c:2826
 #, fuzzy, c-format
 msgid "%s: job has terminated"
 msgstr "Die bediener beëindig Die verbinding."
 
-#: jobs.c:2834
+#: jobs.c:2835
 #, c-format
 msgid "%s: job %d already in background"
 msgstr ""
 
-#: jobs.c:3498
+#: jobs.c:3056
+msgid "waitchld: turning on WNOHANG to avoid indefinite block"
+msgstr ""
+
+#: jobs.c:3505
 #, fuzzy, c-format
 msgid "%s: line %d: "
 msgstr "3d modus"
 
-#: jobs.c:3512 nojobs.c:814
+#: jobs.c:3519 nojobs.c:814
 #, fuzzy, c-format
 msgid " (core dumped)"
 msgstr "Kern Ontwikkelaar"
 
-#: jobs.c:3524 jobs.c:3537
+#: jobs.c:3531 jobs.c:3544
 #, fuzzy, c-format
 msgid "(wd now: %s)\n"
 msgstr "Aktiveer nou dadelik"
 
-#: jobs.c:3569
+#: jobs.c:3576
 #, fuzzy
 msgid "initialize_job_control: getpgrp failed"
 msgstr "Inisialisering van OpenGL het misluk."
 
-#: jobs.c:3629
+#: jobs.c:3636
 msgid "initialize_job_control: line discipline"
 msgstr ""
 
-#: jobs.c:3639
+#: jobs.c:3646
 #, fuzzy
 msgid "initialize_job_control: setpgid"
 msgstr "Inisialisering van OpenGL het misluk."
 
-#: jobs.c:3667
+#: jobs.c:3674
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr ""
 
-#: jobs.c:3672
+#: jobs.c:3679
 msgid "no job control in this shell"
 msgstr "geen taakbeheer in hierdie dop nie"
 
@@ -1274,103 +1284,103 @@ msgstr ""
 msgid "make_redirection: redirection instruction `%d' out of range"
 msgstr ""
 
-#: parse.y:3116 parse.y:3351
+#: parse.y:3117 parse.y:3353
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr ""
 
-#: parse.y:3918
+#: parse.y:3935
 msgid "unexpected EOF while looking for `]]'"
 msgstr ""
 
-#: parse.y:3923
+#: parse.y:3940
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr ""
 
-#: parse.y:3927
+#: parse.y:3944
 #, fuzzy
 msgid "syntax error in conditional expression"
 msgstr "Sintaks fout in patroon"
 
-#: parse.y:4005
+#: parse.y:4022
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr ""
 
-#: parse.y:4009
+#: parse.y:4026
 #, fuzzy
 msgid "expected `)'"
 msgstr "')' is verwag\n"
 
-#: parse.y:4037
+#: parse.y:4054
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr ""
 
-#: parse.y:4041
+#: parse.y:4058
 msgid "unexpected argument to conditional unary operator"
 msgstr ""
 
-#: parse.y:4087
+#: parse.y:4104
 #, fuzzy, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr "%s: binêre operator is verwag\n"
 
-#: parse.y:4091
+#: parse.y:4108
 #, fuzzy
 msgid "conditional binary operator expected"
 msgstr "%s: binêre operator is verwag\n"
 
-#: parse.y:4113
+#: parse.y:4130
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr ""
 
-#: parse.y:4117
+#: parse.y:4134
 msgid "unexpected argument to conditional binary operator"
 msgstr ""
 
-#: parse.y:4128
+#: parse.y:4145
 #, fuzzy, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr "Soek die lêer vir 'n uitdrukking"
 
-#: parse.y:4131
+#: parse.y:4148
 #, fuzzy, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr "Soek die lêer vir 'n uitdrukking"
 
-#: parse.y:4135
+#: parse.y:4152
 #, fuzzy, c-format
 msgid "unexpected token %d in conditional command"
 msgstr "Soek die lêer vir 'n uitdrukking"
 
-#: parse.y:5424
+#: parse.y:5443
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr ""
 
-#: parse.y:5442
+#: parse.y:5461
 #, fuzzy, c-format
 msgid "syntax error near `%s'"
 msgstr "Sintaks fout in patroon"
 
-#: parse.y:5452
+#: parse.y:5471
 #, fuzzy
 msgid "syntax error: unexpected end of file"
 msgstr "Onverwagte einde van lêer tydens inlees van hulpbron."
 
-#: parse.y:5452
+#: parse.y:5471
 msgid "syntax error"
 msgstr "sintaksfout"
 
-#: parse.y:5514
+#: parse.y:5533
 #, fuzzy, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "Gebruik Kaart na Los Tronk"
 
-#: parse.y:5676
+#: parse.y:5695
 msgid "unexpected EOF while looking for matching `)'"
 msgstr ""
 
@@ -1717,81 +1727,81 @@ msgstr "Sein kwaliteit:"
 msgid "Unknown Signal #%d"
 msgstr "Sein kwaliteit:"
 
-#: subst.c:1320 subst.c:1441
+#: subst.c:1321 subst.c:1442
 #, fuzzy, c-format
 msgid "bad substitution: no closing `%s' in %s"
 msgstr "--Geen reëls in buffer--"
 
-#: subst.c:2722
+#: subst.c:2723
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr ""
 
-#: subst.c:4739 subst.c:4755
+#: subst.c:4742 subst.c:4758
 #, fuzzy
 msgid "cannot make pipe for process substitution"
 msgstr "Woord Substitusie"
 
-#: subst.c:4787
+#: subst.c:4790
 #, fuzzy
 msgid "cannot make child for process substitution"
 msgstr "Woord Substitusie"
 
-#: subst.c:4832
+#: subst.c:4835
 #, fuzzy, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "Kan nie oopmaak vir skrip-afvoer nie: \""
 
-#: subst.c:4834
+#: subst.c:4837
 #, fuzzy, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "Kan nie oopmaak vir skrip-afvoer nie: \""
 
-#: subst.c:4852
+#: subst.c:4855
 #, fuzzy, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "Kan nie oopmaak vir skrip-afvoer nie: \""
 
-#: subst.c:5048
+#: subst.c:5051
 #, fuzzy
 msgid "cannot make pipe for command substitution"
 msgstr "Woord Substitusie"
 
-#: subst.c:5082
+#: subst.c:5085
 #, fuzzy
 msgid "cannot make child for command substitution"
 msgstr "Woord Substitusie"
 
-#: subst.c:5099
+#: subst.c:5102
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr ""
 
-#: subst.c:5602
+#: subst.c:5605
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr ""
 
-#: subst.c:5892
+#: subst.c:5895
 #, fuzzy, c-format
 msgid "%s: substring expression < 0"
 msgstr "ongeldige uitdrukking"
 
-#: subst.c:6950
+#: subst.c:6953
 #, fuzzy, c-format
 msgid "%s: bad substitution"
 msgstr "Woord Substitusie"
 
-#: subst.c:7030
+#: subst.c:7033
 #, fuzzy, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "Kan nie soek 'n handtekening in hierdie boodskap!"
 
-#: subst.c:7813
+#: subst.c:7824
 #, fuzzy, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "--Geen reëls in buffer--"
 
-#: subst.c:8689
+#: subst.c:8705
 #, c-format
 msgid "no match: %s"
 msgstr ""
@@ -1866,43 +1876,43 @@ msgstr ""
 msgid "make_local_variable: no function context at current scope"
 msgstr ""
 
-#: variables.c:3154
+#: variables.c:3159
 msgid "all_local_variables: no function context at current scope"
 msgstr ""
 
-#: variables.c:3371
+#: variables.c:3376
 #, c-format
 msgid "%s has null exportstr"
 msgstr ""
 
-#: variables.c:3376 variables.c:3385
+#: variables.c:3381 variables.c:3390
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr ""
 
-#: variables.c:3391
+#: variables.c:3396
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr ""
 
-#: variables.c:3830
+#: variables.c:3835
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr ""
 
-#: variables.c:3843
+#: variables.c:3848
 msgid "pop_var_context: no global_variables context"
 msgstr ""
 
-#: variables.c:3917
+#: variables.c:3922
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr ""
 
-#: variables.c:4673
+#: variables.c:4678
 #, fuzzy, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: kan nie %s skep nie"
 
-#: variables.c:4678
+#: variables.c:4683
 #, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr ""
@@ -3997,13 +4007,13 @@ msgstr ""
 
 #: builtins.c:1968
 msgid ""
-"Read lines from the standard input into an array variable.\n"
+"Read lines from the standard input into an indexed array variable.\n"
 "    \n"
-"    Read lines from the standard input into the array variable ARRAY, or "
-"from\n"
-"    file descriptor FD if the -u option is supplied.  The variable MAPFILE "
-"is\n"
-"    the default ARRAY.\n"
+"    Read lines from the standard input into the indexed array variable "
+"ARRAY, or\n"
+"    from file descriptor FD if the -u option is supplied.  The variable "
+"MAPFILE\n"
+"    is the default ARRAY.\n"
 "    \n"
 "    Options:\n"
 "      -n count\tCopy at most COUNT lines.  If COUNT is 0, all lines are "
@@ -4030,10 +4040,12 @@ msgid ""
 "    assigning to it.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success unless an invalid option is given or ARRAY is readonly."
+"    Returns success unless an invalid option is given or ARRAY is readonly "
+"or\n"
+"    not an indexed array."
 msgstr ""
 
-#: builtins.c:2000
+#: builtins.c:2001
 msgid ""
 "Read lines from a file into an array variable.\n"
 "    \n"
