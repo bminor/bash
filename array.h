@@ -31,7 +31,8 @@ enum atype {array_indexed, array_assoc};
 
 typedef struct array {
 	enum atype	type;
-	arrayind_t	max_index, num_elements;
+	arrayind_t	max_index;
+	int		num_elements;
 	struct array_element *head;
 } ARRAY;
 

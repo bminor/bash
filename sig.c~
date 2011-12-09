@@ -448,6 +448,11 @@ sighandler
 termsig_sighandler (sig)
      int sig;
 {
+  /* If we get called twice with the same signal before handling it,
+     terminate right away. */
+  if (sig == terminating_signal)
+    terminate_immediately = 1;
+
   terminating_signal = sig;
 
   /* XXX - should this also trigger when interrupt_immediately is set? */
@@ -519,6 +524,7 @@ sigint_sighandler (sig)
   if (interrupt_immediately)
     {
       interrupt_immediately = 0;
+      last_command_exit_value = 128 + sig;
       throw_to_top_level ();
     }
 

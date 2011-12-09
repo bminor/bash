@@ -755,7 +755,7 @@ _run_trap_internal (sig, tag)
 	}
 
       flags = SEVAL_NONINT|SEVAL_NOHIST;
-      if (sig != DEBUG_TRAP && sig != RETURN_TRAP)
+      if (sig != DEBUG_TRAP && sig != RETURN_TRAP && sig != ERROR_TRAP)
 	flags |= SEVAL_RESETLINE;
       if (function_code == 0)
 	parse_and_execute (trap_command, tag, flags);

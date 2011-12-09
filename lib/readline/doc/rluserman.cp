@@ -4,6 +4,6 @@
 \entry{editing command lines}{1}{editing command lines}
 \entry{killing text}{2}{killing text}
 \entry{yanking text}{2}{yanking text}
-\entry{kill ring}{3}{kill ring}
+\entry{kill ring}{2}{kill ring}
 \entry{initialization file, readline}{4}{initialization file, readline}
-\entry{variables, readline}{5}{variables, readline}
+\entry{variables, readline}{4}{variables, readline}

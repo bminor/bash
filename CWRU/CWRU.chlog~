@@ -7710,6 +7710,14 @@ parse.y
 {.,lib/readline}/doc/fdl.texi
 	- updated to FDL version 1.3
 
+				   3/11
+				   ----
+parse.y
+	- when using the |& construct with a simple command preceding it, add
+	  the implicit redirection to the simple command's redirection list,
+	  since the redirections associated with the command struct are never
+	  executed.  Fixes bug reported by Matt Zyzik <Matt@ice.filescope.com>
+
 				   3/14
 				   ----
 execute_cmd.c
@@ -7764,9 +7772,59 @@ subst.c
 	- param_expand now checks for Q_PATQUOTE and treats it identically
 	  to Q_DOUBLE_QUOTES when expanding $*
 	- expand_word_unsplit now sets W_NOSPLIT in the flags of the word it
-	  passes to expand_word_internal
+	  passes to expand_word_internal if $IFS is NULL
 	- expand_word_leave_quoted now sets expand_no_split_dollar_start and
 	  the W_NOSPLIT bit in the word flags before calling
-	  expand_word_internal, just like expand_word_unsplit.  It is now
-	  virtually identical to expand_word_unsplit.  Rest of fix for
+	  expand_word_internal if $IFS is NULL, just like expand_word_unsplit.
+	  It is now virtually identical to expand_word_unsplit.  Rest of fix for
 	  problems reported by Stephane Chazleas <stephane_chazelas@yahoo.fr>
+
+				   3/20
+				   ----
+trap.c
+	- in _run_trap_internal, don't pass SEVAL_RESETLINE as flag to
+	  parse_and_execute if running the ERR trap (further modification
+	  of change from 1/12)
+
+execute_cmd.c
+	- in execute_simple_command, set line_number to line_number_for_err_trap
+	  before calling run_error_trap.  Part of fix for bug reported by
+	  Brian J. Murrell <brian@interlinx.bc.ca>
+	- change other places calling run_error_trap() to set and use
+	  line_number_for_err_trap
+
+				   3/21
+				   ----
+builtins/fc.def
+	- Even though command substitution through parse_and_execute turns 
+	  off remember_on_history, command substitution in a shell when
+	  set -o history has been enabled (interactive or not) should use it
+	  in the last_hist calculation as if it were on.  Same calculation
+	  in fc_gethnum and fc_builtin.  Fixes bug reported by
+	  <smallnow@gmail.com> 
+
+sig.c
+	- change termsig_sighandler to terminate immediately if it gets called
+	  twice with the same signal before termsig_handler gets called.  This
+	  fixes the `looping on SIGSEGV' phenomenon reported by Linux users.
+
+parse.y
+	- in read_secondary_line, don't try to add NULL lines to the history
+	  list.  Report and patch from Lubomir Rintel <lkundrak@v3.sk>
+
+				   3/22
+				   ----
+sig.c
+	- Augment change from 3/21 with explicit check for signals we *don't*
+	  want this to happen for.  Patch from Lubomir Rintel <lkundrak@v3.sk>
+
+				   3/28
+				   ----
+array.c
+	- in array_reference, return NULL immediately if the desired index
+	  is larger than the maximum
+	- add cache of last array referenced and last array element referenced;
+	  use in array_reference to optimize case of sequential access;
+	  invalidated where necessary in other functions
+	- array_rshift needs to set max_index to 0 if the array was empty
+	  before shifting in the new element 0

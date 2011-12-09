@@ -1,7 +1,7 @@
 shcat()
 {
 	while read -r ; do
-		echo "$REPLY"
+		printf "%s\n" "$REPLY"
 	done
 }
 

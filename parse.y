@@ -1879,7 +1879,7 @@ read_secondary_line (remove_quoted_newline)
     prompt_again ();
   ret = read_a_line (remove_quoted_newline);
 #if defined (HISTORY)
-  if (remember_on_history && (parser_state & PST_HEREDOC))
+  if (ret && remember_on_history && (parser_state & PST_HEREDOC))
     {
       /* To make adding the the here-document body right, we need to rely
 	 on history_delimiting_chars() returning \n for the first line of

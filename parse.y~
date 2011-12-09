@@ -3258,6 +3258,10 @@ eof_error:
 	    }
 	}
 
+      /* Possible reprompting. */
+      if (ch == '\n' && SHOULD_PROMPT ())
+	prompt_again ();
+
       /* XXX -- possibly allow here doc to be delimited by ending right
 	 paren. */
       if ((tflags & LEX_INHEREDOC) && ch == close && count == 1)
@@ -3274,10 +3278,6 @@ eof_error:
 	      lex_firstind = -1;
 	    }
 	}
-
-      /* Possible reprompting. */
-      if (ch == '\n' && SHOULD_PROMPT ())
-	prompt_again ();
 
       /* Don't bother counting parens or doing anything else if in a comment */
       if (tflags & (LEX_INCOMMENT|LEX_INHEREDOC))

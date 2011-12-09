@@ -1,205 +1,118 @@
-*** ../bash-4.0-patched/parse.y	2009-03-08 21:24:47.000000000 -0400
---- parse.y	2009-03-14 20:24:51.000000000 -0400
+*** array.c	2009-03-29 17:21:09.000000000 -0400
+--- array.c.save3	2009-03-28 18:16:49.000000000 -0400
 ***************
-*** 260,263 ****
---- 260,266 ----
-  int current_token;
+*** 56,59 ****
+--- 56,84 ----
+  static char *array_to_string_internal __P((ARRAY_ELEMENT *, ARRAY_ELEMENT *, char *, int));
   
-+ /* The current parser state. */
-+ int parser_state;
++ static ARRAY *lastarray = 0;
++ static ARRAY_ELEMENT *lastref = 0;
 + 
-  /* Variables to manage the task of reading here documents, because we need to
-     defer the reading until after a complete command has been collected. */
-***************
-*** 284,290 ****
-  static int arith_for_lineno;
-  
-- /* The current parser state. */
-- static int parser_state;
-- 
-  /* The last read token, or NULL.  read_token () uses this for context
-     checking. */
---- 287,290 ----
-***************
-*** 1123,1127 ****
-  			  REDIRECT *r;
-  
-! 			  tc = $1;
-  			  rd.dest = 1;
-  			  r = make_redirection (2, r_duplicating_output, rd);
---- 1123,1127 ----
-  			  REDIRECT *r;
-  
-! 			  tc = $1->type == cm_simple ? (COMMAND *)$1->value.Simple : $1;
-  			  rd.dest = 1;
-  			  r = make_redirection (2, r_duplicating_output, rd);
-***************
-*** 2397,2401 ****
-  
-  #define command_token_position(token) \
-!   (((token) == ASSIGNMENT_WORD) || \
-     ((token) != SEMI_SEMI && (token) != SEMI_AND && (token) != SEMI_SEMI_AND && reserved_word_acceptable(token)))
-  
---- 2397,2401 ----
-  
-  #define command_token_position(token) \
-!   (((token) == ASSIGNMENT_WORD) || (parser_state&PST_REDIRLIST) || \
-     ((token) != SEMI_SEMI && (token) != SEMI_AND && (token) != SEMI_SEMI_AND && reserved_word_acceptable(token)))
-  
-***************
-*** 2968,2972 ****
-    int retind, retsize, rflags;
-  
-! /* itrace("parse_matched_pair: open = %c close = %c flags = %d", open, close, flags); */
-    count = 1;
-    tflags = 0;
---- 2968,2972 ----
-    int retind, retsize, rflags;
-  
-! /*itrace("parse_matched_pair: open = %c close = %c flags = %d", open, close, flags); */
-    count = 1;
-    tflags = 0;
-***************
-*** 3263,3266 ****
---- 3263,3283 ----
-  	prompt_again ();
-  
-+       /* XXX -- possibly allow here doc to be delimited by ending right
-+ 	 paren. */
-+       if ((tflags & LEX_INHEREDOC) && ch == close && count == 1)
-+ 	{
-+ 	  int tind;
-+ /*itrace("parse_comsub: in here doc, ch == close, retind - firstind = %d hdlen = %d retind = %d", retind-lex_firstind, hdlen, retind);*/
-+ 	  tind = lex_firstind;
-+ 	  while ((tflags & LEX_STRIPDOC) && ret[tind] == '\t')
-+ 	    tind++;
-+ 	  if (retind-tind == hdlen && STREQN (ret + tind, heredelim, hdlen))
-+ 	    {
-+ 	      tflags &= ~(LEX_STRIPDOC|LEX_INHEREDOC);
-+ /*itrace("parse_comsub:%d: found here doc end `%s'", line_number, ret + tind);*/
-+ 	      lex_firstind = -1;
-+ 	    }
-+ 	}
++ #define IS_LASTREF(a)	((a) == lastarray)
 + 
-        /* Don't bother counting parens or doing anything else if in a comment */
-        if (tflags & (LEX_INCOMMENT|LEX_INHEREDOC))
++ #define INVALIDATE_LASTREF(a) \
++ do { \
++ 	if ((a) == lastarray) { \
++ 		lastarray = 0; \
++ 		lastref = 0; \
++ 	} \
++ } while (0)
++ 
++ #define SET_LASTREF(a, e) \
++ do { \
++ 	lastarray = (a); \
++ 	lastref = (e); \
++ } while (0)
++ 
++ #define UNSET_LASTREF() \
++ do { \
++ 	lastarray = 0; \
++ 	lastref = 0; \
++ } while (0)
++ 
+  ARRAY *
+  array_create()
 ***************
-*** 3271,3275 ****
---- 3288,3295 ----
-  
-  	  if ((tflags & LEX_INCOMMENT) && ch == '\n')
-+ {
-+ /*itrace("parse_comsub:%d: lex_incomment -> 0 ch = `%c'", line_number, ch);*/
-  	    tflags &= ~LEX_INCOMMENT;
-+ }
-  
-  	  continue;
-***************
-*** 3365,3369 ****
-  	      RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
-  	      ret[retind++] = peekc;
-! /*itrace("parse_comsub:%d: set lex_reswordok = 1, ch = `%c'", line_number, ch); */
-  	      tflags |= LEX_RESWDOK;
-  	      lex_rwlen = 0;
---- 3385,3389 ----
-  	      RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
-  	      ret[retind++] = peekc;
-! /*itrace("parse_comsub:%d: set lex_reswordok = 1, ch = `%c'", line_number, ch);*/
-  	      tflags |= LEX_RESWDOK;
-  	      lex_rwlen = 0;
-***************
-*** 3373,3378 ****
-  	    {
-  	      shell_ungetc (peekc);
-- 	      tflags |= LEX_RESWDOK;
-  /*itrace("parse_comsub:%d: set lex_reswordok = 1, ch = `%c'", line_number, ch);*/
-  	      lex_rwlen = 0;
-  	      continue;
---- 3393,3398 ----
-  	    {
-  	      shell_ungetc (peekc);
-  /*itrace("parse_comsub:%d: set lex_reswordok = 1, ch = `%c'", line_number, ch);*/
-+ 	      tflags |= LEX_RESWDOK;
-  	      lex_rwlen = 0;
-  	      continue;
-***************
-*** 3404,3413 ****
-  {
-  		tflags |= LEX_INCASE;
-! /*itrace("parse_comsub:%d: found `case', lex_incase -> 1", line_number);*/
+*** 88,91 ****
+--- 113,117 ----
+  	a->max_index = -1;
+  	a->num_elements = 0;
++ 	INVALIDATE_LASTREF(a);
   }
-  	      else if (STREQN (ret + retind - 4, "esac", 4))
-  {
-  		tflags &= ~LEX_INCASE;
-! /*itrace("parse_comsub:%d: found `esac', lex_incase -> 0", line_number);*/
-  }	        
-  	      tflags &= ~LEX_RESWDOK;
---- 3424,3433 ----
-  {
-  		tflags |= LEX_INCASE;
-! /*itrace("parse_comsub:%d: found `case', lex_incase -> 1 lex_reswdok -> 0", line_number);*/
-  }
-  	      else if (STREQN (ret + retind - 4, "esac", 4))
-  {
-  		tflags &= ~LEX_INCASE;
-! /*itrace("parse_comsub:%d: found `esac', lex_incase -> 0 lex_reswdok -> 0", line_number);*/
-  }	        
-  	      tflags &= ~LEX_RESWDOK;
+  
 ***************
-*** 3432,3435 ****
---- 3452,3456 ----
+*** 186,189 ****
+--- 212,216 ----
+  		return ((ARRAY_ELEMENT *)NULL);
+  
++ 	INVALIDATE_LASTREF(a);
+  	for (i = 0, ret = ae = element_forw(a->head); ae != a->head && i < n; ae = element_forw(ae), i++)
+  		;
+***************
+*** 264,267 ****
+--- 291,295 ----
+  	a->max_index = element_index(a->head->prev);
+  
++ 	INVALIDATE_LASTREF(a);
+  	return (a->num_elements);
+  }
+***************
+*** 595,598 ****
+--- 623,627 ----
+  		a->max_index = i;
+  		a->num_elements++;
++ 		SET_LASTREF(a, new);
+  		return(0);
   	}
-  
-+       /* Might be the start of a here-doc delimiter */
-        if MBTEST((tflags & LEX_INCOMMENT) == 0 && (tflags & LEX_CKCASE) && ch == '<')
-  	{
 ***************
-*** 3488,3492 ****
---- 3509,3516 ----
+*** 608,618 ****
+--- 637,650 ----
+  			free(element_value(ae));
+  			ae->value = v ? savestring(v) : (char *)NULL;
++ 			SET_LASTREF(a, ae);
+  			return(0);
+  		} else if (element_index(ae) > i) {
+  			ADD_BEFORE(ae, new);
+  			a->num_elements++;
++ 			SET_LASTREF(a, new);
+  			return(0);
+  		}
+  	}
++ 	INVALIDATE_LASTREF(a);
+  	return (-1);		/* problem */
   }
-        else if MBTEST(((flags & P_FIRSTCLOSE) == 0) && (tflags & LEX_INCASE) == 0 && ch == open)	/* nested begin */
-+ {
-  	count++;
-+ /*itrace("parse_comsub:%d: found open: count = %d", line_number, count);*/
-+ }
-  
-        /* Add this character. */
 ***************
-*** 5232,5236 ****
-        if (interactive && EOF_Reached)
-  	EOF_Reached = 0;
-!       last_command_exit_value = EX_USAGE;
-        return;
-      }
---- 5256,5260 ----
-        if (interactive && EOF_Reached)
-  	EOF_Reached = 0;
-!       last_command_exit_value = EX_BADUSAGE;
-        return;
-      }
+*** 638,641 ****
+--- 670,674 ----
+  			if (i == array_max_index(a))
+  				a->max_index = element_index(ae->prev);
++ 			INVALIDATE_LASTREF(a);
+  			return(ae);
+  		}
 ***************
-*** 5247,5251 ****
-  	print_offending_line ();
-  
-!       last_command_exit_value = EX_USAGE;
-        return;
-      }
---- 5271,5275 ----
-  	print_offending_line ();
-  
-!       last_command_exit_value = EX_BADUSAGE;
-        return;
-      }
-***************
-*** 5278,5282 ****
-      }
-  
-!   last_command_exit_value = EX_USAGE;
+*** 655,661 ****
+  	if (a == 0 || array_empty(a))
+  		return((char *) NULL);
+! 	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae))
+! 		if (element_index(ae) == i)
+  			return(element_value(ae));
+  	return((char *) NULL);
   }
-  
---- 5302,5306 ----
-      }
-  
-!   last_command_exit_value = EX_BADUSAGE;
+--- 688,704 ----
+  	if (a == 0 || array_empty(a))
+  		return((char *) NULL);
+! 	if (i > array_max_index(a))
+! 		return ((char *)NULL);
+! 	/* Keep roving pointer into array to optimize sequential access */
+! 	if (lastref && IS_LASTREF(a))
+! 		ae = (i >= element_index(lastref)) ? lastref : element_forw(a->head);
+! 	else
+! 		ae = element_forw(a->head);
+! 	for ( ; ae != a->head; ae = element_forw(ae))
+! 		if (element_index(ae) == i) {
+! 			SET_LASTREF(a, ae);
+  			return(element_value(ae));
++ 		}
++ 	UNSET_LASTREF();
+  	return((char *) NULL);
   }
-  

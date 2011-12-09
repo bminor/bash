@@ -6,13 +6,14 @@
 # subscript → podskript
 # subroutine → podprogram
 # completition options → možnosti doplňování
+# shell option → přepínač shellu (shopt)
 # Názvy signálu a stavů procesu by měly souhlasit se signal(7).
 msgid ""
 msgstr ""
-"Project-Id-Version: bash 4.0-pre1\n"
+"Project-Id-Version: bash 4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-08-25 11:13-0400\n"
-"PO-Revision-Date: 2009-02-24 13:26+0100\n"
+"POT-Creation-Date: 2009-02-19 14:53-0500\n"
+"PO-Revision-Date: 2009-03-19 09:21+0100\n"
 "Last-Translator: Petr Pisar <petr.pisar@atlas.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -20,80 +21,84 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
-#: arrayfunc.c:49
+#: arrayfunc.c:50
 msgid "bad array subscript"
 msgstr "chybný podskript pole"
 
-#: arrayfunc.c:312 builtins/declare.def:467
+#: arrayfunc.c:313 builtins/declare.def:474
 #, c-format
 msgid "%s: cannot convert indexed to associative array"
 msgstr "%s: číslované pole nezle převést na pole asociativní"
 
-#: arrayfunc.c:478
+#: arrayfunc.c:479
 #, c-format
 msgid "%s: invalid associative array key"
 msgstr "%s: neplatný klíč asociativního pole"
 
-#: arrayfunc.c:480
+#: arrayfunc.c:481
 #, c-format
 msgid "%s: cannot assign to non-numeric index"
 msgstr "%s: přes nečíselný indexu nelze dosadit"
 
-#: arrayfunc.c:516
+#: arrayfunc.c:517
 #, c-format
 msgid "%s: %s: must use subscript when assigning associative array"
 msgstr "%s: %s: při přiřazovaní asociativního pole se musí použít podskript"
 
-#: bashhist.c:382
+#: bashhist.c:379
 #, c-format
 msgid "%s: cannot create: %s"
 msgstr "%s: nelze vytvořit: %s"
 
-#: bashline.c:3190
+#: bashline.c:3413
 msgid "bash_execute_unix_command: cannot find keymap for command"
 msgstr "bash_execute_unix_command: pro příkaz nelze nalézt klávesovou mapu "
 
-#: bashline.c:3268
+#: bashline.c:3491
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr "%s: první nebílý znak není „\"“"
 
-#: bashline.c:3297
+#: bashline.c:3520
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr "ne zavírající „%c“ v %s"
 
-#: bashline.c:3331
+#: bashline.c:3554
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: chybí dvojtečkový oddělovač"
 
-#: builtins/bind.def:199
+#: builtins/bind.def:120 builtins/bind.def:123
+msgid "line editing not enabled"
+msgstr "upravování řádku není povoleno"
+
+#: builtins/bind.def:206
 #, c-format
 msgid "`%s': invalid keymap name"
 msgstr "„%s“: chybný název klávesové mapy"
 
-#: builtins/bind.def:238
+#: builtins/bind.def:245
 #, c-format
 msgid "%s: cannot read: %s"
 msgstr "%s: nelze číst: %s"
 
-#: builtins/bind.def:253
+#: builtins/bind.def:260
 #, c-format
 msgid "`%s': cannot unbind"
 msgstr "„%s“: nelze zrušit vazbu"
 
-#: builtins/bind.def:288 builtins/bind.def:318
+#: builtins/bind.def:295 builtins/bind.def:325
 #, c-format
 msgid "`%s': unknown function name"
 msgstr "„%s“: neznámé jméno funkce"
 
-#: builtins/bind.def:296
+#: builtins/bind.def:303
 #, c-format
 msgid "%s is not bound to any keys.\n"
 msgstr "%s není svázán s žádnou klávesou.\n"
 
-#: builtins/bind.def:300
+#: builtins/bind.def:307
 #, c-format
 msgid "%s can be invoked via "
 msgstr "%s lze vyvolat přes "
@@ -106,6 +111,16 @@ msgstr "počet smyček"
 msgid "only meaningful in a `for', `while', or `until' loop"
 msgstr "má smysl jen ve smyčkách „for“, „while“ nebo „until“"
 
+#: builtins/caller.def:133
+msgid ""
+"Returns the context of the current subroutine call.\n"
+"    \n"
+"    Without EXPR, returns "
+msgstr ""
+"Vrátí kontext aktuálního volání podprogramu.\n"
+"    \n"
+"    Bez VÝRAZU vrátí "
+
 #: builtins/cd.def:215
 msgid "HOME not set"
 msgstr "není nestavena HOME"
@@ -114,130 +129,145 @@ msgstr "není nestavena HOME"
 msgid "OLDPWD not set"
 msgstr "není nastaveno OLDPWD"
 
-#: builtins/common.c:107
+#: builtins/common.c:101
 #, c-format
 msgid "line %d: "
 msgstr "řádek %d: "
 
-#: builtins/common.c:124
+#: builtins/common.c:139 error.c:260
+#, c-format
+msgid "warning: "
+msgstr "varování: "
+
+#: builtins/common.c:153
 #, c-format
 msgid "%s: usage: "
 msgstr "%s: užití: "
 
-#: builtins/common.c:137 test.c:822
+#: builtins/common.c:166 test.c:822
 msgid "too many arguments"
 msgstr "příliš mnoho argumentů"
 
-#: builtins/common.c:162 shell.c:493 shell.c:774
+#: builtins/common.c:191 shell.c:493 shell.c:774
 #, c-format
 msgid "%s: option requires an argument"
 msgstr "%s: přepínač vyžaduje argument"
 
-#: builtins/common.c:169
+#: builtins/common.c:198
 #, c-format
 msgid "%s: numeric argument required"
 msgstr "%s: vyžadován číselný argument"
 
-#: builtins/common.c:176
+#: builtins/common.c:205
 #, c-format
 msgid "%s: not found"
 msgstr "%s: nenalezeno"
 
-#: builtins/common.c:185 shell.c:787
+#: builtins/common.c:214 shell.c:787
 #, c-format
 msgid "%s: invalid option"
 msgstr "%s: chybný přepínač"
 
-#: builtins/common.c:192
+#: builtins/common.c:221
 #, c-format
 msgid "%s: invalid option name"
 msgstr "%s: chybný název přepínače"
 
-#: builtins/common.c:199 general.c:231 general.c:236
+#: builtins/common.c:228 general.c:231 general.c:236
 #, c-format
 msgid "`%s': not a valid identifier"
 msgstr "„%s“: není platným identifikátorem"
 
-#: builtins/common.c:209
+#: builtins/common.c:238
 msgid "invalid octal number"
 msgstr "neplatné osmičkové číslo"
 
-#: builtins/common.c:211
+#: builtins/common.c:240
 msgid "invalid hex number"
 msgstr "chybné šestnáctkové číslo"
 
-#: builtins/common.c:213 expr.c:1255
+#: builtins/common.c:242 expr.c:1255
 msgid "invalid number"
 msgstr "chybné číslo"
 
-#: builtins/common.c:221
+#: builtins/common.c:250
 #, c-format
 msgid "%s: invalid signal specification"
 msgstr "%s: chybné určení signálu"
 
-#: builtins/common.c:228
+#: builtins/common.c:257
 #, c-format
 msgid "`%s': not a pid or valid job spec"
 msgstr "„%s“: není PID ani platným označením úlohy"
 
-#: builtins/common.c:235 error.c:453
+#: builtins/common.c:264 error.c:453
 #, c-format
 msgid "%s: readonly variable"
 msgstr "%s: proměnná pouze pro čtení"
 
-#: builtins/common.c:243
+#: builtins/common.c:272
 #, c-format
 msgid "%s: %s out of range"
 msgstr "%s: %s mimo rozsah"
 
-#: builtins/common.c:243 builtins/common.c:245
+#: builtins/common.c:272 builtins/common.c:274
 msgid "argument"
 msgstr "argument"
 
-#: builtins/common.c:245
+#: builtins/common.c:274
 #, c-format
 msgid "%s out of range"
 msgstr "%s mimo rozsah"
 
-#: builtins/common.c:253
+#: builtins/common.c:282
 #, c-format
 msgid "%s: no such job"
 msgstr "%s: žádná taková úloha"
 
-#: builtins/common.c:261
+#: builtins/common.c:290
 #, c-format
 msgid "%s: no job control"
 msgstr "%s: žádné řízení úloh"
 
-#: builtins/common.c:263
+#: builtins/common.c:292
 msgid "no job control"
 msgstr "žádné řízení úloh"
 
-#: builtins/common.c:273
+#: builtins/common.c:302
 #, c-format
 msgid "%s: restricted"
 msgstr "%s: omezeno"
 
-#: builtins/common.c:275
+#: builtins/common.c:304
 msgid "restricted"
 msgstr "omezeno"
 
-#: builtins/common.c:283
+#: builtins/common.c:312
 #, c-format
 msgid "%s: not a shell builtin"
 msgstr "%s: není vestavěným příkazem shellu"
 
-#: builtins/common.c:292
+#: builtins/common.c:321
 #, c-format
 msgid "write error: %s"
 msgstr "chyba zápisu: %s"
 
-#: builtins/common.c:523
+#: builtins/common.c:329
+#, c-format
+msgid "error setting terminal attributes: %s"
+msgstr "chyba při nastavování vlastností terminálu: %s"
+
+#: builtins/common.c:331
+#, c-format
+msgid "error getting terminal attributes: %s"
+msgstr "chyba při získávání vlastností terminálu: %s"
+
+#: builtins/common.c:563
 #, c-format
 msgid "%s: error retrieving current directory: %s: %s\n"
 msgstr "%s: chyba při zjišťování současného adresáře: %s: %s\n"
 
-#: builtins/common.c:589 builtins/common.c:591
+#: builtins/common.c:629 builtins/common.c:631
 #, c-format
 msgid "%s: ambiguous job spec"
 msgstr "%s: nejednoznačné určení úlohy"
@@ -273,17 +303,17 @@ msgstr "může být použito jen ve funkci"
 msgid "cannot use `-f' to make functions"
 msgstr "„-f“ nezle použít na výrobu funkce"
 
-#: builtins/declare.def:365 execute_cmd.c:4696
+#: builtins/declare.def:365 execute_cmd.c:4818
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: funkce jen pro čtení"
 
-#: builtins/declare.def:454
+#: builtins/declare.def:461
 #, c-format
 msgid "%s: cannot destroy array variables in this way"
 msgstr "%s: takto nelze likvidovat pole"
 
-#: builtins/declare.def:461
+#: builtins/declare.def:468
 #, c-format
 msgid "%s: cannot convert associative to indexed array"
 msgstr "%s: asociativní pole nelze převést na číslované pole"
@@ -312,7 +342,7 @@ msgstr "%s: není dynamicky nahráno"
 msgid "%s: cannot delete: %s"
 msgstr "%s: nelze smazat: %s"
 
-#: builtins/evalfile.c:134 builtins/hash.def:169 execute_cmd.c:4553
+#: builtins/evalfile.c:134 builtins/hash.def:169 execute_cmd.c:4675
 #: shell.c:1439
 #, c-format
 msgid "%s: is a directory"
@@ -328,7 +358,7 @@ msgstr "%s: není obyčejný soubor"
 msgid "%s: file is too large"
 msgstr "%s: soubor je příliš velký"
 
-#: builtins/evalfile.c:185 execute_cmd.c:4623 shell.c:1449
+#: builtins/evalfile.c:185 execute_cmd.c:4745 shell.c:1449
 #, c-format
 msgid "%s: cannot execute binary file"
 msgstr "%s: binární soubor nelze spustit"
@@ -451,7 +481,7 @@ msgstr "nelze použít více jak jeden z -anrw"
 msgid "history position"
 msgstr "místo v historii"
 
-#: builtins/history.def:366
+#: builtins/history.def:365
 #, c-format
 msgid "%s: history expansion failed"
 msgstr "%s: expanze historie selhala"
@@ -478,55 +508,55 @@ msgstr "Neznámá chyba"
 msgid "expression expected"
 msgstr "očekáván výraz"
 
-#: builtins/mapfile.def:215 builtins/read.def:271
+#: builtins/mapfile.def:241 builtins/read.def:272
 #, c-format
 msgid "%s: invalid file descriptor specification"
 msgstr "%s: chybné určení deskriptoru souboru"
 
-#: builtins/mapfile.def:223 builtins/read.def:278
+#: builtins/mapfile.def:249 builtins/read.def:279
 #, c-format
 msgid "%d: invalid file descriptor: %s"
 msgstr "%d: neplatný deskriptor souboru: %s"
 
-#: builtins/mapfile.def:232 builtins/mapfile.def:270
+#: builtins/mapfile.def:258 builtins/mapfile.def:296
 #, c-format
 msgid "%s: invalid line count"
 msgstr "%s: chybný počet řádků"
 
-#: builtins/mapfile.def:243
+#: builtins/mapfile.def:269
 #, c-format
 msgid "%s: invalid array origin"
 msgstr "%s: chybný počátek pole"
 
-#: builtins/mapfile.def:260
+#: builtins/mapfile.def:286
 #, c-format
 msgid "%s: invalid callback quantum"
 msgstr "%s: neplatné množství mezi voláními"
 
-#: builtins/mapfile.def:292
+#: builtins/mapfile.def:318
 msgid "empty array variable name"
 msgstr "prázdný název proměnné typu pole"
 
-#: builtins/mapfile.def:313
+#: builtins/mapfile.def:339
 msgid "array variable support required"
 msgstr "je vyžadována podpora proměnných typu pole"
 
-#: builtins/printf.def:364
+#: builtins/printf.def:367
 #, c-format
 msgid "`%s': missing format character"
 msgstr "„%s“: postrádám formátovací znak"
 
-#: builtins/printf.def:541
+#: builtins/printf.def:544
 #, c-format
 msgid "`%c': invalid format character"
 msgstr "„%c“: neplatný formátovací znak"
 
-#: builtins/printf.def:568
+#: builtins/printf.def:571
 #, c-format
 msgid "warning: %s: %s"
 msgstr "varování: %s: %s"
 
-#: builtins/printf.def:747
+#: builtins/printf.def:750
 msgid "missing hex digit for \\x"
 msgstr "u \\x chybí šestnáctková číslovka"
 
@@ -669,17 +699,17 @@ msgstr ""
 "    \n"
 "    Zásobník adresářů si můžete prohlédnout příkazem „dirs“."
 
-#: builtins/read.def:247
+#: builtins/read.def:248
 #, c-format
 msgid "%s: invalid timeout specification"
 msgstr "%s: chybné určení časového limitu"
 
-#: builtins/read.def:569
+#: builtins/read.def:574
 #, c-format
 msgid "read error: %d: %s"
 msgstr "chyba čtení: %d: %s"
 
-#: builtins/return.def:68
+#: builtins/return.def:73
 msgid "can only `return' from a function or sourced script"
 msgstr "„return“ lze provést jen z funkce nebo skriptu načteného přes „source“"
 
@@ -711,11 +741,11 @@ msgstr "%s: není funkcí"
 msgid "shift count"
 msgstr "počet shiftů"
 
-#: builtins/shopt.def:250
+#: builtins/shopt.def:254
 msgid "cannot set and unset shell options simultaneously"
 msgstr "přepínač shellu nelze zároveň nastavit a zrušit"
 
-#: builtins/shopt.def:315
+#: builtins/shopt.def:319
 #, c-format
 msgid "%s: invalid shell option name"
 msgstr "%s: chybný název přepínače shellu"
@@ -819,11 +849,6 @@ msgstr "poslední příkaz: %s\n"
 msgid "Aborting..."
 msgstr "Ukončuji…"
 
-#: error.c:260
-#, c-format
-msgid "warning: "
-msgstr "varování: "
-
 #: error.c:405
 msgid "unknown command error"
 msgstr "chyba neznámého příkazu"
@@ -850,36 +875,36 @@ msgstr "%s: nevázaná proměnná"
 msgid "\atimed out waiting for input: auto-logout\n"
 msgstr "\ačasový limit pro čekání na vstup vypršel: automatické odhlášení\n"
 
-#: execute_cmd.c:483
+#: execute_cmd.c:491
 #, c-format
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr "standardní vstup nelze přesměrovat z /dev/null: %s"
 
-#: execute_cmd.c:1079
+#: execute_cmd.c:1112
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "TIMEFORMAT: „%c“: chybný formátovací znak"
 
-#: execute_cmd.c:1930
+#: execute_cmd.c:2011
 msgid "pipe error"
 msgstr "chyba v rouře"
 
-#: execute_cmd.c:4243
+#: execute_cmd.c:4363
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: omezeno: v názvu příkazu nesmí být „/“"
 
-#: execute_cmd.c:4334
+#: execute_cmd.c:4454
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: příkaz nenalezen"
 
-#: execute_cmd.c:4586
+#: execute_cmd.c:4708
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: chybný interpretr"
 
-#: execute_cmd.c:4735
+#: execute_cmd.c:4857
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "deskriptor souboru %d nelze duplikovat na deskriptor %d"
@@ -954,7 +979,7 @@ msgstr "%s: chyba výrazu\n"
 msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: rodičovské adresáře nejsou přístupné"
 
-#: input.c:94 subst.c:4551
+#: input.c:94 subst.c:4559
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "na deskriptoru %d nelze resetovat režim nodelay"
@@ -969,145 +994,145 @@ msgstr "nový deskriptor souboru pro vstup bashe z deskr. %d nelze alokovat"
 msgid "save_bash_input: buffer already exists for new fd %d"
 msgstr "save_bash_input: buffer již pro nový deskriptor %d existuje"
 
-#: jobs.c:464
+#: jobs.c:466
 msgid "start_pipeline: pgrp pipe"
 msgstr "start_pipeline: pgrp roury"
 
-#: jobs.c:879
+#: jobs.c:887
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr "forknutý PID %d se objevil v běžící úloze %d"
 
-#: jobs.c:997
+#: jobs.c:1005
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "mažu pozastavenou úlohu %d se skupinou procesů %ld"
 
-#: jobs.c:1102
+#: jobs.c:1110
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
 msgstr "add_process: proces %5ld (%s) do the_pipeline"
 
-#: jobs.c:1105
+#: jobs.c:1113
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr "add_process: PID %5ld (%s) označen za stále živého"
 
-#: jobs.c:1393
+#: jobs.c:1401
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "describe_pid: %ld: žádný takový PID"
 
-#: jobs.c:1408
+#: jobs.c:1416
 #, c-format
 msgid "Signal %d"
 msgstr "Signál %d"
 
 # FIXME: rod a zkontrolovat následující
-#: jobs.c:1422 jobs.c:1447
+#: jobs.c:1430 jobs.c:1455
 msgid "Done"
 msgstr "Dokonán"
 
-#: jobs.c:1427 siglist.c:122
+#: jobs.c:1435 siglist.c:122
 msgid "Stopped"
 msgstr "Pozastaven"
 
-#: jobs.c:1431
+#: jobs.c:1439
 #, c-format
 msgid "Stopped(%s)"
 msgstr "Pozastaven (%s)"
 
-#: jobs.c:1435
+#: jobs.c:1443
 msgid "Running"
 msgstr "Běží"
 
-#: jobs.c:1449
+#: jobs.c:1457
 #, c-format
 msgid "Done(%d)"
 msgstr "Dokonán (%d)"
 
-#: jobs.c:1451
+#: jobs.c:1459
 #, c-format
 msgid "Exit %d"
 msgstr "Ukončen %d"
 
-#: jobs.c:1454
+#: jobs.c:1462
 msgid "Unknown status"
 msgstr "Stav neznámý"
 
-#: jobs.c:1541
+#: jobs.c:1549
 #, c-format
 msgid "(core dumped) "
 msgstr "(core dumped [obraz paměti uložen]) "
 
-#: jobs.c:1560
+#: jobs.c:1568
 #, c-format
 msgid "  (wd: %s)"
 msgstr "  (cwd: %s)"
 
-#: jobs.c:1761
+#: jobs.c:1771
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr "setpgid na potomku (z %ld na %ld)"
 
-#: jobs.c:2089 nojobs.c:576
+#: jobs.c:2099 nojobs.c:585
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: PID %ld není potomkem tohoto shellu"
 
-#: jobs.c:2316
+#: jobs.c:2326
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for: Žádný záznam o procesu %ld"
 
-#: jobs.c:2588
+#: jobs.c:2598
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: úloha %d je pozastavena"
 
-#: jobs.c:2810
+#: jobs.c:2820
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: úloha skončila"
 
-#: jobs.c:2819
+#: jobs.c:2829
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: úloha %d je již na pozadí"
 
-#: jobs.c:3482
+#: jobs.c:3492
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s: řádek %d: "
 
-#: jobs.c:3496 nojobs.c:805
+#: jobs.c:3506 nojobs.c:814
 #, c-format
 msgid " (core dumped)"
 msgstr " (core dumped [obraz paměti uložen])"
 
-#: jobs.c:3508 jobs.c:3521
+#: jobs.c:3518 jobs.c:3531
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(cwd nyní: %s)\n"
 
-#: jobs.c:3553
+#: jobs.c:3563
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: getpgrp selhalo"
 
-#: jobs.c:3613
+#: jobs.c:3623
 msgid "initialize_job_control: line discipline"
 msgstr "initialize_job_control: disciplína linky"
 
-#: jobs.c:3623
+#: jobs.c:3633
 msgid "initialize_job_control: setpgid"
 msgstr "initialize_job_control: setpgid"
 
-#: jobs.c:3651
+#: jobs.c:3661
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "nelze nastavit skupinu procesů terminálu (%d)"
 
-#: jobs.c:3656
+#: jobs.c:3666
 msgid "no job control in this shell"
 msgstr "žádná správa úloh v tomto shellu"
 
@@ -1240,106 +1265,106 @@ msgstr "„here“ dokument na řádku %d ukončen koncem souboru (požadováno 
 msgid "make_redirection: redirection instruction `%d' out of range"
 msgstr "make_redirection: instrukce přesměrování „%d“ mimo rozsah"
 
-#: parse.y:2982 parse.y:3204
+#: parse.y:2986 parse.y:3218
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "neočekávaný konec souboru při hledání znaku odpovídajícímu „%c“"
 
-#: parse.y:3708
+#: parse.y:3722
 msgid "unexpected EOF while looking for `]]'"
 msgstr "neočekávaný konec souboru při hledání „]]“"
 
 # XXX: Condional means condition (adj.) probably. Can English distinguish
 # between the condition (podmínkový) and the code branch (podmíněný)? Check
 # for all "conditional" string occurences.
-#: parse.y:3713
+#: parse.y:3727
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr "chyba syntaxe ve výrazu podmínky: neočekávaný token „%s“"
 
-#: parse.y:3717
+#: parse.y:3731
 msgid "syntax error in conditional expression"
 msgstr "chyba syntaxe ve výrazu podmínky"
 
-#: parse.y:3795
+#: parse.y:3809
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr "neočekávaný token „%s“, očekávána „)“"
 
-#: parse.y:3799
+#: parse.y:3813
 msgid "expected `)'"
 msgstr "očekávána „)“"
 
-#: parse.y:3827
+#: parse.y:3841
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr "neočekávaný argument „%s“ u podmínkového unárního operátoru"
 
-#: parse.y:3831
+#: parse.y:3845
 msgid "unexpected argument to conditional unary operator"
 msgstr "neočekávaný argument u podmínkového unárního operátoru"
 
-#: parse.y:3871
+#: parse.y:3885
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr "neočekávaný token „%s“, očekáván podmínkový binární operátor"
 
-#: parse.y:3875
+#: parse.y:3889
 msgid "conditional binary operator expected"
 msgstr "očekáván podmínkový binární operátor"
 
-#: parse.y:3892
+#: parse.y:3906
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr "neočekávaný argument „%s„ u podmínkového binárního operátoru"
 
-#: parse.y:3896
+#: parse.y:3910
 msgid "unexpected argument to conditional binary operator"
 msgstr "neočekávaný argument u podmínkového binárního operátoru"
 
-#: parse.y:3907
+#: parse.y:3921
 #, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr "neočekávaný token „%c“ v podmínkovém příkazu"
 
-#: parse.y:3910
+#: parse.y:3924
 #, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr "neočekávaný token „%s“ v podmínkovém příkazu"
 
-#: parse.y:3914
+#: parse.y:3928
 #, c-format
 msgid "unexpected token %d in conditional command"
 msgstr "neočekávaný token %d v podmínkovém příkazu"
 
-#: parse.y:5181
+#: parse.y:5195
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "chyba syntaxe poblíž neočekávaného tokenu „%s“"
 
-#: parse.y:5199
+#: parse.y:5213
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "chyba syntaxe poblíž „%s“"
 
-#: parse.y:5209
+#: parse.y:5223
 msgid "syntax error: unexpected end of file"
 msgstr "chyba syntaxe: nenadálý konec souboru"
 
-#: parse.y:5209
+#: parse.y:5223
 msgid "syntax error"
 msgstr "chyba syntaxe"
 
-#: parse.y:5271
+#: parse.y:5285
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "Shell lze ukončit příkazem „%s“.\n"
 
-#: parse.y:5433
+#: parse.y:5447
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "nenadálý konec souboru při hledání odpovídající „)“"
 
-#: pcomplete.c:1016
+#: pcomplete.c:1018
 #, c-format
 msgid "completion: function `%s' not found"
 msgstr "doplňování: funkce „%s“ nenalezena"
@@ -1349,45 +1374,45 @@ msgstr "doplňování: funkce „%s“ nenalezena"
 msgid "progcomp_insert: %s: NULL COMPSPEC"
 msgstr "progcomp_insert: %s: NULLOVÝ COMPSPEC"
 
-#: print_cmd.c:287
+#: print_cmd.c:285
 #, c-format
 msgid "print_command: bad connector `%d'"
 msgstr "print_command: chybná propojka „%d“"
 
-#: print_cmd.c:1347
+#: print_cmd.c:1348
 #, c-format
 msgid "cprintf: `%c': invalid format character"
 msgstr "cprintf: „%c“: chybný formátovací znak"
 
-#: redir.c:104
+#: redir.c:105
 msgid "file descriptor out of range"
 msgstr "deskriptor souboru mimo rozsah"
 
-#: redir.c:146
+#: redir.c:148
 #, c-format
 msgid "%s: ambiguous redirect"
 msgstr "%s: nejednoznačné přesměrování"
 
-#: redir.c:150
+#: redir.c:152
 #, c-format
 msgid "%s: cannot overwrite existing file"
 msgstr "%s: existující soubor nelze přepsat"
 
-#: redir.c:155
+#: redir.c:157
 #, c-format
 msgid "%s: restricted: cannot redirect output"
 msgstr "%s: omezeno: výstup nelze přesměrovat"
 
-#: redir.c:160
+#: redir.c:162
 #, c-format
 msgid "cannot create temp file for here-document: %s"
 msgstr "pro „here“ dokument nelze vytvořit dočasný soubor: %s"
 
-#: redir.c:515
+#: redir.c:517
 msgid "/dev/(tcp|udp)/host/port not supported without networking"
 msgstr "/dev/(tcp|udp)/host/port není bez síťování podporováno"
 
-#: redir.c:992
+#: redir.c:1023
 msgid "redirection error: cannot duplicate fd"
 msgstr "chyba přesměrování: deskriptor souboru nelze duplikovat"
 
@@ -1404,16 +1429,16 @@ msgstr "/tmp musí být platným názvem pro adresář"
 msgid "%c%c: invalid option"
 msgstr "%c%c: chybný přepínač"
 
-#: shell.c:1637
+#: shell.c:1638
 msgid "I have no name!"
 msgstr "Nemám žádné jméno!"
 
-#: shell.c:1777
+#: shell.c:1778
 #, c-format
 msgid "GNU bash, version %s-(%s)\n"
 msgstr "GNU bash, verze %s-(%s)\n"
 
-#: shell.c:1778
+#: shell.c:1779
 #, c-format
 msgid ""
 "Usage:\t%s [GNU long option] [option] ...\n"
@@ -1422,41 +1447,41 @@ msgstr ""
 "Použití:\t%s [Dlouhý GNU přepínač] [přepínač]…\n"
 "\t%s [Dlouhý GNU přepínač] [přepínač] skriptový_soubor…\n"
 
-#: shell.c:1780
+#: shell.c:1781
 msgid "GNU long options:\n"
 msgstr "Dlouhé GNU přepínače:\n"
 
-#: shell.c:1784
+#: shell.c:1785
 msgid "Shell options:\n"
 msgstr "Přepínače shellu:\n"
 
-#: shell.c:1785
+#: shell.c:1786
 msgid "\t-irsD or -c command or -O shopt_option\t\t(invocation only)\n"
 msgstr "\t-irsD nebo -c příkaz nebo -O shopt_přepínač\t(pouze při vyvolání)\n"
 
-#: shell.c:1800
+#: shell.c:1801
 #, c-format
 msgid "\t-%s or -o option\n"
 msgstr "\t-%s nebo -o přepínač\n"
 
-#: shell.c:1806
+#: shell.c:1807
 #, c-format
 msgid "Type `%s -c \"help set\"' for more information about shell options.\n"
 msgstr "Podrobnosti o přepínačích shellu získáte tím, že napíšete „%s -c \"help set\"“.\n"
 
-#: shell.c:1807
+#: shell.c:1808
 #, c-format
 msgid "Type `%s -c help' for more information about shell builtin commands.\n"
 msgstr ""
 "Podrobnosti o příkazech vestavěných do shellu získáte tím, že\n"
 "napište „%s -c help“.\n"
 
-#: shell.c:1808
+#: shell.c:1809
 #, c-format
 msgid "Use the `bashbug' command to report bugs.\n"
 msgstr "Chyby nahlásíte příkazem „bashbug“.\n"
 
-#: sig.c:576
+#: sig.c:583
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
 msgstr "sigprocmask: %d: neplatná operace"
@@ -1634,77 +1659,77 @@ msgstr "Neznámé číslo signálu"
 msgid "Unknown Signal #%d"
 msgstr "Neznámý signál č. %d"
 
-#: subst.c:1177 subst.c:1298
+#: subst.c:1181 subst.c:1302
 #, c-format
 msgid "bad substitution: no closing `%s' in %s"
 msgstr "chybná substituce: v %2$s chybí uzavírací „%1$s“"
 
-#: subst.c:2450
+#: subst.c:2458
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr "%s: seznam nelze přiřadit do prvku pole"
 
-#: subst.c:4448 subst.c:4464
+#: subst.c:4456 subst.c:4472
 msgid "cannot make pipe for process substitution"
 msgstr "nelze vyrobit rouru za účelem substituce procesu"
 
-#: subst.c:4496
+#: subst.c:4504
 msgid "cannot make child for process substitution"
 msgstr "nelze vytvořit potomka za účelem substituce procesu"
 
-#: subst.c:4541
+#: subst.c:4549
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "pojmenovanou rouru %s nelze otevřít pro čtení"
 
-#: subst.c:4543
+#: subst.c:4551
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "pojmenovanou rouru %s nelze otevřít pro zápis"
 
-#: subst.c:4561
+#: subst.c:4569
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "pojmenovanou rouru %s nelze zdvojit jako deskriptor %d"
 
-#: subst.c:4757
+#: subst.c:4765
 msgid "cannot make pipe for command substitution"
 msgstr "nelze vytvořit rouru pro substituci příkazu"
 
-#: subst.c:4791
+#: subst.c:4799
 msgid "cannot make child for command substitution"
 msgstr "nelze vytvořit potomka pro substituci příkazu"
 
-#: subst.c:4808
+#: subst.c:4816
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr "command_substitute: rouru nelze zdvojit jako deskriptor 1"
 
-#: subst.c:5310
+#: subst.c:5318
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: parametr null nebo nenastaven"
 
-#: subst.c:5600
+#: subst.c:5608
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: výraz podřetězce < 0"
 
-#: subst.c:6646
+#: subst.c:6660
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: chybná substituce"
 
-#: subst.c:6722
+#: subst.c:6740
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: takto nelze přiřazovat"
 
-#: subst.c:7441
+#: subst.c:7499
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "chybná substituce: v %s chybí uzavírací „`“"
 
-#: subst.c:8314
+#: subst.c:8375
 #, c-format
 msgid "no match: %s"
 msgstr "žádná shoda: %s"
@@ -1741,68 +1766,67 @@ msgstr "%s: očekáván binární operátor"
 msgid "missing `]'"
 msgstr "postrádám „]“"
 
-#: trap.c:200
+#: trap.c:201
 msgid "invalid signal number"
 msgstr "neplatné číslo signálu"
 
-#: trap.c:323
+#: trap.c:324
 #, c-format
 msgid "run_pending_traps: bad value in trap_list[%d]: %p"
 msgstr "run_pending_traps: chybná hodnota v trap_list[%d]: %p"
 
-#: trap.c:327
+#: trap.c:328
 #, c-format
 msgid "run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself"
 msgstr "run_pending_traps: obsluha signálu je SIG_DFL, přeposílám %d (%s) sobě"
 
-#: trap.c:371
+#: trap.c:372
 #, c-format
 msgid "trap_handler: bad signal %d"
 msgstr "trap_handler: chybný signál %d"
 
-#: variables.c:354
+#: variables.c:358
 #, c-format
 msgid "error importing function definition for `%s'"
 msgstr "chyba při importu definice „%s“"
 
-#: variables.c:732
+#: variables.c:736
 #, c-format
 msgid "shell level (%d) too high, resetting to 1"
 msgstr "úroveň shellu (%d) příliš vysoká, resetuji na 1"
 
-#: variables.c:1891
+#: variables.c:1898
 msgid "make_local_variable: no function context at current scope"
 msgstr "make_local_variable: žádný kontext funkce v aktuálním rozsahu"
 
-#: variables.c:3120
+#: variables.c:3127
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: žádný kontext funkce v aktuálním rozsahu"
 
-#: variables.c:3337 variables.c:3346
+#: variables.c:3344 variables.c:3353
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "neplatný znak %d v exportstr pro %s"
 
-#: variables.c:3352
+#: variables.c:3359
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "v exportstr pro %s chybí „=“"
 
-#: variables.c:3787
+#: variables.c:3794
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr "pop_var_context: hlava shell_variables není kontextem funkce"
 
-#: variables.c:3800
+#: variables.c:3807
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: chybí kontext global_variables"
 
-#: variables.c:3874
+#: variables.c:3881
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr "pop_scope: hlava shell_variables není dočasným rozsahem prostředí"
 
 #: version.c:46
-#, fuzzy
-msgid "Copyright (C) 2008 Free Software Foundation, Inc."
+msgid "Copyright (C) 2009 Free Software Foundation, Inc."
 msgstr "Copyright © 2009 Free Software Foundation, Inc."
 
 #: version.c:47
@@ -2109,67 +2133,75 @@ msgid "until COMMANDS; do COMMANDS; done"
 msgstr "until PŘÍKAZY; do PŘÍKAZY; done"
 
 #: builtins.c:198
+msgid "coproc [NAME] command [redirections]"
+msgstr "command [NÁZEV] příkaz [přesměrování]"
+
+#: builtins.c:200
 msgid "function name { COMMANDS ; } or name () { COMMANDS ; }"
 msgstr "function jméno { PŘÍKAZY ; } nebo jméno () { PŘÍKAZY ; }"
 
-#: builtins.c:200
+#: builtins.c:202
 msgid "{ COMMANDS ; }"
 msgstr "{ PŘÍKAZY ; }"
 
-#: builtins.c:202
+#: builtins.c:204
 msgid "job_spec [&]"
 msgstr "úloha [&]"
 
-#: builtins.c:204
+#: builtins.c:206
 msgid "(( expression ))"
 msgstr "(( výraz ))"
 
-#: builtins.c:206
+#: builtins.c:208
 msgid "[[ expression ]]"
 msgstr "[[ výraz ]]"
 
 # XXX: "variable" je literál na seznamy vestavěných příkazů
-#: builtins.c:208
+#: builtins.c:210
 msgid "variables - Names and meanings of some shell variables"
 msgstr "variables – názvy a významy některých proměnných shellu"
 
-#: builtins.c:211
+#: builtins.c:213
 msgid "pushd [-n] [+N | -N | dir]"
 msgstr "pushd [-n] [+N | -N | adresář]"
 
-#: builtins.c:215
+#: builtins.c:217
 msgid "popd [-n] [+N | -N]"
 msgstr "popd [-n] [+N | -N]"
 
-#: builtins.c:219
+#: builtins.c:221
 msgid "dirs [-clpv] [+N] [-N]"
 msgstr "dirs [-clpv] [+N] [-N]"
 
-#: builtins.c:222
+#: builtins.c:224
 msgid "shopt [-pqsu] [-o] [optname ...]"
 msgstr "shopt [-pqsu] [-o] [název_volby…]"
 
-#: builtins.c:224
+#: builtins.c:226
 msgid "printf [-v var] format [arguments]"
 msgstr "printf [-v proměnná] formát [argumenty]"
 
-#: builtins.c:227
+#: builtins.c:229
 msgid "complete [-abcdefgjksuv] [-pr] [-o option] [-A action] [-G globpat] [-W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [name ...]"
 msgstr "complete [-abcdefgjksuv] [-pr] [-o přepínač] [-A akce] [-G globvzor] [-W seznam_slov]  [-F funkce] [-C příkaz] [-X filtrvzor] [-P předpona] [-S přípona] [název…]"
 
-#: builtins.c:231
+#: builtins.c:233
 msgid "compgen [-abcdefgjksuv] [-o option]  [-A action] [-G globpat] [-W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]"
 msgstr "compgen [-abcdefgjksuv] [-o přepínač]  [-A akce] [-G globvzor] [-W seznam_slov]  [-F funkce] [-C příkaz] [-X filtrvzor] [-P předpona] [-S přípona] [slovo]"
 
-#: builtins.c:235
+#: builtins.c:237
 msgid "compopt [-o|+o option] [name ...]"
 msgstr "compopt [-o|+o možnost] [název…]"
 
-#: builtins.c:238
+#: builtins.c:240
 msgid "mapfile [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c quantum] [array]"
 msgstr "mapfile [-n počet] [-O počátek] [-s počet] [-t] [-u fd] [-C volání] [-c množství] [pole]"
 
-#: builtins.c:250
+#: builtins.c:242
+msgid "readarray [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c quantum] [array]"
+msgstr "readarray [-n počet] [-O počátek] [-s počet] [-t] [-u fd] [-C volání] [-c množství] [pole]"
+
+#: builtins.c:254
 msgid ""
 "Define or display aliases.\n"
 "    \n"
@@ -2203,7 +2235,7 @@ msgstr ""
 "    alias vrátí pravdu, pokud nebyl zadán NÁZEV, pro který není žádný alias\n"
 "    definován."
 
-#: builtins.c:272
+#: builtins.c:276
 msgid ""
 "Remove each NAME from the list of defined aliases.\n"
 "    \n"
@@ -2218,7 +2250,7 @@ msgstr ""
 "      -a\todstraní všechny definice aliasů.    \n"
 "    Vrací úspěch, pokud NÁZEV není neexistující alias."
 
-#: builtins.c:285
+#: builtins.c:289
 msgid ""
 "Set Readline key bindings and variables.\n"
 "    \n"
@@ -2287,7 +2319,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    bind vrací 0, pokud není zadán nerozpoznaný přepínač nebo nedojde k chybě."
 
-#: builtins.c:322
+#: builtins.c:326
 msgid ""
 "Exit for, while, or until loops.\n"
 "    \n"
@@ -2305,7 +2337,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Návratový kód je 0, pokud N je větší nebo rovno 1."
 
-#: builtins.c:334
+#: builtins.c:338
 msgid ""
 "Resume for, while, or until loops.\n"
 "    \n"
@@ -2322,7 +2354,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Návratový kód je 0, pokud N je větší nebo rovno 1."
 
-#: builtins.c:346
+#: builtins.c:350
 msgid ""
 "Execute shell builtins.\n"
 "    \n"
@@ -2345,7 +2377,7 @@ msgstr ""
 "    Vrací návratový kód VESTAVĚNÉHO-PŘÍKAZU-SHELLU, nebo nepravdu, pokud\n"
 "    VESTAVĚNÝ-PŘÍKAZ-SHELLU není vestavěným příkazem shellu."
 
-#: builtins.c:361
+#: builtins.c:365
 msgid ""
 "Return the context of the current subroutine call.\n"
 "    \n"
@@ -2372,7 +2404,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrací 0, pokud shell provádí shellovou funkci a VÝRAZ je platný."
 
-#: builtins.c:379
+#: builtins.c:383
 msgid ""
 "Change the shell working directory.\n"
 "    \n"
@@ -2422,7 +2454,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrací 0, byl-li adresář změněn, jinak nenulovou hodnotu."
 
-#: builtins.c:407
+#: builtins.c:411
 msgid ""
 "Print the name of the current working directory.\n"
 "    \n"
@@ -2450,7 +2482,7 @@ msgstr ""
 "    Vrací 0, nebyl-li zadán neplatný přepínač a mohl-li být současný\n"
 "    adresář přečten."
 
-#: builtins.c:424
+#: builtins.c:428
 msgid ""
 "Null command.\n"
 "    \n"
@@ -2466,7 +2498,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vždy uspěje."
 
-#: builtins.c:435
+#: builtins.c:439
 msgid ""
 "Return a successful result.\n"
 "    \n"
@@ -2478,7 +2510,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vždy uspěje."
 
-#: builtins.c:444
+#: builtins.c:448
 msgid ""
 "Return an unsuccessful result.\n"
 "    \n"
@@ -2490,7 +2522,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vždy selže."
 
-#: builtins.c:453
+#: builtins.c:457
 msgid ""
 "Execute a simple command or display information about commands.\n"
 "    \n"
@@ -2522,7 +2554,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrací návratový kód PŘÍKAZU, nebo selže, nebyl–li příkaz nalezen."
 
-#: builtins.c:472
+#: builtins.c:476
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
@@ -2588,7 +2620,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrací úspěch, pokud nebyl zadán neplatný přepínač a nedošlo k chybě."
 
-#: builtins.c:508
+#: builtins.c:512
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
@@ -2598,7 +2630,7 @@ msgstr ""
 "    \n"
 "    Příkaz je zastaralý. Vizte „help declare“."
 
-#: builtins.c:516
+#: builtins.c:520
 msgid ""
 "Define local variables.\n"
 "    \n"
@@ -2624,7 +2656,7 @@ msgstr ""
 "    Vrací úspěch, nebyl-li zadán neplatný přepínač, nenastala-li chyba a\n"
 "    vykonává-li shell funkci."
 
-#: builtins.c:533
+#: builtins.c:537
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -2682,7 +2714,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrací úspěch, nedojde-li k chybě zápisu na výstup."
 
-#: builtins.c:567
+#: builtins.c:571
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -2703,7 +2735,7 @@ msgstr ""
 "    \n"
 "    Vrací úspěch, nedojte-li k chybě zápisu na výstup."
 
-#: builtins.c:582
+#: builtins.c:586
 msgid ""
 "Enable and disable shell builtins.\n"
 "    \n"
@@ -2756,7 +2788,7 @@ msgstr ""
 "    Vrací úspěch, je-li NÁZEV vestavěným příkazem shellu a nevyskytne-li\n"
 "    se chyba."
 
-#: builtins.c:610
+#: builtins.c:614
 msgid ""
 "Execute arguments as a shell command.\n"
 "    \n"
@@ -2773,7 +2805,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí návratový kód příkazu, nebo úspěch, byl-li příkaz prázdný."
 
-#: builtins.c:622
+#: builtins.c:626
 msgid ""
 "Parse option arguments.\n"
 "    \n"
@@ -2850,7 +2882,7 @@ msgstr ""
 "    Vrátí úspěch, byl-li nalezen nějaký přepínač. Neúspěch vrátí, když dojde\n"
 "    na konec přepínačů nebo nastane-li chyba."
 
-#: builtins.c:664
+#: builtins.c:668
 msgid ""
 "Replace the shell with the given command.\n"
 "    \n"
@@ -2886,7 +2918,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud byl PŘÍKAZ nalezen a nedošlo k chybě přesměrování."
 
-#: builtins.c:685
+#: builtins.c:689
 msgid ""
 "Exit the shell.\n"
 "    \n"
@@ -2898,7 +2930,7 @@ msgstr ""
 "    Ukončí tento shell se stavem N. Bez N bude návratový kód roven kódu\n"
 "    posledně prováděného příkazu."
 
-#: builtins.c:694
+#: builtins.c:698
 msgid ""
 "Exit a login shell.\n"
 "    \n"
@@ -2910,7 +2942,7 @@ msgstr ""
 "    Ukončí přihlašovací (login) shell se stavem N. Nebyl-li příkaz zavolán\n"
 "    z přihlašovacího shellu, vrátí chybu."
 
-#: builtins.c:704
+#: builtins.c:708
 msgid ""
 "Display or execute commands from the history list.\n"
 "    \n"
@@ -2958,7 +2990,7 @@ msgstr ""
 "    Vrátí úspěch nebo kód provedeného příkazu. Nenulový kód, vyskytne-li se\n"
 "    chyba."
 
-#: builtins.c:734
+#: builtins.c:738
 msgid ""
 "Move job to the foreground.\n"
 "    \n"
@@ -2978,7 +3010,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Kód úlohy přesunuté do popředí, nebo došlo-li k chybě, kód selhání."
 
-#: builtins.c:749
+#: builtins.c:753
 msgid ""
 "Move jobs to the background.\n"
 "    \n"
@@ -2998,7 +3030,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud je správa úloh zapnuta a nedošlo-li k nějaké chybě."
 
-#: builtins.c:763
+#: builtins.c:767
 msgid ""
 "Remember or display program locations.\n"
 "    \n"
@@ -3039,7 +3071,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud byl NÁZEV nalezen a nebyl-li zadán neplatný přepínač."
 
-#: builtins.c:788
+#: builtins.c:792
 msgid ""
 "Display information about builtin commands.\n"
 "    \n"
@@ -3078,7 +3110,7 @@ msgstr ""
 "    Vrací úspěch, pokud byl nalezen VZOREK a nebyl zadán neplatný přepínač."
 
 # FIXME: bash-4.0-pre1: Orphaned line between -w and -p option. It belongs to -n.
-#: builtins.c:812
+#: builtins.c:816
 msgid ""
 "Display or manipulate the history list.\n"
 "    \n"
@@ -3139,7 +3171,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač a nedošlo k chybě."
 
-#: builtins.c:848
+#: builtins.c:852
 msgid ""
 "Display status of jobs.\n"
 "    \n"
@@ -3181,7 +3213,7 @@ msgstr ""
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač a nevyskytla se chyba.\n"
 "    Byl-ly použit přepínač -x, vrátí návratový kód PŘÍKAZU."
 
-#: builtins.c:875
+#: builtins.c:879
 msgid ""
 "Remove jobs from current shell.\n"
 "    \n"
@@ -3211,7 +3243,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač nebo ÚLOHA."
 
-#: builtins.c:894
+#: builtins.c:898
 msgid ""
 "Send a signal to a job.\n"
 "    \n"
@@ -3251,7 +3283,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač a nedošlo k chybě."
 
-#: builtins.c:917
+#: builtins.c:921
 msgid ""
 "Evaluate arithmetic expressions.\n"
 "    \n"
@@ -3335,8 +3367,7 @@ msgstr ""
 "    Pokud poslední ARGUMENT je vyhodnocen na 0, let vrátí 1. Jinak je\n"
 "    navrácena 0."
 
-#: builtins.c:962
-#, fuzzy
+#: builtins.c:966
 msgid ""
 "Read a line from the standard input and split it into fields.\n"
 "    \n"
@@ -3365,8 +3396,9 @@ msgid ""
 "      -t timeout\ttime out and return failure if a complete line of input is\n"
 "    \t\tnot read withint TIMEOUT seconds.  The value of the TMOUT\n"
 "    \t\tvariable is the default timeout.  TIMEOUT may be a\n"
-"    \t\tfractional number.  The exit status is greater than 128 if\n"
-"    \t\tthe timeout is exceeded\n"
+"    \t\tfractional number.  If TIMEOUT is 0, read returns success only\n"
+"    \t\tif input is available on the specified file descriptor.  The\n"
+"    \t\texit status is greater than 128 if the timeout is exceeded\n"
 "      -u fd\t\tread from file descriptor FD instead of the standard input\n"
 "    \n"
 "    Exit Status:\n"
@@ -3410,7 +3442,7 @@ msgstr ""
 "    pro čtení nevyprší nebo není poskytnut neplatný deskriptor souboru jako\n"
 "    argument -u."
 
-#: builtins.c:1001
+#: builtins.c:1006
 msgid ""
 "Return from a shell function.\n"
 "    \n"
@@ -3430,7 +3462,7 @@ msgstr ""
 "    Návratová hodnota:\n"
 "    Vrátí N, nebo selže, pokud shell neprovádí funkci nebo skript."
 
-#: builtins.c:1014
+#: builtins.c:1019
 msgid ""
 "Set or unset values of shell options and positional parameters.\n"
 "    \n"
@@ -3592,7 +3624,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud nebyl zadán neplatný argument."
 
-#: builtins.c:1096
+#: builtins.c:1101
 msgid ""
 "Unset values and attributes of shell variables and functions.\n"
 "    \n"
@@ -3627,7 +3659,7 @@ msgstr ""
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač a JMÉNO není jen pro\n"
 "    čtení."
 
-#: builtins.c:1116
+#: builtins.c:1121
 msgid ""
 "Set export attribute for shell variables.\n"
 "    \n"
@@ -3659,7 +3691,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač nebo NÁZEV."
 
-#: builtins.c:1135
+#: builtins.c:1140
 msgid ""
 "Mark shell variables as unchangeable.\n"
 "    \n"
@@ -3695,7 +3727,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač nebo NÁZEV."
 
-#: builtins.c:1156
+#: builtins.c:1161
 msgid ""
 "Shift positional parameters.\n"
 "    \n"
@@ -3713,7 +3745,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud N není záporný a není větší než $#."
 
-#: builtins.c:1168 builtins.c:1183
+#: builtins.c:1173 builtins.c:1188
 msgid ""
 "Execute commands from a file in the current shell.\n"
 "    \n"
@@ -3737,7 +3769,7 @@ msgstr ""
 "    Vrací návratový kód posledního provedeného příkazu z NÁZVU_SOUBORU.\n"
 "    Selže, pokud NÁZEV_SOUBORU nelze načíst."
 
-#: builtins.c:1199
+#: builtins.c:1204
 msgid ""
 "Suspend shell execution.\n"
 "    \n"
@@ -3761,7 +3793,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrací úspěch, pokud je správa úloh zapnuta a nevyskytla se chyba."
 
-#: builtins.c:1215
+#: builtins.c:1220
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -3916,7 +3948,7 @@ msgstr ""
 "    Vrací úspěch, je-li VÝRAZ vyhodnocen jako pravdivý. Selže, je-li VÝRAZ\n"
 "    vyhodnocen jako nepravdivý nebo je-li zadán neplatný argument."
 
-#: builtins.c:1291
+#: builtins.c:1296
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -3928,7 +3960,7 @@ msgstr ""
 "    Toto je synonymum pro vestavěný příkaz „test“, až na to, že poslední\n"
 "    argument musí být doslovně „]“, aby se shodoval s otevírající „[“."
 
-#: builtins.c:1300
+#: builtins.c:1305
 msgid ""
 "Display process times.\n"
 "    \n"
@@ -3946,7 +3978,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vždy uspěje."
 
-#: builtins.c:1312
+#: builtins.c:1317
 msgid ""
 "Trap signals and other events.\n"
 "    \n"
@@ -4005,7 +4037,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud SIGSPEC a zadané přepínače jsou platné."
 
-#: builtins.c:1344
+#: builtins.c:1349
 msgid ""
 "Display information about command type.\n"
 "    \n"
@@ -4060,7 +4092,7 @@ msgstr ""
 "    Vrátí úspěch, pokud všechny NÁZVY byly nalezeny. Selže, pokud některé\n"
 "    nalezeny nebyly."
 
-#: builtins.c:1375
+#: builtins.c:1380
 msgid ""
 "Modify shell resource limits.\n"
 "    \n"
@@ -4141,7 +4173,7 @@ msgstr ""
 "    Návratová hodnota:\n"
 "    Vrací úspěch, pokud nebyl zadán neplatný přepínač a nevyskytla se chyba."
 
-#: builtins.c:1420
+#: builtins.c:1425
 msgid ""
 "Display or set file mode mask.\n"
 "    \n"
@@ -4174,7 +4206,7 @@ msgstr ""
 "    Návratový kód\n"
 "    Vrátí úspěch, pokud nebyl zadán neplatný MÓD nebo přepínač."
 
-#: builtins.c:1440
+#: builtins.c:1445
 msgid ""
 "Wait for job completion and return exit status.\n"
 "    \n"
@@ -4198,7 +4230,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí kód ID, selže, pokud ID není platný nebo byl zadán neplatný přepínač."
 
-#: builtins.c:1458
+#: builtins.c:1463
 msgid ""
 "Wait for process completion and return exit status.\n"
 "    \n"
@@ -4219,7 +4251,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí kód ID, selže, pokud ID není platný nebo byl zadán neplatný přepínač."
 
-#: builtins.c:1473
+#: builtins.c:1478
 msgid ""
 "Execute commands for each member in a list.\n"
 "    \n"
@@ -4240,7 +4272,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí kód naposledy provedeného příkazu."
 
-#: builtins.c:1487
+#: builtins.c:1492
 msgid ""
 "Arithmetic for loop.\n"
 "    \n"
@@ -4269,7 +4301,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí kód naposledy vykonaného příkazu."
 
-#: builtins.c:1505
+#: builtins.c:1510
 msgid ""
 "Select words from a list and execute commands.\n"
 "    \n"
@@ -4304,7 +4336,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí kód naposledy prováděného příkazu."
 
-#: builtins.c:1526
+#: builtins.c:1531
 msgid ""
 "Report time consumed by pipeline's execution.\n"
 "    \n"
@@ -4333,7 +4365,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Návratová hodnota je návratová hodnota KOLONY."
 
-#: builtins.c:1543
+#: builtins.c:1548
 msgid ""
 "Execute commands based on pattern matching.\n"
 "    \n"
@@ -4351,7 +4383,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí kód naposledy provedeného příkazu."
 
-#: builtins.c:1555
+#: builtins.c:1560
 msgid ""
 "Execute commands based on conditional.\n"
 "    \n"
@@ -4379,7 +4411,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí kód naposledy provedeného příkazu."
 
-#: builtins.c:1572
+#: builtins.c:1577
 msgid ""
 "Execute commands as long as a test succeeds.\n"
 "    \n"
@@ -4397,7 +4429,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí kód naposledy provedeného příkazu."
 
-#: builtins.c:1584
+#: builtins.c:1589
 msgid ""
 "Execute commands as long as a test does not succeed.\n"
 "    \n"
@@ -4414,7 +4446,28 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí kód naposledy provedeného příkazu."
 
-#: builtins.c:1596
+#: builtins.c:1601
+msgid ""
+"Create a coprocess named NAME.\n"
+"    \n"
+"    Execute COMMAND asynchronously, with the standard output and standard\n"
+"    input of the command connected via a pipe to file descriptors assigned\n"
+"    to indices 0 and 1 of an array variable NAME in the executing shell.\n"
+"    The default NAME is \"COPROC\".\n"
+"    \n"
+"    Exit Status:\n"
+"    Returns the exit status of COMMAND."
+msgstr ""
+"Vytvoří koproces pojmenovaný NÁZEV.\n"
+"    \n"
+"    Vykoná PŘÍKAZ asynchronně, přičemž jeho standardní výstup a standardní\n"
+"    vstup budou napojeny rourou na souborové deskriptory uvedené v poli NÁZEV\n"
+"    tohoto shellu pod indexem 0 a 1. Implicitní NÁZEV je „COPROC“.\n"
+"    \n"
+"    Návratový kód:\n"
+"    Vrátí návratový kód PŘÍKAZU."
+
+#: builtins.c:1615
 msgid ""
 "Define shell function.\n"
 "    \n"
@@ -4436,7 +4489,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud NÁZEV není jen pro čtení."
 
-#: builtins.c:1610
+#: builtins.c:1629
 msgid ""
 "Group commands as a unit.\n"
 "    \n"
@@ -4453,7 +4506,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí kód naposledy spuštěného příkazu."
 
-#: builtins.c:1622
+#: builtins.c:1641
 msgid ""
 "Resume job in foreground.\n"
 "    \n"
@@ -4476,7 +4529,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí kód obnovené úlohy."
 
-#: builtins.c:1637
+#: builtins.c:1656
 msgid ""
 "Evaluate arithmetic expression.\n"
 "    \n"
@@ -4498,7 +4551,7 @@ msgstr ""
 # příkaz, který by byl vykonán na základě splnění jiné podmínky. Tj. překlad
 # „podmíněný příkaz“ je chybný.
 # Toto je nápověda k vestavěnému příkazu „[“.
-#: builtins.c:1649
+#: builtins.c:1668
 msgid ""
 "Execute conditional command.\n"
 "    \n"
@@ -4545,7 +4598,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    0 nebo 1 podle hodnoty VÝRAZU."
 
-#: builtins.c:1675
+#: builtins.c:1694
 msgid ""
 "Common shell variable names and usage.\n"
 "    \n"
@@ -4649,7 +4702,7 @@ msgstr ""
 "    \t\trozlišení, které příkazy by měly být uloženy do seznamu\n"
 "    \t\thistorie.\n"
 
-#: builtins.c:1732
+#: builtins.c:1751
 msgid ""
 "Add directories to stack.\n"
 "    \n"
@@ -4706,7 +4759,7 @@ msgstr ""
 "    Vrátí úspěch, pokud nebyl zadán neplatný argument a změna adresáře\n"
 "    neselhala."
 
-#: builtins.c:1766
+#: builtins.c:1785
 msgid ""
 "Remove directories from stack.\n"
 "    \n"
@@ -4756,7 +4809,7 @@ msgstr ""
 "    Vrátí úspěch, pokud nebyl zadán neplatný argument nebo neselhala změna\n"
 "    adresáře."
 
-#: builtins.c:1796
+#: builtins.c:1815
 msgid ""
 "Display directory stack.\n"
 "    \n"
@@ -4804,7 +4857,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač a nevyskytla se chyba."
 
-#: builtins.c:1825
+#: builtins.c:1844
 msgid ""
 "Set and unset shell options.\n"
 "    \n"
@@ -4840,7 +4893,7 @@ msgstr ""
 "    Vrátí úspěch, je-li NÁZEV_VOLBY zapnut. Selže, byl-li zadán neplatný\n"
 "    přepínač nebo je-li NÁZEV_VOLBY vypnut."
 
-#: builtins.c:1846
+#: builtins.c:1865
 msgid ""
 "Formats and prints ARGUMENTS under control of the FORMAT.\n"
 "    \n"
@@ -4887,7 +4940,7 @@ msgstr ""
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač a nedošlo k chybě\n"
 "    zápisu nebo přiřazení."
 
-#: builtins.c:1873
+#: builtins.c:1892
 msgid ""
 "Specify how arguments are to be completed by Readline.\n"
 "    \n"
@@ -4923,7 +4976,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač a nevyskytla se chyba."
 
-#: builtins.c:1896
+#: builtins.c:1915
 msgid ""
 "Display possible completions depending on the options.\n"
 "    \n"
@@ -4943,7 +4996,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač a nevyskytla se chyba."
 
-#: builtins.c:1911
+#: builtins.c:1930
 msgid ""
 "Modify or display completion options.\n"
 "    \n"
@@ -4991,10 +5044,9 @@ msgstr ""
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač a NÁZEV měl definováno\n"
 "    pravidlo doplňování."
 
-#: builtins.c:1939
-#, fuzzy
+#: builtins.c:1958
 msgid ""
-"Read lines from a file into an array variable.\n"
+"Read lines from the standard input into an array variable.\n"
 "    \n"
 "    Read lines from the standard input into the array variable ARRAY, or from\n"
 "    file descriptor FD if the -u option is supplied.  The variable MAPFILE is\n"
@@ -5012,13 +5064,15 @@ msgid ""
 "    Arguments:\n"
 "      ARRAY\t\tArray variable name to use for file data.\n"
 "    \n"
-"    If -C is supplied without -c, the default quantum is 5000.\n"
+"    If -C is supplied without -c, the default quantum is 5000.  When\n"
+"    CALLBACK is evaluated, it is supplied the index of the next array\n"
+"    element to be assigned as an additional argument.\n"
 "    \n"
 "    If not supplied with an explicit origin, mapfile will clear ARRAY before\n"
 "    assigning to it.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success unless an invald option is given or ARRAY is readonly."
+"    Returns success unless an invalid option is given or ARRAY is readonly."
 msgstr ""
 "Načte řádky ze souboru do proměnné typu pole.\n"
 "    \n"
@@ -5055,58 +5109,15 @@ msgstr ""
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač a POLE nebylo jen pro\n"
 "    čtení."
 
-#~ msgid "line editing not enabled"
-#~ msgstr "upravování řádku není povoleno"
-
-#~ msgid ""
-#~ "Returns the context of the current subroutine call.\n"
-#~ "    \n"
-#~ "    Without EXPR, returns "
-#~ msgstr ""
-#~ "Vrátí kontext aktuálního volání podprogramu.\n"
-#~ "    \n"
-#~ "    Bez VÝRAZU vrátí "
-
-#~ msgid "error setting terminal attributes: %s"
-#~ msgstr "chyba při nastavování vlastností terminálu: %s"
-
-#~ msgid "error getting terminal attributes: %s"
-#~ msgstr "chyba při získávání vlastností terminálu: %s"
-
-#~ msgid "coproc [NAME] command [redirections]"
-#~ msgstr "command [NÁZEV] příkaz [přesměrování]"
-
-#~ msgid "readarray [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c quantum] [array]"
-#~ msgstr "readarray [-n počet] [-O počátek] [-s počet] [-t] [-u fd] [-C volání] [-c množství] [pole]"
-
-#~ msgid ""
-#~ "Create a coprocess named NAME.\n"
-#~ "    \n"
-#~ "    Execute COMMAND asynchronously, with the standard output and standard\n"
-#~ "    input of the command connected via a pipe to file descriptors assigned\n"
-#~ "    to indices 0 and 1 of an array variable NAME in the executing shell.\n"
-#~ "    The default NAME is \"COPROC\".\n"
-#~ "    \n"
-#~ "    Exit Status:\n"
-#~ "    Returns the exit status of COMMAND."
-#~ msgstr ""
-#~ "Vytvoří koproces pojmenovaný NÁZEV.\n"
-#~ "    \n"
-#~ "    Vykoná PŘÍKAZ asynchronně, přičemž jeho standardní výstup a standardní\n"
-#~ "    vstup budou napojeny rourou na souborové deskriptory uvedené v poli NÁZEV\n"
-#~ "    tohoto shellu pod indexem 0 a 1. Implicitní NÁZEV je „COPROC“.\n"
-#~ "    \n"
-#~ "    Návratový kód:\n"
-#~ "    Vrátí návratový kód PŘÍKAZU."
-
-#~ msgid ""
-#~ "Read lines from a file into an array variable.\n"
-#~ "    \n"
-#~ "    A synonym for `mapfile'."
-#~ msgstr ""
-#~ "Načte řádky ze souboru do proměnné typu pole.\n"
-#~ "    \n"
-#~ "    Synonymum pro „mapfile“."
+#: builtins.c:1990
+msgid ""
+"Read lines from a file into an array variable.\n"
+"    \n"
+"    A synonym for `mapfile'."
+msgstr ""
+"Načte řádky ze souboru do proměnné typu pole.\n"
+"    \n"
+"    Synonymum pro „mapfile“."
 
 #~ msgid " "
 #~ msgstr " "

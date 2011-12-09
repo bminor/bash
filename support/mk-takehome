@@ -3,7 +3,9 @@
 DATE=$(date +%Y%m%d)
 
 PARENT=/fs2/chet/bash
-DIR=$PARENT/bash-$DATE
+FROOT=bash-$DATE
+DIR=$PARENT/$FROOT
+TARF=${FROOT}.tar
 SRC=/usr/homes/chet/src/bash/src
 
 mkdir $DIR || exit 1
@@ -22,10 +24,16 @@ find . -type d -name 'savedir' -print | xargs rm -rf
 
 rm parser-built y.tab.c y.tab.h
 
-rm -f d d? ddd		# convention for temp diff files
+rm -f d d? ddd ddd?		# convention for temp diff files
 
 cd $PARENT || exit 1
 
-tar cvf bash-$DATE.tar bash-$DATE 
+tar cvf ${TARF} $FROOT
 
-gzip -v bash-$DATE.tar
+gzip -v ${TARF}
+
+REMHOST=z4
+
+if [ "$1" = "-s" ]; then
+	scp ${TARF}.gz ${REMHOST}:
+fi
