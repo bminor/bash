@@ -1,3 +1,58 @@
+This document details the changes between this version, bash-4.1-beta,
+and the previous version, bash-4.1-alpha.
+
+1.  Changes to Bash
+
+a.  Fixed a bug in mapfile that caused the shell to crash if it was passed the
+    name of an associative array.
+
+b.  Fixed a bug that caused the shell to incorrectly split case patterns if
+    they contained characters in $IFS.
+
+c.  Fixed a bug that caused the shell to set $? to the wrong value when using
+    a construct ending with a variable assignment with set -x enabled and PS4
+    containing a command substitution.
+
+d.  Fixed a bug that caused the shell to read commands incorrectly if an
+    expansion error occurred under certain conditions in a user-specified
+    subshell.
+
+e.  Fixed a bug that caused the shell to set $? incorrectly if a parse error
+    occurred in an evaluation context ("eval", trap command, dot script, etc.)
+
+f.  Fixed a bug that caused the shell to attempt command substitution
+    completion within a single-quoted string.
+
+g.  Fixed a bug that caused the shell to insert an extra single quote during
+    word completion.
+
+h.  Fixed a bug that caused the shell to crash if invoked with the environment
+    variable EMACS having a null value.
+
+i.  Fixed a bug that caused bash to incorrectly report the presence of new
+    mail in a `maildir' environment.
+
+j.  Fixed a bug that caused the shell to not recognize a here-document ending
+    delimiter inside a command substitution.
+
+k.  Fixed a bug that caused the shell to crash when a a dynamic array variable
+    was assigned a scalar value.
+
+2.  Changes to Readline
+
+3.  New Features in Bash
+
+a.  The mapfile/readarray builtin no longer stores the commands it invokes via
+    callbacks in the history list.
+
+b.  There is a new `compat40' shopt option.
+
+c.  The < and > operators to [[ do string comparisons using the current locale
+    only if the compatibility level is greater than 40 (set to 41 by default).
+
+4.  New Features in Readline
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-4.1-alpha,
 and the previous version, bash-4.0-release.
 

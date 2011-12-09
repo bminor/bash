@@ -9262,3 +9262,7 @@ lib/readline/signals.c
 	  _rl_interrupt_immediately is set, so RL_CHECK_SIGNALS doesn't
 	  cause it to be processed twice.  Suggested by Jan Kratochvil
 	  <jan.kratochvil@redhat.com>
+	- if the callback interface is being used, use the code path that
+	  immediately handles signals.  This restores the readline-5.2
+	  behavior.  Fixes GDB readline bug reported by Jan Kratochvil
+	  <jan.kratochvil@redhat.com>

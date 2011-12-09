@@ -73,6 +73,14 @@ t.  Changed the behavior of interrupting the wait builtin when a SIGCHLD is
 u.  The read builtin has a new `-N nchars' option, which reads exactly NCHARS
     characters, ignoring delimiters like newline.
 
+v.  The mapfile/readarray builtin no longer stores the commands it invokes via
+    callbacks in the history list.
+
+w.  There is a new `compat40' shopt option.
+
+x.  The < and > operators to [[ do string comparisons using the current locale
+    only if the compatibility level is greater than 40 (set to 41 by default).
+
 2.  New Features in Readline
 
 a.  New bindable function: menu-complete-backward.
@@ -1521,3 +1529,9 @@ e.  There are new library functions and variables available to application
 
 f.  The NEWLINE character (^J) is now treated as a search terminator by the
     incremental search functions.
+-------------------------------------------------------------------------------
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.  This file is offered as-is,
+without any warranty.

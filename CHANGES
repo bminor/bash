@@ -1,3 +1,35 @@
+This document details the changes between this version, bash-4.1-rc,
+and the previous version, bash-4.1-beta.
+
+1.  Changes to Bash
+
+a.  Fixed a bug that caused printf to not return a partial value when it
+    encountered an error while converting an integer argument.
+
+b.  Fixed a bug that caused setting one of the compatNN options to not
+    turn off the others.
+
+c.  The (undocumented) --wordexp option is no longer included by default.
+
+d.  Fixed a bug in conditional command execution that caused it to not
+    correctly ignore the exit status under certain circumstances.
+
+e.  Added a configure-time check for correctly-working asprintf/snprintf.
+
+f.  Fixed some problems with line number calculation and display when sourcing
+    a file in an interactive shell.
+
+g.  Fixed a bug that caused the shell to crash when using `declare -A foo=bar'.
+
+h.  Fixed a bug that caused an off-by-one error when calculating the directories
+    to display with the PROMPT_DIRTRIM option.
+
+2.  Changes to Readline
+
+a.  Fixed a bug that caused applications using the callback interface to not
+    react to SIGINT (or other signals) until another character arrived.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-4.1-beta,
 and the previous version, bash-4.1-alpha.
 
