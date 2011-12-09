@@ -733,6 +733,7 @@ rl_redisplay ()
   if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
     {
       memset (&ps, 0, sizeof (mbstate_t));
+      /* XXX - what if wc_bytes ends up <= 0? check for MB_INVALIDCH */
       wc_bytes = mbrtowc (&wc, rl_line_buffer, rl_end, &ps);
     }
   else
@@ -893,6 +894,7 @@ rl_redisplay ()
       if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
 	{
 	  in += wc_bytes;
+	  /* XXX - what if wc_bytes ends up <= 0? check for MB_INVALIDCH */
 	  wc_bytes = mbrtowc (&wc, rl_line_buffer + in, rl_end - in, &ps);
 	}
       else
@@ -1189,15 +1191,24 @@ rl_redisplay ()
       if (t < out)
 	line[t - 1] = '>';
 
-      if (!rl_display_fixed || forced_display || lmargin != last_lmargin)
+      if (rl_display_fixed == 0 || forced_display || lmargin != last_lmargin)
 	{
 	  forced_display = 0;
+	  o_cpos = _rl_last_c_pos;
+	  cpos_adjusted = 0;
 	  update_line (&visible_line[last_lmargin],
 		       &invisible_line[lmargin],
 		       0,
 		       _rl_screenwidth + visible_wrap_offset,
 		       _rl_screenwidth + (lmargin ? 0 : wrap_offset),
 		       0);
+
+	  if (linenum == 0 && (MB_CUR_MAX > 1 && rl_byte_oriented == 0) &&
+	      cpos_adjusted == 0 &&
+	      _rl_last_c_pos != o_cpos &&
+	      _rl_last_c_pos > wrap_offset &&
+	      o_cpos < prompt_last_invisible)
+		_rl_last_c_pos -= prompt_invis_chars_first_line;	/* XXX - was wrap_offset */
 
 	  /* If the visible new line is shorter than the old, but the number
 	     of invisible characters is greater, and we are at the end of
@@ -1895,10 +1906,8 @@ _rl_move_cursor_relative (new, data)
   woff = WRAP_OFFSET (_rl_last_v_pos, wrap_offset);
   cpos = _rl_last_c_pos;
 
-#if 0
   if (cpos == 0 && cpos == new)
     return;
-#endif
 
 #if defined (HANDLE_MULTIBYTE)
   /* If we have multibyte characters, NEW is indexed by the buffer point in

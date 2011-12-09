@@ -8105,3 +8105,29 @@ lib/readline/vi_mode.c
 	- fix _rl_vi_initialize_line so that the loop counter is not
 	  unsigned (it doesn't matter, but it eliminates a compiler warning).
 	  Bug reported by Dave Caroline <dave.thearchivist@gmail.com>
+
+				   5/26
+				   ----
+doc/{bash.1,bashref.texi}
+	- add text to the description of array variables making it clear
+	  that an array variable is not considered set until a subscript
+	  has been assigned a value
+
+				   5/29
+				   ----
+lib/readline/text.c
+	- fix rl_change_case to handle case where mbrtowc doesn't find a
+	  valid multibyte character
+
+lib/readline/vi_mode.c
+	- fix _rl_vi_change_mbchar_case to handle case where mbrtowc doesn't
+	  find a valid multibyte character
+
+lib/sh/casemod.c
+	- fix sh_modcase to handle case where mbrtowc doesn't find a valid
+	  multibyte character
+
+lib/readline/mbutil.c
+	- fix _rl_find_next_mbchar_internalto not call mbrtowc at the end of
+	  the string, since implementations return different values -- just
+	  break the loop immediately

@@ -131,9 +131,10 @@ static int _rl_vi_callback_char_search PARAMS((_rl_callback_generic_arg *));
 void
 _rl_vi_initialize_line ()
 {
-  register int i;
+  register int i, n;
 
-  for (i = 0; i < sizeof (vi_mark_chars) / sizeof (int); i++)
+  n = sizeof (vi_mark_chars) / sizeof (vi_mark_chars[0]);
+  for (i = 0; i < n; i++)
     vi_mark_chars[i] = -1;
 
   RL_UNSETSTATE(RL_STATE_VICMDONCE);

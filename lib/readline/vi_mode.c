@@ -769,6 +769,7 @@ _rl_vi_change_mbchar_case (count)
   wchar_t wc;
   char mb[MB_LEN_MAX+1];
   int mlen, p;
+  size_t m;
   mbstate_t ps;
 
   memset (&ps, 0, sizeof (mbstate_t));
@@ -776,7 +777,11 @@ _rl_vi_change_mbchar_case (count)
     count--;
   while (count-- && rl_point < rl_end)
     {
-      mbrtowc (&wc, rl_line_buffer + rl_point, rl_end - rl_point, &ps);
+      m = mbrtowc (&wc, rl_line_buffer + rl_point, rl_end - rl_point, &ps);
+      if (MB_INVALIDCH (m))
+	wc = (wchar_t)rl_line_buffer[rl_point];
+      else if (MB_NULLWCH (m))
+        wc = L'\0';
       if (iswupper (wc))
 	wc = towlower (wc);
       else if (iswlower (wc))

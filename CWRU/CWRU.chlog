@@ -8113,3 +8113,27 @@ doc/{bash.1,bashref.texi}
 	  that an array variable is not considered set until a subscript
 	  has been assigned a value
 
+				   5/29
+				   ----
+lib/readline/text.c
+	- fix rl_change_case to handle case where mbrtowc doesn't find a
+	  valid multibyte character
+
+lib/readline/vi_mode.c
+	- fix _rl_vi_change_mbchar_case to handle case where mbrtowc doesn't
+	  find a valid multibyte character
+
+lib/sh/casemod.c
+	- fix sh_modcase to handle case where mbrtowc doesn't find a valid
+	  multibyte character
+
+lib/readline/mbutil.c
+	- fix _rl_find_next_mbchar_internalto not call mbrtowc at the end of
+	  the string, since implementations return different values -- just
+	  break the loop immediately
+
+lib/readline/display.c
+	- fix rl_redisplay to make same sort of cursor position adjustments
+	  based on multibyte locale and _rl_last_c_pos when performing
+	  horizontal scrolling rather than line wrapping.  Probably still
+	  more to do.  Fixes bug reported by jim@jim.sh

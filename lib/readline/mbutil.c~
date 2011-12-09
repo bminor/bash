@@ -99,10 +99,7 @@ _rl_find_next_mbchar_internal (string, seed, count, find_non_zero)
 
   while (count > 0)  
     {
-      len = strlen (string + point);
-      if (len == 0)
-	break;
-      tmp = mbrtowc (&wc, string+point, len, &ps);
+      tmp = mbrtowc (&wc, string+point, strlen(string + point), &ps);
       if (MB_INVALIDCH ((size_t)tmp))
 	{
 	  /* invalid bytes. assume a byte represents a character */
