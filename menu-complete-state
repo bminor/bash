@@ -1,0 +1,59 @@
+*** ../bash-4.0-patched/lib/readline/complete.c	2009-01-22 15:15:14.000000000 -0500
+--- lib/readline/complete.c	2009-08-26 17:15:59.000000000 -0400
+***************
+*** 2209,2213 ****
+    /* The first time through, we generate the list of matches and set things
+       up to insert them. */
+!   if (rl_last_func != rl_menu_complete)
+      {
+        /* Clean up from previous call, if any. */
+--- 2252,2256 ----
+    /* The first time through, we generate the list of matches and set things
+       up to insert them. */
+!   if (rl_last_func != rl_old_menu_complete)
+      {
+        /* Clean up from previous call, if any. */
+***************
+*** 2221,2224 ****
+--- 2264,2269 ----
+        rl_completion_invoking_key = invoking_key;
+  
++       RL_SETSTATE(RL_STATE_COMPLETING);
++ 
+        /* Only the completion entry function can change these. */
+        set_completion_defaults ('%');
+***************
+*** 2260,2266 ****
+--- 2305,2314 ----
+  	  orig_text = (char *)0;
+      	  completion_changed_buffer = 0;
++  	  RL_UNSETSTATE(RL_STATE_COMPLETING);
+            return (0);
+  	}
+  
++       RL_UNSETSTATE(RL_STATE_COMPLETING);
++ 
+        for (match_list_size = 0; matches[match_list_size]; match_list_size++)
+          ;
+***************
+*** 2338,2341 ****
+--- 2386,2391 ----
+        full_completion = 0;
+  
++       RL_SETSTATE(RL_STATE_COMPLETING);
++ 
+        /* Only the completion entry function can change these. */
+        set_completion_defaults ('%');
+***************
+*** 2379,2385 ****
+--- 2429,2438 ----
+  	  orig_text = (char *)0;
+      	  completion_changed_buffer = 0;
++  	  RL_UNSETSTATE(RL_STATE_COMPLETING);
+            return (0);
+  	}
+  
++       RL_UNSETSTATE(RL_STATE_COMPLETING);
++ 
+        for (match_list_size = 0; matches[match_list_size]; match_list_size++)
+          ;

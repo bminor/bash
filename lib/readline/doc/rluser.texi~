@@ -474,6 +474,11 @@ key bindings is used.  By default, Readline starts up in Emacs editing
 mode, where the keystrokes are most similar to Emacs.  This variable can be
 set to either @samp{emacs} or @samp{vi}.
 
+@item echo-control-characters
+When set to @samp{on}, on operating systems that indicate they support it,
+readline echoes a character corresponding to a signal generated from the
+keyboard.  The default is @samp{on}.
+
 @item enable-keypad
 @vindex enable-keypad
 When set to @samp{on}, Readline will try to enable the application
@@ -604,6 +609,20 @@ words which have more than one possible completion without any
 possible partial completion (the possible completions don't share
 a common prefix) cause the matches to be listed immediately instead
 of ringing the bell.
+The default value is @samp{off}.
+
+@item skip-completed-text
+@vindex skip-completed-text
+If set to @samp{on}, this alters the default completion behavior when
+inserting a single match into the line.  It's only active when
+performing completion in the middle of a word.  If enabled, readline
+does not insert characters from the completion that match characters
+after point in the word being completed, so portions of the word
+following the cursor are not duplicated.
+For instance, if this is enabled, attempting completion when the cursor
+is after the @samp{e} in @samp{Makefile} will result in @samp{Makefile}
+rather than @samp{Makefilefile}, assuming there is a single possible
+completion.
 The default value is @samp{off}.
 
 @item visible-stats

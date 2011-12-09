@@ -1608,7 +1608,7 @@ or when @var{parameter}
 is followed by a character that is not to be
 interpreted as part of its name.
 
-If the first character of @var{parameter} is an exclamation point,
+If the first character of @var{parameter} is an exclamation point (!),
 a level of variable indirection is introduced.
 Bash uses the value of the variable formed from the rest of
 @var{parameter} as the name of the variable; this variable is then
@@ -6565,6 +6565,7 @@ and @option{-f} options.
 @item
 The arrival of @code{SIGCHLD}  when a trap is set on @code{SIGCHLD} does
 not interrupt the @code{wait} builtin and cause it to return immediately.
+The trap command is run once for each child that exits.
 
 @end enumerate
 

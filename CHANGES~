@@ -117,30 +117,7 @@ jj. Fixed a bug that caused variable expansion in here documents to look in
 kk. Bash and readline can now convert file names between precomposed and
     decomposed Unicode on Mac OS X ("keyboard" and file system forms,
     respectively).  This affects filename completion (using new
-    rl_filename_rewrite_hook), globbing, and readline redisplay.
-
-ll. The ERR and EXIT traps now see a non-zero value for $? when a parser
-    error after set -e has been enabled causes the shell to exit.
-
-mm. Fixed a bug that in brace expansion that caused zero-prefixed terms to
-    not contain the correct number of digits.
-
-nn. Fixed a bug that caused the shell to free non-allocated memory when
-    unsetting an associative array which had had a value implicitly assigned
-    to index "0".
-
-oo. Fixed a memory leak in the ${!prefix@} expansion.
-
-pp. Fixed a bug that caused printf to not correctly report all write errors.
-
-qq. Fixed a bug that caused single and double quotes to act as delimiters
-    when splitting a command line into words for programmable completion.
-
-rr. Fixed a bug that caused ** globbing that caused **/path/* to match every
-    directory, not just those matching `path'.
-
-ss. Fixed a bug that caused the shell to dump core when running `help' without
-    arguments if the terminal width was fewer than 7 characters.
+    rl_filename_rewrite_hook) and globbing.
 
 2.  Changes to Readline
 
@@ -165,16 +142,6 @@ f.  Fixed a redisplay bug caused by a multibyte character causing a line to
 g.  Fixed a bug that caused key sequences of two characters to not be
     recognized when a longer sequence identical in the first two characters
     was bound.
-
-h.  Fixed a bug that caused history expansion to be attempted on $'...'
-    single-quoted strings.
-
-i.  Fixed a bug that caused incorrect redisplay when the prompt contained
-    multibyte characters in an `invisible' sequence bracketed by \[ and
-    \].
-
-j.  Fixed a bug that caused history expansion to short-circuit after
-    encountering a multibyte character.
 
 3.  New Features in Bash
 
@@ -228,25 +195,6 @@ n.  There is a new confgure option that forces the extglob option to be
 o.  New variable $BASH_XTRACEFD; when set to an integer bash will write xtrace
     output to that file descriptor.
 
-p.  If the optional left-hand-side of a redirection is of the form {var}, the
-    shell assigns the file descriptor used to $var or uses $var as the file
-    descriptor to move or close, depending on the redirection operator.
-
-q.  The < and > operators to the [[ conditional command now do string
-    comparison according to the current locale.
-
-r.  Programmable completion now uses the completion for `b' instead of `a'
-    when completion is attempted on a line like: a $(b c.
-
-s.  Force extglob on temporarily when parsing the pattern argument to
-    the == and != operators to the [[ command, for compatibility.
-
-t.  Changed the behavior of interrupting the wait builtin when a SIGCHLD is
-    received and a trap on SIGCHLD is set to be Posix-mode only.
-
-u.  The read builtin has a new `-N nchars' option, which reads exactly NCHARS
-    characters, ignoring delimiters like newline.
-
 4.  New Features in Readline
 
 a.  New bindable function: menu-complete-backward.
@@ -270,18 +218,6 @@ f.  New bindable variable: skip-completed-text, active when completing in the
     middle of a word.  If enabled, it means that characters in the completion
     that match characters in the remainder of the word are "skipped" rather
     than inserted into the line.
-
-g.  The pre-readline-6.0 version of menu completion is available as
-    "old-menu-complete" for users who do not like the readline-6.0 version.
-
-h.  New bindable variable: echo-control-characters.  If enabled, and the
-    tty ECHOCTL bit is set, controls the echoing of characters corresponding
-    to keyboard-generated signals.
-
-i.  New bindable variable: enable-meta-key.  Controls whether or not readline
-    sends the smm/rmm sequences if the terminal indicates it has a meta key
-    that enables eight-bit characters.
-
 ------------------------------------------------------------------------------
 This document details the changes between this version, bash-4.0-release,
 and the previous version, bash-4.0-rc1.

@@ -1608,7 +1608,7 @@ or when @var{parameter}
 is followed by a character that is not to be
 interpreted as part of its name.
 
-If the first character of @var{parameter} is an exclamation point,
+If the first character of @var{parameter} is an exclamation point (!),
 a level of variable indirection is introduced.
 Bash uses the value of the variable formed from the rest of
 @var{parameter} as the name of the variable; this variable is then
@@ -3719,7 +3719,7 @@ non-zero on failure.
 @item read
 @btindex read
 @example
-read [-ers] [-a @var{aname}] [-d @var{delim}] [-i @var{text}] [-n @var{nchars}] [-p @var{prompt}] [-t @var{timeout}] [-u @var{fd}] [@var{name} @dots{}]
+read [-ers] [-a @var{aname}] [-d @var{delim}] [-i @var{text}] [-n @var{nchars}] [-N @var{nchars}] [-p @var{prompt}] [-t @var{timeout}] [-u @var{fd}] [@var{name} @dots{}]
 @end example
 One line is read from the standard input, or from the file descriptor
 @var{fd} supplied as an argument to the @option{-u} option, and the first word
@@ -3762,7 +3762,13 @@ the editing buffer before editing begins.
 
 @item -n @var{nchars}
 @code{read} returns after reading @var{nchars} characters rather than
-waiting for a complete line of input.
+waiting for a complete line of input, but honor a delimiter if fewer
+than @var{nchars} characters are read before the delimiter.
+
+@item -N @var{nchars}
+@code{read} returns after reading exactly @var{nchars} characters rather
+than waiting for a complete line of input, unless EOF is encountered or
+@code{read} times out.  Any delimiter is ignored.
 
 @item -p @var{prompt}
 Display @var{prompt}, without a trailing newline, before attempting

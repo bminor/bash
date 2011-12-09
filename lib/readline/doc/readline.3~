@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet@ins.CWRU.Edu
 .\"
-.\"	Last Change: Thu Jul 30 09:22:50 EDT 2009
+.\"	Last Change: Sat Aug 22 12:03:05 EDT 2009
 .\"
-.TH READLINE 3 "2009 Jul 30" "GNU Readline 6.0"
+.TH READLINE 3 "2009 August 22" "GNU Readline 6.0"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -401,6 +401,11 @@ can be set to either
 or
 .BR vi .
 .TP
+.B echo\-control\-characters (On)
+When set to \fBOn\fP, on operating systems that indicate they support it,
+readline echoes a character corresponding to a signal generated from the
+keyboard.
+.TP
 .B enable\-keypad (Off)
 When set to \fBOn\fP, readline will try to enable the application
 keypad when it is called.  Some systems need this to enable the
@@ -503,6 +508,14 @@ words which have more than one possible completion without any
 possible partial completion (the possible completions don't share 
 a common prefix) cause the matches to be listed immediately instead
 of ringing the bell.
+.TP
+.B skip\-completed\-text (Off)
+If set to \fBOn\fP, this alters the default completion behavior when
+inserting a single match into the line.  It's only active when
+performing completion in the middle of a word.  If enabled, readline
+does not insert characters from the completion that match characters
+after point in the word being completed, so portions of the word
+following the cursor are not duplicated.
 .TP
 .B visible\-stats (Off)
 If set to \fBOn\fP, a character denoting a file's type as reported  

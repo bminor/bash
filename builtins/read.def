@@ -22,7 +22,7 @@ $PRODUCES read.c
 
 $BUILTIN read
 $FUNCTION read_builtin
-$SHORT_DOC read [-ers] [-a array] [-d delim] [-i text] [-n nchars] [-p prompt] [-t timeout] [-u fd] [name ...]
+$SHORT_DOC read [-ers] [-a array] [-d delim] [-i text] [-n nchars] [-N nchars] [-p prompt] [-t timeout] [-u fd] [name ...]
 Read a line from the standard input and split it into fields.
 
 Reads a single line from the standard input, or from file descriptor FD
@@ -42,7 +42,10 @@ Options:
   -e		use Readline to obtain the line in an interactive shell
   -i text	Use TEXT as the initial text for Readline
   -n nchars	return after reading NCHARS characters rather than waiting
-		for a newline
+		for a newline, but honor a delimiter if fewer than NCHARS
+		characters are read before the delimiter
+  -N nchars	return only after reading exactly NCHARS characters, unless
+		EOF is encountered or read times out, ignoring any delimiter
   -p prompt	output the string PROMPT without a trailing newline before
 		attempting to read
   -r		do not allow backslashes to escape any characters
@@ -155,7 +158,7 @@ read_builtin (list)
   register char *varname;
   int size, i, nr, pass_next, saw_escape, eof, opt, retval, code, print_ps2;
   int input_is_tty, input_is_pipe, unbuffered_read, skip_ctlesc, skip_ctlnul;
-  int raw, edit, nchars, silent, have_timeout, fd;
+  int raw, edit, nchars, silent, have_timeout, ignore_delim, fd;
   unsigned int tmsec, tmusec;
   long ival, uval;
   intmax_t intval;
@@ -211,9 +214,10 @@ read_builtin (list)
   tmsec = tmusec = 0;		/* no timeout */
   nr = nchars = input_is_tty = input_is_pipe = unbuffered_read = have_timeout = 0;
   delim = '\n';		/* read until newline */
+  ignore_delim = 0;
 
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "ersa:d:i:n:p:t:u:")) != -1)
+  while ((opt = internal_getopt (list, "ersa:d:i:n:p:t:u:N:")) != -1)
     {
       switch (opt)
 	{
@@ -255,6 +259,9 @@ read_builtin (list)
 	      tmusec = uval;
 	    }
 	  break;
+	case 'N':
+	  ignore_delim = 1;
+	  delim = -1;
 	case 'n':
 	  code = legal_number (list_optarg, &intval);
 	  if (code == 0 || intval < 0 || intval != (int)intval)
@@ -299,9 +306,16 @@ read_builtin (list)
     return (input_avail (fd) ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
 #endif
 
+  /* If we're asked to ignore the delimiter, make sure we do. */
+  if (ignore_delim)
+    delim = -1;
+
   /* IF IFS is unset, we use the default of " \t\n". */
   ifs_chars = getifs ();
   if (ifs_chars == 0)		/* XXX - shouldn't happen */
+    ifs_chars = "";
+  /* If we want to read exactly NCHARS chars, don't split on IFS */
+  if (ignore_delim)
     ifs_chars = "";
   for (skip_ctlesc = skip_ctlnul = 0, e = ifs_chars; *e; e++)
     skip_ctlesc |= *e == CTLESC, skip_ctlnul |= *e == CTLNUL;

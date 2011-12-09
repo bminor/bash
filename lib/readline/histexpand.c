@@ -1101,7 +1101,7 @@ history_expand (hstring, output)
 	  if (strlen (mb) > 1)
 	    {
 	      ADD_STRING (mb);
-	      break;
+	      continue;
 	    }
 	}
 #endif /* HANDLE_MULTIBYTE */

@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Wed Sep 16 21:33:34 EDT 2009
+.\"	Last Change: Fri Oct  9 12:07:53 EDT 2009
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2009 September 16" "GNU Bash-4.1"
+.TH BASH 1 "2009 October 9" "GNU Bash-4.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1096,8 +1096,8 @@ a control-\fIx\fP character
 The expanded result is single-quoted, as if the dollar sign had
 not been present.
 .PP
-A double-quoted string preceded by a dollar sign (\fB$\fP) will cause
-the string to be translated according to the current locale.
+A double-quoted string preceded by a dollar sign (\fB$\fP\(dq\fIstring\fP\(dq)
+will cause the string to be translated according to the current locale.
 If the current locale is \fBC\fP or \fBPOSIX\fP, the dollar sign
 is ignored.
 If the string is translated and replaced, the replacement is
@@ -2520,7 +2520,7 @@ is followed by a character which is not to be
 interpreted as part of its name.
 .PD
 .PP
-If the first character of \fIparameter\fP is an exclamation point,
+If the first character of \fIparameter\fP is an exclamation point (\fB!\fP),
 a level of variable indirection is introduced.
 \fBBash\fP uses the value of the variable formed from the rest of
 \fIparameter\fP as the name of the variable; this variable is then
@@ -4968,6 +4968,11 @@ keyboard.
 When set to \fBOn\fP, readline will try to enable the application
 keypad when it is called.  Some systems need this to enable the
 arrow keys.
+.TP
+.B enable\-meta\-key (On)
+When set to \fBOn\fP, readline will try to enable any meta modifier
+key the terminal claims to support when it is called.  On many terminals,
+the meta key is used to send eight-bit characters.
 .TP
 .B expand\-tilde (Off)
 If set to \fBon\fP, tilde expansion is performed when readline
@@ -7987,7 +7992,7 @@ The return status is 0 unless an error occurs while
 reading the name of the current directory or an
 invalid option is supplied.
 .TP
-\fBread\fP [\fB\-ers\fP] [\fB\-a\fP \fIaname\fP] [\fB\-d\fP \fIdelim\fP] [\fB\-i\fP \fItext\fP] [\fB\-n\fP \fInchars\fP] [\fB\-p\fP \fIprompt\fP] [\fB\-t\fP \fItimeout\fP] [\fB\-u\fP \fIfd\fP] [\fIname\fP ...]
+\fBread\fP [\fB\-ers\fP] [\fB\-a\fP \fIaname\fP] [\fB\-d\fP \fIdelim\fP] [\fB\-i\fP \fItext\fP] [\fB\-n\fP \fInchars\fP] [\fB\-N\fP \fInchars\fP] [\fB\-p\fP \fIprompt\fP] [\fB\-t\fP \fItimeout\fP] [\fB\-u\fP \fIfd\fP] [\fIname\fP ...]
 One line is read from the standard input, or from the file descriptor
 \fIfd\fP supplied as an argument to the \fB\-u\fP option, and the first word
 is assigned to the first
@@ -8041,7 +8046,13 @@ buffer before editing begins.
 .TP
 .B \-n \fInchars\fP
 \fBread\fP returns after reading \fInchars\fP characters rather than
-waiting for a complete line of input.
+waiting for a complete line of input, but honor a delimiter if fewer
+than \fInchars\fP characters are read before the delimiter.
+.TP
+.B \-N \fInchars\fP
+\fBread\fP returns after reading exactly \fInchars\fP characters rather
+than waiting for a complete line of input, unless EOF is encountered or
+\fBread\fP times out.  Any delimiter is ignored.
 .TP
 .B \-p \fIprompt\fP
 Display \fIprompt\fP on standard error, without a

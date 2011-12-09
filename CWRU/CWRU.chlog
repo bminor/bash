@@ -8071,7 +8071,8 @@ subst.c
 	  no positional parameters be a non-fatal error.  This is the
 	  consensus of the austin group, though it is not historical practice.
 	  Message from Geoff Clare <20090505091501.GA10097@squonk.masqnet> of
-	  5 May 2009 to austin-group list
+	  5 May 2009 and http://austingroupbugs.net/view.php?id=155
+
 
 				   5/20
 				   ----
@@ -8587,8 +8588,7 @@ lib/readline/text.c
 	  end, and we don't call rl_insert_text if passed the empty string
 
 config.h.in
-	- add define for HAVE_ICONV, already found by intl autoconf
-	  macros
+	- add define for HAVE_ICONV, already found by intl autoconf macros
 	- add define for HAVE_LOCALE_CHARSET
 
 aclocal.m4
@@ -8978,3 +8978,39 @@ jobs.c
 doc/bashref.texi
 	- document new posix mode behavior about SIGCHLD arriving while the
 	  wait builtin is executing when a trap on SIGCHLD has been set
+
+				   10/6
+				   ----
+lib/readline/histexpand.c
+	- fix hist_expand to keep from stopping history expansion after the
+	  first multibyte character (a `break' instead of a `continue').
+	  Fixes debian bug (#549933) reported by Nikolaus Schulz
+	  <microschulz@web.de>
+
+				   10/8
+				   ----
+builtins/read.def
+	- implement new `-N nchars' option: read exactly NCHARS characters,
+	  ignoring any delimiter, and don't split the result on $IFS.
+	  Feature requested by Richard Stallman <rms@gnu.org>
+
+doc/{bash.1,bashref.texi}
+	- document new `read -N' option
+
+				   10/9
+				   ----
+lib/readline/bind.c
+	- new bindable variable, "enable-meta-key", controls whether or not
+	  readline enables any meta modifier key the terminal claims to
+	  support.  Suggested by Werner Fink <werner@suse.de>
+
+lib/readline/doc/{readline.3,rluser.texi},doc/bash.1
+	- document new readline "enable-meta-key" bindable variable
+
+				   10/10
+				   -----
+trap.c
+	- new function, free_trap_string(), does what it says and turns off
+	  SIG_TRAPPED flag without changing signal disposition
+
+[bash-4.1-alpha frozen]

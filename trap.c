@@ -72,6 +72,7 @@ static void get_original_signal __P((int));
 
 static int _run_trap_internal __P((int, char *));
 
+static void free_trap_string __P((int));
 static void reset_signal __P((int));
 static void restore_signal __P((int));
 static void reset_or_restore_signal_handlers __P((sh_resetsig_func_t *));
@@ -889,19 +890,27 @@ run_interrupt_trap ()
 
 #ifdef INCLUDE_UNUSED
 /* Free all the allocated strings in the list of traps and reset the trap
-   values to the default. */
+   values to the default.  Intended to be called from subshells that want
+   to complete work done by reset_signal_handlers upon execution of a
+   subsequent `trap' command that changes a signal's disposition. */
 void
 free_trap_strings ()
 {
   register int i;
 
   for (i = 0; i < BASH_NSIG; i++)
-    {
-      free_trap_command (i);
-      trap_list[i] = (char *)DEFAULT_SIG;
-      sigmodes[i] &= ~SIG_TRAPPED;
-    }
+    free_trap_string (i);
   trap_list[DEBUG_TRAP] = trap_list[EXIT_TRAP] = trap_list[ERROR_TRAP] = trap_list[RETURN_TRAP] = (char *)NULL;
+}
+
+/* Free a trap command string associated with SIG without changing signal
+   disposition.  Intended to be called from free_trap_strings()  */
+static void
+free_trap_string (sig)
+     int sig;
+{
+  change_signal (sig, (char *)DEFAULT_SIG);
+  sigmodes[sig] &= ~SIG_TRAPPED;
 }
 #endif
 
