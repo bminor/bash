@@ -254,6 +254,7 @@ static SHELL_VAR **fapply __P((sh_var_map_func_t *));
 
 static int visible_var __P((SHELL_VAR *));
 static int visible_and_exported __P((SHELL_VAR *));
+static int export_environment_candidate __P((SHELL_VAR *));
 static int local_and_exported __P((SHELL_VAR *));
 static int variable_in_context __P((SHELL_VAR *));
 #if defined (ARRAY_VARS)
@@ -377,10 +378,17 @@ initialize_shell_variables (env, privmode)
 	}
 #  endif
 #endif
+#if 0
       else if (legal_identifier (name))
+#else
+      else
+#endif
 	{
 	  temp_var = bind_variable (name, string, 0);
-	  VSETATTR (temp_var, (att_exported | att_imported));
+	  if (legal_identifier (name))
+	    VSETATTR (temp_var, (att_exported | att_imported));
+	  else
+	    VSETATTR (temp_var, (att_exported | att_imported | att_invisible));
 	  array_needs_making = 1;
 	}
 
@@ -3089,6 +3097,16 @@ visible_and_exported (var)
   return (invisible_p (var) == 0 && exported_p (var));
 }
 
+/* Candidate variables for the export environment are either valid variables
+   with the export attribute or invalid variables inherited from the initial
+   environment and simply passed through. */
+static int
+export_environment_candidate (var)
+     SHELL_VAR *var;
+{
+  return (exported_p (var) && (invisible_p (var) == 0 || imported_p (var)));
+}
+
 /* Return non-zero if VAR is a local variable in the current context and
    is exported. */
 static int
@@ -3445,7 +3463,11 @@ make_var_export_array (vcxt)
   char **list;
   SHELL_VAR **vars;
 
+#if 0
   vars = map_over (visible_and_exported, vcxt);
+#else
+  vars = map_over (export_environment_candidate, vcxt);
+#endif
 
   if (vars == 0)
     return (char **)NULL;
@@ -3594,7 +3616,7 @@ maybe_make_export_env ()
 	}
       export_env[export_env_index = 0] = (char *)NULL;
 
-      /* Make a dummy variable context from the  temporary_env, stick it on
+      /* Make a dummy variable context from the temporary_env, stick it on
 	 the front of shell_variables, call make_var_export_array on the
 	 whole thing to flatten it, and convert the list of SHELL_VAR *s
 	 to the form needed by the environment. */

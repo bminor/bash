@@ -763,7 +763,10 @@ assign_vars:
       if (*input_string == 0)
 	tofree = input_string = t;
       else
-	input_string = strip_trailing_ifs_whitespace (t1, ifs_chars, saw_escape);
+	{
+	  input_string = strip_trailing_ifs_whitespace (t1, ifs_chars, saw_escape);
+	  tofree = t;
+	}
     }
 #endif
 
