@@ -1417,10 +1417,10 @@ history_tokenize_word (string, ind)
      int ind;
 {
   register int i;
-  int delimiter;
+  int delimiter, nestdelim, delimopen;
 
   i = ind;
-  delimiter = 0;
+  delimiter = nestdelim = 0;
 
   if (member (string[i], "()\n"))
     {
@@ -1442,12 +1442,24 @@ history_tokenize_word (string, ind)
 	  return i;
 	}
       else if ((peek == '&' && (string[i] == '>' || string[i] == '<')) ||
-		(peek == '>' && string[i] == '&') ||
-		(peek == '(' && (string[i] == '>' || string[i] == '<')) || /* ) */
-		(peek == '(' && string[i] == '$')) /* ) */
+		(peek == '>' && string[i] == '&'))
 	{
 	  i += 2;
 	  return i;
+	}
+      /* XXX - separated out for later -- bash-4.2 */
+      else if ((peek == '(' && (string[i] == '>' || string[i] == '<')) || /* ) */
+	       (peek == '(' && string[i] == '$')) /*)*/
+	{
+	  i += 2;
+#if 0			/* XXX - bash-4.2 -- rajeevvp@gmail.com */
+	  delimopen = '(';
+	  delimiter = ')';
+	  nestdelim = 1;
+	  goto get_word;
+#else
+	  return i;
+#endif
 	}
 #if 0
       else if (peek == '\'' && string[i] == '$')
@@ -1464,9 +1476,27 @@ history_tokenize_word (string, ind)
 	}
     }
 
+#if 0
+  /* XXX - can also use this for $(...) -- bash-4.2 -- rajeevvp@gmail.com */
+  if (member (string[i], "!@?+*"))
+    {
+      int peek = string[i + 1];
+
+      if (peek == '(')		/*)*/
+	{
+	  /* Shell extended globbing patterns */
+	  i += 2;
+	  delimopen = '(';
+	  delimiter = ')';	/* XXX - not perfect */
+	  nestdelim = 1;
+	}
+    }
+#endif
+
+get_word:
   /* Get word from string + i; */
 
-  if (member (string[i], HISTORY_QUOTE_CHARACTERS))
+  if (delimiter == 0 && member (string[i], HISTORY_QUOTE_CHARACTERS))
     delimiter = string[i++];
 
   for (; string[i]; i++)
@@ -1484,16 +1514,33 @@ history_tokenize_word (string, ind)
 	  continue;
 	}
 
+#if 0			/* XXX - bash-4.2 -- rajeevvp@gmail.com */
+      /* delimiter must be set and set to something other than a quote if
+	 nestdelim is set, so these tests are safe. */
+      if (nestdelim && string[i] == delimopen)
+	{
+	  nestdelim++;
+	  continue;
+	}
+      if (nestdelim && string[i] == delimiter)
+	{
+	  nestdelim--;
+	  if (nestdelim == 0)
+	    delimiter = 0;
+	  continue;
+	}
+#endif
+      
       if (delimiter && string[i] == delimiter)
 	{
 	  delimiter = 0;
 	  continue;
 	}
 
-      if (!delimiter && (member (string[i], history_word_delimiters)))
+      if (delimiter == 0 && (member (string[i], history_word_delimiters)))
 	break;
 
-      if (!delimiter && member (string[i], HISTORY_QUOTE_CHARACTERS))
+      if (delimiter == 0 && member (string[i], HISTORY_QUOTE_CHARACTERS))
 	delimiter = string[i];
     }
 

@@ -2986,10 +2986,12 @@ If @code{getopts} is silent, then a colon (@samp{:}) is placed in
 @example
 hash [-r] [-p @var{filename}] [-dt] [@var{name}]
 @end example
-Remember the full pathnames of commands specified as @var{name} arguments,
+Each time @code{hash} is invoked, it remembers the full pathnames of the
+commands specified as @var{name} arguments,
 so they need not be searched for on subsequent invocations.
 The commands are found by searching through the directories listed in
 @env{$PATH}.
+Any previously-remembered pathname is discarded.
 The @option{-p} option inhibits the path search, and @var{filename} is
 used as the location of @var{name}.
 The @option{-r} option causes the shell to forget all remembered locations.

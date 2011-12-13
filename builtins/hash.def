@@ -202,6 +202,7 @@ add_hashed_command (w, quiet)
   rv = 0;
   if (find_function (w) == 0 && find_shell_builtin (w) == 0)
     {
+      phash_remove (w);
       full_path = find_user_command (w);
       if (full_path && executable_file (full_path))
 	phash_insert (w, full_path, dot_found_in_search, 0);

@@ -9488,3 +9488,10 @@ variables.c
 	  context has no variable hash table), make sure we create a hash
 	  table so we have a place to save the variable to be propagated.
 	  Fixes bug reported by Crestez Dan Leonard <cdleonard@gmail.com>.
+
+				   2/18
+				   ----
+builtins/hash.def
+	- change add_hashed_command to remove the command being looked up from
+	  the hash table before trying to add it.  That way, if it's not found,
+	  there won't be anything remaining in the hash table

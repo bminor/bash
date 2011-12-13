@@ -7642,12 +7642,13 @@ It returns false if the end of options is encountered or an
 error occurs.
 .TP
 \fBhash\fP [\fB\-lr\fP] [\fB\-p\fP \fIfilename\fP] [\fB\-dt\fP] [\fIname\fP]
-For each
-.IR name ,
-the full file name of the command is determined by searching
+Each time \fBhash\fP is invoked,
+the full pathname of the command 
+.I name
+is determined by searching
 the directories in
 .B $PATH
-and remembered.
+and remembered.  Any previously-remembered pathname is discarded.
 If the
 .B \-p
 option is supplied, no path search is performed, and
