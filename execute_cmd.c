@@ -98,6 +98,7 @@ extern int errno;
 #  include "bashhist.h"
 #endif
 
+extern int dollar_dollar_pid;
 extern int posixly_correct;
 extern int expand_aliases;
 extern int autocd;
@@ -274,6 +275,8 @@ static int line_number_for_err_trap;
 /* A sort of function nesting level counter */
 int funcnest = 0;
 int funcnest_max = 0;		/* XXX - bash-4.2 */
+
+int lastpipe_opt = 0;
 
 struct fd_bitmap *current_fds_to_close = (struct fd_bitmap *)NULL;
 
@@ -2070,6 +2073,22 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
 }
 #endif
 
+static void
+restore_stdin (s)
+     int s;
+{
+  dup2 (s, 0);
+  close (s);
+}
+
+/* Catch-all cleanup function for lastpipe code for unwind-protects */
+static void
+lastpipe_cleanup (s)
+     int s;
+{
+  unfreeze_jobs_list ();
+}
+
 static int
 execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
      COMMAND *command;
@@ -2077,8 +2096,10 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
      struct fd_bitmap *fds_to_close;
 {
   int prev, fildes[2], new_bitmap_size, dummyfd, ignore_return, exec_result;
+  int lstdin, lastpipe_flag, lastpipe_jid;
   COMMAND *cmd;
   struct fd_bitmap *fd_bitmap;
+  pid_t lastpid;
 
 #if defined (JOB_CONTROL)
   sigset_t set, oset;
@@ -2168,10 +2189,44 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       cmd = cmd->value.Connection->second;
     }
 
+  lastpid = last_made_pid;
+
   /* Now execute the rightmost command in the pipeline.  */
   if (ignore_return && cmd)
     cmd->flags |= CMD_IGNORE_RETURN;
+
+  lastpipe_flag = 0;
+  begin_unwind_frame ("lastpipe-exec");
+  lstdin = -1;
+  /* If the `lastpipe' option is set with shopt, and job control is not
+     enabled, execute the last element of non-async pipelines in the
+     current shell environment. */
+  if (lastpipe_opt && job_control == 0 && asynchronous == 0 && pipe_out == NO_PIPE && prev > 0)
+    {
+      lstdin = move_to_high_fd (0, 0, 255);
+      if (lstdin > 0)
+	{
+	  do_piping (prev, pipe_out);
+	  prev = NO_PIPE;
+	  add_unwind_protect (restore_stdin, lstdin);
+	  lastpipe_flag = 1;
+	  freeze_jobs_list ();
+	  lastpipe_jid = stop_pipeline (0, (COMMAND *)NULL);	/* XXX */
+	  add_unwind_protect (lastpipe_cleanup, lastpipe_jid);
+	}
+      cmd->flags |= CMD_LASTPIPE;
+    }	  
+  if (prev >= 0)
+    add_unwind_protect (close, prev);
+
+  /* XXX - might need to temporarily put shell process in pgrp of the pipeline,
+     so after we give the terminal to that process group in stop_pipeline, the
+     shell can still access it.  Would need to give it to
+     jobs[lastpipe_jid]->pgrp  */
   exec_result = execute_command_internal (cmd, asynchronous, prev, pipe_out, fds_to_close);
+
+  if (lstdin > 0)
+    restore_stdin (lstdin);
 
   if (prev >= 0)
     close (prev);
@@ -2181,6 +2236,21 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 #endif
 
   QUIT;
+
+  if (lastpipe_flag)
+    {
+#if defined (JOB_CONTROL)
+      append_process (savestring (the_printed_command), dollar_dollar_pid, exec_result, lastpipe_jid);
+#endif
+      lstdin = wait_for (lastpid);
+#if defined (JOB_CONTROL)
+      exec_result = job_exit_status (lastpipe_jid);
+#endif
+      unfreeze_jobs_list ();
+    }
+
+  discard_unwind_frame ("lastpipe-exec");
+
   return (exec_result);
 }
 

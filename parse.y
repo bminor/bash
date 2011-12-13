@@ -2658,6 +2658,20 @@ static int
 time_command_acceptable ()
 {
 #if defined (COMMAND_TIMING)
+  int i;
+
+  if (posixly_correct && shell_compatibility_level > 41)
+    {
+      /* Quick check of the rest of the line to find the next token.  If it
+	 begins with a `-', Posix says to not return `time' as the token.
+	 This was interp 267. */
+      i = shell_input_line_index;
+      while (i < shell_input_line_len && (shell_input_line[i] == ' ' || shell_input_line[i] == '\t'))
+        i++;
+      if (shell_input_line[i] == '-')
+	return 0;
+    }
+
   switch (last_read_token)
     {
     case 0:

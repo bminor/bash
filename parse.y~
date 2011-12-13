@@ -2516,7 +2516,6 @@ yylex ()
   if ((parser_state & PST_EOFTOKEN) && current_token == shell_eof_token)
     {
       current_token = yacc_EOF;
-itrace("read_token: read shell_eof_token, returning yacc_EOF");
       if (bash_input.type == st_string)
 	rewind_input_string ();
     }
@@ -2659,6 +2658,17 @@ static int
 time_command_acceptable ()
 {
 #if defined (COMMAND_TIMING)
+  int c, i;
+
+  if (posixly_correct && shell_compatibility_level > 41)
+    {
+      i = shell_input_line_index;
+      while (i < shell_input_line_len && (shell_input_line[i] == ' ' || shell_input_line[i] == '\t'))
+        i++;
+      if (shell_input_line[i] == '-')
+	return 0;
+    }
+
   switch (last_read_token)
     {
     case 0:
@@ -4740,9 +4750,6 @@ got_token:
       word_lineno[word_top] = line_number;
       break;
     }
-
-if (result == WORD)
-  itrace("read_token: returning WORD: `%s'", yylval.word->word);
 
   return (result);
 }

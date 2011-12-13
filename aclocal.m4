@@ -4119,3 +4119,51 @@ main()
       [Define if you have a standard-conformant vsnprintf function.])
   fi
 ])
+
+AC_DEFUN(BASH_STRUCT_WEXITSTATUS_OFFSET,
+[AC_MSG_CHECKING(for offset of exit status in return status from wait)
+AC_CACHE_VAL(bash_cv_wexitstatus_offset,
+[AC_RUN_IFELSE([
+#include <stdlib.h>
+#include <unistd.h>
+
+#include <sys/wait.h>
+
+main(c, v)
+     int c;
+     char **v;
+{
+  pid_t pid, p;
+  int s, i, n;
+
+  s = 0;
+  pid = fork();
+  if (pid == 0)
+    exit (42);
+
+  /* wait for the process */
+  p = wait(&s);
+  if (p != pid)
+    exit (255);
+
+  /* crack s */
+  for (i = 0; i < (sizeof(s) - 8); i++)
+    {
+      n = (s >> i) & 0xff;
+      if (n == 42)
+	exit (i);
+    }
+
+  exit (254);
+}
+], bash_cv_wexitstatus_offset=0, bash_cv_wexitstatus_offset=$?,
+   [AC_MSG_WARN(cannot check WEXITSTATUS offset if cross compiling -- defaulting to 0)
+    bash_cv_wexitstatus_offset=0]
+)])
+if test "$bash_cv_wexitstatus_offset" -gt 32 ; then
+  AC_MSG_WARN(bad exit status from test program -- defaulting to 0)
+  bash_cv_wexitstatus_offset=0
+fi
+AC_MSG_RESULT($bash_cv_wexitstatus_offset)
+AC_DEFINE_UNQUOTED([WEXITSTATUS_OFFSET], [$bash_cv_wexitstatus_offset], [Offset of exit status in wait status word])
+])

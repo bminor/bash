@@ -1,7 +1,7 @@
 /* command.h -- The structures used internally to represent commands, and
    the extern declarations of the functions used to create them. */
 
-/* Copyright (C) 1993-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -169,6 +169,7 @@ typedef struct element {
 #define CMD_STDIN_REDIR	   0x400 /* async command needs implicit </dev/null */
 #define CMD_COMMAND_BUILTIN 0x0800 /* command executed by `command' builtin */
 #define CMD_COPROC_SUBSHELL 0x1000
+#defien CMD_LASTPIPE	    0x2000
 
 /* What a command looks like. */
 typedef struct command {

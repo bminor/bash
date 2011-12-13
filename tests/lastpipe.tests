@@ -1,0 +1,38 @@
+shopt -s lastpipe
+
+unset foo bar
+echo a b c | read foo
+echo after 1: foo = $foo
+
+unset tot
+declare -i tot
+printf "%d\n" 1 2 3 | while read foo; do tot+=$foo; done
+echo after 2: tot = $tot
+
+unset bar
+echo g h i | bar=7
+echo after: $bar
+
+unset foo last
+printf "%s\n" a b c | while read foo; do last=$foo; done
+echo last = $last
+
+exit 142 | false
+echo $? -- ${PIPESTATUS[@]}
+
+true | false | /usr/bin/true
+echo $? -- ${PIPESTATUS[@]}
+
+true | /usr/bin/true | false
+echo $? -- ${PIPESTATUS[@]}
+
+set -o pipefail
+true | /usr/bin/true | false
+echo $? -- ${PIPESTATUS[@]}
+
+true | /usr/bin/false | true
+echo $? -- ${PIPESTATUS[@]}
+set +o pipefail
+
+${THIS_SH} ./lastpipe1.sub
+echo lastpipe1.sub returns $?

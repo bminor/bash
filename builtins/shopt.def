@@ -84,6 +84,7 @@ extern int gnu_error_format;
 extern int check_jobs_at_exit;
 extern int autocd;
 extern int glob_star;
+extern int lastpipe_opt;
 
 #if defined (EXTENDED_GLOB)
 extern int extended_glob;
@@ -177,6 +178,7 @@ static struct {
 #endif
   { "huponexit", &hup_on_exit, (shopt_set_func_t *)NULL },
   { "interactive_comments", &interactive_comments, set_shellopts_after_change },
+  { "lastpipe", &lastpipe_opt, (shopt_set_func_t *)NULL },
 #if defined (HISTORY)
   { "lithist", &literal_history, (shopt_set_func_t *)NULL },
 #endif

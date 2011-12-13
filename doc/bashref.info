@@ -1,10 +1,10 @@
 This is bashref.info, produced by makeinfo version 4.13 from
-/usr/homes/chet/src/bash/src/doc/bashref.texi.
+/Users/chet/src/bash/src/doc/bashref.texi.
 
 This text is a brief description of the features that are present in
-the Bash shell (version 4.1, 30 May 2010).
+the Bash shell (version 4.1, 12 June 2010).
 
-   This is Edition 4.1, last updated 30 May 2010, of `The GNU Bash
+   This is Edition 4.1, last updated 12 June 2010, of `The GNU Bash
 Reference Manual', for `Bash', Version 4.1.
 
    Copyright (C) 1988-2010 Free Software Foundation, Inc.
@@ -38,9 +38,9 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in
-the Bash shell (version 4.1, 30 May 2010).
+the Bash shell (version 4.1, 12 June 2010).
 
-   This is Edition 4.1, last updated 30 May 2010, of `The GNU Bash
+   This is Edition 4.1, last updated 12 June 2010, of `The GNU Bash
 Reference Manual', for `Bash', Version 4.1.
 
    Bash contains features that appear in other popular shells, and some
@@ -1531,16 +1531,19 @@ omitted, the operator tests only for existence.
      OFFSET.  LENGTH and OFFSET are arithmetic expressions (*note Shell
      Arithmetic::).  This is referred to as Substring Expansion.
 
-     LENGTH must evaluate to a number greater than or equal to zero.
      If OFFSET evaluates to a number less than zero, the value is used
-     as an offset from the end of the value of PARAMETER.  If PARAMETER
-     is `@', the result is LENGTH positional parameters beginning at
-     OFFSET.  If PARAMETER is an indexed array name subscripted by `@'
-     or `*', the result is the LENGTH members of the array beginning
-     with `${PARAMETER[OFFSET]}'.  A negative OFFSET is taken relative
-     to one greater than the maximum index of the specified array.
-     Substring expansion applied to an associative array produces
-     undefined results.
+     as an offset from the end of the value of PARAMETER.  If LENGTH
+     evaluates to a number less than zero, and PARAMETER is not `@' and
+     not an indexed or associative array, it is interpreted as an
+     offset from the end of the value of PARAMETER rather than a number
+     of characters, and the expansion is the characters between the two
+     offsets.  If PARAMETER is `@', the result is LENGTH positional
+     parameters beginning at OFFSET.  If PARAMETER is an indexed array
+     name subscripted by `@' or `*', the result is the LENGTH members
+     of the array beginning with `${PARAMETER[OFFSET]}'.  A negative
+     OFFSET is taken relative to one greater than the maximum index of
+     the specified array.  Substring expansion applied to an
+     associative array produces undefined results.
 
      Note that a negative offset must be separated from the colon by at
      least one space to avoid being confused with the `:-' expansion.
@@ -3914,6 +3917,14 @@ This builtin allows you to change additional shell optional behavior.
           conditional command's < and > operators and the effect of
           interrupting a command list.
 
+    `compat41'
+          If set, Bash, when in posix mode, treats a single quote in a
+          double-quoted parameter expansion as a special character.
+          The single quotes must match (an even number) and the
+          characters between the single quotes are considered quoted.
+          This is the behavior of POSIX mode through version 4.1.  The
+          default Bash behavior remains as in previous versions.
+
     `dirspell'
           If set, Bash attempts spelling correction on directory names
           during word completion if the directory name initially
@@ -5488,8 +5499,10 @@ assigned to using the syntax
      name[SUBSCRIPT]=VALUE
 
 The SUBSCRIPT is treated as an arithmetic expression that must evaluate
-to a number greater than or equal to zero.  To explicitly declare an
-array, use
+to a number.  If SUBSCRIPT evaluates to a number less than zero, it is
+used as an offset from one greater than the array's maximum index (so a
+subcript of -1 refers to the last element of the array).  To explicitly
+declare an array, use
      declare -a NAME
    The syntax
      declare -a NAME[SUBSCRIPT]
@@ -10416,7 +10429,7 @@ D.5 Concept Index
 
 
 Tag Table:
-Node: Top1340
+Node: Top1338
 Node: Introduction3169
 Node: What is Bash?3397
 Node: What is a shell?4510
@@ -10449,100 +10462,100 @@ Node: Shell Expansions53319
 Node: Brace Expansion55244
 Node: Tilde Expansion57999
 Node: Shell Parameter Expansion60350
-Node: Command Substitution69251
-Node: Arithmetic Expansion70584
-Node: Process Substitution71434
-Node: Word Splitting72484
-Node: Filename Expansion74107
-Node: Pattern Matching76246
-Node: Quote Removal79885
-Node: Redirections80180
-Node: Executing Commands88705
-Node: Simple Command Expansion89375
-Node: Command Search and Execution91305
-Node: Command Execution Environment93642
-Node: Environment96628
-Node: Exit Status98288
-Node: Signals99909
-Node: Shell Scripts101877
-Node: Shell Builtin Commands104395
-Node: Bourne Shell Builtins106423
-Node: Bash Builtins124101
-Node: Modifying Shell Behavior150306
-Node: The Set Builtin150651
-Node: The Shopt Builtin160175
-Node: Special Builtins171509
-Node: Shell Variables172488
-Node: Bourne Shell Variables172928
-Node: Bash Variables174909
-Node: Bash Features199247
-Node: Invoking Bash200130
-Node: Bash Startup Files205894
-Node: Interactive Shells210906
-Node: What is an Interactive Shell?211316
-Node: Is this Shell Interactive?211965
-Node: Interactive Shell Behavior212780
-Node: Bash Conditional Expressions216060
-Node: Shell Arithmetic219808
-Node: Aliases222567
-Node: Arrays225139
-Node: The Directory Stack229097
-Node: Directory Stack Builtins229811
-Node: Printing a Prompt232703
-Node: The Restricted Shell235455
-Node: Bash POSIX Mode237287
-Node: Job Control246113
-Node: Job Control Basics246573
-Node: Job Control Builtins251290
-Node: Job Control Variables255654
-Node: Command Line Editing256812
-Node: Introduction and Notation258379
-Node: Readline Interaction260001
-Node: Readline Bare Essentials261192
-Node: Readline Movement Commands262981
-Node: Readline Killing Commands263946
-Node: Readline Arguments265866
-Node: Searching266910
-Node: Readline Init File269096
-Node: Readline Init File Syntax270243
-Node: Conditional Init Constructs285347
-Node: Sample Init File287880
-Node: Bindable Readline Commands290997
-Node: Commands For Moving292204
-Node: Commands For History293348
-Node: Commands For Text296503
-Node: Commands For Killing299176
-Node: Numeric Arguments301627
-Node: Commands For Completion302766
-Node: Keyboard Macros306958
-Node: Miscellaneous Commands307529
-Node: Readline vi Mode313335
-Node: Programmable Completion314242
-Node: Programmable Completion Builtins321452
-Node: Using History Interactively330588
-Node: Bash History Facilities331272
-Node: Bash History Builtins334186
-Node: History Interaction338043
-Node: Event Designators340748
-Node: Word Designators341763
-Node: Modifiers343402
-Node: Installing Bash344806
-Node: Basic Installation345943
-Node: Compilers and Options348635
-Node: Compiling For Multiple Architectures349376
-Node: Installation Names351040
-Node: Specifying the System Type351858
-Node: Sharing Defaults352574
-Node: Operation Controls353247
-Node: Optional Features354205
-Node: Reporting Bugs363764
-Node: Major Differences From The Bourne Shell364965
-Node: GNU Free Documentation License381652
-Node: Indexes406848
-Node: Builtin Index407302
-Node: Reserved Word Index414129
-Node: Variable Index416577
-Node: Function Index429531
-Node: Concept Index436540
+Node: Command Substitution69485
+Node: Arithmetic Expansion70818
+Node: Process Substitution71668
+Node: Word Splitting72718
+Node: Filename Expansion74341
+Node: Pattern Matching76480
+Node: Quote Removal80119
+Node: Redirections80414
+Node: Executing Commands88939
+Node: Simple Command Expansion89609
+Node: Command Search and Execution91539
+Node: Command Execution Environment93876
+Node: Environment96862
+Node: Exit Status98522
+Node: Signals100143
+Node: Shell Scripts102111
+Node: Shell Builtin Commands104629
+Node: Bourne Shell Builtins106657
+Node: Bash Builtins124335
+Node: Modifying Shell Behavior150540
+Node: The Set Builtin150885
+Node: The Shopt Builtin160409
+Node: Special Builtins172168
+Node: Shell Variables173147
+Node: Bourne Shell Variables173587
+Node: Bash Variables175568
+Node: Bash Features199906
+Node: Invoking Bash200789
+Node: Bash Startup Files206553
+Node: Interactive Shells211565
+Node: What is an Interactive Shell?211975
+Node: Is this Shell Interactive?212624
+Node: Interactive Shell Behavior213439
+Node: Bash Conditional Expressions216719
+Node: Shell Arithmetic220467
+Node: Aliases223226
+Node: Arrays225798
+Node: The Directory Stack229913
+Node: Directory Stack Builtins230627
+Node: Printing a Prompt233519
+Node: The Restricted Shell236271
+Node: Bash POSIX Mode238103
+Node: Job Control246929
+Node: Job Control Basics247389
+Node: Job Control Builtins252106
+Node: Job Control Variables256470
+Node: Command Line Editing257628
+Node: Introduction and Notation259195
+Node: Readline Interaction260817
+Node: Readline Bare Essentials262008
+Node: Readline Movement Commands263797
+Node: Readline Killing Commands264762
+Node: Readline Arguments266682
+Node: Searching267726
+Node: Readline Init File269912
+Node: Readline Init File Syntax271059
+Node: Conditional Init Constructs286163
+Node: Sample Init File288696
+Node: Bindable Readline Commands291813
+Node: Commands For Moving293020
+Node: Commands For History294164
+Node: Commands For Text297319
+Node: Commands For Killing299992
+Node: Numeric Arguments302443
+Node: Commands For Completion303582
+Node: Keyboard Macros307774
+Node: Miscellaneous Commands308345
+Node: Readline vi Mode314151
+Node: Programmable Completion315058
+Node: Programmable Completion Builtins322268
+Node: Using History Interactively331404
+Node: Bash History Facilities332088
+Node: Bash History Builtins335002
+Node: History Interaction338859
+Node: Event Designators341564
+Node: Word Designators342579
+Node: Modifiers344218
+Node: Installing Bash345622
+Node: Basic Installation346759
+Node: Compilers and Options349451
+Node: Compiling For Multiple Architectures350192
+Node: Installation Names351856
+Node: Specifying the System Type352674
+Node: Sharing Defaults353390
+Node: Operation Controls354063
+Node: Optional Features355021
+Node: Reporting Bugs364580
+Node: Major Differences From The Bourne Shell365781
+Node: GNU Free Documentation License382468
+Node: Indexes407664
+Node: Builtin Index408118
+Node: Reserved Word Index414945
+Node: Variable Index417393
+Node: Function Index430347
+Node: Concept Index437356
 
 End Tag Table

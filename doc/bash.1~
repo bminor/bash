@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sat Jun 12 15:34:58 EDT 2010
+.\"	Last Change: Fri Jul  2 17:31:49 EDT 2010
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2010 June 12" "GNU Bash-4.1"
+.TH BASH 1 "2010 July 2" "GNU Bash-4.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -554,6 +554,8 @@ reserved word precedes a pipeline, the elapsed as well as user and
 system time consumed by its execution are reported when the pipeline
 terminates.
 The \fB\-p\fP option changes the output format to that specified by POSIX.
+When the shell is in \fIposix mode\fP, it does not recognize
+\fBtime\fP as a reserved word if the next token begins with a `-'.
 The
 .SM
 .B TIMEFORMAT
@@ -1429,14 +1431,15 @@ The command argument to the \fB\-c\fP invocation option.
 .TP
 .B BASH_LINENO
 An array variable whose members are the line numbers in source files
-corresponding to each member of
+where each corresponding member of
 .SM
-.BR FUNCNAME .
+.B FUNCNAME
+was invoked.
 \fB${BASH_LINENO[\fP\fI$i\fP\fB]}\fP is the line number in the source
-file where \fB${FUNCNAME[\fP\fI$i\fP\fB]}\fP was called
+file (\fB${BASH_SOURCE[\fP\fI$i+1\fP\fB]}\fP) where
+\fB${FUNCNAME[\fP\fI$i\fP\fB]}\fP was called
 (or \fB${BASH_LINENO[\fP\fI$i-1\fP\fB]}\fP if referenced within another
 shell function).
-The corresponding source file name is \fB${BASH_SOURCE[\fP\fI$i\fP\fB]}\fP.
 Use
 .SM
 .B LINENO
@@ -1452,11 +1455,15 @@ string matching the \fIn\fPth parenthesized subexpression.
 This variable is read-only.
 .TP
 .B BASH_SOURCE
-An array variable whose members are the source filenames corresponding
-to the elements in the
+An array variable whose members are the source filenames
+where the corresponding shell function names in the
 .SM
 .B FUNCNAME
-array variable.
+array variable are defined.
+The shell function
+\fB${FUNCNAME[\fP\fI$i\fP\fB]}\fP is defined in the file
+\fB${BASH_SOURCE[\fP\fI$i\fP\fB]}\fP and called from
+\fB${BASH_SOURCE[\fP\fI$i+1\fP\fB]}\fP.
 .TP
 .B BASH_SUBSHELL
 Incremented by one each time a subshell or subshell environment is spawned.
@@ -1593,7 +1600,7 @@ An array variable containing the names of all shell functions
 currently in the execution call stack.
 The element with index 0 is the name of any currently-executing
 shell function.
-The bottom-most element is
+The bottom-most element (the one with the highest index) is
 .if t \f(CW"main"\fP.
 .if n "main".
 This variable exists only when a shell function is executing.
@@ -1606,6 +1613,16 @@ If
 .B FUNCNAME
 is unset, it loses its special properties, even if it is
 subsequently reset.
+.if t .sp 0.5
+.if n .sp 1
+This variable can be used with \fBBASH_LINENO\fP and \fBBASH_SOURCE\fP.
+Each element of \fBFUNCNAME\fP has corresponding elements in
+\fBBASH_LINENO\fP and \fBBASH_SOURCE\fP to describe the call stack.
+For instance, \fB${FUNCNAME[\fP\fI$i\fP\fB]}\fP was called from the file
+\fB${BASH_SOURCE[\fP\fI$i+1\fP\fB]}\fP at line number
+\fB${BASH_LINENO[\fP\fI$i\fP\fB]}\fP.
+The \fBcaller\fP builtin displays the current call stack using this
+information.
 .TP
 .B GROUPS
 An array variable containing the list of groups of which the current
@@ -8897,6 +8914,7 @@ when in posix mode, treats a single quote in a double-quoted
 parameter expansion as a special character.  The single quotes must match
 (an even number) and the characters between the single quotes are considered
 quoted.  This is the behavior of posix mode through version 4.1.
+The default bash behavior remains as in previous versions.
 .TP 8
 .B dirspell
 If set,
@@ -9046,6 +9064,10 @@ line to be ignored in an interactive shell (see
 .SM
 .B COMMENTS
 above).  This option is enabled by default.
+.TP 8
+.B lastpipe
+If set, and job control is not active, the shell runs the last command of
+a pipeline not executed in the background in the current shell environment.
 .TP 8
 .B lithist
 If set, and the

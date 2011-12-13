@@ -648,6 +648,9 @@ The statistics currently consist of elapsed (wall-clock) time and
 user and system time consumed by the command's execution.
 The @option{-p} option changes the output format to that specified
 by @sc{posix}.
+When the shell is in @sc{posix} mode (@pxref{Bash POSIX Mode}),
+it does not recognize @code{time} as a reserved word if the next
+token begins with a @samp{-}.
 The @env{TIMEFORMAT} variable may be set to a format string that
 specifies how the timing information should be displayed.
 @xref{Bash Variables}, for a description of the available formats.
@@ -1325,8 +1328,10 @@ in multiple identically-named entries in the environment passed to the
 shell's children.
 Care should be taken in cases where this may cause a problem.
 
-Functions may be recursive.  No limit is placed on the number of
-recursive  calls.
+Functions may be recursive.
+The @code{FUNCNEST} variable may be used to limit the depth of the
+function call stack and restrict the number of function invocations.
+By default, no limit is placed on the number of recursive  calls.
 
 @node Shell Parameters
 @section Shell Parameters
@@ -4632,6 +4637,10 @@ to cause that word and all remaining characters on that
 line to be ignored in an interactive shell.
 This option is enabled by default.
 
+@item lastpipe
+If set, and job control is not active, the shell runs the last command of
+a pipeline not executed in the background in the current shell environment.
+
 @item lithist
 If enabled, and the @code{cmdhist}
 option is enabled, multi-line commands are saved to the history with
@@ -4894,11 +4903,11 @@ The command argument to the @option{-c} invocation option.
 
 @item BASH_LINENO
 An array variable whose members are the line numbers in source files
-corresponding to each member of @var{FUNCNAME}.
-@code{$@{BASH_LINENO[$i]@}} is the line number in the source file where
+where each corresponding member of @var{FUNCNAME} was invoked.
+@code{$@{BASH_LINENO[$i]@}} is the line number in the source file
+(@code{$@{BASH_SOURCE[$i+1]@}}) where
 @code{$@{FUNCNAME[$i]@}} was called (or @code{$@{BASH_LINENO[$i-1]@}} if
-referenced within another shell function).
-The corresponding source file name is @code{$@{BASH_SOURCE[$i]@}}.
+referenced within another shell function). 
 Use @code{LINENO} to obtain the current line number.
 
 @item BASH_REMATCH
@@ -4912,8 +4921,11 @@ string matching the @var{n}th parenthesized subexpression.
 This variable is read-only.
 
 @item BASH_SOURCE
-An array variable whose members are the source filenames corresponding
-to the elements in the @code{FUNCNAME} array variable.
+An array variable whose members are the source filenames where the
+corresponding shell function names in the @code{FUNCNAME} array
+variable are defined.
+The shell function @code{$@{FUNCNAME[$i]@}} is defined in the file
+@code{$@{BASH_SOURCE[$i]@}} and called from @code{$@{BASH_SOURCE[$i+1]@}}
 
 @item BASH_SUBSHELL
 Incremented by one each time a subshell or subshell environment is spawned.
@@ -5070,11 +5082,20 @@ An array variable containing the names of all shell functions
 currently in the execution call stack.
 The element with index 0 is the name of any currently-executing
 shell function.
-The bottom-most element is @code{"main"}.
+The bottom-most element (the one with the highest index)
+is @code{"main"}.
 This variable exists only when a shell function is executing.
 Assignments to @env{FUNCNAME} have no effect and return an error status.
 If @env{FUNCNAME} is unset, it loses its special properties, even if
 it is subsequently reset.
+
+This variable can be used with @code{BASH_LINENO} and @code{BASH_SOURCE}.
+Each element of @code{FUNCNAME} has corresponding elements in
+@code{BASH_LINENO} and @code{BASH_SOURCE} to describe the call stack.
+For instance, @code{$@{FUNCNAME[$i]@}} was called from the file
+@code{$@{BASH_SOURCE[$i+1]@}} at line number @code{$@{BASH_LINENO[$i]@}}.
+The @code{caller} builtin displays the current call stack using this
+information.
 
 @item FUNCNEST
 If set to a numeric value greater than 0, defines a maximum function
@@ -6657,6 +6678,10 @@ double quotes, single quotes are no longer special and cannot be used to
 quote a closing brace or other special character, unless the operator is
 one of those defined to perform pattern removal.  In this case, they do
 not have to appear as matched pairs.
+
+@item
+The parser does not recognize @code{time} as a reserved word if the next
+token begins with a @samp{-}.
 
 @item
 If a @sc{posix} special builtin returns an error status, a

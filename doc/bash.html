@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2010 May 30<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2010 June 12<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -3007,9 +3007,14 @@ An indexed array is created automatically if any variable is assigned to
 using the syntax <I>name</I>[<I>subscript</I>]=<I>value</I>.  The
 <I>subscript</I>
 
-is treated as an arithmetic expression that must evaluate to a number
-greater than or equal to zero.  To explicitly declare an indexed array,
-use
+is treated as an arithmetic expression that must evaluate to a number.
+If
+<I>subscript</I>
+
+evaluates to a number less than zero, it is used as
+an offset from one greater than the array's maximum index (so a subcript
+of -1 refers to the last element of the array).
+To explicitly declare an indexed array, use
 <B>declare -a </B><I>name</I>
 
 (see
@@ -3491,9 +3496,13 @@ If <I>length</I> is omitted, expands to the substring of
 
 </FONT>
 below).
-<I>length</I> must evaluate to a number greater than or equal to zero.
 If <I>offset</I> evaluates to a number less than zero, the value
 is used as an offset from the end of the value of <I>parameter</I>.
+If <I>length</I> evaluates to a number less than zero, and <I>parameter</I>
+is not <B>@</B> and not an indexed or associative array, it is interpreted
+as an offset from the end of the value of <I>parameter</I> rather than
+a number of characters, and the expansion is the characters between the
+two offsets.
 If <I>parameter</I> is <B>@</B>, the result is <I>length</I> positional
 parameters beginning at <I>offset</I>.
 If <I>parameter</I> is an indexed array name subscripted by @ or *,
@@ -11373,6 +11382,18 @@ If set,
 changes its behavior to that of version 4.0 with respect to locale-specific
 string comparison when using the conditional command's &lt; and &gt; operators
 and the effect of interrupting a command list.
+<DT><B>compat41</B>
+
+<DD>
+@item compat41
+If set,
+<B>bash</B>,
+
+when in posix mode, treats a single quote in a double-quoted
+parameter expansion as a special character.  The single quotes must match
+(an even number) and the characters between the single quotes are considered
+quoted.  This is the behavior of posix mode through version 4.1.
+The default bash behavior remains as in previous versions.
 <DT><B>dirspell</B>
 
 <DD>
@@ -12608,7 +12629,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-4.1<TH ALIGN=CENTER width=33%>2010 May 30<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-4.1<TH ALIGN=CENTER width=33%>2010 June 12<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -12714,6 +12735,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 07 June 2010 16:19:05 EDT
+Time: 29 June 2010 14:02:49 EDT
 </BODY>
 </HTML>

@@ -10148,3 +10148,55 @@ parse.y
 	- add `TIMEIGN' token to handle `time -p -- ...'.  Pointed out by
 	  Laszlo Ersek <lacos@caesar.elte.hu> on austin-group list
 
+				   6/28
+				   ----
+jobs.c
+	- treat a shell with (subshell_environment&SUBSHELL_PIPE) != 0 like
+	  a command substitution in wait_for and act like we received a
+	  SIGINT if a job we're waiting for dies of SIGINT.  Fixes bug
+	  reported by Ilya Basin <basinilya@gmail.com>
+
+				    7/2
+				    ---
+jobs.c
+	- if fork() fails in make_child, try to reap some dead children before
+	  retrying
+
+execute_cmd.c
+	- change execute_pipeline to run the last command of a non-asynchronous
+	  pipeline in the current shell environment if the `lastpipe' shell
+	  option is enabled and job control is not active.  Code from
+	  Werner Fink <werner@suse.de>
+
+parse.y
+	- Posix says (issue 267) that time is not recognized as a keyword
+	  if the next token begins with a `-'
+
+doc/{bash.1,bashref.texi}
+	- changed the descriptions of BASH_SOURCE, BASH_LINENO, and FUNCNAME
+	  as proposed in Ubuntu bug 591677.
+	- document new `lastpipe' shell option that runs last command of a
+	  pipeline in the current shell environment
+	- document new posix-mode behavior with `time -p'
+
+				    7/5
+				    ---
+aclocal.m4
+	- new autoconf test WEXITSTATUS_OFFSET, bit offset in status word
+	  returned by wait() of the process's exit status
+
+jobs.[ch]
+	- change stop_pipeline to return the actual index of the job just
+	  created and added to the jobs table, instead of the current job
+	- job_exit_status and job_exit_signal are now global functions, with
+	  extern declarations in jobs.h
+	- append_process: new utility function for use by the lastpipe code,
+	  takes info, creates a PROCESS from them, and adds it to the end of
+	  the passed job id's pipeline.  lastpipe code uses it to add a dummy
+	  process for the last command in the pipeline
+	- freeze_jobs_list: new utility function so rest of shell can freeze
+	  the jobs list.  Used by the lastpipe code
+
+execute_cmd.c
+	- changes to lastpipe code to make `pipefail' option, $PIPESTATUS, and
+	  $? work correctly.  Uses append_process and job_exit_status
