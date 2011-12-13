@@ -155,7 +155,7 @@ static void
 make_command_string_internal (command)
      COMMAND *command;
 {
-  char s[3], *op;
+  char s[3];
 
   if (command == 0)
     cprintf ("");
@@ -1052,10 +1052,9 @@ static void
 print_redirection (redirect)
      REDIRECT *redirect;
 {
-  int kill_leading, redirector, redir_fd;
+  int redirector, redir_fd;
   WORD_DESC *redirectee, *redir_word;
 
-  kill_leading = 0;
   redirectee = redirect->redirectee.filename;
   redir_fd = redirect->redirectee.dest;
 

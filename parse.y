@@ -1957,6 +1957,7 @@ read_a_line (remove_quoted_newline)
 	}
       else if (c == '\\' && remove_quoted_newline)
 	{
+	  QUIT;
 	  peekc = yy_getc ();
 	  if (peekc == '\n')
 	    {

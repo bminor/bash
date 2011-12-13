@@ -1121,6 +1121,9 @@ print_redirection (redirect)
       else if (redirector != 0)
 	cprintf ("%d", redirector);
 #if 0
+      /* Don't need to check whether or not to requote, since original quotes
+         are still intact.  The only thing that has happened is that $'...'
+         has been replaced with 'expanded ...'. */
       if (ansic_shouldquote (redirect->redirectee.filename->word))
 	{
 	  char *x;

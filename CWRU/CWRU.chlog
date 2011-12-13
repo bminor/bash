@@ -9466,3 +9466,15 @@ bashline.c
 	  hint might contain an already-dequoted globbing character, but
 	  glob_matches will be NULL.  Fixes bug reported by
 	  coyote@wariat.org.pl
+
+				    2/5
+				    ---
+builtins/exec.def
+	- set extern variable "exec_argv0" to the argument to -a
+
+shell.c
+	- if exec_argv0 is set, set dollar_vars[0] to it and set it to NULL,
+	  assuming it was set by `exec -a'.  `exec -a foo' now sets $0 to
+	  foo in an executable shell script without a leading `#!' (fixes
+	  longstanding bug)
+

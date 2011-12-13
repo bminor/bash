@@ -112,6 +112,7 @@ extern pid_t last_command_subst_pid;
 extern sh_builtin_func_t *last_shell_builtin, *this_shell_builtin;
 extern char **subshell_argv, **subshell_envp;
 extern int subshell_argc;
+extern char *exec_argv0;
 #if 0
 extern char *glob_argv_flags;
 #endif
@@ -4879,7 +4880,8 @@ shell_execve (command, args, env)
   for (i = larray - 1; i; i--)
     args[i] = args[i - 1];
 
-  args[0] = shell_name;
+  args[0] = exec_argv0 ? shell_name : exec_argv0;
+  exec_argv0 = (char *)NULL;
   args[1] = command;
   args[larray] = (char *)NULL;
 

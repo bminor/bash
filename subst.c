@@ -1270,7 +1270,7 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
       if ((flags & SX_COMMAND) && string[i] == '$' && string[i+1] == LPAREN)
         {
           si = i + 2;
-          t = extract_command_subst (string, &si, flags);
+          t = extract_command_subst (string, &si, flags|SX_NOALLOC);
           i = si + 1;
           continue;
         }
@@ -2661,8 +2661,8 @@ do_assignment_internal (word, expand)
      const WORD_DESC *word;
      int expand;
 {
-  int offset, tlen, appendop, assign_list, aflags, retval;
-  char *name, *value;
+  int offset, appendop, assign_list, aflags, retval;
+  char *name, *value, *temp;
   SHELL_VAR *entry;
 #if defined (ARRAY_VARS)
   char *t;
@@ -2681,8 +2681,6 @@ do_assignment_internal (word, expand)
 
   if (name[offset] == '=')
     {
-      char *temp;
-
       if (name[offset - 1] == '+')
 	{
 	  appendop = 1;
@@ -2691,7 +2689,6 @@ do_assignment_internal (word, expand)
 
       name[offset] = 0;		/* might need this set later */
       temp = name + offset + 1;
-      tlen = STRLEN (temp);
 
 #if defined (ARRAY_VARS)
       if (expand && (word->flags & W_COMPASSIGN))

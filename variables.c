@@ -158,7 +158,6 @@ static int export_env_size;
 
 #if defined (READLINE)
 static int winsize_assignment;		/* currently assigning to LINES or COLUMNS */
-static int winsize_assigned;		/* assigned to LINES or COLUMNS */
 #endif
 
 /* Some forward declarations. */
@@ -4342,7 +4341,7 @@ sv_winsize (name)
     {
       if (legal_number (value_cell (v), &xd) == 0)
 	return;
-      winsize_assignment = winsize_assigned = 1;
+      winsize_assignment = 1;
       d = xd;			/* truncate */
       if (name[0] == 'L')	/* LINES */
 	rl_set_screen_size (d, -1);

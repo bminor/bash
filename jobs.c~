@@ -77,6 +77,10 @@
 extern int errno;
 #endif /* !errno */
 
+#if !defined (HAVE_KILLPG)
+extern int killpg __P((pid_t, int));
+#endif
+
 #define DEFAULT_CHILD_MAX 32
 #if !defined (DEBUG)
 #define MAX_JOBS_IN_ARRAY 4096		/* production */

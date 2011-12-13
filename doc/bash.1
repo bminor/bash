@@ -67,8 +67,10 @@ Shell and Utilities portion of the IEEE POSIX specification
 .B Bash
 can be configured to be POSIX-conformant by default.
 .SH OPTIONS
-In addition to the single-character shell options documented in the
-description of the \fBset\fR builtin command, \fBbash\fR
+All of the  single-character shell options documented in the
+description of the \fBset\fR builtin command can be used as options
+when the shell is invoked.
+In addition, \fBbash\fR
 interprets the following options when it is invoked:
 .PP
 .PD 0
@@ -161,10 +163,6 @@ Turns on extended debugging mode (see the description of the
 .B extdebug
 option to the
 .B shopt
-builtin below)
-and shell function tracing (see the description of the
-\fB\-o functrace\fP option to the
-.B set
 builtin below).
 .TP
 .B \-\-dump\-po\-strings
@@ -6057,7 +6055,7 @@ exit status of 124.  If a shell function returns 124, and changes
 the compspec associated with the command on which completion is being
 attempted (supplied as the first argument when the function is executed),
 programmable completion restarts from the beginning, with an
-attempt to find a compspec for that command.  This allows a set of
+attempt to find a new compspec for that command.  This allows a set of
 completions to be built dynamically as completion is attempted, rather than
 being loaded all at once.
 .PP
