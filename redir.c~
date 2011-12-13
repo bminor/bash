@@ -95,10 +95,10 @@ static REDIRECTEE rd;
 static int heredoc_errno;
 
 #define REDIRECTION_ERROR(r, e) \
-  if (r != 0) \
+  if ((r) != 0) \
     { \
       last_command_exit_value = EXECUTION_FAILURE;\
-      return (e == 0 ? EINVAL : e);\
+      return ((e) == 0 ? EINVAL : (e));\
     }
 
 void

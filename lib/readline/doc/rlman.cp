@@ -7,5 +7,5 @@
 \entry{kill ring}{2}{kill ring}
 \entry{initialization file, readline}{4}{initialization file, readline}
 \entry{variables, readline}{4}{variables, readline}
-\entry{readline, function}{20}{readline, function}
-\entry{application-specific completion functions}{41}{application-specific completion functions}
+\entry{readline, function}{22}{readline, function}
+\entry{application-specific completion functions}{43}{application-specific completion functions}

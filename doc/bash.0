@@ -3108,12 +3108,16 @@ RREEAADDLLIINNEE
               "!_n" history expansion had been specified.
        yyaannkk--llaasstt--aarrgg ((MM--..,, MM--__))
               Insert the last argument to the previous command (the last  word
-              of  the  previous  history  entry).   With  an  argument, behave
+              of the previous history entry).  With a numeric argument, behave
               exactly like yyaannkk--nntthh--aarrgg.  Successive  calls  to  yyaannkk--llaasstt--aarrgg
-              move  back through the history list, inserting the last argument
-              of each line in turn.  The history expansion facilities are used
-              to  extract  the last argument, as if the "!$" history expansion
-              had been specified.
+              move  back through the history list, inserting the last word (or
+              the word specified by the argument to the first  call)  of  each
+              line in turn.  Any numeric argument supplied to these successive
+              calls determines the direction to move through the  history.   A
+              negative  argument  switches  the  direction through the history
+              (back or forward).  The history expansion facilities are used to
+              extract  the last argument, as if the "!$" history expansion had
+              been specified.
        sshheellll--eexxppaanndd--lliinnee ((MM--CC--ee))
               Expand the line as the shell does.  This performs alias and his-
               tory expansion as well as all of the shell word expansions.  See
@@ -5131,10 +5135,11 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
 
               Expressions may  be  combined  using  the  following  operators,
               listed  in  decreasing  order  of  precedence.   The  evaluation
-              depends on the number of arguments; see below.
+              depends on the number of arguments; see below.  Operator  prece-
+              dence is used when there are five or more arguments.
               !! _e_x_p_r True if _e_x_p_r is false.
               (( _e_x_p_r ))
-                     Returns the value of _e_x_p_r.  This may be used to  override
+                     Returns  the value of _e_x_p_r.  This may be used to override
                      the normal precedence of operators.
               _e_x_p_r_1 -aa _e_x_p_r_2
                      True if both _e_x_p_r_1 and _e_x_p_r_2 are true.
@@ -5151,13 +5156,14 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
                      null.
               2 arguments
                      If the first argument is !!, the expression is true if and
-                     only if the second argument is null.  If the first  argu-
-                     ment  is  one  of  the unary conditional operators listed
-                     above under CCOONNDDIITTIIOONNAALL EEXXPPRREESSSSIIOONNSS,  the  expression  is
+                     only  if the second argument is null.  If the first argu-
+                     ment is one of the  unary  conditional  operators  listed
+                     above  under  CCOONNDDIITTIIOONNAALL  EEXXPPRREESSSSIIOONNSS, the expression is
                      true if the unary test is true.  If the first argument is
                      not a valid unary conditional operator, the expression is
                      false.
               3 arguments
+                     The following conditions are applied in the order listed.
                      If  the  second argument is one of the binary conditional
                      operators listed above under CCOONNDDIITTIIOONNAALL EEXXPPRREESSSSIIOONNSS, the
                      result of the expression is the result of the binary test
@@ -5461,4 +5467,4 @@ BBUUGGSS
 
 
 
-GNU Bash-4.2                   2010 September 6                        BASH(1)
+GNU Bash-4.2                    2010 December 6                        BASH(1)

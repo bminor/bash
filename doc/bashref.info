@@ -2741,7 +2741,8 @@ standard.
 
      Expressions may be combined using the following operators, listed
      in decreasing order of precedence.  The evaluation depends on the
-     number of arguments; see below.
+     number of arguments; see below.  Operator precedence is used when
+     there are five or more arguments.
 
     `! EXPR'
           True if EXPR is false.
@@ -2775,7 +2776,8 @@ standard.
           unary operator, the expression is false.
 
     3 arguments
-          If the second argument is one of the binary conditional
+          The following conditions are applied in the order listed.  If
+          the second argument is one of the binary conditional
           operators (*note Bash Conditional Expressions::), the result
           of the expression is the result of the binary test using the
           first and third arguments as operands.  The `-a' and `-o'
@@ -7286,11 +7288,16 @@ File: bashref.info,  Node: Commands For History,  Next: Commands For Text,  Prev
 
 `yank-last-arg (M-. or M-_)'
      Insert last argument to the previous command (the last word of the
-     previous history entry).  With an argument, behave exactly like
-     `yank-nth-arg'.  Successive calls to `yank-last-arg' move back
-     through the history list, inserting the last argument of each line
-     in turn.  The history expansion facilities are used to extract the
-     last argument, as if the `!$' history expansion had been specified.
+     previous history entry).  With a numeric argument, behave exactly
+     like `yank-nth-arg'.  Successive calls to `yank-last-arg' move
+     back through the history list, inserting the last word (or the
+     word specified by the argument to the first call) of each line in
+     turn.  Any numeric argument supplied to these successive calls
+     determines the direction to move through the history.  A negative
+     argument switches the direction through the history (back or
+     forward).  The history expansion facilities are used to extract
+     the last argument, as if the `!$' history expansion had been
+     specified.
 
 
 
@@ -9947,17 +9954,17 @@ D.1 Index of Shell Builtin Commands
 * test:                                  Bourne Shell Builtins.
                                                               (line 217)
 * times:                                 Bourne Shell Builtins.
-                                                              (line 285)
+                                                              (line 287)
 * trap:                                  Bourne Shell Builtins.
-                                                              (line 290)
+                                                              (line 292)
 * type:                                  Bash Builtins.       (line 539)
 * typeset:                               Bash Builtins.       (line 570)
 * ulimit:                                Bash Builtins.       (line 576)
 * umask:                                 Bourne Shell Builtins.
-                                                              (line 336)
+                                                              (line 338)
 * unalias:                               Bash Builtins.       (line 665)
 * unset:                                 Bourne Shell Builtins.
-                                                              (line 353)
+                                                              (line 355)
 * wait:                                  Job Control Builtins.
                                                               (line  73)
 
@@ -10511,82 +10518,82 @@ Node: Signals100504
 Node: Shell Scripts102472
 Node: Shell Builtin Commands104990
 Node: Bourne Shell Builtins107018
-Node: Bash Builtins124694
-Node: Modifying Shell Behavior150908
-Node: The Set Builtin151253
-Node: The Shopt Builtin160787
-Node: Special Builtins172752
-Node: Shell Variables173731
-Node: Bourne Shell Variables174171
-Node: Bash Variables176198
-Node: Bash Features201123
-Node: Invoking Bash202006
-Node: Bash Startup Files207770
-Node: Interactive Shells212791
-Node: What is an Interactive Shell?213201
-Node: Is this Shell Interactive?213850
-Node: Interactive Shell Behavior214665
-Node: Bash Conditional Expressions217945
-Node: Shell Arithmetic221693
-Node: Aliases224452
-Node: Arrays227024
-Node: The Directory Stack231139
-Node: Directory Stack Builtins231853
-Node: Printing a Prompt234745
-Node: The Restricted Shell237497
-Node: Bash POSIX Mode239329
-Node: Job Control247990
-Node: Job Control Basics248450
-Node: Job Control Builtins253167
-Node: Job Control Variables257531
-Node: Command Line Editing258689
-Node: Introduction and Notation260256
-Node: Readline Interaction261878
-Node: Readline Bare Essentials263069
-Node: Readline Movement Commands264858
-Node: Readline Killing Commands265823
-Node: Readline Arguments267743
-Node: Searching268787
-Node: Readline Init File270973
-Node: Readline Init File Syntax272120
-Node: Conditional Init Constructs287462
-Node: Sample Init File289995
-Node: Bindable Readline Commands293112
-Node: Commands For Moving294319
-Node: Commands For History295463
-Node: Commands For Text298618
-Node: Commands For Killing301291
-Node: Numeric Arguments303748
-Node: Commands For Completion304887
-Node: Keyboard Macros309079
-Node: Miscellaneous Commands309650
-Node: Readline vi Mode315456
-Node: Programmable Completion316363
-Node: Programmable Completion Builtins323573
-Node: Using History Interactively332709
-Node: Bash History Facilities333393
-Node: Bash History Builtins336307
-Node: History Interaction340164
-Node: Event Designators342869
-Node: Word Designators344091
-Node: Modifiers345730
-Node: Installing Bash347134
-Node: Basic Installation348271
-Node: Compilers and Options350963
-Node: Compiling For Multiple Architectures351704
-Node: Installation Names353368
-Node: Specifying the System Type354186
-Node: Sharing Defaults354902
-Node: Operation Controls355575
-Node: Optional Features356533
-Node: Reporting Bugs366092
-Node: Major Differences From The Bourne Shell367293
-Node: GNU Free Documentation License383980
-Node: Indexes409176
-Node: Builtin Index409630
-Node: Reserved Word Index416457
-Node: Variable Index418905
-Node: Function Index432000
-Node: Concept Index439009
+Node: Bash Builtins124836
+Node: Modifying Shell Behavior151050
+Node: The Set Builtin151395
+Node: The Shopt Builtin160929
+Node: Special Builtins172894
+Node: Shell Variables173873
+Node: Bourne Shell Variables174313
+Node: Bash Variables176340
+Node: Bash Features201265
+Node: Invoking Bash202148
+Node: Bash Startup Files207912
+Node: Interactive Shells212933
+Node: What is an Interactive Shell?213343
+Node: Is this Shell Interactive?213992
+Node: Interactive Shell Behavior214807
+Node: Bash Conditional Expressions218087
+Node: Shell Arithmetic221835
+Node: Aliases224594
+Node: Arrays227166
+Node: The Directory Stack231281
+Node: Directory Stack Builtins231995
+Node: Printing a Prompt234887
+Node: The Restricted Shell237639
+Node: Bash POSIX Mode239471
+Node: Job Control248132
+Node: Job Control Basics248592
+Node: Job Control Builtins253309
+Node: Job Control Variables257673
+Node: Command Line Editing258831
+Node: Introduction and Notation260398
+Node: Readline Interaction262020
+Node: Readline Bare Essentials263211
+Node: Readline Movement Commands265000
+Node: Readline Killing Commands265965
+Node: Readline Arguments267885
+Node: Searching268929
+Node: Readline Init File271115
+Node: Readline Init File Syntax272262
+Node: Conditional Init Constructs287604
+Node: Sample Init File290137
+Node: Bindable Readline Commands293254
+Node: Commands For Moving294461
+Node: Commands For History295605
+Node: Commands For Text299040
+Node: Commands For Killing301713
+Node: Numeric Arguments304170
+Node: Commands For Completion305309
+Node: Keyboard Macros309501
+Node: Miscellaneous Commands310072
+Node: Readline vi Mode315878
+Node: Programmable Completion316785
+Node: Programmable Completion Builtins323995
+Node: Using History Interactively333131
+Node: Bash History Facilities333815
+Node: Bash History Builtins336729
+Node: History Interaction340586
+Node: Event Designators343291
+Node: Word Designators344513
+Node: Modifiers346152
+Node: Installing Bash347556
+Node: Basic Installation348693
+Node: Compilers and Options351385
+Node: Compiling For Multiple Architectures352126
+Node: Installation Names353790
+Node: Specifying the System Type354608
+Node: Sharing Defaults355324
+Node: Operation Controls355997
+Node: Optional Features356955
+Node: Reporting Bugs366514
+Node: Major Differences From The Bourne Shell367715
+Node: GNU Free Documentation License384402
+Node: Indexes409598
+Node: Builtin Index410052
+Node: Reserved Word Index416879
+Node: Variable Index419327
+Node: Function Index432422
+Node: Concept Index439431
 
 End Tag Table

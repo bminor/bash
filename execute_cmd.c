@@ -684,6 +684,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
   if (redirection_undo_list)
     {
+      /* XXX - why copy here? */
       my_undo_list = (REDIRECT *)copy_redirects (redirection_undo_list);
       dispose_redirects (redirection_undo_list);
       redirection_undo_list = (REDIRECT *)NULL;
@@ -693,6 +694,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
   if (exec_redirection_undo_list)
     {
+      /* XXX - why copy here? */
       exec_undo_list = (REDIRECT *)copy_redirects (exec_redirection_undo_list);
       dispose_redirects (exec_redirection_undo_list);
       exec_redirection_undo_list = (REDIRECT *)NULL;

@@ -1,9 +1,9 @@
 This is readline.info, produced by makeinfo version 4.13 from
 ./rlman.texi.
 
-This manual describes the GNU Readline Library (version 6.1, 9 October
-2009), a library which aids in the consistency of user interface across
-discrete programs which provide a command line interface.
+This manual describes the GNU Readline Library (version 6.2, September
+6 2010), a library which aids in the consistency of user interface
+across discrete programs which provide a command line interface.
 
    Copyright (C) 1988-2009 Free Software Foundation, Inc.
 
@@ -402,10 +402,23 @@ Variable Settings
           `insert-comment' command is executed.  The default value is
           `"#"'.
 
+    `completion-display-width'
+          The number of screen columns used to display possible matches
+          when performing completion.  The value is ignored if it is
+          less than 0 or greater than the terminal screen width.  A
+          value of 0 will cause matches to be displayed one per line.
+          The default value is -1.
+
     `completion-ignore-case'
           If set to `on', Readline performs filename matching and
           completion in a case-insensitive fashion.  The default value
           is `off'.
+
+    `completion-map-case'
+          If set to `on', and COMPLETION-IGNORE-CASE is enabled,
+          Readline treats hyphens (`-') and underscores (`_') as
+          equivalent when performing case-insensitive filename matching
+          and completion.
 
     `completion-prefix-display-length'
           The length in characters of the common prefix of a list of
@@ -519,9 +532,14 @@ Variable Settings
     `match-hidden-files'
           This variable, when set to `on', causes Readline to match
           files whose names begin with a `.' (hidden files) when
-          performing filename completion, unless the leading `.' is
-          supplied by the user in the filename to be completed.  This
-          variable is `on' by default.
+          performing filename completion.  If set to `off', the leading
+          `.' must be supplied by the user in the filename to be
+          completed.  This variable is `on' by default.
+
+    `menu-complete-display-prefix'
+          If set to `on', menu completion displays the common prefix of
+          the list of possible completions (which may be empty) before
+          cycling through the list.  The default is `off'.
 
     `output-meta'
           If set to `on', Readline will display characters with the
@@ -992,11 +1010,16 @@ File: readline.info,  Node: Commands For History,  Next: Commands For Text,  Pre
 
 `yank-last-arg (M-. or M-_)'
      Insert last argument to the previous command (the last word of the
-     previous history entry).  With an argument, behave exactly like
-     `yank-nth-arg'.  Successive calls to `yank-last-arg' move back
-     through the history list, inserting the last argument of each line
-     in turn.  The history expansion facilities are used to extract the
-     last argument, as if the `!$' history expansion had been specified.
+     previous history entry).  With a numeric argument, behave exactly
+     like `yank-nth-arg'.  Successive calls to `yank-last-arg' move
+     back through the history list, inserting the last word (or the
+     word specified by the argument to the first call) of each line in
+     turn.  Any numeric argument supplied to these successive calls
+     determines the direction to move through the history.  A negative
+     argument switches the direction through the history (back or
+     forward).  The history expansion facilities are used to extract
+     the last argument, as if the `!$' history expansion had been
+     specified.
 
 
 
@@ -1168,7 +1191,11 @@ File: readline.info,  Node: Commands For Completion,  Next: Keyboard Macros,  Pr
      is filename completion.
 
 `possible-completions (M-?)'
-     List the possible completions of the text before point.
+     List the possible completions of the text before point.  When
+     displaying completions, Readline sets the number of columns used
+     for display to the value of `completion-display-width', the value
+     of the environment variable `COLUMNS', or the screen width, in
+     that order.
 
 `insert-completions (M-*)'
      Insert all completions of the text before point that would have
@@ -1321,8 +1348,7 @@ File: readline.info,  Node: Readline vi Mode,  Prev: Bindable Readline Commands,
 
 While the Readline library does not have a full set of `vi' editing
 functions, it does contain enough to allow simple editing of the line.
-The Readline `vi' mode behaves as specified in the POSIX 1003.2
-standard.
+The Readline `vi' mode behaves as specified in the POSIX standard.
 
    In order to switch interactively between `emacs' and `vi' editing
 modes, use the command `M-C-j' (bound to emacs-editing-mode when in
@@ -1339,7 +1365,7 @@ the standard `vi' movement keys, move to previous history lines with
 aiding in the consistency of user interface across discrete programs
 that need to provide a command line interface.
 
-   Copyright (C) 1988-2007 Free Software Foundation, Inc.
+   Copyright (C) 1988-2010 Free Software Foundation, Inc.
 
    Permission is granted to make and distribute verbatim copies of this
 manual provided the copyright notice and this permission notice pare
@@ -2430,7 +2456,11 @@ File: readline.info,  Node: Utility Functions,  Next: Miscellaneous Functions,  
      `len' is the number of strings in `matches', and `max' is the
      length of the longest string in `matches'.  This function uses the
      setting of `print-completions-horizontally' to select how the
-     matches are displayed (*note Readline Init File Syntax::).
+     matches are displayed (*note Readline Init File Syntax::).  When
+     displaying completions, this function sets the number of columns
+     used for display to the value of `completion-display-width', the
+     value of the environment variable `COLUMNS', or the screen width,
+     in that order.
 
    The following are implemented as macros, defined in `chardefs.h'.
 Applications should refrain from using them.
@@ -4150,12 +4180,12 @@ Function and Variable Index
  [index ]
 * Menu:
 
-* _rl_digit_p:                           Utility Functions.   (line  61)
-* _rl_digit_value:                       Utility Functions.   (line  72)
-* _rl_lowercase_p:                       Utility Functions.   (line  58)
-* _rl_to_lower:                          Utility Functions.   (line  68)
-* _rl_to_upper:                          Utility Functions.   (line  64)
-* _rl_uppercase_p:                       Utility Functions.   (line  55)
+* _rl_digit_p:                           Utility Functions.   (line  65)
+* _rl_digit_value:                       Utility Functions.   (line  76)
+* _rl_lowercase_p:                       Utility Functions.   (line  62)
+* _rl_to_lower:                          Utility Functions.   (line  72)
+* _rl_to_upper:                          Utility Functions.   (line  68)
+* _rl_uppercase_p:                       Utility Functions.   (line  59)
 * abort (C-g):                           Miscellaneous Commands.
                                                               (line  10)
 * accept-line (Newline or Return):       Commands For History.
@@ -4185,12 +4215,18 @@ Function and Variable Index
                                                               (line  47)
 * complete (<TAB>):                      Commands For Completion.
                                                               (line   6)
-* completion-prefix-display-length:      Readline Init File Syntax.
-                                                              (line  57)
-* completion-query-items:                Readline Init File Syntax.
+* completion-display-width:              Readline Init File Syntax.
+                                                              (line  52)
+* completion-ignore-case:                Readline Init File Syntax.
+                                                              (line  59)
+* completion-map-case:                   Readline Init File Syntax.
                                                               (line  64)
+* completion-prefix-display-length:      Readline Init File Syntax.
+                                                              (line  70)
+* completion-query-items:                Readline Init File Syntax.
+                                                              (line  77)
 * convert-meta:                          Readline Init File Syntax.
-                                                              (line  74)
+                                                              (line  87)
 * copy-backward-word ():                 Commands For Killing.
                                                               (line  49)
 * copy-forward-word ():                  Commands For Killing.
@@ -4199,12 +4235,12 @@ Function and Variable Index
                                                               (line  45)
 * delete-char (C-d):                     Commands For Text.   (line   6)
 * delete-char-or-list ():                Commands For Completion.
-                                                              (line  35)
+                                                              (line  39)
 * delete-horizontal-space ():            Commands For Killing.
                                                               (line  37)
 * digit-argument (M-0, M-1, ... M--):    Numeric Arguments.   (line   6)
 * disable-completion:                    Readline Init File Syntax.
-                                                              (line  80)
+                                                              (line  93)
 * do-uppercase-version (M-a, M-b, M-X, ...): Miscellaneous Commands.
                                                               (line  14)
 * downcase-word (M-l):                   Commands For Text.   (line  45)
@@ -4215,9 +4251,9 @@ Function and Variable Index
 * dump-variables ():                     Miscellaneous Commands.
                                                               (line  76)
 * editing-mode:                          Readline Init File Syntax.
-                                                              (line  85)
+                                                              (line  98)
 * enable-keypad:                         Readline Init File Syntax.
-                                                              (line  96)
+                                                              (line 109)
 * end-kbd-macro (C-x )):                 Keyboard Macros.     (line   9)
 * end-of-history (M->):                  Commands For History.
                                                               (line  22)
@@ -4225,32 +4261,32 @@ Function and Variable Index
 * exchange-point-and-mark (C-x C-x):     Miscellaneous Commands.
                                                               (line  36)
 * expand-tilde:                          Readline Init File Syntax.
-                                                              (line 107)
+                                                              (line 120)
 * forward-backward-delete-char ():       Commands For Text.   (line  15)
 * forward-char (C-f):                    Commands For Moving. (line  12)
 * forward-search-history (C-s):          Commands For History.
                                                               (line  30)
 * forward-word (M-f):                    Commands For Moving. (line  18)
 * history-preserve-point:                Readline Init File Syntax.
-                                                              (line 111)
+                                                              (line 124)
 * history-search-backward ():            Commands For History.
                                                               (line  50)
 * history-search-forward ():             Commands For History.
                                                               (line  45)
 * history-size:                          Readline Init File Syntax.
-                                                              (line 117)
+                                                              (line 130)
 * horizontal-scroll-mode:                Readline Init File Syntax.
-                                                              (line 122)
+                                                              (line 135)
 * input-meta:                            Readline Init File Syntax.
-                                                              (line 129)
+                                                              (line 142)
 * insert-comment (M-#):                  Miscellaneous Commands.
                                                               (line  60)
 * insert-completions (M-*):              Commands For Completion.
-                                                              (line  14)
+                                                              (line  18)
 * isearch-terminators:                   Readline Init File Syntax.
-                                                              (line 136)
+                                                              (line 149)
 * keymap:                                Readline Init File Syntax.
-                                                              (line 143)
+                                                              (line 156)
 * kill-line (C-k):                       Commands For Killing.
                                                               (line   6)
 * kill-region ():                        Commands For Killing.
@@ -4260,17 +4296,19 @@ Function and Variable Index
 * kill-word (M-d):                       Commands For Killing.
                                                               (line  19)
 * mark-modified-lines:                   Readline Init File Syntax.
-                                                              (line 156)
+                                                              (line 169)
 * mark-symlinked-directories:            Readline Init File Syntax.
-                                                              (line 161)
+                                                              (line 174)
 * match-hidden-files:                    Readline Init File Syntax.
-                                                              (line 166)
+                                                              (line 179)
 * menu-complete ():                      Commands For Completion.
-                                                              (line  18)
+                                                              (line  22)
 * menu-complete-backward ():             Commands For Completion.
-                                                              (line  30)
+                                                              (line  34)
+* menu-complete-display-prefix:          Readline Init File Syntax.
+                                                              (line 186)
 * meta-flag:                             Readline Init File Syntax.
-                                                              (line 129)
+                                                              (line 142)
 * next-history (C-n):                    Commands For History.
                                                               (line  16)
 * non-incremental-forward-search-history (M-n): Commands For History.
@@ -4278,10 +4316,10 @@ Function and Variable Index
 * non-incremental-reverse-search-history (M-p): Commands For History.
                                                               (line  35)
 * output-meta:                           Readline Init File Syntax.
-                                                              (line 173)
+                                                              (line 191)
 * overwrite-mode ():                     Commands For Text.   (line  53)
 * page-completions:                      Readline Init File Syntax.
-                                                              (line 178)
+                                                              (line 196)
 * possible-completions (M-?):            Commands For Completion.
                                                               (line  11)
 * prefix-meta (<ESC>):                   Miscellaneous Commands.
@@ -4296,7 +4334,7 @@ Function and Variable Index
 * reverse-search-history (C-r):          Commands For History.
                                                               (line  26)
 * revert-all-at-newline:                 Readline Init File Syntax.
-                                                              (line 188)
+                                                              (line 206)
 * revert-line (M-r):                     Miscellaneous Commands.
                                                               (line  25)
 * rl_add_defun:                          Function Naming.     (line  20)
@@ -4547,11 +4585,11 @@ Function and Variable Index
 * set-mark (C-@):                        Miscellaneous Commands.
                                                               (line  32)
 * show-all-if-ambiguous:                 Readline Init File Syntax.
-                                                              (line 194)
+                                                              (line 212)
 * show-all-if-unmodified:                Readline Init File Syntax.
-                                                              (line 200)
+                                                              (line 218)
 * skip-completed-text:                   Readline Init File Syntax.
-                                                              (line 209)
+                                                              (line 227)
 * skip-csi-sequence ():                  Miscellaneous Commands.
                                                               (line  51)
 * start-kbd-macro (C-x ():               Keyboard Macros.     (line   6)
@@ -4568,7 +4606,7 @@ Function and Variable Index
                                                               (line  28)
 * upcase-word (M-u):                     Commands For Text.   (line  41)
 * visible-stats:                         Readline Init File Syntax.
-                                                              (line 222)
+                                                              (line 240)
 * yank (C-y):                            Commands For Killing.
                                                               (line  59)
 * yank-last-arg (M-. or M-_):            Commands For History.
@@ -4581,57 +4619,57 @@ Function and Variable Index
 
 
 Tag Table:
-Node: Top1284
-Node: Command Line Editing1941
-Node: Introduction and Notation2593
-Node: Readline Interaction4216
-Node: Readline Bare Essentials5408
-Node: Readline Movement Commands7198
-Node: Readline Killing Commands8164
-Node: Readline Arguments10085
-Node: Searching11130
-Node: Readline Init File13282
-Node: Readline Init File Syntax14436
-Node: Conditional Init Constructs28642
-Node: Sample Init File31176
-Node: Bindable Readline Commands34294
-Node: Commands For Moving35352
-Node: Commands For History36214
-Node: Commands For Text39339
-Node: Commands For Killing42066
-Node: Numeric Arguments44209
-Node: Commands For Completion45349
-Node: Keyboard Macros47087
-Node: Miscellaneous Commands47659
-Node: Readline vi Mode51516
-Node: Programming with GNU Readline53340
-Node: Basic Behavior54326
-Node: Custom Functions57743
-Node: Readline Typedefs59227
-Node: Function Writing60866
-Node: Readline Variables62173
-Node: Readline Convenience Functions72839
-Node: Function Naming73829
-Node: Keymaps75091
-Node: Binding Keys77084
-Node: Associating Function Names and Bindings81631
-Node: Allowing Undoing83916
-Node: Redisplay86466
-Node: Modifying Text90366
-Node: Character Input91612
-Node: Terminal Management93510
-Node: Utility Functions94946
-Node: Miscellaneous Functions98037
-Node: Alternate Interface100334
-Node: A Readline Example102493
-Node: Readline Signal Handling104396
-Node: Custom Completers110584
-Node: How Completing Works111304
-Node: Completion Functions114618
-Node: Completion Variables118190
-Node: A Short Completion Example132204
-Node: GNU Free Documentation License144983
-Node: Concept Index170176
-Node: Function and Variable Index171697
+Node: Top1286
+Node: Command Line Editing1943
+Node: Introduction and Notation2595
+Node: Readline Interaction4218
+Node: Readline Bare Essentials5410
+Node: Readline Movement Commands7200
+Node: Readline Killing Commands8166
+Node: Readline Arguments10087
+Node: Searching11132
+Node: Readline Init File13284
+Node: Readline Init File Syntax14438
+Node: Conditional Init Constructs29499
+Node: Sample Init File32033
+Node: Bindable Readline Commands35151
+Node: Commands For Moving36209
+Node: Commands For History37071
+Node: Commands For Text40476
+Node: Commands For Killing43203
+Node: Numeric Arguments45346
+Node: Commands For Completion46486
+Node: Keyboard Macros48456
+Node: Miscellaneous Commands49028
+Node: Readline vi Mode52885
+Node: Programming with GNU Readline54702
+Node: Basic Behavior55688
+Node: Custom Functions59105
+Node: Readline Typedefs60589
+Node: Function Writing62228
+Node: Readline Variables63535
+Node: Readline Convenience Functions74201
+Node: Function Naming75191
+Node: Keymaps76453
+Node: Binding Keys78446
+Node: Associating Function Names and Bindings82993
+Node: Allowing Undoing85278
+Node: Redisplay87828
+Node: Modifying Text91728
+Node: Character Input92974
+Node: Terminal Management94872
+Node: Utility Functions96308
+Node: Miscellaneous Functions99636
+Node: Alternate Interface101933
+Node: A Readline Example104092
+Node: Readline Signal Handling105995
+Node: Custom Completers112183
+Node: How Completing Works112903
+Node: Completion Functions116217
+Node: Completion Variables119789
+Node: A Short Completion Example133803
+Node: GNU Free Documentation License146582
+Node: Concept Index171775
+Node: Function and Variable Index173296
 
 End Tag Table

@@ -36,7 +36,7 @@
 #define PST_CASESTMT	0x000080	/* parsing a case statement */
 #define PST_CONDCMD	0x000100	/* parsing a [[...]] command */
 #define PST_CONDEXPR	0x000200	/* parsing the guts of [[...]] */
-#define PST_ARITHFOR	0x000400	/* parsing an arithmetic for command */
+#define PST_ARITHFOR	0x000400	/* parsing an arithmetic for command - unused */
 #define PST_ALEXPAND	0x000800	/* OK to expand aliases - unused */
 #define PST_EXTPAT	0x001000	/* parsing an extended shell pattern */
 #define PST_COMPASSIGN	0x002000	/* parsing x=(...) compound assignment */

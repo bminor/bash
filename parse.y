@@ -3833,8 +3833,7 @@ eof_error:
   return ret;
 }
 
-/* XXX - this needs to handle functionality like subst.c:no_longjmp_on_fatal_error;
-   maybe extract_command_subst should handle it. */
+/* Recursively call the parser to parse a $(...) command substitution. */
 char *
 xparse_dolparen (base, string, indp, flags)
      char *base;

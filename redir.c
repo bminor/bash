@@ -1145,7 +1145,7 @@ add_undo_redirect (fd, ri, fdbase)
      above SHELL_FD_BASE, add a redirection to be undone if the exec builtin
      causes redirections to be discarded.  There needs to be a difference
      between fds that are used to save other fds and then are the target of
-     user redirctions and fds that are just the target of user redirections.
+     user redirections and fds that are just the target of user redirections.
      We use the close-on-exec flag to tell the difference; fds > SHELL_FD_BASE
      that have the close-on-exec flag set are assumed to be fds used internally
      to save others. */

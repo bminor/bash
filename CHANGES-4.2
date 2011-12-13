@@ -1,3 +1,32 @@
+This document details the changes between this version, bash-4.2-beta,
+and the previous version, bash-4.2-alpha.
+
+1.  Changes to Bash
+
+a.  Fixed a bug that caused the \W prompt string escape to not add a closing
+    NULL.
+
+b.  Fixed a bug that caused partially-quoted words that were not subject to
+    word splitting to retained quoted NULLs.
+
+c.  Added considerable efficiency speedups when pattern matching in multibyte
+    locales by skipping multibyte character functions where possible.
+
+d.  Added considerable speedups to variable expansion when in multibyte locales.
+
+e.  Fixed a bug that caused the expansion of $* when there are no positional
+    parameters to cause the shell to dump core when used in a pattern
+    matching context.
+
+f.  Fixed a bug that caused variable expansions preceding regular builtins to
+    not change the shell environment during their execution.
+
+2.  Changes to Readline
+
+a.  Fixed a bug that made an explicit argument of 0 to yank-last-arg behave
+    as if it were a negative argument.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-4.2-alpha,
 and the previous version, bash-4.1-release.
 

@@ -1,9 +1,9 @@
 This is history.info, produced by makeinfo version 4.13 from
 ./history.texi.
 
-This document describes the GNU History library (version 6.1, 9 October
-2009), a programming tool that provides a consistent user interface for
-recalling lines of previously typed input.
+This document describes the GNU History library (version 6.2, September
+6 2010), a programming tool that provides a consistent user interface
+for recalling lines of previously typed input.
 
    Copyright (C) 1988-2009 Free Software Foundation, Inc.
 
@@ -102,7 +102,8 @@ File: history.info,  Node: Event Designators,  Next: Word Designators,  Up: Hist
 -----------------------
 
 An event designator is a reference to a command line entry in the
-history list.  
+history list.  Unless the reference is absolute, events are relative to
+the current position in the history list.  
 
 `!'
      Start a history substitution, except when followed by a space, tab,
@@ -118,12 +119,13 @@ history list.
      Refer to the previous command.  This is a synonym for `!-1'.
 
 `!STRING'
-     Refer to the most recent command starting with STRING.
+     Refer to the most recent command preceding the current position in
+     the history list starting with STRING.
 
 `!?STRING[?]'
-     Refer to the most recent command containing STRING.  The trailing
-     `?' may be omitted if the STRING is followed immediately by a
-     newline.
+     Refer to the most recent command preceding the current position in
+     the history list containing STRING.  The trailing `?' may be
+     omitted if the STRING is followed immediately by a newline.
 
 `^STRING1^STRING2^'
      Quick Substitution.  Repeat the last command, replacing STRING1
@@ -641,6 +643,11 @@ GNU History Library.
      If non-zero, timestamps are written to the history file, so they
      can be preserved between sessions.  The default value is 0,
      meaning that timestamps are not saved.
+
+     The current timestamp format uses the value of HISTORY_COMMENT_CHAR
+     to delimit timestamp entries in the history file.  If that
+     variable does not have a value (the default), timestamps will not
+     be written.
 
  -- Variable: char history_expansion_char
      The character that introduces a history event.  The default is `!'.
@@ -1276,7 +1283,7 @@ Appendix B Concept Index
 * anchored search:                       Searching the History List.
                                                                (line 10)
 * event designators:                     Event Designators.    (line  6)
-* history events:                        Event Designators.    (line  7)
+* history events:                        Event Designators.    (line  8)
 * history expansion:                     History Interaction.  (line  6)
 * History Searching:                     Searching the History List.
                                                                (line  6)
@@ -1305,27 +1312,27 @@ Appendix C Function and Variable Index
 * get_history_event:                     History Expansion.    (line 31)
 * history_arg_extract:                   History Expansion.    (line 46)
 * history_base:                          History Variables.    (line 10)
-* history_comment_char:                  History Variables.    (line 33)
+* history_comment_char:                  History Variables.    (line 38)
 * history_expand:                        History Expansion.    (line  9)
-* history_expansion_char:                History Variables.    (line 25)
+* history_expansion_char:                History Variables.    (line 30)
 * history_get:                           Information About the History List.
                                                                (line 23)
 * history_get_history_state:             Initializing History and State Management.
                                                                (line 15)
 * history_get_time:                      Information About the History List.
                                                                (line 29)
-* history_inhibit_expansion_function:    History Variables.    (line 57)
+* history_inhibit_expansion_function:    History Variables.    (line 62)
 * history_is_stifled:                    History List Management.
                                                                (line 47)
 * history_length:                        History Variables.    (line 13)
 * history_list:                          Information About the History List.
                                                                (line 10)
 * history_max_entries:                   History Variables.    (line 16)
-* history_no_expand_chars:               History Variables.    (line 48)
-* history_quotes_inhibit_expansion:      History Variables.    (line 53)
+* history_no_expand_chars:               History Variables.    (line 53)
+* history_quotes_inhibit_expansion:      History Variables.    (line 58)
 * history_search:                        Searching the History List.
                                                                (line 13)
-* history_search_delimiter_chars:        History Variables.    (line 43)
+* history_search_delimiter_chars:        History Variables.    (line 48)
 * history_search_pos:                    Searching the History List.
                                                                (line 33)
 * history_search_prefix:                 Searching the History List.
@@ -1334,13 +1341,13 @@ Appendix C Function and Variable Index
                                                                (line 19)
 * history_set_pos:                       Moving Around the History List.
                                                                (line 10)
-* history_subst_char:                    History Variables.    (line 29)
+* history_subst_char:                    History Variables.    (line 34)
 * history_tokenize:                      History Expansion.    (line 39)
 * history_total_bytes:                   Information About the History List.
                                                                (line 32)
 * history_truncate_file:                 Managing the History File.
                                                                (line 35)
-* history_word_delimiters:               History Variables.    (line 39)
+* history_word_delimiters:               History Variables.    (line 44)
 * history_write_timestamps:              History Variables.    (line 20)
 * next_history:                          Moving Around the History List.
                                                                (line 20)
@@ -1368,27 +1375,27 @@ Appendix C Function and Variable Index
 
 
 Tag Table:
-Node: Top1268
-Node: Using History Interactively1913
-Node: History Interaction2421
-Node: Event Designators3845
-Node: Word Designators4780
-Node: Modifiers6419
-Node: Programming with GNU History7644
-Node: Introduction to History8387
-Node: History Storage10077
-Node: History Functions11212
-Node: Initializing History and State Management12201
-Node: History List Management13013
-Node: Information About the History List15045
-Node: Moving Around the History List16542
-Node: Searching the History List17543
-Node: Managing the History File19475
-Node: History Expansion21295
-Node: History Variables23203
-Node: History Programming Example26009
-Node: GNU Free Documentation License28686
-Node: Concept Index53877
-Node: Function and Variable Index54582
+Node: Top1270
+Node: Using History Interactively1915
+Node: History Interaction2423
+Node: Event Designators3847
+Node: Word Designators4989
+Node: Modifiers6628
+Node: Programming with GNU History7853
+Node: Introduction to History8596
+Node: History Storage10286
+Node: History Functions11421
+Node: Initializing History and State Management12410
+Node: History List Management13222
+Node: Information About the History List15254
+Node: Moving Around the History List16751
+Node: Searching the History List17752
+Node: Managing the History File19684
+Node: History Expansion21504
+Node: History Variables23412
+Node: History Programming Example26444
+Node: GNU Free Documentation License29121
+Node: Concept Index54312
+Node: Function and Variable Index55017
 
 End Tag Table

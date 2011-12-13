@@ -105,14 +105,14 @@
 \entry{variables, readline}{99}{variables, readline}
 \entry{programmable completion}{117}{programmable completion}
 \entry{completion builtins}{119}{completion builtins}
-\entry{History, how to use}{122}{History, how to use}
-\entry{command history}{123}{command history}
-\entry{history list}{123}{history list}
-\entry{history builtins}{123}{history builtins}
-\entry{history expansion}{125}{history expansion}
-\entry{event designators}{125}{event designators}
-\entry{history events}{125}{history events}
-\entry{installation}{129}{installation}
-\entry{configuration}{129}{configuration}
-\entry{Bash installation}{129}{Bash installation}
-\entry{Bash configuration}{129}{Bash configuration}
+\entry{History, how to use}{123}{History, how to use}
+\entry{command history}{125}{command history}
+\entry{history list}{125}{history list}
+\entry{history builtins}{125}{history builtins}
+\entry{history expansion}{127}{history expansion}
+\entry{event designators}{127}{event designators}
+\entry{history events}{127}{history events}
+\entry{installation}{131}{installation}
+\entry{configuration}{131}{configuration}
+\entry{Bash installation}{131}{Bash installation}
+\entry{Bash configuration}{131}{Bash configuration}

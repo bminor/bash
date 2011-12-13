@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2010 September 6<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2010 December 6<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -998,9 +998,7 @@ and
 <I>expression2</I>
 
 are true.
-<DT><I>expression1</I> <B>||</B> <I>expression2</I>
-<DD>
-
+<DT><I>expression1</I> <B>||</B> <I>expression2</I><DD>
 True if either
 <I>expression1</I>
 
@@ -1012,9 +1010,7 @@ is true.
 </DL>
 <P>
 
-The <B>&amp;&amp;</B> and
-<B>||</B>
-
+The <B>&amp;&amp;</B> and <B>||</B>
 operators do not evaluate <I>expression2</I> if the value of
 <I>expression1</I> is sufficient to determine the return value of
 the entire conditional expression.
@@ -7117,10 +7113,14 @@ as if the &quot;!<I>n</I>&quot; history expansion had been specified.
 
 <DD>
 Insert the last argument to the previous command (the last word of
-the previous history entry).  With an argument,
-behave exactly like <B>yank-nth-arg</B>.
+the previous history entry).
+With a numeric argument, behave exactly like <B>yank-nth-arg</B>.
 Successive calls to <B>yank-last-arg</B> move back through the history
-list, inserting the last argument of each line in turn.
+list, inserting the last word (or the word specified by the argument to
+the first call) of each line in turn.
+Any numeric argument supplied to these successive calls determines
+the direction to move through the history.  A negative argument switches
+the direction through the history (back or forward).
 The history expansion facilities are used to extract the last argument,
 as if the &quot;!$&quot; history expansion had been specified.
 <DT><B>shell-expand-line (M-C-e)</B>
@@ -11782,6 +11782,7 @@ an argument of <B>--</B> as signifying the end of options.
 Expressions may be combined using the following operators, listed
 in decreasing order of precedence.
 The evaluation depends on the number of arguments; see below.
+Operator precedence is used when there are five or more arguments.
 <DL COMPACT><DT><DD>
 
 <DL COMPACT>
@@ -11840,6 +11841,7 @@ the expression is true if the unary test is true.
 If the first argument is not a valid unary conditional operator, the expression
 is false.
 <DT>3 arguments<DD>
+The following conditions are applied in the order listed.
 If the second argument is one of the binary conditional operators listed above
 under
 <FONT SIZE=-1><B>CONDITIONAL EXPRESSIONS</B>,
@@ -12672,7 +12674,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-4.2<TH ALIGN=CENTER width=33%>2010 September 6<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-4.2<TH ALIGN=CENTER width=33%>2010 December 6<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -12778,6 +12780,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 25 October 2010 12:00:43 EDT
+Time: 07 December 2010 16:12:47 EST
 </BODY>
 </HTML>
