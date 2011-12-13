@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: GNU bash 4.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-12-30 08:25-0500\n"
-"PO-Revision-Date: 2010-08-19 15:21+0900\n"
+"PO-Revision-Date: 2010-10-17 19:38+0900\n"
 "Last-Translator: Yasuaki Taniguchi <yasuakit@gmail.com>\n"
 "Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -67,7 +67,7 @@ msgstr "%s: 区切り文字コロン(:)がありません"
 #: builtins/alias.def:132
 #, c-format
 msgid "`%s': invalid alias name"
-msgstr "%s: 無効なエイリアス名です"
+msgstr "`%s': 無効なエイリアス名です"
 
 #: builtins/bind.def:120 builtins/bind.def:123
 msgid "line editing not enabled"
@@ -362,7 +362,7 @@ msgstr "%s: 動的にロードされていません"
 #: builtins/enable.def:474
 #, c-format
 msgid "%s: cannot delete: %s"
-msgstr "%s: %s を削除できません"
+msgstr "%s: 削除できません: %s"
 
 #: builtins/evalfile.c:134 builtins/hash.def:169 execute_cmd.c:4794
 #: shell.c:1452
@@ -389,7 +389,7 @@ msgstr "%s: バイナリファイルを実行できません"
 #: builtins/exec.def:212
 #, c-format
 msgid "%s: cannot execute: %s"
-msgstr "%s: %s を実行できません"
+msgstr "%s: 実行できません: %s"
 
 #: builtins/exit.def:65
 #, c-format
@@ -421,7 +421,7 @@ msgstr "ヒストリ指定"
 #: builtins/fc.def:370
 #, c-format
 msgid "%s: cannot open temp file: %s"
-msgstr "%s: 一時ファイル %s を開くことができません"
+msgstr "%s: 一時ファイルを開くことができません: %s"
 
 #: builtins/fg_bg.def:149 builtins/jobs.def:282
 msgid "current"
@@ -470,7 +470,7 @@ msgstr "`%s' に一致するヘルプ項目がありません。`help help'、`m
 #: builtins/help.def:185
 #, c-format
 msgid "%s: cannot open: %s"
-msgstr "%s: %s を開くことができません"
+msgstr "%s: 開くことができません: %s"
 
 #: builtins/help.def:337
 #, c-format
@@ -534,7 +534,7 @@ msgstr "%s: インデックス配列ではありません"
 #: builtins/mapfile.def:249 builtins/read.def:279
 #, c-format
 msgid "%s: invalid file descriptor specification"
-msgstr "%s: 指定したファイル記述子は無効です"
+msgstr "%s: 無効なファイル記述子指定です"
 
 #: builtins/mapfile.def:257 builtins/read.def:286
 #, c-format
@@ -817,7 +817,7 @@ msgstr "%s は %s です\n"
 #: builtins/type.def:337
 #, c-format
 msgid "%s is hashed (%s)\n"
-msgstr "%s はハッシュされている (%s)\n"
+msgstr "%s はハッシュされています (%s)\n"
 
 #: builtins/ulimit.def:372
 #, c-format
@@ -827,7 +827,7 @@ msgstr "%s: limit の無効な引数です"
 #: builtins/ulimit.def:398
 #, c-format
 msgid "`%c': bad command"
-msgstr "`%c': 誤った指定です"
+msgstr "`%c': 誤ったコマンドです"
 
 #: builtins/ulimit.def:427
 #, c-format
@@ -900,7 +900,7 @@ msgstr "\a入力待ちがタイムアウトしました: 自動ログアウト\n
 #: execute_cmd.c:497
 #, c-format
 msgid "cannot redirect standard input from /dev/null: %s"
-msgstr "/dev/null を入力にリダイレクトできません: %s"
+msgstr "/dev/null から標準入力に対してリダイレクトできません: %s"
 
 #: execute_cmd.c:1162
 #, c-format
@@ -914,7 +914,7 @@ msgstr "パイプエラー"
 #: execute_cmd.c:4481
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
-msgstr "%s: 制限されています:  `/' をコマンド名に指定できません"
+msgstr "%s: 制限されています:  `/' をコマンド名の中に指定できません"
 
 #: execute_cmd.c:4572
 #, c-format
@@ -953,7 +953,7 @@ msgstr "0 による除算です"
 
 #: expr.c:471
 msgid "bug: bad expassign token"
-msgstr "bug: 誤った式のトークンです"
+msgstr "バグ: 誤った式のトークンです"
 
 #: expr.c:513
 msgid "`:' expected for conditional expression"
@@ -1038,7 +1038,7 @@ msgstr "add_process: プロセス %5ld (%s) が the_pipeline にあります"
 #: jobs.c:1113
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
-msgstr "add_process: pid %5ld (%s) はまだ存在しています"
+msgstr "add_process: pid %5ld (%s) はまだ存在しているとマークされています"
 
 #: jobs.c:1401
 #, c-format
@@ -1159,7 +1159,7 @@ msgstr "端末プロセスグループを設定できません (%d)"
 
 #: jobs.c:3682
 msgid "no job control in this shell"
-msgstr "このシェルにはジョブ制御がありません"
+msgstr "このシェルではジョブ制御が無効になっています"
 
 #: lib/malloc/malloc.c:296
 #, c-format
@@ -1172,8 +1172,8 @@ msgid ""
 "\r\n"
 "malloc: %s:%d: assertion botched\r\n"
 msgstr ""
-"\\r\n"
-"malloc: %s:%d: アサーション失敗\\r\n"
+"\r\n"
+"malloc: %s:%d: アサーション失敗\r\n"
 
 #: lib/malloc/malloc.c:313
 msgid "unknown"
@@ -1181,7 +1181,7 @@ msgstr "不明"
 
 #: lib/malloc/malloc.c:797
 msgid "malloc: block on free list clobbered"
-msgstr "malloc: block on free リストにあるブロックが壊れています"
+msgstr "malloc: free ブロックリストが壊れています"
 
 #: lib/malloc/malloc.c:874
 msgid "free: called with already freed block argument"
