@@ -820,7 +820,7 @@ until it evaluates to zero.
 Each time @var{expr2} evaluates to a non-zero value, @var{commands} are
 executed and the arithmetic expression @var{expr3} is evaluated.       
 If any expression is omitted, it behaves as if it evaluates to 1.
-The return value is the exit status of the last command in @var{list}
+The return value is the exit status of the last command in @var{commands}
 that is executed, or false if any of the expressions is invalid.
 
 @end table
@@ -1233,7 +1233,8 @@ shell context; no new process is created to interpret them.
 Functions are declared using this syntax:
 @rwindex function
 @example
-[ @code{function} ] @var{name} () @var{compound-command} [ @var{redirections} ]
+@var{name} () @var{compound-command} [ @var{redirections} ]@*or@*
+@code{function} @var{name} [()] @var{compound-command} [ @var{redirections} ]
 @end example
 
 This defines a shell function named @var{name}.  The reserved
@@ -3650,6 +3651,7 @@ backspace
 @item \c
 suppress further output
 @item \e
+@itemx \E
 escape
 @item \f
 form feed
@@ -4783,9 +4785,10 @@ A list of characters that separate fields; used when the shell splits
 words as part of expansion.
 
 @item MAIL
-If this parameter is set to a filename and the @env{MAILPATH} variable
+If this parameter is set to a filename or directory name
+and the @env{MAILPATH} variable
 is not set, Bash informs the user of the arrival of mail in
-the specified file.
+the specified file or Maildir-format directory.
 
 @item MAILPATH
 A colon-separated list of filenames which the shell periodically checks

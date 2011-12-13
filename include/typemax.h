@@ -77,6 +77,17 @@ static const unsigned long long int maxquad = ULLONG_MAX;
 #  define ULLONG_MAX maxquad
 #endif
 
+#if SIZEOF_INTMAX_T == SIZEOF_LONG_LONG
+#  define INTMAX_MAX	LLONG_MAX
+#  define INTMAX_MIN	LLONG_MIN
+#elif SIZEOF_INTMAX_T == SIZEOF_LONG
+#  define INTMAX_MAX	LONG_MAX
+#  define INTMAX_MIN	LONG_MIN
+#else
+#  define INTMAX_MAX	INT_MAX
+#  define INTMAX_MIN	INT_MIN
+#endif
+
 #ifndef SSIZE_MAX
 #  define SSIZE_MAX	32767		/* POSIX minimum max */
 #endif

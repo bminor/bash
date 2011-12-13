@@ -142,6 +142,8 @@ typedef struct _sh_parser_state_t {
   /* Nothing right now for multibyte state, but might want something later. */
 #endif
 
+  char **prompt_string_pointer;
+
   /* history state affecting or modified by the parser */
   int current_command_line_count;
 #if defined (HISTORY)

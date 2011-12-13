@@ -10206,7 +10206,8 @@ execute_cmd.c
 subst.c
 	- when performing pattern substitution word expansions, a `&' in the
 	  replacement string is replaced by the text matched by the pattern.
-	  The `&' can be quoted with a backslash to inhibit the expansion
+	  The `&' can be quoted with a backslash to inhibit the expansion.
+	  CURRENTLY DISABLED
 
 				   7/13
 				   ----
@@ -10248,3 +10249,113 @@ lib/readline/terminal.c
 				   ----
 lib/readline/xfree.c
 	- new file, contains definition of xfree moved from xmalloc.c
+
+				   7/28
+				   ----
+variables.c
+	- check suspect return values from bind_variable before trying to use
+	  the returned SHELL_VAR *.  Changes to: initialize_shell_variables,
+	  bind_int_variable, FIND_OR_MAKE_VARIABLE.  Fixes bug reported by
+	  Roman Rakus <rrakus@redhat.com>
+
+				   7/31
+				   ----
+lib/readline/rltty.c
+	- fix rl_prep_terminal and rl_deprep_terminal to use fileno(stdout)
+	  if rl_instream is NULL.  Fixes bug reported by Otto Allmendinger
+	  otto.allmendinger@googlemail.com
+
+				    8/2
+				    ---
+lib/sh/casemod.c
+	- if the passed string is NULL or empty, return it immediately.  Fixes
+	  bug reported by Dennis Williamson <dennistwilliamson@gmail.com>
+
+subst.c
+	- fix pat_subst to cope with the passed string being NULL
+
+arrayfunc.h
+	- added flag values for array_value_internal and its callers; converted
+	  array_value_internal `allow_all' parameter into a general flags word
+	- get_array_value now takes a flags value
+	- changed array_value internal to use *indp as an index to use if the
+	  AV_USEIND flag is set, rather than recomputing it
+
+subst.c
+	- get_var_and_type takes two new parameters: a flags word and an index
+	  that represents an already-computed index for an array reference
+	  (just indexed arrays so far).  Index is used and passed to array_value
+	  if flags includes AV_USEIND
+	- parameter_brace_expand_word takes a new argument: the already-
+	  computed index; returns W_ARRAYIND if word expanded is being used
+	  as an array index
+	- changed parameter_brace_casemod, parameter_brace_patsub,
+	  parameter_brace_substring, parameter_brace_remove_pattern to take new
+	  flags and index arguments from parameter_brace_expand_word.  They
+	  pass the new parameters along to get_var_and_type to use an
+	  already-computed array index if necessary.  Fixes bug where array
+	  indexes are computed twice reported by Andrew Benton
+	  <b3nton@gmail.com>
+
+doc/bash.1,lib/readline/doc/{history.3,hsuser.texi}
+	- modified description of history event designators to clarify that
+	  all non-absolute event designators are relative to the current
+	  position in the history list.  Question raised by Frank
+	  Heckenbach <f.heckenbach@fh-soft.de> as debian bash bug 590012
+
+				    8/5
+				    ---
+subst.c
+	- remove code that does not add a quoted null when the input string
+	  is partially quoted; subsequent word splitting may require it.
+	  Fixes bug reported by Eric Blake <eblake@redhat.com>
+
+				   8/12
+				   ----
+lib/glob/gmisc.c
+	- move match_pattern_wchar and match_pattern_char to new file in
+	  glob library
+	- new functions: wmatchlen(pat, max) and umatchlen(pat, max), computes
+	  number of characters PAT will match.  Returns the number of chars
+	  that will be matched or -1 if the match length is indeterminate
+	  (i.e., contains a `*')
+
+subst.c
+	- use umatchlen/wmatchlen in match_upattern/match_wpattern to bound
+	  the number of match attempts in large strings to (usually) one,
+	  depending on match length.  Fixes performance problems with
+	  pattern substitution in large strings noted by Yi Yan
+	  <yiyan97@hotmail.com>.  Can be applied to remove_[uw]pattern also
+
+				   8/13
+				   ----
+bashhist.c
+	- in maybe_append_history, change check for history_lines_this_session
+	  so that we append the lines to the file if it's equal to the value
+	  returned by where_history().  This means that without this change,
+	  the history won't be appended if all the lines in the history list
+	  were added in the current session since the last time the history
+	  file was read or written.  Fixes bug reported by Bruce Korb
+	  <bruce.korb@gmail.com>
+
+shell.h,parse.y
+	- add prompt_string_pointer to the parser_state struct saved and
+	  restored by {save,restore}_parser_state.  Fixes both bugs exposed
+	  by bash_completion and completion of open backquotes reported by
+	  Egmont Koblinger <egmont@gmail.com>
+
+subst.h
+	- new flag for skip_to_delim: SD_EXTGLOB.  Skip extended globbing
+	  patterns while looking for ending delimiter
+
+subst.c
+	- when passed the SD_EXTGLOB flag, skip_to_delim skips over extended
+	  globbing patterns (when extended_glob is set) while looking for a
+	  character in the delimiter set
+
+pathexp.c
+	- split_ignorespec: new function to replace calls to extract_colon_unit
+	  in setup_ignore_patterns.  uses skip_to_delim with the SD_EXTGLOB
+	  flag to skip over extended globbing patterns in variables like
+	  HISTIGNORE and GLOBIGNORE.  Fixes bug reported by Dimitar DIMITROV
+	  <mitkofr@yahoo.fr> and Greg Wooledge <wooledg@eeg.ccf.org>

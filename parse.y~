@@ -2658,10 +2658,13 @@ static int
 time_command_acceptable ()
 {
 #if defined (COMMAND_TIMING)
-  int c, i;
+  int i;
 
   if (posixly_correct && shell_compatibility_level > 41)
     {
+      /* Quick check of the rest of the line to find the next token.  If it
+	 begins with a `-', Posix says to not return `time' as the token.
+	 This was interp 267. */
       i = shell_input_line_index;
       while (i < shell_input_line_len && (shell_input_line[i] == ' ' || shell_input_line[i] == '\t'))
         i++;
@@ -3552,7 +3555,7 @@ eof_error:
 	}
 
       /* Skip whitespace */
-      if MBTEST(shellblank (ch) && lex_rwlen == 0)
+      if MBTEST(shellblank (ch) && (tflags & LEX_HEREDELIM) == 0 && lex_rwlen == 0)
         {
 	  /* Add this character. */
 	  RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
@@ -4798,6 +4801,8 @@ reserved_word_acceptable (toksym)
       if (last_read_token == WORD && token_before_that == COPROC)
 	return 1;
 #endif
+      if (last_read_token == WORD && token_before_that == FUNCTION)
+	return 1;
       return 0;
     }
 }
@@ -4948,6 +4953,7 @@ prompt_again ()
 {
   char *temp_prompt;
 
+itrace("prompt_again()");
   if (interactive == 0 || expanding_alias ())	/* XXX */
     return;
 
@@ -4982,6 +4988,7 @@ prompt_again ()
       FREE (current_decoded_prompt);
       current_decoded_prompt = temp_prompt;
     }
+itrace("prompt_again: current_prompt_string = %s", current_prompt_string);
 }
 
 int
@@ -5870,6 +5877,8 @@ save_parser_state (ps)
   ps->input_line_terminator = shell_input_line_terminator;
   ps->eof_encountered = eof_encountered;
 
+  ps->prompt_string_pointer = prompt_string_pointer;
+
   ps->current_command_line_count = current_command_line_count;
 
 #if defined (HISTORY)
@@ -5909,6 +5918,8 @@ restore_parser_state (ps)
 
   shell_input_line_terminator = ps->input_line_terminator;
   eof_encountered = ps->eof_encountered;
+
+  prompt_string_pointer = ps->prompt_string_pointer;
 
   current_command_line_count = ps->current_command_line_count;
 

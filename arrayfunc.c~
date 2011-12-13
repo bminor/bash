@@ -864,9 +864,9 @@ array_variable_part (s, subp, lenp)
    is non-null it gets 1 if the array reference is name[*], 2 if the
    reference is name[@], and 0 otherwise. */
 static char *
-array_value_internal (s, quoted, allow_all, rtype, indp)
+array_value_internal (s, quoted, flags, rtype, indp)
      char *s;
-     int quoted, allow_all, *rtype;
+     int quoted, flags, *rtype;
      arrayind_t *indp;
 {
   int len;
@@ -893,7 +893,7 @@ array_value_internal (s, quoted, allow_all, rtype, indp)
     {
       if (rtype)
 	*rtype = (t[0] == '*') ? 1 : 2;
-      if (allow_all == 0)
+      if ((flags & AV_ALLOWALL) == 0)
 	{
 	  err_badarraysub (s);
 	  return ((char *)NULL);
@@ -932,16 +932,22 @@ array_value_internal (s, quoted, allow_all, rtype, indp)
 	*rtype = 0;
       if (var == 0 || array_p (var) || assoc_p (var) == 0)
 	{
-	  ind = array_expand_index (t, len);
-	  if (ind < 0)
+	  if ((flags & AV_USEIND) == 0)
 	    {
-	      if (var && array_p (var))
-		ind = array_max_index (array_cell (var)) + 1 + ind;
+	      ind = array_expand_index (t, len);
 	      if (ind < 0)
-		INDEX_ERROR();
+		{
+		  /* negative subscripts to indexed arrays count back from end */
+		  if (var && array_p (var))
+		    ind = array_max_index (array_cell (var)) + 1 + ind;
+		  if (ind < 0)
+		    INDEX_ERROR();
+		}
+	      if (indp)
+		*indp = ind;
 	    }
-	  if (indp)
-	    *indp = ind;
+	  else if (indp)
+	    ind = *indp;
 	}
       else if (assoc_p (var))
 	{
@@ -971,25 +977,25 @@ array_value_internal (s, quoted, allow_all, rtype, indp)
 /* Return a string containing the elements described by the array and
    subscript contained in S, obeying quoting for subscripts * and @. */
 char *
-array_value (s, quoted, rtype, indp)
+array_value (s, quoted, flags, rtype, indp)
      char *s;
-     int quoted, *rtype;
+     int quoted, flags, *rtype;
      arrayind_t *indp;
 {
-  return (array_value_internal (s, quoted, 1, rtype, indp));
+  return (array_value_internal (s, quoted, flags|AV_ALLOWALL, rtype, indp));
 }
 
 /* Return the value of the array indexing expression S as a single string.
-   If ALLOW_ALL is 0, do not allow `@' and `*' subscripts.  This is used
-   by other parts of the shell such as the arithmetic expression evaluator
-   in expr.c. */
+   If (FLAGS & AV_ALLOWALL) is 0, do not allow `@' and `*' subscripts.  This
+   is used by other parts of the shell such as the arithmetic expression
+   evaluator in expr.c. */
 char *
-get_array_value (s, allow_all, rtype, indp)
+get_array_value (s, flags, rtype, indp)
      char *s;
-     int allow_all, *rtype;
+     int flags, *rtype;
      arrayind_t *indp;
 {
-  return (array_value_internal (s, 0, allow_all, rtype, indp));
+  return (array_value_internal (s, 0, flags, rtype, indp));
 }
 
 char *

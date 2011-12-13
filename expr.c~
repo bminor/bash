@@ -1,6 +1,6 @@
 /* expr.c -- arithmetic expression evaluation. */
 
-/* Copyright (C) 1990-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1990-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -309,6 +309,7 @@ static void
 expr_bind_variable (lhs, rhs)
      char *lhs, *rhs;
 {
+itrace("expr_bind_variable: %s = %s", lhs, rhs);
   (void)bind_int_variable (lhs, rhs);
   stupidly_hack_special_variables (lhs);
 }
@@ -1000,6 +1001,7 @@ expr_streval (tok, e, lvalue)
   arrayind_t ind;
 #endif
 
+itrace("expr_streval: %s", tok);
   /* [[[[[ */
 #if defined (ARRAY_VARS)
   v = (e == ']') ? array_variable_part (tok, (char **)0, (int *)0) : find_variable (tok);

@@ -245,10 +245,8 @@ static wchar_t *remove_wpattern __P((wchar_t *, size_t, wchar_t *, int));
 #endif
 static char *remove_pattern __P((char *, char *, int));
 
-static int match_pattern_char __P((char *, char *));
 static int match_upattern __P((char *, char *, int, char **, char **));
 #if defined (HANDLE_MULTIBYTE)
-static int match_pattern_wchar __P((wchar_t *, wchar_t *));
 static int match_wpattern __P((wchar_t *, char **, size_t, wchar_t *, int, char **, char **));
 #endif
 static int match_pattern __P((char *, char *, int, char **, char **));
@@ -260,7 +258,7 @@ static char *parameter_list_remove_pattern __P((int, char *, int, int));
 #ifdef ARRAY_VARS
 static char *array_remove_pattern __P((SHELL_VAR *, char *, int, char *, int));
 #endif
-static char *parameter_brace_remove_pattern __P((char *, char *, char *, int, int));
+static char *parameter_brace_remove_pattern __P((char *, char *, int, char *, int, int, int));
 
 static char *process_substitute __P((char *, int));
 
@@ -274,7 +272,7 @@ static int valid_brace_expansion_word __P((char *, int));
 static int chk_atstar __P((char *, int, int *, int *));
 static int chk_arithsub __P((const char *, int));
 
-static WORD_DESC *parameter_brace_expand_word __P((char *, int, int, int));
+static WORD_DESC *parameter_brace_expand_word __P((char *, int, int, int, arrayind_t *));
 static WORD_DESC *parameter_brace_expand_indir __P((char *, int, int, int *, int *));
 static WORD_DESC *parameter_brace_expand_rhs __P((char *, char *, int, int, int *, int *));
 static void parameter_brace_expand_error __P((char *, char *));
@@ -284,18 +282,18 @@ static intmax_t parameter_brace_expand_length __P((char *));
 
 static char *skiparith __P((char *, int));
 static int verify_substring_values __P((SHELL_VAR *, char *, char *, int, intmax_t *, intmax_t *));
-static int get_var_and_type __P((char *, char *, int, SHELL_VAR **, char **));
+static int get_var_and_type __P((char *, char *, arrayind_t, int, int, SHELL_VAR **, char **));
 static char *mb_substring __P((char *, int, int));
-static char *parameter_brace_substring __P((char *, char *, char *, int));
+static char *parameter_brace_substring __P((char *, char *, int, char *, int, int));
 
 static int shouldexp_replacement __P((char *));
 
 static char *pos_params_pat_subst __P((char *, char *, char *, int));
 
-static char *parameter_brace_patsub __P((char *, char *, char *, int));
+static char *parameter_brace_patsub __P((char *, char *, int, char *, int, int));
 
 static char *pos_params_casemod __P((char *, char *, int, int));
-static char *parameter_brace_casemod __P((char *, char *, int, char *, int));
+static char *parameter_brace_casemod __P((char *, char *, int, int, char *, int, int));
 
 static WORD_DESC *parameter_brace_expand __P((char *, int *, int, int, int *, int *));
 static WORD_DESC *param_expand __P((char *, int *, int, int *, int *, int *, int *, int));
@@ -611,7 +609,6 @@ unquoted_substring (substr, string)
 	{
 	case '\\':
 	  sindex++;
-
 	  if (string[sindex])
 	    ADVANCE_CHAR (string, slen, sindex);
 	  break;
@@ -3972,36 +3969,6 @@ remove_pattern (param, pattern, op)
     }
 }
 
-/* Return 1 of the first character of STRING could match the first
-   character of pattern PAT.  Used to avoid n2 calls to strmatch(). */
-static int
-match_pattern_char (pat, string)
-     char *pat, *string;
-{
-  char c;
-
-  if (*string == 0)
-    return (0);
-
-  switch (c = *pat++)
-    {
-    default:
-      return (*string == c);
-    case '\\':
-      return (*string == *pat);
-    case '?':
-      return (*pat == LPAREN ? 1 : (*string != '\0'));
-    case '*':
-      return (1);
-    case '+':
-    case '!':
-    case '@':
-      return (*pat == LPAREN ? 1 : (*string == c));
-    case '[':
-      return (*string != '\0');
-    }
-}
-
 /* Match PAT anywhere in STRING and return the match boundaries.
    This returns 1 in case of a successful match, 0 otherwise.  SP
    and EP are pointers into the string where the match begins and
@@ -4014,7 +3981,7 @@ match_upattern (string, pat, mtype, sp, ep)
      int mtype;
      char **sp, **ep;
 {
-  int c, len;
+  int c, len, mlen;
   register char *p, *p1, *npat;
   char *end;
 
@@ -4050,6 +4017,8 @@ match_upattern (string, pat, mtype, sp, ep)
   len = STRLEN (string);
   end = string + len;
 
+  mlen = umatchlen (pat, len);
+
   switch (mtype)
     {
     case MATCH_ANY:
@@ -4057,7 +4026,15 @@ match_upattern (string, pat, mtype, sp, ep)
 	{
 	  if (match_pattern_char (pat, p))
 	    {
+#if 0
 	      for (p1 = end; p1 >= p; p1--)
+#else
+	      p1 = (mlen == -1) ? end : p + mlen;
+	      /* extra -1 to handle case of p1 == end */
+	      if (p1 - p + mlen - 1 > len)
+		break;
+	      for ( ; p1 >= p; p1--)
+#endif
 		{
 		  c = *p1; *p1 = '\0';
 		  if (strmatch (pat, p, FNMATCH_EXTFLAG) == 0)
@@ -4068,6 +4045,11 @@ match_upattern (string, pat, mtype, sp, ep)
 		      return 1;
 		    }
 		  *p1 = c;
+#if 1
+		  /* If MLEN != -1, we have a fixed length pattern. */
+		  if (mlen != -1)
+		    break;
+#endif
 		}
 	    }
 	}
@@ -4078,7 +4060,11 @@ match_upattern (string, pat, mtype, sp, ep)
       if (match_pattern_char (pat, string) == 0)
 	return (0);
 
+#if 0
       for (p = end; p >= string; p--)
+#else
+      for (p = (mlen == -1) ? end : string + mlen; p >= string; p--)
+#endif
 	{
 	  c = *p; *p = '\0';
 	  if (strmatch (pat, string, FNMATCH_EXTFLAG) == 0)
@@ -4089,12 +4075,21 @@ match_upattern (string, pat, mtype, sp, ep)
 	      return 1;
 	    }
 	  *p = c;
+#if 1
+	  /* If MLEN != -1, we have a fixed length pattern. */
+	  if (mlen != -1)
+	    break;
+#endif
 	}
 
       return (0);
 
     case MATCH_END:
+#if 0
       for (p = string; p <= end; p++)
+#else
+      for (p = end - ((mlen == -1) ? len : mlen); p <= end; p++)
+#endif
 	{
 	  if (strmatch (pat, p, FNMATCH_EXTFLAG) == 0)
 	    {
@@ -4102,7 +4097,11 @@ match_upattern (string, pat, mtype, sp, ep)
 	      *ep = end;
 	      return 1;
 	    }
-
+#if 1
+	  /* If MLEN != -1, we have a fixed length pattern. */
+	  if (mlen != -1)
+	    break;
+#endif
 	}
 
       return (0);
@@ -4112,36 +4111,6 @@ match_upattern (string, pat, mtype, sp, ep)
 }
 
 #if defined (HANDLE_MULTIBYTE)
-/* Return 1 of the first character of WSTRING could match the first
-   character of pattern WPAT.  Wide character version. */
-static int
-match_pattern_wchar (wpat, wstring)
-     wchar_t *wpat, *wstring;
-{
-  wchar_t wc;
-
-  if (*wstring == 0)
-    return (0);
-
-  switch (wc = *wpat++)
-    {
-    default:
-      return (*wstring == wc);
-    case L'\\':
-      return (*wstring == *wpat);
-    case L'?':
-      return (*wpat == LPAREN ? 1 : (*wstring != L'\0'));
-    case L'*':
-      return (1);
-    case L'+':
-    case L'!':
-    case L'@':
-      return (*wpat == LPAREN ? 1 : (*wstring == wc));
-    case L'[':
-      return (*wstring != L'\0');
-    }
-}
-
 /* Match WPAT anywhere in WSTRING and return the match boundaries.
    This returns 1 in case of a successful match, 0 otherwise.  Wide
    character version. */
@@ -4155,12 +4124,9 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
      char **sp, **ep;
 {
   wchar_t wc, *wp, *nwpat, *wp1;
-  int len;
-#if 0
-  size_t n, n1;	/* Apple's gcc seems to miscompile this badly */
-#else
+  size_t len;
+  int mlen;
   int n, n1;
-#endif
 
   /* If the pattern doesn't match anywhere in the string, go ahead and
      short-circuit right away.  A minor optimization, saves a bunch of
@@ -4168,8 +4134,6 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
      characters) if the match is unsuccessful.  To preserve the semantics
      of the substring matches below, we make sure that the pattern has
      `*' as first and last character, making a new pattern if necessary. */
-  /* XXX - check this later if I ever implement `**' with special meaning,
-     since this will potentially result in `**' at the beginning or end */
   len = wcslen (wpat);
   if (wpat[0] != L'*' || (wpat[0] == L'*' && wpat[1] == WLPAREN && extended_glob) || wpat[len - 1] != L'*')
     {
@@ -4191,6 +4155,8 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
   if (len == FNM_NOMATCH)
     return (0);
 
+  mlen = wmatchlen (wpat, wstrlen);
+/* itrace("wmatchlen (%ls) -> %d", wpat, mlen); */
   switch (mtype)
     {
     case MATCH_ANY:
@@ -4198,7 +4164,15 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
 	{
 	  if (match_pattern_wchar (wpat, wstring + n))
 	    {
+#if 0
 	      for (n1 = wstrlen; n1 >= n; n1--)
+#else
+	      n1 = (mlen == -1) ? wstrlen : n + mlen;
+	      if (n1 > wstrlen)
+	        break;
+
+	      for ( ; n1 >= n; n1--)
+#endif
 		{
 		  wc = wstring[n1]; wstring[n1] = L'\0';
 		  if (wcsmatch (wpat, wstring + n, FNMATCH_EXTFLAG) == 0)
@@ -4209,6 +4183,11 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
 		      return 1;
 		    }
 		  wstring[n1] = wc;
+#if 1
+		  /* If MLEN != -1, we have a fixed length pattern. */
+		  if (mlen != -1)
+		    break;
+#endif
 		}
 	    }
 	}
@@ -4219,7 +4198,11 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
       if (match_pattern_wchar (wpat, wstring) == 0)
 	return (0);
 
+#if 0
       for (n = wstrlen; n >= 0; n--)
+#else
+      for (n = (mlen == -1) ? wstrlen : mlen; n >= 0; n--)
+#endif
 	{
 	  wc = wstring[n]; wstring[n] = L'\0';
 	  if (wcsmatch (wpat, wstring, FNMATCH_EXTFLAG) == 0)
@@ -4230,12 +4213,21 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
 	      return 1;
 	    }
 	  wstring[n] = wc;
+#if 1
+	  /* If MLEN != -1, we have a fixed length pattern. */
+	  if (mlen != -1)
+	    break;
+#endif
 	}
 
       return (0);
 
     case MATCH_END:
+#if 0
       for (n = 0; n <= wstrlen; n++)
+#else
+      for (n = wstrlen - ((mlen == -1) ? wstrlen : mlen); n <= wstrlen; n++)
+#endif
 	{
 	  if (wcsmatch (wpat, wstring + n, FNMATCH_EXTFLAG) == 0)
 	    {
@@ -4243,6 +4235,11 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
 	      *ep = indices[wstrlen];
 	      return 1;
 	    }
+#if 1
+	  /* If MLEN != -1, we have a fixed length pattern. */
+	  if (mlen != -1)
+	    break;
+#endif
 	}
 
       return (0);
@@ -4446,9 +4443,11 @@ array_remove_pattern (var, pattern, patspec, varname, quoted)
 #endif /* ARRAY_VARS */
 
 static char *
-parameter_brace_remove_pattern (varname, value, patstr, rtype, quoted)
-     char *varname, *value, *patstr;
-     int rtype, quoted;
+parameter_brace_remove_pattern (varname, value, ind, patstr, rtype, quoted, flags)
+     char *varname, *value;
+     int ind;
+     char *patstr;
+     int rtype, quoted, flags;
 {
   int vtype, patspec, starsub;
   char *temp1, *val, *pattern;
@@ -4459,7 +4458,7 @@ parameter_brace_remove_pattern (varname, value, patstr, rtype, quoted)
 
   this_command_name = varname;
 
-  vtype = get_var_and_type (varname, value, quoted, &v, &val);
+  vtype = get_var_and_type (varname, value, ind, quoted, flags, &v, &val);
   if (vtype == -1)
     return ((char *)NULL);
 
@@ -5571,19 +5570,24 @@ chk_atstar (name, quoted, quoted_dollar_atp, contains_dollar_at)
    the shell, e.g., "@", "$", "*", etc.  QUOTED, if non-zero, means that
    NAME was found inside of a double-quoted expression. */
 static WORD_DESC *
-parameter_brace_expand_word (name, var_is_special, quoted, pflags)
+parameter_brace_expand_word (name, var_is_special, quoted, pflags, indp)
      char *name;
      int var_is_special, quoted, pflags;
+     arrayind_t *indp;
 {
   WORD_DESC *ret;
   char *temp, *tt;
   intmax_t arg_index;
   SHELL_VAR *var;
   int atype, rflags;
+  arrayind_t ind;
 
   ret = 0;
   temp = 0;
   rflags = 0;
+
+  if (indp)
+    *indp = INTMAX_MIN;
 
   /* Handle multiple digit arguments, as in ${11}. */  
   if (legal_number (name, &arg_index))
@@ -5611,11 +5615,16 @@ parameter_brace_expand_word (name, var_is_special, quoted, pflags)
 #if defined (ARRAY_VARS)
   else if (valid_array_reference (name))
     {
-      temp = array_value (name, quoted, &atype, (arrayind_t *)NULL);
+      temp = array_value (name, quoted, 0, &atype, &ind);
       if (atype == 0 && temp)
- 	temp = (*temp && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
- 		  ? quote_string (temp)
- 		  : quote_escapes (temp);
+	{
+	  temp = (*temp && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
+		    ? quote_string (temp)
+		    : quote_escapes (temp);
+	  rflags |= W_ARRAYIND;
+	  if (indp)
+	    *indp = ind;
+	} 		  
       else if (atype == 1 && temp && QUOTED_NULL (temp) && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
 	rflags |= W_HASQUOTEDNULL;
     }
@@ -5666,7 +5675,7 @@ parameter_brace_expand_indir (name, var_is_special, quoted, quoted_dollar_atp, c
   char *temp, *t;
   WORD_DESC *w;
 
-  w = parameter_brace_expand_word (name, var_is_special, quoted, PF_IGNUNBOUND);
+  w = parameter_brace_expand_word (name, var_is_special, quoted, PF_IGNUNBOUND, 0);
   t = w->word;
   /* Have to dequote here if necessary */
   if (t)
@@ -5683,7 +5692,7 @@ parameter_brace_expand_indir (name, var_is_special, quoted, quoted_dollar_atp, c
   if (t == 0)
     return (WORD_DESC *)NULL;
 
-  w = parameter_brace_expand_word (t, SPECIAL_VAR(t, 0), quoted, 0);
+  w = parameter_brace_expand_word (t, SPECIAL_VAR(t, 0), quoted, 0, 0);
   free (t);
 
   return w;
@@ -6119,13 +6128,18 @@ verify_substring_values (v, value, substr, vtype, e1p, e2p)
 /* Return the type of variable specified by VARNAME (simple variable,
    positional param, or array variable).  Also return the value specified
    by VARNAME (value of a variable or a reference to an array element).
+   QUOTED is the standard description of quoting state, using Q_* defines.
+   FLAGS is currently a set of flags to pass to array_value.  If IND is
+   non-null and not INTMAX_MIN, and FLAGS includes AV_USEIND, IND is
+   passed to array_value so the array index is not computed again.
    If this returns VT_VARIABLE, the caller assumes that CTLESC and CTLNUL
    characters in the value are quoted with CTLESC and takes appropriate
    steps.  For convenience, *VALP is set to the dequoted VALUE. */
 static int
-get_var_and_type (varname, value, quoted, varp, valp)
+get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
      char *varname, *value;
-     int quoted;
+     arrayind_t ind;
+     int quoted, flags;
      SHELL_VAR **varp;
      char **valp;
 {
@@ -6134,6 +6148,7 @@ get_var_and_type (varname, value, quoted, varp, valp)
 #if defined (ARRAY_VARS)
   SHELL_VAR *v;
 #endif
+  arrayind_t lind;
 
   /* This sets vtype to VT_VARIABLE or VT_POSPARMS */
   vtype = (varname[0] == '@' || varname[0] == '*') && varname[1] == '\0';
@@ -6145,6 +6160,9 @@ get_var_and_type (varname, value, quoted, varp, valp)
   if (valid_array_reference (varname))
     {
       v = array_variable_part (varname, &temp, (int *)0);
+      /* If we want to signal array_value to use an already-computed index,
+	 set LIND to that index */
+      lind = (ind != INTMAX_MIN && (flags & AV_USEIND)) ? ind : 0;
       if (v && (array_p (v) || assoc_p (v)))
 	{ /* [ */
 	  if (ALL_ELEMENT_SUB (temp[0]) && temp[1] == ']')
@@ -6158,7 +6176,7 @@ get_var_and_type (varname, value, quoted, varp, valp)
 	  else
 	    {
 	      vtype = VT_ARRAYMEMBER;
-	      *valp = array_value (varname, 1, (int *)NULL, (arrayind_t *)NULL);
+	      *valp = array_value (varname, Q_DOUBLE_QUOTES, flags, (int *)NULL, &lind);
 	    }
 	  *varp = v;
 	}
@@ -6175,7 +6193,7 @@ get_var_and_type (varname, value, quoted, varp, valp)
 	{
 	  vtype = VT_ARRAYMEMBER;
 	  *varp = v;
-	  *valp = array_value (varname, 1, (int *)NULL, (arrayind_t *)NULL);
+	  *valp = array_value (varname, Q_DOUBLE_QUOTES, flags, (int *)NULL, &lind);
 	}
     }
   else if ((v = find_variable (varname)) && (invisible_p (v) == 0) && (assoc_p (v) || array_p (v)))
@@ -6242,9 +6260,11 @@ mb_substring (string, s, e)
    VARNAME.  If VARNAME is an array variable, use the array elements. */
 
 static char *
-parameter_brace_substring (varname, value, substr, quoted)
-     char *varname, *value, *substr;
-     int quoted;
+parameter_brace_substring (varname, value, ind, substr, quoted, flags)
+     char *varname, *value;
+     int ind;
+     char *substr;
+     int quoted, flags;
 {
   intmax_t e1, e2;
   int vtype, r, starsub;
@@ -6257,7 +6277,7 @@ parameter_brace_substring (varname, value, substr, quoted)
   oname = this_command_name;
   this_command_name = varname;
 
-  vtype = get_var_and_type (varname, value, quoted, &v, &val);
+  vtype = get_var_and_type (varname, value, ind, quoted, flags, &v, &val);
   if (vtype == -1)
     {
       this_command_name = oname;
@@ -6353,20 +6373,28 @@ pat_subst (string, pat, rep, mflags)
   char *ret, *s, *e, *str, *rstr, *mstr;
   int rsize, rptr, l, replen, mtype, rxpand, rslen, mlen;
 
+  if (string  == 0)
+    return (savestring (""));
+
   mtype = mflags & MATCH_TYPEMASK;
 
+#if 0	/* bash-4.2 ? */
   rxpand = (rep && *rep) ? shouldexp_replacement (rep) : 0;
+#else
+  rxpand = 0;
+#endif
 
   /* Special cases:
    * 	1.  A null pattern with mtype == MATCH_BEG means to prefix STRING
    *	    with REP and return the result.
    *	2.  A null pattern with mtype == MATCH_END means to append REP to
    *	    STRING and return the result.
+   * These don't understand or process `&' in the replacement string.
    */
   if ((pat == 0 || *pat == 0) && (mtype == MATCH_BEG || mtype == MATCH_END))
     {
       replen = STRLEN (rep);
-      l = strlen (string);
+      l = STRLEN (string);
       ret = (char *)xmalloc (replen + l + 2);
       if (replen == 0)
 	strcpy (ret, string);
@@ -6444,7 +6472,7 @@ pat_subst (string, pat, rep, mflags)
     }
 
   /* Now copy the unmatched portion of the input string */
-  if (*str)
+  if (str && *str)
     {
       RESIZE_MALLOCED_BUFFER (ret, rptr, STRLEN(str) + 1, rsize, 64);
       strcpy (ret + rptr, str);
@@ -6505,9 +6533,11 @@ pos_params_pat_subst (string, pat, rep, mflags)
    and the string to substitute.  QUOTED is a flags word containing
    the type of quoting currently in effect. */
 static char *
-parameter_brace_patsub (varname, value, patsub, quoted)
-     char *varname, *value, *patsub;
-     int quoted;
+parameter_brace_patsub (varname, value, ind, patsub, quoted, flags)
+     char *varname, *value;
+     int ind;
+     char *patsub;
+     int quoted, flags;
 {
   int vtype, mflags, starsub, delim;
   char *val, *temp, *pat, *rep, *p, *lpatsub, *tt;
@@ -6518,7 +6548,7 @@ parameter_brace_patsub (varname, value, patsub, quoted)
 
   this_command_name = varname;
 
-  vtype = get_var_and_type (varname, value, quoted, &v, &val);
+  vtype = get_var_and_type (varname, value, ind, quoted, flags, &v, &val);
   if (vtype == -1)
     return ((char *)NULL);
 
@@ -6693,11 +6723,11 @@ pos_params_modcase (string, pat, modop, mflags)
    to perform.  QUOTED is a flags word containing the type of quoting
    currently in effect. */
 static char *
-parameter_brace_casemod (varname, value, modspec, patspec, quoted)
+parameter_brace_casemod (varname, value, ind, modspec, patspec, quoted, flags)
      char *varname, *value;
-     int modspec;
+     int ind, modspec;
      char *patspec;
-     int quoted;
+     int quoted, flags;
 {
   int vtype, starsub, modop, mflags, x;
   char *val, *temp, *pat, *p, *lpat, *tt;
@@ -6708,7 +6738,7 @@ parameter_brace_casemod (varname, value, modspec, patspec, quoted)
 
   this_command_name = varname;
 
-  vtype = get_var_and_type (varname, value, quoted, &v, &val);
+  vtype = get_var_and_type (varname, value, ind, quoted, flags, &v, &val);
   if (vtype == -1)
     return ((char *)NULL);
 
@@ -6859,6 +6889,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
   WORD_DESC *tdesc, *ret;
   int t_index, sindex, c, tflag, modspec;
   intmax_t number;
+  arrayind_t ind;
 
   temp = temp1 = value = (char *)NULL;
   var_is_set = var_is_null = var_is_special = check_nullness = 0;
@@ -6884,6 +6915,8 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 
   ret = 0;
   tflag = 0;
+
+  ind = INTMAX_MIN;
 
   /* If the name really consists of a special variable, then make sure
      that we have the entire name.  We don't allow indirect references
@@ -7091,7 +7124,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
   if (want_indir)
     tdesc = parameter_brace_expand_indir (name + 1, var_is_special, quoted, quoted_dollar_atp, contains_dollar_at);
   else
-    tdesc = parameter_brace_expand_word (name, var_is_special, quoted, PF_IGNUNBOUND|(pflags&PF_NOSPLIT2));
+    tdesc = parameter_brace_expand_word (name, var_is_special, quoted, PF_IGNUNBOUND|(pflags&PF_NOSPLIT2), &ind);
 
   if (tdesc)
     {
@@ -7129,7 +7162,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
   /* If this is a substring spec, process it and add the result. */
   if (want_substring)
     {
-      temp1 = parameter_brace_substring (name, temp, value, quoted);
+      temp1 = parameter_brace_substring (name, temp, ind, value, quoted, (tflag & W_ARRAYIND) ? AV_USEIND : 0);
       FREE (name);
       FREE (value);
       FREE (temp);
@@ -7147,7 +7180,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
     }
   else if (want_patsub)
     {
-      temp1 = parameter_brace_patsub (name, temp, value, quoted);
+      temp1 = parameter_brace_patsub (name, temp, ind, value, quoted, (tflag & W_ARRAYIND) ? AV_USEIND : 0);
       FREE (name);
       FREE (value);
       FREE (temp);
@@ -7168,7 +7201,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 #if defined (CASEMOD_EXPANSIONS)
   else if (want_casemod)
     {
-      temp1 = parameter_brace_casemod (name, temp, modspec, value, quoted);
+      temp1 = parameter_brace_casemod (name, temp, ind, modspec, value, quoted, (tflag & W_ARRAYIND) ? AV_USEIND : 0);
       FREE (name);
       FREE (value);
       FREE (temp);
@@ -7217,7 +7250,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 	  FREE (value);
 	  break;
 	}
-      temp1 = parameter_brace_remove_pattern (name, temp, value, c, quoted);
+      temp1 = parameter_brace_remove_pattern (name, temp, ind, value, c, quoted, (tflag & W_ARRAYIND) ? AV_USEIND : 0);
       free (temp);
       free (value);
       free (name);
@@ -8281,10 +8314,12 @@ add_twochars:
 	  else
 	    temp = (char *)NULL;
 
+#if 0
 	  /* We do not want to add quoted nulls to strings that are only
 	     partially quoted; we can throw them away. */
 	  if (temp == 0 && quoted_state == PARTIALLY_QUOTED)
 	    continue;
+#endif
 
 	add_quoted_string:
 

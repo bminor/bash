@@ -482,4 +482,13 @@ extern void zsyncfd __P((int));
 /* declarations for functions defined in lib/sh/zwrite.c */
 extern int zwrite __P((int, char *, size_t));
 
+/* declarations for functions defined in lib/glob/gmisc.c */
+extern int match_pattern_char __P((char *, char *));
+extern int umatchlen __P((char *, size_t));
+
+#if defined (HANDLE_MULTIBYTE)
+extern int match_pattern_wchar __P((wchar_t *, wchar_t *));
+extern int wmatchlen __P((wchar_t *, size_t));
+#endif
+
 #endif /* _EXTERNS_H_ */

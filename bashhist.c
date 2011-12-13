@@ -359,7 +359,7 @@ save_history ()
 	 the history file. */
       using_history ();
 
-      if (history_lines_this_session < where_history () || force_append_history)
+      if (history_lines_this_session <= where_history () || force_append_history)
 	append_history (history_lines_this_session, hf);
       else
 	write_history (hf);
@@ -376,7 +376,7 @@ maybe_append_history (filename)
   struct stat buf;
 
   result = EXECUTION_SUCCESS;
-  if (history_lines_this_session && (history_lines_this_session < where_history ()))
+  if (history_lines_this_session && (history_lines_this_session <= where_history ()))
     {
       /* If the filename was supplied, then create it if necessary. */
       if (stat (filename, &buf) == -1 && errno == ENOENT)

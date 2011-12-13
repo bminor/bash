@@ -71,7 +71,7 @@ CSOURCES = $(srcdir)/glob.c $(srcdir)/strmatch.c $(srcdir)/smatch.c \
 # The header files for this library.
 HSOURCES = $(srcdir)/strmatch.h
 
-OBJECTS = glob.o strmatch.o smatch.o xmbsrtowcs.o
+OBJECTS = glob.o strmatch.o smatch.o xmbsrtowcs.o gmisc.o
 
 # The texinfo files which document this library.
 DOCSOURCE = doc/glob.texi
@@ -147,12 +147,17 @@ glob.o: strmatch.h glob.h
 glob.o: $(BASHINCDIR)/shmbutil.h
 glob.o: $(topdir)/xmalloc.h
 
+gmisc.o: $(BUILD_DIR)/config.h
+gmisc.o: $(topdir)/bashtypes.h $(BASHINCDIR)/ansi_stdlib.h $(topdir)/bashansi.h
+gmisc.o: $(BASHINCDIR)/shmbutil.h
+
 xmbsrtowcs.o: ${BUILD_DIR}/config.h
 xmbsrtowcs.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 xmbsrtowcs.o: ${BASHINCDIR}/shmbutil.h
 
 # Rules for deficient makes, like SunOS and Solaris
 glob.o: glob.c
+gmisc.o: gmisc.c
 strmatch.o: strmatch.c
 smatch.o: smatch.c
 xmbsrtowcs.o: xmbsrtowcs.c

@@ -2212,17 +2212,13 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	  lastpipe_flag = 1;
 	  freeze_jobs_list ();
 	  lastpipe_jid = stop_pipeline (0, (COMMAND *)NULL);	/* XXX */
-	  add_unwind_protect (lastpipe_cleanup, lastpipe_flag);
+	  add_unwind_protect (lastpipe_cleanup, lastpipe_jid);
 	}
       cmd->flags |= CMD_LASTPIPE;
     }	  
   if (prev >= 0)
     add_unwind_protect (close, prev);
 
-  /* XXX - might need to temporarily put shell process in pgrp of the pipeline,
-     so after we give the terminal to that process group in stop_pipeline, the
-     shell can still access it.  Would need to give it to
-     jobs[lastpipe_jid]->pgrp  */
   exec_result = execute_command_internal (cmd, asynchronous, prev, pipe_out, fds_to_close);
 
   if (lstdin > 0)
@@ -4333,6 +4329,7 @@ execute_shell_function (var, words)
   int ret;
   struct fd_bitmap *bitmap;
 
+itrace("execute_shell_function: %s", var->name);
   bitmap = new_fd_bitmap (FD_BITMAP_DEFAULT_SIZE);
   begin_unwind_frame ("execute-shell-function");
   add_unwind_protect (dispose_fd_bitmap, (char *)bitmap);

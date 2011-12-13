@@ -111,6 +111,13 @@ sh_modcase (string, pat, flags)
   mbstate_t state;
 #endif
 
+  if (string == 0 || *string == 0)
+    {
+      ret = (char *)xmalloc (1);
+      ret[0] = '\0';
+      return ret;
+    }
+
 #if defined (HANDLE_MULTIBYTE)
   memset (&state, 0, sizeof (mbstate_t));
 #endif

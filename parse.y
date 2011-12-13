@@ -5875,6 +5875,8 @@ save_parser_state (ps)
   ps->input_line_terminator = shell_input_line_terminator;
   ps->eof_encountered = eof_encountered;
 
+  ps->prompt_string_pointer = prompt_string_pointer;
+
   ps->current_command_line_count = current_command_line_count;
 
 #if defined (HISTORY)
@@ -5914,6 +5916,8 @@ restore_parser_state (ps)
 
   shell_input_line_terminator = ps->input_line_terminator;
   eof_encountered = ps->eof_encountered;
+
+  prompt_string_pointer = ps->prompt_string_pointer;
 
   current_command_line_count = ps->current_command_line_count;
 

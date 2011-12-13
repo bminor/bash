@@ -905,6 +905,8 @@ BASH_CHECK_TYPE(socklen_t, [#include <sys/socket.h>], int, HAVE_SOCKLEN_T)
 fi
 BASH_TYPE_RLIMIT
 
+AC_CHECK_SIZEOF(intmax_t, 8)
+
 dnl presence and contents of structures used by system calls
 BASH_STRUCT_TERMIOS_LDISC
 BASH_STRUCT_TERMIO_LDISC

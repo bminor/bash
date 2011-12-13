@@ -40,6 +40,7 @@
 
 static int glob_name_is_acceptable __P((const char *));
 static void ignore_globbed_names __P((char **, sh_ignore_func_t *));
+static char *split_ignorespec __P((char *, int *));
                
 #if defined (USE_POSIX_GLOB_LIBRARY)
 #  include <glob.h>
@@ -428,6 +429,30 @@ ignore_glob_matches (names)
   ignore_globbed_names (names, glob_name_is_acceptable);
 }
 
+static char *
+split_ignorespec (s, ip)
+     char *s;
+     int *ip;
+{
+  char *t;
+  int n, i;
+
+  if (s == 0)
+    return 0;
+
+  i = *ip;
+  if (s[i] == 0)
+    return 0;
+
+  n = skip_to_delim (s, i, ":", SD_NOJMP|SD_EXTGLOB);
+  t = substring (s, i, n);
+
+  if (s[n] == ':')
+    n++;  
+  *ip = n;  
+  return t;
+}
+  
 void
 setup_ignore_patterns (ivp)
      struct ignorevar *ivp;
@@ -467,7 +492,11 @@ setup_ignore_patterns (ivp)
 
   numitems = maxitems = ptr = 0;
 
+#if 0
   while (colon_bit = extract_colon_unit (this_ignoreval, &ptr))
+#else
+  while (colon_bit = split_ignorespec (this_ignoreval, &ptr))
+#endif
     {
       if (numitems + 1 >= maxitems)
 	{

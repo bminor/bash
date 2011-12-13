@@ -33,5 +33,9 @@ char *
 savestring (s)
      const char *s;
 {
-  return ((char *)strcpy ((char *)xmalloc (1 + strlen (s)), (s)));
+  char *ret;
+
+  ret = (char *)xmalloc (strlen (s) + 1);
+  strcpy (ret, s);
+  return ret;
 }

@@ -25,6 +25,11 @@
 
 #if defined (ARRAY_VARS)
 
+/* Flags for array_value_internal and callers array_value/get_array_value */
+#define AV_ALLOWALL	0x001
+#define AV_QUOTED	0x002
+#define AV_USEIND	0x004
+
 extern SHELL_VAR *convert_var_to_array __P((SHELL_VAR *));
 extern SHELL_VAR *convert_var_to_assoc __P((SHELL_VAR *));
 
@@ -51,7 +56,7 @@ extern void print_assoc_assignment __P((SHELL_VAR *, int));
 
 extern arrayind_t array_expand_index __P((char *, int));
 extern int valid_array_reference __P((char *));
-extern char *array_value __P((char *, int, int *, arrayind_t *));
+extern char *array_value __P((char *, int, int, int *, arrayind_t *));
 extern char *get_array_value __P((char *, int, int *, arrayind_t *));
 
 extern char *array_keys __P((char *, int));

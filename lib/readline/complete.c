@@ -2092,8 +2092,8 @@ complete_fncmp (convfn, convlen, filename, filename_len)
 	return 1;
       if (convlen < filename_len)
 	return 0;
-      s1 = convfn;
-      s2 = filename;
+      s1 = (char *)convfn;
+      s2 = (char *)filename;
       len = filename_len;
       do
 	{

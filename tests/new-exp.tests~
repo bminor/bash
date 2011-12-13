@@ -418,8 +418,9 @@ c=${var:4}
 expect nothing
 recho $c
 # as of bash-4.2, negative LENGTH means offset from the end
-expect '<a>'
 c=${var:0:-2}
+expect '<a>'
+recho $c
 
 var=abcdefghi
 c=${var:3:12}

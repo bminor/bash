@@ -1,7 +1,7 @@
 /* externs.h -- extern function declarations which do not appear in their
    own header file. */
 
-/* Copyright (C) 1993-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -481,5 +481,14 @@ extern void zsyncfd __P((int));
 
 /* declarations for functions defined in lib/sh/zwrite.c */
 extern int zwrite __P((int, char *, size_t));
+
+/* declarations for functions defined in lib/glob/gmisc.c */
+extern int match_pattern_char __P((char *, char *));
+extern size_t umatchlen __P((char *, size_t));
+
+#if defined (HANDLE_MULTIBYTE)
+extern int match_pattern_wchar __P((wchar_t *, wchar_t *));
+extern size_t wmatchlen __P((wchar_t *, size_t));
+#endif
 
 #endif /* _EXTERNS_H_ */

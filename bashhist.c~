@@ -213,6 +213,9 @@ bash_history_inhibit_expansion (string, i)
   else if (i > 1 && string[i - 1] == '{' && string[i - 2] == '$' &&
 	     member ('}', string + i + 1))
     return (1);
+  /* The shell uses $! as a defined parameter expansion. */
+  else if (i > 1 && string[i - 1] == '$' && string[i] == '!')
+    return (1);
 #if defined (EXTENDED_GLOB)
   else if (extended_glob && i > 1 && string[i+1] == '(' && member (')', string + i + 2))
     return (1);
@@ -356,7 +359,7 @@ save_history ()
 	 the history file. */
       using_history ();
 
-      if (history_lines_this_session < where_history () || force_append_history)
+      if (history_lines_this_session <= where_history () || force_append_history)
 	append_history (history_lines_this_session, hf);
       else
 	write_history (hf);
@@ -373,7 +376,8 @@ maybe_append_history (filename)
   struct stat buf;
 
   result = EXECUTION_SUCCESS;
-  if (history_lines_this_session && (history_lines_this_session < where_history ()))
+  /* XXX - why isn't this <= where_history() ? */
+  if (history_lines_this_session && (history_lines_this_session <= where_history ()))
     {
       /* If the filename was supplied, then create it if necessary. */
       if (stat (filename, &buf) == -1 && errno == ENOENT)

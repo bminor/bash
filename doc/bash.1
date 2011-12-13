@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Wed Jul 21 08:47:30 EDT 2010
+.\"	Last Change: Tue Aug  3 15:24:33 EDT 2010
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2010 July 21" "GNU Bash-4.2"
+.TH BASH 1 "2010 August 3" "GNU Bash-4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -408,7 +408,7 @@ No other startup files are read.
 .PP
 .B Bash
 attempts to determine when it is being run with its standard input
-connected to a a network connection, as if by the remote shell
+connected to a network connection, as if by the remote shell
 daemon, usually \fIrshd\fP, or the secure shell daemon \fIsshd\fP.
 If
 .B bash
@@ -1883,7 +1883,7 @@ If \fBbash\fP finds this variable in the environment when the shell starts
 with value
 .if t \f(CWt\fP,
 .if n "t",
-it assumes that the shell is running in an emacs shell buffer and disables
+it assumes that the shell is running in an Emacs shell buffer and disables
 line editing.
 .TP
 .B ENV
@@ -2300,8 +2300,8 @@ terminates after waiting for that number of seconds if input does
 not arrive.
 .TP
 .B TMPDIR
-If set, \fBBash\fP uses its value as the name of a directory in which
-\fBBash\fP creates temporary files for the shell's use.
+If set, \fBbash\fP uses its value as the name of a directory in which
+\fBbash\fP creates temporary files for the shell's use.
 .TP
 .B auto_resume
 This variable controls how the shell interacts with the user and
@@ -6357,6 +6357,8 @@ writing the history file.
 .PP
 An event designator is a reference to a command line entry in the
 history list.
+Unless the reference is absolute, events are relative to the current
+position in the history list.
 .PP
 .PD 0
 .TP
@@ -6372,25 +6374,27 @@ Refer to command line
 .IR n .
 .TP
 .B !\-\fIn\fR
-Refer to the current command line minus
+Refer to the current command minus
 .IR n .
 .TP
 .B !!
 Refer to the previous command.  This is a synonym for `!\-1'.
 .TP
 .B !\fIstring\fR
-Refer to the most recent command starting with 
+Refer to the most recent command preceding the current position in the
+history list starting with
 .IR string .
 .TP
 .B !?\fIstring\fR\fB[?]\fR
-Refer to the most recent command containing
+Refer to the most recent command preceding the current postition in the
+history list containing
 .IR string .
 The trailing \fB?\fP may be omitted if
 .I string
 is followed immediately by a newline.
 .TP
 .B \d\s+2^\s-2\u\fIstring1\fP\d\s+2^\s-2\u\fIstring2\fP\d\s+2^\s-2\u
-Quick substitution.  Repeat the last command, replacing
+Quick substitution.  Repeat the previous command, replacing
 .I string1
 with
 .IR string2 .

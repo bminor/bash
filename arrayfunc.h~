@@ -1,6 +1,6 @@
 /* arrayfunc.h -- declarations for miscellaneous array functions in arrayfunc.c */
 
-/* Copyright (C) 2001-2009 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,6 +24,11 @@
 /* Must include variables.h before including this file. */
 
 #if defined (ARRAY_VARS)
+
+/* Flags for array_value_internal and callers */
+#define AV_ALLOWALL	0x001
+#define AV_QUOTED	0x002
+#define AV_USEIND	0x004
 
 extern SHELL_VAR *convert_var_to_array __P((SHELL_VAR *));
 extern SHELL_VAR *convert_var_to_assoc __P((SHELL_VAR *));
