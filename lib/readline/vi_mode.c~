@@ -635,7 +635,7 @@ _rl_vi_append_forward (key)
 #if 0
 	  rl_forward_char (1, key);
 #else
-	  _rl_forward_char_internal (1);
+	  rl_point = _rl_forward_char_internal (1);
 #endif
 	  if (point == rl_point)
 	    rl_point = rl_end;

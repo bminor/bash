@@ -31,14 +31,17 @@
 
 #include "stdc.h"
 
-#ifndef RPAREN
-#  define RPAREN '('
-#endif
 #ifndef LPAREN
-#  define LPAREN ')'
+#  define LPAREN '('
+#endif
+#ifndef RPAREN
+#  define RPAREN ')'
 #endif
 
 #if defined (HANDLE_MULTIBYTE)
+#define WLPAREN         L'('
+#define WRPAREN         L')'
+
 /* Return 1 of the first character of WSTRING could match the first
    character of pattern WPAT.  Wide character version. */
 int
@@ -235,17 +238,17 @@ umatchlen (pat, max)
 	  break;
 	case L'?':
 	  if (*pat == LPAREN)
-	    return (matlen = max);		/* XXX for now */
+	    return (matlen = -1);		/* XXX for now */
 	  else
 	    matlen++;
 	  break;
 	case L'*':
-	  return (matlen = max);
+	  return (matlen = -1);
 	case L'+':
 	case L'!':
 	case L'@':
 	  if (*pat == LPAREN)
-	    return (matlen = max);		/* XXX for now */
+	    return (matlen = -1);		/* XXX for now */
 	  else
 	    matlen++;
 	  break;

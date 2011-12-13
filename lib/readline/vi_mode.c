@@ -1022,7 +1022,7 @@ static int
 rl_domove_motion_callback (m)
      _rl_vimotion_cxt *m;
 {
-  int c, key, save, r;
+  int c, save, r;
   int old_end;
 
   _rl_vi_last_motion = c = m->motion;
@@ -1054,7 +1054,7 @@ rl_domove_motion_callback (m)
 
   /* If cw or cW, back up to the end of a word, so the behaviour of ce
      or cE is the actual result.  Brute-force, no subtlety. */
-  if (key == 'c' && rl_point >= rl_mark && (_rl_to_upper (c) == 'W'))
+  if (m->key == 'c' && rl_point >= rl_mark && (_rl_to_upper (c) == 'W'))
     {
       /* Don't move farther back than where we started. */
       while (rl_point > rl_mark && whitespace (rl_line_buffer[rl_point]))
@@ -1193,7 +1193,8 @@ rl_vi_domove (x, ignore)
   int r;
   _rl_vimotion_cxt *m;
 
-  *ignore = m->motion = rl_vi_domove_getchar (m = _rl_vimvcxt);
+  m = _rl_vimvcxt;
+  *ignore = m->motion = rl_vi_domove_getchar (m);
 
   if (m->motion < 0)
     {

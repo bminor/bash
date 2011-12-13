@@ -2221,6 +2221,8 @@ rl_filename_completion_function (text, state)
 	  temp = (*rl_filename_dequoting_function) (dirname, rl_completion_quote_character);
 	  xfree (dirname);
 	  dirname = temp;
+	  xfree (users_dirname);
+	  users_dirname = savestring (dirname);
 	}
       directory = opendir (dirname);
 

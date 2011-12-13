@@ -10565,6 +10565,8 @@ lib/readline/text.c
 	  optimize and insert all of the available typeahead input if we're
 	  reading input from a macro.  Fixes bug reported by Andre Majorel
 	  <aym-ung@teaser.fr>
+
+lib/readline/text.c
 	- break out multibyte guts of rl_forward_char into a separate function
 	  _rl_forward_char_internal that does nothing but calculate the new
 	  value of point
@@ -10580,3 +10582,54 @@ lib/readline/vi_mode.c
 	  of the line, rl_forward_char will ring the bell.  Fixes debian
 	  bash bug 601042, reported by Alan J. Greenberger <alanjg@ptd.net>
 
+				   11/14
+				   -----
+subst.c
+	- fix match_upattern to use correct test to immediately break out of
+	  loop (when potential match length is greater than number of chars
+	  remaining in the string) in MATCH_ANY case
+
+				   11/15
+				   -----
+subst.c
+	- include "typemax.h" to make sure we have a definition of INTMAX_MIN
+
+				   11/16
+				   -----
+lib/sh/unicode.c
+	- make sure `localconv' isn't declared on machines without iconv
+	- add stub_charset for systems that don't have locale_charset: looks
+	  up LC_CTYPE, returns everything after last `.', "UTF-8" if the
+	  value is exactly "UTF-8", and "ASCII" otherwise
+
+				   11/20
+				   -----
+lib/readline/vi_mode.c
+	- in rl_domove_motion_callback, make sure to use m->key instead of
+	  key, which is not initialized and should not be used.  Bug report
+	  from Andreas Schwab <schwab@linux-m68k.org>
+	- in rl_vi_domove, make assignment to `m' explicit instead of
+	  relying on evaluation order semantics, since the C standard leaves
+	  them unspecified.  Bug report from Andreas Schwab
+	  <schwab@linux-m68k.org>
+
+				   11/21
+				   -----
+lib/sh/shquote.c
+	- sh_single_quote and sh_double_quote now take a const char *
+	  argument.  Fixes problem pointed out by Joachim Schmitz
+	  <jojo@schmitz-digital.de>
+
+externs.h
+	- change extern declarations for sh_single_quote and sh_double_quote
+
+lib/sh/strchrnul.c
+	- make sure that return value is cast to (char *) if we're using a
+	  part of the passed (const char *) argument.  Fixes problem pointed
+	  out by Joachim Schmitz <jojo@schmitz-digital.de>
+
+lib/glob/gmisc.c
+	- fix a typo that mixed up defines for LPAREN and RPAREN.  Bug and
+	  fix from Andreas Schwab <schwab@linux-m68k.org>
+	- use WLPAREN and WRPAREN in multibyte character environments
+	- fixed typos using L'cc' in a non-wide-char environment

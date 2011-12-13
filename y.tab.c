@@ -1,9 +1,7 @@
-/* A Bison parser, made by GNU Bison 2.3.  */
+/* A Bison parser, made by GNU Bison 2.0.  */
 
-/* Skeleton implementation for Bison's Yacc-like parsers in C
-
-   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
-   Free Software Foundation, Inc.
+/* Skeleton parser for Yacc-like parsing with Bison,
+   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,24 +15,16 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
-/* As a special exception, you may create a larger work that contains
-   part or all of the Bison parser skeleton and distribute that work
-   under terms of your choice, so long as that work isn't itself a
-   parser generator using the skeleton or a modified version thereof
-   as a parser skeleton.  Alternatively, if you modify or redistribute
-   the parser skeleton itself, you may (at your option) remove this
-   special exception, which will cause the skeleton and the resulting
-   Bison output files to be licensed under the GNU General Public
-   License without this special exception.
+/* As a special exception, when this file is copied by Bison into a
+   Bison output file, you may use that output file without restriction.
+   This special exception was added by the Free Software Foundation
+   in version 1.24 of Bison.  */
 
-   This special exception was added by the Free Software Foundation in
-   version 2.2 of Bison.  */
-
-/* C LALR(1) parser skeleton written by Richard Stallman, by
-   simplifying the original so-called "semantic" parser.  */
+/* Written by Richard Stallman by simplifying the original so called
+   ``semantic'' parser.  */
 
 /* All symbols defined below should begin with yy or YY, to avoid
    infringing on user name space.  This should be done even for local
@@ -45,9 +35,6 @@
 
 /* Identify Bison output.  */
 #define YYBISON 1
-
-/* Bison version.  */
-#define YYBISON_VERSION "2.3"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -115,7 +102,6 @@
      yacc_EOF = 304
    };
 #endif
-/* Tokens.  */
 #define IF 258
 #define THEN 259
 #define ELSE 260
@@ -168,7 +154,7 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 21 "/Users/chet/src/bash/src/parse.y"
+#line 21 "parse.y"
 
 #include "config.h"
 
@@ -484,15 +470,9 @@ static REDIRECTEE redir;
 # define YYERROR_VERBOSE 0
 #endif
 
-/* Enabling the token table.  */
-#ifndef YYTOKEN_TABLE
-# define YYTOKEN_TABLE 0
-#endif
-
-#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE
-#line 323 "/Users/chet/src/bash/src/parse.y"
-{
+#if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
+#line 323 "parse.y"
+typedef union YYSTYPE {
   WORD_DESC *word;		/* the word that we read. */
   int number;			/* the number that we read. */
   WORD_LIST *word_list;
@@ -500,10 +480,9 @@ typedef union YYSTYPE
   REDIRECT *redirect;
   ELEMENT element;
   PATTERN_LIST *pattern;
-}
-/* Line 187 of yacc.c.  */
-#line 506 "y.tab.c"
-	YYSTYPE;
+} YYSTYPE;
+/* Line 185 of yacc.c.  */
+#line 486 "y.tab.c"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
@@ -514,94 +493,17 @@ typedef union YYSTYPE
 /* Copy the second part of user declarations.  */
 
 
-/* Line 216 of yacc.c.  */
-#line 519 "y.tab.c"
+/* Line 213 of yacc.c.  */
+#line 498 "y.tab.c"
 
-#ifdef short
-# undef short
-#endif
+#if ! defined (yyoverflow) || YYERROR_VERBOSE
 
-#ifdef YYTYPE_UINT8
-typedef YYTYPE_UINT8 yytype_uint8;
-#else
-typedef unsigned char yytype_uint8;
-#endif
-
-#ifdef YYTYPE_INT8
-typedef YYTYPE_INT8 yytype_int8;
-#elif (defined __STDC__ || defined __C99__FUNC__ \
-     || defined __cplusplus || defined _MSC_VER)
-typedef signed char yytype_int8;
-#else
-typedef short int yytype_int8;
-#endif
-
-#ifdef YYTYPE_UINT16
-typedef YYTYPE_UINT16 yytype_uint16;
-#else
-typedef unsigned short int yytype_uint16;
-#endif
-
-#ifdef YYTYPE_INT16
-typedef YYTYPE_INT16 yytype_int16;
-#else
-typedef short int yytype_int16;
-#endif
-
-#ifndef YYSIZE_T
-# ifdef __SIZE_TYPE__
-#  define YYSIZE_T __SIZE_TYPE__
-# elif defined size_t
-#  define YYSIZE_T size_t
-# elif ! defined YYSIZE_T && (defined __STDC__ || defined __C99__FUNC__ \
-     || defined __cplusplus || defined _MSC_VER)
-#  include <stddef.h> /* INFRINGES ON USER NAME SPACE */
-#  define YYSIZE_T size_t
-# else
-#  define YYSIZE_T unsigned int
+# ifndef YYFREE
+#  define YYFREE free
 # endif
-#endif
-
-#define YYSIZE_MAXIMUM ((YYSIZE_T) -1)
-
-#ifndef YY_
-# if YYENABLE_NLS
-#  if ENABLE_NLS
-#   include <libintl.h> /* INFRINGES ON USER NAME SPACE */
-#   define YY_(msgid) dgettext ("bison-runtime", msgid)
-#  endif
+# ifndef YYMALLOC
+#  define YYMALLOC malloc
 # endif
-# ifndef YY_
-#  define YY_(msgid) msgid
-# endif
-#endif
-
-/* Suppress unused-variable warnings by "using" E.  */
-#if ! defined lint || defined __GNUC__
-# define YYUSE(e) ((void) (e))
-#else
-# define YYUSE(e) /* empty */
-#endif
-
-/* Identity function, used to suppress warnings about constant conditions.  */
-#ifndef lint
-# define YYID(n) (n)
-#else
-#if (defined __STDC__ || defined __C99__FUNC__ \
-     || defined __cplusplus || defined _MSC_VER)
-static int
-YYID (int i)
-#else
-static int
-YYID (i)
-    int i;
-#endif
-{
-  return i;
-}
-#endif
-
-#if ! defined yyoverflow || YYERROR_VERBOSE
 
 /* The parser invokes alloca or malloc; define the necessary symbols.  */
 
@@ -609,76 +511,34 @@ YYID (i)
 #  if YYSTACK_USE_ALLOCA
 #   ifdef __GNUC__
 #    define YYSTACK_ALLOC __builtin_alloca
-#   elif defined __BUILTIN_VA_ARG_INCR
-#    include <alloca.h> /* INFRINGES ON USER NAME SPACE */
-#   elif defined _AIX
-#    define YYSTACK_ALLOC __alloca
-#   elif defined _MSC_VER
-#    include <malloc.h> /* INFRINGES ON USER NAME SPACE */
-#    define alloca _alloca
 #   else
 #    define YYSTACK_ALLOC alloca
-#    if ! defined _ALLOCA_H && ! defined _STDLIB_H && (defined __STDC__ || defined __C99__FUNC__ \
-     || defined __cplusplus || defined _MSC_VER)
-#     include <stdlib.h> /* INFRINGES ON USER NAME SPACE */
-#     ifndef _STDLIB_H
-#      define _STDLIB_H 1
-#     endif
-#    endif
 #   endif
 #  endif
 # endif
 
 # ifdef YYSTACK_ALLOC
-   /* Pacify GCC's `empty if-body' warning.  */
-#  define YYSTACK_FREE(Ptr) do { /* empty */; } while (YYID (0))
-#  ifndef YYSTACK_ALLOC_MAXIMUM
-    /* The OS might guarantee only one guard page at the bottom of the stack,
-       and a page size can be as small as 4096 bytes.  So we cannot safely
-       invoke alloca (N) if N exceeds 4096.  Use a slightly smaller number
-       to allow for a few compiler-allocated temporary stack slots.  */
-#   define YYSTACK_ALLOC_MAXIMUM 4032 /* reasonable circa 2006 */
-#  endif
+   /* Pacify GCC's `empty if-body' warning. */
+#  define YYSTACK_FREE(Ptr) do { /* empty */; } while (0)
 # else
+#  if defined (__STDC__) || defined (__cplusplus)
+#   include <stdlib.h> /* INFRINGES ON USER NAME SPACE */
+#   define YYSIZE_T size_t
+#  endif
 #  define YYSTACK_ALLOC YYMALLOC
 #  define YYSTACK_FREE YYFREE
-#  ifndef YYSTACK_ALLOC_MAXIMUM
-#   define YYSTACK_ALLOC_MAXIMUM YYSIZE_MAXIMUM
-#  endif
-#  if (defined __cplusplus && ! defined _STDLIB_H \
-       && ! ((defined YYMALLOC || defined malloc) \
-	     && (defined YYFREE || defined free)))
-#   include <stdlib.h> /* INFRINGES ON USER NAME SPACE */
-#   ifndef _STDLIB_H
-#    define _STDLIB_H 1
-#   endif
-#  endif
-#  ifndef YYMALLOC
-#   define YYMALLOC malloc
-#   if ! defined malloc && ! defined _STDLIB_H && (defined __STDC__ || defined __C99__FUNC__ \
-     || defined __cplusplus || defined _MSC_VER)
-void *malloc (YYSIZE_T); /* INFRINGES ON USER NAME SPACE */
-#   endif
-#  endif
-#  ifndef YYFREE
-#   define YYFREE free
-#   if ! defined free && ! defined _STDLIB_H && (defined __STDC__ || defined __C99__FUNC__ \
-     || defined __cplusplus || defined _MSC_VER)
-void free (void *); /* INFRINGES ON USER NAME SPACE */
-#   endif
-#  endif
 # endif
-#endif /* ! defined yyoverflow || YYERROR_VERBOSE */
+#endif /* ! defined (yyoverflow) || YYERROR_VERBOSE */
 
 
-#if (! defined yyoverflow \
-     && (! defined __cplusplus \
-	 || (defined YYSTYPE_IS_TRIVIAL && YYSTYPE_IS_TRIVIAL)))
+#if (! defined (yyoverflow) \
+     && (! defined (__cplusplus) \
+	 || (defined (YYSTYPE_IS_TRIVIAL) && YYSTYPE_IS_TRIVIAL)))
 
 /* A type that is properly aligned for any stack member.  */
 union yyalloc
 {
-  yytype_int16 yyss;
+  short int yyss;
   YYSTYPE yyvs;
   };
 
@@ -688,24 +548,24 @@ union yyalloc
 /* The size of an array large to enough to hold all stacks, each with
    N elements.  */
 # define YYSTACK_BYTES(N) \
-     ((N) * (sizeof (yytype_int16) + sizeof (YYSTYPE)) \
+     ((N) * (sizeof (short int) + sizeof (YYSTYPE))			\
       + YYSTACK_GAP_MAXIMUM)
 
 /* Copy COUNT objects from FROM to TO.  The source and destination do
    not overlap.  */
 # ifndef YYCOPY
-#  if defined __GNUC__ && 1 < __GNUC__
+#  if defined (__GNUC__) && 1 < __GNUC__
 #   define YYCOPY(To, From, Count) \
       __builtin_memcpy (To, From, (Count) * sizeof (*(From)))
 #  else
 #   define YYCOPY(To, From, Count)		\
       do					\
 	{					\
-	  YYSIZE_T yyi;				\
+	  register YYSIZE_T yyi;		\
 	  for (yyi = 0; yyi < (Count); yyi++)	\
 	    (To)[yyi] = (From)[yyi];		\
 	}					\
-      while (YYID (0))
+      while (0)
 #  endif
 # endif
 
@@ -723,33 +583,39 @@ union yyalloc
 	yynewbytes = yystacksize * sizeof (*Stack) + YYSTACK_GAP_MAXIMUM; \
 	yyptr += yynewbytes / sizeof (*yyptr);				\
       }									\
-    while (YYID (0))
+    while (0)
 
 #endif
 
-/* YYFINAL -- State number of the termination state.  */
+#if defined (__STDC__) || defined (__cplusplus)
+   typedef signed char yysigned_char;
+#else
+   typedef short int yysigned_char;
+#endif
+
+/* YYFINAL -- State number of the termination state. */
 #define YYFINAL  116
 /* YYLAST -- Last index in YYTABLE.  */
 #define YYLAST   659
 
-/* YYNTOKENS -- Number of terminals.  */
+/* YYNTOKENS -- Number of terminals. */
 #define YYNTOKENS  61
-/* YYNNTS -- Number of nonterminals.  */
+/* YYNNTS -- Number of nonterminals. */
 #define YYNNTS  38
-/* YYNRULES -- Number of rules.  */
+/* YYNRULES -- Number of rules. */
 #define YYNRULES  167
-/* YYNRULES -- Number of states.  */
+/* YYNRULES -- Number of states. */
 #define YYNSTATES  342
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
 #define YYMAXUTOK   304
 
-#define YYTRANSLATE(YYX)						\
+#define YYTRANSLATE(YYX) 						\
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
 
 /* YYTRANSLATE[YYLEX] -- Bison symbol number corresponding to YYLEX.  */
-static const yytype_uint8 yytranslate[] =
+static const unsigned char yytranslate[] =
 {
        0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
       51,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -787,7 +653,7 @@ static const yytype_uint8 yytranslate[] =
 #if YYDEBUG
 /* YYPRHS[YYN] -- Index of the first RHS symbol of rule number YYN in
    YYRHS.  */
-static const yytype_uint16 yyprhs[] =
+static const unsigned short int yyprhs[] =
 {
        0,     0,     3,     6,     8,    11,    13,    15,    18,    21,
       24,    28,    32,    36,    40,    43,    47,    51,    54,    58,
@@ -808,8 +674,8 @@ static const yytype_uint16 yyprhs[] =
      655,   658,   661,   666,   671,   673,   675,   678
 };
 
-/* YYRHS -- A `-1'-separated list of the rules' RHS.  */
-static const yytype_int8 yyrhs[] =
+/* YYRHS -- A `-1'-separated list of the rules' RHS. */
+static const yysigned_char yyrhs[] =
 {
       62,     0,    -1,    94,    91,    -1,    51,    -1,     1,    51,
       -1,    52,    -1,    26,    -1,    63,    26,    -1,    54,    26,
@@ -883,7 +749,7 @@ static const yytype_int8 yyrhs[] =
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
-static const yytype_uint16 yyrline[] =
+static const unsigned short int yyrline[] =
 {
        0,   376,   376,   387,   396,   411,   421,   423,   427,   433,
      439,   445,   451,   457,   463,   469,   475,   481,   487,   493,
@@ -905,9 +771,9 @@ static const yytype_uint16 yyrline[] =
 };
 #endif
 
-#if YYDEBUG || YYERROR_VERBOSE || YYTOKEN_TABLE
-/* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
-   First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
+#if YYDEBUG || YYERROR_VERBOSE
+/* YYTNME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
+   First, the terminals, then, starting at YYNTOKENS, nonterminals. */
 static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "IF", "THEN", "ELSE", "ELIF", "FI",
@@ -936,7 +802,7 @@ static const char *const yytname[] =
 # ifdef YYPRINT
 /* YYTOKNUM[YYLEX-NUM] -- Internal token number corresponding to
    token YYLEX-NUM.  */
-static const yytype_uint16 yytoknum[] =
+static const unsigned short int yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
@@ -949,7 +815,7 @@ static const yytype_uint16 yytoknum[] =
 # endif
 
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
-static const yytype_uint8 yyr1[] =
+static const unsigned char yyr1[] =
 {
        0,    61,    62,    62,    62,    62,    63,    63,    64,    64,
       64,    64,    64,    64,    64,    64,    64,    64,    64,    64,
@@ -971,7 +837,7 @@ static const yytype_uint8 yyr1[] =
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
-static const yytype_uint8 yyr2[] =
+static const unsigned char yyr2[] =
 {
        0,     2,     2,     1,     2,     1,     1,     2,     2,     2,
        3,     3,     3,     3,     2,     3,     3,     2,     3,     3,
@@ -995,7 +861,7 @@ static const yytype_uint8 yyr2[] =
 /* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
    STATE-NUM when YYTABLE doesn't specify something else to do.  Zero
    means the default is an error.  */
-static const yytype_uint8 yydefact[] =
+static const unsigned char yydefact[] =
 {
        0,     0,   147,     0,     0,     0,   147,   147,     0,     0,
        0,     0,   165,    52,    53,     0,     0,   111,     0,     0,
@@ -1034,8 +900,8 @@ static const yytype_uint8 yydefact[] =
       91,    92
 };
 
-/* YYDEFGOTO[NTERM-NUM].  */
-static const yytype_int16 yydefgoto[] =
+/* YYDEFGOTO[NTERM-NUM]. */
+static const short int yydefgoto[] =
 {
       -1,    34,   239,    35,    36,   120,    37,    38,    39,    40,
       41,    42,    43,    44,   213,    45,    46,    47,    48,    49,
@@ -1046,7 +912,7 @@ static const yytype_int16 yydefgoto[] =
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
 #define YYPACT_NINF -208
-static const yytype_int16 yypact[] =
+static const short int yypact[] =
 {
      296,   -35,  -208,    -2,    38,    10,  -208,  -208,    24,   546,
       31,   346,    51,    47,  -208,   591,   604,  -208,    56,    71,
@@ -1086,7 +952,7 @@ static const yytype_int16 yypact[] =
 };
 
 /* YYPGOTO[NTERM-NUM].  */
-static const yytype_int16 yypgoto[] =
+static const short int yypgoto[] =
 {
     -208,  -208,   164,   -37,   -31,   -62,   368,  -208,    -5,  -208,
     -208,  -208,  -208,  -208,  -206,  -208,  -208,  -208,  -208,  -208,
@@ -1099,7 +965,7 @@ static const yytype_int16 yypgoto[] =
    number is the opposite.  If zero, do what YYDEFACT says.
    If YYTABLE_NINF, syntax error.  */
 #define YYTABLE_NINF -1
-static const yytype_uint16 yytable[] =
+static const unsigned short int yytable[] =
 {
       64,    65,   119,    53,    69,    52,   118,   150,   100,   256,
      130,   101,   137,   139,    75,   144,    56,   142,   148,   260,
@@ -1169,7 +1035,7 @@ static const yytype_uint16 yytable[] =
       94,    95,     0,     0,     0,     0,     0,     0,    96,    97
 };
 
-static const yytype_int16 yycheck[] =
+static const short int yycheck[] =
 {
        6,     7,    39,     0,     9,     0,    37,    69,    26,   215,
       55,    29,    60,    61,    11,    63,    51,    62,    66,   226,
@@ -1241,7 +1107,7 @@ static const yytype_int16 yycheck[] =
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
    symbol of state STATE-NUM.  */
-static const yytype_uint8 yystos[] =
+static const unsigned char yystos[] =
 {
        0,     1,     3,     8,    10,    11,    12,    13,    16,    17,
       18,    22,    23,    26,    27,    28,    29,    30,    35,    36,
@@ -1280,6 +1146,22 @@ static const yytype_uint8 yystos[] =
       15,    58
 };
 
+#if ! defined (YYSIZE_T) && defined (__SIZE_TYPE__)
+# define YYSIZE_T __SIZE_TYPE__
+#endif
+#if ! defined (YYSIZE_T) && defined (size_t)
+# define YYSIZE_T size_t
+#endif
+#if ! defined (YYSIZE_T)
+# if defined (__STDC__) || defined (__cplusplus)
+#  include <stddef.h> /* INFRINGES ON USER NAME SPACE */
+#  define YYSIZE_T size_t
+# endif
+#endif
+#if ! defined (YYSIZE_T)
+# define YYSIZE_T unsigned int
+#endif
+
 #define yyerrok		(yyerrstatus = 0)
 #define yyclearin	(yychar = YYEMPTY)
 #define YYEMPTY		(-2)
@@ -1305,15 +1187,15 @@ do								\
       yychar = (Token);						\
       yylval = (Value);						\
       yytoken = YYTRANSLATE (yychar);				\
-      YYPOPSTACK (1);						\
+      YYPOPSTACK;						\
       goto yybackup;						\
     }								\
   else								\
-    {								\
-      yyerror (YY_("syntax error: cannot back up")); \
+    { 								\
+      yyerror ("syntax error: cannot back up");\
       YYERROR;							\
     }								\
-while (YYID (0))
+while (0)
 
 
 #define YYTERROR	1
@@ -1328,7 +1210,7 @@ while (YYID (0))
 #ifndef YYLLOC_DEFAULT
 # define YYLLOC_DEFAULT(Current, Rhs, N)				\
     do									\
-      if (YYID (N))                                                    \
+      if (N)								\
 	{								\
 	  (Current).first_line   = YYRHSLOC (Rhs, 1).first_line;	\
 	  (Current).first_column = YYRHSLOC (Rhs, 1).first_column;	\
@@ -1342,7 +1224,7 @@ while (YYID (0))
 	  (Current).first_column = (Current).last_column =		\
 	    YYRHSLOC (Rhs, 0).last_column;				\
 	}								\
-    while (YYID (0))
+    while (0)
 #endif
 
 
@@ -1354,8 +1236,8 @@ while (YYID (0))
 # if YYLTYPE_IS_TRIVIAL
 #  define YY_LOCATION_PRINT(File, Loc)			\
      fprintf (File, "%d.%d-%d.%d",			\
-	      (Loc).first_line, (Loc).first_column,	\
-	      (Loc).last_line,  (Loc).last_column)
+              (Loc).first_line, (Loc).first_column,	\
+              (Loc).last_line,  (Loc).last_column)
 # else
 #  define YY_LOCATION_PRINT(File, Loc) ((void) 0)
 # endif
@@ -1382,96 +1264,36 @@ while (YYID (0))
 do {						\
   if (yydebug)					\
     YYFPRINTF Args;				\
-} while (YYID (0))
+} while (0)
 
-# define YY_SYMBOL_PRINT(Title, Type, Value, Location)			  \
-do {									  \
-  if (yydebug)								  \
-    {									  \
-      YYFPRINTF (stderr, "%s ", Title);					  \
-      yy_symbol_print (stderr,						  \
-		  Type, Value); \
-      YYFPRINTF (stderr, "\n");						  \
-    }									  \
-} while (YYID (0))
-
-
-/*--------------------------------.
-| Print this symbol on YYOUTPUT.  |
-`--------------------------------*/
-
-/*ARGSUSED*/
-#if (defined __STDC__ || defined __C99__FUNC__ \
-     || defined __cplusplus || defined _MSC_VER)
-static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep)
-#else
-static void
-yy_symbol_value_print (yyoutput, yytype, yyvaluep)
-    FILE *yyoutput;
-    int yytype;
-    YYSTYPE const * const yyvaluep;
-#endif
-{
-  if (!yyvaluep)
-    return;
-# ifdef YYPRINT
-  if (yytype < YYNTOKENS)
-    YYPRINT (yyoutput, yytoknum[yytype], *yyvaluep);
-# else
-  YYUSE (yyoutput);
-# endif
-  switch (yytype)
-    {
-      default:
-	break;
-    }
-}
-
-
-/*--------------------------------.
-| Print this symbol on YYOUTPUT.  |
-`--------------------------------*/
-
-#if (defined __STDC__ || defined __C99__FUNC__ \
-     || defined __cplusplus || defined _MSC_VER)
-static void
-yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep)
-#else
-static void
-yy_symbol_print (yyoutput, yytype, yyvaluep)
-    FILE *yyoutput;
-    int yytype;
-    YYSTYPE const * const yyvaluep;
-#endif
-{
-  if (yytype < YYNTOKENS)
-    YYFPRINTF (yyoutput, "token %s (", yytname[yytype]);
-  else
-    YYFPRINTF (yyoutput, "nterm %s (", yytname[yytype]);
-
-  yy_symbol_value_print (yyoutput, yytype, yyvaluep);
-  YYFPRINTF (yyoutput, ")");
-}
+# define YY_SYMBOL_PRINT(Title, Type, Value, Location)		\
+do {								\
+  if (yydebug)							\
+    {								\
+      YYFPRINTF (stderr, "%s ", Title);				\
+      yysymprint (stderr, 					\
+                  Type, Value);	\
+      YYFPRINTF (stderr, "\n");					\
+    }								\
+} while (0)
 
 /*------------------------------------------------------------------.
 | yy_stack_print -- Print the state stack from its BOTTOM up to its |
 | TOP (included).                                                   |
 `------------------------------------------------------------------*/
 
-#if (defined __STDC__ || defined __C99__FUNC__ \
-     || defined __cplusplus || defined _MSC_VER)
+#if defined (__STDC__) || defined (__cplusplus)
 static void
-yy_stack_print (yytype_int16 *bottom, yytype_int16 *top)
+yy_stack_print (short int *bottom, short int *top)
 #else
 static void
 yy_stack_print (bottom, top)
-    yytype_int16 *bottom;
-    yytype_int16 *top;
+    short int *bottom;
+    short int *top;
 #endif
 {
   YYFPRINTF (stderr, "Stack now");
-  for (; bottom <= top; ++bottom)
+  for (/* Nothing. */; bottom <= top; ++bottom)
     YYFPRINTF (stderr, " %d", *bottom);
   YYFPRINTF (stderr, "\n");
 }
@@ -1480,45 +1302,37 @@ yy_stack_print (bottom, top)
 do {								\
   if (yydebug)							\
     yy_stack_print ((Bottom), (Top));				\
-} while (YYID (0))
+} while (0)
 
 
 /*------------------------------------------------.
 | Report that the YYRULE is going to be reduced.  |
 `------------------------------------------------*/
 
-#if (defined __STDC__ || defined __C99__FUNC__ \
-     || defined __cplusplus || defined _MSC_VER)
+#if defined (__STDC__) || defined (__cplusplus)
 static void
-yy_reduce_print (YYSTYPE *yyvsp, int yyrule)
+yy_reduce_print (int yyrule)
 #else
 static void
-yy_reduce_print (yyvsp, yyrule)
-    YYSTYPE *yyvsp;
+yy_reduce_print (yyrule)
     int yyrule;
 #endif
 {
-  int yynrhs = yyr2[yyrule];
   int yyi;
-  unsigned long int yylno = yyrline[yyrule];
-  YYFPRINTF (stderr, "Reducing stack by rule %d (line %lu):\n",
-	     yyrule - 1, yylno);
-  /* The symbols being reduced.  */
-  for (yyi = 0; yyi < yynrhs; yyi++)
-    {
-      fprintf (stderr, "   $%d = ", yyi + 1);
-      yy_symbol_print (stderr, yyrhs[yyprhs[yyrule] + yyi],
-		       &(yyvsp[(yyi + 1) - (yynrhs)])
-		       		       );
-      fprintf (stderr, "\n");
-    }
+  unsigned int yylno = yyrline[yyrule];
+  YYFPRINTF (stderr, "Reducing stack by rule %d (line %u), ",
+             yyrule - 1, yylno);
+  /* Print the symbols being reduced, and their result.  */
+  for (yyi = yyprhs[yyrule]; 0 <= yyrhs[yyi]; yyi++)
+    YYFPRINTF (stderr, "%s ", yytname [yyrhs[yyi]]);
+  YYFPRINTF (stderr, "-> %s\n", yytname [yyr1[yyrule]]);
 }
 
 # define YY_REDUCE_PRINT(Rule)		\
 do {					\
   if (yydebug)				\
-    yy_reduce_print (yyvsp, Rule); \
-} while (YYID (0))
+    yy_reduce_print (Rule);		\
+} while (0)
 
 /* Nonzero means print parse trace.  It is left uninitialized so that
    multiple parsers can coexist.  */
@@ -1540,7 +1354,7 @@ int yydebug;
    if the built-in stack extension method is used).
 
    Do not make this value too large; the results are undefined if
-   YYSTACK_ALLOC_MAXIMUM < YYSTACK_BYTES (YYMAXDEPTH)
+   SIZE_MAX < YYSTACK_BYTES (YYMAXDEPTH)
    evaluated with infinite-precision integer arithmetic.  */
 
 #ifndef YYMAXDEPTH
@@ -1552,47 +1366,45 @@ int yydebug;
 #if YYERROR_VERBOSE
 
 # ifndef yystrlen
-#  if defined __GLIBC__ && defined _STRING_H
+#  if defined (__GLIBC__) && defined (_STRING_H)
 #   define yystrlen strlen
 #  else
 /* Return the length of YYSTR.  */
-#if (defined __STDC__ || defined __C99__FUNC__ \
-     || defined __cplusplus || defined _MSC_VER)
 static YYSIZE_T
+#   if defined (__STDC__) || defined (__cplusplus)
 yystrlen (const char *yystr)
-#else
-static YYSIZE_T
+#   else
 yystrlen (yystr)
-    const char *yystr;
-#endif
+     const char *yystr;
+#   endif
 {
-  YYSIZE_T yylen;
-  for (yylen = 0; yystr[yylen]; yylen++)
+  register const char *yys = yystr;
+
+  while (*yys++ != '\0')
     continue;
-  return yylen;
+
+  return yys - yystr - 1;
 }
 #  endif
 # endif
 
 # ifndef yystpcpy
-#  if defined __GLIBC__ && defined _STRING_H && defined _GNU_SOURCE
+#  if defined (__GLIBC__) && defined (_STRING_H) && defined (_GNU_SOURCE)
 #   define yystpcpy stpcpy
 #  else
 /* Copy YYSRC to YYDEST, returning the address of the terminating '\0' in
    YYDEST.  */
-#if (defined __STDC__ || defined __C99__FUNC__ \
-     || defined __cplusplus || defined _MSC_VER)
 static char *
+#   if defined (__STDC__) || defined (__cplusplus)
 yystpcpy (char *yydest, const char *yysrc)
-#else
-static char *
+#   else
 yystpcpy (yydest, yysrc)
-    char *yydest;
-    const char *yysrc;
-#endif
+     char *yydest;
+     const char *yysrc;
+#   endif
 {
-  char *yyd = yydest;
-  const char *yys = yysrc;
+  register char *yyd = yydest;
+  register const char *yys = yysrc;
 
   while ((*yyd++ = *yys++) != '\0')
     continue;
@@ -1602,171 +1414,53 @@ yystpcpy (yydest, yysrc)
 #  endif
 # endif
 
-# ifndef yytnamerr
-/* Copy to YYRES the contents of YYSTR after stripping away unnecessary
-   quotes and backslashes, so that it's suitable for yyerror.  The
-   heuristic is that double-quoting is unnecessary unless the string
-   contains an apostrophe, a comma, or backslash (other than
-   backslash-backslash).  YYSTR is taken from yytname.  If YYRES is
-   null, do not copy; instead, return the length of what the result
-   would have been.  */
-static YYSIZE_T
-yytnamerr (char *yyres, const char *yystr)
-{
-  if (*yystr == '"')
-    {
-      YYSIZE_T yyn = 0;
-      char const *yyp = yystr;
+#endif /* !YYERROR_VERBOSE */
 
-      for (;;)
-	switch (*++yyp)
-	  {
-	  case '\'':
-	  case ',':
-	    goto do_not_strip_quotes;
-
-	  case '\\':
-	    if (*++yyp != '\\')
-	      goto do_not_strip_quotes;
-	    /* Fall through.  */
-	  default:
-	    if (yyres)
-	      yyres[yyn] = *yyp;
-	    yyn++;
-	    break;
-
-	  case '"':
-	    if (yyres)
-	      yyres[yyn] = '\0';
-	    return yyn;
-	  }
-    do_not_strip_quotes: ;
-    }
-
-  if (! yyres)
-    return yystrlen (yystr);
-
-  return yystpcpy (yyres, yystr) - yyres;
-}
-# endif
-
-/* Copy into YYRESULT an error message about the unexpected token
-   YYCHAR while in state YYSTATE.  Return the number of bytes copied,
-   including the terminating null byte.  If YYRESULT is null, do not
-   copy anything; just return the number of bytes that would be
-   copied.  As a special case, return 0 if an ordinary "syntax error"
-   message will do.  Return YYSIZE_MAXIMUM if overflow occurs during
-   size calculation.  */
-static YYSIZE_T
-yysyntax_error (char *yyresult, int yystate, int yychar)
-{
-  int yyn = yypact[yystate];
-
-  if (! (YYPACT_NINF < yyn && yyn <= YYLAST))
-    return 0;
-  else
-    {
-      int yytype = YYTRANSLATE (yychar);
-      YYSIZE_T yysize0 = yytnamerr (0, yytname[yytype]);
-      YYSIZE_T yysize = yysize0;
-      YYSIZE_T yysize1;
-      int yysize_overflow = 0;
-      enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
-      char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
-      int yyx;
-
-# if 0
-      /* This is so xgettext sees the translatable formats that are
-	 constructed on the fly.  */
-      YY_("syntax error, unexpected %s");
-      YY_("syntax error, unexpected %s, expecting %s");
-      YY_("syntax error, unexpected %s, expecting %s or %s");
-      YY_("syntax error, unexpected %s, expecting %s or %s or %s");
-      YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s");
-# endif
-      char *yyfmt;
-      char const *yyf;
-      static char const yyunexpected[] = "syntax error, unexpected %s";
-      static char const yyexpecting[] = ", expecting %s";
-      static char const yyor[] = " or %s";
-      char yyformat[sizeof yyunexpected
-		    + sizeof yyexpecting - 1
-		    + ((YYERROR_VERBOSE_ARGS_MAXIMUM - 2)
-		       * (sizeof yyor - 1))];
-      char const *yyprefix = yyexpecting;
-
-      /* Start YYX at -YYN if negative to avoid negative indexes in
-	 YYCHECK.  */
-      int yyxbegin = yyn < 0 ? -yyn : 0;
-
-      /* Stay within bounds of both yycheck and yytname.  */
-      int yychecklim = YYLAST - yyn + 1;
-      int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
-      int yycount = 1;
-
-      yyarg[0] = yytname[yytype];
-      yyfmt = yystpcpy (yyformat, yyunexpected);
-
-      for (yyx = yyxbegin; yyx < yyxend; ++yyx)
-	if (yycheck[yyx + yyn] == yyx && yyx != YYTERROR)
-	  {
-	    if (yycount == YYERROR_VERBOSE_ARGS_MAXIMUM)
-	      {
-		yycount = 1;
-		yysize = yysize0;
-		yyformat[sizeof yyunexpected - 1] = '\0';
-		break;
-	      }
-	    yyarg[yycount++] = yytname[yyx];
-	    yysize1 = yysize + yytnamerr (0, yytname[yyx]);
-	    yysize_overflow |= (yysize1 < yysize);
-	    yysize = yysize1;
-	    yyfmt = yystpcpy (yyfmt, yyprefix);
-	    yyprefix = yyor;
-	  }
-
-      yyf = YY_(yyformat);
-      yysize1 = yysize + yystrlen (yyf);
-      yysize_overflow |= (yysize1 < yysize);
-      yysize = yysize1;
-
-      if (yysize_overflow)
-	return YYSIZE_MAXIMUM;
-
-      if (yyresult)
-	{
-	  /* Avoid sprintf, as that infringes on the user's name space.
-	     Don't have undefined behavior even if the translation
-	     produced a string with the wrong number of "%s"s.  */
-	  char *yyp = yyresult;
-	  int yyi = 0;
-	  while ((*yyp = *yyf) != '\0')
-	    {
-	      if (*yyp == '%' && yyf[1] == 's' && yyi < yycount)
-		{
-		  yyp += yytnamerr (yyp, yyarg[yyi++]);
-		  yyf += 2;
-		}
-	      else
-		{
-		  yyp++;
-		  yyf++;
-		}
-	    }
-	}
-      return yysize;
-    }
-}
-#endif /* YYERROR_VERBOSE */
 
 
+#if YYDEBUG
+/*--------------------------------.
+| Print this symbol on YYOUTPUT.  |
+`--------------------------------*/
+
+#if defined (__STDC__) || defined (__cplusplus)
+static void
+yysymprint (FILE *yyoutput, int yytype, YYSTYPE *yyvaluep)
+#else
+static void
+yysymprint (yyoutput, yytype, yyvaluep)
+    FILE *yyoutput;
+    int yytype;
+    YYSTYPE *yyvaluep;
+#endif
+{
+  /* Pacify ``unused variable'' warnings.  */
+  (void) yyvaluep;
+
+  if (yytype < YYNTOKENS)
+    YYFPRINTF (yyoutput, "token %s (", yytname[yytype]);
+  else
+    YYFPRINTF (yyoutput, "nterm %s (", yytname[yytype]);
+
+
+# ifdef YYPRINT
+  if (yytype < YYNTOKENS)
+    YYPRINT (yyoutput, yytoknum[yytype], *yyvaluep);
+# endif
+  switch (yytype)
+    {
+      default:
+        break;
+    }
+  YYFPRINTF (yyoutput, ")");
+}
+
+#endif /* ! YYDEBUG */
 /*-----------------------------------------------.
 | Release the memory associated to this symbol.  |
 `-----------------------------------------------*/
 
-/*ARGSUSED*/
-#if (defined __STDC__ || defined __C99__FUNC__ \
-     || defined __cplusplus || defined _MSC_VER)
+#if defined (__STDC__) || defined (__cplusplus)
 static void
 yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep)
 #else
@@ -1777,7 +1471,8 @@ yydestruct (yymsg, yytype, yyvaluep)
     YYSTYPE *yyvaluep;
 #endif
 {
-  YYUSE (yyvaluep);
+  /* Pacify ``unused variable'' warnings.  */
+  (void) yyvaluep;
 
   if (!yymsg)
     yymsg = "Deleting";
@@ -1787,7 +1482,7 @@ yydestruct (yymsg, yytype, yyvaluep)
     {
 
       default:
-	break;
+        break;
     }
 }
 
@@ -1795,13 +1490,13 @@ yydestruct (yymsg, yytype, yyvaluep)
 /* Prevent warnings from -Wmissing-prototypes.  */
 
 #ifdef YYPARSE_PARAM
-#if defined __STDC__ || defined __cplusplus
+# if defined (__STDC__) || defined (__cplusplus)
 int yyparse (void *YYPARSE_PARAM);
-#else
+# else
 int yyparse ();
-#endif
+# endif
 #else /* ! YYPARSE_PARAM */
-#if defined __STDC__ || defined __cplusplus
+#if defined (__STDC__) || defined (__cplusplus)
 int yyparse (void);
 #else
 int yyparse ();
@@ -1826,18 +1521,14 @@ int yynerrs;
 `----------*/
 
 #ifdef YYPARSE_PARAM
-#if (defined __STDC__ || defined __C99__FUNC__ \
-     || defined __cplusplus || defined _MSC_VER)
-int
-yyparse (void *YYPARSE_PARAM)
-#else
-int
-yyparse (YYPARSE_PARAM)
-    void *YYPARSE_PARAM;
-#endif
+# if defined (__STDC__) || defined (__cplusplus)
+int yyparse (void *YYPARSE_PARAM)
+# else
+int yyparse (YYPARSE_PARAM)
+  void *YYPARSE_PARAM;
+# endif
 #else /* ! YYPARSE_PARAM */
-#if (defined __STDC__ || defined __C99__FUNC__ \
-     || defined __cplusplus || defined _MSC_VER)
+#if defined (__STDC__) || defined (__cplusplus)
 int
 yyparse (void)
 #else
@@ -1848,19 +1539,13 @@ yyparse ()
 #endif
 {
   
-  int yystate;
-  int yyn;
+  register int yystate;
+  register int yyn;
   int yyresult;
   /* Number of tokens to shift before error messages enabled.  */
   int yyerrstatus;
   /* Look-ahead token as an internal (translated) token number.  */
   int yytoken = 0;
-#if YYERROR_VERBOSE
-  /* Buffer for error messages, and its allocated size.  */
-  char yymsgbuf[128];
-  char *yymsg = yymsgbuf;
-  YYSIZE_T yymsg_alloc = sizeof yymsgbuf;
-#endif
 
   /* Three stacks and their tools:
      `yyss': related to states,
@@ -1871,18 +1556,18 @@ yyparse ()
      to reallocate them elsewhere.  */
 
   /* The state stack.  */
-  yytype_int16 yyssa[YYINITDEPTH];
-  yytype_int16 *yyss = yyssa;
-  yytype_int16 *yyssp;
+  short int yyssa[YYINITDEPTH];
+  short int *yyss = yyssa;
+  register short int *yyssp;
 
   /* The semantic value stack.  */
   YYSTYPE yyvsa[YYINITDEPTH];
   YYSTYPE *yyvs = yyvsa;
-  YYSTYPE *yyvsp;
+  register YYSTYPE *yyvsp;
 
 
 
-#define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N))
+#define YYPOPSTACK   (yyvsp--, yyssp--)
 
   YYSIZE_T yystacksize = YYINITDEPTH;
 
@@ -1891,9 +1576,9 @@ yyparse ()
   YYSTYPE yyval;
 
 
-  /* The number of symbols on the RHS of the reduced rule.
-     Keep to zero when no symbol should be popped.  */
-  int yylen = 0;
+  /* When reducing, the number of symbols on the RHS of the reduced
+     rule.  */
+  int yylen;
 
   YYDPRINTF ((stderr, "Starting parse\n"));
 
@@ -1910,6 +1595,9 @@ yyparse ()
   yyssp = yyss;
   yyvsp = yyvs;
 
+
+  yyvsp[0] = yylval;
+
   goto yysetstate;
 
 /*------------------------------------------------------------.
@@ -1917,7 +1605,8 @@ yyparse ()
 `------------------------------------------------------------*/
  yynewstate:
   /* In all cases, when you get here, the value and location stacks
-     have just been pushed.  So pushing a state here evens the stacks.  */
+     have just been pushed. so pushing a state here evens the stacks.
+     */
   yyssp++;
 
  yysetstate:
@@ -1930,18 +1619,18 @@ yyparse ()
 
 #ifdef yyoverflow
       {
-	/* Give user a chance to reallocate the stack.  Use copies of
+	/* Give user a chance to reallocate the stack. Use copies of
 	   these so that the &'s don't force the real ones into
 	   memory.  */
 	YYSTYPE *yyvs1 = yyvs;
-	yytype_int16 *yyss1 = yyss;
+	short int *yyss1 = yyss;
 
 
 	/* Each stack pointer address is followed by the size of the
 	   data in use in that stack, in bytes.  This used to be a
 	   conditional around just the two extra args, but that might
 	   be undefined if yyoverflow is a macro.  */
-	yyoverflow (YY_("memory exhausted"),
+	yyoverflow ("parser stack overflow",
 		    &yyss1, yysize * sizeof (*yyssp),
 		    &yyvs1, yysize * sizeof (*yyvsp),
 
@@ -1952,21 +1641,21 @@ yyparse ()
       }
 #else /* no yyoverflow */
 # ifndef YYSTACK_RELOCATE
-      goto yyexhaustedlab;
+      goto yyoverflowlab;
 # else
       /* Extend the stack our own way.  */
       if (YYMAXDEPTH <= yystacksize)
-	goto yyexhaustedlab;
+	goto yyoverflowlab;
       yystacksize *= 2;
       if (YYMAXDEPTH < yystacksize)
 	yystacksize = YYMAXDEPTH;
 
       {
-	yytype_int16 *yyss1 = yyss;
+	short int *yyss1 = yyss;
 	union yyalloc *yyptr =
 	  (union yyalloc *) YYSTACK_ALLOC (YYSTACK_BYTES (yystacksize));
 	if (! yyptr)
-	  goto yyexhaustedlab;
+	  goto yyoverflowlab;
 	YYSTACK_RELOCATE (yyss);
 	YYSTACK_RELOCATE (yyvs);
 
@@ -1997,10 +1686,12 @@ yyparse ()
 `-----------*/
 yybackup:
 
-  /* Do appropriate processing given the current state.  Read a
-     look-ahead token if we need one and don't already have one.  */
+/* Do appropriate processing given the current state.  */
+/* Read a look-ahead token if we need one and don't already have one.  */
+/* yyresume: */
 
   /* First try to decide what to do without reference to look-ahead token.  */
+
   yyn = yypact[yystate];
   if (yyn == YYPACT_NINF)
     goto yydefault;
@@ -2042,21 +1733,22 @@ yybackup:
   if (yyn == YYFINAL)
     YYACCEPT;
 
+  /* Shift the look-ahead token.  */
+  YY_SYMBOL_PRINT ("Shifting", yytoken, &yylval, &yylloc);
+
+  /* Discard the token being shifted unless it is eof.  */
+  if (yychar != YYEOF)
+    yychar = YYEMPTY;
+
+  *++yyvsp = yylval;
+
+
   /* Count tokens shifted since error; after three, turn off error
      status.  */
   if (yyerrstatus)
     yyerrstatus--;
 
-  /* Shift the look-ahead token.  */
-  YY_SYMBOL_PRINT ("Shifting", yytoken, &yylval, &yylloc);
-
-  /* Discard the shifted token unless it is eof.  */
-  if (yychar != YYEOF)
-    yychar = YYEMPTY;
-
   yystate = yyn;
-  *++yyvsp = yylval;
-
   goto yynewstate;
 
 
@@ -2092,11 +1784,11 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 377 "/Users/chet/src/bash/src/parse.y"
+#line 377 "parse.y"
     {
 			  /* Case of regular command.  Discard the error
 			     safety net,and return the command just parsed. */
-			  global_command = (yyvsp[(1) - (2)].command);
+			  global_command = (yyvsp[-1].command);
 			  eof_encountered = 0;
 			  /* discard_parser_constructs (0); */
 			  if (parser_state & PST_CMDSUBST)
@@ -2106,7 +1798,7 @@ yyreduce:
     break;
 
   case 3:
-#line 388 "/Users/chet/src/bash/src/parse.y"
+#line 388 "parse.y"
     {
 			  /* Case of regular command, but not a very
 			     interesting one.  Return a NULL command. */
@@ -2118,7 +1810,7 @@ yyreduce:
     break;
 
   case 4:
-#line 397 "/Users/chet/src/bash/src/parse.y"
+#line 397 "parse.y"
     {
 			  /* Error during parsing.  Return NULL command. */
 			  global_command = (COMMAND *)NULL;
@@ -2136,7 +1828,7 @@ yyreduce:
     break;
 
   case 5:
-#line 412 "/Users/chet/src/bash/src/parse.y"
+#line 412 "parse.y"
     {
 			  /* Case of EOF seen by itself.  Do ignoreeof or
 			     not. */
@@ -2147,347 +1839,347 @@ yyreduce:
     break;
 
   case 6:
-#line 422 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.word_list) = make_word_list ((yyvsp[(1) - (1)].word), (WORD_LIST *)NULL); }
+#line 422 "parse.y"
+    { (yyval.word_list) = make_word_list ((yyvsp[0].word), (WORD_LIST *)NULL); }
     break;
 
   case 7:
-#line 424 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.word_list) = make_word_list ((yyvsp[(2) - (2)].word), (yyvsp[(1) - (2)].word_list)); }
+#line 424 "parse.y"
+    { (yyval.word_list) = make_word_list ((yyvsp[0].word), (yyvsp[-1].word_list)); }
     break;
 
   case 8:
-#line 428 "/Users/chet/src/bash/src/parse.y"
+#line 428 "parse.y"
     {
 			  source.dest = 1;
-			  redir.filename = (yyvsp[(2) - (2)].word);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_output_direction, redir, 0);
 			}
     break;
 
   case 9:
-#line 434 "/Users/chet/src/bash/src/parse.y"
+#line 434 "parse.y"
     {
 			  source.dest = 0;
-			  redir.filename = (yyvsp[(2) - (2)].word);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_input_direction, redir, 0);
 			}
     break;
 
   case 10:
-#line 440 "/Users/chet/src/bash/src/parse.y"
+#line 440 "parse.y"
     {
-			  source.dest = (yyvsp[(1) - (3)].number);
-			  redir.filename = (yyvsp[(3) - (3)].word);
+			  source.dest = (yyvsp[-2].number);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_output_direction, redir, 0);
 			}
     break;
 
   case 11:
-#line 446 "/Users/chet/src/bash/src/parse.y"
+#line 446 "parse.y"
     {
-			  source.dest = (yyvsp[(1) - (3)].number);
-			  redir.filename = (yyvsp[(3) - (3)].word);
+			  source.dest = (yyvsp[-2].number);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_input_direction, redir, 0);
 			}
     break;
 
   case 12:
-#line 452 "/Users/chet/src/bash/src/parse.y"
+#line 452 "parse.y"
     {
-			  source.filename = (yyvsp[(1) - (3)].word);
-			  redir.filename = (yyvsp[(3) - (3)].word);
+			  source.filename = (yyvsp[-2].word);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_output_direction, redir, REDIR_VARASSIGN);
 			}
     break;
 
   case 13:
-#line 458 "/Users/chet/src/bash/src/parse.y"
+#line 458 "parse.y"
     {
-			  source.filename = (yyvsp[(1) - (3)].word);
-			  redir.filename = (yyvsp[(3) - (3)].word);
+			  source.filename = (yyvsp[-2].word);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_input_direction, redir, REDIR_VARASSIGN);
 			}
     break;
 
   case 14:
-#line 464 "/Users/chet/src/bash/src/parse.y"
+#line 464 "parse.y"
     {
 			  source.dest = 1;
-			  redir.filename = (yyvsp[(2) - (2)].word);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_appending_to, redir, 0);
 			}
     break;
 
   case 15:
-#line 470 "/Users/chet/src/bash/src/parse.y"
+#line 470 "parse.y"
     {
-			  source.dest = (yyvsp[(1) - (3)].number);
-			  redir.filename = (yyvsp[(3) - (3)].word);
+			  source.dest = (yyvsp[-2].number);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_appending_to, redir, 0);
 			}
     break;
 
   case 16:
-#line 476 "/Users/chet/src/bash/src/parse.y"
+#line 476 "parse.y"
     {
-			  source.filename = (yyvsp[(1) - (3)].word);
-			  redir.filename = (yyvsp[(3) - (3)].word);
+			  source.filename = (yyvsp[-2].word);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_appending_to, redir, REDIR_VARASSIGN);
 			}
     break;
 
   case 17:
-#line 482 "/Users/chet/src/bash/src/parse.y"
+#line 482 "parse.y"
     {
 			  source.dest = 1;
-			  redir.filename = (yyvsp[(2) - (2)].word);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_output_force, redir, 0);
 			}
     break;
 
   case 18:
-#line 488 "/Users/chet/src/bash/src/parse.y"
+#line 488 "parse.y"
     {
-			  source.dest = (yyvsp[(1) - (3)].number);
-			  redir.filename = (yyvsp[(3) - (3)].word);
+			  source.dest = (yyvsp[-2].number);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_output_force, redir, 0);
 			}
     break;
 
   case 19:
-#line 494 "/Users/chet/src/bash/src/parse.y"
+#line 494 "parse.y"
     {
-			  source.filename = (yyvsp[(1) - (3)].word);
-			  redir.filename = (yyvsp[(3) - (3)].word);
+			  source.filename = (yyvsp[-2].word);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_output_force, redir, REDIR_VARASSIGN);
 			}
     break;
 
   case 20:
-#line 500 "/Users/chet/src/bash/src/parse.y"
+#line 500 "parse.y"
     {
 			  source.dest = 0;
-			  redir.filename = (yyvsp[(2) - (2)].word);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_input_output, redir, 0);
 			}
     break;
 
   case 21:
-#line 506 "/Users/chet/src/bash/src/parse.y"
+#line 506 "parse.y"
     {
-			  source.dest = (yyvsp[(1) - (3)].number);
-			  redir.filename = (yyvsp[(3) - (3)].word);
+			  source.dest = (yyvsp[-2].number);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_input_output, redir, 0);
 			}
     break;
 
   case 22:
-#line 512 "/Users/chet/src/bash/src/parse.y"
+#line 512 "parse.y"
     {
-			  source.filename = (yyvsp[(1) - (3)].word);
-			  redir.filename = (yyvsp[(3) - (3)].word);
+			  source.filename = (yyvsp[-2].word);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_input_output, redir, REDIR_VARASSIGN);
 			}
     break;
 
   case 23:
-#line 518 "/Users/chet/src/bash/src/parse.y"
+#line 518 "parse.y"
     {
 			  source.dest = 0;
-			  redir.filename = (yyvsp[(2) - (2)].word);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_reading_until, redir, 0);
 			  redir_stack[need_here_doc++] = (yyval.redirect);
 			}
     break;
 
   case 24:
-#line 525 "/Users/chet/src/bash/src/parse.y"
+#line 525 "parse.y"
     {
-			  source.dest = (yyvsp[(1) - (3)].number);
-			  redir.filename = (yyvsp[(3) - (3)].word);
+			  source.dest = (yyvsp[-2].number);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_reading_until, redir, 0);
 			  redir_stack[need_here_doc++] = (yyval.redirect);
 			}
     break;
 
   case 25:
-#line 532 "/Users/chet/src/bash/src/parse.y"
+#line 532 "parse.y"
     {
-			  source.filename = (yyvsp[(1) - (3)].word);
-			  redir.filename = (yyvsp[(3) - (3)].word);
+			  source.filename = (yyvsp[-2].word);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_reading_until, redir, REDIR_VARASSIGN);
 			  redir_stack[need_here_doc++] = (yyval.redirect);
 			}
     break;
 
   case 26:
-#line 539 "/Users/chet/src/bash/src/parse.y"
+#line 539 "parse.y"
     {
 			  source.dest = 0;
-			  redir.filename = (yyvsp[(2) - (2)].word);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_deblank_reading_until, redir, 0);
 			  redir_stack[need_here_doc++] = (yyval.redirect);
 			}
     break;
 
   case 27:
-#line 546 "/Users/chet/src/bash/src/parse.y"
+#line 546 "parse.y"
     {
-			  source.dest = (yyvsp[(1) - (3)].number);
-			  redir.filename = (yyvsp[(3) - (3)].word);
+			  source.dest = (yyvsp[-2].number);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_deblank_reading_until, redir, 0);
 			  redir_stack[need_here_doc++] = (yyval.redirect);
 			}
     break;
 
   case 28:
-#line 553 "/Users/chet/src/bash/src/parse.y"
+#line 553 "parse.y"
     {
-			  source.filename = (yyvsp[(1) - (3)].word);
-			  redir.filename = (yyvsp[(3) - (3)].word);
+			  source.filename = (yyvsp[-2].word);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_deblank_reading_until, redir, REDIR_VARASSIGN);
 			  redir_stack[need_here_doc++] = (yyval.redirect);
 			}
     break;
 
   case 29:
-#line 560 "/Users/chet/src/bash/src/parse.y"
+#line 560 "parse.y"
     {
 			  source.dest = 0;
-			  redir.filename = (yyvsp[(2) - (2)].word);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_reading_string, redir, 0);
 			}
     break;
 
   case 30:
-#line 566 "/Users/chet/src/bash/src/parse.y"
+#line 566 "parse.y"
     {
-			  source.dest = (yyvsp[(1) - (3)].number);
-			  redir.filename = (yyvsp[(3) - (3)].word);
+			  source.dest = (yyvsp[-2].number);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_reading_string, redir, 0);
 			}
     break;
 
   case 31:
-#line 572 "/Users/chet/src/bash/src/parse.y"
+#line 572 "parse.y"
     {
-			  source.filename = (yyvsp[(1) - (3)].word);
-			  redir.filename = (yyvsp[(3) - (3)].word);
+			  source.filename = (yyvsp[-2].word);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_reading_string, redir, REDIR_VARASSIGN);
 			}
     break;
 
   case 32:
-#line 578 "/Users/chet/src/bash/src/parse.y"
+#line 578 "parse.y"
     {
 			  source.dest = 0;
-			  redir.dest = (yyvsp[(2) - (2)].number);
+			  redir.dest = (yyvsp[0].number);
 			  (yyval.redirect) = make_redirection (source, r_duplicating_input, redir, 0);
 			}
     break;
 
   case 33:
-#line 584 "/Users/chet/src/bash/src/parse.y"
+#line 584 "parse.y"
     {
-			  source.dest = (yyvsp[(1) - (3)].number);
-			  redir.dest = (yyvsp[(3) - (3)].number);
+			  source.dest = (yyvsp[-2].number);
+			  redir.dest = (yyvsp[0].number);
 			  (yyval.redirect) = make_redirection (source, r_duplicating_input, redir, 0);
 			}
     break;
 
   case 34:
-#line 590 "/Users/chet/src/bash/src/parse.y"
+#line 590 "parse.y"
     {
-			  source.filename = (yyvsp[(1) - (3)].word);
-			  redir.dest = (yyvsp[(3) - (3)].number);
+			  source.filename = (yyvsp[-2].word);
+			  redir.dest = (yyvsp[0].number);
 			  (yyval.redirect) = make_redirection (source, r_duplicating_input, redir, REDIR_VARASSIGN);
 			}
     break;
 
   case 35:
-#line 596 "/Users/chet/src/bash/src/parse.y"
+#line 596 "parse.y"
     {
 			  source.dest = 1;
-			  redir.dest = (yyvsp[(2) - (2)].number);
+			  redir.dest = (yyvsp[0].number);
 			  (yyval.redirect) = make_redirection (source, r_duplicating_output, redir, 0);
 			}
     break;
 
   case 36:
-#line 602 "/Users/chet/src/bash/src/parse.y"
+#line 602 "parse.y"
     {
-			  source.dest = (yyvsp[(1) - (3)].number);
-			  redir.dest = (yyvsp[(3) - (3)].number);
+			  source.dest = (yyvsp[-2].number);
+			  redir.dest = (yyvsp[0].number);
 			  (yyval.redirect) = make_redirection (source, r_duplicating_output, redir, 0);
 			}
     break;
 
   case 37:
-#line 608 "/Users/chet/src/bash/src/parse.y"
+#line 608 "parse.y"
     {
-			  source.filename = (yyvsp[(1) - (3)].word);
-			  redir.dest = (yyvsp[(3) - (3)].number);
+			  source.filename = (yyvsp[-2].word);
+			  redir.dest = (yyvsp[0].number);
 			  (yyval.redirect) = make_redirection (source, r_duplicating_output, redir, REDIR_VARASSIGN);
 			}
     break;
 
   case 38:
-#line 614 "/Users/chet/src/bash/src/parse.y"
+#line 614 "parse.y"
     {
 			  source.dest = 0;
-			  redir.filename = (yyvsp[(2) - (2)].word);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_duplicating_input_word, redir, 0);
 			}
     break;
 
   case 39:
-#line 620 "/Users/chet/src/bash/src/parse.y"
+#line 620 "parse.y"
     {
-			  source.dest = (yyvsp[(1) - (3)].number);
-			  redir.filename = (yyvsp[(3) - (3)].word);
+			  source.dest = (yyvsp[-2].number);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_duplicating_input_word, redir, 0);
 			}
     break;
 
   case 40:
-#line 626 "/Users/chet/src/bash/src/parse.y"
+#line 626 "parse.y"
     {
-			  source.filename = (yyvsp[(1) - (3)].word);
-			  redir.filename = (yyvsp[(3) - (3)].word);
+			  source.filename = (yyvsp[-2].word);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_duplicating_input_word, redir, REDIR_VARASSIGN);
 			}
     break;
 
   case 41:
-#line 632 "/Users/chet/src/bash/src/parse.y"
+#line 632 "parse.y"
     {
 			  source.dest = 1;
-			  redir.filename = (yyvsp[(2) - (2)].word);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_duplicating_output_word, redir, 0);
 			}
     break;
 
   case 42:
-#line 638 "/Users/chet/src/bash/src/parse.y"
+#line 638 "parse.y"
     {
-			  source.dest = (yyvsp[(1) - (3)].number);
-			  redir.filename = (yyvsp[(3) - (3)].word);
+			  source.dest = (yyvsp[-2].number);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_duplicating_output_word, redir, 0);
 			}
     break;
 
   case 43:
-#line 644 "/Users/chet/src/bash/src/parse.y"
+#line 644 "parse.y"
     {
-			  source.filename = (yyvsp[(1) - (3)].word);
-			  redir.filename = (yyvsp[(3) - (3)].word);
+			  source.filename = (yyvsp[-2].word);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_duplicating_output_word, redir, REDIR_VARASSIGN);
 			}
     break;
 
   case 44:
-#line 650 "/Users/chet/src/bash/src/parse.y"
+#line 650 "parse.y"
     {
 			  source.dest = 1;
 			  redir.dest = 0;
@@ -2496,25 +2188,25 @@ yyreduce:
     break;
 
   case 45:
-#line 656 "/Users/chet/src/bash/src/parse.y"
+#line 656 "parse.y"
     {
-			  source.dest = (yyvsp[(1) - (3)].number);
+			  source.dest = (yyvsp[-2].number);
 			  redir.dest = 0;
 			  (yyval.redirect) = make_redirection (source, r_close_this, redir, 0);
 			}
     break;
 
   case 46:
-#line 662 "/Users/chet/src/bash/src/parse.y"
+#line 662 "parse.y"
     {
-			  source.filename = (yyvsp[(1) - (3)].word);
+			  source.filename = (yyvsp[-2].word);
 			  redir.dest = 0;
 			  (yyval.redirect) = make_redirection (source, r_close_this, redir, REDIR_VARASSIGN);
 			}
     break;
 
   case 47:
-#line 668 "/Users/chet/src/bash/src/parse.y"
+#line 668 "parse.y"
     {
 			  source.dest = 0;
 			  redir.dest = 0;
@@ -2523,373 +2215,373 @@ yyreduce:
     break;
 
   case 48:
-#line 674 "/Users/chet/src/bash/src/parse.y"
+#line 674 "parse.y"
     {
-			  source.dest = (yyvsp[(1) - (3)].number);
+			  source.dest = (yyvsp[-2].number);
 			  redir.dest = 0;
 			  (yyval.redirect) = make_redirection (source, r_close_this, redir, 0);
 			}
     break;
 
   case 49:
-#line 680 "/Users/chet/src/bash/src/parse.y"
+#line 680 "parse.y"
     {
-			  source.filename = (yyvsp[(1) - (3)].word);
+			  source.filename = (yyvsp[-2].word);
 			  redir.dest = 0;
 			  (yyval.redirect) = make_redirection (source, r_close_this, redir, REDIR_VARASSIGN);
 			}
     break;
 
   case 50:
-#line 686 "/Users/chet/src/bash/src/parse.y"
+#line 686 "parse.y"
     {
 			  source.dest = 1;
-			  redir.filename = (yyvsp[(2) - (2)].word);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_err_and_out, redir, 0);
 			}
     break;
 
   case 51:
-#line 692 "/Users/chet/src/bash/src/parse.y"
+#line 692 "parse.y"
     {
 			  source.dest = 1;
-			  redir.filename = (yyvsp[(2) - (2)].word);
+			  redir.filename = (yyvsp[0].word);
 			  (yyval.redirect) = make_redirection (source, r_append_err_and_out, redir, 0);
 			}
     break;
 
   case 52:
-#line 700 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.element).word = (yyvsp[(1) - (1)].word); (yyval.element).redirect = 0; }
+#line 700 "parse.y"
+    { (yyval.element).word = (yyvsp[0].word); (yyval.element).redirect = 0; }
     break;
 
   case 53:
-#line 702 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.element).word = (yyvsp[(1) - (1)].word); (yyval.element).redirect = 0; }
+#line 702 "parse.y"
+    { (yyval.element).word = (yyvsp[0].word); (yyval.element).redirect = 0; }
     break;
 
   case 54:
-#line 704 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.element).redirect = (yyvsp[(1) - (1)].redirect); (yyval.element).word = 0; }
+#line 704 "parse.y"
+    { (yyval.element).redirect = (yyvsp[0].redirect); (yyval.element).word = 0; }
     break;
 
   case 55:
-#line 708 "/Users/chet/src/bash/src/parse.y"
+#line 708 "parse.y"
     {
-			  (yyval.redirect) = (yyvsp[(1) - (1)].redirect);
+			  (yyval.redirect) = (yyvsp[0].redirect);
 			}
     break;
 
   case 56:
-#line 712 "/Users/chet/src/bash/src/parse.y"
+#line 712 "parse.y"
     {
 			  register REDIRECT *t;
 
-			  for (t = (yyvsp[(1) - (2)].redirect); t->next; t = t->next)
+			  for (t = (yyvsp[-1].redirect); t->next; t = t->next)
 			    ;
-			  t->next = (yyvsp[(2) - (2)].redirect);
-			  (yyval.redirect) = (yyvsp[(1) - (2)].redirect);
+			  t->next = (yyvsp[0].redirect);
+			  (yyval.redirect) = (yyvsp[-1].redirect);
 			}
     break;
 
   case 57:
-#line 723 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = make_simple_command ((yyvsp[(1) - (1)].element), (COMMAND *)NULL); }
+#line 723 "parse.y"
+    { (yyval.command) = make_simple_command ((yyvsp[0].element), (COMMAND *)NULL); }
     break;
 
   case 58:
-#line 725 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = make_simple_command ((yyvsp[(2) - (2)].element), (yyvsp[(1) - (2)].command)); }
+#line 725 "parse.y"
+    { (yyval.command) = make_simple_command ((yyvsp[0].element), (yyvsp[-1].command)); }
     break;
 
   case 59:
-#line 729 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = clean_simple_command ((yyvsp[(1) - (1)].command)); }
+#line 729 "parse.y"
+    { (yyval.command) = clean_simple_command ((yyvsp[0].command)); }
     break;
 
   case 60:
-#line 731 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = (yyvsp[(1) - (1)].command); }
+#line 731 "parse.y"
+    { (yyval.command) = (yyvsp[0].command); }
     break;
 
   case 61:
-#line 733 "/Users/chet/src/bash/src/parse.y"
+#line 733 "parse.y"
     {
 			  COMMAND *tc;
 
-			  tc = (yyvsp[(1) - (2)].command);
+			  tc = (yyvsp[-1].command);
 			  if (tc->redirects)
 			    {
 			      register REDIRECT *t;
 			      for (t = tc->redirects; t->next; t = t->next)
 				;
-			      t->next = (yyvsp[(2) - (2)].redirect);
+			      t->next = (yyvsp[0].redirect);
 			    }
 			  else
-			    tc->redirects = (yyvsp[(2) - (2)].redirect);
-			  (yyval.command) = (yyvsp[(1) - (2)].command);
+			    tc->redirects = (yyvsp[0].redirect);
+			  (yyval.command) = (yyvsp[-1].command);
 			}
     break;
 
   case 62:
-#line 749 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = (yyvsp[(1) - (1)].command); }
+#line 749 "parse.y"
+    { (yyval.command) = (yyvsp[0].command); }
     break;
 
   case 63:
-#line 751 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = (yyvsp[(1) - (1)].command); }
+#line 751 "parse.y"
+    { (yyval.command) = (yyvsp[0].command); }
     break;
 
   case 64:
-#line 755 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = (yyvsp[(1) - (1)].command); }
+#line 755 "parse.y"
+    { (yyval.command) = (yyvsp[0].command); }
     break;
 
   case 65:
-#line 757 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = (yyvsp[(1) - (1)].command); }
+#line 757 "parse.y"
+    { (yyval.command) = (yyvsp[0].command); }
     break;
 
   case 66:
-#line 759 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = make_while_command ((yyvsp[(2) - (5)].command), (yyvsp[(4) - (5)].command)); }
+#line 759 "parse.y"
+    { (yyval.command) = make_while_command ((yyvsp[-3].command), (yyvsp[-1].command)); }
     break;
 
   case 67:
-#line 761 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = make_until_command ((yyvsp[(2) - (5)].command), (yyvsp[(4) - (5)].command)); }
+#line 761 "parse.y"
+    { (yyval.command) = make_until_command ((yyvsp[-3].command), (yyvsp[-1].command)); }
     break;
 
   case 68:
-#line 763 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = (yyvsp[(1) - (1)].command); }
+#line 763 "parse.y"
+    { (yyval.command) = (yyvsp[0].command); }
     break;
 
   case 69:
-#line 765 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = (yyvsp[(1) - (1)].command); }
+#line 765 "parse.y"
+    { (yyval.command) = (yyvsp[0].command); }
     break;
 
   case 70:
-#line 767 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = (yyvsp[(1) - (1)].command); }
+#line 767 "parse.y"
+    { (yyval.command) = (yyvsp[0].command); }
     break;
 
   case 71:
-#line 769 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = (yyvsp[(1) - (1)].command); }
+#line 769 "parse.y"
+    { (yyval.command) = (yyvsp[0].command); }
     break;
 
   case 72:
-#line 771 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = (yyvsp[(1) - (1)].command); }
+#line 771 "parse.y"
+    { (yyval.command) = (yyvsp[0].command); }
     break;
 
   case 73:
-#line 773 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = (yyvsp[(1) - (1)].command); }
+#line 773 "parse.y"
+    { (yyval.command) = (yyvsp[0].command); }
     break;
 
   case 74:
-#line 775 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = (yyvsp[(1) - (1)].command); }
+#line 775 "parse.y"
+    { (yyval.command) = (yyvsp[0].command); }
     break;
 
   case 75:
-#line 779 "/Users/chet/src/bash/src/parse.y"
+#line 779 "parse.y"
     {
-			  (yyval.command) = make_for_command ((yyvsp[(2) - (6)].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[(5) - (6)].command), word_lineno[word_top]);
+			  (yyval.command) = make_for_command ((yyvsp[-4].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[-1].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
     break;
 
   case 76:
-#line 784 "/Users/chet/src/bash/src/parse.y"
+#line 784 "parse.y"
     {
-			  (yyval.command) = make_for_command ((yyvsp[(2) - (6)].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[(5) - (6)].command), word_lineno[word_top]);
+			  (yyval.command) = make_for_command ((yyvsp[-4].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[-1].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
     break;
 
   case 77:
-#line 789 "/Users/chet/src/bash/src/parse.y"
+#line 789 "parse.y"
     {
-			  (yyval.command) = make_for_command ((yyvsp[(2) - (7)].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[(6) - (7)].command), word_lineno[word_top]);
+			  (yyval.command) = make_for_command ((yyvsp[-5].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[-1].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
     break;
 
   case 78:
-#line 794 "/Users/chet/src/bash/src/parse.y"
+#line 794 "parse.y"
     {
-			  (yyval.command) = make_for_command ((yyvsp[(2) - (7)].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[(6) - (7)].command), word_lineno[word_top]);
+			  (yyval.command) = make_for_command ((yyvsp[-5].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[-1].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
     break;
 
   case 79:
-#line 799 "/Users/chet/src/bash/src/parse.y"
+#line 799 "parse.y"
     {
-			  (yyval.command) = make_for_command ((yyvsp[(2) - (10)].word), REVERSE_LIST ((yyvsp[(5) - (10)].word_list), WORD_LIST *), (yyvsp[(9) - (10)].command), word_lineno[word_top]);
+			  (yyval.command) = make_for_command ((yyvsp[-8].word), REVERSE_LIST ((yyvsp[-5].word_list), WORD_LIST *), (yyvsp[-1].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
     break;
 
   case 80:
-#line 804 "/Users/chet/src/bash/src/parse.y"
+#line 804 "parse.y"
     {
-			  (yyval.command) = make_for_command ((yyvsp[(2) - (10)].word), REVERSE_LIST ((yyvsp[(5) - (10)].word_list), WORD_LIST *), (yyvsp[(9) - (10)].command), word_lineno[word_top]);
+			  (yyval.command) = make_for_command ((yyvsp[-8].word), REVERSE_LIST ((yyvsp[-5].word_list), WORD_LIST *), (yyvsp[-1].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
     break;
 
   case 81:
-#line 809 "/Users/chet/src/bash/src/parse.y"
+#line 809 "parse.y"
     {
-			  (yyval.command) = make_for_command ((yyvsp[(2) - (9)].word), (WORD_LIST *)NULL, (yyvsp[(8) - (9)].command), word_lineno[word_top]);
+			  (yyval.command) = make_for_command ((yyvsp[-7].word), (WORD_LIST *)NULL, (yyvsp[-1].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
     break;
 
   case 82:
-#line 814 "/Users/chet/src/bash/src/parse.y"
+#line 814 "parse.y"
     {
-			  (yyval.command) = make_for_command ((yyvsp[(2) - (9)].word), (WORD_LIST *)NULL, (yyvsp[(8) - (9)].command), word_lineno[word_top]);
+			  (yyval.command) = make_for_command ((yyvsp[-7].word), (WORD_LIST *)NULL, (yyvsp[-1].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
     break;
 
   case 83:
-#line 821 "/Users/chet/src/bash/src/parse.y"
+#line 821 "parse.y"
     {
-				  (yyval.command) = make_arith_for_command ((yyvsp[(2) - (7)].word_list), (yyvsp[(6) - (7)].command), arith_for_lineno);
+				  (yyval.command) = make_arith_for_command ((yyvsp[-5].word_list), (yyvsp[-1].command), arith_for_lineno);
 				  if (word_top > 0) word_top--;
 				}
     break;
 
   case 84:
-#line 826 "/Users/chet/src/bash/src/parse.y"
+#line 826 "parse.y"
     {
-				  (yyval.command) = make_arith_for_command ((yyvsp[(2) - (7)].word_list), (yyvsp[(6) - (7)].command), arith_for_lineno);
+				  (yyval.command) = make_arith_for_command ((yyvsp[-5].word_list), (yyvsp[-1].command), arith_for_lineno);
 				  if (word_top > 0) word_top--;
 				}
     break;
 
   case 85:
-#line 831 "/Users/chet/src/bash/src/parse.y"
+#line 831 "parse.y"
     {
-				  (yyval.command) = make_arith_for_command ((yyvsp[(2) - (5)].word_list), (yyvsp[(4) - (5)].command), arith_for_lineno);
+				  (yyval.command) = make_arith_for_command ((yyvsp[-3].word_list), (yyvsp[-1].command), arith_for_lineno);
 				  if (word_top > 0) word_top--;
 				}
     break;
 
   case 86:
-#line 836 "/Users/chet/src/bash/src/parse.y"
+#line 836 "parse.y"
     {
-				  (yyval.command) = make_arith_for_command ((yyvsp[(2) - (5)].word_list), (yyvsp[(4) - (5)].command), arith_for_lineno);
+				  (yyval.command) = make_arith_for_command ((yyvsp[-3].word_list), (yyvsp[-1].command), arith_for_lineno);
 				  if (word_top > 0) word_top--;
 				}
     break;
 
   case 87:
-#line 843 "/Users/chet/src/bash/src/parse.y"
+#line 843 "parse.y"
     {
-			  (yyval.command) = make_select_command ((yyvsp[(2) - (6)].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[(5) - (6)].command), word_lineno[word_top]);
+			  (yyval.command) = make_select_command ((yyvsp[-4].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[-1].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
     break;
 
   case 88:
-#line 848 "/Users/chet/src/bash/src/parse.y"
+#line 848 "parse.y"
     {
-			  (yyval.command) = make_select_command ((yyvsp[(2) - (6)].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[(5) - (6)].command), word_lineno[word_top]);
+			  (yyval.command) = make_select_command ((yyvsp[-4].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[-1].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
     break;
 
   case 89:
-#line 853 "/Users/chet/src/bash/src/parse.y"
+#line 853 "parse.y"
     {
-			  (yyval.command) = make_select_command ((yyvsp[(2) - (7)].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[(6) - (7)].command), word_lineno[word_top]);
+			  (yyval.command) = make_select_command ((yyvsp[-5].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[-1].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
     break;
 
   case 90:
-#line 858 "/Users/chet/src/bash/src/parse.y"
+#line 858 "parse.y"
     {
-			  (yyval.command) = make_select_command ((yyvsp[(2) - (7)].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[(6) - (7)].command), word_lineno[word_top]);
+			  (yyval.command) = make_select_command ((yyvsp[-5].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[-1].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
     break;
 
   case 91:
-#line 863 "/Users/chet/src/bash/src/parse.y"
+#line 863 "parse.y"
     {
-			  (yyval.command) = make_select_command ((yyvsp[(2) - (10)].word), REVERSE_LIST ((yyvsp[(5) - (10)].word_list), WORD_LIST *), (yyvsp[(9) - (10)].command), word_lineno[word_top]);
+			  (yyval.command) = make_select_command ((yyvsp[-8].word), REVERSE_LIST ((yyvsp[-5].word_list), WORD_LIST *), (yyvsp[-1].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
     break;
 
   case 92:
-#line 868 "/Users/chet/src/bash/src/parse.y"
+#line 868 "parse.y"
     {
-			  (yyval.command) = make_select_command ((yyvsp[(2) - (10)].word), REVERSE_LIST ((yyvsp[(5) - (10)].word_list), WORD_LIST *), (yyvsp[(9) - (10)].command), word_lineno[word_top]);
+			  (yyval.command) = make_select_command ((yyvsp[-8].word), REVERSE_LIST ((yyvsp[-5].word_list), WORD_LIST *), (yyvsp[-1].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
     break;
 
   case 93:
-#line 875 "/Users/chet/src/bash/src/parse.y"
+#line 875 "parse.y"
     {
-			  (yyval.command) = make_case_command ((yyvsp[(2) - (6)].word), (PATTERN_LIST *)NULL, word_lineno[word_top]);
+			  (yyval.command) = make_case_command ((yyvsp[-4].word), (PATTERN_LIST *)NULL, word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
     break;
 
   case 94:
-#line 880 "/Users/chet/src/bash/src/parse.y"
+#line 880 "parse.y"
     {
-			  (yyval.command) = make_case_command ((yyvsp[(2) - (7)].word), (yyvsp[(5) - (7)].pattern), word_lineno[word_top]);
+			  (yyval.command) = make_case_command ((yyvsp[-5].word), (yyvsp[-2].pattern), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
     break;
 
   case 95:
-#line 885 "/Users/chet/src/bash/src/parse.y"
+#line 885 "parse.y"
     {
-			  (yyval.command) = make_case_command ((yyvsp[(2) - (6)].word), (yyvsp[(5) - (6)].pattern), word_lineno[word_top]);
+			  (yyval.command) = make_case_command ((yyvsp[-4].word), (yyvsp[-1].pattern), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
     break;
 
   case 96:
-#line 892 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = make_function_def ((yyvsp[(1) - (5)].word), (yyvsp[(5) - (5)].command), function_dstart, function_bstart); }
+#line 892 "parse.y"
+    { (yyval.command) = make_function_def ((yyvsp[-4].word), (yyvsp[0].command), function_dstart, function_bstart); }
     break;
 
   case 97:
-#line 895 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = make_function_def ((yyvsp[(2) - (6)].word), (yyvsp[(6) - (6)].command), function_dstart, function_bstart); }
+#line 895 "parse.y"
+    { (yyval.command) = make_function_def ((yyvsp[-4].word), (yyvsp[0].command), function_dstart, function_bstart); }
     break;
 
   case 98:
-#line 898 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = make_function_def ((yyvsp[(2) - (4)].word), (yyvsp[(4) - (4)].command), function_dstart, function_bstart); }
+#line 898 "parse.y"
+    { (yyval.command) = make_function_def ((yyvsp[-2].word), (yyvsp[0].command), function_dstart, function_bstart); }
     break;
 
   case 99:
-#line 902 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = (yyvsp[(1) - (1)].command); }
+#line 902 "parse.y"
+    { (yyval.command) = (yyvsp[0].command); }
     break;
 
   case 100:
-#line 904 "/Users/chet/src/bash/src/parse.y"
+#line 904 "parse.y"
     {
 			  COMMAND *tc;
 
-			  tc = (yyvsp[(1) - (2)].command);
+			  tc = (yyvsp[-1].command);
 			  /* According to Posix.2 3.9.5, redirections
 			     specified after the body of a function should
 			     be attached to the function and performed when
@@ -2908,281 +2600,281 @@ yyreduce:
 			      register REDIRECT *t;
 			      for (t = tc->redirects; t->next; t = t->next)
 				;
-			      t->next = (yyvsp[(2) - (2)].redirect);
+			      t->next = (yyvsp[0].redirect);
 			    }
 			  else
-			    tc->redirects = (yyvsp[(2) - (2)].redirect);
-			  (yyval.command) = (yyvsp[(1) - (2)].command);
+			    tc->redirects = (yyvsp[0].redirect);
+			  (yyval.command) = (yyvsp[-1].command);
 			}
     break;
 
   case 101:
-#line 935 "/Users/chet/src/bash/src/parse.y"
+#line 935 "parse.y"
     {
-			  (yyval.command) = make_subshell_command ((yyvsp[(2) - (3)].command));
+			  (yyval.command) = make_subshell_command ((yyvsp[-1].command));
 			  (yyval.command)->flags |= CMD_WANT_SUBSHELL;
 			}
     break;
 
   case 102:
-#line 942 "/Users/chet/src/bash/src/parse.y"
+#line 942 "parse.y"
     {
-			  (yyval.command) = make_coproc_command ("COPROC", (yyvsp[(2) - (2)].command));
+			  (yyval.command) = make_coproc_command ("COPROC", (yyvsp[0].command));
 			  (yyval.command)->flags |= CMD_WANT_SUBSHELL|CMD_COPROC_SUBSHELL;
 			}
     break;
 
   case 103:
-#line 947 "/Users/chet/src/bash/src/parse.y"
+#line 947 "parse.y"
     {
 			  COMMAND *tc;
 
-			  tc = (yyvsp[(2) - (3)].command);
+			  tc = (yyvsp[-1].command);
 			  if (tc->redirects)
 			    {
 			      register REDIRECT *t;
 			      for (t = tc->redirects; t->next; t = t->next)
 				;
-			      t->next = (yyvsp[(3) - (3)].redirect);
+			      t->next = (yyvsp[0].redirect);
 			    }
 			  else
-			    tc->redirects = (yyvsp[(3) - (3)].redirect);
-			  (yyval.command) = make_coproc_command ("COPROC", (yyvsp[(2) - (3)].command));
+			    tc->redirects = (yyvsp[0].redirect);
+			  (yyval.command) = make_coproc_command ("COPROC", (yyvsp[-1].command));
 			  (yyval.command)->flags |= CMD_WANT_SUBSHELL|CMD_COPROC_SUBSHELL;
 			}
     break;
 
   case 104:
-#line 964 "/Users/chet/src/bash/src/parse.y"
+#line 964 "parse.y"
     {
-			  (yyval.command) = make_coproc_command ((yyvsp[(2) - (3)].word)->word, (yyvsp[(3) - (3)].command));
+			  (yyval.command) = make_coproc_command ((yyvsp[-1].word)->word, (yyvsp[0].command));
 			  (yyval.command)->flags |= CMD_WANT_SUBSHELL|CMD_COPROC_SUBSHELL;
 			}
     break;
 
   case 105:
-#line 969 "/Users/chet/src/bash/src/parse.y"
+#line 969 "parse.y"
     {
 			  COMMAND *tc;
 
-			  tc = (yyvsp[(3) - (4)].command);
+			  tc = (yyvsp[-1].command);
 			  if (tc->redirects)
 			    {
 			      register REDIRECT *t;
 			      for (t = tc->redirects; t->next; t = t->next)
 				;
-			      t->next = (yyvsp[(4) - (4)].redirect);
+			      t->next = (yyvsp[0].redirect);
 			    }
 			  else
-			    tc->redirects = (yyvsp[(4) - (4)].redirect);
-			  (yyval.command) = make_coproc_command ((yyvsp[(2) - (4)].word)->word, (yyvsp[(3) - (4)].command));
+			    tc->redirects = (yyvsp[0].redirect);
+			  (yyval.command) = make_coproc_command ((yyvsp[-2].word)->word, (yyvsp[-1].command));
 			  (yyval.command)->flags |= CMD_WANT_SUBSHELL|CMD_COPROC_SUBSHELL;
 			}
     break;
 
   case 106:
-#line 986 "/Users/chet/src/bash/src/parse.y"
+#line 986 "parse.y"
     {
-			  (yyval.command) = make_coproc_command ("COPROC", clean_simple_command ((yyvsp[(2) - (2)].command)));
+			  (yyval.command) = make_coproc_command ("COPROC", clean_simple_command ((yyvsp[0].command)));
 			  (yyval.command)->flags |= CMD_WANT_SUBSHELL|CMD_COPROC_SUBSHELL;
 			}
     break;
 
   case 107:
-#line 993 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = make_if_command ((yyvsp[(2) - (5)].command), (yyvsp[(4) - (5)].command), (COMMAND *)NULL); }
+#line 993 "parse.y"
+    { (yyval.command) = make_if_command ((yyvsp[-3].command), (yyvsp[-1].command), (COMMAND *)NULL); }
     break;
 
   case 108:
-#line 995 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = make_if_command ((yyvsp[(2) - (7)].command), (yyvsp[(4) - (7)].command), (yyvsp[(6) - (7)].command)); }
+#line 995 "parse.y"
+    { (yyval.command) = make_if_command ((yyvsp[-5].command), (yyvsp[-3].command), (yyvsp[-1].command)); }
     break;
 
   case 109:
-#line 997 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = make_if_command ((yyvsp[(2) - (6)].command), (yyvsp[(4) - (6)].command), (yyvsp[(5) - (6)].command)); }
+#line 997 "parse.y"
+    { (yyval.command) = make_if_command ((yyvsp[-4].command), (yyvsp[-2].command), (yyvsp[-1].command)); }
     break;
 
   case 110:
-#line 1002 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = make_group_command ((yyvsp[(2) - (3)].command)); }
+#line 1002 "parse.y"
+    { (yyval.command) = make_group_command ((yyvsp[-1].command)); }
     break;
 
   case 111:
-#line 1006 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = make_arith_command ((yyvsp[(1) - (1)].word_list)); }
+#line 1006 "parse.y"
+    { (yyval.command) = make_arith_command ((yyvsp[0].word_list)); }
     break;
 
   case 112:
-#line 1010 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = (yyvsp[(2) - (3)].command); }
+#line 1010 "parse.y"
+    { (yyval.command) = (yyvsp[-1].command); }
     break;
 
   case 113:
-#line 1014 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = make_if_command ((yyvsp[(2) - (4)].command), (yyvsp[(4) - (4)].command), (COMMAND *)NULL); }
+#line 1014 "parse.y"
+    { (yyval.command) = make_if_command ((yyvsp[-2].command), (yyvsp[0].command), (COMMAND *)NULL); }
     break;
 
   case 114:
-#line 1016 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = make_if_command ((yyvsp[(2) - (6)].command), (yyvsp[(4) - (6)].command), (yyvsp[(6) - (6)].command)); }
+#line 1016 "parse.y"
+    { (yyval.command) = make_if_command ((yyvsp[-4].command), (yyvsp[-2].command), (yyvsp[0].command)); }
     break;
 
   case 115:
-#line 1018 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = make_if_command ((yyvsp[(2) - (5)].command), (yyvsp[(4) - (5)].command), (yyvsp[(5) - (5)].command)); }
+#line 1018 "parse.y"
+    { (yyval.command) = make_if_command ((yyvsp[-3].command), (yyvsp[-1].command), (yyvsp[0].command)); }
     break;
 
   case 117:
-#line 1023 "/Users/chet/src/bash/src/parse.y"
-    { (yyvsp[(2) - (2)].pattern)->next = (yyvsp[(1) - (2)].pattern); (yyval.pattern) = (yyvsp[(2) - (2)].pattern); }
+#line 1023 "parse.y"
+    { (yyvsp[0].pattern)->next = (yyvsp[-1].pattern); (yyval.pattern) = (yyvsp[0].pattern); }
     break;
 
   case 118:
-#line 1027 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.pattern) = make_pattern_list ((yyvsp[(2) - (4)].word_list), (yyvsp[(4) - (4)].command)); }
+#line 1027 "parse.y"
+    { (yyval.pattern) = make_pattern_list ((yyvsp[-2].word_list), (yyvsp[0].command)); }
     break;
 
   case 119:
-#line 1029 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.pattern) = make_pattern_list ((yyvsp[(2) - (4)].word_list), (COMMAND *)NULL); }
+#line 1029 "parse.y"
+    { (yyval.pattern) = make_pattern_list ((yyvsp[-2].word_list), (COMMAND *)NULL); }
     break;
 
   case 120:
-#line 1031 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.pattern) = make_pattern_list ((yyvsp[(3) - (5)].word_list), (yyvsp[(5) - (5)].command)); }
+#line 1031 "parse.y"
+    { (yyval.pattern) = make_pattern_list ((yyvsp[-2].word_list), (yyvsp[0].command)); }
     break;
 
   case 121:
-#line 1033 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.pattern) = make_pattern_list ((yyvsp[(3) - (5)].word_list), (COMMAND *)NULL); }
+#line 1033 "parse.y"
+    { (yyval.pattern) = make_pattern_list ((yyvsp[-2].word_list), (COMMAND *)NULL); }
     break;
 
   case 122:
-#line 1037 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.pattern) = (yyvsp[(1) - (2)].pattern); }
+#line 1037 "parse.y"
+    { (yyval.pattern) = (yyvsp[-1].pattern); }
     break;
 
   case 123:
-#line 1039 "/Users/chet/src/bash/src/parse.y"
-    { (yyvsp[(2) - (3)].pattern)->next = (yyvsp[(1) - (3)].pattern); (yyval.pattern) = (yyvsp[(2) - (3)].pattern); }
+#line 1039 "parse.y"
+    { (yyvsp[-1].pattern)->next = (yyvsp[-2].pattern); (yyval.pattern) = (yyvsp[-1].pattern); }
     break;
 
   case 124:
-#line 1041 "/Users/chet/src/bash/src/parse.y"
-    { (yyvsp[(1) - (2)].pattern)->flags |= CASEPAT_FALLTHROUGH; (yyval.pattern) = (yyvsp[(1) - (2)].pattern); }
+#line 1041 "parse.y"
+    { (yyvsp[-1].pattern)->flags |= CASEPAT_FALLTHROUGH; (yyval.pattern) = (yyvsp[-1].pattern); }
     break;
 
   case 125:
-#line 1043 "/Users/chet/src/bash/src/parse.y"
-    { (yyvsp[(2) - (3)].pattern)->flags |= CASEPAT_FALLTHROUGH; (yyvsp[(2) - (3)].pattern)->next = (yyvsp[(1) - (3)].pattern); (yyval.pattern) = (yyvsp[(2) - (3)].pattern); }
+#line 1043 "parse.y"
+    { (yyvsp[-1].pattern)->flags |= CASEPAT_FALLTHROUGH; (yyvsp[-1].pattern)->next = (yyvsp[-2].pattern); (yyval.pattern) = (yyvsp[-1].pattern); }
     break;
 
   case 126:
-#line 1045 "/Users/chet/src/bash/src/parse.y"
-    { (yyvsp[(1) - (2)].pattern)->flags |= CASEPAT_TESTNEXT; (yyval.pattern) = (yyvsp[(1) - (2)].pattern); }
+#line 1045 "parse.y"
+    { (yyvsp[-1].pattern)->flags |= CASEPAT_TESTNEXT; (yyval.pattern) = (yyvsp[-1].pattern); }
     break;
 
   case 127:
-#line 1047 "/Users/chet/src/bash/src/parse.y"
-    { (yyvsp[(2) - (3)].pattern)->flags |= CASEPAT_TESTNEXT; (yyvsp[(2) - (3)].pattern)->next = (yyvsp[(1) - (3)].pattern); (yyval.pattern) = (yyvsp[(2) - (3)].pattern); }
+#line 1047 "parse.y"
+    { (yyvsp[-1].pattern)->flags |= CASEPAT_TESTNEXT; (yyvsp[-1].pattern)->next = (yyvsp[-2].pattern); (yyval.pattern) = (yyvsp[-1].pattern); }
     break;
 
   case 128:
-#line 1051 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.word_list) = make_word_list ((yyvsp[(1) - (1)].word), (WORD_LIST *)NULL); }
+#line 1051 "parse.y"
+    { (yyval.word_list) = make_word_list ((yyvsp[0].word), (WORD_LIST *)NULL); }
     break;
 
   case 129:
-#line 1053 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.word_list) = make_word_list ((yyvsp[(3) - (3)].word), (yyvsp[(1) - (3)].word_list)); }
+#line 1053 "parse.y"
+    { (yyval.word_list) = make_word_list ((yyvsp[0].word), (yyvsp[-2].word_list)); }
     break;
 
   case 130:
-#line 1062 "/Users/chet/src/bash/src/parse.y"
+#line 1062 "parse.y"
     {
-			  (yyval.command) = (yyvsp[(2) - (2)].command);
+			  (yyval.command) = (yyvsp[0].command);
 			  if (need_here_doc)
 			    gather_here_documents ();
 			 }
     break;
 
   case 132:
-#line 1071 "/Users/chet/src/bash/src/parse.y"
+#line 1071 "parse.y"
     {
-			  (yyval.command) = (yyvsp[(2) - (2)].command);
+			  (yyval.command) = (yyvsp[0].command);
 			}
     break;
 
   case 134:
-#line 1078 "/Users/chet/src/bash/src/parse.y"
+#line 1078 "parse.y"
     {
-			  if ((yyvsp[(1) - (3)].command)->type == cm_connection)
-			    (yyval.command) = connect_async_list ((yyvsp[(1) - (3)].command), (COMMAND *)NULL, '&');
+			  if ((yyvsp[-2].command)->type == cm_connection)
+			    (yyval.command) = connect_async_list ((yyvsp[-2].command), (COMMAND *)NULL, '&');
 			  else
-			    (yyval.command) = command_connect ((yyvsp[(1) - (3)].command), (COMMAND *)NULL, '&');
+			    (yyval.command) = command_connect ((yyvsp[-2].command), (COMMAND *)NULL, '&');
 			}
     break;
 
   case 136:
-#line 1089 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = command_connect ((yyvsp[(1) - (4)].command), (yyvsp[(4) - (4)].command), AND_AND); }
+#line 1089 "parse.y"
+    { (yyval.command) = command_connect ((yyvsp[-3].command), (yyvsp[0].command), AND_AND); }
     break;
 
   case 137:
-#line 1091 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = command_connect ((yyvsp[(1) - (4)].command), (yyvsp[(4) - (4)].command), OR_OR); }
+#line 1091 "parse.y"
+    { (yyval.command) = command_connect ((yyvsp[-3].command), (yyvsp[0].command), OR_OR); }
     break;
 
   case 138:
-#line 1093 "/Users/chet/src/bash/src/parse.y"
+#line 1093 "parse.y"
     {
-			  if ((yyvsp[(1) - (4)].command)->type == cm_connection)
-			    (yyval.command) = connect_async_list ((yyvsp[(1) - (4)].command), (yyvsp[(4) - (4)].command), '&');
+			  if ((yyvsp[-3].command)->type == cm_connection)
+			    (yyval.command) = connect_async_list ((yyvsp[-3].command), (yyvsp[0].command), '&');
 			  else
-			    (yyval.command) = command_connect ((yyvsp[(1) - (4)].command), (yyvsp[(4) - (4)].command), '&');
+			    (yyval.command) = command_connect ((yyvsp[-3].command), (yyvsp[0].command), '&');
 			}
     break;
 
   case 139:
-#line 1100 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = command_connect ((yyvsp[(1) - (4)].command), (yyvsp[(4) - (4)].command), ';'); }
+#line 1100 "parse.y"
+    { (yyval.command) = command_connect ((yyvsp[-3].command), (yyvsp[0].command), ';'); }
     break;
 
   case 140:
-#line 1102 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = command_connect ((yyvsp[(1) - (4)].command), (yyvsp[(4) - (4)].command), ';'); }
+#line 1102 "parse.y"
+    { (yyval.command) = command_connect ((yyvsp[-3].command), (yyvsp[0].command), ';'); }
     break;
 
   case 141:
-#line 1104 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = (yyvsp[(1) - (1)].command); }
+#line 1104 "parse.y"
+    { (yyval.command) = (yyvsp[0].command); }
     break;
 
   case 144:
-#line 1112 "/Users/chet/src/bash/src/parse.y"
+#line 1112 "parse.y"
     { (yyval.number) = '\n'; }
     break;
 
   case 145:
-#line 1114 "/Users/chet/src/bash/src/parse.y"
+#line 1114 "parse.y"
     { (yyval.number) = ';'; }
     break;
 
   case 146:
-#line 1116 "/Users/chet/src/bash/src/parse.y"
+#line 1116 "parse.y"
     { (yyval.number) = yacc_EOF; }
     break;
 
   case 149:
-#line 1130 "/Users/chet/src/bash/src/parse.y"
+#line 1130 "parse.y"
     {
-			  (yyval.command) = (yyvsp[(1) - (1)].command);
+			  (yyval.command) = (yyvsp[0].command);
 			  if (need_here_doc)
 			    gather_here_documents ();
 			  if ((parser_state & PST_CMDSUBST) && current_token == shell_eof_token)
 			    {
-			      global_command = (yyvsp[(1) - (1)].command);
+			      global_command = (yyvsp[0].command);
 			      eof_encountered = 0;
 			      rewind_input_string ();
 			      YYACCEPT;
@@ -3191,17 +2883,17 @@ yyreduce:
     break;
 
   case 150:
-#line 1143 "/Users/chet/src/bash/src/parse.y"
+#line 1143 "parse.y"
     {
-			  if ((yyvsp[(1) - (2)].command)->type == cm_connection)
-			    (yyval.command) = connect_async_list ((yyvsp[(1) - (2)].command), (COMMAND *)NULL, '&');
+			  if ((yyvsp[-1].command)->type == cm_connection)
+			    (yyval.command) = connect_async_list ((yyvsp[-1].command), (COMMAND *)NULL, '&');
 			  else
-			    (yyval.command) = command_connect ((yyvsp[(1) - (2)].command), (COMMAND *)NULL, '&');
+			    (yyval.command) = command_connect ((yyvsp[-1].command), (COMMAND *)NULL, '&');
 			  if (need_here_doc)
 			    gather_here_documents ();
 			  if ((parser_state & PST_CMDSUBST) && current_token == shell_eof_token)
 			    {
-			      global_command = (yyvsp[(1) - (2)].command);
+			      global_command = (yyvsp[-1].command);
 			      eof_encountered = 0;
 			      rewind_input_string ();
 			      YYACCEPT;
@@ -3210,14 +2902,14 @@ yyreduce:
     break;
 
   case 151:
-#line 1159 "/Users/chet/src/bash/src/parse.y"
+#line 1159 "parse.y"
     {
-			  (yyval.command) = (yyvsp[(1) - (2)].command);
+			  (yyval.command) = (yyvsp[-1].command);
 			  if (need_here_doc)
 			    gather_here_documents ();
 			  if ((parser_state & PST_CMDSUBST) && current_token == shell_eof_token)
 			    {
-			      global_command = (yyvsp[(1) - (2)].command);
+			      global_command = (yyvsp[-1].command);
 			      eof_encountered = 0;
 			      rewind_input_string ();
 			      YYACCEPT;
@@ -3226,60 +2918,60 @@ yyreduce:
     break;
 
   case 152:
-#line 1174 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = command_connect ((yyvsp[(1) - (4)].command), (yyvsp[(4) - (4)].command), AND_AND); }
+#line 1174 "parse.y"
+    { (yyval.command) = command_connect ((yyvsp[-3].command), (yyvsp[0].command), AND_AND); }
     break;
 
   case 153:
-#line 1176 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = command_connect ((yyvsp[(1) - (4)].command), (yyvsp[(4) - (4)].command), OR_OR); }
+#line 1176 "parse.y"
+    { (yyval.command) = command_connect ((yyvsp[-3].command), (yyvsp[0].command), OR_OR); }
     break;
 
   case 154:
-#line 1178 "/Users/chet/src/bash/src/parse.y"
+#line 1178 "parse.y"
     {
-			  if ((yyvsp[(1) - (3)].command)->type == cm_connection)
-			    (yyval.command) = connect_async_list ((yyvsp[(1) - (3)].command), (yyvsp[(3) - (3)].command), '&');
+			  if ((yyvsp[-2].command)->type == cm_connection)
+			    (yyval.command) = connect_async_list ((yyvsp[-2].command), (yyvsp[0].command), '&');
 			  else
-			    (yyval.command) = command_connect ((yyvsp[(1) - (3)].command), (yyvsp[(3) - (3)].command), '&');
+			    (yyval.command) = command_connect ((yyvsp[-2].command), (yyvsp[0].command), '&');
 			}
     break;
 
   case 155:
-#line 1185 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = command_connect ((yyvsp[(1) - (3)].command), (yyvsp[(3) - (3)].command), ';'); }
+#line 1185 "parse.y"
+    { (yyval.command) = command_connect ((yyvsp[-2].command), (yyvsp[0].command), ';'); }
     break;
 
   case 156:
-#line 1188 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = (yyvsp[(1) - (1)].command); }
+#line 1188 "parse.y"
+    { (yyval.command) = (yyvsp[0].command); }
     break;
 
   case 157:
-#line 1192 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = (yyvsp[(1) - (1)].command); }
+#line 1192 "parse.y"
+    { (yyval.command) = (yyvsp[0].command); }
     break;
 
   case 158:
-#line 1194 "/Users/chet/src/bash/src/parse.y"
+#line 1194 "parse.y"
     {
-			  if ((yyvsp[(2) - (2)].command))
-			    (yyvsp[(2) - (2)].command)->flags ^= CMD_INVERT_RETURN;	/* toggle */
-			  (yyval.command) = (yyvsp[(2) - (2)].command);
+			  if ((yyvsp[0].command))
+			    (yyvsp[0].command)->flags ^= CMD_INVERT_RETURN;	/* toggle */
+			  (yyval.command) = (yyvsp[0].command);
 			}
     break;
 
   case 159:
-#line 1200 "/Users/chet/src/bash/src/parse.y"
+#line 1200 "parse.y"
     {
-			  if ((yyvsp[(2) - (2)].command))
-			    (yyvsp[(2) - (2)].command)->flags |= (yyvsp[(1) - (2)].number);
-			  (yyval.command) = (yyvsp[(2) - (2)].command);
+			  if ((yyvsp[0].command))
+			    (yyvsp[0].command)->flags |= (yyvsp[-1].number);
+			  (yyval.command) = (yyvsp[0].command);
 			}
     break;
 
   case 160:
-#line 1206 "/Users/chet/src/bash/src/parse.y"
+#line 1206 "parse.y"
     {
 			  ELEMENT x;
 
@@ -3291,15 +2983,15 @@ yyreduce:
 			  x.word = 0;
 			  x.redirect = 0;
 			  (yyval.command) = make_simple_command (x, (COMMAND *)NULL);
-			  (yyval.command)->flags |= (yyvsp[(1) - (2)].number);
+			  (yyval.command)->flags |= (yyvsp[-1].number);
 			  /* XXX - let's cheat and push a newline back */
-			  if ((yyvsp[(2) - (2)].number) == '\n')
+			  if ((yyvsp[0].number) == '\n')
 			    token_to_read = '\n';
 			}
     break;
 
   case 161:
-#line 1223 "/Users/chet/src/bash/src/parse.y"
+#line 1223 "parse.y"
     {
 			  ELEMENT x;
 
@@ -3314,25 +3006,25 @@ yyreduce:
 			  (yyval.command) = make_simple_command (x, (COMMAND *)NULL);
 			  (yyval.command)->flags |= CMD_INVERT_RETURN;
 			  /* XXX - let's cheat and push a newline back */
-			  if ((yyvsp[(2) - (2)].number) == '\n')
+			  if ((yyvsp[0].number) == '\n')
 			    token_to_read = '\n';
 			}
     break;
 
   case 162:
-#line 1243 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = command_connect ((yyvsp[(1) - (4)].command), (yyvsp[(4) - (4)].command), '|'); }
+#line 1243 "parse.y"
+    { (yyval.command) = command_connect ((yyvsp[-3].command), (yyvsp[0].command), '|'); }
     break;
 
   case 163:
-#line 1245 "/Users/chet/src/bash/src/parse.y"
+#line 1245 "parse.y"
     {
 			  /* Make cmd1 |& cmd2 equivalent to cmd1 2>&1 | cmd2 */
 			  COMMAND *tc;
 			  REDIRECTEE rd, sd;
 			  REDIRECT *r;
 
-			  tc = (yyvsp[(1) - (4)].command)->type == cm_simple ? (COMMAND *)(yyvsp[(1) - (4)].command)->value.Simple : (yyvsp[(1) - (4)].command);
+			  tc = (yyvsp[-3].command)->type == cm_simple ? (COMMAND *)(yyvsp[-3].command)->value.Simple : (yyvsp[-3].command);
 			  sd.dest = 2;
 			  rd.dest = 1;
 			  r = make_redirection (sd, r_duplicating_output, rd, 0);
@@ -3346,39 +3038,40 @@ yyreduce:
 			  else
 			    tc->redirects = r;
 
-			  (yyval.command) = command_connect ((yyvsp[(1) - (4)].command), (yyvsp[(4) - (4)].command), '|');
+			  (yyval.command) = command_connect ((yyvsp[-3].command), (yyvsp[0].command), '|');
 			}
     break;
 
   case 164:
-#line 1268 "/Users/chet/src/bash/src/parse.y"
-    { (yyval.command) = (yyvsp[(1) - (1)].command); }
+#line 1268 "parse.y"
+    { (yyval.command) = (yyvsp[0].command); }
     break;
 
   case 165:
-#line 1272 "/Users/chet/src/bash/src/parse.y"
+#line 1272 "parse.y"
     { (yyval.number) = CMD_TIME_PIPELINE; }
     break;
 
   case 166:
-#line 1274 "/Users/chet/src/bash/src/parse.y"
+#line 1274 "parse.y"
     { (yyval.number) = CMD_TIME_PIPELINE|CMD_TIME_POSIX; }
     break;
 
   case 167:
-#line 1276 "/Users/chet/src/bash/src/parse.y"
+#line 1276 "parse.y"
     { (yyval.number) = CMD_TIME_PIPELINE|CMD_TIME_POSIX; }
     break;
 
 
-/* Line 1267 of yacc.c.  */
-#line 3376 "y.tab.c"
-      default: break;
     }
-  YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
 
-  YYPOPSTACK (yylen);
-  yylen = 0;
+/* Line 1037 of yacc.c.  */
+#line 3070 "y.tab.c"
+
+  yyvsp -= yylen;
+  yyssp -= yylen;
+
+
   YY_STACK_PRINT (yyss, yyssp);
 
   *++yyvsp = yyval;
@@ -3407,41 +3100,66 @@ yyerrlab:
   if (!yyerrstatus)
     {
       ++yynerrs;
-#if ! YYERROR_VERBOSE
-      yyerror (YY_("syntax error"));
-#else
-      {
-	YYSIZE_T yysize = yysyntax_error (0, yystate, yychar);
-	if (yymsg_alloc < yysize && yymsg_alloc < YYSTACK_ALLOC_MAXIMUM)
-	  {
-	    YYSIZE_T yyalloc = 2 * yysize;
-	    if (! (yysize <= yyalloc && yyalloc <= YYSTACK_ALLOC_MAXIMUM))
-	      yyalloc = YYSTACK_ALLOC_MAXIMUM;
-	    if (yymsg != yymsgbuf)
-	      YYSTACK_FREE (yymsg);
-	    yymsg = (char *) YYSTACK_ALLOC (yyalloc);
-	    if (yymsg)
-	      yymsg_alloc = yyalloc;
-	    else
-	      {
-		yymsg = yymsgbuf;
-		yymsg_alloc = sizeof yymsgbuf;
-	      }
-	  }
+#if YYERROR_VERBOSE
+      yyn = yypact[yystate];
 
-	if (0 < yysize && yysize <= yymsg_alloc)
-	  {
-	    (void) yysyntax_error (yymsg, yystate, yychar);
-	    yyerror (yymsg);
-	  }
-	else
-	  {
-	    yyerror (YY_("syntax error"));
-	    if (yysize != 0)
-	      goto yyexhaustedlab;
-	  }
-      }
-#endif
+      if (YYPACT_NINF < yyn && yyn < YYLAST)
+	{
+	  YYSIZE_T yysize = 0;
+	  int yytype = YYTRANSLATE (yychar);
+	  const char* yyprefix;
+	  char *yymsg;
+	  int yyx;
+
+	  /* Start YYX at -YYN if negative to avoid negative indexes in
+	     YYCHECK.  */
+	  int yyxbegin = yyn < 0 ? -yyn : 0;
+
+	  /* Stay within bounds of both yycheck and yytname.  */
+	  int yychecklim = YYLAST - yyn;
+	  int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
+	  int yycount = 0;
+
+	  yyprefix = ", expecting ";
+	  for (yyx = yyxbegin; yyx < yyxend; ++yyx)
+	    if (yycheck[yyx + yyn] == yyx && yyx != YYTERROR)
+	      {
+		yysize += yystrlen (yyprefix) + yystrlen (yytname [yyx]);
+		yycount += 1;
+		if (yycount == 5)
+		  {
+		    yysize = 0;
+		    break;
+		  }
+	      }
+	  yysize += (sizeof ("syntax error, unexpected ")
+		     + yystrlen (yytname[yytype]));
+	  yymsg = (char *) YYSTACK_ALLOC (yysize);
+	  if (yymsg != 0)
+	    {
+	      char *yyp = yystpcpy (yymsg, "syntax error, unexpected ");
+	      yyp = yystpcpy (yyp, yytname[yytype]);
+
+	      if (yycount < 5)
+		{
+		  yyprefix = ", expecting ";
+		  for (yyx = yyxbegin; yyx < yyxend; ++yyx)
+		    if (yycheck[yyx + yyn] == yyx && yyx != YYTERROR)
+		      {
+			yyp = yystpcpy (yyp, yyprefix);
+			yyp = yystpcpy (yyp, yytname[yyx]);
+			yyprefix = " or ";
+		      }
+		}
+	      yyerror (yymsg);
+	      YYSTACK_FREE (yymsg);
+	    }
+	  else
+	    yyerror ("syntax error; also virtual memory exhausted");
+	}
+      else
+#endif /* YYERROR_VERBOSE */
+	yyerror ("syntax error");
     }
 
 
@@ -3452,15 +3170,23 @@ yyerrlab:
 	 error, discard it.  */
 
       if (yychar <= YYEOF)
-	{
-	  /* Return failure if at end of input.  */
+        {
+          /* If at end of input, pop the error token,
+	     then the rest of the stack, then return failure.  */
 	  if (yychar == YYEOF)
-	    YYABORT;
-	}
+	     for (;;)
+	       {
+
+		 YYPOPSTACK;
+		 if (yyssp == yyss)
+		   YYABORT;
+		 yydestruct ("Error: popping",
+                             yystos[*yyssp], yyvsp);
+	       }
+        }
       else
 	{
-	  yydestruct ("Error: discarding",
-		      yytoken, &yylval);
+	  yydestruct ("Error: discarding", yytoken, &yylval);
 	  yychar = YYEMPTY;
 	}
     }
@@ -3475,17 +3201,15 @@ yyerrlab:
 `---------------------------------------------------*/
 yyerrorlab:
 
-  /* Pacify compilers like GCC when the user code never invokes
-     YYERROR and the label yyerrorlab therefore never appears in user
-     code.  */
-  if (/*CONSTCOND*/ 0)
+#ifdef __GNUC__
+  /* Pacify GCC when the user code never invokes YYERROR and the label
+     yyerrorlab therefore never appears in user code.  */
+  if (0)
      goto yyerrorlab;
+#endif
 
-  /* Do not reclaim the symbols of the rule which action triggered
-     this YYERROR.  */
-  YYPOPSTACK (yylen);
-  yylen = 0;
-  YY_STACK_PRINT (yyss, yyssp);
+yyvsp -= yylen;
+  yyssp -= yylen;
   yystate = *yyssp;
   goto yyerrlab1;
 
@@ -3515,9 +3239,8 @@ yyerrlab1:
 	YYABORT;
 
 
-      yydestruct ("Error: popping",
-		  yystos[yystate], yyvsp);
-      YYPOPSTACK (1);
+      yydestruct ("Error: popping", yystos[yystate], yyvsp);
+      YYPOPSTACK;
       yystate = *yyssp;
       YY_STACK_PRINT (yyss, yyssp);
     }
@@ -3528,7 +3251,7 @@ yyerrlab1:
   *++yyvsp = yylval;
 
 
-  /* Shift the error token.  */
+  /* Shift the error token. */
   YY_SYMBOL_PRINT ("Shifting", yystos[yyn], yyvsp, yylsp);
 
   yystate = yyn;
@@ -3546,47 +3269,32 @@ yyacceptlab:
 | yyabortlab -- YYABORT comes here.  |
 `-----------------------------------*/
 yyabortlab:
+  yydestruct ("Error: discarding lookahead",
+              yytoken, &yylval);
+  yychar = YYEMPTY;
   yyresult = 1;
   goto yyreturn;
 
 #ifndef yyoverflow
-/*-------------------------------------------------.
-| yyexhaustedlab -- memory exhaustion comes here.  |
-`-------------------------------------------------*/
-yyexhaustedlab:
-  yyerror (YY_("memory exhausted"));
+/*----------------------------------------------.
+| yyoverflowlab -- parser overflow comes here.  |
+`----------------------------------------------*/
+yyoverflowlab:
+  yyerror ("parser stack overflow");
   yyresult = 2;
   /* Fall through.  */
 #endif
 
 yyreturn:
-  if (yychar != YYEOF && yychar != YYEMPTY)
-     yydestruct ("Cleanup: discarding lookahead",
-		 yytoken, &yylval);
-  /* Do not reclaim the symbols of the rule which action triggered
-     this YYABORT or YYACCEPT.  */
-  YYPOPSTACK (yylen);
-  YY_STACK_PRINT (yyss, yyssp);
-  while (yyssp != yyss)
-    {
-      yydestruct ("Cleanup: popping",
-		  yystos[*yyssp], yyvsp);
-      YYPOPSTACK (1);
-    }
 #ifndef yyoverflow
   if (yyss != yyssa)
     YYSTACK_FREE (yyss);
 #endif
-#if YYERROR_VERBOSE
-  if (yymsg != yymsgbuf)
-    YYSTACK_FREE (yymsg);
-#endif
-  /* Make sure YYID is used.  */
-  return YYID (yyresult);
+  return yyresult;
 }
 
 
-#line 1278 "/Users/chet/src/bash/src/parse.y"
+#line 1278 "parse.y"
 
 
 /* Initial size to allocate for tokens, and the

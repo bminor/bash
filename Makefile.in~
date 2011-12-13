@@ -1,4 +1,4 @@
-# Makefile for bash-4.1, version 4.1
+# Makefile for bash-4.2, version 4.4
 #
 # Copyright (C) 1996-2010 Free Software Foundation, Inc.
 
@@ -319,9 +319,11 @@ GLOB_DEP = $(GLOB_LIBRARY)
 GLOB_SOURCE = $(GLOB_LIBSRC)/glob.c $(GLOB_LIBSRC)/strmatch.c \
 	      $(GLOB_LIBSRC)/smatch.c $(GLOB_LIBSRC)/xmbsrtowcs.c \
 	      $(GLOB_LIBSRC)/glob_loop.c $(GLOB_LIBSRC)/sm_loop.c \
+	      $(GLOB_LIBSRC)/gmisc.c \
 	      $(GLOB_LIBSRC)/glob.h $(GLOB_LIBSRC)/strmatch.h
 GLOB_OBJ    = $(GLOB_LIBDIR)/glob.o $(GLOB_LIBDIR)/strmatch.o \
-	      $(GLOB_LIBDIR)/smatch.o $(GLOB_LIBDIR)/xmbsrtowcs.o
+	      $(GLOB_LIBDIR)/smatch.o $(GLOB_LIBDIR)/xmbsrtowcs.o \
+	      $(GLOB_LIBDIR)/gmisc.o
 
 # The source, object and documentation for the GNU Tilde library.
 TILDE_LIBSRC = $(LIBSRC)/tilde

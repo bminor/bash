@@ -31,14 +31,17 @@
 
 #include "stdc.h"
 
-#ifndef RPAREN
-#  define RPAREN '('
-#endif
 #ifndef LPAREN
-#  define LPAREN ')'
+#  define LPAREN '('
+#endif
+#ifndef RPAREN
+#  define RPAREN ')'
 #endif
 
 #if defined (HANDLE_MULTIBYTE)
+#define WLPAREN         L'('
+#define WRPAREN         L')'
+
 /* Return 1 of the first character of WSTRING could match the first
    character of pattern WPAT.  Wide character version. */
 int
@@ -57,13 +60,13 @@ match_pattern_wchar (wpat, wstring)
     case L'\\':
       return (*wstring == *wpat);
     case L'?':
-      return (*wpat == LPAREN ? 1 : (*wstring != L'\0'));
+      return (*wpat == WLPAREN ? 1 : (*wstring != L'\0'));
     case L'*':
       return (1);
     case L'+':
     case L'!':
     case L'@':
-      return (*wpat == LPAREN ? 1 : (*wstring == wc));
+      return (*wpat == WLPAREN ? 1 : (*wstring == wc));
     case L'[':
       return (*wstring != L'\0');
     }
@@ -98,7 +101,7 @@ wmatchlen (wpat, wmax)
 	    }
 	  break;
 	case L'?':
-	  if (*wpat == LPAREN)
+	  if (*wpat == WLPAREN)
 	    return (matlen = -1);		/* XXX for now */
 	  else
 	    matlen++;
@@ -108,7 +111,7 @@ wmatchlen (wpat, wmax)
 	case L'+':
 	case L'!':
 	case L'@':
-	  if (*wpat == LPAREN)
+	  if (*wpat == WLPAREN)
 	    return (matlen = -1);		/* XXX for now */
 	  else
 	    matlen++;
@@ -224,7 +227,7 @@ umatchlen (pat, max)
 	default:
 	  matlen++;
 	  break;
-	case L'\\':
+	case '\\':
 	  if (*pat == 0)
 	    return ++matlen;
 	  else
@@ -233,23 +236,23 @@ umatchlen (pat, max)
 	      pat++;
 	    }
 	  break;
-	case L'?':
+	case '?':
 	  if (*pat == LPAREN)
 	    return (matlen = -1);		/* XXX for now */
 	  else
 	    matlen++;
 	  break;
-	case L'*':
+	case '*':
 	  return (matlen = -1);
-	case L'+':
-	case L'!':
-	case L'@':
+	case '+':
+	case '!':
+	case '@':
 	  if (*pat == LPAREN)
 	    return (matlen = -1);		/* XXX for now */
 	  else
 	    matlen++;
 	  break;
-	case L'[':
+	case '[':
 	  /* scan for ending `]', skipping over embedded [:...:] */
 	  brack = pat;
 	  c = *pat++;

@@ -40,7 +40,7 @@ strchrnul (s, c_in)
 
   c = (unsigned char) c_in;
   if (c == 0)		/* find final null byte */
-    return s ? (s + strlen (s)) : s;
+    return (char *)(s ? (s + strlen (s)) : s);
 
   /* Handle the first few bytes by reading one byte at a time.
      Do this until CHAR_PTR is aligned on a longword boundary.  */
