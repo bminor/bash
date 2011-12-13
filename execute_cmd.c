@@ -1548,7 +1548,7 @@ static struct cpelement *cpl_search __P((pid_t));
 static struct cpelement *cpl_searchbyname __P((char *));
 static void cpl_prune __P((void));
 
-Coproc sh_coproc = { 0, NO_PID, -1, -1, 0, 0 };
+Coproc sh_coproc = { 0, NO_PID, -1, -1, 0, 0, 0, 0 };
 
 cplist_t coproc_list = {0, 0, 0};
 

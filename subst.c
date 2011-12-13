@@ -1479,9 +1479,15 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
 
       /* This logic must agree with parse.y:parse_matched_pair, since they
 	 share the same defines. */
-      if (dolbrace_state == DOLBRACE_PARAM && c == '%' && (i - *sindex) > 0)
+      if (dolbrace_state == DOLBRACE_PARAM && c == '%' && (i - *sindex) > 1)
 	dolbrace_state = DOLBRACE_QUOTE;
       else if (dolbrace_state == DOLBRACE_PARAM && c == '#' && (i - *sindex) > 1)
+        dolbrace_state = DOLBRACE_QUOTE;
+      else if (dolbrace_state == DOLBRACE_PARAM && c == '/' && (i - *sindex) > 1)
+        dolbrace_state = DOLBRACE_QUOTE;
+      else if (dolbrace_state == DOLBRACE_PARAM && c == '^' && (i - *sindex) > 1)
+        dolbrace_state = DOLBRACE_QUOTE;
+      else if (dolbrace_state == DOLBRACE_PARAM && c == ',' && (i - *sindex) > 1)
         dolbrace_state = DOLBRACE_QUOTE;
       else if (dolbrace_state == DOLBRACE_PARAM && strchr ("#%^,~:-=?+/", c) != 0)
 	dolbrace_state = DOLBRACE_OP;
@@ -3759,6 +3765,7 @@ mb_getcharlens (string, len)
 #define RP_LONG_RIGHT	3
 #define RP_SHORT_RIGHT	4
 
+/* Returns its first argument if nothing matched; new memory otherwise */
 static char *
 remove_upattern (param, pattern, op)
      char *param, *pattern;
@@ -3827,10 +3834,11 @@ remove_upattern (param, pattern, op)
 	break;
     }
 
-  return (savestring (param));	/* no match, return original string */
+  return (param);	/* no match, return original string */
 }
 
 #if defined (HANDLE_MULTIBYTE)
+/* Returns its first argument if nothing matched; new memory otherwise */
 static wchar_t *
 remove_wpattern (wparam, wstrlen, wpattern, op)
      wchar_t *wparam;
@@ -3896,7 +3904,7 @@ remove_wpattern (wparam, wstrlen, wpattern, op)
 	break;
     }
 
-  return (wcsdup (wparam));	/* no match, return original string */
+  return (wparam);	/* no match, return original string */
 }
 #endif /* HANDLE_MULTIBYTE */
 
@@ -3905,6 +3913,8 @@ remove_pattern (param, pattern, op)
      char *param, *pattern;
      int op;
 {
+  char *xret;
+
   if (param == NULL)
     return (param);
   if (*param == '\0' || pattern == NULL || *pattern == '\0')	/* minor optimization */
@@ -3917,18 +3927,29 @@ remove_pattern (param, pattern, op)
       size_t n;
       wchar_t *wparam, *wpattern;
       mbstate_t ps;
-      char *xret;
 
       n = xdupmbstowcs (&wpattern, NULL, pattern);
       if (n == (size_t)-1)
-	return (remove_upattern (param, pattern, op));
+	{
+	  xret = remove_upattern (param, pattern, op);
+	  return ((xret == param) ? savestring (param) : xret);
+	}
       n = xdupmbstowcs (&wparam, NULL, param);
       if (n == (size_t)-1)
 	{
 	  free (wpattern);
-	  return (remove_upattern (param, pattern, op));
+	  xret = remove_upattern (param, pattern, op);
+	  return ((xret == param) ? savestring (param) : xret);
 	}
       oret = ret = remove_wpattern (wparam, n, wpattern, op);
+      /* Don't bother to convert wparam back to multibyte string if nothing
+	 matched; just return copy of original string */
+      if (ret == wparam)
+        {
+          free (wparam);
+          free (wpattern);
+          return (savestring (param));
+        }
 
       free (wparam);
       free (wpattern);
@@ -3943,7 +3964,10 @@ remove_pattern (param, pattern, op)
     }
   else
 #endif
-    return (remove_upattern (param, pattern, op));
+    {
+      xret = remove_upattern (param, pattern, op);
+      return ((xret == param) ? savestring (param) : xret);
+    }
 }
 
 /* Return 1 of the first character of STRING could match the first
@@ -7155,6 +7179,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
       temp1 = parameter_brace_remove_pattern (name, temp, value, c, quoted);
       free (temp);
       free (value);
+      free (name);
 
       ret = alloc_word_desc ();
       ret->word = temp1;

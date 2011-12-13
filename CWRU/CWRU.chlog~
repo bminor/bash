@@ -10103,3 +10103,41 @@ variables.c
 	- make sure initialize_shell_variables calls sv_xtracefd if
 	  BASH_XTRACEFD is inherited in the shell environment.  Fixes but
 	  reported by <jsunx1@bellsouth.net>
+
+				   6/13
+				   ----
+lib/readline/complete.c
+	- change get_y_or_n to always return 1 when in callback mode, so we
+	  don't do a blocking read.  Have to wait until readline-7.0 to add
+	  a state so we can use callbacks, since that will change public
+	  interface
+
+				   6/17
+				   ----
+subst.c
+	- fix memory leak in parameter_brace_expand: when performing pattern
+	  removal with parameter_brace_remove_pattern, make sure `name' is
+	  freed.  Fixes bug reported by oyvindh@dhampir.no
+
+				   6/23
+				   ----
+{parse.y,subst.c}
+	- make the ${param//pat/rep}, ${param^pat}, and ${param,pat} expansions
+	  require single quotes and double quotes to match when within double
+	  quotes.  This way every expansion except the Posix ones behaves as
+	  bash has always behaved
+
+subst.c
+	- change remove_upattern and remove_wpattern to return their first
+	  argument if nothing matches, change callers to allocate memory
+	  appropriately
+	- change remove_pattern to short-circuit and return copy of PARAM
+	  if remove_wpattern returns its first argument (indicating no match)
+	  rather than convert back to multibyte string, allocating new memory
+	  twice and calling wcsrtombs
+
+				   6/24
+				   ----
+execute_cmd.c
+	- add missing initializers for sh_coproc to eliminate a compiler
+	  warning.  Patch from Werner Fink <werner@suse.de>

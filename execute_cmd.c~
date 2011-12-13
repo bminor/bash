@@ -136,6 +136,7 @@ static int builtin_status __P((int));
 
 static int execute_for_command __P((FOR_COM *));
 #if defined (SELECT_COMMAND)
+static int displen __P((const char *));
 static int print_index_and_element __P((int, int, WORD_LIST *));
 static void indent __P((int, int));
 static void print_select_list __P((WORD_LIST *, int, int, int));
@@ -2641,7 +2642,7 @@ static int LINES, COLS, tabsize;
 
 static int
 displen (s)
-     char *s;
+     const char *s;
 {
 #if defined (HANDLE_MULTIBYTE)
   wchar_t *wcstr;

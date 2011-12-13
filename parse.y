@@ -336,7 +336,7 @@ static REDIRECTEE redir;
    third group are recognized only under special circumstances. */
 %token IF THEN ELSE ELIF FI CASE ESAC FOR SELECT WHILE UNTIL DO DONE FUNCTION COPROC
 %token COND_START COND_END COND_ERROR
-%token IN BANG TIME TIMEOPT
+%token IN BANG TIME TIMEOPT TIMEIGN
 
 /* More general tokens. yylex () knows how to make these. */
 %token <word> WORD ASSIGNMENT_WORD REDIR_WORD
@@ -1272,6 +1272,8 @@ timespec:	TIME
 			{ $$ = CMD_TIME_PIPELINE; }
 	|	TIME TIMEOPT
 			{ $$ = CMD_TIME_PIPELINE|CMD_TIME_POSIX; }
+	|	TIME TIMEOPT TIMEIGN
+			{ $$ = CMD_TIME_PIPELINE|CMD_TIME_POSIX; }
 	;
 %%
 
@@ -2068,6 +2070,7 @@ STRING_INT_ALIST word_token_alist[] = {
 /* other tokens that can be returned by read_token() */
 STRING_INT_ALIST other_token_alist[] = {
   /* Multiple-character tokens with special values */
+  { "--", TIMEIGN },
   { "-p", TIMEOPT },
   { "&&", AND_AND },
   { "||", OR_OR },
@@ -2671,6 +2674,7 @@ time_command_acceptable ()
     case BANG:		/* ! time pipeline */
     case TIME:		/* time time pipeline */
     case TIMEOPT:	/* time -p time pipeline */
+    case TIMEIGN:	/* time -p -- ... */
       return 1;
     default:
       return 0;
@@ -2697,6 +2701,7 @@ time_command_acceptable ()
 	`}' is recognized if there is an unclosed `{' present.
 
 	`-p' is returned as TIMEOPT if the last read token was TIME.
+	`--' is returned as TIMEIGN if the last read token was TIMEOPT.
 
 	']]' is returned as COND_END if the parser is currently parsing
 	a conditional expression ((parser_state & PST_CONDEXPR) != 0)
@@ -2782,6 +2787,9 @@ special_case_tokens (tokstr)
   /* Handle -p after `time'. */
   if (last_read_token == TIME && tokstr[0] == '-' && tokstr[1] == 'p' && !tokstr[2])
     return (TIMEOPT);
+  /* Handle -- after `time -p'. */
+  if (last_read_token == TIMEOPT && tokstr[0] == '-' && tokstr[1] == '-' && !tokstr[2])
+    return (TIMEIGN);
 #endif
 
 #if defined (COND_COMMAND) /* [[ */
@@ -3241,9 +3249,20 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	 since they share the same defines. */
       if (flags & P_DOLBRACE)
         {
-	  if MBTEST(dolbrace_state == DOLBRACE_PARAM && ch == '%' && retind > 0)
+          /* ${param%[%]word} */
+	  if MBTEST(dolbrace_state == DOLBRACE_PARAM && ch == '%' && retind > 1)
 	    dolbrace_state = DOLBRACE_QUOTE;
+          /* ${param#[#]word} */
 	  else if MBTEST(dolbrace_state == DOLBRACE_PARAM && ch == '#' && retind > 1)
+	    dolbrace_state = DOLBRACE_QUOTE;
+          /* ${param/[/]pat/rep} */
+	  else if MBTEST(dolbrace_state == DOLBRACE_PARAM && ch == '/' && retind > 1)
+	    dolbrace_state = DOLBRACE_QUOTE;
+          /* ${param^[^]pat} */
+	  else if MBTEST(dolbrace_state == DOLBRACE_PARAM && ch == '^' && retind > 1)
+	    dolbrace_state = DOLBRACE_QUOTE;
+          /* ${param,[,]pat} */
+	  else if MBTEST(dolbrace_state == DOLBRACE_PARAM && ch == ',' && retind > 1)
 	    dolbrace_state = DOLBRACE_QUOTE;
 	  else if MBTEST(dolbrace_state == DOLBRACE_PARAM && strchr ("#%^,~:-=?+/", ch) != 0)
 	    dolbrace_state = DOLBRACE_OP;
@@ -4757,6 +4776,7 @@ reserved_word_acceptable (toksym)
     case THEN:
     case TIME:
     case TIMEOPT:
+    case TIMEIGN:
     case COPROC:
     case UNTIL:
     case WHILE:
