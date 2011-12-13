@@ -129,7 +129,7 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
 
        ccaalllleerr [_e_x_p_r]
               Returns the context of any active subroutine call (a shell func-
-              tion or a script executed with the .. or ssoouurrccee builtins.   With-
+              tion or a script executed with the .. or ssoouurrccee builtins).  With-
               out _e_x_p_r, ccaalllleerr displays the line number and source filename of
               the current subroutine call.  If a non-negative integer is  sup-
               plied as _e_x_p_r, ccaalllleerr displays the line number, subroutine name,
@@ -282,23 +282,29 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                       vvaarriiaabbllee
                               Names of all shell variables.  May also be spec-
                               ified as --vv.
+              --CC _c_o_m_m_a_n_d
+                      _c_o_m_m_a_n_d is executed in a subshell environment,  and  its
+                      output is used as the possible completions.
+              --FF _f_u_n_c_t_i_o_n
+                      The  shell  function _f_u_n_c_t_i_o_n is executed in the current
+                      shell environment.  When it finishes, the possible  com-
+                      pletions  are  retrieved from the value of the CCOOMMPPRREEPPLLYY
+                      array variable.
               --GG _g_l_o_b_p_a_t
                       The pathname expansion pattern _g_l_o_b_p_a_t  is  expanded  to
                       generate the possible completions.
+              --PP _p_r_e_f_i_x
+                      _p_r_e_f_i_x  is  added at the beginning of each possible com-
+                      pletion after all other options have been applied.
+              --SS _s_u_f_f_i_x
+                      _s_u_f_f_i_x is appended to each possible completion after all
+                      other options have been applied.
               --WW _w_o_r_d_l_i_s_t
                       The  _w_o_r_d_l_i_s_t  is  split using the characters in the IIFFSS
                       special variable as delimiters, and each resultant  word
                       is  expanded.   The possible completions are the members
                       of the resultant list which match the  word  being  com-
                       pleted.
-              --CC _c_o_m_m_a_n_d
-                      _c_o_m_m_a_n_d  is  executed in a subshell environment, and its
-                      output is used as the possible completions.
-              --FF _f_u_n_c_t_i_o_n
-                      The shell function _f_u_n_c_t_i_o_n is executed in  the  current
-                      shell  environment.  When it finishes, the possible com-
-                      pletions are retrieved from the value of  the  CCOOMMPPRREEPPLLYY
-                      array variable.
               --XX _f_i_l_t_e_r_p_a_t
                       _f_i_l_t_e_r_p_a_t  is  a pattern as used for pathname expansion.
                       It is applied to the list of possible completions gener-
@@ -306,12 +312,6 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                       completion matching _f_i_l_t_e_r_p_a_t is removed from the  list.
                       A  leading  !!  in _f_i_l_t_e_r_p_a_t negates the pattern; in this
                       case, any completion not matching _f_i_l_t_e_r_p_a_t is  removed.
-              --PP _p_r_e_f_i_x
-                      _p_r_e_f_i_x  is  added at the beginning of each possible com-
-                      pletion after all other options have been applied.
-              --SS _s_u_f_f_i_x
-                      _s_u_f_f_i_x is appended to each possible completion after all
-                      other options have been applied.
 
               The  return  value is true unless an invalid option is supplied,
               an option other than --pp or --rr is supplied without a  _n_a_m_e  argu-
@@ -321,7 +321,7 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
 
        ccoommppoopptt [--oo _o_p_t_i_o_n] [--DDEE] [++oo _o_p_t_i_o_n] [_n_a_m_e]
               Modify  completion  options  for  each  _n_a_m_e  according  to  the
-              _o_p_t_i_o_ns, or for the currently-execution completion if  no  _n_a_m_es
+              _o_p_t_i_o_ns, or for the currently-executing completion if  no  _n_a_m_es
               are  supplied.   If no _o_p_t_i_o_ns are given, display the completion
               options for each _n_a_m_e or the current completion.   The  possible
               values  of  _o_p_t_i_o_n  are  those  valid  for  the ccoommpplleettee builtin
@@ -332,9 +332,9 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               remaining options should apply to ``empty'' command  completion;
               that is, completion attempted on a blank line.
 
-       The  return  value  is  true  unless  an invalid option is supplied, an
-       attempt is made to modify the options for a _n_a_m_e for which  no  comple-
-       tion specification exists, or an output error occurs.
+              The  return  value is true unless an invalid option is supplied,
+              an attempt is made to modify the options for a _n_a_m_e for which no
+              completion specification exists, or an output error occurs.
 
        ccoonnttiinnuuee [_n]
               Resume the next iteration of the enclosing ffoorr, wwhhiillee, uunnttiill, or
@@ -401,7 +401,7 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               an  array variable, or an attempt is made to display a non-exis-
               tent function with --ff.
 
-       ddiirrss [[++_n]] [[--_n]] [[--ccppllvv]]
+       ddiirrss [[++_n]] [[--_n]] [[--ccllppvv]]
               Without options,  displays  the  list  of  currently  remembered
               directories.   The  default  display  is  on  a single line with
               directory names separated by spaces.  Directories are  added  to
@@ -697,10 +697,10 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               The first form lists the active jobs.  The options have the fol-
               lowing meanings:
               --ll     List process IDs in addition to the normal information.
+              --nn     Display information only about  jobs  that  have  changed
+                     status  since the user was last notified of their status.
               --pp     List only the process  ID  of  the  job's  process  group
                      leader.
-              --nn     Display  information  only  about  jobs that have changed
-                     status since the user was last notified of their  status.
               --rr     Restrict output to running jobs.
               --ss     Restrict output to stopped jobs.
 
@@ -1247,7 +1247,7 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                              (( _c_o_m_m_a_n_d )) inherit the DDEEBBUUGG and RREETTUURRNN traps.
                       66..     Error tracing is enabled:  command  substitution,
                              shell  functions,  and  subshells  invoked with ((
-                             _c_o_m_m_a_n_d )) inherit the EERRRROORR trap.
+                             _c_o_m_m_a_n_d )) inherit the EERRRR trap.
               eexxttgglloobb If set, the extended pattern matching features described
                       above under PPaatthhnnaammee EExxppaannssiioonn are enabled.
               eexxttqquuoottee
@@ -1434,7 +1434,7 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               causes the shell to print a list of signal names and their  cor-
               responding  numbers.   Each  _s_i_g_s_p_e_c  is  either  a  signal name
               defined in <_s_i_g_n_a_l_._h>, or a signal  number.   Signal  names  are
-              case insensitive and the SIG prefix is optional.
+              case insensitive and the SSIIGG prefix is optional.
 
               If  a  _s_i_g_s_p_e_c  is  EEXXIITT (0) the command _a_r_g is executed on exit
               from the shell.  If a _s_i_g_s_p_e_c is DDEEBBUUGG, the command _a_r_g is  exe-

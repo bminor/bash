@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2009 December 29<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2010 January 15<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -1768,7 +1768,7 @@ that do not require <B>bash</B> to be re-initialized.
 
 <DD>
 An associative array variable whose members correspond to the internal
-list of aliases as maintained by the <B>alias</B> builtin
+list of aliases as maintained by the <B>alias</B> builtin.
 Elements added to this array appear in the alias list; unsetting array
 elements cause aliases to be removed from the alias list.
 <DT><B>BASH_ARGC</B>
@@ -1995,6 +1995,12 @@ as described above.
 This variable is available only in shell functions invoked by the
 programmable completion facilities (see <B>Programmable Completion</B>
 below).
+<DT><B>COPROC</B>
+
+<DD>
+An array variable (see <B>Arrays</B> below) created to hold the file descriptors
+for output from and input to an unnamed coprocess (see <B>Coprocesses</B>
+above).
 <DT><B>DIRSTACK</B>
 
 <DD>
@@ -2111,6 +2117,11 @@ type on which
 
 is executing, in the standard GNU <I>cpu-company-system</I> format.
 The default is system-dependent.
+<DT><B>MAPFILE</B>
+
+<DD>
+An array variable (see <B>Arrays</B> below) created to hold the text
+read by the <B>mapfile</B> builtin when no variable name is supplied.
 <DT><B>OLDPWD</B>
 
 <DD>
@@ -2185,6 +2196,34 @@ If
 </FONT>
 is unset, it loses its special properties, even if it is
 subsequently reset.
+<DT><B>READLINE_LINE</B>
+
+<DD>
+The contents of the
+<B>readline</B>
+
+line buffer, for use with
+<TT>bind -x</TT>
+
+(see
+<FONT SIZE=-1><B>SHELL BUILTIN COMMANDS</B>
+
+</FONT>
+below).
+<DT><B>READLINE_POINT</B>
+
+<DD>
+The position of the insertion point in the
+<B>readline</B>
+
+line buffer, for use with
+<TT>bind -x</TT>
+
+(see
+<FONT SIZE=-1><B>SHELL BUILTIN COMMANDS</B>
+
+</FONT>
+below).
 <DT><B>REPLY</B>
 
 <DD>
@@ -2281,21 +2320,6 @@ expansion before being interpreted as a file name.
 
 </FONT>
 is not used to search for the resultant file name.
-<DT><B>CDPATH</B>
-
-<DD>
-The search path for the
-<B>cd</B>
-
-command.
-This is a colon-separated list of directories in which the shell looks
-for destination directories specified by the
-<B>cd</B>
-
-command.
-A sample value is
-<TT>&quot;.:~:/usr&quot;</TT>.
-
 <DT><B>BASH_XTRACEFD</B>
 
 <DD>
@@ -2322,11 +2346,29 @@ Note that setting
 to 2 (the standard error file
 descriptor) and then unsetting it will result in the standard error
 being closed.
+<DT><B>CDPATH</B>
+
+<DD>
+The search path for the
+<B>cd</B>
+
+command.
+This is a colon-separated list of directories in which the shell looks
+for destination directories specified by the
+<B>cd</B>
+
+command.
+A sample value is
+<TT>&quot;.:~:/usr&quot;</TT>.
+
 <DT><B>COLUMNS</B>
 
 <DD>
 Used by the <B>select</B> builtin command to determine the terminal width
-when printing selection lists.  Automatically set upon receipt of a SIGWINCH.
+when printing selection lists.  Automatically set upon receipt of a
+<FONT SIZE=-1><B>SIGWINCH</B>.
+
+</FONT>
 <DT><B>COMPREPLY</B>
 
 <DD>
@@ -2342,6 +2384,14 @@ with value
 
 it assumes that the shell is running in an emacs shell buffer and disables
 line editing.
+<DT><B>ENV</B>
+
+<DD>
+Similar to
+<FONT SIZE=-1><B>BASH_ENV</B>;
+
+</FONT>
+used when the shell is invoked in POSIX mode.
 <DT><B>FCEDIT</B>
 
 <DD>
@@ -3610,7 +3660,7 @@ to uppercase; the <B>,</B> operator converts matching uppercase letters
 to lowercase.
 The <B>^^</B> and <B>,,</B> expansions convert each matched character in the
 expanded value; the <B>^</B> and <B>,</B> expansions match and convert only
-the first character in the expanded value..
+the first character in the expanded value.
 If <I>pattern</I> is omitted, it is treated like a <B>?</B>, which matches
 every character.
 If
@@ -5103,10 +5153,6 @@ True if <I>file</I> exists and is writable.
 
 <DD>
 True if <I>file</I> exists and is executable.
-<DT><B>-O </B><I>file</I>
-
-<DD>
-True if <I>file</I> exists and is owned by the effective user id.
 <DT><B>-G </B><I>file</I>
 
 <DD>
@@ -5115,23 +5161,27 @@ True if <I>file</I> exists and is owned by the effective group id.
 
 <DD>
 True if <I>file</I> exists and is a symbolic link.
-<DT><B>-S </B><I>file</I>
-
-<DD>
-True if <I>file</I> exists and is a socket.
 <DT><B>-N </B><I>file</I>
 
 <DD>
 True if <I>file</I> exists and has been modified since it was last read.
+<DT><B>-O </B><I>file</I>
+
+<DD>
+True if <I>file</I> exists and is owned by the effective user id.
+<DT><B>-S </B><I>file</I>
+
+<DD>
+True if <I>file</I> exists and is a socket.
+<DT><I>file1</I> <B>-ef</B> <I>file2</I><DD>
+True if <I>file1</I> and <I>file2</I> refer to the same device and
+inode numbers.
 <DT><I>file1</I> -<B>nt</B> <I>file2</I><DD>
 True if <I>file1</I> is newer (according to modification date) than <I>file2</I>,
 or if <I>file1</I> exists and file2 does not.
 <DT><I>file1</I> -<B>ot</B> <I>file2</I><DD>
 True if <I>file1</I> is older than <I>file2</I>, or if <I>file2</I> exists
 and <I>file1</I> does not.
-<DT><I>file1</I> <B>-ef</B> <I>file2</I><DD>
-True if <I>file1</I> and <I>file2</I> refer to the same device and
-inode numbers.
 <DT><B>-o </B><I>optname</I>
 
 <DD>
@@ -8596,7 +8646,7 @@ The return status is false if
 is not a shell builtin command.
 <DT><B>caller</B> [<I>expr</I>]<DD>
 Returns the context of any active subroutine call (a shell function or
-a script executed with the <B>.</B> or <B>source</B> builtins.
+a script executed with the <B>.</B> or <B>source</B> builtins).
 Without <I>expr</I>, <B>caller</B> displays the line number and source
 filename of the current subroutine call.
 If a non-negative integer is supplied as <I>expr</I>, <B>caller</B> 
@@ -8931,17 +8981,6 @@ User names.  May also be specified as <B>-u</B>.
 Names of all shell variables.  May also be specified as <B>-v</B>.
 </DL></DL>
 
-<DT><B>-G</B> <I>globpat</I><DD>
-The pathname expansion pattern <I>globpat</I> is expanded to generate
-the possible completions.
-<DT><B>-W</B> <I>wordlist</I><DD>
-The <I>wordlist</I> is split using the characters in the
-<FONT SIZE=-1><B>IFS</B>
-
-</FONT>
-special variable as delimiters, and each resultant word is expanded.
-The possible completions are the members of the resultant list which
-match the word being completed.
 <DT><B>-C</B> <I>command</I><DD>
 <I>command</I> is executed in a subshell environment, and its output is
 used as the possible completions.
@@ -8954,6 +8993,23 @@ of the
 
 </FONT>
 array variable.
+<DT><B>-G</B> <I>globpat</I><DD>
+The pathname expansion pattern <I>globpat</I> is expanded to generate
+the possible completions.
+<DT><B>-P</B> <I>prefix</I><DD>
+<I>prefix</I> is added at the beginning of each possible completion
+after all other options have been applied.
+<DT><B>-S</B> <I>suffix</I><DD>
+<I>suffix</I> is appended to each possible completion
+after all other options have been applied.
+<DT><B>-W</B> <I>wordlist</I><DD>
+The <I>wordlist</I> is split using the characters in the
+<FONT SIZE=-1><B>IFS</B>
+
+</FONT>
+special variable as delimiters, and each resultant word is expanded.
+The possible completions are the members of the resultant list which
+match the word being completed.
 <DT><B>-X</B> <I>filterpat</I><DD>
 <I>filterpat</I> is a pattern as used for pathname expansion.
 It is applied to the list of possible completions generated by the
@@ -8961,12 +9017,6 @@ preceding options and arguments, and each completion matching
 <I>filterpat</I> is removed from the list.
 A leading <B>!</B> in <I>filterpat</I> negates the pattern; in this
 case, any completion not matching <I>filterpat</I> is removed.
-<DT><B>-P</B> <I>prefix</I><DD>
-<I>prefix</I> is added at the beginning of each possible completion
-after all other options have been applied.
-<DT><B>-S</B> <I>suffix</I><DD>
-<I>suffix</I> is appended to each possible completion
-after all other options have been applied.
 
 </DL>
 <P>
@@ -8981,7 +9031,7 @@ an error occurs adding a completion specification.
 <DT><B>compopt</B> [<B>-o</B> <I>option</I>] [<B>-DE</B>] [<B>+o</B> <I>option</I>] [<I>name</I>]<DD>
 Modify completion options for each <I>name</I> according to the
 <I>option</I>s, or for the
-currently-execution completion if no <I>name</I>s are supplied.
+currently-executing completion if no <I>name</I>s are supplied.
 If no <I>option</I>s are given, display the completion options for each
 <I>name</I> or the current completion.
 The possible values of <I>option</I> are those valid for the <B>complete</B>
@@ -8992,13 +9042,10 @@ on a command for which no completion has previously been defined.
 The <B>-E</B> option indicates that the remaining options should
 apply to ``empty'' command completion; that is, completion attempted on a
 blank line.
-</DL>
 <P>
-
 The return value is true unless an invalid option is supplied, an attempt
 is made to modify the options for a <I>name</I> for which no completion
 specification exists, or an output error occurs.
-<DL COMPACT>
 <DT><B>continue</B> [<I>n</I>]<DD>
 Resume the next iteration of the enclosing
 <B>for</B>,
@@ -9153,7 +9200,7 @@ an attempt is made to turn off array status for an array variable,
 or an attempt is made to display a non-existent function with <B>-f</B>.
 </DL>
 
-<DT><B>dirs [+</B><I>n</I>] [-<I>n</I>] [<B>-cplv</B>]
+<DT><B>dirs [+</B><I>n</I>] [-<I>n</I>] [<B>-clpv</B>]
 
 <DD>
 Without options, displays the list of currently remembered directories.
@@ -9954,16 +10001,16 @@ meanings:
 <DD>
 List process IDs
 in addition to the normal information.
-<DT><B>-p</B>
-
-<DD>
-List only the process ID of the job's process group
-leader.
 <DT><B>-n</B>
 
 <DD>
 Display information only about jobs that have changed status since
 the user was last notified of their status.
+<DT><B>-p</B>
+
+<DD>
+List only the process ID of the job's process group
+leader.
 <DT><B>-r</B>
 
 <DD>
@@ -11311,7 +11358,7 @@ subshells invoked with <B>(</B> <I>command</I> <B>)</B> inherit the
 <DD>
 Error tracing is enabled:  command substitution, shell functions, and
 subshells invoked with <B>(</B> <I>command</I> <B>)</B> inherit the
-<B>ERROR</B> trap.
+<B>ERR</B> trap.
 </DL></DL>
 
 <DT><B>extglob</B>
@@ -11715,7 +11762,11 @@ Each
 
 is either
 a signal name defined in &lt;<I>signal.h</I>&gt;, or a signal number.
-Signal names are case insensitive and the SIG prefix is optional.
+Signal names are case insensitive and the
+<FONT SIZE=-1><B>SIG</B>
+
+</FONT>
+prefix is optional.
 <P>
 
 
@@ -12375,7 +12426,7 @@ version of
 <B>bash</B>.
 
 The latest version is always available from
-<I><A HREF="ftp://ftp.gnu.org/pub/bash/">ftp://ftp.gnu.org/pub/bash/</A></I>.
+<I><A HREF="ftp://ftp.gnu.org/pub/gnu/bash/">ftp://ftp.gnu.org/pub/gnu/bash/</A></I>.
 <P>
 
 Once you have determined that a bug actually exists, use the
@@ -12460,7 +12511,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-4.1<TH ALIGN=CENTER width=33%>2009 December 29<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-4.1<TH ALIGN=CENTER width=33%>2010 January 15<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -12566,6 +12617,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 30 December 2009 13:07:38 EST
+Time: 15 January 2010 11:58:10 EST
 </BODY>
 </HTML>
