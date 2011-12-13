@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet@ins.CWRU.Edu
 .\"
-.\"	Last Change: Sat Apr 17 23:46:04 EDT 2010
+.\"	Last Change: Thu Apr 22 18:59:21 EDT 2010
 .\"
-.TH READLINE 3 "2009 April 17" "GNU Readline 6.1"
+.TH READLINE 3 "2009 April 22" "GNU Readline 6.1"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -360,6 +360,14 @@ This command is bound to
 in emacs mode and to
 .B #
 in vi command mode.
+.TP
+.B completion\-display\-width (-1)
+The number of screen columns used to display possible matches
+when performing completion.
+The value is ignored if it is less than 0 or greater than the terminal
+screen width.
+A value of 0 will cause matches to be displayed one per line.
+The default value is -1.
 .TP 
 .B completion\-ignore\-case (Off)
 If set to \fBOn\fP, readline performs filename matching and completion
@@ -923,6 +931,12 @@ only attempts filename completion under certain circumstances.
 .TP
 .B possible\-completions (M\-?)
 List the possible completions of the text before point.
+When displaying completions, readline sets the number of columns used
+for display to the value of \fBcompletion-display-width\fP, the value of
+the environment variable
+.SM
+.BR COLUMNS ,
+or the screen width, in that order.
 .TP
 .B insert\-completions (M\-*)
 Insert all completions of the text before point

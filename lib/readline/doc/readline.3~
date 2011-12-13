@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet@ins.CWRU.Edu
 .\"
-.\"	Last Change: Fri Oct  9 12:57:27 EDT 2009
+.\"	Last Change: Thu Apr 22 18:59:21 EDT 2010
 .\"
-.TH READLINE 3 "2009 October 9" "GNU Readline 6.1"
+.TH READLINE 3 "2009 April 22" "GNU Readline 6.1"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -34,8 +34,8 @@ readline \- get a line from a user with editing
 \fBreadline\fP (\fIconst char *prompt\fP);
 .fi
 .SH COPYRIGHT
-.if n Readline is Copyright (C) 1989\-2009 Free Software Foundation,  Inc.
-.if t Readline is Copyright \(co 1989\-2009 Free Software Foundation, Inc.
+.if n Readline is Copyright (C) 1989\-2010 Free Software Foundation,  Inc.
+.if t Readline is Copyright \(co 1989\-2010 Free Software Foundation, Inc.
 .SH DESCRIPTION
 .LP
 .B readline
@@ -360,6 +360,14 @@ This command is bound to
 in emacs mode and to
 .B #
 in vi command mode.
+.TP
+.B completion\-display\-width (-1)
+The number of screen columns used to display possible matches
+when performing completion.
+The value is ignored if it is less than 0 or greater than the terminal
+screen width.
+A value of 0 will cause matches to be displayed one per line.
+The default value is -1.
 .TP 
 .B completion\-ignore\-case (Off)
 If set to \fBOn\fP, readline performs filename matching and completion

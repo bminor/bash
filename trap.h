@@ -88,6 +88,8 @@ extern void free_trap_strings __P((void));
 extern void reset_signal_handlers __P((void));
 extern void restore_original_signals __P((void));
 
+extern void get_all_original_signals __P((void));
+
 extern char *signal_name __P((int));
 
 extern int decode_signal __P((char *, int));

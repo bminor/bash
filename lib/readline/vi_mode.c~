@@ -1316,19 +1316,18 @@ rl_vi_char_search (count, key)
   static char target;
 #endif
 
-  if (key == ';' || key == ',')
-    {
-      if (_rl_cs_orig_dir == 0)
-	return -1;
+  if (_rl_cs_orig_dir == 0)
+    return -1;
 #if defined (HANDLE_MULTIBYTE)
-      if (_rl_vi_last_search_mblen == 0)
-	return -1;
+  if (_rl_vi_last_search_mblen == 0)
+    return -1;
 #else
-      if (_rl_vi_last_search_char == 0)
-	return -1;
+  if (_rl_vi_last_search_char == 0)
+    return -1;
 #endif
-      _rl_cs_dir = (key == ';') ? _rl_cs_orig_dir : -_rl_cs_orig_dir;
-    }
+
+  if (key == ';' || key == ',')
+    _rl_cs_dir = (key == ';') ? _rl_cs_orig_dir : -_rl_cs_orig_dir;
   else
     {
       switch (key)

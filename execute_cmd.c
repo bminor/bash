@@ -1390,15 +1390,11 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 
   reset_terminating_signals ();		/* in sig.c */
   /* Cancel traps, in trap.c. */
-#if 0	/* XXX - bash-4.2 */
   /* Reset the signal handlers in the child, but don't free the
      trap strings.  Set a flag noting that we have to free the
      trap strings if we run trap to change a signal disposition. */
   reset_signal_handlers ();
   subshell_environment |= SUBSHELL_RESETTRAP;
-#else
-  restore_original_signals ();
-#endif
 
   /* Make sure restore_original_signals doesn't undo the work done by
      make_child to ensure that asynchronous children are immune to SIGINT
@@ -3812,16 +3808,11 @@ run_builtin:
       if (already_forked)
 	{
 	  /* reset_terminating_signals (); */	/* XXX */
-#if 0	/* XXX - bash-4.2 */
 	  /* Reset the signal handlers in the child, but don't free the
 	     trap strings.  Set a flag noting that we have to free the
 	     trap strings if we run trap to change a signal disposition. */
 	  reset_signal_handlers ();
 	  subshell_environment |= SUBSHELL_RESETTRAP;
-#else
-	  /* Cancel traps, in trap.c. */
-	  restore_original_signals ();
-#endif
 
 	  if (async)
 	    {

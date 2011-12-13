@@ -9734,4 +9734,58 @@ execute_cmd.c
 	  substitution FDs or FIFOs created by a shell builtin or shell
 	  function.  Fixes bug reported by Charles Duffy <charles@dyfis.net>
 
+doc/{bash.1,bashref.texi}
+	- document 'C and "C constants for printf builtin
+
+				   4/22
+				   ----
+lib/readline/complete.c
+	- new function to return screenwidth for use when displaying possible
+	  matches: complete_get_screenwidth; changed uses of _rl_screenwidth
+	  to use complete_get_screenwidth().
+	- change complete_get_screenwidth to query (readline-private)
+	  _rl_completion_colums, $COLUMNS, then _rl_screenwidth in that order
+	- change rl_display_match_list to deal with limit < 0 (which implies
+	  that cols == 0) when _rl_screenwidth > 0
+
+lib/readline/bind.c
+	- new bindable variable: completion-display-width, controls the
+	  number of columns used when displaying completionsm with new
+	  sv_compwidth function to call when value is set or unset
+
+lib/readline/doc/{readline.3,rltech.texi}
+	- documented completion-display-width variable
+
+				   4/23
+				   ----
+execute_cmd.c
+	- change execute_in_subshell to reset trap handlers without freeing
+	  the trap strings and set SUBSHELL_RESETTRAP.  In line with Austin
+	  Group interp #53 (trap in a subshell).
+	- ditto for execute_simple_command where it can be determined that
+	  the shell is going to run a builtin or function in a subshell
+
+trap.c
+	- new function, get_all_original_signals, retrieves the original
+	  signal disposition for all signals
+
+trap.h
+	- extern declaration for get_all_original_signals
+
+builtins/trap.def
+	- change showtrap to display signals that are "hard ignored" as
+	  trap commands to ignore them, even though that trap command would
+	  be a no-op.  Partial fix for feature request from Siddhesh
+	  Poyarekar <siddhesh.poyarekar@gmail.com>
+	- change trap_builtin to call get_all_original_signals before displaying
+	  traps.  This will show inherited ignored signals.  Rest of feature
+	  request from Siddhesh Poyarekar <siddhesh.poyarekar@gmail.com>
+
+lib/readline/histexpand.c
+	- fix history_tokenize_word so that it understands $(...) and the
+	   <(...) and >(...) expansions as a single word
+	- change history_tokenize_word so that it understands extended shell
+	  globbing patterns as a single word.  Code is very similar to
+	  $(...) code above.  Bug reported by Rajeev V. Pillai
+	  <rajeevvp@gmail.com>
 

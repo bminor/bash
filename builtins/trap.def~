@@ -245,17 +245,13 @@ showtrap (i)
   char *t, *p, *sn;
 
   p = trap_list[i];
-#if 1
-  if (p == (char *)DEFAULT_SIG)
-    return;
-#else
   if (p == (char *)DEFAULT_SIG && signal_is_hard_ignored (i) == 0)
     return;
   else if (signal_is_hard_ignored (i))
     t = (char *)NULL;
   else
-#endif
     t = (p == (char *)IGNORE_SIG) ? (char *)NULL : sh_single_quote (p);
+
   sn = signal_name (i);
   /* Make sure that signals whose names are unknown (for whatever reason)
      are printed as signal numbers. */

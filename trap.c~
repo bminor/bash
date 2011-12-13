@@ -952,7 +952,8 @@ free_trap_string (sig)
   sigmodes[sig] &= ~SIG_TRAPPED;
 }
 
-/* Reset the handler for SIG to the original value. */
+/* Reset the handler for SIG to the original value but leave the trap string
+   in place. */
 static void
 reset_signal (sig)
      int sig;
@@ -1017,7 +1018,8 @@ reset_or_restore_signal_handlers (reset)
 }
 
 /* Reset trapped signals to their original values, but don't free the
-   trap strings.  Called by the command substitution code. */
+   trap strings.  Called by the command substitution code and other places
+   that create a "subshell environment". */
 void
 reset_signal_handlers ()
 {

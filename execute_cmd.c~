@@ -4397,6 +4397,9 @@ execute_builtin_or_function (words, builtin, var, redirects,
       cleanup_redirects (redirection_undo_list);
       redirection_undo_list = (REDIRECT *)NULL;
       dispose_exec_redirects ();
+#if defined (PROCESS_SUBSTITUTION)
+      free (ofifo_list);
+#endif
       return (EX_REDIRFAIL);	/* was EXECUTION_FAILURE */
     }
 

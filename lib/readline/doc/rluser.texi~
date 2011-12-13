@@ -431,7 +431,17 @@ The string to insert at the beginning of the line when the
 @code{insert-comment} command is executed.  The default value
 is @code{"#"}.
 
+@item completion-display-width
+@vindex completion-display-width
+The number of screen columns used to display possible matches
+when performing completion.
+The value is ignored if it is less than 0 or greater than the terminal
+screen width.
+A value of 0 will cause matches to be displayed one per line.
+The default value is -1.
+
 @item completion-ignore-case
+@vindex completion-ignore-case
 If set to @samp{on}, Readline performs filename matching and completion
 in a case-insensitive fashion.
 The default value is @samp{off}.
@@ -1299,6 +1309,9 @@ The default is filename completion.
 
 @item possible-completions (M-?)
 List the possible completions of the text before point.
+When displaying completions, Readline sets the number of columns used
+for display to the value of @code{completion-display-width}, the value of
+the environment variable @env{COLUMNS}, or the screen width, in that order.
 
 @item insert-completions (M-*)
 Insert all completions of the text before point that would have
@@ -1580,7 +1593,7 @@ editing mode.
 While the Readline library does not have a full set of @code{vi}
 editing functions, it does contain enough to allow simple editing
 of the line.  The Readline @code{vi} mode behaves as specified in
-the @sc{posix} 1003.2 standard.
+the @sc{posix} standard.
 
 @ifset BashFeatures
 In order to switch interactively between @code{emacs} and @code{vi}

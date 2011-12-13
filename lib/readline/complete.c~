@@ -122,6 +122,7 @@ static void insert_all_matches PARAMS((char **, int, char *));
 static void display_matches PARAMS((char **));
 static int compute_lcd_of_matches PARAMS((char **, int, const char *));
 static int postprocess_matches PARAMS((char ***, int));
+static int complete_get_screenwidth PARAMS((void));
 
 static char *make_quoted_replacement PARAMS((char *, int, char *));
 
@@ -160,7 +161,7 @@ int _rl_completion_case_fold = 1;
 int _rl_completion_case_fold;
 #endif
 
-/* If non-zero, don't match hidden files (filenames beginning with a `.' on
+/* If zero, don't match hidden files (filenames beginning with a `.' on
    Unix) when doing filename completion. */
 int _rl_match_hidden_files = 1;
 
@@ -169,6 +170,10 @@ int _rl_match_hidden_files = 1;
    more than this number of displaying characters in common will have the common
    display prefix replaced with an ellipsis. */
 int _rl_completion_prefix_display_length = 0;
+
+/* The readline-private number of screen columns to use when displaying
+   matches.  If < 0 or > _rl_screenwidth, it is ignored. */
+int _rl_completion_columns = 0;
 
 /* Global variables available to applications using readline. */
 
@@ -1325,6 +1330,23 @@ postprocess_matches (matchesp, matching_filenames)
   return (1);
 }
 
+static int
+complete_get_screenwidth ()
+{
+  int cols;
+  char *envcols;
+
+  cols = _rl_completion_columns;
+  if (cols >= 0 && cols <= _rl_screenwidth)
+    return cols;
+  envcols = getenv ("COLUMNS");
+  if (envcols && *envcols)
+    cols = atoi (envcols);
+  if (cols >= 0 && cols <= _rl_screenwidth)
+    return cols;
+  return _rl_screenwidth;
+}
+
 /* A convenience function for displaying a list of strings in
    columnar format on readline's output stream.  MATCHES is the list
    of strings, in argv format, LEN is the number of strings in MATCHES,
@@ -1334,7 +1356,7 @@ rl_display_match_list (matches, len, max)
      char **matches;
      int len, max;
 {
-  int count, limit, printed_len, lines;
+  int count, limit, printed_len, lines, cols;
   int i, j, k, l, common_length, sind;
   char *temp, *t;
 
@@ -1355,12 +1377,17 @@ rl_display_match_list (matches, len, max)
     }
 
   /* How many items of MAX length can we fit in the screen window? */
+  cols = complete_get_screenwidth ();
   max += 2;
-  limit = _rl_screenwidth / max;
-  if (limit != 1 && (limit * max == _rl_screenwidth))
+  limit = cols / max;
+  if (limit != 1 && (limit * max == cols))
     limit--;
 
-  /* Avoid a possible floating exception.  If max > _rl_screenwidth,
+  /* If cols == 0, limit will end up -1 */
+  if (cols < _rl_screenwidth && limit < 0)
+    limit = 1;
+
+  /* Avoid a possible floating exception.  If max > cols,
      limit will be 0 and a divide-by-zero fault will result. */
   if (limit == 0)
     limit = 1;

@@ -129,6 +129,7 @@ trap_builtin (list)
   else if (display || list == 0)
     {
       initialize_terminating_signals ();
+      get_all_original_signals ();
       return (sh_chkwrite (display_traps (list)));
     }
   else
@@ -245,19 +246,13 @@ showtrap (i)
   char *t, *p, *sn;
 
   p = trap_list[i];
-#if 1
-  if (p == (char *)DEFAULT_SIG)
-    return;
-
-  t = (p == (char *)IGNORE_SIG) ? (char *)NULL : sh_single_quote (p);
-#else
   if (p == (char *)DEFAULT_SIG && signal_is_hard_ignored (i) == 0)
     return;
   else if (signal_is_hard_ignored (i))
     t = (char *)NULL;
   else
     t = (p == (char *)IGNORE_SIG) ? (char *)NULL : sh_single_quote (p);
-#endif
+
   sn = signal_name (i);
   /* Make sure that signals whose names are unknown (for whatever reason)
      are printed as signal numbers. */

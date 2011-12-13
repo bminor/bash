@@ -4677,24 +4677,16 @@ close_new_fifos (list, lsize)
 
   if (list == 0)
     {
-itrace("close_new_fifos: list == 0, calling unlink_fifo_list");
       unlink_fifo_list ();
       return;
     }
 
   for (i = 0; i < lsize; i++)
     if (list[i] == 0 && i < fifo_list_size && fifo_list[i].proc != -1)
-{
-itrace("close_new_fifos: closing %d", i);
       unlink_fifo (i);
-}
 
   for (i = lsize; i < fifo_list_size; i++)
-{
-if (fifo_list[i].proc != -1)
-  itrace("close_new_fifos: closing %d", i);
     unlink_fifo (i);  
-}
 }
 
 int
