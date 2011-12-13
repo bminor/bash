@@ -10359,3 +10359,16 @@ pathexp.c
 	  flag to skip over extended globbing patterns in variables like
 	  HISTIGNORE and GLOBIGNORE.  Fixes bug reported by Dimitar DIMITROV
 	  <mitkofr@yahoo.fr> and Greg Wooledge <wooledg@eeg.ccf.org>
+
+				   8/28
+				   ----
+lib/readline/rlprivate.h
+	- add member to search_cxt to save _rl_keymap
+	- new flag for isearch context: SF_CHGKMAP, set if we changed the
+	  keymap while reading a character for the search string that
+	  translated to a command
+
+lib/readline/isearch.c
+	- save current readline keymap in cxt->keymap in _rl_scxt_alloc
+	- in _rl_isearch_dispatch, only check for cxt->lastc as a member of
+	  cxt->search_terminators if it's > 0 (i.e., not an isearch opcode)

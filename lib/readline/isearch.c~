@@ -339,15 +339,15 @@ _rl_isearch_dispatch (cxt, c)
     }
 
 #if 0
-  /* If we are moving into a new keymap, modify cxt->keymap and go on.
-     This can be a problem if c == ESC and we want to terminate the
-     incremental search */
+  /* If we are moving into a new keymap, modify cxt->keymap and go on */
   if (c >= 0 && cxt->keymap[c].type == ISKMAP && strchr (cxt->search_terminators, cxt->lastc) == 0)
     {
       cxt->keymap = FUNCTION_TO_KEYMAP (cxt->keymap, c);
       cxt->sflags |= SF_CHGKMAP;
       /* XXX - we should probably save this sequence, so we can do
-	 something useful if this doesn't end up mapping to a command. */
+	 something useful if this doesn't end up mapping to a command.
+	 This can be a problem if c == ESC and we want to terminate
+	 the incremental search */
       return 1;
     }
 #endif

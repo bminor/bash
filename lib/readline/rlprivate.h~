@@ -79,6 +79,8 @@ typedef struct  __rl_search_context
 
   UNDO_LIST *save_undo_list;
 
+  Keymap keymap;	/* used when dispatching commands in search string */
+
   int history_pos;
   int direction;
 
@@ -495,6 +497,6 @@ extern int _rl_undo_group_level;
 
 /* vi_mode.c */
 extern int _rl_vi_last_command;
-extern _rl_vimotion_cxt *_rl_vimv_cxt;
+extern _rl_vimotion_cxt *_rl_vimvcxt;
 
 #endif /* _RL_PRIVATE_H_ */
