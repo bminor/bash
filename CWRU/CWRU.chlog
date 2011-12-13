@@ -9478,3 +9478,13 @@ shell.c
 	  foo in an executable shell script without a leading `#!' (fixes
 	  longstanding bug)
 
+				    2/8
+				    ---
+variables.c
+	- in push_func_var, if a variable is in a special builtin's temporary
+	  environment and needs to be propagated because we're in Posix mode,
+	  or we just need to propagate a variable, and we are executing in a
+	  function without any local variables (so the function-local variable
+	  context has no variable hash table), make sure we create a hash
+	  table so we have a place to save the variable to be propagated.
+	  Fixes bug reported by Crestez Dan Leonard <cdleonard@gmail.com>.
