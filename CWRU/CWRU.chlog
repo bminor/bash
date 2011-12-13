@@ -9495,3 +9495,87 @@ builtins/hash.def
 	- change add_hashed_command to remove the command being looked up from
 	  the hash table before trying to add it.  That way, if it's not found,
 	  there won't be anything remaining in the hash table
+
+				   2/26
+				   ----
+trap.[ch]
+	- move IMPOSSIBLE_TRAP_HANDLER define to trap.h so other parts of the
+	  shell can use it
+
+parse.y
+	- change yy_readline_get to use IMPOSSIBLE_TRAP_HANDER instead of NULL
+	  as a sentinel value for the SIGINT signal handler
+	- make sure yy_readline_get resets interrupt_immediately to 0 after
+	  calling readline() using the same criteria it used to set it to 1
+	  before the call -- make the code symmetric.  Suggested by Werner
+	  Fink <werner@suse.de>
+
+builtins/read.def
+	- move assignment to `retval' before decrement of interrupt_immediately
+	  and terminate_immediately and call to discard_unwind_frame
+	- move assign_vars label before decrement of interrupt_immediately and
+	  terminate_immediately so those variables get reset appropriately
+	  if read -t times out
+
+subst.h
+	- new define for Q_DOLBRACE, indicates double-quoted ${...}
+
+subst.c
+	- in parameter_brace_expand, before calling parameter_brace_expand_rhs,
+	  add Q_DOLBRACE to `quoted' if we're within double quotes.
+	- in expand_word_internal, if the Q_DOLBRACE flag is set, remove a
+	  backslash escaping a { or }.  Result of a Posix discussion on the
+	  austin-group list
+
+				   2/27
+				   ----
+variables.c
+	- new functions to save and restore the PIPESTATUS variable's internal
+	  array: save_pipestatus_array and restore_pipestatus_array
+
+variables.h
+	- new extern declarations for save_pipestatus_array and
+	  restore_pipestatus_array
+
+trap.c
+	- in run_pending_traps, _run_trap_internal, and run_exit_trap, save
+	  and restore $PIPESTATUS while traps are running.  Fixes bug
+	  reported by Florian Bruhin <me@the-compiler.org>
+
+parse.y
+	- use save_pipestatus_array and restore_pipestatus_array in
+	  save_parser_state and restore_parser_state, respectively, replacing
+	  inline code
+
+lib/readline/histfile.c
+	- fix callers of history_filename to be prepared to cope with it
+	  returning NULL
+	- change history_filename to return NULL if $HOME is not set, rather
+	  than trying to write the history file in the current directory.
+	  This is the default directory, used only if the application does
+	  not specify a history filename.  Changed due to long-ago (unsent)
+	  bug report from OpenBSD
+
+{Makefile,config.h,configure}.in,externs.h,lib/sh/{dprintf.c,Makefile.in}
+	- change fdprintf to dprintf, which is the Posix standard interface,
+	  look for it with configure, replace it if not available
+
+				   2/28
+				   ----
+command.h
+	- add new subshell flag, SUBSHELL_RESETTRAP.  Indicates to the trap
+	  builtin that the shell is executing a command substitution and
+	  should free the trap strings we left unfreed by reset_signal_handlers()
+
+trap.c
+	- free_trap_string() and free_trap_strings() are now compiled in
+
+builtins/trap.def
+	- if changing a signal disposition and the SUBSHELL_RESETTRAP flag is
+	  set in subshell_environment, free the trap strings left unfreed by
+	  reset_signal_handlers
+
+subst.c
+	- in command_substitute, set the SUBSHELL_RESETTRAP flag.  This change
+	  is for Austin Group Posix interpretation 53
+	  (http://austingroupbugs.net/view.php?id=53)

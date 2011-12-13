@@ -1422,11 +1422,11 @@ yy_readline_get ()
 	give_terminal_to (shell_pgrp, 0);
 #endif /* JOB_CONTROL */
 
-      old_sigint = (SigHandler *)NULL;
+      old_sigint = (SigHandler *)IMPOSSIBLE_TRAP_HANDLER;
       if (signal_is_ignored (SIGINT) == 0)
 	{
-	  old_sigint = (SigHandler *)set_signal_handler (SIGINT, sigint_sighandler);
 	  interrupt_immediately++;
+	  old_sigint = (SigHandler *)set_signal_handler (SIGINT, sigint_sighandler);
 	}
       terminate_immediately = 1;
 
@@ -1434,10 +1434,11 @@ yy_readline_get ()
       					  current_readline_prompt : "");
 
       terminate_immediately = 0;
-      if (signal_is_ignored (SIGINT) == 0 && old_sigint)
+      if (signal_is_ignored (SIGINT) == 0)
 	{
 	  interrupt_immediately--;
-	  set_signal_handler (SIGINT, old_sigint);
+	  if (old_sigint != IMPOSSIBLE_TRAP_HANDLER)
+	    set_signal_handler (SIGINT, old_sigint);
 	}
 
 #if 0
@@ -5779,10 +5780,6 @@ sh_parser_state_t *
 save_parser_state (ps)
      sh_parser_state_t *ps;
 {
-#if defined (ARRAY_VARS)
-  SHELL_VAR *v;
-#endif
-
   if (ps == 0)
     ps = (sh_parser_state_t *)xmalloc (sizeof (sh_parser_state_t));
   if (ps == 0)
@@ -5805,11 +5802,7 @@ save_parser_state (ps)
 
   ps->last_command_exit_value = last_command_exit_value;
 #if defined (ARRAY_VARS)
-  v = find_variable ("PIPESTATUS");
-  if (v && array_p (v) && array_cell (v))
-    ps->pipestatus = array_copy (array_cell (v));
-  else
-    ps->pipestatus = (ARRAY *)NULL;
+  ps->pipestatus = save_pipestatus_array ();
 #endif
     
   ps->last_shell_builtin = last_shell_builtin;
@@ -5825,10 +5818,6 @@ void
 restore_parser_state (ps)
      sh_parser_state_t *ps;
 {
-#if defined (ARRAY_VARS)
-  SHELL_VAR *v;
-#endif
-
   if (ps == 0)
     return;
 
@@ -5853,12 +5842,7 @@ restore_parser_state (ps)
 
   last_command_exit_value = ps->last_command_exit_value;
 #if defined (ARRAY_VARS)
-  v = find_variable ("PIPESTATUS");
-  if (v && array_p (v) && array_cell (v))
-    {
-      array_dispose (array_cell (v));
-      var_setarray (v, ps->pipestatus);
-    }
+  restore_pipestatus_array (ps->pipestatus);
 #endif
 
   last_shell_builtin = ps->last_shell_builtin;

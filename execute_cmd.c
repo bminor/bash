@@ -112,6 +112,7 @@ extern pid_t last_command_subst_pid;
 extern sh_builtin_func_t *last_shell_builtin, *this_shell_builtin;
 extern char **subshell_argv, **subshell_envp;
 extern int subshell_argc;
+extern time_t shell_start_time;
 #if 0
 extern char *glob_argv_flags;
 #endif
@@ -1182,7 +1183,7 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
      int asynchronous, pipe_in, pipe_out;
      struct fd_bitmap *fds_to_close;
 {
-  int rv, posix_time, old_flags;
+  int rv, posix_time, old_flags, nullcmd;
   time_t rs, us, ss;
   int rsf, usf, ssf;
   int cpu;
@@ -1217,6 +1218,22 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 #endif
 
   posix_time = (command->flags & CMD_TIME_POSIX);
+
+#if 0	/* XXX - bash-4.2 */
+  nullcmd = (command == 0) || (command->type == cm_simple && command->value.Simple->words == 0 && command->value.Simple->redirects == 0);
+  if (posixly_correct && nullcmd)
+    {
+#if defined (HAVE_GETRUSAGE)
+      selfb.ru_utime.tv_sec = kidsb.ru_utime.tv_sec = selfb.ru_stime.tv_sec = kidsb.ru_stime.tv_sec = 0;
+      selfb.ru_utime.tv_usec = kidsb.ru_utime.tv_usec = selfb.ru_stime.tv_usec = kidsb.ru_stime.tv_usec = 0;
+      before.tv_sec = shell_start_time;
+      before.tv_usec = 0;
+#else
+      before.tms_utime = before.tms_stime = before.tms_cutime = before.tms_cstime = 0;
+      tbefore = shell_start_time;
+#endif
+    }
+#endif
 
   old_flags = command->flags;
   command->flags &= ~(CMD_TIME_PIPELINE|CMD_TIME_POSIX);
@@ -1271,8 +1288,14 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   if (posix_time)
     time_format = POSIX_TIMEFORMAT;
   else if ((time_format = get_string_value ("TIMEFORMAT")) == 0)
-    time_format = BASH_TIMEFORMAT;
-
+    {
+#if 0 /* XXX - bash-4.2 */
+      if (posixly_correct && nullcmd)
+	time_format = "user\t%2lU\nsys\t%2lS";
+      else
+#endif
+	time_format = BASH_TIMEFORMAT;
+    }
   if (time_format && *time_format)
     print_formatted_time (stderr, time_format, rs, rsf, us, usf, ss, ssf, cpu);
 

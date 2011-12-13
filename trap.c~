@@ -912,6 +912,7 @@ run_interrupt_trap ()
   _run_trap_internal (SIGINT, "interrupt trap");
 }
 
+#ifdef INCLUDE_UNUSED
 /* Free all the allocated strings in the list of traps and reset the trap
    values to the default.  Intended to be called from subshells that want
    to complete work done by reset_signal_handlers upon execution of a
@@ -935,6 +936,7 @@ free_trap_string (sig)
   change_signal (sig, (char *)DEFAULT_SIG);
   sigmodes[sig] &= ~SIG_TRAPPED;
 }
+#endif
 
 /* Reset the handler for SIG to the original value. */
 static void

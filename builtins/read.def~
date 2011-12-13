@@ -390,6 +390,7 @@ read_builtin (list)
 	  run_unwind_frame ("read_builtin");
 	  input_string[i] = '\0';	/* make sure it's terminated */
 	  retval = 128+SIGALRM;
+itrace("read_builtin: before goto assign_vars: interrupt_immediately = %d", interrupt_immediately);
 	  goto assign_vars;
 	}
       old_alrm = set_signal_handler (SIGALRM, sigalrm);

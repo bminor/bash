@@ -858,7 +858,7 @@ add_one_character:
 	  if (string[i + 1] == LPAREN)
 	    ret = extract_command_subst (string, &si, 0);
 	  else
-	    ret = extract_dollar_brace_string (string, &si, 1, 0);
+	    ret = extract_dollar_brace_string (string, &si, Q_DOUBLE_QUOTES, 0);
 
 	  temp[j++] = '$';
 	  temp[j++] = string[i + 1];
@@ -5075,9 +5075,13 @@ command_substitute (string, quoted)
   last_asynchronous_pid = old_async_pid;
 
   if (pid == 0)
-    /* Reset the signal handlers in the child, but don't free the
-       trap strings. */
-    reset_signal_handlers ();
+    {
+      /* Reset the signal handlers in the child, but don't free the
+	 trap strings.  Set a flag noting that we have to free the
+	 trap strings if we run trap to change a signal disposition. */
+      reset_signal_handlers ();
+      subshell_environment |= SUBSHELL_RESETTRAP;
+    }
 
 #if defined (JOB_CONTROL)
   /* XXX DO THIS ONLY IN PARENT ? XXX */
@@ -5587,9 +5591,15 @@ parameter_brace_expand_rhs (name, value, c, quoted, qdollaratp, hasdollarat)
   else
 #endif /* ARRAY_VARS */
   bind_variable (name, t1, 0);
+#if 1
   free (t1);
 
   w->word = temp;
+#else		/* XXX - bash-4.2 -- depends on Posix group interpretation */
+  free (temp);
+
+  w->word = t1;
+#endif
   return w;
 }
 
@@ -7018,6 +7028,10 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 	      FREE (temp);
 	      if (value)
 		{
+		  /* XXX - bash-4.2 */
+		  /* From Posix discussion on austin-group list */
+		  if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
+		    quoted |= Q_DOLBRACE;
 		  ret = parameter_brace_expand_rhs (name, value, c,
 						    quoted,
 						    quoted_dollar_atp,
@@ -7061,6 +7075,8 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 	      if (contains_dollar_at)
 		*contains_dollar_at = 0;
 
+	      if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
+		quoted |= Q_DOLBRACE;
 	      ret = parameter_brace_expand_rhs (name, value, c, quoted,
 						quoted_dollar_atp,
 						contains_dollar_at);
@@ -7877,7 +7893,13 @@ add_string:
 	  else
 	    tflag = 0;
 
-	  if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && ((sh_syntaxtab[c] & tflag) == 0))
+	  /* From Posix discussion on austin-group list:  Backslash escaping
+	     { or } in ${...} is removed. */
+	  if ((quoted & Q_DOLBRACE) && (c == '{' || c == '}'))
+	    {
+	      SCOPY_CHAR_I (twochars, CTLESC, c, string, sindex, string_size);
+	    }
+	  else if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && ((sh_syntaxtab[c] & tflag) == 0))
 	    {
 	      SCOPY_CHAR_I (twochars, '\\', c, string, sindex, string_size);
 	    }

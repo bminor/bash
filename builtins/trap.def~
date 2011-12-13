@@ -93,7 +93,7 @@ static int display_traps __P((WORD_LIST *));
 #define REVERT 1		/* Revert to this signals original value. */
 #define IGNORE 2		/* Ignore this signal. */
 
-extern int posixly_correct, subshell_environment;
+extern int posixly_correct;
 
 int
 trap_builtin (list)
@@ -103,7 +103,6 @@ trap_builtin (list)
 
   list_signal_names = display = 0;
   result = EXECUTION_SUCCESS;
-
   reset_internal_getopt ();
   while ((opt = internal_getopt (list, "lp")) != -1)
     {
@@ -162,16 +161,6 @@ trap_builtin (list)
 	    operation = IGNORE;
 	  else if (first_arg[0] == '-' && !first_arg[1])
 	    operation = REVERT;
-	}
-
-      /* If we're in a command substitution, we haven't freed the trap strings
-	 (though we reset the signal handlers).  If we're setting a trap to
-	 handle a signal here, free the rest of the trap strings since they
-	 don't apply any more. */
-      if (subshell_environment & SUBSHELL_RESETTRAP)
-	{
-	  free_trap_strings ();
-	  subshell_environment &= ~SUBSHELL_RESETTRAP;
 	}
 
       while (list)

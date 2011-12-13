@@ -158,7 +158,6 @@ static int export_env_size;
 
 #if defined (READLINE)
 static int winsize_assignment;		/* currently assigning to LINES or COLUMNS */
-static int winsize_assigned;		/* assigned to LINES or COLUMNS */
 #endif
 
 /* Some forward declarations. */
@@ -3808,6 +3807,11 @@ push_func_var (data)
 
   if (tempvar_p (var) && (posixly_correct || (var->attributes & att_propagate)))
     {
+      /* Make sure we have a hash table to store the variable in while it is
+	 being propagated down to the global variables table.  Create one if
+	 we have to */
+      if ((vc_isfuncenv (shell_variables) || vc_istempenv (shell_variables)) && shell_variables->table == 0)
+	shell_variables->table = hash_create (0);
       /* XXX - should we set v->context here? */
       v = bind_variable_internal (var->name, value_cell (var), shell_variables->table, 0, 0);
       if (shell_variables == global_variables)
@@ -4342,7 +4346,7 @@ sv_winsize (name)
     {
       if (legal_number (value_cell (v), &xd) == 0)
 	return;
-      winsize_assignment = winsize_assigned = 1;
+      winsize_assignment = 1;
       d = xd;			/* truncate */
       if (name[0] == 'L')	/* LINES */
 	rl_set_screen_size (d, -1);
@@ -4634,6 +4638,39 @@ set_pipestatus_array (ps, nproc)
 	  array_insert (a, i, t);
 	}
     }
+}
+
+ARRAY *
+save_pipestatus_array ()
+{
+  SHELL_VAR *v;
+  ARRAY *a, *a2;
+
+  v = find_variable ("PIPESTATUS");
+  if (v == 0 || array_p (v) == 0)
+    return ((ARRAY *)NULL);
+    
+  a = array_cell (v);
+  a2 = a ? array_copy (a) : a;
+itrace("save_pipestatus_array: returning 0x%x", a2);
+  return a2;
+}
+
+void
+restore_pipestatus_array (a)
+     ARRAY *a;
+{
+  SHELL_VAR *v;
+  ARRAY *a2;
+
+  v = find_variable ("PIPESTATUS");
+  if (v == 0 || array_p (v) == 0)
+    return ((ARRAY *)NULL);
+
+  a2 = array_cell (v);
+  var_setarray (v, a); 
+itrace("restore_pipestatus_array: restored 0x%x", a);
+  array_dispose (a2);
 }
 #endif
 

@@ -858,7 +858,7 @@ add_one_character:
 	  if (string[i + 1] == LPAREN)
 	    ret = extract_command_subst (string, &si, 0);
 	  else
-	    ret = extract_dollar_brace_string (string, &si, 1, 0);
+	    ret = extract_dollar_brace_string (string, &si, Q_DOUBLE_QUOTES, 0);
 
 	  temp[j++] = '$';
 	  temp[j++] = string[i + 1];
@@ -1270,7 +1270,7 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
       if ((flags & SX_COMMAND) && string[i] == '$' && string[i+1] == LPAREN)
         {
           si = i + 2;
-          t = extract_command_subst (string, &si, flags);
+          t = extract_command_subst (string, &si, flags|SX_NOALLOC);
           i = si + 1;
           continue;
         }
@@ -2661,8 +2661,8 @@ do_assignment_internal (word, expand)
      const WORD_DESC *word;
      int expand;
 {
-  int offset, tlen, appendop, assign_list, aflags, retval;
-  char *name, *value;
+  int offset, appendop, assign_list, aflags, retval;
+  char *name, *value, *temp;
   SHELL_VAR *entry;
 #if defined (ARRAY_VARS)
   char *t;
@@ -2681,8 +2681,6 @@ do_assignment_internal (word, expand)
 
   if (name[offset] == '=')
     {
-      char *temp;
-
       if (name[offset - 1] == '+')
 	{
 	  appendop = 1;
@@ -2691,7 +2689,6 @@ do_assignment_internal (word, expand)
 
       name[offset] = 0;		/* might need this set later */
       temp = name + offset + 1;
-      tlen = STRLEN (temp);
 
 #if defined (ARRAY_VARS)
       if (expand && (word->flags & W_COMPASSIGN))
@@ -5590,9 +5587,15 @@ parameter_brace_expand_rhs (name, value, c, quoted, qdollaratp, hasdollarat)
   else
 #endif /* ARRAY_VARS */
   bind_variable (name, t1, 0);
+#if 1
   free (t1);
 
   w->word = temp;
+#else		/* XXX - bash-4.2 -- depends on Posix group interpretation */
+  free (temp);
+
+  w->word = t1;
+#endif
   return w;
 }
 
@@ -7021,6 +7024,10 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 	      FREE (temp);
 	      if (value)
 		{
+		  /* XXX - bash-4.2 */
+		  /* From Posix discussion on austin-group list */
+		  if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
+		    quoted |= Q_DOLBRACE;
 		  ret = parameter_brace_expand_rhs (name, value, c,
 						    quoted,
 						    quoted_dollar_atp,
@@ -7064,6 +7071,8 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 	      if (contains_dollar_at)
 		*contains_dollar_at = 0;
 
+	      if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
+		quoted |= Q_DOLBRACE;
 	      ret = parameter_brace_expand_rhs (name, value, c, quoted,
 						quoted_dollar_atp,
 						contains_dollar_at);
@@ -7880,7 +7889,13 @@ add_string:
 	  else
 	    tflag = 0;
 
-	  if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && ((sh_syntaxtab[c] & tflag) == 0))
+	  /* From Posix discussion on austin-group list:  Backslash escaping
+	     { or } in ${...} is removed. */
+	  if ((quoted & Q_DOLBRACE) && (c == '{' || c == '}'))
+	    {
+	      SCOPY_CHAR_I (twochars, CTLESC, c, string, sindex, string_size);
+	    }
+	  else if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && ((sh_syntaxtab[c] & tflag) == 0))
 	    {
 	      SCOPY_CHAR_I (twochars, '\\', c, string, sindex, string_size);
 	    }

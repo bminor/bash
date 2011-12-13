@@ -4639,6 +4639,40 @@ set_pipestatus_array (ps, nproc)
 	}
     }
 }
+
+ARRAY *
+save_pipestatus_array ()
+{
+  SHELL_VAR *v;
+  ARRAY *a, *a2;
+
+  v = find_variable ("PIPESTATUS");
+  if (v == 0 || array_p (v) == 0 || array_cell (v) == 0)
+    return ((ARRAY *)NULL);
+    
+  a = array_cell (v);
+  a2 = array_copy (array_cell (v));
+
+  return a2;
+}
+
+void
+restore_pipestatus_array (a)
+     ARRAY *a;
+{
+  SHELL_VAR *v;
+  ARRAY *a2;
+
+  v = find_variable ("PIPESTATUS");
+  /* XXX - should we still assign even if existing value is NULL? */
+  if (v == 0 || array_p (v) == 0 || array_cell (v) == 0)
+    return;
+
+  a2 = array_cell (v);
+  var_setarray (v, a); 
+
+  array_dispose (a2);
+}
 #endif
 
 void

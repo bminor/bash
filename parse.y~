@@ -1,6 +1,6 @@
 /* parse.y - Yacc grammar for bash. */
 
-/* Copyright (C) 1989-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1422,11 +1422,11 @@ yy_readline_get ()
 	give_terminal_to (shell_pgrp, 0);
 #endif /* JOB_CONTROL */
 
-      old_sigint = (SigHandler *)NULL;
+      old_sigint = (SigHandler *)IMPOSSIBLE_TRAP_HANDLER;
       if (signal_is_ignored (SIGINT) == 0)
 	{
-	  old_sigint = (SigHandler *)set_signal_handler (SIGINT, sigint_sighandler);
 	  interrupt_immediately++;
+	  old_sigint = (SigHandler *)set_signal_handler (SIGINT, sigint_sighandler);
 	}
       terminate_immediately = 1;
 
@@ -1434,10 +1434,11 @@ yy_readline_get ()
       					  current_readline_prompt : "");
 
       terminate_immediately = 0;
-      if (signal_is_ignored (SIGINT) == 0 && old_sigint)
+      if (signal_is_ignored (SIGINT) == 0)
 	{
 	  interrupt_immediately--;
-	  set_signal_handler (SIGINT, old_sigint);
+	  if (old_sigint != IMPOSSIBLE_TRAP_HANDLER)
+	    set_signal_handler (SIGINT, old_sigint);
 	}
 
 #if 0
@@ -1957,6 +1958,7 @@ read_a_line (remove_quoted_newline)
 	}
       else if (c == '\\' && remove_quoted_newline)
 	{
+	  QUIT;
 	  peekc = yy_getc ();
 	  if (peekc == '\n')
 	    {
@@ -2600,7 +2602,7 @@ mk_alexpansion (s)
   strcpy (r, s);
   /* If the last character in the alias is a newline, don't add a trailing
      space to the expansion.  Works with shell_getc above. */
-  if (r[l -1] != ' ' && r[l -1] != '\n')
+  if (r[l - 1] != ' ' && r[l - 1] != '\n')
     r[l++] = ' ';
   r[l] = '\0';
   return r;
@@ -3339,6 +3341,14 @@ parse_comsub (qc, open, close, lenp, flags)
   int nestlen, ttranslen, start_lineno;
   char *ret, *nestret, *ttrans, *heredelim;
   int retind, retsize, rflags, hdlen;
+
+#if 0	/* XXX - bash-4.2 -- jwm@horde.net */
+  /* Assume $(( introduces arithmetic command and parse accordingly. */
+  peekc = shell_getc (0);
+  shell_ungetc (peekc);
+  if (peekc == '(')
+    return (parse_matched_pair (qc, open, close, lenp, 0));
+#endif
 
 /*itrace("parse_comsub: qc = `%c' open = %c close = %c", qc, open, close);*/
   count = 1;
