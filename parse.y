@@ -3340,6 +3340,14 @@ parse_comsub (qc, open, close, lenp, flags)
   char *ret, *nestret, *ttrans, *heredelim;
   int retind, retsize, rflags, hdlen;
 
+#if 0	/* XXX - bash-4.2 -- jwm@horde.net */
+  /* Assume $(( introduces arithmetic command and parse accordingly. */
+  peekc = shell_getc (0);
+  shell_ungetc (peekc);
+  if (peekc == '(')
+    return (parse_matched_pair (qc, open, close, lenp, 0));
+#endif
+
 /*itrace("parse_comsub: qc = `%c' open = %c close = %c", qc, open, close);*/
   count = 1;
   tflags = LEX_RESWDOK;

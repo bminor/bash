@@ -1680,7 +1680,11 @@ globword:
      a single match (multiple matches that end up reducing the number of
      characters in the common prefix are bad) will ever be returned on
      regular completion. */
+#if 1
+  if (globpat)
+#else
   if (glob_pattern_p (hint))
+#endif
     {
       if (state == 0)
 	{
@@ -3421,7 +3425,10 @@ static int
 putx(c)
      int c;
 {
-  return (putc (c, rl_outstream));
+  int x;
+
+  x = putc (c, rl_outstream);
+  return (x);
 }
   
 static int

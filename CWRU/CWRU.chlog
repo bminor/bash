@@ -9457,3 +9457,12 @@ arrayfunc.c
 	  invisible.  Pointed out by Mart Frauenlab <mart.frauenlob@chello.at>
 	- change array_value_internal to return NULL for variable which has
 	  not been set
+
+				   1/30
+				   ----
+bashline.c
+	- in command_word_completion_function, don't call glob_pattern_p
+	  on hint -- use the already-computed `globpat'.  At this point,
+	  hint might contain an already-dequoted globbing character, but
+	  glob_matches will be NULL.  Fixes bug reported by
+	  coyote@wariat.org.pl
