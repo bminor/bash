@@ -67,9 +67,11 @@ int cdspelling = 0;
 
 int cdable_vars;
 
+static int eflag;	/* file scope so bindpwd() can see it */
+
 $BUILTIN cd
 $FUNCTION cd_builtin
-$SHORT_DOC cd [-L|-P] [dir]
+$SHORT_DOC cd [-L|[-P [-e]]] [dir]
 Change the shell working directory.
 
 Change the current directory to DIR.  The default DIR is the value of the
@@ -88,11 +90,14 @@ Options:
     -L	force symbolic links to be followed
     -P	use the physical directory structure without following symbolic
 	links
+    -e	if the -P option is supplied, and the current working directory
+	cannot be determined successfully, exit with a non-zero status
 
 The default is to follow symbolic links, as if `-L' were specified.
 
 Exit Status:
-Returns 0 if the directory is changed; non-zero otherwise.
+Returns 0 if the directory is changed, and if $PWD is set successfully when
+-P is used; non-zero otherwise.
 $END
 
 /* Just set $PWD, don't change OLDPWD.  Used by `pwd -P' in posix mode. */
@@ -138,6 +143,8 @@ bindpwd (no_symlinks)
     }
 
   setpwd (dirname);
+  if (dirname == 0 && eflag)
+    r = EXECUTION_FAILURE;
 
   if (dirname && dirname != the_current_working_directory)
     free (dirname);
@@ -183,6 +190,7 @@ cd_builtin (list)
     }
 #endif /* RESTRICTED_SHELL */
 
+  eflag = 0;
   no_symlinks = no_symbolic_links;
   reset_internal_getopt ();
   while ((opt = internal_getopt (list, "LP")) != -1)
@@ -194,6 +202,9 @@ cd_builtin (list)
 	  break;
 	case 'L':
 	  no_symlinks = 0;
+	  break;
+	case 'e':
+	  eflag = 1;
 	  break;
 	default:
 	  builtin_usage ();

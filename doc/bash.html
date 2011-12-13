@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2010 April 17<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2010 May 30<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -751,6 +751,17 @@ under
 below.
 <P>
 
+When the shell is in <I>posix mode</I>, <B>time</B>
+may be followed by a newline.  In this case, the shell displays the
+total user and system time consumed by the shell and its children.
+The
+<FONT SIZE=-1><B>TIMEFORMAT</B>
+
+</FONT>
+variable may be used to specify the format of
+the time information.
+<P>
+
 Each command in a pipeline is executed as a separate process (i.e., in a
 subshell).
 <A NAME="lbAN">&nbsp;</A>
@@ -1423,6 +1434,16 @@ the eight-bit character whose value is the octal value <I>nnn</I>
 <DD>
 the eight-bit character whose value is the hexadecimal value <I>HH</I>
 (one or two hex digits)
+<DT><B>\u</B><I>HHHH</I>
+
+<DD>
+the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+<I>HHHH</I> (one to four hex digits)
+<DT><B>\U</B><I>HHHHHHHH</I>
+
+<DD>
+the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+<I>HHHHHHHH</I> (one to eight hex digits)
 <DT><B>\c</B><I>x</I>
 
 <DD>
@@ -2413,6 +2434,12 @@ is excluded from the list of matched filenames.
 A sample value is
 <TT>&quot;.o:~&quot;</TT>.
 
+<DT><B>FUNCNEST</B>
+
+<DD>
+If set to a numeric value greater than 0, defines a maximum function
+nesting level.  Function invocations that exceed this nesting level
+will cause the current command to abort.
 <DT><B>GLOBIGNORE</B>
 
 <DD>
@@ -4878,6 +4905,12 @@ builtin command.  Ordinarily, variables and their values
 are shared between the function and its caller.
 <P>
 
+The <B>FUNCNEST</B> variable, if set to a numeric value greater
+than 0, defines a maximum function nesting level.  Function
+invocations that exceed the limit cause the entire command to
+abort.
+<P>
+
 If the builtin command
 <B>return</B>
 
@@ -5182,7 +5215,7 @@ and <I>file1</I> does not.
 <DT><B>-o </B><I>optname</I>
 
 <DD>
-True if shell option
+True if the shell option
 <I>optname</I>
 
 is enabled.
@@ -5193,6 +5226,13 @@ option to the
 <B>set</B>
 
 builtin below.
+<DT><B>-v </B><I>varname</I>
+
+<DD>
+True if the shell variable
+<I>varname</I>
+
+is set (has been assigned a value).
 <DT><B>-z </B><I>string</I>
 
 <DD>
@@ -9068,9 +9108,9 @@ must be >= 1.  If
 is greater than the number of enclosing loops, the last enclosing loop
 (the ``top-level'' loop) is resumed.
 The return value is 0 unless <I>n</I> is not greater than or equal to 1.
-<DT><B>declare</B> [<B>-aAfFilrtux</B>] [<B>-p</B>] [<I>name</I>[=<I>value</I>] ...]<DD>
+<DT><B>declare</B> [<B>-aAfFgilrtux</B>] [<B>-p</B>] [<I>name</I>[=<I>value</I>] ...]<DD>
 
-<DT><B>typeset</B> [<B>-aAfFilrtux</B>] [<B>-p</B>] [<I>name</I>[=<I>value</I>] ...]<DD>
+<DT><B>typeset</B> [<B>-aAfFgilrtux</B>] [<B>-p</B>] [<I>name</I>[=<I>value</I>] ...]<DD>
 
 Declare variables and/or give them attributes.
 If no <I>name</I>s are given then display the values of variables.
@@ -9106,6 +9146,12 @@ are displayed as well.  The
 option implies
 <B>-f</B>.
 
+The
+<B>-g</B>
+
+option forces variables to be created or modified at the global scope,
+even when <B>declare</B> is executed in a shell function.
+It is ignored in all other cases.
 The following options can
 be used to restrict output to variables with the specified attribute or
 to give variables attributes:
@@ -9175,13 +9221,13 @@ turns off the attribute instead,
 with the exceptions that <B>+a</B>
 may not be used to destroy an array variable and <B>+r</B> will not
 remove the readonly attribute.
-When used in a function,
-makes each
+When used in a function, makes each
 <I>name</I> local, as with the 
 <B>local</B>
 
-command.
-If a variable name is followed by =<I>value</I>, the value of
+command,
+unless the <B>-gP option is supplied,
+If a variable name is followed by =</B><I>value</I>, the value of
 the variable is set to <I>value</I>.
 The return value is 0 unless an invalid option is encountered,
 an attempt is made to define a function using
@@ -9373,6 +9419,16 @@ the eight-bit character whose value is the octal value <I>nnn</I>
 <DD>
 the eight-bit character whose value is the hexadecimal value <I>HH</I>
 (one or two hex digits)
+<DT><B>\u</B><I>HHHH</I>
+
+<DD>
+the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+<I>HHHH</I> (one to four hex digits)
+<DT><B>\U</B><I>HHHHHHHH</I>
+
+<DD>
+the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+<I>HHHHHHHH</I> (one to eight hex digits)
 
 </DL></DL>
 
@@ -10242,7 +10298,8 @@ is specified without
 
 the default quantum is 5000.
 When <I>callback</I> is evaluated, it is supplied the index of the next
-array element to be assigned as an additional argument.
+array element to be assigned and the line to be assigned to that element
+as additional arguments.
 <I>callback</I> is evaluated after the line is read but before the 
 array element is assigned.
 <P>
@@ -10316,32 +10373,57 @@ directory change fails.
 <DT><B>printf</B> [<B>-v</B> <I>var</I>] <I>format</I> [<I>arguments</I>]<DD>
 Write the formatted <I>arguments</I> to the standard output under the
 control of the <I>format</I>.
+The <B>-v</B> option causes the output to be assigned to the variable
+<I>var</I> rather than being printed to the standard output.
+<P>
 The <I>format</I> is a character string which contains three types of objects:
 plain characters, which are simply copied to standard output, character
 escape sequences, which are converted and copied to the standard output, and
 format specifications, each of which causes printing of the next successive
 <I>argument</I>.
-In addition to the standard <I>printf</I>(1) formats, <B>%b</B> causes
+In addition to the standard <I>printf</I>(1) format specifications,
+<B>printf</B> interprets the following extensions:
+<DL COMPACT><DT><DD>
+
+<DL COMPACT>
+<DT><B>%b</B>
+
+<DD>
+causes
 <B>printf</B> to expand backslash escape sequences in the corresponding
 <I>argument</I> (except that <B>\c</B> terminates output, backslashes in
 <B>\aq</B>, <B>\&quot;</B>, and <B>\?</B> are not removed, and octal escapes
-beginning with <B>\0</B> may contain up to four digits),
-and <B>%q</B> causes <B>printf</B> to output the corresponding
+beginning with <B>\0</B> may contain up to four digits).
+<DT><B>%q</B>
+
+<DD>
+causes <B>printf</B> to output the corresponding
 <I>argument</I> in a format that can be reused as shell input.
+<DT><B>%(</B><I>datefmt</I>)T
+
+<DD>
+causes <B>printf</B> to output the date-time string resulting from using
+<I>datefmt</I> as a format string for <I>strftime</I>(3).  The corresponding
+<I>argument</I> is an integer representing the number of seconds since the
+epoch.  Two special argument values may be used: -1 represents the current
+time, and -2 represents the time the shell was invoked.
+
+</DL>
 <P>
+
 Arguments to non-string format specifiers are treated as C constants,
 except that a leading plus or minus sign is allowed, and if the leading
 character is a single or double quote, the value is the ASCII value of
 the following character.
 <P>
-The <B>-v</B> option causes the output to be assigned to the variable
-<I>var</I> rather than being printed to the standard output.
-<P>
+
 The <I>format</I> is reused as necessary to consume all of the <I>arguments</I>.
 If the <I>format</I> requires more <I>arguments</I> than are supplied, the
 extra format specifications behave as if a zero value or null string, as
-appropriate, had been supplied.  The return value is zero on success,
-non-zero on failure.
+appropriate, had been supplied.
+The return value is zero on success, non-zero on failure.
+</DL>
+
 <DT><B>pushd</B> [<B>-n</B>] [+<I>n</I>] [-<I>n</I>]<DD>
 
 <DT><B>pushd</B> [<B>-n</B>] [<I>dir</I>]<DD>
@@ -12516,7 +12598,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-4.1<TH ALIGN=CENTER width=33%>2010 April 17<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-4.1<TH ALIGN=CENTER width=33%>2010 May 30<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -12622,6 +12704,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 20 May 2010 16:33:15 EDT
+Time: 01 June 2010 11:58:46 EDT
 </BODY>
 </HTML>

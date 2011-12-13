@@ -136,6 +136,7 @@ static int builtin_status __P((int));
 
 static int execute_for_command __P((FOR_COM *));
 #if defined (SELECT_COMMAND)
+static int displen __P((const char *));
 static int print_index_and_element __P((int, int, WORD_LIST *));
 static void indent __P((int, int));
 static void print_select_list __P((WORD_LIST *, int, int, int));
@@ -2640,6 +2641,28 @@ static int LINES, COLS, tabsize;
 								: 6)))))
 
 static int
+displen (s)
+     const char *s;
+{
+#if defined (HANDLE_MULTIBYTE)
+  wchar_t *wcstr;
+  size_t wclen, slen;
+
+  wcstr = 0;
+  slen = mbstowcs (wcstr, s, 0);
+  if (slen == -1)
+    slen = 0;
+  wcstr = (wchar_t *)xmalloc (sizeof (wchar_t) * (slen + 1));
+  mbstowcs (wcstr, s, slen + 1);
+  wclen = wcswidth (wcstr, slen);
+  free (wcstr);
+  return ((int)wclen);
+#else
+  return (STRLEN (s));
+#endif
+}
+
+static int
 print_index_and_element (len, ind, list)
       int len, ind;
       WORD_LIST *list;
@@ -2652,7 +2675,7 @@ print_index_and_element (len, ind, list)
   for (i = ind, l = list; l && --i; l = l->next)
     ;
   fprintf (stderr, "%*d%s%s", len, ind, RP_SPACE, l->word->word);
-  return (STRLEN (l->word->word));
+  return (displen (l->word->word));
 }
 
 static void
@@ -2758,7 +2781,7 @@ select_query (list, list_len, prompt, print_menu)
   max_elem_len = 0;
   for (l = list; l; l = l->next)
     {
-      len = STRLEN (l->word->word);
+      len = displen (l->word->word);
       if (len > max_elem_len)
 	max_elem_len = len;
     }

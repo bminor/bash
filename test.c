@@ -603,9 +603,7 @@ unary_test (op, arg)
 
     case 'v':
       v = find_variable (arg);
-      if (v == 0)
-        return (FALSE);
-      return (var_isset (v) ? TRUE : FALSE);
+      return (v && var_isset (v) ? TRUE : FALSE);
     }
 
   /* We can't actually get here, but this shuts up gcc. */

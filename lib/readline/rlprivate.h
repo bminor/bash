@@ -387,6 +387,7 @@ extern void _rl_vi_reset_last PARAMS((void));
 extern void _rl_vi_set_last PARAMS((int, int, int));
 extern int _rl_vi_textmod_command PARAMS((int));
 extern void _rl_vi_done_inserting PARAMS((void));
+extern int _rl_vi_domove_callback PARAMS((_rl_vimotion_cxt *));
 
 /*************************************************************************
  * Undocumented private variables					 *
@@ -494,5 +495,6 @@ extern int _rl_undo_group_level;
 
 /* vi_mode.c */
 extern int _rl_vi_last_command;
+extern _rl_vimotion_cxt *_rl_vimvcxt;
 
 #endif /* _RL_PRIVATE_H_ */

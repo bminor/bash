@@ -1154,7 +1154,7 @@ string:
 @example
 cat file | parallel -k echo prefix_string
 @end example
-
+@noindent
 The @option{-k} option is required to preserve the lines' order.
 
 Similarly, you can append a specified string to each line in a text file:
@@ -1185,6 +1185,7 @@ from a file (in this case, filenames):
 	done | process-output
 @end example
 
+@noindent
 with a more compact syntax reminiscent of lambdas:
 @example
 cat list | parallel "do-something1 @{@} config-@{@} ; do-something2 < @{@}" | process-output
@@ -1195,7 +1196,7 @@ lends itself to batch file transformations or renaming:
 @example
 ls *.gz | parallel -j+0 "zcat @{@} | bzip2 >@{.@}.bz2 && rm @{@}"
 @end example
-
+@noindent
 This will recompress all files in the current directory with names ending
 in .gz using bzip2, running one job per CPU (-j+0)  in parallel.
 
@@ -1204,12 +1205,13 @@ the output.  For instance, the following command
 @example
 @{ echo foss.org.my ; echo debian.org; echo freenetproject.org; @} | parallel traceroute
 @end example
-
+@noindent
 will display as output the traceroute invocation that finishes first.  Using
 the @option{-k} option, as we saw above
 @example
 @{ echo foss.org.my ; echo debian.org; echo freenetproject.org; @} | parallel -k traceroute
 @end example
+@noindent
 will ensure that the output of @code{traceroute foss.org.my} is displayed first.
 
 @node Shell Functions
@@ -3803,27 +3805,40 @@ printf [-v @var{var}] @var{format} [@var{arguments}]
 @end example
 Write the formatted @var{arguments} to the standard output under the
 control of the @var{format}.
+The @option{-v} option causes the output to be assigned to the variable
+@var{var} rather than being printed to the standard output.
+
 The @var{format} is a character string which contains three types of objects:
 plain characters, which are simply copied to standard output, character
 escape sequences, which are converted and copied to the standard output, and
 format specifications, each of which causes printing of the next successive
 @var{argument}.
-In addition to the standard @code{printf(1)} formats, @samp{%b} causes
-@code{printf} to expand backslash escape sequences in the corresponding
-@var{argument},
+In addition to the standard @code{printf(1)} formats, @code{printf}
+interprets the following extensions:
+
+@table @code
+@item %b
+causes @code{printf} to expand backslash escape sequences in the
+corresponding @var{argument},
 (except that @samp{\c} terminates output, backslashes in
 @samp{\'}, @samp{\"}, and @samp{\?} are not removed, and octal escapes
-beginning with @samp{\0} may contain up to four digits),
-and @samp{%q} causes @code{printf} to output the
+beginning with @samp{\0} may contain up to four digits).
+@item %q
+causes @code{printf} to output the
 corresponding @var{argument} in a format that can be reused as shell input.
+@item %(@var{datefmt})T
+causes @code{printf} to output the date-time string resulting from using
+@var{datefmt} as a format string for @code{strftime}(3).  The corresponding
+@var{argument} is an integer representing the number of seconds since the
+epoch.  Two special argument values may be used: -1 represents the current
+time, and -2 represents the time the shell was invoked.
+@end table
 
+@noindent
 Arguments to non-string format specifiers are treated as C language constants,
 except that a leading plus or minus sign is allowed, and if the leading
 character is a single or double quote, the value is the ASCII value of
 the following character.
-
-The @option{-v} option causes the output to be assigned to the variable
-@var{var} rather than being printed to the standard output.
 
 The @var{format} is reused as necessary to consume all of the @var{arguments}.
 If the @var{format} requires more @var{arguments} than are supplied, the

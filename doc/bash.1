@@ -6737,7 +6737,7 @@ The return value is 0 unless the shell is not executing a subroutine
 call or \fIexpr\fP does not correspond to a valid position in the
 call stack.
 .TP
-\fBcd\fP [\fB\-L|-P\fP] [\fIdir\fP]
+\fBcd\fP [\fB\-L\fP|[\fB\-P\fP [\fB\-e\fP]]] [\fIdir\fP]
 Change the current directory to \fIdir\fP.  The variable
 .SM
 .B HOME
@@ -6770,7 +6770,15 @@ option to the
 .B set
 builtin command); the
 .B \-L
-option forces symbolic links to be followed.  An argument of
+option forces symbolic links to be followed.
+If the
+.B \-e
+option is supplied with
+.BR \-P ,
+and the current working directory cannot be successfully determined
+after a successful directory change, \fBcd\fP will return an unsuccessful
+status.
+An argument of
 .B \-
 is equivalent to
 .SM

@@ -10041,3 +10041,31 @@ doc/{bash.1,bashref.texi}
 	- document new %(datefmt)T printf format specifier and special
 	  arguments
 
+builtins/hash.def
+	- don't permit programs with slashes to be entered into the hash table
+	  at all, even with the -p option.  Inconsistency pointed out by
+	  Jan Schampera <jan.schampera@web.de>
+
+				    6/6
+				    ---
+lib/readline/vi_mode.c
+	- finish restructuring rl_vi_domove and the functions that call it so
+	  it works in callback mode, including numeric arguments.  Requested
+	  a long time ago by Bob Rossi 
+
+lib/readline/callback.c
+	- arrange to call appropriate callback when readline state indicates
+	  RL_STATE_VIMOTION, so vi motion commands like `cw' and `d2w' are
+	  handled in callback mode
+
+lib/sh/wcswidth.c
+	- replacement wcswidth implementation
+
+aclocal.m4
+	- add REPLACE_FUNCS(wcswidth) to BASH_CHECK_MULTIBYTE
+
+execute_cmd.c
+	- fix select_query and print_index_and_element to compute correct
+	  display width of select list elements in presence of multibyte
+	  characters.  Bug reported by Bernd Eggink <monoped@sudrala.de>
+

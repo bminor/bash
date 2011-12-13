@@ -1154,7 +1154,7 @@ string:
 @example
 cat file | parallel -k echo prefix_string
 @end example
-
+@noindent
 The @option{-k} option is required to preserve the lines' order.
 
 Similarly, you can append a specified string to each line in a text file:
@@ -1185,6 +1185,7 @@ from a file (in this case, filenames):
 	done | process-output
 @end example
 
+@noindent
 with a more compact syntax reminiscent of lambdas:
 @example
 cat list | parallel "do-something1 @{@} config-@{@} ; do-something2 < @{@}" | process-output
@@ -1195,7 +1196,7 @@ lends itself to batch file transformations or renaming:
 @example
 ls *.gz | parallel -j+0 "zcat @{@} | bzip2 >@{.@}.bz2 && rm @{@}"
 @end example
-
+@noindent
 This will recompress all files in the current directory with names ending
 in .gz using bzip2, running one job per CPU (-j+0)  in parallel.
 
@@ -1204,12 +1205,13 @@ the output.  For instance, the following command
 @example
 @{ echo foss.org.my ; echo debian.org; echo freenetproject.org; @} | parallel traceroute
 @end example
-
+@noindent
 will display as output the traceroute invocation that finishes first.  Using
 the @option{-k} option, as we saw above
 @example
 @{ echo foss.org.my ; echo debian.org; echo freenetproject.org; @} | parallel -k traceroute
 @end example
+@noindent
 will ensure that the output of @code{traceroute foss.org.my} is displayed first.
 
 @node Shell Functions
@@ -2929,7 +2931,7 @@ The return status is zero unless @var{n} is not greater than or equal to 1.
 @item cd
 @btindex cd
 @example
-cd [-L|-P] [@var{directory}]
+cd [-L|[-P [-e]]] [@var{directory}]
 @end example
 Change the current working directory to @var{directory}.
 If @var{directory} is not given, the value of the @env{HOME} shell
@@ -2939,6 +2941,10 @@ If @var{directory} begins with a slash, @env{CDPATH} is not used.
 
 The @option{-P} option means to not follow symbolic links; symbolic
 links are followed by default or with the @option{-L} option.
+If the @option{-e} option is supplied with @option{-P}
+and the current working directory cannot be successfully determined
+after a successful directory change, @code{cd} will return an unsuccessful
+status.
 If @var{directory} is @samp{-}, it is equivalent to @env{$OLDPWD}.
 
 If a non-empty directory name from @env{CDPATH} is used, or if

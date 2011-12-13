@@ -92,7 +92,7 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   mktime.c strftime.c mbschr.c zcatfd.c zmapfd.c winsize.c eaccess.c \
 	   wcsdup.c fpurge.c zgetline.c mbscmp.c uconvert.c ufuncs.c \
 	   casemod.c dprintf.c input_avail.c mbscasecmp.c fnxform.c \
-	   strchrnul.c unicode.c
+	   strchrnul.c unicode.c wcswidth.c
 
 # The header files for this library.
 HSOURCES = 
@@ -196,6 +196,7 @@ uconvert.o: uconvert.c
 ufuncs.o: ufuncs.c
 vprint.o: vprint.c
 wcsdup.o: wcsdup.c
+wcswidth.o: wcswidth.c
 mbschr.o: mbschr.c
 zcatfd.o: zcatfd.c
 zmapfd.o: zmapfd.c
@@ -266,6 +267,7 @@ uconvert.o: ${BUILD_DIR}/config.h
 ufuncs.o: ${BUILD_DIR}/config.h
 vprint.o: ${BUILD_DIR}/config.h
 wcsdup.o: ${BUILD_DIR}/config.h
+wcswidth.o: ${BUILD_DIR}/config.h
 mbschr.o: ${BUILD_DIR}/config.h
 zcatfd.o: ${BUILD_DIR}/config.h
 zgetline.o: ${BUILD_DIR}/config.h
@@ -505,6 +507,9 @@ fmtumax.o: ${topdir}/bashintl.h ${LIBINTL_H} ${BASHINCDIR}/gettext.h
 wcsdup.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 wcsdup.o: ${BASHINCDIR}/stdc.h
 wcsdup.o: ${topdir}/xmalloc.h
+
+wcswidth.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+wcswidth.o: ${BASHINCDIR}/stdc.h
 
 mbschr.o: ${topdir}/bashansi.h
 mbschr.o: ${BASHINCDIR}/ansi_stdlib.h

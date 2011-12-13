@@ -1707,6 +1707,8 @@ AC_CHECK_FUNC(wcsdup, AC_DEFINE(HAVE_WCSDUP))
 AC_CHECK_FUNC(wcwidth, AC_DEFINE(HAVE_WCWIDTH))
 AC_CHECK_FUNC(wctype, AC_DEFINE(HAVE_WCTYPE))
 
+AC_REPLACE_FUNCS(wcswidth)
+
 dnl checks for both mbrtowc and mbstate_t
 AC_FUNC_MBRTOWC
 if test $ac_cv_func_mbrtowc = yes; then
