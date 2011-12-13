@@ -2884,33 +2884,17 @@ do_assignment_no_expand (string)
 WORD_LIST *
 list_rest_of_args ()
 {
-  register WORD_LIST *list, *args, *last, *l;
-  WORD_DESC *w;
+  register WORD_LIST *list, *args;
   int i;
 
   /* Break out of the loop as soon as one of the dollar variables is null. */
-  list = last = 0;
   for (i = 1, list = (WORD_LIST *)NULL; i < 10 && dollar_vars[i]; i++)
-    {
-      w = make_bare_word (dollar_vars[i]);
-      l = make_word_list (w, (WORD_LIST *)NULL);
-      if (list == 0)
-        list = last = l;
-      else
-	{
-	  last->next = l;
-	  last = l;
-	}
-    }
+    list = make_word_list (make_bare_word (dollar_vars[i]), list);
 
   for (args = rest_of_args; args; args = args->next)
-    {
-      w = make_bare_word (args->word->word);
-      last->next = make_word_list (w, (WORD_LIST *)NULL);
-      last = last->next;
-    }
+    list = make_word_list (make_bare_word (args->word->word), list);
 
-  return list;
+  return (REVERSE_LIST (list, WORD_LIST *));
 }
 
 int
@@ -7929,22 +7913,6 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
 
   DECLARE_MBSTATE;
 
-  /* XXX - experimental -- short-circuit "$@" */
-  if (STREQ (word->word, "$@") &&
-      ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES|Q_PATQUOTE)) || (word->flags & (W_DQUOTE|W_NOPROCSUB))) &&
-      (word->flags & W_NOSPLIT) == 0 &&
-      dollar_vars[1] &&
-      ifs_value)
-    {
-      list = list_rest_of_args ();
-      quote_list (list);
-      if (expanded_something)
-	*expanded_something = 1;
-      if (contains_dollar_at)
-        *contains_dollar_at = 1;
-      return list;
-    }
-      
   istring = (char *)xmalloc (istring_size = DEFAULT_INITIAL_ARRAY_SIZE);
   istring[istring_index = 0] = '\0';
   quoted_dollar_at = had_quoted_null = has_dollar_at = 0;

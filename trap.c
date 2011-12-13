@@ -1100,6 +1100,7 @@ signal_is_ignored (sig)
 
 int
 signal_is_hard_ignored (sig)
+     int sig;
 {
   return (sigmodes[sig] & SIG_HARD_IGNORE);
 }

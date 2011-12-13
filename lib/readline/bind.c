@@ -1451,7 +1451,7 @@ static const struct {
 #if defined (VISIBLE_STATS)
   { "visible-stats",		&rl_visible_stats,		0 },
 #endif /* VISIBLE_STATS */
-  { (char *)NULL, (int *)NULL }
+  { (char *)NULL, (int *)NULL, 0 }
 };
 
 static int
@@ -1526,7 +1526,7 @@ static const struct {
   { "history-size",	V_INT,		sv_histsize },
   { "isearch-terminators", V_STRING,	sv_isrchterm },
   { "keymap",		V_STRING,	sv_keymap },
-  { (char *)NULL,	0 }
+  { (char *)NULL,	0, (_rl_sv_func_t *)0 }
 };
 
 static int

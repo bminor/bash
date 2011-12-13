@@ -1127,7 +1127,7 @@ char *structfile_header[] = {
   };
 
 char *structfile_footer[] = {
-  "  { (char *)0x0, (sh_builtin_func_t *)0x0, 0, (char **)0x0, (char *)0x0 }",
+  "  { (char *)0x0, (sh_builtin_func_t *)0x0, 0, (char **)0x0, (char *)0x0, (char *)0x0 }",
   "};",
   "",
   "struct builtin *shell_builtins = static_shell_builtins;",

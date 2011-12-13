@@ -1317,7 +1317,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   int user_subshell, return_code, function_value, should_redir_stdin, invert;
   int ois, user_coproc;
   int result;
-  COMMAND *tcom;
+  volatile COMMAND *tcom;
 
   USE_VAR(user_subshell);
   USE_VAR(user_coproc);
@@ -4135,7 +4135,9 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   char *debug_trap, *error_trap, *return_trap;
 #if defined (ARRAY_VARS)
   SHELL_VAR *funcname_v, *nfv, *bash_source_v, *bash_lineno_v;
-  ARRAY *funcname_a, *bash_source_a, *bash_lineno_a;
+  ARRAY *funcname_a;
+  volatile ARRAY *bash_source_a;
+  volatile ARRAY *bash_lineno_a;
 #endif
   FUNCTION_DEF *shell_fn;
   char *sfile, *t;
