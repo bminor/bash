@@ -83,7 +83,7 @@ wmatchlen (wpat, wmax)
   if (*wpat == 0)
     return (0);
 
-  matlen = 0;
+  matlen = in_cclass = in_collsym = in_equiv = 0;
   while (wc = *wpat++)
     {
       switch (wc)
@@ -219,7 +219,7 @@ umatchlen (pat, max)
   if (*pat == 0)
     return (0);
 
-  matlen = 0;
+  matlen = in_cclass = in_collsym = in_equiv = 0;
   while (c = *pat++)
     {
       switch (c)

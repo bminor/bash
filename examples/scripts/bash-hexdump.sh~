@@ -12,7 +12,8 @@
 # bash-hexdump# pure Bash, no externals
 # by Dennis Williamson - 2010-01-04
 # in response to 
-http://stackoverflow.com/questions/2003803/show-hexadecimal-numbers-of-a-file
+http://stackoverflow.com/questions/2003803/show-hexadecimal-numbers-of-a-fil
+e
 # usage: bash-hexdump file
 saveIFS="$IFS"
 IFS=""                     # disables interpretation of \t, \n and space
@@ -23,9 +24,9 @@ valcount=0
 printf "%08x  " $bytecount
 while read  -d '' -r -n 1 char    # -d '' allows newlines, -r allows \
 do
-   ((bytecount++))
-   # for information about the apostrophe in this printf command, see
-   #  http://www.opengroup.org/onlinepubs/009695399/utilities/printf.html
+   ((bytecount++))    # for information about the apostrophe in this printf 
+command, see    # 
+http://www.opengroup.org/onlinepubs/009695399/utilities/printf.html
    printf -v val "%02x" "'$char"
    echo -n "$val "
    ((valcount++))
@@ -48,7 +49,8 @@ do
    fi
 done < "$1"
 
-if [[ "$string" != "" ]]            # if the last line wasn't full, pad it out
+if [[ "$string" != "" ]]            # if the last line wasn't full, pad it 
+out
 then
    length=${#string}
    if (( length > 7 ))

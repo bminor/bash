@@ -339,7 +339,7 @@ mkseq (start, end, incr, type, width)
 	{
 	  int len, arg;
 	  arg = n;
-	  len = asprintf (&t, "%0*d", width, n);
+	  len = asprintf (&t, "%0*d", width, arg);
 	  result[i++] = t;
 	}
       else

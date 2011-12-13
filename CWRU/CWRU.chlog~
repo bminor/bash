@@ -11002,3 +11002,16 @@ execute_cmd.c
 	  executing_builtin and executing_command_builtin before discarding
 	  the unwind-protect frame.  Bug and fix from Werner Fink
 	  <werner@suse.de>
+
+				   1/24
+				   ----
+variables.c
+	- change brand to set rseed to a known, constant value if it's 0,
+	  so the sequence is known.  Fixes issue reported by Olivier
+	  Mehani <shtrom@ssji.net>
+
+				    2/2
+				    ---
+braces.c
+	- make sure to pass an `int' argument to asprintf in mkseq.  Fixes
+	  bug reported by Mike Frysinger <vapier@gentoo.org>
