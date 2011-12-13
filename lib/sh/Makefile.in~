@@ -91,7 +91,8 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   strtoll.c strtoull.c strtoimax.c strtoumax.c memset.c strstr.c \
 	   mktime.c strftime.c mbschr.c zcatfd.c zmapfd.c winsize.c eaccess.c \
 	   wcsdup.c fpurge.c zgetline.c mbscmp.c uconvert.c ufuncs.c \
-	   casemod.c dprintf.c input_avail.c mbscasecmp.c fnxform.c
+	   casemod.c dprintf.c input_avail.c mbscasecmp.c fnxform.c \
+	   strchrnul.c
 
 # The header files for this library.
 HSOURCES = 
@@ -144,7 +145,7 @@ casemod.o: casemod.c
 clktck.o: clktck.c
 clock.o: clock.c
 eaccess.o: eaccess.c
-fdprintf.o: fdprintf.c
+dprintf.o: dprintf.c
 fmtullong.o: fmtullong.c
 fmtulong.o: fmtulong.c
 fmtumax.o: fmtumax.c
@@ -214,7 +215,7 @@ casemod.o: ${BUILD_DIR}/config.h
 clktck.o: ${BUILD_DIR}/config.h
 clock.o: ${BUILD_DIR}/config.h
 eaccess.o: ${BUILD_DIR}/config.h
-fdprintf.o: ${BUILD_DIR}/config.h
+dprintf.o: ${BUILD_DIR}/config.h
 fmtullong.o: ${BUILD_DIR}/config.h
 fmtulong.o: ${BUILD_DIR}/config.h
 fmtumax.o: ${BUILD_DIR}/config.h
@@ -529,7 +530,7 @@ casemod.o: ${topdir}/bashtypes.h
 casemod.o: ${BASHINCDIR}/shmbutil.h
 casemod.o: ${topdir}/bashintl.h ${LIBINTL_H} ${BASHINCDIR}/gettext.h
 
-fdprintf.o: ${BASHINCDIR}/stdc.h
+dprintf.o: ${BASHINCDIR}/stdc.h
 
 input_avail.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 input_avail.o: ${BASHINCDIR}/stdc.h

@@ -5075,9 +5075,13 @@ command_substitute (string, quoted)
   last_asynchronous_pid = old_async_pid;
 
   if (pid == 0)
-    /* Reset the signal handlers in the child, but don't free the
-       trap strings. */
-    reset_signal_handlers ();
+    {
+      /* Reset the signal handlers in the child, but don't free the
+	 trap strings.  Set a flag noting that we have to free the
+	 trap strings if we run trap to change a signal disposition. */
+      reset_signal_handlers ();
+      subshell_environment |= SUBSHELL_RESETTRAP;
+    }
 
 #if defined (JOB_CONTROL)
   /* XXX DO THIS ONLY IN PARENT ? XXX */
@@ -5587,7 +5591,7 @@ parameter_brace_expand_rhs (name, value, c, quoted, qdollaratp, hasdollarat)
   else
 #endif /* ARRAY_VARS */
   bind_variable (name, t1, 0);
-#if 1
+#if 0
   free (t1);
 
   w->word = temp;

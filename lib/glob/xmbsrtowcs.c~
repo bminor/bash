@@ -219,6 +219,7 @@ xdupmbstowcs2 (destp, src)
 }
 #endif /* HAVE_MBSNRTOWCS */
 
+
 /* Convert a multibyte string to a wide character string. Memory for the
    new wide character string is obtained with malloc.
 
@@ -253,11 +254,6 @@ xdupmbstowcs (destp, indicesp, src)
 	*destp = NULL;
       return (size_t)-1;
     }
-
-#if HAVE_MBSNRTOWCS
-  if (indicesp == NULL)
-    return (xdupmbstowcs2 (destp, src));
-#endif
 
   memset (&state, '\0', sizeof(mbstate_t));
   wsbuf_size = WSBUF_INC;

@@ -5595,7 +5595,8 @@ parameter_brace_expand_rhs (name, value, c, quoted, qdollaratp, hasdollarat)
   free (t1);
 
   w->word = temp;
-#else		/* XXX - bash-4.2 -- depends on Posix group interpretation */
+#else		/* XXX - bash-4.2 */
+  /* From Posix group discussion Feb-March 2010 */
   free (temp);
 
   w->word = t1;

@@ -9579,3 +9579,18 @@ subst.c
 	- in command_substitute, set the SUBSHELL_RESETTRAP flag.  This change
 	  is for Austin Group Posix interpretation 53
 	  (http://austingroupbugs.net/view.php?id=53)
+
+				    3/7
+				    ---
+lib/sh/{Makefile.in,strchrnul.c},Makefile.in
+	- implementation of strchrnul, from gnulib
+
+configure.in,config.h.in
+	- look for strchrnul and compile in version in lib/sh/strchrnul.c if
+	  not available
+	- look for mbsnrtowcs and define HAVE_MBSNRTOWCS if available
+
+lib/sh/xmbsrtowcs.c
+	- new function, xdupmbstowcs2, fast version of xdupmbstowcs used when
+	  mbsnrtowcs is available and the indices are not required.  Initial
+	  patch from <0xe2.0x9a.0x9b@gmail.com>
