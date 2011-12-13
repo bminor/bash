@@ -272,7 +272,7 @@ static int line_number_for_err_trap;
 
 /* A sort of function nesting level counter */
 static int funcnest = 0;
-int funcnest_max = 0;		/* XXX - for bash-4.2 */
+int funcnest_max = 0;		/* XXX - bash-4.2 */
 
 struct fd_bitmap *current_fds_to_close = (struct fd_bitmap *)NULL;
 
@@ -1390,7 +1390,15 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 
   reset_terminating_signals ();		/* in sig.c */
   /* Cancel traps, in trap.c. */
+#if 0	/* XXX - bash-4.2 */
+  /* Reset the signal handlers in the child, but don't free the
+     trap strings.  Set a flag noting that we have to free the
+     trap strings if we run trap to change a signal disposition. */
+  reset_signal_handlers ();
+  subshell_environment |= SUBSHELL_RESETTRAP;
+#else
   restore_original_signals ();
+#endif
 
   /* Make sure restore_original_signals doesn't undo the work done by
      make_child to ensure that asynchronous children are immune to SIGINT
@@ -3804,8 +3812,16 @@ run_builtin:
       if (already_forked)
 	{
 	  /* reset_terminating_signals (); */	/* XXX */
+#if 0	/* XXX - bash-4.2 */
+	  /* Reset the signal handlers in the child, but don't free the
+	     trap strings.  Set a flag noting that we have to free the
+	     trap strings if we run trap to change a signal disposition. */
+	  reset_signal_handlers ();
+	  subshell_environment |= SUBSHELL_RESETTRAP;
+#else
 	  /* Cancel traps, in trap.c. */
 	  restore_original_signals ();
+#endif
 
 	  if (async)
 	    {
@@ -4033,7 +4049,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
 
   USE_VAR(fc);
 
-#if 0	/* for bash-4.2 */
+#if 0	/* XXX - bash-4.2 */
   if (funcnest_max > 0 && funcnest >= funcnest_max)
     {
       internal_error ("%s: maximum function nesting level exceeded (%d)", var->name, funcnest);

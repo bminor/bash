@@ -4826,7 +4826,7 @@ process_substitute (string, open_for_read_in_child)
       reset_terminating_signals ();	/* XXX */
       free_pushed_string_input ();
       /* Cancel traps, in trap.c. */
-      restore_original_signals ();
+      restore_original_signals ();	/* XXX - what about special builtins? bash-4.2 */
       setup_async_signals ();
       subshell_environment |= SUBSHELL_COMSUB|SUBSHELL_PROCSUB;
     }

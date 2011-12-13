@@ -9682,3 +9682,18 @@ subst.h
 	- new string_extract and extract_dollar_brace_string flag value:
 	  SX_POSIXEXP, set if the shell is expanding one of the new Posix
 	  pattern removal word expansions
+
+parser.h
+	- new definitions for "word expansion state", shared between parse.y
+	  and subst.c
+
+subst.c
+	- include parser.h
+
+				    4/8
+				    ---
+builtins/declare.def
+	- make sure declare_internal calls bind_assoc_variable with newly-
+	  allocated memory for the key argument when using an implicit key
+	  of "0".  Bug report and fix from Andreas Schwab
+	  <schwab@linux-m68k.org>
