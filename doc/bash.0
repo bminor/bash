@@ -265,9 +265,11 @@ SSHHEELLLL GGRRAAMMMMAARR
        If  the  ttiimmee reserved word precedes a pipeline, the elapsed as well as
        user and system time consumed by its execution are  reported  when  the
        pipeline  terminates.   The --pp option changes the output format to that
-       specified by POSIX.  The TTIIMMEEFFOORRMMAATT variable may be  set  to  a  format
-       string  that  specifies how the timing information should be displayed;
-       see the description of TTIIMMEEFFOORRMMAATT under SShheellll VVaarriiaabblleess below.
+       specified by POSIX.  When the shell is in _p_o_s_i_x _m_o_d_e, it does not  rec-
+       ognize  ttiimmee  as  a  reserved word if the next token begins with a `-'.
+       The TTIIMMEEFFOORRMMAATT variable may be set to a format  string  that  specifies
+       how  the timing information should be displayed; see the description of
+       TTIIMMEEFFOORRMMAATT under SShheellll VVaarriiaabblleess below.
 
        When the shell is in _p_o_s_i_x _m_o_d_e, ttiimmee may be followed by a newline.  In
        this  case,  the shell displays the total user and system time consumed
@@ -506,7 +508,8 @@ SSHHEELLLL GGRRAAMMMMAARR
        executes a compound command with a new set  of  positional  parameters.
        Shell functions are declared as follows:
 
-       [ ffuunnccttiioonn ] _n_a_m_e () _c_o_m_p_o_u_n_d_-_c_o_m_m_a_n_d [_r_e_d_i_r_e_c_t_i_o_n]
+       _n_a_m_e () _c_o_m_p_o_u_n_d_-_c_o_m_m_a_n_d [_r_e_d_i_r_e_c_t_i_o_n]
+       ffuunnccttiioonn _n_a_m_e [()] _c_o_m_p_o_u_n_d_-_c_o_m_m_a_n_d [_r_e_d_i_r_e_c_t_i_o_n]
               This  defines a function named _n_a_m_e.  The reserved word ffuunnccttiioonn
               is optional.  If the ffuunnccttiioonn reserved  word  is  supplied,  the
               parentheses  are optional.  The _b_o_d_y of the function is the com-
@@ -757,22 +760,24 @@ PPAARRAAMMEETTEERRSS
               The command argument to the --cc invocation option.
        BBAASSHH__LLIINNEENNOO
               An  array  variable whose members are the line numbers in source
-              files   corresponding    to    each    member    of    FFUUNNCCNNAAMMEE.
-              $${{BBAASSHH__LLIINNEENNOO[[_$_i]]}}  is  the line number in the source file where
-              $${{FFUUNNCCNNAAMMEE[[_$_i]]}} was called (or  $${{BBAASSHH__LLIINNEENNOO[[_$_i_-_1]]}}  if  refer-
-              enced  within another shell function).  The corresponding source
-              file name is $${{BBAASSHH__SSOOUURRCCEE[[_$_i]]}}.  Use LLIINNEENNOO to obtain the  cur-
-              rent line number.
+              files where each corresponding member of FFUUNNCCNNAAMMEE  was  invoked.
+              $${{BBAASSHH__LLIINNEENNOO[[_$_i]]}}  is  the  line  number  in  the  source  file
+              ($${{BBAASSHH__SSOOUURRCCEE[[_$_i_+_1]]}})  where  $${{FFUUNNCCNNAAMMEE[[_$_i]]}}  was  called  (or
+              $${{BBAASSHH__LLIINNEENNOO[[_$_i_-_1]]}}  if  referenced  within another shell func-
+              tion).  Use LLIINNEENNOO to obtain the current line number.
        BBAASSHH__RREEMMAATTCCHH
-              An  array  variable  whose members are assigned by the ==~~ binary
-              operator to the [[[[ conditional command.  The element with  index
-              0  is  the  portion  of  the  string matching the entire regular
-              expression.  The element with index _n  is  the  portion  of  the
+              An array variable whose members are assigned by  the  ==~~  binary
+              operator  to the [[[[ conditional command.  The element with index
+              0 is the portion of  the  string  matching  the  entire  regular
+              expression.   The  element  with  index  _n is the portion of the
               string matching the _nth parenthesized subexpression.  This vari-
               able is read-only.
        BBAASSHH__SSOOUURRCCEE
-              An array variable whose members are the source filenames  corre-
-              sponding to the elements in the FFUUNNCCNNAAMMEE array variable.
+              An  array  variable whose members are the source filenames where
+              the corresponding shell function names  in  the  FFUUNNCCNNAAMMEE  array
+              variable  are  defined.   The  shell function $${{FFUUNNCCNNAAMMEE[[_$_i]]}} is
+              defined  in  the  file  $${{BBAASSHH__SSOOUURRCCEE[[_$_i]]}}   and   called   from
+              $${{BBAASSHH__SSOOUURRCCEE[[_$_i_+_1]]}}.
        BBAASSHH__SSUUBBSSHHEELLLL
               Incremented  by one each time a subshell or subshell environment
               is spawned.  The initial value is 0.
@@ -863,10 +868,19 @@ PPAARRAAMMEETTEERRSS
               An  array  variable  containing the names of all shell functions
               currently in the execution call stack.  The element with index 0
               is the name of any currently-executing shell function.  The bot-
-              tom-most element is "main".  This variable exists  only  when  a
-              shell  function  is  executing.  Assignments to FFUUNNCCNNAAMMEE have no
-              effect and return an error status.  If  FFUUNNCCNNAAMMEE  is  unset,  it
-              loses  its special properties, even if it is subsequently reset.
+              tom-most element (the one with the  highest  index)  is  "main".
+              This  variable  exists  only when a shell function is executing.
+              Assignments to FFUUNNCCNNAAMMEE have no effect and return an error  sta-
+              tus.   If  FFUUNNCCNNAAMMEE  is  unset, it loses its special properties,
+              even if it is subsequently reset.
+
+              This variable can be  used  with  BBAASSHH__LLIINNEENNOO  and  BBAASSHH__SSOOUURRCCEE.
+              Each   element   of   FFUUNNCCNNAAMMEE  has  corresponding  elements  in
+              BBAASSHH__LLIINNEENNOO and BBAASSHH__SSOOUURRCCEE to describe  the  call  stack.   For
+              instance,    $${{FFUUNNCCNNAAMMEE[[_$_i]]}}    was   called   from   the   file
+              $${{BBAASSHH__SSOOUURRCCEE[[_$_i_+_1]]}} at  line  number  $${{BBAASSHH__LLIINNEENNOO[[_$_i]]}}.   The
+              ccaalllleerr builtin displays the current call stack using this infor-
+              mation.
 
        GGRROOUUPPSS An array variable containing the list of  groups  of  which  the
               current  user is a member.  Assignments to GGRROOUUPPSS have no effect
@@ -2087,7 +2101,9 @@ FFUUNNCCTTIIOONNSS
        tically-named entries in the environment passed to  the  shell's  chil-
        dren.  Care should be taken in cases where this may cause a problem.
 
-       Functions  may  be  recursive.   No  limit  is imposed on the number of
+       Functions may be recursive.  The FFUUNNCCNNEESSTT variable may be used to limit
+       the depth of the function call stack and restrict the number  of  func-
+       tion  invocations.   By  default,  no limit is imposed on the number of
        recursive calls.
 
 AARRIITTHHMMEETTIICC EEVVAALLUUAATTIIOONN
@@ -4157,7 +4173,8 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               \\aa     alert (bell)
               \\bb     backspace
               \\cc     suppress further output
-              \\ee     an escape character
+              \\ee
+              \\EE     an escape character
               \\ff     form feed
               \\nn     new line
               \\rr     carriage return
@@ -5032,6 +5049,10 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
                       and  all remaining characters on that line to be ignored
                       in an interactive  shell  (see  CCOOMMMMEENNTTSS  above).   This
                       option is enabled by default.
+              llaassttppiippee
+                      If  set,  and  job control is not active, the shell runs
+                      the last command of a pipeline not executed in the back-
+                      ground in the current shell environment.
               lliitthhiisstt If  set,  and  the ccmmddhhiisstt option is enabled, multi-line
                       commands are saved to the history with embedded newlines
                       rather than using semicolon separators where possible.
@@ -5433,4 +5454,4 @@ BBUUGGSS
 
 
 
-GNU Bash-4.1                     2010 June 12                          BASH(1)
+GNU Bash-4.2                     2010 July 21                          BASH(1)

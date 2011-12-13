@@ -417,7 +417,7 @@ history_truncate_file (fname, lines)
 
   FREE (buffer);
 
-  free (filename);
+  xfree (filename);
   return rv;
 }
 
@@ -520,7 +520,7 @@ mmap_error:
 #else
     if (write (file, buffer, buffer_size) < 0)
       rv = errno;
-    free (buffer);
+    xfree (buffer);
 #endif
   }
 

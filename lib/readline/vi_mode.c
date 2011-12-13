@@ -1011,7 +1011,7 @@ static void
 _rl_mvcxt_dispose (m)
      _rl_vimotion_cxt *m;
 {
-  free (m);
+  xfree (m);
 }
 
 static int

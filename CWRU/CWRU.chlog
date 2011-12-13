@@ -10219,3 +10219,32 @@ parse.y
 	- fix problem in parse_comsub where extra space was added to here-doc
 	  delimiter if the first word in the comsub contained a `/'.  Fixes
 	  bug reported by Alex Khesin <alexk@google.com>
+
+				   7/20
+				   ----
+parse.y
+	- change reserved_word_acceptable to return success if the last two
+	  tokens read were `function WORD'.  Allows function definitions like
+	  function good [[ -x foo ]];.  Fixes bug reported by Linda Walsh
+	  <bash@tlinx.org>
+
+doc/{bash.1,bashref.texi}
+	- change function definition meta-syntax to make it clearer, rather
+	  than let the text note the optional portions
+
+				   7/24
+				   ----
+bashhist.c
+	- change bash_history_inhibit_expansion() to suppress history expansion
+	  for $! parameter expansion.  Fixes debian bug #589745 submitted by
+	  Frank Heckenbach <f.heckenbach@fh-soft.de>
+
+lib/readline/terminal.c
+	- change rl_resize_terminal to always fetch the new terminal size and
+	  only force the redisplay if _rl_echoing_p is non-zero.  Fixes bug
+	  reported by Balazs Kezes <rlblaster@gmail.com>
+
+				   7/25
+				   ----
+lib/readline/xfree.c
+	- new file, contains definition of xfree moved from xmalloc.c

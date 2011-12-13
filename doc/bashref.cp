@@ -44,7 +44,7 @@
 \entry{shell variable}{17}{shell variable}
 \entry{parameters, positional}{17}{parameters, positional}
 \entry{parameters, special}{18}{parameters, special}
-\entry{expansion}{18}{expansion}
+\entry{expansion}{19}{expansion}
 \entry{brace expansion}{19}{brace expansion}
 \entry{expansion, brace}{19}{expansion, brace}
 \entry{tilde expansion}{20}{tilde expansion}
@@ -63,7 +63,7 @@
 \entry{pattern matching}{26}{pattern matching}
 \entry{matching, pattern}{26}{matching, pattern}
 \entry{redirection}{27}{redirection}
-\entry{command expansion}{30}{command expansion}
+\entry{command expansion}{31}{command expansion}
 \entry{command execution}{31}{command execution}
 \entry{command search}{31}{command search}
 \entry{execution environment}{32}{execution environment}

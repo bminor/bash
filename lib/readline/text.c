@@ -150,7 +150,7 @@ rl_delete_text (from, to)
   if (_rl_doing_an_undo == 0)
     rl_add_undo (UNDO_DELETE, from, to, text);
   else
-    free (text);
+    xfree (text);
 
   rl_end -= diff;
   rl_line_buffer[rl_end] = '\0';
@@ -752,7 +752,7 @@ _rl_insert_char (count, c)
 
       string[i] = '\0';
       rl_insert_text (string);
-      free (string);
+      xfree (string);
 
       return 0;
     }
@@ -779,7 +779,7 @@ _rl_insert_char (count, c)
 	  count -= decreaser;
 	}
 
-      free (string);
+      xfree (string);
       incoming_length = 0;
       stored_count = 0;
 #else /* !HANDLE_MULTIBYTE */
@@ -1407,8 +1407,8 @@ rl_transpose_words (count, key)
 
   /* I think that does it. */
   rl_end_undo_group ();
-  free (word1);
-  free (word2);
+  xfree (word1);
+  xfree (word2);
 
   return 0;
 }
@@ -1467,7 +1467,7 @@ rl_transpose_chars (count, key)
   rl_end_undo_group ();
 
 #if defined (HANDLE_MULTIBYTE)
-  free (dummy);
+  xfree (dummy);
 #endif
 
   return 0;

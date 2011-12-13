@@ -4801,6 +4801,8 @@ reserved_word_acceptable (toksym)
       if (last_read_token == WORD && token_before_that == COPROC)
 	return 1;
 #endif
+      if (last_read_token == WORD && token_before_that == FUNCTION)
+	return 1;
       return 0;
     }
 }

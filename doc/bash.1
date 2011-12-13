@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Fri Jul  2 17:31:49 EDT 2010
+.\"	Last Change: Wed Jul 21 08:47:30 EDT 2010
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2010 July 2" "GNU Bash-4.2"
+.TH BASH 1 "2010 July 21" "GNU Bash-4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -950,7 +950,11 @@ A shell function is an object that is called like a simple command and
 executes a compound command with a new set of positional parameters.
 Shell functions are declared as follows:
 .TP
-[ \fBfunction\fP ] \fIname\fP () \fIcompound\-command\fP [\fIredirection\fP]
+\fIname\fP () \fIcompound\-command\fP [\fIredirection\fP]
+.PD 0
+.TP
+\fBfunction\fP \fIname\fP [()] \fIcompound\-command\fP [\fIredirection\fP]
+.PD
 This defines a function named \fIname\fP.
 The reserved word \fBfunction\fP is optional.
 If the \fBfunction\fP reserved word is supplied, the parentheses are optional.
@@ -2102,12 +2106,13 @@ for printing selection lists.  Automatically set upon receipt of a
 .BR SIGWINCH .
 .TP
 .B MAIL
-If this parameter is set to a file name and the
+If this parameter is set to a file or directory name and the
 .SM
 .B MAILPATH
 variable is not set,
 .B bash
-informs the user of the arrival of mail in the specified file.
+informs the user of the arrival of mail in the specified file or
+Maildir-format directory.
 .TP
 .B MAILCHECK
 Specifies how
@@ -7338,6 +7343,8 @@ backspace
 suppress further output
 .TP
 .B \ee
+.TP
+.B \eE
 an escape character
 .TP
 .B \ef

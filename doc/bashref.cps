@@ -14,7 +14,7 @@
 \initial {C}
 \entry {command editing}{96}
 \entry {command execution}{31}
-\entry {command expansion}{30}
+\entry {command expansion}{31}
 \entry {command history}{123}
 \entry {command search}{31}
 \entry {command substitution}{24}
@@ -41,7 +41,7 @@
 \entry {event designators}{125}
 \entry {execution environment}{32}
 \entry {exit status}{3, 33}
-\entry {expansion}{18}
+\entry {expansion}{19}
 \entry {expansion, arithmetic}{24}
 \entry {expansion, brace}{19}
 \entry {expansion, filename}{25}

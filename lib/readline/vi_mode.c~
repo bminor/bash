@@ -1113,6 +1113,7 @@ rl_domove_read_callback (m)
       return (0);
     }
 #if defined (READLINE_CALLBACKS)
+  /* XXX - these need to handle rl_universal_argument bindings */
   /* Reading vi motion char continuing numeric argument */
   else if (_rl_digit_p (c) && RL_ISSTATE (RL_STATE_CALLBACK) && RL_VIMOVENUMARG())
     {
@@ -1146,6 +1147,7 @@ rl_domove_read_callback (m)
   else
     {
       RL_UNSETSTATE (RL_STATE_VIMOTION);
+      RL_UNSETSTATE (RL_STATE_NUMERICARG);
       return (1);
     }
 }

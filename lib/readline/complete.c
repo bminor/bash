@@ -847,7 +847,7 @@ print_filename (to_print, full_pathname, prefix_bytes)
 	  if (path_isdir (new_full_pathname))
 	    extension_char = '/';
 
-	  free (new_full_pathname);
+	  xfree (new_full_pathname);
 	  to_print[-1] = c;
 	}
       else
@@ -862,7 +862,7 @@ print_filename (to_print, full_pathname, prefix_bytes)
 	      extension_char = '/';
 	}
 
-      free (s);
+      xfree (s);
       if (extension_char)
 	{
 	  putc (extension_char, rl_outstream);
@@ -1099,7 +1099,7 @@ remove_duplicate_matches (matches)
     {
       if (strcmp (matches[i], matches[i + 1]) == 0)
 	{
-	  free (matches[i]);
+	  xfree (matches[i]);
 	  matches[i] = (char *)&dead_slot;
 	}
       else
@@ -1117,7 +1117,7 @@ remove_duplicate_matches (matches)
   temp_array[j] = (char *)NULL;
 
   if (matches[0] != (char *)&dead_slot)
-    free (matches[0]);
+    xfree (matches[0]);
 
   /* Place the lowest common denominator back in [0]. */
   temp_array[0] = lowest_common;
@@ -1127,7 +1127,7 @@ remove_duplicate_matches (matches)
      insert. */
   if (j == 2 && strcmp (temp_array[0], temp_array[1]) == 0)
     {
-      free (temp_array[1]);
+      xfree (temp_array[1]);
       temp_array[1] = (char *)NULL;
     }
   return (temp_array);
@@ -1306,7 +1306,7 @@ postprocess_matches (matchesp, matching_filenames)
   if (rl_ignore_completion_duplicates)
     {
       temp_matches = remove_duplicate_matches (matches);
-      free (matches);
+      xfree (matches);
       matches = temp_matches;
     }
 
@@ -1648,7 +1648,7 @@ insert_match (match, start, mtype, qc)
       else
 	_rl_replace_text (replacement, start, end);
       if (replacement != match)
-        free (replacement);
+        xfree (replacement);
     }
 }
 
@@ -1715,7 +1715,7 @@ append_to_match (text, delimiter, quote_char, nontrivial_match)
 	  if (rl_point == rl_end && temp_string_index)
 	    rl_insert_text (temp_string);
 	}
-      free (filename);
+      xfree (filename);
     }
   else
     {
@@ -1751,7 +1751,7 @@ insert_all_matches (matches, point, qc)
 	  rl_insert_text (rp);
 	  rl_insert_text (" ");
 	  if (rp != matches[i])
-	    free (rp);
+	    xfree (rp);
 	}
     }
   else
@@ -1760,7 +1760,7 @@ insert_all_matches (matches, point, qc)
       rl_insert_text (rp);
       rl_insert_text (" ");
       if (rp != matches[0])
-	free (rp);
+	xfree (rp);
     }
   rl_end_undo_group ();
 }
@@ -1775,8 +1775,8 @@ _rl_free_match_list (matches)
     return;
 
   for (i = 0; matches[i]; i++)
-    free (matches[i]);
-  free (matches);
+    xfree (matches[i]);
+  xfree (matches);
 }
 
 /* Complete the word at or before point.
@@ -1831,7 +1831,7 @@ rl_complete_internal (what_to_do)
   if (what_to_do == '!' || what_to_do == '@')
     tlen = strlen (text);
 #endif
-  free (text);
+  xfree (text);
 
   if (matches == 0)
     {
@@ -1936,7 +1936,7 @@ rl_complete_internal (what_to_do)
   if (saved_line_buffer)
     {
       completion_changed_buffer = strcmp (rl_line_buffer, saved_line_buffer) != 0;
-      free (saved_line_buffer);
+      xfree (saved_line_buffer);
     }
 
   RL_UNSETSTATE(RL_STATE_COMPLETING);
@@ -2003,7 +2003,7 @@ rl_completion_matches (text, entry_function)
     compute_lcd_of_matches (match_list, matches, text);
   else				/* There were no matches. */
     {
-      free (match_list);
+      xfree (match_list);
       match_list = (char **)NULL;
     }
   return (match_list);
@@ -2197,7 +2197,7 @@ rl_filename_completion_function (text, state)
       if (*dirname == '~')
 	{
 	  temp = tilde_expand (dirname);
-	  free (dirname);
+	  xfree (dirname);
 	  dirname = temp;
 	}
 
@@ -2208,14 +2208,14 @@ rl_filename_completion_function (text, state)
 	 dequoting. */
       if (rl_directory_completion_hook && (*rl_directory_completion_hook) (&dirname))
 	{
-	  free (users_dirname);
+	  xfree (users_dirname);
 	  users_dirname = savestring (dirname);
 	}
       else if (rl_completion_found_quote && rl_filename_dequoting_function)
 	{
 	  /* delete single and double quotes */
 	  temp = (*rl_filename_dequoting_function) (dirname, rl_completion_quote_character);
-	  free (dirname);
+	  xfree (dirname);
 	  dirname = temp;
 	}
       directory = opendir (dirname);
@@ -2225,7 +2225,7 @@ rl_filename_completion_function (text, state)
 	{
 	  /* delete single and double quotes */
 	  temp = (*rl_filename_dequoting_function) (filename, rl_completion_quote_character);
-	  free (filename);
+	  xfree (filename);
 	  filename = temp;
 	}
       filename_len = strlen (filename);
@@ -2281,17 +2281,17 @@ rl_filename_completion_function (text, state)
 	}
       if (dirname)
 	{
-	  free (dirname);
+	  xfree (dirname);
 	  dirname = (char *)NULL;
 	}
       if (filename)
 	{
-	  free (filename);
+	  xfree (filename);
 	  filename = (char *)NULL;
 	}
       if (users_dirname)
 	{
-	  free (users_dirname);
+	  xfree (users_dirname);
 	  users_dirname = (char *)NULL;
 	}
 
@@ -2331,7 +2331,7 @@ rl_filename_completion_function (text, state)
 	temp = savestring (convfn);
 
       if (convfn != dentry)
-	free (convfn);
+	xfree (convfn);
 
       return (temp);
     }

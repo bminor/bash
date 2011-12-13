@@ -1,6 +1,6 @@
 <HTML>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<!-- Created on June, 29  2010 by texi2html 1.64 -->
+<!-- Created on July, 21  2010 by texi2html 1.64 -->
 <!-- 
 Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -33,12 +33,12 @@ Send bugs and suggestions to <texi2html@mathematik.uni-kl.de>
 <H1>Bash Reference Manual</H1></P><P>
 
 This text is a brief description of the features that are present in
-the Bash shell (version 4.1, 12 June 2010).
+the Bash shell (version 4.2, 21 July 2010).
 </P><P>
 
-This is Edition 4.1, last updated 12 June 2010,
+This is Edition 4.2, last updated 21 July 2010,
 of <CITE>The GNU Bash Reference Manual</CITE>,
-for <CODE>Bash</CODE>, Version 4.1.
+for <CODE>Bash</CODE>, Version 4.2.
 </P><P>
 
 Bash contains features that appear in other popular shells, and some
@@ -914,6 +914,9 @@ The statistics currently consist of elapsed (wall-clock) time and
 user and system time consumed by the command's execution.
 The <SAMP>`-p'</SAMP> option changes the output format to that specified
 by POSIX.
+When the shell is in POSIX mode (see section <A HREF="bashref.html#SEC91">6.11 Bash POSIX Mode</A>),
+it does not recognize <CODE>time</CODE> as a reserved word if the next
+token begins with a <SAMP>`-'</SAMP>.
 The <CODE>TIMEFORMAT</CODE> variable may be set to a format string that
 specifies how the timing information should be displayed.
 See section <A HREF="bashref.html#SEC68">5.2 Bash Variables</A>, for a description of the available formats.
@@ -1137,7 +1140,7 @@ until it evaluates to zero.
 Each time <VAR>expr2</VAR> evaluates to a non-zero value, <VAR>commands</VAR> are
 executed and the arithmetic expression <VAR>expr3</VAR> is evaluated.       
 If any expression is omitted, it behaves as if it evaluates to 1.
-The return value is the exit status of the last command in <VAR>list</VAR>
+The return value is the exit status of the last command in <VAR>commands</VAR>
 that is executed, or false if any of the expressions is invalid.
 </P><P>
 
@@ -1630,7 +1633,8 @@ shell context; no new process is created to interpret them.
 
 Functions are declared using this syntax:
 <A NAME="IDX45"></A>
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>[ <CODE>function</CODE> ] <VAR>name</VAR> () <VAR>compound-command</VAR> [ <VAR>redirections</VAR> ]
+<TABLE><tr><td>&nbsp;</td><td class=example><pre><VAR>name</VAR> () <VAR>compound-command</VAR> [ <VAR>redirections</VAR> ]<BR>or<BR>
+<CODE>function</CODE> <VAR>name</VAR> [()] <VAR>compound-command</VAR> [ <VAR>redirections</VAR> ]
 </pre></td></tr></table></P><P>
 
 This defines a shell function named <VAR>name</VAR>.  The reserved
@@ -1735,8 +1739,10 @@ shell's children.
 Care should be taken in cases where this may cause a problem.
 </P><P>
 
-Functions may be recursive.  No limit is placed on the number of
-recursive  calls.
+Functions may be recursive.
+The <CODE>FUNCNEST</CODE> variable may be used to limit the depth of the
+function call stack and restrict the number of function invocations.
+By default, no limit is placed on the number of recursive  calls.
 </P><P>
 
 <A NAME="Shell Parameters"></A>
@@ -4743,6 +4749,7 @@ escape characters by default.
 <DT><CODE>\c</CODE>
 <DD>suppress further output
 <DT><CODE>\e</CODE>
+<DD><DT><CODE>\E</CODE>
 <DD>escape
 <DT><CODE>\f</CODE>
 <DD>form feed
@@ -5914,6 +5921,11 @@ line to be ignored in an interactive shell.
 This option is enabled by default.
 <P>
 
+<DT><CODE>lastpipe</CODE>
+<DD>If set, and job control is not active, the shell runs the last command of
+a pipeline not executed in the background in the current shell environment.
+<P>
+
 <DT><CODE>lithist</CODE>
 <DD>If enabled, and the <CODE>cmdhist</CODE>
 option is enabled, multi-line commands are saved to the history with
@@ -6321,11 +6333,11 @@ The command argument to the <SAMP>`-c'</SAMP> invocation option.
 <DT><CODE>BASH_LINENO</CODE>
 <DD><A NAME="IDX153"></A>
 An array variable whose members are the line numbers in source files
-corresponding to each member of <VAR>FUNCNAME</VAR>.
-<CODE>${BASH_LINENO[$i]}</CODE> is the line number in the source file where
+where each corresponding member of <VAR>FUNCNAME</VAR> was invoked.
+<CODE>${BASH_LINENO[$i]}</CODE> is the line number in the source file
+(<CODE>${BASH_SOURCE[$i+1]}</CODE>) where
 <CODE>${FUNCNAME[$i]}</CODE> was called (or <CODE>${BASH_LINENO[$i-1]}</CODE> if
-referenced within another shell function).
-The corresponding source file name is <CODE>${BASH_SOURCE[$i]}</CODE>.
+referenced within another shell function). 
 Use <CODE>LINENO</CODE> to obtain the current line number.
 <P>
 
@@ -6345,8 +6357,11 @@ This variable is read-only.
 <A NAME="IDX156"></A>
 <DT><CODE>BASH_SOURCE</CODE>
 <DD><A NAME="IDX157"></A>
-An array variable whose members are the source filenames corresponding
-to the elements in the <CODE>FUNCNAME</CODE> array variable.
+An array variable whose members are the source filenames where the
+corresponding shell function names in the <CODE>FUNCNAME</CODE> array
+variable are defined.
+The shell function <CODE>${FUNCNAME[$i]}</CODE> is defined in the file
+<CODE>${BASH_SOURCE[$i]}</CODE> and called from <CODE>${BASH_SOURCE[$i+1]}</CODE>
 <P>
 
 <A NAME="IDX158"></A>
@@ -6573,12 +6588,22 @@ An array variable containing the names of all shell functions
 currently in the execution call stack.
 The element with index 0 is the name of any currently-executing
 shell function.
-The bottom-most element is <CODE>"main"</CODE>.
+The bottom-most element (the one with the highest index)
+is <CODE>"main"</CODE>.
 This variable exists only when a shell function is executing.
 Assignments to <CODE>FUNCNAME</CODE> have no effect and return an error status.
 If <CODE>FUNCNAME</CODE> is unset, it loses its special properties, even if
 it is subsequently reset.
 <P>
+
+This variable can be used with <CODE>BASH_LINENO</CODE> and <CODE>BASH_SOURCE</CODE>.
+Each element of <CODE>FUNCNAME</CODE> has corresponding elements in
+<CODE>BASH_LINENO</CODE> and <CODE>BASH_SOURCE</CODE> to describe the call stack.
+For instance, <CODE>${FUNCNAME[$i]}</CODE> was called from the file
+<CODE>${BASH_SOURCE[$i+1]}</CODE> at line number <CODE>${BASH_LINENO[$i]}</CODE>.
+The <CODE>caller</CODE> builtin displays the current call stack using this
+information.
+</P><P>
 
 <A NAME="IDX200"></A>
 <DT><CODE>FUNCNEST</CODE>
@@ -8728,6 +8753,11 @@ double quotes, single quotes are no longer special and cannot be used to
 quote a closing brace or other special character, unless the operator is
 one of those defined to perform pattern removal.  In this case, they do
 not have to appear as matched pairs.
+<P>
+
+<LI>
+The parser does not recognize <CODE>time</CODE> as a reserved word if the next
+token begins with a <SAMP>`-'</SAMP>.
 <P>
 
 <LI>
@@ -16327,7 +16357,7 @@ to permit their use in free software.
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="bashref.html#SEC_About"> ? </A>]</TD>
 </TR></TABLE>
 <H1>About this document</H1>
-This document was generated by <I>Chet Ramey</I> on <I>June, 29  2010</I>
+This document was generated by <I>Chet Ramey</I> on <I>July, 21  2010</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 <P></P>  
@@ -16489,7 +16519,7 @@ the following structure:
 <BR>  
 <FONT SIZE="-1">
 This document was generated
-by <I>Chet Ramey</I> on <I>June, 29  2010</I>
+by <I>Chet Ramey</I> on <I>July, 21  2010</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 
