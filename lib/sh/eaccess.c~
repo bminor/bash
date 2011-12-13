@@ -1,6 +1,6 @@
 /* eaccess.c - eaccess replacement for the shell, plus other access functions. */
 
-/* Copyright (C) 2006 Free Software Foundation, Inc.
+/* Copyright (C) 2006-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -224,7 +224,11 @@ sh_eaccess (path, mode)
 #  endif
 
   if (current_user.uid == current_user.euid && current_user.gid == current_user.egid)
-    return (access (path, mode));  
+    {
+      ret = access (path, mode);
+      if (ret == 0 && current_user.euid == 0 && mode == X_OK)
+	return (sh_stataccess (path, mode));
+    }
 
   return (sh_stataccess (path, mode));
 #endif

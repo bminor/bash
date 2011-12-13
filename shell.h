@@ -55,6 +55,8 @@ extern int EOF_Reached;
 /* Usage messages by builtins result in a return status of 2. */
 #define EX_BADUSAGE	2
 
+#define EX_MISCERROR	2
+
 /* Special exit statuses used by the shell, internally and externally. */
 #define EX_RETRYFAIL	124
 #define EX_WEXPCOMSUB	125

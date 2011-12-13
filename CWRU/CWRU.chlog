@@ -10908,3 +10908,50 @@ subst.c
 doc/{bash.1,bashref.texi}
 	- changes to the readonly documentation suggested by Jan Schampera
 	  <jan.schampera@web.de>
+
+				    1/4
+				    ---
+builtins/read.def
+	- change bind_read_variable to consistently return NULL if there is some
+	  kind of variable assignment error (e.g., assigning to a readonly or
+	  noassign var)
+	- change read builtin to only call stupidly_hack_special_variables if
+	  bind_read_variable returns non-NULL
+	- change read_builtin to return EXECUTION_FAILURE if there is an
+	  assignment error (e.g., assigning to a readonly or noassign var).
+	  Fixes bug reported by Jan Schampera <jan.schampera@web.de>
+
+				    1/5
+				    ---
+builtins/{help.def,common.c}
+	- change uses of a builtin's `short_doc' member to go through gettext
+	  for possible translation before being displayed.  Suggestion from
+	  <goeran@uddeborg.se>
+
+				    1/6
+				    ---
+shell.h
+	- new exit status define: EX_MISCERROR (2)
+
+builtins/getopts.def
+	- change getopts_bind_variable to return error if an attempt is made
+	  to assign to a variable with the `noassign' attribute
+	- change getopts_bind_variable to return EX_MISCERROR if attempt is
+	  made to assign to readonly or noassign variable
+
+builtins/cd.def
+	- change setpwd to return an int and return failure when PWD is
+	  readonly; success otherwise
+	- change bindpwd to return failure if setpwd returns EXECUTION_FAILURE.
+	  Inspired by message from Eric Blake <eblake@redhat.com>
+	- change pwd builtin to return failure if PWD is readonly (and setpwd
+	  returns EXECUTION_FAILURE)
+
+				    1/8
+				    ---
+lib/sh/eaccess.c
+	- on FreeBSD and Solaris, check the result of access(2) with mode X_OK
+	  for root by checking sh_stataccess().  Same code as was added to
+	  check result of eaccess().  Fixes Solaris 11 problem reported by
+	  <cloyce@headgear.org>
+

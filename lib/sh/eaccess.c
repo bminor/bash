@@ -224,7 +224,15 @@ sh_eaccess (path, mode)
 #  endif
 
   if (current_user.uid == current_user.euid && current_user.gid == current_user.egid)
-    return (access (path, mode));  
+    {
+      ret = access (path, mode);
+#if defined (__FreeBSD__) || defined (SOLARIS)
+      if (ret == 0 && current_user.euid == 0 && mode == X_OK)
+	return (sh_stataccess (path, mode));
+#endif
+      return ret;
+      
+    }
 
   return (sh_stataccess (path, mode));
 #endif

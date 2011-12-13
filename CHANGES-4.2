@@ -11,7 +11,28 @@ b.  Fixed a bug that caused unary `+' and `-' arithmetic operators to have a
 c.  Fixed a bug that caused simple commands in a pipeline to affect the exit
     status ($?) seen by subsequent pipeline commands.
 
+d.  A number of cygwin-specific changes to avoid the use of text-mode files
+    and file access, and to make sure that \r is handled correctly.
+
+e.  Fixed a bug that caused the read builtin to not return failure if an
+    attempt is made to assign to a readonly variable.
+
+f.  Fixed a bug that caused some builtin usage messages to not be translated.
+
+g.  Fixed a bug that caused the getopts builtin to not return failure if an
+    attempt is made to assign to a readonly variable.  Now it returns 2.
+
+h.  Fixed the cd and pwd builtins to return failure if PWD is readonly and
+    cannot be assigned to.
+
+i.  Added code to check the return value of access(2) on Solaris systems,
+    since it returns success for executable tests (e.g., `test -x') when
+    run by root, even if the file permissions don't allow execution.
+
 2.  Changes to Readline
+
+a.  Fixed a bug that caused directory names in words to be completed to not
+    be dequoted correctly.
 
 3.  New Features in Bash
 
