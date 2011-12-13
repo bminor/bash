@@ -327,6 +327,11 @@ extern int strcasecmp __P((const char *, const char *));
 extern char *strcasestr __P((const char *, const char *));
 #endif
 
+/* declarations for functions defined in lib/sh/strchrnul.c */
+#if ! HAVE_STRCHRNUL
+extern char *strchrnul __P((const char *, int));
+#endif
+
 /* declarations for functions defined in lib/sh/strerror.c */
 #if !defined (HAVE_STRERROR) && !defined (strerror)
 extern char *strerror __P((int));

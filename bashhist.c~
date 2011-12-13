@@ -184,6 +184,7 @@ int dont_save_function_defs;
 extern int current_command_line_count;
 
 extern struct dstack dstack;
+extern int parser_state;
 
 static int bash_history_inhibit_expansion __P((char *, int));
 #if defined (READLINE)
@@ -731,7 +732,8 @@ bash_add_history (line)
   add_it = 1;
   if (command_oriented_history && current_command_line_count > 1)
     {
-      chars_to_add = literal_history ? "\n" : history_delimiting_chars ();
+      chars_to_add = literal_history ? "\n" : history_delimiting_chars (line);
+itrace("bash_add_history: `%s' PST_HEREDOC = %d chars_to_add = `%s'", line, (parser_state&PST_HEREDOC), chars_to_add);
 
       using_history ();
       current = previous_history ();
@@ -750,6 +752,15 @@ bash_add_history (line)
 	      curlen--;
 	      chars_to_add = "";
 	    }
+
+#if 1	/* XXX - bash-4.2 */
+	  /* If we're not in some kind of quoted construct, the current history
+	     entry ends with a newline, and we're going to add a semicolon,
+	     don't.  In some cases, it results in a syntax error (e.g., before
+	     a close brace), and it should not be needed. */
+	  if (dstack.delimiter_depth == 0 && current->line[curlen - 1] == '\n' && *chars_to_add == ';')
+	    chars_to_add++;
+#endif
 
 	  new_line = (char *)xmalloc (1
 				      + curlen

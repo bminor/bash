@@ -216,7 +216,8 @@ static int termsigs_initialized = 0;
 
 /* Initialize signals that will terminate the shell to do some
    unwind protection.  For non-interactive shells, we only call
-   this when a trap is defined for EXIT (0). */
+   this when a trap is defined for EXIT (0) or when trap is run
+   to display signal dispositions. */
 void
 initialize_terminating_signals ()
 {
@@ -250,7 +251,8 @@ initialize_terminating_signals ()
       XSAFLAGS(i) = oact.sa_flags;
       /* Don't do anything with signals that are ignored at shell entry
 	 if the shell is not interactive. */
-      if (!interactive_shell && XHANDLER (i) == SIG_IGN)
+      /* XXX - should we do this for interactive shells, too? */
+      if (interactive_shell == 0 && XHANDLER (i) == SIG_IGN)
 	{
 	  sigaction (XSIG (i), &oact, &act);
 	  set_signal_ignored (XSIG (i));
@@ -273,7 +275,8 @@ initialize_terminating_signals ()
       XSAFLAGS(i) = 0;
       /* Don't do anything with signals that are ignored at shell entry
 	 if the shell is not interactive. */
-      if (!interactive_shell && XHANDLER (i) == SIG_IGN)
+      /* XXX - should we do this for interactive shells, too? */
+      if (interactive_shell == 0 && XHANDLER (i) == SIG_IGN)
 	{
 	  signal (XSIG (i), SIG_IGN);
 	  set_signal_ignored (XSIG (i));
@@ -652,12 +655,13 @@ set_signal_handler (sig, handler)
 
   act.sa_handler = handler;
   act.sa_flags = 0;
-#if 0
-  if (sig == SIGALRM)
-    act.sa_flags |= SA_INTERRUPT;	/* XXX */
-  else
+
+  /* XXX - bash-4.2 */
+  /* We don't want a child death to interrupt interruptible system calls, even
+     if we take the time to reap children */
+  if (sig == SIGCHLD)
     act.sa_flags |= SA_RESTART;		/* XXX */
-#endif
+
   sigemptyset (&act.sa_mask);
   sigemptyset (&oact.sa_mask);
   sigaction (sig, &act, &oact);

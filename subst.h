@@ -47,14 +47,15 @@
 #define ASS_MKASSOC	0x04
 
 /* Flags for the string extraction functions. */
-#define SX_NOALLOC	0x01	/* just skip; don't return substring */
-#define SX_VARNAME	0x02	/* variable name; for string_extract () */
-#define SX_REQMATCH	0x04	/* closing/matching delimiter required */
-#define SX_COMMAND	0x08	/* extracting a shell script/command */
-#define SX_NOCTLESC	0x10	/* don't honor CTLESC quoting */
-#define SX_NOESCCTLNUL	0x20	/* don't let CTLESC quote CTLNUL */
-#define SX_NOLONGJMP	0x40	/* don't longjmp on fatal error */
-#define SX_ARITHSUB	0x80	/* extracting $(( ... )) (currently unused) */
+#define SX_NOALLOC	0x0001	/* just skip; don't return substring */
+#define SX_VARNAME	0x0002	/* variable name; for string_extract () */
+#define SX_REQMATCH	0x0004	/* closing/matching delimiter required */
+#define SX_COMMAND	0x0008	/* extracting a shell script/command */
+#define SX_NOCTLESC	0x0010	/* don't honor CTLESC quoting */
+#define SX_NOESCCTLNUL	0x0020	/* don't let CTLESC quote CTLNUL */
+#define SX_NOLONGJMP	0x0040	/* don't longjmp on fatal error */
+#define SX_ARITHSUB	0x0080	/* extracting $(( ... )) (currently unused) */
+#define SX_POSIXEXP	0x0100	/* extracting new Posix pattern removal expansions in extract_dollar_brace_string */
 
 /* Remove backslashes which are quoting backquotes from STRING.  Modifies
    STRING, and returns a pointer to it. */

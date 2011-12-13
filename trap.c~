@@ -121,6 +121,13 @@ int wait_signal_received;
       sigmodes[sig] |= SIG_HARD_IGNORE; \
   } while (0)
 
+#define SETORIGSIG(sig,handler) \
+  do { \
+    original_signals[sig] = handler; \
+    if (original_signals[sig] == SIG_IGN) \
+      sigmodes[sig] |= SIG_HARD_IGNORE; \
+  } while (0)
+
 #define GET_ORIGINAL_SIGNAL(sig) \
   if (sig && sig < NSIG && original_signals[sig] == IMPOSSIBLE_TRAP_HANDLER) \
     GETORIGSIG(sig)
@@ -140,7 +147,7 @@ initialize_traps ()
     {
       pending_traps[i] = 0;
       trap_list[i] = (char *)DEFAULT_SIG;
-      sigmodes[i] = SIG_INHERITED;
+      sigmodes[i] = SIG_INHERITED;	/* XXX - only set, not used */
       original_signals[i] = IMPOSSIBLE_TRAP_HANDLER;
     }
 
@@ -600,6 +607,15 @@ get_original_signal (sig)
     GETORIGSIG (sig);
 }
 
+void
+set_original_signal (sig, handler)
+     int sig;
+     SigHandler *handler;
+{
+  if (sig > 0 && sig < NSIG && original_signals[sig] == (SigHandler *)IMPOSSIBLE_TRAP_HANDLER)
+    SETORIGSIG (sig, handler);
+}
+
 /* Restore the default action for SIG; i.e., the action the shell
    would have taken before you used the trap command.  This is called
    from trap_builtin (), which takes care to restore the handlers for
@@ -912,7 +928,6 @@ run_interrupt_trap ()
   _run_trap_internal (SIGINT, "interrupt trap");
 }
 
-#ifdef INCLUDE_UNUSED
 /* Free all the allocated strings in the list of traps and reset the trap
    values to the default.  Intended to be called from subshells that want
    to complete work done by reset_signal_handlers upon execution of a
@@ -936,7 +951,6 @@ free_trap_string (sig)
   change_signal (sig, (char *)DEFAULT_SIG);
   sigmodes[sig] &= ~SIG_TRAPPED;
 }
-#endif
 
 /* Reset the handler for SIG to the original value. */
 static void
@@ -1073,10 +1087,17 @@ signal_is_ignored (sig)
   return (sigmodes[sig] & SIG_IGNORED);
 }
 
+int
+signal_is_hard_ignored (sig)
+{
+  return (sigmodes[sig] & SIG_HARD_IGNORE);
+}
+
 void
 set_signal_ignored (sig)
      int sig;
 {
+itrace("set_signal_ignored: %d set to SIG_HARD_IGNORE", sig);
   sigmodes[sig] |= SIG_HARD_IGNORE;
   original_signals[sig] = SIG_IGN;
 }

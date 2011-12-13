@@ -184,7 +184,6 @@ int dont_save_function_defs;
 extern int current_command_line_count;
 
 extern struct dstack dstack;
-extern int parser_state;
 
 static int bash_history_inhibit_expansion __P((char *, int));
 #if defined (READLINE)
@@ -732,7 +731,7 @@ bash_add_history (line)
   add_it = 1;
   if (command_oriented_history && current_command_line_count > 1)
     {
-      chars_to_add = literal_history ? "\n" : history_delimiting_chars (line);
+      chars_to_add = literal_history ? "\n" : history_delimiting_chars ();
 
       using_history ();
       current = previous_history ();
@@ -751,13 +750,6 @@ bash_add_history (line)
 	      curlen--;
 	      chars_to_add = "";
 	    }
-
-	  /* If we're not in some kind of quoted construct, the current history
-	     entry ends with a newline, and we're going to add a semicolon,
-	     don't.  In some cases, it results in a syntax error (e.g., before
-	     a close brace), and it should not be needed. */
-	  if (dstack.delimiter_depth == 0 && current->line[curlen - 1] == '\n' && *chars_to_add == ';')
-	    chars_to_add++;
 
 	  new_line = (char *)xmalloc (1
 				      + curlen

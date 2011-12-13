@@ -42,6 +42,7 @@
 #include "bashintl.h"
 
 #include "shell.h"
+#include "parser.h"
 #include "flags.h"
 #include "jobs.h"
 #include "execute_cmd.h"
@@ -785,6 +786,7 @@ string_extract_double_quoted (string, sindex, stripdq)
       /* Process a character that was quoted by a backslash. */
       if (pass_next)
 	{
+	  /* XXX - take another look at this in light of Interp 221 */
 	  /* Posix.2 sez:
 
 	     ``The backslash shall retain its special meaning as an escape
@@ -960,7 +962,7 @@ skip_double_quoted (string, slen, sind)
 	  if (string[i + 1] == LPAREN)
 	    ret = extract_command_subst (string, &si, SX_NOALLOC);
 	  else
-	    ret = extract_dollar_brace_string (string, &si, 1, SX_NOALLOC);
+	    ret = extract_dollar_brace_string (string, &si, Q_DOUBLE_QUOTES, SX_NOALLOC);
 
 	  i = si + 1;
 	  continue;
@@ -1266,7 +1268,7 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
 
 #if 0
       /* Process a nested command substitution, but only if we're parsing a
-	 command substitution.  XXX - for bash-4.2 */
+	 command substitution.  XXX - bash-4.2 */
       if ((flags & SX_COMMAND) && string[i] == '$' && string[i+1] == LPAREN)
         {
           si = i + 2;
@@ -1370,13 +1372,19 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
 {
   register int i, c;
   size_t slen;
-  int pass_character, nesting_level, si;
+  int pass_character, nesting_level, si, dolbrace_state;
   char *result, *t;
   DECLARE_MBSTATE;
 
   pass_character = 0;
   nesting_level = 1;
   slen = strlen (string + *sindex) + *sindex;
+
+  /* The handling of dolbrace_state needs to agree with the code in parse.y:
+     parse_matched_pair() */
+  dolbrace_state = 0;
+  if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
+    dolbrace_state = (flags & SX_POSIXEXP) ? DOLBRACE_QUOTE : DOLBRACE_PARAM;
 
   i = *sindex;
   while (c = string[i])
@@ -1432,6 +1440,7 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
 	  continue;
 	}
 
+#if 1
       /* Pass the contents of single-quoted and double-quoted strings
 	 through verbatim. */
       if (c == '\'' || c == '"')
@@ -1442,9 +1451,44 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
 	  /* skip_XXX_quoted leaves index one past close quote */
 	  continue;
 	}
+#else	/* XXX - bash-4.2 */
+      /* Pass the contents of double-quoted strings through verbatim. */
+      if (c == '"')
+	{
+	  si = i + 1;
+	  i = skip_double_quoted (string, slen, si);
+	  /* skip_XXX_quoted leaves index one past close quote */
+	  continue;
+	}
+
+      if (c == '\'')
+	{
+/*itrace("extract_dollar_brace_string: c == single quote flags = %d quoted = %d dolbrace_state = %d", flags, quoted, dolbrace_state);*/
+	  if (posixly_correct && shell_compatibility_level > 41 && dolbrace_state != DOLBRACE_QUOTE)
+	    ADVANCE_CHAR (string, slen, i);
+	  else
+	    {
+	      si = i + 1;
+	      i = skip_single_quoted (string, slen, si);
+	    }
+
+          continue;
+	}
+#endif
 
       /* move past this character, which was not special. */
       ADVANCE_CHAR (string, slen, i);
+
+      /* This logic must agree with parse.y:parse_matched_pair, since they
+	 share the same defines. */
+      if (dolbrace_state == DOLBRACE_PARAM && c == '%' && (i - *sindex) > 0)
+	dolbrace_state = DOLBRACE_QUOTE;
+      else if (dolbrace_state == DOLBRACE_PARAM && c == '#' && (i - *sindex) > 1)
+        dolbrace_state = DOLBRACE_QUOTE;
+      else if (dolbrace_state == DOLBRACE_PARAM && strchr ("#%^,~:-=?+/", c) != 0)
+	dolbrace_state = DOLBRACE_OP;
+      else if (dolbrace_state == DOLBRACE_OP && strchr ("#%^,~:-=?+/", c) == 0)
+	dolbrace_state = DOLBRACE_WORD;
     }
 
   if (c == 0 && nesting_level)
@@ -5591,11 +5635,12 @@ parameter_brace_expand_rhs (name, value, c, quoted, qdollaratp, hasdollarat)
   else
 #endif /* ARRAY_VARS */
   bind_variable (name, t1, 0);
-#if 0
+#if 1
   free (t1);
 
   w->word = temp;
-#else		/* XXX - bash-4.2 -- depends on Posix group interpretation */
+#else		/* XXX - bash-4.2 */
+  /* From Posix group discussion Feb-March 2010.  Issue 7 0000221 */
   free (temp);
 
   w->word = t1;
@@ -6894,7 +6939,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
     {
       /* Extract the contents of the ${ ... } expansion
 	 according to the Posix.2 rules. */
-      value = extract_dollar_brace_string (string, &sindex, quoted, 0);
+      value = extract_dollar_brace_string (string, &sindex, quoted, (c == '%' || c == '#') ? SX_POSIXEXP : 0);
       if (string[sindex] == RBRACE)
 	sindex++;
       else
@@ -7029,7 +7074,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 	      if (value)
 		{
 		  /* XXX - bash-4.2 */
-		  /* From Posix discussion on austin-group list */
+		  /* From Posix discussion on austin-group list.  Issue 221 */
 		  if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
 		    quoted |= Q_DOLBRACE;
 		  ret = parameter_brace_expand_rhs (name, value, c,
@@ -7075,6 +7120,8 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 	      if (contains_dollar_at)
 		*contains_dollar_at = 0;
 
+	      /* XXX - bash-4.2 */
+	      /* From Posix discussion on austin-group list.  Issue 221 */
 	      if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
 		quoted |= Q_DOLBRACE;
 	      ret = parameter_brace_expand_rhs (name, value, c, quoted,
@@ -7893,9 +7940,10 @@ add_string:
 	  else
 	    tflag = 0;
 
+	  /* XXX - bash-4.2 */
 	  /* From Posix discussion on austin-group list:  Backslash escaping
-	     { or } in ${...} is removed. */
-	  if ((quoted & Q_DOLBRACE) && (c == '{' || c == '}'))
+	     a } in ${...} is removed.  Issue 0000221 */
+	  if ((quoted & Q_DOLBRACE) && c == RBRACE)
 	    {
 	      SCOPY_CHAR_I (twochars, CTLESC, c, string, sindex, string_size);
 	    }

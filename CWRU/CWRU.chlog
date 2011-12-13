@@ -9524,7 +9524,7 @@ subst.c
 	- in parameter_brace_expand, before calling parameter_brace_expand_rhs,
 	  add Q_DOLBRACE to `quoted' if we're within double quotes.
 	- in expand_word_internal, if the Q_DOLBRACE flag is set, remove a
-	  backslash escaping a { or }.  Result of a Posix discussion on the
+	  backslash escaping a }.  Result of a Posix discussion on the
 	  austin-group list
 
 				   2/27
@@ -9595,3 +9595,97 @@ lib/sh/xmbsrtowcs.c
 	  mbsnrtowcs is available and the indices are not required.  Called
 	  from xdupmbstowcs as required.  Initial patch from
 	  <0xe2.0x9a.0x9b@gmail.com>
+
+				   3/22
+				   ----
+print_cmd.c
+	- call print_deferred_heredocs virtually every time a recursive call
+	  to make_command_string_internal is made so here documents get
+	  printed correctly when they are attached to commands inside compound
+	  commands such as for and while.  Fixes bug reported by Mike
+	  Frysinger <vapier@gentoo.org>
+
+				   3/25
+				   ----
+builtins/printf.def
+	- fix have_precision case in PF macro to call printf with precision
+	  instead of fieldwidth argument.  Fixes bug reported by Rob Robason
+	  <rob@robason.net>
+
+				   3/26
+				   ----
+trap.[ch]
+	- new function, signal_is_hard_ignored, returns true if the shell
+	  inherited SIG_IGN as a signal's disposition
+	- new function, set_original_signal (sig, handler), provides interface
+	  for rest of shell to set original_signals[sig] = handler
+
+execute_cmd.c
+	- execute_disk_command needs to call reset_terminating_signals in the
+	  child process before resetting traps with restore_original_signals
+
+builtins/trap.def
+	- call initialize_terminating_signals before calling display_traps for
+	  trap -p or trap without any other arguments.  Possible future use
+
+lib/readline/complete.c
+	- rl_filename_completion_function needs to call
+	  rl_filename_dequoting_function with `dirname' (which has already
+	  been tilde-expanded) instead of `users_dirname', because it calls
+	  opendir with `dirname'.  Fixes bug reported by Stefan H. Holek 
+	  <stefan@jarn.com>
+
+				   3/27
+				   ----
+sig.c
+	- experimental change to set_signal_handler: when setting the SIGCHLD
+	  handler, set the SA_RESTART flag so that interruptible system calls
+	  get restarted after a child dies.  Fixes bug reported by Tomas
+	  Trnka <tomastrnka@gmx.com>, but needs further evaluation
+
+lib/sh/eaccess.c
+	- eaccess(2) apparently does only half the job: it does not check that
+	  the permission bits on a file actually allow, for instance, execution.
+	  Need to augment with a call to sh_stataccess if eaccess returns
+	  success on FreeBSD.  Fixes FreeBSD problem reported by Jonan Hattne
+	  <johan.hattne@utsouthwestern.edu>
+
+				   3/28
+				   ----
+parse.y,bashline.c,externs.h
+	- history_delimiting_chars now takes a const char * as an argument:
+	  the line being added to the history.  Changed callers
+
+parse.y
+	- bash_add_history should not add a semicolon separator if the current
+	  history entry already ends in a newline.  It can introduce syntax
+	  errors (e.g., when it results in a null command before a close brace).
+	  Fixes bug reported by Andreas Schwab <schwab@linux-m68k.org>
+
+parse.y
+	- history_delimiting_chars needs to return a newline instead of a
+	  semicolon if it thinks the current line starts a here document
+	  (if it contains `<<').  Also keeps track of the fact with a new
+	  static variable, LAST_WAS_HEREDOC, so it can return the right
+	  sequence of newlines later for the here-document body.  Fixes bug
+	  reported by Andreas Schwab <schwab@linux-m68k.org>
+
+				   3/29
+				   ----
+lib/sh/eaccess.c
+	- if the system has faccessat, sh_eaccess will now use it in
+	  preference to all other options
+
+				   3/30
+				   ----
+subst.h
+	- new string_extract and extract_dollar_brace_string flag value:
+	  SX_POSIXEXP, set if the shell is expanding one of the new Posix
+	  pattern removal word expansions
+
+parser.h
+	- new definitions for "word expansion state", shared between parse.y
+	  and subst.c
+
+subst.c
+	- include parser.h

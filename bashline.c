@@ -863,6 +863,7 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
 {
   char *command, *metaval;
   int r, cclc, rrs, metaflag;
+  sh_parser_state_t ps;
 
   rrs = rl_readline_state;
   cclc = current_command_line_count;
@@ -897,7 +898,9 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
      yet. */
   if (rl_deprep_term_function)
     (*rl_deprep_term_function) ();
+  save_parser_state (&ps);
   r = parse_and_execute (command, (editing_mode == VI_EDITING_MODE) ? "v" : "C-xC-e", SEVAL_NOHIST);
+  restore_parser_state (&ps);
   if (rl_prep_term_function)
     (*rl_prep_term_function) (metaflag);
 

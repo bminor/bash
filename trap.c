@@ -121,6 +121,13 @@ int wait_signal_received;
       sigmodes[sig] |= SIG_HARD_IGNORE; \
   } while (0)
 
+#define SETORIGSIG(sig,handler) \
+  do { \
+    original_signals[sig] = handler; \
+    if (original_signals[sig] == SIG_IGN) \
+      sigmodes[sig] |= SIG_HARD_IGNORE; \
+  } while (0)
+
 #define GET_ORIGINAL_SIGNAL(sig) \
   if (sig && sig < NSIG && original_signals[sig] == IMPOSSIBLE_TRAP_HANDLER) \
     GETORIGSIG(sig)
@@ -140,7 +147,7 @@ initialize_traps ()
     {
       pending_traps[i] = 0;
       trap_list[i] = (char *)DEFAULT_SIG;
-      sigmodes[i] = SIG_INHERITED;
+      sigmodes[i] = SIG_INHERITED;	/* XXX - only set, not used */
       original_signals[i] = IMPOSSIBLE_TRAP_HANDLER;
     }
 
@@ -598,6 +605,15 @@ get_original_signal (sig)
   /* If we aren't sure the of the original value, then get it. */
   if (sig > 0 && sig < NSIG && original_signals[sig] == (SigHandler *)IMPOSSIBLE_TRAP_HANDLER)
     GETORIGSIG (sig);
+}
+
+void
+set_original_signal (sig, handler)
+     int sig;
+     SigHandler *handler;
+{
+  if (sig > 0 && sig < NSIG && original_signals[sig] == (SigHandler *)IMPOSSIBLE_TRAP_HANDLER)
+    SETORIGSIG (sig, handler);
 }
 
 /* Restore the default action for SIG; i.e., the action the shell
@@ -1069,6 +1085,12 @@ signal_is_ignored (sig)
      int sig;
 {
   return (sigmodes[sig] & SIG_IGNORED);
+}
+
+int
+signal_is_hard_ignored (sig)
+{
+  return (sigmodes[sig] & SIG_HARD_IGNORE);
 }
 
 void

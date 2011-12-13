@@ -4542,6 +4542,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 #endif
 #endif
 
+      reset_terminating_signals ();	/* XXX */
       /* Cancel traps, in trap.c. */
       restore_original_signals ();
 

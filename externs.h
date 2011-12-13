@@ -114,7 +114,7 @@ extern int get_current_prompt_level __P((void));
 extern void set_current_prompt_level __P((int));
 
 #if defined (HISTORY)
-extern char *history_delimiting_chars __P((void));
+extern char *history_delimiting_chars __P((const char *));
 #endif
 
 /* Declarations for functions defined in locale.c */

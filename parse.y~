@@ -2305,7 +2305,7 @@ shell_getc (remove_quoted_newline)
 	  else
 	    {
 	      char *hdcs;
-	      hdcs = history_delimiting_chars ();
+	      hdcs = history_delimiting_chars (shell_input_line);
 	      if (hdcs && hdcs[0] == ';')
 		maybe_add_history (shell_input_line);
 	    }
@@ -3062,12 +3062,13 @@ tokword:
  * reprompting the user, if necessary, after reading a newline, and returning
  * correct error values if it reads EOF.
  */
-#define P_FIRSTCLOSE	0x01
-#define P_ALLOWESC	0x02
-#define P_DQUOTE	0x04
-#define P_COMMAND	0x08	/* parsing a command, so look for comments */
-#define P_BACKQUOTE	0x10	/* parsing a backquoted command substitution */
-#define P_ARRAYSUB	0x20	/* parsing a [...] array subscript for assignment */
+#define P_FIRSTCLOSE	0x0001
+#define P_ALLOWESC	0x0002
+#define P_DQUOTE	0x0004
+#define P_COMMAND	0x0008	/* parsing a command, so look for comments */
+#define P_BACKQUOTE	0x0010	/* parsing a backquoted command substitution */
+#define P_ARRAYSUB	0x0020	/* parsing a [...] array subscript for assignment */
+#define P_DOLBRACE	0x0040	/* parsing a ${...} construct */
 
 /* Lexical state while parsing a grouping construct or $(...). */
 #define LEX_WASDOL	0x001
@@ -3115,6 +3116,9 @@ parse_matched_pair (qc, open, close, lenp, flags)
   int nestlen, ttranslen, start_lineno;
   char *ret, *nestret, *ttrans;
   int retind, retsize, rflags;
+  int dolbrace_state;
+
+  dolbrace_state = (flags & P_DOLBRACE) ? DOLBRACE_PARAM : 0;
 
 /*itrace("parse_matched_pair[%d]: open = %c close = %c flags = %d", line_number, open, close, flags);*/
   count = 1;
@@ -3225,12 +3229,32 @@ parse_matched_pair (qc, open, close, lenp, flags)
       if MBTEST(ch == '\\')			/* backslashes */
 	tflags |= LEX_PASSNEXT;
 
-#if 0
+#if 0	/* XXX - bash-4.2 */
+      /* Based on which dolstate is currently in (param, op, or word),
+	 decide what the op is.  We're really only concerned if it's % or
+	 #, so we can turn on a flag that says whether or not we should
+	 treat single quotes as special when inside a double-quoted
+	 ${...} */
+      if (flags & P_DOLBRACE)
+        {
+	  if MBTEST(dolbrace_state == DOLBRACE_PARAM && ch == '%' && retind > 0)
+	    dolbrace_state = DOLBRACE_QUOTE;
+	  else if MBTEST(dolbrace_state == DOLBRACE_PARAM && ch == '#' && retind > 1)
+	    dolbrace_state = DOLBRACE_QUOTE;
+	  else if MBTEST(dolbrace_state == DOLBRACE_PARAM && strchr ("#%^,~:-=?+/", ch) != 0)
+	    dolbrace_state = DOLBRACE_OP;
+	  else if MBTEST(dolbrace_state == DOLBRACE_OP && strchr ("#%^,~:-=?+/", ch) == 0)
+	    dolbrace_state = DOLBRACE_WORD;
+        }
+#endif
+
+#if 0 /* XXX - bash-4.2 */
       /* The big hammer.  Single quotes aren't special in double quotes.  The
-         problem is that Posix says the single quotes are semi-special:
+         problem is that Posix used to say the single quotes are semi-special:
          within a double-quoted ${...} construct "an even number of
          unescaped double-quotes or single-quotes, if any, shall occur." */
-      if MBTEST(open == '{' && (flags & P_DQUOTE) && ch == '\'')	/* } */
+      /* This was changed in Interp 221 */
+      if MBTEST(/*posixly_correct && shell_compatibility_level > 41 &&*/ dolbrace_state == DOLBRACE_QUOTE && (flags & P_DQUOTE) && (flags & P_DOLBRACE) && ch == '\'')
 	continue;
 #endif
 
@@ -3307,7 +3331,7 @@ parse_dollar_word:
 	  if (ch == '(')		/* ) */
 	    nestret = parse_comsub (0, '(', ')', &nestlen, (rflags|P_COMMAND) & ~P_DQUOTE);
 	  else if (ch == '{')		/* } */
-	    nestret = parse_matched_pair (0, '{', '}', &nestlen, P_FIRSTCLOSE|rflags);
+	    nestret = parse_matched_pair (0, '{', '}', &nestlen, P_FIRSTCLOSE|P_DOLBRACE|rflags);
 	  else if (ch == '[')		/* ] */
 	    nestret = parse_matched_pair (0, '[', ']', &nestlen, rflags);
 
@@ -3750,7 +3774,7 @@ eof_error:
 	  if (ch == '(')		/* ) */
 	    nestret = parse_comsub (0, '(', ')', &nestlen, (rflags|P_COMMAND) & ~P_DQUOTE);
 	  else if (ch == '{')		/* } */
-	    nestret = parse_matched_pair (0, '{', '}', &nestlen, P_FIRSTCLOSE|rflags);
+	    nestret = parse_matched_pair (0, '{', '}', &nestlen, P_FIRSTCLOSE|P_DOLBRACE|rflags);
 	  else if (ch == '[')		/* ] */
 	    nestret = parse_matched_pair (0, '[', ']', &nestlen, rflags);
 
@@ -4398,7 +4422,7 @@ read_token_word (character)
 		((peek_char == '{' || peek_char == '[') && character == '$'))	/* ) ] } */
 	    {
 	      if (peek_char == '{')		/* } */
-		ttok = parse_matched_pair (cd, '{', '}', &ttoklen, P_FIRSTCLOSE);
+		ttok = parse_matched_pair (cd, '{', '}', &ttoklen, P_FIRSTCLOSE|P_DOLBRACE);
 	      else if (peek_char == '(')		/* ) */
 		{
 		  /* XXX - push and pop the `(' as a delimiter for use by
@@ -4803,24 +4827,35 @@ static const int no_semi_successors[] = {
 /* If we are not within a delimited expression, try to be smart
    about which separators can be semi-colons and which must be
    newlines.  Returns the string that should be added into the
-   history entry. */
+   history entry.  LINE is the line we're about to add; it helps
+   make some more intelligent decisions in certain cases. */
 char *
-history_delimiting_chars ()
+history_delimiting_chars (line)
+     const char *line;
 {
+  static int last_was_heredoc = 0;	/* was the last entry the start of a here document? */
   register int i;
+
+  if ((parser_state & PST_HEREDOC) == 0)
+    last_was_heredoc = 0;
 
   if (dstack.delimiter_depth != 0)
     return ("\n");
 
   /* We look for current_command_line_count == 2 because we are looking to
      add the first line of the body of the here document (the second line
-     of the command). */
+     of the command).  We also keep LAST_WAS_HEREDOC as a private sentinel
+     variable to note when we think we added the first line of a here doc
+     (the one with a "<<" somewhere in it) */
   if (parser_state & PST_HEREDOC)
-{
-  if (last_read_token == WORD && (token_before_that == LESS_LESS || token_before_that == LESS_LESS_MINUS))
-    return ("\n");	/* XXX -- need to clean up in bash_add_history */
-    return (current_command_line_count == 2 ? "\n" : "");
-}
+    {
+      if (last_was_heredoc)
+	{
+	  last_was_heredoc = 0;
+	  return "\n";
+	}
+      return (current_command_line_count == 2 ? "\n" : "");
+    }
 
   /* First, handle some special cases. */
   /*(*/
@@ -4842,6 +4877,15 @@ history_delimiting_chars ()
     }
   else if (token_before_that == WORD && two_tokens_ago == FUNCTION)
     return " ";		/* function def using `function name' without `()' */
+
+  /* If we're not in a here document, but we think we're about to parse one,
+     and we would otherwise return a `;', return a newline to delimit the
+     line with the here-doc delimiter */
+  else if ((parser_state & PST_HEREDOC) == 0 && current_command_line_count > 1 && last_read_token == '\n' && strstr (line, "<<"))
+    {
+      last_was_heredoc = 1;
+      return "\n";
+    }
 
   else if (token_before_that == WORD && two_tokens_ago == FOR)
     {
