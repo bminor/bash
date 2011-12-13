@@ -171,6 +171,8 @@ ansicstr (string, len, flags, sawc, rlen)
 		    *rlen = r - ret;
 		  return ret;
 		}
+	      else if ((flags & 1) == 0 && *s == 0)
+		;		/* pass \c through */
 	      else if ((flags & 1) == 0 && (c = *s))
 		{
 		  s++;

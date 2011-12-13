@@ -1135,7 +1135,7 @@ command (@pxref{Redirections}).
 The file descriptors can be utilized as arguments to shell commands
 and redirections using standard word expansions.
 
-The process id of the shell spawned to execute the coprocess is
+The process ID of the shell spawned to execute the coprocess is
 available as the value of the variable @var{NAME}_PID.
 The @code{wait}
 builtin command may be used to wait for the coprocess to terminate.
@@ -1382,7 +1382,7 @@ In the context where an assignment statement is assigning a value
 to a shell variable or array index (@pxref{Arrays}), the @samp{+=}
 operator can be used to   
 append to or add to the variable's previous value.
-When @samp{+=} is applied to a variable for which the integer attribute
+When @samp{+=} is applied to a variable for which the @var{integer} attribute
 has been set, @var{value} is evaluated as an arithmetic expression and
 added to the variable's current value, which is also evaluated.
 When @samp{+=} is applied to an array variable using compound assignment
@@ -1717,7 +1717,7 @@ Bash uses the value of the variable formed from the rest of
 expanded and that value is used in the rest of the substitution, rather
 than the value of @var{parameter} itself.
 This is known as @code{indirect expansion}.
-The exceptions to this are the expansions of $@{!@var{prefix*}@}
+The exceptions to this are the expansions of $@{!@var{prefix}@*}
 and $@{!@var{name}[@@]@}
 described below.
 The exclamation point must immediately follow the left brace in order to
@@ -3061,7 +3061,7 @@ invocation if a new set of parameters is to be used.
 When the end of options is encountered, @code{getopts} exits with a
 return value greater than zero.
 @env{OPTIND} is set to the index of the first non-option argument,
-and @code{name} is set to @samp{?}.
+and @var{name} is set to @samp{?}.
 
 @code{getopts}
 normally parses the positional parameters, but if more arguments are
@@ -4141,8 +4141,8 @@ parameters, or to display the names and values of shell variables.
 @item set
 @btindex set
 @example
-set [--abefhkmnptuvxBCEHPT] [-o @var{option}] [@var{argument} @dots{}]
-set [+abefhkmnptuvxBCEHPT] [+o @var{option}] [@var{argument} @dots{}]
+set [--abefhkmnptuvxBCEHPT] [-o @var{option-name}] [@var{argument} @dots{}]
+set [+abefhkmnptuvxBCEHPT] [+o @var{option-name}] [@var{argument} @dots{}]
 @end example
 
 If no options or arguments are supplied, @code{set} displays the names
@@ -4503,18 +4503,19 @@ easy re-editing of multi-line commands.
 @item compat31
 If set, Bash
 changes its behavior to that of version 3.1 with respect to quoted
-arguments to the conditional command's =~ operator.
+arguments to the conditional command's @samp{=~} operator.
 
 @item compat32
 If set, Bash
 changes its behavior to that of version 3.2 with respect to locale-specific
-string comparison when using the conditional command's < and > operators.
+string comparison when using the conditional command's @samp{<} and @samp{>}
+operators.
 
 @item compat40
 If set, Bash
 changes its behavior to that of version 4.0 with respect to locale-specific
-string comparison when using the conditional command's < and > operators
-and the effect of interrupting a command list.
+string comparison when using the conditional command's @samp{<} and @samp{>}
+operators and the effect of interrupting a command list.
 
 @item compat41
 If set, Bash, when in posix mode, treats a single quote in a double-quoted
@@ -4850,13 +4851,13 @@ starts up, each shell option in the list will be enabled before
 reading any startup files.  This variable is readonly.
 
 @item BASHPID
-Expands to the process id of the current Bash process.
+Expands to the process ID of the current Bash process.
 This differs from @code{$$} under certain circumstances, such as subshells
 that do not require Bash to be re-initialized.
 
 @item BASH_ALIASES
 An associative array variable whose members correspond to the internal
-list of aliases as maintained by the @code{alias} builtin
+list of aliases as maintained by the @code{alias} builtin.
 (@pxref{Bourne Shell Builtins}).
 Elements added to this array appear in the alias list; unsetting array
 elements cause aliases to be removed from the alias list.
@@ -5728,7 +5729,7 @@ No other startup files are read.
 @subsubheading Invoked by remote shell daemon
 
 Bash attempts to determine when it is being run with its standard input
-connected to a network connection, as if by the remote shell
+connected to a network connection, as when executed by the remote shell
 daemon, usually @code{rshd}, or the secure shell daemon @code{sshd}.
 If Bash determines it is being run in
 this fashion, it reads and executes commands from @file{~/.bashrc}, if that
@@ -6132,7 +6133,7 @@ The value of a variable is evaluated as an arithmetic expression
 when it is referenced, or when a variable which has been given the  
 @var{integer} attribute using @samp{declare -i} is assigned a value.
 A null value evaluates to 0.
-A shell variable need not have its integer attribute turned on
+A shell variable need not have its @var{integer} attribute turned on
 to be used in an expression.
 
 Constants with a leading 0 are interpreted as octal numbers.

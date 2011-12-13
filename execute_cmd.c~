@@ -4081,7 +4081,7 @@ execute_builtin (builtin, words, flags, subshell)
     }
 
   executing_builtin++;
-  executing_command_builtin = builtin == command_builtin;
+  executing_command_builtin |= builtin == command_builtin;
   result = ((*builtin) (words->next));
 
   /* This shouldn't happen, but in case `return' comes back instead of
@@ -4523,11 +4523,18 @@ execute_builtin_or_function (words, builtin, var, redirects,
      and preserve the redirections. */
   if (builtin == command_builtin && this_shell_builtin == exec_builtin)
     {
+      int discard;
+
+      discard = 0;
       if (saved_undo_list)
-	dispose_redirects (saved_undo_list);
+	{
+	  dispose_redirects (saved_undo_list);
+	  discard = 1;
+	}
       redirection_undo_list = exec_redirection_undo_list;
       saved_undo_list = exec_redirection_undo_list = (REDIRECT *)NULL;      
-      discard_unwind_frame ("saved_redirects");
+      if (discard)
+	discard_unwind_frame ("saved redirects");
     }
 
   if (saved_undo_list)
@@ -4929,6 +4936,7 @@ shell_execve (command, args, env)
   CHECK_TERMSIG;
   SETOSTYPE (1);
 
+itrace("shell_execve: command = %s", command);
   /* If we get to this point, then start checking out the file.
      Maybe it is something we can hack ourselves. */
   if (i != ENOEXEC)

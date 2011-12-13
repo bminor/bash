@@ -4523,11 +4523,18 @@ execute_builtin_or_function (words, builtin, var, redirects,
      and preserve the redirections. */
   if (builtin == command_builtin && this_shell_builtin == exec_builtin)
     {
+      int discard;
+
+      discard = 0;
       if (saved_undo_list)
-	dispose_redirects (saved_undo_list);
+	{
+	  dispose_redirects (saved_undo_list);
+	  discard = 1;
+	}
       redirection_undo_list = exec_redirection_undo_list;
       saved_undo_list = exec_redirection_undo_list = (REDIRECT *)NULL;      
-      discard_unwind_frame ("saved_redirects");
+      if (discard)
+	discard_unwind_frame ("saved redirects");
     }
 
   if (saved_undo_list)

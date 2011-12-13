@@ -387,11 +387,14 @@ initialize_shell_variables (env, privmode)
 #endif
 	{
 	  temp_var = bind_variable (name, string, 0);
-	  if (legal_identifier (name))
-	    VSETATTR (temp_var, (att_exported | att_imported));
-	  else
-	    VSETATTR (temp_var, (att_exported | att_imported | att_invisible));
-	  array_needs_making = 1;
+	  if (temp_var)
+	    {
+	      if (legal_identifier (name))
+		VSETATTR (temp_var, (att_exported | att_imported));
+	      else
+		VSETATTR (temp_var, (att_exported | att_imported | att_invisible));
+	      array_needs_making = 1;
+	    }
 	}
 
       name[char_index] = '=';
@@ -2389,7 +2392,7 @@ bind_int_variable (lhs, rhs)
 #endif
     v = bind_variable (lhs, rhs, 0);
 
-  if (isint)
+  if (v && isint)
     VSETATTR (v, att_integer);
 
   return (v);
@@ -2838,7 +2841,7 @@ delete_all_variables (hashed_vars)
       if (!entry) \
 	{ \
 	  entry = bind_variable (name, "", 0); \
-	  if (!no_invisible_vars) entry->attributes |= att_invisible; \
+	  if (!no_invisible_vars && entry) entry->attributes |= att_invisible; \
 	} \
     } \
   while (0)
@@ -4733,7 +4736,6 @@ sv_xtracefd (name)
   int fd;
   FILE *fp;
 
-itrace("sv_xtracefd: %s", name);
   v = find_variable (name);
   if (v == 0)
     {

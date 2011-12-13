@@ -1,6 +1,6 @@
 /* evalstring.c - evaluate a string as one or more shell commands. 
 
-/* Copyright (C) 1996-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -263,6 +263,7 @@ parse_and_execute (string, from_file, flags)
 
 	      bitmap = new_fd_bitmap (FD_BITMAP_SIZE);
 	      begin_unwind_frame ("pe_dispose");
+itrace("begin_unwind_frame: pe_dispose");
 	      add_unwind_protect (dispose_fd_bitmap, bitmap);
 	      add_unwind_protect (dispose_command, command);	/* XXX */
 

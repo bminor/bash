@@ -10438,3 +10438,78 @@ execute_cmd.c
 	- set executing_command_builtin in execute_builtin if the builtin is
 	  command_builtin.  Unwind-protected in execute_function_or_builtin
 	  (like executing_builtin variable).  Available for rest of shell
+
+builtins/{source.def,evalfile.c}
+	- make sure that non-interactive posix mode shells exit if the file
+	  argument to `.' is not found only if they are not being executed
+	  by the command builtin (executing_command_builtin == 0).  This is
+	  how `command' can cancel effects of special builtin exit properties
+	  in the case of `dot file not found'
+
+				   10/13
+				   -----
+lib/sh/strtrans.c
+	- pass \c through unchanged if not escaping for `echo -e' and they are
+	  the final two characters in the string
+
+				   10/15
+				   -----
+subst.c
+	- extract_dollar_brace_string: fix problem with single quotes
+	  in unquoted ${...} for Posix compliance
+
+				   10/16
+				   -----
+builtins/exec.def
+	- catch return value from shell_execve; don't print duplicate error
+	  message if return value is EX_NOTFOUND.  Make sure exit status
+	  from exec is 127 if command is not found
+
+execute_cmd.c
+	- fix typo (`saved_redirects' should be `saved redirects') in
+	  execute_function_or_builtin `command exec' case.  Typo caused
+	  too much of the unwind-protect stack to be discarded
+	- in same execute_function_or_builtin case, don't discard the
+	  `saved redirects' frame unconditionally; only discard it if
+	  saved_redirects is non-null in the `command exec' case.  Fixes
+	  sh -c 'command exec; exit 1' hanging bug uncovered by FreeBSD
+	  sh test cases
+
+				   10/18
+				   -----
+subst.c
+	- when in posix mode, shell should not exit if a variable assignment
+	  error (e.g., assigning to readonly variable) occurs preceding a
+	  command that is not a special builtin.  Fixes bug uncovered by
+	  FreeBSD sh test cases
+	- when in posix mode, the ${!?} and ${!#} expansions are not indirect
+	  expansions, but posix word expansions involving the `!' variable
+
+parse.y
+	- fix parse_comsub so that it does not skip backslash-newline when
+	  parsing a comment
+
+				   10/19
+				   -----
+subst.c
+	- fix parameter_brace_expand so that an attempt to use the % or #
+	  expansions on an unset variable with -u set will cause a non-
+	  interactive shell to abort.  Posix change
+	- fix parameter_brace_expand so that an attempt to use pattern
+	  substitution or case modification expansions on an unset variable
+	  with -u set will cause and unbound variable error and make a
+	  non-interactive shell abort
+	- change parameter_brace_expand_length to return INTMAX_MIN if a
+	  positional parameter is unset and -u is set
+	- if parameter_brace_expand_length returns INTMAX_MIN when -u is set,
+	  treat it as an unbound variable error and make a non-interactive
+	  shell abort.  Posix change
+	- change parameter_brace_expand_length to return INTMAX_MIN if an
+	  implicit reference to array[0] is made ${#array} and array[0] is
+	  not set when -u is set
+
+				   10/20
+				   -----
+builtins/cd.def
+	- Posix 2008 says that if no matching directories are found in $CDPATH,
+	  use the directory name passed as an operand and go on.  Posix change

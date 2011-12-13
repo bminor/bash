@@ -1647,6 +1647,9 @@ typedef struct stream_saver {
 /* The globally known line number. */
 int line_number = 0;
 
+/* The line number offset set by assigning to LINENO.  Not currently used. */
+int line_number_base = 0;
+
 #if defined (COND_COMMAND)
 static int cond_lineno;
 static int cond_token;
@@ -3162,7 +3165,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
   start_lineno = line_number;
   while (count)
     {
-      ch = shell_getc (qc != '\'' && (tflags & LEX_PASSNEXT) == 0);
+      ch = shell_getc (qc != '\'' && (tflags & (LEX_PASSNEXT)) == 0);
 
       if (ch == EOF)
 	{
@@ -3431,7 +3434,7 @@ parse_comsub (qc, open, close, lenp, flags)
   while (count)
     {
 comsub_readchar:
-      ch = shell_getc (qc != '\'' && (tflags & LEX_PASSNEXT) == 0);
+      ch = shell_getc (qc != '\'' && (tflags & (LEX_INCOMMENT|LEX_PASSNEXT)) == 0);
 
       if (ch == EOF)
 	{

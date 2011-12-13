@@ -67,6 +67,8 @@ int cdspelling = 0;
 
 int cdable_vars;
 
+static int eflag;	/* file scope so bindpwd() can see it */
+
 $BUILTIN cd
 $FUNCTION cd_builtin
 $SHORT_DOC cd [-L|[-P [-e]]] [dir]
@@ -141,6 +143,8 @@ bindpwd (no_symlinks)
     }
 
   setpwd (dirname);
+  if (dirname == 0 && eflag)
+    r = EXECUTION_FAILURE;
 
   if (dirname && dirname != the_current_working_directory)
     free (dirname);
@@ -176,7 +180,7 @@ cd_builtin (list)
      WORD_LIST *list;
 {
   char *dirname, *cdpath, *path, *temp;
-  int path_index, no_symlinks, opt, lflag, eflag;
+  int path_index, no_symlinks, opt, lflag;
 
 #if defined (RESTRICTED_SHELL)
   if (restricted)
@@ -211,6 +215,8 @@ cd_builtin (list)
 
   lflag = (cdable_vars ? LCD_DOVARS : 0) |
 	  ((interactive && cdspelling) ? LCD_DOSPELL : 0);
+  if (eflag && no_symlinks == 0)
+    eflag = 0;
 
   if (list == 0)
     {
@@ -284,8 +290,15 @@ cd_builtin (list)
 	 specifying the current directory. */
       if (posixly_correct && cdpath[0])
 	{
+#if 0
 	  builtin_error ("%s: %s", dirname, strerror (ENOENT));
 	  return (EXECUTION_FAILURE);
+#else	/* changed for bash-4.2 Posix cd description steps 5-6 */
+	  if (no_symlinks)
+	    dirname = list->word->word;
+	  else
+	    dirname = 
+#endif
 	}
     }
   else

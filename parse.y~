@@ -1647,6 +1647,9 @@ typedef struct stream_saver {
 /* The globally known line number. */
 int line_number = 0;
 
+/* The line number offset set by assigning to LINENO.  Not currently used. */
+int line_number_base = 0;
+
 #if defined (COND_COMMAND)
 static int cond_lineno;
 static int cond_token;
@@ -3162,7 +3165,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
   start_lineno = line_number;
   while (count)
     {
-      ch = shell_getc (qc != '\'' && (tflags & LEX_PASSNEXT) == 0);
+      ch = shell_getc (qc != '\'' && (tflags & (LEX_PASSNEXT)) == 0);
 
       if (ch == EOF)
 	{
@@ -4953,7 +4956,6 @@ prompt_again ()
 {
   char *temp_prompt;
 
-itrace("prompt_again()");
   if (interactive == 0 || expanding_alias ())	/* XXX */
     return;
 
@@ -4988,7 +4990,6 @@ itrace("prompt_again()");
       FREE (current_decoded_prompt);
       current_decoded_prompt = temp_prompt;
     }
-itrace("prompt_again: current_prompt_string = %s", current_prompt_string);
 }
 
 int

@@ -83,7 +83,7 @@ extern char **environ;
 
 /* Variables used here and defined in other files. */
 extern int posixly_correct;
-extern int line_number;
+extern int line_number, line_number_base;
 extern int subshell_environment, indirection_level, subshell_level;
 extern int build_version, patch_level;
 extern int expanding_redir;
@@ -1336,7 +1336,7 @@ assign_lineno (var, value, unused, key)
 
   if (value == 0 || *value == '\0' || legal_number (value, &new_value) == 0)
     new_value = 0;
-  line_number = new_value;
+  line_number = line_number_base = new_value;
   return var;
 }
 
