@@ -28,14 +28,14 @@ echo ${dice[11]}
 unset dice1 dice2
 RANDOM=42
 
-for i in {1..10000}; do ((dice1[$RANDOM%6+1 + $RANDOM%6+1]++)); done;
+for i in {1..5000}; do ((dice1[$RANDOM%6+1 + $RANDOM%6+1]++)); done;
 unset t; for i in ${dice1[@]}; do ((t+=i)); done; echo $t
 
 foo="${dice1[@]}"
 
 RANDOM=42
 
-for i in {1..10000}; do ((dice2[RANDOM%6+1 + RANDOM%6+1]++)); done;
+for i in {1..5000}; do ((dice2[RANDOM%6+1 + RANDOM%6+1]++)); done;
 unset t; for i in ${dice2[@]}; do ((t+=i)); done; echo $t
 
 bar="${dice2[@]}"

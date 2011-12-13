@@ -337,6 +337,8 @@ unwind_protect_mem (var, size)
 }
 
 #if defined (DEBUG)
+#include <stdio.h>
+
 void
 print_unwind_protect_tags ()
 {

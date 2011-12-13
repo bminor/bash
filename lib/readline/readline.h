@@ -1,6 +1,6 @@
 /* Readline.h -- the names of functions callable from within readline. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -39,9 +39,9 @@ extern "C" {
 #endif
 
 /* Hex-encoded Readline version number. */
-#define RL_READLINE_VERSION	0x0600		/* Readline 6.0 */
+#define RL_READLINE_VERSION	0x0602		/* Readline 6.2 */
 #define RL_VERSION_MAJOR	6
-#define RL_VERSION_MINOR	0
+#define RL_VERSION_MINOR	2
 
 /* Readline data structures. */
 

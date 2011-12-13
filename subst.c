@@ -52,6 +52,7 @@
 #include "mailcheck.h"
 
 #include "shmbutil.h"
+#include "typemax.h"
 
 #include "builtins/getopt.h"
 #include "builtins/common.h"
@@ -4003,6 +4004,7 @@ match_upattern (string, pat, mtype, sp, ep)
   int c, len, mlen;
   register char *p, *p1, *npat;
   char *end;
+  int n1;
 
   /* If the pattern doesn't match anywhere in the string, go ahead and
      short-circuit right away.  A minor optimization, saves a bunch of
@@ -4049,8 +4051,15 @@ match_upattern (string, pat, mtype, sp, ep)
 	      for (p1 = end; p1 >= p; p1--)
 #else
 	      p1 = (mlen == -1) ? end : p + mlen;
-	      /* extra -1 to handle case of p1 == end */
-	      if (p1 - p + mlen - 1 > len)
+	      /* p1 - p = length of portion of string to be considered
+	         p = current position in string
+	         mlen = number of characters consumed by match (-1 for entire string)
+	         end = end of string
+	         we want to break immediately if the potential match len
+	         is greater than the number of characters remaining in the
+	         string
+	      */
+	      if (p1 > end)
 		break;
 	      for ( ; p1 >= p; p1--)
 #endif

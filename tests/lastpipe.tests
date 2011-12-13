@@ -1,3 +1,8 @@
+binfalse()
+{
+	$binfalse || return 1	# normalize return value
+}
+
 if [ -x /usr/bin/true ]; then
 	bintrue=/usr/bin/true
 elif [ -x /bin/true ]; then
@@ -45,7 +50,7 @@ set -o pipefail
 true | $bintrue | false
 echo $? -- ${PIPESTATUS[@]}
 
-true | $binfalse | true
+true | binfalse | true
 echo $? -- ${PIPESTATUS[@]}
 set +o pipefail
 

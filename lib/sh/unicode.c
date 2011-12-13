@@ -56,7 +56,28 @@ extern char *get_locale_var __P((char *));
 
 static int u32init = 0;
 static int utf8locale = 0;
+#if defined (HAVE_ICONV)
 static iconv_t localconv;
+#endif
+
+#ifndef HAVE_LOCALE_CHARSET
+static char *
+stub_charset ()
+{
+  char *locale, *s;
+
+  locale = get_locale_var ("LC_CTYPE");
+  if (locale == 0)
+    return "ASCII";
+  s = strrchr (locale, '.');
+  if (s)
+    return ++s;
+  else if (STREQ (locale, "UTF-8"))
+    return "UTF-8";
+  else
+    return "ASCII";
+}
+#endif
 
 /* u32toascii ? */
 int
@@ -127,7 +148,7 @@ u32cconv (c, s)
   const char *charset;
   char obuf[25], *optr;
   size_t obytesleft;
-  char *iptr;
+  const char *iptr;
   size_t sn;
 #endif
 
@@ -136,7 +157,7 @@ u32cconv (c, s)
 #if __STDC_ISO_10646__
   if (sizeof (wchar_t) == 4)
     {
-      n = wctomb (wc, s);
+      n = wctomb (s, wc);
       return n;
     }
 #endif
@@ -154,7 +175,11 @@ u32cconv (c, s)
   /* this is mostly from coreutils-8.5/lib/unicodeio.c */
   if (u32init == 0)
     {
+#  if HAVE_LOCALE_CHARSET
       charset = locale_charset ();	/* XXX - fix later */
+#  else
+      charset = stub_charset ();
+#  endif
       if (STREQ (charset, "UTF-8"))
 	utf8locale = 1;
       else
@@ -187,7 +212,7 @@ u32cconv (c, s)
 
   iconv (localconv, NULL, NULL, NULL, NULL);
 
-  if (iconv (localconv, &iptr, &sn, &optr, &obytesleft) == (size_t)-1)
+  if (iconv (localconv, (ICONV_CONST char **)&iptr, &sn, &optr, &obytesleft) == (size_t)-1)
     return n;	/* You get utf-8 if iconv fails */
 
   *optr = '\0';

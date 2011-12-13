@@ -4,7 +4,7 @@ x=a\ b
 set -- ${x?}
 { [ "$#" = 2 ] && [ "$1" = a ] && [ "$2" = b ]; } || exit 1
 unset x
-(echo ${x?abcdefg}) 2>&1 | grep -q abcdefg || exit 1
+(echo ${x?abcdefg}) 2>&1 | grep abcdefg >/dev/null || exit 1
 ${THIS_SH} -c 'unset foo; echo ${foo?}' 2>/dev/null && exit 2
 ${THIS_SH} -c 'foo=; echo ${foo:?}' 2>/dev/null && exit 3
 ${THIS_SH} -c 'foo=; echo ${foo?}' >/dev/null || exit 4
