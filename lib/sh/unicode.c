@@ -64,14 +64,19 @@ static iconv_t localconv;
 static char *
 stub_charset ()
 {
-  char *locale, *s;
+  char *locale, *s, *t;
 
   locale = get_locale_var ("LC_CTYPE");
-  if (locale == 0)
+  if (locale == 0 || *locale == 0)
     return "ASCII";
   s = strrchr (locale, '.');
   if (s)
-    return ++s;
+    {
+      t = strchr (s, '@');
+      if (t)
+	*t = 0;
+      return ++s;
+    }
   else if (STREQ (locale, "UTF-8"))
     return "UTF-8";
   else

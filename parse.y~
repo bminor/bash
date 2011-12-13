@@ -3434,7 +3434,7 @@ parse_comsub (qc, open, close, lenp, flags)
   while (count)
     {
 comsub_readchar:
-      ch = shell_getc (qc != '\'' && (tflags & LEX_PASSNEXT) == 0);
+      ch = shell_getc (qc != '\'' && (tflags & (LEX_INCOMMENT|LEX_PASSNEXT)) == 0);
 
       if (ch == EOF)
 	{
@@ -5255,7 +5255,7 @@ decode_prompt_string (string)
 		      {
 			t = strrchr (t_string, '/');
 			if (t)
-			  memmove (t_string, t + 1, strlen (t) - 1);
+			  memmove (t_string, t + 1, strlen (t));	/* tlen to copy NULL */
 		      }
 		  }
 #undef ROOT_PATH

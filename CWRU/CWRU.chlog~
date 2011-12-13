@@ -10633,3 +10633,142 @@ lib/glob/gmisc.c
 	  fix from Andreas Schwab <schwab@linux-m68k.org>
 	- use WLPAREN and WRPAREN in multibyte character environments
 	- fixed typos using L'cc' in a non-wide-char environment
+
+lib/readline/complete.c
+	- fix rl_filename_completion_function to dequote users_dirname if
+	  there is a filename dequoting function (as well as dirname), since
+	  users_dirname gets tacked back onto the beginning of the possible
+	  completions and then requoted.  Bug reported by Andreas Schwab
+	  <schwab@linux-m68k.org>
+
+				   11/22
+				   -----
+lib/readline/parens.c
+	- the `blink-matching-paren' variable should default to off
+
+				   11/23
+				   -----
+subst.h
+	- add extern declaration for close_new_fifos()
+
+lib/sh/fnxform.c
+	- fix curencoding to return the character past the `.', not a string
+	  beginning with `.'
+
+lib/sh/unicode.c
+	- fix stub_charset to do the same cut-off at `@' as curencoding().
+	  These two functions should be combined
+
+builtins/printf.def
+	- document new %(datefmt)T modifier in help text
+
+				   11/24
+				   -----
+parse.y
+	- fix `W' case in decode_prompt_string: memmove was copying one too
+	  few bytes and missed the closing NUL.  Bug report from Tim Mooney
+	  <Tim.Mooney@ndsu.edu>
+
+				   11/26
+				   -----
+subst.c
+	- in expand_word_internal, don't add quoted nulls to partially-
+	  quoted strings if the word will not be subjected to word splitting
+	  later (which will remove the quoted null).  Fixes bug reported by
+	  Rocky Bernstein <rocky.bernstein@gmail.com>
+
+				   11/28
+				   -----
+subst.c
+	- change multibyte case of match_pattern to revert to match_upattern
+	  if neither the pattern nor the string has any multibyte characters
+
+alias.c
+	- fix tests of backslash-escaped characters in skipquotes, skipws,
+	  rd_token to check for backslash at EOS and not go past the end.
+	  Fixes debian bug 603696 reported by Tim Small <tim@buttersideup.com>
+
+include/shmbchar.h
+	- new file, mbchar.h from gnulib minus the <stdbool.h> include
+
+lib/sh/shmbchar.c
+	- new file, mbchar.c from gnulib with additions
+	- moved mbstrlen from subst.c to here, changed initialization of mbs
+	- change mbstrlen to use is_basic to avoid calls to mbrlen for ASCII
+	  chars; code hints from gnulib
+	- don't copy mbs and mbsbak if we're not calling mbrlen
+
+				   11/29
+				   -----
+lib/glob/smatch.c
+	- change xstrmatch to use internal_strmatch() if the pattern and
+	  string don't have any multibyte characters
+
+				   11/30
+				   -----
+include/shmbutil.h
+	- change ADVANCE_CHAR and ADVANCE_CHAR_P macros to use is_basic and
+	  only call mbrlen and copy state and state_bak if is_basic returns
+	  false (non-ASCII).  Called all over the place.
+	- change rest of macros except BACKUP_CHAR and BACKUP_CHAR_P in the
+	  same way
+
+				   12/2
+				   ----
+subst.c
+	- audit all calls to string_list and make sure caller can handle a
+	  NULL return value.  Fixes bug reported by David Rochberg
+	  <rochberg@google.com>
+
+general.h
+	- change sh_wassign_func_t to take an additional argument: an int
+	  flags word
+
+subst.c
+	- change do_word_assignment to take an additional argument to match
+	  wassign_func_t; change callers
+	- change call to (*assign_func) in expand_word_list_internal to match
+	  new wassign_func_t prototype
+	- (*assign_func) passes 1 as additional arg if the simple command is
+	  a builtin or function, in which case the assignment to the
+	  temporary env should take effect
+
+variables.c
+	- change assign_in_env to take an additional argument to match
+	  wassign_func_t; change callers
+	- move call to sv_ifs from dispose_temporary_env to
+	  dispose_used_env_vars; we don't need to do it if called from
+	  merge_temporary_env
+
+				   12/3
+				   ----
+variables.c
+	- change dispose_temporary_env to maintain a list (tempvar_list) of
+	  variables that need to be handled specially.  If a variable that
+	  gets freed by push_temp_var or propagate_temp_var is one of the
+	  variables that the shell handles specially (IFS, LANG, etc.), it's
+	  stored on the list.  For each variable in this list,
+	  dispose_temp_var calls stupidly_hack_special_variables.
+	- assign_in_env calls stupidly_hack_special_variables if flags arg
+	  is non-zero, so variable assignments affect current shell
+	  execution environment if a builtin or function is being executed.
+	  Fixes bug reported by Bruno Haible <bruno@clisp.org>
+
+				   12/5
+				   ----
+subst.c
+	- use mbsmbchar on both string and pattern in match_pattern instead
+	  of strlen and mbstrlen; only go through the strings once
+
+				   12/6
+				   ----
+lib/readline/kill.c
+	- in rl_yank_last_arg, only switch directions if the `count'
+	  argument is < 0, not < 1.  This makes explicit count arguments of
+	  0 work as expected.  Fixes bug reported by Dennis Williamson
+	  <dennistwilliamson@gmail.com>
+
+doc/bash.1,lib/readline/doc/{readline.3,rluser.texi}
+	- fix documentation for yank-last-arg to make it clear how the count
+	  argument is set and how second and subsequent calls treat any
+	  numeric argument

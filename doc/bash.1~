@@ -5508,10 +5508,14 @@ as if the "!\fIn\fP" history expansion had been specified.
 .B
 yank\-last\-arg (M\-.\^, M\-_\^)
 Insert the last argument to the previous command (the last word of
-the previous history entry).  With an argument,
-behave exactly like \fByank\-nth\-arg\fP.
+the previous history entry).
+With a numeric argument, behave exactly like \fByank\-nth\-arg\fP.
 Successive calls to \fByank\-last\-arg\fP move back through the history
-list, inserting the last argument of each line in turn.
+list, inserting the last word (or the word specified by the argument to
+the first call) of each line in turn.
+Any numeric argument supplied to these successive calls determines
+the direction to move through the history.  A negative argument switches
+the direction through the history (back or forward).
 The history expansion facilities are used to extract the last argument,
 as if the "!$" history expansion had been specified.
 .TP
@@ -9210,6 +9214,7 @@ an argument of \fB\-\-\fP as signifying the end of options.
 Expressions may be combined using the following operators, listed
 in decreasing order of precedence.
 The evaluation depends on the number of arguments; see below.
+Operator precedence is used when there are five or more arguments.
 .RS
 .PD 0
 .TP
@@ -9366,8 +9371,8 @@ is
 .BR RETURN ,
 the command
 .I arg
-is executed each time a shell function or a script executed with the
-\fB.\fP or \fBsource\fP builtins finishes executing.
+is executed each time a shell function or a script executed with
+the \fB.\fP or \fBsource\fP builtins finishes executing.
 .if t .sp 0.5
 .if n .sp 1
 If a

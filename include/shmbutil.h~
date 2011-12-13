@@ -301,14 +301,8 @@ extern char *xstrchr __P((const char *, int));
 	    size_t mblength; \
 	    int _k; \
 \
-	    _k = is_basic (*((_src) + (_si))); \
-	    if (_k) \
-	      mblength = 1; \
-	    else \
-	      {\
-		state_bak = state; \
-		mblength = mbrlen ((_src) + (_si), (_srcend) - ((_src)+(_si)), &state); \
-	      } \
+	    state_bak = state; \
+	    mblength = mbrlen ((_src) + (_si), (_srcend) - ((_src)+(_si)), &state); \
 	    if (mblength == (size_t)-2 || mblength == (size_t)-1) \
 	      { \
 		state = state_bak; \
@@ -344,14 +338,8 @@ extern char *xstrchr __P((const char *, int));
 	    size_t mblength; \
 	    int _i; \
 \
-	    _i = is_basic (*((_src) + (_si))); \
-	    if (_i) \
-	      mblength = 1; \
-	    else \
-	      { \
-		state_bak = state; \
-		mblength = mbrlen ((_src) + (_si), (_slen) - (_si), &state); \
-	      } \
+	    state_bak = state; \
+	    mblength = mbrlen ((_src) + (_si), (_slen) - (_si), &state); \
 	    if (mblength == (size_t)-2 || mblength == (size_t)-1) \
 	      { \
 		state = state_bak; \
@@ -389,16 +377,9 @@ extern char *xstrchr __P((const char *, int));
 	  { \
 	    mbstate_t state_bak; \
 	    size_t mblength; \
-	    int _i; \
 \
-	    _i = is_basic (*((_src) + (_si))); \
-	    if (_i) \
-	      mblength = 1; \
-	    else \
-	      { \
-		state_bak = state; \
-		mblength = mbrlen ((_src) + (_si), (_srcend) - ((_src) + (_si)), &state); \
-	      } \
+	    state_bak = state; \
+	    mblength = mbrlen ((_src) + (_si), (_srcend) - ((_src) + (_si)), &state); \
 	    if (mblength == (size_t)-2 || mblength == (size_t)-1) \
 	      { \
 		state = state_bak; \
@@ -435,14 +416,8 @@ extern char *xstrchr __P((const char *, int));
 	    mbstate_t state_bak; \
 	    size_t mblength; \
 \
-	    i = is_basic (*((_src) + (_si))); \
-	    if (i) \
-	      mblength = 1; \
-	    else \
-	      { \
-		state_bak = state; \
-		mblength = mbrlen ((_src) + (_si), (_srcsize) - (_si), &state); \
-	      } \
+	    state_bak = state; \
+	    mblength = mbrlen ((_src) + (_si), (_srcsize) - (_si), &state); \
 	    if (mblength == (size_t)-1 || mblength == (size_t)-2) \
 	      { \
 		state = state_bak; \
@@ -473,14 +448,8 @@ extern char *xstrchr __P((const char *, int));
 	    mbstate_t state_bak; \
 	    size_t mblength; \
 \
-	    i = is_basic (*((_src) + (_si))); \
-	    if (i) \
-	      mblength = 1; \
-	    else \
-	      { \
-		state_bak = state; \
-		mblength = mbrlen ((_src) + (_si), (_srcsize) - (_si), &state); \
-	      } \
+	    state_bak = state; \
+	    mblength = mbrlen ((_src) + (_si), (_srcsize) - (_si), &state); \
 	    if (mblength == (size_t)-1 || mblength == (size_t)-2) \
 	      { \
 		state = state_bak; \

@@ -215,7 +215,7 @@ SHLIB_SOURCE =	${SH_LIBSRC}/clktck.c ${SH_LIBSRC}/getcwd.c \
 		${SH_LIBSRC}/ufuncs.c ${SH_LIBSRC}/dprintf.c \
 		${SH_LIBSRC}/input_avail.c ${SH_LIBSRC}/mbscasecmp.c \
 		${SH_LIBSRC}/fnxform.c ${SH_LIBSRC}/unicode.c \
-		${SH_LIBSRC}/wcswidth.c
+		${SH_LIBSRC}/wcswidth.c ${SH_LIBSRC}/shmbchar.c
 
 SHLIB_LIB = -lsh
 SHLIB_LIBNAME = libsh.a
@@ -973,7 +973,7 @@ make_cmd.o: config.h bashtypes.h ${BASHINCDIR}/filecntl.h bashansi.h
 make_cmd.o: command.h ${BASHINCDIR}/stdc.h general.h xmalloc.h error.h flags.h make_cmd.h
 make_cmd.o: variables.h arrayfunc.h conftypes.h array.h hashlib.h subst.h input.h externs.h
 make_cmd.o: jobs.h quit.h siglist.h syntax.h dispose_cmd.h parser.h
-make_cmd.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/ocache.h
+make_cmd.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h ${BASHINCDIR}/ocache.h
 y.tab.o: config.h bashtypes.h bashansi.h ${BASHINCDIR}/ansi_stdlib.h ${BASHINCDIR}/memalloc.h
 y.tab.o: shell.h syntax.h config.h bashjmp.h ${BASHINCDIR}/posixjmp.h command.h ${BASHINCDIR}/stdc.h error.h
 y.tab.o: general.h xmalloc.h bashtypes.h variables.h arrayfunc.h conftypes.h array.h hashlib.h
@@ -988,7 +988,7 @@ pathexp.o: quit.h ${BASHINCDIR}/maxpath.h unwind_prot.h dispose_cmd.h
 pathexp.o: make_cmd.h subst.h sig.h pathnames.h externs.h
 pathexp.o: pathexp.h flags.h 
 pathexp.o: $(GLOB_LIBSRC)/glob.h $(GLOB_LIBSRC)/strmatch.h
-pathexp.o: ${BASHINCDIR}/shmbutil.h
+pathexp.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 print_cmd.o: config.h bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 print_cmd.o: shell.h syntax.h config.h bashjmp.h ${BASHINCDIR}/posixjmp.h command.h ${BASHINCDIR}/stdc.h error.h
 print_cmd.o: general.h xmalloc.h bashtypes.h variables.h arrayfunc.h conftypes.h array.h hashlib.h
@@ -1030,7 +1030,7 @@ subst.o: flags.h jobs.h siglist.h execute_cmd.h ${BASHINCDIR}/filecntl.h trap.h 
 subst.o: mailcheck.h input.h $(DEFSRC)/getopt.h $(DEFSRC)/common.h
 subst.o: bashline.h bashhist.h ${GLOB_LIBSRC}/strmatch.h
 subst.o: ${BASHINCDIR}/chartypes.h
-subst.o: ${BASHINCDIR}/shmbutil.h
+subst.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 subst.o: ${DEFDIR}/builtext.h
 test.o: bashtypes.h ${BASHINCDIR}/posixstat.h ${BASHINCDIR}/filecntl.h
 test.o: shell.h syntax.h config.h bashjmp.h ${BASHINCDIR}/posixjmp.h command.h ${BASHINCDIR}/stdc.h error.h
@@ -1089,7 +1089,7 @@ arrayfunc.o: general.h xmalloc.h bashtypes.h variables.h arrayfunc.h conftypes.h
 arrayfunc.o: quit.h ${BASHINCDIR}/maxpath.h unwind_prot.h dispose_cmd.h
 arrayfunc.o: make_cmd.h subst.h sig.h pathnames.h externs.h pathexp.h
 arrayfunc.o: $(DEFSRC)/common.h
-arrayfunc.o: ${BASHINCDIR}/shmbutil.h
+arrayfunc.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 assoc.o: config.h bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 assoc.o: shell.h syntax.h config.h bashjmp.h ${BASHINCDIR}/posixjmp.h
 assoc.o: command.h ${BASHINCDIR}/stdc.h error.h
@@ -1103,7 +1103,7 @@ braces.o: shell.h syntax.h config.h bashjmp.h ${BASHINCDIR}/posixjmp.h command.h
 braces.o: general.h xmalloc.h bashtypes.h variables.h arrayfunc.h conftypes.h array.h hashlib.h
 braces.o: quit.h ${BASHINCDIR}/maxpath.h unwind_prot.h dispose_cmd.h
 braces.o: make_cmd.h subst.h sig.h pathnames.h externs.h 
-braces.o: ${BASHINCDIR}/shmbutil.h
+braces.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 alias.o: config.h bashansi.h ${BASHINCDIR}/ansi_stdlib.h command.h ${BASHINCDIR}/stdc.h
 alias.o: general.h xmalloc.h bashtypes.h externs.h alias.h
 alias.o: pcomplete.h 

@@ -1235,10 +1235,6 @@ static int seeded_subshell = 0;
 static int
 brand ()
 {
-#if 0
-  rseed = rseed * 1103515245 + 12345;
-  return ((unsigned int)((rseed >> 16) & 32767));	/* was % 32768 */
-#else
   /* From "Random number generators: good ones are hard to find",
      Park and Miller, Communications of the ACM, vol. 31, no. 10,
      October 1988, p. 1195. filtered through FreeBSD */
@@ -1254,7 +1250,6 @@ brand ()
     rseed += 0x7fffffff;
 #endif
   return ((unsigned int)(rseed & 32767));	/* was % 32768 */
-#endif
 }
 
 /* Set the random number generator seed to SEED. */
@@ -2491,8 +2486,9 @@ bind_function_def (name, value)
    responsible for moving the main temporary env to one of the other
    temporary environments.  The expansion code in subst.c calls this. */
 int
-assign_in_env (word)
+assign_in_env (word, flags)
      WORD_DESC *word;
+     int flags;
 {
   int offset;
   char *name, *temp, *value;
@@ -2550,8 +2546,13 @@ assign_in_env (word)
 
   array_needs_making = 1;
 
+#if 0
   if (ifsname (name))
     setifs (var);
+else
+#endif
+  if (flags)
+    stupidly_hack_special_variables (name);
 
   if (echo_command_at_execute)
     /* The Korn shell prints the `+ ' in front of assignment statements,
@@ -3271,6 +3272,9 @@ find_tempenv_variable (name)
   return (temporary_env ? hash_lookup (name, temporary_env) : (SHELL_VAR *)NULL);
 }
 
+char **tempvar_list;
+int tvlist_ind;
+
 /* Push the variable described by (SHELL_VAR *)DATA down to the next
    variable context from the temporary environment. */
 static void
@@ -3306,6 +3310,9 @@ push_temp_var (data)
     }
   v->attributes |= var->attributes;
 
+  if (find_special_var (var->name) >= 0)
+    tempvar_list[tvlist_ind++] = savestring (var->name);
+
   dispose_variable (var);
 }
 
@@ -3319,24 +3326,46 @@ propagate_temp_var (data)
   if (tempvar_p (var) && (var->attributes & att_propagate))
     push_temp_var (data);
   else
-    dispose_variable (var);
+    {
+      if (find_special_var (var->name) >= 0)
+	tempvar_list[tvlist_ind++] = savestring (var->name);
+      dispose_variable (var);
+    }
 }
 
 /* Free the storage used in the hash table for temporary
    environment variables.  PUSHF is a function to be called
    to free each hash table entry.  It takes care of pushing variables
-   to previous scopes if appropriate. */
+   to previous scopes if appropriate.  PUSHF stores names of variables
+   that require special handling (e.g., IFS) on tempvar_list, so this
+   function can call stupidly_hack_special_variables on all the
+   variables in the list when the temporary hash table is destroyed. */
 static void
 dispose_temporary_env (pushf)
      sh_free_func_t *pushf;
 {
+  int i;
+
+  tempvar_list = strvec_create (HASH_ENTRIES (temporary_env) + 1);
+  tempvar_list[tvlist_ind = 0] = 0;
+    
   hash_flush (temporary_env, pushf);
   hash_dispose (temporary_env);
   temporary_env = (HASH_TABLE *)NULL;
 
+  tempvar_list[tvlist_ind] = 0;
+
   array_needs_making = 1;
 
-  sv_ifs ("IFS");		/* XXX here for now */
+#if 0
+  sv_ifs ("IFS");		/* XXX here for now -- check setifs in assign_in_env */  
+#endif
+  for (i = 0; i < tvlist_ind; i++)
+    stupidly_hack_special_variables (tempvar_list[i]);
+
+  strvec_dispose (tempvar_list);
+  tempvar_list = 0;
+  tvlist_ind = 0;
 }
 
 void

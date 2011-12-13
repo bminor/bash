@@ -1717,7 +1717,7 @@ Bash uses the value of the variable formed from the rest of
 expanded and that value is used in the rest of the substitution, rather
 than the value of @var{parameter} itself.
 This is known as @code{indirect expansion}.
-The exceptions to this are the expansions of $@{!@var{prefix}@*}
+The exceptions to this are the expansions of $@{!@var{prefix}@*@}
 and $@{!@var{name}[@@]@}
 described below.
 The exclamation point must immediately follow the left brace in order to
@@ -3202,6 +3202,7 @@ be a @code{]}.
 Expressions may be combined using the following operators, listed in
 decreasing order of precedence.
 The evaluation depends on the number of arguments; see below.
+Operator precedence is used when there are five or more arguments.
 
 @table @code
 @item ! @var{expr}
@@ -6695,19 +6696,16 @@ redirection errors, variable assignment errors for assignments preceding
 the command name, and so on.
 
 @item
-If @env{CDPATH} is set, the @code{cd} builtin will not implicitly
-append the current directory to it.  This means that @code{cd} will
-fail if no valid directory name can be constructed from
-any of the entries in @env{$CDPATH}, even if the a directory with
-the same name as the name given as an argument to @code{cd} exists
-in the current directory.
-
-@item
 A non-interactive shell exits with an error status if a variable
 assignment error occurs when no command name follows the assignment
 statements.
 A variable assignment error occurs, for example, when trying to assign
 a value to a readonly variable.
+
+@item
+A non-interactive shell exists with an error status if a variable
+assignment error occurs in an assignment statement preceding a special
+builtin, but not with any other simple command.
 
 @item
 A non-interactive shell exits with an error status if the iteration
@@ -6773,10 +6771,6 @@ When the @code{cd} builtin is invoked in @var{logical} mode, and the pathname
 constructed from @code{$PWD} and the directory name supplied as an argument
 does not refer to an existing directory, @code{cd} will fail instead of
 falling back to @var{physical} mode.
-
-@item
-When the @code{pwd} builtin is supplied the @option{-P} option, it resets
-@code{$PWD} to a pathname containing no symlinks.
 
 @item
 The @code{pwd} builtin verifies that the value it prints is the same as the

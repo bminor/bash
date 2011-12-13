@@ -48,6 +48,7 @@
 #include "unwind_prot.h"
 #include "quit.h"
 #include "sig.h"
+#include "error.h"	/* for internal_warning */
 
 /* Structure describing a saved variable and the value to restore it to.  */
 typedef struct {

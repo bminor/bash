@@ -124,7 +124,7 @@ extern char *strip_trailing_ifs_whitespace __P((char *, char *, int));
    splitting on the result of expansion. */
 extern int do_assignment __P((char *));
 extern int do_assignment_no_expand __P((char *));
-extern int do_word_assignment __P((WORD_DESC *));
+extern int do_word_assignment __P((WORD_DESC *, int));
 
 /* Append SOURCE to TARGET at INDEX.  SIZE is the current amount
    of space allocated to TARGET.  SOURCE can be NULL, in which
@@ -260,6 +260,7 @@ extern void unlink_fifo __P((int));
 
 extern char *copy_fifo_list __P((int *));
 extern void unlink_new_fifos __P((char *, int));
+extern void close_new_fifos __P((char *, int));
 
 extern WORD_LIST *list_string_with_quotes __P((char *));
 

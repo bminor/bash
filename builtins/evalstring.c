@@ -1,4 +1,4 @@
-/* evalstring.c - evaluate a string as one or more shell commands. 
+/* evalstring.c - evaluate a string as one or more shell commands. */
 
 /* Copyright (C) 1996-2010 Free Software Foundation, Inc.
 

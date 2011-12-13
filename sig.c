@@ -63,7 +63,7 @@ extern int parse_and_execute_level, shell_initialized;
 extern int history_lines_this_session;
 #endif
 
-extern void intialize_siglist ();
+extern void initialize_siglist ();
 
 /* Non-zero after SIGINT. */
 volatile int interrupt_state = 0;

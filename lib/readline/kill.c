@@ -640,7 +640,7 @@ rl_yank_last_arg (count, key)
     {
       if (undo_needed)
 	rl_do_undo ();
-      if (count < 1)
+      if (count < 0)		/* XXX - was < 1 */
         direction = -direction;
       history_skip += direction;
       if (history_skip < 0)

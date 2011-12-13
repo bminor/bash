@@ -72,7 +72,7 @@ curencoding ()
   mod = strchr (dot, '@');
   if (mod)
     *mod = '\0';
-  return dot;
+  return ++dot;
 #endif
 }  
 

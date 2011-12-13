@@ -1120,10 +1120,14 @@ as if the @samp{!@var{n}} history expansion had been specified.
 
 @item yank-last-arg (M-. or M-_)
 Insert last argument to the previous command (the last word of the
-previous history entry).  With an
-argument, behave exactly like @code{yank-nth-arg}.
+previous history entry).
+With a numeric argument, behave exactly like @code{yank-nth-arg}.
 Successive calls to @code{yank-last-arg} move back through the history
-list, inserting the last argument of each line in turn.
+list, inserting the last word (or the word specified by the argument to
+the first call) of each line in turn.
+Any numeric argument supplied to these successive calls determines
+the direction to move through the history.  A negative argument switches
+the direction through the history (back or forward).
 The history expansion facilities are used to extract the last argument,
 as if the @samp{!$} history expansion had been specified.
 

@@ -52,6 +52,7 @@
 #include "mailcheck.h"
 
 #include "shmbutil.h"
+#include "typemax.h"
 
 #include "builtins/getopt.h"
 #include "builtins/common.h"
@@ -2296,11 +2297,7 @@ string_list_dollar_at (list, quoted)
 
   /* XXX -- why call quote_list if ifs == 0?  we can get away without doing
      it now that quote_escapes quotes spaces */
-#if 0
-  tlist = ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (ifs && *ifs == 0))
-#else
   tlist = (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES|Q_PATQUOTE))
-#endif
 		? quote_list (list)
 		: list_quote_escapes (list);
 
@@ -2855,8 +2852,9 @@ do_assignment (string)
 }
 
 int
-do_word_assignment (word)
+do_word_assignment (word, flags)
      WORD_DESC *word;
+     int flags;
 {
   return do_assignment_internal (word, 1);
 }
@@ -4003,6 +4001,7 @@ match_upattern (string, pat, mtype, sp, ep)
   int c, len, mlen;
   register char *p, *p1, *npat;
   char *end;
+  int n1;
 
   /* If the pattern doesn't match anywhere in the string, go ahead and
      short-circuit right away.  A minor optimization, saves a bunch of
@@ -4049,8 +4048,15 @@ match_upattern (string, pat, mtype, sp, ep)
 	      for (p1 = end; p1 >= p; p1--)
 #else
 	      p1 = (mlen == -1) ? end : p + mlen;
-	      /* extra -1 to handle case of p1 == end */
-	      if (p1 - p + mlen - 1 > len)
+	      /* p1 - p = length of portion of string to be considered
+	         p = current position in string
+	         mlen = number of characters consumed by match (-1 for entire string)
+	         end = end of string
+	         we want to break immediately if the potential match len
+	         is greater than the number of characters remaining in the
+	         string
+	      */
+	      if (p1 > end)
 		break;
 	      for ( ; p1 >= p; p1--)
 #endif
@@ -4145,7 +4151,13 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
   wchar_t wc, *wp, *nwpat, *wp1;
   size_t len;
   int mlen;
-  int n, n1;
+  int n, n1, n2, simple;
+
+  simple = (wpat[0] != L'\\' && wpat[0] != L'*' && wpat[0] != L'?' && wpat[0] != L'[');
+#if defined (EXTENDED_GLOB)
+  if (extended_glob)
+    simple |= (wpat[1] != L'(' || (wpat[0] != L'*' && wpat[0] != L'?' && wpat[0] != L'+' && wpat[0] != L'!' && wpat[0] != L'@')); /*)*/
+#endif
 
   /* If the pattern doesn't match anywhere in the string, go ahead and
      short-circuit right away.  A minor optimization, saves a bunch of
@@ -4175,13 +4187,19 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
     return (0);
 
   mlen = wmatchlen (wpat, wstrlen);
+
 /* itrace("wmatchlen (%ls) -> %d", wpat, mlen); */
   switch (mtype)
     {
     case MATCH_ANY:
       for (n = 0; n <= wstrlen; n++)
 	{
-	  if (match_pattern_wchar (wpat, wstring + n))
+#if 1
+	  n2 = simple ? (*wpat == wstring[n]) : match_pattern_wchar (wpat, wstring + n);
+#else
+	  n2 = match_pattern_wchar (wpat, wstring + n);
+#endif
+	  if (n2)
 	    {
 #if 0
 	      for (n1 = wstrlen; n1 >= n; n1--)
@@ -4279,6 +4297,7 @@ match_pattern (string, pat, mtype, sp, ep)
   size_t n;
   wchar_t *wstring, *wpat;
   char **indices;
+  size_t slen, plen, mslen, mplen;
 #endif
 
   if (string == 0 || *string == 0 || pat == 0 || *pat == 0)
@@ -4287,6 +4306,13 @@ match_pattern (string, pat, mtype, sp, ep)
 #if defined (HANDLE_MULTIBYTE)
   if (MB_CUR_MAX > 1)
     {
+      slen = STRLEN (string);
+      mslen = MBSLEN (string);
+      plen = STRLEN (pat);
+      mplen = MBSLEN (pat);
+      if (slen == mslen && plen == mplen)
+        return (match_upattern (string, pat, mtype, sp, ep));
+
       n = xdupmbstowcs (&wpat, NULL, pat);
       if (n == (size_t)-1)
 	return (match_upattern (string, pat, mtype, sp, ep));
@@ -5846,34 +5872,6 @@ valid_length_expression (name)
 	  legal_identifier (name + 1));				/* ${#PS1} */
 }
 
-#if defined (HANDLE_MULTIBYTE)
-size_t
-mbstrlen (s)
-     const char *s;
-{
-  size_t clen, nc;
-  mbstate_t mbs, mbsbak;
-
-  nc = 0;
-  memset (&mbs, 0, sizeof (mbs));
-  mbsbak = mbs;
-  while ((clen = mbrlen(s, MB_CUR_MAX, &mbs)) != 0)
-    {
-      if (MB_INVALIDCH(clen))
-        {
-	  clen = 1;	/* assume single byte */
-	  mbs = mbsbak;
-        }
-
-      s += clen;
-      nc++;
-      mbsbak = mbs;
-    }
-  return nc;
-}
-#endif
-      
-
 /* Handle the parameter brace expansion that requires us to return the
    length of a parameter. */
 static intmax_t
@@ -5907,7 +5905,7 @@ parameter_brace_expand_length (name)
 	  break;
 	case '!':
 	  if (last_asynchronous_pid == NO_PID)
-	    t = (char *)NULL;
+	    t = (char *)NULL;	/* XXX - error if set -u set? */
 	  else
 	    t = itos (last_asynchronous_pid);
 	  break;
@@ -5956,7 +5954,7 @@ parameter_brace_expand_length (name)
 	  if (list)
 	    dispose_words (list);
 
-	  number = MB_STRLEN (t);
+	  number = t ? MB_STRLEN (t) : 0;
 	  FREE (t);
 	}
     }
@@ -7527,11 +7525,14 @@ param_expand (string, sindex, quoted, expanded_something,
 	     is unset, the parameters are separated by ' '; if $IFS is
 	     null, the parameters are concatenated. */
 	  temp = (quoted & (Q_DOUBLE_QUOTES|Q_PATQUOTE)) ? string_list_dollar_star (list) : string_list (list);
-	  temp1 = quote_string (temp);
-	  if (*temp == 0)
-	    tflag |= W_HASQUOTEDNULL;
-	  free (temp);
-	  temp = temp1;
+	  if (temp)
+	    {
+	      temp1 = quote_string (temp);
+	      if (*temp == 0)
+		tflag |= W_HASQUOTEDNULL;
+	      free (temp);
+	      temp = temp1;
+	    }
 	}
       else
 	{
@@ -8305,7 +8306,7 @@ add_twochars:
 	      if (list->next)
 		{
 #if 0
-		  if (quoted_dollar_at && word->flags & W_NOSPLIT2)
+		  if (quoted_dollar_at && (word->flags & W_NOSPLIT2))
 		    temp = string_list_internal (quote_list (list), " ");
 		  else
 #endif
@@ -8343,12 +8344,10 @@ add_twochars:
 	  else
 	    temp = (char *)NULL;
 
-#if 0
 	  /* We do not want to add quoted nulls to strings that are only
 	     partially quoted; we can throw them away. */
-	  if (temp == 0 && quoted_state == PARTIALLY_QUOTED)
+	  if (temp == 0 && quoted_state == PARTIALLY_QUOTED && (word->flags & (W_NOSPLIT|W_NOSPLIT2)))
 	    continue;
-#endif
 
 	add_quoted_string:
 
@@ -9185,7 +9184,7 @@ shell_expand_word_list (tlist, eflags)
 	  if (tlist->word->flags & W_ASSIGNASSOC)
 	    make_internal_declare (tlist->word->word, "-A");
 
-	  t = do_word_assignment (tlist->word);
+	  t = do_word_assignment (tlist->word, 0);
 	  if (t == 0)
 	    {
 	      last_command_exit_value = EXECUTION_FAILURE;
@@ -9285,7 +9284,7 @@ expand_word_list_internal (list, eflags)
 	      for (temp_list = subst_assign_varlist; temp_list; temp_list = temp_list->next)
 		{
 		  this_command_name = (char *)NULL;	/* no arithmetic errors */
-		  tint = do_word_assignment (temp_list->word);
+		  tint = do_word_assignment (temp_list->word, 0);
 		  /* Variable assignment errors in non-interactive shells
 		     running in Posix.2 mode cause the shell to exit. */
 		  if (tint == 0)
@@ -9334,7 +9333,7 @@ expand_word_list_internal (list, eflags)
   if ((eflags & WEXP_VARASSIGN) && subst_assign_varlist)
     {
       sh_wassign_func_t *assign_func;
-      int is_special_builtin;
+      int is_special_builtin, is_builtin_or_func;
 
       /* If the remainder of the words expand to nothing, Posix.2 requires
 	 that the variable and environment assignments affect the shell's
@@ -9342,15 +9341,16 @@ expand_word_list_internal (list, eflags)
       assign_func = new_list ? assign_in_env : do_word_assignment;
       tempenv_assign_error = 0;
 
+      is_builtin_or_func = (new_list && new_list->word && (find_shell_builtin (new_list->word->word) || find_function (new_list->word->word)));
       /* Posix says that special builtins exit if a variable assignment error
 	 occurs in an assignment preceding it. */
-      is_special_builtin = (posixly_correct && new_list && find_special_builtin (new_list->word->word));
+      is_special_builtin = (posixly_correct && new_list && new_list->word && find_special_builtin (new_list->word->word));
       
       for (temp_list = subst_assign_varlist; temp_list; temp_list = temp_list->next)
 	{
 	  this_command_name = (char *)NULL;
 	  assigning_in_environment = (assign_func == assign_in_env);
-	  tint = (*assign_func) (temp_list->word);
+	  tint = (*assign_func) (temp_list->word, is_builtin_or_func);
 	  assigning_in_environment = 0;
 	  /* Variable assignment errors in non-interactive shells running
 	     in Posix.2 mode cause the shell to exit. */

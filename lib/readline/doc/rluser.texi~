@@ -591,6 +591,12 @@ If set to @samp{off}, the leading @samp{.} must be
 supplied by the user in the filename to be completed.
 This variable is @samp{on} by default.
 
+@item menu-complete-display-prefix
+@vindex menu-complete-display-prefix
+If set to @samp{on}, menu completion displays the common prefix of the
+list of possible completions (which may be empty) before cycling through
+the list.  The default is @samp{off}.
+
 @item output-meta
 @vindex output-meta
 If set to @samp{on}, Readline will display characters with the
@@ -1114,10 +1120,14 @@ as if the @samp{!@var{n}} history expansion had been specified.
 
 @item yank-last-arg (M-. or M-_)
 Insert last argument to the previous command (the last word of the
-previous history entry).  With an
-argument, behave exactly like @code{yank-nth-arg}.
+previous history entry).
+With a numeric argument, behave exactly like @code{yank-nth-arg}.
 Successive calls to @code{yank-last-arg} move back through the history
-list, inserting the last argument of each line in turn.
+list, inserting the last word (or the word specified by the argument to
+the first call) of each line in turn.
+Any numeric argument supplied to these successive calls determines
+the direction to move through the history.  A negative argument switches
+the direction through the history (back or forward).
 The history expansion facilities are used to extract the last argument,
 as if the @samp{!$} history expansion had been specified.
 
@@ -1229,7 +1239,7 @@ Kill from point to the end of the current word, or if between
 words, to the end of the next word.
 Word boundaries are the same as @code{shell-forward-word}.
 
-@item backward-kill-word ()
+@item shell-backward-kill-word ()
 Kill the word behind point.
 Word boundaries are the same as @code{shell-backward-word}.
 @end ifset

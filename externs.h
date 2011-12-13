@@ -303,6 +303,10 @@ extern int sh_regmatch __P((const char *, const char *, int));
 #define SHMAT_SUBEXP		0x001	/* save subexpressions in SH_REMATCH */
 #define SHMAT_PWARN		0x002	/* print a warning message on invalid regexp */
 
+/* declarations for functions defined in lib/sh/shmbchar.c */
+extern size_t mbstrlen __P((const char *));
+extern char *mbsmbchar __P((const char *));
+
 /* declarations for functions defined in lib/sh/shquote.c */
 extern char *sh_single_quote __P((const char *));
 extern char *sh_double_quote __P((const char *));

@@ -367,13 +367,9 @@ xstrmatch (pattern, string, flags)
   wchar_t *wpattern, *wstring;
   size_t plen, slen, mplen, mslen;
 
-#if 0
   plen = strlen (pattern);
   mplen = mbstrlen (pattern);
   if (plen == mplen && strlen (string) == mbstrlen (string))
-#else
-  if (mbsmbchar (string) == 0 && mbsmbchar (pattern) == 0)
-#endif
     return (internal_strmatch ((unsigned char *)pattern, (unsigned char *)string, flags));
 
   if (MB_CUR_MAX == 1)

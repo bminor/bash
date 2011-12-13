@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Mon Sep  6 22:07:38 EDT 2010
+.\"	Last Change: Mon Dec  6 22:25:10 EST 2010
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2010 September 6" "GNU Bash-4.2"
+.TH BASH 1 "2010 December 6" "GNU Bash-4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -476,7 +476,7 @@ A \fItoken\fP that performs a control function.  It is one of the following
 symbols:
 .RS
 .PP
-.if t \fB\(bv\(bv  &  &&  ;  ;;  (  )  |  |&    <newline>\fP
+.if t \fB||  &  &&  ;  ;;  (  )  |  |&    <newline>\fP
 .if n \fB|| & && ; ;; ( ) | |& <newline>\fP
 .RE
 .PD
@@ -586,7 +586,7 @@ of the operators
 .BR & ,
 .BR && ,
 or
-.BR \(bv\(bv ,
+.BR || ,
 and optionally terminated by one of
 .BR ; ,
 .BR & ,
@@ -596,7 +596,7 @@ or
 Of these list operators,
 .B &&
 and
-.B \(bv\(bv
+.B ||
 have equal precedence, followed by
 .B ;
 and
@@ -617,7 +617,7 @@ command to terminate in turn.  The return status is the
 exit status of the last command executed.
 .PP
 AND and OR lists are sequences of one of more pipelines separated by the
-\fB&&\fP and \fB\(bv\(bv\fP control operators, respectively.
+\fB&&\fP and \fB||\fP control operators, respectively.
 AND and OR lists are executed with left associativity.
 An AND list has the form
 .RS
@@ -633,7 +633,7 @@ returns an exit status of zero.
 An OR list has the form
 .RS
 .PP
-\fIcommand1\fP \fB\(bv\(bv\fP \fIcommand2\fP
+\fIcommand1\fP \fB||\fP \fIcommand2\fP
 .PP
 .RE
 .PP
@@ -763,8 +763,7 @@ and
 .I expression2
 are true.
 .TP
-.if t \fIexpression1\fP \fB\(bv\(bv\fP \fIexpression2\fP
-.if n \fIexpression1\fP \fB||\fP \fIexpression2\fP
+\fIexpression1\fP \fB||\fP \fIexpression2\fP
 True if either
 .I expression1
 or
@@ -772,9 +771,7 @@ or
 is true.
 .PD
 .LP
-The \fB&&\fP and
-.if t \fB\(bv\(bv\fP
-.if n \fB||\fP
+The \fB&&\fP and \fB||\fP
 operators do not evaluate \fIexpression2\fP if the value of
 \fIexpression1\fP is sufficient to determine the return value of
 the entire conditional expression.
@@ -5508,10 +5505,14 @@ as if the "!\fIn\fP" history expansion had been specified.
 .B
 yank\-last\-arg (M\-.\^, M\-_\^)
 Insert the last argument to the previous command (the last word of
-the previous history entry).  With an argument,
-behave exactly like \fByank\-nth\-arg\fP.
+the previous history entry).
+With a numeric argument, behave exactly like \fByank\-nth\-arg\fP.
 Successive calls to \fByank\-last\-arg\fP move back through the history
-list, inserting the last argument of each line in turn.
+list, inserting the last word (or the word specified by the argument to
+the first call) of each line in turn.
+Any numeric argument supplied to these successive calls determines
+the direction to move through the history.  A negative argument switches
+the direction through the history (back or forward).
 The history expansion facilities are used to extract the last argument,
 as if the "!$" history expansion had been specified.
 .TP
@@ -8476,8 +8477,8 @@ or
 reserved words, part of any command executed in a
 .B &&
 or
-.B \(bv\(bv
-list except the command following the final \fB&&\fP or \fB\(bv\(bv\fP,
+.B ||
+list except the command following the final \fB&&\fP or \fB||\fP,
 any command in a pipeline but the last,
 or if the command's return value is
 being inverted with
@@ -9262,6 +9263,7 @@ If the first argument is not a valid unary conditional operator, the expression
 is false.
 .TP
 3 arguments
+The following conditions are applied in the order listed.
 If the second argument is one of the binary conditional operators listed above
 under
 .SM
@@ -9394,7 +9396,7 @@ part of the test in an
 statement, part of a command executed in a
 .B &&
 or
-.B \(bv\(bv
+.B ||
 list, or if the command's return value is
 being inverted via
 .BR ! .
