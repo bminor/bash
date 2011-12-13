@@ -3645,6 +3645,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
   pid_t old_last_async_pid;
   sh_builtin_func_t *builtin;
   SHELL_VAR *func;
+  volatile int old_builtin, old_command_builtin;
 
   result = EXECUTION_SUCCESS;
   special_builtin_failed = builtin_is_special = 0;
@@ -3895,6 +3896,8 @@ run_builtin:
     {
       if (builtin)
         {
+	  old_builtin = executing_builtin;
+	  old_command_builtin = executing_command_builtin;
 	  unwind_protect_int (executing_builtin);	/* modified in execute_builtin */
 	  unwind_protect_int (executing_command_builtin);	/* ditto */
         }
@@ -3979,6 +3982,11 @@ run_builtin:
   bind_lastarg (lastarg);
   FREE (command_line);
   dispose_words (words);
+  if (builtin)
+    {
+      executing_builtin = old_builtin;
+      executing_command_builtin = old_command_builtin;
+    }
   discard_unwind_frame ("simple-command");
   this_command_name = (char *)NULL;	/* points to freed memory now */
   return (result);

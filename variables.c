@@ -1240,8 +1240,9 @@ brand ()
      October 1988, p. 1195. filtered through FreeBSD */
   long h, l;
 
+  /* Can't seed with 0. */
   if (rseed == 0)
-    seedrand ();
+    rseed = 123459876;
   h = rseed / 127773;
   l = rseed % 127773;
   rseed = 16807 * l - 2836 * h;

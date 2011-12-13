@@ -10987,3 +10987,18 @@ lib/sh/strftime.c
 
 configure.in
 	- change release level to rc2
+
+				   1/17
+				   ----
+execute_cmd.c
+	- short-circuit select builtin if read_builtin returns anything but
+	  EXECUTION_SUCCESS, not just EXECUTION_FAILURE.  Fixes bug reported
+	  by Pierre Gaston <pierre.gaston@gmail.com>
+
+				   1/19
+				   ----
+execute_cmd.c
+	- change execute_simple_command to save and restore the values of
+	  executing_builtin and executing_command_builtin before discarding
+	  the unwind-protect frame.  Bug and fix from Werner Fink
+	  <werner@suse.de>

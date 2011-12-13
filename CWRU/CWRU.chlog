@@ -10994,3 +10994,18 @@ execute_cmd.c
 	- short-circuit select builtin if read_builtin returns anything but
 	  EXECUTION_SUCCESS, not just EXECUTION_FAILURE.  Fixes bug reported
 	  by Pierre Gaston <pierre.gaston@gmail.com>
+
+				   1/19
+				   ----
+execute_cmd.c
+	- change execute_simple_command to save and restore the values of
+	  executing_builtin and executing_command_builtin before discarding
+	  the unwind-protect frame.  Bug and fix from Werner Fink
+	  <werner@suse.de>
+
+				   1/24
+				   ----
+variables.c
+	- change brand to set rseed to a known, constant value if it's 0,
+	  so the sequence is known.  Fixes issue reported by Olivier
+	  Mehani <shtrom@ssji.net>

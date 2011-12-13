@@ -3310,7 +3310,7 @@ push_temp_var (data)
     }
   v->attributes |= var->attributes;
 
-  if (find_special_var (var->name))
+  if (find_special_var (var->name) >= 0)
     tempvar_list[tvlist_ind++] = savestring (var->name);
 
   dispose_variable (var);
@@ -3327,7 +3327,7 @@ propagate_temp_var (data)
     push_temp_var (data);
   else
     {
-      if (find_special_var (var->name))
+      if (find_special_var (var->name) >= 0)
 	tempvar_list[tvlist_ind++] = savestring (var->name);
       dispose_variable (var);
     }
