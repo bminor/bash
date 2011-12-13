@@ -1692,7 +1692,7 @@ skip_to_delim (string, start, delims, flags)
 {
   int i, pass_next, backq, si, c, invert, skipquote, skipcmd;
   size_t slen;
-  char *temp;
+  char *temp, open[3];
   DECLARE_MBSTATE;
 
   slen = strlen (string + start) + start;
@@ -1775,6 +1775,25 @@ skip_to_delim (string, start, delims, flags)
 	  continue;
 	}
 #endif /* PROCESS_SUBSTITUTION */
+#if defined (EXTENDED_GLOB)
+      else if ((flags & SD_EXTGLOB) && extended_glob && string[i+1] == LPAREN && member (c, "?*+!@"))
+	{
+	  si = i + 2;
+	  if (string[si] == '\0')
+	    CQ_RETURN(si);
+
+	  open[0] = c;
+	  open[1] = LPAREN;
+	  open[2] = '\0';
+	  temp = extract_delimited_string (string, &si, open, "(", ")", SX_NOALLOC); /* ) */
+
+	  i = si;
+	  if (string[i] == '\0')	/* don't increment i past EOS in loop */
+	    break;
+	  i++;
+	  continue;
+	}
+#endif
       else if ((skipquote || invert) && (member (c, delims) == 0))
 	break;
       else
@@ -7430,6 +7449,7 @@ param_expand (string, sindex, quoted, expanded_something,
     /* $? -- return value of the last synchronous command. */
     case '?':
       temp = itos (last_command_exit_value);
+itrace("last_command_exit_value = %d", last_command_exit_value);
       break;
 
     /* $- -- flags supplied to the shell on invocation or by `set'. */

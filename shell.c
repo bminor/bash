@@ -526,21 +526,20 @@ main (argc, argv, env)
   else
     init_noninteractive ();
 
-#define CLOSE_FDS_AT_LOGIN
-#if defined (CLOSE_FDS_AT_LOGIN)
   /*
    * Some systems have the bad habit of starting login shells with lots of open
    * file descriptors.  For instance, most systems that have picked up the
    * pre-4.0 Sun YP code leave a file descriptor open each time you call one
    * of the getpw* functions, and it's set to be open across execs.  That
-   * means one for login, one for xterm, one for shelltool, etc.
+   * means one for login, one for xterm, one for shelltool, etc.  There are
+   * also systems that open persistent FDs to other agents or files as part
+   * of process startup; these need to be set to be close-on-exec.
    */
   if (login_shell && interactive_shell)
     {
       for (i = 3; i < 20; i++)
-	close (i);
+	SET_CLOSE_ON_EXEC (i);
     }
-#endif /* CLOSE_FDS_AT_LOGIN */
 
   /* If we're in a strict Posix.2 mode, turn on interactive comments,
      alias expansion in non-interactive shells, and other Posix.2 things. */

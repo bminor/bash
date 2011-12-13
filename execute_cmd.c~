@@ -735,7 +735,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	  execute_simple_command (command->value.Simple, pipe_in, pipe_out,
 				  asynchronous, fds_to_close);
 	line_number = save_line_number;
-
+itrace("execute_simple_command (%s) returns %d", command->value.Simple->words->word->word, exec_result);
 	/* The temporary environment should be used for only the simple
 	   command immediately following its definition. */
 	dispose_used_env_vars ();
@@ -4329,7 +4329,6 @@ execute_shell_function (var, words)
   int ret;
   struct fd_bitmap *bitmap;
 
-itrace("execute_shell_function: %s", var->name);
   bitmap = new_fd_bitmap (FD_BITMAP_DEFAULT_SIZE);
   begin_unwind_frame ("execute-shell-function");
   add_unwind_protect (dispose_fd_bitmap, (char *)bitmap);

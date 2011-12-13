@@ -195,6 +195,10 @@ int rl_visible_stats = 0;
    after the `e' in `Makefile' won't result in `Makefilefile'. */
 int _rl_skip_completed_text = 0;
 
+/* If non-zero, menu completion displays the common prefix first in the
+   cycle of possible completions instead of the last. */
+int _rl_menu_complete_prefix_first = 0;
+
 /* If non-zero, then this is the address of a function to call when
    completing on a directory name.  The function is called with
    the address of a string (the current directory name) as an arg. */
@@ -2481,7 +2485,7 @@ rl_menu_complete (count, ignore)
   static int full_completion = 0;	/* set to 1 if menu completion should reinitialize on next call */
   static int orig_start, orig_end;
   static char quote_char;
-  static int delimiter;
+  static int delimiter, cstate;
 
   /* The first time through, we generate the list of matches and set things
      up to insert them. */
@@ -2587,6 +2591,11 @@ rl_menu_complete (count, ignore)
 	{
 	  append_to_match (matches[0], delimiter, quote_char, nontrivial_lcd);
 	  full_completion = 1;
+	  return (0);
+	}
+      else if (_rl_menu_complete_prefix_first && match_list_size > 1)
+	{
+	  rl_ding ();
 	  return (0);
 	}
     }

@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet@ins.CWRU.Edu
 .\"
-.\"	Last Change: Thu Apr 22 18:59:21 EDT 2010
+.\"	Last Change: Sat Aug 28 18:56:32 EDT 2010
 .\"
-.TH READLINE 3 "2010 April 22" "GNU Readline 6.2"
+.TH READLINE 3 "2010 August 28" "GNU Readline 6.2"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -76,7 +76,7 @@ is read with a non\-empty line, it is
 treated as a newline.
 .SH NOTATION
 .LP
-An emacs-style notation is used to denote
+An Emacs-style notation is used to denote
 keystrokes.  Control keys are denoted by C\-\fIkey\fR, e.g., C\-n
 means Control\-N.  Similarly, 
 .I meta
@@ -407,7 +407,7 @@ mapped to \fBself-insert\fP.
 .TP
 .B editing\-mode (emacs)
 Controls whether readline begins with a set of key bindings similar
-to emacs or vi.
+to \fIEmacs\fP or \fIvi\fP.
 .B editing\-mode
 can be set to either
 .B emacs
@@ -430,11 +430,11 @@ key the terminal claims to support when it is called.  On many terminals,
 the meta key is used to send eight-bit characters.
 .TP
 .B expand\-tilde (Off)
-If set to \fBon\fP, tilde expansion is performed when readline
+If set to \fBOn\fP, tilde expansion is performed when readline
 attempts word completion.
 .TP
 .B history\-preserve\-point (Off)
-If set to \fBon\fP, the history code attempts to place point at the 
+If set to \fBOn\fP, the history code attempts to place point at the 
 same location on each history line retrieved with \fBprevious-history\fP 
 or \fBnext-history\fP.
 .TP
@@ -506,7 +506,7 @@ If set to \fBOn\fP, readline will display completions with matches
 sorted horizontally in alphabetical order, rather than down the screen.
 .TP
 .B revert\-all\-at\-newline (Off)
-If set to \fBon\fP, readline will undo all changes to history lines
+If set to \fBOn\fP, readline will undo all changes to history lines
 before returning when \fBaccept\-line\fP is executed.  By default,
 history lines may be modified and retain individual undo lists across
 calls to \fBreadline\fP.
@@ -514,7 +514,7 @@ calls to \fBreadline\fP.
 .B show\-all\-if\-ambiguous (Off)
 This alters the default behavior of the completion functions.  If
 set to
-.BR on ,
+.BR On ,
 words which have more than one possible completion cause the
 matches to be listed immediately instead of ringing the bell.
 .TP
@@ -522,7 +522,7 @@ matches to be listed immediately instead of ringing the bell.
 This alters the default behavior of the completion functions in
 a fashion similar to \fBshow\-all\-if\-ambiguous\fP.
 If set to
-.BR on , 
+.BR On , 
 words which have more than one possible completion without any
 possible partial completion (the possible completions don't share 
 a common prefix) cause the matches to be listed immediately instead
@@ -582,7 +582,7 @@ library sets the \fIapplication name\fP, and an initialization
 file can test for a particular value.
 This could be used to bind key sequences to functions useful for
 a specific program.  For instance, the following command adds a
-key sequence that quotes the current or previous word in Bash:
+key sequence that quotes the current or previous word in \fBbash\fP:
 .sp 1
 .RS
 .nf
@@ -962,7 +962,7 @@ through the list.
 This command is intended to be bound to \fBTAB\fP, but is unbound
 by default.
 .TP
-.B menu\-complete-\backward
+.B menu\-complete\-backward
 Identical to \fBmenu\-complete\fP, but moves backward through the list
 of possible completions, as if \fBmenu\-complete\fP had been given a
 negative argument.  This command is unbound by default.
@@ -1040,7 +1040,7 @@ character.  A negative count searches for previous occurrences.
 A character is read and point is moved to the previous occurrence of that
 character.  A negative count searches for subsequent occurrences.
 .TP
-.B skip\-csi\-sequence ()
+.B skip\-csi\-sequence
 Read enough characters to consume a multi-key sequence such as those
 defined for keys like Home and End.  Such sequences begin with a
 Control Sequence Indicator (CSI), usually ESC\-[.  If this sequence is

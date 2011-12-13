@@ -6088,7 +6088,8 @@ lib/readline/complete.c
 	- new variable, rl_menu_completion_entry_function, generator for
 	  rl_menu_complete
 	- new menu completion `browsing' implementation, with several
-	  improvements over the old code.  Inspired by Sami
+	  improvements over the old code.  Inspired by Sami Pietila
+	  <sami.pietila@gmail.com>
 
 lib/readline/readline.h
 	- extern declaration for rl_menu_completion_entry_function
@@ -10363,12 +10364,48 @@ pathexp.c
 				   8/28
 				   ----
 lib/readline/rlprivate.h
-	- add member to search_cxt to save _rl_keymap
+	- add members to search_cxt to save _rl_keymap
 	- new flag for isearch context: SF_CHGKMAP, set if we changed the
 	  keymap while reading a character for the search string that
 	  translated to a command
 
 lib/readline/isearch.c
-	- save current readline keymap in cxt->keymap in _rl_scxt_alloc
+	- save current readline keymap in cxt->keymap and cxt->okeymap
+	  in _rl_scxt_alloc
 	- in _rl_isearch_dispatch, only check for cxt->lastc as a member of
 	  cxt->search_terminators if it's > 0 (i.e., not an isearch opcode)
+
+				    9/3
+				    ---
+support/signames.c
+	- add Solaris SIGJVM1 and SIGJVM2.  Update from Stefan Teleman
+	  <stefan.teleman@oracle.com>
+
+shell.c
+	- instead of closing all fds 3-20 at shell startup, just set them to
+	  be close-on-exec.  Report from Rainer Müller<raimue@macports.org>
+
+lib/readline/isearch.c
+	- in _rl_isearch_dispatch, if the current character maps to ISKMAP,
+	  move to the indicated keymap (using cxt->keymap) and go on to
+	  read another character.  Fixes problem reported by Davor
+	  Cubranic <cubranic@stat.ubc.ca>
+	- in _rl_isearch_dispatch, after translating key to possible opcode,
+	  restore _rl_keymap from cxt->okeymap if necessary
+	- in _rl_isearch_dispatch, use key sequences that map to default
+	  functions that ^G, ^W, and ^Y map to as equivalent to those chars
+
+lib/readline/complete.c
+	- new variable, _rl_menu_complete_prefix_first, zero by default
+	- change menu_complete to display common prefix (matches[0]) first
+	  before cycling through rest of match list if
+	  _rl_menu_complete_prefix_first is non-zero.  Suggested by Sami
+	  Pietila <sami.pietila@gmail.com>
+
+lib/readline/bind.c
+	- new bindable readline variable, "menu-complete-display-prefix",
+	  controls setting of _rl_menu_complete_prefix_first
+
+doc/{bash.1,bashref.texi},lib/readline/doc/{readline.3,rluser.texi}
+	- added description of menu-complete-display-prefix bindable
+	  readline variable

@@ -81,6 +81,7 @@ typedef struct  __rl_search_context
   UNDO_LIST *save_undo_list;
 
   Keymap keymap;	/* used when dispatching commands in search string */
+  Keymap okeymap;	/* original keymap */
 
   int history_pos;
   int direction;
@@ -417,6 +418,7 @@ extern int _rl_completion_case_map;
 extern int _rl_match_hidden_files;
 extern int _rl_page_completions;
 extern int _rl_skip_completed_text;
+extern int _rl_menu_complete_prefix_first;
 
 /* display.c */
 extern int _rl_vis_botlin;

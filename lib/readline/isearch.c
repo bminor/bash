@@ -105,6 +105,7 @@ _rl_scxt_alloc (type, flags)
   cxt->save_undo_list = 0;
 
   cxt->keymap = _rl_keymap;
+  cxt->okeymap = _rl_keymap;
 
   cxt->history_pos = 0;
   cxt->direction = 0;
@@ -338,10 +339,9 @@ _rl_isearch_dispatch (cxt, c)
       return -1;
     }
 
-#if 0
   /* If we are moving into a new keymap, modify cxt->keymap and go on.
      This can be a problem if c == ESC and we want to terminate the
-     incremental search */
+     incremental search, so we check */
   if (c >= 0 && cxt->keymap[c].type == ISKMAP && strchr (cxt->search_terminators, cxt->lastc) == 0)
     {
       cxt->keymap = FUNCTION_TO_KEYMAP (cxt->keymap, c);
@@ -350,7 +350,6 @@ _rl_isearch_dispatch (cxt, c)
 	 something useful if this doesn't end up mapping to a command. */
       return 1;
     }
-#endif
 
   /* Translate the keys we do something with to opcodes. */
   if (c >= 0 && cxt->keymap[c].type == ISFUNC)
@@ -363,12 +362,20 @@ _rl_isearch_dispatch (cxt, c)
 	cxt->lastc = (cxt->sflags & SF_REVERSE) ? -2 : -1;
       else if (f == rl_rubout)
 	cxt->lastc = -3;
-      else if (c == CTRL ('G'))
+      else if (c == CTRL ('G') || f == rl_abort)
 	cxt->lastc = -4;
-      else if (c == CTRL ('W'))	/* XXX */
+      else if (c == CTRL ('W') || f == rl_unix_word_rubout)	/* XXX */
 	cxt->lastc = -5;
-      else if (c == CTRL ('Y'))	/* XXX */
+      else if (c == CTRL ('Y') || f == rl_yank)	/* XXX */
 	cxt->lastc = -6;
+    }
+
+  /* If we changed the keymap earlier while translating a key sequence into
+     a command, restore it now that we've succeeded. */
+  if (cxt->sflags & SF_CHGKMAP)
+    {
+      cxt->keymap = cxt->okeymap;
+      cxt->sflags &= ~SF_CHGKMAP;
     }
 
   /* The characters in isearch_terminators (set from the user-settable
@@ -414,16 +421,6 @@ _rl_isearch_dispatch (cxt, c)
 	rl_execute_next (cxt->lastc);
 	return (0);
       }
-
-#if 0
-  /* If we changed the keymap earlier while translating a key sequence into
-     a command, restore it now that we've succeeded. */
-  if (cxt->sflags & SF_CHGKMAP)
-    {
-      cxt->keymap = _rl_keymap;
-      cxt->sflags &= ~SF_CHGKMAP;
-    }
-#endif
 
   /* Now dispatch on the character.  `Opcodes' affect the search string or
      state.  Other characters are added to the string.  */
