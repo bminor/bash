@@ -1,3 +1,17 @@
+This document details the changes between this version, bash-4.2-rc2,
+and the previous version, bash-4.2-rc1.
+
+1.  Changes to Bash
+
+a.  Changes to bash_directory_completion_hook so that it's assigned to the
+    readline rl_directory_rewrite_hook variable, which modifies the directory
+    name passed to opendir without modifying the directory name the user
+    typed.
+
+b.  Fix bug in select builtin that caused it to not terminate correctly if
+    the read timed out due to $TMOUT.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-4.2-rc1,
 and the previous version, bash-4.2-beta.
 

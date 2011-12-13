@@ -1,6 +1,6 @@
 /* bashline.c -- Bash's interface to the readline library. */
 
-/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2011 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -501,7 +501,7 @@ initialize_readline ()
 
   /* Tell the completer that we might want to follow symbolic links or
      do other expansion on directory names. */
-  rl_directory_completion_hook = bash_directory_completion_hook;
+  rl_directory_rewrite_hook = bash_directory_completion_hook;
 
   rl_filename_rewrite_hook = bash_filename_rewrite_hook;
 
@@ -564,7 +564,7 @@ bashline_reset ()
   tilde_initialize ();
   rl_attempted_completion_function = attempt_shell_completion;
   rl_completion_entry_function = NULL;
-  rl_directory_completion_hook = bash_directory_completion_hook;
+  rl_directory_rewrite_hook = bash_directory_completion_hook;
   rl_ignore_some_completions_function = filename_completion_ignore;
 }
 
@@ -2665,8 +2665,7 @@ bash_directory_expansion (dirname)
 
   if (rl_directory_rewrite_hook)
     (*rl_directory_rewrite_hook) (&d);
-
-  if (rl_directory_completion_hook && (*rl_directory_completion_hook) (&d))
+  else if (rl_directory_completion_hook && (*rl_directory_completion_hook) (&d))
     {
       free (*dirname);
       *dirname = d;
@@ -3003,12 +3002,12 @@ bash_complete_filename_internal (what_to_do)
 
   orig_func = rl_completion_entry_function;
   orig_attempt_func = rl_attempted_completion_function;
-  orig_dir_func = rl_directory_completion_hook;
+  orig_dir_func = rl_directory_rewrite_hook;
   orig_ignore_func = rl_ignore_some_completions_function;
   orig_rl_completer_word_break_characters = rl_completer_word_break_characters;
   rl_completion_entry_function = rl_filename_completion_function;
   rl_attempted_completion_function = (rl_completion_func_t *)NULL;
-  rl_directory_completion_hook = (rl_icppfunc_t *)NULL;
+  rl_directory_rewrite_hook = (rl_icppfunc_t *)NULL;
   rl_ignore_some_completions_function = filename_completion_ignore;
   rl_completer_word_break_characters = " \t\n\"\'";
 
@@ -3016,7 +3015,7 @@ bash_complete_filename_internal (what_to_do)
 
   rl_completion_entry_function = orig_func;
   rl_attempted_completion_function = orig_attempt_func;
-  rl_directory_completion_hook = orig_dir_func;
+  rl_directory_rewrite_hook = orig_dir_func;
   rl_ignore_some_completions_function = orig_ignore_func;
   rl_completer_word_break_characters = orig_rl_completer_word_break_characters;
 

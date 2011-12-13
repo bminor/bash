@@ -1,6 +1,6 @@
 /* complete.c -- filename completion for readline. */
 
-/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2011 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -2209,15 +2209,17 @@ rl_filename_completion_function (text, state)
 	  dirname = temp;
 	}
 
-      if (rl_directory_rewrite_hook)
-	(*rl_directory_rewrite_hook) (&dirname);
-
       /* We have saved the possibly-dequoted version of the directory name
 	 the user typed.  Now transform the directory name we're going to
-	 pass to opendir(2).  The directory completion hook should perform
-	 any necessary dequoting.  If the directory completion hook returns
-	 0, it should not modify the directory name pointer passed as an
-	 argument. */
+	 pass to opendir(2).  The directory rewrite hook modifies only the
+	 directory name; the directory completion hook modifies both the
+	 directory name passed to opendir(2) and the version the user
+	 typed.  Both the directory completion and rewrite hooks should perform
+	 any necessary dequoting.  The hook functions return 1 if they modify
+	 the directory name argument.  If either hook returns 0, it should
+	 not modify the directory name pointer passed as an argument. */
+      if (rl_directory_rewrite_hook)
+	(*rl_directory_rewrite_hook) (&dirname);
       else if (rl_directory_completion_hook && (*rl_directory_completion_hook) (&dirname))
 	{
 	  xfree (users_dirname);
@@ -2226,9 +2228,8 @@ rl_filename_completion_function (text, state)
       else if (rl_completion_found_quote && rl_filename_dequoting_function)
 	{
 	  /* delete single and double quotes */
-	  temp = (*rl_filename_dequoting_function) (dirname, rl_completion_quote_character);
 	  xfree (dirname);
-	  dirname = temp;
+	  dirname = savestring (users_dirname);
 	}
       directory = opendir (dirname);
 

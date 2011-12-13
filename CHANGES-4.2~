@@ -1,3 +1,14 @@
+This document details the changes between this version, bash-4.2-rc2,
+and the previous version, bash-4.2-rc1.
+
+1.  Changes to Bash
+
+a.  Changes to bash_directory_completion_hook so that it's assigned to the
+    readline rl_directory_rewrite_hook variable, which modifies the directory
+    name passed to opendir without modifying the directory name the user
+    typed.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-4.2-rc1,
 and the previous version, bash-4.2-beta.
 
@@ -24,6 +35,10 @@ g.  Fixed a bug that caused the getopts builtin to not return failure if an
 
 h.  Fixed the cd and pwd builtins to return failure if PWD is readonly and
     cannot be assigned to.
+
+i.  Added code to check the return value of access(2) on Solaris systems,
+    since it returns success for executable tests (e.g., `test -x') when
+    run by root, even if the file permissions don't allow execution.
 
 2.  Changes to Readline
 

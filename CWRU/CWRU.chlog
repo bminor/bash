@@ -10959,3 +10959,38 @@ lib/sh/eaccess.c
 				   ----
 builtins/set.def
 	- add description of `--' to help text
+
+[bash-4.2-rc1 released]
+
+				   1/14
+				   ----
+lib/readline/readline.h
+	- fix/update description of rl_directory_rewrite_hook
+
+lib/readline/complete.c
+	- if there are no directory rewrite or completion hooks, set dirname
+	  to a duplicate copy of users_dirname instead of calling the
+	  dequoting function again
+
+bashline.c
+	- use rl_directory_rewrite_hook instead of rl_directory_completion_hook
+	  to avoid changing the directory name the user typed, other than
+	  dequoting it.  Fixes bug introduced by changes to directory
+	  completion hook, pointed out first by William Bader
+	  <william.bader@gmail.com>
+
+				   1/16
+				   ----
+lib/sh/strftime.c
+	- portability and other (int->long) updates from Aharon Robbins
+	  <arnold@skeeve.com>
+
+configure.in
+	- change release level to rc2
+
+				   1/17
+				   ----
+execute_cmd.c
+	- short-circuit select builtin if read_builtin returns anything but
+	  EXECUTION_SUCCESS, not just EXECUTION_FAILURE.  Fixes bug reported
+	  by Pierre Gaston <pierre.gaston@gmail.com>

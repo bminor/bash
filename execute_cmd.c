@@ -2863,7 +2863,7 @@ select_query (list, list_len, prompt, print_menu)
       fflush (stderr);
       QUIT;
 
-      if (read_builtin ((WORD_LIST *)NULL) == EXECUTION_FAILURE)
+      if (read_builtin ((WORD_LIST *)NULL) != EXECUTION_SUCCESS)
 	{
 	  putchar ('\n');
 	  return ((char *)NULL);

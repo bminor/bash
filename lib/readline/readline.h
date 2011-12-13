@@ -1,6 +1,6 @@
 /* Readline.h -- the names of functions callable from within readline. */
 
-/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2011 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -666,16 +666,24 @@ extern const char *rl_special_prefixes;
    completing on a directory name.  The function is called with
    the address of a string (the current directory name) as an arg.  It
    changes what is displayed when the possible completions are printed
-   or inserted. */
+   or inserted.  The directory completion hook should perform
+   any necessary dequoting.  This function should return 1 if it modifies
+   the directory name pointer passed as an argument.  If the directory
+   completion hook returns 0, it should not modify the directory name
+   pointer passed as an argument. */
 extern rl_icppfunc_t *rl_directory_completion_hook;
 
 /* If non-zero, this is the address of a function to call when completing
    a directory name.  This function takes the address of the directory name
    to be modified as an argument.  Unlike rl_directory_completion_hook, it
    only modifies the directory name used in opendir(2), not what is displayed
-   when the possible completions are printed or inserted.  It is called
-   before rl_directory_completion_hook.  I'm not happy with how this works
-   yet, so it's undocumented. */
+   when the possible completions are printed or inserted.  If set, it takes
+   precedence over rl_directory_completion_hook.  The directory rewrite
+   hook should perform any necessary dequoting.  This function has the same
+   return value properties as the directory_completion_hook.
+
+   I'm not happy with how this works yet, so it's undocumented.  I'm trying
+   it in bash to see how well it goes. */
 extern rl_icppfunc_t *rl_directory_rewrite_hook;
 
 /* If non-zero, this is the address of a function to call when reading
