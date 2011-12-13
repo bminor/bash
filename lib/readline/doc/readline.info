@@ -2989,19 +2989,20 @@ File: readline.info,  Node: Completion Variables,  Next: A Short Completion Exam
 
  -- Variable: rl_icppfunc_t * rl_directory_completion_hook
      This function, if defined, is allowed to modify the directory
-     portion of filenames Readline completes.  It is called with the
-     address of a string (the current directory name) as an argument,
-     and may modify that string.  If the string is replaced with a new
-     string, the old value should be freed.  Any modified directory
-     name should have a trailing slash.  The modified value will be
-     displayed as part of the completion, replacing the directory
-     portion of the pathname the user typed.  It returns an integer
-     that should be non-zero if the function modifies its directory
-     argument.  It could be used to expand symbolic links or shell
-     variables in pathnames.  At the least, even if no other expansion
-     is performed, this function should remove any quote characters
-     from the directory name, because its result will be passed
-     directly to `opendir()'.
+     portion of filenames Readline completes.  It could be used to
+     expand symbolic links or shell variables in pathnames.  It is
+     called with the address of a string (the current directory name)
+     as an argument, and may modify that string.  If the string is
+     replaced with a new string, the old value should be freed.  Any
+     modified directory name should have a trailing slash.  The
+     modified value will be used as part of the completion, replacing
+     the directory portion of the pathname the user typed.  At the
+     least, even if no other expansion is performed, this function
+     should remove any quote characters from the directory name,
+     because its result will be passed directly to `opendir()'.  The
+     directory completion hook returns an integer that should be
+     non-zero if the function modifies its directory argument.  The
+     function should not modify the directory argument if it returns 0.
 
  -- Variable: rl_dequote_func_t * rl_filename_rewrite_hook
      If non-zero, this is the address of a function called when reading
@@ -4346,11 +4347,11 @@ Function and Variable Index
 * rl_attempted_completion_function:      Completion Variables.
                                                               (line  12)
 * rl_attempted_completion_over:          Completion Variables.
-                                                              (line 225)
+                                                              (line 226)
 * rl_basic_quote_characters:             Completion Variables.
-                                                              (line 114)
+                                                              (line 115)
 * rl_basic_word_break_characters:        Completion Variables.
-                                                              (line 108)
+                                                              (line 109)
 * rl_begin_undo_group:                   Allowing Undoing.    (line  29)
 * rl_bind_key:                           Binding Keys.        (line  22)
 * rl_bind_key_if_unbound:                Binding Keys.        (line  32)
@@ -4383,39 +4384,39 @@ Function and Variable Index
 * rl_complete_internal:                  Completion Functions.
                                                               (line  10)
 * rl_completer_quote_characters:         Completion Variables.
-                                                              (line 131)
+                                                              (line 132)
 * rl_completer_word_break_characters:    Completion Variables.
-                                                              (line 117)
+                                                              (line 118)
 * rl_completion_append_character:        Completion Variables.
-                                                              (line 155)
+                                                              (line 156)
 * rl_completion_display_matches_hook:    Completion Variables.
-                                                              (line  95)
+                                                              (line  96)
 * rl_completion_entry_function <1>:      How Completing Works.
                                                               (line  55)
 * rl_completion_entry_function:          Completion Variables.
                                                               (line   7)
 * rl_completion_found_quote:             Completion Variables.
-                                                              (line 183)
+                                                              (line 184)
 * rl_completion_invoking_key:            Completion Variables.
-                                                              (line 248)
+                                                              (line 249)
 * rl_completion_mark_symlink_dirs:       Completion Variables.
-                                                              (line 190)
+                                                              (line 191)
 * rl_completion_matches:                 Completion Functions.
                                                               (line  45)
 * rl_completion_mode:                    Completion Functions.
                                                               (line  37)
 * rl_completion_query_items:             Completion Variables.
-                                                              (line 149)
+                                                              (line 150)
 * rl_completion_quote_character:         Completion Variables.
-                                                              (line 171)
+                                                              (line 172)
 * rl_completion_suppress_append:         Completion Variables.
-                                                              (line 165)
+                                                              (line 166)
 * rl_completion_suppress_quote:          Completion Variables.
-                                                              (line 177)
+                                                              (line 178)
 * rl_completion_type:                    Completion Variables.
-                                                              (line 240)
+                                                              (line 241)
 * rl_completion_word_break_hook:         Completion Variables.
-                                                              (line 122)
+                                                              (line 123)
 * rl_copy_keymap:                        Keymaps.             (line  17)
 * rl_copy_text:                          Modifying Text.      (line  15)
 * rl_crlf:                               Redisplay.           (line  30)
@@ -4445,19 +4446,19 @@ Function and Variable Index
 * rl_explicit_arg:                       Readline Variables.  (line 261)
 * rl_extend_line_buffer:                 Utility Functions.   (line  27)
 * rl_filename_completion_desired:        Completion Variables.
-                                                              (line 205)
+                                                              (line 206)
 * rl_filename_completion_function:       Completion Functions.
                                                               (line  59)
 * rl_filename_dequoting_function:        Completion Variables.
                                                               (line  37)
 * rl_filename_quote_characters:          Completion Variables.
-                                                              (line 137)
+                                                              (line 138)
 * rl_filename_quoting_desired:           Completion Variables.
-                                                              (line 215)
+                                                              (line 216)
 * rl_filename_quoting_function:          Completion Variables.
                                                               (line  24)
 * rl_filename_rewrite_hook:              Completion Variables.
-                                                              (line  80)
+                                                              (line  81)
 * rl_forced_update_display:              Redisplay.           (line  11)
 * rl_free:                               Utility Functions.   (line  18)
 * rl_free_keymap:                        Keymaps.             (line  30)
@@ -4482,11 +4483,11 @@ Function and Variable Index
 * rl_getc_function:                      Readline Variables.  (line 130)
 * rl_gnu_readline_p:                     Readline Variables.  (line  83)
 * rl_ignore_completion_duplicates:       Completion Variables.
-                                                              (line 201)
+                                                              (line 202)
 * rl_ignore_some_completions_function:   Completion Variables.
                                                               (line  56)
 * rl_inhibit_completion:                 Completion Variables.
-                                                              (line 254)
+                                                              (line 255)
 * rl_initialize:                         Utility Functions.   (line  31)
 * rl_insert_completions:                 Completion Functions.
                                                               (line  32)
@@ -4561,9 +4562,9 @@ Function and Variable Index
                                                               (line 119)
 * rl_show_char:                          Redisplay.           (line  33)
 * rl_sort_completion_matches:            Completion Variables.
-                                                              (line 232)
+                                                              (line 233)
 * rl_special_prefixes:                   Completion Variables.
-                                                              (line 142)
+                                                              (line 143)
 * rl_startup_hook:                       Readline Variables.  (line 115)
 * rl_stuff_char:                         Character Input.     (line  19)
 * rl_terminal_name:                      Readline Variables.  (line  87)
@@ -4667,9 +4668,9 @@ Node: Custom Completers112183
 Node: How Completing Works112903
 Node: Completion Functions116217
 Node: Completion Variables119789
-Node: A Short Completion Example133803
-Node: GNU Free Documentation License146582
-Node: Concept Index171775
-Node: Function and Variable Index173296
+Node: A Short Completion Example133902
+Node: GNU Free Documentation License146681
+Node: Concept Index171874
+Node: Function and Variable Index173395
 
 End Tag Table
