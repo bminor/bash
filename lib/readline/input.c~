@@ -133,7 +133,6 @@ rl_get_char (key)
 #endif
     pop_index = 0;
 
-fprintf(stderr, "rl_get_char: returning 1 (key = %d)\n", *key);
   return (1);
 }
 
@@ -428,17 +427,19 @@ rl_read_key ()
       /* If the user has an event function, then call it periodically. */
       if (rl_event_hook)
 	{
-	  while (rl_event_hook && rl_get_char (&c) == 0)
+	  while (rl_event_hook)
 	    {
-	      (*rl_event_hook) ();
-	      RL_CHECK_SIGNALS ();
-	      if (rl_done)		/* XXX - experimental */
-		return ('\n');
 	      if (rl_gather_tyi () < 0)	/* XXX - EIO */
 		{
 		  rl_done = 1;
 		  return ('\n');
 		}
+	      RL_CHECK_SIGNALS ();
+	      if (rl_get_char (&c) != 0)
+		break;
+	      if (rl_done)		/* XXX - experimental */
+		return ('\n');
+	      (*rl_event_hook) ();
 	    }
 	}
       else

@@ -1,6 +1,6 @@
 /* bashline.c -- Bash's interface to the readline library. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -2876,12 +2876,15 @@ dynamic_complete_history (count, key)
   int r;
   rl_compentry_func_t *orig_func;
   rl_completion_func_t *orig_attempt_func;
+  rl_compignore_func_t *orig_ignore_func;
 
   orig_func = rl_completion_entry_function;
   orig_attempt_func = rl_attempted_completion_function;
+  orig_ignore_func = rl_ignore_some_completions_function;
 
   rl_completion_entry_function = history_completion_generator;
   rl_attempted_completion_function = (rl_completion_func_t *)NULL;
+  rl_ignore_some_completions_function = filename_completion_ignore;
 
   /* XXX - use rl_completion_mode here? */
   if (rl_last_func == dynamic_complete_history)
@@ -2891,6 +2894,8 @@ dynamic_complete_history (count, key)
 
   rl_completion_entry_function = orig_func;
   rl_attempted_completion_function = orig_attempt_func;
+  rl_ignore_some_completions_function = orig_ignore_func;
+
   return r;
 }
 
@@ -2901,14 +2906,17 @@ bash_dabbrev_expand (count, key)
   int r, orig_suppress, orig_sort;
   rl_compentry_func_t *orig_func;
   rl_completion_func_t *orig_attempt_func;
+  rl_compignore_func_t *orig_ignore_func;
 
   orig_func = rl_menu_completion_entry_function;
   orig_attempt_func = rl_attempted_completion_function;
+  orig_ignore_func = rl_ignore_some_completions_function;
   orig_suppress = rl_completion_suppress_append;
   orig_sort = rl_sort_completion_matches;
 
   rl_menu_completion_entry_function = history_completion_generator;
   rl_attempted_completion_function = (rl_completion_func_t *)NULL;
+  rl_ignore_some_completions_function = filename_completion_ignore;
   rl_filename_completion_desired = 0;
   rl_completion_suppress_append = 1;
   rl_sort_completion_matches = 0;
@@ -2923,6 +2931,7 @@ bash_dabbrev_expand (count, key)
   rl_last_func = bash_dabbrev_expand;
   rl_menu_completion_entry_function = orig_func;
   rl_attempted_completion_function = orig_attempt_func;
+  rl_ignore_some_completions_function = orig_ignore_func;
   rl_completion_suppress_append = orig_suppress;
   rl_sort_completion_matches = orig_sort;
 
@@ -2972,16 +2981,19 @@ bash_complete_filename_internal (what_to_do)
   rl_compentry_func_t *orig_func;
   rl_completion_func_t *orig_attempt_func;
   rl_icppfunc_t *orig_dir_func;
+  rl_compignore_func_t *orig_ignore_func;
   /*const*/ char *orig_rl_completer_word_break_characters;
   int r;
 
   orig_func = rl_completion_entry_function;
   orig_attempt_func = rl_attempted_completion_function;
   orig_dir_func = rl_directory_completion_hook;
+  orig_ignore_func = rl_ignore_some_completions_function;
   orig_rl_completer_word_break_characters = rl_completer_word_break_characters;
   rl_completion_entry_function = rl_filename_completion_function;
   rl_attempted_completion_function = (rl_completion_func_t *)NULL;
   rl_directory_completion_hook = (rl_icppfunc_t *)NULL;
+  rl_ignore_some_completions_function = filename_completion_ignore;
   rl_completer_word_break_characters = " \t\n\"\'";
 
   r = rl_complete_internal (what_to_do);
@@ -2989,6 +3001,7 @@ bash_complete_filename_internal (what_to_do)
   rl_completion_entry_function = orig_func;
   rl_attempted_completion_function = orig_attempt_func;
   rl_directory_completion_hook = orig_dir_func;
+  rl_ignore_some_completions_function = orig_ignore_func;
   rl_completer_word_break_characters = orig_rl_completer_word_break_characters;
 
   return r;
@@ -3166,17 +3179,21 @@ bash_specific_completion (what_to_do, generator)
 {
   rl_compentry_func_t *orig_func;
   rl_completion_func_t *orig_attempt_func;
+  rl_compignore_func_t *orig_ignore_func;
   int r;
 
   orig_func = rl_completion_entry_function;
   orig_attempt_func = rl_attempted_completion_function;
+  orig_ignore_func = rl_ignore_some_completions_function;
   rl_completion_entry_function = generator;
   rl_attempted_completion_function = NULL;
+  rl_ignore_some_completions_function = orig_ignore_func;
 
   r = rl_complete_internal (what_to_do);
 
   rl_completion_entry_function = orig_func;
   rl_attempted_completion_function = orig_attempt_func;
+  rl_ignore_some_completions_function = orig_ignore_func;
 
   return r;
 }

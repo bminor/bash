@@ -1,6 +1,6 @@
 /* util.c -- readline utility functions */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -366,41 +366,56 @@ _rl_strpbrk (string1, string2)
 
 #if !defined (HAVE_STRCASECMP)
 /* Compare at most COUNT characters from string1 to string2.  Case
-   doesn't matter. */
+   doesn't matter (strncasecmp). */
 int
 _rl_strnicmp (string1, string2, count)
      char *string1, *string2;
      int count;
 {
-  register char ch1, ch2;
+  register char *s1, *s2;
+  int d;
 
-  while (count)
+  if (count <= 0 || (string1 == string2))
+    return 0;
+
+  s1 = string1;
+  s2 = string2;
+  do
     {
-      ch1 = *string1++;
-      ch2 = *string2++;
-      if (_rl_to_upper(ch1) == _rl_to_upper(ch2))
-	count--;
-      else
+      d = _rl_to_lower (*s1) - _rl_to_lower (*s2);	/* XXX - cast to unsigned char? */
+      if (d != 0)
+	return d;
+      if (*s1++ == '\0')
         break;
+      s2++;
     }
-  return (count);
+  while (--count != 0)
+
+  return (0);
 }
 
-/* strcmp (), but caseless. */
+/* strcmp (), but caseless (strcasecmp). */
 int
 _rl_stricmp (string1, string2)
      char *string1, *string2;
 {
-  register char ch1, ch2;
+  register char *s1, *s2;
+  int d;
 
-  while (*string1 && *string2)
+  s1 = string1;
+  s2 = string2;
+
+  if (s1 == s2)
+    return 0;
+
+  while ((d = _rl_to_lower (*s1) - _rl_to_lower (*s2)) == 0)
     {
-      ch1 = *string1++;
-      ch2 = *string2++;
-      if (_rl_to_upper(ch1) != _rl_to_upper(ch2))
-	return (1);
+      if (*s1++ == '\0')
+        return 0;
+      s2++;
     }
-  return (*string1 - *string2);
+
+  return (d);
 }
 #endif /* !HAVE_STRCASECMP */
 

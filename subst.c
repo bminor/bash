@@ -4,7 +4,7 @@
 /* ``Have a little faith, there's magic in the night.  You ain't a
      beauty, but, hey, you're alright.'' */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1266,9 +1266,8 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
 	  continue;
 	}
 
-#if 0
-      /* Process a nested command substitution, but only if we're parsing a
-	 command substitution.  XXX - bash-4.2 */
+      /* Process a nested command substitution, but only if we're parsing an
+	 arithmetic substitution. */
       if ((flags & SX_COMMAND) && string[i] == '$' && string[i+1] == LPAREN)
         {
           si = i + 2;
@@ -1276,7 +1275,6 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
           i = si + 1;
           continue;
         }
-#endif
 
       /* Process a nested OPENER. */
       if (STREQN (string + i, opener, len_opener))
@@ -1440,7 +1438,7 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
 	  continue;
 	}
 
-#if 1
+#if 0
       /* Pass the contents of single-quoted and double-quoted strings
 	 through verbatim. */
       if (c == '\'' || c == '"')
@@ -1464,7 +1462,7 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
       if (c == '\'')
 	{
 /*itrace("extract_dollar_brace_string: c == single quote flags = %d quoted = %d dolbrace_state = %d", flags, quoted, dolbrace_state);*/
-	  if (posixly_correct && shell_compatibility_level > 41 && dolbrace_state != DOLBRACE_QUOTE)
+	  if (posixly_correct && /*shell_compatibility_level > 41 &&*/ dolbrace_state != DOLBRACE_QUOTE)
 	    ADVANCE_CHAR (string, slen, i);
 	  else
 	    {
@@ -5367,11 +5365,7 @@ command_substitute (string, quoted)
 	 pipline, so what we are concerned about is whether or not that
 	 pipeline was started in the background.  A pipeline started in
 	 the background should never get the tty back here. */
-#if 0
-      if (interactive && pipeline_pgrp != (pid_t)0 && pipeline_pgrp != last_asynchronous_pid)
-#else
       if (interactive && pipeline_pgrp != (pid_t)0 && (subshell_environment & SUBSHELL_ASYNC) == 0)
-#endif
 	give_terminal_to (pipeline_pgrp, 0);
 #endif /* JOB_CONTROL */
 
@@ -5747,16 +5741,11 @@ parameter_brace_expand_rhs (name, value, c, quoted, qdollaratp, hasdollarat)
   else
 #endif /* ARRAY_VARS */
   bind_variable (name, t1, 0);
-#if 1
-  free (t1);
 
-  w->word = temp;
-#else		/* XXX - bash-4.2 */
   /* From Posix group discussion Feb-March 2010.  Issue 7 0000221 */
   free (temp);
 
   w->word = t1;
-#endif
   return w;
 }
 
@@ -7184,8 +7173,9 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 	      FREE (temp);
 	      if (value)
 		{
-		  /* XXX - bash-4.2 */
-		  /* From Posix discussion on austin-group list.  Issue 221 */
+		  /* From Posix discussion on austin-group list.  Issue 221
+		     requires that backslashes escaping `}' inside
+		     double-quoted ${...} be removed. */
 		  if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
 		    quoted |= Q_DOLBRACE;
 		  ret = parameter_brace_expand_rhs (name, value, c,
@@ -7231,8 +7221,9 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 	      if (contains_dollar_at)
 		*contains_dollar_at = 0;
 
-	      /* XXX - bash-4.2 */
-	      /* From Posix discussion on austin-group list.  Issue 221 */
+	      /* From Posix discussion on austin-group list.  Issue 221 requires
+		 that backslashes escaping `}' inside double-quoted ${...} be
+		 removed. */
 	      if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
 		quoted |= Q_DOLBRACE;
 	      ret = parameter_brace_expand_rhs (name, value, c, quoted,
@@ -8051,7 +8042,6 @@ add_string:
 	  else
 	    tflag = 0;
 
-	  /* XXX - bash-4.2 */
 	  /* From Posix discussion on austin-group list:  Backslash escaping
 	     a } in ${...} is removed.  Issue 0000221 */
 	  if ((quoted & Q_DOLBRACE) && c == RBRACE)

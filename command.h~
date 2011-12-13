@@ -105,6 +105,7 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define SUBSHELL_PIPE	0x10	/* subshell from a pipeline element */
 #define SUBSHELL_PROCSUB 0x20	/* subshell caused by <(command) or >(command) */
 #define SUBSHELL_COPROC	0x40	/* subshell from a coproc pipeline */
+#define SUBSHELL_RESETTRAP 0x80	/* subshell needs to reset trap strings on first call to trap */
 
 /* A structure which represents a word. */
 typedef struct word_desc {

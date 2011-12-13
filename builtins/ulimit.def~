@@ -118,7 +118,7 @@ extern int errno;
 #  undef HAVE_RESOURCE
 #endif
 
-#if !HAVE_RESOURCE && HAVE_ULIMIT_H
+#if !defined (HAVE_RESOURCE) && defined (HAVE_ULIMIT_H)
 #  include <ulimit.h>
 #endif
 

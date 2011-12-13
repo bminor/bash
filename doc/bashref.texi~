@@ -522,6 +522,12 @@ the eight-bit character whose value is the octal value @var{nnn}
 @item \x@var{HH}
 the eight-bit character whose value is the hexadecimal value @var{HH}
 (one or two hex digits)
+@item \u@var{HHHH}
+the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+@var{HHHH} (one to four hex digits)
+@item \U@var{HHHHHHHH}
+the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+@var{HHHHHHHH} (one to eight hex digits)
 @item \c@var{x}
 a control-@var{x} character
 @end table
@@ -590,6 +596,7 @@ some other grouping.
 * Lists::			How to execute commands sequentially.
 * Compound Commands::		Shell commands for control flow.
 * Coprocesses::			Two-way communication between commands.
+* GNU Parallel::		Running commands in parallel.
 @end menu
 
 @node Simple Commands
@@ -647,6 +654,12 @@ specifies how the timing information should be displayed.
 The use of @code{time} as a reserved word permits the timing of
 shell builtins, shell functions, and pipelines.  An external
 @code{time} command cannot time these easily.
+
+When the shell is in @sc{posix} mode (@pxref{Bash POSIX Mode}), @code{time}
+may be followed by a newline.  In this case, the shell displays the
+total user and system time consumed by the shell and its children.
+The @env{TIMEFORMAT} variable may be used to specify the format of
+the time information.
 
 If the pipeline is not executed asynchronously (@pxref{Lists}), the
 shell waits for all commands in the pipeline to complete.
@@ -1126,6 +1139,79 @@ builtin command may be used to wait for the coprocess to terminate.
 
 The return status of a coprocess is the exit status of @var{command}.
 
+@node GNU Parallel
+@subsection GNU Parallel
+
+GNU Parallel, as its name suggests, can be used to build and run commands
+in parallel.  You may run the same command with different arguments, whether
+they are filenames, usernames, hostnames, or lines read from files.
+
+For a complete description, refer to the GNU Parallel documentation.  A few
+examples should provide a brief introduction to its use.
+
+For example, it is easy to prefix each line in a text file with a specified
+string:
+@example
+cat file | parallel -k echo prefix_string
+@end example
+
+The @option{-k} option is required to preserve the lines' order.
+
+Similarly, you can append a specified string to each line in a text file:
+@example
+cat file | parallel -k echo @{@} append_string
+@end example
+
+You can use Parallel to move files from the current directory when the
+number of files is too large to process with one @code{mv} invocation:
+@example
+ls | parallel mv @{@} destdir
+@end example
+
+As you can see, the @{@} is replaced with each line read from standard input.
+This will run as many @code{mv} commands as there are files in the current
+directory.  You can emulate a parallel @code{xargs} by adding the @option{-X}
+option:
+@example
+ls | parallel -X mv @{@} destdir
+@end example
+
+GNU Parallel can replace certain common idioms that operate on lines read
+from a file (in this case, filenames):
+@example
+	for x in $(cat list); do
+		do-something1 $x config-$x
+		do-something2 < $x
+	done | process-output
+@end example
+
+with a more compact syntax reminiscent of lambdas:
+@example
+cat list | parallel "do-something1 @{@} config-@{@} ; do-something2 < @{@}" | process-output
+@end example
+
+Parallel provides a built-in mechanism to remove filename extensions, which
+lends itself to batch file transformations or renaming:
+@example
+ls *.gz | parallel -j+0 "zcat @{@} | bzip2 >@{.@}.bz2 && rm @{@}"
+@end example
+
+This will recompress all files in the current directory with names ending
+in .gz using bzip2, running one job per CPU (-j+0)  in parallel.
+
+If a command generates output, you may want to preserve the input order in
+the output.  For instance, the following command
+@example
+@{ echo foss.org.my ; echo debian.org; echo freenetproject.org; @} | parallel traceroute
+@end example
+
+will display as output the traceroute invocation that finishes first.  Using
+the @option{-k} option, as we saw above
+@example
+@{ echo foss.org.my ; echo debian.org; echo freenetproject.org; @} | parallel -k traceroute
+@end example
+will ensure that the output of @code{traceroute foss.org.my} is displayed first.
+
 @node Shell Functions
 @section Shell Functions
 @cindex shell function
@@ -1197,6 +1283,11 @@ and the @env{ERR} trap is not inherited unless the @code{-o errtrace}
 shell option has been enabled.
 @xref{Bourne Shell Builtins}, for the description of the
 @code{trap} builtin.
+
+The @env{FUNCNEST} variable, if set to a numeric value greater
+than 0, defines a maximum function nesting level.  Function
+invocations that exceed the limit cause the entire command to
+abort.
 
 If the builtin command @code{return}
 is executed in a function, the function completes and
@@ -3450,6 +3541,11 @@ If the @code{extdebug} shell option is enabled using @code{shopt}
 (@pxref{The Shopt Builtin}), the source file name and line number where
 the function is defined are displayed as well.
 @option{-F} implies @option{-f}.
+
+The @option{-g} option forces variables to be created or modified at
+the global scope, even when \fBdeclare\fP is executed in a shell function.
+It is ignored in all other cases.
+
 The following options can be used to restrict output to variables with
 the specified attributes or to give variables attributes:
 
@@ -3498,8 +3594,9 @@ with the exceptions that @samp{+a}
 may not be used to destroy an array variable and @samp{+r} will not
 remove the readonly attribute.
 When used in a function, @code{declare} makes each @var{name} local,
-as with the @code{local} command.  If a variable name is followed by
-=@var{value}, the value of the variable is set to @var{value}.
+as with the @code{local} command, unless the @samp{-g} option is used.
+If a variable name is followed by =@var{value}, the value of the variable
+is set to @var{value}.
 
 The return status is zero unless an invalid option is encountered,
 an attempt is made to define a function using @samp{-f foo=bar},
@@ -3557,6 +3654,12 @@ the eight-bit character whose value is the octal value @var{nnn}
 @item \x@var{HH}
 the eight-bit character whose value is the hexadecimal value @var{HH}
 (one or two hex digits)
+@item \u@var{HHHH}
+the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+@var{HHHH} (one to four hex digits)
+@item \U@var{HHHHHHHH}
+the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+@var{HHHHHHHH} (one to eight hex digits)
 @end table
 
 @item enable
@@ -3681,7 +3784,8 @@ Specify the number of lines read between each call to @var{callback}.
 If @option{-C} is specified without @option{-c}, 
 the default quantum is 5000.
 When @var{callback}  is evaluated, it is supplied the index of the next
-array element to be assigned as an additional argument.
+array element to be assigned and the line to be assigned to that element
+as additional arguments.
 @var{callback} is evaluated after the line is read but before the 
 array element is assigned.
 
@@ -4942,6 +5046,11 @@ Assignments to @env{FUNCNAME} have no effect and return an error status.
 If @env{FUNCNAME} is unset, it loses its special properties, even if
 it is subsequently reset.
 
+@item FUNCNEST
+If set to a numeric value greater than 0, defines a maximum function
+nesting level.  Function invocations that exceed this nesting level
+will cause the current command to abort.
+
 @item GLOBIGNORE
 A colon-separated list of patterns defining the set of filenames to
 be ignored by filename expansion.
@@ -5843,9 +5952,12 @@ True if @var{file1} is older than @var{file2},
 or if @var{file2} exists and @var{file1} does not.
 
 @item -o @var{optname}
-True if shell option @var{optname} is enabled.
+True if the shell option @var{optname} is enabled.
 The list of options appears in the description of the @option{-o}
 option to the @code{set} builtin (@pxref{The Set Builtin}).
+
+@item -v @var{varname}
+True if the shell variable @var{varname} is set (has been assigned a value).
 
 @item -z @var{string}
 True if the length of @var{string} is zero.
@@ -6478,6 +6590,11 @@ Non-interactive shells exit if a syntax error in an arithmetic expansion
 results in an invalid expression.
 
 @item
+Non-interactive shells exit if there is a syntax error in a script read
+with the @code{.} or @code{source} builtins, or in a string processed by
+the @code{eval} builtin.
+
+@item
 Redirection operators do not perform filename expansion on the word
 in the redirection unless the shell is interactive.
 
@@ -6494,6 +6611,19 @@ causes a fatal syntax error in non-interactive shells.
 @item
 @sc{posix} special builtins are found before shell functions
 during command lookup.
+
+@item
+The @code{time} reserved word may be used by itself as a command.  When
+used in this way, it displays timing statistics for the shell and its
+completed children.  The @env{TIMEFORMAT} variable controls the format
+of the timing information.
+
+@item
+When parsing and expanding a $@{@dots{}@} expansion that appears within
+double quotes, single quotes are no longer special and cannot be used to
+quote a closing brace or other special character, unless the operator is
+one of those defined to perform pattern removal.  In this case, they do
+not have to appear as matched pairs.
 
 @item
 If a @sc{posix} special builtin returns an error status, a

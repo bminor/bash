@@ -1,6 +1,6 @@
 /* execute_cmd.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -179,7 +179,7 @@ static void execute_subshell_builtin_or_function __P((WORD_LIST *, REDIRECT *,
 						      int, int, int,
 						      struct fd_bitmap *,
 						      int));
-static void execute_disk_command __P((WORD_LIST *, REDIRECT *, char *,
+static int execute_disk_command __P((WORD_LIST *, REDIRECT *, char *,
 				      int, int, int, struct fd_bitmap *, int));
 
 static char *getinterp __P((char *, int, int *));
@@ -271,7 +271,7 @@ static int showing_function_line;
 static int line_number_for_err_trap;
 
 /* A sort of function nesting level counter */
-static int funcnest = 0;
+int funcnest = 0;
 int funcnest_max = 0;		/* XXX - bash-4.2 */
 
 struct fd_bitmap *current_fds_to_close = (struct fd_bitmap *)NULL;
@@ -1219,7 +1219,6 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 
   posix_time = (command->flags & CMD_TIME_POSIX);
 
-#if 0	/* XXX - bash-4.2 */
   nullcmd = (command == 0) || (command->type == cm_simple && command->value.Simple->words == 0 && command->value.Simple->redirects == 0);
   if (posixly_correct && nullcmd)
     {
@@ -1233,7 +1232,6 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       tbefore = shell_start_time;
 #endif
     }
-#endif
 
   old_flags = command->flags;
   command->flags &= ~(CMD_TIME_PIPELINE|CMD_TIME_POSIX);
@@ -1289,11 +1287,9 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
     time_format = POSIX_TIMEFORMAT;
   else if ((time_format = get_string_value ("TIMEFORMAT")) == 0)
     {
-#if 0 /* XXX - bash-4.2 */
       if (posixly_correct && nullcmd)
 	time_format = "user\t%2lU\nsys\t%2lS";
       else
-#endif
 	time_format = BASH_TIMEFORMAT;
     }
   if (time_format && *time_format)
@@ -3878,7 +3874,7 @@ run_builtin:
     simple_command->flags &= ~CMD_NO_FORK;
 #endif
 
-  execute_disk_command (words, simple_command->redirects, command_line,
+  result = execute_disk_command (words, simple_command->redirects, command_line,
 			pipe_in, pipe_out, async, fds_to_close,
 			simple_command->flags);
 
@@ -4040,13 +4036,12 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
 
   USE_VAR(fc);
 
-#if 0	/* XXX - bash-4.2 */
   if (funcnest_max > 0 && funcnest >= funcnest_max)
     {
       internal_error ("%s: maximum function nesting level exceeded (%d)", var->name, funcnest);
+      funcnest = 0;	/* XXX - should we reset it somewhere else? */
       jump_to_top_level (DISCARD);
     }
-#endif
 
 #if defined (ARRAY_VARS)
   GET_ARRAY_FROM_VAR ("FUNCNAME", funcname_v, funcname_a);
@@ -4505,7 +4500,7 @@ setup_async_signals ()
 #  define NOTFOUND_HOOK "command_not_found_handle"
 #endif
 
-static void
+static int
 execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 		      async, fds_to_close, cmdflags)
      WORD_LIST *words;
@@ -4516,7 +4511,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
      int cmdflags;
 {
   char *pathname, *command, **args;
-  int nofork;
+  int nofork, result;
   pid_t pid;
   SHELL_VAR *hookf;
   WORD_LIST *wl;
@@ -4524,13 +4519,14 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
   nofork = (cmdflags & CMD_NO_FORK);  /* Don't fork, just exec, if no pipes */
   pathname = words->word->word;
 
+  result = EXECUTION_SUCCESS;
 #if defined (RESTRICTED_SHELL)
   command = (char *)NULL;
   if (restricted && mbschr (pathname, '/'))
     {
       internal_error (_("%s: restricted: cannot specify `/' in command names"),
 		    pathname);
-      last_command_exit_value = EXECUTION_FAILURE;
+      result = last_command_exit_value = EXECUTION_FAILURE;
 
       /* If we're not going to fork below, we must already be in a child
          process or a context in which it's safe to call exit(2).  */
@@ -4644,6 +4640,7 @@ parent_return:
         unlink_fifo_list ();
 #endif
       FREE (command);
+      return (result);
     }
 }
 

@@ -433,7 +433,7 @@ show_var_attributes (var, pattr, nodefs)
     printf ("%s\n", var->name);
   else if (function_p (var))
     printf ("%s\n", named_function_string (var->name, function_cell (var), FUNC_MULTILINE|FUNC_EXTERNAL));
-  else if (invisible_p (var) || var_isnull (var))
+  else if (invisible_p (var) || var_isset (var) == 0)
     printf ("%s\n", var->name);
   else
     {

@@ -164,7 +164,8 @@ exec_builtin (list)
   if (argv0)
     {
       free (args[0]);
-      exec_argv0 = args[0] = login ? mkdashname (argv0) : savestring (argv0);
+      args[0] = login ? mkdashname (argv0) : savestring (argv0);
+      exec_argv0 = savestring (args[0]);
     }
   else if (login)
     {

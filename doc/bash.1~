@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sat Apr 17 23:24:15 EDT 2010
+.\"	Last Change: Sat May 29 20:59:17 EDT 2010
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2010 April 17" "GNU Bash-4.1"
+.TH BASH 1 "2010 May 29" "GNU Bash-4.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -565,6 +565,15 @@ under
 .B "Shell Variables"
 below.
 .PP
+When the shell is in \fIposix mode\fP, \fBtime\fP
+may be followed by a newline.  In this case, the shell displays the
+total user and system time consumed by the shell and its children.
+The
+.SM
+.B TIMEFORMAT
+variable may be used to specify the format of
+the time information.
+.PP
 Each command in a pipeline is executed as a separate process (i.e., in a
 subshell).
 .SS Lists
@@ -1103,6 +1112,14 @@ the eight-bit character whose value is the octal value \fInnn\fP
 .B \ex\fIHH\fP
 the eight-bit character whose value is the hexadecimal value \fIHH\fP
 (one or two hex digits)
+.TP
+.B \eu\fIHHHH\fP
+the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+\fIHHHH\fP (one to four hex digits)
+.TP
+.B \eU\fIHHHHHHHH\fP
+the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+\fIHHHHHHHH\fP (one to eight hex digits)
 .TP
 .B \ec\fIx\fP
 a control-\fIx\fP character
@@ -1872,6 +1889,11 @@ is excluded from the list of matched filenames.
 A sample value is
 .if t \f(CW".o:~"\fP.
 .if n ".o:~".
+.TP
+.B FUNCNEST
+If set to a numeric value greater than 0, defines a maximum function
+nesting level.  Function invocations that exceed this nesting level
+will cause the current command to abort.
 .TP
 .B GLOBIGNORE
 A colon-separated list of patterns defining the set of filenames to
@@ -3773,6 +3795,11 @@ Variables local to the function may be declared with the
 builtin command.  Ordinarily, variables and their values
 are shared between the function and its caller.
 .PP
+The \fBFUNCNEST\fP variable, if set to a numeric value greater
+than 0, defines a maximum function nesting level.  Function
+invocations that exceed the limit cause the entire command to
+abort.
+.PP
 If the builtin command
 .B return
 is executed in a function, the function completes and
@@ -4013,7 +4040,7 @@ True if \fIfile1\fP is older than \fIfile2\fP, or if \fIfile2\fP exists
 and \fIfile1\fP does not.
 .TP
 .B \-o \fIoptname\fP
-True if shell option
+True if the shell option
 .I optname
 is enabled.
 See the list of options under the description of the
@@ -4021,6 +4048,11 @@ See the list of options under the description of the
 option to the
 .B set
 builtin below.
+.TP
+.B \-v \fIvarname\fP
+True if the shell variable
+.I varname
+is set (has been assigned a value).
 .TP
 .B \-z \fIstring\fP
 True if the length of \fIstring\fP is zero.
@@ -7050,10 +7082,10 @@ is greater than the number of enclosing loops, the last enclosing loop
 (the ``top-level'' loop) is resumed.
 The return value is 0 unless \fIn\fP is not greater than or equal to 1.
 .TP
-\fBdeclare\fP [\fB\-aAfFilrtux\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP] ...]
+\fBdeclare\fP [\fB\-aAfFgilrtux\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP] ...]
 .PD 0
 .TP
-\fBtypeset\fP [\fB\-aAfFilrtux\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP] ...]
+\fBtypeset\fP [\fB\-aAfFgilrtux\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP] ...]
 .PD
 Declare variables and/or give them attributes.
 If no \fIname\fPs are given then display the values of variables.
@@ -7082,6 +7114,11 @@ are displayed as well.  The
 .B \-F
 option implies
 .BR \-f .
+The
+.B \-g
+option forces variables to be created or modified at the global scope,
+even when \fBdeclare\fP is executed in a shell function.
+It is ignored in all other cases.
 The following options can
 be used to restrict output to variables with the specified attribute or
 to give variables attributes:
@@ -7136,11 +7173,11 @@ turns off the attribute instead,
 with the exceptions that \fB+a\fP
 may not be used to destroy an array variable and \fB+r\fP will not
 remove the readonly attribute.
-When used in a function,
-makes each
+When used in a function, makes each
 \fIname\fP local, as with the 
 .B local
-command.
+command,
+unless the \fB\-g\P option is supplied,
 If a variable name is followed by =\fIvalue\fP, the value of
 the variable is set to \fIvalue\fP.
 The return value is 0 unless an invalid option is encountered,
@@ -7293,6 +7330,14 @@ the eight-bit character whose value is the octal value \fInnn\fP
 .B \ex\fIHH\fP
 the eight-bit character whose value is the hexadecimal value \fIHH\fP
 (one or two hex digits)
+.TP
+.B \eu\fIHHHH\fP
+the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+\fIHHHH\fP (one to four hex digits)
+.TP
+.B \eU\fIHHHHHHHH\fP
+the Unicode (ISO/IEC 10646) character whose value is the hexadecimal value
+\fIHHHHHHHH\fP (one to eight hex digits)
 .PD
 .RE
 .TP
@@ -7988,7 +8033,8 @@ is specified without
 .BR \-c ,
 the default quantum is 5000.
 When \fIcallback\fP is evaluated, it is supplied the index of the next
-array element to be assigned as an additional argument.
+array element to be assigned and the line to be assigned to that element
+as additional arguments.
 \fIcallback\fP is evaluated after the line is read but before the 
 array element is assigned.
 .PP
@@ -8052,32 +8098,49 @@ directory change fails.
 \fBprintf\fP [\fB\-v\fP \fIvar\fP] \fIformat\fP [\fIarguments\fP]
 Write the formatted \fIarguments\fP to the standard output under the
 control of the \fIformat\fP.
+The \fB\-v\fP option causes the output to be assigned to the variable
+\fIvar\fP rather than being printed to the standard output.
+.sp 1
 The \fIformat\fP is a character string which contains three types of objects:
 plain characters, which are simply copied to standard output, character
 escape sequences, which are converted and copied to the standard output, and
 format specifications, each of which causes printing of the next successive
 \fIargument\fP.
-In addition to the standard \fIprintf\fP(1) formats, \fB%b\fP causes
+In addition to the standard \fIprintf\fP(1) format specifications,
+\fBprintf\fP interprets the following extensions:
+.RS
+.PD 0
+.TP
+.B %b
+causes
 \fBprintf\fP to expand backslash escape sequences in the corresponding
 \fIargument\fP (except that \fB\ec\fP terminates output, backslashes in
 \fB\e\(aq\fP, \fB\e"\fP, and \fB\e?\fP are not removed, and octal escapes
-beginning with \fB\e0\fP may contain up to four digits),
-and \fB%q\fP causes \fBprintf\fP to output the corresponding
+beginning with \fB\e0\fP may contain up to four digits).
+.TP
+.B %q
+causes \fBprintf\fP to output the corresponding
 \fIargument\fP in a format that can be reused as shell input.
-.sp 1
+.TP
+.B %(\fIdatefmt\fP)T
+causes \fBprintf\fP to output the date-time string resulting from using
+\fIdatefmt\fP as a format string for \fIstrftime\fP(3).  The corresponding
+\fIargument\fP is an integer representing the number of seconds since the
+epoch.  Two special argument values may be used: -1 represents the current
+time, and -2 represents the time the shell was invoked.
+.PD
+.PP
 Arguments to non-string format specifiers are treated as C constants,
 except that a leading plus or minus sign is allowed, and if the leading
 character is a single or double quote, the value is the ASCII value of
 the following character.
-.sp 1
-The \fB\-v\fP option causes the output to be assigned to the variable
-\fIvar\fP rather than being printed to the standard output.
-.sp 1
+.PP
 The \fIformat\fP is reused as necessary to consume all of the \fIarguments\fP.
 If the \fIformat\fP requires more \fIarguments\fP than are supplied, the
 extra format specifications behave as if a zero value or null string, as
-appropriate, had been supplied.  The return value is zero on success,
-non-zero on failure.
+appropriate, had been supplied.
+The return value is zero on success, non-zero on failure.
+.RE
 .TP
 \fBpushd\fP [\fB\-n\fP] [+\fIn\fP] [\-\fIn\fP]
 .PD 0

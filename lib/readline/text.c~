@@ -1495,6 +1495,9 @@ _rl_char_search_internal (count, dir, schar)
   int prepos;
 #endif
 
+  if (dir == 0)
+    return -1;
+
   pos = rl_point;
   inc = (dir < 0) ? -1 : 1;
   while (count)

@@ -114,7 +114,7 @@ extern int get_current_prompt_level __P((void));
 extern void set_current_prompt_level __P((int));
 
 #if defined (HISTORY)
-extern char *history_delimiting_chars __P((void));
+extern char *history_delimiting_chars __P((const char *));
 #endif
 
 /* Declarations for functions defined in locale.c */
@@ -454,6 +454,9 @@ extern int uconvert __P((char *, long *, long *));
 /* declarations for functions defined in lib/sh/ufuncs.c */
 extern unsigned int falarm __P((unsigned int, unsigned int));
 extern unsigned int fsleep __P((unsigned int, unsigned int));
+
+/* declarations for functions defined in lib/sh/unicode.c */
+extern int u32cconv __P((unsigned long, char *));
 
 /* declarations for functions defined in lib/sh/winsize.c */
 extern void get_new_window_size __P((int, int *, int *));

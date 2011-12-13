@@ -176,6 +176,10 @@ static struct lvalue lastlval = {0, 0, 0, -1};
 static int	_is_arithop __P((int));
 static void	readtok __P((void));	/* lexical analyzer */
 
+static void	init_lvalue __P((struct lvalue *));
+static struct lvalue *alloc_lvalue __P((void));
+static void	free_lvalue __P((struct lvalue *));
+
 static intmax_t	expr_streval __P((char *, int, struct lvalue *));
 static intmax_t	strlong __P((char *));
 static void	evalerror __P((const char *));
@@ -321,7 +325,7 @@ expr_bind_array_element (tok, ind, rhs)
   size_t llen;
   char ibuf[INT_STRLEN_BOUND (arrayind_t) + 1], *istr;
 
-  istr = fmtulong (ind, 10, ibuf, sizeof (ibuf), 0);
+  istr = fmtumax (ind, 10, ibuf, sizeof (ibuf), 0);
   vname = array_variable_name (tok, (char **)NULL, (int *)NULL);
 
   llen = strlen (vname) + sizeof (ibuf) + 3;
@@ -401,12 +405,14 @@ subexpr (expr)
     return (0);
 
   pushexp ();
-  curtok = lasttok = 0;
   expression = savestring (expr);
   tp = expression;
 
+  curtok = lasttok = 0;
   tokstr = (char *)NULL;
   tokval = 0;
+  init_lvalue (&curlval);
+  lastlval = curlval;
 
   readtok ();
 
@@ -955,15 +961,22 @@ exp0 ()
   return (val);
 }
 
+static void
+init_lvalue (lv)
+     struct lvalue *lv;
+{
+  lv->tokstr = 0;
+  lv->tokvar = 0;
+  lv->tokval = lv->ind = -1;
+}
+
 static struct lvalue *
 alloc_lvalue ()
 {
   struct lvalue *lv;
 
   lv = xmalloc (sizeof (struct lvalue));
-  lv->tokstr = 0;
-  lv->tokvar = 0;
-  lv->tokval = lv->ind = -1;
+  init_lvalue (lv);
   return (lv);
 }
 

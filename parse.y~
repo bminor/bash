@@ -250,6 +250,9 @@ int extended_quote = 1;
 /* The number of lines read from input while creating the current command. */
 int current_command_line_count;
 
+/* The number of lines in a command saved while we run parse_and_execute */
+int saved_command_line_count;
+
 /* The token that currently denotes the end of parse. */
 int shell_eof_token;
 
@@ -1186,30 +1189,18 @@ simple_list1:	simple_list1 AND_AND newline_list simple_list1
 	;
 
 pipeline_command: pipeline
-			{ $$ = $1; }
-	|	BANG pipeline
+			{ $$ = $1; }			
+	|	BANG pipeline_command
 			{
 			  if ($2)
-			    $2->flags |= CMD_INVERT_RETURN;
+			    $2->flags ^= CMD_INVERT_RETURN;	/* toggle */
 			  $$ = $2;
 			}
-	|	timespec pipeline
+	|	timespec pipeline_command
 			{
 			  if ($2)
 			    $2->flags |= $1;
 			  $$ = $2;
-			}
-	|	timespec BANG pipeline
-			{
-			  if ($3)
-			    $3->flags |= $1|CMD_INVERT_RETURN;
-			  $$ = $3;
-			}
-	|	BANG timespec pipeline
-			{
-			  if ($3)
-			    $3->flags |= $2|CMD_INVERT_RETURN;
-			  $$ = $3;
 			}
 	|	timespec list_terminator
 			{
@@ -1228,7 +1219,24 @@ pipeline_command: pipeline
 			  if ($2 == '\n')
 			    token_to_read = '\n';
 			}
-			
+	|	BANG list_terminator
+			{
+			  ELEMENT x;
+
+			  /* This is just as unclean.  Posix says that `!'
+			     by itself should be equivalent to `false'.
+			     We cheat and push a
+			     newline back if the list_terminator was a newline
+			     to avoid the double-newline problem (one to
+			     terminate this, one to terminate the command) */
+			  x.word = 0;
+			  x.redirect = 0;
+			  $$ = make_simple_command (x, (COMMAND *)NULL);
+			  $$->flags |= CMD_INVERT_RETURN;
+			  /* XXX - let's cheat and push a newline back */
+			  if ($2 == '\n')
+			    token_to_read = '\n';
+			}
 	;
 
 pipeline:	pipeline '|' newline_list pipeline
@@ -2660,6 +2668,9 @@ time_command_acceptable ()
     case ELSE:
     case '{':		/* } */
     case '(':		/* ) */
+    case BANG:		/* ! time pipeline */
+    case TIME:		/* time time pipeline */
+    case TIMEOPT:	/* time -p time pipeline */
       return 1;
     default:
       return 0;
@@ -2771,13 +2782,6 @@ special_case_tokens (tokstr)
   /* Handle -p after `time'. */
   if (last_read_token == TIME && tokstr[0] == '-' && tokstr[1] == 'p' && !tokstr[2])
     return (TIMEOPT);
-#endif
-
-#if 0
-#if defined (COMMAND_TIMING)
-  if (STREQ (token, "time") && ((parser_state & PST_CASEPAT) == 0) && time_command_acceptable ())
-    return (TIME);
-#endif /* COMMAND_TIMING */
 #endif
 
 #if defined (COND_COMMAND) /* [[ */
@@ -3229,7 +3233,6 @@ parse_matched_pair (qc, open, close, lenp, flags)
       if MBTEST(ch == '\\')			/* backslashes */
 	tflags |= LEX_PASSNEXT;
 
-#if 0	/* XXX - bash-4.2 */
       /* Based on which dolstate is currently in (param, op, or word),
 	 decide what the op is.  We're really only concerned if it's % or
 	 #, so we can turn on a flag that says whether or not we should
@@ -3247,17 +3250,17 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	  else if MBTEST(dolbrace_state == DOLBRACE_OP && strchr ("#%^,~:-=?+/", ch) == 0)
 	    dolbrace_state = DOLBRACE_WORD;
         }
-#endif
 
-#if 0 /* XXX - bash-4.2 */
       /* The big hammer.  Single quotes aren't special in double quotes.  The
          problem is that Posix used to say the single quotes are semi-special:
          within a double-quoted ${...} construct "an even number of
          unescaped double-quotes or single-quotes, if any, shall occur." */
-      /* This was changed in Interp 221 */
-      if MBTEST(/*posixly_correct && shell_compatibility_level > 41 &&*/ dolbrace_state == DOLBRACE_QUOTE && (flags & P_DQUOTE) && (flags & P_DOLBRACE) && ch == '\'')
+      /* This was changed in Austin Group Interp 221 */
+      if MBTEST(posixly_correct && /*shell_compatibility_level > 41 &&*/ dolbrace_state != DOLBRACE_QUOTE && (flags & P_DQUOTE) && (flags & P_DOLBRACE) && ch == '\'')
+{
+itrace("parse_matched_pair: found single quote in double-quoted dolbrace");
 	continue;
-#endif
+}
 
       /* Could also check open == '`' if we want to parse grouping constructs
 	 inside old-style command substitution. */
@@ -3367,13 +3370,12 @@ parse_comsub (qc, open, close, lenp, flags)
   char *ret, *nestret, *ttrans, *heredelim;
   int retind, retsize, rflags, hdlen;
 
-#if 0	/* XXX - bash-4.2 -- jwm@horde.net */
-  /* Assume $(( introduces arithmetic command and parse accordingly. */
+  /* Posix interp 217 says arithmetic expressions have precedence, so
+     assume $(( introduces arithmetic expansion and parse accordingly. */
   peekc = shell_getc (0);
   shell_ungetc (peekc);
   if (peekc == '(')
     return (parse_matched_pair (qc, open, close, lenp, 0));
-#endif
 
 /*itrace("parse_comsub: qc = `%c' open = %c close = %c", qc, open, close);*/
   count = 1;
@@ -5217,7 +5219,7 @@ decode_prompt_string (string)
 		      {
 			t = strrchr (t_string, '/');
 			if (t)
-			  strcpy (t_string, t + 1);
+			  memmove (t_string, t + 1, strlen (t) - 1);
 		      }
 		  }
 #undef ROOT_PATH

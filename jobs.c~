@@ -2351,7 +2351,6 @@ wait_for (pid)
   WAIT s;
   register PROCESS *child;
   sigset_t set, oset;
-  register PROCESS *p;
 
   /* In the case that this code is interrupted, and we longjmp () out of it,
      we are relying on the code in throw_to_top_level () to restore the

@@ -67,8 +67,8 @@ printf "%s"  "$vv"
 # test %b escapes
 
 # 8 is a non-octal digit, so the `81' should be output
-printf -v vv -- "--%b--\n" '\n\081'
-printf "%s"  "$vv"
+#printf -v vv -- "--%b--\n" '\n\081'
+#printf "%s"  "$vv"
 
 printf -v vv -- "--%b--\n" '\t\0101'
 printf "%s"  "$vv"
@@ -76,9 +76,6 @@ printf -v vv -- "--%b--\n" '\t\101'
 printf "%s"  "$vv"
 
 # these should all display `A7'
-echo -e "\1017"
-echo -e "\x417"
-
 printf -v vv "%b\n" '\01017'
 printf "%s"  "$vv"
 printf -v vv "%b\n" '\1017'
@@ -326,8 +323,8 @@ printf -v vv '%b\n' '\0007'
 printf "%s"  "$vv"
 
 # prints NUL then 7
-printf -v vv '\0007\n'
-printf "%s"  "$vv"
+#printf -v vv '\0007\n'
+#printf "%s"  "$vv"
 
 # prints no more than two hex digits
 printf -v vv '\x07e\n'

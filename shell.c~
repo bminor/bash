@@ -1417,7 +1417,7 @@ open_shell_script (script_name)
 
   free (dollar_vars[0]);
   dollar_vars[0] = exec_argv0 ? savestring (exec_argv0) : savestring (script_name);
-  if (exec_argv[0])
+  if (exec_argv0)
     {
       free (exec_argv0);
       exec_argv0 = (char *)NULL;

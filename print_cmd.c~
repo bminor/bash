@@ -113,6 +113,12 @@ FILE *xtrace_fp = 0;
 
 #define CHECK_XTRACE_FP	xtrace_fp = (xtrace_fp ? xtrace_fp : stderr)
 
+#define PRINT_DEFERRED_HEREDOCS(x) \
+  do { \
+    if (deferred_heredocs) \
+      print_deferred_heredocs (x); \
+  } while (0)
+
 /* Non-zero means the stuff being printed is inside of a function def. */
 static int inside_function_def;
 static int skip_this_indent;
@@ -293,8 +299,7 @@ make_command_string_internal (command)
 	    }
 
 	  make_command_string_internal (command->value.Connection->second);
-	  if (deferred_heredocs)
-	    print_deferred_heredocs ("");
+	  PRINT_DEFERRED_HEREDOCS ("");
 	  printing_connection--;	  	  
 	  break;
 
@@ -560,15 +565,15 @@ print_for_command (for_command)
      FOR_COM *for_command;
 {
   print_for_command_head (for_command);
-
   cprintf (";");
   newline ("do\n");
+
   indentation += indentation_amount;
   make_command_string_internal (for_command->action);
-  if (deferred_heredocs)
-    print_deferred_heredocs ("");
+  PRINT_DEFERRED_HEREDOCS ("");
   semicolon ();
   indentation -= indentation_amount;
+
   newline ("done");
 }
 
@@ -622,6 +627,7 @@ print_select_command (select_command)
   newline ("do\n");
   indentation += indentation_amount;
   make_command_string_internal (select_command->action);
+  PRINT_DEFERRED_HEREDOCS ("");
   semicolon ();
   indentation -= indentation_amount;
   newline ("done");
@@ -705,6 +711,7 @@ print_case_clauses (clauses)
       indentation += indentation_amount;
       make_command_string_internal (clauses->action);
       indentation -= indentation_amount;
+      PRINT_DEFERRED_HEREDOCS ("");
       if (clauses->flags & CASEPAT_FALLTHROUGH)
 	newline (";&");
       else if (clauses->flags & CASEPAT_TESTNEXT)
@@ -738,10 +745,12 @@ print_until_or_while (while_command, which)
   cprintf ("%s ", which);
   skip_this_indent++;
   make_command_string_internal (while_command->test);
+  PRINT_DEFERRED_HEREDOCS ("");
   semicolon ();
   cprintf (" do\n");	/* was newline ("do\n"); */
   indentation += indentation_amount;
   make_command_string_internal (while_command->action);
+  PRINT_DEFERRED_HEREDOCS ("");
   indentation -= indentation_amount;
   semicolon ();
   newline ("done");
@@ -758,6 +767,7 @@ print_if_command (if_command)
   cprintf (" then\n");
   indentation += indentation_amount;
   make_command_string_internal (if_command->true_case);
+  PRINT_DEFERRED_HEREDOCS ("");
   indentation -= indentation_amount;
 
   if (if_command->false_case)
@@ -766,6 +776,7 @@ print_if_command (if_command)
       newline ("else\n");
       indentation += indentation_amount;
       make_command_string_internal (if_command->false_case);
+      PRINT_DEFERRED_HEREDOCS ("");
       indentation -= indentation_amount;
     }
   semicolon ();
@@ -945,7 +956,7 @@ print_deferred_heredocs (cstring)
       cprintf (" ");
       print_heredoc_header (hdtail);
     }
-  if (cstring[0] != ';' || cstring[1])
+  if (cstring[0] && (cstring[0] != ';' || cstring[1]))
     cprintf ("%s", cstring); 
   if (deferred_heredocs)
     cprintf ("\n");

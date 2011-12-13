@@ -44,6 +44,10 @@
 #  endif
 #endif
 
+#if !defined (STREQ)
+#  define STREQ(a, b) ((a)[0] == (b)[0] && strcmp ((a), (b)) == 0)
+#endif /* !STREQ */
+
 #if defined (HAVE_LOCALE_CHARSET)
 extern const char *locale_charset __P((void));
 #else

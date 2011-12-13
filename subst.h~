@@ -253,11 +253,13 @@ extern WORD_LIST *expand_words_shellexp __P((WORD_LIST *));
 extern WORD_DESC *command_substitute __P((char *, int));
 extern char *pat_subst __P((char *, char *, char *, int));
 
-extern char *copy_fifo_list __P((int *));
 extern int fifos_pending __P((void));
 extern int num_fifos __P((void));
 extern void unlink_fifo_list __P((void));
 extern void unlink_fifo __P((int));
+
+extern char *copy_fifo_list __P((int *));
+extern void unlink_new_fifos __P((char *, int));
 
 extern WORD_LIST *list_string_with_quotes __P((char *));
 

@@ -608,6 +608,15 @@ get_original_signal (sig)
 }
 
 void
+get_all_original_signals ()
+{
+  register int i;
+
+  for (i = 1; i < NSIG; i++)
+    GET_ORIGINAL_SIGNAL (i);
+}
+
+void
 set_original_signal (sig, handler)
      int sig;
      SigHandler *handler;

@@ -119,6 +119,7 @@ static char **remove_duplicate_matches PARAMS((char **));
 static void insert_match PARAMS((char *, int, int, char *));
 static int append_to_match PARAMS((char *, int, int, int));
 static void insert_all_matches PARAMS((char **, int, char *));
+static int complete_fncmp PARAMS((const char *, int, const char *, int));
 static void display_matches PARAMS((char **));
 static int compute_lcd_of_matches PARAMS((char **, int, const char *));
 static int postprocess_matches PARAMS((char ***, int));
@@ -158,8 +159,12 @@ int _rl_print_completions_horizontally;
 #if defined (__MSDOS__) && !defined (__DJGPP__)
 int _rl_completion_case_fold = 1;
 #else
-int _rl_completion_case_fold;
+int _rl_completion_case_fold = 0;
 #endif
+
+/* Non-zero means that `-' and `_' are equivalent when comparing filenames
+  for completion. */
+int _rl_completion_case_map = 0;
 
 /* If zero, don't match hidden files (filenames beginning with a `.' on
    Unix) when doing filename completion. */
@@ -2056,6 +2061,62 @@ rl_username_completion_function (text, state)
 #endif /* !__WIN32__ && !__OPENNT */
 }
 
+/* Return non-zero if CONVFN matches FILENAME up to the length of FILENAME
+   (FILENAME_LEN).  If _rl_completion_case_fold is set, compare without
+   regard to the alphabetic case of characters.  CONVFN is the possibly-
+   converted directory entry; FILENAME is what the user typed. */
+static int
+complete_fncmp (convfn, convlen, filename, filename_len)
+     const char *convfn;
+     int convlen;
+     const char *filename;
+     int filename_len;
+{
+  register char *s1, *s2;
+  int d, len;
+
+  /* Otherwise, if these match up to the length of filename, then
+     it is a match. */
+  if (_rl_completion_case_fold && _rl_completion_case_map)
+    {
+      /* Case-insensitive comparison treating _ and - as equivalent */
+      if (filename_len == 0)
+	return 1;
+      if (convlen < filename_len)
+	return 0;
+      s1 = convfn;
+      s2 = filename;
+      len = filename_len;
+      do
+	{
+	  d = _rl_to_lower (*s1) - _rl_to_lower (*s2);
+	  /* *s1 == [-_] && *s2 == [-_] */
+	  if ((*s1 == '-' || *s1 == '_') && (*s2 == '-' || *s2 == '_'))
+	    d = 0;
+	  if (d != 0)
+	    return 0;
+	  s1++; s2++;	/* already checked convlen >= filename_len */
+	}
+      while (--len != 0);
+      return 1;
+    }
+  else if (_rl_completion_case_fold)
+    {
+      if ((_rl_to_lower (convfn[0]) == _rl_to_lower (filename[0])) &&
+	  (convlen >= filename_len) &&
+	  (_rl_strnicmp (filename, convfn, filename_len) == 0))
+	return 1;
+    }
+  else
+    {
+      if ((convfn[0] == filename[0]) &&
+	  (convlen >= filename_len) &&
+	  (strncmp (filename, convfn, filename_len) == 0))
+	return 1;
+    }
+  return 0;
+}
+
 /* Okay, now we write the entry_function for filename completion.  In the
    general case.  Note that completion in the shell is a little different
    because of all the pathnames that must be followed when looking up the
@@ -2198,22 +2259,8 @@ rl_filename_completion_function (text, state)
 	}
       else
 	{
-	  /* Otherwise, if these match up to the length of filename, then
-	     it is a match. */
-	  if (_rl_completion_case_fold)
-	    {
-	      if ((_rl_to_lower (convfn[0]) == _rl_to_lower (filename[0])) &&
-		  (convlen >= filename_len) &&
-		  (_rl_strnicmp (filename, convfn, filename_len) == 0))
-		break;
-	    }
-	  else
-	    {
-	      if ((convfn[0] == filename[0]) &&
-		  (convlen >= filename_len) &&
-		  (strncmp (filename, convfn, filename_len) == 0))
-		break;
-	    }
+	  if (complete_fncmp (convfn, convlen, filename, filename_len))
+	    break;
 	}
     }
 

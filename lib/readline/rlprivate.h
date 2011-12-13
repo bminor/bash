@@ -1,7 +1,7 @@
 /* rlprivate.h -- functions and variables global to the readline library,
 		  but not intended for use by applications. */
 
-/* Copyright (C) 1999-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2010 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -120,7 +120,28 @@ typedef struct __rl_keyseq_context
   int childval;
 } _rl_keyseq_cxt;
 
-  /* fill in more as needed */
+/* vi-mode commands that use result of motion command to define boundaries */
+#define VIM_DELETE	0x01
+#define VIM_CHANGE	0x02
+#define VIM_YANK	0x04
+
+/* various states for vi-mode commands that use motion commands.  reflects
+   RL_READLINE_STATE */
+#define VMSTATE_READ	0x01
+#define VMSTATE_NUMARG	0x02
+
+typedef struct __rl_vimotion_context
+{
+  int op;
+  int state;
+  int flags;		/* reserved */
+  _rl_arg_cxt ncxt;
+  int numeric_arg;
+  int start, end;	/* rl_point, rl_end */
+  int key, motion;	/* initial key, motion command */
+} _rl_vimotion_cxt;
+
+/* fill in more as needed */
 /* `Generic' callback data and functions */
 typedef struct __rl_callback_generic_arg 
 {
@@ -388,6 +409,7 @@ extern int _rl_completion_prefix_display_length;
 extern int _rl_completion_columns;
 extern int _rl_print_completions_horizontally;
 extern int _rl_completion_case_fold;
+extern int _rl_completion_case_map;
 extern int _rl_match_hidden_files;
 extern int _rl_page_completions;
 extern int _rl_skip_completed_text;

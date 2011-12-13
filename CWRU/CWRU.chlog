@@ -9831,3 +9831,217 @@ lib/sh/strtrans.c
 doc/{bash.1,bashref.texi}
 	- document new \u and \U escape sequences for $'...' and echo (printf
 	  defers to the system's man page or Posix)
+
+				   5/24
+				   ----
+execute_cmd.c
+	- change execute_disk_command to return a status, instead of just
+	  leaving it in `last_command_exit_value', since the parent's return
+	  value is sometimes uses (e.g., when a restricted shell refuses to
+	  run a command with a `/').  Fixes bug reported by David Pitt
+	  <David.Pitt@anz.com>
+
+				   5/25
+				   ----
+bashline.c
+	- change bash completion functions to save and restore the value of
+	  rl_ignore_some_completions_function, and set it to the bash default
+	  of filename_completion_ignore where appropriate.  Fixes bug
+	  reported by Henning Bekel <h.bekel@googlemail.com>
+
+variables.c
+	- new convenience function: find_global_variable (name).  Looks for
+	  NAME in the global variables table, skipping any local and
+	  temporary environment variables
+
+builtins/declare.def
+	- add new -g option to declare/typeset/local, forces variables to be
+	  created or modified at the global scope when executing inside a
+	  shell function.  Requested by many, most recently by
+	  konsolebox@gmail.com
+
+				   5/27
+				   ----
+test.c
+	- added new `-v var' unary test operator; returns TRUE if var is set
+	  (i.e., has been assigned a value).  Works in both test builtin and
+	  [[ conditional command
+
+doc/{bash.1,bashref.texi}
+	- documented new `-v var' unary conditional operator
+
+tests/test.tests
+	- added tests for new -v var operator
+
+builtins/kill.def
+	- change kill builtin so -PID (pgrp specification) following a
+	  -s sig or -n sig option is not interpreted as a signal specification.
+	  Fixes bug reported by Roman Rakus <rrakus@redhat.com>
+
+builtins/evalstring.c
+	- in parse_and_execute, if parse_command() returns non-zero,
+	  indicating a parse error, exit the shell if the conditions require
+	  a posix-mode non-interactive shell to abort (parse error in a `.'
+	  script or eval string).  Bash-4.1 only printed a warning.  This is
+	  from Austin Group interp 114
+
+doc/bashref.texi
+	- add note to the posix mode section of the texinfo manual noting
+	  the changed behavior for `.' and `eval'
+
+parse.y
+	- change time_command_acceptable to allow TIME token to appear after
+	  BANG token (to allow `! time foo', which is supposed to be valid)
+	- change pipeline_command production to allow multiple instances of
+	  `!' (which toggle inverting the return status) and `time' (which
+	  have no effect)
+
+execute_cmd.c
+	- In posix mode, `time' without a following pipeline prints the
+	  elapsed user, system, and real time for the shell and its
+	  children since the shell was invoked.
+	  It's like `times' but obeys the setting of TIMEFORMAT.  A future
+	  revision of Posix will require this
+
+doc/{bashref.texi,bash.1}
+	- document new posix mode use of `time' 
+
+parse.y
+	- add production to pipeline_command that permits `!' by itself to
+	  be equivalent to `false' (and, with the changes above, permits
+	  `! !' to be roughly equivalent to `true').  A future revision of
+	  Posix will require this
+
+				   5/28
+				   ----
+parse.y
+	- fix \W prompt expansion to use memmove instead of strcpy, since the
+	  source and target strings overlap (though you think it wouldn't
+	  matter, since the overlapping regions are never touched at the same
+	  time).  Fixes bug reported by Stéphane Jourdoi
+	  <sjourdois@gmail.com>
+
+parse.y
+	- Posix interp 217 states that $(( must be parsed first as an
+	  arithmetic expansion, so avoid attempting to parse it as a nested
+	  command substitution.  Fixes bug reported by several, most recently
+	  <jwm@horde.net>
+
+subst.c
+	- change extract_delimited_string to process nested $( as a possible
+	  command substitution, but only if already parsing an arithmetic
+	  expansion.  Rest of fix for Posix interp 217
+	- change parameter_brace_expand_rhs to make the := expansion operator
+	  perform quote removal and both assign the result to the variable and
+	  return it as the result of the expansion, rather than assign the
+	  value after quote removal but return the value before quote removal.
+	  Posix interp 221
+	- introduce new internal quoting flag: Q_DOLBRACE.  Denotes a double-
+	  quoted ${...} expansion.  In this case, Posix interp 221 requires
+	  that a backslash quoting an embedded `}' be removed, even though it's
+	  not one of the characters marked as special inside double quotes.
+	  Set in parameter_brace_expand, used by expand_word_internal.
+
+parse.y
+	- introduce new parsing state, P_DOLBRACE, set when parsing a ${...}
+	  expansion
+	- set a "dolbrace operator state" in parse_matched_pair to decide
+	  whether the lexer is reading the param, op, or word in
+	  ${paramOPword}.  Will be used to decide whether or not to treat
+	  single quotes specially in a double-quoted "${...}
+
+				   5/29
+				   ----
+parse.y
+	- change parse_matched_pair so that a single quote appearing in a
+	  double-quoted ${...} expansion is not special unless the expansion
+	  operator is `#[#]' or `%[%]'.  Posix interp 221
+
+subst.c
+	- change string_extract_double_quoted so that a single quote appearing
+	  in a double-quoted ${...} expansion is not special unless the
+	  expansion operator is `#[#]' or `%[%]'.  Posix interp 221
+
+doc/bashref.texi
+	- document posix-mode effects of Posix interp 221
+	- add section describing GNU parallel as requested by Stallman
+
+lib/readline/complete.c
+	- broke code that compares filenames read from the file system (and
+	  possibly converted) to words being completed out into a separate
+	  function: complete_fncmp
+	- augment complete_fncmp to treat hyphen and underscore as equivalent
+	  when comparing filenames if _rl_completion_case_map is set
+
+lib/readline/rlprivate.h
+	- new extern declaration for _rl_completion_case_map
+
+lib/readline/util.c
+	- change _rl_strnicmp to return the difference between the characters,
+	  like strcasecmp, and not modify the pointers it is passed
+	- change _rl_stricmp to not modify the pointers it is passed
+
+lib/readline/bind.c
+	- new bindable variable, "completion-case-map", toggles value of
+	  _rl_completion_case_map
+
+lib/readline/doc/{rluser.texi,readline.3}
+	- document new bindable readline variable "completion-case-map"
+
+execute_cmd.c
+	- change execute_function to reset funcnest and jump back to top level
+	  if funcnest exceeds funcnest_max
+	- use funcnest_max as a max function nesting level, if set to numeric
+	  value greater than 0 (defaults to 0, so inactive)
+
+variables.c
+	- new variable FUNCNEST, controls funcnest_max value if set to numeric
+	  value > 0
+sig.c
+	- reset funcnest to 0 when throw_to_top_level occurs
+
+doc/{bash.1,bashref.texi}
+	- document FUNCNEST variable and its effect on function execution
+
+lib/readline/funmap.c
+	- add new bindable command names to avoid case-insensitive matching
+	  problems between, for instance, vi-fword and vi-fWord:
+
+		vi-forward-word
+		vi-forward-bigword
+		vi-backward-word
+		vi-backward-bigword
+		vi-end-word
+		vi-end-bigword
+
+	  Suggested in a different form in 2006 (!) by Servatius Brandt
+	  <servatius.brandt@arcor.de>
+
+builtins/mapfile.def
+	- run_callback now takes a new third argument: curline, the line
+	  currently being read and about to be assigned
+	- the callback function/command now takes an additional argument:
+	  the line to be assigned to the array index.  Feature suggested by
+	  Dennis Williamson <dennistwilliamson@gmail.com>
+
+doc/{bash.1,bashref.texi}
+	- document new additional `line' argument to mapfile callback
+
+				   5/30
+				   ----
+builtins/printf.def
+	- add new %(fmt)T format specifier, where FMT is a strftime format.
+	  Argument is number of seconds since the epoch, with -1 meaning
+	  current time (roughly date +%s) and -2 meaning shell start time
+	  (roughly $SECONDS, unless it's been assigned a value or unset).
+	  Fieldwidth and precision are preserved, strftime result is printed
+	  as with %[-][[fieldwidth][.[precision]]]s
+
+doc/{bash.1,bashref.texi}
+	- document new %(datefmt)T printf format specifier and special
+	  arguments
+
+builtins/hash.def
+	- don't permit programs with slashes to be entered into the hash table
+	  at all, even with the -p option.  Inconsistency pointed out by
+	  Jan Schampera <jan.schampera@web.de>

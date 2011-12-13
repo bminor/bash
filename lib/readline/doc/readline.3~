@@ -373,6 +373,11 @@ The default value is -1.
 If set to \fBOn\fP, readline performs filename matching and completion
 in a case\-insensitive fashion.
 .TP
+.B completion\-map\-case (Off)
+If set to \fBOn\fP, and \fBcompletion\-ignore\-case\fP is enabled, readline
+treats hyphens (\fI\-\fP) and underscores (\fI_\fP) as equivalent when
+performing case\-insensitive filename matching and completion.
+.TP
 .B completion\-prefix\-display\-length (0)
 The length in characters of the common prefix of a list of possible
 completions that is displayed without modification.  When set to a
@@ -931,6 +936,12 @@ only attempts filename completion under certain circumstances.
 .TP
 .B possible\-completions (M\-?)
 List the possible completions of the text before point.
+When displaying completions, readline sets the number of columns used
+for display to the value of \fBcompletion-display-width\fP, the value of
+the environment variable
+.SM
+.BR COLUMNS ,
+or the screen width, in that order.
 .TP
 .B insert\-completions (M\-*)
 Insert all completions of the text before point

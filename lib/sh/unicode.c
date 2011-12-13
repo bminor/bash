@@ -1,6 +1,6 @@
 /* unicode.c - functions to convert unicode characters */
 
-/* Copyright (C) 2006 Free Software Foundation, Inc.
+/* Copyright (C) 2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

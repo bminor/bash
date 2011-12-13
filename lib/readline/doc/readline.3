@@ -8,7 +8,7 @@
 .\"
 .\"	Last Change: Thu Apr 22 18:59:21 EDT 2010
 .\"
-.TH READLINE 3 "2009 April 22" "GNU Readline 6.1"
+.TH READLINE 3 "2010 April 22" "GNU Readline 6.1"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -372,6 +372,11 @@ The default value is -1.
 .B completion\-ignore\-case (Off)
 If set to \fBOn\fP, readline performs filename matching and completion
 in a case\-insensitive fashion.
+.TP
+.B completion\-map\-case (Off)
+If set to \fBOn\fP, and \fBcompletion\-ignore\-case\fP is enabled, readline
+treats hyphens (\fI\-\fP) and underscores (\fI_\fP) as equivalent when
+performing case\-insensitive filename matching and completion.
 .TP
 .B completion\-prefix\-display\-length (0)
 The length in characters of the common prefix of a list of possible

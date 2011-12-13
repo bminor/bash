@@ -1,6 +1,6 @@
 /* strtrans.c - Translate and untranslate strings with ANSI-C escape sequences. */
 
-/* Copyright (C) 2000 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

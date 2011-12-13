@@ -390,7 +390,6 @@ read_builtin (list)
 	  run_unwind_frame ("read_builtin");
 	  input_string[i] = '\0';	/* make sure it's terminated */
 	  retval = 128+SIGALRM;
-itrace("read_builtin: before goto assign_vars: interrupt_immediately = %d", interrupt_immediately);
 	  goto assign_vars;
 	}
       old_alrm = set_signal_handler (SIGALRM, sigalrm);
@@ -616,13 +615,14 @@ add_char:
   if (unbuffered_read == 0)
     zsyncfd (fd);
 
+  discard_unwind_frame ("read_builtin");
+
   retval = eof ? EXECUTION_FAILURE : EXECUTION_SUCCESS;
 
 assign_vars:
 
   interrupt_immediately--;
   terminate_immediately--;
-  discard_unwind_frame ("read_builtin");
 
 #if defined (ARRAY_VARS)
   /* If -a was given, take the string read, break it into a list of words,

@@ -1,6 +1,6 @@
 /* xmbsrtowcs.c -- replacement function for mbsrtowcs */
 
-/* Copyright (C) 2002-2004 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

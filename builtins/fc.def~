@@ -304,8 +304,8 @@ fc_builtin (list)
   last_hist = i - rh - hist_last_line_added;
 
   /* XXX */
-  if (i == last_hist && hlist[last_hist] == 0)
-    while (saved_command_line_count > 0 && last_hist >= 0 && hlist[last_hist] == 0)
+  if (saved_command_line_count > 0 && i == last_hist && hlist[last_hist] == 0)
+    while (last_hist >= 0 && hlist[last_hist] == 0)
       last_hist--;
   if (last_hist < 0)
     {

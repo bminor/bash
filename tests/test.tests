@@ -286,11 +286,23 @@ t -n abcd -a aaa
 echo 't -n abcd -a -z aaa'
 t -n abcd -a -z aaa
 
+# test set or unset shell options
 set +o allexport
 echo 't -o allexport'
 t -o allexport
 echo 't ! -o allexport'
 t ! -o allexport
+
+#test set or unset shell variables
+unset unset
+echo 't -v unset'
+t -v unset
+set=
+echo 't -v set'
+t -v set
+set=set
+echo 't -v set'
+t -v set
 
 echo 't xx -a yy'
 t xx -a yy

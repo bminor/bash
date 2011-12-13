@@ -1,6 +1,6 @@
 /* variables.c -- Functions for hacking shell variables. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -99,6 +99,7 @@ extern char *command_execution_string;
 extern time_t shell_start_time;
 extern int assigning_in_environment;
 extern int executing_builtin;
+extern int funcnest_max;
 
 #if defined (READLINE)
 extern int no_line_editing;
@@ -1783,6 +1784,20 @@ find_variable_internal (name, force_tempenv)
 
   if (var == 0)
     var = var_lookup (name, shell_variables);
+
+  if (var == 0)
+    return ((SHELL_VAR *)NULL);
+
+  return (var->dynamic_value ? (*(var->dynamic_value)) (var) : var);
+}
+
+SHELL_VAR *
+find_global_variable (name)
+     const char *name;
+{
+  SHELL_VAR *var;
+
+  var = var_lookup (name, global_variables);
 
   if (var == 0)
     return ((SHELL_VAR *)NULL);
@@ -4108,6 +4123,8 @@ static struct name_and_function special_vars[] = {
   { "COMP_WORDBREAKS", sv_comp_wordbreaks },
 #endif
 
+  { "FUNCNEST", sv_funcnest },
+
   { "GLOBIGNORE", sv_globignore },
 
 #if defined (HISTORY)
@@ -4277,6 +4294,22 @@ sv_mail (name)
       free_mail_files ();
       remember_mail_dates ();
     }
+}
+
+void
+sv_funcnest (name)
+     char *name;
+{
+  SHELL_VAR *v;
+  intmax_t num;
+
+  v = find_variable (name);
+  if (v == 0)
+    funcnest_max = 0;
+  else if (legal_number (value_cell (v), &num) == 0)
+    funcnest_max = 0;
+  else
+    funcnest_max = num;
 }
 
 /* What to do when GLOBIGNORE changes. */

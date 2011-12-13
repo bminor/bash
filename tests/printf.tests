@@ -308,4 +308,9 @@ shopt -s nullglob extglob
 echo "x$(printf "%b" @(hugo))x"
 printf -v var "%b" @(hugo); echo "x${var}x"
 
+# tests variable assignment with -v
+${THIS_SH} ./printf1.sub
+
 ${THIS_SH} ./printf2.sub
+
+${THIS_SH} ./printf3.sub
