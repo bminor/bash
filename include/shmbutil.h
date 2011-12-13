@@ -25,9 +25,9 @@
 
 /* Include config.h for HANDLE_MULTIBYTE */
 #include <config.h>
-#include "shmbchar.h"
 
 #if defined (HANDLE_MULTIBYTE)
+#include "shmbchar.h"
 
 extern size_t xmbsrtowcs __P((wchar_t *, const char **, size_t, mbstate_t *));
 extern size_t xdupmbstowcs __P((wchar_t **, char ***, const char *));

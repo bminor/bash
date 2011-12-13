@@ -145,6 +145,8 @@
 #ifndef _SHMBCHAR_H
 #define _SHMBCHAR_H 1
 
+#if defined (HANDLE_MULTIBYTE)
+
 #include <string.h>
 
 /* Tru64 with Desktop Toolkit C has a bug: <stdio.h> must be included before
@@ -347,4 +349,5 @@ is_basic (char c)
 
 #endif
 
+#endif /* HANDLE_MULTIBYTE */
 #endif /* _SHMBCHAR_H */
