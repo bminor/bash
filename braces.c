@@ -337,7 +337,8 @@ mkseq (start, end, incr, type, width)
 	result[i++] = itos (n);
       else if (type == ST_ZINT)
 	{
-	  int len;
+	  int len, arg;
+	  arg = n;
 	  len = asprintf (&t, "%0*d", width, n);
 	  result[i++] = t;
 	}

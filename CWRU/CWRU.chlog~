@@ -10795,3 +10795,14 @@ redir.c
 	  <schwab@linux-m68k.org>
 	- make sure to close any file descriptors opened for REDIR_VARASSIGN
 	  before returning an error
+
+				   12/19
+				   -----
+expr.c
+	- move processing of unary `-' and `+' to exp1 from exp0 to avoid
+	  precedence problems.  Fixes bug reported by <12bric@gmail.com>
+
+				   12/22
+				   -----
+lib/sh/fpurge.c
+	- updated version from gnulib, inlined gnulib stdio-impl.h

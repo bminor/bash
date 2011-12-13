@@ -86,3 +86,9 @@ swizzle ()
     exec {stdin}<&$fd0-;
     exec {stdout}>&$fd1-
 }
+ok 1
+./vredir6.sub: redirection error: cannot duplicate fd: Invalid argument
+./vredir6.sub: line 10: /dev/null: Invalid argument
+./vredir6.sub: redirection error: cannot duplicate fd: Invalid argument
+./vredir6.sub: line 13: v: Invalid argument
+unset

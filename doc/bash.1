@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Mon Dec  6 22:25:10 EST 2010
+.\"	Last Change: Fri Dec 24 16:00:06 EST 2010
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2010 December 6" "GNU Bash-4.2"
+.TH BASH 1 "2010 December 24" "GNU Bash-4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -879,24 +879,22 @@ command completes.  Otherwise, the \fBelse\fP \fIlist\fP is
 executed, if present.  The exit status is the exit status of the
 last command executed, or zero if no condition tested true.
 .TP
-\fBwhile\fP \fIlist\fP; \fBdo\fP \fIlist\fP; \fBdone\fP
+\fBwhile\fP \fIlist-1\fP; \fBdo\fP \fIlist-2\fP; \fBdone\fP
 .PD 0
 .TP
-\fBuntil\fP \fIlist\fP; \fBdo\fP \fIlist\fP; \fBdone\fP
+\fBuntil\fP \fIlist-1\fP; \fBdo\fP \fIlist-2\fP; \fBdone\fP
 .PD
-The \fBwhile\fP command continuously executes the \fBdo\fP
-\fIlist\fP as long as the last command in \fIlist\fP returns
+The \fBwhile\fP command continuously executes the list
+\fIlist-2\fP as long as the last command in the list \fIlist-1\fP returns
 an exit status of zero.  The \fBuntil\fP command is identical
 to the \fBwhile\fP command, except that the test is negated;
-the
-.B do
-.I list
+.I list-2
 is executed as long as the last command in
-.I list
+.I list-1
 returns a non-zero exit status.
 The exit status of the \fBwhile\fP and \fBuntil\fP commands
 is the exit status
-of the last \fBdo\fP \fIlist\fP command executed, or zero if
+of the last command executed in \fIlist-2\fP, or zero if
 none was executed.
 .SS Coprocesses
 .PP
@@ -3218,6 +3216,7 @@ they are to be matched literally.
 The special pattern characters have the following meanings:
 .PP
 .PD 0
+.RS
 .TP
 .B *
 Matches any string, including the null string.
@@ -3296,6 +3295,7 @@ and
 .BR ] ,
 the syntax \fB[.\fP\fIsymbol\fP\fB.]\fP matches the collating symbol
 \fIsymbol\fP.
+.RE
 .RE
 .PD
 .PP

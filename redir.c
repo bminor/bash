@@ -99,7 +99,7 @@ do { \
   if ((r) < 0) \
     { \
       if (fd >= 0) \
-	close (fd); \    
+	close (fd); \
       last_command_exit_value = EXECUTION_FAILURE;\
       return ((e) == 0 ? EINVAL : (e));\
     } \
@@ -821,7 +821,10 @@ do_redirection_internal (redirect, flags)
 	  if (redirect->rflags & REDIR_VARASSIGN)
 	    {
 	      redirector = fcntl (fd, F_DUPFD, SHELL_FD_BASE);		/* XXX try this for now */
-	      REDIRECTION_ERROR (redirector, errno, fd);
+	      r = errno;
+	      if (redirector < 0)
+		sys_error (_("redirection error: cannot duplicate fd"));
+	      REDIRECTION_ERROR (redirector, r, fd);
 	    }
 
 	  if (flags & RX_UNDOABLE)
@@ -930,7 +933,10 @@ do_redirection_internal (redirect, flags)
 	  if (redirect->rflags & REDIR_VARASSIGN)
 	    {
 	      redirector = fcntl (fd, F_DUPFD, SHELL_FD_BASE);		/* XXX try this for now */
-	      REDIRECTION_ERROR (redirector, errno, fd);
+	      r = errno;
+	      if (redirector < 0)
+		sys_error (_("redirection error: cannot duplicate fd"));
+	      REDIRECTION_ERROR (redirector, r, fd);
 	    }
 
 	  if (flags & RX_ACTIVE)
@@ -990,7 +996,10 @@ do_redirection_internal (redirect, flags)
       if ((flags & RX_ACTIVE) && (redirect->rflags & REDIR_VARASSIGN))
         {
 	  redirector = fcntl (redir_fd, F_DUPFD, SHELL_FD_BASE);		/* XXX try this for now */
-	  REDIRECTION_ERROR (redirector, errno, -1);
+	  r = errno;
+	  if (redirector < 0)
+	    sys_error (_("redirection error: cannot duplicate fd"));
+	  REDIRECTION_ERROR (redirector, r, -1);
         }
 
       if ((flags & RX_ACTIVE) && (redir_fd != redirector))

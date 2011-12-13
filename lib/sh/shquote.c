@@ -45,7 +45,8 @@ sh_single_quote (string)
      const char *string;
 {
   register int c;
-  char *result, *r, *s;
+  char *result, *r;
+  const char *s;
 
   result = (char *)xmalloc (3 + (4 * strlen (string)));
   r = result;
@@ -75,7 +76,8 @@ sh_double_quote (string)
      const char *string;
 {
   register unsigned char c;
-  char *result, *r, *s;
+  char *result, *r;
+  const char *s;
 
   result = (char *)xmalloc (3 + (2 * strlen (string)));
   r = result;

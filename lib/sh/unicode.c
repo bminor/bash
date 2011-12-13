@@ -162,7 +162,7 @@ u32cconv (c, s)
 #if __STDC_ISO_10646__
   if (sizeof (wchar_t) == 4)
     {
-      n = wctomb (wc, s);
+      n = wctomb (s, wc);
       return n;
     }
 #endif

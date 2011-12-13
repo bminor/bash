@@ -32,5 +32,4 @@ else
 fi
 
 echo -n ${A[0]} | cat -vet
-echo -n ${A[0]} | wc
-
+echo -n ${A[0]} | wc | ( IFS=$' \t\n' ;  while read line; do echo $line; done; )

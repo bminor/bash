@@ -63,7 +63,6 @@ sh_regmatch (string, pattern, flags)
   rematch = (SHELL_VAR *)NULL;
 #endif
 
-itrace("sh_regmatch: pattern = <%s>", pattern);
   rflags = REG_EXTENDED;
   if (glob_ignore_case || match_ignore_case)
     rflags |= REG_ICASE;
