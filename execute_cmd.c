@@ -2219,10 +2219,6 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   if (prev >= 0)
     add_unwind_protect (close, prev);
 
-  /* XXX - might need to temporarily put shell process in pgrp of the pipeline,
-     so after we give the terminal to that process group in stop_pipeline, the
-     shell can still access it.  Would need to give it to
-     jobs[lastpipe_jid]->pgrp  */
   exec_result = execute_command_internal (cmd, asynchronous, prev, pipe_out, fds_to_close);
 
   if (lstdin > 0)

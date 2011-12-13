@@ -52,11 +52,6 @@ typedef struct _keymap_entry {
 #define KEYMAP_SIZE 257
 #define ANYOTHERKEY KEYMAP_SIZE-1
 
-/* I wanted to make the above structure contain a union of:
-   union { rl_command_func_t *function; struct _keymap_entry *keymap; } value;
-   but this made it impossible for me to create a static array.
-   Maybe I need C lessons. */
-
 typedef KEYMAP_ENTRY KEYMAP_ENTRY_ARRAY[KEYMAP_SIZE];
 typedef KEYMAP_ENTRY *Keymap;
 

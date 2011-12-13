@@ -44,10 +44,10 @@ printf "current time: %(%F %r)T\n" $SECS
 printf "epoch time: %(%F %r %z)T\n" 0
 printf "random time: %(%F %r %z)T\n"  $SECS
 
-printf "local time: %(%+)T\n" $SECS
+printf "local time: %(%a %b %e %H:%M:%S %Z %Y)T\n" $SECS
 
 # test fieldwidth, justification, precision
-printf "%-40.50(%+)T date-style time\n" $SECS
+printf "%-40.50(%a %b %e %H:%M:%S %Z %Y)T date-style time\n" $SECS
 
 # test fieldwidth, justification, precision, embedded parens
 printf "%-40.50(%x (foo) %X)T date-style time\n" $SECS

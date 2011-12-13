@@ -10200,3 +10200,10 @@ jobs.[ch]
 execute_cmd.c
 	- changes to lastpipe code to make `pipefail' option, $PIPESTATUS, and
 	  $? work correctly.  Uses append_process and job_exit_status
+
+				   7/10
+				   ----
+subst.c
+	- when performing pattern substitution word expansions, a `&' in the
+	  replacement string is replaced by the text matched by the pattern.
+	  The `&' can be quoted with a backslash to inhibit the expansion

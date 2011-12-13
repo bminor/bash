@@ -288,6 +288,8 @@ static int get_var_and_type __P((char *, char *, int, SHELL_VAR **, char **));
 static char *mb_substring __P((char *, int, int));
 static char *parameter_brace_substring __P((char *, char *, char *, int));
 
+static int shouldexp_replacement __P((char *));
+
 static char *pos_params_pat_subst __P((char *, char *, char *, int));
 
 static char *parameter_brace_patsub __P((char *, char *, char *, int));
@@ -6327,21 +6329,40 @@ parameter_brace_substring (varname, value, substr, quoted)
 /*								*/
 /****************************************************************/
 
+static int
+shouldexp_replacement (s)
+     char *s;
+{
+  register char *p;
+
+  for (p = s; p && *p; p++)
+    {
+      if (*p == '\\')
+	p++;
+      else if (*p == '&')
+	return 1;
+    }
+  return 0;
+}
+
 char *
 pat_subst (string, pat, rep, mflags)
      char *string, *pat, *rep;
      int mflags;
 {
-  char *ret, *s, *e, *str;
-  int rsize, rptr, l, replen, mtype;
+  char *ret, *s, *e, *str, *rstr, *mstr;
+  int rsize, rptr, l, replen, mtype, rxpand, rslen, mlen;
 
   mtype = mflags & MATCH_TYPEMASK;
+
+  rxpand = (rep && *rep) ? shouldexp_replacement (rep) : 0;
 
   /* Special cases:
    * 	1.  A null pattern with mtype == MATCH_BEG means to prefix STRING
    *	    with REP and return the result.
    *	2.  A null pattern with mtype == MATCH_END means to append REP to
    *	    STRING and return the result.
+   * These don't understand or process `&' in the replacement string.
    */
   if ((pat == 0 || *pat == 0) && (mtype == MATCH_BEG || mtype == MATCH_END))
     {
@@ -6371,7 +6392,25 @@ pat_subst (string, pat, rep, mflags)
       if (match_pattern (str, pat, mtype, &s, &e) == 0)
 	break;
       l = s - str;
-      RESIZE_MALLOCED_BUFFER (ret, rptr, (l + replen), rsize, 64);
+
+      if (rxpand)
+        {
+          int x;
+          mlen = e - s;
+          mstr = xmalloc (mlen + 1);
+	  for (x = 0; x < mlen; x++)
+	    mstr[x] = s[x];
+          mstr[mlen] = '\0';
+          rstr = strcreplace (rep, '&', mstr, 0);
+          rslen = strlen (rstr);
+        }
+      else
+        {
+          rstr = rep;
+          rslen = replen;
+        }
+        
+      RESIZE_MALLOCED_BUFFER (ret, rptr, (l + rslen), rsize, 64);
 
       /* OK, now copy the leading unmatched portion of the string (from
 	 str to s) to ret starting at rptr (the current offset).  Then copy
@@ -6384,10 +6423,13 @@ pat_subst (string, pat, rep, mflags)
 	}
       if (replen)
 	{
-	  strncpy (ret + rptr, rep, replen);
-	  rptr += replen;
+	  strncpy (ret + rptr, rstr, rslen);
+	  rptr += rslen;
 	}
       str = e;		/* e == end of match */
+
+      if (rstr != rep)
+	free (rstr);
 
       if (((mflags & MATCH_GLOBREP) == 0) || mtype != MATCH_ANY)
 	break;

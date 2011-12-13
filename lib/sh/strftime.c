@@ -114,6 +114,11 @@ extern int timezone, altzone;
 
 #undef min	/* just in case */
 
+/* format for %+ */
+#ifndef NATIONAL_FORMAT
+#define NATIONAL_FORMAT "%a %b %e %H:%M:%S %Z %Y"
+#endif
+
 /* min --- return minimum of two numbers */
 
 static inline int
