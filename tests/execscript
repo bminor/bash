@@ -115,3 +115,10 @@ echo after
 
 # Problem with bash at least back to version 3.0
 ${THIS_SH} -c 'VAR=0; VAR=1 command exec; exit ${VAR}'
+
+# problem with bash through bash-4.1
+(
+        exec /var/empty/nosuch
+        echo bad
+) 2>/dev/null
+[ $? = 127 ] || echo FAIL: bad exit status $? at $LINENO

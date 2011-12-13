@@ -993,6 +993,18 @@ bash_forward_shellword (count, key)
 	  return 0;
 	}
 
+      /* Are we in a quoted string?  If we are, move to the end of the quoted
+         string and continue the outer loop. */
+      if (char_is_quoted (rl_line_buffer, p) && p > 0 && rl_line_buffer[p-1] != '\\')
+	{
+	  do
+	    ADVANCE_CHAR (rl_line_buffer, slen, p);
+	  while (p < rl_end && char_is_quoted (rl_line_buffer, p));
+	  count--;
+	  continue;
+	}
+
+      /* Rest of code assumes we are not in a quoted string. */
       /* Move forward until we hit a non-metacharacter. */
       while (p < rl_end && (c = rl_line_buffer[p]) && WORDDELIM (c))
 	{
@@ -1400,12 +1412,12 @@ bash_default_completion (text, start, end, qc, compflags)
 
   /* If the word starts in `~', and there is no slash in the word, then
      try completing this word as a username. */
-  if (matches ==0 && *text == '~' && mbschr (text, '/') == 0)
+  if (matches == 0 && *text == '~' && mbschr (text, '/') == 0)
     matches = rl_completion_matches (text, rl_username_completion_function);
 
   /* Another one.  Why not?  If the word starts in '@', then look through
      the world of known hostnames for completion first. */
-  if (!matches && perform_hostname_completion && *text == '@')
+  if (matches == 0 && perform_hostname_completion && *text == '@')
     matches = rl_completion_matches (text, hostname_completion_function);
 
   /* And last, (but not least) if this word is in a command position, then

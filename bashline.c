@@ -993,6 +993,20 @@ bash_forward_shellword (count, key)
 	  return 0;
 	}
 
+      /* Are we in a quoted string?  If we are, move to the end of the quoted
+         string and continue the outer loop. We only want quoted strings, not
+         backslash-escaped characters, but char_is_quoted doesn't
+         differentiate. */
+      if (char_is_quoted (rl_line_buffer, p) && p > 0 && rl_line_buffer[p-1] != '\\')
+	{
+	  do
+	    ADVANCE_CHAR (rl_line_buffer, slen, p);
+	  while (p < rl_end && char_is_quoted (rl_line_buffer, p));
+	  count--;
+	  continue;
+	}
+
+      /* Rest of code assumes we are not in a quoted string. */
       /* Move forward until we hit a non-metacharacter. */
       while (p < rl_end && (c = rl_line_buffer[p]) && WORDDELIM (c))
 	{

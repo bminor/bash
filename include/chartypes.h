@@ -103,7 +103,6 @@
 #ifndef TOCTRL
    /* letter to control char -- ASCII.  The TOUPPER is in there so \ce and
       \cE will map to the same character in $'...' expansions. */
-   /* XXX - should this be TOUPPER(x) ^ x040 ? */
 #  define TOCTRL(x)	(TOUPPER(x) & 037)
 #endif
 #ifndef UNCTRL

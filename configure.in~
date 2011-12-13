@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.2, version 4.032])dnl
+AC_REVISION([for Bash 4.2, version 4.033])dnl
 
 define(bashvers, 4.2)
 define(relstatus, devel)
@@ -98,7 +98,7 @@ esac
 dnl
 dnl macros for the bash debugger
 dnl
-AM_PATH_LISPDIR
+dnl AM_PATH_LISPDIR
 AC_ARG_VAR(DEBUGGER_START_FILE, [location of bash debugger initialization file])
 
 dnl arguments to configure
@@ -904,6 +904,8 @@ if test "$ac_cv_header_sys_socket_h" = "yes"; then
 BASH_CHECK_TYPE(socklen_t, [#include <sys/socket.h>], int, HAVE_SOCKLEN_T)
 fi
 BASH_TYPE_RLIMIT
+
+AC_CHECK_SIZEOF(intmax_t, 8)
 
 dnl presence and contents of structures used by system calls
 BASH_STRUCT_TERMIOS_LDISC

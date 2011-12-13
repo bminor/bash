@@ -1,6 +1,6 @@
 /* sig.c - interface for shell signal handlers and signal initialization. */
 
-/* Copyright (C) 1994-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -500,6 +500,9 @@ termsig_sighandler (sig)
   /* XXX - should this also trigger when interrupt_immediately is set? */
   if (terminate_immediately)
     {
+#if defined (HISTORY)
+      /* XXX - history_lines_this_session = 0 will inhibit history file being written */
+#endif
       terminate_immediately = 0;
       termsig_handler (sig);
     }

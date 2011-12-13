@@ -283,6 +283,7 @@ cd_builtin (list)
 	    free (temp);
 	}
 
+#if 0	/* changed for bash-4.2 Posix cd description steps 5-6 */
       /* POSIX.2 says that if `.' does not appear in $CDPATH, we don't
 	 try the current directory, so we just punt now with an error
 	 message if POSIXLY_CORRECT is non-zero.  The check for cdpath[0]
@@ -293,6 +294,7 @@ cd_builtin (list)
 	  builtin_error ("%s: %s", dirname, strerror (ENOENT));
 	  return (EXECUTION_FAILURE);
 	}
+#endif
     }
   else
     dirname = list->word->word;

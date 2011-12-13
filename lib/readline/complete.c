@@ -2450,7 +2450,10 @@ rl_old_menu_complete (count, invoking_key)
 
   match_list_index += count;
   if (match_list_index < 0)
-    match_list_index += match_list_size;
+    {
+      while (match_list_index < 0)
+	match_list_index += match_list_size;
+    }
   else
     match_list_index %= match_list_size;
 
@@ -2615,7 +2618,10 @@ rl_menu_complete (count, ignore)
 
   match_list_index += count;
   if (match_list_index < 0)
-    match_list_index += match_list_size;
+    {
+      while (match_list_index < 0)
+	match_list_index += match_list_size;
+    }
   else
     match_list_index %= match_list_size;
 

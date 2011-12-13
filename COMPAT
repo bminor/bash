@@ -332,6 +332,20 @@ version and versions 2.0 and above.
     > operators to the `[[' command.  This can be reverted to the previous
     behavior by setting one of the `compatNN' shopt options.
 
+45. Command substitutions now remove the caller's trap strings when trap is
+    run to set a new trap in the subshell.  Previous to bash-4.2, the old
+    trap strings persisted even though the actual signal handlers were reset.
+
+46. When in Posix mode, a single quote is not treated specially in a
+    double-quoted ${...} expansion, unless the expansion operator is
+    # or % or the new `//', `^', or `,' expansions.  In particular, it
+    does not define a new quoting context.  This is from Posix interpretation
+    221.
+
+47. Posix mode shells no longer exit if a variable assignment error occurs
+    with an assignment preceding a command that is not a special builtin.
+
+
 Shell Compatibility Level
 =========================
 

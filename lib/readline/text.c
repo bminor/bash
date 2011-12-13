@@ -265,11 +265,13 @@ rl_forward_byte (count, key)
 
   if (count > 0)
     {
-      int end = rl_point + count;
+      int end, lend;
+
+      end = rl_point + count;
 #if defined (VI_MODE)
-      int lend = rl_end > 0 ? rl_end - (VI_COMMAND_MODE()) : rl_end;
+      lend = rl_end > 0 ? rl_end - (VI_COMMAND_MODE()) : rl_end;
 #else
-      int lend = rl_end;
+      lend = rl_end;
 #endif
 
       if (end > lend)
@@ -285,6 +287,31 @@ rl_forward_byte (count, key)
     rl_end = 0;
 
   return 0;
+}
+
+int
+_rl_forward_char_internal (count)
+     int count;
+{
+  int point;
+
+#if defined (HANDLE_MULTIBYTE)
+  point = _rl_find_next_mbchar (rl_line_buffer, rl_point, count, MB_FIND_NONZERO);
+
+#if defined (VI_MODE)
+  if (point >= rl_end && VI_COMMAND_MODE())
+    point = _rl_find_prev_mbchar (rl_line_buffer, rl_end, MB_FIND_NONZERO);
+#endif
+
+    if (rl_end < 0)
+	rl_end = 0;
+#else
+  point = rl_point + count;
+  if (point > rl_end)
+    point = rl_end;
+#endif
+
+  return (point);
 }
 
 #if defined (HANDLE_MULTIBYTE)
@@ -309,20 +336,12 @@ rl_forward_char (count, key)
 	  return 0;
 	}
 
-      point = _rl_find_next_mbchar (rl_line_buffer, rl_point, count, MB_FIND_NONZERO);
-
-#if defined (VI_MODE)
-      if (point >= rl_end && VI_COMMAND_MODE())
-	point = _rl_find_prev_mbchar (rl_line_buffer, rl_end, MB_FIND_NONZERO);
-#endif
+      point = _rl_forward_char_internal (count);
 
       if (rl_point == point)
 	rl_ding ();
 
       rl_point = point;
-
-      if (rl_end < 0)
-	rl_end = 0;
     }
 
   return 0;
@@ -805,8 +824,9 @@ _rl_insert_char (count, c)
       /* We are inserting a single character.
 	 If there is pending input, then make a string of all of the
 	 pending characters that are bound to rl_insert, and insert
-	 them all. */
-      if (_rl_any_typein ())
+	 them all.  Don't do this if we're current reading input from
+	 a macro. */
+      if ((RL_ISSTATE (RL_STATE_MACROINPUT) == 0) && _rl_any_typein ())
 	_rl_insert_typein (c);
       else
 	{

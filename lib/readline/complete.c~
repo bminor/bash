@@ -197,7 +197,7 @@ int _rl_skip_completed_text = 0;
 
 /* If non-zero, menu completion displays the common prefix first in the
    cycle of possible completions instead of the last. */
-int _rl_menu_complete_prefix_first = 1;
+int _rl_menu_complete_prefix_first = 0;
 
 /* If non-zero, then this is the address of a function to call when
    completing on a directory name.  The function is called with
@@ -2450,7 +2450,10 @@ rl_old_menu_complete (count, invoking_key)
 
   match_list_index += count;
   if (match_list_index < 0)
-    match_list_index += match_list_size;
+    {
+      while (match_list_index < 0)
+	match_list_index += match_list_size;
+    }
   else
     match_list_index %= match_list_size;
 

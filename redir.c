@@ -62,13 +62,14 @@ extern int errno;
 int expanding_redir;
 
 extern int posixly_correct;
+extern int last_command_exit_value;
 extern REDIRECT *redirection_undo_list;
 extern REDIRECT *exec_redirection_undo_list;
 
 /* Static functions defined and used in this file. */
-static void add_undo_close_redirect __P((int));
 static void add_exec_redirect __P((REDIRECT *));
 static int add_undo_redirect __P((int, enum r_instruction, int));
+static int add_undo_close_redirect __P((int));
 static int expandable_redirection_filename __P((REDIRECT *));
 static int stdin_redirection __P((enum r_instruction, int));
 static int undoablefd __P((int));
@@ -92,6 +93,13 @@ static REDIRECTEE rd;
 /* Set to errno when a here document cannot be created for some reason.
    Used to print a reasonable error message. */
 static int heredoc_errno;
+
+#define REDIRECTION_ERROR(r, e) \
+  if ((r) != 0) \
+    { \
+      last_command_exit_value = EXECUTION_FAILURE;\
+      return ((e) == 0 ? EINVAL : (e));\
+    }
 
 void
 redirection_error (temp, error)
@@ -813,9 +821,10 @@ do_redirection_internal (redirect, flags)
 	    {
 	      /* Only setup to undo it if the thing to undo is active. */
 	      if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
-		add_undo_redirect (redirector, ri, -1);
+		r = add_undo_redirect (redirector, ri, -1);
 	      else
-		add_undo_close_redirect (redirector);
+		r = add_undo_close_redirect (redirector);
+	      REDIRECTION_ERROR (r, errno);
 	    }
 
 #if defined (BUFFERED_INPUT)
@@ -918,9 +927,10 @@ do_redirection_internal (redirect, flags)
 	        {
 		  /* Only setup to undo it if the thing to undo is active. */
 		  if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
-		    add_undo_redirect (redirector, ri, -1);
+		    r = add_undo_redirect (redirector, ri, -1);
 		  else
-		    add_undo_close_redirect (redirector);
+		    r = add_undo_close_redirect (redirector);
+		  REDIRECTION_ERROR(r, errno);
 	        }
 
 #if defined (BUFFERED_INPUT)
@@ -972,9 +982,10 @@ do_redirection_internal (redirect, flags)
 	    {
 	      /* Only setup to undo it if the thing to undo is active. */
 	      if (fcntl (redirector, F_GETFD, 0) != -1)
-		add_undo_redirect (redirector, ri, redir_fd);
+		r = add_undo_redirect (redirector, ri, redir_fd);
 	      else
-		add_undo_close_redirect (redirector);
+		r = add_undo_close_redirect (redirector);
+	      REDIRECTION_ERROR(r, errno);
 	    }
 #if defined (BUFFERED_INPUT)
 	  check_bash_input (redirector);
@@ -1046,8 +1057,10 @@ do_redirection_internal (redirect, flags)
 		return AMBIGUOUS_REDIRECT;
 	    }
 
+	  r = 0;
 	  if ((flags & RX_UNDOABLE) && (fcntl (redirector, F_GETFD, 0) != -1))
-	    add_undo_redirect (redirector, ri, -1);
+	    r = add_undo_redirect (redirector, ri, -1);
+	  REDIRECTION_ERROR (r, errno);
 
 #if defined (COPROCESS_SUPPORT)
 	  coproc_fdchk (redirector);
@@ -1164,7 +1177,7 @@ add_undo_redirect (fd, ri, fdbase)
 
 /* Set up to close FD when we are finished with the current command
    and its redirections. */
-static void
+static int
 add_undo_close_redirect (fd)
      int fd;
 {
@@ -1177,6 +1190,8 @@ add_undo_close_redirect (fd)
   closer->flags |= RX_INTERNAL;
   closer->next = redirection_undo_list;
   redirection_undo_list = closer;
+
+  return 0;
 }
 
 static void

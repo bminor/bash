@@ -59,6 +59,9 @@ extern int loop_level, continuing, breaking, funcnest;
 extern int executing_list;
 extern int comsub_ignore_return;
 extern int parse_and_execute_level, shell_initialized;
+#if defined (HISTORY)
+extern int history_lines_this_session;
+#endif
 
 extern void intialize_siglist ();
 
@@ -500,6 +503,10 @@ termsig_sighandler (sig)
   /* XXX - should this also trigger when interrupt_immediately is set? */
   if (terminate_immediately)
     {
+#if defined (HISTORY)
+      /* XXX - will inhibit history file being written */
+      history_lines_this_session = 0;
+#endif
       terminate_immediately = 0;
       termsig_handler (sig);
     }

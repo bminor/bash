@@ -176,6 +176,8 @@ ansicstr (string, len, flags, sawc, rlen)
 	      else if ((flags & 1) == 0 && (c = *s))
 		{
 		  s++;
+		  if ((flags & 2) && c == '\\' && c == *s)
+		    s++;	/* Posix requires $'\c\\' do backslash escaping */
 		  c = TOCTRL(c);
 		  break;
 		}

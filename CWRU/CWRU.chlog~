@@ -9838,7 +9838,7 @@ doc/{bash.1,bashref.texi}
 execute_cmd.c
 	- change execute_disk_command to return a status, instead of just
 	  leaving it in `last_command_exit_value', since the parent's return
-	  value is sometimes uses (e.g., when a restricted shell refuses to
+	  value is sometimes used (e.g., when a restricted shell refuses to
 	  run a command with a `/').  Fixes bug reported by David Pitt
 	  <David.Pitt@anz.com>
 
@@ -10513,3 +10513,70 @@ subst.c
 builtins/cd.def
 	- Posix 2008 says that if no matching directories are found in $CDPATH,
 	  use the directory name passed as an operand and go on.  Posix change
+
+doc/bashref.texi
+	- change Posix mode section with latest additions and removals
+
+				   11/4
+				   ----
+lib/readline/complete.c
+	- fix rl_menu_complete and rl_old_menu_complete to keep incrementing
+	  match_list_index by match_list_size as long as it's < 0.  Fixes
+	  bug reported by jeenuv@gmail.com
+
+braces.c
+	- make mkseq() take intmax_t arguments for sequence start and end
+	  and make sure it's passed intmax_t values.  Fixes bug reported by
+	  Pete Gregory <pg@bushlitt.org>
+
+sig.c
+	- if termsig_handler is called when terminate_immediately == 1,
+	  assume we're being called as a signal handler and set
+	  history_lines_this_session to 0 to inhibit history file being
+	  written on shell exit.  Fixes long-standing bug most recently
+	  observed by Andreas Schwab <schwab@linux-m68k.org>
+
+				   11/5
+				   ----
+redir.c
+	- add_undo_close_redirect now returns int, 0 on success, non-zero on
+	  failure.  Currently always succeeds
+	- new macro REDIRECTION_ERROR to make do_redirection_internal return
+	  value of errno
+	- change do_redirection_internal to call REDIRECTION_ERROR after
+	  saving file descriptor and make do_redirection_internal return error
+	  if add_undo_redirect or add_undo_close redirect fails.  This makes
+	  failure to save a file descriptor a redirection error and the shell
+	  behaves appropriately.  Fixes bug reported by Eric Blake
+	  <eblake@redhat.com>
+
+bashline.c
+	- modify bash_forward_shellword to correctly handle quoted strings,
+	  especially if point is in a quoted string when function is invoked.
+	  Fixes bug reported by Daniel Colascione <dan.colascione@gmail.com>
+
+configure.in
+	- change version to 4.2-alpha
+
+				   11/7
+				   ----
+lib/readline/text.c
+	- in rl_insert, if we're not in the multibyte code path, don't try to
+	  optimize and insert all of the available typeahead input if we're
+	  reading input from a macro.  Fixes bug reported by Andre Majorel
+	  <aym-ung@teaser.fr>
+	- break out multibyte guts of rl_forward_char into a separate function
+	  _rl_forward_char_internal that does nothing but calculate the new
+	  value of point
+	- change rl_forward_char to call _rl_forward_char_internal instead of
+	  having equivalent code inline
+
+lib/readline/rlprivate.h
+	- new extern declaration for _rl_forward_char_internal
+
+lib/readline/vi_mode.c
+	- change _rl_vi_append_forward to call _rl_forward_char_internal to
+	  set rl_point, instead of calling rl_forward_char.  When at the end
+	  of the line, rl_forward_char will ring the bell.  Fixes debian
+	  bash bug 601042, reported by Alan J. Greenberger <alanjg@ptd.net>
+

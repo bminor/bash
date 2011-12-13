@@ -63,6 +63,15 @@ recho "foo ${IFS+'bar} baz"
 recho ${IFS+'}'z}
 recho "${IFS+'}'z}"
 
+: ${TMPDIR:=/var/tmp}
+rm -f $TMPDIR/sh
+cp ${THIS_SH} $TMPDIR/sh
+THIS_SH=$TMPDIR/sh ${THIS_SH} ./posixexp1.sub || echo "sh posixexp1.sub: test $? failed"
+${THIS_SH} ./posixexp1.sub || echo "bash posixexp1.sub: test $? failed"
+
+THIS_SH=$TMPDIR/sh ${THIS_SH} ./posixexp2.sub || echo "sh posixexp2.sub: test $? failed"
+rm -f $TMPDIR/sh
+
 # this will be an error
 foo=bar
 echo "${foo:-"a}"

@@ -108,7 +108,7 @@ extern int errno;
 /* Evaluates to 1 if C is one of the shell's special parameters for which an
    indirect variable reference may be made. */
 #define VALID_INDIR_PARAM(c) \
-  ((c) == '#' || (c) == '?' || (c) == '@' || (c) == '*')
+  ((posixly_correct == 0 && (c) == '#') || (posixly_correct == 0 && (c) == '?') || (c) == '@' || (c) == '*')
 
 /* Evaluates to 1 if C is one of the OP characters that follows the parameter
    in ${parameter[:]OPword}. */
@@ -5907,7 +5907,7 @@ parameter_brace_expand_length (name)
 	  break;
 	case '!':
 	  if (last_asynchronous_pid == NO_PID)
-	    t = (char *)NULL;
+	    t = (char *)NULL;	/* XXX - error if set -u set? */
 	  else
 	    t = itos (last_asynchronous_pid);
 	  break;
@@ -5929,6 +5929,8 @@ parameter_brace_expand_length (name)
       if (legal_number (name + 1, &arg_index))		/* ${#1} */
 	{
 	  t = get_dollar_var_value (arg_index);
+	  if (t == 0 && unbound_vars_is_error)
+	    return INTMAX_MIN;
 	  number = MB_STRLEN (t);
 	  FREE (t);
 	}
@@ -5939,6 +5941,8 @@ parameter_brace_expand_length (name)
 	    t = assoc_reference (assoc_cell (var), "0");
 	  else
 	    t = array_reference (array_cell (var), 0);
+	  if (t == 0 && unbound_vars_is_error)
+	    return INTMAX_MIN;
 	  number = MB_STRLEN (t);
 	}
 #endif
@@ -6940,15 +6944,8 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
   /* If the name really consists of a special variable, then make sure
      that we have the entire name.  We don't allow indirect references
      to special variables except `#', `?', `@' and `*'. */
-  if ((sindex == t_index &&
-	(string[t_index] == '-' ||
-	 string[t_index] == '?' ||
-	 string[t_index] == '#')) ||
-      (sindex == t_index - 1 && string[sindex] == '!' &&
-	(string[t_index] == '#' ||
-	 string[t_index] == '?' ||
-	 string[t_index] == '@' ||
-	 string[t_index] == '*')))
+  if ((sindex == t_index && VALID_SPECIAL_LENGTH_PARAM (string[t_index])) ||
+      (sindex == t_index - 1 && string[sindex] == '!' && VALID_INDIR_PARAM (string[t_index])))
     {
       t_index++;
       free (name);
@@ -7043,6 +7040,13 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 	}
 
       number = parameter_brace_expand_length (name);
+      if (number == INTMAX_MIN && unbound_vars_is_error)
+	{
+	  last_command_exit_value = EXECUTION_FAILURE;
+	  err_unboundvar (name+1);
+	  free (name);
+	  return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
+	}
       free (name);
 
       *indexp = sindex;
@@ -7178,6 +7182,21 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 
   *indexp = sindex;
 
+  /* All the cases where an expansion can possibly generate an unbound
+     variable error. */
+  if (want_substring || want_patsub || want_casemod || c == '#' || c == '%' || c == RBRACE)
+    {
+      if (var_is_set == 0 && unbound_vars_is_error && ((name[0] != '@' && name[0] != '*') || name[1]))
+	{
+	  last_command_exit_value = EXECUTION_FAILURE;
+	  err_unboundvar (name);
+	  FREE (value);
+	  FREE (temp);
+	  free (name);
+	  return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
+	}
+    }
+    
   /* If this is a substring spec, process it and add the result. */
   if (want_substring)
     {
@@ -7251,15 +7270,6 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
       return &expand_wdesc_error;
 
     case RBRACE:
-      if (var_is_set == 0 && unbound_vars_is_error && ((name[0] != '@' && name[0] != '*') || name[1]))
-	{
-	  last_command_exit_value = EXECUTION_FAILURE;
-	  err_unboundvar (name);
-	  FREE (value);
-	  FREE (temp);
-	  free (name);
-	  return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
-	}
       break;
 
     case '#':	/* ${param#[#]pattern} */
@@ -9324,6 +9334,7 @@ expand_word_list_internal (list, eflags)
   if ((eflags & WEXP_VARASSIGN) && subst_assign_varlist)
     {
       sh_wassign_func_t *assign_func;
+      int is_special_builtin;
 
       /* If the remainder of the words expand to nothing, Posix.2 requires
 	 that the variable and environment assignments affect the shell's
@@ -9331,6 +9342,10 @@ expand_word_list_internal (list, eflags)
       assign_func = new_list ? assign_in_env : do_word_assignment;
       tempenv_assign_error = 0;
 
+      /* Posix says that special builtins exit if a variable assignment error
+	 occurs in an assignment preceding it. */
+      is_special_builtin = (posixly_correct && new_list && find_special_builtin (new_list->word->word));
+      
       for (temp_list = subst_assign_varlist; temp_list; temp_list = temp_list->next)
 	{
 	  this_command_name = (char *)NULL;
@@ -9344,7 +9359,7 @@ expand_word_list_internal (list, eflags)
 	      if (assign_func == do_word_assignment)
 		{
 		  last_command_exit_value = EXECUTION_FAILURE;
-		  if (interactive_shell == 0 && posixly_correct)
+		  if (interactive_shell == 0 && posixly_correct && is_special_builtin)
 		    exp_jump_to_top_level (FORCE_EOF);
 		  else
 		    exp_jump_to_top_level (DISCARD);

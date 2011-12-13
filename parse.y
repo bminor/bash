@@ -3165,7 +3165,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
   start_lineno = line_number;
   while (count)
     {
-      ch = shell_getc (qc != '\'' && (tflags & LEX_PASSNEXT) == 0);
+      ch = shell_getc (qc != '\'' && (tflags & (LEX_PASSNEXT)) == 0);
 
       if (ch == EOF)
 	{
@@ -3434,7 +3434,7 @@ parse_comsub (qc, open, close, lenp, flags)
   while (count)
     {
 comsub_readchar:
-      ch = shell_getc (qc != '\'' && (tflags & LEX_PASSNEXT) == 0);
+      ch = shell_getc (qc != '\'' && (tflags & (LEX_INCOMMENT|LEX_PASSNEXT)) == 0);
 
       if (ch == EOF)
 	{
