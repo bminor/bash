@@ -9810,3 +9810,24 @@ lib/readline/complete.c
 	  text being completed, inhibit inserting the match.
 	  The guess is that replacing text with a shorter match will not
 	  be wanted
+
+				   5/20
+				   ----
+lib/sh/unicode.c
+	- new file, with unicode character conversion-related code.  Will be
+	  used to implement \u and \U escapes where appropriate, and for
+	  other unicode-related functions in the future
+
+				   5/21
+				   ----
+builtins/printf.def
+	- add code to handle \u and \U escapes in format strings and arguments
+	  processed by the %b format specifier
+
+lib/sh/strtrans.c
+	- add code to handle \u and \U escapes as unicode characters, works for
+	  both `echo -e' and $'...'
+
+doc/{bash.1,bashref.texi}
+	- document new \u and \U escape sequences for $'...' and echo (printf
+	  defers to the system's man page or Posix)

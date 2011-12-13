@@ -455,6 +455,9 @@ extern int uconvert __P((char *, long *, long *));
 extern unsigned int falarm __P((unsigned int, unsigned int));
 extern unsigned int fsleep __P((unsigned int, unsigned int));
 
+/* declarations for functions defined in lib/sh/unicode.c */
+extern int u32cconv __P((unsigned long, char *));
+
 /* declarations for functions defined in lib/sh/winsize.c */
 extern void get_new_window_size __P((int, int *, int *));
 

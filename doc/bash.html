@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2010 January 15<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2010 April 17<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -42,7 +42,7 @@ bash - GNU Bourne-Again SHell
 <H3>COPYRIGHT</H3>
 
 
-Bash is Copyright &#169; 1989-2009 by the Free Software Foundation, Inc.
+Bash is Copyright &#169; 1989-2010 by the Free Software Foundation, Inc.
 <A NAME="lbAE">&nbsp;</A>
 <H3>DESCRIPTION</H3>
 
@@ -67,8 +67,10 @@ can be configured to be POSIX-conformant by default.
 <A NAME="lbAF">&nbsp;</A>
 <H3>OPTIONS</H3>
 
-In addition to the single-character shell options documented in the
-description of the <B>set</B> builtin command, <B>bash</B>
+All of the  single-character shell options documented in the
+description of the <B>set</B> builtin command can be used as options
+when the shell is invoked.
+In addition, <B>bash</B>
 interprets the following options when it is invoked:
 <P>
 
@@ -194,11 +196,6 @@ Turns on extended debugging mode (see the description of the
 
 option to the
 <B>shopt</B>
-
-builtin below)
-and shell function tracing (see the description of the
-<B>-o functrace</B> option to the
-<B>set</B>
 
 builtin below).
 <DT><B>--dump-po-strings</B>
@@ -5048,7 +5045,7 @@ turned on to be used in an expression.
 
 Constants with a leading 0 are interpreted as octal numbers.
 A leading 0x or 0X denotes hexadecimal.
-Otherwise, numbers take the form [<I>base#</I>]n, where <I>base</I>
+Otherwise, numbers take the form [<I>base#</I>]n, where the optional <I>base</I>
 is a decimal number between 2 and 64 representing the arithmetic
 base, and <I>n</I> is a number in that base.
 If <I>base#</I> is omitted, then base 10 is used.
@@ -6688,7 +6685,8 @@ have a slash appended (subject to the value of
 <DD>
 This variable, when set to <B>On</B>, causes readline to match files whose
 names begin with a `.' (hidden files) when performing filename 
-completion, unless the leading `.' is
+completion.
+If set to <B>Off</B>, the leading `.' must be
 supplied by the user in the filename to be completed.
 <DT><B>output-meta (Off)</B>
 
@@ -7822,7 +7820,7 @@ exit status of 124.  If a shell function returns 124, and changes
 the compspec associated with the command on which completion is being
 attempted (supplied as the first argument when the function is executed),
 programmable completion restarts from the beginning, with an
-attempt to find a compspec for that command.  This allows a set of
+attempt to find a new compspec for that command.  This allows a set of
 completions to be built dynamically as completion is attempted, rather than
 being loaded all at once.
 <P>
@@ -9810,14 +9808,15 @@ returns true if an option, specified or unspecified, is found.
 It returns false if the end of options is encountered or an
 error occurs.
 <DT><B>hash</B> [<B>-lr</B>] [<B>-p</B> <I>filename</I>] [<B>-dt</B>] [<I>name</I>]<DD>
-For each
-<I>name</I>,
+Each time <B>hash</B> is invoked,
+the full pathname of the command 
+<I>name</I>
 
-the full file name of the command is determined by searching
+is determined by searching
 the directories in
 <B>$PATH</B>
 
-and remembered.
+and remembered.  Any previously-remembered pathname is discarded.
 If the
 <B>-p</B>
 
@@ -10329,6 +10328,11 @@ In addition to the standard <I>printf</I>(1) formats, <B>%b</B> causes
 beginning with <B>\0</B> may contain up to four digits),
 and <B>%q</B> causes <B>printf</B> to output the corresponding
 <I>argument</I> in a format that can be reused as shell input.
+<P>
+Arguments to non-string format specifiers are treated as C constants,
+except that a leading plus or minus sign is allowed, and if the leading
+character is a single or double quote, the value is the ASCII value of
+the following character.
 <P>
 The <B>-v</B> option causes the output to be assigned to the variable
 <I>var</I> rather than being printed to the standard output.
@@ -12069,7 +12073,8 @@ The maximum number of processes available to a single user
 <DT><B>-v</B>
 
 <DD>
-The maximum amount of virtual memory available to the shell
+The maximum amount of virtual memory available to the shell and, on
+some systems, to its children
 <DT><B>-x</B>
 
 <DD>
@@ -12511,7 +12516,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-4.1<TH ALIGN=CENTER width=33%>2010 January 15<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-4.1<TH ALIGN=CENTER width=33%>2010 April 17<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -12617,6 +12622,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 15 January 2010 11:58:10 EST
+Time: 20 May 2010 16:33:15 EDT
 </BODY>
 </HTML>

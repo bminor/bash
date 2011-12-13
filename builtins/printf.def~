@@ -782,13 +782,8 @@ tescape (estart, cp, sawc)
 	    *cp = '\\';
 	    return 0;
 	  }
-	if (evalue <= UCHAR_MAX)
-	  *cp = evalue;
-	else
-	  {
-	    temp = u32cconv (evalue, cp);
-	    cp[temp] = '\0';
-	  }
+	temp = u32cconv (evalue, cp);
+	cp[temp] = '\0';
 	break;
 #endif
 	

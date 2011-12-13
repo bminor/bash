@@ -9789,3 +9789,41 @@ lib/readline/histexpand.c
 	  $(...) code above.  Bug reported by Rajeev V. Pillai
 	  <rajeevvp@gmail.com>
 
+				   4/24
+				   ----
+lib/readline/vi_mode.c
+	- add checks to rl_vi_char_search to make sure we've already done a
+	  search if the command is `;' or `,', and return immediately if we
+	  have not.  Fixes bug reported by Eric Ho <ericmho@shaw.ca>
+
+lib/readline/text.c
+	- make sure `dir' is in the valid range before searching in
+	  _rl_char_search_internal.  Range checks in the code depend on it
+	  being non-zero
+
+				    5/3
+				    ---
+lib/readline/complete.c
+	- in rl_complete_internal, if show-all-if-ambiguous or
+	  show-all-if-unmodified are set (what_to_do == '!' or '@',
+	  respectively), and the common match prefix is shorter than the
+	  text being completed, inhibit inserting the match.
+	  The guess is that replacing text with a shorter match will not
+	  be wanted
+
+				   5/20
+				   ----
+lib/sh/unicode.c
+	- new file, with unicode character conversion-related code.  Will be
+	  used to implement \u and \U escapes where appropriate, and for
+	  other unicode-related functions in the future
+
+				   5/21
+				   ----
+builtins/printf.def
+	- add code to handle \u and \U escapes in format strings and arguments
+	  processed by the %b format specifier
+
+lib/sh/strtrans.c
+	- add code to handle \u and \U escapes as unicode characters, works for
+	  both `echo -e' and $'...'
