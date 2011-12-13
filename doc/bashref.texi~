@@ -2986,10 +2986,12 @@ If @code{getopts} is silent, then a colon (@samp{:}) is placed in
 @example
 hash [-r] [-p @var{filename}] [-dt] [@var{name}]
 @end example
-Remember the full pathnames of commands specified as @var{name} arguments,
+Each time @code{hash} is invoked, it remembers the full pathnames of the
+commands specified as @var{name} arguments,
 so they need not be searched for on subsequent invocations.
 The commands are found by searching through the directories listed in
 @env{$PATH}.
+Any previously-remembered pathname is discarded.
 The @option{-p} option inhibits the path search, and @var{filename} is
 used as the location of @var{name}.
 The @option{-r} option causes the shell to forget all remembered locations.
@@ -5316,8 +5318,9 @@ bash [long-opt] [-abefhkmnptuvxdBCDHP] [-o @var{option}] [-O @var{shopt_option}]
 bash [long-opt] -s [-abefhkmnptuvxdBCDHP] [-o @var{option}] [-O @var{shopt_option}] [@var{argument} @dots{}]
 @end example
 
-In addition to the single-character shell command-line options
-(@pxref{The Set Builtin}), there are several multi-character
+All of the single-character options used with the @code{set} builtin
+(@pxref{The Set Builtin}) can be used as options when the shell is invoked.
+In addition, there are several multi-character
 options that you can use.  These options must appear on the command
 line before the single-character options to be recognized. 
 
@@ -5326,9 +5329,7 @@ line before the single-character options to be recognized.
 Arrange for the debugger profile to be executed before the shell
 starts.  Turns on extended debugging mode (see @ref{The Shopt Builtin}
 for a description of the @code{extdebug} option to the @code{shopt}
-builtin) and shell function tracing
-(see @ref{The Set Builtin} for a description of the @code{-o functrace}
-option).
+builtin).
 
 @item --dump-po-strings
 A list of all double-quoted strings preceded by @samp{$}

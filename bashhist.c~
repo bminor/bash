@@ -751,9 +751,6 @@ bash_add_history (line)
 	      chars_to_add = "";
 	    }
 
-if (dstack.delimiter_depth == 0 && current->line[curlen - 1] == '\n' && *chars_to_add == ';')
-  chars_to_add++;
-
 	  new_line = (char *)xmalloc (1
 				      + curlen
 				      + strlen (line)

@@ -155,7 +155,7 @@ static void
 make_command_string_internal (command)
      COMMAND *command;
 {
-  char s[3], *op;
+  char s[3];
 
   if (command == 0)
     cprintf ("");
@@ -565,6 +565,8 @@ print_for_command (for_command)
   newline ("do\n");
   indentation += indentation_amount;
   make_command_string_internal (for_command->action);
+  if (deferred_heredocs)
+    print_deferred_heredocs ("");
   semicolon ();
   indentation -= indentation_amount;
   newline ("done");
@@ -1052,10 +1054,9 @@ static void
 print_redirection (redirect)
      REDIRECT *redirect;
 {
-  int kill_leading, redirector, redir_fd;
+  int redirector, redir_fd;
   WORD_DESC *redirectee, *redir_word;
 
-  kill_leading = 0;
   redirectee = redirect->redirectee.filename;
   redir_fd = redirect->redirectee.dest;
 

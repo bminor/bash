@@ -4816,7 +4816,15 @@ history_delimiting_chars ()
      add the first line of the body of the here document (the second line
      of the command). */
   if (parser_state & PST_HEREDOC)
+#if 0
+{
+  if (last_read_token == WORD && (token_before_that == LESS_LESS || token_before_that == LESS_LESS_MINUS))
+    return ("\n");	/* XXX -- need to clean up in bash_add_history */
+#endif
     return (current_command_line_count == 2 ? "\n" : "");
+#if 0
+}
+#endif
 
   /* First, handle some special cases. */
   /*(*/

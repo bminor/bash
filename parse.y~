@@ -4816,7 +4816,11 @@ history_delimiting_chars ()
      add the first line of the body of the here document (the second line
      of the command). */
   if (parser_state & PST_HEREDOC)
+{
+  if (last_read_token == WORD && (token_before_that == LESS_LESS || token_before_that == LESS_LESS_MINUS))
+    return ("\n");	/* XXX -- need to clean up in bash_add_history */
     return (current_command_line_count == 2 ? "\n" : "");
+}
 
   /* First, handle some special cases. */
   /*(*/
@@ -5780,10 +5784,6 @@ sh_parser_state_t *
 save_parser_state (ps)
      sh_parser_state_t *ps;
 {
-#if defined (ARRAY_VARS)
-  SHELL_VAR *v;
-#endif
-
   if (ps == 0)
     ps = (sh_parser_state_t *)xmalloc (sizeof (sh_parser_state_t));
   if (ps == 0)
@@ -5806,11 +5806,7 @@ save_parser_state (ps)
 
   ps->last_command_exit_value = last_command_exit_value;
 #if defined (ARRAY_VARS)
-  v = find_variable ("PIPESTATUS");
-  if (v && array_p (v) && array_cell (v))
-    ps->pipestatus = array_copy (array_cell (v));
-  else
-    ps->pipestatus = (ARRAY *)NULL;
+  ps->pipestatus = save_pipestatus_array ();
 #endif
     
   ps->last_shell_builtin = last_shell_builtin;
@@ -5826,10 +5822,6 @@ void
 restore_parser_state (ps)
      sh_parser_state_t *ps;
 {
-#if defined (ARRAY_VARS)
-  SHELL_VAR *v;
-#endif
-
   if (ps == 0)
     return;
 
@@ -5854,12 +5846,7 @@ restore_parser_state (ps)
 
   last_command_exit_value = ps->last_command_exit_value;
 #if defined (ARRAY_VARS)
-  v = find_variable ("PIPESTATUS");
-  if (v && array_p (v) && array_cell (v))
-    {
-      array_dispose (array_cell (v));
-      var_setarray (v, ps->pipestatus);
-    }
+  restore_pipestatus_array (ps->pipestatus);
 #endif
 
   last_shell_builtin = ps->last_shell_builtin;
