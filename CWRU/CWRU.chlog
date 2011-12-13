@@ -9751,7 +9751,7 @@ lib/readline/complete.c
 
 lib/readline/bind.c
 	- new bindable variable: completion-display-width, controls the
-	  number of columns used when displaying completionsm with new
+	  number of columns used when displaying completions with new
 	  sv_compwidth function to call when value is set or unset
 
 lib/readline/doc/{readline.3,rltech.texi}
@@ -10415,3 +10415,34 @@ doc/{bash.1,bashref.texi},lib/readline/doc/{readline.3,rluser.texi}
 configure.in
 	- remove AM_PATH_LISPDIR call since we don't use that bash debugger
 	  any more.  Suggested by Mike Frysinger <vapier@gentoo.org>
+
+				   10/6
+				   ----
+findcmd.c
+	- change executable_file to set errno to EISDIR if the passed name
+	  is a directory
+
+builtins/exec.def
+	- change exec_builtin to report appropriate error message if the
+	  file argument is a directory.  Noted by Eric Blake <eblake@redhat.com>
+	  in a message to austin-group
+
+builtins/source.def
+	- change source_builtin to make sure the shell exits if the file is
+	  not found when in a non-interactive shell running in  posix mode
+	  and source_searches_cwd == 0 (as posix mode makes it by default).
+	  Pointed out in http://thread.gmane.org/gmane.comp.shells.dash/291/focus=392
+	  by Jilles Tjoelker <jilles@stack.nl>
+
+execute_cmd.c
+	- set executing_command_builtin in execute_builtin if the builtin is
+	  command_builtin.  Unwind-protected in execute_function_or_builtin
+	  (like executing_builtin variable).  Available for rest of shell
+
+builtins/{source.def,evalfile.c}
+	- make sure that non-interactive posix mode shells exit if the file
+	  argument to `.' is not found only if they are not being executed
+	  by the command builtin (executing_command_builtin == 0).  This is
+	  how `command' can cancel effects of special builtin exit properties
+	  in the case of `dot file not found'
+

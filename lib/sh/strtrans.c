@@ -49,11 +49,9 @@ ansicstr (string, len, flags, sawc, rlen)
      char *string;
      int len, flags, *sawc, *rlen;
 {
-  int c, temp, v;
+  int c, temp;
   char *ret, *r, *s;
-#if defined (HANDLE_MULTIBYTE)
-  char mbch[25];		/* 25 > MB_LEN_MAX, plus can handle 4-byte UTF-8 and large Unicode characters*/
-#endif
+  unsigned long v;
 
   if (string == 0 || *string == '\0')
     return ((char *)NULL);
@@ -153,7 +151,6 @@ ansicstr (string, len, flags, sawc, rlen)
 		}
 	      else
 		{
-		  memset (mbch, '\0', sizeof (mbch));
 		  temp = u32cconv (v, r);
 		  r += temp;
 		  continue;

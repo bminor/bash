@@ -788,6 +788,7 @@ tescape (estart, cp, lenp, sawc)
 {
   register char *p;
   int temp, c, evalue;
+  unsigned long uvalue;
 
   p = estart;
   if (lenp)
@@ -845,19 +846,19 @@ tescape (estart, cp, lenp, sawc)
       case 'u':
       case 'U':
 	temp = (c == 'u') ? 4 : 8;	/* \uNNNN \UNNNNNNNN */
-	for (evalue = 0; ISXDIGIT ((unsigned char)*p) && temp--; p++)
-	  evalue = (evalue * 16) + HEXVALUE (*p);
+	for (uvalue = 0; ISXDIGIT ((unsigned char)*p) && temp--; p++)
+	  uvalue = (uvalue * 16) + HEXVALUE (*p);
 	if (p == estart + 1)
 	  {
 	    builtin_error (_("missing unicode digit for \\%c"), c);
 	    *cp = '\\';
 	    return 0;
 	  }
-	if (evalue <= UCHAR_MAX)
-	  *cp = evalue;
+	if (uvalue <= UCHAR_MAX)
+	  *cp = uvalue;
 	else
 	  {
-	    temp = u32cconv (evalue, cp);
+	    temp = u32cconv (uvalue, cp);
 	    cp[temp] = '\0';
 	    if (lenp)
 	      *lenp = temp;

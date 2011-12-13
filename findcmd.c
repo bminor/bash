@@ -32,6 +32,7 @@
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif
+#include <errno.h>
 
 #include "bashansi.h"
 
@@ -42,6 +43,10 @@
 #include "pathexp.h"
 #include "hashcmd.h"
 #include "findcmd.h"	/* matching prototypes and declarations */
+
+#if !defined (errno)
+extern int errno;
+#endif
 
 extern int posixly_correct;
 
@@ -172,6 +177,10 @@ executable_file (file)
   int s;
 
   s = file_status (file);
+#if defined EISDIR
+  if (s & FS_DIRECTORY)
+    errno = EISDIR;	/* let's see if we can improve error messages */
+#endif
   return ((s & FS_EXECABLE) && ((s & FS_DIRECTORY) == 0));
 }
 

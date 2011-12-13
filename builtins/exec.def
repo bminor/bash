@@ -148,8 +148,20 @@ exec_builtin (list)
 
   if (command == 0)
     {
-      sh_notfound (args[0]);
-      exit_value = EX_NOTFOUND;	/* As per Posix.2, 3.14.6 */
+      if (file_isdir (args[0]))
+	{
+#if defined (EISDIR)
+	  builtin_error (_("%s: cannot execute: %s"), args[0], strerror (EISDIR));
+#else
+	  builtin_error (_("%s: cannot execute: %s"), args[0], strerror (errno));
+#endif
+	  exit_value = EX_NOEXEC;
+	}
+      else
+	{
+	  sh_notfound (args[0]);
+	  exit_value = EX_NOTFOUND;	/* As per Posix.2, 3.14.6 */
+	}
       goto failed_exec;
     }
 
