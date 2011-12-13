@@ -1784,6 +1784,9 @@ rl_complete_internal (what_to_do)
   int start, end, delimiter, found_quote, i, nontrivial_lcd;
   char *text, *saved_line_buffer;
   char quote_char;
+#if 1
+  int tlen, mlen;
+#endif
 
   RL_SETSTATE(RL_STATE_COMPLETING);
 
@@ -1811,6 +1814,10 @@ rl_complete_internal (what_to_do)
   /* nontrivial_lcd is set if the common prefix adds something to the word
      being completed. */
   nontrivial_lcd = matches && strcmp (text, matches[0]) != 0;
+#if 1
+  if (what_to_do == '!' || what_to_do == '@')
+    tlen = strlen (text);
+#endif
   free (text);
 
   if (matches == 0)
@@ -1844,8 +1851,25 @@ rl_complete_internal (what_to_do)
     case '!':
     case '@':
       /* Insert the first match with proper quoting. */
+#if 0
       if (*matches[0])
 	insert_match (matches[0], start, matches[1] ? MULT_MATCH : SINGLE_MATCH, &quote_char);
+#else
+      if (what_to_do == TAB)
+        {
+          if (*matches[0])
+	    insert_match (matches[0], start, matches[1] ? MULT_MATCH : SINGLE_MATCH, &quote_char);
+        }
+      else if (*matches[0] && matches[1] == 0)
+	/* should we perform the check only if there are multiple matches? */
+	insert_match (matches[0], start, matches[1] ? MULT_MATCH : SINGLE_MATCH, &quote_char);
+      else if (*matches[0])	/* what_to_do != TAB && multiple matches */
+	{
+	  mlen = *matches[0] ? strlen (matches[0]) : 0;
+	  if (mlen >= tlen)
+	    insert_match (matches[0], start, matches[1] ? MULT_MATCH : SINGLE_MATCH, &quote_char);
+	}
+#endif
 
       /* If there are more matches, ring the bell to indicate.
 	 If we are in vi mode, Posix.2 says to not ring the bell.

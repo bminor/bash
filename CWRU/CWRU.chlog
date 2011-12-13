@@ -9800,3 +9800,13 @@ lib/readline/text.c
 	- make sure `dir' is in the valid range before searching in
 	  _rl_char_search_internal.  Range checks in the code depend on it
 	  being non-zero
+
+				    5/3
+				    ---
+lib/readline/complete.c
+	- in rl_complete_internal, if show-all-if-ambiguous or
+	  show-all-if-unmodified are set (what_to_do == '!' or '@',
+	  respectively), and the common match prefix is shorter than the
+	  text being completed, inhibit inserting the match.
+	  The guess is that replacing text with a shorter match will not
+	  be wanted
