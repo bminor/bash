@@ -10784,6 +10784,10 @@ doc/{bash.1,bashref.texi}
 configure.in
 	- changed release status to 4.2-beta
 
+				   12/14
+				   -----
+[bash-4.2-beta frozen]
+
 				   12/18
 				   -----
 redir.c
@@ -10806,3 +10810,95 @@ expr.c
 				   -----
 lib/sh/fpurge.c
 	- updated version from gnulib, inlined gnulib stdio-impl.h
+
+				   12/24
+				   -----
+doc/bash.1
+	- change the description of while and until to use `list-1' and
+	  `list-2', similar to the Posix description.  Suggested by
+	  Jeff Haemer <jeffrey.haemer@gmail.com>
+
+				   12/27
+				   -----
+execute_cmd.c
+	- slight changes to execute_command_internal and how it captures the
+	  exit status of (command) and shell control structures with pipes to
+	  avoid multiple variable assignments to last_command_exit_value
+	- change to execute_simple_command so that parent branches of shells
+	  forked to execute commands in pipelines don't change $? to 0
+	  (if (pipe_out != NO_PIPE) result = last_command_exit_value).  Fixes
+	  bug reported by Damien Nad√ <dnade.ext@orange-ftgroup.com>
+
+				   12/28
+				   -----
+configure.in
+	- changed version to bash-4.2-rc1
+
+				 1/2/2011
+				 --------
+lib/readline/complete.c
+	- fix rl_filename_completion_function to dequote and save users_dirname
+	  before calling any function to transform the directory name passed
+	  to opendir().  Fix from Andreas Schwab <schwab@linux-m68k.org>
+
+lib/readline/doc/
+	- make sure to note that rl_directory_completion_hook cannot modify
+	  the directory name argument if it returns 0
+
+bashline.c
+	- make sure that bash_directory_completion_hook consistently returns
+	  non-zero whenever it modifies its directory name argument 
+
+lib/readline/terminal.c
+	- don't bother with the declarations (extern or not) for PC, BS, and
+	  UP if NCURSES_VERSION is defined, since ncurses defines local
+	  versions of those symbols in the library.  Fixes bug most recently
+	  reported by Kevin Scott <kscott@eznet.net> against Mac OS X
+
+include/filecntl.h
+	- make sure O_TEXT and O_BINARY are defined to avoid Windows-specific
+	  (or cygwin-specific) code.  This and the following changes from
+	  Eric Blake <eblake@redhat.com> for current cygwin systems
+
+input.h
+	- add a B_TEXT flag to note when the underlying file descriptor is
+	  opened in O_TEXT mode
+
+lib/sh/tmpfile.c
+	- make sure temporary files are opened in binary mode (O_BINARY) on
+	  systems where it matters
+
+input.c
+	- make sure to set the B_TEXT flag if the file descriptor has O_TEXT
+	  in its flags (returned by fcntl)
+	- change b_fill_buffer to compensate for lseek() and read() returning
+	  different offsets on files opened in O_TEXT mode
+	- cygwin now is able to lseek on files and set the unbuffered and text
+	  flags appropriately, so can use the general test for a seekable fd
+	- now that cygwin uses O_TEXT or O_BINARY appropriately, we no longer
+	  have to manually translate \r\n to \n
+
+redir.c
+	- remove the Cygwin-1.1 code from here_document_to_fd; cygwin is now
+	  up to version 1.7 and can unlink an open file descriptor
+	- make sure temporary files used for here documents are opened in
+	  binary mode (O_BINARY) on systems where it matters
+
+execute_cmd.c,parse.y
+	- make sure error messages use all printable characters in filenames
+	  and strings
+
+{builtins/evalfile,shell,subst}.c
+	- remove cygwin-specific calls to setmode to force file descriptors
+	  into text mode, since we're using text or binary mode according to
+	  the mode of the mount point
+
+execute_cmd.c
+	- when creating pipes and making them stdin and stdout, make sure to
+	  tell stdio that the mode of the underlying file descriptor may have
+	  changed from text to binary
+
+subst.c
+	- when creating pipes for command substitution, make sure to
+	  tell stdio that the mode of the underlying file descriptor may have
+	  changed from text to binary

@@ -1292,13 +1292,12 @@ run_one_command (command)
   int code;
 
   code = setjmp (top_level);
-itrace("run_one_command: setjmp: code = %d", code);
+
   if (code != NOT_JUMPED)
     {
 #if defined (PROCESS_SUBSTITUTION)
       unlink_fifo_list ();
 #endif /* PROCESS_SUBSTITUTION */
-itrace("run_one_command: code = %d", code);
       switch (code)
 	{
 	  /* Some kind of throw to top_level has occured. */

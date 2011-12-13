@@ -5146,10 +5146,6 @@ read_comsub (fd, quoted, rflag)
   for (skip_ctlesc = skip_ctlnul = 0, s = ifs_value; s && *s; s++)
     skip_ctlesc |= *s == CTLESC, skip_ctlnul |= *s == CTLNUL;
 
-#ifdef __CYGWIN__
-  setmode (fd, O_TEXT);		/* we don't want CR/LF, we want Unix-style */
-#endif
-
   /* Read the output of the command through the pipe.  This may need to be
      changed to understand multibyte characters in the future. */
   while (1)
@@ -5359,6 +5355,13 @@ command_substitute (string, quoted)
 	  (fildes[0] != fileno (stdout)) &&
 	  (fildes[0] != fileno (stderr)))
 	close (fildes[0]);
+
+#ifdef __CYGWIN__
+      /* Let stdio know the fd may have changed from text to binary mode, and
+	 make sure to preserve stdout line buffering. */
+      freopen (NULL, "w", stdout);
+      sh_setlinebuf (stdout);
+#endif /* __CYGWIN__ */
 
       /* The currently executing shell is not interactive. */
       interactive = 0;

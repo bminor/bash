@@ -99,7 +99,7 @@ do { \
   if ((r) < 0) \
     { \
       if (fd >= 0) \
-	close (fd); \    
+	close (fd); \
       last_command_exit_value = EXECUTION_FAILURE;\
       return ((e) == 0 ? EINVAL : (e));\
     } \
@@ -465,14 +465,6 @@ here_document_to_fd (redirectee, ri)
   if (unlink (filename) < 0)
     {
       r = errno;
-#if defined (__CYGWIN__)
-      /* Under CygWin 1.1.0, the unlink will fail if the file is
-	 open. This hack will allow the previous action of silently
-	 ignoring the error, but will still leave the file there. This
-	 needs some kind of magic. */
-      if (r == EACCES)
-	return (fd2);
-#endif /* __CYGWIN__ */
       close (fd2);
       free (filename);
       errno = r;
@@ -821,7 +813,10 @@ do_redirection_internal (redirect, flags)
 	  if (redirect->rflags & REDIR_VARASSIGN)
 	    {
 	      redirector = fcntl (fd, F_DUPFD, SHELL_FD_BASE);		/* XXX try this for now */
-	      REDIRECTION_ERROR (redirector, errno, fd);
+	      r = errno;
+	      if (redirector < 0)
+		sys_error (_("redirection error: cannot duplicate fd"));
+	      REDIRECTION_ERROR (redirector, r, fd);
 	    }
 
 	  if (flags & RX_UNDOABLE)
@@ -930,7 +925,10 @@ do_redirection_internal (redirect, flags)
 	  if (redirect->rflags & REDIR_VARASSIGN)
 	    {
 	      redirector = fcntl (fd, F_DUPFD, SHELL_FD_BASE);		/* XXX try this for now */
-	      REDIRECTION_ERROR (redirector, errno, fd);
+	      r = errno;
+	      if (redirector < 0)
+		sys_error (_("redirection error: cannot duplicate fd"));
+	      REDIRECTION_ERROR (redirector, r, fd);
 	    }
 
 	  if (flags & RX_ACTIVE)
@@ -990,7 +988,10 @@ do_redirection_internal (redirect, flags)
       if ((flags & RX_ACTIVE) && (redirect->rflags & REDIR_VARASSIGN))
         {
 	  redirector = fcntl (redir_fd, F_DUPFD, SHELL_FD_BASE);		/* XXX try this for now */
-	  REDIRECTION_ERROR (redirector, errno, -1);
+	  r = errno;
+	  if (redirector < 0)
+	    sys_error (_("redirection error: cannot duplicate fd"));
+	  REDIRECTION_ERROR (redirector, r, -1);
         }
 
       if ((flags & RX_ACTIVE) && (redir_fd != redirector))
@@ -1115,7 +1116,7 @@ do_redirection_internal (redirect, flags)
    since we're going to use it later (e.g., make sure we don't save fd 0
    to fd 10 if we have a redirection like 0<&10).  If the value of fdbase
    puts the process over its fd limit, causing fcntl to fail, we try
-   again with SHELL_FD_BASE. */
+   again with SHELL_FD_BASE.  Return 0 on success, -1 on error. */
 static int
 add_undo_redirect (fd, ri, fdbase)
      int fd;
@@ -1197,7 +1198,7 @@ add_undo_redirect (fd, ri, fdbase)
 }
 
 /* Set up to close FD when we are finished with the current command
-   and its redirections. */
+   and its redirections.  Return 0 on success, -1 on error. */
 static int
 add_undo_close_redirect (fd)
      int fd;

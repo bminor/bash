@@ -2695,7 +2695,9 @@ bash_filename_rewrite_hook (fname, fnlen)
 }
 
 /* Handle symbolic link references and other directory name
-   expansions while hacking completion. */
+   expansions while hacking completion.  This should return 1 if it modifies
+   the DIRNAME argument, 0 otherwise.  It should make sure not to modify
+   DIRNAME if it returns 0. */
 static int
 bash_directory_completion_hook (dirname)
      char **dirname;
@@ -2752,6 +2754,7 @@ bash_directory_completion_hook (dirname)
     {
       /* Dequote the filename even if we don't expand it. */
       new_dirname = bash_dequote_filename (local_dirname, rl_completion_quote_character);
+      return_value = STREQ (local_dirname, new_dirname) == 0;
       free (local_dirname);
       local_dirname = *dirname = new_dirname;
     }
@@ -2775,14 +2778,14 @@ bash_directory_completion_hook (dirname)
 	      free (temp1);
 	      temp1 = temp2;
 	      temp2 = sh_canonpath (temp1, PATH_CHECKDOTDOT|PATH_CHECKEXISTS);
-	      return_value = temp2 != 0;
+	      return_value |= temp2 != 0;
 	    }
 	}
       /* If we can't canonicalize, bail. */
       if (temp2 == 0)
 	{
 	  free (temp1);
-	  return 1;
+	  return return_value;
 	}
       len1 = strlen (temp1);
       if (temp1[len1 - 1] == '/')
@@ -2795,10 +2798,12 @@ bash_directory_completion_hook (dirname)
 	      temp2[len2 + 1] = '\0';
 	    }
 	}
+      return_value |= STREQ (local_dirname, temp2) == 0;
       free (local_dirname);
       *dirname = temp2;
       free (temp1);
     }
+
   return (return_value);
 }
 

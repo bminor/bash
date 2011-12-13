@@ -995,7 +995,7 @@ substitution, and quote removal are performed.
 Conditional operators such as @samp{-f} must be unquoted to be recognized
 as primaries.
 
-When used with @samp{[[}, The @samp{<} and @samp{>} operators sort
+When used with @samp{[[}, the @samp{<} and @samp{>} operators sort
 lexicographically using the current locale.
 
 When the @samp{==} and @samp{!=} operators are used, the string to the
@@ -3132,7 +3132,7 @@ is supplied.
 @item readonly
 @btindex readonly
 @example
-readonly [-aApf] [@var{name}[=@var{value}]] @dots{}
+readonly [-aAf] [-p] [@var{name}[=@var{value}]] @dots{}
 @end example
 Mark each @var{name} as readonly.
 The values of these names may not be changed by subsequent assignment.
@@ -3141,8 +3141,11 @@ function.
 The @option{-a} option means each @var{name} refers to an indexed
 array variable; the @option{-A} option means each @var{name} refers
 to an associative array variable.
+If both options are supplied, @option{-A} takes precedence.
 If no @var{name} arguments are given, or if the @option{-p}
 option is supplied, a list of all readonly names is printed.
+The other options may be used to restrict the output to a subset of
+the set of readonly names.
 The @option{-p} option causes output to be displayed in a format that
 may be reused as input.
 If a variable name is followed by =@var{value}, the value of
@@ -3239,6 +3242,7 @@ If the first argument is not a valid unary operator, the expression is
 false.
 
 @item 3 arguments
+The following conditions are applied in the order listed.
 If the second argument is one of the binary conditional
 operators (@pxref{Bash Conditional Expressions}), the
 result of the expression is the result of the binary test using the
@@ -3262,6 +3266,9 @@ precedence using the rules listed above.
 The expression is parsed and evaluated according to precedence
 using the rules listed above.
 @end table
+
+When used with @code{test} or @samp{[}, the @samp{<} and @samp{>}
+operators sort lexicographically using ASCII ordering.
 
 @item times
 @btindex times
@@ -4509,14 +4516,17 @@ arguments to the conditional command's @samp{=~} operator.
 @item compat32
 If set, Bash
 changes its behavior to that of version 3.2 with respect to locale-specific
-string comparison when using the conditional command's @samp{<} and @samp{>}
-operators.
+string comparison when using the @samp{[[}
+conditional command's @samp{<} and @samp{>} operators.
+Bash versions prior to bash-4.0 use ASCII collation and strcmp(3);
+bash-4.1 and later use the current locale's collation sequence and strcoll(3).
 
 @item compat40
 If set, Bash
 changes its behavior to that of version 4.0 with respect to locale-specific
-string comparison when using the conditional command's @samp{<} and @samp{>}
-operators and the effect of interrupting a command list.
+string comparison when using the @samp{[[}
+conditional command's @samp{<} and @samp{>} operators (see previous item)
+and the effect of interrupting a command list.
 
 @item compat41
 If set, Bash, when in posix mode, treats a single quote in a double-quoted
@@ -4601,7 +4611,7 @@ This option is enabled by default.
 
 @item globstar
 If set, the pattern @samp{**} used in a filename expansion context will
-match a files and zero or more directories and subdirectories.
+match all files and zero or more directories and subdirectories.
 If the pattern is followed by a @samp{/}, only directories and
 subdirectories match.
 
@@ -4981,7 +4991,7 @@ descriptor) and then unsetting it will result in the standard error
 being closed.
 
 @item COLUMNS
-Used by the @code{select} builtin command to determine the terminal width
+Used by the @code{select} command to determine the terminal width
 when printing selection lists.  Automatically set upon receipt of a
 @code{SIGWINCH}.
 
@@ -5270,7 +5280,7 @@ This variable determines the locale category used for number formatting.
 The line number in the script or shell function currently executing.
 
 @item LINES
-Used by the @code{select} builtin command to determine the column length
+Used by the @code{select} command to determine the column length
 for printing selection lists.  Automatically set upon receipt of a
 @code{SIGWINCH}.
 
@@ -5925,8 +5935,9 @@ If the @var{file} argument to one of the primaries is one of
 @file{/dev/stdin}, @file{/dev/stdout}, or @file{/dev/stderr}, file
 descriptor 0, 1, or 2, respectively, is checked.
 
-When used with @samp{[[}, The @samp{<} and @samp{>} operators sort
+When used with @samp{[[}, the @samp{<} and @samp{>} operators sort
 lexicographically using the current locale.
+The @code{test} command uses ASCII ordering.
 
 Unless otherwise specified, primaries that operate on files follow symbolic
 links and operate on the target of the link, rather than the link itself.
@@ -6320,6 +6331,7 @@ entire array.
 The @code{declare}, @code{local}, and @code{readonly}
 builtins each accept a @option{-a} option to specify an indexed
 array and a @option{-A} option to specify an associative array.
+If both options are supplied, @option{-A} takes precedence.
 The @code{read} builtin accepts a @option{-a}
 option to assign a list of words read from the standard input
 to an array, and can read values from the standard input into
@@ -7574,8 +7586,8 @@ when called as @code{rbash}, enters a restricted mode.  See
 @ref{The Restricted Shell}, for a description of restricted mode.
 
 @item --enable-select
-Include the @code{select} builtin, which allows the generation of simple
-menus (@pxref{Conditional Constructs}).
+Include the @code{select} compound command, which allows the generation of
+simple menus (@pxref{Conditional Constructs}).
 
 @item --enable-separate-helpfiles
 Use external files for the documentation displayed by the @code{help} builtin

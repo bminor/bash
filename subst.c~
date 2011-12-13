@@ -4306,11 +4306,15 @@ match_pattern (string, pat, mtype, sp, ep)
 #if defined (HANDLE_MULTIBYTE)
   if (MB_CUR_MAX > 1)
     {
+#if 0
       slen = STRLEN (string);
       mslen = MBSLEN (string);
       plen = STRLEN (pat);
       mplen = MBSLEN (pat);
       if (slen == mslen && plen == mplen)
+#else
+      if (mbsmbchar (string) == 0 && mbsmbchar (pat) == 0)
+#endif
         return (match_upattern (string, pat, mtype, sp, ep));
 
       n = xdupmbstowcs (&wpat, NULL, pat);
@@ -5141,10 +5145,6 @@ read_comsub (fd, quoted, rflag)
 
   for (skip_ctlesc = skip_ctlnul = 0, s = ifs_value; s && *s; s++)
     skip_ctlesc |= *s == CTLESC, skip_ctlnul |= *s == CTLNUL;
-
-#ifdef __CYGWIN__
-  setmode (fd, O_TEXT);		/* we don't want CR/LF, we want Unix-style */
-#endif
 
   /* Read the output of the command through the pipe.  This may need to be
      changed to understand multibyte characters in the future. */

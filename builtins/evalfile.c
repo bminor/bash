@@ -149,10 +149,6 @@ file_error_and_exit:
       return ((flags & FEVAL_BUILTIN) ? EXECUTION_FAILURE : -1);
     }      
 
-#if defined (__CYGWIN__) && defined (O_TEXT)
-  setmode (fd, O_TEXT);
-#endif
-
   if (S_ISREG (finfo.st_mode) && file_size <= SSIZE_MAX)
     {
       string = (char *)xmalloc (1 + file_size);

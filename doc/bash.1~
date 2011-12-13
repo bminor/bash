@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Fri Dec 24 16:00:06 EST 2010
+.\"	Last Change: Tue Dec 28 13:41:43 EST 2010
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2010 December 24" "GNU Bash-4.2"
+.TH BASH 1 "2010 December 28" "GNU Bash-4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -693,7 +693,7 @@ Conditional operators such as \fB\-f\fP must be unquoted to be recognized
 as primaries.
 .if t .sp 0.5
 .if n .sp 1
-When used with \fB[[\fP, The \fB<\fP and \fB>\fP operators sort
+When used with \fB[[\fP, the \fB<\fP and \fB>\fP operators sort
 lexicographically using the current locale.
 .if t .sp 0.5
 .if n .sp 1
@@ -1475,7 +1475,6 @@ this instance of
 The values assigned to the array members are as follows:
 .sp .5
 .RS
-.PD 0
 .TP 24
 .B BASH_VERSINFO[\fR0\fP]
 The major version number (the \fIrelease\fP).
@@ -1496,7 +1495,6 @@ The release status (e.g., \fIbeta1\fP).
 The value of
 .SM
 .BR MACHTYPE .
-.PD
 .RE
 .TP
 .B BASH_VERSION
@@ -1863,7 +1861,7 @@ A sample value is
 .if n ".:~:/usr".
 .TP
 .B COLUMNS
-Used by the \fBselect\fP builtin command to determine the terminal width
+Used by the \fBselect\fP compound command to determine the terminal width
 when printing selection lists.  Automatically set upon receipt of a
 .SM
 .BR SIGWINCH .
@@ -2095,7 +2093,7 @@ strings preceded by a \fB$\fP.
 This variable determines the locale category used for number formatting.
 .TP
 .B LINES
-Used by the \fBselect\fP builtin command to determine the column length
+Used by the \fBselect\fP compound command to determine the column length
 for printing selection lists.  Automatically set upon receipt of a
 .SM
 .BR SIGWINCH .
@@ -2276,6 +2274,7 @@ If this variable is not set, \fBbash\fP acts as if it had the
 value \fB$\(aq\enreal\et%3lR\enuser\et%3lU\ensys\t%3lS\(aq\fP.
 If the value is null, no timing information is displayed.
 A trailing newline is added when the format string is displayed.
+.PD 0
 .TP
 .B TMOUT
 If set to a value greater than zero,
@@ -2451,6 +2450,9 @@ builtins each accept a
 option to specify an indexed array and a
 .B \-A
 option to specify an associative array.
+If both options are supplied, 
+.B \-A
+takes precedence.
 The
 .B read
 builtin accepts a
@@ -2675,7 +2677,7 @@ a level of variable indirection is introduced.
 expanded and that value is used in the rest of the substitution, rather
 than the value of \fIparameter\fP itself.
 This is known as \fIindirect expansion\fP.
-The exceptions to this are the expansions of ${\fB!\\fPfIprefix\fP\fB*\fP} and
+The exceptions to this are the expansions of ${\fB!\fP\fIprefix\fP\fB*\fP} and
 ${\fB!\fP\fIname\fP[\fI@\fP]} described below.
 The exclamation point must immediately follow the left brace in order to
 introduce indirection.
@@ -2949,7 +2951,6 @@ array in turn, and the expansion is the resultant list.
 .PP
 \fICommand substitution\fP allows the output of a command to replace
 the command name.  There are two forms:
-.PP
 .RS
 .PP
 \fB$(\fP\fIcommand\fP\|\fB)\fP
@@ -3295,6 +3296,7 @@ and
 .BR ] ,
 the syntax \fB[.\fP\fIsymbol\fP\fB.]\fP matches the collating symbol
 \fIsymbol\fP.
+.RE
 .RE
 .PD
 .PP
@@ -3985,8 +3987,9 @@ Unless otherwise specified, primaries that operate on files follow symbolic
 links and operate on the target of the link, rather than the link itself.
 .if t .sp 0.5
 .if n .sp 1
-When used with \fB[[\fP, The \fB<\fP and \fB>\fP operators sort
+When used with \fB[[\fP, the \fB<\fP and \fB>\fP operators sort
 lexicographically using the current locale.
+The \fBtest\fP command sorts using ASCII ordering.
 .sp 1
 .PD 0
 .TP
@@ -4240,7 +4243,6 @@ arguments, if any.
 .SH COMMAND EXECUTION ENVIRONMENT
 The shell has an \fIexecution environment\fP, which consists of the
 following:
-.if n .sp 1
 .IP \(bu
 open files inherited by the shell at invocation, as modified by
 redirections supplied to the \fBexec\fP builtin
@@ -7223,10 +7225,10 @@ with the exceptions that \fB+a\fP
 may not be used to destroy an array variable and \fB+r\fP will not
 remove the readonly attribute.
 When used in a function, makes each
-\fIname\fP local, as with the 
+\fIname\fP local, as with the
 .B local
 command,
-unless the \fB\-g\P option is supplied,
+unless the \fB\-g\fP option is supplied,
 If a variable name is followed by =\fIvalue\fP, the value of
 the variable is set to \fIvalue\fP.
 The return value is 0 unless an invalid option is encountered,
@@ -7793,9 +7795,10 @@ Display the description of each \fIpattern\fP in a manpage-like format
 .B \-s
 Display only a short usage synopsis for each \fIpattern\fP
 .PD
-.RE
+.PP
 The return status is 0 unless no command matches
 .IR pattern .
+.RE
 .TP
 \fBhistory [\fIn\fP]
 .PD 0
@@ -8369,7 +8372,7 @@ times out (in which case the return code is greater than 128), or an
 invalid file descriptor is supplied as the argument to \fB\-u\fP.
 .RE
 .TP
-\fBreadonly\fP [\fB\-aApf\fP] [\fIname\fP[=\fIword\fP] ...]
+\fBreadonly\fP [\fB\-aAf\fP] [\fB\-p\fP] [\fIname\fP[=\fIword\fP] ...]
 .PD
 The given
 \fInames\fP are marked readonly; the values of these
@@ -8385,11 +8388,16 @@ The
 option restricts the variables to indexed arrays; the
 .B \-A
 option restricts the variables to associative arrays.
+If both options are supplied,
+.B \-A
+takes precedence.
 If no
 .I name
 arguments are given, or if the
 .B \-p
 option is supplied, a list of all readonly names is printed.
+The other options may be used to restrict the output to a subset of
+the set of readonly names.
 The
 .B \-p
 option causes output to be displayed in a format that
@@ -8909,24 +8917,29 @@ easy re-editing of multi-line commands.
 If set,
 .B bash
 changes its behavior to that of version 3.1 with respect to quoted
-arguments to the conditional command's \fB=~\fP operator.
+arguments to the \fB[[\fP conditional command's \fB=~\fP operator.
 .TP 8
 .B compat32
 If set,
 .B bash
 changes its behavior to that of version 3.2 with respect to locale-specific
-string comparison when using the conditional command's \fB<\fP and \fB>\fP
-operators.
+string comparison when using the \fB[[\fP
+conditional command's \fB<\fP and \fB>\fP operators.
+Bash versions prior to bash-4.1 use ASCII collation and
+.IR strcmp (3);
+bash-4.1 and later
+use the current locale's collation sequence and
+.IR strcoll (3).
 .TP 8
 .B compat40
 If set,
 .B bash
 changes its behavior to that of version 4.0 with respect to locale-specific
-string comparison when using the conditional command's \fB<\fP and \fB>\fP
-operators and the effect of interrupting a command list.
+string comparison when using the \fB[[\fP
+conditional command's \fB<\fP and \fB>\fP operators (see previous item)
+and the effect of interrupting a command list.
 .TP 8
 .B compat41
-@item compat41
 If set,
 .BR bash ,
 when in posix mode, treats a single quote in a double-quoted
@@ -9029,7 +9042,7 @@ This option is enabled by default.
 .TP 8
 .B globstar
 If set, the pattern \fB**\fP used in a pathname expansion context will
-match a files and zero or more directories and subdirectories.
+match all files and zero or more directories and subdirectories.
 If the pattern is followed by a \fB/\fP, only directories and
 subdirectories match.
 .TP 8
@@ -9180,6 +9193,7 @@ This option is enabled by default.
 If set, the \fBecho\fP builtin expands backslash-escape sequences
 by default.
 .RE
+.PD
 .TP
 \fBsuspend\fP [\fB\-f\fP]
 Suspend the execution of this shell until it receives a
@@ -9287,6 +9301,11 @@ precedence using the rules listed above.
 5 or more arguments
 The expression is parsed and evaluated according to precedence
 using the rules listed above.
+.if t .sp 0.5
+.if n .sp 1
+.LP
+When used with \fBtest\fP or \fB[\fP, the \fB<\fP and \fB>\fP operators
+sort lexicographically using ASCII ordering.
 .RE
 .PD
 .TP

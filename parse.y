@@ -5541,7 +5541,7 @@ static void
 report_syntax_error (message)
      char *message;
 {
-  char *msg;
+  char *msg, *p;
 
   if (message)
     {
@@ -5557,6 +5557,12 @@ report_syntax_error (message)
      parser's complaining about by looking at current_token. */
   if (current_token != 0 && EOF_Reached == 0 && (msg = error_token_from_token (current_token)))
     {
+      if (ansic_shouldquote (msg))
+	{
+	  p = ansic_quote (msg, 0, NULL);
+	  free (msg);
+	  msg = p;
+	}
       parser_error (line_number, _("syntax error near unexpected token `%s'"), msg);
       free (msg);
 

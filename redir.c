@@ -449,7 +449,7 @@ here_document_to_fd (redirectee, ri)
   /* In an attempt to avoid races, we close the first fd only after opening
      the second. */
   /* Make the document really temporary.  Also make it the input. */
-  fd2 = open (filename, O_RDONLY, 0600);
+  fd2 = open (filename, O_RDONLY|O_BINARY, 0600);
 
   if (fd2 < 0)
     {
@@ -465,14 +465,6 @@ here_document_to_fd (redirectee, ri)
   if (unlink (filename) < 0)
     {
       r = errno;
-#if defined (__CYGWIN__)
-      /* Under CygWin 1.1.0, the unlink will fail if the file is
-	 open. This hack will allow the previous action of silently
-	 ignoring the error, but will still leave the file there. This
-	 needs some kind of magic. */
-      if (r == EACCES)
-	return (fd2);
-#endif /* __CYGWIN__ */
       close (fd2);
       free (filename);
       errno = r;

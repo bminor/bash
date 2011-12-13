@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2010 December 6<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2010 December 28<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -915,7 +915,7 @@ as primaries.
 <P>
 
 
-When used with <B>[[</B>, The <B>&lt;</B> and <B>&gt;</B> operators sort
+When used with <B>[[</B>, the <B>&lt;</B> and <B>&gt;</B> operators sort
 lexicographically using the current locale.
 <P>
 
@@ -1126,26 +1126,23 @@ the corresponding <B>then</B> <I>list</I> is executed and the
 command completes.  Otherwise, the <B>else</B> <I>list</I> is
 executed, if present.  The exit status is the exit status of the
 last command executed, or zero if no condition tested true.
-<DT><B>while</B> <I>list</I>; <B>do</B> <I>list</I>; <B>done</B><DD>
+<DT><B>while</B> <I>list-1</I>; <B>do</B> <I>list-2</I>; <B>done</B><DD>
 
-<DT><B>until</B> <I>list</I>; <B>do</B> <I>list</I>; <B>done</B><DD>
+<DT><B>until</B> <I>list-1</I>; <B>do</B> <I>list-2</I>; <B>done</B><DD>
 
-The <B>while</B> command continuously executes the <B>do</B>
-<I>list</I> as long as the last command in <I>list</I> returns
+The <B>while</B> command continuously executes the list
+<I>list-2</I> as long as the last command in the list <I>list-1</I> returns
 an exit status of zero.  The <B>until</B> command is identical
 to the <B>while</B> command, except that the test is negated;
-the
-<B>do</B>
-
-<I>list</I>
+<I>list-2</I>
 
 is executed as long as the last command in
-<I>list</I>
+<I>list-1</I>
 
 returns a non-zero exit status.
 The exit status of the <B>while</B> and <B>until</B> commands
 is the exit status
-of the last <B>do</B> <I>list</I> command executed, or zero if
+of the last command executed in <I>list-2</I>, or zero if
 none was executed.
 </DL>
 <A NAME="lbAP">&nbsp;</A>
@@ -2399,7 +2396,7 @@ A sample value is
 <DT><B>COLUMNS</B>
 
 <DD>
-Used by the <B>select</B> builtin command to determine the terminal width
+Used by the <B>select</B> compound command to determine the terminal width
 when printing selection lists.  Automatically set upon receipt of a
 <FONT SIZE=-1><B>SIGWINCH</B>.
 
@@ -2692,7 +2689,7 @@ This variable determines the locale category used for number formatting.
 <DT><B>LINES</B>
 
 <DD>
-Used by the <B>select</B> builtin command to determine the column length
+Used by the <B>select</B> compound command to determine the column length
 for printing selection lists.  Automatically set upon receipt of a
 <FONT SIZE=-1><B>SIGWINCH</B>.
 
@@ -4104,6 +4101,7 @@ The special pattern characters have the following meanings:
 <P>
 
 
+<DL COMPACT><DT><DD>
 <DL COMPACT>
 <DT><B>*</B>
 
@@ -4208,6 +4206,8 @@ and
 
 the syntax <B>[.</B><I>symbol</I><B>.]</B> matches the collating symbol
 <I>symbol</I>.
+</DL>
+
 </DL>
 
 
@@ -5140,8 +5140,9 @@ links and operate on the target of the link, rather than the link itself.
 <P>
 
 
-When used with <B>[[</B>, The <B>&lt;</B> and <B>&gt;</B> operators sort
+When used with <B>[[</B>, the <B>&lt;</B> and <B>&gt;</B> operators sort
 lexicographically using the current locale.
+The <B>test</B> command sorts using ASCII ordering.
 <P>
 
 <DL COMPACT>
@@ -11401,7 +11402,7 @@ If set,
 <B>bash</B>
 
 changes its behavior to that of version 3.1 with respect to quoted
-arguments to the conditional command's <B>=~</B> operator.
+arguments to the <B>[[</B> conditional command's <B>=~</B> operator.
 <DT><B>compat32</B>
 
 <DD>
@@ -11409,8 +11410,15 @@ If set,
 <B>bash</B>
 
 changes its behavior to that of version 3.2 with respect to locale-specific
-string comparison when using the conditional command's <B>&lt;</B> and <B>&gt;</B>
-operators.
+string comparison when using the <B>[[</B>
+conditional command's <B>&lt;</B> and <B>&gt;</B> operators.
+Bash versions prior to bash-4.1 use ASCII collation and
+<I>strcmp</I>(3);
+
+bash-4.1 and later
+use the current locale's collation sequence and
+<I>strcoll</I>(3).
+
 <DT><B>compat40</B>
 
 <DD>
@@ -11418,8 +11426,9 @@ If set,
 <B>bash</B>
 
 changes its behavior to that of version 4.0 with respect to locale-specific
-string comparison when using the conditional command's <B>&lt;</B> and <B>&gt;</B>
-operators and the effect of interrupting a command list.
+string comparison when using the <B>[[</B>
+conditional command's <B>&lt;</B> and <B>&gt;</B> operators (see previous item)
+and the effect of interrupting a command list.
 <DT><B>compat41</B>
 
 <DD>
@@ -11865,7 +11874,15 @@ precedence using the rules listed above.
 <DT>5 or more arguments<DD>
 The expression is parsed and evaluated according to precedence
 using the rules listed above.
-</DL></DL>
+<P>
+
+
+</DL>
+<P>
+
+When used with <B>test</B> or <B>[</B>, the <B>&lt;</B> and <B>&gt;</B> operators
+sort lexicographically using ASCII ordering.
+</DL>
 
 
 <DT><B>times</B>
@@ -12674,7 +12691,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-4.2<TH ALIGN=CENTER width=33%>2010 December 6<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash-4.2<TH ALIGN=CENTER width=33%>2010 December 28<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -12780,6 +12797,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 07 December 2010 16:12:47 EST
+Time: 28 December 2010 14:30:29 EST
 </BODY>
 </HTML>

@@ -1476,10 +1476,6 @@ open_shell_script (script_name)
      not match with ours. */
   fd = move_to_high_fd (fd, 1, -1);
 
-#if defined (__CYGWIN__) && defined (O_TEXT)
-  setmode (fd, O_TEXT);
-#endif
-
 #if defined (BUFFERED_INPUT)
   default_buffered_input = fd;
   SET_CLOSE_ON_EXEC (default_buffered_input);

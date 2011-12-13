@@ -610,19 +610,17 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	      invert = (command->flags & CMD_INVERT_RETURN) != 0;
 	      ignore_return = (command->flags & CMD_IGNORE_RETURN) != 0;
 
-	      last_command_exit_value = wait_for (paren_pid);
+	      exec_result = wait_for (paren_pid);
 
 	      /* If we have to, invert the return value. */
 	      if (invert)
-		exec_result = ((last_command_exit_value == EXECUTION_SUCCESS)
+		exec_result = ((exec_result == EXECUTION_SUCCESS)
 				? EXECUTION_FAILURE
 				: EXECUTION_SUCCESS);
-	      else
-		exec_result = last_command_exit_value;
 
+	      last_command_exit_value = exec_result;
 	      if (user_subshell && was_error_trap && ignore_return == 0 && invert == 0 && exec_result != EXECUTION_SUCCESS)
 		{
-		  last_command_exit_value = exec_result;
 		  save_line_number = line_number;
 		  line_number = line_number_for_err_trap;
 		  run_error_trap ();
@@ -631,12 +629,11 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
 	      if (user_subshell && ignore_return == 0 && invert == 0 && exit_immediately_on_error && exec_result != EXECUTION_SUCCESS)
 		{
-		  last_command_exit_value = exec_result;
 		  run_pending_traps ();
 		  jump_to_top_level (ERREXIT);
 		}
 
-	      return (last_command_exit_value = exec_result);
+	      return (last_command_exit_value);
 	    }
 	  else
 	    {
@@ -3738,6 +3735,10 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	}
       else
 	{
+	  /* Don't let simple commands that aren't the last command in a
+	     pipeline change $? for the rest of the pipeline (or at all). */
+	  if (pipe_out != NO_PIPE)
+	    result = last_command_exit_value;
 	  close_pipes (pipe_in, pipe_out);
 #if defined (PROCESS_SUBSTITUTION) && defined (HAVE_DEV_FD)
 	  unlink_fifo_list ();
@@ -4720,6 +4721,9 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 	  hookf = find_function (NOTFOUND_HOOK);
 	  if (hookf == 0)
 	    {
+	      /* Make sure filenames are displayed using printable characters */
+	      if (ansic_shouldquote (pathname))
+		pathname = ansic_quote (pathname, 0, NULL);
 	      internal_error (_("%s: command not found"), pathname);
 	      exit (EX_NOTFOUND);	/* Posix.2 says the exit status is 127 */
 	    }
@@ -5144,6 +5148,10 @@ do_piping (pipe_in, pipe_out)
 	dup_error (pipe_in, 0);
       if (pipe_in > 0)
 	close (pipe_in);
+#ifdef __CYGWIN__
+      /* Let stdio know the fd may have changed from text to binary mode. */
+      freopen (NULL, "r", stdin);
+#endif /* __CYGWIN__ */
     }
   if (pipe_out != NO_PIPE)
     {
@@ -5159,5 +5167,11 @@ do_piping (pipe_in, pipe_out)
 	  if (dup2 (1, 2) < 0)
 	    dup_error (1, 2);
 	}
+#ifdef __CYGWIN__
+      /* Let stdio know the fd may have changed from text to binary mode, and
+	 make sure to preserve stdout line buffering. */
+      freopen (NULL, "w", stdout);
+      sh_setlinebuf (stdout);
+#endif /* __CYGWIN__ */
     }
 }

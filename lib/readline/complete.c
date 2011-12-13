@@ -2195,8 +2195,12 @@ rl_filename_completion_function (text, state)
 
       /* We aren't done yet.  We also support the "~user" syntax. */
 
-      /* Save the version of the directory that the user typed. */
-      users_dirname = savestring (dirname);
+      /* Save the version of the directory that the user typed, dequoting
+	 it if necessary. */
+      if (rl_completion_found_quote && rl_filename_dequoting_function)
+	users_dirname = (*rl_filename_dequoting_function) (dirname, rl_completion_quote_character);
+      else
+	users_dirname = savestring (dirname);
 
       if (*dirname == '~')
 	{
@@ -2208,9 +2212,13 @@ rl_filename_completion_function (text, state)
       if (rl_directory_rewrite_hook)
 	(*rl_directory_rewrite_hook) (&dirname);
 
-      /* The directory completion hook should perform any necessary
-	 dequoting. */
-      if (rl_directory_completion_hook && (*rl_directory_completion_hook) (&dirname))
+      /* We have saved the possibly-dequoted version of the directory name
+	 the user typed.  Now transform the directory name we're going to
+	 pass to opendir(2).  The directory completion hook should perform
+	 any necessary dequoting.  If the directory completion hook returns
+	 0, it should not modify the directory name pointer passed as an
+	 argument. */
+      else if (rl_directory_completion_hook && (*rl_directory_completion_hook) (&dirname))
 	{
 	  xfree (users_dirname);
 	  users_dirname = savestring (dirname);
@@ -2221,8 +2229,6 @@ rl_filename_completion_function (text, state)
 	  temp = (*rl_filename_dequoting_function) (dirname, rl_completion_quote_character);
 	  xfree (dirname);
 	  dirname = temp;
-	  xfree (users_dirname);
-	  users_dirname = savestring (dirname);
 	}
       directory = opendir (dirname);
 
