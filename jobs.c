@@ -2154,7 +2154,7 @@ wait_for_single_pid (pid)
   return r;
 }
 
-/* Wait for all of the backgrounds of this shell to finish. */
+/* Wait for all of the background processes started by this shell to finish. */
 void
 wait_for_background_pids ()
 {

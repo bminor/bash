@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: GNU bash 4.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-12-30 08:25-0500\n"
-"PO-Revision-Date: 2010-04-09 18:51+0900\n"
+"PO-Revision-Date: 2010-08-19 15:21+0900\n"
 "Last-Translator: Yasuaki Taniguchi <yasuakit@gmail.com>\n"
 "Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -81,7 +81,7 @@ msgstr "`%s': 無効なキーマップ名です"
 #: builtins/bind.def:245
 #, c-format
 msgid "%s: cannot read: %s"
-msgstr "%s: %s を読み出しすることができません"
+msgstr "%s: %s を読み込めません"
 
 #: builtins/bind.def:260
 #, c-format
@@ -202,11 +202,11 @@ msgstr "`%s': 有効な識別子ではありません"
 
 #: builtins/common.c:238
 msgid "invalid octal number"
-msgstr "無効な8進数です"
+msgstr "無効な八進数です"
 
 #: builtins/common.c:240
 msgid "invalid hex number"
-msgstr "無効な16進数です"
+msgstr "無効な十六進数です"
 
 #: builtins/common.c:242 expr.c:1256
 msgid "invalid number"
@@ -220,7 +220,7 @@ msgstr "%s: 無効なシグナル指定です"
 #: builtins/common.c:257
 #, c-format
 msgid "`%s': not a pid or valid job spec"
-msgstr "`%s': pid またはジョブ指定ではありません"
+msgstr "`%s': pid または有効なジョブ指定ではありません"
 
 #: builtins/common.c:264 error.c:454
 #, c-format
@@ -511,7 +511,7 @@ msgstr "%s: inlib が失敗しました"
 
 #: builtins/jobs.def:109
 msgid "no other options allowed with `-x'"
-msgstr "`-x' と他のオプションを一緒に使うことはできません"
+msgstr "`-x' は他のオプションを同時に使用できません"
 
 #: builtins/kill.def:200
 #, c-format
@@ -581,7 +581,7 @@ msgstr "警告: %s: %s"
 
 #: builtins/printf.def:757
 msgid "missing hex digit for \\x"
-msgstr "\\x に16進数字がありません"
+msgstr "\\x に十六進数字がありません"
 
 #: builtins/pushd.def:195
 msgid "no other directory"
@@ -827,7 +827,7 @@ msgstr "%s: limit の無効な引数です"
 #: builtins/ulimit.def:398
 #, c-format
 msgid "`%c': bad command"
-msgstr "`%c': 誤ったコマンドです"
+msgstr "`%c': 誤った指定です"
 
 #: builtins/ulimit.def:427
 #, c-format
@@ -845,7 +845,7 @@ msgstr "%s: limit を変更できません : %s"
 
 #: builtins/umask.def:118
 msgid "octal number"
-msgstr "8進数"
+msgstr "八進数"
 
 #: builtins/umask.def:231
 #, c-format
@@ -890,7 +890,7 @@ msgstr "誤ったジャンプです"
 #: error.c:447
 #, c-format
 msgid "%s: unbound variable"
-msgstr "%s: 展開されていない変数"
+msgstr "%s: 未割り当ての変数です"
 
 #: eval.c:181
 #, c-format
@@ -1457,12 +1457,12 @@ msgstr "%s: 存在するファイルを上書きできません"
 #: redir.c:175
 #, c-format
 msgid "%s: restricted: cannot redirect output"
-msgstr "%s: 制限されています:  `/' をコマンド名に記述できません"
+msgstr "%s: 制限されています: 出力をリダイレクト出来ません"
 
 #: redir.c:180
 #, c-format
 msgid "cannot create temp file for here-document: %s"
-msgstr "ヒアドキュメントの一時賄るを作成できません: %s"
+msgstr "ヒアドキュメント用一時ファイルを作成できません: %s"
 
 #: redir.c:184
 #, c-format
@@ -1505,35 +1505,35 @@ msgid ""
 "Usage:\t%s [GNU long option] [option] ...\n"
 "\t%s [GNU long option] [option] script-file ...\n"
 msgstr ""
-"使用方法:\t%s [GNU 長いオプション] [オプション] ...\n"
-"\t%s [GNU 長いオプション] [オプション] スクリプトファイル ...\n"
+"使用法:\t%s [GNU long option] [option] ...\n"
+"\t%s [GNU long option] [option] script-file ...\n"
 
 #: shell.c:1796
 msgid "GNU long options:\n"
-msgstr "GNU 長いオプション:\n"
+msgstr "GNU 形式の長いオプション:\n"
 
 #: shell.c:1800
 msgid "Shell options:\n"
-msgstr "シェル オプション:\n"
+msgstr "シェルオプション:\n"
 
 #: shell.c:1801
 msgid "\t-irsD or -c command or -O shopt_option\t\t(invocation only)\n"
-msgstr "\t-irsD or -c command or -O shopt_option\t\t(invocation only)\n"
+msgstr "\t-irsD または -c command または -O shopt_option\t\t(起動時のみ)\n"
 
 #: shell.c:1816
 #, c-format
 msgid "\t-%s or -o option\n"
-msgstr "\t-%s または -o オプション\n"
+msgstr "\t-%s または -o option\n"
 
 #: shell.c:1822
 #, c-format
 msgid "Type `%s -c \"help set\"' for more information about shell options.\n"
-msgstr "シェルオプションの詳細については `%s -c \"help set\"'と入力.\n"
+msgstr "シェルオプションの詳細については `%s -c \"help set\"'と入力してください。\n"
 
 #: shell.c:1823
 #, c-format
 msgid "Type `%s -c help' for more information about shell builtin commands.\n"
-msgstr "組み込みコマンドについては `%s -c help'と入力 .\n"
+msgstr "シェル組み込みコマンドについては `%s -c help' と入力してください。\n"
 
 #: shell.c:1824
 #, c-format
@@ -1623,7 +1623,7 @@ msgstr "続行"
 
 #: siglist.c:135
 msgid "Child death or stop"
-msgstr "子プロセスの死亡又は停止 "
+msgstr "子プロセスの死亡または停止 "
 
 #: siglist.c:139
 msgid "Stopped (tty input)"
@@ -1683,7 +1683,7 @@ msgstr "システムクラッシュの危険"
 
 #: siglist.c:195
 msgid "migrate process to another CPU"
-msgstr "プロセスを違うCPUに移動"
+msgstr "プロセスを別のCPUに移動"
 
 #: siglist.c:199
 msgid "programming error"
@@ -1740,7 +1740,7 @@ msgstr "名前付きパイプ %s を読み込み用に開けません"
 #: subst.c:4849
 #, c-format
 msgid "cannot open named pipe %s for writing"
-msgstr "名前付きパイプ %s を書き込みように開けません"
+msgstr "名前付きパイプ %s を書き込み用に開けません"
 
 #: subst.c:4867
 #, c-format
@@ -2154,7 +2154,7 @@ msgstr "ulimit [-SHacdefilmnpqrstuvx] [limit]"
 
 #: builtins.c:172
 msgid "umask [-p] [-S] [mode]"
-msgstr "umask [-p] [-S] [モード]"
+msgstr "umask [-p] [-S] [mode]"
 
 #: builtins.c:175
 msgid "wait [id]"
