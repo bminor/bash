@@ -5276,7 +5276,7 @@ array_length_reference (s)
       else if (array_p (var))
 	return (array ? array_num_elements (array) : 0);
       else
-	return (var_isset (var) ? 1 : 0);
+	return (value_cell (var) ? 1 : 0);
     }
 
   if (assoc_p (var))

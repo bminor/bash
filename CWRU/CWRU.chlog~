@@ -9325,6 +9325,10 @@ doc/bash.1
 
 [bash-4.1 frozen]
 
+				   12/31
+				   -----
+[bash-4.1 released]
+
 				 1/5/2010
 				 --------
 doc/bashref.texi
@@ -9344,3 +9348,110 @@ lib/readline/complete.c
 builtins/printf.def
 	- fix prototype in extern declaration for vsnprintf.  Fix for bug
 	  reported by Yann Rouillard <yann@pleiades.fr.eu.org>
+
+				    1/9
+				    ---
+parse.y
+	- fix shell_getc to handle alias expansions containing quoted
+	  newlines.  Problems in bash-4.1 with aliases containing quoted
+	  newlines in the middle of and at the end of their expansion.
+	  Fix for bug reported by Jonathan Claggett
+	  <jonathan@claggett.org>
+	- change mk_alexpansion to not append a space to an alias
+	  expansion ending with a newline.  Works with shell_getc
+
+				   1/11
+				   ----
+lib/glob/Makefile.in
+	- add dependencies on shell.h and pathnames.h.  From Mike Frysinger
+	  <vapier@gentoo.org>
+
+				   1/15
+				   ----
+doc/{bash.1,{bashref,version}.texi},lib/readine/doc/rluser.texi
+	- some typo fixes from Aharon Robbins <arnold@skeeve.com>
+	- added descriptions of ENV, COPROC, and MAPFILE variables
+	- added descriptions of READLINE_LINE and READLINE_POINT
+
+				   1/21
+				   ----
+arrayfunc.c
+	- free `akey', the word-expanded index into the assoc array to avoid
+	  mem leak in array_value_internal
+	- free index into assoc array in unbind_array_element
+	- change array_value_internal to take an additional argument: an
+	  arrayind_t *.  If not null, an index to an indexed array is
+	  returned there.  If not an indexed array or subscript is @ or
+	  *, the value is unchanged
+
+				   1/22
+				   ----
+builtins/ulimit.def
+	- include <ulimit.h> if we found it during configure and we don't
+	  have resources.  Fixes omission reported by Joachim Schmitz
+	  <jojo@schmitz-digital.de>
+
+{configure,config.h}.in
+	- check for <ulimit.h>, define HAVE_ULIMIT_H if found
+
+lib/sh/oslib.c
+	- include <signal.h> for extern declaration for kill(2) if
+	  HAVE_KILLPG not defined
+
+jobs.c
+	- if HAVE_KILLPG is not defined, add an extern prototype decl for
+	  killpg()
+
+				   1/24
+				   ----
+print_cmd.c
+	- when printing here-string redirections, don't quote the string.  The
+	  original quotes, if any, are still in place and don't need to be
+	  requoted.  Fixes bug reported by Arfrever Frehtes Taifersar Arahesis
+	  <arfrever.fta@gmail.com>
+
+subst.c
+	- fix array_length_reference to return 0 for variables that have not
+	  been assigned a value.  Fixes bug reported by Mart Frauenlab
+	  <mart.frauenlob@chello.at>, but is not backwards compatible
+
+arrayfunc.[ch]
+	- change array_value to take a new arrayind_t *indp parameter like
+	  get_array_value; changed extern prototype declaration
+
+subst.c
+	- changed callers of array_value to add extra parameter
+
+expr.c
+	- change expr_streval to set a new `lvalue' parameter with information
+	  about the string being evaluated: string, value, array index (if
+	  any), variable evaluated (if set).
+	- saving and restoring current context now saves and restores the
+	  current `lvalue'
+	- new function expr_bind_array_element, binds an array element with an
+	  already-computed index to a specified value
+	- anywhere we set the current token to a string (STR), save and set
+	  the current lvalue
+	- change calls to expr_bind_variable to check whether or not the
+	  current lvalue indicates an indexed array was evaluated, and, if so,
+	  call expr_bind_array_element using the already-computed index
+	  (curlval.ind).  Fixes problems with dynamic variables (e.g., RANDOM)
+	  in array indices with {pre,post}-{inc,dec}rement and op=
+	  operators reported by <dennis@netstrata.com>
+
+				   1/25
+				   ----
+expr.c
+	- fix subexpr() to initialize curlval and lastlval when resetting all
+	  of the rest of the expression-parsing variables
+
+				   1/26
+				   ----
+builtins/setattr.def
+	- in show_var_attributes, if the variable is not set (value == 0),
+	  don't print `name=""', just print `name'.  Pointed out by
+	  Mart Frauenlab <mart.frauenlob@chello.at>
+
+arrayfunc.c
+	- fix array_keys to return NULL if the variable is not set or
+	  invisible.  Pointed out by Mart Frauenlab <mart.frauenlob@chello.at>

@@ -213,8 +213,7 @@ gethostname (name, namelen)
 #  else /* !HAVE_UNAME */
 int
 gethostname (name, namelen)
-     char *name;
-     int namelen;
+     int name, namelen;
 {
   strncpy (name, "unknown", namelen);
   name[namelen] = '\0';

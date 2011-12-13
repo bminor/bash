@@ -1309,6 +1309,7 @@ get_random (var)
 
   rv = get_random_number ();
   last_random_value = rv;
+fprintf(stderr, "get_random: rv = %d\n", rv);
   p = itos (rv);
 
   FREE (value_cell (var));
