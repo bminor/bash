@@ -175,7 +175,8 @@ static char **prog_complete_matches;
 extern int hist_verify;
 #endif
 
-extern int current_command_line_count, last_command_exit_value;
+extern int current_command_line_count, saved_command_line_count;
+extern int last_command_exit_value;
 extern int array_needs_making;
 extern int posixly_correct, no_symbolic_links;
 extern char *current_prompt_string, *ps1_prompt;
@@ -862,11 +863,11 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
      char *edit_command;
 {
   char *command, *metaval;
-  int r, cclc, rrs, metaflag;
+  int r, rrs, metaflag;
   sh_parser_state_t ps;
 
   rrs = rl_readline_state;
-  cclc = current_command_line_count;
+  saved_command_line_count = current_command_line_count;
 
   /* Accept the current line. */
   rl_newline (1, c);
@@ -882,6 +883,8 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
 	 then call fc to operate on it.  We have to add a dummy command to
 	 the end of the history because fc ignores the last command (assumes
 	 it's supposed to deal with the command before the `fc'). */
+      /* This breaks down when using command-oriented history and are not
+	 finished with the command, so we should not ignore the last command */
       using_history ();
       bash_add_history (rl_line_buffer);
       bash_add_history ("");
@@ -904,7 +907,7 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
   if (rl_prep_term_function)
     (*rl_prep_term_function) (metaflag);
 
-  current_command_line_count = cclc;
+  current_command_line_count = saved_command_line_count;
 
   /* Now erase the contents of the current line and undo the effects of the
      rl_accept_line() above.  We don't even want to make the text we just

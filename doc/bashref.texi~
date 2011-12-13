@@ -3713,6 +3713,11 @@ beginning with @samp{\0} may contain up to four digits),
 and @samp{%q} causes @code{printf} to output the
 corresponding @var{argument} in a format that can be reused as shell input.
 
+Arguments to non-string format specifiers are treated as C language constants,
+except that a leading plus or minus sign is allowed, and if the leading
+character is a single or double quote, the value is the ASCII value of
+the following character.
+
 The @option{-v} option causes the output to be assigned to the variable
 @var{var} rather than being printed to the standard output.
 
@@ -5966,7 +5971,7 @@ to be used in an expression.
 
 Constants with a leading 0 are interpreted as octal numbers.
 A leading @samp{0x} or @samp{0X} denotes hexadecimal.  Otherwise,
-numbers take the form [@var{base}@code{#}]@var{n}, where @var{base}
+numbers take the form [@var{base}@code{#}]@var{n}, where the optional @var{base}
 is a decimal number between 2 and 64 representing the arithmetic
 base, and @var{n} is a number in that base.  If @var{base}@code{#} is
 omitted, then base 10 is used.

@@ -3234,7 +3234,8 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	 decide what the op is.  We're really only concerned if it's % or
 	 #, so we can turn on a flag that says whether or not we should
 	 treat single quotes as special when inside a double-quoted
-	 ${...} */
+	 ${...}. This logic must agree with subst.c:extract_dollar_brace_string
+	 since they share the same defines. */
       if (flags & P_DOLBRACE)
         {
 	  if MBTEST(dolbrace_state == DOLBRACE_PARAM && ch == '%' && retind > 0)

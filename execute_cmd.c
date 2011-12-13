@@ -4381,12 +4381,25 @@ execute_builtin_or_function (words, builtin, var, redirects,
 {
   int result;
   REDIRECT *saved_undo_list;
+#if defined (PROCESS_SUBSTITUTION)
+  int ofifo, nfifo, osize;
+  char *ofifo_list;
+#endif
+
+
+#if defined (PROCESS_SUBSTITUTION)  
+  ofifo = num_fifos ();
+  ofifo_list = copy_fifo_list (&osize);
+#endif
 
   if (do_redirections (redirects, RX_ACTIVE|RX_UNDOABLE) != 0)
     {
       cleanup_redirects (redirection_undo_list);
       redirection_undo_list = (REDIRECT *)NULL;
       dispose_exec_redirects ();
+#if defined (PROCESS_SUBSTITUTION)
+      free (ofifo_list);
+#endif
       return (EX_REDIRFAIL);	/* was EXECUTION_FAILURE */
     }
 
@@ -4447,6 +4460,14 @@ execute_builtin_or_function (words, builtin, var, redirects,
       cleanup_redirects (redirection_undo_list);
       redirection_undo_list = (REDIRECT *)NULL;
     }
+
+#if defined (PROCESS_SUBSTITUTION)
+  /* Close any FIFOs created by this builtin or function. */
+  nfifo = num_fifos ();
+  if (nfifo > ofifo)
+    close_new_fifos (ofifo_list, osize);
+  free (ofifo_list);
+#endif
 
   return (result);
 }

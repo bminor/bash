@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Fri Jan 15 10:50:42 EST 2010
+.\"	Last Change: Sat Apr 17 23:24:15 EDT 2010
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2010 January 15" "GNU Bash-4.1"
+.TH BASH 1 "2010 April 17" "GNU Bash-4.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -50,8 +50,8 @@ bash \- GNU Bourne-Again SHell
 [options]
 [file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989-2009 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989-2009 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-2010 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-2010 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
 is an \fBsh\fR-compatible command language interpreter that
@@ -5159,7 +5159,8 @@ have a slash appended (subject to the value of
 .B match\-hidden\-files (On)
 This variable, when set to \fBOn\fP, causes readline to match files whose
 names begin with a `.' (hidden files) when performing filename 
-completion, unless the leading `.' is
+completion.
+If set to \fBOff\fP, the leading `.' must be
 supplied by the user in the filename to be completed.
 .TP
 .B output\-meta (Off)
@@ -8063,6 +8064,11 @@ In addition to the standard \fIprintf\fP(1) formats, \fB%b\fP causes
 beginning with \fB\e0\fP may contain up to four digits),
 and \fB%q\fP causes \fBprintf\fP to output the corresponding
 \fIargument\fP in a format that can be reused as shell input.
+.sp 1
+Arguments to non-string format specifiers are treated as C constants,
+except that a leading plus or minus sign is allowed, and if the leading
+character is a single or double quote, the value is the ASCII value of
+the following character.
 .sp 1
 The \fB\-v\fP option causes the output to be assigned to the variable
 \fIvar\fP rather than being printed to the standard output.

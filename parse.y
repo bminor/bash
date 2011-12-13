@@ -250,6 +250,9 @@ int extended_quote = 1;
 /* The number of lines read from input while creating the current command. */
 int current_command_line_count;
 
+/* The number of lines in a command saved while we run parse_and_execute */
+int saved_command_line_count;
+
 /* The token that currently denotes the end of parse. */
 int shell_eof_token;
 

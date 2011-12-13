@@ -9690,10 +9690,48 @@ parser.h
 subst.c
 	- include parser.h
 
-				    4/8
+				    4/9
 				    ---
 builtins/declare.def
 	- make sure declare_internal calls bind_assoc_variable with newly-
 	  allocated memory for the key argument when using an implicit key
 	  of "0".  Bug report and fix from Andreas Schwab
 	  <schwab@linux-m68k.org>
+
+				   4/14
+				   ----
+lib/readline/input.c
+	- restructure the rl_event_hook loop in rl_read_key to call the
+	  event hook after rl_gather_tyi() returns and rl_get_char has
+	  a chance to collect the input.  Previous behavior was to call
+	  the event hook before attempting to read input.  Problem
+	  reported by Anant Shankar <anantshankar17@gmail.com>
+
+				   4/15
+				   ----
+builtins/fc.def
+	- fc_builtin needs to check whether the calculation of last_hist
+	  leaves hlist[last_hist] == 0, and keep decrementing it until it
+	  leaves a non-null history entry or goes < 0.  Currently only
+	  does this if saved_command_line_count > 0, indicating we're
+	  trying to edit a multi-line command.  Fixes bug reported by
+	  Roman Rakus <rrakus@redhat.com>
+
+				   4/17
+				   ----
+subst.c
+	- new process substitution helper functions:
+		unlink_fifo - closes a single FD or FIFO
+		num_fifos - returns number of open FDs or active FIFOs
+		copy_fifo_list - returns a bitmap of open FDs or active FIFOs
+		  by index into appropriate list (dev_fd_list or fifo_list)
+		close_new_fifos - take a bitmap saved by copy_fifo_list and
+		  call unlink_fifo on any FD or FIFO open at the time of the
+		  call that is not marked as active in list
+
+execute_cmd.c
+	- execute_builtin_or_function: use new framework to close process
+	  substitution FDs or FIFOs created by a shell builtin or shell
+	  function.  Fixes bug reported by Charles Duffy <charles@dyfis.net>
+
+

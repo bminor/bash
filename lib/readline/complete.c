@@ -160,7 +160,7 @@ int _rl_completion_case_fold = 1;
 int _rl_completion_case_fold;
 #endif
 
-/* If non-zero, don't match hidden files (filenames beginning with a `.' on
+/* If zero, don't match hidden files (filenames beginning with a `.' on
    Unix) when doing filename completion. */
 int _rl_match_hidden_files = 1;
 

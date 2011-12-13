@@ -2094,9 +2094,9 @@ rl_filename_completion_function (text, state)
       else if (rl_completion_found_quote && rl_filename_dequoting_function)
 	{
 	  /* delete single and double quotes */
-	  temp = (*rl_filename_dequoting_function) (users_dirname, rl_completion_quote_character);
-	  free (users_dirname);
-	  users_dirname = temp;
+	  temp = (*rl_filename_dequoting_function) (dirname, rl_completion_quote_character);
+	  free (dirname);
+	  dirname = temp;
 	}
       directory = opendir (dirname);
 

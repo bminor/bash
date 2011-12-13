@@ -175,7 +175,8 @@ static char **prog_complete_matches;
 extern int hist_verify;
 #endif
 
-extern int current_command_line_count, last_command_exit_value;
+extern int current_command_line_count, fc_command_line_count;
+extern int last_command_exit_value;
 extern int array_needs_making;
 extern int posixly_correct, no_symbolic_links;
 extern char *current_prompt_string, *ps1_prompt;
@@ -863,6 +864,7 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
 {
   char *command, *metaval;
   int r, cclc, rrs, metaflag;
+  sh_parser_state_t ps;
 
   rrs = rl_readline_state;
   cclc = current_command_line_count;
@@ -881,6 +883,8 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
 	 then call fc to operate on it.  We have to add a dummy command to
 	 the end of the history because fc ignores the last command (assumes
 	 it's supposed to deal with the command before the `fc'). */
+      /* This breaks down when using command-oriented history and are not
+	 finished with the command, so we should not ignore the last command */
       using_history ();
       bash_add_history (rl_line_buffer);
       bash_add_history ("");
@@ -897,7 +901,9 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
      yet. */
   if (rl_deprep_term_function)
     (*rl_deprep_term_function) ();
+  save_parser_state (&ps);
   r = parse_and_execute (command, (editing_mode == VI_EDITING_MODE) ? "v" : "C-xC-e", SEVAL_NOHIST);
+  restore_parser_state (&ps);
   if (rl_prep_term_function)
     (*rl_prep_term_function) (metaflag);
 

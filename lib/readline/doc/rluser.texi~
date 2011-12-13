@@ -9,7 +9,7 @@ use these features.  There is a document entitled "readline.texinfo"
 which contains both end-user and programmer documentation for the
 GNU Readline Library.
 
-Copyright (C) 1988--2009 Free Software Foundation, Inc.
+Copyright (C) 1988--2010 Free Software Foundation, Inc.
 
 Authored by Brian Fox and Chet Ramey.
 
@@ -570,7 +570,8 @@ The default is @samp{off}.
 @vindex match-hidden-files
 This variable, when set to @samp{on}, causes Readline to match files whose
 names begin with a @samp{.} (hidden files) when performing filename
-completion, unless the leading @samp{.} is
+completion.
+If set to @samp{off}, the leading @samp{.} must be
 supplied by the user in the filename to be completed.
 This variable is @samp{on} by default.
 
@@ -1733,7 +1734,7 @@ exit status of 124.  If a shell function returns 124, and changes
 the compspec associated with the command on which completion is being
 attempted (supplied as the first argument when the function is executed),
 programmable completion restarts from the beginning, with an
-attempt to find a compspec for that command.  This allows a set of
+attempt to find a new compspec for that command.  This allows a set of
 completions to be built dynamically as completion is attempted, rather than
 being loaded all at once.
 

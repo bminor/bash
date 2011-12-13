@@ -4589,6 +4589,15 @@ static struct temp_fifo *fifo_list = (struct temp_fifo *)NULL;
 static int nfifo;
 static int fifo_list_size;
 
+char *
+copy_fifo_list (sizep)
+     int *sizep;
+{
+  if (sizep)
+    *sizep = 0;
+  return (char *)NULL;
+}
+
 static void
 add_fifo_list (pathname)
      char *pathname;
@@ -4602,6 +4611,19 @@ add_fifo_list (pathname)
 
   fifo_list[nfifo].file = savestring (pathname);
   nfifo++;
+}
+
+void
+unlink_fifo (i)
+     int i;
+{
+  if ((fifo_list[i].proc == -1) || (kill(fifo_list[i].proc, 0) == -1))
+    {
+      unlink (fifo_list[i].file);
+      free (fifo_list[i].file);
+      fifo_list[i].file = (char *)NULL;
+      fifo_list[i].proc = -1;
+    }
 }
 
 void
@@ -4641,8 +4663,48 @@ unlink_fifo_list ()
     nfifo = 0;
 }
 
+/* Take LIST, which is a bitmap denoting active FIFOs in fifo_list
+   from some point in the past, and close all open FIFOs in fifo_list
+   that are not marked as active in LIST.  If LIST is NULL, close
+   everything in fifo_list. LSIZE is the number of elements in LIST, in
+   case it's larger than fifo_list_size (size of fifo_list). */
+void
+close_new_fifos (list, lsize)
+     char *list;
+     int lsize;
+{
+  int i;
+
+  if (list == 0)
+    {
+itrace("close_new_fifos: list == 0, calling unlink_fifo_list");
+      unlink_fifo_list ();
+      return;
+    }
+
+  for (i = 0; i < lsize; i++)
+    if (list[i] == 0 && i < fifo_list_size && fifo_list[i].proc != -1)
+{
+itrace("close_new_fifos: closing %d", i);
+      unlink_fifo (i);
+}
+
+  for (i = lsize; i < fifo_list_size; i++)
+{
+if (fifo_list[i].proc != -1)
+  itrace("close_new_fifos: closing %d", i);
+    unlink_fifo (i);  
+}
+}
+
 int
 fifos_pending ()
+{
+  return nfifo;
+}
+
+int
+num_fifos ()
 {
   return nfifo;
 }
@@ -4673,11 +4735,30 @@ static char *dev_fd_list = (char *)NULL;
 static int nfds;
 static int totfds;	/* The highest possible number of open files. */
 
+char *
+copy_fifo_list (sizep)
+     int *sizep;
+{
+  char *ret;
+
+  if (nfds == 0 || totfds == 0)
+    {
+      if (sizep)
+	*sizep = 0;
+      return (char *)NULL;
+    }
+
+  if (sizep)
+    *sizep = totfds;
+  ret = (char *)xmalloc (totfds);
+  return (memcpy (ret, dev_fd_list, totfds));
+}
+
 static void
 add_fifo_list (fd)
      int fd;
 {
-  if (!dev_fd_list || fd >= totfds)
+  if (dev_fd_list == 0 || fd >= totfds)
     {
       int ofds;
 
@@ -4702,6 +4783,24 @@ fifos_pending ()
   return 0;	/* used for cleanup; not needed with /dev/fd */
 }
 
+int
+num_fifos ()
+{
+  return nfds;
+}
+
+void
+unlink_fifo (fd)
+     int fd;
+{
+  if (dev_fd_list[fd])
+    {
+      close (fd);
+      dev_fd_list[fd] = 0;
+      nfds--;
+    }
+}
+
 void
 unlink_fifo_list ()
 {
@@ -4711,14 +4810,35 @@ unlink_fifo_list ()
     return;
 
   for (i = 0; nfds && i < totfds; i++)
-    if (dev_fd_list[i])
-      {
-	close (i);
-	dev_fd_list[i] = 0;
-	nfds--;
-      }
+    unlink_fifo (i);
 
   nfds = 0;
+}
+
+/* Take LIST, which is a snapshot copy of dev_fd_list from some point in
+   the past, and close all open fds in dev_fd_list that are not marked
+   as open in LIST.  If LIST is NULL, close everything in dev_fd_list.
+   LSIZE is the number of elements in LIST, in case it's larger than
+   totfds (size of dev_fd_list). */
+void
+close_new_fifos (list, lsize)
+     char *list;
+     int lsize;
+{
+  int i;
+
+  if (list == 0)
+    {
+      unlink_fifo_list ();
+      return;
+    }
+
+  for (i = 0; i < lsize; i++)
+    if (list[i] == 0 && i < totfds && dev_fd_list[i])
+      unlink_fifo (i);
+
+  for (i = lsize; i < totfds; i++)
+    unlink_fifo (i);  
 }
 
 #if defined (NOTDEF)

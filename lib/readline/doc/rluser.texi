@@ -9,7 +9,7 @@ use these features.  There is a document entitled "readline.texinfo"
 which contains both end-user and programmer documentation for the
 GNU Readline Library.
 
-Copyright (C) 1988--2009 Free Software Foundation, Inc.
+Copyright (C) 1988--2010 Free Software Foundation, Inc.
 
 Authored by Brian Fox and Chet Ramey.
 
@@ -570,7 +570,8 @@ The default is @samp{off}.
 @vindex match-hidden-files
 This variable, when set to @samp{on}, causes Readline to match files whose
 names begin with a @samp{.} (hidden files) when performing filename
-completion, unless the leading @samp{.} is
+completion.
+If set to @samp{off}, the leading @samp{.} must be
 supplied by the user in the filename to be completed.
 This variable is @samp{on} by default.
 
@@ -1579,7 +1580,7 @@ editing mode.
 While the Readline library does not have a full set of @code{vi}
 editing functions, it does contain enough to allow simple editing
 of the line.  The Readline @code{vi} mode behaves as specified in
-the @sc{posix} 1003.2 standard.
+the @sc{posix} standard.
 
 @ifset BashFeatures
 In order to switch interactively between @code{emacs} and @code{vi}
