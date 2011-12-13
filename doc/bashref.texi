@@ -1765,9 +1765,13 @@ If @var{length} is omitted, expands to the substring of
 (@pxref{Shell Arithmetic}).
 This is referred to as Substring Expansion.
 
-@var{length} must evaluate to a number greater than or equal to zero.
 If @var{offset} evaluates to a number less than zero, the value
 is used as an offset from the end of the value of @var{parameter}.
+If @var{length} evaluates to a number less than zero, and @var{parameter}
+is not @samp{@@} and not an indexed or associative array, it is interpreted
+as an offset from the end of the value of @var{parameter} rather than
+a number of characters, and the expansion is the characters between the
+two offsets.
 If @var{parameter} is @samp{@@}, the result is @var{length} positional
 parameters beginning at @var{offset}.
 If @var{parameter} is an indexed array name subscripted
@@ -4505,6 +4509,13 @@ changes its behavior to that of version 4.0 with respect to locale-specific
 string comparison when using the conditional command's < and > operators
 and the effect of interrupting a command list.
 
+@item compat41
+If set, Bash, when in posix mode, treats a single quote in a double-quoted
+parameter expansion as a special character.  The single quotes must match
+(an even number) and the characters between the single quotes are considered
+quoted.  This is the behavior of @sc{posix} mode through version 4.1.
+The default Bash behavior remains as in previous versions.
+
 @item dirspell
 If set, Bash
 attempts spelling correction on directory names during word completion 
@@ -6197,8 +6208,11 @@ name[@var{subscript}]=@var{value}
 
 @noindent
 The @var{subscript}
-is treated as an arithmetic expression that must evaluate to a number
-greater than or equal to zero.  To explicitly declare an array, use
+is treated as an arithmetic expression that must evaluate to a number.
+If @var{subscript} evaluates to a number less than zero, it is used as
+an offset from one greater than the array's maximum index (so a subcript
+of -1 refers to the last element of the array).
+To explicitly declare an array, use
 @example
 declare -a @var{name}
 @end example

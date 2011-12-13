@@ -215,6 +215,8 @@ cd_builtin (list)
 
   lflag = (cdable_vars ? LCD_DOVARS : 0) |
 	  ((interactive && cdspelling) ? LCD_DOSPELL : 0);
+  if (eflag && no_symlinks == 0)
+    eflag = 0;
 
   if (list == 0)
     {

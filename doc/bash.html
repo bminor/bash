@@ -8695,7 +8695,7 @@ current frame is frame 0.
 The return value is 0 unless the shell is not executing a subroutine
 call or <I>expr</I> does not correspond to a valid position in the
 call stack.
-<DT><B>cd</B> [<B>-L|-P</B>] [<I>dir</I>]<DD>
+<DT><B>cd</B> [<B>-L</B>|[<B>-P</B> [<B>-e</B>]]] [<I>dir</I>]<DD>
 Change the current directory to <I>dir</I>.  The variable
 <FONT SIZE=-1><B>HOME</B>
 
@@ -8740,7 +8740,17 @@ option to the
 builtin command); the
 <B>-L</B>
 
-option forces symbolic links to be followed.  An argument of
+option forces symbolic links to be followed.
+If the
+<B>-e</B>
+
+option is supplied with
+<B>-P</B>,
+
+and the current working directory cannot be successfully determined
+after a successful directory change, <B>cd</B> will return an unsuccessful
+status.
+An argument of
 <B>-</B>
 
 is equivalent to
@@ -12704,6 +12714,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 01 June 2010 11:58:46 EDT
+Time: 07 June 2010 16:19:05 EDT
 </BODY>
 </HTML>

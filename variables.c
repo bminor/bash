@@ -588,6 +588,10 @@ initialize_shell_variables (env, privmode)
   /* Get the user's real and effective user ids. */
   uidset ();
 
+  temp_var = find_variable ("BASH_XTRACEFD");
+  if (temp_var && imported_p (temp_var))
+    sv_xtracefd (temp_var->name);
+
   /* Initialize the dynamic variables, and seed their values. */
   initialize_dynamic_variables ();
 }

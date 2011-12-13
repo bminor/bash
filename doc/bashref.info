@@ -1,5 +1,5 @@
 This is bashref.info, produced by makeinfo version 4.13 from
-/Users/chet/src/bash/src/doc/bashref.texi.
+/usr/homes/chet/src/bash/src/doc/bashref.texi.
 
 This text is a brief description of the features that are present in
 the Bash shell (version 4.1, 30 May 2010).
@@ -2539,14 +2539,17 @@ standard.
      greater than or equal to 1.
 
 `cd'
-          cd [-L|-P] [DIRECTORY]
+          cd [-L|[-P [-e]]] [DIRECTORY]
      Change the current working directory to DIRECTORY.  If DIRECTORY
      is not given, the value of the `HOME' shell variable is used.  If
      the shell variable `CDPATH' exists, it is used as a search path.
      If DIRECTORY begins with a slash, `CDPATH' is not used.
 
      The `-P' option means to not follow symbolic links; symbolic links
-     are followed by default or with the `-L' option.  If DIRECTORY is
+     are followed by default or with the `-L' option.  If the `-e'
+     option is supplied with `-P' and the current working directory
+     cannot be successfully determined after a successful directory
+     change, `cd' will return an unsuccessful status.  If DIRECTORY is
      `-', it is equivalent to `$OLDPWD'.
 
      If a non-empty directory name from `CDPATH' is used, or if `-' is
@@ -9825,7 +9828,7 @@ D.1 Index of Shell Builtin Commands
 * ::                                     Bourne Shell Builtins.
                                                               (line  11)
 * [:                                     Bourne Shell Builtins.
-                                                              (line 214)
+                                                              (line 217)
 * alias:                                 Bash Builtins.       (line  11)
 * bg:                                    Job Control Builtins.
                                                               (line   7)
@@ -9844,7 +9847,7 @@ D.1 Index of Shell Builtin Commands
 * compopt:                               Programmable Completion Builtins.
                                                               (line 217)
 * continue:                              Bourne Shell Builtins.
-                                                              (line  55)
+                                                              (line  58)
 * declare:                               Bash Builtins.       (line 142)
 * dirs:                                  Directory Stack Builtins.
                                                               (line   7)
@@ -9853,21 +9856,21 @@ D.1 Index of Shell Builtin Commands
 * echo:                                  Bash Builtins.       (line 226)
 * enable:                                Bash Builtins.       (line 286)
 * eval:                                  Bourne Shell Builtins.
-                                                              (line  63)
+                                                              (line  66)
 * exec:                                  Bourne Shell Builtins.
-                                                              (line  70)
+                                                              (line  73)
 * exit:                                  Bourne Shell Builtins.
-                                                              (line  82)
+                                                              (line  85)
 * export:                                Bourne Shell Builtins.
-                                                              (line  88)
+                                                              (line  91)
 * fc:                                    Bash History Builtins.
                                                               (line  10)
 * fg:                                    Job Control Builtins.
                                                               (line  16)
 * getopts:                               Bourne Shell Builtins.
-                                                              (line 103)
+                                                              (line 106)
 * hash:                                  Bourne Shell Builtins.
-                                                              (line 145)
+                                                              (line 148)
 * help:                                  Bash Builtins.       (line 314)
 * history:                               Bash History Builtins.
                                                               (line  39)
@@ -9885,34 +9888,34 @@ D.1 Index of Shell Builtin Commands
 * pushd:                                 Directory Stack Builtins.
                                                               (line  58)
 * pwd:                                   Bourne Shell Builtins.
-                                                              (line 164)
+                                                              (line 167)
 * read:                                  Bash Builtins.       (line 446)
 * readarray:                             Bash Builtins.       (line 526)
 * readonly:                              Bourne Shell Builtins.
-                                                              (line 173)
+                                                              (line 176)
 * return:                                Bourne Shell Builtins.
-                                                              (line 189)
+                                                              (line 192)
 * set:                                   The Set Builtin.     (line  11)
 * shift:                                 Bourne Shell Builtins.
-                                                              (line 202)
+                                                              (line 205)
 * shopt:                                 The Shopt Builtin.   (line   9)
 * source:                                Bash Builtins.       (line 534)
 * suspend:                               Job Control Builtins.
                                                               (line  94)
 * test:                                  Bourne Shell Builtins.
-                                                              (line 214)
+                                                              (line 217)
 * times:                                 Bourne Shell Builtins.
-                                                              (line 282)
+                                                              (line 285)
 * trap:                                  Bourne Shell Builtins.
-                                                              (line 287)
+                                                              (line 290)
 * type:                                  Bash Builtins.       (line 538)
 * typeset:                               Bash Builtins.       (line 569)
 * ulimit:                                Bash Builtins.       (line 575)
 * umask:                                 Bourne Shell Builtins.
-                                                              (line 333)
+                                                              (line 336)
 * unalias:                               Bash Builtins.       (line 664)
 * unset:                                 Bourne Shell Builtins.
-                                                              (line 350)
+                                                              (line 353)
 * wait:                                  Job Control Builtins.
                                                               (line  73)
 
@@ -10413,133 +10416,133 @@ D.5 Concept Index
 
 
 Tag Table:
-Node: Top1336
-Node: Introduction3165
-Node: What is Bash?3393
-Node: What is a shell?4506
-Node: Definitions7046
-Node: Basic Shell Features9964
-Node: Shell Syntax11183
-Node: Shell Operation12213
-Node: Quoting13507
-Node: Escape Character14810
-Node: Single Quotes15295
-Node: Double Quotes15643
-Node: ANSI-C Quoting16768
-Node: Locale Translation18012
-Node: Comments18908
-Node: Shell Commands19526
-Node: Simple Commands20398
-Node: Pipelines21029
-Node: Lists23576
-Node: Compound Commands25305
-Node: Looping Constructs26109
-Node: Conditional Constructs28564
-Node: Command Grouping36677
-Node: Coprocesses38156
-Node: GNU Parallel39821
-Node: Shell Functions42289
-Node: Shell Parameters47035
-Node: Positional Parameters49451
-Node: Special Parameters50351
-Node: Shell Expansions53315
-Node: Brace Expansion55240
-Node: Tilde Expansion57995
-Node: Shell Parameter Expansion60346
-Node: Command Substitution69247
-Node: Arithmetic Expansion70580
-Node: Process Substitution71430
-Node: Word Splitting72480
-Node: Filename Expansion74103
-Node: Pattern Matching76242
-Node: Quote Removal79881
-Node: Redirections80176
-Node: Executing Commands88701
-Node: Simple Command Expansion89371
-Node: Command Search and Execution91301
-Node: Command Execution Environment93638
-Node: Environment96624
-Node: Exit Status98284
-Node: Signals99905
-Node: Shell Scripts101873
-Node: Shell Builtin Commands104391
-Node: Bourne Shell Builtins106419
-Node: Bash Builtins123887
-Node: Modifying Shell Behavior150092
-Node: The Set Builtin150437
-Node: The Shopt Builtin159961
-Node: Special Builtins171295
-Node: Shell Variables172274
-Node: Bourne Shell Variables172714
-Node: Bash Variables174695
-Node: Bash Features199033
-Node: Invoking Bash199916
-Node: Bash Startup Files205680
-Node: Interactive Shells210692
-Node: What is an Interactive Shell?211102
-Node: Is this Shell Interactive?211751
-Node: Interactive Shell Behavior212566
-Node: Bash Conditional Expressions215846
-Node: Shell Arithmetic219594
-Node: Aliases222353
-Node: Arrays224925
-Node: The Directory Stack228883
-Node: Directory Stack Builtins229597
-Node: Printing a Prompt232489
-Node: The Restricted Shell235241
-Node: Bash POSIX Mode237073
-Node: Job Control245899
-Node: Job Control Basics246359
-Node: Job Control Builtins251076
-Node: Job Control Variables255440
-Node: Command Line Editing256598
-Node: Introduction and Notation258165
-Node: Readline Interaction259787
-Node: Readline Bare Essentials260978
-Node: Readline Movement Commands262767
-Node: Readline Killing Commands263732
-Node: Readline Arguments265652
-Node: Searching266696
-Node: Readline Init File268882
-Node: Readline Init File Syntax270029
-Node: Conditional Init Constructs285133
-Node: Sample Init File287666
-Node: Bindable Readline Commands290783
-Node: Commands For Moving291990
-Node: Commands For History293134
-Node: Commands For Text296289
-Node: Commands For Killing298962
-Node: Numeric Arguments301413
-Node: Commands For Completion302552
-Node: Keyboard Macros306744
-Node: Miscellaneous Commands307315
-Node: Readline vi Mode313121
-Node: Programmable Completion314028
-Node: Programmable Completion Builtins321238
-Node: Using History Interactively330374
-Node: Bash History Facilities331058
-Node: Bash History Builtins333972
-Node: History Interaction337829
-Node: Event Designators340534
-Node: Word Designators341549
-Node: Modifiers343188
-Node: Installing Bash344592
-Node: Basic Installation345729
-Node: Compilers and Options348421
-Node: Compiling For Multiple Architectures349162
-Node: Installation Names350826
-Node: Specifying the System Type351644
-Node: Sharing Defaults352360
-Node: Operation Controls353033
-Node: Optional Features353991
-Node: Reporting Bugs363550
-Node: Major Differences From The Bourne Shell364751
-Node: GNU Free Documentation License381438
-Node: Indexes406634
-Node: Builtin Index407088
-Node: Reserved Word Index413915
-Node: Variable Index416363
-Node: Function Index429317
-Node: Concept Index436326
+Node: Top1340
+Node: Introduction3169
+Node: What is Bash?3397
+Node: What is a shell?4510
+Node: Definitions7050
+Node: Basic Shell Features9968
+Node: Shell Syntax11187
+Node: Shell Operation12217
+Node: Quoting13511
+Node: Escape Character14814
+Node: Single Quotes15299
+Node: Double Quotes15647
+Node: ANSI-C Quoting16772
+Node: Locale Translation18016
+Node: Comments18912
+Node: Shell Commands19530
+Node: Simple Commands20402
+Node: Pipelines21033
+Node: Lists23580
+Node: Compound Commands25309
+Node: Looping Constructs26113
+Node: Conditional Constructs28568
+Node: Command Grouping36681
+Node: Coprocesses38160
+Node: GNU Parallel39825
+Node: Shell Functions42293
+Node: Shell Parameters47039
+Node: Positional Parameters49455
+Node: Special Parameters50355
+Node: Shell Expansions53319
+Node: Brace Expansion55244
+Node: Tilde Expansion57999
+Node: Shell Parameter Expansion60350
+Node: Command Substitution69251
+Node: Arithmetic Expansion70584
+Node: Process Substitution71434
+Node: Word Splitting72484
+Node: Filename Expansion74107
+Node: Pattern Matching76246
+Node: Quote Removal79885
+Node: Redirections80180
+Node: Executing Commands88705
+Node: Simple Command Expansion89375
+Node: Command Search and Execution91305
+Node: Command Execution Environment93642
+Node: Environment96628
+Node: Exit Status98288
+Node: Signals99909
+Node: Shell Scripts101877
+Node: Shell Builtin Commands104395
+Node: Bourne Shell Builtins106423
+Node: Bash Builtins124101
+Node: Modifying Shell Behavior150306
+Node: The Set Builtin150651
+Node: The Shopt Builtin160175
+Node: Special Builtins171509
+Node: Shell Variables172488
+Node: Bourne Shell Variables172928
+Node: Bash Variables174909
+Node: Bash Features199247
+Node: Invoking Bash200130
+Node: Bash Startup Files205894
+Node: Interactive Shells210906
+Node: What is an Interactive Shell?211316
+Node: Is this Shell Interactive?211965
+Node: Interactive Shell Behavior212780
+Node: Bash Conditional Expressions216060
+Node: Shell Arithmetic219808
+Node: Aliases222567
+Node: Arrays225139
+Node: The Directory Stack229097
+Node: Directory Stack Builtins229811
+Node: Printing a Prompt232703
+Node: The Restricted Shell235455
+Node: Bash POSIX Mode237287
+Node: Job Control246113
+Node: Job Control Basics246573
+Node: Job Control Builtins251290
+Node: Job Control Variables255654
+Node: Command Line Editing256812
+Node: Introduction and Notation258379
+Node: Readline Interaction260001
+Node: Readline Bare Essentials261192
+Node: Readline Movement Commands262981
+Node: Readline Killing Commands263946
+Node: Readline Arguments265866
+Node: Searching266910
+Node: Readline Init File269096
+Node: Readline Init File Syntax270243
+Node: Conditional Init Constructs285347
+Node: Sample Init File287880
+Node: Bindable Readline Commands290997
+Node: Commands For Moving292204
+Node: Commands For History293348
+Node: Commands For Text296503
+Node: Commands For Killing299176
+Node: Numeric Arguments301627
+Node: Commands For Completion302766
+Node: Keyboard Macros306958
+Node: Miscellaneous Commands307529
+Node: Readline vi Mode313335
+Node: Programmable Completion314242
+Node: Programmable Completion Builtins321452
+Node: Using History Interactively330588
+Node: Bash History Facilities331272
+Node: Bash History Builtins334186
+Node: History Interaction338043
+Node: Event Designators340748
+Node: Word Designators341763
+Node: Modifiers343402
+Node: Installing Bash344806
+Node: Basic Installation345943
+Node: Compilers and Options348635
+Node: Compiling For Multiple Architectures349376
+Node: Installation Names351040
+Node: Specifying the System Type351858
+Node: Sharing Defaults352574
+Node: Operation Controls353247
+Node: Optional Features354205
+Node: Reporting Bugs363764
+Node: Major Differences From The Bourne Shell364965
+Node: GNU Free Documentation License381652
+Node: Indexes406848
+Node: Builtin Index407302
+Node: Reserved Word Index414129
+Node: Variable Index416577
+Node: Function Index429531
+Node: Concept Index436540
 
 End Tag Table

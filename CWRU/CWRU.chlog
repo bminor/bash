@@ -10046,6 +10046,9 @@ builtins/hash.def
 	  at all, even with the -p option.  Inconsistency pointed out by
 	  Jan Schampera <jan.schampera@web.de>
 
+builtins/shopt.def
+	- add `compat41' option in preparation for bash-4.2
+
 				    6/6
 				    ---
 lib/readline/vi_mode.c
@@ -10075,3 +10078,35 @@ builtins/cd.def
 doc/{bash.1,bashref.texi}
 	- document new `cd -e' option
 
+				   6/12
+				   ----
+arrayfunc.c
+	- change array_value_internal to treat negative subscripts to indexed
+	  arrays, offset from array_max_index(x) + 1, so foo[-1] is the last
+	  element of $foo
+
+subst.c
+	- Change verify_substring_values to allow negative length specifications
+	  when using string variables or array members.  Negative lengths
+	  mean to return characters from OFFSET until (${#var} - N) for
+	  {var:offset:-N}.  Feature requested by Richard Neill
+	  <rn214@hermes.cam.ac.uk>
+
+doc/{bash.1,bashref.texi}
+	- document new behavior of negative subscripts to indexed arrays
+	- document new behavior of negative LENGTH in substring expansion
+
+configure.in
+	- change version to bash-4.2-devel
+
+variables.c
+	- make sure initialize_shell_variables calls sv_xtracefd if
+	  BASH_XTRACEFD is inherited in the shell environment.  Fixes but
+	  reported by <jsunx1@bellsouth.net>
+
+				   6/13
+				   ----
+lib/readline/complete.c
+	- change get_y_or_n to always return 1 when in callback mode, so we
+	  don't do a blocking read.  Have to wait until readline-7.0 to add
+	  a state, since that will change public interface

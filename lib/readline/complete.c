@@ -477,6 +477,14 @@ get_y_or_n (for_pager)
 {
   int c;
 
+  /* For now, disable pager in callback mode, until we later convert to state
+     driven functions.  Have to wait until next major version to add new
+     state definition, since it will change value of RL_STATE_DONE. */
+#if defined (READLINE_CALLBACKS)
+  if (RL_ISSTATE (RL_STATE_CALLBACK))
+    return 1;
+#endif
+
   for (;;)
     {
       RL_SETSTATE(RL_STATE_MOREINPUT);

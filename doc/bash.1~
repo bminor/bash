@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sun May 30 17:03:08 EDT 2010
+.\"	Last Change: Sat Jun 12 15:34:58 EDT 2010
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2010 May 30" "GNU Bash-4.1"
+.TH BASH 1 "2010 June 12" "GNU Bash-4.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2343,9 +2343,13 @@ using arbitrary strings.
 An indexed array is created automatically if any variable is assigned to
 using the syntax \fIname\fP[\fIsubscript\fP]=\fIvalue\fP.  The
 .I subscript
-is treated as an arithmetic expression that must evaluate to a number
-greater than or equal to zero.  To explicitly declare an indexed array,
-use
+is treated as an arithmetic expression that must evaluate to a number.
+If
+.I subscript
+evaluates to a number less than zero, it is used as
+an offset from one greater than the array's maximum index (so a subcript
+of -1 refers to the last element of the array).
+To explicitly declare an indexed array, use
 .B declare \-a \fIname\fP
 (see
 .SM
@@ -2724,9 +2728,13 @@ If \fIlength\fP is omitted, expands to the substring of
 .B
 ARITHMETIC EVALUATION
 below).
-\fIlength\fP must evaluate to a number greater than or equal to zero.
 If \fIoffset\fP evaluates to a number less than zero, the value
 is used as an offset from the end of the value of \fIparameter\fP.
+If \fIlength\fP evaluates to a number less than zero, and \fIparameter\fP
+is not \fB@\fP and not an indexed or associative array, it is interpreted
+as an offset from the end of the value of \fIparameter\fP rather than
+a number of characters, and the expansion is the characters between the
+two offsets.
 If \fIparameter\fP is \fB@\fP, the result is \fIlength\fP positional
 parameters beginning at \fIoffset\fP.
 If \fIparameter\fP is an indexed array name subscripted by @ or *,
@@ -6737,7 +6745,7 @@ The return value is 0 unless the shell is not executing a subroutine
 call or \fIexpr\fP does not correspond to a valid position in the
 call stack.
 .TP
-\fBcd\fP [\fB\-L|-P\fP] [\fIdir\fP]
+\fBcd\fP [\fB\-L\fP|[\fB\-P\fP [\fB\-e\fP]]] [\fIdir\fP]
 Change the current directory to \fIdir\fP.  The variable
 .SM
 .B HOME
@@ -6770,7 +6778,15 @@ option to the
 .B set
 builtin command); the
 .B \-L
-option forces symbolic links to be followed.  An argument of
+option forces symbolic links to be followed.
+If the
+.B \-e
+option is supplied with
+.BR \-P ,
+and the current working directory cannot be successfully determined
+after a successful directory change, \fBcd\fP will return an unsuccessful
+status.
+An argument of
 .B \-
 is equivalent to
 .SM
@@ -8872,6 +8888,15 @@ If set,
 changes its behavior to that of version 4.0 with respect to locale-specific
 string comparison when using the conditional command's < and > operators
 and the effect of interrupting a command list.
+.TP 8
+.B compat41
+@item compat41
+If set,
+.BR bash ,
+when in posix mode, treats a single quote in a double-quoted
+parameter expansion as a special character.  The single quotes must match
+(an even number) and the characters between the single quotes are considered
+quoted.  This is the behavior of posix mode through version 4.1.
 .TP 8
 .B dirspell
 If set,

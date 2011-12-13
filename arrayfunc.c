@@ -843,6 +843,21 @@ array_variable_part (s, subp, lenp)
   return (var == 0 || invisible_p (var)) ? (SHELL_VAR *)0 : var;
 }
 
+#define INDEX_ERROR() \
+  do \
+    { \
+      if (var) \
+	err_badarraysub (var->name); \
+      else \
+	{ \
+	  t[-1] = '\0'; \
+	  err_badarraysub (s); \
+	  t[-1] = '[';	/* ] */\
+	} \
+      return ((char *)NULL); \
+    } \
+  while (0)
+
 /* Return a string containing the elements in the array and subscript
    described by S.  If the subscript is * or @, obeys quoting rules akin
    to the expansion of $* and $@ including double quoting.  If RTYPE
@@ -920,16 +935,11 @@ array_value_internal (s, quoted, allow_all, rtype, indp)
 	  ind = array_expand_index (t, len);
 	  if (ind < 0)
 	    {
-index_error:
-	      if (var)
-		err_badarraysub (var->name);
-	      else
-		{
-		  t[-1] = '\0';
-		  err_badarraysub (s);
-		  t[-1] = '[';	/* ] */
-		}
-	      return ((char *)NULL);
+	      /* negative subscripts to indexed arrays count back from end */
+	      if (var && array_p (var))
+		ind = array_max_index (array_cell (var)) + 1 + ind;
+	      if (ind < 0)
+		INDEX_ERROR();
 	    }
 	  if (indp)
 	    *indp = ind;
@@ -940,7 +950,7 @@ index_error:
 	  akey = expand_assignment_string_to_string (t, 0);	/* [ */
 	  t[len - 1] = ']';
 	  if (akey == 0 || *akey == 0)
-	    goto index_error;
+	    INDEX_ERROR();
 	}
      
       if (var == 0 || value_cell (var) == 0)	/* XXX - check invisible_p(var) ? */

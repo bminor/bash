@@ -1462,7 +1462,7 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
       if (c == '\'')
 	{
 /*itrace("extract_dollar_brace_string: c == single quote flags = %d quoted = %d dolbrace_state = %d", flags, quoted, dolbrace_state);*/
-	  if (posixly_correct && /*shell_compatibility_level > 41 &&*/ dolbrace_state != DOLBRACE_QUOTE)
+	  if (posixly_correct && shell_compatibility_level > 41 && dolbrace_state != DOLBRACE_QUOTE)
 	    ADVANCE_CHAR (string, slen, i);
 	  else
 	    {
@@ -6057,7 +6057,7 @@ verify_substring_values (v, value, substr, vtype, e1p, e2p)
       free (temp1);
       if (expok == 0)
 	return (0);
-      if (*e2p < 0)
+      if ((vtype == VT_ARRAYVAR || vtype == VT_POSPARMS) && *e2p < 0)
 	{
 	  internal_error (_("%s: substring expression < 0"), t);
 	  return (0);
@@ -6069,7 +6069,17 @@ verify_substring_values (v, value, substr, vtype, e1p, e2p)
       if (vtype != VT_ARRAYVAR)
 #endif
 	{
-	  *e2p += *e1p;		/* want E2 chars starting at E1 */
+	  if (*e2p < 0)
+	    {
+	      *e2p += len;
+	      if (*e2p < 0 || *e2p < *e1p)
+		{
+		  internal_error (_("%s: substring expression < 0"), t);
+		  return (0);
+		}
+	    }
+	  else
+	    *e2p += *e1p;		/* want E2 chars starting at E1 */
 	  if (*e2p > len)
 	    *e2p = len;
 	}

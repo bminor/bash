@@ -3257,10 +3257,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
          unescaped double-quotes or single-quotes, if any, shall occur." */
       /* This was changed in Austin Group Interp 221 */
       if MBTEST(posixly_correct && /*shell_compatibility_level > 41 &&*/ dolbrace_state != DOLBRACE_QUOTE && (flags & P_DQUOTE) && (flags & P_DOLBRACE) && ch == '\'')
-{
-itrace("parse_matched_pair: found single quote in double-quoted dolbrace");
 	continue;
-}
 
       /* Could also check open == '`' if we want to parse grouping constructs
 	 inside old-style command substitution. */

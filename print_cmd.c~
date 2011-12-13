@@ -1,6 +1,6 @@
 /* print_command -- A way to make readable commands from a command tree. */
 
-/* Copyright (C) 1989-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -363,6 +363,7 @@ xtrace_set (fd, fp)
      int fd;
      FILE *fp;
 {
+itrace("xtrace_set: fd = %d fp = 0x%x", fd, fp);
   if (fd >= 0 && sh_validfd (fd) == 0)
     {
       internal_error (_("xtrace_set: %d: invalid file descriptor"), fd);
@@ -383,6 +384,7 @@ xtrace_set (fd, fp)
 void
 xtrace_init ()
 {
+itrace("xtrace_init");
   xtrace_set (-1, stderr);
 }
 
