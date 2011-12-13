@@ -2138,7 +2138,7 @@ rl_filename_completion_function (text, state)
 	 All other entries except "." and ".." match. */
       if (filename_len == 0)
 	{
-	  if (_rl_match_hidden_files == 0 && HIDDEN_FILE (entry->d_name))
+	  if (_rl_match_hidden_files == 0 && HIDDEN_FILE (convfn))
 	    continue;
 
 	  if (convfn[0] != '.' ||
@@ -2219,7 +2219,7 @@ rl_filename_completion_function (text, state)
 		temp[dirlen++] = '/';
 	    }
 
-	  strcpy (temp + dirlen, entry->d_name);
+	  strcpy (temp + dirlen, convfn);
 	}
       else
 	temp = savestring (convfn);

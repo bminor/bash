@@ -9325,10 +9325,6 @@ doc/bash.1
 
 [bash-4.1 frozen]
 
-				   12/31
-				   -----
-[bash-4.1 released]
-
 				 1/5/2010
 				 --------
 doc/bashref.texi
@@ -9348,15 +9344,3 @@ lib/readline/complete.c
 builtins/printf.def
 	- fix prototype in extern declaration for vsnprintf.  Fix for bug
 	  reported by Yann Rouillard <yann@pleiades.fr.eu.org>
-
-				    1/9
-				    ---
-parse.y
-	- fix shell_getc to handle alias expansions containing quoted
-	  newlines.  Problems in bash-4.1 with aliases containing quoted
-	  newlines in the middle of and at the end of their expansion.
-	  Fix for bug reported by Jonathan Claggett
-	  <jonathan@claggett.org>
-	- change mk_alexpansion to not append a space to an alias
-	  expansion ending with a newline.  Works with shell_getc
-

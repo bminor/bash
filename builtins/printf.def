@@ -172,7 +172,7 @@ extern int asprintf __P((char **, const char *, ...)) __attribute__((__format__ 
 #endif
 
 #if !HAVE_VSNPRINTF
-extern int vsnprintf __P((char *, size_t, const char *, ...)) __attribute__((__format__ (printf, 3, 4)));
+extern int vsnprintf __P((char *, size_t, const char *, va_list)) __attribute__((__format__ (printf, 3, 0)));
 #endif
 
 static void printf_erange __P((char *));
