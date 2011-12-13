@@ -3555,7 +3555,7 @@ eof_error:
 	}
 
       /* Skip whitespace */
-      if MBTEST(shellblank (ch) && lex_rwlen == 0)
+      if MBTEST(shellblank (ch) && (tflags & LEX_HEREDELIM) == 0 && lex_rwlen == 0)
         {
 	  /* Add this character. */
 	  RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);

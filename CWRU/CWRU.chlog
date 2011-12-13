@@ -10207,3 +10207,15 @@ subst.c
 	- when performing pattern substitution word expansions, a `&' in the
 	  replacement string is replaced by the text matched by the pattern.
 	  The `&' can be quoted with a backslash to inhibit the expansion
+
+				   7/13
+				   ----
+pcomplib.[ch]
+	- new member for struct compspec: lcommand.  for future use
+
+				   7/15
+				   ----
+parse.y
+	- fix problem in parse_comsub where extra space was added to here-doc
+	  delimiter if the first word in the comsub contained a `/'.  Fixes
+	  bug reported by Alex Khesin <alexk@google.com>

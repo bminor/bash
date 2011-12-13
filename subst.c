@@ -6355,7 +6355,11 @@ pat_subst (string, pat, rep, mflags)
 
   mtype = mflags & MATCH_TYPEMASK;
 
+#if 0	/* bash-4.2 ? */
   rxpand = (rep && *rep) ? shouldexp_replacement (rep) : 0;
+#else
+  rxpand = 0;
+#endif
 
   /* Special cases:
    * 	1.  A null pattern with mtype == MATCH_BEG means to prefix STRING

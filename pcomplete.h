@@ -35,6 +35,7 @@ typedef struct compspec {
   char *suffix;
   char *funcname;
   char *command;
+  char *lcommand;
   char *filterpat;
 } COMPSPEC;
 
