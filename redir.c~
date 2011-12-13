@@ -94,12 +94,16 @@ static REDIRECTEE rd;
    Used to print a reasonable error message. */
 static int heredoc_errno;
 
-#define REDIRECTION_ERROR(r, e) \
-  if ((r) != 0) \
+#define REDIRECTION_ERROR(r, e, fd) \
+do { \
+  if ((r) < 0) \
     { \
+      if (fd >= 0) \
+	close (fd); \    
       last_command_exit_value = EXECUTION_FAILURE;\
       return ((e) == 0 ? EINVAL : (e));\
-    }
+    } \
+} while (0)
 
 void
 redirection_error (temp, error)
@@ -815,7 +819,10 @@ do_redirection_internal (redirect, flags)
       if (flags & RX_ACTIVE)
 	{
 	  if (redirect->rflags & REDIR_VARASSIGN)
-	    redirector = fcntl (fd, F_DUPFD, SHELL_FD_BASE);		/* XXX try this for now */
+	    {
+	      redirector = fcntl (fd, F_DUPFD, SHELL_FD_BASE);		/* XXX try this for now */
+	      REDIRECTION_ERROR (redirector, errno, fd);
+	    }
 
 	  if (flags & RX_UNDOABLE)
 	    {
@@ -824,7 +831,9 @@ do_redirection_internal (redirect, flags)
 		r = add_undo_redirect (redirector, ri, -1);
 	      else
 		r = add_undo_close_redirect (redirector);
-	      REDIRECTION_ERROR (r, errno);
+	      if (r < 0 && (redirect->rflags & REDIR_VARASSIGN))
+		close (redirector);
+	      REDIRECTION_ERROR (r, errno, fd);
 	    }
 
 #if defined (BUFFERED_INPUT)
@@ -919,7 +928,10 @@ do_redirection_internal (redirect, flags)
 	    }
 
 	  if (redirect->rflags & REDIR_VARASSIGN)
-	    redirector = fcntl (fd, F_DUPFD, SHELL_FD_BASE);		/* XXX try this for now */
+	    {
+	      redirector = fcntl (fd, F_DUPFD, SHELL_FD_BASE);		/* XXX try this for now */
+	      REDIRECTION_ERROR (redirector, errno, fd);
+	    }
 
 	  if (flags & RX_ACTIVE)
 	    {
@@ -930,7 +942,9 @@ do_redirection_internal (redirect, flags)
 		    r = add_undo_redirect (redirector, ri, -1);
 		  else
 		    r = add_undo_close_redirect (redirector);
-		  REDIRECTION_ERROR(r, errno);
+		  if (r < 0 && (redirect->rflags & REDIR_VARASSIGN))
+		    close (redirector);
+		  REDIRECTION_ERROR (r, errno, fd);
 	        }
 
 #if defined (BUFFERED_INPUT)
@@ -974,7 +988,10 @@ do_redirection_internal (redirect, flags)
     case r_move_input:
     case r_move_output:
       if ((flags & RX_ACTIVE) && (redirect->rflags & REDIR_VARASSIGN))
-	redirector = fcntl (redir_fd, F_DUPFD, SHELL_FD_BASE);		/* XXX try this for now */
+        {
+	  redirector = fcntl (redir_fd, F_DUPFD, SHELL_FD_BASE);		/* XXX try this for now */
+	  REDIRECTION_ERROR (redirector, errno, -1);
+        }
 
       if ((flags & RX_ACTIVE) && (redir_fd != redirector))
 	{
@@ -985,7 +1002,9 @@ do_redirection_internal (redirect, flags)
 		r = add_undo_redirect (redirector, ri, redir_fd);
 	      else
 		r = add_undo_close_redirect (redirector);
-	      REDIRECTION_ERROR(r, errno);
+	      if (r < 0 && (redirect->rflags & REDIR_VARASSIGN))
+		close (redirector);
+	      REDIRECTION_ERROR (r, errno, -1);
 	    }
 #if defined (BUFFERED_INPUT)
 	  check_bash_input (redirector);
@@ -1059,8 +1078,10 @@ do_redirection_internal (redirect, flags)
 
 	  r = 0;
 	  if ((flags & RX_UNDOABLE) && (fcntl (redirector, F_GETFD, 0) != -1))
-	    r = add_undo_redirect (redirector, ri, -1);
-	  REDIRECTION_ERROR (r, errno);
+	    {
+	      r = add_undo_redirect (redirector, ri, -1);
+	      REDIRECTION_ERROR (r, errno, redirector);
+	    }
 
 #if defined (COPROCESS_SUPPORT)
 	  coproc_fdchk (redirector);
@@ -1145,7 +1166,7 @@ add_undo_redirect (fd, ri, fdbase)
      above SHELL_FD_BASE, add a redirection to be undone if the exec builtin
      causes redirections to be discarded.  There needs to be a difference
      between fds that are used to save other fds and then are the target of
-     user redirctions and fds that are just the target of user redirections.
+     user redirections and fds that are just the target of user redirections.
      We use the close-on-exec flag to tell the difference; fds > SHELL_FD_BASE
      that have the close-on-exec flag set are assumed to be fds used internally
      to save others. */

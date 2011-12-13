@@ -852,6 +852,16 @@ exp1 ()
       readtok ();
       val = ~exp1 ();
     }
+  else if (curtok == MINUS)
+    {
+      readtok ();
+      val = - exp1 ();
+    }
+  else if (curtok == PLUS)
+    {
+      readtok ();
+      val = exp1 ();
+    }
   else
     val = exp0 ();
 
@@ -891,6 +901,7 @@ exp0 ()
       curtok = NUM;	/* make sure --x=7 is flagged as an error */
       readtok ();
     }
+#if 0
   else if (curtok == MINUS)
     {
       readtok ();
@@ -901,6 +912,7 @@ exp0 ()
       readtok ();
       val = exp0 ();
     }
+#endif
   else if (curtok == LPAR)
     {
       readtok ();

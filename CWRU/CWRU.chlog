@@ -10783,3 +10783,21 @@ doc/{bash.1,bashref.texi}
 				   -----
 configure.in
 	- changed release status to 4.2-beta
+
+				   12/18
+				   -----
+redir.c
+	- change REDIRECTION_ERROR macro to accept a third argument: an
+	  additional file descriptor to close before returning and error (pass
+	  -1 to do nothing)
+	- change calls to REDIRECTION_ERROR to close appropriate file
+	  descriptors.  Fixes bug reported by Andreas Schwab
+	  <schwab@linux-m68k.org>
+	- make sure to close any file descriptors opened for REDIR_VARASSIGN
+	  before returning an error
+
+				   12/19
+				   -----
+expr.c
+	- move processing of unary `-' and `+' to exp1 from exp0 to avoid
+	  precedence problems.  Fixes bug reported by <12bric@gmail.com>
