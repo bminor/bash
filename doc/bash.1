@@ -3256,11 +3256,21 @@ or a
 .B ^
 then any character not enclosed is matched.
 The sorting order of characters in range expressions is determined by
-the current locale and the value of the
+the current locale and the values of the
 .SM
 .B LC_COLLATE
-shell variable,
-if set.
+or
+.SM
+.B LC_ALL
+shell variables, if set.
+To obtain the traditional interpretation of range expressions, where
+.B [a\-d]
+is equivalent to
+.BR [abcd] ,
+set value of the
+.B LC_ALL
+shell variable to
+.BR C .
 A 
 .B \-
 may be matched by including it as the first or last character
