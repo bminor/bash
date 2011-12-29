@@ -1,7 +1,7 @@
 /* rlprivate.h -- functions and variables global to the readline library,
 		  but not intended for use by applications. */
 
-/* Copyright (C) 1999-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2011 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -86,6 +86,7 @@ typedef struct  __rl_search_context
   int history_pos;
   int direction;
 
+  int prevc;
   int lastc;
 #if defined (HANDLE_MULTIBYTE)
   char mb[MB_LEN_MAX];
@@ -442,6 +443,9 @@ extern int _rl_history_preserve_point;
 extern int _rl_history_saved_point;
 
 extern _rl_arg_cxt _rl_argcxt;
+
+/* nls.c */
+extern int _rl_utf8locale;
 
 /* readline.c */
 extern int _rl_echoing_p;

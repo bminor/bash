@@ -309,7 +309,11 @@ static void
 expr_bind_variable (lhs, rhs)
      char *lhs, *rhs;
 {
-  (void)bind_int_variable (lhs, rhs);
+  SHELL_VAR *v;
+
+  v = bind_int_variable (lhs, rhs);
+  if (v && (readonly_p (v) || noassign_p (v)))
+    longjmp (evalbuf, 1);	/* variable assignment error */
   stupidly_hack_special_variables (lhs);
 }
 

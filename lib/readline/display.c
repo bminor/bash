@@ -766,7 +766,7 @@ rl_redisplay ()
 	    break;			/* Found '\0' */
 	  else
 	    {
-	      temp = wcwidth (wc);
+	      temp = WCWIDTH (wc);
 	      wc_width = (temp >= 0) ? temp : 1;
 	    }
 	}
@@ -1320,7 +1320,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	  else if (MB_NULLWCH (ret))
 	    tempwidth = 0;
 	  else
-	    tempwidth = wcwidth (wc);
+	    tempwidth = WCWIDTH (wc);
 
 	  if (tempwidth > 0)
 	    {
@@ -1377,6 +1377,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
       temp = (omax < nmax) ? omax : nmax;
       if (memcmp (old, new, temp) == 0)		/* adding at the end */
 	{
+	  new_offset = old_offset = temp;
 	  ofd = old + temp;
 	  nfd = new + temp;
 	}
@@ -1387,6 +1388,8 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 
 	  if (omax == nmax && STREQN (new, old, omax))
 	    {
+	      old_offset = omax;
+	      new_offset = nmax;
 	      ofd = old + omax;
 	      nfd = new + nmax;
 	    }
@@ -1399,6 +1402,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 		{
 		  old_offset = _rl_find_next_mbchar (old, old_offset, 1, MB_FIND_ANY);
 		  new_offset = _rl_find_next_mbchar (new, new_offset, 1, MB_FIND_ANY);
+
 		  ofd = old + old_offset;
 		  nfd = new + new_offset;
 		}
@@ -1422,6 +1426,27 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
   if (ofd == oe && nfd == ne)
     return;
 
+#if defined (HANDLE_MULTIBYTE)
+  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0 && _rl_utf8locale)
+    {
+      wchar_t wc;
+      mbstate_t ps = { 0 };
+      int t;
+
+      /* If the first character in the difference is a zero-width character,
+	 assume it's a combining character and back one up so the two base
+	 characters no longer compare equivalently. */
+      t = mbrtowc (&wc, ofd, MB_CUR_MAX, &ps);
+      if (t > 0 && UNICODE_COMBINING_CHAR (wc) && WCWIDTH (wc) == 0)
+	{
+	  old_offset = _rl_find_prev_mbchar (old, ofd - old, MB_FIND_ANY);
+	  new_offset = _rl_find_prev_mbchar (new, nfd - new, MB_FIND_ANY);
+	  ofd = old + old_offset;	/* equal by definition */
+	  nfd = new + new_offset;
+	}
+    }
+#endif
+
   wsatend = 1;			/* flag for trailing whitespace */
 
 #if defined (HANDLE_MULTIBYTE)
@@ -1429,6 +1454,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
     {
       ols = old + _rl_find_prev_mbchar (old, oe - old, MB_FIND_ANY);
       nls = new + _rl_find_prev_mbchar (new, ne - new, MB_FIND_ANY);
+
       while ((ols > ofd) && (nls > nfd))
 	{
 	  memset (&ps_old, 0, sizeof (mbstate_t));
@@ -2721,14 +2747,7 @@ _rl_ttymsg ("_rl_col_width: called with MB_CUR_MAX == 1");
 	{
 	  point += tmp;
 	  max -= tmp;
-#if defined (MACOSX)
-	  /* Mac OS X has a bug where wcwidth returns 1 for UTF-8 combining
-	     characters */
-	  if (wc >= 769 && wc <= 833)
-	    tmp = 0;
-	  else
-#endif
-	  tmp = wcwidth(wc);
+	  tmp = WCWIDTH(wc);
 	  width += (tmp >= 0) ? tmp : 1;
 	}
     }

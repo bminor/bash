@@ -679,7 +679,7 @@ fnwidth (string)
 	  else
 	    {
 	      pos += clen;
-	      w = wcwidth (wc);
+	      w = WCWIDTH (wc);
 	      width += (w >= 0) ? w : 1;
 	    }
 #else
@@ -766,7 +766,7 @@ fnprint (to_print, prefix_bytes)
 	    break;
 	  else
 	    {
-	      w = wcwidth (wc);
+	      w = WCWIDTH (wc);
 	      width = (w >= 0) ? w : 1;
 	    }
 	  fwrite (s, 1, tlen, rl_outstream);

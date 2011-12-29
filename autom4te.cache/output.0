@@ -10787,7 +10787,6 @@ if test "x$ac_cv_func_mbsrtowcs" = xyes; then :
 fi
 
 
-
 ac_fn_c_check_func "$LINENO" "mbschr" "ac_cv_func_mbschr"
 if test "x$ac_cv_func_mbschr" = xyes; then :
   $as_echo "@%:@define HAVE_MBSCHR 1" >>confdefs.h
@@ -11035,6 +11034,57 @@ $as_echo "$bash_cv_type_wint_t" >&6; }
 if test $bash_cv_type_wint_t = yes; then
         
 $as_echo "@%:@define HAVE_WINT_T 1" >>confdefs.h
+
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for wcwidth broken with unicode combining characters" >&5
+$as_echo_n "checking for wcwidth broken with unicode combining characters... " >&6; }
+if ${bash_cv_wcwidth_broken+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test "$cross_compiling" = yes; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`config.log' for more details" "$LINENO" 5; }
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#include <locale.h>
+#include <wchar.h>
+
+main(c, v)
+int     c;
+char    **v;
+{
+        int     w;
+
+        setlocale(LC_ALL, "en_US.UTF-8");
+        w = wcwidth (0x0301);
+        exit (w == 0);  /* exit 0 if wcwidth broken */
+}
+
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  bash_cv_wcwidth_broken=yes
+else
+  bash_cv_wcwdith_broken=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $bash_cv_wcwidth_broken" >&5
+$as_echo "$bash_cv_wcwidth_broken" >&6; }
+if test $bash_cv_wcwidth_broken = yes; then
+        
+$as_echo "@%:@define WCWIDTH_BROKEN 1" >>confdefs.h
 
 fi
 

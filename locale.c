@@ -26,6 +26,10 @@
 #  include <unistd.h>
 #endif
 
+#if HAVE_LANGINFO_CODESET
+#  include <langinfo.h>
+#endif
+
 #include "bashintl.h"
 #include "bashansi.h"
 #include <stdio.h>
@@ -38,6 +42,8 @@
 #ifndef errno
 extern int errno;
 #endif
+
+int locale_utf8locale;	/* unused for now */
 
 extern int dump_translatable_strings, dump_po_strings;
 
@@ -61,6 +67,7 @@ static char *lang;
 static int reset_locale_vars __P((void));
 
 static void locale_setblanks __P((void));
+static int locale_isutf8 __P((char *));
 
 /* Set the value of default_locale and make the current locale the
    system default locale.  This should be called very early in main(). */
@@ -267,7 +274,7 @@ set_lang (var, value)
       lang = (char *)xmalloc (1);
       lang[0] = '\0';
     }
-    
+
   return ((lc_all == 0 || *lc_all == 0) ? reset_locale_vars () : 0);
 }
 
@@ -531,4 +538,19 @@ locale_setblanks ()
       else
 	sh_syntaxtab[x] &= ~(CSHBRK|CBLANK);
     }
+}
+
+static int
+locale_isutf8 (lspec)
+     char *lspec;
+{
+  char *cp;
+
+#if HAVE_LANGINFO_CODESET
+  cp = nl_langinfo (CODESET);
+  return (STREQ (cp, "UTF-8") || STREQ (cp, "utf8"));
+#else
+  /* Take a shot */
+  return (strstr (lspec, "UTF-8") || strstr (lspec, "utf8"));
+#endif
 }

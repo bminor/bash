@@ -1698,7 +1698,6 @@ AC_CHECK_FUNC(mbscmp, AC_DEFINE(HAVE_MBSCMP))
 AC_CHECK_FUNC(mbsnrtowcs, AC_DEFINE(HAVE_MBSNRTOWCS))
 AC_CHECK_FUNC(mbsrtowcs, AC_DEFINE(HAVE_MBSRTOWCS))
 
-
 AC_REPLACE_FUNCS(mbschr)
 
 AC_CHECK_FUNC(wcrtomb, AC_DEFINE(HAVE_WCRTOMB))
@@ -1761,6 +1760,33 @@ AC_CACHE_CHECK([for wint_t in wctype.h], bash_cv_type_wint_t,
 ], bash_cv_type_wint_t=yes, bash_cv_type_wint_t=no)])
 if test $bash_cv_type_wint_t = yes; then
         AC_DEFINE(HAVE_WINT_T, 1, [systems should define this type here])
+fi
+
+dnl check for broken wcwidth
+AC_CACHE_CHECK([for wcwidth broken with unicode combining characters],
+bash_cv_wcwidth_broken,
+[AC_TRY_RUN([
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#include <locale.h>
+#include <wchar.h>
+
+main(c, v)
+int     c;
+char    **v;
+{
+        int     w;
+
+        setlocale(LC_ALL, "en_US.UTF-8");
+        w = wcwidth (0x0301);
+        exit (w == 0);  /* exit 0 if wcwidth broken */
+}
+],
+bash_cv_wcwidth_broken=yes, bash_cv_wcwdith_broken=no)])
+if test $bash_cv_wcwidth_broken = yes; then
+        AC_DEFINE(WCWIDTH_BROKEN, 1, [wcwidth is usually not broken])
 fi
 
 if test "$am_cv_func_iconv" = yes; then

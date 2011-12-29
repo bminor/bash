@@ -11661,3 +11661,76 @@ lib/readline/display.c
 	  for UTF-8 combining characters.  Added workaround dependent on
 	  MACOSX.  Fixes problem pointed out by Thomas De Contes
 	  <d.l.tDecontes@free.fr>
+
+				   5/16
+				   ----
+lib/readline/rlmbutil.h
+	- WCWIDTH: wrapper for wcwidth that returns 0 for Unicode combining
+	  characters on systems where wcwidth is broken (e.g., Mac OS X).
+
+lib/readline/{complete,display,mbutil}.c
+	- use WCWIDTH instead of wcwidth
+
+				   5/17
+				   ----
+lib/readline/display.c
+	- update_line: after computing ofd and nfd, see whether the next
+	  character in ofd is a zero-width combining character.  If it is,
+	  back ofd and nfd up one, so the base characters no longer compare
+	  as equivalent.  Fixes problem reported by Keith Winstein
+	  <keithw@mit.edu>
+
+lib/readline/nls.c
+	- _rl_utf8locale: new flag variable, set to non-zero if the current
+	  locale is UTF-8
+	- utf8locale(): new function, returns 1 if the passed lspec (or the
+	  current locale) indicates that the locale is UTF-8.  Called from
+	  _rl_init_eightbit
+
+lib/readline/rlprivate.h
+	- extern declaration for _rl_utf8locale
+
+locale.c
+	- locale_utf8locale: new flag variable, set to non-zero if the current
+	  locale is UTF-8 (currently unused)
+	- locale_isutf8(): new function, returns 1 if the passed lspec (or the
+	  current locale) indicates that the locale is UTF-8.  Should be called
+	  whenever the locale or LC_CTYPE value is modified
+
+aclocal.m4
+	- BASH_WCWIDTH_BROKEN: new test for whether or not wcwidth returns
+	  zero-width characters like unicode combining characters as having
+	  display length 1; define WCWIDTH_BROKEN in this case
+
+config.h.in
+	- WCWIDTH_BROKEN: new define
+
+lib/readline/rlmbutil.h
+	- change WCWIDTH macro to use _rl_utf8locale and the full range of
+	  Unicode combining characters (U+0300-U+036F)
+
+				   5/19
+				   ----
+lib/readline/rlprivate.h
+	- _rl_search_context: new member, prevc, will hold character read
+	  prior to lastc
+
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: if the character causes us to index into
+	  another keymap, save that character in cxt->prevc
+	- _rl_isearch_dispatch: if we index into another keymap, but don't
+	  find a function that's special to i-search, and the character that
+	  caused us to index into that keymap would have terminated the
+	  search, push back cxt->prevc and cxt->lastc to make it appear as
+	  if `prevc' terminated the search, and execute lastc as a command.
+	  We have to push prevc back so we index into the same keymap before
+	  we read lastc.  Fixes bug report from Davor Cubranic
+	  <cubranic@stat.ubc.ca>
+
+				   5/20
+				   ----
+expr.c
+	- expr_bind_variable: pay attention to the return value from
+	  bind_variable and check whether or not we should error out due to
+	  a readonly or noassign variable.  Fixes bug reported by Eric
+	  Blake <eblake@redhat.com>

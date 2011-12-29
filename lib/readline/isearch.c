@@ -6,7 +6,7 @@
 /*								    */
 /* **************************************************************** */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2011 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -110,7 +110,7 @@ _rl_scxt_alloc (type, flags)
   cxt->history_pos = 0;
   cxt->direction = 0;
 
-  cxt->lastc = 0;
+  cxt->prevc = cxt->lastc = 0;
 
   cxt->sline = 0;
   cxt->sline_len = cxt->sline_index = 0;
@@ -319,6 +319,9 @@ _rl_search_getchar (cxt)
   return c;
 }
 
+#define ENDSRCH_CHAR(c) \
+  ((CTRL_CHAR (c) || META_CHAR (c) || (c) == RUBOUT) && ((c) != CTRL ('G')))
+
 /* Process just-read character C according to isearch context CXT.  Return
    -1 if the caller should just free the context and return, 0 if we should
    break out of the loop, and 1 if we should continue to read characters. */
@@ -347,7 +350,10 @@ _rl_isearch_dispatch (cxt, c)
       cxt->keymap = FUNCTION_TO_KEYMAP (cxt->keymap, c);
       cxt->sflags |= SF_CHGKMAP;
       /* XXX - we should probably save this sequence, so we can do
-	 something useful if this doesn't end up mapping to a command. */
+	 something useful if this doesn't end up mapping to a command we
+	 interpret here.  Right now we just save the most recent character
+	 that caused the index into a new keymap. */
+      cxt->prevc = c;
       return 1;
     }
 
@@ -376,6 +382,18 @@ _rl_isearch_dispatch (cxt, c)
     {
       cxt->keymap = cxt->okeymap;
       cxt->sflags &= ~SF_CHGKMAP;
+      /* If we indexed into a new keymap, but didn't map to a command that
+	 affects the search (lastc > 0), and the character that mapped to a
+	 new keymap would have ended the search (ENDSRCH_CHAR(cxt->prevc)),
+	 handle that now as if the previous char would have ended the search
+	 and we would have read the current character. */
+      /* XXX - should we check cxt->mb? */
+      if (cxt->lastc > 0 && ENDSRCH_CHAR (cxt->prevc))
+	{
+	  rl_stuff_char (cxt->lastc);
+	  rl_execute_next (cxt->prevc);
+	  return (0);
+	}
     }
 
   /* The characters in isearch_terminators (set from the user-settable
@@ -397,9 +415,6 @@ _rl_isearch_dispatch (cxt, c)
 	rl_execute_next (ESC);
       return (0);
     }
-
-#define ENDSRCH_CHAR(c) \
-  ((CTRL_CHAR (c) || META_CHAR (c) || (c) == RUBOUT) && ((c) != CTRL ('G')))
 
 #if defined (HANDLE_MULTIBYTE)
   if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
