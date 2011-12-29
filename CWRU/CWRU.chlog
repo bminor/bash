@@ -11290,3 +11290,26 @@ arrayfunc.[ch],subst.c
 	- array_expand_index now takes a new first argument: a SHELL_VAR *
 	  of the array variable being subscripted.  Can be used later to fully
 	  implement negative subscripts
+
+				   3/14
+				   ----
+lib/glob/glob.c
+	- fix mbskipname to not turn the directory entry name into a wide char
+	  string if the conversion of the pattern to a wide char string fails
+	- fix mbskipname to call skipname if either the pattern or the filename
+	  can't be converted into a wide-char string
+
+lib/glob/xmbstowcs.c
+	- fix xdupmbstowcs2 to handle return value of 0 from mbsnrtowcs and
+	  short-circuit with failure in that case.  Fixes bug reported by
+	  Roman Rakus <rrakus@redhat.com>
+
+				   3/15
+				   ----
+bashline.c
+	- new variable, bash_filename_quote_characters to store the value
+	  assigned to rl_filename_quote_characters so it can be restored
+	  if changed.
+	- change bashline_reset and attempt_shell_completion to restore
+	  rl_filename_quote_characters if not set to default
+

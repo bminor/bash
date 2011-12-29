@@ -249,6 +249,9 @@ static char *bash_completer_word_break_characters = " \t\n\"'@><=;|&(:";
 static char *bash_nohostname_word_break_characters = " \t\n\"'><=;|&(:";
 /* )) */
 
+static const char *default_filename_quote_characters = " \t\n\\\"'@<>=;|&()#$`?*[!:{~";	/*}*/
+static char *custom_filename_quote_characters = 0;
+
 static rl_hook_func_t *old_rl_startup_hook = (rl_hook_func_t *)NULL;
 
 static int dot_in_path = 0;
@@ -531,7 +534,7 @@ initialize_readline ()
   enable_hostname_completion (perform_hostname_completion);
 
   /* characters that need to be quoted when appearing in filenames. */
-  rl_filename_quote_characters = " \t\n\\\"'@<>=;|&()#$`?*[!:{~";	/*}*/
+  rl_filename_quote_characters = default_filename_quote_characters;
 
   rl_filename_quoting_function = bash_quote_filename;
   rl_filename_dequoting_function = bash_dequote_filename;
@@ -570,6 +573,7 @@ bashline_reset ()
   rl_completion_entry_function = NULL;
   rl_directory_rewrite_hook = bash_directory_completion_hook;
   rl_ignore_some_completions_function = filename_completion_ignore;
+  rl_filename_quote_characters = default_filename_quote_characters;
 }
 
 /* Contains the line to push into readline. */
@@ -1282,6 +1286,8 @@ attempt_shell_completion (text, start, end)
   command_separator_chars = COMMAND_SEPARATORS;
   matches = (char **)NULL;
   rl_ignore_some_completions_function = filename_completion_ignore;
+
+  rl_filename_quote_characters = default_filename_quote_characters;
 
   /* Determine if this could be a command word.  It is if it appears at
      the start of the line (ignoring preceding whitespace), or if it
@@ -2706,20 +2712,31 @@ bash_directory_completion_hook (dirname)
      char **dirname;
 {
   char *local_dirname, *new_dirname, *t;
-  int return_value, should_expand_dirname;
+  int return_value, should_expand_dirname, nextch, closer;
   WORD_LIST *wl;
   struct stat sb;
 
-  return_value = should_expand_dirname = 0;
+  return_value = should_expand_dirname = nextch = closer = 0;
   local_dirname = *dirname;
 
-  if (mbschr (local_dirname, '$'))
-    should_expand_dirname = 1;
+  if (t = mbschr (local_dirname, '$'))
+    {
+      should_expand_dirname = '$';
+      nextch = t[1];
+      /* Deliberately does not handle the deprecated $[...] arithmetic
+	 expansion syntax */
+      if (nextch == '(')
+	closer = ')';
+      else if (nextch == '{')
+	closer = '}';
+      else
+	nextch = 0;
+    }
   else
     {
       t = mbschr (local_dirname, '`');
       if (t && unclosed_pair (local_dirname, strlen (local_dirname), "`") == 0)
-	should_expand_dirname = 1;
+	should_expand_dirname = '`';
     }
 
 #if defined (HAVE_LSTAT)
@@ -2743,6 +2760,23 @@ bash_directory_completion_hook (dirname)
 	  free (new_dirname);
 	  dispose_words (wl);
 	  local_dirname = *dirname;
+	  /* XXX - change rl_filename_quote_characters here based on
+	     should_expand_dirname/nextch/closer.  This is the only place
+	     custom_filename_quote_characters is modified. */
+	  if (rl_filename_quote_characters && *rl_filename_quote_characters)
+	    {
+	      int i, j, c;
+	      i = strlen (default_filename_quote_characters);
+	      custom_filename_quote_characters = xrealloc (custom_filename_quote_characters, i+1);
+	      for (i = j = 0; c = default_filename_quote_characters[i]; i++)
+		{
+		  if (c == should_expand_dirname || c == nextch || c == closer)
+		    continue;
+		  custom_filename_quote_characters[j++] = c;
+		}
+	      custom_filename_quote_characters[j] = '\0';
+	      rl_filename_quote_characters = custom_filename_quote_characters;
+	    }
 	}
       else
 	{

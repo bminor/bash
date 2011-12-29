@@ -1,6 +1,6 @@
 /* xmbsrtowcs.c -- replacement function for mbsrtowcs */
 
-/* Copyright (C) 2002-2010 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2011 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -148,7 +148,7 @@ xdupmbstowcs2 (destp, src)
   size_t wsbuf_size;	/* Size of WSBUF */
   size_t wcnum;		/* Number of wide characters in WSBUF */
   mbstate_t state;	/* Conversion State */
-  size_t wcslength;	/* Number of wide characters produced by the conversion. */
+  size_t n, wcslength;	/* Number of wide characters produced by the conversion. */
   const char *end_or_backslash;
   size_t nms;	/* Number of multibyte characters to convert at one time. */
   mbstate_t tmp_state;
@@ -164,17 +164,17 @@ xdupmbstowcs2 (destp, src)
   do
     {
       end_or_backslash = strchrnul(p, '\\');
-      nms = (end_or_backslash - p);
+      nms = end_or_backslash - p;
       if (*end_or_backslash == '\0')
 	nms++;
 
       /* Compute the number of produced wide-characters. */
       tmp_p = p;
       tmp_state = state;
-      wcslength = mbsnrtowcs(NULL, &tmp_p, nms, 0, &tmp_state);
+      wcslength = mbsnrtowcs (NULL, &tmp_p, nms, 0, &tmp_state);
 
       /* Conversion failed. */
-      if (wcslength == (size_t)-1)
+      if (wcslength == 0 || wcslength == (size_t)-1)
 	{
 	  free (wsbuf);
 	  *destp = NULL;
@@ -200,7 +200,7 @@ xdupmbstowcs2 (destp, src)
 
       /* Perform the conversion. This is assumed to return 'wcslength'.
        * It may set 'p' to NULL. */
-      mbsnrtowcs(wsbuf+wcnum, &p, nms, wsbuf_size-wcnum, &state);
+      n = mbsnrtowcs(wsbuf+wcnum, &p, nms, wsbuf_size-wcnum, &state);
 
       wcnum += wcslength;
 
