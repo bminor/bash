@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Thu Mar 24 10:21:02 EDT 2011
+.\"	Last Change: Mon Apr 11 16:56:54 EDT 2011
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2011 March 24" "GNU Bash-4.2"
+.TH BASH 1 "2011 April 11" "GNU Bash 4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -911,7 +911,7 @@ The format for a coprocess is:
 .RE
 .PP
 This creates a coprocess named \fINAME\fP.
-If \fINAME\fP is not supplied, the default name is \fICOPROC\fP.
+If \fINAME\fP is not supplied, the default name is \fBCOPROC\fP.
 \fINAME\fP must not be supplied if \fIcommand\fP is a \fIsimple
 command\fP (see above); otherwise, it is interpreted as the first word
 of the simple command.
@@ -2164,8 +2164,8 @@ The default path is system-dependent,
 and is set by the administrator who installs
 .BR bash .
 A common value is
-.if t \f(CW/usr/gnu/bin:/usr/local/bin:/usr/ucb:/bin:/usr/bin\fP.
-.if n ``/usr/gnu/bin:/usr/local/bin:/usr/ucb:/bin:/usr/bin''.
+.if t \f(CW/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin\fP.
+.if n ``/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin''.
 .TP
 .B POSIXLY_CORRECT
 If this variable is in the environment when \fBbash\fP starts, the shell
@@ -3529,6 +3529,7 @@ This is semantically equivalent to
 \fB>\fP\fIword\fP 2\fB>&\fP1
 .RE
 .PP
+(see \fBDuplicating File Descriptors\fP below).
 .SS Appending Standard Output and Standard Error
 .PP
 This construct allows both the
@@ -3549,6 +3550,8 @@ This is semantically equivalent to
 .PP
 \fB>>\fP\fIword\fP 2\fB>&\fP1
 .RE
+.PP
+(see \fBDuplicating File Descriptors\fP below).
 .SS Here Documents
 .PP
 This type of redirection instructs the shell to read input from the
@@ -7331,7 +7334,7 @@ does not specify a valid job.
 .TP
 \fBecho\fP [\fB\-neE\fP] [\fIarg\fP ...]
 Output the \fIarg\fPs, separated by spaces, followed by a newline.
-The return status is always 0.
+The return status is 0 unless a write error occurs.
 If \fB\-n\fP is specified, the trailing newline is
 suppressed.  If the \fB\-e\fP option is given, interpretation of
 the following backslash-escaped characters is enabled.  The
@@ -8520,9 +8523,10 @@ by default for interactive shells on systems that support
 it (see
 .SM
 .B JOB CONTROL
-above).  Background processes run in a separate process
-group and a line containing their exit status is printed
-upon their completion.
+above).
+All processes run in a separate process group.
+When a background job completes, the shell prints a line
+containing its exit status.
 .TP 8
 .B \-n
 Read commands but do not execute them.  This may be used to 

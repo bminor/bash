@@ -316,6 +316,7 @@ make_command_string_internal (command)
 	  cprintf ("( ");
 	  skip_this_indent++;
 	  make_command_string_internal (command->value.Subshell->command);
+	  PRINT_DEFERRED_HEREDOCS ("");
 	  cprintf (" )");
 	  break;
 
@@ -604,6 +605,7 @@ print_arith_for_command (arith_for_command)
   newline ("do\n");
   indentation += indentation_amount;
   make_command_string_internal (arith_for_command->action);
+  PRINT_DEFERRED_HEREDOCS ("");
   semicolon ();
   indentation -= indentation_amount;
   newline ("done");
@@ -665,6 +667,7 @@ print_group_command (group_command)
     }
 
   make_command_string_internal (group_command->command);
+  PRINT_DEFERRED_HEREDOCS ("");
 
   if (inside_function_def)
     {
@@ -1268,6 +1271,7 @@ print_function_def (func)
   make_command_string_internal (cmdcopy->type == cm_group
 					? cmdcopy->value.Group->command
 					: cmdcopy);
+  /* XXX - PRINT_DEFERRED_HEREDOCS (""); ? */
 
   remove_unwind_protect ();
   indentation -= indentation_amount;
@@ -1339,6 +1343,7 @@ named_function_string (name, command, flags)
   make_command_string_internal (cmdcopy->type == cm_group
 					? cmdcopy->value.Group->command
 					: cmdcopy);
+  /* XXX - PRINT_DEFERRED_HEREDOCS (""); ? */
 
   indentation = old_indent;
   indentation_amount = old_amount;
@@ -1367,7 +1372,8 @@ named_function_string (name, command, flags)
 	  }
 #else
       if (result[2] == '\n')	/* XXX -- experimental */
-	strcpy (result + 2, result + 3);
+	memmove (result + 2, result + 3, strlen (result) - 2);
+	
 #endif
     }
 

@@ -636,7 +636,7 @@ sigprocmask (operation, newset, oldset)
       break;
 
     case SIG_SETMASK:
-      sigsetmask (new);
+      old = sigsetmask (new);
       break;
 
     default:

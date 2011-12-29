@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2010 December 28<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2011 April 11<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -1895,7 +1895,8 @@ The shell function
 <DT><B>BASH_SUBSHELL</B>
 
 <DD>
-Incremented by one each time a subshell or subshell environment is spawned.
+Incremented by one within each subshell or subshell environment when
+the shell begins executing in that environment.
 The initial value is 0.
 <DT><B>BASH_VERSINFO</B>
 
@@ -3022,12 +3023,6 @@ using the syntax <I>name</I>[<I>subscript</I>]=<I>value</I>.  The
 <I>subscript</I>
 
 is treated as an arithmetic expression that must evaluate to a number.
-If
-<I>subscript</I>
-
-evaluates to a number less than zero, it is used as
-an offset from one greater than the array's maximum index (so a subcript
-of -1 refers to the last element of the array).
 To explicitly declare an indexed array, use
 <B>declare -a </B><I>name</I>
 
@@ -3104,6 +3099,13 @@ ${<I>name</I>[<I>subscript</I>]}.  If <I>subscript</I> is <B>*</B> or
 <B>@</B>, the expansion is the number of elements in the array.
 Referencing an array variable without a subscript is equivalent to
 referencing the array with a subscript of 0.
+If the
+<I>subscript</I>
+
+used to reference an element of an indexed array
+evaluates to a number less than zero, it is used as
+an offset from one greater than the array's maximum index (so a subcript
+of -1 refers to the last element of the array).
 <P>
 
 An array variable is considered set if a subscript has been assigned a
@@ -4524,6 +4526,7 @@ This is semantically equivalent to
 
 <P>
 
+(see <B>Duplicating File Descriptors</B> below).
 <A NAME="lbBN">&nbsp;</A>
 <H4>Appending Standard Output and Standard Error</H4>
 
@@ -4554,6 +4557,9 @@ This is semantically equivalent to
 <B>&gt;&gt;</B><I>word</I> 2<B>&gt;&amp;</B>1
 </DL>
 
+<P>
+
+(see <B>Duplicating File Descriptors</B> below).
 <A NAME="lbBO">&nbsp;</A>
 <H4>Here Documents</H4>
 
@@ -12702,7 +12708,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash-4.2<TH ALIGN=CENTER width=33%>2010 December 28<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.2<TH ALIGN=CENTER width=33%>2011 April 11<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -12808,6 +12814,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 09 March 2011 17:05:44 EST
+Time: 11 April 2011 17:01:53 EDT
 </BODY>
 </HTML>

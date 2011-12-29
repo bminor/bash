@@ -116,6 +116,7 @@ extern ITEMLIST it_exports;
 extern ITEMLIST it_files;
 extern ITEMLIST it_functions;
 extern ITEMLIST it_groups;
+extern ITEMLIST it_helptopics;
 extern ITEMLIST it_hostnames;
 extern ITEMLIST it_jobs;
 extern ITEMLIST it_keywords;

@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.2, version 4.038])dnl
+AC_REVISION([for Bash 4.2, version 4.039])dnl
 
 define(bashvers, 4.2)
 define(relstatus, maint)
@@ -461,6 +461,9 @@ if test "$opt_profiling" = "yes"; then
 fi
 
 if test "$opt_static_link" = yes; then
+	enable_static=yes
+	enable_shared=no
+	enable_rpath=no
 	# if we're using gcc, add `-static' to LDFLAGS, except on Solaris >= 2
 	if test -n "$GCC" || test "$ac_cv_prog_gcc" = "yes"; then
 		STATIC_LD="-static" 

@@ -22,18 +22,18 @@ $BUILTIN wait
 $FUNCTION wait_builtin
 $DEPENDS_ON JOB_CONTROL
 $PRODUCES wait.c
-$SHORT_DOC wait [id]
+$SHORT_DOC wait [id ...]
 Wait for job completion and return exit status.
 
-Waits for the process identified by ID, which may be a process ID or a
+Waits for each process identified by an ID, which may be a process ID or a
 job specification, and reports its termination status.  If ID is not
 given, waits for all currently active child processes, and the return
 status is zero.  If ID is a a job specification, waits for all processes
-in the job's pipeline.
+in that job's pipeline.
 
 Exit Status:
-Returns the status of ID; fails if ID is invalid or an invalid option is
-given.
+Returns the status of the last ID; fails if ID is invalid or an invalid
+option is given.
 $END
 
 $BUILTIN wait

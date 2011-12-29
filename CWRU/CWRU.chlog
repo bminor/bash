@@ -11419,3 +11419,87 @@ lib/readline/terminal.c
 	  _rl_term_* variables
 	- don't call tputs on DJGPP; there is no good terminfo support
 	  DJGPP support from Eli Zaretskii  <eliz@gnu.org>
+
+				    4/6
+				    ---
+
+config-top.h
+	- change DEFAULT_PATH_VALUE to something more useful and modern
+
+				    4/8
+				    ---
+tests/printf2.sub
+	- make sure LC_ALL and LC_CTYPE are set so LANG assignment takes effect.
+	  Reported by Cedric Arbogast <arbogast.cedric@gmail.com>
+
+				   4/11
+				   ----
+include/chartypes.h
+	- fix a couple of dicey defines (though ones that don't cause any
+	  compiler warnings) in IN_CTYPE_DOMAIN
+
+doc/{bashref.texi,bash.1}
+	- add note referring to duplicating file descriptors in sections
+	  describing redirecting stdout and stderr and appending to stdout
+	  and stderr.  Suggested by Matthew Dinger <mdinger.bugzilla@gmail.com>
+
+pcomplete.c
+	- it_init_helptopics: new function to support completing on help topics,
+	  not just builtins
+	- it_helptopics: new programmable completion list of help topics
+	- build list of helptopic completions in gen_action_completions on
+	  demand
+
+pcomplete.h
+	- new extern declaration for it_helptopics
+
+builtins/complete.def
+	- the `helptopic' action now maps to CA_HELPTOPIC intead of CA_BUILTIN,
+	  since there are more help topics than just builtins.  Suggested by
+	  Clark Wang <dearvoid@gmail.com>
+
+				   4/12
+				   ----
+print_cmd.c
+	- fix print_arith_for_command to add a call to PRINT_DEFERRED_HEREDOCS
+	  before ending the body of the command, so heredocs get attached to
+	  the right command instead of to the loop.  From gentoo bug 363371
+	  http://bugs.gentoo.org/show_bug.cgi?id=363371
+
+execute_cmd.c
+	- change coproc_pidchk to unset the appropriate shell variables when
+	  the (currently single) known coproc pid terminates
+	- cleanup and new functions to fully support multiple coprocesses when
+	  and if I decide to go there
+
+				   4/13
+				   ----
+print_cmd.c
+	- fix print_group_command to add a call to PRINT_DEFERRED_HEREDOCS
+	  after call to make_command_string_internal before printing closing
+	  `}'
+	- fix make_command_string_internal to add a call to
+	  PRINT_DEFERRED_HEREDOCS after recursive call to
+	  make_command_string_internal in case cm_subshell before printing
+	  closing `)'
+
+				   4/14
+				   ----
+print_cmd.c
+	- change overlapping strcpy in named_function_string to memmove
+
+sig.h
+	- UNBLOCK_SIGNAL: convenience define, same as UNBLOCK_CHILD, just
+	  restores an old signal mask
+
+trap.c
+	- set_signal: instead of setting the signal handler to SIG_IGN while
+	  installing the new trap handler, block the signal and unblock it
+	  after the new handler is installed.  Fixes bug reported by Roman
+	  Rakus <rrakus@redhat.com>
+
+				   4/15
+				   ----
+doc/{bash.1,bashref.texi}
+	- make it clear that enabling monitor mode means that all jobs run in
+	  separate process groups

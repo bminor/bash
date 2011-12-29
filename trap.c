@@ -533,6 +533,8 @@ set_signal (sig, string)
      int sig;
      char *string;
 {
+  sigset_t set, oset;
+
   if (SPECIAL_TRAP (sig))
     {
       change_signal (sig, savestring (string));
@@ -563,9 +565,10 @@ set_signal (sig, string)
      environment in which it is safe to do so. */
   if ((sigmodes[sig] & SIG_NO_TRAP) == 0)
     {
-      set_signal_handler (sig, SIG_IGN);
+      BLOCK_SIGNAL (sig, set, oset);
       change_signal (sig, savestring (string));
       set_signal_handler (sig, trap_handler);
+      UNBLOCK_SIGNAL (oset);
     }
   else
     change_signal (sig, savestring (string));

@@ -1548,10 +1548,14 @@ static struct cpelement *cpl_add __P((struct coproc *));
 static struct cpelement *cpl_delete __P((pid_t));
 static void cpl_reap __P((void));
 static void cpl_flush __P((void));
+static void cpl_closeall __P((void));
 static struct cpelement *cpl_search __P((pid_t));
-static struct cpelement *cpl_searchbyname __P((char *));
+static struct cpelement *cpl_searchbyname __P((const char *));
 static void cpl_prune __P((void));
 
+static void coproc_free __P((struct coproc *));
+
+/* Will go away when there is fully-implemented support for multiple coprocs. */
 Coproc sh_coproc = { 0, NO_PID, -1, -1, 0, 0, 0, 0 };
 
 cplist_t coproc_list = {0, 0, 0};
@@ -1685,17 +1689,36 @@ cpl_flush ()
   coproc_list.ncoproc = 0;
 }
 
+static void
+cpl_closeall ()
+{
+  struct cpelement *cpe;
+
+  for (cpe = coproc_list.head; cpe; )
+    coproc_close (cpe->coproc);
+}
+
+static void
+cpl_fdchk (fd)
+     int fd;
+{
+  struct cpelement *cpe;
+
+  for (cpe = coproc_list.head; cpe; )
+    coproc_checkfd (cpe->coproc, fd);
+}
+
 /* Search for PID in the list of coprocs; return the cpelement struct if
    found.  If not found, return NULL. */
 static struct cpelement *
 cpl_search (pid)
      pid_t pid;
 {
-  struct cpelement *cp;
+  struct cpelement *cpe;
 
-  for (cp = coproc_list.head ; cp; cp = cp->next)
-    if (cp->coproc->c_pid == pid)
-      return cp;
+  for (cpe = coproc_list.head ; cpe; cpe = cpe->next)
+    if (cpe->coproc->c_pid == pid)
+      return cpe;
   return (struct cpelement *)NULL;
 }
 
@@ -1703,7 +1726,7 @@ cpl_search (pid)
    cpelement struct if found.  If not found, return NULL. */
 static struct cpelement *
 cpl_searchbyname (name)
-     char *name;
+     const char *name;
 {
   struct cpelement *cp;
 
@@ -1738,14 +1761,28 @@ struct coproc *
 getcoprocbypid (pid)
      pid_t pid;
 {
+#if MULTIPLE_COPROCS
+  struct cpelement *p;
+
+  p = cpl_search (pid);
+  return (p ? p->coproc : 0);
+#else
   return (pid == sh_coproc.c_pid ? &sh_coproc : 0);
+#endif
 }
 
 struct coproc *
 getcoprocbyname (name)
      const char *name;
 {
+#if MULTIPLE_COPROCS
+  struct cpelement *p;
+
+  p = cpl_searchbyname (name);
+  return (p ? p->coproc : 0);
+#else
   return ((sh_coproc.c_name && STREQ (sh_coproc.c_name, name)) ? &sh_coproc : 0);
+#endif
 }
 
 void
@@ -1766,13 +1803,28 @@ coproc_alloc (name, pid)
 {
   struct coproc *cp;
 
-  cp = &sh_coproc;		/* XXX */
+#if MULTIPLE_COPROCS
+  cp = (struct coproc *)xmalloc (sizeof (struct coproc));
+#else
+  cp = &sh_coproc;
+#endif
   coproc_init (cp);
 
   cp->c_name = savestring (name);
   cp->c_pid = pid;
 
+#if MULTIPLE_COPROCS
+  cpl_add (cp);
+#endif
+
   return (cp);
+}
+
+static void
+coproc_free (cp)
+     struct coproc *cp;
+{
+  free (cp);
 }
 
 void
@@ -1785,14 +1837,22 @@ coproc_dispose (cp)
   coproc_unsetvars (cp);
   FREE (cp->c_name);
   coproc_close (cp);
+#if MULTIPLE_COPROCS
+  coproc_free (cp);
+#else
   coproc_init (cp);
+#endif
 }
 
-/* Placeholder for now. */
+/* Placeholder for now.  Will require changes for multiple coprocs */
 void
 coproc_flush ()
 {
+#if MULTIPLE_COPROCS
+  cpl_flush ();
+#else
   coproc_dispose (&sh_coproc);
+#endif
 }
 
 void
@@ -1815,17 +1875,25 @@ coproc_close (cp)
 void
 coproc_closeall ()
 {
-  coproc_close (&sh_coproc);
+#if MULTIPLE_COPROCS
+  cpl_closeall ();
+#else
+  coproc_close (&sh_coproc);	/* XXX - will require changes for multiple coprocs */
+#endif
 }
 
 void
 coproc_reap ()
 {
+#if MULTIPLE_COPROCS
+  cpl_reap ();
+#else
   struct coproc *cp;
 
-  cp = &sh_coproc;
+  cp = &sh_coproc;		/* XXX - will require changes for multiple coprocs */
   if (cp && (cp->c_flags & COPROC_DEAD))
     coproc_dispose (cp);
+#endif
 }
 
 void
@@ -1872,7 +1940,11 @@ void
 coproc_fdchk (fd)
      int fd;
 {
+#if MULTIPLE_COPROCS
+  cpl_fdchk (fd);
+#else
   coproc_checkfd (&sh_coproc, fd);
+#endif
 }
 
 void
@@ -1907,18 +1979,26 @@ coproc_pidchk (pid, status)
 {
   struct coproc *cp;
 
+#if MULTIPLE_COPROCS
+  struct cpelement *cpe;
+
+  cpe = cpl_delete (pid);
+  cp = cpe ? cpe->coproc : 0;
+#else
   cp = getcoprocbypid (pid);
-#if 0
-  if (cp)
-    itrace("coproc_pidchk: pid %d has died", pid);
 #endif
   if (cp)
     {
+#if 0
+      itrace("coproc_pidchk: pid %d has died", pid);
+#endif
       cp->c_status = status;
       cp->c_flags |= COPROC_DEAD;
       cp->c_flags &= ~COPROC_RUNNING;
-#if 0
+#if MULTIPLE_COPROCS
       coproc_dispose (cp);
+#else
+      coproc_unsetvars (cp);
 #endif
     }
 }
@@ -2014,17 +2094,12 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
   Coproc *cp;
   char *tcmd;
 
-  /* XXX -- will require changes to handle multiple coprocs */
+  /* XXX -- can be removed after changes to handle multiple coprocs */
+#if !MULTIPLE_COPROCS
   if (sh_coproc.c_pid != NO_PID)
-    {
-#if 0
-      internal_error ("execute_coproc: coproc [%d:%s] already exists", sh_coproc.c_pid, sh_coproc.c_name);
-      return (last_command_exit_value = EXECUTION_FAILURE);
-#else
-      internal_warning ("execute_coproc: coproc [%d:%s] still exists", sh_coproc.c_pid, sh_coproc.c_name);
-#endif
-    }
+    internal_warning ("execute_coproc: coproc [%d:%s] still exists", sh_coproc.c_pid, sh_coproc.c_name);
   coproc_init (&sh_coproc);
+#endif
 
   command_string_index = 0;
   tcmd = make_command_string (command);

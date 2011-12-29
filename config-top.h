@@ -54,7 +54,7 @@
 /* The default value of the PATH variable. */
 #ifndef DEFAULT_PATH_VALUE
 #define DEFAULT_PATH_VALUE \
-  "/usr/gnu/bin:/usr/local/bin:/bin:/usr/bin:."
+  "/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:."
 #endif
 
 /* The value for PATH when invoking `command -p'.  This is only used when

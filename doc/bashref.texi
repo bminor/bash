@@ -1554,7 +1554,7 @@ This mechanism is similar to
 @var{filename expansion} (@pxref{Filename Expansion}),
 but the file names generated need not exist.
 Patterns to be brace expanded take the form of an optional @var{preamble},
-followed by either a series of comma-separated strings or a seqeunce expression
+followed by either a series of comma-separated strings or a sequence expression
 between a pair of braces,
 followed by an optional @var{postscript}.
 The preamble is prefixed to each string contained within the braces, and
@@ -2337,6 +2337,7 @@ This is semantically equivalent to
 @example
 >@var{word} 2>&1
 @end example
+(see Duplicating File Descriptors below).
 
 @subsection Appending Standard Output and Standard Error
 This construct allows both the
@@ -2354,6 +2355,7 @@ This is semantically equivalent to
 @example
 >>@var{word} 2>&1
 @end example
+(see Duplicating File Descriptors below).
 
 @subsection Here Documents
 This type of redirection instructs the shell to read input from the
@@ -3641,7 +3643,7 @@ echo [-neE] [@var{arg} @dots{}]
 @end example
 Output the @var{arg}s, separated by spaces, terminated with a
 newline.
-The return status is always 0.
+The return status is 0 unless a write error occurs.
 If @option{-n} is specified, the trailing newline is suppressed.
 If the @option{-e} option is given, interpretation of the following
 backslash-escaped characters is enabled.
@@ -4208,6 +4210,9 @@ the command name.
 
 @item -m
 Job control is enabled (@pxref{Job Control}).
+All processes run in a separate process group.
+When a background job completes, the shell prints a line
+containing its exit status.
 
 @item -n
 Read commands but do not execute them; this may be used to check a

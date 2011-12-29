@@ -99,6 +99,7 @@ static int it_init_disabled __P((ITEMLIST *));
 static int it_init_enabled __P((ITEMLIST *));
 static int it_init_exported __P((ITEMLIST *));
 static int it_init_functions __P((ITEMLIST *));
+static int it_init_helptopics __P((ITEMLIST *));
 static int it_init_hostnames __P((ITEMLIST *));
 static int it_init_jobs __P((ITEMLIST *));
 static int it_init_running __P((ITEMLIST *));
@@ -157,6 +158,7 @@ ITEMLIST it_enabled = { 0, it_init_enabled, (STRINGLIST *)0 };
 ITEMLIST it_exports  = { LIST_DYNAMIC, it_init_exported, (STRINGLIST *)0 };
 ITEMLIST it_files = { LIST_DYNAMIC };		/* unused */
 ITEMLIST it_functions  = { 0, it_init_functions, (STRINGLIST *)0 };
+ITEMLIST it_helptopics  = { 0, it_init_helptopics, (STRINGLIST *)0 };
 ITEMLIST it_hostnames  = { LIST_DYNAMIC, it_init_hostnames, (STRINGLIST *)0 };
 ITEMLIST it_groups = { LIST_DYNAMIC };		/* unused */
 ITEMLIST it_jobs = { LIST_DYNAMIC, it_init_jobs, (STRINGLIST *)0 };
@@ -497,6 +499,24 @@ it_init_functions (itp)
   return 0;
 }
 
+/* Like it_init_builtins, but includes everything the help builtin looks at,
+   not just builtins with an active implementing function. */
+static int
+it_init_helptopics (itp)
+     ITEMLIST *itp;
+{
+  STRINGLIST *sl;
+  register int i, n;
+
+  sl = strlist_create (num_shell_builtins);
+  for (i = n = 0; i < num_shell_builtins; i++)
+    sl->list[n++] = shell_builtins[i].name;
+  sl->list[sl->list_len = n] = (char *)NULL;
+  itp->flags |= LIST_DONTFREEMEMBERS;
+  itp->slist = sl;
+  return 0;
+}
+
 static int
 it_init_hostnames (itp)
      ITEMLIST *itp;
@@ -764,6 +784,7 @@ gen_action_completions (cs, text)
   GEN_COMPS (flags, CA_ENABLED, &it_enabled, text, ret, tmatches);
   GEN_COMPS (flags, CA_EXPORT, &it_exports, text, ret, tmatches);
   GEN_COMPS (flags, CA_FUNCTION, &it_functions, text, ret, tmatches);
+  GEN_COMPS (flags, CA_HELPTOPIC, &it_helptopics, text, ret, tmatches);
   GEN_COMPS (flags, CA_HOSTNAME, &it_hostnames, text, ret, tmatches);
   GEN_COMPS (flags, CA_JOB, &it_jobs, text, ret, tmatches);
   GEN_COMPS (flags, CA_KEYWORD, &it_keywords, text, ret, tmatches);
