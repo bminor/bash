@@ -296,8 +296,7 @@ _rl_get_screen_size (tty, ignore_env)
   /* If we're being compiled as part of bash, set the environment
      variables $LINES and $COLUMNS to new values.  Otherwise, just
      do a pair of putenv () or setenv () calls. */
-  if (ignore_env == 0)
-    sh_set_lines_and_columns (_rl_screenheight, _rl_screenwidth);
+  sh_set_lines_and_columns (_rl_screenheight, _rl_screenwidth);
 
   if (_rl_term_autowrap == 0)
     _rl_screenwidth--;
@@ -366,7 +365,6 @@ rl_resize_terminal ()
 	_rl_redisplay_after_sigwinch ();
     }
 }
-
 
 struct _tc_string {
      const char * const tc_var;

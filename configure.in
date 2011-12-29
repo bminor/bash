@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.2, version 4.037])dnl
+AC_REVISION([for Bash 4.2, version 4.038])dnl
 
 define(bashvers, 4.2)
 define(relstatus, maint)
@@ -713,8 +713,6 @@ AC_TYPE_SIGNAL
 dnl checks for certain version-specific system calls and libc functions
 AC_CHECK_FUNC(__setostype, AC_DEFINE(HAVE_SETOSTYPE))
 AC_CHECK_FUNC(wait3, AC_DEFINE(HAVE_WAIT3))
-AC_CHECK_FUNC(isinf, AC_DEFINE(HAVE_ISINF_IN_LIBC))
-AC_CHECK_FUNC(isnan, AC_DEFINE(HAVE_ISNAN_IN_LIBC))
 
 dnl checks for missing libc functions
 AC_CHECK_FUNC(mkfifo,AC_DEFINE(HAVE_MKFIFO),AC_DEFINE(MKFIFO_MISSING))

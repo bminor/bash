@@ -11382,5 +11382,39 @@ lib/readline/signals.c
 	- rl_sigwinch_handler: don't immediately call rl_resize_terminal; just
 	  leave _rl_caught_signal set for RL_CHECK_SIGNALS to handle
 	- _rl_signal_handler: call rl_resize_terminal if sig == SIGWINCH.
-	  Should fix hang when sending multiple repeat SIGWINCH reported by
+	  Should fix hang when sending multiple repeated SIGWINCH reported by
 	  Henning Bekel <h.bekel@googlemail.com>
+
+				   3/29
+				   ----
+lib/sh/snprintf.c
+	- include math.h for any defines for isinf/isnan
+	- use code from gnulib documentation to implement isinf/isnan if they
+	  are not defined
+
+configure.in
+	- don't check for isinf or isnan; c99 says they're macros anyway
+
+config.h.in
+	- remove defines for ISINF_IN_LIBC and ISNAN_IN_LIBC, no longer used
+	  by snprintf.c
+
+				    4/2
+				    ---
+braces.c
+	- brace_gobbler: fix to understand double-quoted command subtitution,
+	  since the shell understands unquoted comsubs.  Fixes bug reported
+	  by Michael Whitten <mfwitten@gmail.com>
+
+lib/readline/display.c
+	- include <pc.h> on MDOS
+	- get and set screen size using DJGPP-specific calls on MSDOS
+	- move cursor up clear screen using DJGPP-specific calls
+	- don't call tputs on DJGPP; there is no good terminfo support
+
+lib/readline/terminal.c
+	- get and set screen size using DJGPP-specific calls on MSDOS
+	- use DJGPP-specific initialization on MSDOS, zeroing all the
+	  _rl_term_* variables
+	- don't call tputs on DJGPP; there is no good terminfo support
+	  DJGPP support from Eli Zaretskii  <eliz@gnu.org>

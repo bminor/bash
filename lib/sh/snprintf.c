@@ -303,11 +303,30 @@ static void dfallback __P((struct DATA *, const char *, const char *, double));
 
 static char *groupnum __P((char *));
 
-#ifndef HAVE_ISINF_IN_LIBC
-static int isinf __P((double));
+#if defined (HAVE_LONG_DOUBLE)
+#  define LONGDOUBLE long double
+#else
+#  define LONGDOUBLE double
 #endif
-#ifndef HAVE_ISNAN_IN_LIBC
-static int isnan __P((double));
+
+#ifndef isnan
+  static inline int isnan_f  (float       x) { return x != x; }
+  static inline int isnan_d  (double      x) { return x != x; }
+  static inline int isnan_ld (LONGDOUBLE  x) { return x != x; }
+  # define isnan(x) \
+      (sizeof (x) == sizeof (LONGDOUBLE) ? isnan_ld (x) \
+       : sizeof (x) == sizeof (double) ? isnan_d (x) \
+       : isnan_f (x))
+#endif
+  
+#ifndef isinf
+  static inline int isinf_f  (float       x) { return !isnan (x) && isnan (x - x); }
+  static inline int isinf_d  (double      x) { return !isnan (x) && isnan (x - x); }
+  static inline int isinf_ld (LONGDOUBLE  x) { return !isnan (x) && isnan (x - x); }
+  # define isinf(x) \
+      (sizeof (x) == sizeof (LONGDOUBLE) ? isinf_ld (x) \
+       : sizeof (x) == sizeof (double) ? isinf_d (x) \
+       : isinf_f (x))
 #endif
 
 #ifdef DRIVER
@@ -431,9 +450,9 @@ static void xfree __P((void *));
 	  if (lv) \
 	    { \
 	      if (lv->decimal_point && lv->decimal_point[0]) \
-	        (d) = lv->decimal_point[0]; \
+		(d) = lv->decimal_point[0]; \
 	      if (lv->thousands_sep && lv->thousands_sep[0]) \
-	        (t) = lv->thousands_sep[0]; \
+		(t) = lv->thousands_sep[0]; \
 	      (g) = lv->grouping ? lv->grouping : ""; \
 	      if (*(g) == '\0' || *(g) == CHAR_MAX || (t) == -1) (g) = 0; \
 	    } \
@@ -698,7 +717,7 @@ number(p, d, base)
     {
       GETLOCALEDATA(decpoint, thoussep, grouping);
       if (grouping && (t = groupnum (tmp)))
-        tmp = t;
+	tmp = t;
     }
 
   p->width -= strlen(tmp);
@@ -768,7 +787,7 @@ lnumber(p, d, base)
     {
       GETLOCALEDATA(decpoint, thoussep, grouping);
       if (grouping && (t = groupnum (tmp)))
-        tmp = t;
+	tmp = t;
     }
 
   p->width -= strlen(tmp);
@@ -875,11 +894,11 @@ wstrings(p, tmp)
     {
       len = wcsrtombs (NULL, &ws, 0, &mbs);
       if (len != (size_t)-1)
-        {
+	{
 	  memset (&mbs, '\0', sizeof (mbstate_t));
 	  os = (char *)xmalloc (len + 1);
 	  (void)wcsrtombs (os, &ws, len + 1, &mbs);
-        }
+	}
     }
   if (len == (size_t)-1)
     {
@@ -918,32 +937,6 @@ wchars (p, wc)
 #endif /* HANDLE_MULTIBYTE */
 
 #ifdef FLOATING_POINT
-
-#ifndef HAVE_ISINF_IN_LIBC
-/* Half-assed versions, since we don't want to link with libm. */
-static int
-isinf(d)
-     double d;
-{
-#ifdef DBL_MAX
-  if (d < DBL_MIN)
-    return -1;
-  else if (d > DBL_MAX)
-    return 1;
-  else
-#endif
-    return 0;
-}
-#endif
-
-#ifndef HAVE_ISNAN_IN_LIBC
-static int
-isnan(d)
-     double d;
-{
-  return 0;
-}
-#endif
 
 /* Check for [+-]infinity and NaN.  If MODE == 1, we check for Infinity, else
    (mode == 2) we check for NaN.  This does the necessary printing.  Returns
@@ -1002,7 +995,7 @@ floating(p, d)
     {
       /* smash the trailing zeros unless altform */
       for (i = strlen(tmp2) - 1; i >= 0 && tmp2[i] == '0'; i--)
-        tmp2[i] = '\0'; 
+	tmp2[i] = '\0'; 
       if (tmp2[0] == '\0')
 	p->precision = 0;
     }
@@ -1163,7 +1156,7 @@ groupnum (s)
 	  else if (*g == CHAR_MAX)
 	    {
 	      do
-	        *--re = *--se;
+		*--re = *--se;
 	      while (se > s);
 	      break;
 	    }

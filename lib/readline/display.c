@@ -41,6 +41,10 @@
 
 #include <stdio.h>
 
+#ifdef __MSDOS__
+#  include <pc.h>
+#endif
+
 /* System-specific feature definitions and include files. */
 #include "rldefs.h"
 #include "rlmbutil.h"
@@ -2057,9 +2061,18 @@ _rl_move_vert (to)
     }
   else
     {			/* delta < 0 */
+#ifdef __DJGPP__
+      int row, col;
+
+      fflush (rl_outstream);
+      ScreenGetCursor (&row, &col);
+      ScreenSetCursor (row + delta, col);
+      i = -delta;
+#else
       if (_rl_term_up && *_rl_term_up)
 	for (i = 0; i < -delta; i++)
 	  tputs (_rl_term_up, 1, _rl_output_character_function);
+#endif /* !__DJGPP__ */
     }
 
   _rl_last_v_pos = to;		/* Now TO is here */
@@ -2342,10 +2355,13 @@ void
 _rl_clear_to_eol (count)
      int count;
 {
+#ifndef __MSDOS__
   if (_rl_term_clreol)
     tputs (_rl_term_clreol, 1, _rl_output_character_function);
-  else if (count)
-    space_to_eol (count);
+  else
+#endif
+    if (count)
+      space_to_eol (count);
 }
 
 /* Clear to the end of the line using spaces.  COUNT is the minimum
@@ -2365,10 +2381,15 @@ space_to_eol (count)
 void
 _rl_clear_screen ()
 {
+#ifndef __DJGPP__
   if (_rl_term_clrpag)
     tputs (_rl_term_clrpag, 1, _rl_output_character_function);
   else
     rl_crlf ();
+#else
+  ScreenClear ();
+  ScreenSetCursor (0, 0);
+#endif /* __DJGPP__ */
 }
 
 /* Insert COUNT characters from STRING to the output stream at column COL. */

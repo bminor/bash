@@ -536,7 +536,6 @@ brace_gobbler (text, tlen, indx, satisfy)
 	  if (c == quoted)
 	    quoted = 0;
 #if defined (SHELL)
-	  /* The shell allows quoted command substitutions */
 	  if (quoted == '"' && c == '$' && text[i+1] == '(')	/*)*/
 	    goto comsub;
 #endif
