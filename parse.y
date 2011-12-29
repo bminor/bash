@@ -4431,7 +4431,7 @@ read_token_word (character)
 	      pop_delimiter (dstack);
 	      if (ttok == &matched_pair_error)
 		return -1;		/* Bail immediately. */
-	      RESIZE_MALLOCED_BUFFER (token, token_index, ttoklen + 2,
+	      RESIZE_MALLOCED_BUFFER (token, token_index, ttoklen + 3,
 				      token_buffer_size,
 				      TOKEN_DEFAULT_GROW_SIZE);
 	      token[token_index++] = character;
@@ -4453,7 +4453,7 @@ read_token_word (character)
 	{
 	  peek_char = shell_getc (1);
 	  /* $(...), <(...), >(...), $((...)), ${...}, and $[...] constructs */
-	  if MBTEST(peek_char == '(' || \
+	  if MBTEST(peek_char == '(' ||
 		((peek_char == '{' || peek_char == '[') && character == '$'))	/* ) ] } */
 	    {
 	      if (peek_char == '{')		/* } */
@@ -4473,7 +4473,7 @@ read_token_word (character)
 		ttok = parse_matched_pair (cd, '[', ']', &ttoklen, 0);
 	      if (ttok == &matched_pair_error)
 		return -1;		/* Bail immediately. */
-	      RESIZE_MALLOCED_BUFFER (token, token_index, ttoklen + 2,
+	      RESIZE_MALLOCED_BUFFER (token, token_index, ttoklen + 3,
 				      token_buffer_size,
 				      TOKEN_DEFAULT_GROW_SIZE);
 	      token[token_index++] = character;
@@ -4524,7 +4524,7 @@ read_token_word (character)
 		  ttrans = ttok;
 		}
 
-	      RESIZE_MALLOCED_BUFFER (token, token_index, ttranslen + 2,
+	      RESIZE_MALLOCED_BUFFER (token, token_index, ttranslen + 1,
 				      token_buffer_size,
 				      TOKEN_DEFAULT_GROW_SIZE);
 	      strcpy (token + token_index, ttrans);
@@ -4538,17 +4538,13 @@ read_token_word (character)
 	     shell's single-character parameter expansions, and set flags.*/
 	  else if MBTEST(character == '$' && peek_char == '$')
 	    {
-	      ttok = (char *)xmalloc (3);
-	      ttok[0] = ttok[1] = '$';
-	      ttok[2] = '\0';
 	      RESIZE_MALLOCED_BUFFER (token, token_index, 3,
 				      token_buffer_size,
 				      TOKEN_DEFAULT_GROW_SIZE);
-	      strcpy (token + token_index, ttok);
-	      token_index += 2;
+	      token[token_index++] = '$';
+	      token[token_index++] = peek_char;
 	      dollar_present = 1;
 	      all_digit_token = 0;
-	      FREE (ttok);
 	      goto next_character;
 	    }
 	  else
@@ -4618,20 +4614,23 @@ read_token_word (character)
 	  goto got_token;
 	}
 
-    got_character:
+got_character:
 
       if (character == CTLESC || character == CTLNUL)
-	token[token_index++] = CTLESC;
-
-    got_escaped_character:
-
-      all_digit_token &= DIGIT (character);
-      dollar_present |= character == '$';
+	{
+	  RESIZE_MALLOCED_BUFFER (token, token_index, 2, token_buffer_size,
+				  TOKEN_DEFAULT_GROW_SIZE);
+	  token[token_index++] = CTLESC;
+	}
+      else
+got_escaped_character:
+	RESIZE_MALLOCED_BUFFER (token, token_index, 1, token_buffer_size,
+				TOKEN_DEFAULT_GROW_SIZE);
 
       token[token_index++] = character;
 
-      RESIZE_MALLOCED_BUFFER (token, token_index, 1, token_buffer_size,
-			      TOKEN_DEFAULT_GROW_SIZE);
+      all_digit_token &= DIGIT (character);
+      dollar_present |= character == '$';
 
     next_character:
       if (character == '\n' && SHOULD_PROMPT ())
@@ -4646,14 +4645,15 @@ read_token_word (character)
 
 got_token:
 
+  /* Calls to RESIZE_MALLOCED_BUFFER ensure there is sufficient room. */
   token[token_index] = '\0';
 
   /* Check to see what thing we should return.  If the last_read_token
      is a `<', or a `&', or the character which ended this token is
      a '>' or '<', then, and ONLY then, is this input token a NUMBER.
      Otherwise, it is just a word, and should be returned as such. */
-  if MBTEST(all_digit_token && (character == '<' || character == '>' || \
-		    last_read_token == LESS_AND || \
+  if MBTEST(all_digit_token && (character == '<' || character == '>' ||
+		    last_read_token == LESS_AND ||
 		    last_read_token == GREATER_AND))
       {
 	if (legal_number (token, &lvalue) && (int)lvalue == lvalue)

@@ -51,3 +51,7 @@ printf "%-40.50(%a %b %e %H:%M:%S %Z %Y)T date-style time\n" $SECS
 
 # test fieldwidth, justification, precision, embedded parens
 printf "%-40.50(%x (foo) %X)T date-style time\n" $SECS
+
+# problem introduced in bash-4.2 patch 5
+unset TZ
+printf '%(%Y-%m-%d %H:%M:%S %Z)T\n' >/dev/null

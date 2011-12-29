@@ -89,6 +89,7 @@ extern int errno;
 #define PF_NOCOMSUB	0x01	/* Do not perform command substitution */
 #define PF_IGNUNBOUND	0x02	/* ignore unbound vars even if -u set */
 #define PF_NOSPLIT2	0x04	/* same as W_NOSPLIT2 */
+#define PF_ASSIGNRHS	0x08	/* same as W_ASSIGNRHS */
 
 /* These defs make it easier to use the editor. */
 #define LBRACE		'{'
@@ -4611,6 +4612,7 @@ expand_word_unsplit (word, quoted)
   if (ifs_firstc == 0)
 #endif
     word->flags |= W_NOSPLIT;
+  word->flags |= W_NOSPLIT2;
   result = call_expand_word_internal (word, quoted, 0, (int *)NULL, (int *)NULL);
   expand_no_split_dollar_star = 0;
 
@@ -7609,17 +7611,16 @@ param_expand (string, sindex, quoted, expanded_something,
       if (contains_dollar_at)
 	*contains_dollar_at = 1;
 
-#if 0
-      if (pflags & PF_NOSPLIT2)
-	temp = string_list_internal (quoted ? quote_list (list) : list, " ");
-      else
-#endif
       /* We want to separate the positional parameters with the first
 	 character of $IFS in case $IFS is something other than a space.
 	 We also want to make sure that splitting is done no matter what --
 	 according to POSIX.2, this expands to a list of the positional
 	 parameters no matter what IFS is set to. */
+#if 0
       temp = string_list_dollar_at (list, quoted);
+#else
+      temp = string_list_dollar_at (list, (pflags & PF_ASSIGNRHS) ? (quoted|Q_DOUBLE_QUOTES) : quoted);
+#endif
 
       dispose_words (list);
       break;
@@ -8113,6 +8114,8 @@ add_string:
 	  pflags = (word->flags & W_NOCOMSUB) ? PF_NOCOMSUB : 0;
 	  if (word->flags & W_NOSPLIT2)
 	    pflags |= PF_NOSPLIT2;
+	  if (word->flags & W_ASSIGNRHS)
+	    pflags |= PF_ASSIGNRHS;
 	  tword = param_expand (string, &sindex, quoted, expanded_something,
 			       &has_dollar_at, &quoted_dollar_at,
 			       &had_quoted_null, pflags);

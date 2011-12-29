@@ -176,8 +176,7 @@ int _rl_vis_botlin = 0;
 static int last_lmargin;
 
 /* A buffer for `modeline' messages. */
-static char *msg_buf = 0;
-static int msg_bufsiz = 0;
+static char msg_buf[128];
 
 /* Non-zero forces the redisplay even if we thought it was unnecessary. */
 static int forced_display;
@@ -2137,9 +2136,6 @@ rl_message (va_alist)
 #if defined (PREFER_VARARGS)
   char *format;
 #endif
-#if defined (HAVE_VSNPRINTF)
-  int bneed;
-#endif
 
 #if defined (PREFER_STDARG)
   va_start (args, format);
@@ -2148,28 +2144,11 @@ rl_message (va_alist)
   format = va_arg (args, char *);
 #endif
 
-  if (msg_buf == 0)
-    msg_buf = xmalloc (msg_bufsiz = 128);
-
 #if defined (HAVE_VSNPRINTF)
-  bneed = vsnprintf (msg_buf, msg_bufsiz - 1, format, args);
-  if (bneed >= msg_bufsiz - 1)
-    {
-      msg_bufsiz = bneed + 1;
-      msg_buf = xrealloc (msg_buf, msg_bufsiz);
-      va_end (args);
-
-#if defined (PREFER_STDARG)
-      va_start (args, format);
-#else
-      va_start (args);
-      format = va_arg (args, char *);
-#endif
-      vsnprintf (msg_buf, msg_bufsiz - 1, format, args);
-    }
+  vsnprintf (msg_buf, sizeof (msg_buf) - 1, format, args);
 #else
   vsprintf (msg_buf, format, args);
-  msg_buf[msg_bufsiz - 1] = '\0';	/* overflow? */
+  msg_buf[sizeof(msg_buf) - 1] = '\0';	/* overflow? */
 #endif
   va_end (args);
 
@@ -2194,11 +2173,8 @@ int
 rl_message (format, arg1, arg2)
      char *format;
 {
-  if (msg_buf == 0)
-    msg_buf = xmalloc (msg_bufsiz = 128);
-
   sprintf (msg_buf, format, arg1, arg2);
-  msg_buf[msg_bufsiz - 1] = '\0';	/* overflow? */
+  msg_buf[sizeof(msg_buf) - 1] = '\0';	/* overflow? */
 
   rl_display_prompt = msg_buf;
   if (saved_local_prompt == 0)

@@ -11137,3 +11137,76 @@ execute_cmd.c
 support/shobj-conf
 	- add a stanza for nsk on the Tandem from Joachim Schmitz
 	  <jojo@schmitz-digital.de>
+
+{shell,lib/readline/shell}.c
+	- Tandem systems should use getpwnam (getlogin()); for some reason
+	  they don't do well with using getuid().  Fix from Joachim Schmitz
+	  <jojo@schmitz-digital.de>
+
+				    3/1
+				    ---
+variables.c
+	- make sure that the return value from find_variable is non-null
+	  before trying to use it in chkexport.  Fixes bug reported by
+	  Evangelos Foutras <foutrelis@gmail.com>
+
+				    3/3
+				    ---
+parse.y
+	- when adding $$ to the current token buffer in read_token_word(),
+	  don't xmalloc a buffer for two characters and then strcpy it, just
+	  copy the characters directly into the token buffer.  Fix from
+	  Michael Whitten <mfwitten@gmail.com>
+
+execute_cmd.c
+	- fix expand_word_unsplit to add the W_NOSPLIT2 flag to the word to
+	  be expanded, so "" doesn't add CTLNUL.  Similar to fix of 2/18 to
+	  expand_string_for_rhs.  Fixes bug reported by Nathanael D. Noblet
+	  <nathanael@gnat.ca>
+
+parse.y
+	- fix extended_glob case of read_token_word to allocate an extra
+	  space in the buffer for the next character read after the extended
+	  glob specification if it's a CTLESC or CTLNUL.  Report and fix from
+	  Michael Witten <mfwitten@gmail.com>
+	- fix shell expansions case of read_token_word to allocate an extra
+	  space in the buffer for the next character read after the shell
+	  expansion if it's a CTLESC or CTLNUL.  Report and fix from
+	  Michael Witten <mfwitten@gmail.com>
+	- TENTATIVE: fix read_token_word to reduce the amount of buffer space
+	  required to hold the translated and double-quoted value of $"..."
+	  strings.  Report and fix from Michael Witten <mfwitten@gmail.com>
+	- change code around got_character and got_escaped_character labels to
+	  make sure that we call RESIZE_MALLOCED_BUFFER before adding the
+	  CTLESC before a CTLESC or CTLNUL, and before adding the character if
+	  we're not adding a CTLESC.  Report and fix from
+	  Michael Witten <mfwitten@gmail.com>
+
+subst.c
+	- new param flags value, PF_ASSIGNRHS, mirrors W_ASSIGNRHS, noting that
+	  parameter expansion is on rhs of assignment statement.  That inhibits
+	  word splitting
+	- change param_expand to call string_list_dollar_at with quoted == 1
+	  if PF_ASSIGNRHS is set, so it will quote IFS characters in the
+	  positional parameter before separating them with the first char of
+	  $IFS.  This keeps the rhs from being split inappropriately.  Fixes
+	  bug reported by Andres Perera <andres.p@zoho.com>
+
+				    3/4
+				    ---
+lib/readline/bind.c
+	- add a missing free of `names' in rl_function_dumper.  Bug report
+	  and fix from Michael Snyder <msnyder@vmware.com>
+
+				    3/5
+				    ---
+lib/readline/rltty.c
+	- change rl_deprep_terminal so it uses fileno (stdin) for the tty fd
+	  if rl_instream is not set, like rl_prep_terminal
+
+				    3/6
+				    ---
+lib/readline/display.c
+	- fix rl_message to use a dynamically-allocated buffer instead of a
+	  fixed-size buffer of 128 chars for the `local message prompt'.  Bug
+	  report and fix from Micah Cowan <micah@cowan.name>

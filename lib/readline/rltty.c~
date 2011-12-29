@@ -678,7 +678,7 @@ rl_deprep_terminal ()
   /* Try to keep this function from being interrupted. */
   _rl_block_sigint ();
 
-  tty = rl_instream ? fileno (rl_instream) : fileno (stdin);
+  tty = rl_instream ? fileno (rl_instream) : fileno (stdout);
 
   if (_rl_enable_keypad)
     _rl_control_keypad (0);

@@ -37,3 +37,54 @@ if [ "$var"X == ""X"" ]; then
 	echo good 3
 fi
 
+if [ X"" == X ]; then
+	echo good 4
+fi
+
+if [[ X"" == X ]]; then
+	echo good 5
+fi
+
+case x"" in
+  x) echo 'ok 1'
+     ;;
+  x??) echo 'this would be really odd'
+     ;;
+  x?) echo 'does this prove anything?'
+      echo x""x
+     ;;
+  *) echo 'no match'
+     ;;
+esac
+
+if [[ x"" == x ]]; then
+	echo ok 2
+fi
+
+if [[ x"" == x"" ]]; then
+	echo ok 3
+else
+	echo bad 3
+fi
+
+case x"" in
+x"")	echo ok 4 ;;
+*)	echo bad 4;;
+esac
+
+if [[ x"" == x"" ]]; then
+	echo ok 5
+else
+	echo bad 5
+fi
+
+case x"" in
+"x")	echo ok 6 ;;
+*)	echo bad 6;;
+esac
+
+case x"" in
+"x")	echo CTLNUL 7 ;;
+x)	echo ok 7 ;;
+*)	echo bad 7 ;;
+esac
