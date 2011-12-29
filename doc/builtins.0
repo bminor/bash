@@ -395,13 +395,13 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               the exceptions that ++aa may not be used to destroy an array vari-
               able and ++rr will not remove the readonly attribute.   When  used
               in a function, makes each _n_a_m_e local, as with the llooccaall command,
-              unless the --ggPP ooppttiioonn iiss ssuupppplliieedd,, IIff aa vvaarriiaabbllee  nnaammee  iiss  ffooll--
-              lloowweedd bbyy ==_v_a_l_u_e,, tthhee vvaalluuee ooff tthhee vvaarriiaabbllee iiss sseett ttoo _v_a_l_u_e..  TThhee
-              rreettuurrnn vvaalluuee iiss 00 uunnlleessss aann iinnvvaalliidd ooppttiioonn  iiss  eennccoouunntteerreedd,,  aann
-              aatttteemmpptt  iiss  mmaaddee  ttoo ddeeffiinnee aa ffuunnccttiioonn uussiinngg ````--ff ffoooo==bbaarr'''',, aann
-              aatttteemmpptt iiss mmaaddee ttoo aassssiiggnn aa vvaalluuee ttoo  aa  rreeaaddoonnllyy  vvaarriiaabbllee,,  aann
-              aatttteemmpptt  iiss  mmaaddee ttoo aassssiiggnn aa vvaalluuee ttoo aann aarrrraayy vvaarriiaabbllee wwiitthhoouutt
-              uussiinngg tthhee ccoommppoouunndd aassssiiggnnmmeenntt ssyynnttaaxx ((sseeee AArrrraayyss above), one  of
+              unless the --gg option is supplied, If a variable name is followed
+              by  =_v_a_l_u_e,  the  value  of  the  variable is set to _v_a_l_u_e.  The
+              return value is 0 unless an invalid option  is  encountered,  an
+              attempt  is  made  to define a function using ``-f foo=bar'', an
+              attempt is made to assign a value to  a  readonly  variable,  an
+              attempt  is  made to assign a value to an array variable without
+              using the compound assignment syntax (see AArrrraayyss above), one  of
               the _n_a_m_e_s is not a valid shell variable name, an attempt is made
               to turn off readonly status for a readonly variable, an  attempt
               is  made  to  turn off array status for an array variable, or an
@@ -654,7 +654,8 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               --mm     Display the description of each _p_a_t_t_e_r_n in a manpage-like
                      format
               --ss     Display only a short usage synopsis for each _p_a_t_t_e_r_n
-       The return status is 0 unless no command matches _p_a_t_t_e_r_n.
+
+              The return status is 0 unless no command matches _p_a_t_t_e_r_n.
 
        hhiissttoorryy [[_n]]
        hhiissttoorryy --cc
@@ -956,20 +957,22 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               greater  than 128), or an invalid file descriptor is supplied as
               the argument to --uu.
 
-       rreeaaddoonnllyy [--aaAAppff] [_n_a_m_e[=_w_o_r_d] ...]
+       rreeaaddoonnllyy [--aaAAff] [--pp] [_n_a_m_e[=_w_o_r_d] ...]
               The given _n_a_m_e_s are marked readonly; the values of  these  _n_a_m_e_s
               may  not  be changed by subsequent assignment.  If the --ff option
               is supplied, the functions corresponding to  the  _n_a_m_e_s  are  so
               marked.   The  --aa  option  restricts  the  variables  to indexed
               arrays; the --AA option restricts  the  variables  to  associative
-              arrays.   If no _n_a_m_e arguments are given, or if the --pp option is
-              supplied, a list of all  readonly  names  is  printed.   The  --pp
-              option  causes  output  to  be displayed in a format that may be
-              reused as input.  If a variable name is followed by  =_w_o_r_d,  the
-              value  of  the  variable is set to _w_o_r_d.  The return status is 0
-              unless an invalid option is encountered, one of the _n_a_m_e_s is not
-              a  valid shell variable name, or --ff is supplied with a _n_a_m_e that
-              is not a function.
+              arrays.   If both options are supplied, --AA takes precedence.  If
+              no _n_a_m_e arguments are given, or if the --pp option is supplied,  a
+              list of all readonly names is printed.  The other options may be
+              used to restrict the output to a subset of the set  of  readonly
+              names.   The --pp option causes output to be displayed in a format
+              that may be reused as input.  If a variable name is followed  by
+              =_w_o_r_d,  the  value  of  the variable is set to _w_o_r_d.  The return
+              status is 0 unless an invalid option is encountered, one of  the
+              _n_a_m_e_s is not a valid shell variable name, or --ff is supplied with
+              a _n_a_m_e that is not a function.
 
        rreettuurrnn [_n]
               Causes a function to exit with the return value specified by  _n.
@@ -1243,13 +1246,13 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                       (see  previous  item)  and  the effect of interrupting a
                       command list.
               ccoommppaatt4411
-                      @item compat41 If set, bbaasshh, when in posix mode,  treats
-                      a single quote in a double-quoted parameter expansion as
-                      a special character.  The single quotes must  match  (an
-                      even  number)  and  the  characters  between  the single
-                      quotes are considered quoted.  This is the  behavior  of
-                      posix mode through version 4.1.  The default bash behav-
-                      ior remains as in previous versions.
+                      If set, bbaasshh, when in posix mode, treats a single  quote
+                      in  a  double-quoted  parameter  expansion  as a special
+                      character.  The single quotes must match (an  even  num-
+                      ber)  and  the  characters between the single quotes are
+                      considered quoted.  This is the behavior of  posix  mode
+                      through  version 4.1.  The default bash behavior remains
+                      as in previous versions.
               ddiirrssppeellll
                       If set, bbaasshh attempts spelling correction  on  directory
                       names  during word completion if the directory name ini-
@@ -1305,9 +1308,9 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                       default.
               gglloobbssttaarr
                       If set, the pattern **** used in a pathname expansion con-
-                      text will match a files and zero or more directories and
-                      subdirectories.  If the pattern is followed by a //, only
-                      directories and subdirectories match.
+                      text will match all files and zero or  more  directories
+                      and  subdirectories.  If the pattern is followed by a //,
+                      only directories and subdirectories match.
               ggnnuu__eerrrrffmmtt
                       If set, shell error messages are written in the standard
                       GNU error message format.
@@ -1395,12 +1398,14 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               xxppgg__eecchhoo
                       If   set,  the  eecchhoo  builtin  expands  backslash-escape
                       sequences by default.
+
        ssuussppeenndd [--ff]
               Suspend the execution of this shell until it receives a  SSIIGGCCOONNTT
               signal.  A login shell cannot be suspended; the --ff option can be
               used to override this and force the suspension.  The return sta-
               tus  is  0  unless the shell is a login shell and --ff is not sup-
               plied, or if job control is not enabled.
+
        tteesstt _e_x_p_r
        [[ _e_x_p_r ]]
               Return a status of 0 or 1 depending on  the  evaluation  of  the

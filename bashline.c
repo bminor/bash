@@ -161,6 +161,8 @@ static int set_saved_history __P((void));
 static int posix_edit_macros __P((int, int));
 #endif
 
+static int bash_event_hook __P((void));
+
 #if defined (PROGRAMMABLE_COMPLETION)
 static int find_cmd_start __P((int));
 static int find_cmd_end __P((int));
@@ -534,6 +536,8 @@ initialize_readline ()
   rl_filename_quoting_function = bash_quote_filename;
   rl_filename_dequoting_function = bash_dequote_filename;
   rl_char_is_quoted_p = char_is_quoted;
+
+  rl_event_hook = bash_event_hook;
 
 #if 0
   /* This is superfluous and makes it impossible to use tab completion in
@@ -3701,4 +3705,11 @@ bash_dequote_text (text)
   dtxt = bash_dequote_filename ((char *)text, qc);
   return (dtxt);
 }
+
+static int
+bash_event_hook ()
+{
+  CHECK_TERMSIG;
+}
+
 #endif /* READLINE */

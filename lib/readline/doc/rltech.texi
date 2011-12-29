@@ -1365,6 +1365,7 @@ functions to do so manually.
 
 Readline contains an internal signal handler that is installed for a
 number of signals (@code{SIGINT}, @code{SIGQUIT}, @code{SIGTERM},
+@code{SIGHUP}, 
 @code{SIGALRM}, @code{SIGTSTP}, @code{SIGTTIN}, and @code{SIGTTOU}).
 When one of these signals is received, the signal handler
 will reset the terminal attributes to those that were in effect before
@@ -1397,7 +1398,7 @@ a signal handler, so Readline's internal signal state is not corrupted.
 
 @deftypevar int rl_catch_signals
 If this variable is non-zero, Readline will install signal handlers for
-@code{SIGINT}, @code{SIGQUIT}, @code{SIGTERM}, @code{SIGALRM},
+@code{SIGINT}, @code{SIGQUIT}, @code{SIGTERM}, @code{SIGHUP}, @code{SIGALRM},
 @code{SIGTSTP}, @code{SIGTTIN}, and @code{SIGTTOU}.
 
 The default value of @code{rl_catch_signals} is 1.
@@ -1477,7 +1478,7 @@ The following functions install and remove Readline's signal handlers.
 
 @deftypefun int rl_set_signals (void)
 Install Readline's signal handler for @code{SIGINT}, @code{SIGQUIT},
-@code{SIGTERM}, @code{SIGALRM}, @code{SIGTSTP}, @code{SIGTTIN},
+@code{SIGTERM}, @code{SIGHUP}, @code{SIGALRM}, @code{SIGTSTP}, @code{SIGTTIN},
 @code{SIGTTOU}, and @code{SIGWINCH}, depending on the values of
 @code{rl_catch_signals} and @code{rl_catch_sigwinch}.
 @end deftypefun

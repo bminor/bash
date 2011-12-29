@@ -455,7 +455,6 @@ read_builtin (list)
      of the unwind-protect stack after the realloc() works right. */
   add_unwind_protect (xfree, input_string);
   interrupt_immediately++;
-  terminate_immediately++;
 
   unbuffered_read = (nchars > 0) || (delim != '\n') || input_is_pipe;
 
@@ -512,6 +511,7 @@ read_builtin (list)
 
       if (retval <= 0)
 	{
+	  CHECK_TERMSIG;
 	  eof = 1;
 	  break;
 	}
@@ -622,7 +622,6 @@ add_char:
 assign_vars:
 
   interrupt_immediately--;
-  terminate_immediately--;
 
 #if defined (ARRAY_VARS)
   /* If -a was given, take the string read, break it into a list of words,

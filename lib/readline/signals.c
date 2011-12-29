@@ -1,6 +1,6 @@
 /* signals.c -- signal handling support for readline. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2011 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -87,7 +87,7 @@ static RETSIGTYPE _rl_handle_signal PARAMS((int));
 /* Exported variables for use by applications. */
 
 /* If non-zero, readline will install its own signal handlers for
-   SIGINT, SIGTERM, SIGQUIT, SIGALRM, SIGTSTP, SIGTTIN, and SIGTTOU. */
+   SIGINT, SIGTERM, SIGHUP, SIGQUIT, SIGALRM, SIGTSTP, SIGTTIN, and SIGTTOU. */
 int rl_catch_signals = 1;
 
 /* If non-zero, readline will install a signal handler for SIGWINCH. */
@@ -118,7 +118,7 @@ static int sigwinch_set_flag;
 /*								    */
 /* **************************************************************** */
 
-static sighandler_cxt old_int, old_term, old_alrm, old_quit;
+static sighandler_cxt old_int, old_term, old_hup, old_alrm, old_quit;
 #if defined (SIGTSTP)
 static sighandler_cxt old_tstp, old_ttou, old_ttin;
 #endif
@@ -189,6 +189,7 @@ _rl_handle_signal (sig)
       /* FALLTHROUGH */
 
     case SIGTERM:
+    case SIGHUP:
 #if defined (SIGTSTP)
     case SIGTSTP:
     case SIGTTOU:
@@ -349,6 +350,7 @@ rl_set_signals ()
 
       sigaddset (&bset, SIGINT);
       sigaddset (&bset, SIGTERM);
+      sigaddset (&bset, SIGHUP);
 #if defined (SIGQUIT)
       sigaddset (&bset, SIGQUIT);
 #endif
@@ -377,6 +379,7 @@ rl_set_signals ()
 
       rl_maybe_set_sighandler (SIGINT, rl_signal_handler, &old_int);
       rl_maybe_set_sighandler (SIGTERM, rl_signal_handler, &old_term);
+      rl_maybe_set_sighandler (SIGHUP, rl_signal_handler, &old_hup);
 #if defined (SIGQUIT)
       rl_maybe_set_sighandler (SIGQUIT, rl_signal_handler, &old_quit);
 #endif
@@ -436,6 +439,7 @@ rl_clear_signals ()
 
       rl_sigaction (SIGINT, &old_int, &dummy);
       rl_sigaction (SIGTERM, &old_term, &dummy);
+      rl_sigaction (SIGHUP, &old_hup, &dummy);
 #if defined (SIGQUIT)
       rl_sigaction (SIGQUIT, &old_quit, &dummy);
 #endif

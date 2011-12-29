@@ -3651,6 +3651,8 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
   special_builtin_failed = builtin_is_special = 0;
   command_line = (char *)0;
 
+  QUIT;
+
   /* If we're in a function, update the line number information. */
   if (variable_context && interactive_shell && sourcelevel == 0)
     line_number -= function_line_number;
@@ -4028,11 +4030,6 @@ execute_builtin (builtin, words, flags, subshell)
   int isbltinenv;
   char *error_trap;
 
-#if 0
-  /* XXX -- added 12/11 */
-  terminate_immediately++;
-#endif
-
   error_trap = 0;
   old_e_flag = exit_immediately_on_error;
   /* The eval builtin calls parse_and_execute, which does not know about
@@ -4113,11 +4110,6 @@ execute_builtin (builtin, words, flags, subshell)
 	}
       discard_unwind_frame ("eval_builtin");
     }
-
-#if 0
-  /* XXX -- added 12/11 */
-  terminate_immediately--;
-#endif
 
   return (result);
 }
@@ -4751,6 +4743,8 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
   else
     {
 parent_return:
+      QUIT;
+
       /* Make sure that the pipes are closed in the parent. */
       close_pipes (pipe_in, pipe_out);
 #if defined (PROCESS_SUBSTITUTION) && defined (HAVE_DEV_FD)

@@ -706,8 +706,8 @@ is enabled, the match is performed without regard to the case
 of alphabetic characters.
 The return value is 0 if the string matches (\fB==\fP) or does not match
 (\fB!=\fP) the pattern, and 1 otherwise.
-Any part of the pattern may be quoted to force it to be matched as a
-string.
+Any part of the pattern may be quoted to force the quoted portion
+to be matched as a string.
 .if t .sp 0.5
 .if n .sp 1
 An additional binary operator, \fB=~\fP, is available, with the same
@@ -722,8 +722,8 @@ If the shell option
 .B nocasematch
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
-Any part of the pattern may be quoted to force it to be matched as a
-string.
+Any part of the pattern may be quoted to force the quoted portion
+to be matched as a string.
 Substrings matched by parenthesized subexpressions within the regular
 expression are saved in the array variable
 .SM
@@ -2360,11 +2360,6 @@ An indexed array is created automatically if any variable is assigned to
 using the syntax \fIname\fP[\fIsubscript\fP]=\fIvalue\fP.  The
 .I subscript
 is treated as an arithmetic expression that must evaluate to a number.
-If
-.I subscript
-evaluates to a number less than zero, it is used as
-an offset from one greater than the array's maximum index (so a subcript
-of -1 refers to the last element of the array).
 To explicitly declare an indexed array, use
 .B declare \-a \fIname\fP
 (see
@@ -2426,6 +2421,12 @@ ${\fIname\fP[\fIsubscript\fP]}.  If \fIsubscript\fP is \fB*\fP or
 \fB@\fP, the expansion is the number of elements in the array.
 Referencing an array variable without a subscript is equivalent to
 referencing the array with a subscript of 0.
+If the
+.I subscript
+used to reference an element of an indexed array
+evaluates to a number less than zero, it is used as
+an offset from one greater than the array's maximum index (so a subcript
+of -1 refers to the last element of the array).
 .PP
 An array variable is considered set if a subscript has been assigned a
 value.  The null string is a valid value.

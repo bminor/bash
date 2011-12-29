@@ -1007,8 +1007,8 @@ is enabled, the match is performed without regard to the case
 of alphabetic characters.
 The return value is 0 if the string matches (@samp{==}) or does not
 match (@samp{!=})the pattern, and 1 otherwise.
-Any part of the pattern may be quoted to force it to be matched as a
-string.
+Any part of the pattern may be quoted to force the quoted portion
+to be matched as a string.
 
 An additional binary operator, @samp{=~}, is available, with the same
 precedence as @samp{==} and @samp{!=}.
@@ -1022,8 +1022,8 @@ If the shell option @code{nocasematch}
 (see the description of @code{shopt} in @ref{The Shopt Builtin})
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
-Any part of the pattern may be quoted to force it to be matched as a
-string.
+Any part of the pattern may be quoted to force the quoted portion
+to be matched as a string.
 Substrings matched by parenthesized subexpressions within the regular
 expression are saved in the array variable @code{BASH_REMATCH}.
 The element of @code{BASH_REMATCH} with index 0 is the portion of the string
@@ -6236,7 +6236,7 @@ There is no maximum
 limit on the size of an array, nor any requirement that members
 be indexed or assigned contiguously.
 Indexed arrays are referenced using integers (including arithmetic
-expressions (@pxref{Shell Arithmetic}) and are zero-based;
+expressions (@pxref{Shell Arithmetic})) and are zero-based;
 associative arrays use arbitrary strings.
 
 An indexed array is created automatically if any variable is assigned to

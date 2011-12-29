@@ -2,18 +2,21 @@
 # Copyright (C) 2007 Free Software Foundation, Inc.
 # This file is distributed under the same license as the bash package.
 # Andrzej M. Krzysztofowicz <ankry@mif.pg.gda.pl> 2006,2007.
+# Jakub Bogusz <qboosh@pld-linux.org> 2010.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: bash 3.2\n"
+"Project-Id-Version: bash 4.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2011-01-28 22:09-0500\n"
-"PO-Revision-Date: 2007-11-30 08:49+0100\n"
-"Last-Translator: Andrzej M. Krzysztofowicz <ankry@mif.pg.gda.pl>\n"
+"PO-Revision-Date: 2011-02-21 19:25+0100\n"
+"Last-Translator: Jakub Bogusz <qboosh@pld-linux.org>\n"
 "Language-Team: Polish <translation-team-pl@lists.sourceforge.net>\n"
+"Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-2\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #: arrayfunc.c:50
 msgid "bad array subscript"
@@ -22,12 +25,12 @@ msgstr "nieprawid³owy indeks tablicy"
 #: arrayfunc.c:313 builtins/declare.def:487
 #, c-format
 msgid "%s: cannot convert indexed to associative array"
-msgstr ""
+msgstr "%s: nie mo¿na przekszta³ciæ tablicy indeksowanej na asocjacyjn±"
 
 #: arrayfunc.c:480
-#, fuzzy, c-format
+#, c-format
 msgid "%s: invalid associative array key"
-msgstr "%s: nieprawid³owa nazwa akcji"
+msgstr "%s: b³êdny klucz tablicy asocjacyjnej"
 
 #: arrayfunc.c:482
 #, c-format
@@ -37,7 +40,7 @@ msgstr "%s: nie mo¿na przypisaæ do nienumerycznego indeksu"
 #: arrayfunc.c:518
 #, c-format
 msgid "%s: %s: must use subscript when assigning associative array"
-msgstr ""
+msgstr "%s: %s: przy przypisaniu do tablicy asocjacyjnej nale¿y u¿yæ nawiasów"
 
 #: bashhist.c:387
 #, c-format
@@ -47,8 +50,7 @@ msgstr "%s: nie mo¿na utworzyæ: %s"
 # ???
 #: bashline.c:3498
 msgid "bash_execute_unix_command: cannot find keymap for command"
-msgstr ""
-"bash_execute_unix_command: nie mo¿na znale¼æ mapy klawiszy dla polecenia"
+msgstr "bash_execute_unix_command: nie mo¿na znale¼æ mapy klawiszy dla polecenia"
 
 #: bashline.c:3584
 #, c-format
@@ -65,15 +67,14 @@ msgstr "brak zamykaj±cego `%c' w %s"
 msgid "%s: missing colon separator"
 msgstr "%s: brak separuj±cego dwukropka"
 
-# ???
 #: builtins/alias.def:132
-#, fuzzy, c-format
+#, c-format
 msgid "`%s': invalid alias name"
-msgstr "`%s': nieprawid³owa nazwa mapy klawiszy"
+msgstr "`%s': b³êdna nazwa aliasu"
 
 #: builtins/bind.def:120 builtins/bind.def:123
 msgid "line editing not enabled"
-msgstr ""
+msgstr "edycja wiersza nie zosta³a w³±czona"
 
 # ???
 #: builtins/bind.def:206
@@ -109,20 +110,21 @@ msgstr "%s mo¿e byæ wywo³any przez "
 
 #: builtins/break.def:77 builtins/break.def:117
 msgid "loop count"
-msgstr ""
+msgstr "licznik pêtli"
 
 #: builtins/break.def:137
 msgid "only meaningful in a `for', `while', or `until' loop"
 msgstr "ma sens tylko w pêtli `for', `while' lub `until'"
 
-# ???
 #: builtins/caller.def:133
-#, fuzzy
 msgid ""
 "Returns the context of the current subroutine call.\n"
 "    \n"
 "    Without EXPR, returns "
-msgstr "Wraca do kontekstu wywo³ania bie¿±cego podprogramu"
+msgstr ""
+"Zwraca kontekst wywo³ania bie¿±cego podprogramu.\n"
+"    \n"
+"    Bez WYRA¯ENIA zwraca "
 
 #: builtins/cd.def:235
 msgid "HOME not set"
@@ -135,17 +137,17 @@ msgstr "Nie ustawiono OLDPWD"
 #: builtins/common.c:101
 #, c-format
 msgid "line %d: "
-msgstr ""
+msgstr "linia %d: "
 
 #: builtins/common.c:139 error.c:261
-#, fuzzy, c-format
+#, c-format
 msgid "warning: "
-msgstr "%s: uwaga: "
+msgstr "uwaga: "
 
 #: builtins/common.c:153
-#, fuzzy, c-format
+#, c-format
 msgid "%s: usage: "
-msgstr "%s: uwaga: "
+msgstr "%s: sk³adnia: "
 
 #: builtins/common.c:166 test.c:832
 msgid "too many arguments"
@@ -182,14 +184,12 @@ msgid "`%s': not a valid identifier"
 msgstr "`%s': nieprawid³owy identyfikator"
 
 #: builtins/common.c:238
-#, fuzzy
 msgid "invalid octal number"
-msgstr "nieprawid³owy numer sygna³u"
+msgstr "b³êdna liczba ósemkowa"
 
 #: builtins/common.c:240
-#, fuzzy
 msgid "invalid hex number"
-msgstr "nieprawid³owa liczba"
+msgstr "b³êdna liczba szesnastkowa"
 
 #: builtins/common.c:242 expr.c:1362
 msgid "invalid number"
@@ -260,12 +260,12 @@ msgstr "b³±d zapisu: %s"
 #: builtins/common.c:329
 #, c-format
 msgid "error setting terminal attributes: %s"
-msgstr ""
+msgstr "b³±d podczas ustawiania atrybutów terminala: %s"
 
 #: builtins/common.c:331
 #, c-format
 msgid "error getting terminal attributes: %s"
-msgstr ""
+msgstr "b³±d podczas pobierania atrybutów terminala: %s"
 
 #: builtins/common.c:563
 #, c-format
@@ -298,7 +298,7 @@ msgstr "uwaga: opcja -C mo¿e dzia³aæ inaczej ni¿ oczekiwano"
 
 #: builtins/complete.def:826
 msgid "not currently executing completion function"
-msgstr ""
+msgstr "aktualnie nie jest wykonywana funkcja dope³niania"
 
 #: builtins/declare.def:124
 msgid "can only be used in a function"
@@ -321,7 +321,7 @@ msgstr "%s: nie mo¿na w ten sposób unicestwiæ zmiennej tablicowej"
 #: builtins/declare.def:481
 #, c-format
 msgid "%s: cannot convert associative to indexed array"
-msgstr ""
+msgstr "%s: nie mo¿na przekszta³ciæ tablicy asocjacyjnej na indeksowan±"
 
 #: builtins/enable.def:137 builtins/enable.def:145
 msgid "dynamic loading not available"
@@ -377,7 +377,7 @@ msgstr "%s: nie mo¿na uruchomiæ: %s"
 #: builtins/exit.def:65
 #, c-format
 msgid "logout\n"
-msgstr ""
+msgstr "wylogowanie\n"
 
 #: builtins/exit.def:88
 msgid "not login shell: use `exit'"
@@ -389,9 +389,9 @@ msgid "There are stopped jobs.\n"
 msgstr "Istniej± zatrzymane zadania.\n"
 
 #: builtins/exit.def:122
-#, fuzzy, c-format
+#, c-format
 msgid "There are running jobs.\n"
-msgstr "Istniej± zatrzymane zadania.\n"
+msgstr "Istniej± dzia³aj±ce zadania.\n"
 
 #: builtins/fc.def:262
 msgid "no command found"
@@ -408,7 +408,7 @@ msgstr "%s: nie uda³o siê otworzyæ pliku tymczasowego: %s"
 
 #: builtins/fg_bg.def:149 builtins/jobs.def:282
 msgid "current"
-msgstr ""
+msgstr "bie¿±ce"
 
 #: builtins/fg_bg.def:158
 #, c-format
@@ -435,21 +435,21 @@ msgid "%s: hash table empty\n"
 msgstr "%s: tablica asocjacyjna pusta\n"
 
 #: builtins/hash.def:245
-#, fuzzy, c-format
+#, c-format
 msgid "hits\tcommand\n"
-msgstr "ostatnie polecenie: %s\n"
+msgstr "trafienia\tpolecenie\n"
 
 #: builtins/help.def:130
-#, fuzzy, c-format
+#, c-format
 msgid "Shell commands matching keyword `"
 msgid_plural "Shell commands matching keywords `"
 msgstr[0] "Polecenia pow³oki pasuj±ce do s³owa kluczowego `"
-msgstr[1] "Polecenia pow³oki pasuj±ce do s³owa kluczowego `"
+msgstr[1] "Polecenia pow³oki pasuj±ce do s³ów kluczowych `"
+msgstr[2] "Polecenia pow³oki pasuj±ce do s³ów kluczowych `"
 
 #: builtins/help.def:168
 #, c-format
-msgid ""
-"no help topics match `%s'.  Try `help help' or `man -k %s' or `info %s'."
+msgid "no help topics match `%s'.  Try `help help' or `man -k %s' or `info %s'."
 msgstr ""
 "¿aden temat pomocy nie pasuje do `%s'. Spróbuj `help help', `man -k %s'\n"
 "lub `info %s'."
@@ -474,8 +474,7 @@ msgstr ""
 "zobaczyæ listê.\n"
 "Napisz `help nazwa', aby otrzymaæ wiêcej informacji o funkcji `nazwa'.\n"
 "U¿yj `info bash', aby otrzymaæ wiêcej informacji ogólnych o pow³oce.\n"
-"U¿yj `man -k' lub `info', aby otrzymaæ wiêcej informacji o poleceniach z "
-"tej\n"
+"U¿yj `man -k' lub `info', aby otrzymaæ wiêcej informacji o poleceniach z tej\n"
 "listy.\n"
 "\n"
 "Gwiazdka (*) po nazwie oznacza, ¿e dane polecenie jest wy³±czone.\n"
@@ -495,9 +494,9 @@ msgid "%s: history expansion failed"
 msgstr "%s: rozwiniêcie wg historii nie powiod³o siê"
 
 #: builtins/inlib.def:71
-#, fuzzy, c-format
+#, c-format
 msgid "%s: inlib failed"
-msgstr "%s: rozwiniêcie wg historii nie powiod³o siê"
+msgstr "%s: inlib nie powiod³o siê"
 
 #: builtins/jobs.def:109
 msgid "no other options allowed with `-x'"
@@ -517,9 +516,9 @@ msgid "expression expected"
 msgstr "spodziewano siê wyra¿enia"
 
 #: builtins/mapfile.def:172
-#, fuzzy, c-format
+#, c-format
 msgid "%s: not an indexed array"
-msgstr "%s: nie jest zmienn± tablicow±"
+msgstr "%s: nie jest tablic± indeksowan±"
 
 #: builtins/mapfile.def:256 builtins/read.def:279
 #, c-format
@@ -532,28 +531,27 @@ msgid "%d: invalid file descriptor: %s"
 msgstr "%d: nieprawid³owy deskryptor pliku: %s"
 
 #: builtins/mapfile.def:273 builtins/mapfile.def:311
-#, fuzzy, c-format
+#, c-format
 msgid "%s: invalid line count"
-msgstr "%s: nieprawid³owa opcja"
+msgstr "%s: b³êdna liczba linii"
 
 #: builtins/mapfile.def:284
-#, fuzzy, c-format
+#, c-format
 msgid "%s: invalid array origin"
-msgstr "%s: nieprawid³owa opcja"
+msgstr "%s: b³êdny pocz±tek tablicy"
 
 #: builtins/mapfile.def:301
-#, fuzzy, c-format
+#, c-format
 msgid "%s: invalid callback quantum"
-msgstr "%s: nieprawid³owa nazwa akcji"
+msgstr "%s: b³êdna liczba linii miêdzy wywo³aniami"
 
 #: builtins/mapfile.def:333
-#, fuzzy
 msgid "empty array variable name"
-msgstr "%s: nie jest zmienn± tablicow±"
+msgstr "pusta nazwa zmiennej tablicowej"
 
 #: builtins/mapfile.def:354
 msgid "array variable support required"
-msgstr ""
+msgstr "wymagana obs³uga zmiennych tablicowych"
 
 #: builtins/printf.def:394
 #, c-format
@@ -561,9 +559,9 @@ msgid "`%s': missing format character"
 msgstr "`%s': brak znaku formatuj±cego"
 
 #: builtins/printf.def:448
-#, fuzzy, c-format
+#, c-format
 msgid "`%c': invalid time format specification"
-msgstr "%s: nieprawid³owo okre¶lony timeout"
+msgstr "`%c': b³êdne okre¶lenie formatu czasu"
 
 #: builtins/printf.def:635
 #, c-format
@@ -571,18 +569,18 @@ msgid "`%c': invalid format character"
 msgstr "`%c': nieprawid³owy znak formatuj±cy"
 
 #: builtins/printf.def:662
-#, fuzzy, c-format
+#, c-format
 msgid "warning: %s: %s"
-msgstr "%s: uwaga: "
+msgstr "uwaga: %s: %s"
 
 #: builtins/printf.def:840
 msgid "missing hex digit for \\x"
 msgstr "brak cyfry szesnastkowej dla \\x"
 
 #: builtins/printf.def:855
-#, fuzzy, c-format
+#, c-format
 msgid "missing unicode digit for \\%c"
-msgstr "brak cyfry szesnastkowej dla \\x"
+msgstr "brak cyfry unikodowej dla \\%c"
 
 #: builtins/pushd.def:195
 msgid "no other directory"
@@ -594,15 +592,13 @@ msgstr "<brak katalogu bie¿±cego>"
 
 #: builtins/pushd.def:506
 msgid "directory stack empty"
-msgstr ""
+msgstr "pusty stos katalogów"
 
 #: builtins/pushd.def:508
-#, fuzzy
 msgid "directory stack index"
-msgstr "niedomiar stosu rekursji"
+msgstr "indeks stosu katalogów"
 
 #: builtins/pushd.def:683
-#, fuzzy
 msgid ""
 "Display the list of currently remembered directories.  Directories\n"
 "    find their way onto the list with the `pushd' command; you can get\n"
@@ -617,36 +613,32 @@ msgid ""
 "    \twith its position in the stack\n"
 "    \n"
 "    Arguments:\n"
-"      +N\tDisplays the Nth entry counting from the left of the list shown "
-"by\n"
+"      +N\tDisplays the Nth entry counting from the left of the list shown by\n"
 "    \tdirs when invoked without options, starting with zero.\n"
 "    \n"
-"      -N\tDisplays the Nth entry counting from the right of the list shown "
-"by\n"
+"      -N\tDisplays the Nth entry counting from the right of the list shown by\n"
 "\tdirs when invoked without options, starting with zero."
 msgstr ""
 "Wypisanie listy aktualnie pamiêtanych katalogów. Katalogi umieszczane s±\n"
 "    na li¶cie za pomoc± polecenia `pushd'; mo¿na cofaæ siê w obrêbie listy\n"
 "    za pomoc± polecenia `popd'.\n"
 "    \n"
-"    Znacznik -l oznacza, ¿e `dirs' nie powinno wypisywaæ katalogów w "
-"skróconej\n"
-"    wersji, tzn. wzglêdem katalogu domowego wywo³uj±cego. Oznacza to, ¿e\n"
-"    `~/bin' mo¿e zostaæ wypisany jako `/homes/bfox/bin'. Znacznik -v "
-"powoduje,\n"
-"    ¿e `dirs' wypisuje katalogi w osobnych wierszach, poprzedzaj±c ka¿dy\n"
-"    z nich jego pozycj± na stosie. Znacznik -p powoduje to samo, lecz bez\n"
-"    podawania pozycji na stosie. Znacznik -c powoduje wyczyszczenie stosu\n"
-"    katalogów poprzez usuniêcie wszystkich jego elementów.\n"
+"    Opcje:\n"
+"      -c\twyczyszczenie stosu katalogów poprzez usuniêcie wszystkich elementów\n"
+"      -l\tniewypisywanie katalogów wzglêdem kat. domowego u¿ytkownika\n"
+"    \tw postaci skróconej z tyld±\n"
+"      -p\twypisanie stosu katalogów po jednym wpisie w linii\n"
+"      -v\twypisanie stosu katalogów po jednym wpisie w linii, poprzedzonych\n"
+"    \tpozycj± na stosie\n"
 "    \n"
-"    +N\tWypisanie N-tej pozycji licz±c od lewej strony listy wypisywanej\n"
+"    Argumenty:\n"
+"      +N\tWypisanie N-tej pozycji licz±c od lewej strony listy wypisywanej\n"
 "    \tprzez dirs wywo³ane bez opcji, pocz±wszy od zera.\n"
 "    \n"
-"    -N\tWypisanie N-tej pozycji licz±c od prawej strony listy wypisywanej\n"
-"    \tprzez dirs wywo³ane bez opcji, pocz±wszy od zera."
+"      -N\tWypisanie N-tej pozycji licz±c od prawej strony listy wypisywanej\n"
+"\tprzez dirs wywo³ane bez opcji, pocz±wszy od zera."
 
 #: builtins/pushd.def:705
-#, fuzzy
 msgid ""
 "Adds a directory to the top of the directory stack, or rotates\n"
 "    the stack, making the new top of the stack the current working\n"
@@ -674,22 +666,23 @@ msgstr ""
 "    jego nowym wierzcho³kiem bie¿±cy katalog roboczy. Wywo³ane bez\n"
 "    argumentów zamienia na stosie dwa najwy¿sze katalogi.\n"
 "    \n"
-"    +N\tRotacja stosu czyni±ca jego wierzcho³kiem N-ty katalog (licz±c od\n"
-"    \tlewej strony listy wypisywanej przez `dirs', pocz±wszy od zera).\n"
-"    \n"
-"    -N\tRotacja stosu czyni±ca jego wierzcho³kiem N-ty katalog (licz±c od\n"
-"    \tprawej strony listy wypisywanej przez `dirs', pocz±wszy od zera).\n"
-"    \n"
-"    -n\tPominiêcie zmiany katalogu podczas umieszczania katalogów na\n"
+"    Opcje:\n"
+"      -n\tPominiêcie zmiany katalogu podczas umieszczania katalogów na\n"
 "    \tstosie tak, ¿e zmieniany jest tylko stos.\n"
 "    \n"
-"    dir\tUmieszczenie DIR na wierzcho³ku stosu i uczynienie go nowym\n"
+"    Argumenty:\n"
+"      +N\tRotacja stosu czyni±ca jego wierzcho³kiem N-ty katalog (licz±c\n"
+"    \tod lewej strony listy wypisywanej przez `dirs', pocz±wszy od zera).\n"
+"    \n"
+"      -N\tRotacja stosu czyni±ca jego wierzcho³kiem N-ty katalog (licz±c\n"
+"    \tod prawej strony listy wypisywanej przez `dirs', pocz±wszy od zera).\n"
+"    \n"
+"      dir\tUmieszczenie DIR na wierzcho³ku stosu i uczynienie go nowym\n"
 "    \tbie¿±cym katalogiem roboczym.\n"
 "    \n"
 "    Zawarto¶æ stosu katalogów mo¿na zobaczyæ za pomoc± polecenia `dirs'."
 
 #: builtins/pushd.def:730
-#, fuzzy
 msgid ""
 "Removes entries from the directory stack.  With no arguments, removes\n"
 "    the top directory from the stack, and changes to the new top directory.\n"
@@ -713,16 +706,18 @@ msgstr ""
 "    katalog z wierzcho³ka stosu i zmienia katalog bie¿±cy na katalog\n"
 "    bêd±cy nowym wierzcho³kiem stosu.\n"
 "    \n"
-"    +N\tUsuniêcie ze stosu N-tej pozycji licz±c od lewej strony listy\n"
+"    Opcje:\n"
+"      -n\tPominiêcie zmiany katalogu podczas usuwania katalogów ze stosu\n"
+"    \ttak, ¿e zmieniany jest tylko stos.\n"
+"    \n"
+"    Argumenty:\n"
+"      +N\tUsuniêcie ze stosu N-tej pozycji licz±c od lewej strony listy\n"
 "    \twypisywanej przez `dirs', pocz±wszy od zera. Na przyk³ad: `popd +0'\n"
 "    \tusuwa pierwszy katalog, `popd +1' usuwa drugi.\n"
 "    \n"
-"    -N\tUsuniêcie ze stosu N-tej pozycji licz±c od prawej strony listy\n"
+"      -N\tUsuniêcie ze stosu N-tej pozycji licz±c od prawej strony listy\n"
 "    \twypisywanej przez `dirs', pocz±wszy od zera. Na przyk³ad: `popd -0'\n"
-"    \tusuwa pierwszy katalog, `popd -1' usuwa drugi.\n"
-"    \n"
-"    -n\tPominiêcie zmiany katalogu podczas usuwania katalogów ze stosu tak,\n"
-"    \t¿e zmieniany jest tylko stos.\n"
+"    \tusuwa ostatni katalog, `popd -1' usuwa poprzedni.\n"
 "    \n"
 "    Zawarto¶æ stosu katalogów mo¿na zobaczyæ za pomoc± polecenia `dirs'."
 
@@ -740,18 +735,15 @@ msgstr "b³±d odczytu: %d: %s"
 msgid "can only `return' from a function or sourced script"
 msgstr "wyj¶cie przez `return' mo¿liwe tylko z funkcji lub skryptu"
 
-# ???
 #: builtins/set.def:771
 msgid "cannot simultaneously unset a function and a variable"
 msgstr "nie mo¿na jednocze¶nie anulowaæ definicji funkcji i zmiennej"
 
-# ???
 #: builtins/set.def:808
 #, c-format
 msgid "%s: cannot unset"
 msgstr "%s: nie mo¿na anulowaæ definicji"
 
-# ???
 #: builtins/set.def:815
 #, c-format
 msgid "%s: cannot unset: readonly %s"
@@ -844,7 +836,7 @@ msgstr "%s: nie mo¿na odczytaæ ograniczenia: %s"
 
 #: builtins/ulimit.def:457
 msgid "limit"
-msgstr ""
+msgstr "ograniczenie"
 
 #: builtins/ulimit.def:469 builtins/ulimit.def:769
 #, c-format
@@ -867,7 +859,7 @@ msgstr "`%c': nieprawid³owy znak trybu symbolicznego"
 
 #: error.c:90 error.c:321 error.c:323 error.c:325
 msgid " line "
-msgstr ""
+msgstr " linia "
 
 #: error.c:165
 #, c-format
@@ -916,9 +908,8 @@ msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "TIMEFORMAT: `%c': nieprawid³owy znak formatuj±cy"
 
 #: execute_cmd.c:2121
-#, fuzzy
 msgid "pipe error"
-msgstr "b³±d zapisu: %s"
+msgstr "b³±d potoku"
 
 #: execute_cmd.c:4640
 #, c-format
@@ -931,9 +922,9 @@ msgid "%s: command not found"
 msgstr "%s: nie znaleziono polecenia"
 
 #: execute_cmd.c:4959
-#, fuzzy, c-format
+#, c-format
 msgid "%s: %s"
-msgstr "%s jest %s\n"
+msgstr "%s: %s"
 
 #: execute_cmd.c:4995
 #, c-format
@@ -980,8 +971,7 @@ msgstr "wyk³adnik mniejszy ni¿ 0"
 
 #: expr.c:887
 msgid "identifier expected after pre-increment or pre-decrement"
-msgstr ""
-"spodziewany identyfikator po operatorze preinkrementacji lub predekrementacji"
+msgstr "spodziewany identyfikator po operatorze preinkrementacji lub predekrementacji"
 
 #: expr.c:910
 msgid "missing `)'"
@@ -998,7 +988,7 @@ msgstr "b³±d sk³adni: nieprawid³owy operator arytmetyczny"
 #: expr.c:1308
 #, c-format
 msgid "%s%s%s: %s (error token is \"%s\")"
-msgstr ""
+msgstr "%s%s%s: %s (b³êdny znacznik to \"%s\")"
 
 #: expr.c:1366
 msgid "invalid arithmetic base"
@@ -1009,16 +999,16 @@ msgid "value too great for base"
 msgstr "warto¶æ za du¿a na podstawê"
 
 #: expr.c:1435
-#, fuzzy, c-format
+#, c-format
 msgid "%s: expression error\n"
-msgstr "%s: oczekiwano wyra¿enia ca³kowitego"
+msgstr "%s: b³±d w wyra¿eniu\n"
 
 #: general.c:61
 msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: niemo¿liwy dostêp do katalogów nadrzêdnych"
 
 #: input.c:94 subst.c:5082
-#, fuzzy, c-format
+#, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "nie mo¿na wy³±czyæ trybu nieblokuj±cego dla deskryptora %d"
 
@@ -1034,7 +1024,7 @@ msgstr "save_bash_input: bufor dla nowego deskryptora %d ju¿ istnieje"
 
 #: jobs.c:468
 msgid "start_pipeline: pgrp pipe"
-msgstr ""
+msgstr "start_pipeline: pgrp pipe"
 
 # ???
 #: jobs.c:889
@@ -1050,12 +1040,12 @@ msgstr "usuwanie zatrzymanego zadania %d z grup± procesów %ld"
 #: jobs.c:1112
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
-msgstr ""
+msgstr "add_process: proces %5ld (%s) w potoku"
 
 #: jobs.c:1115
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
-msgstr ""
+msgstr "add_process: pid %5ld (%s) oznaczony jako nadal ¿ywy"
 
 #: jobs.c:1430
 #, c-format
@@ -1065,53 +1055,53 @@ msgstr "describe_pid: %ld: brak takiego PID-u"
 #: jobs.c:1445
 #, c-format
 msgid "Signal %d"
-msgstr ""
+msgstr "Sygna³ %d"
 
 #: jobs.c:1459 jobs.c:1484
 msgid "Done"
-msgstr ""
+msgstr "Zakoñczono"
 
 #: jobs.c:1464 siglist.c:123
 msgid "Stopped"
-msgstr ""
+msgstr "Zatrzymano"
 
 #: jobs.c:1468
 #, c-format
 msgid "Stopped(%s)"
-msgstr ""
+msgstr "Zatrzymano(%s)"
 
 #: jobs.c:1472
 msgid "Running"
-msgstr ""
+msgstr "Dzia³a"
 
 #: jobs.c:1486
 #, c-format
 msgid "Done(%d)"
-msgstr ""
+msgstr "Zakoñczono(%d)"
 
 #: jobs.c:1488
 #, c-format
 msgid "Exit %d"
-msgstr ""
+msgstr "Kod wyj¶cia %d"
 
 #: jobs.c:1491
 msgid "Unknown status"
-msgstr ""
+msgstr "Stan nieznany"
 
 #: jobs.c:1578
 #, c-format
 msgid "(core dumped) "
-msgstr ""
+msgstr "(zrzut pamiêci) "
 
 #: jobs.c:1597
 #, c-format
 msgid "  (wd: %s)"
-msgstr ""
+msgstr "  (katalog: %s)"
 
 #: jobs.c:1805
 #, c-format
 msgid "child setpgid (%ld to %ld)"
-msgstr ""
+msgstr "setpgid potomka (%ld na %ld)"
 
 #: jobs.c:2133 nojobs.c:585
 #, c-format
@@ -1140,39 +1130,39 @@ msgstr "%s: zadanie %d ju¿ pracuje w tle"
 
 #: jobs.c:3089
 msgid "waitchld: turning on WNOHANG to avoid indefinite block"
-msgstr ""
+msgstr "waitchld: wy³±czanie WNOHANG w celu unikniêcia nieskoñczonego oczekiwania"
 
 #: jobs.c:3538
-#, fuzzy, c-format
+#, c-format
 msgid "%s: line %d: "
-msgstr "%s: uwaga: "
+msgstr "%s: linia %d: "
 
 #: jobs.c:3552 nojobs.c:814
 #, c-format
 msgid " (core dumped)"
-msgstr ""
+msgstr " (zrzut pamiêci)"
 
 #: jobs.c:3564 jobs.c:3577
 #, c-format
 msgid "(wd now: %s)\n"
-msgstr ""
+msgstr "(katalog: %s)\n"
 
 #: jobs.c:3609
 msgid "initialize_job_control: getpgrp failed"
-msgstr ""
+msgstr "initialize_job_control: getpgrp nie powiod³o siê"
 
 #: jobs.c:3669
 msgid "initialize_job_control: line discipline"
-msgstr ""
+msgstr "initialize_job_control: dyscyplina linii"
 
 #: jobs.c:3679
 msgid "initialize_job_control: setpgid"
-msgstr ""
+msgstr "initialize_job_control: setpgid"
 
 #: jobs.c:3707
 #, c-format
 msgid "cannot set terminal process group (%d)"
-msgstr ""
+msgstr "nie mo¿na ustawiæ grupy procesów terminala (%d)"
 
 #: jobs.c:3712
 msgid "no job control in this shell"
@@ -1193,9 +1183,8 @@ msgstr ""
 "malloc: %s:%d: spartaczone za³o¿enie\r\n"
 
 #: lib/malloc/malloc.c:313
-#, fuzzy
 msgid "unknown"
-msgstr "%s: nieznany host"
+msgstr "nieznany"
 
 # ???
 #: lib/malloc/malloc.c:797
@@ -1271,22 +1260,22 @@ msgstr "operacje sieciowe nie s± wspierane"
 #: locale.c:192
 #, c-format
 msgid "setlocale: LC_ALL: cannot change locale (%s)"
-msgstr ""
+msgstr "setlocale: LC_ALL: nie mo¿na zmieniæ lokalizacji (%s)"
 
 #: locale.c:194
 #, c-format
 msgid "setlocale: LC_ALL: cannot change locale (%s): %s"
-msgstr ""
+msgstr "setlocale: LC_ALL: nie mo¿na zmieniæ lokalizacji (%s): %s"
 
 #: locale.c:247
-#, fuzzy, c-format
+#, c-format
 msgid "setlocale: %s: cannot change locale (%s)"
-msgstr "xrealloc: %s:%d: nie mo¿na przydzieliæ %lu bajtów"
+msgstr "setlocale: %s: nie mo¿na zmieniæ lokalizacji (%s)"
 
 #: locale.c:249
-#, fuzzy, c-format
+#, c-format
 msgid "setlocale: %s: cannot change locale (%s): %s"
-msgstr "xrealloc: %s:%d: nie mo¿na przydzieliæ %lu bajtów"
+msgstr "setlocale: %s: nie mo¿na zmieniæ lokalizacji (%s): %s"
 
 #: mailcheck.c:433
 msgid "You have mail in $_"
@@ -1322,7 +1311,7 @@ msgstr "make_here_document: z³y rodzaj instrukcji %d"
 #: make_cmd.c:659
 #, c-format
 msgid "here-document at line %d delimited by end-of-file (wanted `%s')"
-msgstr ""
+msgstr "dokument miejscowy w linii %d ograniczony koñcem pliku (oczekiwano `%s')"
 
 #: make_cmd.c:756
 #, c-format
@@ -1441,18 +1430,18 @@ msgid "print_command: bad connector `%d'"
 msgstr "print_command: z³y ³±cznik `%d'"
 
 #: print_cmd.c:368
-#, fuzzy, c-format
+#, c-format
 msgid "xtrace_set: %d: invalid file descriptor"
-msgstr "%d: nieprawid³owy deskryptor pliku: %s"
+msgstr "xtrace_set: %d: nieprawid³owy deskryptor pliku"
 
 #: print_cmd.c:373
 msgid "xtrace_set: NULL file pointer"
-msgstr ""
+msgstr "xtrace_set: pusty wska¼nik pliku"
 
 #: print_cmd.c:377
 #, c-format
 msgid "xtrace fd (%d) != fileno xtrace fp (%d)"
-msgstr ""
+msgstr "xtrace fd (%d) != fileno xtrace fp (%d)"
 
 #: print_cmd.c:1478
 #, c-format
@@ -1479,14 +1468,14 @@ msgid "%s: restricted: cannot redirect output"
 msgstr "%s: ograniczony: nie mo¿na przekierowaæ wyj¶cia"
 
 #: redir.c:192
-#, fuzzy, c-format
+#, c-format
 msgid "cannot create temp file for here-document: %s"
 msgstr "nie mo¿na utworzyæ pliku tymczasowego dla dokumentu miejscowego: %s"
 
 #: redir.c:196
-#, fuzzy, c-format
+#, c-format
 msgid "%s: cannot assign fd to variable"
-msgstr "%s: nie mo¿na przypisaæ listy do elementu tablicy"
+msgstr "%s: nie mo¿na przypisaæ deskryptora pliku do zmiennej"
 
 #: redir.c:548
 msgid "/dev/(tcp|udp)/host/port not supported without networking"
@@ -1516,7 +1505,7 @@ msgstr "Nie mam nazwy!"
 #: shell.c:1795
 #, c-format
 msgid "GNU bash, version %s-(%s)\n"
-msgstr ""
+msgstr "GNU bash, wersja %s-(%s)\n"
 
 #: shell.c:1796
 #, c-format
@@ -1547,9 +1536,7 @@ msgstr "\t-%s lub -o opcja\n"
 #: shell.c:1824
 #, c-format
 msgid "Type `%s -c \"help set\"' for more information about shell options.\n"
-msgstr ""
-"Aby uzyskaæ wiêcej informacji o opcjach pow³oki, napisz `%s -c \"help set"
-"\"'.\n"
+msgstr "Aby uzyskaæ wiêcej informacji o opcjach pow³oki, napisz `%s -c \"help set\"'.\n"
 
 #: shell.c:1825
 #, c-format
@@ -1570,174 +1557,172 @@ msgstr "sigprocmask: %d: nieprawid³owa operacja"
 
 #: siglist.c:48
 msgid "Bogus signal"
-msgstr ""
+msgstr "B³êdny sygna³"
 
 #: siglist.c:51
 msgid "Hangup"
-msgstr ""
+msgstr "Roz³±czenie"
 
 #: siglist.c:55
 msgid "Interrupt"
-msgstr ""
+msgstr "Przerwanie"
 
 #: siglist.c:59
 msgid "Quit"
-msgstr ""
+msgstr "Wyj¶cie"
 
 #: siglist.c:63
 msgid "Illegal instruction"
-msgstr ""
+msgstr "Niedozwolona instrukcja"
 
 #: siglist.c:67
 msgid "BPT trace/trap"
-msgstr ""
+msgstr "Pu³apka debuggera/breakpoint"
 
 #: siglist.c:75
 msgid "ABORT instruction"
-msgstr ""
+msgstr "Instrukcja ABORT"
 
 #: siglist.c:79
 msgid "EMT instruction"
-msgstr ""
+msgstr "Pu³apka EMT"
 
 #: siglist.c:83
 msgid "Floating point exception"
-msgstr ""
+msgstr "B³±d w obliczeniach zmiennoprzecinkowych"
 
 #: siglist.c:87
 msgid "Killed"
-msgstr ""
+msgstr "Unicestwiony"
 
 #: siglist.c:91
-#, fuzzy
 msgid "Bus error"
-msgstr "b³±d sk³adni"
+msgstr "B³±d szyny"
 
 #: siglist.c:95
 msgid "Segmentation fault"
-msgstr ""
+msgstr "Naruszenie ochrony pamiêci"
 
 #: siglist.c:99
 msgid "Bad system call"
-msgstr ""
+msgstr "B³êdne wywo³anie systemowe"
 
 #: siglist.c:103
 msgid "Broken pipe"
-msgstr ""
+msgstr "Przerwany potok"
 
 #: siglist.c:107
 msgid "Alarm clock"
-msgstr ""
+msgstr "Budzik"
 
 #: siglist.c:111
-#, fuzzy
 msgid "Terminated"
-msgstr "ograniczony"
+msgstr "Zakoñczony"
 
 #: siglist.c:115
 msgid "Urgent IO condition"
-msgstr ""
+msgstr "Nag³e ¿±danie we/wy"
 
 #: siglist.c:119
 msgid "Stopped (signal)"
-msgstr ""
+msgstr "Zatrzymany (sygna³)"
 
 #: siglist.c:127
 msgid "Continue"
-msgstr ""
+msgstr "Kontynuacja"
 
 #: siglist.c:135
 msgid "Child death or stop"
-msgstr ""
+msgstr "¦mieræ lub zatrzymanie potomka"
 
 #: siglist.c:139
 msgid "Stopped (tty input)"
-msgstr ""
+msgstr "Zatrzymany (wej¶cie z tty)"
 
 #: siglist.c:143
 msgid "Stopped (tty output)"
-msgstr ""
+msgstr "Zatrzymany (wyj¶cie na tty)"
 
 #: siglist.c:147
 msgid "I/O ready"
-msgstr ""
+msgstr "We/wy gotowe"
 
 #: siglist.c:151
 msgid "CPU limit"
-msgstr ""
+msgstr "Przekroczony limit procesora"
 
 #: siglist.c:155
 msgid "File limit"
-msgstr ""
+msgstr "Przekroczony limit pliku"
 
 #: siglist.c:159
 msgid "Alarm (virtual)"
-msgstr ""
+msgstr "Alarm (wirtualny)"
 
 #: siglist.c:163
 msgid "Alarm (profile)"
-msgstr ""
+msgstr "Alarm (profiler)"
 
 #: siglist.c:167
 msgid "Window changed"
-msgstr ""
+msgstr "Okno zmienione"
 
 #: siglist.c:171
 msgid "Record lock"
-msgstr ""
+msgstr "Zasoby utracone"
 
 #: siglist.c:175
 msgid "User signal 1"
-msgstr ""
+msgstr "Sygna³ u¿ytkownika 1"
 
 #: siglist.c:179
 msgid "User signal 2"
-msgstr ""
+msgstr "Sygna³ u¿ytkownika 2"
 
 #: siglist.c:183
 msgid "HFT input data pending"
-msgstr ""
+msgstr "Dane wej¶ciowe HFT"
 
 #: siglist.c:187
 msgid "power failure imminent"
-msgstr ""
+msgstr "Bliska awaria zasilania"
 
 #: siglist.c:191
 msgid "system crash imminent"
-msgstr ""
+msgstr "Bliska awaria systemu"
 
 #: siglist.c:195
 msgid "migrate process to another CPU"
-msgstr ""
+msgstr "Przeniesienie procesu na inny procesor"
 
 #: siglist.c:199
 msgid "programming error"
-msgstr ""
+msgstr "B³±d programowania"
 
 #: siglist.c:203
 msgid "HFT monitor mode granted"
-msgstr ""
+msgstr "Nadany tryb monitora HFT"
 
 #: siglist.c:207
 msgid "HFT monitor mode retracted"
-msgstr ""
+msgstr "Wycofany tryb monitora HFT"
 
 #: siglist.c:211
 msgid "HFT sound sequence has completed"
-msgstr ""
+msgstr "Sekwencja d¼wiêkowa HFT zakoñczona"
 
 #: siglist.c:215
 msgid "Information request"
-msgstr ""
+msgstr "¯±danie informacji"
 
 #: siglist.c:223
 msgid "Unknown Signal #"
-msgstr ""
+msgstr "Nieznany sygna³ #"
 
 #: siglist.c:225
 #, c-format
 msgid "Unknown Signal #%d"
-msgstr ""
+msgstr "Nieznany sygna³ #%d"
 
 #: subst.c:1333 subst.c:1502
 #, c-format
@@ -1805,15 +1790,13 @@ msgid "$%s: cannot assign in this way"
 msgstr "$%s: nie mo¿na przypisywaæ w ten sposób"
 
 #: subst.c:7684
-msgid ""
-"future versions of the shell will force evaluation as an arithmetic "
-"substitution"
-msgstr ""
+msgid "future versions of the shell will force evaluation as an arithmetic substitution"
+msgstr "przysz³e wersje pow³oki bêd± wymuszaæ obliczenie jako podstawienie arytmetyczne"
 
 #: subst.c:8149
-#, fuzzy, c-format
+#, c-format
 msgid "bad substitution: no closing \"`\" in %s"
-msgstr "z³e podstawienie: brak zamykaj±cego `%s' w %s"
+msgstr "z³e podstawienie: brak zamykaj±cego \"`\" w %s"
 
 #: subst.c:9036
 #, c-format
@@ -1863,11 +1846,8 @@ msgstr "run_pending_traps: z³a warto¶æ trap_list[%d]: %p"
 
 #: trap.c:341
 #, c-format
-msgid ""
-"run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself"
-msgstr ""
-"run_pending_traps: obs³uga sygna³u jest ustawiona na SIG_DFL, wysy³aj±c %d (%"
-"s) do siebie"
+msgid "run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself"
+msgstr "run_pending_traps: obs³uga sygna³u jest ustawiona na SIG_DFL, wysy³aj±c %d (%s) do siebie"
 
 #: trap.c:393
 #, c-format
@@ -1893,9 +1873,9 @@ msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: brak kontekstu funkcji w bie¿±cym zakresie"
 
 #: variables.c:3427
-#, fuzzy, c-format
+#, c-format
 msgid "%s has null exportstr"
-msgstr "%s: parametr pusty lub nieustawiony"
+msgstr "%s ma pusty exportstr"
 
 #: variables.c:3432 variables.c:3441
 #, c-format
@@ -1917,415 +1897,384 @@ msgstr "pop_var_context: brak kontekstu global_variables"
 
 #: variables.c:3978
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
-msgstr ""
-"pop_scope: nag³ówek shell_variables poza zakresem tymczasowego ¶rodowiska"
+msgstr "pop_scope: nag³ówek shell_variables poza zakresem tymczasowego ¶rodowiska"
 
 #: variables.c:4786
-#, fuzzy, c-format
+#, c-format
 msgid "%s: %s: cannot open as FILE"
-msgstr "%s: nie mo¿na otworzyæ: %s"
+msgstr "%s: %s: nie mo¿na otworzyæ jako PLIK"
 
 #: variables.c:4791
-#, fuzzy, c-format
+#, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
-msgstr "%d: nieprawid³owy deskryptor pliku: %s"
+msgstr "%s: %s: nieprawid³owa warto¶æ dla deskryptora pliku do ¶ledzenia"
 
 #: version.c:46
-#, fuzzy
 msgid "Copyright (C) 2011 Free Software Foundation, Inc."
-msgstr "Copyright (C) 2006 Free Software Foundation, Inc.\n"
+msgstr "Copyright (C) 2011 Free Software Foundation, Inc."
 
 #: version.c:47
-msgid ""
-"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl."
-"html>\n"
-msgstr ""
+msgid "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
+msgstr "Licencja GPLv3+: GNU GPL wersja 3 lub pó¼niejsza <http://gnu.org/licenses/gpl.html>\n"
 
 #: version.c:86 version2.c:83
 #, c-format
 msgid "GNU bash, version %s (%s)\n"
-msgstr ""
+msgstr "GNU bash, wersja %s (%s)\n"
 
 #: version.c:91 version2.c:88
 #, c-format
 msgid "This is free software; you are free to change and redistribute it.\n"
-msgstr ""
+msgstr "To oprogramowanie jest wolnodostêpne; mo¿na je swobodnie zmieniaæ i rozpowszechniaæ.\n"
 
 #: version.c:92 version2.c:89
 #, c-format
 msgid "There is NO WARRANTY, to the extent permitted by law.\n"
-msgstr ""
+msgstr "Nie ma ¯ADNEJ GWARANCJI w granicach dopuszczanych przez prawo.\n"
 
 #: version2.c:86
-#, fuzzy, c-format
+#, c-format
 msgid "Copyright (C) 2009 Free Software Foundation, Inc.\n"
-msgstr "Copyright (C) 2006 Free Software Foundation, Inc.\n"
+msgstr "Copyright (C) 2009 Free Software Foundation, Inc.\n"
 
 #: version2.c:87
 #, c-format
-msgid ""
-"License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl."
-"html>\n"
-msgstr ""
+msgid "License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>\n"
+msgstr "Licencja GPLv2+: GNU GPL wersja 2 lub pó¼niejsza <http://gnu.org/licenses/gpl.html>\n"
 
 #: xmalloc.c:91
-#, fuzzy, c-format
+#, c-format
 msgid "%s: cannot allocate %lu bytes (%lu bytes allocated)"
-msgstr "xmalloc: nie mo¿na przydzieliæ %lu bajtów (przydzielono %lu)"
+msgstr "%s: nie mo¿na przydzieliæ %lu bajtów (przydzielono %lu)"
 
 #: xmalloc.c:93
-#, fuzzy, c-format
+#, c-format
 msgid "%s: cannot allocate %lu bytes"
-msgstr "xmalloc: nie mo¿na przydzieliæ %lu bajtów"
+msgstr "%s: nie mo¿na przydzieliæ %lu bajtów"
 
 #: xmalloc.c:163
-#, fuzzy, c-format
+#, c-format
 msgid "%s: %s:%d: cannot allocate %lu bytes (%lu bytes allocated)"
-msgstr "xmalloc: %s:%d: nie mo¿na przydzieliæ %lu bajtów (przydzielono %lu)"
+msgstr "%s: %s:%d: nie mo¿na przydzieliæ %lu bajtów (przydzielono %lu)"
 
 #: xmalloc.c:165
-#, fuzzy, c-format
+#, c-format
 msgid "%s: %s:%d: cannot allocate %lu bytes"
-msgstr "xmalloc: %s:%d: nie mo¿na przydzieliæ %lu bajtów"
+msgstr "%s: %s:%d: nie mo¿na przydzieliæ %lu bajtów"
 
 #: builtins.c:43
 msgid "alias [-p] [name[=value] ... ]"
-msgstr ""
+msgstr "alias [-p] [nazwa[=warto¶æ] ... ]"
 
 #: builtins.c:47
 msgid "unalias [-a] name [name ...]"
-msgstr ""
+msgstr "unalias [-a] nazwa [nazwa ...]"
 
 #: builtins.c:51
-msgid ""
-"bind [-lpvsPVS] [-m keymap] [-f filename] [-q name] [-u name] [-r keyseq] [-"
-"x keyseq:shell-command] [keyseq:readline-function or readline-command]"
-msgstr ""
+msgid "bind [-lpvsPVS] [-m keymap] [-f filename] [-q name] [-u name] [-r keyseq] [-x keyseq:shell-command] [keyseq:readline-function or readline-command]"
+msgstr "bind [-lpvsPVS] [-m mapa] [-f plik] [-q nazwa] [-u nazwa] [-r sekwencja] [-x sekwencja:polecenie-pow³oki] [sekwencja:funkcja-readline lub polecenie-readline]"
 
 #: builtins.c:54
 msgid "break [n]"
-msgstr ""
+msgstr "break [n]"
 
 #: builtins.c:56
 msgid "continue [n]"
-msgstr ""
+msgstr "continue [n]"
 
 #: builtins.c:58
 msgid "builtin [shell-builtin [arg ...]]"
-msgstr ""
+msgstr "builtin [polecenie-wbudowane [arg ... ]]"
 
 #: builtins.c:61
 msgid "caller [expr]"
-msgstr ""
+msgstr "caller [wyra¿enie]"
 
 #: builtins.c:64
 msgid "cd [-L|[-P [-e]]] [dir]"
-msgstr ""
+msgstr "cd [-L|[-P [-e]]] [katalog]"
 
 #: builtins.c:66
 msgid "pwd [-LP]"
-msgstr ""
+msgstr "pwd [-LP]"
 
 #: builtins.c:68
 msgid ":"
-msgstr ""
+msgstr ":"
 
 #: builtins.c:70
 msgid "true"
-msgstr ""
+msgstr "true"
 
 #: builtins.c:72
 msgid "false"
-msgstr ""
+msgstr "false"
 
 #: builtins.c:74
 msgid "command [-pVv] command [arg ...]"
-msgstr ""
+msgstr "command [-pVv] polecenie [arg ...]"
 
 #: builtins.c:76
 msgid "declare [-aAfFgilrtux] [-p] [name[=value] ...]"
-msgstr ""
+msgstr "declare [-aAfFgilrtux] [-p] [nazwa[=warto¶æ] ...]"
 
 #: builtins.c:78
 msgid "typeset [-aAfFgilrtux] [-p] name[=value] ..."
-msgstr ""
+msgstr "typeset [-aAfFgilrtux] [-p] nazwa[=warto¶æ] ..."
 
 #: builtins.c:80
 msgid "local [option] name[=value] ..."
-msgstr ""
+msgstr "local [opcja] nazwa[=warto¶æ] ..."
 
 #: builtins.c:83
 msgid "echo [-neE] [arg ...]"
-msgstr ""
+msgstr "echo [-neE] [arg ...]"
 
 #: builtins.c:87
 msgid "echo [-n] [arg ...]"
-msgstr ""
+msgstr "echo [-n] [arg ...]"
 
 #: builtins.c:90
 msgid "enable [-a] [-dnps] [-f filename] [name ...]"
-msgstr ""
+msgstr "enable [-a] [-dnps] [-f plik] [nazwa ...]"
 
 #: builtins.c:92
 msgid "eval [arg ...]"
-msgstr ""
+msgstr "eval [arg ...]"
 
 #: builtins.c:94
 msgid "getopts optstring name [arg]"
-msgstr ""
+msgstr "getopts ³añcuch-opcji nazwa [arg]"
 
 #: builtins.c:96
 msgid "exec [-cl] [-a name] [command [arguments ...]] [redirection ...]"
-msgstr ""
+msgstr "exec [-cl] [-a nazwa] [polecenie [argumenty ...]] [przekierowanie ...]"
 
 #: builtins.c:98
 msgid "exit [n]"
-msgstr ""
+msgstr "exit [n]"
 
 #: builtins.c:100
 msgid "logout [n]"
-msgstr ""
+msgstr "logout [n]"
 
 #: builtins.c:103
 msgid "fc [-e ename] [-lnr] [first] [last] or fc -s [pat=rep] [command]"
-msgstr ""
+msgstr "fc [-e nazwa-ed] [-lnr] [pierwszy] [ostatni] lub fc -s [wz=zam] [polecenie]"
 
 #: builtins.c:107
 msgid "fg [job_spec]"
-msgstr ""
+msgstr "fg [zadanie]"
 
 #: builtins.c:111
 msgid "bg [job_spec ...]"
-msgstr ""
+msgstr "bg [zadanie ...]"
 
 #: builtins.c:114
 msgid "hash [-lr] [-p pathname] [-dt] [name ...]"
-msgstr ""
+msgstr "hash [-lr] [-p ¶cie¿ka] [-dt] [nazwa ...]"
 
 #: builtins.c:117
 msgid "help [-dms] [pattern ...]"
-msgstr ""
+msgstr "help [-dms] [wzorzec ...]"
 
 #: builtins.c:121
-msgid ""
-"history [-c] [-d offset] [n] or history -anrw [filename] or history -ps arg "
-"[arg...]"
-msgstr ""
+msgid "history [-c] [-d offset] [n] or history -anrw [filename] or history -ps arg [arg...]"
+msgstr "history [-c] [-d offset] [n] lub history -anrw [plik] lub history -ps arg [arg ...]"
 
 #: builtins.c:125
 msgid "jobs [-lnprs] [jobspec ...] or jobs -x command [args]"
-msgstr ""
+msgstr "jobs [-lnprs] [zadanie ...] lub jobs -x polecenie [argumenty]"
 
 #: builtins.c:129
 msgid "disown [-h] [-ar] [jobspec ...]"
-msgstr ""
+msgstr "disown [-h] [-ar] [zadanie ...]"
 
 #: builtins.c:132
-msgid ""
-"kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l "
-"[sigspec]"
-msgstr ""
+msgid "kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]"
+msgstr "kill [-s sygna³ | -n numer-sygna³u | -sygna³] pid | zadanie ... lub kill -l [sygna³]"
 
 #: builtins.c:134
 msgid "let arg [arg ...]"
-msgstr ""
+msgstr "let arg [arg ...]"
 
 #: builtins.c:136
-msgid ""
-"read [-ers] [-a array] [-d delim] [-i text] [-n nchars] [-N nchars] [-p "
-"prompt] [-t timeout] [-u fd] [name ...]"
-msgstr ""
+msgid "read [-ers] [-a array] [-d delim] [-i text] [-n nchars] [-N nchars] [-p prompt] [-t timeout] [-u fd] [name ...]"
+msgstr "read [-ers] [-a tablica] [-d separator] [-i tekst] [-n lznaków] [-N lznaków] [-p zachêta] [-t czas] [-u fd] [nazwa ...]"
 
 #: builtins.c:138
 msgid "return [n]"
-msgstr ""
+msgstr "return [n]"
 
 #: builtins.c:140
 msgid "set [-abefhkmnptuvxBCHP] [-o option-name] [--] [arg ...]"
-msgstr ""
+msgstr "set [-abefhkmnptuvxBCHP] [-o nazwa-opcji] [--] [arg ...]"
 
 #: builtins.c:142
 msgid "unset [-f] [-v] [name ...]"
-msgstr ""
+msgstr "unset [-f] [-v] [nazwa ...]"
 
 #: builtins.c:144
 msgid "export [-fn] [name[=value] ...] or export -p"
-msgstr ""
+msgstr "export [-fn] [nazwa[=warto¶æ] ...] lub export -p"
 
 #: builtins.c:146
 msgid "readonly [-aAf] [name[=value] ...] or readonly -p"
-msgstr ""
+msgstr "readonly [aAf] [nazwa[=warto¶æ] ...] lub readonly -p"
 
 #: builtins.c:148
-#, fuzzy
 msgid "shift [n]"
-msgstr "licznik przesuniêcia"
+msgstr "shift [n]"
 
 #: builtins.c:150
-#, fuzzy
 msgid "source filename [arguments]"
-msgstr "wymagany argument w postaci nazwy pliku"
+msgstr "source plik [argumenty]"
 
 #: builtins.c:152
-#, fuzzy
 msgid ". filename [arguments]"
-msgstr "wymagany argument w postaci nazwy pliku"
+msgstr ". plik [argumenty]"
 
 #: builtins.c:155
 msgid "suspend [-f]"
-msgstr ""
+msgstr "suspend [-f]"
 
 #: builtins.c:158
 msgid "test [expr]"
-msgstr ""
+msgstr "test [wyra¿enie]"
 
 #: builtins.c:160
 msgid "[ arg... ]"
-msgstr ""
+msgstr "[ arg... ]"
 
 #: builtins.c:162
 msgid "times"
-msgstr ""
+msgstr "times"
 
 #: builtins.c:164
 msgid "trap [-lp] [[arg] signal_spec ...]"
-msgstr ""
+msgstr "trap [-lp] [[arg] sygna³ ...]"
 
 #: builtins.c:166
 msgid "type [-afptP] name [name ...]"
-msgstr ""
+msgstr "type [-afptP] nazwa [nazwa ...]"
 
 #: builtins.c:169
 msgid "ulimit [-SHacdefilmnpqrstuvx] [limit]"
-msgstr ""
+msgstr "ulimit [-SHacdefilmnpqrstuvx] [ograniczenie]"
 
 #: builtins.c:172
 msgid "umask [-p] [-S] [mode]"
-msgstr ""
+msgstr "umask [-p] [-S] [uprawnienia]"
 
 #: builtins.c:175
 msgid "wait [id]"
-msgstr ""
+msgstr "wait [id]"
 
 #: builtins.c:179
 msgid "wait [pid]"
-msgstr ""
+msgstr "wait [pid]"
 
 #: builtins.c:182
 msgid "for NAME [in WORDS ... ] ; do COMMANDS; done"
-msgstr ""
+msgstr "for NAZWA [in S£OWA ... ] ; do POLECENIA; done"
 
 #: builtins.c:184
 msgid "for (( exp1; exp2; exp3 )); do COMMANDS; done"
-msgstr ""
+msgstr "for (( wyr1; wyr2; wyr3 )); do POLECENIA; done"
 
 #: builtins.c:186
 msgid "select NAME [in WORDS ... ;] do COMMANDS; done"
-msgstr ""
+msgstr "select NAZWA [in S£OWA ... ;] do POLECENIA; done"
 
 #: builtins.c:188
 msgid "time [-p] pipeline"
-msgstr ""
+msgstr "time [-p] potok"
 
 #: builtins.c:190
 msgid "case WORD in [PATTERN [| PATTERN]...) COMMANDS ;;]... esac"
-msgstr ""
+msgstr "case S£OWO in [WZORZEC [| WZORZEC]...) POLECENIA ;;]... esac"
 
 #: builtins.c:192
-msgid ""
-"if COMMANDS; then COMMANDS; [ elif COMMANDS; then COMMANDS; ]... [ else "
-"COMMANDS; ] fi"
-msgstr ""
+msgid "if COMMANDS; then COMMANDS; [ elif COMMANDS; then COMMANDS; ]... [ else COMMANDS; ] fi"
+msgstr "if POLECENIA; then POLECENIA; [ elif POLECENIA; then POLECENIA; ]... [ else POLECENIA; ] fi"
 
 #: builtins.c:194
 msgid "while COMMANDS; do COMMANDS; done"
-msgstr ""
+msgstr "while POLECENIA; do POLECENIA; done"
 
 #: builtins.c:196
 msgid "until COMMANDS; do COMMANDS; done"
-msgstr ""
+msgstr "until POLECENIA; do POLECENIA; done"
 
 #: builtins.c:198
 msgid "coproc [NAME] command [redirections]"
-msgstr ""
+msgstr "coproc [NAZWA] polecenie [przekierowania]"
 
 #: builtins.c:200
 msgid "function name { COMMANDS ; } or name () { COMMANDS ; }"
-msgstr ""
+msgstr "function nazwa { POLECENIA ; } lub nazwa () { POLECENIA ; }"
 
 #: builtins.c:202
 msgid "{ COMMANDS ; }"
-msgstr ""
+msgstr "{ POLECENIA ; }"
 
 #: builtins.c:204
 msgid "job_spec [&]"
-msgstr ""
+msgstr "zadanie [&]"
 
 #: builtins.c:206
-#, fuzzy
 msgid "(( expression ))"
-msgstr "spodziewano siê wyra¿enia"
+msgstr "(( wyra¿enie ))"
 
 #: builtins.c:208
-#, fuzzy
 msgid "[[ expression ]]"
-msgstr "spodziewano siê wyra¿enia"
+msgstr "[[ wyra¿enie ]]"
 
 #: builtins.c:210
 msgid "variables - Names and meanings of some shell variables"
-msgstr ""
+msgstr "zmienne - nazwy i znaczenie niektórych zmiennych pow³oki"
 
 #: builtins.c:213
 msgid "pushd [-n] [+N | -N | dir]"
-msgstr ""
+msgstr "pushd [-n] [+N | -N | katalog]"
 
 #: builtins.c:217
 msgid "popd [-n] [+N | -N]"
-msgstr ""
+msgstr "popd [-n] [+N | -N]"
 
 #: builtins.c:221
 msgid "dirs [-clpv] [+N] [-N]"
-msgstr ""
+msgstr "dirs [-clpv] [+N] [-N]"
 
 #: builtins.c:224
 msgid "shopt [-pqsu] [-o] [optname ...]"
-msgstr ""
+msgstr "shopt [-pqsu] [-o] [nazwa-opcji ...]"
 
 #: builtins.c:226
 msgid "printf [-v var] format [arguments]"
-msgstr ""
+msgstr "printf [-v var] format [argumenty]"
 
 #: builtins.c:229
-msgid ""
-"complete [-abcdefgjksuv] [-pr] [-DE] [-o option] [-A action] [-G globpat] [-"
-"W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S "
-"suffix] [name ...]"
-msgstr ""
+msgid "complete [-abcdefgjksuv] [-pr] [-DE] [-o option] [-A action] [-G globpat] [-W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [name ...]"
+msgstr "complete [-abcdefgjksuv] [-pr] [-DE] [-o opcja] [-A akcja] [-G wzorzec-glob] [-W lista-s³ów] [-F funkcja] [-C polecenie] [-X wzorzec-filtra] [-P przedrostek] [-S przyrostek] [nazwa ...]"
 
 #: builtins.c:233
-msgid ""
-"compgen [-abcdefgjksuv] [-o option]  [-A action] [-G globpat] [-W wordlist]  "
-"[-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]"
-msgstr ""
+msgid "compgen [-abcdefgjksuv] [-o option]  [-A action] [-G globpat] [-W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]"
+msgstr "compgen [-abcdefgjksuv] [-o opcja]  [-A akcja] [-G wzorzec-glob] [-W lista-s³ów]  [-F funkcja] [-C polecenie] [-X wzorzec-filtra] [-P przedrostek ] [-S przyrostek] [s³owo]"
 
 #: builtins.c:237
 msgid "compopt [-o|+o option] [-DE] [name ...]"
-msgstr ""
+msgstr "compopt [-o|+o opcja] [-DE] [nazwa ...]"
 
 #: builtins.c:240
-msgid ""
-"mapfile [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c "
-"quantum] [array]"
-msgstr ""
+msgid "mapfile [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c quantum] [array]"
+msgstr "mapfile [-n liczba] [-O pocz±tek] [-s liczba] [-t] [-u fd] [-C wywo³anie] [-c co-ile] [tablica]"
 
 #: builtins.c:242
-msgid ""
-"readarray [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c "
-"quantum] [array]"
-msgstr ""
+msgid "readarray [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c quantum] [array]"
+msgstr "readarray [-n liczba] [-O pocz±tek] [-s liczba] [-t] [-u fd] [-C wywo³anie] [-c co-ile] [tablica]"
 
 #: builtins.c:254
-#, fuzzy
 msgid ""
 "Define or display aliases.\n"
 "    \n"
@@ -2340,20 +2289,28 @@ msgid ""
 "      -p\tPrint all defined aliases in a reusable format\n"
 "    \n"
 "    Exit Status:\n"
-"    alias returns true unless a NAME is supplied for which no alias has "
-"been\n"
+"    alias returns true unless a NAME is supplied for which no alias has been\n"
 "    defined."
 msgstr ""
-"`alias' bez argumentów lub z opcj± -p wypisuje na standardowym wyj¶ciu\n"
-"    listê aliasów w postaci alias NAME=VALUE. W przeciwnym przypadku\n"
-"    definiowany jest alias dla ka¿dego NAME, dla którego podano VALUE.\n"
-"    Spacja na koñcu VALUE powoduje, ¿e podczas rozwijania tego aliasu\n"
-"    podstawienie aliasów bêdzie przeprowadzone tak¿e dla nastêpnego\n"
-"    s³owa. Polecenie alias zwraca prawdê, chyba ¿e poda siê NAME, dla\n"
-"    którego nie zdefiniowano aliasu."
+"Definiowanie i wy¶wietlanie aliasów.\n"
+"    \n"
+"    Bez argumentów `alias' wypisuje na standardowym wyj¶ciu listê aliasów\n"
+"    w postaci alias NAZWA=WARTO¦Æ.\n"
+"    \n"
+"    W przeciwnym przypadku definiowany jest alias dla ka¿dej NAZWY, dla której\n"
+"    podano WARTO¦Æ. Spacja na koñcu WARTO¦CI powoduje, ¿e podczas rozwijania\n"
+"    tego aliasu podstawienie aliasów bêdzie przeprowadzone tak¿e dla\n"
+"    nastêpnego s³owa.\n"
+"    \n"
+"    Opcje:\n"
+"      -p\tWypisanie wszystkich zdefiniowanych aliasów w formacie do\n"
+"    \tponownego u¿ycia\n"
+"    \n"
+"    Stan wyj¶ciowy:\n"
+"    Polecenie alias zwraca prawdê, chyba ¿e poda siê NAZWÊ, dla której nie\n"
+"    zdefiniowano aliasu."
 
 #: builtins.c:276
-#, fuzzy
 msgid ""
 "Remove each NAME from the list of defined aliases.\n"
 "    \n"
@@ -2362,11 +2319,14 @@ msgid ""
 "    \n"
 "    Return success unless a NAME is not an existing alias."
 msgstr ""
-"Usuwa wszystkie NAME z listy zdefiniowanych aliasów. Je¶li podano opcjê -a,\n"
-"    usuwane s± wszystkie definicje aliasów."
+"Usuwa wszystkich NAZW z listy zdefiniowanych aliasów.\n"
+"    \n"
+"    Opcje:\n"
+"      -a\tusuniêcie wszystkich definicji aliasów.\n"
+"    \n"
+"    Zwracana jest prawda, chyba ¿e NAZWA nie jest istniej±cym aliasem."
 
 #: builtins.c:289
-#, fuzzy
 msgid ""
 "Set Readline key bindings and variables.\n"
 "    \n"
@@ -2378,24 +2338,20 @@ msgid ""
 "    Options:\n"
 "      -m  keymap         Use KEYMAP as the keymap for the duration of this\n"
 "                         command.  Acceptable keymap names are emacs,\n"
-"                         emacs-standard, emacs-meta, emacs-ctlx, vi, vi-"
-"move,\n"
+"                         emacs-standard, emacs-meta, emacs-ctlx, vi, vi-move,\n"
 "                         vi-command, and vi-insert.\n"
 "      -l                 List names of functions.\n"
 "      -P                 List function names and bindings.\n"
 "      -p                 List functions and bindings in a form that can be\n"
 "                         reused as input.\n"
-"      -S                 List key sequences that invoke macros and their "
-"values\n"
-"      -s                 List key sequences that invoke macros and their "
-"values\n"
+"      -S                 List key sequences that invoke macros and their values\n"
+"      -s                 List key sequences that invoke macros and their values\n"
 "                         in a form that can be reused as input.\n"
 "      -V                 List variable names and values\n"
 "      -v                 List variable names and values in a form that can\n"
 "                         be reused as input.\n"
 "      -q  function-name  Query about which keys invoke the named function.\n"
-"      -u  function-name  Unbind all keys which are bound to the named "
-"function.\n"
+"      -u  function-name  Unbind all keys which are bound to the named function.\n"
 "      -r  keyseq         Remove the binding for KEYSEQ.\n"
 "      -f  filename       Read key bindings from FILENAME.\n"
 "      -x  keyseq:shell-command\tCause SHELL-COMMAND to be executed when\n"
@@ -2404,45 +2360,41 @@ msgid ""
 "    Exit Status:\n"
 "    bind returns 0 unless an unrecognized option is given or an error occurs."
 msgstr ""
-"Przypisanie sekwencji klawiszy do funkcji Readline lub makra albo "
-"ustawienie\n"
-"    zmiennej Readline. Sk³adnia pozbawiona opcji jest równowa¿na stosowanej\n"
-"    w ~/.inputrc, ale musi byæ przekazana jako jeden argument:\n"
+"Ustawianie przypisañ klawiszy i zmiennych Readline.\n"
+"    \n"
+"    Przypisanie sekwencji klawiszy do funkcji Readline lub makra albo\n"
+"    ustawienie zmiennej Readline. Sk³adnia pozbawiona opcji jest równowa¿na\n"
+"    stosowanej w ~/.inputrc, ale musi byæ przekazana jako jeden argument, np.:\n"
 "    bind '\"\\C-x\\C-r\": re-read-init-file'.\n"
-"    bind akceptuje nastêpuj±ce opcje:\n"
-"      -m  keymap         U¿ycie `keymap' jako mapy klawiatury na czas tego\n"
-"                         polecenia. Dozwolone nazwy map klawiatury to "
-"emacs,\n"
-"                         emacs-standard, emacs-meta, emacs-ctlx, vi, vi-"
-"move,\n"
+"    \n"
+"    Opcje:\n"
+"      -m  MAPA           U¿ycie MAPY jako mapy klawiatury na czas tego\n"
+"                         polecenia. Dozwolone nazwy map klawiatury to emacs,\n"
+"                         emacs-standard, emacs-meta, emacs-ctlx, vi, vi-move,\n"
 "                         vi-command i vi-insert.\n"
 "      -l                 Wypisanie nazw funkcji.\n"
 "      -P                 Wypisanie nazw funkcji i dowi±zañ.\n"
-"      -p                 Wypisanie funkcji i dowi±zañ w postaci nadaj±cej "
-"siê\n"
+"      -p                 Wypisanie funkcji i dowi±zañ w postaci nadaj±cej siê\n"
 "                         do u¿ycia jako dane wej¶ciowe.\n"
-"      -r  keyseq         Usuniêcie dowi±zania dla KEYSEQ.\n"
-"      -x  keyseq:shell-command\tPowoduje uruchomienie SHELL-COMMAND, gdy\n"
-"    \t\t\t\twprowadzone zostanie KEYSEQ.\n"
-"      -f  filename       Odczyt dowi±zañ dla klawiszy z pliku FILENAME.\n"
-"      -q  function-name  Okre¶lenie, które klawisze wywo³uj± zadan± "
-"funkcjê.\n"
-"      -u  function-name  Anulowanie wszystkich dowi±zañ dla klawiszy\n"
-"                         przypisanych do funkcji function-name.\n"
-"      -V                 Wypisanie nazw zmiennych i ich warto¶ci.\n"
+"      -S                 Wypisanie sekwencji klawiszy wywo³uj±cych makra oraz\n"
+"                         ich warto¶ci.\n"
+"      -s                 Wypisanie sekwencji klawiszy wywo³uj±cych makra oraz\n"
+"                         ich warto¶ci w postaci nadaj±cej siê do u¿ycia jako\n"
+"                         dane wej¶ciowe.      -V                 Wypisanie nazw zmiennych i ich warto¶ci.\n"
 "      -v                 Wypisanie nazw zmiennych i ich warto¶ci w postaci\n"
 "                         nadaj±cej siê do u¿ycia jako dane wej¶ciowe.\n"
-"      -S                 Wypisanie sekwencji klawiszy wywo³uj±cych makra "
-"oraz\n"
-"                         ich warto¶ci.\n"
-"      -s                 Wypisanie sekwencji klawiszy wywo³uj±cych makra "
-"oraz\n"
-"                         ich warto¶ci w postaci nadaj±cej siê do u¿ycia "
-"jako\n"
-"                         dane wej¶ciowe."
+"      -q  nazwa-funkcji  Okre¶lenie, które klawisze wywo³uj± zadan± funkcjê.\n"
+"      -u  nazwa-funkcji  Anulowanie wszystkich dowi±zañ dla klawiszy\n"
+"                         przypisanych do funkcji o podanej nazwie.\n"
+"      -r  sekwencja      Usuniêcie dowi±zania dla SEKWENCJI klawiszy.\n"
+"      -f  plik           Odczyt dowi±zañ dla klawiszy z podanego PLIKU.\n"
+"      -x  sekwencja:polecenie-pow³oki\tPowoduje uruchomienie POLECENIA-POW£OKI\n"
+"    \t\t\t\tgdy wprowadzona zostanie podana SEKWENCJA klawiszy.\n"
+"    \n"
+"    Stan wyj¶ciowy:\n"
+"    bind zwraca 0, chyba ¿e podano nieznan± opcjê lub wyst±pi³ b³±d."
 
 #: builtins.c:326
-#, fuzzy
 msgid ""
 "Exit for, while, or until loops.\n"
 "    \n"
@@ -2452,11 +2404,15 @@ msgid ""
 "    Exit Status:\n"
 "    The exit status is 0 unless N is not greater than or equal to 1."
 msgstr ""
-"Rozpoczêcie nastêpnej iteracji pêtli FOR, WHILE lub UNTIL zawier±jacej\n"
-"    polecenie. Je¶li podano N, iteracja dotyczy pêtli N-tego poziomu."
+"Wyj¶cie z pêtli for, while lub until.\n"
+"    \n"
+"    Wyj¶cie z pêtli FOR, WHILE lub UNTIL. Je¶li podano N, sterowanie wychodzi\n"
+"    za N-t± zagnie¿d¿on± pêtlê.\n"
+"    \n"
+"    Stan wyj¶ciowy:\n"
+"    Instrukcja zwraca prawdê, chyba ¿e N jest mniejsze ni¿ 1."
 
 #: builtins.c:338
-#, fuzzy
 msgid ""
 "Resume for, while, or until loops.\n"
 "    \n"
@@ -2466,8 +2422,13 @@ msgid ""
 "    Exit Status:\n"
 "    The exit status is 0 unless N is not greater than or equal to 1."
 msgstr ""
-"Rozpoczêcie nastêpnej iteracji pêtli FOR, WHILE lub UNTIL zawier±jacej\n"
-"    polecenie. Je¶li podano N, iteracja dotyczy pêtli N-tego poziomu."
+"Wznowienie pêtli for, while lub until.\n"
+"    \n"
+"    Wznowienie nastêpnej iteracji otaczaj±cej pêtli FOR, WHILE lub UNTIL.\n"
+"    Je¶li podano N, to wznawiana jest N-ta otaczaj±ca pêtla.\n"
+"    \n"
+"    Stan wyj¶ciowy:\n"
+"    Instrukcja zwraca 0, chyba ¿e N jest mniejsze ni¿ 1."
 
 #: builtins.c:350
 msgid ""
@@ -2475,16 +2436,24 @@ msgid ""
 "    \n"
 "    Execute SHELL-BUILTIN with arguments ARGs without performing command\n"
 "    lookup.  This is useful when you wish to reimplement a shell builtin\n"
-"    as a shell function, but need to execute the builtin within the "
-"function.\n"
+"    as a shell function, but need to execute the builtin within the function.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns the exit status of SHELL-BUILTIN, or false if SHELL-BUILTIN is\n"
 "    not a shell builtin.."
 msgstr ""
+"Wywo³anie polecenia wbudowanego pow³oki.\n"
+"    \n"
+"    Wywo³anie POLECENIA-WBUDOWANEGO z argumentami ARG bez wykonywania\n"
+"    wyszukiwania polecenia. Jest to przydatne w przypadku ponownego\n"
+"    implementowania polecenia wbudowanego jako funkcji pow³oki i wywo³ywania\n"
+"    polecenia wbudowanego z wewn±trz tej funkcji.\n"
+"    \n"
+"    Stan wyj¶ciowy:\n"
+"    Instrukcja zwraca stan wyj¶ciowy POLECENIA-WBUDOWANEGO lub fa³sz, je¶li\n"
+"    POLECENIE-WBUDOWANE nie jest poleceniem wbudowanym pow³oki."
 
 #: builtins.c:365
-#, fuzzy
 msgid ""
 "Return the context of the current subroutine call.\n"
 "    \n"
@@ -2501,34 +2470,30 @@ msgid ""
 msgstr ""
 "Zwrócenie kontekstu wywo³ania bie¿±cej procedury.\n"
 "    \n"
-"    Bez EXPR, zwracane jest \"$line $filename\". Z EXPR, zwracane jest\n"
-"    \"$line $subroutine $filename\"; dodatkowe informacje s³u¿± do\n"
-"    udostêpnienia ¶ladu stosu.\n"
+"    Bez WYRA¯ENIA zwracane jest \"$linia $plik\". Z WYRA¯ENIEM zwracane jest\n"
+"    \"$linia $procedura $plik\"; dodatkowe informacje s³u¿± do udostêpnienia\n"
+"    ¶ladu stosu.\n"
 "    \n"
-"    Warto¶æ EXPR okre¶la o ile ramek wywo³añ wzglêdem bie¿±cej ramki\n"
-"    nale¿y siê cofn±æ; numer najwy¿szej ramki to 0."
+"    Warto¶æ WYRA¯ENIA okre¶la o ile ramek wywo³añ wzglêdem bie¿±cej ramki\n"
+"    nale¿y siê cofn±æ; numer najwy¿szej ramki to 0.    \n"
+"    Stan wyj¶ciowy:\n"
+"    Polecenie zwraca 0, chyba ¿e pow³oka nie wykonuje funkcji lub WYRA¯ENIE\n"
+"    jest nieprawid³owe."
 
 #: builtins.c:383
-#, fuzzy
 msgid ""
 "Change the shell working directory.\n"
 "    \n"
-"    Change the current directory to DIR.  The default DIR is the value of "
-"the\n"
+"    Change the current directory to DIR.  The default DIR is the value of the\n"
 "    HOME shell variable.\n"
 "    \n"
-"    The variable CDPATH defines the search path for the directory "
-"containing\n"
-"    DIR.  Alternative directory names in CDPATH are separated by a colon "
-"(:).\n"
-"    A null directory name is the same as the current directory.  If DIR "
-"begins\n"
+"    The variable CDPATH defines the search path for the directory containing\n"
+"    DIR.  Alternative directory names in CDPATH are separated by a colon (:).\n"
+"    A null directory name is the same as the current directory.  If DIR begins\n"
 "    with a slash (/), then CDPATH is not used.\n"
 "    \n"
-"    If the directory is not found, and the shell option `cdable_vars' is "
-"set,\n"
-"    the word is assumed to be  a variable name.  If that variable has a "
-"value,\n"
+"    If the directory is not found, and the shell option `cdable_vars' is set,\n"
+"    the word is assumed to be  a variable name.  If that variable has a value,\n"
 "    its value is used for DIR.\n"
 "    \n"
 "    Options:\n"
@@ -2541,22 +2506,37 @@ msgid ""
 "    The default is to follow symbolic links, as if `-L' were specified.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns 0 if the directory is changed, and if $PWD is set successfully "
-"when\n"
+"    Returns 0 if the directory is changed, and if $PWD is set successfully when\n"
 "    -P is used; non-zero otherwise."
 msgstr ""
-"Zmiana bie¿±cego katalogu na DIR. Domy¶lnym DIR jest zmienna $HOME.\n"
+"Zmiana bie¿±cego katalogu pow³oki.\n"
+"    \n"
+"    Zmiana bie¿±cego katalogu na KATALOG. Domy¶lnym KATALOGIEM jest warto¶æ\n"
+"    zmiennej pow³oki $HOME.\n"
+"    \n"
 "    Zmienna CDPATH okre¶la ¶cie¿kê przeszukiwania w poszukiwaniu katalogu\n"
-"    zawieraj±cego DIR. Alternatywne nazwy katalogów s± w CDPATH rozdzielone\n"
+"    zawieraj±cego KATALOG. Alternatywne nazwy katalogów s± w CDPATH rozdzielone\n"
 "    dwukropkami (:). Pusta nazwa katalogu oznacza to samo, co katalog\n"
-"    bie¿±cy, tzn. `.'. Je¶li DIR zaczyna siê od uko¶nika (/), to CDPATH nie\n"
-"    nie jest u¿ywane. Gdy katalog nie zostanie znaleziony, a ustawiona\n"
-"    zmienna pow³oki `cdable_vars', to nastêpuje próba u¿ycia podanej nazwy\n"
-"    jako nazwy zmiennej. Je¶li zmienna ta ma warto¶æ, to wykonywane jest cd\n"
-"    do warto¶ci tej zmiennej. Opcja -P poleca korzystaæ z fizycznej "
-"struktury\n"
-"    katalogów zamiast ¶ledzenia dowi±zañ symbolicznych; opcja -L wymusza\n"
-"    ¶ledzenie dowi±zañ symbolicznych."
+"    bie¿±cy. Je¶li KATALOG zaczyna siê od uko¶nika (/), to CDPATH nie\n"
+"    nie jest u¿ywane.\n"
+"    \n"
+"    Gdy katalog nie zostanie znaleziony, a ustawiona jest zmienna pow³oki\n"
+"    `cdable_vars', to nastêpuje próba u¿ycia podanej nazwy jako nazwy zmiennej.\n"
+"    Je¶li zmienna ta ma warto¶æ, to jako KATALOG jest u¿ywana jej wartosæ.\n"
+"    \n"
+"    Opcje:\n"
+"        -L\twymuszenie ¶ledzenia dowi±zañ symbolicznych\n"
+"        -P\tkorzystanie z fizycznej struktury katalogów zamiast ¶ledzenia\n"
+"    \tdowi±zañ symbolicznych\n"
+"        -e\tje¶li podano opcjê -P, a nie mo¿na okre¶liæ bie¿±cego katalogu,\n"
+"    \tpolecenie koñczy siê stanem niezerowym\n"
+"    \n"
+"    Domy¶lne jest ¶ledzenie dowi±zañ symbolicznych, jak z opcj± `-L'.\n"
+"    \n"
+"    Stan wyj¶ciowy:\n"
+"    Polecenie zwraca 0 je¶li katalog zosta³ zmieniony oraz $PWD zosta³o\n"
+"    zmienione pomy¶lnie w przypadku u¿ycia -P; w przeciwnym razie zwraca\n"
+"    warto¶æ niezerow±."
 
 #: builtins.c:414
 msgid ""
@@ -2573,9 +2553,19 @@ msgid ""
 "    Returns 0 unless an invalid option is given or the current directory\n"
 "    cannot be read."
 msgstr ""
+"Wypisanie nazwy bie¿±cego katalogu roboczego.\n"
+"    \n"
+"    Opcje:\n"
+"      -L\twypisanie warto¶ci $PWD je¶li okre¶la bie¿±cy katalog roboczy\n"
+"      -P\twypisanie katalogu fizycznego, bez dowi±zañ symbolicznych\n"
+"    \n"
+"    Domy¶lnie `pwd' zachowuje siê tak, jak z opcj± `-L'.\n"
+"    \n"
+"    Stan wyj¶ciowy:\n"
+"    Polecenie zwraca 0, chyba ¿e podano nieprawid³ow± opcjê lub katalog\n"
+"    bie¿±cy nie mo¿e byæ odczytany."
 
 #: builtins.c:431
-#, fuzzy
 msgid ""
 "Null command.\n"
 "    \n"
@@ -2584,8 +2574,12 @@ msgid ""
 "    Exit Status:\n"
 "    Always succeeds."
 msgstr ""
-"¯adnego efektu; polecenie nic nie robi. Jako kod zakoñczenia\n"
-"    zwracane jest zero."
+"Polecenie puste.\n"
+"    \n"
+"    ¯adnego efektu; polecenie nic nie robi.\n"
+"    \n"
+"    Stan wyj¶ciowy:\n"
+"    Zawsze zwracana jest prawda."
 
 #: builtins.c:442
 msgid ""
@@ -2594,23 +2588,29 @@ msgid ""
 "    Exit Status:\n"
 "    Always succeeds."
 msgstr ""
+"Zwrócenie wyniku pozytywnego.\n"
+"    \n"
+"    Stan wyj¶ciowy:\n"
+"    Zawsze zwracana jest prawda."
 
 #: builtins.c:451
-#, fuzzy
 msgid ""
 "Return an unsuccessful result.\n"
 "    \n"
 "    Exit Status:\n"
 "    Always fails."
-msgstr "Zwracany jest niepomy¶lny wynik zakoñczenia."
+msgstr ""
+"Zwrócenie wyniku negatywnego.\n"
+"    \n"
+"    Stan wyj¶ciowy:\n"
+"    Zawsze zwracany jest fa³sz."
 
 #: builtins.c:460
 msgid ""
 "Execute a simple command or display information about commands.\n"
 "    \n"
 "    Runs COMMAND with ARGS suppressing  shell function lookup, or display\n"
-"    information about the specified COMMANDs.  Can be used to invoke "
-"commands\n"
+"    information about the specified COMMANDs.  Can be used to invoke commands\n"
 "    on disk when a function with the same name exists.\n"
 "    \n"
 "    Options:\n"
@@ -2622,9 +2622,23 @@ msgid ""
 "    Exit Status:\n"
 "    Returns exit status of COMMAND, or failure if COMMAND is not found."
 msgstr ""
+"Wywo³anie prostego polecenia lub wy¶wietlenie informacji o poleceniach.\n"
+"    \n"
+"    Uruchomienie POLECENIA z ARGUMENTAMI z pominiêciem wyszukiwania funkcji\n"
+"    pow³oki lub wy¶wietlenie informacji o podanych POLECENIACH. Mo¿e byæ u¿yte\n"
+"    do wywo³ania poleceñ z dysku je¶li ju¿ istnieje funkcja o danej nazwie.\n"
+"    \n"
+"    Opcje:\n"
+"      -p\tu¿ycie domy¶lnej warto¶ci PATH, pod któr± powinny byæ wszystkie\n"
+"    \tstandardowe narzêdzia\n"
+"      -v\twypisanie opisu POLECENIA w sposób podobny do polecenia `type'\n"
+"      -V\twypisanie szczegó³owego opisu ka¿dego POLECENIA\n"
+"    \n"
+"    Stan wyj¶ciowy:\n"
+"    Polecenie zwraca stan POLECENIA lub fa³sz, je¶li POLECENIE nie zosta³o\n"
+"    znalezione."
 
 #: builtins.c:479
-#, fuzzy
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
@@ -2654,38 +2668,45 @@ msgid ""
 "    Variables with the integer attribute have arithmetic evaluation (see\n"
 "    the `let' command) performed when the variable is assigned a value.\n"
 "    \n"
-"    When used in a function, `declare' makes NAMEs local, as with the "
-"`local'\n"
+"    When used in a function, `declare' makes NAMEs local, as with the `local'\n"
 "    command.  The `-g' option suppresses this behavior.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns success unless an invalid option is supplied or an error occurs."
 msgstr ""
-"Deklarowanie zmiennych i/lub nadawanie im atrybutów. Je¶li nie podano NAME,\n"
-"    wypisywane s± warto¶ci zmiennych. Opcja -p powoduje wypisanie atrybutów\n"
-"    i warto¶ci dla ka¿dego NAME.\n"
+"Ustawienie warto¶ci i atrybutów zmiennej.\n"
 "    \n"
-"    Pozosta³e opcje:\n"
+"    Deklaracja zmiennych i nadanie im warto¶ci. Je¶li nie podano NAZW,\n"
+"    wy¶wietlane s± atrybuty i warto¶ci wszystkich zmiennych.\n"
 "    \n"
-"      -a\tuczynienie wszystkich NAME tablicami (je¶li wspierane)\n"
-"      -f\twybranie tylko spo¶ród nazw funkcji\n"
-"      -F\twypisanie nazw funkcji (oraz, w przypadku ¶ledzenia, numerów\n"
-"    \twierszy i nazw plików) bez definicji\n"
-"      -i\tnadanie wszystkim NAME atrybutu `integer'\n"
-"      -r\tuczynienie wszystkich NAME tylko do odczytu\n"
-"      -t\tnadanie wszystkim NAME atrybutu `trace'\n"
-"      -x\tuczynienie wszystkich NAME eksportowanymi\n"
+"    Opcje:\n"
+"      -f\tograniczenie akcji lub wy¶wietlania do nazw i definicji funkcji\n"
+"      -F\tograniczenie wy¶wietlania tylko do nazw funkcji (oraz numeru\n"
+"    \tlinii i pliku ¼ród³owego w przypadku diagnostyki)\n"
+"      -g\ttworzenie zmiennych globalnych w przypadku u¿ycia w funkcji\n"
+"    \tpow³oki; w przeciwnym wypadku ignorowane\n"
+"      -p\twy¶wietlenie atrybutów i warto¶ci dla ka¿dej NAZWY\n"
 "    \n"
-"    Dla zmiennych posiadaj±cych atrybut integer wykonywana jest podczas\n"
-"    nadawania im warto¶ci ewaluacja arytmetyczna (patrz `let').\n"
+"    Opcje ustawiaj±ce atrybuty:\n"
+"      -a\tczyni NAZWÊ tablic± indeksowan± (je¶li s± one obs³ugiwane)\n"
+"      -A\tczyni NAZWÊ tablic± asocjacyjn± (je¶li s± one obs³ugiwane)\n"
+"      -i\tnadaje NAZWIE atrybut `integer' (zmiennej ca³kowitej)\n"
+"      -l\tprzekszta³ca NAZWÊ na ma³e litery przy przypisaniu\n"
+"      -r\tczyni NAZWÊ tylko do odczytu\n"
+"      -t\tnadaje NAZWIE atrybut `trace'\n"
+"      -u\tprzekszta³ca NAZWÊ na wielkie litery przy przypisaniu\n"
+"      -x\teksportuje NAZWÊ\n"
 "    \n"
-"    Przy wypisywaniu warto¶ci zmiennych, -f powoduje wypisanie zarówno "
-"nazw,\n"
-"    jak i definicji funkcji. Przy opcji -F wypisywane s± tylko nazwy "
-"funkcji.\n"
+"    U¿ycie `+' zamiast `-' wy³±cza podany atrybut.\n"
 "    \n"
-"    U¿ycie `+' zamiast `-' powoduje wy³±czenie danego atrybutu. U¿yte\n"
-"    w funkcji czyni wszystkie NAME lokalnymi, podobnie jak polecenie `local'."
+"    Zmienne z atrybutem `integer' maj± obliczan± warto¶æ arytmetyczn±\n"
+"    (jak w poleceniu `let') podczas przypisywania warto¶ci.\n"
+"    \n"
+"    W przypadku u¿ycia w funkcji `declare' czyni NAZWÊ lokaln±, podobnie\n"
+"    jak polecenie `local'. Opcja `-g' zmienia to zachowanie.\n"
+"    \n"
+"    Stan wyj¶ciowy:\n"
+"    Polecenie zwraca prawdê, chyba ¿e podano b³êdn± opcjê lub wyst±pi³ b³±d."
 
 #: builtins.c:517
 msgid ""
@@ -2693,6 +2714,9 @@ msgid ""
 "    \n"
 "    Obsolete.  See `help declare'."
 msgstr ""
+"Ustawienie warto¶ci i atrybutów zmiennej.\n"
+"    \n"
+"    Polecenie przestarza³e - p. `help declare'."
 
 #: builtins.c:525
 msgid ""
@@ -2708,9 +2732,19 @@ msgid ""
 "    Returns success unless an invalid option is supplied, an error occurs,\n"
 "    or the shell is not executing a function."
 msgstr ""
+"Definiowanie zmiennych lokalnych.\n"
+"    \n"
+"    Utworzenie zmiennej lokalnej o podanej NAZWIE i nadanie jej WARTO¦CI.\n"
+"    OPCJA mo¿e byæ dowoln± opcj± przyjmowan± przez `declare'.\n"
+"    \n"
+"    Zmienne lokalne mog± byæ u¿ywane tylko w funkcji; s± widoczne wy³±cznie\n"
+"    w funkcji, w której zosta³y zdefiniowanej, oraz jej potomkach.\n"
+"    \n"
+"    Stan wyj¶ciowy:\n"
+"    Zwracana jest prawda, chyba ¿e podano b³êdn± opcjê, wyst±pi³ b³±d lub\n"
+"    pow³oka nie wykonuje ¿adnej funkcji."
 
 #: builtins.c:542
-#, fuzzy
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -2740,24 +2774,35 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless a write error occurs."
 msgstr ""
-"Wypisanie argumentów. Je¶li podano -n, pomijany jest koñcowy znak nowego\n"
-"    wiersza. Je¶li podano opcjê -e, w³±czana jest interpretacja "
-"nastêpuj±cych\n"
-"    znaków poprzedzonych odwrotnym uko¶nikiem:\n"
-"    \t\\a\talarm (dzwonek)\n"
-"    \t\\b\tcofanie\n"
-"    \t\\c\tlikwidacja koñcowego znaku nowego wiersza\n"
-"    \t\\E\tznak ESCAPE\n"
-"    \t\\f\twysuw strony\n"
-"    \t\\n\tnowy wiersz\n"
-"    \t\\r\tpowrót karetki\n"
-"    \t\\t\ttabulacja pozioma\n"
-"    \t\\v\ttabulacja pionowa\n"
-"    \t\\\\\todwrotny uko¶nik\n"
-"    \t\\0nnn\tznak o kodzie ASCII NNN (ósemkowo). NNN mo¿e stanowiæ od\n"
-"    \t\t0 do 3 cyfr ósemkowych\n"
+"Wypisanie argumentów na standardowym wyj¶ciu.\n"
 "    \n"
-"    Za pomoc± opcji -E mo¿na jawnie wy³±czyæ interpretacjê powy¿szych znaków."
+"    Wypisanie na standardowym wyj¶ciu ARGumentów oraz znaku koñca linii.\n"
+"    \n"
+"    Opcje:\n"
+"      -n\tniedo³±czanie znaku koñca linii\n"
+"      -e\tw³±czenie interpretowania poni¿szych znaków poprzedzonych\n"
+"    \todwrotnym uko¶nikiem\n"
+"      -E\twy³±czenie interpretowania poni¿szych znaków poprzedzonych\n"
+"    \todwrotnym uko¶nikiem\n"
+"    \n"
+"    `echo' interpretuje nastêpuj±ce znaki poprzedzone odwrotnym uko¶nikiem:\n"
+"      \\a\talarm (dzwonek)\n"
+"      \\b\tcofniêcie\n"
+"      \\c\tpominiêcie dalszego wyj¶cia (w tym znaku nowego wiersza)\n"
+"      \\e\tznak ESCAPE\n"
+"      \\f\twysuw strony\n"
+"      \\n\tnowy wiersz\n"
+"      \\r\tpowrót karetki\n"
+"      \\t\ttabulacja pozioma\n"
+"      \\v\ttabulacja pionowa\n"
+"      \\\\\todwrotny uko¶nik\n"
+"      \\0nnn\tznak o kodzie ASCII NNN (ósemkowo). NNN mo¿e stanowiæ od\n"
+"    \t0 do 3 cyfr ósemkowych\n"
+"      \\xHH\tznak o¶miobitowy o warto¶ci HH (szesnastkowo). HH mo¿e byæ\n"
+"    \tjedn± lub dwiema cyframi\n"
+"    \n"
+"    Stan wyj¶ciowy:\n"
+"    Zwracana jest prawda, chyba ¿e wyst±pi³ b³±d zapisu."
 
 #: builtins.c:576
 msgid ""
@@ -2771,6 +2816,15 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless a write error occurs."
 msgstr ""
+"Wypisanie argumentów na standardowym wyj¶ciu.\n"
+"    \n"
+"    Wypisanie na standardowym wyj¶ciu ARGumentów i znaku koñca linii.\n"
+"    \n"
+"    Opcje:\n"
+"      -n\tniedo³±czanie znaku koñca linii\n"
+"    \n"
+"    Stan wyj¶ciowy:\n"
+"    Zwracana jest prawda, chyba ¿e wyst±pi³ b³±d zapisu."
 
 #: builtins.c:591
 msgid ""
@@ -2803,8 +2857,7 @@ msgstr ""
 msgid ""
 "Execute arguments as a shell command.\n"
 "    \n"
-"    Combine ARGs into a single string, use the result as input to the "
-"shell,\n"
+"    Combine ARGs into a single string, use the result as input to the shell,\n"
 "    and execute the resulting commands.\n"
 "    \n"
 "    Exit Status:\n"
@@ -2857,8 +2910,7 @@ msgid ""
 "Replace the shell with the given command.\n"
 "    \n"
 "    Execute COMMAND, replacing this shell with the specified program.\n"
-"    ARGUMENTS become the arguments to COMMAND.  If COMMAND is not "
-"specified,\n"
+"    ARGUMENTS become the arguments to COMMAND.  If COMMAND is not specified,\n"
 "    any redirections take effect in the current shell.\n"
 "    \n"
 "    Options:\n"
@@ -2866,49 +2918,49 @@ msgid ""
 "      -c\t\texecute COMMAND with an empty environment\n"
 "      -l\t\tplace a dash in the zeroth argument to COMMAND\n"
 "    \n"
-"    If the command cannot be executed, a non-interactive shell exits, "
-"unless\n"
+"    If the command cannot be executed, a non-interactive shell exits, unless\n"
 "    the shell option `execfail' is set.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success unless COMMAND is not found or a redirection error "
-"occurs."
+"    Returns success unless COMMAND is not found or a redirection error occurs."
 msgstr ""
 
 #: builtins.c:694
-#, fuzzy
 msgid ""
 "Exit the shell.\n"
 "    \n"
 "    Exits the shell with a status of N.  If N is omitted, the exit status\n"
 "    is that of the last command executed."
 msgstr ""
-"Opuszczenie pow³oki z kodem zakoñczenia N. Je¶li N pominiêto, kodem\n"
+"Opuszczenie pow³oki.\n"
+"    \n"
+"    Opuszczenie pow³oki z kodem zakoñczenia N. Je¶li N pominiêto, kodem\n"
 "    zakoñczenia bêdzie kod zakoñczenia ostatniego wykonanego polecenia."
 
 #: builtins.c:703
 msgid ""
 "Exit a login shell.\n"
 "    \n"
-"    Exits a login shell with exit status N.  Returns an error if not "
-"executed\n"
+"    Exits a login shell with exit status N.  Returns an error if not executed\n"
 "    in a login shell."
 msgstr ""
+"Opuszczenie pow³oki logowania.\n"
+"    \n"
+"    Opuszczenie pow³oki logowania z kodem zakoñczenia N. Zwraca b³±d, je¶li\n"
+"    pow³oka nie jest pow³ok± logowania."
 
 #: builtins.c:713
 #, fuzzy
 msgid ""
 "Display or execute commands from the history list.\n"
 "    \n"
-"    fc is used to list or edit and re-execute commands from the history "
-"list.\n"
+"    fc is used to list or edit and re-execute commands from the history list.\n"
 "    FIRST and LAST can be numbers specifying the range, or FIRST can be a\n"
 "    string, which means the most recent command beginning with that\n"
 "    string.\n"
 "    \n"
 "    Options:\n"
-"      -e ENAME\tselect which editor to use.  Default is FCEDIT, then "
-"EDITOR,\n"
+"      -e ENAME\tselect which editor to use.  Default is FCEDIT, then EDITOR,\n"
 "    \t\tthen vi\n"
 "      -l \tlist lines instead of editing\n"
 "      -n\tomit line numbers when listing\n"
@@ -2922,33 +2974,34 @@ msgid ""
 "    the last command.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success or status of executed command; non-zero if an error "
-"occurs."
+"    Returns success or status of executed command; non-zero if an error occurs."
 msgstr ""
-"fc s³u¿y do wypisywania, edycji i pomownego uruchamiania poleceñ z listy\n"
-"    historii. FIRST i LAST jako liczby okre¶laj± zakres lub FIRST jako "
-"napis\n"
-"    oznacza najpó¼niej wykonywane polecenie zaczynaj±ce siê od tego napisu.\n"
+"Wy¶wietlanie lub wykonywanie poleceñ z listy historii.\n"
 "    \n"
-"       -e ENAME okre¶la edytor, który ma byæ u¿ywany. Domy¶lnymi "
-"warto¶ciami\n"
-"          s±: najpierw FCEDIT, potem EDITOR, a na koñcu vi.\n"
+"    fc s³u¿y do wypisywania, edycji i pomownego uruchamiania poleceñ z listy\n"
+"    historii. PIERWSZY i OSTATNI jako liczby okre¶laj± zakres lub PIERWSZY\n"
+"    jako napis oznacza najpó¼niej wykonywane polecenie zaczynaj±ce siê od tego\n"
+"    napisu.\n"
 "    \n"
-"       -l oznacza wypisysanie wierszy zamiast ich edycji.\n"
-"       -n oznacza niewypisysanie numerów wierszy.\n"
-"       -r oznacza odwrócenie kolejno¶ci wierszy (czyni±c najnowsze wypisane\n"
-"          polecenie pierwszym).\n"
+"    Opcje:\n"
+"       -e NAZWA-ED\tokre¶la edytor, który ma byæ u¿ywany. Domy¶lnymi\n"
+"    \twarto¶ciami s±: najpierw FCEDIT, potem EDITOR, a na koñcu vi\n"
+"       -l\twypisywanie wierszy zamiast ich edycji\n"
+"       -n\tniewypisysanie numerów wierszy\n"
+"       -r\todwrócenie kolejno¶ci wierszy (czyni±c najnowsze wypisane\n"
+"    \tpolecenie pierwszym)\n"
 "    \n"
-"    Przy wywo³aniu polecenia w postaci `fc -s [pat=rep ...] [command]',\n"
-"    jest ono wywo³ywane ponownie po wykonaniu podstawienia OLD=NEW.\n"
+"    Przy wywo³aniu polecenia w postaci `fc -s [wz=zam ...] [polecenie]',\n"
+"    jest ono wywo³ywane ponownie po wykonaniu podstawienia WZ=ZAM.\n"
 "    \n"
-"    Przydatnym aliasem korzystaj±cym z tego jest r='fc -s' tak, ¿e "
-"napisanie\n"
-"    `r cc' uruchamia ostatnie polecenie zaczynaj±ce siê od `cc' a napisanie\n"
-"    `r' uruchamia ponownie ostatnie polecenie."
+"    Przydatnym aliasem korzystaj±cym z tego jest r='fc -s' tak, ¿e napisanie\n"
+"    `r cc' uruchamia ostatnie polecenie zaczynaj±ce siê od `cc', a napisanie\n"
+"    `r' uruchamia ponownie ostatnie polecenie.    \n"
+"    Stan wyj¶ciowy:\n"
+"    Zwracana jest prawda lub stan wykonanego polecenia; warto¶æ niezerowa\n"
+"    w przypadku b³êdu."
 
 #: builtins.c:743
-#, fuzzy
 msgid ""
 "Move job to the foreground.\n"
 "    \n"
@@ -2959,35 +3012,43 @@ msgid ""
 "    Exit Status:\n"
 "    Status of command placed in foreground, or failure if an error occurs."
 msgstr ""
-"Umieszczenie JOB_SPEC na pierwszym planie oraz uczynienie go bie¿±cym\n"
-"    zadaniem. Je¶li nie podano JOB_SPEC, u¿yte zostanie zadanie bie¿±ce\n"
-"    w rozumieniu pow³oki"
+"Przeniesienie zadania na pierwszy plan.\n"
+"    \n"
+"    Umieszczenie ZADANIA na pierwszym planie oraz uczynienie go bie¿±cym\n"
+"    zadaniem. Je¶li nie okre¶lono ZADANIA, u¿yte zostanie zadanie bie¿±ce\n"
+"    w rozumieniu pow³oki.\n"
+"    \n"
+"    Stan wyj¶ciowy:\n"
+"    Stan zadania umieszczonego na pierwszym planie lub fa³sz, je¶li wyst±pi³\n"
+"    b³±d."
 
 #: builtins.c:758
-#, fuzzy
 msgid ""
 "Move jobs to the background.\n"
 "    \n"
-"    Place the jobs identified by each JOB_SPEC in the background, as if "
-"they\n"
-"    had been started with `&'.  If JOB_SPEC is not present, the shell's "
-"notion\n"
+"    Place the jobs identified by each JOB_SPEC in the background, as if they\n"
+"    had been started with `&'.  If JOB_SPEC is not present, the shell's notion\n"
 "    of the current job is used.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns success unless job control is not enabled or an error occurs."
 msgstr ""
-"Umieszczenie wszystkich JOB_SPEC w tle tak, jakby zosta³y uruchomione\n"
-"    z `&'. Je¶li nie podano JOB_SPEC, u¿yte zostanie zadanie bie¿±ce\n"
-"    w rozumieniu pow³oki"
+"Przeniesienie zadañ w t³o.\n"
+"    \n"
+"    Umieszczenie wszystkich ZADAÑ w tle tak, jakby zosta³y uruchomione\n"
+"    z `&'. Je¶li nie okre¶lono ZADAÑ, u¿yte zostanie zadanie bie¿±ce\n"
+"    w rozumieniu pow³oki.\n"
+"    \n"
+"    Stan wyj¶ciowy:\n"
+"    Zwracana jest prawda, chyba ¿e sterowanie zadaniami nie jest w³±czone\n"
+"    lub wyst±pi³ b³±d."
 
 #: builtins.c:772
 msgid ""
 "Remember or display program locations.\n"
 "    \n"
 "    Determine and remember the full pathname of each command NAME.  If\n"
-"    no arguments are given, information about remembered commands is "
-"displayed.\n"
+"    no arguments are given, information about remembered commands is displayed.\n"
 "    \n"
 "    Options:\n"
 "      -d\t\tforget the remembered location of each NAME\n"
@@ -3023,8 +3084,7 @@ msgid ""
 "      PATTERN\tPattern specifiying a help topic\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success unless PATTERN is not found or an invalid option is "
-"given."
+"    Returns success unless PATTERN is not found or an invalid option is given."
 msgstr ""
 
 #: builtins.c:821
@@ -3054,15 +3114,13 @@ msgid ""
 "    \n"
 "    If the $HISTTIMEFORMAT variable is set and not null, its value is used\n"
 "    as a format string for strftime(3) to print the time stamp associated\n"
-"    with each displayed history entry.  No time stamps are printed "
-"otherwise.\n"
+"    with each displayed history entry.  No time stamps are printed otherwise.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or an error occurs."
 msgstr ""
 
 #: builtins.c:857
-#, fuzzy
 msgid ""
 "Display status of jobs.\n"
 "    \n"
@@ -3085,18 +3143,26 @@ msgid ""
 "    Returns success unless an invalid option is given or an error occurs.\n"
 "    If -x is used, returns the exit status of COMMAND."
 msgstr ""
-"Wypisanie aktywnych zadañ. Opcja -l powoduje wypisanie oprócz zwyk³ej\n"
-"    informacji tak¿e numerów PID procesów; Opcja -p powoduje wypisanie "
-"tylko\n"
-"    numerów PID procesów. Przy podaniu opcji -n, wypisywane s± tylko te\n"
-"    procesy, których stan uleg³ zmianie od ostatniego powiadomienia.\n"
-"    JOBSPEC ogranicza wypisywanie do danego zadania. Opcje -r i -s\n"
-"    ograniczaj± wypisywanie do zadañ, odpowiednio, dzia³aj±cych i\n"
-"    zatrzymanych. Bez opcji wypisywany jest stan wszystkich aktywnych "
-"zadañ.\n"
-"    Przy podaniu -x, uruchamiane jet polecenie COMMAND po zast±pieniu\n"
-"    ka¿dej z wystêpuj±cych w ARGS specyfikacji zadañ numerem PID procesu\n"
-"    wiod±cego danego zadania."
+"Wy¶wietlenie stanu zadañ.\n"
+"    \n"
+"    Wypisanie aktywnych zadañ. ZADANIE ogranicza wyj¶cie tylko do tego zadania.\n"
+"    Bez opcji wypisywany jest stan wszystkich aktywnych zadañ.\n"
+"    \n"
+"    Opcje:\n"
+"      -l\twypisanie dodatkowo numerów PID procesów\n"
+"      -n\twypisanie tylko procesów, które zmieni³y stan od ostatniego\n"
+"    \tpowiadomienia\n"
+"      -p\twypisanie tylko numerów PID procesów\n"
+"      -r\tograniczenie wyj¶cia do zadañ dzia³aj±cych\n"
+"      -s\tograniczenie wyj¶cia do zadañ zatrzymanych\n"
+"    \n"
+"    Przy podaniu -x, uruchamiane jet polecenie podane POLECENIE po zast±pieniu\n"
+"    ka¿dej z wystêpuj±cych w ARGumentach specyfikacji zadañ numerem PID procesu\n"
+"    wiod±cego danego zadania.\n"
+"    \n"
+"    Stan wyj¶ciowy:\n"
+"    Zwracana jest prawda, chyba ¿e podano b³êdn± opcjê lub wyst±pi³ b³±d.\n"
+"    Je¶li u¿yto -x, zwracany jest stan wyj¶ciowy POLECENIA."
 
 #: builtins.c:884
 msgid ""
@@ -3116,7 +3182,6 @@ msgid ""
 msgstr ""
 
 #: builtins.c:903
-#, fuzzy
 msgid ""
 "Send a signal to a job.\n"
 "    \n"
@@ -3137,14 +3202,24 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or an error occurs."
 msgstr ""
-"Wys³anie do procesów okre¶lonych przez PID (lub JOBSPEC) sygna³u SIGSPEC.\n"
-"    Gdy SIGSPEC nie jest podany, zak³ada siê, ¿e chodzi o SIGTERM. Argument\n"
-"    `-l' powoduje wypisanie nazw sygna³ów; je¶li po `-l' wystêpuj± jakie¶\n"
-"    argumenty, zak³ada siê, ¿e s± to numery sygna³ów, dla których nale¿y\n"
-"    wypisaæ nazwy. Kill jest poleceniem wewnêtrznym z dwóch powodów:\n"
-"    umo¿liwia korzystanie z identyfikatorów zadañ zamiast numerów PID\n"
-"    oraz, w przypadku osi±gniêcia ograniczenia na liczbê procesów, nie\n"
-"    powoduje potrzeby uruchamiania dodatkowego procesu, aby jaki¶ ubiæ."
+"Wys³anie sygna³u do zadania.\n"
+"    \n"
+"    Wys³anie do procesów okre¶lonych przez PID lub ZADANIE sygna³u o nazwie\n"
+"    SYGNA£ lub NUMERZE-SYGNA£U. Je¶li nie podano SYGNA£U ani NUMERU-SYGNA£U,\n"
+"    przyjmowany jest SIGTERM.\n"
+"    \n"
+"    Opcje:\n"
+"      -s SYG\tSYG jest nazw± sygna³u\n"
+"      -n SYG\tSYG jest numerem sygna³u\n"
+"      -l\tlista nazw sygna³ów; je¶li `-l' wystêpuje z argumentami, s± one\n"
+"    \ttraktowane jako numery sygna³ów, dla których maj± byæ wypisane nazwy\n"
+"    \n"
+"    Kill jest poleceniem wewnêtrznym z dwóch powodów: umo¿liwia korzystanie\n"
+"    z identyfikatorów zadañ zamiast numerów PID oraz, w przypadku osi±gniêcia\n"
+"    ograniczenia na liczbê procesów, nie powoduje potrzeby uruchamiania\n"
+"    dodatkowego procesu, aby jaki¶ zabiæ.    \n"
+"    Stan wyj¶ciowy:\n"
+"    Zwracany jest sukces, chyba ¿e podano b³êdn± opcjê lub wyst±pi³ b³±d."
 
 #: builtins.c:926
 #, fuzzy
@@ -3154,8 +3229,7 @@ msgid ""
 "    Evaluate each ARG as an arithmetic expression.  Evaluation is done in\n"
 "    fixed-width integers with no check for overflow, though division by 0\n"
 "    is trapped and flagged as an error.  The following list of operators is\n"
-"    grouped into levels of equal-precedence operators.  The levels are "
-"listed\n"
+"    grouped into levels of equal-precedence operators.  The levels are listed\n"
 "    in order of decreasing precedence.\n"
 "    \n"
 "    \tid++, id--\tvariable post-increment, post-decrement\n"
@@ -3193,8 +3267,7 @@ msgid ""
 msgstr ""
 "Ka¿dy z argumentów jest wyra¿eniem arytmetycznym do obliczenia. Obliczenia\n"
 "    s± wykonywane dla liczb ca³kowitych o sta³ej d³ugo¶ci bez sprawdzania\n"
-"    przepe³nienia, jednak¿e dzielenie przez 0 jest przechwytywane i "
-"oznaczane\n"
+"    przepe³nienia, jednak¿e dzielenie przez 0 jest przechwytywane i oznaczane\n"
 "    jako b³±d. Nastêpuj±ca lista operatorów jest pogrupowana na poziomy\n"
 "    operatorów o jednakowym priorytecie.\n"
 "    Poziomy s± wypisane w kolejno¶ci malej±cego priorytetu.\n"
@@ -3233,21 +3306,17 @@ msgstr ""
 "    w pozosta³ych przypadkach zwracane jest 0."
 
 #: builtins.c:971
-#, fuzzy
 msgid ""
 "Read a line from the standard input and split it into fields.\n"
 "    \n"
 "    Reads a single line from the standard input, or from file descriptor FD\n"
-"    if the -u option is supplied.  The line is split into fields as with "
-"word\n"
+"    if the -u option is supplied.  The line is split into fields as with word\n"
 "    splitting, and the first word is assigned to the first NAME, the second\n"
 "    word to the second NAME, and so on, with any leftover words assigned to\n"
-"    the last NAME.  Only the characters found in $IFS are recognized as "
-"word\n"
+"    the last NAME.  Only the characters found in $IFS are recognized as word\n"
 "    delimiters.\n"
 "    \n"
-"    If no NAMEs are supplied, the line read is stored in the REPLY "
-"variable.\n"
+"    If no NAMEs are supplied, the line read is stored in the REPLY variable.\n"
 "    \n"
 "    Options:\n"
 "      -a array\tassign the words read to sequential indices of the array\n"
@@ -3259,15 +3328,13 @@ msgid ""
 "      -n nchars\treturn after reading NCHARS characters rather than waiting\n"
 "    \t\tfor a newline, but honor a delimiter if fewer than NCHARS\n"
 "    \t\tcharacters are read before the delimiter\n"
-"      -N nchars\treturn only after reading exactly NCHARS characters, "
-"unless\n"
+"      -N nchars\treturn only after reading exactly NCHARS characters, unless\n"
 "    \t\tEOF is encountered or read times out, ignoring any delimiter\n"
 "      -p prompt\toutput the string PROMPT without a trailing newline before\n"
 "    \t\tattempting to read\n"
 "      -r\t\tdo not allow backslashes to escape any characters\n"
 "      -s\t\tdo not echo input coming from a terminal\n"
-"      -t timeout\ttime out and return failure if a complete line of input "
-"is\n"
+"      -t timeout\ttime out and return failure if a complete line of input is\n"
 "    \t\tnot read withint TIMEOUT seconds.  The value of the TMOUT\n"
 "    \t\tvariable is the default timeout.  TIMEOUT may be a\n"
 "    \t\tfractional number.  If TIMEOUT is 0, read returns success only\n"
@@ -3276,34 +3343,9 @@ msgid ""
 "      -u fd\t\tread from file descriptor FD instead of the standard input\n"
 "    \n"
 "    Exit Status:\n"
-"    The return code is zero, unless end-of-file is encountered, read times "
-"out,\n"
+"    The return code is zero, unless end-of-file is encountered, read times out,\n"
 "    or an invalid file descriptor is supplied as the argument to -u."
 msgstr ""
-"Odczytanie pojedynczego wiersza ze standardowego wej¶cia lub z deskryptora\n"
-"    pliku FD, je¶li podano opcjê -u. Przypisanie pierwszego odczytanego\n"
-"    s³owa do pierwszego NAME, drugiego - do drugiego NAME itd., pozosta³e\n"
-"    nadmiarowe s³owa przypisuj±c do ostatniego NAME. Jako separatory s³ów\n"
-"    rozpoznawane s± jedynie znaki wystêpuj±ce w $IFS. W razie nie podania\n"
-"    ¿adnego NAME, przeczytany wiersz jest przechowywany w zmiennej REPLY.\n"
-"    Podanie opcji -r, oznacza wej¶cie `surowe' i wy³±czenie cytowania przez\n"
-"    odwrotny uko¶nik. Opcja -d powoduje czytanie do napotkania pierwszego\n"
-"    znaku DELIM, a nie do znaku nowego wiersza. Gdy podana zostanie opcja\n"
-"    -p, przed odczytem wyprowadzany jest napis PROMPT bez nastêpuj±cego po\n"
-"    nim znaku koñca wiersza. Gdy podana zostanie opcja -a, odczytane s³owa\n"
-"    s± przypisywane do kolejnych indeksów tablicy ARRAY, pocz±wszy od zera.\n"
-"    Gdy podana zostanie opcja -e a pow³oka jest interakcyjna, wiersz jest\n"
-"    pobierany za pomoc± readline. Podanie -n z niezerowym argumentem NCHARS\n"
-"    powoduje, ¿e odczyt koñczy siê po odczytaniu NCHARS znaków. Opcja -s\n"
-"    powoduje, ¿e odczyt z terminala odbywa siê bez echa.\n"
-"    \n"
-"    Opcja -t powoduje przeterminowanie odczytu i zwrócenie b³êdy, je¿eli\n"
-"    w ci±gu TIMEOUT sekund nie zostanie odczytany pe³en wiersz. Je¶li\n"
-"    ustawiona jest zmienna TMOUT, jej warto¶æ stanowi domy¶lny timeout.\n"
-"    Kodem powrotu jest zero, chyba ¿e napotkano koniec pliku, wyst±pi³\n"
-"    timeout odczytu lub jako argument dla -u podano nieprawid³owy "
-"deskryptor\n"
-"    pliku."
 
 #: builtins.c:1014
 msgid ""
@@ -3361,8 +3403,7 @@ msgid ""
 "              physical     same as -P\n"
 "              pipefail     the return value of a pipeline is the status of\n"
 "                           the last command to exit with a non-zero status,\n"
-"                           or zero if no command exited with a non-zero "
-"status\n"
+"                           or zero if no command exited with a non-zero status\n"
 "              posix        change the behavior of bash where the default\n"
 "                           operation differs from the Posix standard to\n"
 "                           match the standard\n"
@@ -3402,8 +3443,7 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given."
 msgstr ""
-"    -a  Oznaczenie zmiennych, które zosta³y zmodyfikowane lub utworzone "
-"jako\n"
+"    -a  Oznaczenie zmiennych, które zosta³y zmodyfikowane lub utworzone jako\n"
 "         eksportowane.\n"
 "        -b  Natychmiastowe powiadomienie o zakoñczeniu zadania.\n"
 "        -e  Natychmiastowe zakoñczenie, gdy polecenie zakoñczy siê z\n"
@@ -3419,8 +3459,7 @@ msgstr ""
 "            Ustawienie zmiennej odpowiadaj±cej nazwa-opcji:\n"
 "                allexport    to samo, co -a\n"
 "                braceexpand  to samo, co -B\n"
-"                emacs        korzystanie z interfejsu edycji wiersza w "
-"stylu\n"
+"                emacs        korzystanie z interfejsu edycji wiersza w stylu\n"
 "                             emacsa\n"
 "                errexit      to samo, co -e\n"
 "                errtrace     to samo, co -E\n"
@@ -3442,10 +3481,8 @@ msgstr ""
 "                nounset      to samo, co -u\n"
 "                onecmd       to samo, co -t\n"
 "                physical     to samo, co -P\n"
-"                pipefail     kodem powrotu potoku jest kod powrotu "
-"ostatniego\n"
-"                             polecenia koñcz±cego siê z niezerowym kodem "
-"lub\n"
+"                pipefail     kodem powrotu potoku jest kod powrotu ostatniego\n"
+"                             polecenia koñcz±cego siê z niezerowym kodem lub\n"
 "                             zero, gdy ¿adne polecenie nie zakoñczy³o siê z\n"
 "                             niezerowym kodem powrotu\n"
 "                posix        zmiana zachowania basha, gdy standardowe\n"
@@ -3453,13 +3490,11 @@ msgstr ""
 "                             1003.2 na zgodne ze standardem\n"
 "                privileged   to samo, co -p\n"
 "                verbose      to samo, co -v\n"
-"                vi           korzystanie z interfejsu edycji wiersza w "
-"stylu\n"
+"                vi           korzystanie z interfejsu edycji wiersza w stylu\n"
 "                             vi\n"
 "                xtrace       to samo, co -x\n"
 "        -p  W³±czone, gdy nie zgadzaj± siê rzeczywisty i efektywny ID\n"
-"            u¿ytkownika. Wy³±cza przetwarzanie pliku $ENV oraz import "
-"funkcji\n"
+"            u¿ytkownika. Wy³±cza przetwarzanie pliku $ENV oraz import funkcji\n"
 "            pow³oki. Wy³±czenie tej opcji powoduje, ¿e efektywne UID i GID\n"
 "            zostan± ustawione na rzeczywiste UID i GID.\n"
 "        -t  Zakoñczenie po przeczytaniu i uruchomieniu jednego polecenia.\n"
@@ -3476,10 +3511,8 @@ msgstr ""
 "        -P  Gdy ustawione, nie ¶ledzenie dowi±zañ symbolicznych podczas\n"
 "            uruchamiania poleceñ takich, jak cd, które zmieniaj± katalog\n"
 "            bie¿±cy.\n"
-"        -T  Gdy ustawione, dziedziczenie pu³apki DEBUG przez funkcje "
-"pow³oki.\n"
-"        -   Przypisywanie pozostaj±cych argumentów do argumentów "
-"pozycyjnych.\n"
+"        -T  Gdy ustawione, dziedziczenie pu³apki DEBUG przez funkcje pow³oki.\n"
+"        -   Przypisywanie pozostaj±cych argumentów do argumentów pozycyjnych.\n"
 "            Wy³±czenie opcji -x i -v.\n"
 "    \n"
 "    U¿ycie + zamiast - powoduje wy³±czenie powy¿szych znaczników. Mo¿na z\n"
@@ -3498,8 +3531,7 @@ msgid ""
 "      -f\ttreat each NAME as a shell function\n"
 "      -v\ttreat each NAME as a shell variable\n"
 "    \n"
-"    Without options, unset first tries to unset a variable, and if that "
-"fails,\n"
+"    Without options, unset first tries to unset a variable, and if that fails,\n"
 "    tries to unset a function.\n"
 "    \n"
 "    Some variables cannot be unset; also see `readonly'.\n"
@@ -3513,8 +3545,7 @@ msgid ""
 "Set export attribute for shell variables.\n"
 "    \n"
 "    Marks each NAME for automatic export to the environment of subsequently\n"
-"    executed commands.  If VALUE is supplied, assign VALUE before "
-"exporting.\n"
+"    executed commands.  If VALUE is supplied, assign VALUE before exporting.\n"
 "    \n"
 "    Options:\n"
 "      -f\trefer to shell functions\n"
@@ -3626,8 +3657,7 @@ msgid ""
 "      -x FILE        True if the file is executable by you.\n"
 "      -O FILE        True if the file is effectively owned by you.\n"
 "      -G FILE        True if the file is effectively owned by your group.\n"
-"      -N FILE        True if the file has been modified since it was last "
-"read.\n"
+"      -N FILE        True if the file has been modified since it was last read.\n"
 "    \n"
 "      FILE1 -nt FILE2  True if file1 is newer than file2 (according to\n"
 "                       modification date).\n"
@@ -3648,8 +3678,7 @@ msgid ""
 "      STRING1 != STRING2\n"
 "                     True if the strings are not equal.\n"
 "      STRING1 < STRING2\n"
-"                     True if STRING1 sorts before STRING2 "
-"lexicographically.\n"
+"                     True if STRING1 sorts before STRING2 lexicographically.\n"
 "      STRING1 > STRING2\n"
 "                     True if STRING1 sorts after STRING2 lexicographically.\n"
 "    \n"
@@ -3674,8 +3703,7 @@ msgid ""
 msgstr ""
 "Polecenie zwracaj±ce kod 0 (prawda) lub 1 (fa³sz) w zalezno¶ci od wyniku\n"
 "    obliczenia wyra¿enia EXPR. Wyra¿enia mog± mieæ postaæ jedno- lub\n"
-"    dwuargumentow±. jednoargumentowe wyra¿enia s³u¿± zwykle do badania "
-"stanu\n"
+"    dwuargumentow±. jednoargumentowe wyra¿enia s³u¿± zwykle do badania stanu\n"
 "    pliku. Istniej± równiez operatory dzia³aj±ce na ³añcuchach tekstowych,\n"
 "    jak te¿ operatory numerycznego porównania.\n"
 "    \n"
@@ -3694,19 +3722,16 @@ msgstr ""
 "        -L FILE        Prawda, gdy FILE jest dowi±zaniem symbolicznym.\n"
 "        -k FILE        Prawda, gdy FILE ma ustawiony bit `sticky'.\n"
 "        -p FILE        Prawda, gdy FILE jest nazwanym potokiem.\n"
-"        -r FILE        Prawda, gdy FILE jest odczytywalny przez "
-"u¿ytkownika.\n"
+"        -r FILE        Prawda, gdy FILE jest odczytywalny przez u¿ytkownika.\n"
 "        -s FILE        Prawda, gdy FILE istnieje i jest niepusty.\n"
 "        -S FILE        Prawda, gdy FILE jest gniazdem.\n"
 "        -t FD          Prawda, gdy FD jest otwarty na terminalu.\n"
 "        -u FILE        Prawda, gdy FILE ma ustawiony bit SUID.\n"
 "        -w FILE        Prawda, gdy FILE jest zapisywalny przez u¿ytkownika.\n"
-"        -x FILE        Prawda, gdy FILE jest uruchamialny przez "
-"u¿ytkownika.\n"
+"        -x FILE        Prawda, gdy FILE jest uruchamialny przez u¿ytkownika.\n"
 "        -O FILE        Prawda, gdy u¿ytkownik jest efentywnym w³a¶cicielem\n"
 "                       FILE.\n"
-"        -G FILE        Prawda, grupa u¿ytkownika jest efentywnym "
-"w³a¶cicielem\n"
+"        -G FILE        Prawda, grupa u¿ytkownika jest efentywnym w³a¶cicielem\n"
 "                       FILE.\n"
 "        -N FILE        Prawda, gdy FILE zosta³ zmodyfikowany po ostatnim\n"
 "                       odczycie.\n"
@@ -3751,22 +3776,22 @@ msgstr ""
 "    wiêkszy lub równy arg2."
 
 #: builtins.c:1311
-#, fuzzy
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
 "    This is a synonym for the \"test\" builtin, but the last argument must\n"
 "    be a literal `]', to match the opening `['."
 msgstr ""
-"Jest to synonim dla wbudowanego polecenia \"test\", ale wymagaj±cy, by\n"
+"Obliczenie wyra¿enia warunkowego.\n"
+"    \n"
+"    Jest to synonim dla wbudowanego polecenia \"test\", ale wymagaj±cy, by\n"
 "    ostatnim argumentem by³ `]' pasuj±cy do pocz±tkowego `['."
 
 #: builtins.c:1320
 msgid ""
 "Display process times.\n"
 "    \n"
-"    Prints the accumulated user and system times for the shell and all of "
-"its\n"
+"    Prints the accumulated user and system times for the shell and all of its\n"
 "    child processes.\n"
 "    \n"
 "    Exit Status:\n"
@@ -3778,8 +3803,7 @@ msgstr ""
 msgid ""
 "Trap signals and other events.\n"
 "    \n"
-"    Defines and activates handlers to be run when the shell receives "
-"signals\n"
+"    Defines and activates handlers to be run when the shell receives signals\n"
 "    or other conditions.\n"
 "    \n"
 "    ARG is a command to be read and executed when the shell receives the\n"
@@ -3788,39 +3812,30 @@ msgid ""
 "    value.  If ARG is the null string each SIGNAL_SPEC is ignored by the\n"
 "    shell and by the commands it invokes.\n"
 "    \n"
-"    If a SIGNAL_SPEC is EXIT (0) ARG is executed on exit from the shell.  "
-"If\n"
-"    a SIGNAL_SPEC is DEBUG, ARG is executed before every simple command.  "
-"If\n"
-"    a SIGNAL_SPEC is RETURN, ARG is executed each time a shell function or "
-"a\n"
-"    script run by the . or source builtins finishes executing.  A "
-"SIGNAL_SPEC\n"
-"    of ERR means to execute ARG each time a command's failure would cause "
-"the\n"
+"    If a SIGNAL_SPEC is EXIT (0) ARG is executed on exit from the shell.  If\n"
+"    a SIGNAL_SPEC is DEBUG, ARG is executed before every simple command.  If\n"
+"    a SIGNAL_SPEC is RETURN, ARG is executed each time a shell function or a\n"
+"    script run by the . or source builtins finishes executing.  A SIGNAL_SPEC\n"
+"    of ERR means to execute ARG each time a command's failure would cause the\n"
 "    shell to exit when the -e option is enabled.\n"
 "    \n"
-"    If no arguments are supplied, trap prints the list of commands "
-"associated\n"
+"    If no arguments are supplied, trap prints the list of commands associated\n"
 "    with each signal.\n"
 "    \n"
 "    Options:\n"
 "      -l\tprint a list of signal names and their corresponding numbers\n"
 "      -p\tdisplay the trap commands associated with each SIGNAL_SPEC\n"
 "    \n"
-"    Each SIGNAL_SPEC is either a signal name in <signal.h> or a signal "
-"number.\n"
+"    Each SIGNAL_SPEC is either a signal name in <signal.h> or a signal number.\n"
 "    Signal names are case insensitive and the SIG prefix is optional.  A\n"
 "    signal may be sent to the shell with \"kill -signal $$\".\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success unless a SIGSPEC is invalid or an invalid option is "
-"given."
+"    Returns success unless a SIGSPEC is invalid or an invalid option is given."
 msgstr ""
 "Gdy pow³oka otrzyma sygna³(y) SIGNAL_SPEC, odczytywane i uruchamiane jest\n"
 "    polecenie podane jako argument ARG. W azie braku argumentów (i podaniu\n"
-"    pojedynczego SIGNAL_SPEC) lub gdy argumentem jest `-', ka¿demu z "
-"podanych\n"
+"    pojedynczego SIGNAL_SPEC) lub gdy argumentem jest `-', ka¿demu z podanych\n"
 "    sygna³ów jest przywracana pierwotna warto¶æ. Je¶li ARG jest pustym\n"
 "    ³añcuchem, ka¿dy SIGNAL_SPEC jest ignorowany przez pow³okê i wywo³ane\n"
 "    przez ni± polecenia. Je¿eli jako SIGNAL_SPEC podano EXIT (0), polecenie\n"
@@ -3830,10 +3845,8 @@ msgstr ""
 "    z poszczególnymi SIGNAL_SPEC. W przypadku braku argumentów lub gdy\n"
 "    podano jedynie opcjê -p, trap wypisuje listê poleceñ skojarzonych ze\n"
 "    wszystkimi mo¿liwymi sygna³ami. Ka¿de z SIGNAL_SPEC mo¿e byæ albo nazw±\n"
-"    sygna³u wg. <signal.h> lub numerem sygna³u. Nazwy sygna³ów s± "
-"niewra¿liwe\n"
-"    na wielko¶æ liter a prefiks SIG jest opcjonalny. `trap -l' wypisuje "
-"listê\n"
+"    sygna³u wg. <signal.h> lub numerem sygna³u. Nazwy sygna³ów s± niewra¿liwe\n"
+"    na wielko¶æ liter a prefiks SIG jest opcjonalny. `trap -l' wypisuje listê\n"
 "    nazw sygna³ów wraz z odpowiadaj±cymi im numerami. Nale¿y zauwa¿yæ, ¿e\n"
 "    sygna³ mo¿na wys³aæ do pow³oki poleceniem \"kill -signal $$\"."
 
@@ -3863,8 +3876,7 @@ msgid ""
 "      NAME\tCommand name to be interpreted.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success if all of the NAMEs are found; fails if any are not "
-"found."
+"    Returns success if all of the NAMEs are found; fails if any are not found."
 msgstr ""
 
 #: builtins.c:1399
@@ -3872,8 +3884,7 @@ msgstr ""
 msgid ""
 "Modify shell resource limits.\n"
 "    \n"
-"    Provides control over the resources available to the shell and "
-"processes\n"
+"    Provides control over the resources available to the shell and processes\n"
 "    it creates, on systems that allow such control.\n"
 "    \n"
 "    Options:\n"
@@ -3973,13 +3984,11 @@ msgid ""
 "    Waits for the process identified by ID, which may be a process ID or a\n"
 "    job specification, and reports its termination status.  If ID is not\n"
 "    given, waits for all currently active child processes, and the return\n"
-"    status is zero.  If ID is a a job specification, waits for all "
-"processes\n"
+"    status is zero.  If ID is a a job specification, waits for all processes\n"
 "    in the job's pipeline.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns the status of ID; fails if ID is invalid or an invalid option "
-"is\n"
+"    Returns the status of ID; fails if ID is invalid or an invalid option is\n"
 "    given."
 msgstr ""
 
@@ -3993,8 +4002,7 @@ msgid ""
 "    and the return code is zero.  PID must be a process ID.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns the status of ID; fails if ID is invalid or an invalid option "
-"is\n"
+"    Returns the status of ID; fails if ID is invalid or an invalid option is\n"
 "    given."
 msgstr ""
 "Oczekiwanie na podany proces i zg³oszenie jego statusu zakoñczenia. Gdy nie\n"
@@ -4017,8 +4025,7 @@ msgid ""
 "    Returns the status of the last command executed."
 msgstr ""
 "Pêtla `for' uruchamia ci±g poleceñ dla ka¿dego elementu podanej listy. Gdy\n"
-"    nie zostanie podane `in WORDS ...;', zak³ada siê, ¿e podano `in \"$@"
-"\"'.\n"
+"    nie zostanie podane `in WORDS ...;', zak³ada siê, ¿e podano `in \"$@\"'.\n"
 "    Dla ka¿dego elementu WORDS, NAME jest ustawiane na ten element\n"
 "    i uruchamiane s± COMMANDS."
 
@@ -4072,8 +4079,7 @@ msgstr ""
 "    wypisywany jest na standardowej diagnostyce, a ka¿de s³owo jest\n"
 "    poprzedzone przez liczbê. Gdy nie zostanie podane `in WORDS', zak³ada\n"
 "    siê, ¿e podano `in \"$@\"'. Wy¶wietlany jest wówczas tekst zachêty PS3\n"
-"    i odczytywany jest wiersz ze standardowego wej¶cia. Gdy wiersz ten "
-"sk³ada\n"
+"    i odczytywany jest wiersz ze standardowego wej¶cia. Gdy wiersz ten sk³ada\n"
 "    siê z liczby przypisanej do jednego z wypisanych s³ów, to NAME jest\n"
 "    ustawiane na to s³owo. Gdy wiersz jest pusty, WORDS i tekst zachêty s±\n"
 "    Wy¶wietlane ponownie. Gdy odczytany zostanie EOF, polecenie siê koñczy.\n"
@@ -4097,14 +4103,10 @@ msgid ""
 "    Exit Status:\n"
 "    The return status is the return status of PIPELINE."
 msgstr ""
-"Uruchomienie PIPELINE i wypisanie podsumowania zawieraj±cego czas "
-"rzeczywisty,\n"
-"    czas procesora w trybie u¿ytkownika oraz czas procesora w trybie "
-"systemu,\n"
-"    jakie spêdzi³o polecenie PIPELINE do chwili zatrzymania. Kod "
-"zakoñczenia\n"
-"    jest kodem zakoñczenia polecenia PIPELINE. Opcja `-p' powoduje "
-"wypisanie\n"
+"Uruchomienie PIPELINE i wypisanie podsumowania zawieraj±cego czas rzeczywisty,\n"
+"    czas procesora w trybie u¿ytkownika oraz czas procesora w trybie systemu,\n"
+"    jakie spêdzi³o polecenie PIPELINE do chwili zatrzymania. Kod zakoñczenia\n"
+"    jest kodem zakoñczenia polecenia PIPELINE. Opcja `-p' powoduje wypisanie\n"
 "    podsumowania czasów w nieco innej postaci. U¿ywana jest wtedy warto¶æ\n"
 "    zmiennej TIMEFORMAT jako format danych wyj¶ciowych."
 
@@ -4119,8 +4121,7 @@ msgid ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 msgstr ""
-"Wybiórcze uruchamianie poleceñ COMMANDS w zale¿no¶ci od tego, czy WORD "
-"pasuje\n"
+"Wybiórcze uruchamianie poleceñ COMMANDS w zale¿no¶ci od tego, czy WORD pasuje\n"
 "    do wzorca PATTERN. Znak `|' s³u¿y do rozdzielania wielu wzorców."
 
 #: builtins.c:1579
@@ -4128,17 +4129,12 @@ msgstr ""
 msgid ""
 "Execute commands based on conditional.\n"
 "    \n"
-"    The `if COMMANDS' list is executed.  If its exit status is zero, then "
-"the\n"
-"    `then COMMANDS' list is executed.  Otherwise, each `elif COMMANDS' list "
-"is\n"
+"    The `if COMMANDS' list is executed.  If its exit status is zero, then the\n"
+"    `then COMMANDS' list is executed.  Otherwise, each `elif COMMANDS' list is\n"
 "    executed in turn, and if its exit status is zero, the corresponding\n"
-"    `then COMMANDS' list is executed and the if command completes.  "
-"Otherwise,\n"
-"    the `else COMMANDS' list is executed, if present.  The exit status of "
-"the\n"
-"    entire construct is the exit status of the last command executed, or "
-"zero\n"
+"    `then COMMANDS' list is executed and the if command completes.  Otherwise,\n"
+"    the `else COMMANDS' list is executed, if present.  The exit status of the\n"
+"    entire construct is the exit status of the last command executed, or zero\n"
 "    if no condition tested true.\n"
 "    \n"
 "    Exit Status:\n"
@@ -4200,8 +4196,7 @@ msgid ""
 "Define shell function.\n"
 "    \n"
 "    Create a shell function named NAME.  When invoked as a simple command,\n"
-"    NAME runs COMMANDs in the calling shell's context.  When NAME is "
-"invoked,\n"
+"    NAME runs COMMANDs in the calling shell's context.  When NAME is invoked,\n"
 "    the arguments are passed to the function as $1...$n, and the function's\n"
 "    name is in $FUNCNAME.\n"
 "    \n"
@@ -4240,8 +4235,7 @@ msgstr ""
 "Równowa¿ne argumentowi JOB_SPEC polecenia `fg'. Wznowienie zatrzymanego lub\n"
 "    dzia³aj±cego w tle zadania. JOB_SPEC mo¿e okre¶laæ albo nazwê zadania\n"
 "    albo jego numer. Umieszczenie `&' po JOB_SPEC umieszcza zadanie w tle\n"
-"    tak, jak to siê dzieje po podaniu specyfikacji zadania jako argumentu "
-"dla\n"
+"    tak, jak to siê dzieje po podaniu specyfikacji zadania jako argumentu dla\n"
 "    `bg'."
 
 #: builtins.c:1675
@@ -4263,12 +4257,9 @@ msgstr ""
 msgid ""
 "Execute conditional command.\n"
 "    \n"
-"    Returns a status of 0 or 1 depending on the evaluation of the "
-"conditional\n"
-"    expression EXPRESSION.  Expressions are composed of the same primaries "
-"used\n"
-"    by the `test' builtin, and may be combined using the following "
-"operators:\n"
+"    Returns a status of 0 or 1 depending on the evaluation of the conditional\n"
+"    expression EXPRESSION.  Expressions are composed of the same primaries used\n"
+"    by the `test' builtin, and may be combined using the following operators:\n"
 "    \n"
 "      ( EXPRESSION )\tReturns the value of EXPRESSION\n"
 "      ! EXPRESSION\t\tTrue if EXPRESSION is false; else false\n"
@@ -4286,24 +4277,20 @@ msgid ""
 "    Exit Status:\n"
 "    0 or 1 depending on value of EXPRESSION."
 msgstr ""
-"Zwraca status wynosz±cy 0 lub 1 w zale¿no¶ci od wyniku wyra¿enia "
-"warynkowego\n"
+"Zwraca status wynosz±cy 0 lub 1 w zale¿no¶ci od wyniku wyra¿enia warynkowego\n"
 "    EXPRESSION. Wyra¿enia s± tworzone na tych samych zasadach, jak\n"
-"    w poleceniu `test' i mog± byæ ³±czone za pomoc± nastêpuj±cych "
-"operatorów\n"
+"    w poleceniu `test' i mog± byæ ³±czone za pomoc± nastêpuj±cych operatorów\n"
 "    \n"
 "    \t( EXPRESSION )\tZwraca warto¶æ EXPRESSION\n"
 "    \t! EXPRESSION\tPrawdziwe, gdy EXPRESSION jest fa³szywe; fa³szywe\n"
 "    \t\tw innym przypadku\n"
-"    \tEXPR1 && EXPR2\tPrawdziwe, gdy zarówno EXPR1 jak i EXPR2 s± "
-"prawdziwe;\n"
+"    \tEXPR1 && EXPR2\tPrawdziwe, gdy zarówno EXPR1 jak i EXPR2 s± prawdziwe;\n"
 "    \t\tfa³szywe w innym przypadku\n"
 "    \tEXPR1 || EXPR2\tPrawdziwe, gdy EXPR1 lub EXPR2 jest prawdziwe;\n"
 "    \t\tfa³szywe w innym przypadku\n"
 "    \n"
 "    W przypadku u¿ycia operatorów `==' lub `!=', napis po prawej stronie\n"
-"    operatora jest traktowany jak wzorzec i wykonywane jest dopasowywanie "
-"do\n"
+"    operatora jest traktowany jak wzorzec i wykonywane jest dopasowywanie do\n"
 "    wzorca. Operatory && i || nie opliczaj± EXPR2, je¶li obliczenie EXPR1\n"
 "    wystarcza do okre¶lenia warto¶ci wyra¿enia."
 
@@ -4472,12 +4459,10 @@ msgid ""
 "    \twith its position in the stack\n"
 "    \n"
 "    Arguments:\n"
-"      +N\tDisplays the Nth entry counting from the left of the list shown "
-"by\n"
+"      +N\tDisplays the Nth entry counting from the left of the list shown by\n"
 "    \tdirs when invoked without options, starting with zero.\n"
 "    \n"
-"      -N\tDisplays the Nth entry counting from the right of the list shown "
-"by\n"
+"      -N\tDisplays the Nth entry counting from the right of the list shown by\n"
 "    \tdirs when invoked without options, starting with zero.\n"
 "    \n"
 "    Exit Status:\n"
@@ -4487,11 +4472,9 @@ msgstr ""
 "    na li¶cie za pomoc± polecenia `pushd'; mo¿na cofaæ siê w obrêbie listy\n"
 "    za pomoc± polecenia `popd'.\n"
 "    \n"
-"    Znacznik -l oznacza, ¿e `dirs' nie powinno wypisywaæ katalogów w "
-"skróconej\n"
+"    Znacznik -l oznacza, ¿e `dirs' nie powinno wypisywaæ katalogów w skróconej\n"
 "    wersji, tzn. wzglêdem katalogu domowego wywo³uj±cego. Oznacza to, ¿e\n"
-"    `~/bin' mo¿e zostaæ wypisany jako `/homes/bfox/bin'. Znacznik -v "
-"powoduje,\n"
+"    `~/bin' mo¿e zostaæ wypisany jako `/homes/bfox/bin'. Znacznik -v powoduje,\n"
 "    ¿e `dirs' wypisuje katalogi w osobnych wierszach, poprzedzaj±c ka¿dy\n"
 "    z nich jego pozycj± na stosie. Znacznik -p powoduje to samo, lecz bez\n"
 "    podawania pozycji na stosie. Znacznik -c powoduje wyczyszczenie stosu\n"
@@ -4508,8 +4491,7 @@ msgid ""
 "Set and unset shell options.\n"
 "    \n"
 "    Change the setting of each shell option OPTNAME.  Without any option\n"
-"    arguments, list all shell options with an indication of whether or not "
-"each\n"
+"    arguments, list all shell options with an indication of whether or not each\n"
 "    is set.\n"
 "    \n"
 "    Options:\n"
@@ -4532,28 +4514,22 @@ msgid ""
 "      -v var\tassign the output to shell variable VAR rather than\n"
 "    \t\tdisplay it on the standard output\n"
 "    \n"
-"    FORMAT is a character string which contains three types of objects: "
-"plain\n"
-"    characters, which are simply copied to standard output; character "
-"escape\n"
+"    FORMAT is a character string which contains three types of objects: plain\n"
+"    characters, which are simply copied to standard output; character escape\n"
 "    sequences, which are converted and copied to the standard output; and\n"
-"    format specifications, each of which causes printing of the next "
-"successive\n"
+"    format specifications, each of which causes printing of the next successive\n"
 "    argument.\n"
 "    \n"
-"    In addition to the standard format specifications described in printf"
-"(1)\n"
+"    In addition to the standard format specifications described in printf(1)\n"
 "    and printf(3), printf interprets:\n"
 "    \n"
 "      %b\texpand backslash escape sequences in the corresponding argument\n"
 "      %q\tquote the argument in a way that can be reused as shell input\n"
-"      %(fmt)T output the date-time string resulting from using FMT as a "
-"format\n"
+"      %(fmt)T output the date-time string resulting from using FMT as a format\n"
 "            string for strftime(3)\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success unless an invalid option is given or a write or "
-"assignment\n"
+"    Returns success unless an invalid option is given or a write or assignment\n"
 "    error occurs."
 msgstr ""
 
@@ -4561,10 +4537,8 @@ msgstr ""
 msgid ""
 "Specify how arguments are to be completed by Readline.\n"
 "    \n"
-"    For each NAME, specify how arguments are to be completed.  If no "
-"options\n"
-"    are supplied, existing completion specifications are printed in a way "
-"that\n"
+"    For each NAME, specify how arguments are to be completed.  If no options\n"
+"    are supplied, existing completion specifications are printed in a way that\n"
 "    allows them to be reused as input.\n"
 "    \n"
 "    Options:\n"
@@ -4590,8 +4564,7 @@ msgid ""
 "Display possible completions depending on the options.\n"
 "    \n"
 "    Intended to be used from within a shell function generating possible\n"
-"    completions.  If the optional WORD argument is supplied, matches "
-"against\n"
+"    completions.  If the optional WORD argument is supplied, matches against\n"
 "    WORD are generated.\n"
 "    \n"
 "    Exit Status:\n"
@@ -4606,12 +4579,9 @@ msgstr ""
 msgid ""
 "Modify or display completion options.\n"
 "    \n"
-"    Modify the completion options for each NAME, or, if no NAMEs are "
-"supplied,\n"
-"    the completion currently being executed.  If no OPTIONs are given, "
-"print\n"
-"    the completion options for each NAME or the current completion "
-"specification.\n"
+"    Modify the completion options for each NAME, or, if no NAMEs are supplied,\n"
+"    the completion currently being executed.  If no OPTIONs are given, print\n"
+"    the completion options for each NAME or the current completion specification.\n"
 "    \n"
 "    Options:\n"
 "    \t-o option\tSet completion option OPTION for each NAME\n"
@@ -4637,24 +4607,18 @@ msgstr ""
 msgid ""
 "Read lines from the standard input into an indexed array variable.\n"
 "    \n"
-"    Read lines from the standard input into the indexed array variable "
-"ARRAY, or\n"
-"    from file descriptor FD if the -u option is supplied.  The variable "
-"MAPFILE\n"
+"    Read lines from the standard input into the indexed array variable ARRAY, or\n"
+"    from file descriptor FD if the -u option is supplied.  The variable MAPFILE\n"
 "    is the default ARRAY.\n"
 "    \n"
 "    Options:\n"
-"      -n count\tCopy at most COUNT lines.  If COUNT is 0, all lines are "
-"copied.\n"
-"      -O origin\tBegin assigning to ARRAY at index ORIGIN.  The default "
-"index is 0.\n"
+"      -n count\tCopy at most COUNT lines.  If COUNT is 0, all lines are copied.\n"
+"      -O origin\tBegin assigning to ARRAY at index ORIGIN.  The default index is 0.\n"
 "      -s count \tDiscard the first COUNT lines read.\n"
 "      -t\t\tRemove a trailing newline from each line read.\n"
-"      -u fd\t\tRead lines from file descriptor FD instead of the standard "
-"input.\n"
+"      -u fd\t\tRead lines from file descriptor FD instead of the standard input.\n"
 "      -C callback\tEvaluate CALLBACK each time QUANTUM lines are read.\n"
-"      -c quantum\tSpecify the number of lines read between each call to "
-"CALLBACK.\n"
+"      -c quantum\tSpecify the number of lines read between each call to CALLBACK.\n"
 "    \n"
 "    Arguments:\n"
 "      ARRAY\t\tArray variable name to use for file data.\n"
@@ -4664,13 +4628,11 @@ msgid ""
 "    element to be assigned and the line to be assigned to that element\n"
 "    as additional arguments.\n"
 "    \n"
-"    If not supplied with an explicit origin, mapfile will clear ARRAY "
-"before\n"
+"    If not supplied with an explicit origin, mapfile will clear ARRAY before\n"
 "    assigning to it.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success unless an invalid option is given or ARRAY is readonly "
-"or\n"
+"    Returns success unless an invalid option is given or ARRAY is readonly or\n"
 "    not an indexed array."
 msgstr ""
 
@@ -4680,554 +4642,6 @@ msgid ""
 "    \n"
 "    A synonym for `mapfile'."
 msgstr ""
-
-#~ msgid "xrealloc: cannot reallocate %lu bytes (%lu bytes allocated)"
-#~ msgstr ""
-#~ "xrealloc: nie mo¿na ponownie przydzieliæ %lu bajtów (przydzielono %lu)"
-
-#~ msgid "xrealloc: cannot allocate %lu bytes"
-#~ msgstr "xrealloc: nie mo¿na przydzieliæ %lu bajtów"
-
-#~ msgid "xrealloc: %s:%d: cannot reallocate %lu bytes (%lu bytes allocated)"
-#~ msgstr ""
-#~ "xrealloc: %s:%d: nie mo¿na ponownie przydzieliæ %lu bajtów (przydzielono %"
-#~ "lu)"
-
-#~ msgid " "
-#~ msgstr " "
-
-# tekst wielowierszowy!
-#
-#~ msgid "Without EXPR, returns returns \"$line $filename\".  With EXPR,"
-#~ msgstr "Bez EXPR zwraca \"$line $filename\". Z EXPR zwraca"
-
-#~ msgid "returns \"$line $subroutine $filename\"; this extra information"
-#~ msgstr "\"$line $subroutine $filename\"; te dodatkowe informacje"
-
-#~ msgid "can be used used to provide a stack trace."
-#~ msgstr "mog± s³u¿yæ umo¿liwieniu ¶ledzenia stosu."
-
-# tekst wielowierszowy!
-#
-#~ msgid ""
-#~ "The value of EXPR indicates how many call frames to go back before the"
-#~ msgstr "Warto¶æ EXPR okre¶la o ile ramek wywo³añ wzglêdem bie¿±cej ramki"
-
-#~ msgid "current one; the top frame is frame 0."
-#~ msgstr "nale¿y siê cofn±æ; ramka na szczycie stosu ma numer 0."
-
-#~ msgid "%s: invalid number"
-#~ msgstr "%s: nieprawid³owa liczba"
-
-#~ msgid "Shell commands matching keywords `"
-#~ msgstr "Polecenia pow³oki pasuj±ce do s³ów kluczowych `"
-
-#~ msgid "Display the list of currently remembered directories.  Directories"
-#~ msgstr "Wy¶wietla listê aktualnie pamiêtanych katalogów. Katalogi"
-
-#~ msgid "find their way onto the list with the `pushd' command; you can get"
-#~ msgstr "umieszczane s± na li¶cie za pomoc± polecenia `pushd'; cofanie siê"
-
-#~ msgid "back up through the list with the `popd' command."
-#~ msgstr "na li¶cie odbywa siê za pomoc± polecenia `popd'."
-
-#~ msgid ""
-#~ "The -l flag specifies that `dirs' should not print shorthand versions"
-#~ msgstr "Opcja -l oznacza, ¿e `dirs' nie powinno wypisywaæ skróconej wersji"
-
-#~ msgid ""
-#~ "of directories which are relative to your home directory.  This means"
-#~ msgstr ""
-#~ "tych katalogów, które odnosz± siê do katalogu domowego. Oznacza to, ¿e"
-
-#~ msgid "that `~/bin' might be displayed as `/homes/bfox/bin'.  The -v flag"
-#~ msgstr ""
-#~ "`~/bin' mo¿e zostaæ wypisane jako `/homes/bfox/bin'. Opcja -v powoduje,"
-
-#~ msgid "causes `dirs' to print the directory stack with one entry per line,"
-#~ msgstr ""
-#~ "¿e `dirs' wypisuje listê katalogów w osobnych wierszach, poprzedzaj±c"
-
-#~ msgid ""
-#~ "prepending the directory name with its position in the stack.  The -p"
-#~ msgstr ""
-#~ "nazwy katalogów ich numerami pozycji na stosie. Opcja -p robi to samo,"
-
-#~ msgid "flag does the same thing, but the stack position is not prepended."
-#~ msgstr "ale nie poprzedza numerami pozycji."
-
-#~ msgid ""
-#~ "The -c flag clears the directory stack by deleting all of the elements."
-#~ msgstr "Opcja -c czy¶ci stos katalogów usuwaj±c wszystkie jego elementy."
-
-#~ msgid ""
-#~ "+N   displays the Nth entry counting from the left of the list shown by"
-#~ msgstr "+N   wypisuje N-t± z kolei pozycjê od lewej w odniesieniu do listy"
-
-#~ msgid "     dirs when invoked without options, starting with zero."
-#~ msgstr "     wypisywanej przy wywo³aniu dirs bez opcji, licz±c od zera."
-
-#~ msgid ""
-#~ "-N   displays the Nth entry counting from the right of the list shown by"
-#~ msgstr "-N   wypisuje N-t± z kolei pozycjê od prawej w odniesieniu do listy"
-
-#~ msgid "Adds a directory to the top of the directory stack, or rotates"
-#~ msgstr "Dodaje katalog na wierzcho³ku stosu lub wykonuje rotacjê stosu,"
-
-#~ msgid "the stack, making the new top of the stack the current working"
-#~ msgstr "czyni±c jego wierzcho³kiem aktualny katalog bie¿±cy."
-
-#~ msgid "directory.  With no arguments, exchanges the top two directories."
-#~ msgstr "Bez argumentów zamienia dwa katalogi po³o¿one najwy¿ej na stosie."
-
-#~ msgid "+N   Rotates the stack so that the Nth directory (counting"
-#~ msgstr "+N   Wykonuje rotacjê stosu tak, ¿e N-ty katalog (licz±c od"
-
-#~ msgid "     from the left of the list shown by `dirs', starting with"
-#~ msgstr "     lewej w odniesieniu do listy wypisywanej przez `dirs',"
-
-#~ msgid "     zero) is at the top."
-#~ msgstr "     pocz±wszy od zera) znajdzie siê na wierzcho³ku."
-
-#~ msgid "-N   Rotates the stack so that the Nth directory (counting"
-#~ msgstr "-N   Wykonuje rotacjê stosu tak, ¿e N-ty katalog (licz±c od"
-
-#~ msgid "     from the right of the list shown by `dirs', starting with"
-#~ msgstr "     prawej w odniesieniu do listy wypisywanej przez `dirs',"
-
-#~ msgid "-n   suppress the normal change of directory when adding directories"
-#~ msgstr "-n   wy³±cza zwyk³± zmianê katalogu przy umieszczaniu katalogów na"
-
-#~ msgid "     to the stack, so only the stack is manipulated."
-#~ msgstr "     stosie tak, ¿e zmieniany jest tylko stos."
-
-#~ msgid "dir  adds DIR to the directory stack at the top, making it the"
-#~ msgstr "dir  umieszcza DIR na wierzcho³ku stosu katalogów, czyni±c go"
-
-#~ msgid "     new current working directory."
-#~ msgstr "     nowym katalogiem bie¿±cym."
-
-#~ msgid "You can see the directory stack with the `dirs' command."
-#~ msgstr "Stos katalogów mo¿na zobaczyæ za pomoc± polecenia `dirs'."
-
-#~ msgid "Removes entries from the directory stack.  With no arguments,"
-#~ msgstr "Usuwa pozycje ze stosu katalogów. Bez argumentów, usuwa ze"
-
-#~ msgid "removes the top directory from the stack, and cd's to the new"
-#~ msgstr "stosu najwy¿szy katalog oraz wykonuje cd do nowego najwy¿szego"
-
-#~ msgid "top directory."
-#~ msgstr "katalogu."
-
-#~ msgid "+N   removes the Nth entry counting from the left of the list"
-#~ msgstr "+N   usuwa N-t± z kolei pozycjê od lewej w odniesieniu do listy"
-
-#~ msgid "     shown by `dirs', starting with zero.  For example: `popd +0'"
-#~ msgstr "     wypisywanej przez `dirs', licz±c od zera. Np.: `popd +0'"
-
-#~ msgid "     removes the first directory, `popd +1' the second."
-#~ msgstr "     usuwa pierwszy katalog a `popd +1' usuwa drugi."
-
-#~ msgid "-N   removes the Nth entry counting from the right of the list"
-#~ msgstr "-N   usuwa N-t± z kolei pozycjê od prawej w odniesieniu do listy"
-
-#~ msgid "     shown by `dirs', starting with zero.  For example: `popd -0'"
-#~ msgstr "     wypisywanej przez `dirs', licz±c od zera. Np.: `popd -0'"
-
-#~ msgid "     removes the last directory, `popd -1' the next to last."
-#~ msgstr "     usuwa ostatni katalog a `popd -1' usuwa przedostatni."
-
-#~ msgid ""
-#~ "-n   suppress the normal change of directory when removing directories"
-#~ msgstr "-n   wy³±cza zwyk³± zmianê katalogu przy usuwaniu katalogów ze"
-
-#~ msgid "     from the stack, so only the stack is manipulated."
-#~ msgstr "     stosu tak, ¿e zmieniany jest tylko stos."
-
-#~ msgid "allocated"
-#~ msgstr "przydzielony"
-
-#~ msgid "freed"
-#~ msgstr "zwolniony"
-
-#~ msgid "requesting resize"
-#~ msgstr "wymagaj±cy zmiany rozmiaru"
-
-#~ msgid "just resized"
-#~ msgstr "o w³a¶nie zmienionym rozmiarze"
-
-#~ msgid "bug: unknown operation"
-#~ msgstr "b³±d: nieznana operacja"
-
-#~ msgid "malloc: watch alert: %p %s "
-#~ msgstr "malloc: alarm stra¿nka: %p %s "
-
-#~ msgid ""
-#~ "Exit from within a FOR, WHILE or UNTIL loop.  If N is specified,\n"
-#~ "    break N levels."
-#~ msgstr ""
-#~ "Wyj¶cie z wnêtrza pêtli FOR, WHILE lub UNTIL. Je¶li podano N, "
-#~ "przerywanych\n"
-#~ "    jest N poziomów pêtli."
-
-#~ msgid ""
-#~ "Run a shell builtin.  This is useful when you wish to rename a\n"
-#~ "    shell builtin to be a function, but need the functionality of the\n"
-#~ "    builtin within the function itself."
-#~ msgstr ""
-#~ "Uruchomienie wewnêtrznego polecenia pow³oki. Przydatne przy zastêpowaniu\n"
-#~ "    polecenia pow³oki funkcj±, wewn±trz której wymagane jest wywo³anie "
-#~ "tego\n"
-#~ "    polecenia pow³oki."
-
-#~ msgid ""
-#~ "Print the current working directory.  With the -P option, pwd prints\n"
-#~ "    the physical directory, without any symbolic links; the -L option\n"
-#~ "    makes pwd follow symbolic links."
-#~ msgstr ""
-#~ "Wypisanie bia¿±cego katalogu roboczego.  Z opcj± -P, pwd wypisuje "
-#~ "katalog\n"
-#~ "    fizyczny, bez dowi±zañ symbolicznych; opcja -L powoduje, ¿e pwd "
-#~ "pod±¿a\n"
-#~ "    za dowi±zaniami symbolicznymi."
-
-#~ msgid "Return a successful result."
-#~ msgstr "Zwracany jest pomy¶lny wynik zakoñczenia."
-
-#~ msgid ""
-#~ "Runs COMMAND with ARGS ignoring shell functions.  If you have a shell\n"
-#~ "    function called `ls', and you wish to call the command `ls', you can\n"
-#~ "    say \"command ls\".  If the -p option is given, a default value is "
-#~ "used\n"
-#~ "    for PATH that is guaranteed to find all of the standard utilities.  "
-#~ "If\n"
-#~ "    the -V or -v option is given, a string is printed describing "
-#~ "COMMAND.\n"
-#~ "    The -V option produces a more verbose description."
-#~ msgstr ""
-#~ "Uruchomienie COMMAND z argumentami ARGS ignoruj±c funkcje pow³oki. Je¶li\n"
-#~ "    istnieje funkcja pow³oki o nazwie `ls', a istnieje potrzeba "
-#~ "wywo³ania\n"
-#~ "    polecenia `ls', mo¿na napisaæ \"command ls\". Je¶li podano opcje -p,\n"
-#~ "    u¿ywana jest domy¶lna warto¶æ PATH, co zapewnia odnalezienie "
-#~ "wszystkich\n"
-#~ "    standardowych narzêdzi. Je¶li podano opcjê -V lub -v, wypisywany "
-#~ "jest\n"
-#~ "    napis opisuj±cy COMMAND. Opcja -V generuje obszerniejszy opis."
-
-#~ msgid "Obsolete.  See `declare'."
-#~ msgstr "Przestarza³e. Patrz `declare'."
-
-#~ msgid ""
-#~ "Create a local variable called NAME, and give it VALUE.  LOCAL\n"
-#~ "    can only be used within a function; it makes the variable NAME\n"
-#~ "    have a visible scope restricted to that function and its children."
-#~ msgstr ""
-#~ "Utworzenie zmiennej lokalnej o nazwie NAME, i nadanie jej warto¶ci "
-#~ "VALUE.\n"
-#~ "    LOCAL mo¿na u¿yæ jedynie wewn±trz funkcji; powoduje, ¿e zakres\n"
-#~ "    widoczno¶ci zmiennej NAME jest ograniczony do tej funkcji i jej\n"
-#~ "    procesów potomnych."
-
-#~ msgid ""
-#~ "Output the ARGs.  If -n is specified, the trailing newline is suppressed."
-#~ msgstr ""
-#~ "Wypisanie argumentów. Gdy podano -n, koñcowy znak nowego wiersza jest "
-#~ "pomijany."
-
-#~ msgid ""
-#~ "Enable and disable builtin shell commands.  This allows\n"
-#~ "    you to use a disk command which has the same name as a shell\n"
-#~ "    builtin without specifying a full pathname.  If -n is used, the\n"
-#~ "    NAMEs become disabled; otherwise NAMEs are enabled.  For example,\n"
-#~ "    to use the `test' found in $PATH instead of the shell builtin\n"
-#~ "    version, type `enable -n test'.  On systems supporting dynamic\n"
-#~ "    loading, the -f option may be used to load new builtins from the\n"
-#~ "    shared object FILENAME.  The -d option will delete a builtin\n"
-#~ "    previously loaded with -f.  If no non-option names are given, or\n"
-#~ "    the -p option is supplied, a list of builtins is printed.  The\n"
-#~ "    -a option means to print every builtin with an indication of whether\n"
-#~ "    or not it is enabled.  The -s option restricts the output to the "
-#~ "POSIX.2\n"
-#~ "    `special' builtins.  The -n option displays a list of all disabled "
-#~ "builtins."
-#~ msgstr ""
-#~ "W³±czenie i wy³±czenie wewnêtrznych poleceñ pow³oki. Pozwala to u¿ywaæ\n"
-#~ "    programu zewnêtrznego o tej samej nazwie co polecenie wewnêtrzne "
-#~ "pow³oki\n"
-#~ "    bez podawania pe³nej ¶cie¿ki. Je¶li podano -n, polecenia o nazwach\n"
-#~ "    NAME ... s± wy³±czane; w przeciwnym przypadku polecenia o tych "
-#~ "nazwach\n"
-#~ "    s± w³±czane. Np., aby u¿ywaæ zamiast wewnêtrznego polecenia `test'\n"
-#~ "    polecenia znalezionego w $PATH, nale¿y napisaæ `nable -n test'.\n"
-#~ "    W systemach wspieraj±cych ³adowanie dynamiczne mo¿na pos³u¿yc siê "
-#~ "opcj±\n"
-#~ "    -f do wczytania nowej listy poleceñ wewnêtrznych ze wspó³dzielonego\n"
-#~ "    obiektu FILENAME. Opcja -d usuwa polecenia wewnêtrzne wczytane "
-#~ "wcze¶niej\n"
-#~ "    za pomoc± -f. W przypadku nie podania ¿adnej nazwy lub podania opcji -"
-#~ "p,\n"
-#~ "    wypisywana jest lista poleceñ wewnêtrznych. Opcja -a oznacza "
-#~ "wypisanie\n"
-#~ "    wszystkich poleceñ wewnêtrznych wraz z informacj± o ich w³±czeniu "
-#~ "bad¼\n"
-#~ "    wy³±czeniu. Opcja -s ogranicza wypisywanie do poleceñ `specjalnych'\n"
-#~ "    zgodnych z POSIX.2. Opcja -n powoduje wypisanie listy wszystkich\n"
-#~ "    wy³±czonych poleceñ."
-
-#~ msgid ""
-#~ "Read ARGs as input to the shell and execute the resulting command(s)."
-#~ msgstr ""
-#~ "Czytanie argumentów jako danych wej¶ciowych pow³oki i uruchomienie tak\n"
-#~ "    powsta³ego polecenia (powsta³ych poleceñ)."
-
-#~ msgid ""
-#~ "Exec FILE, replacing this shell with the specified program.\n"
-#~ "    If FILE is not specified, the redirections take effect in this\n"
-#~ "    shell.  If the first argument is `-l', then place a dash in the\n"
-#~ "    zeroth arg passed to FILE, as login does.  If the `-c' option\n"
-#~ "    is supplied, FILE is executed with a null environment.  The `-a'\n"
-#~ "    option means to make set argv[0] of the executed process to NAME.\n"
-#~ "    If the file cannot be executed and the shell is not interactive,\n"
-#~ "    then the shell exits, unless the shell option `execfail' is set."
-#~ msgstr ""
-#~ "Uruchomienie FILE, zastêpuj±c bie¿±c± pow³okê podanym programem.\n"
-#~ "    Gdy nie podano FILE, przekierowanie dotyczy bie¿±cej pow³oki. Je¶li\n"
-#~ "    pierwszym argumentem jest `-l', to zerowym argumentem przekazywanym\n"
-#~ "    do FILE jest my¶lnik tak, jak to robi login. Gdy podano opcjê `-c',\n"
-#~ "    FILE jest uruchamiane z pustym ¶rodowiskiem. Opcja `-a' oznacza\n"
-#~ "    ustawienie argv[0] uruchomionego procesu na NAME. Je¶li pliku nie\n"
-#~ "    mo¿na uruchomiæ a pow³oka nie jest interakcyjna, to koñczy ona\n"
-#~ "    dzia³anie, chyba ¿e ustawiono opcjê pow³oki `execfail'."
-
-#~ msgid "Logout of a login shell."
-#~ msgstr "Wylogowanie z pow³oki logowania"
-
-#~ msgid ""
-#~ "For each NAME, the full pathname of the command is determined and\n"
-#~ "    remembered.  If the -p option is supplied, PATHNAME is used as the\n"
-#~ "    full pathname of NAME, and no path search is performed.  The -r\n"
-#~ "    option causes the shell to forget all remembered locations.  The -d\n"
-#~ "    option causes the shell to forget the remembered location of each "
-#~ "NAME.\n"
-#~ "    If the -t option is supplied the full pathname to which each NAME\n"
-#~ "    corresponds is printed.  If multiple NAME arguments are supplied "
-#~ "with\n"
-#~ "    -t, the NAME is printed before the hashed full pathname.  The -l "
-#~ "option\n"
-#~ "    causes output to be displayed in a format that may be reused as "
-#~ "input.\n"
-#~ "    If no arguments are given, information about remembered commands is "
-#~ "displayed."
-#~ msgstr ""
-#~ "Dla ka¿dego NAME, okre¶lana i zapamiêtywana jest pe³na ¶cie¿ka "
-#~ "polecenia.\n"
-#~ "    Gdy podano opcjê -p, to jako pe³na ¶cie¿ka dla NAME jest u¿ywane\n"
-#~ "    PATHNAME i nie odbywa siê poszukiwanie ¶cie¿ki. Opcja -r powoduje,\n"
-#~ "    ¿e pow³oka zapomina wszystkie pamiêtane po³o¿enia. Opcja -d "
-#~ "powoduje,\n"
-#~ "    ¿e pow³oka zapomina pamiêtane po³o¿enia wszystkich NAME. Podanie "
-#~ "opcji\n"
-#~ "    -t powoduje wypisanie pe³nej ¶cie¿ki odpowiadaj±cej ka¿demu NAME.\n"
-#~ "    Gdy przy -t podanych zostanie wiele NAME, s± one wypisywane przed\n"
-#~ "    zapamiêtan± pe³n± ¶cie¿k±. Opcja -l powoduje wypisanie danych w "
-#~ "postaci,\n"
-#~ "    która mo¿e s³u¿yæ jako dane wej¶ciowe. W przypadku nie podania "
-#~ "¿adnych\n"
-#~ "    argumentów, wypisywane s± informacje o pamiêtanych poleceniach."
-
-#~ msgid ""
-#~ "Display helpful information about builtin commands.  If PATTERN is\n"
-#~ "    specified, gives detailed help on all commands matching PATTERN,\n"
-#~ "    otherwise a list of the builtins is printed.  The -s option\n"
-#~ "    restricts the output for each builtin command matching PATTERN to\n"
-#~ "    a short usage synopsis."
-#~ msgstr ""
-#~ "Wypisanie pomocnych informacji o wbudowanych poleceniach. Gdy podano\n"
-#~ "    PATTERN, wypisywane s± szczegó³owe informacje pomocnicze dla\n"
-#~ "    wszystkich poleceñ pasuj±cych do wzorca PATTERN, a w przeciwnym\n"
-#~ "    przypadku wypisywana jest tylko lista poleceñ wewnêtrznych. Opcja -s\n"
-#~ "    ogranicza opis ka¿dego z poleceñ wewnêtrznych pasuj±cych do wzorca\n"
-#~ "    PATTERN do krótkiego opisu sk³adni."
-
-#~ msgid ""
-#~ "By default, removes each JOBSPEC argument from the table of active jobs.\n"
-#~ "    If the -h option is given, the job is not removed from the table, but "
-#~ "is\n"
-#~ "    marked so that SIGHUP is not sent to the job if the shell receives a\n"
-#~ "    SIGHUP.  The -a option, when JOBSPEC is not supplied, means to remove "
-#~ "all\n"
-#~ "    jobs from the job table; the -r option means to remove only running "
-#~ "jobs."
-#~ msgstr ""
-#~ "Domy¶lnie, usuwanie wszystkich argumentów JOBSPEC z tablicy aktywnych "
-#~ "zadañ.\n"
-#~ "    Przy podaniu opcji -h, zadanie nie jest usuwane z tablicy ale, "
-#~ "oznaczane\n"
-#~ "    w ten sposób, ¿e nie jest do niego wysy³any SIGHUP, gdy pow³oka "
-#~ "otrzyma\n"
-#~ "    SIGHUP. Opcja -a, gdy nie jest podane JOBSPEC, oznacza usuniêcie\n"
-#~ "    wszystkich zadañ z tablicy zadañ; opcja -r oznacza usuniêcie tylko\n"
-#~ "    dzia³aj±cych zadañ."
-
-#~ msgid ""
-#~ "Causes a function to exit with the return value specified by N.  If N\n"
-#~ "    is omitted, the return status is that of the last command."
-#~ msgstr ""
-#~ "Powoduje zakoñczenie funkcji z kodem powrotu okre¶lonym przez N. Gdy N\n"
-#~ "    zostanie pominiête, kodem powrotu jest kod powrotu ostatniego "
-#~ "polecenia."
-
-#~ msgid ""
-#~ "For each NAME, remove the corresponding variable or function.  Given\n"
-#~ "    the `-v', unset will only act on variables.  Given the `-f' flag,\n"
-#~ "    unset will only act on functions.  With neither flag, unset first\n"
-#~ "    tries to unset a variable, and if that fails, then tries to unset a\n"
-#~ "    function.  Some variables cannot be unset; also see readonly."
-#~ msgstr ""
-#~ "Dla ka¿dego NAME, usuwana jest odpowiednia zmienna lub funkcja. Po "
-#~ "podaniu\n"
-#~ "    `-v' unset dzia³a tylko dla zmiennych. Po podaniu znacznika`-f' "
-#~ "unset\n"
-#~ "    dzia³a tylko dla funkcji. Bez ¿adnego ze znaczników, unset najpierw\n"
-#~ "    próbuje unicestwiæ zmienn±, a gdy to siê nie uda, próbuje unicestwiæ\n"
-#~ "    funkcjê. Niektórych zmiennych nie mo¿na unicestwiæ; patrz tak¿e "
-#~ "readonly."
-
-#~ msgid ""
-#~ "NAMEs are marked for automatic export to the environment of\n"
-#~ "    subsequently executed commands.  If the -f option is given,\n"
-#~ "    the NAMEs refer to functions.  If no NAMEs are given, or if `-p'\n"
-#~ "    is given, a list of all names that are exported in this shell is\n"
-#~ "    printed.  An argument of `-n' says to remove the export property\n"
-#~ "    from subsequent NAMEs.  An argument of `--' disables further option\n"
-#~ "    processing."
-#~ msgstr ""
-#~ "Wszystkie NAME s± oznaczane jako eksportowane automatycznie do "
-#~ "¶rodowiska\n"
-#~ "    kolenjno uruchamianych poleceñ. Je¶li zostanie podana opcja -f, to "
-#~ "NAME\n"
-#~ "    oznaczaj± funkcje. W przypadku nie podania ¿adnego NAME lub podania "
-#~ "opcji\n"
-#~ "    `-p', wypisywana jest lista wszystkich eksportowanych z tej pow³oki "
-#~ "nazw.\n"
-#~ "    Argument `-n' oznacza, ¿e nale¿y usuni±æ w³asno¶æ eksportowania\n"
-#~ "    z wszystkich nastêpnych NAME. Argument `--' wy³±cza przetwarzanie\n"
-#~ "    dalszych opcji."
-
-#~ msgid ""
-#~ "The given NAMEs are marked readonly and the values of these NAMEs may\n"
-#~ "    not be changed by subsequent assignment.  If the -f option is given,\n"
-#~ "    then functions corresponding to the NAMEs are so marked.  If no\n"
-#~ "    arguments are given, or if `-p' is given, a list of all readonly "
-#~ "names\n"
-#~ "    is printed.  The `-a' option means to treat each NAME as\n"
-#~ "    an array variable.  An argument of `--' disables further option\n"
-#~ "    processing."
-#~ msgstr ""
-#~ "Oznaczanie podanych NAME jako tylko do odczytu tak, ¿e warto¶ci tych "
-#~ "NAME\n"
-#~ "    nie mog± zostaæ zmienione przez pó¿niejsze przypisania. Gdy podana\n"
-#~ "    zostanie opcja -f, odpowiednio oznaczane s± równie¿ funkcje "
-#~ "odpowiadaj±ce\n"
-#~ "    NAME. Gdy nie podano argumentów lub podano `-p', wypisywana jest "
-#~ "lista\n"
-#~ "    wszystkich nazw tylko do odczytu. Opcja `-a' oznacza, ¿e NAME nale¿y\n"
-#~ "    traktowaæ jak zmienne tablicowe. Argument `--' wy³±cza przetwarzanie\n"
-#~ "    dalszych opcji."
-
-#~ msgid ""
-#~ "The positional parameters from $N+1 ... are renamed to $1 ...  If N is\n"
-#~ "    not given, it is assumed to be 1."
-#~ msgstr ""
-#~ "Przemianowanie parametrów pozycyjnych od $N+1 ... na $1 ...  Je¶li N nie\n"
-#~ "    zostanie podane, zak³ada siê, ¿e jest równe 1."
-
-#~ msgid ""
-#~ "Suspend the execution of this shell until it receives a SIGCONT\n"
-#~ "    signal.  The `-f' if specified says not to complain about this\n"
-#~ "    being a login shell if it is; just suspend anyway."
-#~ msgstr ""
-#~ "Zawieszenie wykonania bie¿±cej pow³oki do czasu otrzymania sygna³u "
-#~ "SIGCONT.\n"
-#~ "    Podanie `-f' oznacza, ¿e pow³oka, bêd±ca pow³ok± logowania, nie "
-#~ "powinna\n"
-#~ "    wobec tego protestowaæ, lecz zawiesiæ siê pomimo to."
-
-#~ msgid ""
-#~ "Print the accumulated user and system times for processes run from\n"
-#~ "    the shell."
-#~ msgstr ""
-#~ "Wypisywanie ³±cznych czasów u¿ytkownika i systemu dla procesów "
-#~ "uruchomionych\n"
-#~ "    z pow³oki."
-
-#~ msgid ""
-#~ "The user file-creation mask is set to MODE.  If MODE is omitted, or if\n"
-#~ "    `-S' is supplied, the current value of the mask is printed.  The `-"
-#~ "S'\n"
-#~ "    option makes the output symbolic; otherwise an octal number is "
-#~ "output.\n"
-#~ "    If `-p' is supplied, and MODE is omitted, the output is in a form\n"
-#~ "    that may be used as input.  If MODE begins with a digit, it is\n"
-#~ "    interpreted as an octal number, otherwise it is a symbolic mode "
-#~ "string\n"
-#~ "    like that accepted by chmod(1)."
-#~ msgstr ""
-#~ "Ustawienie maski dla plików tworzonych przez u¿ytkownika na MODE. Gdy "
-#~ "MODE\n"
-#~ "    zostanie pominiête lub gdy podane zostanie `-S', wypisywana jest "
-#~ "bie¿±ca\n"
-#~ "    warto¶c maski. Opcja `-S' powoduje wyprowadzanie symboliczne; w "
-#~ "przeciwnym\n"
-#~ "    przypadku wyprowadzana jest liczba ósemkowa. Gdy podane zostanie `-"
-#~ "p'\n"
-#~ "    a MODE zostanie pominiête, wyprowadzane s± dane w takim formacie, "
-#~ "jaki\n"
-#~ "    powinny mieæ dane wej¶ciowe. Gdy MODE zaczyna siê od cyfry, jest\n"
-#~ "    interpretowane jako liczba ósemkowa, w przeciwnym razie jest "
-#~ "³añcuchem\n"
-#~ "    trybu w postaci symbolicznej, podobnej do akceptowanej przez chmod(1)."
-
-#~ msgid ""
-#~ "Wait for the specified process and report its termination status.  If\n"
-#~ "    N is not given, all currently active child processes are waited for,\n"
-#~ "    and the return code is zero.  N is a process ID; if it is not given,\n"
-#~ "    all child processes of the shell are waited for."
-#~ msgstr ""
-#~ "Oczekiwanie na podany proces i zg³oszenie jego statusu zakoñczenia. Gdy "
-#~ "nie\n"
-#~ "    zostanie podane N, oczekiwanie dotyczy wszystkich aktualnie "
-#~ "aktywnych\n"
-#~ "    procesów potomnych, a kodem powrotu jest zero. N jest PID; gdy nie\n"
-#~ "    zostanie podane, oczekiwanie dotyczy wszystkich procesów potomnych\n"
-#~ "    pow³oki."
-
-#~ msgid ""
-#~ "Create a simple command invoked by NAME which runs COMMANDS.\n"
-#~ "    Arguments on the command line along with NAME are passed to the\n"
-#~ "    function as $0 .. $n."
-#~ msgstr ""
-#~ "Utworzenie prostego polecenia wywo³ywanego przez NAME, które uruchamia\n"
-#~ "    polecenia COMMANDS. Argumenty z wiersza poleceñ podane po NAME s±\n"
-#~ "    przekazywane do funkcji jako $0 .. $n."
-
-#~ msgid ""
-#~ "For each NAME, specify how arguments are to be completed.\n"
-#~ "    If the -p option is supplied, or if no options are supplied, "
-#~ "existing\n"
-#~ "    completion specifications are printed in a way that allows them to "
-#~ "be\n"
-#~ "    reused as input.  The -r option removes a completion specification "
-#~ "for\n"
-#~ "    each NAME, or, if no NAMEs are supplied, all completion "
-#~ "specifications."
-#~ msgstr ""
-#~ "Okre¶lenie, jak argumenty maja byc uzupe³niane dla poszczególnych NAME.\n"
-#~ "    Gdy podano opcjê -p, lub nie podano ¿adnych opcji, wypisywane s±\n"
-#~ "    istniej±ce specyfikacje uzupe³nieñ w postaci, umo¿liwiaj±cej ich "
-#~ "ponowne\n"
-#~ "    u¿ycie jako danych wej¶ciowych. Opcja -r powoduje usuniêcie "
-#~ "specyfikacji\n"
-#~ "    uzupe³nieñ dla wszystkich NAME lub, gdy nie podano ¿adnego NAME,\n"
-#~ "    wszystkich specyfikacji uzupe³nieñ."
+"Odczyt linii z pliku do zmiennej tablicowej.\n"
+"    \n"
+"    Synonim polecenia `mapfile'."

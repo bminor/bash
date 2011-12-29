@@ -6248,9 +6248,6 @@ name[@var{subscript}]=@var{value}
 @noindent
 The @var{subscript}
 is treated as an arithmetic expression that must evaluate to a number.
-If @var{subscript} evaluates to a number less than zero, it is used as
-an offset from one greater than the array's maximum index (so a subcript
-of -1 refers to the last element of the array).
 To explicitly declare an array, use
 @example
 declare -a @var{name}
@@ -6317,6 +6314,11 @@ If @var{subscript} is @samp{@@} or
 @samp{*}, the expansion is the number of elements in the array. 
 Referencing an array variable without a subscript is equivalent to
 referencing with a subscript of 0. 
+If the @var{subscript}
+used to reference an element of an indexed array
+evaluates to a number less than zero, it is used as
+an offset from one greater than the array's maximum index (so a subcript
+of -1 refers to the last element of the array).
 
 An array variable is considered set if a subscript has been assigned a
 value.  The null string is a valid value.

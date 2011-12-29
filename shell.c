@@ -214,7 +214,11 @@ static int make_login_shell;		/* Make this shell be a `-bash' shell. */
 static int want_initial_help;		/* --help option */
 
 int debugging_mode = 0;		/* In debugging mode with --debugger */
-int no_line_editing = 0;	/* Don't do fancy line editing. */
+#if defined (READLINE)
+int no_line_editing = 0;	/* non-zero -> don't do fancy line editing. */
+#else
+int no_line_editing = 1;	/* can't have line editing without readline */
+#endif
 int dump_translatable_strings;	/* Dump strings in $"...", don't execute. */
 int dump_po_strings;		/* Dump strings in $"..." in po format */
 int wordexp_only = 0;		/* Do word expansion only */

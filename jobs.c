@@ -3,7 +3,7 @@
 /* This file works with both POSIX and BSD systems.  It implements job
    control. */
 
-/* Copyright (C) 1989-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2011 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -2212,6 +2212,10 @@ wait_for_background_pids ()
 #define INVALID_SIGNAL_HANDLER (SigHandler *)wait_for_background_pids
 static SigHandler *old_sigint_handler = INVALID_SIGNAL_HANDLER;
 
+static int wait_sigint_received;
+static int child_caught_sigint;
+static int waiting_for_child;
+
 static void
 restore_sigint_handler ()
 {
@@ -2219,10 +2223,9 @@ restore_sigint_handler ()
     {
       set_signal_handler (SIGINT, old_sigint_handler);
       old_sigint_handler = INVALID_SIGNAL_HANDLER;
+      waiting_for_child = 0;
     }
 }
-
-static int wait_sigint_received;
 
 /* Handle SIGINT while we are waiting for children in a script to exit.
    The `wait' builtin should be interruptible, but all others should be
@@ -2256,7 +2259,14 @@ wait_sigint_handler (sig)
 
   /* XXX - should this be interrupt_state?  If it is, the shell will act
      as if it got the SIGINT interrupt. */
-  wait_sigint_received = 1;
+  if (waiting_for_child)
+    wait_sigint_received = 1;
+  else
+    {
+      last_command_exit_value = 128+SIGINT;
+      restore_sigint_handler ();
+      kill (getpid (), SIGINT);
+    }
 
   /* Otherwise effectively ignore the SIGINT and allow the running job to
      be killed. */
@@ -2392,10 +2402,11 @@ wait_for (pid)
      substitution. */
 
   /* This is possibly a race condition -- should it go in stop_pipeline? */
-  wait_sigint_received = 0;
+  wait_sigint_received = child_caught_sigint = 0;
   if (job_control == 0 || (subshell_environment&SUBSHELL_COMSUB))
     {
       old_sigint_handler = set_signal_handler (SIGINT, wait_sigint_handler);
+      waiting_for_child = 0;
       if (old_sigint_handler == SIG_IGN)
 	set_signal_handler (SIGINT, old_sigint_handler);
     }
@@ -2447,7 +2458,9 @@ wait_for (pid)
 	  sigaction (SIGCHLD, &act, &oact);
 #  endif
 	  queue_sigchld = 1;
+	  waiting_for_child++;
 	  r = waitchld (pid, 1);
+	  waiting_for_child--;
 #  if defined (MUST_UNBLOCK_CHLD)
 	  sigaction (SIGCHLD, &oact, (struct sigaction *)NULL);
 	  sigprocmask (SIG_SETMASK, &chldset, (sigset_t *)NULL);
@@ -2489,6 +2502,9 @@ wait_for (pid)
     }
   while (PRUNNING (child) || (job != NO_JOB && RUNNING (job)));
 
+  /* Restore the original SIGINT signal handler before we return. */
+  restore_sigint_handler ();
+
   /* The exit state of the command is either the termination state of the
      child, or the termination state of the job.  If a job, the status
      of the last child in the pipeline is the significant one.  If the command
@@ -2523,9 +2539,6 @@ if (job == NO_JOB)
 #endif
       give_terminal_to (shell_pgrp, 0);
     }
-
-  /* Restore the original SIGINT signal handler before we return. */
-  restore_sigint_handler ();
 
   /* If the command did not exit cleanly, or the job is just
      being stopped, then reset the tty state back to what it
@@ -2588,8 +2601,8 @@ if (job == NO_JOB)
 	     and being killed by the SIGINT to pass the status back to our
 	     parent. */
 	  s = job_signal_status (job);
-	
-	  if (WIFSIGNALED (s) && WTERMSIG (s) == SIGINT && signal_is_trapped (SIGINT) == 0)
+
+	  if (child_caught_sigint == 0 && signal_is_trapped (SIGINT) == 0)
 	    {
 	      UNBLOCK_CHILD (oset);
 	      old_sigint_handler = set_signal_handler (SIGINT, SIG_DFL);
@@ -3116,8 +3129,22 @@ waitchld (wpid, block)
       /* If waitpid returns 0, there are running children.  If it returns -1,
 	 the only other error POSIX says it can return is EINTR. */
       CHECK_TERMSIG;
+
+      /* If waitpid returns -1/EINTR and the shell saw a SIGINT, then we
+	 assume the child has blocked or handled SIGINT.  In that case, we
+	 require the child to actually die due to SIGINT to act on the
+	 SIGINT we received; otherwise we assume the child handled it and
+	 let it go. */
+      if (pid < 0 && errno == EINTR && wait_sigint_received)
+	child_caught_sigint = 1;
+
       if (pid <= 0)
 	continue;	/* jumps right to the test */
+
+      /* If the child process did die due to SIGINT, forget our assumption
+	 that it caught or otherwise handled it. */
+      if (WIFSIGNALED (status) && WTERMSIG (status) == SIGINT)
+        child_caught_sigint = 0;
 
       /* children_exited is used to run traps on SIGCHLD.  We don't want to
          run the trap if a process is just being continued. */
@@ -3306,7 +3333,7 @@ set_job_status_and_cleanup (job)
 	 does not exit due to SIGINT, run the trap handler but do not
 	 otherwise act as if we got the interrupt. */
       if (wait_sigint_received && interactive_shell == 0 &&
-	  WIFSIGNALED (child->status) == 0 && IS_FOREGROUND (job) &&
+	  child_caught_sigint && IS_FOREGROUND (job) &&
 	  signal_is_trapped (SIGINT))
 	{
 	  int old_frozen;
@@ -3328,7 +3355,8 @@ set_job_status_and_cleanup (job)
 	 signals are sent to process groups) or via kill(2) to the foreground
 	 process by another process (or itself).  If the shell did receive the
 	 SIGINT, it needs to perform normal SIGINT processing. */
-      else if (wait_sigint_received && (WTERMSIG (child->status) == SIGINT) &&
+      else if (wait_sigint_received &&
+	      child_caught_sigint == 0 &&
 	      IS_FOREGROUND (job) && IS_JOBCONTROL (job) == 0)
 	{
 	  int old_frozen;
@@ -3368,7 +3396,7 @@ set_job_status_and_cleanup (job)
 		  temp_handler = trap_to_sighandler (SIGINT);
 		restore_sigint_handler ();
 	      if (temp_handler == SIG_DFL)
-		termsig_handler (SIGINT);
+		termsig_handler (SIGINT);	/* XXX */
 	      else if (temp_handler != SIG_IGN)
 		(*temp_handler) (SIGINT);
 	    }

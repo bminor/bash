@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Tue Dec 28 13:41:43 EST 2010
+.\"	Last Change: Sat Mar 12 21:44:43 EST 2011
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2010 December 28" "GNU Bash-4.2"
+.TH BASH 1 "2011 March 12" "GNU Bash-4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2360,11 +2360,6 @@ An indexed array is created automatically if any variable is assigned to
 using the syntax \fIname\fP[\fIsubscript\fP]=\fIvalue\fP.  The
 .I subscript
 is treated as an arithmetic expression that must evaluate to a number.
-If
-.I subscript
-evaluates to a number less than zero, it is used as
-an offset from one greater than the array's maximum index (so a subcript
-of -1 refers to the last element of the array).
 To explicitly declare an indexed array, use
 .B declare \-a \fIname\fP
 (see
@@ -2426,6 +2421,12 @@ ${\fIname\fP[\fIsubscript\fP]}.  If \fIsubscript\fP is \fB*\fP or
 \fB@\fP, the expansion is the number of elements in the array.
 Referencing an array variable without a subscript is equivalent to
 referencing the array with a subscript of 0.
+If the
+.I subscript
+used to reference an element of an indexed array
+evaluates to a number less than zero, it is used as
+an offset from one greater than the array's maximum index (so a subcript
+of -1 refers to the last element of the array).
 .PP
 An array variable is considered set if a subscript has been assigned a
 value.  The null string is a valid value.

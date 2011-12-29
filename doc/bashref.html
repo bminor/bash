@@ -1,6 +1,6 @@
 <HTML>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<!-- Created on December, 28  2010 by texi2html 1.64 -->
+<!-- Created on March, 9  2011 by texi2html 1.64 -->
 <!-- 
 Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -1351,8 +1351,8 @@ is enabled, the match is performed without regard to the case
 of alphabetic characters.
 The return value is 0 if the string matches (<SAMP>`=='</SAMP>) or does not
 match (<SAMP>`!='</SAMP>)the pattern, and 1 otherwise.
-Any part of the pattern may be quoted to force it to be matched as a
-string.
+Any part of the pattern may be quoted to force the quoted portion
+to be matched as a string.
 </P><P>
 
 An additional binary operator, <SAMP>`=~'</SAMP>, is available, with the same
@@ -1367,8 +1367,8 @@ If the shell option <CODE>nocasematch</CODE>
 (see the description of <CODE>shopt</CODE> in <A HREF="bashref.html#SEC64">4.3.2 The Shopt Builtin</A>)
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
-Any part of the pattern may be quoted to force it to be matched as a
-string.
+Any part of the pattern may be quoted to force the quoted portion
+to be matched as a string.
 Substrings matched by parenthesized subexpressions within the regular
 expression are saved in the array variable <CODE>BASH_REMATCH</CODE>.
 The element of <CODE>BASH_REMATCH</CODE> with index 0 is the portion of the string
@@ -3198,8 +3198,10 @@ A variant of here documents, the format is:
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>&#60;&#60;&#60; <VAR>word</VAR>
 </pre></td></tr></table><P>
 
-The <VAR>word</VAR> is expanded and supplied to the command on its standard
-input.
+The <VAR>word</VAR>
+is expanded as described above, with the exception that
+pathname expansion is not applied, and supplied as a single string
+to the command on its standard input.
 </P><P>
 
 <HR SIZE="6">
@@ -4172,7 +4174,7 @@ is supplied.
 
 <DT><CODE>readonly</CODE>
 <DD><A NAME="IDX80"></A>
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>readonly [-aApf] [<VAR>name</VAR>[=<VAR>value</VAR>]] <small>...</small>
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>readonly [-aAf] [-p] [<VAR>name</VAR>[=<VAR>value</VAR>]] <small>...</small>
 </pre></td></tr></table>Mark each <VAR>name</VAR> as readonly.
 The values of these names may not be changed by subsequent assignment.
 If the <SAMP>`-f'</SAMP> option is supplied, each <VAR>name</VAR> refers to a shell
@@ -4180,8 +4182,11 @@ function.
 The <SAMP>`-a'</SAMP> option means each <VAR>name</VAR> refers to an indexed
 array variable; the <SAMP>`-A'</SAMP> option means each <VAR>name</VAR> refers
 to an associative array variable.
+If both options are supplied, <SAMP>`-A'</SAMP> takes precedence.
 If no <VAR>name</VAR> arguments are given, or if the <SAMP>`-p'</SAMP>
 option is supplied, a list of all readonly names is printed.
+The other options may be used to restrict the output to a subset of
+the set of readonly names.
 The <SAMP>`-p'</SAMP> option causes output to be displayed in a format that
 may be reused as input.
 If a variable name is followed by =<VAR>value</VAR>, the value of
@@ -4651,7 +4656,7 @@ the function is defined are displayed as well.
 </P><P>
 
 The <SAMP>`-g'</SAMP> option forces variables to be created or modified at
-the global scope, even when \fBdeclare\fP is executed in a shell function.
+the global scope, even when <CODE>declare</CODE> is executed in a shell function.
 It is ignored in all other cases.
 </P><P>
 
@@ -5883,7 +5888,7 @@ This option is enabled by default.
 
 <DT><CODE>globstar</CODE>
 <DD>If set, the pattern <SAMP>`**'</SAMP> used in a filename expansion context will
-match a files and zero or more directories and subdirectories.
+match all files and zero or more directories and subdirectories.
 If the pattern is followed by a <SAMP>`/'</SAMP>, only directories and
 subdirectories match.
 <P>
@@ -8201,7 +8206,7 @@ There is no maximum
 limit on the size of an array, nor any requirement that members
 be indexed or assigned contiguously.
 Indexed arrays are referenced using integers (including arithmetic
-expressions (see section <A HREF="bashref.html#SEC84">6.5 Shell Arithmetic</A>) and are zero-based;
+expressions (see section <A HREF="bashref.html#SEC84">6.5 Shell Arithmetic</A>)) and are zero-based;
 associative arrays use arbitrary strings.
 </P><P>
 
@@ -8295,6 +8300,7 @@ entire array.
 The <CODE>declare</CODE>, <CODE>local</CODE>, and <CODE>readonly</CODE>
 builtins each accept a <SAMP>`-a'</SAMP> option to specify an indexed
 array and a <SAMP>`-A'</SAMP> option to specify an associative array.
+If both options are supplied, <SAMP>`-A'</SAMP> takes precedence.
 The <CODE>read</CODE> builtin accepts a <SAMP>`-a'</SAMP>
 option to assign a list of words read from the standard input
 to an array, and can read values from the standard input into
@@ -16380,7 +16386,7 @@ to permit their use in free software.
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="bashref.html#SEC_About"> ? </A>]</TD>
 </TR></TABLE>
 <H1>About this document</H1>
-This document was generated by <I>Chet Ramey</I> on <I>December, 28  2010</I>
+This document was generated by <I>Chet Ramey</I> on <I>March, 9  2011</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 <P></P>  
@@ -16542,7 +16548,7 @@ the following structure:
 <BR>  
 <FONT SIZE="-1">
 This document was generated
-by <I>Chet Ramey</I> on <I>December, 28  2010</I>
+by <I>Chet Ramey</I> on <I>March, 9  2011</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 

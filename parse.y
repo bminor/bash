@@ -1438,12 +1438,11 @@ yy_readline_get ()
 	  interrupt_immediately++;
 	  old_sigint = (SigHandler *)set_signal_handler (SIGINT, sigint_sighandler);
 	}
-      terminate_immediately = 1;
 
       current_readline_line = readline (current_readline_prompt ?
       					  current_readline_prompt : "");
 
-      terminate_immediately = 0;
+      CHECK_TERMSIG;
       if (signal_is_ignored (SIGINT) == 0)
 	{
 	  interrupt_immediately--;
@@ -1603,16 +1602,15 @@ yy_stream_get ()
   if (bash_input.location.file)
     {
       if (interactive)
-	{
-	  interrupt_immediately++;
-	  terminate_immediately++;
-	}
+	interrupt_immediately++;
+
+      /* XXX - don't need terminate_immediately; getc_with_restart checks
+	 for terminating signals itself if read returns < 0 */
       result = getc_with_restart (bash_input.location.file);
+
       if (interactive)
-	{
-	  interrupt_immediately--;
-	  terminate_immediately--;
-	}
+	interrupt_immediately--;
+
     }
   return (result);
 }

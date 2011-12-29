@@ -42,7 +42,7 @@ bash - GNU Bourne-Again SHell
 <H3>COPYRIGHT</H3>
 
 
-Bash is Copyright &#169; 1989-2010 by the Free Software Foundation, Inc.
+Bash is Copyright &#169; 1989-2011 by the Free Software Foundation, Inc.
 <A NAME="lbAE">&nbsp;</A>
 <H3>DESCRIPTION</H3>
 
@@ -930,8 +930,8 @@ is enabled, the match is performed without regard to the case
 of alphabetic characters.
 The return value is 0 if the string matches (<B>==</B>) or does not match
 (<B>!=</B>) the pattern, and 1 otherwise.
-Any part of the pattern may be quoted to force it to be matched as a
-string.
+Any part of the pattern may be quoted to force the quoted portion
+to be matched as a string.
 <P>
 
 
@@ -948,8 +948,8 @@ If the shell option
 
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
-Any part of the pattern may be quoted to force it to be matched as a
-string.
+Any part of the pattern may be quoted to force the quoted portion
+to be matched as a string.
 Substrings matched by parenthesized subexpressions within the regular
 expression are saved in the array variable
 <FONT SIZE=-1><B>BASH_REMATCH</B>.
@@ -1907,7 +1907,6 @@ this instance of
 The values assigned to the array members are as follows:
 <P>
 <DL COMPACT><DT><DD>
-
 <DL COMPACT>
 <DT><B>BASH_VERSINFO[</B>0]
 
@@ -1936,7 +1935,6 @@ The value of
 <FONT SIZE=-1><B>MACHTYPE</B>.
 
 </FONT>
-
 </DL></DL>
 
 <DT><B>BASH_VERSION</B>
@@ -2917,6 +2915,7 @@ If this variable is not set, <B>bash</B> acts as if it had the
 value <B>$aq\nreal\t%3lR\nuser\t%3lU\nsys	%3lSaq</B>.
 If the value is null, no timing information is displayed.
 A trailing newline is added when the format string is displayed.
+
 <DT><B>TMOUT</B>
 
 <DD>
@@ -3138,6 +3137,10 @@ option to specify an indexed array and a
 <B>-A</B>
 
 option to specify an associative array.
+If both options are supplied, 
+<B>-A</B>
+
+takes precedence.
 The
 <B>read</B>
 
@@ -3432,7 +3435,7 @@ a level of variable indirection is introduced.
 expanded and that value is used in the rest of the substitution, rather
 than the value of <I>parameter</I> itself.
 This is known as <I>indirect expansion</I>.
-The exceptions to this are the expansions of ${<B>!\fPfIprefix</B><B>*</B>} and
+The exceptions to this are the expansions of ${<B>!</B><I>prefix</I><B>*</B>} and
 ${<B>!</B><I>name</I>[<I>@</I>]} described below.
 The exclamation point must immediately follow the left brace in order to
 introduce indirection.
@@ -3741,8 +3744,6 @@ array in turn, and the expansion is the resultant list.
 
 <I>Command substitution</I> allows the output of a command to replace
 the command name.  There are two forms:
-<P>
-
 <DL COMPACT><DT><DD>
 <P>
 
@@ -4640,8 +4641,10 @@ A variant of here documents, the format is:
 
 <P>
 
-The <I>word</I> is expanded and supplied to the command on its standard
-input.
+The <I>word</I>
+is expanded as described above, with the exception that
+pathname expansion is not applied, and supplied as a single string
+to the command on its standard input.
 <A NAME="lbBQ">&nbsp;</A>
 <H4>Duplicating File Descriptors</H4>
 
@@ -5455,7 +5458,6 @@ arguments, if any.
 
 The shell has an <I>execution environment</I>, which consists of the
 following:
-
 <DL COMPACT>
 <DT>*<DD>
 open files inherited by the shell at invocation, as modified by
@@ -9276,12 +9278,12 @@ with the exceptions that <B>+a</B>
 may not be used to destroy an array variable and <B>+r</B> will not
 remove the readonly attribute.
 When used in a function, makes each
-<I>name</I> local, as with the 
+<I>name</I> local, as with the
 <B>local</B>
 
 command,
-unless the <B>-gP option is supplied,
-If a variable name is followed by =</B><I>value</I>, the value of
+unless the <B>-g</B> option is supplied,
+If a variable name is followed by =<I>value</I>, the value of
 the variable is set to <I>value</I>.
 The return value is 0 unless an invalid option is encountered,
 an attempt is made to define a function using
@@ -9990,10 +9992,13 @@ Display the description of each <I>pattern</I> in a manpage-like format
 <DD>
 Display only a short usage synopsis for each <I>pattern</I>
 
-</DL></DL>
+</DL>
+<P>
 
 The return status is 0 unless no command matches
 <I>pattern</I>.
+
+</DL>
 
 <DT><B>history [</B><I>n</I>]<DD>
 
@@ -10695,7 +10700,7 @@ times out (in which case the return code is greater than 128), or an
 invalid file descriptor is supplied as the argument to <B>-u</B>.
 </DL>
 
-<DT><B>readonly</B> [<B>-aApf</B>] [<I>name</I>[=<I>word</I>] ...]<DD>
+<DT><B>readonly</B> [<B>-aAf</B>] [<B>-p</B>] [<I>name</I>[=<I>word</I>] ...]<DD>
 
 The given
 <I>names</I> are marked readonly; the values of these
@@ -10715,6 +10720,10 @@ option restricts the variables to indexed arrays; the
 <B>-A</B>
 
 option restricts the variables to associative arrays.
+If both options are supplied,
+<B>-A</B>
+
+takes precedence.
 If no
 <I>name</I>
 
@@ -10722,6 +10731,8 @@ arguments are given, or if the
 <B>-p</B>
 
 option is supplied, a list of all readonly names is printed.
+The other options may be used to restrict the output to a subset of
+the set of readonly names.
 The
 <B>-p</B>
 
@@ -11432,7 +11443,6 @@ and the effect of interrupting a command list.
 <DT><B>compat41</B>
 
 <DD>
-@item compat41
 If set,
 <B>bash</B>,
 
@@ -11562,7 +11572,7 @@ This option is enabled by default.
 
 <DD>
 If set, the pattern <B>**</B> used in a pathname expansion context will
-match a files and zero or more directories and subdirectories.
+match all files and zero or more directories and subdirectories.
 If the pattern is followed by a <B>/</B>, only directories and
 subdirectories match.
 <DT><B>gnu_errfmt</B>
@@ -11757,6 +11767,7 @@ This option is enabled by default.
 If set, the <B>echo</B> builtin expands backslash-escape sequences
 by default.
 </DL></DL>
+
 
 <DT><B>suspend</B> [<B>-f</B>]<DD>
 Suspend the execution of this shell until it receives a
@@ -12643,7 +12654,7 @@ it provides for filing a bug report.
 
 Comments and bug reports concerning
 this manual page should be directed to
-<I><A HREF="mailto:chet@po.cwru.edu">chet@po.cwru.edu</A></I>.
+<I><A HREF="mailto:chet.ramey@case.edu">chet.ramey@case.edu</A></I>.
 
 <A NAME="lbDH">&nbsp;</A>
 <H3>BUGS</H3>
@@ -12797,6 +12808,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 28 December 2010 14:30:29 EST
+Time: 09 March 2011 17:05:44 EST
 </BODY>
 </HTML>

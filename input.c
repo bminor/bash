@@ -87,6 +87,11 @@ getc_with_restart (stream)
 	  local_bufused = read (fileno (stream), localbuf, sizeof(localbuf));
 	  if (local_bufused > 0)
 	    break;
+	  else if (local_bufused == 0)
+	    {
+	      local_index = 0;
+	      return EOF;
+	    }
 	  else if (errno == X_EAGAIN || errno == X_EWOULDBLOCK)
 	    {
 	      if (sh_unset_nodelay_mode (fileno (stream)) < 0)
@@ -96,7 +101,7 @@ getc_with_restart (stream)
 		}
 	      continue;
 	    }
-	  else if (local_bufused == 0 || errno != EINTR)
+	  else if (errno != EINTR)
 	    {
 	      local_index = 0;
 	      return EOF;

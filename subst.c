@@ -5527,7 +5527,7 @@ array_length_reference (s)
     }
   else
     {
-      ind = array_expand_index (t, len);
+      ind = array_expand_index (var, t, len);
       if (ind < 0)
 	{
 	  err_badarraysub (t);

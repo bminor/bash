@@ -11162,7 +11162,7 @@ execute_cmd.c
 	- fix expand_word_unsplit to add the W_NOSPLIT2 flag to the word to
 	  be expanded, so "" doesn't add CTLNUL.  Similar to fix of 2/18 to
 	  expand_string_for_rhs.  Fixes bug reported by Nathanael D. Noblet
-	  <nathanael@gnat.ca>
+	  <nathanael@gnat.ca> and Matthias Klose <doko@debian.org>
 
 parse.y
 	- fix extended_glob case of read_token_word to allocate an extra
@@ -11210,3 +11210,83 @@ lib/readline/display.c
 	- fix rl_message to use a dynamically-allocated buffer instead of a
 	  fixed-size buffer of 128 chars for the `local message prompt'.  Bug
 	  report and fix from Micah Cowan <micah@cowan.name>
+
+				    3/7
+				    ---
+jobs.c
+	- add sentinel to wait_sigint_handler so it only sets wait_sigint_received
+	  if waiting_for_child is non-zero; otherwise, it restores the old
+	  SIGINT handler and sends itself the SIGINT
+	- set waiting_for_child around the calls to waitchld that use it to
+	  synchronously wait for a process
+	- change logic that decides whether or not the child process blocked
+	  or handled SIGINT based on whether or not waitpid returns -1/EINTR
+	  and the shell receives a SIGINT and the child does not exit.  If
+	  the child later exits due to SIGINT, cancel the assumoption that it
+	  was handled
+	- instead of testing whether or not the child exited due to SIGINT
+	  when deciding whether the shell should act on a SIGINT it received
+	  while waiting, test whether or not we think the child caught
+	  SIGINT.  If it did, we let it go (unless the shell has it trapped);
+	  if it did not catch it, the shell acts on the SIGINT.  Fix from
+	  Linus Torvalds <torvalds@linux-foundation.org>, bug report originally
+	  from Oleg Nesterov <oleg@redhat.com>
+
+				    3/8
+				    ---
+shell.c
+	- initialize no_line_editing to 1 if READLINE is not defined -- we
+	  can't have line editing without readline
+
+				   3/12
+				   ----
+lib/readline/signals.c
+	- add SIGHUP to the set of signals readline handles
+
+lib/readline/doc/rltech.texi
+	- document that SIGHUP is now part of the set of signals readline
+	  handles
+
+lib/readline/input.c
+	- if _rl_caught_signal indicates that read() was interrupted by a
+	  SIGHUP or SIGTERM, return READERR or EOF as appropriate
+	- call rl_event_hook, if it's set, if call to read in rl_getc
+	  returns -1/EINTR.  If rl_event_hook doesn't do anything, this
+	  continues the loop as before.  This handles the other fatal
+	  signals
+
+execute_cmd.c
+	- add a couple of QUIT; calls to execute_disk_command and
+	  execute_simple_command to improve responsiveness to interrupts
+	  and fatal signals
+
+input.c
+	- rearrange getc_with_restart so that the return values from read()
+	  are handled right
+
+parse.y
+	- don't need to set terminate_immediately in yy_stream_get, since
+	  getc_with_restart checks for terminating signals itself
+	- since readline returns READERR on SIGHUP or SIGTERM, don't need
+	  to set terminate_immediately.  Still doesn't handle other
+	  signals well -- will have to check that some more
+
+bashline.c
+	- new function, bash_event_hook, for rl_event_hook.  Just checks for
+	  terminating signals and acts on them using CHECK_TERMSIG.
+	- set rl_event_hook to bash_event_hook
+
+builtins/read.def
+	- take out setting terminate_immediately; add calls to CHECK_TERMSIG
+	  after read calls
+
+doc/{bash.1,bashref.texi}
+	- move the text describing the effect of negative subscripts used to
+	  reference indexed array elements to the paragraphs describing
+	  ${parameter[subscript]}, since that's where they are implemented.
+	  Pointed out by Christopher F. A. Johnson <cfajohnson@gmail.com>
+
+arrayfunc.[ch],subst.c
+	- array_expand_index now takes a new first argument: a SHELL_VAR *
+	  of the variable being subscripted.  Can be used later to fully
+	  implement negative subscripts

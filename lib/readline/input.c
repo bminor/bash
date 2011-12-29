@@ -1,6 +1,6 @@
 /* input.c -- character input functions for readline. */
 
-/* Copyright (C) 1994-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2011 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -464,6 +464,8 @@ rl_getc (stream)
     {
       RL_CHECK_SIGNALS ();
 
+      /* We know at this point that _rl_caught_signal == 0 */
+
 #if defined (__MINGW32__)
       if (isatty (fileno (stream)))
 	return (getch ());
@@ -510,6 +512,10 @@ rl_getc (stream)
 	 Otherwise, some error ocurred, also signifying EOF. */
       if (errno != EINTR)
 	return (RL_ISSTATE (RL_STATE_READCMD) ? READERR : EOF);
+      else if (_rl_caught_signal == SIGHUP || _rl_caught_signal == SIGTERM)
+	return (RL_ISSTATE (RL_STATE_READCMD) ? READERR : EOF);
+      else if (rl_event_hook)
+	(*rl_event_hook) ();
     }
 }
 
