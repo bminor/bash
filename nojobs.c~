@@ -801,17 +801,13 @@ wait_for (pid)
   return_val = process_exit_status (status);
   last_command_exit_signal = get_termsig (status);
 
-#if defined (DONT_REPORT_SIGPIPE) && defined (DONT_REPORT_SIGTERM)
-#  define REPORTSIG(x) ((x) != SIGINT && (x) != SIGPIPE && (x) != SIGTERM)
-#elif !defined (DONT_REPORT_SIGPIPE) && !defined (DONT_REPORT_SIGTERM)
-#  define REPORTSIG(x) ((x) != SIGINT)
-#elif defined (DONT_REPORT_SIGPIPE)
-#  define REPORTSIG(x) ((x) != SIGINT && (x) != SIGPIPE)
+#if !defined (DONT_REPORT_SIGPIPE)
+  if ((WIFSTOPPED (status) == 0) && WIFSIGNALED (status) &&
+	(WTERMSIG (status) != SIGINT))
 #else
-#  define REPORTSIG(x) ((x) != SIGINT && (x) != SIGTERM)
-#endiof
-
-  if ((WIFSTOPPED (status) == 0) && WIFSIGNALED (status) && REPORTSIG(WTERMSIG (status)))
+  if ((WIFSTOPPED (status) == 0) && WIFSIGNALED (status) &&
+	(WTERMSIG (status) != SIGINT) && (WTERMSIG (status) != SIGPIPE))
+#endif
     {
       fprintf (stderr, "%s", j_strsignal (WTERMSIG (status)));
       if (WIFCORED (status))

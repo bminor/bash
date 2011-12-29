@@ -1,6 +1,6 @@
 /* arrayfunc.c -- High-level array functions used by other parts of the shell. */
 
-/* Copyright (C) 2001-2011 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -385,13 +385,10 @@ expand_compound_array_assignment (var, value, flags)
      int flags;
 {
   WORD_LIST *list, *nlist;
-  WORD_LIST *hd, *tl, *t, *n;
   char *val;
   int ni;
 
-  /* This condition is true when invoked from the declare builtin with a
-     command like
-	declare -a d='([1]="" [2]="bdef" [5]="hello world" "test")' */
+  /* I don't believe this condition is ever true any more. */
   if (*value == '(')	/*)*/
     {
       ni = 1;
@@ -408,17 +405,8 @@ expand_compound_array_assignment (var, value, flags)
      (ksh93 seems to do this). */
   list = parse_string_to_word_list (val, 1, "array assign");
 
-  if (var && assoc_p (var))
-    {
-      if (val != value)
-	free (val);
-      return list;
-    }
-
   /* If we're using [subscript]=value, we need to quote each [ and ] to
-     prevent unwanted filename expansion.  This doesn't need to be done
-     for associative array expansion, since that uses a different expansion
-     function (see assign_compound_array_list below). */
+     prevent unwanted filename expansion. */
   if (list)
     quote_array_assignment_chars (list);
 
@@ -445,7 +433,7 @@ assign_compound_array_list (var, nlist, flags)
   HASH_TABLE *h;
   WORD_LIST *list;
   char *w, *val, *nval;
-  int len, iflags, free_val;
+  int len, iflags;
   arrayind_t ind, last_ind;
   char *akey;
 
@@ -475,10 +463,7 @@ assign_compound_array_list (var, nlist, flags)
       /* We have a word of the form [ind]=value */
       if ((list->word->flags & W_ASSIGNMENT) && w[0] == '[')
 	{
-	  /* Don't have to handle embedded quotes specially any more, since
-	     associative array subscripts have not been expanded yet (see
-	     above). */
-	  len = skipsubscript (w, 0, 0);
+	  len = skipsubscript (w, 0, (var && assoc_p (var) != 0));
 
 	  /* XXX - changes for `+=' */
  	  if (w[len] != ']' || (w[len+1] != '=' && (w[len+1] != '+' || w[len+2] != '=')))
@@ -526,11 +511,7 @@ assign_compound_array_list (var, nlist, flags)
 	    }
 	  else if (assoc_p (var))
 	    {
-	      /* This is not performed above, see expand_compound_array_assignment */
-	      w[len] = '\0';	/*[*/
-	      akey = expand_assignment_string_to_string (w+1, 0);
-	      w[len] = ']';
-	      /* And we need to expand the value also, see below */
+	      akey = substring (w, 1, len);
 	      if (akey == 0 || *akey == 0)
 		{
 		  err_badarraysub (w);
@@ -545,7 +526,7 @@ assign_compound_array_list (var, nlist, flags)
 	      val = w + len + 3;
 	    }
 	  else
-	    val = w + len + 2;	    
+	    val = w + len + 2;
 	}
       else if (assoc_p (var))
 	{
@@ -558,21 +539,10 @@ assign_compound_array_list (var, nlist, flags)
 	  val = w;
 	}
 
-      free_val = 0;
-      /* See above; we need to expand the value here */
-      if (assoc_p (var))
-	{
-	  val = expand_assignment_string_to_string (val, 0);
-	  free_val = 1;
-	}
-
       if (integer_p (var))
 	this_command_name = (char *)NULL;	/* no command name for errors */
       bind_array_var_internal (var, ind, akey, val, iflags);
       last_ind++;
-
-      if (free_val)
-	free (val);
     }
 }
 

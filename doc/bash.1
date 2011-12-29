@@ -1866,7 +1866,8 @@ A sample value is
 .TP
 .B COLUMNS
 Used by the \fBselect\fP compound command to determine the terminal width
-when printing selection lists.  Automatically set upon receipt of a
+when printing selection lists.  Automatically set in an interactive shell
+upon receipt of a
 .SM
 .BR SIGWINCH .
 .TP
@@ -2098,7 +2099,8 @@ This variable determines the locale category used for number formatting.
 .TP
 .B LINES
 Used by the \fBselect\fP compound command to determine the column length
-for printing selection lists.  Automatically set upon receipt of a
+for printing selection lists.  Automatically set by an interactive shell
+upon receipt of a
 .SM
 .BR SIGWINCH .
 .TP
@@ -8913,7 +8915,8 @@ above).  The shell always
 postpones exiting if any jobs are stopped.
 .TP 8
 .B checkwinsize
-If set, \fBbash\fP checks the window size after each command
+If set, \fBbash\fP checks the window size after each command when running
+interactively
 and, if necessary, updates the values of
 .SM
 .B LINES
@@ -9669,11 +9672,11 @@ is not a defined alias.
 For each
 .IR name ,
 remove the corresponding variable or function.
-If no options are supplied, or the
+If the
 .B \-v
 option is given, each
 .I name
-refers to a shell variable.
+refers to a shell variable, and that variable is removed.
 Read-only variables may not be unset.
 If
 .B \-f
@@ -9681,6 +9684,9 @@ is specified, each
 .I name
 refers to a shell function, and the function definition
 is removed.
+If no options are supplied, each \fIname\fP refers to a variable; if
+there is no variable by that name, any function with that name is
+unset.
 Each unset variable or function is removed from the environment
 passed to subsequent commands.
 If any of

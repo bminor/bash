@@ -3556,6 +3556,9 @@ notify_of_job_status ()
 	    case JDEAD:
 	      if (interactive_shell == 0 && termsig && WIFSIGNALED (s) &&
 		  termsig != SIGINT &&
+#if defined (DONT_REPORT_SIGTERM)
+		  termsig != SIGTERM &&
+#endif
 #if defined (DONT_REPORT_SIGPIPE)
 		  termsig != SIGPIPE &&
 #endif

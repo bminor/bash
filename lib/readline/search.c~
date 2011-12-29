@@ -553,7 +553,7 @@ rl_history_search_reinit (flags)
 
 /* Search forward in the history for the string of characters
    from the start of the line to rl_point.  This is a non-incremental
-   search.  The search is anchored to the beginning of the history line. */
+   search. */
 int
 rl_history_search_forward (count, ignore)
      int count, ignore;
@@ -583,45 +583,6 @@ rl_history_search_backward (count, ignore)
   if (rl_last_func != rl_history_search_forward &&
       rl_last_func != rl_history_search_backward)
     rl_history_search_reinit (ANCHORED_SEARCH);
-
-  if (rl_history_search_len == 0)
-    return (rl_get_previous_history (count, ignore));
-  return (rl_history_search_internal (abs (count), (count > 0) ? -1 : 1));
-}
-
-/* Search forward in the history for the string of characters
-   from the start of the line to rl_point.  This is a non-incremental
-   search.  The search succeeds if the search string is present anywhere
-   in the history line. */
-int
-rl_history_substr_search_forward (count, ignore)
-     int count, ignore;
-{
-  if (count == 0)
-    return (0);
-
-  if (rl_last_func != rl_history_substr_search_forward &&
-      rl_last_func != rl_history_substr_search_backward)
-    rl_history_search_reinit (NON_ANCHORED_SEARCH);
-
-  if (rl_history_search_len == 0)
-    return (rl_get_next_history (count, ignore));
-  return (rl_history_search_internal (abs (count), (count > 0) ? 1 : -1));
-}
-
-/* Search backward through the history for the string of characters
-   from the start of the line to rl_point.  This is a non-incremental
-   search. */
-int
-rl_history_substr_search_backward (count, ignore)
-     int count, ignore;
-{
-  if (count == 0)
-    return (0);
-
-  if (rl_last_func != rl_history_substr_search_forward &&
-      rl_last_func != rl_history_substr_search_backward)
-    rl_history_search_reinit (NON_ANCHORED_SEARCH);
 
   if (rl_history_search_len == 0)
     return (rl_get_previous_history (count, ignore));

@@ -11653,3 +11653,160 @@ sig.c
 	  readline is active, call bashline_set_event_hook to cause
 	  termsig_handler to be called via bash_event_hook when the shell
 	  returns from the signal handler
+
+				   5/15
+				   ----
+lib/readline/display.c
+	- _rl_col_width: Mac OS X has a bug in wcwitdh: it does not return 0
+	  for UTF-8 combining characters.  Added workaround dependent on
+	  MACOSX.  Fixes problem pointed out by Thomas De Contes
+	  <d.l.tDecontes@free.fr>
+
+				   5/16
+				   ----
+lib/readline/rlmbutil.h
+	- WCWIDTH: wrapper for wcwidth that returns 0 for Unicode combining
+	  characters on systems where wcwidth is broken (e.g., Mac OS X).
+
+lib/readline/{complete,display,mbutil}.c
+	- use WCWIDTH instead of wcwidth
+
+				   5/17
+				   ----
+lib/readline/display.c
+	- update_line: after computing ofd and nfd, see whether the next
+	  character in ofd is a zero-width combining character.  If it is,
+	  back ofd and nfd up one, so the base characters no longer compare
+	  as equivalent.  Fixes problem reported by Keith Winstein
+	  <keithw@mit.edu>
+
+lib/readline/nls.c
+	- _rl_utf8locale: new flag variable, set to non-zero if the current
+	  locale is UTF-8
+	- utf8locale(): new function, returns 1 if the passed lspec (or the
+	  current locale) indicates that the locale is UTF-8.  Called from
+	  _rl_init_eightbit
+
+lib/readline/rlprivate.h
+	- extern declaration for _rl_utf8locale
+
+locale.c
+	- locale_utf8locale: new flag variable, set to non-zero if the current
+	  locale is UTF-8 (currently unused)
+	- locale_isutf8(): new function, returns 1 if the passed lspec (or the
+	  current locale) indicates that the locale is UTF-8.  Should be called
+	  whenever the locale or LC_CTYPE value is modified
+
+aclocal.m4
+	- BASH_WCWIDTH_BROKEN: new test for whether or not wcwidth returns
+	  zero-width characters like unicode combining characters as having
+	  display length 1; define WCWIDTH_BROKEN in this case
+
+config.h.in
+	- WCWIDTH_BROKEN: new define
+
+lib/readline/rlmbutil.h
+	- change WCWIDTH macro to use _rl_utf8locale and the full range of
+	  Unicode combining characters (U+0300-U+036F)
+
+				   5/19
+				   ----
+lib/readline/rlprivate.h
+	- _rl_search_context: new member, prevc, will hold character read
+	  prior to lastc
+
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: if the character causes us to index into
+	  another keymap, save that character in cxt->prevc
+	- _rl_isearch_dispatch: if we index into another keymap, but don't
+	  find a function that's special to i-search, and the character that
+	  caused us to index into that keymap would have terminated the
+	  search, push back cxt->prevc and cxt->lastc to make it appear as
+	  if `prevc' terminated the search, and execute lastc as a command.
+	  We have to push prevc back so we index into the same keymap before
+	  we read lastc.  Fixes bug report from Davor Cubranic
+	  <cubranic@stat.ubc.ca>
+
+				   5/20
+				   ----
+expr.c
+	- expr_bind_variable: pay attention to the return value from
+	  bind_variable and check whether or not we should error out due to
+	  a readonly or noassign variable.  Fixes bug reported by Eric
+	  Blake <eblake@redhat.com>
+
+				   5/26
+				   ----
+
+lib/readline/search.c
+	- include histlib.h for ANCHORED_SEARCH defines
+	- rl_history_search_flags: new variable, holds ANCHORED_SEARCH flag for
+	  the duration of a history search
+	- rl_history_search_reinit: takes a new flags variable, defines whether
+	  or not the search is anchored; assigned to rl_history_search_flags
+	- rl_history_serarch_reinit: if ANCHORED_SEARCH flag passed, add ^ to
+	  beginning of search string; otherwise search string is unmodified
+	- rl_history_search_internal: set rl_point appropriately based on
+	  whether or not rl_history_search_flags includes ANCHORED_SEARCH
+	- rl_history_substr_search_forward: new function, for non-anchored
+	  substring search forward through history for string of characters
+	  preceding rl_point
+	- rl_history_substr_search_backward: new function, for non-anchored
+	  substring search backward through history for string of characters
+	  preceding rl_point.  Original code from Niraj Kulkarni
+	  <kulkarniniraj14@gmail.com>
+
+lib/readline/readline.h
+	- extern declarations for rl_history_substr_search_{for,back}ward
+
+lib/readline/funmap.c
+	- history-substring-search-forward: new bindable command, invokes
+	  rl_history_substr_search_forward
+	- history-substring-search-backward: new bindable command, invokes
+	  rl_history_substr_search_backward
+
+lib/readline/doc/{rluser.texi,readline.3}
+	- document history-substring-search-forward and
+	  history-substring-search-backward
+
+				   5/27
+				   ----
+{nojobs,jobs}.c
+	- add support for DONT_REPORT_SIGTERM so that the shell doesn't print
+	  a message when a job exits due to SIGTERM since that's the default
+	  signal sent by the kill builtin.  Suggested by Marc Herbert
+	  <mark.herbert@gmail.com>
+
+config-top.h
+	- DONT_REPORT_SIGTERM: new user-modifiable setting.  Commented out
+	  by default
+
+				   5/28
+				   ----
+lib/readline/bind.c
+	- _rl_skip_to_delim: skip to a closing double quote or other delimiter,
+	  allowing backslash to quote any character, including the delimiter
+	- rl_parse_and_bind: call _rl_skip_to_delim instead of using inline
+	  code
+	- rl_parse_and_bind: allow quoted strings as the values of string
+	  variables.  Variable values without double quotes have trailing
+	  whitespace removed (which still allows embedded whitespace, for
+	  better or worse).  Fixes problem with string variables not matching
+	  in `set' command if values happen to have trailing spaces or tabs
+	  (debian bash bug #602762), but introduces slight incompatibility.
+
+				   5/29
+				   ----
+doc/{bash.1,bashref.texi}
+	- clarify unset description to specify that without options, a
+	  variable, then a shell function if there is no variable by that
+	  name, is unset.  Fixes discrepancy reported by Mu Qiao
+	  <qiaomuf@gentoo.org>
+
+				   6/4
+				   ----
+doc/{bash.1,bashref.texi}
+	- clarify description of LINES and COLUMNS (and checkwinsize shopt
+	  option) to make it clear that only interactive shells set a
+	  handler for SIGWINCH and update LINES and COLUMNS.  Original
+	  report submitted by Jonathan Nieder <jrnieder@gmail.com>

@@ -1257,7 +1257,6 @@ rl_parse_and_bind (string)
   if (_rl_stricmp (string, "set") == 0)
     {
       char *var, *value, *e;
-      int s;
 
       var = string + i;
       /* Make VAR point to start of variable name. */
@@ -1274,7 +1273,6 @@ rl_parse_and_bind (string)
       if (find_boolean_var (var) >= 0)
 	{
 	  /* remove trailing whitespace */
-remove_trailing:
 	  e = value + strlen (value) - 1;
 	  while (e >= value && whitespace (*e))
 	    e--;
@@ -1285,14 +1283,6 @@ remove_trailing:
 	}
       else if ((i = find_string_var (var)) >= 0)
 	{
-	  /* Allow quoted strings in variable values */
-	  if (*value == '"')
-	    {
-	      i = _rl_skip_to_delim (value, 1, *value);
-	      value[i] = '\0';
-	    }
-	  else
-	    goto remove_trailing;
 	}
 	
       rl_variable_bind (var, value);
@@ -1315,13 +1305,32 @@ remove_trailing:
      the quoted string delimiter, like the shell. */
   if (*funname == '\'' || *funname == '"')
     {
-      i = _rl_skip_to_delim (string, i+1, *funname);
-      if (string[i])
+      int delimiter, passc;
+
+      delimiter = string[i++];
+      for (passc = 0; c = string[i]; i++)
+	{
+	  if (passc)
+	    {
+	      passc = 0;
+	      continue;
+	    }
+
+	  if (c == '\\')
+	    {
+	      passc = 1;
+	      continue;
+	    }
+
+	  if (c == delimiter)
+	    break;
+	}
+      if (c)
 	i++;
     }
 
   /* Advance to the end of the string.  */
-  for (; string[i] && whitespace (string[i]) == 0; i++);
+  for (; string[i] && !whitespace (string[i]); i++);
 
   /* No extra whitespace at the end of the string. */
   string[i] = '\0';
@@ -1381,7 +1390,7 @@ remove_trailing:
 
   /* Get the actual character we want to deal with. */
   kname = strrchr (string, '-');
-  if (kname == 0)
+  if (!kname)
     kname = string;
   else
     kname++;

@@ -11734,3 +11734,93 @@ expr.c
 	  bind_variable and check whether or not we should error out due to
 	  a readonly or noassign variable.  Fixes bug reported by Eric
 	  Blake <eblake@redhat.com>
+
+				   5/26
+				   ----
+
+lib/readline/search.c
+	- include histlib.h for ANCHORED_SEARCH defines
+	- rl_history_search_flags: new variable, holds ANCHORED_SEARCH flag for
+	  the duration of a history search
+	- rl_history_search_reinit: takes a new flags variable, defines whether
+	  or not the search is anchored; assigned to rl_history_search_flags
+	- rl_history_serarch_reinit: if ANCHORED_SEARCH flag passed, add ^ to
+	  beginning of search string; otherwise search string is unmodified
+	- rl_history_search_internal: set rl_point appropriately based on
+	  whether or not rl_history_search_flags includes ANCHORED_SEARCH
+	- rl_history_substr_search_forward: new function, for non-anchored
+	  substring search forward through history for string of characters
+	  preceding rl_point
+	- rl_history_substr_search_backward: new function, for non-anchored
+	  substring search backward through history for string of characters
+	  preceding rl_point.  Original code from Niraj Kulkarni
+	  <kulkarniniraj14@gmail.com>
+
+lib/readline/readline.h
+	- extern declarations for rl_history_substr_search_{for,back}ward
+
+lib/readline/funmap.c
+	- history-substring-search-forward: new bindable command, invokes
+	  rl_history_substr_search_forward
+	- history-substring-search-backward: new bindable command, invokes
+	  rl_history_substr_search_backward
+
+lib/readline/doc/{rluser.texi,readline.3}
+	- document history-substring-search-forward and
+	  history-substring-search-backward
+
+				   5/27
+				   ----
+{nojobs,jobs}.c
+	- add support for DONT_REPORT_SIGTERM so that the shell doesn't print
+	  a message when a job exits due to SIGTERM since that's the default
+	  signal sent by the kill builtin.  Suggested by Marc Herbert
+	  <mark.herbert@gmail.com>
+
+config-top.h
+	- DONT_REPORT_SIGTERM: new user-modifiable setting.  Commented out
+	  by default
+
+				   5/28
+				   ----
+lib/readline/bind.c
+	- _rl_skip_to_delim: skip to a closing double quote or other delimiter,
+	  allowing backslash to quote any character, including the delimiter
+	- rl_parse_and_bind: call _rl_skip_to_delim instead of using inline
+	  code
+	- rl_parse_and_bind: allow quoted strings as the values of string
+	  variables.  Variable values without double quotes have trailing
+	  whitespace removed (which still allows embedded whitespace, for
+	  better or worse).  Fixes problem with string variables not matching
+	  in `set' command if values happen to have trailing spaces or tabs
+	  (debian bash bug #602762), but introduces slight incompatibility.
+
+				   5/29
+				   ----
+doc/{bash.1,bashref.texi}
+	- clarify unset description to specify that without options, a
+	  variable, then a shell function if there is no variable by that
+	  name, is unset.  Fixes discrepancy reported by Mu Qiao
+	  <qiaomuf@gentoo.org>
+
+				   6/4
+				   ----
+doc/{bash.1,bashref.texi}
+	- clarify description of LINES and COLUMNS (and checkwinsize shopt
+	  option) to make it clear that only interactive shells set a
+	  handler for SIGWINCH and update LINES and COLUMNS.  Original
+	  report submitted by Jonathan Nieder <jrnieder@gmail.com>
+
+arrayfunc.c
+	- expand_compound_array_assignment: defer expansion of words between
+	  parens when performing compound assignmnt to an associative array
+	  variable
+	- assign_compound_array_list: perform the same expansions when doing
+	  a compound array assignment to an associative array variable as
+	  when doing a straight array index assignment.  The idea is that
+	  	foo=( [ind1]=bar [ind2]=quux)
+	  is the same as
+		foo[ind1]=bar ; foo[ind2]=quux
+
+	  This fixes problems with double-expansion and quote removal being
+	  performed on the array indices

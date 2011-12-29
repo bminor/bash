@@ -185,7 +185,7 @@ Shells also provide a small set of built-in
 commands (@dfn{builtins}) implementing functionality impossible
 or inconvenient to obtain via separate utilities.
 For example, @code{cd}, @code{break}, @code{continue}, and
-@code{exec}) cannot be implemented outside of the shell because
+@code{exec} cannot be implemented outside of the shell because
 they directly manipulate the shell itself.
 The @code{history}, @code{getopts}, @code{kill}, or @code{pwd}
 builtins, among others, could be implemented in separate utilities,
@@ -3368,10 +3368,13 @@ results in permissions of @code{755}.
 unset [-fv] [@var{name}]
 @end example
 Each variable or function @var{name} is removed.
-If no options are supplied, or the @option{-v} option is given, each
-@var{name} refers to a shell variable. 
+If the @option{-v} option is given, each
+@var{name} refers to a shell variable and that variable is remvoved.
 If the @option{-f} option is given, the @var{name}s refer to shell
 functions, and the function definition is removed.
+If no options are supplied, each @var{name} refers to a variable; if
+there is no variable by that name, any function with that name is
+unset.
 Readonly variables and functions may not be unset.
 The return status is zero unless a @var{name} is readonly.
 @end table
@@ -4510,8 +4513,8 @@ intervening command (@pxref{Job Control}).
 The shell always postpones exiting if any jobs are stopped.
 
 @item checkwinsize
-If set, Bash checks the window size after each command
-and, if necessary, updates the values of    
+If set, Bash checks the window size after each command when running
+interactively and, if necessary, updates the values of    
 @env{LINES} and @env{COLUMNS}.
 
 @item cmdhist
@@ -5005,7 +5008,8 @@ being closed.
 
 @item COLUMNS
 Used by the @code{select} command to determine the terminal width
-when printing selection lists.  Automatically set upon receipt of a
+when printing selection lists.  Automatically set by an interactive shell
+upon receipt of a
 @code{SIGWINCH}.
 
 @item COMP_CWORD
@@ -5294,7 +5298,8 @@ The line number in the script or shell function currently executing.
 
 @item LINES
 Used by the @code{select} command to determine the column length
-for printing selection lists.  Automatically set upon receipt of a
+for printing selection lists.  Automatically set by an interactive shell
+upon receipt of a
 @code{SIGWINCH}.
 
 @item MACHTYPE
@@ -6741,6 +6746,10 @@ variable in a @code{for} statement or the selection variable in a
 
 @item
 Process substitution is not available.
+
+@item
+While variable indirection is available, it may not be applied to the
+@samp{#} and @samp{?} special parameters.
 
 @item
 Assignment statements preceding @sc{posix} special builtins

@@ -1,6 +1,6 @@
 /* arrayfunc.c -- High-level array functions used by other parts of the shell. */
 
-/* Copyright (C) 2001-2011 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -408,23 +408,37 @@ expand_compound_array_assignment (var, value, flags)
      (ksh93 seems to do this). */
   list = parse_string_to_word_list (val, 1, "array assign");
 
-  if (var && assoc_p (var))
-    {
-      if (val != value)
-	free (val);
-      return list;
-    }
-
   /* If we're using [subscript]=value, we need to quote each [ and ] to
      prevent unwanted filename expansion.  This doesn't need to be done
      for associative array expansion, since that uses a different expansion
      function (see assign_compound_array_list below). */
-  if (list)
+  if (list && var && assoc_p (var) == 0)
     quote_array_assignment_chars (list);
 
-  /* Now that we've split it, perform the shell expansions on each
-     word in the list. */
-  nlist = list ? expand_words_no_vars (list) : (WORD_LIST *)NULL;
+  /* We want vname=([sub]=value) to be as close as possible to
+     vname[sub]=value for associative arrays, so we don't expand the
+     subscript before we try to find the end of it, for instance.
+     We defer most of the expansions and let the caller
+     (assign_compound_array_list) take care of it. */
+  nlist = 0;
+  for (t = list; t; t = t->next)
+    {
+      n = t->next;
+      t->next = 0;
+      /* t == word to expand */
+      if (var && assoc_p (var) && (t->word->flags & W_ASSIGNMENT) && t->word->word[0] == '[') /*]*/
+	hd = copy_word_list (t);	/* defer expansions to caller */
+      else
+        hd = expand_words_no_vars (t);
+      t->next = n;
+
+      /* Now we want to append hd to nlist.  tl is the running tail of nlist */
+      if (nlist == 0)
+        nlist = tl = hd;
+      else
+        tl->next = hd;
+      while (tl && tl->next) tl = tl->next;
+    }
 
   dispose_words (list);
 
@@ -545,7 +559,8 @@ assign_compound_array_list (var, nlist, flags)
 	      val = w + len + 3;
 	    }
 	  else
-	    val = w + len + 2;	    
+	    val = w + len + 2;
+	    
 	}
       else if (assoc_p (var))
 	{

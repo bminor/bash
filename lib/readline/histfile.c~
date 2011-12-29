@@ -125,7 +125,14 @@ history_filename (filename)
   home = sh_get_env_value ("HOME");
 
   if (home == 0)
-    return (NULL);
+    {
+#if 0
+      home = ".";
+      home_len = 1;
+#else
+      return (NULL);
+#endif
+    }
   else
     home_len = strlen (home);
 
@@ -423,7 +430,7 @@ history_do_write (filename, nelements, overwrite)
      int nelements, overwrite;
 {
   register int i;
-  char *output, *bakname;
+  char *output;
   int file, mode, rv;
 #ifdef HISTORY_USE_MMAP
   size_t cursize;
