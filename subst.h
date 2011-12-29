@@ -56,6 +56,7 @@
 #define SX_NOLONGJMP	0x0040	/* don't longjmp on fatal error */
 #define SX_ARITHSUB	0x0080	/* extracting $(( ... )) (currently unused) */
 #define SX_POSIXEXP	0x0100	/* extracting new Posix pattern removal expansions in extract_dollar_brace_string */
+#define SX_WORD		0x0200	/* extracting word in ${param op word} */
 
 /* Remove backslashes which are quoting backquotes from STRING.  Modifies
    STRING, and returns a pointer to it. */

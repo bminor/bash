@@ -1007,8 +1007,8 @@ is enabled, the match is performed without regard to the case
 of alphabetic characters.
 The return value is 0 if the string matches (@samp{==}) or does not
 match (@samp{!=})the pattern, and 1 otherwise.
-Any part of the pattern may be quoted to force it to be matched as a
-string.
+Any part of the pattern may be quoted to force the quoted portion
+to be matched as a string.
 
 An additional binary operator, @samp{=~}, is available, with the same
 precedence as @samp{==} and @samp{!=}.
@@ -1022,8 +1022,8 @@ If the shell option @code{nocasematch}
 (see the description of @code{shopt} in @ref{The Shopt Builtin})
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
-Any part of the pattern may be quoted to force it to be matched as a
-string.
+Any part of the pattern may be quoted to force the quoted portion
+to be matched as a string.
 Substrings matched by parenthesized subexpressions within the regular
 expression are saved in the array variable @code{BASH_REMATCH}.
 The element of @code{BASH_REMATCH} with index 0 is the portion of the string
@@ -2393,8 +2393,10 @@ A variant of here documents, the format is:
 <<< @var{word}
 @end example
 
-The @var{word} is expanded and supplied to the command on its standard
-input.
+The @var{word}
+is expanded as described above, with the exception that
+pathname expansion is not applied, and supplied as a single string
+to the command on its standard input.
 
 @subsection Duplicating File Descriptors
 The redirection operator

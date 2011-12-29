@@ -148,6 +148,9 @@ rl_callback_read_char ()
 	  eof = _rl_vi_domove_callback (_rl_vimvcxt);
 	  /* Should handle everything, including cleanup, numeric arguments,
 	     and turning off RL_STATE_VIMOTION */
+	  if (RL_ISSTATE (RL_STATE_NUMERICARG) == 0)
+	    _rl_internal_char_cleanup ();
+
 	  return;
 	}
 #endif

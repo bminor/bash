@@ -706,8 +706,8 @@ is enabled, the match is performed without regard to the case
 of alphabetic characters.
 The return value is 0 if the string matches (\fB==\fP) or does not match
 (\fB!=\fP) the pattern, and 1 otherwise.
-Any part of the pattern may be quoted to force it to be matched as a
-string.
+Any part of the pattern may be quoted to force the quoted portion
+to be matched as a string.
 .if t .sp 0.5
 .if n .sp 1
 An additional binary operator, \fB=~\fP, is available, with the same
@@ -722,8 +722,8 @@ If the shell option
 .B nocasematch
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
-Any part of the pattern may be quoted to force it to be matched as a
-string.
+Any part of the pattern may be quoted to force the quoted portion
+to be matched as a string.
 Substrings matched by parenthesized subexpressions within the regular
 expression are saved in the array variable
 .SM
@@ -3607,8 +3607,10 @@ A variant of here documents, the format is:
 .fi
 .RE
 .PP
-The \fIword\fP is expanded and supplied to the command on its standard
-input.
+The \fIword\fP
+is expanded as described above, with the exception that
+pathname expansion is not applied, and supplied as a single string
+to the command on its standard input.
 .SS "Duplicating File Descriptors"
 .PP
 The redirection operator

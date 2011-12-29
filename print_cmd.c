@@ -435,7 +435,7 @@ indirection_level_string ()
 #if defined (HANDLE_MULTIBYTE)
   ps4_len = strnlen (ps4, MB_CUR_MAX);
   ps4_firstc_len = MBLEN (ps4, ps4_len);
-  if (ps4_firstc_len == 1 || ps4_firstc_len == 0 || MB_INVALIDCH (ps4_firstc_len))
+  if (ps4_firstc_len == 1 || ps4_firstc_len == 0 || ps4_firstc_len < 0)
     {
       ps4_firstc[0] = ps4[0];
       ps4_firstc[ps4_firstc_len = 1] = '\0';

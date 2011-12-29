@@ -125,6 +125,7 @@ wmatchlen (wpat, wmax)
 	      if (wc == 0)
 		{
 	          matlen += wpat - wbrack - 1;	/* incremented below */
+	          wpat--;			/* back up to NUL */
 	          break;
 	        }
 	      else if (wc == L'\\')
@@ -261,6 +262,7 @@ umatchlen (pat, max)
 	      if (c == 0)
 		{
 	          matlen += pat - brack - 1;	/* incremented below */
+	          pat--;			/* back up to NUL */
 	          break;
 	        }
 	      else if (c == '\\')

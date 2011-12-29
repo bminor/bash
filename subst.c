@@ -1379,10 +1379,12 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
   slen = strlen (string + *sindex) + *sindex;
 
   /* The handling of dolbrace_state needs to agree with the code in parse.y:
-     parse_matched_pair() */
-  dolbrace_state = 0;
-  if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
-    dolbrace_state = (flags & SX_POSIXEXP) ? DOLBRACE_QUOTE : DOLBRACE_PARAM;
+     parse_matched_pair().  The different initial value is to handle the
+     case where this function is called to parse the word in
+     ${param op word} (SX_WORD). */
+  dolbrace_state = (flags & SX_WORD) ? DOLBRACE_WORD : DOLBRACE_PARAM;
+  if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && (flags & SX_POSIXEXP))
+    dolbrace_state = DOLBRACE_QUOTE;
 
   i = *sindex;
   while (c = string[i])
@@ -7176,7 +7178,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
     {
       /* Extract the contents of the ${ ... } expansion
 	 according to the Posix.2 rules. */
-      value = extract_dollar_brace_string (string, &sindex, quoted, (c == '%' || c == '#') ? SX_POSIXEXP : 0);
+      value = extract_dollar_brace_string (string, &sindex, quoted, (c == '%' || c == '#' || c =='/' || c == '^' || c == ',' || c ==':') ? SX_POSIXEXP|SX_WORD : SX_WORD);
       if (string[sindex] == RBRACE)
 	sindex++;
       else

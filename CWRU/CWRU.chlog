@@ -11021,3 +11021,71 @@ braces.c
 lib/glob/gmisc.c
 	- fix wmatchlen and umatchlen to initialize all state variables.  Fix
 	  from Andreas Schwab <schwab@linux-m68k.org>
+
+				    2/7
+				    ---
+configure.in
+	- changed release status to `release'
+
+				    2/9
+				    ---
+execute_cmd.c
+	- make sure some variables are declared as volatile if necessary.  Bug
+	  report and fix from Eric Blake <eblake@redhat.com>
+
+[bash-4.2 frozen]
+
+				   2/11
+				   ----
+print_cmd.c
+	- in indirection_level_string, change to simpler test of result of
+	  MBLEN (< 0 instead of MB_INVALIDCH)
+
+				   2/14
+				   ----
+[bash-4.2 released]
+
+				   2/15
+				   ----
+lib/glob/gmisc.c
+	- fix wmatchlen and umatchlen to avoid going past the end of the
+	  string on an incomplete bracket expression that ends with a
+	  NUL.  Fixes bug reported by Clark Wang <dearvoid@gmail.com>
+
+				   2/16
+				   ----
+subst.h
+	- new string extract flag value: SX_WORD.  Used when calling
+	  extract_dollar_brace_string to skip over the word in
+	  ${param op word} from parameter_brace_expand
+
+subst.c
+	- change parameter_brace_expand to add SX_WORD to flags passed to
+	  extract_dollar_brace_string
+	- change parameter_brace_expand to use SX_POSIXEXP for all non-posix
+	  word expansion operators that treat single quotes as special, not
+	  just % and #
+	- change extract_dollar_brace_string to initialize dolbrace_state to
+	  DOLBRACE_WORD if SX_WORD flag supplied and we shouldn't use
+	  DOLBRACE_QUOTE.  Fixes bug reported by Juergen Daubert <jue@jue.li>
+
+doc/{bash.1,bashref.texi}
+	- document the exact expansions here strings undergo
+
+				   2/17
+				   ----
+lib/readline/vi_mode.c
+	- make sure that `dd', `cc', and `yy' call vidomove_dispatch from
+	  rl_domove_read_callback.  Fixes bug reported by Clark Wang
+	  <dearvoid@gmail.com>
+
+lib/readline/callback.c
+	- make sure _rl_internal_char_cleanup is called after the
+	  vi-motion callbacks (rl_vi_domove_callback) in rl_callback_read_char.
+	  Companion to above fix
+
+doc/{bash.1,bashref.texi}
+	- make sure that the text describing the rhs of the == and =~
+	  operators to [[ states that only the quoted portion of the pattern
+	  is matched as a string
+
