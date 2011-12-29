@@ -340,6 +340,7 @@ extern int _rl_output_character_function PARAMS((int));
 extern void _rl_output_some_chars PARAMS((const char *, int));
 extern int _rl_backspace PARAMS((int));
 extern void _rl_enable_meta_key PARAMS((void));
+extern void _rl_disable_meta_key PARAMS((void));
 extern void _rl_control_keypad PARAMS((int));
 extern void _rl_set_cursor PARAMS((int, int));
 

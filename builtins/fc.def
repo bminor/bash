@@ -1,7 +1,7 @@
 This file is fc.def, from which is created fc.c.
 It implements the builtin "fc" in Bash.
 
-Copyright (C) 1987-2010 Free Software Foundation, Inc.
+Copyright (C) 1987-2011 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -85,7 +85,7 @@ $END
 extern int errno;
 #endif /* !errno */
 
-extern int current_command_line_count, saved_command_line_count;
+extern int current_command_line_count;
 extern int literal_history;
 extern int posixly_correct;
 extern int subshell_environment, interactive_shell;
@@ -304,7 +304,7 @@ fc_builtin (list)
   last_hist = i - rh - hist_last_line_added;
 
   /* XXX */
-  if (saved_command_line_count > 0 && i == last_hist && hlist[last_hist] == 0)
+  if (i == last_hist && hlist[last_hist] == 0)
     while (last_hist >= 0 && hlist[last_hist] == 0)
       last_hist--;
   if (last_hist < 0)
@@ -475,7 +475,7 @@ fc_gethnum (command, hlist)
      HIST_ENTRY **hlist;
 {
   int sign, n, clen, rh;
-  register int i, j;
+  register int i, j, last_hist;
   register char *s;
 
   sign = 1;
@@ -495,7 +495,15 @@ fc_gethnum (command, hlist)
      has been enabled (interactive or not) should use it in the last_hist
      calculation as if it were on. */
   rh = remember_on_history || ((subshell_environment & SUBSHELL_COMSUB) && enable_history_list);
-  i -= rh + hist_last_line_added;
+  last_hist = i - rh - hist_last_line_added;
+
+  if (i == last_hist && hlist[last_hist] == 0)
+    while (last_hist >= 0 && hlist[last_hist] == 0)
+      last_hist--;
+  if (last_hist < 0)
+    return (-1);
+
+  i = last_hist;
 
   /* No specification defaults to most recent command. */
   if (command == NULL)

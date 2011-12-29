@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.2, version 4.039])dnl
+AC_REVISION([for Bash 4.2, version 4.040])dnl
 
 define(bashvers, 4.2)
 define(relstatus, maint)
@@ -477,6 +477,9 @@ fi
 if test "X$cross_compiling" = "Xno"; then
 	CPPFLAGS_FOR_BUILD=${CPPFLAGS_FOR_BUILD-"$CPPFLAGS"}
 	LDFLAGS_FOR_BUILD=${LDFLAGS_FOR_BUILD-'$(LDFLAGS)'}
+	if test -z "$auto_cflags"; then
+		CFLAGS_FOR_BUILD=${CFLAGS-'$(CFLAGS)'}
+	fi
 else
 	CPPFLAGS_FOR_BUILD=${CPPFLAGS_FOR_BUILD-""}
 	LDFLAGS_FOR_BUILD=${LDFLAGS_FOR_BUILD-""}

@@ -725,12 +725,29 @@ rl_ding ()
 /*								    */
 /* **************************************************************** */
 
+static int enabled_meta = 0;	/* flag indicating we enabled meta mode */
+
 void
 _rl_enable_meta_key ()
 {
 #if !defined (__DJGPP__)
   if (term_has_meta && _rl_term_mm)
-    tputs (_rl_term_mm, 1, _rl_output_character_function);
+    {
+      tputs (_rl_term_mm, 1, _rl_output_character_function);
+      enabled_meta = 1;
+    }
+#endif
+}
+
+void
+_rl_disable_meta_key ()
+{
+#if !defined (__DJGPP__)
+  if (term_has_meta && _rl_term_mo && enabled_meta)
+    {
+      tputs (_rl_term_mo, 1, _rl_output_character_function);
+      enabled_meta = 0;
+    }
 #endif
 }
 

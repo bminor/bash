@@ -11503,3 +11503,34 @@ trap.c
 doc/{bash.1,bashref.texi}
 	- make it clear that enabling monitor mode means that all jobs run in
 	  separate process groups
+
+				   4/18
+				   ----
+builtins/fc.def
+	- update fix of 4/15/2010 to not take saved_command_line_count into
+	  account when stepping down the history list to make sure that
+	  last_hist indexes something that is valid.  Fixes bug reported by
+	  <piuma@piumalab.org>
+
+				   4/19
+				   ----
+builtins/fc.def
+	- fc_gethnum: make sure the calculation to decide the last history
+	  entry is exactly the same as fc_builtin.  Fixes bug uncovered by
+	  fix of 4/18 to stop seg fault
+
+				   4/22
+				   ----
+lib/readline/terminal.c
+	- change _rl_enable_meta_key to set a flag indicating that it sent the
+	  enable-meta sequence
+	- _rl_disable_meta_key: new function to turn off meta mode after we
+	  turned it on with _rl_enable_meta_key
+
+lib/readline/rlprivate.h
+	- extern declaration for _rl_disable_meta_key
+
+configure.in
+	- if not cross-compiling, set CFLAGS_FOR_BUILD from any CFLAGS inherited
+	  from the environment.  Fixes HP/UX build problem reported by
+	  "Daniel Richard G." <skunk@iSKUNK.ORG>
