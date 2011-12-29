@@ -271,8 +271,8 @@ wdequote_pathname (pathname)
   /* Convert the strings into wide characters.  */
   n = xdupmbstowcs (&wpathname, NULL, pathname);
   if (n == (size_t) -1)
-    /* Something wrong. */
-    return;
+    /* Something wrong.  Fall back to single-byte */
+    return udequote_pathname (pathname);
   orig_wpathname = wpathname;
 
   for (i = j = 0; wpathname && wpathname[i]; )

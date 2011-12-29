@@ -164,7 +164,11 @@ sh_get_home_dir ()
 
   home_dir = (char *)NULL;
 #if defined (HAVE_GETPWUID)
+#  if defined (__TANDEM)
+  entry = getpwnam (getlogin ());
+#  else
   entry = getpwuid (getuid ());
+#  endif
   if (entry)
     home_dir = entry->pw_dir;
 #endif

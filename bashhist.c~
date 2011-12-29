@@ -351,7 +351,6 @@ void
 save_history ()
 {
   char *hf;
-  int r;
 
   hf = get_string_value ("HISTFILE");
   if (hf && *hf && file_exists (hf))
@@ -361,9 +360,9 @@ save_history ()
       using_history ();
 
       if (history_lines_this_session <= where_history () || force_append_history)
-	r = append_history (history_lines_this_session, hf);
+	append_history (history_lines_this_session, hf);
       else
-	r = write_history (hf);
+	write_history (hf);
       sv_histsize ("HISTFILESIZE");
     }
 }

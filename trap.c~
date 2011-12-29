@@ -389,8 +389,6 @@ trap_handler (sig)
       SIGRETURN (0);
     }
 
-itrace("trap_handler: sig = %d", sig);
-
   if ((sig >= NSIG) ||
       (trap_list[sig] == (char *)DEFAULT_SIG) ||
       (trap_list[sig] == (char *)IGNORE_SIG))

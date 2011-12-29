@@ -449,16 +449,7 @@ indirection_level_string ()
   ps4_firstc[0] = ps4[0];
   ps4_firstc[ps4_firstc_len = 1] = '\0';
 #endif
-
-  /* Dynamically resize indirection_string so we have room for everything
-     and we don't have to truncate ps4 */
-  ineed = (ps4_firstc_len * indirection_level) + strlen (ps4);
-  if (ineed > indirection_stringsiz - 1)
-    {
-      indirection_stringsiz = ineed + 1;
-      indirection_string = xrealloc (indirection_string, indirection_stringsiz);
-    }
-
+      
   for (i = j = 0; ps4_firstc[0] && j < indirection_level && i < indirection_stringsiz - 1; i += ps4_firstc_len, j++)
     {
       if (ps4_firstc_len == 1)

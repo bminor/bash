@@ -11299,7 +11299,7 @@ lib/glob/glob.c
 	- fix mbskipname to call skipname if either the pattern or the filename
 	  can't be converted into a wide-char string
 
-lib/glob/xmbstowcs.c
+lib/glob/xmbsrtowcs.c
 	- fix xdupmbstowcs2 to handle return value of 0 from mbsnrtowcs and
 	  short-circuit with failure in that case.  Fixes bug reported by
 	  Roman Rakus <rrakus@redhat.com>
@@ -11313,3 +11313,74 @@ bashline.c
 	- change bashline_reset and attempt_shell_completion to restore
 	  rl_filename_quote_characters if not set to default
 
+				   3/22
+				   ----
+lib/glob/glob.c
+	- wdequote_pathname falls back to udequote_pathname if xdupmbstowcs
+	  fails to convert the pathname to a wide-character string
+
+lib/glob/xmbsrtowcs.c
+	- xdupmbstowcs2: change to fix problem with leading '\\' (results in
+	  nms == 0, which causes it to short-circuit with failure right
+	  away).  Fixes bug pointed out by Werner Fink <werner@suse.de>
+	- xdupmbstowcs2: compensate for mbsnrtowcs returning 0 by taking the
+	  next single-byte character and going on
+	- xdupmbstowcs2: change memory allocation to increase by WSBUF_INC
+	  bytes; try to avoid calls to realloc (even if they don't actually
+	  result in more memory being allocated)
+
+				   3/24
+				   ----
+doc/{bash.1,bashref.texi}
+	- slightly modify BASH_SUBSHELL description based on complaint from
+	  Sam Liddicott <sam@liddicott.com>
+
+				   3/25
+				   ----
+trap.c
+	- change free_trap_strings to not call free_trap_string for signals
+	  that are being ignored, like reset_or_restore_signal_handlers.
+	  Fixes bug reported by Satoshi Takahashi <blue3waters@gmail.com>
+
+				   3/26
+				   ----
+lib/readline/rltypedefs.h
+	- remove old Function/VFunction/CPFunction/CPPFunction typedefs as
+	  suggested by Tom Tromey <tromey@redhat.com>
+
+lib/readline/rlstdc.h
+	- move defines for USE_VARARGS/PREFER_STDARG/PREFER_VARARGS from
+	  config.h.in to here because declaration of rl_message in
+	  readline.h uses the defines.  This makes it hard for another packages
+	  to use after the header files are installed, since config.h is not
+	  one of the installed files.  Suggested by Tom Tromey
+	  <tromey@redhat.com>
+
+				   3/27
+				   ----
+print_cmd.c
+	- change indirection_string from a static buffer to a dynamic one
+	  managed by indirection_level_string(), so we don't end up truncating
+	  PS4.  Suggested by Dennis Williamson <dennistwilliamson@gmail.com>
+
+lib/readline/shell.c
+	- change sh_set_lines_and_columns to use static buffers instead of
+	  allocating the buffers to pass to setenv/putenv
+
+lib/readline/terminal.c
+	- change _rl_get_screen_size to not call sh_set_lines_and_columns if
+	  ignore_env == 0
+	- _rl_sigwinch_resize_terminal: new function to just retrieve terminal
+	  size, ignoring environment
+
+lib/readline/rlprivate.h
+	- new external declaration for _rl_sigwinch_resize_terminal() (currently
+	  unused)
+
+lib/readline/signals.c
+	- rl_sigwinch_handler: set _rl_caught_signal to SIGWINCH
+	- rl_sigwinch_handler: don't immediately call rl_resize_terminal; just
+	  leave _rl_caught_signal set for RL_CHECK_SIGNALS to handle
+	- _rl_signal_handler: call rl_resize_terminal if sig == SIGWINCH.
+	  Should fix hang when sending multiple repeated SIGWINCH reported by
+	  Henning Bekel <h.bekel@googlemail.com>

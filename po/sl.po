@@ -3,13 +3,13 @@
 # This file is distributed under the same license as the bash package.
 # Primož PETERLIN <primozz.peterlin@gmail.com>, 2011.
 #
-# $Id: bash-4.2.sl.po,v 1.4 2011/03/16 22:05:29 peterlin Exp $
+# $Id: bash-4.2.sl.po,v 1.5 2011/03/27 20:33:04 peterlin Exp $
 msgid ""
 msgstr ""
 "Project-Id-Version: bash 4.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2011-01-28 22:09-0500\n"
-"PO-Revision-Date: 2011-03-16 23:05+0100\n"
+"PO-Revision-Date: 2011-03-27 22:32+0200\n"
 "Last-Translator: Primož PETERLIN <primozz.peterlin@gmail.com>\n"
 "Language-Team: Slovenian <translation-team-sl@lists.sourceforge.net>\n"
 "Language: sl\n"
@@ -20,7 +20,7 @@ msgstr ""
 
 #: arrayfunc.c:50
 msgid "bad array subscript"
-msgstr ""
+msgstr "slab indeks polja"
 
 #: arrayfunc.c:313 builtins/declare.def:487
 #, c-format
@@ -40,7 +40,7 @@ msgstr "%s: ni mogoče dodeliti neštevilčnemu indeksu"
 #: arrayfunc.c:518
 #, c-format
 msgid "%s: %s: must use subscript when assigning associative array"
-msgstr ""
+msgstr "%s: %s: pri dodeljevanju asociativnega polja je treba uporabiti indeks"
 
 #: bashhist.c:387
 #, c-format
@@ -49,7 +49,7 @@ msgstr "%s: ni mogoče ustvariti: %s"
 
 #: bashline.c:3498
 msgid "bash_execute_unix_command: cannot find keymap for command"
-msgstr ""
+msgstr "bash_execute_unix_command: bližnjice za ukaz ni mogoče najti"
 
 #: bashline.c:3584
 #, c-format
@@ -78,7 +78,7 @@ msgstr "urejanje vrstice ni omogočeno"
 #: builtins/bind.def:206
 #, c-format
 msgid "`%s': invalid keymap name"
-msgstr ""
+msgstr "»%s«: neveljavno ime preslikave tipkovnice"
 
 #: builtins/bind.def:245
 #, c-format
@@ -98,12 +98,12 @@ msgstr "»%s«: neznano ime funkcije"
 #: builtins/bind.def:303
 #, c-format
 msgid "%s is not bound to any keys.\n"
-msgstr ""
+msgstr "%s ni prirejen nobeni tipki.\n"
 
 #: builtins/bind.def:307
 #, c-format
 msgid "%s can be invoked via "
-msgstr ""
+msgstr "%s je mogoče poklicati prek "
 
 #: builtins/break.def:77 builtins/break.def:117
 msgid "loop count"
@@ -119,6 +119,9 @@ msgid ""
 "    \n"
 "    Without EXPR, returns "
 msgstr ""
+"Vrne kontekst trenutnega klica podprograma.\n"
+"\n"
+"    Če IZRAZ ni podan, vrne "
 
 #: builtins/cd.def:235
 msgid "HOME not set"
@@ -2351,6 +2354,18 @@ msgid ""
 "    Returns 0 unless the shell is not executing a shell function or EXPR\n"
 "    is invalid."
 msgstr ""
+"Vrne kontekst trenutnega klica podprograma.\n"
+"\n"
+"    Če IZRAZ ni podan, vrne \"$line $filename\".  Če je IZRAZ podan, vrne\n"
+"    \"$line $subroutine $filename\"; to dodatno informacijo je mogoče uporabiti\n"
+"    za sledenje sklada.\n"
+"\n"
+"    Vrednost IZRAZA določa, za koliko okvirov klicev glede na trenutnega se\n"
+"    vrnemo; vrhnji okvir nosi številko 0.\n"
+"\n"
+"    Izhodni status:\n"
+"    Vrne se vrednost 0, razen če ukazna lupina ne izvaja funkcije ukazne\n"
+"    lupine, ali pa če je IZRAZ neveljaven."
 
 #: builtins.c:383
 msgid ""
@@ -2381,6 +2396,31 @@ msgid ""
 "    Returns 0 if the directory is changed, and if $PWD is set successfully when\n"
 "    -P is used; non-zero otherwise."
 msgstr ""
+"Zamenjaj delovni imenik ukazne lupine.\n"
+"\n"
+"    Trenutni imenik zamenjaj s podanim IMENIKOM. Privzeti IMENIK je vrednost\n"
+"    lupinske spremenljivke HOME.\n"
+"\n"
+"    Iskalna pot za iskanje imenika, ki vsebuje podani IMENIK, je določena z\n"
+"    lupinsko spremenljivko CDPATH.  Imeniki, navedeni v CDPATH, so ločeni z\n"
+"    dvopičjem (:).  Prazno ime imenika pomeni trenitni imenik.  Če se podani\n"
+"    IMENIK začne s poševnico (/), spremenljivka CDPATH nima nobenega vpliva.\n"
+"\n"
+"    Če imenika ni mogoče najti, vklopljena pa je lupinska izbira »cdable_vars«,\n"
+"    se podana beseda obravnava kot ime spremenljivke.  Če je tej spremenljivki\n"
+"    podana vrednost, se ta vrednost uporabi za IMENIK.\n"
+"\n"
+"    Izbire:\n"
+"        -L\tvedno se sledi simbolnim povezavam\n"
+"        -P\tuporabi se fizična struktura imenikov brez sledenja simbolnim\n"
+"                povezavam\n"
+"        -e\tče je podana izbira -P in trenutnega delovnega imenika ni\n"
+"\t\tmogoče ugotoviti, zaključi z ne-ničelnim statusom\n"
+"\n"
+"    Izhodni status:\n"
+"    Vrne se vrednost 0 če je bil imenik zamenjan, ter če je bila lupinska\n"
+"    spremenljivka $PWD uspešno posodobljena pri izbiri -P; sicer ne-ničelna\n"
+"    vrednost."
 
 #: builtins.c:414
 msgid ""
@@ -2397,6 +2437,18 @@ msgid ""
 "    Returns 0 unless an invalid option is given or the current directory\n"
 "    cannot be read."
 msgstr ""
+"Izpiše ime trenutnega delovnega imenika.\n"
+"\n"
+"    Izbire:\n"
+"      -L\tizpiše vrednost lupinske spremenljivke $PWD, če ta vsebuje\n"
+"\t\time trenutnega delovnega imenika\n"
+"      -P\tizpiše fizični imenik brez simbolnih povezav\n"
+"\n"
+"    Privzeto se »pwd« obnaša, kot bi bila podana izbira »-L«.\n"
+"\n"
+"    Izhodni status:\n"
+"    Vrne se 0, razen če je podana izbira neveljavna ali če trenutnega imenika\n"
+"    ni mogoče prebrati."
 
 #: builtins.c:431
 msgid ""
@@ -2407,6 +2459,12 @@ msgid ""
 "    Exit Status:\n"
 "    Always succeeds."
 msgstr ""
+"Prazen ukaz.\n"
+"\n"
+"    Brez učinka; ta ukaz ne napravi ničesar.\n"
+"\n"
+"    Izhodni status:\n"
+"    Vedno uspel."
 
 #: builtins.c:442
 msgid ""
@@ -2415,6 +2473,10 @@ msgid ""
 "    Exit Status:\n"
 "    Always succeeds."
 msgstr ""
+"Vrni uspeli status.\n"
+"\n"
+"    Izhodni status:\n"
+"    Vedno uspel."
 
 #: builtins.c:451
 msgid ""
@@ -2423,6 +2485,10 @@ msgid ""
 "    Exit Status:\n"
 "    Always fails."
 msgstr ""
+"Vrni neuspeli status.\n"
+"\n"
+"    Izhodni status:\n"
+"    Vedno neuspel."
 
 #: builtins.c:460
 msgid ""
@@ -2651,6 +2717,10 @@ msgid ""
 "    Exits the shell with a status of N.  If N is omitted, the exit status\n"
 "    is that of the last command executed."
 msgstr ""
+"Izidi iz ukazne lupine.\n"
+"\n"
+"    Zaključi ukazno lupino z izhodnim statusom N.  Če N ni podan, je izhodni\n"
+"    status enak izhodnemu statusu nazadnje izvajanega ukaza."
 
 #: builtins.c:703
 msgid ""

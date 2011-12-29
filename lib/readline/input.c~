@@ -474,6 +474,12 @@ rl_getc (stream)
 #endif
       result = read (fileno (stream), &c, sizeof (unsigned char));
 
+if (_rl_caught_signal)
+  {
+itrace("rl_getc: caught SIGWINCH: %d", _rl_caught_signal);
+    _rl_caught_signal = 0;
+  }
+
       if (result == sizeof (unsigned char))
 	return (c);
 
