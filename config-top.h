@@ -109,3 +109,8 @@
 
 /* Define if you want to include code in shell.c to support wordexp(3) */
 /* #define WORDEXP_OPTION */
+
+/* Define as 1 if you want to enable code that implements multiple coprocs */
+#ifndef MULTIPLE_COPROCS
+#  define MULTIPLE_COPROCS 0
+#endif

@@ -9648,7 +9648,7 @@ lib/sh/eaccess.c
 	- eaccess(2) apparently does only half the job: it does not check that
 	  the permission bits on a file actually allow, for instance, execution.
 	  Need to augment with a call to sh_stataccess if eaccess returns
-	  success on FreeBSD.  Fixes FreeBSD problem reported by Jonan Hattne
+	  success on FreeBSD.  Fixes FreeBSD problem reported by Johan Hattne
 	  <johan.hattne@utsouthwestern.edu>
 
 				   3/28
@@ -11534,3 +11534,18 @@ configure.in
 	- if not cross-compiling, set CFLAGS_FOR_BUILD from any CFLAGS inherited
 	  from the environment.  Fixes HP/UX build problem reported by
 	  "Daniel Richard G." <skunk@iSKUNK.ORG>
+
+				   4/26
+				   ----
+config-top.h
+	- define MULTIPLE_COPROCS to 0 so the code is still disabled but easy
+	  to enable via configure option or editing this file
+
+				   4/29
+				   ----
+lib/sh/eaccess.c
+	- freebsd provides faccessat, with the same misfeature as their eaccess
+	  and access implementations (X_OK returns true for uid==0 regardless
+	  of the actual file permissions), so reorganize code to check the
+	  file permissions as with eaccess.  Report and fix from Johan Hattne
+	  <johan.hattne@utsouthwestern.edu>
