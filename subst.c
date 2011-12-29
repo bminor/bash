@@ -1170,7 +1170,7 @@ extract_process_subst (string, starter, sindex)
      char *starter;
      int *sindex;
 {
-  return (extract_delimited_string (string, sindex, starter, "(", ")", 0));
+  return (extract_delimited_string (string, sindex, starter, "(", ")", SX_COMMAND));
 }
 #endif /* PROCESS_SUBSTITUTION */
 
@@ -3709,7 +3709,10 @@ remove_quoted_nulls (string)
 	    break;
 	}
       else if (string[i] == CTLNUL)
-	i++;
+	{
+	  i++;
+	  continue;
+	}
 
       prev_i = i;
       ADVANCE_CHAR (string, slen, i);
@@ -8359,7 +8362,10 @@ add_twochars:
 	    temp = (char *)NULL;
 
 	  /* We do not want to add quoted nulls to strings that are only
-	     partially quoted; we can throw them away. */
+	     partially quoted; we can throw them away.  The execption to
+	     this is when we are going to be performing word splitting,
+	     since we have to preserve a null argument if the next character
+	     will cause word splitting. */
 	  if (temp == 0 && quoted_state == PARTIALLY_QUOTED && (word->flags & (W_NOSPLIT|W_NOSPLIT2)))
 	    continue;
 

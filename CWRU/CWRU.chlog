@@ -11577,3 +11577,87 @@ builtins/printf.def
 	  ferror(stdout) true, and PRETURN is going to be called, let PRETURN
 	  print the error message rather than doubling up the messages.  Fixes
 	  problem reported by Roman Rakus <rrakus@redhat.com>
+
+				    5/9
+				    ---
+doc/{bash.1,bashref.texi}
+	- add note to the effect that lists inside compound command can be
+	  terminated by newlines as well as semicolons.  Suggested by
+	  Roman Byshko <rbyshko@gmail.com>
+
+				   5/10
+				   ----
+subst.c
+	- remove_quoted_nulls: fix problem that caused it to skip over the
+	  character after a CTLNUL, which had the effect of skipping every
+	  other of a series of CTLNULs.  Fixes bug reported by
+	  Marten Wikstrom <marten.wikstrom@keystream.se>
+
+				   5/11
+				   ----
+subst.c
+	- extract_process_subst: add SX_COMMAND flag to call to
+	  extract_delimited_string, since we're expanding the same sort of
+	  command as command substitution.  Fixes bug reported in Ubuntu
+	  bug 779848
+
+				   5/12
+				   ----
+configure.in
+	- set the prefer_shared and prefer_static variables appropriately
+	  depending on the value of $opt_static_link
+
+aclocal.m4
+	- AC_LIB_LINKFLAGS_BODY: change to not prefer shared versions of the
+	  libraries it's searching for if the prefer_shared variable is "no".
+	  Fixes problem reported by Cedric Arbogast <arbogast.cedric@gmail.com>
+
+				   5/13
+				   ----
+lib/readline/readline.c
+	- _rl_internal_teardown: add call to _rl_disable_meta_key to make the
+	  meta key active only for the duration of the call to readline()
+	- _rl_internal_setup: move call to _rl_enable_meta_key here from
+	  readline_initialize_everything so the meta key is active only for
+	  the duration of the call to readline().  Suggestion from Miroslav
+	  Lichvar <mlichvar@redhat.com>
+
+builtins/help.def
+	- help_builtin: change strncmp to strcmp so that `help read' no longer
+	  matches `readonly'.  Suggested by Clark Wang <dearvoid@gmail.com>
+
+config.h.in
+	- add define for GLIBC21, checked using jm_GLIBC21 as part of the tests
+	  for libintl
+
+lib/malloc/malloc.c
+	- internal_free: don't use the cached value of memtop when deciding
+	  whether or not to adjust the break and give memory back to the kernel
+	  when using the GNU C library, since glibc uses sbrk for its own
+	  internal purposes.  From Debian bug 614815, reported by Samuel
+	  Thibault <samuel.thibault@gnu.org>
+
+aclocal.m4
+	- BASH_STRUCT_WEXITSTATUS_OFFSET: change AC_RUN_IFELSE to AC_TRY_RUN
+	  to avoid warning about not using AC_LANG_SOURCE
+
+				   5/14
+				   ----
+bashline.[ch]
+	- two new functions, bashline_set_event_hook and bashline_reset_event_hook,
+	  to set rl_event_hook to bash_event_hook and back to NULL, respectively
+	- don't set rl_event_hook unconditionally
+
+sig.c
+	- termsig_sighandler: if the shell is currently interactive and
+	  readline is active, call bashline_set_event_hook to cause
+	  termsig_handler to be called via bash_event_hook when the shell
+	  returns from the signal handler
+
+				   5/15
+				   ----
+lib/readline/display.c
+	- _rl_col_width: Mac OS X has a bug in wcwitdh: it does not return 0
+	  for UTF-8 combining characters.  Added workaround dependent on
+	  MACOSX.  Fixes problem pointed out by Thomas De Contes
+	  <d.l.tDecontes@free.fr>

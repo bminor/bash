@@ -3208,7 +3208,11 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	    }
 
 	  RESIZE_MALLOCED_BUFFER (ret, retind, 2, retsize, 64);
+#if 0
 	  if MBTEST(ch == CTLESC || ch == CTLNUL)
+#else
+	  if MBTEST(ch == CTLESC)
+#endif
 	    ret[retind++] = CTLESC;
 	  ret[retind++] = ch;
 	  continue;
@@ -3527,7 +3531,11 @@ eof_error:
 	    }
 
 	  RESIZE_MALLOCED_BUFFER (ret, retind, 2, retsize, 64);
+#if 0
 	  if MBTEST(ch == CTLESC || ch == CTLNUL)
+#else
+	  if MBTEST(ch == CTLESC)
+#endif
 	    ret[retind++] = CTLESC;
 	  ret[retind++] = ch;
 	  continue;

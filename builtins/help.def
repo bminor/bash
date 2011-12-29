@@ -140,7 +140,7 @@ help_builtin (list)
       for (i = 0; name = shell_builtins[i].name; i++)
 	{
 	  QUIT;
-	  if ((strncmp (pattern, name, plen) == 0) ||
+	  if ((strcmp (pattern, name) == 0) ||
 	      (strmatch (pattern, name, FNMATCH_EXTFLAG) != FNM_NOMATCH))
 	    {
 	      match_found++;

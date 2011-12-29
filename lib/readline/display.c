@@ -2721,6 +2721,13 @@ _rl_ttymsg ("_rl_col_width: called with MB_CUR_MAX == 1");
 	{
 	  point += tmp;
 	  max -= tmp;
+#if defined (MACOSX)
+	  /* Mac OS X has a bug where wcwidth returns 1 for UTF-8 combining
+	     characters */
+	  if (wc >= 769 && wc <= 833)
+	    tmp = 0;
+	  else
+#endif
 	  tmp = wcwidth(wc);
 	  width += (tmp >= 0) ? tmp : 1;
 	}

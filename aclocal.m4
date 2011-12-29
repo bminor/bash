@@ -3098,7 +3098,7 @@ AC_DEFUN([AC_LIB_LINKFLAGS_BODY],
           found_so=
           found_a=
           if test $use_additional = yes; then
-            if test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext"; then
+            if test "X$prefer_shared" = "Xyes" && test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext"; then
               found_dir="$additional_libdir"
               found_so="$additional_libdir/lib$name.$shlibext"
               if test -f "$additional_libdir/lib$name.la"; then
@@ -3120,7 +3120,7 @@ AC_DEFUN([AC_LIB_LINKFLAGS_BODY],
               case "$x" in
                 -L*)
                   dir=`echo "X$x" | sed -e 's/^X-L//'`
-                  if test -n "$shlibext" && test -f "$dir/lib$name.$shlibext"; then
+                  if test "X$prefer_shared" = "Xyes" && test -n "$shlibext" && test -f "$dir/lib$name.$shlibext"; then
                     found_dir="$dir"
                     found_so="$dir/lib$name.$shlibext"
                     if test -f "$dir/lib$name.la"; then
@@ -4123,7 +4123,7 @@ main()
 AC_DEFUN(BASH_STRUCT_WEXITSTATUS_OFFSET,
 [AC_MSG_CHECKING(for offset of exit status in return status from wait)
 AC_CACHE_VAL(bash_cv_wexitstatus_offset,
-[AC_RUN_IFELSE([
+[AC_TRY_RUN([
 #include <stdlib.h>
 #include <unistd.h>
 

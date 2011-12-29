@@ -369,6 +369,11 @@ readline_internal_setup ()
   _rl_in_stream = rl_instream;
   _rl_out_stream = rl_outstream;
 
+  /* Enable the meta key only for the duration of readline(), if this
+     terminal has one. */
+  if (_rl_enable_meta)
+    _rl_enable_meta_key ();
+
   if (rl_startup_hook)
     (*rl_startup_hook) ();
 
@@ -436,6 +441,9 @@ readline_internal_teardown (eof)
      rid of it now. */
   if (rl_undo_list)
     rl_free_undo_list ();
+
+  /* Disable the meta key, if this terminal has one. */
+  _rl_disable_meta_key ();
 
   /* Restore normal cursor, if available. */
   _rl_set_insert_mode (RL_IM_INSERT, 0);
@@ -1090,10 +1098,6 @@ readline_initialize_everything ()
 
   /* Try to bind a common arrow key prefix, if not already bound. */
   bind_arrow_keys ();
-
-  /* Enable the meta key, if this terminal has one. */
-  if (_rl_enable_meta)
-    _rl_enable_meta_key ();
 
   /* If the completion parser's default word break characters haven't
      been set yet, then do so now. */

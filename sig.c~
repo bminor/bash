@@ -516,11 +516,6 @@ termsig_sighandler (sig)
       termsig_handler (sig);
     }
 
-#if defined (READLINE)
-  if (interactive_shell && interactive && no_line_editing == 0)
-    bashline_set_event_hook ();
-#endif
-
   SIGRETURN (0);
 }
 

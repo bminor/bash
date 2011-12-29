@@ -901,10 +901,10 @@ internal_free (mem, file, line, flags)
   if (mg.i != p->mh_nbytes)
     xbotch (mem, ERR_ASSERT_FAILED, _("free: start and end chunk sizes differ"), file, line);
 
-#if 1
-  if (nunits >= LESSCORE_MIN && ((char *)p + binsize(nunits) == memtop))
+#if GLIBC21
+  if (nunits >= LESSCORE_MIN && ((char *)p + binsize(nunits) == sbrk (0)))
 #else
-  if (((char *)p + binsize(nunits) == memtop) && nunits >= LESSCORE_MIN)
+  if (nunits >= LESSCORE_MIN && ((char *)p + binsize(nunits) == memtop))
 #endif
     {
       /* If above LESSCORE_FRC, give back unconditionally.  This should be set

@@ -40,3 +40,10 @@ v="one two buckle my shoe"
 [[ ${v} =~ (one two) ]] && echo matches 8
 
 [[ ${v} =~ one\ two ]] && echo matches 9
+
+# problems in pre-patched bash-4.2
+[[ "helloworld" =~ llo ]] && echo match control-a 1
+[[ "helloworld" =~ world ]] && echo match control-a 2
+[[ "helloworld" =~ world$ ]] && echo match control-a 3
+[[ "helloworld" =~  ]] && echo match control-a 4
+[[ "helloworld" =~ oworld$ ]] && echo match control-a 5
