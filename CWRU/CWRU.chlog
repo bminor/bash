@@ -11022,6 +11022,12 @@ lib/glob/gmisc.c
 	- fix wmatchlen and umatchlen to initialize all state variables.  Fix
 	  from Andreas Schwab <schwab@linux-m68k.org>
 
+jobs.c
+	- change wait_for to call restore_sigint_handler right after exiting
+	  the wait loop, instead of right before function returns.  Reduces
+	  the window for a SIGINT to be lost because a child does not exit	
+	  due to SIGINT
+
 				    2/7
 				    ---
 configure.in
@@ -11050,7 +11056,7 @@ print_cmd.c
 lib/glob/gmisc.c
 	- fix wmatchlen and umatchlen to avoid going past the end of the
 	  string on an incomplete bracket expression that ends with a
-	  NUL.  Fixes bug reported by Clark Wang <dearvoid@gmail.com>
+	  NUL.  Partial fix for bug reported by Clark Wang <dearvoid@gmail.com>
 
 				   2/16
 				   ----
@@ -11089,3 +11095,50 @@ doc/{bash.1,bashref.texi}
 	  operators to [[ states that only the quoted portion of the pattern
 	  is matched as a string
 
+				   2/18
+				   ----
+lib/glob/gmisc.c
+	- better fix for umatchlen/wmatchlen: keep track of the number of
+	  characters in a bracket expression as the value to increase
+	  matchlen by if the bracket expression is not well-formed.  Fixes
+	  bug reported by Clark Wang <dearvoid@gmail.com>
+
+subst.c
+	- change expand_string_for_rhs so that it sets the W_NOSPLIT2 flag
+	  in the word flags.  We will not perform word splitting or quote
+	  removal on the result, so we do not want to add quoted nulls if
+	  we see "" or ''.  Fixes bug reported by Mike Frysinger
+	  <vapier@gentoo.org>
+
+				   2/19
+				   ----
+variables.c
+	- new function, int chkexport(name), checks whether variable NAME is
+	  exported and remakes the export environment if necessary.  Returns
+	  1 if NAME is exported and 0 if not
+	- call chkexport(name) to get tzset to look at the right variable in
+	  the environment when modifying TZ in sv_tz.  Don't call tzset if
+	  chkexport doesn't indicate that the variable is exported
+
+variables.h
+	- new extern declaration for chkexport
+
+
+{parse.y,builtins/printf.def}
+	- call sv_tz before calling localtime() when formatting time strings
+	  in prompt strings or using printf.  Fixes bug reported by
+	  Dennis Williamson <dennistwilliamson@gmail.com>
+
+execute_cmd.c
+	- modify fix of 2/9 to add casts when those variables are passed to
+	  functions; some compilers throw errors instead of warnings.  Report
+	  and fix from Joachim Schmitz <jojo@schmitz-digital.de>
+
+support/shobj-conf
+	- add a stanza for nsk on the Tandem from Joachim Schmitz
+	  <jojo@schmitz-digital.de>
+
+{shell,lib/readline/shell}.c
+	- Tandem systems should use getpwnam (getlogin()); for some reason
+	  they don't do well with using getuid().  Fix from Joachim Schmitz
+	  <jojo@schmitz-digital.de>

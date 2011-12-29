@@ -1638,11 +1638,7 @@ get_current_user_info ()
   /* Don't fetch this more than once. */
   if (current_user.user_name == 0)
     {
-#if defined (__TANDEM)
-      entry = getpwnam (getlogin ());
-#else
       entry = getpwuid (current_user.uid);
-#endif
       if (entry)
 	{
 	  current_user.user_name = savestring (entry->pw_name);

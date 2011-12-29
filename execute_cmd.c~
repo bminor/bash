@@ -4317,8 +4317,8 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
 #if defined (ARRAY_VARS)
   /* These two variables cannot be unset, and cannot be affected by the
      function. */
-  array_pop ((ARRAY *)bash_source_a);
-  array_pop ((ARRAY *)bash_lineno_a);
+  array_pop (bash_source_a);
+  array_pop (bash_lineno_a);
 
   /* FUNCNAME can be unset, and so can potentially be changed by the
      function. */

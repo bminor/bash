@@ -1,0 +1,39 @@
+# fixes for bugs in bash-4.2 regarding empty strings in expand_string_for_rhs
+
+f=abc
+recho ${f##""a}
+recho ${f##"$v"a}
+
+recho ${f%%""c}
+recho ${f%%"$v"c}
+
+recho ${f//""a}
+recho ${f//"$v"a}
+
+recho ${f/""a""b/}
+recho ${f/""c/}
+recho ${f/"$v"c/}
+
+S2=oenophile
+
+recho ${S2^"$v"[aeiou]}
+recho ${S2^^"$v"[aeiou]}
+
+recho ${foo:-""}
+recho ${foo:-""abc}
+
+recho "${foo:-''}"
+recho "${foo:-}"
+
+if [[ $var == "" ]]; then
+	echo good 1
+fi
+
+if [[ "$var"X == ""X ]]; then
+	echo good 2
+fi
+
+if [ "$var"X == ""X"" ]; then
+	echo good 3
+fi
+

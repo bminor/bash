@@ -2524,9 +2524,6 @@ if (job == NO_JOB)
       give_terminal_to (shell_pgrp, 0);
     }
 
-  /* Restore the original SIGINT signal handler before we return. */
-  restore_sigint_handler ();
-
   /* If the command did not exit cleanly, or the job is just
      being stopped, then reset the tty state back to what it
      was before this command.  Reset the tty state and notify
@@ -2592,6 +2589,7 @@ if (job == NO_JOB)
 	  if (WIFSIGNALED (s) && WTERMSIG (s) == SIGINT && signal_is_trapped (SIGINT) == 0)
 	    {
 	      UNBLOCK_CHILD (oset);
+	      restore_sigint_handler ();
 	      old_sigint_handler = set_signal_handler (SIGINT, SIG_DFL);
 	      if (old_sigint_handler == SIG_IGN)
 		restore_sigint_handler ();
@@ -2616,6 +2614,9 @@ if (job == NO_JOB)
 wait_for_return:
 
   UNBLOCK_CHILD (oset);
+
+  /* Restore the original SIGINT signal handler before we return. */
+  restore_sigint_handler ();
 
   return (termination_state);
 }

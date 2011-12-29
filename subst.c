@@ -3206,7 +3206,9 @@ call_expand_word_internal (w, q, i, c, e)
 }
 
 /* Perform parameter expansion, command substitution, and arithmetic
-   expansion on STRING, as if it were a word.  Leave the result quoted. */
+   expansion on STRING, as if it were a word.  Leave the result quoted.
+   Since this does not perform word splitting, it leaves quoted nulls
+   in the result.  */
 static WORD_LIST *
 expand_string_internal (string, quoted)
      char *string;
@@ -3373,7 +3375,7 @@ expand_string_for_rhs (string, quoted, dollar_at_p, has_dollar_at)
   if (string == 0 || *string == '\0')
     return (WORD_LIST *)NULL;
 
-  td.flags = 0;
+  td.flags = W_NOSPLIT2;		/* no splitting, remove "" and '' */
   td.word = string;
   tresult = call_expand_word_internal (&td, quoted, 1, dollar_at_p, has_dollar_at);
   return (tresult);
