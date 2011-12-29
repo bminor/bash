@@ -11549,3 +11549,31 @@ lib/sh/eaccess.c
 	  of the actual file permissions), so reorganize code to check the
 	  file permissions as with eaccess.  Report and fix from Johan Hattne
 	  <johan.hattne@utsouthwestern.edu>
+
+				    5/2
+				    ---
+doc/{bash.1,bashref.texi}
+	- add forward reference to `Pattern Matching' from `Pathname
+	  Expansion', suggested by Greg Wooledge <wooledg@eeg.ccf.org>
+
+				    5/5
+				    ---
+pcomplib.c
+	- the bash_completion project now distributes over 200 completions
+	  for various programs, with no end in sight, so increase the value
+	  of COMPLETE_HASH_BUCKETS from 32 to 128
+
+pathexp.c
+	- quote_string_for_globbing: make sure CTLESC quoting CTLESC is
+	  translated into \<CTLESC> even if the flags include QGLOB_REGEXP.
+	  We don't want to process the second CTLESC as a quote character.
+	  Fixes bug reported by Shawn Bohrer <sbohrer@rgmadvisors.com>
+
+				    5/6
+				    ---
+builtins/printf.def
+	- change PRETURN to not call fflush if ferror(stdout) is true
+	- if a call to one of the stdio functions or printstr leaves
+	  ferror(stdout) true, and PRETURN is going to be called, let PRETURN
+	  print the error message rather than doubling up the messages.  Fixes
+	  problem reported by Roman Rakus <rrakus@redhat.com>

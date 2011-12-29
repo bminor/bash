@@ -158,7 +158,8 @@ extern int errno;
       else if (vbuf) \
 	vbuf[0] = 0; \
       terminate_immediately--; \
-      fflush (stdout); \
+      if (ferror (stdout) == 0) \
+	fflush (stdout); \
       if (ferror (stdout)) \
 	{ \
 	  sh_wrerror (); \
@@ -481,8 +482,11 @@ printf_builtin (list)
 		n = printstr (start, timebuf, strlen (timebuf), fieldwidth, precision);	/* XXX - %s for now */
 		if (n < 0)
 		  {
-		    sh_wrerror ();
-		    clearerr (stdout);
+		    if (ferror (stdout) == 0)
+		      {
+			sh_wrerror ();
+			clearerr (stdout);
+		      }
 		    PRETURN (EXECUTION_FAILURE);
 		  }
 		break;
@@ -522,8 +526,11 @@ printf_builtin (list)
 		    r = printstr (start, xp, rlen, fieldwidth, precision);
 		    if (r < 0)
 		      {
-		        sh_wrerror ();
-			clearerr (stdout);
+			if (ferror (stdout) == 0)
+			  {
+		            sh_wrerror ();
+			    clearerr (stdout);
+			  }
 		        retval = EXECUTION_FAILURE;
 		      }
 		    free (xp);
@@ -645,8 +652,7 @@ printf_builtin (list)
 
       if (ferror (stdout))
 	{
-	  sh_wrerror ();
-	  clearerr (stdout);
+	  /* PRETURN will print error message. */
 	  PRETURN (EXECUTION_FAILURE);
 	}
     }

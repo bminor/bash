@@ -96,13 +96,11 @@ do { \
   sigprocmask (SIG_BLOCK, &nvar, &ovar); \
 } while (0)
 
-#define UNBLOCK_SIGNAL(ovar)	sigprocmask (SIG_SETMASK, &ovar, (sigset_t)NULL)
+#define UNBLOCK_SIGNAL(ovar) sigprocmask (SIG_SETMASK, &ovar, (sigset_t *) NULL)
 
 #if defined (HAVE_POSIX_SIGNALS)
-#  define BLOCK_CHILD(nvar, ovar) \
-	BLOCK_SIGNAL (SIGCHLD, nvar, ovar)
-#  define UNBLOCK_CHILD(ovar) \
-	sigprocmask (SIG_SETMASK, &ovar, (sigset_t *) NULL)
+#  define BLOCK_CHILD(nvar, ovar) BLOCK_SIGNAL (SIGCHLD, nvar, ovar)
+#  define UNBLOCK_CHILD(ovar) UNBLOCK_SIGNAL(ovar)
 #else /* !HAVE_POSIX_SIGNALS */
 #  define BLOCK_CHILD(nvar, ovar) ovar = sigblock (sigmask (SIGCHLD))
 #  define UNBLOCK_CHILD(ovar) sigsetmask (ovar)
