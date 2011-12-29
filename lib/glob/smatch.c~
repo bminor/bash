@@ -48,9 +48,7 @@ int glob_asciirange = 0;
 /* We use strcoll(3) for range comparisons in bracket expressions,
    even though it can have unwanted side effects in locales
    other than POSIX or US.  For instance, in the de locale, [A-Z] matches
-   all characters.  If GLOB_ASCIIRANGE is non-zero, and we're not forcing
-   the use of strcoll (e.g., for explicit collating symbols), we use
-   straight ordering as if in the C locale. */
+   all characters. */
 
 #if defined (HAVE_STRCOLL)
 /* Helper function for collating symbol equivalence. */

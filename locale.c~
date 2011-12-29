@@ -84,6 +84,7 @@ set_default_locale ()
   textdomain (PACKAGE);
 
   locale_mb_cur_max = MB_CUR_MAX;
+itrace("set_default_locale: locale_mb_cur_max -> %d", locale_mb_cur_max);
 }
 
 /* Set default values for LC_CTYPE, LC_COLLATE, LC_MESSAGES, LC_NUMERIC and
@@ -103,6 +104,7 @@ set_default_locale_vars ()
       setlocale (LC_CTYPE, lc_all);
       locale_setblanks ();
       locale_mb_cur_max = MB_CUR_MAX;
+itrace("set_default_locale_vars: locale_mb_cur_max -> %d", locale_mb_cur_max);
     }
 #  endif
 
@@ -206,6 +208,7 @@ set_locale_var (var, value)
 	}
       locale_setblanks ();
       locale_mb_cur_max = MB_CUR_MAX;
+itrace("set_locale_var: locale_mb_cur_max -> %d", locale_mb_cur_max);
       return r;
 #else
       return (1);
@@ -221,6 +224,7 @@ set_locale_var (var, value)
 	  x = setlocale (LC_CTYPE, get_locale_var ("LC_CTYPE"));
 	  locale_setblanks ();
 	  locale_mb_cur_max = MB_CUR_MAX;
+itrace("set_locale_var: locale_mb_cur_max -> %d", locale_mb_cur_max);
 	}
 #  endif
     }
@@ -353,6 +357,7 @@ reset_locale_vars ()
 
   locale_setblanks ();  
   locale_mb_cur_max = MB_CUR_MAX;
+itrace("reset_locale_vars: locale_mb_cur_max -> %d", locale_mb_cur_max);
 
 #endif
   return 1;

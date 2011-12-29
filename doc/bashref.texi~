@@ -2124,8 +2124,8 @@ may be matched by including it as the first or last character
 in the set.  A @samp{]} may be matched by including it as the first
 character in the set.
 The sorting order of characters in range expressions is determined by
-the current locale and the value of the @env{LC_COLLATE} shell variable,
-if set.
+the current locale and the values of the
+@env{LC_COLLATE} and @env{LC_ALL} shell variables, if set.
 
 For example, in the default C locale, @samp{[a-dx-z]} is equivalent to
 @samp{[abcdxyz]}.  Many locales sort characters in dictionary order, and in
@@ -4513,8 +4513,8 @@ intervening command (@pxref{Job Control}).
 The shell always postpones exiting if any jobs are stopped.
 
 @item checkwinsize
-If set, Bash checks the window size after each command
-and, if necessary, updates the values of    
+If set, Bash checks the window size after each command when running
+interactively and, if necessary, updates the values of    
 @env{LINES} and @env{COLUMNS}.
 
 @item cmdhist
@@ -5008,7 +5008,8 @@ being closed.
 
 @item COLUMNS
 Used by the @code{select} command to determine the terminal width
-when printing selection lists.  Automatically set upon receipt of a
+when printing selection lists.  Automatically set by an interactive shell
+upon receipt of a
 @code{SIGWINCH}.
 
 @item COMP_CWORD
@@ -5297,7 +5298,8 @@ The line number in the script or shell function currently executing.
 
 @item LINES
 Used by the @code{select} command to determine the column length
-for printing selection lists.  Automatically set upon receipt of a
+for printing selection lists.  Automatically set by an interactive shell
+upon receipt of a
 @code{SIGWINCH}.
 
 @item MACHTYPE

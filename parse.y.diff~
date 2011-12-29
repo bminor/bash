@@ -1,0 +1,312 @@
+*** ../bash-4.2-patched/parse.y	2011-02-26 19:19:05.000000000 -0500
+--- parse.y	2011-06-24 20:08:22.000000000 -0400
+***************
+*** 1439,1448 ****
+  	  old_sigint = (SigHandler *)set_signal_handler (SIGINT, sigint_sighandler);
+  	}
+-       terminate_immediately = 1;
+  
+        current_readline_line = readline (current_readline_prompt ?
+        					  current_readline_prompt : "");
+  
+!       terminate_immediately = 0;
+        if (signal_is_ignored (SIGINT) == 0)
+  	{
+--- 1439,1447 ----
+  	  old_sigint = (SigHandler *)set_signal_handler (SIGINT, sigint_sighandler);
+  	}
+  
+        current_readline_line = readline (current_readline_prompt ?
+        					  current_readline_prompt : "");
+  
+!       CHECK_TERMSIG;
+        if (signal_is_ignored (SIGINT) == 0)
+  	{
+***************
+*** 1604,1617 ****
+      {
+        if (interactive)
+! 	{
+! 	  interrupt_immediately++;
+! 	  terminate_immediately++;
+! 	}
+        result = getc_with_restart (bash_input.location.file);
+        if (interactive)
+! 	{
+! 	  interrupt_immediately--;
+! 	  terminate_immediately--;
+! 	}
+      }
+    return (result);
+--- 1603,1615 ----
+      {
+        if (interactive)
+! 	interrupt_immediately++;
+! 
+!       /* XXX - don't need terminate_immediately; getc_with_restart checks
+! 	 for terminating signals itself if read returns < 0 */
+        result = getc_with_restart (bash_input.location.file);
++ 
+        if (interactive)
+! 	interrupt_immediately--;
+! 
+      }
+    return (result);
+***************
+*** 3211,3215 ****
+--- 3209,3217 ----
+  
+  	  RESIZE_MALLOCED_BUFFER (ret, retind, 2, retsize, 64);
++ #if 0
+  	  if MBTEST(ch == CTLESC || ch == CTLNUL)
++ #else
++ 	  if MBTEST(ch == CTLESC)
++ #endif
+  	    ret[retind++] = CTLESC;
+  	  ret[retind++] = ch;
+***************
+*** 3530,3534 ****
+--- 3532,3540 ----
+  
+  	  RESIZE_MALLOCED_BUFFER (ret, retind, 2, retsize, 64);
++ #if 0
+  	  if MBTEST(ch == CTLESC || ch == CTLNUL)
++ #else
++ 	  if MBTEST(ch == CTLESC)
++ #endif
+  	    ret[retind++] = CTLESC;
+  	  ret[retind++] = ch;
+***************
+*** 3843,3846 ****
+--- 3849,3853 ----
+  {
+    sh_parser_state_t ps;
++   sh_input_line_state_t ls;
+    int orig_ind, nc, sflags;
+    char *ret, *s, *ep, *ostring;
+***************
+*** 3850,3857 ****
+--- 3857,3866 ----
+    ostring = string;
+  
++ /*itrace("xparse_dolparen: size = %d shell_input_line = `%s'", shell_input_line_size, shell_input_line);*/
+    sflags = SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOFREE;
+    if (flags & SX_NOLONGJMP)
+      sflags |= SEVAL_NOLONGJMP;
+    save_parser_state (&ps);
++   save_input_line_state (&ls);
+  
+    /*(*/
+***************
+*** 3862,3865 ****
+--- 3871,3876 ----
+    restore_parser_state (&ps);
+    reset_parser ();
++   /* reset_parser clears shell_input_line and associated variables */
++   restore_input_line_state (&ls);
+    if (interactive)
+      token_to_read = 0;
+***************
+*** 4432,4436 ****
+  	      if (ttok == &matched_pair_error)
+  		return -1;		/* Bail immediately. */
+! 	      RESIZE_MALLOCED_BUFFER (token, token_index, ttoklen + 2,
+  				      token_buffer_size,
+  				      TOKEN_DEFAULT_GROW_SIZE);
+--- 4443,4447 ----
+  	      if (ttok == &matched_pair_error)
+  		return -1;		/* Bail immediately. */
+! 	      RESIZE_MALLOCED_BUFFER (token, token_index, ttoklen + 3,
+  				      token_buffer_size,
+  				      TOKEN_DEFAULT_GROW_SIZE);
+***************
+*** 4454,4458 ****
+  	  peek_char = shell_getc (1);
+  	  /* $(...), <(...), >(...), $((...)), ${...}, and $[...] constructs */
+! 	  if MBTEST(peek_char == '(' || \
+  		((peek_char == '{' || peek_char == '[') && character == '$'))	/* ) ] } */
+  	    {
+--- 4465,4469 ----
+  	  peek_char = shell_getc (1);
+  	  /* $(...), <(...), >(...), $((...)), ${...}, and $[...] constructs */
+! 	  if MBTEST(peek_char == '(' ||
+  		((peek_char == '{' || peek_char == '[') && character == '$'))	/* ) ] } */
+  	    {
+***************
+*** 4474,4478 ****
+  	      if (ttok == &matched_pair_error)
+  		return -1;		/* Bail immediately. */
+! 	      RESIZE_MALLOCED_BUFFER (token, token_index, ttoklen + 2,
+  				      token_buffer_size,
+  				      TOKEN_DEFAULT_GROW_SIZE);
+--- 4485,4489 ----
+  	      if (ttok == &matched_pair_error)
+  		return -1;		/* Bail immediately. */
+! 	      RESIZE_MALLOCED_BUFFER (token, token_index, ttoklen + 3,
+  				      token_buffer_size,
+  				      TOKEN_DEFAULT_GROW_SIZE);
+***************
+*** 4525,4529 ****
+  		}
+  
+! 	      RESIZE_MALLOCED_BUFFER (token, token_index, ttranslen + 2,
+  				      token_buffer_size,
+  				      TOKEN_DEFAULT_GROW_SIZE);
+--- 4536,4540 ----
+  		}
+  
+! 	      RESIZE_MALLOCED_BUFFER (token, token_index, ttranslen + 1,
+  				      token_buffer_size,
+  				      TOKEN_DEFAULT_GROW_SIZE);
+***************
+*** 4539,4553 ****
+  	  else if MBTEST(character == '$' && peek_char == '$')
+  	    {
+- 	      ttok = (char *)xmalloc (3);
+- 	      ttok[0] = ttok[1] = '$';
+- 	      ttok[2] = '\0';
+  	      RESIZE_MALLOCED_BUFFER (token, token_index, 3,
+  				      token_buffer_size,
+  				      TOKEN_DEFAULT_GROW_SIZE);
+! 	      strcpy (token + token_index, ttok);
+! 	      token_index += 2;
+  	      dollar_present = 1;
+  	      all_digit_token = 0;
+- 	      FREE (ttok);
+  	      goto next_character;
+  	    }
+--- 4550,4560 ----
+  	  else if MBTEST(character == '$' && peek_char == '$')
+  	    {
+  	      RESIZE_MALLOCED_BUFFER (token, token_index, 3,
+  				      token_buffer_size,
+  				      TOKEN_DEFAULT_GROW_SIZE);
+! 	      token[token_index++] = '$';
+! 	      token[token_index++] = peek_char;
+  	      dollar_present = 1;
+  	      all_digit_token = 0;
+  	      goto next_character;
+  	    }
+***************
+*** 4619,4637 ****
+  	}
+  
+!     got_character:
+  
+        if (character == CTLESC || character == CTLNUL)
+! 	token[token_index++] = CTLESC;
+  
+!     got_escaped_character:
+  
+        all_digit_token &= DIGIT (character);
+        dollar_present |= character == '$';
+  
+-       token[token_index++] = character;
+- 
+-       RESIZE_MALLOCED_BUFFER (token, token_index, 1, token_buffer_size,
+- 			      TOKEN_DEFAULT_GROW_SIZE);
+- 
+      next_character:
+        if (character == '\n' && SHOULD_PROMPT ())
+--- 4626,4647 ----
+  	}
+  
+! got_character:
+  
+        if (character == CTLESC || character == CTLNUL)
+! 	{
+! 	  RESIZE_MALLOCED_BUFFER (token, token_index, 2, token_buffer_size,
+! 				  TOKEN_DEFAULT_GROW_SIZE);
+! 	  token[token_index++] = CTLESC;
+! 	}
+!       else
+! got_escaped_character:
+! 	RESIZE_MALLOCED_BUFFER (token, token_index, 1, token_buffer_size,
+! 				TOKEN_DEFAULT_GROW_SIZE);
+  
+!       token[token_index++] = character;
+  
+        all_digit_token &= DIGIT (character);
+        dollar_present |= character == '$';
+  
+      next_character:
+        if (character == '\n' && SHOULD_PROMPT ())
+***************
+*** 4647,4650 ****
+--- 4657,4661 ----
+  got_token:
+  
++   /* Calls to RESIZE_MALLOCED_BUFFER ensure there is sufficient room. */
+    token[token_index] = '\0';
+  
+***************
+*** 4653,4658 ****
+       a '>' or '<', then, and ONLY then, is this input token a NUMBER.
+       Otherwise, it is just a word, and should be returned as such. */
+!   if MBTEST(all_digit_token && (character == '<' || character == '>' || \
+! 		    last_read_token == LESS_AND || \
+  		    last_read_token == GREATER_AND))
+        {
+--- 4664,4669 ----
+       a '>' or '<', then, and ONLY then, is this input token a NUMBER.
+       Otherwise, it is just a word, and should be returned as such. */
+!   if MBTEST(all_digit_token && (character == '<' || character == '>' ||
+! 		    last_read_token == LESS_AND ||
+  		    last_read_token == GREATER_AND))
+        {
+***************
+*** 5909,5912 ****
+--- 5920,5929 ----
+    ps->echo_input_at_read = echo_input_at_read;
+  
++   ps->token = token;
++   ps->token_buffer_size = token_buffer_size;
++   /* Force reallocation on next call to read_token_word */
++   token = 0;
++   token_buffer_size = 0;
++ 
+    return (ps);
+  }
+***************
+*** 5950,5953 ****
+--- 5967,6006 ----
+    expand_aliases = ps->expand_aliases;
+    echo_input_at_read = ps->echo_input_at_read;
++ 
++   FREE (token);
++   token = ps->token;
++   token_buffer_size = ps->token_buffer_size;
++ }
++ 
++ sh_input_line_state_t *
++ save_input_line_state (ls)
++      sh_input_line_state_t *ls;
++ {
++   if (ls == 0)
++     ls = (sh_input_line_state_t *)xmalloc (sizeof (sh_input_line_state_t));
++   if (ls == 0)
++     return ((sh_input_line_state_t *)NULL);
++ 
++   ls->input_line = shell_input_line;
++   ls->input_line_size = shell_input_line_size;
++   ls->input_line_len = shell_input_line_len;
++   ls->input_line_index = shell_input_line_index;
++ 
++   /* force reallocation */
++   shell_input_line = 0;
++   shell_input_line_size = shell_input_line_len = shell_input_line_index = 0;
++ }
++ 
++ void
++ restore_input_line_state (ls)
++      sh_input_line_state_t *ls;
++ {
++   FREE (shell_input_line);
++   shell_input_line = ls->input_line;
++   shell_input_line_size = ls->input_line_size;
++   shell_input_line_len = ls->input_line_len;
++   shell_input_line_index = ls->input_line_index;
++ 
++   set_line_mbstate ();
+  }
+  

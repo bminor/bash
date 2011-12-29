@@ -166,7 +166,7 @@ static int bash_event_hook __P((void));
 #if defined (PROGRAMMABLE_COMPLETION)
 static int find_cmd_start __P((int));
 static int find_cmd_end __P((int));
-static char *find_cmd_name __P((int));
+static char *find_cmd_name __P((int, int *, int *));
 static char *prog_complete_return __P((const char *, int));
 
 static char **prog_complete_matches;
@@ -563,7 +563,13 @@ bashline_set_event_hook ()
 {
   rl_event_hook = bash_event_hook;
 }
-  
+
+void
+bashline_reset_event_hook ()
+{
+  rl_event_hook = 0;
+}
+
 /* On Sun systems at least, rl_attempted_completion_function can end up
    getting set to NULL, and rl_completion_entry_function set to do command
    word completion if Bash is interrupted while trying to complete a command
@@ -1243,8 +1249,9 @@ find_cmd_end (end)
 }
 
 static char *
-find_cmd_name (start)
+find_cmd_name (start, sp, ep)
      int start;
+     int *sp, *ep;
 {
   char *name;
   register int s, e;
@@ -1256,6 +1263,11 @@ find_cmd_name (start)
   e = skip_to_delim (rl_line_buffer, s, "()<>;&| \t\n", SD_NOJMP);
 
   name = substring (rl_line_buffer, s, e);
+
+  if (sp)
+    *sp = s;
+  if (ep)
+    *ep = e;
 
   return (name);
 }
@@ -1359,7 +1371,7 @@ attempt_shell_completion (text, start, end)
       prog_completion_enabled && (progcomp_size () > 0) &&
       current_prompt_string == ps1_prompt)
     {
-      int s, e, foundcs;
+      int s, e, s1, e1, foundcs;
       char *n;
 
       /* XXX - don't free the members */
@@ -1369,9 +1381,15 @@ attempt_shell_completion (text, start, end)
 
       s = find_cmd_start (start);
       e = find_cmd_end (end);
-      n = find_cmd_name (s);
-      if (e == 0 && e == s && text[0] == '\0')
+      n = find_cmd_name (s, &s1, &e1);
+      if (start == 0 && end == 0 && e != 0 && text[0] == '\0')	/* beginning of non-empty line */
+        foundcs = 0;
+      else if (start == end && start == s1 && e1 > end)
+	foundcs = 0;
+      else if (e == 0 && e == s && text[0] == '\0')	/* beginning of empty line */
         prog_complete_matches = programmable_completions ("_EmptycmD_", text, s, e, &foundcs);
+      else if (start == end && text[0] == '\0' && s1 > start && whitespace (rl_line_buffer[start]))
+        foundcs = 0;		/* whitespace before command name */
       else if (e > s && assignment (n, 0) == 0)
 	prog_complete_matches = programmable_completions (n, text, s, e, &foundcs);
       else
@@ -1527,7 +1545,7 @@ command_word_completion_function (hint_text, state)
 #if defined (ALIAS)
   static alias_t **alias_list = (alias_t **)NULL;
 #endif /* ALIAS */
-  char *temp;
+  char *temp, *cval;
 
   /* We have to map over the possibilities for command words.  If we have
      no state, then make one just for that purpose. */
@@ -1853,19 +1871,38 @@ globword:
 	    freetemp = match = 0;
 	}
 
-#if 0
-      /* If we have found a match, and it is an executable file or a
-	 directory name, return it. */
-      if (match && executable_or_directory (val))
-#else
       /* If we have found a match, and it is an executable file, return it.
 	 We don't return directory names when searching $PATH, since the
 	 bash execution code won't find executables in directories which
 	 appear in directories in $PATH when they're specified using
-	 relative pathnames. */
-      if (match && (searching_path ? executable_file (val) : executable_or_directory (val)))
-#endif
+	 relative pathnames.  */
+#if 0
+      /* If we're not searching $PATH and we have a relative pathname, we
+	 need to re-canonicalize it before testing whether or not it's an
+	 executable or a directory so the shell treats .. relative to $PWD
+	 according to the physical/logical option.  The shell already
+	 canonicalizes the directory name in order to tell readline where
+	 to look, so not doing it here will be inconsistent. */
+      /* XXX -- currently not used -- will introduce more inconsistency,
+	 since shell does not canonicalize ../foo before passing it to
+	 shell_execve().  */
+      if (match && searching_path == 0 && *val == '.')
 	{
+	  char *t, *t1;
+
+	  t = get_working_directory ("command-word-completion");
+	  t1 = make_absolute (val, t);
+	  free (t);
+	  cval = sh_canonpath (t1, PATH_CHECKDOTDOT|PATH_CHECKEXISTS);
+	}
+      else
+#endif
+	cval = val;
+
+      if (match && (searching_path ? executable_file (val) : executable_or_directory (cval)))
+	{
+	  if (cval != val)
+	    free (cval);
 	  free (val);
 	  val = "";		/* So it won't be NULL. */
 	  return (temp);
@@ -1874,6 +1911,8 @@ globword:
 	{
 	  if (freetemp)
 	    free (temp);
+	  if (cval != val)
+	    free (cval);
 	  free (val);
 	  goto inner;
 	}

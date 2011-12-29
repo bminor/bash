@@ -1438,12 +1438,11 @@ yy_readline_get ()
 	  interrupt_immediately++;
 	  old_sigint = (SigHandler *)set_signal_handler (SIGINT, sigint_sighandler);
 	}
-      terminate_immediately = 1;
 
       current_readline_line = readline (current_readline_prompt ?
       					  current_readline_prompt : "");
 
-      terminate_immediately = 0;
+      CHECK_TERMSIG;
       if (signal_is_ignored (SIGINT) == 0)
 	{
 	  interrupt_immediately--;
@@ -1603,16 +1602,15 @@ yy_stream_get ()
   if (bash_input.location.file)
     {
       if (interactive)
-	{
-	  interrupt_immediately++;
-	  terminate_immediately++;
-	}
+	interrupt_immediately++;
+
+      /* XXX - don't need terminate_immediately; getc_with_restart checks
+	 for terminating signals itself if read returns < 0 */
       result = getc_with_restart (bash_input.location.file);
+
       if (interactive)
-	{
-	  interrupt_immediately--;
-	  terminate_immediately--;
-	}
+	interrupt_immediately--;
+
     }
   return (result);
 }
@@ -3210,7 +3208,11 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	    }
 
 	  RESIZE_MALLOCED_BUFFER (ret, retind, 2, retsize, 64);
+#if 0
 	  if MBTEST(ch == CTLESC || ch == CTLNUL)
+#else
+	  if MBTEST(ch == CTLESC)
+#endif
 	    ret[retind++] = CTLESC;
 	  ret[retind++] = ch;
 	  continue;
@@ -3529,7 +3531,11 @@ eof_error:
 	    }
 
 	  RESIZE_MALLOCED_BUFFER (ret, retind, 2, retsize, 64);
+#if 0
 	  if MBTEST(ch == CTLESC || ch == CTLNUL)
+#else
+	  if MBTEST(ch == CTLESC)
+#endif
 	    ret[retind++] = CTLESC;
 	  ret[retind++] = ch;
 	  continue;
@@ -3842,6 +3848,7 @@ xparse_dolparen (base, string, indp, flags)
      int flags;
 {
   sh_parser_state_t ps;
+  sh_input_line_state_t ls;
   int orig_ind, nc, sflags;
   char *ret, *s, *ep, *ostring;
 
@@ -3849,10 +3856,12 @@ xparse_dolparen (base, string, indp, flags)
   orig_ind = *indp;
   ostring = string;
 
+/*itrace("xparse_dolparen: size = %d shell_input_line = `%s'", shell_input_line_size, shell_input_line);*/
   sflags = SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOFREE;
   if (flags & SX_NOLONGJMP)
     sflags |= SEVAL_NOLONGJMP;
   save_parser_state (&ps);
+  save_input_line_state (&ls);
 
   /*(*/
   parser_state |= PST_CMDSUBST|PST_EOFTOKEN;	/* allow instant ')' */ /*(*/
@@ -3861,6 +3870,8 @@ xparse_dolparen (base, string, indp, flags)
 
   restore_parser_state (&ps);
   reset_parser ();
+  /* reset_parser clears shell_input_line and associated variables */
+  restore_input_line_state (&ls);
   if (interactive)
     token_to_read = 0;
 
@@ -4431,7 +4442,7 @@ read_token_word (character)
 	      pop_delimiter (dstack);
 	      if (ttok == &matched_pair_error)
 		return -1;		/* Bail immediately. */
-	      RESIZE_MALLOCED_BUFFER (token, token_index, ttoklen + 2,
+	      RESIZE_MALLOCED_BUFFER (token, token_index, ttoklen + 3,
 				      token_buffer_size,
 				      TOKEN_DEFAULT_GROW_SIZE);
 	      token[token_index++] = character;
@@ -4453,7 +4464,7 @@ read_token_word (character)
 	{
 	  peek_char = shell_getc (1);
 	  /* $(...), <(...), >(...), $((...)), ${...}, and $[...] constructs */
-	  if MBTEST(peek_char == '(' || \
+	  if MBTEST(peek_char == '(' ||
 		((peek_char == '{' || peek_char == '[') && character == '$'))	/* ) ] } */
 	    {
 	      if (peek_char == '{')		/* } */
@@ -4473,7 +4484,7 @@ read_token_word (character)
 		ttok = parse_matched_pair (cd, '[', ']', &ttoklen, 0);
 	      if (ttok == &matched_pair_error)
 		return -1;		/* Bail immediately. */
-	      RESIZE_MALLOCED_BUFFER (token, token_index, ttoklen + 2,
+	      RESIZE_MALLOCED_BUFFER (token, token_index, ttoklen + 3,
 				      token_buffer_size,
 				      TOKEN_DEFAULT_GROW_SIZE);
 	      token[token_index++] = character;
@@ -4524,7 +4535,7 @@ read_token_word (character)
 		  ttrans = ttok;
 		}
 
-	      RESIZE_MALLOCED_BUFFER (token, token_index, ttranslen + 2,
+	      RESIZE_MALLOCED_BUFFER (token, token_index, ttranslen + 1,
 				      token_buffer_size,
 				      TOKEN_DEFAULT_GROW_SIZE);
 	      strcpy (token + token_index, ttrans);
@@ -4538,17 +4549,13 @@ read_token_word (character)
 	     shell's single-character parameter expansions, and set flags.*/
 	  else if MBTEST(character == '$' && peek_char == '$')
 	    {
-	      ttok = (char *)xmalloc (3);
-	      ttok[0] = ttok[1] = '$';
-	      ttok[2] = '\0';
 	      RESIZE_MALLOCED_BUFFER (token, token_index, 3,
 				      token_buffer_size,
 				      TOKEN_DEFAULT_GROW_SIZE);
-	      strcpy (token + token_index, ttok);
-	      token_index += 2;
+	      token[token_index++] = '$';
+	      token[token_index++] = peek_char;
 	      dollar_present = 1;
 	      all_digit_token = 0;
-	      FREE (ttok);
 	      goto next_character;
 	    }
 	  else
@@ -4618,20 +4625,23 @@ read_token_word (character)
 	  goto got_token;
 	}
 
-    got_character:
+got_character:
 
       if (character == CTLESC || character == CTLNUL)
-	token[token_index++] = CTLESC;
-
-    got_escaped_character:
-
-      all_digit_token &= DIGIT (character);
-      dollar_present |= character == '$';
+	{
+	  RESIZE_MALLOCED_BUFFER (token, token_index, 2, token_buffer_size,
+				  TOKEN_DEFAULT_GROW_SIZE);
+	  token[token_index++] = CTLESC;
+	}
+      else
+got_escaped_character:
+	RESIZE_MALLOCED_BUFFER (token, token_index, 1, token_buffer_size,
+				TOKEN_DEFAULT_GROW_SIZE);
 
       token[token_index++] = character;
 
-      RESIZE_MALLOCED_BUFFER (token, token_index, 1, token_buffer_size,
-			      TOKEN_DEFAULT_GROW_SIZE);
+      all_digit_token &= DIGIT (character);
+      dollar_present |= character == '$';
 
     next_character:
       if (character == '\n' && SHOULD_PROMPT ())
@@ -4646,14 +4656,15 @@ read_token_word (character)
 
 got_token:
 
+  /* Calls to RESIZE_MALLOCED_BUFFER ensure there is sufficient room. */
   token[token_index] = '\0';
 
   /* Check to see what thing we should return.  If the last_read_token
      is a `<', or a `&', or the character which ended this token is
      a '>' or '<', then, and ONLY then, is this input token a NUMBER.
      Otherwise, it is just a word, and should be returned as such. */
-  if MBTEST(all_digit_token && (character == '<' || character == '>' || \
-		    last_read_token == LESS_AND || \
+  if MBTEST(all_digit_token && (character == '<' || character == '>' ||
+		    last_read_token == LESS_AND ||
 		    last_read_token == GREATER_AND))
       {
 	if (legal_number (token, &lvalue) && (int)lvalue == lvalue)
@@ -5136,8 +5147,7 @@ decode_prompt_string (string)
 	      /* Make the current time/date into a string. */
 	      (void) time (&the_time);
 #if defined (HAVE_TZSET)
-	      if (chkexport ("TZ"))
-		sv_tz ("TZ");		/* XXX -- just make sure */
+	      sv_tz ("TZ");		/* XXX -- just make sure */
 #endif
 	      tm = localtime (&the_time);
 
@@ -5909,6 +5919,12 @@ save_parser_state (ps)
   ps->expand_aliases = expand_aliases;
   ps->echo_input_at_read = echo_input_at_read;
 
+  ps->token = token;
+  ps->token_buffer_size = token_buffer_size;
+  /* Force reallocation on next call to read_token_word */
+  token = 0;
+  token_buffer_size = 0;
+
   return (ps);
 }
 
@@ -5950,6 +5966,42 @@ restore_parser_state (ps)
 
   expand_aliases = ps->expand_aliases;
   echo_input_at_read = ps->echo_input_at_read;
+
+  FREE (token);
+  token = ps->token;
+  token_buffer_size = ps->token_buffer_size;
+}
+
+sh_input_line_state_t *
+save_input_line_state (ls)
+     sh_input_line_state_t *ls;
+{
+  if (ls == 0)
+    ls = (sh_input_line_state_t *)xmalloc (sizeof (sh_input_line_state_t));
+  if (ls == 0)
+    return ((sh_input_line_state_t *)NULL);
+
+  ls->input_line = shell_input_line;
+  ls->input_line_size = shell_input_line_size;
+  ls->input_line_len = shell_input_line_len;
+  ls->input_line_index = shell_input_line_index;
+
+  /* force reallocation */
+  shell_input_line = 0;
+  shell_input_line_size = shell_input_line_len = shell_input_line_index = 0;
+}
+
+void
+restore_input_line_state (ls)
+     sh_input_line_state_t *ls;
+{
+  FREE (shell_input_line);
+  shell_input_line = ls->input_line;
+  shell_input_line_size = ls->input_line_size;
+  shell_input_line_len = ls->input_line_len;
+  shell_input_line_index = ls->input_line_index;
+
+  set_line_mbstate ();
 }
 
 /************************************************

@@ -11810,3 +11810,90 @@ doc/{bash.1,bashref.texi}
 	  option) to make it clear that only interactive shells set a
 	  handler for SIGWINCH and update LINES and COLUMNS.  Original
 	  report submitted by Jonathan Nieder <jrnieder@gmail.com>
+
+arrayfunc.c
+	- expand_compound_array_assignment: defer expansion of words between
+	  parens when performing compound assignmnt to an associative array
+	  variable
+	- assign_compound_array_list: perform the same expansions when doing
+	  a compound array assignment to an associative array variable as
+	  when doing a straight array index assignment.  The idea is that
+	  	foo=( [ind1]=bar [ind2]=quux)
+	  is the same as
+		foo[ind1]=bar ; foo[ind2]=quux
+
+	  This fixes problems with double-expansion and quote removal being
+	  performed on the array indices
+
+				   6/13
+				   ----
+doc/{bash.1,bashref.texi}
+	- Add a little text to make it clear that the locale determines how
+	  range expressions in glob patterns are handled.
+
+
+				   6/21
+				   ----
+builtins/read.def
+	- display a message and return error status if -a is used with an
+	  existing associative array.  Fixes bug reported by Curtis Doty
+	  <curtis@greenkey.net>
+
+				   6/24
+				   ----
+{jobs,nojobs}.c
+	- non-interactive shells now react to the setting of checkwinsize
+	  and set LINES and COLUMNS after a foreground job exits.  From a
+	  suggestion by Leslie Rhorer <lrhorer@satx.rr.com>
+
+lib/readline/histfile.c
+	- history_backupfile: new file, creates a backup history file name
+	  given a filename (appending `-')
+	- history_do_write: when overwriting the history file, back it up
+	  before writing.  Restore backup file on a write error.  Suggested
+	  by chkno@chkno.net
+
+bashline.c
+	- find_cmd_name: two new arguments, return the start and end of the
+	  actual text string used to find the command name, without taking
+	  whitespace into account
+	- attempt_shell_completion: small changes to make sure that completion
+	  attempted at the beginning of a non-empty line does not find a
+	  programmable completion, even if the command name starts at point
+	- attempt_shell_completion: small change to make sure that completion
+	  does not find a progcomp when in whitespace before the command
+	  name
+	- attempt_shell_completion: small change to make sure that completion
+	  does not find a progcomp when point is at the first character of a
+	  command name, even when there is leading whitespace (similar to
+	  above).  Fixes problems noted by Ville Skytta <ville.skytta@iki.fi>
+
+subst.c
+	- brace_expand_word_list: since the individual strings in the strvec
+	  returned by brace_expand are already allocated, don't copy them to
+	  newly-allocated memory when building the WORD_LIST, just use them
+	  intact
+
+locale.c
+	- locale_mb_cur_max: cache value of MB_CUR_MAX when we set or change
+	  the locale to avoid a function call every time we need to read it
+
+shell.h
+	- new struct to save shell_input_line and associated variables:
+	  shell_input_line_state_t
+	- add members of sh_parser_state_t to save and restore token and the
+	  size of the token buffer
+
+parse.y
+	- {save,restore}_input_line_state: new functions to save and restore
+	  shell_input_line and associated variables
+	- {save,restore}_parser_state: add code to save and restore the token
+	  and token buffer size
+	- xparse_dolparen: call save_ and restore_input_line_state to avoid
+	  problems with overwriting shell_input_line when we recursively
+	  call the parser to parse a command substitution.  Fixes bug
+	  reported by Rui Santos <rsantos@grupopie.com>
+
+include/shmbutil.h
+	- use locale_mb_cur_max instead of MB_CUR_MAX in ADVANCE_CHAR and
+	  similar macros

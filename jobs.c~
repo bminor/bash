@@ -2612,6 +2612,8 @@ if (job == NO_JOB)
 		kill (getpid (), SIGINT);
 	    }
 	}
+      else if (interactive_shell == 0 && IS_FOREGROUND (job) && check_window_size)
+	get_new_window_size (0, (int *)0, (int *)0);
 
       /* Moved here from set_job_status_and_cleanup, which is in the SIGCHLD
          signal handler path */
@@ -3556,6 +3558,9 @@ notify_of_job_status ()
 	    case JDEAD:
 	      if (interactive_shell == 0 && termsig && WIFSIGNALED (s) &&
 		  termsig != SIGINT &&
+#if defined (DONT_REPORT_SIGTERM)
+		  termsig != SIGTERM &&
+#endif
 #if defined (DONT_REPORT_SIGPIPE)
 		  termsig != SIGPIPE &&
 #endif

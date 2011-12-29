@@ -801,13 +801,17 @@ wait_for (pid)
   return_val = process_exit_status (status);
   last_command_exit_signal = get_termsig (status);
 
-#if !defined (DONT_REPORT_SIGPIPE)
-  if ((WIFSTOPPED (status) == 0) && WIFSIGNALED (status) &&
-	(WTERMSIG (status) != SIGINT))
+#if defined (DONT_REPORT_SIGPIPE) && defined (DONT_REPORT_SIGTERM)
+#  define REPORTSIG(x) ((x) != SIGINT && (x) != SIGPIPE && (x) != SIGTERM)
+#elif !defined (DONT_REPORT_SIGPIPE) && !defined (DONT_REPORT_SIGTERM)
+#  define REPORTSIG(x) ((x) != SIGINT)
+#elif defined (DONT_REPORT_SIGPIPE)
+#  define REPORTSIG(x) ((x) != SIGINT && (x) != SIGPIPE)
 #else
-  if ((WIFSTOPPED (status) == 0) && WIFSIGNALED (status) &&
-	(WTERMSIG (status) != SIGINT) && (WTERMSIG (status) != SIGPIPE))
-#endif
+#  define REPORTSIG(x) ((x) != SIGINT && (x) != SIGTERM)
+#endiof
+
+  if ((WIFSTOPPED (status) == 0) && WIFSIGNALED (status) && REPORTSIG(WTERMSIG (status)))
     {
       fprintf (stderr, "%s", j_strsignal (WTERMSIG (status)));
       if (WIFCORED (status))
@@ -822,6 +826,8 @@ wait_for (pid)
       else
 	get_tty_state ();
     }
+  else if (interactive_shell == 0 && subshell_environment == 0 && check_window_size)
+    get_new_window_size (0, (int *)0, (int *)0);
 
   return (return_val);
 }

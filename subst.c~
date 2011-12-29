@@ -1170,7 +1170,7 @@ extract_process_subst (string, starter, sindex)
      char *starter;
      int *sindex;
 {
-  return (extract_delimited_string (string, sindex, starter, "(", ")", 0));
+  return (extract_delimited_string (string, sindex, starter, "(", ")", SX_COMMAND));
 }
 #endif /* PROCESS_SUBSTITUTION */
 
@@ -3709,7 +3709,10 @@ remove_quoted_nulls (string)
 	    break;
 	}
       else if (string[i] == CTLNUL)
-	i++;
+	{
+	  i++;
+	  continue;
+	}
 
       prev_i = i;
       ADVANCE_CHAR (string, slen, i);
@@ -5527,7 +5530,7 @@ array_length_reference (s)
     }
   else
     {
-      ind = array_expand_index (t, len);
+      ind = array_expand_index (var, t, len);
       if (ind < 0)
 	{
 	  err_badarraysub (t);
@@ -8359,7 +8362,10 @@ add_twochars:
 	    temp = (char *)NULL;
 
 	  /* We do not want to add quoted nulls to strings that are only
-	     partially quoted; we can throw them away. */
+	     partially quoted; we can throw them away.  The execption to
+	     this is when we are going to be performing word splitting,
+	     since we have to preserve a null argument if the next character
+	     will cause word splitting. */
 	  if (temp == 0 && quoted_state == PARTIALLY_QUOTED && (word->flags & (W_NOSPLIT|W_NOSPLIT2)))
 	    continue;
 
@@ -9114,14 +9120,24 @@ brace_expand_word_list (tlist, eflags)
 
 	  for (eindex = 0; temp_string = expansions[eindex]; eindex++)
 	    {
+#if 0
 	      w = make_word (temp_string);
+#else
+	      w = alloc_word_desc ();
+	      w->word = temp_string;
+#endif
+
 	      /* If brace expansion didn't change the word, preserve
 		 the flags.  We may want to preserve the flags
 		 unconditionally someday -- XXX */
 	      if (STREQ (temp_string, tlist->word->word))
 		w->flags = tlist->word->flags;
+	      else
+		w = make_word_flags (w, temp_string);
 	      output_list = make_word_list (w, output_list);
+#if 0
 	      free (expansions[eindex]);
+#endif
 	    }
 	  free (expansions);
 

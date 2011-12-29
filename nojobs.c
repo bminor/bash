@@ -3,7 +3,7 @@
 /* This file works under BSD, System V, minix, and Posix systems.  It does
    not implement job control. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2011 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -826,6 +826,8 @@ wait_for (pid)
       else
 	get_tty_state ();
     }
+  else if (interactive_shell == 0 && subshell_environment == 0 && check_window_size)
+    get_new_window_size (0, (int *)0, (int *)0);
 
   return (return_val);
 }

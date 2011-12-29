@@ -9120,14 +9120,18 @@ brace_expand_word_list (tlist, eflags)
 
 	  for (eindex = 0; temp_string = expansions[eindex]; eindex++)
 	    {
-	      w = make_word (temp_string);
+	      w = alloc_word_desc ();
+	      w->word = temp_string;
+
 	      /* If brace expansion didn't change the word, preserve
 		 the flags.  We may want to preserve the flags
 		 unconditionally someday -- XXX */
 	      if (STREQ (temp_string, tlist->word->word))
 		w->flags = tlist->word->flags;
+	      else
+		w = make_word_flags (w, temp_string);
+
 	      output_list = make_word_list (w, output_list);
-	      free (expansions[eindex]);
 	    }
 	  free (expansions);
 
