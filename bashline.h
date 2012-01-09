@@ -40,6 +40,8 @@ extern int bind_keyseq_to_unix_command __P((char *));
 
 extern char **bash_default_completion __P((const char *, int, int, int, int));
 
+void set_directory_hook __P((void));
+
 /* Used by programmable completion code. */
 extern char *command_word_completion_function __P((const char *, int));
 extern char *bash_groupname_completion_function __P((const char *, int));

@@ -82,8 +82,6 @@ static char *normalize_codeset PARAMS((char *));
 
 static char *find_codeset PARAMS((char *, size_t *));
 
-int _rl_utf8locale = 0;
-
 static char *_rl_get_locale_var PARAMS((const char *));
 
 static char *

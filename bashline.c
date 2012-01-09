@@ -121,7 +121,6 @@ static int bash_directory_completion_hook __P((char **));
 static int filename_completion_ignore __P((char **));
 static int bash_push_line __P((void));
 
-static void set_directory_hook __P((void));
 static rl_icppfunc_t *save_directory_hook __P((void));
 static void reset_directory_hook __P((rl_icppfunc_t *));
 
@@ -2755,13 +2754,20 @@ bash_filename_rewrite_hook (fname, fnlen)
 }
 
 /* Functions to save and restore the appropriate directory hook */
-static void
+/* This is not static so the shopt code can call it */
+void
 set_directory_hook ()
 {
   if (dircomplete_expand)
-    rl_directory_completion_hook = bash_directory_completion_hook;
+    {
+      rl_directory_completion_hook = bash_directory_completion_hook;
+      rl_directory_rewrite_hook = (rl_icppfunc_t *)0;
+    }
   else
-    rl_directory_rewrite_hook = bash_directory_completion_hook;
+    {
+      rl_directory_rewrite_hook = bash_directory_completion_hook;
+      rl_directory_completion_hook = (rl_icppfunc_t *)0;
+    }
 }
 
 static rl_icppfunc_t *

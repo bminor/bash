@@ -11846,6 +11846,10 @@ builtins/read.def
 	  and set LINES and COLUMNS after a foreground job exits.  From a
 	  suggestion by Leslie Rhorer <lrhorer@satx.rr.com>
 
+doc/{bash.1,bashref.texi}
+	- checkwinsize: remove language saying that only interactive shells
+	  check the window size after each command
+
 lib/readline/histfile.c
 	- history_backupfile: new file, creates a backup history file name
 	  given a filename (appending `-')
@@ -11937,3 +11941,29 @@ bashline.c
 	- change {set,save,restore}_directory_hook to look at dircomplete_expand
 	  and change rl_directory_completion_hook or rl_directory_rewrite_hook
 	  appropriately
+
+bashline.h
+	- extern declaration for set_directory_hook so shopt code can use it
+
+				    7/6
+				    ---
+builtins/shopt.def
+	- globasciiranges: new settable shopt option, makes glob ranges act
+	  as if in the C locale (so b no longer comes between A and B).
+	  Suggested by Aharon Robbins <arnold@skeeve.com>
+
+				    7/7
+				    ---
+doc/{bash.1,bashref.texi}
+	- document new `globasciiranges' shopt option
+
+				    7/8
+				    ---
+builtins/shopt.def
+	- direxpand: new settable option, makes filename completion expand
+	  variables in directory names like bash-4.1 did.
+	- shopt_set_complete_direxpand: new function, does the work for the
+	  above by calling set_directory_hook
+
+doc/{bash.1,bashref.texi}
+	- document new `direxpand' shopt option

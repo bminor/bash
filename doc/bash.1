@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Fri Jun 24 11:28:14 EDT 2011
+.\"	Last Change: Thu Jul  7 07:26:51 EDT 2011
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2011 June 24" "GNU Bash 4.2"
+.TH BASH 1 "2011 July 7" "GNU Bash 4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -3270,7 +3270,10 @@ is equivalent to
 set value of the
 .B LC_ALL
 shell variable to
-.BR C .
+.BR C ,
+or enable the
+.B globasciiranges
+shell option.
 A 
 .B \-
 may be matched by including it as the first or last character
@@ -8975,6 +8978,16 @@ parameter expansion as a special character.  The single quotes must match
 quoted.  This is the behavior of posix mode through version 4.1.
 The default bash behavior remains as in previous versions.
 .TP 8
+.B direxpand
+If set,
+.B bash
+replaces directory names with the results of word expansion when performing
+filename completion.  This changes the contents of the readline editing
+buffer.
+If not set,
+.B bash
+attempts to preserve what the user typed.
+.TP 8
 .B dirspell
 If set,
 .B bash
@@ -9066,6 +9079,20 @@ above for a description of
 .SM
 .BR FIGNORE .
 This option is enabled by default.
+.TP 8
+.B globasciiranges
+If set, range expressions used in pattern matching (see
+.SM
+.B Pattern Matching
+above) behave as if in the traditional C locale when performing
+comparisons.  That is, the current locale's collating sequence
+is not taken into account, so
+.B b
+will not collate between
+.B A
+and
+.BR B ,
+and upper-case and lower-case ASCII characters will collate together.
 .TP 8
 .B globstar
 If set, the pattern \fB**\fP used in a pathname expansion context will

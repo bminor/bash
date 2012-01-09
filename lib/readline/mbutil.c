@@ -64,6 +64,9 @@ int rl_byte_oriented = 0;
 int rl_byte_oriented = 1;
 #endif
 
+/* Ditto */
+int _rl_utf8locale = 0;
+
 /* **************************************************************** */
 /*								    */
 /*		Multibyte Character Utility Functions		    */

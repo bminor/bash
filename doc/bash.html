@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2011 April 11<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2011 July 7<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -869,7 +869,10 @@ executed in the list.
 
 <P>
 
-A <I>compound command</I> is one of the following:
+A <I>compound command</I> is one of the following.
+In most cases a <I>list</I> in a command's description may be separated from
+the rest of the command by one or more newlines, and may be followed by a
+newline in place of a semicolon.
 <DL COMPACT>
 <DT>(<I>list</I>)<DD>
 <I>list</I> is executed in a subshell environment (see
@@ -1167,7 +1170,7 @@ The format for a coprocess is:
 <P>
 
 This creates a coprocess named <I>NAME</I>.
-If <I>NAME</I> is not supplied, the default name is <I>COPROC</I>.
+If <I>NAME</I> is not supplied, the default name is <B>COPROC</B>.
 <I>NAME</I> must not be supplied if <I>command</I> is a <I>simple
 command</I> (see above); otherwise, it is interpreted as the first word
 of the simple command.
@@ -2396,7 +2399,8 @@ A sample value is
 
 <DD>
 Used by the <B>select</B> compound command to determine the terminal width
-when printing selection lists.  Automatically set upon receipt of a
+when printing selection lists.  Automatically set in an interactive shell
+upon receipt of a
 <FONT SIZE=-1><B>SIGWINCH</B>.
 
 </FONT>
@@ -2689,7 +2693,8 @@ This variable determines the locale category used for number formatting.
 
 <DD>
 Used by the <B>select</B> compound command to determine the column length
-for printing selection lists.  Automatically set upon receipt of a
+for printing selection lists.  Automatically set by an interactive shell
+upon receipt of a
 <FONT SIZE=-1><B>SIGWINCH</B>.
 
 </FONT>
@@ -2778,7 +2783,7 @@ and is set by the administrator who installs
 <B>bash</B>.
 
 A common value is
-<TT>/usr/gnu/bin:/usr/local/bin:/usr/ucb:/bin:/usr/bin</TT>.
+<TT>/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin</TT>.
 
 <DT><B>POSIXLY_CORRECT</B>
 
@@ -3976,7 +3981,12 @@ regarded as a
 <I>pattern</I>,
 
 and replaced with an alphabetically sorted list of
-file names matching the pattern.
+file names matching the pattern
+(see
+<FONT SIZE=-1><B>Pattern Matching</B>
+
+</FONT>
+below).
 If no matching file names are found,
 and the shell option
 <B>nullglob</B>
@@ -4139,12 +4149,31 @@ or a
 
 then any character not enclosed is matched.
 The sorting order of characters in range expressions is determined by
-the current locale and the value of the
+the current locale and the values of the
 <FONT SIZE=-1><B>LC_COLLATE</B>
 
 </FONT>
-shell variable,
-if set.
+or
+<FONT SIZE=-1><B>LC_ALL</B>
+
+</FONT>
+shell variables, if set.
+To obtain the traditional interpretation of range expressions, where
+<B>[a-d]</B>
+
+is equivalent to
+<B>[abcd]</B>,
+
+set value of the
+<B>LC_ALL</B>
+
+shell variable to
+<B>C</B>,
+
+or enable the
+<B>globasciiranges</B>
+
+shell option.
 A 
 <B>-</B>
 
@@ -9411,7 +9440,7 @@ The return value is 0 unless a
 does not specify a valid job.
 <DT><B>echo</B> [<B>-neE</B>] [<I>arg</I> ...]<DD>
 Output the <I>arg</I>s, separated by spaces, followed by a newline.
-The return status is always 0.
+The return status is 0 unless a write error occurs.
 If <B>-n</B> is specified, the trailing newline is
 suppressed.  If the <B>-e</B> option is given, interpretation of
 the following backslash-escaped characters is enabled.  The
@@ -10884,9 +10913,10 @@ it (see
 <FONT SIZE=-1><B>JOB CONTROL</B>
 
 </FONT>
-above).  Background processes run in a separate process
-group and a line containing their exit status is printed
-upon their completion.
+above).
+All processes run in a separate process group.
+When a background job completes, the shell prints a line
+containing its exit status.
 <DT><B>-n</B>
 
 <DD>
@@ -11457,6 +11487,19 @@ parameter expansion as a special character.  The single quotes must match
 (an even number) and the characters between the single quotes are considered
 quoted.  This is the behavior of posix mode through version 4.1.
 The default bash behavior remains as in previous versions.
+<DT><B>direxpand</B>
+
+<DD>
+If set,
+<B>bash</B>
+
+replaces directory names with the results of word expansion when performing
+filename completion.  This changes the contents of the readline editing
+buffer.
+If not set,
+<B>bash</B>
+
+attempts to preserve what the user typed.
 <DT><B>dirspell</B>
 
 <DD>
@@ -11574,6 +11617,25 @@ above for a description of
 
 </FONT>
 This option is enabled by default.
+<DT><B>globasciiranges</B>
+
+<DD>
+If set, range expressions used in pattern matching (see
+<FONT SIZE=-1><B>Pattern Matching</B>
+
+</FONT>
+above) behave as if in the traditional C locale when performing
+comparisons.  That is, the current locale's collating sequence
+is not taken into account, so
+<B>b</B>
+
+will not collate between
+<B>A</B>
+
+and
+<B>B</B>,
+
+and upper-case and lower-case ASCII characters will collate together.
 <DT><B>globstar</B>
 
 <DD>
@@ -12356,13 +12418,13 @@ For each
 <I>name</I>,
 
 remove the corresponding variable or function.
-If no options are supplied, or the
+If the
 <B>-v</B>
 
 option is given, each
 <I>name</I>
 
-refers to a shell variable.
+refers to a shell variable, and that variable is removed.
 Read-only variables may not be unset.
 If
 <B>-f</B>
@@ -12372,6 +12434,9 @@ is specified, each
 
 refers to a shell function, and the function definition
 is removed.
+If no options are supplied, each <I>name</I> refers to a variable; if
+there is no variable by that name, any function with that name is
+unset.
 Each unset variable or function is removed from the environment
 passed to subsequent commands.
 If any of
@@ -12708,7 +12773,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.2<TH ALIGN=CENTER width=33%>2011 April 11<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.2<TH ALIGN=CENTER width=33%>2011 July 7<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -12814,6 +12879,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 11 April 2011 17:01:53 EDT
+Time: 08 July 2011 17:23:53 EDT
 </BODY>
 </HTML>
