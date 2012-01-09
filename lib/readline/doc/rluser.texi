@@ -72,6 +72,8 @@ Line editing can be enabled at any time using the @option{-o emacs} or
 				a specific command.
 * Programmable Completion Builtins::	Builtin commands to specify how to
 				complete arguments for a particular command.
+* A Programmable Completion Example::	An example shell function for
+				generating possible completions.
 @end ifset
 @end menu
 
@@ -1714,10 +1716,11 @@ When the command or function is invoked, the @env{COMP_LINE},
 assigned values as described above (@pxref{Bash Variables}).
 If a shell function is being invoked, the @env{COMP_WORDS} and
 @env{COMP_CWORD} variables are also set.
-When the function or command is invoked, the first argument is the
+When the function or command is invoked, the first argument ($1) is the
 name of the command whose arguments are being completed, the
-second argument is the word being completed, and the third argument
-is the word preceding the word being completed on the current command line.
+second argument ($2) is the word being completed, and the third argument
+($3) is the word preceding the word being completed on the current command
+line.
 No filtering of the generated completions against the word being completed
 is performed; the function or command has complete freedom in generating
 the matches.
@@ -1727,7 +1730,7 @@ The function may use any of the shell facilities, including the
 @code{compgen} and @code{compopt} builtins described below
 (@pxref{Programmable Completion Builtins}), to generate the matches.
 It must put the possible completions in the @env{COMPREPLY} array
-variable.
+variable, one per array element.
 
 Next, any command specified with the @option{-C} option is invoked
 in an environment equivalent to command substitution.
@@ -1996,6 +1999,10 @@ used as the possible completions.
 @item -F @var{function}
 The shell function @var{function} is executed in the current shell
 environment.
+When it is executed, $1 is the name of the command whose arguments are
+being completed, $2 is the word being completed, and $3 is the word
+preceding the word being completed, as described above
+(@pxref{Programmable Completion}).
 When it finishes, the possible completions are retrieved from the value
 of the @env{COMPREPLY} array variable.
 
@@ -2059,5 +2066,58 @@ is made to modify the options for a @var{name} for which no completion
 specification exists, or an output error occurs.
 
 @end table
+
+@node A Programmable Completion Example
+@section A Programmable Completion Example
+
+@example
+# A completion function for the cd builtin
+# based on the cd completion function from the bash_completion package
+_comp_cd()
+{
+	local IFS=$' \t\n'	# normalize IFS
+	local cur _skipdot
+	local i j k
+
+	# Tilde expansion, with side effect of expanding tilde to full pathname
+	case "$2" in
+	\~*)	eval cur="$2" ;;
+	*)	cur=$2 ;;
+	esac
+
+	# no cdpath or absolute pathname -- straight directory completion
+	if [[ -z "${CDPATH:-}" ]] || [[ "$cur" == @(./*|../*|/*) ]]; then
+		# compgen prints paths one per line; could also use while loop
+		IFS=$'\n'
+		COMPREPLY=( $(compgen -d -- "$cur") )
+		IFS=$' \t\n'
+	# CDPATH+directories in the current directory if not in CDPATH
+	else
+		IFS=$'\n'
+		_skipdot=false
+		for i in ${CDPATH//:/$'\n'}; do
+			if [[ $i -ef . ]]; then _skipdot=true; fi
+			k="${#COMPREPLY[@]}"
+			for j in $( compgen -d -- "$i/$cur" ); do
+				COMPREPLY[k++]=${j#$i/}		# cut off directory
+			done
+		done
+		$_skipdot || COMPREPLY+=( $(compgen -d -- "$cur") )
+		IFS=$' \t\n'
+	fi
+
+	# variable names if appropriate shell option set and no completions
+	if shopt -q cdable_vars && [[ ${#COMPREPLY[@]} -eq 0 ]]; then
+		COMPREPLY=( $(compgen -v -- "$cur") )
+	fi
+
+	return 0
+}
+
+# Tell readline to quote appropriate and append slashes to directories;
+# use the bash default completion for other arguments
+complete -o filenames -o nospace -o bashdefault -F _comp_cd cd
+
+@end example
 
 @end ifset
