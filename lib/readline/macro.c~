@@ -234,7 +234,7 @@ rl_end_kbd_macro (count, ignore)
       return -1;
     }
 
-  current_macro_index -= rl_key_sequence_length;
+  current_macro_index -= rl_key_sequence_length - 1;
   current_macro[current_macro_index] = '\0';
 
   RL_UNSETSTATE(RL_STATE_MACRODEF);

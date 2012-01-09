@@ -479,6 +479,15 @@ last key binding occurred.
 This variable is set to the text of any currently-executing macro.
 @end deftypevar
 
+@deftypevar int rl_executing_key
+The key that caused the dispatch to the currently-executing Readline function.
+@end deftypevar
+
+@deftypevar {char *} rl_executing_keyseq
+The full key sequence that caused the dispatch to the currently-executing
+Readline function.
+@end deftypevar
+
 @deftypevar {int} rl_readline_state
 A variable with bit values that encapsulate the current Readline state.
 A bit is set with the @code{RL_SETSTATE} macro, and unset with the
@@ -1729,23 +1738,39 @@ the directory portion of the pathname the user typed.
 At the least, even if no other expansion is performed, this function should
 remove any quote characters from the directory name, because its result will
 be passed directly to @code{opendir()}.
+
 The directory completion hook returns an integer that should be non-zero if
 the function modifies its directory argument.
 The function should not modify the directory argument if it returns 0.
 @end deftypevar
 
-@ignore
-@deftypevar extern rl_icppfunc_t *rl_directory_rewrite_hook;
+@deftypevar {rl_icppfunc_t *} rl_directory_rewrite_hook;
 If non-zero, this is the address of a function to call when completing
 a directory name.  This function takes the address of the directory name
 to be modified as an argument.  Unlike @code{rl_directory_completion_hook},
 it only modifies the directory name used in @code{opendir}, not what is
 displayed when the possible completions are printed or inserted.  It is
 called before rl_directory_completion_hook.
+At the least, even if no other expansion is performed, this function should
+remove any quote characters from the directory name, because its result will
+be passed directly to @code{opendir()}.
 
-I'm not happy with how this works yet, so it's undocumented.
+The directory rewrite hook returns an integer that should be non-zero if
+the function modfies its directory argument.
+The function should not modify the directory argument if it returns 0.
 @end deftypevar
-@end ignore
+
+@deftypevar {rl_icppfunc_t *} rl_filename_stat_hook
+If non-zero, this is the address of a function for the completer to
+call before deciding which character to append to a completed name.
+This function modifies its filename name argument, and the modified value
+is passed to @code{stat()} to determine the file's type and characteristics.
+This function does not need to remove quote characters from the filename.
+
+The stat hook returns an integer that should be non-zero if
+the function modfies its directory argument.
+The function should not modify the directory argument if it returns 0.
+@end deftypevar
 
 @deftypevar {rl_dequote_func_t *} rl_filename_rewrite_hook
 If non-zero, this is the address of a function called when reading

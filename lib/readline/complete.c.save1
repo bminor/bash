@@ -1302,13 +1302,9 @@ compute_lcd_of_matches (match_list, matches, text)
 	      if (i > matches)
 		strncpy (match_list[0], match_list[1], low);
 	    }
-	  else if (strncasecmp (match_list[1], text, low) == 0)
-	    /* if the text the user typed matches up to the length of the
-	       first match, use what the user typed */
-	    strncpy (match_list[0], text, low);
 	  else
-	    /* otherwise, just use the first entry. */
-	    strncpy (match_list[0], match_list[1], low);		/* XXX */
+	    /* otherwise, just use the text the user typed. */
+	    strncpy (match_list[0], text, low);
 
 	  FREE (dtext);
 	}

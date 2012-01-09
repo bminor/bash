@@ -479,6 +479,19 @@ last key binding occurred.
 This variable is set to the text of any currently-executing macro.
 @end deftypevar
 
+@deftypevar int rl_executing_key
+The key that caused the dispatch to the currently-executing Readline function.
+@end deftypevar
+
+@deftypevar {char *} rl_executing_keyseq
+The full key sequence that caused the dispatch to the currently-executing
+Readline function.
+@end deftypevar
+
+@deftypevar int rl_key_sequence_length
+The number of characters in @var{rl_executing_keyseq}.
+@end deftypevar
+
 @deftypevar {int} rl_readline_state
 A variable with bit values that encapsulate the current Readline state.
 A bit is set with the @code{RL_SETSTATE} macro, and unset with the

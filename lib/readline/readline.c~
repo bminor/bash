@@ -800,7 +800,7 @@ _rl_dispatch_subseq (key, map, got_subseq)
 
 	  rl_dispatching = 1;
 	  RL_SETSTATE(RL_STATE_DISPATCHING);
-	  (*func) (rl_numeric_arg * rl_arg_sign, key);
+	  (*map[key].function)(rl_numeric_arg * rl_arg_sign, key);
 	  RL_UNSETSTATE(RL_STATE_DISPATCHING);
 	  rl_dispatching = 0;
 

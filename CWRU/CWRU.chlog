@@ -12802,3 +12802,52 @@ lib/readline/complete.c
 	  match, use the first of the list of matches, as if case were not
 	  being ignored.  Fixes bug reported by Clark Wang
 	  <dearvoid@gmail.com>
+
+				   12/7
+				   ----
+builtins/cd.def
+	- cd_builtin: add code to return error in case cd has more than one
+	  non-option argument, conditional on CD_COMPLAINS define (which is
+	  not defined anywhere)
+
+doc/{bash.1,bashref.texi}
+	- note that additional arguments to cd following the directory name
+	  are ignored.  Suggested by Vaclav Hanzl <hanzl@noel.feld.cvut.cz>
+
+				   12/10
+				   -----
+lib/readline/input.c
+	- rl_read_key: don't need to increment key sequence length here; doing
+	  it leads to an off-by-one error
+
+lib/readline/macro.c
+	- rl_end_kbd_macro: after off-by-one error with rl_key_sequence_length
+	  fixed, can decrement current_macro_index by rl_key_sequence_length
+	  (length of key sequence that closes keyboard macro)
+
+lib/readline/readline.c
+	- _rl_dispatch_subseq: fix extra increment of rl_key_sequence_length
+	  when ESC maps to a new keymap and we're converting meta characters
+	  to ESC+key
+	- _rl_dispatch_subseq: better increment of rl_key_sequence_length
+	  before we dispatch to a function in the ISFUNC case (where the
+	  second increment above should have happened)
+	- rl_executing_keyseq: the full key sequence that ended up executing
+	  a readline command.  Available to the calling application, maintained
+	  by _rl_dispatch_subseq, indexed by rl_key_sequence_length
+	- rl_executing_key: the key that was bound to the currently-executing
+	  readline command.  Same as the `key' argument to the function
+
+lib/readline/readline.h
+	- rl_executing_keyseq: extern declaration
+	- rl_executing_key: extern declaration
+	- rl_key_sequence_length: declaration moved here from rlprivate.h,
+	  now part of public interface
+
+lib/readline/rlprivate.h
+	- new extern declaration for _rl_executing_keyseq_size, buffer size
+	  for rl_executing_keyseq
+
+lib/readline/doc/rltech.texi
+	- documented new variables: rl_executing_key, rl_executing_keyseq,
+	  rl_key_sequence_length

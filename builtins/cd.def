@@ -237,6 +237,13 @@ cd_builtin (list)
 	}
       lflag = 0;
     }
+#if defined (CD_COMPLAINS)
+  else if (list->next)
+    {
+      builtin_error (_("too many arguments"));
+      return (EXECUTION_FAILURE);
+    }
+#endif
   else if (list->word->word[0] == '-' && list->word->word[1] == '\0')
     {
       /* This is `cd -', equivalent to `cd $OLDPWD' */

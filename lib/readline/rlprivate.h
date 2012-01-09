@@ -185,7 +185,6 @@ extern int rl_visible_stats;
 extern int rl_line_buffer_len;
 extern int rl_arg_sign;
 extern int rl_visible_prompt_length;
-extern int rl_key_sequence_length;
 extern int rl_byte_oriented;
 
 /* display.c */
@@ -473,6 +472,8 @@ extern int _rl_last_command_was_kill;
 extern int _rl_eof_char;
 extern procenv_t _rl_top_level;
 extern _rl_keyseq_cxt *_rl_kscxt;
+
+extern int _rl_executing_keyseq_size;
 
 /* search.c */
 extern _rl_search_cxt *_rl_nscxt;

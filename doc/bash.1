@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sat Nov 19 15:15:30 EST 2011
+.\"	Last Change: Wed Dec  7 17:34:07 EST 2011
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2011 November 19" "GNU Bash 4.2"
+.TH BASH 1 "2011 December 7" "GNU Bash 4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -6846,12 +6846,12 @@ call or \fIexpr\fP does not correspond to a valid position in the
 call stack.
 .TP
 \fBcd\fP [\fB\-L\fP|[\fB\-P\fP [\fB\-e\fP]]] [\fIdir\fP]
-Change the current directory to \fIdir\fP.  The variable
+Change the current directory to \fIdir\fP.
+if \fIdir\fP is not supplied, the value of the
 .SM
 .B HOME
-is the
-default
-.IR dir .
+shell variable is the default.
+Any additional arguments following \fIdir\fP are ignored.
 The variable
 .SM
 .B CDPATH
