@@ -48,7 +48,7 @@ bash \- GNU Bourne-Again SHell
 .SH SYNOPSIS
 .B bash
 [options]
-[file]
+[command_string | file]
 .SH COPYRIGHT
 .if n Bash is Copyright (C) 1989-2011 by the Free Software Foundation, Inc.
 .if t Bash is Copyright \(co 1989-2011 by the Free Software Foundation, Inc.
@@ -75,13 +75,13 @@ interprets the following options when it is invoked:
 .PP
 .PD 0
 .TP 10
-.BI \-c "\| string\^"
+.B \-c
 If the
 .B \-c
-option is present, then commands are read from
-.IR string .
+option is present, then commands are read from the first non-option argument
+.IR command_string .
 If there are arguments after the
-.IR string ,
+.IR command_string ,
 they are assigned to the positional parameters, starting with
 .BR $0 .
 .TP
@@ -1981,7 +1981,7 @@ to contain no more than that number of lines by removing the oldest entries.
 The history file is also truncated to this size after
 writing it when an interactive shell exits.
 If the value is 0, the history file is truncated to zero size.
-Numeric values less than zero inhibit truncation.
+Non-numeric values and numeric values less than zero inhibit truncation.
 The shell sets the default value to the value of \fBHISTSIZE\fP
 after reading any startup files.
 .TP
@@ -6294,7 +6294,8 @@ to contain no more than
 lines.  If
 .SM
 .B HISTFILESIZE
-is not set, no truncation is performed.
+is unset, or set to null, a non-numeric value,
+or a numeric value less than zero, the history file is not truncated.
 .PP
 The builtin command
 .B fc

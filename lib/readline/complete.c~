@@ -31,6 +31,8 @@
 #  include <sys/file.h>
 #endif
 
+#include <signal.h>
+
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif /* HAVE_UNISTD_H */
@@ -104,6 +106,8 @@ static int stat_char PARAMS((char *));
 static int path_isdir PARAMS((const char *));
 
 static char *rl_quote_filename PARAMS((char *, int, char *));
+
+static void _rl_complete_sigcleanup PARAMS((int, void *));
 
 static void set_completion_defaults PARAMS((int));
 static int get_y_or_n PARAMS((int));
@@ -206,7 +210,7 @@ rl_icppfunc_t *rl_directory_completion_hook = (rl_icppfunc_t *)NULL;
 
 rl_icppfunc_t *rl_directory_rewrite_hook = (rl_icppfunc_t *)NULL;
 
-rl_icppfunc_t *rl_directory_stat_hook = (rl_icppfunc_t *)NULL;
+rl_icppfunc_t *rl_filename_stat_hook = (rl_icppfunc_t *)NULL;
 
 /* If non-zero, this is the address of a function to call when reading
    directory entries from the filesystem for completion and comparing
@@ -457,6 +461,15 @@ _rl_reset_completion_state ()
 {
   rl_completion_found_quote = 0;
   rl_completion_quote_character = 0;
+}
+
+static void
+_rl_complete_sigcleanup (sig, ptr)
+     int sig;
+     void *ptr;
+{
+  if (sig == SIGINT)	/* XXX - for now */
+    _rl_free_match_list ((char **)ptr);
 }
 
 /* Set default values for readline word completion.  These are the variables
@@ -1060,14 +1073,13 @@ gen_completion_matches (text, start, end, our_func, found_quote, quote_char)
      variable rl_attempted_completion_function. */
   if (rl_attempted_completion_function)
     {
-#if 0
-      _rl_interrupt_immediately++;
-#endif
       matches = (*rl_attempted_completion_function) (text, start, end);
-#if 0
-      if (_rl_interrupt_immediately > 0)
-	_rl_interrupt_immediately--;
-#endif
+      if (RL_SIG_RECEIVED())
+	{
+	  _rl_free_match_list (matches);
+	  matches = 0;
+	  RL_CHECK_SIGNALS ();
+	}
 
       if (matches || rl_attempted_completion_over)
 	{
@@ -1078,7 +1090,15 @@ gen_completion_matches (text, start, end, our_func, found_quote, quote_char)
 
   /* XXX -- filename dequoting moved into rl_filename_completion_function */
 
+  /* rl_completion_matches will check for signals as well to avoid a long
+     delay while reading a directory. */
   matches = rl_completion_matches (text, our_func);
+  if (RL_SIG_RECEIVED())
+    {
+      _rl_free_match_list (matches);
+      matches = 0;
+      RL_CHECK_SIGNALS ();
+    }
   return matches;  
 }
 
@@ -1697,8 +1717,8 @@ append_to_match (text, delimiter, quote_char, nontrivial_match)
   if (rl_filename_completion_desired)
     {
       filename = tilde_expand (text);
-      if (rl_directory_stat_hook)
-	(*rl_directory_stat_hook) (&filename);
+      if (rl_filename_stat_hook)
+	(*rl_filename_stat_hook) (&filename);
       s = (nontrivial_match && rl_completion_mark_symlink_dirs == 0)
 		? LSTAT (filename, &finfo)
 		: stat (filename, &finfo);
@@ -1838,10 +1858,8 @@ rl_complete_internal (what_to_do)
   /* nontrivial_lcd is set if the common prefix adds something to the word
      being completed. */
   nontrivial_lcd = matches && strcmp (text, matches[0]) != 0;
-#if 1
   if (what_to_do == '!' || what_to_do == '@')
     tlen = strlen (text);
-#endif
   xfree (text);
 
   if (matches == 0)
@@ -1875,10 +1893,6 @@ rl_complete_internal (what_to_do)
     case '!':
     case '@':
       /* Insert the first match with proper quoting. */
-#if 0
-      if (*matches[0])
-	insert_match (matches[0], start, matches[1] ? MULT_MATCH : SINGLE_MATCH, &quote_char);
-#else
       if (what_to_do == TAB)
         {
           if (*matches[0])
@@ -1893,7 +1907,6 @@ rl_complete_internal (what_to_do)
 	  if (mlen >= tlen)
 	    insert_match (matches[0], start, matches[1] ? MULT_MATCH : SINGLE_MATCH, &quote_char);
 	}
-#endif
 
       /* If there are more matches, ring the bell to indicate.
 	 If we are in vi mode, Posix.2 says to not ring the bell.
@@ -1929,7 +1942,14 @@ rl_complete_internal (what_to_do)
       break;
 
     case '?':
+      if (rl_completion_display_matches_hook == 0)
+	{
+	  _rl_sigcleanup = _rl_complete_sigcleanup;
+	  _rl_sigcleanarg = matches;
+	}
       display_matches (matches);
+      _rl_sigcleanup = 0;
+      _rl_sigcleanarg = 0;
       break;
 
     default:
@@ -1937,6 +1957,7 @@ rl_complete_internal (what_to_do)
       rl_ding ();
       FREE (saved_line_buffer);
       RL_UNSETSTATE(RL_STATE_COMPLETING);
+      _rl_free_match_list (matches);
       _rl_reset_completion_state ();
       return 1;
     }
@@ -1961,6 +1982,8 @@ rl_complete_internal (what_to_do)
 /*							       */
 /***************************************************************/
 
+extern void _rl_settracefp (FILE *);
+
 /* Return an array of (char *) which is a list of completions for TEXT.
    If there are no completions, return a NULL pointer.
    The first entry in the returned array is the substitution for TEXT.
@@ -1978,6 +2001,8 @@ rl_completion_matches (text, entry_function)
      const char *text;
      rl_compentry_func_t *entry_function;
 {
+  register int i;
+
   /* Number of slots in match_list. */
   int match_list_size;
 
@@ -1995,11 +2020,25 @@ rl_completion_matches (text, entry_function)
   match_list = (char **)xmalloc ((match_list_size + 1) * sizeof (char *));
   match_list[1] = (char *)NULL;
 
-#if 0
-  _rl_interrupt_immediately++;
-#endif
   while (string = (*entry_function) (text, matches))
     {
+      if (RL_SIG_RECEIVED ())
+	{
+	  /* Start at 1 because we don't set matches[0] in this function.
+	     Only free the list members if we're building match list from
+	     rl_filename_completion_function, since we know that doesn't
+	     free the strings it returns. */
+	  if (entry_function == rl_filename_completion_function)
+	    {
+	      for (i = 1; match_list[i]; i++)
+		xfree (match_list[i]);
+	    }
+	  xfree (match_list);
+	  match_list = 0;
+	  match_list_size = 0;
+	  RL_CHECK_SIGNALS ();
+	}
+
       if (matches + 1 == match_list_size)
 	match_list = (char **)xrealloc
 	  (match_list, ((match_list_size += 10) + 1) * sizeof (char *));
@@ -2007,10 +2046,6 @@ rl_completion_matches (text, entry_function)
       match_list[++matches] = string;
       match_list[matches + 1] = (char *)NULL;
     }
-#if 0
-  if (_rl_interrupt_immediately > 0)
-    _rl_interrupt_immediately--;
-#endif
 
   /* If there were any matches, then look through them finding out the
      lowest common denominator.  That then becomes match_list[0]. */

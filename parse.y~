@@ -2532,26 +2532,14 @@ static int esacs_needed_count;
 void
 gather_here_documents ()
 {
-  int r, save_lithist;
+  int r;
 
   r = 0;
-  save_lithist = -1;
   while (need_here_doc)
     {
       parser_state |= PST_HEREDOC;
-#if defined (HISTORY)
-      if (remember_on_history)
-	{
-          save_lithist = literal_history;
-/*          literal_history = 1; */
-	}
-#endif
       make_here_document (redir_stack[r++], line_number);
       parser_state &= ~PST_HEREDOC;
-#if defined (HISTORY)
-      if (remember_on_history && save_lithist >= 0)
-	literal_history = save_lithist;
-#endif
       need_here_doc--;
     }
 }

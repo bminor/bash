@@ -1045,6 +1045,53 @@ matching the entire regular expression.
 The element of @code{BASH_REMATCH} with index @var{n} is the portion of the
 string matching the @var{n}th parenthesized subexpression.
 
+For example, the following will match a line
+(stored in the shell variable @var{line})
+if there is a sequence of characters in the value consisting of
+any number, including zero, of 
+space characters, zero or one instances of @samp{a}, then a @samp{b}:
+@example
+[[ $line =~ [[:space:]]*(a)?b ]]
+@end example
+
+@noindent
+That means values like @samp{aab} and @samp{  aaaaaab} will match, as
+will a line containing a @samp{b} anywhere in its value.
+
+Storing the regular expression in a shell variable is often a useful
+way to avoid problems with quoting characters that are special to the
+shell.  For example, the following is equivalent to the above:
+@example
+pattern='[[:space:]]*(a)?b'
+[[ $line =~ $pattern ]]
+@end example
+
+@noindent
+If you want to match a character that's special to the regular expression
+grammar, it has to be quoted to remove its special meaning.
+Shell programmers should take special care with backslashes, since backslashes
+are used both by the shell and regular expressions to remove the special
+meaning from the following character.
+The following two sets of commands are @emph{not} equivalent:
+@example
+pattern='\.'
+
+[[ . =~ $pattern ]]
+[[ . =~ \. ]]
+
+[[ . =~ "$pattern" ]]
+[[ . =~ '\.' ]]
+@end example
+
+@noindent
+The first two matches will succeed, but the second two will not, because
+in the second two the backslash will be part of the pattern to be matched.
+In the first two examples, the backslash removes the special meaning from
+@samp{.}, so the literal @samp{.} matches.
+If the string in the first examples were anything other than @samp{.}, say
+@samp{a}, the pattern would not match, because the quoted @samp{.} in the
+pattern loses its special meaning of matching any single character.
+
 Expressions may be combined using the following operators, listed
 in decreasing order of precedence:
 
@@ -5313,7 +5360,7 @@ by removing the oldest entries.
 The history file is also truncated to this size after
 writing it when an interactive shell exits.
 If the value is 0, the history file is truncated to zero size.
-Numeric values less than zero are treated as 0.
+Non-numeric values and numeric values less than zero inhibit truncation.
 The shell sets the default value to the value of @env{HISTSIZE}
 after reading any startup files.
 
@@ -5340,7 +5387,8 @@ provides the functionality of @code{ignoreboth}.
 @item HISTSIZE
 The maximum number of commands to remember on the history list.
 If the value is 0, commands are not saved in the history list.
-Numeric values less than zero are treated as 0.
+Numeric values less than zero result in every command being saved
+on the history list (there is no limit).
 The shell sets the default value to 500 after reading any startup files.
 
 @item HISTTIMEFORMAT
@@ -5705,9 +5753,10 @@ There are several single-character options that may be supplied at
 invocation which are not available with the @code{set} builtin.
 
 @table @code
-@item -c @var{string}
-Read and execute commands from @var{string} after processing the
-options, then exit.  Any remaining arguments are assigned to the
+@item -c
+Read and execute commands from the first non-option @var{argument}
+after processing the options, then exit. 
+Any remaining arguments are assigned to the
 positional parameters, starting with @code{$0}.
 
 @item -i

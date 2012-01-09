@@ -12620,5 +12620,126 @@ doc/{bash.1,bashref.texi},lib/readline/doc/hsuser.texi
 	  saved in the history list
 	- make it clear that setting HISTFILESIZE=0 causes the history file
 	  to be truncated to zero size
+
+variables.c
+	- sv_histsize: change so setting HISTSIZE to a value less than 0
+	  causes the history to be `unstifled'
+	- sv_histsize: change so setting HISTFILESIZE to a value less than 0
+	  results in no file truncation
 	- make it clear that numeric values less than 0 for HISTFILESIZE or
-	  HISTSIZE are treated the same as 0
+	  HISTSIZE inhibit the usual functions
+
+				   11/23
+				   -----
+parse.y
+	- save_input_line_state: add missing `return ls' at the end, since the
+	  function is supposed to return its argument.  Pointed out by
+	  Andreas Schwab <schwab@linux-m68k.org>
+
+builtins/read.def
+	- skip over NUL bytes in input, as most modern shells seem to.  Bug
+	  report by Matthew Story <matt@tablethotels.com>
+
+lib/readline/vi_mode.c
+	- rl_vi_replace: set _rl_vi_last_key_before_insert to invoking key
+
+				   11/25
+				   -----
+builtins/read.def
+	- read_builtin: if xrealloc returns same pointer as first argument,
+	  don't bother with the remove_unwind_protect/add_unwind_protect pair
+	- read_builtin: set a flag (`reading') around calls to zread/zreadc
+	  and readline()
+	- sigalrm: change to set flag (`sigalrm_seen') and only longjmp if
+	  currently in read(2) (reading != 0)
+	- CHECK_ALRM: new macro, checks sigalrm_seen and longjmps if non-zero,
+	  behavior of old SIGALRM catching function
+	- read_builtin: call CHECK_ALRM in appropriate places while reading
+	  line of input.  Fixes bug reported by Pierre Gaston
+	  <pierre.gaston@gmail.com>
+
+lib/readline/vi_mode.c
+	- rl_vi_replace: initialize characters before printing characters in
+	  vi_replace_keymap to their default values in vi_insertion_keymap,
+	  since we're supposed to be in insert mode replacing characters
+	- rl_vi_replace: call rl_vi_start_inserting to set last command to
+	  `R' for undo
+	- rl_vi_replace: set _rl_vi_last_key_before_insert to `R' for future
+	  use by _rl_vi_done_inserting
+	- vi_save_insert_buffer: new function, broke out code that copies text
+	  into vi_insert_buffer from _rl_vi_save_insert
+	- _rl_vi_save_replace: new function, saves text modified by
+	  rl_vi_replace (using current point and vi_replace_count to figure
+	  it out) to vi_replace_buffer
+	- _rl_vi_save_insert: call vi_save_insert_buffer
+	- _rl_vi_done_inserting: if _rl_vi_last_key_before_insert == 'R', call
+	  _rl_vi_save_replace to save text modified in replace mode (uses
+	  vi_save_insert_buffer)
+	- _rl_vi_replace_insert: new function, replaces the number of chars
+	  in vi_insert_buffer after rl_point with contents ov vi_insert_buffer
+	- rl_vi_redo: call _rl_vi_replace_insert if last command == 'R' and
+	  there's something in vi_insert_buffer.  Fixes bug with `.' not
+	  redoing the most recent `R' command, reported by Geoff Clare
+	  <g.clare@opengroup.org> in readline area on savannah
+
+				   11/26
+				   -----
+lib/readline/rlprivate.h
+	- RL_SIG_RECEIVED(): evaluate to non-zero if there is a pending signal
+	  to be handled
+	- RL_SIGINT_RECEIVED(): evaluate to non-zero if there is a pending
+	  SIGINT to be handled
+
+lib/readline/complete.c
+	- remove all mention of _rl_interrupt_immediately
+	- rl_completion_matches: check RL_SIG_RECEIVED after each call to
+	  the entry function, call RL_CHECK_SIGNALS if true to handle the
+	  signal
+	- rl_completion_matches: if RL_SIG_RECEIVED evaluates to true, free
+	  and zero out the match_list this function allocated
+	- rl_completion_matches: if the completion entry function is
+	  rl_filename_completion_function, free the contents of match_list,
+	  because that function does not keep state and will not free the
+	  entries; avoids possible memory leak pointed out by
+	  Garrett Cooper <yanegomi@gmail.com>
+	- gen_completion_matches: if RL_SIG_RECEIVED evalutes to true after
+	  calling rl_attempted_completion_function, free the returned match
+	  list and handle the signal with RL_CHECK_SIGNALS; avoids
+	  possible memory leak pointed out by Garrett Cooper
+	  <yanegomi@gmail.com>
+	- gen_completion_matches: if RL_SIG_RECEIVED evaluates to true after
+	  calling rl_completion_matches, free the returned match list and
+	  handle the signal with RL_CHECK_SIGNALS
+
+lib/readline/util.c
+	- rl_settracefp: new utility function to set the tracing FILE *
+
+lib/readline/signals.c
+	- _rl_sigcleanup: pointer to a function that will be called with the
+	  signal and a void * argument from _rl_handle_signal
+	- _rl_sigcleanarg: void * that the rest of the code can set to have
+	  passed to the signal cleanup function
+	- _rl_handle_signal: if _rl_sigcleanup set, call as
+		(*_rl_sigcleanup) (sig, _rl_sigcleanarg)
+
+lib/readline/rlprivate.h
+	- extern declarations for _rl_sigcleanup and _rl_sigcleanarg
+
+lib/readline/complete.c
+	- _rl_complete_sigcleanup: signal cleanup function for completion code;
+	  calls _rl_free_match_list on _rl_sigcleanarg if signal == SIGINT
+	- rl_complete_internal: before calling display_matches if what_to_do
+	  == `?', set _rl_sigcleanup to _rl_complete_sigcleanup so the match
+	  list gets freed on SIGINT; avoids possible memory leak pointed out
+	  by Garrett Cooper <yanegomi@gmail.com>
+	- rl_complete_internal: in default switch case, call _rl_free_match_list
+	  before returning to avoid memory leak
+
+doc/bashref.texi
+	- start at a set of examples for the =~ regular expression matching
+	  operator, touching on keeping the pattern in a shell variable and
+	  quoting portions of the pattern to remove their special meaning
+
+variables.c
+	- sv_history_control: setting HISTCONTROL to the empty string or
+	  unsetting it unsets the history_control variables

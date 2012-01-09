@@ -202,9 +202,7 @@ _rl_vi_replace_insert (count)
 
   rl_begin_undo_group ();
   while (count--)
-    /* nchars-1 to compensate for _rl_replace_text using `end+1' in call
-       to rl_delete_text */
-    _rl_replace_text (vi_insert_buffer, rl_point, rl_point+nchars-1);
+    _rl_replace_text (vi_insert_buffer, rl_point, rl_point+nchars);
   rl_end_undo_group ();
 }
 

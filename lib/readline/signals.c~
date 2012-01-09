@@ -126,6 +126,9 @@ static sighandler_cxt old_tstp, old_ttou, old_ttin;
 static sighandler_cxt old_winch;
 #endif
 
+_rl_sigcleanup_func_t *_rl_sigcleanup;
+void *_rl_sigcleanarg;
+
 /* Readline signal handler functions. */
 
 /* Called from RL_CHECK_SIGNALS() macro */
@@ -146,15 +149,7 @@ static RETSIGTYPE
 rl_signal_handler (sig)
      int sig;
 {
-#if 0
-#if defined (SIGWINCH)
-  if (_rl_interrupt_immediately || (sig != SIGWINCH && RL_ISSTATE(RL_STATE_CALLBACK)))
-#else
-  if (_rl_interrupt_immediately || RL_ISSTATE(RL_STATE_CALLBACK))
-#endif
-#else
   if (_rl_interrupt_immediately)
-#endif
     {
       _rl_interrupt_immediately = 0;
       _rl_handle_signal (sig);
@@ -192,6 +187,15 @@ _rl_handle_signal (sig)
     rl_set_sighandler (sig, SIG_IGN, &dummy_cxt);
 #endif /* !HAVE_BSD_SIGNALS && !HAVE_POSIX_SIGNALS */
 
+  /* If there's a sig cleanup function registered, call it and `deregister'
+     the cleanup function to avoid multiple calls */
+  if (_rl_sigcleanup)
+    {
+      (*_rl_sigcleanup) (sig, _rl_sigcleanarg);
+      _rl_sigcleanup = 0;
+      _rl_sigcleanarg = 0;
+    }
+    
   switch (sig)
     {
     case SIGINT:
