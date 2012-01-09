@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.2, version 4.041])dnl
+AC_REVISION([for Bash 4.2, version 4.042])dnl
 
 define(bashvers, 4.2)
 define(relstatus, maint)
@@ -247,6 +247,12 @@ AC_ARG_ENABLE(mem-scramble, AC_HELP_STRING([--enable-mem-scramble], [scramble me
 AC_ARG_ENABLE(profiling, AC_HELP_STRING([--enable-profiling], [allow profiling with gprof]), opt_profiling=$enableval)
 AC_ARG_ENABLE(static-link, AC_HELP_STRING([--enable-static-link], [link bash statically, for use as a root shell]), opt_static_link=$enableval)
 
+dnl So-called `precious' variables
+AC_ARG_VAR([CC_FOR_BUILD], [C compiler used when compiling binaries used only at build time])
+AC_ARG_VAR([CFLAGS_FOR_BUILD], [Compliation options (CFLAGS) used when compiling binaries used only at build time])
+AC_ARG_VAR([LDFLAGS_FOR_BUILD], [Linker options (LDFLAGS) used when compiling binaries used only at build time])
+AC_ARG_VAR([CPPFLAGS_FOR_BUILD], [C preprocessor options (CPPFLAGS) used when compiling binaries used only at build time])
+
 dnl opt_job_control is handled later, after BASH_JOB_CONTROL_MISSING runs
 
 dnl opt_readline and opt_history are handled later, because AC_PROG_CC needs
@@ -432,22 +438,19 @@ fi
 AC_SUBST(SIGNAMES_H)
 AC_SUBST(SIGNAMES_O)
 
-if test -z "$CC_FOR_BUILD"; then
-    if test "x$cross_compiling" = "xno"; then
-	CC_FOR_BUILD='$(CC)'
-    else
-	CC_FOR_BUILD=gcc
-    fi
-fi
-AC_SUBST(CC_FOR_BUILD)
-
 dnl END changes for cross-building
 
 dnl We want these before the checks, so the checks can modify their values.
-test -z "$CFLAGS" && CFLAGS=-g auto_cflags=1
+if test -z "$CFLAGS"; then
+	AUTO_CFLAGS="-g ${GCC+-O2}"
+	AUTO_LDFLAGS="-g ${GCC+-O2}"
+else
+	AUTO_CFLAGS= AUTO_LDFLAGS=
+fi
 
-dnl If we're using gcc and the user hasn't specified CFLAGS, add -O2 to CFLAGS.
-test -n "$GCC" && test -n "$auto_cflags" && CFLAGS="$CFLAGS -O2"
+dnl default values
+CFLAGS=${CFLAGS-"$AUTO_CFLAGS"}
+# LDFLAGS=${LDFLAGS="$AUTO_LDFLAGS"}	# XXX
 
 dnl handle options that alter how bash is compiled and linked
 dnl these must come after the test for cc/gcc
@@ -476,27 +479,33 @@ if test "$opt_static_link" = yes; then
 	fi
 fi
 
+# set the appropriate make variables for building the "build tools"
+
 if test "X$cross_compiling" = "Xno"; then
-	CPPFLAGS_FOR_BUILD=${CPPFLAGS_FOR_BUILD-"$CPPFLAGS"}
+	CC_FOR_BUILD=${CC_FOR_BUILD-'$(CC)'}
+	CPPFLAGS_FOR_BUILD=${CPPFLAGS_FOR_BUILD-"$CPPFLAGS"}	# XXX - should it be '$(CPPFLAGS)'
 	LDFLAGS_FOR_BUILD=${LDFLAGS_FOR_BUILD-'$(LDFLAGS)'}
-	if test -z "$auto_cflags"; then
-		CFLAGS_FOR_BUILD=${CFLAGS-'$(CFLAGS)'}
-	fi
+	# CFLAGS set above to default value if not passed in environment
+	CFLAGS_FOR_BUILD=${CFLAGS-'$(CFLAGS)'}
+	LIBS_FOR_BUILD=${LIBS_FOR_BUILD-'$(LIBS)'}
 else
+	CC_FOR_BUILD=${CC_FOR_BUILD-"gcc"}
 	CPPFLAGS_FOR_BUILD=${CPPFLAGS_FOR_BUILD-""}
 	LDFLAGS_FOR_BUILD=${LDFLAGS_FOR_BUILD-""}
+	CFLAGS_FOR_BUILD=${CFLAGS_FOR_BUILD="-g"}
+	LIBS_FOR_BUILD=${LIBS_FOR_BUILD-""}
 fi
-
-test -z "$CFLAGS_FOR_BUILD" && CFLAGS_FOR_BUILD="-g"
 
 AC_SUBST(CFLAGS)
 AC_SUBST(CPPFLAGS)
 AC_SUBST(LDFLAGS)
 AC_SUBST(STATIC_LD)
 
+AC_SUBST(CC_FOR_BUILD)
 AC_SUBST(CFLAGS_FOR_BUILD)
 AC_SUBST(CPPFLAGS_FOR_BUILD)
 AC_SUBST(LDFLAGS_FOR_BUILD)
+AC_SUBST(LIBS_FOR_BUILD)
 
 AC_PROG_GCC_TRADITIONAL
 
@@ -771,7 +780,6 @@ AC_CHECK_DECLS([strtold], [
 	AC_DEFINE(STRTOLD_BROKEN)
     fi
 ])
-    
 
 BASH_CHECK_DECL(strtoimax)
 BASH_CHECK_DECL(strtol)

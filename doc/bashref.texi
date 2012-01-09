@@ -4190,11 +4190,11 @@ Cause the status of terminated background jobs to be reported
 immediately, rather than before printing the next primary prompt.
 
 @item -e
-Exit immediately if a pipeline (@pxref{Pipelines}), which may consist
-of a single simple command (@pxref{Simple Commands}),
-a subshell command enclosed in parentheses (@pxref{Command Grouping}),
-or one of the commands executed as part of a command list enclosed
-by braces (@pxref{Command Grouping})
+Exit immediately if
+a pipeline (@pxref{Pipelines}), which may consist of a single simple command
+(@pxref{Simple Commands}),
+a list (@pxref{Lists}),
+or a compound command (@pxref{Compound Commands})
 returns a non-zero status.
 The shell does not exit if the command that fails is part of the
 command list immediately following a @code{while} or @code{until} keyword,
@@ -4203,6 +4203,9 @@ part of any command executed in a @code{&&} or @code{||} list except
 the command following the final @code{&&} or @code{||},
 any command in a pipeline but the last,
 or if the command's return status is being inverted with @code{!}.
+If a compound command other than a subshell
+returns a non-zero status because a command failed
+while @option{-e} was being ignored, the shell does not exit.
 A trap on @code{ERR}, if set, is executed before the shell exits.
 
 This option applies to the shell environment and each subshell environment

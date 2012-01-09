@@ -12082,3 +12082,31 @@ builtins/return.def
 	  let it handle proper parsing and handling of arguments.  Fixes
 	  issue most recently raised by Linda Walsh <bash@tlinx.org>.
 	  Reverses change from 9/11/2008 (see above)
+
+				   8/16
+				   ----
+doc/{bash.1,bashref.texi}
+	- clean up `set -e' language to make it clearer that any failure of
+	  a compound command will cause the shell to exit, not just subshells
+	  and brace commands
+
+				   8/17
+				   ----
+configure.in
+	- make the various XXX_FOR_BUILD variables `precious' to autoconf to
+	  avoid stale data
+	- change how CC_FOR_BUILD is initialized when cross-compiling and not,
+	  but do not change behavior
+	- initialize CFLAGS_FOR_BUILD to -g when cross-compiling
+	- initialize LIBS_FOR_BUILD to $(LIBS) when not cross-compiling, empty
+	  when cross-compiling
+	- create AUTO_CFLAGS variable to hold basic CFLAGS defaults; used when
+	  CFLAGS not inherited from environment (like effect of old
+	  auto_cflags variable)
+	- substitute LIBS_FOR_BUILD into output Makefiles
+	  [changes inspired by bug report from Nathan Phillip Brink
+	  <ohnobinki@ohnopublishing.net> -- gentoo bug 378941]
+
+builtins/Makefile.in	
+	- substitute LIBS_FOR_BUILD from configure, not strictly initialized
+	  to $(LIBS)
