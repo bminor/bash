@@ -246,6 +246,7 @@ extern void _rl_callback_data_dispose PARAMS((_rl_callback_generic_arg *));
 #endif /* READLINE_CALLBACKS */
 
 /* bind.c */
+extern char *_rl_untranslate_macro_value PARAMS((char *, int));
 
 /* complete.c */
 extern void _rl_reset_completion_state PARAMS((void));

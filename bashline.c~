@@ -1232,7 +1232,11 @@ bash_backward_kill_shellword (count, key)
 
 #define COMMAND_SEPARATORS ";|&{(`"
 /* )} */ 
+#define COMMAND_SEPARATORS_PLUS_WS ";|&{(` \t"
+/* )} */ 
 
+/* check for redirections and other character combinations that are not
+   command separators */
 static int
 check_redir (ti)
      int ti;
@@ -1247,8 +1251,19 @@ check_redir (ti)
   if ((this_char == '&' && (prev_char == '<' || prev_char == '>')) ||
       (this_char == '|' && prev_char == '>'))
     return (1);
-  else if ((this_char == '{' && prev_char == '$') || /* } */
-	   (char_is_quoted (rl_line_buffer, ti)))
+  else if (this_char == '{' && prev_char == '$') /*}*/
+    return (1);
+#if 0	/* Not yet */
+  else if (this_char == '(' && prev_char == '$') /*)*/
+    return (1);
+  else if (this_char == '(' && prev_char == '<') /*)*/
+    return (1);
+#if defined (EXTENDED_GLOB)
+  else if (extended_glob && this_char == '(' && prev_char == '!') /*)*/
+    return (1);
+#endif
+#endif
+  else if (char_is_quoted (rl_line_buffer, ti))
     return (1);
   return (0);
 }
@@ -1266,7 +1281,10 @@ find_cmd_start (start)
   register int s, os;
 
   os = 0;
-  while (((s = skip_to_delim (rl_line_buffer, os, COMMAND_SEPARATORS, SD_NOJMP|SD_NOSKIPCMD)) <= start) &&
+  /* Flags == SD_NOJMP only because we want to skip over command substitutions
+     in assignment statements.  Have to test whether this affects `standalone'
+     command substitutions as individual words. */
+  while (((s = skip_to_delim (rl_line_buffer, os, COMMAND_SEPARATORS, SD_NOJMP/*|SD_NOSKIPCMD*/)) <= start) &&
 	 rl_line_buffer[s])
     os = s+1;
   return os;
@@ -1370,6 +1388,8 @@ attempt_shell_completion (text, start, end)
 	 are prompting at the top level. */
       if (current_prompt_string == ps1_prompt)
 	in_command_position++;
+      else if (parser_in_command_position ())
+	in_command_position++;
     }
   else if (member (rl_line_buffer[ti], command_separator_chars))
     {
@@ -1407,7 +1427,7 @@ attempt_shell_completion (text, start, end)
       prog_completion_enabled && (progcomp_size () > 0) &&
       current_prompt_string == ps1_prompt)
     {
-      int s, e, s1, e1, foundcs;
+      int s, e, s1, e1, os, foundcs;
       char *n;
 
       /* XXX - don't free the members */
@@ -1415,9 +1435,23 @@ attempt_shell_completion (text, start, end)
 	free (prog_complete_matches);
       prog_complete_matches = (char **)NULL;
 
-      s = find_cmd_start (start);
+      os = start;
+      n = 0;
+      s = find_cmd_start (os);
       e = find_cmd_end (end);
-      n = find_cmd_name (s, &s1, &e1);
+      do
+	{
+	  /* Skip over assignment statements preceding a command name.  If we
+	     don't find a command name at all, we can perform command name
+	     completion.  If we find a partial command name, we should perform
+	     command name completion on it. */
+	  FREE (n);
+	  n = find_cmd_name (s, &s1, &e1);
+	  s = e1 + 1;
+	}
+      while (assignment (n, 0));
+      s = s1;		/* reset to index where name begins */
+
       if (start == 0 && end == 0 && e != 0 && text[0] == '\0')	/* beginning of non-empty line */
         foundcs = 0;
       else if (start == end && start == s1 && e != 0 && e1 > end)	/* beginning of command name, leading whitespace */
@@ -1428,6 +1462,16 @@ attempt_shell_completion (text, start, end)
         foundcs = 0;		/* whitespace before command name */
       else if (e > s && assignment (n, 0) == 0)
 	prog_complete_matches = programmable_completions (n, text, s, e, &foundcs);
+      else if (s >= e && n[0] == '\0' && text[0] == '\0' && start > 0)
+        {
+          foundcs = 0;	/* empty command name following assignments */
+          in_command_position = 1;
+        }
+      else if (s == start && e == end && STREQ (n, text) && start > 0)
+        {
+          foundcs = 0;	/* partial command name following assignments */
+          in_command_position = 1;
+        }
       else
 	foundcs = 0;
       FREE (n);
@@ -2773,8 +2817,11 @@ bash_directory_expansion (dirname)
 
   d = savestring (*dirname);
 
-  if (rl_directory_rewrite_hook)
-    (*rl_directory_rewrite_hook) (&d);
+  if ((rl_directory_rewrite_hook) &&  (*rl_directory_rewrite_hook) (&d))
+    {
+      free (*dirname);
+      *dirname = d;
+    }
   else if (rl_directory_completion_hook && (*rl_directory_completion_hook) (&d))
     {
       free (*dirname);
@@ -3731,6 +3778,8 @@ bash_execute_unix_command (count, key)
 {
   Keymap ckmap;		/* current keymap */
   Keymap xkmap;		/* unix command executing keymap */
+  rl_command_func_t *func;
+  int type;
   register int i, r;
   intmax_t mi;
   sh_parser_state_t ps;
@@ -3739,34 +3788,15 @@ bash_execute_unix_command (count, key)
   char ibuf[INT_STRLEN_BOUND(int) + 1];
 
   /* First, we need to find the right command to execute.  This is tricky,
-     because we might have already indirected into another keymap. */
-  ckmap = rl_get_keymap ();
-  if (ckmap != rl_executing_keymap)
+     because we might have already indirected into another keymap, so we
+     have to walk cmd_xmap using the entire key sequence. */
+  cmd = (char *)rl_function_of_keyseq (rl_executing_keyseq, cmd_xmap, &type);
+    
+  if (cmd == 0 || type != ISMACR)
     {
-      /* bogus.  we have to search.  only handle one level of indirection. */
-      for (i = 0; i < KEYMAP_SIZE; i++)
-	{
-	  if (ckmap[i].type == ISKMAP && (Keymap)ckmap[i].function == rl_executing_keymap)
-	    break;
-	}
-      if (i < KEYMAP_SIZE)
-	xkmap = (Keymap)cmd_xmap[i].function;
-      else
-	{
-	  rl_crlf ();
-	  internal_error (_("bash_execute_unix_command: cannot find keymap for command"));
-	  rl_forced_update_display ();
-	  return 1;
-	}
-    }
-  else
-    xkmap = cmd_xmap;
-
-  cmd = (char *)xkmap[key].function;
-
-  if (cmd == 0)
-    {
-      rl_ding ();
+      rl_crlf ();
+      internal_error (_("bash_execute_unix_command: cannot find keymap for command"));
+      rl_forced_update_display ();
       return 1;
     }
 
@@ -3818,6 +3848,18 @@ bash_execute_unix_command (count, key)
 
   /* and restore the readline buffer and display after command execution. */
   rl_forced_update_display ();
+  return 0;
+}
+
+int
+print_unix_command_map ()
+{
+  Keymap save;
+
+  save = rl_get_keymap ();
+  rl_set_keymap (unix_cmdmap);
+  rl_macro_dumper (1);
+  rl_set_keymap (save);
   return 0;
 }
 
@@ -3904,12 +3946,16 @@ bind_keyseq_to_unix_command (line)
   if (line[i] != ':')
     {
       builtin_error (_("%s: missing colon separator"), line);
+      FREE (kseq);
       return -1;
     }
 
   i = isolate_sequence (line, i + 1, 0, &kstart);
   if (i < 0)
-    return -1;
+    {
+      FREE (kseq);
+      return -1;
+    }
 
   /* Create the value string containing the command to execute. */
   value = substring (line, kstart, i);
@@ -3920,7 +3966,8 @@ bind_keyseq_to_unix_command (line)
   /* and bind the key sequence in the current keymap to a function that
      understands how to execute from CMD_XMAP */
   rl_bind_keyseq_in_map (kseq, bash_execute_unix_command, kmap);
-  
+
+  free (kseq);  
   return 0;
 }
 

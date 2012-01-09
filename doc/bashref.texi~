@@ -1060,7 +1060,12 @@ will a line containing a @samp{b} anywhere in its value.
 
 Storing the regular expression in a shell variable is often a useful
 way to avoid problems with quoting characters that are special to the
-shell.  For example, the following is equivalent to the above:
+shell.
+It is sometimes difficult to specify a regular expression literally
+without using quotes, or to keep track of the quoting used by regular
+expressions while paying attention to the shell's quote removal.
+Using a shell variable to store the pattern decreases these problems.
+For example, the following is equivalent to the above:
 @example
 pattern='[[:space:]]*(a)?b'
 [[ $line =~ $pattern ]]
@@ -1069,6 +1074,9 @@ pattern='[[:space:]]*(a)?b'
 @noindent
 If you want to match a character that's special to the regular expression
 grammar, it has to be quoted to remove its special meaning.
+This means that in the pattern @samp{xxx.txt}, the @samp{.} matches any
+character in the string (its usual regular expression meaning), but in the
+pattern @samp{"xxx.txt"} it can only match a literal @samp{.}.
 Shell programmers should take special care with backslashes, since backslashes
 are used both by the shell and regular expressions to remove the special
 meaning from the following character.
@@ -3030,8 +3038,9 @@ cd [-L|[-P [-e]]] [@var{directory}]
 @end example
 
 Change the current working directory to @var{directory}.
-If @var{directory} is not given, the value of the @env{HOME} shell
-variable is used.
+If @var{directory} is not supplied, the value of the @env{HOME}
+shell variable is used.
+Any additional arguments following @var{directory} are ignored.
 If the shell variable @env{CDPATH} exists, it is used as a search path.
 If @var{directory} begins with a slash, @env{CDPATH} is not used.
 
@@ -3513,7 +3522,7 @@ Aliases are described in @ref{Aliases}.
 @item bind
 @btindex bind
 @example
-bind [-m @var{keymap}] [-lpsvPSV]
+bind [-m @var{keymap}] [-lpsvPSVX]
 bind [-m @var{keymap}] [-q @var{function}] [-u @var{function}] [-r @var{keyseq}]
 bind [-m @var{keymap}] -f @var{filename}
 bind [-m @var{keymap}] -x @var{keyseq:shell-command}
@@ -3595,6 +3604,10 @@ of the insertion point.
 If the executed command changes the value of @code{READLINE_LINE} or
 @code{READLINE_POINT}, those new values will be reflected in the
 editing state.
+
+@item -X
+List all key sequences bound to shell commands and the associated commands
+in a format that can be reused as input.
 @end table
 
 @noindent
@@ -4022,8 +4035,9 @@ meaning for the next character read and for line continuation.
 If no names are supplied, the line read is assigned to the
 variable @env{REPLY}.
 The return code is zero, unless end-of-file is encountered, @code{read}
-times out (in which case the return code is greater than 128), or an
-invalid file descriptor is supplied as the argument to @option{-u}.
+times out (in which case the return code is greater than 128),
+a variable assignment error (such as assigning to a readonly variable) occurs,
+or an invalid file descriptor is supplied as the argument to @option{-u}.
 
 Options, if supplied, have the following meanings:
 
@@ -5224,6 +5238,7 @@ The line is split into words as Readline would split it, using
 @code{COMP_WORDBREAKS} as described above.
 This variable is available only in shell functions invoked by the
 programmable completion facilities (@pxref{Programmable Completion}).
+Each array element contains one possible completion.
 
 @item COMPREPLY
 An array variable from which Bash reads the possible completions

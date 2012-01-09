@@ -499,13 +499,15 @@ expassign ()
 	    case DIV:
 	    case MOD:
 	      if (lvalue == INTMAX_MIN && value == -1)
-		value = (op == DIV) ? 1 : 0;
+		lvalue = (op == DIV) ? INTMAX_MIN : 0;
 	      else
 #if HAVE_IMAXDIV
-		idiv = imaxdiv (lvalue, value);
-		lvalue = (op == DIV) ? idiv.quot : idiv.rem;
+		{
+		  idiv = imaxdiv (lvalue, value);
+		  lvalue = (op == DIV) ? idiv.quot : idiv.rem;
+		}
 #else
-		lvalue = (op == DIV) ? lvalue / value : lvalue % value;
+	        lvalue = (op == DIV) ? lvalue / value : lvalue % value;
 #endif
 	      break;
 	    case PLUS:
@@ -843,8 +845,10 @@ exp2 ()
 	val1 *= val2;
       else if (op == DIV || op == MOD)
 #if defined (HAVE_IMAXDIV)
-	idiv = imaxdiv (val1, val2);
-	val1 = (op == DIV) ? idiv.quot : idiv.rem;
+	{
+	  idiv = imaxdiv (val1, val2);
+	  val1 = (op == DIV) ? idiv.quot : idiv.rem;
+	}
 #else
 	val1 = (op == DIV) ? val1 / val2 : val1 % val2;
 #endif

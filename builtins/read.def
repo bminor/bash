@@ -835,7 +835,7 @@ assign_vars:
       xfree (t);
     }
   else
-    var = bind_read_variable (list->word->word, input_string);
+    var = bind_read_variable (list->word->word, input_string ? input_string : "");
 
   if (var)
     {

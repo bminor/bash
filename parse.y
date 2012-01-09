@@ -4833,6 +4833,14 @@ find_reserved_word (tokstr)
   return -1;
 }
 
+/* An interface to let the rest of the shell (primarily the completion
+   system) know what the parser is expecting. */
+int
+parser_in_command_position ()
+{
+  return (command_token_position (last_read_token));
+}
+
 #if 0
 #if defined (READLINE)
 /* Called after each time readline is called.  This insures that whatever

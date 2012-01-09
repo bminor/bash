@@ -316,7 +316,7 @@ ansic_wshouldquote (string)
       }
 
   free (wcstr);
-  return 0;	
+  return 0;
 }
 #endif
 

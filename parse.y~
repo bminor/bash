@@ -5989,6 +5989,8 @@ save_input_line_state (ls)
   /* force reallocation */
   shell_input_line = 0;
   shell_input_line_size = shell_input_line_len = shell_input_line_index = 0;
+
+  return ls;
 }
 
 void

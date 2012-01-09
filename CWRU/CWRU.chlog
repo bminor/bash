@@ -12851,3 +12851,123 @@ lib/readline/rlprivate.h
 lib/readline/doc/rltech.texi
 	- documented new variables: rl_executing_key, rl_executing_keyseq,
 	  rl_key_sequence_length
+
+				   12/13
+				   -----
+bashline.c
+	- bash_execute_unix_command: replace ad-hoc code that searches
+	  cmd_xmap for correct command with call to rl_function_of_keyseq
+	  using rl_executing_keyseq; now supports key sequences longer
+	  than two characters.  Fixes bug reported by Michael Kazior
+	  <kazikcz@gmail.com>
+
+				   12/15
+				   -----
+make_cmd.c
+	- make_function_def: don't null out source_file before calling
+	  make_command so it can be used later on when the function definition
+	  is executed
+
+execute_cmd.c
+	- execute_intern_function: second argument is now FUNCTION_DEF *
+	  instead of COMMAND *
+	- execute_command_internal: call execute_intern_function with the
+	  new second argument (the entire FUNCTION_DEF instead of just the
+	  command member)
+	- execute_intern_function: if DEBUGGER is defined, call
+	  bind_function_def before calling bind_function, just like
+	  make_function_def does (might be able to take out the call in
+	  make_function_def depending on what the debugger does with it).
+	  Fixes bug reported by <dethrophes@motd005>
+
+expr.c
+	- more minor changes to cases of INTMAX_MIN % -1 and INTMAX_MIN / 1;
+	  fix typos and logic errors
+
+				   12/16
+				   -----
+bashline.c
+	- find_cmd_start: change flags to remove SD_NOSKIPCMD so it skips over
+	  command substitutions and doesn't treat them as command separators
+	- attempt_shell_completion: instead of taking first return from
+	  find_cmd_name as command name to use for programmable completion,
+	  use loop to skip over assignment statements.  Fixes problem reported
+	  by Raphael Droz <raphael.droz+floss@gmail.com>
+	- attempt_shell_completion: if we don't find a command name but the
+	  command line is non-empty, assume the other words are all assignment
+	  statements and flag that point is in a command position so we can
+	  do command name completion
+	- attempt_shell_completion: if the word being completed is the first
+	  word following a series of assignment statements, and the
+	  command line is non-empty, flag that point is in a command position
+	  so we can do command name completion
+
+lib/readline/history.c
+	- history_get_time: atol -> strtol
+
+				   12/18
+				   -----
+parse.y
+	- parser_in_command_position: external interface to the
+	  command_token_position macro for use by other parts of the shell,
+	  like the completion mechanism
+
+externs.h
+	- extern declaration for parser_in_command_position
+
+				   12/19
+				   -----
+
+builtins/read.def
+	- read_builtin: make sure all calls to bind_read_variable are passed
+	  a non-null string.  Fixes bug reported by Dan Douglas
+	  <ormaaj@gmail.com>
+
+bashline.c
+	- attempt_shell_completion: mark that we're in a command position if
+	  we're at the start of the line and the parser is ready to accept
+	  a reserved word or command name.  Feature most recently suggested
+	  by Peng Yu <pengyu.ut@gmail.com>
+
+				   12/21
+				   -----
+lib/readline/bind.c
+	- _rl_escchar: return the character that would be backslash-escaped
+	  to denote the control character passed as an argument ('\n' -> 'n')
+	- _rl_isescape: return 1 if character passed is one that has a
+	  backslash escape
+	- _rl_untranslate_macro_value: new second argument: use_escapes, if
+	  non-zero translate to backslash escapes where possible instead of
+	  using straight \C-x for control character `x'.  Change callers
+	- _rl_untranslate_macro_value: now global
+
+lib/readline/rlprivate.h
+	- _rl_untranslate_macro_value: extern declaration
+
+lib/readline/{macro.c,readline.h}
+	- rl_print_last_kbd_macro: new bindable function, inspired by patch
+	  from Mitchel Humpherys
+
+lib/readline/funmap.c
+	- print-last-kbd-macro: new bindable command, bound to
+	  rl_print_last_kbd_macro
+
+lib/readline/doc/{rluser.texi,readline.3},doc/bash.1
+	- print-last-kbd-macro: document.
+
+lib/readline/text.c
+	- _rl_insert_next: if we're defining a macro, make sure the key gets
+	  added to the macro text (should really audit calls to rl_read_key()
+	  and make sure the right thing is happening for all of them)
+
+bashline.[ch]
+	- print_unix_command_map: new function, prints all bound commands in
+	  cmd_xmap using rl_macro_dumper in a reusable format
+
+builtins/bind.def
+	- new -X option: print all keysequences bound to Unix commands using
+	  print_unix_command_map.  Feature suggested by Dennis Williamson
+	  (2/2011)
+
+doc/{bash.1,bashref.texi}
+	- document new `bind -X' option

@@ -263,6 +263,29 @@ rl_call_last_kbd_macro (count, ignore)
   return 0;
 }
 
+int
+rl_print_last_kbd_macro (count, ignore)
+     int count, ignore;
+{
+  char *m;
+
+  if (current_macro == 0)
+    {
+      rl_ding ();
+      return 0;
+    }
+  m = _rl_untranslate_macro_value (current_macro, 1);
+  rl_crlf ();
+  printf ("%s", m);
+  fflush (stdout);
+  rl_crlf ();
+  FREE (m);
+  rl_forced_update_display ();
+  rl_display_fixed = 1;
+
+  return 0;
+}
+
 void
 rl_push_macro_input (macro)
      char *macro;

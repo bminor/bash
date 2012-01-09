@@ -1800,8 +1800,9 @@ complete -D -F _completion_loader
 @section Programmable Completion Builtins
 @cindex completion builtins
 
-Two builtin commands are available to manipulate the programmable completion
-facilities.
+Three builtin commands are available to manipulate the programmable completion
+facilities: one to specify how the arguments to a particular command are to
+be completed, and two to modify the completion as it is happening.
 
 @table @code
 @item compgen
@@ -1887,6 +1888,10 @@ filename-specific processing (like adding a slash to directory names
 quoting special characters, or suppressing trailing spaces).
 This option is intended to be used with shell functions specified
 with @option{-F}.
+
+@item noquote
+Tell Readline not to quote the completed words if they are filenames
+(quoting filenames is the default).
 
 @item nospace
 Tell Readline not to append a space (the default) to words completed at

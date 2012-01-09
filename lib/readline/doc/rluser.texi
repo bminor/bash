@@ -1452,6 +1452,10 @@ and save the definition.
 Re-execute the last keyboard macro defined, by making the characters
 in the macro appear as if typed at the keyboard.
 
+@item print-last-kbd-macro ()
+Print the last keboard macro defined in a format suitable for the
+@var{inputrc} file.
+
 @end ftable
 
 @node Miscellaneous Commands
@@ -1800,8 +1804,9 @@ complete -D -F _completion_loader
 @section Programmable Completion Builtins
 @cindex completion builtins
 
-Two builtin commands are available to manipulate the programmable completion
-facilities.
+Three builtin commands are available to manipulate the programmable completion
+facilities: one to specify how the arguments to a particular command are to
+be completed, and two to modify the completion as it is happening.
 
 @table @code
 @item compgen

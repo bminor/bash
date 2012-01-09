@@ -1,7 +1,7 @@
 This file is read.def, from which is created read.c.
 It implements the builtin "read" in Bash.
 
-Copyright (C) 1987-2010 Free Software Foundation, Inc.
+Copyright (C) 1987-2011 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -129,14 +129,26 @@ static sighandler sigalrm __P((int));
 static void reset_alarm __P((void));
 
 static procenv_t alrmbuf;
+static int sigalrm_seen, reading;
 static SigHandler *old_alrm;
 static unsigned char delim;
+
+/* In most cases, SIGALRM just sets a flag that we check periodically.  This
+   avoids problems with the semi-tricky stuff we do with the xfree of
+   input_string at the top of the unwind-protect list (see below). */
+#define CHECK_ALRM \
+  do { \
+    if (sigalrm_seen) \
+      longjmp (alrmbuf, 1); \
+  } while (0)
 
 static sighandler
 sigalrm (s)
      int s;
 {
-  longjmp (alrmbuf, 1);
+  sigalrm_seen = 1;
+  if (reading)		/* do the longjmp if we get SIGALRM while in read() */
+    longjmp (alrmbuf, 1);
 }
 
 static void
@@ -200,6 +212,8 @@ read_builtin (list)
 #endif
   USE_VAR(list);
   USE_VAR(ps2);
+
+  sigalrm_seen = reading = 0;
 
   i = 0;		/* Index into the string that we are reading. */
   raw = edit = 0;	/* Not reading raw input by default. */
@@ -384,9 +398,12 @@ read_builtin (list)
       code = setjmp (alrmbuf);
       if (code)
 	{
+	  sigalrm_seen = 0;
 	  /* Tricky.  The top of the unwind-protect stack is the free of
 	     input_string.  We want to run all the rest and use input_string,
 	     so we have to remove it from the stack. */
+	  orig_input_string = 0;
+
 	  remove_unwind_protect ();
 	  run_unwind_frame ("read_builtin");
 	  input_string[i] = '\0';	/* make sure it's terminated */
@@ -457,6 +474,7 @@ read_builtin (list)
   add_unwind_protect (xfree, input_string);
   interrupt_immediately++;
 
+  CHECK_ALRM;
   unbuffered_read = (nchars > 0) || (delim != '\n') || input_is_pipe;
 
   if (prompt && edit == 0)
@@ -472,6 +490,8 @@ read_builtin (list)
   ps2 = 0;
   for (print_ps2 = eof = retval = 0;;)
     {
+      CHECK_ALRM;
+
 #if defined (READLINE)
       if (edit)
 	{
@@ -482,7 +502,9 @@ read_builtin (list)
 	    }
 	  if (rlbuf == 0)
 	    {
+	      reading = 1;
 	      rlbuf = edit_line (prompt ? prompt : "", itext);
+	      reading = 0;
 	      rlind = 0;
 	    }
 	  if (rlbuf == 0)
@@ -505,10 +527,12 @@ read_builtin (list)
 	  print_ps2 = 0;
 	}
 
+      reading = 1;
       if (unbuffered_read)
 	retval = zread (fd, &c, 1);
       else
 	retval = zreadc (fd, &c);
+      reading = 0;
 
       if (retval <= 0)
 	{
@@ -517,15 +541,25 @@ read_builtin (list)
 	  break;
 	}
 
+      CHECK_ALRM;
+
 #if defined (READLINE)
 	}
 #endif
 
+      CHECK_ALRM;
       if (i + 4 >= size)	/* XXX was i + 2; use i + 4 for multibyte/read_mbchar */
 	{
-	  input_string = (char *)xrealloc (input_string, size += 128);
-	  remove_unwind_protect ();
-	  add_unwind_protect (xfree, input_string);
+	  char *t;
+	  t = (char *)xrealloc (input_string, size += 128);
+
+	  /* Only need to change unwind-protect if input_string changes */
+	  if (t != input_string)
+	    {
+	      input_string = t;
+	      remove_unwind_protect ();
+	      add_unwind_protect (xfree, input_string);
+	    }
 	}
 
       /* If the next character is to be accepted verbatim, a backslash
@@ -559,6 +593,9 @@ read_builtin (list)
       if ((unsigned char)c == delim)
 	break;
 
+      if (c == '\0' && delim != '\0')
+	continue;		/* skip NUL bytes in input */
+
       if ((skip_ctlesc == 0 && c == CTLESC) || (skip_ctlnul == 0 && c == CTLNUL))
 	{
 	  saw_escape++;
@@ -567,6 +604,7 @@ read_builtin (list)
 
 add_char:
       input_string[i++] = c;
+      CHECK_ALRM;
 
 #if defined (HANDLE_MULTIBYTE)
       if (nchars > 0 && MB_CUR_MAX > 1)
@@ -582,15 +620,14 @@ add_char:
 	break;
     }
   input_string[i] = '\0';
+  CHECK_ALRM;
 
-#if 1
   if (retval < 0)
     {
       builtin_error (_("read error: %d: %s"), fd, strerror (errno));
       run_unwind_frame ("read_builtin");
       return (EXECUTION_FAILURE);
     }
-#endif
 
   if (tmsec > 0 || tmusec > 0)
     reset_alarm ();
@@ -693,7 +730,7 @@ assign_vars:
 	var = bind_variable ("REPLY", input_string, 0);
       VUNSETATTR (var, att_invisible);
 
-      free (input_string);
+      xfree (input_string);
       return (retval);
     }
 
@@ -737,12 +774,12 @@ assign_vars:
 	      xfree (t1);
 	    }
 	  else
-	    var = bind_read_variable (varname, t);
+	    var = bind_read_variable (varname, t ? t : "");
 	}
       else
 	{
 	  t = (char *)0;
-	  var = bind_read_variable (varname, "");
+	  var = bind_read_variable< (varname, "");
 	}
 
       FREE (t);
@@ -798,7 +835,7 @@ assign_vars:
       xfree (t);
     }
   else
-    var = bind_read_variable (list->word->word, input_string);
+    var = bind_read_variable (list->word->word, input_string ? input_string : "");
 
   if (var)
     {

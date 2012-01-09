@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sat Nov 19 15:15:30 EST 2011
+.\"	Last Change: Wed Dec 21 20:32:29 EST 2011
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2011 November 19" "GNU Bash 4.2"
+.TH BASH 1 "2011 December 21" "GNU Bash 4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -48,7 +48,7 @@ bash \- GNU Bourne-Again SHell
 .SH SYNOPSIS
 .B bash
 [options]
-[file]
+[command_string | file]
 .SH COPYRIGHT
 .if n Bash is Copyright (C) 1989-2011 by the Free Software Foundation, Inc.
 .if t Bash is Copyright \(co 1989-2011 by the Free Software Foundation, Inc.
@@ -75,13 +75,13 @@ interprets the following options when it is invoked:
 .PP
 .PD 0
 .TP 10
-.BI \-c "\| string\^"
+.B \-c
 If the
 .B \-c
-option is present, then commands are read from
-.IR string .
+option is present, then commands are read from the first non-option argument
+.IR command_string .
 If there are arguments after the
-.IR string ,
+.IR command_string ,
 they are assigned to the positional parameters, starting with
 .BR $0 .
 .TP
@@ -1981,7 +1981,7 @@ to contain no more than that number of lines by removing the oldest entries.
 The history file is also truncated to this size after
 writing it when an interactive shell exits.
 If the value is 0, the history file is truncated to zero size.
-Numeric values less than zero are treated as 0.
+Non-numeric values and numeric values less than zero inhibit truncation.
 The shell sets the default value to the value of \fBHISTSIZE\fP
 after reading any startup files.
 .TP
@@ -5908,6 +5908,9 @@ and store the definition.
 .B call\-last\-kbd\-macro (C\-x e)
 Re-execute the last keyboard macro defined, by making the characters
 in the macro appear as if typed at the keyboard.
+.B print\-last\-kbd\-macro ()
+Print the last keyboard macro defined in a format suitable for the
+\fIinputrc\fP file.
 .PD
 .SS Miscellaneous
 .PP
@@ -6117,10 +6120,12 @@ and
 .SM
 .B COMP_CWORD
 variables are also set.
-When the function or command is invoked, the first argument is the
-name of the command whose arguments are being completed, the
-second argument is the word being completed, and the third argument
-is the word preceding the word being completed on the current command line.
+When the function or command is invoked,
+the first argument (\fB$1\fP) is the name of the command whose arguments are
+being completed,
+the second argument (\fB$2\fP) is the word being completed,
+and the third argument (\fB$3\fP) is the word preceding the word being
+completed on the current command line.
 No filtering of the generated completions against the word being completed
 is performed; the function or command has complete freedom in generating
 the matches.
@@ -6131,7 +6136,7 @@ The function may use any of the shell facilities, including the
 It must put the possible completions in the
 .SM
 .B COMPREPLY
-array variable.
+array variable, one per array element.
 .PP
 Next, any command specified with the \fB\-C\fP option is invoked
 in an environment equivalent to command substitution.
@@ -6249,8 +6254,8 @@ is truncated, if necessary, to contain no more than
 the number of lines specified by the value of
 .SM
 .BR HISTFILESIZE .
-If \fBHISTFILESIZE\fP is unset, or set to a null or non-numeric value,
-the history file is not truncated.
+If \fBHISTFILESIZE\fP is unset, or set to null, a non-numeric value,
+or a numeric value less than zero, the history file is not truncated.
 When the history file is read,
 lines beginning with the history comment character followed immediately
 by a digit are interpreted as timestamps for the preceding history line.
@@ -6294,7 +6299,8 @@ to contain no more than
 lines.  If
 .SM
 .B HISTFILESIZE
-is not set, no truncation is performed.
+is unset, or set to null, a non-numeric value,
+or a numeric value less than zero, the history file is not truncated.
 .PP
 The builtin command
 .B fc
@@ -6457,7 +6463,7 @@ history list starting with
 .IR string .
 .TP
 .B !?\fIstring\fR\fB[?]\fR
-Refer to the most recent command preceding the current postition in the
+Refer to the most recent command preceding the current position in the
 history list containing
 .IR string .
 The trailing \fB?\fP may be omitted if
@@ -6702,7 +6708,7 @@ returns 0 unless run when job control is disabled or, when run with
 job control enabled, any specified \fIjobspec\fP was not found
 or was started without job control.
 .TP
-\fBbind\fP [\fB\-m\fP \fIkeymap\fP] [\fB\-lpsvPSV\fP]
+\fBbind\fP [\fB\-m\fP \fIkeymap\fP] [\fB\-lpsvPSVX\fP]
 .PD 0
 .TP
 \fBbind\fP [\fB\-m\fP \fIkeymap\fP] [\fB\-q\fP \fIfunction\fP] [\fB\-u\fP \fIfunction\fP] [\fB\-r\fP \fIkeyseq\fP]
@@ -6797,6 +6803,10 @@ or
 .SM
 .BR READLINE_POINT ,
 those new values will be reflected in the editing state.
+.TP
+.B \-X
+List all key sequences bound to shell commands and the associated commands
+in a format that can be reused as input.
 .PD
 .PP
 The return value is 0 unless an unrecognized option is given or an
@@ -6845,12 +6855,12 @@ call or \fIexpr\fP does not correspond to a valid position in the
 call stack.
 .TP
 \fBcd\fP [\fB\-L\fP|[\fB\-P\fP [\fB\-e\fP]]] [\fIdir\fP]
-Change the current directory to \fIdir\fP.  The variable
+Change the current directory to \fIdir\fP.
+if \fIdir\fP is not supplied, the value of the
 .SM
 .B HOME
-is the
-default
-.IR dir .
+shell variable is the default.
+Any additional arguments following \fIdir\fP are ignored.
 The variable
 .SM
 .B CDPATH
@@ -7123,6 +7133,12 @@ used as the possible completions.
 \fB\-F\fP \fIfunction\fP
 The shell function \fIfunction\fP is executed in the current shell
 environment.
+When the function is executed,
+the first argument (\fB$1\fP) is the name of the command whose arguments are
+being completed,
+the second argument (\fB$2\fP) is the word being completed,
+and the third argument (\fB$3\fP) is the word preceding the word being
+completed on the current command line.
 When it finishes, the possible completions are retrieved from the value
 of the
 .SM
@@ -8446,8 +8462,9 @@ are supplied, the line read is assigned to the variable
 .SM
 .BR REPLY .
 The return code is zero, unless end-of-file is encountered, \fBread\fP
-times out (in which case the return code is greater than 128), or an
-invalid file descriptor is supplied as the argument to \fB\-u\fP.
+times out (in which case the return code is greater than 128),
+a variable assignment error (such as assigning to a readonly variable) occurs,
+or an invalid file descriptor is supplied as the argument to \fB\-u\fP.
 .RE
 .TP
 \fBreadonly\fP [\fB\-aAf\fP] [\fB\-p\fP] [\fIname\fP[=\fIword\fP] ...]

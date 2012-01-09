@@ -1,6 +1,6 @@
 /* execute_cmd.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2011 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -195,7 +195,7 @@ static int execute_pipeline __P((COMMAND *, int, int, int, struct fd_bitmap *));
 
 static int execute_connection __P((COMMAND *, int, int, int, struct fd_bitmap *));
 
-static int execute_intern_function __P((WORD_DESC *, COMMAND *));
+static int execute_intern_function __P((WORD_DESC *, FUNCTION_DEF *));
 
 /* Set to 1 if fd 0 was the subject of redirection to a subshell.  Global
    so that reader_loop can set it to zero before executing a command. */
@@ -970,7 +970,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
     
     case cm_function_def:
       exec_result = execute_intern_function (command->value.Function_def->name,
-					     command->value.Function_def->command);
+					     command->value.Function_def);
       break;
 
     default:
@@ -5219,9 +5219,9 @@ shell_execve (command, args, env)
 }
 
 static int
-execute_intern_function (name, function)
+execute_intern_function (name, funcdef)
      WORD_DESC *name;
-     COMMAND *function;
+     FUNCTION_DEF *funcdef;
 {
   SHELL_VAR *var;
 
@@ -5251,7 +5251,11 @@ execute_intern_function (name, function)
       return (EXECUTION_FAILURE);
     }
 
-  bind_function (name->word, function);
+#if defined (DEBUGGER)
+  bind_function_def (name->word, funcdef);
+#endif
+
+  bind_function (name->word, funcdef->command);
   return (EXECUTION_SUCCESS);
 }
 

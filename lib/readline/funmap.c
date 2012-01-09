@@ -120,6 +120,7 @@ static const FUNMAP default_funmap[] = {
 #endif
   { "possible-completions", rl_possible_completions },
   { "previous-history", rl_get_previous_history },
+  { "print-last-kbd-macro", rl_print_last_kbd_macro },
   { "quoted-insert", rl_quoted_insert },
   { "re-read-init-file", rl_re_read_init_file },
   { "redraw-current-line", rl_refresh_line},

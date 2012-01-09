@@ -793,7 +793,7 @@ make_function_def (name, command, lineno, lstart)
   bind_function_def (name->word, temp);
 #endif
 
-  temp->source_file = 0;
+  temp->source_file = temp->source_file ? savestring (temp->source_file) : 0;
   return (make_command (cm_function_def, (SIMPLE_COM *)temp));
 }
 

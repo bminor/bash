@@ -185,7 +185,6 @@ extern int rl_visible_stats;
 extern int rl_line_buffer_len;
 extern int rl_arg_sign;
 extern int rl_visible_prompt_length;
-extern int rl_key_sequence_length;
 extern int rl_byte_oriented;
 
 /* display.c */
@@ -247,6 +246,7 @@ extern void _rl_callback_data_dispose PARAMS((_rl_callback_generic_arg *));
 #endif /* READLINE_CALLBACKS */
 
 /* bind.c */
+extern char *_rl_untranslate_macro_value PARAMS ((char *, int));
 
 /* complete.c */
 extern void _rl_reset_completion_state PARAMS((void));
