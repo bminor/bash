@@ -90,6 +90,7 @@ typedef struct  __rl_search_context
   int lastc;
 #if defined (HANDLE_MULTIBYTE)
   char mb[MB_LEN_MAX];
+  char pmb[MB_LEN_MAX];
 #endif
 
   char *sline;

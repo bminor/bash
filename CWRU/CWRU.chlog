@@ -11974,3 +11974,91 @@ lib/readline/isearch.c
 	- _rl_isearch_dispatch: when adding character to search string, use
 	  cxt->lastc (which we use in the switch statement) instead of c,
 	  since lastc can be modified earlier in the function
+
+				   7/18
+				   ----
+lib/readline/rlprivate.h
+	- _rl_search_context: add another member to save previous value of
+	  (multibyte) lastc: pmb is to mb as prevc is to lastc
+
+lib/readline/isearch.c:
+	- _rl_isearch_dispatch: if a key sequence indexes into a new keymap,
+	  but doesn't find any bound function (k[ind].function == 0) or is
+	  bound to self-insert (k[ind].function == rl_insert), back up and
+	  insert the previous character (the one that caused the index into a
+	  new keymap) and arrange things so the current character is the next
+	  one read, so both of them end up in the search string.  Fixes bug
+	  reported by Clark Wang <dearvoid@gmail.com>
+	- _rl_isearch_dispatch: a couple of efficiency improvements when adding
+	  characters to the isearch string
+
+				   7/24
+				   ----
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: save and restore cxt->mb and cxt->pmb
+	  appropriately when in a multibyte locale
+
+doc/{bash.1,bashref.texi}
+	- correct description of {x}>file (and other redirection operators
+	  that allocate a file descriptor) to note the the fd range is
+	  greater than or equal to 10.  Fixes problem reported by
+	  Christian Ullrich 
+
+lib/readline/signals.c
+	- rl_signal_handler: don't interrupt immediately if in callback mode
+
+lib/readline/callback.c
+	- rl_callback_read_char: install signal handlers only when readline
+	  has control in callback mode, so readline's signal handlers aren't
+	  called when the application is active (e.g., between the calls to
+	  rl_callback_handler_install and rl_callback_read_char).  If the
+	  readline signal handlers only set a flag, which the application
+	  doesn't know about, the signals will effectively be ignored until
+	  the next time the application calls into the readline callback
+	  interface.  Fixes problem of calling unsafe functions from signal
+	  handlers when in callback mode reported by Jan Kratochvil
+	  <jan.kratochvil@redhat.com>
+
+execute_cmd.c
+	- fix_assignment_words: when in Posix mode, the `command' builtin
+	  doesn't change whether or not the command name it protects is an
+	  assignment builtin.  One or more instances of `command'
+	  preceding `export', for instance, doesn't make `export' treat its
+	  assignment statement arguments differently.  Posix interpretation
+	  #351
+
+doc/{bash.1,bashref.texi}
+	- document new Posix-mode behavior of `command' when preceding builtins
+	  that take assignment statements as arguments
+
+builtins/printf.def
+	- printstr: if fieldwidth or precision are < 0 or > INT_MAX when
+	  supplied explicitly (since we take care of the `-' separately),
+	  clamp at INT_MAX like when using getint().  Fixes issue reported
+	  by Ralph Coredroy <ralph@inputplus.co.uk>
+
+				   7/25
+				   ----
+lib/readline/chardefs.h
+	- isxdigit: don't define if compiling with c++; declared as a c++
+	  template function.  Fixes bug reported by Miroslav Lichvar
+	  <mlichvar@redhat.com>
+
+builtins/printf.def
+	- getint: if garglist == 0, return whatever getintmax returns (0).
+	  Fixes bug reported  by Ralph Coredroy <ralph@inputplus.co.uk>
+
+				   7/28
+				   ----
+doc/{bash.1,bashref.texi}
+	- minor changes to the descriptions of the cd and pushd builtins
+
+lib/sh/zread.c
+	- zsyncfd: change variable holding return value from lseek to
+	  off_t.  Bug report and fix from Gregory Margo <gmargo@pacbell.net>
+
+				    8/1
+				    ---
+expr.c
+	- don't check for division by 0 when in a context where no evaluation
+	  is taking place.  Fixes bug reported by dnade.ext@orange-ftgroup.com

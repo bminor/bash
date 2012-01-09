@@ -406,7 +406,6 @@ _rl_isearch_dispatch (cxt, c)
 	{
 	  rl_stuff_char (cxt->lastc);
 	  rl_execute_next (cxt->prevc);
-	  /* XXX - do we insert everything in cxt->pmb? */
 	  return (0);
 	}
       /* Otherwise, if the current character is mapped to self-insert or
@@ -419,7 +418,6 @@ _rl_isearch_dispatch (cxt, c)
 	       (cxt->okeymap[cxt->lastc].function == rl_insert || cxt->okeymap[cxt->lastc].function == 0))
 	{
 	  /* Make lastc be the next character read */
-	  /* XXX - do we insert everything in cxt->mb? */
 	  rl_execute_next (cxt->lastc);
 	  /* Dispatch on the previous character (insert into search string) */
 	  cxt->lastc = cxt->prevc;

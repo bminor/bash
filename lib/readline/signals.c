@@ -146,15 +146,7 @@ static RETSIGTYPE
 rl_signal_handler (sig)
      int sig;
 {
-#if 0
-#if defined (SIGWINCH)
-  if (_rl_interrupt_immediately || (sig != SIGWINCH && RL_ISSTATE(RL_STATE_CALLBACK)))
-#else
-  if (_rl_interrupt_immediately || RL_ISSTATE(RL_STATE_CALLBACK))
-#endif
-#else
   if (_rl_interrupt_immediately)
-#endif
     {
       _rl_interrupt_immediately = 0;
       _rl_handle_signal (sig);

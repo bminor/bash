@@ -3668,11 +3668,6 @@ fix_assignment_words (words)
       {
 	if (b == 0)
 	  {
-	    /* Posix (post-2008) says that `command' doesn't change whether
-	       or not the builtin it shadows is a `declaration command', even
-	       though it removes other special builtin properties.  In Posix
-	       mode, we skip over one or more instances of `command' and
-	       deal with the next word as the assignment builtin. */
 	    while (posixly_correct && wcmd && wcmd->word && wcmd->word->word && STREQ (wcmd->word->word, "command"))
 	      wcmd = wcmd->next;
 	    b = builtin_address_internal (wcmd->word->word, 0);
@@ -3694,8 +3689,6 @@ fix_assignment_words (words)
       {
 	if (b == 0)
 	  {
-	    while (posixly_correct && wcmd && wcmd->word && wcmd->word->word && STREQ (wcmd->word->word, "command"))
-	      wcmd = wcmd->next;
 	    b = builtin_address_internal (wcmd->word->word, 0);
 	    if (b == 0 || (b->flags & ASSIGNMENT_BUILTIN) == 0)
 	      return;

@@ -729,7 +729,6 @@ printstr (fmt, string, len, fieldwidth, precision)
       mfw = *fmt++ - '0';
       while (DIGIT (*fmt))
 	mfw = (mfw * 10) + (*fmt++ - '0');
-      /* Error if fieldwidth > INT_MAX here? */
       fw = (mfw < 0 || mfw > INT_MAX) ? INT_MAX : mfw;
     }
 
@@ -747,7 +746,6 @@ printstr (fmt, string, len, fieldwidth, precision)
 	  mpr = *fmt++ - '0';
 	  while (DIGIT (*fmt))
 	    mpr = (mpr * 10) + (*fmt++ - '0');
-	  /* Error if precision > INT_MAX here? */
 	  pr = (mpr < 0 || mpr > INT_MAX) ? INT_MAX : mpr;
 	}
     }
