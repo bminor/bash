@@ -4564,7 +4564,10 @@ This is semantically equivalent to
 
 <P>
 
-(see <B>Duplicating File Descriptors</B> below).
+When using the second form, <I>word</I> may not expand to a number or
+<B>-</B>.  If it does, other redirection operators apply
+(see <B>Duplicating File Descriptors</B> below) for compatibility
+reasons.
 <A NAME="lbBN">&nbsp;</A>
 <H4>Appending Standard Output and Standard Error</H4>
 
@@ -4749,8 +4752,18 @@ If the digits in
 <I>word</I>
 
 do not specify a file descriptor open for output, a redirection error occurs.
+If
+<I>word</I>
+
+evaluates to
+<B>-</B>,
+
+file descriptor
+<I>n</I>
+
+is closed.
 As a special case, if <I>n</I> is omitted, and <I>word</I> does not
-expand to one or more digits, the standard output and standard
+expand to one or more digits or <B>-</B>, the standard output and standard
 error are redirected as described previously.
 <A NAME="lbBR">&nbsp;</A>
 <H4>Moving File Descriptors</H4>
@@ -10831,9 +10844,12 @@ that script and return either
 
 or the exit status of the last command executed within the
 script as the exit status of the script.
+If <I>n</I> is supplied, the return value is its least significant
+8 bits.
 The return status is non-zero if
 <B>return</B>
 
+is supplied a non-numeric argument, or
 is used outside a
 function and not during execution of a script by <B>.</B> or <B>source</B>.
 Any command associated with the <B>RETURN</B> trap is executed
@@ -12938,6 +12954,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 26 September 2011 10:56:19 EDT
+Time: 24 October 2011 08:43:51 EDT
 </BODY>
 </HTML>

@@ -12363,3 +12363,39 @@ builtins/history.def
 	  try to delete the last history entry -- the `history -s' command
 	  might not have been saved.  Fixes bug reported by
 	  lester@vmw-les.eng.vmware.com
+
+lib/readline/complete.c
+	- rl_callback_read_char: add calls to a macro CALLBACK_READ_RETURN
+	  instead of straight return; add same call at end of function.
+	  Placeholder for future work in deinstalling signal handlers when
+	  readline is not active
+
+				   10/25
+				   -----
+expr.c
+	- exp2: catch arithmetic overflow when val1 == INTMAX_MIN and val2 == -1
+	  for DIV and MOD and avoid SIGFPE.  Bug report and pointer to fix
+	  from Jaak Ristioja <jaak.ristioja@cyber.ee>
+	- expassign: same changes for arithmetic overflow for DIV and MOD
+
+				   10/28
+				   -----
+subst.c
+	- parameter_brace_expand: allow pattern substitution when there is an
+	  expansion of the form ${var/} as a no-op: replacing nothing with
+	  nothing
+	- parameter_brace_patsub: don't need to check for PATSUB being NULL;
+	  it never is
+
+flags.c
+	- if STRICT_POSIX is defined, initialize history_expansion to 0, since
+	  history expansion (and its treatment of ! within double quotes) is
+	  not a conforming posix environment.  From austin-group issue 500
+
+lib/readline/histexpand.c
+	- history_expand: when processing a string within double quotes
+	  (DQUOTE == 1), make the closing double quote inhibit history
+	  expansion, as if the word were outside double quotes.  In effect,
+	  we assume that the double quote is followed by a character in
+	  history_no_expand_chars.  tcsh and csh seem to do this.  This
+	  answers a persistent complaint about history expansion

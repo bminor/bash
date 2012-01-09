@@ -6593,7 +6593,8 @@ parameter_brace_patsub (varname, value, ind, patsub, quoted, flags)
   vtype &= ~VT_STARSUB;
 
   mflags = 0;
-  if (patsub && *patsub == '/')
+  /* PATSUB is never NULL when this is called. */
+  if (*patsub == '/')
     {
       mflags |= MATCH_GLOBREP;
       patsub++;
@@ -6611,12 +6612,6 @@ parameter_brace_patsub (varname, value, ind, patsub, quoted, flags)
 
   /* If the pattern starts with a `/', make sure we skip over it when looking
      for the replacement delimiter. */
-#if 0
-  if (rep = quoted_strchr ((*patsub == '/') ? lpatsub+1 : lpatsub, '/', ST_BACKSL))
-    *rep++ = '\0';
-  else
-    rep = (char *)NULL;
-#else
   delim = skip_to_delim (lpatsub, ((*patsub == '/') ? 1 : 0), "/", 0);
   if (lpatsub[delim] == '/')
     {
@@ -6625,7 +6620,6 @@ parameter_brace_patsub (varname, value, ind, patsub, quoted, flags)
     }
   else
     rep = (char *)NULL;
-#endif
 
   if (rep && *rep == '\0')
     rep = (char *)NULL;
@@ -6995,7 +6989,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
     }
   else if (c == ':' && string[sindex] != RBRACE)
     want_substring = 1;
-  else if (c == '/' && string[sindex] != RBRACE)
+  else if (c == '/' /* && string[sindex] != RBRACE */)	/* XXX */
     want_patsub = 1;
 #if defined (CASEMOD_EXPANSIONS)
   else if (c == '^' || c == ',' || c == '~')
@@ -8136,7 +8130,7 @@ add_string:
 	  if (tword && (tword->flags & W_HASQUOTEDNULL))
 	    had_quoted_null = 1;
 
-	  temp = tword->word;
+	  temp = tword ? tword->word : (char *)NULL;
 	  dispose_word_desc (tword);
 
 	  goto add_string;

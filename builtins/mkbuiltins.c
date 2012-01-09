@@ -537,7 +537,7 @@ extract_info (filename, structfile, externfile)
     {
       array_add (&buffer[i], defs->lines);
 
-      while (buffer[i] != '\n' && i < file_size)
+      while (i < file_size && buffer[i] != '\n')
 	i++;
       buffer[i++] = '\0';
     }

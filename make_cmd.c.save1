@@ -292,7 +292,7 @@ make_arith_for_command (exprs, action, lineno)
 	s++;
       start = s;
       /* skip to the semicolon or EOS */
-      i = skip_to_delim (start, 0, ";", SD_NOJMP);
+      i = skip_to_delim (s, 0, ";", SD_NOJMP);
       s = start + i;
 
       t = (i > 0) ? substring (start, 0, i) : (char *)NULL;

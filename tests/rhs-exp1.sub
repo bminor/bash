@@ -14,6 +14,19 @@ recho ${f/""a""b/}
 recho ${f/""c/}
 recho ${f/"$v"c/}
 
+unset foo empty
+foo=aabbcc
+
+recho ${foo/bb/}
+recho ${foo/bb/$empty}
+
+recho ${foo/}
+recho ${empty/}
+
+recho ${foo/ }
+recho ${empty/ }
+unset foo empty
+
 S2=oenophile
 
 recho ${S2^"$v"[aeiou]}

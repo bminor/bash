@@ -1022,6 +1022,13 @@ history_expand (hstring, output)
 	    {
 	      if (cc == 0 || member (cc, history_no_expand_chars))
 		continue;
+	      /* DQUOTE won't be set unless history_quotes_inhibit_expansion
+		 is set.  The idea here is to treat double-quoted strings the
+		 same as the word outside double quotes; in effect making the
+		 double quote part of history_no_expand_chars when DQUOTE is
+		 set. */
+	      else if (dquote && cc == '"')
+		continue;
 	      /* If the calling application has set
 		 history_inhibit_expansion_function to a function that checks
 		 for special cases that should not be history expanded,

@@ -494,10 +494,16 @@ expassign ()
 	      lvalue *= value;
 	      break;
 	    case DIV:
-	      lvalue /= value;
+	      if (lvalue == INTMAX_MIN && value == -1)
+		value = 1;
+	      else
+		lvalue /= value;
 	      break;
 	    case MOD:
-	      lvalue %= value;
+	      if (lvalue == INTMAX_MIN && value == -1)
+		lvalue = 0;
+	      else
+		lvalue %= value;
 	      break;
 	    case PLUS:
 	      lvalue += value;
@@ -811,6 +817,7 @@ exp2 ()
 
       val2 = exppower ();
 
+      /* Handle division by 0 and twos-complement arithmetic overflow */
       if (((op == DIV) || (op == MOD)) && (val2 == 0))
 	{
 	  if (noeval == 0)
@@ -818,6 +825,13 @@ exp2 ()
 	  else
 	    val2 = 1;
 	}
+      else if (op == MOD && val1 == INTMAX_MIN && val2 == -1)
+	{
+	  val1 = 0;
+	  continue;
+	}
+      else if (op == DIV && val1 == INTMAX_MIN && val2 == -1)
+	val2 = 1;
 
       if (op == MUL)
 	val1 *= val2;
