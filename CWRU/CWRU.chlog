@@ -12971,3 +12971,45 @@ builtins/bind.def
 
 doc/{bash.1,bashref.texi}
 	- document new `bind -X' option
+
+				   12/24
+				   -----
+
+doc/{bash.1,bashref.texi}
+	- add a couple of sentences to the description of the case modification
+	  operators making it clearer that each character of parameter is
+	  tested against the pattern, and that the pattern should only attempt
+	  to match a single character.  Suggested by Bill Gradwohl
+	  <bill@ycc.com>
+
+				   12/28
+				   -----
+shell.c
+	- init_noninteractive: instead of calling set_job_control(0) to
+	  unconditionally turn off job control, turn on job control if
+	  forced_interactive or jobs_m_flag is set
+	- shell_initialize: call initialize_job_control with jobs_m_flag as
+	  argument so `bash -m script' enables job control while running the
+	  script
+
+jobs.c
+	- initialize_job_control: if the `force' argument is non-zero, turn on
+	  job control even if the shell is not currently interactive
+	  (interactive == 0)
+
+				   12/29
+				   -----
+
+flags.h
+	- new extern declaration for jobs_m_flag
+
+builtins/{cd,set}.def,doc/{bash.1,bashref.texi}
+	- added text clarifying the descriptions of cd -L and -P, suggested by
+	  Padraig Brady <p@draigbrady.com>
+	- slight change to the description of `set -P' about resolving symbolic
+	  links
+
+lib/readline/doc/rluser.texi
+	- Added an example to the programmable completion section: _comp_cd,
+	  a completion function for cd, with additional verbiage.  Text
+	  includes a reference to the bash_completion project

@@ -3644,8 +3644,8 @@ initialize_job_control (force)
       exit (1);
     }
 
-  /* We can only have job control if we are interactive. */
-  if (interactive == 0)
+  /* We can only have job control if we are interactive unless we force it. */
+  if (interactive == 0 && force == 0)
     {
       job_control = 0;
       original_pgrp = NO_PID;
@@ -3731,6 +3731,8 @@ initialize_job_control (force)
 		  t_errno = errno;
 		  setpgid (0, original_pgrp);
 		  shell_pgrp = original_pgrp;
+		  errno = t_errno;
+		  sys_error (_("cannot set terminal process group (%d)"), shell_pgrp);
 		  job_control = 0;
 		}
 	    }

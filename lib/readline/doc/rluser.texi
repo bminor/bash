@@ -1798,7 +1798,7 @@ completion function would load completions dynamically:
 @example
 _completion_loader()
 @{
-	. "/etc/bash_completion.d/$1.sh" >/dev/null 2>&1 && return 124
+    . "/etc/bash_completion.d/$1.sh" >/dev/null 2>&1 && return 124
 @}
 complete -D -F _completion_loader
 @end example
@@ -2070,54 +2070,119 @@ specification exists, or an output error occurs.
 @node A Programmable Completion Example
 @section A Programmable Completion Example
 
+The most common way to obtain additional completion functionality beyond
+the default actions @code{complete} and @code{compgen} provide is to use
+a shell function and bind it to a particular command using @code{complete -F}.
+
+The following function provides completions for the @code{cd} builtin.
+It is a reasonably good example of what shell functions must do when
+used for completion.  This function uses the word passsed as @code{$2}
+to determine the directory name to complete.  You can also use the
+@code{COMP_WORDS} array variable; the current word is indexed by the
+@code{COMP_CWORD} variable.
+
+The function relies on the @code{complete} and @code{compgen} builtins
+to do much of the work, adding only the things that the Bash @code{cd}
+does beyond accepting basic directory names:
+tilde expansion (@pxref{Tilde Expansion}),
+searching directories in @var{$CDPATH}, which is described above
+(@pxref{Bourne Shell Builtins}),
+and basic support for the @code{cdable_vars} shell option
+(@pxref{The Shopt Builtin}).
+@code{_comp_cd} modifies the value of @var{IFS} so that it contains only
+a newline to accommodate file names containing spaces and tabs --
+@code{compgen} prints the possible completions it generates one per line.
+
+Possible completions go into the @var{COMPREPLY} array variable, one
+completion per array element.  The programmable completion system retrieves
+the completions from there when the function returns.
+
 @example
 # A completion function for the cd builtin
 # based on the cd completion function from the bash_completion package
 _comp_cd()
-{
-	local IFS=$' \t\n'	# normalize IFS
-	local cur _skipdot
-	local i j k
+@{
+    local IFS=$' \t\n'    # normalize IFS
+    local cur _skipdot _cdpath
+    local i j k
 
-	# Tilde expansion, with side effect of expanding tilde to full pathname
-	case "$2" in
-	\~*)	eval cur="$2" ;;
-	*)	cur=$2 ;;
-	esac
+    # Tilde expansion, with side effect of expanding tilde to full pathname
+    case "$2" in
+    \~*)    eval cur="$2" ;;
+    *)      cur=$2 ;;
+    esac
 
-	# no cdpath or absolute pathname -- straight directory completion
-	if [[ -z "${CDPATH:-}" ]] || [[ "$cur" == @(./*|../*|/*) ]]; then
-		# compgen prints paths one per line; could also use while loop
-		IFS=$'\n'
-		COMPREPLY=( $(compgen -d -- "$cur") )
-		IFS=$' \t\n'
-	# CDPATH+directories in the current directory if not in CDPATH
-	else
-		IFS=$'\n'
-		_skipdot=false
-		for i in ${CDPATH//:/$'\n'}; do
-			if [[ $i -ef . ]]; then _skipdot=true; fi
-			k="${#COMPREPLY[@]}"
-			for j in $( compgen -d -- "$i/$cur" ); do
-				COMPREPLY[k++]=${j#$i/}		# cut off directory
-			done
-		done
-		$_skipdot || COMPREPLY+=( $(compgen -d -- "$cur") )
-		IFS=$' \t\n'
-	fi
+    # no cdpath or absolute pathname -- straight directory completion
+    if [[ -z "$@{CDPATH:-@}" ]] || [[ "$cur" == @@(./*|../*|/*) ]]; then
+        # compgen prints paths one per line; could also use while loop
+        IFS=$'\n'
+        COMPREPLY=( $(compgen -d -- "$cur") )
+        IFS=$' \t\n'
+    # CDPATH+directories in the current directory if not in CDPATH
+    else
+        IFS=$'\n'
+        _skipdot=false
+        # preprocess CDPATH to convert null directory names to .
+        _cdpath=$@{CDPATH/#:/.:@}
+        _cdpath=$@{_cdpath//::/:.:@}
+        _cdpath=$@{_cdpath/%:/:.@}
+        for i in $@{_cdpath//:/$'\n'@}; do
+            if [[ $i -ef . ]]; then _skipdot=true; fi
+            k="$@{#COMPREPLY[@@]@}"
+            for j in $( compgen -d -- "$i/$cur" ); do
+                COMPREPLY[k++]=$@{j#$i/@}        # cut off directory
+            done
+        done
+        $_skipdot || COMPREPLY+=( $(compgen -d -- "$cur") )
+        IFS=$' \t\n'
+    fi
 
-	# variable names if appropriate shell option set and no completions
-	if shopt -q cdable_vars && [[ ${#COMPREPLY[@]} -eq 0 ]]; then
-		COMPREPLY=( $(compgen -v -- "$cur") )
-	fi
+    # variable names if appropriate shell option set and no completions
+    if shopt -q cdable_vars && [[ $@{#COMPREPLY[@@]@} -eq 0 ]]; then
+        COMPREPLY=( $(compgen -v -- "$cur") )
+    fi
 
-	return 0
-}
+    return 0
+@}
+@end example
 
+We install the completion function using the @option{-F} option to
+@code{complete}:
+
+@example
 # Tell readline to quote appropriate and append slashes to directories;
 # use the bash default completion for other arguments
 complete -o filenames -o nospace -o bashdefault -F _comp_cd cd
-
 @end example
+
+@noindent
+Since we'd like Bash and Readline to take care of some
+of the other details for us, we use several other options to tell Bash
+and Readline what to do.  The @option{-o filenames} option tells Readline
+that the possible completions should be treated as filenames, and quoted
+appropriately.  That option will also cause Readline to append a slash to
+filenames it can determine are directories (which is why we might want to
+extend @code{_comp_cd} to append a slash if we're using directories found
+via @var{CDPATH}: Readline can't tell those completions are directories).
+The @option{-o nospace} option tells Readline to not append a space
+character to the directory name, in case we want to append to it.
+The @option{-o bashdefault} option brings in the rest of the "Bash default"
+completions -- possible completion that Bash adds to the default Readline
+set.  These include things like command name completion, variable completion
+for words beginning with @samp{@{}, completions containing pathname
+expansion patterns (@pxref{Filename Expansion}), and so on.
+
+Once installed using @code{complete}, @code{_comp_cd} will be called every
+time we attempt word completion for a @code{cd} command.
+
+Many more examples -- an extensive collection of completions for most of
+the common GNU, Unix, and Linux commands -- are available as part of the
+bash_completion project.  This is installed by default on many GNU/Linux
+distributions.  Originally written by Ian Macdonald, the project now lives
+at @url{http://bash-completion.alioth.debian.org/}.  There are ports for
+other systems such as Solaris and Mac OS X.
+
+An older version of the bash_completion package is distributed with bash
+in the @file{examples/complete} subdirectory.
 
 @end ifset

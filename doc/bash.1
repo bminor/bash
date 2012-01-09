@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Wed Dec 21 20:32:29 EST 2011
+.\"	Last Change: Sat Dec 24 15:51:37 EST 2011
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2011 December 21" "GNU Bash 4.2"
+.TH BASH 1 "2011 December 24" "GNU Bash 4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2950,6 +2950,9 @@ ${\fIparameter\fP\fB,,\fP\fIpattern\fP}
 This expansion modifies the case of alphabetic characters in \fIparameter\fP.
 The \fIpattern\fP is expanded to produce a pattern just as in
 pathname expansion.
+Each character in the expanded value of \fIparameter\fP is tested against
+\fIpattern\fP, and, if it matches the pattern, its case is converted.
+The pattern should not attempt to match more than one character.
 The \fB^\fP operator converts lowercase letters matching \fIpattern\fP
 to uppercase; the \fB,\fP operator converts matching uppercase letters
 to lowercase.
@@ -6866,7 +6869,11 @@ The variable
 .SM
 .B CDPATH
 defines the search path for the directory containing
-.IR dir .
+.IR dir :
+each directory name in
+.SM
+.B CDPATH
+is searched for \fIdir\fP.
 Alternative directory names in
 .SM
 .B CDPATH
@@ -6881,14 +6888,19 @@ then
 .B CDPATH
 is not used. The
 .B \-P
-option says to use the physical directory structure instead of
-following symbolic links (see also the
+option causes \fBcd\fP to use the physical directory structure
+by resolving symbolic links while traversing \fIdir\fP and
+before processing instances of \fI..\fP in \fIdir\fP (see also the
 .B \-P
 option to the
 .B set
 builtin command); the
 .B \-L
-option forces symbolic links to be followed.
+option forces symbolic links to be followed by resolving the link
+after processing instances of \fI..\fP in \fIdir\fP.
+If \fI..\fP appears in \fIdir\fP, it is processed by removing the
+immediately previous pathname component from \fIdir\fP, back to a slash
+or the beginning of \fIdir\fP.
 If the
 .B \-e
 option is supplied with
@@ -8851,7 +8863,7 @@ style history substitution.  This option is on by
 default when the shell is interactive.
 .TP 8
 .B \-P
-If set, the shell does not follow symbolic links when executing
+If set, the shell does not resolve symbolic links when executing
 commands such as
 .B cd
 that change the current working directory.  It uses the

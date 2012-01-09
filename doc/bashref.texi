@@ -1119,7 +1119,7 @@ True if either @var{expression1} or @var{expression2} is true.
 @end table
 
 @noindent
-The @code{&&} and @code{||} operators do not evaluate @var{[Bexpression2} if the
+The @code{&&} and @code{||} operators do not evaluate @var{expression2} if the
 value of @var{expression1} is sufficient to determine the return
 value of the entire conditional expression.
 @end table
@@ -1961,6 +1961,9 @@ array in turn, and the expansion is the resultant list.
 This expansion modifies the case of alphabetic characters in @var{parameter}.
 The @var{pattern} is expanded to produce a pattern just as in
 filename expansion.
+Each character in the expanded value of @var{parameter} is tested against
+@var{pattern}, and, if it matches the pattern, its case is converted.
+The pattern should not attempt to match more than one character.
 The @samp{^} operator converts lowercase letters matching @var{pattern}
 to uppercase; the @samp{,} operator converts matching uppercase letters
 to lowercase.
@@ -3041,11 +3044,25 @@ Change the current working directory to @var{directory}.
 If @var{directory} is not supplied, the value of the @env{HOME}
 shell variable is used.
 Any additional arguments following @var{directory} are ignored.
-If the shell variable @env{CDPATH} exists, it is used as a search path.
+If the shell variable
+@env{CDPATH} exists, it is used as a search path:
+each directory name in @env{CDPATH} is searched for
+@var{directory}, with alternative directory names in @env{CDPATH}
+separated by a colon (@samp{:}).
 If @var{directory} begins with a slash, @env{CDPATH} is not used.
 
-The @option{-P} option means to not follow symbolic links; symbolic
-links are followed by default or with the @option{-L} option.
+The @option{-P} option means to not follow symbolic links: symbolic links
+are resolved while @code{cd} is traversing @var{directory} and before
+processing an instance of @samp{..} in @var{directory}.
+
+By default, or when the @option{-L} option is supplied, symbolic links
+in @var{directory} are resolved after @code{cd} processes an instance
+of @samp{..} in @var{directory}.
+
+If @samp{..} appears in @var{directory}, it is processed by removing the
+immediately preceding pathname component, back to a slash or the beginning
+of @var{directory}.
+
 If the @option{-e} option is supplied with @option{-P}
 and the current working directory cannot be successfully determined
 after a successful directory change, @code{cd} will return an unsuccessful
@@ -4517,7 +4534,7 @@ Enable @samp{!} style history substitution (@pxref{History Interaction}).
 This option is on by default for interactive shells.
 
 @item -P
-If set, do not follow symbolic links when performing commands such as
+If set, do not resolve symbolic links when performing commands such as
 @code{cd} which change the current directory.  The physical directory
 is used instead.  By default, Bash follows
 the logical chain of directories when performing commands

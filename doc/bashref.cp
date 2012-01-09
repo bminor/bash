@@ -35,42 +35,42 @@
 \entry{commands, compound}{9}{commands, compound}
 \entry{commands, looping}{10}{commands, looping}
 \entry{commands, conditional}{10}{commands, conditional}
-\entry{commands, grouping}{13}{commands, grouping}
-\entry{coprocess}{14}{coprocess}
-\entry{shell function}{15}{shell function}
-\entry{functions, shell}{15}{functions, shell}
-\entry{parameters}{17}{parameters}
-\entry{variable, shell}{17}{variable, shell}
-\entry{shell variable}{17}{shell variable}
+\entry{commands, grouping}{14}{commands, grouping}
+\entry{coprocess}{15}{coprocess}
+\entry{shell function}{16}{shell function}
+\entry{functions, shell}{16}{functions, shell}
+\entry{parameters}{18}{parameters}
+\entry{variable, shell}{18}{variable, shell}
+\entry{shell variable}{18}{shell variable}
 \entry{parameters, positional}{18}{parameters, positional}
-\entry{parameters, special}{18}{parameters, special}
-\entry{expansion}{19}{expansion}
-\entry{brace expansion}{19}{brace expansion}
-\entry{expansion, brace}{19}{expansion, brace}
-\entry{tilde expansion}{20}{tilde expansion}
-\entry{expansion, tilde}{20}{expansion, tilde}
-\entry{parameter expansion}{21}{parameter expansion}
-\entry{expansion, parameter}{21}{expansion, parameter}
-\entry{command substitution}{24}{command substitution}
-\entry{expansion, arithmetic}{24}{expansion, arithmetic}
-\entry{arithmetic expansion}{24}{arithmetic expansion}
+\entry{parameters, special}{19}{parameters, special}
+\entry{expansion}{20}{expansion}
+\entry{brace expansion}{20}{brace expansion}
+\entry{expansion, brace}{20}{expansion, brace}
+\entry{tilde expansion}{21}{tilde expansion}
+\entry{expansion, tilde}{21}{expansion, tilde}
+\entry{parameter expansion}{22}{parameter expansion}
+\entry{expansion, parameter}{22}{expansion, parameter}
+\entry{command substitution}{25}{command substitution}
+\entry{expansion, arithmetic}{25}{expansion, arithmetic}
+\entry{arithmetic expansion}{25}{arithmetic expansion}
 \entry{process substitution}{25}{process substitution}
-\entry{word splitting}{25}{word splitting}
-\entry{expansion, filename}{25}{expansion, filename}
-\entry{expansion, pathname}{25}{expansion, pathname}
-\entry{filename expansion}{25}{filename expansion}
-\entry{pathname expansion}{25}{pathname expansion}
-\entry{pattern matching}{26}{pattern matching}
-\entry{matching, pattern}{26}{matching, pattern}
-\entry{redirection}{27}{redirection}
-\entry{command expansion}{31}{command expansion}
+\entry{word splitting}{26}{word splitting}
+\entry{expansion, filename}{26}{expansion, filename}
+\entry{expansion, pathname}{26}{expansion, pathname}
+\entry{filename expansion}{26}{filename expansion}
+\entry{pathname expansion}{26}{pathname expansion}
+\entry{pattern matching}{27}{pattern matching}
+\entry{matching, pattern}{27}{matching, pattern}
+\entry{redirection}{28}{redirection}
+\entry{command expansion}{32}{command expansion}
 \entry{command execution}{32}{command execution}
 \entry{command search}{32}{command search}
-\entry{execution environment}{32}{execution environment}
-\entry{environment}{33}{environment}
-\entry{exit status}{34}{exit status}
-\entry{signal handling}{34}{signal handling}
-\entry{shell script}{35}{shell script}
+\entry{execution environment}{33}{execution environment}
+\entry{environment}{34}{environment}
+\entry{exit status}{35}{exit status}
+\entry{signal handling}{35}{signal handling}
+\entry{shell script}{36}{shell script}
 \entry{special builtin}{63}{special builtin}
 \entry{login shell}{77}{login shell}
 \entry{interactive shell}{77}{interactive shell}
@@ -105,14 +105,14 @@
 \entry{variables, readline}{101}{variables, readline}
 \entry{programmable completion}{119}{programmable completion}
 \entry{completion builtins}{121}{completion builtins}
-\entry{History, how to use}{125}{History, how to use}
-\entry{command history}{127}{command history}
-\entry{history list}{127}{history list}
-\entry{history builtins}{127}{history builtins}
-\entry{history expansion}{129}{history expansion}
-\entry{event designators}{130}{event designators}
-\entry{history events}{130}{history events}
-\entry{installation}{133}{installation}
-\entry{configuration}{133}{configuration}
-\entry{Bash installation}{133}{Bash installation}
-\entry{Bash configuration}{133}{Bash configuration}
+\entry{History, how to use}{127}{History, how to use}
+\entry{command history}{129}{command history}
+\entry{history list}{129}{history list}
+\entry{history builtins}{129}{history builtins}
+\entry{history expansion}{131}{history expansion}
+\entry{event designators}{132}{event designators}
+\entry{history events}{132}{history events}
+\entry{installation}{135}{installation}
+\entry{configuration}{135}{configuration}
+\entry{Bash installation}{135}{Bash installation}
+\entry{Bash configuration}{135}{Bash configuration}

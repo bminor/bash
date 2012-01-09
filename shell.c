@@ -1623,7 +1623,9 @@ init_noninteractive ()
   expand_aliases = posixly_correct;	/* XXX - was 0 not posixly_correct */
   no_line_editing = 1;
 #if defined (JOB_CONTROL)
-  set_job_control (0);
+  /* Even if the shell is not interactive, enable job control if the -i or
+     -m option is supplied at startup. */
+  set_job_control (forced_interactive||jobs_m_flag);
 #endif /* JOB_CONTROL */
 }
 
@@ -1720,7 +1722,7 @@ shell_initialize ()
 #endif
 
   /* Initialize the data structures for storing and running jobs. */
-  initialize_job_control (0);
+  initialize_job_control (jobs_m_flag);
 
   /* Initialize input streams to null. */
   initialize_bash_input ();
@@ -1764,6 +1766,8 @@ shell_reinitialize ()
   debugging = do_version = line_number = last_command_exit_value = 0;
   forced_interactive = interactive_shell = subshell_environment = 0;
   expand_aliases = 0;
+
+  /* XXX - should we set jobs_m_flag to 0 here? */
 
 #if defined (HISTORY)
   bash_history_reinit (0);
