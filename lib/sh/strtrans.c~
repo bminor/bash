@@ -318,7 +318,7 @@ ansic_shouldquote (string)
   for (s = string; c = *s; s++)
     {
 #if defined (HANDLE_MULTIBYTE)
-      if (is_basic (c) == 0)
+      if (isbasic (c) == 0)
 	return (ansic_wshouldquote (s));
 #endif
       if (ISPRINT (c) == 0)

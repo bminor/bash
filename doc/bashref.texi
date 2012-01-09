@@ -2380,8 +2380,8 @@ The format of here-documents is:
 @var{delimiter}
 @end example
 
-No parameter expansion, command substitution, arithmetic expansion,
-or filename expansion is performed on
+No parameter and variable expansion, command substitution,
+arithmetic expansion, or filename expansion is performed on
 @var{word}.  If any characters in @var{word} are quoted, the
 @var{delimiter} is the result of quote removal on @var{word},
 and the lines in the here-document are not expanded.
@@ -2404,10 +2404,12 @@ A variant of here documents, the format is:
 <<< @var{word}
 @end example
 
-The @var{word}
-is expanded as described above, with the exception that
-pathname expansion is not applied, and supplied as a single string
-to the command on its standard input.
+The @var{word} undergoes
+brace expansion, tilde expansion, parameter and variable expansion,
+command substitution, arithmetic expansion, and quote removal.
+Pathname expansion word splitting are not performed.
+The result is supplied as a single string to the command on its
+standard input.
 
 @subsection Duplicating File Descriptors
 The redirection operator

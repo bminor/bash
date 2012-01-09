@@ -12056,3 +12056,68 @@ doc/{bash.1,bashref.texi}
 lib/sh/zread.c
 	- zsyncfd: change variable holding return value from lseek to
 	  off_t.  Bug report and fix from Gregory Margo <gmargo@pacbell.net>
+
+				    8/1
+				    ---
+expr.c
+	- don't check for division by 0 when in a context where no evaluation
+	  is taking place.  Fixes bug reported by dnade.ext@orange-ftgroup.com
+
+				    8/6
+				    ---
+execute_cmd.c
+	- execute_command_internal: the parent branch of the subshell code
+	  (where the child calls execute_in_subshell) should not close all
+	  open FIFOs with unlink_fifo_list if it's part of a shell function
+	  that's still executing.  Fixes bug reported by Maarten Billemont
+	  <lhunath@lyndir.com>
+
+				    8/9
+				    ---
+builtins/common.c
+	- get_exitstat: return EX_BADUSAGE (2) on a non-numeric argument
+
+builtins/return.def
+	- return_builtin: just call get_exitstat to get the return status,
+	  let it handle proper parsing and handling of arguments.  Fixes
+	  issue most recently raised by Linda Walsh <bash@tlinx.org>.
+	  Reverses change from 9/11/2008 (see above)
+
+				   8/16
+				   ----
+doc/{bash.1,bashref.texi}
+	- clean up `set -e' language to make it clearer that any failure of
+	  a compound command will cause the shell to exit, not just subshells
+	  and brace commands
+
+				   8/17
+				   ----
+configure.in
+	- make the various XXX_FOR_BUILD variables `precious' to autoconf to
+	  avoid stale data
+	- change how CC_FOR_BUILD is initialized when cross-compiling and not,
+	  but do not change behavior
+	- initialize CFLAGS_FOR_BUILD to -g when cross-compiling
+	- initialize LIBS_FOR_BUILD to $(LIBS) when not cross-compiling, empty
+	  when cross-compiling
+	- create AUTO_CFLAGS variable to hold basic CFLAGS defaults; used when
+	  CFLAGS not inherited from environment (like effect of old
+	  auto_cflags variable)
+	- substitute LIBS_FOR_BUILD into output Makefiles
+	  [changes inspired by bug report from Nathan Phillip Brink
+	  <ohnobinki@ohnopublishing.net> -- gentoo bug 378941]
+
+builtins/Makefile.in	
+	- substitute LIBS_FOR_BUILD from configure, not strictly initialized
+	  to $(LIBS)
+
+				   8/27
+				   ----
+doc/{bash.1,bashref.texi}
+	- minor changes to the here string description to clarify the
+	  expansions performed on the word
+
+support/shobj-conf
+	- handle compilation on Lion (Mac OS X 10.7/darwin11) with changes
+	  to darwin stanzas.  Fixes readline bug reported by Vincent
+	  Sheffer <vince.sheffer@apisphere.com>

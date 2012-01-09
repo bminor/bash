@@ -3395,9 +3395,10 @@ the redirection refers to the standard output (file descriptor
 1).
 .PP
 The word following the redirection operator in the following
-descriptions, unless otherwise noted, is subjected to brace expansion,
-tilde expansion, parameter expansion, command substitution, arithmetic
-expansion, quote removal, pathname expansion, and word splitting.
+descriptions, unless otherwise noted, is subjected to
+brace expansion, tilde expansion, parameter and variable expansion,
+command substitution, arithmetic expansion, quote removal,
+pathname expansion, and word splitting.
 If it expands to more than one word,
 .B bash
 reports an error.
@@ -3599,8 +3600,8 @@ The format of here-documents is:
 .fi
 .RE
 .PP
-No parameter expansion, command substitution, arithmetic expansion,
-or pathname expansion is performed on
+No parameter and variable expansion, command substitution,
+arithmetic expansion, or pathname expansion is performed on
 .IR word .
 If any characters in
 .I word
@@ -3639,10 +3640,12 @@ A variant of here documents, the format is:
 .fi
 .RE
 .PP
-The \fIword\fP
-is expanded as described above, with the exception that
-pathname expansion is not applied, and supplied as a single string
-to the command on its standard input.
+The \fIword\fP undergoes
+brace expansion, tilde expansion, parameter and variable expansion,
+command substitution, arithmetic expansion, and quote removal.
+Pathname expansion word splitting are not performed.
+The result is supplied as a single string to the command on its
+standard input.
 .SS "Duplicating File Descriptors"
 .PP
 The redirection operator

@@ -12110,3 +12110,21 @@ configure.in
 builtins/Makefile.in	
 	- substitute LIBS_FOR_BUILD from configure, not strictly initialized
 	  to $(LIBS)
+
+				   8/27
+				   ----
+doc/{bash.1,bashref.texi}
+	- minor changes to the here string description to clarify the
+	  expansions performed on the word
+
+support/shobj-conf
+	- handle compilation on Lion (Mac OS X 10.7/darwin11) with changes
+	  to darwin stanzas.  Fixes readline bug reported by Vincent
+	  Sheffer <vince.sheffer@apisphere.com>
+
+lib/sh/strtrans.c
+	- ansic_wshouldquote: check a string with multi-byte characters for
+	  characters that needs to be backslash-octal escaped for $'...'
+	- ansic_shouldquote: if is_basic fails for one character, let
+	  ansic_wshouldquote examine the rest of the string and return what
+	  it returns.  From a patch sent by Roman Rakus <rrakus@redhat.com>
