@@ -394,6 +394,24 @@ _rl_isearch_dispatch (cxt, c)
 	  rl_execute_next (cxt->prevc);
 	  return (0);
 	}
+      /* Otherwise, if the current character is mapped to self-insert (i.e.,
+	 not an editing command), and the previous character was a keymap
+	 index, then we need to insert both the previous character and the
+	 current character into the search string. */
+      else if (cxt->lastc > 0 && cxt->prevc > 0 &&
+	       cxt->keymap[cxt->prevc].type == ISKMAP &&
+	       cxt->okeymap[cxt->lastc].type == ISFUNC && cxt->okeymap[cxt->lastc].function == rl_insert)
+	{
+	  /* Make lastc be the next character read */
+	  rl_execute_next (cxt->lastc);
+	  /* Dispatch on the previous character (insert into search string) */
+	  cxt->lastc = cxt->prevc;
+	  /* Have to overwrite cxt->mb here because dispatch uses it below */
+	  cxt->mb[0] = cxt->lastc;
+	  cxt->mb[1] = '\0';
+
+	  cxt->prevc = 0;	  
+	}
     }
 
   /* The characters in isearch_terminators (set from the user-settable
@@ -564,7 +582,7 @@ _rl_isearch_dispatch (cxt, c)
 	}
       else
 #endif
-	cxt->search_string[cxt->search_string_index++] = c;
+	cxt->search_string[cxt->search_string_index++] = cxt->lastc;	/* XXX - was c instead of lastc */
       cxt->search_string[cxt->search_string_index] = '\0';
       break;
     }

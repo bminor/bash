@@ -11967,3 +11967,10 @@ builtins/shopt.def
 
 doc/{bash.1,bashref.texi}
 	- document new `direxpand' shopt option
+
+				   7/15
+				   ----
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: when adding character to search string, use
+	  cxt->lastc (which we use in the switch statement) instead of c,
+	  since lastc can be modified earlier in the function
