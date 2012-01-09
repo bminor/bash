@@ -454,6 +454,9 @@ expassign ()
   register intmax_t value;
   char *lhs, *rhs;
   arrayind_t lind;
+#if defined (HAVE_IMAXDIV)
+  imaxdiv_t idiv;
+#endif
 
   value = expcond ();
   if (curtok == EQ || curtok == OP_ASSIGN)
@@ -494,16 +497,16 @@ expassign ()
 	      lvalue *= value;
 	      break;
 	    case DIV:
-	      if (lvalue == INTMAX_MIN && value == -1)
-		value = 1;
-	      else
-		lvalue /= value;
-	      break;
 	    case MOD:
 	      if (lvalue == INTMAX_MIN && value == -1)
-		lvalue = 0;
+		value = (op == DIV) ? 1 : 0;
 	      else
-		lvalue %= value;
+#if HAVE_IMAXDIV
+		idiv = imaxdiv (lvalue, value);
+		lvalue = (op == DIV) ? idiv.quot : idiv.rem;
+#else
+		lvalue = (op == DIV) ? lvalue / value : lvalue % value;
+#endif
 	      break;
 	    case PLUS:
 	      lvalue += value;
@@ -804,6 +807,9 @@ static intmax_t
 exp2 ()
 {
   register intmax_t val1, val2;
+#if defined (HAVE_IMAXDIV)
+  imaxdiv_t idiv;
+#endif
 
   val1 = exppower ();
 
@@ -835,10 +841,13 @@ exp2 ()
 
       if (op == MUL)
 	val1 *= val2;
-      else if (op == DIV)
-	val1 /= val2;
-      else if (op == MOD)
-	val1 %= val2;
+      else if (op == DIV || op == MOD)
+#if defined (HAVE_IMAXDIV)
+	idiv = imaxdiv (val1, val2);
+	val1 = (op == DIV) ? idiv.quot : idiv.rem;
+#else
+	val1 = (op == DIV) ? val1 / val2 : val1 % val2;
+#endif
     }
   return (val1);
 }

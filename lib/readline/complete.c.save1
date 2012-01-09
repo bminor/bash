@@ -1173,7 +1173,6 @@ compute_lcd_of_matches (match_list, matches, text)
 {
   register int i, c1, c2, si;
   int low;		/* Count of max-matched characters. */
-  int lx;
   char *dtext;		/* dequoted TEXT, if needed */
 #if defined (HANDLE_MULTIBYTE)
   int v;
@@ -1291,19 +1290,25 @@ compute_lcd_of_matches (match_list, matches, text)
 	  qsort (match_list+1, matches, sizeof(char *), (QSFUNC *)_rl_qsort_string_compare);
 
 	  si = strlen (text);
-
-	  /* Check each match for something that matches what the user typed
-	     taking case into account; use it up to common length of matches
-	     if so.  If not, just use first match. */
-	  for (i = 1; i <= matches; i++)
-	    if (strncmp (match_list[i], text, si) == 0)
-	      {
-		strncpy (match_list[0], match_list[i], low);
-		break;
-	      }
-	  /* no casematch, use first entry */
-	  if (i > matches)
-	    strncpy (match_list[0], match_list[1], low);
+	  if (si <= low)
+	    {
+	      for (i = 1; i <= matches; i++)
+		if (strncmp (match_list[i], text, si) == 0)
+		  {
+		    strncpy (match_list[0], match_list[i], low);
+		    break;
+		  }
+	      /* no casematch, use first entry */
+	      if (i > matches)
+		strncpy (match_list[0], match_list[1], low);
+	    }
+	  else if (strncasecmp (match_list[1], text, low) == 0)
+	    /* if the text the user typed matches up to the length of the
+	       first match, use what the user typed */
+	    strncpy (match_list[0], text, low);
+	  else
+	    /* otherwise, just use the first entry. */
+	    strncpy (match_list[0], match_list[1], low);		/* XXX */
 
 	  FREE (dtext);
 	}

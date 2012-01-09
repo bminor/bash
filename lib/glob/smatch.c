@@ -223,7 +223,7 @@ is_cclass (c, name)
 #define COLLSYM			collsym
 #define PARSE_COLLSYM		parse_collsym
 #define BRACKMATCH		brackmatch
-#define PATSCAN			patscan
+#define PATSCAN			glob_patscan
 #define STRCOMPARE		strcompare
 #define EXTMATCH		extmatch
 #define STRCHR(S, C)		strchr((S), (C))
@@ -355,7 +355,7 @@ is_wcclass (wc, name)
 #define COLLSYM			collwcsym
 #define PARSE_COLLSYM		parse_collwcsym
 #define BRACKMATCH		brackmatch_wc
-#define PATSCAN			patscan_wc
+#define PATSCAN			glob_patscan_wc
 #define STRCOMPARE		wscompare
 #define EXTMATCH		extmatch_wc
 #define STRCHR(S, C)		wcschr((S), (C))

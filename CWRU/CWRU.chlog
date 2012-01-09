@@ -12739,3 +12739,66 @@ doc/bashref.texi
 	- start at a set of examples for the =~ regular expression matching
 	  operator, touching on keeping the pattern in a shell variable and
 	  quoting portions of the pattern to remove their special meaning
+
+				   12/1
+				   ----
+lib/glob/gmisc.c
+	- extglob_pattern: new function, returns 1 if pattern passed as an
+	  argument looks like an extended globbing pattern
+
+lib/glob/glob.c
+	- skipname: return 0 immediately if extglob_pattern returns non-zero,
+	  let the extended globbing code do the right thing with skipping
+	  names beginning with a `.'
+	- mbskipname: return 0 immediately if extglob_pattern returns non-zero,
+	  let the extended globbing code do the right thing with skipping
+	  names beginning with a `.'.  Fixes bug reported by Yongzhi Pan
+	  <panyongzhi@gmail.com>
+
+				   12/2
+				   ----
+lib/glob/smatch.c
+	- patscan, patscan_wc: no longer static so other parts of the glob
+	  library can use them, renamed to glob_patscan, glob_patscan_wc
+
+lib/glob/glob.c
+	- extern declarations for glob_patscan, glob_patscan_wc
+	- wchkname: new function, does skipname on wchar_t pattern and dname,
+	  old body of mbskipname after converting to wide chars
+	- extglob_skipname: new function, checks all subpatterns in an extglob
+	  pattern to determine whether or not a filename should be skipped.
+	  Calls skipname for each subpattern.  Dname is only skipped if all
+	  subpatterns indicate it should be.  Better fix for bug reported by
+	  Yongzhi Pan <panyongzhi@gmail.com>
+	- wextglob_skipname: wide-char version of extglob_skipname, calls
+	  wchkname instead of calling back into mbskipname for each
+	  subpattern to avoid problems with char/wchar_t mismatch
+	- skipname: call extglob_skipname if extglob_pattern returns non-zero
+	- mbskipname: call wextglob_skipname if extglob_pattern returns non-zero
+	- mbskipname: short-circuit immediately if no multibyte chars in
+	  pattern or filename
+
+execute_cmd.c
+	- execute_cond_node: added parens to patmatch assignment statement to
+	  make intent clearer
+
+				   12/3
+				   ----
+configure.in,config.h.in
+	- check for imaxdiv, define HAVE_IMAXDIV if present
+
+expr.c
+	- expassign, exp2: use imaxdiv if available.  Doesn't help with checks
+	  for overflow from 10/25
+
+				   12/6
+				   ----
+lib/readline/complete.c
+	- compute_lcd_of_matches: if we're ignoring case in the matches, only
+	  use what the user typed as the lcd if it matches the first match
+	  (after sorting) up to the length of what was typed (if what the
+	  user typed is longer than the shortest of the possible matches, use
+	  the shortest common length of the matches instead).  If it doesn't
+	  match, use the first of the list of matches, as if case were not
+	  being ignored.  Fixes bug reported by Clark Wang
+	  <dearvoid@gmail.com>

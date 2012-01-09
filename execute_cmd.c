@@ -3497,8 +3497,8 @@ execute_cond_node (cond)
   else if (cond->type == COND_BINARY)
     {
       rmatch = 0;
-      patmatch = ((cond->op->word[1] == '=') && (cond->op->word[2] == '\0') &&
-		  (cond->op->word[0] == '!' || cond->op->word[0] == '=') ||
+      patmatch = (((cond->op->word[1] == '=') && (cond->op->word[2] == '\0') &&
+		   (cond->op->word[0] == '!' || cond->op->word[0] == '=')) ||
 		  (cond->op->word[0] == '=' && cond->op->word[1] == '\0'));
 #if defined (COND_REGEXP)
       rmatch = (cond->op->word[0] == '=' && cond->op->word[1] == '~' &&

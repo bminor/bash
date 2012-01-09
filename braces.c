@@ -136,7 +136,8 @@ brace_expand (text)
 #endif /* !CSH_BRACE_COMPAT */
 
   preamble = (char *)xmalloc (i + 1);
-  strncpy (preamble, text, i);
+  if (i > 0)
+    strncpy (preamble, text, i);
   preamble[i] = '\0';
 
   result = (char **)xmalloc (2 * sizeof (char *));
@@ -232,13 +233,18 @@ brace_expand (text)
 add_tack:
   result = array_concat (result, tack);
   free (amble);
-  strvec_dispose (tack);
+  if (tack != result)
+    strvec_dispose (tack);
 
   postamble = text + i + 1;
 
-  tack = brace_expand (postamble);
-  result = array_concat (result, tack);
-  strvec_dispose (tack);
+  if (postamble && *postamble)
+    {
+      tack = brace_expand (postamble);
+      result = array_concat (result, tack);
+      if (tack != result)
+	strvec_dispose (tack);
+    }
 
   return (result);
 }
@@ -600,6 +606,20 @@ comsub:
   return (c);
 }
 
+/* Return 1 if ARR has any non-empty-string members.  Used to short-circuit
+   in array_concat() below. */
+static int
+degenerate_array (arr)
+     char **arr;
+{
+  register int i;
+
+  for (i = 0; arr[i]; i++)
+    if (arr[i][0] != '\0')
+      return 0;
+  return 1;
+}
+
 /* Return a new array of strings which is the result of appending each
    string in ARR2 to each string in ARR1.  The resultant array is
    len (arr1) * len (arr2) long.  For convenience, ARR1 (and its contents)
@@ -613,10 +633,19 @@ array_concat (arr1, arr2)
   register char **result;
 
   if (arr1 == 0)
-    return (strvec_copy (arr2));
+    return (arr2);		/* XXX - see if we can get away without copying? */
 
   if (arr2 == 0)
-    return (strvec_copy (arr1));
+    return (arr1);		/* XXX - caller expects us to free arr1 */
+
+  if (degenerate_array (arr1))
+    {
+      strvec_dispose (arr1);
+      return (arr2);		/* XXX - use flags to see if we can avoid copying here */
+    }
+
+  if (degenerate_array (arr2))
+    return (arr1);		/* XXX - rather than copying and freeing it */
 
   len1 = strvec_len (arr1);
   len2 = strvec_len (arr2);

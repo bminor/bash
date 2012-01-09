@@ -22,7 +22,8 @@ static int GMATCH __P((CHAR *, CHAR *, CHAR *, CHAR *, int));
 static CHAR *PARSE_COLLSYM __P((CHAR *, INT *));
 static CHAR *BRACKMATCH __P((CHAR *, U_CHAR, int));
 static int EXTMATCH __P((INT, CHAR *, CHAR *, CHAR *, CHAR *, int));
-static CHAR *PATSCAN __P((CHAR *, CHAR *, INT));
+
+/*static*/ CHAR *PATSCAN __P((CHAR *, CHAR *, INT));
 
 int
 FCT (pattern, string, flags)
@@ -520,7 +521,7 @@ matched:
    because we're scanning a `patlist'.  Otherwise, we scan until we see
    DELIM.  In all cases, we never scan past END.  The return value is the
    first character after the matching DELIM. */
-static CHAR *
+/*static*/ CHAR *
 PATSCAN (string, end, delim)
      CHAR *string, *end;
      INT delim;

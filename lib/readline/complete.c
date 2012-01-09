@@ -1173,6 +1173,7 @@ compute_lcd_of_matches (match_list, matches, text)
 {
   register int i, c1, c2, si;
   int low;		/* Count of max-matched characters. */
+  int lx;
   char *dtext;		/* dequoted TEXT, if needed */
 #if defined (HANDLE_MULTIBYTE)
   int v;
@@ -1290,21 +1291,20 @@ compute_lcd_of_matches (match_list, matches, text)
 	  qsort (match_list+1, matches, sizeof(char *), (QSFUNC *)_rl_qsort_string_compare);
 
 	  si = strlen (text);
-	  if (si <= low)
-	    {
-	      for (i = 1; i <= matches; i++)
-		if (strncmp (match_list[i], text, si) == 0)
-		  {
-		    strncpy (match_list[0], match_list[i], low);
-		    break;
-		  }
-	      /* no casematch, use first entry */
-	      if (i > matches)
-		strncpy (match_list[0], match_list[1], low);
-	    }
-	  else
-	    /* otherwise, just use the text the user typed. */
-	    strncpy (match_list[0], text, low);
+	  lx = (si <= low) ? si : low;	/* check shorter of text and matches */
+	  /* Try to preserve the case of what the user typed in the presence of
+	     multiple matches: check each match for something that matches
+	     what the user typed taking case into account; use it up to common
+	     length of matches if one is found.  If not, just use first match. */
+	  for (i = 1; i <= matches; i++)
+	    if (strncmp (match_list[i], text, lx) == 0)
+	      {
+		strncpy (match_list[0], match_list[i], low);
+		break;
+	      }
+	  /* no casematch, use first entry */
+	  if (i > matches)
+	    strncpy (match_list[0], match_list[1], low);
 
 	  FREE (dtext);
 	}

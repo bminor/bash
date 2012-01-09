@@ -115,6 +115,10 @@ static void dequote_pathname __P((char *));
 static int glob_testdir __P((char *));
 static char **glob_dir_to_array __P((char *, char **, int));
 
+/* Make sure these names continue to agree with what's in smatch.c */
+extern char *glob_patscan __P((char *, char *, int));
+extern wchar_t *glob_patscan_wc __P((wchar_t *, wchar_t *, int));
+
 /* Compile `glob_loop.c' for single-byte characters. */
 #define CHAR	unsigned char
 #define INT	int
@@ -162,15 +166,63 @@ glob_pattern_p (pattern)
 #endif
 }
 
+#if EXTENDED_GLOB
+/* Return 1 if all subpatterns in the extended globbing pattern PAT indicate
+   that the name should be skipped.  XXX - doesn't handle pattern negation,
+   not sure if it should */
+static int
+extglob_skipname (pat, dname, flags)
+     char *pat, *dname;
+     int flags;
+{
+  char *pp, *pe, *t;
+  int n, r;
+
+  pp = pat + 2;
+  pe = pp + strlen (pp) - 1;	/*(*/
+  if (*pe != ')')
+    return 0;
+  if ((t = strchr (pp, '|')) == 0)	/* easy case first */
+    {
+      *pe = '\0';
+      r = skipname (pp, dname, flags);	/*(*/
+      *pe = ')';
+      return r;
+    }
+  while (t = glob_patscan (pp, pe, '|'))
+    {
+      n = t[-1];
+      t[-1] = '\0';
+      r = skipname (pp, dname, flags);
+      t[-1] = n;
+      if (r == 0)	/* if any pattern says not skip, we don't skip */
+        return r;
+      pp = t;
+    }	/*(*/
+
+  if (pp == pe)		/* glob_patscan might find end of pattern */
+    return r;
+
+  *pe = '\0';
+  r = mbskipname (pp, dname, flags);	/*(*/
+  *pe = ')';
+  return r;
+}
+#endif
+
 /* Return 1 if DNAME should be skipped according to PAT.  Mostly concerned
    with matching leading `.'. */
-
 static int
 skipname (pat, dname, flags)
      char *pat;
      char *dname;
      int flags;
 {
+#if EXTENDED_GLOB
+  if (extglob_pattern (pat))		/* XXX */
+    return (extglob_skipname (pat, dname, flags));
+#endif
+
   /* If a leading dot need not be explicitly matched, and the pattern
      doesn't start with a `.', don't match `.' or `..' */
   if (noglob_dot_filenames == 0 && pat[0] != '.' &&
@@ -188,17 +240,90 @@ skipname (pat, dname, flags)
 }
 
 #if HANDLE_MULTIBYTE
+
+static int
+wchkname (pat_wc, dn_wc)
+     wchar_t *pat_wc, *dn_wc;
+{
+  /* If a leading dot need not be explicitly matched, and the
+     pattern doesn't start with a `.', don't match `.' or `..' */
+  if (noglob_dot_filenames == 0 && pat_wc[0] != L'.' &&
+	(pat_wc[0] != L'\\' || pat_wc[1] != L'.') &&
+	(dn_wc[0] == L'.' &&
+	  (dn_wc[1] == L'\0' || (dn_wc[1] == L'.' && dn_wc[2] == L'\0'))))
+    return 1;
+
+  /* If a leading dot must be explicity matched, check to see if the
+     pattern and dirname both have one. */
+ else if (noglob_dot_filenames && dn_wc[0] == L'.' &&
+	pat_wc[0] != L'.' &&
+	   (pat_wc[0] != L'\\' || pat_wc[1] != L'.'))
+    return 1;
+
+  return 0;
+}
+
+static int
+wextglob_skipname (pat, dname, flags)
+     wchar_t *pat, *dname;
+     int flags;
+{
+#if EXTENDED_GLOB
+  wchar_t *pp, *pe, *t, n;
+  int r;
+
+  pp = pat + 2;
+  pe = pp + wcslen (pp) - 1;	/*(*/
+  if (*pe != L')')
+    return 0;
+  if ((t = wcschr (pp, L'|')) == 0)
+    {
+      *pe = L'\0';
+      r = wchkname (pp, dname); /*(*/
+      *pe = L')';
+      return r;
+    }
+  while (t = glob_patscan_wc (pp, pe, '|'))
+    {
+      n = t[-1];
+      t[-1] = L'\0';
+      r = wchkname (pp, dname);
+      t[-1] = n;
+      if (r == 0)
+	return 0;
+      pp = t;
+    }
+
+  if (pp == pe)		/* glob_patscan_wc might find end of pattern */
+    return r;
+
+  *pe = L'\0';
+  r = wchkname (pp, dname);	/*(*/
+  *pe = L')';
+  return r;
+#else
+  return (wchkname (pp, dname));
+#endif
+}
+
 /* Return 1 if DNAME should be skipped according to PAT.  Handles multibyte
    characters in PAT and DNAME.  Mostly concerned with matching leading `.'. */
-
 static int
 mbskipname (pat, dname, flags)
      char *pat, *dname;
      int flags;
 {
-  int ret;
+  int ret, ext;
   wchar_t *pat_wc, *dn_wc;
   size_t pat_n, dn_n;
+
+  if (mbsmbchar (dname) == 0 && mbsmbchar (pat) == 0)
+    return (skipname (pat, dname, flags));
+
+  ext = 0;
+#if EXTENDED_GLOB
+  ext = extglob_pattern (pat);
+#endif
 
   pat_wc = dn_wc = (wchar_t *)NULL;
 
@@ -208,22 +333,7 @@ mbskipname (pat, dname, flags)
 
   ret = 0;
   if (pat_n != (size_t)-1 && dn_n !=(size_t)-1)
-    {
-      /* If a leading dot need not be explicitly matched, and the
-	 pattern doesn't start with a `.', don't match `.' or `..' */
-      if (noglob_dot_filenames == 0 && pat_wc[0] != L'.' &&
-	    (pat_wc[0] != L'\\' || pat_wc[1] != L'.') &&
-	    (dn_wc[0] == L'.' &&
-	      (dn_wc[1] == L'\0' || (dn_wc[1] == L'.' && dn_wc[2] == L'\0'))))
-	ret = 1;
-
-      /* If a leading dot must be explicity matched, check to see if the
-	 pattern and dirname both have one. */
-     else if (noglob_dot_filenames && dn_wc[0] == L'.' &&
-	   pat_wc[0] != L'.' &&
-	   (pat_wc[0] != L'\\' || pat_wc[1] != L'.'))
-	ret = 1;
-    }
+    ret = ext ? wextglob_skipname (pat_wc, dn_wc, flags) : wchkname (pat_wc, dn_wc);
   else
     ret = skipname (pat, dname, flags);
 
