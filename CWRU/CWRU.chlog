@@ -12136,3 +12136,46 @@ lib/sh/strtrans.c
 	  code converts them to wide characters and uses iswprint to check
 	  valid wide chars.  From a patch sent by Roman Rakus
 	  <rrakus@redhat.com>
+
+				    9/7
+				    ---
+lib/sh/shquote.c
+	- sh_backslash_quote: change to be table-driven so we can use a
+	  different table if we want to
+	- sh_backslash_quote: takes a second char table[256] argument;
+
+externs.h
+	- sh_backslash_quote: add second argument to function prototype
+
+bashline.c,braces.c,parse.y,builtins/printf.def
+	- change callers of sh_backslash_quote to add second argument
+
+bashline.c
+	- filename_bstab: table of characters to pass to sh_backslash_quote;
+	  characters with value 1 will be backslash-quoted
+	- set_filename_bstab: turn on characters in filename backslash-quote
+	  table according to passed string argument
+	- call set_filename_bstab every time rl_filename_quote_characters is
+	  assigned a value
+	- bash_quote_filename: call sh_backslash_quote with filename_bstab
+	  as second argument.  This allows other characters in filenames to
+	  be quoted without quoting, for instance, a dollar sign in a shell
+	  variable reference
+
+				    9/8
+				    ---
+bashline.c
+	- complete_fullquote: new variable, controls table passed to
+	  sh_backslash_quote.  If non-zero (the default), the standard set
+	  of shell metacharacters -- as in bash versions up to and including
+	  bash-4.2 -- gets backslash-quoted by the completion code.  If zero,
+	  sh_backslash_quote gets the table with the characters in the
+	  variable reference removed, which means they are removed from the
+	  set of characters to be quoted in filenames
+
+				   9/10
+				   ----
+bashline.c
+	- bash_filename_stat_hook: new function, designed to expand variable
+	  references in filenames before readline passes them to stat(2)
+	  to determine whether or not they are a directory

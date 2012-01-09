@@ -32,6 +32,50 @@
 #include "syntax.h"
 #include <xmalloc.h>
 
+/* Default set of characters that should be backslash-quoted in strings */
+static const char bstab[256] =
+  {
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 1, 1, 0, 0, 0, 0, 0,	/* TAB, NL */
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+
+    1, 1, 1, 0, 1, 0, 1, 1,	/* SPACE, !, DQUOTE, DOL, AMP, SQUOTE */
+    1, 1, 1, 0, 1, 0, 0, 0,	/* LPAR, RPAR, STAR, COMMA */
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 1, 1, 0, 1, 1,	/* SEMI, LESSTHAN, GREATERTHAN, QUEST */
+
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 1, 1, 1, 1, 0,	/* LBRACK, BS, RBRACK, CARAT */
+
+    1, 0, 0, 0, 0, 0, 0, 0,	/* BACKQ */
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 1, 1, 1, 0, 0,	/* LBRACE, BAR, RBRACE */
+
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+  };
+
 /* **************************************************************** */
 /*								    */
 /*	 Functions for quoting strings to be re-read as input	    */
@@ -165,51 +209,24 @@ sh_un_double_quote (string)
    going through the shell parser, which will protect the internal
    quoting characters. */
 char *
-sh_backslash_quote (string)
+sh_backslash_quote (string, table)
      char *string;
+     char *table;
 {
   int c;
-  char *result, *r, *s;
+  char *result, *r, *s, *backslash_table;
 
   result = (char *)xmalloc (2 * strlen (string) + 1);
 
+  backslash_table = table ? table : bstab;
   for (r = result, s = string; s && (c = *s); s++)
     {
-      switch (c)
-	{
-	case ' ': case '\t': case '\n':		/* IFS white space */
-	case '\'': case '"': case '\\':		/* quoting chars */
-	case '|': case '&': case ';':		/* shell metacharacters */
-	case '(': case ')': case '<': case '>':
-	case '!': case '{': case '}':		/* reserved words */
-	case '*': case '[': case '?': case ']':	/* globbing chars */
-	case '^':
-	case '$': case '`':			/* expansion chars */
-	case ',':				/* brace expansion */
-	  *r++ = '\\';
-	  *r++ = c;
-	  break;
-#if 0
-	case '~':				/* tilde expansion */
-	  if (s == string || s[-1] == '=' || s[-1] == ':')
-	    *r++ = '\\';
-	  *r++ = c;
-	  break;
-
-	case CTLESC: case CTLNUL:		/* internal quoting characters */
-	  *r++ = CTLESC;			/* could be '\\'? */
-	  *r++ = c;
-	  break;
-#endif
-
-	case '#':				/* comment char */
-	  if (s == string)
-	    *r++ = '\\';
-	  /* FALLTHROUGH */
-	default:
-	  *r++ = c;
-	  break;
-	}
+      
+      if (backslash_table[c] == 1)
+	*r++ = '\\';
+      else if (c == '#' && s == string)			/* comment char */
+	*r++ = '\\';
+      *r++ = c;
     }
 
   *r = '\0';

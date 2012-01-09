@@ -4562,6 +4562,23 @@ parameter expansion as a special character.  The single quotes must match
 quoted.  This is the behavior of @sc{posix} mode through version 4.1.
 The default Bash behavior remains as in previous versions.
 
+@item complete_fullquote
+If set, Bash
+quotes all shell metacharacters in filenames and directory names when
+performing completion.
+If not set, Bash
+removes metacharacters such as the dollar sign from the set of
+characters that will be quoted in completed filenames
+when these metacharacters appear in shell variable references in words to be
+completed.
+This means that dollar signs in variable names that expand to directories
+will not be quoted;
+however, any dollar signs appearing in filenames will not be quoted, either.
+This is active only when bash is using backslashes to quote completed
+filenames.
+This variable is set by default, which is the default Bash behavior in
+versions through 4.2.
+
 @item direxpand
 If set, Bash
 replaces directory names with the results of word expansion when performing

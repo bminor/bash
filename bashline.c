@@ -116,13 +116,15 @@ static int bash_backward_kill_shellword __P((int, int));
 static char *restore_tilde __P((char *, char *));
 
 static char *bash_filename_rewrite_hook __P((char *, int));
+
 static void bash_directory_expansion __P((char **));
+static int bash_filename_stat_hook __P((char **));
 static int bash_directory_completion_hook __P((char **));
 static int filename_completion_ignore __P((char **));
 static int bash_push_line __P((void));
 
 static rl_icppfunc_t *save_directory_hook __P((void));
-static void reset_directory_hook __P((rl_icppfunc_t *));
+static void restore_directory_hook __P((rl_icppfunc_t));
 
 static void cleanup_expansion_error __P((void));
 static void maybe_make_readline_line __P((char *));
@@ -151,6 +153,7 @@ static int return_zero __P((const char *));
 
 static char *bash_dequote_filename __P((char *, int));
 static char *quote_word_break_chars __P((char *));
+static void set_filename_bstab __P((const char *));
 static char *bash_quote_filename __P((char *, int, char *));
 
 static int putx __P((int));
@@ -251,12 +254,20 @@ int dircomplete_spelling = 0;
 /* Expand directory names during word/filename completion. */
 int dircomplete_expand = 0;
 
+/* When non-zero, perform `normal' shell quoting on completed filenames
+   even when the completed name contains a directory name with a shell
+   variable referene, so dollar signs in a filename get quoted appropriately.
+   Set to zero to remove dollar sign (and braces or parens as needed) from
+   the set of characters that will be quoted. */
+int complete_fullquote = 1;
+
 static char *bash_completer_word_break_characters = " \t\n\"'@><=;|&(:";
 static char *bash_nohostname_word_break_characters = " \t\n\"'><=;|&(:";
 /* )) */
 
 static const char *default_filename_quote_characters = " \t\n\\\"'@<>=;|&()#$`?*[!:{~";	/*}*/
 static char *custom_filename_quote_characters = 0;
+static char filename_bstab[256];
 
 static rl_hook_func_t *old_rl_startup_hook = (rl_hook_func_t *)NULL;
 
@@ -541,6 +552,7 @@ initialize_readline ()
 
   /* characters that need to be quoted when appearing in filenames. */
   rl_filename_quote_characters = default_filename_quote_characters;
+  set_filename_bstab (rl_filename_quote_characters);
 
   rl_filename_quoting_function = bash_quote_filename;
   rl_filename_dequoting_function = bash_dequote_filename;
@@ -589,6 +601,7 @@ bashline_reset ()
   rl_completion_entry_function = NULL;
   rl_ignore_some_completions_function = filename_completion_ignore;
   rl_filename_quote_characters = default_filename_quote_characters;
+  set_filename_bstab (rl_filename_quote_characters);
 
   set_directory_hook ();
 }
@@ -1311,6 +1324,7 @@ attempt_shell_completion (text, start, end)
   rl_ignore_some_completions_function = filename_completion_ignore;
 
   rl_filename_quote_characters = default_filename_quote_characters;
+  set_filename_bstab (rl_filename_quote_characters);
 
   /* Determine if this could be a command word.  It is if it appears at
      the start of the line (ignoring preceding whitespace), or if it
@@ -2799,6 +2813,56 @@ restore_directory_hook (hookf)
     rl_directory_rewrite_hook = hookf;
 }
 
+static int
+bash_filename_stat_hook (dirname)
+     char **dirname;
+{
+  char *local_dirname, *new_dirname, *t;
+  int should_expand_dirname, return_value;
+  WORD_LIST *wl;
+  struct stat sb;
+
+  local_dirname = *dirname;
+  should_expand_dirname = return_value = 0;
+  if (t = mbschr (local_dirname, '$'))
+    should_expand_dirname = '$';
+  else if (t = mbschr (local_dirname, '`'))	/* XXX */
+    should_expand_dirname = '`';
+
+#if defined (HAVE_LSTAT)
+  if (should_expand_dirname && lstat (local_dirname, &sb) == 0)
+#else
+  if (should_expand_dirname && stat (local_dirname, &sb) == 0)
+#endif
+    should_expand_dirname = 0;
+  
+  if (should_expand_dirname)  
+    {
+      new_dirname = savestring (local_dirname);
+      wl = expand_prompt_string (new_dirname, 0, W_NOCOMSUB);	/* does the right thing */
+      if (wl)
+	{
+	  free (new_dirname);
+	  new_dirname = string_list (wl);
+	  /* Tell the completer we actually expanded something and change
+	     *dirname only if we expanded to something non-null -- stat
+	     behaves unpredictably when passed null or empty strings */
+	  if (new_dirname && *new_dirname)
+	    {
+	      *dirname = new_dirname;
+	      return_value = STREQ (local_dirname, *dirname) == 0;
+	    }
+	  free (local_dirname);
+	  free (new_dirname);
+	  dispose_words (wl);
+	}
+      else
+	free (new_dirname);
+    }	
+
+  return (return_value);
+}
+
 /* Handle symbolic link references and other directory name
    expansions while hacking completion.  This should return 1 if it modifies
    the DIRNAME argument, 0 otherwise.  It should make sure not to modify
@@ -2872,6 +2936,7 @@ bash_directory_completion_hook (dirname)
 		}
 	      custom_filename_quote_characters[j] = '\0';
 	      rl_filename_quote_characters = custom_filename_quote_characters;
+	      set_filename_bstab (rl_filename_quote_characters);
 	    }
 	}
       else
@@ -3494,6 +3559,20 @@ quote_word_break_chars (text)
   return ret;
 }
 
+/* Use characters in STRING to populate the table of characters that should
+   be backslash-quoted.  The table will be used for sh_backslash_quote from
+   this file. */
+static void
+set_filename_bstab (string)
+     const char *string;
+{
+  const char *s;
+
+  memset (filename_bstab, 0, sizeof (filename_bstab));
+  for (s = string; s && *s; s++)
+    filename_bstab[*s] = 1;
+}
+
 /* Quote a filename using double quotes, single quotes, or backslashes
    depending on the value of completion_quoting_style.  If we're
    completing using backslashes, we need to quote some additional
@@ -3559,7 +3638,7 @@ bash_quote_filename (s, rtype, qcp)
       rtext = sh_single_quote (mtext);
       break;
     case COMPLETE_BSQUOTE:
-      rtext = sh_backslash_quote (mtext);
+      rtext = sh_backslash_quote (mtext, complete_fullquote ? 0 : filename_bstab);
       break;
     }
 

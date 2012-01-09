@@ -312,7 +312,7 @@ extern char *sh_single_quote __P((const char *));
 extern char *sh_double_quote __P((const char *));
 extern char *sh_mkdoublequoted __P((const char *, int, int));
 extern char *sh_un_double_quote __P((char *));
-extern char *sh_backslash_quote __P((char *));
+extern char *sh_backslash_quote __P((char *, const char *));
 extern char *sh_backslash_quote_for_double_quotes __P((char *));
 extern int sh_contains_shell_metas __P((char *));
 

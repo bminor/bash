@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Fri Sep  2 14:19:38 EDT 2011
+.\"	Last Change: Thu Sep  8 09:39:24 EDT 2011
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2011 September 2" "GNU Bash 4.2"
+.TH BASH 1 "2011 September 8" "GNU Bash 4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -8992,6 +8992,25 @@ parameter expansion as a special character.  The single quotes must match
 (an even number) and the characters between the single quotes are considered
 quoted.  This is the behavior of posix mode through version 4.1.
 The default bash behavior remains as in previous versions.
+.TP 8
+.B complete_fullquote
+If set,
+.B bash
+quotes all shell metacharacters in filenames and directory names when
+performing completion.
+If not set,
+.B bash
+removes metacharacters such as the dollar sign from the set of
+characters that will be quoted in completed filenames
+when these metacharacters appear in shell variable references in words to be
+completed.
+This means that dollar signs in variable names that expand to directories
+will not be quoted;
+however, any dollar signs appearing in filenames will not be quoted, either.
+This is active only when bash is using backslashes to quote completed
+filenames.
+This variable is set by default, which is the default bash behavior in
+versions through 4.2.
 .TP 8
 .B direxpand
 If set,
