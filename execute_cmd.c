@@ -5184,6 +5184,14 @@ execute_intern_function (name, function)
       return (EXECUTION_FAILURE);
     }
 
+  /* Posix interpretation 383 */
+  if (posixly_correct && find_special_builtin (name->word))
+    {
+      internal_error (_("`%s': is a special builtin"), name->word);
+      last_command_exit_value = EX_BADUSAGE;
+      jump_to_top_level (ERREXIT);
+    }
+
   var = find_function (name->word);
   if (var && (readonly_p (var) || noassign_p (var)))
     {

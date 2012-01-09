@@ -3,13 +3,13 @@
 # This file is distributed under the same license as the bash package.
 # Primož PETERLIN <primozz.peterlin@gmail.com>, 2011.
 #
-# $Id: bash-4.2.sl.po,v 1.9 2011/08/06 20:04:00 peterlin Exp $
+# $Id: bash-4.2.sl.po,v 1.10 2011/09/20 19:33:18 peterlin Exp $
 msgid ""
 msgstr ""
 "Project-Id-Version: bash 4.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2011-01-28 22:09-0500\n"
-"PO-Revision-Date: 2011-08-06 22:03+0200\n"
+"PO-Revision-Date: 2011-09-20 21:31+0200\n"
 "Last-Translator: Primož PETERLIN <primozz.peterlin@gmail.com>\n"
 "Language-Team: Slovenian <translation-team-sl@lists.sourceforge.net>\n"
 "Language: sl\n"
@@ -440,8 +440,10 @@ msgstr "zadetki\tukaz\n"
 #, c-format
 msgid "Shell commands matching keyword `"
 msgid_plural "Shell commands matching keywords `"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Ukazev lupine, ujemajočih se s ključno besedo »"
+msgstr[1] "Ukaz lupine, ujemajoč se s ključno besedo »"
+msgstr[2] "Ukaza lupine, ujemajoča se s ključno besedo »"
+msgstr[3] "Ukazi lupine, ujemajoči se s ključno besedo »"
 
 #: builtins/help.def:168
 #, c-format
@@ -478,21 +480,21 @@ msgstr "uporabite lahko le eno od izbir -anrw"
 
 #: builtins/history.def:186
 msgid "history position"
-msgstr ""
+msgstr "položaj v zgodovini"
 
 #: builtins/history.def:365
 #, c-format
 msgid "%s: history expansion failed"
-msgstr ""
+msgstr "%s: neuspešna razrešitev zgodovine"
 
 #: builtins/inlib.def:71
 #, c-format
 msgid "%s: inlib failed"
-msgstr ""
+msgstr "%s: neuspel klic inlib"
 
 #: builtins/jobs.def:109
 msgid "no other options allowed with `-x'"
-msgstr ""
+msgstr "nobena druga izbira ni dovoljena skupaj z »-x«"
 
 #: builtins/kill.def:198
 #, c-format
@@ -814,7 +816,7 @@ msgstr ""
 #: builtins/ulimit.def:402
 #, c-format
 msgid "`%c': bad command"
-msgstr ""
+msgstr "»%c«: slab ukaz"
 
 #: builtins/ulimit.def:431
 #, c-format
@@ -860,19 +862,19 @@ msgstr "Prekinjanje.."
 
 #: error.c:406
 msgid "unknown command error"
-msgstr ""
+msgstr "neznana ukazna napaka"
 
 #: error.c:407
 msgid "bad command type"
-msgstr ""
+msgstr "slaba zvrst ukaza"
 
 #: error.c:408
 msgid "bad connector"
-msgstr ""
+msgstr "slab konektor"
 
 #: error.c:409
 msgid "bad jump"
-msgstr ""
+msgstr "slab skok"
 
 #: error.c:447
 #, c-format
@@ -882,7 +884,7 @@ msgstr ""
 #: eval.c:181
 #, c-format
 msgid "\atimed out waiting for input: auto-logout\n"
-msgstr ""
+msgstr "\ačasovna prekoračitev pri čakanju na vhod: samodejna odjava\n"
 
 #: execute_cmd.c:504
 #, c-format
@@ -892,11 +894,11 @@ msgstr "standardnega vhoda ni mogoče preusmeriti iz /dev/null: %s"
 #: execute_cmd.c:1168
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
-msgstr ""
+msgstr "TIMEFORMAT: »%c«: neveljavni formatni znak"
 
 #: execute_cmd.c:2121
 msgid "pipe error"
-msgstr ""
+msgstr "napaka cevovoda"
 
 #: execute_cmd.c:4640
 #, c-format
@@ -916,7 +918,7 @@ msgstr "%s: %s"
 #: execute_cmd.c:4995
 #, c-format
 msgid "%s: %s: bad interpreter"
-msgstr ""
+msgstr "%s: %s: slab tolmač"
 
 #: execute_cmd.c:5144
 #, c-format
@@ -1010,17 +1012,17 @@ msgstr ""
 
 #: jobs.c:468
 msgid "start_pipeline: pgrp pipe"
-msgstr ""
+msgstr "start_pipeline: cevovod pgrp"
 
 #: jobs.c:889
 #, c-format
 msgid "forked pid %d appears in running job %d"
-msgstr ""
+msgstr "vejeni PID %d se pojavlja v tekočem poslu %d"
 
 #: jobs.c:1007
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
-msgstr ""
+msgstr "brisanje ustavljenega posla %d s skupino procesa %ld"
 
 #: jobs.c:1112
 #, c-format
@@ -1091,17 +1093,17 @@ msgstr ""
 #: jobs.c:2133 nojobs.c:585
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
-msgstr ""
+msgstr "wait: PID %ld ni naslednik te lupine"
 
 #: jobs.c:2360
 #, c-format
 msgid "wait_for: No record of process %ld"
-msgstr ""
+msgstr "wait_for: Ni zapisa za proces %ld"
 
 #: jobs.c:2637
 #, c-format
 msgid "wait_for_job: job %d is stopped"
-msgstr ""
+msgstr "wait_for_job: posel %d je ustavljen"
 
 #: jobs.c:2859
 #, c-format
@@ -1125,7 +1127,7 @@ msgstr "%s: vrstica %d: "
 #: jobs.c:3552 nojobs.c:814
 #, c-format
 msgid " (core dumped)"
-msgstr ""
+msgstr " (izmet pomnilnika)"
 
 #: jobs.c:3564 jobs.c:3577
 #, c-format
@@ -1151,7 +1153,7 @@ msgstr ""
 
 #: jobs.c:3712
 msgid "no job control in this shell"
-msgstr ""
+msgstr "ta lupina nima nadzora poslov"
 
 #: lib/malloc/malloc.c:296
 #, c-format
@@ -1303,76 +1305,76 @@ msgstr ""
 #: parse.y:3173 parse.y:3444
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
-msgstr ""
+msgstr "nepričakovani EOF pri iskanju ujemajočega »%c«"
 
 #: parse.y:4025
 msgid "unexpected EOF while looking for `]]'"
-msgstr ""
+msgstr "nepričakovani EOF pri iskanju »]]«"
 
 #: parse.y:4030
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
-msgstr ""
+msgstr "napaka v skladnji pogojnega izraza: nepričakovani žeton »%s«"
 
 #: parse.y:4034
 msgid "syntax error in conditional expression"
-msgstr ""
+msgstr "napaka v skladnji pogojnega izraza"
 
 #: parse.y:4112
 #, c-format
 msgid "unexpected token `%s', expected `)'"
-msgstr ""
+msgstr "nepričakovani žeton »%s«, pričakovan »)«"
 
 #: parse.y:4116
 msgid "expected `)'"
-msgstr ""
+msgstr "pričakovan »)«"
 
 #: parse.y:4144
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
-msgstr ""
+msgstr "nepričakovani argument »%s« pogojnega unarnega operatorja"
 
 #: parse.y:4148
 msgid "unexpected argument to conditional unary operator"
-msgstr ""
+msgstr "nepričakovani argument pogojnega unarnega operatorja"
 
 #: parse.y:4194
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
-msgstr ""
+msgstr "nepričakovani žeton »%s«, pričakovan pogojni binarni operator"
 
 #: parse.y:4198
 msgid "conditional binary operator expected"
-msgstr ""
+msgstr "pričakovan pogojni binarni operator"
 
 #: parse.y:4220
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
-msgstr ""
+msgstr "nepričakovani argument »%s« pogojnega binarnega operatorja"
 
 #: parse.y:4224
 msgid "unexpected argument to conditional binary operator"
-msgstr ""
+msgstr "nepričakovani argument pogojnega binarnega operatorja"
 
 #: parse.y:4235
 #, c-format
 msgid "unexpected token `%c' in conditional command"
-msgstr ""
+msgstr "nepričakovani žeton »%c« v pogojnem ukazu"
 
 #: parse.y:4238
 #, c-format
 msgid "unexpected token `%s' in conditional command"
-msgstr ""
+msgstr "nepričakovani žeton »%s« v pogojnem ukazu"
 
 #: parse.y:4242
 #, c-format
 msgid "unexpected token %d in conditional command"
-msgstr ""
+msgstr "nepričakovani žeton %d v pogojnem ukazu"
 
 #: parse.y:5566
 #, c-format
 msgid "syntax error near unexpected token `%s'"
-msgstr ""
+msgstr "napaka v skladnji blizu nepričakovanega žetona »%s«"
 
 #: parse.y:5584
 #, c-format
@@ -1432,32 +1434,32 @@ msgstr ""
 
 #: redir.c:122
 msgid "file descriptor out of range"
-msgstr ""
+msgstr "deskriptor datoteke izven obsega"
 
 #: redir.c:178
 #, c-format
 msgid "%s: ambiguous redirect"
-msgstr ""
+msgstr "%s: preusmeritev ni enopomenska"
 
 #: redir.c:182
 #, c-format
 msgid "%s: cannot overwrite existing file"
-msgstr ""
+msgstr "%s: prek obstoječe datoteke ni mogoče pisati"
 
 #: redir.c:187
 #, c-format
 msgid "%s: restricted: cannot redirect output"
-msgstr ""
+msgstr "%s: omejitev: izhoda ni mogoče preusmeriti"
 
 #: redir.c:192
 #, c-format
 msgid "cannot create temp file for here-document: %s"
-msgstr ""
+msgstr "ni mogoče ustvariti začasne datoteke za dokument: %s"
 
 #: redir.c:196
 #, c-format
 msgid "%s: cannot assign fd to variable"
-msgstr ""
+msgstr "%s: fd ni mogoče pripisati spremenljivki"
 
 #: redir.c:548
 msgid "/dev/(tcp|udp)/host/port not supported without networking"
@@ -1465,7 +1467,7 @@ msgstr ""
 
 #: redir.c:818 redir.c:930 redir.c:993 redir.c:1136
 msgid "redirection error: cannot duplicate fd"
-msgstr ""
+msgstr "napaka pri preusmeritvi: fd ni mogoče podvojiti"
 
 #: shell.c:333
 msgid "could not find /tmp, please create!"

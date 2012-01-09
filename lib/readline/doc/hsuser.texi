@@ -141,8 +141,10 @@ history list and history file.
 @code{fc -s [@var{pat}=@var{rep}] [@var{command}]}
 @end example
 
-Fix Command.  In the first form, a range of commands from @var{first} to
-@var{last} is selected from the history list.  Both @var{first} and
+The first form selects a range of commands from @var{first} to
+@var{last} from the history list and displays or edits and re-executes
+them.
+Both @var{first} and
 @var{last} may be specified as a string (to locate the most recent
 command beginning with that string) or as a number (an index into the
 history list, where a negative number is used as an offset from the
@@ -161,6 +163,7 @@ When editing is complete, the edited commands are echoed and executed.
 
 In the second form, @var{command} is re-executed after each instance
 of @var{pat} in the selected command is replaced by @var{rep}.
+@var{command} is intepreted the same as @var{first} above.
 
 A useful alias to use with the @code{fc} command is @code{r='fc -s'}, so
 that typing @samp{r cc} runs the last command beginning with @code{cc}
@@ -208,11 +211,11 @@ to the current history list.  These are lines appended to the history
 file since the beginning of the current Bash session.
 
 @item -r
-Read the current history file and append its contents to
+Read the history file and append its contents to
 the history list.
 
 @item -w
-Write out the current history to the history file.
+Write out the current history list to the history file.
 
 @item -p
 Perform history substitution on the @var{arg}s and display the result

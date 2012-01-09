@@ -849,12 +849,25 @@ hostnames_matching (text)
 /* The equivalent of the Korn shell C-o operate-and-get-next-history-line
    editing command. */
 static int saved_history_line_to_use = -1;
+static int last_saved_history_line = -1;
+
+#define HISTORY_FULL() (history_is_stifled () && history_length >= history_max_entries)
 
 static int
 set_saved_history ()
 {
+  /* XXX - compensate for assumption that history was `shuffled' if it was
+     actually not. */
+  if (HISTORY_FULL () &&
+      hist_last_line_added == 0 &&
+      saved_history_line_to_use < history_length - 1)
+    saved_history_line_to_use++;
+
   if (saved_history_line_to_use >= 0)
-    rl_get_previous_history (history_length - saved_history_line_to_use, 0);
+    {
+     rl_get_previous_history (history_length - saved_history_line_to_use, 0);
+     last_saved_history_line = saved_history_line_to_use;
+    }
   saved_history_line_to_use = -1;
   rl_startup_hook = old_rl_startup_hook;
   return (0);
@@ -872,8 +885,7 @@ operate_and_get_next (count, c)
   /* Find the current line, and find the next line to use. */
   where = where_history ();
 
-  if ((history_is_stifled () && (history_length >= history_max_entries)) ||
-      (where >= history_length - 1))
+  if (HISTORY_FULL () || (where >= history_length - 1))
     saved_history_line_to_use = where;
   else
     saved_history_line_to_use = where + 1;
@@ -3656,9 +3668,17 @@ bash_quote_filename (s, rtype, qcp)
 
   /* Leave the opening quote intact.  The readline completion code takes
      care of avoiding doubled opening quotes. */
-  rlen = strlen (rtext);
-  ret = (char *)xmalloc (rlen + 1);
-  strcpy (ret, rtext);
+  if (rtext)
+    {
+      rlen = strlen (rtext);
+      ret = (char *)xmalloc (rlen + 1);
+      strcpy (ret, rtext);
+    }
+  else
+    {
+      ret = (char *)xmalloc (rlen = 1);
+      ret[0] = '\0';
+    }
 
   /* If there are multiple matches, cut off the closing quote. */
   if (rtype == MULT_MATCH && cs != COMPLETE_BSQUOTE)

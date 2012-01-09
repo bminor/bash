@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Fri Sep 16 08:43:45 EDT 2011
+.\"	Last Change: Sun Sep 25 22:01:16 EDT 2011
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2011 September 16" "GNU Bash 4.2"
+.TH BASH 1 "2011 September 25" "GNU Bash 4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -294,7 +294,7 @@ executes its startup files.
 If any of the files exist but cannot be read,
 .B bash
 reports an error.
-Tildes are expanded in file names as described below under
+Tildes are expanded in filenames as described below under
 .B "Tilde Expansion"
 in the
 .SM
@@ -348,7 +348,7 @@ behaves as if the following command were executed:
 but the value of the
 .SM
 .B PATH
-variable is not used to search for the file name.
+variable is not used to search for the filename.
 .PP
 If
 .B bash
@@ -920,7 +920,7 @@ If \fINAME\fP is not supplied, the default name is \fBCOPROC\fP.
 \fINAME\fP must not be supplied if \fIcommand\fP is a \fIsimple
 command\fP (see above); otherwise, it is interpreted as the first word
 of the simple command.
-When the coproc is executed, the shell creates an array variable (see
+When the coprocess is executed, the shell creates an array variable (see
 .B Arrays
 below) named \fINAME\fP in the context of the executing shell.
 The standard output of
@@ -965,6 +965,8 @@ That command is usually a \fIlist\fP of commands between { and }, but
 may be any command listed under \fBCompound Commands\fP above.
 \fIcompound\-command\fP is executed whenever \fIname\fP is specified as the
 name of a simple command.
+When in \fIposix mode\fP, \fIname\fP may not be the name of one of the
+POSIX \fIspecial builtins\fP.
 Any redirections (see
 .SM
 .B REDIRECTION
@@ -1329,7 +1331,7 @@ option, then
 .B $0
 is set to the first argument after the string to be
 executed, if one is present.  Otherwise, it is set
-to the file name used to invoke
+to the filename used to invoke
 .BR bash ,
 as given by argument zero.
 .TP
@@ -1351,7 +1353,7 @@ The following variables are set by the shell:
 .PD 0
 .TP
 .B BASH
-Expands to the full file name used to invoke this instance of
+Expands to the full filename used to invoke this instance of
 .BR bash .
 .TP
 .B BASHOPTS
@@ -1830,10 +1832,10 @@ The value of
 .SM
 .B BASH_ENV
 is subjected to parameter expansion, command substitution, and arithmetic
-expansion before being interpreted as a file name.
+expansion before being interpreted as a filename.
 .SM
 .B PATH
-is not used to search for the resultant file name.
+is not used to search for the resultant filename.
 .TP
 .B BASH_XTRACEFD
 If set to an integer corresponding to a valid file descriptor, \fBbash\fP
@@ -2128,9 +2130,9 @@ If this variable is unset, or set to a value that is not a number
 greater than or equal to zero, the shell disables mail checking.
 .TP
 .B MAILPATH
-A colon-separated list of file names to be checked for mail. 
+A colon-separated list of filenames to be checked for mail. 
 The message to be printed when mail arrives in a particular file
-may be specified by separating the file name from the message with a `?'.
+may be specified by separating the filename from the message with a `?'.
 When used in the text of the message, \fB$_\fP expands to the name of
 the current mailfile. 
 Example:
@@ -2393,7 +2395,7 @@ builtins.  Each attribute applies to all members of an array.
 Arrays are assigned to using compound assignments of the form
 \fIname\fP=\fB(\fPvalue\fI1\fP ... value\fIn\fP\fB)\fP, where each
 \fIvalue\fP is of the form [\fIsubscript\fP]=\fIstring\fP.
-Indexed array assignments do not require the bracket and subscript.
+Indexed array assignments do not require anything but \fIstring\fP.
 When assigning to indexed arrays, if the optional brackets and subscript
 are supplied, that index is assigned to;
 otherwise the index of the element assigned is the last index assigned
@@ -2646,7 +2648,7 @@ following a
 or the first
 .BR = .
 In these cases, tilde expansion is also performed.
-Consequently, one may use file names with tildes in assignments to
+Consequently, one may use filenames with tildes in assignments to
 .SM
 .BR PATH ,
 .SM
@@ -3134,12 +3136,12 @@ If one of these characters appears, then the word is
 regarded as a
 .IR pattern ,
 and replaced with an alphabetically sorted list of
-file names matching the pattern
+filenames matching the pattern
 (see
 .SM
 .B "Pattern Matching"
 below).
-If no matching file names are found,
+If no matching filenames are found,
 and the shell option
 .B nullglob
 is not enabled, the word is left unchanged.
@@ -3183,16 +3185,16 @@ shell options.
 The
 .SM
 .B GLOBIGNORE
-shell variable may be used to restrict the set of file names matching a
+shell variable may be used to restrict the set of filenames matching a
 .IR pattern .
 If
 .SM
 .B GLOBIGNORE
-is set, each matching file name that also matches one of the patterns in
+is set, each matching filename that also matches one of the patterns in
 .SM
 .B GLOBIGNORE
 is removed from the list of matches.
-The file names
+The filenames
 .B ``.''
 and
 .B ``..''
@@ -3204,10 +3206,10 @@ is set and not null.  However, setting
 .B GLOBIGNORE
 to a non-null value has the effect of enabling the
 .B dotglob
-shell option, so all other file names beginning with a
+shell option, so all other filenames beginning with a
 .B ``.''
 will match.
-To get the old behavior of ignoring file names beginning with a
+To get the old behavior of ignoring filenames beginning with a
 .BR ``.'' ,
 make
 .B ``.*''
@@ -4405,7 +4407,7 @@ When
 .B bash
 invokes an external command, the variable
 .B _
-is set to the full file name of the command and passed to that
+is set to the full filename of the command and passed to that
 command in its environment.
 .SH "EXIT STATUS"
 .PP
@@ -5965,11 +5967,11 @@ will be executed by the shell.
 .B glob\-complete\-word (M\-g)
 The word before point is treated as a pattern for pathname expansion,
 with an asterisk implicitly appended.  This pattern is used to
-generate a list of matching file names for possible completions.
+generate a list of matching filenames for possible completions.
 .TP
 .B glob\-expand\-word (C\-x *)
 The word before point is treated as a pattern for pathname expansion,
-and the list of matching file names is inserted, replacing the word.
+and the list of matching filenames is inserted, replacing the word.
 If a numeric argument is supplied, an asterisk is appended before
 pathname expansion.
 .TP
@@ -6513,10 +6515,10 @@ one or more of the following modifiers, each preceded by a `:'.
 .PP
 .TP
 .B h
-Remove a trailing file name component, leaving only the head.
+Remove a trailing filename component, leaving only the head.
 .TP
 .B t
-Remove all leading file name components, leaving the tail.
+Remove all leading filename components, leaving the tail.
 .TP
 .B r
 Remove a trailing suffix of the form \fI.xxx\fP, leaving the
@@ -6620,7 +6622,7 @@ executed from
 .IR filename .
 If
 .I filename
-does not contain a slash, file names in
+does not contain a slash, filenames in
 .SM
 .B PATH
 are used to find the directory containing
@@ -6900,7 +6902,7 @@ option is supplied, a description of
 .I command
 is printed.  The
 .B \-v
-option causes a single word indicating the command or file name
+option causes a single word indicating the command or filename
 used to invoke
 .I command
 to be displayed; the
@@ -7263,11 +7265,15 @@ turns off the attribute instead,
 with the exceptions that \fB+a\fP
 may not be used to destroy an array variable and \fB+r\fP will not
 remove the readonly attribute.
-When used in a function, makes each
+When used in a function,
+.B declare
+and
+.B typeset
+make each
 \fIname\fP local, as with the
 .B local
 command,
-unless the \fB\-g\fP option is supplied,
+unless the \fB\-g\fP option is supplied.
 If a variable name is followed by =\fIvalue\fP, the value of
 the variable is set to \fIvalue\fP.
 The return value is 0 unless an invalid option is encountered,
@@ -7284,7 +7290,7 @@ an attempt is made to turn off array status for an array variable,
 or an attempt is made to display a non-existent function with \fB\-f\fP.
 .RE
 .TP
-.B dirs [+\fIn\fP] [\-\fIn\fP] [\fB\-clpv\fP]
+.B dirs [\fB\-clpv\fP] [+\fIn\fP] [\-\fIn\fP]
 Without options, displays the list of currently remembered directories.
 The default display is on a single line with directory names separated
 by spaces.
@@ -7295,6 +7301,20 @@ command; the
 command removes entries from the list.
 .RS
 .PD 0
+.TP
+.B \-c
+Clears the directory stack by deleting all of the entries.
+.TP
+.B \-l
+Produces a listing using full pathnames;
+the default listing format uses a tilde to denote the home directory.
+.TP
+.B \-p
+Print the directory stack with one entry per line.
+.TP
+.B \-v
+Print the directory stack with one entry per line,
+prefixing each entry with its index in the stack.
 .TP
 \fB+\fP\fIn\fP
 Displays the \fIn\fPth entry counting from the left of the list
@@ -7307,20 +7327,6 @@ Displays the \fIn\fPth entry counting from the right of the list
 shown by
 .B dirs
 when invoked without options, starting with zero.
-.TP
-.B \-c
-Clears the directory stack by deleting all of the entries.
-.TP
-.B \-l
-Produces a longer listing; the default listing format uses a 
-tilde to denote the home directory.
-.TP
-.B \-p
-Print the directory stack with one entry per line.
-.TP
-.B \-v
-Print the directory stack with one entry per line,
-prefixing each entry with its index in the stack.
 .PD
 .PP
 The return value is 0 unless an
@@ -7329,9 +7335,9 @@ of the directory stack.
 .RE
 .TP
 \fBdisown\fP [\fB\-ar\fP] [\fB\-h\fP] [\fIjobspec\fP ...]
-Without options, each
+Without options, remove each
 .I jobspec
-is removed from the table of active jobs.
+from the table of active jobs.
 If
 .I jobspec
 is not present, and neither \fB\-a\fP nor \fB\-r\fP is supplied,
@@ -7506,12 +7512,14 @@ to be executed with an empty environment.  If
 .B \-a
 is supplied, the shell passes
 .I name
-as the zeroth argument to the executed command.  If
+as the zeroth argument to the executed command.
+If
 .I command
 cannot be executed for some reason, a non-interactive shell exits,
-unless the shell option
+unless the
 .B execfail
-is enabled, in which case it returns failure.
+shell option
+is enabled.  In that case, it returns failure.
 An interactive shell returns failure if the file cannot be executed.
 If
 .I command
@@ -7549,7 +7557,7 @@ If no
 are given, or if the
 .B \-p
 option is supplied, a list
-of all names that are exported in this shell is printed.
+of names of all exported variables is printed.
 The
 .B \-n
 option causes the export property to be removed from each
@@ -7570,11 +7578,11 @@ that is not a function.
 .TP
 \fBfc\fP \fB\-s\fP [\fIpat\fP=\fIrep\fP] [\fIcmd\fP]
 .PD
-Fix Command.  In the first form, a range of commands from
+The first form selects a range of commands from
 .I first
 to
 .I last
-is selected from the history list.
+from the history list and displays or edits and re-executes them.
 .I First
 and
 .I last
@@ -7628,6 +7636,7 @@ echoed and executed.
 .sp 1
 In the second form, \fIcommand\fP is re-executed after each instance
 of \fIpat\fP is replaced by \fIrep\fP.
+\fICommand\fP is intepreted the same as \fIfirst\fP above.
 A useful alias to use with this is
 .if n ``r="fc -s"'',
 .if t \f(CWr='fc \-s'\fP,
@@ -7730,7 +7739,7 @@ can report errors in two ways.  If the first character of
 .I optstring
 is a colon,
 .I silent
-error reporting is used.  In normal operation diagnostic messages
+error reporting is used.  In normal operation, diagnostic messages
 are printed when invalid options or missing option arguments are
 encountered.
 If the variable
@@ -7791,7 +7800,7 @@ If the
 .B \-p
 option is supplied, no path search is performed, and
 .I filename
-is used as the full file name of the command.
+is used as the full filename of the command.
 The
 .B \-r
 option causes the shell to forget all
@@ -7895,10 +7904,10 @@ current \fBbash\fP session.
 .TP
 .B \-r
 Read the contents of the history file
-and use them as the current history.
+and append them to the current history list.
 .TP
 .B \-w
-Write the current history to the history file, overwriting the
+Write the current history list to the history file, overwriting the
 history file's contents.
 .TP
 .B \-p
@@ -7954,10 +7963,10 @@ List only the process ID of the job's process group
 leader.
 .TP
 .B \-r
-Restrict output to running jobs.
+Display only running jobs.
 .TP
 .B \-s
-Restrict output to stopped jobs.
+Display only stopped jobs.
 .PD
 .PP
 If
@@ -8455,21 +8464,26 @@ is supplied with a
 that is not a function.
 .TP
 \fBreturn\fP [\fIn\fP]
-Causes a function to exit with the return value specified by
-.IR n .
+Causes a function to stop executing and return the value specified by
+.I n
+to its caller.
 If 
 .I n
 is omitted, the return status is that of the last command
-executed in the function body.  If used outside a function,
+executed in the function body.  If
+.B return
+is used outside a function,
 but during execution of a script by the 
 .B .
 (\fBsource\fP) command, it causes the shell to stop executing
 that script and return either
 .I n
 or the exit status of the last command executed within the
-script as the exit status of the script.  If used outside a
-function and not during execution of a script by \fB.\fP\^,
-the return status is false.
+script as the exit status of the script.
+The return status is non-zero if
+.B return
+is used outside a
+function and not during execution of a script by \fB.\fP\^ or \fBsource\fP.
 Any command associated with the \fBRETURN\fP trap is executed
 before execution resumes after the function or script.
 .TP
@@ -8891,8 +8905,9 @@ If either
 .B \-s
 or
 .B \-u
-is used with no \fIoptname\fP arguments, the display is limited to
-those options which are set or unset, respectively.
+is used with no \fIoptname\fP arguments,
+.B shopt
+shows only those options which are set or unset, respectively.
 Unless otherwise noted, the \fBshopt\fP options are disabled (unset)
 by default.
 .PP
@@ -8924,7 +8939,7 @@ If set, minor errors in the spelling of a directory component in a
 command will be corrected.
 The errors checked for are transposed characters,
 a missing character, and one character too many.
-If a correction is found, the corrected file name is printed,
+If a correction is found, the corrected filename is printed,
 and the command proceeds.
 This option is only used by interactive shells.
 .TP 8
@@ -9299,7 +9314,7 @@ is not supplied, or if job control is not enabled.
 .PD 0
 .TP
 \fB[\fP \fIexpr\fP \fB]\fP
-Return a status of 0 or 1 depending on
+Return a status of 0 (true) or 1 (false) depending on
 the evaluation of the conditional expression
 .IR expr .
 Each operator and operand must be a separate argument.
@@ -9570,7 +9585,7 @@ If a command is hashed,
 .B \-p
 and
 .B \-P
-print the hashed value, not necessarily the file that appears
+print the hashed value, which is not necessarily the file that appears
 first in 
 .SM
 .BR PATH .
@@ -9685,16 +9700,17 @@ The maximum number of threads
 .PP
 If
 .I limit
-is given, it is the new value of the specified resource (the
+is given, and the
 .B \-a
-option is display only).
+option is not used,
+\fIlimit\fP is the new value of the specified resource.
 If no option is given, then
 .B \-f
 is assumed.  Values are in 1024-byte increments, except for
 .BR \-t ,
-which is in seconds,
+which is in seconds;
 .BR \-p ,
-which is in units of 512-byte blocks,
+which is in units of 512-byte blocks;
 and
 .BR \-T ,
 .BR \-b ,
@@ -9833,7 +9849,7 @@ or
 specifying command names containing
 .B /
 .IP \(bu
-specifying a file name containing a
+specifying a filename containing a
 .B /
 as an argument to the
 .B .

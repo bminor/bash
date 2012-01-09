@@ -830,6 +830,23 @@ exp2 ()
 }
 
 static intmax_t
+ipow (base, exp)
+     intmax_t base, exp;
+{
+  intmax_t result;
+
+  result = 1;
+  while (exp)
+    {
+      if (exp & 1)
+	result *= base;
+      exp >>= 1;
+      base *= base;
+    }
+  return result;
+}
+
+static intmax_t
 exppower ()
 {
   register intmax_t val1, val2, c;
@@ -843,9 +860,7 @@ exppower ()
 	return (1);
       if (val2 < 0)
 	evalerror (_("exponent less than 0"));
-      for (c = 1; val2--; c *= val1)
-	;
-      val1 = c;
+      val1 = ipow (val1, val2);
     }
   return (val1);
 }

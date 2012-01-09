@@ -12187,3 +12187,43 @@ builtins/declare.def
 	  it as an assignment error and don't attempt any further processing
 	  of that declaration.  Fixes segfault bug reported by Diego Augusto
 	  Molina <diegoaugustomolina@gmail.com>
+
+				   9/19
+				   ----
+expr.c
+	- exppower: replace the simple exponentiation algorithm with an
+	  implementation of exponentiation by squaring.  Inspired by report
+	  from Nicolas ARGYROU <nargy@yahoo.com>
+
+bashline.c
+	- bash_quote_filename: check for rtext being non-null before
+	  dereferencing it
+	- set_saved_history: operate_and_get_next assumes that the previous
+	  line was added to the history, even when the history is stifled and
+	  at the max number of entries.  If it wasn't, make sure the history
+	  number is incremented properly.  Partial fix for bug reported by
+	  gregrwm <backuppc-users@whitleymott.net>
+
+doc/{bash.1,bashref.texi},lib/readline/doc/{hsuser,rluser}.texi
+	- minor editorial changes inspired by suggestions from
+	  <rogerx.oss@gmail.com>
+
+				   9/20
+				   ----
+lib/intl/localealias.c
+	- read_alias_file: close resource leak (fp) when returning on error
+
+				   9/22
+				   ----
+execute_command.c
+	- execute_intern_function: implement Posix interpretation 383 by making
+	  it an error to define a function with the same name as a special
+	  builtin when in Posix mode.
+	  http://austingroupbugs.net/view.php?id=383#c692
+
+				   9/25
+				   ----
+doc/{bash.1,bashref.texi}
+	- formatting and some content changes from Benno Schulenberg
+	  <bensberg@justemail.net>
+	- document new posix-mode behavior from interp 383 change of 9/22

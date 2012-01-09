@@ -2241,8 +2241,9 @@ rl_filename_completion_function (text, state)
 	}
       directory = opendir (dirname);
 
-      /* Now dequote a non-null filename. */
-      if (filename && *filename && rl_completion_found_quote && rl_filename_dequoting_function)
+      /* Now dequote a non-null filename.  FILENAME will not be NULL, but may
+	 be empty. */
+      if (*filename && rl_completion_found_quote && rl_filename_dequoting_function)
 	{
 	  /* delete single and double quotes */
 	  temp = (*rl_filename_dequoting_function) (filename, rl_completion_quote_character);
