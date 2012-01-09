@@ -11923,17 +11923,3 @@ lib/readline/complete.c
 lib/readline/signals.c
 	- rl_signal_handler: if we're in callback mode, don't interrupt
 	  immediately on a SIGWINCH
-
-				    7/3
-				    ---
-bashline.c
-	- set_directory_hook: and its siblings are a new set of functions to
-	  set, save, and restore the appropriate directory completion hook
-	- change callers to use {set,save,restore}_directory_hook instead of
-	  manipulating rl_directory_rewrite_hook directly
-	- dircomplete_expand: new variable, defaults to 0, if non-zero causes
-	  directory names to be word-expanded during word and filename
-	  completion
-	- change {set,save,restore}_directory_hook to look at dircomplete_expand
-	  and change rl_directory_completion_hook or rl_directory_rewrite_hook
-	  appropriately
