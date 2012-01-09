@@ -1034,6 +1034,8 @@ is enabled, the match is performed without regard to the case
 of alphabetic characters.
 Any part of the pattern may be quoted to force the quoted portion
 to be matched as a string.
+Bracket expressions in regular expressions must be treated carefully,
+since normal quoting characters lose their meanings between brackets.
 If the pattern is stored in a shell variable, quoting the variable
 expansion forces the entire pattern to be matched as a string.
 Substrings matched by parenthesized subexpressions within the regular
@@ -5304,13 +5306,16 @@ The name of the file to which the command history is saved.  The
 default value is @file{~/.bash_history}.
 
 @item HISTFILESIZE
-The maximum number of lines contained in the history file.  When this
-variable is assigned a value, the history file is truncated, if
-necessary, by removing the oldest entries,
-to contain no more than that number of lines.
+The maximum number of lines contained in the history file.
+When this variable is assigned a value, the history file is truncated,
+if necessary, to contain no more than that number of lines
+by removing the oldest entries.
 The history file is also truncated to this size after
 writing it when an interactive shell exits.
-The default value is 500.
+If the value is 0, the history file is truncated to zero size.
+Numeric values less than zero are treated as 0.
+The shell sets the default value to the value of @env{HISTSIZE}
+after reading any startup files.
 
 @item HISTIGNORE
 A colon-separated list of patterns used to decide which command
@@ -5334,7 +5339,9 @@ provides the functionality of @code{ignoreboth}.
 
 @item HISTSIZE
 The maximum number of commands to remember on the history list.
-The default value is 500.
+If the value is 0, commands are not saved in the history list.
+Numeric values less than zero are treated as 0.
+The shell sets the default value to 500 after reading any startup files.
 
 @item HISTTIMEFORMAT
 If this variable is set and not null, its value is used as a format string

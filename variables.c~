@@ -535,11 +535,6 @@ initialize_shell_variables (env, privmode)
 
       set_if_not ("HISTFILE", name);
       free (name);
-
-#if 0
-      set_if_not ("HISTSIZE", "500");
-      sv_histsize ("HISTSIZE");
-#endif
     }
 #endif /* HISTORY */
 
@@ -4071,7 +4066,7 @@ push_dollar_vars ()
     {
       dollar_arg_stack = (WORD_LIST **)
 	xrealloc (dollar_arg_stack, (dollar_arg_stack_slots += 10)
-		  * sizeof (WORD_LIST **));
+		  * sizeof (WORD_LIST *));
     }
   dollar_arg_stack[dollar_arg_stack_index++] = list_rest_of_args ();
   dollar_arg_stack[dollar_arg_stack_index] = (WORD_LIST *)NULL;

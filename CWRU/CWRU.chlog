@@ -12608,3 +12608,23 @@ redir.c
 	  limit is such that the shell can't duplicate to a file descriptor
 	  >= 10.  Fixes a limitation that tripped a coreutils test reported
 	  by Paul Eggert <eggert@cs.ucla.edu>
+
+				   11/19
+				   -----
+doc/{bash.1,bashref.texi},lib/readline/doc/hsuser.texi
+	- make it clear that bash runs HISTFILESIZE=$HISTSIZE after reading
+	  the startup files
+	- make it clear that bash runs HISTSIZE=500 after reading the
+	  startup files
+	- make it clear that setting HISTSIZE=0 causes commands to not be
+	  saved in the history list
+	- make it clear that setting HISTFILESIZE=0 causes the history file
+	  to be truncated to zero size
+
+variables.c
+	- sv_histsize: change so setting HISTSIZE to a value less than 0
+	  causes the history to be `unstifled'
+	- sv_histsize: change so setting HISTFILESIZE to a value less than 0
+	  results in no file truncation
+	- make it clear that numeric values less than 0 for HISTFILESIZE or
+	  HISTSIZE inhibit the usual functions
