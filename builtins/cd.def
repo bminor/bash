@@ -1,7 +1,7 @@
 This file is cd.def, from which is created cd.c.  It implements the
 builtins "cd" and "pwd" in Bash.
 
-Copyright (C) 1987-2010 Free Software Foundation, Inc.
+Copyright (C) 1987-2011 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -338,6 +338,7 @@ cd_builtin (list)
       if (temp && change_to_directory (temp, no_symlinks))
 	{
 	  printf ("%s\n", temp);
+	  free (temp);
 	  return (bindpwd (no_symlinks));
 	}
       else
@@ -406,7 +407,11 @@ pwd_builtin (list)
      the file system has changed state underneath bash). */
   if ((tcwd && directory == 0) ||
       (posixly_correct && same_file (".", tcwd, (struct stat *)0, (struct stat *)0) == 0))
-    directory = resetpwd ("pwd");
+    {
+      if (directory && directory != tcwd)
+        free (directory);
+      directory = resetpwd ("pwd");
+    }
 
 #undef tcwd
 
@@ -495,6 +500,8 @@ change_to_directory (newdir, nolinks)
 	  t = resetpwd ("cd");
 	  if (t == 0)
 	    set_working_directory (tdir);
+	  else
+	    free (t);
 	}
       else
 	set_working_directory (tdir);

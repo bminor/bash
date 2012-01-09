@@ -431,7 +431,7 @@ indirection_level_string ()
 
   old = change_flag ('x', FLAG_OFF);
   ps4 = decode_prompt_string (ps4);
-  if (old == FLAG_ON)
+  if (old)
     change_flag ('x', FLAG_ON);
 
   if (ps4 == 0 || *ps4 == '\0')
@@ -972,7 +972,7 @@ print_deferred_heredocs (cstring)
       cprintf (" ");
       print_heredoc_header (hdtail);
     }
-  if (cstring[0] && (cstring[0] != ';' || cstring[1]))
+  if (cstring && cstring[0] && (cstring[0] != ';' || cstring[1]))
     cprintf ("%s", cstring); 
   if (deferred_heredocs)
     cprintf ("\n");

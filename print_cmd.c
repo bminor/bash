@@ -972,7 +972,7 @@ print_deferred_heredocs (cstring)
       cprintf (" ");
       print_heredoc_header (hdtail);
     }
-  if (cstring[0] && (cstring[0] != ';' || cstring[1]))
+  if (cstring && cstring[0] && (cstring[0] != ';' || cstring[1]))
     cprintf ("%s", cstring); 
   if (deferred_heredocs)
     cprintf ("\n");
@@ -1506,6 +1506,8 @@ cprintf (control, va_alist)
 	  command_string_index += arg_len;
 	}
     }
+
+  va_end (args);
 
   the_printed_command[command_string_index] = '\0';
 }

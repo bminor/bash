@@ -1,7 +1,7 @@
 This file is cd.def, from which is created cd.c.  It implements the
 builtins "cd" and "pwd" in Bash.
 
-Copyright (C) 1987-2010 Free Software Foundation, Inc.
+Copyright (C) 1987-2011 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -290,7 +290,8 @@ cd_builtin (list)
 	    free (temp);
 	}
 
-#if 0	/* changed for bash-4.2 Posix cd description steps 5-6 */
+#if 0
+      /* changed for bash-4.2 Posix cd description steps 5-6 */
       /* POSIX.2 says that if `.' does not appear in $CDPATH, we don't
 	 try the current directory, so we just punt now with an error
 	 message if POSIXLY_CORRECT is non-zero.  The check for cdpath[0]
@@ -494,6 +495,8 @@ change_to_directory (newdir, nolinks)
 	  t = resetpwd ("cd");
 	  if (t == 0)
 	    set_working_directory (tdir);
+	  else
+	    free (t);
 	}
       else
 	set_working_directory (tdir);

@@ -1,6 +1,6 @@
 /* pcomplete.c - functions to generate lists of matches for programmable completion. */
 
-/* Copyright (C) 1999-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2011 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -372,6 +372,7 @@ it_init_aliases (itp)
 #else
   itp->slist = (STRINGLIST *)NULL;
 #endif
+  free (alias_list);
   return 1;
 }
 
@@ -1191,7 +1192,8 @@ gen_command_matches (cs, text, line, ind, lwords, nw, cw)
 
   tw = command_substitute (cscmd, 0);
   csbuf = tw ? tw->word : (char *)NULL;
-  dispose_word_desc (tw);
+  if (tw)
+    dispose_word_desc (tw);
 
   /* Now clean up and destroy everything. */
   dispose_words (cmdlist);
@@ -1431,6 +1433,7 @@ gen_compspec_completions (cs, cmd, word, start, end, foundp)
     {
       tcs = compspec_create ();
       tcs->actions = CA_DIRECTORY;
+      FREE (ret);
       ret = gen_action_completions (tcs, word);
       compspec_dispose (tcs);
     }
@@ -1491,7 +1494,13 @@ gen_progcomp_completions (ocmd, cmd, word, start, end, foundp, retryp, lastcs)
   cs = progcomp_search (ocmd);
 
   if (cs == 0 || cs == *lastcs)
-    return (NULL);
+    {
+#if 0
+      if (foundp)
+	*foundp = 0;
+#endif
+      return (NULL);
+    }
 
   if (*lastcs)
     compspec_dispose (*lastcs);

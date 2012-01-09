@@ -1252,7 +1252,7 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 #  endif
 #endif
 
-  posix_time = (command->flags & CMD_TIME_POSIX);
+  posix_time = command && (command->flags & CMD_TIME_POSIX);
 
   nullcmd = (command == 0) || (command->type == cm_simple && command->value.Simple->words == 0 && command->value.Simple->redirects == 0);
   if (posixly_correct && nullcmd)
@@ -1672,32 +1672,45 @@ cpl_delete (pid)
 static void
 cpl_reap ()
 {
-  struct cpelement *prev, *p;
+  struct cpelement *p, *next, *nh, *nt;
 
-  for (prev = p = coproc_list.head; p; prev = p, p = p->next)
-    if (p->coproc->c_flags & COPROC_DEAD)
-      {
-        prev->next = p->next;	/* remove from list */
-
-	/* Housekeeping in the border cases. */
-	if (p == coproc_list.head)
-	  coproc_list.head = coproc_list.head->next;
-	else if (p == coproc_list.tail)
-	  coproc_list.tail = prev;
-
-	coproc_list.ncoproc--;
-	if (coproc_list.ncoproc == 0)
-	  coproc_list.head = coproc_list.tail = 0;
-	else if (coproc_list.ncoproc == 1)
-	  coproc_list.tail = coproc_list.head;		/* just to make sure */
+  /* Build a new list by removing dead coprocs and fix up the coproc_list
+     pointers when done. */
+  nh = nt = next = (struct cpelement *)0;
+  for (p = coproc_list.head; p; p = next)
+    {
+      next = p->next;
+      if (p->coproc->c_flags & COPROC_DEAD)
+	{
+	  coproc_list.ncoproc--;	/* keep running count, fix up pointers later */
 
 #if defined (DEBUG)
-	itrace("cpl_reap: deleting %d", p->coproc->c_pid);
+	  itrace("cpl_reap: deleting %d", p->coproc->c_pid);
 #endif
 
-	coproc_dispose (p->coproc);
-	cpe_dispose (p);
-      }
+	  coproc_dispose (p->coproc);
+	  cpe_dispose (p);
+	}
+      else if (nh == 0)
+	nh = nt = p;
+      else
+	{
+	  nt->next = p;
+	  nt = nt->next;
+	}
+    }
+
+  if (coproc_list.ncoproc == 0)
+    coproc_list.head = coproc_list.tail = 0;
+  else
+    {
+      if (nt)
+        nt->next = 0;
+      coproc_list.head = nh;
+      coproc_list.tail = nt;
+      if (coproc_list.ncoproc == 1)
+	coproc_list.tail = coproc_list.head;		/* just to make sure */  
+    }
 }
 
 /* Clear out the list of saved statuses */
@@ -2321,7 +2334,8 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	  lastpipe_jid = stop_pipeline (0, (COMMAND *)NULL);	/* XXX */
 	  add_unwind_protect (lastpipe_cleanup, lastpipe_jid);
 	}
-      cmd->flags |= CMD_LASTPIPE;
+      if (cmd)
+	cmd->flags |= CMD_LASTPIPE;
     }	  
   if (prev >= 0)
     add_unwind_protect (close, prev);
@@ -2850,6 +2864,8 @@ print_index_and_element (len, ind, list)
     return (0);
   for (i = ind, l = list; l && --i; l = l->next)
     ;
+  if (l == 0)		/* don't think this can happen */
+    return (0);
   fprintf (stderr, "%*d%s%s", len, ind, RP_SPACE, l->word->word);
   return (displen (l->word->word));
 }
@@ -2990,7 +3006,7 @@ select_query (list, list_len, prompt, print_menu)
 
       for (l = list; l && --reply; l = l->next)
 	;
-      return (l->word->word);
+      return (l->word->word);		/* XXX - can't be null? */
     }
 }
 
@@ -3431,6 +3447,7 @@ execute_arith_command (arith_command)
 
 static char * const nullstr = "";
 
+/* XXX - can COND ever be NULL when this is called? */
 static int
 execute_cond_node (cond)
      COND_COM *cond;
@@ -3745,8 +3762,12 @@ is_dirname (pathname)
      char *pathname;
 {
   char *temp;
+  int ret;
+
   temp = search_for_command (pathname);
-  return (temp ? file_isdir (temp) : file_isdir (pathname));
+  ret = (temp ? file_isdir (temp) : file_isdir (pathname));
+  free (temp);
+  return ret;
 }
 
 /* The meaty part of all the executions.  We have to start hacking the
@@ -5092,6 +5113,7 @@ shell_execve (command, args, env)
 	     run it for some reason.  See why. */
 #if defined (HAVE_HASH_BANG_EXEC)
 	  READ_SAMPLE_BUF (command, sample, sample_len);
+	  sample[sample_len - 1] = '\0';
 	  if (sample_len > 2 && sample[0] == '#' && sample[1] == '!')
 	    {
 	      char *interp;

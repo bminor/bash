@@ -158,7 +158,7 @@ strsub (string, pat, rep, global)
 	  if (replen)
 	    RESIZE_MALLOCED_BUFFER (temp, templen, replen, tempsize, (replen * 2));
 
-	  for (r = rep; *r; )	/* can rep == "" */
+	  for (r = rep; *r; )
 	    temp[templen++] = *r++;
 
 	  i += patlen ? patlen : 1;	/* avoid infinite recursion */

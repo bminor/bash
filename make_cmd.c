@@ -324,6 +324,9 @@ make_arith_for_command (exprs, action, lineno)
       else
 	parser_error (lineno, _("syntax error: `;' unexpected"));
       parser_error (lineno, _("syntax error: `((%s))'"), exprs->word->word);
+      free (init);
+      free (test);
+      free (step);
       last_command_exit_value = 2;
       return ((COMMAND *)NULL);
     }

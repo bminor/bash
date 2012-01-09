@@ -1807,7 +1807,7 @@ globword:
         {
 	  if (executable_or_directory (val))
 	    {
-	      if (*hint_text == '~')
+	      if (*hint_text == '~' && directory_part)
 		{
 		  temp = restore_tilde (val, directory_part);
 		  free (val);
@@ -2773,8 +2773,11 @@ bash_directory_expansion (dirname)
 
   d = savestring (*dirname);
 
-  if (rl_directory_rewrite_hook)
-    (*rl_directory_rewrite_hook) (&d);
+  if ((rl_directory_rewrite_hook) &&  (*rl_directory_rewrite_hook) (&d))
+    {
+      free (*dirname);
+      *dirname = d;
+    }
   else if (rl_directory_completion_hook && (*rl_directory_completion_hook) (&d))
     {
       free (*dirname);
@@ -3904,12 +3907,16 @@ bind_keyseq_to_unix_command (line)
   if (line[i] != ':')
     {
       builtin_error (_("%s: missing colon separator"), line);
+      FREE (kseq);
       return -1;
     }
 
   i = isolate_sequence (line, i + 1, 0, &kstart);
   if (i < 0)
-    return -1;
+    {
+      FREE (kseq);
+      return -1;
+    }
 
   /* Create the value string containing the command to execute. */
   value = substring (line, kstart, i);
@@ -3920,7 +3927,8 @@ bind_keyseq_to_unix_command (line)
   /* and bind the key sequence in the current keymap to a function that
      understands how to execute from CMD_XMAP */
   rl_bind_keyseq_in_map (kseq, bash_execute_unix_command, kmap);
-  
+
+  free (kseq);  
   return 0;
 }
 

@@ -171,9 +171,6 @@ legal_number (string, result)
   if (result)
     *result = 0;
 
-  if (string == 0)
-    return 0;
-
   errno = 0;
   value = strtoimax (string, &ep, 10);
   if (errno || ep == string)
@@ -185,7 +182,7 @@ legal_number (string, result)
 
   /* If *string is not '\0' but *ep is '\0' on return, the entire string
      is valid. */
-  if (*string && *ep == '\0')
+  if (string && *string && *ep == '\0')
     {
       if (result)
 	*result = value;

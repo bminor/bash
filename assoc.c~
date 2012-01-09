@@ -533,7 +533,7 @@ assoc_to_string (h, sep, quoted)
     return (savestring (""));
 
   result = NULL;
-  l = list = NULL;
+  list = NULL;
   /* This might be better implemented directly, but it's simple to implement
      by converting to a word list first, possibly quoting the data, then
      using list_string */
@@ -551,8 +551,6 @@ assoc_to_string (h, sep, quoted)
   l = REVERSE_LIST(list, WORD_LIST *);
 
   result = l ? string_list_internal (l, sep) : savestring ("");
-  dispose_words (l);  
-
   return result;
 }
 

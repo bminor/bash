@@ -1,7 +1,7 @@
 This file is help.def, from which is created help.c.
 It implements the builtin "help" in Bash.
 
-Copyright (C) 1987-2011 Free Software Foundation, Inc.
+Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -209,7 +209,7 @@ show_longdoc (i)
       zcatfd (fd, 1, doc[0]);
       close (fd);
     }
-  else if (doc)
+  else
     for (j = 0; doc[j]; j++)
       printf ("%*s%s\n", BASE_INDENT, " ", _(doc[j]));
 }

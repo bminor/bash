@@ -570,8 +570,7 @@ find_user_command_in_path (name, path_list, flags)
 
   file_to_lose_on = (char *)NULL;
   name_len = strlen (name);
-  if (stat (".", &dotinfo) < 0)
-    dotinfo.st_dev = dotinfo.st_ino = 0;
+  stat (".", &dotinfo);
   path_index = 0;
 
   while (path_list[path_index])

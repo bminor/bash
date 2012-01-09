@@ -3669,7 +3669,8 @@ initialize_job_control (force)
       if (shell_tty == -1)
 	shell_tty = dup (fileno (stderr));	/* fd 2 */
 
-      shell_tty = move_to_high_fd (shell_tty, 1, -1);
+      if (shell_tty != -1)
+	shell_tty = move_to_high_fd (shell_tty, 1, -1);
 
       /* Compensate for a bug in systems that compiled the BSD
 	 rlogind with DEBUG defined, like NeXT and Alliant. */

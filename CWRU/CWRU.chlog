@@ -12407,3 +12407,145 @@ make_cmd.c
 	  when breaking the string between the double parens into three
 	  separate components instead of a simple character loop.  Fixes
 	  bug reported by Dan Douglas <ormaaj@gmail.com>
+
+				   11/2
+				   ----
+Makefile.in
+	- make libbuiltins.a depend on builtext.h to serialize its creation
+	  and avoid conflict between multiple invocations of mkbuiltins.
+	  Fix from Mike Frysinger <vapier@gentoo.org>
+
+				   11/5
+				   ----
+findcmd.c
+	- user_command_matches: if stat(".", ...) returns -1, set st_dev
+	  and st_ino fields in dotinfo to 0 to avoid same_file matches
+	- find_user_command_in_path: check stat(2) return the same way
+
+lib/glob/glob.c
+	- glob_vector: don't call strlen(pat) without checking pat == 0
+	- glob_dir_to_array: make sure to free `result' and all allocated
+	  members before returning error due to malloc failure
+	- glob_vector: make sure to free `nextname' and `npat' on errors
+	  (mostly when setting lose = 1)
+	- glob_vector: if flags & GX_MATCHDIRS but not GX_ALLDIRS, make
+	  sure we free `subdir'
+	- glob_filename: when expanding ** (GX_ALLDIRS), make sure we
+	  free temp_results (return value from glob_vector)
+
+lib/glob/xmbsrtowcs.c
+	- xdupmbstowcs: fix call to realloc to use sizeof (char *) instead
+	  of sizeof (char **) when assigning idxtmp
+
+execute_cmd.c
+	- print_index_and_element: return 0 right away if L == 0
+	- is_dirname: fix memory leak by freeing `temp'
+	- time_command: don't try to deref NULL `command' when assigning
+	  to `posix_time'
+	- shell_execve: null-terminate `sample' after READ_SAMPLE_BUF so it's
+	  terminated for functions that expect that
+
+builtins/read.def
+	- read_builtin: don't call bind_read_variable with a potentially-null
+	  string
+
+pcomplete.c
+	- gen_command_matches: don't call dispose_word_desc with a NULL arg
+	- gen_compspec_completions: fix memory leak by freeing `ret' before
+	  calling gen_action_completions (tcs, ...).  happens when
+	  performing directory completion as default and no completions
+	  have been generated
+	- gen_progcomp_completions: make sure to set foundp to 0 whenever
+	  returning NULL
+	- it_init_aliases: fix memory leak by freeing alias_list before
+	  returning
+
+bashline.c
+	- command_word_completion_function: don't call restore_tilde with a
+	  NULL directory_part argument
+	- bash_directory_expansion: bugfix: don't throw away results of
+	  rl_directory_rewrite_hook if it's set and returns non-zero
+	- bind_keyseq_to_unix_command: free `kseq' before returning error
+
+arrayfunc.c
+	- assign_array_element_internal: make sure `akey' is freed if non-null
+	  before returning error
+	- assign_compound_array_list: free `akey' before returning error
+	- array_value_internal: free `akey' before returning error
+	- unbind_array_element: free `akey' before returning error
+
+subst.c
+	- array_length_reference: free `akey' before returning error in case
+	  of expand_assignment_string_to_string error
+	- array_length_reference: free `akey' after call to assoc_reference
+	- skip_to_delim: if skipping process and command substitution, free
+	  return value from extract_process_subst
+	- parameter_brace_substring: free `val' (vtype == VT_VARIABLE) before
+	  returning if verify_substring_values fails
+	- parameter_brace_expand: remove two duplicate lines that allocate
+	  ret in parameter_brace_substring case
+	- parameter_brace_expand: convert `free (name); name = xmalloc (...)'
+	  to use `xrealloc (name, ...)'
+	- parameter_brace_expand: free `name' before returning when handling
+	  ${!PREFIX*} expansion
+	- split_at_delims: fix memory leak by freeing `d2' before returning
+
+redir.c
+	- redirection_error: free `filename' if the redirection operator is
+	  REDIR_VARASSIGN by assigning allocname
+
+eval.c
+	- send_pwd_to_eterm: fix memory leak by freeing value returned by
+	  get_working_directory()
+
+builtins/cd.def
+	- change_to_directory: fix memory leak by freeing return value from
+	  resetpwd()
+	- cd_builtin: fix memory leak by freeing value returned by dirspell()
+	- cd_builtin: fix memory leak by freeing `directory' if appropriate
+	  before overwriting with return value from resetpwd()
+
+builtins/type.def
+	- describe_command: free `full_path' before overwriting it with return
+	  value from sh_makepath
+
+builtins/complete.def
+	- compgen_builtin: fix memory leak by calling strlist_dispose (sl)
+	  before overwriting sl with return value from completions_to_stringlist
+
+builtins/hash.def
+	- list_hashed_filename_targets: fix memory leak by freeing `target'
+
+make_cmd.c
+	- make_arith_for_command: free `init', `test', and `step' before
+	  returning error on parse error
+
+jobs.c
+	- initialize_job_control: don't call move_to_high_fd if shell_tty == -1
+
+general.c
+	- check_dev_tty: don't call close with an fd < 0
+	- legal_number: deal with NULL `string' argument, return invalid
+
+lib/sh/fmtulong.c
+	- fmtulong: if the `base' argument is invalid, make sure we index
+	  buf by `len-1' at maximum
+
+print_cmd.c
+	- print_deferred_heredocs: don't try to dereference a NULL `cstring'
+	- cprintf: make sure to call va_end (args)
+
+variables.c
+	- push_dollar_vars: fix call to xrealloc to use sizeof (WORD_LIST *)
+	  instead of sizeof (WORD_LIST **)
+
+lib/sh/zmapfd.c
+	- zmapfd: if read returns error, free result and return -1 immediately
+	  instead of trying to reallocate it
+
+				   11/6
+				   ----
+execute_cmd.c
+	- cpl_reap: rewrote to avoid using pointer after freeing it; now builds
+	  new coproc list on the fly while traversing the old one and sets the
+	  right values for coproc_list when done
