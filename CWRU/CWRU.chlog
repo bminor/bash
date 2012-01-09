@@ -12062,3 +12062,23 @@ lib/sh/zread.c
 expr.c
 	- don't check for division by 0 when in a context where no evaluation
 	  is taking place.  Fixes bug reported by dnade.ext@orange-ftgroup.com
+
+				    8/6
+				    ---
+execute_cmd.c
+	- execute_command_internal: the parent branch of the subshell code
+	  (where the child calls execute_in_subshell) should not close all
+	  open FIFOs with unlink_fifo_list if it's part of a shell function
+	  that's still executing.  Fixes bug reported by Maarten Billemont
+	  <lhunath@lyndir.com>
+
+				    8/9
+				    ---
+builtins/common.c
+	- get_exitstat: return EX_BADUSAGE (2) on a non-numeric argument
+
+builtins/return.def
+	- return_builtin: just call get_exitstat to get the return status,
+	  let it handle proper parsing and handling of arguments.  Fixes
+	  issue most recently raised by Linda Walsh <bash@tlinx.org>.
+	  Reverses change from 9/11/2008 (see above)

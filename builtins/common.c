@@ -500,7 +500,7 @@ get_exitstat (list)
   if (arg == 0 || legal_number (arg, &sval) == 0)
     {
       sh_neednumarg (list->word->word ? list->word->word : "`'");
-      return 255;
+      return EX_BADUSAGE;
     }
   no_args (list->next);
 

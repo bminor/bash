@@ -592,7 +592,8 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	  close_pipes (pipe_in, pipe_out);
 
 #if defined (PROCESS_SUBSTITUTION) && defined (HAVE_DEV_FD)
-	  unlink_fifo_list ();
+	  if (variable_context == 0)	/* wait until shell function completes */
+	    unlink_fifo_list ();
 #endif
 	  /* If we are part of a pipeline, and not the end of the pipeline,
 	     then we should simply return and let the last command in the
