@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Thu Sep  8 09:39:24 EDT 2011
+.\"	Last Change: Fri Sep 16 08:43:45 EDT 2011
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2011 September 8" "GNU Bash 4.2"
+.TH BASH 1 "2011 September 16" "GNU Bash 4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -8394,8 +8394,9 @@ the decimal point.
 This option is only effective if \fBread\fP is reading input from a
 terminal, pipe, or other special file; it has no effect when reading
 from regular files.
-If \fItimeout\fP is 0, \fBread\fP returns success if input is available on
-the specified file descriptor, failure otherwise.
+If \fItimeout\fP is 0, \fBread\fP returns immediately, without trying to
+read any data.  The exit statis is 0 if input is available on
+the specified file descriptor, non-zero otherwise.
 The exit status is greater than 128 if the timeout is exceeded.
 .TP
 .B \-u \fIfd\fP

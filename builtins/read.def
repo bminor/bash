@@ -53,8 +53,9 @@ Options:
   -t timeout	time out and return failure if a complete line of input is
 		not read withint TIMEOUT seconds.  The value of the TMOUT
 		variable is the default timeout.  TIMEOUT may be a
-		fractional number.  If TIMEOUT is 0, read returns success only
-		if input is available on the specified file descriptor.  The
+		fractional number.  If TIMEOUT is 0, read returns immediately,
+		without trying to read any data, returning success only if
+		input is available on the specified file descriptor.  The
 		exit status is greater than 128 if the timeout is exceeded
   -u fd		read from file descriptor FD instead of the standard input
 

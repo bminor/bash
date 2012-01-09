@@ -12179,3 +12179,11 @@ bashline.c
 	- bash_filename_stat_hook: new function, designed to expand variable
 	  references in filenames before readline passes them to stat(2)
 	  to determine whether or not they are a directory
+
+				   9/15
+				   ----
+builtins/declare.def
+	- if assign_array_element fails due to a bad (or empty) subscript, mark
+	  it as an assignment error and don't attempt any further processing
+	  of that declaration.  Fixes segfault bug reported by Diego Augusto
+	  Molina <diegoaugustomolina@gmail.com>

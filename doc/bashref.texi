@@ -3970,8 +3970,9 @@ the decimal point.
 This option is only effective if @code{read} is reading input from a
 terminal, pipe, or other special file; it has no effect when reading
 from regular files.
-If @var{timeout} is 0, @code{read} returns success if input is available on
-the specified file descriptor, failure otherwise.
+If @var{timeout} is 0, @code{read} returns immediately, without trying to
+read and data.  The exit status is 0 if input is available on
+the specified file descriptor, non-zero otherwise.
 The exit status is greater than 128 if the timeout is exceeded.
 
 @item -u @var{fd}
