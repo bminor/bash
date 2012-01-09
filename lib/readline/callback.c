@@ -100,11 +100,15 @@ rl_callback_handler_install (prompt, linefunc)
   _rl_callback_newline ();
 }
 
-/* Placeholder for now */
-#define CALLBACK_READ_RETURN()	\
+#if defined (HANDLE_SIGNALS)
+#define CALLBACK_READ_RETURN() \
   do { \
+    rl_clear_signals (); \
     return; \
   } while (0)
+#else
+#define CALLBACK_READ_RETURN() return
+#endif
 
 /* Read one character, and dispatch to the handler if it ends the line. */
 void

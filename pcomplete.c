@@ -1461,6 +1461,10 @@ pcomp_set_readline_variables (flags, nval)
   /* If the user doesn't want a space appended, tell readline. */
   if (flags & COPT_NOSPACE)
     rl_completion_suppress_append = nval;
+  /* The value here is inverted, since the default is on and the `noquote'
+     option is supposed to turn it off */
+  if (flags & COPT_NOQUOTE)
+    rl_filename_quoting_desired = 1 - nval;
 }
 
 /* Set or unset FLAGS in the options word of the current compspec.

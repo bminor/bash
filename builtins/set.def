@@ -1,7 +1,7 @@
 This file is set.def, from which is created set.c.
 It implements the "set" and "unset" builtins in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2011 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -791,6 +791,8 @@ unset_builtin (list)
 	  unset_array++;
 	}
 #endif
+      /* Get error checking out of the way first.  The low-level functions
+	 just perform the unset, relying on the caller to verify. */
 
       /* Bash allows functions with names which are not valid identifiers
 	 to be created when not in posix mode, so check only when in posix
@@ -801,12 +803,24 @@ unset_builtin (list)
 	  NEXT_VARIABLE ();
 	}
 
+      /* Only search for functions here if -f supplied. */
       var = unset_function ? find_function (name) : find_variable (name);
 
-      if (var && !unset_function && non_unsettable_p (var))
+      /* Some variables (but not functions yet) cannot be unset, period. */
+      if (var && unset_function == 0 && non_unsettable_p (var))
 	{
 	  builtin_error (_("%s: cannot unset"), name);
 	  NEXT_VARIABLE ();
+	}
+
+      /* Posix.2 says try variables first, then functions.  If we would
+	 find a function after unsuccessfully searching for a variable,
+	 note that we're acting on a function now as if -f were
+	 supplied.  The readonly check below takes care of it. */
+      if (var == 0 && unset_variable == 0 && unset_function == 0)
+	{
+	  if (var = find_function (name))
+	    unset_function = 1;
 	}
 
       /* Posix.2 says that unsetting readonly variables is an error. */
@@ -817,6 +831,7 @@ unset_builtin (list)
 	  NEXT_VARIABLE ();
 	}
 
+      
       /* Unless the -f option is supplied, the name refers to a variable. */
 #if defined (ARRAY_VARS)
       if (var && unset_array)
@@ -837,11 +852,11 @@ unset_builtin (list)
 #endif /* ARRAY_VARS */
       tem = unset_function ? unbind_func (name) : unbind_variable (name);
 
-      /* This is what Posix.2 draft 11+ says.  ``If neither -f nor -v
+      /* This is what Posix.2 says:  ``If neither -f nor -v
 	 is specified, the name refers to a variable; if a variable by
 	 that name does not exist, a function by that name, if any,
 	 shall be unset.'' */
-      if (tem == -1 && !unset_function && !unset_variable)
+      if (tem == -1 && unset_function == 0 && unset_variable == 0)
 	tem = unbind_func (name);
 
       /* SUSv3, POSIX.1-2001 say:  ``Unsetting a variable or function that

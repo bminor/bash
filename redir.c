@@ -1051,7 +1051,7 @@ do_redirection_internal (redirect, flags)
 	     file descriptors >= SHELL_FD_BASE, we set the saving fd to be
 	     close-on-exec and use a flag to decide how to set close-on-exec
 	     when the fd is restored. */
-	  if ((redirect->flags & RX_INTERNAL) && (redirect->flags & RX_SAVCLEXEC) && redirector >= 3 && redir_fd >= SHELL_FD_BASE)
+	  if ((redirect->flags & RX_INTERNAL) && (redirect->flags & RX_SAVCLEXEC) && redirector >= 3 && (redir_fd >= SHELL_FD_BASE || (redirect->flags & RX_SAVEFD)))
 	    SET_OPEN_ON_EXEC (redirector);
 	    
 	  /* dup-and-close redirection */
@@ -1123,13 +1123,19 @@ add_undo_redirect (fd, ri, fdbase)
      enum r_instruction ri;
      int fdbase;
 {
-  int new_fd, clexec_flag;
+  int new_fd, clexec_flag, savefd_flag;
   REDIRECT *new_redirect, *closer, *dummy_redirect;
   REDIRECTEE sd;
 
+  savefd_flag = 0;
   new_fd = fcntl (fd, F_DUPFD, (fdbase < SHELL_FD_BASE) ? SHELL_FD_BASE : fdbase+1);
   if (new_fd < 0)
     new_fd = fcntl (fd, F_DUPFD, SHELL_FD_BASE);
+  if (new_fd < 0)
+    {
+      new_fd = fcntl (fd, F_DUPFD, 0);
+      savefd_flag = 1;
+    }
 
   if (new_fd < 0)
     {
@@ -1152,7 +1158,9 @@ add_undo_redirect (fd, ri, fdbase)
   else
     new_redirect = make_redirection (sd, r_duplicating_output, rd, 0);
   new_redirect->flags |= RX_INTERNAL;
-  if (clexec_flag == 0 && fd >= 3 && new_fd >= SHELL_FD_BASE)
+  if (savefd_flag)
+    new_redirect->flags |= RX_SAVEFD;
+  if (clexec_flag == 0 && fd >= 3 && (new_fd >= SHELL_FD_BASE || savefd_flag))
     new_redirect->flags |= RX_SAVCLEXEC;
   new_redirect->next = closer;
 

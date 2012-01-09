@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sun Sep 25 22:01:16 EDT 2011
+.\"	Last Change: Sat Nov 12 13:34:37 EST 2011
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2011 September 25" "GNU Bash 4.2"
+.TH BASH 1 "2011 November 12" "GNU Bash 4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -729,6 +729,10 @@ is enabled, the match is performed without regard to the case
 of alphabetic characters.
 Any part of the pattern may be quoted to force the quoted portion
 to be matched as a string.
+Bracket expressions in regular expressions must be treated carefully,
+since normal quoting characters lose their meanings between brackets.
+If the pattern is stored in a shell variable, quoting the variable
+expansion forces the entire pattern to be matched as a string.
 Substrings matched by parenthesized subexpressions within the regular
 expression are saved in the array variable
 .SM
@@ -7006,6 +7010,10 @@ Tell readline that the compspec generates filenames, so it can perform any
 filename\-specific processing (like adding a slash to directory names,
 quoting special characters, or suppressing trailing spaces).
 Intended to be used with shell functions.
+.TP 8
+.B noquote
+Tell readline not to quote the completed words if they are filenames
+(quoting filenames is the default).
 .TP 8
 .B nospace
 Tell readline not to append a space (the default) to words completed at

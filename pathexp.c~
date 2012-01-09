@@ -220,7 +220,7 @@ quote_string_for_globbing (pathname, qflags)
 		{
 		  /* skip c, check for EOS, let assignment at end of loop */
 		  /* pathname[i] == backslash-escaped character */
-		  if (pathname[i] == 0)
+		  if (pathname[i] == 0 || pathname[++i] == 0)
 		    goto endpat;
 		  temp[j++] = pathname[i++];
 		}

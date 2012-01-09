@@ -115,7 +115,7 @@ redirection_error (temp, error)
 
   allocname = 0;
   if (temp->rflags & REDIR_VARASSIGN)
-    filename = savestring (temp->redirector.filename->word);
+    filename = allocname = savestring (temp->redirector.filename->word);
   else if (temp->redirector.dest < 0)
     /* This can happen when read_token_word encounters overflow, like in
        exec 4294967297>x */
@@ -1051,7 +1051,7 @@ do_redirection_internal (redirect, flags)
 	     file descriptors >= SHELL_FD_BASE, we set the saving fd to be
 	     close-on-exec and use a flag to decide how to set close-on-exec
 	     when the fd is restored. */
-	  if ((redirect->flags & RX_INTERNAL) && (redirect->flags & RX_SAVCLEXEC) && redirector >= 3 && redir_fd >= SHELL_FD_BASE)
+	  if ((redirect->flags & RX_INTERNAL) && (redirect->flags & RX_SAVCLEXEC) && redirector >= 3 && (redir_fd >= SHELL_FD_BASE || (redirect->flags & RX_SAVEFD)))
 	    SET_OPEN_ON_EXEC (redirector);
 	    
 	  /* dup-and-close redirection */

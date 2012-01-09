@@ -1,7 +1,7 @@
 This file is complete.def, from which is created complete.c.
 It implements the builtins "complete", "compgen", and "compopt" in Bash.
 
-Copyright (C) 1999-2010 Free Software Foundation, Inc.
+Copyright (C) 1999-2011 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -728,6 +728,7 @@ compgen_builtin (list)
   if ((sl == 0 || sl->list_len == 0) && (copts & COPT_DEFAULT))
     {
       matches = rl_completion_matches (word, rl_filename_completion_function);
+      strlist_dispose (sl);
       sl = completions_to_stringlist (matches);
       strvec_dispose (matches);
     }

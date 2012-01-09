@@ -1,6 +1,6 @@
 /* pcomplete.c - functions to generate lists of matches for programmable completion. */
 
-/* Copyright (C) 1999-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2011 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -372,6 +372,7 @@ it_init_aliases (itp)
 #else
   itp->slist = (STRINGLIST *)NULL;
 #endif
+  free (alias_list);
   return 1;
 }
 

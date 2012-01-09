@@ -1034,6 +1034,10 @@ is enabled, the match is performed without regard to the case
 of alphabetic characters.
 Any part of the pattern may be quoted to force the quoted portion
 to be matched as a string.
+Bracket expressions in regular expressions must be treated carefully,
+since normal quoting characters lose their meanings between brackets.
+If the pattern is stored in a shell variable, quoting the variable
+expansion forces the entire pattern to be matched as a string.
 Substrings matched by parenthesized subexpressions within the regular
 expression are saved in the array variable @code{BASH_REMATCH}.
 The element of @code{BASH_REMATCH} with index 0 is the portion of the string

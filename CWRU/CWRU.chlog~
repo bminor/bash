@@ -11657,7 +11657,7 @@ sig.c
 				   5/15
 				   ----
 lib/readline/display.c
-	- _rl_col_width: Mac OS X has a bug in wcwitdh: it does not return 0
+	- _rl_col_width: Mac OS X has a bug in wcwidth: it does not return 0
 	  for UTF-8 combining characters.  Added workaround dependent on
 	  MACOSX.  Fixes problem pointed out by Thomas De Contes
 	  <d.l.tDecontes@free.fr>
@@ -12542,3 +12542,69 @@ variables.c
 lib/sh/zmapfd.c
 	- zmapfd: if read returns error, free result and return -1 immediately
 	  instead of trying to reallocate it
+
+				   11/6
+				   ----
+execute_cmd.c
+	- cpl_reap: rewrote to avoid using pointer after freeing it; now builds
+	  new coproc list on the fly while traversing the old one and sets the
+	  right values for coproc_list when done
+
+				   11/12
+				   -----
+builtins/set.def
+	- if neither -f nor -v supplied, don't allow a readonly function to
+	  be implicitly unset.  Fixes bug reported by Jens Schmidt
+	  <jens.schmidt35@arcor.de>
+
+lib/readline/callback.c
+	- change CALLBACK_READ_RETURN to clear signal handlers before returning
+	  from rl_callback_read_char so readline's signal handlers aren't
+	  installed when readline doesn't have control.  Idea from Jan
+	  Kratochvil <jan.ktratochvil@redhat.com> and the GDB development
+	  team
+
+pcomplete.h
+	- COPT_NOQUOTE: new complete/compgen option value
+
+builtins/complete.def
+	- noquote: new complete/compgen option; will be used to disable
+	  filename completion quoting
+
+pcomplete.c
+	- pcomp_set_readline_variables: pay attention to COPT_NOQUOTE; turns
+	  of rl_filename_quoting_desired if set; turns it on if unset (value
+	  is inverted, since default is on)
+
+doc/bash.1,lib/readline/doc/rluser.texi
+	- document new -o noquote option to complete/compgen/compopt
+
+pathexp.c
+	- quote_string_for_globbing: if QGLOB_REGEXP, make sure characters
+	  between brackets in an ERE bracket expression are not inappropriately
+	  quoted with backslashes.  This is a pretty substantial change,
+	  should be stressed when opening bash up for alpha and beta tests.
+	  Fixes bug pointed out by Stephane Chazleas
+	  <stephane_chazelas@yahoo.fr>
+
+doc/{bash.1,bashref.texi}
+	- document that regexp matches can be inconsistent when quoting
+	  characters in bracket expressions, since usual quoting characters
+	  lose their meaning within brackets
+	- note that regular expression matching when the pattern is stored
+	  in a shell variable which is quoted for expansion causes string
+	  matching
+
+redir.h
+	- RX_SAVEFD: new flag value; notes that a redirection denotes an
+	  fd used to save another even if it's not >= SHELL_FD_BASE
+
+redir.c
+	- do_redirection_internal: when deciding whether or not to reset the
+	  close-on-exec flag on a restored file descriptor, trust the value
+	  of redirect->flags & RX_SAVCLEXEC even if the fd is < SHELL_FD_BASE
+	  if the RX_SAVEFD flag is set
+	- add_undo_redirect: set the RX_SAVEFD flag if the file descriptor
+	  limit is such that the shell can't duplicate to a file descriptor
+	  >= 10
+
