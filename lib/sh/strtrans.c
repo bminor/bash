@@ -211,8 +211,11 @@ ansic_quote (str, flags, rlen)
   char *r, *ret, *s;
   int l, rsize, sindex;
   unsigned char c;
-  size_t slen;
-  DECLARE_MBSTATE;
+  size_t slen, clen;
+#if defined (HANDLE_MULTIBYTE)
+  int b;
+  wchar_t wc;
+#endif
 
   if (str == 0 || *str == 0)
     return ((char *)0);
@@ -230,6 +233,8 @@ ansic_quote (str, flags, rlen)
   for (s = str; c = *s; s++)
     {
       l = 1;		/* 1 == add backslash; 0 == no backslash */
+      clen = 1;
+
       switch (c)
 	{
 	case ESC: c = 'E'; break;
@@ -237,7 +242,7 @@ ansic_quote (str, flags, rlen)
 	case '\a': c = 'a'; break;
 	case '\v': c = 'v'; break;
 #else
-	case '\007': c = 'a'; break;
+	case 0x07: c = 'a'; break;
 	case 0x0b: c = 'v'; break;
 #endif
 
@@ -250,7 +255,13 @@ ansic_quote (str, flags, rlen)
 	case '\'':
 	  break;
 	default:
+#if defined (HANDLE_MULTIBYTE)
+	  b = is_basic (c);
+	  if ((b == 0 && ((clen = mbrtowc (&wc, s, MB_CUR_MAX, 0)) < 0 || iswprint (wc) == 0)) ||
+	      (b == 1 && ISPRINT (c) == 0))
+#else
 	  if (ISPRINT (c) == 0)
+#endif
 	    {
 	      *r++ = '\\';
 	      *r++ = TOCHAR ((c >> 6) & 07);
@@ -263,7 +274,12 @@ ansic_quote (str, flags, rlen)
 	}
       if (l)
 	*r++ = '\\';
-      *r++ = c;
+
+      if (clen == 1)
+	*r++ = c;
+      else
+	for (b = 0; b < (int)clen; c = b ? *++s : c)
+	  *r++ = c;
     }
 
   *r++ = '\'';

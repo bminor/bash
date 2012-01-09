@@ -637,9 +637,11 @@ That is, each command reads the previous command's output.  This
 connection is performed before any redirections specified by the
 command.
 
-If @samp{|&} is used, the standard error of @var{command1} is connected to
-@var{command2}'s standard input through the pipe; it is shorthand for
-@code{2>&1 |}.  This implicit redirection of the standard error is
+If @samp{|&} is used, @var{command1}'s standard output and standard error
+are connected to
+@var{command2}'s standard input through the pipe;
+it is shorthand for @code{2>&1 |}.
+This implicit redirection of the standard error is
 performed after any redirections specified by the command.
 
 The reserved word @code{time} causes timing statistics

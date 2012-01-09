@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Tue Aug 16 20:43:02 EDT 2011
+.\"	Last Change: Fri Sep  2 14:19:38 EDT 2011
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2011 August 16" "GNU Bash 4.2"
+.TH BASH 1 "2011 September 2" "GNU Bash 4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -530,11 +530,12 @@ command (see
 .SM
 .B REDIRECTION
 below).
-If \fB|&\fP is used, the standard error of \fIcommand\fP is connected to
-\fIcommand2\fP's standard input through the pipe; it is shorthand for
-\fB2>&1 |\fP.
-This implicit redirection of the standard error is performed after any
-redirections specified by the command.
+If \fB|&\fP is used, \fIcommand\fP's standard output and standard error
+are connected to
+\fIcommand2\fP's standard input through the pipe;
+it is shorthand for \fB2>&1 |\fP.
+This implicit redirection of the standard error is
+performed after any redirections specified by the command.
 .PP
 The return status of a pipeline is the exit status of the last
 command, unless the \fBpipefail\fP option is enabled.

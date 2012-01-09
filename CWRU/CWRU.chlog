@@ -12128,3 +12128,11 @@ lib/sh/strtrans.c
 	- ansic_shouldquote: if is_basic fails for one character, let
 	  ansic_wshouldquote examine the rest of the string and return what
 	  it returns.  From a patch sent by Roman Rakus <rrakus@redhat.com>
+
+				   8/30
+				   ----
+lib/sh/strtrans.c
+	- ansic_quote: changes to quote (or not) multibyte characters.  New
+	  code converts them to wide characters and uses iswprint to check
+	  valid wide chars.  From a patch sent by Roman Rakus
+	  <rrakus@redhat.com>
