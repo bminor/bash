@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2011 July 7<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2011 September 25<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -376,7 +376,7 @@ If any of the files exist but cannot be read,
 <B>bash</B>
 
 reports an error.
-Tildes are expanded in file names as described below under
+Tildes are expanded in filenames as described below under
 <B>Tilde Expansion</B>
 
 in the
@@ -447,7 +447,7 @@ but the value of the
 <FONT SIZE=-1><B>PATH</B>
 
 </FONT>
-variable is not used to search for the file name.
+variable is not used to search for the filename.
 <P>
 
 If
@@ -708,11 +708,12 @@ command (see
 
 </FONT>
 below).
-If <B>|&amp;</B> is used, the standard error of <I>command</I> is connected to
-<I>command2</I>'s standard input through the pipe; it is shorthand for
-<B>2&gt;&amp;1 |</B>.
-This implicit redirection of the standard error is performed after any
-redirections specified by the command.
+If <B>|&amp;</B> is used, <I>command</I>'s standard output and standard error
+are connected to
+<I>command2</I>'s standard input through the pipe;
+it is shorthand for <B>2&gt;&amp;1 |</B>.
+This implicit redirection of the standard error is
+performed after any redirections specified by the command.
 <P>
 
 The return status of a pipeline is the exit status of the last
@@ -910,8 +911,9 @@ Expressions are composed of the primaries described below under
 
 </FONT>
 Word splitting and pathname expansion are not performed on the words
-between the <B>[[</B> and <B>]]</B>; tilde expansion, parameter and
-variable expansion, arithmetic expansion, command substitution, process
+between the <B>[[</B> and <B>]]</B>; tilde expansion,
+parameter and variable expansion,
+arithmetic expansion, command substitution, process
 substitution, and quote removal are performed.
 Conditional operators such as <B>-f</B> must be unquoted to be recognized
 as primaries.
@@ -1174,7 +1176,7 @@ If <I>NAME</I> is not supplied, the default name is <B>COPROC</B>.
 <I>NAME</I> must not be supplied if <I>command</I> is a <I>simple
 command</I> (see above); otherwise, it is interpreted as the first word
 of the simple command.
-When the coproc is executed, the shell creates an array variable (see
+When the coprocess is executed, the shell creates an array variable (see
 <B>Arrays</B>
 
 below) named <I>NAME</I> in the context of the executing shell.
@@ -1227,6 +1229,8 @@ That command is usually a <I>list</I> of commands between { and }, but
 may be any command listed under <B>Compound Commands</B> above.
 <I>compound-command</I> is executed whenever <I>name</I> is specified as the
 name of a simple command.
+When in <I>posix mode</I>, <I>name</I> may not be the name of one of the
+POSIX <I>special builtins</I>.
 Any redirections (see
 <FONT SIZE=-1><B>REDIRECTION</B>
 
@@ -1563,6 +1567,9 @@ and
 <B>local</B>
 
 builtin commands.
+When in <I>posix mode</I>, these builtins may appear in a command after
+one or more instances of the <B>command</B> builtin and retain these
+assignment statement properties.
 <P>
 
 In the context where an assignment statement is assigning a value
@@ -1715,7 +1722,7 @@ option, then
 
 is set to the first argument after the string to be
 executed, if one is present.  Otherwise, it is set
-to the file name used to invoke
+to the filename used to invoke
 <B>bash</B>,
 
 as given by argument zero.
@@ -1746,7 +1753,7 @@ The following variables are set by the shell:
 <DT><B>BASH</B>
 
 <DD>
-Expands to the full file name used to invoke this instance of
+Expands to the full filename used to invoke this instance of
 <B>bash</B>.
 
 <DT><B>BASHOPTS</B>
@@ -2349,11 +2356,11 @@ The value of
 
 </FONT>
 is subjected to parameter expansion, command substitution, and arithmetic
-expansion before being interpreted as a file name.
+expansion before being interpreted as a filename.
 <FONT SIZE=-1><B>PATH</B>
 
 </FONT>
-is not used to search for the resultant file name.
+is not used to search for the resultant filename.
 <DT><B>BASH_XTRACEFD</B>
 
 <DD>
@@ -2724,9 +2731,9 @@ greater than or equal to zero, the shell disables mail checking.
 <DT><B>MAILPATH</B>
 
 <DD>
-A colon-separated list of file names to be checked for mail. 
+A colon-separated list of filenames to be checked for mail. 
 The message to be printed when mail arrives in a particular file
-may be specified by separating the file name from the message with a `?'.
+may be specified by separating the filename from the message with a `?'.
 When used in the text of the message, <B>$_</B> expands to the name of
 the current mailfile. 
 Example:
@@ -3059,7 +3066,7 @@ builtins.  Each attribute applies to all members of an array.
 Arrays are assigned to using compound assignments of the form
 <I>name</I>=<B>(</B>value<I>1</I> ... value<I>n</I><B>)</B>, where each
 <I>value</I> is of the form [<I>subscript</I>]=<I>string</I>.
-Indexed array assignments do not require the bracket and subscript.
+Indexed array assignments do not require anything but <I>string</I>.
 When assigning to indexed arrays, if the optional brackets and subscript
 are supplied, that index is assigned to;
 otherwise the index of the element assigned is the last index assigned
@@ -3387,7 +3394,7 @@ or the first
 <B>=</B>.
 
 In these cases, tilde expansion is also performed.
-Consequently, one may use file names with tildes in assignments to
+Consequently, one may use filenames with tildes in assignments to
 <FONT SIZE=-1><B>PATH</B>,
 
 </FONT>
@@ -3981,13 +3988,13 @@ regarded as a
 <I>pattern</I>,
 
 and replaced with an alphabetically sorted list of
-file names matching the pattern
+filenames matching the pattern
 (see
 <FONT SIZE=-1><B>Pattern Matching</B>
 
 </FONT>
 below).
-If no matching file names are found,
+If no matching filenames are found,
 and the shell option
 <B>nullglob</B>
 
@@ -4046,19 +4053,19 @@ The
 <FONT SIZE=-1><B>GLOBIGNORE</B>
 
 </FONT>
-shell variable may be used to restrict the set of file names matching a
+shell variable may be used to restrict the set of filenames matching a
 <I>pattern</I>.
 
 If
 <FONT SIZE=-1><B>GLOBIGNORE</B>
 
 </FONT>
-is set, each matching file name that also matches one of the patterns in
+is set, each matching filename that also matches one of the patterns in
 <FONT SIZE=-1><B>GLOBIGNORE</B>
 
 </FONT>
 is removed from the list of matches.
-The file names
+The filenames
 <B>``.''</B>
 
 and
@@ -4075,11 +4082,11 @@ is set and not null.  However, setting
 to a non-null value has the effect of enabling the
 <B>dotglob</B>
 
-shell option, so all other file names beginning with a
+shell option, so all other filenames beginning with a
 <B>``.''</B>
 
 will match.
-To get the old behavior of ignoring file names beginning with a
+To get the old behavior of ignoring filenames beginning with a
 <B>``.''</B>,
 
 make
@@ -4305,7 +4312,8 @@ Each redirection that may be preceded by a file descriptor number
 may instead be preceded by a word of the form {<I>varname</I>}.
 In this case, for each redirection operator except
 &gt;&amp;- and &lt;&amp;-, the shell will allocate a file descriptor greater
-than 10 and assign it to <I>varname</I>.  If &gt;&amp;- or &lt;&amp;- is preceded
+than or equal to 10 and assign it to <I>varname</I>.
+If &gt;&amp;- or &lt;&amp;- is preceded
 by {<I>varname</I>}, the value of <I>varname</I> defines the file
 descriptor to close.
 <P>
@@ -4323,9 +4331,10 @@ the redirection refers to the standard output (file descriptor
 <P>
 
 The word following the redirection operator in the following
-descriptions, unless otherwise noted, is subjected to brace expansion,
-tilde expansion, parameter expansion, command substitution, arithmetic
-expansion, quote removal, pathname expansion, and word splitting.
+descriptions, unless otherwise noted, is subjected to
+brace expansion, tilde expansion, parameter and variable expansion,
+command substitution, arithmetic expansion, quote removal,
+pathname expansion, and word splitting.
 If it expands to more than one word,
 <B>bash</B>
 
@@ -4618,8 +4627,8 @@ The format of here-documents is:
 
 <P>
 
-No parameter expansion, command substitution, arithmetic expansion,
-or pathname expansion is performed on
+No parameter and variable expansion, command substitution,
+arithmetic expansion, or pathname expansion is performed on
 <I>word</I>.
 
 If any characters in
@@ -4676,10 +4685,12 @@ A variant of here documents, the format is:
 
 <P>
 
-The <I>word</I>
-is expanded as described above, with the exception that
-pathname expansion is not applied, and supplied as a single string
-to the command on its standard input.
+The <I>word</I> undergoes
+brace expansion, tilde expansion, parameter and variable expansion,
+command substitution, arithmetic expansion, and quote removal.
+Pathname expansion word splitting are not performed.
+The result is supplied as a single string to the command on its
+standard input.
 <A NAME="lbBQ">&nbsp;</A>
 <H4>Duplicating File Descriptors</H4>
 
@@ -5648,7 +5659,7 @@ When
 invokes an external command, the variable
 <B>_</B>
 
-is set to the full file name of the command and passed to that
+is set to the full filename of the command and passed to that
 command in its environment.
 <A NAME="lbCB">&nbsp;</A>
 <H3>EXIT STATUS</H3>
@@ -7695,12 +7706,12 @@ will be executed by the shell.
 <DD>
 The word before point is treated as a pattern for pathname expansion,
 with an asterisk implicitly appended.  This pattern is used to
-generate a list of matching file names for possible completions.
+generate a list of matching filenames for possible completions.
 <DT><B>glob-expand-word (C-x *)</B>
 
 <DD>
 The word before point is treated as a pattern for pathname expansion,
-and the list of matching file names is inserted, replacing the word.
+and the list of matching filenames is inserted, replacing the word.
 If a numeric argument is supplied, an asterisk is appended before
 pathname expansion.
 <DT><B>glob-list-expansions (C-x g)</B>
@@ -8404,11 +8415,11 @@ one or more of the following modifiers, each preceded by a `:'.
 <DT><B>h</B>
 
 <DD>
-Remove a trailing file name component, leaving only the head.
+Remove a trailing filename component, leaving only the head.
 <DT><B>t</B>
 
 <DD>
-Remove all leading file name components, leaving the tail.
+Remove all leading filename components, leaving the tail.
 <DT><B>r</B>
 
 <DD>
@@ -8541,7 +8552,7 @@ executed from
 If
 <I>filename</I>
 
-does not contain a slash, file names in
+does not contain a slash, filenames in
 <FONT SIZE=-1><B>PATH</B>
 
 </FONT>
@@ -8834,10 +8845,11 @@ status.
 An argument of
 <B>-</B>
 
-is equivalent to
-<FONT SIZE=-1><B>$OLDPWD</B>.
+is converted to
+<FONT SIZE=-1><B>$OLDPWD</B>
 
 </FONT>
+before the directory change is attempted.
 If a non-empty directory name from
 <FONT SIZE=-1><B>CDPATH</B>
 
@@ -8883,7 +8895,7 @@ option is supplied, a description of
 is printed.  The
 <B>-v</B>
 
-option causes a single word indicating the command or file name
+option causes a single word indicating the command or filename
 used to invoke
 <I>command</I>
 
@@ -9312,12 +9324,18 @@ turns off the attribute instead,
 with the exceptions that <B>+a</B>
 may not be used to destroy an array variable and <B>+r</B> will not
 remove the readonly attribute.
-When used in a function, makes each
+When used in a function,
+<B>declare</B>
+
+and
+<B>typeset</B>
+
+make each
 <I>name</I> local, as with the
 <B>local</B>
 
 command,
-unless the <B>-g</B> option is supplied,
+unless the <B>-g</B> option is supplied.
 If a variable name is followed by =<I>value</I>, the value of
 the variable is set to <I>value</I>.
 The return value is 0 unless an invalid option is encountered,
@@ -9335,7 +9353,7 @@ an attempt is made to turn off array status for an array variable,
 or an attempt is made to display a non-existent function with <B>-f</B>.
 </DL>
 
-<DT><B>dirs [+</B><I>n</I>] [-<I>n</I>] [<B>-clpv</B>]
+<DT><B>dirs [-clpv</B>] [+<I>n</I>] [-<I>n</I>]
 
 <DD>
 Without options, displays the list of currently remembered directories.
@@ -9351,6 +9369,24 @@ command removes entries from the list.
 <DL COMPACT><DT><DD>
 
 <DL COMPACT>
+<DT><B>-c</B>
+
+<DD>
+Clears the directory stack by deleting all of the entries.
+<DT><B>-l</B>
+
+<DD>
+Produces a listing using full pathnames;
+the default listing format uses a tilde to denote the home directory.
+<DT><B>-p</B>
+
+<DD>
+Print the directory stack with one entry per line.
+<DT><B>-v</B>
+
+<DD>
+Print the directory stack with one entry per line,
+prefixing each entry with its index in the stack.
 <DT><B>+</B><I>n</I><DD>
 Displays the <I>n</I>th entry counting from the left of the list
 shown by
@@ -9363,24 +9399,6 @@ shown by
 <B>dirs</B>
 
 when invoked without options, starting with zero.
-<DT><B>-c</B>
-
-<DD>
-Clears the directory stack by deleting all of the entries.
-<DT><B>-l</B>
-
-<DD>
-Produces a longer listing; the default listing format uses a 
-tilde to denote the home directory.
-<DT><B>-p</B>
-
-<DD>
-Print the directory stack with one entry per line.
-<DT><B>-v</B>
-
-<DD>
-Print the directory stack with one entry per line,
-prefixing each entry with its index in the stack.
 
 </DL>
 <P>
@@ -9391,10 +9409,10 @@ of the directory stack.
 </DL>
 
 <DT><B>disown</B> [<B>-ar</B>] [<B>-h</B>] [<I>jobspec</I> ...]<DD>
-Without options, each
+Without options, remove each
 <I>jobspec</I>
 
-is removed from the table of active jobs.
+from the table of active jobs.
 If
 <I>jobspec</I>
 
@@ -9618,14 +9636,16 @@ to be executed with an empty environment.  If
 is supplied, the shell passes
 <I>name</I>
 
-as the zeroth argument to the executed command.  If
+as the zeroth argument to the executed command.
+If
 <I>command</I>
 
 cannot be executed for some reason, a non-interactive shell exits,
-unless the shell option
+unless the
 <B>execfail</B>
 
-is enabled, in which case it returns failure.
+shell option
+is enabled.  In that case, it returns failure.
 An interactive shell returns failure if the file cannot be executed.
 If
 <I>command</I>
@@ -9670,7 +9690,7 @@ are given, or if the
 <B>-p</B>
 
 option is supplied, a list
-of all names that are exported in this shell is printed.
+of names of all exported variables is printed.
 The
 <B>-n</B>
 
@@ -9693,13 +9713,13 @@ that is not a function.
 
 <DT><B>fc</B> <B>-s</B> [<I>pat</I>=<I>rep</I>] [<I>cmd</I>]<DD>
 
-Fix Command.  In the first form, a range of commands from
+The first form selects a range of commands from
 <I>first</I>
 
 to
 <I>last</I>
 
-is selected from the history list.
+from the history list and displays or edits and re-executes them.
 <I>First</I>
 
 and
@@ -9768,6 +9788,7 @@ echoed and executed.
 <P>
 In the second form, <I>command</I> is re-executed after each instance
 of <I>pat</I> is replaced by <I>rep</I>.
+<I>Command</I> is intepreted the same as <I>first</I> above.
 A useful alias to use with this is
 
 <TT>r='fc -s'</TT>,
@@ -9895,7 +9916,7 @@ can report errors in two ways.  If the first character of
 is a colon,
 <I>silent</I>
 
-error reporting is used.  In normal operation diagnostic messages
+error reporting is used.  In normal operation, diagnostic messages
 are printed when invalid options or missing option arguments are
 encountered.
 If the variable
@@ -9973,7 +9994,7 @@ If the
 option is supplied, no path search is performed, and
 <I>filename</I>
 
-is used as the full file name of the command.
+is used as the full filename of the command.
 The
 <B>-r</B>
 
@@ -10095,11 +10116,11 @@ current <B>bash</B> session.
 
 <DD>
 Read the contents of the history file
-and use them as the current history.
+and append them to the current history list.
 <DT><B>-w</B>
 
 <DD>
-Write the current history to the history file, overwriting the
+Write the current history list to the history file, overwriting the
 history file's contents.
 <DT><B>-p</B>
 
@@ -10166,11 +10187,11 @@ leader.
 <DT><B>-r</B>
 
 <DD>
-Restrict output to running jobs.
+Display only running jobs.
 <DT><B>-s</B>
 
 <DD>
-Restrict output to stopped jobs.
+Display only stopped jobs.
 
 </DL>
 <P>
@@ -10558,7 +10579,8 @@ Adds
 <I>dir</I>
 
 to the directory stack at the top, making it the
-new current working directory.
+new current working directory as if it had been supplied as the argument
+to the <B>cd</B> builtin.
 
 </DL>
 <P>
@@ -10712,8 +10734,9 @@ the decimal point.
 This option is only effective if <B>read</B> is reading input from a
 terminal, pipe, or other special file; it has no effect when reading
 from regular files.
-If <I>timeout</I> is 0, <B>read</B> returns success if input is available on
-the specified file descriptor, failure otherwise.
+If <I>timeout</I> is 0, <B>read</B> returns immediately, without trying to
+read any data.  The exit statis is 0 if input is available on
+the specified file descriptor, non-zero otherwise.
 The exit status is greater than 128 if the timeout is exceeded.
 <DT><B>-u </B><I>fd</I>
 
@@ -10787,14 +10810,18 @@ is supplied with a
 
 that is not a function.
 <DT><B>return</B> [<I>n</I>]<DD>
-Causes a function to exit with the return value specified by
-<I>n</I>.
+Causes a function to stop executing and return the value specified by
+<I>n</I>
 
+to its caller.
 If 
 <I>n</I>
 
 is omitted, the return status is that of the last command
-executed in the function body.  If used outside a function,
+executed in the function body.  If
+<B>return</B>
+
+is used outside a function,
 but during execution of a script by the 
 <B>.</B>
 
@@ -10803,9 +10830,12 @@ that script and return either
 <I>n</I>
 
 or the exit status of the last command executed within the
-script as the exit status of the script.  If used outside a
-function and not during execution of a script by <B>.</B>,
-the return status is false.
+script as the exit status of the script.
+The return status is non-zero if
+<B>return</B>
+
+is used outside a
+function and not during execution of a script by <B>.</B> or <B>source</B>.
 Any command associated with the <B>RETURN</B> trap is executed
 before execution resumes after the function or script.
 <DT><B>set</B> [<B>--abefhkmnptuvxBCEHPT</B>] [<B>-o</B> <I>option-name</I>] [<I>arg</I> ...]<DD>
@@ -10847,14 +10877,15 @@ effective only when job control is enabled.
 <DT><B>-e</B>
 
 <DD>
-Exit immediately if a <I>pipeline</I> (which may consist of a single
-<I>simple command</I>),  a <I>subshell</I> command enclosed in parentheses,
-or one of the commands executed as part of a command list enclosed
-by braces (see
+Exit immediately if a
+<I>pipeline</I> (which may consist of a single <I>simple command</I>),
+a <I>list</I>,
+or a <I>compound command</I>
+(see
 <FONT SIZE=-1><B>SHELL GRAMMAR</B>
 
 </FONT>
-above) exits with a non-zero status.
+above),  exits with a non-zero status.
 The shell does not exit if the
 command that fails is part of the command list immediately following a
 <B>while</B>
@@ -10881,6 +10912,9 @@ or if the command's return value is
 being inverted with
 <B>!</B>.
 
+If a compound command other than a subshell
+returns a non-zero status because a command failed
+while <B>-e</B> was being ignored, the shell does not exit.
 A trap on <B>ERR</B>, if set, is executed before the shell exits.
 This option applies to the shell environment and each subshell environment
 separately (see
@@ -11358,8 +11392,10 @@ If either
 or
 <B>-u</B>
 
-is used with no <I>optname</I> arguments, the display is limited to
-those options which are set or unset, respectively.
+is used with no <I>optname</I> arguments,
+<B>shopt</B>
+
+shows only those options which are set or unset, respectively.
 Unless otherwise noted, the <B>shopt</B> options are disabled (unset)
 by default.
 <P>
@@ -11400,7 +11436,7 @@ If set, minor errors in the spelling of a directory component in a
 command will be corrected.
 The errors checked for are transposed characters,
 a missing character, and one character too many.
-If a correction is found, the corrected file name is printed,
+If a correction is found, the corrected filename is printed,
 and the command proceeds.
 This option is only used by interactive shells.
 <DT><B>checkhash</B>
@@ -11487,6 +11523,28 @@ parameter expansion as a special character.  The single quotes must match
 (an even number) and the characters between the single quotes are considered
 quoted.  This is the behavior of posix mode through version 4.1.
 The default bash behavior remains as in previous versions.
+<DT><B>complete_fullquote</B>
+
+<DD>
+If set,
+<B>bash</B>
+
+quotes all shell metacharacters in filenames and directory names when
+performing completion.
+If not set,
+<B>bash</B>
+
+removes metacharacters such as the dollar sign from the set of
+characters that will be quoted in completed filenames
+when these metacharacters appear in shell variable references in words to be
+completed.
+This means that dollar signs in variable names that expand to directories
+will not be quoted;
+however, any dollar signs appearing in filenames will not be quoted, either.
+This is active only when bash is using backslashes to quote completed
+filenames.
+This variable is set by default, which is the default bash behavior in
+versions through 4.2.
 <DT><B>direxpand</B>
 
 <DD>
@@ -11853,7 +11911,7 @@ is not supplied, or if job control is not enabled.
 <DT><B>test</B> <I>expr</I><DD>
 
 <DT><B>[</B> <I>expr</I> <B>]</B><DD>
-Return a status of 0 or 1 depending on
+Return a status of 0 (true) or 1 (false) depending on
 the evaluation of the conditional expression
 <I>expr</I>.
 
@@ -12194,7 +12252,7 @@ If a command is hashed,
 and
 <B>-P</B>
 
-print the hashed value, not necessarily the file that appears
+print the hashed value, which is not necessarily the file that appears
 first in 
 <FONT SIZE=-1><B>PATH</B>.
 
@@ -12344,20 +12402,21 @@ The maximum number of threads
 If
 <I>limit</I>
 
-is given, it is the new value of the specified resource (the
+is given, and the
 <B>-a</B>
 
-option is display only).
+option is not used,
+<I>limit</I> is the new value of the specified resource.
 If no option is given, then
 <B>-f</B>
 
 is assumed.  Values are in 1024-byte increments, except for
 <B>-t</B>,
 
-which is in seconds,
+which is in seconds;
 <B>-p</B>,
 
-which is in units of 512-byte blocks,
+which is in units of 512-byte blocks;
 and
 <B>-T</B>,
 
@@ -12537,7 +12596,7 @@ specifying command names containing
 <B>/</B>
 
 <DT>*<DD>
-specifying a file name containing a
+specifying a filename containing a
 <B>/</B>
 
 as an argument to the
@@ -12773,7 +12832,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.2<TH ALIGN=CENTER width=33%>2011 July 7<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.2<TH ALIGN=CENTER width=33%>2011 September 25<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -12879,6 +12938,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 08 July 2011 17:23:53 EDT
+Time: 26 September 2011 10:56:19 EDT
 </BODY>
 </HTML>

@@ -206,6 +206,8 @@ rl_icppfunc_t *rl_directory_completion_hook = (rl_icppfunc_t *)NULL;
 
 rl_icppfunc_t *rl_directory_rewrite_hook = (rl_icppfunc_t *)NULL;
 
+rl_icppfunc_t *rl_directory_stat_hook = (rl_icppfunc_t *)NULL;
+
 /* If non-zero, this is the address of a function to call when reading
    directory entries from the filesystem for completion and comparing
    them to the partial word to be completed.  The function should
@@ -1058,10 +1060,14 @@ gen_completion_matches (text, start, end, our_func, found_quote, quote_char)
      variable rl_attempted_completion_function. */
   if (rl_attempted_completion_function)
     {
+#if 0
       _rl_interrupt_immediately++;
+#endif
       matches = (*rl_attempted_completion_function) (text, start, end);
+#if 0
       if (_rl_interrupt_immediately > 0)
 	_rl_interrupt_immediately--;
+#endif
 
       if (matches || rl_attempted_completion_over)
 	{
@@ -1691,6 +1697,8 @@ append_to_match (text, delimiter, quote_char, nontrivial_match)
   if (rl_filename_completion_desired)
     {
       filename = tilde_expand (text);
+      if (rl_directory_stat_hook)
+	(*rl_directory_stat_hook) (&filename);
       s = (nontrivial_match && rl_completion_mark_symlink_dirs == 0)
 		? LSTAT (filename, &finfo)
 		: stat (filename, &finfo);
@@ -1710,8 +1718,7 @@ append_to_match (text, delimiter, quote_char, nontrivial_match)
 #ifdef S_ISLNK
       /* Don't add anything if the filename is a symlink and resolves to a
 	 directory. */
-      else if (s == 0 && S_ISLNK (finfo.st_mode) &&
-	       stat (filename, &finfo) == 0 && S_ISDIR (finfo.st_mode))
+      else if (s == 0 && S_ISLNK (finfo.st_mode) && path_isdir (filename))
 	;
 #endif
       else
@@ -1988,7 +1995,9 @@ rl_completion_matches (text, entry_function)
   match_list = (char **)xmalloc ((match_list_size + 1) * sizeof (char *));
   match_list[1] = (char *)NULL;
 
+#if 0
   _rl_interrupt_immediately++;
+#endif
   while (string = (*entry_function) (text, matches))
     {
       if (matches + 1 == match_list_size)
@@ -1998,8 +2007,10 @@ rl_completion_matches (text, entry_function)
       match_list[++matches] = string;
       match_list[matches + 1] = (char *)NULL;
     }
+#if 0
   if (_rl_interrupt_immediately > 0)
     _rl_interrupt_immediately--;
+#endif
 
   /* If there were any matches, then look through them finding out the
      lowest common denominator.  That then becomes match_list[0]. */
@@ -2233,8 +2244,9 @@ rl_filename_completion_function (text, state)
 	}
       directory = opendir (dirname);
 
-      /* Now dequote a non-null filename. */
-      if (filename && *filename && rl_completion_found_quote && rl_filename_dequoting_function)
+      /* Now dequote a non-null filename.  FILENAME will not be NULL, but may
+	 be empty. */
+      if (*filename && rl_completion_found_quote && rl_filename_dequoting_function)
 	{
 	  /* delete single and double quotes */
 	  temp = (*rl_filename_dequoting_function) (filename, rl_completion_quote_character);

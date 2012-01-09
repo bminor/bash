@@ -527,6 +527,8 @@ initialize_readline ()
 
   rl_filename_rewrite_hook = bash_filename_rewrite_hook;
 
+  rl_filename_stat_hook = bash_filename_stat_hook;
+
   /* Tell the filename completer we want a chance to ignore some names. */
   rl_ignore_some_completions_function = filename_completion_ignore;
 
@@ -1464,7 +1466,7 @@ bash_default_completion (text, start, end, qc, compflags)
      const char *text;
      int start, end, qc, compflags;
 {
-  char **matches;
+  char **matches, *t;
 
   matches = (char **)NULL;
 
@@ -1474,7 +1476,19 @@ bash_default_completion (text, start, end, qc, compflags)
       if (qc != '\'' && text[1] == '(') /* ) */
 	matches = rl_completion_matches (text, command_subst_completion_function);
       else
-	matches = rl_completion_matches (text, variable_completion_function);
+	{
+	  matches = rl_completion_matches (text, variable_completion_function);
+	  if (matches && matches[0] && matches[1] == 0)
+	    {
+	      t = savestring (matches[0]);
+	      bash_filename_stat_hook (&t);
+	      /* doesn't use test_for_directory because that performs tilde
+		 expansion */
+	      if (file_isdir (t))
+		rl_completion_append_character = '/';
+	      free (t);
+	    }
+	}
     }
 
   /* If the word starts in `~', and there is no slash in the word, then
@@ -2825,6 +2839,8 @@ restore_directory_hook (hookf)
     rl_directory_rewrite_hook = hookf;
 }
 
+/* Expand a filename before the readline completion code passes it to stat(2).
+   The filename will already have had tilde expansion performed. */
 static int
 bash_filename_stat_hook (dirname)
      char **dirname;
@@ -2864,8 +2880,9 @@ bash_filename_stat_hook (dirname)
 	      *dirname = new_dirname;
 	      return_value = STREQ (local_dirname, *dirname) == 0;
 	    }
+	  else
+	    free (new_dirname);
 	  free (local_dirname);
-	  free (new_dirname);
 	  dispose_words (wl);
 	}
       else

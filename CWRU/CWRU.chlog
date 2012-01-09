@@ -12227,3 +12227,63 @@ doc/{bash.1,bashref.texi}
 	- formatting and some content changes from Benno Schulenberg
 	  <bensberg@justemail.net>
 	- document new posix-mode behavior from interp 383 change of 9/22
+
+				   9/30
+				   ----
+execute_cmd.c
+	- shell_execve: add strerror to error message about executable file
+	  that shell can't execute as a shell script.  From suggestion by
+	  daysleeper <daysleeper@centrum.cz>
+
+				   10/1
+				   ----
+bashhist.c
+	- maybe_add_history: act as if literal_history is set when parser_state
+	  includes PST_HEREDOC, so we save the bodies of here-documents just
+	  as they were entered.  Fixes bug reported by Jonathan Wakely
+	  <bugs@kayari.org>
+	- bash_add_history: make sure that the second and subsequent lines of
+	  a here document don't have extra newlines or other delimiting
+	  chars added, since they have the trailing newline preserved, when
+	  `lithist' is set and history_delimiting_chars isn't called
+
+execute_cmd.c
+	- execute_command_internal: avoid fd exhaustion caused by using
+	  process substitution in loops inside shell functions by using
+	  copy_fifo_list and close_new_fifos ().  Fixes debian bash bug
+	  642504
+
+lib/readline/complete.c
+	- new variable, rl_filename_stat_hook, used by append_to_match.  If
+	  filename completion is desired, and rl_filename_stat_hook points
+	  to a function, call that function to expand the filename in an
+	  application-specific way before calling stat.
+
+bashline.c
+	- bash_default_completion: if variable completion returns a single
+	  match, use bash_filename_stat_hook and file_isdir to determine
+	  whether or not the variable name expands to a directory.  If it
+	  does, set the filename_append_character to `/'.  This is not
+	  perfect, so we will see how it works out.  Adds functionality
+	  requested by Peter Toft <pto@linuxbog.dk> and Patrick Pfeifer
+	  <patrick@pfeifer.de>
+	- rl_filename_stat_hook: assigned bash_filename_stat_hook, so things
+	  like $HOME/Downloads (after completion) have a slash appended.
+	  In general, this causes the stat hook to be called whenever
+	  filename completion is appended.  Adds functionality requested by
+	  Patrick Pfeifer <patrick@pfeifer.de>
+
+lib/readline/readline.h
+	- new extern declaration for rl_filename_stat_hook
+
+lib/readline/doc/rltech.texi
+	- rl_directory_rewrite_hook: now documented
+	- rl_filename_stat_hook: document
+
+pcomplete.c
+	- gen_action_completions: in the CA_DIRECTORY case, turn off
+	  rl_filename_completion_desired if it was off before we called
+	  rl_filename_completion_function and we didn't get any matches.
+	  Having it on causes readline to quote the matches as if they
+	  were filenames.  Adds functionality requested by many,
+	  including Clark Wang <dearvoid@gmail.com>

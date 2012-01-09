@@ -42,7 +42,7 @@
 \entry{parameters}{17}{parameters}
 \entry{variable, shell}{17}{variable, shell}
 \entry{shell variable}{17}{shell variable}
-\entry{parameters, positional}{17}{parameters, positional}
+\entry{parameters, positional}{18}{parameters, positional}
 \entry{parameters, special}{18}{parameters, special}
 \entry{expansion}{19}{expansion}
 \entry{brace expansion}{19}{brace expansion}
@@ -54,7 +54,7 @@
 \entry{command substitution}{24}{command substitution}
 \entry{expansion, arithmetic}{24}{expansion, arithmetic}
 \entry{arithmetic expansion}{24}{arithmetic expansion}
-\entry{process substitution}{24}{process substitution}
+\entry{process substitution}{25}{process substitution}
 \entry{word splitting}{25}{word splitting}
 \entry{expansion, filename}{25}{expansion, filename}
 \entry{expansion, pathname}{25}{expansion, pathname}
@@ -64,14 +64,14 @@
 \entry{matching, pattern}{26}{matching, pattern}
 \entry{redirection}{27}{redirection}
 \entry{command expansion}{31}{command expansion}
-\entry{command execution}{31}{command execution}
-\entry{command search}{31}{command search}
+\entry{command execution}{32}{command execution}
+\entry{command search}{32}{command search}
 \entry{execution environment}{32}{execution environment}
 \entry{environment}{33}{environment}
-\entry{exit status}{33}{exit status}
+\entry{exit status}{34}{exit status}
 \entry{signal handling}{34}{signal handling}
 \entry{shell script}{35}{shell script}
-\entry{special builtin}{62}{special builtin}
+\entry{special builtin}{63}{special builtin}
 \entry{login shell}{77}{login shell}
 \entry{interactive shell}{77}{interactive shell}
 \entry{startup files}{77}{startup files}
@@ -86,7 +86,7 @@
 \entry{alias expansion}{83}{alias expansion}
 \entry{arrays}{84}{arrays}
 \entry{directory stack}{85}{directory stack}
-\entry{prompting}{86}{prompting}
+\entry{prompting}{87}{prompting}
 \entry{restricted shell}{88}{restricted shell}
 \entry{POSIX Mode}{88}{POSIX Mode}
 \entry{job control}{93}{job control}
@@ -110,8 +110,8 @@
 \entry{history list}{127}{history list}
 \entry{history builtins}{127}{history builtins}
 \entry{history expansion}{129}{history expansion}
-\entry{event designators}{129}{event designators}
-\entry{history events}{129}{history events}
+\entry{event designators}{130}{event designators}
+\entry{history events}{130}{history events}
 \entry{installation}{133}{installation}
 \entry{configuration}{133}{configuration}
 \entry{Bash installation}{133}{Bash installation}

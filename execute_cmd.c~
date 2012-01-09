@@ -592,7 +592,8 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	  close_pipes (pipe_in, pipe_out);
 
 #if defined (PROCESS_SUBSTITUTION) && defined (HAVE_DEV_FD)
-	  unlink_fifo_list ();
+	  if (variable_context == 0)	/* wait until shell function completes */
+	    unlink_fifo_list ();
 #endif
 	  /* If we are part of a pipeline, and not the end of the pipeline,
 	     then we should simply return and let the last command in the
@@ -3668,6 +3669,11 @@ fix_assignment_words (words)
       {
 	if (b == 0)
 	  {
+	    /* Posix (post-2008) says that `command' doesn't change whether
+	       or not the builtin it shadows is a `declaration command', even
+	       though it removes other special builtin properties.  In Posix
+	       mode, we skip over one or more instances of `command' and
+	       deal with the next word as the assignment builtin. */
 	    while (posixly_correct && wcmd && wcmd->word && wcmd->word->word && STREQ (wcmd->word->word, "command"))
 	      wcmd = wcmd->next;
 	    b = builtin_address_internal (wcmd->word->word, 0);
@@ -3689,6 +3695,8 @@ fix_assignment_words (words)
       {
 	if (b == 0)
 	  {
+	    while (posixly_correct && wcmd && wcmd->word && wcmd->word->word && STREQ (wcmd->word->word, "command"))
+	      wcmd = wcmd->next;
 	    b = builtin_address_internal (wcmd->word->word, 0);
 	    if (b == 0 || (b->flags & ASSIGNMENT_BUILTIN) == 0)
 	      return;
@@ -4220,7 +4228,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
 
   if (funcnest_max > 0 && funcnest >= funcnest_max)
     {
-      internal_error ("%s: maximum function nesting level exceeded (%d)", var->name, funcnest);
+      internal_error (_("%s: maximum function nesting level exceeded (%d)"), var->name, funcnest);
       funcnest = 0;	/* XXX - should we reset it somewhere else? */
       jump_to_top_level (DISCARD);
     }
@@ -5107,7 +5115,7 @@ shell_execve (command, args, env)
 #endif
       if (check_binary_file (sample, sample_len))
 	{
-	  internal_error (_("%s: cannot execute binary file"), command);
+	  internal_error (_("%s: cannot execute binary file: %s"), command, strerror (i));
 	  return (EX_BINARY_FILE);
 	}
     }
@@ -5174,6 +5182,14 @@ execute_intern_function (name, function)
 	  jump_to_top_level (ERREXIT);
 	}
       return (EXECUTION_FAILURE);
+    }
+
+  /* Posix interpretation 383 */
+  if (posixly_correct && find_special_builtin (name->word))
+    {
+      internal_error (_("`%s': is a special builtin"), name->word);
+      last_command_exit_value = EX_BADUSAGE;
+      jump_to_top_level (ERREXIT);
     }
 
   var = find_function (name->word);

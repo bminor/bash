@@ -13,10 +13,10 @@
 \entry {builtin}{3}
 \initial {C}
 \entry {command editing}{98}
-\entry {command execution}{31}
+\entry {command execution}{32}
 \entry {command expansion}{31}
 \entry {command history}{127}
-\entry {command search}{31}
+\entry {command search}{32}
 \entry {command substitution}{24}
 \entry {command timing}{8}
 \entry {commands, compound}{9}
@@ -38,9 +38,9 @@
 \entry {editing command lines}{98}
 \entry {environment}{33}
 \entry {evaluation, arithmetic}{82}
-\entry {event designators}{129}
+\entry {event designators}{130}
 \entry {execution environment}{32}
-\entry {exit status}{3, 33}
+\entry {exit status}{3, 34}
 \entry {expansion}{19}
 \entry {expansion, arithmetic}{24}
 \entry {expansion, brace}{19}
@@ -58,7 +58,7 @@
 \entry {functions, shell}{15}
 \initial {H}
 \entry {history builtins}{127}
-\entry {history events}{129}
+\entry {history events}{130}
 \entry {history expansion}{129}
 \entry {history list}{127}
 \entry {History, how to use}{125}
@@ -90,7 +90,7 @@
 \initial {P}
 \entry {parameter expansion}{21}
 \entry {parameters}{17}
-\entry {parameters, positional}{17}
+\entry {parameters, positional}{18}
 \entry {parameters, special}{18}
 \entry {pathname expansion}{25}
 \entry {pattern matching}{26}
@@ -99,9 +99,9 @@
 \entry {POSIX Mode}{88}
 \entry {process group}{3}
 \entry {process group ID}{3}
-\entry {process substitution}{24}
+\entry {process substitution}{25}
 \entry {programmable completion}{119}
-\entry {prompting}{86}
+\entry {prompting}{87}
 \initial {Q}
 \entry {quoting}{6}
 \entry {quoting, ANSI}{6}
@@ -119,7 +119,7 @@
 \entry {shell, interactive}{78}
 \entry {signal}{4}
 \entry {signal handling}{34}
-\entry {special builtin}{4, 62}
+\entry {special builtin}{4, 63}
 \entry {startup files}{77}
 \entry {suspending jobs}{93}
 \initial {T}

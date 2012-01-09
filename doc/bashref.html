@@ -1,6 +1,6 @@
 <HTML>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<!-- Created on July, 8  2011 by texi2html 1.64 -->
+<!-- Created on September, 26  2011 by texi2html 1.64 -->
 <!-- 
 Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -33,10 +33,10 @@ Send bugs and suggestions to <texi2html@mathematik.uni-kl.de>
 <H1>Bash Reference Manual</H1></P><P>
 
 This text is a brief description of the features that are present in
-the Bash shell (version 4.2, 7 July 2011).
+the Bash shell (version 4.2, 25 September 2011).
 </P><P>
 
-This is Edition 4.2, last updated 7 July 2011,
+This is Edition 4.2, last updated 25 September 2011,
 of <CITE>The GNU Bash Reference Manual</CITE>,
 for <CODE>Bash</CODE>, Version 4.2.
 </P><P>
@@ -45,7 +45,7 @@ Bash contains features that appear in other popular shells, and some
 features that only appear in Bash.  Some of the shells that Bash has
 borrowed concepts from are the Bourne Shell (<TT>`sh'</TT>), the Korn Shell
 (<TT>`ksh'</TT>), and the C-shell (<TT>`csh'</TT> and its successor,
-<TT>`tcsh'</TT>). The following menu breaks the features up into
+<TT>`tcsh'</TT>).  The following menu breaks the features up into
 categories based upon which one of these other shells inspired the
 feature.
 </P><P>
@@ -892,7 +892,7 @@ the control operators <SAMP>`|'</SAMP> or <SAMP>`|&#38;'</SAMP>.
 <A NAME="IDX25"></A>
 <A NAME="IDX26"></A>
 The format for a pipeline is
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>[<CODE>time</CODE> [<CODE>-p</CODE>]] [<CODE>!</CODE>] <VAR>command1</VAR> [ [<CODE>|</CODE> or <CODE>|&#38;</CODE>] <VAR>command2</VAR> <small>...</small>]
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>[time [-p]] [!] <VAR>command1</VAR> [ | or |&#38; <VAR>command2</VAR> ] <small>...</small>
 </pre></td></tr></table></P><P>
 
 The output of each command in the pipeline is connected via a pipe
@@ -902,9 +902,11 @@ connection is performed before any redirections specified by the
 command.
 </P><P>
 
-If <SAMP>`|&#38;'</SAMP> is used, the standard error of <VAR>command1</VAR> is connected to
-<VAR>command2</VAR>'s standard input through the pipe; it is shorthand for
-<CODE>2&#62;&#38;1 |</CODE>.  This implicit redirection of the standard error is
+If <SAMP>`|&#38;'</SAMP> is used, <VAR>command1</VAR>'s standard output and standard error
+are connected to
+<VAR>command2</VAR>'s standard input through the pipe;
+it is shorthand for <CODE>2&#62;&#38;1 |</CODE>.
+This implicit redirection of the standard error is
 performed after any redirections specified by the command.
 </P><P>
 
@@ -1098,18 +1100,24 @@ command's syntax, it may be replaced with one or more newlines.
 <A NAME="IDX28"></A>
 <A NAME="IDX29"></A>
 The syntax of the <CODE>until</CODE> command is:
+<P>
+
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>until <VAR>test-commands</VAR>; do <VAR>consequent-commands</VAR>; done
-</pre></td></tr></table>Execute <VAR>consequent-commands</VAR> as long as
+</pre></td></tr></table></P><P>
+
+Execute <VAR>consequent-commands</VAR> as long as
 <VAR>test-commands</VAR> has an exit status which is not zero.
 The return status is the exit status of the last command executed
 in <VAR>consequent-commands</VAR>, or zero if none was executed.
-<P>
+</P><P>
 
 <DT><CODE>while</CODE>
 <DD><A NAME="IDX30"></A>
 The syntax of the <CODE>while</CODE> command is:
+<P>
+
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>while <VAR>test-commands</VAR>; do <VAR>consequent-commands</VAR>; done
-</pre></td></tr></table><P>
+</pre></td></tr></table></P><P>
 
 Execute <VAR>consequent-commands</VAR> as long as
 <VAR>test-commands</VAR> has an exit status of zero.
@@ -1123,7 +1131,9 @@ The syntax of the <CODE>for</CODE> command is:
 <P>
 
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>for <VAR>name</VAR> [ [in [<VAR>words</VAR> <small>...</small>] ] ; ] do <VAR>commands</VAR>; done
-</pre></td></tr></table>Expand <VAR>words</VAR>, and execute <VAR>commands</VAR> once for each member
+</pre></td></tr></table></P><P>
+
+Expand <VAR>words</VAR>, and execute <VAR>commands</VAR> once for each member
 in the resultant list, with <VAR>name</VAR> bound to the current member.
 If <SAMP>`in <VAR>words</VAR>'</SAMP> is not present, the <CODE>for</CODE> command
 executes the <VAR>commands</VAR> once for each positional parameter that is
@@ -1138,7 +1148,9 @@ An alternate form of the <CODE>for</CODE> command is also supported:
 </P><P>
 
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>for (( <VAR>expr1</VAR> ; <VAR>expr2</VAR> ; <VAR>expr3</VAR> )) ; do <VAR>commands</VAR> ; done
-</pre></td></tr></table>First, the arithmetic expression <VAR>expr1</VAR> is evaluated according
+</pre></td></tr></table></P><P>
+
+First, the arithmetic expression <VAR>expr1</VAR> is evaluated according
 to the rules described below (see section <A HREF="bashref.html#SEC84">6.5 Shell Arithmetic</A>).
 The arithmetic expression <VAR>expr2</VAR> is then evaluated repeatedly
 until it evaluates to zero.   
@@ -1147,8 +1159,6 @@ executed and the arithmetic expression <VAR>expr3</VAR> is evaluated.
 If any expression is omitted, it behaves as if it evaluates to 1.
 The return value is the exit status of the last command in <VAR>commands</VAR>
 that is executed, or false if any of the expressions is invalid.
-</P><P>
-
 </DL>
 <P>
 
@@ -1212,7 +1222,7 @@ zero if no condition tested true.
 The syntax of the <CODE>case</CODE> command is:
 <P>
 
-<TABLE><tr><td>&nbsp;</td><td class=example><pre><CODE>case <VAR>word</VAR> in [ [(] <VAR>pattern</VAR> [| <VAR>pattern</VAR>]<small>...</small>) <VAR>command-list</VAR> ;;]<small>...</small> esac</CODE>
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>case <VAR>word</VAR> in [ [(] <VAR>pattern</VAR> [| <VAR>pattern</VAR>]<small>...</small>) <VAR>command-list</VAR> ;;]<small>...</small> esac
 </pre></td></tr></table></P><P>
 
 <CODE>case</CODE> will selectively execute the <VAR>command-list</VAR> corresponding to
@@ -1403,11 +1413,11 @@ This may be used to override the normal precedence of operators.
 <DT><CODE><VAR>expression1</VAR> || <VAR>expression2</VAR></CODE>
 <DD>True if either <VAR>expression1</VAR> or <VAR>expression2</VAR> is true.
 </DL>
-The <CODE>&#38;&#38;</CODE> and <CODE>||</CODE> operators do not evaluate <VAR>expression2</VAR> if the
-value of <VAR>expression1</VAR> is sufficient to determine the return
-value of the entire conditional expression.
 <P>
 
+The <CODE>&#38;&#38;</CODE> and <CODE>||</CODE> operators do not evaluate <VAR>[Bexpression2</VAR> if the
+value of <VAR>expression1</VAR> is sufficient to determine the return
+value of the entire conditional expression.
 </DL>
 <P>
 
@@ -1498,7 +1508,7 @@ established between the executing shell and the coprocess.
 </P><P>
 
 The format for a coprocess is:
-<TABLE><tr><td>&nbsp;</td><td class=example><pre><CODE>coproc</CODE> [<VAR>NAME</VAR>] <VAR>command</VAR> [<VAR>redirections</VAR>]
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>coproc [<VAR>NAME</VAR>] <VAR>command</VAR> [<VAR>redirections</VAR>]
 </pre></td></tr></table></P><P>
 
 This creates a coprocess named <VAR>NAME</VAR>.
@@ -1508,15 +1518,15 @@ command (see section <A HREF="bashref.html#SEC16">3.2.1 Simple Commands</A>); ot
 the first word of the simple command.
 </P><P>
 
-When the coproc is executed, the shell creates an array variable
+When the coprocess is executed, the shell creates an array variable
 (see section <A HREF="bashref.html#SEC86">6.7 Arrays</A>)
-named <VAR>NAME</VAR> in the context of the executing shell.
+named <CODE>NAME</CODE> in the context of the executing shell.
 The standard output of <VAR>command</VAR>
 is connected via a pipe to a file descriptor in the executing shell,
-and that file descriptor is assigned to <VAR>NAME</VAR>[0].
+and that file descriptor is assigned to <CODE>NAME</CODE>[0].
 The standard input of <VAR>command</VAR>
 is connected via a pipe to a file descriptor in the executing shell,
-and that file descriptor is assigned to <VAR>NAME</VAR>[1].
+and that file descriptor is assigned to <CODE>NAME</CODE>[1].
 This pipe is established before any redirections specified by the
 command (see section <A HREF="bashref.html#SEC40">3.6 Redirections</A>).
 The file descriptors can be utilized as arguments to shell commands
@@ -1524,7 +1534,7 @@ and redirections using standard word expansions.
 </P><P>
 
 The process ID of the shell spawned to execute the coprocess is
-available as the value of the variable <VAR>NAME</VAR>_PID.
+available as the value of the variable <CODE>NAME</CODE>_PID.
 The <CODE>wait</CODE>
 builtin command may be used to wait for the coprocess to terminate.
 </P><P>
@@ -1638,8 +1648,13 @@ shell context; no new process is created to interpret them.
 
 Functions are declared using this syntax:
 <A NAME="IDX45"></A>
-<TABLE><tr><td>&nbsp;</td><td class=example><pre><VAR>name</VAR> () <VAR>compound-command</VAR> [ <VAR>redirections</VAR> ]<BR>or<BR>
-<CODE>function</CODE> <VAR>name</VAR> [()] <VAR>compound-command</VAR> [ <VAR>redirections</VAR> ]
+<TABLE><tr><td>&nbsp;</td><td class=example><pre><VAR>name</VAR> () <VAR>compound-command</VAR> [ <VAR>redirections</VAR> ]
+</pre></td></tr></table></P><P>
+
+or
+</P><P>
+
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>function <VAR>name</VAR> [()] <VAR>compound-command</VAR> [ <VAR>redirections</VAR> ]
 </pre></td></tr></table></P><P>
 
 This defines a shell function named <VAR>name</VAR>.  The reserved
@@ -1652,6 +1667,9 @@ That command is usually a <VAR>list</VAR> enclosed between { and }, but
 may be any compound command listed above.
 <VAR>compound-command</VAR> is executed whenever <VAR>name</VAR> is specified as the
 name of a command.
+When the shell is in POSIX mode (see section <A HREF="bashref.html#SEC91">6.11 Bash POSIX Mode</A>),
+<VAR>name</VAR> may not be the same as one of the special builtins
+(see section <A HREF="bashref.html#SEC65">4.4 Special Builtins</A>).
 Any redirections (see section <A HREF="bashref.html#SEC40">3.6 Redirections</A>) associated with the shell function
 are performed when the function is executed.
 </P><P>
@@ -1728,8 +1746,8 @@ the function and the commands it invokes.
 </P><P>
 
 Function names and definitions may be listed with the
-<SAMP>`-f'</SAMP> option to the <CODE>declare</CODE> or <CODE>typeset</CODE>
-builtin commands (see section <A HREF="bashref.html#SEC61">4.2 Bash Builtin Commands</A>).
+<SAMP>`-f'</SAMP> option to the <CODE>declare</CODE> (<CODE>typeset</CODE>)
+builtin command (see section <A HREF="bashref.html#SEC61">4.2 Bash Builtin Commands</A>).
 The <SAMP>`-F'</SAMP> option to <CODE>declare</CODE> or <CODE>typeset</CODE>
 will list the function names only
 (and optionally the source file and line number, if the <CODE>extdebug</CODE>
@@ -1805,6 +1823,9 @@ Assignment statements may also appear as arguments to the
 <CODE>alias</CODE>, 
 <CODE>declare</CODE>, <CODE>typeset</CODE>, <CODE>export</CODE>, <CODE>readonly</CODE>,
 and <CODE>local</CODE> builtin commands.
+When in POSIX mode (see section <A HREF="bashref.html#SEC91">6.11 Bash POSIX Mode</A>), these builtins may appear
+in a command after one or more instances of the <CODE>command</CODE> builtin
+and retain these assignment statement properties.
 </P><P>
 
 In the context where an assignment statement is assigning a value  
@@ -1999,6 +2020,8 @@ When checking mail, this parameter holds the name of the mail file.
 
 Expansion is performed on the command line after it has been split into
 <CODE>token</CODE>s.  There are seven kinds of expansion performed:
+</P><P>
+
 <UL>
 <LI>brace expansion
 <LI>tilde expansion
@@ -2072,7 +2095,7 @@ is performed.
 Brace expansion is a mechanism by which arbitrary strings may be generated.
 This mechanism is similar to
 <VAR>filename expansion</VAR> (see section <A HREF="bashref.html#SEC37">3.5.8 Filename Expansion</A>),
-but the file names generated need not exist.
+but the filenames generated need not exist.
 Patterns to be brace expanded take the form of an optional <VAR>preamble</VAR>,
 followed by either a series of comma-separated strings or a sequence expression
 between a pair of braces,
@@ -2190,7 +2213,7 @@ left unchanged.
 Each variable assignment is checked for unquoted tilde-prefixes immediately
 following a <SAMP>`:'</SAMP> or the first <SAMP>`='</SAMP>.
 In these cases, tilde expansion is also performed.
-Consequently, one may use file names with tildes in assignments to
+Consequently, one may use filenames with tildes in assignments to
 <CODE>PATH</CODE>, <CODE>MAILPATH</CODE>, and <CODE>CDPATH</CODE>,
 and the shell assigns the expanded value.
 </P><P>
@@ -2228,8 +2251,6 @@ The following table shows how Bash treats unquoted tilde-prefixes:
 
 <DT><CODE>~-<VAR>N</VAR></CODE>
 <DD>The string that would be displayed by <SAMP>`dirs -<VAR>N</VAR>'</SAMP>
-<P>
-
 </DL>
 <P>
 
@@ -2477,8 +2498,6 @@ If <VAR>parameter</VAR>
 is an array variable subscripted with <SAMP>`@'</SAMP> or <SAMP>`*'</SAMP>,
 the case modification operation is applied to each member of the
 array in turn, and the expansion is the resultant list.
-<P>
-
 </DL>
 <P>
 
@@ -2698,8 +2717,8 @@ After word splitting, unless the <SAMP>`-f'</SAMP> option has been set
 If one of these characters appears, then the word is
 regarded as a <VAR>pattern</VAR>,
 and replaced with an alphabetically sorted list of
-file names matching the pattern (see section <A HREF="bashref.html#SEC38">3.5.8.1 Pattern Matching</A>).
-If no matching file names are found,
+filenames matching the pattern (see section <A HREF="bashref.html#SEC38">3.5.8.1 Pattern Matching</A>).
+If no matching filenames are found,
 and the shell option <CODE>nullglob</CODE> is disabled, the word is left
 unchanged.
 If the <CODE>nullglob</CODE> option is set, and no matches are found, the word
@@ -2713,7 +2732,7 @@ without regard to the case of alphabetic characters.
 When a pattern is used for filename expansion, the character <SAMP>`.'</SAMP>
 at the start of a filename or immediately following a slash
 must be matched explicitly, unless the shell option <CODE>dotglob</CODE> is set.
-When matching a file name, the slash character must always be
+When matching a filename, the slash character must always be
 matched explicitly.
 In other cases, the <SAMP>`.'</SAMP> character is not treated specially.
 </P><P>
@@ -2976,8 +2995,6 @@ connection to the corresponding socket.
 <DD>If <VAR>host</VAR> is a valid hostname or Internet address, and <VAR>port</VAR>
 is an integer port number or service name, Bash attempts to open a UDP
 connection to the corresponding socket.
-<P>
-
 </DL>
 <P>
 
@@ -3168,8 +3185,8 @@ The format of here-documents is:
 <VAR>delimiter</VAR>
 </pre></td></tr></table></P><P>
 
-No parameter expansion, command substitution, arithmetic expansion,
-or filename expansion is performed on
+No parameter and variable expansion, command substitution,
+arithmetic expansion, or filename expansion is performed on
 <VAR>word</VAR>.  If any characters in <VAR>word</VAR> are quoted, the
 <VAR>delimiter</VAR> is the result of quote removal on <VAR>word</VAR>,
 and the lines in the here-document are not expanded.
@@ -3207,10 +3224,12 @@ A variant of here documents, the format is:
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>&#60;&#60;&#60; <VAR>word</VAR>
 </pre></td></tr></table><P>
 
-The <VAR>word</VAR>
-is expanded as described above, with the exception that
-pathname expansion is not applied, and supplied as a single string
-to the command on its standard input.
+The <VAR>word</VAR> undergoes
+brace expansion, tilde expansion, parameter and variable expansion,
+command substitution, arithmetic expansion, and quote removal.
+Pathname expansion word splitting are not performed.
+The result is supplied as a single string to the command on its
+standard input.
 </P><P>
 
 <HR SIZE="6">
@@ -3666,7 +3685,7 @@ not just those that precede the command name.
 </P><P>
 
 When Bash invokes an external command, the variable <SAMP>`$_'</SAMP>
-is set to the full path name of the command and passed to that
+is set to the full pathname of the command and passed to that
 command in its environment.
 </P><P>
 
@@ -3692,7 +3711,7 @@ The exit status of an executed command is the value returned by the
 <VAR>waitpid</VAR> system call or equivalent function.  Exit statuses    
 fall between 0 and 255, though, as explained below, the shell may
 use values above 125 specially.  Exit statuses from shell builtins and
-compound commands are also limited to this range. Under certain
+compound commands are also limited to this range.  Under certain
 circumstances, the shell will use special values to indicate specific
 failure modes.
 </P><P>
@@ -3960,14 +3979,18 @@ These commands are implemented as specified by the POSIX standard.
 <DT><CODE>:    (a colon)</CODE>
 <DD><A NAME="IDX68"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>: [<VAR>arguments</VAR>]
-</pre></td></tr></table>Do nothing beyond expanding <VAR>arguments</VAR> and performing redirections.
+</pre></td></tr></table><P>
+
+Do nothing beyond expanding <VAR>arguments</VAR> and performing redirections.
 The return status is zero.
-<P>
+</P><P>
 
 <DT><CODE>.    (a period)</CODE>
 <DD><A NAME="IDX69"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>. <VAR>filename</VAR> [<VAR>arguments</VAR>]
-</pre></td></tr></table>Read and execute commands from the <VAR>filename</VAR> argument in the
+</pre></td></tr></table><P>
+
+Read and execute commands from the <VAR>filename</VAR> argument in the
 current shell context.  If <VAR>filename</VAR> does not contain a slash,
 the <CODE>PATH</CODE> variable is used to find <VAR>filename</VAR>.
 When Bash is not in POSIX mode, the current directory is searched
@@ -3979,26 +4002,30 @@ The return status is the exit status of the last command executed, or
 zero if no commands are executed.  If <VAR>filename</VAR> is not found, or
 cannot be read, the return status is non-zero.
 This builtin is equivalent to <CODE>source</CODE>.
-<P>
+</P><P>
 
 <DT><CODE>break</CODE>
 <DD><A NAME="IDX70"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>break [<VAR>n</VAR>]
-</pre></td></tr></table>Exit from a <CODE>for</CODE>, <CODE>while</CODE>, <CODE>until</CODE>, or <CODE>select</CODE> loop.
+</pre></td></tr></table><P>
+
+Exit from a <CODE>for</CODE>, <CODE>while</CODE>, <CODE>until</CODE>, or <CODE>select</CODE> loop.
 If <VAR>n</VAR> is supplied, the <VAR>n</VAR>th enclosing loop is exited.
 <VAR>n</VAR> must be greater than or equal to 1.
 The return status is zero unless <VAR>n</VAR> is not greater than or equal to 1.
-<P>
+</P><P>
 
 <DT><CODE>cd</CODE>
 <DD><A NAME="IDX71"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>cd [-L|[-P [-e]]] [<VAR>directory</VAR>]
-</pre></td></tr></table>Change the current working directory to <VAR>directory</VAR>.
+</pre></td></tr></table><P>
+
+Change the current working directory to <VAR>directory</VAR>.
 If <VAR>directory</VAR> is not given, the value of the <CODE>HOME</CODE> shell
 variable is used.
 If the shell variable <CODE>CDPATH</CODE> exists, it is used as a search path.
 If <VAR>directory</VAR> begins with a slash, <CODE>CDPATH</CODE> is not used.
-<P>
+</P><P>
 
 The <SAMP>`-P'</SAMP> option means to not follow symbolic links; symbolic
 links are followed by default or with the <SAMP>`-L'</SAMP> option.
@@ -4006,7 +4033,8 @@ If the <SAMP>`-e'</SAMP> option is supplied with <SAMP>`-P'</SAMP>
 and the current working directory cannot be successfully determined
 after a successful directory change, <CODE>cd</CODE> will return an unsuccessful
 status.
-If <VAR>directory</VAR> is <SAMP>`-'</SAMP>, it is equivalent to <CODE>$OLDPWD</CODE>.
+If <VAR>directory</VAR> is <SAMP>`-'</SAMP>, it is converted to <CODE>$OLDPWD</CODE>
+before the directory change is attempted.
 </P><P>
 
 If a non-empty directory name from <CODE>CDPATH</CODE> is used, or if
@@ -4022,28 +4050,34 @@ non-zero otherwise.
 <DT><CODE>continue</CODE>
 <DD><A NAME="IDX72"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>continue [<VAR>n</VAR>]
-</pre></td></tr></table>Resume the next iteration of an enclosing <CODE>for</CODE>, <CODE>while</CODE>,
+</pre></td></tr></table><P>
+
+Resume the next iteration of an enclosing <CODE>for</CODE>, <CODE>while</CODE>,
 <CODE>until</CODE>, or <CODE>select</CODE> loop.
 If <VAR>n</VAR> is supplied, the execution of the <VAR>n</VAR>th enclosing loop
 is resumed.
 <VAR>n</VAR> must be greater than or equal to 1.
 The return status is zero unless <VAR>n</VAR> is not greater than or equal to 1.
-<P>
+</P><P>
 
 <DT><CODE>eval</CODE>
 <DD><A NAME="IDX73"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>eval [<VAR>arguments</VAR>]
-</pre></td></tr></table>The arguments are concatenated together into a single command, which is
+</pre></td></tr></table><P>
+
+The arguments are concatenated together into a single command, which is
 then read and executed, and its exit status returned as the exit status
 of <CODE>eval</CODE>.
 If there are no arguments or only empty arguments, the return status is
 zero.
-<P>
+</P><P>
 
 <DT><CODE>exec</CODE>
 <DD><A NAME="IDX74"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>exec [-cl] [-a <VAR>name</VAR>] [<VAR>command</VAR> [<VAR>arguments</VAR>]]
-</pre></td></tr></table>If <VAR>command</VAR>
+</pre></td></tr></table><P>
+
+If <VAR>command</VAR>
 is supplied, it replaces the shell without creating a new process.
 If the <SAMP>`-l'</SAMP> option is supplied, the shell places a dash at the
 beginning of the zeroth argument passed to <VAR>command</VAR>.
@@ -4052,32 +4086,41 @@ The <SAMP>`-c'</SAMP> option causes <VAR>command</VAR> to be executed with an em
 environment.
 If <SAMP>`-a'</SAMP> is supplied, the shell passes <VAR>name</VAR> as the zeroth
 argument to <VAR>command</VAR>.
+If <VAR>command</VAR>
+cannot be executed for some reason, a non-interactive shell exits,
+unless the <CODE>execfail</CODE> shell option
+is enabled.  In that case, it returns failure.
+An interactive shell returns failure if the file cannot be executed.
 If no <VAR>command</VAR> is specified, redirections may be used to affect
 the current shell environment.  If there are no redirection errors, the
 return status is zero; otherwise the return status is non-zero.
-<P>
+</P><P>
 
 <DT><CODE>exit</CODE>
 <DD><A NAME="IDX75"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>exit [<VAR>n</VAR>]
-</pre></td></tr></table>Exit the shell, returning a status of <VAR>n</VAR> to the shell's parent.
+</pre></td></tr></table><P>
+
+Exit the shell, returning a status of <VAR>n</VAR> to the shell's parent.
 If <VAR>n</VAR> is omitted, the exit status is that of the last command executed.
 Any trap on <CODE>EXIT</CODE> is executed before the shell terminates.
-<P>
+</P><P>
 
 <DT><CODE>export</CODE>
 <DD><A NAME="IDX76"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>export [-fn] [-p] [<VAR>name</VAR>[=<VAR>value</VAR>]]
-</pre></td></tr></table>Mark each <VAR>name</VAR> to be passed to child processes
+</pre></td></tr></table><P>
+
+Mark each <VAR>name</VAR> to be passed to child processes
 in the environment.  If the <SAMP>`-f'</SAMP> option is supplied, the <VAR>name</VAR>s
 refer to shell functions; otherwise the names refer to shell variables.
 The <SAMP>`-n'</SAMP> option means to no longer mark each <VAR>name</VAR> for export.
 If no <VAR>names</VAR> are supplied, or if the <SAMP>`-p'</SAMP> option is given, a
-list of exported names is displayed.
+list of names of all exported variables is displayed.
 The <SAMP>`-p'</SAMP> option displays output in a form that may be reused as input.
 If a variable name is followed by =<VAR>value</VAR>, the value of
 the variable is set to <VAR>value</VAR>.
-<P>
+</P><P>
 
 The return status is zero unless an invalid option is supplied, one of
 the names is not a valid shell variable name, or <SAMP>`-f'</SAMP> is supplied
@@ -4087,10 +4130,12 @@ with a name that is not a shell function.
 <DT><CODE>getopts</CODE>
 <DD><A NAME="IDX77"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>getopts <VAR>optstring</VAR> <VAR>name</VAR> [<VAR>args</VAR>]
-</pre></td></tr></table><CODE>getopts</CODE> is used by shell scripts to parse positional parameters.
+</pre></td></tr></table><P>
+
+<CODE>getopts</CODE> is used by shell scripts to parse positional parameters.
 <VAR>optstring</VAR> contains the option characters to be recognized; if a
 character is followed by a colon, the option is expected to have an
-argument, which should be separated from it by white space.
+argument, which should be separated from it by whitespace.
 The colon (<SAMP>`:'</SAMP>) and question mark (<SAMP>`?'</SAMP>) may not be
 used as option characters.
 Each time it is invoked, <CODE>getopts</CODE>
@@ -4105,7 +4150,7 @@ When an option requires an argument,
 The shell does not reset <CODE>OPTIND</CODE> automatically; it must be manually
 reset between multiple calls to <CODE>getopts</CODE> within the same shell
 invocation if a new set of parameters is to be used.
-<P>
+</P><P>
 
 When the end of options is encountered, <CODE>getopts</CODE> exits with a
 return value greater than zero.
@@ -4120,7 +4165,7 @@ given in <VAR>args</VAR>, <CODE>getopts</CODE> parses those instead.
 
 <CODE>getopts</CODE> can report errors in two ways.  If the first character of
 <VAR>optstring</VAR> is a colon, <VAR>silent</VAR>
-error reporting is used.  In normal operation diagnostic messages
+error reporting is used.  In normal operation, diagnostic messages
 are printed when invalid options or missing option arguments are
 encountered.
 If the variable <CODE>OPTERR</CODE>
@@ -4145,7 +4190,9 @@ If <CODE>getopts</CODE> is silent, then a colon (<SAMP>`:'</SAMP>) is placed in
 <DT><CODE>hash</CODE>
 <DD><A NAME="IDX78"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>hash [-r] [-p <VAR>filename</VAR>] [-dt] [<VAR>name</VAR>]
-</pre></td></tr></table>Each time <CODE>hash</CODE> is invoked, it remembers the full pathnames of the
+</pre></td></tr></table><P>
+
+Each time <CODE>hash</CODE> is invoked, it remembers the full pathnames of the
 commands specified as <VAR>name</VAR> arguments,
 so they need not be searched for on subsequent invocations.
 The commands are found by searching through the directories listed in
@@ -4166,12 +4213,14 @@ If no arguments are given, or if only <SAMP>`-l'</SAMP> is supplied,
 information about remembered commands is printed.
 The return status is zero unless a <VAR>name</VAR> is not found or an invalid
 option is supplied.
-<P>
+</P><P>
 
 <DT><CODE>pwd</CODE>
 <DD><A NAME="IDX79"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>pwd [-LP]
-</pre></td></tr></table>Print the absolute pathname of the current working directory.
+</pre></td></tr></table><P>
+
+Print the absolute pathname of the current working directory.
 If the <SAMP>`-P'</SAMP> option is supplied, the pathname printed will not
 contain symbolic links.
 If the <SAMP>`-L'</SAMP> option is supplied, the pathname printed may contain
@@ -4179,12 +4228,14 @@ symbolic links.
 The return status is zero unless an error is encountered while
 determining the name of the current directory or an invalid option
 is supplied.
-<P>
+</P><P>
 
 <DT><CODE>readonly</CODE>
 <DD><A NAME="IDX80"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>readonly [-aAf] [-p] [<VAR>name</VAR>[=<VAR>value</VAR>]] <small>...</small>
-</pre></td></tr></table>Mark each <VAR>name</VAR> as readonly.
+</pre></td></tr></table><P>
+
+Mark each <VAR>name</VAR> as readonly.
 The values of these names may not be changed by subsequent assignment.
 If the <SAMP>`-f'</SAMP> option is supplied, each <VAR>name</VAR> refers to a shell
 function.
@@ -4203,28 +4254,34 @@ the variable is set to <VAR>value</VAR>.
 The return status is zero unless an invalid option is supplied, one of
 the <VAR>name</VAR> arguments is not a valid shell variable or function name,
 or the <SAMP>`-f'</SAMP> option is supplied with a name that is not a shell function.
-<P>
+</P><P>
 
 <DT><CODE>return</CODE>
 <DD><A NAME="IDX81"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>return [<VAR>n</VAR>]
-</pre></td></tr></table>Cause a shell function to exit with the return value <VAR>n</VAR>.
+</pre></td></tr></table><P>
+
+Cause a shell function to stop executing and return the value <VAR>n</VAR>
+to its caller.
 If <VAR>n</VAR> is not supplied, the return value is the exit status of the
 last command executed in the function.
-This may also be used to terminate execution of a script being executed
-with the <CODE>.</CODE> (or <CODE>source</CODE>) builtin, returning either <VAR>n</VAR> or
+<CODE>return</CODE> may also be used to terminate execution of a script
+being executed with the <CODE>.</CODE> (<CODE>source</CODE>) builtin,
+returning either <VAR>n</VAR> or
 the exit status of the last command executed within the script as the exit
 status of the script.
 Any command associated with the <CODE>RETURN</CODE> trap is executed
 before execution resumes after the function or script.
 The return status is non-zero if <CODE>return</CODE> is used outside a function
 and not during the execution of a script by <CODE>.</CODE> or <CODE>source</CODE>.
-<P>
+</P><P>
 
 <DT><CODE>shift</CODE>
 <DD><A NAME="IDX82"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>shift [<VAR>n</VAR>]
-</pre></td></tr></table>Shift the positional parameters to the left by <VAR>n</VAR>.
+</pre></td></tr></table><P>
+
+Shift the positional parameters to the left by <VAR>n</VAR>.
 The positional parameters from <VAR>n</VAR>+1 <small>...</small> <CODE>$#</CODE> are
 renamed to <CODE>$1</CODE> <small>...</small> <CODE>$#</CODE>-<VAR>n</VAR>.
 Parameters represented by the numbers <CODE>$#</CODE> to <CODE>$#</CODE>-<VAR>n</VAR>+1
@@ -4235,19 +4292,23 @@ are not changed.
 If <VAR>n</VAR> is not supplied, it is assumed to be 1.
 The return status is zero unless <VAR>n</VAR> is greater than <CODE>$#</CODE> or
 less than zero, non-zero otherwise.
-<P>
+</P><P>
 
-<DT><CODE>test</CODE>
+<DT><CODE>test[B</CODE>
 <DD><DT><CODE>[</CODE>
 <DD><A NAME="IDX83"></A>
 <A NAME="IDX84"></A>
-Evaluate a conditional expression <VAR>expr</VAR>.
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>test <VAR>expr</VAR>
+</pre></td></tr></table><P>
+
+Evaluate a conditional expression <VAR>expr</VAR> and return a status of 0
+(true) or 1 (false).
 Each operator and operand must be a separate argument.
 Expressions are composed of the primaries described below in
 <A HREF="bashref.html#SEC83">6.4 Bash Conditional Expressions</A>.
 <CODE>test</CODE> does not accept any options, nor does it accept and ignore
 an argument of <SAMP>`--'</SAMP> as signifying the end of options.
-<P>
+</P><P>
 
 When the <CODE>[</CODE> form is used, the last argument to the command must
 be a <CODE>]</CODE>.
@@ -4337,14 +4398,18 @@ operators sort lexicographically using ASCII ordering.
 <DT><CODE>times</CODE>
 <DD><A NAME="IDX85"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>times
-</pre></td></tr></table>Print out the user and system times used by the shell and its children.
+</pre></td></tr></table><P>
+
+Print out the user and system times used by the shell and its children.
 The return status is zero.
-<P>
+</P><P>
 
 <DT><CODE>trap</CODE>
 <DD><A NAME="IDX86"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>trap [-lp] [<VAR>arg</VAR>] [<VAR>sigspec</VAR> <small>...</small>]
-</pre></td></tr></table>The commands in <VAR>arg</VAR> are to be read and executed when the
+</pre></td></tr></table><P>
+
+The commands in <VAR>arg</VAR> are to be read and executed when the
 shell receives signal <VAR>sigspec</VAR>.  If <VAR>arg</VAR> is absent (and
 there is a single <VAR>sigspec</VAR>) or
 equal to <SAMP>`-'</SAMP>, each specified signal's disposition is reset
@@ -4361,7 +4426,7 @@ The <SAMP>`-l'</SAMP> option causes the shell to print a list of signal names
 and their corresponding numbers.
 Each <VAR>sigspec</VAR> is either a signal name or a signal number.
 Signal names are case insensitive and the <CODE>SIG</CODE> prefix is optional.
-<P>
+</P><P>
 
 If a <VAR>sigspec</VAR>
 is <CODE>0</CODE> or <CODE>EXIT</CODE>, <VAR>arg</VAR> is executed when the shell exits.
@@ -4401,7 +4466,9 @@ valid signal.
 <DT><CODE>umask</CODE>
 <DD><A NAME="IDX87"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>umask [-p] [-S] [<VAR>mode</VAR>]
-</pre></td></tr></table>Set the shell process's file creation mask to <VAR>mode</VAR>.  If
+</pre></td></tr></table><P>
+
+Set the shell process's file creation mask to <VAR>mode</VAR>.  If
 <VAR>mode</VAR> begins with a digit, it is interpreted as an octal number;
 if not, it is interpreted as a symbolic mode mask similar
 to that accepted by the <CODE>chmod</CODE> command.  If <VAR>mode</VAR> is
@@ -4412,7 +4479,7 @@ If the  <SAMP>`-p'</SAMP> option is supplied, and <VAR>mode</VAR>
 is omitted, the output is in a form that may be reused as input.
 The return status is zero if the mode is successfully changed or if
 no <VAR>mode</VAR> argument is supplied, and non-zero otherwise.
-<P>
+</P><P>
 
 Note that when the mode is interpreted as an octal number, each number
 of the umask is subtracted from <CODE>7</CODE>.  Thus, a umask of <CODE>022</CODE>
@@ -4422,7 +4489,9 @@ results in permissions of <CODE>755</CODE>.
 <DT><CODE>unset</CODE>
 <DD><A NAME="IDX88"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>unset [-fv] [<VAR>name</VAR>]
-</pre></td></tr></table>Each variable or function <VAR>name</VAR> is removed.
+</pre></td></tr></table><P>
+
+Remove each variable or function <VAR>name</VAR>.
 If the <SAMP>`-v'</SAMP> option is given, each
 <VAR>name</VAR> refers to a shell variable and that variable is remvoved.
 If the <SAMP>`-f'</SAMP> option is given, the <VAR>name</VAR>s refer to shell
@@ -4462,7 +4531,7 @@ Some of these commands are specified in the POSIX standard.
 
 <DT><CODE>alias</CODE>
 <DD><A NAME="IDX89"></A>
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>alias [<CODE>-p</CODE>] [<VAR>name</VAR>[=<VAR>value</VAR>] <small>...</small>]
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>alias [-p] [<VAR>name</VAR>[=<VAR>value</VAR>] <small>...</small>]
 </pre></td></tr></table><P>
 
 Without arguments or with the <SAMP>`-p'</SAMP> option, <CODE>alias</CODE> prints
@@ -4582,20 +4651,24 @@ error occurs.
 <DT><CODE>builtin</CODE>
 <DD><A NAME="IDX91"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>builtin [<VAR>shell-builtin</VAR> [<VAR>args</VAR>]]
-</pre></td></tr></table>Run a shell builtin, passing it <VAR>args</VAR>, and return its exit status.
+</pre></td></tr></table><P>
+
+Run a shell builtin, passing it <VAR>args</VAR>, and return its exit status.
 This is useful when defining a shell function with the same
 name as a shell builtin, retaining the functionality of the builtin within
 the function.
 The return status is non-zero if <VAR>shell-builtin</VAR> is not a shell
 builtin command.
-<P>
+</P><P>
 
 <DT><CODE>caller</CODE>
 <DD><A NAME="IDX92"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>caller [<VAR>expr</VAR>]
-</pre></td></tr></table>Returns the context of any active subroutine call (a shell function or
+</pre></td></tr></table><P>
+
+Returns the context of any active subroutine call (a shell function or
 a script executed with the <CODE>.</CODE> or <CODE>source</CODE> builtins).
-<P>
+</P><P>
 
 Without <VAR>expr</VAR>, <CODE>caller</CODE> displays the line number and source
 filename of the current subroutine call.
@@ -4614,7 +4687,9 @@ call stack.
 <DT><CODE>command</CODE>
 <DD><A NAME="IDX93"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>command [-pVv] <VAR>command</VAR> [<VAR>arguments</VAR> <small>...</small>]
-</pre></td></tr></table>Runs <VAR>command</VAR> with <VAR>arguments</VAR> ignoring any shell function
+</pre></td></tr></table><P>
+
+Runs <VAR>command</VAR> with <VAR>arguments</VAR> ignoring any shell function
 named <VAR>command</VAR>.
 Only shell builtin commands or commands found by searching the
 <CODE>PATH</CODE> are executed.
@@ -4626,7 +4701,7 @@ that is guaranteed to find all of the standard utilities.
 The return status in this case is 127 if <VAR>command</VAR> cannot be
 found or an error occurred, and the exit status of <VAR>command</VAR>
 otherwise.
-<P>
+</P><P>
 
 If either the <SAMP>`-V'</SAMP> or <SAMP>`-v'</SAMP> option is supplied, a
 description of <VAR>command</VAR> is printed.  The <SAMP>`-v'</SAMP> option
@@ -4638,7 +4713,7 @@ zero if <VAR>command</VAR> is found, and non-zero if not.
 
 <DT><CODE>declare</CODE>
 <DD><A NAME="IDX94"></A>
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>declare [-aAfFilrtux] [-p] [<VAR>name</VAR>[=<VAR>value</VAR>] <small>...</small>]
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>declare [-aAfFgilrtux] [-p] [<VAR>name</VAR>[=<VAR>value</VAR>] <small>...</small>]
 </pre></td></tr></table><P>
 
 Declare variables and give them attributes.  If no <VAR>name</VAR>s
@@ -4749,7 +4824,9 @@ or an attempt is made to display a non-existent function with <SAMP>`-f'</SAMP>.
 <DT><CODE>echo</CODE>
 <DD><A NAME="IDX95"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>echo [-neE] [<VAR>arg</VAR> <small>...</small>]
-</pre></td></tr></table>Output the <VAR>arg</VAR>s, separated by spaces, terminated with a
+</pre></td></tr></table><P>
+
+Output the <VAR>arg</VAR>s, separated by spaces, terminated with a
 newline.
 The return status is 0 unless a write error occurs.
 If <SAMP>`-n'</SAMP> is specified, the trailing newline is suppressed.
@@ -4761,7 +4838,7 @@ The <CODE>xpg_echo</CODE> shell option may be used to
 dynamically determine whether or not <CODE>echo</CODE> expands these
 escape characters by default.
 <CODE>echo</CODE> does not interpret <SAMP>`--'</SAMP> to mean the end of options.
-<P>
+</P><P>
 
 <CODE>echo</CODE> interprets the following escape sequences:
 <DL COMPACT>
@@ -4804,7 +4881,9 @@ escape characters by default.
 <DT><CODE>enable</CODE>
 <DD><A NAME="IDX96"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>enable [-a] [-dnps] [-f <VAR>filename</VAR>] [<VAR>name</VAR> <small>...</small>]
-</pre></td></tr></table>Enable and disable builtin shell commands.
+</pre></td></tr></table><P>
+
+Enable and disable builtin shell commands.
 Disabling a builtin allows a disk command which has the same name
 as a shell builtin to be executed without specifying a full pathname,
 even though the shell normally searches for builtins before disk commands.
@@ -4812,7 +4891,7 @@ If <SAMP>`-n'</SAMP> is used, the <VAR>name</VAR>s become disabled.  Otherwise
 <VAR>name</VAR>s are enabled.  For example, to use the <CODE>test</CODE> binary
 found via <CODE>$PATH</CODE> instead of the shell builtin version, type
 <SAMP>`enable -n test'</SAMP>.
-<P>
+</P><P>
 
 If the <SAMP>`-p'</SAMP> option is supplied, or no <VAR>name</VAR> arguments appear,
 a list of shell builtins is printed.  With no other arguments, the list
@@ -4839,11 +4918,13 @@ or there is an error loading a new builtin from a shared object.
 <DT><CODE>help</CODE>
 <DD><A NAME="IDX97"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>help [-dms] [<VAR>pattern</VAR>]
-</pre></td></tr></table>Display helpful information about builtin commands.
+</pre></td></tr></table><P>
+
+Display helpful information about builtin commands.
 If <VAR>pattern</VAR> is specified, <CODE>help</CODE> gives detailed help
 on all commands matching <VAR>pattern</VAR>, otherwise a list of
 the builtins is printed.
-<P>
+</P><P>
 
 Options, if supplied, have the following meanings:
 </P><P>
@@ -4863,18 +4944,22 @@ The return status is zero unless no command matches <VAR>pattern</VAR>.
 
 <DT><CODE>let</CODE>
 <DD><A NAME="IDX98"></A>
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>let <VAR>expression</VAR> [<VAR>expression</VAR>]
-</pre></td></tr></table>The <CODE>let</CODE> builtin allows arithmetic to be performed on shell
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>let <VAR>expression</VAR> [<VAR>expression</VAR> <small>...</small>]
+</pre></td></tr></table><P>
+
+The <CODE>let</CODE> builtin allows arithmetic to be performed on shell
 variables.  Each <VAR>expression</VAR> is evaluated according to the
 rules given below in <A HREF="bashref.html#SEC84">6.5 Shell Arithmetic</A>.  If the
 last <VAR>expression</VAR> evaluates to 0, <CODE>let</CODE> returns 1;
 otherwise 0 is returned.
-<P>
+</P><P>
 
 <DT><CODE>local</CODE>
 <DD><A NAME="IDX99"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>local [<VAR>option</VAR>] <VAR>name</VAR>[=<VAR>value</VAR>] <small>...</small>
-</pre></td></tr></table>For each argument, a local variable named <VAR>name</VAR> is created,
+</pre></td></tr></table><P>
+
+For each argument, a local variable named <VAR>name</VAR> is created,
 and assigned <VAR>value</VAR>.
 The <VAR>option</VAR> can be any of the options accepted by <CODE>declare</CODE>.
 <CODE>local</CODE> can only be used within a function; it makes the variable
@@ -4882,24 +4967,30 @@ The <VAR>option</VAR> can be any of the options accepted by <CODE>declare</CODE>
 children.  The return status is zero unless <CODE>local</CODE> is used outside
 a function, an invalid <VAR>name</VAR> is supplied, or <VAR>name</VAR> is a
 readonly variable.
-<P>
+</P><P>
 
 <DT><CODE>logout</CODE>
 <DD><A NAME="IDX100"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>logout [<VAR>n</VAR>]
-</pre></td></tr></table>Exit a login shell, returning a status of <VAR>n</VAR> to the shell's
+</pre></td></tr></table><P>
+
+Exit a login shell, returning a status of <VAR>n</VAR> to the shell's
 parent.
-<P>
+</P><P>
 
 <DT><CODE>mapfile</CODE>
 <DD><A NAME="IDX101"></A>
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>mapfile [-n <VAR>count</VAR>] [-O <VAR>origin</VAR>] [-s <VAR>count</VAR>] [-t] [-u <VAR>fd</VAR>] [
--C <VAR>callback</VAR>] [-c <VAR>quantum</VAR>] [<VAR>array</VAR>]
-</pre></td></tr></table>Read lines from the standard input into the indexed array variable <VAR>array</VAR>,
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>mapfile [-n <VAR>count</VAR>] [-O <VAR>origin</VAR>] [-s <VAR>count</VAR>] [-t] [-u <VAR>fd</VAR>]
+    [-C <VAR>callback</VAR>] [-c <VAR>quantum</VAR>] [<VAR>array</VAR>]
+</pre></td></tr></table><P>
+
+Read lines from the standard input into the indexed array variable <VAR>array</VAR>,
 or from file descriptor <VAR>fd</VAR>
 if the <SAMP>`-u'</SAMP> option is supplied.
 The variable <CODE>MAPFILE</CODE> is the default <VAR>array</VAR>.
 Options, if supplied, have the following meanings:
+</P><P>
+
 <DL COMPACT>
 
 <DT><CODE>-n</CODE>
@@ -4942,11 +5033,13 @@ is not an indexed array.
 <DT><CODE>printf</CODE>
 <DD><A NAME="IDX102"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>printf [-v <VAR>var</VAR>] <VAR>format</VAR> [<VAR>arguments</VAR>]
-</pre></td></tr></table>Write the formatted <VAR>arguments</VAR> to the standard output under the
+</pre></td></tr></table><P>
+
+Write the formatted <VAR>arguments</VAR> to the standard output under the
 control of the <VAR>format</VAR>.
 The <SAMP>`-v'</SAMP> option causes the output to be assigned to the variable
 <VAR>var</VAR> rather than being printed to the standard output.
-<P>
+</P><P>
 
 The <VAR>format</VAR> is a character string which contains three types of objects:
 plain characters, which are simply copied to standard output, character
@@ -4959,16 +5052,16 @@ interprets the following extensions:
 
 <DL COMPACT>
 <DT><CODE>%b</CODE>
-<DD>causes <CODE>printf</CODE> to expand backslash escape sequences in the
+<DD>Causes <CODE>printf</CODE> to expand backslash escape sequences in the
 corresponding <VAR>argument</VAR>,
-(except that <SAMP>`\c'</SAMP> terminates output, backslashes in
+except that <SAMP>`\c'</SAMP> terminates output, backslashes in
 <SAMP>`\''</SAMP>, <SAMP>`\"'</SAMP>, and <SAMP>`\?'</SAMP> are not removed, and octal escapes
-beginning with <SAMP>`\0'</SAMP> may contain up to four digits).
+beginning with <SAMP>`\0'</SAMP> may contain up to four digits.
 <DT><CODE>%q</CODE>
-<DD>causes <CODE>printf</CODE> to output the
+<DD>Causes <CODE>printf</CODE> to output the
 corresponding <VAR>argument</VAR> in a format that can be reused as shell input.
 <DT><CODE>%(<VAR>datefmt</VAR>)T</CODE>
-<DD>causes <CODE>printf</CODE> to output the date-time string resulting from using
+<DD>Causes <CODE>printf</CODE> to output the date-time string resulting from using
 <VAR>datefmt</VAR> as a format string for <CODE>strftime</CODE>(3).  The corresponding
 <VAR>argument</VAR> is an integer representing the number of seconds since the
 epoch.  Two special argument values may be used: -1 represents the current
@@ -4991,8 +5084,11 @@ non-zero on failure.
 
 <DT><CODE>read</CODE>
 <DD><A NAME="IDX103"></A>
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>read [-ers] [-a <VAR>aname</VAR>] [-d <VAR>delim</VAR>] [-i <VAR>text</VAR>] [-n <VAR>nchars</VAR>] [-N <VAR>nchars</VAR>] [-p <VAR>prompt</VAR>] [-t <VAR>timeout</VAR>] [-u <VAR>fd</VAR>] [<VAR>name</VAR> <small>...</small>]
-</pre></td></tr></table>One line is read from the standard input, or from the file descriptor
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>read [-ers] [-a <VAR>aname</VAR>] [-d <VAR>delim</VAR>] [-i <VAR>text</VAR>] [-n <VAR>nchars</VAR>]
+    [-N <VAR>nchars</VAR>] [-p <VAR>prompt</VAR>] [-t <VAR>timeout</VAR>] [-u <VAR>fd</VAR>] [<VAR>name</VAR> <small>...</small>]
+</pre></td></tr></table><P>
+
+One line is read from the standard input, or from the file descriptor
 <VAR>fd</VAR> supplied as an argument to the <SAMP>`-u'</SAMP> option, and the first word
 is assigned to the first <VAR>name</VAR>, the second word to the second <VAR>name</VAR>,
 and so on, with leftover words and their intervening separators assigned
@@ -5008,7 +5104,7 @@ variable <CODE>REPLY</CODE>.
 The return code is zero, unless end-of-file is encountered, <CODE>read</CODE>
 times out (in which case the return code is greater than 128), or an
 invalid file descriptor is supplied as the argument to <SAMP>`-u'</SAMP>.
-<P>
+</P><P>
 
 Options, if supplied, have the following meanings:
 </P><P>
@@ -5078,26 +5174,27 @@ the decimal point.
 This option is only effective if <CODE>read</CODE> is reading input from a
 terminal, pipe, or other special file; it has no effect when reading
 from regular files.
-If <VAR>timeout</VAR> is 0, <CODE>read</CODE> returns success if input is available on
-the specified file descriptor, failure otherwise.
+If <VAR>timeout</VAR> is 0, <CODE>read</CODE> returns immediately, without trying to
+read and data.  The exit status is 0 if input is available on
+the specified file descriptor, non-zero otherwise.
 The exit status is greater than 128 if the timeout is exceeded.
 <P>
 
 <DT><CODE>-u <VAR>fd</VAR></CODE>
 <DD>Read input from file descriptor <VAR>fd</VAR>.
-<P>
-
 </DL>
 <P>
 
 <DT><CODE>readarray</CODE>
 <DD><A NAME="IDX104"></A>
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>readarray [-n <VAR>count</VAR>] [-O <VAR>origin</VAR>] [-s <VAR>count</VAR>] [-t] [-u <VAR>fd</VAR>] [
--C <VAR>callback</VAR>] [-c <VAR>quantum</VAR>] [<VAR>array</VAR>]
-</pre></td></tr></table>Read lines from the standard input into the indexed array variable <VAR>array</VAR>,
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>readarray [-n <VAR>count</VAR>] [-O <VAR>origin</VAR>] [-s <VAR>count</VAR>] [-t] [-u <VAR>fd</VAR>]
+    [-C <VAR>callback</VAR>] [-c <VAR>quantum</VAR>] [<VAR>array</VAR>]
+</pre></td></tr></table><P>
+
+Read lines from the standard input into the indexed array variable <VAR>array</VAR>,
 or from file descriptor <VAR>fd</VAR>
 if the <SAMP>`-u'</SAMP> option is supplied.
-<P>
+</P><P>
 
 A synonym for <CODE>mapfile</CODE>.
 </P><P>
@@ -5105,15 +5202,19 @@ A synonym for <CODE>mapfile</CODE>.
 <DT><CODE>source</CODE>
 <DD><A NAME="IDX105"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>source <VAR>filename</VAR>
-</pre></td></tr></table>A synonym for <CODE>.</CODE> (see section <A HREF="bashref.html#SEC60">4.1 Bourne Shell Builtins</A>).
-<P>
+</pre></td></tr></table><P>
+
+A synonym for <CODE>.</CODE> (see section <A HREF="bashref.html#SEC60">4.1 Bourne Shell Builtins</A>).
+</P><P>
 
 <DT><CODE>type</CODE>
 <DD><A NAME="IDX106"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>type [-afptP] [<VAR>name</VAR> <small>...</small>]
-</pre></td></tr></table>For each <VAR>name</VAR>, indicate how it would be interpreted if used as a
+</pre></td></tr></table><P>
+
+For each <VAR>name</VAR>, indicate how it would be interpreted if used as a
 command name.
-<P>
+</P><P>
 
 If the <SAMP>`-t'</SAMP> option is used, <CODE>type</CODE> prints a single word
 which is one of <SAMP>`alias'</SAMP>, <SAMP>`function'</SAMP>, <SAMP>`builtin'</SAMP>,
@@ -5134,7 +5235,7 @@ The <SAMP>`-P'</SAMP> option forces a path search for each <VAR>name</VAR>, even
 </P><P>
 
 If a command is hashed, <SAMP>`-p'</SAMP> and <SAMP>`-P'</SAMP> print the hashed value,
-not necessarily the file that appears first in <CODE>$PATH</CODE>.
+which is not necessarily the file that appears first in <CODE>$PATH</CODE>.
 </P><P>
 
 If the <SAMP>`-a'</SAMP> option is used, <CODE>type</CODE> returns all of the places
@@ -5153,18 +5254,24 @@ if any are not found.
 
 <DT><CODE>typeset</CODE>
 <DD><A NAME="IDX107"></A>
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>typeset [-afFrxi] [-p] [<VAR>name</VAR>[=<VAR>value</VAR>] <small>...</small>]
-</pre></td></tr></table>The <CODE>typeset</CODE> command is supplied for compatibility with the Korn
-shell; however, it has been deprecated in favor of the <CODE>declare</CODE>
-builtin command.
-<P>
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>typeset [-afFgrxilrtux] [-p] [<VAR>name</VAR>[=<VAR>value</VAR>] <small>...</small>]
+</pre></td></tr></table><P>
+
+The <CODE>typeset</CODE> command is supplied for compatibility with the Korn
+shell.
+It is a synonym for the <CODE>declare</CODE> builtin command.
+</P><P>
 
 <DT><CODE>ulimit</CODE>
 <DD><A NAME="IDX108"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>ulimit [-abcdefilmnpqrstuvxHST] [<VAR>limit</VAR>]
-</pre></td></tr></table><CODE>ulimit</CODE> provides control over the resources available to processes
+</pre></td></tr></table><P>
+
+<CODE>ulimit</CODE> provides control over the resources available to processes
 started by the shell, on systems that allow such control.  If an
 option is given, it is interpreted as follows:
+</P><P>
+
 <DL COMPACT>
 <DT><CODE>-S</CODE>
 <DD>Change and report the soft limit associated with a resource.
@@ -5250,13 +5357,12 @@ some systems, to its children.
 
 <DT><CODE>-T</CODE>
 <DD>The maximum number of threads.
-<P>
-
 </DL>
 <P>
 
-If <VAR>limit</VAR> is given, it is the new value of the specified resource;
-the special <VAR>limit</VAR> values <CODE>hard</CODE>, <CODE>soft</CODE>, and
+If <VAR>limit</VAR> is given, and the <SAMP>`-a'</SAMP> option is not used,
+<VAR>limit</VAR> is the new value of the specified resource.
+The special <VAR>limit</VAR> values <CODE>hard</CODE>, <CODE>soft</CODE>, and
 <CODE>unlimited</CODE> stand for the current hard limit, the current soft limit,
 and no limit, respectively.
 A hard limit cannot be increased by a non-root user once it is set;
@@ -5266,9 +5372,9 @@ is printed, unless the <SAMP>`-H'</SAMP> option is supplied.
 When setting new limits, if neither <SAMP>`-H'</SAMP> nor <SAMP>`-S'</SAMP> is supplied,
 both the hard and soft limits are set.
 If no option is given, then <SAMP>`-f'</SAMP> is assumed.  Values are in 1024-byte
-increments, except for <SAMP>`-t'</SAMP>, which is in seconds, <SAMP>`-p'</SAMP>,
-which is in units of 512-byte blocks, and <SAMP>`-n'</SAMP> and <SAMP>`-u'</SAMP>, which
-are unscaled values.
+increments, except for <SAMP>`-t'</SAMP>, which is in seconds; <SAMP>`-p'</SAMP>,
+which is in units of 512-byte blocks; and <SAMP>`-T'</SAMP>, <SAMP>`-b'</SAMP>,
+<SAMP>`-n'</SAMP> and <SAMP>`-u'</SAMP>, which are unscaled values.
 </P><P>
 
 The return status is zero unless an invalid option or argument is supplied,
@@ -5283,8 +5389,6 @@ or an error occurs while setting a new limit.
 Remove each <VAR>name</VAR> from the list of aliases.  If <SAMP>`-a'</SAMP> is
 supplied, all aliases are removed.
 Aliases are described in <A HREF="bashref.html#SEC85">6.6 Aliases</A>.
-</P><P>
-
 </DL>
 <P>
 
@@ -5366,11 +5470,11 @@ immediately, rather than before printing the next primary prompt.
 <P>
 
 <DT><CODE>-e</CODE>
-<DD>Exit immediately if a pipeline (see section <A HREF="bashref.html#SEC17">3.2.2 Pipelines</A>), which may consist
-of a single simple command (see section <A HREF="bashref.html#SEC16">3.2.1 Simple Commands</A>),
-a subshell command enclosed in parentheses (see section <A HREF="bashref.html#SEC22">3.2.4.3 Grouping Commands</A>),
-or one of the commands executed as part of a command list enclosed
-by braces (see section <A HREF="bashref.html#SEC22">3.2.4.3 Grouping Commands</A>)
+<DD>Exit immediately if
+a pipeline (see section <A HREF="bashref.html#SEC17">3.2.2 Pipelines</A>), which may consist of a single simple command
+(see section <A HREF="bashref.html#SEC16">3.2.1 Simple Commands</A>),
+a list (see section <A HREF="bashref.html#SEC18">3.2.3 Lists of Commands</A>),
+or a compound command (see section <A HREF="bashref.html#SEC19">3.2.4 Compound Commands</A>)
 returns a non-zero status.
 The shell does not exit if the command that fails is part of the
 command list immediately following a <CODE>while</CODE> or <CODE>until</CODE> keyword,
@@ -5379,6 +5483,9 @@ part of any command executed in a <CODE>&#38;&#38;</CODE> or <CODE>||</CODE> lis
 the command following the final <CODE>&#38;&#38;</CODE> or <CODE>||</CODE>,
 any command in a pipeline but the last,
 or if the command's return status is being inverted with <CODE>!</CODE>.
+If a compound command other than a subshell
+returns a non-zero status because a command failed
+while <SAMP>`-e'</SAMP> was being ignored, the shell does not exit.
 A trap on <CODE>ERR</CODE>, if set, is executed before the shell exits.
 <P>
 
@@ -5544,9 +5651,9 @@ processed, shell functions are not inherited from the environment,
 and the <CODE>SHELLOPTS</CODE>, <CODE>BASHOPTS</CODE>, <CODE>CDPATH</CODE> and <CODE>GLOBIGNORE</CODE>
 variables, if they appear in the environment, are ignored.
 If the shell is started with the effective user (group) id not equal to the
-real user (group) id, and the <CODE>-p</CODE> option is not supplied, these actions
+real user (group) id, and the <SAMP>`-p'</SAMP> option is not supplied, these actions
 are taken and the effective user id is set to the real user id.
-If the <CODE>-p</CODE> option is supplied at startup, the effective user id is
+If the <SAMP>`-p'</SAMP> option is supplied at startup, the effective user id is
 not reset.
 Turning this option off causes the effective user
 and group ids to be set to the real user and group ids.
@@ -5682,13 +5789,15 @@ This builtin allows you to change additional shell optional behavior.
 <DT><CODE>shopt</CODE>
 <DD><A NAME="IDX111"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>shopt [-pqsu] [-o] [<VAR>optname</VAR> <small>...</small>]
-</pre></td></tr></table>Toggle the values of variables controlling optional shell behavior.
+</pre></td></tr></table><P>
+
+Toggle the values of variables controlling optional shell behavior.
 With no options, or with the <SAMP>`-p'</SAMP> option, a list of all settable
 options is displayed, with an indication of whether or not each is set.
 The <SAMP>`-p'</SAMP> option causes output to be displayed in a form that
 may be reused as input.
 Other options have the following meanings:
-<P>
+</P><P>
 
 <DL COMPACT>
 <DT><CODE>-s</CODE>
@@ -5715,7 +5824,7 @@ non-zero otherwise.
 <P>
 
 If either <SAMP>`-s'</SAMP> or <SAMP>`-u'</SAMP>
-is used with no <VAR>optname</VAR> arguments, the display is limited to
+is used with no <VAR>optname</VAR> arguments, <CODE>shopt</CODE> shows only
 those options which are set or unset, respectively.
 </P><P>
 
@@ -5810,6 +5919,24 @@ parameter expansion as a special character.  The single quotes must match
 (an even number) and the characters between the single quotes are considered
 quoted.  This is the behavior of POSIX mode through version 4.1.
 The default Bash behavior remains as in previous versions.
+<P>
+
+<DT><CODE>complete_fullquote</CODE>
+<DD>If set, Bash
+quotes all shell metacharacters in filenames and directory names when
+performing completion.
+If not set, Bash
+removes metacharacters such as the dollar sign from the set of
+characters that will be quoted in completed filenames
+when these metacharacters appear in shell variable references in words to be
+completed.
+This means that dollar signs in variable names that expand to directories
+will not be quoted;
+however, any dollar signs appearing in filenames will not be quoted, either.
+This is active only when bash is using backslashes to quote completed
+filenames.
+This variable is set by default, which is the default Bash behavior in
+versions through 4.2.
 <P>
 
 <DT><CODE>direxpand</CODE>
@@ -6059,8 +6186,6 @@ The return status when listing options is zero if all <VAR>optnames</VAR>
 are enabled, non-zero otherwise.
 When setting or unsetting options, the return status is zero unless an
 <VAR>optname</VAR> is not a valid shell option.
-</P><P>
-
 </DL>
 <P>
 
@@ -6204,7 +6329,7 @@ the specified file or Maildir-format directory.
 A colon-separated list of filenames which the shell periodically checks
 for new mail.
 Each list entry can specify the message that is printed when new mail
-arrives in the mail file by separating the file name from the message with
+arrives in the mail file by separating the filename from the message with
 a <SAMP>`?'</SAMP>.
 When used in the text of the message, <CODE>$_</CODE> expands to the name of
 the current mail file.
@@ -6452,8 +6577,6 @@ The values assigned to the array members are as follows:
 
 <DT><CODE>BASH_VERSINFO[5]</CODE>
 <DD>The value of <CODE>MACHTYPE</CODE>.
-<P>
-
 </DL>
 <P>
 
@@ -6625,9 +6748,9 @@ builtin command.
 <DD><A NAME="IDX197"></A>
 A colon-separated list of suffixes to ignore when performing
 filename completion.
-A file name whose suffix matches one of the entries in 
+A filename whose suffix matches one of the entries in 
 <CODE>FIGNORE</CODE>
-is excluded from the list of matched file names.  A sample
+is excluded from the list of matched filenames.  A sample
 value is <SAMP>`.o:~'</SAMP>
 <P>
 
@@ -6957,10 +7080,10 @@ contain only a single command).
 <A NAME="IDX262"></A>
 <DT><CODE>POSIXLY_CORRECT</CODE>
 <DD><A NAME="IDX263"></A>
-If this variable is in the environment when <CODE>bash</CODE> starts, the shell
+If this variable is in the environment when Bash starts, the shell
 enters POSIX mode (see section <A HREF="bashref.html#SEC91">6.11 Bash POSIX Mode</A>) before reading the
 startup files, as if the <SAMP>`--posix'</SAMP> invocation option had been supplied.
-If it is set while the shell is running, <CODE>bash</CODE> enables POSIX mode,
+If it is set while the shell is running, Bash enables POSIX mode,
 as if the command
 <TABLE><tr><td>&nbsp;</td><td class=example><pre><CODE>set -o posix</CODE>
 </pre></td></tr></table>had been executed.  
@@ -7185,7 +7308,7 @@ The numeric real user id of the current user.  This variable is readonly.
 <!--docid::SEC69::-->
 <P>
 
-This section describes features unique to Bash.
+This chapter describes features unique to Bash.
 </P><P>
 
 <BLOCKQUOTE><TABLE BORDER=0 CELLSPACING=0> 
@@ -7199,7 +7322,7 @@ This section describes features unique to Bash.
 <TR><TD ALIGN="left" VALIGN="TOP"><A HREF="bashref.html#SEC85">6.6 Aliases</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">Substituting one command for another.</TD></TR>
 <TR><TD ALIGN="left" VALIGN="TOP"><A HREF="bashref.html#SEC86">6.7 Arrays</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">Array Variables.</TD></TR>
 <TR><TD ALIGN="left" VALIGN="TOP"><A HREF="bashref.html#SEC87">6.8 The Directory Stack</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">History of visited directories.</TD></TR>
-<TR><TD ALIGN="left" VALIGN="TOP"><A HREF="bashref.html#SEC89">6.9 Controlling the Prompt</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">Controlling the PS1 string.</TD></TR>
+<TR><TD ALIGN="left" VALIGN="TOP"><A HREF="bashref.html#SEC89">6.9 Controlling the Prompt</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">Customizing the various prompt strings.</TD></TR>
 <TR><TD ALIGN="left" VALIGN="TOP"><A HREF="bashref.html#SEC90">6.10 The Restricted Shell</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">A more controlled mode of shell execution.</TD></TR>
 <TR><TD ALIGN="left" VALIGN="TOP"><A HREF="bashref.html#SEC91">6.11 Bash POSIX Mode</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">Making Bash behave more closely to what
 				the POSIX standard specifies.</TD></TR>
@@ -7306,8 +7429,6 @@ POSIX mode.
 <DT><CODE>--version</CODE>
 <DD>Show version information for this instance of
 Bash on the standard output and exit successfully.
-<P>
-
 </DL>
 <P>
 
@@ -7374,8 +7495,6 @@ that may be reused as input.
 <DD>A <CODE>--</CODE> signals the end of options and disables further option
 processing.
 Any arguments after the <CODE>--</CODE> are treated as filenames and arguments.
-<P>
-
 </DL>
 <P>
 
@@ -7425,7 +7544,7 @@ in the script.  If no commands are executed, the exit status is 0.
 
 This section describes how Bash executes its startup files.
 If any of the files exist but cannot be read, Bash reports an error.
-Tildes are expanded in file names as described above under
+Tildes are expanded in filenames as described above under
 Tilde Expansion (see section <A HREF="bashref.html#SEC31">3.5.2 Tilde Expansion</A>).
 </P><P>
 
@@ -7480,7 +7599,7 @@ the name of a file to read and execute.  Bash behaves as if the
 following command were executed:
 <TABLE><tr><td>&nbsp;</td><td class=example><pre><CODE>if [ -n "$BASH_ENV" ]; then . "$BASH_ENV"; fi</CODE>
 </pre></td></tr></table>but the value of the <CODE>PATH</CODE> variable is not used to search for the
-file name.
+filename.
 </P><P>
 
 As noted above, if a non-interactive shell is invoked with the
@@ -7555,12 +7674,12 @@ allow them to be specified.
 <P>
 
 If Bash is started with the effective user (group) id not equal to the
-real user (group) id, and the <CODE>-p</CODE> option is not supplied, no startup
+real user (group) id, and the <SAMP>`-p'</SAMP> option is not supplied, no startup
 files are read, shell functions are not inherited from the environment,
 the <CODE>SHELLOPTS</CODE>, <CODE>BASHOPTS</CODE>, <CODE>CDPATH</CODE>, and <CODE>GLOBIGNORE</CODE>
 variables, if they appear in the environment, are ignored, and the effective
 user id is set to the real user id.
-If the <CODE>-p</CODE> option is supplied at invocation, the startup behavior is
+If the <SAMP>`-p'</SAMP> option is supplied at invocation, the startup behavior is
 the same, but the effective user id is not reset.
 </P><P>
 
@@ -7992,8 +8111,6 @@ is equal to, not equal to, less than, less than or equal to,
 greater than, or greater than or equal to <VAR>arg2</VAR>,
 respectively.  <VAR>Arg1</VAR> and <VAR>arg2</VAR>
 may be positive or negative integers.
-<P>
-
 </DL>
 <P>
 
@@ -8173,8 +8290,9 @@ aliases, but a word that is identical to an alias being expanded
 is not expanded a second time.
 This means that one may alias <CODE>ls</CODE> to <CODE>"ls -F"</CODE>,
 for instance, and Bash does not try to recursively expand the
-replacement text. If the last character of the alias value is a
-space or tab character, then the next command word following the
+replacement text.
+If the last character of the alias value is a
+<VAR>blank</VAR>, then the next command word following the
 alias is also checked for alias expansion.
 </P><P>
 
@@ -8247,7 +8365,7 @@ associative arrays use arbitrary strings.
 
 An indexed array is created automatically if any variable is assigned to
 using the syntax
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>name[<VAR>subscript</VAR>]=<VAR>value</VAR>
+<TABLE><tr><td>&nbsp;</td><td class=example><pre><VAR>name</VAR>[<VAR>subscript</VAR>]=<VAR>value</VAR>
 </pre></td></tr></table></P><P>
 
 The <VAR>subscript</VAR>
@@ -8270,10 +8388,10 @@ an array.
 </P><P>
 
 Arrays are assigned to using compound assignments of the form
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>name=(value<VAR>1</VAR> <small>...</small> value<VAR>n</VAR>)
+<TABLE><tr><td>&nbsp;</td><td class=example><pre><VAR>name</VAR>=(<VAR>value1</VAR> <VAR>value2</VAR> <small>...</small> )
 </pre></td></tr></table>where each
 <VAR>value</VAR> is of the form <CODE>[<VAR>subscript</VAR>]=</CODE><VAR>string</VAR>.
-Indexed array assignments do not require the bracket and subscript.
+Indexed array assignments do not require anything but <VAR>string</VAR>.
 When assigning to indexed arrays, if
 the optional subscript is supplied, that index is assigned to;
 otherwise the index of the element assigned is the last index assigned
@@ -8285,30 +8403,30 @@ When assigning to an associative array, the subscript is required.
 
 This syntax is also accepted by the <CODE>declare</CODE>
 builtin.  Individual array elements may be assigned to using the
-<CODE>name[</CODE><VAR>subscript</VAR><CODE>]=</CODE><VAR>value</VAR> syntax introduced above.
+<CODE><VAR>name</VAR>[<VAR>subscript</VAR>]=<VAR>value</VAR></CODE> syntax introduced above.
 </P><P>
 
 Any element of an array may be referenced using
-<CODE>${name[</CODE><VAR>subscript</VAR><CODE>]}</CODE>.
+<CODE>${<VAR>name</VAR>[<VAR>subscript</VAR>]}</CODE>.
 The braces are required to avoid
 conflicts with the shell's filename expansion operators.  If the
 <VAR>subscript</VAR> is <SAMP>`@'</SAMP> or <SAMP>`*'</SAMP>, the word expands to all members
 of the array <VAR>name</VAR>.  These subscripts differ only when the word
 appears within double quotes.
 If the word is double-quoted,
-<CODE>${name[*]}</CODE> expands to a single word with
+<CODE>${<VAR>name</VAR>[*]}</CODE> expands to a single word with
 the value of each array member separated by the first character of the
-<CODE>IFS</CODE> variable, and <CODE>${name[@]}</CODE> expands each element of
+<CODE>IFS</CODE> variable, and <CODE>${<VAR>name</VAR>[@]}</CODE> expands each element of
 <VAR>name</VAR> to a separate word.  When there are no array members,
-<CODE>${name[@]}</CODE> expands to nothing.
+<CODE>${<VAR>name</VAR>[@]}</CODE> expands to nothing.
 If the double-quoted expansion occurs within a word, the expansion of
 the first parameter is joined with the beginning part of the original
 word, and the expansion of the last parameter is joined with the last
 part of the original word.
 This is analogous to the
 expansion of the special parameters <SAMP>`@'</SAMP> and <SAMP>`*'</SAMP>. 
-<CODE>${#name[</CODE><VAR>subscript</VAR><CODE>]}</CODE> expands to the length of
-<CODE>${name[</CODE><VAR>subscript</VAR><CODE>]}</CODE>.
+<CODE>${#<VAR>name</VAR>[<VAR>subscript</VAR>]}</CODE> expands to the length of
+<CODE>${<VAR>name</VAR>[<VAR>subscript</VAR>]}</CODE>.
 If <VAR>subscript</VAR> is <SAMP>`@'</SAMP> or
 <SAMP>`*'</SAMP>, the expansion is the number of elements in the array. 
 Referencing an array variable without a subscript is equivalent to
@@ -8325,12 +8443,12 @@ value.  The null string is a valid value.
 </P><P>
 
 The <CODE>unset</CODE> builtin is used to destroy arrays.
-<CODE>unset</CODE> <VAR>name</VAR>[<VAR>subscript</VAR>]
+<CODE>unset <VAR>name</VAR>[<VAR>subscript</VAR>]</CODE>
 destroys the array element at index <VAR>subscript</VAR>.
 Care must be taken to avoid unwanted side effects caused by filename
 expansion.
-<CODE>unset</CODE> <VAR>name</VAR>, where <VAR>name</VAR> is an array, removes the
-entire array. A subscript of <SAMP>`*'</SAMP> or <SAMP>`@'</SAMP> also removes the
+<CODE>unset <VAR>name</VAR></CODE>, where <VAR>name</VAR> is an array, removes the
+entire array.  A subscript of <SAMP>`*'</SAMP> or <SAMP>`@'</SAMP> also removes the
 entire array.
 </P><P>
 
@@ -8404,11 +8522,26 @@ as the value of the <CODE>DIRSTACK</CODE> shell variable.
 
 <DT><CODE>dirs</CODE>
 <DD><A NAME="IDX302"></A>
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>dirs [+<VAR>N</VAR> | -<VAR>N</VAR>] [-clpv]
-</pre></td></tr></table>Display the list of currently remembered directories.  Directories
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>dirs [-clpv] [+<VAR>N</VAR> | -<VAR>N</VAR>]
+</pre></td></tr></table><P>
+
+Display the list of currently remembered directories.  Directories
 are added to the list with the <CODE>pushd</CODE> command; the
 <CODE>popd</CODE> command removes directories from the list.
+</P><P>
+
 <DL COMPACT>
+<DT><CODE>-c</CODE>
+<DD>Clears the directory stack by deleting all of the elements.
+<DT><CODE>-l</CODE>
+<DD>Produces a listing using full pathnames;
+the default listing format uses a tilde to denote the home directory.
+<DT><CODE>-p</CODE>
+<DD>Causes <CODE>dirs</CODE> to print the directory stack with one entry per
+line.
+<DT><CODE>-v</CODE>
+<DD>Causes <CODE>dirs</CODE> to print the directory stack with one entry per
+line, prefixing each entry with its index in the stack.
 <DT><CODE>+<VAR>N</VAR></CODE>
 <DD>Displays the <VAR>N</VAR>th directory (counting from the left of the
 list printed by <CODE>dirs</CODE> when invoked without options), starting
@@ -8417,23 +8550,12 @@ with zero.
 <DD>Displays the <VAR>N</VAR>th directory (counting from the right of the
 list printed by <CODE>dirs</CODE> when invoked without options), starting
 with zero.
-<DT><CODE>-c</CODE>
-<DD>Clears the directory stack by deleting all of the elements.
-<DT><CODE>-l</CODE>
-<DD>Produces a longer listing; the default listing format uses a 
-tilde to denote the home directory.
-<DT><CODE>-p</CODE>
-<DD>Causes <CODE>dirs</CODE> to print the directory stack with one entry per
-line.
-<DT><CODE>-v</CODE>
-<DD>Causes <CODE>dirs</CODE> to print the directory stack with one entry per
-line, prefixing each entry with its index in the stack.
 </DL>
 <P>
 
 <DT><CODE>popd</CODE>
 <DD><A NAME="IDX303"></A>
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>popd [+<VAR>N</VAR> | -<VAR>N</VAR>] [-n]
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>popd [-n] [+<VAR>N</VAR> | -<VAR>N</VAR>]
 </pre></td></tr></table><P>
 
 Remove the top entry from the directory stack, and <CODE>cd</CODE>
@@ -8442,23 +8564,25 @@ When no arguments are given, <CODE>popd</CODE>
 removes the top directory from the stack and
 performs a <CODE>cd</CODE> to the new top directory.  The
 elements are numbered from 0 starting at the first directory listed with
-<CODE>dirs</CODE>; i.e., <CODE>popd</CODE> is equivalent to <CODE>popd +0</CODE>.
+<CODE>dirs</CODE>; that is, <CODE>popd</CODE> is equivalent to <CODE>popd +0</CODE>.
+</P><P>
+
 <DL COMPACT>
+<DT><CODE>-n</CODE>
+<DD>Suppresses the normal change of directory when removing directories
+from the stack, so that only the stack is manipulated.
 <DT><CODE>+<VAR>N</VAR></CODE>
 <DD>Removes the <VAR>N</VAR>th directory (counting from the left of the
 list printed by <CODE>dirs</CODE>), starting with zero.
 <DT><CODE>-<VAR>N</VAR></CODE>
 <DD>Removes the <VAR>N</VAR>th directory (counting from the right of the
 list printed by <CODE>dirs</CODE>), starting with zero.
-<DT><CODE>-n</CODE>
-<DD>Suppresses the normal change of directory when removing directories
-from the stack, so that only the stack is manipulated.
 </DL>
 <P>
 
 <A NAME="IDX304"></A>
 <DT><CODE>pushd</CODE>
-<DD><TABLE><tr><td>&nbsp;</td><td class=example><pre>pushd [-n] [<VAR>+N</VAR> | <VAR>-N</VAR> | <VAR>dir</VAR> ]
+<DD><TABLE><tr><td>&nbsp;</td><td class=example><pre>pushd [-n] [<VAR>+N</VAR> | <VAR>-N</VAR> | <VAR>dir</VAR>]
 </pre></td></tr></table><P>
 
 Save the current directory on the top of the directory stack
@@ -8479,16 +8603,14 @@ the list by rotating the stack.
 list printed by <CODE>dirs</CODE>, starting with zero) to the top of
 the list by rotating the stack.
 <DT><CODE><VAR>dir</VAR></CODE>
-<DD>Makes the current working directory be the top of the stack, and then
-executes the equivalent of `<CODE>cd</CODE> <VAR>dir</VAR>'.
-<CODE>cd</CODE>s to <VAR>dir</VAR>.
+<DD>Makes the current working directory be the top of the stack, making
+it the new current directory as if it had been supplied as an argument
+to the <CODE>cd</CODE> builtin.
+</DL>
 </DL>
 <P>
 
-</DL>
-<P>
-
-<A NAME="Printing a Prompt"></A>
+<A NAME="Controlling the Prompt"></A>
 <HR SIZE="6">
 <A NAME="SEC89"></A>
 <TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
@@ -8513,7 +8635,7 @@ value is executed just as if it had been typed on the command line.
 </P><P>
 
 In addition, the following table describes the special characters which
-can appear in the prompt variables:
+can appear in the prompt variables <CODE>PS1</CODE> to <CODE>PS4</CODE>:
 </P><P>
 
 <DL COMPACT>
@@ -8743,6 +8865,13 @@ name, rather than on all assignment statements on the line.
 <P>
 
 <LI>
+The <CODE>command</CODE> builtin does not prevent builtins that take assignment
+statements as arguments from expanding them as assignment statements;
+when not in POSIX mode, assignment builtins lose their assignment
+statement expansion properties when preceded by <CODE>command</CODE>.
+<P>
+
+<LI>
 The default history file is <TT>`~/.sh_history'</TT> (this is the
 default value of <CODE>$HISTFILE</CODE>).
 <P>
@@ -8788,6 +8917,11 @@ Function names must be valid shell <CODE>name</CODE>s.  That is, they may not
 contain characters other than letters, digits, and underscores, and
 may not start with a digit.  Declaring a function with an invalid name
 causes a fatal syntax error in non-interactive shells.
+<P>
+
+<LI>
+Function names may not be the same as one of the POSIX special
+builtins.
 <P>
 
 <LI>
@@ -9117,7 +9251,7 @@ previous job with a <SAMP>`-'</SAMP>.
 A job may also be referred to
 using a prefix of the name used to start it, or using a substring
 that appears in its command line.  For example, <SAMP>`%ce'</SAMP> refers
-to a stopped <CODE>ce</CODE> job. Using <SAMP>`%?ce'</SAMP>, on the
+to a stopped <CODE>ce</CODE> job.  Using <SAMP>`%?ce'</SAMP>, on the
 other hand, refers to any job containing the string <SAMP>`ce'</SAMP> in
 its command line.  If the prefix or substring matches more than one job,
 Bash reports an error.
@@ -9171,25 +9305,29 @@ Bash does not print another warning, and any stopped jobs are terminated.
 <DT><CODE>bg</CODE>
 <DD><A NAME="IDX305"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>bg [<VAR>jobspec</VAR> <small>...</small>]
-</pre></td></tr></table>Resume each suspended job <VAR>jobspec</VAR> in the background, as if it
+</pre></td></tr></table><P>
+
+Resume each suspended job <VAR>jobspec</VAR> in the background, as if it
 had been started with <SAMP>`&#38;'</SAMP>.
 If <VAR>jobspec</VAR> is not supplied, the current job is used.
 The return status is zero unless it is run when job control is not
 enabled, or, when run with job control enabled, any
 <VAR>jobspec</VAR> was not found or specifies a job
 that was started without job control.
-<P>
+</P><P>
 
 <DT><CODE>fg</CODE>
 <DD><A NAME="IDX306"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>fg [<VAR>jobspec</VAR>]
-</pre></td></tr></table>Resume the job <VAR>jobspec</VAR> in the foreground and make it the current job.
+</pre></td></tr></table><P>
+
+Resume the job <VAR>jobspec</VAR> in the foreground and make it the current job.
 If <VAR>jobspec</VAR> is not supplied, the current job is used.
 The return status is that of the command placed into the foreground,
 or non-zero if run when job control is disabled or, when run with
 job control enabled, <VAR>jobspec</VAR> does not specify a valid job or
 <VAR>jobspec</VAR> specifies a job that was started without job control.
-<P>
+</P><P>
 
 <DT><CODE>jobs</CODE>
 <DD><A NAME="IDX307"></A>
@@ -9216,11 +9354,11 @@ the user was last notified of their status.
 <P>
 
 <DT><CODE>-r</CODE>
-<DD>Restrict output to running jobs.
+<DD>Display only running jobs.
 <P>
 
 <DT><CODE>-s</CODE>
-<DD>Restrict output to stopped jobs.
+<DD>Display only stopped jobs.
 </DL>
 <P>
 
@@ -9240,7 +9378,9 @@ passing it <VAR>argument</VAR>s, returning its exit status.
 <DD><A NAME="IDX308"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>kill [-s <VAR>sigspec</VAR>] [-n <VAR>signum</VAR>] [-<VAR>sigspec</VAR>] <VAR>jobspec</VAR> or <VAR>pid</VAR>
 kill -l [<VAR>exit_status</VAR>]
-</pre></td></tr></table>Send a signal specified by <VAR>sigspec</VAR> or <VAR>signum</VAR> to the process
+</pre></td></tr></table><P>
+
+Send a signal specified by <VAR>sigspec</VAR> or <VAR>signum</VAR> to the process
 named by job specification <VAR>jobspec</VAR> or process ID <VAR>pid</VAR>.
 <VAR>sigspec</VAR> is either a case-insensitive signal name such as
 <CODE>SIGINT</CODE> (with or without the <CODE>SIG</CODE> prefix)
@@ -9254,12 +9394,14 @@ is zero.
 status of a process terminated by a signal.
 The return status is zero if at least one signal was successfully sent,
 or non-zero if an error occurs or an invalid option is encountered.
-<P>
+</P><P>
 
 <DT><CODE>wait</CODE>
 <DD><A NAME="IDX309"></A>
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>wait [<VAR>jobspec</VAR> or <VAR>pid</VAR> ...]
-</pre></td></tr></table>Wait until the child process specified by each process ID <VAR>pid</VAR>
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>wait [<VAR>jobspec</VAR> or <VAR>pid</VAR> <small>...</small>]
+</pre></td></tr></table><P>
+
+Wait until the child process specified by each process ID <VAR>pid</VAR>
 or job specification <VAR>jobspec</VAR> exits and return the exit status of the
 last command waited for.
 If a job spec is given, all processes in the job are waited for.
@@ -9267,12 +9409,14 @@ If no arguments are given, all currently active child processes are
 waited for, and the return status is zero.
 If neither <VAR>jobspec</VAR> nor <VAR>pid</VAR> specifies an active child process
 of the shell, the return status is 127.
-<P>
+</P><P>
 
 <DT><CODE>disown</CODE>
 <DD><A NAME="IDX310"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>disown [-ar] [-h] [<VAR>jobspec</VAR> <small>...</small>]
-</pre></td></tr></table>Without options, each <VAR>jobspec</VAR> is removed from the table of
+</pre></td></tr></table><P>
+
+Without options, remove each <VAR>jobspec</VAR> from the table of
 active jobs.
 If the <SAMP>`-h'</SAMP> option is given, the job is not removed from the table,
 but is marked so that <CODE>SIGHUP</CODE> is not sent to the job if the shell
@@ -9282,17 +9426,17 @@ option is supplied, the current job is used.
 If no <VAR>jobspec</VAR> is supplied, the <SAMP>`-a'</SAMP> option means to remove or
 mark all jobs; the <SAMP>`-r'</SAMP> option without a <VAR>jobspec</VAR>
 argument restricts operation to running jobs.
-<P>
+</P><P>
 
 <DT><CODE>suspend</CODE>
 <DD><A NAME="IDX311"></A>
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>suspend [-f]
-</pre></td></tr></table>Suspend the execution of this shell until it receives a
+</pre></td></tr></table><P>
+
+Suspend the execution of this shell until it receives a
 <CODE>SIGCONT</CODE> signal.
 A login shell cannot be suspended; the <SAMP>`-f'</SAMP>
 option can be used to override this and force the suspension.
-<P>
-
 </DL>
 <P>
 
@@ -12278,8 +12422,10 @@ history list and history file.
 <CODE>fc -s [<VAR>pat</VAR>=<VAR>rep</VAR>] [<VAR>command</VAR>]</CODE>
 </pre></td></tr></table><P>
 
-Fix Command.  In the first form, a range of commands from <VAR>first</VAR> to
-<VAR>last</VAR> is selected from the history list.  Both <VAR>first</VAR> and
+The first form selects a range of commands from <VAR>first</VAR> to
+<VAR>last</VAR> from the history list and displays or edits and re-executes
+them.
+Both <VAR>first</VAR> and
 <VAR>last</VAR> may be specified as a string (to locate the most recent
 command beginning with that string) or as a number (an index into the
 history list, where a negative number is used as an offset from the
@@ -12299,6 +12445,7 @@ When editing is complete, the edited commands are echoed and executed.
 
 In the second form, <VAR>command</VAR> is re-executed after each instance
 of <VAR>pat</VAR> in the selected command is replaced by <VAR>rep</VAR>.
+<VAR>command</VAR> is intepreted the same as <VAR>first</VAR> above.
 </P><P>
 
 A useful alias to use with the <CODE>fc</CODE> command is <CODE>r='fc -s'</CODE>, so
@@ -12353,12 +12500,12 @@ file since the beginning of the current Bash session.
 <P>
 
 <DT><CODE>-r</CODE>
-<DD>Read the current history file and append its contents to
+<DD>Read the history file and append its contents to
 the history list.
 <P>
 
 <DT><CODE>-w</CODE>
-<DD>Write out the current history to the history file.
+<DD>Write out the current history list to the history file.
 <P>
 
 <DT><CODE>-p</CODE>
@@ -13398,8 +13545,6 @@ which makes the Bash <CODE>echo</CODE> behave more like the version specified in
 the Single Unix Specification, version 3.
 See section <A HREF="bashref.html#SEC61">4.2 Bash Builtin Commands</A>, for a description of the escape sequences that
 <CODE>echo</CODE> recognizes.
-<P>
-
 </DL>
 <P>
 
@@ -13849,7 +13994,7 @@ builtin (see section <A HREF="bashref.html#SEC63">4.3.1 The Set Builtin</A>).
 <P>
 
 <LI>
-The <SAMP>`-x'</SAMP> (<CODE>xtrace</CODE>) option displays commands other than
+The <SAMP>`-x'</SAMP> (<SAMP>`xtrace'</SAMP>) option displays commands other than
 simple commands when performing an execution trace
 (see section <A HREF="bashref.html#SEC63">4.3.1 The Set Builtin</A>).
 <P>
@@ -16455,7 +16600,7 @@ to permit their use in free software.
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="bashref.html#SEC_About"> ? </A>]</TD>
 </TR></TABLE>
 <H1>About this document</H1>
-This document was generated by <I>Chet Ramey</I> on <I>July, 8  2011</I>
+This document was generated by <I>Chet Ramey</I> on <I>September, 26  2011</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 <P></P>  
@@ -16617,7 +16762,7 @@ the following structure:
 <BR>  
 <FONT SIZE="-1">
 This document was generated
-by <I>Chet Ramey</I> on <I>July, 8  2011</I>
+by <I>Chet Ramey</I> on <I>September, 26  2011</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 

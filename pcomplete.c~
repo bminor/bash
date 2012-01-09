@@ -801,15 +801,15 @@ gen_action_completions (cs, text)
   /* And lastly, the special case for directories */
   if (flags & CA_DIRECTORY)
     {
-      t = rl_filename_completion_desired;
+      t = rl_filename_quoting_desired;
       rl_completion_mark_symlink_dirs = 1;	/* override user preference */
       cmatches = bash_directory_completion_matches (text);
       /* If we did not want filename completion before this, and there are
-	 no matches, turn off rl_filename_completion_desired so whatever
+	 no matches, turn off rl_filename_quoting_desired so whatever
 	 matches we get are not treated as filenames (it gets turned on by
 	 rl_filename_completion_function unconditionally). */
-      if (t == 0 && cmatches == 0 && rl_filename_completion_desired == 1)
-        rl_filename_completion_desired = 0;
+      if (t == 0 && cmatches == 0 && rl_filename_quoting_desired == 1)
+        rl_filename_quoting_desired = 0;
       tmatches = completions_to_stringlist (cmatches);
       ret = strlist_append (ret, tmatches);
       strvec_dispose (cmatches);

@@ -530,6 +530,10 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
   REDIRECT *my_undo_list, *exec_undo_list;
   volatile int last_pid;
   volatile int save_line_number;
+#if defined (PROCESS_SUBSTITUTION)
+  volatile int ofifo, nfifo, osize, saved_fifo;
+  volatile char *ofifo_list;
+#endif
 
 #if 0
   if (command == 0 || breaking || continuing || read_but_dont_execute)
@@ -670,6 +674,17 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
   if (shell_control_structure (command->type) && command->redirects)
     stdin_redir = stdin_redirects (command->redirects);
 
+#if defined (PROCESS_SUBSTITUTION)
+  if (variable_context != 0)
+    {
+      ofifo = num_fifos ();
+      ofifo_list = copy_fifo_list (&osize);
+      saved_fifo = 1;
+    }
+  else
+    saved_fifo = 0;
+#endif
+
   /* Handle WHILE FOR CASE etc. with redirections.  (Also '&' input
      redirection.)  */
   if (do_redirections (command->redirects, RX_ACTIVE|RX_UNDOABLE) != 0)
@@ -677,6 +692,9 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       cleanup_redirects (redirection_undo_list);
       redirection_undo_list = (REDIRECT *)NULL;
       dispose_exec_redirects ();
+#if defined (PROCESS_SUBSTITUTION)
+      free (ofifo_list);
+#endif
       return (last_command_exit_value = EXECUTION_FAILURE);
     }
 
@@ -971,6 +989,16 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
   if (my_undo_list || exec_undo_list)
     discard_unwind_frame ("loop_redirections");
 
+#if defined (PROCESS_SUBSTITUTION)
+  if (saved_fifo)
+    {
+      nfifo = num_fifos ();
+      if (nfifo > ofifo)
+	close_new_fifos (ofifo_list, osize);
+      free (ofifo_list);
+    }
+#endif
+
   /* Invert the return value if we have to */
   if (invert)
     exec_result = (exec_result == EXECUTION_SUCCESS)
@@ -1001,6 +1029,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
   if (running_trap == 0)
 #endif
     currently_executing_command = (COMMAND *)NULL;
+
   return (last_command_exit_value);
 }
 
@@ -4228,7 +4257,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
 
   if (funcnest_max > 0 && funcnest >= funcnest_max)
     {
-      internal_error ("%s: maximum function nesting level exceeded (%d)", var->name, funcnest);
+      internal_error (_("%s: maximum function nesting level exceeded (%d)"), var->name, funcnest);
       funcnest = 0;	/* XXX - should we reset it somewhere else? */
       jump_to_top_level (DISCARD);
     }
@@ -5115,7 +5144,7 @@ shell_execve (command, args, env)
 #endif
       if (check_binary_file (sample, sample_len))
 	{
-	  internal_error (_("%s: cannot execute binary file"), command);
+	  internal_error (_("%s: cannot execute binary file: %s"), command, strerror (i));
 	  return (EX_BINARY_FILE);
 	}
     }

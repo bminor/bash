@@ -744,8 +744,8 @@ bash_add_history (line)
 	 do want to add one after the first line (which is the command that
 	 contains the here-doc specifier).  parse.y:history_delimiting_chars()
 	 does the right thing to take care of this for us.  We don't want to
-	 add extra newlines if the user chooses to enable literal_history,
-	 so we have to duplicate some of what that function does here. */
+	 add extra newlines if the user chooses literal_history, so we have to
+	 duplicate some of what that function does here. */
       if ((parser_state & PST_HEREDOC) && literal_history && current_command_line_count > 2 && line[strlen (line) - 1] == '\n')
 	chars_to_add = "";
       else

@@ -206,6 +206,8 @@ rl_icppfunc_t *rl_directory_completion_hook = (rl_icppfunc_t *)NULL;
 
 rl_icppfunc_t *rl_directory_rewrite_hook = (rl_icppfunc_t *)NULL;
 
+rl_icppfunc_t *rl_filename_stat_hook = (rl_icppfunc_t *)NULL;
+
 /* If non-zero, this is the address of a function to call when reading
    directory entries from the filesystem for completion and comparing
    them to the partial word to be completed.  The function should
@@ -1695,6 +1697,8 @@ append_to_match (text, delimiter, quote_char, nontrivial_match)
   if (rl_filename_completion_desired)
     {
       filename = tilde_expand (text);
+      if (rl_filename_stat_hook)
+	(*rl_filename_stat_hook) (&filename);
       s = (nontrivial_match && rl_completion_mark_symlink_dirs == 0)
 		? LSTAT (filename, &finfo)
 		: stat (filename, &finfo);
@@ -1714,8 +1718,7 @@ append_to_match (text, delimiter, quote_char, nontrivial_match)
 #ifdef S_ISLNK
       /* Don't add anything if the filename is a symlink and resolves to a
 	 directory. */
-      else if (s == 0 && S_ISLNK (finfo.st_mode) &&
-	       stat (filename, &finfo) == 0 && S_ISDIR (finfo.st_mode))
+      else if (s == 0 && S_ISLNK (finfo.st_mode) && path_isdir (filename))
 	;
 #endif
       else

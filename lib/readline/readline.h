@@ -688,6 +688,13 @@ extern rl_icppfunc_t *rl_directory_completion_hook;
    it in bash to see how well it goes. */
 extern rl_icppfunc_t *rl_directory_rewrite_hook;
 
+/* If non-zero, this is the address of a function for the completer to call
+   before deciding which character to append to a completed name.  It should
+   modify the directory name passed as an argument if appropriate, and return
+   non-zero if it modifies the name.  This should not worry about dequoting
+   the filename; that has already happened by the time it gets here. */
+extern rl_icppfunc_t *rl_filename_stat_hook;
+
 /* If non-zero, this is the address of a function to call when reading
    directory entries from the filesystem for completion and comparing
    them to the partial word to be completed.  The function should
