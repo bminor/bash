@@ -9148,7 +9148,7 @@ parse.y
 				   ----
 variables.c
 	- fix bind_variable_internal to call a variable's dynamic 'set function'
-	  with the right arguments depending on whether its an associative
+	  with the right arguments depending on whether it's an associative
 	  array, an indexed array, or a scalar.  Fixes Ubuntu bug #471504
 	  https://bugs.launchpad.net/ubuntu/+source/bash/+bug/471504 reported
 	  by AJ Slater <aj.slater@gmail.com>
@@ -10383,7 +10383,7 @@ support/signames.c
 
 shell.c
 	- instead of closing all fds 3-20 at shell startup, just set them to
-	  be close-on-exec.  Report from Rainer Müller<raimue@macports.org>
+	  be close-on-exec.  Report from Rainer Mülle <raimue@macports.org>
 
 lib/readline/isearch.c
 	- in _rl_isearch_dispatch, if the current character maps to ISKMAP,
@@ -12287,3 +12287,58 @@ pcomplete.c
 	  Having it on causes readline to quote the matches as if they
 	  were filenames.  Adds functionality requested by many,
 	  including Clark Wang <dearvoid@gmail.com>
+
+assoc.[ch]
+	- assoc_replace: new function, takes the same arguments as
+	  assoc_insert, but returns the old data instead of freeing it
+	- assoc_insert: if the object returned by hash_insert doesn't have
+	  the same value for its key as the key passed as an argument, we
+	  are overwriting an existing value.  In this case, we can free the
+	  key.  Fixes bug reported by David Parks <davidparks21@yahoo.com>
+
+				   10/5
+				   ----
+print_cmd.c
+	- indirection_level_string: small change to only re-enable `x'
+	  option after calling decode_prompt_string if it was on before.  In
+	  normal mode, it will be, but John Reiser <jreiser@bitwagon.com>
+	  has a novel use for that code in conjunction with a pre-loaded
+	  shared library that traces system call usage in shell scripts
+
+				   10/10
+				   -----
+Makefile.in
+	- Fix from Mike Frysinger <vapier@gentoo.org> to avoid trying to
+	  build y.tab.c and y.tab.h with two separate runs of yacc if
+	  parse.y changes.  Problem with parallel makes
+	- Fix from Mike Frysinger <vapier@gentoo.org> to avoid subdirectory
+	  builds each trying to make version.h (and all its dependencies)
+
+lib/sh/Makefile.in
+	- remove some dependencies on version.h where it doesn't make sense
+
+variables.c
+	- initialize_shell_variables: while reading the environment, a shell
+	  running in posix mode now checks for SHELLOPTS being readonly (it
+	  gets set early on in main()) before trying to assign to it.  It
+	  saves an error message and the variable gets parsed as it should.
+	  Fixes bug reported by Len Giambrone <Len.Giambrone@intersystems.com>
+
+				   10/14
+				   -----
+doc/{bash.1,bashref.texi}
+	- add to the "duplicating file descriptors" description that >&word
+	  doesn't redirect stdout and stderr if word expands to `-'
+	- add to the "appending standard output and standard error"
+	  description a note that >&word, where word is a number or `-',
+	  causes other redirection operators to apply for sh and Posix
+	  compatibility reasons.  Suggested by Greg Wooledge
+	  <wooledg@eeg.ccf.org>
+
+				   10/15
+				   -----
+pcomplete.c
+	- change pcomp_filename_completion_function to only run the filename
+	  dequoting function in the cases (as best as it can figure) where
+	  readline won't do it via rl_filename_completion_function.  Based
+	  on reports from <lolilolicon@gmail.com>

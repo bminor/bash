@@ -4650,6 +4650,7 @@ void
 sv_strict_posix (name)
      char *name;
 {
+itrace("sv_strict_posix: entry");
   SET_INT_VAR (name, posixly_correct);
   posix_initialize (posixly_correct);
 #if defined (READLINE)
@@ -4657,6 +4658,7 @@ sv_strict_posix (name)
     posix_readline_initialize (posixly_correct);
 #endif /* READLINE */
   set_shellopts ();	/* make sure `posix' is/is not in $SHELLOPTS */
+itrace("sv_strict_posix: return");
 }
 
 void

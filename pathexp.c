@@ -173,7 +173,9 @@ glob_char_p (s)
    removal has not been done (for example, before attempting to match a
    pattern while executing a case statement), flags should include
    QGLOB_CVTNULL.  If flags includes QGLOB_FILENAME, appropriate quoting
-   to match a filename should be performed. */
+   to match a filename should be performed.  QGLOB_REGEXP means we're
+   quoting for a Posix ERE (for [[ string =~ pat ]]) and that requires
+   some special handling. */
 char *
 quote_string_for_globbing (pathname, qflags)
      const char *pathname;

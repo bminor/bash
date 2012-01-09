@@ -58,6 +58,7 @@
 
 #include "builtins.h"
 #include "builtins/common.h"
+#include "builtins/builtext.h"
 
 #include <glob/glob.h>
 #include <glob/strmatch.h>
@@ -713,12 +714,28 @@ pcomp_filename_completion_function (text, state)
 {
   static char *dfn;	/* dequoted filename */
   int qc;
+  int iscompgen, iscompleting;
 
   if (state == 0)
     {
       FREE (dfn);
       /* remove backslashes quoting special characters in filenames. */
-      if (RL_ISSTATE (RL_STATE_COMPLETING) && rl_filename_dequoting_function)
+      /* There are roughtly three paths we can follow to get here:
+		1.  complete -f
+		2.  compgen -f "$word" from a completion function
+		3.  compgen -f "$word" from the command line
+	 They all need to be handled.
+
+	 In the first two cases, readline will run the filename dequoting
+	 function in rl_filename_completion_function if it found a filename
+	 quoting character in the word to be completed
+	 (rl_completion_found_quote).  We run the dequoting function here
+	 if we're running compgen, we're not completing, and the
+	 rl_filename_completion_function won't dequote the filename
+	 (rl_completion_found_quote == 0). */
+      iscompgen = this_shell_builtin == compgen_builtin;
+      iscompleting = RL_ISSTATE (RL_STATE_COMPLETING);
+      if (iscompgen && iscompleting == 0 && rl_completion_found_quote == 0)
 	{
 	  /* Use rl_completion_quote_character because any single or
 	     double quotes have been removed by the time TEXT makes it
@@ -801,15 +818,15 @@ gen_action_completions (cs, text)
   /* And lastly, the special case for directories */
   if (flags & CA_DIRECTORY)
     {
-      t = rl_filename_quoting_desired;
+      t = rl_filename_completion_desired;
       rl_completion_mark_symlink_dirs = 1;	/* override user preference */
       cmatches = bash_directory_completion_matches (text);
       /* If we did not want filename completion before this, and there are
-	 no matches, turn off rl_filename_quoting_desired so whatever
+	 no matches, turn off rl_filename_completion_desired so whatever
 	 matches we get are not treated as filenames (it gets turned on by
 	 rl_filename_completion_function unconditionally). */
-      if (t == 0 && cmatches == 0 && rl_filename_quoting_desired == 1)
-        rl_filename_quoting_desired = 0;
+      if (t == 0 && cmatches == 0 && rl_filename_completion_desired == 1)
+        rl_filename_completion_desired = 0;
       tmatches = completions_to_stringlist (cmatches);
       ret = strlist_append (ret, tmatches);
       strvec_dispose (cmatches);

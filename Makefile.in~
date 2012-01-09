@@ -598,8 +598,8 @@ y.tab.h: y.tab.c
 # Subdirs will often times want version.h, so they'll change back up to
 # the top level and try to create it.  This causes parallel build issues
 # so just force top level sanity before we descend.
-$(LIBDEP): .build
-#$(LIBDEP): version.h
+#$(LIBDEP): .build
+$(LIBDEP): version.h
 
 $(READLINE_LIBRARY): config.h $(READLINE_SOURCE)
 	@echo making $@ in ${RL_LIBDIR}

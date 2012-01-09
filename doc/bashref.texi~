@@ -1262,6 +1262,9 @@ That command is usually a @var{list} enclosed between @{ and @}, but
 may be any compound command listed above.
 @var{compound-command} is executed whenever @var{name} is specified as the
 name of a command.
+When the shell is in @sc{posix} mode (@pxref{Bash POSIX Mode}),
+@var{name} may not be the same as one of the special builtins
+(@pxref{Special Builtins}).
 Any redirections (@pxref{Redirections}) associated with the shell function
 are performed when the function is executed.
 
@@ -2433,8 +2436,8 @@ is made to be a copy of that file descriptor.
 If the digits in @var{word} do not specify a file descriptor open for
 input, a redirection error occurs.
 If @var{word}
-evaluates to @samp{-}, file descriptor @var{n} is closed.  If
-@var{n} is not specified, the standard input (file descriptor 0) is used.
+evaluates to @samp{-}, file descriptor @var{n} is closed.
+If @var{n} is not specified, the standard input (file descriptor 0) is used.
 
 The operator
 @example
@@ -2445,8 +2448,10 @@ is used similarly to duplicate output file descriptors.  If
 @var{n} is not specified, the standard output (file descriptor 1) is used.
 If the digits in @var{word} do not specify a file descriptor open for
 output, a redirection error occurs.
+If @var{word}
+evaluates to @samp{-}, file descriptor @var{n} is closed.
 As a special case, if @var{n} is omitted, and @var{word} does not
-expand to one or more digits, the standard output and standard
+expand to one or more digits or @samp{-}, the standard output and standard
 error are redirected as described previously.
 
 @subsection Moving File Descriptors

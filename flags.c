@@ -250,7 +250,6 @@ change_flag (flag, on_or_off)
     return (FLAG_ERROR);
 
   old_value = *value;
-
   *value = (on_or_off == FLAG_ON) ? 1 : 0;
 
   /* Special cases for a few flags. */

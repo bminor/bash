@@ -965,6 +965,8 @@ That command is usually a \fIlist\fP of commands between { and }, but
 may be any command listed under \fBCompound Commands\fP above.
 \fIcompound\-command\fP is executed whenever \fIname\fP is specified as the
 name of a simple command.
+When in \fIposix mode\fP, \fIname\fP may not be the name of one of the
+POSIX \fIspecial builtins\fP.
 Any redirections (see
 .SM
 .B REDIRECTION
@@ -3686,8 +3688,15 @@ is not specified, the standard output (file descriptor 1) is used.
 If the digits in
 .I word
 do not specify a file descriptor open for output, a redirection error occurs.
+If
+.I word
+evaluates to
+.BR \- ,
+file descriptor
+.I n
+is closed.
 As a special case, if \fIn\fP is omitted, and \fIword\fP does not
-expand to one or more digits, the standard output and standard
+expand to one or more digits or \fB\-\fP, the standard output and standard
 error are redirected as described previously.
 .SS "Moving File Descriptors"
 .PP

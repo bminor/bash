@@ -2358,7 +2358,9 @@ This is semantically equivalent to
 @example
 >@var{word} 2>&1
 @end example
-(see Duplicating File Descriptors below).
+When using the second form, @var{word} may not expand to a number or
+@samp{-}.  If it does, other redirection operators apply
+(see Duplicating File Descriptors below) for compatibility reasons.
 
 @subsection Appending Standard Output and Standard Error
 This construct allows both the
@@ -2436,8 +2438,8 @@ is made to be a copy of that file descriptor.
 If the digits in @var{word} do not specify a file descriptor open for
 input, a redirection error occurs.
 If @var{word}
-evaluates to @samp{-}, file descriptor @var{n} is closed.  If
-@var{n} is not specified, the standard input (file descriptor 0) is used.
+evaluates to @samp{-}, file descriptor @var{n} is closed.
+If @var{n} is not specified, the standard input (file descriptor 0) is used.
 
 The operator
 @example
@@ -2448,8 +2450,10 @@ is used similarly to duplicate output file descriptors.  If
 @var{n} is not specified, the standard output (file descriptor 1) is used.
 If the digits in @var{word} do not specify a file descriptor open for
 output, a redirection error occurs.
+If @var{word}
+evaluates to @samp{-}, file descriptor @var{n} is closed.
 As a special case, if @var{n} is omitted, and @var{word} does not
-expand to one or more digits, the standard output and standard
+expand to one or more digits or @samp{-}, the standard output and standard
 error are redirected as described previously.
 
 @subsection Moving File Descriptors

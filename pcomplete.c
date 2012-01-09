@@ -58,6 +58,7 @@
 
 #include "builtins.h"
 #include "builtins/common.h"
+#include "builtins/builtext.h"
 
 #include <glob/glob.h>
 #include <glob/strmatch.h>
@@ -82,6 +83,7 @@ extern char *strpbrk __P((char *, char *));
 extern int array_needs_making;
 extern STRING_INT_ALIST word_token_alist[];
 extern char *signal_names[];
+extern sh_builtin_func_t *last_shell_builtin, *this_shell_builtin;
 
 #if defined (DEBUG)
 #if defined (PREFER_STDARG)
@@ -713,12 +715,28 @@ pcomp_filename_completion_function (text, state)
 {
   static char *dfn;	/* dequoted filename */
   int qc;
+  int iscompgen, iscompleting;
 
   if (state == 0)
     {
       FREE (dfn);
       /* remove backslashes quoting special characters in filenames. */
-      if (RL_ISSTATE (RL_STATE_COMPLETING) && rl_filename_dequoting_function)
+      /* There are roughtly three paths we can follow to get here:
+		1.  complete -f
+		2.  compgen -f "$word" from a completion function
+		3.  compgen -f "$word" from the command line
+	 They all need to be handled.
+
+	 In the first two cases, readline will run the filename dequoting
+	 function in rl_filename_completion_function if it found a filename
+	 quoting character in the word to be completed
+	 (rl_completion_found_quote).  We run the dequoting function here
+	 if we're running compgen, we're not completing, and the
+	 rl_filename_completion_function won't dequote the filename
+	 (rl_completion_found_quote == 0). */
+      iscompgen = this_shell_builtin == compgen_builtin;
+      iscompleting = RL_ISSTATE (RL_STATE_COMPLETING);
+      if (iscompgen && iscompleting == 0 && rl_completion_found_quote == 0)
 	{
 	  /* Use rl_completion_quote_character because any single or
 	     double quotes have been removed by the time TEXT makes it

@@ -38,6 +38,7 @@ extern void assoc_dispose __P((HASH_TABLE *));
 extern void assoc_flush __P((HASH_TABLE *));
 
 extern int assoc_insert __P((HASH_TABLE *, char *, char *));
+extern PTR_T assoc_replace __P((HASH_TABLE *, char *, char *));
 extern void assoc_remove __P((HASH_TABLE *, char *));
 
 extern char *assoc_reference __P((HASH_TABLE *, char *));

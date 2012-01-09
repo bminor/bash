@@ -419,7 +419,7 @@ indirection_level_string ()
   register int i, j;
   char *ps4;
   char ps4_firstc[MB_LEN_MAX+1];
-  int ps4_firstc_len, ps4_len, ineed;
+  int ps4_firstc_len, ps4_len, ineed, old;
 
   ps4 = get_string_value ("PS4");
   if (indirection_string == 0)
@@ -429,9 +429,10 @@ indirection_level_string ()
   if (ps4 == 0 || *ps4 == '\0')
     return (indirection_string);
 
-  change_flag ('x', FLAG_OFF);
+  old = change_flag ('x', FLAG_OFF);
   ps4 = decode_prompt_string (ps4);
-  change_flag ('x', FLAG_ON);
+  if (old == FLAG_ON)
+    change_flag ('x', FLAG_ON);
 
   if (ps4 == 0 || *ps4 == '\0')
     return (indirection_string);
