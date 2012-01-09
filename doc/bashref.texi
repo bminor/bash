@@ -3219,9 +3219,12 @@ being executed with the @code{.} (@code{source}) builtin,
 returning either @var{n} or
 the exit status of the last command executed within the script as the exit
 status of the script.
+If @var{n} is supplied, the return value is its least significant
+8 bits.
 Any command associated with the @code{RETURN} trap is executed
 before execution resumes after the function or script.
-The return status is non-zero if @code{return} is used outside a function
+The return status is non-zero if @code{return} is supplied a non-numeric
+argument or is used outside a function
 and not during the execution of a script by @code{.} or @code{source}.
 
 @item shift

@@ -1339,6 +1339,7 @@ attempt_shell_completion (text, start, end)
 
   rl_filename_quote_characters = default_filename_quote_characters;
   set_filename_bstab (rl_filename_quote_characters);
+  set_directory_hook ();
 
   /* Determine if this could be a command word.  It is if it appears at
      the start of the line (ignoring preceding whitespace), or if it
@@ -1670,6 +1671,12 @@ command_word_completion_function (hint_text, state)
 	    }
 	  else
 	    {
+	     if (dircomplete_expand && path_dot_or_dotdot (filename_hint))
+		{
+		  dircomplete_expand = 0;
+		  set_directory_hook ();
+		  dircomplete_expand = 1;
+		}
 	      mapping_over = 4;
 	      goto inner;
 	    }
@@ -1870,6 +1877,9 @@ globword:
 
  inner:
   val = rl_filename_completion_function (filename_hint, istate);
+  if (mapping_over == 4 && dircomplete_expand)
+    set_directory_hook ();
+
   istate = 1;
 
   if (val == 0)
@@ -2028,7 +2038,7 @@ command_subst_completion_function (text, state)
 	rl_completion_suppress_append = 1;
     }
 
-  if (!matches || !matches[cmd_index])
+  if (matches == 0 || matches[cmd_index] == 0)
     {
       rl_filename_quoting_desired = 0;	/* disable quoting */
       return ((char *)NULL);

@@ -100,6 +100,12 @@ rl_callback_handler_install (prompt, linefunc)
   _rl_callback_newline ();
 }
 
+/* Placeholder for now */
+#define CALLBACK_READ_RETURN()	\
+  do { \
+    return; \
+  } while (0)
+
 /* Read one character, and dispatch to the handler if it ends the line. */
 void
 rl_callback_read_char ()
@@ -121,7 +127,7 @@ rl_callback_read_char ()
       (*rl_redisplay_function) ();
       _rl_want_redisplay = 0;
       memcpy ((void *)_rl_top_level, (void *)olevel, sizeof (procenv_t));
-      return;
+      CALLBACK_READ_RETURN ();
     }
 
 #if defined (HANDLE_SIGNALS)
@@ -138,12 +144,13 @@ rl_callback_read_char ()
 	  if (eof == 0 && (RL_ISSTATE (RL_STATE_ISEARCH) == 0) && RL_ISSTATE (RL_STATE_INPUTPENDING))
 	    rl_callback_read_char ();
 
-	  return;
+	  CALLBACK_READ_RETURN ();
 	}
       else if  (RL_ISSTATE (RL_STATE_NSEARCH))
 	{
 	  eof = _rl_nsearch_callback (_rl_nscxt);
-	  return;
+
+	  CALLBACK_READ_RETURN ();
 	}
 #if defined (VI_MODE)
       else if (RL_ISSTATE (RL_STATE_VIMOTION))
@@ -154,7 +161,7 @@ rl_callback_read_char ()
 	  if (RL_ISSTATE (RL_STATE_NUMERICARG) == 0)
 	    _rl_internal_char_cleanup ();
 
-	  return;
+	  CALLBACK_READ_RETURN ();
 	}
 #endif
       else if (RL_ISSTATE (RL_STATE_NUMERICARG))
@@ -166,7 +173,7 @@ rl_callback_read_char ()
 	  else if (RL_ISSTATE (RL_STATE_NUMERICARG) == 0)
 	    _rl_internal_char_cleanup ();
 
-	  return;
+	  CALLBACK_READ_RETURN ();
 	}
       else if (RL_ISSTATE (RL_STATE_MULTIKEY))
 	{
@@ -233,6 +240,8 @@ rl_callback_read_char ()
 	}
     }
   while (rl_pending_input || _rl_pushed_input_available () || RL_ISSTATE (RL_STATE_MACROINPUT));
+
+  CALLBACK_READ_RETURN ();
 }
 
 /* Remove the handler, and make sure the terminal is in its normal state. */

@@ -562,7 +562,7 @@ file_iswdir (fn)
 /* Return 1 if STRING is "." or "..", optionally followed by a directory
    separator */
 int
-dot_or_dotdot (string)
+path_dot_or_dotdot (string)
      const char *string;
 {
   if (string == 0 || *string == '\0' || *string != '.')

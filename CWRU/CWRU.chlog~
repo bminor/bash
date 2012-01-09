@@ -12334,3 +12334,32 @@ doc/{bash.1,bashref.texi}
 	  causes other redirection operators to apply for sh and Posix
 	  compatibility reasons.  Suggested by Greg Wooledge
 	  <wooledg@eeg.ccf.org>
+
+				   10/15
+				   -----
+pcomplete.c
+	- change pcomp_filename_completion_function to only run the filename
+	  dequoting function in the cases (as best as it can figure) where
+	  readline won't do it via rl_filename_completion_function.  Based
+	  on reports from <lolilolicon@gmail.com>
+
+				   10/19
+				   -----
+bashline.c
+	- attempt_shell_completion: add call to set_directory_hook() to make
+	  sure the rewrite functions are correct.  It's cheap and doesn't
+	  hurt
+	- command_word_completion_function: if completing a command name that
+	  starts with `.' or `..', temporarily suppress the effects of the
+	  `direxpand' option and restore the correct value after calling
+	  rl_filename_completion_function.  If it's enabled, the directory
+	  name will be rewritten and no longer match `./' or `../'.  Fixes
+	  problem reported by Michael Kalisz <michael@kalisz.homelinux.net>
+
+				   10/22
+				   -----
+builtins/history.def
+	- push_history: make sure remember_on_history is enabled before we
+	  try to delete the last history entry -- the `history -s' command
+	  might not have been saved.  Fixes bug reported by
+	  lester@vmw-les.eng.vmware.com
