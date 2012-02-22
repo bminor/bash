@@ -622,7 +622,6 @@ unset_sigwinch_handler ()
 /* Signal functions used by the rest of the code. */
 #if !defined (HAVE_POSIX_SIGNALS)
 
-#if defined (JOB_CONTROL)
 /* Perform OPERATION on NEWSET, perhaps leaving information in OLDSET. */
 sigprocmask (operation, newset, oldset)
      int operation, *newset, *oldset;
@@ -651,7 +650,6 @@ sigprocmask (operation, newset, oldset)
   if (oldset)
     *oldset = old;
 }
-#endif /* JOB_CONTROL */
 
 #else
 

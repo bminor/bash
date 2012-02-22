@@ -809,7 +809,7 @@ wait_for (pid)
 #  define REPORTSIG(x) ((x) != SIGINT && (x) != SIGPIPE)
 #else
 #  define REPORTSIG(x) ((x) != SIGINT && (x) != SIGTERM)
-#endiof
+#endif
 
   if ((WIFSTOPPED (status) == 0) && WIFSIGNALED (status) && REPORTSIG(WTERMSIG (status)))
     {

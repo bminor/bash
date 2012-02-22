@@ -384,7 +384,7 @@ extern void sv_histchars __P((char *));
 extern void sv_histtimefmt __P((char *));
 #endif /* HISTORY */
 
-#if defined (HAVE_TZSET) && defined (PROMPT_STRING_DECODE)
+#if defined (HAVE_TZSET)
 extern void sv_tz __P((char *));
 #endif
 

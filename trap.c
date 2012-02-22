@@ -292,19 +292,9 @@ run_pending_traps ()
 	 while (pending_traps[sig]--) instead of the if statement. */
       if (pending_traps[sig])
 	{
-#if defined (HAVE_POSIX_SIGNALS)
 	  sigset_t set, oset;
 
-	  sigemptyset (&set);
-	  sigemptyset (&oset);
-
-	  sigaddset (&set, sig);
-	  sigprocmask (SIG_BLOCK, &set, &oset);
-#else
-#  if defined (HAVE_BSD_SIGNALS)
-	  int oldmask = sigblock (sigmask (sig));
-#  endif
-#endif /* HAVE_POSIX_SIGNALS */
+	  BLOCK_SIGNAL (sig, set, oset);
 
 	  if (sig == SIGINT)
 	    {
@@ -359,13 +349,7 @@ run_pending_traps ()
 
 	  pending_traps[sig] = 0;
 
-#if defined (HAVE_POSIX_SIGNALS)
-	  sigprocmask (SIG_SETMASK, &oset, (sigset_t *)NULL);
-#else
-#  if defined (HAVE_BSD_SIGNALS)
-	  sigsetmask (oldmask);
-#  endif
-#endif /* POSIX_VERSION */
+	  UNBLOCK_SIGNAL (oset);
 	}
     }
 

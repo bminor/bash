@@ -607,6 +607,8 @@ _rl_block_sigwinch ()
   if (sigwinch_blocked)
     return;
 
+#if defined (SIGWINCH)
+
 #if defined (HAVE_POSIX_SIGNALS)
   sigemptyset (&sigwinch_set);
   sigemptyset (&sigwinch_oset);
@@ -622,6 +624,8 @@ _rl_block_sigwinch ()
 #  endif /* !HAVE_BSD_SIGNALS */
 #endif /* !HAVE_POSIX_SIGNALS */
 
+#endif /* SIGWINCH */
+
   sigwinch_blocked = 1;
 }
 
@@ -631,6 +635,8 @@ _rl_release_sigwinch ()
 {
   if (sigwinch_blocked == 0)
     return;
+
+#if defined (SIGWINCH)
 
 #if defined (HAVE_POSIX_SIGNALS)
   sigprocmask (SIG_SETMASK, &sigwinch_oset, (sigset_t *)NULL);
@@ -643,6 +649,8 @@ _rl_release_sigwinch ()
 #    endif /* HAVE_USG_SIGHOLD */
 #  endif /* !HAVE_BSD_SIGNALS */
 #endif /* !HAVE_POSIX_SIGNALS */
+
+#endif /* SIGWINCH */
 
   sigwinch_blocked = 0;
 }

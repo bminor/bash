@@ -13159,3 +13159,53 @@ lib/readline/readline.c
 	  it if the Linux tty audit system is available and it's been enabled
 	  in rlconf.h  Original patch from Miroslav Trmac; recent request
 	  from Miroslav Lichvar <mlichvar@redhat.com>
+
+				   1/21
+				   ----
+
+lib/readline/readline.c:
+	- _rl_dispatch_subseq: add an inter-character timeout for multi-char
+	  key sequences.  Suggested by <rogerx.oss@gmail.com>.  Still needs
+	  work to make a user-settable variable
+
+parse.y
+	- shell_getc: make code that uses the pop_alias dependent on ALIAS
+	  define
+
+variables.h
+	- sv_tz: extern define should only depend on HAVE_TZSET
+
+expr.c
+	- expr_streval: if ARRAY_VARS is not defined, set lvalue->ind to -1;
+	  move assignment to `ind' inside define
+	- expr_bind_array_element: declaration and uses need to be #ifdef
+	  ARRAY_VARS
+
+arrayfunc.h
+	- AV_ALLOWALL, AV_QUOTED, AV_USEIND: define to 0 if ARRAY_VARS not
+	  defined; used in subst.c unconditionally
+
+sig.h
+	- make the signal blocking functions not dependent on JOB_CONTROL
+
+sig.c
+	- sigprocmask: make the replacement definition not dependent on
+	  JOB_CONTROL
+
+trap.c
+	- use BLOCK_SIGNAL/UNBLOCK_SIGNAL instead of code dependent on
+	  HAVE_POSIX_SIGNALS and BSD signals
+
+				   1/29
+				   ----
+lib/readline/signals.c
+	- _rl_block_sigwinch,_rl_release_sigwinch: don't compile in bodies
+	  unless SIGWINCH is defined.  Fixes bug reported by Pierre Muller
+	  <pierre.muller@ics-cnrs.unistra.fr>
+
+doc/{bash.1,bashref.texi}
+	- small modifications to the introduction to the REDIRECTION section
+	  to describe how redirections can modify file handles
+	- small modification to the section describing base#n to make it
+	  clearer that n can be denoted using non-numerics.  From a posting
+	  by Linda Walsh <bash@tlinx.org>

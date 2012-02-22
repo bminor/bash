@@ -113,6 +113,9 @@ FILE *xtrace_fp = 0;
 
 #define CHECK_XTRACE_FP	xtrace_fp = (xtrace_fp ? xtrace_fp : stderr)
 
+/* shell expansion characters: used in print_redirection_list */
+#define EXPCHAR(c) ((c) == '{' || (c) == '~' || (c) == '$' || (c) == '`')
+
 #define PRINT_DEFERRED_HEREDOCS(x) \
   do { \
     if (deferred_heredocs) \
@@ -996,6 +999,7 @@ print_redirection_list (redirects)
      REDIRECT *redirects;
 {
   REDIRECT *heredocs, *hdtail, *newredir;
+  char *rw;
 
   heredocs = (REDIRECT *)NULL;
   hdtail = heredocs;
@@ -1017,10 +1021,12 @@ print_redirection_list (redirects)
 	  else
 	    hdtail = heredocs = newredir;
 	}
-      else if (redirects->instruction == r_duplicating_output_word && redirects->redirector.dest == 1)
+      else if (redirects->instruction == r_duplicating_output_word && (redirects->flags & REDIR_VARASSIGN) == 0 && redirects->redirector.dest == 1)
 	{
 	  /* Temporarily translate it as the execution code does. */
-	  redirects->instruction = r_err_and_out;
+	  rw = redirects->redirectee.filename->word;
+	  if (rw && *rw != '-' && DIGIT (*rw) == 0 && EXPCHAR (*rw) == 0)
+	    redirects->instruction = r_err_and_out;
 	  print_redirection (redirects);
 	  redirects->instruction = r_duplicating_output_word;
 	}

@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Wed Jan 11 17:19:15 EST 2012
+.\"	Last Change: Sun Jan 29 21:16:46 EST 2012
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2012 January 11" "GNU Bash 4.2"
+.TH BASH 1 "2012 January 29" "GNU Bash 4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -3386,8 +3386,13 @@ Before a command is executed, its input and output
 may be
 .I redirected
 using a special notation interpreted by the shell.
-Redirection may also be used to open and close files for the
-current shell execution environment.  The following redirection
+Redirection allows commands' file handles to be
+duplicated, opened, closed,
+made to refer to different files,
+and can change the files the command reads from and writes to.
+Redirection may also be used to modify file handles in the
+current shell execution environment.
+The following redirection
 operators may precede or appear anywhere within a
 .I simple command
 or may follow a
@@ -4029,7 +4034,8 @@ Otherwise, numbers take the form [\fIbase#\fP]n, where the optional \fIbase\fP
 is a decimal number between 2 and 64 representing the arithmetic
 base, and \fIn\fP is a number in that base.
 If \fIbase#\fP is omitted, then base 10 is used.
-The digits greater than 9 are represented by the lowercase letters,
+When specifying \fIn\fP,
+the digits greater< than 9 are represented by the lowercase letters,
 the uppercase letters, @, and _, in that order.
 If \fIbase\fP is less than or equal to 36, lowercase and uppercase
 letters may be used interchangeably to represent numbers between 10

@@ -64,6 +64,12 @@ extern char *array_keys __P((char *, int));
 extern char *array_variable_name __P((char *, char **, int *));
 extern SHELL_VAR *array_variable_part __P((char *, char **, int *));
 
+#else
+
+#define AV_ALLOWALL	0
+#define AV_QUOTED	0
+#define AV_USEIND	0
+
 #endif
 
 #endif /* !_ARRAYFUNC_H_ */

@@ -302,7 +302,7 @@ wextglob_skipname (pat, dname, flags)
   *pe = L')';
   return r;
 #else
-  return (wchkname (pp, dname));
+  return (wchkname (pat, dname));
 #endif
 }
 

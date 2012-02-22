@@ -2274,7 +2274,11 @@ result from one of the above expansions are removed.
 Before a command is executed, its input and output
 may be @var{redirected}
 using a special notation interpreted by the shell.
-Redirection may also be used to open and close files for the
+Redirection allows commands' file handles to be
+duplicated, opened, closed,
+made to refer to different files,
+and can change the files the command reads from and writes to.
+Redirection may also be used to modify file handles in the
 current shell execution environment.  The following redirection
 operators may precede or appear anywhere within a
 simple command or may follow a command.
@@ -6373,9 +6377,10 @@ Constants with a leading 0 are interpreted as octal numbers.
 A leading @samp{0x} or @samp{0X} denotes hexadecimal.  Otherwise,
 numbers take the form [@var{base}@code{#}]@var{n}, where the optional @var{base}
 is a decimal number between 2 and 64 representing the arithmetic
-base, and @var{n} is a number in that base.  If @var{base}@code{#} is
-omitted, then base 10 is used.
-The digits greater than 9 are represented by the lowercase letters,
+base, and @var{n} is a number in that base.
+If @var{base}@code{#} is omitted, then base 10 is used.
+When specifying @var{n},
+he digits greater than 9 are represented by the lowercase letters,
 the uppercase letters, @samp{@@}, and @samp{_}, in that order.
 If @var{base} is less than or equal to 36, lowercase and uppercase
 letters may be used interchangeably to represent numbers between 10

@@ -188,7 +188,9 @@ static void	pushexp __P((void));
 static void	popexp __P((void));
 static void	expr_unwind __P((void));
 static void	expr_bind_variable __P((char *, char *));
+#if defined (ARRAY_VARS)
 static void	expr_bind_array_element __P((char *, arrayind_t, char *));
+#endif
 
 static intmax_t subexpr __P((char *));
 
@@ -317,6 +319,7 @@ expr_bind_variable (lhs, rhs)
   stupidly_hack_special_variables (lhs);
 }
 
+#if defined (ARRAY_VARS)
 /* Rewrite tok, which is of the form vname[expression], to vname[ind], where
    IND is the already-calculated value of expression. */
 static void
@@ -342,6 +345,7 @@ expr_bind_array_element (tok, ind, rhs)
   free (vname);
   free (lhs);
 }
+#endif /* ARRAY_VARS */
 
 /* Evaluate EXPR, and return the arithmetic result.  If VALIDP is
    non-null, a zero is stored into the location to which it points
@@ -542,9 +546,11 @@ expassign ()
       rhs = itos (value);
       if (noeval == 0)
 	{
+#if defined (ARRAY_VARS)
 	  if (lind != -1)
 	    expr_bind_array_element (lhs, lind, rhs);
 	  else
+#endif
 	    expr_bind_variable (lhs, rhs);
 	}
       free (rhs);
@@ -945,9 +951,11 @@ exp0 ()
       vincdec = itos (v2);
       if (noeval == 0)
 	{
+#if defined (ARRAY_VARS)
 	  if (curlval.ind != -1)
 	    expr_bind_array_element (curlval.tokstr, curlval.ind, vincdec);
 	  else
+#endif
 	    expr_bind_variable (tokstr, vincdec);
 	}
       free (vincdec);
@@ -991,9 +999,11 @@ exp0 ()
 	      vincdec = itos (v2);
 	      if (noeval == 0)
 		{
+#if defined (ARRAY_VARS)
 		  if (curlval.ind != -1)
 		    expr_bind_array_element (curlval.tokstr, curlval.ind, vincdec);
 		  else
+#endif
 		    expr_bind_variable (tokstr, vincdec);
 		}
 	      free (vincdec);
@@ -1088,8 +1098,8 @@ expr_streval (tok, e, lvalue)
 	jump_to_top_level (FORCE_EOF);
     }
 
-  ind = -1;
 #if defined (ARRAY_VARS)
+  ind = -1;
   /* Second argument of 0 to get_array_value means that we don't allow
      references like array[@].  In this case, get_array_value is just
      like get_variable_value in that it does not return newly-allocated
@@ -1106,7 +1116,11 @@ expr_streval (tok, e, lvalue)
       lvalue->tokstr = tok;	/* XXX */
       lvalue->tokval = tval;
       lvalue->tokvar = v;	/* XXX */
+#if defined (ARRAY_VARS)
       lvalue->ind = ind;
+#else
+      lvalue->ind = -1;
+#endif
     }
 	  
   return (tval);

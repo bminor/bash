@@ -47,9 +47,6 @@ typedef RETSIGTYPE SigHandler __P((int));
 extern SigHandler *set_signal_handler __P((int, SigHandler *));	/* in sig.c */
 #endif /* _POSIX_VERSION */
 
-/* Definitions used by the job control code. */
-#if defined (JOB_CONTROL)
-
 #if !defined (SIGCHLD) && defined (SIGCLD)
 #  define SIGCHLD SIGCLD
 #endif
@@ -105,8 +102,6 @@ do { \
 #  define BLOCK_CHILD(nvar, ovar) ovar = sigblock (sigmask (SIGCHLD))
 #  define UNBLOCK_CHILD(ovar) sigsetmask (ovar)
 #endif /* !HAVE_POSIX_SIGNALS */
-
-#endif /* JOB_CONTROL */
 
 /* Extern variables */
 extern volatile int sigwinch_received;
