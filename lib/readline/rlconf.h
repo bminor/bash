@@ -33,7 +33,7 @@
 #define COLOR_SUPPORT
 
 /* This definition is needed by readline.c, rltty.c, and signals.c. */
-/* If on, then readline handles signals in a way that doesn't screw. */
+/* If on, then readline handles signals in a way that doesn't suck. */
 #define HANDLE_SIGNALS
 
 /* Ugly but working hack for binding prefix meta. */
@@ -61,5 +61,9 @@
 
 /* Define this if you want the cursor to indicate insert or overwrite mode. */
 /* #define CURSOR_MODE */
+
+/* Define this if you want to enable code that talks to the Linux kernel
+   tty auditing system. */
+#define ENABLE_TTY_AUDIT_SUPPORT
 
 #endif /* _RLCONF_H_ */

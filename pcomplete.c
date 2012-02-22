@@ -1,6 +1,6 @@
 /* pcomplete.c - functions to generate lists of matches for programmable completion. */
 
-/* Copyright (C) 1999-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -122,10 +122,13 @@ static STRINGLIST *gen_action_completions __P((COMPSPEC *, const char *));
 static STRINGLIST *gen_globpat_matches __P((COMPSPEC *, const char *));
 static STRINGLIST *gen_wordlist_matches __P((COMPSPEC *, const char *));
 static STRINGLIST *gen_shell_function_matches __P((COMPSPEC *, const char *,
+						   const char *,
 						   char *, int, WORD_LIST *,
 						   int, int, int *));
-static STRINGLIST *gen_command_matches __P((COMPSPEC *, const char *, char *,
-					    int, WORD_LIST *, int, int));
+static STRINGLIST *gen_command_matches __P((COMPSPEC *, const char *,
+					    const char *,
+					    char *, int, WORD_LIST *,
+					    int, int));
 
 static STRINGLIST *gen_progcomp_completions __P((const char *, const char *,
 						 const char *,
@@ -139,7 +142,7 @@ static SHELL_VAR *bind_comp_words __P((WORD_LIST *));
 #endif
 static void bind_compfunc_variables __P((char *, int, WORD_LIST *, int, int));
 static void unbind_compfunc_variables __P((int));
-static WORD_LIST *build_arg_list __P((char *, const char *, WORD_LIST *, int));
+static WORD_LIST *build_arg_list __P((char *, const char *, const char *, WORD_LIST *, int));
 static WORD_LIST *command_line_to_word_list __P((char *, int, int, int *, int *));
 
 #ifdef DEBUG
@@ -1000,8 +1003,9 @@ unbind_compfunc_variables (exported)
    make do with the COMP_LINE and COMP_POINT variables. */
 
 static WORD_LIST *
-build_arg_list (cmd, text, lwords, ind)
+build_arg_list (cmd, cname, text, lwords, ind)
      char *cmd;
+     const char *cname;
      const char *text;
      WORD_LIST *lwords;
      int ind;
@@ -1012,13 +1016,13 @@ build_arg_list (cmd, text, lwords, ind)
 
   ret = (WORD_LIST *)NULL;
   w = make_word (cmd);
-  ret = make_word_list (w, (WORD_LIST *)NULL);
+  ret = make_word_list (w, (WORD_LIST *)NULL);	/* $0 */
 
-  w = (lwords && lwords->word) ? copy_word (lwords->word) : make_word ("");
+  w = make_word (cname);			/* $1 */
   cl = ret->next = make_word_list (w, (WORD_LIST *)NULL);
 
   w = make_word (text);
-  cl->next = make_word_list (w, (WORD_LIST *)NULL);
+  cl->next = make_word_list (w, (WORD_LIST *)NULL);	/* $2 */
   cl = cl->next;
 
   /* Search lwords for current word */
@@ -1043,8 +1047,9 @@ build_arg_list (cmd, text, lwords, ind)
    variable, this does nothing if arrays are not compiled into the shell. */
 
 static STRINGLIST *
-gen_shell_function_matches (cs, text, line, ind, lwords, nw, cw, foundp)
+gen_shell_function_matches (cs, cmd, text, line, ind, lwords, nw, cw, foundp)
      COMPSPEC *cs;
+     const char *cmd;
      const char *text;
      char *line;
      int ind;
@@ -1085,7 +1090,7 @@ gen_shell_function_matches (cs, text, line, ind, lwords, nw, cw, foundp)
      1-based, while bash arrays are 0-based. */
   bind_compfunc_variables (line, ind, lwords, cw - 1, 0);
 
-  cmdlist = build_arg_list (funcname, text, lwords, cw);
+  cmdlist = build_arg_list (funcname, cmd, text, lwords, cw);
 
   pps = &ps;
   save_parser_state (pps);
@@ -1147,8 +1152,9 @@ gen_shell_function_matches (cs, text, line, ind, lwords, nw, cw, foundp)
    STRINGLIST from the results and return it. */
 
 static STRINGLIST *
-gen_command_matches (cs, text, line, ind, lwords, nw, cw)
+gen_command_matches (cs, cmd, text, line, ind, lwords, nw, cw)
      COMPSPEC *cs;
+     const char *cmd;
      const char *text;
      char *line;
      int ind;
@@ -1162,7 +1168,7 @@ gen_command_matches (cs, text, line, ind, lwords, nw, cw)
   STRINGLIST *sl;
 
   bind_compfunc_variables (line, ind, lwords, cw, 1);
-  cmdlist = build_arg_list (cs->command, text, lwords, cw);
+  cmdlist = build_arg_list (cs->command, cmd, text, lwords, cw);
 
   /* Estimate the size needed for the buffer. */
   n = strlen (cs->command);
@@ -1262,6 +1268,7 @@ gen_compspec_completions (cs, cmd, word, start, end, foundp)
   char *line;
   int llen, nw, cw, found, foundf;
   WORD_LIST *lwords;
+  WORD_DESC *lw;
   COMPSPEC *tcs;
 
   found = 1;
@@ -1333,6 +1340,14 @@ gen_compspec_completions (cs, cmd, word, start, end, foundp)
 		line, llen, rl_point - start, &nw, &cw);
 #endif
       lwords = command_line_to_word_list (line, llen, rl_point - start, &nw, &cw);
+      /* If we skipped a NULL word at the beginning of the line, add it back */
+      if (lwords && lwords->word && cmd[0] == 0 && lwords->word->word[0] != 0)
+	{
+	  lw = make_bare_word (cmd);
+	  lwords = make_word_list (lw, lwords);
+	  nw++;
+	  cw++;
+	}
 #ifdef DEBUG
       if (lwords == 0 && llen > 0)
 	debug_printf ("ERROR: command_line_to_word_list returns NULL");
@@ -1351,7 +1366,7 @@ gen_compspec_completions (cs, cmd, word, start, end, foundp)
   if (cs->funcname)
     {
       foundf = 0;
-      tmatches = gen_shell_function_matches (cs, word, line, rl_point - start, lwords, nw, cw, &foundf);
+      tmatches = gen_shell_function_matches (cs, cmd, word, line, rl_point - start, lwords, nw, cw, &foundf);
       if (foundf != 0)
 	found = foundf;
       if (tmatches)
@@ -1359,7 +1374,7 @@ gen_compspec_completions (cs, cmd, word, start, end, foundp)
 #ifdef DEBUG
 	  if (progcomp_debug)
 	    {
-	      debug_printf ("gen_shell_function_matches (%p, %s, %p, %d, %d) -->", cs, word, lwords, nw, cw);
+	      debug_printf ("gen_shell_function_matches (%p, %s, %s, %p, %d, %d) -->", cs, cmd, word, lwords, nw, cw);
 	      strlist_print (tmatches, "\t");
 	      rl_on_new_line ();
 	    }
@@ -1371,13 +1386,13 @@ gen_compspec_completions (cs, cmd, word, start, end, foundp)
 
   if (cs->command)
     {
-      tmatches = gen_command_matches (cs, word, line, rl_point - start, lwords, nw, cw);
+      tmatches = gen_command_matches (cs, cmd, word, line, rl_point - start, lwords, nw, cw);
       if (tmatches)
 	{
 #ifdef DEBUG
 	  if (progcomp_debug)
 	    {
-	      debug_printf ("gen_command_matches (%p, %s, %p, %d, %d) -->", cs, word, lwords, nw, cw);
+	      debug_printf ("gen_command_matches (%p, %s, %s, %p, %d, %d) -->", cs, cmd, word, lwords, nw, cw);
 	      strlist_print (tmatches, "\t");
 	      rl_on_new_line ();
 	    }

@@ -383,6 +383,7 @@ extern void _rl_ttymsg ();
 extern void _rl_errmsg ();
 extern void _rl_trace ();
 #endif
+extern void _rl_audit_tty PARAMS((char *));
 
 extern int _rl_tropen PARAMS((void));
 

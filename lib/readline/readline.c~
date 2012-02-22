@@ -1,7 +1,7 @@
 /* readline.c -- a general facility for reading lines of input
    with emacs style editing and completion. */
 
-/* Copyright (C) 1987-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -364,6 +364,11 @@ readline (prompt)
 #if 0
   if (in_callback)
     RL_SETSTATE (RL_STATE_CALLBACK);
+#endif
+
+#if HAVE_DECL_AUDIT_TTY && defined (ENABLE_TTY_AUDIT_SUPPORT)
+  if (value)
+    _rl_audit_tty (value);
 #endif
 
   return (value);
@@ -884,6 +889,12 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	      return r;		/* don't indicate immediate success */
 	    }
 #endif
+
+	  /* Tentative inter-character timeout for potential multi-key
+	     sequences?  If no input within timeout, abort sequence and
+	     act as if we got non-matching input. */
+	  if (_rl_input_queued (500000) == 0)
+	    return (_rl_subseq_result (-2, map, key, got_subseq));
 
 	  newkey = _rl_subseq_getchar (key);
 	  if (newkey < 0)

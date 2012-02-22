@@ -530,3 +530,51 @@ _rl_settracefp (fp)
   _rl_tracefp = fp;
 }
 #endif
+
+
+#if HAVE_DECL_AUDIT_USER_TTY && defined (ENABLE_TTY_AUDIT_SUPPORT)
+
+/* Report STRING to the audit system. */
+void
+_rl_audit_tty (string)
+     char *string;
+{
+  struct sockaddr_nl addr;
+  struct msghdr msg;
+  struct nlmsghdr nlm;
+  struct iovec iov[2];
+  size_t size;
+  int fd;
+
+  fd = socket (AF_NETLINK, SOCK_RAW, NETLINK_AUDIT);
+  if (fd < 0)
+    return;
+  size = strlen (string) + 1;
+
+  nlm.nlmsg_len = NLMSG_LENGTH (size);
+  nlm.nlmsg_type = AUDIT_USER_TTY;
+  nlm.nlmsg_flags = NLM_F_REQUEST;
+  nlm.nlmsg_seq = 0;
+  nlm.nlmsg_pid = 0;
+
+  iov[0].iov_base = &nlm;
+  iov[0].iov_len = sizeof (nlm);
+  iov[1].iov_base = string;
+  iov[1].iov_len = size;
+
+  addr.nl_family = AF_NETLINK;
+  addr.nl_pid = 0;
+  addr.nl_groups = 0;
+
+  msg.msg_name = &addr;
+  msg.msg_namelen = sizeof (addr);
+  msg.msg_iov = iov;
+  msg.msg_iovlen = 2;
+  msg.msg_control = NULL;
+  msg.msg_controllen = 0;
+  msg.msg_flags = 0;
+
+  (void)sendmsg (fd, &msg, 0);
+  close (fd);
+}
+#endif

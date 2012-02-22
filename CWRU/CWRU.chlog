@@ -13115,3 +13115,47 @@ bashline.c
 	  executable_or_directory; change command_word_completion_function to
 	  call executable_completion.  This allows $HOME/bin/[TAB] to do
 	  command completion and display alternatives
+
+				   1/17
+				   ----
+pcomplete.c
+	- gen_command_matches: now takes a new second argument: the command
+	  name as deciphered by the programmable completion code and used
+	  to look up the compspec; changed callers (gen_compspec_completions)
+	- gen_shell_function_matches: now takes a new second argument: the
+	  command that originally caused the completion function to be
+	  invoked; changed callers (gen_compspec_completions))
+	- build_arg_list: now takes a new second argument: the command name
+	  corresponding to the current compspec; changed callers
+	  (gen_command_matches, gen_shell_function_matches)
+	- build_arg_list: now uses `cmd' argument to create $1 passed to
+	  invoked command or shell function
+	- gen_compspec_completions: if we skipped a null command at the
+	  beginning of the line (e.g., for completing `>'), add a new word for
+	  it at the beginning of the word list and increment nw and cw
+	  appropriately.  This is all a partial fix for the shortcoming
+	  pointed out by Sung Pae <sungpae@gmail.com>
+
+				   1/18
+				   ----
+
+{configure,config.h}.in
+	- new check: check for AUDIT_USER_TTY defined in <linux/audit.h>,
+	  define HAVE_DECL_AUDIT_USER_TTY if both are found
+
+lib/readline/rlconf.h
+	- ENABLE_TTY_AUDIT_SUPPORT: new define, allows use of the Linux kernel
+	  tty auditing system if it's available and enabled
+
+lib/readline/util.c
+	- _rl_audit_tty: new function, send a string to the kernel tty audit
+	  system
+
+lib/readline/rlprivate.h
+	- _rl_audit_tty: new extern declaration
+
+lib/readline/readline.c
+	- readline: call _rl_audit_tty with line to be returned before returning
+	  it if the Linux tty audit system is available and it's been enabled
+	  in rlconf.h  Original patch from Miroslav Trmac; recent request
+	  from Miroslav Lichvar <mlichvar@redhat.com>

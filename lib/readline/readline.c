@@ -366,6 +366,11 @@ readline (prompt)
     RL_SETSTATE (RL_STATE_CALLBACK);
 #endif
 
+#if HAVE_DECL_AUDIT_TTY && defined (ENABLE_TTY_AUDIT_SUPPORT)
+  if (value)
+    _rl_audit_tty (value);
+#endif
+
   return (value);
 }
 
@@ -883,6 +888,14 @@ _rl_dispatch_subseq (key, map, got_subseq)
 
 	      return r;		/* don't indicate immediate success */
 	    }
+#endif
+
+#ifdef NOTYET
+	  /* Tentative inter-character timeout for potential multi-key
+	     sequences?  If no input within timeout, abort sequence and
+	     act as if we got non-matching input. */
+	  if (_rl_input_queued (500000) == 0)
+	    return (_rl_subseq_result (-2, map, key, got_subseq));
 #endif
 
 	  newkey = _rl_subseq_getchar (key);
