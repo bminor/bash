@@ -1,7 +1,7 @@
 /* readline.c -- a general facility for reading lines of input
    with emacs style editing and completion. */
 
-/* Copyright (C) 1987-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -1126,6 +1126,11 @@ readline_initialize_everything ()
      been set yet, then do so now. */
   if (rl_completer_word_break_characters == (char *)NULL)
     rl_completer_word_break_characters = (char *)rl_basic_word_break_characters;
+
+#if defined (COLOR_SUPPORT)
+  if (_rl_colored_stats)
+    _rl_parse_colors ();
+#endif
 
   rl_executing_keyseq = malloc (_rl_executing_keyseq_size = 16);
   if (rl_executing_keyseq)

@@ -1,6 +1,6 @@
 /* util.c -- readline utility functions */
 
-/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -507,7 +507,7 @@ _rl_tropen ()
 
   if (_rl_tracefp)
     fclose (_rl_tracefp);
-  sprintf (fnbuf, "/var/tmp/rltrace.%ld", getpid());
+  sprintf (fnbuf, "/var/tmp/rltrace.%ld", (long)getpid());
   unlink(fnbuf);
   _rl_tracefp = fopen (fnbuf, "w+");
   return _rl_tracefp != 0;

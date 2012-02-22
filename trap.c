@@ -1,7 +1,7 @@
 /* trap.c -- Not the trap command, but useful functions for manipulating
    those objects.  The trap command is in builtins/trap.def. */
 
-/* Copyright (C) 1987-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -112,6 +112,8 @@ int trap_saved_exit_value;
 
 /* The (trapped) signal received while executing in the `wait' builtin */
 int wait_signal_received;
+
+int trapped_signal_received;
 
 #define GETORIGSIG(sig) \
   do { \
@@ -276,9 +278,7 @@ run_pending_traps ()
   if (catch_flag == 0)		/* simple optimization */
     return;
 
-itrace("run_pending_traps: ");
-
-  catch_flag = 0;
+  catch_flag = trapped_signal_received = 0;
 
   /* Preserve $? when running trap. */
   old_exit_value = last_command_exit_value;
@@ -389,8 +389,6 @@ trap_handler (sig)
       SIGRETURN (0);
     }
 
-itrace("trap_handler: sig = %d", sig);
-
   if ((sig >= NSIG) ||
       (trap_list[sig] == (char *)DEFAULT_SIG) ||
       (trap_list[sig] == (char *)IGNORE_SIG))
@@ -408,6 +406,8 @@ itrace("trap_handler: sig = %d", sig);
       catch_flag = 1;
       pending_traps[sig]++;
 
+      trapped_signal_received = sig;
+
       if (interrupt_immediately && this_shell_builtin && (this_shell_builtin == wait_builtin))
 	{
 	  wait_signal_received = sig;
@@ -421,6 +421,17 @@ itrace("trap_handler: sig = %d", sig);
     }
 
   SIGRETURN (0);
+}
+
+int
+first_pending_trap ()
+{
+  register int i;
+
+  for (i = 1; i < NSIG; i++)
+    if (pending_traps[i])
+      return i;
+  return -1;
 }
 
 #if defined (JOB_CONTROL) && defined (SIGCHLD)

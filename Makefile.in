@@ -244,6 +244,7 @@ READLINE_SOURCE	= $(RL_LIBSRC)/rldefs.h $(RL_LIBSRC)/rlconf.h \
 		  $(RL_LIBSRC)/posixstat.h $(RL_LIBSRC)/tilde.h \
 		  $(RL_LIBSRC)/rlstdc.h ${RL_LIBSRC}/xmalloc.h \
 		  $(RL_LIBSRC)/rlshell.h ${RL_LIBSRC}/rlprivate.h \
+		  $(RL_LIBSRC)/colors.h  $(RL_LIBSRC)/parse-colors.h \
 		  $(RL_LIBSRC)/funmap.c $(RL_LIBSRC)/emacs_keymap.c \
 		  $(RL_LIBSRC)/search.c $(RL_LIBSRC)/vi_keymap.c \
 		  $(RL_LIBSRC)/keymaps.c $(RL_LIBSRC)/parens.c \
@@ -257,6 +258,7 @@ READLINE_SOURCE	= $(RL_LIBSRC)/rldefs.h $(RL_LIBSRC)/rlconf.h \
 		  $(RL_LIBSRC)/terminal.c $(RL_LIBSRC)/nls.c \
 		  $(RL_LIBSRC)/input.c $(RL_LIBSRC)/xmalloc.c \
 		  $(RL_LIBSRC)/shell.c $(RL_LIBSRC)/savestring.c \
+		  $(RL_LIBSRC)/colors.c $(RL_LIBSRC)/parse-colors.c \
 		  $(RL_LIBSRC)/misc.c $(RL_LIBSRC)/mbutil.c $(RL_LIBSRC)/compat.c \
 		  $(RL_LIBSRC)/histexpand.c $(RL_LIBSRC)/history.c \
 		  $(RL_LIBSRC)/histsearch.c $(RL_LIBSRC)/histfile.c
@@ -274,7 +276,8 @@ READLINE_OBJ	= $(RL_LIBDIR)/readline.o $(RL_LIBDIR)/funmap.o \
 		  $(RL_LIBDIR)/shell.o $(RL_LIBDIR)/savestring.o \
 		  $(RL_LIBDIR)/mbutil.o $(RL_LIBDIR)/compat.o \
 		  $(RL_LIBDIR)/history.o $(RL_LIBDIR)/histexpand.o \
-		  $(RL_LIBDIR)/histsearch.o $(RL_LIBDIR)/histfile.o
+		  $(RL_LIBDIR)/histsearch.o $(RL_LIBDIR)/histfile.o \
+		  $(RL_LIBDIR)/colors.o $(RL_LIBDIR)/parse-colors.o
 
 HIST_LIBSRC = $(LIBSRC)/readline
 HIST_LIBDIR = @HIST_LIBDIR@

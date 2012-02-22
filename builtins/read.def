@@ -1,7 +1,7 @@
 This file is read.def, from which is created read.c.
 It implements the builtin "read" in Bash.
 
-Copyright (C) 1987-2011 Free Software Foundation, Inc.
+Copyright (C) 1987-2012 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -107,6 +107,9 @@ $END
 extern int errno;
 #endif
 
+extern int posixly_correct;
+extern int trapped_signal_received;
+
 struct ttsave
 {
   int fd;
@@ -172,7 +175,7 @@ read_builtin (list)
   register char *varname;
   int size, i, nr, pass_next, saw_escape, eof, opt, retval, code, print_ps2;
   int input_is_tty, input_is_pipe, unbuffered_read, skip_ctlesc, skip_ctlnul;
-  int raw, edit, nchars, silent, have_timeout, ignore_delim, fd;
+  int raw, edit, nchars, silent, have_timeout, ignore_delim, fd, lastsig, t_errno;
   unsigned int tmsec, tmusec;
   long ival, uval;
   intmax_t intval;
@@ -213,6 +216,7 @@ read_builtin (list)
 #endif
   USE_VAR(list);
   USE_VAR(ps2);
+  USE_VAR(lastsig);
 
   sigalrm_seen = reading = 0;
 
@@ -473,7 +477,8 @@ read_builtin (list)
   /* This *must* be the top unwind-protect on the stack, so the manipulation
      of the unwind-protect stack after the realloc() works right. */
   add_unwind_protect (xfree, input_string);
-  interrupt_immediately++;
+  if (posixly_correct == 0)
+    interrupt_immediately++;
 
   CHECK_ALRM;
   unbuffered_read = (nchars > 0) || (delim != '\n') || input_is_pipe;
@@ -530,13 +535,22 @@ read_builtin (list)
 
       reading = 1;
       if (unbuffered_read)
-	retval = zread (fd, &c, 1);
+	retval = posixly_correct ? zreadintr (fd, &c, 1) : zread (fd, &c, 1);
       else
-	retval = zreadc (fd, &c);
+	retval = posixly_correct ? zreadcintr (fd, &c) : zreadc (fd, &c);
       reading = 0;
 
       if (retval <= 0)
 	{
+	  if (retval < 0 && errno == EINTR)
+	    {
+	      lastsig = LASTSIG();
+	      if (lastsig == 0)
+		lastsig = trapped_signal_received;
+	      run_pending_traps ();	/* because interrupt_immediately is not set */
+	    }
+	  else
+	    lastsig = 0;
 	  CHECK_TERMSIG;
 	  eof = 1;
 	  break;
@@ -625,9 +639,11 @@ add_char:
 
   if (retval < 0)
     {
-      builtin_error (_("read error: %d: %s"), fd, strerror (errno));
+      t_errno = errno;
+      if (errno != EINTR)
+	builtin_error (_("read error: %d: %s"), fd, strerror (errno));
       run_unwind_frame ("read_builtin");
-      return (EXECUTION_FAILURE);
+      return ((t_errno != EINTR) ? EXECUTION_FAILURE : 128+lastsig);
     }
 
   if (tmsec > 0 || tmusec > 0)
@@ -660,7 +676,8 @@ add_char:
 
 assign_vars:
 
-  interrupt_immediately--;
+  if (posixly_correct == 0)
+    interrupt_immediately--;
 
 #if defined (ARRAY_VARS)
   /* If -a was given, take the string read, break it into a list of words,

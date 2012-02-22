@@ -1,6 +1,6 @@
 /* execute_cmd.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -3764,7 +3764,7 @@ is_dirname (pathname)
   char *temp;
   int ret;
 
-  temp = search_for_command (pathname);
+  temp = search_for_command (pathname, 0);
   ret = (temp ? file_isdir (temp) : file_isdir (pathname));
   free (temp);
   return ret;
@@ -4784,7 +4784,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
     }
 #endif /* RESTRICTED_SHELL */
 
-  command = search_for_command (pathname);
+  command = search_for_command (pathname, 1);
 
   if (command)
     {

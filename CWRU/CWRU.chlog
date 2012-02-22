@@ -11402,7 +11402,7 @@ config.h.in
 				    4/2
 				    ---
 braces.c
-	- brace_gobbler: fix to understand double-quoted command subtitution,
+	- brace_gobbler: fix to understand double-quoted command substitution,
 	  since the shell understands unquoted comsubs.  Fixes bug reported
 	  by Michael Whitten <mfwitten@gmail.com>
 
@@ -13013,3 +13013,105 @@ lib/readline/doc/rluser.texi
 	- Added an example to the programmable completion section: _comp_cd,
 	  a completion function for cd, with additional verbiage.  Text
 	  includes a reference to the bash_completion project
+
+				 1/1/2012
+				 --------
+jobs.c
+	- set_job_status_and_cleanup: note that a job is stopped due to
+	  SIGTSTP (any_tstped) if job_control is set; there's no need to
+	  test interactive
+
+				    1/5
+				    ---
+quit.h
+	- LASTSIG(): new macro, expands to signal number of last terminating
+	  signal received (terminating_signal or SIGINT)
+
+trap.c
+	- first_pending_trap: returns lowest signal number with a trap pending
+	- trapped_signal_received: set to the last trapped signal the shell
+	  received in trap_handler(); reset to 0 in run_pending_traps
+
+builtins/read.def
+	- read_builtin: changes to posix-mode (posixly_correct != 0) to make
+	  `read' interruptible by a trapped signal.  After the trap runs,
+	  read returns 128+sig and does not assign the partially-read line
+	  to the named variable(s).  From an austin-group discussion started
+	  by David Korn
+
+				   1/11
+				   ----
+doc/{bash.1,bashref.texi}
+	- slight changes to the descriptions of the compat32 and compat40 shell
+	  options to clarify their meaning
+
+				   1/12
+				   ----
+lib/readline/{colors.[ch],parse-colors.[ch]}
+	- new files, part of color infrastructure support
+
+Makefile.in,lib/readline/Makefile.in
+	- arrange to have colors.o and parse-colors.o added to readline
+	  library
+
+{configure,config.h}.in
+	- check for stdbool.h, define HAVE_STDBOOL_H if found
+
+				   1/14
+				   ----
+lib/readline/bind.c
+	- colored_stats: new bindable variable, enables using colors to
+	  indicate file type when listing completions
+
+lib/readline/complete.c
+	- _rl_colored_stats: new variable, controlled by colored-stats bindable
+	  variable
+	- colored_stat_start, colored_stat_end: new functions to set and reset
+	  the terminal color appropriately depending on the type of the
+	  filename to be printed
+	- print_filename: changes to print colors if `colored-stats' variable
+	  set.  Changes contributed by Raphael Droz
+	  <raphael.droz+floss@gmail.com>
+
+lib/readline/readline.c
+	- rl_initialize_everything: add call to _rl_parse_colors to parse
+	  color values out of $LS_COLORS.  May have to add to rl_initialize
+	  to make more dynamic if LS_COLORS changes (which doesn't happen
+	  very often, if at all)
+
+lib/readline/rlprivate.h
+	- _rl_colored_stats: new extern declaration
+
+lib/readline/doc/{readline.3,rluser.texi},doc/bash.1
+	- colored-stats: document new bindable readline variable
+
+lib/readline/colors.c
+	- _rl_print_color_indicator: call rl_filename_stat_hook before calling
+	  lstat/stat so we can get color indicators for stuff like
+	  $HOME/Applications
+
+lib/readline/complete.c
+	- stat_char: call rl_filename_stat_hook before calling lstat/stat
+
+findcmd.[ch],execute_cmd.c
+	- search_for_command: now takes a second `flags' argument; changed
+	  header function prototype and callers
+	- search_for_command: if (flags & 1), put the command found in $PATH
+	  into the command hash table (previous default behavior)
+
+execute_cmd.c
+	- is_dirname: call search_for_command with flags argument of 0 so it
+	  doesn't try to put something in the command hash table
+
+bashline.c
+	- bash_command_name_stat_hook: a hook function for readline's
+	  filename_stat_hook that does $PATH searching the same way that
+	  execute_cmd.c:execute_disk_command() does it, and rewrites the
+	  passed filename if found.  Does not put names into command hash
+	  table.  This allows command name completion to take advantage
+	  of `visible-stats' and `colored-stats' settings.
+	- executable_completion: new function, calls the directory completion
+	  hook to expand the filename before calling executable_file or
+	  executable_or_directory; change command_word_completion_function to
+	  call executable_completion.  This allows $HOME/bin/[TAB] to do
+	  command completion and display alternatives

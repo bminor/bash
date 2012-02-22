@@ -1,6 +1,6 @@
 /* complete.c -- filename completion for readline. */
 
-/* Copyright (C) 1987-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -66,6 +66,10 @@ extern int errno;
 #include "xmalloc.h"
 #include "rlprivate.h"
 
+#if defined (COLOR_SUPPORT)
+#  include "colors.h"
+#endif
+
 #ifdef __STDC__
 typedef int QSFUNC (const void *, const void *);
 #else
@@ -96,11 +100,19 @@ extern struct passwd *getpwent PARAMS((void));
    longest string in that array. */
 rl_compdisp_func_t *rl_completion_display_matches_hook = (rl_compdisp_func_t *)NULL;
 
-#if defined (VISIBLE_STATS)
+#if defined (VISIBLE_STATS) || defined (COLOR_SUPPORT)
 #  if !defined (X_OK)
 #    define X_OK 1
 #  endif
+#endif
+
+#if defined (VISIBLE_STATS)
 static int stat_char PARAMS((char *));
+#endif
+
+#if defined (COLOR_SUPPORT)
+static int colored_stat_start PARAMS((char *));
+static void colored_stat_end PARAMS((void));
 #endif
 
 static int path_isdir PARAMS((const char *));
@@ -192,6 +204,12 @@ int _rl_completion_columns = -1;
    to indicate the type of file being listed. */
 int rl_visible_stats = 0;
 #endif /* VISIBLE_STATS */
+
+#if defined (COLOR_SUPPORT)
+/* Non-zero means to use colors to indicate file type when listing possible
+   completions.  The colors used are taken from $LS_COLORS, if set. */
+int _rl_colored_stats = 1;
+#endif
 
 /* If non-zero, when completing in the middle of a word, don't insert
    characters from the match that match characters following point in
@@ -566,6 +584,8 @@ stat_char (filename)
 {
   struct stat finfo;
   int character, r;
+  char *f;
+  const char *fn;
 
   /* Short-circuit a //server on cygwin, since that will always behave as
      a directory. */
@@ -574,10 +594,20 @@ stat_char (filename)
     return '/';
 #endif
 
+  f = 0;
+  if (rl_filename_stat_hook)
+    {
+      f = savestring (filename);
+      (*rl_filename_stat_hook) (&f);
+      fn = f;
+    }
+  else
+    fn = filename;
+    
 #if defined (HAVE_LSTAT) && defined (S_ISLNK)
-  r = lstat (filename, &finfo);
+  r = lstat (fn, &finfo);
 #else
-  r = stat (filename, &finfo);
+  r = stat (fn, &finfo);
 #endif
 
   if (r == -1)
@@ -611,9 +641,28 @@ stat_char (filename)
       if (access (filename, X_OK) == 0)
 	character = '*';
     }
+
+  free (f);
   return (character);
 }
 #endif /* VISIBLE_STATS */
+
+#if defined (COLOR_SUPPORT)
+static int
+colored_stat_start (filename)
+     char *filename;
+{
+  _rl_set_normal_color ();
+  return (_rl_print_color_indicator (filename));
+}
+
+static void
+colored_stat_end ()
+{
+  _rl_prep_non_filename_text ();
+  _rl_put_indicator (&_rl_color_indicator[C_CLR_TO_EOL]);
+}
+#endif
 
 /* Return the portion of PATHNAME that should be output when listing
    possible completions.  If we are hacking filename completion, we
@@ -811,13 +860,20 @@ print_filename (to_print, full_pathname, prefix_bytes)
   char *s, c, *new_full_pathname, *dn;
 
   extension_char = 0;
-  printed_len = fnprint (to_print, prefix_bytes);
-
-#if defined (VISIBLE_STATS)
- if (rl_filename_completion_desired && (rl_visible_stats || _rl_complete_mark_directories))
-#else
- if (rl_filename_completion_desired && _rl_complete_mark_directories)
+#if defined (COLOR_SUPPORT)
+  /* Defer printing if we want to prefix with a color indicator */
+  if (_rl_colored_stats == 0 || rl_filename_completion_desired == 0)
 #endif
+    printed_len = fnprint (to_print, prefix_bytes);
+
+  if (rl_filename_completion_desired && (
+#if defined (VISIBLE_STATS)
+     rl_visible_stats ||
+#endif
+#if defined (COLOR_SUPPORT)
+     _rl_colored_stats ||
+#endif
+     _rl_complete_mark_directories))
     {
       /* If to_print != full_pathname, to_print is the basename of the
 	 path passed.  In this case, we try to expand the directory
@@ -863,8 +919,17 @@ print_filename (to_print, full_pathname, prefix_bytes)
 	    extension_char = stat_char (new_full_pathname);
 	  else
 #endif
-	  if (path_isdir (new_full_pathname))
+	  if (_rl_complete_mark_directories && path_isdir (new_full_pathname))
 	    extension_char = '/';
+
+#if defined (COLOR_SUPPORT)
+	  if (_rl_colored_stats)
+	    {
+	      colored_stat_start (new_full_pathname);
+	      printed_len = fnprint (to_print, prefix_bytes);
+	      colored_stat_end ();
+	    }
+#endif
 
 	  xfree (new_full_pathname);
 	  to_print[-1] = c;
@@ -877,8 +942,18 @@ print_filename (to_print, full_pathname, prefix_bytes)
 	    extension_char = stat_char (s);
 	  else
 #endif
-	    if (path_isdir (s))
+	    if (_rl_complete_mark_directories && path_isdir (s))
 	      extension_char = '/';
+
+#if defined (COLOR_SUPPORT)
+	  if (_rl_colored_stats)
+	    {
+	      colored_stat_start (s);
+	      printed_len = fnprint (to_print, prefix_bytes);
+	      colored_stat_end ();
+	    }
+#endif
+
 	}
 
       xfree (s);

@@ -1,6 +1,6 @@
 /* bashline.c -- Bash's interface to the readline library. */
 
-/* Copyright (C) 1987-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -119,9 +119,12 @@ static char *bash_filename_rewrite_hook __P((char *, int));
 
 static void bash_directory_expansion __P((char **));
 static int bash_filename_stat_hook __P((char **));
+static int bash_command_name_stat_hook __P((char **));
 static int bash_directory_completion_hook __P((char **));
 static int filename_completion_ignore __P((char **));
 static int bash_push_line __P((void));
+
+static int executable_completion __P((const char *, int));
 
 static rl_icppfunc_t *save_directory_hook __P((void));
 static void restore_directory_hook __P((rl_icppfunc_t));
@@ -606,6 +609,7 @@ bashline_reset ()
   set_filename_bstab (rl_filename_quote_characters);
 
   set_directory_hook ();
+  rl_filename_stat_hook = bash_filename_stat_hook;
 }
 
 /* Contains the line to push into readline. */
@@ -1358,6 +1362,7 @@ attempt_shell_completion (text, start, end)
   rl_filename_quote_characters = default_filename_quote_characters;
   set_filename_bstab (rl_filename_quote_characters);
   set_directory_hook ();
+  rl_filename_stat_hook = bash_filename_stat_hook;
 
   /* Determine if this could be a command word.  It is if it appears at
      the start of the line (ignoring preceding whitespace), or if it
@@ -1614,6 +1619,40 @@ bash_default_completion (text, start, end, qc, compflags)
   return (matches);
 }
 
+static int
+bash_command_name_stat_hook (name)
+     char **name;
+{
+  char *cname, *result;
+
+  cname = *name;
+  /* XXX - we could do something here with converting aliases, builtins,
+     and functions into something that came out as executable, but we don't. */
+  result = search_for_command (cname, 0);
+  if (result)
+    {
+      *name = result;
+      return 1;
+    }
+  return 0;
+}
+
+static int
+executable_completion (filename, searching_path)
+     const char *filename;
+     int searching_path;
+{
+  char *f;
+  int r;
+
+  f = savestring (filename);
+  bash_directory_completion_hook (&f);
+  
+  r = searching_path ? executable_file (f) : executable_or_directory (f);
+  free (f);
+  return r;
+}
+
 /* This is the function to call when the word to complete is in a position
    where a command word can be found.  It grovels $PATH, looking for commands
    that match.  It also scans aliases, function names, and the shell_builtin
@@ -1643,6 +1682,8 @@ command_word_completion_function (hint_text, state)
      no state, then make one just for that purpose. */
   if (state == 0)
     {
+      rl_filename_stat_hook = bash_command_name_stat_hook;
+
       if (dequoted_hint && dequoted_hint != hint)
 	free (dequoted_hint);
       if (hint)
@@ -2000,7 +2041,7 @@ globword:
 #endif
 	cval = val;
 
-      if (match && (searching_path ? executable_file (val) : executable_or_directory (cval)))
+      if (match && executable_completion ((searching_path ? val : cval), searching_path))
 	{
 	  if (cval != val)
 	    free (cval);

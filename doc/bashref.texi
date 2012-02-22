@@ -16,7 +16,7 @@ This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Bash Reference Manual},
 for @code{Bash}, Version @value{VERSION}.
 
-Copyright @copyright{} 1988--2011 Free Software Foundation, Inc.
+Copyright @copyright{} 1988--2012 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -4688,22 +4688,28 @@ easy re-editing of multi-line commands.
 @item compat31
 If set, Bash
 changes its behavior to that of version 3.1 with respect to quoted
-arguments to the conditional command's @samp{=~} operator.
+arguments to the conditional command's @samp{=~} operator
+and with respect to locale-specific
+string comparison when using the @samp{[[}
+conditional command's @samp{<} and @samp{>} operators.
+Bash versions prior to bash-4.1 use ASCII collation and strcmp(3);
+bash-4.1 and later use the current locale's collation sequence and strcoll(3).
 
 @item compat32
 If set, Bash
 changes its behavior to that of version 3.2 with respect to locale-specific
 string comparison when using the @samp{[[}
-conditional command's @samp{<} and @samp{>} operators.
-Bash versions prior to bash-4.0 use ASCII collation and strcmp(3);
-bash-4.1 and later use the current locale's collation sequence and strcoll(3).
+conditional command's @samp{<} and @samp{>} operators (see previous item).
 
 @item compat40
 If set, Bash
 changes its behavior to that of version 4.0 with respect to locale-specific
 string comparison when using the @samp{[[}
-conditional command's @samp{<} and @samp{>} operators (see previous item)
+conditional command's @samp{<} and @samp{>} operators (see description
+of @code{compat31})
 and the effect of interrupting a command list.
+Bash versions 4.0 and later interrupt the list as if the shell received the
+interrupt; previous versions continue with the next command in the list.
 
 @item compat41
 If set, Bash, when in posix mode, treats a single quote in a double-quoted
@@ -7054,6 +7060,12 @@ and @option{-f} options.
 The arrival of @code{SIGCHLD}  when a trap is set on @code{SIGCHLD} does
 not interrupt the @code{wait} builtin and cause it to return immediately.
 The trap command is run once for each child that exits.
+
+@item
+The @code{read} builtin may be interrupted by a signal for which a trap
+has been set.
+If Bash receives a trapped signal while executing @code{read}, the trap
+handler executes and @code{read} returns an exit status greater than 128.
 
 @end enumerate
 

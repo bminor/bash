@@ -3,7 +3,7 @@
 /* This file works with both POSIX and BSD systems.  It implements job
    control. */
 
-/* Copyright (C) 1989-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -3119,7 +3119,7 @@ waitchld (wpid, block)
 	 if it was non-zero before we called waitpid. */
       if (sigchld > 0 && (waitpid_flags & WNOHANG))
 	sigchld--;
-  
+
       /* If waitpid returns -1 with errno == ECHILD, there are no more
 	 unwaited-for child processes of this shell. */
       if (pid < 0 && errno == ECHILD)
@@ -3270,8 +3270,7 @@ set_job_status_and_cleanup (job)
 #endif
 	{
 	  any_stopped = 1;
-	  any_tstped |= interactive && job_control &&
-			    (WSTOPSIG (child->status) == SIGTSTP);
+	  any_tstped |= job_control && (WSTOPSIG (child->status) == SIGTSTP);
 	}
       child = child->next;
     }

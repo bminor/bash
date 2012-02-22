@@ -1,6 +1,6 @@
 /* quit.h -- How to handle SIGINT gracefully. */
 
-/* Copyright (C) 1993-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -49,5 +49,8 @@ extern volatile int terminating_signal;
   do { \
     if (terminating_signal) termsig_handler (terminating_signal); \
   } while (0)
+
+#define LASTSIG() \
+  (terminating_signal ? terminating_signal : (interrupt_state ? SIGINT : 0))
 
 #endif /* _QUIT_H_ */

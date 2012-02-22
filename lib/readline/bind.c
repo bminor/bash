@@ -1,6 +1,6 @@
 /* bind.c -- key binding and startup file support for the readline library. */
 
-/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -1477,6 +1477,9 @@ static const struct {
   { "bind-tty-special-chars",	&_rl_bind_stty_chars,		0 },
   { "blink-matching-paren",	&rl_blink_matching_paren,	V_SPECIAL },
   { "byte-oriented",		&rl_byte_oriented,		0 },
+#if defined (COLOR_SUPPORT)
+  { "colored-stats",		&_rl_colored_stats,		0 },
+#endif
   { "completion-ignore-case",	&_rl_completion_case_fold,	0 },
   { "completion-map-case",	&_rl_completion_case_map,	0 },
   { "convert-meta",		&_rl_convert_meta_chars_to_ascii, 0 },

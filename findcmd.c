@@ -1,6 +1,6 @@
 /* findcmd.c -- Functions to search for commands by name. */
 
-/* Copyright (C) 1997-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -296,10 +296,13 @@ get_next_path_element (path_list, path_index_pointer)
 
 /* Look for PATHNAME in $PATH.  Returns either the hashed command
    corresponding to PATHNAME or the first instance of PATHNAME found
-   in $PATH.  Returns a newly-allocated string. */
+   in $PATH.  If (FLAGS&1) is non-zero, insert the instance of PATHNAME
+   found in $PATH into the command hash table.  Returns a newly-allocated
+   string. */
 char *
-search_for_command (pathname)
+search_for_command (pathname, flags)
      const char *pathname;
+     int flags;
 {
   char *hashed_file, *command;
   int temp_path, st;
@@ -352,7 +355,7 @@ search_for_command (pathname)
 	}
       else
 	command = find_user_command (pathname);
-      if (command && hashing_enabled && temp_path == 0)
+      if (command && hashing_enabled && temp_path == 0 && (flags & 1))
 	phash_insert ((char *)pathname, command, dot_found_in_search, 1);	/* XXX fix const later */
     }
   return (command);

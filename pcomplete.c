@@ -997,7 +997,7 @@ unbind_compfunc_variables (exported)
 
    Functions can access all of the words in the current command line
    with the COMP_WORDS array.  External commands cannot; they have to
-   make do  with the COMP_LINE and COMP_POINT variables. */
+   make do with the COMP_LINE and COMP_POINT variables. */
 
 static WORD_LIST *
 build_arg_list (cmd, text, lwords, ind)
