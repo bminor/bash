@@ -1,7 +1,7 @@
 /* readline.c -- a general facility for reading lines of input
    with emacs style editing and completion. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -101,6 +101,25 @@ rl_add_undo (what, start, end, text)
   rl_undo_list = temp;
 }
 
+/* Free an UNDO_LIST */
+void
+_rl_free_undo_list (ul)
+     UNDO_LIST *ul;
+{
+  UNDO_LIST *release;
+
+  while (ul)
+    {
+      release = ul;
+      ul = ul->next;
+
+      if (release->what == UNDO_DELETE)
+	xfree (release->text);
+
+      xfree (release);
+    }
+}
+
 /* Free the existing undo list. */
 void
 rl_free_undo_list ()
@@ -108,16 +127,7 @@ rl_free_undo_list ()
   UNDO_LIST *release, *orig_list;
 
   orig_list = rl_undo_list;
-  while (rl_undo_list)
-    {
-      release = rl_undo_list;
-      rl_undo_list = rl_undo_list->next;
-
-      if (release->what == UNDO_DELETE)
-	xfree (release->text);
-
-      xfree (release);
-    }
+  _rl_free_undo_list (rl_undo_list);
   rl_undo_list = (UNDO_LIST *)NULL;
   replace_history_data (-1, (histdata_t *)orig_list, (histdata_t *)NULL);
 }

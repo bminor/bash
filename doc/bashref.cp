@@ -64,8 +64,8 @@
 \entry{matching, pattern}{27}{matching, pattern}
 \entry{redirection}{28}{redirection}
 \entry{command expansion}{32}{command expansion}
-\entry{command execution}{32}{command execution}
-\entry{command search}{32}{command search}
+\entry{command execution}{33}{command execution}
+\entry{command search}{33}{command search}
 \entry{execution environment}{33}{execution environment}
 \entry{environment}{34}{environment}
 \entry{exit status}{35}{exit status}

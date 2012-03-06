@@ -1568,6 +1568,7 @@ static int sv_editmode PARAMS((const char *));
 static int sv_histsize PARAMS((const char *));
 static int sv_isrchterm PARAMS((const char *));
 static int sv_keymap PARAMS((const char *));
+static int sv_seqtimeout PARAMS((const char *));
 
 static const struct {
   const char * const name;
@@ -1583,6 +1584,7 @@ static const struct {
   { "history-size",	V_INT,		sv_histsize },
   { "isearch-terminators", V_STRING,	sv_isrchterm },
   { "keymap",		V_STRING,	sv_keymap },
+  { "keyseq-timeout",	V_INT,		sv_seqtimeout },
   { (char *)NULL,	0, (_rl_sv_func_t *)0 }
 };
 
@@ -1740,8 +1742,9 @@ static int
 sv_histsize (value)
      const char *value;
 {
-  int nval = 500;
+  int nval;
 
+  nval = 500;
   if (value && *value)
     {
       nval = atoi (value);
@@ -1765,6 +1768,23 @@ sv_keymap (value)
       return 0;
     }
   return 1;
+}
+
+static int
+sv_seqtimeout (value)
+     const char *value;
+{
+  int nval;
+
+  nval = 0;
+  if (value && *value)
+    {
+      nval = atoi (value);
+      if (nval < 0)
+	nval = 0;
+    }
+  _rl_keyseq_timeout = nval;
+  return 0;
 }
 
 static int
@@ -2387,6 +2407,11 @@ _rl_get_string_variable_value (name)
       if (ret == 0)
 	ret = rl_get_keymap_name_from_edit_mode ();
       return (ret ? ret : "none");
+    }
+  else if (_rl_stricmp (name, "keyseq-timeout") == 0)
+    {
+      sprintf (numbuf, "%d", _rl_keyseq_timeout);    
+      return (numbuf);
     }
   else
     return (0);

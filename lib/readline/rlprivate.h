@@ -198,7 +198,7 @@ extern int rl_blink_matching_paren;
 
 /*************************************************************************
  *									 *
- * Global functions and variables unsed and undocumented		 *
+ * Global functions and variables unused and undocumented		 *
  *									 *
  *************************************************************************/
 
@@ -372,6 +372,7 @@ extern int _rl_set_mark_at_pos PARAMS((int));
 /* undo.c */
 extern UNDO_LIST *_rl_copy_undo_entry PARAMS((UNDO_LIST *));
 extern UNDO_LIST *_rl_copy_undo_list PARAMS((UNDO_LIST *));
+extern void _rl_free_undo_list PARAMS((UNDO_LIST *));
 
 /* util.c */
 #if defined (USE_VARARGS) && defined (PREFER_STDARG)
@@ -477,6 +478,7 @@ extern int _rl_last_command_was_kill;
 extern int _rl_eof_char;
 extern procenv_t _rl_top_level;
 extern _rl_keyseq_cxt *_rl_kscxt;
+extern int _rl_keyseq_timeout;
 
 extern int _rl_executing_keyseq_size;
 

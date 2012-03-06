@@ -575,6 +575,20 @@ equivalent to @code{emacs-standard}.  The default value is @code{emacs}.
 The value of the @code{editing-mode} variable also affects the
 default keymap.
 
+@item keyseq-timeout
+Specifies the duration Readline will wait for a character when reading an
+ambiguous key sequence (one that can form a complete key sequence using
+the input read so far, or can take additional input to complete a longer
+key sequence).
+If no input is received within the timeout, Readline will use the shorter
+but complete key sequence.
+The value is specified in milliseconds, so a value of 1000 means that
+Readline will wait one second for additional input.
+If this variable is set to a value less than or equal to zero, or to a
+non-numeric value, Readline will wait until another key is pressed to
+decide which key sequence to complete.
+The default value is @code{500}.
+
 @item mark-directories
 If set to @samp{on}, completed directory names have a slash
 appended.  The default is @samp{on}.

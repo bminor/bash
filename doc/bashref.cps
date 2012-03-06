@@ -13,10 +13,10 @@
 \entry {builtin}{3}
 \initial {C}
 \entry {command editing}{98}
-\entry {command execution}{32}
+\entry {command execution}{33}
 \entry {command expansion}{32}
 \entry {command history}{129}
-\entry {command search}{32}
+\entry {command search}{33}
 \entry {command substitution}{25}
 \entry {command timing}{8}
 \entry {commands, compound}{9}

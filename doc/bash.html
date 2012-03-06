@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2011 December 24<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2012 January 29<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -42,7 +42,7 @@ bash - GNU Bourne-Again SHell
 <H3>COPYRIGHT</H3>
 
 
-Bash is Copyright &#169; 1989-2011 by the Free Software Foundation, Inc.
+Bash is Copyright &#169; 1989-2012 by the Free Software Foundation, Inc.
 <A NAME="lbAE">&nbsp;</A>
 <H3>DESCRIPTION</H3>
 
@@ -4312,8 +4312,13 @@ may be
 <I>redirected</I>
 
 using a special notation interpreted by the shell.
-Redirection may also be used to open and close files for the
-current shell execution environment.  The following redirection
+Redirection allows commands' file handles to be
+duplicated, opened, closed,
+made to refer to different files,
+and can change the files the command reads from and writes to.
+Redirection may also be used to modify file handles in the
+current shell execution environment.
+The following redirection
 operators may precede or appear anywhere within a
 <I>simple command</I>
 
@@ -5189,7 +5194,8 @@ Otherwise, numbers take the form [<I>base#</I>]n, where the optional <I>base</I>
 is a decimal number between 2 and 64 representing the arithmetic
 base, and <I>n</I> is a number in that base.
 If <I>base#</I> is omitted, then base 10 is used.
-The digits greater than 9 are represented by the lowercase letters,
+When specifying <I>n</I>,
+the digits greater&lt; than 9 are represented by the lowercase letters,
 the uppercase letters, @, and _, in that order.
 If <I>base</I> is less than or equal to 36, lowercase and uppercase
 letters may be used interchangeably to represent numbers between 10
@@ -6676,6 +6682,13 @@ If set to <B>audible</B>, readline attempts to ring the terminal's bell.
 If set to <B>On</B>, readline attempts to bind the control characters
 treated specially by the kernel's terminal driver to their readline
 equivalents.
+<DT><B>colored-stats (Off)</B>
+
+<DD>
+If set to <B>On</B>, readline displays possible completions using different
+colors to indicate their file type.     
+The color definitions are taken from the value of the <B>LS_COLORS</B>
+environment variable.
 <DT><B>comment-begin (``#'')</B>
 
 <DD>
@@ -11552,23 +11565,24 @@ If set,
 <B>bash</B>
 
 changes its behavior to that of version 3.1 with respect to quoted
-arguments to the <B>[[</B> conditional command's <B>=~</B> operator.
+arguments to the <B>[[</B> conditional command's <B>=~</B> operator
+and locale-specific string comparison when using the <B>[[</B>
+conditional command's <B>&lt;</B> and <B>&gt;</B> operators.
+Bash versions prior to bash-4.1 use ASCII collation and
+<I>strcmp</I>(3);
+
+bash-4.1 and later use the current locale's collation sequence and
+<I>strcoll</I>(3).
+
 <DT><B>compat32</B>
 
 <DD>
 If set,
 <B>bash</B>
 
-changes its behavior to that of version 3.2 with respect to locale-specific
-string comparison when using the <B>[[</B>
-conditional command's <B>&lt;</B> and <B>&gt;</B> operators.
-Bash versions prior to bash-4.1 use ASCII collation and
-<I>strcmp</I>(3);
-
-bash-4.1 and later
-use the current locale's collation sequence and
-<I>strcoll</I>(3).
-
+changes its behavior to that of version 3.2 with respect to
+locale-specific string comparison when using the <B>[[</B>
+conditional command's <B>&lt;</B> and <B>&gt;</B> operators (see previous item).
 <DT><B>compat40</B>
 
 <DD>
@@ -11577,8 +11591,11 @@ If set,
 
 changes its behavior to that of version 4.0 with respect to locale-specific
 string comparison when using the <B>[[</B>
-conditional command's <B>&lt;</B> and <B>&gt;</B> operators (see previous item)
+conditional command's <B>&lt;</B> and <B>&gt;</B> operators (see description of
+<B>compat31</B>)
 and the effect of interrupting a command list.
+Bash versions 4.0 and later interrupt the list as if the shell received the
+interrupt; previous versions continue with the next command in the list.
 <DT><B>compat41</B>
 
 <DD>
@@ -12899,7 +12916,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.2<TH ALIGN=CENTER width=33%>2011 December 24<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.2<TH ALIGN=CENTER width=33%>2012 January 29<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13005,6 +13022,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 29 December 2011 15:07:27 EST
+Time: 30 January 2012 10:38:37 EST
 </BODY>
 </HTML>

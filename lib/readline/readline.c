@@ -248,6 +248,10 @@ int rl_executing_key;
 char *rl_executing_keyseq = 0;
 int _rl_executing_keyseq_size = 0;
 
+/* Timeout (specified in milliseconds) when reading characters making up an
+   ambiguous multiple-key sequence */
+int _rl_keyseq_timeout = 500;
+
 #define RESIZE_KEYSEQ_BUFFER() \
   do \
     { \
@@ -890,13 +894,17 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	    }
 #endif
 
-#ifdef NOTYET
 	  /* Tentative inter-character timeout for potential multi-key
 	     sequences?  If no input within timeout, abort sequence and
 	     act as if we got non-matching input. */
-	  if (_rl_input_queued (500000) == 0)
+	  /* _rl_keyseq_timeout specified in milliseconds; _rl_input_queued
+	     takes microseconds, so multiply by 1000 */
+	  if (_rl_keyseq_timeout > 0 &&
+	  	(RL_ISSTATE (RL_STATE_INPUTPENDING|RL_STATE_MACROINPUT) == 0) &&
+	  	_rl_pushed_input_available () == 0 &&
+		_rl_dispatching_keymap[ANYOTHERKEY].function &&
+		_rl_input_queued (_rl_keyseq_timeout*1000) == 0)
 	    return (_rl_subseq_result (-2, map, key, got_subseq));
-#endif
 
 	  newkey = _rl_subseq_getchar (key);
 	  if (newkey < 0)

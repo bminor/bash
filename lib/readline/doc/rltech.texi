@@ -7,7 +7,7 @@ This document describes the GNU Readline Library, a utility for aiding
 in the consistency of user interface across discrete programs that need
 to provide a command line interface.
 
-Copyright (C) 1988--2011 Free Software Foundation, Inc.
+Copyright (C) 1988--2012 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -29,7 +29,7 @@ Permission is granted to copy and distribute translations of this manual
 into another language, under the above conditions for modified versions,
 except that this permission notice may be stated in a translation approved
 by the Foundation.
-@end ifinfo
+end ifinfo
 
 @node Programming with GNU Readline
 @chapter Programming with GNU Readline
@@ -1252,6 +1252,13 @@ uses those capabilities to move around the screen line and perform other
 terminal-specific operations, like erasing a line.  Readline does not
 use all of a terminal's capabilities, and this function will return
 values for only those capabilities Readline uses.
+@end deftypefun
+
+@deftypefun {void} rl_clear_history (void)
+Clear the history list by deleting all of the entries, in the same manner
+as the History library's @code{clear_history()} function.
+This differs from @code{clear_history} because it frees private data
+Readline saves in the history list.
 @end deftypefun
 
 @node Alternate Interface

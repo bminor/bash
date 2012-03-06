@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sun Jan 29 21:16:46 EST 2012
+.\"	Last Change: Sat Feb  4 17:32:13 EST 2012
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2012 January 29" "GNU Bash 4.2"
+.TH BASH 1 "2012 February 4" "GNU Bash 4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -5282,6 +5282,19 @@ equivalent to \fIemacs\-standard\fP.  The default value is
 the value of
 .B editing\-mode
 also affects the default keymap.
+.TP
+.B keyseq\-timeout (500)
+Specifies the duration \fIreadline\fP will wait for a character when reading an
+ambiguous key sequence (one that can form a complete key sequence using
+the input read so far, or can take additional input to complete a longer
+key sequence).
+If no input is received within the timeout, \fIreadline\fP will use the shorter
+but complete key sequence.
+The value is specified in milliseconds, so a value of 1000 means that
+\fIreadline\fP will wait one second for additional input.
+If this variable is set to a value less than or equal to zero, or to a
+non-numeric value, \fIreadline\fP will wait until another key is pressed to
+decide which key sequence to complete.
 .TP
 .B mark\-directories (On)
 If set to \fBOn\fP, completed directory names have a slash

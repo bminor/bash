@@ -6,7 +6,7 @@
 /*								    */
 /* **************************************************************** */
 
-/* Copyright (C) 1987-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -349,6 +349,19 @@ _rl_isearch_dispatch (cxt, c)
      incremental search, so we check */
   if (c >= 0 && cxt->keymap[c].type == ISKMAP && strchr (cxt->search_terminators, cxt->lastc) == 0)
     {
+      /* _rl_keyseq_timeout specified in milliseconds; _rl_input_queued
+	 takes microseconds, so multiply by 1000.  If we don't get any
+	 additional input and we this keymap shadows another function, process
+	 that key as if it was all we read. */
+      if (_rl_keyseq_timeout > 0 &&
+	    RL_ISSTATE (RL_STATE_CALLBACK) == 0 &&
+	    RL_ISSTATE (RL_STATE_INPUTPENDING) == 0 &&
+	    _rl_pushed_input_available () == 0 &&
+	    ((Keymap)(cxt->keymap[c].function))[ANYOTHERKEY].function &&
+	    _rl_input_queued (_rl_keyseq_timeout*1000) == 0)
+	goto add_character;
+
+      cxt->okeymap = cxt->keymap;
       cxt->keymap = FUNCTION_TO_KEYMAP (cxt->keymap, c);
       cxt->sflags |= SF_CHGKMAP;
       /* XXX - we should probably save this sequence, so we can do
@@ -370,6 +383,8 @@ _rl_isearch_dispatch (cxt, c)
 #endif
       return 1;
     }
+
+add_character:
 
   /* Translate the keys we do something with to opcodes. */
   if (c >= 0 && cxt->keymap[c].type == ISFUNC)
@@ -415,8 +430,7 @@ _rl_isearch_dispatch (cxt, c)
 	 character and the current character into the search string. */
       else if (cxt->lastc > 0 && cxt->prevc > 0 &&
 	       cxt->keymap[cxt->prevc].type == ISKMAP &&
-	       cxt->okeymap[cxt->lastc].type == ISFUNC &&
-	       (cxt->okeymap[cxt->lastc].function == rl_insert || cxt->okeymap[cxt->lastc].function == 0))
+	       (f == 0 || f == rl_insert))
 	{
 	  /* Make lastc be the next character read */
 	  /* XXX - do we insert everything in cxt->mb? */
@@ -437,6 +451,13 @@ _rl_isearch_dispatch (cxt, c)
 	    }
 #endif
 	  cxt->prevc = 0;	  
+	}
+      else if (cxt->lastc > 0 && cxt->prevc > 0 && f && f != rl_insert)
+	{
+	  rl_stuff_char (cxt->lastc);
+	  rl_execute_next (cxt->prevc);
+	  /* XXX - do we insert everything in cxt->pmb? */
+	  return (0);
 	}
     }
 

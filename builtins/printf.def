@@ -256,6 +256,8 @@ printf_builtin (list)
 #endif
 	    {
 	      vflag = 1;
+	      if (vbsize == 0)
+		vbuf = xmalloc (vbsize = 16);
 	      vblen = 0;
 	      if (vbuf)
 		vbuf[0] = 0;
@@ -687,11 +689,7 @@ printstr (fmt, string, len, fieldwidth, precision)
   int fw, pr;			/* fieldwidth and precision */
   intmax_t mfw, mpr;
 
-#if 0
-  if (string == 0 || *string == '\0')
-#else
   if (string == 0 || len == 0)
-#endif
     return 0;
 
 #if 0

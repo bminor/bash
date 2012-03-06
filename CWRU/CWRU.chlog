@@ -12206,7 +12206,7 @@ bashline.c
 
 doc/{bash.1,bashref.texi},lib/readline/doc/{hsuser,rluser}.texi
 	- minor editorial changes inspired by suggestions from
-	  <rogerx.oss@gmail.com>
+	  Roger Zauner <rogerx.oss@gmail.com>
 
 				   9/20
 				   ----
@@ -13209,3 +13209,104 @@ doc/{bash.1,bashref.texi}
 	- small modification to the section describing base#n to make it
 	  clearer that n can be denoted using non-numerics.  From a posting
 	  by Linda Walsh <bash@tlinx.org>
+
+				    2/2
+				    ---
+builtins/printf.def
+	- printf_builtin: make sure vbuf is intialized and non-null when -v
+	  is supplied, since other parts of the code assume that it's not
+	  null (e.g., bind_printf_variable()).  Fixes bug reported by Jim
+	  Avera <james_avera@yahoo.com>
+
+				    2/4
+				    ---
+lib/readline/undo.c
+	- _rl_free_undo_list: new function, old body of rl_free_undo_list,
+	  frees undo entries in UNDO_LIST * passed as argument
+	- rl_free_undo_list: call _rl_free_undo_list
+
+lib/readline/rlprivate.h
+	- _rl_free_undo_list: new extern declaration
+	- _rl_keyseq_timeout: new extern declaration (see below)
+
+lib/readline/misc.c
+	- rl_clear_history: new function.  Clears the history list and frees
+	  all associated data similar to history.c:clear_history(), but
+	  takes rl_undo_list into account and frees and UNDO_LISTs saved as
+	  `data' members of a history list entry
+
+lib/readline/doc/rltech.texi
+	- rl_clear_history: documented
+
+lib/readline/readline.c
+	- _rl_keyseq_timeout: new variable to hold intra-key timeout value
+	  from 1/21 fix; specified in milliseconds.  Default value is 500
+	- _rl_dispatch_subseq: change to use _rl_keyseq_timeout as intra-key
+	  timeout if it's greater than 0; no timeout if <= 0
+	- _rl_dispatch_subseq: don't check for queued keyboard input if we have
+	  pushed or pending input, or if we're reading input from a macro
+
+lib/readline/bind.c
+	- keyseq-timeout: new bindable variable, shadows _rl_keyseq_timeout
+	- string_varlist: add keyseq-timeout
+	- sv_seqtimeout: new function to modify value of _rl_keyseq_timeout;
+	  clamps negative values at 0 for now
+	- _rl_get_string_variable_value: return value for keyseq-timeout
+
+doc/bash.1,lib/readline/doc/{rluser.texi,readline.3}
+	- keyseq-timeout: documented
+
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: modification to fix from 7/18 to not use
+	  cxt->keymap and cxt->okeymap, since by the time this code is
+	  executed, they are equal.  Use `f' to check for rl_insert or
+	  unbound func
+	- _rl_isearch_dispatch: if we're switching keymaps, not in
+	  callback mode, and don't have pending or pushed input, use
+	  _rl_input_queued to resolve a potentially ambiguous key sequence.
+	  Suggested by Roger Zauner <rogerx.oss@gmail.com>
+	- _rl_isearch_dispatch: if we have changed keymaps and resolved to
+	  an editing function (not self-insert), make sure we stuff the
+	  right characters back onto the input after changing the keymap
+	  back so the right editing function is executed after the search
+	  is terminated.  Rest of fix for bug reported by Roger Zauner
+	  <rogerx.oss@gmail.com>
+
+				    2/5
+				    ---
+builtins/gen-helpfiles.c
+	- new file: reads struct builtin and writes the long docs to files
+	  in the `helpdirs' subdirectory.  The filename is given in the
+	  previously-unused `handle' member of the struct builtin.  Links
+	  with `tmpbuiltins.o', which is created by Makefile to have the
+	  right long documentation.  When not cross-compiling, gets the
+	  right #defines based on configuration options from config.h instead
+	  of trying to parse conditional parts of def files.  Fixes
+	  shortcoming pointed out by Andreas Schwab <schwab@linux-m68k.org>
+
+builtins/Makefile.in
+	- tmpbuiltins.c: new generated file, created to enable creation of
+	  separate helpfiles based on correct #defines instead of trying to
+	  parse conditional parts of def files
+	- gen-helpfiles: new program to generate helpfiles, links with
+	  tmpbuiltins.o
+	- HELPFILES_TARGET: new target, substituted by configure to `helpdoc'
+	  if separate helpfiles requested
+	- targets: new target, libbuiltins.a and $(HELPFILES_TARGET)
+	- CREATED_OBJECTS: new variable, holds created object files for
+	  make clean; changed make clean to remove created objects
+	- helpdoc: changed to call gen-helpfiles instead of mkbuiltins
+
+Makefile.in
+	- when building libbuiltins.a, recursively call make with `targets'
+	  argument to make sure separate helpfiles get built
+
+configure.in
+	- substitute `helpdoc' as value of HELPFILES_TARGET if
+	  --enable-separate-helpfiles supplied as configure argument
+
+builtins/mkbuiltins.c
+	- `-nofunctions': new argument, causes mkbuiltins to not write value
+	  for function implementing a particular builtin to struct builtin
+	  and to write document file name to `handle' member of struct builtin
+	- no longer writes separate helpfiles; that is left to gen-helpfiles

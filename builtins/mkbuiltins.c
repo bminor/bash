@@ -85,6 +85,10 @@ int only_documentation = 0;
 /* Non-zero means to not do any productions. */
 int inhibit_production = 0;
 
+/* Non-zero means to not add functions (xxx_builtin) to the members of the
+   produced `struct builtin []' */
+int inhibit_functions = 0;
+
 /* Non-zero means to produce separate help files for each builtin, named by
    the builtin name, in `./helpfiles'. */
 int separate_helpfiles = 0;
@@ -222,6 +226,8 @@ main (argc, argv)
 	struct_filename = argv[arg_index++];
       else if (strcmp (arg, "-noproduction") == 0)
 	inhibit_production = 1;
+      else if (strcmp (arg, "-nofunctions") == 0)
+	inhibit_functions = 1;
       else if (strcmp (arg, "-document") == 0)
 	documentation_file = fopen (documentation_filename, "w");
       else if (strcmp (arg, "-D") == 0)
@@ -322,10 +328,13 @@ main (argc, argv)
 	fclose (externfile);
     }
 
+#if 0
+  /* This is now done by a different program */
   if (separate_helpfiles)
     {
       write_helpfiles (saved_builtins);
     }
+#endif
 
   if (documentation_file)
     {
@@ -1225,7 +1234,7 @@ write_builtins (defs, structfile, externfile)
 		{
 		  fprintf (structfile, "  { \"%s\", ", builtin->name);
 
-		  if (builtin->function)
+		  if (builtin->function && inhibit_functions == 0)
 		    fprintf (structfile, "%s, ", builtin->function);
 		  else
 		    fprintf (structfile, "(sh_builtin_func_t *)0x0, ");
@@ -1237,9 +1246,15 @@ write_builtins (defs, structfile, externfile)
 		    (builtin->flags & BUILTIN_FLAG_POSIX_BUILTIN) ? " | POSIX_BUILTIN" : "",
 		    document_name (builtin));
 
-		  fprintf
-		    (structfile, "     N_(\"%s\"), (char *)NULL },\n",
-		     builtin->shortdoc ? builtin->shortdoc : builtin->name);
+		  if (inhibit_functions)
+		    fprintf
+		      (structfile, "     N_(\"%s\"), \"%s\" },\n",
+		       builtin->shortdoc ? builtin->shortdoc : builtin->name,
+		       document_name (builtin));
+		  else
+		    fprintf
+		      (structfile, "     N_(\"%s\"), (char *)NULL },\n",
+		       builtin->shortdoc ? builtin->shortdoc : builtin->name);
 
 		}
 
@@ -1306,6 +1321,26 @@ write_longdocs (stream, builtins)
       if (builtin->dependencies)
 	write_endifs (stream, builtin->dependencies->array);
 
+    }
+}
+
+void
+write_dummy_declarations (stream, builtins)
+     FILE *stream;
+     ARRAY *builtins;
+{
+  register int i;
+  BUILTIN_DESC *builtin;
+
+  for (i = 0; structfile_header[i]; i++)
+    fprintf (stream, "%s\n", structfile_header[i]);
+
+  for (i = 0; i < builtins->sindex; i++)
+    {
+      builtin = (BUILTIN_DESC *)builtins->array[i];
+
+      /* How to guarantee that no builtin is written more than once? */
+      fprintf (stream, "int %s () { return (0); }\n", builtin->function);
     }
 }
 
