@@ -5392,7 +5392,7 @@ command_substitute (string, quoted)
       /* Give command substitution a place to jump back to on failure,
 	 so we don't go back up to main (). */
       result = setjmp (top_level);
-
+itrace("command_substitute: %s", string);
       /* If we're running a command substitution inside a shell function,
 	 trap `return' so we don't return from the function in the subshell
 	 and go off to never-never land. */

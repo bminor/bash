@@ -326,6 +326,7 @@ find_or_make_array_variable (name, flags)
     }
   else if ((flags & 2) && array_p (var))
     {
+      last_command_exit_value = 1;
       report_error (_("%s: cannot convert indexed to associative array"), name);
       return ((SHELL_VAR *)NULL);
     }
@@ -507,6 +508,7 @@ assign_compound_array_list (var, nlist, flags)
 
 	  if (ALL_ELEMENT_SUB (w[1]) && len == 2)
 	    {
+	      last_command_exit_value = 1;
 	      if (assoc_p (var))
 		report_error (_("%s: invalid associative array key"), w);
 	      else
@@ -551,6 +553,7 @@ assign_compound_array_list (var, nlist, flags)
 	}
       else if (assoc_p (var))
 	{
+	  last_command_exit_value = 1;
 	  report_error (_("%s: %s: must use subscript when assigning associative array"), var->name, w);
 	  continue;
 	}

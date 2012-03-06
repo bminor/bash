@@ -98,9 +98,13 @@ trap: usage: trap [-lp] [[arg] signal_spec ...]
 ./errors.tests: line 250: kill: `': not a pid or valid job spec
 kill: usage: kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]
 ./errors.tests: line 255: set: trackall: invalid option name
+./errors.tests: line 259: xx: readonly variable
+1
 ./errors1.sub: line 1: .: -i: invalid option
 .: usage: . filename [arguments]
 ./errors1.sub: line 9: shift: -4: shift count out of range
 ./errors1.sub: line 14: break: -1: loop count out of range
 after f
-./errors.tests: line 264: `!!': not a valid identifier
+./errors2.sub: line 3: ${$NO_SUCH_VAR}: bad substitution
+1
+./errors.tests: line 270: `!!': not a valid identifier

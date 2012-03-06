@@ -4670,10 +4670,17 @@ got_token:
 		    last_read_token == GREATER_AND))
       {
 	if (legal_number (token, &lvalue) && (int)lvalue == lvalue)
+#if 0
+	  yylval.number = lvalue;
+	else
+	  yylval.number = -1;
+	return (NUMBER);
+#else
 	  {
 	    yylval.number = lvalue;
 	    return (NUMBER);
 	  }
+#endif
       }
 
   /* Check for special case tokens. */

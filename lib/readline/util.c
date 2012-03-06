@@ -533,6 +533,9 @@ _rl_settracefp (fp)
 
 
 #if HAVE_DECL_AUDIT_USER_TTY && defined (ENABLE_TTY_AUDIT_SUPPORT)
+#include <sys/socket.h>
+#include <linux/audit.h>
+#include <linux/netlink.h>
 
 /* Report STRING to the audit system. */
 void

@@ -84,6 +84,13 @@ stub_charset ()
 }
 #endif
 
+void
+u32reset ()
+{
+  u32init = 0;
+  utf8locale = 0;
+}
+
 /* u32toascii ? */
 int
 u32tochar (wc, s)
@@ -114,28 +121,61 @@ u32tochar (wc, s)
   return l;  
 }
 
+/* Convert unsigned 32-bit int to utf-8 character string */
 int
 u32toutf8 (wc, s)
-     wchar_t wc;
+     u_bits32_t wc;
      char *s;
 {
   int l;
 
-  l = (wc < 0x0080) ? 1 : ((wc < 0x0800) ? 2 : 3);
-
   if (wc < 0x0080)
-    s[0] = (unsigned char)wc;
+    {
+      s[0] = (char)wc;
+      l = 1;
+    }
   else if (wc < 0x0800)
     {
       s[0] = (wc >> 6) | 0xc0;
       s[1] = (wc & 0x3f) | 0x80;
+      l = 2;
     }
-  else
+  else if (wc < 0x10000)
     {
       s[0] = (wc >> 12) | 0xe0;
       s[1] = ((wc >> 6) & 0x3f) | 0x80;
       s[2] = (wc & 0x3f) | 0x80;
+      l = 3;
     }
+  else if (wc < 0x200000)
+    {
+      s[0] = (wc >> 18) | 0xf0;
+      s[1] = ((wc >> 12) & 0x3f) | 0x80;
+      s[2] = ((wc >>  6) & 0x3f) | 0x80;
+      s[3] = (wc & 0x3f) | 0x80;
+      l = 4;
+    }
+  /* Strictly speaking, UTF-8 doesn't have characters longer than 4 bytes */
+  else if (wc < 0x04000000)
+    {
+      s[0] = (wc >> 24) | 0xf8;
+      s[1] = ((wc >> 18) & 0x3f) | 0x80;
+      s[2] = ((wc >> 12) & 0x3f) | 0x80;
+      s[3] = ((wc >>  6) & 0x3f) | 0x80;
+      s[4] = (wc & 0x3f) | 0x80;
+      l = 5;
+    }
+  else
+    {
+      s[0] = (wc >> 30) | 0xf8;
+      s[1] = ((wc >> 24) & 0x3f) | 0x80;
+      s[2] = ((wc >> 18) & 0x3f) | 0x80;
+      s[3] = ((wc >> 12) & 0x3f) | 0x80;
+      s[4] = ((wc >>  6) & 0x3f) | 0x80;
+      s[5] = (wc & 0x3f) | 0x80;
+      l = 6;
+    }
+
   s[l] = '\0';
   return l;
 }
@@ -171,7 +211,7 @@ u32cconv (c, s)
   codeset = nl_langinfo (CODESET);
   if (STREQ (codeset, "UTF-8"))
     {
-      n = u32toutf8 (wc, s);
+      n = u32toutf8 (c, s);
       return n;
     }
 #endif
@@ -198,7 +238,7 @@ u32cconv (c, s)
 
   if (utf8locale)
     {
-      n = u32toutf8 (wc, s);
+      n = u32toutf8 (c, s);
       return n;
     }
 
@@ -208,7 +248,7 @@ u32cconv (c, s)
       return n;
     }
 
-  n = u32toutf8 (wc, s);
+  n = u32toutf8 (c, s);
 
   optr = obuf;
   obytesleft = sizeof (obuf);

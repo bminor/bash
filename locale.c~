@@ -103,7 +103,6 @@ set_default_locale_vars ()
       setlocale (LC_CTYPE, lc_all);
       locale_setblanks ();
       locale_mb_cur_max = MB_CUR_MAX;
-      u32reset ();
     }
 #  endif
 
@@ -207,7 +206,6 @@ set_locale_var (var, value)
 	}
       locale_setblanks ();
       locale_mb_cur_max = MB_CUR_MAX;
-      u32reset ();
       return r;
 #else
       return (1);
@@ -223,7 +221,6 @@ set_locale_var (var, value)
 	  x = setlocale (LC_CTYPE, get_locale_var ("LC_CTYPE"));
 	  locale_setblanks ();
 	  locale_mb_cur_max = MB_CUR_MAX;
-	  u32reset ();
 	}
 #  endif
     }
@@ -356,7 +353,6 @@ reset_locale_vars ()
 
   locale_setblanks ();  
   locale_mb_cur_max = MB_CUR_MAX;
-  u32reset ();
 
 #endif
   return 1;

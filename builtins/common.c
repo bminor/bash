@@ -628,7 +628,7 @@ get_job_by_name (name, flags)
 	      if (this_shell_builtin)
 	        builtin_error (_("%s: ambiguous job spec"), name);
 	      else
-	        report_error (_("%s: ambiguous job spec"), name);
+	        internal_error (_("%s: ambiguous job spec"), name);
 	      return (DUP_JOB);
 	    }
 	  else

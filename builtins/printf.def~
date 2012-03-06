@@ -870,7 +870,7 @@ tescape (estart, cp, lenp, sawc)
 	    *cp = '\\';
 	    return 0;
 	  }
-	if (uvalue <= 0x7f)		/* <= 0x7f translates directly */
+	if (uvalue <= UCHAR_MAX)
 	  *cp = uvalue;
 	else
 	  {

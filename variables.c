@@ -87,6 +87,7 @@ extern int line_number, line_number_base;
 extern int subshell_environment, indirection_level, subshell_level;
 extern int build_version, patch_level;
 extern int expanding_redir;
+extern int last_command_exit_value;
 extern char *dist_version, *release_status;
 extern char *shell_name;
 extern char *primary_prompt, *secondary_prompt;
@@ -360,7 +361,10 @@ initialize_shell_variables (env, privmode)
 	      array_needs_making = 1;
 	    }
 	  else
-	    report_error (_("error importing function definition for `%s'"), name);
+	    {
+	      last_command_exit_value = 1;
+	      report_error (_("error importing function definition for `%s'"), name);
+	    }
 
 	  /* ( */
 	  if (name[char_index - 1] == ')' && name[char_index - 2] == '\0')

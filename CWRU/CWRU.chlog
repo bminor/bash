@@ -13333,3 +13333,65 @@ builtins/declare.def
 	  assignment like declare a[b]=c.  Fixes seg fault resulting from
 	  a being an already-declared local associative array variable in a
 	  function.  Ubuntu bash bug 928900.
+
+				   2/14
+				   ----
+
+execute_cmd.c
+	- execute_command_internal: if redirections into or out of a loop fail,
+	  don't try to free ofifo_list unless saved_fifo is non-zero.  It's
+	  only valid if saved_fifo is set
+
+				   2/15
+				   ----
+{arrayfunc,braces,variables}.c
+	- last_command_exit_value: make sure it's set before any calls to
+	  report_error, since -e will cause that to exit the shell
+
+builtins/common.c
+	- get_job_by_name: call internal_error instead of report_error so this
+	  doesn't exit the shell
+
+				   2/18
+				   ----
+builtins/evalstring.c
+	- parse_and_execute: make sure the file descriptor to be redirected to
+	  is 1 before calling cat_file.  One fix for bug reported by Dan Douglas
+	  <ormaaj@gmail.com>
+
+parse.y
+	- read_token_word: don't return NUMBER if a string of all digits
+	  resolves to a number that overflows the bounds of an intmax_t.
+	  Other fix for bug reported by Dan Douglas <ormaaj@gmail.com>
+
+				   2/19
+				   ----
+lib/sh/strtrans.c
+	- ansicstr: use 0x7f as the boundary for characters that translate
+	  directly from ASCII to unicode (\u and \U escapes) instead of
+	  UCHAR_MAX, since everything >= 0x80 requires more than one byte.
+	  Bug and fix from John Kearney <dethrophes@web.de>
+
+builtins/printf.def
+	- tescape: ditto for printf \u and \U escape sequences
+
+				   2/20
+				   ----
+lib/sh/unicode.c
+	- u32toutf8: fix to handle encodings up to six bytes long correctly
+	  (though technically UTF-8 only has characters up to 4 bytes long).
+	  Report and fix from John Kearney <dethrophes@web.de>
+	- u32toutf8: first argument is now an unsigned 32-bit quantity,
+	  changed callers (u32cconv) to pass c instead of wc
+	- u32reset: new function, resets local static state to uninitialized
+	  (locale information, currently)
+
+lib/sh/strtrans.c
+	- ansicstr: allocate a new string 6 times longer than the original
+	  if the \U escape sequence appears, to accommodate UTF-8 chars
+	  of maximum theoretical length
+
+locale.c
+	- call u32reset whenever LC_CTYPE/LC_ALL/LANG is changed to reset the
+	  cached locale information used by u32cconv.  From a report from
+	  John Kearney <dethrophes@web.de>
