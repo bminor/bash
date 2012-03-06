@@ -327,7 +327,7 @@ extern void print_var_function __P((SHELL_VAR *));
 
 #if defined (ARRAY_VARS)
 extern SHELL_VAR *make_new_array_variable __P((char *));
-extern SHELL_VAR *make_local_array_variable __P((char *));
+extern SHELL_VAR *make_local_array_variable __P((char *, int));
 
 extern SHELL_VAR *make_new_assoc_variable __P((char *));
 extern SHELL_VAR *make_local_assoc_variable __P((char *));

@@ -1331,8 +1331,8 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
     {
       if (no_longjmp_on_fatal_error == 0)
 	{
-	  report_error (_("bad substitution: no closing `%s' in %s"), closer, string);
 	  last_command_exit_value = EXECUTION_FAILURE;
+	  report_error (_("bad substitution: no closing `%s' in %s"), closer, string);
 	  exp_jump_to_top_level (DISCARD);
 	}
       else
@@ -1502,8 +1502,8 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
     {
       if (no_longjmp_on_fatal_error == 0)
 	{			/* { */
-	  report_error (_("bad substitution: no closing `%s' in %s"), "}", string);
 	  last_command_exit_value = EXECUTION_FAILURE;
+	  report_error (_("bad substitution: no closing `%s' in %s"), "}", string);
 	  exp_jump_to_top_level (DISCARD);
 	}
       else
@@ -2710,7 +2710,7 @@ do_compound_assignment (name, value, flags)
       if (mkassoc)
 	v = make_local_assoc_variable (name);
       else if (v == 0 || (array_p (v) == 0 && assoc_p (v) == 0) || v->context != variable_context)
-        v = make_local_array_variable (name);
+        v = make_local_array_variable (name, 0);
       assign_compound_array_list (v, list, flags);
     }
   else
@@ -5862,6 +5862,7 @@ parameter_brace_expand_error (name, value)
   WORD_LIST *l;
   char *temp;
 
+  last_command_exit_value = EXECUTION_FAILURE;	/* ensure it's non-zero */
   if (value && *value)
     {
       l = expand_string (value, 0);
@@ -7280,6 +7281,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
     default:
     case '\0':
     bad_substitution:
+      last_command_exit_value = EXECUTION_FAILURE;
       report_error (_("%s: bad substitution"), string ? string : "??");
       FREE (value);
       FREE (temp);
@@ -7356,6 +7358,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 	  temp = (char *)NULL;
 	  if (c == '=' && var_is_special)
 	    {
+	      last_command_exit_value = EXECUTION_FAILURE;
 	      report_error (_("$%s: cannot assign in this way"), name);
 	      free (name);
 	      free (value);
@@ -8159,6 +8162,7 @@ add_string:
 		    sindex = t_index;
 		    goto add_character;
 		  }
+		last_command_exit_value = EXECUTION_FAILURE;
 		report_error (_("bad substitution: no closing \"`\" in %s") , string+t_index);
 		free (string);
 		free (istring);
@@ -9049,6 +9053,7 @@ glob_expand_word_list (tlist, eflags)
 	    }
 	  else if (fail_glob_expansion != 0)
 	    {
+	      last_command_exit_value = EXECUTION_FAILURE;
 	      report_error (_("no match: %s"), tlist->word->word);
 	      exp_jump_to_top_level (DISCARD);
 	    }

@@ -2046,14 +2046,15 @@ make_new_array_variable (name)
 }
 
 SHELL_VAR *
-make_local_array_variable (name)
+make_local_array_variable (name, assoc_ok)
      char *name;
+     int assoc_ok;
 {
   SHELL_VAR *var;
   ARRAY *array;
 
   var = make_local_variable (name);
-  if (var == 0 || array_p (var))
+  if (var == 0 || array_p (var) || (assoc_ok && assoc_p (var)))
     return var;
 
   array = array_create ();

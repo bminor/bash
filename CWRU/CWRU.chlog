@@ -13310,3 +13310,26 @@ builtins/mkbuiltins.c
 	  for function implementing a particular builtin to struct builtin
 	  and to write document file name to `handle' member of struct builtin
 	- no longer writes separate helpfiles; that is left to gen-helpfiles
+
+				    2/8
+				    ---
+subst.c
+	- make sure last_command_exit_value is set to a non-zero value before
+	  any calls to report_error, since `-e' set will short-circuit
+	  report_error.  Fixes bug reported by Ewan Mellor
+	  <Ewan.Mellor@eu.citrix.com>
+
+variables.c
+	- make_local_array_variable: added second argument; if non-zero,
+	  function will return an existing local associative array variable
+	  instead of insisting on an indexed array
+
+variable.h,subst.c
+	- make_local_array_variable: changed prototype and caller
+
+builtins/declare.def
+	- declare_internal: add second arg to call to make_local_array_variable;
+	  making_array_special, which indicates we're processing an
+	  assignment like declare a[b]=c.  Fixes seg fault resulting from
+	  a being an already-declared local associative array variable in a
+	  function.  Ubuntu bash bug 928900.

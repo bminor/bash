@@ -1,0 +1,165 @@
+#!/bin/bash 
+#	@(#)	newdirstack.bsh
+
+# Date: Tue, 31 Jan 2012 16:28:52 +0100
+# Subject: A Bash source code example
+# From: Eric Sanchis <eric.sanchis@iut-rodez.fr>
+# To: chet.ramey@case.edu
+#
+# Using Bash everyday, I developped an enhanced implementation of the
+# cd/dir functions described in the Bolsky & Korn book, which
+# illustrates several specific Bash syntax elements.
+#
+# It works fine with a non empty CDPATH and cdable variables. In
+# addition, a directory name is indexed only once into the stack.
+#
+# If you find this code snippet useful, would it be possible to include
+# it into the bash-doc section of future bash packages ?
+#
+# Sincerely yours,
+#
+# Eric
+# IUT Rodez
+# University of Toulouse (France)
+
+###
+# Another implementation of the directory manipulation functions
+# published in the Bolsky & Korn book : "The new Korn shell" :
+# 	cd, to change current directory
+#	d,  to display the stack content
+# Eric Sanchis (eric.sanchis@iut-rodez.fr), 2012
+###
+
+
+shopt -s expand_aliases
+shopt -s extglob
+shopt -s cdable_vars
+
+alias integer='declare -i'
+
+	integer	MAX=32
+	integer INDMAX=MAX-1
+	integer	INDTOP=0
+
+unalias cd 2>/dev/null
+alias cd=cdir
+
+unset tab
+tab[INDTOP]="$(pwd)"
+
+
+function cdir      
+{
+	local -i ind 
+
+dir="${1:-$HOME}"
+case "$dir" in
+ - )			# cd -  => equivalent to : cd -1
+		ind=INDTOP-1
+ 		cd_by_number  $ind
+		  ;;
+ -+([[:digit:]]) )	# cd -n
+		ind=$INDTOP-${dir#-}
+		cd_by_number  $ind 
+		  ;;
+ *)			# cd ~   or    cd dir_name
+		cd_by_name  "$dir"
+esac
+}
+
+
+function  cd_by_number
+{
+	local -i  k=$1
+	local -i  j 
+	local     dirtmp
+
+if (( k < 0 ))
+ then 		
+   echo Impossible to change directory >&2
+   return 1
+ else
+   dirtmp="${tab[k]}"
+   j=k+1 
+   while (( j <= INDTOP ))
+    do
+      tab[j-1]="${tab[j]}"
+      j=j+1
+    done
+   tab[INDTOP]="$dirtmp"
+   \cd "${tab[INDTOP]}"
+fi
+}
+
+
+function cd_by_name
+{
+ 	local -i  i
+	local  rep
+
+rep=$( \cd "$1" &>/dev/null && pwd)
+if [[ -z "$rep" ]]
+  then 
+    echo cd : "$1" unknown >&2
+    return 1
+fi
+
+	i=$INDTOP 
+	while (( i >= 0 ))
+  	 do
+	   if [[ "${tab[i]}" == "$rep" ]]
+	     then  break
+	   fi
+	   i=i-1
+	 done
+
+if (( i == INDTOP ))
+  then	#  cd -0	=> we do nothing !
+     return 0	
+  elif (( i == -1 ))
+     then	# the directory isn't in the stack
+       if (( INDTOP == INDMAX ))
+         then 	# the stack is FULL
+		# the oldest directory is removed
+            local -i  m
+       
+          m=1
+	  while (( m <= INDMAX ))
+	   do
+	     tab[m-1]="${tab[m]}"
+	     m=m+1
+           done
+        else 	# the new directory is added to the top of the stack
+	  INDTOP=INDTOP+1
+      fi
+      tab[INDTOP]="$rep"
+      \cd "${tab[INDTOP]}"
+      return 0
+  
+     else # the directory is already in the stack 
+	# $i gives its index
+       cd_by_number $i
+fi
+}
+
+
+function d	# display the directory stack
+{
+	local -i  i 
+	local rep
+
+i=0
+while (( $i <= $INDTOP ))
+ do
+   rep="${tab[INDTOP-i]#$HOME/}"
+   case "$rep" in
+    $HOME)  rep="~" ;;
+    /*   )   :  ;;
+    *    )  rep="~/$rep"
+   esac
+   
+   echo "$i )		$rep"
+   i=i+1
+ done
+}
+
