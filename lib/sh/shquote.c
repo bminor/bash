@@ -226,6 +226,10 @@ sh_backslash_quote (string, table)
 	*r++ = '\\';
       else if (c == '#' && s == string)			/* comment char */
 	*r++ = '\\';
+      else if (c == '~' && (s == string || s[-1] == ':' || s[-1] == '='))
+        /* Tildes are special at the start of a word or after a `:' or `='
+	   (technically unquoted, but it doesn't make a difference in practice) */
+	*r++ = '\\';
       *r++ = c;
     }
 

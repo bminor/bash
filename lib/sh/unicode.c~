@@ -231,13 +231,20 @@ u32cconv (c, s)
 #if __STDC_ISO_10646__
   wc = c;
   if (sizeof (wchar_t) == 4 && c <= 0x7fffffff)
-    n = wctomb (s, wc);
-  else if (sizeof (wchar_t) == 2 && c <= 0x10ffff && u32toutf16 (c, ws))
-    n = wcstombs (s, ws, MB_LEN_MAX);
-  else
-    n = -1;
-  if (n != -1)
-    return n;
+    {
+      n = wctomb (s, wc);
+      if (n != -1)
+	return n;
+    }
+  else if (sizeof (wchar_t) == 2)
+    {
+      if (u32toutf16 (c, ws))
+	{
+	  n = wcstombs (s, ws, MB_LEN_MAX);
+	  if (n != -1)
+	    return n;
+	}
+    }
 #endif
 
 #if HAVE_NL_LANGINFO
@@ -269,9 +276,19 @@ u32cconv (c, s)
       u32init = 1;
     }
 
+  if (utf8locale)
+    {
+      n = u32toutf8 (c, s);
+      return n;
+    }
+
+  if (localconv == (iconv_t)-1)
+    {
+      n = u32tochar (c, s);
+      return n;
+    }
+
   n = u32toutf8 (c, s);
-  if (utf8locale || localconv == (iconv_t)-1)
-    return n;
 
   optr = obuf;
   obytesleft = sizeof (obuf);

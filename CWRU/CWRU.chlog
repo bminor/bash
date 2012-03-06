@@ -13196,6 +13196,16 @@ trap.c
 	- use BLOCK_SIGNAL/UNBLOCK_SIGNAL instead of code dependent on
 	  HAVE_POSIX_SIGNALS and BSD signals
 
+				   1/24
+				   ----
+
+print_cmd.c
+	- print_redirection_list: change the conditions under which
+	  r_duplicating_output_word is mapped to r_err_and_out to more or
+	  less match those used in redir.c.  Fixes bug pointed out by
+	  Dan Douglas <ormaaj@gmail.com>
+
+
 				   1/29
 				   ----
 lib/readline/signals.c
@@ -13386,12 +13396,58 @@ lib/sh/unicode.c
 	- u32reset: new function, resets local static state to uninitialized
 	  (locale information, currently)
 
-lib/sh/strtrans.c
-	- ansicstr: allocate a new string 6 times longer than the original
-	  if the \U escape sequence appears, to accommodate UTF-8 chars
-	  of maximum theoretical length
-
 locale.c
 	- call u32reset whenever LC_CTYPE/LC_ALL/LANG is changed to reset the
 	  cached locale information used by u32cconv.  From a report from
 	  John Kearney <dethrophes@web.de>
+
+				   2/21
+				   ----
+doc/{bash,builtins}.1
+	- minor changes from Bjarni Ingi Gislason <bjarniig@rhi.hi.is>
+
+lib/sh/unicode.c
+	- u32cconv: only assume you can directly call wctomb on the passed
+	  value if __STDC_ISO_10646__ is defined and the value is <=
+	  0x7fffffff
+	- stub_charset: return locale as default instead of "ASCII", let
+	  rest of code decide what to do with it
+
+lib/readline/parens.c
+	- _rl_enable_paren_matching: make paren matching work in vi insert
+	  mode.  Bug report from <derflob@derflob.de>
+
+				   2/22
+				   ----
+lib/sh/shquote.c
+	- sh_backslash_quote: quote tilde in places where it would be
+	  expanded.  From a report from John Kearney <dethrophes@web.de>
+
+				   2/23
+				   ----
+execute_cmd.c
+	- execute_pipeline: wrap the discard_unwind_frame call in #ifdef
+	  JOB_CONTROL, since the frame is only created if JOB_CONTROL is
+	  defined.  Bug and fix from Doug Kehn <rdkehn@yahoo.com>
+
+				   2/25
+				   ----
+error.c
+	- report_error: make sure last_command_exit_value is non-zero before
+	  we call exit_shell, since the exit trap may reference it.  Call
+	  exit_shell with last_command_exit_value to allow exit statuses
+	  other than 1
+
+unicode.c
+	- stub_charset: use local static buffer to hold charset, don't change
+	  value returned by get_locale_var.  Based on idea and code from
+	  John Kearney <dethrophes@web.de>
+	- u32toutf16: function to convert unsigned 32-bit value (unicode) to
+	  UTF-16.  From John Kearney <dethrophes@web.de>
+	- u32cconv: call u32toutf16 if __STDC_ISO_10646__ defined and wchar_t
+	  is two bytes, send result to wcstombs, return if not encoding error.
+	  From John Kearney <dethrophes@web.de>
+	- u32cconv: return UTF-8 conversion if iconv conversion to local
+	  charset is unsupported
+
+	  

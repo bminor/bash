@@ -60,10 +60,7 @@ ansicstr (string, len, flags, sawc, rlen)
     return ((char *)NULL);
 
 #if defined (HANDLE_MULTIBYTE)
-  if (strstr (string, "\\U") != 0)
-    ret = (char *)xmalloc (6*len + 1);
-  else
-    ret = (char *)xmalloc (4*len + 1);
+  ret = (char *)xmalloc (4*len + 1);
 #else
   ret = (char *)xmalloc (2*len + 1);	/* 2*len for possible CTLESC */
 #endif

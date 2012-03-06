@@ -2370,7 +2370,9 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       unfreeze_jobs_list ();
     }
 
+#if defined (JOB_CONTROL)
   discard_unwind_frame ("lastpipe-exec");
+#endif
 
   return (exec_result);
 }
