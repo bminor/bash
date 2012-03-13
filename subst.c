@@ -7274,6 +7274,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
     default:
     case '\0':
     bad_substitution:
+      last_command_exit_value = EXECUTION_FAILURE;
       report_error (_("%s: bad substitution"), string ? string : "??");
       FREE (value);
       FREE (temp);
