@@ -200,7 +200,11 @@ report_error (format, va_alist)
 
   va_end (args);
   if (exit_immediately_on_error)
-    exit_shell (1);
+    {
+      if (last_command_exit_value == 0)
+	last_command_exit_value = 1;
+      exit_shell (last_command_exit_value);
+    }
 }
 
 void
