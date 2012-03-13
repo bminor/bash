@@ -255,6 +255,8 @@ printf_builtin (list)
 #endif
 	    {
 	      vflag = 1;
+	      if (vbsize == 0)
+		vbuf = xmalloc (vbsize = 16);
 	      vblen = 0;
 	      if (vbuf)
 		vbuf[0] = 0;
