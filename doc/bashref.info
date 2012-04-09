@@ -2125,9 +2125,9 @@ arithmetic expansion, or filename expansion is performed on WORD.  If
 any characters in WORD are quoted, the DELIMITER is the result of quote
 removal on WORD, and the lines in the here-document are not expanded.
 If WORD is unquoted, all lines of the here-document are subjected to
-parameter expansion, command substitution, and arithmetic expansion.
-In the latter case, the character sequence `\newline' is ignored, and
-`\' must be used to quote the characters `\', `$', and ``'.
+parameter expansion, command substitution, and arithmetic expansion,
+the character sequence `\newline' is ignored, and `\' must be used to
+quote the characters `\', `$', and ``'.
 
    If the redirection operator is `<<-', then all leading tab
 characters are stripped from input lines and the line containing
@@ -2142,7 +2142,7 @@ A variant of here documents, the format is:
 
    The WORD undergoes brace expansion, tilde expansion, parameter and
 variable expansion, command substitution, arithmetic expansion, and
-quote removal.  Pathname expansion word splitting are not performed.
+quote removal.  Pathname expansion and word splitting are not performed.
 The result is supplied as a single string to the command on its
 standard input.
 
@@ -7004,6 +7004,20 @@ Variable Settings
           default value is `emacs'.  The value of the `editing-mode'
           variable also affects the default keymap.
 
+    `keyseq-timeout'
+          Specifies the duration Readline will wait for a character
+          when reading an ambiguous key sequence (one that can form a
+          complete key sequence using the input read so far, or can
+          take additional input to complete a longer key sequence).  If
+          no input is received within the timeout, Readline will use
+          the shorter but complete key sequence.  The value is
+          specified in milliseconds, so a value of 1000 means that
+          Readline will wait one second for additional input.  If this
+          variable is set to a value less than or equal to zero, or to a
+          non-numeric value, Readline will wait until another key is
+          pressed to decide which key sequence to complete.  The
+          default value is `500'.
+
     `mark-directories'
           If set to `on', completed directory names have a slash
           appended.  The default is `on'.
@@ -10514,13 +10528,13 @@ D.3 Parameter and Variable Index
                                                               (line  27)
 * MAPFILE:                               Bash Variables.      (line 439)
 * mark-modified-lines:                   Readline Init File Syntax.
-                                                              (line 178)
+                                                              (line 192)
 * mark-symlinked-directories:            Readline Init File Syntax.
-                                                              (line 183)
+                                                              (line 197)
 * match-hidden-files:                    Readline Init File Syntax.
-                                                              (line 188)
+                                                              (line 202)
 * menu-complete-display-prefix:          Readline Init File Syntax.
-                                                              (line 195)
+                                                              (line 209)
 * meta-flag:                             Readline Init File Syntax.
                                                               (line 151)
 * OLDPWD:                                Bash Variables.      (line 443)
@@ -10531,9 +10545,9 @@ D.3 Parameter and Variable Index
                                                               (line  38)
 * OSTYPE:                                Bash Variables.      (line 450)
 * output-meta:                           Readline Init File Syntax.
-                                                              (line 200)
+                                                              (line 214)
 * page-completions:                      Readline Init File Syntax.
-                                                              (line 205)
+                                                              (line 219)
 * PATH:                                  Bourne Shell Variables.
                                                               (line  42)
 * PIPESTATUS:                            Bash Variables.      (line 453)
@@ -10553,17 +10567,17 @@ D.3 Parameter and Variable Index
 * READLINE_POINT:                        Bash Variables.      (line 504)
 * REPLY:                                 Bash Variables.      (line 508)
 * revert-all-at-newline:                 Readline Init File Syntax.
-                                                              (line 215)
+                                                              (line 229)
 * SECONDS:                               Bash Variables.      (line 511)
 * SHELL:                                 Bash Variables.      (line 517)
 * SHELLOPTS:                             Bash Variables.      (line 522)
 * SHLVL:                                 Bash Variables.      (line 531)
 * show-all-if-ambiguous:                 Readline Init File Syntax.
-                                                              (line 221)
+                                                              (line 235)
 * show-all-if-unmodified:                Readline Init File Syntax.
-                                                              (line 227)
+                                                              (line 241)
 * skip-completed-text:                   Readline Init File Syntax.
-                                                              (line 236)
+                                                              (line 250)
 * TEXTDOMAIN:                            Locale Translation.  (line  11)
 * TEXTDOMAINDIR:                         Locale Translation.  (line  11)
 * TIMEFORMAT:                            Bash Variables.      (line 536)
@@ -10571,7 +10585,7 @@ D.3 Parameter and Variable Index
 * TMPDIR:                                Bash Variables.      (line 586)
 * UID:                                   Bash Variables.      (line 590)
 * visible-stats:                         Readline Init File Syntax.
-                                                              (line 249)
+                                                              (line 263)
 
 
 File: bashref.info,  Node: Function Index,  Next: Concept Index,  Prev: Variable Index,  Up: Indexes
@@ -10885,93 +10899,93 @@ Node: Filename Expansion78057
 Node: Pattern Matching80222
 Node: Quote Removal83922
 Node: Redirections84217
-Node: Executing Commands93429
-Node: Simple Command Expansion94099
-Node: Command Search and Execution96029
-Node: Command Execution Environment98366
-Node: Environment101352
-Node: Exit Status103011
-Node: Signals104633
-Node: Shell Scripts106601
-Node: Shell Builtin Commands109119
-Node: Bourne Shell Builtins111147
-Node: Bash Builtins130528
-Node: Modifying Shell Behavior157142
-Node: The Set Builtin157487
-Node: The Shopt Builtin167235
-Node: Special Builtins181286
-Node: Shell Variables182265
-Node: Bourne Shell Variables182705
-Node: Bash Variables184736
-Node: Bash Features210247
-Node: Invoking Bash211146
-Node: Bash Startup Files216924
-Node: Interactive Shells221943
-Node: What is an Interactive Shell?222353
-Node: Is this Shell Interactive?223002
-Node: Interactive Shell Behavior223817
-Node: Bash Conditional Expressions227097
-Node: Shell Arithmetic230885
-Node: Aliases233661
-Node: Arrays236217
-Node: The Directory Stack240425
-Node: Directory Stack Builtins241144
-Node: Controlling the Prompt244100
-Node: The Restricted Shell246872
-Node: Bash POSIX Mode248709
-Node: Job Control258096
-Node: Job Control Basics258556
-Node: Job Control Builtins263275
-Node: Job Control Variables267627
-Node: Command Line Editing268785
-Node: Introduction and Notation270457
-Node: Readline Interaction272079
-Node: Readline Bare Essentials273270
-Node: Readline Movement Commands275059
-Node: Readline Killing Commands276024
-Node: Readline Arguments277944
-Node: Searching278988
-Node: Readline Init File281174
-Node: Readline Init File Syntax282321
-Node: Conditional Init Constructs297943
-Node: Sample Init File300476
-Node: Bindable Readline Commands303593
-Node: Commands For Moving304800
-Node: Commands For History305944
-Node: Commands For Text310129
-Node: Commands For Killing312802
-Node: Numeric Arguments315259
-Node: Commands For Completion316398
-Node: Keyboard Macros320590
-Node: Miscellaneous Commands321278
-Node: Readline vi Mode327084
-Node: Programmable Completion327991
-Node: Programmable Completion Builtins335241
-Node: A Programmable Completion Example344987
-Node: Using History Interactively350237
-Node: Bash History Facilities350921
-Node: Bash History Builtins353912
-Node: History Interaction357840
-Node: Event Designators360545
-Node: Word Designators361767
-Node: Modifiers363406
-Node: Installing Bash364810
-Node: Basic Installation365947
-Node: Compilers and Options368639
-Node: Compiling For Multiple Architectures369380
-Node: Installation Names371044
-Node: Specifying the System Type371862
-Node: Sharing Defaults372578
-Node: Operation Controls373251
-Node: Optional Features374209
-Node: Reporting Bugs383781
-Node: Major Differences From The Bourne Shell384982
-Node: GNU Free Documentation License401674
-Node: Indexes426870
-Node: Builtin Index427324
-Node: Reserved Word Index434151
-Node: Variable Index436599
-Node: Function Index449835
-Node: Concept Index457063
+Node: Executing Commands93413
+Node: Simple Command Expansion94083
+Node: Command Search and Execution96013
+Node: Command Execution Environment98350
+Node: Environment101336
+Node: Exit Status102995
+Node: Signals104617
+Node: Shell Scripts106585
+Node: Shell Builtin Commands109103
+Node: Bourne Shell Builtins111131
+Node: Bash Builtins130512
+Node: Modifying Shell Behavior157126
+Node: The Set Builtin157471
+Node: The Shopt Builtin167219
+Node: Special Builtins181270
+Node: Shell Variables182249
+Node: Bourne Shell Variables182689
+Node: Bash Variables184720
+Node: Bash Features210231
+Node: Invoking Bash211130
+Node: Bash Startup Files216908
+Node: Interactive Shells221927
+Node: What is an Interactive Shell?222337
+Node: Is this Shell Interactive?222986
+Node: Interactive Shell Behavior223801
+Node: Bash Conditional Expressions227081
+Node: Shell Arithmetic230869
+Node: Aliases233645
+Node: Arrays236201
+Node: The Directory Stack240409
+Node: Directory Stack Builtins241128
+Node: Controlling the Prompt244084
+Node: The Restricted Shell246856
+Node: Bash POSIX Mode248693
+Node: Job Control258080
+Node: Job Control Basics258540
+Node: Job Control Builtins263259
+Node: Job Control Variables267611
+Node: Command Line Editing268769
+Node: Introduction and Notation270441
+Node: Readline Interaction272063
+Node: Readline Bare Essentials273254
+Node: Readline Movement Commands275043
+Node: Readline Killing Commands276008
+Node: Readline Arguments277928
+Node: Searching278972
+Node: Readline Init File281158
+Node: Readline Init File Syntax282305
+Node: Conditional Init Constructs298738
+Node: Sample Init File301271
+Node: Bindable Readline Commands304388
+Node: Commands For Moving305595
+Node: Commands For History306739
+Node: Commands For Text310924
+Node: Commands For Killing313597
+Node: Numeric Arguments316054
+Node: Commands For Completion317193
+Node: Keyboard Macros321385
+Node: Miscellaneous Commands322073
+Node: Readline vi Mode327879
+Node: Programmable Completion328786
+Node: Programmable Completion Builtins336036
+Node: A Programmable Completion Example345782
+Node: Using History Interactively351032
+Node: Bash History Facilities351716
+Node: Bash History Builtins354707
+Node: History Interaction358635
+Node: Event Designators361340
+Node: Word Designators362562
+Node: Modifiers364201
+Node: Installing Bash365605
+Node: Basic Installation366742
+Node: Compilers and Options369434
+Node: Compiling For Multiple Architectures370175
+Node: Installation Names371839
+Node: Specifying the System Type372657
+Node: Sharing Defaults373373
+Node: Operation Controls374046
+Node: Optional Features375004
+Node: Reporting Bugs384576
+Node: Major Differences From The Bourne Shell385777
+Node: GNU Free Documentation License402469
+Node: Indexes427665
+Node: Builtin Index428119
+Node: Reserved Word Index434946
+Node: Variable Index437394
+Node: Function Index450630
+Node: Concept Index457858
 
 End Tag Table

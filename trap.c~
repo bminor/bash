@@ -453,17 +453,6 @@ set_impossible_sigchld_trap ()
   change_signal (SIGCHLD, (char *)IMPOSSIBLE_TRAP_HANDLER);
   sigmodes[SIGCHLD] &= ~SIG_TRAPPED;	/* maybe_set_sigchld_trap checks this */
 }
-
-/* Act as if we received SIGCHLD NCHILD times and increment
-   pending_traps[SIGCHLD] by that amount.  This allows us to still run the
-   SIGCHLD trap once for each exited child. */
-void
-queue_sigchld_trap (nchild)
-     int nchild;
-{
-  if (nchild > 0)
-    pending_traps[SIGCHLD] += nchild;
-}
 #endif /* JOB_CONTROL && SIGCHLD */
 
 void

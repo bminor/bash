@@ -50,6 +50,7 @@ extern int errno;
 #endif /* !_POSIX_VERSION */
 #include "posixstat.h"
 #include "filecntl.h"
+#include "stat-time.h"
 
 #include "bashintl.h"
 
@@ -289,19 +290,35 @@ term ()
 }
 
 static int
+stat_mtime (fn, st, ts)
+     char *fn;
+     struct stat *st;
+     struct timespec *ts;
+{
+  int r;
+
+  r = sh_stat (fn, st);
+  if (r < 0)
+    return r;
+  *ts = get_stat_mtime (st);
+  return 0;
+}
+
+static int
 filecomp (s, t, op)
      char *s, *t;
      int op;
 {
   struct stat st1, st2;
+  struct timespec ts1, ts2;
   int r1, r2;
 
-  if ((r1 = sh_stat (s, &st1)) < 0)
+  if ((r1 = stat_mtime (s, &st1, &ts1)) < 0)
     {
       if (op == EF)
 	return (FALSE);
     }
-  if ((r2 = sh_stat (t, &st2)) < 0)
+  if ((r2 = stat_mtime (t, &st2, &ts2)) < 0)
     {
       if (op == EF)
 	return (FALSE);
@@ -309,8 +326,8 @@ filecomp (s, t, op)
   
   switch (op)
     {
-    case OT: return (r1 < r2 || (r2 == 0 && st1.st_mtime < st2.st_mtime));
-    case NT: return (r1 > r2 || (r1 == 0 && st1.st_mtime > st2.st_mtime));
+    case OT: return (r1 < r2 || (r2 == 0 && timespec_cmp (ts1, ts2) < 0));
+    case NT: return (r1 > r2 || (r1 == 0 && timespec_cmp (ts1, ts2) > 0));
     case EF: return (same_file (s, t, &st1, &st2));
     }
   return (FALSE);

@@ -28,7 +28,7 @@
 \entry {commands, shell}{8}
 \entry {commands, simple}{8}
 \entry {comments, shell}{7}
-\entry {completion builtins}{121}
+\entry {completion builtins}{122}
 \entry {configuration}{135}
 \entry {control operator}{3}
 \entry {coprocess}{15}
@@ -61,7 +61,7 @@
 \entry {history events}{132}
 \entry {history expansion}{131}
 \entry {history list}{129}
-\entry {History, how to use}{127}
+\entry {History, how to use}{128}
 \initial {I}
 \entry {identifier}{3}
 \entry {initialization file, readline}{100}
@@ -100,7 +100,7 @@
 \entry {process group}{3}
 \entry {process group ID}{3}
 \entry {process substitution}{25}
-\entry {programmable completion}{119}
+\entry {programmable completion}{120}
 \entry {prompting}{87}
 \initial {Q}
 \entry {quoting}{6}

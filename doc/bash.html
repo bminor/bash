@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2012 January 29<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2012 February 4<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -4666,9 +4666,9 @@ is the result of quote removal on
 
 and the lines in the here-document are not expanded.
 If <I>word</I> is unquoted,
-all lines of the here-document are subjected to parameter expansion,
-command substitution, and arithmetic expansion.  In the latter
-case, the character sequence
+all lines of the here-document are subjected to
+parameter expansion, command substitution, and arithmetic expansion,
+the character sequence
 <B>\&lt;newline&gt;</B>
 
 is ignored, and
@@ -4712,7 +4712,7 @@ A variant of here documents, the format is:
 The <I>word</I> undergoes
 brace expansion, tilde expansion, parameter and variable expansion,
 command substitution, arithmetic expansion, and quote removal.
-Pathname expansion word splitting are not performed.
+Pathname expansion and word splitting are not performed.
 The result is supplied as a single string to the command on its
 standard input.
 <A NAME="lbBQ">&nbsp;</A>
@@ -6824,6 +6824,20 @@ the value of
 <B>editing-mode</B>
 
 also affects the default keymap.
+<DT><B>keyseq-timeout (500)</B>
+
+<DD>
+Specifies the duration <I>readline</I> will wait for a character when reading an
+ambiguous key sequence (one that can form a complete key sequence using
+the input read so far, or can take additional input to complete a longer
+key sequence).
+If no input is received within the timeout, <I>readline</I> will use the shorter
+but complete key sequence.
+The value is specified in milliseconds, so a value of 1000 means that
+<I>readline</I> will wait one second for additional input.
+If this variable is set to a value less than or equal to zero, or to a
+non-numeric value, <I>readline</I> will wait until another key is pressed to
+decide which key sequence to complete.
 <DT><B>mark-directories (On)</B>
 
 <DD>
@@ -12916,7 +12930,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.2<TH ALIGN=CENTER width=33%>2012 January 29<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.2<TH ALIGN=CENTER width=33%>2012 February 4<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13022,6 +13036,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 30 January 2012 10:38:37 EST
+Time: 05 March 2012 21:31:01 EST
 </BODY>
 </HTML>

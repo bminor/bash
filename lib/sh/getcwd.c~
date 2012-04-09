@@ -48,7 +48,7 @@
 
 #include <bashansi.h>
 
-#if !defined (D_FILENO_AVAILABLE)
+#if defined (BROKEN_DIRENT_D_INO)
 #  include "command.h"
 #  include "general.h"
 #  include "externs.h"
@@ -71,7 +71,7 @@ extern int errno;
 /* If the d_fileno member of a struct dirent doesn't return anything useful,
    we need to check inode number equivalence the hard way.  Return 1 if
    the inode corresponding to PATH/DIR is identical to THISINO. */
-#if !defined (D_FILENO_AVAILABLE)
+#if defined (BROKEN_DIRENT_D_INO)
 static int
 _path_checkino (dotp, name, thisino)
      char *dotp;
@@ -206,7 +206,7 @@ getcwd (buf, size)
 	      (d->d_name[1] == '\0' ||
 		(d->d_name[1] == '.' && d->d_name[2] == '\0')))
 	    continue;
-#if defined (D_FILENO_AVAILABLE)
+#if !defined (BROKEN_DIRENT_D_INO)
 	  if (mount_point || d->d_fileno == thisino)
 #else
 	  if (mount_point || _path_checkino (dotp, d->d_name, thisino))

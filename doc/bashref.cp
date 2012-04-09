@@ -103,9 +103,9 @@
 \entry{kill ring}{99}{kill ring}
 \entry{initialization file, readline}{100}{initialization file, readline}
 \entry{variables, readline}{101}{variables, readline}
-\entry{programmable completion}{119}{programmable completion}
-\entry{completion builtins}{121}{completion builtins}
-\entry{History, how to use}{127}{History, how to use}
+\entry{programmable completion}{120}{programmable completion}
+\entry{completion builtins}{122}{completion builtins}
+\entry{History, how to use}{128}{History, how to use}
 \entry{command history}{129}{command history}
 \entry{history list}{129}{history list}
 \entry{history builtins}{129}{history builtins}

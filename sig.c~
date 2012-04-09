@@ -674,10 +674,8 @@ set_signal_handler (sig, handler)
   /* XXX - bash-4.2 */
   /* We don't want a child death to interrupt interruptible system calls, even
      if we take the time to reap children */
-#if defined (SIGCHLD)
   if (sig == SIGCHLD)
     act.sa_flags |= SA_RESTART;		/* XXX */
-#endif
 
   sigemptyset (&act.sa_mask);
   sigemptyset (&oact.sa_mask);

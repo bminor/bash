@@ -13491,3 +13491,93 @@ bashline.c
 	  isn't changed by canonicalization or spell checking after being
 	  appended to $PWD, then don't change what the user typed.  Controlled
 	  by dircomplete_expand_relpath
+
+				    3/7
+				    ---
+m4/timespec.m4
+	- new macros, cribbed from gnulib and coreutils: find out whether we
+	  have `struct timespec' and what file includes it
+
+m4/stat-time.m4
+	- new macros, cribbed from gnulib and coreutils: find out whether the
+	  mtime/atime/ctime/etctime fields of struct stat are of type
+	  struct timespec, and what the name is
+
+include/stat-time.h
+	- new file, cribbed from gnulib, with additions from coreutils: include
+	  the right file to get the struct timespec define, or provide our own
+	  replacement.  Provides a bunch of inline functions to turn the
+	  appropriate members of struct stat into `struct timespec' values,
+	  zeroing out the tv_nsec field if necessary
+
+test.c
+	- include "stat-time.h" for the nanosecond timestamp resolution stuff
+	- stat_mtime: new function, returns struct stat and the mod time
+	  normalized into a `struct timespec' for the filename passed as the
+	  first argument
+	- filecomp: call stat_mtime instead of sh_stat for each filename
+	  argument to get the mtime as a struct timespec
+	- filecomp: call timespec_cmp instead of using a straight arithmetic
+	  comparison for the -nt and -ot operators, using timespec returned by
+	  stat_mtime.  Added functionality requested by by Werner Fink
+	  <werner@suse.de> for systems that can support it
+
+				   3/10
+				   ----
+include/posixdir.h
+	- REAL_DIR_ENTRY: remove dependency on _POSIX_SOURCE, only use feature
+	  test macros to decide whether dirent.d_ino is present and usable;
+	  define D_INO_AVAILABLE.  Report and fix from Fabrizion Gennari
+	  <fabrizio.ge@tiscali.it>
+	- D_FILENO_AVAILABLE: define if we can use dirent.d_fileno
+
+lib/sh/getcwd.c
+	- use D_FILENO_AVAILABLE to decide whether or not to compile in
+	  _path_checkino and whether or not to call it.  Report and initial
+	  fix from Fabrizion Gennari <fabrizio.ge@tiscali.it>
+
+lib/readline/signals.c
+	- make sure all occurrences of SIGWINCH are protected by #ifdef
+
+sig.c
+	- make sure all occurrences of SIGCHLD are protected by #ifdef
+
+nojobs.c
+	- make sure SA_RESTART is defined to 0 if the OS doesn't define it
+
+version.c
+	- show_shell_version: don't use string literals in printf, use %s.
+	  Has added benefit of removing newline from string to be translated
+
+trap.c
+	- queue_sigchld_trap: new function, increments the number of pending
+	  SIGCHLD signals by the argument, which is by convention the number
+	  of children reaped in a call to waitchld()
+
+trap.h
+	- queue_sigchld_trap: new extern declaration
+
+jobs.c
+	- waitchld: if called from the SIGCHLD signal handler (sigchld > 0),
+	  then call queue_sigchld_trap to avoid running the trap in a signal
+	  handler context.  Report and original fix from Siddhesh Poyarekar
+	  <siddhesh@redhat.com>
+
+lib/sh/unicode.c
+	- u32tocesc: take an unsigned 32-bit quantity and encode it using
+	  ISO C99 string notation (\u/\U)
+	- u32cconv: call u32tocesc as a fallback instead of u32cchar
+	- u32cconv: call u32tocesc if iconv cannot convert the character.
+	  Maybe do the same thing if iconv_open fails
+	- u32reset: call iconv_close on localconv if u32init == 1
+
+				   3/11
+				   ----
+config-top.h
+	- CHECKWINSIZE_DEFAULT: new define, set to initial value of
+	  check_window_size (shopt checkwinsize): 0 for off, 1 for on.
+	  Default is 0
+
+{jobs,nojobs}.c
+	- check_window_size: default initial value to CHECKWINSIZE_DEFAULT
+
