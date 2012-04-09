@@ -8,63 +8,64 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash 4.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-01-28 22:09-0500\n"
+"POT-Creation-Date: 2012-03-05 22:17-0500\n"
 "PO-Revision-Date: 2010-06-01 14:53+0300\n"
 "Last-Translator: Maxim V. Dziumanenko <dziumanenko@gmail.com>\n"
 "Language-Team: Ukrainian <translation-team-uk@lists.sourceforge.net>\n"
+"Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%"
-"10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 
-#: arrayfunc.c:50
+#: arrayfunc.c:51
 msgid "bad array subscript"
 msgstr "неправильний індекс масиву"
 
-#: arrayfunc.c:313 builtins/declare.def:487
+#: arrayfunc.c:330 builtins/declare.def:487
 #, c-format
 msgid "%s: cannot convert indexed to associative array"
 msgstr "%s: неможливо перетворити індексований масив на асоціативний"
 
-#: arrayfunc.c:480
+#: arrayfunc.c:513
 #, c-format
 msgid "%s: invalid associative array key"
 msgstr "%s: неправильний ключ асоціативного масиву"
 
-#: arrayfunc.c:482
+#: arrayfunc.c:515
 #, c-format
 msgid "%s: cannot assign to non-numeric index"
 msgstr "%s: означення нечислових елементів неможливе"
 
-#: arrayfunc.c:518
+#: arrayfunc.c:557
 #, c-format
 msgid "%s: %s: must use subscript when assigning associative array"
 msgstr "%s: %s: при означенні асоціативних масивів потрібно вказувати ключ"
 
-#: bashhist.c:387
+#: bashhist.c:388
 #, c-format
 msgid "%s: cannot create: %s"
 msgstr "%s: не вдається створити: %s"
 
-#: bashline.c:3498
+#: bashline.c:3868
 msgid "bash_execute_unix_command: cannot find keymap for command"
 msgstr ""
 "bash_execute_unix_command: не вдається знайти відповідне призначення для "
 "команди"
 
-#: bashline.c:3584
+#: bashline.c:3955
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr "%s: перший непробільний символ не є `\"'"
 
 # c-format
-#: bashline.c:3613
+#: bashline.c:3984
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr "нема заключної `%c' у %s"
 
-#: bashline.c:3647
+#: bashline.c:4018
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: пропущено двокрапку-роздільник"
@@ -74,36 +75,36 @@ msgstr "%s: пропущено двокрапку-роздільник"
 msgid "`%s': invalid alias name"
 msgstr "`%s': неправильна назва набору призначень клавіш"
 
-#: builtins/bind.def:120 builtins/bind.def:123
+#: builtins/bind.def:123 builtins/bind.def:126
 msgid "line editing not enabled"
 msgstr "редагування рядку не ввімкнено"
 
-#: builtins/bind.def:206
+#: builtins/bind.def:212
 #, c-format
 msgid "`%s': invalid keymap name"
 msgstr "`%s': неправильна назва набору призначень клавіш"
 
-#: builtins/bind.def:245
+#: builtins/bind.def:251
 #, c-format
 msgid "%s: cannot read: %s"
 msgstr "%s: не вдається прочитати: %s"
 
-#: builtins/bind.def:260
+#: builtins/bind.def:266
 #, c-format
 msgid "`%s': cannot unbind"
 msgstr "`%s': не вдається зняти призначення"
 
-#: builtins/bind.def:295 builtins/bind.def:325
+#: builtins/bind.def:304 builtins/bind.def:334
 #, c-format
 msgid "`%s': unknown function name"
 msgstr "`%s': невідома назва функції"
 
-#: builtins/bind.def:303
+#: builtins/bind.def:312
 #, c-format
 msgid "%s is not bound to any keys.\n"
 msgstr "%s не призначено жодної клавіші.\n"
 
-#: builtins/bind.def:307
+#: builtins/bind.def:316
 #, c-format
 msgid "%s can be invoked via "
 msgstr "%s можна запустити за допомогою "
@@ -126,11 +127,15 @@ msgstr ""
 "    \n"
 "    Якщо EXPR не вказано, повертає "
 
-#: builtins/cd.def:235
+#: builtins/cd.def:239
 msgid "HOME not set"
 msgstr "змінну HOME не встановлено"
 
-#: builtins/cd.def:247
+#: builtins/cd.def:247 builtins/common.c:166 test.c:832
+msgid "too many arguments"
+msgstr "забагато аргументів"
+
+#: builtins/cd.def:258
 msgid "OLDPWD not set"
 msgstr "змінну OLDPWD не встановлено"
 
@@ -139,7 +144,7 @@ msgstr "змінну OLDPWD не встановлено"
 msgid "line %d: "
 msgstr "рядок %d: "
 
-#: builtins/common.c:139 error.c:261
+#: builtins/common.c:139 error.c:265
 #, c-format
 msgid "warning: "
 msgstr "попередження: "
@@ -149,11 +154,7 @@ msgstr "попередження: "
 msgid "%s: usage: "
 msgstr "%s: використовуйте: "
 
-#: builtins/common.c:166 test.c:832
-msgid "too many arguments"
-msgstr "забагато аргументів"
-
-#: builtins/common.c:191 shell.c:500 shell.c:782
+#: builtins/common.c:191 shell.c:504 shell.c:786
 #, c-format
 msgid "%s: option requires an argument"
 msgstr "%s: параметр потребує аргументу"
@@ -168,7 +169,7 @@ msgstr "%s: потрібен числовий аргумент"
 msgid "%s: not found"
 msgstr "%s: не знайдено"
 
-#: builtins/common.c:214 shell.c:795
+#: builtins/common.c:214 shell.c:799
 #, c-format
 msgid "%s: invalid option"
 msgstr "%s: неправильний параметр"
@@ -178,7 +179,7 @@ msgstr "%s: неправильний параметр"
 msgid "%s: invalid option name"
 msgstr "%s: невірна назва параметру"
 
-#: builtins/common.c:228 general.c:231 general.c:236
+#: builtins/common.c:228 general.c:234 general.c:239
 #, c-format
 msgid "`%s': not a valid identifier"
 msgstr "`%s': неправильний ідентифікатор"
@@ -191,7 +192,7 @@ msgstr "неправильне вісімкове число"
 msgid "invalid hex number"
 msgstr "неправильне шістнадцяткове число"
 
-#: builtins/common.c:242 expr.c:1362
+#: builtins/common.c:242 expr.c:1431
 msgid "invalid number"
 msgstr "неправильне число"
 
@@ -205,7 +206,7 @@ msgstr "%s: сигнал вказано невірно"
 msgid "`%s': not a pid or valid job spec"
 msgstr "`%s': не є ідентифікатором процесу чи завдання"
 
-#: builtins/common.c:264 error.c:454
+#: builtins/common.c:264 error.c:458
 #, c-format
 msgid "%s: readonly variable"
 msgstr "%s: змінна призначена лише для читання"
@@ -277,26 +278,26 @@ msgstr "%s: помилка отримання поточної директор�
 msgid "%s: ambiguous job spec"
 msgstr "%s: завдання вказано неоднозначно"
 
-#: builtins/complete.def:276
+#: builtins/complete.def:277
 #, c-format
 msgid "%s: invalid action name"
 msgstr "%s: неправильна назва дії"
 
-#: builtins/complete.def:449 builtins/complete.def:644
-#: builtins/complete.def:853
+#: builtins/complete.def:450 builtins/complete.def:645
+#: builtins/complete.def:855
 #, c-format
 msgid "%s: no completion specification"
 msgstr "%s: не вказана специфіцкація завершення"
 
-#: builtins/complete.def:696
+#: builtins/complete.def:697
 msgid "warning: -F option may not work as you expect"
 msgstr "попередження: можливо параметр -F працює не так, як ви очікуєте"
 
-#: builtins/complete.def:698
+#: builtins/complete.def:699
 msgid "warning: -C option may not work as you expect"
 msgstr "попередження: можливо параметр -C працює не так, як ви очікуєте"
 
-#: builtins/complete.def:826
+#: builtins/complete.def:828
 msgid "not currently executing completion function"
 msgstr "наразі функція завершення рядку не виконується"
 
@@ -308,7 +309,7 @@ msgstr "може використовуватися лише усередині 
 msgid "cannot use `-f' to make functions"
 msgstr "`-f' не використовується для створення функцій"
 
-#: builtins/declare.def:378 execute_cmd.c:5105
+#: builtins/declare.def:378 execute_cmd.c:5253
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: незмінна функція"
@@ -318,7 +319,7 @@ msgstr "%s: незмінна функція"
 msgid "%s: cannot destroy array variables in this way"
 msgstr "%s: неможливо знищити масив таким чином"
 
-#: builtins/declare.def:481
+#: builtins/declare.def:481 builtins/read.def:702
 #, c-format
 msgid "%s: cannot convert associative to indexed array"
 msgstr "%s: неможливо перетворити асоціативний масив на індексований"
@@ -347,8 +348,8 @@ msgstr "%s: завантажений не динамічно"
 msgid "%s: cannot delete: %s"
 msgstr "%s: не вдається вилучити: %s"
 
-#: builtins/evalfile.c:135 builtins/hash.def:171 execute_cmd.c:4961
-#: shell.c:1457
+#: builtins/evalfile.c:135 builtins/hash.def:171 execute_cmd.c:5100
+#: shell.c:1461
 #, c-format
 msgid "%s: is a directory"
 msgstr "%s: це директорія"
@@ -363,8 +364,7 @@ msgstr "%s: не є звичайним файлом"
 msgid "%s: file is too large"
 msgstr "%s: файл завеликий"
 
-#: builtins/evalfile.c:182 builtins/evalfile.c:200 execute_cmd.c:5032
-#: shell.c:1467
+#: builtins/evalfile.c:182 builtins/evalfile.c:200 shell.c:1471
 #, c-format
 msgid "%s: cannot execute binary file"
 msgstr "%s: не вдається виконати бінарний файл"
@@ -490,7 +490,7 @@ msgstr "-anrw можуть зустрічатися лише один раз"
 msgid "history position"
 msgstr "позиція у історії команд"
 
-#: builtins/history.def:365
+#: builtins/history.def:366
 #, c-format
 msgid "%s: history expansion failed"
 msgstr "%s: невдалий пошук по історії команд"
@@ -513,7 +513,7 @@ msgstr "%s: аргументи мають бути ідентифікатора�
 msgid "Unknown error"
 msgstr "Невідома помилка"
 
-#: builtins/let.def:95 builtins/let.def:120 expr.c:552 expr.c:567
+#: builtins/let.def:95 builtins/let.def:120 expr.c:577 expr.c:592
 msgid "expression expected"
 msgstr "очікувався вираз"
 
@@ -522,12 +522,12 @@ msgstr "очікувався вираз"
 msgid "%s: not an indexed array"
 msgstr "%s: не є масивом"
 
-#: builtins/mapfile.def:256 builtins/read.def:279
+#: builtins/mapfile.def:256 builtins/read.def:299
 #, c-format
 msgid "%s: invalid file descriptor specification"
 msgstr "%s: неправильно вказаний дескриптор файлу"
 
-#: builtins/mapfile.def:264 builtins/read.def:286
+#: builtins/mapfile.def:264 builtins/read.def:306
 #, c-format
 msgid "%d: invalid file descriptor: %s"
 msgstr "%d: неправильний дескриптор файлу: %s"
@@ -555,31 +555,31 @@ msgstr "порожня назва змінної-масиву"
 msgid "array variable support required"
 msgstr "змінні-масиви не підтримуються"
 
-#: builtins/printf.def:394
+#: builtins/printf.def:397
 #, c-format
 msgid "`%s': missing format character"
 msgstr "`%s': пропущено символ у шаблоні"
 
-#: builtins/printf.def:448
+#: builtins/printf.def:451
 #, fuzzy, c-format
 msgid "`%c': invalid time format specification"
 msgstr "%s: неправильно вказаний термін часу"
 
-#: builtins/printf.def:635
+#: builtins/printf.def:647
 #, c-format
 msgid "`%c': invalid format character"
 msgstr "`%c': невірний символ у шаблоні"
 
-#: builtins/printf.def:662
+#: builtins/printf.def:673
 #, c-format
 msgid "warning: %s: %s"
 msgstr "попередження: %s: %s"
 
-#: builtins/printf.def:840
+#: builtins/printf.def:854
 msgid "missing hex digit for \\x"
 msgstr "пропущено шістнадцяткову цифру у \\x"
 
-#: builtins/printf.def:855
+#: builtins/printf.def:869
 #, fuzzy, c-format
 msgid "missing unicode digit for \\%c"
 msgstr "пропущено шістнадцяткову цифру у \\x"
@@ -733,17 +733,17 @@ msgstr ""
 "    \n"
 "    Вбудована команда `dirs' показує стек директорій."
 
-#: builtins/read.def:252
+#: builtins/read.def:272
 #, fuzzy, c-format
 msgid "%s: invalid timeout specification"
 msgstr "%s: неправильно вказаний термін часу"
 
-#: builtins/read.def:588
+#: builtins/read.def:644
 #, c-format
 msgid "read error: %d: %s"
 msgstr "помилка читання: %d: %s"
 
-#: builtins/return.def:73
+#: builtins/return.def:75
 msgid "can only `return' from a function or sourced script"
 msgstr ""
 "`return' працює лише у функції чи скрипті, запущеному за допомогою `source'"
@@ -752,17 +752,17 @@ msgstr ""
 msgid "cannot simultaneously unset a function and a variable"
 msgstr "не можна одночасно знищити і функцію і змінну"
 
-#: builtins/set.def:808
+#: builtins/set.def:812
 #, c-format
 msgid "%s: cannot unset"
 msgstr "%s: не вдається знищити"
 
-#: builtins/set.def:815
+#: builtins/set.def:829
 #, c-format
 msgid "%s: cannot unset: readonly %s"
 msgstr "%s: не вдається знищити: %s лише для читання"
 
-#: builtins/set.def:826
+#: builtins/set.def:841
 #, c-format
 msgid "%s: not an array variable"
 msgstr "%s: не є масивом"
@@ -776,11 +776,11 @@ msgstr "%s: не є функцією"
 msgid "shift count"
 msgstr "кількість зсувів"
 
-#: builtins/shopt.def:264
+#: builtins/shopt.def:277
 msgid "cannot set and unset shell options simultaneously"
 msgstr "не можна одночасно встановлювати й скасовувати параметри оболонки"
 
-#: builtins/shopt.def:329
+#: builtins/shopt.def:342
 #, c-format
 msgid "%s: invalid shell option name"
 msgstr "%s: неправильне ім’я параметру оболонки"
@@ -822,7 +822,7 @@ msgstr "%s є функцією\n"
 msgid "%s is a shell builtin\n"
 msgstr "%s є вбудованою командою оболонки\n"
 
-#: builtins/type.def:317 builtins/type.def:391
+#: builtins/type.def:317 builtins/type.def:393
 #, c-format
 msgid "%s is %s\n"
 msgstr "%s — це %s\n"
@@ -834,26 +834,26 @@ msgstr "%s — це %s\n"
 msgid "%s is hashed (%s)\n"
 msgstr "%s знаходиться в кеші (%s)\n"
 
-#: builtins/ulimit.def:376
+#: builtins/ulimit.def:379
 #, c-format
 msgid "%s: invalid limit argument"
 msgstr "%s: невірний аргумент обмеження"
 
-#: builtins/ulimit.def:402
+#: builtins/ulimit.def:405
 #, c-format
 msgid "`%c': bad command"
 msgstr "`%c': неправильна команда"
 
-#: builtins/ulimit.def:431
+#: builtins/ulimit.def:434
 #, c-format
 msgid "%s: cannot get limit: %s"
 msgstr "%s: не вдається отримати значення обмеження: %s"
 
-#: builtins/ulimit.def:457
+#: builtins/ulimit.def:460
 msgid "limit"
 msgstr "значення обмеження"
 
-#: builtins/ulimit.def:469 builtins/ulimit.def:769
+#: builtins/ulimit.def:472 builtins/ulimit.def:772
 #, c-format
 msgid "%s: cannot modify limit: %s"
 msgstr "%s: не вдається змінити обмеження: %s"
@@ -872,7 +872,7 @@ msgstr "`%c': невірний оператор у символьному реж
 msgid "`%c': invalid symbolic mode character"
 msgstr "`%c': невірний символ у символьному режимі"
 
-#: error.c:90 error.c:321 error.c:323 error.c:325
+#: error.c:90 error.c:325 error.c:327 error.c:329
 msgid " line "
 msgstr " рядок "
 
@@ -886,23 +886,23 @@ msgstr "остання команда: %s\n"
 msgid "Aborting..."
 msgstr "Припинення..."
 
-#: error.c:406
+#: error.c:410
 msgid "unknown command error"
 msgstr "невідома помилка команди"
 
-#: error.c:407
+#: error.c:411
 msgid "bad command type"
 msgstr "неправильний тип команди"
 
-#: error.c:408
+#: error.c:412
 msgid "bad connector"
 msgstr "неправильний з’єднувальний оператор"
 
-#: error.c:409
+#: error.c:413
 msgid "bad jump"
 msgstr "неправильний перехід"
 
-#: error.c:447
+#: error.c:451
 #, c-format
 msgid "%s: unbound variable"
 msgstr "%s: неозначена змінна"
@@ -917,102 +917,117 @@ msgstr "\aчас очікування вводу вичерпано: автом�
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr "не вдається переспрямувати /dev/null на стандартний ввід: %s"
 
-#: execute_cmd.c:1168
+#: execute_cmd.c:1199
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "TIMEFORMAT: `%c': невірний символ шаблону"
 
-#: execute_cmd.c:2121
+#: execute_cmd.c:2240
 msgid "pipe error"
 msgstr "помилка каналу"
 
-#: execute_cmd.c:4640
+#: execute_cmd.c:4284
+#, c-format
+msgid "%s: maximum function nesting level exceeded (%d)"
+msgstr ""
+
+#: execute_cmd.c:4777
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: обмеження: не можна вказувати `/' у імені команди"
 
-#: execute_cmd.c:4735
+#: execute_cmd.c:4872
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: команду не знайдено"
 
-#: execute_cmd.c:4959
+#: execute_cmd.c:5098
 #, fuzzy, c-format
 msgid "%s: %s"
 msgstr "%s — це %s\n"
 
-#: execute_cmd.c:4995
+#: execute_cmd.c:5135
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: неправильний інтерпретатор"
 
-#: execute_cmd.c:5144
+#: execute_cmd.c:5172
+#, fuzzy, c-format
+msgid "%s: cannot execute binary file: %s"
+msgstr "%s: не вдається виконати бінарний файл"
+
+#: execute_cmd.c:5244
+#, fuzzy, c-format
+msgid "`%s': is a special builtin"
+msgstr "%s є вбудованою командою оболонки\n"
+
+#: execute_cmd.c:5296
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "не вдається створити копію файлового дескриптору %d у %d"
 
-#: expr.c:256
+#: expr.c:258
 msgid "expression recursion level exceeded"
 msgstr "рівень вкладення виразів перевищено"
 
-#: expr.c:280
+#: expr.c:282
 msgid "recursion stack underflow"
 msgstr "нестача стеку рекурсії"
 
-#: expr.c:422
+#: expr.c:430
 msgid "syntax error in expression"
 msgstr "синтаксична помилка у виразі"
 
-#: expr.c:463
+#: expr.c:474
 msgid "attempted assignment to non-variable"
 msgstr "спроба призначення не-змінної"
 
-#: expr.c:486 expr.c:491 expr.c:807
+#: expr.c:493 expr.c:838
 msgid "division by 0"
 msgstr "ділення на 0"
 
-#: expr.c:517
+#: expr.c:540
 msgid "bug: bad expassign token"
 msgstr "вада: неправильна лексема у виразі"
 
-#: expr.c:564
+#: expr.c:589
 msgid "`:' expected for conditional expression"
 msgstr "очікувалася `:' умовного виразу"
 
-#: expr.c:832
+#: expr.c:895
 msgid "exponent less than 0"
 msgstr "експонента менша за 0"
 
-#: expr.c:887
+#: expr.c:948
 msgid "identifier expected after pre-increment or pre-decrement"
 msgstr "пре-інкремент чи пре-декремент потребують ідентифікатор"
 
-#: expr.c:910
+#: expr.c:973
 msgid "missing `)'"
 msgstr "відсутня `)'"
 
-#: expr.c:959 expr.c:1282
+#: expr.c:1024 expr.c:1351
 msgid "syntax error: operand expected"
 msgstr "синтаксична помилка: очікувався операнд"
 
-#: expr.c:1284
+#: expr.c:1353
 msgid "syntax error: invalid arithmetic operator"
 msgstr "синтаксична помилка: невірний арифметичний оператор"
 
-#: expr.c:1308
+#: expr.c:1377
 #, c-format
 msgid "%s%s%s: %s (error token is \"%s\")"
 msgstr "%s%s%s: %s (позначка помилки \"%s\")"
 
-#: expr.c:1366
+#: expr.c:1435
 msgid "invalid arithmetic base"
 msgstr "невірна арифметична основа"
 
-#: expr.c:1386
+#: expr.c:1455
 msgid "value too great for base"
 msgstr "завелике значення основи"
 
-#: expr.c:1435
+#: expr.c:1504
 #, c-format
 msgid "%s: expression error\n"
 msgstr "%s: помилка у виразі\n"
@@ -1021,168 +1036,168 @@ msgstr "%s: помилка у виразі\n"
 msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: не вдається отримати доступ до директорій вищого рівня"
 
-#: input.c:94 subst.c:5082
+#: input.c:99 subst.c:5094
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "не вдається перевстановити режим без затримки файлового дескриптору %d"
 
-#: input.c:260
+#: input.c:265
 #, c-format
 msgid "cannot allocate new file descriptor for bash input from fd %d"
 msgstr ""
 "не вдається отримати новий файловий дескриптор для вводу bash з файлового "
 "дескриптору %d"
 
-#: input.c:268
+#: input.c:273
 #, c-format
 msgid "save_bash_input: buffer already exists for new fd %d"
 msgstr "save_bash_input: для нового файлового дескриптору %d вже існує буфер"
 
-#: jobs.c:468
+#: jobs.c:470
 msgid "start_pipeline: pgrp pipe"
 msgstr "start_pipeline: pgrp pipe"
 
-#: jobs.c:889
+#: jobs.c:891
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr ""
 "ідентифікатор відгалуженого процесу %d знайдено у працюючому завданні %d"
 
-#: jobs.c:1007
+#: jobs.c:1009
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "вилучення зупиненого завдання %d, що має групу процесів %ld"
 
-#: jobs.c:1112
+#: jobs.c:1114
 #, fuzzy, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
 msgstr "add_process: процес %5ld (%s) у the_pipeline"
 
-#: jobs.c:1115
+#: jobs.c:1117
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr ""
 "add_process: ідентифікатор процесу %5ld (%s) вважається все ще працюючим"
 
-#: jobs.c:1430
+#: jobs.c:1432
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "describe_pid: %ld: ідентифікатор процесу не існує"
 
-#: jobs.c:1445
+#: jobs.c:1447
 #, c-format
 msgid "Signal %d"
 msgstr "Сигнал %d"
 
-#: jobs.c:1459 jobs.c:1484
+#: jobs.c:1461 jobs.c:1486
 msgid "Done"
 msgstr "Завершено"
 
-#: jobs.c:1464 siglist.c:123
+#: jobs.c:1466 siglist.c:123
 msgid "Stopped"
 msgstr "Зупинено"
 
-#: jobs.c:1468
+#: jobs.c:1470
 #, c-format
 msgid "Stopped(%s)"
 msgstr "Зупинено(%s)"
 
-#: jobs.c:1472
+#: jobs.c:1474
 msgid "Running"
 msgstr "Працює"
 
-#: jobs.c:1486
+#: jobs.c:1488
 #, c-format
 msgid "Done(%d)"
 msgstr "Зроблено(%d)"
 
-#: jobs.c:1488
+#: jobs.c:1490
 #, c-format
 msgid "Exit %d"
 msgstr "Вихід %d"
 
-#: jobs.c:1491
+#: jobs.c:1493
 msgid "Unknown status"
 msgstr "Невідомий стан"
 
-#: jobs.c:1578
+#: jobs.c:1580
 #, c-format
 msgid "(core dumped) "
 msgstr "(збережено знімок оперативної пам’яті)"
 
-#: jobs.c:1597
+#: jobs.c:1599
 #, c-format
 msgid "  (wd: %s)"
 msgstr "  (РД: %s)"
 
-#: jobs.c:1805
+#: jobs.c:1807
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr "зміна групи дочірнього процесу (%ld на %ld)"
 
-#: jobs.c:2133 nojobs.c:585
+#: jobs.c:2135 nojobs.c:585
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: процес %ld не є відгалуженим від цієї оболонки"
 
-#: jobs.c:2360
+#: jobs.c:2372
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for: Нема запису для процесу %ld"
 
-#: jobs.c:2637
+#: jobs.c:2653
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: завдання %d зупинене"
 
-#: jobs.c:2859
+#: jobs.c:2875
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: завдання завершилося"
 
-#: jobs.c:2868
+#: jobs.c:2884
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: завдання %d вже працює в фоні"
 
-#: jobs.c:3089
+#: jobs.c:3105
 msgid "waitchld: turning on WNOHANG to avoid indefinite block"
 msgstr ""
 
-#: jobs.c:3538
+#: jobs.c:3571
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s: рядок %d: "
 
-#: jobs.c:3552 nojobs.c:814
+#: jobs.c:3585 nojobs.c:818
 #, c-format
 msgid " (core dumped)"
 msgstr " (збережено знімок оперативної пам’яті)"
 
-#: jobs.c:3564 jobs.c:3577
+#: jobs.c:3597 jobs.c:3610
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(тепер РД: %s)\n"
 
-#: jobs.c:3609
+#: jobs.c:3642
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: помилка getpgrp"
 
-#: jobs.c:3669
+#: jobs.c:3703
 #, fuzzy
 msgid "initialize_job_control: line discipline"
 msgstr "initialize_job_control: line discipline"
 
-#: jobs.c:3679
+#: jobs.c:3713
 msgid "initialize_job_control: setpgid"
 msgstr "initialize_job_control: setpgid"
 
-#: jobs.c:3707
+#: jobs.c:3734 jobs.c:3743
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "не вдається встановити групу процесу для терміналу (%d)"
 
-#: jobs.c:3712
+#: jobs.c:3748
 msgid "no job control in this shell"
 msgstr "ця оболонка не може керувати завданнями"
 
@@ -1255,7 +1270,7 @@ msgstr "register_alloc: %p вже позначений як виділений �
 msgid "register_free: %p already in table as free?\n"
 msgstr "register_free: %p вже позначений як вільний у таблиці?\n"
 
-#: lib/sh/fmtulong.c:101
+#: lib/sh/fmtulong.c:102
 msgid "invalid base"
 msgstr "неправильна основа"
 
@@ -1278,22 +1293,22 @@ msgstr "%s: неправильно вказаний мережевий шлях"
 msgid "network operations not supported"
 msgstr "мережеві операції не підтримуються"
 
-#: locale.c:192
+#: locale.c:204
 #, c-format
 msgid "setlocale: LC_ALL: cannot change locale (%s)"
 msgstr ""
 
-#: locale.c:194
+#: locale.c:206
 #, c-format
 msgid "setlocale: LC_ALL: cannot change locale (%s): %s"
 msgstr ""
 
-#: locale.c:247
+#: locale.c:263
 #, fuzzy, c-format
 msgid "setlocale: %s: cannot change locale (%s)"
 msgstr "xrealloc: %s:%d: не вдається виділити %lu байтів"
 
-#: locale.c:249
+#: locale.c:265
 #, fuzzy, c-format
 msgid "setlocale: %s: cannot change locale (%s): %s"
 msgstr "xrealloc: %s:%d: не вдається виділити %lu байтів"
@@ -1324,118 +1339,118 @@ msgstr "синтаксична помилка: неочікувана `;'"
 msgid "syntax error: `((%s))'"
 msgstr "синтаксична помилка: `((%s))'"
 
-#: make_cmd.c:575
+#: make_cmd.c:578
 #, c-format
 msgid "make_here_document: bad instruction type %d"
 msgstr "make_here_document: неправильний тип інструкції %d"
 
-#: make_cmd.c:659
+#: make_cmd.c:662
 #, fuzzy, c-format
 msgid "here-document at line %d delimited by end-of-file (wanted `%s')"
 msgstr "here-document з рядка %d закінчено кінцем файлу (очікувалося `%s')"
 
-#: make_cmd.c:756
+#: make_cmd.c:759
 #, c-format
 msgid "make_redirection: redirection instruction `%d' out of range"
 msgstr "make_redirection: інструкція переспрямування `%d' поза межами"
 
-#: parse.y:3173 parse.y:3444
+#: parse.y:3173 parse.y:3448
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "файл скінчився раніше, ніж було знайдено відповідний `%c'"
 
-#: parse.y:4025
+#: parse.y:4038
 msgid "unexpected EOF while looking for `]]'"
 msgstr "файл скінчився раніше, ніж було знайдено `]]'"
 
-#: parse.y:4030
+#: parse.y:4043
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr "синтаксична помилка в умовному виразі: неочікувана лексема `%s'"
 
-#: parse.y:4034
+#: parse.y:4047
 msgid "syntax error in conditional expression"
 msgstr "синтаксична помилка в умовному виразі"
 
-#: parse.y:4112
+#: parse.y:4125
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr "неочікувана лексема `%s', очікувалася `)'"
 
-#: parse.y:4116
+#: parse.y:4129
 msgid "expected `)'"
 msgstr "очікувалася `)'"
 
-#: parse.y:4144
+#: parse.y:4157
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr "неочікуваний аргумент унарного умовного оператору `%s'"
 
-#: parse.y:4148
+#: parse.y:4161
 msgid "unexpected argument to conditional unary operator"
 msgstr "неочікуваний аргумент унарного умовного оператору"
 
-#: parse.y:4194
+#: parse.y:4207
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr "неочікувана лексема `%s', очікувався бінарний умовний оператор"
 
-#: parse.y:4198
+#: parse.y:4211
 msgid "conditional binary operator expected"
 msgstr "очікувався бінарний умовний оператор"
 
-#: parse.y:4220
+#: parse.y:4233
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr "неочікуваний аргумент бінарного умовного оператора `%s'"
 
-#: parse.y:4224
+#: parse.y:4237
 msgid "unexpected argument to conditional binary operator"
 msgstr "неочікуваний аргумент бінарного умовного оператора"
 
-#: parse.y:4235
+#: parse.y:4248
 #, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr "неочікувана лексема `%c' в умовній команді"
 
-#: parse.y:4238
+#: parse.y:4251
 #, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr "неочікувана лексема `%s' в умовній команді"
 
-#: parse.y:4242
+#: parse.y:4255
 #, c-format
 msgid "unexpected token %d in conditional command"
 msgstr "неочікувана лексема %d в умовній команді"
 
-#: parse.y:5566
+#: parse.y:5590
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "синтаксична помилка коло неочікуваної лексеми `%s'"
 
-#: parse.y:5584
+#: parse.y:5608
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "синтаксична помилка коло `%s'"
 
-#: parse.y:5594
+#: parse.y:5618
 msgid "syntax error: unexpected end of file"
 msgstr "синтаксична помилка: раптово скінчився файл"
 
-#: parse.y:5594
+#: parse.y:5618
 msgid "syntax error"
 msgstr "синтаксична помилка"
 
-#: parse.y:5656
+#: parse.y:5680
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "Використовуйте \"%s\", щоб вийти з оболонки.\n"
 
-#: parse.y:5818
+#: parse.y:5842
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "файл скінчився, перш ніж було знайдено відповідну `)'"
 
-#: pcomplete.c:1030
+#: pcomplete.c:1079
 #, c-format
 msgid "completion: function `%s' not found"
 msgstr "завершення: функцію `%s' не знайдено"
@@ -1445,26 +1460,26 @@ msgstr "завершення: функцію `%s' не знайдено"
 msgid "progcomp_insert: %s: NULL COMPSPEC"
 msgstr "progcomp_insert: %s: NULL COMPSPEC"
 
-#: print_cmd.c:296
+#: print_cmd.c:300
 #, c-format
 msgid "print_command: bad connector `%d'"
 msgstr "print_command: неправильний з’єднувальний оператор `%d'"
 
-#: print_cmd.c:368
+#: print_cmd.c:373
 #, fuzzy, c-format
 msgid "xtrace_set: %d: invalid file descriptor"
 msgstr "%d: неправильний дескриптор файлу: %s"
 
-#: print_cmd.c:373
+#: print_cmd.c:378
 msgid "xtrace_set: NULL file pointer"
 msgstr ""
 
-#: print_cmd.c:377
+#: print_cmd.c:382
 #, c-format
 msgid "xtrace fd (%d) != fileno xtrace fp (%d)"
 msgstr ""
 
-#: print_cmd.c:1478
+#: print_cmd.c:1503
 #, c-format
 msgid "cprintf: `%c': invalid format character"
 msgstr "cprintf: `%c': неправильний символ шаблону"
@@ -1502,33 +1517,33 @@ msgstr "%s: неможливо означити елемент масиву сп
 msgid "/dev/(tcp|udp)/host/port not supported without networking"
 msgstr "/dev/(tcp|udp)/host/port не підтримується"
 
-#: redir.c:818 redir.c:930 redir.c:993 redir.c:1136
+#: redir.c:818 redir.c:930 redir.c:993 redir.c:1142
 msgid "redirection error: cannot duplicate fd"
 msgstr "помилка переспрямування: не вдається створити копію дескриптора файлу"
 
-#: shell.c:333
+#: shell.c:337
 msgid "could not find /tmp, please create!"
 msgstr "не вдається знайти /tmp, будь ласка створіть його!"
 
-#: shell.c:337
+#: shell.c:341
 msgid "/tmp must be a valid directory name"
 msgstr "/tmp має бути назвою дійсної директорії"
 
-#: shell.c:884
+#: shell.c:888
 #, c-format
 msgid "%c%c: invalid option"
 msgstr "%c%c: невірний параметр"
 
-#: shell.c:1652
+#: shell.c:1662
 msgid "I have no name!"
 msgstr "У мене нема імені!"
 
-#: shell.c:1795
+#: shell.c:1807
 #, c-format
 msgid "GNU bash, version %s-(%s)\n"
 msgstr "GNU bash, версія %s-(%s)\n"
 
-#: shell.c:1796
+#: shell.c:1808
 #, c-format
 msgid ""
 "Usage:\t%s [GNU long option] [option] ...\n"
@@ -1537,44 +1552,44 @@ msgstr ""
 "Використовуйте:\t%s [довгий параметр GNU] [параметр] ...\n"
 "\t%s [довгий параметр GNU] [параметр] файл_сценарію ...\n"
 
-#: shell.c:1798
+#: shell.c:1810
 msgid "GNU long options:\n"
 msgstr "Довгі параметри GNU:\n"
 
-#: shell.c:1802
+#: shell.c:1814
 msgid "Shell options:\n"
 msgstr "Параметри оболонки:\n"
 
-#: shell.c:1803
+#: shell.c:1815
 msgid "\t-irsD or -c command or -O shopt_option\t\t(invocation only)\n"
 msgstr "\t-irsD чи -c команда чи -O параметр_shopt\t\t(тільки на початку)\n"
 
-#: shell.c:1818
+#: shell.c:1830
 #, c-format
 msgid "\t-%s or -o option\n"
 msgstr "\t-%s чи -o параметр\n"
 
-#: shell.c:1824
+#: shell.c:1836
 #, c-format
 msgid "Type `%s -c \"help set\"' for more information about shell options.\n"
 msgstr ""
 "Введіть `%s -c \"help set\"', щоб отримати більше інформації про параметри "
 "оболонки.\n"
 
-#: shell.c:1825
+#: shell.c:1837
 #, c-format
 msgid "Type `%s -c help' for more information about shell builtin commands.\n"
 msgstr ""
 "Введіть `%s -c help', щоб отримати більше інформації про вбудовані команди "
 "оболонки.\n"
 
-#: shell.c:1826
+#: shell.c:1838
 #, c-format
 msgid "Use the `bashbug' command to report bugs.\n"
 msgstr ""
 "Щоб повідомити про помилку в програмі, використовуйте команду `bashbug'.\n"
 
-#: sig.c:638
+#: sig.c:647
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
 msgstr "sigprocmask: %d: невірна операція"
@@ -1748,85 +1763,85 @@ msgstr "Невідомий сигнал №"
 msgid "Unknown Signal #%d"
 msgstr "Невідомий сигнал №%d"
 
-#: subst.c:1333 subst.c:1502
+#: subst.c:1335 subst.c:1506
 #, c-format
 msgid "bad substitution: no closing `%s' in %s"
 msgstr "неправильна заміна: немає заключної `%s' у %s"
 
-#: subst.c:2795
+#: subst.c:2801
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr "%s: неможливо означити елемент масиву списком"
 
-#: subst.c:4979 subst.c:4995
+#: subst.c:4991 subst.c:5007
 msgid "cannot make pipe for process substitution"
 msgstr "не вдається створити канал для підставляння процесу"
 
-#: subst.c:5027
+#: subst.c:5039
 msgid "cannot make child for process substitution"
 msgstr "не вдається створити дочірній процес для підставляння процесу"
 
-#: subst.c:5072
+#: subst.c:5084
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "не вдається відкрити іменований канал %s для читання"
 
-#: subst.c:5074
+#: subst.c:5086
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "не вдається відкрити іменований канал %s для запису"
 
-#: subst.c:5092
+#: subst.c:5104
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr ""
 
-#: subst.c:5284
+#: subst.c:5296
 msgid "cannot make pipe for command substitution"
 msgstr "не вдається створити канал для підставляння команди"
 
-#: subst.c:5322
+#: subst.c:5334
 msgid "cannot make child for command substitution"
 msgstr "не вдається створити дочірній процес для підставляння команди"
 
-#: subst.c:5339
+#: subst.c:5351
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr ""
 "command_substitute: не вдається створити копію каналу із файловим "
 "дескриптором 1"
 
-#: subst.c:5859
+#: subst.c:5875
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: параметр нульової довжини чи не вказаний"
 
-#: subst.c:6125 subst.c:6140
+#: subst.c:6141 subst.c:6156
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: підрядок коротший за 0"
 
-#: subst.c:7271
+#: subst.c:7284
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: неправильна заміна"
 
-#: subst.c:7347
+#: subst.c:7361
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: не можна призначити таким чином"
 
-#: subst.c:7684
+#: subst.c:7697
 msgid ""
 "future versions of the shell will force evaluation as an arithmetic "
 "substitution"
 msgstr ""
 
-#: subst.c:8149
+#: subst.c:8165
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "неправильна заміна: немає заключної \"`\" у %s"
 
-#: subst.c:9036
+#: subst.c:9056
 #, c-format
 msgid "no match: %s"
 msgstr "нема відповідника: %s"
@@ -1863,16 +1878,16 @@ msgstr "%s: очікувався бінарний оператор"
 msgid "missing `]'"
 msgstr "відсутня `]'"
 
-#: trap.c:207
+#: trap.c:209
 msgid "invalid signal number"
 msgstr "неправильний номер сигналу"
 
-#: trap.c:337
+#: trap.c:329
 #, c-format
 msgid "run_pending_traps: bad value in trap_list[%d]: %p"
 msgstr "run_pending_traps: неправильне значення у trap_list[%d]: %p"
 
-#: trap.c:341
+#: trap.c:333
 #, c-format
 msgid ""
 "run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself"
@@ -1880,68 +1895,68 @@ msgstr ""
 "run_pending_traps: обробник сигналу є SIG_DFL, %d (%s) повторно надсилається "
 "собі"
 
-#: trap.c:393
+#: trap.c:379
 #, c-format
 msgid "trap_handler: bad signal %d"
 msgstr "trap_handler: неправильний сигнал %d"
 
-#: variables.c:363
+#: variables.c:366
 #, c-format
 msgid "error importing function definition for `%s'"
 msgstr "помилка імпортування означення функції `%s'"
 
-#: variables.c:755
+#: variables.c:764
 #, c-format
 msgid "shell level (%d) too high, resetting to 1"
 msgstr "рівень оболонки (%d) занадто високий, перевстановлено у 1"
 
-#: variables.c:1932
+#: variables.c:1941
 #, fuzzy
 msgid "make_local_variable: no function context at current scope"
 msgstr ""
 "make_local_variable: немає контексту функції у поточному оточенні виконання"
 
-#: variables.c:3182
+#: variables.c:3192
 #, fuzzy
 msgid "all_local_variables: no function context at current scope"
 msgstr ""
 "all_local_variables: немає контексту функції у поточному оточенні виконання"
 
-#: variables.c:3427
+#: variables.c:3437
 #, fuzzy, c-format
 msgid "%s has null exportstr"
 msgstr "%s: параметр нульової довжини чи не вказаний"
 
-#: variables.c:3432 variables.c:3441
+#: variables.c:3442 variables.c:3451
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "невірний символ %d у рядку експорту для %s"
 
-#: variables.c:3447
+#: variables.c:3457
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "немає `=' у рядку експорту для %s"
 
-#: variables.c:3891
+#: variables.c:3917
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr ""
 "pop_var_context: перший елемент shell_variables не є контекстом функції"
 
-#: variables.c:3904
+#: variables.c:3930
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: немає контексту global_variables"
 
-#: variables.c:3978
+#: variables.c:4004
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr ""
 "pop_scope: перший елемент shell_variables не є тимчасовим оточенням виконання"
 
-#: variables.c:4786
+#: variables.c:4821
 #, fuzzy, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: не вдається відкрити: %s"
 
-#: variables.c:4791
+#: variables.c:4826
 #, fuzzy, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%d: неправильний дескриптор файлу: %s"
@@ -2019,8 +2034,9 @@ msgid "unalias [-a] name [name ...]"
 msgstr "unalias [-a] ім’я [ім’я ...]"
 
 #: builtins.c:51
+#, fuzzy
 msgid ""
-"bind [-lpvsPVS] [-m keymap] [-f filename] [-q name] [-u name] [-r keyseq] [-"
+"bind [-lpsvPSVX] [-m keymap] [-f filename] [-q name] [-u name] [-r keyseq] [-"
 "x keyseq:shell-command] [keyseq:readline-function or readline-command]"
 msgstr ""
 "bind [-lpvsPVS] [-m keymap] [-f файл] [-q ім’я] [-u ім’я] [-r послідовність-"
@@ -2233,7 +2249,8 @@ msgid "type [-afptP] name [name ...]"
 msgstr "type [-afptP] ім’я [ім’я ...]"
 
 #: builtins.c:169
-msgid "ulimit [-SHacdefilmnpqrstuvx] [limit]"
+#, fuzzy
+msgid "ulimit [-SHabcdefilmnpqrstuvxT] [limit]"
 msgstr "ulimit [-SHacdefilmnpqrstuvx] [обмеження]"
 
 #: builtins.c:172
@@ -2241,7 +2258,8 @@ msgid "umask [-p] [-S] [mode]"
 msgstr "umask [-p] [-S] [режим-доступу]"
 
 #: builtins.c:175
-msgid "wait [id]"
+#, fuzzy
+msgid "wait [id ...]"
 msgstr "wait [ідентифікатор]"
 
 #: builtins.c:179
@@ -2429,6 +2447,7 @@ msgstr ""
 "    Завершується невдало, якщо ІМ’Я не є визначеним псевдонімом."
 
 #: builtins.c:289
+#, fuzzy
 msgid ""
 "Set Readline key bindings and variables.\n"
 "    \n"
@@ -2462,6 +2481,8 @@ msgid ""
 "      -f  filename       Read key bindings from FILENAME.\n"
 "      -x  keyseq:shell-command\tCause SHELL-COMMAND to be executed when\n"
 "    \t\t\t\tKEYSEQ is entered.\n"
+"      -X\t\t     List key sequences bound with -x and associated commands\n"
+"                         in a form that can be reused as input.\n"
 "    \n"
 "    Exit Status:\n"
 "    bind returns 0 unless an unrecognized option is given or an error occurs."
@@ -2508,7 +2529,7 @@ msgstr ""
 "    Команда завершується успішно, якщо вказані правильні параметри та не\n"
 "    виникло помилки під час виконання."
 
-#: builtins.c:326
+#: builtins.c:328
 msgid ""
 "Exit for, while, or until loops.\n"
 "    \n"
@@ -2526,7 +2547,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда завершується невдало, якщо N менше за 1."
 
-#: builtins.c:338
+#: builtins.c:340
 msgid ""
 "Resume for, while, or until loops.\n"
 "    \n"
@@ -2544,7 +2565,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда завершується невдало, якщо N менше 1."
 
-#: builtins.c:350
+#: builtins.c:352
 msgid ""
 "Execute shell builtins.\n"
 "    \n"
@@ -2568,7 +2589,7 @@ msgstr ""
 "    Команда повертає код завершення ВБУДОВАНОЇ-КОМАНДИ або помилку, якщо\n"
 "    ВБУДОВАНА-КОМАНДА не є вбудованою командою оболонки."
 
-#: builtins.c:365
+#: builtins.c:367
 #, fuzzy
 msgid ""
 "Return the context of the current subroutine call.\n"
@@ -2597,7 +2618,7 @@ msgstr ""
 "    Команда завершується невдало, якщо оболонка зараз не виконує функцію\n"
 "    або якщо ВИРАЗ є неправильним."
 
-#: builtins.c:383
+#: builtins.c:385
 #, fuzzy
 msgid ""
 "Change the shell working directory.\n"
@@ -2621,13 +2642,18 @@ msgid ""
 "    its value is used for DIR.\n"
 "    \n"
 "    Options:\n"
-"        -L\tforce symbolic links to be followed\n"
+"        -L\tforce symbolic links to be followed: resolve symbolic links in\n"
+"    \tDIR after processing instances of `..'\n"
 "        -P\tuse the physical directory structure without following symbolic\n"
-"    \tlinks\n"
+"    \tlinks: resolve symbolic links in DIR before processing instances\n"
+"    \tof `..'\n"
 "        -e\tif the -P option is supplied, and the current working directory\n"
 "    \tcannot be determined successfully, exit with a non-zero status\n"
 "    \n"
 "    The default is to follow symbolic links, as if `-L' were specified.\n"
+"    `..' is processed by removing the immediately previous pathname "
+"component\n"
+"    back to a slash or the beginning of DIR.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns 0 if the directory is changed, and if $PWD is set successfully "
@@ -2660,7 +2686,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда завершується невдало, якщо директорію змінити не вдалося."
 
-#: builtins.c:414
+#: builtins.c:420
 msgid ""
 "Print the name of the current working directory.\n"
 "    \n"
@@ -2689,7 +2715,7 @@ msgstr ""
 "    Команда завершується невдало, якщо вказано неправильний параметр чи\n"
 "    не вдається отримати доступ до поточної робочої директорії."
 
-#: builtins.c:431
+#: builtins.c:437
 msgid ""
 "Null command.\n"
 "    \n"
@@ -2705,7 +2731,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда завжди успішна."
 
-#: builtins.c:442
+#: builtins.c:448
 msgid ""
 "Return a successful result.\n"
 "    \n"
@@ -2717,7 +2743,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда завжди успішна."
 
-#: builtins.c:451
+#: builtins.c:457
 msgid ""
 "Return an unsuccessful result.\n"
 "    \n"
@@ -2729,7 +2755,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда завжди завершується невдало."
 
-#: builtins.c:460
+#: builtins.c:466
 msgid ""
 "Execute a simple command or display information about commands.\n"
 "    \n"
@@ -2766,7 +2792,7 @@ msgstr ""
 "буде\n"
 "    знайдено."
 
-#: builtins.c:479
+#: builtins.c:485
 #, fuzzy
 msgid ""
 "Set variable values and attributes.\n"
@@ -2838,7 +2864,7 @@ msgstr ""
 "виникло\n"
 "    помилки під час виконання."
 
-#: builtins.c:517
+#: builtins.c:523
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
@@ -2848,7 +2874,7 @@ msgstr ""
 "    \n"
 "    Команда вийшла з ужитку. Дивіться `help declare'."
 
-#: builtins.c:525
+#: builtins.c:531
 msgid ""
 "Define local variables.\n"
 "    \n"
@@ -2876,11 +2902,14 @@ msgstr ""
 "    Команда завершується невдало, якщо вказано невірні параметри, якщо\n"
 "    трапилася помилка або якщо оболонка зараз не виконує функцію."
 
-#: builtins.c:542
+#: builtins.c:548
+#, fuzzy
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
-"    Display the ARGs on the standard output followed by a newline.\n"
+"    Display the ARGs, separated by a single space character and followed by "
+"a\n"
+"    newline, on the standard output.\n"
 "    \n"
 "    Options:\n"
 "      -n\tdo not append a newline\n"
@@ -2892,6 +2921,7 @@ msgid ""
 "      \\b\tbackspace\n"
 "      \\c\tsuppress further output\n"
 "      \\e\tescape character\n"
+"      \\E\tescape character\n"
 "      \\f\tform feed\n"
 "      \\n\tnew line\n"
 "      \\r\tcarriage return\n"
@@ -2935,7 +2965,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда завершується невдало, якщо виникне помилка запису."
 
-#: builtins.c:576
+#: builtins.c:584
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -2957,7 +2987,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда завершується невдало, якщо трапиться помилка запису."
 
-#: builtins.c:591
+#: builtins.c:599
 msgid ""
 "Enable and disable shell builtins.\n"
 "    \n"
@@ -3012,7 +3042,7 @@ msgstr ""
 "    Команда завершується невдало, якщо ІМ’Я не є вбудованою командою\n"
 "    оболонки або якщо трапиться помилка під час виконання."
 
-#: builtins.c:619
+#: builtins.c:627
 msgid ""
 "Execute arguments as a shell command.\n"
 "    \n"
@@ -3034,7 +3064,7 @@ msgstr ""
 "команди\n"
 "    є порожнім рядком, команда завершується успішно."
 
-#: builtins.c:631
+#: builtins.c:639
 msgid ""
 "Parse option arguments.\n"
 "    \n"
@@ -3119,7 +3149,7 @@ msgstr ""
 "    Команда завершується успішно, якщо знайдено параметр; помилково, якщо\n"
 "    параметри скінчилися або трапилася помилка."
 
-#: builtins.c:673
+#: builtins.c:681
 msgid ""
 "Replace the shell with the given command.\n"
 "    \n"
@@ -3160,7 +3190,7 @@ msgstr ""
 "    Команда завершується невдало, якщо команду не буде знайдено або якщо\n"
 "    трапиться помилка переспрямування."
 
-#: builtins.c:694
+#: builtins.c:702
 msgid ""
 "Exit the shell.\n"
 "    \n"
@@ -3172,7 +3202,7 @@ msgstr ""
 "    Виходить з оболонки, повертаючи статус N. Якщо N не вказано, береться\n"
 "    статус останньої запущеної команди."
 
-#: builtins.c:703
+#: builtins.c:711
 msgid ""
 "Exit a login shell.\n"
 "    \n"
@@ -3186,7 +3216,7 @@ msgstr ""
 "команду\n"
 "    запущено не у оболонці сеансу."
 
-#: builtins.c:713
+#: builtins.c:721
 msgid ""
 "Display or execute commands from the history list.\n"
 "    \n"
@@ -3241,7 +3271,7 @@ msgstr ""
 "    Команда завершується зі статусом запущених команд, або помилкою, якщо\n"
 "    трапиться помилка."
 
-#: builtins.c:743
+#: builtins.c:751
 #, fuzzy
 msgid ""
 "Move job to the foreground.\n"
@@ -3264,7 +3294,7 @@ msgstr ""
 "    Команда завершується зі статусом завершення завдання, що переведене\n"
 "    у пріоритетний режим, або помилку, якщо трапиться помилка."
 
-#: builtins.c:758
+#: builtins.c:766
 msgid ""
 "Move jobs to the background.\n"
 "    \n"
@@ -3289,7 +3319,7 @@ msgstr ""
 "якщо\n"
 "    трапиться помилка."
 
-#: builtins.c:772
+#: builtins.c:780
 msgid ""
 "Remember or display program locations.\n"
 "    \n"
@@ -3334,7 +3364,7 @@ msgstr ""
 "    Команда завершується невдало, якщо ІМ’Я не вдається знайти або якщо\n"
 "    вказано невірний параметр."
 
-#: builtins.c:797
+#: builtins.c:805
 msgid ""
 "Display information about builtin commands.\n"
 "    \n"
@@ -3377,7 +3407,7 @@ msgstr ""
 "    невірний параметр."
 
 # WTF??? history list += history + history file ???
-#: builtins.c:821
+#: builtins.c:829
 msgid ""
 "Display or manipulate the history list.\n"
 "    \n"
@@ -3446,7 +3476,7 @@ msgstr ""
 "виникло\n"
 "    помилки під час виконання."
 
-#: builtins.c:857
+#: builtins.c:865
 msgid ""
 "Display status of jobs.\n"
 "    \n"
@@ -3491,7 +3521,7 @@ msgstr ""
 "    виникло помилки під час виконання. При використанні -x команда\n"
 "    завершується зі статусом завершення КОМАНДИ."
 
-#: builtins.c:884
+#: builtins.c:892
 msgid ""
 "Remove jobs from current shell.\n"
 "    \n"
@@ -3523,7 +3553,7 @@ msgstr ""
 "    Команда завершується невдало, якщо вказано неправильний параметр чи\n"
 "    ЗАВДАННЯ."
 
-#: builtins.c:903
+#: builtins.c:911
 msgid ""
 "Send a signal to a job.\n"
 "    \n"
@@ -3565,7 +3595,7 @@ msgstr ""
 "    Команда завершується успішно, якщо вказані правильні аргументи та не\n"
 "    трапилося помилки під час виконання."
 
-#: builtins.c:926
+#: builtins.c:934
 #, fuzzy
 msgid ""
 "Evaluate arithmetic expressions.\n"
@@ -3652,7 +3682,7 @@ msgstr ""
 "    Якщо результатом обчислення останнього АРГУМЕНТУ є 0, let повертає 1,\n"
 "    інакше — 0."
 
-#: builtins.c:971
+#: builtins.c:979
 #, fuzzy
 msgid ""
 "Read a line from the standard input and split it into fields.\n"
@@ -3690,14 +3720,17 @@ msgid ""
 "is\n"
 "    \t\tnot read withint TIMEOUT seconds.  The value of the TMOUT\n"
 "    \t\tvariable is the default timeout.  TIMEOUT may be a\n"
-"    \t\tfractional number.  If TIMEOUT is 0, read returns success only\n"
-"    \t\tif input is available on the specified file descriptor.  The\n"
+"    \t\tfractional number.  If TIMEOUT is 0, read returns immediately,\n"
+"    \t\twithout trying to read any data, returning success only if\n"
+"    \t\tinput is available on the specified file descriptor.  The\n"
 "    \t\texit status is greater than 128 if the timeout is exceeded\n"
 "      -u fd\t\tread from file descriptor FD instead of the standard input\n"
 "    \n"
 "    Exit Status:\n"
 "    The return code is zero, unless end-of-file is encountered, read times "
-"out,\n"
+"out\n"
+"    (in which case it's greater than 128), a variable assignment error "
+"occurs,\n"
 "    or an invalid file descriptor is supplied as the argument to -u."
 msgstr ""
 "Читає рядок зі стандартного вводу та розбиває його на поля.\n"
@@ -3742,7 +3775,7 @@ msgstr ""
 "час\n"
 "    очікування, або якщо із -u вказано неправильний файловий дескриптор."
 
-#: builtins.c:1014
+#: builtins.c:1024
 msgid ""
 "Return from a shell function.\n"
 "    \n"
@@ -3763,7 +3796,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда повертає N, або помилку, якщо викликана не у функції чи сценарії."
 
-#: builtins.c:1027
+#: builtins.c:1037
 #, fuzzy
 msgid ""
 "Set or unset values of shell options and positional parameters.\n"
@@ -3830,7 +3863,7 @@ msgid ""
 "      -E  If set, the ERR trap is inherited by shell functions.\n"
 "      -H  Enable ! style history substitution.  This flag is on\n"
 "          by default when the shell is interactive.\n"
-"      -P  If set, do not follow symbolic links when executing commands\n"
+"      -P  If set, do not resolve symbolic links when executing commands\n"
 "          such as cd which change the current directory.\n"
 "      -T  If set, the DEBUG trap is inherited by shell functions.\n"
 "      --  Assign any remaining arguments to the positional parameters.\n"
@@ -3938,7 +3971,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда завершується успішно, якщо вказані правильні параметри."
 
-#: builtins.c:1112
+#: builtins.c:1122
 msgid ""
 "Unset values and attributes of shell variables and functions.\n"
 "    \n"
@@ -3975,7 +4008,7 @@ msgstr ""
 "ІМ’Я\n"
 "    доступне лише для читання."
 
-#: builtins.c:1132
+#: builtins.c:1142
 msgid ""
 "Set export attribute for shell variables.\n"
 "    \n"
@@ -4008,7 +4041,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда завершується успішно, якщо вказано правильні параметри та ІМЕНА."
 
-#: builtins.c:1151
+#: builtins.c:1161
 msgid ""
 "Mark shell variables as unchangeable.\n"
 "    \n"
@@ -4045,7 +4078,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда завершується успішно, якщо вказано правильні параметри та ІМЕНА."
 
-#: builtins.c:1172
+#: builtins.c:1182
 msgid ""
 "Shift positional parameters.\n"
 "    \n"
@@ -4063,7 +4096,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда завершується невдало, якщо N менше за нуль чи більше за $#."
 
-#: builtins.c:1184 builtins.c:1199
+#: builtins.c:1194 builtins.c:1209
 msgid ""
 "Execute commands from a file in the current shell.\n"
 "    \n"
@@ -4087,7 +4120,7 @@ msgstr ""
 "або\n"
 "    помилку, якщо ФАЙЛ не вдається прочитати."
 
-#: builtins.c:1215
+#: builtins.c:1225
 msgid ""
 "Suspend shell execution.\n"
 "    \n"
@@ -4112,7 +4145,7 @@ msgstr ""
 "    Команда завершується невдало, якщо не ввімкнене керування завданнями чи\n"
 "    якщо трапиться помилка."
 
-#: builtins.c:1231
+#: builtins.c:1241
 #, fuzzy
 msgid ""
 "Evaluate conditional expression.\n"
@@ -4272,7 +4305,7 @@ msgstr ""
 "вказано\n"
 "    невірний аргумент чи ВИРАЗ хибний."
 
-#: builtins.c:1311
+#: builtins.c:1321
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -4285,7 +4318,7 @@ msgstr ""
 "останнім\n"
 "    аргументом має бути `]'."
 
-#: builtins.c:1320
+#: builtins.c:1330
 #, fuzzy
 msgid ""
 "Display process times.\n"
@@ -4305,7 +4338,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда завжди успішна."
 
-#: builtins.c:1332
+#: builtins.c:1342
 #, fuzzy
 msgid ""
 "Trap signals and other events.\n"
@@ -4382,7 +4415,7 @@ msgstr ""
 "    Команда завершується успішно, якщо вказані правильні параметри та "
 "СИГНАЛИ."
 
-#: builtins.c:1368
+#: builtins.c:1378
 msgid ""
 "Display information about command type.\n"
 "    \n"
@@ -4434,7 +4467,8 @@ msgstr ""
 "якщо\n"
 "    хоч одне з них не вдасться знайти."
 
-#: builtins.c:1399
+#: builtins.c:1409
+#, fuzzy
 msgid ""
 "Modify shell resource limits.\n"
 "    \n"
@@ -4463,6 +4497,9 @@ msgid ""
 "      -u\tthe maximum number of user processes\n"
 "      -v\tthe size of virtual memory\n"
 "      -x\tthe maximum number of file locks\n"
+"      -T    the maximum number of threads\n"
+"    \n"
+"    Not all options are available on all platforms.\n"
 "    \n"
 "    If LIMIT is given, it is the new value of the specified resource; the\n"
 "    special LIMIT values `soft', `hard', and `unlimited' stand for the\n"
@@ -4521,7 +4558,7 @@ msgstr ""
 "    Команда завершується невдало, якщо вказано неправильний параметр чи\n"
 "    трапилася помилка під час виконання."
 
-#: builtins.c:1444
+#: builtins.c:1457
 msgid ""
 "Display or set file mode mask.\n"
 "    \n"
@@ -4555,21 +4592,22 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда завершується успішно, якщо вказано правильну МАСКУ та параметри."
 
-#: builtins.c:1464
+#: builtins.c:1477
+#, fuzzy
 msgid ""
 "Wait for job completion and return exit status.\n"
 "    \n"
-"    Waits for the process identified by ID, which may be a process ID or a\n"
+"    Waits for each process identified by an ID, which may be a process ID or "
+"a\n"
 "    job specification, and reports its termination status.  If ID is not\n"
 "    given, waits for all currently active child processes, and the return\n"
 "    status is zero.  If ID is a a job specification, waits for all "
 "processes\n"
-"    in the job's pipeline.\n"
+"    in that job's pipeline.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns the status of ID; fails if ID is invalid or an invalid option "
-"is\n"
-"    given."
+"    Returns the status of the last ID; fails if ID is invalid or an invalid\n"
+"    option is given."
 msgstr ""
 "Чекає завершення виконання завдання та повертає його код завершення.\n"
 "    \n"
@@ -4585,7 +4623,7 @@ msgstr ""
 "вказано\n"
 "    неправильні параметри чи ІДЕНТИФІКАТОР."
 
-#: builtins.c:1482
+#: builtins.c:1495
 msgid ""
 "Wait for process completion and return exit status.\n"
 "    \n"
@@ -4612,7 +4650,7 @@ msgstr ""
 "вказано\n"
 "    неправильний ІДЕНТИФІКАТОР чи параметр."
 
-#: builtins.c:1497
+#: builtins.c:1510
 #, fuzzy
 msgid ""
 "Execute commands for each member in a list.\n"
@@ -4634,7 +4672,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда повертає код завершення останньої виконаної команди."
 
-#: builtins.c:1511
+#: builtins.c:1524
 msgid ""
 "Arithmetic for loop.\n"
 "    \n"
@@ -4664,7 +4702,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда повертає код завершення останньої виконаної команди."
 
-#: builtins.c:1529
+#: builtins.c:1542
 msgid ""
 "Select words from a list and execute commands.\n"
 "    \n"
@@ -4703,7 +4741,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда повертає код завершення останньої виконаної команди."
 
-#: builtins.c:1550
+#: builtins.c:1563
 msgid ""
 "Report time consumed by pipeline's execution.\n"
 "    \n"
@@ -4731,7 +4769,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда повертає код завершення ЛАНЦЮЖКА-КОМАНД."
 
-#: builtins.c:1567
+#: builtins.c:1580
 #, fuzzy
 msgid ""
 "Execute commands based on pattern matching.\n"
@@ -4751,7 +4789,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда повертає код завершення останньої виконаної команди."
 
-#: builtins.c:1579
+#: builtins.c:1592
 msgid ""
 "Execute commands based on conditional.\n"
 "    \n"
@@ -4784,7 +4822,7 @@ msgstr ""
 "    Команда повертає код завершення останньої виконаної команди або нуль,\n"
 "    якщо жодна з перевірених умов не була істинною."
 
-#: builtins.c:1596
+#: builtins.c:1609
 msgid ""
 "Execute commands as long as a test succeeds.\n"
 "    \n"
@@ -4802,7 +4840,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда повертає код завершення останньої виконаної команди."
 
-#: builtins.c:1608
+#: builtins.c:1621
 msgid ""
 "Execute commands as long as a test does not succeed.\n"
 "    \n"
@@ -4821,7 +4859,7 @@ msgstr ""
 "    Команда повертає код завершення останньої виконаної команди."
 
 # WTF? How can it return exit code of _asynchronous_ process...
-#: builtins.c:1620
+#: builtins.c:1633
 msgid ""
 "Create a coprocess named NAME.\n"
 "    \n"
@@ -4845,7 +4883,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда повертає код завершення КОМАНДИ."
 
-#: builtins.c:1634
+#: builtins.c:1647
 msgid ""
 "Define shell function.\n"
 "    \n"
@@ -4871,7 +4909,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда завершується невдало, якщо ІМ’Я є незмінним."
 
-#: builtins.c:1648
+#: builtins.c:1661
 msgid ""
 "Group commands as a unit.\n"
 "    \n"
@@ -4890,7 +4928,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Конструкція повертає код завершення останньої виконаної команди."
 
-#: builtins.c:1660
+#: builtins.c:1673
 msgid ""
 "Resume job in foreground.\n"
 "    \n"
@@ -4915,7 +4953,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда повертає статус продовженого завдання."
 
-#: builtins.c:1675
+#: builtins.c:1688
 msgid ""
 "Evaluate arithmetic expression.\n"
 "    \n"
@@ -4933,7 +4971,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда завершується успішно, якщо результат обчислення ненульовий."
 
-#: builtins.c:1687
+#: builtins.c:1700
 msgid ""
 "Execute conditional command.\n"
 "    \n"
@@ -4982,7 +5020,7 @@ msgstr ""
 "    Код завершення:\n"
 "    Команда завершується успішно, якщо ВИРАЗ істинний."
 
-#: builtins.c:1713
+#: builtins.c:1726
 #, fuzzy
 msgid ""
 "Common shell variable names and usage.\n"
@@ -5086,7 +5124,7 @@ msgstr ""
 "    HISTIGNORE\tРозділений двокрапкою список шаблонів, що використовуються\n"
 "    \t\tпри визначенні, чи зберігати команду у списку історії.\n"
 
-#: builtins.c:1770
+#: builtins.c:1783
 msgid ""
 "Add directories to stack.\n"
 "    \n"
@@ -5144,7 +5182,7 @@ msgstr ""
 "    Команда завершується невдало, якщо вказаний неправильний аргумент чи\n"
 "    якщо не вдається змінити поточну директорію."
 
-#: builtins.c:1804
+#: builtins.c:1817
 msgid ""
 "Remove directories from stack.\n"
 "    \n"
@@ -5195,7 +5233,7 @@ msgstr ""
 "    Команда завершується невдало, якщо вказано невірний аргумент чи якщо\n"
 "    не вдається змінити поточну директорію."
 
-#: builtins.c:1834
+#: builtins.c:1847
 msgid ""
 "Display directory stack.\n"
 "    \n"
@@ -5250,7 +5288,7 @@ msgstr ""
 "якщо\n"
 "    трапиться помилка."
 
-#: builtins.c:1863
+#: builtins.c:1876
 msgid ""
 "Set and unset shell options.\n"
 "    \n"
@@ -5286,7 +5324,7 @@ msgstr ""
 "    Команда завершується успішно, якщо ПАРАМЕТР ввімкнено; невдало, якщо\n"
 "    вказано неправильні параметри чи ПАРАМЕТР вимкнено."
 
-#: builtins.c:1884
+#: builtins.c:1897
 #, fuzzy
 msgid ""
 "Formats and prints ARGUMENTS under control of the FORMAT.\n"
@@ -5305,8 +5343,8 @@ msgid ""
 "    argument.\n"
 "    \n"
 "    In addition to the standard format specifications described in printf"
-"(1)\n"
-"    and printf(3), printf interprets:\n"
+"(1),\n"
+"    printf interprets:\n"
 "    \n"
 "      %b\texpand backslash escape sequences in the corresponding argument\n"
 "      %q\tquote the argument in a way that can be reused as shell input\n"
@@ -5344,7 +5382,7 @@ msgstr ""
 "або\n"
 "    якщо трапиться помилка запису чи присвоєння."
 
-#: builtins.c:1913
+#: builtins.c:1926
 #, fuzzy
 msgid ""
 "Specify how arguments are to be completed by Readline.\n"
@@ -5389,7 +5427,7 @@ msgstr ""
 "    Команда завершується успішно, якщо вказано правильні параметри та не\n"
 "    трапиться помилки під час виконання."
 
-#: builtins.c:1941
+#: builtins.c:1954
 #, fuzzy
 msgid ""
 "Display possible completions depending on the options.\n"
@@ -5412,7 +5450,7 @@ msgstr ""
 "    Команда завершується успішно, якщо вказано правильні параметри і не\n"
 "    трапиться помилки під час виконання."
 
-#: builtins.c:1956
+#: builtins.c:1969
 #, fuzzy
 msgid ""
 "Modify or display completion options.\n"
@@ -5467,7 +5505,7 @@ msgstr ""
 "    Команда завершується успішно, якщо вказано правильні параметри та\n"
 "    вказівки завершень для ІМЕН існують."
 
-#: builtins.c:1986
+#: builtins.c:1999
 #, fuzzy
 msgid ""
 "Read lines from the standard input into an indexed array variable.\n"
@@ -5547,7 +5585,7 @@ msgstr ""
 "або\n"
 "    якщо МАСИВ є незмінним."
 
-#: builtins.c:2020
+#: builtins.c:2033
 msgid ""
 "Read lines from a file into an array variable.\n"
 "    \n"

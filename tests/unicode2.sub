@@ -1,0 +1,22 @@
+export LANG=en_US.UTF-8
+
+printf '%s\n' "$(printf '\uff')" | od -b
+printf '%s\n' $'\uff' | od -b
+
+printf '\uff'\\n | od -b
+echo $'\uff' | od -b
+
+printf '\uffff'\\n | od -b
+echo $'\uffff' | od -b
+
+printf '\Ufffffffe'\\n | od -b
+echo $'\Ufffffffe' | od -b
+
+printf '\Uffffffff'\\n | od -b
+echo $'\Uffffffff' | od -b
+
+LC_CTYPE=C printf '\uff'\\n | od -b
+LC_CTYPE=ru_RU.CP1251 printf '\uff'\\n | od -b
+LC_CTYPE=en_US.UTF-8 printf '\uff'\\n | od -b
+
+echo -e '\u0041 \u00a3 \u0152' | od -b

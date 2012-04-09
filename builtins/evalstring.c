@@ -309,7 +309,7 @@ parse_and_execute (string, from_file, flags)
 		  command->value.Simple->redirects &&
 		  command->value.Simple->redirects->next == 0 &&
 		  command->value.Simple->redirects->instruction == r_input_direction &&
-		  command->value.Simple->redirects->redirector.dest == 1)
+		  command->value.Simple->redirects->redirector.dest == 0)
 		{
 		  int r;
 		  r = cat_file (command->value.Simple->redirects);

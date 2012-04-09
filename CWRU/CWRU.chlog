@@ -4285,7 +4285,7 @@ findcmd.c
 subst.c
 	- in pos_params, handle case of `start' == 0 by making the list of
 	  positional parameters begin with $0
-	- in parameter_brace_substring, increment `len' if start == 0, sicne
+	- in parameter_brace_substring, increment `len' if start == 0, since
 	  we will be adding $0 to the beginning of the list when we process it
 
 doc/{bash.1,bashref.texi}
@@ -13450,4 +13450,44 @@ unicode.c
 	- u32cconv: return UTF-8 conversion if iconv conversion to local
 	  charset is unsupported
 
-	  
+				    3/2
+				    ---
+lib/readline/complete.c
+	- print_filename: if there is no directory hook, but there is a stat
+	  hook, and we want to append a slash to directories, call the stat
+	  hook before calling path_isdir on the expanded directory name.
+	  Report and pointer to fix from Steve Rago <sar@nec-labs.com>
+
+				    3/3
+				    ---
+builtins/evalstring.c
+	- parse_and_execute: fix to change of 2/18: make sure the file
+	  descriptor being redirected to is 0 before calling cat_file when
+	  we see something like $(< file).  Real fix for bug reported by
+	  Dan Douglas <ormaaj@gmail.com>
+
+subst.c
+	- parameter_brace_patsub: run the replacement string through quote
+	  removal even if the expansion is within double quotes, because
+	  the parser and string extract functions treat the quotes and
+	  backslashes as special.  If they're treated as special, quote
+	  removal should remove them (this is the Posix position and
+	  compatible with ksh93).  THIS IS NOT BACKWARDS COMPATIBLE.
+
+				    3/4
+				    ---
+lib/readline/complete.c
+	- rl_menu_complete: fix to make show-all-if-ambiguous and
+	  menu-complete-display-prefix work together if both are set.  Fix
+	  from Sami Pietila <sami.pietila@gmail.com>
+
+				    3/5
+				    ---
+bashline.c
+	- dircomplete_expand_relpath: new variable, if non-zero, means that
+	  `shopt -s direxpand' should expand relative pathnames.  Zero by
+	  default, not user-settable yet
+	- bash_directory_completion_hook: if we have a relative pathname that
+	  isn't changed by canonicalization or spell checking after being
+	  appended to $PWD, then don't change what the user typed.  Controlled
+	  by dircomplete_expand_relpath

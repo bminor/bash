@@ -256,6 +256,7 @@ int dircomplete_spelling = 0;
 
 /* Expand directory names during word/filename completion. */
 int dircomplete_expand = 0;
+int dircomplete_expand_relpath = 0;
 
 /* When non-zero, perform `normal' shell quoting on completed filenames
    even when the completed name contains a directory name with a shell
@@ -2858,7 +2859,7 @@ bash_directory_expansion (dirname)
 
   d = savestring (*dirname);
 
-  if ((rl_directory_rewrite_hook) &&  (*rl_directory_rewrite_hook) (&d))
+  if ((rl_directory_rewrite_hook) && (*rl_directory_rewrite_hook) (&d))
     {
       free (*dirname);
       *dirname = d;
@@ -3084,11 +3085,31 @@ bash_directory_completion_hook (dirname)
       local_dirname = *dirname = new_dirname;
     }
 
+  /* no_symbolic_links == 0 -> use (default) logical view of the file system.
+     local_dirname[0] == '.' && local_dirname[1] == '/' means files in the
+     current directory (./).
+     local_dirname[0] == '.' && local_dirname[1] == 0 means relative pathnames
+     in the current directory (e.g., lib/sh).
+     XXX - should we do spelling correction on these? */
+
+  /* This is test as it was in bash-4.2: skip relative pathnames in current
+     directory.  Change test to
+      (local_dirname[0] != '.' || (local_dirname[1] && local_dirname[1] != '/'))
+     if we want to skip paths beginning with ./ also. */
   if (no_symbolic_links == 0 && (local_dirname[0] != '.' || local_dirname[1]))
     {
       char *temp1, *temp2;
       int len1, len2;
 
+      /* If we have a relative path
+      		(local_dirname[0] != '/' && local_dirname[0] != '.')
+	 that is canonical after appending it to the current directory, then
+	 	temp1 = temp2+'/'
+	 That is,
+	 	strcmp (temp1, temp2) == 0
+	 after adding a slash to temp2 below.  It should be safe to not
+	 change those.
+      */
       t = get_working_directory ("symlink-hook");
       temp1 = make_absolute (local_dirname, t);
       free (t);
@@ -3123,7 +3144,15 @@ bash_directory_completion_hook (dirname)
 	      temp2[len2 + 1] = '\0';
 	    }
 	}
-      return_value |= STREQ (local_dirname, temp2) == 0;
+
+      /* dircomplete_expand_relpath == 0 means we want to leave relative
+	 pathnames that are unchanged by canonicalization alone.
+	 *local_dirname != '/' && *local_dirname != '.' == relative pathname
+	 (consistent with general.c:absolute_pathname())
+	 temp1 == temp2 (after appending a slash to temp2) means the pathname
+	 is not changed by canonicalization as described above. */
+      if (dircomplete_expand_relpath || ((local_dirname[0] != '/' && local_dirname[0] != '.') && STREQ (temp1, temp2) == 0))
+	return_value |= STREQ (local_dirname, temp2) == 0;
       free (local_dirname);
       *dirname = temp2;
       free (temp1);

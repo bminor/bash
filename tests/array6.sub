@@ -42,6 +42,9 @@ a=(abc def)
 a2=("${a[@]/#/"-iname '"}") 
 recho "${a2[@]}"
 
+eval a2=("${a[@]/#/\"-iname \'\"}") 
+recho "${a2[@]}"
+
 eval a2=("${a[@]/#/"-iname '"}") 
 recho "${a2[@]}"
 
@@ -54,6 +57,9 @@ recho "${a2[@]}"
 set -- abc def
 
 a2=("${@/#/"-iname '"}") 
+recho "${a2[@]}"
+
+eval a2=("${@/#/\"-iname \'\"}") 
 recho "${a2[@]}"
 
 eval a2=("${@/#/"-iname '"}") 

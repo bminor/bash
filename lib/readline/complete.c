@@ -919,8 +919,19 @@ print_filename (to_print, full_pathname, prefix_bytes)
 	    extension_char = stat_char (new_full_pathname);
 	  else
 #endif
-	  if (_rl_complete_mark_directories && path_isdir (new_full_pathname))
-	    extension_char = '/';
+	  if (_rl_complete_mark_directories)
+	    {
+	      dn = 0;
+	      if (rl_directory_completion_hook == 0 && rl_filename_stat_hook)
+		{
+		  dn = savestring (new_full_pathname);
+		  (*rl_filename_stat_hook) (&dn);
+		  free (new_full_pathname);
+		  new_full_pathname = dn;
+		}
+	      if (path_isdir (new_full_pathname))
+		extension_char = '/';
+	    }
 
 #if defined (COLOR_SUPPORT)
 	  if (_rl_colored_stats)
@@ -2716,6 +2727,11 @@ rl_menu_complete (count, ignore)
 	      FREE (matches);
 	      matches = (char **)0;
 	      full_completion = 1;
+	      return (0);
+	    }
+	  else if (_rl_menu_complete_prefix_first)
+	    {
+	      rl_ding ();
 	      return (0);
 	    }
 	}

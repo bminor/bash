@@ -34,3 +34,9 @@ set +o posix
 # now see what happens when we try it with a non-existant file
 LINES3=$(< /tmp/redir-notthere)
 echo $?
+
+# These were bugs through bash-4.2
+{ : "$({xxxxxxxxxxxxxxxxxxxx}</dev/stdin)"; } <<<'hi'
+echo ${xxxxxxxxxxxxxxxxxxxx}
+
+{ echo "$(1111111111111111111111</dev/stdin)"; } <<<'hi'

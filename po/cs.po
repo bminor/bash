@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash 4.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-01-28 22:09-0500\n"
+"POT-Creation-Date: 2012-03-05 22:17-0500\n"
 "PO-Revision-Date: 2012-01-23 21:10+0100\n"
 "Last-Translator: Petr Pisar <petr.pisar@atlas.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
@@ -23,50 +23,50 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
-#: arrayfunc.c:50
+#: arrayfunc.c:51
 msgid "bad array subscript"
 msgstr "chybný podskript pole"
 
-#: arrayfunc.c:313 builtins/declare.def:487
+#: arrayfunc.c:330 builtins/declare.def:487
 #, c-format
 msgid "%s: cannot convert indexed to associative array"
 msgstr "%s: číslované pole nezle převést na pole asociativní"
 
-#: arrayfunc.c:480
+#: arrayfunc.c:513
 #, c-format
 msgid "%s: invalid associative array key"
 msgstr "%s: neplatný klíč asociativního pole"
 
-#: arrayfunc.c:482
+#: arrayfunc.c:515
 #, c-format
 msgid "%s: cannot assign to non-numeric index"
 msgstr "%s: přes nečíselný indexu nelze dosadit"
 
-#: arrayfunc.c:518
+#: arrayfunc.c:557
 #, c-format
 msgid "%s: %s: must use subscript when assigning associative array"
 msgstr "%s: %s: při přiřazovaní asociativního pole se musí použít podskript"
 
-#: bashhist.c:387
+#: bashhist.c:388
 #, c-format
 msgid "%s: cannot create: %s"
 msgstr "%s: nelze vytvořit: %s"
 
-#: bashline.c:3498
+#: bashline.c:3868
 msgid "bash_execute_unix_command: cannot find keymap for command"
 msgstr "bash_execute_unix_command: pro příkaz nelze nalézt klávesovou mapu "
 
-#: bashline.c:3584
+#: bashline.c:3955
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr "%s: první nebílý znak není „\"“"
 
-#: bashline.c:3613
+#: bashline.c:3984
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr "ne zavírající „%c“ v %s"
 
-#: bashline.c:3647
+#: bashline.c:4018
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: chybí dvojtečkový oddělovač"
@@ -76,36 +76,36 @@ msgstr "%s: chybí dvojtečkový oddělovač"
 msgid "`%s': invalid alias name"
 msgstr "„%s“: chybný název aliasu"
 
-#: builtins/bind.def:120 builtins/bind.def:123
+#: builtins/bind.def:123 builtins/bind.def:126
 msgid "line editing not enabled"
 msgstr "upravování řádku není povoleno"
 
-#: builtins/bind.def:206
+#: builtins/bind.def:212
 #, c-format
 msgid "`%s': invalid keymap name"
 msgstr "„%s“: chybný název klávesové mapy"
 
-#: builtins/bind.def:245
+#: builtins/bind.def:251
 #, c-format
 msgid "%s: cannot read: %s"
 msgstr "%s: nelze číst: %s"
 
-#: builtins/bind.def:260
+#: builtins/bind.def:266
 #, c-format
 msgid "`%s': cannot unbind"
 msgstr "„%s“: nelze zrušit vazbu"
 
-#: builtins/bind.def:295 builtins/bind.def:325
+#: builtins/bind.def:304 builtins/bind.def:334
 #, c-format
 msgid "`%s': unknown function name"
 msgstr "„%s“: neznámé jméno funkce"
 
-#: builtins/bind.def:303
+#: builtins/bind.def:312
 #, c-format
 msgid "%s is not bound to any keys.\n"
 msgstr "%s není svázán s žádnou klávesou.\n"
 
-#: builtins/bind.def:307
+#: builtins/bind.def:316
 #, c-format
 msgid "%s can be invoked via "
 msgstr "%s lze vyvolat přes "
@@ -128,11 +128,15 @@ msgstr ""
 "    \n"
 "    Bez VÝRAZU vrátí "
 
-#: builtins/cd.def:235
+#: builtins/cd.def:239
 msgid "HOME not set"
 msgstr "není nestavena HOME"
 
-#: builtins/cd.def:247
+#: builtins/cd.def:247 builtins/common.c:166 test.c:832
+msgid "too many arguments"
+msgstr "příliš mnoho argumentů"
+
+#: builtins/cd.def:258
 msgid "OLDPWD not set"
 msgstr "není nastaveno OLDPWD"
 
@@ -141,7 +145,7 @@ msgstr "není nastaveno OLDPWD"
 msgid "line %d: "
 msgstr "řádek %d: "
 
-#: builtins/common.c:139 error.c:261
+#: builtins/common.c:139 error.c:265
 #, c-format
 msgid "warning: "
 msgstr "varování: "
@@ -151,11 +155,7 @@ msgstr "varování: "
 msgid "%s: usage: "
 msgstr "%s: užití: "
 
-#: builtins/common.c:166 test.c:832
-msgid "too many arguments"
-msgstr "příliš mnoho argumentů"
-
-#: builtins/common.c:191 shell.c:500 shell.c:782
+#: builtins/common.c:191 shell.c:504 shell.c:786
 #, c-format
 msgid "%s: option requires an argument"
 msgstr "%s: přepínač vyžaduje argument"
@@ -170,7 +170,7 @@ msgstr "%s: vyžadován číselný argument"
 msgid "%s: not found"
 msgstr "%s: nenalezeno"
 
-#: builtins/common.c:214 shell.c:795
+#: builtins/common.c:214 shell.c:799
 #, c-format
 msgid "%s: invalid option"
 msgstr "%s: chybný přepínač"
@@ -180,7 +180,7 @@ msgstr "%s: chybný přepínač"
 msgid "%s: invalid option name"
 msgstr "%s: chybný název přepínače"
 
-#: builtins/common.c:228 general.c:231 general.c:236
+#: builtins/common.c:228 general.c:234 general.c:239
 #, c-format
 msgid "`%s': not a valid identifier"
 msgstr "„%s“: není platným identifikátorem"
@@ -193,7 +193,7 @@ msgstr "neplatné osmičkové číslo"
 msgid "invalid hex number"
 msgstr "chybné šestnáctkové číslo"
 
-#: builtins/common.c:242 expr.c:1362
+#: builtins/common.c:242 expr.c:1431
 msgid "invalid number"
 msgstr "chybné číslo"
 
@@ -207,7 +207,7 @@ msgstr "%s: chybné určení signálu"
 msgid "`%s': not a pid or valid job spec"
 msgstr "„%s“: není PID ani platným označením úlohy"
 
-#: builtins/common.c:264 error.c:454
+#: builtins/common.c:264 error.c:458
 #, c-format
 msgid "%s: readonly variable"
 msgstr "%s: proměnná pouze pro čtení"
@@ -279,26 +279,26 @@ msgstr "%s: chyba při zjišťování současného adresáře: %s: %s\n"
 msgid "%s: ambiguous job spec"
 msgstr "%s: nejednoznačné určení úlohy"
 
-#: builtins/complete.def:276
+#: builtins/complete.def:277
 #, c-format
 msgid "%s: invalid action name"
 msgstr "%s: neplatný název akce"
 
-#: builtins/complete.def:449 builtins/complete.def:644
-#: builtins/complete.def:853
+#: builtins/complete.def:450 builtins/complete.def:645
+#: builtins/complete.def:855
 #, c-format
 msgid "%s: no completion specification"
 msgstr "%s: žádné doplňování neurčeno"
 
-#: builtins/complete.def:696
+#: builtins/complete.def:697
 msgid "warning: -F option may not work as you expect"
 msgstr "varování: přepínač -F možná nebude dělat, co jste čekali"
 
-#: builtins/complete.def:698
+#: builtins/complete.def:699
 msgid "warning: -C option may not work as you expect"
 msgstr "varování: přepínač -C možná nebude dělat, co jste čekali"
 
-#: builtins/complete.def:826
+#: builtins/complete.def:828
 msgid "not currently executing completion function"
 msgstr "doplňovací funkce se právě nevykonává"
 
@@ -310,7 +310,7 @@ msgstr "může být použito jen ve funkci"
 msgid "cannot use `-f' to make functions"
 msgstr "„-f“ nezle použít na výrobu funkce"
 
-#: builtins/declare.def:378 execute_cmd.c:5105
+#: builtins/declare.def:378 execute_cmd.c:5253
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: funkce jen pro čtení"
@@ -320,7 +320,7 @@ msgstr "%s: funkce jen pro čtení"
 msgid "%s: cannot destroy array variables in this way"
 msgstr "%s: takto nelze likvidovat pole"
 
-#: builtins/declare.def:481
+#: builtins/declare.def:481 builtins/read.def:702
 #, c-format
 msgid "%s: cannot convert associative to indexed array"
 msgstr "%s: asociativní pole nelze převést na číslované pole"
@@ -349,8 +349,8 @@ msgstr "%s: není dynamicky nahráno"
 msgid "%s: cannot delete: %s"
 msgstr "%s: nelze smazat: %s"
 
-#: builtins/evalfile.c:135 builtins/hash.def:171 execute_cmd.c:4961
-#: shell.c:1457
+#: builtins/evalfile.c:135 builtins/hash.def:171 execute_cmd.c:5100
+#: shell.c:1461
 #, c-format
 msgid "%s: is a directory"
 msgstr "%s: je adresářem"
@@ -365,8 +365,7 @@ msgstr "%s: není obyčejný soubor"
 msgid "%s: file is too large"
 msgstr "%s: soubor je příliš velký"
 
-#: builtins/evalfile.c:182 builtins/evalfile.c:200 execute_cmd.c:5032
-#: shell.c:1467
+#: builtins/evalfile.c:182 builtins/evalfile.c:200 shell.c:1471
 #, c-format
 msgid "%s: cannot execute binary file"
 msgstr "%s: binární soubor nelze spustit"
@@ -453,8 +452,11 @@ msgstr[2] "Příkazy shellu shodující se s klíčovými slovy „"
 
 #: builtins/help.def:168
 #, c-format
-msgid "no help topics match `%s'.  Try `help help' or `man -k %s' or `info %s'."
-msgstr "žádné téma nápovědy se nehodí pro „%s“. Zkuste „help help“ nebo „man -k %s“ nebo „info %s“."
+msgid ""
+"no help topics match `%s'.  Try `help help' or `man -k %s' or `info %s'."
+msgstr ""
+"žádné téma nápovědy se nehodí pro „%s“. Zkuste „help help“ nebo „man -k %s“ "
+"nebo „info %s“."
 
 #: builtins/help.def:185
 #, c-format
@@ -489,7 +491,7 @@ msgstr "nelze použít více jak jeden z -anrw"
 msgid "history position"
 msgstr "místo v historii"
 
-#: builtins/history.def:365
+#: builtins/history.def:366
 #, c-format
 msgid "%s: history expansion failed"
 msgstr "%s: expanze historie selhala"
@@ -512,7 +514,7 @@ msgstr "%s: argumenty musí být proces nebo identifikátor úlohy"
 msgid "Unknown error"
 msgstr "Neznámá chyba"
 
-#: builtins/let.def:95 builtins/let.def:120 expr.c:552 expr.c:567
+#: builtins/let.def:95 builtins/let.def:120 expr.c:577 expr.c:592
 msgid "expression expected"
 msgstr "očekáván výraz"
 
@@ -521,12 +523,12 @@ msgstr "očekáván výraz"
 msgid "%s: not an indexed array"
 msgstr "%s: není (proměnnou typu) indexované pole"
 
-#: builtins/mapfile.def:256 builtins/read.def:279
+#: builtins/mapfile.def:256 builtins/read.def:299
 #, c-format
 msgid "%s: invalid file descriptor specification"
 msgstr "%s: chybné určení deskriptoru souboru"
 
-#: builtins/mapfile.def:264 builtins/read.def:286
+#: builtins/mapfile.def:264 builtins/read.def:306
 #, c-format
 msgid "%d: invalid file descriptor: %s"
 msgstr "%d: neplatný deskriptor souboru: %s"
@@ -554,31 +556,31 @@ msgstr "prázdný název proměnné typu pole"
 msgid "array variable support required"
 msgstr "je vyžadována podpora proměnných typu pole"
 
-#: builtins/printf.def:394
+#: builtins/printf.def:397
 #, c-format
 msgid "`%s': missing format character"
 msgstr "„%s“: postrádám formátovací znak"
 
-#: builtins/printf.def:448
+#: builtins/printf.def:451
 #, c-format
 msgid "`%c': invalid time format specification"
 msgstr "„%c“: chybné určení časového limitu"
 
-#: builtins/printf.def:635
+#: builtins/printf.def:647
 #, c-format
 msgid "`%c': invalid format character"
 msgstr "„%c“: neplatný formátovací znak"
 
-#: builtins/printf.def:662
+#: builtins/printf.def:673
 #, c-format
 msgid "warning: %s: %s"
 msgstr "varování: %s: %s"
 
-#: builtins/printf.def:840
+#: builtins/printf.def:854
 msgid "missing hex digit for \\x"
 msgstr "u \\x chybí šestnáctková číslovka"
 
-#: builtins/printf.def:855
+#: builtins/printf.def:869
 #, c-format
 msgid "missing unicode digit for \\%c"
 msgstr "u \\%c chybí unikódová číslovka"
@@ -614,10 +616,12 @@ msgid ""
 "    \twith its position in the stack\n"
 "    \n"
 "    Arguments:\n"
-"      +N\tDisplays the Nth entry counting from the left of the list shown by\n"
+"      +N\tDisplays the Nth entry counting from the left of the list shown "
+"by\n"
 "    \tdirs when invoked without options, starting with zero.\n"
 "    \n"
-"      -N\tDisplays the Nth entry counting from the right of the list shown by\n"
+"      -N\tDisplays the Nth entry counting from the right of the list shown "
+"by\n"
 "\tdirs when invoked without options, starting with zero."
 msgstr ""
 "Zobrazí seznam právě zapamatovaných adresářů. Adresáře si najdou svoji\n"
@@ -716,23 +720,24 @@ msgstr ""
 "    \t„dirs“, počínaje nulou. Na příklad: „popd +0“ odstraní první\n"
 "    \tadresář, „popd -1“ druhý.\n"
 "    \n"
-"      -N\tOdstraní N. položku počítáno zprava na seznamu zobrazovaném pomocí\n"
+"      -N\tOdstraní N. položku počítáno zprava na seznamu zobrazovaném "
+"pomocí\n"
 "    \t„dirs“, počínaje nulou. Na příklad: „popd -0“ odstraní poslední\n"
 "    \tadresář, „popd -1“ další vedle posledního.\n"
 "    \n"
 "    Zásobník adresářů si můžete prohlédnout příkazem „dirs“."
 
-#: builtins/read.def:252
+#: builtins/read.def:272
 #, c-format
 msgid "%s: invalid timeout specification"
 msgstr "%s: chybné určení časového limitu"
 
-#: builtins/read.def:588
+#: builtins/read.def:644
 #, c-format
 msgid "read error: %d: %s"
 msgstr "chyba čtení: %d: %s"
 
-#: builtins/return.def:73
+#: builtins/return.def:75
 msgid "can only `return' from a function or sourced script"
 msgstr "„return“ lze provést jen z funkce nebo skriptu načteného přes „source“"
 
@@ -740,17 +745,17 @@ msgstr "„return“ lze provést jen z funkce nebo skriptu načteného přes �
 msgid "cannot simultaneously unset a function and a variable"
 msgstr "funkci i proměnnou nelze rušit současně"
 
-#: builtins/set.def:808
+#: builtins/set.def:812
 #, c-format
 msgid "%s: cannot unset"
 msgstr "%s: nelze zrušit"
 
-#: builtins/set.def:815
+#: builtins/set.def:829
 #, c-format
 msgid "%s: cannot unset: readonly %s"
 msgstr "%s: nelze zrušit: %s jen pro čtení"
 
-#: builtins/set.def:826
+#: builtins/set.def:841
 #, c-format
 msgid "%s: not an array variable"
 msgstr "%s: není (proměnnou typu) pole"
@@ -764,11 +769,11 @@ msgstr "%s: není funkcí"
 msgid "shift count"
 msgstr "počet shiftů"
 
-#: builtins/shopt.def:264
+#: builtins/shopt.def:277
 msgid "cannot set and unset shell options simultaneously"
 msgstr "přepínač shellu nelze zároveň nastavit a zrušit"
 
-#: builtins/shopt.def:329
+#: builtins/shopt.def:342
 #, c-format
 msgid "%s: invalid shell option name"
 msgstr "%s: chybný název přepínače shellu"
@@ -810,7 +815,7 @@ msgstr "%s je funkce\n"
 msgid "%s is a shell builtin\n"
 msgstr "%s je součást shellu\n"
 
-#: builtins/type.def:317 builtins/type.def:391
+#: builtins/type.def:317 builtins/type.def:393
 #, c-format
 msgid "%s is %s\n"
 msgstr "%s je %s\n"
@@ -820,26 +825,26 @@ msgstr "%s je %s\n"
 msgid "%s is hashed (%s)\n"
 msgstr "%s je zahashován (%s)\n"
 
-#: builtins/ulimit.def:376
+#: builtins/ulimit.def:379
 #, c-format
 msgid "%s: invalid limit argument"
 msgstr "%s: chybný argument s limitou"
 
-#: builtins/ulimit.def:402
+#: builtins/ulimit.def:405
 #, c-format
 msgid "`%c': bad command"
 msgstr "„%c“: chybný příkaz"
 
-#: builtins/ulimit.def:431
+#: builtins/ulimit.def:434
 #, c-format
 msgid "%s: cannot get limit: %s"
 msgstr "%s: limit nelze zjistit: %s"
 
-#: builtins/ulimit.def:457
+#: builtins/ulimit.def:460
 msgid "limit"
 msgstr "limit"
 
-#: builtins/ulimit.def:469 builtins/ulimit.def:769
+#: builtins/ulimit.def:472 builtins/ulimit.def:772
 #, c-format
 msgid "%s: cannot modify limit: %s"
 msgstr "%s: limit nelze změnit: %s"
@@ -858,7 +863,7 @@ msgstr "„%c“: chybný operátor symbolických práv"
 msgid "`%c': invalid symbolic mode character"
 msgstr "„%c“: chybný znak symbolický práv "
 
-#: error.c:90 error.c:321 error.c:323 error.c:325
+#: error.c:90 error.c:325 error.c:327 error.c:329
 msgid " line "
 msgstr " řádek "
 
@@ -872,23 +877,23 @@ msgstr "poslední příkaz: %s\n"
 msgid "Aborting..."
 msgstr "Ukončuji…"
 
-#: error.c:406
+#: error.c:410
 msgid "unknown command error"
 msgstr "chyba neznámého příkazu"
 
-#: error.c:407
+#: error.c:411
 msgid "bad command type"
 msgstr "chybný druh příkazu"
 
-#: error.c:408
+#: error.c:412
 msgid "bad connector"
 msgstr "chybný konektor"
 
-#: error.c:409
+#: error.c:413
 msgid "bad jump"
 msgstr "chybný skok"
 
-#: error.c:447
+#: error.c:451
 #, c-format
 msgid "%s: unbound variable"
 msgstr "%s: nevázaná proměnná"
@@ -903,102 +908,117 @@ msgstr "\ačasový limit pro čekání na vstup vypršel: automatické odhláše
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr "standardní vstup nelze přesměrovat z /dev/null: %s"
 
-#: execute_cmd.c:1168
+#: execute_cmd.c:1199
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "TIMEFORMAT: „%c“: chybný formátovací znak"
 
-#: execute_cmd.c:2121
+#: execute_cmd.c:2240
 msgid "pipe error"
 msgstr "chyba v rouře"
 
-#: execute_cmd.c:4640
+#: execute_cmd.c:4284
+#, c-format
+msgid "%s: maximum function nesting level exceeded (%d)"
+msgstr ""
+
+#: execute_cmd.c:4777
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: omezeno: v názvu příkazu nesmí být „/“"
 
-#: execute_cmd.c:4735
+#: execute_cmd.c:4872
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: příkaz nenalezen"
 
-#: execute_cmd.c:4959
+#: execute_cmd.c:5098
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: execute_cmd.c:4995
+#: execute_cmd.c:5135
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: chybný interpretr"
 
-#: execute_cmd.c:5144
+#: execute_cmd.c:5172
+#, fuzzy, c-format
+msgid "%s: cannot execute binary file: %s"
+msgstr "%s: binární soubor nelze spustit"
+
+#: execute_cmd.c:5244
+#, fuzzy, c-format
+msgid "`%s': is a special builtin"
+msgstr "%s je součást shellu\n"
+
+#: execute_cmd.c:5296
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "deskriptor souboru %d nelze duplikovat na deskriptor %d"
 
-#: expr.c:256
+#: expr.c:258
 msgid "expression recursion level exceeded"
 msgstr "úroveň rekurze výrazu byla překročena"
 
-#: expr.c:280
+#: expr.c:282
 msgid "recursion stack underflow"
 msgstr "zásobník rekurze podtekl"
 
-#: expr.c:422
+#: expr.c:430
 msgid "syntax error in expression"
 msgstr "syntaktická chyba ve výrazu"
 
-#: expr.c:463
+#: expr.c:474
 msgid "attempted assignment to non-variable"
 msgstr "pokus o přiřazení do ne-proměnné"
 
-#: expr.c:486 expr.c:491 expr.c:807
+#: expr.c:493 expr.c:838
 msgid "division by 0"
 msgstr "dělení nulou"
 
-#: expr.c:517
+#: expr.c:540
 msgid "bug: bad expassign token"
 msgstr "chyba: chybný expassing token"
 
-#: expr.c:564
+#: expr.c:589
 msgid "`:' expected for conditional expression"
 msgstr "v podmíněném výrazu očekávána „:“"
 
-#: expr.c:832
+#: expr.c:895
 msgid "exponent less than 0"
 msgstr "mocnitel menší než 0"
 
-#: expr.c:887
+#: expr.c:948
 msgid "identifier expected after pre-increment or pre-decrement"
 msgstr "po přednostním zvýšení nebo snížení očekáván identifikátor"
 
-#: expr.c:910
+#: expr.c:973
 msgid "missing `)'"
 msgstr "postrádám „)“"
 
-#: expr.c:959 expr.c:1282
+#: expr.c:1024 expr.c:1351
 msgid "syntax error: operand expected"
 msgstr "syntaktická chyba: očekáván operand"
 
-#: expr.c:1284
+#: expr.c:1353
 msgid "syntax error: invalid arithmetic operator"
 msgstr "syntaktická chyba: chybný aritmetický operátor"
 
-#: expr.c:1308
+#: expr.c:1377
 #, c-format
 msgid "%s%s%s: %s (error token is \"%s\")"
 msgstr "%s%s%s: %s (chybný token je „%s“)"
 
-#: expr.c:1366
+#: expr.c:1435
 msgid "invalid arithmetic base"
 msgstr "chybný aritmetický základ"
 
-#: expr.c:1386
+#: expr.c:1455
 msgid "value too great for base"
 msgstr "hodnot je pro základ příliš velká"
 
-#: expr.c:1435
+#: expr.c:1504
 #, c-format
 msgid "%s: expression error\n"
 msgstr "%s: chyba výrazu\n"
@@ -1007,165 +1027,165 @@ msgstr "%s: chyba výrazu\n"
 msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: rodičovské adresáře nejsou přístupné"
 
-#: input.c:94 subst.c:5082
+#: input.c:99 subst.c:5094
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "na deskriptoru %d nelze resetovat režim nodelay"
 
-#: input.c:260
+#: input.c:265
 #, c-format
 msgid "cannot allocate new file descriptor for bash input from fd %d"
 msgstr "nový deskriptor souboru pro vstup bashe z deskr. %d nelze alokovat"
 
-#: input.c:268
+#: input.c:273
 #, c-format
 msgid "save_bash_input: buffer already exists for new fd %d"
 msgstr "save_bash_input: buffer již pro nový deskriptor %d existuje"
 
-#: jobs.c:468
+#: jobs.c:470
 msgid "start_pipeline: pgrp pipe"
 msgstr "start_pipeline: pgrp roury"
 
-#: jobs.c:889
+#: jobs.c:891
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr "forknutý PID %d se objevil v běžící úloze %d"
 
-#: jobs.c:1007
+#: jobs.c:1009
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "mažu pozastavenou úlohu %d se skupinou procesů %ld"
 
-#: jobs.c:1112
+#: jobs.c:1114
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
 msgstr "add_process: proces %5ld (%s) do the_pipeline"
 
-#: jobs.c:1115
+#: jobs.c:1117
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr "add_process: PID %5ld (%s) označen za stále živého"
 
-#: jobs.c:1430
+#: jobs.c:1432
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "describe_pid: %ld: žádný takový PID"
 
-#: jobs.c:1445
+#: jobs.c:1447
 #, c-format
 msgid "Signal %d"
 msgstr "Signál %d"
 
 # XXX: (úloha) dokončna. Používat ženský rod i unásledujících. Jedná se
 # o výpis úloh.
-#: jobs.c:1459 jobs.c:1484
+#: jobs.c:1461 jobs.c:1486
 msgid "Done"
 msgstr "Dokončena"
 
-#: jobs.c:1464 siglist.c:123
+#: jobs.c:1466 siglist.c:123
 msgid "Stopped"
 msgstr "Pozastavena"
 
-#: jobs.c:1468
+#: jobs.c:1470
 #, c-format
 msgid "Stopped(%s)"
 msgstr "Pozastavena (%s)"
 
-#: jobs.c:1472
+#: jobs.c:1474
 msgid "Running"
 msgstr "Běží"
 
-#: jobs.c:1486
+#: jobs.c:1488
 #, c-format
 msgid "Done(%d)"
 msgstr "Dokončena (%d)"
 
-#: jobs.c:1488
+#: jobs.c:1490
 #, c-format
 msgid "Exit %d"
 msgstr "Ukončena %d"
 
-#: jobs.c:1491
+#: jobs.c:1493
 msgid "Unknown status"
 msgstr "Stav neznámý"
 
-#: jobs.c:1578
+#: jobs.c:1580
 #, c-format
 msgid "(core dumped) "
 msgstr "(core dumped [obraz paměti uložen]) "
 
-#: jobs.c:1597
+#: jobs.c:1599
 #, c-format
 msgid "  (wd: %s)"
 msgstr "  (cwd: %s)"
 
-#: jobs.c:1805
+#: jobs.c:1807
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr "setpgid na potomku (z %ld na %ld)"
 
-#: jobs.c:2133 nojobs.c:585
+#: jobs.c:2135 nojobs.c:585
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: PID %ld není potomkem tohoto shellu"
 
-#: jobs.c:2360
+#: jobs.c:2372
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for: Žádný záznam o procesu %ld"
 
-#: jobs.c:2637
+#: jobs.c:2653
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: úloha %d je pozastavena"
 
-#: jobs.c:2859
+#: jobs.c:2875
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: úloha skončila"
 
-#: jobs.c:2868
+#: jobs.c:2884
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: úloha %d je již na pozadí"
 
-#: jobs.c:3089
+#: jobs.c:3105
 msgid "waitchld: turning on WNOHANG to avoid indefinite block"
 msgstr "waitchld: zapíná se WNOHANG, aby se zabránilo neurčitému zablokování"
 
-#: jobs.c:3538
+#: jobs.c:3571
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s: řádek %d: "
 
-#: jobs.c:3552 nojobs.c:814
+#: jobs.c:3585 nojobs.c:818
 #, c-format
 msgid " (core dumped)"
 msgstr " (core dumped [obraz paměti uložen])"
 
-#: jobs.c:3564 jobs.c:3577
+#: jobs.c:3597 jobs.c:3610
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(cwd nyní: %s)\n"
 
-#: jobs.c:3609
+#: jobs.c:3642
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: getpgrp selhalo"
 
-#: jobs.c:3669
+#: jobs.c:3703
 msgid "initialize_job_control: line discipline"
 msgstr "initialize_job_control: disciplína linky"
 
-#: jobs.c:3679
+#: jobs.c:3713
 msgid "initialize_job_control: setpgid"
 msgstr "initialize_job_control: setpgid"
 
-#: jobs.c:3707
+#: jobs.c:3734 jobs.c:3743
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "nelze nastavit skupinu procesů terminálu (%d)"
 
-#: jobs.c:3712
+#: jobs.c:3748
 msgid "no job control in this shell"
 msgstr "žádná správa úloh v tomto shellu"
 
@@ -1234,7 +1254,7 @@ msgstr "register_alloc: %p již obsažen v tabulce jako alokovaný?\n"
 msgid "register_free: %p already in table as free?\n"
 msgstr "register_free: %p již obsažen v tabulce jako volný?\n"
 
-#: lib/sh/fmtulong.c:101
+#: lib/sh/fmtulong.c:102
 msgid "invalid base"
 msgstr "chybný základ"
 
@@ -1257,22 +1277,22 @@ msgstr "%s: chybné určení síťové cesty"
 msgid "network operations not supported"
 msgstr "síťové operace nejsou podporovány"
 
-#: locale.c:192
+#: locale.c:204
 #, c-format
 msgid "setlocale: LC_ALL: cannot change locale (%s)"
 msgstr "setlocale: LC_ALL: národní prostředí nelze změnit (%s)"
 
-#: locale.c:194
+#: locale.c:206
 #, c-format
 msgid "setlocale: LC_ALL: cannot change locale (%s): %s"
 msgstr "setlocale: LC_ALL: národní prostředí nelze změnit (%s): %s"
 
-#: locale.c:247
+#: locale.c:263
 #, c-format
 msgid "setlocale: %s: cannot change locale (%s)"
 msgstr "setlocale: %s: národní prostředí nelze změnit (%s)"
 
-#: locale.c:249
+#: locale.c:265
 #, c-format
 msgid "setlocale: %s: cannot change locale (%s): %s"
 msgstr "setlocale: %s: národní prostředí nelze změnit (%s): %s"
@@ -1303,121 +1323,121 @@ msgstr "chyba syntaxe: neočekávaný „;“"
 msgid "syntax error: `((%s))'"
 msgstr "chyba syntaxe: „((%s))“"
 
-#: make_cmd.c:575
+#: make_cmd.c:578
 #, c-format
 msgid "make_here_document: bad instruction type %d"
 msgstr "make_here_document: chybný druh instrukce %d"
 
-#: make_cmd.c:659
+#: make_cmd.c:662
 #, c-format
 msgid "here-document at line %d delimited by end-of-file (wanted `%s')"
 msgstr "„here“ dokument na řádku %d ukončen koncem souboru (požadováno „%s“)"
 
-#: make_cmd.c:756
+#: make_cmd.c:759
 #, c-format
 msgid "make_redirection: redirection instruction `%d' out of range"
 msgstr "make_redirection: instrukce přesměrování „%d“ mimo rozsah"
 
-#: parse.y:3173 parse.y:3444
+#: parse.y:3173 parse.y:3448
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "neočekávaný konec souboru při hledání znaku odpovídajícímu „%c“"
 
-#: parse.y:4025
+#: parse.y:4038
 msgid "unexpected EOF while looking for `]]'"
 msgstr "neočekávaný konec souboru při hledání „]]“"
 
 # XXX: Condional means condition (adj.) probably. Can English distinguish
 # between the condition (podmínkový) and the code branch (podmíněný)? Check
 # for all "conditional" string occurences.
-#: parse.y:4030
+#: parse.y:4043
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr "chyba syntaxe ve výrazu podmínky: neočekávaný token „%s“"
 
-#: parse.y:4034
+#: parse.y:4047
 msgid "syntax error in conditional expression"
 msgstr "chyba syntaxe ve výrazu podmínky"
 
-#: parse.y:4112
+#: parse.y:4125
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr "neočekávaný token „%s“, očekávána „)“"
 
-#: parse.y:4116
+#: parse.y:4129
 msgid "expected `)'"
 msgstr "očekávána „)“"
 
-#: parse.y:4144
+#: parse.y:4157
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr "neočekávaný argument „%s“ u podmínkového unárního operátoru"
 
-#: parse.y:4148
+#: parse.y:4161
 msgid "unexpected argument to conditional unary operator"
 msgstr "neočekávaný argument u podmínkového unárního operátoru"
 
-#: parse.y:4194
+#: parse.y:4207
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr "neočekávaný token „%s“, očekáván podmínkový binární operátor"
 
-#: parse.y:4198
+#: parse.y:4211
 msgid "conditional binary operator expected"
 msgstr "očekáván podmínkový binární operátor"
 
-#: parse.y:4220
+#: parse.y:4233
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr "neočekávaný argument „%s„ u podmínkového binárního operátoru"
 
-#: parse.y:4224
+#: parse.y:4237
 msgid "unexpected argument to conditional binary operator"
 msgstr "neočekávaný argument u podmínkového binárního operátoru"
 
-#: parse.y:4235
+#: parse.y:4248
 #, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr "neočekávaný token „%c“ v podmínkovém příkazu"
 
-#: parse.y:4238
+#: parse.y:4251
 #, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr "neočekávaný token „%s“ v podmínkovém příkazu"
 
-#: parse.y:4242
+#: parse.y:4255
 #, c-format
 msgid "unexpected token %d in conditional command"
 msgstr "neočekávaný token %d v podmínkovém příkazu"
 
-#: parse.y:5566
+#: parse.y:5590
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "chyba syntaxe poblíž neočekávaného tokenu „%s“"
 
-#: parse.y:5584
+#: parse.y:5608
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "chyba syntaxe poblíž „%s“"
 
-#: parse.y:5594
+#: parse.y:5618
 msgid "syntax error: unexpected end of file"
 msgstr "chyba syntaxe: nenadálý konec souboru"
 
-#: parse.y:5594
+#: parse.y:5618
 msgid "syntax error"
 msgstr "chyba syntaxe"
 
-#: parse.y:5656
+#: parse.y:5680
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "Shell lze ukončit příkazem „%s“.\n"
 
-#: parse.y:5818
+#: parse.y:5842
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "nenadálý konec souboru při hledání odpovídající „)“"
 
-#: pcomplete.c:1030
+#: pcomplete.c:1079
 #, c-format
 msgid "completion: function `%s' not found"
 msgstr "doplňování: funkce „%s“ nenalezena"
@@ -1427,27 +1447,27 @@ msgstr "doplňování: funkce „%s“ nenalezena"
 msgid "progcomp_insert: %s: NULL COMPSPEC"
 msgstr "progcomp_insert: %s: NULLOVÝ COMPSPEC"
 
-#: print_cmd.c:296
+#: print_cmd.c:300
 #, c-format
 msgid "print_command: bad connector `%d'"
 msgstr "print_command: chybná propojka „%d“"
 
-#: print_cmd.c:368
+#: print_cmd.c:373
 #, c-format
 msgid "xtrace_set: %d: invalid file descriptor"
 msgstr "xtrace_set: %d: neplatný deskriptor souboru"
 
-#: print_cmd.c:373
+#: print_cmd.c:378
 msgid "xtrace_set: NULL file pointer"
 msgstr "xtrace_set: nullový ukazatel na souboru"
 
 # fd, fp a fileno jsou identifikátory v kódu
-#: print_cmd.c:377
+#: print_cmd.c:382
 #, c-format
 msgid "xtrace fd (%d) != fileno xtrace fp (%d)"
 msgstr "xtrace: fd (%d) != fileno fp (%d)"
 
-#: print_cmd.c:1478
+#: print_cmd.c:1503
 #, c-format
 msgid "cprintf: `%c': invalid format character"
 msgstr "cprintf: „%c“: chybný formátovací znak"
@@ -1485,33 +1505,33 @@ msgstr "%s: deskriptor souboru nelze přiřadit do proměnné"
 msgid "/dev/(tcp|udp)/host/port not supported without networking"
 msgstr "/dev/(tcp|udp)/host/port není bez síťování podporováno"
 
-#: redir.c:818 redir.c:930 redir.c:993 redir.c:1136
+#: redir.c:818 redir.c:930 redir.c:993 redir.c:1142
 msgid "redirection error: cannot duplicate fd"
 msgstr "chyba přesměrování: deskriptor souboru nelze duplikovat"
 
-#: shell.c:333
+#: shell.c:337
 msgid "could not find /tmp, please create!"
 msgstr "nelze nalézt /tmp, vytvořte jej, prosím!"
 
-#: shell.c:337
+#: shell.c:341
 msgid "/tmp must be a valid directory name"
 msgstr "/tmp musí být platným názvem pro adresář"
 
-#: shell.c:884
+#: shell.c:888
 #, c-format
 msgid "%c%c: invalid option"
 msgstr "%c%c: chybný přepínač"
 
-#: shell.c:1652
+#: shell.c:1662
 msgid "I have no name!"
 msgstr "Nemám žádné jméno!"
 
-#: shell.c:1795
+#: shell.c:1807
 #, c-format
 msgid "GNU bash, version %s-(%s)\n"
 msgstr "GNU bash, verze %s-(%s)\n"
 
-#: shell.c:1796
+#: shell.c:1808
 #, c-format
 msgid ""
 "Usage:\t%s [GNU long option] [option] ...\n"
@@ -1520,41 +1540,43 @@ msgstr ""
 "Použití:\t%s [Dlouhý GNU přepínač] [přepínač]…\n"
 "\t%s [Dlouhý GNU přepínač] [přepínač] skriptový_soubor…\n"
 
-#: shell.c:1798
+#: shell.c:1810
 msgid "GNU long options:\n"
 msgstr "Dlouhé GNU přepínače:\n"
 
-#: shell.c:1802
+#: shell.c:1814
 msgid "Shell options:\n"
 msgstr "Přepínače shellu:\n"
 
-#: shell.c:1803
+#: shell.c:1815
 msgid "\t-irsD or -c command or -O shopt_option\t\t(invocation only)\n"
 msgstr "\t-irsD nebo -c příkaz nebo -O shopt_přepínač\t(pouze při vyvolání)\n"
 
-#: shell.c:1818
+#: shell.c:1830
 #, c-format
 msgid "\t-%s or -o option\n"
 msgstr "\t-%s nebo -o přepínač\n"
 
-#: shell.c:1824
+#: shell.c:1836
 #, c-format
 msgid "Type `%s -c \"help set\"' for more information about shell options.\n"
-msgstr "Podrobnosti o přepínačích shellu získáte tím, že napíšete „%s -c \"help set\"“.\n"
+msgstr ""
+"Podrobnosti o přepínačích shellu získáte tím, že napíšete „%s -c \"help set"
+"\"“.\n"
 
-#: shell.c:1825
+#: shell.c:1837
 #, c-format
 msgid "Type `%s -c help' for more information about shell builtin commands.\n"
 msgstr ""
 "Podrobnosti o příkazech vestavěných do shellu získáte tím, že\n"
 "napište „%s -c help“.\n"
 
-#: shell.c:1826
+#: shell.c:1838
 #, c-format
 msgid "Use the `bashbug' command to report bugs.\n"
 msgstr "Chyby nahlásíte příkazem „bashbug“.\n"
 
-#: sig.c:638
+#: sig.c:647
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
 msgstr "sigprocmask: %d: neplatná operace"
@@ -1732,81 +1754,85 @@ msgstr "Neznámé číslo signálu"
 msgid "Unknown Signal #%d"
 msgstr "Neznámý signál č. %d"
 
-#: subst.c:1333 subst.c:1502
+#: subst.c:1335 subst.c:1506
 #, c-format
 msgid "bad substitution: no closing `%s' in %s"
 msgstr "chybná substituce: v %2$s chybí uzavírací „%1$s“"
 
-#: subst.c:2795
+#: subst.c:2801
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr "%s: seznam nelze přiřadit do prvku pole"
 
-#: subst.c:4979 subst.c:4995
+#: subst.c:4991 subst.c:5007
 msgid "cannot make pipe for process substitution"
 msgstr "nelze vyrobit rouru za účelem substituce procesu"
 
-#: subst.c:5027
+#: subst.c:5039
 msgid "cannot make child for process substitution"
 msgstr "nelze vytvořit potomka za účelem substituce procesu"
 
-#: subst.c:5072
+#: subst.c:5084
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "pojmenovanou rouru %s nelze otevřít pro čtení"
 
-#: subst.c:5074
+#: subst.c:5086
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "pojmenovanou rouru %s nelze otevřít pro zápis"
 
-#: subst.c:5092
+#: subst.c:5104
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "pojmenovanou rouru %s nelze zdvojit jako deskriptor %d"
 
-#: subst.c:5284
+#: subst.c:5296
 msgid "cannot make pipe for command substitution"
 msgstr "nelze vytvořit rouru pro substituci příkazu"
 
-#: subst.c:5322
+#: subst.c:5334
 msgid "cannot make child for command substitution"
 msgstr "nelze vytvořit potomka pro substituci příkazu"
 
-#: subst.c:5339
+#: subst.c:5351
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr "command_substitute: rouru nelze zdvojit jako deskriptor 1"
 
-#: subst.c:5859
+#: subst.c:5875
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: parametr null nebo nenastaven"
 
-#: subst.c:6125 subst.c:6140
+#: subst.c:6141 subst.c:6156
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: výraz podřetězce < 0"
 
-#: subst.c:7271
+#: subst.c:7284
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: chybná substituce"
 
-#: subst.c:7347
+#: subst.c:7361
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: takto nelze přiřazovat"
 
-#: subst.c:7684
-msgid "future versions of the shell will force evaluation as an arithmetic substitution"
-msgstr "budoucá verze tohoto shellu budou vynucovat vyhodnocení jako aritmetickou substituci"
+#: subst.c:7697
+msgid ""
+"future versions of the shell will force evaluation as an arithmetic "
+"substitution"
+msgstr ""
+"budoucá verze tohoto shellu budou vynucovat vyhodnocení jako aritmetickou "
+"substituci"
 
-#: subst.c:8149
+#: subst.c:8165
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "chybná substituce: v %s chybí uzavírací „`“"
 
-#: subst.c:9036
+#: subst.c:9056
 #, c-format
 msgid "no match: %s"
 msgstr "žádná shoda: %s"
@@ -1843,76 +1869,77 @@ msgstr "%s: očekáván binární operátor"
 msgid "missing `]'"
 msgstr "postrádám „]“"
 
-#: trap.c:207
+#: trap.c:209
 msgid "invalid signal number"
 msgstr "neplatné číslo signálu"
 
-#: trap.c:337
+#: trap.c:329
 #, c-format
 msgid "run_pending_traps: bad value in trap_list[%d]: %p"
 msgstr "run_pending_traps: chybná hodnota v trap_list[%d]: %p"
 
-#: trap.c:341
+#: trap.c:333
 #, c-format
-msgid "run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself"
+msgid ""
+"run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself"
 msgstr "run_pending_traps: obsluha signálu je SIG_DFL, přeposílám %d (%s) sobě"
 
-#: trap.c:393
+#: trap.c:379
 #, c-format
 msgid "trap_handler: bad signal %d"
 msgstr "trap_handler: chybný signál %d"
 
-#: variables.c:363
+#: variables.c:366
 #, c-format
 msgid "error importing function definition for `%s'"
 msgstr "chyba při importu definice „%s“"
 
-#: variables.c:755
+#: variables.c:764
 #, c-format
 msgid "shell level (%d) too high, resetting to 1"
 msgstr "úroveň shellu (%d) příliš vysoká, resetuji na 1"
 
-#: variables.c:1932
+#: variables.c:1941
 msgid "make_local_variable: no function context at current scope"
 msgstr "make_local_variable: žádný kontext funkce v aktuálním rozsahu"
 
-#: variables.c:3182
+#: variables.c:3192
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: žádný kontext funkce v aktuálním rozsahu"
 
-#: variables.c:3427
+#: variables.c:3437
 #, c-format
 msgid "%s has null exportstr"
 msgstr "%s: má nullový exportstr"
 
-#: variables.c:3432 variables.c:3441
+#: variables.c:3442 variables.c:3451
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "neplatný znak %d v exportstr pro %s"
 
-#: variables.c:3447
+#: variables.c:3457
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "v exportstr pro %s chybí „=“"
 
-#: variables.c:3891
+#: variables.c:3917
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr "pop_var_context: hlava shell_variables není kontextem funkce"
 
-#: variables.c:3904
+#: variables.c:3930
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: chybí kontext global_variables"
 
-#: variables.c:3978
+#: variables.c:4004
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr "pop_scope: hlava shell_variables není dočasným rozsahem prostředí"
 
-#: variables.c:4786
+#: variables.c:4821
 #, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: %s: nelze otevřít jako SOUBOR"
 
-#: variables.c:4791
+#: variables.c:4826
 #, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%s: %s: neplatná hodnota pro deskriptor trasovacího souboru"
@@ -1922,8 +1949,12 @@ msgid "Copyright (C) 2011 Free Software Foundation, Inc."
 msgstr "Copyright © 2011 Free Software Foundation, Inc."
 
 #: version.c:47
-msgid "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
-msgstr "Licence GPLv3+: GNU GPL verze 3 nebo novější <http://gnu.org/licenses/gpl.html>\n"
+msgid ""
+"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl."
+"html>\n"
+msgstr ""
+"Licence GPLv3+: GNU GPL verze 3 nebo novější <http://gnu.org/licenses/gpl."
+"html>\n"
 
 #: version.c:86 version2.c:83
 #, c-format
@@ -1947,8 +1978,12 @@ msgstr "Copyright © 2009 Free Software Foundation, Inc.\n"
 
 #: version2.c:87
 #, c-format
-msgid "License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>\n"
-msgstr "Licence GPLv2+: GNU GPL verze 2 nebo novější <http://gnu.org/licenses/gpl.html>\n"
+msgid ""
+"License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl."
+"html>\n"
+msgstr ""
+"Licence GPLv2+: GNU GPL verze 2 nebo novější <http://gnu.org/licenses/gpl."
+"html>\n"
 
 #: xmalloc.c:91
 #, c-format
@@ -1979,8 +2014,14 @@ msgid "unalias [-a] name [name ...]"
 msgstr "unalias [-a] název [název…]"
 
 #: builtins.c:51
-msgid "bind [-lpvsPVS] [-m keymap] [-f filename] [-q name] [-u name] [-r keyseq] [-x keyseq:shell-command] [keyseq:readline-function or readline-command]"
-msgstr "bind [-lpvsPVS] [-m klávmapa] [-f soubor] [-q název] [-u název] [-r klávposl] [-x klávposl:příkaz-shellu] [klávposl:readline-funkce nebo readline-příkaz]"
+#, fuzzy
+msgid ""
+"bind [-lpsvPSVX] [-m keymap] [-f filename] [-q name] [-u name] [-r keyseq] [-"
+"x keyseq:shell-command] [keyseq:readline-function or readline-command]"
+msgstr ""
+"bind [-lpvsPVS] [-m klávmapa] [-f soubor] [-q název] [-u název] [-r "
+"klávposl] [-x klávposl:příkaz-shellu] [klávposl:readline-funkce nebo "
+"readline-příkaz]"
 
 #: builtins.c:54
 msgid "break [n]"
@@ -2068,7 +2109,8 @@ msgstr "logout [n]"
 
 #: builtins.c:103
 msgid "fc [-e ename] [-lnr] [first] [last] or fc -s [pat=rep] [command]"
-msgstr "fc [-e enázev] [-lnr] [první] [poslední] nebo fc -s [vzor=náhrada] [příkaz]"
+msgstr ""
+"fc [-e enázev] [-lnr] [první] [poslední] nebo fc -s [vzor=náhrada] [příkaz]"
 
 #: builtins.c:107
 msgid "fg [job_spec]"
@@ -2087,8 +2129,12 @@ msgid "help [-dms] [pattern ...]"
 msgstr "help [-dms] [vzorek…]"
 
 #: builtins.c:121
-msgid "history [-c] [-d offset] [n] or history -anrw [filename] or history -ps arg [arg...]"
-msgstr "history [-c] [-d pozice] [n] nebo history -anrw [jméno_souboru] nebo history -ps argument [argument…]"
+msgid ""
+"history [-c] [-d offset] [n] or history -anrw [filename] or history -ps arg "
+"[arg...]"
+msgstr ""
+"history [-c] [-d pozice] [n] nebo history -anrw [jméno_souboru] nebo history "
+"-ps argument [argument…]"
 
 #: builtins.c:125
 msgid "jobs [-lnprs] [jobspec ...] or jobs -x command [args]"
@@ -2099,16 +2145,23 @@ msgid "disown [-h] [-ar] [jobspec ...]"
 msgstr "disown [-h] [-ar] [úloha…]"
 
 #: builtins.c:132
-msgid "kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]"
-msgstr "kill [-s sigspec | -n číssig | -sigspec] pid | úloha… nebo kill -l [sigspec]"
+msgid ""
+"kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l "
+"[sigspec]"
+msgstr ""
+"kill [-s sigspec | -n číssig | -sigspec] pid | úloha… nebo kill -l [sigspec]"
 
 #: builtins.c:134
 msgid "let arg [arg ...]"
 msgstr "let argument [argument…]"
 
 #: builtins.c:136
-msgid "read [-ers] [-a array] [-d delim] [-i text] [-n nchars] [-N nchars] [-p prompt] [-t timeout] [-u fd] [name ...]"
-msgstr "read [-ers] [-a pole] [-d oddělovač] [-i text] [-n p_znaků] [-N p_znaků] [-p výzva] [-t limit] [-u fd] [jméno…]"
+msgid ""
+"read [-ers] [-a array] [-d delim] [-i text] [-n nchars] [-N nchars] [-p "
+"prompt] [-t timeout] [-u fd] [name ...]"
+msgstr ""
+"read [-ers] [-a pole] [-d oddělovač] [-i text] [-n p_znaků] [-N p_znaků] [-p "
+"výzva] [-t limit] [-u fd] [jméno…]"
 
 #: builtins.c:138
 msgid "return [n]"
@@ -2167,7 +2220,8 @@ msgid "type [-afptP] name [name ...]"
 msgstr "type [-afptP] název [název…]"
 
 #: builtins.c:169
-msgid "ulimit [-SHacdefilmnpqrstuvx] [limit]"
+#, fuzzy
+msgid "ulimit [-SHabcdefilmnpqrstuvxT] [limit]"
 msgstr "ulimit [-SHacdefilmnpqrstuvx] [limit]"
 
 #: builtins.c:172
@@ -2175,7 +2229,8 @@ msgid "umask [-p] [-S] [mode]"
 msgstr "umask [-p] [-S] [mód]"
 
 #: builtins.c:175
-msgid "wait [id]"
+#, fuzzy
+msgid "wait [id ...]"
 msgstr "wait [id]"
 
 #: builtins.c:179
@@ -2203,8 +2258,12 @@ msgid "case WORD in [PATTERN [| PATTERN]...) COMMANDS ;;]... esac"
 msgstr "case SLOVO in [VZOR [| VZOR]…) PŘÍKAZY ;;]… esac"
 
 #: builtins.c:192
-msgid "if COMMANDS; then COMMANDS; [ elif COMMANDS; then COMMANDS; ]... [ else COMMANDS; ] fi"
-msgstr "if PŘÍKAZY; then PŘÍKAZY; [ elif PŘÍKAZY; then PŘÍKAZY; ]… [ else PŘÍKAZY; ] fi"
+msgid ""
+"if COMMANDS; then COMMANDS; [ elif COMMANDS; then COMMANDS; ]... [ else "
+"COMMANDS; ] fi"
+msgstr ""
+"if PŘÍKAZY; then PŘÍKAZY; [ elif PŘÍKAZY; then PŘÍKAZY; ]… [ else PŘÍKAZY; ] "
+"fi"
 
 #: builtins.c:194
 msgid "while COMMANDS; do COMMANDS; done"
@@ -2264,24 +2323,43 @@ msgid "printf [-v var] format [arguments]"
 msgstr "printf [-v proměnná] formát [argumenty]"
 
 #: builtins.c:229
-msgid "complete [-abcdefgjksuv] [-pr] [-DE] [-o option] [-A action] [-G globpat] [-W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [name ...]"
-msgstr "complete [-abcdefgjksuv] [-pr] [-DE] [-o přepínač] [-A akce] [-G globvzor] [-W seznam_slov]  [-F funkce] [-C příkaz] [-X filtrvzor] [-P předpona] [-S přípona] [název…]"
+msgid ""
+"complete [-abcdefgjksuv] [-pr] [-DE] [-o option] [-A action] [-G globpat] [-"
+"W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S "
+"suffix] [name ...]"
+msgstr ""
+"complete [-abcdefgjksuv] [-pr] [-DE] [-o přepínač] [-A akce] [-G globvzor] [-"
+"W seznam_slov]  [-F funkce] [-C příkaz] [-X filtrvzor] [-P předpona] [-S "
+"přípona] [název…]"
 
 #: builtins.c:233
-msgid "compgen [-abcdefgjksuv] [-o option]  [-A action] [-G globpat] [-W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]"
-msgstr "compgen [-abcdefgjksuv] [-o přepínač]  [-A akce] [-G globvzor] [-W seznam_slov]  [-F funkce] [-C příkaz] [-X filtrvzor] [-P předpona] [-S přípona] [slovo]"
+msgid ""
+"compgen [-abcdefgjksuv] [-o option]  [-A action] [-G globpat] [-W wordlist]  "
+"[-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]"
+msgstr ""
+"compgen [-abcdefgjksuv] [-o přepínač]  [-A akce] [-G globvzor] [-W "
+"seznam_slov]  [-F funkce] [-C příkaz] [-X filtrvzor] [-P předpona] [-S "
+"přípona] [slovo]"
 
 #: builtins.c:237
 msgid "compopt [-o|+o option] [-DE] [name ...]"
 msgstr "compopt [-o|+o možnost] [-DE] [název…]"
 
 #: builtins.c:240
-msgid "mapfile [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c quantum] [array]"
-msgstr "mapfile [-n počet] [-O počátek] [-s počet] [-t] [-u fd] [-C volání] [-c množství] [pole]"
+msgid ""
+"mapfile [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c "
+"quantum] [array]"
+msgstr ""
+"mapfile [-n počet] [-O počátek] [-s počet] [-t] [-u fd] [-C volání] [-c "
+"množství] [pole]"
 
 #: builtins.c:242
-msgid "readarray [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c quantum] [array]"
-msgstr "readarray [-n počet] [-O počátek] [-s počet] [-t] [-u fd] [-C volání] [-c množství] [pole]"
+msgid ""
+"readarray [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c "
+"quantum] [array]"
+msgstr ""
+"readarray [-n počet] [-O počátek] [-s počet] [-t] [-u fd] [-C volání] [-c "
+"množství] [pole]"
 
 #: builtins.c:254
 msgid ""
@@ -2298,16 +2376,19 @@ msgid ""
 "      -p\tPrint all defined aliases in a reusable format\n"
 "    \n"
 "    Exit Status:\n"
-"    alias returns true unless a NAME is supplied for which no alias has been\n"
+"    alias returns true unless a NAME is supplied for which no alias has "
+"been\n"
 "    defined."
 msgstr ""
 "Definuje nebo zobrazí aliasy.\n"
 "    \n"
-"    „alias“ bez argumentů vypíše na standardní výstup seznam aliasů ve znovu\n"
+"    „alias“ bez argumentů vypíše na standardní výstup seznam aliasů ve "
+"znovu\n"
 "    použitelném formátu NÁZEV=HODNOTA.\n"
 "    \n"
 "    Jinak bude definován alias pro každý NÁZEV, který má zadanou HODNOTU.\n"
-"    Závěrečná mezera v HODNOTĚ způsobí, že při expanzi bude následující slovo\n"
+"    Závěrečná mezera v HODNOTĚ způsobí, že při expanzi bude následující "
+"slovo\n"
 "    zkontrolováno na substituci aliasů.\n"
 "    \n"
 "    Přepínače:\n"
@@ -2333,6 +2414,7 @@ msgstr ""
 "    Vrací úspěch, pokud NÁZEV není neexistující alias."
 
 #: builtins.c:289
+#, fuzzy
 msgid ""
 "Set Readline key bindings and variables.\n"
 "    \n"
@@ -2344,24 +2426,30 @@ msgid ""
 "    Options:\n"
 "      -m  keymap         Use KEYMAP as the keymap for the duration of this\n"
 "                         command.  Acceptable keymap names are emacs,\n"
-"                         emacs-standard, emacs-meta, emacs-ctlx, vi, vi-move,\n"
+"                         emacs-standard, emacs-meta, emacs-ctlx, vi, vi-"
+"move,\n"
 "                         vi-command, and vi-insert.\n"
 "      -l                 List names of functions.\n"
 "      -P                 List function names and bindings.\n"
 "      -p                 List functions and bindings in a form that can be\n"
 "                         reused as input.\n"
-"      -S                 List key sequences that invoke macros and their values\n"
-"      -s                 List key sequences that invoke macros and their values\n"
+"      -S                 List key sequences that invoke macros and their "
+"values\n"
+"      -s                 List key sequences that invoke macros and their "
+"values\n"
 "                         in a form that can be reused as input.\n"
 "      -V                 List variable names and values\n"
 "      -v                 List variable names and values in a form that can\n"
 "                         be reused as input.\n"
 "      -q  function-name  Query about which keys invoke the named function.\n"
-"      -u  function-name  Unbind all keys which are bound to the named function.\n"
+"      -u  function-name  Unbind all keys which are bound to the named "
+"function.\n"
 "      -r  keyseq         Remove the binding for KEYSEQ.\n"
 "      -f  filename       Read key bindings from FILENAME.\n"
 "      -x  keyseq:shell-command\tCause SHELL-COMMAND to be executed when\n"
 "    \t\t\t\tKEYSEQ is entered.\n"
+"      -X\t\t     List key sequences bound with -x and associated commands\n"
+"                         in a form that can be reused as input.\n"
 "    \n"
 "    Exit Status:\n"
 "    bind returns 0 unless an unrecognized option is given or an error occurs."
@@ -2376,21 +2464,27 @@ msgstr ""
 "    Přepínače:\n"
 "      -m  klávmapa       Použije KLÁVMAPU jako klávesovou mapu pro trvání\n"
 "                         tohoto příkazu. Možné klávesové mapy jsou emacs,\n"
-"                         emacs-standard, emacs-meta, emacs-ctlx, vi, vi-move,\n"
+"                         emacs-standard, emacs-meta, emacs-ctlx, vi, vi-"
+"move,\n"
 "                         vi-command a vi-insert.\n"
 "      -l                 Vypíše seznam názvů funkcí.\n"
 "      -P                 Vypíše seznam názvů funkcí a klávesových vazeb.\n"
-"      -p                 Vypíše seznam funkcí a klávesových vazeb ve formátu,\n"
+"      -p                 Vypíše seznam funkcí a klávesových vazeb ve "
+"formátu,\n"
 "                         který lze použít jako vstup.\n"
 "      -S                 Vypíše seznam posloupností kláves,\n"
 "                         které vyvolávají makra, a jejich hodnoty.\n"
 "      -s                 Vypíše seznam posloupností kláves,\n"
-"                         která vyvolávají makra, a jejich hodnoty ve formátu,\n"
-"                         který lze použít jako vstup.      -V                 Vypíše seznam názvů proměnných a hodnot.\n"
-"      -v                 Vypíše seznam názvů proměnných a hodnot ve formátu,\n"
+"                         která vyvolávají makra, a jejich hodnoty ve "
+"formátu,\n"
+"                         který lze použít jako vstup.      -"
+"V                 Vypíše seznam názvů proměnných a hodnot.\n"
+"      -v                 Vypíše seznam názvů proměnných a hodnot ve "
+"formátu,\n"
 "                         který lze použít jako vstup.\n"
 "      -q  název-funkce   Dotáže se, které klávesy vyvolají zadanou funkci.\n"
-"      -u  název-funkce   Zruší všechny vazby na klávesy, které jsou napojeny\n"
+"      -u  název-funkce   Zruší všechny vazby na klávesy, které jsou "
+"napojeny\n"
 "                         na zadanou funkci.\n"
 "      -r  klávposl       Odstraní vazbu na KLÁVPOSL.\n"
 "      -f  soubor         Načte vazby kláves ze SOUBORU.\n"
@@ -2399,9 +2493,10 @@ msgstr ""
 "                         zadána KLÁVPOSL.\n"
 "    \n"
 "    Návratový kód:\n"
-"    bind vrací 0, pokud není zadán nerozpoznaný přepínač nebo nedojde k chybě."
+"    bind vrací 0, pokud není zadán nerozpoznaný přepínač nebo nedojde "
+"k chybě."
 
-#: builtins.c:326
+#: builtins.c:328
 msgid ""
 "Exit for, while, or until loops.\n"
 "    \n"
@@ -2419,7 +2514,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Návratový kód je 0, pokud N je větší nebo rovno 1."
 
-#: builtins.c:338
+#: builtins.c:340
 msgid ""
 "Resume for, while, or until loops.\n"
 "    \n"
@@ -2436,13 +2531,14 @@ msgstr ""
 "    Návratový kód:\n"
 "    Návratový kód je 0, pokud N je větší nebo rovno 1."
 
-#: builtins.c:350
+#: builtins.c:352
 msgid ""
 "Execute shell builtins.\n"
 "    \n"
 "    Execute SHELL-BUILTIN with arguments ARGs without performing command\n"
 "    lookup.  This is useful when you wish to reimplement a shell builtin\n"
-"    as a shell function, but need to execute the builtin within the function.\n"
+"    as a shell function, but need to execute the builtin within the "
+"function.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns the exit status of SHELL-BUILTIN, or false if SHELL-BUILTIN is\n"
@@ -2450,7 +2546,8 @@ msgid ""
 msgstr ""
 "Provede vestavěný příkaz shellu.\n"
 "    \n"
-"    Provede VESTAVĚNÝ-PŘÍKAZ-SHELLU s argumenty ARGUMENTY, aniž by se uplatnilo\n"
+"    Provede VESTAVĚNÝ-PŘÍKAZ-SHELLU s argumenty ARGUMENTY, aniž by se "
+"uplatnilo\n"
 "    vyhledávání příkazu. Toto se hodí, když si přejete reimplementovat\n"
 "    vestavěný příkaz shellu jako funkci shellu, avšak potřebujete spustit\n"
 "    vestavěný příkaz uvnitř této funkce.\n"
@@ -2459,7 +2556,7 @@ msgstr ""
 "    Vrací návratový kód VESTAVĚNÉHO-PŘÍKAZU-SHELLU, nebo nepravdu, pokud\n"
 "    VESTAVĚNÝ-PŘÍKAZ-SHELLU není vestavěným příkazem shellu."
 
-#: builtins.c:365
+#: builtins.c:367
 msgid ""
 "Return the context of the current subroutine call.\n"
 "    \n"
@@ -2486,46 +2583,62 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrací 0, pokud shell provádí shellovou funkci a VÝRAZ je platný."
 
-#: builtins.c:383
+#: builtins.c:385
+#, fuzzy
 msgid ""
 "Change the shell working directory.\n"
 "    \n"
-"    Change the current directory to DIR.  The default DIR is the value of the\n"
+"    Change the current directory to DIR.  The default DIR is the value of "
+"the\n"
 "    HOME shell variable.\n"
 "    \n"
-"    The variable CDPATH defines the search path for the directory containing\n"
-"    DIR.  Alternative directory names in CDPATH are separated by a colon (:).\n"
-"    A null directory name is the same as the current directory.  If DIR begins\n"
+"    The variable CDPATH defines the search path for the directory "
+"containing\n"
+"    DIR.  Alternative directory names in CDPATH are separated by a colon "
+"(:).\n"
+"    A null directory name is the same as the current directory.  If DIR "
+"begins\n"
 "    with a slash (/), then CDPATH is not used.\n"
 "    \n"
-"    If the directory is not found, and the shell option `cdable_vars' is set,\n"
-"    the word is assumed to be  a variable name.  If that variable has a value,\n"
+"    If the directory is not found, and the shell option `cdable_vars' is "
+"set,\n"
+"    the word is assumed to be  a variable name.  If that variable has a "
+"value,\n"
 "    its value is used for DIR.\n"
 "    \n"
 "    Options:\n"
-"        -L\tforce symbolic links to be followed\n"
+"        -L\tforce symbolic links to be followed: resolve symbolic links in\n"
+"    \tDIR after processing instances of `..'\n"
 "        -P\tuse the physical directory structure without following symbolic\n"
-"    \tlinks\n"
+"    \tlinks: resolve symbolic links in DIR before processing instances\n"
+"    \tof `..'\n"
 "        -e\tif the -P option is supplied, and the current working directory\n"
 "    \tcannot be determined successfully, exit with a non-zero status\n"
 "    \n"
 "    The default is to follow symbolic links, as if `-L' were specified.\n"
+"    `..' is processed by removing the immediately previous pathname "
+"component\n"
+"    back to a slash or the beginning of DIR.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns 0 if the directory is changed, and if $PWD is set successfully when\n"
+"    Returns 0 if the directory is changed, and if $PWD is set successfully "
+"when\n"
 "    -P is used; non-zero otherwise."
 msgstr ""
 "Změní pracovní adresář shellu.\n"
 "    \n"
-"    Změní aktuální adresář na ADR. Implicitní ADR je hodnota proměnné shellu\n"
+"    Změní aktuální adresář na ADR. Implicitní ADR je hodnota proměnné "
+"shellu\n"
 "    HOME.\n"
 "    \n"
 "    Proměnná CDPATH definuje vyhledávací cestu pro adresář obsahující ADR.\n"
 "    Názvy náhradních adresářů v CDPATH se oddělují dvojtečkou (:). Prázdný\n"
-"    název adresáře je stejný jako aktuální adresář. Začíná-li ADR na lomítko\n"
+"    název adresáře je stejný jako aktuální adresář. Začíná-li ADR na "
+"lomítko\n"
 "    (/), nebude CDPATH použita.\n"
 "    \n"
-"    Nebude-li adresář nalezen a přepínač shellu „cdable_vars“ bude nastaven,\n"
+"    Nebude-li adresář nalezen a přepínač shellu „cdable_vars“ bude "
+"nastaven,\n"
 "    pak se dané slovo zkusí jakožto název proměnné. Má-li taková proměnná\n"
 "    hodnotu, pak její hodnota se použije jako ADR.\n"
 "    \n"
@@ -2542,7 +2655,7 @@ msgstr ""
 "    Vrací 0, byl-li adresář změněn a, byl-li zadán -P, $PWD byla úspěšně\n"
 "    nastavena. Jinak vrací nenulovou hodnotu."
 
-#: builtins.c:414
+#: builtins.c:420
 msgid ""
 "Print the name of the current working directory.\n"
 "    \n"
@@ -2570,7 +2683,7 @@ msgstr ""
 "    Vrací 0, nebyl-li zadán neplatný přepínač a mohl-li být současný\n"
 "    adresář přečten."
 
-#: builtins.c:431
+#: builtins.c:437
 msgid ""
 "Null command.\n"
 "    \n"
@@ -2586,7 +2699,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vždy uspěje."
 
-#: builtins.c:442
+#: builtins.c:448
 msgid ""
 "Return a successful result.\n"
 "    \n"
@@ -2598,7 +2711,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vždy uspěje."
 
-#: builtins.c:451
+#: builtins.c:457
 msgid ""
 "Return an unsuccessful result.\n"
 "    \n"
@@ -2610,12 +2723,13 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vždy selže."
 
-#: builtins.c:460
+#: builtins.c:466
 msgid ""
 "Execute a simple command or display information about commands.\n"
 "    \n"
 "    Runs COMMAND with ARGS suppressing  shell function lookup, or display\n"
-"    information about the specified COMMANDs.  Can be used to invoke commands\n"
+"    information about the specified COMMANDs.  Can be used to invoke "
+"commands\n"
 "    on disk when a function with the same name exists.\n"
 "    \n"
 "    Options:\n"
@@ -2629,8 +2743,10 @@ msgid ""
 msgstr ""
 "Provede jednoduchý příkaz nebo zobrazí podrobnosti o příkazech.\n"
 "    \n"
-"    Spustí PŘÍKAZ s ARGUMENTY ignoruje funkce shellu, nebo zobrazí informace\n"
-"    o zadaných PŘÍKAZECH. Lze využít, když je třeba vyvolat příkazy z disku,\n"
+"    Spustí PŘÍKAZ s ARGUMENTY ignoruje funkce shellu, nebo zobrazí "
+"informace\n"
+"    o zadaných PŘÍKAZECH. Lze využít, když je třeba vyvolat příkazy "
+"z disku,\n"
 "    přičemž existuje funkce stejného jména.\n"
 "    \n"
 "    Přepínače:\n"
@@ -2642,7 +2758,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrací návratový kód PŘÍKAZU, nebo selže, nebyl–li příkaz nalezen."
 
-#: builtins.c:479
+#: builtins.c:485
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
@@ -2672,7 +2788,8 @@ msgid ""
 "    Variables with the integer attribute have arithmetic evaluation (see\n"
 "    the `let' command) performed when the variable is assigned a value.\n"
 "    \n"
-"    When used in a function, `declare' makes NAMEs local, as with the `local'\n"
+"    When used in a function, `declare' makes NAMEs local, as with the "
+"`local'\n"
 "    command.  The `-g' option suppresses this behavior.\n"
 "    \n"
 "    Exit Status:\n"
@@ -2706,13 +2823,14 @@ msgstr ""
 "    Proměnné s atributem integer jsou aritmeticky vyhodnoceny (vizte příkaz\n"
 "    „let“), jakmile je do proměnné přiřazeno.\n"
 "    \n"
-"    Je-li použito uvnitř funkce, učiní „declare“ NÁZVY lokálními stejně jako\n"
+"    Je-li použito uvnitř funkce, učiní „declare“ NÁZVY lokálními stejně "
+"jako\n"
 "    příkaz „local“. Přepínač „-g“ toto chování potlačí.\n"
 "    \n"
 "    Návratový kód:\n"
 "    Vrací úspěch, pokud nebyl zadán neplatný přepínač a nedošlo k chybě."
 
-#: builtins.c:517
+#: builtins.c:523
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
@@ -2722,7 +2840,7 @@ msgstr ""
 "    \n"
 "    Příkaz je zastaralý. Vizte „help declare“."
 
-#: builtins.c:525
+#: builtins.c:531
 msgid ""
 "Define local variables.\n"
 "    \n"
@@ -2738,21 +2856,26 @@ msgid ""
 msgstr ""
 "Definuje lokální proměnné.\n"
 "    \n"
-"    Vytvoří lokální proměnnou pojmenovanou NÁZEV a přiřadí jí HODNOTU. PŘEPÍNAČ\n"
+"    Vytvoří lokální proměnnou pojmenovanou NÁZEV a přiřadí jí HODNOTU. "
+"PŘEPÍNAČ\n"
 "    smí být jakýkoliv přepínač přípustný u „declare“.\n"
 "    \n"
-"    Lokální proměnné lze použít jen uvnitř funkcí, budou viditelné jen v dané\n"
+"    Lokální proměnné lze použít jen uvnitř funkcí, budou viditelné jen "
+"v dané\n"
 "    funkci a jejich potomcích.\n"
 "    \n"
 "    Návratový kód:\n"
 "    Vrací úspěch, nebyl-li zadán neplatný přepínač, nenastala-li chyba a\n"
 "    vykonává-li shell funkci."
 
-#: builtins.c:542
+#: builtins.c:548
+#, fuzzy
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
-"    Display the ARGs on the standard output followed by a newline.\n"
+"    Display the ARGs, separated by a single space character and followed by "
+"a\n"
+"    newline, on the standard output.\n"
 "    \n"
 "    Options:\n"
 "      -n\tdo not append a newline\n"
@@ -2764,6 +2887,7 @@ msgid ""
 "      \\b\tbackspace\n"
 "      \\c\tsuppress further output\n"
 "      \\e\tescape character\n"
+"      \\E\tescape character\n"
 "      \\f\tform feed\n"
 "      \\n\tnew line\n"
 "      \\r\tcarriage return\n"
@@ -2780,12 +2904,15 @@ msgid ""
 msgstr ""
 "Vypíše své argumenty na standardní výstup.\n"
 "    \n"
-"    Zobrazí své ARGUMENTY na standardním výstupu a ukončí je z novým řádkem.\n"
+"    Zobrazí své ARGUMENTY na standardním výstupu a ukončí je z novým "
+"řádkem.\n"
 "    \n"
 "    Přepínače:\n"
 "      -n\tnepřipojuje nový řádek\n"
-"      -e\tzapne interpretování následujících znaků uvozených zpětným lomítkem\n"
-"      -E\texplicitně potlačí interpretování znaků uvozených zpětným lomítkem\n"
+"      -e\tzapne interpretování následujících znaků uvozených zpětným "
+"lomítkem\n"
+"      -E\texplicitně potlačí interpretování znaků uvozených zpětným "
+"lomítkem\n"
 "    \n"
 "    „echo“ interpretuje následující znaky uvozené zpětným lomítkem:\n"
 "      \\a\tpoplach (zvonek)\n"
@@ -2806,7 +2933,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrací úspěch, nedojde-li k chybě zápisu na výstup."
 
-#: builtins.c:576
+#: builtins.c:584
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -2827,7 +2954,7 @@ msgstr ""
 "    \n"
 "    Vrací úspěch, nedojte-li k chybě zápisu na výstup."
 
-#: builtins.c:591
+#: builtins.c:599
 msgid ""
 "Enable and disable shell builtins.\n"
 "    \n"
@@ -2860,7 +2987,8 @@ msgstr ""
 "    shellu, aniž byste museli zadávat celou cestu.\n"
 "    \n"
 "    Přepínače:\n"
-"      -a\tvypíše seznam vestavěných příkazů a vyznačí, který je a který není\n"
+"      -a\tvypíše seznam vestavěných příkazů a vyznačí, který je a který "
+"není\n"
 "    \tpovolen\n"
 "      -n\tzakáže každý NÁZEV nebo zobrazí seznam zakázaných vestavěných\n"
 "    \tpříkazů\n"
@@ -2880,11 +3008,12 @@ msgstr ""
 "    Vrací úspěch, je-li NÁZEV vestavěným příkazem shellu a nevyskytne-li\n"
 "    se chyba."
 
-#: builtins.c:619
+#: builtins.c:627
 msgid ""
 "Execute arguments as a shell command.\n"
 "    \n"
-"    Combine ARGs into a single string, use the result as input to the shell,\n"
+"    Combine ARGs into a single string, use the result as input to the "
+"shell,\n"
 "    and execute the resulting commands.\n"
 "    \n"
 "    Exit Status:\n"
@@ -2897,7 +3026,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí návratový kód příkazu, nebo úspěch, byl-li příkaz prázdný."
 
-#: builtins.c:631
+#: builtins.c:639
 msgid ""
 "Parse option arguments.\n"
 "    \n"
@@ -2953,13 +3082,17 @@ msgstr ""
 "    skript. Pokud přepínač vyžaduje argument, getopts umístí tento argument\n"
 "    do proměnné shellu OPTARG.\n"
 "    \n"
-"    getopts hlásí chyby jedním ze dvou způsobů. Pokud prvním znakem OPTSTRING\n"
+"    getopts hlásí chyby jedním ze dvou způsobů. Pokud prvním znakem "
+"OPTSTRING\n"
 "    je dvojtečka, getopts hlásí chyby tichým způsobem. V tomto režimu žádné\n"
 "    chybové zprávy nejsou vypisovány. Když se narazí na neplatný přepínač,\n"
-"    getopts umístí tento znak do OPTARG. Pokud není nalezen povinný argument,\n"
-"    getopts umístí „:“ do NAME a OPTARG nastaví na znak nalezeného přepínače.\n"
+"    getopts umístí tento znak do OPTARG. Pokud není nalezen povinný "
+"argument,\n"
+"    getopts umístí „:“ do NAME a OPTARG nastaví na znak nalezeného "
+"přepínače.\n"
 "    Pokud getopts nepracuje v tomto tichém režimu a je nalezen neplatný\n"
-"    přepínač, getopts umístí „?“ do NAME a zruší OPTARG. Když nenajde povinný\n"
+"    přepínač, getopts umístí „?“ do NAME a zruší OPTARG. Když nenajde "
+"povinný\n"
 "    argument, je do NAME zapsán „?“, OPTARG zrušen a vytištěna diagnostická\n"
 "    zpráva.\n"
 "    \n"
@@ -2967,19 +3100,22 @@ msgstr ""
 "    chybových zpráv, dokonce i když první znak OPTSTRING není dvojtečka.\n"
 "    Implicitní hodnota OPTERR je 1.\n"
 "    \n"
-"    Normálně getopts zpracovává poziční parametry ($0–$9), avšak následuje-li\n"
+"    Normálně getopts zpracovává poziční parametry ($0–$9), avšak následuje-"
+"li\n"
 "    getopts více argumentů, budou rozebrány tyto namísto pozičních.\n"
 "    \n"
 "    Návratový kód:\n"
-"    Vrátí úspěch, byl-li nalezen nějaký přepínač. Neúspěch vrátí, když dojde\n"
+"    Vrátí úspěch, byl-li nalezen nějaký přepínač. Neúspěch vrátí, když "
+"dojde\n"
 "    na konec přepínačů nebo nastane-li chyba."
 
-#: builtins.c:673
+#: builtins.c:681
 msgid ""
 "Replace the shell with the given command.\n"
 "    \n"
 "    Execute COMMAND, replacing this shell with the specified program.\n"
-"    ARGUMENTS become the arguments to COMMAND.  If COMMAND is not specified,\n"
+"    ARGUMENTS become the arguments to COMMAND.  If COMMAND is not "
+"specified,\n"
 "    any redirections take effect in the current shell.\n"
 "    \n"
 "    Options:\n"
@@ -2987,16 +3123,20 @@ msgid ""
 "      -c\t\texecute COMMAND with an empty environment\n"
 "      -l\t\tplace a dash in the zeroth argument to COMMAND\n"
 "    \n"
-"    If the command cannot be executed, a non-interactive shell exits, unless\n"
+"    If the command cannot be executed, a non-interactive shell exits, "
+"unless\n"
 "    the shell option `execfail' is set.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success unless COMMAND is not found or a redirection error occurs."
+"    Returns success unless COMMAND is not found or a redirection error "
+"occurs."
 msgstr ""
 "Nahradí shell zadaným příkazem.\n"
 "    \n"
-"    Vykoná PŘÍKAZ, přičemž nahradí tento shell zadaným programem.  ARGUMENTY\n"
-"    se stanou argumenty PŘÍKAZU. Není-li PŘÍKAZ zadán, přesměrování zapůsobí\n"
+"    Vykoná PŘÍKAZ, přičemž nahradí tento shell zadaným programem.  "
+"ARGUMENTY\n"
+"    se stanou argumenty PŘÍKAZU. Není-li PŘÍKAZ zadán, přesměrování "
+"zapůsobí\n"
 "    v tomto shellu.\n"
 "    \n"
 "    Přepínače:\n"
@@ -3010,7 +3150,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud byl PŘÍKAZ nalezen a nedošlo k chybě přesměrování."
 
-#: builtins.c:694
+#: builtins.c:702
 msgid ""
 "Exit the shell.\n"
 "    \n"
@@ -3022,11 +3162,12 @@ msgstr ""
 "    Ukončí tento shell se stavem N. Bez N bude návratový kód roven kódu\n"
 "    posledně prováděného příkazu."
 
-#: builtins.c:703
+#: builtins.c:711
 msgid ""
 "Exit a login shell.\n"
 "    \n"
-"    Exits a login shell with exit status N.  Returns an error if not executed\n"
+"    Exits a login shell with exit status N.  Returns an error if not "
+"executed\n"
 "    in a login shell."
 msgstr ""
 "Ukončí přihlašovací shell.\n"
@@ -3034,17 +3175,19 @@ msgstr ""
 "    Ukončí přihlašovací (login) shell se stavem N. Nebyl-li příkaz zavolán\n"
 "    z přihlašovacího shellu, vrátí chybu."
 
-#: builtins.c:713
+#: builtins.c:721
 msgid ""
 "Display or execute commands from the history list.\n"
 "    \n"
-"    fc is used to list or edit and re-execute commands from the history list.\n"
+"    fc is used to list or edit and re-execute commands from the history "
+"list.\n"
 "    FIRST and LAST can be numbers specifying the range, or FIRST can be a\n"
 "    string, which means the most recent command beginning with that\n"
 "    string.\n"
 "    \n"
 "    Options:\n"
-"      -e ENAME\tselect which editor to use.  Default is FCEDIT, then EDITOR,\n"
+"      -e ENAME\tselect which editor to use.  Default is FCEDIT, then "
+"EDITOR,\n"
 "    \t\tthen vi\n"
 "      -l \tlist lines instead of editing\n"
 "      -n\tomit line numbers when listing\n"
@@ -3058,12 +3201,14 @@ msgid ""
 "    the last command.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success or status of executed command; non-zero if an error occurs."
+"    Returns success or status of executed command; non-zero if an error "
+"occurs."
 msgstr ""
 "Zobrazí nebo vykoná příkazy ze seznamu historie.\n"
 "    \n"
 "    fc se používá na vypsání, úpravu a znovu provedení příkazů ze seznamu\n"
-"    historie. PRVNÍ a POSLEDNÍ mohou být čísla určující rozsah nebo PRVNÍ může být\n"
+"    historie. PRVNÍ a POSLEDNÍ mohou být čísla určující rozsah nebo PRVNÍ "
+"může být\n"
 "    řetězec, což určuje nejnovější příkaz začínající na zadaný řetězec.\n"
 "    \n"
 "    Přepínače:\n"
@@ -3075,14 +3220,15 @@ msgstr ""
 "    Forma příkazu „fc -s [vzor=náhrada… [příkaz]“ znamená, že PŘÍKAZ bude\n"
 "    po nahrazení STARÝ=NOVÝ znovu vykonán.\n"
 "    \n"
-"    Užitečný alias je r='fc -s', takže napsání „r cc“ spustí poslední příkaz\n"
+"    Užitečný alias je r='fc -s', takže napsání „r cc“ spustí poslední "
+"příkaz\n"
 "    začínající na „cc“ a zadání „r“ znovu spustí poslední příkaz.\n"
 "    \n"
 "    Návratový kód:\n"
 "    Vrátí úspěch nebo kód provedeného příkazu. Nenulový kód, vyskytne-li se\n"
 "    chyba."
 
-#: builtins.c:743
+#: builtins.c:751
 msgid ""
 "Move job to the foreground.\n"
 "    \n"
@@ -3095,19 +3241,22 @@ msgid ""
 msgstr ""
 "Přepne úlohu na popředí.\n"
 "    \n"
-"    Přesune úlohu určenou pomocí ÚLOHA na popředí a učiní ji aktuální úlohou.\n"
+"    Přesune úlohu určenou pomocí ÚLOHA na popředí a učiní ji aktuální "
+"úlohou.\n"
 "    Není-li ÚLOHA zadána, použije se úloha, o které si shell myslí, že je\n"
 "    aktuální.\n"
 "    \n"
 "    Návratový kód:\n"
 "    Kód úlohy přesunuté do popředí, nebo došlo-li k chybě, kód selhání."
 
-#: builtins.c:758
+#: builtins.c:766
 msgid ""
 "Move jobs to the background.\n"
 "    \n"
-"    Place the jobs identified by each JOB_SPEC in the background, as if they\n"
-"    had been started with `&'.  If JOB_SPEC is not present, the shell's notion\n"
+"    Place the jobs identified by each JOB_SPEC in the background, as if "
+"they\n"
+"    had been started with `&'.  If JOB_SPEC is not present, the shell's "
+"notion\n"
 "    of the current job is used.\n"
 "    \n"
 "    Exit Status:\n"
@@ -3122,12 +3271,13 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud je správa úloh zapnuta a nedošlo-li k nějaké chybě."
 
-#: builtins.c:772
+#: builtins.c:780
 msgid ""
 "Remember or display program locations.\n"
 "    \n"
 "    Determine and remember the full pathname of each command NAME.  If\n"
-"    no arguments are given, information about remembered commands is displayed.\n"
+"    no arguments are given, information about remembered commands is "
+"displayed.\n"
 "    \n"
 "    Options:\n"
 "      -d\t\tforget the remembered location of each NAME\n"
@@ -3146,8 +3296,10 @@ msgid ""
 msgstr ""
 "Zapamatuje si nebo zobrazí umístění programu.\n"
 "    \n"
-"    Pro každý NÁZEV je určena plná cesta k příkazu a je zapamatována. Nejsou-li\n"
-"    zadány žádné argumenty, budou vypsány informace o zapamatovaných příkazech.\n"
+"    Pro každý NÁZEV je určena plná cesta k příkazu a je zapamatována. Nejsou-"
+"li\n"
+"    zadány žádné argumenty, budou vypsány informace o zapamatovaných "
+"příkazech.\n"
 "    \n"
 "    Přepínače:\n"
 "      -d\t\tzapomene zapamatovaná umístění každého NÁZVU\n"
@@ -3163,7 +3315,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud byl NÁZEV nalezen a nebyl-li zadán neplatný přepínač."
 
-#: builtins.c:797
+#: builtins.c:805
 msgid ""
 "Display information about builtin commands.\n"
 "    \n"
@@ -3181,12 +3333,14 @@ msgid ""
 "      PATTERN\tPattern specifiying a help topic\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success unless PATTERN is not found or an invalid option is given."
+"    Returns success unless PATTERN is not found or an invalid option is "
+"given."
 msgstr ""
 "Zobrazí podrobnosti o vestavěných příkazech.\n"
 "    \n"
 "    Zobrazí stručný souhrn vestavěných příkazů. Je-li zadán VZOREK,\n"
-"    vrátí podrobnou nápovědu ke všem příkazům odpovídajícím VZORKU, jinak je\n"
+"    vrátí podrobnou nápovědu ke všem příkazům odpovídajícím VZORKU, jinak "
+"je\n"
 "    vytištěn seznam syntaxe vestavěných příkazů.\n"
 "    \n"
 "    Přepínače:\n"
@@ -3202,7 +3356,7 @@ msgstr ""
 "    Vrací úspěch, pokud byl nalezen VZOREK a nebyl zadán neplatný přepínač."
 
 # FIXME: bash-4.0-pre1: Orphaned line between -w and -p option. It belongs to -n.
-#: builtins.c:821
+#: builtins.c:829
 msgid ""
 "Display or manipulate the history list.\n"
 "    \n"
@@ -3229,7 +3383,8 @@ msgid ""
 "    \n"
 "    If the $HISTTIMEFORMAT variable is set and not null, its value is used\n"
 "    as a format string for strftime(3) to print the time stamp associated\n"
-"    with each displayed history entry.  No time stamps are printed otherwise.\n"
+"    with each displayed history entry.  No time stamps are printed "
+"otherwise.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or an error occurs."
@@ -3253,17 +3408,20 @@ msgstr ""
 "    \taniž by cokoliv uložil do seznamu historie\n"
 "      -s\tpřipojí ARGUMENTY do seznamu historie jako jednu položku\n"
 "    \n"
-"    Je-li zadán JMÉNO_SOUBORU, tak ten je použit jako soubor historie. Jinak\n"
+"    Je-li zadán JMÉNO_SOUBORU, tak ten je použit jako soubor historie. "
+"Jinak\n"
 "    pokud $HISTFILE má hodnotu, tato je použita, jinak ~/.bash_history.\n"
 "    \n"
-"    Je-li proměnná $HISTTIMEFORMAT nastavena a není-li prázdná, její hodnota\n"
+"    Je-li proměnná $HISTTIMEFORMAT nastavena a není-li prázdná, její "
+"hodnota\n"
 "    se použije jako formátovací řetězec pro strftime(3) při výpisu časových\n"
-"    razítek spojených s každou položkou historie. Jinak žádná časová razítka\n"
+"    razítek spojených s každou položkou historie. Jinak žádná časová "
+"razítka\n"
 "    nebudou vypisována.    \n"
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač a nedošlo k chybě."
 
-#: builtins.c:857
+#: builtins.c:865
 msgid ""
 "Display status of jobs.\n"
 "    \n"
@@ -3298,14 +3456,17 @@ msgstr ""
 "      -r\tzúží výstup jen na běžící úlohy\n"
 "      -s\tzúží výstup jen na pozastavené úlohy\n"
 "    \n"
-"    Je-li použito -x, bude spuštěn příkaz, jakmile všechny úlohy uvedené mezi\n"
-"    ARGUMENTY budou nahrazeny ID procesu, který je vedoucím skupiny dané úlohy.\n"
+"    Je-li použito -x, bude spuštěn příkaz, jakmile všechny úlohy uvedené "
+"mezi\n"
+"    ARGUMENTY budou nahrazeny ID procesu, který je vedoucím skupiny dané "
+"úlohy.\n"
 "    \n"
 "    Návratový kód:\n"
-"    Vrátí úspěch, pokud nebyl zadán neplatný přepínač a nevyskytla se chyba.\n"
+"    Vrátí úspěch, pokud nebyl zadán neplatný přepínač a nevyskytla se "
+"chyba.\n"
 "    Byl-ly použit přepínač -x, vrátí návratový kód PŘÍKAZU."
 
-#: builtins.c:884
+#: builtins.c:892
 msgid ""
 "Remove jobs from current shell.\n"
 "    \n"
@@ -3335,7 +3496,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač nebo ÚLOHA."
 
-#: builtins.c:903
+#: builtins.c:911
 msgid ""
 "Send a signal to a job.\n"
 "    \n"
@@ -3359,7 +3520,8 @@ msgstr ""
 "Zašle signál úloze.\n"
 "    \n"
 "    Zašle procesu určeném PID (nebo ÚLOHOU) signál zadaný pomocí SIGSPEC\n"
-"    nebo ČÍSSIG. Není-li SIGSPEC ani ČÍSSIG zadán, pak se předpokládá SIGTERM.\n"
+"    nebo ČÍSSIG. Není-li SIGSPEC ani ČÍSSIG zadán, pak se předpokládá "
+"SIGTERM.\n"
 "    \n"
 "    Přepínače:\n"
 "      -s sig\tSIG je název signálu\n"
@@ -3375,14 +3537,15 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač a nedošlo k chybě."
 
-#: builtins.c:926
+#: builtins.c:934
 msgid ""
 "Evaluate arithmetic expressions.\n"
 "    \n"
 "    Evaluate each ARG as an arithmetic expression.  Evaluation is done in\n"
 "    fixed-width integers with no check for overflow, though division by 0\n"
 "    is trapped and flagged as an error.  The following list of operators is\n"
-"    grouped into levels of equal-precedence operators.  The levels are listed\n"
+"    grouped into levels of equal-precedence operators.  The levels are "
+"listed\n"
 "    in order of decreasing precedence.\n"
 "    \n"
 "    \tid++, id--\tvariable post-increment, post-decrement\n"
@@ -3448,8 +3611,10 @@ msgstr ""
 "    \t&=, ^=, |=\tpřiřazení\n"
 "    \n"
 "    Proměnné shellu jsou povolené operandy. Název proměnné je uvnitř výrazu\n"
-"    nahrazen její hodnotou (s automatickým převodem na celé číslo pevné šířky).\n"
-"    Proměnná nemusí mít atribut integer (číslo) zapnutý, aby byla použitelná\n"
+"    nahrazen její hodnotou (s automatickým převodem na celé číslo pevné "
+"šířky).\n"
+"    Proměnná nemusí mít atribut integer (číslo) zapnutý, aby byla "
+"použitelná\n"
 "    ve výrazu.\n"
 "    \n"
 "    Operátory se vyhodnocují v pořadí přednosti. Podvýrazy v závorkách jsou\n"
@@ -3459,18 +3624,22 @@ msgstr ""
 "    Pokud poslední ARGUMENT je vyhodnocen na 0, let vrátí 1. Jinak je\n"
 "    navrácena 0."
 
-#: builtins.c:971
+#: builtins.c:979
+#, fuzzy
 msgid ""
 "Read a line from the standard input and split it into fields.\n"
 "    \n"
 "    Reads a single line from the standard input, or from file descriptor FD\n"
-"    if the -u option is supplied.  The line is split into fields as with word\n"
+"    if the -u option is supplied.  The line is split into fields as with "
+"word\n"
 "    splitting, and the first word is assigned to the first NAME, the second\n"
 "    word to the second NAME, and so on, with any leftover words assigned to\n"
-"    the last NAME.  Only the characters found in $IFS are recognized as word\n"
+"    the last NAME.  Only the characters found in $IFS are recognized as "
+"word\n"
 "    delimiters.\n"
 "    \n"
-"    If no NAMEs are supplied, the line read is stored in the REPLY variable.\n"
+"    If no NAMEs are supplied, the line read is stored in the REPLY "
+"variable.\n"
 "    \n"
 "    Options:\n"
 "      -a array\tassign the words read to sequential indices of the array\n"
@@ -3482,34 +3651,42 @@ msgid ""
 "      -n nchars\treturn after reading NCHARS characters rather than waiting\n"
 "    \t\tfor a newline, but honor a delimiter if fewer than NCHARS\n"
 "    \t\tcharacters are read before the delimiter\n"
-"      -N nchars\treturn only after reading exactly NCHARS characters, unless\n"
+"      -N nchars\treturn only after reading exactly NCHARS characters, "
+"unless\n"
 "    \t\tEOF is encountered or read times out, ignoring any delimiter\n"
 "      -p prompt\toutput the string PROMPT without a trailing newline before\n"
 "    \t\tattempting to read\n"
 "      -r\t\tdo not allow backslashes to escape any characters\n"
 "      -s\t\tdo not echo input coming from a terminal\n"
-"      -t timeout\ttime out and return failure if a complete line of input is\n"
+"      -t timeout\ttime out and return failure if a complete line of input "
+"is\n"
 "    \t\tnot read withint TIMEOUT seconds.  The value of the TMOUT\n"
 "    \t\tvariable is the default timeout.  TIMEOUT may be a\n"
-"    \t\tfractional number.  If TIMEOUT is 0, read returns success only\n"
-"    \t\tif input is available on the specified file descriptor.  The\n"
+"    \t\tfractional number.  If TIMEOUT is 0, read returns immediately,\n"
+"    \t\twithout trying to read any data, returning success only if\n"
+"    \t\tinput is available on the specified file descriptor.  The\n"
 "    \t\texit status is greater than 128 if the timeout is exceeded\n"
 "      -u fd\t\tread from file descriptor FD instead of the standard input\n"
 "    \n"
 "    Exit Status:\n"
-"    The return code is zero, unless end-of-file is encountered, read times out,\n"
+"    The return code is zero, unless end-of-file is encountered, read times "
+"out\n"
+"    (in which case it's greater than 128), a variable assignment error "
+"occurs,\n"
 "    or an invalid file descriptor is supplied as the argument to -u."
 msgstr ""
 "Načte ze standardního vstupu jeden řádek a rozdělí jej na položky.\n"
 "    \n"
 "    Ze standardního vstupu, nebo deskriptoru souboru FD, je-li zadán\n"
 "    přepínač -u, je načten jeden řádek. Řádek se rozdělí na části jako při\n"
-"    dělení na slova a první slovo je přiřazeno do prvního JMÉNA, druhé slovo\n"
+"    dělení na slova a první slovo je přiřazeno do prvního JMÉNA, druhé "
+"slovo\n"
 "    do druhého JMÉNA a tak dále, přičemž přebývající slova se přiřadí do\n"
 "    posledního JMÉNA. Pouze znaky uvedené v $IFS jsou považovány za\n"
 "    oddělovače slov.\n"
 "    \n"
-"    Nejsou-li uvedena žádná JMÉNA, načtený řádek bude uložen do proměnné REPLY.\n"
+"    Nejsou-li uvedena žádná JMÉNA, načtený řádek bude uložen do proměnné "
+"REPLY.\n"
 "    \n"
 "    Přepínače:\n"
 "      -a pole\tnačtená slova budou přiřazena do postupných prvků POLE\n"
@@ -3540,7 +3717,7 @@ msgstr ""
 "    pro čtení nevyprší nebo není poskytnut neplatný deskriptor souboru jako\n"
 "    argument -u."
 
-#: builtins.c:1014
+#: builtins.c:1024
 msgid ""
 "Return from a shell function.\n"
 "    \n"
@@ -3553,14 +3730,17 @@ msgid ""
 msgstr ""
 "Návrat z shellové funkce.\n"
 "    \n"
-"    Způsobí ukončení funkce nebo skriptu načteného přes „source“ s návratovou\n"
-"    hodnotou určenou N. Je-li N vynecháno, návratový kód bude roven poslednímu\n"
+"    Způsobí ukončení funkce nebo skriptu načteného přes „source“ "
+"s návratovou\n"
+"    hodnotou určenou N. Je-li N vynecháno, návratový kód bude roven "
+"poslednímu\n"
 "    příkazu vykonanému uvnitř dotyčné funkce nebo skriptu.\n"
 "    \n"
 "    Návratová hodnota:\n"
 "    Vrátí N, nebo selže, pokud shell neprovádí funkci nebo skript."
 
-#: builtins.c:1027
+#: builtins.c:1037
+#, fuzzy
 msgid ""
 "Set or unset values of shell options and positional parameters.\n"
 "    \n"
@@ -3603,7 +3783,8 @@ msgid ""
 "              physical     same as -P\n"
 "              pipefail     the return value of a pipeline is the status of\n"
 "                           the last command to exit with a non-zero status,\n"
-"                           or zero if no command exited with a non-zero status\n"
+"                           or zero if no command exited with a non-zero "
+"status\n"
 "              posix        change the behavior of bash where the default\n"
 "                           operation differs from the Posix standard to\n"
 "                           match the standard\n"
@@ -3625,7 +3806,7 @@ msgid ""
 "      -E  If set, the ERR trap is inherited by shell functions.\n"
 "      -H  Enable ! style history substitution.  This flag is on\n"
 "          by default when the shell is interactive.\n"
-"      -P  If set, do not follow symbolic links when executing commands\n"
+"      -P  If set, do not resolve symbolic links when executing commands\n"
 "          such as cd which change the current directory.\n"
 "      -T  If set, the DEBUG trap is inherited by shell functions.\n"
 "      --  Assign any remaining arguments to the positional parameters.\n"
@@ -3645,7 +3826,8 @@ msgid ""
 msgstr ""
 "Nastaví nebo zruší hodnoty přepínačů shellu a pozičních parametrů.\n"
 "    \n"
-"    Změní hodnoty atributům shellu a pozičním parametrům, nebo zobrazí názvy\n"
+"    Změní hodnoty atributům shellu a pozičním parametrům, nebo zobrazí "
+"názvy\n"
 "    a hodnoty proměnných shellu.\n"
 "    \n"
 "    Přepínače:\n"
@@ -3719,8 +3901,10 @@ msgstr ""
 "      -   Přiřadí jakékoliv zbývající argumenty do pozičních parametrů.\n"
 "          Přepínače -x a -v budou vypnuty.\n"
 "    \n"
-"    Použití + místo - způsobí, že tyto příznaky budou vypnuty. Příznaky lze též\n"
-"    použít při volání shellu. Aktuální množinu příznaků je možno nalézt v $-.\n"
+"    Použití + místo - způsobí, že tyto příznaky budou vypnuty. Příznaky lze "
+"též\n"
+"    použít při volání shellu. Aktuální množinu příznaků je možno nalézt "
+"v $-.\n"
 "    Přebývajících n ARGUMENTŮ jsou poziční parametry a budou přiřazeny,\n"
 "    v pořadí, do $1, $2, … $n. Nejsou-li zadány žádné ARGUMENTY, budou\n"
 "    vytištěny všechny proměnné shellu.\n"
@@ -3728,7 +3912,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud nebyl zadán neplatný argument."
 
-#: builtins.c:1112
+#: builtins.c:1122
 msgid ""
 "Unset values and attributes of shell variables and functions.\n"
 "    \n"
@@ -3738,7 +3922,8 @@ msgid ""
 "      -f\ttreat each NAME as a shell function\n"
 "      -v\ttreat each NAME as a shell variable\n"
 "    \n"
-"    Without options, unset first tries to unset a variable, and if that fails,\n"
+"    Without options, unset first tries to unset a variable, and if that "
+"fails,\n"
 "    tries to unset a function.\n"
 "    \n"
 "    Some variables cannot be unset; also see `readonly'.\n"
@@ -3754,7 +3939,8 @@ msgstr ""
 "      -f\tpovažuje každé JMÉNO za funkci shellu\n"
 "      -v\tpovažuje každé JMÉNO za proměnnou shellu\n"
 "    \n"
-"    Bez těchto dvou příznaků unset nejprve zkusí zrušit proměnnou a pokud toto\n"
+"    Bez těchto dvou příznaků unset nejprve zkusí zrušit proměnnou a pokud "
+"toto\n"
 "    selže, tak zkusí zrušit funkci.\n"
 "    \n"
 "    Některé proměnné nelze odstranit. Vizte příkaz „readonly“.\n"
@@ -3763,12 +3949,13 @@ msgstr ""
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač a JMÉNO není jen pro\n"
 "    čtení."
 
-#: builtins.c:1132
+#: builtins.c:1142
 msgid ""
 "Set export attribute for shell variables.\n"
 "    \n"
 "    Marks each NAME for automatic export to the environment of subsequently\n"
-"    executed commands.  If VALUE is supplied, assign VALUE before exporting.\n"
+"    executed commands.  If VALUE is supplied, assign VALUE before "
+"exporting.\n"
 "    \n"
 "    Options:\n"
 "      -f\trefer to shell functions\n"
@@ -3782,8 +3969,10 @@ msgid ""
 msgstr ""
 "Nastaví atribut exportovat proměnné shellu.\n"
 "    \n"
-"    Každý NÁZEV je označen pro automatické exportování do prostředí následně\n"
-"    prováděných příkazů. Je-li zadána HODNOTA, před exportem přiřadí HODNOTU.\n"
+"    Každý NÁZEV je označen pro automatické exportování do prostředí "
+"následně\n"
+"    prováděných příkazů. Je-li zadána HODNOTA, před exportem přiřadí "
+"HODNOTU.\n"
 "    \n"
 "    Přepínače:\n"
 "      -f\tvztahuje se na funkce shellu\n"
@@ -3795,7 +3984,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač nebo NÁZEV."
 
-#: builtins.c:1151
+#: builtins.c:1161
 msgid ""
 "Mark shell variables as unchangeable.\n"
 "    \n"
@@ -3816,8 +4005,10 @@ msgid ""
 msgstr ""
 "Označí proměnné shellu za nezměnitelné.\n"
 "    \n"
-"    Označí každý NÁZEV jako jen pro čtení, hodnoty těchto NÁZVŮ nebude možné\n"
-"    změnit následným přiřazením. Je-li zadána HODNOTA, před označením za jen\n"
+"    Označí každý NÁZEV jako jen pro čtení, hodnoty těchto NÁZVŮ nebude "
+"možné\n"
+"    změnit následným přiřazením. Je-li zadána HODNOTA, před označením za "
+"jen\n"
 "    pro čtení přiřadí HODNOTU.\n"
 "    \n"
 "    Přepínače:\n"
@@ -3831,7 +4022,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač nebo NÁZEV."
 
-#: builtins.c:1172
+#: builtins.c:1182
 msgid ""
 "Shift positional parameters.\n"
 "    \n"
@@ -3849,7 +4040,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud N není záporný a není větší než $#."
 
-#: builtins.c:1184 builtins.c:1199
+#: builtins.c:1194 builtins.c:1209
 msgid ""
 "Execute commands from a file in the current shell.\n"
 "    \n"
@@ -3873,7 +4064,7 @@ msgstr ""
 "    Vrací návratový kód posledního provedeného příkazu z NÁZVU_SOUBORU.\n"
 "    Selže, pokud NÁZEV_SOUBORU nelze načíst."
 
-#: builtins.c:1215
+#: builtins.c:1225
 msgid ""
 "Suspend shell execution.\n"
 "    \n"
@@ -3897,7 +4088,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrací úspěch, pokud je správa úloh zapnuta a nevyskytla se chyba."
 
-#: builtins.c:1231
+#: builtins.c:1241
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -3931,7 +4122,8 @@ msgid ""
 "      -x FILE        True if the file is executable by you.\n"
 "      -O FILE        True if the file is effectively owned by you.\n"
 "      -G FILE        True if the file is effectively owned by your group.\n"
-"      -N FILE        True if the file has been modified since it was last read.\n"
+"      -N FILE        True if the file has been modified since it was last "
+"read.\n"
 "    \n"
 "      FILE1 -nt FILE2  True if file1 is newer than file2 (according to\n"
 "                       modification date).\n"
@@ -3952,7 +4144,8 @@ msgid ""
 "      STRING1 != STRING2\n"
 "                     True if the strings are not equal.\n"
 "      STRING1 < STRING2\n"
-"                     True if STRING1 sorts before STRING2 lexicographically.\n"
+"                     True if STRING1 sorts before STRING2 "
+"lexicographically.\n"
 "      STRING1 > STRING2\n"
 "                     True if STRING1 sorts after STRING2 lexicographically.\n"
 "    \n"
@@ -4012,7 +4205,8 @@ msgstr ""
 "      -N SOUBOR      Pravda, pokud soubor byl změněn po posledním čtení.\n"
 "    \n"
 "      SOUBOR1 -nt SOUBOR2\n"
-"                     Pravda, pokud je SOUBOR1 novější než SOUBOR2 (podle času\n"
+"                     Pravda, pokud je SOUBOR1 novější než SOUBOR2 (podle "
+"času\n"
 "                     změny obsahu).\n"
 "    \n"
 "      SOUBOR1 -ot SOUBOR2\n"
@@ -4060,7 +4254,7 @@ msgstr ""
 "    Vrací úspěch, je-li VÝRAZ vyhodnocen jako pravdivý. Selže, je-li VÝRAZ\n"
 "    vyhodnocen jako nepravdivý nebo je-li zadán neplatný argument."
 
-#: builtins.c:1311
+#: builtins.c:1321
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -4072,11 +4266,12 @@ msgstr ""
 "    Toto je synonymum pro vestavěný příkaz „test“, až na to, že poslední\n"
 "    argument musí být doslovně „]“, aby se shodoval s otevírající „[“."
 
-#: builtins.c:1320
+#: builtins.c:1330
 msgid ""
 "Display process times.\n"
 "    \n"
-"    Prints the accumulated user and system times for the shell and all of its\n"
+"    Prints the accumulated user and system times for the shell and all of "
+"its\n"
 "    child processes.\n"
 "    \n"
 "    Exit Status:\n"
@@ -4084,17 +4279,19 @@ msgid ""
 msgstr ""
 "Zobrazí časy procesu.\n"
 "    \n"
-"    Vypíše celkovou dobu procesu shellu a všech jeho potomků, kterou strávili\n"
+"    Vypíše celkovou dobu procesu shellu a všech jeho potomků, kterou "
+"strávili\n"
 "    v uživatelském a jaderném (system) prostoru.\n"
 "    \n"
 "    Návratový kód:\n"
 "    Vždy uspěje."
 
-#: builtins.c:1332
+#: builtins.c:1342
 msgid ""
 "Trap signals and other events.\n"
 "    \n"
-"    Defines and activates handlers to be run when the shell receives signals\n"
+"    Defines and activates handlers to be run when the shell receives "
+"signals\n"
 "    or other conditions.\n"
 "    \n"
 "    ARG is a command to be read and executed when the shell receives the\n"
@@ -4103,26 +4300,34 @@ msgid ""
 "    value.  If ARG is the null string each SIGNAL_SPEC is ignored by the\n"
 "    shell and by the commands it invokes.\n"
 "    \n"
-"    If a SIGNAL_SPEC is EXIT (0) ARG is executed on exit from the shell.  If\n"
-"    a SIGNAL_SPEC is DEBUG, ARG is executed before every simple command.  If\n"
-"    a SIGNAL_SPEC is RETURN, ARG is executed each time a shell function or a\n"
-"    script run by the . or source builtins finishes executing.  A SIGNAL_SPEC\n"
-"    of ERR means to execute ARG each time a command's failure would cause the\n"
+"    If a SIGNAL_SPEC is EXIT (0) ARG is executed on exit from the shell.  "
+"If\n"
+"    a SIGNAL_SPEC is DEBUG, ARG is executed before every simple command.  "
+"If\n"
+"    a SIGNAL_SPEC is RETURN, ARG is executed each time a shell function or "
+"a\n"
+"    script run by the . or source builtins finishes executing.  A "
+"SIGNAL_SPEC\n"
+"    of ERR means to execute ARG each time a command's failure would cause "
+"the\n"
 "    shell to exit when the -e option is enabled.\n"
 "    \n"
-"    If no arguments are supplied, trap prints the list of commands associated\n"
+"    If no arguments are supplied, trap prints the list of commands "
+"associated\n"
 "    with each signal.\n"
 "    \n"
 "    Options:\n"
 "      -l\tprint a list of signal names and their corresponding numbers\n"
 "      -p\tdisplay the trap commands associated with each SIGNAL_SPEC\n"
 "    \n"
-"    Each SIGNAL_SPEC is either a signal name in <signal.h> or a signal number.\n"
+"    Each SIGNAL_SPEC is either a signal name in <signal.h> or a signal "
+"number.\n"
 "    Signal names are case insensitive and the SIG prefix is optional.  A\n"
 "    signal may be sent to the shell with \"kill -signal $$\".\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success unless a SIGSPEC is invalid or an invalid option is given."
+"    Returns success unless a SIGSPEC is invalid or an invalid option is "
+"given."
 msgstr ""
 "Zachytávání signálů a jiných událostí.\n"
 "    \n"
@@ -4130,34 +4335,42 @@ msgstr ""
 "    signály nebo nastanou určité podmínky.\n"
 "    \n"
 "    Příkaz ARGUMENT bude načten a proveden, až shell obdrží signál(y)\n"
-"    SIGNAL_SPEC. Pokud ARGUMENT chybí (a je zadán jeden SIGNAL_SPEC) nebo je\n"
-"    „-“, každý určený signál bude přenastaven zpět na svoji původní hodnotu.\n"
-"    Je-li ARGUMENT prázdný řetězec, každý SIGNAL_SPEC bude shellem a příkazy\n"
+"    SIGNAL_SPEC. Pokud ARGUMENT chybí (a je zadán jeden SIGNAL_SPEC) nebo "
+"je\n"
+"    „-“, každý určený signál bude přenastaven zpět na svoji původní "
+"hodnotu.\n"
+"    Je-li ARGUMENT prázdný řetězec, každý SIGNAL_SPEC bude shellem a "
+"příkazy\n"
 "    z něj spuštěnými ignorován.\n"
 "    \n"
-"    Je-li SIGNAL_SPEC „EXIT (0)“, bude ARGUMENT proveden při ukončování tohoto\n"
+"    Je-li SIGNAL_SPEC „EXIT (0)“, bude ARGUMENT proveden při ukončování "
+"tohoto\n"
 "    shellu. Je-li SIGNAL_SPEC „DEBUG“, bude ARGUMENT proveden před každým\n"
-"    jednoduchým příkazem. Je-li SIGNAL_SPEC „RETURN“, bude ARGUMENT proveden\n"
+"    jednoduchým příkazem. Je-li SIGNAL_SPEC „RETURN“, bude ARGUMENT "
+"proveden\n"
 "    vždy, když skončí běh funkce shellu nebo skriptu spuštěného přes\n"
 "    vestavěný příkaz „.“ nebo „source“. SIGNAL_SPEC „ERR“ znamená, že\n"
 "    ARGUMENT bude proveden pokaždé, když by selhání příkazu způsobilo\n"
 "    ukončení shellu (je-li zapnut přepínač -e).\n"
 "    \n"
-"    Nejsou-li poskytnuty žádné argumenty, trap vypíše seznam příkazů navázaných\n"
+"    Nejsou-li poskytnuty žádné argumenty, trap vypíše seznam příkazů "
+"navázaných\n"
 "    na všechny signály.\n"
 "    \n"
 "    Přepínače:\n"
 "      -l\tvypíše seznam jmen signálů a jim odpovídajících čísel\n"
 "      -p\tzobrazí příkazy navázané na každý SIGNAL_SPEC\n"
 "    \n"
-"    Každý SIGNAL_SPEC je buďto jméno signálu ze <signal.h>, nebo číslo signálu.\n"
-"    U jmen signálů nezáleží na velikosti písmen a předpona SIG je nepovinná.\n"
+"    Každý SIGNAL_SPEC je buďto jméno signálu ze <signal.h>, nebo číslo "
+"signálu.\n"
+"    U jmen signálů nezáleží na velikosti písmen a předpona SIG je "
+"nepovinná.\n"
 "    Aktuálnímu shellu lze zaslat signál pomocí „kill -signal $$“.\n"
 "    \n"
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud SIGSPEC a zadané přepínače jsou platné."
 
-#: builtins.c:1368
+#: builtins.c:1378
 msgid ""
 "Display information about command type.\n"
 "    \n"
@@ -4183,7 +4396,8 @@ msgid ""
 "      NAME\tCommand name to be interpreted.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success if all of the NAMEs are found; fails if any are not found."
+"    Returns success if all of the NAMEs are found; fails if any are not "
+"found."
 msgstr ""
 "Zobrazí informace o typu příkazu.\n"
 "    \n"
@@ -4212,11 +4426,13 @@ msgstr ""
 "    Vrátí úspěch, pokud všechny NÁZVY byly nalezeny. Selže, pokud některé\n"
 "    nalezeny nebyly."
 
-#: builtins.c:1399
+#: builtins.c:1409
+#, fuzzy
 msgid ""
 "Modify shell resource limits.\n"
 "    \n"
-"    Provides control over the resources available to the shell and processes\n"
+"    Provides control over the resources available to the shell and "
+"processes\n"
 "    it creates, on systems that allow such control.\n"
 "    \n"
 "    Options:\n"
@@ -4240,6 +4456,9 @@ msgid ""
 "      -u\tthe maximum number of user processes\n"
 "      -v\tthe size of virtual memory\n"
 "      -x\tthe maximum number of file locks\n"
+"      -T    the maximum number of threads\n"
+"    \n"
+"    Not all options are available on all platforms.\n"
 "    \n"
 "    If LIMIT is given, it is the new value of the specified resource; the\n"
 "    special LIMIT values `soft', `hard', and `unlimited' stand for the\n"
@@ -4264,7 +4483,8 @@ msgstr ""
 "      -H\tpoužije se „tvrdé“ (hard) omezení zdroje\n"
 "      -a\tnahlásí všechna současná omezení (limity)\n"
 "      -b\tvelikost vyrovnávací paměti socketů\n"
-"      -c\tmaximální velikost vytvářených core souborů (výpis paměti programu)\n"
+"      -c\tmaximální velikost vytvářených core souborů (výpis paměti "
+"programu)\n"
 "      -d\tmaximální velikost datového segmentu procesu\n"
 "      -e\tmaximální plánovací priorita („nice“)\n"
 "      -f\tmaximální velikost souborů zapsaných shellem a jeho potomky\n"
@@ -4288,12 +4508,13 @@ msgstr ""
 "    přepínač, pak se předpokládá -f.\n"
 "    \n"
 "    Hodnoty jsou v násobcích 1024 bajtů, kromě -t, která je v sekundách,\n"
-"    -p, která je v násobcích 512 bajtů, a -u, což je absolutní počet procesů.\n"
+"    -p, která je v násobcích 512 bajtů, a -u, což je absolutní počet "
+"procesů.\n"
 "    \n"
 "    Návratová hodnota:\n"
 "    Vrací úspěch, pokud nebyl zadán neplatný přepínač a nevyskytla se chyba."
 
-#: builtins.c:1444
+#: builtins.c:1457
 msgid ""
 "Display or set file mode mask.\n"
 "    \n"
@@ -4326,31 +4547,36 @@ msgstr ""
 "    Návratový kód\n"
 "    Vrátí úspěch, pokud nebyl zadán neplatný MÓD nebo přepínač."
 
-#: builtins.c:1464
+#: builtins.c:1477
+#, fuzzy
 msgid ""
 "Wait for job completion and return exit status.\n"
 "    \n"
-"    Waits for the process identified by ID, which may be a process ID or a\n"
+"    Waits for each process identified by an ID, which may be a process ID or "
+"a\n"
 "    job specification, and reports its termination status.  If ID is not\n"
 "    given, waits for all currently active child processes, and the return\n"
-"    status is zero.  If ID is a a job specification, waits for all processes\n"
-"    in the job's pipeline.\n"
+"    status is zero.  If ID is a a job specification, waits for all "
+"processes\n"
+"    in that job's pipeline.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns the status of ID; fails if ID is invalid or an invalid option is\n"
-"    given."
+"    Returns the status of the last ID; fails if ID is invalid or an invalid\n"
+"    option is given."
 msgstr ""
 "Počká na dokončení úlohy a vrátí její návratový kód.\n"
 "    \n"
 "    Počká na proces určený ID, což může být ID procesu nebo identifikace\n"
-"    úlohy, a nahlásí jeho návratový kód. Není-li ID zadáno, počká na všechny\n"
+"    úlohy, a nahlásí jeho návratový kód. Není-li ID zadáno, počká na "
+"všechny\n"
 "    právě aktivní dětské procesy a návratovým kódem bude nula. Je-li ID\n"
 "    identifikátorem úlohy, počká na všechny procesy z kolony úlohy.\n"
 "    \n"
 "    Návratový kód:\n"
-"    Vrátí kód ID, selže, pokud ID není platný nebo byl zadán neplatný přepínač."
+"    Vrátí kód ID, selže, pokud ID není platný nebo byl zadán neplatný "
+"přepínač."
 
-#: builtins.c:1482
+#: builtins.c:1495
 msgid ""
 "Wait for process completion and return exit status.\n"
 "    \n"
@@ -4359,19 +4585,22 @@ msgid ""
 "    and the return code is zero.  PID must be a process ID.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns the status of ID; fails if ID is invalid or an invalid option is\n"
+"    Returns the status of ID; fails if ID is invalid or an invalid option "
+"is\n"
 "    given."
 msgstr ""
 "Počká na dokončení procesu a vrátí jeho návratový kód.\n"
 "    \n"
 "    Počká na zadaný proces a nahlásí jeho návratový kód. Není-li PID zadán,\n"
-"    bude se čekat na všechny právě aktivní procesy potomků a návratová hodnota\n"
+"    bude se čekat na všechny právě aktivní procesy potomků a návratová "
+"hodnota\n"
 "    bude nula. PID musí být ID procesu.\n"
 "    \n"
 "    Návratový kód:\n"
-"    Vrátí kód ID, selže, pokud ID není platný nebo byl zadán neplatný přepínač."
+"    Vrátí kód ID, selže, pokud ID není platný nebo byl zadán neplatný "
+"přepínač."
 
-#: builtins.c:1497
+#: builtins.c:1510
 msgid ""
 "Execute commands for each member in a list.\n"
 "    \n"
@@ -4385,14 +4614,17 @@ msgid ""
 msgstr ""
 "Pro každý prvek seznamu vykoná příkazy.\n"
 "    \n"
-"    Smyčka „for“ provede posloupnost příkazů pro každý prvek v seznamu položek.\n"
-"    Pokud „in SLOVECH…;“ není přítomno, pak se předpokládá „in \"$@\"“. NÁZEV\n"
-"    bude postupně nastaven na každý prvek ve SLOVECH a PŘÍKAZY budou provedeny.\n"
+"    Smyčka „for“ provede posloupnost příkazů pro každý prvek v seznamu "
+"položek.\n"
+"    Pokud „in SLOVECH…;“ není přítomno, pak se předpokládá „in \"$@\"“. "
+"NÁZEV\n"
+"    bude postupně nastaven na každý prvek ve SLOVECH a PŘÍKAZY budou "
+"provedeny.\n"
 "    \n"
 "    Návratový kód:\n"
 "    Vrátí kód naposledy provedeného příkazu."
 
-#: builtins.c:1511
+#: builtins.c:1524
 msgid ""
 "Arithmetic for loop.\n"
 "    \n"
@@ -4421,7 +4653,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí kód naposledy vykonaného příkazu."
 
-#: builtins.c:1529
+#: builtins.c:1542
 msgid ""
 "Select words from a list and execute commands.\n"
 "    \n"
@@ -4442,13 +4674,20 @@ msgid ""
 msgstr ""
 "Vybere slova ze seznamu a vykoná příkazy.\n"
 "    \n"
-"    SLOVA jsou expandována a vytvoří seznam slov. Množina expandovaných slov\n"
-"    je vytištěna na standardní chybový výstup, každé předchází číslo.  Není-li\n"
-"    „in SLOVA“ přítomno, předpokládá se „in \"$@\"“. Pak je zobrazena výzva PS3\n"
-"    a jeden řádek načten ze standardního vstupu. Pokud je řádek tvořen číslem\n"
-"    odpovídajícím jednomu ze zobrazených slov, pak NÁZEV bude nastaven na toto\n"
-"    slovo. Pokud je řádek prázdný, SLOVA a výzva budou znovu zobrazeny. Je-li\n"
-"    načten EOF (konec souboru), příkaz končí. Načtení jakékoliv jiné hodnoty\n"
+"    SLOVA jsou expandována a vytvoří seznam slov. Množina expandovaných "
+"slov\n"
+"    je vytištěna na standardní chybový výstup, každé předchází číslo.  Není-"
+"li\n"
+"    „in SLOVA“ přítomno, předpokládá se „in \"$@\"“. Pak je zobrazena výzva "
+"PS3\n"
+"    a jeden řádek načten ze standardního vstupu. Pokud je řádek tvořen "
+"číslem\n"
+"    odpovídajícím jednomu ze zobrazených slov, pak NÁZEV bude nastaven na "
+"toto\n"
+"    slovo. Pokud je řádek prázdný, SLOVA a výzva budou znovu zobrazeny. Je-"
+"li\n"
+"    načten EOF (konec souboru), příkaz končí. Načtení jakékoliv jiné "
+"hodnoty\n"
 "    nastaví NÁZEV na prázdný řetězec. Načtený řádek bude uložen do proměnné\n"
 "    REPLY. Po každém výběru budou provedeny PŘÍKAZY, dokud nebude vykonán\n"
 "    příkaz „break“.\n"
@@ -4456,7 +4695,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí kód naposledy prováděného příkazu."
 
-#: builtins.c:1550
+#: builtins.c:1563
 msgid ""
 "Report time consumed by pipeline's execution.\n"
 "    \n"
@@ -4474,18 +4713,20 @@ msgstr ""
 "Nahlásí čas spotřebovaný prováděním kolony.\n"
 "    \n"
 "    Vykoná KOLONU a zobrazí přehled reálného času, uživatelského\n"
-"    procesorového času a systémového procesorového času stráveného prováděním\n"
+"    procesorového času a systémového procesorového času stráveného "
+"prováděním\n"
 "    KOLONY poté, co skončí.\n"
 "    \n"
 "    Přepínače:\n"
 "      -p\tzobrazí přehled časů v přenositelném posixovém formátu\n"
 "    \n"
-"    Hodnota proměnné TIMEFORMAT se použije jako specifikace výstupního formátu.\n"
+"    Hodnota proměnné TIMEFORMAT se použije jako specifikace výstupního "
+"formátu.\n"
 "    \n"
 "    Návratový kód:\n"
 "    Návratová hodnota je návratová hodnota KOLONY."
 
-#: builtins.c:1567
+#: builtins.c:1580
 msgid ""
 "Execute commands based on pattern matching.\n"
 "    \n"
@@ -4503,16 +4744,21 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí kód naposledy provedeného příkazu."
 
-#: builtins.c:1579
+#: builtins.c:1592
 msgid ""
 "Execute commands based on conditional.\n"
 "    \n"
-"    The `if COMMANDS' list is executed.  If its exit status is zero, then the\n"
-"    `then COMMANDS' list is executed.  Otherwise, each `elif COMMANDS' list is\n"
+"    The `if COMMANDS' list is executed.  If its exit status is zero, then "
+"the\n"
+"    `then COMMANDS' list is executed.  Otherwise, each `elif COMMANDS' list "
+"is\n"
 "    executed in turn, and if its exit status is zero, the corresponding\n"
-"    `then COMMANDS' list is executed and the if command completes.  Otherwise,\n"
-"    the `else COMMANDS' list is executed, if present.  The exit status of the\n"
-"    entire construct is the exit status of the last command executed, or zero\n"
+"    `then COMMANDS' list is executed and the if command completes.  "
+"Otherwise,\n"
+"    the `else COMMANDS' list is executed, if present.  The exit status of "
+"the\n"
+"    entire construct is the exit status of the last command executed, or "
+"zero\n"
 "    if no condition tested true.\n"
 "    \n"
 "    Exit Status:\n"
@@ -4521,17 +4767,19 @@ msgstr ""
 "Vykoná příkazy na základě splnění podmínky.\n"
 "    \n"
 "    Provede seznam „if PŘÍKAZŮ“. Bude-li jeho návratový kód nula, pak bude\n"
-"    proveden seznam „then PŘÍKAZŮ“. Jinak bude proveden popořadě každý seznam\n"
+"    proveden seznam „then PŘÍKAZŮ“. Jinak bude proveden popořadě každý "
+"seznam\n"
 "    „elif PŘÍKAZŮ“ a bude-li jeho návratový kód nula, odpovídající seznam\n"
 "    „then PŘÍKAZŮ“ bude proveden a příkaz if skončí. V opačném případě bude\n"
 "    proveden seznam „else PŘÍKAZŮ“, pokud existuje. Návratová hodnota celé\n"
-"    konstrukce je návratovou hodnotou posledního provedeného příkazu nebo nula,\n"
+"    konstrukce je návratovou hodnotou posledního provedeného příkazu nebo "
+"nula,\n"
 "    pokud žádná z testovaných podmínek není pravdivá.\n"
 "    \n"
 "    Návratový kód:\n"
 "    Vrátí kód naposledy provedeného příkazu."
 
-#: builtins.c:1596
+#: builtins.c:1609
 msgid ""
 "Execute commands as long as a test succeeds.\n"
 "    \n"
@@ -4543,13 +4791,14 @@ msgid ""
 msgstr ""
 "Vykonává příkazy, dokud test úspěšně prochází.\n"
 "    \n"
-"    Expanduje a provádí PŘÍKAZY tak dlouho, dokud poslední příkaz ve „while“\n"
+"    Expanduje a provádí PŘÍKAZY tak dlouho, dokud poslední příkaz ve "
+"„while“\n"
 "    PŘÍKAZECH má nulový návratový kód.\n"
 "    \n"
 "    Návratový kód:\n"
 "    Vrátí kód naposledy provedeného příkazu."
 
-#: builtins.c:1608
+#: builtins.c:1621
 msgid ""
 "Execute commands as long as a test does not succeed.\n"
 "    \n"
@@ -4561,12 +4810,13 @@ msgid ""
 msgstr ""
 "Vykonává příkazy, dokud test končí neúspěšně.\n"
 "    \n"
-"    Expanduje a provádí PŘÍKAZY tak dlouho, dokud poslední příkaz ve „until“\n"
+"    Expanduje a provádí PŘÍKAZY tak dlouho, dokud poslední příkaz ve "
+"„until“\n"
 "    PŘÍKAZECH má nenulový návratový kód.    \n"
 "    Návratový kód:\n"
 "    Vrátí kód naposledy provedeného příkazu."
 
-#: builtins.c:1620
+#: builtins.c:1633
 msgid ""
 "Create a coprocess named NAME.\n"
 "    \n"
@@ -4581,18 +4831,20 @@ msgstr ""
 "Vytvoří koproces pojmenovaný NÁZEV.\n"
 "    \n"
 "    Vykoná PŘÍKAZ asynchronně, přičemž jeho standardní výstup a standardní\n"
-"    vstup budou napojeny rourou na souborové deskriptory uvedené v poli NÁZEV\n"
+"    vstup budou napojeny rourou na souborové deskriptory uvedené v poli "
+"NÁZEV\n"
 "    tohoto shellu pod indexem 0 a 1. Implicitní NÁZEV je „COPROC“.\n"
 "    \n"
 "    Návratový kód:\n"
 "    Vrátí návratový kód PŘÍKAZU."
 
-#: builtins.c:1634
+#: builtins.c:1647
 msgid ""
 "Define shell function.\n"
 "    \n"
 "    Create a shell function named NAME.  When invoked as a simple command,\n"
-"    NAME runs COMMANDs in the calling shell's context.  When NAME is invoked,\n"
+"    NAME runs COMMANDs in the calling shell's context.  When NAME is "
+"invoked,\n"
 "    the arguments are passed to the function as $1...$n, and the function's\n"
 "    name is in $FUNCNAME.\n"
 "    \n"
@@ -4602,14 +4854,16 @@ msgstr ""
 "Definuje funkci shellu.\n"
 "    \n"
 "    Vytvoří shellovou funkci pojmenovanou NÁZEV. Volána jakožto jednoduchý\n"
-"    příkaz spustí PŘÍKAZY v kontextu volajícího shellu. Je-li vyvolán NÁZEV,\n"
-"    budou funkci předány argumenty jako $1…$n a název funkce bude umístěn do\n"
+"    příkaz spustí PŘÍKAZY v kontextu volajícího shellu. Je-li vyvolán "
+"NÁZEV,\n"
+"    budou funkci předány argumenty jako $1…$n a název funkce bude umístěn "
+"do\n"
 "    $FUNCNAME.\n"
 "    \n"
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud NÁZEV není jen pro čtení."
 
-#: builtins.c:1648
+#: builtins.c:1661
 msgid ""
 "Group commands as a unit.\n"
 "    \n"
@@ -4626,7 +4880,7 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí kód naposledy spuštěného příkazu."
 
-#: builtins.c:1660
+#: builtins.c:1673
 msgid ""
 "Resume job in foreground.\n"
 "    \n"
@@ -4642,14 +4896,16 @@ msgstr ""
 "Obnoví úlohu do popředí.\n"
 "    \n"
 "    Ekvivalent k argumentu ÚLOHA příkazu „fg“. Obnoví pozastavenou úlohu\n"
-"    nebo úlohu na pozadí. ÚLOHA může určovat buď název úlohy, nebo číslo úlohy.\n"
-"    Přidání „&“ za ÚLOHU přesune úlohu na pozadí, jako by identifikátor úlohy\n"
+"    nebo úlohu na pozadí. ÚLOHA může určovat buď název úlohy, nebo číslo "
+"úlohy.\n"
+"    Přidání „&“ za ÚLOHU přesune úlohu na pozadí, jako by identifikátor "
+"úlohy\n"
 "    byl argumentem příkazu „bg“.\n"
 "    \n"
 "    Návratový kód:\n"
 "    Vrátí kód obnovené úlohy."
 
-#: builtins.c:1675
+#: builtins.c:1688
 msgid ""
 "Evaluate arithmetic expression.\n"
 "    \n"
@@ -4671,13 +4927,16 @@ msgstr ""
 # příkaz, který by byl vykonán na základě splnění jiné podmínky. Tj. překlad
 # „podmíněný příkaz“ je chybný.
 # Toto je nápověda k vestavěnému příkazu „[“.
-#: builtins.c:1687
+#: builtins.c:1700
 msgid ""
 "Execute conditional command.\n"
 "    \n"
-"    Returns a status of 0 or 1 depending on the evaluation of the conditional\n"
-"    expression EXPRESSION.  Expressions are composed of the same primaries used\n"
-"    by the `test' builtin, and may be combined using the following operators:\n"
+"    Returns a status of 0 or 1 depending on the evaluation of the "
+"conditional\n"
+"    expression EXPRESSION.  Expressions are composed of the same primaries "
+"used\n"
+"    by the `test' builtin, and may be combined using the following "
+"operators:\n"
 "    \n"
 "      ( EXPRESSION )\tReturns the value of EXPRESSION\n"
 "      ! EXPRESSION\t\tTrue if EXPRESSION is false; else false\n"
@@ -4705,20 +4964,22 @@ msgstr ""
 "      ! VÝRAZ\t\tPravda, pokud VÝRAZ je nepravdivý; jinak nepravda\n"
 "      VÝR1 && VÝR2\tPravda, pokud oba VÝR1 i VÝR2 jsou pravdivé;\n"
 "    \t\tjinak nepravda\n"
-"      VÝR1 || VÝR2\tPravda, pokud VÝR1 nebo VÝR2 je pravdivý; jinak nepravda\n"
+"      VÝR1 || VÝR2\tPravda, pokud VÝR1 nebo VÝR2 je pravdivý; jinak "
+"nepravda\n"
 "    \n"
 "    Jsou-li použity operátory „==“ a „!=“, řetězec napravo od operátoru je\n"
 "    použit jako vzor a bude uplatněno porovnávání proti vzoru. Je-li použit\n"
 "    operátor „=~, řetězec napravo do operátoru je uvažován jako regulární\n"
 "    výraz.\n"
 "    \n"
-"    Operátory && a || nevyhodnocují VÝR2, pokud VÝR1 je dostatečný na určení\n"
+"    Operátory && a || nevyhodnocují VÝR2, pokud VÝR1 je dostatečný na "
+"určení\n"
 "    hodnoty výrazu.\n"
 "    \n"
 "    Návratový kód:\n"
 "    0 nebo 1 podle hodnoty VÝRAZU."
 
-#: builtins.c:1713
+#: builtins.c:1726
 msgid ""
 "Common shell variable names and usage.\n"
 "    \n"
@@ -4776,7 +5037,8 @@ msgstr ""
 "    BASH_VERSION\tInformace o verzi tohoto Bashe.\n"
 "    CDPATH\tDvojtečkou oddělený seznam adresářů, který se prohledává\n"
 "    \t\tna adresáře zadané jako argumenty u „cd“.\n"
-"    GLOBIGNORE\tDvojtečkou oddělený seznam vzorů popisujících jména souborů,\n"
+"    GLOBIGNORE\tDvojtečkou oddělený seznam vzorů popisujících jména "
+"souborů,\n"
 "    \t\tkterá budou ignorována při expanzi cest.\n"
 "    HISTFILE\tJméno souboru, kde je uložena historie vašich příkazů.\n"
 "    HISTFILESIZE\tMaximální počet řádků, které tento soubor smí obsahovat.\n"
@@ -4822,7 +5084,7 @@ msgstr ""
 "    \t\trozlišení, které příkazy by měly být uloženy do seznamu\n"
 "    \t\thistorie.\n"
 
-#: builtins.c:1770
+#: builtins.c:1783
 msgid ""
 "Add directories to stack.\n"
 "    \n"
@@ -4879,7 +5141,7 @@ msgstr ""
 "    Vrátí úspěch, pokud nebyl zadán neplatný argument a změna adresáře\n"
 "    neselhala."
 
-#: builtins.c:1804
+#: builtins.c:1817
 msgid ""
 "Remove directories from stack.\n"
 "    \n"
@@ -4929,7 +5191,7 @@ msgstr ""
 "    Vrátí úspěch, pokud nebyl zadán neplatný argument nebo neselhala změna\n"
 "    adresáře."
 
-#: builtins.c:1834
+#: builtins.c:1847
 msgid ""
 "Display directory stack.\n"
 "    \n"
@@ -4946,10 +5208,12 @@ msgid ""
 "    \twith its position in the stack\n"
 "    \n"
 "    Arguments:\n"
-"      +N\tDisplays the Nth entry counting from the left of the list shown by\n"
+"      +N\tDisplays the Nth entry counting from the left of the list shown "
+"by\n"
 "    \tdirs when invoked without options, starting with zero.\n"
 "    \n"
-"      -N\tDisplays the Nth entry counting from the right of the list shown by\n"
+"      -N\tDisplays the Nth entry counting from the right of the list shown "
+"by\n"
 "    \tdirs when invoked without options, starting with zero.\n"
 "    \n"
 "    Exit Status:\n"
@@ -4958,7 +5222,8 @@ msgstr ""
 "Zobrazí zásobník adresářů.\n"
 "    \n"
 "    Zobrazí seznam právě pamatovaných adresářů. Adresáře si najdou cestu\n"
-"    na seznam příkazem „pushd“ a procházet seznamem zpět lze příkazem „popd“.\n"
+"    na seznam příkazem „pushd“ a procházet seznamem zpět lze příkazem "
+"„popd“.\n"
 "    \n"
 "    Přepínače:\n"
 "      -c\tvyprázdní zásobník adresářů tím, že smaže všechny jeho prvky\n"
@@ -4977,12 +5242,13 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač a nevyskytla se chyba."
 
-#: builtins.c:1863
+#: builtins.c:1876
 msgid ""
 "Set and unset shell options.\n"
 "    \n"
 "    Change the setting of each shell option OPTNAME.  Without any option\n"
-"    arguments, list all shell options with an indication of whether or not each\n"
+"    arguments, list all shell options with an indication of whether or not "
+"each\n"
 "    is set.\n"
 "    \n"
 "    Options:\n"
@@ -4999,7 +5265,8 @@ msgstr ""
 "Zapne nebo vypne volby (přepínače) shellu.\n"
 "    \n"
 "    Změní nastavení každého přepínače shellu NÁZEV_VOLBY. Bez přepínačových\n"
-"    argumentů vypíše seznam všech přepínačů shellu s příznakem, zda je, nebo\n"
+"    argumentů vypíše seznam všech přepínačů shellu s příznakem, zda je, "
+"nebo\n"
 "    není nastaven.\n"
 "    Přepínače:\n"
 "      -o\tomezí NÁZVY_VOLEB na ty, které jsou definovány pro použití\n"
@@ -5013,7 +5280,8 @@ msgstr ""
 "    Vrátí úspěch, je-li NÁZEV_VOLBY zapnut. Selže, byl-li zadán neplatný\n"
 "    přepínač nebo je-li NÁZEV_VOLBY vypnut."
 
-#: builtins.c:1884
+#: builtins.c:1897
+#, fuzzy
 msgid ""
 "Formats and prints ARGUMENTS under control of the FORMAT.\n"
 "    \n"
@@ -5021,22 +5289,28 @@ msgid ""
 "      -v var\tassign the output to shell variable VAR rather than\n"
 "    \t\tdisplay it on the standard output\n"
 "    \n"
-"    FORMAT is a character string which contains three types of objects: plain\n"
-"    characters, which are simply copied to standard output; character escape\n"
+"    FORMAT is a character string which contains three types of objects: "
+"plain\n"
+"    characters, which are simply copied to standard output; character "
+"escape\n"
 "    sequences, which are converted and copied to the standard output; and\n"
-"    format specifications, each of which causes printing of the next successive\n"
+"    format specifications, each of which causes printing of the next "
+"successive\n"
 "    argument.\n"
 "    \n"
-"    In addition to the standard format specifications described in printf(1)\n"
-"    and printf(3), printf interprets:\n"
+"    In addition to the standard format specifications described in printf"
+"(1),\n"
+"    printf interprets:\n"
 "    \n"
 "      %b\texpand backslash escape sequences in the corresponding argument\n"
 "      %q\tquote the argument in a way that can be reused as shell input\n"
-"      %(fmt)T output the date-time string resulting from using FMT as a format\n"
+"      %(fmt)T output the date-time string resulting from using FMT as a "
+"format\n"
 "            string for strftime(3)\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success unless an invalid option is given or a write or assignment\n"
+"    Returns success unless an invalid option is given or a write or "
+"assignment\n"
 "    error occurs."
 msgstr ""
 "Naformátuje a vypíše ARGUMENTY podle definice FORMÁTU.\n"
@@ -5045,10 +5319,13 @@ msgstr ""
 "      -v proměnná\tvýstup umístí do proměnné shellu PROMĚNNÁ namísto\n"
 "    \t\todeslání na standardní výstup.\n"
 "    \n"
-"    FORMÁT je řetězec znaků, který obsahuje tři druhy objektů: obyčejné znaky,\n"
-"    které jsou prostě zkopírovány na standardní výstup, posloupnosti escapových\n"
+"    FORMÁT je řetězec znaků, který obsahuje tři druhy objektů: obyčejné "
+"znaky,\n"
+"    které jsou prostě zkopírovány na standardní výstup, posloupnosti "
+"escapových\n"
 "    znaků, které jsou zkonvertovány a zkopírovány na standardní výstup a\n"
-"    formátovací definice, z nichž každá způsobí vytištění dalšího argumentu.\n"
+"    formátovací definice, z nichž každá způsobí vytištění dalšího "
+"argumentu.\n"
 "    \n"
 "    Tento printf interpretuje vedle standardních formátovacích definic\n"
 "    popsaných v printf(1) a printf(3) též:\n"
@@ -5064,12 +5341,14 @@ msgstr ""
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač a nedošlo k chybě\n"
 "    zápisu nebo přiřazení."
 
-#: builtins.c:1913
+#: builtins.c:1926
 msgid ""
 "Specify how arguments are to be completed by Readline.\n"
 "    \n"
-"    For each NAME, specify how arguments are to be completed.  If no options\n"
-"    are supplied, existing completion specifications are printed in a way that\n"
+"    For each NAME, specify how arguments are to be completed.  If no "
+"options\n"
+"    are supplied, existing completion specifications are printed in a way "
+"that\n"
 "    allows them to be reused as input.\n"
 "    \n"
 "    Options:\n"
@@ -5103,19 +5382,21 @@ msgstr ""
 "      -E\tpoužije pravidla doplňování á akce na „prázdné“ příkazy –\n"
 "    \tpravidla doplňování se uplatní na prázdný řádek\n"
 "    \n"
-"    Použije-li se doplňování, akce se uplatní v pořadí, v jakém jsou vypsány\n"
+"    Použije-li se doplňování, akce se uplatní v pořadí, v jakém jsou "
+"vypsány\n"
 "    přepínače psané velkými písmeny výše. Přepínač -D má přednost před\n"
 "    přepínačem -E.\n"
 "    \n"
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač a nevyskytla se chyba."
 
-#: builtins.c:1941
+#: builtins.c:1954
 msgid ""
 "Display possible completions depending on the options.\n"
 "    \n"
 "    Intended to be used from within a shell function generating possible\n"
-"    completions.  If the optional WORD argument is supplied, matches against\n"
+"    completions.  If the optional WORD argument is supplied, matches "
+"against\n"
 "    WORD are generated.\n"
 "    \n"
 "    Exit Status:\n"
@@ -5130,13 +5411,16 @@ msgstr ""
 "    Návratový kód:\n"
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač a nevyskytla se chyba."
 
-#: builtins.c:1956
+#: builtins.c:1969
 msgid ""
 "Modify or display completion options.\n"
 "    \n"
-"    Modify the completion options for each NAME, or, if no NAMEs are supplied,\n"
-"    the completion currently being executed.  If no OPTIONs are given, print\n"
-"    the completion options for each NAME or the current completion specification.\n"
+"    Modify the completion options for each NAME, or, if no NAMEs are "
+"supplied,\n"
+"    the completion currently being executed.  If no OPTIONs are given, "
+"print\n"
+"    the completion options for each NAME or the current completion "
+"specification.\n"
 "    \n"
 "    Options:\n"
 "    \t-o option\tSet completion option OPTION for each NAME\n"
@@ -5174,30 +5458,39 @@ msgstr ""
 "    Argumenty:\n"
 "    Každý NÁZEV odkazuje na příkaz, pro který musí být předem definováno\n"
 "    pravidlo (definice) doplňování pomocí vestavěného příkazu „complete“.\n"
-"    Nejsou-li zadány žádné NÁZVY, musí být compopt volán funkcí, která právě\n"
-"    generuje doplňování. Změněny pak budou možnosti tohoto právě prováděného\n"
+"    Nejsou-li zadány žádné NÁZVY, musí být compopt volán funkcí, která "
+"právě\n"
+"    generuje doplňování. Změněny pak budou možnosti tohoto právě "
+"prováděného\n"
 "    generátoru doplňování.\n"
 "    \n"
 "    Návratový kód:\n"
-"    Vrátí úspěch, pokud nebyl zadán neplatný přepínač a NÁZEV měl definováno\n"
+"    Vrátí úspěch, pokud nebyl zadán neplatný přepínač a NÁZEV měl "
+"definováno\n"
 "    pravidlo doplňování."
 
-#: builtins.c:1986
+#: builtins.c:1999
 msgid ""
 "Read lines from the standard input into an indexed array variable.\n"
 "    \n"
-"    Read lines from the standard input into the indexed array variable ARRAY, or\n"
-"    from file descriptor FD if the -u option is supplied.  The variable MAPFILE\n"
+"    Read lines from the standard input into the indexed array variable "
+"ARRAY, or\n"
+"    from file descriptor FD if the -u option is supplied.  The variable "
+"MAPFILE\n"
 "    is the default ARRAY.\n"
 "    \n"
 "    Options:\n"
-"      -n count\tCopy at most COUNT lines.  If COUNT is 0, all lines are copied.\n"
-"      -O origin\tBegin assigning to ARRAY at index ORIGIN.  The default index is 0.\n"
+"      -n count\tCopy at most COUNT lines.  If COUNT is 0, all lines are "
+"copied.\n"
+"      -O origin\tBegin assigning to ARRAY at index ORIGIN.  The default "
+"index is 0.\n"
 "      -s count \tDiscard the first COUNT lines read.\n"
 "      -t\t\tRemove a trailing newline from each line read.\n"
-"      -u fd\t\tRead lines from file descriptor FD instead of the standard input.\n"
+"      -u fd\t\tRead lines from file descriptor FD instead of the standard "
+"input.\n"
 "      -C callback\tEvaluate CALLBACK each time QUANTUM lines are read.\n"
-"      -c quantum\tSpecify the number of lines read between each call to CALLBACK.\n"
+"      -c quantum\tSpecify the number of lines read between each call to "
+"CALLBACK.\n"
 "    \n"
 "    Arguments:\n"
 "      ARRAY\t\tArray variable name to use for file data.\n"
@@ -5207,16 +5500,19 @@ msgid ""
 "    element to be assigned and the line to be assigned to that element\n"
 "    as additional arguments.\n"
 "    \n"
-"    If not supplied with an explicit origin, mapfile will clear ARRAY before\n"
+"    If not supplied with an explicit origin, mapfile will clear ARRAY "
+"before\n"
 "    assigning to it.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success unless an invalid option is given or ARRAY is readonly or\n"
+"    Returns success unless an invalid option is given or ARRAY is readonly "
+"or\n"
 "    not an indexed array."
 msgstr ""
 "Načte řádky ze standardního vstupu do proměnné typu indexované pole.\n"
 "    \n"
-"    Načte řádky ze standardního vstupu nebo z deskriptoru souboru FD, byl-li\n"
+"    Načte řádky ze standardního vstupu nebo z deskriptoru souboru FD, byl-"
+"li\n"
 "    zadán přepínač -u, do proměnné POLE, která je typu indexované pole.\n"
 "    Implicitním POLEM je proměnná MAPFILE.\n"
 "    \n"
@@ -5249,7 +5545,7 @@ msgstr ""
 "    Vrátí úspěch, pokud nebyl zadán neplatný přepínač, POLE nebylo jen pro\n"
 "    čtení a bylo indexovaným polem."
 
-#: builtins.c:2020
+#: builtins.c:2033
 msgid ""
 "Read lines from a file into an array variable.\n"
 "    \n"
@@ -5270,7 +5566,8 @@ msgstr ""
 #~ "; this extra information can be used to\n"
 #~ "    provide a stack trace.\n"
 #~ "    \n"
-#~ "    The value of EXPR indicates how many call frames to go back before the\n"
+#~ "    The value of EXPR indicates how many call frames to go back before "
+#~ "the\n"
 #~ "    current one; the top frame is frame 0."
 #~ msgstr ""
 #~ "; tato dodatečná informace může být\n"
@@ -5286,7 +5583,8 @@ msgstr ""
 #~ msgstr "xrealloc: nelze alokovat %'lu bajtů"
 
 #~ msgid "xrealloc: %s:%d: cannot reallocate %lu bytes (%lu bytes allocated)"
-#~ msgstr "xrealloc: %s:%d: nelze přealokovat %'lu bajtů (%'lu bajtů alokováno)"
+#~ msgstr ""
+#~ "xrealloc: %s:%d: nelze přealokovat %'lu bajtů (%'lu bajtů alokováno)"
 
 #~ msgid " "
 #~ msgstr " "
@@ -5300,7 +5598,8 @@ msgstr ""
 #~ msgid "can be used used to provide a stack trace."
 #~ msgstr "lze využít při výpisu zásobníku volání."
 
-#~ msgid "The value of EXPR indicates how many call frames to go back before the"
+#~ msgid ""
+#~ "The value of EXPR indicates how many call frames to go back before the"
 #~ msgstr "Hodnota VÝRAZ značí, kolik rámců volání se má jít zpět před"
 
 #~ msgid "current one; the top frame is frame 0."
@@ -5321,38 +5620,46 @@ msgstr ""
 #~ msgid "back up through the list with the `popd' command."
 #~ msgstr "vrátit příkazem „popd“."
 
-#~ msgid "The -l flag specifies that `dirs' should not print shorthand versions"
+#~ msgid ""
+#~ "The -l flag specifies that `dirs' should not print shorthand versions"
 #~ msgstr "Příznak -l značí, že „dirs“ nemá vypisovat zkrácené verze adresářů,"
 
-#~ msgid "of directories which are relative to your home directory.  This means"
+#~ msgid ""
+#~ "of directories which are relative to your home directory.  This means"
 #~ msgstr "které leží pod vaším domovským adresářem. To znamená, že „~/bin“"
 
 #~ msgid "that `~/bin' might be displayed as `/homes/bfox/bin'.  The -v flag"
 #~ msgstr "smí být zobrazen jako „/homes/bfox/bin“. Příznak -v způsobí, že"
 
 #~ msgid "causes `dirs' to print the directory stack with one entry per line,"
-#~ msgstr "„dirs“ vypíše zásobník adresářů záznam po záznamu na samostatné řádky"
+#~ msgstr ""
+#~ "„dirs“ vypíše zásobník adresářů záznam po záznamu na samostatné řádky"
 
-#~ msgid "prepending the directory name with its position in the stack.  The -p"
+#~ msgid ""
+#~ "prepending the directory name with its position in the stack.  The -p"
 #~ msgstr "a před název adresáře uvede jeho pořadí v zásobníku. Příznak -p"
 
 #~ msgid "flag does the same thing, but the stack position is not prepended."
 #~ msgstr "dělá to samé, ale bez informace o umístění na zásobníku."
 
-#~ msgid "The -c flag clears the directory stack by deleting all of the elements."
+#~ msgid ""
+#~ "The -c flag clears the directory stack by deleting all of the elements."
 #~ msgstr "Příznak -c vyprázdní zásobník smazáním všem prvků."
 
-#~ msgid "+N   displays the Nth entry counting from the left of the list shown by"
+#~ msgid ""
+#~ "+N   displays the Nth entry counting from the left of the list shown by"
 #~ msgstr "+N   zobrazí N. položku počítáno zleva na seznamu, který by ukázal"
 
 #~ msgid "     dirs when invoked without options, starting with zero."
 #~ msgstr "     příkaz dirs bez jakýchkoliv přepínačů, počítáno od nuly."
 
-#~ msgid "-N   displays the Nth entry counting from the right of the list shown by"
+#~ msgid ""
+#~ "-N   displays the Nth entry counting from the right of the list shown by"
 #~ msgstr "-N   zobrazí N. položku počítáno zprava na seznamu, který by ukázal"
 
 #~ msgid "Adds a directory to the top of the directory stack, or rotates"
-#~ msgstr "Přidá adresář na vrchol zásobníku adresářů, nebo rotuje zásobník tak,"
+#~ msgstr ""
+#~ "Přidá adresář na vrchol zásobníku adresářů, nebo rotuje zásobník tak,"
 
 #~ msgid "the stack, making the new top of the stack the current working"
 #~ msgstr "že nový vrchol zásobníku se stane pracovním adresářem."
@@ -5376,7 +5683,8 @@ msgstr ""
 #~ msgstr "     zprava seznamu, který by ukázal „dirs“, počínaje od"
 
 #~ msgid "-n   suppress the normal change of directory when adding directories"
-#~ msgstr "-n   potlačí obvyklou změnu pracovního adresáře při přidávání adresářů"
+#~ msgstr ""
+#~ "-n   potlačí obvyklou změnu pracovního adresáře při přidávání adresářů"
 
 #~ msgid "     to the stack, so only the stack is manipulated."
 #~ msgstr "     na zásobník, takže se změní jen obsah zásobníku."
@@ -5417,8 +5725,10 @@ msgstr ""
 #~ msgid "     removes the last directory, `popd -1' the next to last."
 #~ msgstr "     odstraní poslední adresář, “popd -1“ předposlední."
 
-#~ msgid "-n   suppress the normal change of directory when removing directories"
-#~ msgstr "-n   potlačí obvyklou změnu pracovního adresáře při odebírání adresářů"
+#~ msgid ""
+#~ "-n   suppress the normal change of directory when removing directories"
+#~ msgstr ""
+#~ "-n   potlačí obvyklou změnu pracovního adresáře při odebírání adresářů"
 
 #~ msgid "     from the stack, so only the stack is manipulated."
 #~ msgstr "     ze zásobníku, takže pouze zásobník dozná změny."
@@ -5444,7 +5754,8 @@ msgstr ""
 #~ msgid ""
 #~ "Exit from within a FOR, WHILE or UNTIL loop.  If N is specified,\n"
 #~ "    break N levels."
-#~ msgstr "Ukončí smyčku FOR, WHILE nebo UNTIL. Je-li zadáno N, ukončí N úrovní."
+#~ msgstr ""
+#~ "Ukončí smyčku FOR, WHILE nebo UNTIL. Je-li zadáno N, ukončí N úrovní."
 
 #~ msgid ""
 #~ "Run a shell builtin.  This is useful when you wish to rename a\n"
@@ -5470,16 +5781,22 @@ msgstr ""
 #~ msgid ""
 #~ "Runs COMMAND with ARGS ignoring shell functions.  If you have a shell\n"
 #~ "    function called `ls', and you wish to call the command `ls', you can\n"
-#~ "    say \"command ls\".  If the -p option is given, a default value is used\n"
-#~ "    for PATH that is guaranteed to find all of the standard utilities.  If\n"
-#~ "    the -V or -v option is given, a string is printed describing COMMAND.\n"
+#~ "    say \"command ls\".  If the -p option is given, a default value is "
+#~ "used\n"
+#~ "    for PATH that is guaranteed to find all of the standard utilities.  "
+#~ "If\n"
+#~ "    the -V or -v option is given, a string is printed describing "
+#~ "COMMAND.\n"
 #~ "    The -V option produces a more verbose description."
 #~ msgstr ""
 #~ "Spustí PŘÍKAZ s ARGUMENTY ignoruje funkce shellu. Máte-li shellovou\n"
 #~ "    funkci pojmenovanou „ls“, a chcete-li zavolat příkaz „ls“, použijte\n"
-#~ "    „command ls“. Je-li zadán přepínač -p, bude pro PATH použita implicitní\n"
-#~ "    hodnota, která zaručuje, že budou nalezeny všechny standardní nástroje.\n"
-#~ "    Je-li zadán přepínač -V nebo -v, bude vytištěn řetězec popisující PŘÍKAZ.\n"
+#~ "    „command ls“. Je-li zadán přepínač -p, bude pro PATH použita "
+#~ "implicitní\n"
+#~ "    hodnota, která zaručuje, že budou nalezeny všechny standardní "
+#~ "nástroje.\n"
+#~ "    Je-li zadán přepínač -V nebo -v, bude vytištěn řetězec popisující "
+#~ "PŘÍKAZ.\n"
 #~ "    Přepínač -V produkuje podrobnější popis."
 
 #~ msgid ""
@@ -5491,7 +5808,8 @@ msgstr ""
 #~ "    \n"
 #~ "      -a\tto make NAMEs arrays (if supported)\n"
 #~ "      -f\tto select from among function names only\n"
-#~ "      -F\tto display function names (and line number and source file name if\n"
+#~ "      -F\tto display function names (and line number and source file name "
+#~ "if\n"
 #~ "    \tdebugging) without definitions\n"
 #~ "      -i\tto make NAMEs have the `integer' attribute\n"
 #~ "      -r\tto make NAMEs readonly\n"
@@ -5505,28 +5823,33 @@ msgstr ""
 #~ "    and definition.  The -F option restricts the display to function\n"
 #~ "    name only.\n"
 #~ "    \n"
-#~ "    Using `+' instead of `-' turns off the given attribute instead.  When\n"
+#~ "    Using `+' instead of `-' turns off the given attribute instead.  "
+#~ "When\n"
 #~ "    used in a function, makes NAMEs local, as with the `local' command."
 #~ msgstr ""
 #~ "Deklaruje proměnné a/nebo jim nastaví atributy. Nejsou-li zadány NÁZVY,\n"
-#~ "    tak místo toho zobrazí hodnoty proměnných. Přepínač -p zobrazí atributy\n"
+#~ "    tak místo toho zobrazí hodnoty proměnných. Přepínač -p zobrazí "
+#~ "atributy\n"
 #~ "    a hodnoty pro každý NÁZEV.\n"
 #~ "    \n"
 #~ "    Příznaky jsou:\n"
 #~ "    \n"
 #~ "      -a\tučiní NÁZVY poli (je-li podporováno)\n"
 #~ "      -f\tvybírá pouze mezi názvy funkcí\n"
-#~ "      -F\tzobrazí názvy funkcí (a číslo řádku a název zdrojového souboru,\n"
+#~ "      -F\tzobrazí názvy funkcí (a číslo řádku a název zdrojového "
+#~ "souboru,\n"
 #~ "        \tje-li zapnuto ladění) bez definic\n"
 #~ "      -i\tpřiřadí NÁZVŮM atribut „integer“ (číslo)\n"
 #~ "      -r\tučiní NÁZVY jen pro čtení\n"
 #~ "      -t\tpřiřadí NÁZVŮM atribut „trace“ (sledování)\n"
 #~ "      -x\tvyexportuje NÁZVY\n"
 #~ "    \n"
-#~ "    Proměnné s atributem integer jsou aritmeticky vyhodnoceny (vizte „let“),\n"
+#~ "    Proměnné s atributem integer jsou aritmeticky vyhodnoceny (vizte "
+#~ "„let“),\n"
 #~ "    když je do proměnné přiřazováno.\n"
 #~ "    \n"
-#~ "    Při zobrazování hodnot proměnných -f zobrazí názvy a definice funkcí.\n"
+#~ "    Při zobrazování hodnot proměnných -f zobrazí názvy a definice "
+#~ "funkcí.\n"
 #~ "    Přepínač -F omezí výpis jen na názvy funkcí.\n"
 #~ "    \n"
 #~ "    Pomocí „+“ namísto „-“ daný atribut odeberete. Je-li použito uvnitř\n"
@@ -5541,11 +5864,14 @@ msgstr ""
 #~ "    have a visible scope restricted to that function and its children."
 #~ msgstr ""
 #~ "Vytvoří lokální proměnnou pojmenovanou NÁZEV a přiřadí jí HODNOTU.\n"
-#~ "    LOCAL smí být použito jen uvnitř funkcí. Učiní proměnnou NÁZEV viditelnou\n"
+#~ "    LOCAL smí být použito jen uvnitř funkcí. Učiní proměnnou NÁZEV "
+#~ "viditelnou\n"
 #~ "    jen v dané funkci a jejích potomcích."
 
-#~ msgid "Output the ARGs.  If -n is specified, the trailing newline is suppressed."
-#~ msgstr "Vypíše ARGUMENTY. Je-li zadáni -n, závěrečný konec řádku bude potlačen."
+#~ msgid ""
+#~ "Output the ARGs.  If -n is specified, the trailing newline is suppressed."
+#~ msgstr ""
+#~ "Vypíše ARGUMENTY. Je-li zadáni -n, závěrečný konec řádku bude potlačen."
 
 #~ msgid ""
 #~ "Enable and disable builtin shell commands.  This allows\n"
@@ -5559,24 +5885,36 @@ msgstr ""
 #~ "    previously loaded with -f.  If no non-option names are given, or\n"
 #~ "    the -p option is supplied, a list of builtins is printed.  The\n"
 #~ "    -a option means to print every builtin with an indication of whether\n"
-#~ "    or not it is enabled.  The -s option restricts the output to the POSIX.2\n"
-#~ "    `special' builtins.  The -n option displays a list of all disabled builtins."
+#~ "    or not it is enabled.  The -s option restricts the output to the "
+#~ "POSIX.2\n"
+#~ "    `special' builtins.  The -n option displays a list of all disabled "
+#~ "builtins."
 #~ msgstr ""
 #~ "Povolí nebo zakáže vestavěný příkaz shellu. To vám umožňuje použít\n"
-#~ "    příkaz z disku, který má stejné jméno jako vestavěný příkaz shellu, aniž\n"
+#~ "    příkaz z disku, který má stejné jméno jako vestavěný příkaz shellu, "
+#~ "aniž\n"
 #~ "    byste museli zadávat celou cestu. Je-li použito -n, NÁZVY se stanou\n"
-#~ "    zakázanými, jinak budou povoleny. Například „test“ z PATH namísto verze\n"
-#~ "    vestavěné do shellu lze používat tak, že napíšete „enable -n test“. Na\n"
-#~ "    systémech podporujících dynamické zavádění přepínač -f může být použit\n"
-#~ "    pro zavedení nových vestavěných příkazů ze sdíleného objektu NÁZEV_SOUBORU.\n"
-#~ "    Přepínač -d odstraní vestavěný příkaz zavedený přes -f. Není-li zadán\n"
-#~ "    žádný přepínač nebo je-li zadán přepínač -p, bude vypsán seznam vestavěných\n"
-#~ "    příkazů. Přepínač -a znamená, že budou vypsány všechny vestavěné příkazy a\n"
-#~ "    u každého bude vyznačeno, zda je povolen nebo zakázán. Přepínač -s omezí\n"
+#~ "    zakázanými, jinak budou povoleny. Například „test“ z PATH namísto "
+#~ "verze\n"
+#~ "    vestavěné do shellu lze používat tak, že napíšete „enable -n test“. "
+#~ "Na\n"
+#~ "    systémech podporujících dynamické zavádění přepínač -f může být "
+#~ "použit\n"
+#~ "    pro zavedení nových vestavěných příkazů ze sdíleného objektu "
+#~ "NÁZEV_SOUBORU.\n"
+#~ "    Přepínač -d odstraní vestavěný příkaz zavedený přes -f. Není-li "
+#~ "zadán\n"
+#~ "    žádný přepínač nebo je-li zadán přepínač -p, bude vypsán seznam "
+#~ "vestavěných\n"
+#~ "    příkazů. Přepínač -a znamená, že budou vypsány všechny vestavěné "
+#~ "příkazy a\n"
+#~ "    u každého bude vyznačeno, zda je povolen nebo zakázán. Přepínač -s "
+#~ "omezí\n"
 #~ "    výpis na příkazy uvedené v POSIX.2. Přepínač -n zobrazí seznam všech\n"
 #~ "    zakázaných vestavěných příkazů."
 
-#~ msgid "Read ARGs as input to the shell and execute the resulting command(s)."
+#~ msgid ""
+#~ "Read ARGs as input to the shell and execute the resulting command(s)."
 #~ msgstr "Načte ARGUMENTY jako vstup shellu a výsledný příkaz(y) provede."
 
 #~ msgid ""
@@ -5590,11 +5928,14 @@ msgstr ""
 #~ "    then the shell exits, unless the shell option `execfail' is set."
 #~ msgstr ""
 #~ "Provede SOUBOR, přičemž nahradí tento shell zadaným programem.\n"
-#~ "    Není-li SOUBOR zadán, přesměrování zapůsobí v tomto shellu. Je-li prvním\n"
-#~ "    argumentem „-l“, bude do nultého argumentu SOUBORU umístěna pomlčka tak,\n"
+#~ "    Není-li SOUBOR zadán, přesměrování zapůsobí v tomto shellu. Je-li "
+#~ "prvním\n"
+#~ "    argumentem „-l“, bude do nultého argumentu SOUBORU umístěna pomlčka "
+#~ "tak,\n"
 #~ "    jak to dělá login. Je-li zadán přepínač „-c“, bude SOUBOR spuštěn\n"
 #~ "    s prázdným prostředím. Přepínač „-a“ znamená, že argv[0] prováděného\n"
-#~ "    procesu bude nastaven na NÁZEV. Pokud soubor nemůže být proveden a shell\n"
+#~ "    procesu bude nastaven na NÁZEV. Pokud soubor nemůže být proveden a "
+#~ "shell\n"
 #~ "    není interaktivní, pak shell bude ukončen, pokud přepínač shellu\n"
 #~ "    „execfail“ není nastaven."
 
@@ -5606,20 +5947,31 @@ msgstr ""
 #~ "    remembered.  If the -p option is supplied, PATHNAME is used as the\n"
 #~ "    full pathname of NAME, and no path search is performed.  The -r\n"
 #~ "    option causes the shell to forget all remembered locations.  The -d\n"
-#~ "    option causes the shell to forget the remembered location of each NAME.\n"
+#~ "    option causes the shell to forget the remembered location of each "
+#~ "NAME.\n"
 #~ "    If the -t option is supplied the full pathname to which each NAME\n"
-#~ "    corresponds is printed.  If multiple NAME arguments are supplied with\n"
-#~ "    -t, the NAME is printed before the hashed full pathname.  The -l option\n"
-#~ "    causes output to be displayed in a format that may be reused as input.\n"
-#~ "    If no arguments are given, information about remembered commands is displayed."
+#~ "    corresponds is printed.  If multiple NAME arguments are supplied "
+#~ "with\n"
+#~ "    -t, the NAME is printed before the hashed full pathname.  The -l "
+#~ "option\n"
+#~ "    causes output to be displayed in a format that may be reused as "
+#~ "input.\n"
+#~ "    If no arguments are given, information about remembered commands is "
+#~ "displayed."
 #~ msgstr ""
 #~ "Pro každý NÁZEV je určena plná cesta k příkazu a je zapamatována.\n"
-#~ "    Za použití přepínače -p se vezme NÁZEV_CESTY za plnou cestu k NÁZVU a\n"
-#~ "    žádné vyhledávání cesty se nekoná. Přepínač -r způsobí, že shell zapomene\n"
-#~ "    všechny zapamatovaná umístění. Přepínač -d způsobí, že shell zapomene\n"
-#~ "    zapamatovaná umístění každého NÁZVU. Je-li zadán přepínač -t, bude vypsána\n"
-#~ "    plná cesta ke každému NÁZVU. Je-li s -t zadáno více NÁZVŮ, NÁZEV bude\n"
-#~ "    vypsán před uloženou celou cestou. Přepínač -l vytvoří takový výstup,\n"
+#~ "    Za použití přepínače -p se vezme NÁZEV_CESTY za plnou cestu k NÁZVU "
+#~ "a\n"
+#~ "    žádné vyhledávání cesty se nekoná. Přepínač -r způsobí, že shell "
+#~ "zapomene\n"
+#~ "    všechny zapamatovaná umístění. Přepínač -d způsobí, že shell "
+#~ "zapomene\n"
+#~ "    zapamatovaná umístění každého NÁZVU. Je-li zadán přepínač -t, bude "
+#~ "vypsána\n"
+#~ "    plná cesta ke každému NÁZVU. Je-li s -t zadáno více NÁZVŮ, NÁZEV "
+#~ "bude\n"
+#~ "    vypsán před uloženou celou cestou. Přepínač -l vytvoří takový "
+#~ "výstup,\n"
 #~ "    který lze opět použít jako vstup. Nejsou-li zadány žádné argumenty,\n"
 #~ "    budou vypsány informace o zapamatovaných příkazech."
 
@@ -5631,20 +5983,27 @@ msgstr ""
 #~ "    a short usage synopsis."
 #~ msgstr ""
 #~ "Zobrazí užitečné informace o vestavěných příkazech. Je-li zadán VZOREK,\n"
-#~ "    vrátí podrobnou nápovědu ke všem příkazům odpovídajícím VZORKU, jinak je\n"
-#~ "    vytištěn seznam vestavěných příkazů. Přepínač -s omezí výstup o každém\n"
+#~ "    vrátí podrobnou nápovědu ke všem příkazům odpovídajícím VZORKU, jinak "
+#~ "je\n"
+#~ "    vytištěn seznam vestavěných příkazů. Přepínač -s omezí výstup "
+#~ "o každém\n"
 #~ "    vestavěném příkazu odpovídajícího VZORKU na stručný popis použití."
 
 #~ msgid ""
 #~ "By default, removes each JOBSPEC argument from the table of active jobs.\n"
-#~ "    If the -h option is given, the job is not removed from the table, but is\n"
+#~ "    If the -h option is given, the job is not removed from the table, but "
+#~ "is\n"
 #~ "    marked so that SIGHUP is not sent to the job if the shell receives a\n"
-#~ "    SIGHUP.  The -a option, when JOBSPEC is not supplied, means to remove all\n"
-#~ "    jobs from the job table; the -r option means to remove only running jobs."
+#~ "    SIGHUP.  The -a option, when JOBSPEC is not supplied, means to remove "
+#~ "all\n"
+#~ "    jobs from the job table; the -r option means to remove only running "
+#~ "jobs."
 #~ msgstr ""
 #~ "Implicitně odstraní každý argument ÚLOHA z tabulky aktivních úloh. Je-li\n"
-#~ "    zadán přepínač -h, úloha není odstraněna z tabulky, ale je označena tak.\n"
-#~ "    že úloze nebude zaslán SIGHUP, když shell obdrží SIGHUP. Přepínač -a,\n"
+#~ "    zadán přepínač -h, úloha není odstraněna z tabulky, ale je označena "
+#~ "tak.\n"
+#~ "    že úloze nebude zaslán SIGHUP, když shell obdrží SIGHUP. Přepínač -"
+#~ "a,\n"
 #~ "    pokud není uvedena ÚLOHA, znamená, že všechny úlohy budou odstraněny\n"
 #~ "    z tabulky úloh. Přepínač -r znamená, že pouze běžící úlohy budou\n"
 #~ "    odstraněny."
@@ -5664,9 +6023,12 @@ msgstr ""
 #~ "    function.  Some variables cannot be unset; also see readonly."
 #~ msgstr ""
 #~ "Pro každé JMÉNO odstraní odpovídající proměnnou nebo funkci.\n"
-#~ "    Spolu s „-v“ bude unset fungovat jen na proměnné. S příznakem „-f“ bude\n"
-#~ "    unset fungovat jen na funkce. Bez těchto dvou příznaků unset nejprve zkusí\n"
-#~ "    zrušit proměnnou a pokud toto selže, tak zkusí zrušit funkci. Některé\n"
+#~ "    Spolu s „-v“ bude unset fungovat jen na proměnné. S příznakem „-f“ "
+#~ "bude\n"
+#~ "    unset fungovat jen na funkce. Bez těchto dvou příznaků unset nejprve "
+#~ "zkusí\n"
+#~ "    zrušit proměnnou a pokud toto selže, tak zkusí zrušit funkci. "
+#~ "Některé\n"
 #~ "    proměnné nelze odstranit. Taktéž vizte příkaz „readonly“."
 
 #~ msgid ""
@@ -5679,9 +6041,12 @@ msgstr ""
 #~ "    processing."
 #~ msgstr ""
 #~ "NÁZVY jsou označeny pro automatické exportování do prostředí následně\n"
-#~ "    prováděných příkazů. Je-li zadán přepínač -f, NÁZVY se vztahují k funkcím.\n"
-#~ "    Nejsou-li zadány žádné NÁZVY nebo je-li zadáno „-p“, bude vytištěn seznam\n"
-#~ "    všech názvů, které jsou v tomto shellu exportovány. Argument „-n“ nařizuje\n"
+#~ "    prováděných příkazů. Je-li zadán přepínač -f, NÁZVY se vztahují "
+#~ "k funkcím.\n"
+#~ "    Nejsou-li zadány žádné NÁZVY nebo je-li zadáno „-p“, bude vytištěn "
+#~ "seznam\n"
+#~ "    všech názvů, které jsou v tomto shellu exportovány. Argument „-n“ "
+#~ "nařizuje\n"
 #~ "    odstranit vlastnost exportovat z následujících NÁZVŮ. Argument „--“\n"
 #~ "    zakazuje zpracování dalších přepínačů."
 
@@ -5689,16 +6054,21 @@ msgstr ""
 #~ "The given NAMEs are marked readonly and the values of these NAMEs may\n"
 #~ "    not be changed by subsequent assignment.  If the -f option is given,\n"
 #~ "    then functions corresponding to the NAMEs are so marked.  If no\n"
-#~ "    arguments are given, or if `-p' is given, a list of all readonly names\n"
+#~ "    arguments are given, or if `-p' is given, a list of all readonly "
+#~ "names\n"
 #~ "    is printed.  The `-a' option means to treat each NAME as\n"
 #~ "    an array variable.  An argument of `--' disables further option\n"
 #~ "    processing."
 #~ msgstr ""
 #~ "Zadané NÁZVY budou označeny jako jen pro čtení a hodnoty těchto NÁZVŮ\n"
-#~ "    nebude možné změnit následným přiřazením. Je-li zadán přepínač -f, pak\n"
-#~ "    funkce těchto NÁZVŮ budou takto označeny. Nejsou-li zadány žádné argumenty\n"
-#~ "    nebo je-li zadáno „-p“, bude vytištěn seznam všech jmen jen pro čtení.\n"
-#~ "    Přepínač „-a“ znamená, že s každým NÁZVEM bude zacházeno jako s proměnnou\n"
+#~ "    nebude možné změnit následným přiřazením. Je-li zadán přepínač -f, "
+#~ "pak\n"
+#~ "    funkce těchto NÁZVŮ budou takto označeny. Nejsou-li zadány žádné "
+#~ "argumenty\n"
+#~ "    nebo je-li zadáno „-p“, bude vytištěn seznam všech jmen jen pro "
+#~ "čtení.\n"
+#~ "    Přepínač „-a“ znamená, že s každým NÁZVEM bude zacházeno jako "
+#~ "s proměnnou\n"
 #~ "    typu pole. Argument „--“ zakáže zpracování dalších přepínačů."
 
 #~ msgid ""
@@ -5728,61 +6098,79 @@ msgstr ""
 #~ "For each NAME, indicate how it would be interpreted if used as a\n"
 #~ "    command name.\n"
 #~ "    \n"
-#~ "    If the -t option is used, `type' outputs a single word which is one of\n"
-#~ "    `alias', `keyword', `function', `builtin', `file' or `', if NAME is an\n"
-#~ "    alias, shell reserved word, shell function, shell builtin, disk file,\n"
+#~ "    If the -t option is used, `type' outputs a single word which is one "
+#~ "of\n"
+#~ "    `alias', `keyword', `function', `builtin', `file' or `', if NAME is "
+#~ "an\n"
+#~ "    alias, shell reserved word, shell function, shell builtin, disk "
+#~ "file,\n"
 #~ "    or unfound, respectively.\n"
 #~ "    \n"
 #~ "    If the -p flag is used, `type' either returns the name of the disk\n"
 #~ "    file that would be executed, or nothing if `type -t NAME' would not\n"
 #~ "    return `file'.\n"
 #~ "    \n"
-#~ "    If the -a flag is used, `type' displays all of the places that contain\n"
+#~ "    If the -a flag is used, `type' displays all of the places that "
+#~ "contain\n"
 #~ "    an executable named `file'.  This includes aliases, builtins, and\n"
 #~ "    functions, if and only if the -p flag is not also used.\n"
 #~ "    \n"
 #~ "    The -f flag suppresses shell function lookup.\n"
 #~ "    \n"
-#~ "    The -P flag forces a PATH search for each NAME, even if it is an alias,\n"
-#~ "    builtin, or function, and returns the name of the disk file that would\n"
+#~ "    The -P flag forces a PATH search for each NAME, even if it is an "
+#~ "alias,\n"
+#~ "    builtin, or function, and returns the name of the disk file that "
+#~ "would\n"
 #~ "    be executed."
 #~ msgstr ""
 #~ "O každém NÁZVU řekne, jak by byl interpretován, kdyby byl použit jako\n"
 #~ "    název příkazu.\n"
 #~ "    \n"
-#~ "    Je-li použit přepínač -t, „type“ vypíše jedno slovo z těchto: „alias“,\n"
+#~ "    Je-li použit přepínač -t, „type“ vypíše jedno slovo z těchto: "
+#~ "„alias“,\n"
 #~ "    „keyword“, „function“, „builtin“, „file“ nebo „“, je-li NÁZEV alias,\n"
-#~ "    klíčové slovo shellu, shellová funkce, vestavěný příkaz shellu, soubor\n"
+#~ "    klíčové slovo shellu, shellová funkce, vestavěný příkaz shellu, "
+#~ "soubor\n"
 #~ "    na disku nebo nenalezený soubor.\n"
 #~ "    \n"
-#~ "    Je-li použit přepínač -p, „type“ buď vrátí jméno souboru na disku, který\n"
+#~ "    Je-li použit přepínač -p, „type“ buď vrátí jméno souboru na disku, "
+#~ "který\n"
 #~ "    by byl spuštěn, nebo nic, pokud „type -t NÁZEV“ by nevrátil „file“.\n"
 #~ "    \n"
-#~ "    Je-li použit přepínač -a, „type“ zobrazí všechna místa, kde se nalézá\n"
-#~ "    spustitelný program pojmenovaný „soubor“. To zahrnuje aliasy, vestavěné\n"
-#~ "    příkazy a funkce jen a pouze tehdy, když není rovněž použit přepínač -p.\n"
+#~ "    Je-li použit přepínač -a, „type“ zobrazí všechna místa, kde se "
+#~ "nalézá\n"
+#~ "    spustitelný program pojmenovaný „soubor“. To zahrnuje aliasy, "
+#~ "vestavěné\n"
+#~ "    příkazy a funkce jen a pouze tehdy, když není rovněž použit přepínač -"
+#~ "p.\n"
 #~ "    \n"
 #~ "    Přepínač -f potlačí hledání mezi funkcemi shellu.\n"
 #~ "    \n"
 #~ "    Přepínač -P vynutí prohledání PATH na každý NÁZEV, dokonce i když se\n"
-#~ "    jedná o alias, vestavěný příkaz nebo funkci, a vrátí název souboru na\n"
+#~ "    jedná o alias, vestavěný příkaz nebo funkci, a vrátí název souboru "
+#~ "na\n"
 #~ "    disku, který by byl spuštěn."
 
 #~ msgid ""
 #~ "The user file-creation mask is set to MODE.  If MODE is omitted, or if\n"
-#~ "    `-S' is supplied, the current value of the mask is printed.  The `-S'\n"
-#~ "    option makes the output symbolic; otherwise an octal number is output.\n"
+#~ "    `-S' is supplied, the current value of the mask is printed.  The `-"
+#~ "S'\n"
+#~ "    option makes the output symbolic; otherwise an octal number is "
+#~ "output.\n"
 #~ "    If `-p' is supplied, and MODE is omitted, the output is in a form\n"
 #~ "    that may be used as input.  If MODE begins with a digit, it is\n"
-#~ "    interpreted as an octal number, otherwise it is a symbolic mode string\n"
+#~ "    interpreted as an octal number, otherwise it is a symbolic mode "
+#~ "string\n"
 #~ "    like that accepted by chmod(1)."
 #~ msgstr ""
 #~ "Uživatelská maska práv vytvářených souborů je nastavena na MÓD. Je-li\n"
-#~ "    MÓD vynechán nebo je-li uvedeno „-S“, bude vytištěna současná hodnota\n"
+#~ "    MÓD vynechán nebo je-li uvedeno „-S“, bude vytištěna současná "
+#~ "hodnota\n"
 #~ "    masky. Přepínač „-S“ učiní výstup symbolický, jinak bude výstupem\n"
 #~ "    osmičkové číslo. Je-li zadáno „-p“ a MÓD je vynechán, bude výstup ve\n"
 #~ "    formátu, který lze použít jako vstup. Začíná-li MÓD číslicí, bude\n"
-#~ "    interpretován jako osmičkové číslo, jinak jako řetězec symbolického zápisu\n"
+#~ "    interpretován jako osmičkové číslo, jinak jako řetězec symbolického "
+#~ "zápisu\n"
 #~ "    práv tak, jak jej chápe chmod(1)."
 
 #~ msgid ""
@@ -5792,7 +6180,8 @@ msgstr ""
 #~ "    all child processes of the shell are waited for."
 #~ msgstr ""
 #~ "Počká na zadaný proces a nahlásí jeho návratový kód. Není-li N zadáno,\n"
-#~ "    bude se čekat na všechny právě aktivní procesy potomků a návratová hodnota\n"
+#~ "    bude se čekat na všechny právě aktivní procesy potomků a návratová "
+#~ "hodnota\n"
 #~ "    bude nula. N je ID procesu. Není-li zadáno, bude se čekat na všechny\n"
 #~ "    procesy potomků tohoto shellu."
 
@@ -5815,22 +6204,30 @@ msgstr ""
 #~ "    not each is set."
 #~ msgstr ""
 #~ "Přepne hodnoty proměnných řídící volitelné chování. Přepínač -s znamená,\n"
-#~ "    že se každý NÁZEV_VOLBY zapne (nastaví). Přepínač -u každý NÁZEV_VOLBY\n"
+#~ "    že se každý NÁZEV_VOLBY zapne (nastaví). Přepínač -u každý "
+#~ "NÁZEV_VOLBY\n"
 #~ "    vypne. Přepínač -q potlačí výstup. Zda je nebo není nastaven každý\n"
-#~ "    NÁZEV_VOLBY, indikuje návratový kód. Přepínač -o omezí NÁZVY_VOLEB na ty,\n"
+#~ "    NÁZEV_VOLBY, indikuje návratový kód. Přepínač -o omezí NÁZVY_VOLEB na "
+#~ "ty,\n"
 #~ "    které jsou definovány pro použití s „set -o“. Bez přepínačů nebo\n"
 #~ "    s přepínačem -p je zobrazen seznam všech nastavitelných voleb včetně\n"
 #~ "    indikace, zda je každá nastavena."
 
 #~ msgid ""
 #~ "For each NAME, specify how arguments are to be completed.\n"
-#~ "    If the -p option is supplied, or if no options are supplied, existing\n"
-#~ "    completion specifications are printed in a way that allows them to be\n"
-#~ "    reused as input.  The -r option removes a completion specification for\n"
-#~ "    each NAME, or, if no NAMEs are supplied, all completion specifications."
+#~ "    If the -p option is supplied, or if no options are supplied, "
+#~ "existing\n"
+#~ "    completion specifications are printed in a way that allows them to "
+#~ "be\n"
+#~ "    reused as input.  The -r option removes a completion specification "
+#~ "for\n"
+#~ "    each NAME, or, if no NAMEs are supplied, all completion "
+#~ "specifications."
 #~ msgstr ""
 #~ "U každého NÁZVU sdělí, jak budou argumenty doplněny. Je-li zadán\n"
-#~ "    přepínač -p nebo není-li zadán přepínač žádný, budou existující definice\n"
+#~ "    přepínač -p nebo není-li zadán přepínač žádný, budou existující "
+#~ "definice\n"
 #~ "    doplňování vytištěny tak. že je bude možné znovu použít jako vstup.\n"
-#~ "    Přepínač -r odstraní definici doplnění pro každý NÁZEV nebo chybí-li NÁZVY,\n"
+#~ "    Přepínač -r odstraní definici doplnění pro každý NÁZEV nebo chybí-li "
+#~ "NÁZVY,\n"
 #~ "    odstraní všechny definice."
