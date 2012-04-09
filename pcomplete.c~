@@ -875,23 +875,24 @@ gen_wordlist_matches (cs, text)
   STRINGLIST *sl;
   int nw, tlen;
   char *ntxt;		/* dequoted TEXT to use in comparisons */
+  struct timeval d1, d2, t1, t2, t3;
 
   if (cs->words == 0 || cs->words[0] == '\0')
     return ((STRINGLIST *)NULL);
 
+gettimeofday(&t1, 0);
   /* This used to be a simple expand_string(cs->words, 0), but that won't
      do -- there's no way to split a simple list into individual words
      that way, since the shell semantics say that word splitting is done
-     only on the results of expansion.  split_at_delims also handles embedded
-     quoted strings and preserves the quotes for the expand_words_shellexp
-     function call that follows. */
-  /* XXX - this is where this function spends most of its time */
+     only on the results of expansion. */
   l = split_at_delims (cs->words, strlen (cs->words), (char *)NULL, -1, 0, (int *)NULL, (int *)NULL);
   if (l == 0)
     return ((STRINGLIST *)NULL);
   /* This will jump back to the top level if the expansion fails... */
   l2 = expand_words_shellexp (l);
   dispose_words (l);
+
+gettimeofday(&t2, 0);
 
   nw = list_length (l2);
   sl = strlist_create (nw + 1);
@@ -905,6 +906,17 @@ gen_wordlist_matches (cs, text)
 	sl->list[nw++] = STRDUP (l->word->word);
     }
   sl->list[sl->list_len = nw] = (char *)NULL;
+
+gettimeofday (&t3, 0);
+difftimeval(&d1, &t1, &t2);
+difftimeval(&d2, &t2, &t3);
+
+itrace("word splitting with split_at_delims and quote removal:");
+print_timeval(stderr, &d1);
+fprintf(stderr, "\n");
+itrace("matching and new list population:");
+print_timeval(stderr, &d2);
+fprintf(stderr, "\n");
 
   dispose_words (l2);
   FREE (ntxt);

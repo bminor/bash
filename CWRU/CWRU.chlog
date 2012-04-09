@@ -13581,3 +13581,35 @@ config-top.h
 {jobs,nojobs}.c
 	- check_window_size: default initial value to CHECKWINSIZE_DEFAULT
 
+				   3/13
+				   ----
+doc/bashref.texi
+	- change text referring to the copying restrictions to that
+	  recommended by the FSF (no Front-Cover Texts and no Back-Cover
+	  Texts)
+
+lib/readline/doc/{history,rlman,rluserman}.texi
+	- change text referring to the copying restrictions to that
+	  recommended by the FSF (no Front-Cover Texts and no Back-Cover
+	  Texts)
+
+				   3/15
+				   ----
+array.c
+	- LASTREF_START: new macro to set the starting position for an array
+	  traversal to `lastref' if that's valid, and to the start of the array
+	  if not.  Used in array_reference, array_insert, array_remove
+	- array_remove: try to be a little smarter with lastref instead of
+	  unconditionally invalidating it
+
+				   3/16
+				   ----
+array.c
+	- array_insert: fix memory leak by deleting element to be added in the
+	  case of an error
+
+				   3/18
+				   ----
+lib/sh/mbschr.c
+	- mbschr: don't call mbrlen unless is_basic is false; devolves to a
+	  straight character-by-character run through the string
