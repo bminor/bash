@@ -209,9 +209,9 @@ ansic_quote (str, flags, rlen)
      int flags, *rlen;
 {
   char *r, *ret, *s;
-  int l, rsize, sindex;
+  int l, rsize;
   unsigned char c;
-  size_t slen, clen;
+  size_t clen;
 #if defined (HANDLE_MULTIBYTE)
   int b;
   wchar_t wc;
@@ -228,7 +228,6 @@ ansic_quote (str, flags, rlen)
   *r++ = '\'';
 
   s = str;
-  slen = strlen (str);
 
   for (s = str; c = *s; s++)
     {
@@ -298,7 +297,7 @@ ansic_wshouldquote (string)
   wchar_t wcc;
 
   wchar_t *wcstr = NULL;
-  size_t wclen, slen;
+  size_t slen;
 
 
   slen = mbstowcs (wcstr, string, 0);

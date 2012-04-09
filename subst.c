@@ -367,6 +367,11 @@ dump_word_flags (flags)
       f &= ~W_ASSNBLTIN;
       fprintf (stderr, "W_ASSNBLTIN%s", f ? "|" : "");
     }
+  if (f & W_ASSNGLOBAL)
+    {
+      f &= ~W_ASSNGLOBAL;
+      fprintf (stderr, "W_ASSNGLOBAL%s", f ? "|" : "");
+    }
   if (f & W_COMPASSIGN)
     {
       f &= ~W_COMPASSIGN;
@@ -2807,7 +2812,7 @@ do_assignment_internal (word, expand)
     }
   else if (assign_list)
     {
-      if (word->flags & W_ASSIGNARG)
+      if ((word->flags & W_ASSIGNARG) && (word->flags & W_ASSNGLOBAL) == 0)
 	aflags |= ASS_MKLOCAL;
       if (word->flags & W_ASSIGNASSOC)
 	aflags |= ASS_MKASSOC;
@@ -5813,6 +5818,16 @@ parameter_brace_expand_rhs (name, value, c, quoted, qdollaratp, hasdollarat)
 	 is the only expansion that creates more than one word. */
       if (qdollaratp && ((hasdol && quoted) || l->next))
 	*qdollaratp = 1;
+      /* If we have a quoted null result (QUOTED_NULL(temp)) and the word is
+	 a quoted null (l->next == 0 && QUOTED_NULL(l->word->word)), the
+	 flags indicate it (l->word->flags & W_HASQUOTEDNULL), and the
+	 expansion is quoted (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
+	 (which is more paranoia than anything else), we need to return the
+	 quoted null string and set the flags to indicate it. */
+      if (l->next == 0 && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && QUOTED_NULL (temp) && QUOTED_NULL (l->word->word) && (l->word->flags & W_HASQUOTEDNULL))
+	{
+	  w->flags |= W_HASQUOTEDNULL;
+	}
       dispose_words (l);
     }
   else if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && hasdol)

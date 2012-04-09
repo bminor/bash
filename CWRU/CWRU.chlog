@@ -13613,3 +13613,57 @@ array.c
 lib/sh/mbschr.c
 	- mbschr: don't call mbrlen unless is_basic is false; devolves to a
 	  straight character-by-character run through the string
+
+				   3/19
+				   ----
+stringlib.c
+	- substring: use memcpy instead of strncpy, since we know the length
+	  and are going to add our own NUL terminator
+
+				   3/20
+				   ----
+subst.c
+	- parameter_brace_expand_rhs: if expand_string_for_rhs returns a quoted
+	  null string (a list with one element for which
+	  QUOTED_NULL(list->word->word) returns true), return the quoted null
+	  and set the flags in the returned word to indicate it.  Fixes bug
+	  reported by Mark Edgar <medgar123@gmail.com>
+
+lib/sh/tmpfile.c
+	- use random(3) instead of get_random_number to avoid perturbing the
+	  random sequence you get using $RANDOM.  Bug report and fix from
+	  Jurij Mihelic <jurij.mihelic@fri.uni-lj.si>
+
+				   3/21
+				   ----
+config-top.h
+	- OPTIMIZE_SEQUENTIAL_ARRAY_ASSIGNMENT: define to 1 to optimize
+	  sequential indexed array assignment patterns.  Defined to 1 by
+	  default
+
+array.c
+	- array_insert: if OPTIMIZE_SEQUENTIAL_ARRAY_ASSIGNMENT is defined,
+	  start the search at lastref (see change from 3/15)
+
+				   3/27
+				   ----
+print_cmd.c
+	- debug_print_word_list: new debugging function, prints a word list
+	  preceded by an optional string and using a caller-specified
+	  separator
+
+				    4/1
+				    ---
+command.h
+	- W_ASSNGLOBAL: new flag, set to indicate declare -g
+
+execute_cmd.c
+	- fix_assignment_words: note that we have a -g argument to an assignment
+	  builtin and set the W_ASSNGLOBAL flag in the variable word
+
+subst.c
+	- dump_word_flags: print out W_ASSNGLOBAL if present
+	- do_assignment_internal: only set ASS_MKLOCAL if W_ASSIGNARG is set
+	  and W_ASSNGLOBAL is not.  Don't want to create a local variable even
+	  if variable_context is non-zero if ASSNGLOBAL is set.  Fixes bug
+	  reported by Bill Gradwohl <bill@ycc.com>

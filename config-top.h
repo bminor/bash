@@ -123,3 +123,8 @@
 /* Define to 0 if you want the checkwinsize option off by default, 1 if you
    want it on. */
 #define CHECKWINSIZE_DEFAULT	0
+
+/* Define to 1 if you want to optimize for sequential array assignment when
+   using indexed arrays, 0 if you want bash-4.2 behavior, which favors
+   random access but is O(N) for each array assignment. */
+#define OPTIMIZE_SEQUENTIAL_ARRAY_ASSIGNMENT	1

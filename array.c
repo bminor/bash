@@ -631,12 +631,16 @@ char	*v;
 		SET_LASTREF(a, new);
 		return(0);
 	}
+#if OPTIMIZE_SEQUENTIAL_ARRAY_ASSIGNMENT
 	/*
 	 * Otherwise we search for the spot to insert it.  The lastref
 	 * handle optimizes the case of sequential or almost-sequential
 	 * assignments that are not at the end of the array.
 	 */
 	start = LASTREF_START(a, i);
+#else
+	start = element_forw(ae->head);
+#endif
 	for (ae = start; ae != a->head; ae = element_forw(ae)) {
 		if (element_index(ae) == i) {
 			/*

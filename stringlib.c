@@ -133,7 +133,7 @@ substring (string, start, end)
 
   len = end - start;
   result = (char *)xmalloc (len + 1);
-  strncpy (result, string + start, len);
+  memcpy (result, string + start, len);
   result[len] = '\0';
   return (result);
 }
