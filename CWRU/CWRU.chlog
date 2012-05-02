@@ -13718,3 +13718,66 @@ lib/sh/snprintf.c
 	  if `.' hasn't been encountered ((flags&PF_DOT) == 0); otherwise treat
 	  it as the first digit of a precision specifier.  Fixes bug reported
 	  by Petr Sumbera <petr.sumbera@sun.com>
+
+				   4/15
+				   ----
+lib/sh/snprintf.c
+	- vsnprintf_internal: if the '0' and '-' flags both occur, the '0'
+	  flag is ignored -- Posix.  Start of a series of fixes based on
+	  tests and patches from Petr Sumbera <petr.sumbera@sun.com>
+	- PUT_PLUS: make sure PF_PLUS flag is specified before putting the `+'
+	- vsnprintf_internal: when '+' is read as a flag, don't set right-
+	  justify flag if the LADJUST (`-') flag has already been supplied
+	- floating: make sure to output space padding before the `+', zero
+	  padding after
+	- exponent: make sure to output space padding before the `+', zero
+	  padding after
+	- exponent: only subtract one from the width for the decimal point
+	  if we're really going to print one
+	- floating: use presence of PF_PLUS flag to decide whether to account
+	  for the `+' in the padded field width.  Ditto for exponent()
+
+				   4/16
+				   ----
+lib/sh/snprintf.c
+	- vsnprint_internal: only reduce precision by 1 when processing the `g'
+	  format if it's > 0.  A precision of 0 should stay 0; otherwise it
+	  gets set to -1 (NOT_FOUND) and converted to the default
+	- number, lnumber: if an explicit precision is supplied, turn off the
+	  zero-padding flag and set the pad character back to space
+	- number, lnumber: only account for a `+' when performing the field
+	  width calculation if the coversion is base 10; we don't add a `+'
+	  for other bases
+
+				   4/18
+				   ----
+tests/printf3.sub
+	- try using "perl -e 'print time'" to get the current time in seconds
+	  since the epoch if "date +%s" is not available (solaris 8-10)
+
+				   4/19
+				   ----
+tests/run-printf
+	- use cat -v instead of relying on diff -a being available to convert
+	  control characters to ascii and avoid the dreaded "Binary files
+	  /tmp/xx and printf.right differ"
+
+				   4/20
+				   ----
+lib/sh/strftime.c
+	- incoporated new version from Aharon Robbins <arnold@skeeve.com>
+
+				   4/22
+				   ----
+doc/{bash.1,bashref.texi}
+	- slight change to the description of /dev/tcp and /dev/udp
+
+subst.c
+	- match_wpattern: logic fix to the calculation of `simple' (was |=,
+	  needs to be &=).  Bug report from Mike Frysinger <vapier@gentoo.org>,
+	  fix from Andreas Schwab <schwab@linux-m68k.org>
+
+bashline.c
+	- bash_filename_stat_hook: add code from bash_directory_completion_hook
+	  that performs pathname canonicalization in the same way that cd and
+	  other builtins will do
