@@ -13781,3 +13781,11 @@ bashline.c
 	- bash_filename_stat_hook: add code from bash_directory_completion_hook
 	  that performs pathname canonicalization in the same way that cd and
 	  other builtins will do
+
+				   4/25
+				   ----
+execute_cmd.c
+	- execute_pipeline: change the call to move_to_high_fd to make it use
+	  getdtablesize() and to not stomp on existing open file descriptors,
+	  like the fd the shell is using to read a script.  Bug report from
+	  Greg Wooledge <wooledg@eeg.ccf.org>

@@ -145,7 +145,7 @@ iso_8601_2000_year(char *buf, int year, size_t fw)
 	char sign = '\0';
 
 	if (year >= -9999 && year <= 9999) {
-		sprintf(buf, "%0*d", (int) fw, year);
+		sprintf(buf, "%0*d", fw, year);
 		return;
 	}
 
@@ -361,7 +361,7 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 				fw = max(fw, min_fw);
 				sprintf(tbuf, flag
 						? "%+0*ld"
-						: "%0*ld", (int) fw,
+						: "%0*ld", fw,
 						(timeptr->tm_year + 1900L) / 100);
 			} else
 #endif /* POSIX_2008 */
@@ -440,7 +440,7 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 					fw = max(fw, min_fw);
 					sprintf(tbuf, flag
 							? "%+0*ld"
-							: "%0*ld", (int) fw,
+							: "%0*ld", fw,
 							y);
 				} else
 #endif /* POSIX_2008 */
@@ -577,7 +577,7 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 				fw = max(fw, min_fw);
 				sprintf(tbuf, flag
 						? "%+0*ld"
-						: "%0*ld", (int) fw,
+						: "%0*ld", fw,
 						1900L + timeptr->tm_year);
 			} else
 #endif /* POSIX_2008 */
