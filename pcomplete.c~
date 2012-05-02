@@ -955,10 +955,14 @@ bind_compfunc_variables (line, ind, lwords, cw, exported)
     VSETATTR(v, att_exported);
 
   /* Post bash-4.2: COMP_POINT is characters instead of bytes. */
+#if 0
   c = line[ind];
   line[ind] = '\0';
   llen = MB_STRLEN (line);
   line[ind] = c;
+#else
+  llen = sh_mbsnlen (line, strlen (line), ind);
+#endif
   value = inttostr (llen, ibuf, sizeof(ibuf));
   v = bind_int_variable ("COMP_POINT", value);
   if (v && exported)
