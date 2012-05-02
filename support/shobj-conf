@@ -67,7 +67,7 @@ done
 case "${host_os}-${SHOBJ_CC}-${host_vendor}" in
 nsk-cc-tandem)
 	SHOBJ_CFLAGS=-Wglobalized
-	case $(uname -m) in
+	case `uname -m` in
 	NSR*)
 		SHOBJ_CFLAGS="${SHOBJ_CFLAGS} -Wcall_shared" # default on TNS/E, needed on TNS/R
 		SHOBJ_LD=/usr/bin/ld # for TNS/R

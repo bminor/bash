@@ -28,7 +28,23 @@
 #define _COLORS_H_
 
 #include <stdio.h> // size_t
-#include <stdbool.h> // bool
+
+#if defined (HAVE_STDBOOL_H)
+#  include <stdbool.h> // bool
+#else
+typedef int _rl_bool_t;
+
+#ifdef bool
+#  undef bool
+#endif
+#define bool _rl_bool_t
+
+#ifndef true
+#  define true 1
+#  define false 0
+#endif
+
+#endif /* !HAVE_STDBOOL_H */
 
 /* Null is a valid character in a color indicator (think about Epson
    printers, for example) so we have to use a length/buffer string

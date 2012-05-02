@@ -1288,10 +1288,6 @@ vsnprintf_internal(data, string, length, format, args)
 	      case '#':
 		data->flags |= PF_ALTFORM;
 		continue;
-	      case '0':
-		data->flags |= PF_ZEROPAD;
-		data->pad = '0';
-		continue;
 	      case '*':
 		if (data->flags & PF_DOT)
 		  data->flags |= PF_STAR_P;
@@ -1322,6 +1318,13 @@ vsnprintf_internal(data, string, length, format, args)
 		data->flags |= PF_THOUSANDS;
 		continue;
 
+	      case '0':
+	        if ((data->flags & PF_DOT) == 0)
+		  {
+		    data->flags |= PF_ZEROPAD;
+		    data->pad = '0';
+		    continue;
+		  }
 	      case '1': case '2': case '3':
 	      case '4': case '5': case '6':
 	      case '7': case '8': case '9':

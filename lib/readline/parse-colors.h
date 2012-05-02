@@ -27,7 +27,6 @@
 #ifndef _PARSE_COLORS_H_
 #define _PARSE_COLORS_H_
 
-#include <stdbool.h> // bool
 #include "readline.h"
 
 #define LEN_STR_PAIR(s) sizeof (s) - 1, s

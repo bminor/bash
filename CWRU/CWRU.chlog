@@ -13702,3 +13702,19 @@ doc/{bash.1,bashref.texi}
 	  any shell with history enabled, not just interactive shells.  This
 	  seems to be more logical behavior.  Suggested by Greg Wooledge
 	  <wooledg@eeg.ccf.org>
+
+				   4/12
+				   ----
+lib/readline/colors.h
+	- only include stdbool.h if HAVE_STDBOOL_H is defined
+	- if HAVE_STDBOOL_H is not defined, provide enough definition for the
+	  library to use `bool', `true', and `false'
+
+lib/readline/parse-colors.[ch]
+	- don't try to include <stdbool.h> at all; rely on colors.h to do it
+
+lib/sh/snprintf.c
+	- vsnprintf_internal: only treat '0' as a flag to indicate zero padding
+	  if `.' hasn't been encountered ((flags&PF_DOT) == 0); otherwise treat
+	  it as the first digit of a precision specifier.  Fixes bug reported
+	  by Petr Sumbera <petr.sumbera@sun.com>

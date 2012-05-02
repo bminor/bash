@@ -46,10 +46,6 @@
 #  include "ansi_stdlib.h"
 #endif /* HAVE_STDLIB_H */
 
-#if defined (HAVE_STDBOOL_H)
-#  include <stdbool.h>	// bool
-#endif
-
 #include "rldefs.h"	// STREQ, savestring
 #include "readline.h"
 #include "rlprivate.h"
@@ -104,8 +100,8 @@ struct bin_str _rl_color_indicator[] =
    the first free byte after the array and the character that ended
    the input string, respectively.  */
 
-static
-bool get_funky_string (char **dest, const char **src, bool equals_end, size_t *output_count) {
+static bool
+get_funky_string (char **dest, const char **src, bool equals_end, size_t *output_count) {
   char num;			/* For numerical codes */
   size_t count;			/* Something to count with */
   enum {

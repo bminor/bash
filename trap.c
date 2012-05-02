@@ -787,7 +787,8 @@ _run_trap_internal (sig, tag)
 {
   char *trap_command, *old_trap;
   int trap_exit_value, *token_state;
-  int save_return_catch_flag, function_code, flags;
+  volatile int save_return_catch_flag, function_code;
+  int flags;
   procenv_t save_return_catch;
   WORD_LIST *save_subst_varlist;
 #if defined (ARRAY_VARS)
