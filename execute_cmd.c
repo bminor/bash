@@ -3580,13 +3580,13 @@ fix_assignment_words (words)
 {
   WORD_LIST *w;
   struct builtin *b;
-  int assoc;
+  int assoc, global;
 
   if (words == 0)
     return;
 
   b = 0;
-  assoc = 0;
+  assoc = global = 0;
 
   for (w = words; w; w = w->next)
     if (w->word->flags & W_ASSIGNMENT)
@@ -3603,12 +3603,17 @@ fix_assignment_words (words)
 #if defined (ARRAY_VARS)
 	if (assoc)
 	  w->word->flags |= W_ASSIGNASSOC;
+	if (global)
+	  w->word->flags |= W_ASSNGLOBAL;
 #endif
       }
 #if defined (ARRAY_VARS)
     /* Note that we saw an associative array option to a builtin that takes
        assignment statements.  This is a bit of a kludge. */
-    else if (w->word->word[0] == '-' && strchr (w->word->word, 'A'))
+    else if (w->word->word[0] == '-' && (strchr (w->word->word+1, 'A') || strchr (w->word->word+1, 'g')))
+#else
+    else if (w->word->word[0] == '-' && strchr (w->word->word+1, 'g'))
+#endif
       {
 	if (b == 0)
 	  {
@@ -3618,10 +3623,11 @@ fix_assignment_words (words)
 	    else if (b && (b->flags & ASSIGNMENT_BUILTIN))
 	      words->word->flags |= W_ASSNBLTIN;
 	  }
-	if (words->word->flags & W_ASSNBLTIN)
+	if ((words->word->flags & W_ASSNBLTIN) && strchr (w->word->word+1, 'A'))
 	  assoc = 1;
+	if ((words->word->flags & W_ASSNBLTIN) && strchr (w->word->word+1, 'g'))
+	  global = 1;
       }
-#endif
 }
 
 /* Return 1 if the file found by searching $PATH for PATHNAME, defaulting

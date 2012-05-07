@@ -366,6 +366,11 @@ dump_word_flags (flags)
       f &= ~W_ASSNBLTIN;
       fprintf (stderr, "W_ASSNBLTIN%s", f ? "|" : "");
     }
+  if (f & W_ASSNGLOBAL)
+    {
+      f &= ~W_ASSNGLOBAL;
+      fprintf (stderr, "W_ASSNGLOBAL%s", f ? "|" : "");
+    }
   if (f & W_COMPASSIGN)
     {
       f &= ~W_COMPASSIGN;
@@ -2803,7 +2808,7 @@ do_assignment_internal (word, expand)
     }
   else if (assign_list)
     {
-      if (word->flags & W_ASSIGNARG)
+      if ((word->flags & W_ASSIGNARG) && (word->flags & W_ASSNGLOBAL) == 0)
 	aflags |= ASS_MKLOCAL;
       if (word->flags & W_ASSIGNASSOC)
 	aflags |= ASS_MKASSOC;
