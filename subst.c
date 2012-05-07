@@ -4166,7 +4166,7 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
   simple = (wpat[0] != L'\\' && wpat[0] != L'*' && wpat[0] != L'?' && wpat[0] != L'[');
 #if defined (EXTENDED_GLOB)
   if (extended_glob)
-    simple |= (wpat[1] != L'(' || (wpat[0] != L'*' && wpat[0] != L'?' && wpat[0] != L'+' && wpat[0] != L'!' && wpat[0] != L'@')); /*)*/
+    simple &= (wpat[1] != L'(' || (wpat[0] != L'*' && wpat[0] != L'?' && wpat[0] != L'+' && wpat[0] != L'!' && wpat[0] != L'@')); /*)*/
 #endif
 
   /* If the pattern doesn't match anywhere in the string, go ahead and
