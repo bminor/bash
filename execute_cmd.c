@@ -2205,7 +2205,7 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
      current shell environment. */
   if (lastpipe_opt && job_control == 0 && asynchronous == 0 && pipe_out == NO_PIPE && prev > 0)
     {
-      lstdin = move_to_high_fd (0, 0, 255);
+      lstdin = move_to_high_fd (0, 1, -1);
       if (lstdin > 0)
 	{
 	  do_piping (prev, pipe_out);
@@ -2251,7 +2251,9 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       unfreeze_jobs_list ();
     }
 
+#if defined (JOB_CONTROL)
   discard_unwind_frame ("lastpipe-exec");
+#endif
 
   return (exec_result);
 }
