@@ -1814,17 +1814,6 @@ find_variable_tempenv (name)
   return (var);
 }
 
-/* Find a variable, not forcing a search of the temporary environment first */
-SHELL_VAR *
-find_variable_notempenv (name)
-     const char *name;
-{
-  SHELL_VAR *var;
-
-  var = find_variable_internal (name, 0);
-  return (var);
-}
-
 SHELL_VAR *
 find_global_variable (name)
      const char *name;

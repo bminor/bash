@@ -180,7 +180,7 @@ gen-helpfiles.o: gen-helpfiles.c
 	$(CC_FOR_BUILD) -c $(CCFLAGS_FOR_BUILD) $<
 
 gen-helpfiles:	tmpbuiltins.o gen-helpfiles.o
-	$(CC_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@ gen-helpfiles.o tmpbuiltins.o $(LIBS_FOR_BUILD)
+	$(CC_FOR_BUILD) ${CCFLAGS_FOR_BUILD} $(LDFLAGS_FOR_BUILD) -o $@ gen-helpfiles.o tmpbuiltins.o $(LIBS_FOR_BUILD)
 
 builtext.h builtins.c: $(MKBUILTINS) $(DEFSRC)
 	@-if test -f builtins.c; then mv -f builtins.c old-builtins.c; fi
@@ -237,8 +237,10 @@ ulimit.o: pipesize.h
 pipesize.h:	psize.aux
 	$(SHELL) $(srcdir)/psize.sh > $@
 
+# Technically this is wrong; the pipe size should be for the target system,
+# not the build host.
 psize.aux:	psize.c
-	$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ $(srcdir)/psize.c
+	$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) ${LDFLAGS_FOR_BUILD} -o $@ $(srcdir)/psize.c
 
 documentation: builtins.texi
 

@@ -13799,3 +13799,94 @@ subst.c
 	  and returning a quoted null string if there's nothing else in
 	  ISTRING.  If there is, the quoted null should just go away.  Part of
 	  fix for bug reported by Ruediger Kuhlmann <RKuhlmann@orga-systems.com>
+	- expand_word_internal: when processing ISTRING to build return value,
+	  only set W_HASQUOTEDNULL in the returned word flags if the word is
+	  a quoted null string AND had_quoted_null is set.  Rest of fix
+
+				    5/9
+				    ---
+variables.c
+	- bind_variable_internal: if we get an array variable here (implicit
+	  assignment to index 0), call make_array_variable_value, which
+	  dummies up a fake SHELL_VAR * from array[0].  This matters when
+	  we're appending and have to use the current value
+	- bind_variable_internal: after computing the new value, treat assoc
+	  variables with higher precedence than simple array variables; it
+	  might be that a variable has both attributes set
+
+arrayfunc.c
+	- bind_array_var_internal: break code out that handles creating the
+	  new value to be assigned to an array variable index into a new
+	  function, make_array_variable_value.  This handles creating a
+	  dummy SHELL_VAR * for implicit array[0] assignment.  Fixes bug
+	  reported by Dan Douglas <ormaaj@gmail.com>
+
+arrayfunc.h
+	- make_array_variable_value: new extern declaration
+
+				   5/24
+				   ----
+
+braces.c
+	- mkseq: handle possible overflow and break the sequence generating
+	  loop if it occurs.  Fixes OpenSUSE bug 763591:
+	  https://bugzilla.novell.com/show_bug.cgi?id=763591
+
+				   5/25
+				   ----
+Makefile.in
+	- LDFLAGS_FOR_BUILD: add to compilation recipes for build tools
+	  buildversion, mksignames, mksyntax
+	- LDFLAGS_FOR_BUILD: add to compilation recipes for test tools
+	  recho, zecho, printenv, xcase
+
+builtins/Makefile.in
+	- LDFLAGS_FOR_BUILD: add to compilation recipes for build tools
+	  gen-helpfiles, psize.aux
+
+variables.c
+	- bind_int_variable: if LHS is a simple variable name without an array
+	  reference, but resolves to an array variable, call
+	  bind_array_variable with index 0 to make x=1 equivalent to x[0]=1.
+	  Fixes bug reported by Dan Douglas <ormaaj@gmail.com>
+
+				   5/27
+				   ----
+subst.c
+	- expand_word_internal: make sure has_dollar_at doesn't get reset before
+	  recursive calls to param_expand or expand_word_internal, since it has
+	  to save state of what came before.  Use temp variable and make sure
+	  has_dollar_at is incremented if recursive call processes "$@".
+	  Fixes bug reported by gregrwm <backuppc-users@whitleymott.net> and
+	  supplemented by Dan Douglas <ormaaj@gmail.com>
+
+doc/{bash.1,bashref.texi}
+	- changes to the description of substring expansion inspired by
+	  suggestions from Bill Gradwohl <bill@ycc.com>
+
+doc/bashref.texi
+	- added substring expansion examples inspired by suggestions from
+	  Bill Gradwohl <bill@ycc.com>
+
+variables.c
+	- find_shell_variable: search for a variable in the list of shell
+	  contexts, ignore the temporary environment
+	- find_variable_tempenv: search for a variable in the list of shell
+	  contexts, force search of the temporary environment
+	- find_variable_notempenv: search for a variable in the list of shell
+	  contexts, don't force search of the temporary environment
+
+variables.h
+	- find_shell_variable: extern declaration
+	- find_variable_tempenv: extern declaration
+	- find_variable_notempenv: extern declaration
+
+arrayfunc.c
+	- bind_array_variable: call find_shell_variable instead of calling
+	  var_lookup directly
+
+findcmd.c
+	- search_for_command: call find_variable_tempenv instead of
+	  find_variable_internal directly
+	- _find_user_command_internal: call find_variable_tempenv instead of
+	  find_variable_internal directly

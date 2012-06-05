@@ -13823,3 +13823,76 @@ arrayfunc.c
 
 arrayfunc.h
 	- make_array_variable_value: new extern declaration
+
+				   5/24
+				   ----
+
+braces.c
+	- mkseq: handle possible overflow and break the sequence generating
+	  loop if it occurs.  Fixes OpenSUSE bug 763591:
+	  https://bugzilla.novell.com/show_bug.cgi?id=763591
+
+				   5/25
+				   ----
+Makefile.in
+	- LDFLAGS_FOR_BUILD: add to compilation recipes for build tools
+	  buildversion, mksignames, mksyntax
+	- LDFLAGS_FOR_BUILD: add to compilation recipes for test tools
+	  recho, zecho, printenv, xcase
+
+builtins/Makefile.in
+	- LDFLAGS_FOR_BUILD: add to compilation recipes for build tools
+	  gen-helpfiles, psize.aux
+
+variables.c
+	- bind_int_variable: if LHS is a simple variable name without an array
+	  reference, but resolves to an array variable, call
+	  bind_array_variable with index 0 to make x=1 equivalent to x[0]=1.
+	  Fixes bug reported by Dan Douglas <ormaaj@gmail.com>
+
+				   5/27
+				   ----
+subst.c
+	- expand_word_internal: make sure has_dollar_at doesn't get reset before
+	  recursive calls to param_expand or expand_word_internal, since it has
+	  to save state of what came before.  Use temp variable and make sure
+	  has_dollar_at is incremented if recursive call processes "$@".
+	  Fixes bug reported by gregrwm <backuppc-users@whitleymott.net> and
+	  supplemented by Dan Douglas <ormaaj@gmail.com>
+
+doc/{bash.1,bashref.texi}
+	- changes to the description of substring expansion inspired by
+	  suggestions from Bill Gradwohl <bill@ycc.com>
+
+doc/bashref.texi
+	- added substring expansion examples inspired by suggestions from
+	  Bill Gradwohl <bill@ycc.com>
+
+variables.c
+	- find_shell_variable: search for a variable in the list of shell
+	  contexts, ignore the temporary environment
+	- find_variable_tempenv: search for a variable in the list of shell
+	  contexts, force search of the temporary environment
+	- find_variable_notempenv: search for a variable in the list of shell
+	  contexts, don't force search of the temporary environment
+
+variables.h
+	- find_shell_variable: extern declaration
+	- find_variable_tempenv: extern declaration
+	- find_variable_notempenv: extern declaration
+
+arrayfunc.c
+	- bind_array_variable: call find_shell_variable instead of calling
+	  var_lookup directly
+
+findcmd.c
+	- search_for_command: call find_variable_tempenv instead of
+	  find_variable_internal directly
+	- _find_user_command_internal: call find_variable_tempenv instead of
+	  find_variable_internal directly
+
+builtins/setattr.def
+	- set_var_attribute: call find_variable_notempenv instead of
+	  find_variable_internal directly
+	- show_name_attributes:  call find_variable_tempenv instead of
+	  find_variable_internal directly

@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.2, version 4.047])dnl
+AC_REVISION([for Bash 4.2, version 4.048])dnl
 
 define(bashvers, 4.2)
 define(relstatus, maint)
@@ -482,7 +482,8 @@ if test "$opt_static_link" = yes; then
 fi
 
 # set the appropriate make variables for building the "build tools"
-
+# modify defaults based on whether or not we are cross compiling, since the
+# options for the target host may not be appropriate for the build host
 if test "X$cross_compiling" = "Xno"; then
 	CC_FOR_BUILD=${CC_FOR_BUILD-'$(CC)'}
 	CPPFLAGS_FOR_BUILD=${CPPFLAGS_FOR_BUILD-"$CPPFLAGS"}	# XXX - should it be '$(CPPFLAGS)'

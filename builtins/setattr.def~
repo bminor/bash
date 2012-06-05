@@ -451,7 +451,7 @@ show_name_attributes (name, nodefs)
 {
   SHELL_VAR *var;
 
-  var = find_variable_tempenv (name);
+  var = find_variable_internal (name, 1);
 
   if (var && invisible_p (var) == 0)
     {
@@ -495,7 +495,7 @@ set_var_attribute (name, attribute, undo)
 	}
       else
 	{
-	  var = find_variable_notempenv (name);
+	  var = find_variable_internal (name, 0);
 	  if (var == 0)
 	    {
 	      var = bind_variable (name, (char *)NULL, 0);

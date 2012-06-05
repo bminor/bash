@@ -1929,56 +1929,12 @@ positional parameter, so an offset of -1 evaluates to the last positional
 parameter.
 It is an expansion error if @var{length} evaluates to a number less than zero.
 
-The following examples illustrate substring expansion using positional
-parameters:
-
-@verbatim
-$ set -- 1 2 3 4 5 6 7 8 9 0 a b c d e f g h
-$ echo ${@:7}
-7 8 9 0 a b c d e f g h
-$ echo ${@:7:0}
-
-$ echo ${@:7:2}
-7 8
-$ echo ${@:7:-2}
-bash: -2: substring expression < 0
-$ echo ${@: -7:2}
-b c
-$ echo ${@:0}
-./bash 1 2 3 4 5 6 7 8 9 0 a b c d e f g h
-$ echo ${@:0:2}
-./bash 1
-$ echo ${@: -7:0}
-
-@end verbatim
-
 If @var{parameter} is an indexed array name subscripted
 by @samp{@@} or @samp{*}, the result is the @var{length}
 members of the array beginning with @code{$@{@var{parameter}[@var{offset}]@}}.
 A negative @var{offset} is taken relative to one greater than the maximum
 index of the specified array.
 It is an expansion error if @var{length} evaluates to a number less than zero.
-
-These examples show how you can use substring expansion with indexed
-arrays:
-
-@verbatim
-$ array=(0 1 2 3 4 5 6 7 8 9 0 a b c d e f g h)
-$ echo ${array[@]:7}
-7 8 9 0 a b c d e f g h
-$ echo ${array[@]:7:2}
-7 8
-$ echo ${array[@]: -7:2}
-b c
-$ echo ${array[@]: -7:-2}
-bash: -2: substring expression < 0
-$ echo ${array[@]:0}
-0 1 2 3 4 5 6 7 8 9 0 a b c d e f g h
-$ echo ${array[@]:0:2}
-0 1
-$ echo ${array[@]: -7:0}
-
-@end verbatim
 
 Substring expansion applied to an associative array produces undefined
 results.

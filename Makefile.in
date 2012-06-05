@@ -1,4 +1,4 @@
-# Makefile for bash-4.2, version 4.6
+# Makefile for bash-4.2, version 4.7
 #
 # Copyright (C) 1996-2011 Free Software Foundation, Inc.
 
@@ -575,7 +575,7 @@ version.h:  $(SOURCES) config.h Makefile patchlevel.h
 		&& mv newversion.h version.h
 
 bashversion$(EXEEXT):	patchlevel.h conftypes.h version.h buildversion.o $(SUPPORT_SRC)bashversion.c
-	$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ $(SUPPORT_SRC)bashversion.c buildversion.o ${LIBS_FOR_BUILD}
+	$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) ${LDFLAGS_FOR_BUILD} -o $@ $(SUPPORT_SRC)bashversion.c buildversion.o ${LIBS_FOR_BUILD}
 
 buildversion.o: version.h conftypes.h patchlevel.h $(srcdir)/version.c
 	$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -DBUILDTOOL -c -o $@ $(srcdir)/version.c
@@ -655,11 +655,11 @@ mksignames.o:	$(SUPPORT_SRC)mksignames.c
 
 mksignames$(EXEEXT):	mksignames.o buildsignames.o
 	$(RM) $@
-	$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ mksignames.o buildsignames.o ${LIBS_FOR_BUILD}
+	$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) ${LDFLAGS_FOR_BUILD} -o $@ mksignames.o buildsignames.o ${LIBS_FOR_BUILD}
 
 mksyntax$(EXEEXT):	${srcdir}/mksyntax.c config.h syntax.h ${BASHINCDIR}/chartypes.h
 	$(RM) $@
-	${CC_FOR_BUILD} ${CCFLAGS_FOR_BUILD} -o $@ ${srcdir}/mksyntax.c ${LIBS_FOR_BUILD}
+	${CC_FOR_BUILD} ${CCFLAGS_FOR_BUILD} ${LDFLAGS_FOR_BUILD} -o $@ ${srcdir}/mksyntax.c ${LIBS_FOR_BUILD}
 
 # make a list of signals for the local system -- this is done when we're
 # *not* cross-compiling
@@ -834,16 +834,16 @@ maybe-clean:
 	fi
 
 recho$(EXEEXT):		$(SUPPORT_SRC)recho.c
-	@$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ $(SUPPORT_SRC)recho.c ${LIBS_FOR_BUILD}
+	@$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) ${LDFLAGS_FOR_BUILD} -o $@ $(SUPPORT_SRC)recho.c ${LIBS_FOR_BUILD}
 
 zecho$(EXEEXT):		$(SUPPORT_SRC)zecho.c
-	@$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ $(SUPPORT_SRC)zecho.c ${LIBS_FOR_BUILD}
+	@$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) ${LDFLAGS_FOR_BUILD} -o $@ $(SUPPORT_SRC)zecho.c ${LIBS_FOR_BUILD}
 
 printenv$(EXEEXT):	$(SUPPORT_SRC)printenv.c
-	@$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ $(SUPPORT_SRC)printenv.c ${LIBS_FOR_BUILD}
+	@$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) ${LDFLAGS_FOR_BUILD} -o $@ $(SUPPORT_SRC)printenv.c ${LIBS_FOR_BUILD}
 
 xcase$(EXEEXT):	$(SUPPORT_SRC)xcase.c
-	@$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ $(SUPPORT_SRC)xcase.c ${LIBS_FOR_BUILD}
+	@$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) ${LDFLAGS_FOR_BUILD} -o $@ $(SUPPORT_SRC)xcase.c ${LIBS_FOR_BUILD}
 
 test tests check:	force $(Program) $(TESTS_SUPPORT)
 	@-test -d tests || mkdir tests

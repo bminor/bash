@@ -235,7 +235,7 @@ _find_user_command_internal (name, flags)
 
   /* Search for the value of PATH in both the temporary environments and
      in the regular list of variables. */
-  if (var = find_variable_tempenv ("PATH"))	/* XXX could be array? */
+  if (var = find_variable_internal ("PATH", 1))	/* XXX could be array? */
     path_list = value_cell (var);
   else
     path_list = (char *)NULL;
@@ -312,7 +312,7 @@ search_for_command (pathname, flags)
 
   /* If PATH is in the temporary environment for this command, don't use the
      hash table to search for the full pathname. */
-  path = find_variable_tempenv ("PATH");
+  path = find_variable_internal ("PATH", 1);
   temp_path = path && tempvar_p (path);
   if (temp_path == 0 && path)
     path = (SHELL_VAR *)NULL;

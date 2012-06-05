@@ -319,7 +319,7 @@ mkseq (start, end, incr, type, width)
      intmax_t start, end;
      int incr, type, width;
 {
-  intmax_t n;
+  intmax_t n, prevn;
   int i;
   char **result, *t;
 
@@ -336,7 +336,7 @@ mkseq (start, end, incr, type, width)
 
   /* Make sure we go through the loop at least once, so {3..3} prints `3' */
   i = 0;
-  n = start;
+  prevn = n = start;
   do
     {
 #if defined (SHELL)
@@ -359,6 +359,11 @@ mkseq (start, end, incr, type, width)
 	  result[i++] = t;
 	}
       n += incr;
+
+      /* Handle overflow */
+      if ((incr > 0 && n < prevn) || (incr < 0 && n > prevn))
+	break;
+
       if ((incr < 0 && n < end) || (incr > 0 && n > end))
 	break;
     }

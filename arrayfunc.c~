@@ -198,7 +198,7 @@ bind_array_variable (name, ind, value, flags)
 {
   SHELL_VAR *entry;
 
-  entry = find_shell_variable (name);
+  entry = var_lookup (name, shell_variables);
 
   if (entry == (SHELL_VAR *) 0)
     entry = make_new_array_variable (name);

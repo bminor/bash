@@ -6151,7 +6151,13 @@ verify_substring_values (v, value, substr, vtype, e1p, e2p)
       free (temp1);
       if (expok == 0)
 	return (0);
+#if 1
       if ((vtype == VT_ARRAYVAR || vtype == VT_POSPARMS) && *e2p < 0)
+#else
+      /* bash-4.3: allow positional parameter length < 0 to count backwards
+	 from end of positional parameters */
+      if (vtype == VT_ARRAYVAR && *e2p < 0)
+#endif
 	{
 	  internal_error (_("%s: substring expression < 0"), t);
 	  return (0);
@@ -7100,6 +7106,8 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 
       if (contains_dollar_at)
 	*contains_dollar_at = 1;
+
+      tflag |= W_DOLLARAT;
     }
 
   /* Process ${!PREFIX*} expansion. */
@@ -7124,6 +7132,8 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 	    *quoted_dollar_atp = 1;
 	  if (contains_dollar_at)
 	    *contains_dollar_at = 1;
+
+	  tflag |= W_DOLLARAT;
 	}
       free (x);
       dispose_words (xlist);
@@ -7134,6 +7144,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 
       ret = alloc_word_desc ();
       ret->word = temp;
+      ret->flags = tflag;	/* XXX */
       return ret;
     }
 
@@ -7156,6 +7167,8 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 		*quoted_dollar_atp = 1;
 	      if (contains_dollar_at)
 		*contains_dollar_at = 1;
+
+	      tflag |= W_DOLLARAT;
 	    }	    
 
 	  free (temp1);
@@ -7163,6 +7176,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 
 	  ret = alloc_word_desc ();
 	  ret->word = temp;
+	  ret->flags = tflag;	/* XXX */
 	  return ret;
 	}
 
@@ -7639,12 +7653,9 @@ param_expand (string, sindex, quoted, expanded_something,
 	 We also want to make sure that splitting is done no matter what --
 	 according to POSIX.2, this expands to a list of the positional
 	 parameters no matter what IFS is set to. */
-#if 0
-      temp = string_list_dollar_at (list, quoted);
-#else
       temp = string_list_dollar_at (list, (pflags & PF_ASSIGNRHS) ? (quoted|Q_DOUBLE_QUOTES) : quoted);
-#endif
 
+      tflag |= W_DOLLARAT;
       dispose_words (list);
       break;
 
@@ -7928,7 +7939,7 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
 
   /* State flags */
   int had_quoted_null;
-  int has_dollar_at;
+  int has_dollar_at, temp_has_dollar_at;
   int tflag;
   int pflags;			/* flags passed to param_expand */
 
@@ -8133,15 +8144,16 @@ add_string:
 	  if (expanded_something)
 	    *expanded_something = 1;
 
-	  has_dollar_at = 0;
+	  temp_has_dollar_at = 0;
 	  pflags = (word->flags & W_NOCOMSUB) ? PF_NOCOMSUB : 0;
 	  if (word->flags & W_NOSPLIT2)
 	    pflags |= PF_NOSPLIT2;
 	  if (word->flags & W_ASSIGNRHS)
 	    pflags |= PF_ASSIGNRHS;
 	  tword = param_expand (string, &sindex, quoted, expanded_something,
-			       &has_dollar_at, &quoted_dollar_at,
+			       &temp_has_dollar_at, &quoted_dollar_at,
 			       &had_quoted_null, pflags);
+	  has_dollar_at += temp_has_dollar_at;
 
 	  if (tword == &expand_wdesc_error || tword == &expand_wdesc_fatal)
 	    {
@@ -8283,9 +8295,10 @@ add_twochars:
 
 	      temp = (char *)NULL;
 
-	      has_dollar_at = 0;
+	      temp_has_dollar_at = 0;	/* XXX */
 	      /* Need to get W_HASQUOTEDNULL flag through this function. */
-	      list = expand_word_internal (tword, Q_DOUBLE_QUOTES, 0, &has_dollar_at, (int *)NULL);
+	      list = expand_word_internal (tword, Q_DOUBLE_QUOTES, 0, &temp_has_dollar_at, (int *)NULL);
+	      has_dollar_at += temp_has_dollar_at;
 
 	      if (list == &expand_word_error || list == &expand_word_fatal)
 		{
