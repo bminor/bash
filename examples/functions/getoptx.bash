@@ -135,7 +135,7 @@ function getoptex()
   [ $OPTIND -lt $# ] || return 1
   shift $OPTIND
   if [ "$1" != "-" ] && [ "$1" != "${1#-}" ]
-  then OPTIND=$[OPTIND+1]; if [ "$1" != "--" ]
+  then OPTIND=$(( OPTIND+1 )); if [ "$1" != "--" ]
   then
     local o
     o="-${1#-$OPTOFS}"
@@ -158,7 +158,7 @@ function getoptex()
               OPTOPT="?"
               return 1;
             fi
-            OPTIND=$[OPTIND+1] # skip option's argument
+            OPTIND=$(( OPTIND+1 )) # skip option's argument
             return 0
           ;;
           "--$OPTOPT="*)
@@ -186,14 +186,14 @@ function getoptex()
               OPTOPT="?"
               return 1
             fi
-            OPTIND=$[OPTIND+1] # skip option's argument
+            OPTIND=$(( OPTIND+1 )) # skip option's argument
             return 0
           ;;
           "-$OPTOPT"*)
             if [ $opttype = ";" ]
             then # an option with no argument is in a chain of options
               OPTOFS="$OPTOFS?" # move to the next option in the chain
-              OPTIND=$[OPTIND-1] # the chain still has other options
+              OPTIND=$(( OPTIND-1 )) # the chain still has other options
               return 0
             else
               unset OPTOFS
@@ -215,7 +215,7 @@ function optlistex
   local l="$1"
   local m # mask
   local r # to store result
-  while [ ${#m} -lt $[${#l}-1] ]; do m="$m?"; done # create a "???..." mask
+  while [ ${#m} -lt $(( ${#l}-1 )) ]; do m="$m?"; done # create a "???..." mask
   while [ -n "$l" ]
   do
     r="${r:+"$r "}${l%$m}" # append the first character of $l to $r
@@ -260,7 +260,7 @@ function getopt()
 #do
 #  echo "Option <$OPTOPT> ${OPTARG:+has an arg <$OPTARG>}"
 #done
-#shift $[OPTIND-1]
+#shift $(( OPTIND-1 ))
 #for arg in "$@"
 #do
 #  echo "Non option argument <$arg>"
@@ -288,7 +288,7 @@ function getopt()
 #do
 #  echo "Option <$OPTOPT> ${OPTARG:+has an arg <$OPTARG>}"
 #done
-#shift $[OPTIND-1]
+#shift $(( OPTIND-1 ))
 #for arg in "$@"
 #do
 #  echo "Non option argument <$arg>"

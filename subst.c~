@@ -8157,7 +8157,7 @@ add_string:
 	    had_quoted_null = 1;
 
 	  temp = tword ? tword->word : (char *)NULL;
-	  dispose_word_desc (tword);
+	  dispose_word_desc (tword);	/* nulls tword->word so ok */
 
 	  /* Kill quoted nulls; we will add them back at the end of
 	     expand_word_internal if nothing else in the string */

@@ -747,7 +747,7 @@ esac/
 						;;
 					*)
 						counter="`expr \"$counter\" + 1`"
-						# counter=$[ $counter + 1 ]
+						# counter=$((  $counter + 1  ))
 						;;
 					esac
 				done
@@ -1226,7 +1226,7 @@ $cmd
 			case "$inc_cmdno" in
 			yes)
 				cmdno="`expr \"$cmdno\" + 1`"
-				# cmdno=$[$cmdno + 1]
+				# cmdno=$(( $cmdno + 1 ))
 				;;
 			esac
 			;;
