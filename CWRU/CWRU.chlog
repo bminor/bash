@@ -13803,3 +13803,23 @@ subst.c
 	  only set W_HASQUOTEDNULL in the returned word flags if the word is
 	  a quoted null string AND had_quoted_null is set.  Rest of fix
 
+				    5/9
+				    ---
+variables.c
+	- bind_variable_internal: if we get an array variable here (implicit
+	  assignment to index 0), call make_array_variable_value, which
+	  dummies up a fake SHELL_VAR * from array[0].  This matters when
+	  we're appending and have to use the current value
+	- bind_variable_internal: after computing the new value, treat assoc
+	  variables with higher precedence than simple array variables; it
+	  might be that a variable has both attributes set
+
+arrayfunc.c
+	- bind_array_var_internal: break code out that handles creating the
+	  new value to be assigned to an array variable index into a new
+	  function, make_array_variable_value.  This handles creating a
+	  dummy SHELL_VAR * for implicit array[0] assignment.  Fixes bug
+	  reported by Dan Douglas <ormaaj@gmail.com>
+
+arrayfunc.h
+	- make_array_variable_value: new extern declaration

@@ -16,3 +16,8 @@
 9
 16
 ./appendop.tests: line 83: x: readonly variable
+declare -A foo='([one]="bar" [two]="baz" [three]="quux" )'
+declare -A foo='([one]="bar" [two]="baz" [0]="zero" [three]="quux" )'
+declare -A foo='([four]="four" [one]="bar" [two]="baz" [0]="zero" [three]="quux" )'
+declare -ai iarr='([0]="3" [1]="2" [2]="3")'
+declare -ai iarr='([0]="3" [1]="2" [2]="3" [3]="4" [4]="5" [5]="6")'

@@ -118,8 +118,8 @@ convert_var_to_assoc (var)
   return var;
 }
 
-static SHELL_VAR *
-bind_array_var_internal (entry, ind, key, value, flags)
+char *
+make_array_variable_value (entry, ind, key, value, flags)
      SHELL_VAR *entry;
      arrayind_t ind;
      char *key;
@@ -155,6 +155,21 @@ bind_array_var_internal (entry, ind, key, value, flags)
     }
   else
     newval = make_variable_value (entry, value, flags);
+
+  return newval;
+}
+  
+static SHELL_VAR *
+bind_array_var_internal (entry, ind, key, value, flags)
+     SHELL_VAR *entry;
+     arrayind_t ind;
+     char *key;
+     char *value;
+     int flags;
+{
+  char *newval;
+
+  newval = make_array_variable_value (entry, ind, key, value, flags);
 
   if (entry->assign_func)
     (*entry->assign_func) (entry, newval, ind, key);

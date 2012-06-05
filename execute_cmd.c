@@ -4118,7 +4118,7 @@ run_builtin:
     }
 
   if (command_line == 0)
-    command_line = savestring (the_printed_command_except_trap);
+    command_line = savestring (the_printed_command_except_trap ? the_printed_command_except_trap : "");
 
 #if defined (PROCESS_SUBSTITUTION)
   if ((subshell_environment & SUBSHELL_COMSUB) && (simple_command->flags & CMD_NO_FORK) && fifos_pending() > 0)

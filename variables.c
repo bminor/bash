@@ -2241,6 +2241,12 @@ bind_variable_internal (name, value, table, hflags, aflags)
       /* Variables which are bound are visible. */
       VUNSETATTR (entry, att_invisible);
 
+#if defined (ARRAY_VARS)
+      if (assoc_p (entry) || array_p (entry))
+        newval = make_array_variable_value (entry, 0, "0", value, aflags);
+      else
+#endif
+
       newval = make_variable_value (entry, value, aflags);	/* XXX */
 
       /* Invalidate any cached export string */
@@ -2251,14 +2257,14 @@ bind_variable_internal (name, value, table, hflags, aflags)
       /* If an existing array variable x is being assigned to with x=b or
 	 `read x' or something of that nature, silently convert it to
 	 x[0]=b or `read x[0]'. */
-      if (array_p (entry))
-	{
-	  array_insert (array_cell (entry), 0, newval);
-	  free (newval);
-	}
-      else if (assoc_p (entry))
+      if (assoc_p (entry))
 	{
 	  assoc_insert (assoc_cell (entry), savestring ("0"), newval);
+	  free (newval);
+	}
+      else if (array_p (entry))
+	{
+	  array_insert (array_cell (entry), 0, newval);
 	  free (newval);
 	}
       else
