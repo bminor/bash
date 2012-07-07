@@ -13916,3 +13916,81 @@ lib/readline/vi_mode.c
 	  motion character.  From Red Hat bug 813289
 	- rl_vi_delete_to: change to correctly redo `dd', since `d' is not a vi
 	  motion character
+	- rl_vi_yank_to: change to correctly redo `yy', since `y' is not a vi
+	  motion character
+
+				    6/4
+				    ---
+lib/sh/mktime.c
+	- current versions of VMS do not need to include <stddef.h>.  Fix from
+	  John E. Malmberg <wb8tyw@qsl.net>
+
+				    6/5
+				    ---
+lib/sh/eaccess.c
+	- sh_stat: instead of using a static buffer to do the DEV_FD_PREFIX
+	  translation, use a dynamically-allocated buffer that we keep
+	  resizing.  Fixes potential security hole reported by David Leverton
+	  <levertond@googlemail.com>
+
+				    6/5
+				    ---
+braces.c
+	- expand_seqterm: check errno == ERANGE after calling strtoimax for
+	  rhs and incr.  Part of a set of fixes from Scott McMillan
+	  <scotty.mcmillan@gmail.com>
+	- expand_seqterm: incr now of type `intmax_t', which changes
+	  arguments to mkseq
+	- mkseq: a better fix for detecting overflow and underflow since it's
+	  undefined in C and compilers `optimize' out overflow checks.  Uses
+	  ADDOVERFLOW and SUBOVERFLOW macros
+	- mkseq: use sh_imaxabs (new macro) instead of abs() for intmax_t
+	  variables
+	- mkseq: don't allow incr to be converted to -INTMAX_MIN
+	- mkseq: make sure that strvec_create isn't called with a size argument
+	  greater than INT_MAX, since it only takes an int
+
+				    6/6
+				    ---
+braces.c
+	- mkseq: try and be smarter about not overallocating elements in
+	  the return array if the increment is not 1 or -1
+
+				    6/8
+				    ---
+bashline.c
+	- bash_directory_completion_hook: don't attempt spelling correction
+	  on the directory name unless the direxpand option is set and we are
+	  going to replace the directory name with the corrected one in the
+	  readline line.  Suggested by Linda Walsh <bash@tlinx.org>
+
+lib/sh/shquote.c
+	- sh_backslash_quote: now takes a third argument: flags.  If non-zero,
+	  tildes are not backslash-escaped.  Have to handle both printf %q,
+	  where they should be escaped, and filename completion, where they
+	  should not when used as usernames
+
+externs.h
+	- sh_backslash_quote: declaration now takes a third argument
+
+builtins/printf.def
+	- printf_builtin: call sh_backslash_quote with 1 as third argument
+	  so tildes get escaped
+
+{bashline,bracecomp}.c
+	- call sh_backslash_quote with 0 as third argument so tildes are not
+	  escaped in completed words
+
+doc/bash.1
+	- add `coproc' to the list of reserved words.  From a report by
+	  Jens Schweikhardt <schweikh@schweikhardt.net>
+
+				   6/10
+				   ----
+execute_cmd.c
+	- line_number_for_err_trap: now global, so parse_and_execute can save
+	  and restore it with unwind-protect
+
+builtins/evalstring.c
+	- parse_and_execute: save and restore line_number_for_err_trap along
+	  with line_number

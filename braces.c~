@@ -370,8 +370,6 @@ mkseq (start, end, incr, type, width)
   /* Need to check this way in case INT_MAX == INTMAX_MAX */
   if (INT_MAX == INTMAX_MAX && (ADDOVERFLOW (prevn, 2, INT_MIN, INT_MAX)))
     return ((char **)NULL);
-  /* Make sure the assignment to nelem below doesn't end up <= 0 due to
-     intmax_t overflow */
   else if (ADDOVERFLOW ((prevn/sh_imaxabs(incr)), 1, INTMAX_MIN, INTMAX_MAX))
     return ((char **)NULL);
 

@@ -117,7 +117,7 @@ parse_prologue (string, flags, tag)
      int flags;
      char *tag;
 {
-  char *orig_string, *lastcom;
+  char *orig_string;
   int x;
 
   orig_string = string;
@@ -154,7 +154,7 @@ parse_prologue (string, flags, tag)
   if (the_printed_command_except_trap)
     {
       lastcom = savestring (the_printed_command_except_trap);
-      add_unwind_protect (restore_lastcom, lastcom);
+      add_unwind_protect (restore_lastcom (lastcom));
     }
 
   add_unwind_protect (pop_stream, (char *)NULL);

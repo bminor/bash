@@ -754,6 +754,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	  command->value.Simple->flags |= CMD_STDIN_REDIR;
 
 	line_number_for_err_trap = line_number = command->value.Simple->line;
+itrace("execute_command_internal: set line_number_for_err_trap = %d", line_number_for_err_trap);
 	exec_result =
 	  execute_simple_command (command->value.Simple, pipe_in, pipe_out,
 				  asynchronous, fds_to_close);
@@ -802,6 +803,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	 only the failure of a simple command. */
       if (was_error_trap && ignore_return == 0 && invert == 0 && pipe_in == NO_PIPE && pipe_out == NO_PIPE && exec_result != EXECUTION_SUCCESS)
 	{
+itrace("execute_command_internal: line_number = %d line_number_for_err_trap = %d save_line_number = %d", line_number, line_number_for_err_trap, save_line_number);
 	  last_command_exit_value = exec_result;
 	  line_number = line_number_for_err_trap;
 	  run_error_trap ();

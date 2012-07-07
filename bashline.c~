@@ -1545,7 +1545,11 @@ bash_default_completion (text, start, end, qc, compflags)
   /* If the word starts in `~', and there is no slash in the word, then
      try completing this word as a username. */
   if (matches == 0 && *text == '~' && mbschr (text, '/') == 0)
-    matches = rl_completion_matches (text, rl_username_completion_function);
+    {
+      matches = rl_completion_matches (text, rl_username_completion_function);
+      if (matches && dircomplete_expand == 0)
+	rl_filename_quoting_desired = 0;	/* XXX */
+    }
 
   /* Another one.  Why not?  If the word starts in '@', then look through
      the world of known hostnames for completion first. */
