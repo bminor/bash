@@ -13999,3 +13999,11 @@ builtins/evalstring.c
 	- parse_prologue: use restore_lastcom to save and restore the value
 	  of the_printed_command_except_trap around calls to parse_and_execute
 	  (eval/source/.)
+
+				   6/15
+				   ----
+lib/readline/complete.c
+	- complete_fncmp: change filename comparison code to understand
+	  multibyte characters, even when doing case-sensitive or case-mapping
+	  comparisons.  Fixes problem reported by Nikolay Shirokovskiy
+	  <nshyrokovskiy@gmail.com>
