@@ -14007,3 +14007,51 @@ lib/readline/complete.c
 	  multibyte characters, even when doing case-sensitive or case-mapping
 	  comparisons.  Fixes problem reported by Nikolay Shirokovskiy
 	  <nshyrokovskiy@gmail.com>
+
+				   6/20
+				   ----
+builtins/mapfile.def
+	- mapfile: move the line count increment and check for having read
+	  the specified number of lines to the end of the loop to avoid
+	  reading an additional line with zgetline.  Fixes bug reported by
+	  Dan Douglas <ormaaj@gmail.com>
+
+				   6/21
+				   ----
+
+execute_cmd.c
+	- execute_pipeline: make sure `lastpipe_flag' is initialized to 0 on
+	  all systems, since it's tested later in the function.  Fixes bug
+	  reported by John E. Malmberg <wb8tyw@qsl.net>
+
+				   6/22
+				   ----
+mailcheck.c
+	- file_mod_date_changed: return 0 right away if mailstat() does not
+	  return success.  Fixes bug with using uninitialized values reported
+	  by szymon.kalasz@uj.edu.pl
+
+builtins/set.def
+	- the `monitor' option is not available when the shell is compiled
+	  without job control, since the underlying `m' flag is not available
+
+nojobs.c
+	- job_control: now declared as int variable, initialized to 0, never
+	  modified
+
+jobs.h
+	- job_control: extern declaration no longer dependent on JOB_CONTROL
+
+execute_cmd.c
+	- execute_pipeline: made necessary changes so `lastpipe' shell option
+	  is now available in all shells, even those compiled without
+	  JOB_CONTROL defined
+
+				   6/23
+				   ----
+lib/glob/glob.c
+	- glob_filename: check for interrupts before returning if glob_vector
+	  returns NULL or an error.  Bug reported by Serge van den Boom
+	  <svdb@stack.nl>, fix from Andreas Schwab <schwab@linux-m68k.org>
+	- call run_pending_traps after each call to QUIT or test of
+	  interrupt_state, like we do in mainline shell code

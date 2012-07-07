@@ -96,6 +96,9 @@ int shell_tty = -1;
    exits from get_tty_state(). */
 int check_window_size = CHECKWINSIZE_DEFAULT;
 
+/* We don't have job control. */
+int job_control = 0;
+
 /* STATUS and FLAGS are only valid if pid != NO_PID
    STATUS is only valid if (flags & PROC_RUNNING) == 0 */
 struct proc_status {

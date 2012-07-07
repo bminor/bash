@@ -118,6 +118,8 @@ extern time_t shell_start_time;
 extern char *glob_argv_flags;
 #endif
 
+extern int job_control;	/* XXX */
+
 extern int close __P((int));
 
 /* Static functions defined and used in this file. */
@@ -2317,8 +2319,8 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   if (ignore_return && cmd)
     cmd->flags |= CMD_IGNORE_RETURN;
 
-#if defined (JOB_CONTROL)
   lastpipe_flag = 0;
+
   begin_unwind_frame ("lastpipe-exec");
   lstdin = -1;
   /* If the `lastpipe' option is set with shopt, and job control is not
@@ -2342,14 +2344,11 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
     }	  
   if (prev >= 0)
     add_unwind_protect (close, prev);
-#endif
 
   exec_result = execute_command_internal (cmd, asynchronous, prev, pipe_out, fds_to_close);
 
-#if defined (JOB_CONTROL)
   if (lstdin > 0)
     restore_stdin (lstdin);
-#endif
 
   if (prev >= 0)
     close (prev);
@@ -2372,9 +2371,7 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       unfreeze_jobs_list ();
     }
 
-#if defined (JOB_CONTROL)
   discard_unwind_frame ("lastpipe-exec");
-#endif
 
   return (exec_result);
 }

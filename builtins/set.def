@@ -96,12 +96,16 @@ Options:
           interactive-comments
                        allow comments to appear in interactive commands
           keyword      same as -k
+#if defined (JOB_CONTROL)
           monitor      same as -m
+#endif
           noclobber    same as -C
           noexec       same as -n
           noglob       same as -f
           nolog        currently accepted but ignored
+#if defined (JOB_CONTROL)
           notify       same as -b
+#endif
           nounset      same as -u
           onecmd       same as -t
           physical     same as -P
@@ -205,7 +209,9 @@ const struct {
   { "ignoreeof", '\0', &ignoreeof, set_ignoreeof, (setopt_get_func_t *)NULL },
   { "interactive-comments", '\0', &interactive_comments, (setopt_set_func_t *)NULL, (setopt_get_func_t *)NULL },
   { "keyword",    'k', (int *)NULL, (setopt_set_func_t *)NULL, (setopt_get_func_t *)NULL  },
+#if defined (JOB_CONTROL)
   { "monitor",	  'm', (int *)NULL, (setopt_set_func_t *)NULL, (setopt_get_func_t *)NULL  },
+#endif
   { "noclobber",  'C', (int *)NULL, (setopt_set_func_t *)NULL, (setopt_get_func_t *)NULL  },
   { "noexec",	  'n', (int *)NULL, (setopt_set_func_t *)NULL, (setopt_get_func_t *)NULL  },
   { "noglob",	  'f', (int *)NULL, (setopt_set_func_t *)NULL, (setopt_get_func_t *)NULL  },

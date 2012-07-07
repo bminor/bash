@@ -243,8 +243,6 @@ extern void close_pgrp_pipe __P((void));
 extern void save_pgrp_pipe __P((int *, int));
 extern void restore_pgrp_pipe __P((int *));
 
-#if defined (JOB_CONTROL)
-extern int job_control;
-#endif
+extern int job_control;		/* set to 0 in nojobs.c */
 
 #endif /* _JOBS_H_ */
