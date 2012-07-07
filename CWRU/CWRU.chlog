@@ -14055,3 +14055,111 @@ lib/glob/glob.c
 	  <svdb@stack.nl>, fix from Andreas Schwab <schwab@linux-m68k.org>
 	- call run_pending_traps after each call to QUIT or test of
 	  interrupt_state, like we do in mainline shell code
+	- glob_vector: don't call QUIT; in `if (lose)' code block; just free
+	  memory, return NULL, and let callers deal with interrupt_state or
+	  other signals and traps
+
+				   6/25
+				   ----
+lib/readline/input.c
+	- rl_read_key: restructure the loop that calls the event hook a little,
+	  so that the hook is called only after rl_gather_tyi returns no input,
+	  and any pending input is returned first.  This results in better
+	  efficiency for processing pending input without calling the hook
+	  on every input character as bash-4.1 did.  From a report from
+	  Max Horn <max@quendi.de>
+
+				   6/26
+				   ----
+trap.c
+	- signal_is_pending: return TRUE if SIG argument has been received and
+	  a trap is waiting to execute
+
+trap.h
+	- signal_is_pending: extern declaration
+
+lib/glob/glob.c
+	- glob_vector: check for pending SIGINT trap each time through the loop,
+	  just like we check for interrupt_state or terminating_signal, and
+	  set `lose = 1' so we clean up after ourselves and interrupt the
+	  operation before running the trap.  This may require a change later,
+	  maybe call run_pending_traps and do that if run_pending_traps returns?
+
+variables.c
+	- sv_histtimefmt: set history_comment_character to default (`#') if
+	  it's 0 when we're turning on history timestamps.  The history code
+	  uses the history comment character to prefix timestamps, and
+	  leaving it at 0 effectively removes them from the history.  From a
+	  report to help-bash by Dennis Williamson <dennistwilliamson@gmail.com>
+
+				   6/27
+				   ----
+lib/readline/signals.c
+	- rl_maybe_restore_sighandler: new function, sets handler for SIG to
+	  HANDLER->sa_handler only if it's not SIG_IGN.  Needs to be called
+	  on same signals set using rl_maybe_set_sighandler, which does not
+	  override an existing SIG_IGN handler (SIGALRM is ok since it does
+	  the check inline; doesn't mess with SIGWINCH)
+
+				   6/30
+				   ----
+variables.h
+	- additional defines for the new `nameref' variable attribute
+	  (att_nameref): nameref_p, nameref_cell, var_setref
+
+variables.c
+	- find_variable_nameref: resolve SHELL_VAR V through chain of namerefs
+	- find_variable_last_nameref: resolve variable NAME until last in a
+	  chain of possibly more than one nameref starting at shell_variables
+	- find_global_variable_last_nameref: resolve variable NAME until last
+	  in a chain of possibly more than one nameref starting at
+	  global_variables
+	- find_nameref_at_context: resolve SHELL_VAR V through chain of namerefs	
+	  in a specific variable context (usually a local variable hash table)
+	- find_variable_nameref_context: resolve SHELL_VAR V through chain of
+	  namerefs following a chain of varible contexts
+	- find_variable_last_nameref_context: resolve SHELL_VAR V as in
+	  find_variable_last_context, but return the final nameref instead of
+	  what the final nameref resolves to
+	- find_variable_tempenv, find_variable_notempenv, find_global_variable,
+	  find_shell_variable, find_variable: modified to follow namerefs
+	- find_global_variable_noref: look up a global variable without following
+	  any namerefs
+	- find_variable_noref: look up a shell variable without following any
+	  namerefs
+	- bind_variable_internal: modify to follow a chain of namerefs in the
+	  global variables table; change to handle assignments to a nameref by
+	  following nameref chain
+	- bind_variable: modify to follow chain of namerefs when binding to a
+	  local variable
+	- unbind_variable: changes to unset nameref variables (unsets both
+	  nameref and variable it resolves to)
+
+subst.c
+	- parameter_brace_expand_word: change to handle expanding nameref whose
+	  value is x[n]
+	- parameter_brace_expand_indir: change to expand in ksh93-compatible
+	  way if variable to be indirected is nameref and a simple (non-array)
+	  expansion
+	- param_expand: change to expand $foo where foo is a nameref whose value
+	  is x[n]
+
+execute_cmd.c
+	- execute_for_command: changes to implement ksh93 semantics when index
+	  variable is a nameref
+
+builtins/setattr.def
+	- show_var_attributes: change to add `n' to flags list if att_nameref
+	  is set
+
+builtins/set.def
+	- unset_builtin: changes to error messages to follow nameref variables
+
+builtins/declare.def
+	- document new -n option
+	- declare_internal: new `-n' and `+n' options
+	- declare_internal: handle declare -n var[=value] and
+	  declare +n var[=value] for existing and non-existant variables.
+	  Enforce restriction that nameref variables cannot be arrays.
+	  Implement semi-peculiar ksh93 semantics for typeset +n ref=value
+

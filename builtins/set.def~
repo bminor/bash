@@ -833,7 +833,7 @@ unset_builtin (list)
       if (var && readonly_p (var))
 	{
 	  builtin_error (_("%s: cannot unset: readonly %s"),
-			 var->name, unset_function ? "function" : "variable");
+			 name, unset_function ? "function" : "variable");
 	  NEXT_VARIABLE ();
 	}
 
@@ -844,7 +844,7 @@ unset_builtin (list)
 	{
 	  if (array_p (var) == 0 && assoc_p (var) == 0)
 	    {
-	      builtin_error (_("%s: not an array variable"), var->name);
+	      builtin_error (_("%s: not an array variable"), name);
 	      NEXT_VARIABLE ();
 	    }
 	  else

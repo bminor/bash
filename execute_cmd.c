@@ -2588,11 +2588,7 @@ execute_for_command (for_command)
 
       /* Save this command unless it's a trap command and we're not running
 	 a debug trap. */
-#if 0
-      if (signal_in_progress (DEBUG_TRAP) == 0 && (this_command_name == 0 || (STREQ (this_command_name, "trap") == 0)))
-#else
       if (signal_in_progress (DEBUG_TRAP) == 0 && running_trap == 0)
-#endif
 	{
 	  FREE (the_printed_command_except_trap);
 	  the_printed_command_except_trap = savestring (the_printed_command);
@@ -2607,7 +2603,14 @@ execute_for_command (for_command)
 #endif
 
       this_command_name = (char *)NULL;
-      v = bind_variable (identifier, list->word->word, 0);
+      /* XXX - special ksh93 for command index variable handling */
+      v = find_variable_last_nameref (identifier);
+      if (v && nameref_p (v))
+        {
+          v = bind_variable_value (v, list->word->word, 0);
+        }
+      else
+        v = bind_variable (identifier, list->word->word, 0);
       if (readonly_p (v) || noassign_p (v))
 	{
 	  line_number = save_line_number;

@@ -1,0 +1,4 @@
+echo "warning: some of these tests will fail if arrays have not" >&2
+echo "warning: been compiled into the shell" >&2
+${THIS_SH} ./nameref.tests > /tmp/xx 2>&1
+diff /tmp/xx nameref.right && rm -f /tmp/xx

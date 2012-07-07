@@ -332,8 +332,6 @@ find_or_make_array_variable (name, flags)
   var = find_variable (name);
   if (var == 0)
     {
-      /* See if we have a nameref pointing to a variable that hasn't been
-	 created yet. */
       var = find_variable_last_nameref (name);
       if (var && nameref_p (var))
 	var = (flags & 2) ? make_new_assoc_variable (nameref_cell (var)) : make_new_array_variable (nameref_cell (var));

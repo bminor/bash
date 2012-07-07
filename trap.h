@@ -98,6 +98,7 @@ extern void run_interrupt_trap __P((void));
 extern int maybe_call_trap_handler __P((int));
 extern int signal_is_special __P((int));
 extern int signal_is_trapped __P((int));
+extern int signal_is_pending __P((int));
 extern int signal_is_ignored __P((int));
 extern int signal_is_hard_ignored __P((int));
 extern void set_signal_ignored __P((int));

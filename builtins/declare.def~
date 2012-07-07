@@ -562,8 +562,7 @@ declare_internal (list, local_var)
 	     setting it until the assignment has been made so we don't do an
 	     inadvertent nameref lookup.  Might have to do the same thing for
 	     flags_off&att_nameref. */
-	  /* XXX - ksh93 makes it an error to set a readonly nameref variable
-	     using a single typeset command. */
+	  /* XXX - ksh93 makes it an error to have a readonly nameref variable */
 	  onref = (flags_on & att_nameref);
 	  flags_on &= ~att_nameref;
 	  if (array_p (var) || assoc_p (var)

@@ -48,6 +48,8 @@
 #include "stdc.h"
 #include "memalloc.h"
 
+#include <signal.h>
+
 #include "shell.h"
 
 #include "glob.h"
@@ -683,7 +685,11 @@ glob_vector (pat, dir, flags)
 	      lose = 1;
 	      break;
 	    }
-	  run_pending_traps ();
+	  else if (signal_is_pending (SIGINT))	/* XXX - make SIGINT traps responsive */
+	    {
+	      lose = 1;
+	      break;
+	    }
 
 	  dp = readdir (d);
 	  if (dp == NULL)
@@ -857,8 +863,7 @@ glob_vector (pat, dir, flags)
 	  FREE (tmplink);
 	}
 
-      QUIT;
-      run_pending_traps ();
+      /* Don't call QUIT; here; let higher layers deal with it. */
 
       return ((char **)NULL);
     }

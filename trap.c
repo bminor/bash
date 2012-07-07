@@ -1105,6 +1105,13 @@ signal_is_trapped (sig)
 }
 
 int
+signal_is_pending (sig)
+     int sig;
+{
+  return (pending_traps[sig]);
+}
+
+int
 signal_is_special (sig)
      int sig;
 {

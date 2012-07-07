@@ -5755,11 +5755,7 @@ parameter_brace_expand_indir (name, var_is_special, quoted, quoted_dollar_atp, c
   WORD_DESC *w;
   SHELL_VAR *v;
 
-  /* See if it's a nameref first, behave in ksh93-compatible fashion.
-     There is at least one incompatibility: given ${!foo[0]} where foo=bar,
-     bash performs an indirect lookup on foo[0] and expands the result;
-     ksh93 expands bar[0].  We could do that here -- there are enough usable
-     primitives to do that -- but do not at this point. */
+  /* See if it's a nameref first, behave in ksh93-compatible fashion */
   if (var_is_special == 0 && (v = find_variable_last_nameref (name)))
     {
       if (nameref_p (v) && (t = nameref_cell (v)) && *t)

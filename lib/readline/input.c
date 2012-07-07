@@ -119,7 +119,7 @@ ibuffer_space ()
 
 /* Get a key from the buffer of characters to be read.
    Return the key in KEY.
-   Result is KEY if there was a key, or 0 if there wasn't. */
+   Result is non-zero if there was a key, or 0 if there wasn't. */
 static int
 rl_get_char (key)
      int *key;
@@ -411,7 +411,7 @@ rl_clear_pending_input ()
 int
 rl_read_key ()
 {
-  int c;
+  int c, r;
 
   if (rl_pending_input)
     {
@@ -429,14 +429,18 @@ rl_read_key ()
 	{
 	  while (rl_event_hook)
 	    {
-	      if (rl_gather_tyi () < 0)	/* XXX - EIO */
+	      if (rl_get_char (&c) != 0)
+		break;
+		
+	      if ((r = rl_gather_tyi ()) < 0)	/* XXX - EIO */
 		{
 		  rl_done = 1;
 		  return ('\n');
 		}
+	      else if (r > 0)			/* read something */
+		continue;
+
 	      RL_CHECK_SIGNALS ();
-	      if (rl_get_char (&c) != 0)
-		break;
 	      if (rl_done)		/* XXX - experimental */
 		return ('\n');
 	      (*rl_event_hook) ();
