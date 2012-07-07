@@ -542,10 +542,12 @@ termsig_handler (sig)
   if (sig == SIGINT && signal_is_trapped (SIGINT))
     run_interrupt_trap ();
 
+#if 0
 #if defined (HISTORY)
-  if (interactive_shell && sig != SIGABRT)
+  if (interactive_shell && (sig != SIGABRT && sig != SIGINT && sig != SIGHUP && sig != SIGTERM))
     maybe_save_shell_history ();
 #endif /* HISTORY */
+#endif
 
 #if defined (JOB_CONTROL)
   if (sig == SIGHUP && (interactive || (subshell_environment & (SUBSHELL_COMSUB|SUBSHELL_PROCSUB))))

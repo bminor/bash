@@ -1457,7 +1457,7 @@ rl_vi_yank_to (count, key)
     }
   else if (vi_redoing && _rl_vi_last_motion != 'y')	/* `yy' is special */
     {
-      _rl_vimvcxt->motion = _rl_vi_last_motion;
+      _rl_vimcxt->motion = _rl_vi_last_motion;
       r = rl_domove_motion_callback (_rl_vimvcxt);
     }
   else if (vi_redoing)			/* handle redoing `yy' here */
