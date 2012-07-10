@@ -4900,6 +4900,9 @@ history_delimiting_chars (line)
       return (current_command_line_count == 2 ? "\n" : "");
     }
 
+  if (parser_state & PST_COMPASSIGN)
+    return (" ");
+
   /* First, handle some special cases. */
   /*(*/
   /* If we just read `()', assume it's a function definition, and don't
