@@ -8151,6 +8151,14 @@ add_string:
 	  temp = tword->word;
 	  dispose_word_desc (tword);
 
+	  /* Kill quoted nulls; we will add them back at the end of
+	     expand_word_internal if nothing else in the string */
+	  if (had_quoted_null && temp && QUOTED_NULL (temp))
+	    {
+	      FREE (temp);
+	      temp = (char *)NULL;
+	    }
+
 	  goto add_string;
 	  break;
 
@@ -8555,7 +8563,7 @@ finished_with_string:
 	tword->flags |= W_NOEXPAND;	/* XXX */
       if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
 	tword->flags |= W_QUOTED;
-      if (had_quoted_null)
+      if (had_quoted_null && QUOTED_NULL (istring))
 	tword->flags |= W_HASQUOTEDNULL;
       list = make_word_list (tword, (WORD_LIST *)NULL);
     }
@@ -8586,7 +8594,7 @@ finished_with_string:
 	    tword->flags |= W_NOGLOB;
 	  if (word->flags & W_NOEXPAND)
 	    tword->flags |= W_NOEXPAND;
-	  if (had_quoted_null)
+	  if (had_quoted_null && QUOTED_NULL (istring))
 	    tword->flags |= W_HASQUOTEDNULL;	/* XXX */
 	  list = make_word_list (tword, (WORD_LIST *)NULL);
 	}
