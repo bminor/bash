@@ -409,7 +409,7 @@ rl_clear_pending_input ()
 int
 rl_read_key ()
 {
-  int c;
+  int c, r;
 
   rl_key_sequence_length++;
 
@@ -429,14 +429,18 @@ rl_read_key ()
 	{
 	  while (rl_event_hook)
 	    {
-	      if (rl_gather_tyi () < 0)	/* XXX - EIO */
+	      if (rl_get_char (&c) != 0)
+		break;
+		
+	      if ((r = rl_gather_tyi ()) < 0)	/* XXX - EIO */
 		{
 		  rl_done = 1;
 		  return ('\n');
 		}
+	      else if (r == 1)			/* read something */
+		continue;
+
 	      RL_CHECK_SIGNALS ();
-	      if (rl_get_char (&c) != 0)
-		break;
 	      if (rl_done)		/* XXX - experimental */
 		return ('\n');
 	      (*rl_event_hook) ();
