@@ -2958,7 +2958,7 @@ dispose_variable (var)
 }
 
 /* Unset the shell variable referenced by NAME.  Unsetting a nameref variable
-   unsets both the variable and the variable it resolves to. */
+   unsets the variable it resolves to but leaves the nameref alone. */
 int
 unbind_variable (name)
      const char *name;
@@ -2969,11 +2969,21 @@ unbind_variable (name)
   v = var_lookup (name, shell_variables);
   nv = (v && nameref_p (v)) ? find_variable_nameref (v) : (SHELL_VAR *)NULL;
 
-  r = nv ? makunbound (nv->name, shell_variables) : 0;
-  if (r == 0)
-    r = makunbound (name, shell_variables);
-    
+  r = nv ? makunbound (nv->name, shell_variables) : makunbound (name, shell_variables);
   return r;
+}
+
+/* Unbind NAME, where NAME is assumed to be a nameref variable */
+int
+unbind_nameref (name)
+     const char *name;
+{
+  SHELL_VAR *v;
+
+  v = var_lookup (name, shell_variables);
+  if (v && nameref_p (v))
+    return makunbound (name, shell_variables);
+  return 0;
 }
 
 /* Unset the shell function named NAME. */
@@ -3073,6 +3083,8 @@ makunbound (name, vc)
       else if (assoc_p (old_var))
 	assoc_dispose (assoc_cell (old_var));
 #endif
+      else if (nameref_p (old_var))
+	FREE (nameref_cell (old_var));
       else
 	FREE (value_cell (old_var));
       /* Reset the attributes.  Preserve the export attribute if the variable

@@ -1473,6 +1473,39 @@ in an associative array.
 When applied to a string-valued variable, @var{value} is expanded and
 appended to the variable's value.
 
+A variable can be assigned the @var{nameref} attribute using the
+@option{-n} option to the \fBdeclare\fP or \fBlocal\fP builtin commands
+(@pxref{Bash Builtins})
+to create a @var{nameref}, or a reference to another variable.
+This allows variables to be manipulated indirectly.
+Whenever the nameref variable is referenced or assigned to, the operation
+is actually performed on the variable specified by the nameref variable's
+value.
+A nameref is commonly used within shell functions to refer to a variable
+whose name is passed as an argument to the function.
+For instance, if a variable name is passed to a shell function as its first
+argument, running
+@example
+declare -n ref=$1
+@end example
+@noindent
+inside the function creates a nameref variable @var{ref} whose value is
+the variable name passed as the first argument.
+References and assignments to @var{ref} are treated as references and
+assignments to the variable whose name was passed as @code{$1}.
+
+If the control variable in a @code{for} loop has the nameref attribute,
+the list of words can be a list of shell variables, and a name reference
+will be established for each word in the list, in turn, when the loop is
+executed.
+Array variables cannot be given the @option{-n} attribute.
+However, nameref variables can reference array variables and subscripted
+array variables.
+Namerefs can be unset using the @option{-n} option to the @code{unset} builtin
+(@pxref{Bourne Shell Builtins}).
+Otherwise, if @code{unset} is executed with the name of a nameref variable
+as an argument, the variable referenced by the nameref variable will be unset.
+
 @node Positional Parameters
 @subsection Positional Parameters
 @cindex parameters, positional
@@ -3616,7 +3649,7 @@ results in permissions of @code{755}.
 @item unset
 @btindex unset
 @example
-unset [-fv] [@var{name}]
+unset [-fnv] [@var{name}]
 @end example
 
 Remove each variable or function @var{name}.
@@ -3624,6 +3657,10 @@ If the @option{-v} option is given, each
 @var{name} refers to a shell variable and that variable is remvoved.
 If the @option{-f} option is given, the @var{name}s refer to shell
 functions, and the function definition is removed.
+If the @option{-n} option is supplied, and @var{name} is a variable with
+the @var{nameref} attribute, @var{name} will be unset rather than the
+variable it references.
+@option{-n} has no effect if the @option{-f} option is supplied.
 If no options are supplied, each @var{name} refers to a variable; if
 there is no variable by that name, any function with that name is
 unset.
@@ -3812,7 +3849,7 @@ zero if @var{command} is found, and non-zero if not.
 @item declare
 @btindex declare
 @example
-declare [-aAfFgilrtux] [-p] [@var{name}[=@var{value}] @dots{}]
+declare [-aAfFgilnrtux] [-p] [@var{name}[=@var{value}] @dots{}]
 @end example
 
 Declare variables and give them attributes.  If no @var{name}s
@@ -3863,6 +3900,15 @@ performed when the variable is assigned a value.
 When the variable is assigned a value, all upper-case characters are
 converted to lower-case.
 The upper-case attribute is disabled.
+
+@item -n
+Give each @var{name} the @var{nameref} attribute, making
+it a name reference to another variable.
+That other variable is defined by the value of @var{name}.
+All references and assignments to @var{name}, except for changing the
+@option{-n} attribute itself, are performed on the variable referenced by
+@var{name}'s value.
+The @option{-n} attribute cannot be applied to array variables.
 
 @item -r
 Make @var{name}s readonly.  These names cannot then be assigned values
@@ -4303,7 +4349,7 @@ if any are not found.
 @item typeset
 @btindex typeset
 @example
-typeset [-afFgrxilrtux] [-p] [@var{name}[=@var{value}] @dots{}]
+typeset [-afFgrxilnrtux] [-p] [@var{name}[=@var{value}] @dots{}]
 @end example
 
 The @code{typeset} command is supplied for compatibility with the Korn

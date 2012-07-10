@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sun May 27 20:28:33 EDT 2012
+.\"	Last Change: Thu Jul  5 11:10:13 EDT 2012
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2012 May 27" "GNU Bash 4.2"
+.TH BASH 1 "2012 July 5" "GNU Bash 4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1235,6 +1235,39 @@ appended to the array beginning at one greater than the array's maximum index
 associative array.
 When applied to a string-valued variable, \fIvalue\fP is expanded and
 appended to the variable's value.
+.PP
+A variable can be assigned the \fInameref\fP attribute using the
+\fB\-n\fP option to the \fBdeclare\fP or \fBlocal\fP builtin commands
+(see the descriptions of \fBdeclare\fP and \fBlocal\fP below)
+to create a \fInameref\fP, or a reference to another variable.
+This allows variables to be manipulated indirectly.
+Whenever the nameref variable is referenced or assigned to, the operation
+is actually performed on the variable specified by the nameref variable's
+value.
+A nameref is commonly used within shell functions to refer to a variable
+whose name is passed as an argument to the function.
+For instance, if a variable name is passed to a shell function as its first
+argument, running
+.sp .5
+.RS
+.if t \f(CWdeclare -n ref=$1\fP
+.if n declare -n ref=$1
+.RE
+.sp .5
+inside the function creates a nameref variable \fBref\fP whose value is
+the variable name passed as the first argument.
+References and assignments to \fBref\fP are treated as references and
+assignments to the variable whose name was passed as \fB$1\fP.
+If the control variable in a \fBfor\fP loop has the nameref attribute,
+the list of words can be a list of shell variables, and a name reference
+will be established for each word in the list, in turn, when the loop is
+executed.
+Array variables cannot be given the \fB\-n\fP attribute.
+However, nameref variables can reference array variables and subscripted
+array variables.
+Namerefs can be unset using the \fB\-n\fP option to the \fBunset\fP builtin.
+Otherwise, if \fBunset\fP is executed with the name of a nameref variable
+as an argument, the variable referenced by the nameref variable will be unset.
 .SS Positional Parameters
 .PP
 A
@@ -7279,10 +7312,10 @@ is greater than the number of enclosing loops, the last enclosing loop
 (the ``top-level'' loop) is resumed.
 The return value is 0 unless \fIn\fP is not greater than or equal to 1.
 .TP
-\fBdeclare\fP [\fB\-aAfFgilrtux\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP] ...]
+\fBdeclare\fP [\fB\-aAfFgilnrtux\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP] ...]
 .PD 0
 .TP
-\fBtypeset\fP [\fB\-aAfFgilrtux\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP] ...]
+\fBtypeset\fP [\fB\-aAfFgilnrtux\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP] ...]
 .PD
 Declare variables and/or give them attributes.
 If no \fIname\fPs are given then display the values of variables.
@@ -7345,6 +7378,15 @@ above) is performed when the variable is assigned a value.
 When the variable is assigned a value, all upper-case characters are
 converted to lower-case.
 The upper-case attribute is disabled.
+.TP
+.B \-n
+Give each \fIname\fP the \fInameref\fP attribute, making
+it a name reference to another variable.
+That other variable is defined by the value of \fIname\fP.
+All references and assignments to \fIname\fP, except for changing the
+\fB\-n\fP attribute itself, are performed on the variable referenced by
+\fIname\fP's value.
+The \fB\-n\fP attribute cannot be applied to array variables.
 .TP
 .B \-r
 Make \fIname\fPs readonly.  These names cannot then be assigned values
@@ -9868,7 +9910,7 @@ value is true unless a supplied
 .I name
 is not a defined alias.
 .TP
-\fBunset\fP [\-\fBfv\fP] [\fIname\fP ...]
+\fBunset\fP [\-\fBfv\fP] [\-\fBn\fP] [\fIname\fP ...]
 For each
 .IR name ,
 remove the corresponding variable or function.
@@ -9884,6 +9926,12 @@ is specified, each
 .I name
 refers to a shell function, and the function definition
 is removed.
+If the
+.B \-n
+option is supplied, and \fIname\fP is a variable with the \fInameref\fP
+attribute, \fIname\fP will be unset rather than the variable it
+references.
+\fB\-n\fP has no effect if the \fB\-f\fP option is supplied.
 If no options are supplied, each \fIname\fP refers to a variable; if
 there is no variable by that name, any function with that name is
 unset.

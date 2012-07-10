@@ -1,7 +1,7 @@
 This file is set.def, from which is created set.c.
 It implements the "set" and "unset" builtins in Bash.
 
-Copyright (C) 1987-2011 Free Software Foundation, Inc.
+Copyright (C) 1987-2012 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -724,7 +724,7 @@ set_builtin (list)
 
 $BUILTIN unset
 $FUNCTION unset_builtin
-$SHORT_DOC unset [-f] [-v] [name ...]
+$SHORT_DOC unset [-f] [-v] [-n] [name ...]
 Unset values and attributes of shell variables and functions.
 
 For each NAME, remove the corresponding variable or function.
@@ -732,6 +732,8 @@ For each NAME, remove the corresponding variable or function.
 Options:
   -f	treat each NAME as a shell function
   -v	treat each NAME as a shell variable
+  -n	treat each NAME as a name reference and unset the variable itself
+	rather than the variable it references
 
 Without options, unset first tries to unset a variable, and if that fails,
 tries to unset a function.
@@ -748,13 +750,13 @@ int
 unset_builtin (list)
   WORD_LIST *list;
 {
-  int unset_function, unset_variable, unset_array, opt, any_failed;
+  int unset_function, unset_variable, unset_array, opt, nameref, any_failed;
   char *name;
 
-  unset_function = unset_variable = unset_array = any_failed = 0;
+  unset_function = unset_variable = unset_array = nameref = any_failed = 0;
 
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "fv")) != -1)
+  while ((opt = internal_getopt (list, "fnv")) != -1)
     {
       switch (opt)
 	{
@@ -763,6 +765,9 @@ unset_builtin (list)
 	  break;
 	case 'v':
 	  unset_variable = 1;
+	  break;
+	case 'n':
+	  nameref = 1;
 	  break;
 	default:
 	  builtin_usage ();
@@ -777,6 +782,8 @@ unset_builtin (list)
       builtin_error (_("cannot simultaneously unset a function and a variable"));
       return (EXECUTION_FAILURE);
     }
+  else if (unset_function && nameref)
+    nameref = 0;
 
   while (list)
     {
@@ -810,7 +817,8 @@ unset_builtin (list)
 	}
 
       /* Only search for functions here if -f supplied. */
-      var = unset_function ? find_function (name) : find_variable (name);
+      var = unset_function ? find_function (name)
+			   : (nameref ? find_variable_last_nameref (name) : find_variable (name));
 
       /* Some variables (but not functions yet) cannot be unset, period. */
       if (var && unset_function == 0 && non_unsettable_p (var))
@@ -837,7 +845,6 @@ unset_builtin (list)
 	  NEXT_VARIABLE ();
 	}
 
-      
       /* Unless the -f option is supplied, the name refers to a variable. */
 #if defined (ARRAY_VARS)
       if (var && unset_array)
