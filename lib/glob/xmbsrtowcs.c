@@ -35,6 +35,8 @@
 
 #if HANDLE_MULTIBYTE
 
+#define WSBUF_INC 32
+
 #ifndef FREE
 #  define FREE(x)	do { if (x) free (x); } while (0)
 #endif
@@ -148,7 +150,7 @@ xdupmbstowcs2 (destp, src)
   size_t wsbuf_size;	/* Size of WSBUF */
   size_t wcnum;		/* Number of wide characters in WSBUF */
   mbstate_t state;	/* Conversion State */
-  size_t wcslength;	/* Number of wide characters produced by the conversion. */
+  size_t n, wcslength;	/* Number of wide characters produced by the conversion. */
   const char *end_or_backslash;
   size_t nms;	/* Number of multibyte characters to convert at one time. */
   mbstate_t tmp_state;
@@ -171,7 +173,18 @@ xdupmbstowcs2 (destp, src)
       /* Compute the number of produced wide-characters. */
       tmp_p = p;
       tmp_state = state;
-      wcslength = mbsnrtowcs(NULL, &tmp_p, nms, 0, &tmp_state);
+
+      if (nms == 0 && *p == '\\')	/* special initial case */
+	nms = wcslength = 1;
+      else
+	wcslength = mbsnrtowcs (NULL, &tmp_p, nms, 0, &tmp_state);
+
+      if (wcslength == 0)
+	{
+	  tmp_p = p;		/* will need below */
+	  tmp_state = state;
+	  wcslength = 1;	/* take a single byte */
+	}
 
       /* Conversion failed. */
       if (wcslength == (size_t)-1)
@@ -186,7 +199,8 @@ xdupmbstowcs2 (destp, src)
 	{
 	  wchar_t *wstmp;
 
-	  wsbuf_size = wcnum+wcslength+1;	/* 1 for the L'\0' or the potential L'\\' */
+	  while (wsbuf_size < wcnum+wcslength+1) /* 1 for the L'\0' or the potential L'\\' */
+	    wsbuf_size += WSBUF_INC;
 
 	  wstmp = (wchar_t *) realloc (wsbuf, wsbuf_size * sizeof (wchar_t));
 	  if (wstmp == NULL)
@@ -199,10 +213,18 @@ xdupmbstowcs2 (destp, src)
 	}
 
       /* Perform the conversion. This is assumed to return 'wcslength'.
-       * It may set 'p' to NULL. */
-      mbsnrtowcs(wsbuf+wcnum, &p, nms, wsbuf_size-wcnum, &state);
+	 It may set 'p' to NULL. */
+      n = mbsnrtowcs(wsbuf+wcnum, &p, nms, wsbuf_size-wcnum, &state);
 
-      wcnum += wcslength;
+      /* Compensate for taking single byte on wcs conversion failure above. */
+      if (wcslength == 1 && (n == 0 || n == (size_t)-1))
+	{
+	  state = tmp_state;
+	  p = tmp_p;
+	  wsbuf[wcnum++] = *p++;
+	}
+      else
+        wcnum += wcslength;
 
       if (mbsinit (&state) && (p != NULL) && (*p == '\\'))
 	{
@@ -229,8 +251,6 @@ xdupmbstowcs2 (destp, src)
    is obtained with malloc, too.
    If conversion is failed, the return value is (size_t)-1 and the values
    of DESTP and INDICESP are NULL. */
-
-#define WSBUF_INC 32
 
 size_t
 xdupmbstowcs (destp, indicesp, src)
