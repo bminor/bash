@@ -7922,7 +7922,7 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
 
   /* State flags */
   int had_quoted_null;
-  int has_dollar_at;
+  int has_dollar_at, temp_has_dollar_at;
   int tflag;
   int pflags;			/* flags passed to param_expand */
 
@@ -8127,13 +8127,14 @@ add_string:
 	  if (expanded_something)
 	    *expanded_something = 1;
 
-	  has_dollar_at = 0;
+	  temp_has_dollar_at = 0;
 	  pflags = (word->flags & W_NOCOMSUB) ? PF_NOCOMSUB : 0;
 	  if (word->flags & W_NOSPLIT2)
 	    pflags |= PF_NOSPLIT2;
 	  tword = param_expand (string, &sindex, quoted, expanded_something,
-			       &has_dollar_at, &quoted_dollar_at,
+			       &temp_has_dollar_at, &quoted_dollar_at,
 			       &had_quoted_null, pflags);
+	  has_dollar_at += temp_has_dollar_at;
 
 	  if (tword == &expand_wdesc_error || tword == &expand_wdesc_fatal)
 	    {
@@ -8274,9 +8275,10 @@ add_twochars:
 
 	      temp = (char *)NULL;
 
-	      has_dollar_at = 0;
+	      temp_has_dollar_at = 0;	/* XXX */
 	      /* Need to get W_HASQUOTEDNULL flag through this function. */
-	      list = expand_word_internal (tword, Q_DOUBLE_QUOTES, 0, &has_dollar_at, (int *)NULL);
+	      list = expand_word_internal (tword, Q_DOUBLE_QUOTES, 0, &temp_has_dollar_at, (int *)NULL);
+	      has_dollar_at += temp_has_dollar_at;
 
 	      if (list == &expand_word_error || list == &expand_word_fatal)
 		{
