@@ -1234,10 +1234,18 @@ rl_vi_delete_to (count, key)
       _rl_vimvcxt->motion = '$';
       r = rl_domove_motion_callback (_rl_vimvcxt);
     }
-  else if (vi_redoing)
+  else if (vi_redoing && _rl_vi_last_motion != 'd')	/* `dd' is special */
     {
       _rl_vimvcxt->motion = _rl_vi_last_motion;
       r = rl_domove_motion_callback (_rl_vimvcxt);
+    }
+  else if (vi_redoing)		/* handle redoing `dd' here */
+    {
+      _rl_vimvcxt->motion = _rl_vi_last_motion;
+      rl_mark = rl_end;
+      rl_beg_of_line (1, key);
+      RL_UNSETSTATE (RL_STATE_VIMOTION);
+      r = vidomove_dispatch (_rl_vimvcxt);
     }
 #if defined (READLINE_CALLBACKS)
   else if (RL_ISSTATE (RL_STATE_CALLBACK))
@@ -1316,10 +1324,18 @@ rl_vi_change_to (count, key)
       _rl_vimvcxt->motion = '$';
       r = rl_domove_motion_callback (_rl_vimvcxt);
     }
-  else if (vi_redoing)
+  else if (vi_redoing && _rl_vi_last_motion != 'c')	/* `cc' is special */
     {
       _rl_vimvcxt->motion = _rl_vi_last_motion;
       r = rl_domove_motion_callback (_rl_vimvcxt);
+    }
+  else if (vi_redoing)		/* handle redoing `cc' here */
+    {
+      _rl_vimvcxt->motion = _rl_vi_last_motion;
+      rl_mark = rl_end;
+      rl_beg_of_line (1, key);
+      RL_UNSETSTATE (RL_STATE_VIMOTION);
+      r = vidomove_dispatch (_rl_vimvcxt);
     }
 #if defined (READLINE_CALLBACKS)
   else if (RL_ISSTATE (RL_STATE_CALLBACK))
@@ -1376,6 +1392,19 @@ rl_vi_yank_to (count, key)
     {
       _rl_vimvcxt->motion = '$';
       r = rl_domove_motion_callback (_rl_vimvcxt);
+    }
+  else if (vi_redoing && _rl_vi_last_motion != 'y')	/* `yy' is special */
+    {
+      _rl_vimvcxt->motion = _rl_vi_last_motion;
+      r = rl_domove_motion_callback (_rl_vimvcxt);
+    }
+  else if (vi_redoing)			/* handle redoing `yy' here */
+    {
+      _rl_vimvcxt->motion = _rl_vi_last_motion;
+      rl_mark = rl_end;
+      rl_beg_of_line (1, key);
+      RL_UNSETSTATE (RL_STATE_VIMOTION);
+      r = vidomove_dispatch (_rl_vimvcxt);
     }
 #if defined (READLINE_CALLBACKS)
   else if (RL_ISSTATE (RL_STATE_CALLBACK))
