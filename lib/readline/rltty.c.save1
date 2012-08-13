@@ -436,6 +436,7 @@ _get_tty_settings (tty, tiop)
 	}
       if (OUTPUT_BEING_FLUSHED (tiop))
 	{
+_rl_errmsg("get_tty_settings: output is being flushed");
 #if defined (FLUSHO)
 	  _rl_errmsg ("warning: turning off output flushing");
 	  tiop->c_lflag &= ~FLUSHO;
@@ -528,10 +529,10 @@ prepare_terminal_settings (meta_flag, oldtio, tiop)
 
 #if defined (USE_XON_XOFF)
 #if defined (IXANY)
-  tiop->c_iflag &= ~(IXON | IXANY);
+  tiop->c_iflag &= ~(IXON | IXOFF | IXANY);
 #else
   /* `strict' Posix systems do not define IXANY. */
-  tiop->c_iflag &= ~IXON;
+  tiop->c_iflag &= ~(IXON | IXOFF);
 #endif /* IXANY */
 #endif /* USE_XON_XOFF */
 

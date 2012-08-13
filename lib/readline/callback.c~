@@ -125,11 +125,7 @@ rl_callback_read_char ()
     }
 
   memcpy ((void *)olevel, (void *)_rl_top_level, sizeof (procenv_t));
-#if defined (HAVE_POSIX_SIGSETJMP)
-  jcode = sigsetjmp (_rl_top_level, 0);
-#else
   jcode = setjmp (_rl_top_level);
-#endif
   if (jcode)
     {
       (*rl_redisplay_function) ();

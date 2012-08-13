@@ -520,6 +520,7 @@ make_child (command, async_p)
   if (pid < 0)
     {
       sys_error ("fork");
+      last_command_exit_value = EX_NOEXEC;
       throw_to_top_level ();
     }
 

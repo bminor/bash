@@ -523,11 +523,7 @@ readline_internal_charloop ()
 #endif
       lk = _rl_last_command_was_kill;
 
-#if defined (HAVE_POSIX_SIGSETJMP)
-      code = sigsetjmp (_rl_top_level, 0);
-#else
       code = setjmp (_rl_top_level);
-#endif
 
       if (code)
 	{

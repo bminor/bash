@@ -315,6 +315,8 @@ prepare_terminal_settings (meta_flag, oldtio, tiop)
 #  define VTIME VEOL
 #endif
 
+#define USE_XON_XOFF
+
 #if defined (TERMIOS_TTY_DRIVER)
 #  define TIOTYPE struct termios
 #  define DRAIN_OUTPUT(fd)	tcdrain (fd)

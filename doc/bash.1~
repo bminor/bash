@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sat Jul 14 14:31:31 EDT 2012
+.\"	Last Change: Thu Jul  5 11:10:13 EDT 2012
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2012 July 14" "GNU Bash 4.2"
+.TH BASH 1 "2012 July 5" "GNU Bash 4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -8707,12 +8707,6 @@ separately (see
 .B "COMMAND EXECUTION ENVIRONMENT"
 above), and may cause
 subshells to exit before executing all the commands in the subshell.
-If a shell function executes in a context where \fB\-e\fP is being ignored,
-even if \fB\-e\fP is set, none of the commands executed within the function
-body will be affected by the \fB\-e\fP setting.
-If a shell function sets \fB\-e\fP while executing in a context where
-\fB\-e\fP is ignored, that setting will not have any effect until the
-command containing the function call completes.
 .TP 8
 .B \-f
 Disable pathname expansion.

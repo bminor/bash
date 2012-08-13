@@ -108,11 +108,7 @@ _rl_abort_internal ()
     _rl_pop_executing_macro ();
 
   rl_last_func = (rl_command_func_t *)NULL;
-#if defined (HAVE_POSIX_SIGSETJMP)
-  siglongjmp (_rl_top_level, 1);
-#else
   longjmp (_rl_top_level, 1);
-#endif
   return (0);
 }
 

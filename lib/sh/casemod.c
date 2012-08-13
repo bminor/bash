@@ -36,6 +36,7 @@
 #include <ctype.h>
 #include <xmalloc.h>
 
+#include <shmbchar.h>
 #include <shmbutil.h>
 #include <chartypes.h>
 
@@ -78,7 +79,7 @@ cval (s, i)
   int l;
   mbstate_t mps;  
 
-  if (MB_CUR_MAX == 1)
+  if (MB_CUR_MAX == 1 || is_basic (s[i]))
     return ((wchar_t)s[i]);
   l = strlen (s);
   if (i >= (l - 1))
@@ -202,7 +203,7 @@ sh_modcase (string, pat, flags)
       else
 	nop = flags;
 
-      if (MB_CUR_MAX == 1 || isascii (wc))
+      if (MB_CUR_MAX == 1 || is_basic ((int)wc))
 	{
 	  switch (nop)
 	  {
@@ -227,8 +228,8 @@ sh_modcase (string, pat, flags)
 	  {
 	  default:
 	  case CASE_NOOP:  nwc = wc; break;
-	  case CASE_UPPER:  nwc = TOUPPER (wc); break;
-	  case CASE_LOWER:  nwc = TOLOWER (wc); break;
+	  case CASE_UPPER:  nwc = _to_wupper (wc); break;
+	  case CASE_LOWER:  nwc = _to_wlower (wc); break;
 	  case CASE_TOGGLEALL:
 	  case CASE_TOGGLE: nwc = TOGGLE (wc); break;
 	  }

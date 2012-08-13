@@ -14189,3 +14189,41 @@ builtins/set.def
 
 doc/{bash.1,bashref.texi}
 	- document namerefs and typeset/declare/local/unset -n
+
+				   7/13
+				   ----
+lib/sh/casemod.c
+	- include shmbchar.h for is_basic and supporting pieces
+	- sh_casemod: use _to_wupper and _to_wlower to convert wide character
+	  case instead of TOUPPER and TOLOWER.  Fixes bug reported by
+	  Dennis Williamson <dennistwilliamson@gmail.com>, fix from
+	  Andreas Schwab <schwab@linux-m68k.org>
+	- cval: short-circuit and return ascii value if is_basic tests true
+	- sh_casemod: short-circuit and use non-multibyte case modification
+	  and toggling code if is_basic tests true
+
+lib/readline/signals.c
+	- _rl_{block,release}_sigint: remove the code that actually blocks and
+	  releases the signals, since we defer signal handling until calls to
+	  RL_CHECK_SIGNALS()
+
+lib/readline/{callback,readline,util}.c
+	- if HAVE_POSIX_SIGSETJMP is defined, use sigsetjmp/siglongjmp without
+	  saving and restoring the signal mask instead of setjmp/longjmp
+
+lib/readline/rltty.c
+	- prepare_terminal_settings: don't mess with IXOFF setting if
+	  USE_XON_XOFF defined
+
+doc/{bash.1,bashref.texi}
+	- add some text to the description of set -e clarifying its effect
+	  on shell functions and shell function execution.  Suggested by
+	  Rainer Blome <rainer.blome@gmx.de>
+
+bashline.c
+	- edit_and_execute_command: increment current_command_line_count before
+	  adding partial line to command history (for command-oriented-history
+	  because of rl_newline at beginning of function), then reset it to 0
+	  before adding the dummy history entry to make sure the dummy entry
+	  doesn't get added to previous incomplete command.  Partial fix for
+	  problem reported by Peng Yu <pengyu.ut@gmail.com>
