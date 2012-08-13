@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.2, version 4.048])dnl
+AC_REVISION([for Bash 4.2, version 4.049])dnl
 
 define(bashvers, 4.2)
 define(relstatus, maint)
@@ -1067,7 +1067,7 @@ linux*)		LOCAL_LDFLAGS=-rdynamic		 # allow dynamic loading
 *qnx*)		LOCAL_CFLAGS="-Dqnx -F -3s" LOCAL_LDFLAGS="-3s" LOCAL_LIBS="-lunix -lncurses" ;;
 powerux*)	LOCAL_LIBS="-lgen" ;;
 cygwin*)	LOCAL_CFLAGS=-DRECYCLES_PIDS ;;
-opennt*|interix*) LOCAL_CFLAGS="-DNO_MAIN_ENV_ARG -DBROKEN_DIRENT_D_INO -D_POSIX_SOURCE -D_ALL_SOURCE" ;;
+opennt*|interix*) LOCAL_CFLAGS="-DNO_MAIN_ENV_ARG -DBROKEN_DIRENT_D_INO -D_POSIX_SOURCE -D_ALL_SOURCE -DRECYCLES_PIDS" ;;
 esac
 
 dnl Stanza for OS/compiler pair-specific flags

@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include "bashtypes.h"
 #include "posixstat.h"
-#ifndef _MINIX
+#if defined (HAVE_SYS_PARAM_H)
 #  include <sys/param.h>
 #endif
 #if defined (HAVE_UNISTD_H)

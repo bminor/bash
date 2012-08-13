@@ -14227,3 +14227,67 @@ bashline.c
 	  before adding the dummy history entry to make sure the dummy entry
 	  doesn't get added to previous incomplete command.  Partial fix for
 	  problem reported by Peng Yu <pengyu.ut@gmail.com>
+
+				   7/24
+				   ----
+configure.in
+	- interix: define RECYCLES_PIDS.  Based on a report from Michael
+	  Haubenwallner <michael.haubenwallner@salomon.at>
+
+				   7/26
+				   ----
+jobs.c
+	- make_child: call bgp_delete on the newly-created pid unconditionally.
+	  Some systems reuse pids before cycling through an entire set of
+	  CHILD_MAX/_SC_CHILD_MAX unique pids.  This is no longer dependent
+	  on RECYCLES_PIDS.  Based on a report from Michael Haubenwallner
+	  <michael.haubenwallner@salomon.at>
+
+support/shobj-conf
+	- Mac OS X: drop MACOSX_DEPLOYMENT_TARGET=10.3 from the LDFLAGS. We
+	  can finally kill Panther
+
+				   7/28
+				   ----
+subst.c
+	- command_substitute: make sure last_made_pid gets reset if make_child
+	  fails
+
+execute_cmd.c
+	- execute_command_internal: case cm_simple: decide whether or not to
+	  wait_for a child if already_making_children is non-zero, indicates
+	  that there is an unwaited-for child.  More of fix for bug report
+	  from Michael Haubenwallner <michael.haubenwallner@salomon.at>
+
+jobs.c
+	- make_child: call delete_old_job (new_pid) unconditionally, don't
+	  bother to check whether or not pid wrap occurred.  Rest of fix for
+	  bug report from Michael Haubenwallner
+	  <michael.haubenwallner@salomon.at>
+
+				   7/29
+				   ----
+shell.c
+	- subshell_exit: new function, exits the shell (via call to sh_exit())
+	  after calling any defined exit trap
+
+externs.h
+	- subshell_exit: new extern declaration
+
+execute_cmd.c
+	- execute_command_internal: make sure to call subshell_exit for
+	  {} group commands executed asynchronously (&).  Part of fix for
+	  EXIT trap bug reported by Maarten Billemont <lhunath@lyndir.com>
+
+sig.c
+	- reset_terminating_signals: make sure to set termsigs_initialized back
+	  to 0, so a subsequent call to initialize_terminating_signals works
+	  right.  Rest of fix for bug reported by Maarten Billemont
+	  <lhunath@lyndir.com>
+
+{execute_cmd,general,jobs,mailcheck,mksyntax,test}.c
+builtins/{cd,fc,pushd,ulimit}.def
+lib/malloc/getpagesize.h
+lib/sh/{clktck,fpurge,inet_aton,mailstat,oslib,pathcanon,pathphys,spell,strerror}.c
+	- make inclusion of <sys/param.h> dependent on HAVE_SYS_PARAM_H
+	  consistently

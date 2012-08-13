@@ -33,7 +33,7 @@
 #include "filecntl.h"
 #include "posixstat.h"
 #include <signal.h>
-#ifndef _MINIX
+#if defined (HAVE_SYS_PARAM_H)
 #  include <sys/param.h>
 #endif
 
@@ -539,15 +539,10 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
   volatile char *ofifo_list;
 #endif
 
-#if 0
-  if (command == 0 || breaking || continuing || read_but_dont_execute)
-    return (EXECUTION_SUCCESS);
-#else
   if (breaking || continuing)
     return (last_command_exit_value);
   if (command == 0 || read_but_dont_execute)
     return (EXECUTION_SUCCESS);
-#endif
 
   QUIT;
   run_pending_traps ();
@@ -586,6 +581,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
        (pipe_out != NO_PIPE || pipe_in != NO_PIPE || asynchronous)))
     {
       pid_t paren_pid;
+      int s;
 
       /* Fork a subshell, turn off the subshell bit, turn off job
 	 control and call execute_command () on the command again. */
@@ -593,8 +589,19 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       paren_pid = make_child (savestring (make_command_string (command)),
 			      asynchronous);
       if (paren_pid == 0)
-	exit (execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close));
-	/* NOTREACHED */
+        {
+	  /* We want to run the exit trap for forced {} subshells, and we
+	     want to note this before execute_in_subshell modifies the
+	     COMMAND struct.  Need to keep in mind that execute_in_subshell
+	     runs the exit trap for () subshells itself. */
+	  s = user_subshell == 0 && command->type == cm_group && pipe_in == NO_PIPE && pipe_out == NO_PIPE && asynchronous;
+	  last_command_exit_value = execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close);
+	  if (s)
+	    subshell_exit (last_command_exit_value);
+	  else
+	    exit (last_command_exit_value);
+	  /* NOTREACHED */
+        }
       else
 	{
 	  close_pipes (pipe_in, pipe_out);
@@ -775,9 +782,11 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	   the child. */
 
 	/* XXX - this is something to watch out for if there are problems
-	   when the shell is compiled without job control. */
-	if (already_making_children && pipe_out == NO_PIPE &&
-	    last_made_pid != last_pid)
+	   when the shell is compiled without job control.  Don't worry about
+	   whether or not last_made_pid == last_pid; already_making_children
+	   tells us whether or not there are unwaited-for children to wait
+	   for and reap. */
+	if (already_making_children && pipe_out == NO_PIPE)
 	  {
 	    stop_pipeline (asynchronous, (COMMAND *)NULL);
 

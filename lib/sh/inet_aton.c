@@ -67,7 +67,9 @@ static char rcsid[] = "$Id: inet_addr.c,v 1.5 1996/08/14 03:48:37 drepper Exp $"
 #if !defined (HAVE_INET_ATON) && defined (HAVE_NETWORK) && defined (HAVE_NETINET_IN_H) && defined (HAVE_ARPA_INET_H)
 
 #include <sys/types.h>
+#if defined (HAVE_SYS_PARAM_H)
 #include <sys/param.h>
+#endif
 #include <netinet/in.h>
 #include <arpa/inet.h>
 

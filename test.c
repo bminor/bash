@@ -32,7 +32,7 @@
 
 #include "bashtypes.h"
 
-#if !defined (HAVE_LIMITS_H)
+#if !defined (HAVE_LIMITS_H) && defined (HAVE_SYS_PARAM_H)
 #  include <sys/param.h>
 #endif
 

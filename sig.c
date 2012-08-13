@@ -358,6 +358,8 @@ reset_terminating_signals ()
       signal (XSIG (i), XHANDLER (i));
     }
 #endif /* !HAVE_POSIX_SIGNALS */
+
+  termsigs_initialized = 0;
 }
 #undef XSIG
 #undef XHANDLER

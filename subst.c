@@ -5332,6 +5332,8 @@ command_substitute (string, quoted)
       sys_error (_("cannot make child for command substitution"));
     error_exit:
 
+      last_made_pid = old_pid;
+
       FREE (istring);
       close (fildes[0]);
       close (fildes[1]);

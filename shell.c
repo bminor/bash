@@ -957,6 +957,24 @@ sh_exit (s)
   exit (s);
 }
 
+/* Exit a subshell, which includes calling the exit trap.  We don't want to
+   do any more cleanup, since a subshell is created as an exact copy of its
+   parent. */
+void
+subshell_exit (s)
+     int s;
+{
+  fflush (stdout);
+  fflush (stderr);
+
+  /* Do trap[0] if defined.  Allow it to override the exit status
+     passed to us. */
+  if (signal_is_trapped (0))
+    s = run_exit_trap ();
+
+  sh_exit (s);
+}
+
 /* Source the bash startup files.  If POSIXLY_CORRECT is non-zero, we obey
    the Posix.2 startup file rules:  $ENV is expanded, and if the file it
    names exists, that file is sourced.  The Posix.2 rules are in effect

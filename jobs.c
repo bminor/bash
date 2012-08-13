@@ -45,7 +45,7 @@
 
 #include "filecntl.h"
 #include <sys/ioctl.h>
-#ifdef HAVE_SYS_PARAM_H
+#if defined (HAVE_SYS_PARAM_H)
 #include <sys/param.h>
 #endif
 
@@ -1898,15 +1898,13 @@ make_child (command, async_p)
 	last_asynchronous_pid = 1;
 #endif
 
-      if (pid_wrap > 0)
-	delete_old_job (pid);
+      /* Delete the saved status for any job containing this PID in case it's
+	 been reused. */
+      delete_old_job (pid);
 
-#if !defined (RECYCLES_PIDS)
-      /* Only check for saved status if we've saved more than CHILD_MAX
-	 statuses, unless the system recycles pids. */
-      if ((js.c_reaped + bgpids.npid) >= js.c_childmax)
-#endif
-	bgp_delete (pid);		/* new process, discard any saved status */
+      /* Perform the check for pid reuse unconditionally.  Some systems reuse
+         PIDs before giving a process CHILD_MAX/_SC_CHILD_MAX unique ones. */
+      bgp_delete (pid);		/* new process, discard any saved status */
 
       last_made_pid = pid;
 

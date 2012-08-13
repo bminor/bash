@@ -78,6 +78,7 @@ extern void xtrace_print_cond_term __P((int, int, WORD_DESC *, char *, char *));
 /* Functions from shell.c. */
 extern void exit_shell __P((int)) __attribute__((__noreturn__));
 extern void sh_exit __P((int)) __attribute__((__noreturn__));
+extern void subshell_exit __P((int)) __attribute__((__noreturn__));
 extern void disable_priv_mode __P((void));
 extern void unbind_args __P((void));
 
