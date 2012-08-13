@@ -13,8 +13,8 @@ expect <one>
 argv[1] = <one>
 expect <two>
 argv[1] = <two>
-expect <bar>
-bar
+expect <one>
+one
 expect <one>
 one
 expect <one>
@@ -27,12 +27,12 @@ changevar: expect <three four five>
 argv[1] = <three four five>
 expect <three four five>
 argv[1] = <three four five>
-./nameref.tests: line 92: bar: readonly variable
-./nameref.tests: line 93: foo: readonly variable
+./nameref.tests: line 93: bar: readonly variable
+./nameref.tests: line 94: foo: readonly variable
 one
 one
-./nameref.tests: line 105: foo: readonly variable
-./nameref.tests: line 102: foo: readonly variable
+./nameref.tests: line 106: foo: readonly variable
+./nameref.tests: line 103: foo: readonly variable
 one
 one
 bar
@@ -43,7 +43,11 @@ expect <unset>
 argv[1] = <unset>
 expect <unset>
 argv[1] = <unset>
-./nameref3.sub: line 15: unset: bar: cannot unset: readonly variable
+expect <bar>
+argv[1] = <bar>
+expect <unset>
+argv[1] = <unset>
+./nameref3.sub: line 21: unset: bar: cannot unset: readonly variable
 expect <two>
 two
 expect <two>

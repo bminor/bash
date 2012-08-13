@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2012 February 4<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2012 July 5<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -654,7 +654,7 @@ command:
 <B>
 </B>
 
-!    case    do    done    elif    else    esac    fi    for    function    if    in    select    then    until    while    {    }    time    [[    ]]
+!    case    coproc    do    done    elif    else    esac    fi    for    function    if    in    select    then    until    while    {    }    time    [[    ]]
 </DL>
 
 
@@ -1202,6 +1202,7 @@ command (see
 below).
 The file descriptors can be utilized as arguments to shell commands
 and redirections using standard word expansions.
+The file descriptors are not available in subshells.
 The process ID of the shell spawned to execute the coprocess is
 available as the value of the variable <I>NAME</I>_PID.
 The <B>wait</B>
@@ -1592,6 +1593,41 @@ appended to the array beginning at one greater than the array's maximum index
 associative array.
 When applied to a string-valued variable, <I>value</I> is expanded and
 appended to the variable's value.
+<P>
+
+A variable can be assigned the <I>nameref</I> attribute using the
+<B>-n</B> option to the <B>declare</B> or <B>local</B> builtin commands
+(see the descriptions of <B>declare</B> and <B>local</B> below)
+to create a <I>nameref</I>, or a reference to another variable.
+This allows variables to be manipulated indirectly.
+Whenever the nameref variable is referenced or assigned to, the operation
+is actually performed on the variable specified by the nameref variable's
+value.
+A nameref is commonly used within shell functions to refer to a variable
+whose name is passed as an argument to the function.
+For instance, if a variable name is passed to a shell function as its first
+argument, running
+<P>
+<DL COMPACT><DT><DD>
+<TT>declare -n ref=$1</TT>
+
+</DL>
+
+<P>
+inside the function creates a nameref variable <B>ref</B> whose value is
+the variable name passed as the first argument.
+References and assignments to <B>ref</B> are treated as references and
+assignments to the variable whose name was passed as <B>$1</B>.
+If the control variable in a <B>for</B> loop has the nameref attribute,
+the list of words can be a list of shell variables, and a name reference
+will be established for each word in the list, in turn, when the loop is
+executed.
+Array variables cannot be given the <B>-n</B> attribute.
+However, nameref variables can reference array variables and subscripted
+array variables.
+Namerefs can be unset using the <B>-n</B> option to the <B>unset</B> builtin.
+Otherwise, if <B>unset</B> is executed with the name of a nameref variable
+as an argument, the variable referenced by the nameref variable will be unset.
 <A NAME="lbAU">&nbsp;</A>
 <H4>Positional Parameters</H4>
 
@@ -2529,7 +2565,7 @@ The name of the file in which command history is saved (see
 
 </FONT>
 below).  The default value is <A HREF="file:~/.bash_history"><I>~/.bash_history</I></A>.  If unset, the
-command history is not saved when an interactive shell exits.
+command history is not saved when a shell exits.
 <DT><B>HISTFILESIZE</B>
 
 <DD>
@@ -2538,7 +2574,7 @@ variable is assigned a value, the history file is truncated, if
 necessary,
 to contain no more than that number of lines by removing the oldest entries.
 The history file is also truncated to this size after
-writing it when an interactive shell exits.
+writing it when a shell exits.
 If the value is 0, the history file is truncated to zero size.
 Non-numeric values and numeric values less than zero inhibit truncation.
 The shell sets the default value to the value of <B>HISTSIZE</B>
@@ -2958,11 +2994,12 @@ after
 </FONT>
 seconds when input is coming from a terminal.
 In an interactive shell, the value is interpreted as the
-number of seconds to wait for input after issuing the primary prompt.
+number of seconds to wait for a line of input after issuing the
+primary prompt.
 <B>Bash</B>
 
-terminates after waiting for that number of seconds if input does
-not arrive.
+terminates after waiting for that number of seconds if a complete
+line of input does not arrive.
 <DT><B>TMPDIR</B>
 
 <DD>
@@ -3041,6 +3078,7 @@ be indexed or assigned contiguously.
 Indexed arrays are referenced using integers (including arithmetic
 expressions)  and are zero-based; associative arrays are referenced
 using arbitrary strings.
+Unless otherwise noted, indexed array indices must be non-negative integers.
 <P>
 
 An indexed array is created automatically if any variable is assigned to
@@ -3451,12 +3489,14 @@ or when
 
 is followed by a character which is not to be
 interpreted as part of its name.
+The <I>parameter</I> is a shell parameter as described above
+<B>PARAMETERS</B>) or an array reference (<B>Arrays</B>).
 
 </DL>
 <P>
 
 If the first character of <I>parameter</I> is an exclamation point (<B>!</B>),
-a level of variable indirection is introduced.
+it introduces a level of variable indirection.
 <B>Bash</B> uses the value of the variable formed from the rest of
 <I>parameter</I> as the name of the variable; this variable is then
 expanded and that value is used in the rest of the substitution, rather
@@ -3472,7 +3512,8 @@ In each of the cases below, <I>word</I> is subject to tilde expansion,
 parameter expansion, command substitution, and arithmetic expansion.
 <P>
 
-When not performing substring expansion, using the forms documented below,
+When not performing substring expansion, using the forms documented below
+(e.g., <B>:-</B>),
 <B>bash</B> tests for a parameter that is unset or null.  Omitting the colon
 results in a test only for a parameter that is unset.
 <P>
@@ -3532,33 +3573,50 @@ is substituted.
 <DT>${<I>parameter</I><B>:</B><I>offset</I><B>:</B><I>length</I>}<DD>
 
 <B>Substring Expansion</B>.
-Expands to up to <I>length</I> characters of <I>parameter</I>
+Expands to up to <I>length</I> characters of the value of <I>parameter</I>
 starting at the character specified by <I>offset</I>.
-If <I>length</I> is omitted, expands to the substring of
-<I>parameter</I> starting at the character specified by <I>offset</I>.
+If <I>parameter</I> is <B>@</B>, an indexed array subscripted by
+<B>@</B> or <B>*</B>, or an associative array name, the results differ as
+described below.
+If <I>length</I> is omitted, expands to the substring of the value of
+<I>parameter</I> starting at the character specified by <I>offset</I>
+and extending to the end of the value.
 <I>length</I> and <I>offset</I> are arithmetic expressions (see
 <FONT SIZE=-1><B>ARITHMETIC EVALUATION</B>
 
 </FONT>
 below).
+<P>
 If <I>offset</I> evaluates to a number less than zero, the value
-is used as an offset from the end of the value of <I>parameter</I>.
-If <I>length</I> evaluates to a number less than zero, and <I>parameter</I>
-is not <B>@</B> and not an indexed or associative array, it is interpreted
-as an offset from the end of the value of <I>parameter</I> rather than
-a number of characters, and the expansion is the characters between the
-two offsets.
+is used as an offset in characters
+from the end of the value of <I>parameter</I>.
+If <I>length</I> evaluates to a number less than zero,
+it is interpreted as an offset in characters
+from the end of the value of <I>parameter</I> rather than
+a number of characters, and the expansion is the characters between
+<I>offset</I> and that result.
+Note that a negative offset must be separated from the colon by at least
+one space to avoid being confused with the <B>:-</B> expansion.
+<P>
 If <I>parameter</I> is <B>@</B>, the result is <I>length</I> positional
 parameters beginning at <I>offset</I>.
+A negative <I>offset</I> is taken relative to one greater than the greatest
+positional parameter, so an offset of -1 evaluates to the last positional
+parameter.
+It is an expansion error if <I>length</I> evaluates to a number less than
+zero.
+<P>
 If <I>parameter</I> is an indexed array name subscripted by @ or *,
 the result is the <I>length</I>
 members of the array beginning with ${<I>parameter</I>[<I>offset</I>]}.
 A negative <I>offset</I> is taken relative to one greater than the maximum
 index of the specified array.
+It is an expansion error if <I>length</I> evaluates to a number less than
+zero.
+<P>
 Substring expansion applied to an associative array produces undefined
 results.
-Note that a negative offset must be separated from the colon by at least
-one space to avoid being confused with the :- expansion.
+<P>
 Substring indexing is zero-based unless the positional parameters 
 are used, in which case the indexing starts at 1 by default.
 If <I>offset</I> is 0, and the positional parameters are used, <B>$0</B> is
@@ -4421,13 +4479,13 @@ File descriptor 2 is duplicated.
 <DD>
 If <I>host</I> is a valid hostname or Internet address, and <I>port</I>
 is an integer port number or service name, <B>bash</B> attempts to open
-a TCP connection to the corresponding socket.
+the corresponding TCP socket.
 <DT><B>/dev/udp/</B><I>host</I>/<I>port</I>
 
 <DD>
 If <I>host</I> is a valid hostname or Internet address, and <I>port</I>
 is an integer port number or service name, <B>bash</B> attempts to open
-a UDP connection to the corresponding socket.
+the corresponding UDP socket.
 
 </DL></DL>
 
@@ -8100,7 +8158,7 @@ These timestamps are optionally displayed depending on the value of the
 
 </FONT>
 variable.
-When an interactive shell exits, the last
+When a shell with history enabled exits, the last
 <FONT SIZE=-1><B>$HISTSIZE</B>
 
 </FONT>
@@ -9301,9 +9359,9 @@ must be >= 1.  If
 is greater than the number of enclosing loops, the last enclosing loop
 (the ``top-level'' loop) is resumed.
 The return value is 0 unless <I>n</I> is not greater than or equal to 1.
-<DT><B>declare</B> [<B>-aAfFgilrtux</B>] [<B>-p</B>] [<I>name</I>[=<I>value</I>] ...]<DD>
+<DT><B>declare</B> [<B>-aAfFgilnrtux</B>] [<B>-p</B>] [<I>name</I>[=<I>value</I>] ...]<DD>
 
-<DT><B>typeset</B> [<B>-aAfFgilrtux</B>] [<B>-p</B>] [<I>name</I>[=<I>value</I>] ...]<DD>
+<DT><B>typeset</B> [<B>-aAfFgilnrtux</B>] [<B>-p</B>] [<I>name</I>[=<I>value</I>] ...]<DD>
 
 Declare variables and/or give them attributes.
 If no <I>name</I>s are given then display the values of variables.
@@ -9383,6 +9441,16 @@ above) is performed when the variable is assigned a value.
 When the variable is assigned a value, all upper-case characters are
 converted to lower-case.
 The upper-case attribute is disabled.
+<DT><B>-n</B>
+
+<DD>
+Give each <I>name</I> the <I>nameref</I> attribute, making
+it a name reference to another variable.
+That other variable is defined by the value of <I>name</I>.
+All references and assignments to <I>name</I>, except for changing the
+<B>-n</B> attribute itself, are performed on the variable referenced by
+<I>name</I>'s value.
+The <B>-n</B> attribute cannot be applied to array variables.
 <DT><B>-r</B>
 
 <DD>
@@ -12570,7 +12638,7 @@ value is true unless a supplied
 <I>name</I>
 
 is not a defined alias.
-<DT><B>unset</B> [-<B>fv</B>] [<I>name</I> ...]<DD>
+<DT><B>unset</B> [-<B>fv</B>] [-<B>n</B>] [<I>name</I> ...]<DD>
 For each
 <I>name</I>,
 
@@ -12591,6 +12659,13 @@ is specified, each
 
 refers to a shell function, and the function definition
 is removed.
+If the
+<B>-n</B>
+
+option is supplied, and <I>name</I> is a variable with the <I>nameref</I>
+attribute, <I>name</I> will be unset rather than the variable it
+references.
+<B>-n</B> has no effect if the <B>-f</B> option is supplied.
 If no options are supplied, each <I>name</I> refers to a variable; if
 there is no variable by that name, any function with that name is
 unset.
@@ -12930,7 +13005,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.2<TH ALIGN=CENTER width=33%>2012 February 4<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.2<TH ALIGN=CENTER width=33%>2012 July 5<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13036,6 +13111,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 05 March 2012 21:31:01 EST
+Time: 05 July 2012 20:43:10 EDT
 </BODY>
 </HTML>

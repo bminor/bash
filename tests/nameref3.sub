@@ -2,12 +2,18 @@
 bar=one
 typeset -n foo=bar
 
-# normal unset unsets both nameref and variable it references
+# normal unset unsets only variable nameref references
+# need unset -n to unset nameref itself
 unset foo
 echo "expect <unset>"
 recho ${bar-unset}
 echo "expect <unset>"
 recho ${foo-unset}
+echo "expect <bar>"
+recho ${!foo}
+unset -n foo
+echo "expect <unset>"
+recho "${!foo-unset}"
 
 readonly bar=two
 typeset -n foo=bar

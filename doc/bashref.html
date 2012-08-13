@@ -1,6 +1,6 @@
 <HTML>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<!-- Created on March, 5  2012 by texi2html 1.64 -->
+<!-- Created on July, 5  2012 by texi2html 1.64 -->
 <!-- 
 Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -33,10 +33,10 @@ Send bugs and suggestions to <texi2html@mathematik.uni-kl.de>
 <H1>Bash Reference Manual</H1></P><P>
 
 This text is a brief description of the features that are present in
-the Bash shell (version 4.2, 29 January 2012).
+the Bash shell (version 4.2, 5 July 2012).
 </P><P>
 
-This is Edition 4.2, last updated 29 January 2012,
+This is Edition 4.2, last updated 5 July 2012,
 of <CITE>The GNU Bash Reference Manual</CITE>,
 for <CODE>Bash</CODE>, Version 4.2.
 </P><P>
@@ -46,8 +46,8 @@ features that only appear in Bash.  Some of the shells that Bash has
 borrowed concepts from are the Bourne Shell (<TT>`sh'</TT>), the Korn Shell
 (<TT>`ksh'</TT>), and the C-shell (<TT>`csh'</TT> and its successor,
 <TT>`tcsh'</TT>).  The following menu breaks the features up into
-categories based upon which one of these other shells inspired the
-feature.
+categories, noting which features were inspired by other shells and
+which are specific to Bash.
 </P><P>
 
 This manual is meant as a brief introduction to features found in
@@ -1248,6 +1248,8 @@ There may be an arbitrary number of <CODE>case</CODE> clauses, each terminated
 by a <SAMP>`;;'</SAMP>, <SAMP>`;&#38;'</SAMP>, or <SAMP>`;;&#38;'</SAMP>.
 The first pattern that matches determines the
 command-list that is executed.
+It's a common idiom to use <SAMP>`*'</SAMP> as the final pattern to define the
+default case, since that pattern will always match.
 </P><P>
 
 Here is an example using <CODE>case</CODE> in a script that could be used to
@@ -1586,6 +1588,7 @@ This pipe is established before any redirections specified by the
 command (see section <A HREF="bashref.html#SEC40">3.6 Redirections</A>).
 The file descriptors can be utilized as arguments to shell commands
 and redirections using standard word expansions.
+The file descriptors are not available in subshells.
 </P><P>
 
 The process ID of the shell spawned to execute the coprocess is
@@ -1898,6 +1901,38 @@ maximum index (for indexed arrays),  or added as additional key-value pairs
 in an associative array.
 When applied to a string-valued variable, <VAR>value</VAR> is expanded and
 appended to the variable's value.
+</P><P>
+
+A variable can be assigned the <VAR>nameref</VAR> attribute using the
+<SAMP>`-n'</SAMP> option to the \fBdeclare\fP or \fBlocal\fP builtin commands
+(see section <A HREF="bashref.html#SEC61">4.2 Bash Builtin Commands</A>)
+to create a <VAR>nameref</VAR>, or a reference to another variable.
+This allows variables to be manipulated indirectly.
+Whenever the nameref variable is referenced or assigned to, the operation
+is actually performed on the variable specified by the nameref variable's
+value.
+A nameref is commonly used within shell functions to refer to a variable
+whose name is passed as an argument to the function.
+For instance, if a variable name is passed to a shell function as its first
+argument, running
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>declare -n ref=$1
+</pre></td></tr></table>inside the function creates a nameref variable <VAR>ref</VAR> whose value is
+the variable name passed as the first argument.
+References and assignments to <VAR>ref</VAR> are treated as references and
+assignments to the variable whose name was passed as <CODE>$1</CODE>.
+</P><P>
+
+If the control variable in a <CODE>for</CODE> loop has the nameref attribute,
+the list of words can be a list of shell variables, and a name reference
+will be established for each word in the list, in turn, when the loop is
+executed.
+Array variables cannot be given the <SAMP>`-n'</SAMP> attribute.
+However, nameref variables can reference array variables and subscripted
+array variables.
+Namerefs can be unset using the <SAMP>`-n'</SAMP> option to the <CODE>unset</CODE> builtin
+(see section <A HREF="bashref.html#SEC60">4.1 Bourne Shell Builtins</A>).
+Otherwise, if <CODE>unset</CODE> is executed with the name of a nameref variable
+as an argument, the variable referenced by the nameref variable will be unset.
 </P><P>
 
 <A NAME="Positional Parameters"></A>
@@ -2342,22 +2377,23 @@ expansion.
 </P><P>
 
 The basic form of parameter expansion is ${<VAR>parameter</VAR>}.
-The value of <VAR>parameter</VAR> is substituted.  The braces are required
-when <VAR>parameter</VAR>
+The value of <VAR>parameter</VAR> is substituted.
+The <VAR>parameter</VAR> is a shell parameter as described above
+(see section <A HREF="bashref.html#SEC26">3.4 Shell Parameters</A>) or an array reference (see section <A HREF="bashref.html#SEC86">6.7 Arrays</A>).
+The braces are required when <VAR>parameter</VAR>
 is a positional parameter with more than one digit,
-or when <VAR>parameter</VAR>
-is followed by a character that is not to be
+or when <VAR>parameter</VAR> is followed by a character that is not to be
 interpreted as part of its name.
 </P><P>
 
 If the first character of <VAR>parameter</VAR> is an exclamation point (!),
-a level of variable indirection is introduced.
+it introduces a level of variable indirection.
 Bash uses the value of the variable formed from the rest of
 <VAR>parameter</VAR> as the name of the variable; this variable is then
 expanded and that value is used in the rest of the substitution, rather
 than the value of <VAR>parameter</VAR> itself.
 This is known as <CODE>indirect expansion</CODE>.
-The exceptions to this are the expansions of ${!<VAR>prefix</VAR><BR>}
+The exceptions to this are the expansions of ${!<VAR>prefix</VAR>*}
 and ${!<VAR>name</VAR>[@]}
 described below.
 The exclamation point must immediately follow the left brace in order to
@@ -2369,7 +2405,7 @@ parameter expansion, command substitution, and arithmetic expansion.
 </P><P>
 
 When not performing substring expansion, using the form described
-below, Bash tests for a parameter that is unset or null.
+below (e.g., <SAMP>`:-'</SAMP>), Bash tests for a parameter that is unset or null.
 Omitting the colon results in a test only for a parameter that is unset.
 Put another way, if the colon is included,
 the operator tests for both <VAR>parameter</VAR>'s existence and that its value
@@ -2410,35 +2446,160 @@ is null or unset, nothing is substituted, otherwise the expansion of
 
 <DT><CODE>${<VAR>parameter</VAR>:<VAR>offset</VAR>}</CODE>
 <DD><DT><CODE>${<VAR>parameter</VAR>:<VAR>offset</VAR>:<VAR>length</VAR>}</CODE>
-<DD>Expands to up to <VAR>length</VAR> characters of <VAR>parameter</VAR>
+<DD>This is referred to as Substring Expansion.
+It expands to up to <VAR>length</VAR> characters of the value of <VAR>parameter</VAR>
 starting at the character specified by <VAR>offset</VAR>.
-If <VAR>length</VAR> is omitted, expands to the substring of
-<VAR>parameter</VAR> starting at the character specified by <VAR>offset</VAR>.
+If <VAR>parameter</VAR> is <SAMP>`@'</SAMP>, an indexed array subscripted by
+<SAMP>`@'</SAMP> or <SAMP>`*'</SAMP>, or an associative array name, the results differ as
+described below.
+If <VAR>length</VAR> is omitted, it expands to the substring of the value of
+<VAR>parameter</VAR> starting at the character specified by <VAR>offset</VAR>
+and extending to the end of the value.
 <VAR>length</VAR> and <VAR>offset</VAR> are arithmetic expressions
 (see section <A HREF="bashref.html#SEC84">6.5 Shell Arithmetic</A>).
-This is referred to as Substring Expansion.
 <P>
 
 If <VAR>offset</VAR> evaluates to a number less than zero, the value
-is used as an offset from the end of the value of <VAR>parameter</VAR>.
-If <VAR>length</VAR> evaluates to a number less than zero, and <VAR>parameter</VAR>
-is not <SAMP>`@'</SAMP> and not an indexed or associative array, it is interpreted
-as an offset from the end of the value of <VAR>parameter</VAR> rather than
-a number of characters, and the expansion is the characters between the
-two offsets.
+is used as an offset in characters
+from the end of the value of <VAR>parameter</VAR>.
+If <VAR>length</VAR> evaluates to a number less than zero,
+it is interpreted as an offset in characters
+from the end of the value of <VAR>parameter</VAR> rather than
+a number of characters, and the expansion is the characters between
+<VAR>offset</VAR> and that result.
+Note that a negative offset must be separated from the colon by at least
+one space to avoid being confused with the <SAMP>`:-'</SAMP> expansion.
+</P><P>
+
+Here are some examples illustrating substring expansion on parameters and
+subscripted arrays:
+</P><P>
+
+@verbatim
+$ string=01234567890abcdefgh
+$ echo ${string:7}
+7890abcdefgh
+$ echo ${string:7:0}
+</P><P>
+
+$ echo ${string:7:2}
+78
+$ echo ${string:7:-2}
+7890abcdef
+$ echo ${string: -7}
+bcdefgh
+$ echo ${string: -7:0}
+</P><P>
+
+$ echo ${string: -7:2}
+bc
+$ echo ${string: -7:-2}
+bcdef
+$ set -- 01234567890abcdefgh
+$ echo ${1:7}
+7890abcdefgh
+$ echo ${1:7:0}
+</P><P>
+
+$ echo ${1:7:2}
+78
+$ echo ${1:7:-2}
+7890abcdef
+$ echo ${1: -7}
+bcdefgh
+$ echo ${1: -7:0}
+</P><P>
+
+$ echo ${1: -7:2}
+bc
+$ echo ${1: -7:-2}
+bcdef
+$ array[0]=01234567890abcdefgh
+$ echo ${array[0]:7}
+7890abcdefgh
+$ echo ${array[0]:7:0}
+</P><P>
+
+$ echo ${array[0]:7:2}
+78
+$ echo ${array[0]:7:-2}
+7890abcdef
+$ echo ${array[0]: -7}
+bcdefgh
+$ echo ${array[0]: -7:0}
+</P><P>
+
+$ echo ${array[0]: -7:2}
+bc
+$ echo ${array[0]: -7:-2}
+bcdef
+</P><P>
+
 If <VAR>parameter</VAR> is <SAMP>`@'</SAMP>, the result is <VAR>length</VAR> positional
 parameters beginning at <VAR>offset</VAR>.
+A negative <VAR>offset</VAR> is taken relative to one greater than the greatest
+positional parameter, so an offset of -1 evaluates to the last positional
+parameter.
+It is an expansion error if <VAR>length</VAR> evaluates to a number less than zero.
+</P><P>
+
+The following examples illustrate substring expansion using positional
+parameters:
+</P><P>
+
+@verbatim
+$ set -- 1 2 3 4 5 6 7 8 9 0 a b c d e f g h
+$ echo ${7}
+7 8 9 0 a b c d e f g h
+$ echo ${7:0}
+</P><P>
+
+$ echo ${7:2}
+7 8
+$ echo ${7:-2}
+bash: -2: substring expression &#60; 0
+$ echo ${ -7:2}
+b c
+$ echo ${0}
+./bash 1 2 3 4 5 6 7 8 9 0 a b c d e f g h
+$ echo ${0:2}
+./bash 1
+$ echo ${ -7:0}
+</P><P>
+
 If <VAR>parameter</VAR> is an indexed array name subscripted
 by <SAMP>`@'</SAMP> or <SAMP>`*'</SAMP>, the result is the <VAR>length</VAR>
 members of the array beginning with <CODE>${<VAR>parameter</VAR>[<VAR>offset</VAR>]}</CODE>.
 A negative <VAR>offset</VAR> is taken relative to one greater than the maximum
 index of the specified array.
+It is an expansion error if <VAR>length</VAR> evaluates to a number less than zero.
+</P><P>
+
+These examples show how you can use substring expansion with indexed
+arrays:
+</P><P>
+
+@verbatim
+$ array=(0 1 2 3 4 5 6 7 8 9 0 a b c d e f g h)
+$ echo ${array[@]:7}
+7 8 9 0 a b c d e f g h
+$ echo ${array[@]:7:2}
+7 8
+$ echo ${array[@]: -7:2}
+b c
+$ echo ${array[@]: -7:-2}
+bash: -2: substring expression &#60; 0
+$ echo ${array[@]:0}
+0 1 2 3 4 5 6 7 8 9 0 a b c d e f g h
+$ echo ${array[@]:0:2}
+0 1
+$ echo ${array[@]: -7:0}
+</P><P>
+
 Substring expansion applied to an associative array produces undefined
 results.
 </P><P>
 
-Note that a negative offset must be separated from the colon by at least
-one space to avoid being confused with the <SAMP>`:-'</SAMP> expansion.
 Substring indexing is zero-based unless the positional parameters
 are used, in which case the indexing starts at 1 by default.
 If <VAR>offset</VAR> is 0, and the positional parameters are used, <CODE>$@</CODE> is
@@ -3049,14 +3210,14 @@ redirections, as described in the following table:
 
 <DT><CODE>/dev/tcp/<VAR>host</VAR>/<VAR>port</VAR></CODE>
 <DD>If <VAR>host</VAR> is a valid hostname or Internet address, and <VAR>port</VAR>
-is an integer port number or service name, Bash attempts to open a TCP
-connection to the corresponding socket.
+is an integer port number or service name, Bash attempts to open
+the corresponding TCP socket.
 <P>
 
 <DT><CODE>/dev/udp/<VAR>host</VAR>/<VAR>port</VAR></CODE>
 <DD>If <VAR>host</VAR> is a valid hostname or Internet address, and <VAR>port</VAR>
-is an integer port number or service name, Bash attempts to open a UDP
-connection to the corresponding socket.
+is an integer port number or service name, Bash attempts to open 
+the corresponding UDP socket.
 </DL>
 <P>
 
@@ -4575,7 +4736,7 @@ results in permissions of <CODE>755</CODE>.
 
 <DT><CODE>unset</CODE>
 <DD><A NAME="IDX88"></A>
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>unset [-fv] [<VAR>name</VAR>]
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>unset [-fnv] [<VAR>name</VAR>]
 </pre></td></tr></table><P>
 
 Remove each variable or function <VAR>name</VAR>.
@@ -4583,6 +4744,10 @@ If the <SAMP>`-v'</SAMP> option is given, each
 <VAR>name</VAR> refers to a shell variable and that variable is remvoved.
 If the <SAMP>`-f'</SAMP> option is given, the <VAR>name</VAR>s refer to shell
 functions, and the function definition is removed.
+If the <SAMP>`-n'</SAMP> option is supplied, and <VAR>name</VAR> is a variable with
+the <VAR>nameref</VAR> attribute, <VAR>name</VAR> will be unset rather than the
+variable it references.
+<SAMP>`-n'</SAMP> has no effect if the <SAMP>`-f'</SAMP> option is supplied.
 If no options are supplied, each <VAR>name</VAR> refers to a variable; if
 there is no variable by that name, any function with that name is
 unset.
@@ -4805,7 +4970,7 @@ zero if <VAR>command</VAR> is found, and non-zero if not.
 
 <DT><CODE>declare</CODE>
 <DD><A NAME="IDX94"></A>
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>declare [-aAfFgilrtux] [-p] [<VAR>name</VAR>[=<VAR>value</VAR>] <small>...</small>]
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>declare [-aAfFgilnrtux] [-p] [<VAR>name</VAR>[=<VAR>value</VAR>] <small>...</small>]
 </pre></td></tr></table><P>
 
 Declare variables and give them attributes.  If no <VAR>name</VAR>s
@@ -4866,6 +5031,16 @@ performed when the variable is assigned a value.
 <DD>When the variable is assigned a value, all upper-case characters are
 converted to lower-case.
 The upper-case attribute is disabled.
+<P>
+
+<DT><CODE>-n</CODE>
+<DD>Give each <VAR>name</VAR> the <VAR>nameref</VAR> attribute, making
+it a name reference to another variable.
+That other variable is defined by the value of <VAR>name</VAR>.
+All references and assignments to <VAR>name</VAR>, except for changing the
+<SAMP>`-n'</SAMP> attribute itself, are performed on the variable referenced by
+<VAR>name</VAR>'s value.
+The <SAMP>`-n'</SAMP> attribute cannot be applied to array variables.
 <P>
 
 <DT><CODE>-r</CODE>
@@ -5347,7 +5522,7 @@ if any are not found.
 
 <DT><CODE>typeset</CODE>
 <DD><A NAME="IDX107"></A>
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>typeset [-afFgrxilrtux] [-p] [<VAR>name</VAR>[=<VAR>value</VAR>] <small>...</small>]
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>typeset [-afFgrxilnrtux] [-p] [<VAR>name</VAR>[=<VAR>value</VAR>] <small>...</small>]
 </pre></td></tr></table><P>
 
 The <CODE>typeset</CODE> command is supplied for compatibility with the Korn
@@ -6969,7 +7144,7 @@ When this variable is assigned a value, the history file is truncated,
 if necessary, to contain no more than that number of lines
 by removing the oldest entries.
 The history file is also truncated to this size after
-writing it when an interactive shell exits.
+writing it when a shell exits.
 If the value is 0, the history file is truncated to zero size.
 Non-numeric values and numeric values less than zero inhibit truncation.
 The shell sets the default value to the value of <CODE>HISTSIZE</CODE>
@@ -7374,10 +7549,11 @@ from a terminal.
 <P>
 
 In an interactive shell, the value is interpreted as
-the number of seconds to wait for input after issuing the primary
-prompt when the shell is interactive.
-Bash terminates after that number of seconds if input does
-not arrive.
+the number of seconds to wait for a line of input after issuing
+the primary prompt.
+Bash
+terminates after waiting for that number of seconds if a complete
+line of input does not arrive.
 </P><P>
 
 <A NAME="IDX296"></A>
@@ -7952,7 +8128,7 @@ Command history (see section <A HREF="bashref.html#SEC122">9.1 Bash History Faci
 and history expansion (see section <A HREF="bashref.html#SEC124">9.3 History Expansion</A>)
 are enabled by default.
 Bash will save the command history to the file named by <CODE>$HISTFILE</CODE>
-when an interactive shell exits.
+when a shell with history enabled exits.
 <P>
 
 <LI>
@@ -8469,6 +8645,7 @@ be indexed or assigned contiguously.
 Indexed arrays are referenced using integers (including arithmetic
 expressions (see section <A HREF="bashref.html#SEC84">6.5 Shell Arithmetic</A>)) and are zero-based;
 associative arrays use arbitrary strings.
+Unless otherwise noted, indexed array indices must be non-negative integers.
 </P><P>
 
 An indexed array is created automatically if any variable is assigned to
@@ -12645,7 +12822,7 @@ file named by the <CODE>HISTFILE</CODE> variable (default <TT>`~/.bash_history'<
 The file named by the value of <CODE>HISTFILE</CODE> is truncated, if
 necessary, to contain no more than the number of lines specified by
 the value of the <CODE>HISTFILESIZE</CODE> variable.
-When an interactive shell exits, the last
+When a shell with history enabled exits, the last
 <CODE>$HISTSIZE</CODE> lines are copied from the history list to the file
 named by <CODE>$HISTFILE</CODE>.
 If the <CODE>histappend</CODE> shell option is set (see section <A HREF="bashref.html#SEC61">4.2 Bash Builtin Commands</A>),
@@ -14089,7 +14266,7 @@ the value of <CODE>var</CODE>, is available (see section <A HREF="bashref.html#S
 <P>
 
 <LI>
-The expansion <CODE>${!<VAR>prefix}*</VAR></CODE> expansion, which expands to
+The expansion <CODE>${!<VAR>prefix</VAR>*}</CODE> expansion, which expands to
 the names of all shell variables whose names begin with <VAR>prefix</VAR>,
 is available (see section <A HREF="bashref.html#SEC32">3.5.3 Shell Parameter Expansion</A>).
 <P>
@@ -16904,7 +17081,7 @@ to permit their use in free software.
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="bashref.html#SEC_About"> ? </A>]</TD>
 </TR></TABLE>
 <H1>About this document</H1>
-This document was generated by <I>Chet Ramey</I> on <I>March, 5  2012</I>
+This document was generated by <I>Chet Ramey</I> on <I>July, 5  2012</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 <P></P>  
@@ -17066,7 +17243,7 @@ the following structure:
 <BR>  
 <FONT SIZE="-1">
 This document was generated
-by <I>Chet Ramey</I> on <I>March, 5  2012</I>
+by <I>Chet Ramey</I> on <I>July, 5  2012</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 

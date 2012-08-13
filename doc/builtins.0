@@ -365,8 +365,8 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               loop) is resumed.  The return value is 0 unless _n is not greater
               than or equal to 1.
 
-       ddeeccllaarree [--aaAAffFFggiillrrttuuxx] [--pp] [_n_a_m_e[=_v_a_l_u_e] ...]
-       ttyyppeesseett [--aaAAffFFggiillrrttuuxx] [--pp] [_n_a_m_e[=_v_a_l_u_e] ...]
+       ddeeccllaarree [--aaAAffFFggiillnnrrttuuxx] [--pp] [_n_a_m_e[=_v_a_l_u_e] ...]
+       ttyyppeesseett [--aaAAffFFggiillnnrrttuuxx] [--pp] [_n_a_m_e[=_v_a_l_u_e] ...]
               Declare  variables and/or give them attributes.  If no _n_a_m_es are
               given then display the values of variables.  The --pp option  will
               display the attributes and values of each _n_a_m_e.  When --pp is used
@@ -397,6 +397,13 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               --ll     When  the  variable  is  assigned a value, all upper-case
                      characters are converted to lower-case.   The  upper-case
                      attribute is disabled.
+              --nn     Give  each  _n_a_m_e  the _n_a_m_e_r_e_f attribute, making it a name
+                     reference to another variable.  That  other  variable  is
+                     defined by the value of _n_a_m_e.  All references and assign-
+                     ments to _n_a_m_e,  except  for  changing  the  --nn  attribute
+                     itself,  are  performed  on  the  variable  referenced by
+                     _n_a_m_e's value.  The --nn  attribute  cannot  be  applied  to
+                     array variables.
               --rr     Make _n_a_m_es readonly.  These names cannot then be assigned
                      values by subsequent assignment statements or unset.
               --tt     Give each _n_a_m_e the  _t_r_a_c_e  attribute.   Traced  functions
@@ -1661,29 +1668,32 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               supplied, all alias definitions are removed.  The  return  value
               is true unless a supplied _n_a_m_e is not a defined alias.
 
-       uunnsseett [-ffvv] [_n_a_m_e ...]
+       uunnsseett [-ffvv] [-nn] [_n_a_m_e ...]
               For  each  _n_a_m_e,  remove the corresponding variable or function.
               If the --vv option is given, each _n_a_m_e refers to a shell variable,
               and  that  variable  is removed.  Read-only variables may not be
               unset.  If --ff is specified, each _n_a_m_e refers to  a  shell  func-
-              tion, and the function definition is removed.  If no options are
-              supplied, each _n_a_m_e refers to a variable; if there is  no  vari-
-              able  by  that name, any function with that name is unset.  Each
-              unset variable or  function  is  removed  from  the  environment
-              passed  to subsequent commands.  If any of CCOOMMPP__WWOORRDDBBRREEAAKKSS, RRAANN--
+              tion,  and the function definition is removed.  If the --nn option
+              is supplied, and _n_a_m_e is a variable with the _n_a_m_e_r_e_f  attribute,
+              _n_a_m_e  will  be unset rather than the variable it references.  --nn
+              has no effect if the --ff option is supplied.  If no  options  are
+              supplied,  each  _n_a_m_e refers to a variable; if there is no vari-
+              able by that name, any function with that name is  unset.   Each
+              unset  variable  or  function  is  removed  from the environment
+              passed to subsequent commands.  If any of CCOOMMPP__WWOORRDDBBRREEAAKKSS,  RRAANN--
               DDOOMM, SSEECCOONNDDSS, LLIINNEENNOO, HHIISSTTCCMMDD, FFUUNNCCNNAAMMEE, GGRROOUUPPSS, or DDIIRRSSTTAACCKK are
               unset, they lose their special properties, even if they are sub-
               sequently reset.  The exit status is true unless a _n_a_m_e is read-
               only.
 
        wwaaiitt [_n _._._.]
-              Wait  for each specified process and return its termination sta-
-              tus.  Each _n may be a process ID or a job  specification;  if  a
-              job  spec  is  given,  all  processes in that job's pipeline are
-              waited for.  If _n is not given, all currently active child  pro-
-              cesses  are  waited  for,  and  the return status is zero.  If _n
-              specifies a non-existent process or job, the  return  status  is
-              127.   Otherwise,  the  return  status is the exit status of the
+              Wait for each specified process and return its termination  sta-
+              tus.   Each  _n  may be a process ID or a job specification; if a
+              job spec is given, all processes  in  that  job's  pipeline  are
+              waited  for.  If _n is not given, all currently active child pro-
+              cesses are waited for, and the return  status  is  zero.   If  _n
+              specifies  a  non-existent  process or job, the return status is
+              127.  Otherwise, the return status is the  exit  status  of  the
               last process or job waited for.
 
 SSEEEE AALLSSOO
