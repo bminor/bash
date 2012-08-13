@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2012 July 5<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2012 July 14<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -11085,6 +11085,12 @@ separately (see
 </FONT>
 above), and may cause
 subshells to exit before executing all the commands in the subshell.
+If a shell function executes in a context where <B>-e</B> is being ignored,
+even if <B>-e</B> is set, none of the commands executed within the function
+body will be affected by the <B>-e</B> setting.
+If a shell function sets <B>-e</B> while executing in a context where
+<B>-e</B> is ignored, that setting will not have any effect until the
+command containing the function call completes.
 <DT><B>-f</B>
 
 <DD>
@@ -13005,7 +13011,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.2<TH ALIGN=CENTER width=33%>2012 July 5<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.2<TH ALIGN=CENTER width=33%>2012 July 14<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13111,6 +13117,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 05 July 2012 20:43:10 EDT
+Time: 16 July 2012 16:12:38 EDT
 </BODY>
 </HTML>
