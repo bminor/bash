@@ -320,10 +320,6 @@ static int jobs_list_frozen;
 
 static char retcode_name_buffer[64];
 
-/* flags to detect pid wraparound */
-static pid_t first_pid = NO_PID;
-static int pid_wrap = -1;
-
 #if !defined (_POSIX_VERSION)
 
 /* These are definitions to map POSIX 1003.1 functions onto existing BSD
@@ -350,8 +346,6 @@ void
 init_job_stats ()
 {
   js = zerojs;
-  first_pid = NO_PID;
-  pid_wrap = -1;
 }
 
 /* Return the working directory for the current process.  Unlike
@@ -1857,13 +1851,6 @@ make_child (command, async_p)
     {
       /* In the parent.  Remember the pid of the child just created
 	 as the proper pgrp if this is the first child. */
-
-      if (first_pid == NO_PID)
-	first_pid = pid;
-      else if (pid_wrap == -1 && pid < first_pid)
-	pid_wrap = 0;
-      else if (pid_wrap == 0 && pid >= first_pid)
-	pid_wrap = 1;
 
       if (job_control)
 	{

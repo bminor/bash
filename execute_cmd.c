@@ -588,6 +588,14 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       line_number_for_err_trap = line_number;
       paren_pid = make_child (savestring (make_command_string (command)),
 			      asynchronous);
+
+      if (user_subshell && signal_is_trapped (ERROR_TRAP) && 
+	  signal_in_progress (DEBUG_TRAP) == 0 && running_trap == 0)
+	{
+	  FREE (the_printed_command_except_trap);
+	  the_printed_command_except_trap = savestring (the_printed_command);
+	}
+
       if (paren_pid == 0)
         {
 	  /* We want to run the exit trap for forced {} subshells, and we
@@ -595,6 +603,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	     COMMAND struct.  Need to keep in mind that execute_in_subshell
 	     runs the exit trap for () subshells itself. */
 	  s = user_subshell == 0 && command->type == cm_group && pipe_in == NO_PIPE && pipe_out == NO_PIPE && asynchronous;
+
 	  last_command_exit_value = execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close);
 	  if (s)
 	    subshell_exit (last_command_exit_value);

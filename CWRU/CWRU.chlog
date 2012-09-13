@@ -14380,3 +14380,52 @@ shell.c
 	  enough to a non-interactive shell, since we can be interactive with
 	  -i while running a shell script).  Fixes oddity reported by
 	  Techlive Zheng <techlivezheng@gmail.com>
+
+				   8/20
+				   ----
+arrayfunc.c
+	- quote_array_assignment_chars: don't bother quoting if the word has
+	  not been marked as an assignment (W_ASSIGNMENT)
+	- quote_array_assignment_chars: turn on W_NOGLOB in the word flags
+	  so assignment statements don't undergo globbing.  Partial fix for
+	  problems reported by Dan Douglas <ormaaj@gmail.com>
+
+				   8/21
+				   ----
+command.h
+	- W_NOBRACE: new word flag that means to inhibit brace expansion
+
+subst.c
+	- brace_expand_word_list: suppress brace expansion for words with
+	  W_NOBRACE flag
+
+				   8/22
+				   ----
+builtins/read.def
+	- read_builtin: don't call dequote_string on what we've read, even if
+	  we saw an escape character, unless (input_string && *input_string).
+	  We may have escaped an IFS whitespace character.  Fixes seg fault
+	  reported by <armandsl@gmail.com>
+
+execute_cmd.c
+	- execute_command_internal: set the_printed_command_except trap when
+	  about to execute a ( ... ) user subshell.  For now, set it only if
+	  ERR is trapped; can relax that later.  Fixes bug reported by
+	  Mike Frysinger <vapier@gentoo.org>
+
+				   8/23
+				   ----
+jobs.c
+	- remove references to first_pid and pid_wrap, since we're not using
+	  them for anything anymore
+
+				   8/24
+				   ----
+subst.c
+	- changes for W_NOBRACE everywhere appropriate: so it can be displayed
+	  for debugging, and passed out of expand_word_internal
+
+doc/{bash.1,bashref.texi}
+	- small changes to make it clearer that the = and == operators are
+	  equivalent, and will cause pattern matching when used with [[.
+	  From a question from Michal Soltys <soltys@ziu.info>

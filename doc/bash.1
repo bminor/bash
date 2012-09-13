@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sat Jul 14 14:31:31 EDT 2012
+.\"	Last Change: Fri Aug 24 11:50:05 EDT 2012
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2012 July 14" "GNU Bash 4.2"
+.TH BASH 1 "2012 August 24" "GNU Bash 4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -705,6 +705,7 @@ lexicographically using the current locale.
 When the \fB==\fP and \fB!=\fP operators are used, the string to the
 right of the operator is considered a pattern and matched according
 to the rules described below under \fBPattern Matching\fP.
+The \fB=\fP operator is equivalent to \fB==\fP.
 If the shell option
 .B nocasematch
 is enabled, the match is performed without regard to the case
@@ -4232,6 +4233,8 @@ is non-zero.
 .PD
 True if the strings are equal.  \fB=\fP should be used
 with the \fBtest\fP command for POSIX conformance.
+When used with the \fB[[\fP command, this performs pattern matching as
+described above (\fBCompound Commands\fP).
 .TP
 \fIstring1\fP \fB!=\fP \fIstring2\fP
 True if the strings are not equal.

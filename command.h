@@ -98,6 +98,7 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define W_ASSIGNASSOC	0x400000	/* word looks like associative array assignment */
 #define W_ARRAYIND	0x800000	/* word is an array index being expanded */
 #define W_ASSNGLOBAL	0x1000000	/* word is a global assignment to declare (declare/typeset -g) */
+#define W_NOBRACE	0x2000000	/* Don't perform brace expansion */
 
 /* Possible values for subshell_environment */
 #define SUBSHELL_ASYNC	0x01	/* subshell caused by `command &' */

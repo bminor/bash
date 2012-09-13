@@ -422,15 +422,20 @@ dump_word_flags (flags)
       f &= ~W_NOSPLIT2;
       fprintf (stderr, "W_NOSPLIT2%s", f ? "|" : "");
     }
-  if (f & W_NOGLOB)
-    {
-      f &= ~W_NOGLOB;
-      fprintf (stderr, "W_NOGLOB%s", f ? "|" : "");
-    }
   if (f & W_NOSPLIT)
     {
       f &= ~W_NOSPLIT;
       fprintf (stderr, "W_NOSPLIT%s", f ? "|" : "");
+    }
+  if (f & W_NOBRACE)
+    {
+      f &= ~W_NOBRACE;
+      fprintf (stderr, "W_NOBRACE%s", f ? "|" : "");
+    }
+  if (f & W_NOGLOB)
+    {
+      f &= ~W_NOGLOB;
+      fprintf (stderr, "W_NOGLOB%s", f ? "|" : "");
     }
   if (f & W_GLOBEXP)
     {
@@ -8626,6 +8631,8 @@ finished_with_string:
 	tword->flags |= W_COMPASSIGN;	/* XXX */
       if (word->flags & W_NOGLOB)
 	tword->flags |= W_NOGLOB;	/* XXX */
+      if (word->flags & W_NOBRACE)
+	tword->flags |= W_NOBRACE;	/* XXX */
       if (word->flags & W_NOEXPAND)
 	tword->flags |= W_NOEXPAND;	/* XXX */
       if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
@@ -8659,6 +8666,8 @@ finished_with_string:
 	    tword->flags |= W_COMPASSIGN;
 	  if (word->flags & W_NOGLOB)
 	    tword->flags |= W_NOGLOB;
+	  if (word->flags & W_NOBRACE)
+	    tword->flags |= W_NOBRACE;
 	  if (word->flags & W_NOEXPAND)
 	    tword->flags |= W_NOEXPAND;
 	  if (had_quoted_null && QUOTED_NULL (istring))
@@ -9185,13 +9194,20 @@ brace_expand_word_list (tlist, eflags)
     {
       next = tlist->next;
 
+      if (tlist->word->flags & W_NOBRACE)
+        {
+itrace("brace_expand_word_list: %s: W_NOBRACE", tlist->word->word);
+	  PREPEND_LIST (tlist, output_list);
+	  continue;
+        }
+
       if ((tlist->word->flags & (W_COMPASSIGN|W_ASSIGNARG)) == (W_COMPASSIGN|W_ASSIGNARG))
         {
 /*itrace("brace_expand_word_list: %s: W_COMPASSIGN|W_ASSIGNARG", tlist->word->word);*/
 	  PREPEND_LIST (tlist, output_list);
 	  continue;
         }
-          
+
       /* Only do brace expansion if the word has a brace character.  If
 	 not, just add the word list element to BRACES and continue.  In
 	 the common case, at least when running shell scripts, this will
@@ -9368,7 +9384,9 @@ shell_expand_word_list (tlist, eflags)
    process substitution, word splitting, and pathname expansion, according
    to the bits set in EFLAGS.  Words with the W_QUOTED or W_NOSPLIT bits
    set, or for which no expansion is done, do not undergo word splitting.
-   Words with the W_NOGLOB bit set do not undergo pathname expansion. */
+   Words with the W_NOGLOB bit set do not undergo pathname expansion; words
+   with W_NOBRACE set do not undergo brace expansion (see
+   brace_expand_word_list above). */
 static WORD_LIST *
 expand_word_list_internal (list, eflags)
      WORD_LIST *list;

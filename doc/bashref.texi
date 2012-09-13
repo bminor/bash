@@ -2,11 +2,9 @@
 @c %**start of header
 @setfilename bashref.info
 @settitle Bash Reference Manual
-@c %**end of header
-
-@setchapternewpage odd
 
 @include version.texi
+@c %**end of header
 
 @copying
 This text is a brief description of the features that are present in
@@ -18,10 +16,6 @@ for @code{Bash}, Version @value{VERSION}.
 
 Copyright @copyright{} 1988--2012 Free Software Foundation, Inc.
 
-Permission is granted to make and distribute verbatim copies of
-this manual provided the copyright notice and this permission notice
-are preserved on all copies.
-
 @quotation
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -29,7 +23,6 @@ any later version published by the Free Software Foundation; with no
 Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 A copy of the license is included in the section entitled
 ``GNU Free Documentation License''.
-
 @end quotation
 @end copying
 
@@ -56,12 +49,6 @@ A copy of the license is included in the section entitled
 @vskip 0pt plus 1filll
 @insertcopying
 
-@sp 1
-Published by the Free Software Foundation @*
-59 Temple Place, Suite 330, @*
-Boston, MA 02111-1307 @*
-USA @*
-
 @end titlepage
 
 @contents
@@ -72,6 +59,7 @@ USA @*
 
 This text is a brief description of the features that are present in
 the Bash shell (version @value{VERSION}, @value{UPDATED}).
+The Bash home page is @url{http://www.gnu.org/software/bash/}.
 
 This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Bash Reference Manual},
@@ -997,18 +985,19 @@ the conditional expression @var{expression}.
 Expressions are composed of the primaries described below in
 @ref{Bash Conditional Expressions}.
 Word splitting and filename expansion are not performed on the words
-between the @samp{[[} and @samp{]]}; tilde expansion, parameter and
+between the @code{[[} and @code{]]}; tilde expansion, parameter and
 variable expansion, arithmetic expansion, command substitution, process
 substitution, and quote removal are performed.
 Conditional operators such as @samp{-f} must be unquoted to be recognized
 as primaries.
 
-When used with @samp{[[}, the @samp{<} and @samp{>} operators sort
+When used with @code{[[}, the @samp{<} and @samp{>} operators sort
 lexicographically using the current locale.
 
 When the @samp{==} and @samp{!=} operators are used, the string to the
 right of the operator is considered a pattern and matched according
 to the rules described below in @ref{Pattern Matching}.
+The @samp{=} operator is identical to @samp{==}.
 If the shell option @code{nocasematch}
 (see the description of @code{shopt} in @ref{The Shopt Builtin})
 is enabled, the match is performed without regard to the case
@@ -3473,7 +3462,7 @@ If @var{n} is not supplied, it is assumed to be 1.
 The return status is zero unless @var{n} is greater than @code{$#} or
 less than zero, non-zero otherwise.
 
-@item test[B
+@item test
 @itemx [
 @btindex test
 @btindex [
@@ -3481,7 +3470,8 @@ less than zero, non-zero otherwise.
 test @var{expr}
 @end example
 
-Evaluate a conditional expression @var{expr} and return a status of 0
+Evaluate a conditional express
+ion @var{expr} and return a status of 0
 (true) or 1 (false).
 Each operator and operand must be a separate argument.
 Expressions are composed of the primaries described below in
@@ -4861,7 +4851,7 @@ If set, Bash
 changes its behavior to that of version 3.1 with respect to quoted
 arguments to the conditional command's @samp{=~} operator
 and with respect to locale-specific
-string comparison when using the @samp{[[}
+string comparison when using the @code{[[}
 conditional command's @samp{<} and @samp{>} operators.
 Bash versions prior to bash-4.1 use ASCII collation and strcmp(3);
 bash-4.1 and later use the current locale's collation sequence and strcoll(3).
@@ -4869,13 +4859,13 @@ bash-4.1 and later use the current locale's collation sequence and strcoll(3).
 @item compat32
 If set, Bash
 changes its behavior to that of version 3.2 with respect to locale-specific
-string comparison when using the @samp{[[}
+string comparison when using the @code{[[}
 conditional command's @samp{<} and @samp{>} operators (see previous item).
 
 @item compat40
 If set, Bash
 changes its behavior to that of version 4.0 with respect to locale-specific
-string comparison when using the @samp{[[}
+string comparison when using the @code{[[}
 conditional command's @samp{<} and @samp{>} operators (see description
 of @code{compat31})
 and the effect of interrupting a command list.
@@ -6329,7 +6319,7 @@ If the @var{file} argument to one of the primaries is one of
 @file{/dev/stdin}, @file{/dev/stdout}, or @file{/dev/stderr}, file
 descriptor 0, 1, or 2, respectively, is checked.
 
-When used with @samp{[[}, the @samp{<} and @samp{>} operators sort
+When used with @code{[[}, the @samp{<} and @samp{>} operators sort
 lexicographically using the current locale.
 The @code{test} command uses ASCII ordering.
 
@@ -6430,6 +6420,9 @@ True if the length of @var{string} is non-zero.
 @item @var{string1} == @var{string2}
 @itemx @var{string1} = @var{string2}
 True if the strings are equal.
+When used with the @code{[[} command, this performs pattern matching as
+described above (@pxref{Conditional Constructs}).
+
 @samp{=} should be used with the @code{test} command for @sc{posix} conformance.
 
 @item @var{string1} != @var{string2}
@@ -8086,7 +8079,7 @@ to reproduce it.
 the template it provides for filing a bug report.
 
 Please send all reports concerning this manual to
-@email{chet.ramey@@case.edu}.
+@email{bug-bash@@gnu.org}.
 
 @node Major Differences From The Bourne Shell
 @appendix Major Differences From The Bourne Shell
@@ -8256,6 +8249,11 @@ for details.
 The @env{IFS} variable is used to split only the results of expansion,
 not all words (@pxref{Word Splitting}).
 This closes a longstanding shell security hole.
+
+@item
+The filename expansion bracket expression code uses @samp{!} and @samp{^}
+to negate the set of characters between the brackets.
+The Bourne shell uses only @samp{!}.
 
 @item
 Bash implements the full set of @sc{posix} filename expansion operators,

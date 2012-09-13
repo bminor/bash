@@ -4723,7 +4723,11 @@ got_token:
       the_word->flags |= W_ASSIGNMENT;
       /* Don't perform word splitting on assignment statements. */
       if (assignment_acceptable (last_read_token) || (parser_state & PST_COMPASSIGN) != 0)
-	the_word->flags |= W_NOSPLIT;
+	{
+	  the_word->flags |= W_NOSPLIT;
+	  if (parser_state & PST_COMPASSIGN)
+	    the_word->flags |= W_NOGLOB;	/* XXX - W_NOBRACE? */
+	}
     }
 
   if (command_token_position (last_read_token))

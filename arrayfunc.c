@@ -684,12 +684,17 @@ quote_array_assignment_chars (list)
     {
       if (l->word == 0 || l->word->word == 0 || l->word->word[0] == '\0')
 	continue;	/* should not happen, but just in case... */
-      /* Don't bother if it doesn't look like [ind]=value */
+      /* Don't bother if it hasn't been recognized as an assignment or
+	 doesn't look like [ind]=value */
+      if ((l->word->flags & W_ASSIGNMENT) == 0)
+	continue;
       if (l->word->word[0] != '[' || mbschr (l->word->word, '=') == 0) /* ] */
 	continue;
+
       nword = quote_assign (l->word->word);
       free (l->word->word);
       l->word->word = nword;
+      l->word->flags |= W_NOGLOB;	/* XXX - W_NOSPLIT also? */
     }
 }
 
