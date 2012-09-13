@@ -69,6 +69,7 @@ extern int loop_level;
 extern int executing_list;
 extern int comsub_ignore_return;
 extern int posixly_correct;
+extern int return_catch_flag, return_catch_value;
 extern sh_builtin_func_t *this_shell_builtin;
 extern char *the_printed_command_except_trap;
 
@@ -521,4 +522,50 @@ cat_file (r)
   close (fd);
 
   return (rval);
+}
+
+int
+evalstring (string, from_file, flags)
+     char *string;
+     const char *from_file;
+     int flags;
+{
+  volatile int r, rflag, rcatch;
+
+  rcatch = 0;
+  rflag = return_catch_flag;
+  /* If we are in a place where `return' is valid, we have to catch
+     `eval "... return"' and make sure parse_and_execute cleans up. Then
+     we can trampoline to the previous saved return_catch location. */
+  if (rflag)
+    {
+      begin_unwind_frame ("evalstring");
+
+      unwind_protect_int (return_catch_flag);
+      unwind_protect_jmp_buf (return_catch);
+
+      return_catch_flag++;	/* increment so we have a counter */
+      rcatch = setjmp (return_catch);
+    }
+
+  if (rcatch)
+    {
+      parse_and_execute_cleanup ();
+      r = return_catch_value;
+    }
+  else
+    /* Note that parse_and_execute () frees the string it is passed. */
+    r = parse_and_execute (string, from_file, flags);
+
+  if (rflag)
+    {
+      run_unwind_frame ("evalstring");
+      if (rcatch && return_catch_flag)
+	{
+	  return_catch_value = r;
+	  longjmp (return_catch, 1);
+	}
+    }
+    
+  return (r);
 }

@@ -125,7 +125,7 @@ run_callback (callback, curindex, curline)
 #endif
   snprintf (execstr, execlen, "%s %d %s", callback, curindex, qline);
   free (qline);
-  return parse_and_execute (execstr, NULL, flags);
+  return evalstring (execstr, NULL, flags);
 }
 
 static void

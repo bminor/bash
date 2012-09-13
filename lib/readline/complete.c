@@ -1791,7 +1791,7 @@ append_to_match (text, delimiter, quote_char, nontrivial_match)
      char *text;
      int delimiter, quote_char, nontrivial_match;
 {
-  char temp_string[4], *filename;
+  char temp_string[4], *filename, *fn;
   int temp_string_index, s;
   struct stat finfo;
 
@@ -1811,7 +1811,12 @@ append_to_match (text, delimiter, quote_char, nontrivial_match)
     {
       filename = tilde_expand (text);
       if (rl_filename_stat_hook)
-	(*rl_filename_stat_hook) (&filename);
+        {
+          fn = savestring (filename);
+	  (*rl_filename_stat_hook) (&fn);
+	  xfree (filename);
+	  filename = fn;
+        }
       s = (nontrivial_match && rl_completion_mark_symlink_dirs == 0)
 		? LSTAT (filename, &finfo)
 		: stat (filename, &finfo);

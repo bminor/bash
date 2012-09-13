@@ -340,7 +340,7 @@ run_pending_traps ()
 	      save_subst_varlist = subst_assign_varlist;
 	      subst_assign_varlist = 0;
 
-	      parse_and_execute (savestring (trap_list[sig]), "trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE);
+	      evalstring (savestring (trap_list[sig]), "trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE);
 	      restore_token_state (token_state);
 	      free (token_state);
 

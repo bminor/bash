@@ -14372,11 +14372,3 @@ variables.c,config-top.h
 	- if ARRAY_EXPORT is defined to 1 when variables.c is compiled, the
 	  code that allows indexed arrays to be exported is enabled and
 	  included
-
-				   8/19
-				   ----
-shell.c
-	- call start_debugger from main() only if dollar_vars[1] != 0 (close
-	  enough to a non-interactive shell, since we can be interactive with
-	  -i while running a shell script).  Fixes oddity reported by
-	  Techlive Zheng <techlivezheng@gmail.com>

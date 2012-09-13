@@ -2978,12 +2978,12 @@ bash_filename_stat_hook (dirname)
 	     behaves unpredictably when passed null or empty strings */
 	  if (new_dirname && *new_dirname)
 	    {
-	      *dirname = new_dirname;
+	      free (local_dirname);	/* XXX */
+	      local_dirname = *dirname = new_dirname;
 	      return_value = STREQ (local_dirname, *dirname) == 0;
 	    }
 	  else
 	    free (new_dirname);
-	  free (local_dirname);
 	  dispose_words (wl);
 	}
       else

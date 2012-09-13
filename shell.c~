@@ -1,6 +1,6 @@
 /* shell.c -- GNU's idea of the POSIX shell specification. */
 
-/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -718,7 +718,7 @@ main (argc, argv, env)
   /* Bind remaining args to $1 ... $n */
   arg_index = bind_args (argv, arg_index, argc, 1);
 
-  if (debugging_mode && locally_skip_execution == 0 && running_setuid == 0 && dollar_vars[1])
+  if (debugging_mode && locally_skip_execution == 0 && running_setuid == 0)
     start_debugger ();
 
   /* Do the things that should be done only for interactive shells. */

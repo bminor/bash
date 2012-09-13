@@ -375,7 +375,7 @@ initialize_shell_variables (env, privmode)
 	    name[char_index - 2] = '(';		/* ) */
 	}
 #if defined (ARRAY_VARS)
-#  if ARRAY_EXPORT
+#  if defined (ARRAY_EXPORT)
       /* Array variables may not yet be exported. */
       else if (*string == '(' && string[1] == '[' && string[strlen (string) - 1] == ')')
 	{
@@ -3803,7 +3803,7 @@ make_env_array_from_var_list (vars)
 	value = named_function_string ((char *)NULL, function_cell (var), 0);
 #if defined (ARRAY_VARS)
       else if (array_p (var))
-#  if ARRAY_EXPORT
+#  if defined (ARRAY_EXPORT)
 	value = array_to_assignment_string (array_cell (var));
 #  else
 	continue;	/* XXX array vars cannot yet be exported */
