@@ -14291,3 +14291,39 @@ lib/malloc/getpagesize.h
 lib/sh/{clktck,fpurge,inet_aton,mailstat,oslib,pathcanon,pathphys,spell,strerror}.c
 	- make inclusion of <sys/param.h> dependent on HAVE_SYS_PARAM_H
 	  consistently
+
+				    8/6
+				    ---
+lib/readline/histexpand.c
+	- history_expand_internal: now takes an additional argument saying
+	  whether the history expansion occurs within a quoted string, set to
+	  the open quote character
+	- history_expand_internal: use new argument instead of checking prev
+	  char and initializing quoted_search_delimiter, pass qc directly to
+	  get_history_event, where it allows a matching quote to terminate a
+	  string defining an event
+	- history_expand: change single-quote handling code so that if
+	  history_quotes_inhibit_expansion is 0, single quotes are treated
+	  like double quotes
+	- history_expand: change call to history_expand_internal to pass new
+	  argument of `"' if double-quoted string, `'' if single-quoted string;
+	  this lets history_expand decide what is a quoted string and what
+	  is not
+
+				    8/7
+				    ---
+configure.in
+	- AC_CANONICAL_BUILD: invoke for later use
+
+lib/readline/macro.c
+	- _rl_prev_macro_key: new function, inverse of _rl_next_macro_key:
+	  backs up the index into the current macro by 1
+
+lib/readline/rlprivate.h
+	- _rl_prev_macro_key: extern declaration
+
+
+lib/readline/readline.c
+	- _rl_dispatch_subseq, _rl_subseq_result: don't call _rl_unget_char
+	  if we're currently reading from a macro; call _rl_prev_macro_key
+	  instead.  Fixes bug reported by Clark Wang <clark.wang@oracle.com>

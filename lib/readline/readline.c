@@ -830,7 +830,10 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	  /* OK, there's no function bound in this map, but there is a
 	     shadow function that was overridden when the current keymap
 	     was created.  Return -2 to note  that. */
-	  _rl_unget_char  (key);
+	  if (RL_ISSTATE (RL_STATE_MACROINPUT))
+	    _rl_prev_macro_key ();
+	  else
+	    _rl_unget_char  (key);
 	  return -2;
 	}
       else if (got_subseq)
@@ -839,7 +842,10 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	     have a matching key, nor was one overridden.  This means
 	     we need to back up the recursion chain and find the last
 	     subsequence that is bound to a function. */
-	  _rl_unget_char (key);
+	  if (RL_ISSTATE (RL_STATE_MACROINPUT))
+	    _rl_prev_macro_key ();
+	  else
+	    _rl_unget_char (key);
 	  return -1;
 	}
       else
@@ -994,14 +1000,20 @@ _rl_subseq_result (r, map, key, got_subseq)
       /* We didn't match (r is probably -1), so return something to
 	 tell the caller that it should try ANYOTHERKEY for an
 	 overridden function. */
-      _rl_unget_char (key);
+      if (RL_ISSTATE (RL_STATE_MACROINPUT))
+	_rl_prev_macro_key ();
+      else
+	_rl_unget_char (key);
       _rl_dispatching_keymap = map;
       return -2;
     }
   else if (r && got_subseq)
     {
       /* OK, back up the chain. */
-      _rl_unget_char (key);
+      if (RL_ISSTATE (RL_STATE_MACROINPUT))
+	_rl_prev_macro_key ();
+      else
+	_rl_unget_char (key);
       _rl_dispatching_keymap = map;
       return -1;
     }

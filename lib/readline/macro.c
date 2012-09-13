@@ -121,6 +121,19 @@ _rl_next_macro_key ()
 #endif
 }
 
+int
+_rl_prev_macro_key ()
+{
+  if (rl_executing_macro == 0)
+    return (0);
+
+  if (executing_macro_index == 0)
+    return (0);
+
+  executing_macro_index--;
+  return (rl_executing_macro[executing_macro_index]);
+}
+
 /* Save the currently executing macro on a stack of saved macros. */
 void
 _rl_push_executing_macro ()
