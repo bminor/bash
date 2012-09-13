@@ -1504,7 +1504,6 @@ static const struct {
   { "revert-all-at-newline",	&_rl_revert_all_at_newline,	0 },
   { "show-all-if-ambiguous",	&_rl_complete_show_all,		0 },
   { "show-all-if-unmodified",	&_rl_complete_show_unmodified,	0 },
-  { "show-mode-in-prompt",	&_rl_show_mode_in_prompt,	0 },
   { "skip-completed-text",	&_rl_skip_completed_text,	0 },
 #if defined (VISIBLE_STATS)
   { "visible-stats",		&rl_visible_stats,		0 },
@@ -1544,8 +1543,6 @@ hack_special_boolean_var (i)
       else
 	_rl_bell_preference = AUDIBLE_BELL;
     }
-  else if (_rl_stricmp (name, "show-mode-in-prompt") == 0)
-    _rl_reset_prompt ();
 }
 
 typedef int _rl_sv_func_t PARAMS((const char *));

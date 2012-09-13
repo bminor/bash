@@ -1830,7 +1830,7 @@ show_shell_usage (fp, extra)
     fprintf (fp, "\t--%s\n", long_args[i].name);
 
   fputs (_("Shell options:\n"), fp);
-  fputs (_("\t-irsD or -c command or -O shopt_option\t\t(invocation only)\n"), fp);
+  fputs (_("\t-ilrsD or -c command or -O shopt_option\t\t(invocation only)\n"), fp);
 
   for (i = 0, set_opts = 0; shell_builtins[i].name; i++)
     if (STREQ (shell_builtins[i].name, "set"))

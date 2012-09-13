@@ -305,6 +305,9 @@ assign_array_element_internal (entry, name, vname, sub, sublen, value, flags)
   else
     {
       ind = array_expand_index (entry, sub, sublen);
+      /* negative subscripts to indexed arrays count back from end */
+      if (ind < 0)
+	ind = array_max_index (array_cell (entry)) + 1 + ind;
       if (ind < 0)
 	{
 	  err_badarraysub (name);
@@ -542,6 +545,9 @@ assign_compound_array_list (var, nlist, flags)
 	  if (array_p (var))
 	    {
 	      ind = array_expand_index (var, w + 1, len);
+	      /* negative subscripts to indexed arrays count back from end */
+	      if (ind < 0)
+		ind = array_max_index (array_cell (var)) + 1 + ind;
 	      if (ind < 0)
 		{
 		  err_badarraysub (w);
@@ -742,6 +748,9 @@ unbind_array_element (var, sub)
   else
     {
       ind = array_expand_index (var, sub, len+1);
+      /* negative subscripts to indexed arrays count back from end */
+      if (ind < 0)
+	ind = array_max_index (array_cell (var)) + 1 + ind;
       if (ind < 0)
 	{
 	  builtin_error ("[%s]: %s", sub, _(bash_badsub_errmsg));

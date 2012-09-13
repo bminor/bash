@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sat Jul 14 14:31:31 EDT 2012
+.\"	Last Change: Tue Aug 28 17:20:54 EDT 2012
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2012 July 14" "GNU Bash 4.2"
+.TH BASH 1 "2012 August 28" "GNU Bash 4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -705,6 +705,7 @@ lexicographically using the current locale.
 When the \fB==\fP and \fB!=\fP operators are used, the string to the
 right of the operator is considered a pattern and matched according
 to the rules described below under \fBPattern Matching\fP.
+The \fB=\fP operator is equivalent to \fB==\fP.
 If the shell option
 .B nocasematch
 is enabled, the match is performed without regard to the case
@@ -1909,6 +1910,12 @@ A sample value is
 .if t \f(CW".:~:/usr"\fP.
 .if n ".:~:/usr".
 .TP
+.B CHILD_MAX
+Set the number of exited child status values for the shell to remember.
+Bash will not allow this value to be decreased below a Posix-mandated
+minimum, and there is a maximum value (currently 8192) that this may
+not exceed.
+.TP
 .B COLUMNS
 Used by the \fBselect\fP compound command to determine the terminal width
 when printing selection lists.  Automatically set in an interactive shell
@@ -2331,7 +2338,7 @@ The value of \fIp\fP determines whether or not the fraction is
 included.
 .IP
 If this variable is not set, \fBbash\fP acts as if it had the
-value \fB$\(aq\enreal\et%3lR\enuser\et%3lU\ensys\t%3lS\(aq\fP.
+value \fB$\(aq\enreal\et%3lR\enuser\et%3lU\ensys\e\t%3lS\(aq\fP.
 If the value is null, no timing information is displayed.
 A trailing newline is added when the format string is displayed.
 .PD 0
@@ -2456,6 +2463,12 @@ This syntax is also accepted by the
 .B declare
 builtin.  Individual array elements may be assigned to using the
 \fIname\fP[\fIsubscript\fP]=\fIvalue\fP syntax introduced above.
+When assigning to an indexed array, if
+.I name
+is subscripted by a negative number, that number is
+interpreted as relative to one greater than the maximum index of
+\fIname\fP, so negative indices count back from the end of the
+array, and an index of \-1 references the last element.
 .PP
 Any element of an array may be referenced using
 ${\fIname\fP[\fIsubscript\fP]}.  The braces are required to avoid
@@ -2486,9 +2499,10 @@ referencing the array with a subscript of 0.
 If the
 .I subscript
 used to reference an element of an indexed array
-evaluates to a number less than zero, it is used as
-an offset from one greater than the array's maximum index (so a subcript
-of -1 refers to the last element of the array).
+evaluates to a number less than zero, it is 
+interpreted as relative to one greater than the maximum index of the array,
+so negative indices count back from the end of the
+array, and an index of \-1 references the last element.
 .PP
 An array variable is considered set if a subscript has been assigned a
 value.  The null string is a valid value.
@@ -2497,6 +2511,7 @@ The
 .B unset
 builtin is used to destroy arrays.  \fBunset\fP \fIname\fP[\fIsubscript\fP]
 destroys the array element at index \fIsubscript\fP.
+Negative subscripts to indexed arrays are interpreted as described above.
 Care must be taken to avoid unwanted side effects caused by pathname
 expansion.
 \fBunset\fP \fIname\fP, where \fIname\fP is an array, or
@@ -2897,6 +2912,12 @@ is an array name subscripted by
 or
 .BR @ ,
 the value substituted is the number of elements in the array.
+If
+.I parameter
+is an indexed array name subscripted by a negative number, that number is
+interpreted as relative to one greater than the maximum index of
+\fIparameter\fP, so negative indices count back from the end of the
+array, and an index of \-1 references the last element.
 .TP
 ${\fIparameter\fP\fB#\fP\fIword\fP}
 .PD 0
@@ -4232,6 +4253,8 @@ is non-zero.
 .PD
 True if the strings are equal.  \fB=\fP should be used
 with the \fBtest\fP command for POSIX conformance.
+When used with the \fB[[\fP command, this performs pattern matching as
+described above (\fBCompound Commands\fP).
 .TP
 \fIstring1\fP \fB!=\fP \fIstring2\fP
 True if the strings are not equal.
@@ -5412,6 +5435,11 @@ words which have more than one possible completion without any
 possible partial completion (the possible completions don't share
 a common prefix) cause the matches to be listed immediately instead
 of ringing the bell.
+.TP
+.B show\-mode\-in\-prompt (Off)
+If set to \fBOn\fP, add a character to the beginning of the prompt
+indicating the editing mode: emacs (@), vi command (:) or vi
+insertion (+).
 .TP
 .B skip\-completed\-text (Off)
 If set to \fBOn\fP, this alters the default completion behavior when

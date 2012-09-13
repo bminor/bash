@@ -4497,6 +4497,10 @@ struct name_and_function {
 static struct name_and_function special_vars[] = {
   { "BASH_XTRACEFD", sv_xtracefd },
 
+#if defined (JOB_CONTROL)
+  { "CHILD_MAX", sv_childmax },
+#endif
+
 #if defined (READLINE)
 #  if defined (STRICT_POSIX)
   { "COLUMNS", sv_winsize },
@@ -5148,3 +5152,17 @@ sv_xtracefd (name)
 	internal_error (_("%s: %s: invalid value for trace file descriptor"), name, value_cell (v));
     }
 }
+
+#if defined (JOB_CONTROL)
+void
+sv_childmax (name)
+     char *name;
+{
+  char *tt;
+  int s;
+
+  tt = get_string_value (name);
+  s = (tt && *tt) ? atoi (tt) : 0;
+  set_maxchild (s);
+}
+#endif
