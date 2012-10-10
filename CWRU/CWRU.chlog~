@@ -3508,6 +3508,10 @@ redir.c
 				    9/8
 				    ---
 expr.c
+	- expr_streval: save and restore the value of `noeval' around any call
+	  to get_array_value, since that can end up recursively calling
+	  evalexp to perform array subscript evaluation.  Fixes bug reported
+	  by Dan Douglas <ormaaj@gmail.com>
 	- readtok: invalidate previous contents of `curlval' before freeing
 	  and reallocating tokstr (which, chances are, will get the same
 	  pointer as before and render curlval inconsistent).  Fixes other
@@ -3531,9 +3535,3 @@ lib/readline/display.c
 lib/readline/{terminal.c,rlprivate.h}
 	- move CUSTOM_REDISPLAY_FUNC and CUSTOM_INPUT_FUNC defines from
 	  terminal.c to rlprivate.h so other files can use them
-
-expr.c
-	- expr_streval: if noeval is non-zero, just return 0 right away,
-	  short-circuiting evaluation completely.  readtok will leave curtok
-	  set correctly without re-entering the evaluator at all.  Rest of
-	  fix for bug reported by Dan Douglas <ormaaj@gmail.com>

@@ -1296,6 +1296,7 @@ redir_varassign (redir, fd)
   if (v == 0 || readonly_p (v) || noassign_p (v))
     return BADVAR_REDIRECT;
 
+  stupidly_hack_special_variables (w->word);
   return 0;
 }
 

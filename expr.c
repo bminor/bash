@@ -1,6 +1,6 @@
 /* expr.c -- arithmetic expression evaluation. */
 
-/* Copyright (C) 1990-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1990-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -63,7 +63,7 @@
  Implementation is a recursive-descent parser.
 
  Chet Ramey
- chet@ins.CWRU.Edu
+ chet@po.cwru.edu
 */
 
 #include "config.h"
@@ -93,7 +93,11 @@
 /* Maximum amount of recursion allowed.  This prevents a non-integer
    variable such as "num=num+2" from infinitely adding to itself when
    "let num=num+2" is given. */
+#if 0
 #define MAX_EXPR_RECURSION_LEVEL 1024
+#else
+#define MAX_EXPR_RECURSION_LEVEL 16
+#endif
 
 /* The Tokens.  Singing "The Lion Sleeps Tonight". */
 
@@ -340,8 +344,8 @@ expr_bind_array_element (tok, ind, rhs)
 
   sprintf (lhs, "%s[%s]", vname, istr);		/* XXX */
   
-  expr_bind_variable (lhs, rhs);
 /*itrace("expr_bind_array_element: %s=%s", lhs, rhs);*/
+  expr_bind_variable (lhs, rhs);
   free (vname);
   free (lhs);
 }
@@ -479,6 +483,7 @@ expassign ()
 	  lvalue = value;
 	}
 
+      /* XXX - watch out for pointer aliasing issues here */
       lhs = savestring (tokstr);
       /* save ind in case rhs is string var and evaluation overwrites it */
       lind = curlval.ind;
@@ -558,6 +563,7 @@ expassign ()
       FREE (tokstr);
       tokstr = (char *)NULL;		/* For freeing on errors. */
     }
+
   return (value);
 }
 
@@ -966,6 +972,7 @@ exp0 ()
     }
   else if (curtok == LPAR)
     {
+      /* XXX - save curlval here?  Or entire expression context? */
       readtok ();
       val = EXP_HIGHEST ();
 
@@ -1011,11 +1018,11 @@ exp0 ()
  	    }
  	  else
  	    {
+	      /* XXX - watch out for pointer aliasing issues here */
 	      if (stok == STR)	/* free new tokstr before old one is restored */
 		FREE (tokstr);
 	      RESTORETOK (&ec);
  	    }
-
 	}
 	  
       readtok ();
@@ -1064,6 +1071,12 @@ expr_streval (tok, e, lvalue)
 #if defined (ARRAY_VARS)
   arrayind_t ind;
 #endif
+
+/*itrace("expr_streval: %s: noeval = %d", tok, noeval);*/
+  /* If we are suppressing evaluation, just short-circuit here instead of
+     going through the rest of the evaluator. */
+  if (noeval)
+    return (0);
 
   /* [[[[[ */
 #if defined (ARRAY_VARS)
@@ -1242,6 +1255,10 @@ readtok ()
 #endif /* ARRAY_VARS */
 
       *cp = '\0';
+      /* XXX - watch out for pointer aliasing issues here */
+      if (curlval.tokstr && curlval.tokstr == tokstr)
+	init_lvalue (&curlval);
+
       FREE (tokstr);
       tokstr = savestring (tp);
       *cp = c;

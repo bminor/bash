@@ -2251,12 +2251,6 @@ rl_message (va_alist)
       rl_save_prompt ();
       msg_saved_prompt = 1;
     }
-  else if (local_prompt != saved_local_prompt)
-    {
-      FREE (local_prompt);
-      FREE (local_prompt_prefix);
-      local_prompt = (char *)NULL;
-    }
   rl_display_prompt = msg_buf;
   local_prompt = expand_prompt (msg_buf, &prompt_visible_length,
 					 &prompt_last_invisible,
@@ -2284,12 +2278,6 @@ rl_message (format, arg1, arg2)
     {
       rl_save_prompt ();
       msg_saved_prompt = 1;
-    }
-  else if (local_prompt != saved_local_prompt)
-    {
-      FREE (local_prompt);
-      FREE (local_prompt_prefix);
-      local_prompt = (char *)NULL;
     }
   local_prompt = expand_prompt (msg_buf, &prompt_visible_length,
 					 &prompt_last_invisible,
