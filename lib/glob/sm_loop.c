@@ -145,8 +145,9 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 		      if (EXTMATCH (c, newn, se, p, pe, flags) == 0)
 			return (0);
 		    }
-		  /* We didn't match.  If we have a `?(...)', that's failure. */
-		  return FNM_NOMATCH;
+		  /* We didn't match.  If we have a `?(...)', we can match 0
+		     or 1 times. */
+		  return 0;
 		}
 #endif
 	      else if (c == L('?'))
@@ -191,6 +192,18 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 	     Otherwise, we need to match that last character. */
 	  if (p == pe && (c == L('?') || c == L('*')))
 	    return (0);
+
+	  /* If we've hit the end of the string and the rest of the pattern
+	     is something that matches the empty string, we can succeed. */
+#if defined (EXTENDED_GLOB)
+	  if (n == se && ((flags & FNM_EXTMATCH) && (c == L('!') || c == L('?')) && *p == L('(')))
+	    {
+	      --p;
+	      if (EXTMATCH (c, n, se, p, pe, flags) == 0)
+		return (c == L('!') ? FNM_NOMATCH : 0);
+	      return (c == L('!') ? 0 : FNM_NOMATCH);
+	    }
+#endif
 
 	  /* General case, use recursion. */
 	  {

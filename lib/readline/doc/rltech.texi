@@ -449,7 +449,8 @@ source.
 Readline queries for available input when implementing intra-key-sequence
 timeouts during input and incremental searches.
 This may use an application-specific timeout before returning a value;
-Readline uses the value passed to @code{rl_set_keyboard_input_timeout()}.
+Readline uses the value passed to @code{rl_set_keyboard_input_timeout()}
+or the value of the user-settable @var{keyseq-timeout} variable.
 This is designed for use by functions using Readline's callback interface
 (@pxref{Alternate Interface}), which may not use the traditional
 @code{read(2)} and file descriptor interface.

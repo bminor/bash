@@ -3622,3 +3622,14 @@ lib/readline/input.c
 
 lib/readline/doc/rltech.texi
 	- rl_input_available_hook: document
+
+				   9/27
+				   ----
+lib/glob/sm_loop.c:
+	- GMATCH: after one or more `*', an instance of ?(x) can match zero or
+	  1 times (unlike ?, which has to match one character).  The old code
+	  failed if it didn't match at least once.  Fixes `a*?(x)' bug.
+	- GMATCH: if we hit the end of the search string, but not the end of
+	  the pattern, and the rest of the pattern is something that can
+	  match the NUL at the end of the search string, we should successfully
+	  match.  Fixes `a*!(x)' bug reported by <hans1worst@gmail.com>
