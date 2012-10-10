@@ -1678,12 +1678,14 @@ and @var{incr}, an optional increment, is an integer.
 When integers are supplied, the expression expands to each number between
 @var{x} and @var{y}, inclusive.
 Supplied integers may be prefixed with @samp{0} to force each term to have the
-same width.  When either @var{x} or @var{y} begins with a zero, the shell
+same width.
+When either @var{x} or @var{y} begins with a zero, the shell
 attempts to force all generated terms to contain the same number of digits,
 zero-padding where necessary.
 When characters are supplied, the expression expands to each character
-lexicographically between @var{x} and @var{y}, inclusive.  Note that
-both @var{x} and @var{y} must be of the same type.
+lexicographically between @var{x} and @var{y}, inclusive,
+using the default C locale.
+Note that both @var{x} and @var{y} must be of the same type.
 When the increment is supplied, it is used as the difference between
 each term.  The default increment is 1 or -1 as appropriate.
 
@@ -2334,7 +2336,7 @@ Matches any single character.
 @item [@dots{}]
 Matches any one of the enclosed characters.  A pair of characters
 separated by a hyphen denotes a @var{range expression};
-any character that sorts between those two characters, inclusive,
+any character that falls between those two characters, inclusive,
 using the current locale's collating sequence and character set,
 is matched.  If the first character following the
 @samp{[} is a @samp{!}  or a @samp{^}

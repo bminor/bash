@@ -442,19 +442,6 @@ to get a character from the input stream.  By default, it is set to
 (@pxref{Character Input}).
 @end deftypevar
 
-@deftypevar {rl_hook_func_t *} rl_input_available_hook
-If non-zero, Readline will use this function's return value when it needs
-to determine whether or not there is available input on the current input
-source.
-Readline queries for available input when implementing intra-key-sequence
-timeouts during input and incremental searches.
-This may use an application-specific timeout before returning a value;
-Readline uses the value passed to @code{rl_set_keyboard_input_timeout()}.
-This is designed for use by functions using Readline's callback interface
-(@pxref{Alternate Interface}), which may not use the traditional
-@code{read(2)} and file descriptor interface.
-@end deftypevar
-
 @deftypevar {rl_voidfunc_t *} rl_redisplay_function
 If non-zero, Readline will call indirectly through this pointer
 to update the display with the current contents of the editing buffer.

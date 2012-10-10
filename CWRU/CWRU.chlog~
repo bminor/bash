@@ -3573,3 +3573,42 @@ configure.ac
 				   ----
 subst.c,execute_cmd.c,lib/glob/sm_loop.c,lib/sh/shquote.c
 	- minor code cleanups from Joachim Schmitz <jojo@schmitz-digital.de>
+
+lib/readline/colors.h
+	- workaround for HP NonStop compiler issue with <stdbool.h> from
+	  Joachim Schmitz <jojo@schmitz-digital.de>
+
+				   9/17
+				   ----
+builtins/printf.def
+	- printf_builtin: handle localtime returning NULL, as can happen when
+	  encountering overflow.  Bug report and initial fix from
+	  Eduardo A. Bustamante L√≥pez <dualbus@gmail.com>
+
+doc/{bash.1,bashref.texi}
+	- emphasize that brace expansion using character ranges ({a..c}) acts
+	  as if the C locale were in use.  Prompted by message from
+	  Marcel Giannelia <info@skeena.net>
+
+				   9/20
+				   ----
+lib/sh/wcsnwidth.c
+	- wcsnwidth: new function, variant of wcwidth, returns the number of
+	  wide characters from a string that will be displayed to not exceed
+	  a specified max column position
+
+				   9/21
+				   ----
+builtins/help.def
+	- show_builtin_command_help: break code that displays the short-doc
+	  for each builtin in two columns into a new function: dispcolumn
+	- wdispcolumn: multibyte-char version of dispcolumn; uses wide
+	  chars and printf "%ls" format.  Fixes problem reported by
+	  Nguy·ªn Th√°i Ng·ªc Duy <pclouds@gmail.c
+
+				   9/22
+				   ----
+execute_cmd.c
+	- execute_disk_command: before running the command-not-found hook,
+	  call kill_current_pipeline() to make sure we don't add processes
+	  to an existing pipeline or wait for processes erroneously

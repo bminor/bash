@@ -714,7 +714,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       dispose_exec_redirects ();
 #if defined (PROCESS_SUBSTITUTION)
       if (saved_fifo)
-	free (ofifo_list);
+	free ((void *)ofifo_list);
 #endif
       return (last_command_exit_value = EXECUTION_FAILURE);
     }
@@ -1018,7 +1018,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       nfifo = num_fifos ();
       if (nfifo > ofifo)
 	close_new_fifos ((char *)ofifo_list, osize);
-      free (ofifo_list);
+      free ((void *)ofifo_list);
     }
 #endif
 
@@ -2859,7 +2859,8 @@ displen (s)
 {
 #if defined (HANDLE_MULTIBYTE)
   wchar_t *wcstr;
-  size_t wclen, slen;
+  size_t slen;
+  int wclen;
 
   wcstr = 0;
   slen = mbstowcs (wcstr, s, 0);
@@ -2869,7 +2870,7 @@ displen (s)
   mbstowcs (wcstr, s, slen + 1);
   wclen = wcswidth (wcstr, slen);
   free (wcstr);
-  return ((int)wclen);
+  return (wclen < 0 ? STRLEN(s) : wclen);
 #else
   return (STRLEN (s));
 #endif
@@ -4898,6 +4899,9 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 	      internal_error (_("%s: command not found"), pathname);
 	      exit (EX_NOTFOUND);	/* Posix.2 says the exit status is 127 */
 	    }
+
+	  /* May need to reinitialize more of the job control state here. */
+	  kill_current_pipeline ();
 
 	  wl = make_word_list (make_word (NOTFOUND_HOOK), words);
 	  exit (execute_shell_function (hookf, wl));

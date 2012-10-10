@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Tue Aug 28 17:20:54 EDT 2012
+.\"	Last Change: Mon Sep 17 09:26:34 EDT 2012
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2012 August 28" "GNU Bash 4.2"
+.TH BASH 1 "2012 September 17" "GNU Bash 4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2600,12 +2600,14 @@ and \fIincr\fP, an optional increment, is an integer.
 When integers are supplied, the expression expands to each number between
 \fIx\fP and \fIy\fP, inclusive.
 Supplied integers may be prefixed with \fI0\fP to force each term to have the
-same width.  When either \fIx\fP or \fPy\fP begins with a zero, the shell
+same width.
+When either \fIx\fP or \fPy\fP begins with a zero, the shell
 attempts to force all generated terms to contain the same number of digits,
 zero-padding where necessary.
 When characters are supplied, the expression expands to each character
-lexicographically between \fIx\fP and \fIy\fP, inclusive.  Note that
-both \fIx\fP and \fIy\fP must be of the same type.
+lexicographically between \fIx\fP and \fIy\fP, inclusive,
+using the default C locale.
+Note that both \fIx\fP and \fIy\fP must be of the same type.
 When the increment is supplied, it is used as the difference between
 each term.  The default increment is 1 or -1 as appropriate.
 .PP
@@ -3347,7 +3349,7 @@ Matches any single character.
 Matches any one of the enclosed characters.  A pair of characters
 separated by a hyphen denotes a
 \fIrange expression\fP;
-any character that sorts between those two characters, inclusive,
+any character that falls between those two characters, inclusive,
 using the current locale's collating sequence and character set,
 is matched.  If the first character following the
 .B [

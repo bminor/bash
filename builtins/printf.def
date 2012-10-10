@@ -472,7 +472,12 @@ printf_builtin (list)
 		sv_tz ("TZ");		/* XXX -- just make sure */
 #endif
 		tm = localtime (&secs);
-		n = strftime (timebuf, sizeof (timebuf), timefmt, tm);
+		if (tm == 0)
+		  {
+		    secs = 0;
+		    tm = localtime (&secs);
+		  }
+		n = tm ? strftime (timebuf, sizeof (timebuf), timefmt, tm) : 0;
 		free (timefmt);
 		if (n == 0)
 		  timebuf[0] = '\0';

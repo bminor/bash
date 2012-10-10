@@ -367,7 +367,6 @@ dispcolumn (i, buf, bufsize, width, height)
   printf ("%s\n", buf);
 }
 
-#if defined (HANDLE_MULTIBYTE)
 static void
 wdispcolumn (i, buf, bufsize, width, height)
      int i;
@@ -379,7 +378,7 @@ wdispcolumn (i, buf, bufsize, width, height)
   int displen;
   char *helpdoc;
   wchar_t *wcstr;
-  size_t slen, n;
+  size_t slen;
   int wclen;
 
   /* first column */
@@ -395,25 +394,16 @@ wdispcolumn (i, buf, bufsize, width, height)
 
   /* No bigger than the passed max width */
   if (slen >= width)
-    slen = width - 2;
+    slen = width - 1;
   wcstr = (wchar_t *)xmalloc (sizeof (wchar_t) * (width + 2));
-  n = mbstowcs (wcstr+1, helpdoc, slen + 1);
-  wcstr[n+1] = L'\0';
+  mbstowcs (wcstr+1, helpdoc, slen + 1);
 
-  /* Turn tabs and newlines into spaces for column display, since wcwidth
-     returns -1 for them */
-  for (j = 1; j < n; j++)
-    if (wcstr[j] == L'\n' || wcstr[j] == L'\t')
-      wcstr[j] = L' ';
-
-  displen = wcsnwidth (wcstr+1, slen, width - 2) + 1;	/* +1 for ' ' or '*' */
+  displen = wcsnwidth (wcstr+1, slen, width - 2);
   
   wcstr[0] = (shell_builtins[i].flags & BUILTIN_ENABLED) ? L' ' : L'*';
 
-  /* This assumes each wide char takes up one column position when displayed */
   wcstr[width - 2] = L'>';		/* indicate truncation */
   wcstr[width - 1] = L'\0';
-
   printf ("%ls", wcstr);
   if (((i << 1) >= num_shell_builtins) || (i+height >= num_shell_builtins))
     {
@@ -421,7 +411,7 @@ wdispcolumn (i, buf, bufsize, width, height)
       return;
     }
 
-  /* at least one space */
+  /* two spaces */
   for (j = displen; j < width; j++)
     putc (' ', stdout);
 
@@ -437,28 +427,19 @@ wdispcolumn (i, buf, bufsize, width, height)
 
   /* Reuse wcstr since it is already width wide chars long */
   if (slen >= width)
-    slen = width - 2;
-  n = mbstowcs (wcstr+1, helpdoc, slen + 1);
-  wcstr[n+1] = L'\0';		/* make sure null-terminated */
+    slen = width - 1;
+  mbstowcs (wcstr+1, helpdoc, slen + 1);
 
-  /* Turn tabs and newlines into spaces for column display */
-  for (j = 1; j < n; j++)
-    if (wcstr[j] == L'\n' || wcstr[j] == L'\t')
-      wcstr[j] = L' ';
-
-  displen = wcsnwidth (wcstr+1, slen, width - 2);
+  displen = wcsnwidth (wcstr+1, slen, width - 3);
   
   wcstr[0] = (shell_builtins[i+height].flags & BUILTIN_ENABLED) ? L' ' : L'*';
 
-  /* This assumes each wide char takes up one column position when displayed */
   wcstr[width - 3] = L'>';		/* indicate truncation */
   wcstr[width - 2] = L'\0';
-
   printf ("%ls\n", wcstr);
 
   free (wcstr);
 }
-#endif /* HANDLE_MULTIBYTE */
 
 static void
 show_builtin_command_help ()
@@ -492,12 +473,7 @@ A star (*) next to a name means that the command is disabled.\n\
     {
       QUIT;
 
-#if defined (HANDLE_MULTIBYTE)
-      if (MB_CUR_MAX > 1)
-	wdispcolumn (i, blurb, sizeof (blurb), width, height);
-      else
-#endif
-	dispcolumn (i, blurb, sizeof (blurb), width, height);
+      wdispcolumn (i, blurb, sizeof (blurb), width, height);
     }
 }
 #endif /* HELP_BUILTIN */

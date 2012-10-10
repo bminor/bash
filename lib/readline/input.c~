@@ -297,9 +297,6 @@ _rl_input_available ()
 #endif
   int tty;
 
-  if (rl_input_available_hook)
-    return (*rl_input_available_hook) ();
-
   tty = fileno (rl_instream);
 
 #if defined (HAVE_SELECT)

@@ -92,7 +92,7 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   mktime.c strftime.c mbschr.c zcatfd.c zmapfd.c winsize.c eaccess.c \
 	   wcsdup.c fpurge.c zgetline.c mbscmp.c uconvert.c ufuncs.c \
 	   casemod.c dprintf.c input_avail.c mbscasecmp.c fnxform.c \
-	   strchrnul.c unicode.c wcswidth.c shmbchar.c
+	   strchrnul.c unicode.c wcswidth.c wcsnwidth.c shmbchar.c
 
 # The header files for this library.
 HSOURCES = 
@@ -106,7 +106,8 @@ OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o strnlen.o \
 	  strtrans.o snprintf.o mailstat.o fmtulong.o \
 	  fmtullong.o fmtumax.o zcatfd.o zmapfd.o winsize.o wcsdup.o \
 	  fpurge.o zgetline.o mbscmp.o uconvert.o ufuncs.o casemod.o \
-	  input_avail.o mbscasecmp.o fnxform.o unicode.o shmbchar.o ${LIBOBJS}
+	  input_avail.o mbscasecmp.o fnxform.o unicode.o shmbchar.o \
+	  wcsnwidth.o ${LIBOBJS}
 
 SUPPORT = Makefile
 
@@ -197,6 +198,7 @@ uconvert.o: uconvert.c
 ufuncs.o: ufuncs.c
 vprint.o: vprint.c
 wcsdup.o: wcsdup.c
+wcsnwidth.o: wcsnwidth.c
 wcswidth.o: wcswidth.c
 mbschr.o: mbschr.c
 zcatfd.o: zcatfd.c
@@ -269,6 +271,7 @@ uconvert.o: ${BUILD_DIR}/config.h
 ufuncs.o: ${BUILD_DIR}/config.h
 vprint.o: ${BUILD_DIR}/config.h
 wcsdup.o: ${BUILD_DIR}/config.h
+wcsnwidth.o: ${BUILD_DIR}/config.h
 wcswidth.o: ${BUILD_DIR}/config.h
 mbschr.o: ${BUILD_DIR}/config.h
 zcatfd.o: ${BUILD_DIR}/config.h
@@ -520,6 +523,9 @@ fmtumax.o: ${topdir}/bashintl.h ${LIBINTL_H} ${BASHINCDIR}/gettext.h
 wcsdup.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 wcsdup.o: ${BASHINCDIR}/stdc.h
 wcsdup.o: ${topdir}/xmalloc.h
+
+wcsnwidth.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+wcsnwidth.o: ${BASHINCDIR}/stdc.h
 
 wcswidth.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 wcswidth.o: ${BASHINCDIR}/stdc.h

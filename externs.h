@@ -467,6 +467,11 @@ extern unsigned int fsleep __P((unsigned int, unsigned int));
 extern int u32cconv __P((unsigned long, char *));
 extern void u32reset __P((void));
 
+/* declarations for functions defined in lib/sh/wcsnwidth.c */
+#if defined (HANDLE_MULTIBYTE)
+extern int wcsnwidth __P((const wchar_t *, size_t, int));
+#endif
+
 /* declarations for functions defined in lib/sh/winsize.c */
 extern void get_new_window_size __P((int, int *, int *));
 
