@@ -255,8 +255,13 @@ int force_fignore = 1;
 int dircomplete_spelling = 0;
 
 /* Expand directory names during word/filename completion. */
+#if DIRCOMPLETE_EXPAND_DEFAULT
+int dircomplete_expand = 1;
+int dircomplete_expand_relpath = 1;
+#else
 int dircomplete_expand = 0;
 int dircomplete_expand_relpath = 0;
+#endif
 
 /* When non-zero, perform `normal' shell quoting on completed filenames
    even when the completed name contains a directory name with a shell

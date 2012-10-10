@@ -7875,7 +7875,7 @@ comsub:
 	  temp = nameref_cell (var);
 	  if (temp && *temp && valid_array_reference (temp))
 	    {
-	      tdesc = parameter_brace_expand_word (temp, SPECIAL_VAR (temp, 0), quoted, pflags, (arrayind_t *)NULL);
+	      tdesc = parameter_brace_expand_word (temp, SPECIAL_VAR (temp, 0), quoted, pflags, (int *)NULL);
 	      if (tdesc == &expand_wdesc_error || tdesc == &expand_wdesc_fatal)
 		return (tdesc);
 	      ret = tdesc;

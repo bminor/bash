@@ -252,7 +252,9 @@ static const struct {
   { "noprofile", Int, &no_profile, (char **)0x0 },
   { "norc", Int, &no_rc, (char **)0x0 },
   { "posix", Int, &posixly_correct, (char **)0x0 },
+#if defined (WORDEXP_OPTION)
   { "protected", Int, &protected_mode, (char **)0x0 },
+#endif
   { "rcfile", Charp, (int *)0x0, &bashrc_file },
 #if defined (RESTRICTED_SHELL)
   { "restricted", Int, &restricted, (char **)0x0 },

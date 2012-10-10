@@ -698,7 +698,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
   if (variable_context != 0)
     {
       ofifo = num_fifos ();
-      ofifo_list = copy_fifo_list ((int *)&osize);
+      ofifo_list = copy_fifo_list (&osize);
       saved_fifo = 1;
     }
   else
@@ -1017,7 +1017,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
     {
       nfifo = num_fifos ();
       if (nfifo > ofifo)
-	close_new_fifos ((char *)ofifo_list, osize);
+	close_new_fifos (ofifo_list, osize);
       free (ofifo_list);
     }
 #endif

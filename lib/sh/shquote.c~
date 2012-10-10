@@ -222,7 +222,7 @@ sh_backslash_quote (string, table, flags)
 
   result = (char *)xmalloc (2 * strlen (string) + 1);
 
-  backslash_table = table ? table : (char *)bstab;
+  backslash_table = table ? table : bstab;
   for (r = result, s = string; s && (c = *s); s++)
     {
       if (backslash_table[c] == 1)

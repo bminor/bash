@@ -3537,3 +3537,43 @@ expr.c
 	  short-circuiting evaluation completely.  readtok will leave curtok
 	  set correctly without re-entering the evaluator at all.  Rest of
 	  fix for bug reported by Dan Douglas <ormaaj@gmail.com>
+
+				   9/11
+				   ----
+
+parse.y
+	- parse_comsub: make sure the `reserved word ok in this context' flag
+	  is preserved after we read `do' followed by whitespace.  Fixes bug
+	  reported by Benoit Vaugon <benoit.vaugon@gmail.com>
+
+				   9/13
+				   ----
+configure.ac,config.h.in
+	- enable-direxpand-default: new configure option, turns the `direxpand'
+	  shell option on by default
+
+bashline.c
+	- dircomplete_expand, dircomplete_expand_relpath: initialize to 1 if
+	  DIRCOMPLETE_EXPAND_DEFAULT is defined and non-zero
+
+doc/bashref.texi
+	- enable-direxpand-default: document new configure option
+
+				   9/14
+				   ----
+shell.c
+	- --protected: make option valid only when wordexp is compiled into
+	  the shell.  Fix from Roman Rakus <rrakus@redhat.com>
+
+configure.ac
+	- HP NonStop (*-nsk*): compile --without-bash-malloc. Change from
+	  Joachim Schmitz <jojo@schmitz-digital.de>
+
+				   9/16
+				   ----
+subst.c,execute_cmd.c,lib/glob/sm_loop.c,lib/sh/shquote.c
+	- minor code cleanups from Joachim Schmitz <jojo@schmitz-digital.de>
+
+lib/readline/colors.h
+	- workaround for HP NonStop compiler issue with <stdbool.h> from
+	  Joachim Schmitz <jojo@schmitz-digital.de>

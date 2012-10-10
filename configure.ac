@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.2, version 4.050])dnl
+AC_REVISION([for Bash 4.2, version 4.052])dnl
 
 define(bashvers, 4.2)
 define(relstatus, maint)
@@ -89,6 +89,7 @@ sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
 *-beos*)	opt_bash_malloc=no ;;	# they say it's suitable
 *-cygwin*)	opt_bash_malloc=no ;;	# Cygnus's CYGWIN environment
 *-opennt*|*-interix*)	opt_bash_malloc=no ;;	# Interix, now owned by Microsoft
+*-nsk*)		opt_bash_malloc=no ;;	# HP NonStop
 esac
 
 # memory scrambling on free()
@@ -188,6 +189,7 @@ opt_single_longdoc_strings=yes
 opt_casemod_attrs=yes
 opt_casemod_expansions=yes
 opt_extglob_default=no
+opt_dircomplete_expand_default=no
 
 dnl options that affect how bash is compiled and linked
 opt_static_link=no
@@ -222,6 +224,7 @@ AC_ARG_ENABLE(cond-command, AC_HELP_STRING([--enable-cond-command], [enable the 
 AC_ARG_ENABLE(cond-regexp, AC_HELP_STRING([--enable-cond-regexp], [enable extended regular expression matching in conditional commands]), opt_cond_regexp=$enableval)
 AC_ARG_ENABLE(coprocesses, AC_HELP_STRING([--enable-coprocesses], [enable coprocess support and the coproc reserved word]), opt_coproc=$enableval)
 AC_ARG_ENABLE(debugger, AC_HELP_STRING([--enable-debugger], [enable support for bash debugger]), opt_debugger=$enableval)
+AC_ARG_ENABLE(direxpand-default, AC_HELP_STRING([--enable-direxpand-default], [enable the direxpand shell option by default]), opt_dircomplete_expand_default=$enableval)
 AC_ARG_ENABLE(directory-stack, AC_HELP_STRING([--enable-directory-stack], [enable builtins pushd/popd/dirs]), opt_dirstack=$enableval)
 AC_ARG_ENABLE(disabled-builtins, AC_HELP_STRING([--enable-disabled-builtins], [allow disabled builtins to still be invoked]), opt_disabled_builtins=$enableval)
 AC_ARG_ENABLE(dparen-arithmetic, AC_HELP_STRING([--enable-dparen-arithmetic], [include ((...)) command]), opt_dparen_arith=$enableval)
@@ -340,6 +343,9 @@ AC_DEFINE(CASEMOD_ATTRS)
 fi
 if test $opt_casemod_expansions = yes; then
 AC_DEFINE(CASEMOD_EXPANSIONS)
+fi
+if test $opt_dircomplete_expand_default = yes; then
+AC_DEFINE(DIRCOMPLETE_EXPAND_DEFAULT)
 fi
 
 if test $opt_memscramble = yes; then
