@@ -1592,6 +1592,7 @@ typedef struct cplist
     struct cpelement *head;
     struct cpelement *tail;
     int ncoproc;
+    int lock;
   }
 cplist_t;
 
@@ -1609,7 +1610,7 @@ static void cpl_prune __P((void));
 static void coproc_free __P((struct coproc *));
 
 /* Will go away when there is fully-implemented support for multiple coprocs. */
-Coproc sh_coproc = { 0, NO_PID, -1, -1, 0, 0, 0, 0 };
+Coproc sh_coproc = { 0, NO_PID, -1, -1, 0, 0, 0, 0, 0 };
 
 cplist_t coproc_list = {0, 0, 0};
 
@@ -1859,7 +1860,7 @@ coproc_init (cp)
   cp->c_pid = NO_PID;
   cp->c_rfd = cp->c_wfd = -1;
   cp->c_rsave = cp->c_wsave = -1;
-  cp->c_flags = cp->c_status = 0;  
+  cp->c_flags = cp->c_status = cp->c_lock = 0;
 }
 
 struct coproc *
@@ -1875,14 +1876,14 @@ coproc_alloc (name, pid)
   cp = &sh_coproc;
 #endif
   coproc_init (cp);
+  cp->c_lock = 2;
 
-  cp->c_name = savestring (name);
   cp->c_pid = pid;
-
+  cp->c_name = savestring (name);
 #if MULTIPLE_COPROCS
   cpl_add (cp);
 #endif
-
+  cp->c_lock = 0;
   return (cp);
 }
 
@@ -1897,9 +1898,13 @@ void
 coproc_dispose (cp)
      struct coproc *cp;
 {
+  sigset_t set, oset;
+
   if (cp == 0)
     return;
 
+  BLOCK_SIGNAL (SIGCHLD, set, oset);
+  cp->c_lock = 3;
   coproc_unsetvars (cp);
   FREE (cp->c_name);
   coproc_close (cp);
@@ -1907,7 +1912,9 @@ coproc_dispose (cp)
   coproc_free (cp);
 #else
   coproc_init (cp);
+  cp->c_lock = 0;
 #endif
+  UNBLOCK_SIGNAL (oset);
 }
 
 /* Placeholder for now.  Will require changes for multiple coprocs */
@@ -2055,17 +2062,14 @@ coproc_pidchk (pid, status)
 #endif
   if (cp)
     {
-#if 0
-      itrace("coproc_pidchk: pid %d has died", pid);
-#endif
+      cp->c_lock = 4;
       cp->c_status = status;
       cp->c_flags |= COPROC_DEAD;
       cp->c_flags &= ~COPROC_RUNNING;
-#if MULTIPLE_COPROCS
-      coproc_dispose (cp);
-#else
-      coproc_unsetvars (cp);
-#endif
+      /* Don't dispose the coproc or unset the COPROC_XXX variables because
+	 this is executed in a signal handler context.  Wait until coproc_reap
+	 takes care of it. */
+      cp->c_lock = 0;
     }
 }
 
@@ -2159,6 +2163,7 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
   pid_t coproc_pid;
   Coproc *cp;
   char *tcmd;
+  sigset_t set, oset;
 
   /* XXX -- can be removed after changes to handle multiple coprocs */
 #if !MULTIPLE_COPROCS
@@ -2173,12 +2178,16 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
   sh_openpipe ((int *)&rpipe);	/* 0 = parent read, 1 = child write */
   sh_openpipe ((int *)&wpipe); /* 0 = child read, 1 = parent write */
 
+  BLOCK_SIGNAL (SIGCHLD, set, oset);
+
   coproc_pid = make_child (savestring (tcmd), 1);
+
   if (coproc_pid == 0)
     {
       close (rpipe[0]);
       close (wpipe[1]);
 
+      UNBLOCK_SIGNAL (oset);
       estat = execute_in_subshell (command, 1, wpipe[0], rpipe[1], fds_to_close);
 
       fflush (stdout);
@@ -2198,6 +2207,8 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
   SET_CLOSE_ON_EXEC (cp->c_wfd);
 
   coproc_setvars (cp);
+
+  UNBLOCK_SIGNAL (oset);
 
 #if 0
   itrace ("execute_coproc: [%d] %s", coproc_pid, the_printed_command);

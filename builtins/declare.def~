@@ -489,6 +489,14 @@ declare_internal (list, local_var)
 	      if (refvar)
 		var = mkglobal ? find_global_variable (nameref_cell (refvar)) : find_variable (nameref_cell (refvar));
 	    }
+#if defined (ARRAY_VARS)
+	  else if (var && (array_p (var) || assoc_p (var)) && (flags_on & att_nameref))
+	    {
+	      builtin_error (_("%s: reference variable cannot be an array"), var->name);
+	      assign_error++;
+	      NEXT_VARIABLE ();
+	    }
+#endif
 	
 	  if (var == 0)
 	    var = mkglobal ? find_global_variable (name) : find_variable (name);
@@ -510,13 +518,6 @@ declare_internal (list, local_var)
 		  var = bind_variable (name, (char *)NULL, 0);
 		  VSETATTR (var, att_invisible);
 		}
-	    }
-	  /* Can't take an existing array variable and make it a nameref */
-	  else if ((array_p (var) || assoc_p (var)) && (flags_on & att_nameref))
-	    {
-	      builtin_error (_("%s: reference variable cannot be an array"), name);
-	      assign_error++;
-	      NEXT_VARIABLE ();
 	    }
 
 	  /* Cannot use declare +r to turn off readonly attribute. */ 

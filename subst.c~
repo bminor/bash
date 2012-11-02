@@ -7253,9 +7253,8 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 
   if (temp == &expand_param_error || temp == &expand_param_fatal)
     {
-      FREE (name);
-      FREE (value);
-      return (temp == &expand_param_error ? &expand_wdesc_error : &expand_wdesc_fatal);
+      temp = (char *)NULL;
+      goto bad_substitution;
     }
 
 #if defined (ARRAY_VARS)

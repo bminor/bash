@@ -1582,7 +1582,7 @@ rl_display_match_list (matches, len, max)
 	  /* Have we reached the end of this line? */
 	  if (matches[i+1])
 	    {
-	      if (limit == 1 || (i && (limit > 1) && (i % limit) == 0))
+	      if (i && (limit > 1) && (i % limit) == 0)
 		{
 		  rl_crlf ();
 		  lines++;

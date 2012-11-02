@@ -356,6 +356,7 @@ typedef struct coproc {
   int c_wsave;
   int c_flags;
   int c_status;
+  int c_lock;
 } Coproc;
 
 typedef struct coproc_com {
