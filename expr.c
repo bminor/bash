@@ -1009,6 +1009,12 @@ expr_streval (tok, e, lvalue)
   arrayind_t ind;
 #endif
 
+/*itrace("expr_streval: %s: noeval = %d", tok, noeval);*/
+  /* If we are suppressing evaluation, just short-circuit here instead of
+     going through the rest of the evaluator. */
+  if (noeval)
+    return (0);
+
   /* [[[[[ */
 #if defined (ARRAY_VARS)
   v = (e == ']') ? array_variable_part (tok, (char **)0, (int *)0) : find_variable (tok);
@@ -1182,6 +1188,10 @@ readtok ()
 #endif /* ARRAY_VARS */
 
       *cp = '\0';
+      /* XXX - watch out for pointer aliasing issues here */
+      if (curlval.tokstr && curlval.tokstr == tokstr)
+	init_lvalue (&curlval);
+
       FREE (tokstr);
       tokstr = savestring (tp);
       *cp = c;
