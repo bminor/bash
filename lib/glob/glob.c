@@ -1034,7 +1034,7 @@ glob_filename (pathname, flags)
 
   /* If directory_name contains globbing characters, then we
      have to expand the previous levels.  Just recurse. */
-  if (glob_pattern_p (directory_name))
+  if (directory_len > 0 && glob_pattern_p (directory_name))
     {
       char **directories;
       register unsigned int i;

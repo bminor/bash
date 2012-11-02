@@ -5389,7 +5389,10 @@ command_substitute (string, quoted)
       /* When not in POSIX mode, command substitution does not inherit
 	 the -e flag. */
       if (posixly_correct == 0)
-	exit_immediately_on_error = 0;
+        {
+	  exit_immediately_on_error = 0;
+	  set_shellopts ();
+        }
 
       remove_quoted_escapes (string);
 

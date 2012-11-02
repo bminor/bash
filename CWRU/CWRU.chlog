@@ -3799,3 +3799,16 @@ trap.c
 	  builtin is executing, and only longjmp if interrupt_immediately is
 	  set.  This whole set of fixes was prompted by report from
 	  lanshun zhou <zls.sogou@gmail.com>
+
+				   10/24
+				   -----
+lib/glob/glob.c
+	- glob_filename: only check directory_name for globbing chars if
+	  it's of non-zero length
+
+lib/sh/strchrnul.c
+	- new simpler implementation
+
+subst.c
+	- command_substitute: call set_shellopts after turning off errexit
+	  in subshells so it's reflected in $SHELLOPTS
