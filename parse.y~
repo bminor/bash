@@ -1435,7 +1435,9 @@ yy_readline_get ()
       old_sigint = (SigHandler *)IMPOSSIBLE_TRAP_HANDLER;
       if (signal_is_ignored (SIGINT) == 0)
 	{
-	  /* interrupt_immediately++; */
+#if 0
+ 	  interrupt_immediately++;
+#endif
 	  old_sigint = (SigHandler *)set_signal_handler (SIGINT, sigint_sighandler);
 	}
 
@@ -1445,7 +1447,9 @@ yy_readline_get ()
       CHECK_TERMSIG;
       if (signal_is_ignored (SIGINT) == 0)
 	{
-	  /* interrupt_immediately--; */
+#if 0
+	  interrupt_immediately--;
+#endif
 	  if (old_sigint != IMPOSSIBLE_TRAP_HANDLER)
 	    set_signal_handler (SIGINT, old_sigint);
 	}

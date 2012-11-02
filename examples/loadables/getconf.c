@@ -1206,11 +1206,9 @@ int all;
 			case VAL_LLONG_MAX:
 				printf ("%lld\n", LLONG_MAX);
 				break;
-#  if (ULLONG_MAX != LLONG_MAX)
 			case VAL_ULLONG_MAX:
 				printf ("%llu\n", ULLONG_MAX);
 				break;
-#  endif
 		}
 		break;
 #endif

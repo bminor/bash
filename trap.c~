@@ -404,7 +404,7 @@ trap_handler (sig)
 	}
 
 #if defined (READLINE)
-      if (RL_ISSTATE (RL_STATE_SIGHANDLER) && interrupt_immediately == 0)
+      if (RL_ISSTATE (RL_STATE_SIGHANDLER))
         bashline_set_event_hook ();
 #endif
 

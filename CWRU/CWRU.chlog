@@ -3686,3 +3686,70 @@ builtins/test.def
 
 doc/{bash.1,bashref.texi}
 	- document new -R unary conditional operator
+
+				   10/13
+				   -----
+trap.c
+	- check_signals_and_traps: new function, convenience function for the
+	  rest of the shell to check for pending terminating and interrupt
+	  signals, and to check for and process any pending traps
+	- any_signals_trapped: new function, returns non-zero if any signals
+	  are trapped and -1 if not
+
+trap.h
+	- extern declaration for check_signals_and_traps
+
+bashline.c
+	- bashline_reset: make sure we reset the event hook
+	- bash_event_hook: call check_signals_and_traps instead of just
+	  checking for terminating signals so we can run pending traps and
+	  react to interrupts, and reset the event hook when we're done
+
+
+				   10/14
+				   -----
+trap.c
+	- trap_handler: if executing in a readline signal handler context,
+	  call bashline_set_event_hook to install bash_event_hook to process
+	  the signal (if bash cares about it)
+
+sig.c
+	- sigint_sighandler: call bashline_set_event_hook to set the event
+	  hook if we're executing in a readline signal handler context
+
+lib/readline/input.c
+	- rl_getc: call RL_CHECK_SIGNALS if read returns -1/EINTR and the caught
+	  signal is SIGINT or SIGQUIT rather than waiting until the next time
+	  around the loop
+	- rl_getc: call rl_event_hook after calling RL_CHECK_SIGNALS to allow
+	  an application signal handler to set the event hook in its own
+	  signal handler (e.g., like bash trap_handler or sigint_sighandler)
+
+
+parse.y
+	- yy_readline_get: don't set interrupt_immediately before we call
+	  readline().  Inspired by report from lanshun zhou
+	  <zls.sogou@gmail.com>
+
+input.c
+	- getc_with_restart: add call to run_pending_traps after call to
+	  CHECK_TERMSIG
+
+lib/sh/zread.c
+	- zread: call check_signals_and_traps if read() returns -1/EINTR
+	  instead of just ignoring the EINTR and deferring handling any
+	  signal that generated it
+
+builtins/mapfile.def
+	- mapfile: don't set interrupt_immediately before calling zgetline()
+	  (which uses zread internally)
+
+builtins/read.def
+	- read_builtin: don't set interrupt_immediately before calling zread
+	  (moved code around so that it was only being set right around calls
+	  to zread to avoid signal handler conflicts).  Inspired by report
+	  from lanshun zhou <zls.sogou@gmail.com>
+	- edit_line: don't set interrupt_immediately around call to readline()
+	- include shmbutil.h
+	- read_builtin: don't call read_mbchar unless is_basic(c) returns
+	  false for the character we just read

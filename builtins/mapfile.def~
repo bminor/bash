@@ -193,6 +193,7 @@ mapfile (fd, line_count_goal, origin, nskip, callback_quantum, callback, array_n
   line_length = 0;    
 
   /* Reset the buffer for bash own stream */
+  interrupt_immediately++;
   for (array_index = origin, line_count = 1; 
  	zgetline (fd, &line, &line_length, unbuffered_read) != -1;
 	array_index++) 
@@ -224,6 +225,7 @@ mapfile (fd, line_count_goal, origin, nskip, callback_quantum, callback, array_n
   if (unbuffered_read == 0)
     zsyncfd (fd);
 
+  interrupt_immediately--;
   return EXECUTION_SUCCESS;
 }
 

@@ -83,7 +83,7 @@ getc_with_restart (stream)
     {
       while (1)
 	{
-	  CHECK_TERMSIG;		/* XXX - QUIT? */
+	  CHECK_TERMSIG;
 	  run_pending_traps ();
 
 	  local_bufused = read (fileno (stream), localbuf, sizeof(localbuf));

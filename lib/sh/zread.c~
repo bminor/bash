@@ -48,6 +48,7 @@ zread (fd, buf, len)
 
   while ((r = read (fd, buf, len)) < 0 && errno == EINTR)
     check_signals_and_traps ();	/* XXX */
+}
   return r;
 }
 

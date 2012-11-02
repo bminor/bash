@@ -630,7 +630,7 @@ add_char:
       CHECK_ALRM;
 
 #if defined (HANDLE_MULTIBYTE)
-      if (nchars > 0 && MB_CUR_MAX > 1 && is_basic (c) == 0)
+      if (nchars > 0 && MB_CUR_MAX > 1)
 	{
 	  input_string[i] = '\0';	/* for simplicity and debugging */
 	  i += read_mbchar (fd, input_string, i, c, unbuffered_read);

@@ -592,7 +592,10 @@ sigint_sighandler (sig)
     }
 #if defined (READLINE)
   else if (RL_ISSTATE (RL_STATE_SIGHANDLER))
+{
+itrace("sigint_sighandler: installing event hook");
     bashline_set_event_hook ();
+}
 #endif
 
   SIGRETURN (0);
