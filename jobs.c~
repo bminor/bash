@@ -3230,7 +3230,7 @@ waitchld (wpid, block)
 	  interrupt_immediately = 0;
 	  trap_handler (SIGCHLD);	/* set pending_traps[SIGCHLD] */
 	  wait_signal_received = SIGCHLD;
-	  /* If we're in a signal handler, let CHECK_WAIT_INTR pick it up;
+	  /* If we're in a signal handler, let CHECK_WAIT_INTR; pick it up;
 	     run_pending_traps will call run_sigchld_trap later  */
 	  if (sigchld == 0)
 	    longjmp (wait_intr_buf, 1);

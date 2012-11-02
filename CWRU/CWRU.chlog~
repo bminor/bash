@@ -3717,10 +3717,6 @@ sig.c
 	- sigint_sighandler: call bashline_set_event_hook to set the event
 	  hook if we're executing in a readline signal handler context
 
-parse.y
-	- yy_readline_get: don't set interrupt_immediately before we call
-	  readline()
-
 lib/readline/input.c
 	- rl_getc: call RL_CHECK_SIGNALS if read returns -1/EINTR and the caught
 	  signal is SIGINT or SIGQUIT rather than waiting until the next time
@@ -3728,6 +3724,12 @@ lib/readline/input.c
 	- rl_getc: call rl_event_hook after calling RL_CHECK_SIGNALS to allow
 	  an application signal handler to set the event hook in its own
 	  signal handler (e.g., like bash trap_handler or sigint_sighandler)
+
+
+parse.y
+	- yy_readline_get: don't set interrupt_immediately before we call
+	  readline().  Inspired by report from lanshun zhou
+	  <zls.sogou@gmail.com>
 
 input.c
 	- getc_with_restart: add call to run_pending_traps after call to
@@ -3751,3 +3753,48 @@ builtins/read.def
 	- include shmbutil.h
 	- read_builtin: don't call read_mbchar unless is_basic(c) returns
 	  false for the character we just read
+
+				   10/15
+				   -----
+sig.c
+	- throw_to_top_level: if interrupt_state is non-zero, make sure that
+	  last_command_exit_value reflects 128+SIGINT if it's not already
+	  greater than 128
+
+				   10/20
+				   -----
+builtins/wait.def
+	- WAIT_RETURN: set wait_signal_received back to 0 for the potential
+	  next call to wait
+
+quit.h
+	- CHECK_WAIT_INTR: macro to check whether trap_handler handled a
+	  signal and set wait_signal_received; longjmp to wait_intr_buf in
+	  that case
+
+jobs.c
+	- wait_for, waitchld: call CHECK_WAIT_INTR at the same places we call
+	  CHECK_TERMSIG to check for terminating signals
+	- wait_sigint_handler: don't longjmp out of the wait builtin unless
+	  interrupt_immediately is set; otherwise just SIGRETURN from the
+	  handler
+	- wait_sigint_handler: if interrupt_immediately not set, but we are
+	  executing in the wait builtin and SIGINT is not trapped, treat it
+	  as a `normally received' SIGINT: restore the signal handler and
+	  send SIGINT to ourselves
+	- waitchld: when in posix mode and running SIGCHLD traps, don't longjmp
+	  to wait_intr_buf (and let wait be interrupted) if we're running from
+	  a signal handler.  Wait for CHECK_WAIT_INTR to do the longjmp.
+	  run_pending_traps will run the SIGCHLD trap later
+
+nojobs.c
+	- reap_zombie_children, wait_for_single_pid, wait_for: call
+	  CHECK_WAIT_INTR where we call CHECK_TERMSIG
+	- wait_sigint_handler: don't longjmp out of the wait builtin unless
+	  interrupt_immediately is set; otherwise just SIGRETURN from the
+	  handler
+
+trap.c
+	- trap_handler: make sure wait_signal_received is set if the wait
+	  builtin is executing, and only longjmp if interrupt_immediately is
+	  set

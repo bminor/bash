@@ -391,6 +391,8 @@ throw_to_top_level ()
 
   if (interrupt_state)
     {
+      if (last_command_exit_value < 128)
+	last_command_exit_value = 128 + SIGINT;
       print_newline = 1;
       DELINTERRUPT;
     }

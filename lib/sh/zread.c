@@ -36,6 +36,8 @@ extern int errno;
 #  define SEEK_CUR 1
 #endif
 
+extern void check_signals_and_traps (void);
+
 /* Read LEN bytes from FD into BUF.  Retry the read on EINTR.  Any other
    error causes the loop to break. */
 ssize_t

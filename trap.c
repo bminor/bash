@@ -33,6 +33,8 @@
 
 #include "bashintl.h"
 
+#include <signal.h>
+
 #include "trap.h"
 
 #include "shell.h"
@@ -397,10 +399,14 @@ trap_handler (sig)
 
       trapped_signal_received = sig;
 
-      if (interrupt_immediately && this_shell_builtin && (this_shell_builtin == wait_builtin))
+      if (this_shell_builtin && (this_shell_builtin == wait_builtin))
 	{
 	  wait_signal_received = sig;
-	  longjmp (wait_intr_buf, 1);
+	  if (interrupt_immediately)
+{
+itrace("trap_handler: calling longjmp to wait_intr_buf: sig = %d", sig);
+	    longjmp (wait_intr_buf, 1);
+}
 	}
 
 #if defined (READLINE)

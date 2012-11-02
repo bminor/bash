@@ -55,6 +55,7 @@
 #include "hashcmd.h"
 #include "pathexp.h"
 #include "alias.h"
+#include "jobs.h"
 
 #include "builtins/getopt.h"
 #include "builtins/common.h"

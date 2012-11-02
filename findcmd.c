@@ -49,6 +49,7 @@ extern int errno;
 #endif
 
 extern int posixly_correct;
+extern int last_command_exit_value;
 
 /* Static functions defined and used in this file. */
 static char *_find_user_command_internal __P((const char *, int));

@@ -31,7 +31,7 @@
 #  include <unistd.h>
 #endif
 
-#include <ansi_stdlib.h>
+#include <bashansi.h>
 
 #include <stdio.h>
 #include <errno.h>

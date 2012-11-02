@@ -86,6 +86,8 @@ struct globval
 extern void throw_to_top_level __P((void));
 extern int sh_eaccess __P((char *, int));
 extern char *sh_makepath __P((const char *, const char *, int));
+extern int signal_is_pending __P((int));
+extern void run_pending_traps __P((void));
 
 extern int extended_glob;
 

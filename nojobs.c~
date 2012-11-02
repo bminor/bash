@@ -695,7 +695,7 @@ wait_sigint_handler (sig)
       signal_is_trapped (SIGINT) &&
       ((sigint_handler = trap_to_sighandler (SIGINT)) == trap_handler))
     {
-      last_command_exit_value = 128+SIGINT;
+      last_command_exit_value = EXECUTION_FAILURE;
       restore_sigint_handler ();
       interrupt_immediately = 0;
       trap_handler (SIGINT);	/* set pending_traps[SIGINT] */

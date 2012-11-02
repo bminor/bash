@@ -256,6 +256,7 @@ ansic_quote (str, flags, rlen)
 	default:
 #if defined (HANDLE_MULTIBYTE)
 	  b = is_basic (c);
+	  /* XXX - clen comparison to 0 is dicey */
 	  if ((b == 0 && ((clen = mbrtowc (&wc, s, MB_CUR_MAX, 0)) < 0 || iswprint (wc) == 0)) ||
 	      (b == 1 && ISPRINT (c) == 0))
 #else

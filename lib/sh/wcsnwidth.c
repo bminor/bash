@@ -39,7 +39,7 @@ wcsnwidth(pwcs, n, max)
   int len, l;
 
   len = 0;
-  ws = pwcs;
+  ws = (wchar_t *)pwcs;
   while (n-- > 0 && (wc = *ws++) != L'\0')
     {
       l = wcwidth (wc);
