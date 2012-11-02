@@ -791,7 +791,7 @@ assign_vars:
     }
 #endif
 
-  if (saw_escape)
+  if (saw_escape && input_string && *input_string)
     {
       t = dequote_string (input_string);
       var = bind_read_variable (list->word->word, t);
