@@ -3890,3 +3890,78 @@ lib/malloc/{malloc.c,imalloc.h}
 lib/readline/bind.c
 	- sv_histsize: if argument evaluates to a value < 0, unstifle the
 	  history
+
+				   11/22
+				   -----
+redir.c
+	- do_redirection_internal: if we have REDIR_VARASSIGN set in the
+	  redirection flags and we set up `redirector' using fcntl or dup2,
+	  don't add a redirect to make sure it stays open.  Let the
+	  script programmer manage the file handle.  Fixes bug reported by
+	  Sam Liddicott <sam@liddicott.com>
+
+				   11/24
+				   -----
+jobs.c
+	- wait_for_any_job: new function, waits for an unspecified background
+	  job to exit and returns its exit status.  Returns -1 on no background
+	  jobs or no children or other errors.  Calls wait_for with new
+	  sentinel value ANY_PID
+	- wait_for: changes to handle argument of ANY_PID: don't look up or
+	  try to modify the child struct, only go through the wait loop once.
+	  Return -1 if waitpid returns no children
+
+jobs.h
+	- ANY_PID: new define
+
+builtins/wait.def
+	- new option: -n. Means to wait for the next job and return its exit
+	  status.  Returns 127 if there are no background jobs (or no
+	  children).  Feature most recently requested by Elliott Forney
+	  <idfah@cs.colostate.edu>
+
+doc/{bash.1,bashref.texi}
+	- document new `wait -n' option
+
+execute_cmd.c
+	- execute_command_internal: save make_command_string () result in a
+	  temp variable before calling savestring() on it; avoids evaluating
+	  make_command_string() result twice.  Fix from John E. Malmberg
+	  <wb8tyw@qsl.net>
+
+				   11/28
+				   -----
+
+builtins/declare.def
+	- declare_internal: if an array variable is declared using `declare -a'
+	  or `declare -A', but not assigned a value, set the `invisible'
+	  attribute so the variable does not show up as set.  Fix for bug
+	  about variable initialization reported by Tim Friske <me@timfriske.com>
+
+builtins/{mapfile,read}.def
+	- after calling find_or_make_array_variable, make sure the invisible
+	  flag is turned off, in case the variable was declared previously
+	  using `declare -a' or `declare -A'.  Side effect of above change to
+	  declare_internal
+
+subst.c
+	- shell_expand_word_list: handle the W_ASSNGLOBAL flag and put -g into
+	  the list of options passed to make_internal_declare as appropriate.
+	  Fix for bug reported by Tim Friske <me@timfriske.com>
+
+				   11/30
+				   -----
+test.c
+	- unary_op: make sure -v and -n check that the variable is not marked
+	  as invisible before calling var_isset.  Fix for bug reported by Tim
+	  Friske <me@timfriske.com>
+
+				   12/2
+				   ----
+subst.c
+	- process_substitute: turn off the `expanding_redir' flag, which
+	  controls whether or not variables.c:find_variable_internal uses the
+	  temporary environment to find variables.  We want to use the
+	  temp environment, since we don't have to worry about order of
+	  evaluation in a subshell.  Fixes bug reported by Andrey Borzenkov
+	  <arvidjaar@gmail.com>

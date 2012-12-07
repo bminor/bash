@@ -933,12 +933,10 @@ realloc_jobs_list ()
       }
 
 #if defined (DEBUG)
-#  if 0
   itrace ("realloc_jobs_list: resize jobs list from %d to %d", js.j_jobslots, nsize);
   itrace ("realloc_jobs_list: j_lastj changed from %d to %d", js.j_lastj, (j > 0) ? j - 1 : 0);
   itrace ("realloc_jobs_list: j_njobs changed from %d to %d", js.j_njobs, j);
   itrace ("realloc_jobs_list: js.j_ndead %d js.c_reaped %d", js.j_ndead, js.c_reaped);
-#  endif
 #endif
 
   js.j_firstj = 0;
@@ -966,7 +964,7 @@ realloc_jobs_list ()
     reset_current ();
 
 #ifdef DEBUG
-/*  itrace ("realloc_jobs_list: reset js.j_current (%d) and js.j_previous (%d)", js.j_current, js.j_previous);*/
+  itrace ("realloc_jobs_list: reset js.j_current (%d) and js.j_previous (%d)", js.j_current, js.j_previous);
 #endif
 
   UNBLOCK_CHILD (oset);
@@ -989,7 +987,7 @@ compact_jobs_list (flags)
   realloc_jobs_list ();
 
 #ifdef DEBUG
-/*  itrace("compact_jobs_list: returning %d", (js.j_lastj || jobs[js.j_lastj]) ? js.j_lastj + 1 : 0); */
+  itrace("compact_jobs_list: returning %d", (js.j_lastj || jobs[js.j_lastj]) ? js.j_lastj + 1 : 0);
 #endif
 
   return ((js.j_lastj || jobs[js.j_lastj]) ? js.j_lastj + 1 : 0);
@@ -2396,6 +2394,7 @@ wait_for (pid)
   /* In the case that this code is interrupted, and we longjmp () out of it,
      we are relying on the code in throw_to_top_level () to restore the
      top-level signal mask. */
+  child = 0;
   BLOCK_CHILD (set, oset);
 
   /* Ignore interrupts while waiting for a job run without job control
@@ -2433,7 +2432,8 @@ wait_for (pid)
   job = NO_JOB;
   do
     {
-      FIND_CHILD (pid, child);
+      if (pid != ANY_PID)
+	FIND_CHILD (pid, child);
 
       /* If this child is part of a job, then we are really waiting for the
 	 job to finish.  Otherwise, we are waiting for the child to finish.
@@ -2446,7 +2446,7 @@ wait_for (pid)
 	 has already exited before this is called, sigchld_handler will have
 	 called waitchld and the state will be set to JDEAD. */
 
-      if (PRUNNING(child) || (job != NO_JOB && RUNNING (job)))
+      if (pid == ANY_PID || PRUNNING(child) || (job != NO_JOB && RUNNING (job)))
 	{
 #if defined (WAITPID_BROKEN)    /* SCOv4 */
 	  sigset_t suspend_set;
@@ -2468,7 +2468,7 @@ wait_for (pid)
 #  endif
 	  queue_sigchld = 1;
 	  waiting_for_child++;
-	  r = waitchld (pid, 1);
+	  r = waitchld (pid, 1);	/* XXX */
 	  waiting_for_child--;
 #  if defined (MUST_UNBLOCK_CHLD)
 	  sigaction (SIGCHLD, &oact, (struct sigaction *)NULL);
@@ -2478,6 +2478,7 @@ wait_for (pid)
 	  if (r == -1 && errno == ECHILD && this_shell_builtin == wait_builtin)
 	    {
 	      termination_state = -1;
+	      /* XXX - restore sigint handler here? */
 	      goto wait_for_return;
 	    }
 
@@ -2487,14 +2488,22 @@ wait_for (pid)
 	     if it exists, as JDEAD. */
 	  if (r == -1 && errno == ECHILD)
 	    {
-	      child->running = PS_DONE;
-	      WSTATUS (child->status) = 0;	/* XXX -- can't find true status */
+	      if (child)
+		{
+		  child->running = PS_DONE;
+		  WSTATUS (child->status) = 0;	/* XXX -- can't find true status */
+		}
 	      js.c_living = 0;		/* no living child processes */
 	      if (job != NO_JOB)
 		{
 		  jobs[job]->state = JDEAD;
 		  js.c_reaped++;
 		  js.j_ndead++;
+		}
+	      if (pid == ANY_PID)
+		{
+		  termination_state = -1;
+		  break;
 		}
 	    }
 #endif /* WAITPID_BROKEN */
@@ -2511,6 +2520,11 @@ wait_for (pid)
 
       /* Check for a trapped signal interrupting the wait builtin and jump out */
       CHECK_WAIT_INTR;
+
+      if (pid == ANY_PID)
+        /* XXX - could set child but we don't have a handle on what waitchld
+	   reaps.  Leave termination_state alone. */
+	goto wait_for_return;
     }
   while (PRUNNING (child) || (job != NO_JOB && RUNNING (job)));
 
@@ -2674,6 +2688,76 @@ wait_for_job (job)
   UNBLOCK_CHILD (oset);
 
   return r;
+}
+
+/* Wait for any background job started by this shell to finish.  Very
+   similar to wait_for_background_pids().  Returns the exit status of
+   the next exiting job, -1 if there are no background jobs.  The caller
+   is responsible for translating -1 into the right return value. */
+int
+wait_for_any_job ()
+{
+  pid_t pid;
+  int i, r, waited_for;
+  sigset_t set, oset;
+
+  if (jobs_list_frozen)
+    return -1;
+
+  /* First see if there are any unnotified dead jobs that we can report on */
+  BLOCK_CHILD (set, oset);
+  for (i = 0; i < js.j_jobslots; i++)
+    {
+      if (jobs[i] && DEADJOB (i) && IS_NOTIFIED (i) == 0)
+	{
+return_job:
+	  r = job_exit_status (i);
+	  notify_of_job_status ();		/* XXX */
+	  delete_job (i, 0);
+#if defined (COPROCESS_SUPPORT)
+	  coproc_reap ();
+#endif
+	  UNBLOCK_CHILD (oset);
+	  return r;
+	}
+    }
+  UNBLOCK_CHILD (oset);
+
+  /* At this point, we have no dead jobs in the jobs table.  Wait until we
+     get one, even if it takes multiple pids exiting. */
+  for (waited_for = 0;;)
+    {
+      /* Make sure there is a background job to wait for */
+      BLOCK_CHILD (set, oset);
+      for (i = 0; i < js.j_jobslots; i++)
+        if (jobs[i] && RUNNING (i) && IS_FOREGROUND (i) == 0)
+          break;
+      if (i == js.j_jobslots)
+	{
+	  UNBLOCK_CHILD (oset);
+	  return -1;
+	}
+
+      UNBLOCK_CHILD (oset);
+
+      QUIT;
+      CHECK_TERMSIG;
+      CHECK_WAIT_INTR;
+
+      errno = 0;
+      r = wait_for (ANY_PID);	/* special sentinel value for wait_for */
+      if (r == -1 && errno == ECHILD)
+	mark_all_jobs_as_dead ();
+	
+      /* Now we see if we have any dead jobs and return the first one */
+      BLOCK_CHILD (set, oset);
+      for (i = 0; i < js.j_jobslots; i++)
+	if (jobs[i] && DEADJOB (i))
+	  goto return_job;
+      UNBLOCK_CHILD (oset);
+    }
+
+  return -1;
 }
 
 /* Print info about dead jobs, and then delete them from the list

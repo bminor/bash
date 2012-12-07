@@ -532,6 +532,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 {
   int exec_result, user_subshell, invert, ignore_return, was_error_trap;
   REDIRECT *my_undo_list, *exec_undo_list;
+  char *tcmd;
   volatile int last_pid;
   volatile int save_line_number;
 #if defined (PROCESS_SUBSTITUTION)
@@ -586,8 +587,8 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       /* Fork a subshell, turn off the subshell bit, turn off job
 	 control and call execute_command () on the command again. */
       line_number_for_err_trap = line_number;
-      paren_pid = make_child (savestring (make_command_string (command)),
-			      asynchronous);
+      tcmd = make_command_string (command);
+      paren_pid = make_child (savestring (tcmd), asynchronous);
 
       if (user_subshell && signal_is_trapped (ERROR_TRAP) && 
 	  signal_in_progress (DEBUG_TRAP) == 0 && running_trap == 0)
@@ -2199,6 +2200,7 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
   close (rpipe[1]);
   close (wpipe[0]);
 
+  /* XXX - possibly run Coproc->name through word expansion? */
   cp = coproc_alloc (command->value.Coproc->name, coproc_pid);
   cp->c_rfd = rpipe[0];
   cp->c_wfd = wpipe[1];

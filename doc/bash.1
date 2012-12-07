@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Thu Nov 15 21:03:47 EST 2012
+.\"	Last Change: Sat Nov 24 15:07:12 EST 2012
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2012 November 15" "GNU Bash 4.2"
+.TH BASH 1 "2012 November 24" "GNU Bash 4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -10006,7 +10006,7 @@ subsequently reset.  The exit status is true unless a
 .I name
 is readonly.
 .TP
-\fBwait\fP [\fIn ...\fP]
+\fBwait\fP [\fB\--n\fP] [\fIn ...\fP]
 Wait for each specified process and return its termination status.
 Each
 .I n
@@ -10015,7 +10015,10 @@ ID or a job specification; if a job spec is given, all processes
 in that job's pipeline are waited for.  If
 .I n
 is not given, all currently active child processes
-are waited for, and the return status is zero.  If
+are waited for, and the return status is zero.
+If the \fB\--n\fP option is supplied, \fBwait\fP waits for any job to
+terminate and returns its exit status.
+If
 .I n
 specifies a non-existent process or job, the return status is
 127.  Otherwise, the return status is the exit status of the last

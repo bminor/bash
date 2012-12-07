@@ -66,6 +66,10 @@ WORD_LIST	*list;
 		return(EX_USAGE);
 	}
 
+	/* Skip over `--' */
+	if (list->word && ISOPTION (list->word->word, '-'))
+		list = list->next;
+
 	if (*list->word->word == '-' || list->next) {
 		builtin_usage ();
 		return (EX_USAGE);

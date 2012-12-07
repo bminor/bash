@@ -414,10 +414,7 @@ trap_handler (sig)
 	{
 	  wait_signal_received = sig;
 	  if (interrupt_immediately)
-{
-itrace("trap_handler: interrupt_immediately = 1: calling longjmp to wait_intr_buf: sig = %d", sig);
 	    longjmp (wait_intr_buf, 1);
-}
 	}
 
 #if defined (READLINE)

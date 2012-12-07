@@ -2192,7 +2192,6 @@ make_local_variable (name)
       return ((SHELL_VAR *)NULL);
     }
 
-itrace("make_local_variable: name = %s old_var = %p variable_context = %d", name, old_var, variable_context);
   if (old_var == 0)
     new_var = make_new_variable (name, vc->table);
   else
@@ -2855,6 +2854,9 @@ assign_in_env (word, flags)
     setifs (var);
 else
 #endif
+if (ifsname (name))
+  itrace("assign_in_env: name = %s value = <%s> flags = %d context = %d", name, value, flags, variable_context);
+
   if (flags)
     stupidly_hack_special_variables (name);
 
@@ -4365,7 +4367,6 @@ push_context (name, is_subshell, tempvars)
      int is_subshell;
      HASH_TABLE *tempvars;
 {
-itrace("push_context: %s: subshell = %d variable_context = %d", name, is_subshell, variable_context);
   if (is_subshell == 0)
     push_dollar_vars ();
   variable_context++;
@@ -4377,7 +4378,6 @@ itrace("push_context: %s: subshell = %d variable_context = %d", name, is_subshel
 void
 pop_context ()
 {
-itrace("pop_context: variable_context = %d", variable_context);
   pop_dollar_vars ();
   variable_context--;
   pop_var_context ();

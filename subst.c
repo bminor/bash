@@ -5128,6 +5128,10 @@ process_substitute (string, open_for_read_in_child)
   dev_fd_list[parent_pipe_fd] = 0;
 #endif /* HAVE_DEV_FD */
 
+  /* subshells shouldn't have this flag, which controls using the temporary
+     environment for variable lookups. */
+  expanding_redir = 0;
+
   result = parse_and_execute (string, "process substitution", (SEVAL_NONINT|SEVAL_NOHIST));
 
 #if !defined (HAVE_DEV_FD)
@@ -7270,7 +7274,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
   var_is_null = check_nullness && (var_is_set == 0 || *temp == 0);
   /* XXX - this may not need to be restricted to special variables */
   if (check_nullness)
-    var_is_null |= var_is_special && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && QUOTED_NULL (temp);
+    var_is_null |= var_is_set && var_is_special && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && QUOTED_NULL (temp);
 
   /* Get the rest of the stuff inside the braces. */
   if (c && c != RBRACE)
@@ -9231,7 +9235,7 @@ brace_expand_word_list (tlist, eflags)
 
       if (tlist->word->flags & W_NOBRACE)
         {
-itrace("brace_expand_word_list: %s: W_NOBRACE", tlist->word->word);
+/*itrace("brace_expand_word_list: %s: W_NOBRACE", tlist->word->word);*/
 	  PREPEND_LIST (tlist, output_list);
 	  continue;
         }
@@ -9341,8 +9345,12 @@ shell_expand_word_list (tlist, eflags)
 	{
 	  int t;
 
-	  if (tlist->word->flags & W_ASSIGNASSOC)
+	  if ((tlist->word->flags & (W_ASSIGNASSOC|W_ASSNGLOBAL)) == (W_ASSIGNASSOC|W_ASSNGLOBAL))
+	    make_internal_declare (tlist->word->word, "-gA");
+	  else if (tlist->word->flags & W_ASSIGNASSOC)
 	    make_internal_declare (tlist->word->word, "-A");
+	  else if (tlist->word->flags & W_ASSNGLOBAL)
+	    make_internal_declare (tlist->word->word, "-g");
 
 	  t = do_word_assignment (tlist->word, 0);
 	  if (t == 0)

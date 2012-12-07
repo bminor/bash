@@ -624,7 +624,7 @@ unary_test (op, arg)
 
     case 'R':
       v = find_variable (arg);
-      return (v && invisible_p (v) == 0 && var_isset (v) && nameref_p (v) ? TRUE : FALSE);
+      return (v && var_isset (v) && nameref_p (v) ? TRUE : FALSE);
     }
 
   /* We can't actually get here, but this shuts up gcc. */

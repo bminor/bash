@@ -156,6 +156,8 @@ struct bgpids {
 /* A value which cannot be a process ID. */
 #define NO_PID (pid_t)-1
 
+#define ANY_PID (pid_t)-1
+
 /* System calls. */
 #if !defined (HAVE_UNISTD_H)
 extern pid_t fork (), getpid (), getpgrp ();
@@ -216,6 +218,7 @@ extern int wait_for_single_pid __P((pid_t));
 extern void wait_for_background_pids __P((void));
 extern int wait_for __P((pid_t));
 extern int wait_for_job __P((int));
+extern int wait_for_any_job __P((void));
 
 extern void notify_and_cleanup __P((void));
 extern void reap_dead_jobs __P((void));

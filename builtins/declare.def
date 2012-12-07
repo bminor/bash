@@ -497,9 +497,17 @@ declare_internal (list, local_var)
 	    {
 #if defined (ARRAY_VARS)
 	      if (flags_on & att_assoc)
-		var = make_new_assoc_variable (name);
+		{
+		  var = make_new_assoc_variable (name);
+		  if (offset == 0)
+		    VSETATTR (var, att_invisible);
+		}
 	      else if ((flags_on & att_array) || making_array_special)
-		var = make_new_array_variable (name);
+		{
+		  var = make_new_array_variable (name);
+		  if (offset == 0)
+		    VSETATTR (var, att_invisible);
+		}
 	      else
 #endif
 

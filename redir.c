@@ -819,15 +819,13 @@ do_redirection_internal (redirect, flags)
 	      REDIRECTION_ERROR (redirector, r, fd);
 	    }
 
-	  if (flags & RX_UNDOABLE)
+	  if ((flags & RX_UNDOABLE) && (redirect->rflags & REDIR_VARASSIGN) == 0)
 	    {
 	      /* Only setup to undo it if the thing to undo is active. */
 	      if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
 		r = add_undo_redirect (redirector, ri, -1);
 	      else
 		r = add_undo_close_redirect (redirector);
-	      if (r < 0 && (redirect->rflags & REDIR_VARASSIGN))
-		close (redirector);
 	      REDIRECTION_ERROR (r, errno, fd);
 	    }
 
@@ -933,15 +931,13 @@ do_redirection_internal (redirect, flags)
 
 	  if (flags & RX_ACTIVE)
 	    {
-	      if (flags & RX_UNDOABLE)
+	      if ((flags & RX_UNDOABLE) && (redirect->rflags & REDIR_VARASSIGN) == 0)
 	        {
 		  /* Only setup to undo it if the thing to undo is active. */
 		  if ((fd != redirector) && (fcntl (redirector, F_GETFD, 0) != -1))
 		    r = add_undo_redirect (redirector, ri, -1);
 		  else
 		    r = add_undo_close_redirect (redirector);
-		  if (r < 0 && (redirect->rflags & REDIR_VARASSIGN))
-		    close (redirector);
 		  REDIRECTION_ERROR (r, errno, fd);
 	        }
 
@@ -996,15 +992,13 @@ do_redirection_internal (redirect, flags)
 
       if ((flags & RX_ACTIVE) && (redir_fd != redirector))
 	{
-	  if (flags & RX_UNDOABLE)
+	  if ((flags & RX_UNDOABLE) && (redirect->rflags & REDIR_VARASSIGN) == 0)
 	    {
 	      /* Only setup to undo it if the thing to undo is active. */
 	      if (fcntl (redirector, F_GETFD, 0) != -1)
 		r = add_undo_redirect (redirector, ri, redir_fd);
 	      else
 		r = add_undo_close_redirect (redirector);
-	      if (r < 0 && (redirect->rflags & REDIR_VARASSIGN))
-		close (redirector);
 	      REDIRECTION_ERROR (r, errno, -1);
 	    }
 #if defined (BUFFERED_INPUT)
@@ -1078,6 +1072,7 @@ do_redirection_internal (redirect, flags)
 	    }
 
 	  r = 0;
+	  /* XXX - only if REDIR_VARASSIGN not set? */
 	  if ((flags & RX_UNDOABLE) && (fcntl (redirector, F_GETFD, 0) != -1))
 	    {
 	      r = add_undo_redirect (redirector, ri, -1);

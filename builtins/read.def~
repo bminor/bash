@@ -884,6 +884,7 @@ bind_read_variable (name, value)
 {
   SHELL_VAR *v;
 
+itrace("bind_read_variable: name = %s value = %s", name, value);
 #if defined (ARRAY_VARS)
   if (valid_array_reference (name) == 0)
     v = bind_variable (name, value, 0);

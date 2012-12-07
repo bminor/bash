@@ -192,8 +192,8 @@ mregister_alloc (tag, mem, size, file, line)
     {
       /* oops.  table is full.  punt. */
       fprintf (stderr, _("register_alloc: alloc table is full with FIND_ALLOC?\n"));
-  if (blocked_sigs)
-    _malloc_unblock_signals (&set, &oset);
+      if (blocked_sigs)
+	_malloc_unblock_signals (&set, &oset);
       return;
     }
   
@@ -246,8 +246,8 @@ mregister_free (mem, size, file, line)
 #if 0
       fprintf (stderr, "register_free: %p not in allocation table?\n", mem);
 #endif
-  if (blocked_sigs)
-    _malloc_unblock_signals (&set, &oset);
+      if (blocked_sigs)
+	_malloc_unblock_signals (&set, &oset);
       return;
     }
   if (tentry->flags & MT_FREE)

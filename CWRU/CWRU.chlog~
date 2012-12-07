@@ -3827,3 +3827,131 @@ execute_cmd.c
 	  last element of a pipeline (or not in a pipeline), rather than for
 	  every child.  Fixes difference in behavior between /dev/fd and
 	  FIFOs reported by Zev Weiss <zev@bewilderbeest.net>
+	- execute_null_command: do the same thing in the parent branch after
+	  make_child
+
+				   11/14
+				   -----
+subst.c
+	- parameter_brace_expand: a variable is null if it's special ($@, $*),
+	  the expansion occurs within double quotes, and the expansion turns
+	  into a quoted null.  Fixes debian bug 692447 reported by
+	  Matrosov Dmitriy <sgf.dma@gmail.com>
+
+jobs.c
+	- run_sigchld_trap: make sure `running_trap' sentinel is set
+	  appropriately
+	- waitchld: only run the sigchld trap if we're not in a signal
+	  handler, not running a trap, and executing the wait builtin.
+	  Otherwise, queue for later handling.  We still run one instance
+	  of the trap handler per exited child.  Bulk of fix for bug
+	  reported by Elliott Forney <idfah@cs.colostate.edu>
+
+trap.c
+	- queue_sigchld_trap: set catch_flag so run_pending_traps notices,
+	  and set trapped_signal_received for completeness.  Rest of fix
+	  for bug reported by Elliott Forney <idfah@cs.colostate.edu>
+
+lib/malloc/malloc.c
+	- block_signals: renamed to _malloc_block_signals, made public
+	- unblock_signals: renamed to _malloc_unblock_signals, made public
+
+lib/malloc/imalloc.h
+	- extern declarations for _malloc_{un,}block_signals
+
+lib/malloc/table.c
+	- mregister_alloc, mregister_free: block signals around table
+	  manipulation
+
+				   11/15
+				   -----
+trap.c
+	- run_pending_traps: set SIG_INPROGRESS flag around calls to
+	  run_sigchld_handler so other parts of the shell know that the
+	  SIGCHLD trap handler is executing
+	- run_pending_traps: if we get a situation where we are looking at
+	  running a SIGCHLD trap but the trap string is IMPOSSIBLE_TRAP_HANDLER
+	  and the SIG_INPROGRESS flag is set, just skip it.  This is possible
+	  if run_pending_traps is called from a SIGCHLD trap handler run by
+	  run_sigchld_trap
+
+doc/bash.1,lib/readline/doc/{rluser.texi,readline.3}
+	- corrected description of the effect of `set history-size 0'.  Report
+	  from Vesa-Matti J Kari <vmkari@cc.helsinki.fi>
+
+include/stdc.h
+	- CPP_STRING: new define, replaces __STRING
+
+lib/malloc/{malloc.c,imalloc.h}
+	- replace __STRING with CPP_STRING
+
+				   11/16
+				   -----
+lib/readline/bind.c
+	- sv_histsize: if argument evaluates to a value < 0, unstifle the
+	  history
+
+				   11/22
+				   -----
+redir.c
+	- do_redirection_internal: if we have REDIR_VARASSIGN set in the
+	  redirection flags and we set up `redirector' using fcntl or dup2,
+	  don't add a redirect to make sure it stays open.  Let the
+	  script programmer manage the file handle.  Fixes bug reported by
+	  Sam Liddicott <sam@liddicott.com>
+
+				   11/24
+				   -----
+jobs.c
+	- wait_for_any_job: new function, waits for an unspecified background
+	  job to exit and returns its exit status.  Returns -1 on no background
+	  jobs or no children or other errors.  Calls wait_for with new
+	  sentinel value ANY_PID
+	- wait_for: changes to handle argument of ANY_PID: don't look up or
+	  try to modify the child struct, only go through the wait loop once.
+	  Return -1 if waitpid returns no children
+
+jobs.h
+	- ANY_PID: new define
+
+builtins/wait.def
+	- new option: -n. Means to wait for the next job and return its exit
+	  status.  Returns 127 if there are no background jobs (or no
+	  children).  Feature most recently requested by Elliott Forney
+	  <idfah@cs.colostate.edu>
+
+doc/{bash.1,bashref.texi}
+	- document new `wait -n' option
+
+execute_cmd.c
+	- execute_command_internal: save make_command_string () result in a
+	  temp variable before calling savestring() on it; avoids evaluating
+	  make_command_string() result twice.  Fix from John E. Malmberg
+	  <wb8tyw@qsl.net>
+
+				   11/28
+				   -----
+
+builtins/declare.def
+	- declare_internal: if an array variable is declared using `declare -a'
+	  or `declare -A', but not assigned a value, set the `invisible'
+	  attribute so the variable does not show up as set.  Fix for bug
+	  about variable initialization reported by Tim Friske <me@timfriske.com>
+
+builtins/{mapfile,read}.def
+	- after calling find_or_make_array_variable, make sure the invisible
+	  flag is turned off, in case the variable was declared previously
+	  using `declare -a' or `declare -A'.  Side effect of above change to
+	  declare_internal
+
+subst.c
+	- shell_expand_word_list: handle the W_ASSNGLOBAL flag and put -g into
+	  the list of options passed to make_internal_declare as appropriate.
+	  Fix for bug reported by Tim Friske <me@timfriske.com>
+
+				   11/30
+				   -----
+test.c
+	- unary_op: make sure -v and -n check that the variable is not marked
+	  as invisible before calling var_isset.  Fix for bug reported by Tim
+	  Friske <me@timfriske.com>

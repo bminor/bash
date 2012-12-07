@@ -172,6 +172,8 @@ mapfile (fd, line_count_goal, origin, nskip, callback_quantum, callback, array_n
       builtin_error (_("%s: not an indexed array"), array_name);
       return (EXECUTION_FAILURE);
     }
+  else if (invisible_p (entry))
+    VUNSETATTR (entry, att_invisible);	/* no longer invisible */
       
   if (flags & MAPF_CLEARARRAY)
     array_flush (array_cell (entry));
