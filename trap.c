@@ -313,7 +313,18 @@ run_pending_traps ()
 		   trap_list[SIGCHLD] != (char *)IMPOSSIBLE_TRAP_HANDLER &&
 		   (sigmodes[SIGCHLD] & SIG_INPROGRESS) == 0)
 	    {
+	      sigmodes[SIGCHLD] |= SIG_INPROGRESS;
 	      run_sigchld_trap (pending_traps[sig]);	/* use as counter */
+	      sigmodes[SIGCHLD] &= ~SIG_INPROGRESS;
+	    }
+	  else if (sig == SIGCHLD &&
+		   trap_list[SIGCHLD] == (char *)IMPOSSIBLE_TRAP_HANDLER &&
+		   (sigmodes[SIGCHLD] & SIG_INPROGRESS) != 0)
+	    {
+	      /* This can happen when run_pending_traps is called while
+		 running a SIGCHLD trap handler. */
+	      UNBLOCK_SIGNAL (oset);
+	      continue;					/* XXX */
 	    }
 #endif
 	  else if (trap_list[sig] == (char *)DEFAULT_SIG ||
@@ -404,7 +415,7 @@ trap_handler (sig)
 	  wait_signal_received = sig;
 	  if (interrupt_immediately)
 {
-itrace("trap_handler: calling longjmp to wait_intr_buf: sig = %d", sig);
+itrace("trap_handler: interrupt_immediately = 1: calling longjmp to wait_intr_buf: sig = %d", sig);
 	    longjmp (wait_intr_buf, 1);
 }
 	}
@@ -496,7 +507,11 @@ queue_sigchld_trap (nchild)
      int nchild;
 {
   if (nchild > 0)
-    pending_traps[SIGCHLD] += nchild;
+    {
+      catch_flag = 1;
+      pending_traps[SIGCHLD] += nchild;
+      trapped_signal_received = SIGCHLD;
+    }
 }
 #endif /* JOB_CONTROL && SIGCHLD */
 

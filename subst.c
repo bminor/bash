@@ -7268,6 +7268,9 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 
   var_is_set = temp != (char *)0;
   var_is_null = check_nullness && (var_is_set == 0 || *temp == 0);
+  /* XXX - this may not need to be restricted to special variables */
+  if (check_nullness)
+    var_is_null |= var_is_special && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && QUOTED_NULL (temp);
 
   /* Get the rest of the stuff inside the braces. */
   if (c && c != RBRACE)

@@ -172,7 +172,7 @@ typedef union _malloc_guard {
 #define ASSERT(p) \
   do \
     { \
-      if (!(p)) xbotch((PTR_T)0, ERR_ASSERT_FAILED, __STRING(p), file, line); \
+      if (!(p)) xbotch((PTR_T)0, ERR_ASSERT_FAILED, CPP_STRING(p), file, line); \
     } \
   while (0)
 
@@ -265,7 +265,7 @@ extern char *sbrk ();
 #endif /* !HAVE_DECL_SBRK */
 
 #ifdef SHELL
-extern int interrupt_immediately;
+extern int interrupt_immediately, running_trap;
 extern int signal_is_trapped __P((int));
 #endif
 
@@ -498,8 +498,8 @@ xsplit (mp, nu)
   busy[nbuck] = 0;
 }
 
-static void
-block_signals (setp, osetp)
+void
+_malloc_block_signals (setp, osetp)
      sigset_t *setp, *osetp;
 {
 #ifdef HAVE_POSIX_SIGNALS
@@ -513,8 +513,8 @@ block_signals (setp, osetp)
 #endif
 }
 
-static void
-unblock_signals (setp, osetp)
+void
+_malloc_unblock_signals (setp, osetp)
      sigset_t *setp, *osetp;
 {
 #ifdef HAVE_POSIX_SIGNALS
@@ -562,10 +562,10 @@ morecore (nu)
   /* Block all signals in case we are executed from a signal handler. */
   blocked_sigs = 0;
 #ifdef SHELL
-  if (interrupt_immediately || signal_is_trapped (SIGINT) || signal_is_trapped (SIGCHLD))
+  if (interrupt_immediately || running_trap || signal_is_trapped (SIGINT) || signal_is_trapped (SIGCHLD))
 #endif
     {
-      block_signals (&set, &oset);
+      _malloc_block_signals (&set, &oset);
       blocked_sigs = 1;
     }
 
@@ -652,7 +652,7 @@ morecore (nu)
 
 morecore_done:
   if (blocked_sigs)
-    unblock_signals (&set, &oset);
+    _malloc_unblock_signals (&set, &oset);
 }
 
 static void

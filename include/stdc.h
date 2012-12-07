@@ -36,10 +36,11 @@
 #  endif
 #endif
 
+/* Fortify, at least, has trouble with this definition */
 #if defined (HAVE_STRINGIZE)
-#  define __STRING(x) #x
+#  define CPP_STRING(x) #x
 #else
-#  define __STRING(x) "x"
+#  define CPP_STRING(x) "x"
 #endif
 
 #if !defined (__STDC__)

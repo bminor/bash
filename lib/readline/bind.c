@@ -1752,7 +1752,10 @@ sv_histsize (value)
     {
       nval = atoi (value);
       if (nval < 0)
-	return 1;
+	{
+	  unstifle_history ();
+	  return 0;
+	}
     }
   stifle_history (nval);
   return 0;

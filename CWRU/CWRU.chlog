@@ -3829,3 +3829,64 @@ execute_cmd.c
 	  FIFOs reported by Zev Weiss <zev@bewilderbeest.net>
 	- execute_null_command: do the same thing in the parent branch after
 	  make_child
+
+				   11/14
+				   -----
+subst.c
+	- parameter_brace_expand: a variable is null if it's special ($@, $*),
+	  the expansion occurs within double quotes, and the expansion turns
+	  into a quoted null.  Fixes debian bug 692447 reported by
+	  Matrosov Dmitriy <sgf.dma@gmail.com>
+
+jobs.c
+	- run_sigchld_trap: make sure `running_trap' sentinel is set
+	  appropriately
+	- waitchld: only run the sigchld trap if we're not in a signal
+	  handler, not running a trap, and executing the wait builtin.
+	  Otherwise, queue for later handling.  We still run one instance
+	  of the trap handler per exited child.  Bulk of fix for bug
+	  reported by Elliott Forney <idfah@cs.colostate.edu>
+
+trap.c
+	- queue_sigchld_trap: set catch_flag so run_pending_traps notices,
+	  and set trapped_signal_received for completeness.  Rest of fix
+	  for bug reported by Elliott Forney <idfah@cs.colostate.edu>
+
+lib/malloc/malloc.c
+	- block_signals: renamed to _malloc_block_signals, made public
+	- unblock_signals: renamed to _malloc_unblock_signals, made public
+
+lib/malloc/imalloc.h
+	- extern declarations for _malloc_{un,}block_signals
+
+lib/malloc/table.c
+	- mregister_alloc, mregister_free: block signals around table
+	  manipulation
+
+				   11/15
+				   -----
+trap.c
+	- run_pending_traps: set SIG_INPROGRESS flag around calls to
+	  run_sigchld_handler so other parts of the shell know that the
+	  SIGCHLD trap handler is executing
+	- run_pending_traps: if we get a situation where we are looking at
+	  running a SIGCHLD trap but the trap string is IMPOSSIBLE_TRAP_HANDLER
+	  and the SIG_INPROGRESS flag is set, just skip it.  This is possible
+	  if run_pending_traps is called from a SIGCHLD trap handler run by
+	  run_sigchld_trap
+
+doc/bash.1,lib/readline/doc/{rluser.texi,readline.3}
+	- corrected description of the effect of `set history-size 0'.  Report
+	  from Vesa-Matti J Kari <vmkari@cc.helsinki.fi>
+
+include/stdc.h
+	- CPP_STRING: new define, replaces __STRING
+
+lib/malloc/{malloc.c,imalloc.h}
+	- replace __STRING with CPP_STRING
+
+				   11/16
+				   -----
+lib/readline/bind.c
+	- sv_histsize: if argument evaluates to a value < 0, unstifle the
+	  history

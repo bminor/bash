@@ -933,10 +933,12 @@ realloc_jobs_list ()
       }
 
 #if defined (DEBUG)
+#  if 0
   itrace ("realloc_jobs_list: resize jobs list from %d to %d", js.j_jobslots, nsize);
   itrace ("realloc_jobs_list: j_lastj changed from %d to %d", js.j_lastj, (j > 0) ? j - 1 : 0);
   itrace ("realloc_jobs_list: j_njobs changed from %d to %d", js.j_njobs, j);
   itrace ("realloc_jobs_list: js.j_ndead %d js.c_reaped %d", js.j_ndead, js.c_reaped);
+#  endif
 #endif
 
   js.j_firstj = 0;
@@ -964,7 +966,7 @@ realloc_jobs_list ()
     reset_current ();
 
 #ifdef DEBUG
-  itrace ("realloc_jobs_list: reset js.j_current (%d) and js.j_previous (%d)", js.j_current, js.j_previous);
+/*  itrace ("realloc_jobs_list: reset js.j_current (%d) and js.j_previous (%d)", js.j_current, js.j_previous);*/
 #endif
 
   UNBLOCK_CHILD (oset);
@@ -987,7 +989,7 @@ compact_jobs_list (flags)
   realloc_jobs_list ();
 
 #ifdef DEBUG
-  itrace("compact_jobs_list: returning %d", (js.j_lastj || jobs[js.j_lastj]) ? js.j_lastj + 1 : 0);
+/*  itrace("compact_jobs_list: returning %d", (js.j_lastj || jobs[js.j_lastj]) ? js.j_lastj + 1 : 0); */
 #endif
 
   return ((js.j_lastj || jobs[js.j_lastj]) ? js.j_lastj + 1 : 0);
@@ -3235,10 +3237,17 @@ waitchld (wpid, block)
 	  if (sigchld == 0)
 	    longjmp (wait_intr_buf, 1);
 	}
+      /* If not in posix mode and not executing the wait builtin, queue the
+	 signal for later handling.  Run the trap immediately if we are
+	 executing the wait builtin, but don't break out of `wait'. */
       else if (sigchld)	/* called from signal handler */
 	queue_sigchld_trap (children_exited);
-      else
+      else if (running_trap)
+	queue_sigchld_trap (children_exited);
+      else if (this_shell_builtin == wait_builtin)
 	run_sigchld_trap (children_exited);
+      else
+	queue_sigchld_trap (children_exited);
     }
 
   /* We have successfully recorded the useful information about this process
@@ -3489,6 +3498,8 @@ run_sigchld_trap (nchild)
   subst_assign_varlist = (WORD_LIST *)NULL;
   the_pipeline = (PROCESS *)NULL;
 
+  running_trap = SIGCHLD + 1;
+
   set_impossible_sigchld_trap ();
   jobs_list_frozen = 1;
   for (i = 0; i < nchild; i++)
@@ -3498,6 +3509,7 @@ run_sigchld_trap (nchild)
     }
 
   run_unwind_frame ("SIGCHLD trap");
+  running_trap = 0;
 }
 
 /* Function to call when you want to notify people of changes

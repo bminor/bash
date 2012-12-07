@@ -45,11 +45,11 @@
 #  define NULL 0
 #endif
 
-#if !defined (__STRING)
+#if !defined (CPP_STRING)
 #  if defined (HAVE_STRINGIZE)
-#    define __STRING(x) #x
+#    define CPP_STRING(x) #x
 #  else
-#    define __STRING(x) "x"
+#    define CPP_STRING(x) "x"
 #  endif /* !HAVE_STRINGIZE */
 #endif /* !__STRING */
 
@@ -164,5 +164,10 @@ do {									\
 #else
 #  define _(x)	x
 #endif
+
+#include <signal.h>
+
+extern void _malloc_block_signals __P((sigset_t *, sigset_t *));
+extern void _malloc_unblock_signals __P((sigset_t *, sigset_t *));
 
 #endif /* _IMALLOC_H */

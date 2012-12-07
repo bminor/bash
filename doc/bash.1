@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sun Oct  7 17:59:28 EDT 2012
+.\"	Last Change: Thu Nov 15 21:03:47 EST 2012
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2012 October 7" "GNU Bash 4.2"
+.TH BASH 1 "2012 November 15" "GNU Bash 4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -5337,8 +5337,12 @@ same location on each history line retrieved with \fBprevious-history\fP
 or \fBnext-history\fP.
 .TP
 .B history\-size (0)
-Set the maximum number of history entries saved in the history list.  If
-set to zero, the number of entries in the history list is not limited.
+Set the maximum number of history entries saved in the history list.
+If set to zero, any existing history entries are deleted and no new entries
+are saved.
+If set to a value less than zero, the number of history entries is not
+limited.
+By default, the number of history entries is not limited.
 .TP
 .B horizontal\-scroll\-mode (Off)
 When set to \fBOn\fP, makes readline use a single line for display,
