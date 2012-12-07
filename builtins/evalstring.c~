@@ -442,8 +442,14 @@ itrace("parse_string: longjmp executed: code = %d", code);
 	  should_jump_to_top_level = 0;
 	  switch (code)
 	    {
-	    case FORCE_EOF:
 	    case ERREXIT:
+	      /* XXX - see above */
+	      if (exit_immediately_on_error)
+{
+itrace("parse_string: ERREXIT");
+		variable_context = 0;
+}
+	    case FORCE_EOF:
 	    case EXITPROG:
 	    case DISCARD:		/* XXX */
 	      if (command)

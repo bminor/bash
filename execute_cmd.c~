@@ -3701,8 +3701,7 @@ execute_null_command (redirects, pipe_in, pipe_out, async)
 	{
 	  close_pipes (pipe_in, pipe_out);
 #if defined (PROCESS_SUBSTITUTION) && defined (HAVE_DEV_FD)
-	  if (pipe_out == NO_PIPE)
-	    unlink_fifo_list ();
+	  unlink_fifo_list ();
 #endif
 	  return (EXECUTION_SUCCESS);
 	}
