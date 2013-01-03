@@ -466,7 +466,8 @@ printf_builtin (list)
 		    timefmt[2] = '\0';
 		  }
 		/* argument is seconds since the epoch with special -1 and -2 */
-		arg = getintmax ();
+		/* default argument is equivalent to -1; special case */
+		arg = garglist ? getintmax () : -1;
 		if (arg == -1)
 		  secs = NOW;		/* roughly date +%s */
 		else if (arg == -2)

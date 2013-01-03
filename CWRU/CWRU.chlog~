@@ -3983,3 +3983,86 @@ lib/glob/glob.c
 		o note when the directory name is all ** or ends in ** so we
 		  can treat it specially when the filename is **
 	  All inspired by report from Andrey Borzenkov <arvidjaar@gmail.com>
+
+lib/sh/zread.c
+	- zreadn: new function, like zread, but takes an additional argument
+	  saying how many bytes to read into the local buffer.  Can be used to
+	  implement `read -N' without so many one-byte calls to zreadc.  Code
+	  from Mike Frysinger <vapier@gentoo.org>
+
+				   12/12
+				   -----
+lib/glob/sm_loop.c
+	- PATSCAN (glob_patscan): if passed string already points to end of
+	  pattern, return NULL immediately.  Fixes problem with
+	  extglob_skipname reported by Raphaël Droz <raphael.droz@gmail.com>
+
+				   12/13
+				   -----
+execute_cmd.c
+	- execute_coproc: handle the command's exit status being inverted
+	  (an oversight).  Fixes bug reported by DJ Mills
+	  <danielmills1@gmail.com> and Andreas Schwab <schwab@linux-m68k.org>
+
+				   12/14
+				   -----
+lib/readline/readline.c
+	- bind_arrow_keys_internal: add MINGW key bindings for Home, End,
+	  Delete, and Insert keys.  Fix from Pierre Muller
+	  <pierre.muller@ics-cnrs.unistra.fr>
+
+builtins/printf.def
+	- printf_builtin: '%()T' conversion: if there is no argument supplied,
+	  behave as if -1 had been supplied (current time).  ksh93-like feature
+	  suggested by Clark Wang <dearvoid@gmail.com>
+
+doc/{bash.1,bashref.texi}
+	- document new printf %()T default argument behavior
+
+				   12/15
+				   -----
+lib/readline/display.c
+	- displaying_prompt_first_line: new variable, indicates whether or
+	  not the first line of output is displaying the prompt.  Always true
+	  in normal mode, sometimes false in horizontal scrolling mode
+	- rl_redisplay: set displaying_prompt_first_line to true unless we
+	  are in horizontal mode; set to false in horizontal mode if the left
+	  margin of the displayed line is greater than the end of the prompt
+	  string
+	- rl_redisplay: when in horizontal scroll mode, don't adjust
+	  _rl_last_c_pos by the wrap offset unless the line is displaying
+	  a prompt containing invisible chars
+	- update line: don't adjust _rl_last_c_pos by the wrap offset unless
+	  the line is displaying a prompt containing invisible chars
+	- update_line: if shrinking the line by reducing the number of
+	  displayed characters, but we have already moved the cursor to the
+	  beginning of the line where the first difference starts, don't
+	  try to delete characters
+
+builtins/read.def
+	- unbuffered_read: set to 2 if invoked as `read -N'
+	- if unbuffered_read is set to 2, compute the number of chars we
+	  need to read and read that many with zreadn.  Posix mode still
+	  uses zreadintr.  Code from Mike Frysinger <vapier@gentoo.org>
+
+doc/{bash.1,bashref.texi}
+	- read: make it clear that if read times out, it saves any input
+	  read to that point into the variable arguments.  Report from
+	  Fiedler Roman <Roman.Fiedler@ait.ac.at>
+
+subst.c
+	- command_substitute: change direct assignment of exit_immediately_on_error
+	  to use change_flag ('e', FLAG_OFF) instead
+
+flags.c
+	- use errexit_flag as the variable modified by changes to the -e
+	  option, reflect those changes to exit_immediately_on_error
+
+execute_cmd.c
+	- execute_builtin: new global variable, builtin_ignoring_errexit, set
+	  to 0 by default and set to 1 if eval/source/command executing in a
+	  context where -e should be ignored
+	- execute_builtin: set exit_immediately_on_error to errextit_flag
+	  after executing eval/source/command in a context where -e should
+	  be ignored
+

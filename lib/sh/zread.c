@@ -150,6 +150,8 @@ zreadcintr (fd, cp)
   return 1;
 }
 
+/* Like zreadc, but read a specified number of characters at a time.  Used
+   for `read -N'. */
 ssize_t
 zreadn (fd, cp, len)
      int fd;

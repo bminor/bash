@@ -150,6 +150,32 @@ zreadcintr (fd, cp)
   return 1;
 }
 
+ssize_t
+zreadn (fd, cp, len)
+     int fd;
+     char *cp;
+     size_t len;
+{
+  ssize_t nr;
+
+  if (lind == lused || lused == 0)
+    {
+      if (len > sizeof (lbuf))
+	len = sizeof (lbuf);
+      nr = zread (fd, lbuf, len);
+      lind = 0;
+      if (nr <= 0)
+	{
+	  lused = 0;
+	  return nr;
+	}
+      lused = nr;
+    }
+  if (cp)
+    *cp = lbuf[lind++];
+  return 1;
+}
+
 void
 zreset ()
 {

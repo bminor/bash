@@ -547,6 +547,9 @@ PATSCAN (string, end, delim)
   cchar = 0;
   bfirst = NULL;
 
+  if (string == end)
+    return (NULL);
+
   for (s = string; c = *s; s++)
     {
       if (s >= end)

@@ -56,7 +56,8 @@ When used in a function, `declare' makes NAMEs local, as with the `local'
 command.  The `-g' option suppresses this behavior.
 
 Exit Status:
-Returns success unless an invalid option is supplied or an error occurs.
+Returns success unless an invalid option is supplied or a variable
+assignment error occurs.
 $END
 
 $BUILTIN typeset
@@ -111,8 +112,8 @@ Local variables can only be used within a function; they are visible
 only to the function where they are defined and its children.
 
 Exit Status:
-Returns success unless an invalid option is supplied, an error occurs,
-or the shell is not executing a function.
+Returns success unless an invalid option is supplied, a variable
+assignment error occurs, or the shell is not executing a function.
 $END
 int
 local_builtin (list)

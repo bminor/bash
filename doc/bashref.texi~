@@ -4274,15 +4274,12 @@ not echoed.
 
 @item -t @var{timeout}
 Cause @code{read} to time out and return failure if a complete line of
-input (or a specified number of characters)
-is not read within @var{timeout} seconds.
+input is not read within @var{timeout} seconds.
 @var{timeout}  may be a decimal number with a fractional portion following
 the decimal point.
 This option is only effective if @code{read} is reading input from a
 terminal, pipe, or other special file; it has no effect when reading
 from regular files.
-If @code{read} times out, @code{read} saves any partial input read into
-the specified variable @var{name}.
 If @var{timeout} is 0, @code{read} returns immediately, without trying to
 read and data.  The exit status is 0 if input is available on
 the specified file descriptor, non-zero otherwise.
