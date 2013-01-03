@@ -1075,7 +1075,7 @@ glob_filename (pathname, flags)
 	{
 	  int dl, prev;
 	  prev = dl = directory_len;
-	  while (dl >= 4 && d[dl - 1] == '/' &&
+	  while (dl > 4 && d[dl - 1] == '/' &&
 			   d[dl - 2] == '*' &&
 			   d[dl - 3] == '*' &&
 			   d[dl - 4] == '/')
@@ -1083,15 +1083,6 @@ glob_filename (pathname, flags)
 	  if (dl != directory_len)
 	    last_starstar = 1;
 	  directory_len = prev;
-	}
-
-      /* If the directory name ends in [star][star]/ but the filename is
-	 [star][star], just remove the final [star][star] from the directory
-	 so we don't have to scan everything twice. */
-      if (last_starstar && directory_len > 4 &&
-	    filename[0] == '*' && filename[1] == '*' && filename[2] == 0)
-	{
-	  directory_len -= 3;
 	}
 
       if (d[directory_len - 1] == '/')
@@ -1128,6 +1119,11 @@ glob_filename (pathname, flags)
 	  directory_name = NULL;
 	  directory_len = 0;
 	  goto only_filename;
+	}
+      else if (last_starstar && filename[0] == '*' && filename[1] == '*' && filename[2] == 0)
+	{
+	  filename[0] = '*';
+	  filename[1] = 0;
 	}
 
       /* We have successfully globbed the preceding directory name.

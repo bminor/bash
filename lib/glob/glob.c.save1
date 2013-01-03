@@ -1036,68 +1036,17 @@ glob_filename (pathname, flags)
      have to expand the previous levels.  Just recurse. */
   if (directory_len > 0 && glob_pattern_p (directory_name))
     {
-      char **directories, *d, *p;
+      char **directories;
       register unsigned int i;
-      int all_starstar, last_starstar;
 
-      all_starstar = last_starstar = 0;
-      d = directory_name;
       dflags = flags & ~GX_MARKDIRS;
-      /* Collapse a sequence of ** patterns separated by one or more slashes
-	 to a single ** terminated by a slash or NUL */
-      if ((flags & GX_GLOBSTAR) && d[0] == '*' && d[1] == '*' && (d[2] == '/' || d[2] == '\0'))
-	{
-	  p = d;
-	  while (d[0] == '*' && d[1] == '*' && (d[2] == '/' || d[2] == '\0'))
-	    {
-	      p = d;
-	      if (d[2])
-		{
-		  d += 3;
-		  while (*d == '/')
-		    d++;
-		  if (*d == 0)
-		    break;
-		}
-	    }
-	  if (*d == 0)
-	    all_starstar = 1;
-	  d = p;
-	  dflags |= GX_ALLDIRS|GX_ADDCURDIR;
-	  directory_len = strlen (d);
-	}
+      if ((flags & GX_GLOBSTAR) && directory_name[0] == '*' && directory_name[1] == '*' && (directory_name[2] == '/' || directory_name[2] == '\0'))
+	dflags |= GX_ALLDIRS|GX_ADDCURDIR;
 
-      /* If there is a non [star][star]/ component in directory_name, we
-	 still need to collapse trailing sequences of [star][star]/ into
-	 a single one and note that the directory name ends with [star][star],
-	 so we can compensate if filename is [star][star] */
-      if ((flags & GX_GLOBSTAR) && all_starstar == 0)
-	{
-	  int dl, prev;
-	  prev = dl = directory_len;
-	  while (dl >= 4 && d[dl - 1] == '/' &&
-			   d[dl - 2] == '*' &&
-			   d[dl - 3] == '*' &&
-			   d[dl - 4] == '/')
-	    prev = dl, dl -= 3;
-	  if (dl != directory_len)
-	    last_starstar = 1;
-	  directory_len = prev;
-	}
+      if (directory_name[directory_len - 1] == '/')
+	directory_name[directory_len - 1] = '\0';
 
-      /* If the directory name ends in [star][star]/ but the filename is
-	 [star][star], just remove the final [star][star] from the directory
-	 so we don't have to scan everything twice. */
-      if (last_starstar && directory_len > 4 &&
-	    filename[0] == '*' && filename[1] == '*' && filename[2] == 0)
-	{
-	  directory_len -= 3;
-	}
-
-      if (d[directory_len - 1] == '/')
-	d[directory_len - 1] = '\0';
-
-      directories = glob_filename (d, dflags);
+      directories = glob_filename (directory_name, dflags);
 
       if (free_dirname)
 	{
@@ -1117,17 +1066,6 @@ glob_filename (pathname, flags)
 	  free ((char *) directories);
 	  free ((char *) result);
 	  return ((char **) &glob_error_return);
-	}
-
-      /* If we have something like [star][star]/[star][star], it's no use to
-         glob **, then do it again, and throw half the results away.  */
-      if (all_starstar && filename[0] == '*' && filename[1] == '*' && filename[2] == 0)
-	{
-	  free ((char *) directories);
-	  free (directory_name);
-	  directory_name = NULL;
-	  directory_len = 0;
-	  goto only_filename;
 	}
 
       /* We have successfully globbed the preceding directory name.
@@ -1185,7 +1123,7 @@ glob_filename (pathname, flags)
 		     directory on down. Break now (shouldbreak = 1) to avoid
 		     duplicate entries in the final result. */
 #define NULL_PLACEHOLDER(x)	((x) && *(x) && **(x) == 0)
-		  if ((dflags & GX_NULLDIR) && (flags & GX_NULLDIR) == 0 &&
+		  if ((dflags & GX_NULLDIR) && /* (flags & GX_NULLDIR) == 0 && */
 			NULL_PLACEHOLDER (temp_results))
 #undef NULL_PLACEHOLDER
 		    {
@@ -1238,7 +1176,6 @@ glob_filename (pathname, flags)
       return (result);
     }
 
-only_filename:
   /* If there is only a directory name, return it. */
   if (*filename == '\0')
     {

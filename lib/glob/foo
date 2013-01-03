@@ -1,0 +1,35 @@
+	      /* If we're expanding **, we don't need to glue the directory
+		 name to the results; we've already done it in glob_vector */
+	      if ((dflags & GX_ALLDIRS) && filename[0] == '*' && filename[1] == '*' && (filename[2] == '\0' || filename[2] == '/'))
+		{
+		  /* When do we remove null elements from temp_results?  And
+		     how to avoid duplicate elements in the final result? */
+		  /* If (dflags & GX_NULLDIR) glob_filename potentially left a
+		     NULL placeholder in the temp results just in case
+		     glob_vector/glob_dir_to_array did something with it, but
+		     if it didn't, and we're not supposed to be passing them
+		     through for some reason ((flags & GX_NULLDIR) == 0) we
+		     need to remove all the NULL elements from the beginning
+		     of TEMP_RESULTS. */
+		  /* If we have a null directory name and ** as the filename,
+		     we have just searched for everything from the current
+		     directory on down. Break now (shouldbreak = 1) to avoid
+		     duplicate entries in the final result. */
+#define NULL_PLACEHOLDER(x)	((x) && *(x) && **(x) == 0)
+		  if ((dflags & GX_NULLDIR) && /* (flags & GX_NULLDIR) == 0 && */
+			NULL_PLACEHOLDER (temp_results))
+#undef NULL_PLACEHOLDER
+		    {
+		      register int i, n;
+		      for (n = 0; temp_results[n] && *temp_results[n] == 0; n++)
+			;
+		      i = n;
+		      do
+			temp_results[i - n] = temp_results[i];
+		      while (temp_results[i++] != 0);
+		      array = temp_results;
+		      shouldbreak = 1;
+		    }
+	          else
+		    array = temp_results;
+		}

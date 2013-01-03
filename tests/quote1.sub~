@@ -1,0 +1,37 @@
+test="weferfds'dsfsdf"
+
+# why does this work, this list was born of frustration, I tried
+# everything I could think of.
+echo \'${test//"'"/\'\\\'\'}\'" "
+
+#but none of the following
+
+echo "'${test//"'"/}'"
+
+echo "'${test//"'"/"'\\''"}'"
+
+echo "'${test//"'"/\'\\'\'}'"
+
+#echo "'${test//'/}'"   # hangs waiting for '
+#echo "'${test//"'"/'\\''}'" # hangs waiting for '
+
+unset test
+test=teststrtest
+echo "${test//str/"dd dd"}"
+echo ${test//str/"dd '\''dd"}
+
+unset test
+test=teststring
+
+echo "${test//str/"dddd"}"
+
+echo ${test//str/"dddd"}
+
+echo ${test//str/"'"}
+
+echo "${test//str/"'"}"
+
+#echo "${test//str/'}"   # hangs
+
+test=test\'string
+echo "${test//"'"/"'"}"

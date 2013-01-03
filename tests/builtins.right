@@ -141,4 +141,14 @@ b
 before: f = 4
 inside
 after: f = 8 bar = 4
-./builtins.tests: line 254: exit: status: numeric argument required
+./builtins4.sub: line 2: declare: c: not found
+./builtins4.sub: line 5: declare: d: not found
+declare -a c='([0]="4")'
+declare -A c='([0]="4" )'
+declare -a c='([0]="1" [1]="2" [2]="3")'
+declare -A c='([one]="1" [two]="2" [three]="3" )'
+declare -a c='([0]="1" [1]="2" [2]="3")'
+declare -a c='([0]="1" [1]="2" [2]="3")'
+unset
+unset
+./builtins.tests: line 257: exit: status: numeric argument required

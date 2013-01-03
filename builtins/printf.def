@@ -43,6 +43,11 @@ printf interprets:
   %(fmt)T output the date-time string resulting from using FMT as a format
         string for strftime(3)
 
+The format is re-used as necessary to consume all of the arguments.  If
+there are fewer arguments than the format requires,  extra format
+specifications behave as if a zero value or null string, as appropriate,
+had been supplied.
+
 Exit Status:
 Returns success unless an invalid option is given or a write or assignment
 error occurs.

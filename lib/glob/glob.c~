@@ -1093,6 +1093,11 @@ glob_filename (pathname, flags)
 	{
 	  directory_len -= 3;
 	}
+      else if (last_starstar && directory_len == 3 &&
+	    filename[0] == '*' && filename[1] == '*' && filename[2] == 0)
+	{
+	  directory_len -= 2;
+	}
 
       if (d[directory_len - 1] == '/')
 	d[directory_len - 1] = '\0';
