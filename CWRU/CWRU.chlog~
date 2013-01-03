@@ -857,8 +857,9 @@ lib/glob/smatch.c
 	- rangecmp,rangecmp_wc: change to take an additional argument, which
 	  forces the use of strcoll/wscoll when non-zero.  If it's 0, a new
 	  variable `glob_asciirange' controls whether or not we use strcoll/
-	  wscoll.  If it's non-zero, we use straight C-locale-like ordering.
-	  Suggested by  Aharon Robbins <arnold@skeeve.com>
+	  wscoll.  If glob_asciirange is non-zero, we use straight
+	  C-locale-like ordering. Suggested by  Aharon Robbins
+	  <arnold@skeeve.com>
 
 				   6/30
 				   ----
@@ -3604,7 +3605,7 @@ builtins/help.def
 	  for each builtin in two columns into a new function: dispcolumn
 	- wdispcolumn: multibyte-char version of dispcolumn; uses wide
 	  chars and printf "%ls" format.  Fixes problem reported by
-	  Nguy·ªn Th√°i Ng·ªc Duy <pclouds@gmail.c
+	  Nguy·ªn Th√°i Ng·ªc Duy <pclouds@gmail.com>
 
 				   9/22
 				   ----
@@ -4186,7 +4187,8 @@ builtins/declare.def
 	- declare_internal: if -g given with name=value, but variable is not
 	  found in the global variable table, make sure to call
 	  bind_global_variable so the variable is created and modified at
-	  global scope
+	  global scope.  Fixes a bug where declare -g x=y could modify `x'
+	  at a previous function scope
 
 command.h
 	- W_ASSIGNARRAY: new word flag, compound indexed array assignment
@@ -4203,4 +4205,58 @@ subst.c
 	- shell_expand_word_list: call make_internal_declare if -a option
 	  given to declaration builtin (W_ASSIGNARRAY); handle -g option with
 	  it (W_ASSNGLOBAL).  Fixes inconsistency noticed by Vicente Couce
-	  Diaz <vituko@gmail.com>
+	  Diaz <vituko@gmail.com>, where declare -ag foo=(bar) could modify
+	  array variable foo at previous function scope, not global scope
+
+				   12/27
+				   -----
+bashline.c
+	- Minix needs the third argument to tputs to be a void funtion taking
+	  an int argument, not an int-returning function.  Fix from
+	  John E. Malmberg <wb8tyw@qsl.net> as part of VMS bash port
+
+				   12/29
+				   -----
+configure.ac,version.c,patchlevel.h
+	- bash-4.3-devel: new version, new shell compatibility level (43)
+
+subst.c
+	- parameter_brace_patsub: put the bash-4.2 code back in from the
+	  change of 3/3 that runs the replacement string through quote
+	  removal, make it dependent on shell_compatibility_level <= 42
+
+builtins/shopt.def
+	- compat42: new shopt option
+	- set_compatibility_level: change logic to set and unset various
+	  compat variables and shell_compatibility_level
+
+COMPAT
+	- new documentation for bash-4.3 compatibility changes
+
+doc/{bash.1,bashref.texi}
+	- compat42: document new shopt option
+
+builtins/shopt.def
+	- set_compatibility_opts: new function, sets the various shopt
+	  compat variables based on the value of shell_compatibility_level
+
+builtins/common.h
+	- set_compatibility_opts: new extern declaration
+
+variables.c
+	- BASH_COMPAT: new special variable; sets the shell compatibility
+	  level.  Accepts values in decimal (4.2) or integer (42) form;
+	  Unsetting variable, setting it to empty string, or setting it to
+	  out-of-range value sets the shell's compatibility level to the
+	  default for the current version.  Valid values are 3.1/31 through
+	  the current version
+	- sv_shcompat: new function implementing logic for BASH_COMPAT
+
+variables.h
+	- sv_shcompat: new extern declaration
+
+doc/{bash.1,bashref.texi}
+	- BASH_COMPAT: description of new variable
+
+lib/readline/complete.c
+	- _rl_colored_stats: default back to 0 for 4.3 release branch

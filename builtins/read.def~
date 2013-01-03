@@ -155,6 +155,8 @@ sigalrm (s)
      int s;
 {
   sigalrm_seen = 1;
+  if (signal_is_trapped (SIGALRM))
+    trap_handler (SIGALRM);
   if (reading)		/* do the longjmp if we get SIGALRM while in read() */
     longjmp (alrmbuf, 1);
 }
@@ -404,7 +406,7 @@ read_builtin (list)
 
   if (tmsec > 0 || tmusec > 0)
     {
-      code = setjmp (alrmbuf);
+      code = setjmp_nosigs (alrmbuf);
       if (code)
 	{
 	  sigalrm_seen = 0;
@@ -416,7 +418,6 @@ read_builtin (list)
 	  remove_unwind_protect ();
 	  run_unwind_frame ("read_builtin");
 	  input_string[i] = '\0';	/* make sure it's terminated */
-itrace("SIGALRM seen: input_string = '%s'", input_string);
 	  retval = 128+SIGALRM;
 	  goto assign_vars;
 	}

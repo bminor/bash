@@ -4274,12 +4274,15 @@ not echoed.
 
 @item -t @var{timeout}
 Cause @code{read} to time out and return failure if a complete line of
-input is not read within @var{timeout} seconds.
+input (or a specified number of characters)
+is not read within @var{timeout} seconds.
 @var{timeout}  may be a decimal number with a fractional portion following
 the decimal point.
 This option is only effective if @code{read} is reading input from a
 terminal, pipe, or other special file; it has no effect when reading
 from regular files.
+If @code{read} times out, @code{read} saves any partial input read into
+the specified variable @var{name}.
 If @var{timeout} is 0, @code{read} returns immediately, without trying to
 read and data.  The exit status is 0 if input is available on
 the specified file descriptor, non-zero otherwise.
@@ -4891,6 +4894,11 @@ parameter expansion as a special character.  The single quotes must match
 quoted.  This is the behavior of @sc{posix} mode through version 4.1.
 The default Bash behavior remains as in previous versions.
 
+@item compat42
+If set, Bash
+does not process the replacement string in the pattern substitution word
+expansion using quote removal.
+
 @item complete_fullquote
 If set, Bash
 quotes all shell metacharacters in filenames and directory names when
@@ -5294,6 +5302,22 @@ elements cause commands to be removed from the hash table.
 The command currently being executed or about to be executed, unless the
 shell is executing a command as the result of a trap,
 in which case it is the command executing at the time of the trap.
+
+@item BASH_COMPAT
+The value is used to set the shell's compatibility level.
+@xref{The Shopt Builtin} for a description of the various compatibility
+levels and their effects.
+The value may be a decimal number (e.g., 4.2) or an integer (e.g., 42)
+corresponding to the desired compatibility level.
+If @code{BASH_COMPAT} is unset or set to the empty string, the compatibility
+level is set to the default for the current version.
+If @code{BASH_COMPAT} is set to a value that is not one of the valid
+compatibility levels, the shell prints an error message and sets the
+compatibility level to the default for the current version.
+The valid compatibility levels correspond to the compatibility options
+accepted by the @code{shopt} builtin described above (for example,
+@var{compat42} means that 4.2 and 42 are valid values).
+The current version is also a valid value.
 
 @item BASH_ENV
 If this variable is set when Bash is invoked to execute a shell
@@ -7067,7 +7091,7 @@ name, rather than on all assignment statements on the line.
 @item
 The @code{command} builtin does not prevent builtins that take assignment
 statements as arguments from expanding them as assignment statements;
-when not in POSIX mode, assignment builtins lose their assignment
+when not in @sc{posix} mode, assignment builtins lose their assignment
 statement expansion properties when preceded by @code{command}.
 
 @item

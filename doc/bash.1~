@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Fri Dec 14 10:13:24 EST 2012
+.\"	Last Change: Sat Dec 29 11:19:16 EST 2012
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2012 December 14" "GNU Bash 4.2"
+.TH BASH 1 "2012 December 29" "GNU Bash 4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -9217,6 +9217,12 @@ parameter expansion as a special character.  The single quotes must match
 (an even number) and the characters between the single quotes are considered
 quoted.  This is the behavior of posix mode through version 4.1.
 The default bash behavior remains as in previous versions.
+.TP 8
+.B compat42
+If set,
+.B bash
+does not process the replacement string in the pattern substitution word
+expansion using quote removal.
 .TP 8
 .B complete_fullquote
 If set,

@@ -378,6 +378,7 @@ extern void sv_optind __P((char *));
 extern void sv_opterr __P((char *));
 extern void sv_locale __P((char *));
 extern void sv_xtracefd __P((char *));
+extern void sv_shcompat __P((char *));
 
 #if defined (READLINE)
 extern void sv_comp_wordbreaks __P((char *));

@@ -374,18 +374,12 @@ Shell Compatibility Level
 =========================
 
 Bash-4.0 introduced the concept of a `shell compatibility level', specified
-as a set of options to the shopt builtin (compat31, compat32, compat40, 
-compat41, and compat42 at this writing).  There is only one current
-compatibility level -- each option is mutually exclusive.  This list does not
-mention behavior that is standard for a particular version (e.g., setting
-compat32 means that quoting the rhs of the regexp matching operator quotes
-special regexp characters in the word, which is default behavior in bash-3.2
-and above).
-
-Bash-4.3 introduces a new shell variable: BASH_COMPAT.  The value assigned
-to this variable (a decimal version number like 4.2, or an integer
-corresponding to the compatNN option, like 42) determines the compatibility
-level.
+as a set of options to the shopt builtin (compat31, compat32, compat40, and
+compat41 at this writing).  There is only one current compatibility level --
+each option is mutually exclusive.  This list does not mention behavior
+that is standard for a particular version (e.g., setting compat32 means that
+quoting the rhs of the regexp matching operator quotes special regexp
+characters in the word, which is default behavior in bash-3.2 and above).
 
 compat31 set
 	- the < and > operators to the [[ command do not consider the current

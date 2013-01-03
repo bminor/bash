@@ -83,7 +83,11 @@ extern int bash_brace_completion __P((int, int));
 #endif /* BRACE_COMPLETION */
 
 /* To avoid including curses.h/term.h/termcap.h and that whole mess. */
+#ifdef _MINIX
+extern int tputs __P((const char *string, int nlines, void (*outx)(int)));
+#else
 extern int tputs __P((const char *string, int nlines, int (*outx)(int)));
+#endif
 
 /* Forward declarations */
 
@@ -159,7 +163,11 @@ static char *quote_word_break_chars __P((char *));
 static void set_filename_bstab __P((const char *));
 static char *bash_quote_filename __P((char *, int, char *));
 
+#ifdef _MINIX
+static void putx __P((int));
+#else
 static int putx __P((int));
+#endif
 static int bash_execute_unix_command __P((int, int));
 static void init_unix_command_map __P((void));
 static int isolate_sequence __P((char *, int, int, int *));
@@ -3871,11 +3879,19 @@ bash_quote_filename (s, rtype, qcp)
 /* Support for binding readline key sequences to Unix commands. */
 static Keymap cmd_xmap;
 
+#ifdef _MINIX
+static void
+#else
 static int
+#endif
 putx(c)
      int c;
 {
-  return (putc (c, rl_outstream));
+  int x;
+  x = putc (c, rl_outstream);
+#ifndef _MINIX
+  return x;
+#endif
 }
   
 static int

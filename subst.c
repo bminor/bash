@@ -6738,11 +6738,19 @@ parameter_brace_patsub (varname, value, ind, patsub, quoted, flags)
   pat = getpattern (lpatsub, quoted, 1);
 
   if (rep)
-    /* We want to perform quote removal on the expanded replacement even if
-       the entire expansion is double-quoted because the parser and string
-       extraction functions treated quotes in the replacement string as
-       special. */
-    rep = expand_string_if_necessary (rep, quoted & ~(Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT), expand_string_unsplit);
+    {
+      /* We want to perform quote removal on the expanded replacement even if
+	 the entire expansion is double-quoted because the parser and string
+	 extraction functions treated quotes in the replacement string as
+	 special.  THIS IS NOT BACKWARDS COMPATIBLE WITH BASH-4.2. */
+      if (shell_compatibility_level > 42)
+	rep = expand_string_if_necessary (rep, quoted & ~(Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT), expand_string_unsplit);
+      /* This is the bash-4.2 code. */      
+      else if ((mflags & MATCH_QUOTED) == 0)
+	rep = expand_string_if_necessary (rep, quoted, expand_string_unsplit);
+      else
+	rep = expand_string_to_string_internal (rep, quoted, expand_string_unsplit);
+    }
 
   /* ksh93 doesn't allow the match specifier to be a part of the expanded
      pattern.  This is an extension.  Make sure we don't anchor the pattern

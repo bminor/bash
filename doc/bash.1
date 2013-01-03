@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sat Dec 15 17:50:05 EST 2012
+.\"	Last Change: Sat Dec 29 11:19:16 EST 2012
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2012 December 15" "GNU Bash 4.2"
+.TH BASH 1 "2012 December 29" "GNU Bash 4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1863,6 +1863,23 @@ assigns a default value to a variable; these cases are noted
 below.
 .PP
 .PD 0
+.TP
+.B BASH_COMPAT
+The value is used to set the shell's compatibility level.
+See the description of the \fBshopt\fB builtin below under
+\fBSHELL BUILTIN COMMANDS\fP  for a description of the various compatibility
+levels and their effects.
+The value may be a decimal number (e.g., 4.2) or an integer (e.g., 42)
+corresponding to the desired compatibility level.
+If \fBBASH_COMPAT\fP is unset or set to the empty string, the compatibility
+level is set to the default for the current version.
+If \fBBASH_COMPAT\fP is set to a value that is not one of the valid
+compatibility levels, the shell prints an error message and sets the
+compatibility level to the default for the current version.
+The valid compatibility levels correspond to the compatibility options
+accepted by the \fBshopt\fP builtin described below (for example,
+\fBcompat42\fP means that 4.2 and 42 are valid values).
+The current version is also a valid value.
 .TP
 .B BASH_ENV
 If this parameter is set when \fBbash\fP is executing a shell script,
@@ -9217,6 +9234,12 @@ parameter expansion as a special character.  The single quotes must match
 (an even number) and the characters between the single quotes are considered
 quoted.  This is the behavior of posix mode through version 4.1.
 The default bash behavior remains as in previous versions.
+.TP 8
+.B compat42
+If set,
+.B bash
+does not process the replacement string in the pattern substitution word
+expansion using quote removal.
 .TP 8
 .B complete_fullquote
 If set,

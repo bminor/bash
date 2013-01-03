@@ -57,6 +57,8 @@
 #include "alias.h"
 #include "jobs.h"
 
+#include "version.h"
+
 #include "builtins/getopt.h"
 #include "builtins/common.h"
 
@@ -4513,6 +4515,7 @@ struct name_and_function {
 };
 
 static struct name_and_function special_vars[] = {
+  { "BASH_COMPAT", sv_shcompat },
   { "BASH_XTRACEFD", sv_xtracefd },
 
 #if defined (JOB_CONTROL)
@@ -5169,6 +5172,60 @@ sv_xtracefd (name)
       else
 	internal_error (_("%s: %s: invalid value for trace file descriptor"), name, value_cell (v));
     }
+}
+
+#define MIN_COMPAT_LEVEL 31
+
+void
+sv_shcompat (name)
+     char *name;
+{
+  SHELL_VAR *v;
+  char *val;
+  int tens, ones, compatval;
+
+  v = find_variable (name);
+  if (v == 0)
+    {
+      shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
+      set_compatibility_opts ();
+      return;
+    }
+  val = value_cell (v);
+  if (val == 0 || *val == '\0')
+    {
+      shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
+      set_compatibility_opts ();
+      return;
+    }
+  /* Handle decimal-like compatibility version specifications: 4.2 */
+  if (isdigit (val[0]) && val[1] == '.' && isdigit (val[2]) && val[3] == 0)
+    {
+      tens = val[0] - '0';
+      ones = val[2] - '0';
+      compatval = tens*10 + ones;
+    }
+  /* Handle integer-like compatibility version specifications: 42 */
+  else if (isdigit (val[0]) && isdigit (val[1]) && val[2] == 0)
+    {
+      tens = val[0] - '0';
+      ones = val[1] - '0';
+      compatval = tens*10 + ones;
+    }
+  else
+    {
+compat_error:
+      internal_error (_("%s: %s: compatibility value out of range"), name, val);
+      shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
+      set_compatibility_opts ();
+      return;
+    }
+
+  if (compatval < MIN_COMPAT_LEVEL || compatval > DEFAULT_COMPAT_LEVEL)
+    goto compat_error;
+
+  shell_compatibility_level = compatval;
+  set_compatibility_opts ();
 }
 
 #if defined (JOB_CONTROL)

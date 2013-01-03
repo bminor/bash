@@ -9374,7 +9374,7 @@ shell_expand_word_list (tlist, eflags)
 	    make_internal_declare (tlist->word->word, "-gA");
 	  else if (tlist->word->flags & W_ASSIGNASSOC)
 	    make_internal_declare (tlist->word->word, "-A");
-	  if ((tlist->word->flags & (W_ASSIGNASSOC|W_ASSNGLOBAL)) == (W_ASSIGNARRAY|W_ASSNGLOBAL))
+	  if ((tlist->word->flags & (W_ASSIGNARRAY|W_ASSNGLOBAL)) == (W_ASSIGNARRAY|W_ASSNGLOBAL))
 	    make_internal_declare (tlist->word->word, "-ga");
 	  else if (tlist->word->flags & W_ASSIGNARRAY)
 	    make_internal_declare (tlist->word->word, "-a");
