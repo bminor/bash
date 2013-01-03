@@ -416,6 +416,7 @@ read_builtin (list)
 	  remove_unwind_protect ();
 	  run_unwind_frame ("read_builtin");
 	  input_string[i] = '\0';	/* make sure it's terminated */
+itrace("SIGALRM seen: input_string = '%s'", input_string);
 	  retval = 128+SIGALRM;
 	  goto assign_vars;
 	}
@@ -483,7 +484,10 @@ read_builtin (list)
   add_unwind_protect (xfree, input_string);
 
   CHECK_ALRM;
-  unbuffered_read = (nchars > 0) || (delim != '\n') || input_is_pipe;
+  if ((nchars > 0) && (input_is_tty == 0) && ignore_delim)	/* read -N */
+    unbuffered_read = 2;
+  else if ((nchars > 0) || (delim != '\n') || input_is_pipe)
+    unbuffered_read = 1;
 
   if (prompt && edit == 0)
     {
@@ -540,7 +544,9 @@ read_builtin (list)
 	interrupt_immediately++;
 #endif
       reading = 1;
-      if (unbuffered_read)
+      if (unbuffered_read == 2)
+	retval = posixly_correct ? zreadintr (fd, &c, 1) : zreadn (fd, &c, nchars - nr);
+      else if (unbuffered_read)
 	retval = posixly_correct ? zreadintr (fd, &c, 1) : zread (fd, &c, 1);
       else
 	retval = posixly_correct ? zreadcintr (fd, &c) : zreadc (fd, &c);

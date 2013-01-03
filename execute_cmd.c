@@ -1545,13 +1545,13 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   invert = (tcom->flags & CMD_INVERT_RETURN) != 0;
   tcom->flags &= ~CMD_INVERT_RETURN;
 
-  result = setjmp (top_level);
+  result = setjmp_nosigs (top_level);
 
   /* If we're inside a function while executing this subshell, we
      need to handle a possible `return'. */
   function_value = 0;
   if (return_catch_flag)
-    function_value = setjmp (return_catch);
+    function_value = setjmp_nosigs (return_catch);
 
   /* If we're going to exit the shell, we don't want to invert the return
      status. */
@@ -3744,13 +3744,13 @@ fix_assignment_words (words)
 {
   WORD_LIST *w, *wcmd;
   struct builtin *b;
-  int assoc, global;
+  int assoc, global, array;
 
   if (words == 0)
     return;
 
   b = 0;
-  assoc = global = 0;
+  assoc = global = array = 0;
 
   wcmd = words;
   for (w = words; w; w = w->next)
@@ -3775,14 +3775,16 @@ fix_assignment_words (words)
 #if defined (ARRAY_VARS)
 	if (assoc)
 	  w->word->flags |= W_ASSIGNASSOC;
+	if (array)
+	  w->word->flags |= W_ASSIGNARRAY;
+#endif
 	if (global)
 	  w->word->flags |= W_ASSNGLOBAL;
-#endif
       }
 #if defined (ARRAY_VARS)
     /* Note that we saw an associative array option to a builtin that takes
        assignment statements.  This is a bit of a kludge. */
-    else if (w->word->word[0] == '-' && (strchr (w->word->word+1, 'A') || strchr (w->word->word+1, 'g')))
+    else if (w->word->word[0] == '-' && (strchr (w->word->word+1, 'A') || strchr (w->word->word+1, 'a') || strchr (w->word->word+1, 'g')))
 #else
     else if (w->word->word[0] == '-' && strchr (w->word->word+1, 'g'))
 #endif
@@ -3799,6 +3801,8 @@ fix_assignment_words (words)
 	  }
 	if ((wcmd->word->flags & W_ASSNBLTIN) && strchr (w->word->word+1, 'A'))
 	  assoc = 1;
+	else if ((wcmd->word->flags & W_ASSNBLTIN) && strchr (w->word->word+1, 'a'))
+	  array = 1;
 	if ((wcmd->word->flags & W_ASSNBLTIN) && strchr (w->word->word+1, 'g'))
 	  global = 1;
       }
@@ -4454,7 +4458,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   fc = tc;
 
   return_catch_flag++;
-  return_val = setjmp (return_catch);
+  return_val = setjmp_nosigs (return_catch);
 
   if (return_val)
     {
@@ -4612,13 +4616,13 @@ execute_subshell_builtin_or_function (words, redirects, builtin, var,
     {
       /* Give builtins a place to jump back to on failure,
 	 so we don't go back up to main(). */
-      result = setjmp (top_level);
+      result = setjmp_nosigs (top_level);
 
       /* Give the return builtin a place to jump to when executed in a subshell
          or pipeline */
       funcvalue = 0;
       if (return_catch_flag && builtin == return_builtin)
-        funcvalue = setjmp (return_catch);
+        funcvalue = setjmp_nosigs (return_catch);
 
       if (result == EXITPROG)
 	exit (last_command_exit_value);

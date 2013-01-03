@@ -251,7 +251,7 @@ file_error_and_exit:
   if (flags & FEVAL_BUILTIN)
     result = EXECUTION_SUCCESS;
 
-  return_val = setjmp_nosigs (return_catch);
+  return_val = setjmp (return_catch);
 
   /* If `return' was seen outside of a function, but in the script, then
      force parse_and_execute () to clean up. */

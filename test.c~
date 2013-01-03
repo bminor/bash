@@ -822,7 +822,7 @@ test_command (margc, margv)
 
   USE_VAR(margc);
 
-  code = setjmp_nosigs (test_exit_buf);
+  code = setjmp (test_exit_buf);
 
   if (code)
     return (test_error_return);

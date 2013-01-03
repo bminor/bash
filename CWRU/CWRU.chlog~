@@ -4066,3 +4066,141 @@ execute_cmd.c
 	  after executing eval/source/command in a context where -e should
 	  be ignored
 
+flags.c
+	- if builtin_ignoring_errexit is set, changes to errexit_flag are
+	  not reflected in the setting of exit_immediately_on_error.  Fixes
+	  bug reported by Robert Schiele <rschiele@gmail.com>
+
+				   12/23
+				   -----
+include/posixjmp.h
+	- setjmp_nosigs: new define, call setjmp in such a way that it will
+	  not manipulate the signal mask
+
+{expr,test,trap}.c
+	- setjmp_nosigs: call instead of setjmp; don't need to manipulate
+	  signal mask
+
+builtins/read.def
+	- read_builtin: setjmp_nosigs: call instead of setjmp; don't need
+	  to manipulate signal mask
+
+builtins/evalstring.c:
+	- parse_and_execute: setjmp_nosigs: call instead of setjmp; don't need
+	  to manipulate signal mask
+	- parse_string: setjmp_nosigs: call instead of setjmp; don't need
+	  to manipulate signal mask
+	- parse_and_execute: save and restore the signal mask if we get a
+	  longjmp that doesn't cause us to return or exit (case DISCARD)
+
+				   12/24
+				   -----
+general.c
+	- bash_tilde_expand: only set interrupt_immediately if there are no
+	  signals trapped; we want to jump to top level if interrupted but
+	  not run any trap commands
+
+				   12/25
+				   -----
+jobs.c
+	- run_sigchld_trap: no longer set interrupt_immediately before calling
+	  parse_and_execute, even if this is no longer run in a signal handler
+	  context
+
+input.c
+	- getc_with_restart: add call to QUIT instead of CHECK_TERMSIG
+
+parse.y
+	- yy_stream_get: now that getc_with_restart calls QUIT, don't need to
+	  set interrupt_immediately (already had call to run_pending_traps)
+
+execute_cmd.c
+	- execute_subshell_builtin_or_function,execute_function,execute_in_subshell:
+	  setjmp_nosigs: call instead of setjmp when saving return_catch; don't
+	  need to manipulate signal mask
+	- execute_subshell_builtin_or_function,execute_in_subshell:
+	  setjmp_nosigs: call instead of setjmp where appropriate when saving
+	  top_level; don't need to manipulate signal mask if we're going to
+	  exit right away
+subst.c
+	- command_substitute: setjmp_nosigs: call instead of setjmp when saving
+	  return_catch; don't need to manipulate signal mask
+	- command_substitute: setjmp_nosigs: call instead of setjmp where
+	  appropriate when saving top_level; don't need to manipulate signal
+	  mask if we're going to exit right away
+
+trap.c
+	- run_exit_trap: setjmp_nosigs: call instead of setjmp when saving
+	  return_catch; don't need to manipulate signal mask
+	- run_exit_trap: setjmp_nosigs: call instead of setjmp where
+	  appropriate when saving top_level; don't need to manipulate signal
+	  mask if we're going to exit right away
+	- _run_trap_internal: setjmp_nosigs: call instead of setjmp when saving
+	  return_catch; don't need to manipulate signal mask
+
+builtins/evalfile.c
+	- _evalfile: setjmp_nosigs: call instead of setjmp when saving
+	  return_catch; don't need to manipulate signal mask
+
+builtins/evalstring.c
+	- evalstring: setjmp_nosigs: call instead of setjmp when saving
+	  return_catch; don't need to manipulate signal mask
+
+shell.c
+	- main: setjmp_nosigs: call instead of setjmp where appropriate when
+	  saving top_level; don't need to manipulate signal mask if we're
+	  going to exit right away
+	- run_one_command: setjmp_nosigs: call instead of setjmp where
+	  appropriate when saving top_level; don't need to manipulate signal
+	  mask if we're going to exit right away
+	- run_wordexp: setjmp_nosigs: call instead of setjmp where
+	  appropriate when saving top_level; don't need to manipulate signal
+	  mask if we're going to exit right away
+
+eval.c
+	- reader_loop: save and restore the signal mask if we get a longjmp
+	  that doesn't cause us to return or exit (case DISCARD)
+
+				   12/26
+				   -----
+parse.y
+	- shell_input_line_{index,size,len}: now of type size_t; in some cases
+	  the unsigned property makes a difference
+	- STRING_SAVER: saved_line_{size,index} now of type size_t
+	- shell_getc: don't allow shell_input_line to grow larger than SIZE_MAX;
+	  lines longer than that are truncated until read sees a newline;
+	  addresses theoretical buffer overflow described by Paul Eggert
+	  <eggert@cs.ucla.edu>
+	- set_line_mbstate: size_t changes like shell_getc
+	- shell_getc: if shell_input_line is larger than 32K, free it and
+	  start over to avoid large memory allocations sticking around
+
+variables.c
+	- bind_global_variable: new function, binds value to a variable in
+	  the global shell_variables table
+
+variables.h
+	- bind_global_variable: new extern declaration
+
+builtins/declare.def
+	- declare_internal: if -g given with name=value, but variable is not
+	  found in the global variable table, make sure to call
+	  bind_global_variable so the variable is created and modified at
+	  global scope
+
+command.h
+	- W_ASSIGNARRAY: new word flag, compound indexed array assignment
+
+subst.h
+	- ASS_MKGLOBAL: new assignment flag, forcing global assignment even in
+	  a function context, used by declare -g
+
+execute_cmd.c
+	- fix_assignment_words: set W_ASSIGNARRAY flag if -a option given to
+	  declaration builtin
+
+subst.c
+	- shell_expand_word_list: call make_internal_declare if -a option
+	  given to declaration builtin (W_ASSIGNARRAY); handle -g option with
+	  it (W_ASSNGLOBAL).  Fixes inconsistency noticed by Vicente Couce
+	  Diaz <vituko@gmail.com>

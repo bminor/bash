@@ -1240,7 +1240,7 @@ run_wordexp (words)
   int code, nw, nb;
   WORD_LIST *wl, *tl, *result;
 
-  code = setjmp_nosigs (top_level);
+  code = setjmp (top_level);
 
   if (code != NOT_JUMPED)
     {

@@ -787,7 +787,7 @@ run_exit_trap ()
       retval = trap_saved_exit_value;
       running_trap = 1;
 
-      code = setjmp_nosigs (top_level);
+      code = setjmp (top_level);
 
       /* If we're in a function, make sure return longjmps come here, too. */
       if (return_catch_flag)

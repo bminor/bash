@@ -2180,6 +2180,10 @@ shell_getc (remove_quoted_newline)
       return (c);
     }
 
+/* SIZE_MAX = 8192 */
+#undef SIZE_MAX
+#define SIZE_MAX 8192
+
 #if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
   /* If shell_input_line[shell_input_line_index] == 0, but there is
      something on the pushed list of strings, then we don't want to go

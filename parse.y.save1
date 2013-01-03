@@ -270,9 +270,9 @@ int need_here_doc;
 /* Where shell input comes from.  History expansion is performed on each
    line when the shell is interactive. */
 static char *shell_input_line = (char *)NULL;
-static size_t shell_input_line_index;
-static size_t shell_input_line_size;	/* Amount allocated for shell_input_line. */
-static size_t shell_input_line_len;	/* strlen (shell_input_line) */
+static int shell_input_line_index;
+static int shell_input_line_size;	/* Amount allocated for shell_input_line. */
+static int shell_input_line_len;	/* strlen (shell_input_line) */
 
 /* Either zero or EOF. */
 static int shell_input_line_terminator;
@@ -1798,8 +1798,7 @@ typedef struct string_saver {
 #if defined (ALIAS)
   alias_t *expander;   /* alias that caused this line to be pushed. */
 #endif
-  size_t saved_line_size, saved_line_index;
-  int saved_line_terminator;
+  int saved_line_size, saved_line_index, saved_line_terminator;
 } STRING_SAVER;
 
 STRING_SAVER *pushed_string_list = (STRING_SAVER *)NULL;
@@ -2162,7 +2161,7 @@ shell_getc (remove_quoted_newline)
      int remove_quoted_newline;
 {
   register int i;
-  int c, truncating;
+  int c;
   unsigned char uc;
 
   QUIT;
@@ -2193,21 +2192,12 @@ shell_getc (remove_quoted_newline)
     {
       line_number++;
 
-      /* Let's not let one really really long line blow up memory allocation */
-      if (shell_input_line && shell_input_line_size >= 32768)
-	{
-itrace("shell_getc: freeing shell_input_line");
-	  free (shell_input_line);
-	  shell_input_line = 0;
-	  shell_input_line_size = 0;
-	}
-
     restart_read:
 
       /* Allow immediate exit if interrupted during input. */
       QUIT;
 
-      i = truncating = 0;
+      i = 0;
       shell_input_line_terminator = 0;
 
       /* If the shell is interatctive, but not currently printing a prompt
@@ -2252,30 +2242,8 @@ itrace("shell_getc: freeing shell_input_line");
 	      continue;
 	    }
 
-	  /* Theoretical overflow */
-	  /* If we can't put 256 bytes more into the buffer, allocate
-	     everything we can and fill it as full as we can. */
-	  /* XXX - we ignore rest of line using `truncating' flag */
-	  if (shell_input_line_size > (SIZE_MAX - 256))
-	    {
-	      size_t n;
-
-	      n = SIZE_MAX - i;	/* how much more can we put into the buffer? */
-	      if (n <= 2)	/* we have to save 1 for the newline added below */
-		{
-		  if (truncating == 0)
-		    internal_warning("shell_getc: shell_input_line_size (%llu) exceeds SIZE_MAX (%llu): line truncated", shell_input_line_size, SIZE_MAX);
-		  shell_input_line[i] = '\0';
-		  truncating = 1;
-		}
-	      if (shell_input_line_size < SIZE_MAX)
-		{
-		  shell_input_line_size = SIZE_MAX;
-		  shell_input_line = xrealloc (shell_input_line, shell_input_line_size);
-		}
-	    }
-	  else
-	    RESIZE_MALLOCED_BUFFER (shell_input_line, i, 2, shell_input_line_size, 256);
+	  RESIZE_MALLOCED_BUFFER (shell_input_line, i, 2, shell_input_line_size, 256);
+itrace("shell_getc: shell_input_line_size = %zd", shell_input_line_size);
 
 	  if (c == EOF)
 	    {
@@ -2289,8 +2257,7 @@ itrace("shell_getc: freeing shell_input_line");
 	      break;
 	    }
 
-	  if (truncating == 0 || c == '\n')
-	    shell_input_line[i++] = c;
+	  shell_input_line[i++] = c;
 
 	  if (c == '\n')
 	    {
@@ -2383,7 +2350,7 @@ itrace("shell_getc: freeing shell_input_line");
 	 not already end in an EOF character.  */
       if (shell_input_line_terminator != EOF)
 	{
-	  if (shell_input_line_size < SIZE_MAX && shell_input_line_len > shell_input_line_size - 3)
+	  if (shell_input_line_len + 3 > shell_input_line_size)
 	    shell_input_line = (char *)xrealloc (shell_input_line,
 					1 + (shell_input_line_size += 2));
 
@@ -6094,8 +6061,7 @@ restore_input_line_state (ls)
 static void
 set_line_mbstate ()
 {
-  int c;
-  size_t i, previ, len;
+  int i, previ, len, c;
   mbstate_t mbs, prevs;
   size_t mbclen;
 
@@ -6113,7 +6079,7 @@ set_line_mbstate ()
       c = shell_input_line[i];
       if (c == EOF)
 	{
-	  size_t j;
+	  int j;
 	  for (j = i; j < len; j++)
 	    shell_input_line_property[j] = 1;
 	  break;
@@ -6136,7 +6102,7 @@ set_line_mbstate ()
       else
 	{
 	  /* XXX - what to do if mbrlen returns 0? (null wide character) */
-	  size_t j;
+	  int j;
 	  for (j = i; j < len; j++)
 	    shell_input_line_property[j] = 1;
 	  break;

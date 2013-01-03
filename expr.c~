@@ -378,7 +378,7 @@ evalexp (expr, validp)
 
   FASTCOPY (evalbuf, oevalbuf, sizeof (evalbuf));
 
-  c = setjmp_nosigs (evalbuf);
+  c = setjmp (evalbuf);
 
   if (c)
     {

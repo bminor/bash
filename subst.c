@@ -338,6 +338,11 @@ dump_word_flags (flags)
       f &= ~W_ASSIGNASSOC;
       fprintf (stderr, "W_ASSIGNASSOC%s", f ? "|" : "");
     }
+  if (f & W_ASSIGNARRAY)
+    {
+      f &= ~W_ASSIGNARRAY;
+      fprintf (stderr, "W_ASSIGNARRAY%s", f ? "|" : "");
+    }
   if (f & W_HASCTLESC)
     {
       f &= ~W_HASCTLESC;
@@ -2708,11 +2713,12 @@ do_compound_assignment (name, value, flags)
      int flags;
 {
   SHELL_VAR *v;
-  int mklocal, mkassoc;
+  int mklocal, mkassoc, mkglobal;
   WORD_LIST *list;
 
   mklocal = flags & ASS_MKLOCAL;
   mkassoc = flags & ASS_MKASSOC;
+  mkglobal = flags & ASS_MKGLOBAL;
 
   if (mklocal && variable_context)
     {
@@ -2722,6 +2728,21 @@ do_compound_assignment (name, value, flags)
 	v = make_local_assoc_variable (name);
       else if (v == 0 || (array_p (v) == 0 && assoc_p (v) == 0) || v->context != variable_context)
         v = make_local_array_variable (name, 0);
+      assign_compound_array_list (v, list, flags);
+    }
+  /* In a function but forcing assignment in global context */
+  else if (mkglobal && variable_context)
+    {
+      v = find_global_variable (name);
+      list = expand_compound_array_assignment (v, value, flags);
+      if (v == 0 && mkassoc)
+	v = make_new_assoc_variable (name);
+      else if (v && mkassoc && assoc_p (v) == 0)
+	v = convert_var_to_assoc (v);
+      else if (v == 0)
+	v = make_new_array_variable (name);
+      else if (v && array_p (v) == 0)
+	v = convert_var_to_array (v);
       assign_compound_array_list (v, list, flags);
     }
   else
@@ -2820,6 +2841,8 @@ do_assignment_internal (word, expand)
     {
       if ((word->flags & W_ASSIGNARG) && (word->flags & W_ASSNGLOBAL) == 0)
 	aflags |= ASS_MKLOCAL;
+      if ((word->flags & W_ASSIGNARG) && (word->flags & W_ASSNGLOBAL))
+	aflags |= ASS_MKGLOBAL;
       if (word->flags & W_ASSIGNASSOC)
 	aflags |= ASS_MKASSOC;
       entry = do_compound_assignment (name, value, aflags);
@@ -5405,13 +5428,13 @@ command_substitute (string, quoted)
       startup_state = 2;	/* see if we can avoid a fork */
       /* Give command substitution a place to jump back to on failure,
 	 so we don't go back up to main (). */
-      result = setjmp (top_level);
+      result = setjmp_nosigs (top_level);
 
       /* If we're running a command substitution inside a shell function,
 	 trap `return' so we don't return from the function in the subshell
 	 and go off to never-never land. */
       if (result == 0 && return_catch_flag)
-	function_value = setjmp (return_catch);
+	function_value = setjmp_nosigs (return_catch);
       else
 	function_value = 0;
 
@@ -9351,6 +9374,10 @@ shell_expand_word_list (tlist, eflags)
 	    make_internal_declare (tlist->word->word, "-gA");
 	  else if (tlist->word->flags & W_ASSIGNASSOC)
 	    make_internal_declare (tlist->word->word, "-A");
+	  if ((tlist->word->flags & (W_ASSIGNARRAY|W_ASSNGLOBAL)) == (W_ASSIGNARRAY|W_ASSNGLOBAL))
+	    make_internal_declare (tlist->word->word, "-ga");
+	  else if (tlist->word->flags & W_ASSIGNARRAY)
+	    make_internal_declare (tlist->word->word, "-a");
 	  else if (tlist->word->flags & W_ASSNGLOBAL)
 	    make_internal_declare (tlist->word->word, "-g");
 
@@ -9364,7 +9391,7 @@ shell_expand_word_list (tlist, eflags)
 	  /* Now transform the word as ksh93 appears to do and go on */
 	  t = assignment (tlist->word->word, 0);
 	  tlist->word->word[t] = '\0';
-	  tlist->word->flags &= ~(W_ASSIGNMENT|W_NOSPLIT|W_COMPASSIGN|W_ASSIGNARG|W_ASSIGNASSOC);
+	  tlist->word->flags &= ~(W_ASSIGNMENT|W_NOSPLIT|W_COMPASSIGN|W_ASSIGNARG|W_ASSIGNASSOC|W_ASSIGNARRAY);
 	}
 #endif
 

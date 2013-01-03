@@ -404,7 +404,7 @@ read_builtin (list)
 
   if (tmsec > 0 || tmusec > 0)
     {
-      code = setjmp (alrmbuf);
+      code = setjmp_nosigs (alrmbuf);
       if (code)
 	{
 	  sigalrm_seen = 0;

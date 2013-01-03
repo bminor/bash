@@ -2601,23 +2601,6 @@ bind_variable (name, value, flags)
   return (bind_variable_internal (name, value, global_variables->table, 0, flags));
 }
 
-SHELL_VAR *
-bind_global_variable (name, value, flags)
-     const char *name;
-     char *value;
-     int flags;
-{
-  SHELL_VAR *v, *nv;
-  VAR_CONTEXT *vc, *nvc;
-  int level;
-
-  if (shell_variables == 0)
-    create_variable_tables ();
-
-  /* bind_variable_internal will handle nameref resolution in this case */
-  return (bind_variable_internal (name, value, global_variables->table, 0, flags));
-}
-
 /* Make VAR, a simple shell variable, have value VALUE.  Once assigned a
    value, variables are no longer invisible.  This is a duplicate of part
    of the internals of bind_variable.  If the variable is exported, or

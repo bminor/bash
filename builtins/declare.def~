@@ -513,10 +513,10 @@ declare_internal (list, local_var)
 #endif
 
 	      if (offset)
-		var = mkglobal ? bind_global_variable (name, "", 0) : bind_variable (name, "", 0);
+		var = bind_variable (name, "", 0);
 	      else
 		{
-		  var = mkglobal ? bind_global_variable (name, (char *)NULL, 0) : bind_variable (name, (char *)NULL, 0);
+		  var = bind_variable (name, (char *)NULL, 0);
 		  VSETATTR (var, att_invisible);
 		}
 	    }
