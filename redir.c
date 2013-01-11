@@ -1091,10 +1091,12 @@ do_redirection_internal (redirect, flags)
 
 #if defined (BUFFERED_INPUT)
 	  check_bash_input (redirector);
-	  close_buffered_fd (redirector);
+	  r = close_buffered_fd (redirector);
 #else /* !BUFFERED_INPUT */
-	  close (redirector);
+	  r = close (redirector);
 #endif /* !BUFFERED_INPUT */
+	  if (r < 0 && (flags & RX_INTERNAL) && (errno == EIO || errno == ENOSPC))
+	    REDIRECTION_ERROR (r, errno, -1);
 	}
       break;
 
