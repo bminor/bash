@@ -5124,6 +5124,10 @@ process_substitute (string, open_for_read_in_child)
   dev_fd_list[parent_pipe_fd] = 0;
 #endif /* HAVE_DEV_FD */
 
+  /* subshells shouldn't have this flag, which controls using the temporary
+     environment for variable lookups. */
+  expanding_redir = 0;
+
   result = parse_and_execute (string, "process substitution", (SEVAL_NONINT|SEVAL_NOHIST));
 
 #if !defined (HAVE_DEV_FD)
