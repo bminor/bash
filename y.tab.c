@@ -168,7 +168,7 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 21 "/Users/chet/src/bash/src/parse.y"
+#line 21 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
 
 #include "config.h"
 
@@ -491,7 +491,7 @@ static REDIRECTEE redir;
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 323 "/Users/chet/src/bash/src/parse.y"
+#line 323 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
 {
   WORD_DESC *word;		/* the word that we read. */
   int number;			/* the number that we read. */
@@ -501,7 +501,7 @@ typedef union YYSTYPE
   ELEMENT element;
   PATTERN_LIST *pattern;
 }
-/* Line 187 of yacc.c.  */
+/* Line 193 of yacc.c.  */
 #line 506 "y.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -565,7 +565,7 @@ typedef short int yytype_int16;
 #define YYSIZE_MAXIMUM ((YYSIZE_T) -1)
 
 #ifndef YY_
-# if YYENABLE_NLS
+# if defined YYENABLE_NLS && YYENABLE_NLS
 #  if ENABLE_NLS
 #   include <libintl.h> /* INFRINGES ON USER NAME SPACE */
 #   define YY_(msgid) dgettext ("bison-runtime", msgid)
@@ -1351,7 +1351,7 @@ while (YYID (0))
    we won't break user code: when these are the locations we know.  */
 
 #ifndef YY_LOCATION_PRINT
-# if YYLTYPE_IS_TRIVIAL
+# if defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL
 #  define YY_LOCATION_PRINT(File, Loc)			\
      fprintf (File, "%d.%d-%d.%d",			\
 	      (Loc).first_line, (Loc).first_column,	\
@@ -2092,7 +2092,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 377 "/Users/chet/src/bash/src/parse.y"
+#line 377 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  /* Case of regular command.  Discard the error
 			     safety net,and return the command just parsed. */
@@ -2106,7 +2106,7 @@ yyreduce:
     break;
 
   case 3:
-#line 388 "/Users/chet/src/bash/src/parse.y"
+#line 388 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  /* Case of regular command, but not a very
 			     interesting one.  Return a NULL command. */
@@ -2118,7 +2118,7 @@ yyreduce:
     break;
 
   case 4:
-#line 397 "/Users/chet/src/bash/src/parse.y"
+#line 397 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  /* Error during parsing.  Return NULL command. */
 			  global_command = (COMMAND *)NULL;
@@ -2136,7 +2136,7 @@ yyreduce:
     break;
 
   case 5:
-#line 412 "/Users/chet/src/bash/src/parse.y"
+#line 412 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  /* Case of EOF seen by itself.  Do ignoreeof or
 			     not. */
@@ -2147,17 +2147,17 @@ yyreduce:
     break;
 
   case 6:
-#line 422 "/Users/chet/src/bash/src/parse.y"
+#line 422 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.word_list) = make_word_list ((yyvsp[(1) - (1)].word), (WORD_LIST *)NULL); }
     break;
 
   case 7:
-#line 424 "/Users/chet/src/bash/src/parse.y"
+#line 424 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.word_list) = make_word_list ((yyvsp[(2) - (2)].word), (yyvsp[(1) - (2)].word_list)); }
     break;
 
   case 8:
-#line 428 "/Users/chet/src/bash/src/parse.y"
+#line 428 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = 1;
 			  redir.filename = (yyvsp[(2) - (2)].word);
@@ -2166,7 +2166,7 @@ yyreduce:
     break;
 
   case 9:
-#line 434 "/Users/chet/src/bash/src/parse.y"
+#line 434 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = 0;
 			  redir.filename = (yyvsp[(2) - (2)].word);
@@ -2175,7 +2175,7 @@ yyreduce:
     break;
 
   case 10:
-#line 440 "/Users/chet/src/bash/src/parse.y"
+#line 440 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = (yyvsp[(1) - (3)].number);
 			  redir.filename = (yyvsp[(3) - (3)].word);
@@ -2184,7 +2184,7 @@ yyreduce:
     break;
 
   case 11:
-#line 446 "/Users/chet/src/bash/src/parse.y"
+#line 446 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = (yyvsp[(1) - (3)].number);
 			  redir.filename = (yyvsp[(3) - (3)].word);
@@ -2193,7 +2193,7 @@ yyreduce:
     break;
 
   case 12:
-#line 452 "/Users/chet/src/bash/src/parse.y"
+#line 452 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.filename = (yyvsp[(1) - (3)].word);
 			  redir.filename = (yyvsp[(3) - (3)].word);
@@ -2202,7 +2202,7 @@ yyreduce:
     break;
 
   case 13:
-#line 458 "/Users/chet/src/bash/src/parse.y"
+#line 458 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.filename = (yyvsp[(1) - (3)].word);
 			  redir.filename = (yyvsp[(3) - (3)].word);
@@ -2211,7 +2211,7 @@ yyreduce:
     break;
 
   case 14:
-#line 464 "/Users/chet/src/bash/src/parse.y"
+#line 464 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = 1;
 			  redir.filename = (yyvsp[(2) - (2)].word);
@@ -2220,7 +2220,7 @@ yyreduce:
     break;
 
   case 15:
-#line 470 "/Users/chet/src/bash/src/parse.y"
+#line 470 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = (yyvsp[(1) - (3)].number);
 			  redir.filename = (yyvsp[(3) - (3)].word);
@@ -2229,7 +2229,7 @@ yyreduce:
     break;
 
   case 16:
-#line 476 "/Users/chet/src/bash/src/parse.y"
+#line 476 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.filename = (yyvsp[(1) - (3)].word);
 			  redir.filename = (yyvsp[(3) - (3)].word);
@@ -2238,7 +2238,7 @@ yyreduce:
     break;
 
   case 17:
-#line 482 "/Users/chet/src/bash/src/parse.y"
+#line 482 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = 1;
 			  redir.filename = (yyvsp[(2) - (2)].word);
@@ -2247,7 +2247,7 @@ yyreduce:
     break;
 
   case 18:
-#line 488 "/Users/chet/src/bash/src/parse.y"
+#line 488 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = (yyvsp[(1) - (3)].number);
 			  redir.filename = (yyvsp[(3) - (3)].word);
@@ -2256,7 +2256,7 @@ yyreduce:
     break;
 
   case 19:
-#line 494 "/Users/chet/src/bash/src/parse.y"
+#line 494 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.filename = (yyvsp[(1) - (3)].word);
 			  redir.filename = (yyvsp[(3) - (3)].word);
@@ -2265,7 +2265,7 @@ yyreduce:
     break;
 
   case 20:
-#line 500 "/Users/chet/src/bash/src/parse.y"
+#line 500 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = 0;
 			  redir.filename = (yyvsp[(2) - (2)].word);
@@ -2274,7 +2274,7 @@ yyreduce:
     break;
 
   case 21:
-#line 506 "/Users/chet/src/bash/src/parse.y"
+#line 506 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = (yyvsp[(1) - (3)].number);
 			  redir.filename = (yyvsp[(3) - (3)].word);
@@ -2283,7 +2283,7 @@ yyreduce:
     break;
 
   case 22:
-#line 512 "/Users/chet/src/bash/src/parse.y"
+#line 512 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.filename = (yyvsp[(1) - (3)].word);
 			  redir.filename = (yyvsp[(3) - (3)].word);
@@ -2292,7 +2292,7 @@ yyreduce:
     break;
 
   case 23:
-#line 518 "/Users/chet/src/bash/src/parse.y"
+#line 518 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = 0;
 			  redir.filename = (yyvsp[(2) - (2)].word);
@@ -2302,7 +2302,7 @@ yyreduce:
     break;
 
   case 24:
-#line 525 "/Users/chet/src/bash/src/parse.y"
+#line 525 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = (yyvsp[(1) - (3)].number);
 			  redir.filename = (yyvsp[(3) - (3)].word);
@@ -2312,7 +2312,7 @@ yyreduce:
     break;
 
   case 25:
-#line 532 "/Users/chet/src/bash/src/parse.y"
+#line 532 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.filename = (yyvsp[(1) - (3)].word);
 			  redir.filename = (yyvsp[(3) - (3)].word);
@@ -2322,7 +2322,7 @@ yyreduce:
     break;
 
   case 26:
-#line 539 "/Users/chet/src/bash/src/parse.y"
+#line 539 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = 0;
 			  redir.filename = (yyvsp[(2) - (2)].word);
@@ -2332,7 +2332,7 @@ yyreduce:
     break;
 
   case 27:
-#line 546 "/Users/chet/src/bash/src/parse.y"
+#line 546 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = (yyvsp[(1) - (3)].number);
 			  redir.filename = (yyvsp[(3) - (3)].word);
@@ -2342,7 +2342,7 @@ yyreduce:
     break;
 
   case 28:
-#line 553 "/Users/chet/src/bash/src/parse.y"
+#line 553 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.filename = (yyvsp[(1) - (3)].word);
 			  redir.filename = (yyvsp[(3) - (3)].word);
@@ -2352,7 +2352,7 @@ yyreduce:
     break;
 
   case 29:
-#line 560 "/Users/chet/src/bash/src/parse.y"
+#line 560 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = 0;
 			  redir.filename = (yyvsp[(2) - (2)].word);
@@ -2361,7 +2361,7 @@ yyreduce:
     break;
 
   case 30:
-#line 566 "/Users/chet/src/bash/src/parse.y"
+#line 566 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = (yyvsp[(1) - (3)].number);
 			  redir.filename = (yyvsp[(3) - (3)].word);
@@ -2370,7 +2370,7 @@ yyreduce:
     break;
 
   case 31:
-#line 572 "/Users/chet/src/bash/src/parse.y"
+#line 572 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.filename = (yyvsp[(1) - (3)].word);
 			  redir.filename = (yyvsp[(3) - (3)].word);
@@ -2379,7 +2379,7 @@ yyreduce:
     break;
 
   case 32:
-#line 578 "/Users/chet/src/bash/src/parse.y"
+#line 578 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = 0;
 			  redir.dest = (yyvsp[(2) - (2)].number);
@@ -2388,7 +2388,7 @@ yyreduce:
     break;
 
   case 33:
-#line 584 "/Users/chet/src/bash/src/parse.y"
+#line 584 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = (yyvsp[(1) - (3)].number);
 			  redir.dest = (yyvsp[(3) - (3)].number);
@@ -2397,7 +2397,7 @@ yyreduce:
     break;
 
   case 34:
-#line 590 "/Users/chet/src/bash/src/parse.y"
+#line 590 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.filename = (yyvsp[(1) - (3)].word);
 			  redir.dest = (yyvsp[(3) - (3)].number);
@@ -2406,7 +2406,7 @@ yyreduce:
     break;
 
   case 35:
-#line 596 "/Users/chet/src/bash/src/parse.y"
+#line 596 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = 1;
 			  redir.dest = (yyvsp[(2) - (2)].number);
@@ -2415,7 +2415,7 @@ yyreduce:
     break;
 
   case 36:
-#line 602 "/Users/chet/src/bash/src/parse.y"
+#line 602 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = (yyvsp[(1) - (3)].number);
 			  redir.dest = (yyvsp[(3) - (3)].number);
@@ -2424,7 +2424,7 @@ yyreduce:
     break;
 
   case 37:
-#line 608 "/Users/chet/src/bash/src/parse.y"
+#line 608 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.filename = (yyvsp[(1) - (3)].word);
 			  redir.dest = (yyvsp[(3) - (3)].number);
@@ -2433,7 +2433,7 @@ yyreduce:
     break;
 
   case 38:
-#line 614 "/Users/chet/src/bash/src/parse.y"
+#line 614 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = 0;
 			  redir.filename = (yyvsp[(2) - (2)].word);
@@ -2442,7 +2442,7 @@ yyreduce:
     break;
 
   case 39:
-#line 620 "/Users/chet/src/bash/src/parse.y"
+#line 620 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = (yyvsp[(1) - (3)].number);
 			  redir.filename = (yyvsp[(3) - (3)].word);
@@ -2451,7 +2451,7 @@ yyreduce:
     break;
 
   case 40:
-#line 626 "/Users/chet/src/bash/src/parse.y"
+#line 626 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.filename = (yyvsp[(1) - (3)].word);
 			  redir.filename = (yyvsp[(3) - (3)].word);
@@ -2460,7 +2460,7 @@ yyreduce:
     break;
 
   case 41:
-#line 632 "/Users/chet/src/bash/src/parse.y"
+#line 632 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = 1;
 			  redir.filename = (yyvsp[(2) - (2)].word);
@@ -2469,7 +2469,7 @@ yyreduce:
     break;
 
   case 42:
-#line 638 "/Users/chet/src/bash/src/parse.y"
+#line 638 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = (yyvsp[(1) - (3)].number);
 			  redir.filename = (yyvsp[(3) - (3)].word);
@@ -2478,7 +2478,7 @@ yyreduce:
     break;
 
   case 43:
-#line 644 "/Users/chet/src/bash/src/parse.y"
+#line 644 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.filename = (yyvsp[(1) - (3)].word);
 			  redir.filename = (yyvsp[(3) - (3)].word);
@@ -2487,7 +2487,7 @@ yyreduce:
     break;
 
   case 44:
-#line 650 "/Users/chet/src/bash/src/parse.y"
+#line 650 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = 1;
 			  redir.dest = 0;
@@ -2496,7 +2496,7 @@ yyreduce:
     break;
 
   case 45:
-#line 656 "/Users/chet/src/bash/src/parse.y"
+#line 656 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = (yyvsp[(1) - (3)].number);
 			  redir.dest = 0;
@@ -2505,7 +2505,7 @@ yyreduce:
     break;
 
   case 46:
-#line 662 "/Users/chet/src/bash/src/parse.y"
+#line 662 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.filename = (yyvsp[(1) - (3)].word);
 			  redir.dest = 0;
@@ -2514,7 +2514,7 @@ yyreduce:
     break;
 
   case 47:
-#line 668 "/Users/chet/src/bash/src/parse.y"
+#line 668 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = 0;
 			  redir.dest = 0;
@@ -2523,7 +2523,7 @@ yyreduce:
     break;
 
   case 48:
-#line 674 "/Users/chet/src/bash/src/parse.y"
+#line 674 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = (yyvsp[(1) - (3)].number);
 			  redir.dest = 0;
@@ -2532,7 +2532,7 @@ yyreduce:
     break;
 
   case 49:
-#line 680 "/Users/chet/src/bash/src/parse.y"
+#line 680 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.filename = (yyvsp[(1) - (3)].word);
 			  redir.dest = 0;
@@ -2541,7 +2541,7 @@ yyreduce:
     break;
 
   case 50:
-#line 686 "/Users/chet/src/bash/src/parse.y"
+#line 686 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = 1;
 			  redir.filename = (yyvsp[(2) - (2)].word);
@@ -2550,7 +2550,7 @@ yyreduce:
     break;
 
   case 51:
-#line 692 "/Users/chet/src/bash/src/parse.y"
+#line 692 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  source.dest = 1;
 			  redir.filename = (yyvsp[(2) - (2)].word);
@@ -2559,29 +2559,29 @@ yyreduce:
     break;
 
   case 52:
-#line 700 "/Users/chet/src/bash/src/parse.y"
+#line 700 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.element).word = (yyvsp[(1) - (1)].word); (yyval.element).redirect = 0; }
     break;
 
   case 53:
-#line 702 "/Users/chet/src/bash/src/parse.y"
+#line 702 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.element).word = (yyvsp[(1) - (1)].word); (yyval.element).redirect = 0; }
     break;
 
   case 54:
-#line 704 "/Users/chet/src/bash/src/parse.y"
+#line 704 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.element).redirect = (yyvsp[(1) - (1)].redirect); (yyval.element).word = 0; }
     break;
 
   case 55:
-#line 708 "/Users/chet/src/bash/src/parse.y"
+#line 708 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.redirect) = (yyvsp[(1) - (1)].redirect);
 			}
     break;
 
   case 56:
-#line 712 "/Users/chet/src/bash/src/parse.y"
+#line 712 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  register REDIRECT *t;
 
@@ -2593,27 +2593,27 @@ yyreduce:
     break;
 
   case 57:
-#line 723 "/Users/chet/src/bash/src/parse.y"
+#line 723 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = make_simple_command ((yyvsp[(1) - (1)].element), (COMMAND *)NULL); }
     break;
 
   case 58:
-#line 725 "/Users/chet/src/bash/src/parse.y"
+#line 725 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = make_simple_command ((yyvsp[(2) - (2)].element), (yyvsp[(1) - (2)].command)); }
     break;
 
   case 59:
-#line 729 "/Users/chet/src/bash/src/parse.y"
+#line 729 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = clean_simple_command ((yyvsp[(1) - (1)].command)); }
     break;
 
   case 60:
-#line 731 "/Users/chet/src/bash/src/parse.y"
+#line 731 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = (yyvsp[(1) - (1)].command); }
     break;
 
   case 61:
-#line 733 "/Users/chet/src/bash/src/parse.y"
+#line 733 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  COMMAND *tc;
 
@@ -2632,72 +2632,72 @@ yyreduce:
     break;
 
   case 62:
-#line 749 "/Users/chet/src/bash/src/parse.y"
+#line 749 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = (yyvsp[(1) - (1)].command); }
     break;
 
   case 63:
-#line 751 "/Users/chet/src/bash/src/parse.y"
+#line 751 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = (yyvsp[(1) - (1)].command); }
     break;
 
   case 64:
-#line 755 "/Users/chet/src/bash/src/parse.y"
+#line 755 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = (yyvsp[(1) - (1)].command); }
     break;
 
   case 65:
-#line 757 "/Users/chet/src/bash/src/parse.y"
+#line 757 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = (yyvsp[(1) - (1)].command); }
     break;
 
   case 66:
-#line 759 "/Users/chet/src/bash/src/parse.y"
+#line 759 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = make_while_command ((yyvsp[(2) - (5)].command), (yyvsp[(4) - (5)].command)); }
     break;
 
   case 67:
-#line 761 "/Users/chet/src/bash/src/parse.y"
+#line 761 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = make_until_command ((yyvsp[(2) - (5)].command), (yyvsp[(4) - (5)].command)); }
     break;
 
   case 68:
-#line 763 "/Users/chet/src/bash/src/parse.y"
+#line 763 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = (yyvsp[(1) - (1)].command); }
     break;
 
   case 69:
-#line 765 "/Users/chet/src/bash/src/parse.y"
+#line 765 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = (yyvsp[(1) - (1)].command); }
     break;
 
   case 70:
-#line 767 "/Users/chet/src/bash/src/parse.y"
+#line 767 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = (yyvsp[(1) - (1)].command); }
     break;
 
   case 71:
-#line 769 "/Users/chet/src/bash/src/parse.y"
+#line 769 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = (yyvsp[(1) - (1)].command); }
     break;
 
   case 72:
-#line 771 "/Users/chet/src/bash/src/parse.y"
+#line 771 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = (yyvsp[(1) - (1)].command); }
     break;
 
   case 73:
-#line 773 "/Users/chet/src/bash/src/parse.y"
+#line 773 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = (yyvsp[(1) - (1)].command); }
     break;
 
   case 74:
-#line 775 "/Users/chet/src/bash/src/parse.y"
+#line 775 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = (yyvsp[(1) - (1)].command); }
     break;
 
   case 75:
-#line 779 "/Users/chet/src/bash/src/parse.y"
+#line 779 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = make_for_command ((yyvsp[(2) - (6)].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[(5) - (6)].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
@@ -2705,7 +2705,7 @@ yyreduce:
     break;
 
   case 76:
-#line 784 "/Users/chet/src/bash/src/parse.y"
+#line 784 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = make_for_command ((yyvsp[(2) - (6)].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[(5) - (6)].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
@@ -2713,7 +2713,7 @@ yyreduce:
     break;
 
   case 77:
-#line 789 "/Users/chet/src/bash/src/parse.y"
+#line 789 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = make_for_command ((yyvsp[(2) - (7)].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[(6) - (7)].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
@@ -2721,7 +2721,7 @@ yyreduce:
     break;
 
   case 78:
-#line 794 "/Users/chet/src/bash/src/parse.y"
+#line 794 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = make_for_command ((yyvsp[(2) - (7)].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[(6) - (7)].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
@@ -2729,7 +2729,7 @@ yyreduce:
     break;
 
   case 79:
-#line 799 "/Users/chet/src/bash/src/parse.y"
+#line 799 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = make_for_command ((yyvsp[(2) - (10)].word), REVERSE_LIST ((yyvsp[(5) - (10)].word_list), WORD_LIST *), (yyvsp[(9) - (10)].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
@@ -2737,7 +2737,7 @@ yyreduce:
     break;
 
   case 80:
-#line 804 "/Users/chet/src/bash/src/parse.y"
+#line 804 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = make_for_command ((yyvsp[(2) - (10)].word), REVERSE_LIST ((yyvsp[(5) - (10)].word_list), WORD_LIST *), (yyvsp[(9) - (10)].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
@@ -2745,7 +2745,7 @@ yyreduce:
     break;
 
   case 81:
-#line 809 "/Users/chet/src/bash/src/parse.y"
+#line 809 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = make_for_command ((yyvsp[(2) - (9)].word), (WORD_LIST *)NULL, (yyvsp[(8) - (9)].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
@@ -2753,7 +2753,7 @@ yyreduce:
     break;
 
   case 82:
-#line 814 "/Users/chet/src/bash/src/parse.y"
+#line 814 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = make_for_command ((yyvsp[(2) - (9)].word), (WORD_LIST *)NULL, (yyvsp[(8) - (9)].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
@@ -2761,7 +2761,7 @@ yyreduce:
     break;
 
   case 83:
-#line 821 "/Users/chet/src/bash/src/parse.y"
+#line 821 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 				  (yyval.command) = make_arith_for_command ((yyvsp[(2) - (7)].word_list), (yyvsp[(6) - (7)].command), arith_for_lineno);
 				  if (word_top > 0) word_top--;
@@ -2769,7 +2769,7 @@ yyreduce:
     break;
 
   case 84:
-#line 826 "/Users/chet/src/bash/src/parse.y"
+#line 826 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 				  (yyval.command) = make_arith_for_command ((yyvsp[(2) - (7)].word_list), (yyvsp[(6) - (7)].command), arith_for_lineno);
 				  if (word_top > 0) word_top--;
@@ -2777,7 +2777,7 @@ yyreduce:
     break;
 
   case 85:
-#line 831 "/Users/chet/src/bash/src/parse.y"
+#line 831 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 				  (yyval.command) = make_arith_for_command ((yyvsp[(2) - (5)].word_list), (yyvsp[(4) - (5)].command), arith_for_lineno);
 				  if (word_top > 0) word_top--;
@@ -2785,7 +2785,7 @@ yyreduce:
     break;
 
   case 86:
-#line 836 "/Users/chet/src/bash/src/parse.y"
+#line 836 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 				  (yyval.command) = make_arith_for_command ((yyvsp[(2) - (5)].word_list), (yyvsp[(4) - (5)].command), arith_for_lineno);
 				  if (word_top > 0) word_top--;
@@ -2793,7 +2793,7 @@ yyreduce:
     break;
 
   case 87:
-#line 843 "/Users/chet/src/bash/src/parse.y"
+#line 843 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = make_select_command ((yyvsp[(2) - (6)].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[(5) - (6)].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
@@ -2801,7 +2801,7 @@ yyreduce:
     break;
 
   case 88:
-#line 848 "/Users/chet/src/bash/src/parse.y"
+#line 848 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = make_select_command ((yyvsp[(2) - (6)].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[(5) - (6)].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
@@ -2809,7 +2809,7 @@ yyreduce:
     break;
 
   case 89:
-#line 853 "/Users/chet/src/bash/src/parse.y"
+#line 853 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = make_select_command ((yyvsp[(2) - (7)].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[(6) - (7)].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
@@ -2817,7 +2817,7 @@ yyreduce:
     break;
 
   case 90:
-#line 858 "/Users/chet/src/bash/src/parse.y"
+#line 858 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = make_select_command ((yyvsp[(2) - (7)].word), add_string_to_list ("\"$@\"", (WORD_LIST *)NULL), (yyvsp[(6) - (7)].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
@@ -2825,7 +2825,7 @@ yyreduce:
     break;
 
   case 91:
-#line 863 "/Users/chet/src/bash/src/parse.y"
+#line 863 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = make_select_command ((yyvsp[(2) - (10)].word), REVERSE_LIST ((yyvsp[(5) - (10)].word_list), WORD_LIST *), (yyvsp[(9) - (10)].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
@@ -2833,7 +2833,7 @@ yyreduce:
     break;
 
   case 92:
-#line 868 "/Users/chet/src/bash/src/parse.y"
+#line 868 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = make_select_command ((yyvsp[(2) - (10)].word), REVERSE_LIST ((yyvsp[(5) - (10)].word_list), WORD_LIST *), (yyvsp[(9) - (10)].command), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
@@ -2841,7 +2841,7 @@ yyreduce:
     break;
 
   case 93:
-#line 875 "/Users/chet/src/bash/src/parse.y"
+#line 875 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = make_case_command ((yyvsp[(2) - (6)].word), (PATTERN_LIST *)NULL, word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
@@ -2849,7 +2849,7 @@ yyreduce:
     break;
 
   case 94:
-#line 880 "/Users/chet/src/bash/src/parse.y"
+#line 880 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = make_case_command ((yyvsp[(2) - (7)].word), (yyvsp[(5) - (7)].pattern), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
@@ -2857,7 +2857,7 @@ yyreduce:
     break;
 
   case 95:
-#line 885 "/Users/chet/src/bash/src/parse.y"
+#line 885 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = make_case_command ((yyvsp[(2) - (6)].word), (yyvsp[(5) - (6)].pattern), word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
@@ -2865,27 +2865,27 @@ yyreduce:
     break;
 
   case 96:
-#line 892 "/Users/chet/src/bash/src/parse.y"
+#line 892 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = make_function_def ((yyvsp[(1) - (5)].word), (yyvsp[(5) - (5)].command), function_dstart, function_bstart); }
     break;
 
   case 97:
-#line 895 "/Users/chet/src/bash/src/parse.y"
+#line 895 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = make_function_def ((yyvsp[(2) - (6)].word), (yyvsp[(6) - (6)].command), function_dstart, function_bstart); }
     break;
 
   case 98:
-#line 898 "/Users/chet/src/bash/src/parse.y"
+#line 898 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = make_function_def ((yyvsp[(2) - (4)].word), (yyvsp[(4) - (4)].command), function_dstart, function_bstart); }
     break;
 
   case 99:
-#line 902 "/Users/chet/src/bash/src/parse.y"
+#line 902 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = (yyvsp[(1) - (1)].command); }
     break;
 
   case 100:
-#line 904 "/Users/chet/src/bash/src/parse.y"
+#line 904 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  COMMAND *tc;
 
@@ -2917,7 +2917,7 @@ yyreduce:
     break;
 
   case 101:
-#line 935 "/Users/chet/src/bash/src/parse.y"
+#line 935 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = make_subshell_command ((yyvsp[(2) - (3)].command));
 			  (yyval.command)->flags |= CMD_WANT_SUBSHELL;
@@ -2925,7 +2925,7 @@ yyreduce:
     break;
 
   case 102:
-#line 942 "/Users/chet/src/bash/src/parse.y"
+#line 942 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = make_coproc_command ("COPROC", (yyvsp[(2) - (2)].command));
 			  (yyval.command)->flags |= CMD_WANT_SUBSHELL|CMD_COPROC_SUBSHELL;
@@ -2933,7 +2933,7 @@ yyreduce:
     break;
 
   case 103:
-#line 947 "/Users/chet/src/bash/src/parse.y"
+#line 947 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  COMMAND *tc;
 
@@ -2953,7 +2953,7 @@ yyreduce:
     break;
 
   case 104:
-#line 964 "/Users/chet/src/bash/src/parse.y"
+#line 964 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = make_coproc_command ((yyvsp[(2) - (3)].word)->word, (yyvsp[(3) - (3)].command));
 			  (yyval.command)->flags |= CMD_WANT_SUBSHELL|CMD_COPROC_SUBSHELL;
@@ -2961,7 +2961,7 @@ yyreduce:
     break;
 
   case 105:
-#line 969 "/Users/chet/src/bash/src/parse.y"
+#line 969 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  COMMAND *tc;
 
@@ -2981,7 +2981,7 @@ yyreduce:
     break;
 
   case 106:
-#line 986 "/Users/chet/src/bash/src/parse.y"
+#line 986 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = make_coproc_command ("COPROC", clean_simple_command ((yyvsp[(2) - (2)].command)));
 			  (yyval.command)->flags |= CMD_WANT_SUBSHELL|CMD_COPROC_SUBSHELL;
@@ -2989,117 +2989,117 @@ yyreduce:
     break;
 
   case 107:
-#line 993 "/Users/chet/src/bash/src/parse.y"
+#line 993 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = make_if_command ((yyvsp[(2) - (5)].command), (yyvsp[(4) - (5)].command), (COMMAND *)NULL); }
     break;
 
   case 108:
-#line 995 "/Users/chet/src/bash/src/parse.y"
+#line 995 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = make_if_command ((yyvsp[(2) - (7)].command), (yyvsp[(4) - (7)].command), (yyvsp[(6) - (7)].command)); }
     break;
 
   case 109:
-#line 997 "/Users/chet/src/bash/src/parse.y"
+#line 997 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = make_if_command ((yyvsp[(2) - (6)].command), (yyvsp[(4) - (6)].command), (yyvsp[(5) - (6)].command)); }
     break;
 
   case 110:
-#line 1002 "/Users/chet/src/bash/src/parse.y"
+#line 1002 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = make_group_command ((yyvsp[(2) - (3)].command)); }
     break;
 
   case 111:
-#line 1006 "/Users/chet/src/bash/src/parse.y"
+#line 1006 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = make_arith_command ((yyvsp[(1) - (1)].word_list)); }
     break;
 
   case 112:
-#line 1010 "/Users/chet/src/bash/src/parse.y"
+#line 1010 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = (yyvsp[(2) - (3)].command); }
     break;
 
   case 113:
-#line 1014 "/Users/chet/src/bash/src/parse.y"
+#line 1014 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = make_if_command ((yyvsp[(2) - (4)].command), (yyvsp[(4) - (4)].command), (COMMAND *)NULL); }
     break;
 
   case 114:
-#line 1016 "/Users/chet/src/bash/src/parse.y"
+#line 1016 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = make_if_command ((yyvsp[(2) - (6)].command), (yyvsp[(4) - (6)].command), (yyvsp[(6) - (6)].command)); }
     break;
 
   case 115:
-#line 1018 "/Users/chet/src/bash/src/parse.y"
+#line 1018 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = make_if_command ((yyvsp[(2) - (5)].command), (yyvsp[(4) - (5)].command), (yyvsp[(5) - (5)].command)); }
     break;
 
   case 117:
-#line 1023 "/Users/chet/src/bash/src/parse.y"
+#line 1023 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyvsp[(2) - (2)].pattern)->next = (yyvsp[(1) - (2)].pattern); (yyval.pattern) = (yyvsp[(2) - (2)].pattern); }
     break;
 
   case 118:
-#line 1027 "/Users/chet/src/bash/src/parse.y"
+#line 1027 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.pattern) = make_pattern_list ((yyvsp[(2) - (4)].word_list), (yyvsp[(4) - (4)].command)); }
     break;
 
   case 119:
-#line 1029 "/Users/chet/src/bash/src/parse.y"
+#line 1029 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.pattern) = make_pattern_list ((yyvsp[(2) - (4)].word_list), (COMMAND *)NULL); }
     break;
 
   case 120:
-#line 1031 "/Users/chet/src/bash/src/parse.y"
+#line 1031 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.pattern) = make_pattern_list ((yyvsp[(3) - (5)].word_list), (yyvsp[(5) - (5)].command)); }
     break;
 
   case 121:
-#line 1033 "/Users/chet/src/bash/src/parse.y"
+#line 1033 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.pattern) = make_pattern_list ((yyvsp[(3) - (5)].word_list), (COMMAND *)NULL); }
     break;
 
   case 122:
-#line 1037 "/Users/chet/src/bash/src/parse.y"
+#line 1037 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.pattern) = (yyvsp[(1) - (2)].pattern); }
     break;
 
   case 123:
-#line 1039 "/Users/chet/src/bash/src/parse.y"
+#line 1039 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyvsp[(2) - (3)].pattern)->next = (yyvsp[(1) - (3)].pattern); (yyval.pattern) = (yyvsp[(2) - (3)].pattern); }
     break;
 
   case 124:
-#line 1041 "/Users/chet/src/bash/src/parse.y"
+#line 1041 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyvsp[(1) - (2)].pattern)->flags |= CASEPAT_FALLTHROUGH; (yyval.pattern) = (yyvsp[(1) - (2)].pattern); }
     break;
 
   case 125:
-#line 1043 "/Users/chet/src/bash/src/parse.y"
+#line 1043 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyvsp[(2) - (3)].pattern)->flags |= CASEPAT_FALLTHROUGH; (yyvsp[(2) - (3)].pattern)->next = (yyvsp[(1) - (3)].pattern); (yyval.pattern) = (yyvsp[(2) - (3)].pattern); }
     break;
 
   case 126:
-#line 1045 "/Users/chet/src/bash/src/parse.y"
+#line 1045 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyvsp[(1) - (2)].pattern)->flags |= CASEPAT_TESTNEXT; (yyval.pattern) = (yyvsp[(1) - (2)].pattern); }
     break;
 
   case 127:
-#line 1047 "/Users/chet/src/bash/src/parse.y"
+#line 1047 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyvsp[(2) - (3)].pattern)->flags |= CASEPAT_TESTNEXT; (yyvsp[(2) - (3)].pattern)->next = (yyvsp[(1) - (3)].pattern); (yyval.pattern) = (yyvsp[(2) - (3)].pattern); }
     break;
 
   case 128:
-#line 1051 "/Users/chet/src/bash/src/parse.y"
+#line 1051 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.word_list) = make_word_list ((yyvsp[(1) - (1)].word), (WORD_LIST *)NULL); }
     break;
 
   case 129:
-#line 1053 "/Users/chet/src/bash/src/parse.y"
+#line 1053 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.word_list) = make_word_list ((yyvsp[(3) - (3)].word), (yyvsp[(1) - (3)].word_list)); }
     break;
 
   case 130:
-#line 1062 "/Users/chet/src/bash/src/parse.y"
+#line 1062 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = (yyvsp[(2) - (2)].command);
 			  if (need_here_doc)
@@ -3108,14 +3108,14 @@ yyreduce:
     break;
 
   case 132:
-#line 1071 "/Users/chet/src/bash/src/parse.y"
+#line 1071 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = (yyvsp[(2) - (2)].command);
 			}
     break;
 
   case 134:
-#line 1078 "/Users/chet/src/bash/src/parse.y"
+#line 1078 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  if ((yyvsp[(1) - (3)].command)->type == cm_connection)
 			    (yyval.command) = connect_async_list ((yyvsp[(1) - (3)].command), (COMMAND *)NULL, '&');
@@ -3125,17 +3125,17 @@ yyreduce:
     break;
 
   case 136:
-#line 1089 "/Users/chet/src/bash/src/parse.y"
+#line 1089 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = command_connect ((yyvsp[(1) - (4)].command), (yyvsp[(4) - (4)].command), AND_AND); }
     break;
 
   case 137:
-#line 1091 "/Users/chet/src/bash/src/parse.y"
+#line 1091 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = command_connect ((yyvsp[(1) - (4)].command), (yyvsp[(4) - (4)].command), OR_OR); }
     break;
 
   case 138:
-#line 1093 "/Users/chet/src/bash/src/parse.y"
+#line 1093 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  if ((yyvsp[(1) - (4)].command)->type == cm_connection)
 			    (yyval.command) = connect_async_list ((yyvsp[(1) - (4)].command), (yyvsp[(4) - (4)].command), '&');
@@ -3145,37 +3145,37 @@ yyreduce:
     break;
 
   case 139:
-#line 1100 "/Users/chet/src/bash/src/parse.y"
+#line 1100 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = command_connect ((yyvsp[(1) - (4)].command), (yyvsp[(4) - (4)].command), ';'); }
     break;
 
   case 140:
-#line 1102 "/Users/chet/src/bash/src/parse.y"
+#line 1102 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = command_connect ((yyvsp[(1) - (4)].command), (yyvsp[(4) - (4)].command), ';'); }
     break;
 
   case 141:
-#line 1104 "/Users/chet/src/bash/src/parse.y"
+#line 1104 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = (yyvsp[(1) - (1)].command); }
     break;
 
   case 144:
-#line 1112 "/Users/chet/src/bash/src/parse.y"
+#line 1112 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.number) = '\n'; }
     break;
 
   case 145:
-#line 1114 "/Users/chet/src/bash/src/parse.y"
+#line 1114 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.number) = ';'; }
     break;
 
   case 146:
-#line 1116 "/Users/chet/src/bash/src/parse.y"
+#line 1116 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.number) = yacc_EOF; }
     break;
 
   case 149:
-#line 1130 "/Users/chet/src/bash/src/parse.y"
+#line 1130 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = (yyvsp[(1) - (1)].command);
 			  if (need_here_doc)
@@ -3191,7 +3191,7 @@ yyreduce:
     break;
 
   case 150:
-#line 1143 "/Users/chet/src/bash/src/parse.y"
+#line 1143 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  if ((yyvsp[(1) - (2)].command)->type == cm_connection)
 			    (yyval.command) = connect_async_list ((yyvsp[(1) - (2)].command), (COMMAND *)NULL, '&');
@@ -3210,7 +3210,7 @@ yyreduce:
     break;
 
   case 151:
-#line 1159 "/Users/chet/src/bash/src/parse.y"
+#line 1159 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  (yyval.command) = (yyvsp[(1) - (2)].command);
 			  if (need_here_doc)
@@ -3226,17 +3226,17 @@ yyreduce:
     break;
 
   case 152:
-#line 1174 "/Users/chet/src/bash/src/parse.y"
+#line 1174 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = command_connect ((yyvsp[(1) - (4)].command), (yyvsp[(4) - (4)].command), AND_AND); }
     break;
 
   case 153:
-#line 1176 "/Users/chet/src/bash/src/parse.y"
+#line 1176 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = command_connect ((yyvsp[(1) - (4)].command), (yyvsp[(4) - (4)].command), OR_OR); }
     break;
 
   case 154:
-#line 1178 "/Users/chet/src/bash/src/parse.y"
+#line 1178 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  if ((yyvsp[(1) - (3)].command)->type == cm_connection)
 			    (yyval.command) = connect_async_list ((yyvsp[(1) - (3)].command), (yyvsp[(3) - (3)].command), '&');
@@ -3246,22 +3246,22 @@ yyreduce:
     break;
 
   case 155:
-#line 1185 "/Users/chet/src/bash/src/parse.y"
+#line 1185 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = command_connect ((yyvsp[(1) - (3)].command), (yyvsp[(3) - (3)].command), ';'); }
     break;
 
   case 156:
-#line 1188 "/Users/chet/src/bash/src/parse.y"
+#line 1188 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = (yyvsp[(1) - (1)].command); }
     break;
 
   case 157:
-#line 1192 "/Users/chet/src/bash/src/parse.y"
+#line 1192 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = (yyvsp[(1) - (1)].command); }
     break;
 
   case 158:
-#line 1194 "/Users/chet/src/bash/src/parse.y"
+#line 1194 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  if ((yyvsp[(2) - (2)].command))
 			    (yyvsp[(2) - (2)].command)->flags ^= CMD_INVERT_RETURN;	/* toggle */
@@ -3270,7 +3270,7 @@ yyreduce:
     break;
 
   case 159:
-#line 1200 "/Users/chet/src/bash/src/parse.y"
+#line 1200 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  if ((yyvsp[(2) - (2)].command))
 			    (yyvsp[(2) - (2)].command)->flags |= (yyvsp[(1) - (2)].number);
@@ -3279,7 +3279,7 @@ yyreduce:
     break;
 
   case 160:
-#line 1206 "/Users/chet/src/bash/src/parse.y"
+#line 1206 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  ELEMENT x;
 
@@ -3299,7 +3299,7 @@ yyreduce:
     break;
 
   case 161:
-#line 1223 "/Users/chet/src/bash/src/parse.y"
+#line 1223 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  ELEMENT x;
 
@@ -3320,12 +3320,12 @@ yyreduce:
     break;
 
   case 162:
-#line 1243 "/Users/chet/src/bash/src/parse.y"
+#line 1243 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = command_connect ((yyvsp[(1) - (4)].command), (yyvsp[(4) - (4)].command), '|'); }
     break;
 
   case 163:
-#line 1245 "/Users/chet/src/bash/src/parse.y"
+#line 1245 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     {
 			  /* Make cmd1 |& cmd2 equivalent to cmd1 2>&1 | cmd2 */
 			  COMMAND *tc;
@@ -3351,22 +3351,22 @@ yyreduce:
     break;
 
   case 164:
-#line 1268 "/Users/chet/src/bash/src/parse.y"
+#line 1268 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.command) = (yyvsp[(1) - (1)].command); }
     break;
 
   case 165:
-#line 1272 "/Users/chet/src/bash/src/parse.y"
+#line 1272 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.number) = CMD_TIME_PIPELINE; }
     break;
 
   case 166:
-#line 1274 "/Users/chet/src/bash/src/parse.y"
+#line 1274 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.number) = CMD_TIME_PIPELINE|CMD_TIME_POSIX; }
     break;
 
   case 167:
-#line 1276 "/Users/chet/src/bash/src/parse.y"
+#line 1276 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
     { (yyval.number) = CMD_TIME_PIPELINE|CMD_TIME_POSIX; }
     break;
 
@@ -3586,7 +3586,7 @@ yyreturn:
 }
 
 
-#line 1278 "/Users/chet/src/bash/src/parse.y"
+#line 1278 "/usr/src/local/chet/src/bash/bash-4.2-patched/parse.y"
 
 
 /* Initial size to allocate for tokens, and the
@@ -4705,6 +4705,7 @@ pop_alias:
 	   is the last character).  If it's not the last character, we need
 	   to consume the quoted newline and move to the next character in
 	   the expansion. */
+#if defined (ALIAS)
 	if (expanding_alias () && shell_input_line[shell_input_line_index+1] == '\0')
 	  {
 	    uc = 0;
@@ -4715,7 +4716,8 @@ pop_alias:
 	    shell_input_line_index++;	/* skip newline */
 	    goto next_alias_char;	/* and get next character */
 	  }
-	else	    
+	else
+#endif 
 	  goto restart_read;
     }
 
@@ -4811,7 +4813,7 @@ yylex ()
 	 We do this only if it is time to do so. Notice that only here
 	 is the mail alarm reset; nothing takes place in check_mail ()
 	 except the checking of mail.  Please don't change this. */
-      if (prompt_is_ps1 && time_to_check_mail ())
+      if (prompt_is_ps1 && parse_and_execute_level == 0 && time_to_check_mail ())
 	{
 	  check_mail ();
 	  reset_mail_timer ();
@@ -6154,6 +6156,7 @@ xparse_dolparen (base, string, indp, flags)
      int flags;
 {
   sh_parser_state_t ps;
+  sh_input_line_state_t ls;
   int orig_ind, nc, sflags;
   char *ret, *s, *ep, *ostring;
 
@@ -6161,10 +6164,12 @@ xparse_dolparen (base, string, indp, flags)
   orig_ind = *indp;
   ostring = string;
 
+/*itrace("xparse_dolparen: size = %d shell_input_line = `%s'", shell_input_line_size, shell_input_line);*/
   sflags = SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOFREE;
   if (flags & SX_NOLONGJMP)
     sflags |= SEVAL_NOLONGJMP;
   save_parser_state (&ps);
+  save_input_line_state (&ls);
 
   /*(*/
   parser_state |= PST_CMDSUBST|PST_EOFTOKEN;	/* allow instant ')' */ /*(*/
@@ -6173,6 +6178,8 @@ xparse_dolparen (base, string, indp, flags)
 
   restore_parser_state (&ps);
   reset_parser ();
+  /* reset_parser clears shell_input_line and associated variables */
+  restore_input_line_state (&ls);
   if (interactive)
     token_to_read = 0;
 
@@ -7207,6 +7214,9 @@ history_delimiting_chars (line)
       return (current_command_line_count == 2 ? "\n" : "");
     }
 
+  if (parser_state & PST_COMPASSIGN)
+    return (" ");
+
   /* First, handle some special cases. */
   /*(*/
   /* If we just read `()', assume it's a function definition, and don't
@@ -7447,6 +7457,9 @@ decode_prompt_string (string)
 	    case 'A':
 	      /* Make the current time/date into a string. */
 	      (void) time (&the_time);
+#if defined (HAVE_TZSET)
+	      sv_tz ("TZ");		/* XXX -- just make sure */
+#endif
 	      tm = localtime (&the_time);
 
 	      if (c == 'd')
@@ -8217,6 +8230,12 @@ save_parser_state (ps)
   ps->expand_aliases = expand_aliases;
   ps->echo_input_at_read = echo_input_at_read;
 
+  ps->token = token;
+  ps->token_buffer_size = token_buffer_size;
+  /* Force reallocation on next call to read_token_word */
+  token = 0;
+  token_buffer_size = 0;
+
   return (ps);
 }
 
@@ -8258,6 +8277,42 @@ restore_parser_state (ps)
 
   expand_aliases = ps->expand_aliases;
   echo_input_at_read = ps->echo_input_at_read;
+
+  FREE (token);
+  token = ps->token;
+  token_buffer_size = ps->token_buffer_size;
+}
+
+sh_input_line_state_t *
+save_input_line_state (ls)
+     sh_input_line_state_t *ls;
+{
+  if (ls == 0)
+    ls = (sh_input_line_state_t *)xmalloc (sizeof (sh_input_line_state_t));
+  if (ls == 0)
+    return ((sh_input_line_state_t *)NULL);
+
+  ls->input_line = shell_input_line;
+  ls->input_line_size = shell_input_line_size;
+  ls->input_line_len = shell_input_line_len;
+  ls->input_line_index = shell_input_line_index;
+
+  /* force reallocation */
+  shell_input_line = 0;
+  shell_input_line_size = shell_input_line_len = shell_input_line_index = 0;
+}
+
+void
+restore_input_line_state (ls)
+     sh_input_line_state_t *ls;
+{
+  FREE (shell_input_line);
+  shell_input_line = ls->input_line;
+  shell_input_line_size = ls->input_line_size;
+  shell_input_line_len = ls->input_line_len;
+  shell_input_line_index = ls->input_line_index;
+
+  set_line_mbstate ();
 }
 
 /************************************************

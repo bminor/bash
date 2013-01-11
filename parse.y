@@ -2393,6 +2393,7 @@ pop_alias:
 	   is the last character).  If it's not the last character, we need
 	   to consume the quoted newline and move to the next character in
 	   the expansion. */
+#if defined (ALIAS)
 	if (expanding_alias () && shell_input_line[shell_input_line_index+1] == '\0')
 	  {
 	    uc = 0;
@@ -2403,7 +2404,8 @@ pop_alias:
 	    shell_input_line_index++;	/* skip newline */
 	    goto next_alias_char;	/* and get next character */
 	  }
-	else	    
+	else
+#endif 
 	  goto restart_read;
     }
 
