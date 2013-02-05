@@ -596,9 +596,6 @@ sigint_sighandler (sig)
       throw_to_top_level ();
     }
 #if defined (READLINE)
-  /* Set the event hook so readline will call it after the signal handlers
-     finish executing, so if this interrupted character input we can get
-     quick response. */
   else if (RL_ISSTATE (RL_STATE_SIGHANDLER))
     bashline_set_event_hook ();
 #endif

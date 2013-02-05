@@ -49,14 +49,12 @@ mkinstalldirs = $(SHELL) $(MKINSTALLDIRS)
 
 l = @INTL_LIBTOOL_SUFFIX_PREFIX@
 
-AR = @AR@
+AR = ar
 CC = @CC@
 LIBTOOL = @LIBTOOL@
 RANLIB = @RANLIB@
 YACC = @INTLBISON@ -y -d
 YFLAGS = --name-prefix=__gettext
-
-ARFLAGS = @ARFLAGS@
 
 LOCAL_DEFS = @LOCAL_DEFS@
 
@@ -148,7 +146,7 @@ all-no-no:
 
 libintl.a libgnuintl.a: $(OBJECTS)
 	rm -f $@
-	$(AR) $(ARFLAGS) $@ $(OBJECTS)
+	$(AR) cru $@ $(OBJECTS)
 	$(RANLIB) $@
 
 libintl.la libgnuintl.la: $(OBJECTS)

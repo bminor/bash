@@ -3606,21 +3606,15 @@ each time a shell function or a script executed with the @code{.} or
 @code{source} builtins finishes executing.
 
 If a @var{sigspec} is @code{ERR}, the command @var{arg} 
-is executed whenever
-a pipeline (which may consist of a single simple
-command), a list, or a compound command returns a 
-non-zero exit status,
+is executed whenever a simple command has a non-zero exit status,
 subject to the following conditions.
 The @code{ERR} trap is not executed if the failed command is part of the
 command list immediately following an @code{until} or @code{while} keyword,
 part of the test following the @code{if} or @code{elif} reserved words,
-part of a command executed in a @code{&&} or @code{||} list
-except the command following the final @code{&&) or @code{||},
-any command in a pipeline but the last,
+part of a command executed in a @code{&&} or @code{||} list,
 or if the command's return
 status is being inverted using @code{!}.
-These are the same conditions obeyed by the @code{errexit} (@option{-e})
-option.
+These are the same conditions obeyed by the @code{errexit} option.
 
 Signals ignored upon entry to the shell cannot be trapped or reset.
 Trapped signals that are not being ignored are reset to their original

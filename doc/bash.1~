@@ -8772,8 +8772,6 @@ separately (see
 .B "COMMAND EXECUTION ENVIRONMENT"
 above), and may cause
 subshells to exit before executing all the commands in the subshell.
-.if t .sp 0.5
-.if n .sp 1
 If a compound command or shell function executes in a context
 where \fB\-e\fP is being ignored,
 none of the commands executed within the compound command or function body
@@ -9739,10 +9737,7 @@ is
 .BR ERR ,
 the command
 .I arg
-is executed whenever a 
-a pipeline (which may consist of a single simple
-command), a list, or a compound command returns a 
-non\-zero exit status,
+is executed whenever a simple command has a non\-zero exit status,
 subject to the following conditions.
 The
 .SM
@@ -9759,12 +9754,10 @@ statement, part of a command executed in a
 .B &&
 or
 .B ||
-list except the command following the final \fB&&\fP or \fB||\fP,
-any command in a pipeline but the last,
-or if the command's return value is
-being inverted using
+list, or if the command's return value is
+being inverted via
 .BR ! .
-These are the same conditions obeyed by the \fBerrexit\fP (\fB\-e\fP) option.
+These are the same conditions obeyed by the \fBerrexit\fP option.
 .if t .sp 0.5
 .if n .sp 1
 Signals ignored upon entry to the shell cannot be trapped or reset.

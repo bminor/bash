@@ -1493,7 +1493,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   if (user_subshell)
     {
       stdin_redir = stdin_redirects (command->redirects);
-      restore_default_signal (EXIT_TRAP);
+      restore_default_signal (0);
     }
 
   /* If this is an asynchronous command (command &), we want to

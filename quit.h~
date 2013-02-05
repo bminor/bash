@@ -56,7 +56,10 @@ extern volatile int terminating_signal;
 #define CHECK_WAIT_INTR \
   do { \
     if (wait_signal_received && this_shell_builtin && (this_shell_builtin == wait_builtin)) \
+{ \
+itrace("CHECK_WAIT_INTR: calling longjmp to wait_intr_buf: sig = %d",wait_signal_received); \
       longjmp (wait_intr_buf, 1); \
+} \
   } while (0)
 
 #endif /* _QUIT_H_ */

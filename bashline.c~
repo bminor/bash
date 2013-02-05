@@ -598,13 +598,13 @@ bashline_reinitialize ()
 void
 bashline_set_event_hook ()
 {
-  rl_signal_event_hook = bash_event_hook;
+  rl_event_hook = bash_event_hook;
 }
 
 void
 bashline_reset_event_hook ()
 {
-  rl_signal_event_hook = 0;
+  rl_event_hook = 0;
 }
 
 /* On Sun systems at least, rl_attempted_completion_function can end up

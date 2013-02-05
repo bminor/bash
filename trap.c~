@@ -970,6 +970,7 @@ run_debug_trap ()
 void
 run_error_trap ()
 {
+itrace("run_error_trap");
   if ((sigmodes[ERROR_TRAP] & SIG_TRAPPED) && ((sigmodes[ERROR_TRAP] & SIG_IGNORED) == 0) && (sigmodes[ERROR_TRAP] & SIG_INPROGRESS) == 0)
     _run_trap_internal (ERROR_TRAP, "error trap");
 }
@@ -1092,7 +1093,10 @@ reset_or_restore_signal_handlers (reset)
       sigmodes[RETURN_TRAP] &= ~SIG_TRAPPED;
     }
   if (error_trace_mode == 0)
+{
+itrace("turning off SIG_TRAPPED for ERROR_TRAP");
     sigmodes[ERROR_TRAP] &= ~SIG_TRAPPED;
+}
 }
 
 /* Reset trapped signals to their original values, but don't free the
