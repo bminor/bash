@@ -135,6 +135,7 @@ pid_t current_command_subst_pid = NO_PID;
 SHELL_VAR *ifs_var;
 char *ifs_value;
 unsigned char ifs_cmap[UCHAR_MAX + 1];
+int ifs_is_set, ifs_is_null;
 
 #if defined (HANDLE_MULTIBYTE)
 unsigned char ifs_firstc[MB_LEN_MAX];
@@ -443,10 +444,10 @@ dump_word_flags (flags)
       f &= ~W_NOGLOB;
       fprintf (stderr, "W_NOGLOB%s", f ? "|" : "");
     }
-  if (f & W_GLOBEXP)
+  if (f & W_SPLITSPACE)
     {
-      f &= ~W_GLOBEXP;
-      fprintf (stderr, "W_GLOBEXP%s", f ? "|" : "");
+      f &= ~W_SPLITSPACE;
+      fprintf (stderr, "W_SPLITSPACE%s", f ? "|" : "");
     }
   if (f & W_ASSIGNMENT)
     {
@@ -1457,18 +1458,6 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
 	  continue;
 	}
 
-#if 0
-      /* Pass the contents of single-quoted and double-quoted strings
-	 through verbatim. */
-      if (c == '\'' || c == '"')
-	{
-	  si = i + 1;
-	  i = (c == '\'') ? skip_single_quoted (string, slen, si)
-			  : skip_double_quoted (string, slen, si);
-	  /* skip_XXX_quoted leaves index one past close quote */
-	  continue;
-	}
-#else	/* XXX - bash-4.2 */
       /* Pass the contents of double-quoted strings through verbatim. */
       if (c == '"')
 	{
@@ -1491,7 +1480,6 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
 
           continue;
 	}
-#endif
 
       /* move past this character, which was not special. */
       ADVANCE_CHAR (string, slen, i);
@@ -4082,9 +4070,6 @@ match_upattern (string, pat, mtype, sp, ep)
 	{
 	  if (match_pattern_char (pat, p))
 	    {
-#if 0
-	      for (p1 = end; p1 >= p; p1--)
-#else
 	      p1 = (mlen == -1) ? end : p + mlen;
 	      /* p1 - p = length of portion of string to be considered
 	         p = current position in string
@@ -4097,7 +4082,6 @@ match_upattern (string, pat, mtype, sp, ep)
 	      if (p1 > end)
 		break;
 	      for ( ; p1 >= p; p1--)
-#endif
 		{
 		  c = *p1; *p1 = '\0';
 		  if (strmatch (pat, p, FNMATCH_EXTFLAG) == 0)
@@ -4123,11 +4107,7 @@ match_upattern (string, pat, mtype, sp, ep)
       if (match_pattern_char (pat, string) == 0)
 	return (0);
 
-#if 0
-      for (p = end; p >= string; p--)
-#else
       for (p = (mlen == -1) ? end : string + mlen; p >= string; p--)
-#endif
 	{
 	  c = *p; *p = '\0';
 	  if (strmatch (pat, string, FNMATCH_EXTFLAG) == 0)
@@ -4138,21 +4118,15 @@ match_upattern (string, pat, mtype, sp, ep)
 	      return 1;
 	    }
 	  *p = c;
-#if 1
 	  /* If MLEN != -1, we have a fixed length pattern. */
 	  if (mlen != -1)
 	    break;
-#endif
 	}
 
       return (0);
 
     case MATCH_END:
-#if 0
-      for (p = string; p <= end; p++)
-#else
       for (p = end - ((mlen == -1) ? len : mlen); p <= end; p++)
-#endif
 	{
 	  if (strmatch (pat, p, FNMATCH_EXTFLAG) == 0)
 	    {
@@ -4160,11 +4134,9 @@ match_upattern (string, pat, mtype, sp, ep)
 	      *ep = end;
 	      return 1;
 	    }
-#if 1
 	  /* If MLEN != -1, we have a fixed length pattern. */
 	  if (mlen != -1)
 	    break;
-#endif
 	}
 
       return (0);
@@ -4232,22 +4204,14 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
     case MATCH_ANY:
       for (n = 0; n <= wstrlen; n++)
 	{
-#if 1
 	  n2 = simple ? (*wpat == wstring[n]) : match_pattern_wchar (wpat, wstring + n);
-#else
-	  n2 = match_pattern_wchar (wpat, wstring + n);
-#endif
 	  if (n2)
 	    {
-#if 0
-	      for (n1 = wstrlen; n1 >= n; n1--)
-#else
 	      n1 = (mlen == -1) ? wstrlen : n + mlen;
 	      if (n1 > wstrlen)
 	        break;
 
 	      for ( ; n1 >= n; n1--)
-#endif
 		{
 		  wc = wstring[n1]; wstring[n1] = L'\0';
 		  if (wcsmatch (wpat, wstring + n, FNMATCH_EXTFLAG) == 0)
@@ -4258,11 +4222,9 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
 		      return 1;
 		    }
 		  wstring[n1] = wc;
-#if 1
 		  /* If MLEN != -1, we have a fixed length pattern. */
 		  if (mlen != -1)
 		    break;
-#endif
 		}
 	    }
 	}
@@ -4273,11 +4235,7 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
       if (match_pattern_wchar (wpat, wstring) == 0)
 	return (0);
 
-#if 0
-      for (n = wstrlen; n >= 0; n--)
-#else
       for (n = (mlen == -1) ? wstrlen : mlen; n >= 0; n--)
-#endif
 	{
 	  wc = wstring[n]; wstring[n] = L'\0';
 	  if (wcsmatch (wpat, wstring, FNMATCH_EXTFLAG) == 0)
@@ -4288,21 +4246,15 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
 	      return 1;
 	    }
 	  wstring[n] = wc;
-#if 1
 	  /* If MLEN != -1, we have a fixed length pattern. */
 	  if (mlen != -1)
 	    break;
-#endif
 	}
 
       return (0);
 
     case MATCH_END:
-#if 0
-      for (n = 0; n <= wstrlen; n++)
-#else
       for (n = wstrlen - ((mlen == -1) ? wstrlen : mlen); n <= wstrlen; n++)
-#endif
 	{
 	  if (wcsmatch (wpat, wstring + n, FNMATCH_EXTFLAG) == 0)
 	    {
@@ -4310,11 +4262,9 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
 	      *ep = indices[wstrlen];
 	      return 1;
 	    }
-#if 1
 	  /* If MLEN != -1, we have a fixed length pattern. */
 	  if (mlen != -1)
 	    break;
-#endif
 	}
 
       return (0);
@@ -4344,15 +4294,7 @@ match_pattern (string, pat, mtype, sp, ep)
 #if defined (HANDLE_MULTIBYTE)
   if (MB_CUR_MAX > 1)
     {
-#if 0
-      slen = STRLEN (string);
-      mslen = MBSLEN (string);
-      plen = STRLEN (pat);
-      mplen = MBSLEN (pat);
-      if (slen == mslen && plen == mplen)
-#else
       if (mbsmbchar (string) == 0 && mbsmbchar (pat) == 0)
-#endif
         return (match_upattern (string, pat, mtype, sp, ep));
 
       n = xdupmbstowcs (&wpat, NULL, pat);
@@ -5935,11 +5877,10 @@ parameter_brace_expand_rhs (name, value, c, quoted, qdollaratp, hasdollarat)
   else
 #endif /* ARRAY_VARS */
   bind_variable (name, t1, 0);
+#if 0
   if (STREQ (name, "IFS") == 0)
+#endif
     stupidly_hack_special_variables (name);
-  else
-    /* XXX - what to do? Set a flag in w->flags to call setifs() later? */
-    ;    
 
   /* From Posix group discussion Feb-March 2010.  Issue 7 0000221 */
   free (temp);
@@ -6661,18 +6602,7 @@ pos_params_pat_subst (string, pat, rep, mflags)
   pchar = (mflags & MATCH_STARSUB) == MATCH_STARSUB ? '*' : '@';
   qflags = (mflags & MATCH_QUOTED) == MATCH_QUOTED ? Q_DOUBLE_QUOTES : 0;
 
-#if 0
-  if ((mflags & (MATCH_QUOTED|MATCH_STARSUB)) == (MATCH_QUOTED|MATCH_STARSUB))
-    ret = string_list_dollar_star (quote_list (save));
-  else if ((mflags & MATCH_STARSUB) == MATCH_STARSUB)
-    ret = string_list_dollar_star (save);
-  else if ((mflags & MATCH_QUOTED) == MATCH_QUOTED)
-    ret = string_list_dollar_at (save, qflags);
-  else
-    ret = string_list_dollar_star (save);
-#else
   ret = string_list_pos_params (pchar, save, qflags);
-#endif
 
   dispose_words (save);
 
@@ -7691,7 +7621,6 @@ param_expand (string, sindex, quoted, expanded_something,
 	     an assignment statement.  In that case, we don't separate the
 	     arguments at all.  Otherwise, if the $* is not quoted it is
 	     identical to $@ */
-#if 1
 #  if defined (HANDLE_MULTIBYTE)
 	  if (expand_no_split_dollar_star && ifs_firstc[0] == 0)
 #  else
@@ -7699,10 +7628,15 @@ param_expand (string, sindex, quoted, expanded_something,
 #  endif
 	    temp = string_list_dollar_star (list);
 	  else
-	    temp = string_list_dollar_at (list, quoted);
-#else
-	  temp = string_list_dollar_at (list, quoted);
-#endif
+	    {
+	      temp = string_list_dollar_at (list, quoted);
+	      if (ifs_is_set == 0 || ifs_is_null)
+{
+itrace("param_expand: set W_SPLITSPACE flag");
+		tflag |= W_SPLITSPACE;
+}
+	    }
+
 	  if (expand_no_split_dollar_star == 0 && contains_dollar_at)
 	    *contains_dollar_at = 1;
 	}
@@ -8064,6 +7998,7 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
   /* State flags */
   int had_quoted_null;
   int has_dollar_at, temp_has_dollar_at;
+  int split_on_spaces;
   int tflag;
   int pflags;			/* flags passed to param_expand */
 
@@ -8079,6 +8014,7 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
   istring = (char *)xmalloc (istring_size = DEFAULT_INITIAL_ARRAY_SIZE);
   istring[istring_index = 0] = '\0';
   quoted_dollar_at = had_quoted_null = has_dollar_at = 0;
+  split_on_spaces = 0;
   quoted_state = UNQUOTED;
 
   string = word->word;
@@ -8279,6 +8215,10 @@ add_string:
 			       &had_quoted_null, pflags);
 	  has_dollar_at += temp_has_dollar_at;
 
+	  split_on_spaces += (tword->flags & W_SPLITSPACE);
+if (tword->flags & W_SPLITSPACE)
+ itrace("expand_word_internal: param_expand return word has W_SPLITSPACE");
+
 	  if (tword == &expand_wdesc_error || tword == &expand_wdesc_fatal)
 	    {
 	      free (string);
@@ -8407,11 +8347,7 @@ add_twochars:
 	  break;
 
 	case '"':
-#if 0
-	  if ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) || (word->flags & W_DQUOTE))
-#else
 	  if ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
-#endif
 	    goto add_character;
 
 	  t_index = ++sindex;
@@ -8499,11 +8435,6 @@ add_twochars:
 	    {
 	      if (list->next)
 		{
-#if 0
-		  if (quoted_dollar_at && (word->flags & W_NOSPLIT2))
-		    temp = string_list_internal (quote_list (list), " ");
-		  else
-#endif
 		  /* Testing quoted_dollar_at makes sure that "$@" is
 		     split correctly when $IFS does not contain a space. */
 		  temp = quoted_dollar_at
@@ -8566,11 +8497,7 @@ add_twochars:
 	  /* break; */
 
 	case '\'':
-#if 0
-	  if ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) || (word->flags & W_DQUOTE))
-#else
 	  if ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
-#endif
 	    goto add_character;
 
 	  t_index = ++sindex;
@@ -8733,6 +8660,7 @@ finished_with_string:
     {
       char *ifs_chars;
 
+itrace("expand_word_internal: splitting `%s': split_on_spaces = %d", istring, split_on_spaces);
       ifs_chars = (quoted_dollar_at || has_dollar_at) ? ifs_value : (char *)NULL;
 
       /* If we have $@, we need to split the results no matter what.  If
@@ -8903,6 +8831,9 @@ setifs (v)
 
   ifs_var = v;
   ifs_value = (v && value_cell (v)) ? value_cell (v) : " \t\n";
+
+  ifs_is_set = ifs_var != 0;
+  ifs_is_null = ifs_is_set && (*ifs_value == 0);
 
   /* Should really merge ifs_cmap with sh_syntaxtab.  XXX - doesn't yet
      handle multibyte chars in IFS */
@@ -9216,7 +9147,6 @@ glob_expand_word_list (tlist, eflags)
 	  for (glob_index = 0; glob_array[glob_index]; glob_index++)
 	    {
 	      tword = make_bare_word (glob_array[glob_index]);
-	      tword->flags |= W_GLOBEXP;	/* XXX */
 	      glob_list = make_word_list (tword, glob_list);
 	    }
 
@@ -9491,6 +9421,7 @@ expand_word_list_internal (list, eflags)
   WORD_LIST *new_list, *temp_list;
   int tint;
 
+  tempenv_assign_error = 0;
   if (list == 0)
     return ((WORD_LIST *)NULL);
 
@@ -9595,14 +9526,6 @@ expand_word_list_internal (list, eflags)
       dispose_words (subst_assign_varlist);
       subst_assign_varlist = (WORD_LIST *)NULL;
     }
-
-#if 0
-  tint = list_length (new_list) + 1;
-  RESIZE_MALLOCED_BUFFER (glob_argv_flags, 0, tint, glob_argv_flags_size, 16);
-  for (tint = 0, temp_list = new_list; temp_list; temp_list = temp_list->next)
-    glob_argv_flags[tint++] = (temp_list->word->flags & W_GLOBEXP) ? '1' : '0';
-  glob_argv_flags[tint] = '\0';
-#endif
 
   return (new_list);
 }

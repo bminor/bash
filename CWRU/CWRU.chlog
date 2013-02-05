@@ -4343,3 +4343,39 @@ subst.c
 	  character is not one for which backslash retains its meaning, add
 	  the (escaped) '\' and the (escaped) character.  Fixes bug reported
 	  by Dan Douglas <ormaaj@gmail.com>
+
+				   1/15
+				   ----
+builtins/cd.def
+	- cd_builtin: make sure call to internal_getopt handles -e option.
+	  Fixes bug reported by <mashimiao.fnst@cn.fujitsu.com>
+
+				   1/17
+				   ----
+subst.c
+	- expand_word_list_internal: make sure tempenv_assign_error is
+	  initialized to 0
+
+execute_cmd.c
+	- execute_simple_command: make sure tempenv_assign_error is reset to 0
+	  after it's tested to see if an error should force the shell to exit.
+	  Fixes problem where a the failure of a tempenv assignment preceding
+	  a non-special builtin `sticks' and causes the next special builtin
+	  to exit the shell.  From a discussion on bug-bash started by
+	  douxin <wq-doux@cn.fujitsu.com>
+
+				   1/20
+				   ----
+subst.c
+	- parameter_brace_expand_rhs: call stupidly_hack_special_variables
+	  after assigning with ${param[:]=word} even if IFS is changing.
+	  Suggested by Dan Douglas <ormaaj@gmail.com> [TENTATIVE, needs work
+	  on IFS side effects]
+
+command.h
+	- W_GLOBEXP (which was unused) is now W_SPLITSPACE (which isn't used
+	  yet)
+
+{execute_cmd,subst,variables}.c
+	- removed all code that mentioned W_GLOBEXP
+	- removed mention of gnu_argv_flags and code that set it

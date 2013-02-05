@@ -4018,6 +4018,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
       last_command_exit_value = EXECUTION_FAILURE;
       jump_to_top_level (ERREXIT);
     }
+  tempenv_assign_error = 0;	/* don't care about this any more */
 
   add_unwind_protect (dispose_words, words);
   QUIT;
@@ -4865,14 +4866,6 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
   if (pid == 0)
     {
       int old_interactive;
-
-#if 0
-      /* This has been disabled for the time being. */
-#if !defined (ARG_MAX) || ARG_MAX >= 10240
-      if (posixly_correct == 0)
-	put_gnu_argv_flags_into_env ((long)getpid (), glob_argv_flags);
-#endif
-#endif
 
       reset_terminating_signals ();	/* XXX */
       /* Cancel traps, in trap.c. */
