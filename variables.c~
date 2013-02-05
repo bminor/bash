@@ -61,6 +61,7 @@
 
 #include "builtins/getopt.h"
 #include "builtins/common.h"
+#include "builtins/builtext.h"
 
 #if defined (READLINE)
 #  include "bashline.h"
@@ -1788,6 +1789,7 @@ find_variable_internal (name, force_tempenv)
 {
   SHELL_VAR *var;
   int search_tempenv;
+  VAR_CONTEXT *vc;
 
   var = (SHELL_VAR *)NULL;
 
@@ -1801,8 +1803,22 @@ find_variable_internal (name, force_tempenv)
   if (search_tempenv && temporary_env)		
     var = hash_lookup (name, temporary_env);
 
+  vc = shell_variables;
+#if 0
+if (search_tempenv == 0 && /* (subshell_environment & SUBSHELL_COMSUB) && */
+    expanding_redir &&
+    (this_shell_builtin == eval_builtin || this_shell_builtin == command_builtin))
+  {
+  itrace("find_variable_internal: search_tempenv == 0: skipping VC_BLTNENV");
+  while (vc && (vc->flags & VC_BLTNENV))
+    vc = vc->down;
+  if (vc == 0)
+    vc = shell_variables;
+  }
+#endif
+
   if (var == 0)
-    var = var_lookup (name, shell_variables);
+    var = var_lookup (name, vc);
 
   if (var == 0)
     return ((SHELL_VAR *)NULL);
@@ -4107,33 +4123,6 @@ put_command_name_into_env (command_name)
 {
   update_export_env_inplace ("_=", 2, command_name);
 }
-
-#if 0	/* UNUSED -- it caused too many problems */
-void
-put_gnu_argv_flags_into_env (pid, flags_string)
-     intmax_t pid;
-     char *flags_string;
-{
-  char *dummy, *pbuf;
-  int l, fl;
-
-  pbuf = itos (pid);
-  l = strlen (pbuf);
-
-  fl = strlen (flags_string);
-
-  dummy = (char *)xmalloc (l + fl + 30);
-  dummy[0] = '_';
-  strcpy (dummy + 1, pbuf);
-  strcpy (dummy + 1 + l, "_GNU_nonoption_argv_flags_");
-  dummy[l + 27] = '=';
-  strcpy (dummy + l + 28, flags_string);
-
-  free (pbuf);
-
-  export_env = add_or_supercede_exported_var (dummy, 0);
-}
-#endif
 
 /* **************************************************************** */
 /*								    */

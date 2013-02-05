@@ -456,11 +456,18 @@ any_signals_trapped ()
   return -1;
 }
 
+/* Convenience functions the rest of the shell can use */
 void
 check_signals_and_traps ()
 {
   QUIT;
   run_pending_traps ();
+}
+
+void
+check_signals ()
+{
+  QUIT;
 }
 
 #if defined (JOB_CONTROL) && defined (SIGCHLD)

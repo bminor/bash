@@ -49,7 +49,7 @@ zread (fd, buf, len)
   ssize_t r;
 
   while ((r = read (fd, buf, len)) < 0 && errno == EINTR)
-    check_signals_and_traps ();	/* XXX */
+    check_signals_and_traps ();	/* XXX - should it be check_signals()? */
   return r;
 }
 

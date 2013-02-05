@@ -608,6 +608,8 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	     COMMAND struct.  Need to keep in mind that execute_in_subshell
 	     runs the exit trap for () subshells itself. */
 	  s = user_subshell == 0 && command->type == cm_group && pipe_in == NO_PIPE && pipe_out == NO_PIPE && asynchronous;
+	  /* run exit trap for : | { ...; } and : | ( ... ) */
+	  s += user_subshell == 0 && command->type == cm_group && pipe_in != NO_PIPE && pipe_out == NO_PIPE && asynchronous == 0;
 
 	  last_command_exit_value = execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close);
 	  if (s)

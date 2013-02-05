@@ -63,6 +63,7 @@ int expanding_redir;
 
 extern int posixly_correct;
 extern int last_command_exit_value;
+extern int executing_builtin;
 extern REDIRECT *redirection_undo_list;
 extern REDIRECT *exec_redirection_undo_list;
 
@@ -275,6 +276,7 @@ redirection_expand (word)
   char *result;
   WORD_LIST *tlist1, *tlist2;
   WORD_DESC *w;
+  int old;
 
   w = copy_word (word);
   if (posixly_correct)
@@ -282,11 +284,22 @@ redirection_expand (word)
 
   tlist1 = make_word_list (w, (WORD_LIST *)NULL);
   expanding_redir = 1;
+  /* Now that we've changed the variable search order to ignore the temp
+     environment, see if we need to change the cached IFS values. */
+  sv_ifs ("IFS");
   tlist2 = expand_words_no_vars (tlist1);
   expanding_redir = 0;
+  /* Now we need to change the variable search order back to include the temp
+     environment.  We force the temp environment search by forcing
+     executing_builtin to 1.  This is what makes `read' get the right values
+     for the IFS-related cached variables, for example. */
+  old = executing_builtin;
+  executing_builtin = 1;
+  sv_ifs ("IFS");
+  executing_builtin = old;
   dispose_words (tlist1);
 
-  if (!tlist2 || tlist2->next)
+  if (tlist2 == 0 || tlist2->next)
     {
       /* We expanded to no words, or to more than a single word.
 	 Dispose of the word list and return NULL. */
@@ -305,11 +318,23 @@ write_here_string (fd, redirectee)
      WORD_DESC *redirectee;
 {
   char *herestr;
-  int herelen, n, e;
+  int herelen, n, e, old;
 
   expanding_redir = 1;
+  /* Now that we've changed the variable search order to ignore the temp
+     environment, see if we need to change the cached IFS values. */
+  sv_ifs ("IFS");
   herestr = expand_string_to_string (redirectee->word, 0);
   expanding_redir = 0;
+  /* Now we need to change the variable search order back to include the temp
+     environment.  We force the temp environment search by forcing
+     executing_builtin to 1.  This is what makes `read' get the right values
+     for the IFS-related cached variables, for example. */
+  old = executing_builtin;
+  executing_builtin = 1;
+  sv_ifs ("IFS");
+  executing_builtin = old;
+
   herelen = STRLEN (herestr);
 
   n = write (fd, herestr, herelen);
@@ -338,7 +363,7 @@ write_here_document (fd, redirectee)
      WORD_DESC *redirectee;
 {
   char *document;
-  int document_len, fd2;
+  int document_len, fd2, old;
   FILE *fp;
   register WORD_LIST *t, *tlist;
 
@@ -362,8 +387,19 @@ write_here_document (fd, redirectee)
     }
 
   expanding_redir = 1;
+  /* Now that we've changed the variable search order to ignore the temp
+     environment, see if we need to change the cached IFS values. */
+  sv_ifs ("IFS");
   tlist = expand_string (redirectee->word, Q_HERE_DOCUMENT);
   expanding_redir = 0;
+  /* Now we need to change the variable search order back to include the temp
+     environment.  We force the temp environment search by forcing
+     executing_builtin to 1.  This is what makes `read' get the right values
+     for the IFS-related cached variables, for example. */
+  old = executing_builtin;
+  executing_builtin = 1;
+  sv_ifs ("IFS");
+  executing_builtin = old;
 
   if (tlist)
     {

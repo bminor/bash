@@ -61,6 +61,7 @@
 
 #include "builtins/getopt.h"
 #include "builtins/common.h"
+#include "builtins/builtext.h"
 
 #if defined (READLINE)
 #  include "bashline.h"
@@ -1788,6 +1789,7 @@ find_variable_internal (name, force_tempenv)
 {
   SHELL_VAR *var;
   int search_tempenv;
+  VAR_CONTEXT *vc;
 
   var = (SHELL_VAR *)NULL;
 
@@ -1801,8 +1803,22 @@ find_variable_internal (name, force_tempenv)
   if (search_tempenv && temporary_env)		
     var = hash_lookup (name, temporary_env);
 
+  vc = shell_variables;
+#if 0
+if (search_tempenv == 0 && /* (subshell_environment & SUBSHELL_COMSUB) && */
+    expanding_redir &&
+    (this_shell_builtin == eval_builtin || this_shell_builtin == command_builtin))
+  {
+  itrace("find_variable_internal: search_tempenv == 0: skipping VC_BLTNENV");
+  while (vc && (vc->flags & VC_BLTNENV))
+    vc = vc->down;
+  if (vc == 0)
+    vc = shell_variables;
+  }
+#endif
+
   if (var == 0)
-    var = var_lookup (name, shell_variables);
+    var = var_lookup (name, vc);
 
   if (var == 0)
     return ((SHELL_VAR *)NULL);
@@ -2868,11 +2884,6 @@ assign_in_env (word, flags)
 
   array_needs_making = 1;
 
-#if 0
-  if (ifsname (name))
-    setifs (var);
-else
-#endif
   if (flags)
     stupidly_hack_special_variables (name);
 

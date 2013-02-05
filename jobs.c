@@ -3176,6 +3176,7 @@ waitchld (wpid, block)
   WAIT status;
   PROCESS *child;
   pid_t pid;
+
   int call_set_current, last_stopped_job, job, children_exited, waitpid_flags;
   static int wcontinued = WCONTINUED;	/* run-time fix for glibc problem */
 
@@ -3191,9 +3192,9 @@ waitchld (wpid, block)
 			: 0;
       if (sigchld || block == 0)
 	waitpid_flags |= WNOHANG;
+
       /* Check for terminating signals and exit the shell if we receive one */
       CHECK_TERMSIG;
-
       /* Check for a trapped signal interrupting the wait builtin and jump out */
       CHECK_WAIT_INTR;
 
@@ -4236,8 +4237,10 @@ mark_dead_jobs_as_notified (force)
     }
 
 #ifdef DEBUG
+# if 0
   if (ndeadproc != js.c_reaped)
     itrace("mark_dead_jobs_as_notified: ndeadproc (%d) != js.c_reaped (%d)", ndeadproc, js.c_reaped);
+# endif
   if (ndead != js.j_ndead)
     itrace("mark_dead_jobs_as_notified: ndead (%d) != js.j_ndead (%d)", ndead, js.j_ndead);
 #endif

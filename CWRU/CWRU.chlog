@@ -4203,6 +4203,9 @@ execute_cmd.c
 	  declaration builtin
 
 subst.c
+	- do_assignment_internal: explicitly handle case where we are
+	  executing in a function and we want to create a global array or
+	  assoc variable
 	- shell_expand_word_list: call make_internal_declare if -a option
 	  given to declaration builtin (W_ASSIGNARRAY); handle -g option with
 	  it (W_ASSNGLOBAL).  Fixes inconsistency noticed by Vicente Couce
@@ -4379,3 +4382,71 @@ command.h
 {execute_cmd,subst,variables}.c
 	- removed all code that mentioned W_GLOBEXP
 	- removed mention of gnu_argv_flags and code that set it
+
+				   1/22
+				   ----
+subst.c
+	- param_expand: set W_SPLITSPACE if we expand (unquoted) $* and
+	  IFS is unset or null so we can be sure to split this on spaces
+	  no matter what happens with IFS later
+	- expand_word_internal: note that param_expand returns W_SPLITSPACE
+	  in the returned word flags and keep track of that state with
+	  `split_on_spaces'
+
+				   1/23
+				   ----
+subst.c
+	- expand_word_internal: if split_on_spaces is non-zero, make sure
+	  we split `istring' on spaces and return the resultant word.  The
+	  previous expansions should have quoted spaces in the positional
+	  parameters where necessary.  Suggested by Dan Douglas
+	  <ormaaj@gmail.com>
+
+execute_cmd.c
+	- execute_command_internal: make sure any subshell forked to run a
+	  group command or user subshell at the end of a pipeline runs any
+	  EXIT trap it sets.  Fixes debian bash bug 698411
+	  http://bugs.debian.org/cgi-big/bugreport.cgi?bug=698411
+
+subst.c
+	- shell_expand_word_list: fix code that creates args for and calls
+	  make_internal_declare to avoid calling it twice (missing `else'
+	  in 12/26 change)
+	- do_assignment_internal: fix code from 12/26 change to fix problem
+	  where an existing assoc variable could be converted to an array
+	  without checking `mkassoc'
+
+				   1/24
+				   ----
+builtins/evalfile.c
+	- _evalfile: add missing `close (fd)' calls before returning to
+	  avoid fd leaks.  Bug and fix from Roman Rakus <rrakus@redhat.com>
+
+				   1/25
+				   ----
+builtins/read.def
+	- read_builtin: don't try to play tricks with the top of the unwind-
+	  protect stack after read gets a SIGALRM; save input_string to new
+	  memory, run the stack, then restore input_string and assign the
+	  variables.  Part of fix for bug reported by konsolebox
+	  <konsolebox@gmail.com>; the rest of the fix is with the changes in
+	  trap and signal handling and doing away with interrupt_immediately
+
+				   1/26
+				   ----
+redir.c
+	- redirection_expand, write_here_string, write_here_document: before
+	  calling any of the word expansion functions, after setting
+	  expanding_redir to 1 (which bypasses the temp environment in the
+	  variable lookup functions), call sv_ifs to reset the cached IFS-
+	  related variables set by subst.c:setifs().  This ensures that
+	  redirections will not get any IFS values that are set in the
+	  temporary environment, as Posix specifies.  Then, after the word
+	  expansions, after resetting expanding_redir to 0, call sv_ifs
+	  again to make sure the cached IFS values are set from any
+	  assignments in the temporary environment.  We force executing_builtin
+	  to 1 to `fool' the variable lookup functions into using any temp
+	  environment, then reset it to its old value after sv_ifs returns.
+	  This is what allows read() to use the (cached) IFS variables set
+	  in the temp environment. Fixes inconsistency reported by Dan Douglas
+	  <ormaaj@gmail.com>

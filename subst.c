@@ -2729,7 +2729,7 @@ do_compound_assignment (name, value, flags)
 	v = convert_var_to_assoc (v);
       else if (v == 0)
 	v = make_new_array_variable (name);
-      else if (v && array_p (v) == 0)
+      else if (v && mkassoc == 0 && array_p (v) == 0)
 	v = convert_var_to_array (v);
       assign_compound_array_list (v, list, flags);
     }
@@ -7630,11 +7630,8 @@ param_expand (string, sindex, quoted, expanded_something,
 	  else
 	    {
 	      temp = string_list_dollar_at (list, quoted);
-	      if (ifs_is_set == 0 || ifs_is_null)
-{
-itrace("param_expand: set W_SPLITSPACE flag");
+	      if (quoted == 0 && (ifs_is_set == 0 || ifs_is_null))
 		tflag |= W_SPLITSPACE;
-}
 	    }
 
 	  if (expand_no_split_dollar_star == 0 && contains_dollar_at)
@@ -8214,10 +8211,7 @@ add_string:
 			       &temp_has_dollar_at, &quoted_dollar_at,
 			       &had_quoted_null, pflags);
 	  has_dollar_at += temp_has_dollar_at;
-
 	  split_on_spaces += (tword->flags & W_SPLITSPACE);
-if (tword->flags & W_SPLITSPACE)
- itrace("expand_word_internal: param_expand return word has W_SPLITSPACE");
 
 	  if (tword == &expand_wdesc_error || tword == &expand_wdesc_fatal)
 	    {
@@ -8660,7 +8654,6 @@ finished_with_string:
     {
       char *ifs_chars;
 
-itrace("expand_word_internal: splitting `%s': split_on_spaces = %d", istring, split_on_spaces);
       ifs_chars = (quoted_dollar_at || has_dollar_at) ? ifs_value : (char *)NULL;
 
       /* If we have $@, we need to split the results no matter what.  If
@@ -8668,8 +8661,13 @@ itrace("expand_word_internal: splitting `%s': split_on_spaces = %d", istring, sp
 	 positional parameters with a space, so we split on space (we have
 	 set ifs_chars to " \t\n" above if ifs is unset).  If IFS is set,
 	 string_list_dollar_at has separated the positional parameters
-	 with the first character of $IFS, so we split on $IFS. */
-      if (has_dollar_at && ifs_chars)
+	 with the first character of $IFS, so we split on $IFS.  If
+	 SPLIT_ON_SPACES is set, we expanded $* (unquoted) with IFS either
+	 unset or null, and we want to make sure that we split on spaces
+	 regardless of what else has happened to IFS since the expansion. */
+      if (split_on_spaces)
+	list = list_string (istring, " ", 1);	/* XXX quoted == 1? */
+      else if (has_dollar_at && ifs_chars)
 	list = list_string (istring, *ifs_chars ? ifs_chars : " ", 1);
       else
 	{
@@ -9328,7 +9326,7 @@ shell_expand_word_list (tlist, eflags)
 	    make_internal_declare (tlist->word->word, "-gA");
 	  else if (tlist->word->flags & W_ASSIGNASSOC)
 	    make_internal_declare (tlist->word->word, "-A");
-	  if ((tlist->word->flags & (W_ASSIGNARRAY|W_ASSNGLOBAL)) == (W_ASSIGNARRAY|W_ASSNGLOBAL))
+	  else if ((tlist->word->flags & (W_ASSIGNARRAY|W_ASSNGLOBAL)) == (W_ASSIGNARRAY|W_ASSNGLOBAL))
 	    make_internal_declare (tlist->word->word, "-ga");
 	  else if (tlist->word->flags & W_ASSIGNARRAY)
 	    make_internal_declare (tlist->word->word, "-a");
