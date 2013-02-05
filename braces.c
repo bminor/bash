@@ -700,13 +700,16 @@ array_concat (arr1, arr2)
   if (arr2 == 0)
     return (arr1);		/* XXX - caller expects us to free arr1 */
 
-  if (degenerate_array (arr1))
+  /* We can only short-circuit if the array consists of a single null element;
+     otherwise we need to replicate the contents of the other array and
+     prefix (or append, below) an empty element to each one. */
+  if (arr1[0] && arr1[0][0] == 0 && arr1[1] == 0)
     {
       strvec_dispose (arr1);
       return (arr2);		/* XXX - use flags to see if we can avoid copying here */
     }
 
-  if (degenerate_array (arr2))
+  if (arr2[0] && arr2[0][0] == 0 && arr2[1] == 0)
     return (arr1);		/* XXX - rather than copying and freeing it */
 
   len1 = strvec_len (arr1);

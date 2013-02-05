@@ -3615,7 +3615,7 @@ The @code{ERR} trap is not executed if the failed command is part of the
 command list immediately following an @code{until} or @code{while} keyword,
 part of the test following the @code{if} or @code{elif} reserved words,
 part of a command executed in a @code{&&} or @code{||} list
-except the command following the final @code{&&) or @code{||},
+except the command following the final @code{&&} or @code{||},
 any command in a pipeline but the last,
 or if the command's return
 status is being inverted using @code{!}.
@@ -5314,7 +5314,7 @@ in which case it is the command executing at the time of the trap.
 
 @item BASH_COMPAT
 The value is used to set the shell's compatibility level.
-@xref{The Shopt Builtin} for a description of the various compatibility
+@xref{The Shopt Builtin}, for a description of the various compatibility
 levels and their effects.
 The value may be a decimal number (e.g., 4.2) or an integer (e.g., 42)
 corresponding to the desired compatibility level.
@@ -5419,8 +5419,9 @@ The minimum value is system-dependent.
 
 @item COLUMNS
 Used by the @code{select} command to determine the terminal width
-when printing selection lists.  Automatically set by an interactive shell
-upon receipt of a
+when printing selection lists.
+Automatically set if the @code{checkwinsize} option is enabled
+(@pxref{The Shopt Builtin}), or in an interactive shell upon receipt of a
 @code{SIGWINCH}.
 
 @item COMP_CWORD
@@ -5716,8 +5717,9 @@ The line number in the script or shell function currently executing.
 
 @item LINES
 Used by the @code{select} command to determine the column length
-for printing selection lists.  Automatically set by an interactive shell
-upon receipt of a
+for printing selection lists.
+Automatically set if the @code{checkwinsize} option is enabled
+(@pxref{The Shopt Builtin}), or in an interactive shell upon receipt of a
 @code{SIGWINCH}.
 
 @item MACHTYPE

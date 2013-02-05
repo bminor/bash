@@ -85,10 +85,10 @@
 \entry{arithmetic evaluation}{86}{arithmetic evaluation}
 \entry{alias expansion}{87}{alias expansion}
 \entry{arrays}{88}{arrays}
-\entry{directory stack}{89}{directory stack}
+\entry{directory stack}{90}{directory stack}
 \entry{prompting}{91}{prompting}
 \entry{restricted shell}{92}{restricted shell}
-\entry{POSIX Mode}{92}{POSIX Mode}
+\entry{POSIX Mode}{93}{POSIX Mode}
 \entry{job control}{97}{job control}
 \entry{foreground}{97}{foreground}
 \entry{background}{97}{background}
@@ -112,7 +112,7 @@
 \entry{history expansion}{135}{history expansion}
 \entry{event designators}{136}{event designators}
 \entry{history events}{136}{history events}
-\entry{installation}{139}{installation}
-\entry{configuration}{139}{configuration}
-\entry{Bash installation}{139}{Bash installation}
-\entry{Bash configuration}{139}{Bash configuration}
+\entry{installation}{138}{installation}
+\entry{configuration}{138}{configuration}
+\entry{Bash installation}{138}{Bash installation}
+\entry{Bash configuration}{138}{Bash configuration}

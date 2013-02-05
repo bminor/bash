@@ -970,7 +970,6 @@ run_debug_trap ()
 void
 run_error_trap ()
 {
-itrace("run_error_trap");
   if ((sigmodes[ERROR_TRAP] & SIG_TRAPPED) && ((sigmodes[ERROR_TRAP] & SIG_IGNORED) == 0) && (sigmodes[ERROR_TRAP] & SIG_INPROGRESS) == 0)
     _run_trap_internal (ERROR_TRAP, "error trap");
 }
@@ -1048,6 +1047,7 @@ restore_signal (sig)
      int sig;
 {
   set_signal_handler (sig, original_signals[sig]);
+itrace("restore_signal_handler: setting signal for %d to 0x%x", sig, original_signals[sig]);
   change_signal (sig, (char *)DEFAULT_SIG);
   sigmodes[sig] &= ~SIG_TRAPPED;
 }
@@ -1074,7 +1074,10 @@ reset_or_restore_signal_handlers (reset)
       if (sigmodes[i] & SIG_TRAPPED)
 	{
 	  if (trap_list[i] == (char *)IGNORE_SIG)
+{          
+itrace("trap_list[%d] == IGNORE_SIG", i);
 	    set_signal_handler (i, SIG_IGN);
+}
 	  else
 	    (*reset) (i);
 	}
@@ -1093,10 +1096,7 @@ reset_or_restore_signal_handlers (reset)
       sigmodes[RETURN_TRAP] &= ~SIG_TRAPPED;
     }
   if (error_trace_mode == 0)
-{
-itrace("turning off SIG_TRAPPED for ERROR_TRAP");
     sigmodes[ERROR_TRAP] &= ~SIG_TRAPPED;
-}
 }
 
 /* Reset trapped signals to their original values, but don't free the

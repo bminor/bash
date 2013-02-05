@@ -6,8 +6,8 @@
 \entry {arrays}{88}
 \initial {B}
 \entry {background}{97}
-\entry {Bash configuration}{139}
-\entry {Bash installation}{139}
+\entry {Bash configuration}{138}
+\entry {Bash installation}{138}
 \entry {Bourne shell}{5}
 \entry {brace expansion}{21}
 \entry {builtin}{3}
@@ -29,11 +29,11 @@
 \entry {commands, simple}{8}
 \entry {comments, shell}{7}
 \entry {completion builtins}{126}
-\entry {configuration}{139}
+\entry {configuration}{138}
 \entry {control operator}{3}
 \entry {coprocess}{15}
 \initial {D}
-\entry {directory stack}{89}
+\entry {directory stack}{90}
 \initial {E}
 \entry {editing command lines}{102}
 \entry {environment}{37}
@@ -65,7 +65,7 @@
 \initial {I}
 \entry {identifier}{3}
 \entry {initialization file, readline}{104}
-\entry {installation}{139}
+\entry {installation}{138}
 \entry {interaction, readline}{101}
 \entry {interactive shell}{81, 82}
 \entry {internationalization}{7}
@@ -96,7 +96,7 @@
 \entry {pattern matching}{29}
 \entry {pipeline}{8}
 \entry {POSIX}{3}
-\entry {POSIX Mode}{92}
+\entry {POSIX Mode}{93}
 \entry {process group}{3}
 \entry {process group ID}{3}
 \entry {process substitution}{28}

@@ -5935,11 +5935,7 @@ parameter_brace_expand_rhs (name, value, c, quoted, qdollaratp, hasdollarat)
   else
 #endif /* ARRAY_VARS */
   bind_variable (name, t1, 0);
-  if (STREQ (name, "IFS") == 0)
-    stupidly_hack_special_variables (name);
-  else
-    /* XXX - what to do? Set a flag in w->flags to call setifs() later? */
-    ;    
+  stupidly_hack_special_variables (name);
 
   /* From Posix group discussion Feb-March 2010.  Issue 7 0000221 */
   free (temp);

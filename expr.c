@@ -1,6 +1,6 @@
 /* expr.c -- arithmetic expression evaluation. */
 
-/* Copyright (C) 1990-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1990-2013 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -558,6 +558,9 @@ expassign ()
 #endif
 	    expr_bind_variable (lhs, rhs);
 	}
+      if (curlval.tokstr && curlval.tokstr == tokstr)
+	init_lvalue (&curlval);
+
       free (rhs);
       free (lhs);
       FREE (tokstr);

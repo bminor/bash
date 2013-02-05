@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sat Jan  5 17:38:02 EST 2013
+.\"	Last Change: Tue Jan  8 15:51:04 EST 2013
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2013 January 5" "GNU Bash 4.2"
+.TH BASH 1 "2013 January 8" "GNU Bash 4.2"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1938,8 +1938,10 @@ The minimum value is system-dependent.
 .TP
 .B COLUMNS
 Used by the \fBselect\fP compound command to determine the terminal width
-when printing selection lists.  Automatically set in an interactive shell
-upon receipt of a
+when printing selection lists.
+Automatically set if the
+.B checkwinsize
+option is enabled or in an interactive shell upon receipt of a
 .SM
 .BR SIGWINCH .
 .TP
@@ -2180,8 +2182,10 @@ This variable determines the locale category used for number formatting.
 .TP
 .B LINES
 Used by the \fBselect\fP compound command to determine the column length
-for printing selection lists.  Automatically set by an interactive shell
-upon receipt of a
+for printing selection lists.
+Automatically set if the
+.B checkwinsize
+option is enabled or in an interactive shell upon receipt of a
 .SM
 .BR SIGWINCH .
 .TP

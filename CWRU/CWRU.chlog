@@ -4303,3 +4303,43 @@ lib/readline/readline.h
 doc/{bash.1,bashref.texi}
 	- a couple of changes to the descriptions of the ERR trap and its
 	  effects based on a message from Rob Nagler <nagler@bivio.biz>
+
+				    1/9
+				    ---
+expr.c
+	- expassign: invalidate curlval before freeing and NULLing tokstr to
+	  avoid aliasing issues.  Fixes bug reported by Eduardo A. Bustamante
+	  López<dualbus@gmail.com>  and Dan Douglas <ormaaj@gmail.com>
+
+braces.c
+	- array_concat: don't be so aggressive in trying to short-circuit. We
+	  can only short-circuit if we have a single-element array where the
+	  element is an empty string (array[0] == "" array[1] = 0x0).  Existing
+	  practice requires us to replicate arrays and prefix or append empty
+	  strings.  Fixes bug reported by Eduardo A. Bustamante López
+	  <dualbus@gmail.com>
+
+				   1/11
+				   ----
+execute_cmd.c
+	- execute_builtin: since mapfile uses evalstring() to run its callbacks
+	  internally, just like eval, so it needs to handle the case where the
+	  temp environment given to mapfile persists throughout the entire
+	  set of callback commands.  This might be a problem with trap also, but
+	  trap isn't run in the same way.  Fixes bug reported by Dan Douglas
+	  <ormaaj@gmail.com>
+
+				   1/13
+				   ----
+redir.c
+	- redirection_error: before expanding the redirection word (if
+	  expandable_redirection_filename returns true), disable command
+	  substitution during expansion.  Fixes bug reported by Dan Douglas
+	  <ormaaj@gmail.com>
+
+subst.c
+	- expand_word_internal: case '\\': if the next character is an IFS
+	  character, and the expansion occurs within double quotes, and the
+	  character is not one for which backslash retains its meaning, add
+	  the (escaped) '\' and the (escaped) character.  Fixes bug reported
+	  by Dan Douglas <ormaaj@gmail.com>

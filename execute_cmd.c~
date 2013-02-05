@@ -1493,7 +1493,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   if (user_subshell)
     {
       stdin_redir = stdin_redirects (command->redirects);
-      restore_default_signal (0);
+      restore_default_signal (EXIT_TRAP);
     }
 
   /* If this is an asynchronous command (command &), we want to
@@ -4259,9 +4259,10 @@ execute_builtin (builtin, words, flags, subshell)
 
   /* The temporary environment for a builtin is supposed to apply to
      all commands executed by that builtin.  Currently, this is a
-     problem only with the `unset', `source' and `eval' builtins. */
-
-  isbltinenv = (builtin == source_builtin || builtin == eval_builtin || builtin == unset_builtin);
+     problem only with the `unset', `source' and `eval' builtins.
+     `mapfile' is a special case because it uses evalstring (same as
+     eval or source) to run its callbacks. */
+  isbltinenv = (builtin == source_builtin || builtin == eval_builtin || builtin == unset_builtin || builtin == mapfile_builtin);
 
   if (isbltinenv)
     {
@@ -4875,6 +4876,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 
       reset_terminating_signals ();	/* XXX */
       /* Cancel traps, in trap.c. */
+itrace("execute_disk_command: calling restore_original_signals");
       restore_original_signals ();
 
       /* restore_original_signals may have undone the work done

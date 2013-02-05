@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2012 July 14<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2013 January 8<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -42,7 +42,7 @@ bash - GNU Bourne-Again SHell
 <H3>COPYRIGHT</H3>
 
 
-Bash is Copyright &#169; 1989-2012 by the Free Software Foundation, Inc.
+Bash is Copyright &#169; 1989-2013 by the Free Software Foundation, Inc.
 <A NAME="lbAE">&nbsp;</A>
 <H3>DESCRIPTION</H3>
 
@@ -928,6 +928,7 @@ lexicographically using the current locale.
 When the <B>==</B> and <B>!=</B> operators are used, the string to the
 right of the operator is considered a pattern and matched according
 to the rules described below under <B>Pattern Matching</B>.
+The <B>=</B> operator is equivalent to <B>==</B>.
 If the shell option
 <B>nocasematch</B>
 
@@ -1209,6 +1210,8 @@ The <B>wait</B>
 builtin command may be used to wait for the coprocess to terminate.
 <P>
 
+Since the coprocess is created as an asynchronous command,
+the <B>coproc</B> command always returns success.
 The return status of a coprocess is the exit status of <I>command</I>.
 <A NAME="lbAQ">&nbsp;</A>
 <H4>Shell Function Definitions</H4>
@@ -2383,6 +2386,24 @@ below.
 
 
 <DL COMPACT>
+<DT><B>BASH_COMPAT</B>
+
+<DD>
+The value is used to set the shell's compatibility level.
+See the description of the <B>shopt builtin below under
+SHELL BUILTIN COMMANDS</B>  for a description of the various compatibility
+levels and their effects.
+The value may be a decimal number (e.g., 4.2) or an integer (e.g., 42)
+corresponding to the desired compatibility level.
+If <B>BASH_COMPAT</B> is unset or set to the empty string, the compatibility
+level is set to the default for the current version.
+If <B>BASH_COMPAT</B> is set to a value that is not one of the valid
+compatibility levels, the shell prints an error message and sets the
+compatibility level to the default for the current version.
+The valid compatibility levels correspond to the compatibility options
+accepted by the <B>shopt</B> builtin described below (for example,
+<B>compat42</B> means that 4.2 and 42 are valid values).
+The current version is also a valid value.
 <DT><B>BASH_ENV</B>
 
 <DD>
@@ -2442,12 +2463,23 @@ command.
 A sample value is
 <TT>&quot;.:~:/usr&quot;</TT>.
 
+<DT><B>CHILD_MAX</B>
+
+<DD>
+Set the number of exited child status values for the shell to remember.
+Bash will not allow this value to be decreased below a Posix-mandated
+minimum, and there is a maximum value (currently 8192) that this may
+not exceed.
+The minimum value is system-dependent.
 <DT><B>COLUMNS</B>
 
 <DD>
 Used by the <B>select</B> compound command to determine the terminal width
-when printing selection lists.  Automatically set in an interactive shell
-upon receipt of a
+when printing selection lists.
+Automatically set if the
+<B>checkwinsize</B>
+
+option is enabled or in an interactive shell upon receipt of a
 <FONT SIZE=-1><B>SIGWINCH</B>.
 
 </FONT>
@@ -2749,8 +2781,11 @@ This variable determines the locale category used for number formatting.
 
 <DD>
 Used by the <B>select</B> compound command to determine the column length
-for printing selection lists.  Automatically set by an interactive shell
-upon receipt of a
+for printing selection lists.
+Automatically set if the
+<B>checkwinsize</B>
+
+option is enabled or in an interactive shell upon receipt of a
 <FONT SIZE=-1><B>SIGWINCH</B>.
 
 </FONT>
@@ -2974,7 +3009,7 @@ The value of <I>p</I> determines whether or not the fraction is
 included.
 <DT><DD>
 If this variable is not set, <B>bash</B> acts as if it had the
-value <B>$aq\nreal\t%3lR\nuser\t%3lU\nsys	%3lSaq</B>.
+value <B>$aq\nreal\t%3lR\nuser\t%3lU\nsys\	%3lSaq</B>.
 If the value is null, no timing information is displayed.
 A trailing newline is added when the format string is displayed.
 
@@ -3132,6 +3167,13 @@ This syntax is also accepted by the
 
 builtin.  Individual array elements may be assigned to using the
 <I>name</I>[<I>subscript</I>]=<I>value</I> syntax introduced above.
+When assigning to an indexed array, if
+<I>name</I>
+
+is subscripted by a negative number, that number is
+interpreted as relative to one greater than the maximum index of
+<I>name</I>, so negative indices count back from the end of the
+array, and an index of -1 references the last element.
 <P>
 
 Any element of an array may be referenced using
@@ -3166,9 +3208,10 @@ If the
 <I>subscript</I>
 
 used to reference an element of an indexed array
-evaluates to a number less than zero, it is used as
-an offset from one greater than the array's maximum index (so a subcript
-of -1 refers to the last element of the array).
+evaluates to a number less than zero, it is 
+interpreted as relative to one greater than the maximum index of the array,
+so negative indices count back from the end of the
+array, and an index of -1 references the last element.
 <P>
 
 An array variable is considered set if a subscript has been assigned a
@@ -3180,6 +3223,7 @@ The
 
 builtin is used to destroy arrays.  <B>unset</B> <I>name</I>[<I>subscript</I>]
 destroys the array element at index <I>subscript</I>.
+Negative subscripts to indexed arrays are interpreted as described above.
 Care must be taken to avoid unwanted side effects caused by pathname
 expansion.
 <B>unset</B> <I>name</I>, where <I>name</I> is an array, or
@@ -3299,12 +3343,14 @@ and <I>incr</I>, an optional increment, is an integer.
 When integers are supplied, the expression expands to each number between
 <I>x</I> and <I>y</I>, inclusive.
 Supplied integers may be prefixed with <I>0</I> to force each term to have the
-same width.  When either <I>x</I> or y begins with a zero, the shell
+same width.
+When either <I>x</I> or y begins with a zero, the shell
 attempts to force all generated terms to contain the same number of digits,
 zero-padding where necessary.
 When characters are supplied, the expression expands to each character
-lexicographically between <I>x</I> and <I>y</I>, inclusive.  Note that
-both <I>x</I> and <I>y</I> must be of the same type.
+lexicographically between <I>x</I> and <I>y</I>, inclusive,
+using the default C locale.
+Note that both <I>x</I> and <I>y</I> must be of the same type.
 When the increment is supplied, it is used as the difference between
 each term.  The default increment is 1 or -1 as appropriate.
 <P>
@@ -3668,6 +3714,13 @@ or
 <B>@</B>,
 
 the value substituted is the number of elements in the array.
+If
+<I>parameter</I>
+
+is an indexed array name subscripted by a negative number, that number is
+interpreted as relative to one greater than the maximum index of
+<I>parameter</I>, so negative indices count back from the end of the
+array, and an index of -1 references the last element.
 <DT>${<I>parameter</I><B>#</B><I>word</I>}<DD>
 
 <DT>${<I>parameter</I><B>##</B><I>word</I>}<DD>
@@ -4217,7 +4270,7 @@ Matches any single character.
 Matches any one of the enclosed characters.  A pair of characters
 separated by a hyphen denotes a
 <I>range expression</I>;
-any character that sorts between those two characters, inclusive,
+any character that falls between those two characters, inclusive,
 using the current locale's collating sequence and character set,
 is matched.  If the first character following the
 <B>[</B>
@@ -5405,6 +5458,13 @@ True if the shell variable
 <I>varname</I>
 
 is set (has been assigned a value).
+<DT><B>-R </B><I>varname</I>
+
+<DD>
+True if the shell variable
+<I>varname</I>
+
+is set and is a name reference.
 <DT><B>-z </B><I>string</I>
 
 <DD>
@@ -5425,6 +5485,8 @@ is non-zero.
 
 True if the strings are equal.  <B>=</B> should be used
 with the <B>test</B> command for POSIX conformance.
+When used with the <B>[[</B> command, this performs pattern matching as
+described above (<B>Compound Commands</B>).
 <DT><I>string1</I> <B>!=</B> <I>string2</I><DD>
 True if the strings are not equal.
 <DT><I>string1</I> <B>&lt;</B> <I>string2</I><DD>
@@ -6842,8 +6904,12 @@ or <B>next-history</B>.
 <DT><B>history-size (0)</B>
 
 <DD>
-Set the maximum number of history entries saved in the history list.  If
-set to zero, the number of entries in the history list is not limited.
+Set the maximum number of history entries saved in the history list.
+If set to zero, any existing history entries are deleted and no new entries
+are saved.
+If set to a value less than zero, the number of history entries is not
+limited.
+By default, the number of history entries is not limited.
 <DT><B>horizontal-scroll-mode (Off)</B>
 
 <DD>
@@ -6970,6 +7036,12 @@ words which have more than one possible completion without any
 possible partial completion (the possible completions don't share
 a common prefix) cause the matches to be listed immediately instead
 of ringing the bell.
+<DT><B>show-mode-in-prompt (Off)</B>
+
+<DD>
+If set to <B>On</B>, add a character to the beginning of the prompt
+indicating the editing mode: emacs (@), vi command (:) or vi
+insertion (+).
 <DT><B>skip-completed-text (Off)</B>
 
 <DD>
@@ -10679,10 +10751,13 @@ causes <B>printf</B> to output the corresponding
 
 <DD>
 causes <B>printf</B> to output the date-time string resulting from using
-<I>datefmt</I> as a format string for <I>strftime</I>(3).  The corresponding
-<I>argument</I> is an integer representing the number of seconds since the
-epoch.  Two special argument values may be used: -1 represents the current
+<I>datefmt</I> as a format string for <I>strftime</I>(3).
+The corresponding <I>argument</I> is an integer representing the number of
+seconds since the epoch.
+Two special argument values may be used: -1 represents the current
 time, and -2 represents the time the shell was invoked.
+If no argument is specified, conversion behaves as if -1 had been given.
+This is an exception to the usual <B>printf</B> behavior.
 
 </DL>
 <P>
@@ -10886,14 +10961,17 @@ not echoed.
 
 <DD>
 Cause <B>read</B> to time out and return failure if a complete line of
-input is not read within <I>timeout</I> seconds.
+input (or a specified number of characters)
+is not read within <I>timeout</I> seconds.
 <I>timeout</I> may be a decimal number with a fractional portion following
 the decimal point.
 This option is only effective if <B>read</B> is reading input from a
 terminal, pipe, or other special file; it has no effect when reading
 from regular files.
+If <B>read</B> times out, <B>read</B> saves any partial input read into
+the specified variable <I>name</I>.
 If <I>timeout</I> is 0, <B>read</B> returns immediately, without trying to
-read any data.  The exit statis is 0 if input is available on
+read any data.  The exit status is 0 if input is available on
 the specified file descriptor, non-zero otherwise.
 The exit status is greater than 128 if the timeout is exceeded.
 <DT><B>-u </B><I>fd</I>
@@ -11085,12 +11163,18 @@ separately (see
 </FONT>
 above), and may cause
 subshells to exit before executing all the commands in the subshell.
-If a shell function executes in a context where <B>-e</B> is being ignored,
-even if <B>-e</B> is set, none of the commands executed within the function
-body will be affected by the <B>-e</B> setting.
-If a shell function sets <B>-e</B> while executing in a context where
-<B>-e</B> is ignored, that setting will not have any effect until the
-command containing the function call completes.
+<P>
+
+
+If a compound command or shell function executes in a context
+where <B>-e</B> is being ignored,
+none of the commands executed within the compound command or function body
+will be affected by the <B>-e</B> setting, even if <B>-e</B> is set
+and a command returns a failure status.
+If a compound command or shell function sets <B>-e</B> while executing in
+a context where <B>-e</B> is ignored, that setting will not have any
+effect until the compound command or the command containing the function
+call completes.
 <DT><B>-f</B>
 
 <DD>
@@ -11695,6 +11779,14 @@ parameter expansion as a special character.  The single quotes must match
 (an even number) and the characters between the single quotes are considered
 quoted.  This is the behavior of posix mode through version 4.1.
 The default bash behavior remains as in previous versions.
+<DT><B>compat42</B>
+
+<DD>
+If set,
+<B>bash</B>
+
+does not process the replacement string in the pattern substitution word
+expansion using quote removal.
 <DT><B>complete_fullquote</B>
 
 <DD>
@@ -12313,7 +12405,10 @@ is
 the command
 <I>arg</I>
 
-is executed whenever a simple command has a non-zero exit status,
+is executed whenever a 
+a pipeline (which may consist of a single simple
+command), a list, or a compound command returns a 
+non-zero exit status,
 subject to the following conditions.
 The
 <FONT SIZE=-1><B>ERR</B>
@@ -12336,11 +12431,13 @@ statement, part of a command executed in a
 or
 <B>||</B>
 
-list, or if the command's return value is
-being inverted via
+list except the command following the final <B>&amp;&amp;</B> or <B>||</B>,
+any command in a pipeline but the last,
+or if the command's return value is
+being inverted using
 <B>!</B>.
 
-These are the same conditions obeyed by the <B>errexit</B> option.
+These are the same conditions obeyed by the <B>errexit</B> (<B>-e</B>) option.
 <P>
 
 
@@ -12708,7 +12805,7 @@ subsequently reset.  The exit status is true unless a
 <I>name</I>
 
 is readonly.
-<DT><B>wait</B> [<I>n ...</I>]<DD>
+<DT><B>wait</B> [<B>--n</B>] [<I>n ...</I>]<DD>
 Wait for each specified process and return its termination status.
 Each
 <I>n</I>
@@ -12719,7 +12816,10 @@ in that job's pipeline are waited for.  If
 <I>n</I>
 
 is not given, all currently active child processes
-are waited for, and the return status is zero.  If
+are waited for, and the return status is zero.
+If the <B>--n</B> option is supplied, <B>wait</B> waits for any job to
+terminate and returns its exit status.
+If
 <I>n</I>
 
 specifies a non-existent process or job, the return status is
@@ -13011,7 +13111,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.2<TH ALIGN=CENTER width=33%>2012 July 14<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.2<TH ALIGN=CENTER width=33%>2013 January 8<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13117,6 +13217,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 16 July 2012 16:12:38 EDT
+Time: 11 January 2013 16:34:33 EST
 </BODY>
 </HTML>

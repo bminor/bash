@@ -4259,9 +4259,10 @@ execute_builtin (builtin, words, flags, subshell)
 
   /* The temporary environment for a builtin is supposed to apply to
      all commands executed by that builtin.  Currently, this is a
-     problem only with the `unset', `source' and `eval' builtins. */
-
-  isbltinenv = (builtin == source_builtin || builtin == eval_builtin || builtin == unset_builtin);
+     problem only with the `unset', `source' and `eval' builtins.
+     `mapfile' is a special case because it uses evalstring (same as
+     eval or source) to run its callbacks. */
+  isbltinenv = (builtin == source_builtin || builtin == eval_builtin || builtin == unset_builtin || builtin == mapfile_builtin);
 
   if (isbltinenv)
     {

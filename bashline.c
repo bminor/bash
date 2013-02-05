@@ -37,6 +37,8 @@
 #  include <netdb.h>
 #endif
 
+#include <signal.h>
+
 #include <stdio.h>
 #include "chartypes.h"
 #include "bashansi.h"

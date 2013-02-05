@@ -156,12 +156,14 @@ redirection_error (temp, error)
   else if (expandable_redirection_filename (temp))
     {
 expandable_filename:
-      oflags = temp->redirectee.filename->flags;
       if (posixly_correct && interactive_shell == 0)
-	temp->redirectee.filename->flags |= W_NOGLOB;
-      temp->redirectee.filename->flags |= W_NOCOMSUB;
+	{
+	  oflags = temp->redirectee.filename->flags;
+	  temp->redirectee.filename->flags |= W_NOGLOB;
+	}
       filename = allocname = redirection_expand (temp->redirectee.filename);
-      temp->redirectee.filename->flags = oflags;
+      if (posixly_correct && interactive_shell == 0)
+	temp->redirectee.filename->flags = oflags;
       if (filename == 0)
 	filename = temp->redirectee.filename->word;
     }

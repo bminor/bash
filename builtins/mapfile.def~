@@ -213,8 +213,6 @@ mapfile (fd, line_count_goal, origin, nskip, callback_quantum, callback, array_n
 	    zsyncfd (fd);
 	}
 
-      /* XXX - bad things can happen if the callback modifies ENTRY, e.g.,
-	 unsetting it or changing it to a non-indexed-array type. */
       bind_array_element (entry, array_index, line, 0);
 
       /* Have we exceeded # of lines to store? */
