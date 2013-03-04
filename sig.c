@@ -76,6 +76,8 @@ volatile int sigwinch_received = 0;
 /* Set to the value of any terminating signal received. */
 volatile int terminating_signal = 0;
 
+sig_atomic_t sigterm_received = 0;
+
 /* The environment at the top-level R-E loop.  We use this in
    the case of error return. */
 procenv_t top_level;
@@ -319,7 +321,9 @@ initialize_shell_signals ()
   if (interactive)
     {
       set_signal_handler (SIGINT, sigint_sighandler);
-      set_signal_handler (SIGTERM, SIG_IGN);
+      get_original_signal (SIGTERM);
+      if (signal_is_hard_ignored (SIGTERM) == 0)
+	set_signal_handler (SIGTERM, sigterm_sighandler);
       set_sigwinch_handler ();
     }
 }
@@ -635,6 +639,14 @@ unset_sigwinch_handler ()
 #endif
 }
 
+sighandler
+sigterm_sighandler (sig)
+     int sig;
+{
+  sigterm_received = 1;		/* XXX - counter? */
+  SIGRETURN (0);
+}
+
 /* Signal functions used by the rest of the code. */
 #if !defined (HAVE_POSIX_SIGNALS)
 
@@ -694,6 +706,10 @@ set_signal_handler (sig, handler)
   if (sig == SIGCHLD)
     act.sa_flags |= SA_RESTART;		/* XXX */
 #endif
+  /* If we're installing a SIGTERM handler for interactive shells, we want
+     it to be as close to SIG_IGN as possible. */
+  if (sig == SIGTERM && handler == sigterm_sighandler)
+    act.sa_flags |= SA_RESTART;		/* XXX */
 
   sigemptyset (&act.sa_mask);
   sigemptyset (&oact.sa_mask);

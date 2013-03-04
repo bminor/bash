@@ -1,6 +1,6 @@
 /* sig.h -- header file for signal handler definitions. */
 
-/* Copyright (C) 1994-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2013 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -123,6 +123,8 @@ extern void jump_to_top_level __P((int)) __attribute__((__noreturn__));
 extern sighandler sigwinch_sighandler __P((int));
 extern void set_sigwinch_handler __P((void));
 extern void unset_sigwinch_handler __P((void));
+
+extern sighandler sigterm_sighandler __P((int));
 
 /* Functions defined in trap.c. */
 extern SigHandler *set_sigint_handler __P((void));

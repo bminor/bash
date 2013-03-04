@@ -4522,3 +4522,96 @@ trap.c
 	  CHECK_ALRM and QUIT inline.  Integrating check for read builtin's
 	  SIGALRM (where zread call to check_signals_and_traps can see it)
 	  fixes problem reported by Mike Frysinger <vapier@gentoo.org>
+
+				   2/12
+				   ----
+lib/glob/xmbsrtowcs.c
+	- xdupmbstowcs2: fixed but where end of string was not handled
+	  correctly, causing loop to go past end of string in a bunch of cases.
+	  Fixes bug reported by
+
+
+				   2/13
+				   ----
+builtins/pushd.def
+	- popd_builtin: treat any argument that isn't -n or of the form
+	  [-+][[:digit:]]* as an error.  Fixes problem reported by Bruce
+	  Korb <bruce.korb@gmail.com>
+
+				   2/14
+				   ----
+configure.ac
+	- add check for sig_atomic_t; already a placeholder for it in
+	  config.h.in
+
+				   2/15
+				   ----
+subst.c
+	- do_compound_assignment: don't call assign_compound_array_list with
+	  a NULL variable in case make_local_xxx_variable returns NULL
+	  (it will if you try to shadow a readonly or noassign variable).
+	  Fixes bug reported by Richard Tollerton <rich.tollerton@ni.com>
+
+				   2/16
+				   ----
+variables.c
+	- make_local_variable: print error messager if an attempt is made to
+	  create a local variable shadowing a `noassign' variable.  Previously
+	  we just silently refused to do it
+
+trap.[ch]
+	- get_original_signal: now global so rest of the shell can use it
+
+sig.c
+	- initialize_shell_signals: install a signal handler for SIGTERM
+	  that does nothing except set a sigterm_received flag instead of
+	  ignoring it with SIG_IGN, as long as SIGTERM is not ignored when
+	  the shell is started.  Use get_original_signal early to get the
+	  original handler, since we will do that later anyway
+	- set_signal_handler: if installing sigterm_sighandler as the SIGTERM
+	  handler, make sure to add SA_RESTART flag to make it as close to
+	  SIG_IGN as possible
+
+sig.h
+	- sigterm_sighandler: new extern declaration
+
+quit.h
+	- RESET_SIGTERM: set sigterm_receved to 0
+	- CHECK_SIGTERM: check sigterm_received; if it's non-zero, treat it
+	  as a fatal signal and call termsig_handler to exit the shell
+
+jobs.c
+	- make_child: call RESET_SIGTERM just before fork() so we can detect
+	  if the child process received a SIGTERM before it's able to change
+	  the signal handler back to what it was when the shell started
+	  (presumably SIG_DFL).  Only has effect if the shell installed
+	  sigterm_sighandler for SIGTERM, interactive shells that were not
+	  started with SIG_IGN as the SIGTERM handler
+	- make_child: call RESET_SIGTERM in the parent after fork() so the
+	  rest of the shell won't react to it
+
+execute_cmd.c
+	- execute_simple_command: call CHECK_SIGTERM after make_child in child
+	  to catch SIGTERM received after fork() and before restoring old
+	  signal handlers
+	- execute_disk_command: call CHECK_SIGTERM after make_child in child
+	  process after restoring old signal handlers and again just before
+	  calling shell_execve.  Fixes race condition observed by
+	  Padraig Brady <p@draigbrady.com> when testing with his `timeout'
+	  program
+
+lib/readline/display.c
+	- open_some_spaces: new function, subset of insert_some_chars that just
+	  opens up a specified number of spaces to be overwritten
+	- insert_some_spaces: now just calls to open_some_spaces followed by
+	  _rl_output_some_chars
+	- update_line: use col_temp instead of recalculating it using
+	  _rl_col_width in the case where we use more columns with fewer bytes
+	- update_line: use open_some_spaces and then output the right number
+	  of chars instead of trying to print new characters then overwrite
+	  existing characters in two separate calls.  This includes removing
+	  some dodgy code and making things simpler.  Fix from Egmont
+	  Koblinger <egmont@gmail.com>
+	- use new variable `bytes_to_insert' instead of overloading temp in
+	  some code blocks (nls - nfd, bytes that comprise the characters
+	  different in the new line from the old)

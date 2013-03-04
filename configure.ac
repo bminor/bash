@@ -5,7 +5,7 @@ dnl report bugs to chet@po.cwru.edu
 dnl
 dnl Process this file with autoconf to produce a configure script.
 
-# Copyright (C) 1987-2012 Free Software Foundation, Inc.
+# Copyright (C) 1987-2013 Free Software Foundation, Inc.
 
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.3, version 4.055])dnl
+AC_REVISION([for Bash 4.3, version 4.056])dnl
 
 define(bashvers, 4.3)
 define(relstatus, alpha)
@@ -928,6 +928,7 @@ dnl various system types
 BASH_TYPE_SIGHANDLER
 BASH_CHECK_TYPE(clock_t, [#include <sys/times.h>], long)
 BASH_CHECK_TYPE(sigset_t, [#include <signal.h>], int)
+BASH_CHECK_TYPE(sig_atomic_t, [#include <signal.h>], int)
 BASH_CHECK_TYPE(quad_t, , long, HAVE_QUAD_T)
 BASH_CHECK_TYPE(intmax_t, , $bash_cv_type_long_long)
 BASH_CHECK_TYPE(uintmax_t, , $bash_cv_type_unsigned_long_long)

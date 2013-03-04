@@ -1,7 +1,7 @@
 This file is pushd.def, from which is created pushd.c.  It implements the
 builtins "pushd", "popd", and "dirs" in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2013 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -346,6 +346,12 @@ popd_builtin (list)
       else if (*list->word->word == '-')
 	{
 	  sh_invalidopt (list->word->word);
+	  builtin_usage ();
+	  return (EXECUTION_FAILURE);
+	}
+      else if (*list->word->word)
+	{
+	  builtin_error (_("%s: invalid argument"), list->word->word);
 	  builtin_usage ();
 	  return (EXECUTION_FAILURE);
 	}

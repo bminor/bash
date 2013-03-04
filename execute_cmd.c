@@ -1,6 +1,6 @@
 /* execute_cmd.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2013 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -3930,6 +3930,8 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 #endif
 
 	  last_asynchronous_pid = old_last_async_pid;
+
+	  CHECK_SIGTERM;
 	}
       else
 	{
@@ -4873,6 +4875,8 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
       /* Cancel traps, in trap.c. */
       restore_original_signals ();
 
+      CHECK_SIGTERM;
+
       /* restore_original_signals may have undone the work done
 	 by make_child to ensure that SIGINT and SIGQUIT are ignored
 	 in asynchronous children. */
@@ -4932,6 +4936,8 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 	  wl = make_word_list (make_word (NOTFOUND_HOOK), words);
 	  exit (execute_shell_function (hookf, wl));
 	}
+
+      CHECK_SIGTERM;
 
       /* Execve expects the command name to be in args[0].  So we
 	 leave it there, in the same format that the user used to

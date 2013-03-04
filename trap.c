@@ -75,8 +75,6 @@ static int sigmodes[BASH_NSIG];
 static void free_trap_command __P((int));
 static void change_signal __P((int, char *));
 
-static void get_original_signal __P((int));
-
 static int _run_trap_internal __P((int, char *));
 
 static void free_trap_string __P((int));
@@ -672,7 +670,7 @@ change_signal (sig, value)
     sigmodes[sig] |= SIG_CHANGED;
 }
 
-static void
+void
 get_original_signal (sig)
      int sig;
 {

@@ -1,6 +1,6 @@
 /* variables.c -- Functions for hacking shell variables. */
 
-/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2013 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -2213,7 +2213,13 @@ make_local_variable (name)
     {
       if (readonly_p (old_var))
 	sh_readonly (name);
-      return ((SHELL_VAR *)NULL);
+      else if (noassign_p (old_var))
+	builtin_error (_("%s: variable may not be assigned value"), name);
+#if 0
+      /* Let noassign variables through with a warning */
+      if (readonly_p (old_var))
+#endif
+	return ((SHELL_VAR *)NULL);
     }
 
   if (old_var == 0)
@@ -2225,6 +2231,7 @@ make_local_variable (name)
       /* If we found this variable in one of the temporary environments,
 	 inherit its value.  Watch to see if this causes problems with
 	 things like `x=4 local x'. */
+      /* XXX - we should only do this if the variable is not an array. */
       if (was_tmpvar)
 	var_setvalue (new_var, savestring (tmp_value));
 

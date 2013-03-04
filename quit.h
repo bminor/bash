@@ -1,6 +1,6 @@
 /* quit.h -- How to handle SIGINT gracefully. */
 
-/* Copyright (C) 1993-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2013 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,6 +24,8 @@
 /* Non-zero means SIGINT has already ocurred. */
 extern volatile int interrupt_state;
 extern volatile int terminating_signal;
+
+extern sig_atomic_t sigterm_received;
 
 /* Macro to call a great deal.  SIGINT just sets the interrupt_state variable.
    When it is safe, put QUIT in the code, and the "interrupt" will take
@@ -65,4 +67,13 @@ extern volatile int terminating_signal;
       longjmp (wait_intr_buf, 1); \
   } while (0)
 
+#define RESET_SIGTERM \
+  do { \
+    sigterm_received = 0; \
+  } while (0)
+
+#define CHECK_SIGTERM \
+  do { \
+    if (sigterm_received) termsig_handler (SIGTERM); \
+  } while (0)
 #endif /* _QUIT_H_ */

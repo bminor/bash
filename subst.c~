@@ -4288,7 +4288,7 @@ match_pattern (string, pat, mtype, sp, ep)
   size_t n;
   wchar_t *wstring, *wpat;
   char **indices;
-  size_t slen, plen, mslen, mplen;
+  size_t slen, plen, mslen, mplen, wn;
 #endif
 
   if (string == 0 || *string == 0 || pat == 0 || *pat == 0)
@@ -4309,6 +4309,9 @@ match_pattern (string, pat, mtype, sp, ep)
 	  free (wpat);
 	  return (match_upattern (string, pat, mtype, sp, ep));
 	}
+wn = wstring ? wcslen (wstring) : 0;
+if (n != wn)
+  itrace("xdupmbstowcs returns %d != length of wstring %d", n, wn);
       ret = match_wpattern (wstring, indices, n, wpat, mtype, sp, ep);
 
       free (wpat);

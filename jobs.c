@@ -3,7 +3,7 @@
 /* This file works with both POSIX and BSD systems.  It implements job
    control. */
 
-/* Copyright (C) 1989-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2013 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1737,6 +1737,8 @@ make_child (command, async_p)
     sync_buffered_stream (default_buffered_input);
 #endif /* BUFFERED_INPUT */
 
+  RESET_SIGTERM;
+
   /* Create the child, handle severe errors.  Retry on EAGAIN. */
   while ((pid = fork ()) < 0 && errno == EAGAIN && forksleep < FORKSLEEP_MAX)
     {
@@ -1764,6 +1766,9 @@ make_child (command, async_p)
       last_command_exit_value = EX_NOEXEC;
       throw_to_top_level ();	/* Reset signals, etc. */
     }
+
+  if (pid != 0)
+    RESET_SIGTERM;
 
   if (pid == 0)
     {
