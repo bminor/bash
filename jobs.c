@@ -3261,7 +3261,7 @@ waitchld (wpid, block)
       child = find_process (pid, 1, &job);	/* want living procs only */
 
 #if defined (COPROCESS_SUPPORT)
-      coproc_pidchk (pid, status);
+      coproc_pidchk (pid, WSTATUS(status));
 #endif
 
       /* It is not an error to have a child terminate that we did

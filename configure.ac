@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.3, version 4.054])dnl
+AC_REVISION([for Bash 4.3, version 4.055])dnl
 
 define(bashvers, 4.3)
 define(relstatus, alpha)
@@ -79,6 +79,7 @@ sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
 *-mirbsd*)	opt_bash_malloc=no ;;	# they claim it needs eight-bit alignment
 *-aix*)		opt_bash_malloc=no ;;	# AIX machines
 *-nextstep*)	opt_bash_malloc=no ;;	# NeXT machines running NeXTstep
+*-openstep*)	opt_bash_malloc=no ;;	# i386/Sparc/HP machines running Openstep
 *-macos*)	opt_bash_malloc=no ;;	# Apple MacOS X
 *-rhapsody*)	opt_bash_malloc=no ;;	# Apple Rhapsody (MacOS X)
 *-darwin*)	opt_bash_malloc=no ;;	# Apple Darwin (MacOS X)
@@ -1075,6 +1076,7 @@ linux*)		LOCAL_LDFLAGS=-rdynamic		 # allow dynamic loading
 powerux*)	LOCAL_LIBS="-lgen" ;;
 cygwin*)	LOCAL_CFLAGS=-DRECYCLES_PIDS ;;
 opennt*|interix*) LOCAL_CFLAGS="-DNO_MAIN_ENV_ARG -DBROKEN_DIRENT_D_INO -D_POSIX_SOURCE -D_ALL_SOURCE -DRECYCLES_PIDS" ;;
+*openstep*)	LOCAL_CFLAGS="-D__APPLE_CC__" ;;
 esac
 
 dnl Stanza for OS/compiler pair-specific flags

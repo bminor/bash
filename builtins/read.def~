@@ -155,12 +155,14 @@ static sighandler
 sigalrm (s)
      int s;
 {
+itrace("sigalrm: reading = %d", reading);
   sigalrm_seen = 1;
 }
 
 static void
 reset_alarm ()
 {
+itrace("reset_alarm: resetting SIGALRM handler to %p", old_alrm);
   set_signal_handler (SIGALRM, old_alrm);
   falarm (0, 0);
 }
@@ -406,6 +408,7 @@ read_builtin (list)
       code = setjmp_nosigs (alrmbuf);
       if (code)
 	{
+itrace("read_builtin: longjmp to alrmbuf code = %d", code);
 	  sigalrm_seen = 0;
 	  /* Tricky.  The top of the unwind-protect stack is the free of
 	     input_string.  We want to run all the rest and use input_string,
@@ -427,12 +430,14 @@ read_builtin (list)
 	  goto assign_vars;
 	}
       old_alrm = set_signal_handler (SIGALRM, sigalrm);
+itrace("read_builtin: set_signal_handler for SIGALRM to sigalrm");
       add_unwind_protect (reset_alarm, (char *)NULL);
 #if defined (READLINE)
       if (edit)
 	add_unwind_protect (reset_attempted_completion_function, (char *)NULL);
 #endif
       falarm (tmsec, tmusec);
+itrace("read_builtin: set falarm %d %d", tmsec, tmusec);
     }
 
   /* If we've been asked to read only NCHARS chars, or we're using some

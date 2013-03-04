@@ -2196,7 +2196,6 @@ shell_getc (remove_quoted_newline)
       /* Let's not let one really really long line blow up memory allocation */
       if (shell_input_line && shell_input_line_size >= 32768)
 	{
-itrace("shell_getc: freeing shell_input_line");
 	  free (shell_input_line);
 	  shell_input_line = 0;
 	  shell_input_line_size = 0;
@@ -3247,11 +3246,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	    }
 
 	  RESIZE_MALLOCED_BUFFER (ret, retind, 2, retsize, 64);
-#if 0
-	  if MBTEST(ch == CTLESC || ch == CTLNUL)
-#else
 	  if MBTEST(ch == CTLESC)
-#endif
 	    ret[retind++] = CTLESC;
 	  ret[retind++] = ch;
 	  continue;
@@ -3550,10 +3545,10 @@ eof_error:
 	  ret[retind++] = ch;
 
 	  if ((tflags & LEX_INCOMMENT) && ch == '\n')
-{
+	    {
 /*itrace("parse_comsub:%d: lex_incomment -> 0 ch = `%c'", line_number, ch);*/
-	    tflags &= ~LEX_INCOMMENT;
-}
+	      tflags &= ~LEX_INCOMMENT;
+	    }
 
 	  continue;
 	}
@@ -3570,11 +3565,7 @@ eof_error:
 	    }
 
 	  RESIZE_MALLOCED_BUFFER (ret, retind, 2, retsize, 64);
-#if 0
-	  if MBTEST(ch == CTLESC || ch == CTLNUL)
-#else
 	  if MBTEST(ch == CTLESC)
-#endif
 	    ret[retind++] = CTLESC;
 	  ret[retind++] = ch;
 	  continue;
@@ -3699,15 +3690,15 @@ eof_error:
 	  else if MBTEST(lex_rwlen == 4 && shellbreak (ch))
 	    {
 	      if (STREQN (ret + retind - 4, "case", 4))
-{
-		tflags |= LEX_INCASE;
+		{
+		  tflags |= LEX_INCASE;
 /*itrace("parse_comsub:%d: found `case', lex_incase -> 1 lex_reswdok -> 0", line_number);*/
-}
+		}
 	      else if (STREQN (ret + retind - 4, "esac", 4))
-{
-		tflags &= ~LEX_INCASE;
+		{
+		  tflags &= ~LEX_INCASE;
 /*itrace("parse_comsub:%d: found `esac', lex_incase -> 0 lex_reswdok -> 0", line_number);*/
-}	        
+		}
 	      tflags &= ~LEX_RESWDOK;
 	    }
 	  else if MBTEST((tflags & LEX_CKCOMMENT) && ch == '#' && (lex_rwlen == 0 || ((tflags & LEX_INWORD) && lex_wlen == 0)))
@@ -3719,33 +3710,33 @@ eof_error:
 			  (isblank(ch) || ch == '\n') &&
 			  lex_rwlen == 2 &&
 			  STREQN (ret + retind - 2, "do", 2))
-{
+	    {
 /*itrace("parse_comsub:%d: lex_incase == 1 found `%c', found \"do\"", line_number, ch);*/
-	    lex_rwlen = 0;
-}
+	      lex_rwlen = 0;
+	    }
 	  else if MBTEST((tflags & LEX_INCASE) && ch != '\n')
 	    /* If we can read a reserved word and we're in case, we're at the
 	       point where we can read a new pattern list or an esac.  We
 	       handle the esac case above.  If we read a newline, we want to
 	       leave LEX_RESWDOK alone.  If we read anything else, we want to
 	       turn off LEX_RESWDOK, since we're going to read a pattern list. */
-{
-	    tflags &= ~LEX_RESWDOK;
+	    {
+	      tflags &= ~LEX_RESWDOK;
 /*itrace("parse_comsub:%d: lex_incase == 1 found `%c', lex_reswordok -> 0", line_number, ch);*/
-}
+	    }
 	  else if MBTEST(shellbreak (ch) == 0)
-{
-	    tflags &= ~LEX_RESWDOK;
+	    {
+	      tflags &= ~LEX_RESWDOK;
 /*itrace("parse_comsub:%d: found `%c', lex_reswordok -> 0", line_number, ch);*/
-}
+	    }
 #if 0
 	  /* If we find a space or tab but have read something and it's not
 	     `do', turn off the reserved-word-ok flag */
 	  else if MBTEST(isblank (ch) && lex_rwlen > 0)
-{
-	    tflags &= ~LEX_RESWDOK;
+	    {
+	      tflags &= ~LEX_RESWDOK;
 /*itrace("parse_comsub:%d: found `%c', lex_reswordok -> 0", line_number, ch);*/
-}
+	    }
 #endif
 	}
 
@@ -3784,10 +3775,10 @@ eof_error:
 	    ch = peekc;		/* fall through and continue XXX */
 	}
       else if MBTEST((tflags & LEX_CKCOMMENT) && (tflags & LEX_INCOMMENT) == 0 && ch == '#' && (((tflags & LEX_RESWDOK) && lex_rwlen == 0) || ((tflags & LEX_INWORD) && lex_wlen == 0)))
-{
+	{
 /*itrace("parse_comsub:%d: lex_incomment -> 1 (%d)", line_number, __LINE__);*/
-	tflags |= LEX_INCOMMENT;
-}
+	  tflags |= LEX_INCOMMENT;
+	}
 
       if MBTEST(ch == CTLESC || ch == CTLNUL)	/* special shell escapes */
 	{
@@ -3801,15 +3792,15 @@ eof_error:
         tflags &= ~LEX_INCASE;		/* XXX */
 #endif
       else if MBTEST(ch == close && (tflags & LEX_INCASE) == 0)		/* ending delimiter */
-{
-	count--;
+	{
+	  count--;
 /*itrace("parse_comsub:%d: found close: count = %d", line_number, count);*/
-}
+	}
       else if MBTEST(((flags & P_FIRSTCLOSE) == 0) && (tflags & LEX_INCASE) == 0 && ch == open)	/* nested begin */
-{
-	count++;
+	{
+	  count++;
 /*itrace("parse_comsub:%d: found open: count = %d", line_number, count);*/
-}
+	}
 
       /* Add this character. */
       RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);

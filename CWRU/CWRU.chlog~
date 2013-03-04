@@ -4493,3 +4493,30 @@ builtins/setattr.def
 	  bother marking the temporary variable for propagation if so.  The
 	  propagation is superfluous and will result in a strange error
 	  message
+
+				    2/2
+				    ---
+variables.c
+	- initialize_shell_variables: don't try to import function definitions
+	  with invalid names from the environment if already in posix mode,
+	  but create them as (invisible) exported variables so they pass
+	  through the environment.  Print an error message so user knows
+	  what's wrong.  Fixes bug reported by Tomas Trnka <ttrnka@mail.muni.cz>
+
+				    2/9
+				    ---
+
+builtins/read.def
+	- sigalrm_seen, alrmbuf: now global so the rest of the shell (trap.c)
+	  can use them
+
+quit.h
+	- move CHECK_ALRM macro here from builtins/read.def so trap.c:
+	  check_signals() can call it
+
+trap.c
+	- check_signals: add call to CHECK_ALRM before QUIT
+	- check_signals_and_traps: call check_signals() instead of including
+	  CHECK_ALRM and QUIT inline.  Integrating check for read builtin's
+	  SIGALRM (where zread call to check_signals_and_traps can see it)
+	  fixes problem reported by Mike Frysinger <vapier@gentoo.org>

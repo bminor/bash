@@ -459,20 +459,22 @@ any_signals_trapped ()
   return -1;
 }
 
+/* Convenience functions the rest of the shell can use */
+void
+check_signals_and_traps ()
+{
+itrace("check_signals_and_traps: sigalrm_seen = %d", sigalrm_seen);
+  CHECK_ALRM;
+
+  QUIT;
+  run_pending_traps ();
+}
+
 void
 check_signals ()
 {
   CHECK_ALRM;		/* set by the read builtin */
   QUIT;
-}
-
-/* Convenience functions the rest of the shell can use */
-void
-check_signals_and_traps ()
-{
-  check_signals ();
-
-  run_pending_traps ();
 }
 
 #if defined (JOB_CONTROL) && defined (SIGCHLD)

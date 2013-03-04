@@ -395,9 +395,11 @@ binary_test (op, arg1, arg2, flags)
     return (patmatch ? patcomp (arg1, arg2, EQ) : STREQ (arg1, arg2));
   else if ((op[0] == '>' || op[0] == '<') && op[1] == '\0')
     {
+#if defined (HAVE_STRCOLL)
       if (shell_compatibility_level > 40 && flags & TEST_LOCALE)
 	return ((op[0] == '>') ? (strcoll (arg1, arg2) > 0) : (strcoll (arg1, arg2) < 0));
       else
+#endif
 	return ((op[0] == '>') ? (strcmp (arg1, arg2) > 0) : (strcmp (arg1, arg2) < 0));
     }
   else if (op[0] == '!' && op[1] == '=' && op[2] == '\0')

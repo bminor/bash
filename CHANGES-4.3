@@ -233,7 +233,7 @@ uuu. Fixed a bug that caused the shell to dump core if `read' reads an escaped
 vvv. Fixed a bug that caused BASH_COMMAND to be set to an incorrect value when
      executing a (...) subshell.
 
-www. Fixed a pointer aliasing bug with the token string in arithmetic
+www. Fixed a couple of pointer aliasing bugs with the token string in arithmetic
      evaluation.
 
 xxx. Fixed a bug with parsing multi-line command substitutions when reading
@@ -284,6 +284,36 @@ llll. Fixed a bug that caused the -e option to be re-enabled using `set -e'
       even when executing in a context where -e is ignored.
 
 mmmm. Fixed a (mostly theoretical) bug with input lines longer than SIZE_MAX.
+
+nnnn. Fixed a bug that could result in double evaluation of command
+      substitutions when they appear in failed redirections.
+
+oooo. Fixed a bug that could cause seg faults during `mapfile' callbacks if
+      the callback unsets the array variable mapfile is using.
+
+pppp. Fixed several problems with variable assignments using ${var:=value}
+      when the variable assignment is supposed to have side effects.
+
+qqqq. Fixed a bug that caused a failure of an assignment statement preceding a
+      builtin caused the next invocation of a special builtin to exit the shell.
+
+rrrr. Fixed several problems with IFS when it appears in the temporary environment
+      and is used in redirections.
+
+ssss. Fixed a problem that caused IFS changes using ${IFS:=value} to modify
+      how preceding expansions were split.
+
+tttt. Fixed a problem that caused subshells to not run an EXIT trap they set.
+
+uuuu. Fixed a problem that caused shells started in posix mode to attempt to
+      import shell functions with invalid names from the environment.  We now
+      print a warning.
+
+vvvv. Worked around a kernel problem that caused SIGCHLD to interrupt open(2)
+      on a FIFO used for process substitution, even if the SIGCHLD handler was
+      installed with the SA_RESTART flag.
+
+wwww. Fixed a problem that resulted in inconsistent expansion of $* and ${a[*]}.
 
 2.  Changes to Readline
 
