@@ -650,7 +650,7 @@ redir_open (filename, flags, mode, ri)
      int flags, mode;
      enum r_instruction ri;
 {
-  int fd, r;
+  int fd, r, e;
 
   r = find_string_in_alist (filename, _redir_special_filenames, 1);
   if (r >= 0)
@@ -666,7 +666,16 @@ redir_open (filename, flags, mode, ri)
     }
   else
     {
-      fd = open (filename, flags, mode);
+      do
+	{
+	  fd = open (filename, flags, mode);
+	  e = errno;
+	  if (fd < 0 && e == EINTR)
+	    QUIT;
+	  errno = e;
+	}
+      while (fd < 0 && errno == EINTR);
+
 #if defined (AFS)
       if ((fd < 0) && (errno == EACCES))
 	{

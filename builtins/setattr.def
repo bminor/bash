@@ -470,7 +470,7 @@ set_var_attribute (name, attribute, undo)
      char *name;
      int attribute, undo;
 {
-  SHELL_VAR *var, *tv;
+  SHELL_VAR *var, *tv, *v;
   char *tvalue;
 
   if (undo)
@@ -487,7 +487,18 @@ set_var_attribute (name, attribute, undo)
 
 	  var = bind_variable (tv->name, tvalue, 0);
 	  var->attributes |= tv->attributes & ~att_tempvar;
-	  VSETATTR (tv, att_propagate);
+	  /* This avoids an error message when propagating a read-only var
+	     later on. */
+	  if (var->context == 0 && (attribute & att_readonly))
+	    {
+	      /* Don't bother to set the `propagate to the global variables
+		 table' flag if we've just bound the variable in that table */
+	      v = find_global_variable (tv->name);
+	      if (v != var)
+		VSETATTR (tv, att_propagate);
+	    }
+	  else
+	    VSETATTR (tv, att_propagate);
 	  if (var->context != 0)
 	    VSETATTR (var, att_propagate);
 	  SETVARATTR (tv, attribute, undo);	/* XXX */

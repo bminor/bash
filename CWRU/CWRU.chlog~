@@ -4493,12 +4493,3 @@ builtins/setattr.def
 	  bother marking the temporary variable for propagation if so.  The
 	  propagation is superfluous and will result in a strange error
 	  message
-
-				    2/2
-				    ---
-variables.c
-	- initialize_shell_variables: don't try to import function definitions
-	  with invalid names from the environment if already in posix mode,
-	  but create them as (invisible) exported variables so they pass
-	  through the environment.  Print an error message so user knows
-	  what's wrong.  Fixes bug reported by Tomas Trnka <ttrnka@mail.muni.cz>

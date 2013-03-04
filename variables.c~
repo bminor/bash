@@ -371,11 +371,13 @@ initialize_shell_variables (env, privmode)
 	    }
 	  else
 	    {
+#if 0
 	      if (temp_var = bind_variable (name, string, 0))
 		{
 		  VSETATTR (temp_var, (att_exported | att_imported | att_invisible));
 		  array_needs_making = 1;
 		}
+#endif
 	      last_command_exit_value = 1;
 	      report_error (_("error importing function definition for `%s'"), name);
 	    }

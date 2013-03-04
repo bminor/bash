@@ -5665,7 +5665,16 @@ parameter_brace_expand_word (name, var_is_special, quoted, pflags, indp)
     {
 expand_arrayref:
       /* XXX - does this leak if name[@] or name[*]? */
-      temp = array_value (name, quoted, 0, &atype, &ind);
+      if (pflags & PF_ASSIGNRHS)
+        {
+          temp = array_variable_name (name, &tt, (int *)0);
+          if (ALL_ELEMENT_SUB (tt[0]) && tt[1] == ']')
+	    temp = array_value (name, quoted|Q_DOUBLE_QUOTES, 0, &atype, &ind);
+	  else
+	    temp = array_value (name, quoted, 0, &atype, &ind);
+        }
+      else
+	temp = array_value (name, quoted, 0, &atype, &ind);
       if (atype == 0 && temp)
 	{
 	  temp = (*temp && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
@@ -7215,7 +7224,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
   if (want_indir)
     tdesc = parameter_brace_expand_indir (name + 1, var_is_special, quoted, quoted_dollar_atp, contains_dollar_at);
   else
-    tdesc = parameter_brace_expand_word (name, var_is_special, quoted, PF_IGNUNBOUND|(pflags&PF_NOSPLIT2), &ind);
+    tdesc = parameter_brace_expand_word (name, var_is_special, quoted, PF_IGNUNBOUND|(pflags&(PF_NOSPLIT2|PF_ASSIGNRHS)), &ind);
 
   if (tdesc)
     {

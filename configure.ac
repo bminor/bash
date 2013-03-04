@@ -21,10 +21,10 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.3, version 4.053])dnl
+AC_REVISION([for Bash 4.3, version 4.054])dnl
 
 define(bashvers, 4.3)
-define(relstatus, devel)
+define(relstatus, alpha)
 
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
 
@@ -625,7 +625,7 @@ dnl END READLINE and HISTORY LIBRARY SECTION
 
 dnl programs needed by the build and install process
 AC_PROG_INSTALL
-AC_CHECK_PROG(AR, ar, , ar)
+AC_CHECK_TOOL(AR, ar)
 dnl Set default for ARFLAGS, since autoconf does not have a macro for it.
 dnl This allows people to set it when running configure or make
 test -n "$ARFLAGS" || ARFLAGS="cr"

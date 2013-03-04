@@ -1378,7 +1378,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 		  memcpy (old, new, bytes);
 		  /* Fix up indices if we copy data from one line to another */
 		  omax += bytes - ret;
-		  for (i = current_line+1; i < inv_botlin+1; i++)
+		  for (i = current_line+1; i <= inv_botlin+1; i++)
 		    vis_lbreaks[i] += bytes - ret;
 		}
 	    }
