@@ -25,8 +25,6 @@
 extern volatile int interrupt_state;
 extern volatile int terminating_signal;
 
-extern sig_atomic_t sigterm_received;
-
 /* Macro to call a great deal.  SIGINT just sets the interrupt_state variable.
    When it is safe, put QUIT in the code, and the "interrupt" will take
    place.  The same scheme is used for terminating signals (e.g., SIGHUP)

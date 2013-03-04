@@ -559,7 +559,8 @@ readline_internal_charloop ()
 
       /* look at input.c:rl_getc() for the circumstances under which this will
 	 be returned; punt immediately on read error without converting it to
-	 a newline. */
+	 a newline; assume that rl_read_key has already called the signal
+	 handler. */
       if (c == READERR)
 	{
 #if defined (READLINE_CALLBACKS)

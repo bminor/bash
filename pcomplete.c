@@ -729,7 +729,7 @@ pcomp_filename_completion_function (text, state)
     {
       FREE (dfn);
       /* remove backslashes quoting special characters in filenames. */
-      /* There are roughtly three paths we can follow to get here:
+      /* There are roughly three paths we can follow to get here:
 		1.  complete -f
 		2.  compgen -f "$word" from a completion function
 		3.  compgen -f "$word" from the command line

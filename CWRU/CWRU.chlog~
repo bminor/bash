@@ -4528,7 +4528,7 @@ trap.c
 lib/glob/xmbsrtowcs.c
 	- xdupmbstowcs2: fixed but where end of string was not handled
 	  correctly, causing loop to go past end of string in a bunch of cases.
-	  Fixes bug reported by
+	  Fixes bug reported by "Dashing" <dashing@hushmail.com>
 
 
 				   2/13
@@ -4603,3 +4603,47 @@ execute_cmd.c
 lib/readline/display.c
 	- open_some_spaces: new function, subset of insert_some_chars that just
 	  opens up a specified number of spaces to be overwritten
+	- insert_some_spaces: now just calls to open_some_spaces followed by
+	  _rl_output_some_chars
+	- update_line: use col_temp instead of recalculating it using
+	  _rl_col_width in the case where we use more columns with fewer bytes
+	- update_line: use open_some_spaces and then output the right number
+	  of chars instead of trying to print new characters then overwrite
+	  existing characters in two separate calls.  This includes removing
+	  some dodgy code and making things simpler.  Fix from Egmont
+	  Koblinger <egmont@gmail.com>
+	- use new variable `bytes_to_insert' instead of overloading temp in
+	  some code blocks (nls - nfd, bytes that comprise the characters
+	  different in the new line from the old)
+
+				   2/18
+				   ----
+redir.c
+	- do_redirection_internal: add undoable redirection for the implicit
+	  close performed by the <&n- and >&n- redirections.  Fixes bug
+	  reported by Stephane Chazelas <stephane.chazelas@gmail.com>
+
+				   2/19
+				   ----
+sig.c
+	- termsig_handler: an interactive shell killed by SIGHUP and keeping
+	  command history will try to save the shell history before exiting.
+	  This is an attempt to preserve the save-history-when-the-terminal-
+	  window-is-closed behavior
+
+				   2/21
+				   ----
+braces.c
+	- brace_expand: if a sequence expansion fails (e.g. because the
+	  integers overflow), treat that expansion as a simple string, including
+	  the braces, and try to process any remainder of the string.  The
+	  remainder may include brace expansions.  Derived from SuSE bug
+	  804551 example (https://bugzilla.novell.com/show_bug.cgi?id=804551)
+
+				   2/23
+				   ----
+{quit,sig}.h,sig.c
+	- sigterm_received declaration now in sig.h; type is sig_atomic_t
+	- sigwinch_received type now sig_atomic_t
+	- sig.h includes bashtypes.h and <signal.h> if SIG_DFL not defined
+	  (same logic as trap.h) to pick up sig_atomic_t

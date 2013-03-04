@@ -501,11 +501,17 @@ make_child (command, async_p)
     sync_buffered_stream (default_buffered_input);
 #endif /* BUFFERED_INPUT */
 
+  /* XXX - block SIGTERM here and unblock in child after fork resets the
+     set of pending signals? */
+  RESET_SIGTERM;
+
   /* Create the child, handle severe errors.  Retry on EAGAIN. */
   forksleep = 1;
   while ((pid = fork ()) < 0 && errno == EAGAIN && forksleep < FORKSLEEP_MAX)
     {
       sys_error ("fork: retry");
+      RESET_SIGTERM;
+
 #if defined (HAVE_WAITPID)
       /* Posix systems with a non-blocking waitpid () system call available
 	 get another chance after zombies are reaped. */
@@ -518,6 +524,9 @@ make_child (command, async_p)
 #endif /* HAVE_WAITPID */
       forksleep <<= 1;
     }
+
+  if (pid != 0)
+    RESET_SIGTERM;
 
   if (pid < 0)
     {

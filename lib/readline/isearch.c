@@ -318,6 +318,7 @@ _rl_search_getchar (cxt)
     c = cxt->lastc = _rl_read_mbstring (cxt->lastc, cxt->mb, MB_LEN_MAX);
 #endif
 
+  RL_CHECK_SIGNALS ();
   return c;
 }
 

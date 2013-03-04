@@ -315,6 +315,22 @@ vvvv. Worked around a kernel problem that caused SIGCHLD to interrupt open(2)
 
 wwww. Fixed a problem that resulted in inconsistent expansion of $* and ${a[*]}.
 
+xxxx. Fixed a problem that caused `read -t' to crash when interrupted by
+      SIGINT.
+
+yyyy. Fixed a problem that caused pattern removal to fail randomly because the
+      pattern matcher read beyond the end of a string.
+
+zzzz. Fixed a bug that caused core dumps when shell functions tried to create
+      local shadow copies of special variables like GROUPS.
+
+aaaaa. Fixed a bug that caused SIGTERM to be occasionally lost by children of
+       interactive shells when it arrived before the child process reset the
+       handler from SIG_DFL.
+
+bbbbb. Fixed a bug that caused redirections like <&n- to leave file descriptor
+       n closed if executed with a builtin command.
+
 2.  Changes to Readline
 
 a.  Fixed a bug that did not allow the `dd', `cc', or `yy' vi editing mode
@@ -371,6 +387,9 @@ q.  Fixed a bug that caused binding a macro to a multi-character key sequence
 
 r.  Fixed several redisplay errors with multibyte characters and prompts
     containing invisible characters when using horizontal scrolling.
+
+s.  Fixed a bug that caused redisplay errors when trying to overwrite
+    existing characters using multibyte characters.
 
 3.  New Features in Bash
 
@@ -471,6 +490,12 @@ dd. The `printf' %(...)T format specifier now uses the current time if no
 
 ee. There is a new variable, BASH_COMPAT, that controls the current shell
     compatibility level.
+
+ff. The `popd' builtin now treats additional arguments as errors.
+
+gg. The brace expansion code now treats a failed sequence expansion as a
+    simple string and will continue to expand brace terms in the remainder
+    of the word.
 
 4.  New Features in Readline
 

@@ -4140,10 +4140,6 @@ bash_dequote_text (text)
 static int
 bash_event_hook ()
 {
-#if defined (DEBUG)
-itrace("bash_event_hook");
-#endif
-
   /* If we're going to longjmp to top_level, make sure we clean up readline */
   if (interrupt_state && signal_is_trapped (SIGINT) == 0)
     rl_cleanup_after_signal ();

@@ -468,6 +468,7 @@ rl_history_search_internal (count, dir)
      copy into the line buffer. */
   while (count)
     {
+      RL_CHECK_SIGNALS ();
       ret = noninc_search_from_pos (history_search_string, rl_history_search_pos + dir, dir);
       if (ret == -1)
 	break;

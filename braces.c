@@ -228,6 +228,19 @@ brace_expand (text)
       tack = expand_seqterm (amble, alen);
       if (tack)
 	goto add_tack;
+      else if (text[i + 1])
+	{
+	  /* If the sequence expansion fails (e.g., because the integers
+	     overflow), but there is more in the string, try and process
+	     the rest of the string, which may contain additional brace
+	     expansions.  Treat the unexpanded sequence term as a simple
+	     string (including the braces). */
+	  tack = strvec_create (2);
+	  tack[0] = savestring (text+start-1);
+	  tack[0][i-start+2] = '\0';
+	  tack[1] = (char *)0;
+	  goto add_tack;
+	}
       else
 	{
 	  free (amble);

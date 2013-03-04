@@ -71,13 +71,12 @@ extern void initialize_siglist ();
 volatile int interrupt_state = 0;
 
 /* Non-zero after SIGWINCH */
-sig_atomic_t sigwinch_received = 0;
-
-/* Non-zero after SIGTERM */
-sig_atomic_t sigterm_received = 0;
+volatile int sigwinch_received = 0;
 
 /* Set to the value of any terminating signal received. */
 volatile int terminating_signal = 0;
+
+sig_atomic_t sigterm_received = 0;
 
 /* The environment at the top-level R-E loop.  We use this in
    the case of error return. */

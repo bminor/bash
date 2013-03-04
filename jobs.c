@@ -1717,6 +1717,8 @@ make_child (command, async_p)
   sigset_t set, oset;
   pid_t pid;
 
+  /* XXX - block SIGTERM here and unblock in child after fork resets the
+     set of pending signals? */
   sigemptyset (&set);
   sigaddset (&set, SIGCHLD);
   sigaddset (&set, SIGINT);
@@ -1747,10 +1749,15 @@ make_child (command, async_p)
       waitchld (-1, 0);
 
       sys_error ("fork: retry");
+      RESET_SIGTERM;
+
       if (sleep (forksleep) != 0)
 	break;
       forksleep <<= 1;
     }
+
+  if (pid != 0)
+    RESET_SIGTERM;
 
   if (pid < 0)
     {
@@ -1766,9 +1773,6 @@ make_child (command, async_p)
       last_command_exit_value = EX_NOEXEC;
       throw_to_top_level ();	/* Reset signals, etc. */
     }
-
-  if (pid != 0)
-    RESET_SIGTERM;
 
   if (pid == 0)
     {
