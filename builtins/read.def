@@ -385,10 +385,20 @@ read_builtin (list)
 	{
 	  /* Tricky.  The top of the unwind-protect stack is the free of
 	     input_string.  We want to run all the rest and use input_string,
-	     so we have to remove it from the stack. */
-	  remove_unwind_protect ();
-	  run_unwind_frame ("read_builtin");
+	     so we have to save input_string temporarily, run the unwind-
+	     protects, then restore input_string so we can use it later. */
+
 	  input_string[i] = '\0';	/* make sure it's terminated */
+	  if (i == 0)
+	    {
+	      t = (char *)xmalloc (1);
+	      t[0] = 0;
+	    }
+	  else
+	    t = savestring (input_string);
+
+	  run_unwind_frame ("read_builtin");
+	  input_string = t;
 	  retval = 128+SIGALRM;
 	  goto assign_vars;
 	}
