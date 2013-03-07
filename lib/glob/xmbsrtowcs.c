@@ -216,12 +216,24 @@ xdupmbstowcs2 (destp, src)
 	 It may set 'p' to NULL. */
       n = mbsnrtowcs(wsbuf+wcnum, &p, nms, wsbuf_size-wcnum, &state);
 
+      if (n == 0 && p == 0)
+	{
+	  wsbuf[wcnum] = L'\0';
+	  break;
+	}
+
       /* Compensate for taking single byte on wcs conversion failure above. */
       if (wcslength == 1 && (n == 0 || n == (size_t)-1))
 	{
 	  state = tmp_state;
 	  p = tmp_p;
-	  wsbuf[wcnum++] = *p++;
+	  wsbuf[wcnum] = *p;
+	  if (*p == 0)
+	    break;
+	  else
+	    {
+	      wcnum++; p++;
+	    }
 	}
       else
         wcnum += wcslength;
