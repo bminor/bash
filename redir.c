@@ -1007,6 +1007,16 @@ do_redirection_internal (redirect, flags)
 		close (redirector);
 	      REDIRECTION_ERROR (r, errno, -1);
 	    }
+	  if ((flags & RX_UNDOABLE) && (ri == r_move_input || ri == r_move_output))
+	    {
+	      /* r_move_input and r_move_output add an additional close()
+		 that needs to be undone */
+	      if (fcntl (redirector, F_GETFD, 0) != -1)
+		{
+		  r = add_undo_redirect (redir_fd, r_close_this, -1);
+		  REDIRECTION_ERROR (r, errno, -1);
+		}
+	    }
 #if defined (BUFFERED_INPUT)
 	  check_bash_input (redirector);
 #endif
