@@ -306,13 +306,16 @@ declare_internal (list, local_var)
 	 that is specific to nameref variables. */
       if (flags_on & att_nameref)
 	{
+#if defined (ARRAY_VARIABLES)
 	  if (valid_array_reference (name))
 	    {
 	      builtin_error (_("%s: reference variable cannot be an array"), name);
 	      assign_error++;
 	      NEXT_VARIABLE ();
 	    }
-	  else if (STREQ (name, value))
+	  else
+#endif
+	  if (STREQ (name, value))
 	    {
 	      builtin_error (_("%s: nameref variable self references not allowed"), name);
 	      assign_error++;
@@ -600,10 +603,12 @@ declare_internal (list, local_var)
 	     using a single typeset command. */
 	  onref = (flags_on & att_nameref);
 	  flags_on &= ~att_nameref;
+#if defined (ARRAY_VARS)
 	  if (array_p (var) || assoc_p (var)
 		|| (offset && compound_array_assign)
 		|| simple_array_assign)
 	    onref = 0;		/* array variables may not be namerefs */
+#endif
 
 	  /* ksh93 seems to do this */
 	  offref = (flags_off & att_nameref);

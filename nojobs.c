@@ -83,8 +83,8 @@ extern sigset_t top_level_mask;
 extern procenv_t wait_intr_buf;
 extern int wait_signal_received;
 
-pid_t last_made_pid = NO_PID;
-pid_t last_asynchronous_pid = NO_PID;
+volatile pid_t last_made_pid = NO_PID;
+volatile pid_t last_asynchronous_pid = NO_PID;
 
 /* Call this when you start making children. */
 int already_making_children = 0;

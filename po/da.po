@@ -12,14 +12,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash 4.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-03-05 22:17-0500\n"
+"POT-Creation-Date: 2013-03-08 16:00-0500\n"
 "PO-Revision-Date: 2011-03-18 01:36+0100\n"
 "Last-Translator: Kenneth Nielsen <k.nielsen81@gmail.com>\n"
 "Language-Team: Danish <dansk@dansk-gruppen.dk>\n"
-"Language: da\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: da\n"
 "X-Generator: KBabel 1.11.4\n"
 "Plural-Forms:  nplurals=2; plural=(n != 1);\n"
 
@@ -28,22 +28,22 @@ msgstr ""
 msgid "bad array subscript"
 msgstr "ugyldigt arrayindeks"
 
-#: arrayfunc.c:330 builtins/declare.def:487
+#: arrayfunc.c:356 builtins/declare.def:578
 #, c-format
 msgid "%s: cannot convert indexed to associative array"
 msgstr "%s: kan ikke konvertere indekseret til associativt array"
 
-#: arrayfunc.c:513
+#: arrayfunc.c:539
 #, c-format
 msgid "%s: invalid associative array key"
 msgstr "%s: ugyldig nøgle til associativt array"
 
-#: arrayfunc.c:515
+#: arrayfunc.c:541
 #, c-format
 msgid "%s: cannot assign to non-numeric index"
 msgstr "%s: kan ikke tildele til ikkenumerisk indeks"
 
-#: arrayfunc.c:557
+#: arrayfunc.c:586
 #, c-format
 msgid "%s: %s: must use subscript when assigning associative array"
 msgstr "%s: %s: et indeks skal bruges ved tildeling til associativt array"
@@ -53,23 +53,23 @@ msgstr "%s: %s: et indeks skal bruges ved tildeling til associativt array"
 msgid "%s: cannot create: %s"
 msgstr "%s: kan ikke oprette %s"
 
-#: bashline.c:3868
+#: bashline.c:3923
 msgid "bash_execute_unix_command: cannot find keymap for command"
 msgstr "bash_execute_unix_command: kan ikke finde tastetildeling for kommando"
 
-#: bashline.c:3955
+#: bashline.c:4010
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr "%s: første ikke-blank-tegn er ikke '\"'"
 
 # Kønnet her er et gæt, hvis det er parenteser eller anførselstegn passer det
 # FEJLRAPPORT
-#: bashline.c:3984
+#: bashline.c:4039
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr "ingen afsluttende \"%c\" i %s"
 
-#: bashline.c:4018
+#: bashline.c:4073
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: manglende kolonseparator"
@@ -135,7 +135,7 @@ msgstr ""
 msgid "HOME not set"
 msgstr "HOME ikke indstillet"
 
-#: builtins/cd.def:247 builtins/common.c:166 test.c:832
+#: builtins/cd.def:247 builtins/common.c:166 test.c:855
 msgid "too many arguments"
 msgstr "for mange argumenter"
 
@@ -158,7 +158,7 @@ msgstr "advarsel: "
 msgid "%s: usage: "
 msgstr "%s: brug: "
 
-#: builtins/common.c:191 shell.c:504 shell.c:786
+#: builtins/common.c:191 shell.c:506 shell.c:788
 #, c-format
 msgid "%s: option requires an argument"
 msgstr "%s: tilvalg kræver et argument"
@@ -173,7 +173,7 @@ msgstr "%s: numerisk argument påkrævet"
 msgid "%s: not found"
 msgstr "%s: ikke fundet"
 
-#: builtins/common.c:214 shell.c:799
+#: builtins/common.c:214 shell.c:801
 #, c-format
 msgid "%s: invalid option"
 msgstr "%s: ugyldigt tilvalg"
@@ -196,7 +196,7 @@ msgstr "ugyldigt oktaltal"
 msgid "invalid hex number"
 msgstr "ugyldigt heksadecimalt tal"
 
-#: builtins/common.c:242 expr.c:1431
+#: builtins/common.c:242 expr.c:1451
 msgid "invalid number"
 msgstr "ugyldigt tal"
 
@@ -305,25 +305,35 @@ msgstr "advarsel: tilvalget -C vil måske ikke virke, som du forventer"
 msgid "not currently executing completion function"
 msgstr "ikke i gang med at eksekvere fuldførelsesfunktion"
 
-#: builtins/declare.def:124
+#: builtins/declare.def:126
 msgid "can only be used in a function"
 msgstr "kan kun bruges i en funktion"
 
-#: builtins/declare.def:366
+#: builtins/declare.def:311 builtins/declare.def:526
+#, c-format
+msgid "%s: reference variable cannot be an array"
+msgstr ""
+
+#: builtins/declare.def:317
+#, c-format
+msgid "%s: nameref variable self references not allowed"
+msgstr ""
+
+#: builtins/declare.def:415
 msgid "cannot use `-f' to make functions"
 msgstr "kan ikke bruge \"-f\" til at lave funktioner"
 
-#: builtins/declare.def:378 execute_cmd.c:5253
+#: builtins/declare.def:427 execute_cmd.c:5315
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: skrivebeskyttet funktion"
 
-#: builtins/declare.def:474
+#: builtins/declare.def:565
 #, c-format
 msgid "%s: cannot destroy array variables in this way"
 msgstr "%s: kan ikke destruere arrayvariabel på denne måde"
 
-#: builtins/declare.def:481 builtins/read.def:702
+#: builtins/declare.def:572 builtins/read.def:721
 #, c-format
 msgid "%s: cannot convert associative to indexed array"
 msgstr "%s: kan ikke konvertere associativt til indekseret array"
@@ -352,23 +362,23 @@ msgstr "%s: ikke dynamisk indlæst"
 msgid "%s: cannot delete: %s"
 msgstr "%s: kan ikke slette: %s"
 
-#: builtins/evalfile.c:135 builtins/hash.def:171 execute_cmd.c:5100
-#: shell.c:1461
+#: builtins/evalfile.c:140 builtins/hash.def:171 execute_cmd.c:5162
+#: shell.c:1481
 #, c-format
 msgid "%s: is a directory"
 msgstr "%s: er en mappe"
 
-#: builtins/evalfile.c:140
+#: builtins/evalfile.c:146
 #, c-format
 msgid "%s: not a regular file"
 msgstr "%s: ikke en regulær fil"
 
-#: builtins/evalfile.c:148
+#: builtins/evalfile.c:155
 #, c-format
 msgid "%s: file is too large"
 msgstr "%s: fil er for stor"
 
-#: builtins/evalfile.c:182 builtins/evalfile.c:200 shell.c:1471
+#: builtins/evalfile.c:190 builtins/evalfile.c:208 shell.c:1491
 #, c-format
 msgid "%s: cannot execute binary file"
 msgstr "%s: kan ikke eksekvere binær fil"
@@ -465,7 +475,7 @@ msgstr ""
 msgid "%s: cannot open: %s"
 msgstr "%s: kan ikke åbne: %s"
 
-#: builtins/help.def:337
+#: builtins/help.def:471
 #, c-format
 msgid ""
 "These shell commands are defined internally.  Type `help' to see this list.\n"
@@ -509,16 +519,16 @@ msgstr "%s: inlib fejlede"
 msgid "no other options allowed with `-x'"
 msgstr "ingen andre tilvalg er tilladt sammen med \"-x\""
 
-#: builtins/kill.def:198
+#: builtins/kill.def:200
 #, c-format
 msgid "%s: arguments must be process or job IDs"
 msgstr "%s: argumenter skal være processer eller job-id'er"
 
-#: builtins/kill.def:261
+#: builtins/kill.def:263
 msgid "Unknown error"
 msgstr "Ukendt fejl"
 
-#: builtins/let.def:95 builtins/let.def:120 expr.c:577 expr.c:592
+#: builtins/let.def:95 builtins/let.def:120 expr.c:586 expr.c:601
 msgid "expression expected"
 msgstr "forventede et udtryk"
 
@@ -527,65 +537,65 @@ msgstr "forventede et udtryk"
 msgid "%s: not an indexed array"
 msgstr "%s: ikke en arrayvariabel"
 
-#: builtins/mapfile.def:256 builtins/read.def:299
+#: builtins/mapfile.def:259 builtins/read.def:302
 #, c-format
 msgid "%s: invalid file descriptor specification"
 msgstr "%s: ugyldig filbeskrivelsesspecifikation"
 
-#: builtins/mapfile.def:264 builtins/read.def:306
+#: builtins/mapfile.def:267 builtins/read.def:309
 #, c-format
 msgid "%d: invalid file descriptor: %s"
 msgstr "%d: ugyldig filbeskrivelse: %s"
 
 # -c     Specify the number of lines read between each call to callback.
-#: builtins/mapfile.def:273 builtins/mapfile.def:311
+#: builtins/mapfile.def:276 builtins/mapfile.def:314
 #, c-format
 msgid "%s: invalid line count"
 msgstr "%s: ugyldigt antal linjer"
 
-#: builtins/mapfile.def:284
+#: builtins/mapfile.def:287
 #, c-format
 msgid "%s: invalid array origin"
 msgstr "%s: ugyldig array-startindeks"
 
-#: builtins/mapfile.def:301
+#: builtins/mapfile.def:304
 #, c-format
 msgid "%s: invalid callback quantum"
 msgstr "%s: ugyldigt tilbagekaldskvantum"
 
-#: builtins/mapfile.def:333
+#: builtins/mapfile.def:336
 msgid "empty array variable name"
 msgstr "tomt arrayvariabelnavn"
 
-#: builtins/mapfile.def:354
+#: builtins/mapfile.def:357
 msgid "array variable support required"
 msgstr "understøttelse af arrayvariabel påkrævet"
 
-#: builtins/printf.def:397
+#: builtins/printf.def:402
 #, c-format
 msgid "`%s': missing format character"
 msgstr "\"%s\": manglende formattegn"
 
-#: builtins/printf.def:451
+#: builtins/printf.def:456
 #, fuzzy, c-format
 msgid "`%c': invalid time format specification"
 msgstr "%s: ugyldig specifikation af tidsudløb"
 
-#: builtins/printf.def:647
+#: builtins/printf.def:658
 #, c-format
 msgid "`%c': invalid format character"
 msgstr "\"%c\": ugyldigt formattegn"
 
-#: builtins/printf.def:673
+#: builtins/printf.def:684
 #, c-format
 msgid "warning: %s: %s"
 msgstr "advarsel: %s: %s"
 
-#: builtins/printf.def:854
+#: builtins/printf.def:865
 msgid "missing hex digit for \\x"
 msgstr "manglende heksciffer for \\x"
 
-#: builtins/printf.def:869
+#: builtins/printf.def:880
 #, fuzzy, c-format
 msgid "missing unicode digit for \\%c"
 msgstr "manglende heksciffer for \\x"
@@ -594,19 +604,24 @@ msgstr "manglende heksciffer for \\x"
 msgid "no other directory"
 msgstr "ingen anden mappe"
 
-#: builtins/pushd.def:462
+#: builtins/pushd.def:354
+#, fuzzy, c-format
+msgid "%s: invalid argument"
+msgstr "%s: ugyldigt grænseargument"
+
+#: builtins/pushd.def:468
 msgid "<no current directory>"
 msgstr "<ingen nuværende mappe>"
 
-#: builtins/pushd.def:506
+#: builtins/pushd.def:512
 msgid "directory stack empty"
 msgstr "mappestak tom"
 
-#: builtins/pushd.def:508
+#: builtins/pushd.def:514
 msgid "directory stack index"
 msgstr "mappestakindeks"
 
-#: builtins/pushd.def:683
+#: builtins/pushd.def:689
 msgid ""
 "Display the list of currently remembered directories.  Directories\n"
 "    find their way onto the list with the `pushd' command; you can get\n"
@@ -649,7 +664,7 @@ msgstr ""
 "        når der ikke angives nogle valgmuligheder, startende fra 0."
 
 # Jeg tror der er en fejl i den engelske, fejlrapport
-#: builtins/pushd.def:705
+#: builtins/pushd.def:711
 #, fuzzy
 msgid ""
 "Adds a directory to the top of the directory stack, or rotates\n"
@@ -696,7 +711,7 @@ msgstr ""
 "    \n"
 "Den indbyggede funktion \"dirs\" viser mappestakken."
 
-#: builtins/pushd.def:730
+#: builtins/pushd.def:736
 msgid ""
 "Removes entries from the directory stack.  With no arguments, removes\n"
 "    the top directory from the stack, and changes to the new top directory.\n"
@@ -734,12 +749,12 @@ msgstr ""
 "    \n"
 "Den indbyggede funktion \"dirs\" viser mappestakken."
 
-#: builtins/read.def:272
+#: builtins/read.def:275
 #, c-format
 msgid "%s: invalid timeout specification"
 msgstr "%s: ugyldig specifikation af tidsudløb"
 
-#: builtins/read.def:644
+#: builtins/read.def:666
 #, c-format
 msgid "read error: %d: %s"
 msgstr "læsefejl: %d: %s"
@@ -748,26 +763,26 @@ msgstr "læsefejl: %d: %s"
 msgid "can only `return' from a function or sourced script"
 msgstr "kan kun udføre \"return\" fra en funktion eller indlæst skript"
 
-#: builtins/set.def:771
+#: builtins/set.def:782
 msgid "cannot simultaneously unset a function and a variable"
 msgstr "kan ikke fjerne en funktion og en variabel samtidig"
 
-#: builtins/set.def:812
+#: builtins/set.def:826
 #, c-format
 msgid "%s: cannot unset"
 msgstr "%s: kan ikke fjerne"
 
-#: builtins/set.def:829
+#: builtins/set.def:843
 #, c-format
 msgid "%s: cannot unset: readonly %s"
 msgstr "%s: kan ikke fjerne: skrivebeskyttet %s"
 
-#: builtins/set.def:841
+#: builtins/set.def:854
 #, c-format
 msgid "%s: not an array variable"
 msgstr "%s: ikke en arrayvariabel"
 
-#: builtins/setattr.def:186
+#: builtins/setattr.def:187
 #, c-format
 msgid "%s: not a function"
 msgstr "%s: ikke en funktion"
@@ -776,11 +791,11 @@ msgstr "%s: ikke en funktion"
 msgid "shift count"
 msgstr "skifttæller"
 
-#: builtins/shopt.def:277
+#: builtins/shopt.def:279
 msgid "cannot set and unset shell options simultaneously"
 msgstr "kan ikke indstille og fjerne skaltilvalg samtidig"
 
-#: builtins/shopt.def:342
+#: builtins/shopt.def:346
 #, c-format
 msgid "%s: invalid shell option name"
 msgstr "%s: ugyldigt navn for skaltilvalg"
@@ -905,56 +920,56 @@ msgstr "dårligt hop"
 msgid "%s: unbound variable"
 msgstr "%s: ubundet variabel"
 
-#: eval.c:181
+#: eval.c:189
 #, c-format
 msgid "\atimed out waiting for input: auto-logout\n"
 msgstr "\atidsudløb mens der ventedes på input: auto-logud\n"
 
-#: execute_cmd.c:504
+#: execute_cmd.c:512
 #, c-format
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr "kan ikke videresende standardinput fra /dev/null: %s"
 
-#: execute_cmd.c:1199
+#: execute_cmd.c:1228
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "TIMEFORMAT: \"%c\": ugyldigt formateringstegn"
 
-#: execute_cmd.c:2240
+#: execute_cmd.c:2282
 msgid "pipe error"
 msgstr "datakanalfejl (pipe error)"
 
-#: execute_cmd.c:4284
+#: execute_cmd.c:4347
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
 msgstr ""
 
-#: execute_cmd.c:4777
+#: execute_cmd.c:4840
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: begrænset: kan ikke specificere \"/\" i kommandonavne"
 
-#: execute_cmd.c:4872
+#: execute_cmd.c:4929
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: kommando ikke fundet"
 
-#: execute_cmd.c:5098
+#: execute_cmd.c:5160
 #, c-format
 msgid "%s: %s"
 msgstr ""
 
-#: execute_cmd.c:5135
+#: execute_cmd.c:5197
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: dårlig fortolker"
 
-#: execute_cmd.c:5172
+#: execute_cmd.c:5234
 #, fuzzy, c-format
 msgid "%s: cannot execute binary file: %s"
 msgstr "%s: kan ikke eksekvere binær fil"
 
-#: execute_cmd.c:5244
+#: execute_cmd.c:5306
 #, fuzzy, c-format
 msgid "`%s': is a special builtin"
 msgstr "%s er indbygget i skallen\n"
@@ -968,74 +983,74 @@ msgstr "%s er indbygget i skallen\n"
 #        expansion.   If the >(list) form is used, writing to the file will pro‐
 #        vide input for list.  If the <(list) form is used, the file  passed  as
 #        an argument should be read to obtain the output of list.
-#: execute_cmd.c:5296
+#: execute_cmd.c:5358
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "kan ikke duplikere fd %d til fd %d"
 
-#: expr.c:258
+#: expr.c:262
 msgid "expression recursion level exceeded"
 msgstr "grænse for rekursion af udtryk overskredet"
 
-#: expr.c:282
+#: expr.c:286
 msgid "recursion stack underflow"
 msgstr "underløb i rekursionsstak"
 
-#: expr.c:430
+#: expr.c:434
 msgid "syntax error in expression"
 msgstr "syntaksfejl i udtryk"
 
-#: expr.c:474
+#: expr.c:478
 msgid "attempted assignment to non-variable"
 msgstr "forsøgte tildeling til ikke-variabel"
 
-#: expr.c:493 expr.c:838
+#: expr.c:498 expr.c:847
 msgid "division by 0"
 msgstr "division med 0"
 
 # denne her streng er dårlig på så mange måder at det fatter man slet ikke. Skal bug oversætter og hvad er expassign. Jeg laver et bud og har fejlmeldt den
-#: expr.c:540
+#: expr.c:545
 msgid "bug: bad expassign token"
 msgstr "bug: dårligt expassign-udtryk"
 
-#: expr.c:589
+#: expr.c:598
 msgid "`:' expected for conditional expression"
 msgstr "\":\" forventet for betingede udtryk"
 
-#: expr.c:895
+#: expr.c:904
 msgid "exponent less than 0"
 msgstr "eksponent mindre end 0"
 
-#: expr.c:948
+#: expr.c:957
 msgid "identifier expected after pre-increment or pre-decrement"
 msgstr "identifikator forventet efter præforøgelse eller -formindskelse"
 
-#: expr.c:973
+#: expr.c:983
 msgid "missing `)'"
 msgstr "manglende \")\""
 
-#: expr.c:1024 expr.c:1351
+#: expr.c:1034 expr.c:1371
 msgid "syntax error: operand expected"
 msgstr "syntaksfejl: operand forventet"
 
-#: expr.c:1353
+#: expr.c:1373
 msgid "syntax error: invalid arithmetic operator"
 msgstr "syntaksfejl: ugyldig aritmetisk operator"
 
-#: expr.c:1377
+#: expr.c:1397
 #, c-format
 msgid "%s%s%s: %s (error token is \"%s\")"
 msgstr "%s%s%s: %s (fejlelement er \"%s\")"
 
-#: expr.c:1435
+#: expr.c:1455
 msgid "invalid arithmetic base"
 msgstr "ugyldig aritmetisk grundtal"
 
-#: expr.c:1455
+#: expr.c:1475
 msgid "value too great for base"
 msgstr "værdi for stor til grundtal"
 
-#: expr.c:1504
+#: expr.c:1524
 #, c-format
 msgid "%s: expression error\n"
 msgstr "%s: fejl i udtryk\n"
@@ -1045,165 +1060,165 @@ msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: kan ikke tilgå overliggende mapper"
 
 # Har ladet nodelay stå, idet jeg gætter på at det er et navn
-#: input.c:99 subst.c:5094
+#: input.c:101 subst.c:5067
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "kan ikke nulstille \"nodelay\"-tilstand for fd %d"
 
-#: input.c:265
+#: input.c:267
 #, c-format
 msgid "cannot allocate new file descriptor for bash input from fd %d"
 msgstr "kan ikke allokere ny fildeskriptor til bash-input fra fd %d"
 
-#: input.c:273
+#: input.c:275
 #, c-format
 msgid "save_bash_input: buffer already exists for new fd %d"
 msgstr "save_bash_input: buffer eksisterer allerede til ny fd %d"
 
 # ??
-#: jobs.c:470
+#: jobs.c:471
 msgid "start_pipeline: pgrp pipe"
 msgstr "start_pipeline: pgrp-datakanal (pipe)"
 
-#: jobs.c:891
+#: jobs.c:892
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr "forgrenet pid %d figurerer i kørende job %d"
 
-#: jobs.c:1009
+#: jobs.c:1010
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "sletter stoppet job %d med procesgruppe %ld"
 
 # ??
-#: jobs.c:1114
+#: jobs.c:1115
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
 msgstr "add_process: proces %5ld (%s) i the_pipeline"
 
-#: jobs.c:1117
+#: jobs.c:1118
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr "add_process: pid %5ld (%s) markeret som stadig i live"
 
-#: jobs.c:1432
+#: jobs.c:1433
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "describe_pid: %ld: ingen process med det pid"
 
-#: jobs.c:1447
+#: jobs.c:1448
 #, c-format
 msgid "Signal %d"
 msgstr "Signal %d"
 
-#: jobs.c:1461 jobs.c:1486
+#: jobs.c:1462 jobs.c:1487
 msgid "Done"
 msgstr "Færdig"
 
-#: jobs.c:1466 siglist.c:123
+#: jobs.c:1467 siglist.c:123
 msgid "Stopped"
 msgstr "Stoppet"
 
-#: jobs.c:1470
+#: jobs.c:1471
 #, c-format
 msgid "Stopped(%s)"
 msgstr "Stoppet(%s)"
 
-#: jobs.c:1474
+#: jobs.c:1475
 msgid "Running"
 msgstr "Kører"
 
-#: jobs.c:1488
+#: jobs.c:1489
 #, c-format
 msgid "Done(%d)"
 msgstr "Færdig(%d)"
 
-#: jobs.c:1490
+#: jobs.c:1491
 #, c-format
 msgid "Exit %d"
 msgstr "Afslut %d"
 
-#: jobs.c:1493
+#: jobs.c:1494
 msgid "Unknown status"
 msgstr "Ukendt status"
 
-#: jobs.c:1580
+#: jobs.c:1581
 #, c-format
 msgid "(core dumped) "
 msgstr "(smed kerne) "
 
-#: jobs.c:1599
+#: jobs.c:1600
 #, c-format
 msgid "  (wd: %s)"
 msgstr "  (wd: %s)"
 
-#: jobs.c:1807
+#: jobs.c:1817
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr "underproces setpgid (%ld til %ld)"
 
-#: jobs.c:2135 nojobs.c:585
+#: jobs.c:2136 nojobs.c:605
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: pid %ld er ikke en underproces af denne skal"
 
-#: jobs.c:2372
+#: jobs.c:2383
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for: Ingen optegnelse af proces %ld"
 
-#: jobs.c:2653
+#: jobs.c:2689
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: job %d er stoppet"
 
-#: jobs.c:2875
+#: jobs.c:2981
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: job er afbrudt"
 
-#: jobs.c:2884
+#: jobs.c:2990
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: job %d er allerede i baggrunden"
 
-#: jobs.c:3105
+#: jobs.c:3215
 msgid "waitchld: turning on WNOHANG to avoid indefinite block"
 msgstr ""
 
-#: jobs.c:3571
+#: jobs.c:3699
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s: linje %d: "
 
-#: jobs.c:3585 nojobs.c:818
+#: jobs.c:3713 nojobs.c:843
 #, c-format
 msgid " (core dumped)"
 msgstr " (smed kerne)"
 
-#: jobs.c:3597 jobs.c:3610
+#: jobs.c:3725 jobs.c:3738
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(wd nu: %s)\n"
 
-#: jobs.c:3642
+#: jobs.c:3770
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: getpgrp fejlede"
 
-#: jobs.c:3703
+#: jobs.c:3831
 msgid "initialize_job_control: line discipline"
 msgstr "initialize_job_control: linjedisciplin"
 
-#: jobs.c:3713
+#: jobs.c:3841
 msgid "initialize_job_control: setpgid"
 msgstr "initialize_job_control: setpgid"
 
-#: jobs.c:3734 jobs.c:3743
+#: jobs.c:3862 jobs.c:3871
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "kan ikke indstille terminal-procesgruppe (%d)"
 
-#: jobs.c:3748
+#: jobs.c:3876
 msgid "no job control in this shell"
 msgstr "ingen jobkontrol i denne skal"
 
@@ -1225,49 +1240,49 @@ msgstr ""
 msgid "unknown"
 msgstr "ukendt"
 
-#: lib/malloc/malloc.c:797
+#: lib/malloc/malloc.c:801
 msgid "malloc: block on free list clobbered"
 msgstr "malloc: blok i fri liste tværet ud"
 
-#: lib/malloc/malloc.c:874
+#: lib/malloc/malloc.c:878
 msgid "free: called with already freed block argument"
 msgstr "free: kaldt med blokargument som allerede er fri"
 
-#: lib/malloc/malloc.c:877
+#: lib/malloc/malloc.c:881
 msgid "free: called with unallocated block argument"
 msgstr "free: kaldt med ikke-allokeret blokargument"
 
-#: lib/malloc/malloc.c:896
+#: lib/malloc/malloc.c:900
 msgid "free: underflow detected; mh_nbytes out of range"
 msgstr "free: underløb detekteret, mh_nbytes uden for interval"
 
-#: lib/malloc/malloc.c:902
+#: lib/malloc/malloc.c:906
 msgid "free: start and end chunk sizes differ"
 msgstr "free: størrelse på start- og slut-bid afviger"
 
-#: lib/malloc/malloc.c:1001
+#: lib/malloc/malloc.c:1005
 msgid "realloc: called with unallocated block argument"
 msgstr "realloc: kaldt med ikke-allokeret blokargument"
 
-#: lib/malloc/malloc.c:1016
+#: lib/malloc/malloc.c:1020
 msgid "realloc: underflow detected; mh_nbytes out of range"
 msgstr "realloc: underløb detekteret, mh_nbytes uden for interval"
 
-#: lib/malloc/malloc.c:1022
+#: lib/malloc/malloc.c:1026
 msgid "realloc: start and end chunk sizes differ"
 msgstr "realloc: størrelse på start- og slut-bid afviger"
 
-#: lib/malloc/table.c:177
+#: lib/malloc/table.c:194
 #, c-format
 msgid "register_alloc: alloc table is full with FIND_ALLOC?\n"
 msgstr "register_alloc: alloc-tabel er fyldt med FIND_ALLOC?\n"
 
-#: lib/malloc/table.c:184
+#: lib/malloc/table.c:203
 #, c-format
 msgid "register_alloc: %p already in table as allocated?\n"
 msgstr "register_alloc: %p allerede i tabel som allokeret?\n"
 
-#: lib/malloc/table.c:220
+#: lib/malloc/table.c:256
 #, c-format
 msgid "register_free: %p already in table as free?\n"
 msgstr "register_free: %p allerede i tabel som fri?\n"
@@ -1315,15 +1330,15 @@ msgstr "xrealloc: %s:%d: kan ikke allokere %lu bytes"
 msgid "setlocale: %s: cannot change locale (%s): %s"
 msgstr "xrealloc: %s:%d: kan ikke allokere %lu bytes"
 
-#: mailcheck.c:433
+#: mailcheck.c:439
 msgid "You have mail in $_"
 msgstr "Du har post i $_"
 
-#: mailcheck.c:458
+#: mailcheck.c:464
 msgid "You have new mail in $_"
 msgstr "Du har ny post i $_"
 
-#: mailcheck.c:474
+#: mailcheck.c:480
 #, c-format
 msgid "The mail in %s has been read\n"
 msgstr "Posten i %s er blevet læst\n"
@@ -1357,108 +1372,108 @@ msgstr ""
 msgid "make_redirection: redirection instruction `%d' out of range"
 msgstr "make_direction: videresendelsesinstruktion \"%d\" uden for interval"
 
-#: parse.y:3173 parse.y:3448
+#: parse.y:3209 parse.y:3480
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "uventet EOF mens der ledtes efter samhørende \"%c\""
 
-#: parse.y:4038
+#: parse.y:4086
 msgid "unexpected EOF while looking for `]]'"
 msgstr "uventet EOF mens der ledtes efter \"]]\""
 
 # word   A sequence of characters considered as  a  single  unit  by  the
 #        shell.  Also known as a token.
 # Jeg har valgt udtryk
-#: parse.y:4043
+#: parse.y:4091
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr "syntaksfejl i betingelsesudtryk: uventet element \"%s\""
 
-#: parse.y:4047
+#: parse.y:4095
 msgid "syntax error in conditional expression"
 msgstr "syntaksfejl i betingelsesudtryk"
 
 # word   A sequence of characters considered as  a  single  unit  by  the
 #        shell.  Also known as a token.
-#: parse.y:4125
+#: parse.y:4173
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr "uventet element \"%s\", forventede \")\""
 
-#: parse.y:4129
+#: parse.y:4177
 msgid "expected `)'"
 msgstr "forventede \")\""
 
-#: parse.y:4157
+#: parse.y:4205
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr "uventet argument \"%s\" til unær betingelsesoperator"
 
-#: parse.y:4161
+#: parse.y:4209
 msgid "unexpected argument to conditional unary operator"
 msgstr "uventet argument til unær betingelsesoperator"
 
-#: parse.y:4207
+#: parse.y:4255
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr "uventet udtryk \"%s\", ventede binær betingelsesoperator"
 
-#: parse.y:4211
+#: parse.y:4259
 msgid "conditional binary operator expected"
 msgstr "ventedet binær betingelsesoperator"
 
-#: parse.y:4233
+#: parse.y:4281
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr "uventet argument \"%s\" til binær betingelsesoperator"
 
-#: parse.y:4237
+#: parse.y:4285
 msgid "unexpected argument to conditional binary operator"
 msgstr "uventet argument til binær betingelsesoperator"
 
-#: parse.y:4248
+#: parse.y:4296
 #, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr "uventet udtryk \"%c\" i betingelseskommando"
 
-#: parse.y:4251
+#: parse.y:4299
 #, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr "uventet udtryk \"%s\" i betingelseskommando"
 
-#: parse.y:4255
+#: parse.y:4303
 #, c-format
 msgid "unexpected token %d in conditional command"
 msgstr "uventet udtryk \"%d\" i betingelseskommando"
 
-#: parse.y:5590
+#: parse.y:5649
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "syntaksfejl nær uventet udtryk \"%s\""
 
-#: parse.y:5608
+#: parse.y:5667
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "syntaksfejl nær \"%s\""
 
-#: parse.y:5618
+#: parse.y:5677
 msgid "syntax error: unexpected end of file"
 msgstr "syntaksfejl: uventet slutning på fil"
 
-#: parse.y:5618
+#: parse.y:5677
 msgid "syntax error"
 msgstr "syntaksfejl"
 
-#: parse.y:5680
+#: parse.y:5739
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "Brug \"%s\" for at forlade skallen.\n"
 
-#: parse.y:5842
+#: parse.y:5901
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "uventet EOF mens der ledtes efter samhørende \")\""
 
-#: pcomplete.c:1079
+#: pcomplete.c:1093
 #, c-format
 msgid "completion: function `%s' not found"
 msgstr "completion: funktion \"%s\" ikke fundet"
@@ -1487,71 +1502,71 @@ msgstr ""
 msgid "xtrace fd (%d) != fileno xtrace fp (%d)"
 msgstr ""
 
-#: print_cmd.c:1503
+#: print_cmd.c:1518
 #, c-format
 msgid "cprintf: `%c': invalid format character"
 msgstr "cprintf: \"%c\": ugyldigt formateringstegn"
 
-#: redir.c:122
+#: redir.c:123 redir.c:170
 msgid "file descriptor out of range"
 msgstr "fil-deskriptor uden for interval"
 
-#: redir.c:178
+#: redir.c:177
 #, c-format
 msgid "%s: ambiguous redirect"
 msgstr "%s: tvetydig videresendelse"
 
-#: redir.c:182
+#: redir.c:181
 #, c-format
 msgid "%s: cannot overwrite existing file"
 msgstr "%s: kan ikke overskrive eksisterende fil"
 
-#: redir.c:187
+#: redir.c:186
 #, c-format
 msgid "%s: restricted: cannot redirect output"
 msgstr "%s: begrænset: kan ikke videresende output"
 
-#: redir.c:192
+#: redir.c:191
 #, c-format
 msgid "cannot create temp file for here-document: %s"
 msgstr "kan ikke danne midlertidig fil til here-dokument: %s"
 
-#: redir.c:196
+#: redir.c:195
 #, fuzzy, c-format
 msgid "%s: cannot assign fd to variable"
 msgstr "%s: kan ikke tildele liste til arrayelementer"
 
-#: redir.c:548
+#: redir.c:582
 msgid "/dev/(tcp|udp)/host/port not supported without networking"
 msgstr "/dev/(tcp|udp)/vært/port ikke understøttet uden netværk"
 
-#: redir.c:818 redir.c:930 redir.c:993 redir.c:1142
+#: redir.c:861 redir.c:971 redir.c:1032 redir.c:1194
 msgid "redirection error: cannot duplicate fd"
 msgstr "videresendelsesfejl: kan ikke duplikere fd"
 
-#: shell.c:337
+#: shell.c:339
 msgid "could not find /tmp, please create!"
 msgstr "kan ikke finde /tmp, opret venligst mappen!"
 
-#: shell.c:341
+#: shell.c:343
 msgid "/tmp must be a valid directory name"
 msgstr "/tmp skal være et gyldigt mappenavn"
 
-#: shell.c:888
+#: shell.c:890
 #, c-format
 msgid "%c%c: invalid option"
 msgstr "%c%c: ugyldigt tilvalg"
 
-#: shell.c:1662
+#: shell.c:1682
 msgid "I have no name!"
 msgstr "Jeg har ikke noget navn!"
 
-#: shell.c:1807
+#: shell.c:1827
 #, c-format
 msgid "GNU bash, version %s-(%s)\n"
 msgstr "GNU bash, version %s-(%s)\n"
 
-#: shell.c:1808
+#: shell.c:1828
 #, c-format
 msgid ""
 "Usage:\t%s [GNU long option] [option] ...\n"
@@ -1560,42 +1575,43 @@ msgstr ""
 "Brug:\t%s [langt GNU-tilvalg] [tilvalg] ...\n"
 "\t%s [langt GNU-tilvalg] [tilvalg] skript-fil ...\n"
 
-#: shell.c:1810
+#: shell.c:1830
 msgid "GNU long options:\n"
 msgstr "Lange GNU-tilvalg:\n"
 
-#: shell.c:1814
+#: shell.c:1834
 msgid "Shell options:\n"
 msgstr "Skal-tilvalg:\n"
 
-#: shell.c:1815
-msgid "\t-irsD or -c command or -O shopt_option\t\t(invocation only)\n"
+#: shell.c:1835
+#, fuzzy
+msgid "\t-ilrsD or -c command or -O shopt_option\t\t(invocation only)\n"
 msgstr "\t-irsD eller -c kommando eller -O shopt_option\t\t(kun programkald)\n"
 
-#: shell.c:1830
+#: shell.c:1850
 #, c-format
 msgid "\t-%s or -o option\n"
 msgstr "\tTilvalg -%s eller -o\n"
 
-#: shell.c:1836
+#: shell.c:1856
 #, c-format
 msgid "Type `%s -c \"help set\"' for more information about shell options.\n"
 msgstr ""
 "Skriv \"%s -c \"help set\"\" for at få mere information om skaltilvalg.\n"
 
-#: shell.c:1837
+#: shell.c:1857
 #, c-format
 msgid "Type `%s -c help' for more information about shell builtin commands.\n"
 msgstr ""
 "Skriv \"%s -c help\" for at få mere information om indbyggede "
 "skalkommandoer.\n"
 
-#: shell.c:1838
+#: shell.c:1858
 #, c-format
 msgid "Use the `bashbug' command to report bugs.\n"
 msgstr "Brug kommandoen \"bashbug\" til at rapportere fejl.\n"
 
-#: sig.c:647
+#: sig.c:679
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
 msgstr "sigprocmask: %d: ugyldig handling"
@@ -1771,129 +1787,134 @@ msgstr "Ukendt signal #"
 msgid "Unknown Signal #%d"
 msgstr "Ukendt signal #%d"
 
-#: subst.c:1335 subst.c:1506
+#: subst.c:1352 subst.c:1510
 #, c-format
 msgid "bad substitution: no closing `%s' in %s"
 msgstr "dårlig udskiftning: ingen lukkende \"%s\" i %s"
 
-#: subst.c:2801
+#: subst.c:2823
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr "%s: kan ikke tildele liste til arrayelementer"
 
-#: subst.c:4991 subst.c:5007
+#: subst.c:4964 subst.c:4980
 msgid "cannot make pipe for process substitution"
 msgstr "kan ikke lave datakanal (pipe) til procesudskiftning"
 
-#: subst.c:5039
+#: subst.c:5012
 msgid "cannot make child for process substitution"
 msgstr "kan ikke danne underproces til procesudskiftning"
 
-#: subst.c:5084
+#: subst.c:5057
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "kan ikke åbne navngiven datakanal (pipe) %s til læsning"
 
-#: subst.c:5086
+#: subst.c:5059
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "kan ikke åbne navngiven datakanal (pipe) %s til skrivning"
 
-#: subst.c:5104
+#: subst.c:5077
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "kan ikke duplikere navngiven datakanal (pipe) %s som %d"
 
-#: subst.c:5296
+#: subst.c:5273
 msgid "cannot make pipe for command substitution"
 msgstr "kan ikke danne datakanal (pipe) til kommandoudskiftning"
 
-#: subst.c:5334
+#: subst.c:5311
 msgid "cannot make child for command substitution"
 msgstr "kan ikke danne underproces til kommandoudskiftning"
 
-#: subst.c:5351
+#: subst.c:5330
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr "command_substitute: kan ikke duplikere datakanal (pipe) som fd 1"
 
-#: subst.c:5875
+#: subst.c:5733 subst.c:7900
+#, fuzzy, c-format
+msgid "%s: invalid variable name for name reference"
+msgstr "%d: ugyldig filbeskrivelse: %s"
+
+#: subst.c:5926
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: parameter null eller ikke indstillet"
 
-#: subst.c:6141 subst.c:6156
+#: subst.c:6198 subst.c:6213
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: understreng-udtryk < 0"
 
-#: subst.c:7284
+#: subst.c:7356
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: dårlig udskiftning"
 
-#: subst.c:7361
+#: subst.c:7433
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: kan ikke tildele på denne måde"
 
-#: subst.c:7697
+#: subst.c:7767
 msgid ""
 "future versions of the shell will force evaluation as an arithmetic "
 "substitution"
 msgstr ""
 
-#: subst.c:8165
+#: subst.c:8271
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "dårlig udskiftning: ingen lukkende \"`\" i %s"
 
-#: subst.c:9056
+#: subst.c:9172
 #, c-format
 msgid "no match: %s"
 msgstr "intet match: %s"
 
-#: test.c:146
+#: test.c:147
 msgid "argument expected"
 msgstr "argument forventet"
 
-#: test.c:155
+#: test.c:156
 #, c-format
 msgid "%s: integer expression expected"
 msgstr "%s: heltalsudtryk forventet"
 
-#: test.c:263
+#: test.c:264
 msgid "`)' expected"
 msgstr "\")\" forventet"
 
-#: test.c:265
+#: test.c:266
 #, c-format
 msgid "`)' expected, found %s"
 msgstr "\")\" forventet, fandt %s"
 
-#: test.c:280 test.c:698 test.c:701
+#: test.c:281 test.c:721 test.c:724
 #, c-format
 msgid "%s: unary operator expected"
 msgstr "%s: unær operator forventet"
 
-#: test.c:449 test.c:741
+#: test.c:468 test.c:764
 #, c-format
 msgid "%s: binary operator expected"
 msgstr "%s: binær operator forventet"
 
-#: test.c:816
+#: test.c:839
 msgid "missing `]'"
 msgstr "manglende \"]\""
 
-#: trap.c:209
+#: trap.c:217
 msgid "invalid signal number"
 msgstr "ugyldigt signalnummer"
 
-#: trap.c:329
+#: trap.c:348
 #, c-format
 msgid "run_pending_traps: bad value in trap_list[%d]: %p"
 msgstr "run_pending_traps: dårlig værdi i trap_list[%d]: %p"
 
-#: trap.c:333
+#: trap.c:352
 #, c-format
 msgid ""
 "run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself"
@@ -1901,73 +1922,83 @@ msgstr ""
 "run_pending_traps: signalhåndtering er SIG_DFL, gensender %d (%s) til mig "
 "selv"
 
-#: trap.c:379
+#: trap.c:398
 #, c-format
 msgid "trap_handler: bad signal %d"
 msgstr "trap_handler: ugyldigt signal %d"
 
-#: variables.c:366
+#: variables.c:380
 #, c-format
 msgid "error importing function definition for `%s'"
 msgstr "fejl under importering af funktionsdefinition for \"%s\""
 
-#: variables.c:764
+#: variables.c:778
 #, c-format
 msgid "shell level (%d) too high, resetting to 1"
 msgstr "skalniveau (%d) for højt, genindstiller til 1"
 
-#: variables.c:1941
+#: variables.c:2198
 msgid "make_local_variable: no function context at current scope"
 msgstr "make_local_variable: ingen funktionskontekst ved nuværende navneområde"
 
-#: variables.c:3192
+#: variables.c:2217
+#, fuzzy, c-format
+msgid "%s: variable may not be assigned value"
+msgstr "%s: kan ikke tildele liste til arrayelementer"
+
+#: variables.c:3554
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: ingen funktionskontekst ved nuværende navneområde"
 
-#: variables.c:3437
+#: variables.c:3799
 #, fuzzy, c-format
 msgid "%s has null exportstr"
 msgstr "%s: parameter null eller ikke indstillet"
 
-#: variables.c:3442 variables.c:3451
+#: variables.c:3804 variables.c:3813
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "ugyldigt tegn %d i exportstr for %s"
 
-#: variables.c:3457
+#: variables.c:3819
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "intet \"=\" i exportstr for %s"
 
-#: variables.c:3917
+#: variables.c:4252
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr "pop_var_context: hoved af shell_variables er ikke en funktionskontekst"
 
-#: variables.c:3930
+#: variables.c:4265
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: ingen global_variables-kontekst"
 
-#: variables.c:4004
+#: variables.c:4339
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr ""
 "pop_scope: hoved af shell_variables er ikke et midlertidigt miljønavnerum"
 
-#: variables.c:4821
+#: variables.c:5165
 #, fuzzy, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: kan ikke åbne: %s"
 
-#: variables.c:4826
+#: variables.c:5170
 #, fuzzy, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%d: ugyldig filbeskrivelse: %s"
 
-#: version.c:46
+#: variables.c:5215
+#, fuzzy, c-format
+msgid "%s: %s: compatibility value out of range"
+msgstr "%s: %s udenfor rækkevidde"
+
+#: version.c:46 version2.c:46
 #, fuzzy
-msgid "Copyright (C) 2011 Free Software Foundation, Inc."
+msgid "Copyright (C) 2012 Free Software Foundation, Inc."
 msgstr "Ophavsret (C) 2009 Free Software Foundation, Inc."
 
-#: version.c:47
+#: version.c:47 version2.c:47
 msgid ""
 "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl."
 "html>\n"
@@ -1975,34 +2006,20 @@ msgstr ""
 "Licens GPLv3+: GNU GPL version 3 eller senere <http://gnu.org/licenses/gpl."
 "html>\n"
 
-#: version.c:86 version2.c:83
+#: version.c:86 version2.c:86
 #, c-format
 msgid "GNU bash, version %s (%s)\n"
 msgstr "GNU bash, version %s (%s)\n"
 
-#: version.c:91 version2.c:88
-#, c-format
-msgid "This is free software; you are free to change and redistribute it.\n"
+#: version.c:91 version2.c:91
+#, fuzzy
+msgid "This is free software; you are free to change and redistribute it."
 msgstr "Dette er fri software; du kan frit ændre eller redistribuere det.\n"
 
-#: version.c:92 version2.c:89
-#, c-format
-msgid "There is NO WARRANTY, to the extent permitted by law.\n"
+#: version.c:92 version2.c:92
+#, fuzzy
+msgid "There is NO WARRANTY, to the extent permitted by law."
 msgstr "Der er INGEN GARANTI i det omfang loven tillader.\n"
-
-#: version2.c:86
-#, fuzzy, c-format
-msgid "Copyright (C) 2009 Free Software Foundation, Inc.\n"
-msgstr "Ophavsret (C) 2009 Free Software Foundation, Inc."
-
-#: version2.c:87
-#, fuzzy, c-format
-msgid ""
-"License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl."
-"html>\n"
-msgstr ""
-"Licens GPLv3+: GNU GPL version 3 eller senere <http://gnu.org/licenses/gpl."
-"html>\n"
 
 #: xmalloc.c:91
 #, fuzzy, c-format
@@ -2085,7 +2102,7 @@ msgstr "command [-pVv] kommando [arg ...]"
 
 #: builtins.c:76
 #, fuzzy
-msgid "declare [-aAfFgilrtux] [-p] [name[=value] ...]"
+msgid "declare [-aAfFgilnrtux] [-p] [name[=value] ...]"
 msgstr "declare [-aAfFilrtux] [-p] [navn[=værdi] ...]"
 
 #: builtins.c:78
@@ -2199,7 +2216,8 @@ msgid "set [-abefhkmnptuvxBCHP] [-o option-name] [--] [arg ...]"
 msgstr "set [--abefhkmnptuvxBCHP] [-o tilvalgsnavn] [arg ...]"
 
 #: builtins.c:142
-msgid "unset [-f] [-v] [name ...]"
+#, fuzzy
+msgid "unset [-f] [-v] [-n] [name ...]"
 msgstr "unset [-f] [-v] [navn ...]"
 
 #: builtins.c:144
@@ -2258,12 +2276,13 @@ msgstr "umask [-p] [-S] [tilstand]"
 
 #: builtins.c:175
 #, fuzzy
-msgid "wait [id ...]"
+msgid "wait [-n] [id ...]"
 msgstr "wait [id]"
 
 #: builtins.c:179
-msgid "wait [pid]"
-msgstr "wait [pid]"
+#, fuzzy
+msgid "wait [pid ...]"
+msgstr "wait [id]"
 
 #: builtins.c:182
 msgid "for NAME [in WORDS ... ] ; do COMMANDS; done"
@@ -2813,6 +2832,7 @@ msgid ""
 "      -A\tto make NAMEs associative arrays (if supported)\n"
 "      -i\tto make NAMEs have the `integer' attribute\n"
 "      -l\tto convert NAMEs to lower case on assignment\n"
+"      -n\tmake NAME a reference to the variable named by its value\n"
 "      -r\tto make NAMEs readonly\n"
 "      -t\tto make NAMEs have the `trace' attribute\n"
 "      -u\tto convert NAMEs to upper case on assignment\n"
@@ -2828,7 +2848,8 @@ msgid ""
 "    command.  The `-g' option suppresses this behavior.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success unless an invalid option is supplied or an error occurs."
+"    Returns success unless an invalid option is supplied or a variable\n"
+"    assignment error occurs."
 msgstr ""
 "Indstil variabelværdier og -attributter\n"
 "    \n"
@@ -2867,7 +2888,7 @@ msgstr ""
 "hvis\n"
 "    der opstår en fejl."
 
-#: builtins.c:523
+#: builtins.c:525
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
@@ -2877,7 +2898,8 @@ msgstr ""
 "    \n"
 "    Forældet. Læs i \"help declare\"."
 
-#: builtins.c:531
+#: builtins.c:533
+#, fuzzy
 msgid ""
 "Define local variables.\n"
 "    \n"
@@ -2888,8 +2910,8 @@ msgid ""
 "    only to the function where they are defined and its children.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns success unless an invalid option is supplied, an error occurs,\n"
-"    or the shell is not executing a function."
+"    Returns success unless an invalid option is supplied, a variable\n"
+"    assignment error occurs, or the shell is not executing a function."
 msgstr ""
 "Definer lokale variable.\n"
 "    \n"
@@ -2905,7 +2927,7 @@ msgstr ""
 "    Returnerer succes med mindre der angives et ugyldigt tilvalg, hvis der\n"
 "    opstår en fejl, eller hvis skallen ikke eksekverer en funktion."
 
-#: builtins.c:548
+#: builtins.c:550
 #, fuzzy
 msgid ""
 "Write arguments to the standard output.\n"
@@ -2969,7 +2991,7 @@ msgstr ""
 "      Afslutningsstatus:\n"
 "      Returnerer succes med mindre der opstår en skrivefejl."
 
-#: builtins.c:584
+#: builtins.c:586
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -2991,7 +3013,7 @@ msgstr ""
 "    Afslutningsstatus:\n"
 "    Returnerer succes med mindre der opstår en skrivefejl."
 
-#: builtins.c:599
+#: builtins.c:601
 msgid ""
 "Enable and disable shell builtins.\n"
 "    \n"
@@ -3046,7 +3068,7 @@ msgstr ""
 "    Returnerer succes med mindre NAVN ikke er en skal-indbygget eller hvis\n"
 "    der opstår en fejl."
 
-#: builtins.c:627
+#: builtins.c:629
 msgid ""
 "Execute arguments as a shell command.\n"
 "    \n"
@@ -3068,7 +3090,7 @@ msgstr ""
 "er\n"
 "    null."
 
-#: builtins.c:639
+#: builtins.c:641
 msgid ""
 "Parse option arguments.\n"
 "    \n"
@@ -3148,7 +3170,7 @@ msgstr ""
 "    Returnerer succes hvis et tilvalg findes, fejler hvis afslutningen\n"
 "    af tilvalgene nås eller hvis der opstår en fejl."
 
-#: builtins.c:681
+#: builtins.c:683
 msgid ""
 "Replace the shell with the given command.\n"
 "    \n"
@@ -3191,7 +3213,7 @@ msgstr ""
 "der\n"
 "    opstår en omdirigeringsfejl."
 
-#: builtins.c:702
+#: builtins.c:704
 msgid ""
 "Exit the shell.\n"
 "    \n"
@@ -3203,7 +3225,7 @@ msgstr ""
 "    Afslut skallen med status N. Hvis N udelades vil afslutningsstatus\n"
 "    blive den samme som sidst eksekverede kommando."
 
-#: builtins.c:711
+#: builtins.c:713
 msgid ""
 "Exit a login shell.\n"
 "    \n"
@@ -3217,7 +3239,7 @@ msgstr ""
 "hvis\n"
 "    den ikke eksekveres i en logindskal."
 
-#: builtins.c:721
+#: builtins.c:723
 msgid ""
 "Display or execute commands from the history list.\n"
 "    \n"
@@ -3278,7 +3300,7 @@ msgstr ""
 "hvis\n"
 "    der opstod en fejl."
 
-#: builtins.c:751
+#: builtins.c:753
 msgid ""
 "Move job to the foreground.\n"
 "    \n"
@@ -3301,7 +3323,7 @@ msgstr ""
 "der\n"
 "    opstår fejl."
 
-#: builtins.c:766
+#: builtins.c:768
 msgid ""
 "Move jobs to the background.\n"
 "    \n"
@@ -3326,7 +3348,7 @@ msgstr ""
 "hvis\n"
 "    der opstår en fejl."
 
-#: builtins.c:780
+#: builtins.c:782
 msgid ""
 "Remember or display program locations.\n"
 "    \n"
@@ -3370,7 +3392,7 @@ msgstr ""
 "angives\n"
 "    et ugyldig tilvalg."
 
-#: builtins.c:805
+#: builtins.c:807
 msgid ""
 "Display information about builtin commands.\n"
 "    \n"
@@ -3411,7 +3433,7 @@ msgstr ""
 "    Returnerer succes med mindre MØNSTER ikke kan findes, eller hvis der\n"
 "    angives et ugyldigt tilvalg."
 
-#: builtins.c:829
+#: builtins.c:831
 msgid ""
 "Display or manipulate the history list.\n"
 "    \n"
@@ -3479,7 +3501,7 @@ msgstr ""
 "hvis\n"
 "    der opstår en fejl."
 
-#: builtins.c:865
+#: builtins.c:867
 msgid ""
 "Display status of jobs.\n"
 "    \n"
@@ -3528,7 +3550,7 @@ msgstr ""
 "der\n"
 "    opstår en fejl. Hvis -x bruges returneres afslutningsstatus for KOMMANDO."
 
-#: builtins.c:892
+#: builtins.c:894
 msgid ""
 "Remove jobs from current shell.\n"
 "    \n"
@@ -3559,7 +3581,7 @@ msgstr ""
 "    Afslutningsstatus:\n"
 "    Returnerer succes med mindre et ugyldigt tilvalg eller JOBSPEC angives."
 
-#: builtins.c:911
+#: builtins.c:913
 msgid ""
 "Send a signal to a job.\n"
 "    \n"
@@ -3605,7 +3627,7 @@ msgstr ""
 "der\n"
 "    opstår en fejl."
 
-#: builtins.c:934
+#: builtins.c:936
 #, fuzzy
 msgid ""
 "Evaluate arithmetic expressions.\n"
@@ -3692,7 +3714,7 @@ msgstr ""
 "    Hvis det sidste ARG evalueres til 0, vil \"let\" returnere 1, ellers\n"
 "    returneres 0."
 
-#: builtins.c:979
+#: builtins.c:981
 #, fuzzy
 msgid ""
 "Read a line from the standard input and split it into fields.\n"
@@ -3728,7 +3750,7 @@ msgid ""
 "      -s\t\tdo not echo input coming from a terminal\n"
 "      -t timeout\ttime out and return failure if a complete line of input "
 "is\n"
-"    \t\tnot read withint TIMEOUT seconds.  The value of the TMOUT\n"
+"    \t\tnot read within TIMEOUT seconds.  The value of the TMOUT\n"
 "    \t\tvariable is the default timeout.  TIMEOUT may be a\n"
 "    \t\tfractional number.  If TIMEOUT is 0, read returns immediately,\n"
 "    \t\twithout trying to read any data, returning success only if\n"
@@ -3788,7 +3810,7 @@ msgstr ""
 "indtræffer,\n"
 "    eller hvis en ugyldig fildeskriptor gives som argument til -u."
 
-#: builtins.c:1024
+#: builtins.c:1026
 msgid ""
 "Return from a shell function.\n"
 "    \n"
@@ -3813,7 +3835,7 @@ msgstr ""
 "en\n"
 "    funktion eller et skript."
 
-#: builtins.c:1037
+#: builtins.c:1039
 #, fuzzy
 msgid ""
 "Set or unset values of shell options and positional parameters.\n"
@@ -3997,7 +4019,8 @@ msgstr ""
 "    Afslutningsstatus:\n"
 "    Returnerer succes med mindre der angives et ugyldigt tilvalg."
 
-#: builtins.c:1122
+#: builtins.c:1124
+#, fuzzy
 msgid ""
 "Unset values and attributes of shell variables and functions.\n"
 "    \n"
@@ -4006,6 +4029,8 @@ msgid ""
 "    Options:\n"
 "      -f\ttreat each NAME as a shell function\n"
 "      -v\ttreat each NAME as a shell variable\n"
+"      -n\ttreat each NAME as a name reference and unset the variable itself\n"
+"    \trather than the variable it references\n"
 "    \n"
 "    Without options, unset first tries to unset a variable, and if that "
 "fails,\n"
@@ -4036,7 +4061,7 @@ msgstr ""
 "et\n"
 "    givent navn er skrivebeskyttet."
 
-#: builtins.c:1142
+#: builtins.c:1146
 msgid ""
 "Set export attribute for shell variables.\n"
 "    \n"
@@ -4072,7 +4097,7 @@ msgstr ""
 "    Returnerer succes med mindre der angives et ugyldigt tilvalg eller hvis\n"
 "    NAVN er ugyldig."
 
-#: builtins.c:1161
+#: builtins.c:1165
 msgid ""
 "Mark shell variables as unchangeable.\n"
 "    \n"
@@ -4110,7 +4135,7 @@ msgstr ""
 "    Returnerer succes med mindre der angives et ugyldigt tilvalg eller hvis\n"
 "    NAVN er ugyldigt."
 
-#: builtins.c:1182
+#: builtins.c:1186
 msgid ""
 "Shift positional parameters.\n"
 "    \n"
@@ -4129,7 +4154,7 @@ msgstr ""
 "    Afslutningsstatus:\n"
 "    Returnerer succes med mindre N er negativ eller større end $#."
 
-#: builtins.c:1194 builtins.c:1209
+#: builtins.c:1198 builtins.c:1213
 msgid ""
 "Execute commands from a file in the current shell.\n"
 "    \n"
@@ -4155,7 +4180,7 @@ msgstr ""
 "hvis\n"
 "    FILNAVN ikke kan læses."
 
-#: builtins.c:1225
+#: builtins.c:1229
 msgid ""
 "Suspend shell execution.\n"
 "    \n"
@@ -4182,7 +4207,7 @@ msgstr ""
 "der\n"
 "    opstår en fejl."
 
-#: builtins.c:1241
+#: builtins.c:1245
 #, fuzzy
 msgid ""
 "Evaluate conditional expression.\n"
@@ -4248,6 +4273,8 @@ msgid ""
 "    \n"
 "      -o OPTION      True if the shell option OPTION is enabled.\n"
 "      -v VAR\t True if the shell variable VAR is set\n"
+"      -R VAR\t True if the shell variable VAR is set and is a name "
+"reference.\n"
 "      ! EXPR         True if expr is false.\n"
 "      EXPR1 -a EXPR2 True if both expr1 AND expr2 are true.\n"
 "      EXPR1 -o EXPR2 True if either expr1 OR expr2 is true.\n"
@@ -4342,7 +4369,7 @@ msgstr ""
 "    Returnerer succes hvis UDTRYK evalueres til sand, og fejler hvis UDTRYK\n"
 "    evalueres til falsk eller hvis der gives et ugyldigt argument."
 
-#: builtins.c:1321
+#: builtins.c:1326
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -4355,7 +4382,7 @@ msgstr ""
 "sidste\n"
 "    argument skal være \"]\", for at den passer til den åbnende \"[\"."
 
-#: builtins.c:1330
+#: builtins.c:1335
 msgid ""
 "Display process times.\n"
 "    \n"
@@ -4375,7 +4402,7 @@ msgstr ""
 "    Afslutningsstatus:\n"
 "    Lykkes altid."
 
-#: builtins.c:1342
+#: builtins.c:1347
 #, fuzzy
 msgid ""
 "Trap signals and other events.\n"
@@ -4456,7 +4483,7 @@ msgstr ""
 "angivet\n"
 "    et ugyldigt tilvalg."
 
-#: builtins.c:1378
+#: builtins.c:1383
 msgid ""
 "Display information about command type.\n"
 "    \n"
@@ -4518,7 +4545,7 @@ msgstr ""
 "enkelt\n"
 "    ikke findes."
 
-#: builtins.c:1409
+#: builtins.c:1414
 #, fuzzy
 msgid ""
 "Modify shell resource limits.\n"
@@ -4612,7 +4639,7 @@ msgstr ""
 "der\n"
 "    opstår en fejl."
 
-#: builtins.c:1457
+#: builtins.c:1462
 msgid ""
 "Display or set file mode mask.\n"
 "    \n"
@@ -4650,7 +4677,7 @@ msgstr ""
 "ugyldigt\n"
 "    tilvalg angives."
 
-#: builtins.c:1477
+#: builtins.c:1482
 #, fuzzy
 msgid ""
 "Wait for job completion and return exit status.\n"
@@ -4662,6 +4689,9 @@ msgid ""
 "    status is zero.  If ID is a a job specification, waits for all "
 "processes\n"
 "    in that job's pipeline.\n"
+"    \n"
+"    If the -n option is supplied, waits for the next job to terminate and\n"
+"    returns its exit status.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns the status of the last ID; fails if ID is invalid or an invalid\n"
@@ -4682,18 +4712,20 @@ msgstr ""
 "angives\n"
 "    et ugyldigt tilvalg."
 
-#: builtins.c:1495
+#: builtins.c:1503
+#, fuzzy
 msgid ""
 "Wait for process completion and return exit status.\n"
 "    \n"
-"    Waits for the specified process and reports its termination status.  If\n"
-"    PID is not given, all currently active child processes are waited for,\n"
-"    and the return code is zero.  PID must be a process ID.\n"
+"    Waits for each process specified by a PID and reports its termination "
+"status.\n"
+"    If PID is not given, waits for all currently active child processes,\n"
+"    and the return status is zero.  PID must be a process ID.\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns the status of ID; fails if ID is invalid or an invalid option "
-"is\n"
-"    given."
+"    Returns the status of the last PID; fails if PID is invalid or an "
+"invalid\n"
+"    option is given."
 msgstr ""
 "Venter på færdiggørelse af proces og returnerer dens afslutningsstatus.\n"
 "    \n"
@@ -4706,7 +4738,7 @@ msgstr ""
 "    Returnerer statussen for ID, fejler hvis ID er ugyldig eller hvis der\n"
 "    angives et ugyldigt tilvalg."
 
-#: builtins.c:1510
+#: builtins.c:1518
 msgid ""
 "Execute commands for each member in a list.\n"
 "    \n"
@@ -4731,7 +4763,7 @@ msgstr ""
 "    Afslutningsstatus:\n"
 "    Returnerer statussen for den sidst eksekverede kommando."
 
-#: builtins.c:1524
+#: builtins.c:1532
 msgid ""
 "Arithmetic for loop.\n"
 "    \n"
@@ -4761,7 +4793,7 @@ msgstr ""
 "    Afslutningsstatus:\n"
 "    Returnerer afslutningsstatussen for den sidst eksekverede kommando."
 
-#: builtins.c:1542
+#: builtins.c:1550
 msgid ""
 "Select words from a list and execute commands.\n"
 "    \n"
@@ -4799,7 +4831,7 @@ msgstr ""
 "    Afslutningsstatus:\n"
 "    Returnerer statussen fra den sidst eksekverede kommando."
 
-#: builtins.c:1563
+#: builtins.c:1571
 msgid ""
 "Report time consumed by pipeline's execution.\n"
 "    \n"
@@ -4828,7 +4860,7 @@ msgstr ""
 "    Afslutningsstatus:\n"
 "    Afslutningsstatus er afslutningsstatus for DATAKANAL."
 
-#: builtins.c:1580
+#: builtins.c:1588
 msgid ""
 "Execute commands based on pattern matching.\n"
 "    \n"
@@ -4847,7 +4879,7 @@ msgstr ""
 "    Afslutningsstatus:\n"
 "    Returnerer statussen fra den sidst eksekverede kommando."
 
-#: builtins.c:1592
+#: builtins.c:1600
 msgid ""
 "Execute commands based on conditional.\n"
 "    \n"
@@ -4886,7 +4918,7 @@ msgstr ""
 "    Afslutningsstatus:\n"
 "    Returnerer statussen fra den sidst eksekverede kommando."
 
-#: builtins.c:1609
+#: builtins.c:1617
 msgid ""
 "Execute commands as long as a test succeeds.\n"
 "    \n"
@@ -4904,7 +4936,7 @@ msgstr ""
 "    Afslutningsstatus:\n"
 "    Returnerer statussen fra den sidst eksekverede kommando."
 
-#: builtins.c:1621
+#: builtins.c:1629
 msgid ""
 "Execute commands as long as a test does not succeed.\n"
 "    \n"
@@ -4922,7 +4954,7 @@ msgstr ""
 "    Afslutningsstatus:\n"
 "    Returnerer statussen fra den sidst eksekverede kommando."
 
-#: builtins.c:1633
+#: builtins.c:1641
 msgid ""
 "Create a coprocess named NAME.\n"
 "    \n"
@@ -4945,7 +4977,7 @@ msgstr ""
 "    Afslutningsstatus:\n"
 "    Returnerer afslutningsstatussen for KOMMANDO."
 
-#: builtins.c:1647
+#: builtins.c:1655
 msgid ""
 "Define shell function.\n"
 "    \n"
@@ -4969,7 +5001,7 @@ msgstr ""
 "    Afslutningsstatus:\n"
 "    Returnerer succes med mindre NAVN er skrivebeskyttet."
 
-#: builtins.c:1661
+#: builtins.c:1669
 msgid ""
 "Group commands as a unit.\n"
 "    \n"
@@ -4987,7 +5019,7 @@ msgstr ""
 "    Afslutningsstatus:\n"
 "    Returnerer statussen fra den sidst eksekverede kommando."
 
-#: builtins.c:1673
+#: builtins.c:1681
 msgid ""
 "Resume job in foreground.\n"
 "    \n"
@@ -5014,7 +5046,7 @@ msgstr ""
 "    Afslutningsstatus:\n"
 "    Returnerer statussen af det genoptagede job."
 
-#: builtins.c:1688
+#: builtins.c:1696
 msgid ""
 "Evaluate arithmetic expression.\n"
 "    \n"
@@ -5033,7 +5065,7 @@ msgstr ""
 "    Afslutningsstatus:\n"
 "    Returnerer 1 hvis udtrykket evalueres til 0, ellers returneres 0."
 
-#: builtins.c:1700
+#: builtins.c:1708
 msgid ""
 "Execute conditional command.\n"
 "    \n"
@@ -5088,7 +5120,7 @@ msgstr ""
 "    Afslutningsstatus:\n"
 "    0 eller 1 afhængigt af udtrykkets værdi."
 
-#: builtins.c:1726
+#: builtins.c:1734
 msgid ""
 "Common shell variable names and usage.\n"
 "    \n"
@@ -5201,7 +5233,7 @@ msgstr ""
 "    HISTIGNORE\tEn kolonsepareret liste af mønstre som bliver brugt til at\n"
 "    \t\tbestemme hvilke kommandoer der skal gemmes i historikken.\n"
 
-#: builtins.c:1783
+#: builtins.c:1791
 msgid ""
 "Add directories to stack.\n"
 "    \n"
@@ -5260,7 +5292,7 @@ msgstr ""
 "hvis\n"
 "      mappeskiftet mislykkes."
 
-#: builtins.c:1817
+#: builtins.c:1825
 msgid ""
 "Remove directories from stack.\n"
 "    \n"
@@ -5314,7 +5346,7 @@ msgstr ""
 "hvis\n"
 "      mappeskiftet mislykkes."
 
-#: builtins.c:1847
+#: builtins.c:1855
 msgid ""
 "Display directory stack.\n"
 "    \n"
@@ -5368,7 +5400,7 @@ msgstr ""
 "der\n"
 "    opstår en fejl."
 
-#: builtins.c:1876
+#: builtins.c:1884
 msgid ""
 "Set and unset shell options.\n"
 "    \n"
@@ -5409,7 +5441,7 @@ msgstr ""
 "et\n"
 "    ugyldigt tilvalg eller hvis INDSTNAVN er deaktiveret."
 
-#: builtins.c:1897
+#: builtins.c:1905
 #, fuzzy
 msgid ""
 "Formats and prints ARGUMENTS under control of the FORMAT.\n"
@@ -5436,6 +5468,12 @@ msgid ""
 "      %(fmt)T output the date-time string resulting from using FMT as a "
 "format\n"
 "            string for strftime(3)\n"
+"    \n"
+"    The format is re-used as necessary to consume all of the arguments.  If\n"
+"    there are fewer arguments than the format requires,  extra format\n"
+"    specifications behave as if a zero value or null string, as "
+"appropriate,\n"
+"    had been supplied.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or a write or "
@@ -5470,7 +5508,7 @@ msgstr ""
 "hvis\n"
 "    der opstår en skrive- eller tildelingsfejl."
 
-#: builtins.c:1926
+#: builtins.c:1939
 #, fuzzy
 msgid ""
 "Specify how arguments are to be completed by Readline.\n"
@@ -5518,7 +5556,7 @@ msgstr ""
 "hvis\n"
 "    der opstår en fejl."
 
-#: builtins.c:1954
+#: builtins.c:1967
 msgid ""
 "Display possible completions depending on the options.\n"
 "    \n"
@@ -5543,7 +5581,7 @@ msgstr ""
 "    der opstår en fejl."
 
 # Fejlrapport
-#: builtins.c:1969
+#: builtins.c:1982
 #, fuzzy
 msgid ""
 "Modify or display completion options.\n"
@@ -5605,7 +5643,7 @@ msgstr ""
 "hvis\n"
 "    der ikke er defineret en fuldførselsspecifikation for NAVN."
 
-#: builtins.c:1999
+#: builtins.c:2012
 #, fuzzy
 msgid ""
 "Read lines from the standard input into an indexed array variable.\n"
@@ -5683,7 +5721,7 @@ msgstr ""
 "hvis\n"
 "    ARRAY er skrivebeskyttet."
 
-#: builtins.c:2033
+#: builtins.c:2046
 msgid ""
 "Read lines from a file into an array variable.\n"
 "    \n"
@@ -5692,6 +5730,21 @@ msgstr ""
 "Læs linjer fra en fil ind i en arrayvariabel.\n"
 "    \n"
 "    Et synonym for \"mapfile\"."
+
+#, fuzzy
+#~ msgid "Copyright (C) 2009 Free Software Foundation, Inc.\n"
+#~ msgstr "Ophavsret (C) 2009 Free Software Foundation, Inc."
+
+#, fuzzy
+#~ msgid ""
+#~ "License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl."
+#~ "html>\n"
+#~ msgstr ""
+#~ "Licens GPLv3+: GNU GPL version 3 eller senere <http://gnu.org/licenses/"
+#~ "gpl.html>\n"
+
+#~ msgid "wait [pid]"
+#~ msgstr "wait [pid]"
 
 #~ msgid "xrealloc: cannot reallocate %lu bytes (%lu bytes allocated)"
 #~ msgstr "xrealloc: kan ikke allokere %lu bytes (%lu bytes allokeret)"

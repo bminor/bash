@@ -5725,9 +5725,10 @@ expand_arrayref:
 	  name = temp;
 	  goto expand_arrayref;
 	}
+      else
 #endif
       /* y=2 ; typeset -n x=y; echo ${x} is not the same as echo ${2} in ksh */
-      else if (temp && *temp && legal_identifier (temp) == 0)
+      if (temp && *temp && legal_identifier (temp) == 0)
         {
 	  last_command_exit_value = EXECUTION_FAILURE;
 	  report_error (_("%s: invalid variable name for name reference"), temp);
