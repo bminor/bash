@@ -26,6 +26,8 @@ PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 
+PACKAGE_TARNAME = @PACKAGE_TARNAME@
+
 # Include some boilerplate Gnu makefile definitions.
 prefix = @prefix@
 
@@ -39,6 +41,8 @@ infodir = @infodir@
 includedir = @includedir@
 datadir = @datadir@
 localedir = @localedir@
+
+docdir = @docdir@
 
 mandir = @mandir@
 manpfx = man
@@ -534,6 +538,10 @@ CREATED_MAKEFILES = Makefile builtins/Makefile doc/Makefile \
 		    examples/loadables/perl/Makefile support/Makefile \
 		    lib/intl/Makefile po/Makefile po/Makefile.in
 
+OTHER_DOCS = $(srcdir)/CHANGES $(srcdir)/COMPAT $(srcdir)/NEWS $(srcdir)/POSIX \
+	$(srcdir)/RBASH $(srcdir)/README
+OTHER_INSTALLED_DOCS = CHANGES COMPAT NEWS POSIX RBASH README
+
 # Keep GNU Make from exporting the entire environment for small machines.
 .NOEXPORT:
 
@@ -739,6 +747,7 @@ info dvi ps: force
 
 force:
 
+# unused
 TAGS:	$(SOURCES) $(BUILTIN_C_SRC) $(LIBRARY_SOURCE)
 	etags $(SOURCES) $(BUILTIN_C_SRC) $(LIBRARY_SOURCE)
 
@@ -751,11 +760,13 @@ installdirs:
 	@${SHELL} $(SUPPORT_SRC)mkinstalldirs $(DESTDIR)$(bindir)
 	@${SHELL} $(SUPPORT_SRC)mkinstalldirs $(DESTDIR)$(man1dir)
 	@${SHELL} $(SUPPORT_SRC)mkinstalldirs $(DESTDIR)$(infodir)
+	@${SHELL} $(SUPPORT_SRC)mkinstalldirs $(DESTDIR)$(docdir)
 	-( cd $(PO_DIR) ; $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 
 install:	.made installdirs
 	$(INSTALL_PROGRAM) $(INSTALLMODE) $(Program) $(DESTDIR)$(bindir)/$(Program)
 	$(INSTALL_SCRIPT) $(INSTALLMODE2) bashbug $(DESTDIR)$(bindir)/bashbug
+	$(INSTALL_DATA) $(OTHER_DOCS) $(docdir)
 	-( cd $(DOCDIR) ; $(MAKE) $(MFLAGS) \
 		man1dir=$(man1dir) man1ext=$(man1ext) \
 		man3dir=$(man3dir) man3ext=$(man3ext) \
@@ -770,6 +781,7 @@ install-strip:
 
 uninstall:	.made
 	$(RM) $(DESTDIR)$(bindir)/$(Program) $(DESTDIR)$(bindir)/bashbug
+	-( cd $(DESTDIR)$(docdir) && ${RM} ${OTHER_INSTALLED_DOCS} )
 	-( cd $(DOCDIR) ; $(MAKE) $(MFLAGS) \
 		man1dir=$(man1dir) man1ext=$(man1ext) \
 		man3dir=$(man3dir) man3ext=$(man3ext) \

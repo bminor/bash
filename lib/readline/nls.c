@@ -114,7 +114,7 @@ utf8locale (lspec)
 
   if (cp == 0 || len < 4 || len > 5)
     return 0;
-  return ((len == 5) ? strncmp (cp. "UTF-8", len) == 0 : strncmp (cp, "utf8", 4) == 0);
+  return ((len == 5) ? strncmp (cp, "UTF-8", len) == 0 : strncmp (cp, "utf8", 4) == 0);
 #endif
 }
 

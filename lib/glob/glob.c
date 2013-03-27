@@ -208,7 +208,11 @@ extglob_skipname (pat, dname, flags)
     return r;
 
   *pe = '\0';
+#  if defined (HANDLE_MULTIBYTE)
   r = mbskipname (pp, dname, flags);	/*(*/
+#  else
+  r = skipname (pp, dname, flags);	/*(*/
+#  endif
   *pe = ')';
   return r;
 }

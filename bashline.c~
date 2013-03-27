@@ -1629,15 +1629,10 @@ bash_default_completion (text, start, end, qc, compflags)
       matches = rl_completion_matches (text, glob_complete_word);
       /* A glob expression that matches more than one filename is problematic.
 	 If we match more than one filename, punt. */
-      if (matches && matches[1] && rl_completion_type == TAB)
+      if (matches && matches[1] && (rl_completion_type == TAB || rl_completion_type == '!'))
 	{
 	  strvec_dispose (matches);
 	  matches = (char **)0;
-	}
-      else if (matches && matches[1] && rl_completion_type == '!')
-	{
-	  rl_completion_suppress_append = 1;
-	  rl_filename_completion_desired = 0;
 	}
     }
 

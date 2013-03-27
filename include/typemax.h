@@ -96,4 +96,8 @@ static const unsigned long long int maxquad = ULLONG_MAX;
 #  define SSIZE_MAX	32767		/* POSIX minimum max */
 #endif
 
+#ifndef SIZE_MAX
+#  define SIZE_MAX	65535		/* POSIX minimum max */
+#endif
+
 #endif /* _SH_TYPEMAX_H */

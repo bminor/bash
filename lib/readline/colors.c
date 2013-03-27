@@ -112,6 +112,8 @@ _rl_print_color_indicator (char *f)
   mode_t mode;
   int linkok;
 
+  int stat_ok;
+
   name = f;
 
   /* This should already have undergone tilde expansion */
@@ -124,9 +126,9 @@ _rl_print_color_indicator (char *f)
     }
 
 #if defined (HAVE_LSTAT)
-  int stat_ok = lstat(name, &astat);
+  stat_ok = lstat(name, &astat);
 #else
-  int stat_ok = stat(name, &astat);
+  stat_ok = stat(name, &astat);
 #endif
   if( stat_ok == 0 ) {
     mode = astat.st_mode;

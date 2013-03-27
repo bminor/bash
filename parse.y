@@ -45,6 +45,7 @@
 #define NEED_STRFTIME_DECL	/* used in externs.h */
 
 #include "shell.h"
+#include "typemax.h"		/* SIZE_MAX if needed */
 #include "trap.h"
 #include "flags.h"
 #include "parser.h"

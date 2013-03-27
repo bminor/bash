@@ -39,6 +39,7 @@
 #  include "shell.h"
 #endif /* SHELL */
 
+#include "typemax.h"		/* INTMAX_MIN, INTMAX_MAX */
 #include "general.h"
 #include "shmbutil.h"
 #include "chartypes.h"

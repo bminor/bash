@@ -212,8 +212,8 @@ ansic_quote (str, flags, rlen)
   int l, rsize;
   unsigned char c;
   size_t clen;
-#if defined (HANDLE_MULTIBYTE)
   int b;
+#if defined (HANDLE_MULTIBYTE)
   wchar_t wc;
 #endif
 

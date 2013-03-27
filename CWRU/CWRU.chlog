@@ -4701,3 +4701,50 @@ lib/readline/display.c
 	  two-part copy to a single call to _rl_output_some_chars (change of
 	  2/16)
 
+				    3/4
+				    ---
+Makefile.in,doc/Makefile.in
+	- PACKAGE_TARNAME, docdir: new variables substituted by autoconf
+	- OTHER_DOCS,OTHER_INSTALLED_DOCS: new variables with auxiliary
+	  documentation files to be installed into $(docdir)
+	- install: add new rule to install $(OTHER_DOCS)
+	- uninstall: add new rule to uninstall $(docdir)/$(OTHER_INSTALLED_DOCS)
+
+doc/bash.1
+	- add URL to `POSIX' file in `SEE ALSO' section; put pointer to that
+	  section in --posix and set -o posix descriptions
+
+examples/
+	- removed around 110 examples at the request of the FSF due to copyright
+	  issues
+
+				    3/5
+				    ---
+builtins/setattr.def
+	- readonly: modified help text slightly to make it clearer that
+	  functions aren't changed or displayed unless the -f option is given.
+	  Report from <gotmynick@gmail.com>
+
+[bash-4.3-alpha frozen]
+
+				    3/9
+				    ---
+include/typemax.h
+	- SIZE_MAX: define to 65535 (Posix minimum maximum) if not defined
+
+parse.y
+	- include "typemax.h" for possible SIZE_MAX definition, make sure we
+	  include it after shell.h
+
+{braces,expr}.c
+	- include "typemax.h" for possible INTMAX_MIN and INTMAX_MAX definitions
+
+				   3/10
+				   ----
+bashline.c
+	- bash_default_completion: make sure completion type of `!' (same as
+	  TAB but with show-all-if-ambiguous set) and glob-word-completion
+	  sets rl_filename_completion_desired to 0 so extra backslashes don't
+	  get inserted by `quoting' the completion.  We can't kill all the
+	  matches because show-all-if-ambiguous needs them.   Bug report from
+	  Marcel (Felix) Giannelia <info@skeena.net>

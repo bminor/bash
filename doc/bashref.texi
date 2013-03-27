@@ -1255,7 +1255,7 @@ find . -depth 1 \! -name '.*' -print0 | parallel -0 -X mv @{@} destdir
 GNU Parallel can replace certain common idioms that operate on lines read
 from a file (in this case, filenames listed one per line):
 @example
-	while read -r x; do
+	while IFS= read -r x; do
 		do-something1 "$x" "config-$x"
 		do-something2 < "$x"
 	done < file | process-output
@@ -1281,7 +1281,7 @@ Parallel can take arguments from the command line; the above can also be
 written as
 
 @example
-parallel "zcat {} | bzip2 >{.}.bz2 && rm {}" ::: *.gz
+parallel "zcat @{@} | bzip2 >@{.@}.bz2 && rm @{@}" ::: *.gz
 @end example
 
 If a command generates output, you may want to preserve the input order in
@@ -4255,7 +4255,8 @@ to the last @var{name}.
 If there are fewer words read from the input stream than names,
 the remaining names are assigned empty values.
 The characters in the value of the @env{IFS} variable
-are used to split the line into words.
+are used to split the line into words using the same rules the shell
+uses for expansion (described above in @ref{Word Splitting}).
 The backslash character @samp{\} may be used to remove any special
 meaning for the next character read and for line continuation.
 If no names are supplied, the line read is assigned to the
@@ -4934,7 +4935,7 @@ Bash versions 4.0 and later interrupt the list as if the shell received the
 interrupt; previous versions continue with the next command in the list.
 
 @item compat41
-If set, Bash, when in posix mode, treats a single quote in a double-quoted
+If set, Bash, when in @sc{posix} mode, treats a single quote in a double-quoted
 parameter expansion as a special character.  The single quotes must match
 (an even number) and the characters between the single quotes are considered
 quoted.  This is the behavior of @sc{posix} mode through version 4.1.

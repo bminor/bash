@@ -82,6 +82,7 @@
 #include "bashintl.h"
 
 #include "shell.h"
+#include "typemax.h"		/* INTMAX_MAX, INTMAX_MIN */
 
 /* Because of the $((...)) construct, expressions may include newlines.
    Here is a macro which accepts newlines, tabs and spaces as whitespace. */
