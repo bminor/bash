@@ -572,7 +572,9 @@ readline_internal_charloop ()
 #endif
 	}
 
-      /* EOF typed to a non-blank line is a <NL>. */
+      /* EOF typed to a non-blank line is a <NL>.  If we want to change this,
+	 to force any existing line to be ignored when read(2) reads EOF,
+	 for example, this is the place to change. */
       if (c == EOF && rl_end)
 	c = NEWLINE;
 
@@ -807,6 +809,7 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	{
 	  /* Special case rl_do_lowercase_version (). */
 	  if (func == rl_do_lowercase_version)
+	    /* Should we do anything special if key == ANYOTHERKEY? */
 	    return (_rl_dispatch (_rl_to_lower (key), map));
 
 	  rl_executing_keymap = map;

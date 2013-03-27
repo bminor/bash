@@ -95,6 +95,14 @@ ok 1
 ok 2
 ok 3
 ok 4
+var=${a[*]}   ... one:::two:three:::four
+var="${a[*]}" ... one:::two:three:::four
+var=$*        ... one:::two:three:::four
+var="$*"      ... one:::two:three:::four
+var=${a[@]}   ... one:::two three:::four
+var="${a[@]}" ... one:::two three:::four
+var=$@        ... one:::two three:::four
+var="$@"      ... one:::two three:::four
 xa|xb|xc
 xa|xb|xc
 a|b|c

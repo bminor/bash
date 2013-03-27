@@ -3221,6 +3221,7 @@ call_expand_word_internal (w, q, i, c, e)
       last_command_exit_value = EXECUTION_FAILURE;
       exp_jump_to_top_level ((result == &expand_word_error) ? DISCARD : FORCE_EOF);
       /* NOTREACHED */
+      return (NULL);
     }
   else
     return (result);

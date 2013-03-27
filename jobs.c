@@ -212,10 +212,10 @@ int previous_job = NO_JOB;
 #endif
 
 /* Last child made by the shell.  */
-pid_t last_made_pid = NO_PID;
+volatile pid_t last_made_pid = NO_PID;
 
 /* Pid of the last asynchronous child. */
-pid_t last_asynchronous_pid = NO_PID;
+volatile pid_t last_asynchronous_pid = NO_PID;
 
 /* The pipeline currently being built. */
 PROCESS *the_pipeline = (PROCESS *)NULL;
@@ -2473,8 +2473,11 @@ wait_for (pid)
 	  sigemptyset (&act.sa_mask);
 	  sigemptyset (&oact.sa_mask);
 	  act.sa_flags = 0;
-	  sigaction (SIGCHLD, &act, &oact);
+#  if defined (SA_RESTART)
+	  act.sa_flags |= SA_RESTART;
 #  endif
+	  sigaction (SIGCHLD, &act, &oact);
+#  endif /* MUST_UNBLOCK_CHLD */
 	  queue_sigchld = 1;
 	  waiting_for_child++;
 	  r = waitchld (pid, 1);	/* XXX */

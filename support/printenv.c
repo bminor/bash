@@ -29,6 +29,7 @@
 #endif
 
 #include "bashansi.h"
+#include <stdio.h>		/* puts */
 
 extern char **environ;
 

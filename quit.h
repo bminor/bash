@@ -21,9 +21,11 @@
 #if !defined (_QUIT_H_)
 #define _QUIT_H_
 
+#include "sig.h"	/* for sig_atomic_t */
+
 /* Non-zero means SIGINT has already ocurred. */
-extern volatile int interrupt_state;
-extern volatile int terminating_signal;
+extern volatile sig_atomic_t interrupt_state;
+extern volatile sig_atomic_t terminating_signal;
 
 /* Macro to call a great deal.  SIGINT just sets the interrupt_state variable.
    When it is safe, put QUIT in the code, and the "interrupt" will take

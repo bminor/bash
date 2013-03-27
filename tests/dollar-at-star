@@ -207,6 +207,10 @@ case "$@" in
 *)	echo bad 4;;
 esac
 
+# tests for the effect of quoting $* and $@ in an assignment context (plus
+# arrays) -- bugs through bash 4.2
+${THIS_SH} ./dollar-at-star1.sub
+
 # tests for special expansion of "$*" and "${array[*]}" when used with other
 # expansions -- bugs through bash-2.05b
 ${THIS_SH} ./dollar-star1.sub

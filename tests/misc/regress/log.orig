@@ -1,0 +1,50 @@
+:; ./shx
+
+sh:
+<&$fd	ok
+nlbq	Mon Aug  3 02:45:00 EDT 1992
+bang	geoff
+quote	712824302
+setbq	defmsgid=<1992Aug3.024502.6176@host>
+bgwait	sleep done... wait 6187
+
+
+bash:
+<&$fd	ok
+nlbq	Mon Aug  3 02:45:09 EDT 1992
+bang	geoff
+quote	712824311
+setbq	defmsgid=<1992Aug3.024512.6212@host>
+bgwait	sleep done... wait 6223
+
+
+ash:
+<&$fd	shx1: 4: Syntax error: Bad fd number
+nlbq	Mon Aug  3 02:45:19 EDT 1992
+bang	geoff
+quote	getdate: `"now"' not a valid date
+
+setbq	defmsgid=<1992Aug3.` echo 024521
+bgwait	sleep done... wait 6241
+
+
+ksh:
+<&$fd	ok
+nlbq	./shx: 6248 Memory fault - core dumped
+bang	geoff
+quote	getdate: `"now"' not a valid date
+
+setbq	defmsgid=<1992Aug3.024530.6257@host>
+bgwait	no such job: 6265
+wait 6265
+sleep done... 
+
+zsh:
+<&$fd	ok
+nlbq	Mon Aug 3 02:45:36 EDT 1992
+bang	shx3: event not found: /s/ [4]
+quote	712824337
+setbq	defmsgid=<..6290@host>
+bgwait	shx7: unmatched " [9]
+sleep done... 
+:; 

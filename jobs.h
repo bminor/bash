@@ -167,7 +167,7 @@ extern pid_t fork (), getpid (), getpgrp ();
 extern struct jobstats js;
 
 extern pid_t original_pgrp, shell_pgrp, pipeline_pgrp;
-extern pid_t last_made_pid, last_asynchronous_pid;
+extern volatile pid_t last_made_pid, last_asynchronous_pid;
 extern int asynchronous_notification;
 
 extern JOB **jobs;

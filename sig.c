@@ -68,16 +68,16 @@ extern int no_line_editing;
 extern void initialize_siglist ();
 
 /* Non-zero after SIGINT. */
-volatile int interrupt_state = 0;
+volatile sig_atomic_t interrupt_state = 0;
 
 /* Non-zero after SIGWINCH */
-sig_atomic_t sigwinch_received = 0;
+volatile sig_atomic_t sigwinch_received = 0;
 
 /* Non-zero after SIGTERM */
-sig_atomic_t sigterm_received = 0;
+volatile sig_atomic_t sigterm_received = 0;
 
 /* Set to the value of any terminating signal received. */
-volatile int terminating_signal = 0;
+volatile sig_atomic_t terminating_signal = 0;
 
 /* The environment at the top-level R-E loop.  We use this in
    the case of error return. */
@@ -560,7 +560,7 @@ termsig_handler (sig)
      an interactive shell is running in a terminal window that gets closed
      with the `close' button.  We can't test for RL_STATE_READCMD because
      readline no longer handles SIGTERM synchronously.  */
-  if (interactive_shell && interactive && sig == SIGHUP && remember_on_history)
+  if (interactive_shell && interactive && (sig == SIGHUP || sig == SIGTERM) && remember_on_history)
     maybe_save_shell_history ();
 #endif /* HISTORY */
 
@@ -578,7 +578,7 @@ termsig_handler (sig)
   loop_level = continuing = breaking = funcnest = 0;
   executing_list = comsub_ignore_return = return_catch_flag = 0;
 
-  run_exit_trap ();
+  run_exit_trap ();	/* XXX - run exit trap possibly in signal context? */
   set_signal_handler (sig, SIG_DFL);
   kill (getpid (), sig);
 }

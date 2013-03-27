@@ -155,8 +155,11 @@ sh_get_env_value (varname)
 char *
 sh_get_home_dir ()
 {
-  char *home_dir;
+  static char *home_dir = (char *)NULL;
   struct passwd *entry;
+
+  if (home_dir)
+    return (home_dir);
 
   home_dir = (char *)NULL;
 #if defined (HAVE_GETPWUID)
@@ -166,8 +169,13 @@ sh_get_home_dir ()
   entry = getpwuid (getuid ());
 #  endif
   if (entry)
-    home_dir = entry->pw_dir;
+    home_dir = savestring (entry->pw_dir);
 #endif
+
+#if defined (HAVE_GETPWENT)
+  endpwent ();		/* some systems need this */
+#endif
+
   return (home_dir);
 }
 

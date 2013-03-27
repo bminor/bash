@@ -1204,25 +1204,28 @@ The return status of a coprocess is the exit status of @var{command}.
 @node GNU Parallel
 @subsection GNU Parallel
 
+There are ways to run commands in parallel that are not built into Bash.
+GNU Parallel is a tool to do just that.
+
 GNU Parallel, as its name suggests, can be used to build and run commands
 in parallel.  You may run the same command with different arguments, whether
-they are filenames, usernames, hostnames, or lines read from files.
+they are filenames, usernames, hostnames, or lines read from files.  GNU
+Parallel provides shorthand references to many of the most common operations
+(input lines, various portions of the input line, different ways to specify
+the input source, and so on).  Parallel can replace @code{xargs} or feed
+commands from its input sources to several different instances of Bash.
 
 For a complete description, refer to the GNU Parallel documentation.  A few
 examples should provide a brief introduction to its use.
 
-For example, it is easy to prefix each line in a text file with a specified
-string:
+For example, it is easy to replace @code{xargs} to gzip all html files in the
+current directory and its subdirectories:
 @example
-cat file | parallel -k echo prefix_string
+find . -type f -name '*.html' -print | parallel gzip
 @end example
 @noindent
-The @option{-k} option is required to preserve the lines' order.
-
-Similarly, you can append a specified string to each line in a text file:
-@example
-cat file | parallel -k echo @{@} append_string
-@end example
+If you need to protect special characters such as newlines in file names,
+use find's @option{-print0} option and parallel's @option{-0} option.
 
 You can use Parallel to move files from the current directory when the
 number of files is too large to process with one @code{mv} invocation:
@@ -1231,20 +1234,31 @@ ls | parallel mv @{@} destdir
 @end example
 
 As you can see, the @{@} is replaced with each line read from standard input.
-This will run as many @code{mv} commands as there are files in the current
-directory.  You can emulate a parallel @code{xargs} by adding the @option{-X}
-option:
+While using @code{ls} will work in most instances, it is not sufficient to
+deal with all filenames.
+If you need to accommodate special characters in filenames, you can use
+
 @example
-ls | parallel -X mv @{@} destdir
+find . -depth 1 \! -name '.*' -print0 | parallel -0 mv @{@} destdir
+@end example
+
+@noindent
+as alluded to above.
+
+This will run as many @code{mv} commands as there are files in the current
+directory.
+You can emulate a parallel @code{xargs} by adding the @option{-X} option:
+@example
+find . -depth 1 \! -name '.*' -print0 | parallel -0 -X mv @{@} destdir
 @end example
 
 GNU Parallel can replace certain common idioms that operate on lines read
-from a file (in this case, filenames):
+from a file (in this case, filenames listed one per line):
 @example
-	for x in $(cat list); do
-		do-something1 $x config-$x
-		do-something2 < $x
-	done | process-output
+	while read -r x; do
+		do-something1 "$x" "config-$x"
+		do-something2 < "$x"
+	done < file | process-output
 @end example
 
 @noindent
@@ -1260,7 +1274,15 @@ ls *.gz | parallel -j+0 "zcat @{@} | bzip2 >@{.@}.bz2 && rm @{@}"
 @end example
 @noindent
 This will recompress all files in the current directory with names ending
-in .gz using bzip2, running one job per CPU (-j+0)  in parallel.
+in .gz using bzip2, running one job per CPU (-j+0) in parallel.
+(We use @code{ls} for brevity here; using @code{find} as above is more
+robust in the face of filenames containing unexpected characters.)
+Parallel can take arguments from the command line; the above can also be
+written as
+
+@example
+parallel "zcat {} | bzip2 >{.}.bz2 && rm {}" ::: *.gz
+@end example
 
 If a command generates output, you may want to preserve the input order in
 the output.  For instance, the following command
@@ -1268,13 +1290,28 @@ the output.  For instance, the following command
 @{ echo foss.org.my ; echo debian.org; echo freenetproject.org; @} | parallel traceroute
 @end example
 @noindent
-will display as output the traceroute invocation that finishes first.  Using
-the @option{-k} option, as we saw above
+will display as output the traceroute invocation that finishes first.
+Adding the @option{-k} option 
 @example
 @{ echo foss.org.my ; echo debian.org; echo freenetproject.org; @} | parallel -k traceroute
 @end example
 @noindent
 will ensure that the output of @code{traceroute foss.org.my} is displayed first.
+
+Finally, Parallel can be used to run a sequence of shell commands in parallel,
+similar to @samp{cat file | bash}.
+It is not uncommon to take a list of filenames, create a series of shell
+commands to operate on them, and feed that list of commnds to a shell.
+Parallel can speed this up.  Assuming that @file{file} contains a list of
+shell commands, one per line,
+
+@example
+parallel -j 10 < file
+@end example
+
+@noindent
+will evaluate the commands using the shell (since no explicit command is
+supplied as an argument), in blocks of ten shell jobs at a time.
 
 @node Shell Functions
 @section Shell Functions

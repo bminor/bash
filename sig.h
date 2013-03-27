@@ -108,10 +108,10 @@ do { \
 #endif /* !HAVE_POSIX_SIGNALS */
 
 /* Extern variables */
-extern sig_atomic_t sigwinch_received;
-extern sig_atomic_t sigterm_received;
+extern volatile sig_atomic_t sigwinch_received;
+extern volatile sig_atomic_t sigterm_received;
 
-extern int interrupt_immediately;
+extern int interrupt_immediately;	/* no longer used */
 extern int terminate_immediately;
 
 /* Functions from sig.c. */

@@ -562,7 +562,11 @@ morecore (nu)
   /* Block all signals in case we are executed from a signal handler. */
   blocked_sigs = 0;
 #ifdef SHELL
+#  if defined (SIGCHLD)
   if (interrupt_immediately || running_trap || signal_is_trapped (SIGINT) || signal_is_trapped (SIGCHLD))
+#  else
+  if (interrupt_immediately || running_trap || signal_is_trapped (SIGINT))
+#  endif
 #endif
     {
       _malloc_block_signals (&set, &oset);

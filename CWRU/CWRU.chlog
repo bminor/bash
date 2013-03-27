@@ -4650,3 +4650,54 @@ braces.c
 
 unwind_prot.c
 	- include sig.h before quit.h (reverse order)
+
+				   2/27
+				   ----
+builtins/shopt.def
+	- reset_shopt_options: make sure check_window_size is reset to the
+	  default from config.h, not unconditionally to 0
+
+jobs.[ch]
+	- last_made_pid, last_asynchronous_pid: now volatile.  Change from SuSE
+
+jobs.c
+	- wait_for: if we're using sigaction to install a handler for SIGCHLD,
+	  make sure we specify SA_RESTART
+
+lib/{tilde,readline}/shell.c
+	- get_home_dir: instead of looking in the password file every time,
+	  look once and cache the result
+
+sig.[ch]
+	- sigwinch_received, sigterm_received: now `volatile' qualified
+
+sig.c,quit.h
+	- interrupt_state,terminating_signal: now sig_atomic_t
+
+				    3/1
+				    ---
+MANIFEST,examples/*
+	- removed around 120 files without FSF copyrights; requested by
+	  Karl Berry in early January
+
+				    3/2
+				    ---
+lib/malloc/malloc.c
+	- morecore: only check whether SIGCHLD is trapped if SIGCHLD is defined
+
+doc/bashref.texi
+	- Fixed most of the examples in the GNU Parallel section to use better
+	  shell idioms following complaints on bug-bash; added a couple of
+	  examples and smoothed out the text
+
+quit.h
+	- include "sig.h" for sig_atomic_t
+
+lib/readline/display.c
+	- update_line: when inserting one or more characters at the end of
+	  the display line in a non-multibyte environment, just write from the
+	  first difference to the end of the line and return. We don't have
+	  to adjust _rl_last_c_pos.  This is needed to adjust from the old
+	  two-part copy to a single call to _rl_output_some_chars (change of
+	  2/16)
+

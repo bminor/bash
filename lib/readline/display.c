@@ -1718,16 +1718,18 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	    {
 	      open_some_spaces (col_lendiff);
 	      _rl_output_some_chars (nfd, bytes_to_insert);
-	      _rl_last_c_pos += _rl_col_width (nfd, 0, bytes_to_insert, 1);
+	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+		_rl_last_c_pos += _rl_col_width (nfd, 0, bytes_to_insert, 1);
+	      else
+		_rl_last_c_pos += bytes_to_insert;
 	    }
 	  else if ((MB_CUR_MAX == 1 || rl_byte_oriented != 0) && *ols == 0 && lendiff > 0)
 	    {
 	      /* At the end of a line the characters do not have to
 		 be "inserted".  They can just be placed on the screen. */
-	      /* However, this screws up the rest of this block, which
-		 assumes you've done the insert because you can. */
-	      _rl_output_some_chars (nfd, lendiff);
-	      _rl_last_c_pos += col_lendiff;
+	      _rl_output_some_chars (nfd, temp);
+	      _rl_last_c_pos += col_temp;
+	      return;
 	    }
 	  else	/* just write from first difference to end of new line */
 	    {
@@ -2730,10 +2732,8 @@ _rl_col_width (str, start, end, flags)
   if (end <= start)
     return 0;
   if (MB_CUR_MAX == 1 || rl_byte_oriented)
-{
-_rl_ttymsg ("_rl_col_width: called with MB_CUR_MAX == 1");
+    /* this can happen in some cases where it's inconvenient to check */
     return (end - start);
-}
 
   memset (&ps, 0, sizeof (mbstate_t));
 
