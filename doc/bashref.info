@@ -1,10 +1,10 @@
 This is bashref.info, produced by makeinfo version 4.13 from
-/Users/chet/src/bash/src/doc/bashref.texi.
+/usr/homes/chet/src/bash/src/doc/bashref.texi.
 
 This text is a brief description of the features that are present in
-the Bash shell (version 4.2, 8 January 2013).
+the Bash shell (version 4.2, 2 March 2013).
 
-   This is Edition 4.2, last updated 8 January 2013, of `The GNU Bash
+   This is Edition 4.2, last updated 2 March 2013, of `The GNU Bash
 Reference Manual', for `Bash', Version 4.2.
 
    Copyright (C) 1988-2013 Free Software Foundation, Inc.
@@ -28,10 +28,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in
-the Bash shell (version 4.2, 8 January 2013).  The Bash home page is
+the Bash shell (version 4.2, 2 March 2013).  The Bash home page is
 `http://www.gnu.org/software/bash/'.
 
-   This is Edition 4.2, last updated 8 January 2013, of `The GNU Bash
+   This is Edition 4.2, last updated 2 March 2013, of `The GNU Bash
 Reference Manual', for `Bash', Version 4.2.
 
    Bash contains features that appear in other popular shells, and some
@@ -1060,39 +1060,51 @@ File: bashref.info,  Node: GNU Parallel,  Prev: Coprocesses,  Up: Shell Commands
 3.2.6 GNU Parallel
 ------------------
 
-GNU Parallel, as its name suggests, can be used to build and run
+There are ways to run commands in parallel that are not built into Bash.
+GNU Parallel is a tool to do just that.
+
+   GNU Parallel, as its name suggests, can be used to build and run
 commands in parallel.  You may run the same command with different
 arguments, whether they are filenames, usernames, hostnames, or lines
-read from files.
+read from files.  GNU Parallel provides shorthand references to many of
+the most common operations (input lines, various portions of the input
+line, different ways to specify the input source, and so on).  Parallel
+can replace `xargs' or feed commands from its input sources to several
+different instances of Bash.
 
    For a complete description, refer to the GNU Parallel documentation.
 A few examples should provide a brief introduction to its use.
 
-   For example, it is easy to prefix each line in a text file with a
-specified string:
-     cat file | parallel -k echo prefix_string
-   The `-k' option is required to preserve the lines' order.
-
-   Similarly, you can append a specified string to each line in a text
-file:
-     cat file | parallel -k echo {} append_string
+   For example, it is easy to replace `xargs' to gzip all html files in
+the current directory and its subdirectories:
+     find . -type f -name '*.html' -print | parallel gzip
+   If you need to protect special characters such as newlines in file
+names, use find's `-print0' option and parallel's `-0' option.
 
    You can use Parallel to move files from the current directory when
 the number of files is too large to process with one `mv' invocation:
      ls | parallel mv {} destdir
 
    As you can see, the {} is replaced with each line read from standard
-input.  This will run as many `mv' commands as there are files in the
-current directory.  You can emulate a parallel `xargs' by adding the
-`-X' option:
-     ls | parallel -X mv {} destdir
+input.  While using `ls' will work in most instances, it is not
+sufficient to deal with all filenames.  If you need to accommodate
+special characters in filenames, you can use
+
+     find . -depth 1 \! -name '.*' -print0 | parallel -0 mv {} destdir
+
+as alluded to above.
+
+   This will run as many `mv' commands as there are files in the current
+directory.  You can emulate a parallel `xargs' by adding the `-X'
+option:
+     find . -depth 1 \! -name '.*' -print0 | parallel -0 -X mv {} destdir
 
    GNU Parallel can replace certain common idioms that operate on lines
-read from a file (in this case, filenames):
-     	for x in $(cat list); do
-     		do-something1 $x config-$x
-     		do-something2 < $x
-     	done | process-output
+read from a file (in this case, filenames listed one per line):
+     	while read -r x; do
+     		do-something1 "$x" "config-$x"
+     		do-something2 < "$x"
+     	done < file | process-output
 
 with a more compact syntax reminiscent of lambdas:
      cat list | parallel "do-something1 {} config-{} ; do-something2 < {}" | process-output
@@ -1102,16 +1114,33 @@ extensions, which lends itself to batch file transformations or
 renaming:
      ls *.gz | parallel -j+0 "zcat {} | bzip2 >{.}.bz2 && rm {}"
    This will recompress all files in the current directory with names
-ending in .gz using bzip2, running one job per CPU (-j+0)  in parallel.
+ending in .gz using bzip2, running one job per CPU (-j+0) in parallel.
+(We use `ls' for brevity here; using `find' as above is more robust in
+the face of filenames containing unexpected characters.)  Parallel can
+take arguments from the command line; the above can also be written as
+
+     parallel "zcat {} | bzip2 >{.}.bz2 && rm {}" ::: *.gz
 
    If a command generates output, you may want to preserve the input
 order in the output.  For instance, the following command
      { echo foss.org.my ; echo debian.org; echo freenetproject.org; } | parallel traceroute
-   will display as output the traceroute invocation that finishes
-first.  Using the `-k' option, as we saw above
+   will display as output the traceroute invocation that finishes first.
+Adding the `-k' option
      { echo foss.org.my ; echo debian.org; echo freenetproject.org; } | parallel -k traceroute
    will ensure that the output of `traceroute foss.org.my' is displayed
 first.
+
+   Finally, Parallel can be used to run a sequence of shell commands in
+parallel, similar to `cat file | bash'.  It is not uncommon to take a
+list of filenames, create a series of shell commands to operate on
+them, and feed that list of commnds to a shell.  Parallel can speed
+this up.  Assuming that `file' contains a list of shell commands, one
+per line,
+
+     parallel -j 10 < file
+
+will evaluate the commands using the shell (since no explicit command is
+supplied as an argument), in blocks of ten shell jobs at a time.
 
 
 File: bashref.info,  Node: Shell Functions,  Next: Shell Parameters,  Prev: Shell Commands,  Up: Basic Shell Features
@@ -4248,7 +4277,7 @@ This builtin allows you to change additional shell optional behavior.
           continue with the next command in the list.
 
     `compat41'
-          If set, Bash, when in posix mode, treats a single quote in a
+          If set, Bash, when in POSIX mode, treats a single quote in a
           double-quoted parameter expansion as a special character.
           The single quotes must match (an even number) and the
           characters between the single quotes are considered quoted.
@@ -11082,133 +11111,133 @@ D.5 Concept Index
 
 Tag Table:
 Node: Top924
-Node: Introduction2840
-Node: What is Bash?3068
-Node: What is a shell?4181
-Node: Definitions6720
-Node: Basic Shell Features9638
-Node: Shell Syntax10857
-Node: Shell Operation11887
-Node: Quoting13181
-Node: Escape Character14484
-Node: Single Quotes14969
-Node: Double Quotes15317
-Node: ANSI-C Quoting16442
-Node: Locale Translation17686
-Node: Comments18582
-Node: Shell Commands19200
-Node: Simple Commands20072
-Node: Pipelines20703
-Node: Lists23402
-Node: Compound Commands25131
-Node: Looping Constructs26137
-Node: Conditional Constructs28600
-Node: Command Grouping39478
-Node: Coprocesses40957
-Node: GNU Parallel42790
-Node: Shell Functions45258
-Node: Shell Parameters50342
-Node: Positional Parameters54471
-Node: Special Parameters55371
-Node: Shell Expansions58335
-Node: Brace Expansion60261
-Node: Tilde Expansion63042
-Node: Shell Parameter Expansion65391
-Node: Command Substitution77685
-Node: Arithmetic Expansion79018
-Node: Process Substitution79868
-Node: Word Splitting80918
-Node: Filename Expansion82541
-Node: Pattern Matching84706
-Node: Quote Removal88406
-Node: Redirections88701
-Node: Executing Commands97865
-Node: Simple Command Expansion98535
-Node: Command Search and Execution100465
-Node: Command Execution Environment102802
-Node: Environment105788
-Node: Exit Status107447
-Node: Signals109069
-Node: Shell Scripts111037
-Node: Shell Builtin Commands113555
-Node: Bourne Shell Builtins115583
-Node: Bash Builtins135359
-Node: Modifying Shell Behavior162686
-Node: The Set Builtin163031
-Node: The Shopt Builtin173357
-Node: Special Builtins187561
-Node: Shell Variables188540
-Node: Bourne Shell Variables188980
-Node: Bash Variables191011
-Node: Bash Features217886
-Node: Invoking Bash218785
-Node: Bash Startup Files224563
-Node: Interactive Shells229582
-Node: What is an Interactive Shell?229992
-Node: Is this Shell Interactive?230641
-Node: Interactive Shell Behavior231456
-Node: Bash Conditional Expressions234744
-Node: Shell Arithmetic238746
-Node: Aliases241522
-Node: Arrays244078
-Node: The Directory Stack248767
-Node: Directory Stack Builtins249486
-Node: Controlling the Prompt252442
-Node: The Restricted Shell255214
-Node: Bash POSIX Mode257051
-Node: Job Control266438
-Node: Job Control Basics266898
-Node: Job Control Builtins271617
-Node: Job Control Variables276079
-Node: Command Line Editing277237
-Node: Introduction and Notation278909
-Node: Readline Interaction280531
-Node: Readline Bare Essentials281722
-Node: Readline Movement Commands283511
-Node: Readline Killing Commands284476
-Node: Readline Arguments286396
-Node: Searching287440
-Node: Readline Init File289626
-Node: Readline Init File Syntax290773
-Node: Conditional Init Constructs307610
-Node: Sample Init File310143
-Node: Bindable Readline Commands313260
-Node: Commands For Moving314467
-Node: Commands For History315611
-Node: Commands For Text319796
-Node: Commands For Killing322469
-Node: Numeric Arguments324926
-Node: Commands For Completion326065
-Node: Keyboard Macros330257
-Node: Miscellaneous Commands330945
-Node: Readline vi Mode336751
-Node: Programmable Completion337658
-Node: Programmable Completion Builtins344908
-Node: A Programmable Completion Example354654
-Node: Using History Interactively359904
-Node: Bash History Facilities360588
-Node: Bash History Builtins363587
-Node: History Interaction367515
-Node: Event Designators370220
-Node: Word Designators371442
-Node: Modifiers373081
-Node: Installing Bash374485
-Node: Basic Installation375622
-Node: Compilers and Options378314
-Node: Compiling For Multiple Architectures379055
-Node: Installation Names380719
-Node: Specifying the System Type381537
-Node: Sharing Defaults382253
-Node: Operation Controls382926
-Node: Optional Features383884
-Node: Reporting Bugs393672
-Node: Major Differences From The Bourne Shell394870
-Node: GNU Free Documentation License411729
-Node: Indexes436925
-Node: Builtin Index437379
-Node: Reserved Word Index444206
-Node: Variable Index446654
-Node: Function Index460177
-Node: Concept Index467405
+Node: Introduction2836
+Node: What is Bash?3064
+Node: What is a shell?4177
+Node: Definitions6716
+Node: Basic Shell Features9634
+Node: Shell Syntax10853
+Node: Shell Operation11883
+Node: Quoting13177
+Node: Escape Character14480
+Node: Single Quotes14965
+Node: Double Quotes15313
+Node: ANSI-C Quoting16438
+Node: Locale Translation17682
+Node: Comments18578
+Node: Shell Commands19196
+Node: Simple Commands20068
+Node: Pipelines20699
+Node: Lists23398
+Node: Compound Commands25127
+Node: Looping Constructs26133
+Node: Conditional Constructs28596
+Node: Command Grouping39474
+Node: Coprocesses40953
+Node: GNU Parallel42786
+Node: Shell Functions46767
+Node: Shell Parameters51851
+Node: Positional Parameters55980
+Node: Special Parameters56880
+Node: Shell Expansions59844
+Node: Brace Expansion61770
+Node: Tilde Expansion64551
+Node: Shell Parameter Expansion66900
+Node: Command Substitution79194
+Node: Arithmetic Expansion80527
+Node: Process Substitution81377
+Node: Word Splitting82427
+Node: Filename Expansion84050
+Node: Pattern Matching86215
+Node: Quote Removal89915
+Node: Redirections90210
+Node: Executing Commands99374
+Node: Simple Command Expansion100044
+Node: Command Search and Execution101974
+Node: Command Execution Environment104311
+Node: Environment107297
+Node: Exit Status108956
+Node: Signals110578
+Node: Shell Scripts112546
+Node: Shell Builtin Commands115064
+Node: Bourne Shell Builtins117092
+Node: Bash Builtins136868
+Node: Modifying Shell Behavior164195
+Node: The Set Builtin164540
+Node: The Shopt Builtin174866
+Node: Special Builtins189070
+Node: Shell Variables190049
+Node: Bourne Shell Variables190489
+Node: Bash Variables192520
+Node: Bash Features219395
+Node: Invoking Bash220294
+Node: Bash Startup Files226072
+Node: Interactive Shells231091
+Node: What is an Interactive Shell?231501
+Node: Is this Shell Interactive?232150
+Node: Interactive Shell Behavior232965
+Node: Bash Conditional Expressions236253
+Node: Shell Arithmetic240255
+Node: Aliases243031
+Node: Arrays245587
+Node: The Directory Stack250276
+Node: Directory Stack Builtins250995
+Node: Controlling the Prompt253951
+Node: The Restricted Shell256723
+Node: Bash POSIX Mode258560
+Node: Job Control267947
+Node: Job Control Basics268407
+Node: Job Control Builtins273126
+Node: Job Control Variables277588
+Node: Command Line Editing278746
+Node: Introduction and Notation280418
+Node: Readline Interaction282040
+Node: Readline Bare Essentials283231
+Node: Readline Movement Commands285020
+Node: Readline Killing Commands285985
+Node: Readline Arguments287905
+Node: Searching288949
+Node: Readline Init File291135
+Node: Readline Init File Syntax292282
+Node: Conditional Init Constructs309119
+Node: Sample Init File311652
+Node: Bindable Readline Commands314769
+Node: Commands For Moving315976
+Node: Commands For History317120
+Node: Commands For Text321305
+Node: Commands For Killing323978
+Node: Numeric Arguments326435
+Node: Commands For Completion327574
+Node: Keyboard Macros331766
+Node: Miscellaneous Commands332454
+Node: Readline vi Mode338260
+Node: Programmable Completion339167
+Node: Programmable Completion Builtins346417
+Node: A Programmable Completion Example356163
+Node: Using History Interactively361413
+Node: Bash History Facilities362097
+Node: Bash History Builtins365096
+Node: History Interaction369024
+Node: Event Designators371729
+Node: Word Designators372951
+Node: Modifiers374590
+Node: Installing Bash375994
+Node: Basic Installation377131
+Node: Compilers and Options379823
+Node: Compiling For Multiple Architectures380564
+Node: Installation Names382228
+Node: Specifying the System Type383046
+Node: Sharing Defaults383762
+Node: Operation Controls384435
+Node: Optional Features385393
+Node: Reporting Bugs395181
+Node: Major Differences From The Bourne Shell396379
+Node: GNU Free Documentation License413238
+Node: Indexes438434
+Node: Builtin Index438888
+Node: Reserved Word Index445715
+Node: Variable Index448163
+Node: Function Index461686
+Node: Concept Index468914
 
 End Tag Table

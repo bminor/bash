@@ -933,7 +933,7 @@ BASH_CHECK_TYPE(quad_t, , long, HAVE_QUAD_T)
 BASH_CHECK_TYPE(intmax_t, , $bash_cv_type_long_long)
 BASH_CHECK_TYPE(uintmax_t, , $bash_cv_type_unsigned_long_long)
 if test "$ac_cv_header_sys_socket_h" = "yes"; then
-BASH_CHECK_TYPE(socklen_t, [#include <sys/socket.h>], int, HAVE_SOCKLEN_T)
+BASH_CHECK_TYPE(socklen_t, [#include <sys/socket.h>], [unsigned int], HAVE_SOCKLEN_T)
 fi
 BASH_TYPE_RLIMIT
 

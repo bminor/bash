@@ -4930,8 +4930,10 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 	      exit (EX_NOTFOUND);	/* Posix.2 says the exit status is 127 */
 	    }
 
+#if defined (JOB_CONTROL)
 	  /* May need to reinitialize more of the job control state here. */
 	  kill_current_pipeline ();
+#endif
 
 	  wl = make_word_list (make_word (NOTFOUND_HOOK), words);
 	  exit (execute_shell_function (hookf, wl));

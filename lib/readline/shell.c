@@ -59,6 +59,8 @@
 
 #include "rlstdc.h"
 #include "rlshell.h"
+#include "rldefs.h"
+
 #include "xmalloc.h"
 
 #if defined (HAVE_GETPWUID) && !defined (HAVE_GETPW_DECLS)

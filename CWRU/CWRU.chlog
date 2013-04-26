@@ -4725,8 +4725,6 @@ builtins/setattr.def
 	  functions aren't changed or displayed unless the -f option is given.
 	  Report from <gotmynick@gmail.com>
 
-[bash-4.3-alpha frozen]
-
 				    3/9
 				    ---
 include/typemax.h
@@ -4748,3 +4746,30 @@ bashline.c
 	  get inserted by `quoting' the completion.  We can't kill all the
 	  matches because show-all-if-ambiguous needs them.   Bug report from
 	  Marcel (Felix) Giannelia <info@skeena.net>
+
+[bash-4.3-alpha frozen]
+
+				   3/14
+				   ----
+general.c
+	- trim_pathname: use memmove instead of memcpy since the source and
+	  destination pathnames may overlap.  Report and fix from Matthew
+	  Riley <mattdr@google.com>
+
+				   3/18
+				   ----
+configure.ac
+	- socklen_t is defined as `unsigned int' if configure can't find it
+
+				   3/20
+				   ----
+lib/readline/complete.c
+	- S_ISVTX: since it's not defined on all platforms (Minix), make sure
+	  its use is protected with #ifdef
+
+				   3/21
+				   ----
+doc/{bash.1,bashref.texi}
+	- Added mention of ${!name[@]} and ${!name[*]} expansions to get all
+	  indices of an array.  Suggested by Jonathan Leffler
+	  <jonathan.leffler@gmail.com>

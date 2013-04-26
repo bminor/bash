@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sun Mar 10 12:10:16 EDT 2013
+.\"	Last Change: Thu Mar 21 10:09:25 EDT 2013
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2013 March 10" "GNU Bash 4.3"
+.TH BASH 1 "2013 March 21" "GNU Bash 4.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1871,8 +1871,9 @@ below.
 .TP
 .B BASH_COMPAT
 The value is used to set the shell's compatibility level.
-See the description of the \fBshopt\fB builtin below under
-\fBSHELL BUILTIN COMMANDS\fP  for a description of the various compatibility
+See the description of the \fBshopt\fP builtin below under
+\fBSHELL BUILTIN COMMANDS\fP
+for a description of the various compatibility
 levels and their effects.
 The value may be a decimal number (e.g., 4.2) or an integer (e.g., 42)
 corresponding to the desired compatibility level.
@@ -2535,6 +2536,12 @@ array, and an index of \-1 references the last element.
 .PP
 An array variable is considered set if a subscript has been assigned a
 value.  The null string is a valid value.
+.PP
+It is possible to obtain the keys (indices) of an array as well as the values.
+${\fB!\fP\fIname\fP[\fI@\fP]} and ${\fB!\fP\fIname\fP[\fI*\fP]}
+expand to the indices assigned in array variable \fIname\fP.
+The treatment when in double quotes is similar to the expansion of the
+special parameters \fI@\fP and \fI*\fP within double quotes.
 .PP
 The
 .B unset

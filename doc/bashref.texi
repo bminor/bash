@@ -6813,6 +6813,12 @@ and an index of -1 refers to the last element.
 An array variable is considered set if a subscript has been assigned a
 value.  The null string is a valid value.
 
+It is possible to obtain the keys (indices) of an array as well as the values.
+$@{!@var{name}[@@]@} and $@{!@var{name}[*]@} expand to the indices
+assigned in array variable @var{name}.
+The treatment when in double quotes is similar to the expansion of the
+special parameters @samp{@@} and @samp{*} within double quotes.
+
 The @code{unset} builtin is used to destroy arrays.
 @code{unset @var{name}[@var{subscript}]}
 destroys the array element at index @var{subscript}.

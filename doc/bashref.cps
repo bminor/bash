@@ -13,11 +13,11 @@
 \entry {builtin}{3}
 \initial {C}
 \entry {command editing}{102}
-\entry {command execution}{35}
-\entry {command expansion}{34}
+\entry {command execution}{36}
+\entry {command expansion}{35}
 \entry {command history}{133}
-\entry {command search}{35}
-\entry {command substitution}{27}
+\entry {command search}{36}
+\entry {command substitution}{28}
 \entry {command timing}{8}
 \entry {commands, compound}{9}
 \entry {commands, conditional}{10}
@@ -40,14 +40,14 @@
 \entry {evaluation, arithmetic}{86}
 \entry {event designators}{136}
 \entry {execution environment}{36}
-\entry {exit status}{3, 37}
+\entry {exit status}{3, 38}
 \entry {expansion}{20}
 \entry {expansion, arithmetic}{28}
 \entry {expansion, brace}{21}
 \entry {expansion, filename}{29}
-\entry {expansion, parameter}{22}
+\entry {expansion, parameter}{23}
 \entry {expansion, pathname}{29}
-\entry {expansion, tilde}{21}
+\entry {expansion, tilde}{22}
 \entry {expressions, arithmetic}{86}
 \entry {expressions, conditional}{84}
 \initial {F}
@@ -55,7 +55,7 @@
 \entry {filename}{3}
 \entry {filename expansion}{29}
 \entry {foreground}{97}
-\entry {functions, shell}{16}
+\entry {functions, shell}{17}
 \initial {H}
 \entry {history builtins}{133}
 \entry {history events}{136}
@@ -79,7 +79,7 @@
 \entry {localization}{7}
 \entry {login shell}{81}
 \initial {M}
-\entry {matching, pattern}{29}
+\entry {matching, pattern}{30}
 \entry {metacharacter}{3}
 \initial {N}
 \entry {name}{3}
@@ -88,18 +88,18 @@
 \initial {O}
 \entry {operator, shell}{3}
 \initial {P}
-\entry {parameter expansion}{22}
+\entry {parameter expansion}{23}
 \entry {parameters}{18}
 \entry {parameters, positional}{19}
-\entry {parameters, special}{19}
+\entry {parameters, special}{20}
 \entry {pathname expansion}{29}
-\entry {pattern matching}{29}
+\entry {pattern matching}{30}
 \entry {pipeline}{8}
 \entry {POSIX}{3}
 \entry {POSIX Mode}{93}
 \entry {process group}{3}
 \entry {process group ID}{3}
-\entry {process substitution}{28}
+\entry {process substitution}{29}
 \entry {programmable completion}{124}
 \entry {prompting}{91}
 \initial {Q}
@@ -113,8 +113,8 @@
 \entry {return status}{4}
 \initial {S}
 \entry {shell arithmetic}{86}
-\entry {shell function}{16}
-\entry {shell script}{38}
+\entry {shell function}{17}
+\entry {shell script}{39}
 \entry {shell variable}{18}
 \entry {shell, interactive}{82}
 \entry {signal}{4}
@@ -123,7 +123,7 @@
 \entry {startup files}{81}
 \entry {suspending jobs}{97}
 \initial {T}
-\entry {tilde expansion}{21}
+\entry {tilde expansion}{22}
 \entry {token}{4}
 \entry {translation, native languages}{7}
 \initial {V}
@@ -131,6 +131,6 @@
 \entry {variables, readline}{105}
 \initial {W}
 \entry {word}{4}
-\entry {word splitting}{28}
+\entry {word splitting}{29}
 \initial {Y}
 \entry {yanking text}{103}

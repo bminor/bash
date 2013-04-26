@@ -1,6 +1,6 @@
 <HTML>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<!-- Created on January, 11  2013 by texi2html 1.64 -->
+<!-- Created on March, 8  2013 by texi2html 1.64 -->
 <!-- 
 Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -33,11 +33,11 @@ Send bugs and suggestions to <texi2html@mathematik.uni-kl.de>
 <H1>Bash Reference Manual</H1></P><P>
 
 This text is a brief description of the features that are present in
-the Bash shell (version 4.2, 8 January 2013 ).
+the Bash shell (version 4.2, 2 March 2013 ).
 The Bash home page is <A HREF="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</A>.
 </P><P>
 
-This is Edition 4.2, last updated 8 January 2013 ,
+This is Edition 4.2, last updated 2 March 2013 ,
 of <CITE>The GNU Bash Reference Manual</CITE>,
 for <CODE>Bash</CODE>, Version 4.2.
 </P><P>
@@ -1622,24 +1622,29 @@ The return status of a coprocess is the exit status of <VAR>command</VAR>.
 <!--docid::SEC24::-->
 <P>
 
+There are ways to run commands in parallel that are not built into Bash.
+GNU Parallel is a tool to do just that.
+</P><P>
+
 GNU Parallel, as its name suggests, can be used to build and run commands
 in parallel.  You may run the same command with different arguments, whether
-they are filenames, usernames, hostnames, or lines read from files.
+they are filenames, usernames, hostnames, or lines read from files.  GNU
+Parallel provides shorthand references to many of the most common operations
+(input lines, various portions of the input line, different ways to specify
+the input source, and so on).  Parallel can replace <CODE>xargs</CODE> or feed
+commands from its input sources to several different instances of Bash.
 </P><P>
 
 For a complete description, refer to the GNU Parallel documentation.  A few
 examples should provide a brief introduction to its use.
 </P><P>
 
-For example, it is easy to prefix each line in a text file with a specified
-string:
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>cat file | parallel -k echo prefix_string
-</pre></td></tr></table>The <SAMP>`-k'</SAMP> option is required to preserve the lines' order.
+For example, it is easy to replace <CODE>xargs</CODE> to gzip all html files in the
+current directory and its subdirectories:
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>find . -type f -name '*.html' -print | parallel gzip
+</pre></td></tr></table>If you need to protect special characters such as newlines in file names,
+use find's <SAMP>`-print0'</SAMP> option and parallel's <SAMP>`-0'</SAMP> option.
 </P><P>
-
-Similarly, you can append a specified string to each line in a text file:
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>cat file | parallel -k echo {} append_string
-</pre></td></tr></table></P><P>
 
 You can use Parallel to move files from the current directory when the
 number of files is too large to process with one <CODE>mv</CODE> invocation:
@@ -1647,18 +1652,29 @@ number of files is too large to process with one <CODE>mv</CODE> invocation:
 </pre></td></tr></table></P><P>
 
 As you can see, the {} is replaced with each line read from standard input.
+While using <CODE>ls</CODE> will work in most instances, it is not sufficient to
+deal with all filenames.
+If you need to accommodate special characters in filenames, you can use
+</P><P>
+
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>find . -depth 1 \! -name '.*' -print0 | parallel -0 mv {} destdir
+</pre></td></tr></table></P><P>
+
+as alluded to above.
+</P><P>
+
 This will run as many <CODE>mv</CODE> commands as there are files in the current
-directory.  You can emulate a parallel <CODE>xargs</CODE> by adding the <SAMP>`-X'</SAMP>
-option:
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>ls | parallel -X mv {} destdir
+directory.
+You can emulate a parallel <CODE>xargs</CODE> by adding the <SAMP>`-X'</SAMP> option:
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>find . -depth 1 \! -name '.*' -print0 | parallel -0 -X mv {} destdir
 </pre></td></tr></table></P><P>
 
 GNU Parallel can replace certain common idioms that operate on lines read
-from a file (in this case, filenames):
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>	for x in $(cat list); do
-		do-something1 $x config-$x
-		do-something2 &#60; $x
-	done | process-output
+from a file (in this case, filenames listed one per line):
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>	while read -r x; do
+		do-something1 "$x" "config-$x"
+		do-something2 &#60; "$x"
+	done &#60; file | process-output
 </pre></td></tr></table></P><P>
 
 with a more compact syntax reminiscent of lambdas:
@@ -1669,16 +1685,38 @@ Parallel provides a built-in mechanism to remove filename extensions, which
 lends itself to batch file transformations or renaming:
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>ls *.gz | parallel -j+0 "zcat {} | bzip2 >{.}.bz2 &&#38; rm {}"
 </pre></td></tr></table>This will recompress all files in the current directory with names ending
-in .gz using bzip2, running one job per CPU (-j+0)  in parallel.
+in .gz using bzip2, running one job per CPU (-j+0) in parallel.
+(We use <CODE>ls</CODE> for brevity here; using <CODE>find</CODE> as above is more
+robust in the face of filenames containing unexpected characters.)
+Parallel can take arguments from the command line; the above can also be
+written as
 </P><P>
+
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>parallel "zcat {} | bzip2 >{.}.bz2 &&#38; rm {}" ::: *.gz
+</pre></td></tr></table></P><P>
 
 If a command generates output, you may want to preserve the input order in
 the output.  For instance, the following command
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>{ echo foss.org.my ; echo debian.org; echo freenetproject.org; } | parallel traceroute
-</pre></td></tr></table>will display as output the traceroute invocation that finishes first.  Using
-the <SAMP>`-k'</SAMP> option, as we saw above
+</pre></td></tr></table>will display as output the traceroute invocation that finishes first.
+Adding the <SAMP>`-k'</SAMP> option 
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>{ echo foss.org.my ; echo debian.org; echo freenetproject.org; } | parallel -k traceroute
 </pre></td></tr></table>will ensure that the output of <CODE>traceroute foss.org.my</CODE> is displayed first.
+</P><P>
+
+Finally, Parallel can be used to run a sequence of shell commands in parallel,
+similar to <SAMP>`cat file | bash'</SAMP>.
+It is not uncommon to take a list of filenames, create a series of shell
+commands to operate on them, and feed that list of commnds to a shell.
+Parallel can speed this up.  Assuming that <TT>`file'</TT> contains a list of
+shell commands, one per line,
+</P><P>
+
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>parallel -j 10 &#60; file
+</pre></td></tr></table></P><P>
+
+will evaluate the commands using the shell (since no explicit command is
+supplied as an argument), in blocks of ten shell jobs at a time.
 </P><P>
 
 <A NAME="Shell Functions"></A>
@@ -6223,7 +6261,7 @@ interrupt; previous versions continue with the next command in the list.
 <P>
 
 <DT><CODE>compat41</CODE>
-<DD>If set, Bash, when in posix mode, treats a single quote in a double-quoted
+<DD>If set, Bash, when in POSIX mode, treats a single quote in a double-quoted
 parameter expansion as a special character.  The single quotes must match
 (an even number) and the characters between the single quotes are considered
 quoted.  This is the behavior of POSIX mode through version 4.1.
@@ -17202,7 +17240,7 @@ to permit their use in free software.
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="bashref.html#SEC_About"> ? </A>]</TD>
 </TR></TABLE>
 <H1>About this document</H1>
-This document was generated by <I>Chet Ramey</I> on <I>January, 11  2013</I>
+This document was generated by <I>Chet Ramey</I> on <I>March, 8  2013</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 <P></P>  
@@ -17364,7 +17402,7 @@ the following structure:
 <BR>  
 <FONT SIZE="-1">
 This document was generated
-by <I>Chet Ramey</I> on <I>January, 11  2013</I>
+by <I>Chet Ramey</I> on <I>March, 8  2013</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 

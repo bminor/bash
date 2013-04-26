@@ -97,7 +97,9 @@ OOPPTTIIOONNSS
 
        ----ppoossiixx
               Change the behavior of bbaasshh where the default operation  differs
-              from the POSIX standard to match the standard (_p_o_s_i_x _m_o_d_e).
+              from the POSIX standard to match the standard (_p_o_s_i_x _m_o_d_e).  See
+              SSEEEE AALLSSOO below for a reference to a document  that  details  how
+              posix mode affects bash's behavior.
 
        ----rreessttrriicctteedd
               The shell becomes restricted (see RREESSTTRRIICCTTEEDD SSHHEELLLL below).
@@ -1025,7 +1027,7 @@ PPAARRAAMMEETTEERRSS
        CCHHIILLDD__MMAAXX
               Set  the  number  of exited child status values for the shell to
               remember.  Bash will not allow this value to be decreased  below
-              a  Posix-mandated  minimum,  and  there is a maximum value (cur-
+              a  POSIX-mandated  minimum,  and  there is a maximum value (cur-
               rently 8192) that this may not exceed.   The  minimum  value  is
               system-dependent.
        CCOOLLUUMMNNSS
@@ -4874,7 +4876,7 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               Without options, the name and value of each shell  variable  are
               displayed in a format that can be reused as input for setting or
               resetting the currently-set variables.  Read-only variables can-
-              not  be  reset.  In _p_o_s_i_x _m_o_d_e, only shell variables are listed.
+              not  be  reset.  In _p_o_s_i_x mode, only shell variables are listed.
               The output is sorted according  to  the  current  locale.   When
               options  are specified, they set or unset shell attributes.  Any
               arguments remaining after option processing are treated as  val-
@@ -4976,7 +4978,9 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
                               is disabled by default.
                       ppoossiixx   Change the behavior of bbaasshh  where  the  default
                               operation  differs  from  the  POSIX standard to
-                              match the standard (_p_o_s_i_x _m_o_d_e).
+                              match the standard (_p_o_s_i_x _m_o_d_e).  See  SSEEEE  AALLSSOO
+                              below for a reference to a document that details
+                              how posix mode affects bash's behavior.
                       pprriivviilleeggeedd
                               Same as --pp.
                       vveerrbboossee Same as --vv.
@@ -5145,7 +5149,7 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
                       rupt;  previous  versions continue with the next command
                       in the list.
               ccoommppaatt4411
-                      If set, bbaasshh, when in posix mode, treats a single  quote
+                      If set, bbaasshh, when in _p_o_s_i_x mode, treats a single  quote
                       in  a  double-quoted  parameter  expansion  as a special
                       character.  The single quotes must match (an  even  num-
                       ber)  and  the  characters between the single quotes are
@@ -5618,6 +5622,7 @@ SSEEEE AALLSSOO
        _T_h_e _G_n_u _H_i_s_t_o_r_y _L_i_b_r_a_r_y, Brian Fox and Chet Ramey
        _P_o_r_t_a_b_l_e  _O_p_e_r_a_t_i_n_g  _S_y_s_t_e_m  _I_n_t_e_r_f_a_c_e _(_P_O_S_I_X_) _P_a_r_t _2_: _S_h_e_l_l _a_n_d _U_t_i_l_i_-
        _t_i_e_s, IEEE
+       http://tiswww.case.edu/~chet/bash/POSIX -- a description of posix mode
        _s_h(1), _k_s_h(1), _c_s_h(1)
        _e_m_a_c_s(1), _v_i(1)
        _r_e_a_d_l_i_n_e(3)
@@ -5693,4 +5698,4 @@ BBUUGGSS
 
 
 
-GNU Bash 4.2                    2013 January 8                         BASH(1)
+GNU Bash 4.2                     2013 March 4                          BASH(1)
