@@ -67,6 +67,6 @@ struct dstack {
 #define DOLBRACE_OP	0x02
 #define DOLBRACE_WORD	0x04
 
-#define DOLBRACE_QUOTE	0x40
+#define DOLBRACE_QUOTE	0x40	/* single quote is special in double quotes */
 
 #endif /* _PARSER_H_ */

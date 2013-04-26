@@ -543,14 +543,10 @@ k.  New application-settable variable: rl_input_available_hook; function to be
     called when readline detects there is data available on its input file
     descriptor.
 
-l.  Readline calls an application-set event hook (rl_event_hook) after it gets
-    a signal while reading input (read returns -1/EINTR but readline does not
-    handle the signal immediately) to allow the application to handle or
-    otherwise note it.
-
+l.  Readline calls an application-set event hook (rl_signal_event_hook) after
+    it gets a signal while reading input (read returns -1/EINTR but readline    
+    does not handle the signal immediately) to allow the application to handle
+    or otherwise note it.  Not currently called for SIGHUP or SIGTERM.
+    
 m.  If the user-settable variable `history-size' is set to a value less than
     0, the history list size is unlimited.
-
-n.  New application-settable variable: rl_signal_event_hook; function that is
-    called when readline is reading terminal input and read(2) is interrupted
-    by a signal.  Currently not called for SIGHUP or SIGTERM.

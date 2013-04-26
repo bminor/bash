@@ -3754,8 +3754,13 @@ fix_assignment_words (words)
   b = 0;
   assoc = global = array = 0;
 
+  /* Skip over assignment statements preceding a command name */
   wcmd = words;
-  for (w = words; w; w = w->next)
+  for (wcmd = words; wcmd; wcmd = wcmd->next)
+    if ((wcmd->word->flags & W_ASSIGNMENT) == 0)
+      break;
+
+  for (w = wcmd; w; w = w->next)
     if (w->word->flags & W_ASSIGNMENT)
       {
 	if (b == 0)

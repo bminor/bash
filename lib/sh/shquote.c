@@ -94,6 +94,15 @@ sh_single_quote (string)
 
   result = (char *)xmalloc (3 + (4 * strlen (string)));
   r = result;
+
+  if (string[0] == '\'' && string[1] == 0)
+    {
+      *r++ = '\\';
+      *r++ = '\'';
+      *r++ = 0;
+      return result;
+    }
+
   *r++ = '\'';
 
   for (s = string; s && (c = *s); s++)
