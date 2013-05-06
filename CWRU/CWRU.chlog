@@ -4902,3 +4902,17 @@ variables.c
 arrayfunc.c
 	- array_variable_part: return variable even if invisible flag set,
 	  callers must handle invisible vars
+
+				   4/18
+				   ----
+builtins/set.def
+	- unset_builtin: if -n flag given, call unset_nameref instead of
+	  unset_variable
+
+variables.c
+	- find_variable_nameref: print warning message if nameref circular
+	  reference detected, return NULL and let caller deal with it
+
+builtins/declare.def
+	- declare_builtin: only disallow global references at this point if
+	  we are at the global scope

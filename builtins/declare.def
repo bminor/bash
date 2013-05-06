@@ -315,7 +315,8 @@ declare_internal (list, local_var)
 	    }
 	  else
 #endif
-	  if (STREQ (name, value))
+	  /* disallow self references at global scope */
+	  if (STREQ (name, value) && variable_context == 0)
 	    {
 	      builtin_error (_("%s: nameref variable self references not allowed"), name);
 	      assign_error++;

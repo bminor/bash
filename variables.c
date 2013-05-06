@@ -1846,17 +1846,25 @@ find_variable_nameref (v)
 {
   int level;
   char *newname;
+  SHELL_VAR *orig, *oldv;
 
   level = 0;
+  orig = v;
   while (v && nameref_p (v))
     {
       level++;
       if (level > NAMEREF_MAX)
-        return ((SHELL_VAR *)0);	/* error message here? */
+	return ((SHELL_VAR *)0);	/* error message here? */
       newname = nameref_cell (v);
       if (newname == 0 || *newname == '\0')
 	return ((SHELL_VAR *)0);
+      oldv = v;
       v = find_variable_internal (newname, (expanding_redir == 0 && (assigning_in_environment || executing_builtin)));
+      if (v == orig || v == oldv)
+	{
+	  internal_warning (_("%s: circular name reference"), orig->name);
+	  return ((SHELL_VAR *)0);
+	}
     }
   return v;
 }

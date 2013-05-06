@@ -94,11 +94,7 @@
 /* Maximum amount of recursion allowed.  This prevents a non-integer
    variable such as "num=num+2" from infinitely adding to itself when
    "let num=num+2" is given. */
-#if 0
 #define MAX_EXPR_RECURSION_LEVEL 1024
-#else
-#define MAX_EXPR_RECURSION_LEVEL 16
-#endif
 
 /* The Tokens.  Singing "The Lion Sleeps Tonight". */
 

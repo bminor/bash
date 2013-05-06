@@ -863,7 +863,7 @@ unset_builtin (list)
 	}
       else
 #endif /* ARRAY_VARS */
-      tem = unset_function ? unbind_func (name) : unbind_variable (name);
+      tem = unset_function ? unbind_func (name) : (nameref ? unbind_nameref (name) : unbind_variable (name));
 
       /* This is what Posix.2 says:  ``If neither -f nor -v
 	 is specified, the name refers to a variable; if a variable by
