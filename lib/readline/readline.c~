@@ -821,7 +821,7 @@ _rl_dispatch_subseq (key, map, got_subseq)
 
 	  rl_dispatching = 1;
 	  RL_SETSTATE(RL_STATE_DISPATCHING);
-	  (*func) (rl_numeric_arg * rl_arg_sign, key);
+	  r = (*func) (rl_numeric_arg * rl_arg_sign, key);
 	  RL_UNSETSTATE(RL_STATE_DISPATCHING);
 	  rl_dispatching = 0;
 
@@ -959,7 +959,6 @@ _rl_dispatch_subseq (key, map, got_subseq)
       key != ANYOTHERKEY &&
       rl_key_sequence_length == 1 &&	/* XXX */
       _rl_vi_textmod_command (key))
-    /* This breaks when using arrow keys to move within line */
     _rl_vi_set_last (key, rl_numeric_arg, rl_arg_sign);
 #endif
 

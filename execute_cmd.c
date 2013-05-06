@@ -607,9 +607,11 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	     want to note this before execute_in_subshell modifies the
 	     COMMAND struct.  Need to keep in mind that execute_in_subshell
 	     runs the exit trap for () subshells itself. */
+	  /* This handles { command; } &
 	  s = user_subshell == 0 && command->type == cm_group && pipe_in == NO_PIPE && pipe_out == NO_PIPE && asynchronous;
-	  /* run exit trap for : | { ...; } and : | ( ... ) */
-	  s += user_subshell == 0 && command->type == cm_group && pipe_in != NO_PIPE && pipe_out == NO_PIPE && asynchronous == 0;
+	  /* run exit trap for : | { ...; } and { ...; } | : */
+	  /* run exit trap for : | ( ...; ) and ( ...; ) | : */
+	  s += user_subshell == 0 && command->type == cm_group && (pipe_in != NO_PIPE || pipe_out != NO_PIPE) && asynchronous == 0;
 
 	  last_command_exit_value = execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close);
 	  if (s)

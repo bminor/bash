@@ -1764,6 +1764,8 @@ hash_lookup (name, hashed_vars)
   BUCKET_CONTENTS *bucket;
 
   bucket = hash_search (name, hashed_vars, 0);
+  /* If we find the name in HASHED_VARS, set LAST_TABLE_SEARCHED to that
+     table. */
   if (bucket)
     last_table_searched = hashed_vars;
   return (bucket ? (SHELL_VAR *)bucket->data : (SHELL_VAR *)NULL);
@@ -2070,6 +2072,7 @@ find_variable (name)
 {
   SHELL_VAR *v;
 
+  last_table_searched = 0;
   v = find_variable_internal (name, (expanding_redir == 0 && (assigning_in_environment || executing_builtin)));
   if (v && nameref_p (v))
     v = find_variable_nameref (v);

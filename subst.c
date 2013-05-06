@@ -4511,6 +4511,11 @@ array_remove_pattern (var, pattern, patspec, varname, quoted)
 
   /* compute itype from varname here */
   v = array_variable_part (varname, &ret, 0);
+
+  /* XXX */
+  if (v && invisible_p (var))
+    return ((char *)NULL);
+
   itype = ret[0];
 
   a = (v && array_p (v)) ? array_cell (v) : 0;
@@ -5160,6 +5165,8 @@ process_substitute (string, open_for_read_in_child)
   close (open_for_read_in_child ? 0 : 1);
 #endif /* !HAVE_DEV_FD */
 
+  last_command_exit_value = result;
+  result = run_exit_trap ();
   exit (result);
   /*NOTREACHED*/
 }
@@ -5524,7 +5531,7 @@ array_length_reference (s)
 
   /* If unbound variables should generate an error, report one and return
      failure. */
-  if ((var == 0 || (assoc_p (var) == 0 && array_p (var) == 0)) && unbound_vars_is_error)
+  if ((var == 0 || invisible_p (var) || (assoc_p (var) == 0 && array_p (var) == 0)) && unbound_vars_is_error)
     {
       c = *--t;
       *t = '\0';
@@ -5533,7 +5540,7 @@ array_length_reference (s)
       *t = c;
       return (-1);
     }
-  else if (var == 0)
+  else if (var == 0 || invisible_p (var))
     return 0;
 
   /* We support a couple of expansions for variables that are not arrays.
@@ -6316,6 +6323,12 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
       /* If we want to signal array_value to use an already-computed index,
 	 set LIND to that index */
       lind = (ind != INTMAX_MIN && (flags & AV_USEIND)) ? ind : 0;
+      if (v && invisible_p (v))
+	{
+	  vtype = VT_ARRAYMEMBER;
+	  *varp = (SHELL_VAR *)NULL;
+	  *valp = (char *)NULL;
+	}
       if (v && (array_p (v) || assoc_p (v)))
 	{ /* [ */
 	  if (ALL_ELEMENT_SUB (temp[0]) && temp[1] == ']')

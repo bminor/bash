@@ -2764,6 +2764,8 @@ bind_int_variable (lhs, rhs)
   if (v && isint)
     VSETATTR (v, att_integer);
 
+  VUNSETATTR (v, att_invisible);
+
   return (v);
 }
 

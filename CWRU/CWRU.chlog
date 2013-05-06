@@ -4406,7 +4406,7 @@ execute_cmd.c
 	- execute_command_internal: make sure any subshell forked to run a
 	  group command or user subshell at the end of a pipeline runs any
 	  EXIT trap it sets.  Fixes debian bash bug 698411
-	  http://bugs.debian.org/cgi-big/bugreport.cgi?bug=698411
+	  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=698411
 
 subst.c
 	- shell_expand_word_list: fix code that creates args for and calls
@@ -4858,3 +4858,47 @@ subst.c
 	  It doesn't work to just turn on the DQUOTE flag, since that means
 	  that things like ${x["expression"]} are not expanded correctly.
 	  Fixes problem pointed out by Dan Douglas <ormaaj@gmail.com>
+
+				   4/13
+				   ----
+subst.c
+	- process_substitute: run the EXIT trap before exiting, as other
+	  shells seem to.  Fixes problem pointed out by Dan Douglas
+	  <ormaaj@gmail.com>
+
+lib/readline/readline.c
+	- readline_internal_setup: call rl_vi_insertion_mode to enter vi
+	  mode instead of rl_vi_insert_mode to avoid resetting the saved last
+	  command information.  Posix says that `.' can repeat a command
+	  that was entered on a previous line so we need to save the info.
+	  Fixes bug reported by Ian A. Watson <watson_ian_a@lilly.com>
+
+				   4/14
+				   ----
+lib/readline/complete.c
+	- rl_completion_matches: make sure xrealloc returns something non-null
+	  (can happen when interrupted by a signal) before trying to add
+	  matches to match_list
+
+subst.c
+	- array_remove_pattern: return NULL right away if array_variable_part
+	  returns an invisible variable
+	- array_length_reference: handle array_variable_part returning an
+	  invisible variable
+	- get_var_and_type: handle array_variable_part returning an invisible
+	  variable
+
+				   4/15
+				   ----
+execute_cmd.c
+	- execute_command_internal: make sure to run the EXIT trap for group
+	  commands anywhere in pipelines, not just at the end.  From a point
+	  raised by Andreas Schwab <schwab@linux-m68k.org>
+
+variables.c
+	- bind_int_variable: make sure invisible flag is unset.  Fixes problems
+	  like "declare -ai a; : $(( a[4]=4 ));"
+
+arrayfunc.c
+	- array_variable_part: return variable even if invisible flag set,
+	  callers must handle invisible vars
