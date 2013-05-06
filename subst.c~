@@ -3150,8 +3150,7 @@ expand_arith_string (string, quoted)
 
   if (string[i])
     {
-      /* This is expanded version of expand_string_internal as it's called by
-	 expand_string_leave_quoted  */
+      /* This is expanded version of expand_string_internal */
       td.flags = W_NOPROCSUB;	/* don't want process substitution */
       td.word = savestring (string);
       list = call_expand_word_internal (&td, quoted, 0, (int *)NULL, (int *)NULL);

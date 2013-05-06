@@ -3312,7 +3312,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	    dolbrace_state = DOLBRACE_QUOTE;
           /* ${param/[/]pat/rep} */
 	  else if MBTEST(dolbrace_state == DOLBRACE_PARAM && ch == '/' && retind > 1)
-	    dolbrace_state = DOLBRACE_OP;	/* XXX */
+	    dolbrace_state = DOLBRACE_QUOTE2;	/* XXX */
           /* ${param^[^]pat} */
 	  else if MBTEST(dolbrace_state == DOLBRACE_PARAM && ch == '^' && retind > 1)
 	    dolbrace_state = DOLBRACE_QUOTE;
@@ -3359,7 +3359,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 		     make sure we single-quote the results of the ansi
 		     expansion because quote removal should remove them later */
 		  /* FLAG POSIX INTERP 221 */
-		  if ((shell_compatibility_level > 41) && (rflags & P_DQUOTE) && (dolbrace_state != DOLBRACE_QUOTE) && (flags & P_DOLBRACE))
+		  if ((shell_compatibility_level > 42) && (rflags & P_DQUOTE) && (dolbrace_state == DOLBRACE_QUOTE2) && (flags & P_DOLBRACE))
 		    {
 		      nestret = sh_single_quote (ttrans);
 		      free (ttrans);

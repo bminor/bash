@@ -4848,13 +4848,3 @@ variables.c
 	  merged (in execute_function) into the list of variable contexts the
 	  function sees as shell_variables by the time this is called.  Fixes
 	  inconsistency pointed out by Dan Douglas <ormaaj@gmail.com>
-
-subst.c
-	- expand_arith_string: expanded out contents of expand_string,
-	  expand_string_internal, expand_string_if_necessary to create a
-	  WORD_DESC and call call_expand_word_internal() on it directly.
-	  We don't want process substitution to be performed ( 1<(2) ) should
-	  mean something different in an arithmetic expression context.
-	  It doesn't work to just turn on the DQUOTE flag, since that means
-	  that things like ${x["expression"]} are not expanded correctly.
-	  Fixes problem pointed out by Dan Douglas <ormaaj@gmail.com>
