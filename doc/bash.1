@@ -424,8 +424,8 @@ The
 .B \-\-norc
 option may be used to inhibit this behavior, and the
 .B \-\-rcfile
-option may be used to force another file to be read, but
-\fIrshd\fP does not generally invoke the shell with those options
+option may be used to force another file to be read, but neither
+\fIrshd\fP nor \fIsshd\fP generally invoke the shell with those options
 or allow them to be specified.
 .PP
 If the shell is started with the effective user (group) id not equal to the
@@ -535,11 +535,11 @@ command (see
 .SM
 .B REDIRECTION
 below).
-If \fB|&\fP is used, \fIcommand\fP's standard output and standard error
-are connected to
+If \fB|&\fP is used, \fIcommand\fP's standard error, in addition to its
+standard output, is connected to
 \fIcommand2\fP's standard input through the pipe;
 it is shorthand for \fB2>&1 |\fP.
-This implicit redirection of the standard error is
+This implicit redirection of the standard error to the standard output is
 performed after any redirections specified by the command.
 .PP
 The return status of a pipeline is the exit status of the last

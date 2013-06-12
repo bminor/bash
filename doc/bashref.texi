@@ -621,11 +621,11 @@ That is, each command reads the previous command's output.  This
 connection is performed before any redirections specified by the
 command.
 
-If @samp{|&} is used, @var{command1}'s standard output and standard error
-are connected to
+If @samp{|&} is used, @var{command1}'s standard error, in addition to
+its standard output, is connected to
 @var{command2}'s standard input through the pipe;
 it is shorthand for @code{2>&1 |}.
-This implicit redirection of the standard error is
+This implicit redirection of the standard error to the standard output is
 performed after any redirections specified by the command.
 
 The reserved word @code{time} causes timing statistics
@@ -6225,8 +6225,8 @@ file exists and is readable.
 It will not do this if invoked as @code{sh}.
 The @option{--norc} option may be used to inhibit this behavior, and the
 @option{--rcfile} option may be used to force another file to be read, but
-@code{rshd} does not generally invoke the shell with those options or
-allow them to be specified.
+neither @code{rshd} nor @code{sshd} generally invoke the shell with those
+options or allow them to be specified.
 
 @subsubheading Invoked with unequal effective and real @sc{uid/gid}s
 
