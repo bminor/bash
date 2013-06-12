@@ -8,4 +8,4 @@
 \entry{initialization file, readline}{4}{initialization file, readline}
 \entry{variables, readline}{4}{variables, readline}
 \entry{readline, function}{22}{readline, function}
-\entry{application-specific completion functions}{45}{application-specific completion functions}
+\entry{application-specific completion functions}{43}{application-specific completion functions}

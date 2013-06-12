@@ -1,5 +1,5 @@
 \initial {A}
-\entry {application-specific completion functions}{45}
+\entry {application-specific completion functions}{43}
 \initial {C}
 \entry {command editing}{1}
 \initial {E}
