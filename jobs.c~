@@ -2483,7 +2483,7 @@ wait_for (pid)
 	  r = waitchld (pid, 1);	/* XXX */
 	  waiting_for_child--;
 #if 0
-itrace("wait_for: blocking wait for %d returns %d child = %p", (int)pid, r, child);
+itrace("wait_for: blocking wait for %d returns %d child = 0x%x", (int)pid, r, child);
 #endif
 #  if defined (MUST_UNBLOCK_CHLD)
 	  sigaction (SIGCHLD, &oact, (struct sigaction *)NULL);
