@@ -5012,14 +5012,3 @@ parse.y
 	  polite_directory_format returns its argument unchanged.  It's not
 	  necessary and Mac OS X 10.9 aborts because of a supposed overlapping
 	  string copy.  Bug and fix from simon@hitzemann.org
-
-subst.c
-	- parameter_brace_find_indir: new function, code from
-	  parameter_brace_expand_indir that looks up the indirectly-referenced
-	  variable, but does not expand it
-	- parameter_brace_expand_indir: call parameter_brace_find_indir to
-	  look up indirected variable reference
-	- get_var_and_type: call parameter_brace_find_indir if it looks like we
-	  are trying to manipulate an indirect variable reference like
-	  ${!b%%foo}.  This makes a difference if !b references an array
-	  variable.  Bug report from Dan Douglas <ormaaj@gmail.com>

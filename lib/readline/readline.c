@@ -397,8 +397,8 @@ readline_internal_setup ()
   _rl_out_stream = rl_outstream;
 
   /* Enable the meta key only for the duration of readline(), if this
-     terminal has one. */
-  if (_rl_enable_meta)
+     terminal has one and the terminal has been initialized */
+  if (_rl_enable_meta & RL_ISSTATE (RL_STATE_TERMPREPPED))
     _rl_enable_meta_key ();
 
   if (rl_startup_hook)
@@ -469,7 +469,9 @@ readline_internal_teardown (eof)
   if (rl_undo_list)
     rl_free_undo_list ();
 
-  /* Disable the meta key, if this terminal has one. */
+  /* Disable the meta key, if this terminal has one and we were told to use it.
+     The check whether or not we sent the enable string is in
+     _rl_disable_meta_key(); the flag is set in _rl_enable_meta_key */
   _rl_disable_meta_key ();
 
   /* Restore normal cursor, if available. */

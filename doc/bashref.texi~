@@ -5046,8 +5046,7 @@ the ignored words are the only possible completions.
 This option is enabled by default.
 
 @item globasciiranges
-If set, range expressions used in pattern matching bracket expressions
-(@pxref{Pattern Matching})
+If set, range expressions used in pattern matching (@pxref{Pattern Matching})
 behave as if in the traditional C locale when performing
 comparisons.  That is, the current locale's collating sequence
 is not taken into account, so
@@ -5059,6 +5058,12 @@ If set, the pattern @samp{**} used in a filename expansion context will
 match all files and zero or more directories and subdirectories.
 If the pattern is followed by a @samp{/}, only directories and
 subdirectories match.
+
+@item globasciiranges
+If set, range expressions (a-z) used in pattern matching bracket expressions
+([a-z]), including when used in a filename expansion context, will act as
+if the C locale is the current locale.
+This means they will not use the current locale's collating sequence.
 
 @item gnu_errfmt
 If set, shell error messages are written in the standard @sc{gnu} error
@@ -8080,8 +8085,6 @@ above under @ref{The Shopt Builtin} to be enabled.
 @item --enable-glob-asciirange-default
 Set the default value of the @var{globasciiranges} shell option described
 above under @ref{The Shopt Builtin} to be enabled.
-This controls the behavior of character ranges when used in pattern matching
-bracket expressions.
 
 @item --enable-help-builtin
 Include the @code{help} builtin, which displays help on shell builtins and

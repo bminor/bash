@@ -6330,11 +6330,15 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
 #endif
   arrayind_t lind;
 
+  wd = 0;
   want_indir = *varname == '!' &&
     (legal_variable_starter ((unsigned char)varname[1]) || DIGIT (varname[1])
 					|| VALID_INDIR_PARAM (varname[1]));
   if (want_indir)
-    vname = parameter_brace_find_indir (varname+1, SPECIAL_VAR (varname, 1), quoted, 1);
+    {
+      wd = parameter_brace_find_indir (varname+1, SPECIAL_VAR (varname, 1), quoted, 1);
+      vname = wd->word;
+    }
   else
     vname = varname;
     
@@ -6409,9 +6413,6 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
       else
 	*valp = value;
     }
-
-  if (want_indir)
-    free (vname);
 
   return vtype;
 }

@@ -361,6 +361,7 @@ run_pending_traps ()
 	    }
 	  else
 	    {
+	      /* XXX - should we use save_parser_state/restore_parser_state? */
 	      token_state = save_token_state ();
 	      save_subst_varlist = subst_assign_varlist;
 	      subst_assign_varlist = 0;

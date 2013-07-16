@@ -353,11 +353,11 @@ executing_line_number ()
 	return currently_executing_command->value.Cond->line;
 #endif
 #if defined (DPAREN_ARITHMETIC)
-      else if (currently_executing_command->type == cm_arith)
+      if (currently_executing_command->type == cm_arith)
 	return currently_executing_command->value.Arith->line;
 #endif
 #if defined (ARITH_FOR_COMMAND)
-      else if (currently_executing_command->type == cm_arith_for)
+      if (currently_executing_command->type == cm_arith_for)
 	return currently_executing_command->value.ArithFor->line;
 #endif
 

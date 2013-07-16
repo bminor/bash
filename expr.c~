@@ -681,7 +681,7 @@ expbor ()
       readtok ();
       val2 = expbxor ();
       val1 = val1 | val2;
-      lasttok = NUM;
+lasttok = NUM;
     }
 
   return (val1);
@@ -700,7 +700,7 @@ expbxor ()
       readtok ();
       val2 = expband ();
       val1 = val1 ^ val2;
-      lasttok = NUM;
+lasttok = NUM;
     }
 
   return (val1);
@@ -719,7 +719,7 @@ expband ()
       readtok ();
       val2 = exp5 ();
       val1 = val1 & val2;
-      lasttok = NUM;
+lasttok = NUM;
     }
 
   return (val1);
@@ -742,7 +742,7 @@ exp5 ()
 	val1 = (val1 == val2);
       else if (op == NEQ)
 	val1 = (val1 != val2);
-      lasttok = NUM;
+lasttok = NUM;
     }
   return (val1);
 }
@@ -771,7 +771,7 @@ exp4 ()
 	val1 = val1 < val2;
       else			/* (op == GT) */
 	val1 = val1 > val2;
-      lasttok = NUM;
+lasttok = NUM;
     }
   return (val1);
 }
@@ -795,7 +795,7 @@ expshift ()
 	val1 = val1 << val2;
       else
 	val1 = val1 >> val2;
-      lasttok = NUM;
+lasttok = NUM;
     }
 
   return (val1);
@@ -819,7 +819,7 @@ exp3 ()
 	val1 += val2;
       else if (op == MINUS)
 	val1 -= val2;
-      lasttok = NUM;
+lasttok = NUM;
     }
   return (val1);
 }
@@ -871,7 +871,7 @@ exp2 ()
 #else
 	val1 = (op == DIV) ? val1 / val2 : val1 % val2;
 #endif
-      lasttok = NUM;
+lasttok = NUM;
     }
   return (val1);
 }
@@ -903,7 +903,7 @@ exppower ()
     {
       readtok ();
       val2 = exppower ();	/* exponentiation is right-associative */
-      lasttok = NUM;
+lasttok = NUM;
       if (val2 == 0)
 	return (1);
       if (val2 < 0)
@@ -922,25 +922,25 @@ exp1 ()
     {
       readtok ();
       val = !exp1 ();
-      lasttok = NUM;
+lasttok = NUM;
     }
   else if (curtok == BNOT)
     {
       readtok ();
       val = ~exp1 ();
-      lasttok = NUM;
+lasttok = NUM;
     }
   else if (curtok == MINUS)
     {
       readtok ();
       val = - exp1 ();
-      lasttok = NUM;
+lasttok = NUM;
     }
   else if (curtok == PLUS)
     {
       readtok ();
       val = exp1 ();
-      lasttok = NUM;
+lasttok = NUM;
     }
   else
     val = exp0 ();

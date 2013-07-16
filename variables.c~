@@ -2908,13 +2908,6 @@ assign_in_env (word, flags)
 
       temp = name + offset + 1;
       value = expand_assignment_string_to_string (temp, 0);
-
-      if (var && (aflags & ASS_APPEND))
-	{
-	  temp = make_variable_value (var, value, aflags);
-	  FREE (value);
-	  value = temp;
-	}
     }
 
   if (temporary_env == 0)

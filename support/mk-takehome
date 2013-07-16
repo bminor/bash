@@ -8,13 +8,14 @@ DIR=$PARENT/$FROOT
 TARF=${FROOT}.tar
 SRC=/usr/homes/chet/src/bash/src
 
-fflag= sflag=
-while getopts "fs" opt
+fflag= sflag= dflag=
+while getopts "dfs" opt
 do
 	case $opt in
 	f)	fflag=1 ;;
 	s)	sflag=1 ;;
-	*)	echo "mk-takehome: usage: mk-takehome [-fs]" 2>&1
+	d)	dflag=1 ;;
+	*)	echo "mk-takehome: usage: mk-takehome [-dfs]" 2>&1
 		exit 2;;
 	esac
 done
@@ -54,4 +55,8 @@ REMHOST=z4
 
 if [ -n "$sflag" ]; then
 	scp ${TARF}.gz ${REMHOST}:
+fi
+
+if [ -n "$dflag" ]; then
+	cp ${TARF}.gz $HOME/Dropbox/
 fi
