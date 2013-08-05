@@ -475,7 +475,7 @@ fc_gethnum (command, hlist)
      HIST_ENTRY **hlist;
 {
   int sign, n, clen, rh;
-  register int i, j, last_hist;
+  register int i, j, last_hist, real_last;
   register char *s;
 
   sign = 1;
@@ -503,6 +503,7 @@ fc_gethnum (command, hlist)
   if (last_hist < 0)
     return (-1);
 
+  real_last = i;
   i = last_hist;
 
   /* No specification defaults to most recent command. */
