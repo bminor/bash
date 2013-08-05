@@ -264,7 +264,10 @@ declare_internal (list, local_var)
     {
       for (any_failed = 0; list; list = list->next)
 	{
-	  pflag = show_name_attributes (list->word->word, nodefs);
+	  if (flags_on & att_function)
+	    pflag = show_func_attributes (list->word->word, nodefs);
+	  else
+	    pflag = show_name_attributes (list->word->word, nodefs);
 	  if (pflag)
 	    {
 	      sh_notfound (list->word->word);

@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Thu Jun 27 10:36:53 EDT 2013
+.\"	Last Change: Mon Jul  8 19:30:46 EDT 2013
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2013 June 27" "GNU Bash 4.3"
+.TH BASH 1 "2013 July 8" "GNU Bash 4.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -7402,7 +7402,8 @@ option will display the attributes and values of each
 .IR name .
 When
 .B \-p
-is used with \fIname\fP arguments, additional options are ignored.
+is used with \fIname\fP arguments, additional options,
+other than \fB\-f\fP and \fB\-F\fP, are ignored.
 When
 .B \-p
 is supplied without \fIname\fP arguments, it will display the attributes
@@ -9119,7 +9120,12 @@ is greater than
 or less than zero; otherwise 0.
 .TP
 \fBshopt\fP [\fB\-pqsu\fP] [\fB\-o\fP] [\fIoptname\fP ...]
-Toggle the values of variables controlling optional shell behavior.
+Toggle the values of settings controlling optional shell behavior.
+The settings can be either those listed below, or, if the
+.B \-o
+option is used, those available with the
+.B \-o
+option to the \fBset\fP builtin command.
 With no options, or with the
 .B \-p
 option, a list of all settable options is displayed, with
@@ -10072,7 +10078,7 @@ subsequently reset.  The exit status is true unless a
 is readonly.
 .TP
 \fBwait\fP [\fB\--n\fP] [\fIn ...\fP]
-Wait for each specified process and return its termination status.
+Wait for each specified child process and return its termination status.
 Each
 .I n
 may be a process

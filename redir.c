@@ -873,7 +873,9 @@ do_redirection_internal (redirect, flags)
 	    }
 
 #if defined (BUFFERED_INPUT)
-	  check_bash_input (redirector);
+	  /* inhibit call to sync_buffered_stream() for async processes */
+	  if (redirector != 0 || (subshell_environment & SUBSHELL_ASYNC) == 0)
+	    check_bash_input (redirector);
 #endif
 
 	  /* Make sure there is no pending output before we change the state
@@ -1055,7 +1057,9 @@ do_redirection_internal (redirect, flags)
 		}
 	    }
 #if defined (BUFFERED_INPUT)
-	  check_bash_input (redirector);
+	  /* inhibit call to sync_buffered_stream() for async processes */
+	  if (redirector != 0 || (subshell_environment & SUBSHELL_ASYNC) == 0)
+	    check_bash_input (redirector);
 #endif
 	  if (redirect->rflags & REDIR_VARASSIGN)
 	    {
@@ -1138,15 +1142,16 @@ do_redirection_internal (redirect, flags)
 	  xtrace_fdchk (redirector);
 
 #if defined (BUFFERED_INPUT)
-	  check_bash_input (redirector);
+	  /* inhibit call to sync_buffered_stream() for async processes */
+	  if (redirector != 0 || (subshell_environment & SUBSHELL_ASYNC) == 0)
+	    check_bash_input (redirector);
 	  r = close_buffered_fd (redirector);
 #else /* !BUFFERED_INPUT */
 	  r = close (redirector);
 #endif /* !BUFFERED_INPUT */
-#if 0	/* bash-4.3 */
+
 	  if (r < 0 && (flags & RX_INTERNAL) && (errno == EIO || errno == ENOSPC))
 	    REDIRECTION_ERROR (r, errno, -1);
-#endif
 	}
       break;
 

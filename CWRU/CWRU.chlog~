@@ -5023,3 +5023,53 @@ subst.c
 	  are trying to manipulate an indirect variable reference like
 	  ${!b%%foo}.  This makes a difference if !b references an array
 	  variable.  Bug report from Dan Douglas <ormaaj@gmail.com>
+
+				    7/6
+				    ---
+lib/sh/casemod.c
+	- sh_modcase: make sure argument passed to is_basic is <= UCHAR_MAX,
+	  since cval can convert something to a wchar_t greater than UCHAR_MAX.
+	  Fixes bug reported by Tomasz Tomasik <scx.mail@gmail.com>
+
+				    7/8
+				    ---
+lib/readline/history.c
+	- add_history_time: if history_length == 0, referencing history_length
+	  - 1 will result in an array bounds error, so make history_length be
+	  at least 1 before going on.  Fixes bug reported by Geng Sheng Liu
+	  <gsliu.tju@gmail.com>
+
+builtins/setattr.def
+	- show_func_attributes: display definition (if NODEFS argument is 0) and
+	  attributes for a particular function; used by `declare -fp name'
+
+builtins/declare.def
+	- declare_internal: call show_func_attributes if -f supplied with -p.
+	  Fixes inconsistency observed by Linda Walsh <bash@tlinx.org>
+
+builtins/common.h
+	- new extern declaration for show_func_attributes
+
+builtins/read.def
+	- read_builtin: check the first supplied variable name for validity
+	  before attempting to read any input, since we know we will have to
+	  at least use that one.  Don't check any other names yet.  Suggested
+	  by jidanni@jidanni.org
+
+				   7/10
+				   ----
+redir.c
+	- do_redirection_internal: when closing a file descriptor with
+	  r_close_this ([n]<&-) count close errors as redirection errors if
+	  errno ends up as EIO or ENOSPC.  Originally reported back in April
+	  2012 by Andrey Zaitsev <jstcdr@gmail.com>
+
+				   7/11
+				   ----
+redir.c
+	- do_redirection_internal: before calling check_bash_input, make sure
+	  that we don't call check_bash_input for an asynchronous process that
+	  is replacing stdin with something else. The seek backwards affects
+	  the parent process as well, since parents and children share the
+	  file pointer. Fixes problem originally reported in March 2013 by
+	  Martin Jackson <mjackson220.list@gmail.com>

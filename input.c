@@ -308,7 +308,7 @@ save_bash_input (fd, new_fd)
    the buffered stream.  Make sure the file descriptor used to save bash
    input is set close-on-exec. Returns 0 on success, -1 on failure.  This
    works only if fd is > 0 -- if fd == 0 and bash is reading input from
-   fd 0, save_bash_input is used instead, to cooperate with input
+   fd 0, sync_buffered_stream is used instead, to cooperate with input
    redirection (look at redir.c:add_undo_redirect()). */
 int
 check_bash_input (fd)

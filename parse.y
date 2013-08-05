@@ -5886,7 +5886,6 @@ parse_compound_assignment (retlenp)
 {
   WORD_LIST *wl, *rl;
   int tok, orig_line_number, orig_token_size, orig_last_token, assignok;
-  int peekc;
   char *saved_token, *ret;
 
   saved_token = token;
