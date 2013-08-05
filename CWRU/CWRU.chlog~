@@ -5023,10 +5023,3 @@ subst.c
 	  are trying to manipulate an indirect variable reference like
 	  ${!b%%foo}.  This makes a difference if !b references an array
 	  variable.  Bug report from Dan Douglas <ormaaj@gmail.com>
-
-				    7/6
-				    ---
-lib/sh/casemod.c
-	- sh_modcase: make sure argument passed to is_basic is <= UCHAR_MAX,
-	  since cval can convert something to a wchar_t greater than UCHAR_MAX.
-	  Fixes bug reported by Tomasz Tomasik <scx.mail@gmail.com>

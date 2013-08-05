@@ -232,7 +232,7 @@ singlebyte:
 	  m = mbrtowc (&wc, string + start, end - start, &state);
 	  if (MB_INVALIDCH (m))
 	    {
-	      wc = (unsigned char)string[start];
+	      wc = (wchar_t)string[start];
 	      goto singlebyte;
 	    }
 	  else if (MB_NULLWCH (m))

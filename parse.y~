@@ -319,6 +319,8 @@ static WORD_DESC *word_desc_to_read;
 
 static REDIRECTEE source;
 static REDIRECTEE redir;
+
+static char compound_assignment_error;
 %}
 
 %union {
@@ -4653,6 +4655,12 @@ read_token_word (character)
 	  if MBTEST(peek_char == '(')		/* ) */
 	    {
 	      ttok = parse_compound_assignment (&ttoklen);
+
+	      if (ttok == &compound_assignment_error)
+		{ /*(*/
+		  report_syntax_error (_("unexpected token `)' while parsing compound assignment"));
+		  return -1;
+		}
 
 	      RESIZE_MALLOCED_BUFFER (token, token_index, ttoklen + 4,
 				      token_buffer_size,
