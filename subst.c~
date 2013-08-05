@@ -9458,11 +9458,9 @@ shell_expand_word_list (tlist, eflags)
 	  else if (tlist->word->flags & W_ASSNGLOBAL)
 	    opts[opti++] = 'g';
 
-#if 0
 	  /* If we have special handling note the integer attribute */
 	  if (opti > 0 && (tlist->word->flags & W_ASSIGNINT))
 	    opts[opti++] = 'i';
-#endif
 
 	  opts[opti] = '\0';
 	  if (opti > 0)

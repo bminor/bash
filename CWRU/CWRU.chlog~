@@ -5073,3 +5073,42 @@ redir.c
 	  the parent process as well, since parents and children share the
 	  file pointer. Fixes problem originally reported in March 2013 by
 	  Martin Jackson <mjackson220.list@gmail.com>
+
+				   7/13
+				   ----
+doc/{bash.1,bashref.texi}
+	- slight change to add a description of `shopt -o' suggested by Bruce
+	  Korb <bruce.korb@gmail.com>
+
+				   7/19
+				   ----
+lib/readline/histfile.c
+	- history_do_write: if close returns < 0, make sure we restore the
+	  backup history file and return a non-zero value
+	- history_truncate_file: if write or close return < 0, make sure we
+	  return a non-zero value
+
+[bash-4.3-beta frozen]
+
+				   7/21
+				   ----
+lib/readline/isearch.c
+	- rl_display_search: now takes an entire search context flags word as
+	  the second argument, instead of just reverse flag; changed callers
+	- rl_display_search: if the search has failed, add `failed ' to the
+	  beginning of the search prompt
+	- _rl_isearch_dispatch: if the search has failed, display the entire
+	  search string with an indication that the search failed but with the
+	  last matching line.  Suggested by jidanni@jidanni.org
+
+command.h
+	- W_ASSIGNINT: new word flag; used internally for make_internal_declare
+	  and set by fix_assignment_words
+
+execute_cmd.c
+	- fix_assignment_words: set W_ASSIGNINT if compound assignment and -i
+	  given as option
+
+subst.c
+	- shell_expand_word_list: rework the way the option list that is
+	  passed to make_internal_declare is created

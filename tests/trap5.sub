@@ -1,5 +1,5 @@
 # make sure process substitution runs the exit trap
-[[ -n $(< <(trap "tee /dev/fd/3" EXIT)) ]] 3>&1 <<<works || echo "fail :("
+[[ -n $(< <(trap "cat /dev/fd/0" EXIT)) ]] <<<works && echo works || echo "fail :("
 
 read foo < <(trap "echo bar" EXIT)
 echo $foo
