@@ -146,7 +146,7 @@ fi
 newtest
 SQUOTE="'"
 val1=$(set | sed -n 's:^SQUOTE=::p')
-if [ "$val1" != "''\\'''" ]; then
+if [ "$val1" != "\'" ]; then
         testfail "variable quoting 1"
 fi
 

@@ -281,6 +281,7 @@ extern char *cond_expand_word __P((WORD_DESC *, int));
 #define SD_NOQUOTEDELIM	0x04	/* don't let single or double quotes act as delimiters */
 #define SD_NOSKIPCMD	0x08	/* don't skip over $(, <(, or >( command/process substitution */
 #define SD_EXTGLOB	0x10	/* skip over extended globbing patterns if appropriate */
+#define SD_IGNOREQUOTE	0x20	/* single and double quotes are not special */
 
 extern int skip_to_delim __P((char *, int, char *, int));
 

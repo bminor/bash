@@ -329,6 +329,18 @@ read_builtin (list)
     return (input_avail (fd) ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
 #endif
 
+  /* Convenience: check early whether or not the first of possibly several
+     variable names is a valid identifier, and bail early if so. */
+#if defined (ARRAY_VARS)
+  if (list && legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word) == 0)
+#else
+  if (list && legal_identifier (list->word->word) == 0)
+#endif
+    {
+      sh_invalidid (list->word->word);
+      return (EXECUTION_FAILURE);
+    }
+
   /* If we're asked to ignore the delimiter, make sure we do. */
   if (ignore_delim)
     delim = -1;

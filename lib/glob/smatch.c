@@ -43,7 +43,11 @@
 #define STREQ(a, b) ((a)[0] == (b)[0] && strcmp(a, b) == 0)
 #define STREQN(a, b, n) ((a)[0] == (b)[0] && strncmp(a, b, n) == 0)
 
-int glob_asciirange = 0;
+#ifndef GLOBASCII_DEFAULT
+#  define GLOBASCII_DEFAULT 0
+#endif
+
+int glob_asciirange = GLOBASCII_DEFAULT;
 
 /* We use strcoll(3) for range comparisons in bracket expressions,
    even though it can have unwanted side effects in locales

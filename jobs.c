@@ -2482,6 +2482,9 @@ wait_for (pid)
 	  waiting_for_child++;
 	  r = waitchld (pid, 1);	/* XXX */
 	  waiting_for_child--;
+#if 0
+itrace("wait_for: blocking wait for %d returns %d child = %p", (int)pid, r, child);
+#endif
 #  if defined (MUST_UNBLOCK_CHLD)
 	  sigaction (SIGCHLD, &oact, (struct sigaction *)NULL);
 	  sigprocmask (SIG_SETMASK, &chldset, (sigset_t *)NULL);
@@ -3218,6 +3221,10 @@ waitchld (wpid, block)
 
       pid = WAITPID (-1, &status, waitpid_flags);
 
+#if 0
+if (wpid != -1 && block)
+  itrace("waitchld: blocking waitpid returns %d", pid);
+#endif
       /* WCONTINUED may be rejected by waitpid as invalid even when defined */
       if (wcontinued && pid < 0 && errno == EINVAL)
 	{
@@ -3240,6 +3247,9 @@ waitchld (wpid, block)
 	    break;
 	}
 
+#if 0
+itrace("waitchld: waitpid returns %d block = %d", pid, block);
+#endif
       /* If waitpid returns 0, there are running children.  If it returns -1,
 	 the only other error POSIX says it can return is EINTR. */
       CHECK_TERMSIG;

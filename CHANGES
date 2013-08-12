@@ -1,3 +1,91 @@
+This document details the changes between this version, bash-4.3-beta, and the
+previous version, bash-4.3-alpha.
+
+1.  Changes to Bash
+
+a.  Fixed a bug in the prompt directory name "trimming" code that caused
+    memory corruption and garbled the results.
+
+b.  Fixed a bug that caused single quotes that resulted from $'...' quoting
+    in the replacement portion of a double-quoted ${word/pat/rep} expansion
+    to be treated as quote characters.
+
+c.  Fixed a bug that caused assignment statements preceding a command word to
+    result in assignment statements following a declaration command to not be
+    expanded like assignment statements.
+
+d.  Fixed a bug with variable search order in the presence of local variables
+    with the same name as variables in the temporary environment supplied to
+    a shell function.
+
+e.  Fixed a bug that caused constructs like 1<(2) to be interpreted as process
+    substitutions even in an arithmetic context.
+
+f.  Fixed several cases where `invisible' variables (variables with attributes
+    but no values, which are technically unset) were treated incorrectly.
+
+g.  Fixed a bug that caused group commands in pipelines that were not the
+    last element to not run the EXIT trap.
+
+h.  Fixed a bug that caused `unset -n' to not unset a nameref variable in
+    certain cases.
+
+i.  Fixed the nameref circular reference checking to be less strict and only
+    disallow a nameref variable with the same value as its name at the global
+    scope.
+
+j.  Fixed a bug that caused trap handlers to be executed recursively,
+    corrupting internal data structures.
+
+k.  Fixed a bug that could result in bash not compiling if certain options were
+    not enabled.
+
+l.  Fixed a bug that caused the arithmetic expansion code to attempt variable
+    assignments when operator precedence prohibited them.
+
+m.  Word expansions like ${foo##bar} now understand indirect variable references.
+
+n.  Fixed a bug that caused `declare -fp name' to not display a function 
+    definition.
+
+o.  Fixed a bug that caused asynchronous child processes to modify the stdin
+    file pointer when bash was using it to read a script, which modified the
+    parent's value as well.
+
+2.  Changes to Readline
+
+a.  Fixed a bug in vi mode that caused the arrow keys to set the saved last
+    vi-mode command to the wrong value.
+
+b.  Fixed a bug that caused double-quoted strings to be scanned incorrectly
+    when being used as the value of a readline variable assignment.
+
+c.  Fixed a bug with vi mode that prevented `.' from repeating a command
+    entered on a previous line (command).
+
+d.  Fixed a bug that could cause completion to core dump if it was interrupted
+    by a signal.
+
+e.  Readline now sends the meta-key enable string to the terminal if the
+    terminal has been successfully initialized.
+
+f.  Readline now calls the signal hook after resizing the terminal when it
+    receives a SIGWINCH.
+
+g.  Fixed a bug that could cause the history list code to perform an out-of-
+    bounds array reference if the history list is empty.
+
+3.  New Features in Bash
+
+a.  Shells started to run process substitutions now run any trap set on EXIT.
+
+b.  There is now a configure-time option to enable the globasciiranges option
+    by default.
+
+c.  The read builtin now checks its first variable argument for validity before
+    trying to read any input.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-4.3-alpha,
 and the previous version, bash-4.2-release.
 
@@ -334,6 +422,10 @@ bbbbb. Fixed a bug that caused redirections like <&n- to leave file descriptor
 ccccc. Fixed a bug that caused incorrect completion quoting when completing a
        word containing a globbing character with `show-all-if-ambiguous' set.
 
+ddddd. Fixed a bug that caused printf's %q format specifier not to quote a
+       tilde even if it appeared in a location where it would be subject to
+       tilde expansion.
+
 2.  Changes to Readline
 
 a.  Fixed a bug that did not allow the `dd', `cc', or `yy' vi editing mode
@@ -543,17 +635,13 @@ k.  New application-settable variable: rl_input_available_hook; function to be
     called when readline detects there is data available on its input file
     descriptor.
 
-l.  Readline calls an application-set event hook (rl_event_hook) after it gets
-    a signal while reading input (read returns -1/EINTR but readline does not
-    handle the signal immediately) to allow the application to handle or
-    otherwise note it.
+l.  Readline calls an application-set event hook (rl_signal_event_hook) after
+    it gets a signal while reading input (read returns -1/EINTR but readline
+    does not handle the signal immediately) to allow the application to handle
+    or otherwise note it.  Not currently called for SIGHUP or SIGTERM.
 
 m.  If the user-settable variable `history-size' is set to a value less than
     0, the history list size is unlimited.
-
-n.  New application-settable variable: rl_signal_event_hook; function that is
-    called when readline is reading terminal input and read(2) is interrupted
-    by a signal.  Currently not called for SIGHUP or SIGTERM.
 
 ------------------------------------------------------------------------------
 This document details the changes between this version, bash-4.2-release,

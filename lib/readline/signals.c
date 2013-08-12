@@ -141,10 +141,19 @@ _rl_signal_handler (sig)
 
 #if defined (SIGWINCH)
   if (sig == SIGWINCH)
-    rl_resize_terminal ();
+    {
+      rl_resize_terminal ();
+      /* XXX - experimental for now */
+      /* Call a signal hook because though we called the original signal handler
+	 in rl_sigwinch_handler below, we will not resend the signal to
+	 ourselves. */
+      if (rl_signal_event_hook)
+	(*rl_signal_event_hook) ();
+    }
   else
 #endif
     _rl_handle_signal (sig);
+
   SIGHANDLER_RETURN;
 }
 

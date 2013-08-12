@@ -167,13 +167,18 @@ _rl_print_color_indicator (char *f)
         {
           colored_filetype = C_DIR;
 
+#if defined (S_ISVTX)
           if ((mode & S_ISVTX) && (mode & S_IWOTH)
               && is_colored (C_STICKY_OTHER_WRITABLE))
             colored_filetype = C_STICKY_OTHER_WRITABLE;
-          else if ((mode & S_IWOTH) != 0 && is_colored (C_OTHER_WRITABLE))
+          else
+#endif
+          if ((mode & S_IWOTH) != 0 && is_colored (C_OTHER_WRITABLE))
             colored_filetype = C_OTHER_WRITABLE;
+#if defined (S_ISVTX)
           else if ((mode & S_ISVTX) != 0 && is_colored (C_STICKY))
             colored_filetype = C_STICKY;
+#endif
         }
       else if (S_ISLNK (mode))
         colored_filetype = ((linkok == 0

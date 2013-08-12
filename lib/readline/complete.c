@@ -2132,12 +2132,16 @@ rl_completion_matches (text, entry_function)
 	  xfree (match_list);
 	  match_list = 0;
 	  match_list_size = 0;
+	  matches = 0;
 	  RL_CHECK_SIGNALS ();
 	}
 
-      if (matches + 1 == match_list_size)
+      if (matches + 1 >= match_list_size)
 	match_list = (char **)xrealloc
 	  (match_list, ((match_list_size += 10) + 1) * sizeof (char *));
+
+      if (match_list == 0)
+	return (match_list);
 
       match_list[++matches] = string;
       match_list[matches + 1] = (char *)NULL;

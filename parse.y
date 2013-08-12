@@ -3301,6 +3301,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	 treat single quotes as special when inside a double-quoted
 	 ${...}. This logic must agree with subst.c:extract_dollar_brace_string
 	 since they share the same defines. */
+      /* FLAG POSIX INTERP 221 */
       if (flags & P_DOLBRACE)
         {
           /* ${param%[%]word} */
@@ -3311,7 +3312,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	    dolbrace_state = DOLBRACE_QUOTE;
           /* ${param/[/]pat/rep} */
 	  else if MBTEST(dolbrace_state == DOLBRACE_PARAM && ch == '/' && retind > 1)
-	    dolbrace_state = DOLBRACE_QUOTE;
+	    dolbrace_state = DOLBRACE_QUOTE2;	/* XXX */
           /* ${param^[^]pat} */
 	  else if MBTEST(dolbrace_state == DOLBRACE_PARAM && ch == '^' && retind > 1)
 	    dolbrace_state = DOLBRACE_QUOTE;
@@ -3353,7 +3354,18 @@ parse_matched_pair (qc, open, close, lenp, flags)
 		  ttrans = ansiexpand (nestret, 0, nestlen - 1, &ttranslen);
 		  xfree (nestret);
 
-		  if ((rflags & P_DQUOTE) == 0)
+		  /* If we're parsing a double-quoted brace expansion and we are
+		     not in a place where single quotes are treated specially,
+		     make sure we single-quote the results of the ansi
+		     expansion because quote removal should remove them later */
+		  /* FLAG POSIX INTERP 221 */
+		  if ((shell_compatibility_level > 42) && (rflags & P_DQUOTE) && (dolbrace_state == DOLBRACE_QUOTE2) && (flags & P_DOLBRACE))
+		    {
+		      nestret = sh_single_quote (ttrans);
+		      free (ttrans);
+		      nestlen = strlen (nestret);
+		    }
+		  else if ((rflags & P_DQUOTE) == 0)
 		    {
 		      nestret = sh_single_quote (ttrans);
 		      free (ttrans);
@@ -5344,9 +5356,13 @@ decode_prompt_string (string)
 #undef ROOT_PATH
 #undef DOUBLE_SLASH_ROOT
 		else
-		  /* polite_directory_format is guaranteed to return a string
-		     no longer than PATH_MAX - 1 characters. */
-		  strcpy (t_string, polite_directory_format (t_string));
+		  {
+		    /* polite_directory_format is guaranteed to return a string
+		       no longer than PATH_MAX - 1 characters. */
+		    temp = polite_directory_format (t_string);
+		    if (temp != t_string)
+		      strcpy (t_string, temp);
+		  }
 
 		temp = trim_pathname (t_string, PATH_MAX - 1);
 		/* If we're going to be expanding the prompt string later,

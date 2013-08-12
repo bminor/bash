@@ -4406,7 +4406,7 @@ execute_cmd.c
 	- execute_command_internal: make sure any subshell forked to run a
 	  group command or user subshell at the end of a pipeline runs any
 	  EXIT trap it sets.  Fixes debian bash bug 698411
-	  http://bugs.debian.org/cgi-big/bugreport.cgi?bug=698411
+	  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=698411
 
 subst.c
 	- shell_expand_word_list: fix code that creates args for and calls
@@ -4725,8 +4725,6 @@ builtins/setattr.def
 	  functions aren't changed or displayed unless the -f option is given.
 	  Report from <gotmynick@gmail.com>
 
-[bash-4.3-alpha frozen]
-
 				    3/9
 				    ---
 include/typemax.h
@@ -4748,3 +4746,344 @@ bashline.c
 	  get inserted by `quoting' the completion.  We can't kill all the
 	  matches because show-all-if-ambiguous needs them.   Bug report from
 	  Marcel (Felix) Giannelia <info@skeena.net>
+
+[bash-4.3-alpha frozen]
+
+				   3/14
+				   ----
+general.c
+	- trim_pathname: use memmove instead of memcpy since the source and
+	  destination pathnames may overlap.  Report and fix from Matthew
+	  Riley <mattdr@google.com>
+
+				   3/18
+				   ----
+configure.ac
+	- socklen_t is defined as `unsigned int' if configure can't find it
+
+				   3/20
+				   ----
+lib/readline/complete.c
+	- S_ISVTX: since it's not defined on all platforms (Minix), make sure
+	  its use is protected with #ifdef
+
+				   3/21
+				   ----
+doc/{bash.1,bashref.texi}
+	- Added mention of ${!name[@]} and ${!name[*]} expansions to get all
+	  indices of an array.  Suggested by Jonathan Leffler
+	  <jonathan.leffler@gmail.com>
+
+				   3/24
+				   ----
+subst.h
+	- SD_IGNOREQUOTE: new define for skip_to_delim; if set, means that
+	  single quotes (for now) will be treated as ordinary characters
+
+subst.c
+	- skip_to_delim: handle SD_IGNOREQUOTE. no callers use it for now
+
+				   3/25
+				   ----
+support/config.{guess,sub}
+	- updated to versions from autoconf-2.69
+
+				   3/31
+				   ----
+lib/sh/shquote.c
+	- sh_single_quote: short-circuit quoting a single "'" instead of
+	  creating a long string with empty single-quoted strings
+
+parser.h
+	- DOLBRACE_QUOTE2: new define, like DOLBRACE_QUOTE, but need to single-
+	  quote results of $'...' expansion because quote removal will be
+	  done later.  Right now this is only done for ${word/pat/rep}
+
+parse.y
+	- parse_matched_pair: set state to DOLBRACE_QUOTE2 for pattern
+	  substitution word expansion so we don't treat single quote specially
+	  in the pattern or replacement string
+	- parse_matched_pair: if we're parsing a dollar-brace word expansion
+	  (${...}) and we're not treating single quote specially within
+	  double quotes, single-quote the translation of $'...' ansi-c
+	  escaped strings.  Original report and fix from Eduardo A.
+	  Bustamante López <dualbus@gmail.com>
+
+subst.c
+	- extract_dollar_brace_string: ${word/pat/rep} scanning now sets the
+	  DOLBRACE_QUOTE2 flag instead of DOLBRACE_QUOTE so we don't treat
+	  single quotes specially within a double-quoted string
+
+execute_cmd.c
+	- fix_assignment_words: skip over assignment statements preceding a
+	  command word before trying to figure out whether or not assignment
+	  statements following a possible declaration command should be 
+	  treated specially.  Fixes bug reported by Dan Douglas
+	  <ormaaj@gmail.com>
+
+				    4/4
+				    ---
+lib/readline/readline.c
+	- _rl_dispatch_subseq: only call _rl_vi_set_last (and check whether
+	  the key is a text modification command) if the key sequence length
+	  is 1.  That keeps the arrow keys from setting the last command
+	  when called in vi command mode.  Fixes bug reported by Ian A.
+	  Watson <watson_ian_a@lilly.com>
+
+				    4/6
+				    ---
+lib/readline/bind.c
+	- rl_parse_and_bind: when parsing a double-quoted string as the value
+	  of a variable, make sure we skip past the leading double quote.
+	  Fix from Andreas Schwab <schwab@linux-m68k.org>
+
+variables.c
+	- hash_lookup: set new local variable last_table_searched to the table
+	  a successful lookup appears in; tested in make_local_variable to
+	  solve the problem below
+	- make_local_variable: if we find a variable with the tempenv flag
+	  set at the same `level' as variable_context', but not found in the
+	  temporary_env (temp environment preceding the builtin), return it.
+	  The temp environment preceding the function call has already been
+	  merged (in execute_function) into the list of variable contexts the
+	  function sees as shell_variables by the time this is called.  Fixes
+	  inconsistency pointed out by Dan Douglas <ormaaj@gmail.com>
+
+subst.c
+	- expand_arith_string: expanded out contents of expand_string,
+	  expand_string_internal, expand_string_if_necessary to create a
+	  WORD_DESC and call call_expand_word_internal() on it directly.
+	  We don't want process substitution to be performed ( 1<(2) ) should
+	  mean something different in an arithmetic expression context.
+	  It doesn't work to just turn on the DQUOTE flag, since that means
+	  that things like ${x["expression"]} are not expanded correctly.
+	  Fixes problem pointed out by Dan Douglas <ormaaj@gmail.com>
+
+				   4/13
+				   ----
+subst.c
+	- process_substitute: run the EXIT trap before exiting, as other
+	  shells seem to.  Fixes problem pointed out by Dan Douglas
+	  <ormaaj@gmail.com>
+
+lib/readline/readline.c
+	- readline_internal_setup: call rl_vi_insertion_mode to enter vi
+	  mode instead of rl_vi_insert_mode to avoid resetting the saved last
+	  command information.  Posix says that `.' can repeat a command
+	  that was entered on a previous line so we need to save the info.
+	  Fixes bug reported by Ian A. Watson <watson_ian_a@lilly.com>
+
+				   4/14
+				   ----
+lib/readline/complete.c
+	- rl_completion_matches: make sure xrealloc returns something non-null
+	  (can happen when interrupted by a signal) before trying to add
+	  matches to match_list
+
+subst.c
+	- array_remove_pattern: return NULL right away if array_variable_part
+	  returns an invisible variable
+	- array_length_reference: handle array_variable_part returning an
+	  invisible variable
+	- get_var_and_type: handle array_variable_part returning an invisible
+	  variable
+
+				   4/15
+				   ----
+execute_cmd.c
+	- execute_command_internal: make sure to run the EXIT trap for group
+	  commands anywhere in pipelines, not just at the end.  From a point
+	  raised by Andreas Schwab <schwab@linux-m68k.org>
+
+variables.c
+	- bind_int_variable: make sure invisible flag is unset.  Fixes problems
+	  like "declare -ai a; : $(( a[4]=4 ));"
+
+arrayfunc.c
+	- array_variable_part: return variable even if invisible flag set,
+	  callers must handle invisible vars
+
+				   4/18
+				   ----
+builtins/set.def
+	- unset_builtin: if -n flag given, call unset_nameref instead of
+	  unset_variable
+
+variables.c
+	- find_variable_nameref: print warning message if nameref circular
+	  reference detected, return NULL and let caller deal with it
+
+builtins/declare.def
+	- declare_builtin: only disallow global references at this point if
+	  we are at the global scope
+
+				   5/16
+				   ----
+configure.ac
+	- update release status to beta
+
+				   5/23
+				   ----
+trap.c
+	- run_pending_traps: save and restore pipeline around calls to
+	  evalstring() in case we get a trap while running a trap. Have to
+	  figure out the recursive running traps issue elsewhere.  Fixes
+	  bug reported by Roman Rakus <rrakus@redhat.com>
+	- run_pending_traps: make sure to set running_trap to the appropriate
+	  signal value when running a trap command
+	- run_pending_traps: short-circuit immediately if running_trap set
+	  when invoked.  Could change this later to only skip if it would
+	  run the same trap as currently being run (running_trap == sig + 1)
+
+configure.ac
+	- add warning if bison not found
+
+lib/readline/doc/rltech.texi
+	- new section with an example program illustrating the callback
+	  interface. Suggested by Peng Yu <pengyu.ut@gmail.com>
+
+examples/loadables/Makefile.in
+	- remove references to `cut' and `getconf', which were removed in
+	  early March
+
+				   5/28
+				   ----
+lib/sh/pathphys.c
+	- sh_realpath: correct inverted two arguments to call to sh_makepath.
+	  Report and fix from Julien Thomas <jthomas@exosec.fr>
+
+				    6/7
+				    ---
+execute_cmd.c
+	- executing_line_number: the else clauses that are conditional on
+	  various options being defined can simply be if clauses -- they are
+	  mutually exclusive and all have `return' in the body.  Fixes bug
+	  reported by Flavio Medeiros <flaviomotamedeiros@gmail.com>
+
+				   6/25
+				   ----
+lib/readline/readline.c
+	- readline_internal_setup: only sent the meta-key enable string to the
+	  terminal if we've been told to use one and the terminal has been
+	  successfully initialized (RL_ISSTATE (RL_STATE_TERMPREPPED) != 0).
+	  Suggested by Dan Mick <dan.mick@inktank.com>
+
+lib/readline/signals.c
+	- _rl_signal_handler: call any defined signal hook after calling
+	  rl_resize_terminal when handling a SIGWINCH.  We already have called
+	  the original SIGWINCH handler but will not be resending the signal
+	  to ourselves
+
+				   6/27
+				   ----
+lib/readline/doc/history.3, doc/bash.1
+	- fix description of the `$' modifier to note that it expands to the
+	  last *word*, which is not always the last argument.  Report from
+	  ariyetz@gmail.com via gnu.org RT
+
+				   6/29
+				   ----
+lib/glob/smatch.c
+	- glob_asciiranges: initialize to value of GLOBASCII_DEFAULT instead
+	  of 0 (0 if not defined)
+
+configure.ac,config.h.in
+	- --enable-glob-asciiranges-default: new option, controls the value of
+	  GLOBASCII_DEFAULT; use it to turn globasciiranges shopt option on
+	  by default
+
+doc/bashref.texi
+	- document new --enable-glob-asciiranges-default configure option
+
+variables.c
+	- assign_in_env: implement += value appending semantics for assignments
+	  preceding command names
+
+				    7/4
+				    ---
+expr.c
+	- set lasttok = NUM in all of the functions that result in a number,
+	  even if it's a boolean, to avoid errors with constructs like
+	  1 * x = 1, which should be an asignment error.  Fixes problem
+	  pointed out by Dan Douglas <ormaaj@gmail.com>
+
+parse.y
+	- decode_prompt_string: don't bother to call strcpy if
+	  polite_directory_format returns its argument unchanged.  It's not
+	  necessary and Mac OS X 10.9 aborts because of a supposed overlapping
+	  string copy.  Bug and fix from simon@hitzemann.org
+
+subst.c
+	- parameter_brace_find_indir: new function, code from
+	  parameter_brace_expand_indir that looks up the indirectly-referenced
+	  variable, but does not expand it
+	- parameter_brace_expand_indir: call parameter_brace_find_indir to
+	  look up indirected variable reference
+	- get_var_and_type: call parameter_brace_find_indir if it looks like we
+	  are trying to manipulate an indirect variable reference like
+	  ${!b%%foo}.  This makes a difference if !b references an array
+	  variable.  Bug report from Dan Douglas <ormaaj@gmail.com>
+
+				    7/6
+				    ---
+lib/sh/casemod.c
+	- sh_modcase: make sure argument passed to is_basic is <= UCHAR_MAX,
+	  since cval can convert something to a wchar_t greater than UCHAR_MAX.
+	  Fixes bug reported by Tomasz Tomasik <scx.mail@gmail.com>
+
+				    7/8
+				    ---
+lib/readline/history.c
+	- add_history_time: if history_length == 0, referencing history_length
+	  - 1 will result in an array bounds error, so make history_length be
+	  at least 1 before going on.  Fixes bug reported by Geng Sheng Liu
+	  <gsliu.tju@gmail.com>
+
+builtins/setattr.def
+	- show_func_attributes: display definition (if NODEFS argument is 0) and
+	  attributes for a particular function; used by `declare -fp name'
+
+builtins/declare.def
+	- declare_internal: call show_func_attributes if -f supplied with -p.
+	  Fixes inconsistency observed by Linda Walsh <bash@tlinx.org>
+
+builtins/common.h
+	- new extern declaration for show_func_attributes
+
+builtins/read.def
+	- read_builtin: check the first supplied variable name for validity
+	  before attempting to read any input, since we know we will have to
+	  at least use that one.  Don't check any other names yet.  Suggested
+	  by jidanni@jidanni.org
+
+				   7/10
+				   ----
+redir.c
+	- do_redirection_internal: when closing a file descriptor with
+	  r_close_this ([n]<&-) count close errors as redirection errors if
+	  errno ends up as EIO or ENOSPC.  Originally reported back in April
+	  2012 by Andrey Zaitsev <jstcdr@gmail.com>
+
+				   7/11
+				   ----
+redir.c
+	- do_redirection_internal: before calling check_bash_input, make sure
+	  that we don't call check_bash_input for an asynchronous process that
+	  is replacing stdin with something else. The seek backwards affects
+	  the parent process as well, since parents and children share the
+	  file pointer. Fixes problem originally reported in March 2013 by
+	  Martin Jackson <mjackson220.list@gmail.com>
+
+				   7/13
+				   ----
+doc/{bash.1,bashref.texi}
+	- slight change to add a description of `shopt -o' suggested by Bruce
+	  Korb <bruce.korb@gmail.com>
+
+				   7/19
+				   ----
+lib/readline/histfile.c
+	- history_do_write: if close returns < 0, make sure we restore the
+	  backup history file and return a non-zero value
+	- history_truncate_file: if write or close return < 0, make sure we
+	  return a non-zero value

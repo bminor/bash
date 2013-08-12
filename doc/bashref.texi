@@ -621,11 +621,11 @@ That is, each command reads the previous command's output.  This
 connection is performed before any redirections specified by the
 command.
 
-If @samp{|&} is used, @var{command1}'s standard output and standard error
-are connected to
+If @samp{|&} is used, @var{command1}'s standard error, in addition to
+its standard output, is connected to
 @var{command2}'s standard input through the pipe;
 it is shorthand for @code{2>&1 |}.
-This implicit redirection of the standard error is
+This implicit redirection of the standard error to the standard output is
 performed after any redirections specified by the command.
 
 The reserved word @code{time} causes timing statistics
@@ -2216,8 +2216,9 @@ $(( @var{expression} ))
 
 The expression is treated as if it were within double quotes, but
 a double quote inside the parentheses is not treated specially.
-All tokens in the expression undergo parameter expansion, command
-substitution, and quote removal.
+All tokens in the expression undergo parameter and variable expansion,
+command substitution, and quote removal.
+The result is treated as the arithmetic expression to be evaluated.
 Arithmetic expansions may be nested. 
 
 The evaluation is performed according to the rules listed below
@@ -3899,8 +3900,8 @@ are given, then display the values of variables instead.
 
 The @option{-p} option will display the attributes and values of each
 @var{name}.
-When @option{-p} is used with @var{name} arguments, additional options
-are ignored.
+When @option{-p} is used with @var{name} arguments, additional options,
+other than @option{-f} and @option{-F}, are ignored.
 
 When @option{-p} is supplied without @var{name} arguments, @code{declare}
 will display the attributes and values of all variables having the
@@ -4824,7 +4825,10 @@ This builtin allows you to change additional shell optional behavior.
 shopt [-pqsu] [-o] [@var{optname} @dots{}]
 @end example
 
-Toggle the values of variables controlling optional shell behavior.
+Toggle the values of settings controlling optional shell behavior.
+The settings can be either those listed below, or, if the
+@option{-o} option is used, those available with the @option{-o}
+option to the @code{set} builtin command (@pxref{The Set Builtin}).
 With no options, or with the @option{-p} option, a list of all settable
 options is displayed, with an indication of whether or not each is set.
 The @option{-p} option causes output to be displayed in a form that
@@ -5045,7 +5049,8 @@ the ignored words are the only possible completions.
 This option is enabled by default.
 
 @item globasciiranges
-If set, range expressions used in pattern matching (@pxref{Pattern Matching})
+If set, range expressions used in pattern matching bracket expressions
+(@pxref{Pattern Matching})
 behave as if in the traditional C locale when performing
 comparisons.  That is, the current locale's collating sequence
 is not taken into account, so
@@ -6224,8 +6229,8 @@ file exists and is readable.
 It will not do this if invoked as @code{sh}.
 The @option{--norc} option may be used to inhibit this behavior, and the
 @option{--rcfile} option may be used to force another file to be read, but
-@code{rshd} does not generally invoke the shell with those options or
-allow them to be specified.
+neither @code{rshd} nor @code{sshd} generally invoke the shell with those
+options or allow them to be specified.
 
 @subsubheading Invoked with unequal effective and real @sc{uid/gid}s
 
@@ -6812,6 +6817,12 @@ and an index of -1 refers to the last element.
 
 An array variable is considered set if a subscript has been assigned a
 value.  The null string is a valid value.
+
+It is possible to obtain the keys (indices) of an array as well as the values.
+$@{!@var{name}[@@]@} and $@{!@var{name}[*]@} expand to the indices
+assigned in array variable @var{name}.
+The treatment when in double quotes is similar to the expansion of the
+special parameters @samp{@@} and @samp{*} within double quotes.
 
 The @code{unset} builtin is used to destroy arrays.
 @code{unset @var{name}[@var{subscript}]}
@@ -8068,6 +8079,12 @@ above under @ref{Pattern Matching}.
 @item --enable-extended-glob-default
 Set the default value of the @var{extglob} shell option described
 above under @ref{The Shopt Builtin} to be enabled.
+
+@item --enable-glob-asciirange-default
+Set the default value of the @var{globasciiranges} shell option described
+above under @ref{The Shopt Builtin} to be enabled.
+This controls the behavior of character ranges when used in pattern matching
+bracket expressions.
 
 @item --enable-help-builtin
 Include the @code{help} builtin, which displays help on shell builtins and

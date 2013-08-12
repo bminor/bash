@@ -397,8 +397,8 @@ readline_internal_setup ()
   _rl_out_stream = rl_outstream;
 
   /* Enable the meta key only for the duration of readline(), if this
-     terminal has one. */
-  if (_rl_enable_meta)
+     terminal has one and the terminal has been initialized */
+  if (_rl_enable_meta & RL_ISSTATE (RL_STATE_TERMPREPPED))
     _rl_enable_meta_key ();
 
   if (rl_startup_hook)
@@ -406,7 +406,7 @@ readline_internal_setup ()
 
 #if defined (VI_MODE)
   if (rl_editing_mode == vi_mode)
-    rl_vi_insert_mode (1, 'i');
+    rl_vi_insertion_mode (1, 'i');	/* don't want to reset last */
 #endif /* VI_MODE */
 
   /* If we're not echoing, we still want to at least print a prompt, because
@@ -469,7 +469,9 @@ readline_internal_teardown (eof)
   if (rl_undo_list)
     rl_free_undo_list ();
 
-  /* Disable the meta key, if this terminal has one. */
+  /* Disable the meta key, if this terminal has one and we were told to use it.
+     The check whether or not we sent the enable string is in
+     _rl_disable_meta_key(); the flag is set in _rl_enable_meta_key */
   _rl_disable_meta_key ();
 
   /* Restore normal cursor, if available. */
@@ -821,7 +823,7 @@ _rl_dispatch_subseq (key, map, got_subseq)
 
 	  rl_dispatching = 1;
 	  RL_SETSTATE(RL_STATE_DISPATCHING);
-	  (*func) (rl_numeric_arg * rl_arg_sign, key);
+	  r = (*func) (rl_numeric_arg * rl_arg_sign, key);
 	  RL_UNSETSTATE(RL_STATE_DISPATCHING);
 	  rl_dispatching = 0;
 
@@ -957,6 +959,7 @@ _rl_dispatch_subseq (key, map, got_subseq)
 #if defined (VI_MODE)
   if (rl_editing_mode == vi_mode && _rl_keymap == vi_movement_keymap &&
       key != ANYOTHERKEY &&
+      rl_key_sequence_length == 1 &&	/* XXX */
       _rl_vi_textmod_command (key))
     _rl_vi_set_last (key, rl_numeric_arg, rl_arg_sign);
 #endif

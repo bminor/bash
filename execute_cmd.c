@@ -353,11 +353,11 @@ executing_line_number ()
 	return currently_executing_command->value.Cond->line;
 #endif
 #if defined (DPAREN_ARITHMETIC)
-      else if (currently_executing_command->type == cm_arith)
+      if (currently_executing_command->type == cm_arith)
 	return currently_executing_command->value.Arith->line;
 #endif
 #if defined (ARITH_FOR_COMMAND)
-      else if (currently_executing_command->type == cm_arith_for)
+      if (currently_executing_command->type == cm_arith_for)
 	return currently_executing_command->value.ArithFor->line;
 #endif
 
@@ -607,9 +607,11 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	     want to note this before execute_in_subshell modifies the
 	     COMMAND struct.  Need to keep in mind that execute_in_subshell
 	     runs the exit trap for () subshells itself. */
+	  /* This handles { command; } & */
 	  s = user_subshell == 0 && command->type == cm_group && pipe_in == NO_PIPE && pipe_out == NO_PIPE && asynchronous;
-	  /* run exit trap for : | { ...; } and : | ( ... ) */
-	  s += user_subshell == 0 && command->type == cm_group && pipe_in != NO_PIPE && pipe_out == NO_PIPE && asynchronous == 0;
+	  /* run exit trap for : | { ...; } and { ...; } | : */
+	  /* run exit trap for : | ( ...; ) and ( ...; ) | : */
+	  s += user_subshell == 0 && command->type == cm_group && (pipe_in != NO_PIPE || pipe_out != NO_PIPE) && asynchronous == 0;
 
 	  last_command_exit_value = execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close);
 	  if (s)
@@ -3754,8 +3756,13 @@ fix_assignment_words (words)
   b = 0;
   assoc = global = array = 0;
 
+  /* Skip over assignment statements preceding a command name */
   wcmd = words;
-  for (w = words; w; w = w->next)
+  for (wcmd = words; wcmd; wcmd = wcmd->next)
+    if ((wcmd->word->flags & W_ASSIGNMENT) == 0)
+      break;
+
+  for (w = wcmd; w; w = w->next)
     if (w->word->flags & W_ASSIGNMENT)
       {
 	if (b == 0)

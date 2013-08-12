@@ -166,6 +166,8 @@ static int export_env_size;
 static int winsize_assignment;		/* currently assigning to LINES or COLUMNS */
 #endif
 
+static HASH_TABLE *last_table_searched;	/* hash_lookup sets this */
+
 /* Some forward declarations. */
 static void create_variable_tables __P((void));
 
@@ -1762,6 +1764,10 @@ hash_lookup (name, hashed_vars)
   BUCKET_CONTENTS *bucket;
 
   bucket = hash_search (name, hashed_vars, 0);
+  /* If we find the name in HASHED_VARS, set LAST_TABLE_SEARCHED to that
+     table. */
+  if (bucket)
+    last_table_searched = hashed_vars;
   return (bucket ? (SHELL_VAR *)bucket->data : (SHELL_VAR *)NULL);
 }
 
@@ -1840,17 +1846,25 @@ find_variable_nameref (v)
 {
   int level;
   char *newname;
+  SHELL_VAR *orig, *oldv;
 
   level = 0;
+  orig = v;
   while (v && nameref_p (v))
     {
       level++;
       if (level > NAMEREF_MAX)
-        return ((SHELL_VAR *)0);	/* error message here? */
+	return ((SHELL_VAR *)0);	/* error message here? */
       newname = nameref_cell (v);
       if (newname == 0 || *newname == '\0')
 	return ((SHELL_VAR *)0);
+      oldv = v;
       v = find_variable_internal (newname, (expanding_redir == 0 && (assigning_in_environment || executing_builtin)));
+      if (v == orig || v == oldv)
+	{
+	  internal_warning (_("%s: circular name reference"), orig->name);
+	  return ((SHELL_VAR *)0);
+	}
     }
   return v;
 }
@@ -2066,6 +2080,7 @@ find_variable (name)
 {
   SHELL_VAR *v;
 
+  last_table_searched = 0;
   v = find_variable_internal (name, (expanding_redir == 0 && (assigning_in_environment || executing_builtin)));
   if (v && nameref_p (v))
     v = find_variable_nameref (v);
@@ -2186,6 +2201,21 @@ make_local_variable (name)
     }
 
   was_tmpvar = old_var && tempvar_p (old_var);
+  /* If we're making a local variable in a shell function, the temporary env
+     has already been merged into the function's variable context stack.  We
+     can assume that a temporary var in the same context appears in the same
+     VAR_CONTEXT and can safely be returned without creating a new variable
+     (which results in duplicate names in the same VAR_CONTEXT->table */
+  /* We can't just test tmpvar_p because variables in the temporary env given
+     to a shell function appear in the function's local variable VAR_CONTEXT
+     but retain their tempvar attribute.  We want temporary variables that are
+     found in temporary_env, hence the test for last_table_searched, which is
+     set in hash_lookup and only (so far) checked here. */
+  if (was_tmpvar && old_var->context == variable_context && last_table_searched != temporary_env)
+    {
+      VUNSETATTR (old_var, att_invisible);
+      return (old_var);
+    }
   if (was_tmpvar)
     tmp_value = value_cell (old_var);
 
@@ -2230,7 +2260,8 @@ make_local_variable (name)
 
       /* If we found this variable in one of the temporary environments,
 	 inherit its value.  Watch to see if this causes problems with
-	 things like `x=4 local x'. */
+	 things like `x=4 local x'. XXX - see above for temporary env
+	 variables with the same context level as variable_context */
       /* XXX - we should only do this if the variable is not an array. */
       if (was_tmpvar)
 	var_setvalue (new_var, savestring (tmp_value));
@@ -2741,6 +2772,8 @@ bind_int_variable (lhs, rhs)
   if (v && isint)
     VSETATTR (v, att_integer);
 
+  VUNSETATTR (v, att_invisible);
+
   return (v);
 }
 
@@ -2841,13 +2874,14 @@ assign_in_env (word, flags)
      WORD_DESC *word;
      int flags;
 {
-  int offset;
+  int offset, aflags;
   char *name, *temp, *value;
   SHELL_VAR *var;
   const char *string;
 
   string = word->word;
 
+  aflags = 0;
   offset = assignment (string, 0);
   name = savestring (string);
   value = (char *)NULL;
@@ -2858,7 +2892,10 @@ assign_in_env (word, flags)
 
       /* ignore the `+' when assigning temporary environment */
       if (name[offset - 1] == '+')
-	name[offset - 1] = '\0';
+	{
+	  name[offset - 1] = '\0';
+	  aflags |= ASS_APPEND;
+	}
 
       var = find_variable (name);
       if (var && (readonly_p (var) || noassign_p (var)))
@@ -2871,6 +2908,13 @@ assign_in_env (word, flags)
 
       temp = name + offset + 1;
       value = expand_assignment_string_to_string (temp, 0);
+
+      if (var && (aflags & ASS_APPEND))
+	{
+	  temp = make_variable_value (var, value, aflags);
+	  FREE (value);
+	  value = temp;
+	}
     }
 
   if (temporary_env == 0)

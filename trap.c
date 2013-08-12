@@ -286,6 +286,9 @@ run_pending_traps ()
   if (catch_flag == 0)		/* simple optimization */
     return;
 
+  if (running_trap > 0)
+    return;			/* no recursive trap invocations */
+
   catch_flag = trapped_signal_received = 0;
 
   /* Preserve $? when running trap. */
@@ -303,6 +306,8 @@ run_pending_traps ()
 	  sigset_t set, oset;
 
 	  BLOCK_SIGNAL (sig, set, oset);
+
+	  running_trap = sig + 1;
 
 	  if (sig == SIGINT)
 	    {
@@ -324,6 +329,7 @@ run_pending_traps ()
 	    {
 	      /* This can happen when run_pending_traps is called while
 		 running a SIGCHLD trap handler. */
+	      running_trap = 0;
 	      UNBLOCK_SIGNAL (oset);
 	      continue;					/* XXX */
 	    }
@@ -355,11 +361,19 @@ run_pending_traps ()
 	    }
 	  else
 	    {
+	      /* XXX - should we use save_parser_state/restore_parser_state? */
 	      token_state = save_token_state ();
 	      save_subst_varlist = subst_assign_varlist;
 	      subst_assign_varlist = 0;
 
+#if defined (JOB_CONTROL)
+	      save_pipeline (1);	/* XXX only provides one save level */
+#endif
 	      evalstring (savestring (trap_list[sig]), "trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE);
+#if defined (JOB_CONTROL)
+	      restore_pipeline (1);
+#endif
+
 	      restore_token_state (token_state);
 	      free (token_state);
 
@@ -367,6 +381,7 @@ run_pending_traps ()
 	    }
 
 	  pending_traps[sig] = 0;
+	  running_trap = 0;
 
 	  UNBLOCK_SIGNAL (oset);
 	}

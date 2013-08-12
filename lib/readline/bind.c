@@ -1330,6 +1330,7 @@ remove_trailing:
 	    {
 	      i = _rl_skip_to_delim (value, 1, *value);
 	      value[i] = '\0';
+	      value++;	/* skip past the quote */
 	    }
 	  else
 	    goto remove_trailing;

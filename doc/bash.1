@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sun Mar 10 12:10:16 EDT 2013
+.\"	Last Change: Sat Jul 13 13:32:19 EDT 2013
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2013 March 10" "GNU Bash 4.3"
+.TH BASH 1 "2013 July 13" "GNU Bash 4.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -424,8 +424,8 @@ The
 .B \-\-norc
 option may be used to inhibit this behavior, and the
 .B \-\-rcfile
-option may be used to force another file to be read, but
-\fIrshd\fP does not generally invoke the shell with those options
+option may be used to force another file to be read, but neither
+\fIrshd\fP nor \fIsshd\fP generally invoke the shell with those options
 or allow them to be specified.
 .PP
 If the shell is started with the effective user (group) id not equal to the
@@ -535,11 +535,11 @@ command (see
 .SM
 .B REDIRECTION
 below).
-If \fB|&\fP is used, \fIcommand\fP's standard output and standard error
-are connected to
+If \fB|&\fP is used, \fIcommand\fP's standard error, in addition to its
+standard output, is connected to
 \fIcommand2\fP's standard input through the pipe;
 it is shorthand for \fB2>&1 |\fP.
-This implicit redirection of the standard error is
+This implicit redirection of the standard error to the standard output is
 performed after any redirections specified by the command.
 .PP
 The return status of a pipeline is the exit status of the last
@@ -1871,8 +1871,9 @@ below.
 .TP
 .B BASH_COMPAT
 The value is used to set the shell's compatibility level.
-See the description of the \fBshopt\fB builtin below under
-\fBSHELL BUILTIN COMMANDS\fP  for a description of the various compatibility
+See the description of the \fBshopt\fP builtin below under
+\fBSHELL BUILTIN COMMANDS\fP
+for a description of the various compatibility
 levels and their effects.
 The value may be a decimal number (e.g., 4.2) or an integer (e.g., 42)
 corresponding to the desired compatibility level.
@@ -2536,6 +2537,12 @@ array, and an index of \-1 references the last element.
 An array variable is considered set if a subscript has been assigned a
 value.  The null string is a valid value.
 .PP
+It is possible to obtain the keys (indices) of an array as well as the values.
+${\fB!\fP\fIname\fP[\fI@\fP]} and ${\fB!\fP\fIname\fP[\fI*\fP]}
+expand to the indices assigned in array variable \fIname\fP.
+The treatment when in double quotes is similar to the expansion of the
+special parameters \fI@\fP and \fI*\fP within double quotes.
+.PP
 The
 .B unset
 builtin is used to destroy arrays.  \fBunset\fP \fIname\fP[\fIsubscript\fP]
@@ -3136,8 +3143,9 @@ The
 .I expression
 is treated as if it were within double quotes, but a double quote
 inside the parentheses is not treated specially.
-All tokens in the expression undergo parameter expansion, string
-expansion, command substitution, and quote removal.
+All tokens in the expression undergo parameter and variable expansion,
+command substitution, and quote removal.
+The result is treated as the arithmetic expression to be evaluated.
 Arithmetic expansions may be nested.
 .PP
 The evaluation is performed according to the rules listed below under
@@ -5729,7 +5737,7 @@ the first call) of each line in turn.
 Any numeric argument supplied to these successive calls determines
 the direction to move through the history.  A negative argument switches
 the direction through the history (back or forward).
-The history expansion facilities are used to extract the last argument,
+The history expansion facilities are used to extract the last word,
 as if the "!$" history expansion had been specified.
 .TP
 .B shell\-expand\-line (M\-C\-e)
@@ -6665,7 +6673,8 @@ The \fIn\fRth word.
 The first argument.  That is, word 1.
 .TP
 .B $
-The last argument.
+The last word.  This is usually the last argument, but will expand to the
+zeroth word if there is only one word in the line.
 .TP
 .B %
 The word matched by the most recent `?\fIstring\fR?' search.
@@ -7393,7 +7402,8 @@ option will display the attributes and values of each
 .IR name .
 When
 .B \-p
-is used with \fIname\fP arguments, additional options are ignored.
+is used with \fIname\fP arguments, additional options,
+other than \fB\-f\fP and \fB\-F\fP, are ignored.
 When
 .B \-p
 is supplied without \fIname\fP arguments, it will display the attributes
@@ -9110,7 +9120,12 @@ is greater than
 or less than zero; otherwise 0.
 .TP
 \fBshopt\fP [\fB\-pqsu\fP] [\fB\-o\fP] [\fIoptname\fP ...]
-Toggle the values of variables controlling optional shell behavior.
+Toggle the values of settings controlling optional shell behavior.
+The settings can be either those listed below, or, if the
+.B \-o
+option is used, those available with the
+.B \-o
+option to the \fBset\fP builtin command.
 With no options, or with the
 .B \-p
 option, a list of all settable options is displayed, with
@@ -9383,7 +9398,7 @@ above for a description of
 This option is enabled by default.
 .TP 8
 .B globasciiranges
-If set, range expressions used in pattern matching (see
+If set, range expressions used in pattern matching bracket expressions (see
 .SM
 .B Pattern Matching
 above) behave as if in the traditional C locale when performing
@@ -10063,7 +10078,7 @@ subsequently reset.  The exit status is true unless a
 is readonly.
 .TP
 \fBwait\fP [\fB\--n\fP] [\fIn ...\fP]
-Wait for each specified process and return its termination status.
+Wait for each specified child process and return its termination status.
 Each
 .I n
 may be a process
@@ -10182,7 +10197,8 @@ script.
 .TP
 \fIThe Gnu History Library\fP, Brian Fox and Chet Ramey
 .TP
-\fIPortable Operating System Interface (POSIX) Part 2: Shell and Utilities\fP, IEEE
+\fIPortable Operating System Interface (POSIX) Part 2: Shell and Utilities\fP, IEEE --
+http://pubs.opengroup.org/onlinepubs/9699919799/
 .TP
 http://tiswww.case.edu/~chet/bash/POSIX -- a description of posix mode
 .TP

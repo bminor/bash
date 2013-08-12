@@ -318,7 +318,7 @@ add_history_time (string)
 {
   HIST_ENTRY *hs;
 
-  if (string == 0)
+  if (string == 0 || history_length < 1)
     return;
   hs = the_history[history_length - 1];
   FREE (hs->timestamp);

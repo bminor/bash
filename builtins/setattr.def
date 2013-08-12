@@ -466,6 +466,24 @@ show_name_attributes (name, nodefs)
     return (1);
 }
 
+int
+show_func_attributes (name, nodefs)
+     char *name;
+     int nodefs;
+{
+  SHELL_VAR *var;
+
+  var = find_function (name);
+
+  if (var)
+    {
+      show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
+      return (0);
+    }
+  else
+    return (1);
+}
+
 void
 set_var_attribute (name, attribute, undo)
      char *name;

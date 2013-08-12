@@ -94,11 +94,7 @@
 /* Maximum amount of recursion allowed.  This prevents a non-integer
    variable such as "num=num+2" from infinitely adding to itself when
    "let num=num+2" is given. */
-#if 0
 #define MAX_EXPR_RECURSION_LEVEL 1024
-#else
-#define MAX_EXPR_RECURSION_LEVEL 16
-#endif
 
 /* The Tokens.  Singing "The Lion Sleeps Tonight". */
 
@@ -685,6 +681,7 @@ expbor ()
       readtok ();
       val2 = expbxor ();
       val1 = val1 | val2;
+      lasttok = NUM;
     }
 
   return (val1);
@@ -703,6 +700,7 @@ expbxor ()
       readtok ();
       val2 = expband ();
       val1 = val1 ^ val2;
+      lasttok = NUM;
     }
 
   return (val1);
@@ -721,6 +719,7 @@ expband ()
       readtok ();
       val2 = exp5 ();
       val1 = val1 & val2;
+      lasttok = NUM;
     }
 
   return (val1);
@@ -743,6 +742,7 @@ exp5 ()
 	val1 = (val1 == val2);
       else if (op == NEQ)
 	val1 = (val1 != val2);
+      lasttok = NUM;
     }
   return (val1);
 }
@@ -771,6 +771,7 @@ exp4 ()
 	val1 = val1 < val2;
       else			/* (op == GT) */
 	val1 = val1 > val2;
+      lasttok = NUM;
     }
   return (val1);
 }
@@ -794,6 +795,7 @@ expshift ()
 	val1 = val1 << val2;
       else
 	val1 = val1 >> val2;
+      lasttok = NUM;
     }
 
   return (val1);
@@ -817,6 +819,7 @@ exp3 ()
 	val1 += val2;
       else if (op == MINUS)
 	val1 -= val2;
+      lasttok = NUM;
     }
   return (val1);
 }
@@ -868,6 +871,7 @@ exp2 ()
 #else
 	val1 = (op == DIV) ? val1 / val2 : val1 % val2;
 #endif
+      lasttok = NUM;
     }
   return (val1);
 }
@@ -899,6 +903,7 @@ exppower ()
     {
       readtok ();
       val2 = exppower ();	/* exponentiation is right-associative */
+      lasttok = NUM;
       if (val2 == 0)
 	return (1);
       if (val2 < 0)
@@ -917,21 +922,25 @@ exp1 ()
     {
       readtok ();
       val = !exp1 ();
+      lasttok = NUM;
     }
   else if (curtok == BNOT)
     {
       readtok ();
       val = ~exp1 ();
+      lasttok = NUM;
     }
   else if (curtok == MINUS)
     {
       readtok ();
       val = - exp1 ();
+      lasttok = NUM;
     }
   else if (curtok == PLUS)
     {
       readtok ();
       val = exp1 ();
+      lasttok = NUM;
     }
   else
     val = exp0 ();

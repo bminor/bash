@@ -21,10 +21,10 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.3, version 4.056])dnl
+AC_REVISION([for Bash 4.3, version 4.059])dnl
 
 define(bashvers, 4.3)
-define(relstatus, alpha)
+define(relstatus, beta)
 
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
 
@@ -191,6 +191,7 @@ opt_casemod_attrs=yes
 opt_casemod_expansions=yes
 opt_extglob_default=no
 opt_dircomplete_expand_default=no
+opt_globascii_default=no
 
 dnl options that affect how bash is compiled and linked
 opt_static_link=no
@@ -211,6 +212,7 @@ if test $opt_minimal_config = yes; then
 	opt_net_redirs=no opt_progcomp=no opt_separate_help=no
 	opt_multibyte=yes opt_cond_regexp=no opt_coproc=no
 	opt_casemod_attrs=no opt_casemod_expansions=no opt_extglob_default=no
+	opt_globascii_default=no
 fi
 
 AC_ARG_ENABLE(alias, AC_HELP_STRING([--enable-alias], [enable shell aliases]), opt_alias=$enableval)
@@ -231,6 +233,7 @@ AC_ARG_ENABLE(disabled-builtins, AC_HELP_STRING([--enable-disabled-builtins], [a
 AC_ARG_ENABLE(dparen-arithmetic, AC_HELP_STRING([--enable-dparen-arithmetic], [include ((...)) command]), opt_dparen_arith=$enableval)
 AC_ARG_ENABLE(extended-glob, AC_HELP_STRING([--enable-extended-glob], [include ksh-style extended pattern matching]), opt_extended_glob=$enableval)
 AC_ARG_ENABLE(extended-glob-default, AC_HELP_STRING([--enable-extended-glob-default], [force extended pattern matching to be enabled by default]), opt_extglob_default=$enableval)
+AC_ARG_ENABLE(glob-asciiranges-default, AC_HELP_STRING([--enable-glob-asciiranges-default], [force bracket range expressions in pattern matching to use the C locale by default]), opt_globascii_default=$enableval)
 AC_ARG_ENABLE(help-builtin, AC_HELP_STRING([--enable-help-builtin], [include the help builtin]), opt_help=$enableval)
 AC_ARG_ENABLE(history, AC_HELP_STRING([--enable-history], [turn on command history]), opt_history=$enableval)
 AC_ARG_ENABLE(job-control, AC_HELP_STRING([--enable-job-control], [enable job control features]), opt_job_control=$enableval)
@@ -347,6 +350,11 @@ AC_DEFINE(CASEMOD_EXPANSIONS)
 fi
 if test $opt_dircomplete_expand_default = yes; then
 AC_DEFINE(DIRCOMPLETE_EXPAND_DEFAULT)
+fi
+if test $opt_globascii_default = yes; then
+AC_DEFINE(GLOBASCII_DEFAULT, 1)
+else
+AC_DEFINE(GLOBASCII_DEFAULT, 0)
 fi
 
 if test $opt_memscramble = yes; then
@@ -633,6 +641,11 @@ test -n "$ARFLAGS" || ARFLAGS="cr"
 AC_PROG_RANLIB
 AC_PROG_YACC
 AC_PROG_MAKE_SET
+
+case "$ac_cv_prog_YACC" in
+*bison*)	;;
+*)	AC_MSG_WARN([bison not available; needed to process parse.y]) ;;
+esac
 
 case "$host_os" in
 opennt*|interix*)	MAKE_SHELL="$INTERIX_ROOT/bin/sh" ;;
@@ -933,7 +946,7 @@ BASH_CHECK_TYPE(quad_t, , long, HAVE_QUAD_T)
 BASH_CHECK_TYPE(intmax_t, , $bash_cv_type_long_long)
 BASH_CHECK_TYPE(uintmax_t, , $bash_cv_type_unsigned_long_long)
 if test "$ac_cv_header_sys_socket_h" = "yes"; then
-BASH_CHECK_TYPE(socklen_t, [#include <sys/socket.h>], int, HAVE_SOCKLEN_T)
+BASH_CHECK_TYPE(socklen_t, [#include <sys/socket.h>], [unsigned int], HAVE_SOCKLEN_T)
 fi
 BASH_TYPE_RLIMIT
 

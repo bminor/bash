@@ -39,6 +39,7 @@
 #include <shmbchar.h>
 #include <shmbutil.h>
 #include <chartypes.h>
+#include <typemax.h>
 
 #include <glob/strmatch.h>
 
@@ -67,6 +68,10 @@
 #define CASE_USEWORDS	0x1000		/* modify behavior to act on words in passed string */
 
 extern char *substring __P((char *, int, int));
+
+#ifndef UCHAR_MAX
+#  define UCHAR_MAX	TYPE_MAXIMUM(unsigned char)
+#endif
 
 #if defined (HANDLE_MULTIBYTE)
 static wchar_t
@@ -141,8 +146,10 @@ sh_modcase (string, pat, flags)
       if (iswalnum (wc) == 0)
 	{
 	  inword = 0;
+#if 0
 	  ADVANCE_CHAR (ret, end, start);
 	  continue;
+#endif
 	}
 
       if (pat)
@@ -203,8 +210,11 @@ sh_modcase (string, pat, flags)
       else
 	nop = flags;
 
-      if (MB_CUR_MAX == 1 || is_basic ((int)wc))
+      /* Need to check UCHAR_MAX since wc may have already been converted to a
+	 wide character by cval() */
+      if (MB_CUR_MAX == 1 || (wc <= UCHAR_MAX && is_basic ((int)wc)))
 	{
+singlebyte:
 	  switch (nop)
 	  {
 	  default:
@@ -221,7 +231,10 @@ sh_modcase (string, pat, flags)
 	{
 	  m = mbrtowc (&wc, string + start, end - start, &state);
 	  if (MB_INVALIDCH (m))
-	    wc = (wchar_t)string[start];
+	    {
+	      wc = (unsigned char)string[start];
+	      goto singlebyte;
+	    }
 	  else if (MB_NULLWCH (m))
 	    wc = L'\0';
 	  switch (nop)

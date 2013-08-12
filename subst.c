@@ -277,6 +277,7 @@ static int chk_atstar __P((char *, int, int *, int *));
 static int chk_arithsub __P((const char *, int));
 
 static WORD_DESC *parameter_brace_expand_word __P((char *, int, int, int, arrayind_t *));
+static char *parameter_brace_find_indir __P((char *, int, int, int));
 static WORD_DESC *parameter_brace_expand_indir __P((char *, int, int, int *, int *));
 static WORD_DESC *parameter_brace_expand_rhs __P((char *, char *, int, int, int *, int *));
 static void parameter_brace_expand_error __P((char *, char *));
@@ -1470,7 +1471,7 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
       if (c == '\'')
 	{
 /*itrace("extract_dollar_brace_string: c == single quote flags = %d quoted = %d dolbrace_state = %d", flags, quoted, dolbrace_state);*/
-	  if (posixly_correct && shell_compatibility_level > 41 && dolbrace_state != DOLBRACE_QUOTE && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
+	  if (posixly_correct && shell_compatibility_level > 42 && dolbrace_state != DOLBRACE_QUOTE && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
 	    ADVANCE_CHAR (string, slen, i);
 	  else
 	    {
@@ -1491,7 +1492,7 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
       else if (dolbrace_state == DOLBRACE_PARAM && c == '#' && (i - *sindex) > 1)
         dolbrace_state = DOLBRACE_QUOTE;
       else if (dolbrace_state == DOLBRACE_PARAM && c == '/' && (i - *sindex) > 1)
-        dolbrace_state = DOLBRACE_QUOTE;
+        dolbrace_state = DOLBRACE_QUOTE2;	/* XXX */
       else if (dolbrace_state == DOLBRACE_PARAM && c == '^' && (i - *sindex) > 1)
         dolbrace_state = DOLBRACE_QUOTE;
       else if (dolbrace_state == DOLBRACE_PARAM && c == ',' && (i - *sindex) > 1)
@@ -3129,7 +3130,58 @@ expand_arith_string (string, quoted)
      char *string;
      int quoted;
 {
-  return (expand_string_if_necessary (string, quoted, expand_string));
+  WORD_DESC td;
+  WORD_LIST *list, *tlist;
+  size_t slen;
+  int i, saw_quote;
+  char *ret;
+  DECLARE_MBSTATE;
+
+  /* Don't need string length for ADVANCE_CHAR unless multibyte chars possible. */
+  slen = (MB_CUR_MAX > 1) ? strlen (string) : 0;
+  i = saw_quote = 0;
+  while (string[i])
+    {
+      if (EXP_CHAR (string[i]))
+	break;
+      else if (string[i] == '\'' || string[i] == '\\' || string[i] == '"')
+	saw_quote = 1;
+      ADVANCE_CHAR (string, slen, i);
+    }
+
+  if (string[i])
+    {
+      /* This is expanded version of expand_string_internal as it's called by
+	 expand_string_leave_quoted  */
+      td.flags = W_NOPROCSUB;	/* don't want process substitution */
+      td.word = savestring (string);
+      list = call_expand_word_internal (&td, quoted, 0, (int *)NULL, (int *)NULL);
+      /* This takes care of the calls from expand_string_leave_quoted and
+	 expand_string */
+      if (list)
+	{
+	  tlist = word_list_split (list);
+	  dispose_words (list);
+	  list = tlist;
+	  if (list)
+	    dequote_list (list);
+	}
+      /* This comes from expand_string_if_necessary */
+      if (list)
+	{
+	  ret = string_list (list);
+	  dispose_words (list);
+	}
+      else
+	ret = (char *)NULL;
+      FREE (td.word);
+    }
+  else if (saw_quote && ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) == 0))
+    ret = string_quote_removal (string, quoted);
+  else
+    ret = savestring (string);
+
+  return ret;
 }
 
 #if defined (COND_COMMAND)
@@ -4460,6 +4512,11 @@ array_remove_pattern (var, pattern, patspec, varname, quoted)
 
   /* compute itype from varname here */
   v = array_variable_part (varname, &ret, 0);
+
+  /* XXX */
+  if (v && invisible_p (var))
+    return ((char *)NULL);
+
   itype = ret[0];
 
   a = (v && array_p (v)) ? array_cell (v) : 0;
@@ -5109,6 +5166,8 @@ process_substitute (string, open_for_read_in_child)
   close (open_for_read_in_child ? 0 : 1);
 #endif /* !HAVE_DEV_FD */
 
+  last_command_exit_value = result;
+  result = run_exit_trap ();
   exit (result);
   /*NOTREACHED*/
 }
@@ -5473,7 +5532,7 @@ array_length_reference (s)
 
   /* If unbound variables should generate an error, report one and return
      failure. */
-  if ((var == 0 || (assoc_p (var) == 0 && array_p (var) == 0)) && unbound_vars_is_error)
+  if ((var == 0 || invisible_p (var) || (assoc_p (var) == 0 && array_p (var) == 0)) && unbound_vars_is_error)
     {
       c = *--t;
       *t = '\0';
@@ -5482,7 +5541,7 @@ array_length_reference (s)
       *t = c;
       return (-1);
     }
-  else if (var == 0)
+  else if (var == 0 || invisible_p (var))
     return 0;
 
   /* We support a couple of expansions for variables that are not arrays.
@@ -5749,6 +5808,38 @@ expand_arrayref:
   return ret;
 }
 
+static char *
+parameter_brace_find_indir (name, var_is_special, quoted, find_nameref)
+     char *name;
+     int var_is_special, quoted, find_nameref;
+{
+  char *temp, *t;
+  WORD_DESC *w;
+  SHELL_VAR *v;
+
+  if (find_nameref && var_is_special == 0 && (v = find_variable_last_nameref (name)) &&
+      nameref_p (v) && (t = nameref_cell (v)) && *t)
+    return (savestring (t));
+
+  /* If var_is_special == 0, and name is not an array reference, this does
+     more expansion than necessary.  It should really look up the variable's
+     value and not try to expand it. */
+  w = parameter_brace_expand_word (name, var_is_special, quoted, PF_IGNUNBOUND, 0);
+  t = w->word;
+  /* Have to dequote here if necessary */
+  if (t)
+    {
+      temp = (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))
+		? dequote_string (t)
+		: dequote_escapes (t);
+      free (t);
+      t = temp;
+    }
+  dispose_word_desc (w);
+
+  return t;
+}
+  
 /* Expand an indirect reference to a variable: ${!NAME} expands to the
    value of the variable whose name is the value of NAME. */
 static WORD_DESC *
@@ -5777,21 +5868,7 @@ parameter_brace_expand_indir (name, var_is_special, quoted, quoted_dollar_atp, c
 	}
     }
 
-  /* If var_is_special == 0, and name is not an array reference, this does
-     more expansion than necessary.  It should really look up the variable's
-     value and not try to expand it. */
-  w = parameter_brace_expand_word (name, var_is_special, quoted, PF_IGNUNBOUND, 0);
-  t = w->word;
-  /* Have to dequote here if necessary */
-  if (t)
-    {
-      temp = (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))
-		? dequote_string (t)
-		: dequote_escapes (t);
-      free (t);
-      t = temp;
-    }
-  dispose_word_desc (w);
+  t = parameter_brace_find_indir (name, var_is_special, quoted, 0);
 
   chk_atstar (t, quoted, quoted_dollar_atp, contains_dollar_at);
   if (t == 0)
@@ -6245,26 +6322,41 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
      SHELL_VAR **varp;
      char **valp;
 {
-  int vtype;
-  char *temp;
+  int vtype, want_indir;
+  char *temp, *vname;
+  WORD_DESC *wd;
 #if defined (ARRAY_VARS)
   SHELL_VAR *v;
 #endif
   arrayind_t lind;
 
+  want_indir = *varname == '!' &&
+    (legal_variable_starter ((unsigned char)varname[1]) || DIGIT (varname[1])
+					|| VALID_INDIR_PARAM (varname[1]));
+  if (want_indir)
+    vname = parameter_brace_find_indir (varname+1, SPECIAL_VAR (varname, 1), quoted, 1);
+  else
+    vname = varname;
+    
   /* This sets vtype to VT_VARIABLE or VT_POSPARMS */
-  vtype = (varname[0] == '@' || varname[0] == '*') && varname[1] == '\0';
-  if (vtype == VT_POSPARMS && varname[0] == '*')
+  vtype = (vname[0] == '@' || vname[0] == '*') && vname[1] == '\0';
+  if (vtype == VT_POSPARMS && vname[0] == '*')
     vtype |= VT_STARSUB;
   *varp = (SHELL_VAR *)NULL;
 
 #if defined (ARRAY_VARS)
-  if (valid_array_reference (varname))
+  if (valid_array_reference (vname))
     {
-      v = array_variable_part (varname, &temp, (int *)0);
+      v = array_variable_part (vname, &temp, (int *)0);
       /* If we want to signal array_value to use an already-computed index,
 	 set LIND to that index */
       lind = (ind != INTMAX_MIN && (flags & AV_USEIND)) ? ind : 0;
+      if (v && invisible_p (v))
+	{
+	  vtype = VT_ARRAYMEMBER;
+	  *varp = (SHELL_VAR *)NULL;
+	  *valp = (char *)NULL;
+	}
       if (v && (array_p (v) || assoc_p (v)))
 	{ /* [ */
 	  if (ALL_ELEMENT_SUB (temp[0]) && temp[1] == ']')
@@ -6278,7 +6370,7 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
 	  else
 	    {
 	      vtype = VT_ARRAYMEMBER;
-	      *valp = array_value (varname, Q_DOUBLE_QUOTES, flags, (int *)NULL, &lind);
+	      *valp = array_value (vname, Q_DOUBLE_QUOTES, flags, (int *)NULL, &lind);
 	    }
 	  *varp = v;
 	}
@@ -6295,10 +6387,10 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
 	{
 	  vtype = VT_ARRAYMEMBER;
 	  *varp = v;
-	  *valp = array_value (varname, Q_DOUBLE_QUOTES, flags, (int *)NULL, &lind);
+	  *valp = array_value (vname, Q_DOUBLE_QUOTES, flags, (int *)NULL, &lind);
 	}
     }
-  else if ((v = find_variable (varname)) && (invisible_p (v) == 0) && (assoc_p (v) || array_p (v)))
+  else if ((v = find_variable (vname)) && (invisible_p (v) == 0) && (assoc_p (v) || array_p (v)))
     {
       vtype = VT_ARRAYMEMBER;
       *varp = v;
@@ -6317,6 +6409,9 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
       else
 	*valp = value;
     }
+
+  if (want_indir)
+    free (vname);
 
   return vtype;
 }
