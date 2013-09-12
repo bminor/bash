@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sat Jul 13 13:32:19 EDT 2013
+.\"	Last Change: Thu Aug  1 15:59:19 EDT 2013
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2013 July 13" "GNU Bash 4.3"
+.TH BASH 1 "2013 August 1" "GNU Bash 4.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1360,8 +1360,12 @@ expands to the process ID of the current shell, not the
 subshell.
 .TP
 .B !
-Expands to the process ID of the most recently executed background
-(asynchronous) command.
+Expands to the process ID of the job most recently placed into the
+background, whether executed as an asynchronous command or using
+the \fBbg\fP builtin (see
+.SM
+.B "JOB CONTROL"
+below).
 .TP
 .B 0
 Expands to the name of the shell or shell script.  This is set at

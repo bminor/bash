@@ -2416,6 +2416,12 @@ make_variable_value (var, value, flags)
      evaluation done. */
   if (integer_p (var))
     {
+      rval = evalexp (value, &expok);
+      if (expok == 0)
+	{
+	  top_level_cleanup ();
+	  jump_to_top_level (DISCARD);
+	}
       if (flags & ASS_APPEND)
 	{
 	  oval = value_cell (var);
@@ -2425,17 +2431,10 @@ make_variable_value (var, value, flags)
 	      top_level_cleanup ();
 	      jump_to_top_level (DISCARD);
 	    }
-	}
-      rval = evalexp (value, &expok);
-      if (expok == 0)
-	{
-	  top_level_cleanup ();
-	  jump_to_top_level (DISCARD);
+	  rval += lval;
 	}
       /* This can be fooled if the variable's value changes while evaluating
 	 `rval'.  We can change it if we move the evaluation of lval to here. */
-      if (flags & ASS_APPEND)
-	rval += lval;
       retval = itos (rval);
     }
 #if defined (CASEMOD_ATTRS)
