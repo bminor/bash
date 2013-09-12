@@ -5166,3 +5166,11 @@ builtins/help.def
 	  versions.  This prevents `help read' from matching both `read' and
 	  `readonly', but allows `help r' to match everything beginning with
 	  `r'.  Inspired by report from Geir Hauge <geir.hauge@gmail.com>
+
+				   8/13
+				   ----
+builtins/fc.def
+	- fc_builtin,fc_gethnum: calculate `real' end of the history list and
+	  use it if -0 is specified as the beginning or end of the history
+	  range to list.  Doesn't work for fc -e or fc -s by design.  Feature
+	  requested by Mike Fied <micfied@gmail.com>

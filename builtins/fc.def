@@ -173,7 +173,7 @@ fc_builtin (list)
   register int i;
   register char *sep;
   int numbering, reverse, listing, execute;
-  int histbeg, histend, last_hist, retval, opt, rh;
+  int histbeg, histend, last_hist, retval, opt, rh, real_last;
   FILE *stream;
   REPL *rlist, *rl;
   char *ename, *command, *newcom, *fcedit;
@@ -303,6 +303,14 @@ fc_builtin (list)
   rh = remember_on_history || ((subshell_environment & SUBSHELL_COMSUB) && enable_history_list);
   last_hist = i - rh - hist_last_line_added;
 
+  /* Make sure that real_last is calculated the same way here and in
+     fc_gethnum.  The return value from fc_gethnum is treated specially if
+     it is == real_last and we are listing commands. */
+  real_last = i;
+  /* back up from the end to the last non-null history entry */
+  while (hlist[real_last] == 0 && real_last > 0)
+    real_last--;
+
   /* XXX */
   if (i == last_hist && hlist[last_hist] == 0)
     while (last_hist >= 0 && hlist[last_hist] == 0)
@@ -320,6 +328,8 @@ fc_builtin (list)
 
       if (list)
 	histend = fc_gethnum (list->word->word, hlist);
+      else if (histbeg == real_last)
+	histend = listing ? real_last : histbeg;
       else
 	histend = listing ? last_hist : histbeg;
     }
@@ -538,7 +548,7 @@ fc_gethnum (command, hlist)
 	  return (n < 0 ? 0 : n);
 	}
       else if (n == 0)
-	return (i);
+	return ((sign == -1) ? real_last : i);
       else
 	{
 	  n -= history_base;

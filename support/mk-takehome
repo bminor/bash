@@ -58,5 +58,8 @@ if [ -n "$sflag" ]; then
 fi
 
 if [ -n "$dflag" ]; then
+	if [ ! -d $HOME/Dropbox ]; then
+		HOME=~chet
+	fi
 	cp ${TARF}.gz $HOME/Dropbox/
 fi
