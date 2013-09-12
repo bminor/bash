@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Thu Aug  1 15:59:19 EDT 2013
+.\"	Last Change: Tue Aug  6 09:55:50 EDT 2013
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2013 August 1" "GNU Bash 4.3"
+.TH BASH 1 "2013 August 6" "GNU Bash 4.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2372,7 +2372,7 @@ The value of \fIp\fP determines whether or not the fraction is
 included.
 .IP
 If this variable is not set, \fBbash\fP acts as if it had the
-value \fB$\(aq\enreal\et%3lR\enuser\et%3lU\ensys\e\t%3lS\(aq\fP.
+value \fB$\(aq\enreal\et%3lR\enuser\et%3lU\ensys\ett%3lS\(aq\fP.
 If the value is null, no timing information is displayed.
 A trailing newline is added when the format string is displayed.
 .PD 0
@@ -6375,7 +6375,7 @@ completion function would load completions dynamically:
 .br
 }
 .br
-complete -D -F _completion_loader
+complete -D -F _completion_loader -o bashdefault -o default
 .br
 \fP
 .SH HISTORY
@@ -10081,7 +10081,7 @@ subsequently reset.  The exit status is true unless a
 .I name
 is readonly.
 .TP
-\fBwait\fP [\fB\--n\fP] [\fIn ...\fP]
+\fBwait\fP [\fB\-n\fP] [\fIn ...\fP]
 Wait for each specified child process and return its termination status.
 Each
 .I n
@@ -10091,7 +10091,7 @@ in that job's pipeline are waited for.  If
 .I n
 is not given, all currently active child processes
 are waited for, and the return status is zero.
-If the \fB\--n\fP option is supplied, \fBwait\fP waits for any job to
+If the \fB\-n\fP option is supplied, \fBwait\fP waits for any job to
 terminate and returns its exit status.
 If
 .I n

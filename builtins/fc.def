@@ -510,6 +510,10 @@ fc_gethnum (command, hlist)
   if (command == NULL)
     return (i);
 
+  /* back up from the end to the last non-null history entry */
+  while (hlist[real_last] == 0 && real_last > 0)
+    real_last--;
+
   /* Otherwise, there is a specification.  It can be a number relative to
      the current position, or an absolute history number. */
   s = command;

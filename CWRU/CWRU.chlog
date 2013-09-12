@@ -5130,10 +5130,39 @@ arrayfunc.c
 	- assign_array_element_internal: before using array_max_index() when
 	  processing a negative subscript, make sure the variable is an array.
 	  if it's not, use 0 as array_max_index assuming it's a string.
-	  Bug report from Geir Hauge <geir.hauge@gmail.com>
+	  Fixes bug report from Geir Hauge <geir.hauge@gmail.com>
 
 				    8/3
 				    ---
 Makefile.in
 	- pcomplete.o: add dependency on $(DEFDIR)/builtext.h. Suggested by
 	  Curtis Doty <curtis@greenkey.net>
+
+				    8/5
+				    ---
+lib/glob/sm_loop.c
+	- strcompare: short-circuit and return FNM_NOMATCH if the lengths of the
+	  pattern and string (pe - p  and se - s, respectively) are not equal
+	- strcompare: don't bother trying to set *pe or *se to '\0' if that's
+	  what they already are.  Fixes bug reported by Geir Hauge
+	  <geir.hauge@gmail.com>
+
+				    8/6
+				    ---
+doc/{bash.1,bashref.texi},builtins/hash.def,lib/readline/doc/rluser.texi
+	- minor typo changes from Geir Hauge <geir.hauge@gmail.com>
+
+bultins/help.def
+	- show_longdoc: avoid trying to translate the empty string because it
+	  often translates to some boilerplate about the project and
+	  translation.  Report and fix from Geir Hauge <geir.hauge@gmail.com>
+
+				    8/8
+				    ---
+builtins/help.def
+	- help_builtin: try two passes through the list of help topics for each
+	  argument: one doing exact string matching and one, if the first pass
+	  fails to find a match, doing string prefix matching like previous
+	  versions.  This prevents `help read' from matching both `read' and
+	  `readonly', but allows `help r' to match everything beginning with
+	  `r'.  Inspired by report from Geir Hauge <geir.hauge@gmail.com>
