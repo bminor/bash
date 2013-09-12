@@ -717,9 +717,7 @@ set_signal_handler (sig, handler)
 
   sigemptyset (&act.sa_mask);
   sigemptyset (&oact.sa_mask);
-  if (sigaction (sig, &act, &oact) == 0)
-    return (oact.sa_handler);
-  else
-    return (SIG_DFL);
+  sigaction (sig, &act, &oact);
+  return (oact.sa_handler);
 }
 #endif /* HAVE_POSIX_SIGNALS */

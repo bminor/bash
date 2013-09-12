@@ -5130,4 +5130,84 @@ arrayfunc.c
 	- assign_array_element_internal: before using array_max_index() when
 	  processing a negative subscript, make sure the variable is an array.
 	  if it's not, use 0 as array_max_index assuming it's a string.
-	  Bug report from Geir Hauge <geir.hauge@gmail.com>
+	  Fixes bug report from Geir Hauge <geir.hauge@gmail.com>
+
+				    8/3
+				    ---
+Makefile.in
+	- pcomplete.o: add dependency on $(DEFDIR)/builtext.h. Suggested by
+	  Curtis Doty <curtis@greenkey.net>
+
+				    8/5
+				    ---
+lib/glob/sm_loop.c
+	- strcompare: short-circuit and return FNM_NOMATCH if the lengths of the
+	  pattern and string (pe - p  and se - s, respectively) are not equal
+	- strcompare: don't bother trying to set *pe or *se to '\0' if that's
+	  what they already are.  Fixes bug reported by Geir Hauge
+	  <geir.hauge@gmail.com>
+
+				    8/6
+				    ---
+doc/{bash.1,bashref.texi},builtins/hash.def,lib/readline/doc/rluser.texi
+	- minor typo changes from Geir Hauge <geir.hauge@gmail.com>
+
+bultins/help.def
+	- show_longdoc: avoid trying to translate the empty string because it
+	  often translates to some boilerplate about the project and
+	  translation.  Report and fix from Geir Hauge <geir.hauge@gmail.com>
+
+				    8/8
+				    ---
+builtins/help.def
+	- help_builtin: try two passes through the list of help topics for each
+	  argument: one doing exact string matching and one, if the first pass
+	  fails to find a match, doing string prefix matching like previous
+	  versions.  This prevents `help read' from matching both `read' and
+	  `readonly', but allows `help r' to match everything beginning with
+	  `r'.  Inspired by report from Geir Hauge <geir.hauge@gmail.com>
+
+				   8/13
+				   ----
+builtins/fc.def
+	- fc_builtin,fc_gethnum: calculate `real' end of the history list and
+	  use it if -0 is specified as the beginning or end of the history
+	  range to list.  Doesn't work for fc -e or fc -s by design.  Feature
+	  requested by Mike Fied <micfied@gmail.com>
+
+				   8/16
+				   ----
+trap.c
+	- _run_trap_internal: use {save,restore}_parser_state instead of
+	  {save,restore}_token_state. It's more comprehensive
+
+				   8/23
+				   ----
+doc/bash.1
+	- disown: remove repeated text.  Report and fix from Thomas Hood
+	  <jdthood@gmail.com>
+
+				   8/25
+				   ----
+lib/readline/rltty.c
+	- set_special_char: fix prototype (last arg is rl_command_func_t *)
+
+sig.c
+	- set_signal_handler: return oact.sa_handler only if sigaction
+	  succeeds; if it doesn't, return SIG_DFL (reasonable default).  From
+	  https://bugzilla.redhat.com/show_bug.cgi?id=911404
+
+bashline.c
+	- attempt_shell_completion: fix to skip assignment statements preceding
+	  command name even if there are no programmable completions defined.
+	  From https://bugzilla.redhat.com/show_bug.cgi?id=994659
+	- attempt_shell_completion: if still completing command word following
+	  assignment statements, do command completion even if programmable
+	  completion defined for partial command name entered so far
+
+				   8/26
+				   ----
+pcomplete.c
+	- pcomp_filename_completion_function: make sure rl_filename_dequoting_function
+	  is non-NULL before trying to call it.  Bug and fix from
+	  Andreas Schwab <schwab@linux-m68k.org>

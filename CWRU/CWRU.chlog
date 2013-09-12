@@ -5174,3 +5174,46 @@ builtins/fc.def
 	  use it if -0 is specified as the beginning or end of the history
 	  range to list.  Doesn't work for fc -e or fc -s by design.  Feature
 	  requested by Mike Fied <micfied@gmail.com>
+
+				   8/16
+				   ----
+trap.c
+	- _run_trap_internal: use {save,restore}_parser_state instead of
+	  {save,restore}_token_state. It's more comprehensive
+
+				   8/23
+				   ----
+doc/bash.1
+	- disown: remove repeated text.  Report and fix from Thomas Hood
+	  <jdthood@gmail.com>
+
+				   8/25
+				   ----
+lib/readline/rltty.c
+	- set_special_char: fix prototype (last arg is rl_command_func_t *)
+
+sig.c
+	- set_signal_handler: return oact.sa_handler only if sigaction
+	  succeeds; if it doesn't, return SIG_DFL (reasonable default).  From
+	  https://bugzilla.redhat.com/show_bug.cgi?id=911404
+
+bashline.c
+	- attempt_shell_completion: fix to skip assignment statements preceding
+	  command name even if there are no programmable completions defined.
+	  From https://bugzilla.redhat.com/show_bug.cgi?id=994659
+	- attempt_shell_completion: if still completing command word following
+	  assignment statements, do command completion even if programmable
+	  completion defined for partial command name entered so far
+
+				   8/26
+				   ----
+pcomplete.c
+	- pcomp_filename_completion_function: make sure rl_filename_dequoting_function
+	  is non-NULL before trying to call it.  Bug and fix from
+	  Andreas Schwab <schwab@linux-m68k.org>
+
+bashline.c
+	- bash_command_name_stat_hook: if *name is not something we're going
+	  to look up in $PATH (absolute_program(*name) != 0), just call the
+	  usual bash_filename_stat_hook and return those results.  This makes
+	  completions like $PWD/exam[TAB] add a trailing slash
