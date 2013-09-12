@@ -5211,3 +5211,24 @@ pcomplete.c
 	- pcomp_filename_completion_function: make sure rl_filename_dequoting_function
 	  is non-NULL before trying to call it.  Bug and fix from
 	  Andreas Schwab <schwab@linux-m68k.org>
+
+bashline.c
+	- bash_command_name_stat_hook: if *name is not something we're going
+	  to look up in $PATH (absolute_program(*name) != 0), just call the
+	  usual bash_filename_stat_hook and return those results.  This makes
+	  completions like $PWD/exam[TAB] add a trailing slash
+
+				    9/2
+				    ---
+builtins/read.def
+	- read_builtin: before comparing what we read to the delim, make sure
+	  we are not supposed to be ignoring the delimiter (read -N).  We
+	  set the delim to -1, but it's possible to read a character whose
+	  int value ends up being between -1 and -128.  Fixes bug
+	  reported by Stephane Chazelas <stephane.chazelas@gmail.com>
+
+doc/{bash.1,bashref.texi}
+	- word splitting: crib some language from Posix to make it clear that
+	  characters in IFS are treated as field *terminators*, not field
+	  *separators*.  Addresses issue raised by DJ Mills
+	  <danielmills1@gmail.com>

@@ -9,12 +9,17 @@ TARF=${FROOT}.tar
 SRC=/usr/homes/chet/src/bash/src
 
 fflag= sflag= dflag=
-while getopts "dfs" opt
+while getopts "dfsp:" opt
 do
 	case $opt in
-	f)	fflag=1 ;;
-	s)	sflag=1 ;;
 	d)	dflag=1 ;;
+	f)	fflag=1 ;;
+	p)	PARENT=$OPTARG
+		if [ ! -d "$PARENT" ]; then
+			echo "mk-takehome: $PARENT: directory does not exist" 2>&1
+			exit 2
+		fi ;;
+	s)	sflag=1 ;;
 	*)	echo "mk-takehome: usage: mk-takehome [-dfs]" 2>&1
 		exit 2;;
 	esac
