@@ -1,6 +1,6 @@
 <HTML>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<!-- Created on March, 8  2013 by texi2html 1.64 -->
+<!-- Created on September, 11  2013 by texi2html 1.64 -->
 <!-- 
 Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -33,13 +33,13 @@ Send bugs and suggestions to <texi2html@mathematik.uni-kl.de>
 <H1>Bash Reference Manual</H1></P><P>
 
 This text is a brief description of the features that are present in
-the Bash shell (version 4.2, 2 March 2013 ).
+the Bash shell (version 4.3, 2 September 2013).
 The Bash home page is <A HREF="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</A>.
 </P><P>
 
-This is Edition 4.2, last updated 2 March 2013 ,
+This is Edition 4.3, last updated 2 September 2013,
 of <CITE>The GNU Bash Reference Manual</CITE>,
-for <CODE>Bash</CODE>, Version 4.2.
+for <CODE>Bash</CODE>, Version 4.3.
 </P><P>
 
 Bash contains features that appear in other popular shells, and some
@@ -903,11 +903,11 @@ connection is performed before any redirections specified by the
 command.
 </P><P>
 
-If <SAMP>`|&#38;'</SAMP> is used, <VAR>command1</VAR>'s standard output and standard error
-are connected to
+If <SAMP>`|&#38;'</SAMP> is used, <VAR>command1</VAR>'s standard error, in addition to
+its standard output, is connected to
 <VAR>command2</VAR>'s standard input through the pipe;
 it is shorthand for <CODE>2&#62;&#38;1 |</CODE>.
-This implicit redirection of the standard error is
+This implicit redirection of the standard error to the standard output is
 performed after any redirections specified by the command.
 </P><P>
 
@@ -1362,7 +1362,8 @@ lexicographically using the current locale.
 
 When the <SAMP>`=='</SAMP> and <SAMP>`!='</SAMP> operators are used, the string to the
 right of the operator is considered a pattern and matched according
-to the rules described below in <A HREF="bashref.html#SEC38">3.5.8.1 Pattern Matching</A>.
+to the rules described below in <A HREF="bashref.html#SEC38">3.5.8.1 Pattern Matching</A>,
+as if the <CODE>extglob</CODE> shell option were enabled.
 The <SAMP>`='</SAMP> operator is identical to <SAMP>`=='</SAMP>.
 If the shell option <CODE>nocasematch</CODE>
 (see the description of <CODE>shopt</CODE> in <A HREF="bashref.html#SEC64">4.3.2 The Shopt Builtin</A>)
@@ -1671,7 +1672,7 @@ You can emulate a parallel <CODE>xargs</CODE> by adding the <SAMP>`-X'</SAMP> op
 
 GNU Parallel can replace certain common idioms that operate on lines read
 from a file (in this case, filenames listed one per line):
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>	while read -r x; do
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>	while IFS= read -r x; do
 		do-something1 "$x" "config-$x"
 		do-something2 &#60; "$x"
 	done &#60; file | process-output
@@ -2101,8 +2102,9 @@ expands to the process ID of the invoking shell, not the subshell.
 <A NAME="IDX58"></A>
 <DT><CODE>!</CODE>
 <DD><A NAME="IDX59"></A>
-Expands to the process ID of the most recently executed background
-(asynchronous) command.
+Expands to the process ID of the job most recently placed into the
+background, whether executed as an asynchronous command or using
+the <CODE>bg</CODE> builtin (see section <A HREF="bashref.html#SEC94">7.2 Job Control Builtins</A>).
 <P>
 
 <A NAME="IDX60"></A>
@@ -2848,8 +2850,9 @@ and the substitution of the result.  The format for arithmetic expansion is:
 
 The expression is treated as if it were within double quotes, but
 a double quote inside the parentheses is not treated specially.
-All tokens in the expression undergo parameter expansion, command
-substitution, and quote removal.
+All tokens in the expression undergo parameter and variable expansion,
+command substitution, and quote removal.
+The result is treated as the arithmetic expression to be evaluated.
 Arithmetic expansions may be nested. 
 </P><P>
 
@@ -2924,7 +2927,8 @@ word splitting.
 </P><P>
 
 The shell treats each character of <CODE>$IFS</CODE> as a delimiter, and splits
-the results of the other expansions into words on these characters.
+the results of the other expansions into words using these characters
+as field terminators.
 If <CODE>IFS</CODE> is unset, or its value is exactly <CODE>&#60;space&#62;&#60;tab&#62;&#60;newline&#62;</CODE>,
 the default, then sequences of
 <CODE> &#60;space&#62;</CODE>, <CODE>&#60;tab&#62;</CODE>, and <CODE>&#60;newline&#62;</CODE>
@@ -5035,8 +5039,8 @@ are given, then display the values of variables instead.
 
 The <SAMP>`-p'</SAMP> option will display the attributes and values of each
 <VAR>name</VAR>.
-When <SAMP>`-p'</SAMP> is used with <VAR>name</VAR> arguments, additional options
-are ignored.
+When <SAMP>`-p'</SAMP> is used with <VAR>name</VAR> arguments, additional options,
+other than <SAMP>`-f'</SAMP> and <SAMP>`-F'</SAMP>, are ignored.
 </P><P>
 
 When <SAMP>`-p'</SAMP> is supplied without <VAR>name</VAR> arguments, <CODE>declare</CODE>
@@ -5422,7 +5426,8 @@ to the last <VAR>name</VAR>.
 If there are fewer words read from the input stream than names,
 the remaining names are assigned empty values.
 The characters in the value of the <CODE>IFS</CODE> variable
-are used to split the line into words.
+are used to split the line into words using the same rules the shell
+uses for expansion (described above in <A HREF="bashref.html#SEC36">3.5.7 Word Splitting</A>).
 The backslash character <SAMP>`\'</SAMP> may be used to remove any special
 meaning for the next character read and for line continuation.
 If no names are supplied, the line read is assigned to the
@@ -6132,7 +6137,10 @@ This builtin allows you to change additional shell optional behavior.
 <TABLE><tr><td>&nbsp;</td><td class=example><pre>shopt [-pqsu] [-o] [<VAR>optname</VAR> <small>...</small>]
 </pre></td></tr></table><P>
 
-Toggle the values of variables controlling optional shell behavior.
+Toggle the values of settings controlling optional shell behavior.
+The settings can be either those listed below, or, if the
+<SAMP>`-o'</SAMP> option is used, those available with the <SAMP>`-o'</SAMP>
+option to the <CODE>set</CODE> builtin command (see section <A HREF="bashref.html#SEC63">4.3.1 The Set Builtin</A>).
 With no options, or with the <SAMP>`-p'</SAMP> option, a list of all settable
 options is displayed, with an indication of whether or not each is set.
 The <SAMP>`-p'</SAMP> option causes output to be displayed in a form that
@@ -6390,7 +6398,8 @@ This option is enabled by default.
 <P>
 
 <DT><CODE>globasciiranges</CODE>
-<DD>If set, range expressions used in pattern matching (see section <A HREF="bashref.html#SEC38">3.5.8.1 Pattern Matching</A>)
+<DD>If set, range expressions used in pattern matching bracket expressions
+(see section <A HREF="bashref.html#SEC38">3.5.8.1 Pattern Matching</A>)
 behave as if in the traditional C locale when performing
 comparisons.  That is, the current locale's collating sequence
 is not taken into account, so
@@ -8057,8 +8066,8 @@ file exists and is readable.
 It will not do this if invoked as <CODE>sh</CODE>.
 The <SAMP>`--norc'</SAMP> option may be used to inhibit this behavior, and the
 <SAMP>`--rcfile'</SAMP> option may be used to force another file to be read, but
-<CODE>rshd</CODE> does not generally invoke the shell with those options or
-allow them to be specified.
+neither <CODE>rshd</CODE> nor <CODE>sshd</CODE> generally invoke the shell with those
+options or allow them to be specified.
 </P><P>
 
 <A NAME="SEC78"></A>
@@ -8851,6 +8860,13 @@ and an index of -1 refers to the last element.
 
 An array variable is considered set if a subscript has been assigned a
 value.  The null string is a valid value.
+</P><P>
+
+It is possible to obtain the keys (indices) of an array as well as the values.
+${!<VAR>name</VAR>[@]} and ${!<VAR>name</VAR>[*]} expand to the indices
+assigned in array variable <VAR>name</VAR>.
+The treatment when in double quotes is similar to the expansion of the
+special parameters <SAMP>`@'</SAMP> and <SAMP>`*'</SAMP> within double quotes.
 </P><P>
 
 The <CODE>unset</CODE> builtin is used to destroy arrays.
@@ -9817,7 +9833,7 @@ or non-zero if an error occurs or an invalid option is encountered.
 
 <DT><CODE>wait</CODE>
 <DD><A NAME="IDX313"></A>
-<TABLE><tr><td>&nbsp;</td><td class=example><pre>wait [<VAR>jobspec</VAR> or <VAR>pid</VAR> <small>...</small>]
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>wait [-n] [<VAR>jobspec</VAR> or <VAR>pid</VAR> <small>...</small>]
 </pre></td></tr></table><P>
 
 Wait until the child process specified by each process ID <VAR>pid</VAR>
@@ -9842,8 +9858,8 @@ active jobs.
 If the <SAMP>`-h'</SAMP> option is given, the job is not removed from the table,
 but is marked so that <CODE>SIGHUP</CODE> is not sent to the job if the shell
 receives a <CODE>SIGHUP</CODE>.
-If <VAR>jobspec</VAR> is not present, and neither the <SAMP>`-a'</SAMP> nor <SAMP>`-r'</SAMP>
-option is supplied, the current job is used.
+If <VAR>jobspec</VAR> is not present, and neither the <SAMP>`-a'</SAMP> nor the
+<SAMP>`-r'</SAMP> option is supplied, the current job is used.
 If no <VAR>jobspec</VAR> is supplied, the <SAMP>`-a'</SAMP> option means to remove or
 mark all jobs; the <SAMP>`-r'</SAMP> option without a <VAR>jobspec</VAR>
 argument restricts operation to running jobs.
@@ -12420,7 +12436,7 @@ completion function would load completions dynamically:
 {
     . "/etc/bash_completion.d/$1.sh" &#62;/dev/null 2&#62;&#38;1 &#38;&#38; return 124
 }
-complete -D -F _completion_loader
+complete -D -F _completion_loader -o bashdefault -o default
 </pre></td></tr></table></P><P>
 
 <A NAME="Programmable Completion Builtins"></A>
@@ -14078,6 +14094,13 @@ above under <A HREF="bashref.html#SEC38">3.5.8.1 Pattern Matching</A>.
 <DT><CODE>--enable-extended-glob-default</CODE>
 <DD>Set the default value of the <VAR>extglob</VAR> shell option described
 above under <A HREF="bashref.html#SEC64">4.3.2 The Shopt Builtin</A> to be enabled.
+<P>
+
+<DT><CODE>--enable-glob-asciirange-default</CODE>
+<DD>Set the default value of the <VAR>globasciiranges</VAR> shell option described
+above under <A HREF="bashref.html#SEC64">4.3.2 The Shopt Builtin</A> to be enabled.
+This controls the behavior of character ranges when used in pattern matching
+bracket expressions.
 <P>
 
 <DT><CODE>--enable-help-builtin</CODE>
@@ -17240,7 +17263,7 @@ to permit their use in free software.
 <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="bashref.html#SEC_About"> ? </A>]</TD>
 </TR></TABLE>
 <H1>About this document</H1>
-This document was generated by <I>Chet Ramey</I> on <I>March, 8  2013</I>
+This document was generated by <I>Chet Ramey</I> on <I>September, 11  2013</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 <P></P>  
@@ -17402,7 +17425,7 @@ the following structure:
 <BR>  
 <FONT SIZE="-1">
 This document was generated
-by <I>Chet Ramey</I> on <I>March, 8  2013</I>
+by <I>Chet Ramey</I> on <I>September, 11  2013</I>
 using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
 "><I>texi2html</I></A>
 

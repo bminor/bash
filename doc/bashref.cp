@@ -44,7 +44,7 @@
 \entry{shell variable}{18}{shell variable}
 \entry{parameters, positional}{19}{parameters, positional}
 \entry{parameters, special}{20}{parameters, special}
-\entry{expansion}{20}{expansion}
+\entry{expansion}{21}{expansion}
 \entry{brace expansion}{21}{brace expansion}
 \entry{expansion, brace}{21}{expansion, brace}
 \entry{tilde expansion}{22}{tilde expansion}
@@ -71,48 +71,48 @@
 \entry{exit status}{38}{exit status}
 \entry{signal handling}{38}{signal handling}
 \entry{shell script}{39}{shell script}
-\entry{special builtin}{67}{special builtin}
-\entry{login shell}{81}{login shell}
-\entry{interactive shell}{81}{interactive shell}
-\entry{startup files}{81}{startup files}
+\entry{special builtin}{68}{special builtin}
+\entry{login shell}{82}{login shell}
 \entry{interactive shell}{82}{interactive shell}
-\entry{shell, interactive}{82}{shell, interactive}
-\entry{expressions, conditional}{84}{expressions, conditional}
-\entry{arithmetic, shell}{86}{arithmetic, shell}
-\entry{shell arithmetic}{86}{shell arithmetic}
-\entry{expressions, arithmetic}{86}{expressions, arithmetic}
-\entry{evaluation, arithmetic}{86}{evaluation, arithmetic}
-\entry{arithmetic evaluation}{86}{arithmetic evaluation}
-\entry{alias expansion}{87}{alias expansion}
-\entry{arrays}{88}{arrays}
-\entry{directory stack}{90}{directory stack}
-\entry{prompting}{91}{prompting}
-\entry{restricted shell}{92}{restricted shell}
-\entry{POSIX Mode}{93}{POSIX Mode}
-\entry{job control}{97}{job control}
-\entry{foreground}{97}{foreground}
-\entry{background}{97}{background}
-\entry{suspending jobs}{97}{suspending jobs}
-\entry{Readline, how to use}{100}{Readline, how to use}
-\entry{interaction, readline}{101}{interaction, readline}
-\entry{notation, readline}{102}{notation, readline}
-\entry{command editing}{102}{command editing}
-\entry{editing command lines}{102}{editing command lines}
-\entry{killing text}{103}{killing text}
-\entry{yanking text}{103}{yanking text}
-\entry{kill ring}{103}{kill ring}
-\entry{initialization file, readline}{104}{initialization file, readline}
-\entry{variables, readline}{105}{variables, readline}
-\entry{programmable completion}{124}{programmable completion}
-\entry{completion builtins}{126}{completion builtins}
-\entry{History, how to use}{132}{History, how to use}
-\entry{command history}{133}{command history}
-\entry{history list}{133}{history list}
-\entry{history builtins}{133}{history builtins}
-\entry{history expansion}{135}{history expansion}
-\entry{event designators}{136}{event designators}
-\entry{history events}{136}{history events}
-\entry{installation}{138}{installation}
-\entry{configuration}{138}{configuration}
-\entry{Bash installation}{138}{Bash installation}
-\entry{Bash configuration}{138}{Bash configuration}
+\entry{startup files}{82}{startup files}
+\entry{interactive shell}{83}{interactive shell}
+\entry{shell, interactive}{83}{shell, interactive}
+\entry{expressions, conditional}{85}{expressions, conditional}
+\entry{arithmetic, shell}{87}{arithmetic, shell}
+\entry{shell arithmetic}{87}{shell arithmetic}
+\entry{expressions, arithmetic}{87}{expressions, arithmetic}
+\entry{evaluation, arithmetic}{87}{evaluation, arithmetic}
+\entry{arithmetic evaluation}{87}{arithmetic evaluation}
+\entry{alias expansion}{88}{alias expansion}
+\entry{arrays}{89}{arrays}
+\entry{directory stack}{91}{directory stack}
+\entry{prompting}{92}{prompting}
+\entry{restricted shell}{93}{restricted shell}
+\entry{POSIX Mode}{94}{POSIX Mode}
+\entry{job control}{98}{job control}
+\entry{foreground}{98}{foreground}
+\entry{background}{98}{background}
+\entry{suspending jobs}{98}{suspending jobs}
+\entry{Readline, how to use}{101}{Readline, how to use}
+\entry{interaction, readline}{102}{interaction, readline}
+\entry{notation, readline}{103}{notation, readline}
+\entry{command editing}{103}{command editing}
+\entry{editing command lines}{103}{editing command lines}
+\entry{killing text}{104}{killing text}
+\entry{yanking text}{104}{yanking text}
+\entry{kill ring}{104}{kill ring}
+\entry{initialization file, readline}{105}{initialization file, readline}
+\entry{variables, readline}{106}{variables, readline}
+\entry{programmable completion}{125}{programmable completion}
+\entry{completion builtins}{127}{completion builtins}
+\entry{History, how to use}{133}{History, how to use}
+\entry{command history}{134}{command history}
+\entry{history list}{134}{history list}
+\entry{history builtins}{134}{history builtins}
+\entry{history expansion}{136}{history expansion}
+\entry{event designators}{137}{event designators}
+\entry{history events}{137}{history events}
+\entry{installation}{139}{installation}
+\entry{configuration}{139}{configuration}
+\entry{Bash installation}{139}{Bash installation}
+\entry{Bash configuration}{139}{Bash configuration}

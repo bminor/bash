@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2013 March 4<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2013 September 2<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -550,8 +550,8 @@ The
 option may be used to inhibit this behavior, and the
 <B>--rcfile</B>
 
-option may be used to force another file to be read, but
-<I>rshd</I> does not generally invoke the shell with those options
+option may be used to force another file to be read, but neither
+<I>rshd</I> nor <I>sshd</I> generally invoke the shell with those options
 or allow them to be specified.
 <P>
 
@@ -714,11 +714,11 @@ command (see
 
 </FONT>
 below).
-If <B>|&amp;</B> is used, <I>command</I>'s standard output and standard error
-are connected to
+If <B>|&amp;</B> is used, <I>command</I>'s standard error, in addition to its
+standard output, is connected to
 <I>command2</I>'s standard input through the pipe;
 it is shorthand for <B>2&gt;&amp;1 |</B>.
-This implicit redirection of the standard error is
+This implicit redirection of the standard error to the standard output is
 performed after any redirections specified by the command.
 <P>
 
@@ -933,7 +933,8 @@ lexicographically using the current locale.
 
 When the <B>==</B> and <B>!=</B> operators are used, the string to the
 right of the operator is considered a pattern and matched according
-to the rules described below under <B>Pattern Matching</B>.
+to the rules described below under <B>Pattern Matching</B>,
+as if the <B>extglob</B> shell option were enabled.
 The <B>=</B> operator is equivalent to <B>==</B>.
 If the shell option
 <B>nocasematch</B>
@@ -1748,8 +1749,13 @@ subshell.
 <DT><B>!</B>
 
 <DD>
-Expands to the process ID of the most recently executed background
-(asynchronous) command.
+Expands to the process ID of the job most recently placed into the
+background, whether executed as an asynchronous command or using
+the <B>bg</B> builtin (see
+<FONT SIZE=-1><B>JOB CONTROL</B>
+
+</FONT>
+below).
 <DT><B>0</B>
 
 <DD>
@@ -2396,8 +2402,9 @@ below.
 
 <DD>
 The value is used to set the shell's compatibility level.
-See the description of the <B>shopt builtin below under
-SHELL BUILTIN COMMANDS</B>  for a description of the various compatibility
+See the description of the <B>shopt</B> builtin below under
+<B>SHELL BUILTIN COMMANDS</B>
+for a description of the various compatibility
 levels and their effects.
 The value may be a decimal number (e.g., 4.2) or an integer (e.g., 42)
 corresponding to the desired compatibility level.
@@ -3015,7 +3022,7 @@ The value of <I>p</I> determines whether or not the fraction is
 included.
 <DT><DD>
 If this variable is not set, <B>bash</B> acts as if it had the
-value <B>$aq\nreal\t%3lR\nuser\t%3lU\nsys\	%3lSaq</B>.
+value <B>$aq\nreal\t%3lR\nuser\t%3lU\nsys\tt%3lSaq</B>.
 If the value is null, no timing information is displayed.
 A trailing newline is added when the format string is displayed.
 
@@ -3222,6 +3229,13 @@ array, and an index of -1 references the last element.
 
 An array variable is considered set if a subscript has been assigned a
 value.  The null string is a valid value.
+<P>
+
+It is possible to obtain the keys (indices) of an array as well as the values.
+${<B>!</B><I>name</I>[<I>@</I>]} and ${<B>!</B><I>name</I>[<I>*</I>]}
+expand to the indices assigned in array variable <I>name</I>.
+The treatment when in double quotes is similar to the expansion of the
+special parameters <I>@</I> and <I>*</I> within double quotes.
 <P>
 
 The
@@ -3956,8 +3970,9 @@ The
 
 is treated as if it were within double quotes, but a double quote
 inside the parentheses is not treated specially.
-All tokens in the expression undergo parameter expansion, string
-expansion, command substitution, and quote removal.
+All tokens in the expression undergo parameter and variable expansion,
+command substitution, and quote removal.
+The result is treated as the arithmetic expression to be evaluated.
 Arithmetic expansions may be nested.
 <P>
 
@@ -4016,7 +4031,8 @@ The shell treats each character of
 
 </FONT>
 as a delimiter, and splits the results of the other
-expansions into words on these characters.  If
+expansions into words using these characters as field terminators.
+If
 <FONT SIZE=-1><B>IFS</B>
 
 </FONT>
@@ -7362,7 +7378,7 @@ the first call) of each line in turn.
 Any numeric argument supplied to these successive calls determines
 the direction to move through the history.  A negative argument switches
 the direction through the history (back or forward).
-The history expansion facilities are used to extract the last argument,
+The history expansion facilities are used to extract the last word,
 as if the &quot;!$&quot; history expansion had been specified.
 <DT><B>shell-expand-line (M-C-e)</B>
 
@@ -8168,7 +8184,7 @@ completion function would load completions dynamically:
 }
 <BR>
 
-complete -D -F _completion_loader
+complete -D -F _completion_loader -o bashdefault -o default
 <BR>
 
 </TT>
@@ -8568,7 +8584,8 @@ The first argument.  That is, word 1.
 <DT><B>$</B>
 
 <DD>
-The last argument.
+The last word.  This is usually the last argument, but will expand to the
+zeroth word if there is only one word in the line.
 <DT><B>%</B>
 
 <DD>
@@ -9452,7 +9469,8 @@ option will display the attributes and values of each
 When
 <B>-p</B>
 
-is used with <I>name</I> arguments, additional options are ignored.
+is used with <I>name</I> arguments, additional options,
+other than <B>-f</B> and <B>-F</B>, are ignored.
 When
 <B>-p</B>
 
@@ -9652,8 +9670,8 @@ from the table of active jobs.
 If
 <I>jobspec</I>
 
-is not present, and neither <B>-a</B> nor <B>-r</B> is supplied,
-the shell's notion of the <I>current job</I> is used.
+is not present, and neither the <B>-a</B> nor the <B>-r</B> option
+is supplied, the <I>current job</I> is used.
 If the <B>-h</B> option is given, each
 <I>jobspec</I>
 
@@ -9665,16 +9683,6 @@ is not sent to the job if the shell receives a
 <FONT SIZE=-1><B>SIGHUP</B>.
 
 </FONT>
-If no
-<I>jobspec</I>
-
-is present, and neither the
-<B>-a</B>
-
-nor the
-<B>-r</B>
-
-option is supplied, the <I>current job</I> is used.
 If no
 <I>jobspec</I>
 
@@ -10884,7 +10892,8 @@ The characters in
 <FONT SIZE=-1><B>IFS</B>
 
 </FONT>
-are used to split the line into words.
+are used to split the line into words using the same rules the shell
+uses for expansion (described above under <B>Word Splitting</B>).
 The backslash character (<B>\</B>) may be used to remove any special
 meaning for the next character read and for line continuation.
 Options, if supplied, have the following meanings:
@@ -11606,7 +11615,14 @@ is greater than
 
 or less than zero; otherwise 0.
 <DT><B>shopt</B> [<B>-pqsu</B>] [<B>-o</B>] [<I>optname</I> ...]<DD>
-Toggle the values of variables controlling optional shell behavior.
+Toggle the values of settings controlling optional shell behavior.
+The settings can be either those listed below, or, if the
+<B>-o</B>
+
+option is used, those available with the
+<B>-o</B>
+
+option to the <B>set</B> builtin command.
 With no options, or with the
 <B>-p</B>
 
@@ -11954,7 +11970,7 @@ This option is enabled by default.
 <DT><B>globasciiranges</B>
 
 <DD>
-If set, range expressions used in pattern matching (see
+If set, range expressions used in pattern matching bracket expressions (see
 <FONT SIZE=-1><B>Pattern Matching</B>
 
 </FONT>
@@ -12817,8 +12833,8 @@ subsequently reset.  The exit status is true unless a
 <I>name</I>
 
 is readonly.
-<DT><B>wait</B> [<B>--n</B>] [<I>n ...</I>]<DD>
-Wait for each specified process and return its termination status.
+<DT><B>wait</B> [<B>-n</B>] [<I>n ...</I>]<DD>
+Wait for each specified child process and return its termination status.
 Each
 <I>n</I>
 
@@ -12829,7 +12845,7 @@ in that job's pipeline are waited for.  If
 
 is not given, all currently active child processes
 are waited for, and the return status is zero.
-If the <B>--n</B> option is supplied, <B>wait</B> waits for any job to
+If the <B>-n</B> option is supplied, <B>wait</B> waits for any job to
 terminate and returns its exit status.
 If
 <I>n</I>
@@ -12970,7 +12986,8 @@ script.
 <DT><I>Bash Reference Manual</I>, Brian Fox and Chet Ramey<DD>
 <DT><I>The Gnu Readline Library</I>, Brian Fox and Chet Ramey<DD>
 <DT><I>The Gnu History Library</I>, Brian Fox and Chet Ramey<DD>
-<DT><I>Portable Operating System Interface (POSIX) Part 2: Shell and Utilities</I>, IEEE<DD>
+<DT><I>Portable Operating System Interface (POSIX) Part 2: Shell and Utilities</I>, IEEE --<DD>
+<A HREF="http://pubs.opengroup.org/onlinepubs/9699919799/">http://pubs.opengroup.org/onlinepubs/9699919799/</A>
 <DT><A HREF="http://tiswww.case.edu/~chet/bash/POSIX">http://tiswww.case.edu/~chet/bash/POSIX</A> -- a description of posix mode<DD>
 <DT><I>sh</I>(1), <I>ksh</I>(1), <I>csh</I>(1)<DD>
 <DT><I>emacs</I>(1), <I>vi</I>(1)<DD>
@@ -13124,7 +13141,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.2<TH ALIGN=CENTER width=33%>2013 March 4<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.3<TH ALIGN=CENTER width=33%>2013 September 2<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13230,6 +13247,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 08 March 2013 15:57:13 EST
+Time: 11 September 2013 09:17:53 EDT
 </BODY>
 </HTML>

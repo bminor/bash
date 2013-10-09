@@ -358,7 +358,7 @@ _rl_isearch_dispatch (cxt, c)
     {
       /* _rl_keyseq_timeout specified in milliseconds; _rl_input_queued
 	 takes microseconds, so multiply by 1000.  If we don't get any
-	 additional input and we this keymap shadows another function, process
+	 additional input and this keymap shadows another function, process
 	 that key as if it was all we read. */
       if (_rl_keyseq_timeout > 0 &&
 	    RL_ISSTATE (RL_STATE_CALLBACK) == 0 &&
@@ -483,7 +483,7 @@ add_character:
 	 XXX - since _rl_input_available depends on the application-
 	 settable keyboard timeout value, this could alternatively
 	 use _rl_input_queued(100000) */
-      if (cxt->lastc == ESC && _rl_input_available ())
+      if (cxt->lastc == ESC && (_rl_pushed_input_available () || _rl_input_available ()))
 	rl_execute_next (ESC);
       return (0);
     }

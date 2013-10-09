@@ -5243,3 +5243,13 @@ doc/{bash.1,bashref.texi}
 	- [[: modify description of pattern matching to make it clear that the
 	  match is performed as if the extglob option were enabled.  From Red
 	  Hat bug https://bugzilla.redhat.com/show_bug.cgi?id=1002078
+
+				   9/12
+				   ----
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: if we read an ESC and it's supposed to
+	  terminate the search, make sure we check for typeahead with
+	  _rl_pushed_input_available, since installing a hook function causes
+	  typeahead to be collected in `ibuffer' (input.c).  If there is any,
+	  make sure we still use the ESC as a prefix character.  Bug and fix
+	  from Mike Miller <mtmiller@ieee.org>
