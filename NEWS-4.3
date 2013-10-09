@@ -110,11 +110,13 @@ gg. The brace expansion code now treats a failed sequence expansion as a
 
 hh. Shells started to run process substitutions now run any trap set on EXIT.
 
-ii. There is now a configure-time option to enable the globasciiranges option
-    by default.
+ii. The help builtin now attempts substring matching (as it did through
+    bash-4.2) if exact string matching fails.
 
-jj. The read builtin now checks its first variable argument for validity before
-    trying to read any input.
+jj. The fc builtin now interprets -0 as the current command line.
+
+kk. Completing directory names containing shell variables now adds a trailing
+    slash if the expanded result is a directory.
 
 2.  New Features in Readline
 
@@ -170,3 +172,7 @@ m.  If the user-settable variable `history-size' is set to a value less than
 n.  New application-settable variable: rl_signal_event_hook; function that is
     called when readline is reading terminal input and read(2) is interrupted
     by a signal.  Currently not called for SIGHUP or SIGTERM.
+
+o.  rl_change_environment: new application-settable variable that controls
+    whether or not Readline modifies the environment (currently readline
+    modifies only LINES and COLUMNS).

@@ -2,6 +2,7 @@ This file is caller.def, from which is created caller.c.  It implements the
 builtin "caller" in Bash.
 
 Copyright (C) 2002-2008 Rocky Bernstein for Free Software Foundation, Inc.
+Copyright (C) 2008-2013 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -121,7 +122,7 @@ caller_builtin (list)
     {
       sh_invalidnum (list->word->word);
       builtin_usage ();
-      return (EXECUTION_FAILURE);
+      return (EX_USAGE);
     }
 
   return (EXECUTION_SUCCESS);

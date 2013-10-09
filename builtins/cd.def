@@ -1,7 +1,7 @@
 This file is cd.def, from which is created cd.c.  It implements the
 builtins "cd" and "pwd" in Bash.
 
-Copyright (C) 1987-2011 Free Software Foundation, Inc.
+Copyright (C) 1987-2013 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -219,7 +219,7 @@ cd_builtin (list)
 	  break;
 	default:
 	  builtin_usage ();
-	  return (EXECUTION_FAILURE);
+	  return (EX_USAGE);
 	}
     }
   list = loptend;
@@ -404,7 +404,7 @@ pwd_builtin (list)
 	  break;
 	default:
 	  builtin_usage ();
-	  return (EXECUTION_FAILURE);
+	  return (EX_USAGE);
 	}
     }
   list = loptend;

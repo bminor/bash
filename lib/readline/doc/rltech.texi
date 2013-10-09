@@ -1539,10 +1539,19 @@ The default value of @code{rl_catch_signals} is 1.
 @end deftypevar
 
 @deftypevar int rl_catch_sigwinch
-If this variable is non-zero, Readline will install a signal handler for
-@code{SIGWINCH}.
+If this variable is set to a non-zero value,
+Readline will install a signal handler for @code{SIGWINCH}.
 
 The default value of @code{rl_catch_sigwinch} is 1.
+@end deftypevar
+
+@deftypevar int rl_change_environment
+If this variable is set to a non-zero value,
+and Readline is handling @code{SIGWINCH}, Readline will modify the
+@var{LINES} and @var{COLUMNS} environment variables upon receipt of a
+@code{SIGWINCH}
+
+The default value of @code{rl_change_environment} is 1.
 @end deftypevar
 
 If an application does not wish to have Readline catch any signals, or
