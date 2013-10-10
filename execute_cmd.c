@@ -3748,13 +3748,13 @@ fix_assignment_words (words)
 {
   WORD_LIST *w, *wcmd;
   struct builtin *b;
-  int assoc, global, array;
+  int assoc, global, array, integer;
 
   if (words == 0)
     return;
 
   b = 0;
-  assoc = global = array = 0;
+  assoc = global = array = integer = 0;
 
   /* Skip over assignment statements preceding a command name */
   wcmd = words;
@@ -3789,6 +3789,8 @@ fix_assignment_words (words)
 #endif
 	if (global)
 	  w->word->flags |= W_ASSNGLOBAL;
+	if (integer)
+	  w->word->flags |= W_ASSIGNINT;
       }
 #if defined (ARRAY_VARS)
     /* Note that we saw an associative array option to a builtin that takes
@@ -3814,6 +3816,8 @@ fix_assignment_words (words)
 	  array = 1;
 	if ((wcmd->word->flags & W_ASSNBLTIN) && strchr (w->word->word+1, 'g'))
 	  global = 1;
+	if ((wcmd->word->flags & W_ASSNBLTIN) && strchr (w->word->word+1, 'i'))
+	  integer = 1;
       }
 }
 

@@ -380,6 +380,11 @@ dump_word_flags (flags)
       f &= ~W_ASSNGLOBAL;
       fprintf (stderr, "W_ASSNGLOBAL%s", f ? "|" : "");
     }
+  if (f & W_ASSIGNINT)
+    {
+      f &= ~W_ASSIGNINT;
+      fprintf (stderr, "W_ASSIGNINT%s", f ? "|" : "");
+    }
   if (f & W_COMPASSIGN)
     {
       f &= ~W_COMPASSIGN;
@@ -9430,17 +9435,38 @@ shell_expand_word_list (tlist, eflags)
       if ((tlist->word->flags & (W_COMPASSIGN|W_ASSIGNARG)) == (W_COMPASSIGN|W_ASSIGNARG))
 	{
 	  int t;
+	  char opts[8], opti;
+
+	  opti = 0;
+	  if (tlist->word->flags & (W_ASSIGNASSOC|W_ASSNGLOBAL|W_ASSIGNARRAY))
+	    opts[opti++] = '-';
 
 	  if ((tlist->word->flags & (W_ASSIGNASSOC|W_ASSNGLOBAL)) == (W_ASSIGNASSOC|W_ASSNGLOBAL))
-	    make_internal_declare (tlist->word->word, "-gA");
+	    {
+	      opts[opti++] = 'g';
+	      opts[opti++] = 'A';
+	    }
 	  else if (tlist->word->flags & W_ASSIGNASSOC)
-	    make_internal_declare (tlist->word->word, "-A");
+	    opts[opti++] = 'A';
 	  else if ((tlist->word->flags & (W_ASSIGNARRAY|W_ASSNGLOBAL)) == (W_ASSIGNARRAY|W_ASSNGLOBAL))
-	    make_internal_declare (tlist->word->word, "-ga");
+	    {
+	      opts[opti++] = 'g';
+	      opts[opti++] = 'a';
+	    }
 	  else if (tlist->word->flags & W_ASSIGNARRAY)
-	    make_internal_declare (tlist->word->word, "-a");
+	    opts[opti++] = 'a';
 	  else if (tlist->word->flags & W_ASSNGLOBAL)
-	    make_internal_declare (tlist->word->word, "-g");
+	    opts[opti++] = 'g';
+
+#if 0
+	  /* If we have special handling note the integer attribute */
+	  if (opti > 0 && (tlist->word->flags & W_ASSIGNINT))
+	    opts[opti++] = 'i';
+#endif
+
+	  opts[opti] = '\0';
+	  if (opti > 0)
+	    make_internal_declare (tlist->word->word, opts);
 
 	  t = do_word_assignment (tlist->word, 0);
 	  if (t == 0)

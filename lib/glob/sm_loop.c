@@ -626,19 +626,32 @@ STRCOMPARE (p, pe, s, se)
 {
   int ret;
   CHAR c1, c2;
+  int l1, l2;
 
+  l1 = pe - p;
+  l2 = se - s;
+
+  if (l1 != l2)
+    return (FNM_NOMATCH);	/* unequal lengths, can't be identical */
+  
   c1 = *pe;
   c2 = *se;
 
-  *pe = *se = '\0';
+  if (c1 != 0)
+    *pe = '\0';
+  if (c2 != 0)
+    *se = '\0';
+    
 #if HAVE_MULTIBYTE || defined (HAVE_STRCOLL)
   ret = STRCOLL ((XCHAR *)p, (XCHAR *)s);
 #else
   ret = STRCMP ((XCHAR *)p, (XCHAR *)s);
 #endif
 
-  *pe = c1;
-  *se = c2;
+  if (c1 != 0)
+    *pe = c1;
+  if (c2 != 0)
+    *se = c2;
 
   return (ret == 0 ? ret : FNM_NOMATCH);
 }

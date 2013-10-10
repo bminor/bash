@@ -94,7 +94,7 @@ kill_builtin (list)
   if (list == 0)
     {
       builtin_usage ();
-      return (EXECUTION_FAILURE);
+      return (EX_USAGE);
     }
 
   any_succeeded = listing = saw_signal = 0;
@@ -139,7 +139,7 @@ kill_builtin (list)
       else if (ISOPTION (word, '?'))
 	{
 	  builtin_usage ();
-	  return (EXECUTION_SUCCESS);
+	  return (EX_USAGE);
 	}
       /* If this is a signal specification then process it.  We only process
 	 the first one seen; other arguments may signify process groups (e.g,
@@ -168,7 +168,7 @@ kill_builtin (list)
   if (list == 0)
     {
       builtin_usage ();
-      return (EXECUTION_FAILURE);
+      return (EX_USAGE);
     }
 
   while (list)

@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Sat Jul 13 13:32:19 EDT 2013
+.\"	Last Change: Mon Sep  2 12:21:48 EDT 2013
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2013 July 13" "GNU Bash 4.3"
+.TH BASH 1 "2013 September 2" "GNU Bash 4.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -709,7 +709,8 @@ lexicographically using the current locale.
 .if n .sp 1
 When the \fB==\fP and \fB!=\fP operators are used, the string to the
 right of the operator is considered a pattern and matched according
-to the rules described below under \fBPattern Matching\fP.
+to the rules described below under \fBPattern Matching\fP,
+as if the \fBextglob\fP shell option were enabled.
 The \fB=\fP operator is equivalent to \fB==\fP.
 If the shell option
 .B nocasematch
@@ -1360,8 +1361,12 @@ expands to the process ID of the current shell, not the
 subshell.
 .TP
 .B !
-Expands to the process ID of the most recently executed background
-(asynchronous) command.
+Expands to the process ID of the job most recently placed into the
+background, whether executed as an asynchronous command or using
+the \fBbg\fP builtin (see
+.SM
+.B "JOB CONTROL"
+below).
 .TP
 .B 0
 Expands to the name of the shell or shell script.  This is set at
@@ -2368,7 +2373,7 @@ The value of \fIp\fP determines whether or not the fraction is
 included.
 .IP
 If this variable is not set, \fBbash\fP acts as if it had the
-value \fB$\(aq\enreal\et%3lR\enuser\et%3lU\ensys\e\t%3lS\(aq\fP.
+value \fB$\(aq\enreal\et%3lR\enuser\et%3lU\ensys\ett%3lS\(aq\fP.
 If the value is null, no timing information is displayed.
 A trailing newline is added when the format string is displayed.
 .PD 0
@@ -3190,7 +3195,8 @@ The shell treats each character of
 .SM
 .B IFS
 as a delimiter, and splits the results of the other
-expansions into words on these characters.  If
+expansions into words using these characters as field terminators.
+If
 .SM
 .B IFS
 is unset, or its
@@ -6371,7 +6377,7 @@ completion function would load completions dynamically:
 .br
 }
 .br
-complete -D -F _completion_loader
+complete -D -F _completion_loader -o bashdefault -o default
 .br
 \fP
 .SH HISTORY
@@ -7565,8 +7571,8 @@ Without options, remove each
 from the table of active jobs.
 If
 .I jobspec
-is not present, and neither \fB\-a\fP nor \fB\-r\fP is supplied,
-the shell's notion of the \fIcurrent job\fP is used.
+is not present, and neither the \fB\-a\fP nor the \fB\-r\fP option
+is supplied, the \fIcurrent job\fP is used.
 If the \fB\-h\fP option is given, each
 .I jobspec
 is not removed from the table, but is marked so that
@@ -7575,13 +7581,6 @@ is not removed from the table, but is marked so that
 is not sent to the job if the shell receives a
 .SM
 .BR SIGHUP .
-If no
-.I jobspec
-is present, and neither the
-.B \-a
-nor the
-.B \-r
-option is supplied, the \fIcurrent job\fP is used.
 If no
 .I jobspec
 is supplied, the
@@ -10077,7 +10076,7 @@ subsequently reset.  The exit status is true unless a
 .I name
 is readonly.
 .TP
-\fBwait\fP [\fB\--n\fP] [\fIn ...\fP]
+\fBwait\fP [\fB\-n\fP] [\fIn ...\fP]
 Wait for each specified child process and return its termination status.
 Each
 .I n
@@ -10087,7 +10086,7 @@ in that job's pipeline are waited for.  If
 .I n
 is not given, all currently active child processes
 are waited for, and the return status is zero.
-If the \fB\--n\fP option is supplied, \fBwait\fP waits for any job to
+If the \fB\-n\fP option is supplied, \fBwait\fP waits for any job to
 terminate and returns its exit status.
 If
 .I n

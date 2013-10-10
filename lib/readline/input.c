@@ -113,6 +113,12 @@ _rl_any_typein ()
   return any_typein;
 }
 
+int
+_rl_pushed_input_available ()
+{
+  return (push_index != pop_index);
+}
+
 /* Return the amount of space available in the buffer for stuffing
    characters. */
 static int
@@ -161,12 +167,6 @@ _rl_unget_char (key)
       return (1);
     }
   return (0);
-}
-
-int
-_rl_pushed_input_available ()
-{
-  return (push_index != pop_index);
 }
 
 /* If a character is available to be read, then read it and stuff it into

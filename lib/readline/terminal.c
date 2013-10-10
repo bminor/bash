@@ -81,10 +81,14 @@ static void _win_get_screensize PARAMS((int *, int *));
 static void _emx_get_screensize PARAMS((int *, int *));
 #endif
 
-/*  If the calling application sets this to a non-zero value, readline will
-    use the $LINES and $COLUMNS environment variables to set its idea of the
-    window size before interrogating the kernel. */
+/* If the calling application sets this to a non-zero value, readline will
+   use the $LINES and $COLUMNS environment variables to set its idea of the
+   window size before interrogating the kernel. */
 int rl_prefer_env_winsize = 0;
+
+/* If this is non-zero, readline will set LINES and COLUMNS in the
+   environment when it handles SIGWINCH. */
+int rl_change_environment = 1;
 
 /* **************************************************************** */
 /*								    */
@@ -305,7 +309,8 @@ _rl_get_screen_size (tty, ignore_env)
   /* If we're being compiled as part of bash, set the environment
      variables $LINES and $COLUMNS to new values.  Otherwise, just
      do a pair of putenv () or setenv () calls. */
-  sh_set_lines_and_columns (_rl_screenheight, _rl_screenwidth);
+  if (rl_change_environment)
+    sh_set_lines_and_columns (_rl_screenheight, _rl_screenwidth);
 
   if (_rl_term_autowrap == 0)
     _rl_screenwidth--;

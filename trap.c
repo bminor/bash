@@ -277,8 +277,9 @@ void
 run_pending_traps ()
 {
   register int sig;
-  int old_exit_value, *token_state;
+  int old_exit_value;
   WORD_LIST *save_subst_varlist;
+  sh_parser_state_t pstate;
 #if defined (ARRAY_VARS)
   ARRAY *ps;
 #endif
@@ -362,7 +363,7 @@ run_pending_traps ()
 	  else
 	    {
 	      /* XXX - should we use save_parser_state/restore_parser_state? */
-	      token_state = save_token_state ();
+	      save_parser_state (&pstate);
 	      save_subst_varlist = subst_assign_varlist;
 	      subst_assign_varlist = 0;
 
@@ -374,8 +375,7 @@ run_pending_traps ()
 	      restore_pipeline (1);
 #endif
 
-	      restore_token_state (token_state);
-	      free (token_state);
+	      restore_parser_state (&pstate);
 
 	      subst_assign_varlist = save_subst_varlist;
 	    }

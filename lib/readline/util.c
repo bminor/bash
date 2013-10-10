@@ -373,11 +373,13 @@ _rl_strpbrk (string1, string2)
    doesn't matter (strncasecmp). */
 int
 _rl_strnicmp (string1, string2, count)
-     char *string1, *string2;
+     const char *string1;
+     const char *string2;
      int count;
 {
-  register char *s1, *s2;
-  int d;
+  register const char *s1;
+  register const char *s2;
+  register int d;
 
   if (count <= 0 || (string1 == string2))
     return 0;
@@ -393,7 +395,7 @@ _rl_strnicmp (string1, string2, count)
         break;
       s2++;
     }
-  while (--count != 0)
+  while (--count != 0);
 
   return (0);
 }
@@ -401,10 +403,12 @@ _rl_strnicmp (string1, string2, count)
 /* strcmp (), but caseless (strcasecmp). */
 int
 _rl_stricmp (string1, string2)
-     char *string1, *string2;
+     const char *string1;
+     const char *string2;
 {
-  register char *s1, *s2;
-  int d;
+  register const char *s1;
+  register const char *s2;
+  register int d;
 
   s1 = string1;
   s2 = string2;

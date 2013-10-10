@@ -617,6 +617,10 @@ extern int rl_catch_signals;
    to do that. */
 extern int rl_catch_sigwinch;
 
+/* If non-zero, the readline SIGWINCH handler will modify LINES and
+   COLUMNS in the environment. */
+extern int rl_change_environment;
+
 /* Completion variables. */
 /* Pointer to the generator function for completion_matches ().
    NULL means to use rl_filename_completion_function (), the default

@@ -306,8 +306,8 @@ assign_array_element_internal (entry, name, vname, sub, sublen, value, flags)
     {
       ind = array_expand_index (entry, sub, sublen);
       /* negative subscripts to indexed arrays count back from end */
-      if (ind < 0)
-	ind = array_max_index (array_cell (entry)) + 1 + ind;
+      if (entry && ind < 0)
+	ind = (array_p (entry) ? array_max_index (array_cell (entry)) : 0) + 1 + ind;
       if (ind < 0)
 	{
 	  err_badarraysub (name);

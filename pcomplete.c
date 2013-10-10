@@ -744,7 +744,8 @@ pcomp_filename_completion_function (text, state)
 	 (rl_completion_found_quote == 0). */
       iscompgen = this_shell_builtin == compgen_builtin;
       iscompleting = RL_ISSTATE (RL_STATE_COMPLETING);
-      if (iscompgen && iscompleting == 0 && rl_completion_found_quote == 0)
+      if (iscompgen && iscompleting == 0 && rl_completion_found_quote == 0
+	  && rl_filename_dequoting_function)
 	{
 	  /* Use rl_completion_quote_character because any single or
 	     double quotes have been removed by the time TEXT makes it

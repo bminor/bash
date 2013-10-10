@@ -826,7 +826,7 @@ _rl_insert_char (count, c)
 	 pending characters that are bound to rl_insert, and insert
 	 them all.  Don't do this if we're current reading input from
 	 a macro. */
-      if ((RL_ISSTATE (RL_STATE_MACROINPUT) == 0) && _rl_any_typein ())
+      if ((RL_ISSTATE (RL_STATE_MACROINPUT) == 0) && _rl_pushed_input_available ())
 	_rl_insert_typein (c);
       else
 	{

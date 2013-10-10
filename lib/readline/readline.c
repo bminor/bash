@@ -1,7 +1,7 @@
 /* readline.c -- a general facility for reading lines of input
    with emacs style editing and completion. */
 
-/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2013 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -1249,7 +1249,17 @@ bind_arrow_keys_internal (map)
   rl_bind_keyseq_if_unbound ("\340G", rl_beg_of_line);
   rl_bind_keyseq_if_unbound ("\340O", rl_end_of_line);
   rl_bind_keyseq_if_unbound ("\340S", rl_delete);
-  rl_bind_keyseq_if_unbound ("\340R", rl_overwrite_mode);  
+  rl_bind_keyseq_if_unbound ("\340R", rl_overwrite_mode);
+
+  /* These may or may not work because of the embedded NUL. */
+  rl_bind_keyseq_if_unbound ("\\000H", rl_get_previous_history);
+  rl_bind_keyseq_if_unbound ("\\000P", rl_get_next_history);
+  rl_bind_keyseq_if_unbound ("\\000M", rl_forward_char);
+  rl_bind_keyseq_if_unbound ("\\000K", rl_backward_char);
+  rl_bind_keyseq_if_unbound ("\\000G", rl_beg_of_line);
+  rl_bind_keyseq_if_unbound ("\\000O", rl_end_of_line);
+  rl_bind_keyseq_if_unbound ("\\000S", rl_delete);
+  rl_bind_keyseq_if_unbound ("\\000R", rl_overwrite_mode);
 #endif
 
   _rl_keymap = xkeymap;

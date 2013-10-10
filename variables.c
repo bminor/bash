@@ -2432,6 +2432,8 @@ make_variable_value (var, value, flags)
 	  top_level_cleanup ();
 	  jump_to_top_level (DISCARD);
 	}
+      /* This can be fooled if the variable's value changes while evaluating
+	 `rval'.  We can change it if we move the evaluation of lval to here. */
       if (flags & ASS_APPEND)
 	rval += lval;
       retval = itos (rval);
@@ -2890,7 +2892,7 @@ assign_in_env (word, flags)
     {
       name[offset] = 0;
 
-      /* ignore the `+' when assigning temporary environment */
+      /* don't ignore the `+' when assigning temporary environment */
       if (name[offset - 1] == '+')
 	{
 	  name[offset - 1] = '\0';

@@ -1,3 +1,57 @@
+This document details the changes between this version, bash-4.3-beta2, and the
+previous version, bash-4.3-beta.
+
+1.  Changes to Bash
+
+a.  Fixed a bug that caused assignment to an unset variable using a negative
+    subscript to result in a segmentation fault.
+
+b.  Fixed a bug that caused assignment to a string variable using a negative
+    subscript to use the incorrect index.
+
+c.  Fixed a bug that caused some strings to be interpreted as invalid
+    extended globbing expressions when used with the help builtin.
+
+d.  Fixed a bug that caused an attempt to trap a signal whose disposition
+    cannot be changed to reference uninitialized memory.
+
+e.  Command completion now skips assignment statements preceding a command
+    name and completes the command.
+
+f.  Fixed a bug that caused `compgen -f' in a non-interactive shell to dump
+    core under certain circumstances.
+
+g.  Fixed a bug that caused the `read -N' to misbehave when the input stream
+    contains 0xff.
+
+2.  Changes to Readline
+
+a.  Changed message when an incremental search fails to include "failed" in
+    the prompt and display the entire search string instead of just the last
+    matching portion.
+
+b.  Fixed a bug that caused an arrow key typed to an incremental search prompt
+    to process the key sequence incorrectly.
+
+c.  Additional key bindings for arrow keys on MinGW.
+
+3.  New Features in Bash
+
+a.  The help builtin now attempts substring matching (as it did through
+    bash-4.2) if exact string matching fails.
+
+b.  The fc builtin now interprets -0 as the current command line.
+
+c.  Completing directory names containing shell variables now adds a trailing
+    slash if the expanded result is a directory.
+
+4.  New Features in Readline
+
+a.  rl_change_environment: new application-settable variable that controls
+    whether or not Readline modifies the environment (currently readline
+    modifies only LINES and COLUMNS).
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-4.3-beta, and the
 previous version, bash-4.3-alpha.
 

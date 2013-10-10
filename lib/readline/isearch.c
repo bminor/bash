@@ -156,16 +156,16 @@ rl_forward_search_history (sign, key)
    WHERE is the history list number of the current line.  If it is
    -1, then this line is the starting one. */
 static void
-rl_display_search (search_string, reverse_p, where)
+rl_display_search (search_string, flags, where)
      char *search_string;
-     int reverse_p, where;
+     int flags, where;
 {
   char *message;
   int msglen, searchlen;
 
   searchlen = (search_string && *search_string) ? strlen (search_string) : 0;
 
-  message = (char *)xmalloc (searchlen + 33);
+  message = (char *)xmalloc (searchlen + 64);
   msglen = 0;
 
 #if defined (NOTDEF)
@@ -178,7 +178,13 @@ rl_display_search (search_string, reverse_p, where)
 
   message[msglen++] = '(';
 
-  if (reverse_p)
+  if (flags & SF_FAILED)
+    {
+      strcpy (message + msglen, "failed ");
+      msglen += 7;
+    }
+
+  if (flags & SF_REVERSE)
     {
       strcpy (message + msglen, "reverse-");
       msglen += 8;
@@ -352,7 +358,7 @@ _rl_isearch_dispatch (cxt, c)
     {
       /* _rl_keyseq_timeout specified in milliseconds; _rl_input_queued
 	 takes microseconds, so multiply by 1000.  If we don't get any
-	 additional input and we this keymap shadows another function, process
+	 additional input and this keymap shadows another function, process
 	 that key as if it was all we read. */
       if (_rl_keyseq_timeout > 0 &&
 	    RL_ISSTATE (RL_STATE_CALLBACK) == 0 &&
@@ -477,7 +483,7 @@ add_character:
 	 XXX - since _rl_input_available depends on the application-
 	 settable keyboard timeout value, this could alternatively
 	 use _rl_input_queued(100000) */
-      if (cxt->lastc == ESC && _rl_input_available ())
+      if (cxt->lastc == ESC && (_rl_pushed_input_available () || _rl_input_available ()))
 	rl_execute_next (ESC);
       return (0);
     }
@@ -517,7 +523,7 @@ add_character:
 	      cxt->search_string = (char *)xrealloc (cxt->search_string, cxt->search_string_size);
 	      strcpy (cxt->search_string, last_isearch_string);
 	      cxt->search_string_index = last_isearch_string_len;
-	      rl_display_search (cxt->search_string, (cxt->sflags & SF_REVERSE), -1);
+	      rl_display_search (cxt->search_string, cxt->sflags, -1);
 	      break;
 	    }
 	  return (1);
@@ -691,6 +697,7 @@ add_character:
       /* We cannot find the search string.  Ding the bell. */
       rl_ding ();
       cxt->history_pos = cxt->last_found_line;
+      rl_display_search (cxt->search_string, cxt->sflags, (cxt->history_pos == cxt->save_line) ? -1 : cxt->history_pos);
       return 1;
     }
 
@@ -703,7 +710,7 @@ add_character:
       rl_replace_line (cxt->lines[cxt->history_pos], 0);
       rl_point = cxt->sline_index;
       cxt->last_found_line = cxt->history_pos;
-      rl_display_search (cxt->search_string, (cxt->sflags & SF_REVERSE), (cxt->history_pos == cxt->save_line) ? -1 : cxt->history_pos);
+      rl_display_search (cxt->search_string, cxt->sflags, (cxt->history_pos == cxt->save_line) ? -1 : cxt->history_pos);
     }
 
   return 1;
@@ -738,7 +745,7 @@ rl_search_history (direction, invoking_key)
   RL_SETSTATE(RL_STATE_ISEARCH);
   cxt = _rl_isearch_init (direction);
 
-  rl_display_search (cxt->search_string, (cxt->sflags & SF_REVERSE), -1);
+  rl_display_search (cxt->search_string, cxt->sflags, -1);
 
   /* If we are using the callback interface, all we do is set up here and
       return.  The key is that we leave RL_STATE_ISEARCH set. */

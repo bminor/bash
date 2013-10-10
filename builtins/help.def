@@ -1,7 +1,7 @@
 This file is help.def, from which is created help.c.
 It implements the builtin "help" in Bash.
 
-Copyright (C) 1987-2012 Free Software Foundation, Inc.
+Copyright (C) 1987-2013 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -92,7 +92,7 @@ help_builtin (list)
 {
   register int i;
   char *pattern, *name;
-  int plen, match_found, sflag, dflag, mflag;
+  int plen, match_found, sflag, dflag, mflag, m, pass, this_found;
 
   dflag = sflag = mflag = 0;
   reset_internal_getopt ();
@@ -137,29 +137,43 @@ help_builtin (list)
       pattern = list->word->word;
       plen = strlen (pattern);
 
-      for (i = 0; name = shell_builtins[i].name; i++)
+      for (pass = 1, this_found = 0; pass < 3; pass++)
 	{
-	  QUIT;
-	  if ((strcmp (pattern, name) == 0) ||
-	      (strmatch (pattern, name, FNMATCH_EXTFLAG) != FNM_NOMATCH))
+	  for (i = 0; name = shell_builtins[i].name; i++)
 	    {
-	      match_found++;
-	      if (dflag)
-		{
-		  show_desc (name, i);
-		  continue;
-		}
-	      else if (mflag)
-		{
-		  show_manpage (name, i);
-		  continue;
-		}
+	      QUIT;
 
-	      printf ("%s: %s\n", name, _(shell_builtins[i].short_doc));
+	      /* First pass: look for exact string or pattern matches.
+		 Second pass: look for prefix matches like bash-4.2 */
+	      if (pass == 1)
+	        m = (strcmp (pattern, name) == 0) ||
+		    (strmatch (pattern, name, FNMATCH_EXTFLAG) != FNM_NOMATCH);
+	      else
+		m = strncmp (pattern, name, plen) == 0;
 
-	      if (sflag == 0)
-		show_longdoc (i);
+	      if (m)
+	        {
+	          this_found = 1;
+	          match_found++;
+	          if (dflag)
+		    {
+		      show_desc (name, i);
+		      continue;
+		    }
+	          else if (mflag)
+		    {
+		      show_manpage (name, i);
+		      continue;
+		    }
+
+	          printf ("%s: %s\n", name, _(shell_builtins[i].short_doc));
+
+	          if (sflag == 0)
+		    show_longdoc (i);
+	        }
 	    }
+	  if (pass == 1 && this_found == 1)
+	    break;
 	}
     }
 

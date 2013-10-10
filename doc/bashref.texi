@@ -996,7 +996,8 @@ lexicographically using the current locale.
 
 When the @samp{==} and @samp{!=} operators are used, the string to the
 right of the operator is considered a pattern and matched according
-to the rules described below in @ref{Pattern Matching}.
+to the rules described below in @ref{Pattern Matching},
+as if the @code{extglob} shell option were enabled.
 The @samp{=} operator is identical to @samp{==}.
 If the shell option @code{nocasematch}
 (see the description of @code{shopt} in @ref{The Shopt Builtin})
@@ -1608,8 +1609,9 @@ Expands to the process @sc{id} of the shell.  In a @code{()} subshell, it
 expands to the process @sc{id} of the invoking shell, not the subshell.
 
 @item !
-Expands to the process @sc{id} of the most recently executed background
-(asynchronous) command.
+Expands to the process @sc{id} of the job most recently placed into the
+background, whether executed as an asynchronous command or using
+the @code{bg} builtin (@pxref{Job Control Builtins}).
 
 @item 0
 Expands to the name of the shell or shell script.  This is set at
@@ -2266,7 +2268,8 @@ and arithmetic expansion that did not occur within double quotes for
 word splitting.
 
 The shell treats each character of @env{$IFS} as a delimiter, and splits
-the results of the other expansions into words on these characters.
+the results of the other expansions into words using these characters
+as field terminators.
 If @env{IFS} is unset, or its value is exactly @code{<space><tab><newline>},
 the default, then sequences of
 @code{ <space>}, @code{<tab>}, and @code{<newline>}
@@ -7585,7 +7588,7 @@ or non-zero if an error occurs or an invalid option is encountered.
 @item wait
 @btindex wait
 @example
-wait [@var{jobspec} or @var{pid} @dots{}]
+wait [-n] [@var{jobspec} or @var{pid} @dots{}]
 @end example
 
 Wait until the child process specified by each process @sc{id} @var{pid}
@@ -7610,8 +7613,8 @@ active jobs.
 If the @option{-h} option is given, the job is not removed from the table,
 but is marked so that @code{SIGHUP} is not sent to the job if the shell
 receives a @code{SIGHUP}.
-If @var{jobspec} is not present, and neither the @option{-a} nor @option{-r}
-option is supplied, the current job is used.
+If @var{jobspec} is not present, and neither the @option{-a} nor the
+@option{-r} option is supplied, the current job is used.
 If no @var{jobspec} is supplied, the @option{-a} option means to remove or
 mark all jobs; the @option{-r} option without a @var{jobspec}
 argument restricts operation to running jobs.

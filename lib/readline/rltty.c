@@ -121,7 +121,7 @@ static int set_tty_settings PARAMS((int, TIOTYPE *));
 
 static void prepare_terminal_settings PARAMS((int, TIOTYPE, TIOTYPE *));
 
-static void set_special_char PARAMS((Keymap, TIOTYPE *, int, rl_command_func_t));
+static void set_special_char PARAMS((Keymap, TIOTYPE *, int, rl_command_func_t *));
 
 static void
 save_tty_chars (tiop)
@@ -341,7 +341,7 @@ static int set_tty_settings PARAMS((int, TIOTYPE *));
 
 static void prepare_terminal_settings PARAMS((int, TIOTYPE, TIOTYPE *));
 
-static void set_special_char PARAMS((Keymap, TIOTYPE *, int, rl_command_func_t));
+static void set_special_char PARAMS((Keymap, TIOTYPE *, int, rl_command_func_t *));
 static void _rl_bind_tty_special_chars PARAMS((Keymap, TIOTYPE));
 
 #if defined (FLUSHO)
