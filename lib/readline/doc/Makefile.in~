@@ -117,11 +117,6 @@ history.ps:	history.dvi
 	$(RM) $@
 	$(DVIPS) history.dvi
 
-# can also use:
-#	$(MAKEINFO) --html --no-split
-# in place of
-#	$(TEXI2HTML) -menu -monolithic
-
 readline.html:	${RLSRC}
 	$(TEXI2HTML) -menu -monolithic -I $(TEXINPUTDIR) $(srcdir)/rlman.texi
 	sed -e 's:rlman.html:readline.html:' rlman.html > readline.html

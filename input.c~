@@ -100,14 +100,13 @@ getc_with_restart (stream)
 	      if (sh_unset_nodelay_mode (fileno (stream)) < 0)
 		{
 		  sys_error (_("cannot reset nodelay mode for fd %d"), fileno (stream));
-		  local_index = local_bufused = 0;
 		  return EOF;
 		}
 	      continue;
 	    }
 	  else if (errno != EINTR)
 	    {
-	      local_index = local_bufused = 0;
+	      local_index = 0;
 	      return EOF;
 	    }
 	}

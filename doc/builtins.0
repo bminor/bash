@@ -143,7 +143,7 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               routine call or _e_x_p_r does not correspond to a valid position  in
               the call stack.
 
-       ccdd [--LL|[--PP [--ee]]] [_d_i_r]
+       ccdd [--LL|[--PP [--ee]] [-@]] [_d_i_r]
               Change  the  current  directory to _d_i_r.  if _d_i_r is not supplied,
               the value of the HHOOMMEE shell variable is the default.  Any  addi-
               tional arguments following _d_i_r are ignored.  The variable CCDDPPAATTHH
@@ -162,13 +162,15 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               slash or the beginning of _d_i_r.  If the  --ee  option  is  supplied
               with  --PP,  and  the current working directory cannot be success-
               fully determined after a successful directory  change,  ccdd  will
-              return an unsuccessful status.  An argument of -- is converted to
-              $$OOLLDDPPWWDD before the directory change is  attempted.   If  a  non-
-              empty  directory  name from CCDDPPAATTHH is used, or if -- is the first
-              argument, and the directory change is successful,  the  absolute
-              pathname of the new working directory is written to the standard
-              output.  The return value is true if the directory was  success-
-              fully changed; false otherwise.
+              return  an unsuccessful status.  On systems that support it, the
+              --@@ option presents the extended  attributes  associated  with  a
+              file  as  a directory.  An argument of -- is converted to $$OOLLDDPPWWDD
+              before the directory change is attempted.  If a non-empty direc-
+              tory  name  from  CCDDPPAATTHH is used, or if -- is the first argument,
+              and the directory change is successful, the absolute pathname of
+              the  new  working  directory  is written to the standard output.
+              The return value is  true  if  the  directory  was  successfully
+              changed; false otherwise.
 
        ccoommmmaanndd [--ppVVvv] _c_o_m_m_a_n_d [_a_r_g ...]
               Run  _c_o_m_m_a_n_d  with  _a_r_g_s  suppressing  the normal shell function

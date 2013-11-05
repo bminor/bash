@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2013 September 2<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2013 October 20<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -3307,15 +3307,19 @@ and
 
 <P>
 
-The order of expansions is: brace expansion, tilde expansion,
-parameter, variable and arithmetic expansion and
-command substitution
-(done in a left-to-right fashion), word splitting, and pathname
-expansion.
+The order of expansions is:
+brace expansion;
+tilde expansion, parameter and variable expansion, arithmetic expansion,
+and command substitution (done in a left-to-right fashion);
+word splitting;
+and pathname expansion.
 <P>
 
 On systems that can support it, there is an additional expansion
 available: <I>process substitution</I>.
+This is performed at the
+same time as tilde, parameter, variable, and arithmetic expansion and
+command substitution.
 <P>
 
 Only brace expansion, word splitting, and pathname expansion
@@ -9010,7 +9014,7 @@ current frame is frame 0.
 The return value is 0 unless the shell is not executing a subroutine
 call or <I>expr</I> does not correspond to a valid position in the
 call stack.
-<DT><B>cd</B> [<B>-L</B>|[<B>-P</B> [<B>-e</B>]]] [<I>dir</I>]<DD>
+<DT><B>cd</B> [<B>-L</B>|[<B>-P</B> [<B>-e</B>]] [-@]] [<I>dir</I>]<DD>
 Change the current directory to <I>dir</I>.
 if <I>dir</I> is not supplied, the value of the
 <FONT SIZE=-1><B>HOME</B>
@@ -9074,6 +9078,8 @@ option is supplied with
 and the current working directory cannot be successfully determined
 after a successful directory change, <B>cd</B> will return an unsuccessful
 status.
+On systems that support it, the <B>-@</B> option presents the extended
+attributes associated with a file as a directory.
 An argument of
 <B>-</B>
 
@@ -13141,7 +13147,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.3<TH ALIGN=CENTER width=33%>2013 September 2<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.3<TH ALIGN=CENTER width=33%>2013 October 20<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13247,6 +13253,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 11 September 2013 09:17:53 EDT
+Time: 22 October 2013 11:07:59 EDT
 </BODY>
 </HTML>

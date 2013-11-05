@@ -5306,3 +5306,36 @@ aclocal.m4
 	- BASH_CHECK_MULTIBYTE: check for wcwidth being broken with unicode
 	  combining characters needs a value to use when cross-compiling.
 	  Bug report from Bert Sutherland <bertsutherland@gmail.com>
+
+doc/{bash.1,bashref.texi}
+	- document new -@ option to cd builtin
+
+				   10/28
+				   -----
+lib/glob/{{gmisc,glob}.c,glob.h}
+	- extglob_pattern renamed to extglob_pattern_p, declared in glob.h
+
+subst.c
+	- expand_word_internal: typo fix: case to fix " $@\ " bug in bash-4.2
+	  had a typo (& isexp instead of &&)
+
+				   10/29
+				   -----
+input.c
+	- getc_with_restart: make sure local_index and local_bufused are
+	  reset to 0 before returning EOF, in case we are running an interactive
+	  shell without line editing and ignoreeof is set.  Report and fix
+	  from Yong Zhang <yong.zhang@windriver.com>
+
+lib/readline/search.c
+	- _rl_nsearch_init: take out extra third argument to rl_message; it
+	  only matches prototype (and maybe format) in cases where
+	  PREFER_STDARG and USE_VARARGS are both undefined, which is rare
+
+				   10/31
+				   -----
+subst.c
+	- process_substitute: when opening the named pipe in the child, open
+	  without O_NONBLOCK to avoid race conditions.  Happens often on AIX.
+	  Bug report and fix from Michael Haubenwallner
+	  <michael.haubenwallner@salomon.at>

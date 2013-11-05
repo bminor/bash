@@ -53,6 +53,7 @@
 #include "findcmd.h"
 #include "pathexp.h"
 #include "shmbutil.h"
+#include "trap.h"
 
 #include "builtins/common.h"
 
@@ -4193,6 +4194,7 @@ bash_event_hook ()
 
   bashline_reset_event_hook ();
   check_signals_and_traps ();	/* XXX */
+  return 0;
 }
 
 #endif /* READLINE */

@@ -476,7 +476,7 @@ expand_seqterm (text, tlen)
   if (ISDIGIT (rhs[0]) || ((rhs[0] == '+' || rhs[0] == '-') && ISDIGIT (rhs[1])))
     {
       rhs_t = ST_INT;
-      errno = 0;
+      errno == 0;
       tr = strtoimax (rhs, &ep, 10);
       if (errno == ERANGE || (ep && *ep != 0 && *ep != '.'))
 	rhs_t = ST_BAD;			/* invalid */

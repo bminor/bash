@@ -170,8 +170,6 @@ bashref.dvi: $(BASHREF_FILES) $(HSUSER) $(RLUSER)
 bashref.info: $(BASHREF_FILES) $(HSUSER) $(RLUSER)
 	$(MAKEINFO) --no-split -I$(TEXINPUTDIR) $(srcdir)/bashref.texi
 
-# can also use:
-#	$(MAKEINFO) --html --no-split -I$(TEXINPUTDIR) $(srcdir)/bashref.texi
 bashref.html: $(BASHREF_FILES) $(HSUSER) $(RLUSER)
 	$(TEXI2HTML) -menu -monolithic -I $(TEXINPUTDIR) $(srcdir)/bashref.texi
 
