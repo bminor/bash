@@ -1246,7 +1246,7 @@ run_wordexp (words)
     {
       switch (code)
 	{
-	  /* Some kind of throw to top_level has occured. */
+	  /* Some kind of throw to top_level has occurred. */
 	case FORCE_EOF:
 	  return last_command_exit_value = 127;
 	case ERREXIT:
@@ -1324,7 +1324,7 @@ run_one_command (command)
 #endif /* PROCESS_SUBSTITUTION */
       switch (code)
 	{
-	  /* Some kind of throw to top_level has occured. */
+	  /* Some kind of throw to top_level has occurred. */
 	case FORCE_EOF:
 	  return last_command_exit_value = 127;
 	case ERREXIT:

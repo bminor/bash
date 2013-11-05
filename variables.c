@@ -1158,7 +1158,7 @@ get_self (self)
 }
 
 #if defined (ARRAY_VARS)
-/* A generic dynamic array variable initializer.  Intialize array variable
+/* A generic dynamic array variable initializer.  Initialize array variable
    NAME with dynamic value function GETFUNC and assignment function SETFUNC. */
 static SHELL_VAR *
 init_dynamic_array_var (name, getfunc, setfunc, attrs)
@@ -2299,7 +2299,7 @@ new_shell_variable (name)
   entry->attributes = 0;
 
   /* Always assume variables are to be made at toplevel!
-     make_local_variable has the responsibilty of changing the
+     make_local_variable has the responsibility of changing the
      variable context. */
   entry->context = 0;
 

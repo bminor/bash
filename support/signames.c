@@ -85,7 +85,7 @@ initialize_signames ()
 
   /* POSIX 1003.1b-1993 real time signals, but take care of incomplete
      implementations. Acoording to the standard, both, SIGRTMIN and
-     SIGRTMAX must be defined, SIGRTMIN must be stricly less than
+     SIGRTMAX must be defined, SIGRTMIN must be strictly less than
      SIGRTMAX, and the difference must be at least 7, that is, there
      must be at least eight distinct real time signals. */
 

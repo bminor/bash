@@ -21,10 +21,10 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.3, version 4.059])dnl
+AC_REVISION([for Bash 4.3, version 4.060])dnl
 
 define(bashvers, 4.3)
-define(relstatus, beta2)
+define(relstatus, rc1)
 
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
 

@@ -467,7 +467,7 @@ extern int locale_mb_cur_max;	/* XXX */
 #  define SADD_MBCHAR(_dst, _src, _si, _srcsize)
 #endif
 
-/* Watch out when using this -- it's just straight textual subsitution */
+/* Watch out when using this -- it's just straight textual substitution */
 #if defined (HANDLE_MULTIBYTE)
 #  define SADD_MBQCHAR_BODY(_dst, _src, _si, _srcsize) \
 \

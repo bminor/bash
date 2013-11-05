@@ -592,7 +592,7 @@ integral(real, ip)
 /* 
  * return an ascii representation of the integral part of the number
  * and set fract to be an ascii representation of the fraction part
- * the container for the fraction and the integral part or staticly
+ * the container for the fraction and the integral part or statically
  * declare with fix size 
  */
 static char *

@@ -237,7 +237,7 @@ int rl_erase_empty_line = 0;
    character bound to accept-line. */
 int rl_num_chars_to_read;
 
-/* Line buffer and maintenence. */
+/* Line buffer and maintenance. */
 char *rl_line_buffer = (char *)NULL;
 int rl_line_buffer_len = 0;
 
@@ -1053,7 +1053,7 @@ rl_initialize ()
       RL_SETSTATE(RL_STATE_INITIALIZED);
     }
 
-  /* Initalize the current line information. */
+  /* Initialize the current line information. */
   _rl_init_line_state ();
 
   /* We aren't done yet.  We haven't even gotten started yet! */

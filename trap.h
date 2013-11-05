@@ -46,7 +46,7 @@
 #define BASH_NSIG	NSIG+3
 
 /* Flags values for decode_signal() */
-#define DSIG_SIGPREFIX	0x01		/* don't alllow `SIG' PREFIX */
+#define DSIG_SIGPREFIX	0x01		/* don't allow `SIG' PREFIX */
 #define DSIG_NOCASE	0x02		/* case-insensitive comparison */
 
 /* A value which can never be the target of a trap handler. */

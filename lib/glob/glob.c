@@ -239,7 +239,7 @@ skipname (pat, dname, flags)
 	  (dname[1] == '\0' || (dname[1] == '.' && dname[2] == '\0'))))
     return 1;
 
-  /* If a dot must be explicity matched, check to see if they do. */
+  /* If a dot must be explicitly matched, check to see if they do. */
   else if (noglob_dot_filenames && dname[0] == '.' && pat[0] != '.' &&
 	(pat[0] != '\\' || pat[1] != '.'))
     return 1;
@@ -261,7 +261,7 @@ wchkname (pat_wc, dn_wc)
 	  (dn_wc[1] == L'\0' || (dn_wc[1] == L'.' && dn_wc[2] == L'\0'))))
     return 1;
 
-  /* If a leading dot must be explicity matched, check to see if the
+  /* If a leading dot must be explicitly matched, check to see if the
      pattern and dirname both have one. */
  else if (noglob_dot_filenames && dn_wc[0] == L'.' &&
 	pat_wc[0] != L'.' &&

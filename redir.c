@@ -205,7 +205,7 @@ expandable_filename:
 
 /* Perform the redirections on LIST.  If flags & RX_ACTIVE, then actually
    make input and output file descriptors, otherwise just do whatever is
-   neccessary for side effecting.  flags & RX_UNDOABLE says to remember
+   necessary for side effecting.  flags & RX_UNDOABLE says to remember
    how to undo the redirections later, if non-zero.  If flags & RX_CLEXEC
    is non-zero, file descriptors opened in do_redirection () have their
    close-on-exec flag set. */
@@ -702,7 +702,7 @@ undoablefd (fd)
 
 /* Do the specific redirection requested.  Returns errno or one of the
    special redirection errors (*_REDIRECT) in case of error, 0 on success.
-   If flags & RX_ACTIVE is zero, then just do whatever is neccessary to
+   If flags & RX_ACTIVE is zero, then just do whatever is necessary to
    produce the appropriate side effects.   flags & RX_UNDOABLE, if non-zero,
    says to remember how to undo each redirection.  If flags & RX_CLEXEC is
    non-zero, then we set all file descriptors > 2 that we open to be

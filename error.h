@@ -59,7 +59,7 @@ extern void command_error __P((const char *, int, int, int));
 
 extern char *command_errstr __P((int));
 
-/* Specific errror message functions that eventually call report_error or
+/* Specific error message functions that eventually call report_error or
    internal_error. */
 
 extern void err_badarraysub __P((const char *));

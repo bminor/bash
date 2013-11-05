@@ -100,7 +100,7 @@ extern WORD_LIST *subst_assign_varlist;
 SigHandler *original_signals[NSIG];
 
 /* For each signal, a slot for a string, which is a command to be
-   executed when that signal is recieved.  The slot can also contain
+   executed when that signal is received.  The slot can also contain
    DEFAULT_SIG, which means do whatever you were going to do before
    you were so rudely interrupted, or IGNORE_SIG, which says ignore
    this signal. */
@@ -242,7 +242,7 @@ decode_signal (string, flags)
       if (name == 0 || name[0] == '\0')
 	continue;
 
-      /* Check name without the SIG prefix first case sensitivly or
+      /* Check name without the SIG prefix first case sensitively or
 	 insensitively depending on whether flags includes DSIG_NOCASE */
       if (STREQN (name, "SIG", 3))
 	{

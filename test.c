@@ -157,7 +157,7 @@ integer_expected_error (pch)
 }
 
 /* Increment our position in the argument list.  Check that we're not
-   past the end of the argument list.  This check is supressed if the
+   past the end of the argument list.  This check is suppressed if the
    argument is FALSE.  Made a macro for efficiency. */
 #define advance(f) do { ++pos; if (f && pos >= argc) beyond (); } while (0)
 #define unary_advance() do { advance (1); ++pos; } while (0)

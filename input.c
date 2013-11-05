@@ -457,7 +457,7 @@ close_buffered_fd (fd)
   return (close_buffered_stream (buffers[fd]));
 }
 
-/* Make the BUFFERED_STREAM associcated with buffers[FD] be BP, and return
+/* Make the BUFFERED_STREAM associated with buffers[FD] be BP, and return
    the old BUFFERED_STREAM. */
 BUFFERED_STREAM *
 set_buffered_stream (fd, bp)

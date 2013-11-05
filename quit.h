@@ -23,7 +23,7 @@
 
 #include "sig.h"	/* for sig_atomic_t */
 
-/* Non-zero means SIGINT has already ocurred. */
+/* Non-zero means SIGINT has already occurred. */
 extern volatile sig_atomic_t interrupt_state;
 extern volatile sig_atomic_t terminating_signal;
 

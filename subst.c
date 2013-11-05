@@ -2324,7 +2324,7 @@ string_list_dollar_at (list, quoted)
   return ret;
 }
 
-/* Turn the positional paramters into a string, understanding quoting and
+/* Turn the positional parameters into a string, understanding quoting and
    the various subtleties of using the first character of $IFS as the
    separator.  Calls string_list_dollar_at, string_list_dollar_star, and
    string_list as appropriate. */
@@ -5498,7 +5498,7 @@ command_substitute (string, quoted)
       /* wait_for gives the terminal back to shell_pgrp.  If some other
 	 process group should have it, give it away to that group here.
 	 pipeline_pgrp is non-zero only while we are constructing a
-	 pipline, so what we are concerned about is whether or not that
+	 pipeline, so what we are concerned about is whether or not that
 	 pipeline was started in the background.  A pipeline started in
 	 the background should never get the tty back here. */
       if (interactive && pipeline_pgrp != (pid_t)0 && (subshell_environment & SUBSHELL_ASYNC) == 0)
@@ -6366,7 +6366,7 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
 	{ /* [ */
 	  if (ALL_ELEMENT_SUB (temp[0]) && temp[1] == ']')
 	    {
-	      /* Callers have to differentiate betwen indexed and associative */
+	      /* Callers have to differentiate between indexed and associative */
 	      vtype = VT_ARRAYVAR;
 	      if (temp[0] == '*')
 		vtype |= VT_STARSUB;
@@ -8146,7 +8146,7 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
     {
       c = string[sindex];
 
-      /* Case on toplevel character. */
+      /* Case on top-level character. */
       switch (c)
 	{
 	case '\0':

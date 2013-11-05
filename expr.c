@@ -88,7 +88,7 @@
    Here is a macro which accepts newlines, tabs and spaces as whitespace. */
 #define cr_whitespace(c) (whitespace(c) || ((c) == '\n'))
 
-/* Size be which the expression stack grows when neccessary. */
+/* Size be which the expression stack grows when necessary. */
 #define EXPR_STACK_GROW_SIZE 10
 
 /* Maximum amount of recursion allowed.  This prevents a non-integer

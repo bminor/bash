@@ -45,7 +45,7 @@
 #define PST_REGEXP	0x010000	/* parsing an ERE/BRE as a single word */
 #define PST_HEREDOC	0x020000	/* reading body of here-document */
 #define PST_REPARSE	0x040000	/* re-parsing in parse_string_to_word_list */
-#define PST_REDIRLIST	0x080000	/* parsing a list of redirctions preceding a simple command name */
+#define PST_REDIRLIST	0x080000	/* parsing a list of redirections preceding a simple command name */
 
 
 /* Definition of the delimiter stack.  Needed by parse.y and bashhist.c. */
