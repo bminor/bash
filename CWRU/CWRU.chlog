@@ -5343,3 +5343,20 @@ subst.c
 builtins/ulimit.def
 	- RLIMIT_NTHR: if RLIMIT_PTHREAD is not defined, but RLIMIT_NTHR is,
 	  use RLIMIT_NTHR (NetBSD)
+
+				   11/5
+				   ----
+locale.c
+	- set_default_locale_vars,set_locale_var: if TEXTDOMAINDIR has been
+	  set, and default_dir has a non-null value, call bindtextdomain(3)
+	  when TEXTDOMAIN is assigned a value.  Fixes problem reported by
+	  Michael Arlt <qwertologe@googlemail.com>
+
+				   11/6
+				   ----
+builtins/cd.def
+	- cdxattr: only create synthetic pathname in `buf' if NDIRP argument
+	  is non-null
+	- change_to_directory: if we have specified -@ and cdxattr returns
+	  failure, fail immediately.  Fixes bug reported by Joshuah Hurst
+	  <joshhurst@gmail.com>

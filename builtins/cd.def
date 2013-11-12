@@ -216,9 +216,11 @@ cdxattr (dir, ndirp)
      a valid name for $PWD, we synthesize one under /proc, but to keep that
      path valid, we need to keep the file descriptor open as long as we are in
      this directory.  This imposes a certain structure on /proc. */
-  sprintf (buff, "/proc/%d/fd/%d", getpid(), fd);
   if (ndirp)
-   *ndirp = savestring (buff);
+    {
+      sprintf (buf, "/proc/%d/fd/%d", getpid(), fd);
+      *ndirp = savestring (buf);
+    }
 
   if (xattrfd >= 0)
     close (xattrfd);
@@ -271,6 +273,7 @@ cd_builtin (list)
 
   eflag = 0;
   no_symlinks = no_symbolic_links;
+  xattrflag = 0;
   reset_internal_getopt ();
 #if defined (O_XATTR)
   while ((opt = internal_getopt (list, "eLP@")) != -1)
@@ -587,6 +590,13 @@ change_to_directory (newdir, nolinks, xattr)
 	  canon_failed = 0;
 	  free (tdir);
 	  tdir = ndir;
+	}
+      else
+	{
+	  err = errno;
+	  free (tdir);
+	  errno = err;
+	  return (0);		/* no xattr */
 	}
     }
   else
