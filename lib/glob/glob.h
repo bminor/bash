@@ -35,6 +35,8 @@ extern int glob_pattern_p __P((const char *));
 extern char **glob_vector __P((char *, char *, int));
 extern char **glob_filename __P((char *, int));
 
+extern int extglob_pattern_p __P((const char *));
+
 extern char *glob_error_return;
 extern int noglob_dot_filenames;
 extern int glob_ignore_case;

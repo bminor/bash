@@ -29,7 +29,7 @@
 
 #include <stdc.h>
 
-/* Find the first ocurrence in S of any character in ACCEPT.  */
+/* Find the first occurrence in S of any character in ACCEPT.  */
 char *
 strpbrk (s, accept)
      register const char *s;

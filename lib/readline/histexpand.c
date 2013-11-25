@@ -831,7 +831,7 @@ history_expand_internal (string, start, qc, end_index_ptr, ret_string, current_l
 	}
       i += 2;
     }
-  /* Done with modfiers. */
+  /* Done with modifiers. */
   /* Believe it or not, we have to back the pointer up by one. */
   --i;
 

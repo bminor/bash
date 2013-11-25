@@ -195,7 +195,7 @@ For Readline 4.2, for example, the value of
 @node Readline Typedefs
 @subsection Readline Typedefs
 
-For readabilty, we declare a number of new object types, all pointers
+For readability, we declare a number of new object types, all pointers
 to functions.
 
 The reason for declaring these new types is to make it easier to write
@@ -519,7 +519,7 @@ whether a particular state bit is set.  Current state bits include:
 
 @table @code
 @item RL_STATE_NONE
-Readline has not yet been called, nor has it begun to intialize.
+Readline has not yet been called, nor has it begun to initialize.
 @item RL_STATE_INITIALIZING
 Readline is initializing its internal data structures.
 @item RL_STATE_INITIALIZED
@@ -941,7 +941,7 @@ Readline thinks the screen display is correct.
 
 @deftypefun int rl_on_new_line (void)
 Tell the update functions that we have moved onto a new (empty) line,
-usually after ouputting a newline.
+usually after outputting a newline.
 @end deftypefun
 
 @deftypefun int rl_on_new_line_with_prompt (void)
@@ -1287,7 +1287,7 @@ Readline saves in the history list.
 An alternate interface is available to plain @code{readline()}.  Some
 applications need to interleave keyboard I/O with file, device, or
 window system I/O, typically by using a main loop to @code{select()}
-on various file descriptors.  To accomodate this need, readline can
+on various file descriptors.  To accommodate this need, readline can
 also be invoked as a `callback' function from an event loop.  There
 are functions available to make this easy.
 
@@ -1755,7 +1755,7 @@ This calls @code{rl_complete_internal()} with an argument of @samp{*}.
 @end deftypefun
 
 @deftypefun int rl_completion_mode (rl_command_func_t *cfunc)
-Returns the apppriate value to pass to @code{rl_complete_internal()}
+Returns the appropriate value to pass to @code{rl_complete_internal()}
 depending on whether @var{cfunc} was called twice in succession and
 the values of the @code{show-all-if-ambiguous} and
 @code{show-all-if-unmodified} variables.
@@ -1910,7 +1910,7 @@ The function should not modify the directory argument if it returns 0.
 If non-zero, this is the address of a function called when reading
 directory entries from the filesystem for completion and comparing
 them to the partial word to be completed.  The function should
-perform any necesary application or system-specific conversion on
+perform any necessary application or system-specific conversion on
 the filename, such as converting between character sets or converting
 from a filesystem format to a character input format.
 The function takes two arguments: @var{fname}, the filename to be converted,

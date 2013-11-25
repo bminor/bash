@@ -1138,7 +1138,7 @@ print_redirection (redirect)
 	cprintf ("{%s}", redir_word->word);
       else if (redirector != 1)
 	cprintf ("%d", redirector);
-      cprintf (">|%s", redirectee->word);
+      cprintf (">| %s", redirectee->word);
       break;
 
     case r_appending_to:
@@ -1249,11 +1249,11 @@ print_redirection (redirect)
       break;
 
     case r_err_and_out:
-      cprintf ("&>%s", redirectee->word);
+      cprintf ("&> %s", redirectee->word);
       break;
 
     case r_append_err_and_out:
-      cprintf ("&>>%s", redirectee->word);
+      cprintf ("&>> %s", redirectee->word);
       break;
     }
 }

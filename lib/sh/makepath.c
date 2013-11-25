@@ -94,7 +94,7 @@ sh_makepath (path, dir, flags)
 	MAKEDOT();
     }
   else if ((flags & MP_IGNDOT) && path[0] == '.' && (path[1] == '\0' ||
-						     path[1] == '/' && path[2] == '\0'))
+						     (path[1] == '/' && path[2] == '\0')))
     {
       xpath = nullpath;
       pathlen = 0;

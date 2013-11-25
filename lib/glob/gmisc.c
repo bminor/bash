@@ -201,7 +201,7 @@ bad_bracket:
 #endif
 
 int
-extglob_pattern (pat)
+extglob_pattern_p (pat)
      char *pat;
 {
   switch (pat[0])

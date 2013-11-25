@@ -34,6 +34,7 @@ $PRODUCES cd.c
 #if defined (HAVE_SYS_PARAM_H)
 #include <sys/param.h>
 #endif
+#include <fcntl.h>
 
 #include <stdio.h>
 
@@ -60,7 +61,10 @@ extern const char * const bash_getcwd_errstr;
 static int bindpwd __P((int));
 static int setpwd __P((char *));
 static char *resetpwd __P((char *));
-static int change_to_directory __P((char *, int));
+static int change_to_directory __P((char *, int, int));
+
+static int cdxattr __P((char *, char **));
+static void resetxattr __P((void));
 
 /* Change this to 1 to get cd spelling correction by default. */
 int cdspelling = 0;
@@ -68,10 +72,12 @@ int cdspelling = 0;
 int cdable_vars;
 
 static int eflag;	/* file scope so bindpwd() can see it */
+static int xattrflag;	/* O_XATTR support for openat */
+static int xattrfd = -1;
 
 $BUILTIN cd
 $FUNCTION cd_builtin
-$SHORT_DOC cd [-L|[-P [-e]]] [dir]
+$SHORT_DOC cd [-L|[-P [-e]] [-@]] [dir]
 Change the shell working directory.
 
 Change the current directory to DIR.  The default DIR is the value of the
@@ -94,6 +100,10 @@ Options:
 	of `..'
     -e	if the -P option is supplied, and the current working directory
 	cannot be determined successfully, exit with a non-zero status
+#if defined (O_XATTR)
+    -@  on systems that support it, present a file with extended attributes
+        as a directory containing the file attributes
+#endif
 
 The default is to follow symbolic links, as if `-L' were specified.
 `..' is processed by removing the immediately previous pathname component
@@ -177,6 +187,66 @@ resetpwd (caller)
   return (tdir);
 }
 
+static int
+cdxattr (dir, ndirp)
+     char *dir;		/* don't assume we can always free DIR */
+     char **ndirp;	/* return new constructed directory name */
+{
+#if defined (O_XATTR)
+  int apfd, fd, r, e;
+  char buf[11+40+40];	/* construct new `fake' path for pwd */
+
+  apfd = openat (AT_FDCWD, dir, O_RDONLY|O_NONBLOCK);
+  if (apfd < 0)
+    return -1;
+  fd = openat (apfd, ".", O_XATTR);
+  e = errno;
+  close (apfd);		/* ignore close error for now */
+  errno = e;
+  if (fd < 0)
+    return -1;
+  r = fchdir (fd);	/* assume fchdir exists everywhere with O_XATTR */
+  if (r < 0)
+    {
+      close (fd);
+      return -1;
+    }
+  /* NFSv4 and ZFS extended attribute directories do not have names which are
+     visible in the standard Unix directory tree structure.  To ensure we have
+     a valid name for $PWD, we synthesize one under /proc, but to keep that
+     path valid, we need to keep the file descriptor open as long as we are in
+     this directory.  This imposes a certain structure on /proc. */
+  if (ndirp)
+    {
+      sprintf (buf, "/proc/%d/fd/%d", getpid(), fd);
+      *ndirp = savestring (buf);
+    }
+
+  if (xattrfd >= 0)
+    close (xattrfd);
+  xattrfd = fd;  
+
+  return r;
+#else
+  return -1;
+#endif
+}
+
+/* Clean up the O_XATTR baggage.  Currently only closes xattrfd */
+static void
+resetxattr ()
+{
+#if defined (O_XATTR)
+  if (xattrfd >= 0)
+    {
+      close (xattrfd);
+      xattrfd = -1;
+    }
+#else
+  xattrfd = -1;		/* not strictly necessary */
+#endif
+}
+
 #define LCD_DOVARS	0x001
 #define LCD_DOSPELL	0x002
 #define LCD_PRINTPATH	0x004
@@ -203,8 +273,13 @@ cd_builtin (list)
 
   eflag = 0;
   no_symlinks = no_symbolic_links;
+  xattrflag = 0;
   reset_internal_getopt ();
+#if defined (O_XATTR)
+  while ((opt = internal_getopt (list, "eLP@")) != -1)
+#else
   while ((opt = internal_getopt (list, "eLP")) != -1)
+#endif
     {
       switch (opt)
 	{
@@ -217,6 +292,11 @@ cd_builtin (list)
 	case 'e':
 	  eflag = 1;
 	  break;
+#if defined (O_XATTR)
+	case '@':
+	  xattrflag = 1;
+	  break;
+#endif
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);
@@ -279,7 +359,7 @@ cd_builtin (list)
 	  temp = sh_makepath (path, dirname, MP_DOTILDE);
 	  free (path);
 
-	  if (change_to_directory (temp, no_symlinks))
+	  if (change_to_directory (temp, no_symlinks, xattrflag))
 	    {
 	      /* POSIX.2 says that if a nonempty directory from CDPATH
 		 is used to find the directory to change to, the new
@@ -320,7 +400,7 @@ cd_builtin (list)
 
   /* When we get here, DIRNAME is the directory to change to.  If we
      chdir successfully, just return. */
-  if (change_to_directory (dirname, no_symlinks))
+  if (change_to_directory (dirname, no_symlinks, xattrflag))
     {
       if (lflag & LCD_PRINTPATH)
 	printf ("%s\n", dirname);
@@ -333,7 +413,7 @@ cd_builtin (list)
   if (lflag & LCD_DOVARS)
     {
       temp = get_string_value (dirname);
-      if (temp && change_to_directory (temp, no_symlinks))
+      if (temp && change_to_directory (temp, no_symlinks, xattrflag))
 	{
 	  printf ("%s\n", temp);
 	  return (bindpwd (no_symlinks));
@@ -346,7 +426,7 @@ cd_builtin (list)
   if (lflag & LCD_DOSPELL)
     {
       temp = dirspell (dirname);
-      if (temp && change_to_directory (temp, no_symlinks))
+      if (temp && change_to_directory (temp, no_symlinks, xattrflag))
 	{
 	  printf ("%s\n", temp);
 	  free (temp);
@@ -448,11 +528,11 @@ pwd_builtin (list)
    to the working directory.  Return 1 on success, 0 on failure. */
 
 static int
-change_to_directory (newdir, nolinks)
+change_to_directory (newdir, nolinks, xattr)
      char *newdir;
-     int nolinks;
+     int nolinks, xattr;
 {
-  char *t, *tdir;
+  char *t, *tdir, *ndir;
   int err, canon_failed, r, ndlen, dlen;
 
   tdir = (char *)NULL;
@@ -501,8 +581,34 @@ change_to_directory (newdir, nolinks)
       return (0);
     }
 
+#if defined (O_XATTR)
+  if (xattrflag)
+    {
+      r = cdxattr (nolinks ? newdir : tdir, &ndir);
+      if (r >= 0)
+	{
+	  canon_failed = 0;
+	  free (tdir);
+	  tdir = ndir;
+	}
+      else
+	{
+	  err = errno;
+	  free (tdir);
+	  errno = err;
+	  return (0);		/* no xattr */
+	}
+    }
+  else
+#endif
+    {
+      r = chdir (nolinks ? newdir : tdir);
+      if (r >= 0)
+	resetxattr ();
+    }
+
   /* If the chdir succeeds, update the_current_working_directory. */
-  if (chdir (nolinks ? newdir : tdir) == 0)
+  if (r == 0)
     {
       /* If canonicalization failed, but the chdir succeeded, reset the
 	 shell's idea of the_current_working_directory. */

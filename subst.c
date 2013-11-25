@@ -2324,7 +2324,7 @@ string_list_dollar_at (list, quoted)
   return ret;
 }
 
-/* Turn the positional paramters into a string, understanding quoting and
+/* Turn the positional parameters into a string, understanding quoting and
    the various subtleties of using the first character of $IFS as the
    separator.  Calls string_list_dollar_at, string_list_dollar_star, and
    string_list as appropriate. */
@@ -5111,7 +5111,7 @@ process_substitute (string, open_for_read_in_child)
 
 #if !defined (HAVE_DEV_FD)
   /* Open the named pipe in the child. */
-  fd = open (pathname, open_for_read_in_child ? O_RDONLY|O_NONBLOCK : O_WRONLY);
+  fd = open (pathname, open_for_read_in_child ? O_RDONLY : O_WRONLY);
   if (fd < 0)
     {
       /* Two separate strings for ease of translation. */
@@ -5498,7 +5498,7 @@ command_substitute (string, quoted)
       /* wait_for gives the terminal back to shell_pgrp.  If some other
 	 process group should have it, give it away to that group here.
 	 pipeline_pgrp is non-zero only while we are constructing a
-	 pipline, so what we are concerned about is whether or not that
+	 pipeline, so what we are concerned about is whether or not that
 	 pipeline was started in the background.  A pipeline started in
 	 the background should never get the tty back here. */
       if (interactive && pipeline_pgrp != (pid_t)0 && (subshell_environment & SUBSHELL_ASYNC) == 0)
@@ -6366,7 +6366,7 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
 	{ /* [ */
 	  if (ALL_ELEMENT_SUB (temp[0]) && temp[1] == ']')
 	    {
-	      /* Callers have to differentiate betwen indexed and associative */
+	      /* Callers have to differentiate between indexed and associative */
 	      vtype = VT_ARRAYVAR;
 	      if (temp[0] == '*')
 		vtype |= VT_STARSUB;
@@ -8146,7 +8146,7 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
     {
       c = string[sindex];
 
-      /* Case on toplevel character. */
+      /* Case on top-level character. */
       switch (c)
 	{
 	case '\0':
@@ -8418,7 +8418,7 @@ add_string:
 	      SCOPY_CHAR_I (twochars, CTLESC, c, string, sindex, string_size);
 	    }
 	  /* This is the fix for " $@\ " */
-	  else if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && ((sh_syntaxtab[c] & tflag) == 0) & isexp == 0 && isifs (c))
+	  else if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && ((sh_syntaxtab[c] & tflag) == 0) && isexp == 0 && isifs (c))
 	    {
 	      RESIZE_MALLOCED_BUFFER (istring, istring_index, 2, istring_size,
 				      DEFAULT_ARRAY_SIZE);

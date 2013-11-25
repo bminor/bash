@@ -1666,15 +1666,17 @@ Expansion is performed on the command line after it has been split into
 			words.
 @end menu
 
-The order of expansions is: brace expansion, tilde expansion,
-parameter, variable, and arithmetic expansion and
-command substitution
-(done in a left-to-right fashion), word splitting, and filename
-expansion.
+The order of expansions is:
+brace expansion;
+tilde expansion, parameter and variable expansion, arithmetic expansion,
+and command substitution (done in a left-to-right fashion);
+word splitting;
+and filename expansion.
 
 On systems that can support it, there is an additional expansion
-available: @var{process substitution}.  This is performed at the
-same time as parameter, variable, and arithmetic expansion and
+available: @var{process substitution}.
+This is performed at the
+same time as tilde, parameter, variable, and arithmetic expansion and
 command substitution.
 
 Only brace expansion, word splitting, and filename expansion
@@ -3227,7 +3229,7 @@ The return status is zero unless @var{n} is not greater than or equal to 1.
 @item cd
 @btindex cd
 @example
-cd [-L|[-P [-e]]] [@var{directory}]
+cd [-L|[-P [-e]] [-@@] [@var{directory}]
 @end example
 
 Change the current working directory to @var{directory}.
@@ -3257,6 +3259,10 @@ If the @option{-e} option is supplied with @option{-P}
 and the current working directory cannot be successfully determined
 after a successful directory change, @code{cd} will return an unsuccessful
 status.
+
+On systems that support it, the @option{-@@} option presents the extended
+attributes associated with a file as a directory.              
+
 If @var{directory} is @samp{-}, it is converted to @env{$OLDPWD}
 before the directory change is attempted.
 

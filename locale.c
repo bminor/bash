@@ -138,10 +138,8 @@ set_default_locale_vars ()
     {
       FREE (default_domain);
       default_domain = savestring (val);
-#if 0
-      /* Don't want to override the shell's textdomain as the default */
-      textdomain (default_domain);
-#endif
+      if (default_dir && *default_dir)
+	bindtextdomain (default_domain, default_dir);
     }
 
   val = get_string_value ("TEXTDOMAINDIR");
@@ -169,10 +167,8 @@ set_locale_var (var, value)
     {
       FREE (default_domain);
       default_domain = value ? savestring (value) : (char *)NULL;
-#if 0
-      /* Don't want to override the shell's textdomain as the default */
-      textdomain (default_domain);
-#endif
+      if (default_dir && *default_dir)
+	bindtextdomain (default_domain, default_dir);
       return (1);
     }
   else if (var[0] == 'T')			/* TEXTDOMAINDIR */

@@ -53,6 +53,7 @@
 #include "findcmd.h"
 #include "pathexp.h"
 #include "shmbutil.h"
+#include "trap.h"
 
 #include "builtins/common.h"
 
@@ -120,6 +121,7 @@ static int bash_backward_kill_shellword __P((int, int));
 
 /* Helper functions for Readline. */
 static char *restore_tilde __P((char *, char *));
+static char *maybe_restore_tilde __P((char *, char *));
 
 static char *bash_filename_rewrite_hook __P((char *, int));
 
@@ -822,7 +824,7 @@ clear_hostname_list ()
 }
 
 /* Return a NULL terminated list of hostnames which begin with TEXT.
-   Initialize the hostname list the first time if neccessary.
+   Initialize the hostname list the first time if necessary.
    The array is malloc ()'ed, but not the individual strings. */
 static char **
 hostnames_matching (text)
@@ -1946,7 +1948,7 @@ globword:
 	    {
 	      if (*hint_text == '~' && directory_part)
 		{
-		  temp = restore_tilde (val, directory_part);
+		  temp = maybe_restore_tilde (val, directory_part);
 		  free (val);
 		  val = temp;
 		}
@@ -2042,7 +2044,7 @@ globword:
 	  /* If we performed tilde expansion, restore the original
 	     filename. */
 	  if (*hint_text == '~')
-	    temp = restore_tilde (val, directory_part);
+	    temp = maybe_restore_tilde (val, directory_part);
 	  else
 	    temp = savestring (val);
 	  freetemp = 1;
@@ -2897,6 +2899,20 @@ restore_tilde (val, directory_part)
 
   free (dh2);
   return (ret);
+}
+
+static char *
+maybe_restore_tilde (val, directory_part)
+     char *val, *directory_part;
+{
+  rl_icppfunc_t *save;
+  char *ret;
+
+  save = (dircomplete_expand == 0) ? save_directory_hook () : (rl_icppfunc_t *)0;
+  ret = restore_tilde (val, directory_part);
+  if (save)
+    restore_directory_hook (save);
+  return ret;
 }
 
 /* Simulate the expansions that will be performed by
@@ -4178,6 +4194,7 @@ bash_event_hook ()
 
   bashline_reset_event_hook ();
   check_signals_and_traps ();	/* XXX */
+  return 0;
 }
 
 #endif /* READLINE */

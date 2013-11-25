@@ -202,7 +202,7 @@ void remove_trailing_whitespace ();
 
 /* For each file mentioned on the command line, process it and
    write the information to STRUCTFILE and EXTERNFILE, while
-   creating the production file if neccessary. */
+   creating the production file if necessary. */
 int
 main (argc, argv)
      int argc;
@@ -399,7 +399,7 @@ copy_string_array (array)
   return (copy);
 }
 
-/* Add ELEMENT to ARRAY, growing the array if neccessary. */
+/* Add ELEMENT to ARRAY, growing the array if necessary. */
 void
 array_add (element, array)
      char *element;
@@ -1148,7 +1148,7 @@ char *structfile_footer[] = {
   (char *)NULL
 };
 
-/* Write out any neccessary opening information for
+/* Write out any necessary opening information for
    STRUCTFILE and EXTERNFILE. */
 void
 write_file_headers (structfile, externfile)
@@ -1263,7 +1263,7 @@ write_builtins (defs, structfile, externfile)
 		   long documentation strings. */
 		save_builtin (builtin);
 
-	      /* Write out the matching #endif, if neccessary. */
+	      /* Write out the matching #endif, if necessary. */
 	      if (builtin->dependencies)
 		{
 		  if (externfile)

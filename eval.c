@@ -95,7 +95,7 @@ reader_loop ()
 
 	  switch (code)
 	    {
-	      /* Some kind of throw to top_level has occured. */
+	      /* Some kind of throw to top_level has occurred. */
 	    case FORCE_EOF:
 	    case ERREXIT:
 	    case EXITPROG:

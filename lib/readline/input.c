@@ -529,7 +529,7 @@ rl_getc (stream)
 	 the read to be interrupted if we caught SIGHUP or SIGTERM (but
 	 not SIGINT; let the signal handler deal with that), but if the
 	 application sets an event hook, call it for other signals.
-	 Otherwise (not EINTR), some error ocurred, also signifying EOF. */
+	 Otherwise (not EINTR), some error occurred, also signifying EOF. */
       if (errno != EINTR)
 	return (RL_ISSTATE (RL_STATE_READCMD) ? READERR : EOF);
       else if (_rl_caught_signal == SIGHUP || _rl_caught_signal == SIGTERM)

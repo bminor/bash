@@ -45,7 +45,7 @@ struct tms
   };
 
 /* Store the CPU time used by this process and all its
-   dead descendents in BUFFER.
+   dead descendants in BUFFER.
    Return the elapsed real time from an arbitrary point in the
    past (the bash emulation uses the epoch), or (clock_t) -1 for
    errors.  All times are in CLK_TCKths of a second.  */

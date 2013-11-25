@@ -299,7 +299,7 @@ typedef struct arith_com {
 } ARITH_COM;
 #endif /* DPAREN_ARITHMETIC */
 
-/* The conditional command, [[...]].  This is a binary tree -- we slippped
+/* The conditional command, [[...]].  This is a binary tree -- we slipped
    a recursive-descent parser into the YACC grammar to parse it. */
 #define COND_AND	1
 #define COND_OR		2

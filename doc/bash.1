@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet@po.cwru.edu
 .\"
-.\"	Last Change: Mon Sep  2 12:21:48 EDT 2013
+.\"	Last Change: Sun Oct 20 22:13:29 EDT 2013
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2013 September 2" "GNU Bash 4.3"
+.TH BASH 1 "2013 October 20" "GNU Bash 4.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2373,7 +2373,7 @@ The value of \fIp\fP determines whether or not the fraction is
 included.
 .IP
 If this variable is not set, \fBbash\fP acts as if it had the
-value \fB$\(aq\enreal\et%3lR\enuser\et%3lU\ensys\ett%3lS\(aq\fP.
+value \fB$\(aq\enreal\et%3lR\enuser\et%3lU\ensys\et%3lS\(aq\fP.
 If the value is null, no timing information is displayed.
 A trailing newline is added when the format string is displayed.
 .PD 0
@@ -2595,14 +2595,18 @@ words.  There are seven kinds of expansion performed:
 and
 .IR "pathname expansion" .
 .PP
-The order of expansions is: brace expansion, tilde expansion,
-parameter, variable and arithmetic expansion and
-command substitution
-(done in a left-to-right fashion), word splitting, and pathname
-expansion.
+The order of expansions is:
+brace expansion;
+tilde expansion, parameter and variable expansion, arithmetic expansion,
+and command substitution (done in a left-to-right fashion);
+word splitting;
+and pathname expansion.
 .PP
 On systems that can support it, there is an additional expansion
 available: \fIprocess substitution\fP.
+This is performed at the
+same time as tilde, parameter, variable, and arithmetic expansion and
+command substitution.
 .PP
 Only brace expansion, word splitting, and pathname expansion
 can change the number of words of the expansion; other expansions
@@ -7022,7 +7026,7 @@ The return value is 0 unless the shell is not executing a subroutine
 call or \fIexpr\fP does not correspond to a valid position in the
 call stack.
 .TP
-\fBcd\fP [\fB\-L\fP|[\fB\-P\fP [\fB\-e\fP]]] [\fIdir\fP]
+\fBcd\fP [\fB\-L\fP|[\fB\-P\fP [\fB\-e\fP]] [\-@]] [\fIdir\fP]
 Change the current directory to \fIdir\fP.
 if \fIdir\fP is not supplied, the value of the
 .SM
@@ -7072,6 +7076,8 @@ option is supplied with
 and the current working directory cannot be successfully determined
 after a successful directory change, \fBcd\fP will return an unsuccessful
 status.
+On systems that support it, the \fB\-@\fP option presents the extended
+attributes associated with a file as a directory.
 An argument of
 .B \-
 is converted to

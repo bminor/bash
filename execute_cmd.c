@@ -284,7 +284,7 @@ int line_number_for_err_trap;
 
 /* A sort of function nesting level counter */
 int funcnest = 0;
-int funcnest_max = 0;		/* XXX - bash-4.2 */
+int funcnest_max = 0;		/* bash-4.2 */
 
 int lastpipe_opt = 0;
 
@@ -514,7 +514,7 @@ async_redirect_stdin ()
 
 #define DESCRIBE_PID(pid) do { if (interactive) describe_pid (pid); } while (0)
 
-/* Execute the command passed in COMMAND, perhaps doing it asynchrounously.
+/* Execute the command passed in COMMAND, perhaps doing it asynchronously.
    COMMAND is exactly what read_command () places into GLOBAL_COMMAND.
    ASYNCHROUNOUS, if non-zero, says to do this command in the background.
    PIPE_IN and PIPE_OUT are file descriptors saying where input comes
@@ -3953,8 +3953,9 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	  close_pipes (pipe_in, pipe_out);
 #if defined (PROCESS_SUBSTITUTION) && defined (HAVE_DEV_FD)
 	  /* Close /dev/fd file descriptors in the parent after forking the
-	     last child in a (possibly one-element) pipeline. */
-	  if (pipe_out == NO_PIPE)		/* XXX */
+	     last child in a (possibly one-element) pipeline.  Defer this
+	     until any running shell function completes. */
+	  if (pipe_out == NO_PIPE && variable_context == 0)	/* XXX */
 	    unlink_fifo_list ();		/* XXX */
 #endif
 	  command_line = (char *)NULL;      /* don't free this. */
@@ -4054,7 +4055,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
       goto return_result;
     }
 
-  /* One other possiblilty.  The user may want to resume an existing job.
+  /* One other possibililty.  The user may want to resume an existing job.
      If they do, find out whether this word is a candidate for a running
      job. */
   if (job_control && already_forked == 0 && async == 0 &&
