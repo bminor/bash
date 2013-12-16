@@ -7,8 +7,9 @@ the place to look for complete descriptions.
 a.  The `helptopic' completion action now maps to all the help topics, not just
     the shell builtins.
 
-b.  The `help' builtin no longer does prefix substring matching, so `help read'
-    does not match `readonly'.
+b.  The `help' builtin no longer does prefix substring matching first, so
+    `help read' does not match `readonly', but will do it if exact string
+    matching fails.
 
 c.  The shell can be compiled to not display a message about processes that
     terminate due to SIGTERM.
@@ -110,13 +111,13 @@ gg. The brace expansion code now treats a failed sequence expansion as a
 
 hh. Shells started to run process substitutions now run any trap set on EXIT.
 
-ii. The help builtin now attempts substring matching (as it did through
-    bash-4.2) if exact string matching fails.
+ii. The fc builtin now interprets -0 as the current command line.
 
-jj. The fc builtin now interprets -0 as the current command line.
-
-kk. Completing directory names containing shell variables now adds a trailing
+jj. Completing directory names containing shell variables now adds a trailing
     slash if the expanded result is a directory.
+
+kk. `cd' has a new `-@' option to browse a file's extended attributes on
+   systems that support O_XATTR.
 
 2.  New Features in Readline
 

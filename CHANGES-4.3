@@ -1,3 +1,37 @@
+This document details the changes between this version, bash-4.3-rc1, and the
+previous version, bash-4.3-beta2.
+
+1.  Changes to Bash
+
+a. Fixed a bug in bash completion that caused a tilde to be expanded even if
+   the `direxpand' option was not enabled.
+
+b. Fixed a potential bug that could cause corrupted input in interactive shells
+   running without line editing and with `ignoreeof' enabled.
+
+c. Fixed a bug that could cause failures when opening pipes back to shells
+   created to run process substitutions.
+
+d. Fixed a bug that caused an assignment to TEXTDOMAIN to require TEXTDOMAINDIR
+   to be set in order to actually change the current text domain.
+
+e. Changed the way redirections are printed to avoid confusion when the target
+   of an output redirection is a process substitution beginning with `>'.
+
+2.  Changes to Readline
+
+a. Shared library building is now supported on Mac OS X 10.9 (Darwin 13).
+
+3.  New Features in Bash
+
+a. `cd' has a new `-@' option to browse a file's extended attributes on
+   systems that support O_XATTR.
+
+4.  New Features in Readline
+
+a. There are additional default key bindings for MinGW32
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-4.3-beta2, and the
 previous version, bash-4.3-beta.
 
@@ -696,4 +730,3 @@ l.  Readline calls an application-set event hook (rl_signal_event_hook) after
 
 m.  If the user-settable variable `history-size' is set to a value less than
     0, the history list size is unlimited.
-

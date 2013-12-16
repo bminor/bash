@@ -1263,8 +1263,6 @@ bind_printf_variable (name, value, flags)
   v = bind_variable (name, value, flags);
 #endif /* !ARRAY_VARS */
 
-  if (v && readonly_p (v) == 0 && noassign_p (v) == 0)
-    VUNSETATTR (v, att_invisible);
-
+  VUNSETATTR (v, att_invisible);
   return v;
 }

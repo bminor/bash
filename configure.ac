@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.3, version 4.060])dnl
+AC_REVISION([for Bash 4.3, version 4.061])dnl
 
 define(bashvers, 4.3)
 define(relstatus, rc1)
@@ -91,6 +91,7 @@ sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
 *-cygwin*)	opt_bash_malloc=no ;;	# Cygnus's CYGWIN environment
 *-opennt*|*-interix*)	opt_bash_malloc=no ;;	# Interix, now owned by Microsoft
 *-nsk*)		opt_bash_malloc=no ;;	# HP NonStop
+*-haiku*)	opt_bash_malloc=no ;;	# Haiku OS
 esac
 
 # memory scrambling on free()
