@@ -889,9 +889,7 @@ delete_old_job (pid)
 	delete_job (job, DEL_NOBGPID);
       else
 	{
-#ifdef DEBUG
 	  internal_warning (_("forked pid %d appears in running job %d"), pid, job+1);
-#endif
 	  if (p)
 	    p->pid = 0;
 	}
