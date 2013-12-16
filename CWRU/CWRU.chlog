@@ -5360,3 +5360,22 @@ builtins/cd.def
 	- change_to_directory: if we have specified -@ and cdxattr returns
 	  failure, fail immediately.  Fixes bug reported by Joshuah Hurst
 	  <joshhurst@gmail.com>
+
+				   11/12
+				   -----
+redir.c
+	- print_redirection: change r_err_and_out (&>) and its append form,
+	  r_append_err_and_out (&>>) cases to separate redirection operator
+	  from filename by a space, in case we have a process substitution.
+	  Fixes bug reported by admn ombres <admn.ombres@gmail.com>
+
+				   11/15
+				   -----
+execute_cmd.c
+	- execute_simple_command: don't close process substitution fds until
+	  we are finished executing any current shell function.  Partial fix
+	  for bug reported by John Dawson <john.dawson@gmail.com>
+
+support/shobj-conf
+	- add support for Darwin 13 (Mac OS X 10.9, Mavericks).  Based on a
+	  report by Ludwig Schwardt <ludwig.schwardt@gmail.com>
