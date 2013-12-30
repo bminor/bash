@@ -1305,20 +1305,18 @@ Implementation differences:
 
 C3)  Which new features in ksh-93 are not in bash, and which are?
 
-This list is current through ksh93v (10/08/2013)
+This list is current through ksh93t+ (05/05/2009)
 
-New things in ksh-93 not in bash-4.3:
-	floating point arithmetic, variables, and constants
-	math library functions, including user-defined math functions
+New things in ksh-93 not in bash-4.2:
+	floating point arithmetic and variables
+	math library functions
 	${!name[sub]} name of subscript for associative array
 	`.' is allowed in variable names to create a hierarchical namespace
 	more extensive compound assignment syntax
 	discipline functions
 	KEYBD trap
 	variables: .sh.edchar, .sh.edmode, .sh.edcol, .sh.edtext, .sh.version,
-		   .sh.name, .sh.subscript, .sh.value, .sh.match, HISTEDIT,
-		   .sh.sig, .sh.stats, .sh.siginfo, .sh.pwdfd, .sh.op_astbin,
-		   .sh.pool
+		   .sh.name, .sh.subscript, .sh.value, .sh.match, HISTEDIT
 	backreferences in pattern matching (\N)
 	`&' operator in pattern lists for matching (match all instead of any)
 	exit statuses between 0 and 255
@@ -1327,20 +1325,16 @@ New things in ksh-93 not in bash-4.3:
 	no scoping for local variables in `POSIX' functions
 	$''  \C[.collating-element.] escape sequence
 	-C/-I invocation options
-	print -f (bash uses printf) and rest of print builtin options
-	printf %(type)q, %#q
+	print -f (bash uses printf)
 	`fc' has been renamed to `hist'
 	`.' can execute shell functions
 	getopts -a
 	printf %B, %H, %P, %R, %Z modifiers, output base for %d, `=' flag
-	read -n/-N differ/-v/-S
+	read -n/-N differ/-v
 	set -o showme/-o multiline (bash default)
-	set -K
-	kill -Q/-q/-L
-	trap -a
 	`sleep' and `getconf' builtins (bash has loadable versions)
 	[[ -R name ]] (checks whether or not name is a nameref)
-	typeset -C/-S/-T/-X/-h/-s/-c/-M
+	typeset -C/-S/-T/-X/-h/-s
 	experimental `type' definitions (a la typedef) using typeset
 	array expansions ${array[sub1..sub2]} and ${!array[sub1..sub2]}
 	associative array assignments using `;' as element separator
@@ -1348,12 +1342,8 @@ New things in ksh-93 not in bash-4.3:
 	new '${ ' form of command substitution, executed in current shell
 	new >;/<>;/<#pat/<##pat/<#/># redirections
 	brace expansion printf-like formats 
-	CHLD trap triggered by SIGSTOP and SIGCONT
-	~{fd} expansion, which replaces fd with the corresponding path name
-	$"string" expanded when referenced rather than when first parsed
-	job "pools", which allow a collection of jobs to be managed as a unit
 
-New things in ksh-93 present in bash-4.3:
+New things in ksh-93 present in bash-4.2:
 	associative arrays
 	[n]<&word- and [n]>&word- redirections (combination dup and close)
         for (( expr1; expr2; expr3 )) ; do list; done - arithmetic for command
@@ -1393,7 +1383,6 @@ New things in ksh-93 present in bash-4.3:
 	DEBUG can force skipping following command
 	[[ -v var ]] operator (checks whether or not var is set)
 	typeset -n and `nameref' variables
-	process substitutions work without /dev/fd
 
 Section D:  Why does bash do some things differently than other Unix shells?
 
@@ -2235,7 +2224,7 @@ before `eval' is executed.  In versions of bash later than bash-2.0,
 does the same thing.
 
 This is not the same thing as ksh93 `nameref' variables, though the syntax
-is similar.  Namerefs are available bash version 4.3, and work as in ksh93.
+is similar.  I may add namerefs in a future bash version.
 
 G4) How can I make the bash `time' reserved word print timing output that
      looks like the output from my system's /usr/bin/time?
@@ -2395,15 +2384,16 @@ a module system like zsh's, using dynamic loading like builtins
 a bash programmer's guide with a chapter on creating loadable builtins
 a better loadable interface to perl with access to the shell builtins and
 	variables (contributions gratefully accepted)
+ksh93-like `nameref' variables
 ksh93-like `xx.yy' variables (including some of the .sh.* variables) and
 	associated disipline functions
 Some of the new ksh93 pattern matching operators, like backreferencing
 
 H5) When will the next release appear?
 
-The next version will appear sometime in 2015.  Never make predictions. 
+The next version will appear sometime in 2010.  Never make predictions. 
 
-This document is Copyright 1995-2014 by Chester Ramey.
+This document is Copyright 1995-2010 by Chester Ramey.
 
 Permission is hereby granted, without written agreement and
 without license or royalty fees, to use, copy, and distribute

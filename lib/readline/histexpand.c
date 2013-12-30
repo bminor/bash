@@ -272,6 +272,8 @@ get_history_event (string, caller_index, delimiting_quote)
       if (local_index == 0 || substring_okay)
 	{
 	  entry = current_history ();
+	  if (entry == 0)
+	    FAIL_SEARCH ();
 	  history_offset = history_length;
 	
 	  /* If this was a substring search, then remember the
