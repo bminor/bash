@@ -111,6 +111,10 @@ extern int parser_in_command_position __P((void));
 
 extern void free_pushed_string_input __P((void));
 
+extern int parser_expanding_alias __P((void));
+extern void parser_save_alias __P((void));
+extern void parser_restore_alias __P((void));
+
 extern char *decode_prompt_string __P((char *));
 
 extern int get_current_prompt_level __P((void));

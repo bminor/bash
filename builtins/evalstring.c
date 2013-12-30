@@ -159,6 +159,9 @@ parse_prologue (string, flags, tag)
     }
 
   add_unwind_protect (pop_stream, (char *)NULL);
+  if (parser_expanding_alias ())
+    add_unwind_protect (parser_restore_alias, (char *)NULL);
+
   if (orig_string && ((flags & SEVAL_NOFREE) == 0))
     add_unwind_protect (xfree, orig_string);
   end_unwind_frame ();
@@ -211,6 +214,10 @@ parse_and_execute (string, from_file, flags)
      before executing the next command (resetting the line number sets it to
      0; the first line number is 1). */
   push_stream (lreset);
+  if (parser_expanding_alias ())
+    /* push current shell_input_line */
+    parser_save_alias ();
+  
   if (lreset == 0)
     line_number--;
     
@@ -432,7 +439,10 @@ parse_string (string, from_file, flags, endp)
      before executing the next command (resetting the line number sets it to
      0; the first line number is 1). */
   push_stream (0);
-    
+  if (parser_expanding_alias ())
+    /* push current shell_input_line */
+    parser_save_alias ();
+
   code = should_jump_to_top_level = 0;
   oglobal = global_command;
   ostring = string;

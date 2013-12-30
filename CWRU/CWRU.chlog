@@ -5443,3 +5443,59 @@ execute_cmd.c
 	- execute_command_internal: make sure last_command_exit_value is set
 	  to 0 after any command executed in the background.  Fixes bug
 	  reported by Martin Kealey <martin@kurahaupo.gen.nz>
+
+				   12/17
+				   -----
+support/config.{guess,sub}
+	- updated to latest versions from git
+
+				   12/19
+				   -----
+parse.y
+	- struct STRING_SAVER: now has a new `flags' element, to identify the
+	  caller: alias expansion, double-paren parsing, or parse_and_execute
+	- push_string: now sets flags to PSH_ALIAS if `ap' argument is non-NULL
+	- push_string: now doesn't attempt to call strlen on a NULL string to
+	  set shell_input_line_size
+	- parser_expanding_alias, parser_save_alias, parser_restore_alias: new
+	  functions to provide an external interface to push_string and
+	  pop_string; parser_save_alias sets flags element to PSH_SOURCE (could
+	  be renamed PSH_EXTERN someday)
+	- shell_getc: when yy_getc returns '\0', instead of just testing
+	  whether the pushed_string_list is not-empty before popping it, don't
+	  pop if if the saved string has flags PSH_SOURCE, indicating that
+	  parse_and_execute set it before setting bash_input to the string.
+	  We should continue reading to the end of that string before popping
+	  back to a potential alias. Partial solution for the problem of aliases
+	  with embedded newlines containing `.' commands being executed out of
+	  order reported by Andrew Martin <andrew.martin@gmail.com>
+	- shell_getc: when yy_getc returns '\0' and there is a saved string of
+	  type PSH_SOURCE, restart the read without popping the string stack
+	  if we have not read to the end of bash_input.location.string.  Rest
+	  of fix for out-of-order execution problem
+
+externs.h
+	- parser_expanding_alias, parser_save_alias, parser_restore_alias: new
+	  extern function declarations
+
+builtins/evalstring.c
+	- pe_prologue: if the parser is expanding an alias, make sure to add
+	  an unwind-protect to restore the alias; undoes the work that will be
+	  performed by parse_and_execute/parse_string
+	- parse_and_execute,parse_string: after calling push_stream to save
+	  bash_input, check whether or not the parser is currently expanding
+	  an alias (parser_expanding_alias() != 0). If it is, we want to save
+	  that string in the pushed_string_list, which we do with
+	  parser_save_alias.
+
+				   12/23
+				   -----
+execute_cmd.c
+	- execute_for_command: make sure to set line_number before expanding
+	  the word list, so expansion errors have the right line number.
+	  From a report from Ben Okopnik <ben@okopnik.com>
+
+expr.c
+	- exp2: save token pointer before calling readtok(), arrange to use
+	  saved token pointer when printing error token on a division by 0
+	  error
