@@ -5499,3 +5499,29 @@ expr.c
 	- exp2: save token pointer before calling readtok(), arrange to use
 	  saved token pointer when printing error token on a division by 0
 	  error
+
+				   12/27
+				   -----
+lib/readline/display.c
+	- rl_redisplay: when calculating effects of invisible characters in a
+	  prompt that is split across physical screen lines to set the indices
+	  of linebreaks, don't bother testing local_prompt_prefix (line 751).
+	  That prefix doesn't matter when calculating prompt visible and
+	  invisible characters.  Fixes problem reported by Jinesh Choksi
+	  <jinesh@onelittlehope.com>
+
+Makefile.in
+	- install: make sure to use $(DESTDIR) when installing OTHER_DOCS.
+	  Report and fix from Matthias Klose <doko@debian.org>
+
+doc/texinfo.tex
+	- updated to version of 2013-09-11
+
+				   12/28
+				   -----
+lib/readline/undo.c
+	- rl_do_undo: if we are undoing from a history entry (rl_undo_list ==
+	  current_history()->data), make sure the change to rl_line_buffer is
+	  reflected in the history entry. We use the guts of
+	  rl_maybe_replace_line to do the work.  Fixes problem reported by
+	  gregrwm <backuppc-users@whitleymott.net>

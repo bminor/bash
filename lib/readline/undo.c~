@@ -231,20 +231,19 @@ rl_do_undo ()
       _rl_doing_an_undo = 0;
       RL_UNSETSTATE(RL_STATE_UNDOING);
 
-      release = rl_undo_list;
-      rl_undo_list = rl_undo_list->next;
-
       /* If we are editing a history entry, make sure the change is replicated
 	 in the history entry's line */
       cur = current_history ();
-      if ((UNDO_LIST *)cur->data == release)
+      if ((UNDO_LIST *)cur->data == rl_undo_list)
 	{
-	  temp = replace_history_entry (where_history (), rl_line_buffer, (histdata_t)rl_undo_list);
+	  temp = replace_history_entry (where_history (), rl_line_buffer, (histdata_t)rl_undo_list->next);
 	  xfree (temp->line);
 	  FREE (temp->timestamp);
 	  xfree (temp);
 	}
 
+      release = rl_undo_list;
+      rl_undo_list = rl_undo_list->next;
       replace_history_data (-1, (histdata_t *)release, (histdata_t *)rl_undo_list);
 
       xfree (release);

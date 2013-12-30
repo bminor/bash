@@ -5,17 +5,17 @@
 \entry {arithmetic, shell}{87}
 \entry {arrays}{89}
 \initial {B}
-\entry {background}{98}
-\entry {Bash configuration}{139}
-\entry {Bash installation}{139}
+\entry {background}{97}
+\entry {Bash configuration}{138}
+\entry {Bash installation}{138}
 \entry {Bourne shell}{5}
 \entry {brace expansion}{21}
 \entry {builtin}{3}
 \initial {C}
-\entry {command editing}{103}
+\entry {command editing}{102}
 \entry {command execution}{36}
 \entry {command expansion}{35}
-\entry {command history}{134}
+\entry {command history}{133}
 \entry {command search}{36}
 \entry {command substitution}{28}
 \entry {command timing}{8}
@@ -28,17 +28,17 @@
 \entry {commands, shell}{8}
 \entry {commands, simple}{8}
 \entry {comments, shell}{7}
-\entry {completion builtins}{127}
-\entry {configuration}{139}
+\entry {completion builtins}{126}
+\entry {configuration}{138}
 \entry {control operator}{3}
 \entry {coprocess}{15}
 \initial {D}
-\entry {directory stack}{91}
+\entry {directory stack}{90}
 \initial {E}
-\entry {editing command lines}{103}
+\entry {editing command lines}{102}
 \entry {environment}{37}
 \entry {evaluation, arithmetic}{87}
-\entry {event designators}{137}
+\entry {event designators}{135}
 \entry {execution environment}{36}
 \entry {exit status}{3, 38}
 \entry {expansion}{21}
@@ -54,37 +54,37 @@
 \entry {field}{3}
 \entry {filename}{3}
 \entry {filename expansion}{29}
-\entry {foreground}{98}
+\entry {foreground}{97}
 \entry {functions, shell}{17}
 \initial {H}
-\entry {history builtins}{134}
-\entry {history events}{137}
-\entry {history expansion}{136}
-\entry {history list}{134}
-\entry {History, how to use}{133}
+\entry {history builtins}{133}
+\entry {history events}{135}
+\entry {history expansion}{135}
+\entry {history list}{133}
+\entry {History, how to use}{132}
 \initial {I}
 \entry {identifier}{3}
-\entry {initialization file, readline}{105}
-\entry {installation}{139}
-\entry {interaction, readline}{102}
-\entry {interactive shell}{82, 83}
+\entry {initialization file, readline}{104}
+\entry {installation}{138}
+\entry {interaction, readline}{101}
+\entry {interactive shell}{81, 83}
 \entry {internationalization}{7}
 \initial {J}
 \entry {job}{3}
-\entry {job control}{3, 98}
+\entry {job control}{3, 97}
 \initial {K}
-\entry {kill ring}{104}
-\entry {killing text}{104}
+\entry {kill ring}{103}
+\entry {killing text}{103}
 \initial {L}
 \entry {localization}{7}
-\entry {login shell}{82}
+\entry {login shell}{81}
 \initial {M}
 \entry {matching, pattern}{30}
 \entry {metacharacter}{3}
 \initial {N}
 \entry {name}{3}
 \entry {native languages}{7}
-\entry {notation, readline}{103}
+\entry {notation, readline}{102}
 \initial {O}
 \entry {operator, shell}{3}
 \initial {P}
@@ -100,13 +100,13 @@
 \entry {process group}{3}
 \entry {process group ID}{3}
 \entry {process substitution}{29}
-\entry {programmable completion}{125}
+\entry {programmable completion}{124}
 \entry {prompting}{92}
 \initial {Q}
 \entry {quoting}{6}
 \entry {quoting, ANSI}{6}
 \initial {R}
-\entry {Readline, how to use}{101}
+\entry {Readline, how to use}{100}
 \entry {redirection}{31}
 \entry {reserved word}{3}
 \entry {restricted shell}{93}
@@ -121,16 +121,16 @@
 \entry {signal handling}{38}
 \entry {special builtin}{4, 68}
 \entry {startup files}{82}
-\entry {suspending jobs}{98}
+\entry {suspending jobs}{97}
 \initial {T}
 \entry {tilde expansion}{22}
 \entry {token}{4}
 \entry {translation, native languages}{7}
 \initial {V}
 \entry {variable, shell}{18}
-\entry {variables, readline}{106}
+\entry {variables, readline}{105}
 \initial {W}
 \entry {word}{4}
 \entry {word splitting}{29}
 \initial {Y}
-\entry {yanking text}{104}
+\entry {yanking text}{103}

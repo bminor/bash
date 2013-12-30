@@ -1350,64 +1350,66 @@ The shell treats several parameters specially.  These parameters may
 only be referenced; assignment to them is not allowed.
 
 `*'
-     Expands to the positional parameters, starting from one.  When the
-     expansion occurs within double quotes, it expands to a single word
-     with the value of each parameter separated by the first character
-     of the `IFS' special variable.  That is, `"$*"' is equivalent to
-     `"$1C$2C..."', where C is the first character of the value of the
-     `IFS' variable.  If `IFS' is unset, the parameters are separated
-     by spaces.  If `IFS' is null, the parameters are joined without
-     intervening separators.
+     ($*) Expands to the positional parameters, starting from one.
+     When the expansion occurs within double quotes, it expands to a
+     single word with the value of each parameter separated by the
+     first character of the `IFS' special variable.  That is, `"$*"' is
+     equivalent to `"$1C$2C..."', where C is the first character of the
+     value of the `IFS' variable.  If `IFS' is unset, the parameters
+     are separated by spaces.  If `IFS' is null, the parameters are
+     joined without intervening separators.
 
 `@'
-     Expands to the positional parameters, starting from one.  When the
-     expansion occurs within double quotes, each parameter expands to a
-     separate word.  That is, `"$@"' is equivalent to `"$1" "$2" ...'.
-     If the double-quoted expansion occurs within a word, the expansion
-     of the first parameter is joined with the beginning part of the
-     original word, and the expansion of the last parameter is joined
-     with the last part of the original word.  When there are no
-     positional parameters, `"$@"' and `$@' expand to nothing (i.e.,
-     they are removed).
+     ($@) Expands to the positional parameters, starting from one.
+     When the expansion occurs within double quotes, each parameter
+     expands to a separate word.  That is, `"$@"' is equivalent to
+     `"$1" "$2" ...'.  If the double-quoted expansion occurs within a
+     word, the expansion of the first parameter is joined with the
+     beginning part of the original word, and the expansion of the last
+     parameter is joined with the last part of the original word.  When
+     there are no positional parameters, `"$@"' and `$@' expand to
+     nothing (i.e., they are removed).
 
 `#'
-     Expands to the number of positional parameters in decimal.
+     ($#) Expands to the number of positional parameters in decimal.
 
 `?'
-     Expands to the exit status of the most recently executed foreground
-     pipeline.
+     ($?) Expands to the exit status of the most recently executed
+     foreground pipeline.
 
 `-'
-     (A hyphen.)  Expands to the current option flags as specified upon
-     invocation, by the `set' builtin command, or those set by the
+     ($-, a hyphen.)  Expands to the current option flags as specified
+     upon invocation, by the `set' builtin command, or those set by the
      shell itself (such as the `-i' option).
 
 `$'
-     Expands to the process ID of the shell.  In a `()' subshell, it
-     expands to the process ID of the invoking shell, not the subshell.
+     ($$) Expands to the process ID of the shell.  In a `()' subshell,
+     it expands to the process ID of the invoking shell, not the
+     subshell.
 
 `!'
-     Expands to the process ID of the job most recently placed into the
-     background, whether executed as an asynchronous command or using
-     the `bg' builtin (*note Job Control Builtins::).
+     ($!) Expands to the process ID of the job most recently placed
+     into the background, whether executed as an asynchronous command
+     or using the `bg' builtin (*note Job Control Builtins::).
 
 `0'
-     Expands to the name of the shell or shell script.  This is set at
-     shell initialization.  If Bash is invoked with a file of commands
-     (*note Shell Scripts::), `$0' is set to the name of that file.  If
-     Bash is started with the `-c' option (*note Invoking Bash::), then
-     `$0' is set to the first argument after the string to be executed,
-     if one is present.  Otherwise, it is set to the filename used to
-     invoke Bash, as given by argument zero.
+     ($0) Expands to the name of the shell or shell script.  This is
+     set at shell initialization.  If Bash is invoked with a file of
+     commands (*note Shell Scripts::), `$0' is set to the name of that
+     file.  If Bash is started with the `-c' option (*note Invoking
+     Bash::), then `$0' is set to the first argument after the string
+     to be executed, if one is present.  Otherwise, it is set to the
+     filename used to invoke Bash, as given by argument zero.
 
 `_'
-     (An underscore.)  At shell startup, set to the absolute pathname
-     used to invoke the shell or shell script being executed as passed
-     in the environment or argument list.  Subsequently, expands to the
-     last argument to the previous command, after expansion.  Also set
-     to the full pathname used to invoke each command executed and
-     placed in the environment exported to that command.  When checking
-     mail, this parameter holds the name of the mail file.
+     ($_, an underscore.)  At shell startup, set to the absolute
+     pathname used to invoke the shell or shell script being executed
+     as passed in the environment or argument list.  Subsequently,
+     expands to the last argument to the previous command, after
+     expansion.  Also set to the full pathname used to invoke each
+     command executed and placed in the environment exported to that
+     command.  When checking mail, this parameter holds the name of the
+     mail file.
 
 
 File: bashref.info,  Node: Shell Expansions,  Next: Redirections,  Prev: Shell Parameters,  Up: Basic Shell Features
@@ -10680,15 +10682,24 @@ D.3 Parameter and Variable Index
  [index ]
 * Menu:
 
-* !:                                     Special Parameters.  (line  46)
+* !:                                     Special Parameters.  (line  47)
 * #:                                     Special Parameters.  (line  30)
 * $:                                     Special Parameters.  (line  42)
+* $!:                                    Special Parameters.  (line  48)
+* $#:                                    Special Parameters.  (line  31)
+* $$:                                    Special Parameters.  (line  43)
+* $*:                                    Special Parameters.  (line  10)
+* $-:                                    Special Parameters.  (line  38)
+* $0:                                    Special Parameters.  (line  53)
+* $?:                                    Special Parameters.  (line  34)
+* $@:                                    Special Parameters.  (line  20)
+* $_:                                    Special Parameters.  (line  62)
 * *:                                     Special Parameters.  (line   9)
 * -:                                     Special Parameters.  (line  37)
-* 0:                                     Special Parameters.  (line  51)
+* 0:                                     Special Parameters.  (line  52)
 * ?:                                     Special Parameters.  (line  33)
 * @:                                     Special Parameters.  (line  19)
-* _:                                     Special Parameters.  (line  60)
+* _:                                     Special Parameters.  (line  61)
 * auto_resume:                           Job Control Variables.
                                                               (line   6)
 * BASH:                                  Bash Variables.      (line  13)
@@ -11167,105 +11178,105 @@ Node: Shell Functions46875
 Node: Shell Parameters51959
 Node: Positional Parameters56088
 Node: Special Parameters56988
-Node: Shell Expansions60047
-Node: Brace Expansion61990
-Node: Tilde Expansion64771
-Node: Shell Parameter Expansion67120
-Node: Command Substitution79414
-Node: Arithmetic Expansion80747
-Node: Process Substitution81679
-Node: Word Splitting82729
-Node: Filename Expansion84377
-Node: Pattern Matching86542
-Node: Quote Removal90242
-Node: Redirections90537
-Node: Executing Commands99701
-Node: Simple Command Expansion100371
-Node: Command Search and Execution102301
-Node: Command Execution Environment104638
-Node: Environment107624
-Node: Exit Status109283
-Node: Signals110905
-Node: Shell Scripts112873
-Node: Shell Builtin Commands115391
-Node: Bourne Shell Builtins117419
-Node: Bash Builtins137326
-Node: Modifying Shell Behavior164779
-Node: The Set Builtin165124
-Node: The Shopt Builtin175450
-Node: Special Builtins189871
-Node: Shell Variables190850
-Node: Bourne Shell Variables191290
-Node: Bash Variables193321
-Node: Bash Features220196
-Node: Invoking Bash221095
-Node: Bash Startup Files226873
-Node: Interactive Shells231902
-Node: What is an Interactive Shell?232312
-Node: Is this Shell Interactive?232961
-Node: Interactive Shell Behavior233776
-Node: Bash Conditional Expressions237064
-Node: Shell Arithmetic241066
-Node: Aliases243842
-Node: Arrays246398
-Node: The Directory Stack251379
-Node: Directory Stack Builtins252098
-Node: Controlling the Prompt255054
-Node: The Restricted Shell257826
-Node: Bash POSIX Mode259663
-Node: Job Control269050
-Node: Job Control Basics269510
-Node: Job Control Builtins274229
-Node: Job Control Variables278700
-Node: Command Line Editing279858
-Node: Introduction and Notation281530
-Node: Readline Interaction283152
-Node: Readline Bare Essentials284343
-Node: Readline Movement Commands286132
-Node: Readline Killing Commands287097
-Node: Readline Arguments289017
-Node: Searching290061
-Node: Readline Init File292247
-Node: Readline Init File Syntax293394
-Node: Conditional Init Constructs310231
-Node: Sample Init File312764
-Node: Bindable Readline Commands315882
-Node: Commands For Moving317089
-Node: Commands For History318233
-Node: Commands For Text322418
-Node: Commands For Killing325091
-Node: Numeric Arguments327548
-Node: Commands For Completion328687
-Node: Keyboard Macros332879
-Node: Miscellaneous Commands333567
-Node: Readline vi Mode339373
-Node: Programmable Completion340280
-Node: Programmable Completion Builtins347556
-Node: A Programmable Completion Example357302
-Node: Using History Interactively362552
-Node: Bash History Facilities363236
-Node: Bash History Builtins366235
-Node: History Interaction370163
-Node: Event Designators372868
-Node: Word Designators374090
-Node: Modifiers375729
-Node: Installing Bash377133
-Node: Basic Installation378270
-Node: Compilers and Options380962
-Node: Compiling For Multiple Architectures381703
-Node: Installation Names383367
-Node: Specifying the System Type384185
-Node: Sharing Defaults384901
-Node: Operation Controls385574
-Node: Optional Features386532
-Node: Reporting Bugs396596
-Node: Major Differences From The Bourne Shell397794
-Node: GNU Free Documentation License414653
-Node: Indexes439849
-Node: Builtin Index440303
-Node: Reserved Word Index447130
-Node: Variable Index449578
-Node: Function Index463101
-Node: Concept Index470329
+Node: Shell Expansions60099
+Node: Brace Expansion62042
+Node: Tilde Expansion64823
+Node: Shell Parameter Expansion67172
+Node: Command Substitution79466
+Node: Arithmetic Expansion80799
+Node: Process Substitution81731
+Node: Word Splitting82781
+Node: Filename Expansion84429
+Node: Pattern Matching86594
+Node: Quote Removal90294
+Node: Redirections90589
+Node: Executing Commands99753
+Node: Simple Command Expansion100423
+Node: Command Search and Execution102353
+Node: Command Execution Environment104690
+Node: Environment107676
+Node: Exit Status109335
+Node: Signals110957
+Node: Shell Scripts112925
+Node: Shell Builtin Commands115443
+Node: Bourne Shell Builtins117471
+Node: Bash Builtins137378
+Node: Modifying Shell Behavior164831
+Node: The Set Builtin165176
+Node: The Shopt Builtin175502
+Node: Special Builtins189923
+Node: Shell Variables190902
+Node: Bourne Shell Variables191342
+Node: Bash Variables193373
+Node: Bash Features220248
+Node: Invoking Bash221147
+Node: Bash Startup Files226925
+Node: Interactive Shells231954
+Node: What is an Interactive Shell?232364
+Node: Is this Shell Interactive?233013
+Node: Interactive Shell Behavior233828
+Node: Bash Conditional Expressions237116
+Node: Shell Arithmetic241118
+Node: Aliases243894
+Node: Arrays246450
+Node: The Directory Stack251431
+Node: Directory Stack Builtins252150
+Node: Controlling the Prompt255106
+Node: The Restricted Shell257878
+Node: Bash POSIX Mode259715
+Node: Job Control269102
+Node: Job Control Basics269562
+Node: Job Control Builtins274281
+Node: Job Control Variables278752
+Node: Command Line Editing279910
+Node: Introduction and Notation281582
+Node: Readline Interaction283204
+Node: Readline Bare Essentials284395
+Node: Readline Movement Commands286184
+Node: Readline Killing Commands287149
+Node: Readline Arguments289069
+Node: Searching290113
+Node: Readline Init File292299
+Node: Readline Init File Syntax293446
+Node: Conditional Init Constructs310283
+Node: Sample Init File312816
+Node: Bindable Readline Commands315934
+Node: Commands For Moving317141
+Node: Commands For History318285
+Node: Commands For Text322470
+Node: Commands For Killing325143
+Node: Numeric Arguments327600
+Node: Commands For Completion328739
+Node: Keyboard Macros332931
+Node: Miscellaneous Commands333619
+Node: Readline vi Mode339425
+Node: Programmable Completion340332
+Node: Programmable Completion Builtins347608
+Node: A Programmable Completion Example357354
+Node: Using History Interactively362604
+Node: Bash History Facilities363288
+Node: Bash History Builtins366287
+Node: History Interaction370215
+Node: Event Designators372920
+Node: Word Designators374142
+Node: Modifiers375781
+Node: Installing Bash377185
+Node: Basic Installation378322
+Node: Compilers and Options381014
+Node: Compiling For Multiple Architectures381755
+Node: Installation Names383419
+Node: Specifying the System Type384237
+Node: Sharing Defaults384953
+Node: Operation Controls385626
+Node: Optional Features386584
+Node: Reporting Bugs396648
+Node: Major Differences From The Bourne Shell397846
+Node: GNU Free Documentation License414705
+Node: Indexes439901
+Node: Builtin Index440355
+Node: Reserved Word Index447182
+Node: Variable Index449630
+Node: Function Index463810
+Node: Concept Index471038
 
 End Tag Table

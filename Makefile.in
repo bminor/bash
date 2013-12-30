@@ -1,4 +1,4 @@
-# Makefile for bash-4.3, version 4.10
+# Makefile for bash-4.3, version 4.11
 #
 # Copyright (C) 1996-2012 Free Software Foundation, Inc.
 
@@ -766,7 +766,7 @@ installdirs:
 install:	.made installdirs
 	$(INSTALL_PROGRAM) $(INSTALLMODE) $(Program) $(DESTDIR)$(bindir)/$(Program)
 	$(INSTALL_SCRIPT) $(INSTALLMODE2) bashbug $(DESTDIR)$(bindir)/bashbug
-	$(INSTALL_DATA) $(OTHER_DOCS) $(docdir)
+	$(INSTALL_DATA) $(OTHER_DOCS) $(DESTDIR)$(docdir)
 	-( cd $(DOCDIR) ; $(MAKE) $(MFLAGS) \
 		man1dir=$(man1dir) man1ext=$(man1ext) \
 		man3dir=$(man3dir) man3ext=$(man3ext) \

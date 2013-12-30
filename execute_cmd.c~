@@ -2599,6 +2599,7 @@ execute_for_command (for_command)
   loop_level++;
   identifier = for_command->name->word;
 
+  line_number = for_command->line;	/* for expansion error messages */
   list = releaser = expand_words_no_vars (for_command->map_list);
 
   begin_unwind_frame ("for");
@@ -4966,6 +4967,8 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
     {
 parent_return:
       QUIT;
+
+itrace("async child pid = %d", pid);
 
       /* Make sure that the pipes are closed in the parent. */
       close_pipes (pipe_in, pipe_out);

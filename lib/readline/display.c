@@ -748,10 +748,9 @@ rl_redisplay ()
       /* Now account for invisible characters in the current line. */
       /* XXX - this assumes that the invisible characters may be split, but only
 	 between the first and the last lines. */
-      temp += ((local_prompt_prefix == 0) ? ((newlines == 0) ? prompt_invis_chars_first_line
-							     : ((newlines == prompt_lines_estimate) ? wrap_offset : prompt_invis_chars_first_line))
-					  : ((newlines == 0) ? wrap_offset : 0));
-             
+      temp += (newlines == 0) ? prompt_invis_chars_first_line
+			      : ((newlines == prompt_lines_estimate) ? wrap_offset : prompt_invis_chars_first_line);
+
       inv_lbreaks[++newlines] = temp;
 #if defined (HANDLE_MULTIBYTE)
       if (MB_CUR_MAX > 1 && rl_byte_oriented == 0 && prompt_multibyte_chars > 0)

@@ -1430,7 +1430,10 @@ yy_readline_get ()
 
 #if defined (JOB_CONTROL)
       if (job_control)
+{
+itrace("yy_readline_get: give_terminal_to: %d", shell_pgrp);
 	give_terminal_to (shell_pgrp, 0);
+}
 #endif /* JOB_CONTROL */
 
       old_sigint = (SigHandler *)IMPOSSIBLE_TRAP_HANDLER;
@@ -1440,6 +1443,7 @@ yy_readline_get ()
 	  old_sigint = (SigHandler *)set_signal_handler (SIGINT, sigint_sighandler);
 	}
 
+itrace("yy_readline_get: calling readline");
       current_readline_line = readline (current_readline_prompt ?
       					  current_readline_prompt : "");
 
