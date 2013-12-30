@@ -5434,10 +5434,6 @@ variables.c
 	  the att_invisible attribute.  All callers from declare_internal.
 	  Indirectly, this is a fix for bug with `declare -n var; var=foo;'
 	  reported by Pierre Gaston <pierre.gaston@gmail.com>
-	- bind_variable: if assigning to nameref variable that doesn't have
-	  a value yet (e.g., with `declare -n var; var=foo'), don't try to
-	  use the unset name. Fixes a segfault reported by Pierre Gaston
-	  <pierre.gaston@gmail.com>
 
 execute_cmd.c
 	- execute_command_internal: make sure last_command_exit_value is set

@@ -2277,8 +2277,7 @@ make_local_variable (name)
   if (ifsname (name))
     setifs (new_var);
 
-  if (was_tmpvar == 0)
-    VSETATTR (new_var, att_invisible);	/* XXX */
+  VSETATTR (new_var, att_invisible);	/* XXX */
   return (new_var);
 }
 

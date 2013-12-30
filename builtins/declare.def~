@@ -143,7 +143,7 @@ declare_internal (list, local_var)
   int flags_on, flags_off, *flags;
   int any_failed, assign_error, pflag, nodefs, opt, mkglobal, onref, offref;
   char *t, *subscript_start;
-  SHELL_VAR *var, *refvar;
+  SHELL_VAR *var, *v, *refvar;
   FUNCTION_DEF *shell_fn;
 
   flags_on = flags_off = any_failed = assign_error = pflag = nodefs = mkglobal = 0;
@@ -368,6 +368,11 @@ declare_internal (list, local_var)
       refvar = (SHELL_VAR *)NULL;
       if (variable_context && mkglobal == 0 && ((flags_on & att_function) == 0))
 	{
+	  /* Is there already a local variable by this name? */
+	  v = find_variable (name);
+	  if (v == 0 || local_p (v) == 0 || tempvar_p (v) == 0 || v->context != variable_context)
+	    v = 0;
+
 #if defined (ARRAY_VARS)
 	  if (flags_on & att_assoc)
 	    var = make_local_assoc_variable (name);
@@ -399,12 +404,17 @@ declare_internal (list, local_var)
 	    }
 	  else
 #endif
-	    var = make_local_variable (name);	/* sets att_invisible for new vars */
+	    var = make_local_variable (name);
 	  if (var == 0)
 	    {
 	      any_failed++;
 	      NEXT_VARIABLE ();
 	    }
+#if 0
+	  /* v != 0 means that this is not a local variable at this context */
+	  if (offset == 0 && v)
+	    VSETATTR (var, att_invisible);
+#endif
 	}
       else
 	var = (SHELL_VAR *)NULL;
