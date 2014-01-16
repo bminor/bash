@@ -4798,10 +4798,15 @@ setup_async_signals ()
   if (job_control == 0)
 #endif
     {
+      /* Make sure we get the original signal dispositions now so we don't
+	 confuse the trap builtin later if the subshell tries to use it to
+	 reset SIGINT/SIGQUIT.  Don't call set_signal_ignored; that sets
+	 the value of original_signals to SIG_IGN. Posix interpretation 751. */
+      get_original_signal (SIGINT);
       set_signal_handler (SIGINT, SIG_IGN);
-      set_signal_ignored (SIGINT);
+
+      get_original_signal (SIGQUIT);
       set_signal_handler (SIGQUIT, SIG_IGN);
-      set_signal_ignored (SIGQUIT);
     }
 }
 

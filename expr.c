@@ -853,6 +853,8 @@ exp2 ()
 	    {
 	      sltp = lasttp;
 	      lasttp = stp;
+	      while (lasttp && *lasttp && whitespace (*lasttp))
+		lasttp++;
 	      evalerror (_("division by 0"));
 	      lasttp = sltp;
 	    }

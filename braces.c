@@ -34,6 +34,7 @@
 #include <errno.h>
 
 #include "bashansi.h"
+#include "bashintl.h"
 
 #if defined (SHELL)
 #  include "shell.h"
@@ -282,7 +283,7 @@ expand_amble (text, tlen, flags)
      size_t tlen;
      int flags;
 {
-  char **result, **partial;
+  char **result, **partial, **tresult;
   char *tem;
   int start, i, c;
 
@@ -314,7 +315,16 @@ expand_amble (text, tlen, flags)
 	  lr = strvec_len (result);
 	  lp = strvec_len (partial);
 
-	  result = strvec_resize (result, lp + lr + 1);
+	  tresult = strvec_mresize (result, lp + lr + 1);
+	  if (tresult == 0)
+	    {
+	      internal_error (_("brace expansion: cannot allocate memory for %s"), tem);
+	      strvec_dispose (result);
+	      result = (char **)NULL;
+	      return result;
+	    }
+	  else
+	    result = tresult;
 
 	  for (j = 0; j < lp; j++)
 	    result[lr + j] = partial[j];
@@ -359,7 +369,7 @@ mkseq (start, end, incr, type, width)
      int type, width;
 {
   intmax_t n, prevn;
-  int i, nelem;
+  int i, j, nelem;
   char **result, *t;
 
   if (incr == 0)
@@ -397,7 +407,12 @@ mkseq (start, end, incr, type, width)
   nelem = (prevn / sh_imaxabs(incr)) + 1;
   if (nelem > INT_MAX - 2)		/* Don't overflow int */
     return ((char **)NULL);
-  result = strvec_create (nelem + 1);
+  result = strvec_mcreate (nelem + 1);
+  if (result == 0)
+    {
+      internal_error (_("brace expansion: failed to allocate memory for %d elements"), nelem);
+      return ((char **)NULL);
+    }
 
   /* Make sure we go through the loop at least once, so {3..3} prints `3' */
   i = 0;
@@ -408,7 +423,7 @@ mkseq (start, end, incr, type, width)
       QUIT;		/* XXX - memory leak here */
 #endif
       if (type == ST_INT)
-	result[i++] = itos (n);
+	result[i++] = t = itos (n);
       else if (type == ST_ZINT)
 	{
 	  int len, arg;
@@ -418,10 +433,25 @@ mkseq (start, end, incr, type, width)
 	}
       else
 	{
-	  t = (char *)xmalloc (2);
-	  t[0] = n;
-	  t[1] = '\0';
+	  if (t = (char *)malloc (2))
+	    {
+	      t[0] = n;
+	      t[1] = '\0';
+	    }
 	  result[i++] = t;
+	}
+
+      /* We failed to allocate memory for this number, so we bail. */
+      if (t == 0)
+	{
+	  char *p, lbuf[INT_STRLEN_BOUND(intmax_t) + 1];
+
+	  /* Easier to do this than mess around with various intmax_t printf
+	     formats (%ld? %lld? %jd?) and PRIdMAX. */
+	  p = inttostr (n, lbuf, sizeof (lbuf));
+	  internal_error (_("brace expansion: failed to allocate memory for `%s'"), p);
+	  strvec_dispose (result);
+	  return ((char **)NULL);
 	}
 
       /* Handle overflow and underflow of n+incr */

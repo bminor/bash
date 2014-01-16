@@ -1207,10 +1207,17 @@ signal_is_hard_ignored (sig)
 }
 
 void
-set_signal_ignored (sig)
+set_signal_hard_ignored (sig)
      int sig;
 {
   sigmodes[sig] |= SIG_HARD_IGNORE;
+  original_signals[sig] = SIG_IGN;
+}
+
+void
+set_signal_ignored (sig)
+     int sig;
+{
   original_signals[sig] = SIG_IGN;
 }
 

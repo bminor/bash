@@ -5525,3 +5525,60 @@ lib/readline/undo.c
 	  reflected in the history entry. We use the guts of
 	  rl_maybe_replace_line to do the work.  Fixes problem reported by
 	  gregrwm <backuppc-users@whitleymott.net>
+
+				   12/30
+				   -----
+sig.c
+	- sigint_sighandler: if we get a SIGINT (and this signal handler is
+	  installed) while the wait builtin is running, note that we received
+	  it in the same way as jobs.c:wait_sigint_handler and return.  The
+	  various wait_for functions will look for that with CHECK_WAIT_INTR.
+	  This fixes the wait builtin not being interruptible in an interactive
+	  job control shell
+
+				   12/31
+				   -----
+trap.c
+	- set_signal_hard_ignored: rename set_signal_ignored to this, since it
+	  both sets original_signals[sig] and sets the HARD_IGNORE flag
+	- set_signal_ignored: new function, now just sets original_signals[sig]
+
+trap.h
+	- set_signal_hard_ignored: new external declaration
+
+sig.c
+	- initialize_terminating_signals: call set_signal_hard_ignored instead
+	  of set_signal_ignored for signals with disposition SIG_IGN when the
+	  shell starts
+
+execute_cmd.c
+	- setup_async_signals: make sure we get the original dispositions for
+	  SIGINT and SIGQUIT before starting the subshell, and don't call
+	  set_signal_ignored  because that sets original_signals[sig].  If we
+	  don't, subsequent attempts to reset handling using trap will fail
+	  because it thinks the original dispositions were SIG_IGN. Posix
+	  interpretation 751 (http://austingroupbugs.net/view.php?id=751)
+
+				 1/2/2014
+				 --------
+lib/sh/stringvec.c
+	- strvec_mcreate, strvec_mresize: versions of create and resize that
+	  use malloc and realloc, respectively, instead of xmalloc/xrealloc
+
+braces.c
+	- expand_amble,mkseq: use strvec_mcreate/strvec_mresize so we can
+	  catch and handle memory allocation failures instead of aborting
+	  with the xmalloc/xrealloc interface
+
+lib/sh/strdup.c
+	- strdup replacement function for ancient systems that don't have it
+
+lib/sh/itos.c
+	- mitos: new function, itos that uses strdup instead of savestring
+
+externs.h
+	- strvec_mcreate/strvec_mresize: new extern declarations
+	- mitos: new extern declaration
+
+configure.ac
+	- bash version moved to 4.3-rc2

@@ -43,6 +43,7 @@
 #include "trap.h"
 
 #include "builtins/common.h"
+#include "builtins/builtext.h"
 
 #if defined (READLINE)
 #  include "bashline.h"
@@ -64,6 +65,8 @@ extern int parse_and_execute_level, shell_initialized;
 extern int history_lines_this_session;
 #endif
 extern int no_line_editing;
+extern int wait_signal_received;
+extern sh_builtin_func_t *this_shell_builtin;
 
 extern void initialize_siglist ();
 
@@ -263,7 +266,7 @@ initialize_terminating_signals ()
       if (interactive_shell == 0 && XHANDLER (i) == SIG_IGN)
 	{
 	  sigaction (XSIG (i), &oact, &act);
-	  set_signal_ignored (XSIG (i));
+	  set_signal_hard_ignored (XSIG (i));
 	}
 #if defined (SIGPROF) && !defined (_MINIX)
       if (XSIG (i) == SIGPROF && XHANDLER (i) != SIG_DFL && XHANDLER (i) != SIG_IGN)
@@ -287,7 +290,7 @@ initialize_terminating_signals ()
       if (interactive_shell == 0 && XHANDLER (i) == SIG_IGN)
 	{
 	  signal (XSIG (i), SIG_IGN);
-	  set_signal_ignored (XSIG (i));
+	  set_signal_hard_ignored (XSIG (i));
 	}
 #ifdef SIGPROF
       if (XSIG (i) == SIGPROF && XHANDLER (i) != SIG_DFL && XHANDLER (i) != SIG_IGN)
@@ -597,6 +600,15 @@ sigint_sighandler (sig)
   if (interrupt_state == 0)
     ADDINTERRUPT;
 
+  /* We will get here in interactive shells with job control active; allow
+     an interactive wait to be interrupted. */
+  if (this_shell_builtin && this_shell_builtin == wait_builtin)
+    {
+      last_command_exit_value = 128 + sig;
+      wait_signal_received = sig;
+      SIGRETURN (0);
+    }
+      
   if (interrupt_immediately)
     {
       interrupt_immediately = 0;
