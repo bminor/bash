@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash 4.3-pre2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-11-20 07:51-0500\n"
+"POT-Creation-Date: 2014-01-09 15:38-0500\n"
 "PO-Revision-Date: 2013-08-25 20:00+0200\n"
 "Last-Translator: Göran Uddeborg <goeran@uddeborg.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
@@ -22,7 +22,7 @@ msgstr ""
 msgid "bad array subscript"
 msgstr "felaktigt vektorindex"
 
-#: arrayfunc.c:356 builtins/declare.def:585
+#: arrayfunc.c:356 builtins/declare.def:566
 #, c-format
 msgid "%s: cannot convert indexed to associative array"
 msgstr "%s: det går inte att konvertera en indexerad vektor till associativ"
@@ -67,6 +67,21 @@ msgstr "ingen avslutande \"%c\" i %s"
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: kolonseparator saknas"
+
+#: braces.c:321
+#, c-format
+msgid "brace expansion: cannot allocate memory for %s"
+msgstr ""
+
+#: braces.c:413
+#, c-format
+msgid "brace expansion: failed to allocate memory for %d elements"
+msgstr ""
+
+#: braces.c:452
+#, c-format
+msgid "brace expansion: failed to allocate memory for `%s'"
+msgstr ""
 
 #: builtins/alias.def:132
 #, c-format
@@ -190,7 +205,7 @@ msgstr "ogiltigt oktalt tal"
 msgid "invalid hex number"
 msgstr "ogiltigt hexadecimalt tal"
 
-#: builtins/common.c:242 expr.c:1461
+#: builtins/common.c:242 expr.c:1470
 msgid "invalid number"
 msgstr "ogiltigt tal"
 
@@ -303,7 +318,7 @@ msgstr "kör inte en kompletteringsfunktion"
 msgid "can only be used in a function"
 msgstr "kan endast användas i en funktion"
 
-#: builtins/declare.def:315 builtins/declare.def:533
+#: builtins/declare.def:315 builtins/declare.def:509
 #, c-format
 msgid "%s: reference variable cannot be an array"
 msgstr "%s: en referensvariabel kan inte vara en vektor"
@@ -313,21 +328,21 @@ msgstr "%s: en referensvariabel kan inte vara en vektor"
 msgid "%s: nameref variable self references not allowed"
 msgstr "%s: att en namnreferensvariabel självrefererar är inte tillåtet"
 
-#: builtins/declare.def:422
+#: builtins/declare.def:398
 msgid "cannot use `-f' to make functions"
 msgstr "det går inte att använda \"-f\" för att göra funktioner"
 
-#: builtins/declare.def:434 execute_cmd.c:5329
+#: builtins/declare.def:410 execute_cmd.c:5338
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: endast läsbar funktion"
 
-#: builtins/declare.def:572
+#: builtins/declare.def:553
 #, c-format
 msgid "%s: cannot destroy array variables in this way"
 msgstr "%s: det går inte att förstöra vektorvariabler på detta sätt"
 
-#: builtins/declare.def:579 builtins/read.def:733
+#: builtins/declare.def:560 builtins/read.def:733
 #, c-format
 msgid "%s: cannot convert associative to indexed array"
 msgstr "%s: det går inte att konvertera en associativ vektor till indexerad"
@@ -356,7 +371,7 @@ msgstr "%s: inte dynamiskt laddad"
 msgid "%s: cannot delete: %s"
 msgstr "%s: kan inte ta bort: %s"
 
-#: builtins/evalfile.c:140 builtins/hash.def:171 execute_cmd.c:5176
+#: builtins/evalfile.c:140 builtins/hash.def:171 execute_cmd.c:5185
 #: shell.c:1481
 #, c-format
 msgid "%s: is a directory"
@@ -579,6 +594,11 @@ msgstr "\"%c\": ogiltigt formateringstecken"
 #, c-format
 msgid "warning: %s: %s"
 msgstr "varning: %s: %s"
+
+#: builtins/printf.def:768
+#, c-format
+msgid "format parsing problem: %s"
+msgstr ""
 
 #: builtins/printf.def:865
 msgid "missing hex digit for \\x"
@@ -918,51 +938,51 @@ msgstr "\atiden gick ut i väntan på indata: automatisk utloggning\n"
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr "det går inte att omdiregera standard in från /dev/null: %s"
 
-#: execute_cmd.c:1230
+#: execute_cmd.c:1233
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "TIMEFORMAT: \"%c\": ogiltigt formateringstecken"
 
-#: execute_cmd.c:2284
+#: execute_cmd.c:2287
 msgid "pipe error"
 msgstr "rörfel"
 
-#: execute_cmd.c:4359
+#: execute_cmd.c:4363
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
 msgstr "%s: maximal nästning av funktioner överskriden (%d)"
 
-#: execute_cmd.c:4852
+#: execute_cmd.c:4861
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: begränsat: det går inte att ange \"/\" i kommandonamn"
 
-#: execute_cmd.c:4941
+#: execute_cmd.c:4950
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: kommandot finns inte"
 
-#: execute_cmd.c:5174
+#: execute_cmd.c:5183
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: execute_cmd.c:5211
+#: execute_cmd.c:5220
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: felaktig tolk"
 
-#: execute_cmd.c:5248
+#: execute_cmd.c:5257
 #, c-format
 msgid "%s: cannot execute binary file: %s"
 msgstr "%s: det går inte att köra binär fil: %s"
 
-#: execute_cmd.c:5320
+#: execute_cmd.c:5329
 #, c-format
 msgid "`%s': is a special builtin"
 msgstr "”%s”: är en speciell inbyggd"
 
-#: execute_cmd.c:5372
+#: execute_cmd.c:5381
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "det går inte att duplicera fb %d till fb %d"
@@ -983,7 +1003,7 @@ msgstr "syntaxfel i uttrycket"
 msgid "attempted assignment to non-variable"
 msgstr "försök att tilldela till en icke-variabel"
 
-#: expr.c:495 expr.c:851
+#: expr.c:495 expr.c:858
 msgid "division by 0"
 msgstr "division med 0"
 
@@ -995,40 +1015,40 @@ msgstr "bug: felaktig expassign-token"
 msgid "`:' expected for conditional expression"
 msgstr "\":\" förväntades i villkorligt uttryck"
 
-#: expr.c:910
+#: expr.c:919
 msgid "exponent less than 0"
 msgstr "exponenten är mindre än 0"
 
-#: expr.c:967
+#: expr.c:976
 msgid "identifier expected after pre-increment or pre-decrement"
 msgstr "en identifierare förväntades efter pre-ökning eller pre-minskning"
 
-#: expr.c:993
+#: expr.c:1002
 msgid "missing `)'"
 msgstr "\")\" saknas"
 
-#: expr.c:1044 expr.c:1381
+#: expr.c:1053 expr.c:1390
 msgid "syntax error: operand expected"
 msgstr "syntaxfel: en operand förväntades"
 
-#: expr.c:1383
+#: expr.c:1392
 msgid "syntax error: invalid arithmetic operator"
 msgstr "syntaxfel: ogiltig aritmetisk operator"
 
-#: expr.c:1407
+#: expr.c:1416
 #, c-format
 msgid "%s%s%s: %s (error token is \"%s\")"
 msgstr "%s%s%s: %s (felsymbol är \"%s\")"
 
-#: expr.c:1465
+#: expr.c:1474
 msgid "invalid arithmetic base"
 msgstr "ogiltig aritmetisk bas"
 
-#: expr.c:1485
+#: expr.c:1494
 msgid "value too great for base"
 msgstr "värdet är för stort för basen"
 
-#: expr.c:1534
+#: expr.c:1543
 #, c-format
 msgid "%s: expression error\n"
 msgstr "%s: uttrycksfel\n"
@@ -1057,144 +1077,144 @@ msgstr "save_bash_input: buffert finns redan för ny fb %d"
 msgid "start_pipeline: pgrp pipe"
 msgstr "start_pipeline: pgrp rör"
 
-#: jobs.c:892
+#: jobs.c:893
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr "avgrenad pid %d fins i körande jobb %d"
 
-#: jobs.c:1010
+#: jobs.c:1012
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "tar bort stoppat jobb %d med processgrupp %ld"
 
-#: jobs.c:1115
+#: jobs.c:1117
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
 msgstr "add_process: process %5ld (%s) i the_pipeline"
 
-#: jobs.c:1118
+#: jobs.c:1120
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr "add_process: pid %5ld (%s) markerad som fortfarande vid liv"
 
-#: jobs.c:1433
+#: jobs.c:1435
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "describe_pid: %ld: ingen sådan pid"
 
-#: jobs.c:1448
+#: jobs.c:1450
 #, c-format
 msgid "Signal %d"
 msgstr "Signal %d"
 
-#: jobs.c:1462 jobs.c:1487
+#: jobs.c:1464 jobs.c:1489
 msgid "Done"
 msgstr "Klart"
 
-#: jobs.c:1467 siglist.c:123
+#: jobs.c:1469 siglist.c:123
 msgid "Stopped"
 msgstr "Stoppat"
 
-#: jobs.c:1471
+#: jobs.c:1473
 #, c-format
 msgid "Stopped(%s)"
 msgstr "Stoppat(%s)"
 
-#: jobs.c:1475
+#: jobs.c:1477
 msgid "Running"
 msgstr "Kör"
 
-#: jobs.c:1489
+#: jobs.c:1491
 #, c-format
 msgid "Done(%d)"
 msgstr "Klart(%d)"
 
-#: jobs.c:1491
+#: jobs.c:1493
 #, c-format
 msgid "Exit %d"
 msgstr "Avslut %d"
 
-#: jobs.c:1494
+#: jobs.c:1496
 msgid "Unknown status"
 msgstr "Okänd status"
 
-#: jobs.c:1581
+#: jobs.c:1583
 #, c-format
 msgid "(core dumped) "
 msgstr "(minnesutskrift skapad) "
 
-#: jobs.c:1600
+#: jobs.c:1602
 #, c-format
 msgid "  (wd: %s)"
 msgstr "  (ak: %s)"
 
-#: jobs.c:1817
+#: jobs.c:1819
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr "barns setpgid (%ld till %ld)"
 
-#: jobs.c:2136 nojobs.c:605
+#: jobs.c:2138 nojobs.c:605
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: pid %ld är inte ett barn till detta skal"
 
-#: jobs.c:2383
+#: jobs.c:2385
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for: Ingen uppgift om process %ld"
 
-#: jobs.c:2692
+#: jobs.c:2694
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: jobb %d är stoppat"
 
-#: jobs.c:2984
+#: jobs.c:2986
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: jobbet har avslutat"
 
-#: jobs.c:2993
+#: jobs.c:2995
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: jobb %d är redan i bakgrunden"
 
-#: jobs.c:3218
+#: jobs.c:3220
 msgid "waitchld: turning on WNOHANG to avoid indefinite block"
 msgstr "waitchld: slår på WNOHANG för att undvika oändlig blockering"
 
-#: jobs.c:3709
+#: jobs.c:3711
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s: rad %d: "
 
-#: jobs.c:3723 nojobs.c:843
+#: jobs.c:3725 nojobs.c:843
 #, c-format
 msgid " (core dumped)"
 msgstr " (minnesutskrift skapad)"
 
-#: jobs.c:3735 jobs.c:3748
+#: jobs.c:3737 jobs.c:3750
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(ak nu: %s)\n"
 
-#: jobs.c:3780
+#: jobs.c:3782
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: getpgrp misslyckades"
 
-#: jobs.c:3841
+#: jobs.c:3843
 msgid "initialize_job_control: line discipline"
 msgstr "initialize_job_control: linjedisciplin"
 
-#: jobs.c:3851
+#: jobs.c:3853
 msgid "initialize_job_control: setpgid"
 msgstr "initialize_job_control: setpgid"
 
-#: jobs.c:3872 jobs.c:3881
+#: jobs.c:3874 jobs.c:3883
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "det går inte att sätta terminalprocessgrupp (%d)"
 
-#: jobs.c:3886
+#: jobs.c:3888
 msgid "no job control in this shell"
 msgstr "ingen jobbstyrning i detta skal"
 
@@ -1348,99 +1368,99 @@ msgid "make_redirection: redirection instruction `%d' out of range"
 msgstr ""
 "make_redirection: omdirigeringsinstruktion \"%d\" utanför giltigt intervall"
 
-#: parse.y:3210 parse.y:3493
+#: parse.y:3273 parse.y:3556
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "oväntat filslut vid sökning efter matchande \"%c\""
 
-#: parse.y:4099
+#: parse.y:4163
 msgid "unexpected EOF while looking for `]]'"
 msgstr "oväntat filslut vid sökning efter \"]]\""
 
-#: parse.y:4104
+#: parse.y:4168
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr "syntaxfel i villkorligt uttryck: oväntad symbol \"%s\""
 
-#: parse.y:4108
+#: parse.y:4172
 msgid "syntax error in conditional expression"
 msgstr "syntaxfel i villkorligt uttryck"
 
-#: parse.y:4186
+#: parse.y:4250
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr "oväntad symbol \"%s\", \")\" förväntades"
 
-#: parse.y:4190
+#: parse.y:4254
 msgid "expected `)'"
 msgstr "\")\" förväntades"
 
-#: parse.y:4218
+#: parse.y:4282
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr "oväntat argument \"%s\" till villkorlig unär operator"
 
-#: parse.y:4222
+#: parse.y:4286
 msgid "unexpected argument to conditional unary operator"
 msgstr "oväntat argument till villkorlig unär operator"
 
-#: parse.y:4268
+#: parse.y:4332
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr "oväntad symbol \"%s\", villkorlig binär operator förväntades"
 
-#: parse.y:4272
+#: parse.y:4336
 msgid "conditional binary operator expected"
 msgstr "villkorlig binär operato förväntades"
 
-#: parse.y:4294
+#: parse.y:4358
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr "oväntat argument \"%s\" till villkorlig binär operator"
 
-#: parse.y:4298
+#: parse.y:4362
 msgid "unexpected argument to conditional binary operator"
 msgstr "oväntat argument till villkorlig binär operator"
 
-#: parse.y:4309
+#: parse.y:4373
 #, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr "oväntad symbol \"%c\" i villkorligt kommando"
 
-#: parse.y:4312
+#: parse.y:4376
 #, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr "oväntad symbol \"%s\" i villkorligt kommando"
 
-#: parse.y:4316
+#: parse.y:4380
 #, c-format
 msgid "unexpected token %d in conditional command"
 msgstr "oväntad symbol %d i villkorligt kommando"
 
-#: parse.y:5666
+#: parse.y:5730
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "syntaxfel nära den oväntade symbolen \"%s\""
 
-#: parse.y:5684
+#: parse.y:5748
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "syntaxfel nära \"%s\""
 
-#: parse.y:5694
+#: parse.y:5758
 msgid "syntax error: unexpected end of file"
 msgstr "syntaxfel: oväntat filslut"
 
-#: parse.y:5694
+#: parse.y:5758
 msgid "syntax error"
 msgstr "syntaxfel"
 
-#: parse.y:5756
+#: parse.y:5820
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "Använd \"%s\" fär att lämna skalet.\n"
 
-#: parse.y:5918
+#: parse.y:5982
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "oväntat filslut när matchande \")\" söktes"
 
@@ -1580,7 +1600,7 @@ msgstr ""
 "Använd kommandot \"bashbug\" för att rapportera fel.\n"
 "Skicka synpunkter på översättningen till <tp-sv@listor.tp-sv.se>.\n"
 
-#: sig.c:679
+#: sig.c:691
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
 msgstr "sigprocmask: %d: ogiltig operation"
@@ -1920,50 +1940,50 @@ msgstr "make_local_variable: ingen funktionskontext i aktuellt sammanhang"
 msgid "%s: variable may not be assigned value"
 msgstr "%s: variabeln får inte tilldelas ett värde"
 
-#: variables.c:3600
+#: variables.c:3646
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: ingen funktionskontext i aktuellt sammanhang"
 
-#: variables.c:3845
+#: variables.c:3891
 #, c-format
 msgid "%s has null exportstr"
 msgstr "%s har tom exportstr"
 
-#: variables.c:3850 variables.c:3859
+#: variables.c:3896 variables.c:3905
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "ogiltigt tecken %d i exportstr för %s"
 
-#: variables.c:3865
+#: variables.c:3911
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "inget \"=\" i exportstr för %s"
 
-#: variables.c:4298
+#: variables.c:4344
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr ""
 "pop_var_context: huvudet på shell_variables är inte en funktionskontext"
 
-#: variables.c:4311
+#: variables.c:4357
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: ingen kontext global_variables"
 
-#: variables.c:4385
+#: variables.c:4431
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr ""
 "pop_scope: huvudet på shell_variables är inte en temporär omgivningsräckvidd"
 
-#: variables.c:5211
+#: variables.c:5257
 #, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: %s: går inte att öppna som FILE"
 
-#: variables.c:5216
+#: variables.c:5262
 #, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%s: %s: ogiltigt värde för spårningsfilbeskrivare"
 
-#: variables.c:5261
+#: variables.c:5307
 #, c-format
 msgid "%s: %s: compatibility value out of range"
 msgstr "%s: %s: kompatibilitetsvärde utanför giltigt intervall"

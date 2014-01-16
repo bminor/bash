@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU bash 4.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-11-20 07:51-0500\n"
+"POT-Creation-Date: 2014-01-09 15:38-0500\n"
 "PO-Revision-Date: 2011-08-14 11:55-0500\n"
 "Last-Translator: Cristian Othón Martínez Vera <cfuga@cfuga.mx>\n"
 "Language-Team: Spanish <es@li.org>\n"
@@ -21,7 +21,7 @@ msgstr ""
 msgid "bad array subscript"
 msgstr "subíndice de matriz incorrecto"
 
-#: arrayfunc.c:356 builtins/declare.def:585
+#: arrayfunc.c:356 builtins/declare.def:566
 #, c-format
 msgid "%s: cannot convert indexed to associative array"
 msgstr "%s: no se puede convertir la matriz de indizada a asociativa"
@@ -66,6 +66,21 @@ msgstr "no hay un `%c' que cierre en %s"
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: falta un `:' separador"
+
+#: braces.c:321
+#, c-format
+msgid "brace expansion: cannot allocate memory for %s"
+msgstr ""
+
+#: braces.c:413
+#, c-format
+msgid "brace expansion: failed to allocate memory for %d elements"
+msgstr ""
+
+#: braces.c:452
+#, c-format
+msgid "brace expansion: failed to allocate memory for `%s'"
+msgstr ""
 
 #: builtins/alias.def:132
 #, c-format
@@ -189,7 +204,7 @@ msgstr "número octal inválido"
 msgid "invalid hex number"
 msgstr "número hexadecimal inválido"
 
-#: builtins/common.c:242 expr.c:1461
+#: builtins/common.c:242 expr.c:1470
 msgid "invalid number"
 msgstr "número inválido"
 
@@ -304,7 +319,7 @@ msgstr "no se está ejecutando la función de completado"
 msgid "can only be used in a function"
 msgstr "sólo se puede usar dentro de una función"
 
-#: builtins/declare.def:315 builtins/declare.def:533
+#: builtins/declare.def:315 builtins/declare.def:509
 #, c-format
 msgid "%s: reference variable cannot be an array"
 msgstr ""
@@ -314,21 +329,21 @@ msgstr ""
 msgid "%s: nameref variable self references not allowed"
 msgstr ""
 
-#: builtins/declare.def:422
+#: builtins/declare.def:398
 msgid "cannot use `-f' to make functions"
 msgstr "no se puede usar `-f' para hacer funciones"
 
-#: builtins/declare.def:434 execute_cmd.c:5329
+#: builtins/declare.def:410 execute_cmd.c:5338
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: función de sólo lectura"
 
-#: builtins/declare.def:572
+#: builtins/declare.def:553
 #, c-format
 msgid "%s: cannot destroy array variables in this way"
 msgstr "%s: no se pueden destruir variables de matriz de esta forma"
 
-#: builtins/declare.def:579 builtins/read.def:733
+#: builtins/declare.def:560 builtins/read.def:733
 #, c-format
 msgid "%s: cannot convert associative to indexed array"
 msgstr "%s: no se puede convertir una matriz asociativa a indizada"
@@ -357,7 +372,7 @@ msgstr "%s: no se cargó dinámicamente"
 msgid "%s: cannot delete: %s"
 msgstr "%s: no se puede borrar: %s"
 
-#: builtins/evalfile.c:140 builtins/hash.def:171 execute_cmd.c:5176
+#: builtins/evalfile.c:140 builtins/hash.def:171 execute_cmd.c:5185
 #: shell.c:1481
 #, c-format
 msgid "%s: is a directory"
@@ -584,6 +599,11 @@ msgstr "`%c': carácter de formato inválido"
 #, c-format
 msgid "warning: %s: %s"
 msgstr "aviso: %s: %s"
+
+#: builtins/printf.def:768
+#, c-format
+msgid "format parsing problem: %s"
+msgstr ""
 
 #: builtins/printf.def:865
 msgid "missing hex digit for \\x"
@@ -923,53 +943,53 @@ msgstr "\aha expirado mientras esperaba alguna entrada: auto-logout\n"
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr "no se puede redirigir la salida estándar desde /dev/null: %s"
 
-#: execute_cmd.c:1230
+#: execute_cmd.c:1233
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "TIMEFORMAT: `%c': carácter de formato inválido"
 
-#: execute_cmd.c:2284
+#: execute_cmd.c:2287
 msgid "pipe error"
 msgstr "error de tubería"
 
-#: execute_cmd.c:4359
+#: execute_cmd.c:4363
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
 msgstr ""
 
-#: execute_cmd.c:4852
+#: execute_cmd.c:4861
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: restringido: no se puede especificar `/' en nombres de órdenes"
 
-#: execute_cmd.c:4941
+#: execute_cmd.c:4950
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: no se encontró la orden"
 
-#: execute_cmd.c:5174
+#: execute_cmd.c:5183
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: execute_cmd.c:5211
+#: execute_cmd.c:5220
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: intérprete erróneo"
 
 # file=fichero. archive=archivo. Si no, es imposible traducir tar. sv
 # De acuerdo. Corregido en todo el fichero. cfuga
-#: execute_cmd.c:5248
+#: execute_cmd.c:5257
 #, fuzzy, c-format
 msgid "%s: cannot execute binary file: %s"
 msgstr "%s: no se puede ejecutar el fichero binario"
 
-#: execute_cmd.c:5320
+#: execute_cmd.c:5329
 #, fuzzy, c-format
 msgid "`%s': is a special builtin"
 msgstr "%s es una orden interna del shell\n"
 
-#: execute_cmd.c:5372
+#: execute_cmd.c:5381
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "no se puede duplicar el df %d al df %d"
@@ -990,7 +1010,7 @@ msgstr "error sintáctico en la expresión"
 msgid "attempted assignment to non-variable"
 msgstr "se intentó asignar a algo que no es una variable"
 
-#: expr.c:495 expr.c:851
+#: expr.c:495 expr.c:858
 msgid "division by 0"
 msgstr "división por 0"
 
@@ -1004,11 +1024,11 @@ msgstr "bicho: elemento de asignación de expresión erróneo"
 msgid "`:' expected for conditional expression"
 msgstr "se esperaba `:' para la expresión condicional"
 
-#: expr.c:910
+#: expr.c:919
 msgid "exponent less than 0"
 msgstr "exponente menor que 0"
 
-#: expr.c:967
+#: expr.c:976
 msgid "identifier expected after pre-increment or pre-decrement"
 msgstr ""
 "se esperaba un identificador después del pre-incremento o pre-decremento"
@@ -1016,32 +1036,32 @@ msgstr ""
 # falta , singular em+
 # mmmh, puede faltar más de un paréntesis cfuga
 # tiene razón Enrique, es singular. cfuga
-#: expr.c:993
+#: expr.c:1002
 msgid "missing `)'"
 msgstr "falta un `)'"
 
-#: expr.c:1044 expr.c:1381
+#: expr.c:1053 expr.c:1390
 msgid "syntax error: operand expected"
 msgstr "error sintáctico: se esperaba un operando"
 
-#: expr.c:1383
+#: expr.c:1392
 msgid "syntax error: invalid arithmetic operator"
 msgstr "error sintáctico: operador aritmético inválido"
 
-#: expr.c:1407
+#: expr.c:1416
 #, c-format
 msgid "%s%s%s: %s (error token is \"%s\")"
 msgstr "%s%s%s: %s (el elemento de error es \"%s\")"
 
-#: expr.c:1465
+#: expr.c:1474
 msgid "invalid arithmetic base"
 msgstr "base aritmética inválida"
 
-#: expr.c:1485
+#: expr.c:1494
 msgid "value too great for base"
 msgstr "valor demasiado grande para la base"
 
-#: expr.c:1534
+#: expr.c:1543
 #, c-format
 msgid "%s: expression error\n"
 msgstr "%s: error de expresión\n"
@@ -1075,145 +1095,145 @@ msgstr ""
 msgid "start_pipeline: pgrp pipe"
 msgstr "start_pipeline: tubería de pgrp"
 
-#: jobs.c:892
+#: jobs.c:893
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr "el pid `forked' %d aparece en el trabajo en ejecución %d"
 
-#: jobs.c:1010
+#: jobs.c:1012
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "borrando el trabajo detenido %d con grupo de proceso %ld"
 
-#: jobs.c:1115
+#: jobs.c:1117
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
 msgstr "add_process: el proceso %5ld (%s) en the_pipeline"
 
-#: jobs.c:1118
+#: jobs.c:1120
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr "add_process: pid %5ld (%s) se marca como vivo aún"
 
 # Cambiaría 'hay' por 'existe' em+
-#: jobs.c:1433
+#: jobs.c:1435
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "describe_pid: %ld: no existe tal pid"
 
-#: jobs.c:1448
+#: jobs.c:1450
 #, c-format
 msgid "Signal %d"
 msgstr "Señal %d"
 
-#: jobs.c:1462 jobs.c:1487
+#: jobs.c:1464 jobs.c:1489
 msgid "Done"
 msgstr "Hecho"
 
-#: jobs.c:1467 siglist.c:123
+#: jobs.c:1469 siglist.c:123
 msgid "Stopped"
 msgstr "Detenido"
 
-#: jobs.c:1471
+#: jobs.c:1473
 #, c-format
 msgid "Stopped(%s)"
 msgstr "Detenido(%s)"
 
-#: jobs.c:1475
+#: jobs.c:1477
 msgid "Running"
 msgstr "Ejecutando"
 
-#: jobs.c:1489
+#: jobs.c:1491
 #, c-format
 msgid "Done(%d)"
 msgstr "Hecho(%d)"
 
-#: jobs.c:1491
+#: jobs.c:1493
 #, c-format
 msgid "Exit %d"
 msgstr "Salida %d"
 
-#: jobs.c:1494
+#: jobs.c:1496
 msgid "Unknown status"
 msgstr "Estado desconocido"
 
-#: jobs.c:1581
+#: jobs.c:1583
 #, c-format
 msgid "(core dumped) "
 msgstr "(`core' generado) "
 
-#: jobs.c:1600
+#: jobs.c:1602
 #, c-format
 msgid "  (wd: %s)"
 msgstr "  (dir ahora: %s)"
 
-#: jobs.c:1817
+#: jobs.c:1819
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr "setpgid hijo (%ld a %ld)"
 
-#: jobs.c:2136 nojobs.c:605
+#: jobs.c:2138 nojobs.c:605
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: pid %ld no es un proceso hijo de este shell"
 
-#: jobs.c:2383
+#: jobs.c:2385
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for: No hay un registro del proceso %ld"
 
-#: jobs.c:2692
+#: jobs.c:2694
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: el trabajo %d está detenido"
 
-#: jobs.c:2984
+#: jobs.c:2986
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: el trabajo ha terminado"
 
-#: jobs.c:2993
+#: jobs.c:2995
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: el trabajo %d ya está en segundo plano"
 
-#: jobs.c:3218
+#: jobs.c:3220
 msgid "waitchld: turning on WNOHANG to avoid indefinite block"
 msgstr "waitchld: se activa WNOHANG para evitar el bloque indefinido"
 
-#: jobs.c:3709
+#: jobs.c:3711
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s: línea %d: "
 
-#: jobs.c:3723 nojobs.c:843
+#: jobs.c:3725 nojobs.c:843
 #, c-format
 msgid " (core dumped)"
 msgstr " (`core' generado)"
 
-#: jobs.c:3735 jobs.c:3748
+#: jobs.c:3737 jobs.c:3750
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(dir ahora: %s)\n"
 
-#: jobs.c:3780
+#: jobs.c:3782
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_jobs_control: falló getpgrp"
 
-#: jobs.c:3841
+#: jobs.c:3843
 msgid "initialize_job_control: line discipline"
 msgstr "initialize_jobs_control: disciplina de línea"
 
-#: jobs.c:3851
+#: jobs.c:3853
 msgid "initialize_job_control: setpgid"
 msgstr "initialize_jobs_control: setpgid"
 
-#: jobs.c:3872 jobs.c:3881
+#: jobs.c:3874 jobs.c:3883
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "no se puede establecer el grupo de proceso de terminal (%d)"
 
-#: jobs.c:3886
+#: jobs.c:3888
 msgid "no job control in this shell"
 msgstr "no hay control de trabajos en este shell"
 
@@ -1371,71 +1391,71 @@ msgid "make_redirection: redirection instruction `%d' out of range"
 msgstr ""
 "make_redirection: la instrucción de redirección `%d' está fuera de rango"
 
-#: parse.y:3210 parse.y:3493
+#: parse.y:3273 parse.y:3556
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "EOF inesperado mientras se buscaba un `%c' coincidente"
 
-#: parse.y:4099
+#: parse.y:4163
 msgid "unexpected EOF while looking for `]]'"
 msgstr "EOF inesperado mientras se buscaba `]]'"
 
-#: parse.y:4104
+#: parse.y:4168
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr "error sintáctico en la expresión condicional: elemento inesperado `%s'"
 
-#: parse.y:4108
+#: parse.y:4172
 msgid "syntax error in conditional expression"
 msgstr "error sintáctico en la expresión condicional"
 
-#: parse.y:4186
+#: parse.y:4250
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr "elemento inesperado `%s', se esperaba `)'"
 
-#: parse.y:4190
+#: parse.y:4254
 msgid "expected `)'"
 msgstr "se esperaba `)'"
 
-#: parse.y:4218
+#: parse.y:4282
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr "argumento inesperado `%s' para el operador unario condicional"
 
-#: parse.y:4222
+#: parse.y:4286
 msgid "unexpected argument to conditional unary operator"
 msgstr "argumento inesperado para el operador unario condicional"
 
-#: parse.y:4268
+#: parse.y:4332
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr "elemento inesperado `%s', se esperaba un operador binario condicional"
 
-#: parse.y:4272
+#: parse.y:4336
 msgid "conditional binary operator expected"
 msgstr "se esperaba un operador binario condicional"
 
-#: parse.y:4294
+#: parse.y:4358
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr "argumento inesperado `%s' para el operador binario condicional"
 
-#: parse.y:4298
+#: parse.y:4362
 msgid "unexpected argument to conditional binary operator"
 msgstr "argumento inesperado para el operador binario condicional"
 
-#: parse.y:4309
+#: parse.y:4373
 #, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr "elemento inesperado `%c' en la orden condicional"
 
-#: parse.y:4312
+#: parse.y:4376
 #, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr "elemento inesperado `%s' en la orden condicional"
 
-#: parse.y:4316
+#: parse.y:4380
 #, c-format
 msgid "unexpected token %d in conditional command"
 msgstr "elemento inesperado %d en la orden condicional"
@@ -1446,12 +1466,12 @@ msgstr "elemento inesperado %d en la orden condicional"
 # provocado por el símbolo. Simplemente estar cerca del mismo. cfuga
 # Por consistencia con el siguiente, yo borraría la coma. sv
 # Cierto. Coma borrada. cfuga
-#: parse.y:5666
+#: parse.y:5730
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "error sintáctico cerca del elemento inesperado `%s'"
 
-#: parse.y:5684
+#: parse.y:5748
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "error sintáctico cerca de `%s'"
@@ -1460,20 +1480,20 @@ msgstr "error sintáctico cerca de `%s'"
 # no se esperaba el final de la línea em+
 # Ojo, que end of file es fin de fichero, no de línea. sv
 # Se hicieron ambos cambios. cfuga
-#: parse.y:5694
+#: parse.y:5758
 msgid "syntax error: unexpected end of file"
 msgstr "error sintáctico: no se esperaba el final del fichero"
 
-#: parse.y:5694
+#: parse.y:5758
 msgid "syntax error"
 msgstr "error sintáctico"
 
-#: parse.y:5756
+#: parse.y:5820
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "Use \"%s\" para dejar el shell.\n"
 
-#: parse.y:5918
+#: parse.y:5982
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "EOF inesperado mientras se buscaba un `)' coincidente"
 
@@ -1624,7 +1644,7 @@ msgstr ""
 msgid "Use the `bashbug' command to report bugs.\n"
 msgstr "Use la orden `bashbug' para reportar bichos.\n"
 
-#: sig.c:679
+#: sig.c:691
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
 msgstr "sigprocmask: %d: operación inválida"
@@ -1982,50 +2002,50 @@ msgstr "make_local_variable: no hay contexto de función en el ámbito actual"
 msgid "%s: variable may not be assigned value"
 msgstr "%s: no se puede asignar el fd a la variable"
 
-#: variables.c:3600
+#: variables.c:3646
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: no hay contexto de función en el ámbito actual"
 
-#: variables.c:3845
+#: variables.c:3891
 #, c-format
 msgid "%s has null exportstr"
 msgstr "%s tiene exportstr nulo"
 
-#: variables.c:3850 variables.c:3859
+#: variables.c:3896 variables.c:3905
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "carácter inválido %d en exportstr para %s"
 
-#: variables.c:3865
+#: variables.c:3911
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "no hay `=' en exportstr para %s"
 
-#: variables.c:4298
+#: variables.c:4344
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr ""
 "pop_var_context: la cabeza de shell_variables no es un contexto de función"
 
-#: variables.c:4311
+#: variables.c:4357
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: no es un contexto global_variables"
 
-#: variables.c:4385
+#: variables.c:4431
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr ""
 "pop_scope: la cabeza de shell_variables no es un ámbito de ambiente temporal"
 
-#: variables.c:5211
+#: variables.c:5257
 #, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: %s: no se puede abrir como FICHERO"
 
-#: variables.c:5216
+#: variables.c:5262
 #, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%s: %s: valor inválido para el descriptor de fichero de rastreo"
 
-#: variables.c:5261
+#: variables.c:5307
 #, fuzzy, c-format
 msgid "%s: %s: compatibility value out of range"
 msgstr "%s: %s fuera de rango"

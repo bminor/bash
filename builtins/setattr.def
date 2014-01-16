@@ -455,7 +455,11 @@ show_name_attributes (name, nodefs)
 {
   SHELL_VAR *var;
 
+#if 0
   var = find_variable_tempenv (name);
+#else
+  var = find_variable_noref (name);
+#endif
 
   if (var && invisible_p (var) == 0)
     {

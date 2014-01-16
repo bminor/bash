@@ -2703,7 +2703,9 @@ bind_variable_value (var, value, aflags)
      int aflags;
 {
   char *t;
+  int invis;
 
+  invis = invisible_p (var);
   VUNSETATTR (var, att_invisible);
 
   if (var->assign_func)
@@ -2718,6 +2720,17 @@ bind_variable_value (var, value, aflags)
   else
     {
       t = make_variable_value (var, value, aflags);
+#if defined (ARRAY_VARS)
+      if ((aflags & ASS_NAMEREF) && (t == 0 || *t == 0 || (legal_identifier (t) == 0 && valid_array_reference (t) == 0)))
+#else
+      if ((aflags & ASS_NAMEREF) && (t == 0 || *t == 0 || legal_identifier (t) == 0))
+#endif
+	{
+	  free (t);
+	  if (invis)
+	    VSETATTR (var, att_invisible);	/* XXX */
+	  return ((SHELL_VAR *)NULL);
+	}
       FREE (value_cell (var));
       var_setvalue (var, t);
     }
@@ -3139,6 +3152,30 @@ unbind_function_def (name)
   return 0;  
 }
 #endif /* DEBUGGER */
+
+int
+delete_var (name, vc)
+     const char *name;
+     VAR_CONTEXT *vc;
+{
+  BUCKET_CONTENTS *elt;
+  SHELL_VAR *old_var;
+  VAR_CONTEXT *v;
+
+  for (elt = (BUCKET_CONTENTS *)NULL, v = vc; v; v = v->down)
+    if (elt = hash_remove (name, v->table, 0))
+      break;
+
+  if (elt == 0)
+    return (-1);
+
+  old_var = (SHELL_VAR *)elt->data;
+  free (elt->key);
+  free (elt);
+
+  dispose_variable (old_var);
+  return (0);
+}
 
 /* Make the variable associated with NAME go away.  HASH_LIST is the
    hash table from which this variable should be deleted (either

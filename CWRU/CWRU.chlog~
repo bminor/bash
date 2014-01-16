@@ -5633,8 +5633,7 @@ builtins/setattr.def
 				   ----
 trap.c
 	- _run_trap_internal: use {save,restore}_parser_state instead of
-	  {save,restore}_token_state, like in run_pending_traps(); don't
-	  need to save and restore last_command_exit_value as a result
+	  {save,restore}_token_state, like in run_pending_traps()
 	- _run_trap_internal: call {save,restore}_pipeline like in
 	  run_pending_traps()
 	- run_pending_traps: since we no longer run traps in a signal handler

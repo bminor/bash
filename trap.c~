@@ -906,7 +906,7 @@ _run_trap_internal (sig, tag)
       trap_command =  savestring (old_trap);
 
       running_trap = sig + 1;
-
+/*      trap_saved_exit_value = last_command_exit_value; */
 #if defined (ARRAY_VARS)
       ps = save_pipestatus_array ();
 #endif
@@ -942,6 +942,7 @@ _run_trap_internal (sig, tag)
       subst_assign_varlist = save_subst_varlist;
       restore_parser_state (&pstate);
 
+/*      last_command_exit_value = trap_saved_exit_value; */
 #if defined (ARRAY_VARS)
       restore_pipestatus_array (ps);
 #endif

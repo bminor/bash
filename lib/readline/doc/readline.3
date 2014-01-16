@@ -4,11 +4,11 @@
 .\"	Chet Ramey
 .\"	Information Network Services
 .\"	Case Western Reserve University
-.\"	chet@ins.CWRU.Edu
+.\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Nov 15 21:02:20 EST 2012
+.\"	Last Change: Mon Jan  6 16:34:55 EST 2014
 .\"
-.TH READLINE 3 "2012 November 15" "GNU Readline 6.2"
+.TH READLINE 3 "2014 January 6" "GNU Readline 6.3"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -821,12 +821,21 @@ as if the "!$" history expansion had been specified.
 .PP
 .PD 0
 .TP
-.B delete\-char (C\-d)
-Delete the character at point.  If point is at the
-beginning of the line, there are no characters in the line, and
-the last character typed was not bound to \fBdelete\-char\fP, then return
+.B \fIend\-of\-file\fP (usually C\-d)
+The character indicating end-of-file as set, for example, by
+.if t \f(CWstty\fP.
+.if n ``stty''.
+If this character is read when there are no characters
+on the line, and point is at the beginning of the line, Readline
+interprets it as the end of input and returns
 .SM
 .BR EOF .
+.TP
+.B delete\-char (C\-d)
+Delete the character at point.
+If this function is bound to the
+same character as the tty \fBEOF\fP character, as \fBC\-d\fP
+commonly is, see above for the effects.
 .TP
 .B backward\-delete\-char (Rubout)
 Delete the character behind the cursor.  When given a numeric argument,
@@ -1401,7 +1410,7 @@ bfox@gnu.org
 .PP
 Chet Ramey, Case Western Reserve University
 .br
-chet@ins.CWRU.Edu
+chet.ramey@case.edu
 .SH BUG REPORTS
 If you find a bug in
 .B readline,
@@ -1421,7 +1430,7 @@ newsgroup
 .PP
 Comments and bug reports concerning
 this manual page should be directed to
-.IR chet@ins.CWRU.Edu .
+.IR chet.ramey@case.edu .
 .SH BUGS
 .PP
 It's too big and too slow.

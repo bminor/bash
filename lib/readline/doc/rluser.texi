@@ -9,7 +9,7 @@ use these features.  There is a document entitled "readline.texinfo"
 which contains both end-user and programmer documentation for the
 GNU Readline Library.
 
-Copyright (C) 1988--2012 Free Software Foundation, Inc.
+Copyright (C) 1988--2014 Free Software Foundation, Inc.
 
 Authored by Brian Fox and Chet Ramey.
 
@@ -1189,11 +1189,17 @@ as if the @samp{!$} history expansion had been specified.
 @subsection Commands For Changing Text
 
 @ftable @code
+
+@item @i{end-of-file} (usually C-d)
+The character indicating end-of-file as set, for example, by
+@code{stty}.  If this character is read when there are no characters
+on the line, and point is at the beginning of the line, Readline
+interprets it as the end of input and returns @sc{eof}.
+
 @item delete-char (C-d)
-Delete the character at point.  If point is at the
-beginning of the line, there are no characters in the line, and
-the last character typed was not bound to @code{delete-char}, then
-return @sc{eof}.
+Delete the character at point.  If this function is bound to the
+same character as the tty @sc{eof} character, as @kbd{C-d}
+commonly is, see above for the effects.
 
 @item backward-delete-char (Rubout)
 Delete the character behind the cursor.  A numeric argument means

@@ -3,14 +3,14 @@
 .\"
 .\"	Chet Ramey
 .\"	Case Western Reserve University
-.\"	chet@po.cwru.edu
+.\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Sun Oct 20 22:13:29 EDT 2013
+.\"	Last Change: Mon Jan  6 16:40:31 EST 2014
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2013 October 20" "GNU Bash 4.3"
+.TH BASH 1 "2014 January 6" "GNU Bash 4.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -5804,13 +5804,21 @@ and \fIemacs\fP as the editor, in that order.
 .PP
 .PD 0
 .TP
-.B delete\-char (C\-d)
-Delete the character at point.  If point is at the
-beginning of the line, there are no characters in the line, and
-the last character typed was not bound to \fBdelete\-char\fP,
-then return
+.B \fIend\-of\-file\fP (usually C\-d)
+The character indicating end-of-file as set, for example, by
+.if t \f(CWstty\fP.
+.if n ``stty''.
+If this character is read when there are no characters
+on the line, and point is at the beginning of the line, Readline
+interprets it as the end of input and returns
 .SM
 .BR EOF .
+.TP
+.B delete\-char (C\-d)
+Delete the character at point.
+If this function is bound to the
+same character as the tty \fBEOF\fP character, as \fBC\-d\fP
+commonly is, see above for the effects.
 .TP
 .B backward\-delete\-char (Rubout)
 Delete the character behind the cursor.  When given a numeric argument,

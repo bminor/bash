@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash 3.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-11-20 07:51-0500\n"
+"POT-Creation-Date: 2014-01-09 15:38-0500\n"
 "PO-Revision-Date: 2007-07-26 07:18+0300\n"
 "Last-Translator: Alexander Shopov <ash@contact.bg>\n"
 "Language-Team: Bulgarian <dict@fsa-bg.org>\n"
@@ -21,7 +21,7 @@ msgstr ""
 msgid "bad array subscript"
 msgstr "неправилен индекс на масив"
 
-#: arrayfunc.c:356 builtins/declare.def:585
+#: arrayfunc.c:356 builtins/declare.def:566
 #, c-format
 msgid "%s: cannot convert indexed to associative array"
 msgstr ""
@@ -66,6 +66,21 @@ msgstr "в %2$s липсва затварящ знак „%1$c“"
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: разделителят двоеточие липсва"
+
+#: braces.c:321
+#, c-format
+msgid "brace expansion: cannot allocate memory for %s"
+msgstr ""
+
+#: braces.c:413
+#, c-format
+msgid "brace expansion: failed to allocate memory for %d elements"
+msgstr ""
+
+#: braces.c:452
+#, c-format
+msgid "brace expansion: failed to allocate memory for `%s'"
+msgstr ""
 
 #: builtins/alias.def:132
 #, fuzzy, c-format
@@ -189,7 +204,7 @@ msgstr "неправилен номер на сигнал"
 msgid "invalid hex number"
 msgstr "грешно число"
 
-#: builtins/common.c:242 expr.c:1461
+#: builtins/common.c:242 expr.c:1470
 msgid "invalid number"
 msgstr "грешно число"
 
@@ -302,7 +317,7 @@ msgstr ""
 msgid "can only be used in a function"
 msgstr "може да се използва само във функция"
 
-#: builtins/declare.def:315 builtins/declare.def:533
+#: builtins/declare.def:315 builtins/declare.def:509
 #, c-format
 msgid "%s: reference variable cannot be an array"
 msgstr ""
@@ -312,21 +327,21 @@ msgstr ""
 msgid "%s: nameref variable self references not allowed"
 msgstr ""
 
-#: builtins/declare.def:422
+#: builtins/declare.def:398
 msgid "cannot use `-f' to make functions"
 msgstr "„-f“ не може да се използва за създаването на функции"
 
-#: builtins/declare.def:434 execute_cmd.c:5329
+#: builtins/declare.def:410 execute_cmd.c:5338
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: функция с права само за четене"
 
-#: builtins/declare.def:572
+#: builtins/declare.def:553
 #, c-format
 msgid "%s: cannot destroy array variables in this way"
 msgstr "%s: променливите за масиви не могат да се унищожават така"
 
-#: builtins/declare.def:579 builtins/read.def:733
+#: builtins/declare.def:560 builtins/read.def:733
 #, c-format
 msgid "%s: cannot convert associative to indexed array"
 msgstr ""
@@ -355,7 +370,7 @@ msgstr "%s: не е зареден динамично"
 msgid "%s: cannot delete: %s"
 msgstr "%s: не може да се изтрие: %s"
 
-#: builtins/evalfile.c:140 builtins/hash.def:171 execute_cmd.c:5176
+#: builtins/evalfile.c:140 builtins/hash.def:171 execute_cmd.c:5185
 #: shell.c:1481
 #, c-format
 msgid "%s: is a directory"
@@ -580,6 +595,11 @@ msgstr "„%c“: грешен форматиращ знак"
 #, fuzzy, c-format
 msgid "warning: %s: %s"
 msgstr "%s: предупреждение: "
+
+#: builtins/printf.def:768
+#, c-format
+msgid "format parsing problem: %s"
+msgstr ""
 
 #: builtins/printf.def:865
 msgid "missing hex digit for \\x"
@@ -929,53 +949,53 @@ msgstr ""
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr "стандартният вход от /dev/null не може да бъде пренасочен: %s"
 
-#: execute_cmd.c:1230
+#: execute_cmd.c:1233
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "в променливата $TIMEFORMAT: „%c“: грешен форматиращ знак"
 
-#: execute_cmd.c:2284
+#: execute_cmd.c:2287
 #, fuzzy
 msgid "pipe error"
 msgstr "грешка при запис: %s"
 
-#: execute_cmd.c:4359
+#: execute_cmd.c:4363
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
 msgstr ""
 
-#: execute_cmd.c:4852
+#: execute_cmd.c:4861
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr ""
 "%s: ограничение: в имената на командите не може да присъства знакът „/“"
 
-#: execute_cmd.c:4941
+#: execute_cmd.c:4950
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: командата не е открита"
 
-#: execute_cmd.c:5174
+#: execute_cmd.c:5183
 #, fuzzy, c-format
 msgid "%s: %s"
 msgstr "%s е %s\n"
 
-#: execute_cmd.c:5211
+#: execute_cmd.c:5220
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: лош интерпретатор"
 
-#: execute_cmd.c:5248
+#: execute_cmd.c:5257
 #, fuzzy, c-format
 msgid "%s: cannot execute binary file: %s"
 msgstr "%s: двоичният файл не може да бъде изпълнен"
 
-#: execute_cmd.c:5320
+#: execute_cmd.c:5329
 #, fuzzy, c-format
 msgid "`%s': is a special builtin"
 msgstr "%s е вградена команда в обвивката\n"
 
-#: execute_cmd.c:5372
+#: execute_cmd.c:5381
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "файловият дескриптор %d не може да се дублира като дескриптор %d"
@@ -996,7 +1016,7 @@ msgstr "синтактична грешка в израз"
 msgid "attempted assignment to non-variable"
 msgstr "опит за присвояване на стойност на нещо, което не е променлива"
 
-#: expr.c:495 expr.c:851
+#: expr.c:495 expr.c:858
 msgid "division by 0"
 msgstr "деление на 0"
 
@@ -1008,41 +1028,41 @@ msgstr "програмна грешка: неправилна лексема з�
 msgid "`:' expected for conditional expression"
 msgstr "за условен израз се изисква „:“"
 
-#: expr.c:910
+#: expr.c:919
 msgid "exponent less than 0"
 msgstr "степента е по-малка от 0"
 
-#: expr.c:967
+#: expr.c:976
 msgid "identifier expected after pre-increment or pre-decrement"
 msgstr "очаква се идентификатор след предварително увеличаване или намаляване"
 
-#: expr.c:993
+#: expr.c:1002
 msgid "missing `)'"
 msgstr "липсва „)“"
 
-#: expr.c:1044 expr.c:1381
+#: expr.c:1053 expr.c:1390
 msgid "syntax error: operand expected"
 msgstr "синтактична грешка: очаква се оператор"
 
-#: expr.c:1383
+#: expr.c:1392
 #, fuzzy
 msgid "syntax error: invalid arithmetic operator"
 msgstr "синтактична грешка: изисква се аритметичен израз"
 
-#: expr.c:1407
+#: expr.c:1416
 #, c-format
 msgid "%s%s%s: %s (error token is \"%s\")"
 msgstr ""
 
-#: expr.c:1465
+#: expr.c:1474
 msgid "invalid arithmetic base"
 msgstr "грешна аритметична основа на бройна система"
 
-#: expr.c:1485
+#: expr.c:1494
 msgid "value too great for base"
 msgstr "стойността е прекалено голяма за основата"
 
-#: expr.c:1534
+#: expr.c:1543
 #, fuzzy, c-format
 msgid "%s: expression error\n"
 msgstr "%s: очаква се целочислен израз"
@@ -1073,145 +1093,145 @@ msgstr ""
 msgid "start_pipeline: pgrp pipe"
 msgstr ""
 
-#: jobs.c:892
+#: jobs.c:893
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr ""
 
-#: jobs.c:1010
+#: jobs.c:1012
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "изтриване на спряната задача %d в групата процеси %ld"
 
-#: jobs.c:1115
+#: jobs.c:1117
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
 msgstr ""
 
-#: jobs.c:1118
+#: jobs.c:1120
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr ""
 
-#: jobs.c:1433
+#: jobs.c:1435
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr ""
 "описателен идентификатор на процес: %ld: няма такъв идентификатор на процес"
 
-#: jobs.c:1448
+#: jobs.c:1450
 #, c-format
 msgid "Signal %d"
 msgstr ""
 
-#: jobs.c:1462 jobs.c:1487
+#: jobs.c:1464 jobs.c:1489
 msgid "Done"
 msgstr ""
 
-#: jobs.c:1467 siglist.c:123
+#: jobs.c:1469 siglist.c:123
 msgid "Stopped"
 msgstr ""
 
-#: jobs.c:1471
+#: jobs.c:1473
 #, c-format
 msgid "Stopped(%s)"
 msgstr ""
 
-#: jobs.c:1475
+#: jobs.c:1477
 msgid "Running"
-msgstr ""
-
-#: jobs.c:1489
-#, c-format
-msgid "Done(%d)"
 msgstr ""
 
 #: jobs.c:1491
 #, c-format
+msgid "Done(%d)"
+msgstr ""
+
+#: jobs.c:1493
+#, c-format
 msgid "Exit %d"
 msgstr ""
 
-#: jobs.c:1494
+#: jobs.c:1496
 msgid "Unknown status"
 msgstr ""
 
-#: jobs.c:1581
+#: jobs.c:1583
 #, c-format
 msgid "(core dumped) "
 msgstr ""
 
-#: jobs.c:1600
+#: jobs.c:1602
 #, c-format
 msgid "  (wd: %s)"
 msgstr ""
 
-#: jobs.c:1817
+#: jobs.c:1819
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr ""
 
-#: jobs.c:2136 nojobs.c:605
+#: jobs.c:2138 nojobs.c:605
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "изчакване: процесът с идентификатор %ld не е дъщерен на тази обвивка"
 
-#: jobs.c:2383
+#: jobs.c:2385
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "изчакване: липсват данни за процес с идентификатор %ld"
 
-#: jobs.c:2692
+#: jobs.c:2694
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "изчакване на задача: задачата %d е спряна"
 
-#: jobs.c:2984
+#: jobs.c:2986
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: задачата е приключила"
 
-#: jobs.c:2993
+#: jobs.c:2995
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: задача %d вече е във фонов режим"
 
-#: jobs.c:3218
+#: jobs.c:3220
 msgid "waitchld: turning on WNOHANG to avoid indefinite block"
 msgstr ""
 
-#: jobs.c:3709
+#: jobs.c:3711
 #, fuzzy, c-format
 msgid "%s: line %d: "
 msgstr "%s: предупреждение: "
 
-#: jobs.c:3723 nojobs.c:843
+#: jobs.c:3725 nojobs.c:843
 #, c-format
 msgid " (core dumped)"
 msgstr ""
 
-#: jobs.c:3735 jobs.c:3748
+#: jobs.c:3737 jobs.c:3750
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr ""
 
-#: jobs.c:3780
+#: jobs.c:3782
 msgid "initialize_job_control: getpgrp failed"
 msgstr ""
 
-#: jobs.c:3841
+#: jobs.c:3843
 msgid "initialize_job_control: line discipline"
 msgstr ""
 
-#: jobs.c:3851
+#: jobs.c:3853
 msgid "initialize_job_control: setpgid"
 msgstr ""
 
-#: jobs.c:3872 jobs.c:3881
+#: jobs.c:3874 jobs.c:3883
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr ""
 
-#: jobs.c:3886
+#: jobs.c:3888
 msgid "no job control in this shell"
 msgstr "в тази обвивка няма управление на задачите"
 
@@ -1374,100 +1394,100 @@ msgid "make_redirection: redirection instruction `%d' out of range"
 msgstr ""
 "пренасочване: инструкцията за пренасочване „%d“ е извън допустимия диапазон"
 
-#: parse.y:3210 parse.y:3493
+#: parse.y:3273 parse.y:3556
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr ""
 "неочакван знак за край на файл „EOF“, а се очакваше съответстващ знак „%c“"
 
-#: parse.y:4099
+#: parse.y:4163
 msgid "unexpected EOF while looking for `]]'"
 msgstr "неочакван знак за край на файл „EOF“, а се очакваше „]]“"
 
-#: parse.y:4104
+#: parse.y:4168
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr "синтактична грешка в условен израз: неочаквана лексема „%s“"
 
-#: parse.y:4108
+#: parse.y:4172
 msgid "syntax error in conditional expression"
 msgstr "синтактична грешка в условен израз"
 
-#: parse.y:4186
+#: parse.y:4250
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr "неочаквана лексема „%s“, а се очакваше знакът „)“"
 
-#: parse.y:4190
+#: parse.y:4254
 msgid "expected `)'"
 msgstr "очакваше се „)“"
 
-#: parse.y:4218
+#: parse.y:4282
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr "неочакван аргумент „%s“ за унарен условен оператор"
 
-#: parse.y:4222
+#: parse.y:4286
 msgid "unexpected argument to conditional unary operator"
 msgstr "неочакван аргумент за унарен условен оператор"
 
-#: parse.y:4268
+#: parse.y:4332
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr "неочаквана лексема „%s“, очакваше се бинарен условен оператор"
 
-#: parse.y:4272
+#: parse.y:4336
 msgid "conditional binary operator expected"
 msgstr "очакваше се бинарен условен оператор"
 
-#: parse.y:4294
+#: parse.y:4358
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr "неочакван аргумент „%s“ за бинарен условен оператор"
 
-#: parse.y:4298
+#: parse.y:4362
 msgid "unexpected argument to conditional binary operator"
 msgstr "неочакван аргумент за бинарен условен оператор"
 
-#: parse.y:4309
+#: parse.y:4373
 #, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr "неочаквана лексема „%c“ в условна команда"
 
-#: parse.y:4312
+#: parse.y:4376
 #, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr "неочаквана лексема „%s“ в условна команда"
 
-#: parse.y:4316
+#: parse.y:4380
 #, c-format
 msgid "unexpected token %d in conditional command"
 msgstr "неочаквана лексема %d в условна команда"
 
-#: parse.y:5666
+#: parse.y:5730
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "синтактична грешка в близост до неочакваната лексема „%s“"
 
-#: parse.y:5684
+#: parse.y:5748
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "синтактична грешка в близост до „%s“"
 
-#: parse.y:5694
+#: parse.y:5758
 msgid "syntax error: unexpected end of file"
 msgstr "синтактична грешка: неочакван край на файл"
 
-#: parse.y:5694
+#: parse.y:5758
 msgid "syntax error"
 msgstr "синтактична грешка"
 
-#: parse.y:5756
+#: parse.y:5820
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "Използвайте „%s“, за да излезете от обвивката.\n"
 
-#: parse.y:5918
+#: parse.y:5982
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "неочакван знак за край на файл „EOF“, очакваше се знакът „)“"
 
@@ -1611,7 +1631,7 @@ msgstr ""
 msgid "Use the `bashbug' command to report bugs.\n"
 msgstr "За да докладвате грешки използвайте командата „bashbug“.\n"
 
-#: sig.c:679
+#: sig.c:691
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
 msgstr "маска за обработката на сигнали: %d: невалидна операция"
@@ -1957,58 +1977,58 @@ msgstr ""
 msgid "%s: variable may not be assigned value"
 msgstr "%s: на член от масив не може да се присвои списък"
 
-#: variables.c:3600
+#: variables.c:3646
 msgid "all_local_variables: no function context at current scope"
 msgstr ""
 "всички локални променливи: липсва контекст на функция в текущата област на\n"
 "видимост"
 
-#: variables.c:3845
+#: variables.c:3891
 #, fuzzy, c-format
 msgid "%s has null exportstr"
 msgstr "%s: аргументът е null или не е зададен"
 
-#: variables.c:3850 variables.c:3859
+#: variables.c:3896 variables.c:3905
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "неправилен знак на позиция %d в низа за изнасяне за %s"
 
-#: variables.c:3865
+#: variables.c:3911
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "липсва „=“ в низа за изнасяне за %s"
 
-#: variables.c:4298
+#: variables.c:4344
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr ""
 "изваждане на контекст на променливи: в началото на структурата за променливи "
 "на\n"
 "обвивката (shell_variables) е нещо, което не е контекст на функция"
 
-#: variables.c:4311
+#: variables.c:4357
 msgid "pop_var_context: no global_variables context"
 msgstr ""
 "изваждане на контекст на променливи: липсва контекст за глобални променливи\n"
 "(global_variables)"
 
-#: variables.c:4385
+#: variables.c:4431
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr ""
 "изваждане на област: последният елемент структурата за променливи на "
 "обвивката\n"
 "(shell_variables) не е временна област в обкръжението"
 
-#: variables.c:5211
+#: variables.c:5257
 #, fuzzy, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: не може да се отвори: %s"
 
-#: variables.c:5216
+#: variables.c:5262
 #, fuzzy, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%d: грешен файлов дескриптор: %s"
 
-#: variables.c:5261
+#: variables.c:5307
 #, fuzzy, c-format
 msgid "%s: %s: compatibility value out of range"
 msgstr "%s: %s е извън допустимия диапазон"

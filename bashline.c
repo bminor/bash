@@ -4188,10 +4188,11 @@ bash_dequote_text (text)
 static int
 bash_event_hook ()
 {
-  /* If we're going to longjmp to top_level, make sure we clean up readline */
-  if (interrupt_state && signal_is_trapped (SIGINT) == 0)
+  /* If we're going to longjmp to top_level, make sure we clean up readline.
+     check_signals will call QUIT, which will eventually longjmp to top_level,
+     calling run_interrupt_trap along the way. */
+  if (interrupt_state)
     rl_cleanup_after_signal ();
-
   bashline_reset_event_hook ();
   check_signals_and_traps ();	/* XXX */
   return 0;

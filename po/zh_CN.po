@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash 4.3-pre2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-11-20 07:51-0500\n"
+"POT-Creation-Date: 2014-01-09 15:38-0500\n"
 "PO-Revision-Date: 2013-09-02 05:15+0800\n"
 "Last-Translator: Anthony Fok <foka@debian.org>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
@@ -23,7 +23,7 @@ msgstr ""
 msgid "bad array subscript"
 msgstr "数组下标不正确"
 
-#: arrayfunc.c:356 builtins/declare.def:585
+#: arrayfunc.c:356 builtins/declare.def:566
 #, c-format
 msgid "%s: cannot convert indexed to associative array"
 msgstr "%s: 无法将索引数组转化为关联数组"
@@ -66,6 +66,21 @@ msgstr "%2$s 中没有闭合的 `%1$c'"
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: 缺少冒号分隔符"
+
+#: braces.c:321
+#, c-format
+msgid "brace expansion: cannot allocate memory for %s"
+msgstr ""
+
+#: braces.c:413
+#, c-format
+msgid "brace expansion: failed to allocate memory for %d elements"
+msgstr ""
+
+#: braces.c:452
+#, c-format
+msgid "brace expansion: failed to allocate memory for `%s'"
+msgstr ""
 
 #: builtins/alias.def:132
 #, c-format
@@ -189,7 +204,7 @@ msgstr "无效的八进制数"
 msgid "invalid hex number"
 msgstr "无效的十六进制数"
 
-#: builtins/common.c:242 expr.c:1461
+#: builtins/common.c:242 expr.c:1470
 msgid "invalid number"
 msgstr "无效数字"
 
@@ -302,7 +317,7 @@ msgstr "当前未执行补完功能"
 msgid "can only be used in a function"
 msgstr "只能在函数中使用"
 
-#: builtins/declare.def:315 builtins/declare.def:533
+#: builtins/declare.def:315 builtins/declare.def:509
 #, c-format
 msgid "%s: reference variable cannot be an array"
 msgstr ""
@@ -312,21 +327,21 @@ msgstr ""
 msgid "%s: nameref variable self references not allowed"
 msgstr ""
 
-#: builtins/declare.def:422
+#: builtins/declare.def:398
 msgid "cannot use `-f' to make functions"
 msgstr "无法用 `-f' 生成函数"
 
-#: builtins/declare.def:434 execute_cmd.c:5329
+#: builtins/declare.def:410 execute_cmd.c:5338
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: 只读函数"
 
-#: builtins/declare.def:572
+#: builtins/declare.def:553
 #, c-format
 msgid "%s: cannot destroy array variables in this way"
 msgstr "%s: 无法以这种方式销毁数组变量"
 
-#: builtins/declare.def:579 builtins/read.def:733
+#: builtins/declare.def:560 builtins/read.def:733
 #, c-format
 msgid "%s: cannot convert associative to indexed array"
 msgstr "%s: 无法将关联数组转化为索引数组"
@@ -355,7 +370,7 @@ msgstr "%s: 未以动态方式加载"
 msgid "%s: cannot delete: %s"
 msgstr "%s: 无法删除: %s"
 
-#: builtins/evalfile.c:140 builtins/hash.def:171 execute_cmd.c:5176
+#: builtins/evalfile.c:140 builtins/hash.def:171 execute_cmd.c:5185
 #: shell.c:1481
 #, c-format
 msgid "%s: is a directory"
@@ -575,6 +590,11 @@ msgstr "`%c': 无效格式字符"
 #, c-format
 msgid "warning: %s: %s"
 msgstr "警告: %s: %s"
+
+#: builtins/printf.def:768
+#, c-format
+msgid "format parsing problem: %s"
+msgstr ""
 
 #: builtins/printf.def:865
 msgid "missing hex digit for \\x"
@@ -913,51 +933,51 @@ msgstr "\a 等待输入超时：自动注销\n"
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr "无法从 /dev/null 重定向标准输入: %s"
 
-#: execute_cmd.c:1230
+#: execute_cmd.c:1233
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "时间格式: `%c': 无效的格式字符"
 
-#: execute_cmd.c:2284
+#: execute_cmd.c:2287
 msgid "pipe error"
 msgstr "管道错误"
 
-#: execute_cmd.c:4359
+#: execute_cmd.c:4363
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
 msgstr ""
 
-#: execute_cmd.c:4852
+#: execute_cmd.c:4861
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: 受限的: 无法在命令名中使用 `/'"
 
-#: execute_cmd.c:4941
+#: execute_cmd.c:4950
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: 未找到命令"
 
-#: execute_cmd.c:5174
+#: execute_cmd.c:5183
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: execute_cmd.c:5211
+#: execute_cmd.c:5220
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: 解释器错误"
 
-#: execute_cmd.c:5248
+#: execute_cmd.c:5257
 #, fuzzy, c-format
 msgid "%s: cannot execute binary file: %s"
 msgstr "%s: 无法执行二进制文件"
 
-#: execute_cmd.c:5320
+#: execute_cmd.c:5329
 #, fuzzy, c-format
 msgid "`%s': is a special builtin"
 msgstr "%s 是 shell 内建\n"
 
-#: execute_cmd.c:5372
+#: execute_cmd.c:5381
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "无法复制文件描述符 %d 到文件描述符 %d"
@@ -978,7 +998,7 @@ msgstr "表达式中有语法错误"
 msgid "attempted assignment to non-variable"
 msgstr "尝试给非变量赋值"
 
-#: expr.c:495 expr.c:851
+#: expr.c:495 expr.c:858
 msgid "division by 0"
 msgstr "除0"
 
@@ -990,40 +1010,40 @@ msgstr "错误：表达式赋值符号错误"
 msgid "`:' expected for conditional expression"
 msgstr "条件表达式需要 `:'"
 
-#: expr.c:910
+#: expr.c:919
 msgid "exponent less than 0"
 msgstr "指数小于0"
 
-#: expr.c:967
+#: expr.c:976
 msgid "identifier expected after pre-increment or pre-decrement"
 msgstr "预增符或预减符后应跟有标识符"
 
-#: expr.c:993
+#: expr.c:1002
 msgid "missing `)'"
 msgstr "缺少 `)'"
 
-#: expr.c:1044 expr.c:1381
+#: expr.c:1053 expr.c:1390
 msgid "syntax error: operand expected"
 msgstr "语法错误: 需要操作数"
 
-#: expr.c:1383
+#: expr.c:1392
 msgid "syntax error: invalid arithmetic operator"
 msgstr "语法错误: 无效的算术运算符"
 
-#: expr.c:1407
+#: expr.c:1416
 #, c-format
 msgid "%s%s%s: %s (error token is \"%s\")"
 msgstr "%s%s%s: %s (错误符号是 \"%s\")"
 
-#: expr.c:1465
+#: expr.c:1474
 msgid "invalid arithmetic base"
 msgstr "无效的算数进制"
 
-#: expr.c:1485
+#: expr.c:1494
 msgid "value too great for base"
 msgstr "数值太大不可为算数进制的基"
 
-#: expr.c:1534
+#: expr.c:1543
 #, c-format
 msgid "%s: expression error\n"
 msgstr "%s: 表达式错误\n"
@@ -1051,144 +1071,144 @@ msgstr "save_bash_input: 已经存在新的文件描述符 %d 的缓冲区"
 msgid "start_pipeline: pgrp pipe"
 msgstr "start_pipeline: 进程组管道"
 
-#: jobs.c:892
+#: jobs.c:893
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr "生成的进程号 %d 显示为运行中的任务 %d"
 
-#: jobs.c:1010
+#: jobs.c:1012
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "删除进程组 %2$ld 中已停止的任务 %1$d"
 
-#: jobs.c:1115
+#: jobs.c:1117
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
 msgstr "add_process: 进程 %5ld(%s) 进入 the_pipeline"
 
-#: jobs.c:1118
+#: jobs.c:1120
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr "add_process: 进程号 %5ld(%s) 标注为仍活着"
 
-#: jobs.c:1433
+#: jobs.c:1435
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "describe_pid: %ld: 无此进程号"
 
-#: jobs.c:1448
+#: jobs.c:1450
 #, c-format
 msgid "Signal %d"
 msgstr "信号 %d"
 
-#: jobs.c:1462 jobs.c:1487
+#: jobs.c:1464 jobs.c:1489
 msgid "Done"
 msgstr "已完成"
 
-#: jobs.c:1467 siglist.c:123
+#: jobs.c:1469 siglist.c:123
 msgid "Stopped"
 msgstr "已停止"
 
-#: jobs.c:1471
+#: jobs.c:1473
 #, c-format
 msgid "Stopped(%s)"
 msgstr "已停止(%s)"
 
-#: jobs.c:1475
+#: jobs.c:1477
 msgid "Running"
 msgstr "运行中"
 
-#: jobs.c:1489
+#: jobs.c:1491
 #, c-format
 msgid "Done(%d)"
 msgstr "已完成(%d)"
 
-#: jobs.c:1491
+#: jobs.c:1493
 #, c-format
 msgid "Exit %d"
 msgstr "退出 %d"
 
-#: jobs.c:1494
+#: jobs.c:1496
 msgid "Unknown status"
 msgstr "未知状态"
 
-#: jobs.c:1581
+#: jobs.c:1583
 #, c-format
 msgid "(core dumped) "
 msgstr "(核心已转储)"
 
-#: jobs.c:1600
+#: jobs.c:1602
 #, c-format
 msgid "  (wd: %s)"
 msgstr "  (工作目录: %s)"
 
-#: jobs.c:1817
+#: jobs.c:1819
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr "子进程 setpgid (%ld 到 %ld)"
 
-#: jobs.c:2136 nojobs.c:605
+#: jobs.c:2138 nojobs.c:605
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: 进程号 %ld 不是当前 shell 的子进程"
 
-#: jobs.c:2383
+#: jobs.c:2385
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wiat_for: 没有进程 %ld 的记录"
 
-#: jobs.c:2692
+#: jobs.c:2694
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: 任务 %d 已停止"
 
-#: jobs.c:2984
+#: jobs.c:2986
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: 任务已经终止"
 
-#: jobs.c:2993
+#: jobs.c:2995
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: 任务 %d 已在后台"
 
-#: jobs.c:3218
+#: jobs.c:3220
 msgid "waitchld: turning on WNOHANG to avoid indefinite block"
 msgstr "waitchld: 打开 WNOHANG 以避免无限阻塞"
 
-#: jobs.c:3709
+#: jobs.c:3711
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s: 行 %d: "
 
-#: jobs.c:3723 nojobs.c:843
+#: jobs.c:3725 nojobs.c:843
 #, c-format
 msgid " (core dumped)"
 msgstr " (核心已转储)"
 
-#: jobs.c:3735 jobs.c:3748
+#: jobs.c:3737 jobs.c:3750
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(当前工作目录：%s)\n"
 
-#: jobs.c:3780
+#: jobs.c:3782
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: getpgrp 失败"
 
-#: jobs.c:3841
+#: jobs.c:3843
 msgid "initialize_job_control: line discipline"
 msgstr "initialize_job_control: 行规则"
 
-#: jobs.c:3851
+#: jobs.c:3853
 msgid "initialize_job_control: setpgid"
 msgstr "initialize_job_control: setpgid"
 
-#: jobs.c:3872 jobs.c:3881
+#: jobs.c:3874 jobs.c:3883
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "无法设定终端进程组(%d)"
 
-#: jobs.c:3886
+#: jobs.c:3888
 msgid "no job control in this shell"
 msgstr "此 shell 中无任务控制"
 
@@ -1341,99 +1361,99 @@ msgstr "立即文档在第 %d 行被文件结束符分隔 (需要 `%s')"
 msgid "make_redirection: redirection instruction `%d' out of range"
 msgstr "make_redirection: 重定向指令 `%d' 越界"
 
-#: parse.y:3210 parse.y:3493
+#: parse.y:3273 parse.y:3556
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "寻找匹配的 `%c' 是遇到了未预期的文件结束符"
 
-#: parse.y:4099
+#: parse.y:4163
 msgid "unexpected EOF while looking for `]]'"
 msgstr "寻找 `]]' 是遇到了未预期的文件结束符"
 
-#: parse.y:4104
+#: parse.y:4168
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr "条件表达式中有语法错误: 未预期的符号 `%s'"
 
-#: parse.y:4108
+#: parse.y:4172
 msgid "syntax error in conditional expression"
 msgstr "条件表达式中有语法错误"
 
-#: parse.y:4186
+#: parse.y:4250
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr "未预期的符号 `%s' ，需要 `)'"
 
-#: parse.y:4190
+#: parse.y:4254
 msgid "expected `)'"
 msgstr "需要 `)'"
 
-#: parse.y:4218
+#: parse.y:4282
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr "一元条件运算符使用了未预期的参数 `%s'"
 
-#: parse.y:4222
+#: parse.y:4286
 msgid "unexpected argument to conditional unary operator"
 msgstr "一元条件运算符使用了未预期的参数"
 
-#: parse.y:4268
+#: parse.y:4332
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr "未预期的符号 `%s'，需要二元条件运算符"
 
-#: parse.y:4272
+#: parse.y:4336
 msgid "conditional binary operator expected"
 msgstr "需要二元条件运算符"
 
-#: parse.y:4294
+#: parse.y:4358
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr "二元条件运算符使用了未预期的参数 `%s'"
 
-#: parse.y:4298
+#: parse.y:4362
 msgid "unexpected argument to conditional binary operator"
 msgstr "二元条件运算符使用了未预期的参数"
 
-#: parse.y:4309
+#: parse.y:4373
 #, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr "条件命令中有未预期的符号 `%c'"
 
-#: parse.y:4312
+#: parse.y:4376
 #, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr "条件命令中有未预期的符号 `%s'"
 
-#: parse.y:4316
+#: parse.y:4380
 #, c-format
 msgid "unexpected token %d in conditional command"
 msgstr "条件命令中有未预期的符号 %d"
 
-#: parse.y:5666
+#: parse.y:5730
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "未预期的符号 `%s' 附近有语法错误"
 
-#: parse.y:5684
+#: parse.y:5748
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "`%s' 附近有语法错误"
 
-#: parse.y:5694
+#: parse.y:5758
 msgid "syntax error: unexpected end of file"
 msgstr "语法错误: 未预期的文件结尾"
 
-#: parse.y:5694
+#: parse.y:5758
 msgid "syntax error"
 msgstr "语法错误"
 
-#: parse.y:5756
+#: parse.y:5820
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "使用 \"%s\" 退出 shell 。\n"
 
-#: parse.y:5918
+#: parse.y:5982
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "寻找匹配的 `)' 时遇到了未预期的文件结束符"
 
@@ -1572,7 +1592,7 @@ msgstr "请输入 `%s -c help' 以获得关于 shell 内建命令的更多信息
 msgid "Use the `bashbug' command to report bugs.\n"
 msgstr "请使用`bashbug' 命令来报告错误.\n"
 
-#: sig.c:679
+#: sig.c:691
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
 msgstr "sigprocmask: %d: 无效的操作"
@@ -1909,48 +1929,48 @@ msgstr "make_local_variable: 当前作用域中没有函数上下文"
 msgid "%s: variable may not be assigned value"
 msgstr "%s: 无法将文件描述符赋值给变量"
 
-#: variables.c:3600
+#: variables.c:3646
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: 当前作用域中没有函数上下文"
 
-#: variables.c:3845
+#: variables.c:3891
 #, c-format
 msgid "%s has null exportstr"
 msgstr "%s 有空的 exportstr"
 
-#: variables.c:3850 variables.c:3859
+#: variables.c:3896 variables.c:3905
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "%2$s 的 exportstr 中有无效的字符 %1$d"
 
-#: variables.c:3865
+#: variables.c:3911
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "%s 的 exportstr 中没有 `='"
 
-#: variables.c:4298
+#: variables.c:4344
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr "pop_var_context: shell_variables 的头部不是函数上下文"
 
-#: variables.c:4311
+#: variables.c:4357
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: 没有 global_variables 上下文"
 
-#: variables.c:4385
+#: variables.c:4431
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr "pop_scope: shell_variables 的头部不是临时环境作用域"
 
-#: variables.c:5211
+#: variables.c:5257
 #, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: %s: 无法作为文件打开"
 
-#: variables.c:5216
+#: variables.c:5262
 #, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%s: %s: 追踪文件描述符的值无效"
 
-#: variables.c:5261
+#: variables.c:5307
 #, fuzzy, c-format
 msgid "%s: %s: compatibility value out of range"
 msgstr "%s: %s 越界"
