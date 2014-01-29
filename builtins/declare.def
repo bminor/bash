@@ -143,7 +143,7 @@ declare_internal (list, local_var)
   int flags_on, flags_off, *flags;
   int any_failed, assign_error, pflag, nodefs, opt, mkglobal, onref, offref;
   char *t, *subscript_start;
-  SHELL_VAR *var, *refvar;
+  SHELL_VAR *var, *refvar, *v;
   FUNCTION_DEF *shell_fn;
 
   flags_on = flags_off = any_failed = assign_error = pflag = nodefs = mkglobal = 0;
@@ -375,31 +375,7 @@ declare_internal (list, local_var)
 	    var = make_local_array_variable (name, making_array_special);
 	  else
 #endif
-#if 0
-	  /* XXX - this doesn't work right yet. */
-	  /* See below for rationale for doing this. */
-	  if (flags_on & att_nameref)
-	    {
-	      /* See if we are trying to modify an existing nameref variable */
-	      var = find_variable_last_nameref (name);
-	      if (var && nameref_p (var) == 0)
-		var = make_local_variable (name);
-	    }
-	  else if (flags_off & att_nameref)
-	    {
-	      var = (SHELL_VAR *)NULL;
-	      /* See if we are trying to modify an existing nameref variable */
-	      refvar = find_variable_last_nameref (name);
-	      if (refvar && nameref_p (refvar) == 0)
-		refvar = 0;
-	      if (refvar)
-		var = make_local_variable (nameref_cell (refvar));
-	      if (var == 0)
-		var = make_local_variable (name);
-	    }
-	  else
-#endif
-	    var = make_local_variable (name);
+	    var = make_local_variable (name);	/* sets att_invisible for new vars */
 	  if (var == 0)
 	    {
 	      any_failed++;
@@ -534,6 +510,11 @@ declare_internal (list, local_var)
 	      assign_error++;
 	      NEXT_VARIABLE ();
 	    }
+	  else if (flags_on & att_nameref)
+	    {
+	      /* ksh93 compat: turning on nameref attribute turns off -ilu */
+	      VUNSETATTR (var, att_integer|att_uppercase|att_lowercase|att_capcase);
+	    }
 
 	  /* Cannot use declare +r to turn off readonly attribute. */ 
 	  if (readonly_p (var) && (flags_off & att_readonly))
@@ -651,7 +632,19 @@ declare_internal (list, local_var)
 	  /* bind_variable_value duplicates the essential internals of
 	     bind_variable() */
 	  if (offset)
-	    bind_variable_value (var, value, aflags);
+	    {
+	      if (onref)
+		aflags |= ASS_NAMEREF;
+	      v = bind_variable_value (var, value, aflags);
+	      if (v == 0 && onref)
+		{
+		  sh_invalidid (value);
+		  assign_error++;
+		  /* XXX - unset this variable? or leave it as normal var? */
+		  delete_var (var->name, mkglobal ? global_variables : shell_variables);
+		  NEXT_VARIABLE ();
+		}
+	    }
 
 	  /* If we found this variable in the temporary environment, as with
 	     `var=value declare -x var', make sure it is treated identically

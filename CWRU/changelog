@@ -5379,3 +5379,340 @@ execute_cmd.c
 support/shobj-conf
 	- add support for Darwin 13 (Mac OS X 10.9, Mavericks).  Based on a
 	  report by Ludwig Schwardt <ludwig.schwardt@gmail.com>
+
+				   11/20
+				   -----
+[bash-4.3-rc1 frozen]
+
+				   11/24
+				   -----
+builtins/printf.def
+	- bind_printf_variable: make sure that the variable assigned to is
+	  no longer marked as invisible. Fixes bug reported by NBaH
+	  <nbah@sfr.fr>
+
+				   11/28
+				   -----
+jobs.c
+	- delete_old_job: fix off-by-one error in job index in call to
+	  internal_warning. Bug report from Peter Cordes <peter@cordes.ca>
+
+				   11/30
+				   -----
+doc/bashref.texi
+	- add string to description of special parameters with name of
+	  special parameter prefixed by a $, so you can search for $#,
+	  for instance
+
+				   12/2
+				   ----
+lib/readline/{histexpand.c
+	- get_history_event: account for current_history() possibly returning
+	  NULL. Report and fix from Pankaj Sharma <pankaj.s01@samsung.com>
+
+
+				   12/11
+				   -----
+
+lib/readline/parse-colors.c
+	- get_funky_string: don't call abort if we see something we can't
+	  parse; just return an error
+	- _rl_parse_colors: if we encounter an error while parsing $LS_COLORS
+	  we need to leave _rl_color_ext_list as NULL after freeing its
+	  elements, then turn off _rl_colored_stats. Report and fix from Martin
+	  Wesdorp <mwesdorp@casema.nl>
+
+				   12/13
+				   -----
+
+lib/readline/parse-colors.c
+	- _rl_parse_colors: if we encounter an unrecognized prefix, throw an
+	  error but try to recover and go on to the next specification
+
+variables.c
+	- make_local_variable: for new variables this function creates, set
+	  the att_invisible attribute.  All callers from declare_internal.
+	  Indirectly, this is a fix for bug with `declare -n var; var=foo;'
+	  reported by Pierre Gaston <pierre.gaston@gmail.com>
+	- bind_variable: if assigning to nameref variable that doesn't have
+	  a value yet (e.g., with `declare -n var; var=foo'), don't try to
+	  use the unset name. Fixes a segfault reported by Pierre Gaston
+	  <pierre.gaston@gmail.com>
+
+execute_cmd.c
+	- execute_command_internal: make sure last_command_exit_value is set
+	  to 0 after any command executed in the background.  Fixes bug
+	  reported by Martin Kealey <martin@kurahaupo.gen.nz>
+
+				   12/17
+				   -----
+support/config.{guess,sub}
+	- updated to latest versions from git
+
+				   12/19
+				   -----
+parse.y
+	- struct STRING_SAVER: now has a new `flags' element, to identify the
+	  caller: alias expansion, double-paren parsing, or parse_and_execute
+	- push_string: now sets flags to PSH_ALIAS if `ap' argument is non-NULL
+	- push_string: now doesn't attempt to call strlen on a NULL string to
+	  set shell_input_line_size
+	- parser_expanding_alias, parser_save_alias, parser_restore_alias: new
+	  functions to provide an external interface to push_string and
+	  pop_string; parser_save_alias sets flags element to PSH_SOURCE (could
+	  be renamed PSH_EXTERN someday)
+	- shell_getc: when yy_getc returns '\0', instead of just testing
+	  whether the pushed_string_list is not-empty before popping it, don't
+	  pop if if the saved string has flags PSH_SOURCE, indicating that
+	  parse_and_execute set it before setting bash_input to the string.
+	  We should continue reading to the end of that string before popping
+	  back to a potential alias. Partial solution for the problem of aliases
+	  with embedded newlines containing `.' commands being executed out of
+	  order reported by Andrew Martin <andrew.martin@gmail.com>
+	- shell_getc: when yy_getc returns '\0' and there is a saved string of
+	  type PSH_SOURCE, restart the read without popping the string stack
+	  if we have not read to the end of bash_input.location.string.  Rest
+	  of fix for out-of-order execution problem
+
+externs.h
+	- parser_expanding_alias, parser_save_alias, parser_restore_alias: new
+	  extern function declarations
+
+builtins/evalstring.c
+	- pe_prologue: if the parser is expanding an alias, make sure to add
+	  an unwind-protect to restore the alias; undoes the work that will be
+	  performed by parse_and_execute/parse_string
+	- parse_and_execute,parse_string: after calling push_stream to save
+	  bash_input, check whether or not the parser is currently expanding
+	  an alias (parser_expanding_alias() != 0). If it is, we want to save
+	  that string in the pushed_string_list, which we do with
+	  parser_save_alias.
+
+				   12/23
+				   -----
+execute_cmd.c
+	- execute_for_command: make sure to set line_number before expanding
+	  the word list, so expansion errors have the right line number.
+	  From a report from Ben Okopnik <ben@okopnik.com>
+
+expr.c
+	- exp2: save token pointer before calling readtok(), arrange to use
+	  saved token pointer when printing error token on a division by 0
+	  error
+
+				   12/27
+				   -----
+lib/readline/display.c
+	- rl_redisplay: when calculating effects of invisible characters in a
+	  prompt that is split across physical screen lines to set the indices
+	  of linebreaks, don't bother testing local_prompt_prefix (line 751).
+	  That prefix doesn't matter when calculating prompt visible and
+	  invisible characters.  Fixes problem reported by Jinesh Choksi
+	  <jinesh@onelittlehope.com>
+
+Makefile.in
+	- install: make sure to use $(DESTDIR) when installing OTHER_DOCS.
+	  Report and fix from Matthias Klose <doko@debian.org>
+
+doc/texinfo.tex
+	- updated to version of 2013-09-11
+
+				   12/28
+				   -----
+lib/readline/undo.c
+	- rl_do_undo: if we are undoing from a history entry (rl_undo_list ==
+	  current_history()->data), make sure the change to rl_line_buffer is
+	  reflected in the history entry. We use the guts of
+	  rl_maybe_replace_line to do the work.  Fixes problem reported by
+	  gregrwm <backuppc-users@whitleymott.net>
+
+				   12/30
+				   -----
+sig.c
+	- sigint_sighandler: if we get a SIGINT (and this signal handler is
+	  installed) while the wait builtin is running, note that we received
+	  it in the same way as jobs.c:wait_sigint_handler and return.  The
+	  various wait_for functions will look for that with CHECK_WAIT_INTR.
+	  This fixes the wait builtin not being interruptible in an interactive
+	  job control shell
+
+				   12/31
+				   -----
+trap.c
+	- set_signal_hard_ignored: rename set_signal_ignored to this, since it
+	  both sets original_signals[sig] and sets the HARD_IGNORE flag
+	- set_signal_ignored: new function, now just sets original_signals[sig]
+
+trap.h
+	- set_signal_hard_ignored: new external declaration
+
+sig.c
+	- initialize_terminating_signals: call set_signal_hard_ignored instead
+	  of set_signal_ignored for signals with disposition SIG_IGN when the
+	  shell starts
+
+execute_cmd.c
+	- setup_async_signals: make sure we get the original dispositions for
+	  SIGINT and SIGQUIT before starting the subshell, and don't call
+	  set_signal_ignored  because that sets original_signals[sig].  If we
+	  don't, subsequent attempts to reset handling using trap will fail
+	  because it thinks the original dispositions were SIG_IGN. Posix
+	  interpretation 751 (http://austingroupbugs.net/view.php?id=751)
+
+				 1/2/2014
+				 --------
+lib/sh/stringvec.c
+	- strvec_mcreate, strvec_mresize: versions of create and resize that
+	  use malloc and realloc, respectively, instead of xmalloc/xrealloc
+
+braces.c
+	- expand_amble,mkseq: use strvec_mcreate/strvec_mresize so we can
+	  catch and handle memory allocation failures instead of aborting
+	  with the xmalloc/xrealloc interface
+
+lib/sh/strdup.c
+	- strdup replacement function for ancient systems that don't have it
+
+lib/sh/itos.c
+	- mitos: new function, itos that uses strdup instead of savestring
+
+externs.h
+	- strvec_mcreate/strvec_mresize: new extern declarations
+	- mitos: new extern declaration
+
+configure.ac
+	- bash version moved to 4.3-rc2
+
+				    1/6
+				    ---
+doc/bash.1,lib/readline/doc/{rluser.texi,readline.3}
+	- separate the description of what happens when readline reads the
+	  tty EOF character from the description of delete-char, leaving a
+	  note in the delete-char description about common binding for ^D.
+	  From suggestion by Parke <parke.nexus@gmail.com>
+
+lib/readline/doc/{version.texi,history.3,*.texi}
+	- updated email addresses and copyright dates
+
+				    1/7
+				    ---
+variables.c
+	- delete_var: new function, just removes a variable from a hash table
+	  and frees it, without doing anything else
+	- make_variable_value: if we are trying to assign to a nameref variable,
+	  return NULL if the value is null or the empty string or not a valid
+	  identifier
+
+variables.h
+	- delete_var: new extern declaration
+
+subst.h
+	- ASS_NAMEREF: new define for assignments, means assigning to a nameref
+	  variable
+
+builtins/declare.def
+	- declare_internal: if we are creating and assigning to a nameref
+	  variable, make sure the value is a valid variable name (checks done
+	  by make_variable_value via bind_variable_value) and display an
+	  error message, deleting the variable we just created, if it is not.
+	  Fixes bug reported by Peggy Russell <prusselltechgroup@gmail.com>
+
+				    1/9
+				    ---
+builtins/declare.def
+	- declare_internal: turning on nameref attribute for an existing
+	  variable turns off -i/-l/-u/-c attributes (essentially the ones
+	  that cause evaluation at assignment time) for ksh93 compat
+
+builtins/setattr.def
+	- show_name_attributes: if asked to display attributes and values for
+	  a nameref variable, don't follow the nameref chain to the end. More
+	  ksh93 compat
+
+				   1/10
+				   ----
+trap.c
+	- _run_trap_internal: use {save,restore}_parser_state instead of
+	  {save,restore}_token_state, like in run_pending_traps(); don't
+	  need to save and restore last_command_exit_value as a result
+	- _run_trap_internal: call {save,restore}_pipeline like in
+	  run_pending_traps()
+	- run_pending_traps: since we no longer run traps in a signal handler
+	  context, do not block and unblock the trapped signal while the
+	  trap is executing
+	- run_pending_traps: allow recursive invocations (basically, running
+	  traps from a trap handler) with only a warning if the shell is
+	  compiled in debug mode.  If a caller doesn't want this to happen,
+	  it should test running_trap > 0. signal_in_progress (sig) only works
+	  for the signals the shell handles specially
+
+bashline.c
+	- bash_event_hook: make sure we clean up readline if interrupt_state
+	  is set, not only when SIGINT is not trapped.  check_signals_and_traps
+	  will call check_signals, which calls QUIT, which will longjmp back
+	  to top_level, running the interrupt trap along the way.  Fixes the
+	  problem of signal handlers being reset out from under readline, and
+	  not being set properly the next time readline is called, because
+	  signals_set_flag is still set to 1.  XXX - might need to do this
+	  for other signals too?
+
+				   1/11
+				   ----
+subst.h
+	- SD_GLOB: new define for skip_to_delim; means we are scanning a
+	  glob pattern.
+
+subst.c
+	- skip_to_delim: if flags include SD_GLOB, assume we are scanning a
+	  glob pattern.  Currently only used to skip bracket expressions
+	  which may contain one of the delimiters
+
+				   1/12
+				   ----
+subst.c
+	- parameter_brace_expand: when expanding $@ as part of substring
+	  expansion, pattern substitution, or case modification, don't turn
+	  on the QUOTED_NULL flag.  The code that constructs the word to be
+	  returned from expand_word_internal expects a different code path
+	  when $@ is being expanded.  Fixes bug reported by Theodoros
+	  V. Kalamatianos <thkala@gmail.com>
+
+				   1/19
+				   ----
+subst.c
+	- list_dequote_escapes: new function; analogue of list_quote_escapes
+
+pathexp.c
+	- quote_string_for_globbing: fix case where unescaped ^A is last char
+	  in string; need to pass it through unaltered instead of turning it
+	  into a bare backslash
+	- quote_string_for_globbing: when quoting for regexp matching in [[,
+	  don't treat backslash as a quote character; quote the backslash as
+	  any other character.  Part of investigation into reports from
+	  Eduardo A. Bustamante López <dualbus@gmail.com>
+
+				   1/25
+				   ----
+builtins/gen-helpfiles.c
+	- write_helpfiles: add prototype
+	- make sure to #undef xmalloc/xfree/xrealloc/free if USING_BASH_MALLOC
+	  is defined. the code does not use them, and we don't link against
+	  xmalloc.o. Report from Linda Walsh <bash@tlinx.org>
+
+Makefile.in
+	- variables.o: add dependency on builtins/builtext.h; helps with
+	  parallel builds.  Report from Linda Walsh <bash@tlinx.org>
+
+support/shobj-conf
+	- darwin: combine the stanzas into one that will not require them to
+	  be updated on each Mac OS X release.  Report and fix from Max Horn
+	  <max@quendi.de>
+
+				   1/27
+				   ----
+support/shobj-conf
+	- darwin: changed the install_name embedded into the shared library
+	  to contain only the major version number, not the minor one. The
+	  idea is that the minor versions should all be API/ABI compatible,
+	  and it is better to link automatically with the latest one.  Idea
+	  from Max Horn <max@quendi.de>

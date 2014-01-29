@@ -21,10 +21,10 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.3, version 4.060])dnl
+AC_REVISION([for Bash 4.3, version 4.062])dnl
 
 define(bashvers, 4.3)
-define(relstatus, rc1)
+define(relstatus, rc2)
 
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
 
@@ -91,6 +91,7 @@ sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
 *-cygwin*)	opt_bash_malloc=no ;;	# Cygnus's CYGWIN environment
 *-opennt*|*-interix*)	opt_bash_malloc=no ;;	# Interix, now owned by Microsoft
 *-nsk*)		opt_bash_malloc=no ;;	# HP NonStop
+*-haiku*)	opt_bash_malloc=no ;;	# Haiku OS
 esac
 
 # memory scrambling on free()
@@ -784,6 +785,7 @@ AC_REPLACE_FUNCS(strcasecmp strcasestr strerror strftime strnlen strpbrk strstr)
 AC_REPLACE_FUNCS(strtod strtol strtoul strtoll strtoull strtoimax strtoumax)
 AC_REPLACE_FUNCS(dprintf)
 AC_REPLACE_FUNCS(strchrnul)
+AC_REPLACE_FUNCS(strdup)
 
 AC_CHECK_DECLS([AUDIT_USER_TTY],,, [[#include <linux/audit.h>]])
 
@@ -830,7 +832,7 @@ AC_CHECK_HEADERS([argz.h errno.h fcntl.h malloc.h stdio_ext.h])
 dnl AC_FUNC_MALLOC
 AC_FUNC_MMAP
 AC_CHECK_FUNCS([__argz_count __argz_next __argz_stringify dcgettext mempcpy \
-		munmap stpcpy strcspn strdup])
+		munmap stpcpy strcspn])
 
 INTL_DEP= INTL_INC= LIBINTL_H=
 if test "x$USE_INCLUDED_LIBINTL" = "xyes"; then

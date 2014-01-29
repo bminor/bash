@@ -260,7 +260,7 @@ _rl_handle_signal (sig)
 #  endif /* HAVE_BSD_SIGNALS */
 #endif /* !HAVE_POSIX_SIGNALS */
 
-      rl_reset_after_signal ();
+      rl_reset_after_signal ();      
     }
 
   RL_UNSETSTATE(RL_STATE_SIGHANDLER);

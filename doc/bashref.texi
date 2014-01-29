@@ -14,7 +14,7 @@ This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Bash Reference Manual},
 for @code{Bash}, Version @value{VERSION}.
 
-Copyright @copyright{} 1988--2013 Free Software Foundation, Inc.
+Copyright @copyright{} 1988--2014 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -1565,7 +1565,8 @@ only be referenced; assignment to them is not allowed.
 @vtable @code
 
 @item *
-Expands to the positional parameters, starting from one.  When the
+@vindex $*
+($*) Expands to the positional parameters, starting from one.  When the
 expansion occurs within double quotes, it expands to a single word
 with the value of each parameter separated by the first character
 of the @env{IFS}
@@ -1579,7 +1580,8 @@ separators.
 
 
 @item @@
-Expands to the positional parameters, starting from one.  When the
+@vindex $@@
+($@@) Expands to the positional parameters, starting from one.  When the
 expansion occurs within double quotes, each parameter expands to a
 separate word.  That is, @code{"$@@"} is equivalent to
 @code{"$1" "$2" @dots{}}.
@@ -1592,29 +1594,35 @@ When there are no positional parameters, @code{"$@@"} and
 expand to nothing (i.e., they are removed).
 
 @item #
-Expands to the number of positional parameters in decimal.
+@vindex $#
+($#) Expands to the number of positional parameters in decimal.
 
 @item ?
-Expands to the exit status of the most recently executed foreground
+@vindex $?
+($?) Expands to the exit status of the most recently executed foreground
 pipeline.
 
 @item -
-(A hyphen.)  Expands to the current option flags as specified upon
+@vindex $-
+($-, a hyphen.)  Expands to the current option flags as specified upon
 invocation, by the @code{set}
 builtin command, or those set by the shell itself
 (such as the @option{-i} option).
 
 @item $
-Expands to the process @sc{id} of the shell.  In a @code{()} subshell, it
+@vindex $$
+($$) Expands to the process @sc{id} of the shell.  In a @code{()} subshell, it
 expands to the process @sc{id} of the invoking shell, not the subshell.
 
 @item !
-Expands to the process @sc{id} of the job most recently placed into the
+@vindex $!
+($!) Expands to the process @sc{id} of the job most recently placed into the
 background, whether executed as an asynchronous command or using
 the @code{bg} builtin (@pxref{Job Control Builtins}).
 
 @item 0
-Expands to the name of the shell or shell script.  This is set at
+@vindex $0
+($0) Expands to the name of the shell or shell script.  This is set at
 shell initialization.  If Bash is invoked with a file of commands
 (@pxref{Shell Scripts}), @code{$0} is set to the name of that file.
 If Bash is started with the @option{-c} option (@pxref{Invoking Bash}),
@@ -1623,7 +1631,8 @@ executed, if one is present.  Otherwise, it is set
 to the filename used to invoke Bash, as given by argument zero.
 
 @item _
-(An underscore.)
+@vindex $_
+($_, an underscore.)
 At shell startup, set to the absolute pathname used to invoke the
 shell or shell script being executed as passed in the environment
 or argument list.

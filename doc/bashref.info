@@ -2,12 +2,12 @@ This is bashref.info, produced by makeinfo version 4.13 from
 /usr/homes/chet/src/bash/src/doc/bashref.texi.
 
 This text is a brief description of the features that are present in
-the Bash shell (version 4.3, 20 October 2013).
+the Bash shell (version 4.3, 6 January 2014).
 
-   This is Edition 4.3, last updated 20 October 2013, of `The GNU Bash
+   This is Edition 4.3, last updated 6 January 2014, of `The GNU Bash
 Reference Manual', for `Bash', Version 4.3.
 
-   Copyright (C) 1988-2013 Free Software Foundation, Inc.
+   Copyright (C) 1988-2014 Free Software Foundation, Inc.
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -28,10 +28,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in
-the Bash shell (version 4.3, 20 October 2013).  The Bash home page is
+the Bash shell (version 4.3, 6 January 2014).  The Bash home page is
 `http://www.gnu.org/software/bash/'.
 
-   This is Edition 4.3, last updated 20 October 2013, of `The GNU Bash
+   This is Edition 4.3, last updated 6 January 2014, of `The GNU Bash
 Reference Manual', for `Bash', Version 4.3.
 
    Bash contains features that appear in other popular shells, and some
@@ -1350,64 +1350,66 @@ The shell treats several parameters specially.  These parameters may
 only be referenced; assignment to them is not allowed.
 
 `*'
-     Expands to the positional parameters, starting from one.  When the
-     expansion occurs within double quotes, it expands to a single word
-     with the value of each parameter separated by the first character
-     of the `IFS' special variable.  That is, `"$*"' is equivalent to
-     `"$1C$2C..."', where C is the first character of the value of the
-     `IFS' variable.  If `IFS' is unset, the parameters are separated
-     by spaces.  If `IFS' is null, the parameters are joined without
-     intervening separators.
+     ($*) Expands to the positional parameters, starting from one.
+     When the expansion occurs within double quotes, it expands to a
+     single word with the value of each parameter separated by the
+     first character of the `IFS' special variable.  That is, `"$*"' is
+     equivalent to `"$1C$2C..."', where C is the first character of the
+     value of the `IFS' variable.  If `IFS' is unset, the parameters
+     are separated by spaces.  If `IFS' is null, the parameters are
+     joined without intervening separators.
 
 `@'
-     Expands to the positional parameters, starting from one.  When the
-     expansion occurs within double quotes, each parameter expands to a
-     separate word.  That is, `"$@"' is equivalent to `"$1" "$2" ...'.
-     If the double-quoted expansion occurs within a word, the expansion
-     of the first parameter is joined with the beginning part of the
-     original word, and the expansion of the last parameter is joined
-     with the last part of the original word.  When there are no
-     positional parameters, `"$@"' and `$@' expand to nothing (i.e.,
-     they are removed).
+     ($@) Expands to the positional parameters, starting from one.
+     When the expansion occurs within double quotes, each parameter
+     expands to a separate word.  That is, `"$@"' is equivalent to
+     `"$1" "$2" ...'.  If the double-quoted expansion occurs within a
+     word, the expansion of the first parameter is joined with the
+     beginning part of the original word, and the expansion of the last
+     parameter is joined with the last part of the original word.  When
+     there are no positional parameters, `"$@"' and `$@' expand to
+     nothing (i.e., they are removed).
 
 `#'
-     Expands to the number of positional parameters in decimal.
+     ($#) Expands to the number of positional parameters in decimal.
 
 `?'
-     Expands to the exit status of the most recently executed foreground
-     pipeline.
+     ($?) Expands to the exit status of the most recently executed
+     foreground pipeline.
 
 `-'
-     (A hyphen.)  Expands to the current option flags as specified upon
-     invocation, by the `set' builtin command, or those set by the
+     ($-, a hyphen.)  Expands to the current option flags as specified
+     upon invocation, by the `set' builtin command, or those set by the
      shell itself (such as the `-i' option).
 
 `$'
-     Expands to the process ID of the shell.  In a `()' subshell, it
-     expands to the process ID of the invoking shell, not the subshell.
+     ($$) Expands to the process ID of the shell.  In a `()' subshell,
+     it expands to the process ID of the invoking shell, not the
+     subshell.
 
 `!'
-     Expands to the process ID of the job most recently placed into the
-     background, whether executed as an asynchronous command or using
-     the `bg' builtin (*note Job Control Builtins::).
+     ($!) Expands to the process ID of the job most recently placed
+     into the background, whether executed as an asynchronous command
+     or using the `bg' builtin (*note Job Control Builtins::).
 
 `0'
-     Expands to the name of the shell or shell script.  This is set at
-     shell initialization.  If Bash is invoked with a file of commands
-     (*note Shell Scripts::), `$0' is set to the name of that file.  If
-     Bash is started with the `-c' option (*note Invoking Bash::), then
-     `$0' is set to the first argument after the string to be executed,
-     if one is present.  Otherwise, it is set to the filename used to
-     invoke Bash, as given by argument zero.
+     ($0) Expands to the name of the shell or shell script.  This is
+     set at shell initialization.  If Bash is invoked with a file of
+     commands (*note Shell Scripts::), `$0' is set to the name of that
+     file.  If Bash is started with the `-c' option (*note Invoking
+     Bash::), then `$0' is set to the first argument after the string
+     to be executed, if one is present.  Otherwise, it is set to the
+     filename used to invoke Bash, as given by argument zero.
 
 `_'
-     (An underscore.)  At shell startup, set to the absolute pathname
-     used to invoke the shell or shell script being executed as passed
-     in the environment or argument list.  Subsequently, expands to the
-     last argument to the previous command, after expansion.  Also set
-     to the full pathname used to invoke each command executed and
-     placed in the environment exported to that command.  When checking
-     mail, this parameter holds the name of the mail file.
+     ($_, an underscore.)  At shell startup, set to the absolute
+     pathname used to invoke the shell or shell script being executed
+     as passed in the environment or argument list.  Subsequently,
+     expands to the last argument to the previous command, after
+     expansion.  Also set to the full pathname used to invoke each
+     command executed and placed in the environment exported to that
+     command.  When checking mail, this parameter holds the name of the
+     mail file.
 
 
 File: bashref.info,  Node: Shell Expansions,  Next: Redirections,  Prev: Shell Parameters,  Up: Basic Shell Features
@@ -7822,10 +7824,16 @@ File: bashref.info,  Node: Commands For Text,  Next: Commands For Killing,  Prev
 8.4.3 Commands For Changing Text
 --------------------------------
 
+`end-of-file (usually C-d)'
+     The character indicating end-of-file as set, for example, by
+     `stty'.  If this character is read when there are no characters on
+     the line, and point is at the beginning of the line, Readline
+     interprets it as the end of input and returns EOF.
+
 `delete-char (C-d)'
-     Delete the character at point.  If point is at the beginning of
-     the line, there are no characters in the line, and the last
-     character typed was not bound to `delete-char', then return EOF.
+     Delete the character at point.  If this function is bound to the
+     same character as the tty EOF character, as `C-d' commonly is, see
+     above for the effects.
 
 `backward-delete-char (Rubout)'
      Delete the character behind the cursor.  A numeric argument means
@@ -10680,15 +10688,24 @@ D.3 Parameter and Variable Index
  [index ]
 * Menu:
 
-* !:                                     Special Parameters.  (line  46)
+* !:                                     Special Parameters.  (line  47)
 * #:                                     Special Parameters.  (line  30)
 * $:                                     Special Parameters.  (line  42)
+* $!:                                    Special Parameters.  (line  48)
+* $#:                                    Special Parameters.  (line  31)
+* $$:                                    Special Parameters.  (line  43)
+* $*:                                    Special Parameters.  (line  10)
+* $-:                                    Special Parameters.  (line  38)
+* $0:                                    Special Parameters.  (line  53)
+* $?:                                    Special Parameters.  (line  34)
+* $@:                                    Special Parameters.  (line  20)
+* $_:                                    Special Parameters.  (line  62)
 * *:                                     Special Parameters.  (line   9)
 * -:                                     Special Parameters.  (line  37)
-* 0:                                     Special Parameters.  (line  51)
+* 0:                                     Special Parameters.  (line  52)
 * ?:                                     Special Parameters.  (line  33)
 * @:                                     Special Parameters.  (line  19)
-* _:                                     Special Parameters.  (line  60)
+* _:                                     Special Parameters.  (line  61)
 * auto_resume:                           Job Control Variables.
                                                               (line   6)
 * BASH:                                  Bash Variables.      (line  13)
@@ -10880,14 +10897,14 @@ D.4 Function Index
                                                                (line 10)
 * accept-line (Newline or Return):       Commands For History. (line  6)
 * backward-char (C-b):                   Commands For Moving.  (line 15)
-* backward-delete-char (Rubout):         Commands For Text.    (line 11)
+* backward-delete-char (Rubout):         Commands For Text.    (line 17)
 * backward-kill-line (C-x Rubout):       Commands For Killing. (line  9)
 * backward-kill-word (M-<DEL>):          Commands For Killing. (line 24)
 * backward-word (M-b):                   Commands For Moving.  (line 22)
 * beginning-of-history (M-<):            Commands For History. (line 20)
 * beginning-of-line (C-a):               Commands For Moving.  (line  6)
 * call-last-kbd-macro (C-x e):           Keyboard Macros.      (line 13)
-* capitalize-word (M-c):                 Commands For Text.    (line 46)
+* capitalize-word (M-c):                 Commands For Text.    (line 52)
 * character-search (C-]):                Miscellaneous Commands.
                                                                (line 41)
 * character-search-backward (M-C-]):     Miscellaneous Commands.
@@ -10898,14 +10915,14 @@ D.4 Function Index
 * copy-backward-word ():                 Commands For Killing. (line 58)
 * copy-forward-word ():                  Commands For Killing. (line 63)
 * copy-region-as-kill ():                Commands For Killing. (line 54)
-* delete-char (C-d):                     Commands For Text.    (line  6)
+* delete-char (C-d):                     Commands For Text.    (line 12)
 * delete-char-or-list ():                Commands For Completion.
                                                                (line 43)
 * delete-horizontal-space ():            Commands For Killing. (line 46)
 * digit-argument (M-0, M-1, ... M--):    Numeric Arguments.    (line  6)
 * do-uppercase-version (M-a, M-b, M-X, ...): Miscellaneous Commands.
                                                                (line 14)
-* downcase-word (M-l):                   Commands For Text.    (line 42)
+* downcase-word (M-l):                   Commands For Text.    (line 48)
 * dump-functions ():                     Miscellaneous Commands.
                                                                (line 73)
 * dump-macros ():                        Miscellaneous Commands.
@@ -10913,11 +10930,12 @@ D.4 Function Index
 * dump-variables ():                     Miscellaneous Commands.
                                                                (line 79)
 * end-kbd-macro (C-x )):                 Keyboard Macros.      (line  9)
+* end-of-file (usually C-d):             Commands For Text.    (line  6)
 * end-of-history (M->):                  Commands For History. (line 23)
 * end-of-line (C-e):                     Commands For Moving.  (line  9)
 * exchange-point-and-mark (C-x C-x):     Miscellaneous Commands.
                                                                (line 36)
-* forward-backward-delete-char ():       Commands For Text.    (line 15)
+* forward-backward-delete-char ():       Commands For Text.    (line 21)
 * forward-char (C-f):                    Commands For Moving.  (line 12)
 * forward-search-history (C-s):          Commands For History. (line 31)
 * forward-word (M-f):                    Commands For Moving.  (line 18)
@@ -10942,35 +10960,35 @@ D.4 Function Index
                                                                (line 41)
 * non-incremental-reverse-search-history (M-p): Commands For History.
                                                                (line 36)
-* overwrite-mode ():                     Commands For Text.    (line 50)
+* overwrite-mode ():                     Commands For Text.    (line 56)
 * possible-completions (M-?):            Commands For Completion.
                                                                (line 15)
 * prefix-meta (<ESC>):                   Miscellaneous Commands.
                                                                (line 18)
 * previous-history (C-p):                Commands For History. (line 13)
 * print-last-kbd-macro ():               Keyboard Macros.      (line 17)
-* quoted-insert (C-q or C-v):            Commands For Text.    (line 20)
+* quoted-insert (C-q or C-v):            Commands For Text.    (line 26)
 * re-read-init-file (C-x C-r):           Miscellaneous Commands.
                                                                (line  6)
 * redraw-current-line ():                Commands For Moving.  (line 38)
 * reverse-search-history (C-r):          Commands For History. (line 27)
 * revert-line (M-r):                     Miscellaneous Commands.
                                                                (line 25)
-* self-insert (a, b, A, 1, !, ...):      Commands For Text.    (line 24)
+* self-insert (a, b, A, 1, !, ...):      Commands For Text.    (line 30)
 * set-mark (C-@):                        Miscellaneous Commands.
                                                                (line 32)
 * skip-csi-sequence ():                  Miscellaneous Commands.
                                                                (line 51)
 * start-kbd-macro (C-x ():               Keyboard Macros.      (line  6)
-* transpose-chars (C-t):                 Commands For Text.    (line 27)
-* transpose-words (M-t):                 Commands For Text.    (line 33)
+* transpose-chars (C-t):                 Commands For Text.    (line 33)
+* transpose-words (M-t):                 Commands For Text.    (line 39)
 * undo (C-_ or C-x C-u):                 Miscellaneous Commands.
                                                                (line 22)
 * universal-argument ():                 Numeric Arguments.    (line 10)
 * unix-filename-rubout ():               Commands For Killing. (line 41)
 * unix-line-discard (C-u):               Commands For Killing. (line 12)
 * unix-word-rubout (C-w):                Commands For Killing. (line 37)
-* upcase-word (M-u):                     Commands For Text.    (line 38)
+* upcase-word (M-u):                     Commands For Text.    (line 44)
 * yank (C-y):                            Commands For Killing. (line 68)
 * yank-last-arg (M-. or M-_):            Commands For History. (line 79)
 * yank-nth-arg (M-C-y):                  Commands For History. (line 70)
@@ -11138,134 +11156,134 @@ D.5 Concept Index
 
 
 Tag Table:
-Node: Top930
-Node: Introduction2848
-Node: What is Bash?3076
-Node: What is a shell?4189
-Node: Definitions6728
-Node: Basic Shell Features9646
-Node: Shell Syntax10865
-Node: Shell Operation11895
-Node: Quoting13189
-Node: Escape Character14492
-Node: Single Quotes14977
-Node: Double Quotes15325
-Node: ANSI-C Quoting16450
-Node: Locale Translation17694
-Node: Comments18590
-Node: Shell Commands19208
-Node: Simple Commands20080
-Node: Pipelines20711
-Node: Lists23449
-Node: Compound Commands25178
-Node: Looping Constructs26184
-Node: Conditional Constructs28647
-Node: Command Grouping39577
-Node: Coprocesses41056
-Node: GNU Parallel42889
-Node: Shell Functions46875
-Node: Shell Parameters51959
-Node: Positional Parameters56088
-Node: Special Parameters56988
-Node: Shell Expansions60047
-Node: Brace Expansion61990
-Node: Tilde Expansion64771
-Node: Shell Parameter Expansion67120
-Node: Command Substitution79414
-Node: Arithmetic Expansion80747
-Node: Process Substitution81679
-Node: Word Splitting82729
-Node: Filename Expansion84377
-Node: Pattern Matching86542
-Node: Quote Removal90242
-Node: Redirections90537
-Node: Executing Commands99701
-Node: Simple Command Expansion100371
-Node: Command Search and Execution102301
-Node: Command Execution Environment104638
-Node: Environment107624
-Node: Exit Status109283
-Node: Signals110905
-Node: Shell Scripts112873
-Node: Shell Builtin Commands115391
-Node: Bourne Shell Builtins117419
-Node: Bash Builtins137326
-Node: Modifying Shell Behavior164779
-Node: The Set Builtin165124
-Node: The Shopt Builtin175450
-Node: Special Builtins189871
-Node: Shell Variables190850
-Node: Bourne Shell Variables191290
-Node: Bash Variables193321
-Node: Bash Features220196
-Node: Invoking Bash221095
-Node: Bash Startup Files226873
-Node: Interactive Shells231902
-Node: What is an Interactive Shell?232312
-Node: Is this Shell Interactive?232961
-Node: Interactive Shell Behavior233776
-Node: Bash Conditional Expressions237064
-Node: Shell Arithmetic241066
-Node: Aliases243842
-Node: Arrays246398
-Node: The Directory Stack251379
-Node: Directory Stack Builtins252098
-Node: Controlling the Prompt255054
-Node: The Restricted Shell257826
-Node: Bash POSIX Mode259663
-Node: Job Control269050
-Node: Job Control Basics269510
-Node: Job Control Builtins274229
-Node: Job Control Variables278700
-Node: Command Line Editing279858
-Node: Introduction and Notation281530
-Node: Readline Interaction283152
-Node: Readline Bare Essentials284343
-Node: Readline Movement Commands286132
-Node: Readline Killing Commands287097
-Node: Readline Arguments289017
-Node: Searching290061
-Node: Readline Init File292247
-Node: Readline Init File Syntax293394
-Node: Conditional Init Constructs310231
-Node: Sample Init File312764
-Node: Bindable Readline Commands315882
-Node: Commands For Moving317089
-Node: Commands For History318233
-Node: Commands For Text322418
-Node: Commands For Killing325091
-Node: Numeric Arguments327548
-Node: Commands For Completion328687
-Node: Keyboard Macros332879
-Node: Miscellaneous Commands333567
-Node: Readline vi Mode339373
-Node: Programmable Completion340280
-Node: Programmable Completion Builtins347556
-Node: A Programmable Completion Example357302
-Node: Using History Interactively362552
-Node: Bash History Facilities363236
-Node: Bash History Builtins366235
-Node: History Interaction370163
-Node: Event Designators372868
-Node: Word Designators374090
-Node: Modifiers375729
-Node: Installing Bash377133
-Node: Basic Installation378270
-Node: Compilers and Options380962
-Node: Compiling For Multiple Architectures381703
-Node: Installation Names383367
-Node: Specifying the System Type384185
-Node: Sharing Defaults384901
-Node: Operation Controls385574
-Node: Optional Features386532
-Node: Reporting Bugs396596
-Node: Major Differences From The Bourne Shell397794
-Node: GNU Free Documentation License414653
-Node: Indexes439849
-Node: Builtin Index440303
-Node: Reserved Word Index447130
-Node: Variable Index449578
-Node: Function Index463101
-Node: Concept Index470329
+Node: Top928
+Node: Introduction2844
+Node: What is Bash?3072
+Node: What is a shell?4185
+Node: Definitions6724
+Node: Basic Shell Features9642
+Node: Shell Syntax10861
+Node: Shell Operation11891
+Node: Quoting13185
+Node: Escape Character14488
+Node: Single Quotes14973
+Node: Double Quotes15321
+Node: ANSI-C Quoting16446
+Node: Locale Translation17690
+Node: Comments18586
+Node: Shell Commands19204
+Node: Simple Commands20076
+Node: Pipelines20707
+Node: Lists23445
+Node: Compound Commands25174
+Node: Looping Constructs26180
+Node: Conditional Constructs28643
+Node: Command Grouping39573
+Node: Coprocesses41052
+Node: GNU Parallel42885
+Node: Shell Functions46871
+Node: Shell Parameters51955
+Node: Positional Parameters56084
+Node: Special Parameters56984
+Node: Shell Expansions60095
+Node: Brace Expansion62038
+Node: Tilde Expansion64819
+Node: Shell Parameter Expansion67168
+Node: Command Substitution79462
+Node: Arithmetic Expansion80795
+Node: Process Substitution81727
+Node: Word Splitting82777
+Node: Filename Expansion84425
+Node: Pattern Matching86590
+Node: Quote Removal90290
+Node: Redirections90585
+Node: Executing Commands99749
+Node: Simple Command Expansion100419
+Node: Command Search and Execution102349
+Node: Command Execution Environment104686
+Node: Environment107672
+Node: Exit Status109331
+Node: Signals110953
+Node: Shell Scripts112921
+Node: Shell Builtin Commands115439
+Node: Bourne Shell Builtins117467
+Node: Bash Builtins137374
+Node: Modifying Shell Behavior164827
+Node: The Set Builtin165172
+Node: The Shopt Builtin175498
+Node: Special Builtins189919
+Node: Shell Variables190898
+Node: Bourne Shell Variables191338
+Node: Bash Variables193369
+Node: Bash Features220244
+Node: Invoking Bash221143
+Node: Bash Startup Files226921
+Node: Interactive Shells231950
+Node: What is an Interactive Shell?232360
+Node: Is this Shell Interactive?233009
+Node: Interactive Shell Behavior233824
+Node: Bash Conditional Expressions237112
+Node: Shell Arithmetic241114
+Node: Aliases243890
+Node: Arrays246446
+Node: The Directory Stack251427
+Node: Directory Stack Builtins252146
+Node: Controlling the Prompt255102
+Node: The Restricted Shell257874
+Node: Bash POSIX Mode259711
+Node: Job Control269098
+Node: Job Control Basics269558
+Node: Job Control Builtins274277
+Node: Job Control Variables278748
+Node: Command Line Editing279906
+Node: Introduction and Notation281578
+Node: Readline Interaction283200
+Node: Readline Bare Essentials284391
+Node: Readline Movement Commands286180
+Node: Readline Killing Commands287145
+Node: Readline Arguments289065
+Node: Searching290109
+Node: Readline Init File292295
+Node: Readline Init File Syntax293442
+Node: Conditional Init Constructs310279
+Node: Sample Init File312812
+Node: Bindable Readline Commands315930
+Node: Commands For Moving317137
+Node: Commands For History318281
+Node: Commands For Text322466
+Node: Commands For Killing325395
+Node: Numeric Arguments327852
+Node: Commands For Completion328991
+Node: Keyboard Macros333183
+Node: Miscellaneous Commands333871
+Node: Readline vi Mode339677
+Node: Programmable Completion340584
+Node: Programmable Completion Builtins347860
+Node: A Programmable Completion Example357606
+Node: Using History Interactively362856
+Node: Bash History Facilities363540
+Node: Bash History Builtins366539
+Node: History Interaction370467
+Node: Event Designators373172
+Node: Word Designators374394
+Node: Modifiers376033
+Node: Installing Bash377437
+Node: Basic Installation378574
+Node: Compilers and Options381266
+Node: Compiling For Multiple Architectures382007
+Node: Installation Names383671
+Node: Specifying the System Type384489
+Node: Sharing Defaults385205
+Node: Operation Controls385878
+Node: Optional Features386836
+Node: Reporting Bugs396900
+Node: Major Differences From The Bourne Shell398098
+Node: GNU Free Documentation License414957
+Node: Indexes440153
+Node: Builtin Index440607
+Node: Reserved Word Index447434
+Node: Variable Index449882
+Node: Function Index464062
+Node: Concept Index471363
 
 End Tag Table

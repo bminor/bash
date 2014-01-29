@@ -1792,6 +1792,10 @@ restore_token_state (ts)
  * implement alias expansion on a per-token basis.
  */
 
+#define PSH_ALIAS	0x01
+#define PSH_DPAREN	0x02
+#define PSH_SOURCE	0x04
+
 typedef struct string_saver {
   struct string_saver *next;
   int expand_alias;  /* Value to set expand_alias to when string is popped. */
@@ -1801,6 +1805,7 @@ typedef struct string_saver {
 #endif
   size_t saved_line_size, saved_line_index;
   int saved_line_terminator;
+  int flags;
 } STRING_SAVER;
 
 STRING_SAVER *pushed_string_list = (STRING_SAVER *)NULL;
@@ -1826,8 +1831,11 @@ push_string (s, expand, ap)
   temp->saved_line_size = shell_input_line_size;
   temp->saved_line_index = shell_input_line_index;
   temp->saved_line_terminator = shell_input_line_terminator;
+  temp->flags = 0;
 #if defined (ALIAS)
   temp->expander = ap;
+  if (ap)
+    temp->flags = PSH_ALIAS;
 #endif
   temp->next = pushed_string_list;
   pushed_string_list = temp;
@@ -1838,7 +1846,7 @@ push_string (s, expand, ap)
 #endif
 
   shell_input_line = s;
-  shell_input_line_size = strlen (s);
+  shell_input_line_size = STRLEN (s);
   shell_input_line_index = 0;
   shell_input_line_terminator = '\0';
 #if 0
@@ -1909,6 +1917,34 @@ free_pushed_string_input ()
 {
 #if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
   free_string_list ();
+#endif
+}
+
+int
+parser_expanding_alias ()
+{
+  return (expanding_alias ());
+}
+
+void
+parser_save_alias ()
+{
+#if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
+  push_string ((char *)NULL, 0, (alias_t *)NULL);
+  pushed_string_list->flags = PSH_SOURCE;	/* XXX - for now */
+#else
+  ;
+#endif
+}
+
+void
+parser_restore_alias ()
+{
+#if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
+  if (pushed_string_list)
+    pop_string ();
+#else
+  ;
 #endif
 }
 
@@ -2406,8 +2442,13 @@ next_alias_char:
      because we have fully consumed the result of the last alias expansion.
      Do it transparently; just return the next character of the string popped
      to. */
+  /* If pushed_string_list != 0 but pushed_string_list->expander == 0 (not
+     currently tested) and the flags value is not PSH_SOURCE, we are not
+     parsing an alias, we have just saved one (push_string, when called by
+     the parse_dparen code) In this case, just go on as well.  The PSH_SOURCE
+     case is handled below. */
 pop_alias:
-  if (uc == 0 && (pushed_string_list != (STRING_SAVER *)NULL))
+  if (uc == 0 && pushed_string_list && pushed_string_list->flags != PSH_SOURCE)
     {
       pop_string ();
       uc = shell_input_line[shell_input_line_index];
@@ -2446,6 +2487,28 @@ pop_alias:
 
   if (uc == 0 && shell_input_line_terminator == EOF)
     return ((shell_input_line_index != 0) ? '\n' : EOF);
+
+#if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
+  /* We already know that we are not parsing an alias expansion because of the
+     check for expanding_alias() above.  This knows how parse_and_execute
+     handles switching to st_string input while an alias is being expanded,
+     hence the check for pushed_string_list without pushed_string_list->expander
+     and the check for PSH_SOURCE as pushed_string_list->flags.
+     parse_and_execute and parse_string both change the input type to st_string
+     and place the string to be parsed and executed into location.string, so
+     we should not stop reading that until the pointer is '\0'.
+     The check for shell_input_line_terminator may be superfluous.
+
+     This solves the problem of `.' inside a multi-line alias with embedded
+     newlines executing things out of order. */
+  if (uc == 0 && bash_input.type == st_string && *bash_input.location.string &&
+      pushed_string_list && pushed_string_list->flags == PSH_SOURCE &&
+      shell_input_line_terminator == 0)
+    {
+      shell_input_line_index = 0;
+      goto restart_read;
+    }
+#endif
 
   return (uc);
 }
@@ -4022,6 +4085,7 @@ parse_dparen (c)
       else if (cmdtyp == 0)	/* nested subshell */
 	{
 	  push_string (wval, 0, (alias_t *)NULL);
+	  pushed_string_list->flags = PSH_DPAREN;
 	  if ((parser_state & PST_CASEPAT) == 0)
 	    parser_state |= PST_SUBSHELL;
 	  return (c);

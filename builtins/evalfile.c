@@ -109,7 +109,7 @@ _evalfile (filename, flags)
   GET_ARRAY_FROM_VAR ("BASH_ARGC", bash_argc_v, bash_argc_a);
 #  endif
 #endif
-  
+
   fd = open (filename, O_RDONLY);
 
   if (fd < 0 || (fstat (fd, &finfo) == -1))

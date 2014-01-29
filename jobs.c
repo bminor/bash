@@ -889,7 +889,9 @@ delete_old_job (pid)
 	delete_job (job, DEL_NOBGPID);
       else
 	{
-	  internal_warning (_("forked pid %d appears in running job %d"), pid, job);
+#ifdef DEBUG
+	  internal_warning (_("forked pid %d appears in running job %d"), pid, job+1);
+#endif
 	  if (p)
 	    p->pid = 0;
 	}
@@ -3352,7 +3354,7 @@ itrace("waitchld: waitpid returns %d block = %d", pid, block);
       else if (running_trap)
 	queue_sigchld_trap (children_exited);
       else if (this_shell_builtin == wait_builtin)
-	run_sigchld_trap (children_exited);
+	run_sigchld_trap (children_exited);	/* XXX */
       else
 	queue_sigchld_trap (children_exited);
     }

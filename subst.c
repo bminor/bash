@@ -96,6 +96,8 @@ extern int errno;
 #define RBRACE		'}'
 #define LPAREN		'('
 #define RPAREN		')'
+#define LBRACK		'['
+#define RBRACK		']'
 
 #if defined (HANDLE_MULTIBYTE)
 #define WLPAREN		L'('
@@ -218,6 +220,8 @@ static WORD_LIST *expand_string_leave_quoted __P((char *, int));
 static WORD_LIST *expand_string_for_rhs __P((char *, int, int *, int *));
 
 static WORD_LIST *list_quote_escapes __P((WORD_LIST *));
+static WORD_LIST *list_dequote_escapes __P((WORD_LIST *));
+
 static char *make_quoted_char __P((int));
 static WORD_LIST *quote_list __P((WORD_LIST *));
 
@@ -1809,6 +1813,20 @@ skip_to_delim (string, start, delims, flags)
 	  continue;
 	}
 #endif
+      else if ((flags & SD_GLOB) && c == LBRACK)
+	{
+	  si = i + 1;
+	  if (string[si] == '\0')
+	    CQ_RETURN(si);
+
+	  temp = extract_delimited_string (string, &si, "[", "[", "]", SX_NOALLOC); /* ] */
+
+	  i = si;
+	  if (string[i] == '\0')	/* don't increment i past EOS in loop */
+	    break;
+	  i++;
+	  continue;
+	}
       else if ((skipquote || invert) && (member (c, delims) == 0))
 	break;
       else
@@ -3234,13 +3252,16 @@ cond_expand_word (w, special)
   l = call_expand_word_internal (w, 0, 0, (int *)0, (int *)0);
   if (l)
     {
-      if (special == 0)
+      if (special == 0)			/* LHS */
 	{
 	  dequote_list (l);
 	  r = string_list (l);
 	}
       else
 	{
+	  /* Need to figure out whether or not we should call dequote_escapes
+	     or a new dequote_ctlnul function here, and under what
+	     circumstances. */
 	  qflags = QGLOB_CVTNULL;
 	  if (special == 2)
 	    qflags |= QGLOB_REGEXP;
@@ -3528,6 +3549,7 @@ quote_escapes (string)
       COPY_CHAR_P (t, s, send);
     }
   *t = '\0';
+
   return (result);
 }
 
@@ -3593,7 +3615,24 @@ dequote_escapes (string)
       COPY_CHAR_P (t, s, send);
     }
   *t = '\0';
+
   return result;
+}
+
+static WORD_LIST *
+list_dequote_escapes (list)
+     WORD_LIST *list;
+{
+  register WORD_LIST *w;
+  char *t;
+
+  for (w = list; w; w = w->next)
+    {
+      t = w->word->word;
+      w->word->word = dequote_escapes (t);
+      free (t);
+    }
+  return list;
 }
 
 /* Return a new string with the quoted representation of character C.
@@ -7404,7 +7443,13 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 
       ret = alloc_word_desc ();
       ret->word = temp1;
-      if (temp1 && QUOTED_NULL (temp1) && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
+      /* We test quoted_dollar_atp because we want variants with double-quoted
+	 "$@" to take a different code path. In fact, we make sure at the end
+	 of expand_word_internal that we're only looking at these flags if
+	 quoted_dollar_at == 0. */
+      if (temp1 && 
+          (quoted_dollar_atp == 0 || *quoted_dollar_atp == 0) &&
+	  QUOTED_NULL (temp1) && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
 	ret->flags |= W_QUOTED|W_HASQUOTEDNULL;
       return ret;
     }
@@ -7422,7 +7467,9 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 
       ret = alloc_word_desc ();
       ret->word = temp1;
-      if (temp1 && QUOTED_NULL (temp1) && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
+      if (temp1 && 
+          (quoted_dollar_atp == 0 || *quoted_dollar_atp == 0) &&
+	  QUOTED_NULL (temp1) && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
 	ret->flags |= W_QUOTED|W_HASQUOTEDNULL;
       return ret;
     }
@@ -7441,7 +7488,9 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 
       ret = alloc_word_desc ();
       ret->word = temp1;
-      if (temp1 && QUOTED_NULL (temp1) && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
+      if (temp1 &&
+          (quoted_dollar_atp == 0 || *quoted_dollar_atp == 0) &&
+	  QUOTED_NULL (temp1) && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
 	ret->flags |= W_QUOTED|W_HASQUOTEDNULL;
       return ret;
     }

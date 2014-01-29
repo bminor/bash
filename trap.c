@@ -288,7 +288,16 @@ run_pending_traps ()
     return;
 
   if (running_trap > 0)
-    return;			/* no recursive trap invocations */
+    {
+#if defined (DEBUG)
+      internal_warning ("run_pending_traps: recursive invocation while running trap for signal %d", running_trap-1);
+#endif
+#if 0
+      return;			/* no recursive trap invocations */
+#else
+      ;
+#endif
+    }
 
   catch_flag = trapped_signal_received = 0;
 
@@ -304,14 +313,14 @@ run_pending_traps ()
 	 while (pending_traps[sig]--) instead of the if statement. */
       if (pending_traps[sig])
 	{
-	  sigset_t set, oset;
-
-	  BLOCK_SIGNAL (sig, set, oset);
+	  if (running_trap == sig+1)
+	    /*continue*/;
 
 	  running_trap = sig + 1;
 
 	  if (sig == SIGINT)
 	    {
+	      pending_traps[sig] = 0;	/* XXX */
 	      run_interrupt_trap ();
 	      CLRINTERRUPT;
 	    }
@@ -331,8 +340,15 @@ run_pending_traps ()
 	      /* This can happen when run_pending_traps is called while
 		 running a SIGCHLD trap handler. */
 	      running_trap = 0;
-	      UNBLOCK_SIGNAL (oset);
+	      /* want to leave pending_traps[SIGCHLD] alone here */
 	      continue;					/* XXX */
+	    }
+	  else if (sig == SIGCHLD && (sigmodes[SIGCHLD] & SIG_INPROGRESS))
+	    {
+	      /* whoops -- print warning? */
+	      running_trap = 0;		/* XXX */
+	      /* want to leave pending_traps[SIGCHLD] alone here */
+	      continue;
 	    }
 #endif
 	  else if (trap_list[sig] == (char *)DEFAULT_SIG ||
@@ -370,20 +386,19 @@ run_pending_traps ()
 #if defined (JOB_CONTROL)
 	      save_pipeline (1);	/* XXX only provides one save level */
 #endif
+	      /* XXX - set pending_traps[sig] = 0 here? */
+	      pending_traps[sig] = 0;
 	      evalstring (savestring (trap_list[sig]), "trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE);
 #if defined (JOB_CONTROL)
 	      restore_pipeline (1);
 #endif
 
-	      restore_parser_state (&pstate);
-
 	      subst_assign_varlist = save_subst_varlist;
+	      restore_parser_state (&pstate);
 	    }
 
-	  pending_traps[sig] = 0;
+	  pending_traps[sig] = 0;	/* XXX - move before evalstring? */
 	  running_trap = 0;
-
-	  UNBLOCK_SIGNAL (oset);
 	}
     }
 
@@ -852,6 +867,8 @@ run_trap_cleanup (sig)
   sigmodes[sig] &= ~(SIG_INPROGRESS|SIG_CHANGED);
 }
 
+#define RECURSIVE_SIG(s) (SPECIAL_TRAP(s) == 0)
+
 /* Run a trap command for SIG.  SIG is one of the signals the shell treats
    specially.  Returns the exit status of the executed trap command list. */
 static int
@@ -865,6 +882,7 @@ _run_trap_internal (sig, tag)
   int flags;
   procenv_t save_return_catch;
   WORD_LIST *save_subst_varlist;
+  sh_parser_state_t pstate;
 #if defined (ARRAY_VARS)
   ARRAY *ps;
 #endif
@@ -874,7 +892,13 @@ _run_trap_internal (sig, tag)
      currently executing in the trap handler. */
   if ((sigmodes[sig] & SIG_TRAPPED) && ((sigmodes[sig] & SIG_IGNORED) == 0) &&
       (trap_list[sig] != (char *)IMPOSSIBLE_TRAP_HANDLER) &&
+#if 0
+      /* Uncomment this to allow some special signals to recursively execute
+	 trap handlers. */
+      (RECURSIVE_SIG (sig) || (sigmodes[sig] & SIG_INPROGRESS) == 0))
+#else
       ((sigmodes[sig] & SIG_INPROGRESS) == 0))
+#endif
     {
       old_trap = trap_list[sig];
       sigmodes[sig] |= SIG_INPROGRESS;
@@ -882,14 +906,18 @@ _run_trap_internal (sig, tag)
       trap_command =  savestring (old_trap);
 
       running_trap = sig + 1;
-      trap_saved_exit_value = last_command_exit_value;
+
 #if defined (ARRAY_VARS)
       ps = save_pipestatus_array ();
 #endif
 
-      token_state = save_token_state ();
+      save_parser_state (&pstate);
       save_subst_varlist = subst_assign_varlist;
       subst_assign_varlist = 0;
+
+#if defined (JOB_CONTROL)
+      save_pipeline (1);	/* XXX only provides one save level */
+#endif
 
       /* If we're in a function, make sure return longjmps come here, too. */
       save_return_catch_flag = return_catch_flag;
@@ -905,13 +933,15 @@ _run_trap_internal (sig, tag)
       if (function_code == 0)
 	parse_and_execute (trap_command, tag, flags);
 
-      restore_token_state (token_state);
-      free (token_state);
+      trap_exit_value = last_command_exit_value;
+
+#if defined (JOB_CONTROL)
+      restore_pipeline (1);
+#endif
 
       subst_assign_varlist = save_subst_varlist;
+      restore_parser_state (&pstate);
 
-      trap_exit_value = last_command_exit_value;
-      last_command_exit_value = trap_saved_exit_value;
 #if defined (ARRAY_VARS)
       restore_pipestatus_array (ps);
 #endif
@@ -1207,10 +1237,17 @@ signal_is_hard_ignored (sig)
 }
 
 void
-set_signal_ignored (sig)
+set_signal_hard_ignored (sig)
      int sig;
 {
   sigmodes[sig] |= SIG_HARD_IGNORE;
+  original_signals[sig] = SIG_IGN;
+}
+
+void
+set_signal_ignored (sig)
+     int sig;
+{
   original_signals[sig] = SIG_IGN;
 }
 

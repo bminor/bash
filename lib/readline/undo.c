@@ -178,6 +178,7 @@ rl_do_undo ()
 {
   UNDO_LIST *release;
   int waiting_for_begin, start, end;
+  HIST_ENTRY *cur, *temp;
 
 #define TRANS(i) ((i) == -1 ? rl_point : ((i) == -2 ? rl_end : (i)))
 
@@ -232,6 +233,18 @@ rl_do_undo ()
 
       release = rl_undo_list;
       rl_undo_list = rl_undo_list->next;
+
+      /* If we are editing a history entry, make sure the change is replicated
+	 in the history entry's line */
+      cur = current_history ();
+      if ((UNDO_LIST *)cur->data == release)
+	{
+	  temp = replace_history_entry (where_history (), rl_line_buffer, (histdata_t)rl_undo_list);
+	  xfree (temp->line);
+	  FREE (temp->timestamp);
+	  xfree (temp);
+	}
+
       replace_history_data (-1, (histdata_t *)release, (histdata_t *)rl_undo_list);
 
       xfree (release);

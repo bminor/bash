@@ -111,6 +111,10 @@ extern int parser_in_command_position __P((void));
 
 extern void free_pushed_string_input __P((void));
 
+extern int parser_expanding_alias __P((void));
+extern void parser_save_alias __P((void));
+extern void parser_restore_alias __P((void));
+
 extern char *decode_prompt_string __P((char *));
 
 extern int get_current_prompt_level __P((void));
@@ -230,6 +234,7 @@ extern int input_avail __P((int));
 /* Declarations for functions defined in lib/sh/itos.c */
 extern char *inttostr __P((intmax_t, char *, size_t));
 extern char *itos __P((intmax_t));
+extern char *mitos __P((intmax_t));
 extern char *uinttostr __P((uintmax_t, char *, size_t));
 extern char *uitos __P((uintmax_t));
 
@@ -378,6 +383,8 @@ extern void strlist_sort __P((STRINGLIST *));
 
 extern char **strvec_create __P((int));
 extern char **strvec_resize __P((char **, int));
+extern char **strvec_mcreate __P((int));
+extern char **strvec_mresize __P((char **, int));
 extern void strvec_flush __P((char **));
 extern void strvec_dispose __P((char **));
 extern int strvec_remove __P((char **, char *));

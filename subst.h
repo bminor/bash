@@ -46,6 +46,7 @@
 #define ASS_MKLOCAL	0x0002
 #define ASS_MKASSOC	0x0004
 #define ASS_MKGLOBAL	0x0008	/* force global assignment */
+#define ASS_NAMEREF	0x0010	/* assigning to nameref variable */
 
 /* Flags for the string extraction functions. */
 #define SX_NOALLOC	0x0001	/* just skip; don't return substring */
@@ -282,6 +283,7 @@ extern char *cond_expand_word __P((WORD_DESC *, int));
 #define SD_NOSKIPCMD	0x08	/* don't skip over $(, <(, or >( command/process substitution */
 #define SD_EXTGLOB	0x10	/* skip over extended globbing patterns if appropriate */
 #define SD_IGNOREQUOTE	0x20	/* single and double quotes are not special */
+#define SD_GLOB		0x40	/* skip over glob patterns like bracket expressions */
 
 extern int skip_to_delim __P((char *, int, char *, int));
 

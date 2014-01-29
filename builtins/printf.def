@@ -765,7 +765,7 @@ printstr (fmt, string, len, fieldwidth, precision)
   /* If we remove this, get rid of `s'. */
   if (*fmt != 'b' && *fmt != 'q')
     {
-      internal_error ("format parsing problem: %s", s);
+      internal_error (_("format parsing problem: %s"), s);
       fw = pr = 0;
     }
 #endif
@@ -1252,12 +1252,19 @@ bind_printf_variable (name, value, flags)
      char *value;
      int flags;
 {
+  SHELL_VAR *v;
+
 #if defined (ARRAY_VARS)
   if (valid_array_reference (name) == 0)
-    return (bind_variable (name, value, flags));
+    v = bind_variable (name, value, flags);
   else
-    return (assign_array_element (name, value, flags));
+    v = assign_array_element (name, value, flags);
 #else /* !ARRAY_VARS */
-  return bind_variable (name, value, flags);
+  v = bind_variable (name, value, flags);
 #endif /* !ARRAY_VARS */
+
+  if (v && readonly_p (v) == 0 && noassign_p (v) == 0)
+    VUNSETATTR (v, att_invisible);
+
+  return v;
 }

@@ -51,6 +51,7 @@ extern void internal_error __P((const char *, ...))  __attribute__((__format__ (
 extern void internal_warning __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
 
 /* Debugging functions, not enabled in released version. */
+extern char *strescape __P((const char *));
 extern void itrace __P((const char *, ...)) __attribute__ ((__format__ (printf, 1, 2)));
 extern void trace __P((const char *, ...)) __attribute__ ((__format__ (printf, 1, 2)));
 

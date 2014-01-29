@@ -1607,7 +1607,7 @@ set_shell_name (argv0)
     {
       if (*shell_name == '-')
 	shell_name++;
-      login_shell++;
+      login_shell = 1;
     }
 
   if (shell_name[0] == 's' && shell_name[1] == 'h' && shell_name[2] == '\0')

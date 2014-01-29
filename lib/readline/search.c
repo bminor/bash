@@ -172,7 +172,8 @@ noninc_dosearch (string, dir)
 
   oldpos = where_history ();
   history_set_pos (noninc_history_pos);
-  entry = current_history ();
+  entry = current_history ();		/* will never be NULL after successful search */
+  
 #if defined (VI_MODE)
   if (rl_editing_mode != vi_mode)
 #endif
@@ -477,7 +478,7 @@ rl_history_search_internal (count, dir)
       rl_history_search_pos = ret;
       oldpos = where_history ();
       history_set_pos (rl_history_search_pos);
-      temp = current_history ();
+      temp = current_history ();	/* will never be NULL after successful search */
       history_set_pos (oldpos);
 
       /* Don't find multiple instances of the same line. */

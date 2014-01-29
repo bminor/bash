@@ -675,6 +675,9 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
 	      run_pending_traps ();
 
+	      /* Posix 2013 2.9.3.1: "the exit status of an asynchronous list
+		 shall be zero." */
+	      last_command_exit_value = 0;
 	      return (EXECUTION_SUCCESS);
 	    }
 	}
@@ -2596,6 +2599,7 @@ execute_for_command (for_command)
   loop_level++;
   identifier = for_command->name->word;
 
+  line_number = for_command->line;	/* for expansion error messages */
   list = releaser = expand_words_no_vars (for_command->map_list);
 
   begin_unwind_frame ("for");
@@ -3500,6 +3504,9 @@ execute_cond_node (cond)
 {
   int result, invert, patmatch, rmatch, mflags, ignore;
   char *arg1, *arg2;
+#if 0
+  char *t1, *t2;
+#endif
 
   invert = (cond->flags & CMD_INVERT_RETURN);
   ignore = (cond->flags & CMD_IGNORE_RETURN);
@@ -3576,6 +3583,14 @@ execute_cond_node (cond)
 	  mflags = SHMAT_PWARN;
 #if defined (ARRAY_VARS)
 	  mflags |= SHMAT_SUBEXP;
+#endif
+
+#if 0
+	  t1 = strescape(arg1);
+	  t2 = strescape(arg2);
+	  itrace("execute_cond_node: sh_regmatch on `%s' and `%s'", t1, t2);
+	  free(t1);
+	  free(t2);
 #endif
 
 	  result = sh_regmatch (arg1, arg2, mflags);
@@ -4794,10 +4809,15 @@ setup_async_signals ()
   if (job_control == 0)
 #endif
     {
+      /* Make sure we get the original signal dispositions now so we don't
+	 confuse the trap builtin later if the subshell tries to use it to
+	 reset SIGINT/SIGQUIT.  Don't call set_signal_ignored; that sets
+	 the value of original_signals to SIG_IGN. Posix interpretation 751. */
+      get_original_signal (SIGINT);
       set_signal_handler (SIGINT, SIG_IGN);
-      set_signal_ignored (SIGINT);
+
+      get_original_signal (SIGQUIT);
       set_signal_handler (SIGQUIT, SIG_IGN);
-      set_signal_ignored (SIGQUIT);
     }
 }
 

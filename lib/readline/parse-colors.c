@@ -283,7 +283,9 @@ get_funky_string (char **dest, const char **src, bool equals_end, size_t *output
 
         default:
 	  /* should we ? */
-          abort ();
+          /* abort ();	no, we should not */
+          state = ST_ERROR;
+          break;
         }
     }
 
@@ -387,7 +389,16 @@ void _rl_parse_colors()
                     }
                 }
               if (state == -1)
-                _rl_errmsg ("LS_COLORS: unrecognized prefix: %s", label);
+		{
+                  _rl_errmsg ("LS_COLORS: unrecognized prefix: %s", label);
+                  /* recover from an unrecognized prefix */
+                  while (p && *p && *p != ':')
+		    p++;
+		  if (p && *p == ':')
+		    state = 1;
+		  else if (p && *p == 0)
+		    state = 0;
+		}
             }
           break;
 
@@ -400,6 +411,9 @@ void _rl_parse_colors()
             }
           else
             state = -1;
+          /* XXX - recover here as with an unrecognized prefix? */
+          if (state == -1 && ext->ext.string)
+	    _rl_errmsg ("LS_COLORS: syntax error: %s", ext->ext.string);
           break;
         }
     }
@@ -417,6 +431,8 @@ void _rl_parse_colors()
           e = e->next;
           free (e2);
         }
+      _rl_color_ext_list = NULL;
+      _rl_colored_stats = 0;	/* can't have colored stats without colors */
     }
 #else /* !COLOR_SUPPORT */
   ;

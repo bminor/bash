@@ -2196,7 +2196,7 @@ make_local_variable (name)
   old_var = find_variable (name);
   if (old_var && local_p (old_var) && old_var->context == variable_context)
     {
-      VUNSETATTR (old_var, att_invisible);
+      VUNSETATTR (old_var, att_invisible);	/* XXX */
       return (old_var);
     }
 
@@ -2277,6 +2277,8 @@ make_local_variable (name)
   if (ifsname (name))
     setifs (new_var);
 
+  if (was_tmpvar == 0)
+    VSETATTR (new_var, att_invisible);	/* XXX */
   return (new_var);
 }
 
@@ -2650,7 +2652,14 @@ bind_variable (name, value, flags)
 		{
 		  nv = find_variable_last_nameref_context (v, vc, &nvc);
 		  if (nv && nameref_p (nv))
-		    return (bind_variable_internal (nameref_cell (nv), value, nvc->table, 0, flags));
+		    {
+		      /* If this nameref variable doesn't have a value yet,
+			 set the value.  Otherwise, assign using the value as
+			 normal. */
+		      if (nameref_cell (nv) == 0)
+			return (bind_variable_internal (nv->name, value, nvc->table, 0, flags));
+		      return (bind_variable_internal (nameref_cell (nv), value, nvc->table, 0, flags));
+		    }
 		  else
 		    v = nv;
 		}
@@ -2694,7 +2703,9 @@ bind_variable_value (var, value, aflags)
      int aflags;
 {
   char *t;
+  int invis;
 
+  invis = invisible_p (var);
   VUNSETATTR (var, att_invisible);
 
   if (var->assign_func)
@@ -2709,6 +2720,17 @@ bind_variable_value (var, value, aflags)
   else
     {
       t = make_variable_value (var, value, aflags);
+#if defined (ARRAY_VARS)
+      if ((aflags & ASS_NAMEREF) && (t == 0 || *t == 0 || (legal_identifier (t) == 0 && valid_array_reference (t) == 0)))
+#else
+      if ((aflags & ASS_NAMEREF) && (t == 0 || *t == 0 || legal_identifier (t) == 0))
+#endif
+	{
+	  free (t);
+	  if (invis)
+	    VSETATTR (var, att_invisible);	/* XXX */
+	  return ((SHELL_VAR *)NULL);
+	}
       FREE (value_cell (var));
       var_setvalue (var, t);
     }
@@ -3130,6 +3152,30 @@ unbind_function_def (name)
   return 0;  
 }
 #endif /* DEBUGGER */
+
+int
+delete_var (name, vc)
+     const char *name;
+     VAR_CONTEXT *vc;
+{
+  BUCKET_CONTENTS *elt;
+  SHELL_VAR *old_var;
+  VAR_CONTEXT *v;
+
+  for (elt = (BUCKET_CONTENTS *)NULL, v = vc; v; v = v->down)
+    if (elt = hash_remove (name, v->table, 0))
+      break;
+
+  if (elt == 0)
+    return (-1);
+
+  old_var = (SHELL_VAR *)elt->data;
+  free (elt->key);
+  free (elt);
+
+  dispose_variable (old_var);
+  return (0);
+}
 
 /* Make the variable associated with NAME go away.  HASH_LIST is the
    hash table from which this variable should be deleted (either

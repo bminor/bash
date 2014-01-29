@@ -1,6 +1,6 @@
 /* pathexp.c -- The shell interface to the globbing library. */
 
-/* Copyright (C) 1995-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1995-2014 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -185,7 +185,7 @@ quote_string_for_globbing (pathname, qflags)
   register int i, j;
   int brack, cclass, collsym, equiv, c;
 
-  temp = (char *)xmalloc (strlen (pathname) + 1);
+  temp = (char *)xmalloc (2 * strlen (pathname) + 1);
 
   if ((qflags & QGLOB_CVTNULL) && QUOTED_NULL (pathname))
     {
@@ -196,7 +196,13 @@ quote_string_for_globbing (pathname, qflags)
   brack = cclass = collsym = equiv = 0;
   for (i = j = 0; pathname[i]; i++)
     {
-      if (pathname[i] == CTLESC)
+      /* Fix for CTLESC at the end of the string? */
+      if (pathname[i] == CTLESC && pathname[i+1] == '\0')
+	{
+	  temp[j++] = pathname[i++];
+	  break;
+	}
+      else if (pathname[i] == CTLESC)
 	{
 	  if ((qflags & QGLOB_FILENAME) && pathname[i+1] == '/')
 	    continue;
@@ -274,10 +280,18 @@ quote_string_for_globbing (pathname, qflags)
 	}
       else if (pathname[i] == '\\')
 	{
+	  /* If we want to pass through backslash unaltered, comment out these
+	     lines. */
 	  temp[j++] = '\\';
-	  i++;
-	  if (pathname[i] == '\0')
-	    break;
+	  /* XXX - if not quoting regexp, use backslash as quote char. Should
+	     we just pass it through without treating it as special? That is
+	     what ksh93 seems to do. */
+	  if ((qflags & QGLOB_REGEXP) == 0)
+	    {
+	      i++;
+	      if (pathname[i] == '\0')
+		break;
+	    }
 	}
       temp[j++] = pathname[i];
     }

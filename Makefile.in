@@ -1,4 +1,4 @@
-# Makefile for bash-4.3, version 4.10
+# Makefile for bash-4.3, version 4.11
 #
 # Copyright (C) 1996-2012 Free Software Foundation, Inc.
 
@@ -190,7 +190,8 @@ SH_ABSSRC = ${topdir}/${SH_LIBSRC}
 SHLIB_SOURCE =	${SH_LIBSRC}/clktck.c ${SH_LIBSRC}/getcwd.c \
 		${SH_LIBSRC}/getenv.c ${SH_LIBSRC}/oslib.c \
 		${SH_LIBSRC}/setlinebuf.c ${SH_LIBSRC}/strchrnul.c \
-		${SH_LIBSRC}/strcasecmp.c ${SH_LIBSRC}/strerror.c \
+		${SH_LIBSRC}/strcasecmp.c ${SH_LIBSRC}/strdup.c \
+		${SH_LIBSRC}/strerror.c \
 		${SH_LIBSRC}/strtod.c ${SH_LIBSRC}/strtol.c \
 		${SH_LIBSRC}/strtoul.c ${SH_LIBSRC}/vprint.c \
 		${SH_LIBSRC}/itos.c ${SH_LIBSRC}/rename.c \
@@ -766,7 +767,7 @@ installdirs:
 install:	.made installdirs
 	$(INSTALL_PROGRAM) $(INSTALLMODE) $(Program) $(DESTDIR)$(bindir)/$(Program)
 	$(INSTALL_SCRIPT) $(INSTALLMODE2) bashbug $(DESTDIR)$(bindir)/bashbug
-	$(INSTALL_DATA) $(OTHER_DOCS) $(docdir)
+	$(INSTALL_DATA) $(OTHER_DOCS) $(DESTDIR)$(docdir)
 	-( cd $(DOCDIR) ; $(MAKE) $(MFLAGS) \
 		man1dir=$(man1dir) man1ext=$(man1ext) \
 		man3dir=$(man3dir) man3ext=$(man3ext) \
@@ -1034,6 +1035,7 @@ sig.o: general.h xmalloc.h bashtypes.h variables.h arrayfunc.h conftypes.h array
 sig.o: quit.h ${BASHINCDIR}/maxpath.h unwind_prot.h dispose_cmd.h
 sig.o: make_cmd.h subst.h sig.h pathnames.h externs.h 
 sig.o: jobs.h siglist.h trap.h $(DEFSRC)/common.h bashline.h bashhist.h
+sig.o: ${DEFDIR}/builtext.h
 siglist.o: config.h bashtypes.h siglist.h trap.h 
 stringlib.o: bashtypes.h ${BASHINCDIR}/chartypes.h
 stringlib.o: shell.h syntax.h config.h bashjmp.h ${BASHINCDIR}/posixjmp.h command.h ${BASHINCDIR}/stdc.h error.h
@@ -1076,7 +1078,7 @@ variables.o: flags.h execute_cmd.h mailcheck.h input.h $(DEFSRC)/common.h
 variables.o: findcmd.h bashhist.h hashcmd.h pathexp.h
 variables.o: pcomplete.h  ${BASHINCDIR}/chartypes.h
 variables.o: ${BASHINCDIR}/posixtime.h assoc.h
-variables.o: version.h
+variables.o: version.h $(DEFDIR)/builtext.h
 version.o:  conftypes.h patchlevel.h version.h
 xmalloc.o: config.h bashtypes.h ${BASHINCDIR}/ansi_stdlib.h error.h
 

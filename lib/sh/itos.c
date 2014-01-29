@@ -50,6 +50,18 @@ itos (i)
   return (savestring (p));
 }
 
+/* Integer to string conversion.  This conses the string using strdup;
+   caller should free it and be prepared to deal with NULL return. */
+char *
+mitos (i)
+     intmax_t i;
+{
+  char *p, lbuf[INT_STRLEN_BOUND(intmax_t) + 1];
+
+  p = fmtumax (i, 10, lbuf, sizeof(lbuf), 0);
+  return (strdup (p));
+}
+
 char *
 uinttostr (i, buf, len)
      uintmax_t i;

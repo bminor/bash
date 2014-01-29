@@ -839,7 +839,9 @@ exp2 ()
 	 (curtok == MOD))
     {
       int op = curtok;
+      char *stp, *sltp;
 
+      stp = tp;
       readtok ();
 
       val2 = exppower ();
@@ -848,7 +850,14 @@ exp2 ()
       if (((op == DIV) || (op == MOD)) && (val2 == 0))
 	{
 	  if (noeval == 0)
-	    evalerror (_("division by 0"));
+	    {
+	      sltp = lasttp;
+	      lasttp = stp;
+	      while (lasttp && *lasttp && whitespace (*lasttp))
+		lasttp++;
+	      evalerror (_("division by 0"));
+	      lasttp = sltp;
+	    }
 	  else
 	    val2 = 1;
 	}

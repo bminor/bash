@@ -40,12 +40,28 @@ strvec_create (n)
   return ((char **)xmalloc ((n) * sizeof (char *)));
 }
 
+/* Allocate an array of strings with room for N members. */
+char **
+strvec_mcreate (n)
+     int n;
+{
+  return ((char **)malloc ((n) * sizeof (char *)));
+}
+
 char **
 strvec_resize (array, nsize)
      char **array;
      int nsize;
 {
   return ((char **)xrealloc (array, nsize * sizeof (char *)));
+}
+
+char **
+strvec_mresize (array, nsize)
+     char **array;
+     int nsize;
+{
+  return ((char **)realloc (array, nsize * sizeof (char *)));
 }
 
 /* Return the length of ARRAY, a NULL terminated array of char *. */

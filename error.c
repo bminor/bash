@@ -340,6 +340,36 @@ parser_error (lineno, format, va_alist)
 }
 
 #ifdef DEBUG
+/* This assumes ASCII and is suitable only for debugging */
+char *
+strescape (str)
+     const char *str;
+{
+  char *r, *result;
+  unsigned char *s;
+
+  r = result = (char *)xmalloc (strlen (str) * 2 + 1);
+
+  for (s = (unsigned char *)str; s && *s; s++)
+    {
+      if (*s < ' ')
+	{
+	  *r++ = '^';
+	  *r++ = *s+64;
+	}
+      else if (*s == 127)
+	{
+	  *r++ = '^';
+	  *r++ = '?';
+	}
+     else
+	*r++ = *s;
+    }
+
+  *r = '\0';
+  return result;
+}
+
 void
 #if defined (PREFER_STDARG)
 itrace (const char *format, ...)

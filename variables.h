@@ -291,6 +291,7 @@ extern int unbind_variable __P((const char *));
 extern int unbind_nameref __P((const char *));
 extern int unbind_func __P((const char *));
 extern int unbind_function_def __P((const char *));
+extern int delete_var __P((const char *, VAR_CONTEXT *));
 extern int makunbound __P((const char *, VAR_CONTEXT *));
 extern int kill_local_variable __P((const char *));
 extern void delete_all_variables __P((HASH_TABLE *));

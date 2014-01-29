@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash 4.3-pre2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-11-20 07:51-0500\n"
+"POT-Creation-Date: 2014-01-23 16:04-0500\n"
 "PO-Revision-Date: 2013-08-18 11:22+0200\n"
 "Last-Translator: Jakub Bogusz <qboosh@pld-linux.org>\n"
 "Language-Team: Polish <translation-team-pl@lists.sourceforge.net>\n"
@@ -23,7 +23,7 @@ msgstr ""
 msgid "bad array subscript"
 msgstr "nieprawidłowy indeks tablicy"
 
-#: arrayfunc.c:356 builtins/declare.def:585
+#: arrayfunc.c:356 builtins/declare.def:566
 #, c-format
 msgid "%s: cannot convert indexed to associative array"
 msgstr "%s: nie można przekształcić tablicy indeksowanej na asocjacyjną"
@@ -68,6 +68,21 @@ msgstr "brak zamykającego `%c' w %s"
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: brak separującego dwukropka"
+
+#: braces.c:321
+#, c-format
+msgid "brace expansion: cannot allocate memory for %s"
+msgstr ""
+
+#: braces.c:413
+#, c-format
+msgid "brace expansion: failed to allocate memory for %d elements"
+msgstr ""
+
+#: braces.c:452
+#, c-format
+msgid "brace expansion: failed to allocate memory for `%s'"
+msgstr ""
 
 #: builtins/alias.def:132
 #, c-format
@@ -193,7 +208,7 @@ msgstr "błędna liczba ósemkowa"
 msgid "invalid hex number"
 msgstr "błędna liczba szesnastkowa"
 
-#: builtins/common.c:242 expr.c:1461
+#: builtins/common.c:242 expr.c:1470
 msgid "invalid number"
 msgstr "nieprawidłowa liczba"
 
@@ -207,7 +222,7 @@ msgstr "%s: nieprawidłowo określony sygnał"
 msgid "`%s': not a pid or valid job spec"
 msgstr "`%s': nie jest to nr PID ani prawidłowe określenie zadania"
 
-#: builtins/common.c:264 error.c:458
+#: builtins/common.c:264 error.c:488
 #, c-format
 msgid "%s: readonly variable"
 msgstr "%s: zmienna tylko do odczytu"
@@ -306,7 +321,7 @@ msgstr "aktualnie nie jest wykonywana funkcja dopełniania"
 msgid "can only be used in a function"
 msgstr "można używać tylko w funkcji"
 
-#: builtins/declare.def:315 builtins/declare.def:533
+#: builtins/declare.def:315 builtins/declare.def:509
 #, c-format
 msgid "%s: reference variable cannot be an array"
 msgstr "%s: zmienna referencyjna nie może być tablicą"
@@ -316,21 +331,21 @@ msgstr "%s: zmienna referencyjna nie może być tablicą"
 msgid "%s: nameref variable self references not allowed"
 msgstr "%s: zmienna referencyjna nie może wskazywać na siebie"
 
-#: builtins/declare.def:422
+#: builtins/declare.def:398
 msgid "cannot use `-f' to make functions"
 msgstr "nie można używać `-f' do tworzenia funkcji"
 
-#: builtins/declare.def:434 execute_cmd.c:5329
+#: builtins/declare.def:410 execute_cmd.c:5349
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: funkcja tylko do odczytu"
 
-#: builtins/declare.def:572
+#: builtins/declare.def:553
 #, c-format
 msgid "%s: cannot destroy array variables in this way"
 msgstr "%s: nie można w ten sposób unicestwić zmiennej tablicowej"
 
-#: builtins/declare.def:579 builtins/read.def:733
+#: builtins/declare.def:560 builtins/read.def:733
 #, c-format
 msgid "%s: cannot convert associative to indexed array"
 msgstr "%s: nie można przekształcić tablicy asocjacyjnej na indeksowaną"
@@ -359,7 +374,7 @@ msgstr "%s: nie jest ładowany dynamicznie"
 msgid "%s: cannot delete: %s"
 msgstr "%s: nie można usunąć: %s"
 
-#: builtins/evalfile.c:140 builtins/hash.def:171 execute_cmd.c:5176
+#: builtins/evalfile.c:140 builtins/hash.def:171 execute_cmd.c:5196
 #: shell.c:1481
 #, c-format
 msgid "%s: is a directory"
@@ -585,6 +600,11 @@ msgstr "`%c': nieprawidłowy znak formatujący"
 #, c-format
 msgid "warning: %s: %s"
 msgstr "uwaga: %s: %s"
+
+#: builtins/printf.def:768
+#, c-format
+msgid "format parsing problem: %s"
+msgstr ""
 
 #: builtins/printf.def:865
 msgid "missing hex digit for \\x"
@@ -892,23 +912,23 @@ msgstr "ostatnie polecenie: %s\n"
 msgid "Aborting..."
 msgstr "Przerywanie..."
 
-#: error.c:410
+#: error.c:440
 msgid "unknown command error"
 msgstr "nieznany błąd polecenia"
 
-#: error.c:411
+#: error.c:441
 msgid "bad command type"
 msgstr "zły rodzaj polecenia"
 
-#: error.c:412
+#: error.c:442
 msgid "bad connector"
 msgstr "zły łącznik"
 
-#: error.c:413
+#: error.c:443
 msgid "bad jump"
 msgstr "zły skok"
 
-#: error.c:451
+#: error.c:481
 #, c-format
 msgid "%s: unbound variable"
 msgstr "%s: nieustawiona zmienna"
@@ -923,51 +943,51 @@ msgstr "\aprzekroczony czas oczekiwania na dane wejściowe: auto-wylogowanie\n"
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr "nie można przekierować standardowego wejścia z /dev/null: %s"
 
-#: execute_cmd.c:1230
+#: execute_cmd.c:1233
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "TIMEFORMAT: `%c': nieprawidłowy znak formatujący"
 
-#: execute_cmd.c:2284
+#: execute_cmd.c:2287
 msgid "pipe error"
 msgstr "błąd potoku"
 
-#: execute_cmd.c:4359
+#: execute_cmd.c:4374
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
 msgstr "%s: przekroczono maksymalny poziom zagnieżdżenia funkcji (%d)"
 
-#: execute_cmd.c:4852
+#: execute_cmd.c:4872
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: ograniczony: nie można podawać `/' w nazwach poleceń"
 
-#: execute_cmd.c:4941
+#: execute_cmd.c:4961
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: nie znaleziono polecenia"
 
-#: execute_cmd.c:5174
+#: execute_cmd.c:5194
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: execute_cmd.c:5211
+#: execute_cmd.c:5231
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: zły interpreter"
 
-#: execute_cmd.c:5248
+#: execute_cmd.c:5268
 #, c-format
 msgid "%s: cannot execute binary file: %s"
 msgstr "%s: nie można uruchomić pliku binarnego: %s"
 
-#: execute_cmd.c:5320
+#: execute_cmd.c:5340
 #, c-format
 msgid "`%s': is a special builtin"
 msgstr "`%s' jest specjalnym poleceniem wewnętrznym"
 
-#: execute_cmd.c:5372
+#: execute_cmd.c:5392
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "nie można skopiować deskryptora pliku %d do %d"
@@ -988,7 +1008,7 @@ msgstr "błąd składniowy w wyrażeniu"
 msgid "attempted assignment to non-variable"
 msgstr "próba przypisania do nie-zmiennej"
 
-#: expr.c:495 expr.c:851
+#: expr.c:495 expr.c:858
 msgid "division by 0"
 msgstr "dzielenie przez 0"
 
@@ -1001,41 +1021,41 @@ msgstr "błąd: zły prefiks operatora przypisującego"
 msgid "`:' expected for conditional expression"
 msgstr "spodziewano się `:' w wyrażeniu warunkowym"
 
-#: expr.c:910
+#: expr.c:919
 msgid "exponent less than 0"
 msgstr "wykładnik mniejszy niż 0"
 
-#: expr.c:967
+#: expr.c:976
 msgid "identifier expected after pre-increment or pre-decrement"
 msgstr ""
 "spodziewany identyfikator po operatorze preinkrementacji lub predekrementacji"
 
-#: expr.c:993
+#: expr.c:1002
 msgid "missing `)'"
 msgstr "brakujący `)'"
 
-#: expr.c:1044 expr.c:1381
+#: expr.c:1053 expr.c:1390
 msgid "syntax error: operand expected"
 msgstr "błąd składni: spodziewany argument"
 
-#: expr.c:1383
+#: expr.c:1392
 msgid "syntax error: invalid arithmetic operator"
 msgstr "błąd składni: nieprawidłowy operator arytmetyczny"
 
-#: expr.c:1407
+#: expr.c:1416
 #, c-format
 msgid "%s%s%s: %s (error token is \"%s\")"
 msgstr "%s%s%s: %s (błędny znacznik to \"%s\")"
 
-#: expr.c:1465
+#: expr.c:1474
 msgid "invalid arithmetic base"
 msgstr "nieprawidłowa podstawa arytmetyczna"
 
-#: expr.c:1485
+#: expr.c:1494
 msgid "value too great for base"
 msgstr "wartość za duża na podstawę"
 
-#: expr.c:1534
+#: expr.c:1543
 #, c-format
 msgid "%s: expression error\n"
 msgstr "%s: błąd w wyrażeniu\n"
@@ -1044,7 +1064,7 @@ msgstr "%s: błąd w wyrażeniu\n"
 msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: niemożliwy dostęp do katalogów nadrzędnych"
 
-#: input.c:102 subst.c:5129
+#: input.c:102 subst.c:5168
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "nie można wyłączyć trybu nieblokującego dla deskryptora %d"
@@ -1064,145 +1084,145 @@ msgid "start_pipeline: pgrp pipe"
 msgstr "start_pipeline: pgrp pipe"
 
 # ???
-#: jobs.c:892
+#: jobs.c:893
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr "proces o PID %d występuje w działającym zadaniu %d"
 
-#: jobs.c:1010
+#: jobs.c:1012
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "usuwanie zatrzymanego zadania %d z grupą procesów %ld"
 
-#: jobs.c:1115
+#: jobs.c:1117
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
 msgstr "add_process: proces %5ld (%s) w potoku"
 
-#: jobs.c:1118
+#: jobs.c:1120
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr "add_process: pid %5ld (%s) oznaczony jako nadal żywy"
 
-#: jobs.c:1433
+#: jobs.c:1435
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "describe_pid: %ld: brak takiego PID-u"
 
-#: jobs.c:1448
+#: jobs.c:1450
 #, c-format
 msgid "Signal %d"
 msgstr "Sygnał %d"
 
-#: jobs.c:1462 jobs.c:1487
+#: jobs.c:1464 jobs.c:1489
 msgid "Done"
 msgstr "Zakończono"
 
-#: jobs.c:1467 siglist.c:123
+#: jobs.c:1469 siglist.c:123
 msgid "Stopped"
 msgstr "Zatrzymano"
 
-#: jobs.c:1471
+#: jobs.c:1473
 #, c-format
 msgid "Stopped(%s)"
 msgstr "Zatrzymano(%s)"
 
-#: jobs.c:1475
+#: jobs.c:1477
 msgid "Running"
 msgstr "Działa"
 
-#: jobs.c:1489
+#: jobs.c:1491
 #, c-format
 msgid "Done(%d)"
 msgstr "Zakończono(%d)"
 
-#: jobs.c:1491
+#: jobs.c:1493
 #, c-format
 msgid "Exit %d"
 msgstr "Kod wyjścia %d"
 
-#: jobs.c:1494
+#: jobs.c:1496
 msgid "Unknown status"
 msgstr "Stan nieznany"
 
-#: jobs.c:1581
+#: jobs.c:1583
 #, c-format
 msgid "(core dumped) "
 msgstr "(zrzut pamięci) "
 
-#: jobs.c:1600
+#: jobs.c:1602
 #, c-format
 msgid "  (wd: %s)"
 msgstr "  (katalog: %s)"
 
-#: jobs.c:1817
+#: jobs.c:1819
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr "setpgid potomka (%ld na %ld)"
 
-#: jobs.c:2136 nojobs.c:605
+#: jobs.c:2138 nojobs.c:605
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: PID %ld nie jest potomkiem tej powłoki"
 
-#: jobs.c:2383
+#: jobs.c:2385
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for: Brak rekordu dla procesu %ld"
 
-#: jobs.c:2692
+#: jobs.c:2694
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: zadanie %d jest zatrzymane"
 
-#: jobs.c:2984
+#: jobs.c:2986
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: zadanie zostało przerwane"
 
-#: jobs.c:2993
+#: jobs.c:2995
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: zadanie %d już pracuje w tle"
 
-#: jobs.c:3218
+#: jobs.c:3220
 msgid "waitchld: turning on WNOHANG to avoid indefinite block"
 msgstr ""
 "waitchld: wyłączanie WNOHANG w celu uniknięcia nieskończonego oczekiwania"
 
-#: jobs.c:3709
+#: jobs.c:3711
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s: linia %d: "
 
-#: jobs.c:3723 nojobs.c:843
+#: jobs.c:3725 nojobs.c:843
 #, c-format
 msgid " (core dumped)"
 msgstr " (zrzut pamięci)"
 
-#: jobs.c:3735 jobs.c:3748
+#: jobs.c:3737 jobs.c:3750
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(katalog: %s)\n"
 
-#: jobs.c:3780
+#: jobs.c:3782
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: getpgrp nie powiodło się"
 
-#: jobs.c:3841
+#: jobs.c:3843
 msgid "initialize_job_control: line discipline"
 msgstr "initialize_job_control: dyscyplina linii"
 
-#: jobs.c:3851
+#: jobs.c:3853
 msgid "initialize_job_control: setpgid"
 msgstr "initialize_job_control: setpgid"
 
-#: jobs.c:3872 jobs.c:3881
+#: jobs.c:3874 jobs.c:3883
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "nie można ustawić grupy procesów terminala (%d)"
 
-#: jobs.c:3886
+#: jobs.c:3888
 msgid "no job control in this shell"
 msgstr "w tej powłoce nie ma kontroli zadań"
 
@@ -1357,99 +1377,99 @@ msgstr ""
 msgid "make_redirection: redirection instruction `%d' out of range"
 msgstr "make_redirection: instrukcja przekierowania `%d' poza zakresem"
 
-#: parse.y:3210 parse.y:3493
+#: parse.y:3273 parse.y:3556
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "nieoczekiwany EOF podczas poszukiwania pasującego `%c'"
 
-#: parse.y:4099
+#: parse.y:4163
 msgid "unexpected EOF while looking for `]]'"
 msgstr "nieoczekiwany EOF podczas poszukiwania `]]'"
 
-#: parse.y:4104
+#: parse.y:4168
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr "błąd składni w wyrażeniu warunkowym: nieoczekiwany znacznik `%s'"
 
-#: parse.y:4108
+#: parse.y:4172
 msgid "syntax error in conditional expression"
 msgstr "błąd składni w wyrażeniu warunkowym"
 
-#: parse.y:4186
+#: parse.y:4250
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr "nieoczekiwany znacznik `%s', oczekiwano `)'"
 
-#: parse.y:4190
+#: parse.y:4254
 msgid "expected `)'"
 msgstr "oczekiwano `)'"
 
-#: parse.y:4218
+#: parse.y:4282
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr "nieoczekiwany argument `%s' jednoargumentowego operatora warunkowego"
 
-#: parse.y:4222
+#: parse.y:4286
 msgid "unexpected argument to conditional unary operator"
 msgstr "nieoczekiwany argument jednoargumentowego operatora warunkowego"
 
-#: parse.y:4268
+#: parse.y:4332
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr "nieoczekiwany argument `%s', oczekiwano dwuarg. operatora warunkowego"
 
-#: parse.y:4272
+#: parse.y:4336
 msgid "conditional binary operator expected"
 msgstr "oczekiwano dwuargumentowego operatora warunkowego"
 
-#: parse.y:4294
+#: parse.y:4358
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr "nieoczekiwany argument `%s' dwuargumentowego operatora warunkowego"
 
-#: parse.y:4298
+#: parse.y:4362
 msgid "unexpected argument to conditional binary operator"
 msgstr "nieoczekiwany argument dwuargumentowego operatora warunkowego"
 
-#: parse.y:4309
+#: parse.y:4373
 #, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr "nieoczekiwany znacznik `%c' w poleceniu warunkowym"
 
-#: parse.y:4312
+#: parse.y:4376
 #, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr "nieoczekiwany znacznik `%s' w poleceniu warunkowym"
 
-#: parse.y:4316
+#: parse.y:4380
 #, c-format
 msgid "unexpected token %d in conditional command"
 msgstr "nieoczekiwany znacznik %d w poleceniu warunkowym"
 
-#: parse.y:5666
+#: parse.y:5730
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "błąd składni przy nieoczekiwanym znaczniku `%s'"
 
-#: parse.y:5684
+#: parse.y:5748
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "błąd składni przy `%s'"
 
-#: parse.y:5694
+#: parse.y:5758
 msgid "syntax error: unexpected end of file"
 msgstr "błąd składni: nieoczekiwany koniec pliku"
 
-#: parse.y:5694
+#: parse.y:5758
 msgid "syntax error"
 msgstr "błąd składni"
 
-#: parse.y:5756
+#: parse.y:5820
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "Użyj \"%s\", aby opuścić tę powłokę.\n"
 
-#: parse.y:5918
+#: parse.y:5982
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "nieoczekiwany EOF podczas poszukiwania pasującego `)'"
 
@@ -1591,7 +1611,7 @@ msgstr ""
 msgid "Use the `bashbug' command to report bugs.\n"
 msgstr "Do zgłaszania błędów należy używać polecenia `bashbug'.\n"
 
-#: sig.c:679
+#: sig.c:691
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
 msgstr "sigprocmask: %d: nieprawidłowa operacja"
@@ -1765,77 +1785,77 @@ msgstr "Nieznany sygnał #"
 msgid "Unknown Signal #%d"
 msgstr "Nieznany sygnał #%d"
 
-#: subst.c:1358 subst.c:1516
+#: subst.c:1362 subst.c:1520
 #, c-format
 msgid "bad substitution: no closing `%s' in %s"
 msgstr "złe podstawienie: brak zamykającego `%s' w %s"
 
-#: subst.c:2829
+#: subst.c:2847
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr "%s: nie można przypisać listy do elementu tablicy"
 
-#: subst.c:5026 subst.c:5042
+#: subst.c:5065 subst.c:5081
 msgid "cannot make pipe for process substitution"
 msgstr "nie można utworzyć potoku dla podstawienia procesu"
 
-#: subst.c:5074
+#: subst.c:5113
 msgid "cannot make child for process substitution"
 msgstr "nie można utworzyć procesu potomnego dla podstawienia procesu"
 
-#: subst.c:5119
+#: subst.c:5158
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "nie można otworzyć nazwanego potoku %s do odczytu"
 
-#: subst.c:5121
+#: subst.c:5160
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "nie można otworzyć nazwanego potoku %s do zapisu"
 
-#: subst.c:5139
+#: subst.c:5178
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "nie można powielić nazwanego potoku %s jako deskryptor %d"
 
-#: subst.c:5337
+#: subst.c:5376
 msgid "cannot make pipe for command substitution"
 msgstr "nie można utworzyć potoku dla podstawienia polecenia"
 
-#: subst.c:5375
+#: subst.c:5414
 msgid "cannot make child for command substitution"
 msgstr "nie można utworzyć procesu potomnego dla podstawienia polecenia"
 
-#: subst.c:5394
+#: subst.c:5433
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr "command_substitute: nie można powielić potoku jako deskryptora 1"
 
-#: subst.c:5798 subst.c:8001
+#: subst.c:5837 subst.c:8050
 #, c-format
 msgid "%s: invalid variable name for name reference"
 msgstr "%s: nieprawidłowa nazwa zmiennej przy odwołaniu do nazwy"
 
-#: subst.c:6009
+#: subst.c:6048
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: parametr pusty lub nieustawiony"
 
-#: subst.c:6281 subst.c:6296
+#: subst.c:6320 subst.c:6335
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: wyrażenie dla podłańcucha < 0"
 
-#: subst.c:7457
+#: subst.c:7506
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: złe podstawienie"
 
-#: subst.c:7534
+#: subst.c:7583
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: nie można przypisywać w ten sposób"
 
-#: subst.c:7868
+#: subst.c:7917
 msgid ""
 "future versions of the shell will force evaluation as an arithmetic "
 "substitution"
@@ -1843,12 +1863,12 @@ msgstr ""
 "przyszłe wersje powłoki będą wymuszać obliczenie jako podstawienie "
 "arytmetyczne"
 
-#: subst.c:8372
+#: subst.c:8421
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "złe podstawienie: brak zamykającego \"`\" w %s"
 
-#: subst.c:9273
+#: subst.c:9322
 #, c-format
 msgid "no match: %s"
 msgstr "brak pasującego: %s"
@@ -1889,12 +1909,12 @@ msgstr "brakujący `]'"
 msgid "invalid signal number"
 msgstr "nieprawidłowy numer sygnału"
 
-#: trap.c:355
+#: trap.c:371
 #, c-format
 msgid "run_pending_traps: bad value in trap_list[%d]: %p"
 msgstr "run_pending_traps: zła wartość trap_list[%d]: %p"
 
-#: trap.c:359
+#: trap.c:375
 #, c-format
 msgid ""
 "run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself"
@@ -1902,7 +1922,7 @@ msgstr ""
 "run_pending_traps: obsługa sygnału jest ustawiona na SIG_DFL, wysyłając %d "
 "(%s) do siebie"
 
-#: trap.c:413
+#: trap.c:428
 #, c-format
 msgid "trap_handler: bad signal %d"
 msgstr "trap_handler: zły sygnał %d"
@@ -1931,49 +1951,49 @@ msgstr "make_local_variable: brak kontekstu funkcji w bieżącym zakresie"
 msgid "%s: variable may not be assigned value"
 msgstr "%s: nie można przypisać wartości do zmiennej"
 
-#: variables.c:3600
+#: variables.c:3646
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: brak kontekstu funkcji w bieżącym zakresie"
 
-#: variables.c:3845
+#: variables.c:3891
 #, c-format
 msgid "%s has null exportstr"
 msgstr "%s ma pusty exportstr"
 
-#: variables.c:3850 variables.c:3859
+#: variables.c:3896 variables.c:3905
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "nieprawidłowy znak %d w exportstr dla %s"
 
-#: variables.c:3865
+#: variables.c:3911
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "brak `=' w exportstr dla %s"
 
-#: variables.c:4298
+#: variables.c:4344
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr "pop_var_context: nagłówek shell_variables poza kontekstem funkcji"
 
-#: variables.c:4311
+#: variables.c:4357
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: brak kontekstu global_variables"
 
-#: variables.c:4385
+#: variables.c:4431
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr ""
 "pop_scope: nagłówek shell_variables poza zakresem tymczasowego środowiska"
 
-#: variables.c:5211
+#: variables.c:5257
 #, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: %s: nie można otworzyć jako PLIK"
 
-#: variables.c:5216
+#: variables.c:5262
 #, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%s: %s: nieprawidłowa wartość dla deskryptora pliku do śledzenia"
 
-#: variables.c:5261
+#: variables.c:5307
 #, c-format
 msgid "%s: %s: compatibility value out of range"
 msgstr "%s: %s: wartość kompatybilna poza zakresem"
