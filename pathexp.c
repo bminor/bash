@@ -183,7 +183,7 @@ quote_string_for_globbing (pathname, qflags)
 {
   char *temp;
   register int i, j;
-  int brack, cclass, collsym, equiv, c;
+  int brack, cclass, collsym, equiv, c, last_was_backslash;
 
   temp = (char *)xmalloc (2 * strlen (pathname) + 1);
 
@@ -193,7 +193,7 @@ quote_string_for_globbing (pathname, qflags)
       return temp;
     }
 
-  brack = cclass = collsym = equiv = 0;
+  brack = cclass = collsym = equiv = last_was_backslash = 0;
   for (i = j = 0; pathname[i]; i++)
     {
       /* Fix for CTLESC at the end of the string? */
@@ -202,10 +202,19 @@ quote_string_for_globbing (pathname, qflags)
 	  temp[j++] = pathname[i++];
 	  break;
 	}
+      /* If we are parsing regexp, turn CTLESC CTLESC into CTLESC. It's not an
+	 ERE special character, so we should just be able to pass it through. */
+      else if ((qflags & QGLOB_REGEXP) && pathname[i] == CTLESC && pathname[i+1] == CTLESC)
+	{
+	  i++;
+	  temp[j++] = pathname[i];
+	  continue;
+	}
       else if (pathname[i] == CTLESC)
 	{
 	  if ((qflags & QGLOB_FILENAME) && pathname[i+1] == '/')
 	    continue;
+	  /* What to do if preceding char is backslash? */
 	  if (pathname[i+1] != CTLESC && (qflags & QGLOB_REGEXP) && ere_char (pathname[i+1]) == 0)
 	    continue;
 	  temp[j++] = '\\';
@@ -278,21 +287,22 @@ quote_string_for_globbing (pathname, qflags)
 	  i--;			/* increment will happen above in loop */
 	  continue;		/* skip double assignment below */
 	}
-      else if (pathname[i] == '\\')
+      else if (pathname[i] == '\\' && (qflags & QGLOB_REGEXP) == 0)
 	{
-	  /* If we want to pass through backslash unaltered, comment out these
-	     lines. */
-	  temp[j++] = '\\';
 	  /* XXX - if not quoting regexp, use backslash as quote char. Should
 	     we just pass it through without treating it as special? That is
 	     what ksh93 seems to do. */
-	  if ((qflags & QGLOB_REGEXP) == 0)
-	    {
-	      i++;
-	      if (pathname[i] == '\0')
-		break;
-	    }
+
+	  /* If we want to pass through backslash unaltered, comment out these
+	     lines. */
+	  temp[j++] = '\\';
+
+	  i++;
+	  if (pathname[i] == '\0')
+	    break;
 	}
+      else if (pathname[i] == '\\' && (qflags & QGLOB_REGEXP))
+        last_was_backslash = 1;
       temp[j++] = pathname[i];
     }
 endpat:

@@ -40,6 +40,7 @@
 
 #include "shell.h"
 #include "test.h"
+#include "trap.h"
 
 #include <tilde/tilde.h>
 

@@ -5707,3 +5707,75 @@ support/shobj-conf
 	- darwin: combine the stanzas into one that will not require them to
 	  be updated on each Mac OS X release.  Report and fix from Max Horn
 	  <max@quendi.de>
+
+				   1/27
+				   ----
+support/shobj-conf
+	- darwin: changed the install_name embedded into the shared library
+	  to contain only the major version number, not the minor one. The
+	  idea is that the minor versions should all be API/ABI compatible,
+	  and it is better to link automatically with the latest one.  Idea
+	  from Max Horn <max@quendi.de>
+
+				   1/29
+				   ----
+[bash-4.3-rc2 released]
+
+				   1/30
+				   ----
+lib/readline/readline.h
+	- rl_clear_history, rl_free_keymap: add extern declarations.  Report
+	  from Hiroo Hayashi <hiroo.hayashi@computer.org>
+
+general.c
+	- include trap.h for any_signals_trapped() prototype
+
+lib/sh/unicode.c
+	- include <stdio.h> for sprintf prototype
+
+				   1/31
+				   ----
+execute_cmd.c
+	- execute_simple_command: only posix-mode shells should exit on an
+	  assignment failure in the temporary environment preceding a special
+	  builtin. This is what the documentation and code comments have
+	  always said
+	- execute_simple_command: make sure redirection errors, word expansion
+	  errors, and assignment errors to Posix special builtins cause a
+	  non-interactive posix mode shell to exit.  Previously the shell
+	  would not exit if the failed special builtin was on the LHS of ||
+	  or &&
+
+pathexp.c
+	- quote_string_for_globbing: when quoting a regular expression
+	  (QGLOB_REGEXP), allow an unquoted backslash to pass through
+	  unaltered. Don't use it as a quote character or quote it.  More
+	  investigation from 1/24 and report by Mike Frysinger
+	  <vapier@gentoo.org>
+	- quote_string_for_globbing: when quoting a regular expression
+	  (QGLOB_REGEXP), turn CTLESC CTLESC into CTLESC without adding a
+	  backslash to quote it. We should not have to quote it because it is
+	  not a character special to EREs. More investigation from 1/24
+
+lib/glob/glob.c
+	- glob_testdir: now takes a second flags argument (currently unused);
+	  changed prototype and callers
+
+				    2/1
+				    ---
+lib/glob/glob.c
+	- glob_testdir: if flags argument includes GX_ALLDIRS (globstar), use
+	  lstat so we skip symlinks when traversing the directory tree.
+	  Originally reported by Chris Down <chris@chrisdown.name>
+
+				    2/2
+				    ---
+lib/readline/undo.c
+	- rl_do_undo: make sure CUR is non-zero before dereferencing it to
+	  check cur->data against rl_undo_list.  Report and fix from
+	  Andreas Schwab <schwab@linux-m68k.org>
+
+doc/{bash.1,bashref.texi}
+	- added slight clarifying language to the description of $*,
+	  describing what happens when the expansion is not within double
+	  quotes

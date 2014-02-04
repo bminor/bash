@@ -180,18 +180,21 @@ darwin*)
 	SHLIB_LIBVERSION='$(SHLIB_MAJOR)$(SHLIB_MINOR).$(SHLIB_LIBSUFF)'
 	SHLIB_LIBSUFF='dylib'
 
+	# unused at this time
+	SHLIB_SONAME='$(libdir)/`echo $@ | sed "s:\\..*::"`.$(SHLIB_MAJOR).$(SHLIB_LIBSUFF)'
+
 	case "${host_os}" in
 	# Darwin versions 1, 5, 6, 7 correspond to Mac OS X 10.0, 10.1, 10.2,
 	# and 10.3, respectively.
 	darwin[1-7].*)
 		SHOBJ_STATUS=unsupported
 		SHOBJ_LDFLAGS='-dynamic'
-		SHLIB_XLDFLAGS='-arch_only `/usr/bin/arch` -install_name $(libdir)/$@ -current_version $(SHLIB_MAJOR)$(SHLIB_MINOR) -compatibility_version $(SHLIB_MAJOR) -v'
+		SHLIB_XLDFLAGS='-arch_only `/usr/bin/arch` -install_name $(libdir)/`echo $@ | sed "s:\\..*::"`.$(SHLIB_MAJOR).$(SHLIB_LIBSUFF) -current_version $(SHLIB_MAJOR)$(SHLIB_MINOR) -compatibility_version $(SHLIB_MAJOR) -v'
 		;;
 	# Darwin 8 == Mac OS X 10.4; Mac OS X 10.N == Darwin N+4
 	*)
 		SHOBJ_LDFLAGS='-dynamiclib -dynamic -undefined dynamic_lookup -arch_only `/usr/bin/arch`'
-		SHLIB_XLDFLAGS='-dynamiclib -arch_only `/usr/bin/arch` -install_name $(libdir)/$@ -current_version $(SHLIB_MAJOR)$(SHLIB_MINOR) -compatibility_version $(SHLIB_MAJOR) -v'
+		SHLIB_XLDFLAGS='-dynamiclib -arch_only `/usr/bin/arch` -install_name $(libdir)/`echo $@ | sed "s:\\..*::"`.$(SHLIB_MAJOR).$(SHLIB_LIBSUFF) -current_version $(SHLIB_MAJOR)$(SHLIB_MINOR) -compatibility_version $(SHLIB_MAJOR) -v'
 		;;
 	esac
 

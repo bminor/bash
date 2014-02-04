@@ -50,6 +50,13 @@ bs='\'
 [[ x =~ $'\\'x ]] ; echo $?
 [[ x =~ '\'x ]] ; echo $?
 
+v='a\-b'
+[[ a-b =~ ${v} ]] ; echo $?
+[[ a-b =~ a\-b ]]; echo $?
+[[ a-b =~ a${bs}-b ]]; echo $?
+[[ a-b =~ a\\-b ]] ; echo $?
+[[ a-b =~ "a\-b" ]] ; echo $?
+
 c=$'\001'
 
 recho $c "$c"

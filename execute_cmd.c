@@ -4044,7 +4044,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 
   /* In POSIX mode, assignment errors in the temporary environment cause a
      non-interactive shell to exit. */
-  if (builtin_is_special && interactive_shell == 0 && tempenv_assign_error)
+  if (posixly_correct && builtin_is_special && interactive_shell == 0 && tempenv_assign_error)
     {
       last_command_exit_value = EXECUTION_FAILURE;
       jump_to_top_level (ERREXIT);
@@ -4165,6 +4165,18 @@ run_builtin:
 	    {
 	      if (result > EX_SHERRBASE)
 		{
+		  switch (result)
+		    {
+		    case EX_REDIRFAIL:
+		    case EX_BADASSIGN:
+		    case EX_EXPFAIL:
+		      /* These errors cause non-interactive posix mode shells to exit */
+		      if (posixly_correct && builtin_is_special && interactive_shell == 0)
+			{
+			  last_command_exit_value = EXECUTION_FAILURE;
+			  jump_to_top_level (ERREXIT);
+			}
+		    }
 		  result = builtin_status (result);
 		  if (builtin_is_special)
 		    special_builtin_failed = 1;

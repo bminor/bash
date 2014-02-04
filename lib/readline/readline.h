@@ -342,6 +342,7 @@ extern Keymap rl_make_bare_keymap PARAMS((void));
 extern Keymap rl_copy_keymap PARAMS((Keymap));
 extern Keymap rl_make_keymap PARAMS((void));
 extern void rl_discard_keymap PARAMS((Keymap));
+extern void rl_free_keymap PARAMS((Keymap));
 
 extern Keymap rl_get_keymap_by_name PARAMS((const char *));
 extern char *rl_get_keymap_name PARAMS((Keymap));
@@ -438,6 +439,10 @@ extern void rl_free_line_state PARAMS((void));
 extern void rl_echo_signal_char PARAMS((int)); 
 
 extern int rl_set_paren_blink_timeout PARAMS((int));
+
+/* History management functions. */
+
+extern void rl_clear_history PARAMS((void));
 
 /* Undocumented. */
 extern int rl_maybe_save_line PARAMS((void));

@@ -237,7 +237,7 @@ rl_do_undo ()
       /* If we are editing a history entry, make sure the change is replicated
 	 in the history entry's line */
       cur = current_history ();
-      if (cur && cur->data && (UNDO_LIST *)cur->data == release)
+      if ((UNDO_LIST *)cur->data == release)
 	{
 	  temp = replace_history_entry (where_history (), rl_line_buffer, (histdata_t)rl_undo_list);
 	  xfree (temp->line);
