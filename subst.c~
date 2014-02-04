@@ -3259,15 +3259,20 @@ cond_expand_word (w, special)
 	}
       else
 	{
-	  /* Need to figure out whether or not we should call dequote_escapes
-	     or a new dequote_ctlnul function here, and under what
-	     circumstances. */
+	  /* Need to figure out whether or not we call dequote_escapes or a
+	     new dequote_ctlnul function here, and under what circumstances. */
+	  /* XXX - also need to figure out what quote_string_for_globbing
+	     should do with a string x[0] = ^A, x[1] = 0.  Right now it turns
+	     it into the empty string. */
 	  qflags = QGLOB_CVTNULL;
 	  if (special == 2)
 	    qflags |= QGLOB_REGEXP;
 	  p = string_list (l);
 	  r = quote_string_for_globbing (p, qflags);
 	  free (p);
+p = strescape(r);
+itrace("cond_expand_word: quote_string_for_globbing returns `%s'", p);
+free(p);
 	}
       dispose_words (l);
     }

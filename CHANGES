@@ -1,5 +1,5 @@
-This document details the changes between this version, bash-4.3-rc1, and the
-previous version, bash-4.3-beta2.
+This document details the changes between this version, bash-4.3-rc2, and the
+previous version, bash-4.3-rc1.
 
 1.  Changes to Bash
 
@@ -32,6 +32,16 @@ j. Converting an existing variable to a nameref variable now turns off the
 
 k. Displaying a nameref variable with `declare -p' now displays the nameref
    variable and its value rather than following the nameref chain.
+
+l. Fixed a problem with interrupt handling that caused a second and subsequent
+   SIGINT to be ignored by interactive shells.
+
+m. Fixed a bug that caused certain positional parameter and array expansions
+   to mishandle (discard) null positional parameters and array elements.
+
+n. The shell no longer blocks receipt of signals while running trap handlers
+   for those signals, and allows trap handlers to be run recursively
+   (running trap handlers while a trap handler is executing).
 
 2.  Changes to Readline
 
