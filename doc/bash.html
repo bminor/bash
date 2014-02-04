@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2013 October 20<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2014 January 6<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -7457,16 +7457,25 @@ and <I>emacs</I> as the editor, in that order.
 
 
 <DL COMPACT>
-<DT><B>delete-char (C-d)</B>
+<DT><B></B><I>end-of-file</I> (usually C-d)
 
 <DD>
-Delete the character at point.  If point is at the
-beginning of the line, there are no characters in the line, and
-the last character typed was not bound to <B>delete-char</B>,
-then return
+The character indicating end-of-file as set, for example, by
+<TT>stty</TT>.
+
+If this character is read when there are no characters
+on the line, and point is at the beginning of the line, Readline
+interprets it as the end of input and returns
 <FONT SIZE=-1><B>EOF</B>.
 
 </FONT>
+<DT><B>delete-char (C-d)</B>
+
+<DD>
+Delete the character at point.
+If this function is bound to the
+same character as the tty <B>EOF</B> character, as <B>C-d</B>
+commonly is, see above for the effects.
 <DT><B>backward-delete-char (Rubout)</B>
 
 <DD>
@@ -7812,8 +7821,9 @@ and store the definition.
 <DD>
 Re-execute the last keyboard macro defined, by making the characters
 in the macro appear as if typed at the keyboard.
-<B>print-last-kbd-macro ()</B>
+<DT><B>print-last-kbd-macro ()</B>
 
+<DD>
 Print the last keyboard macro defined in a format suitable for the
 <I>inputrc</I> file.
 
@@ -13147,7 +13157,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.3<TH ALIGN=CENTER width=33%>2013 October 20<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.3<TH ALIGN=CENTER width=33%>2014 January 6<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13253,6 +13263,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 20 November 2013 08:00:32 EST
+Time: 23 January 2014 15:52:11 EST
 </BODY>
 </HTML>

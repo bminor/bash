@@ -3274,51 +3274,56 @@ RREEAADDLLIINNEE
               $$EEDDIITTOORR, and _e_m_a_c_s as the editor, in that order.
 
    CCoommmmaannddss ffoorr CChhaannggiinngg TTeexxtt
+       _e_n_d_-_o_f_-_f_i_l_e ((uussuuaallllyy CC--dd))
+              The  character  indicating  end-of-file  as set, for example, by
+              ``stty''.  If this character is read when there are  no  charac-
+              ters  on  the  line,  and point is at the beginning of the line,
+              Readline interprets it as the end of input and returns EEOOFF.
        ddeelleettee--cchhaarr ((CC--dd))
-              Delete  the character at point.  If point is at the beginning of
-              the line, there are no characters in  the  line,  and  the  last
-              character typed was not bound to ddeelleettee--cchhaarr, then return EEOOFF.
+              Delete the character at point.  If this function is bound to the
+              same character as the tty EEOOFF character, as CC--dd commonly is, see
+              above for the effects.
        bbaacckkwwaarrdd--ddeelleettee--cchhaarr ((RRuubboouutt))
-              Delete  the  character  behind the cursor.  When given a numeric
+              Delete the character behind the cursor.  When  given  a  numeric
               argument, save the deleted text on the kill ring.
        ffoorrwwaarrdd--bbaacckkwwaarrdd--ddeelleettee--cchhaarr
-              Delete the character under the cursor, unless the cursor  is  at
+              Delete  the  character under the cursor, unless the cursor is at
               the end of the line, in which case the character behind the cur-
               sor is deleted.
        qquuootteedd--iinnsseerrtt ((CC--qq,, CC--vv))
-              Add the next character typed to the line verbatim.  This is  how
+              Add  the next character typed to the line verbatim.  This is how
               to insert characters like CC--qq, for example.
        ttaabb--iinnsseerrtt ((CC--vv TTAABB))
               Insert a tab character.
        sseellff--iinnsseerrtt ((aa,, bb,, AA,, 11,, !!,, ......))
               Insert the character typed.
        ttrraannssppoossee--cchhaarrss ((CC--tt))
-              Drag  the  character  before point forward over the character at
-              point, moving point forward as well.  If point is at the end  of
-              the  line, then this transposes the two characters before point.
+              Drag the character before point forward over  the  character  at
+              point,  moving point forward as well.  If point is at the end of
+              the line, then this transposes the two characters before  point.
               Negative arguments have no effect.
        ttrraannssppoossee--wwoorrddss ((MM--tt))
-              Drag the word before point past the  word  after  point,  moving
-              point  over  that  word  as well.  If point is at the end of the
+              Drag  the  word  before  point past the word after point, moving
+              point over that word as well.  If point is at  the  end  of  the
               line, this transposes the last two words on the line.
        uuppccaassee--wwoorrdd ((MM--uu))
-              Uppercase the current (or  following)  word.   With  a  negative
+              Uppercase  the  current  (or  following)  word.  With a negative
               argument, uppercase the previous word, but do not move point.
        ddoowwnnccaassee--wwoorrdd ((MM--ll))
-              Lowercase  the  current  (or  following)  word.  With a negative
+              Lowercase the current (or  following)  word.   With  a  negative
               argument, lowercase the previous word, but do not move point.
        ccaappiittaalliizzee--wwoorrdd ((MM--cc))
-              Capitalize the current (or following)  word.   With  a  negative
+              Capitalize  the  current  (or  following) word.  With a negative
               argument, capitalize the previous word, but do not move point.
        oovveerrwwrriittee--mmooddee
-              Toggle  overwrite mode.  With an explicit positive numeric argu-
+              Toggle overwrite mode.  With an explicit positive numeric  argu-
               ment, switches to overwrite mode.  With an explicit non-positive
               numeric argument, switches to insert mode.  This command affects
-              only eemmaaccss mode; vvii mode does overwrite differently.  Each  call
+              only  eemmaaccss mode; vvii mode does overwrite differently.  Each call
               to _r_e_a_d_l_i_n_e_(_) starts in insert mode.  In overwrite mode, charac-
-              ters bound to sseellff--iinnsseerrtt replace the text at point rather  than
-              pushing  the  text  to  the  right.   Characters  bound to bbaacckk--
-              wwaarrdd--ddeelleettee--cchhaarr replace  the  character  before  point  with  a
+              ters  bound to sseellff--iinnsseerrtt replace the text at point rather than
+              pushing the text  to  the  right.   Characters  bound  to  bbaacckk--
+              wwaarrdd--ddeelleettee--cchhaarr  replace  the  character  before  point  with a
               space.  By default, this command is unbound.
 
    KKiilllliinngg aanndd YYaannkkiinngg
@@ -3327,31 +3332,31 @@ RREEAADDLLIINNEE
        bbaacckkwwaarrdd--kkiillll--lliinnee ((CC--xx RRuubboouutt))
               Kill backward to the beginning of the line.
        uunniixx--lliinnee--ddiissccaarrdd ((CC--uu))
-              Kill  backward  from  point  to  the beginning of the line.  The
+              Kill backward from point to the  beginning  of  the  line.   The
               killed text is saved on the kill-ring.
        kkiillll--wwhhoollee--lliinnee
-              Kill all characters on the current line, no matter  where  point
+              Kill  all  characters on the current line, no matter where point
               is.
        kkiillll--wwoorrdd ((MM--dd))
-              Kill  from  point  to the end of the current word, or if between
-              words, to the end of the next word.   Word  boundaries  are  the
-              same as those used by ffoorrwwaarrdd--wwoorrdd.
-       bbaacckkwwaarrdd--kkiillll--wwoorrdd ((MM--RRuubboouutt))
-              Kill  the  word  behind  point.  Word boundaries are the same as
-              those used by bbaacckkwwaarrdd--wwoorrdd.
-       sshheellll--kkiillll--wwoorrdd ((MM--dd))
               Kill from point to the end of the current word,  or  if  between
               words,  to  the  end  of the next word.  Word boundaries are the
+              same as those used by ffoorrwwaarrdd--wwoorrdd.
+       bbaacckkwwaarrdd--kkiillll--wwoorrdd ((MM--RRuubboouutt))
+              Kill the word behind point.  Word boundaries  are  the  same  as
+              those used by bbaacckkwwaarrdd--wwoorrdd.
+       sshheellll--kkiillll--wwoorrdd ((MM--dd))
+              Kill  from  point  to the end of the current word, or if between
+              words, to the end of the next word.   Word  boundaries  are  the
               same as those used by sshheellll--ffoorrwwaarrdd--wwoorrdd.
        sshheellll--bbaacckkwwaarrdd--kkiillll--wwoorrdd ((MM--RRuubboouutt))
-              Kill the word behind point.  Word boundaries  are  the  same  as
+              Kill  the  word  behind  point.  Word boundaries are the same as
               those used by sshheellll--bbaacckkwwaarrdd--wwoorrdd.
        uunniixx--wwoorrdd--rruubboouutt ((CC--ww))
-              Kill  the  word behind point, using white space as a word bound-
+              Kill the word behind point, using white space as a  word  bound-
               ary.  The killed text is saved on the kill-ring.
        uunniixx--ffiilleennaammee--rruubboouutt
-              Kill the word behind point, using  white  space  and  the  slash
-              character  as  the word boundaries.  The killed text is saved on
+              Kill  the  word  behind  point,  using white space and the slash
+              character as the word boundaries.  The killed text is  saved  on
               the kill-ring.
        ddeelleettee--hhoorriizzoonnttaall--ssppaaccee ((MM--\\))
               Delete all spaces and tabs around point.
@@ -3360,65 +3365,65 @@ RREEAADDLLIINNEE
        ccooppyy--rreeggiioonn--aass--kkiillll
               Copy the text in the region to the kill buffer.
        ccooppyy--bbaacckkwwaarrdd--wwoorrdd
-              Copy the word before point to the kill buffer.  The word  bound-
+              Copy  the word before point to the kill buffer.  The word bound-
               aries are the same as bbaacckkwwaarrdd--wwoorrdd.
        ccooppyy--ffoorrwwaarrdd--wwoorrdd
-              Copy  the  word  following  point  to the kill buffer.  The word
+              Copy the word following point to  the  kill  buffer.   The  word
               boundaries are the same as ffoorrwwaarrdd--wwoorrdd.
        yyaannkk ((CC--yy))
               Yank the top of the kill ring into the buffer at point.
        yyaannkk--ppoopp ((MM--yy))
-              Rotate the kill ring, and yank the new top.  Only works  follow-
+              Rotate  the kill ring, and yank the new top.  Only works follow-
               ing yyaannkk or yyaannkk--ppoopp.
 
    NNuummeerriicc AArrgguummeennttss
        ddiiggiitt--aarrgguummeenntt ((MM--00,, MM--11,, ......,, MM----))
-              Add  this digit to the argument already accumulating, or start a
+              Add this digit to the argument already accumulating, or start  a
               new argument.  M-- starts a negative argument.
        uunniivveerrssaall--aarrgguummeenntt
-              This is another way to specify an argument.  If this command  is
-              followed  by one or more digits, optionally with a leading minus
-              sign, those digits define the argument.  If the command is  fol-
-              lowed  by  digits,  executing  uunniivveerrssaall--aarrgguummeenntt again ends the
-              numeric argument, but is otherwise ignored.  As a special  case,
-              if  this  command is immediately followed by a character that is
-              neither a digit or minus sign, the argument count for  the  next
-              command  is multiplied by four.  The argument count is initially
-              one, so executing this function the first time makes  the  argu-
+              This  is another way to specify an argument.  If this command is
+              followed by one or more digits, optionally with a leading  minus
+              sign,  those digits define the argument.  If the command is fol-
+              lowed by digits, executing  uunniivveerrssaall--aarrgguummeenntt  again  ends  the
+              numeric  argument, but is otherwise ignored.  As a special case,
+              if this command is immediately followed by a character  that  is
+              neither  a  digit or minus sign, the argument count for the next
+              command is multiplied by four.  The argument count is  initially
+              one,  so  executing this function the first time makes the argu-
               ment count four, a second time makes the argument count sixteen,
               and so on.
 
    CCoommpplleettiinngg
        ccoommpplleettee ((TTAABB))
-              Attempt to perform completion on the text  before  point.   BBaasshh
+              Attempt  to  perform  completion on the text before point.  BBaasshh
               attempts completion treating the text as a variable (if the text
-              begins with $$), username (if the text begins with  ~~),  hostname
-              (if  the  text begins with @@), or command (including aliases and
+              begins  with  $$), username (if the text begins with ~~), hostname
+              (if the text begins with @@), or command (including  aliases  and
               functions) in turn.  If none of these produces a match, filename
               completion is attempted.
        ppoossssiibbllee--ccoommpplleettiioonnss ((MM--??))
               List the possible completions of the text before point.
        iinnsseerrtt--ccoommpplleettiioonnss ((MM--**))
-              Insert  all completions of the text before point that would have
+              Insert all completions of the text before point that would  have
               been generated by ppoossssiibbllee--ccoommpplleettiioonnss.
        mmeennuu--ccoommpplleettee
-              Similar to ccoommpplleettee, but replaces the word to be completed  with
-              a  single match from the list of possible completions.  Repeated
-              execution of mmeennuu--ccoommpplleettee steps through the  list  of  possible
-              completions,  inserting  each  match in turn.  At the end of the
+              Similar  to ccoommpplleettee, but replaces the word to be completed with
+              a single match from the list of possible completions.   Repeated
+              execution  of  mmeennuu--ccoommpplleettee  steps through the list of possible
+              completions, inserting each match in turn.  At the  end  of  the
               list of completions, the bell is rung (subject to the setting of
               bbeellll--ssttyyllee) and the original text is restored.  An argument of _n
-              moves _n positions forward in the list  of  matches;  a  negative
-              argument  may  be  used to move backward through the list.  This
-              command is intended to be  bound  to  TTAABB,  but  is  unbound  by
+              moves  _n  positions  forward  in the list of matches; a negative
+              argument may be used to move backward through  the  list.   This
+              command  is  intended  to  be  bound  to  TTAABB, but is unbound by
               default.
        mmeennuu--ccoommpplleettee--bbaacckkwwaarrdd
-              Identical  to mmeennuu--ccoommpplleettee, but moves backward through the list
-              of possible completions, as if mmeennuu--ccoommpplleettee had  been  given  a
+              Identical to mmeennuu--ccoommpplleettee, but moves backward through the  list
+              of  possible  completions,  as if mmeennuu--ccoommpplleettee had been given a
               negative argument.  This command is unbound by default.
        ddeelleettee--cchhaarr--oorr--lliisstt
-              Deletes  the  character under the cursor if not at the beginning
-              or end of the line (like ddeelleettee--cchhaarr).  If at  the  end  of  the
+              Deletes the character under the cursor if not at  the  beginning
+              or  end  of  the  line (like ddeelleettee--cchhaarr).  If at the end of the
               line, behaves identically to ppoossssiibbllee--ccoommpplleettiioonnss.  This command
               is unbound by default.
        ccoommpplleettee--ffiilleennaammee ((MM--//))
@@ -3427,56 +3432,57 @@ RREEAADDLLIINNEE
               List the possible completions of the text before point, treating
               it as a filename.
        ccoommpplleettee--uusseerrnnaammee ((MM--~~))
-              Attempt  completion  on  the text before point, treating it as a
+              Attempt completion on the text before point, treating  it  as  a
               username.
        ppoossssiibbllee--uusseerrnnaammee--ccoommpplleettiioonnss ((CC--xx ~~))
               List the possible completions of the text before point, treating
               it as a username.
        ccoommpplleettee--vvaarriiaabbllee ((MM--$$))
-              Attempt  completion  on  the text before point, treating it as a
+              Attempt completion on the text before point, treating  it  as  a
               shell variable.
        ppoossssiibbllee--vvaarriiaabbllee--ccoommpplleettiioonnss ((CC--xx $$))
               List the possible completions of the text before point, treating
               it as a shell variable.
        ccoommpplleettee--hhoossttnnaammee ((MM--@@))
-              Attempt  completion  on  the text before point, treating it as a
+              Attempt completion on the text before point, treating  it  as  a
               hostname.
        ppoossssiibbllee--hhoossttnnaammee--ccoommpplleettiioonnss ((CC--xx @@))
               List the possible completions of the text before point, treating
               it as a hostname.
        ccoommpplleettee--ccoommmmaanndd ((MM--!!))
-              Attempt  completion  on  the text before point, treating it as a
-              command name.  Command completion attempts  to  match  the  text
-              against   aliases,   reserved   words,  shell  functions,  shell
+              Attempt completion on the text before point, treating  it  as  a
+              command  name.   Command  completion  attempts to match the text
+              against  aliases,  reserved  words,   shell   functions,   shell
               builtins, and finally executable filenames, in that order.
        ppoossssiibbllee--ccoommmmaanndd--ccoommpplleettiioonnss ((CC--xx !!))
               List the possible completions of the text before point, treating
               it as a command name.
        ddyynnaammiicc--ccoommpplleettee--hhiissttoorryy ((MM--TTAABB))
-              Attempt  completion on the text before point, comparing the text
-              against lines from the  history  list  for  possible  completion
+              Attempt completion on the text before point, comparing the  text
+              against  lines  from  the  history  list for possible completion
               matches.
        ddaabbbbrreevv--eexxppaanndd
-              Attempt  menu completion on the text before point, comparing the
+              Attempt menu completion on the text before point, comparing  the
               text against lines from the history list for possible completion
               matches.
        ccoommpplleettee--iinnttoo--bbrraacceess ((MM--{{))
               Perform filename completion and insert the list of possible com-
-              pletions enclosed within braces so the list is available to  the
+              pletions  enclosed within braces so the list is available to the
               shell (see BBrraaccee EExxppaannssiioonn above).
 
    KKeeyybbooaarrdd MMaaccrrooss
        ssttaarrtt--kkbbdd--mmaaccrroo ((CC--xx (())
-              Begin  saving  the  characters  typed  into the current keyboard
+              Begin saving the characters  typed  into  the  current  keyboard
               macro.
        eenndd--kkbbdd--mmaaccrroo ((CC--xx ))))
               Stop saving the characters typed into the current keyboard macro
               and store the definition.
        ccaallll--llaasstt--kkbbdd--mmaaccrroo ((CC--xx ee))
-              Re-execute  the last keyboard macro defined, by making the char-
-              acters in  the  macro  appear  as  if  typed  at  the  keyboard.
-              pprriinntt--llaasstt--kkbbdd--mmaaccrroo (()) Print the last keyboard macro defined in
-              a format suitable for the _i_n_p_u_t_r_c file.
+              Re-execute the last keyboard macro defined, by making the  char-
+              acters in the macro appear as if typed at the keyboard.
+       pprriinntt--llaasstt--kkbbdd--mmaaccrroo (())
+              Print  the  last keyboard macro defined in a format suitable for
+              the _i_n_p_u_t_r_c file.
 
    MMiisscceellllaanneeoouuss
        rree--rreeaadd--iinniitt--ffiillee ((CC--xx CC--rr))
@@ -5715,4 +5721,4 @@ BBUUGGSS
 
 
 
-GNU Bash 4.3                    2013 October 20                        BASH(1)
+GNU Bash 4.3                    2014 January 6                         BASH(1)

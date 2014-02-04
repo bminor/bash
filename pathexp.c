@@ -185,7 +185,7 @@ quote_string_for_globbing (pathname, qflags)
   register int i, j;
   int brack, cclass, collsym, equiv, c;
 
-  temp = (char *)xmalloc (strlen (pathname) + 1);
+  temp = (char *)xmalloc (2 * strlen (pathname) + 1);
 
   if ((qflags & QGLOB_CVTNULL) && QUOTED_NULL (pathname))
     {

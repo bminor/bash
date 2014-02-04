@@ -1819,7 +1819,7 @@ skip_to_delim (string, start, delims, flags)
 	  if (string[si] == '\0')
 	    CQ_RETURN(si);
 
-	  temp = extract_delimited_string (string, &si, LBRACK, LBRACK, RBRACK, SX_NOALLOC); /* ) */
+	  temp = extract_delimited_string (string, &si, "[", "[", "]", SX_NOALLOC); /* ] */
 
 	  i = si;
 	  if (string[i] == '\0')	/* don't increment i past EOS in loop */

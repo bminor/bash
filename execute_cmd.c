@@ -3504,7 +3504,9 @@ execute_cond_node (cond)
 {
   int result, invert, patmatch, rmatch, mflags, ignore;
   char *arg1, *arg2;
-char *t1, *t2;
+#if 0
+  char *t1, *t2;
+#endif
 
   invert = (cond->flags & CMD_INVERT_RETURN);
   ignore = (cond->flags & CMD_IGNORE_RETURN);
@@ -3582,13 +3584,15 @@ char *t1, *t2;
 #if defined (ARRAY_VARS)
 	  mflags |= SHMAT_SUBEXP;
 #endif
+
 #if 0
-t1 = strescape(arg1);
-t2 = strescape(arg2);
-itrace("execute_cond_node: sh_regmatch on `%s' and `%s'", t1, t2);
-free(t1);
-free(t2);
+	  t1 = strescape(arg1);
+	  t2 = strescape(arg2);
+	  itrace("execute_cond_node: sh_regmatch on `%s' and `%s'", t1, t2);
+	  free(t1);
+	  free(t2);
 #endif
+
 	  result = sh_regmatch (arg1, arg2, mflags);
 	}
       else

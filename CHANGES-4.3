@@ -40,8 +40,12 @@ m. Fixed a bug that caused certain positional parameter and array expansions
    to mishandle (discard) null positional parameters and array elements.
 
 n. The shell no longer blocks receipt of signals while running trap handlers
-   for those signals, and allows trap handlers to be run recursively
+   for those signals, and allows most trap handlers to be run recursively
    (running trap handlers while a trap handler is executing).
+
+o. The shell now handles backslashes in regular expression arguments to the
+   [[ command's =~ operator slightly differently, resulting in more
+   consistent behavior.
 
 2.  Changes to Readline
 
