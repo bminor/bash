@@ -622,6 +622,27 @@ unary_test (op, arg)
 
     case 'v':
       v = find_variable (arg);
+#if defined (ARRAY_VARS)
+      if (v == 0 && valid_array_reference (arg))
+	{
+	  char *t;
+	  t = array_value (arg, 0, 0, (int *)0, (arrayind_t *)0);
+	  return (t ? TRUE : FALSE);
+	}
+     else if (v && invisible_p (v) == 0 && array_p (v))
+	{
+	  char *t;
+	  /* [[ -v foo ]] == [[ -v foo[0] ]] */
+	  t = array_reference (array_cell (v), 0);
+	  return (t ? TRUE : FALSE);
+	}
+      else if (v && invisible_p (v) == 0 && assoc_p (v))
+	{
+	  char *t;
+	  t = assoc_reference (assoc_cell (v), "0");
+	  return (t ? TRUE : FALSE);
+	}
+#endif
       return (v && invisible_p (v) == 0 && var_isset (v) ? TRUE : FALSE);
 
     case 'R':

@@ -110,6 +110,8 @@ getc_with_restart (stream)
 	      local_index = local_bufused = 0;
 	      return EOF;
 	    }
+	  else if (interrupt_state || terminating_signal)	/* QUIT; */
+	    local_index = local_bufused = 0;
 	}
       local_index = 0;
     }

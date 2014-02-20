@@ -440,6 +440,8 @@ If non-zero, Readline will call indirectly through this pointer
 to get a character from the input stream.  By default, it is set to
 @code{rl_getc}, the default Readline character input function
 (@pxref{Character Input}).
+In general, an application that sets @var{rl_getc_function} should consider
+setting @var{rl_input_available_hook} as well.
 @end deftypevar
 
 @deftypevar {rl_hook_func_t *} rl_signal_event_hook
@@ -451,14 +453,22 @@ call is interrupted when Readline is reading terminal input.
 If non-zero, Readline will use this function's return value when it needs
 to determine whether or not there is available input on the current input
 source.
+The default hook checks @code{rl_instream}; if an application is using a
+different input source, it should set the hook appropriately.
 Readline queries for available input when implementing intra-key-sequence
 timeouts during input and incremental searches.
 This may use an application-specific timeout before returning a value;
 Readline uses the value passed to @code{rl_set_keyboard_input_timeout()}
 or the value of the user-settable @var{keyseq-timeout} variable.
-This is designed for use by functions using Readline's callback interface
+This is designed for use by applications using Readline's callback interface
 (@pxref{Alternate Interface}), which may not use the traditional
-@code{read(2)} and file descriptor interface.
+@code{read(2)} and file descriptor interface, or other applications using
+a different input mechanism.
+If an application uses an input mechanism or hook that can potentially exceed
+the value of @var{keyseq-timeout}, it should increase the timeout or set
+this hook appropriately even when not using the callback interface.
+In general, an application that sets @var{rl_getc_function} should consider
+setting @var{rl_input_available_hook} as well.
 @end deftypevar
 
 @deftypevar {rl_voidfunc_t *} rl_redisplay_function

@@ -52,14 +52,14 @@
 \entry{parameter expansion}{23}{parameter expansion}
 \entry{expansion, parameter}{23}{expansion, parameter}
 \entry{command substitution}{28}{command substitution}
-\entry{expansion, arithmetic}{28}{expansion, arithmetic}
-\entry{arithmetic expansion}{28}{arithmetic expansion}
+\entry{expansion, arithmetic}{29}{expansion, arithmetic}
+\entry{arithmetic expansion}{29}{arithmetic expansion}
 \entry{process substitution}{29}{process substitution}
 \entry{word splitting}{29}{word splitting}
-\entry{expansion, filename}{29}{expansion, filename}
-\entry{expansion, pathname}{29}{expansion, pathname}
-\entry{filename expansion}{29}{filename expansion}
-\entry{pathname expansion}{29}{pathname expansion}
+\entry{expansion, filename}{30}{expansion, filename}
+\entry{expansion, pathname}{30}{expansion, pathname}
+\entry{filename expansion}{30}{filename expansion}
+\entry{pathname expansion}{30}{pathname expansion}
 \entry{pattern matching}{30}{pattern matching}
 \entry{matching, pattern}{30}{matching, pattern}
 \entry{redirection}{31}{redirection}

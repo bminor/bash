@@ -278,8 +278,11 @@ ansic_quote (str, flags, rlen)
       if (clen == 1)
 	*r++ = c;
       else
-	for (b = 0; b < (int)clen; c = b ? *++s : c)
-	  *r++ = c;
+	{
+	  for (b = 0; b < (int)clen; b++)
+	    *r++ = (unsigned char)s[b];
+	  s += clen - 1;	/* -1 because of the increment above */
+	}
     }
 
   *r++ = '\'';

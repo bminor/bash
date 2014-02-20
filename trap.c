@@ -755,7 +755,11 @@ restore_default_signal (sig)
     return;
 
   /* If we aren't trapping this signal, don't bother doing anything else. */
-  if ((sigmodes[sig] & SIG_TRAPPED) == 0)
+  /* We special-case SIGCHLD and IMPOSSIBLE_TRAP_HANDLER (see above) as a
+     sentinel to determine whether or not disposition is reset to the default
+     while the trap handler is executing. */
+  if (((sigmodes[sig] & SIG_TRAPPED) == 0) &&
+      (sig != SIGCHLD || (sigmodes[sig] & SIG_INPROGRESS) == 0 || trap_list[sig] != (char *)IMPOSSIBLE_TRAP_HANDLER))
     return;
 
   /* Only change the signal handler for SIG if it allows it. */

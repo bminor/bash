@@ -1,7 +1,7 @@
 \initial {A}
 \entry {alias expansion}{88}
 \entry {arithmetic evaluation}{87}
-\entry {arithmetic expansion}{28}
+\entry {arithmetic expansion}{29}
 \entry {arithmetic, shell}{87}
 \entry {arrays}{89}
 \initial {B}
@@ -42,18 +42,18 @@
 \entry {execution environment}{36}
 \entry {exit status}{3, 38}
 \entry {expansion}{21}
-\entry {expansion, arithmetic}{28}
+\entry {expansion, arithmetic}{29}
 \entry {expansion, brace}{21}
-\entry {expansion, filename}{29}
+\entry {expansion, filename}{30}
 \entry {expansion, parameter}{23}
-\entry {expansion, pathname}{29}
+\entry {expansion, pathname}{30}
 \entry {expansion, tilde}{22}
 \entry {expressions, arithmetic}{87}
 \entry {expressions, conditional}{85}
 \initial {F}
 \entry {field}{3}
 \entry {filename}{3}
-\entry {filename expansion}{29}
+\entry {filename expansion}{30}
 \entry {foreground}{97}
 \entry {functions, shell}{17}
 \initial {H}
@@ -92,7 +92,7 @@
 \entry {parameters}{18}
 \entry {parameters, positional}{19}
 \entry {parameters, special}{20}
-\entry {pathname expansion}{29}
+\entry {pathname expansion}{30}
 \entry {pattern matching}{30}
 \entry {pipeline}{8}
 \entry {POSIX}{3}

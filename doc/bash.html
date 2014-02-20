@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2014 January 6<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2014 February 2<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -1130,7 +1130,7 @@ on a successful match.
 The exit status is zero if no
 pattern matches.  Otherwise, it is the exit status of the
 last command executed in <I>list</I>.
-<DT><B>if</B> <I>list</I>; <B>then</B> <I>list;</I> [ <B>elif</B> <I>list</I>; <B>then</B> <I>list</I>; ] ... [ <B>else</B> <I>list</I>; ] <B>fi</B><DD>
+<DT><B>if</B> <I>list</I>; <B>then</B> <I>list</I>; [ <B>elif</B> <I>list</I>; <B>then</B> <I>list</I>; ] ... [ <B>else</B> <I>list</I>; ] <B>fi</B><DD>
 The
 <B>if </B>
 
@@ -1679,8 +1679,12 @@ only be referenced; assignment to them is not allowed.
 <DT><B>*</B>
 
 <DD>
-Expands to the positional parameters, starting from one.  When the
-expansion occurs within double quotes, it expands to a single word
+Expands to the positional parameters, starting from one.
+When the expansion is not within double quotes, each positional parameter
+expands to a separate word.
+In contexts where it is performed, those words
+are subject to further word splitting and pathname expansion.
+When the expansion occurs within double quotes, it expands to a single word
 with the value of each parameter separated by the first character
 of the 
 <FONT SIZE=-1><B>IFS</B>
@@ -13157,7 +13161,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.3<TH ALIGN=CENTER width=33%>2014 January 6<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.3<TH ALIGN=CENTER width=33%>2014 February 2<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13263,6 +13267,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 23 January 2014 15:52:11 EST
+Time: 04 February 2014 09:39:07 EST
 </BODY>
 </HTML>

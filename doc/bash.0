@@ -468,7 +468,7 @@ SSHHEELLLL GGRRAAMMMMAARR
               status is zero if no pattern matches.  Otherwise, it is the exit
               status of the last command executed in _l_i_s_t.
 
-       iiff _l_i_s_t; tthheenn _l_i_s_t_; [ eelliiff _l_i_s_t; tthheenn _l_i_s_t; ] ... [ eellssee _l_i_s_t; ] ffii
+       iiff _l_i_s_t; tthheenn _l_i_s_t; [ eelliiff _l_i_s_t; tthheenn _l_i_s_t; ] ... [ eellssee _l_i_s_t; ] ffii
               The iiff _l_i_s_t is executed.  If its exit status is zero,  the  tthheenn
               _l_i_s_t  is  executed.   Otherwise,  each  eelliiff _l_i_s_t is executed in
               turn, and if its exit status is  zero,  the  corresponding  tthheenn
@@ -706,13 +706,16 @@ PPAARRAAMMEETTEERRSS
        The shell treats several parameters specially.   These  parameters  may
        only be referenced; assignment to them is not allowed.
        **      Expands  to  the positional parameters, starting from one.  When
-              the expansion occurs within double quotes, it expands to a  sin-
-              gle word with the value of each parameter separated by the first
-              character of the IIFFSS special variable.  That is, "$$**" is equiva-
-              lent to "$$11_c$$22_c......", where _c is the first character of the value
-              of the IIFFSS variable.  If IIFFSS is unset, the parameters are  sepa-
-              rated  by  spaces.   If  IIFFSS  is null, the parameters are joined
-              without intervening separators.
+              the expansion is  not  within  double  quotes,  each  positional
+              parameter  expands  to a separate word.  In contexts where it is
+              performed, those words are subject to further word splitting and
+              pathname  expansion.   When  the  expansion occurs within double
+              quotes, it expands to a single  word  with  the  value  of  each
+              parameter  separated  by  the first character of the IIFFSS special
+              variable.  That is, "$$**" is equivalent to "$$11_c$$22_c......",  where  _c
+              is the first character of the value of the IIFFSS variable.  If IIFFSS
+              is unset, the parameters are separated by  spaces.   If  IIFFSS  is
+              null,  the parameters are joined without intervening separators.
        @@      Expands to the positional parameters, starting from  one.   When
               the  expansion  occurs  within  double  quotes,  each  parameter
               expands to a separate word.  That is, "$$@@" is equivalent to "$$11"
@@ -5721,4 +5724,4 @@ BBUUGGSS
 
 
 
-GNU Bash 4.3                    2014 January 6                         BASH(1)
+GNU Bash 4.3                    2014 February 2                        BASH(1)

@@ -2,9 +2,9 @@ This is bashref.info, produced by makeinfo version 4.13 from
 /usr/homes/chet/src/bash/src/doc/bashref.texi.
 
 This text is a brief description of the features that are present in
-the Bash shell (version 4.3, 6 January 2014).
+the Bash shell (version 4.3, 2 February 2014).
 
-   This is Edition 4.3, last updated 6 January 2014, of `The GNU Bash
+   This is Edition 4.3, last updated 2 February 2014, of `The GNU Bash
 Reference Manual', for `Bash', Version 4.3.
 
    Copyright (C) 1988-2014 Free Software Foundation, Inc.
@@ -28,10 +28,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in
-the Bash shell (version 4.3, 6 January 2014).  The Bash home page is
+the Bash shell (version 4.3, 2 February 2014).  The Bash home page is
 `http://www.gnu.org/software/bash/'.
 
-   This is Edition 4.3, last updated 6 January 2014, of `The GNU Bash
+   This is Edition 4.3, last updated 2 February 2014, of `The GNU Bash
 Reference Manual', for `Bash', Version 4.3.
 
    Bash contains features that appear in other popular shells, and some
@@ -1351,13 +1351,16 @@ only be referenced; assignment to them is not allowed.
 
 `*'
      ($*) Expands to the positional parameters, starting from one.
-     When the expansion occurs within double quotes, it expands to a
-     single word with the value of each parameter separated by the
-     first character of the `IFS' special variable.  That is, `"$*"' is
-     equivalent to `"$1C$2C..."', where C is the first character of the
-     value of the `IFS' variable.  If `IFS' is unset, the parameters
-     are separated by spaces.  If `IFS' is null, the parameters are
-     joined without intervening separators.
+     When the expansion is not within double quotes, each positional
+     parameter expands to a separate word.  In contexts where it is
+     performed, those words are subject to further word splitting and
+     pathname expansion.  When the expansion occurs within double
+     quotes, it expands to a single word with the value of each
+     parameter separated by the first character of the `IFS' special
+     variable.  That is, `"$*"' is equivalent to `"$1C$2C..."', where C
+     is the first character of the value of the `IFS' variable.  If
+     `IFS' is unset, the parameters are separated by spaces.  If `IFS'
+     is null, the parameters are joined without intervening separators.
 
 `@'
      ($@) Expands to the positional parameters, starting from one.
@@ -10688,24 +10691,24 @@ D.3 Parameter and Variable Index
  [index ]
 * Menu:
 
-* !:                                     Special Parameters.  (line  47)
-* #:                                     Special Parameters.  (line  30)
-* $:                                     Special Parameters.  (line  42)
-* $!:                                    Special Parameters.  (line  48)
-* $#:                                    Special Parameters.  (line  31)
-* $$:                                    Special Parameters.  (line  43)
+* !:                                     Special Parameters.  (line  50)
+* #:                                     Special Parameters.  (line  33)
+* $:                                     Special Parameters.  (line  45)
+* $!:                                    Special Parameters.  (line  51)
+* $#:                                    Special Parameters.  (line  34)
+* $$:                                    Special Parameters.  (line  46)
 * $*:                                    Special Parameters.  (line  10)
-* $-:                                    Special Parameters.  (line  38)
-* $0:                                    Special Parameters.  (line  53)
-* $?:                                    Special Parameters.  (line  34)
-* $@:                                    Special Parameters.  (line  20)
-* $_:                                    Special Parameters.  (line  62)
+* $-:                                    Special Parameters.  (line  41)
+* $0:                                    Special Parameters.  (line  56)
+* $?:                                    Special Parameters.  (line  37)
+* $@:                                    Special Parameters.  (line  23)
+* $_:                                    Special Parameters.  (line  65)
 * *:                                     Special Parameters.  (line   9)
-* -:                                     Special Parameters.  (line  37)
-* 0:                                     Special Parameters.  (line  52)
-* ?:                                     Special Parameters.  (line  33)
-* @:                                     Special Parameters.  (line  19)
-* _:                                     Special Parameters.  (line  61)
+* -:                                     Special Parameters.  (line  40)
+* 0:                                     Special Parameters.  (line  55)
+* ?:                                     Special Parameters.  (line  36)
+* @:                                     Special Parameters.  (line  22)
+* _:                                     Special Parameters.  (line  64)
 * auto_resume:                           Job Control Variables.
                                                               (line   6)
 * BASH:                                  Bash Variables.      (line  13)
@@ -11156,134 +11159,134 @@ D.5 Concept Index
 
 
 Tag Table:
-Node: Top928
-Node: Introduction2844
-Node: What is Bash?3072
-Node: What is a shell?4185
-Node: Definitions6724
-Node: Basic Shell Features9642
-Node: Shell Syntax10861
-Node: Shell Operation11891
-Node: Quoting13185
-Node: Escape Character14488
-Node: Single Quotes14973
-Node: Double Quotes15321
-Node: ANSI-C Quoting16446
-Node: Locale Translation17690
-Node: Comments18586
-Node: Shell Commands19204
-Node: Simple Commands20076
-Node: Pipelines20707
-Node: Lists23445
-Node: Compound Commands25174
-Node: Looping Constructs26180
-Node: Conditional Constructs28643
-Node: Command Grouping39573
-Node: Coprocesses41052
-Node: GNU Parallel42885
-Node: Shell Functions46871
-Node: Shell Parameters51955
-Node: Positional Parameters56084
-Node: Special Parameters56984
-Node: Shell Expansions60095
-Node: Brace Expansion62038
-Node: Tilde Expansion64819
-Node: Shell Parameter Expansion67168
-Node: Command Substitution79462
-Node: Arithmetic Expansion80795
-Node: Process Substitution81727
-Node: Word Splitting82777
-Node: Filename Expansion84425
-Node: Pattern Matching86590
-Node: Quote Removal90290
-Node: Redirections90585
-Node: Executing Commands99749
-Node: Simple Command Expansion100419
-Node: Command Search and Execution102349
-Node: Command Execution Environment104686
-Node: Environment107672
-Node: Exit Status109331
-Node: Signals110953
-Node: Shell Scripts112921
-Node: Shell Builtin Commands115439
-Node: Bourne Shell Builtins117467
-Node: Bash Builtins137374
-Node: Modifying Shell Behavior164827
-Node: The Set Builtin165172
-Node: The Shopt Builtin175498
-Node: Special Builtins189919
-Node: Shell Variables190898
-Node: Bourne Shell Variables191338
-Node: Bash Variables193369
-Node: Bash Features220244
-Node: Invoking Bash221143
-Node: Bash Startup Files226921
-Node: Interactive Shells231950
-Node: What is an Interactive Shell?232360
-Node: Is this Shell Interactive?233009
-Node: Interactive Shell Behavior233824
-Node: Bash Conditional Expressions237112
-Node: Shell Arithmetic241114
-Node: Aliases243890
-Node: Arrays246446
-Node: The Directory Stack251427
-Node: Directory Stack Builtins252146
-Node: Controlling the Prompt255102
-Node: The Restricted Shell257874
-Node: Bash POSIX Mode259711
-Node: Job Control269098
-Node: Job Control Basics269558
-Node: Job Control Builtins274277
-Node: Job Control Variables278748
-Node: Command Line Editing279906
-Node: Introduction and Notation281578
-Node: Readline Interaction283200
-Node: Readline Bare Essentials284391
-Node: Readline Movement Commands286180
-Node: Readline Killing Commands287145
-Node: Readline Arguments289065
-Node: Searching290109
-Node: Readline Init File292295
-Node: Readline Init File Syntax293442
-Node: Conditional Init Constructs310279
-Node: Sample Init File312812
-Node: Bindable Readline Commands315930
-Node: Commands For Moving317137
-Node: Commands For History318281
-Node: Commands For Text322466
-Node: Commands For Killing325395
-Node: Numeric Arguments327852
-Node: Commands For Completion328991
-Node: Keyboard Macros333183
-Node: Miscellaneous Commands333871
-Node: Readline vi Mode339677
-Node: Programmable Completion340584
-Node: Programmable Completion Builtins347860
-Node: A Programmable Completion Example357606
-Node: Using History Interactively362856
-Node: Bash History Facilities363540
-Node: Bash History Builtins366539
-Node: History Interaction370467
-Node: Event Designators373172
-Node: Word Designators374394
-Node: Modifiers376033
-Node: Installing Bash377437
-Node: Basic Installation378574
-Node: Compilers and Options381266
-Node: Compiling For Multiple Architectures382007
-Node: Installation Names383671
-Node: Specifying the System Type384489
-Node: Sharing Defaults385205
-Node: Operation Controls385878
-Node: Optional Features386836
-Node: Reporting Bugs396900
-Node: Major Differences From The Bourne Shell398098
-Node: GNU Free Documentation License414957
-Node: Indexes440153
-Node: Builtin Index440607
-Node: Reserved Word Index447434
-Node: Variable Index449882
-Node: Function Index464062
-Node: Concept Index471363
+Node: Top930
+Node: Introduction2848
+Node: What is Bash?3076
+Node: What is a shell?4189
+Node: Definitions6728
+Node: Basic Shell Features9646
+Node: Shell Syntax10865
+Node: Shell Operation11895
+Node: Quoting13189
+Node: Escape Character14492
+Node: Single Quotes14977
+Node: Double Quotes15325
+Node: ANSI-C Quoting16450
+Node: Locale Translation17694
+Node: Comments18590
+Node: Shell Commands19208
+Node: Simple Commands20080
+Node: Pipelines20711
+Node: Lists23449
+Node: Compound Commands25178
+Node: Looping Constructs26184
+Node: Conditional Constructs28647
+Node: Command Grouping39577
+Node: Coprocesses41056
+Node: GNU Parallel42889
+Node: Shell Functions46875
+Node: Shell Parameters51959
+Node: Positional Parameters56088
+Node: Special Parameters56988
+Node: Shell Expansions60327
+Node: Brace Expansion62270
+Node: Tilde Expansion65051
+Node: Shell Parameter Expansion67400
+Node: Command Substitution79694
+Node: Arithmetic Expansion81027
+Node: Process Substitution81959
+Node: Word Splitting83009
+Node: Filename Expansion84657
+Node: Pattern Matching86822
+Node: Quote Removal90522
+Node: Redirections90817
+Node: Executing Commands99981
+Node: Simple Command Expansion100651
+Node: Command Search and Execution102581
+Node: Command Execution Environment104918
+Node: Environment107904
+Node: Exit Status109563
+Node: Signals111185
+Node: Shell Scripts113153
+Node: Shell Builtin Commands115671
+Node: Bourne Shell Builtins117699
+Node: Bash Builtins137606
+Node: Modifying Shell Behavior165059
+Node: The Set Builtin165404
+Node: The Shopt Builtin175730
+Node: Special Builtins190151
+Node: Shell Variables191130
+Node: Bourne Shell Variables191570
+Node: Bash Variables193601
+Node: Bash Features220476
+Node: Invoking Bash221375
+Node: Bash Startup Files227153
+Node: Interactive Shells232182
+Node: What is an Interactive Shell?232592
+Node: Is this Shell Interactive?233241
+Node: Interactive Shell Behavior234056
+Node: Bash Conditional Expressions237344
+Node: Shell Arithmetic241346
+Node: Aliases244122
+Node: Arrays246678
+Node: The Directory Stack251659
+Node: Directory Stack Builtins252378
+Node: Controlling the Prompt255334
+Node: The Restricted Shell258106
+Node: Bash POSIX Mode259943
+Node: Job Control269330
+Node: Job Control Basics269790
+Node: Job Control Builtins274509
+Node: Job Control Variables278980
+Node: Command Line Editing280138
+Node: Introduction and Notation281810
+Node: Readline Interaction283432
+Node: Readline Bare Essentials284623
+Node: Readline Movement Commands286412
+Node: Readline Killing Commands287377
+Node: Readline Arguments289297
+Node: Searching290341
+Node: Readline Init File292527
+Node: Readline Init File Syntax293674
+Node: Conditional Init Constructs310511
+Node: Sample Init File313044
+Node: Bindable Readline Commands316162
+Node: Commands For Moving317369
+Node: Commands For History318513
+Node: Commands For Text322698
+Node: Commands For Killing325627
+Node: Numeric Arguments328084
+Node: Commands For Completion329223
+Node: Keyboard Macros333415
+Node: Miscellaneous Commands334103
+Node: Readline vi Mode339909
+Node: Programmable Completion340816
+Node: Programmable Completion Builtins348092
+Node: A Programmable Completion Example357838
+Node: Using History Interactively363088
+Node: Bash History Facilities363772
+Node: Bash History Builtins366771
+Node: History Interaction370699
+Node: Event Designators373404
+Node: Word Designators374626
+Node: Modifiers376265
+Node: Installing Bash377669
+Node: Basic Installation378806
+Node: Compilers and Options381498
+Node: Compiling For Multiple Architectures382239
+Node: Installation Names383903
+Node: Specifying the System Type384721
+Node: Sharing Defaults385437
+Node: Operation Controls386110
+Node: Optional Features387068
+Node: Reporting Bugs397132
+Node: Major Differences From The Bourne Shell398330
+Node: GNU Free Documentation License415189
+Node: Indexes440385
+Node: Builtin Index440839
+Node: Reserved Word Index447666
+Node: Variable Index450114
+Node: Function Index464294
+Node: Concept Index471595
 
 End Tag Table

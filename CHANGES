@@ -790,8 +790,8 @@ j.  New user-settable variable, show-mode-in-prompt, adds a characters to the
     beginning of the prompt indicating the current editing mode.
 
 k.  New application-settable variable: rl_input_available_hook; function to be
-    called when readline detects there is data available on its input file
-    descriptor.
+    called when readline needs to check whether there is data available on its
+    input source.  The default hook checks rl_instream.
 
 l.  Readline calls an application-set event hook (rl_signal_event_hook) after
     it gets a signal while reading input (read returns -1/EINTR but readline

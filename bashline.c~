@@ -1720,7 +1720,6 @@ command_word_completion_function (hint_text, state)
   static char *path = (char *)NULL;
   static char *val = (char *)NULL;
   static char *filename_hint = (char *)NULL;
-  static char *fnhint = (char *)NULL;
   static char *dequoted_hint = (char *)NULL;
   static char *directory_part = (char *)NULL;
   static char **glob_matches = (char **)NULL;
@@ -1731,7 +1730,7 @@ command_word_completion_function (hint_text, state)
 #if defined (ALIAS)
   static alias_t **alias_list = (alias_t **)NULL;
 #endif /* ALIAS */
-  char *temp, *cval;
+  char *temp, *cval, *fnhint;
 
   /* We have to map over the possibilities for command words.  If we have
      no state, then make one just for that purpose. */
@@ -2008,7 +2007,7 @@ globword:
       if (current_path[0] == '.' && current_path[1] == '\0')
 	dot_in_path = 1;
 
-      if (fnhint && fnhint != filename_hint)
+      if (fnhint && filename_hint && fnhint != filename_hint)
 	free (fnhint);
       if (filename_hint)
 	free (filename_hint);
