@@ -1,4 +1,4 @@
-This is the Bash FAQ, version 4.12, for Bash version 4.2.
+This is the Bash FAQ, version 4.13, for Bash version 4.3.
 
 This document contains a set of frequently-asked questions concerning
 Bash, the GNU Bourne-Again Shell.  Bash is a freely-available command
@@ -36,8 +36,8 @@ A10) What is the bash `posix mode'?
 
 Section B:  The latest version
 
-B1) What's new in version 4.2?
-B2) Are there any user-visible incompatibilities between bash-4.2 and
+B1) What's new in version 4.3?
+B2) Are there any user-visible incompatibilities between bash-4.3 and
     previous bash versions?
 
 Section C:  Differences from other Unix shells
@@ -144,26 +144,26 @@ of Case Western Reserve University.
 
 A2)  What's the latest version?
 
-The latest version is 4.2, first made available on 14 February, 2011.
+The latest version is 4.3, first made available on xx December, 2013.
 
 A3)  Where can I get it?
 
 Bash is the GNU project's shell, and so is available from the
 master GNU archive site, ftp.gnu.org, and its mirrors.  The
 latest version is also available for FTP from ftp.cwru.edu.
-The following URLs tell how to get version 4.2:
+The following URLs tell how to get version 4.3:
 
-ftp://ftp.gnu.org/pub/gnu/bash/bash-4.2.tar.gz
-ftp://ftp.cwru.edu/pub/bash/bash-4.2.tar.gz
+ftp://ftp.gnu.org/pub/gnu/bash/bash-4.3.tar.gz
+ftp://ftp.cwru.edu/pub/bash/bash-4.3.tar.gz
 
 Formatted versions of the documentation are available with the URLs:
 
-ftp://ftp.gnu.org/pub/gnu/bash/bash-doc-4.2.tar.gz
-ftp://ftp.cwru.edu/pub/bash/bash-doc-4.2.tar.gz
+ftp://ftp.gnu.org/pub/gnu/bash/bash-doc-4.3.tar.gz
+ftp://ftp.cwru.edu/pub/bash/bash-doc-4.3.tar.gz
 
 Any patches for the current version are available with the URL:
 
-ftp://ftp.cwru.edu/pub/bash/bash-4.2-patches/
+ftp://ftp.cwru.edu/pub/bash/bash-4.3-patches/
 
 A4)  On what machines will bash run?
 
@@ -219,7 +219,8 @@ Mark began to work with bash-2.05, but I don't know the current status.
 
 Bash-3.0 compiles and runs with no modifications under Microsoft's Services
 for Unix (SFU), once known as Interix.  I do not anticipate any problems
-with building bash-4.2, but will gladly accept any patches that are needed.
+with building bash-4.2 and later, but will gladly accept any patches that
+are needed.
 
 A6) How can I build bash with gcc? 
 
@@ -388,13 +389,129 @@ They are also listed in a section in the Bash Reference Manual
 
 Section B:  The latest version
 
-B1) What's new in version 4.2?
+B1) What's new in version 4.3?
 
-Bash-4.2 is the second revision to the fourth major release of bash.
+Bash-4.3 is the third revision to the fourth major release of bash.
 
-Bash-4.2 contains the following new features (see the manual page for
-complete descriptions and the CHANGES and NEWS files in the bash-4.2
+Bash-4.3 contains the following new features (see the manual page for
+complete descriptions and the CHANGES and NEWS files in the bash-4.3
 distribution):
+
+o  The `helptopic' completion action now maps to all the help topics, not just
+    the shell builtins.
+
+o  The `help' builtin no longer does prefix substring matching first, so
+   `help read' does not match `readonly', but will do it if exact string
+   matching fails.
+
+o  The shell can be compiled to not display a message about processes that
+    terminate due to SIGTERM.
+
+o  Non-interactive shells now react to the setting of checkwinsize and set
+    LINES and COLUMNS after a foreground job exits.
+
+o  There is a new shell option, `globasciiranges', which, when set to on,
+    forces globbing range comparisons to use character ordering as if they
+    were run in the C locale.
+
+o  There is a new shell option, `direxpand', which makes filename completion
+    expand variables in directory names in the way bash-4.1 did.
+
+o  In Posix mode, the `command' builtin does not change whether or not a
+    builtin it shadows is treated as an assignment builtin.
+
+o  The `return' and `exit' builtins accept negative exit status arguments.
+
+o  The word completion code checks whether or not a filename containing a
+   shell variable expands to a directory name and appends `/' to the word
+   as appropriate.  The same code expands shell variables in command names
+   when performing command completion.
+
+o  In Posix mode, it is now an error to attempt to define a shell function
+   with the same name as a Posix special builtin.
+
+o  When compiled for strict Posix conformance, history expansion is disabled
+   by default.
+
+o  The history expansion character (!) does not cause history expansion when
+   followed by the closing quote in a double-quoted string.
+
+o  `complete' and its siblings compgen/compopt now takes a new `-o noquote'
+   option to inhibit quoting of the completions.
+
+o  Setting HISTSIZE to a value less than zero causes the history list to be
+   unlimited (setting it 0 zero disables the history list).
+
+o  Setting HISTFILESIZE to a value less than zero causes the history file size
+   to be unlimited (setting it to 0 causes the history file to be truncated
+   to zero size).
+
+o  The `read' builtin now skips NUL bytes in the input.
+
+o  There is a new `bind -X' option to print all key sequences bound to Unix
+   commands.
+
+o  When in Posix mode, `read' is interruptible by a trapped signal.  After
+   running the trap handler, read returns 128+signal and throws away any
+   partially-read input.
+
+o  The command completion code skips whitespace and assignment statements
+   before looking for the command name word to be completed.
+
+o  The build process has a new mechanism for constructing separate help files
+   that better reflects the current set of compilation options.
+
+o  The -nt and -ot options to test now work with files with nanosecond
+   timestamp resolution.
+
+o  The shell saves the command history in any shell for which history is
+   enabled and HISTFILE is set, not just interactive shells.
+
+o  The shell has `nameref' variables and new -n(/+n) options to declare and
+   unset to use them, and a `test -R' option to test for them.
+
+o  The shell now allows assigning, referencing, and unsetting elements of
+   indexed arrays using negative subscripts (a[-1]=2, echo ${a[-1]}) which
+   count back from the last element of the array.
+
+o  The {x}<word redirection feature now allows words like {array[ind]} and
+   can use variables with special meanings to the shell (e.g., BASH_XTRACEFD).
+
+o  There is a new CHILD_MAX special shell variable; its value controls the
+   number of exited child statues the shell remembers.
+
+o  There is a new configuration option (--enable-direxpand-default) that
+   causes the `direxpand' shell option to be enabled by default.
+
+o  Bash does not do anything special to ensure that the file descriptor
+   assigned to X in {x}<foo remains open after the block containing it
+   completes.
+
+o  The `wait' builtin has a new `-n' option to wait for the next child to
+   change status.
+
+o  The `printf' %(...)T format specifier now uses the current time if no
+    argument is supplied.
+
+o  There is a new variable, BASH_COMPAT, that controls the current shell
+   compatibility level.
+
+o  The `popd' builtin now treats additional arguments as errors.
+
+o  The brace expansion code now treats a failed sequence expansion as a
+   simple string and will continue to expand brace terms in the remainder
+   of the word.
+
+o  Shells started to run process substitutions now run any trap set on EXIT.
+
+o  The fc builtin now interprets -0 as the current command line.
+
+o  Completing directory names containing shell variables now adds a trailing
+   slash if the expanded result is a directory.
+
+A short feature history dating back to Bash-2.0:
+
+Bash-4.2 contained the following new features:
 
 o   `exec -a foo' now sets $0 to `foo' in an executable shell script without a
     leading #!.
@@ -973,10 +1090,10 @@ grammar tighter and smaller (66 reduce-reduce conflicts gone)
 lots of code now smaller and faster
 test suite greatly expanded
 
-B2) Are there any user-visible incompatibilities between bash-4.2 and
+B2) Are there any user-visible incompatibilities between bash-4.3 and
     previous bash versions?
 
-There are a few incompatibilities between version 4.2 and previous
+There are a few incompatibilities between version 4.3 and previous
 versions.  They are detailed in the file COMPAT in the bash distribution.
 That file is not meant to be all-encompassing; send mail to
 bash-maintainers@gnu.org (or bug-bash@gnu.org if you would like
@@ -1026,14 +1143,14 @@ Things bash has that sh does not:
 	auto-export of variables in initial environment
 	command search finds functions before builtins
 	bash return builtin will exit a file sourced with `.'
-	builtins: cd -/-L/-P, exec -l/-c/-a, echo -e/-E, hash -d/-l/-p/-t.
+	builtins: cd -/-L/-P/-@, exec -l/-c/-a, echo -e/-E, hash -d/-l/-p/-t.
 		  export -n/-f/-p/name=value, pwd -L/-P,
 		  read -e/-p/-a/-t/-n/-d/-s/-u/-i/-N,
 		  readonly -a/-f/name=value, trap -l, set +o,
 		  set -b/-m/-o option/-h/-p/-B/-C/-H/-P,
-		  unset -f/-v, ulimit -i/-m/-p/-q/-u/-x,
+		  unset -f/-n/-v, ulimit -i/-m/-p/-q/-u/-x,
 		  type -a/-p/-t/-f/-P, suspend -f, kill -n,
-		  test -o optname/s1 == s2/s1 < s2/s1 > s2/-nt/-ot/-ef/-O/-G/-S
+		  test -o optname/s1 == s2/s1 < s2/s1 > s2/-nt/-ot/-ef/-O/-G/-S/-R
 	bash reads ~/.bashrc for interactive shells, $ENV for non-interactive
 	bash restricted shell mode is more extensive
 	bash allows functions and variables with the same name
@@ -1188,18 +1305,20 @@ Implementation differences:
 
 C3)  Which new features in ksh-93 are not in bash, and which are?
 
-This list is current through ksh93t+ (05/05/2009)
+This list is current through ksh93v (10/08/2013)
 
-New things in ksh-93 not in bash-4.2:
-	floating point arithmetic and variables
-	math library functions
+New things in ksh-93 not in bash-4.3:
+	floating point arithmetic, variables, and constants
+	math library functions, including user-defined math functions
 	${!name[sub]} name of subscript for associative array
 	`.' is allowed in variable names to create a hierarchical namespace
 	more extensive compound assignment syntax
 	discipline functions
 	KEYBD trap
 	variables: .sh.edchar, .sh.edmode, .sh.edcol, .sh.edtext, .sh.version,
-		   .sh.name, .sh.subscript, .sh.value, .sh.match, HISTEDIT
+		   .sh.name, .sh.subscript, .sh.value, .sh.match, HISTEDIT,
+		   .sh.sig, .sh.stats, .sh.siginfo, .sh.pwdfd, .sh.op_astbin,
+		   .sh.pool
 	backreferences in pattern matching (\N)
 	`&' operator in pattern lists for matching (match all instead of any)
 	exit statuses between 0 and 255
@@ -1208,17 +1327,20 @@ New things in ksh-93 not in bash-4.2:
 	no scoping for local variables in `POSIX' functions
 	$''  \C[.collating-element.] escape sequence
 	-C/-I invocation options
-	print -f (bash uses printf)
+	print -f (bash uses printf) and rest of print builtin options
+	printf %(type)q, %#q
 	`fc' has been renamed to `hist'
 	`.' can execute shell functions
 	getopts -a
 	printf %B, %H, %P, %R, %Z modifiers, output base for %d, `=' flag
-	read -n/-N differ/-v
+	read -n/-N differ/-v/-S
 	set -o showme/-o multiline (bash default)
+	set -K
+	kill -Q/-q/-L
+	trap -a
 	`sleep' and `getconf' builtins (bash has loadable versions)
-	typeset -n and `nameref' variables
 	[[ -R name ]] (checks whether or not name is a nameref)
-	typeset -C/-S/-T/-X/-h/-s
+	typeset -C/-S/-T/-X/-h/-s/-c/-M
 	experimental `type' definitions (a la typedef) using typeset
 	array expansions ${array[sub1..sub2]} and ${!array[sub1..sub2]}
 	associative array assignments using `;' as element separator
@@ -1226,8 +1348,12 @@ New things in ksh-93 not in bash-4.2:
 	new '${ ' form of command substitution, executed in current shell
 	new >;/<>;/<#pat/<##pat/<#/># redirections
 	brace expansion printf-like formats 
+	CHLD trap triggered by SIGSTOP and SIGCONT
+	~{fd} expansion, which replaces fd with the corresponding path name
+	$"string" expanded when referenced rather than when first parsed
+	job "pools", which allow a collection of jobs to be managed as a unit
 
-New things in ksh-93 present in bash-4.2:
+New things in ksh-93 present in bash-4.3:
 	associative arrays
 	[n]<&word- and [n]>&word- redirections (combination dup and close)
         for (( expr1; expr2; expr3 )) ; do list; done - arithmetic for command
@@ -1266,6 +1392,8 @@ New things in ksh-93 present in bash-4.2:
 	redirection operators preceded with {varname} to store fd number in varname
 	DEBUG can force skipping following command
 	[[ -v var ]] operator (checks whether or not var is set)
+	typeset -n and `nameref' variables
+	process substitutions work without /dev/fd
 
 Section D:  Why does bash do some things differently than other Unix shells?
 
@@ -1854,6 +1982,18 @@ compat40 set
 	  of the entire list to be aborted (in versions before bash-4.0,
 	  interrupting one command in a list caused the next to be executed)
 
+compat41 set
+        - interrupting a command list such as "a ; b ; c" causes the execution
+          of the entire list to be aborted (in versions before bash-4.1,
+          interrupting one command in a list caused the next to be executed)
+        - when in posix mode, single quotes in the `word' portion of a
+          double-quoted parameter expansion define a new quoting context and
+          are treated specially
+    
+compat42 set
+        - the replacement string in double-quoted pattern substitution is not
+          run through quote removal, as in previous versions
+
 Section F:  Things to watch out for on certain Unix versions
 
 F1) Why can't I use command line editing in my `cmdtool'?
@@ -2095,7 +2235,7 @@ before `eval' is executed.  In versions of bash later than bash-2.0,
 does the same thing.
 
 This is not the same thing as ksh93 `nameref' variables, though the syntax
-is similar.  I may add namerefs in a future bash version.
+is similar.  Namerefs are available bash version 4.3, and work as in ksh93.
 
 G4) How can I make the bash `time' reserved word print timing output that
      looks like the output from my system's /usr/bin/time?
@@ -2255,16 +2395,15 @@ a module system like zsh's, using dynamic loading like builtins
 a bash programmer's guide with a chapter on creating loadable builtins
 a better loadable interface to perl with access to the shell builtins and
 	variables (contributions gratefully accepted)
-ksh93-like `nameref' variables
 ksh93-like `xx.yy' variables (including some of the .sh.* variables) and
 	associated disipline functions
 Some of the new ksh93 pattern matching operators, like backreferencing
 
 H5) When will the next release appear?
 
-The next version will appear sometime in 2010.  Never make predictions. 
+The next version will appear sometime in 2015.  Never make predictions. 
 
-This document is Copyright 1995-2010 by Chester Ramey.
+This document is Copyright 1995-2014 by Chester Ramey.
 
 Permission is hereby granted, without written agreement and
 without license or royalty fees, to use, copy, and distribute

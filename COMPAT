@@ -2,11 +2,13 @@ Compatibility with previous versions
 ====================================
 
 This document details the incompatibilities between this version of bash,
-bash-4.3, and the previous widely-available version, bash-3.x (which is
-still the `standard' version for a few Linux distributions).  These were
-discovered by users of bash-2.x through 4.x, so this list is not
-comprehensive.  Some of these incompatibilities occur between the current
-version and versions 2.0 and above.
+bash-4.3, and the previous widely-available versions, bash-3.x (which is
+still the `standard' version for Mac OS X), 4.0/4.1 (which are still
+standard on a few Linux distributions), and bash-4.2, the current
+widely-available version.  These were discovered by users of bash-2.x
+through 4.x, so this list is not comprehensive.  Some of these
+incompatibilities occur between the current version and versions 2.0 and
+above. 
 
 1.  Bash uses a new quoting syntax, $"...", to do locale-specific
     string translation.  Users who have relied on the (undocumented)
@@ -362,8 +364,8 @@ version and versions 2.0 and above.
     to `.' is not found and the shell is not interactive.
 
 52. When compiled for strict Posix compatibility, bash-4.3 does not enable
-    history expansion by default, since it results in a non-conforming
-    environment.
+    history expansion by default in interactive shells, since it results in
+    a non-conforming environment.
 
 53. Bash-4.3 runs the replacement string in the pattern substitution word
     expansion through quote removal.  The code already treats quote

@@ -5820,3 +5820,31 @@ bashline.c
 	  path to rl_filename_completion_function, which performs dequoting on
 	  the pathname it's passed.  Fixes bug reported by Ilyushkin Nikita
 	  <ilyushkeane@gmail.com>
+
+				   2/11
+				   ----
+parse.y
+	- xparse_dolparen: save and restore shell_eof_token around call to
+	  parse_string, intead of just leaving it set to ')'
+	- shell_getc: when -v is set, only print the command line when
+	  shell_eof_token is 0, so we don't print it multiple times when
+	  recursively entering the parser to parse $(...) commands.  Fixes
+	  bug reported by Greg Wooledge <wooledg@eeg.ccf.org>
+
+[changed release status to 4.3-release]
+
+				   2/13
+				   ----
+lib/sh/strtrans.c
+	- ansic_quote: handle case where mbrtowc reports that the multibyte
+	  sequence is incomplete or invalid.  Fixes bug reported by
+	  Eduardo A. Bustamante López <dualbus@gmail.com>
+
+				   2/14
+				   ----
+variables.c
+	- find_variable_nameref_context: fix a problem that caused the loop
+	  to go one context too close to the global context.  In some cases,
+	  simple variable assignment would set a variable in the global
+	  context instead of a local context.  Bug report from
+	  Geir Hauge <geir.hauge@gmail.com>

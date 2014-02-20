@@ -2401,9 +2401,14 @@ shell_getc (remove_quoted_newline)
       if (shell_input_line)
 	{
 	  /* Lines that signify the end of the shell's input should not be
-	     echoed. */
+	     echoed.  We should not echo lines while parsing command
+	     substitutions with recursive calls into the parsing engine; those
+	     should only be echoed once when we read the word.  That is the
+	     reason for the test against shell_eof_token, which is set to a
+	     right paren when parsing the contents of command substitutions. */
 	  if (echo_input_at_read && (shell_input_line[0] ||
-				     shell_input_line_terminator != EOF))
+				       shell_input_line_terminator != EOF) &&
+				     shell_eof_token == 0)
 	    fprintf (stderr, "%s\n", shell_input_line);
 	}
       else
@@ -3975,7 +3980,7 @@ xparse_dolparen (base, string, indp, flags)
 {
   sh_parser_state_t ps;
   sh_input_line_state_t ls;
-  int orig_ind, nc, sflags;
+  int orig_ind, nc, sflags, orig_eof_token;
   char *ret, *s, *ep, *ostring;
 
   /*yydebug = 1;*/
@@ -3988,12 +3993,14 @@ xparse_dolparen (base, string, indp, flags)
     sflags |= SEVAL_NOLONGJMP;
   save_parser_state (&ps);
   save_input_line_state (&ls);
+  orig_eof_token = shell_eof_token;
 
   /*(*/
   parser_state |= PST_CMDSUBST|PST_EOFTOKEN;	/* allow instant ')' */ /*(*/
   shell_eof_token = ')';
   parse_string (string, "command substitution", sflags, &ep);
 
+  shell_eof_token = orig_eof_token;
   restore_parser_state (&ps);
   reset_parser ();
   /* reset_parser clears shell_input_line and associated variables */

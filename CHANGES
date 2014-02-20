@@ -1,3 +1,46 @@
+This document details the changes between this version, bash-4.3-release, and
+the previous version, bash-4.3-rc2.
+
+1.  Changes to Bash
+
+a.  Only Posix-mode shells should exit on an assignment failure in the
+    temporary environment preceding a special builtin.  This is how it's been
+    documented.
+
+b.  Fixed a bug that caused a failed special builtin to not exit a posix-mode
+    shell if the failing builtin was on the LHS of a && or ||.
+
+c.  Changed the handling of unquoted backslashes in regular expressions to be
+    closer to bash-4.2.
+
+d.  globstar (**) no longer traverses symbolic links that resolve to
+    directories.  This eliminates some duplicate entries.
+
+e.  Fixed a bug that caused a SIGCHLD trap handler to not be able to change the
+    SIGCHLD disposition.
+
+f.  Fixed a bug that caused a crash when -x was enabled and a command
+    contained a printable multibyte (wide) character.
+
+g.  Fixed a bug that caused an interactive shell without line editing enabled
+    to read invalid data after receiving a SIGINT.
+
+h.  Fixed a bug that caused command word completion to fail if the directory in
+    $PATH where the completion would be found contained single or double quotes.
+
+i.  Fixed a bug that caused a shell with -v enabled to print commands in $()
+    multiple times.
+
+2.  Changes to Readline
+
+a.  Fixed a bug that caused `undo' to reference freed memory or null pointers.
+
+3.  New Features in Bash
+
+a.  The [[ -v ]] option now understands array references (foo[1]) and returns
+    success if the referenced element has a value.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-4.3-rc2, and the
 previous version, bash-4.3-rc1.
 

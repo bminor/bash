@@ -434,6 +434,7 @@ parse_string (string, from_file, flags, endp)
   sigprocmask (SIG_BLOCK, (sigset_t *)NULL, &ps_sigmask);
 #endif
 
+/* itrace("parse_string: `%s'", string); */
   /* Reset the line number if the caller wants us to.  If we don't reset the
      line number, we have to subtract one, because we will add one just
      before executing the next command (resetting the line number sets it to

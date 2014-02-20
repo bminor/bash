@@ -1970,6 +1970,8 @@ find_variable_nameref_context (v, vc, nvcp)
       nv = nv2;
       if (*nvcp)
         *nvcp = nvc;
+      if (nameref_p (nv) == 0)
+        break;
     }
   return (nameref_p (nv) ? (SHELL_VAR *)NULL : nv);
 }
