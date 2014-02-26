@@ -305,7 +305,10 @@ read_alias_file (fname, fname_len)
 
 	      if (nmap >= maxmap)
 		if (__builtin_expect (extend_alias_table (), 0))
-		  return added;
+		  {
+		    fclose (fp);
+		    return added;
+		  }
 
 	      alias_len = strlen (alias) + 1;
 	      value_len = strlen (value) + 1;

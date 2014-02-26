@@ -124,7 +124,7 @@ typedef struct {
   int token;
 } STRING_INT_ALIST;
 
-/* A macro to avoid making an uneccessary function call. */
+/* A macro to avoid making an unneccessary function call. */
 #define REVERSE_LIST(list, type) \
   ((list && list->next) ? (type)list_reverse ((GENERIC_LIST *)list) \
 			: (type)(list))
@@ -304,7 +304,7 @@ extern int sh_closepipe __P((int *));
 extern int file_exists __P((char *));
 extern int file_isdir __P((char  *));
 extern int file_iswdir __P((char  *));
-extern int dot_or_dotdot __P((const char *));
+extern int path_dot_or_dotdot __P((const char *));
 extern int absolute_pathname __P((const char *));
 extern int absolute_program __P((const char *));
 

@@ -16,3 +16,18 @@ esac
 case a in
 a)	echo no more clauses;&
 esac
+
+x=0 y=1
+case 1 in
+  $((y=0)) ) ;;
+  $((x=1)) ) ;&
+  $((x=2)) ) echo $x.$y ;;
+esac
+
+unset x
+readonly xx=1
+case 1 in $((xx++)) ) echo hi1 ;; *) echo hi2; esac
+echo ${xx}.$?
+
+# tests of quote removal and pattern matching
+${THIS_SH} ./case1.sub

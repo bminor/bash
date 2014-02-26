@@ -1,7 +1,7 @@
 This file is help.def, from which is created help.c.
 It implements the builtin "help" in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2013 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -92,7 +92,7 @@ help_builtin (list)
 {
   register int i;
   char *pattern, *name;
-  int plen, match_found, sflag, dflag, mflag;
+  int plen, match_found, sflag, dflag, mflag, m, pass, this_found;
 
   dflag = sflag = mflag = 0;
   reset_internal_getopt ();
@@ -137,29 +137,43 @@ help_builtin (list)
       pattern = list->word->word;
       plen = strlen (pattern);
 
-      for (i = 0; name = shell_builtins[i].name; i++)
+      for (pass = 1, this_found = 0; pass < 3; pass++)
 	{
-	  QUIT;
-	  if ((strncmp (pattern, name, plen) == 0) ||
-	      (strmatch (pattern, name, FNMATCH_EXTFLAG) != FNM_NOMATCH))
+	  for (i = 0; name = shell_builtins[i].name; i++)
 	    {
-	      match_found++;
-	      if (dflag)
-		{
-		  show_desc (name, i);
-		  continue;
-		}
-	      else if (mflag)
-		{
-		  show_manpage (name, i);
-		  continue;
-		}
+	      QUIT;
 
-	      printf ("%s: %s\n", name, _(shell_builtins[i].short_doc));
+	      /* First pass: look for exact string or pattern matches.
+		 Second pass: look for prefix matches like bash-4.2 */
+	      if (pass == 1)
+	        m = (strcmp (pattern, name) == 0) ||
+		    (strmatch (pattern, name, FNMATCH_EXTFLAG) != FNM_NOMATCH);
+	      else
+		m = strncmp (pattern, name, plen) == 0;
 
-	      if (sflag == 0)
-		show_longdoc (i);
+	      if (m)
+	        {
+	          this_found = 1;
+	          match_found++;
+	          if (dflag)
+		    {
+		      show_desc (name, i);
+		      continue;
+		    }
+	          else if (mflag)
+		    {
+		      show_manpage (name, i);
+		      continue;
+		    }
+
+	          printf ("%s: %s\n", name, _(shell_builtins[i].short_doc));
+
+	          if (sflag == 0)
+		    show_longdoc (i);
+	        }
 	    }
+	  if (pass == 1 && this_found == 1)
+	    break;
 	}
     }
 
@@ -209,7 +223,7 @@ show_longdoc (i)
       zcatfd (fd, 1, doc[0]);
       close (fd);
     }
-  else
+  else if (doc)
     for (j = 0; doc[j]; j++)
       printf ("%*s%s\n", BASE_INDENT, " ", _(doc[j]));
 }
@@ -327,6 +341,140 @@ show_manpage (name, i)
 }
 
 static void
+dispcolumn (i, buf, bufsize, width, height)
+     int i;
+     char *buf;
+     size_t bufsize;
+     int width, height;
+{
+  int j;
+  int displen;
+  char *helpdoc;
+
+  /* first column */
+  helpdoc = _(shell_builtins[i].short_doc);
+
+  buf[0] = (shell_builtins[i].flags & BUILTIN_ENABLED) ? ' ' : '*';
+  strncpy (buf + 1, helpdoc, width - 2);
+  buf[width - 2] = '>';		/* indicate truncation */
+  buf[width - 1] = '\0';
+  printf ("%s", buf);
+  if (((i << 1) >= num_shell_builtins) || (i+height >= num_shell_builtins))
+    {
+      printf ("\n");
+      return;
+    }
+
+  displen = strlen (buf);
+  /* two spaces */
+  for (j = displen; j < width; j++)
+    putc (' ', stdout);
+
+  /* second column */
+  helpdoc = _(shell_builtins[i+height].short_doc);
+
+  buf[0] = (shell_builtins[i+height].flags & BUILTIN_ENABLED) ? ' ' : '*';
+  strncpy (buf + 1, helpdoc, width - 3);
+  buf[width - 3] = '>';		/* indicate truncation */
+  buf[width - 2] = '\0';
+
+  printf ("%s\n", buf);
+}
+
+#if defined (HANDLE_MULTIBYTE)
+static void
+wdispcolumn (i, buf, bufsize, width, height)
+     int i;
+     char *buf;
+     size_t bufsize;
+     int width, height;
+{
+  int j;
+  int displen;
+  char *helpdoc;
+  wchar_t *wcstr;
+  size_t slen, n;
+  int wclen;
+
+  /* first column */
+  helpdoc = _(shell_builtins[i].short_doc);
+
+  wcstr = 0;
+  slen = mbstowcs ((wchar_t *)0, helpdoc, 0);
+  if (slen == -1)
+    {
+      dispcolumn (i, buf, bufsize, width, height);
+      return;
+    }
+
+  /* No bigger than the passed max width */
+  if (slen >= width)
+    slen = width - 2;
+  wcstr = (wchar_t *)xmalloc (sizeof (wchar_t) * (width + 2));
+  n = mbstowcs (wcstr+1, helpdoc, slen + 1);
+  wcstr[n+1] = L'\0';
+
+  /* Turn tabs and newlines into spaces for column display, since wcwidth
+     returns -1 for them */
+  for (j = 1; j < n; j++)
+    if (wcstr[j] == L'\n' || wcstr[j] == L'\t')
+      wcstr[j] = L' ';
+
+  displen = wcsnwidth (wcstr+1, slen, width - 2) + 1;	/* +1 for ' ' or '*' */
+  
+  wcstr[0] = (shell_builtins[i].flags & BUILTIN_ENABLED) ? L' ' : L'*';
+
+  /* This assumes each wide char takes up one column position when displayed */
+  wcstr[width - 2] = L'>';		/* indicate truncation */
+  wcstr[width - 1] = L'\0';
+
+  printf ("%ls", wcstr);
+  if (((i << 1) >= num_shell_builtins) || (i+height >= num_shell_builtins))
+    {
+      printf ("\n");
+      return;
+    }
+
+  /* at least one space */
+  for (j = displen; j < width; j++)
+    putc (' ', stdout);
+
+  /* second column */
+  helpdoc = _(shell_builtins[i+height].short_doc);
+  slen = mbstowcs ((wchar_t *)0, helpdoc, 0);
+  if (slen == -1)
+    {
+      /* for now */
+      printf ("%c%s\n", (shell_builtins[i+height].flags & BUILTIN_ENABLED) ? ' ' : '*', helpdoc);
+      return;
+    }
+
+  /* Reuse wcstr since it is already width wide chars long */
+  if (slen >= width)
+    slen = width - 2;
+  n = mbstowcs (wcstr+1, helpdoc, slen + 1);
+  wcstr[n+1] = L'\0';		/* make sure null-terminated */
+
+  /* Turn tabs and newlines into spaces for column display */
+  for (j = 1; j < n; j++)
+    if (wcstr[j] == L'\n' || wcstr[j] == L'\t')
+      wcstr[j] = L' ';
+
+  displen = wcsnwidth (wcstr+1, slen, width - 2);
+  
+  wcstr[0] = (shell_builtins[i+height].flags & BUILTIN_ENABLED) ? L' ' : L'*';
+
+  /* This assumes each wide char takes up one column position when displayed */
+  wcstr[width - 3] = L'>';		/* indicate truncation */
+  wcstr[width - 2] = L'\0';
+
+  printf ("%ls\n", wcstr);
+
+  free (wcstr);
+}
+#endif /* HANDLE_MULTIBYTE */
+
+static void
 show_builtin_command_help ()
 {
   int i, j;
@@ -358,28 +506,12 @@ A star (*) next to a name means that the command is disabled.\n\
     {
       QUIT;
 
-      /* first column */
-      blurb[0] = (shell_builtins[i].flags & BUILTIN_ENABLED) ? ' ' : '*';
-      strncpy (blurb + 1, _(shell_builtins[i].short_doc), width - 2);
-      blurb[width - 2] = '>';		/* indicate truncation */
-      blurb[width - 1] = '\0';
-      printf ("%s", blurb);
-      if (((i << 1) >= num_shell_builtins) || (i+height >= num_shell_builtins))
-	{
-	  printf ("\n");
-	  break;
-	}
-
-      /* two spaces */
-      for (j = strlen (blurb); j < width; j++)
-        putc (' ', stdout);
-
-      /* second column */
-      blurb[0] = (shell_builtins[i+height].flags & BUILTIN_ENABLED) ? ' ' : '*';
-      strncpy (blurb + 1, _(shell_builtins[i+height].short_doc), width - 3);
-      blurb[width - 3] = '>';		/* indicate truncation */
-      blurb[width - 2] = '\0';
-      printf ("%s\n", blurb);
+#if defined (HANDLE_MULTIBYTE)
+      if (MB_CUR_MAX > 1)
+	wdispcolumn (i, blurb, sizeof (blurb), width, height);
+      else
+#endif
+	dispcolumn (i, blurb, sizeof (blurb), width, height);
     }
 }
 #endif /* HELP_BUILTIN */

@@ -36,6 +36,8 @@ extern size_t mbstrlen __P((const char *));
 
 extern char *xstrchr __P((const char *, int));
 
+extern int locale_mb_cur_max;	/* XXX */
+
 #ifndef MB_INVALIDCH
 #define MB_INVALIDCH(x)		((x) == (size_t)-1 || (x) == (size_t)-2)
 #define MB_NULLWCH(x)		((x) == 0)
@@ -98,7 +100,7 @@ extern char *xstrchr __P((const char *, int));
 #  define ADVANCE_CHAR(_str, _strsize, _i) \
     do \
       { \
-	if (MB_CUR_MAX > 1) \
+	if (locale_mb_cur_max > 1) \
 	  { \
 	    mbstate_t state_bak; \
 	    size_t mblength; \
@@ -138,7 +140,7 @@ extern char *xstrchr __P((const char *, int));
 #  define ADVANCE_CHAR_P(_str, _strsize) \
     do \
       { \
-	if (MB_CUR_MAX > 1) \
+	if (locale_mb_cur_max > 1) \
 	  { \
 	    mbstate_t state_bak; \
 	    size_t mblength; \
@@ -173,7 +175,7 @@ extern char *xstrchr __P((const char *, int));
 #  define BACKUP_CHAR(_str, _strsize, _i) \
     do \
       { \
-	if (MB_CUR_MAX > 1) \
+	if (locale_mb_cur_max > 1) \
 	  { \
 	    mbstate_t state_bak; \
 	    size_t mblength; \
@@ -215,7 +217,7 @@ extern char *xstrchr __P((const char *, int));
 #  define BACKUP_CHAR_P(_base, _strsize, _str) \
     do \
       { \
-	if (MB_CUR_MAX > 1) \
+	if (locale_mb_cur_max > 1) \
 	  { \
 	    mbstate_t state_bak; \
 	    size_t mblength; \
@@ -256,7 +258,7 @@ extern char *xstrchr __P((const char *, int));
 #  define COPY_CHAR_P(_dst, _src, _srcend) \
     do \
       { \
-	if (MB_CUR_MAX > 1) \
+	if (locale_mb_cur_max > 1) \
 	  { \
 	    mbstate_t state_bak; \
 	    size_t mblength; \
@@ -295,7 +297,7 @@ extern char *xstrchr __P((const char *, int));
 #  define COPY_CHAR_I(_dst, _di, _src, _srcend, _si) \
     do \
       { \
-	if (MB_CUR_MAX > 1) \
+	if (locale_mb_cur_max > 1) \
 	  { \
 	    mbstate_t state_bak; \
 	    size_t mblength; \
@@ -338,7 +340,7 @@ extern char *xstrchr __P((const char *, int));
 #  define SCOPY_CHAR_I(_dst, _escchar, _sc, _src, _si, _slen) \
     do \
       { \
-	if (MB_CUR_MAX > 1) \
+	if (locale_mb_cur_max > 1) \
 	  { \
 	    mbstate_t state_bak; \
 	    size_t mblength; \
@@ -385,7 +387,7 @@ extern char *xstrchr __P((const char *, int));
 #  define SCOPY_CHAR_M(_dst, _src, _srcend, _si) \
     do \
       { \
-	if (MB_CUR_MAX > 1) \
+	if (locale_mb_cur_max > 1) \
 	  { \
 	    mbstate_t state_bak; \
 	    size_t mblength; \
@@ -429,7 +431,7 @@ extern char *xstrchr __P((const char *, int));
 #  define SADD_MBCHAR(_dst, _src, _si, _srcsize) \
     do \
       { \
-	if (MB_CUR_MAX > 1) \
+	if (locale_mb_cur_max > 1) \
 	  { \
 	    int i; \
 	    mbstate_t state_bak; \
@@ -465,7 +467,7 @@ extern char *xstrchr __P((const char *, int));
 #  define SADD_MBCHAR(_dst, _src, _si, _srcsize)
 #endif
 
-/* Watch out when using this -- it's just straight textual subsitution */
+/* Watch out when using this -- it's just straight textual substitution */
 #if defined (HANDLE_MULTIBYTE)
 #  define SADD_MBQCHAR_BODY(_dst, _src, _si, _srcsize) \
 \

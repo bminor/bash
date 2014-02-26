@@ -71,9 +71,10 @@ typedef struct compspec {
 #define COPT_DEFAULT	(1<<1)
 #define COPT_FILENAMES	(1<<2)
 #define COPT_DIRNAMES	(1<<3)
-#define COPT_NOSPACE	(1<<4)
-#define COPT_BASHDEFAULT (1<<5)
-#define COPT_PLUSDIRS	(1<<6)
+#define COPT_NOQUOTE	(1<<4)
+#define COPT_NOSPACE	(1<<5)
+#define COPT_BASHDEFAULT (1<<6)
+#define COPT_PLUSDIRS	(1<<7)
 
 /* List of items is used by the code that implements the programmable
    completions. */
@@ -116,6 +117,7 @@ extern ITEMLIST it_exports;
 extern ITEMLIST it_files;
 extern ITEMLIST it_functions;
 extern ITEMLIST it_groups;
+extern ITEMLIST it_helptopics;
 extern ITEMLIST it_hostnames;
 extern ITEMLIST it_jobs;
 extern ITEMLIST it_keywords;

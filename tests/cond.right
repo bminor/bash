@@ -59,3 +59,73 @@ rematch 1
 matches 7
 matches 8
 matches 9
+unquoted matches
+match control-a 1
+match control-a 2
+match control-a 3
+match control-a 4
+match control-a 5
+ok 1
+ok 2
+ok 3
+ok 4
+ok 4a
+ok 5
+ok 6
+ok 7 -- d
+ok 8 -- o
+ok 9
+ok 10
+ok 11
+ok 12
+argv[1] = <\^?>
+0
+1
+1
+0
+1
+1
+0
+1
+1
+[[ $'\001' =~ $'\001' ]] -> 0
+[[ $'\001' =~ $'\\\001' ]] -> 0
+[[ $'\001' =~ $'\\[\001]' ]] -> 1
+---
+[[ $'\a' =~ $'\a' ]] -> 0
+[[ $'\a' =~ $'\\\a' ]] -> 0
+[[ $'\a' =~ $'\\[\a]' ]] -> 1
+---
+[[ $'\177' =~ $'\177' ]] -> 0
+[[ $'\177' =~ $'\\\177' ]] -> 0
+[[ $'\177' =~ $'\\[\177]' ]] -> 1
+---
+0
+1
+1
+0
+1
+1
+0
+1
+1
+0
+1
+0
+1
+1
+0
+0
+0
+1
+1
+argv[1] = <^A>
+argv[2] = <^A>
+ok 1
+ok 2
+ok 3
+ok 4
+ok 5
+ok 6
+ok 7
+ok 8

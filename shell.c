@@ -1,6 +1,6 @@
 /* shell.c -- GNU's idea of the POSIX shell specification. */
 
-/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -214,7 +214,11 @@ static int make_login_shell;		/* Make this shell be a `-bash' shell. */
 static int want_initial_help;		/* --help option */
 
 int debugging_mode = 0;		/* In debugging mode with --debugger */
-int no_line_editing = 0;	/* Don't do fancy line editing. */
+#if defined (READLINE)
+int no_line_editing = 0;	/* non-zero -> don't do fancy line editing. */
+#else
+int no_line_editing = 1;	/* can't have line editing without readline */
+#endif
 int dump_translatable_strings;	/* Dump strings in $"...", don't execute. */
 int dump_po_strings;		/* Dump strings in $"..." in po format */
 int wordexp_only = 0;		/* Do word expansion only */
@@ -248,7 +252,9 @@ static const struct {
   { "noprofile", Int, &no_profile, (char **)0x0 },
   { "norc", Int, &no_rc, (char **)0x0 },
   { "posix", Int, &posixly_correct, (char **)0x0 },
+#if defined (WORDEXP_OPTION)
   { "protected", Int, &protected_mode, (char **)0x0 },
+#endif
   { "rcfile", Charp, (int *)0x0, &bashrc_file },
 #if defined (RESTRICTED_SHELL)
   { "restricted", Int, &restricted, (char **)0x0 },
@@ -375,7 +381,7 @@ main (argc, argv, env)
 #endif
 
   /* Catch early SIGINTs. */
-  code = setjmp (top_level);
+  code = setjmp_nosigs (top_level);
   if (code)
     exit (2);
 
@@ -441,7 +447,7 @@ main (argc, argv, env)
 	shell_name++;
 
       shell_reinitialize ();
-      if (setjmp (top_level))
+      if (setjmp_nosigs (top_level))
 	exit (2);
     }
 
@@ -714,7 +720,7 @@ main (argc, argv, env)
   /* Bind remaining args to $1 ... $n */
   arg_index = bind_args (argv, arg_index, argc, 1);
 
-  if (debugging_mode && locally_skip_execution == 0 && running_setuid == 0)
+  if (debugging_mode && locally_skip_execution == 0 && running_setuid == 0 && dollar_vars[1])
     start_debugger ();
 
   /* Do the things that should be done only for interactive shells. */
@@ -913,7 +919,7 @@ exit_shell (s)
 #endif /* PROCESS_SUBSTITUTION */
 
 #if defined (HISTORY)
-  if (interactive_shell)
+  if (remember_on_history)
     maybe_save_shell_history ();
 #endif /* HISTORY */
 
@@ -951,6 +957,24 @@ sh_exit (s)
 #endif
 
   exit (s);
+}
+
+/* Exit a subshell, which includes calling the exit trap.  We don't want to
+   do any more cleanup, since a subshell is created as an exact copy of its
+   parent. */
+void
+subshell_exit (s)
+     int s;
+{
+  fflush (stdout);
+  fflush (stderr);
+
+  /* Do trap[0] if defined.  Allow it to override the exit status
+     passed to us. */
+  if (signal_is_trapped (0))
+    s = run_exit_trap ();
+
+  sh_exit (s);
 }
 
 /* Source the bash startup files.  If POSIXLY_CORRECT is non-zero, we obey
@@ -1216,13 +1240,13 @@ run_wordexp (words)
   int code, nw, nb;
   WORD_LIST *wl, *tl, *result;
 
-  code = setjmp (top_level);
+  code = setjmp_nosigs (top_level);
 
   if (code != NOT_JUMPED)
     {
       switch (code)
 	{
-	  /* Some kind of throw to top_level has occured. */
+	  /* Some kind of throw to top_level has occurred. */
 	case FORCE_EOF:
 	  return last_command_exit_value = 127;
 	case ERREXIT:
@@ -1291,7 +1315,7 @@ run_one_command (command)
 {
   int code;
 
-  code = setjmp (top_level);
+  code = setjmp_nosigs (top_level);
 
   if (code != NOT_JUMPED)
     {
@@ -1300,7 +1324,7 @@ run_one_command (command)
 #endif /* PROCESS_SUBSTITUTION */
       switch (code)
 	{
-	  /* Some kind of throw to top_level has occured. */
+	  /* Some kind of throw to top_level has occurred. */
 	case FORCE_EOF:
 	  return last_command_exit_value = 127;
 	case ERREXIT:
@@ -1583,7 +1607,7 @@ set_shell_name (argv0)
     {
       if (*shell_name == '-')
 	shell_name++;
-      login_shell++;
+      login_shell = 1;
     }
 
   if (shell_name[0] == 's' && shell_name[1] == 'h' && shell_name[2] == '\0')
@@ -1619,7 +1643,9 @@ init_noninteractive ()
   expand_aliases = posixly_correct;	/* XXX - was 0 not posixly_correct */
   no_line_editing = 1;
 #if defined (JOB_CONTROL)
-  set_job_control (0);
+  /* Even if the shell is not interactive, enable job control if the -i or
+     -m option is supplied at startup. */
+  set_job_control (forced_interactive||jobs_m_flag);
 #endif /* JOB_CONTROL */
 }
 
@@ -1638,7 +1664,11 @@ get_current_user_info ()
   /* Don't fetch this more than once. */
   if (current_user.user_name == 0)
     {
+#if defined (__TANDEM)
+      entry = getpwnam (getlogin ());
+#else
       entry = getpwuid (current_user.uid);
+#endif
       if (entry)
 	{
 	  current_user.user_name = savestring (entry->pw_name);
@@ -1712,7 +1742,7 @@ shell_initialize ()
 #endif
 
   /* Initialize the data structures for storing and running jobs. */
-  initialize_job_control (0);
+  initialize_job_control (jobs_m_flag);
 
   /* Initialize input streams to null. */
   initialize_bash_input ();
@@ -1757,6 +1787,8 @@ shell_reinitialize ()
   forced_interactive = interactive_shell = subshell_environment = 0;
   expand_aliases = 0;
 
+  /* XXX - should we set jobs_m_flag to 0 here? */
+
 #if defined (HISTORY)
   bash_history_reinit (0);
 #endif /* HISTORY */
@@ -1800,7 +1832,7 @@ show_shell_usage (fp, extra)
     fprintf (fp, "\t--%s\n", long_args[i].name);
 
   fputs (_("Shell options:\n"), fp);
-  fputs (_("\t-irsD or -c command or -O shopt_option\t\t(invocation only)\n"), fp);
+  fputs (_("\t-ilrsD or -c command or -O shopt_option\t\t(invocation only)\n"), fp);
 
   for (i = 0, set_opts = 0; shell_builtins[i].name; i++)
     if (STREQ (shell_builtins[i].name, "set"))

@@ -31,6 +31,8 @@
 #  include <unistd.h>
 #endif
 
+#include <bashansi.h>
+
 #include <stdio.h>
 #include <errno.h>
 
@@ -135,7 +137,7 @@ sh_mktmpname (nameroot, flags)
       filenum = (filenum << 1) ^
 		(unsigned long) time ((time_t *)0) ^
 		(unsigned long) dollar_dollar_pid ^
-		(unsigned long) ((flags & MT_USERANDOM) ? get_random_number () : ntmpfiles++);
+		(unsigned long) ((flags & MT_USERANDOM) ? random () : ntmpfiles++);
       sprintf (filename, "%s/%s-%lu", tdir, lroot, filenum);
       if (tmpnamelen > 0 && tmpnamelen < 32)
 	filename[tdlen + 1 + tmpnamelen] = '\0';
@@ -184,7 +186,7 @@ sh_mktmpfd (nameroot, flags, namep)
       filenum = (filenum << 1) ^
 		(unsigned long) time ((time_t *)0) ^
 		(unsigned long) dollar_dollar_pid ^
-		(unsigned long) ((flags & MT_USERANDOM) ? get_random_number () : ntmpfiles++);
+		(unsigned long) ((flags & MT_USERANDOM) ? random () : ntmpfiles++);
       sprintf (filename, "%s/%s-%lu", tdir, lroot, filenum);
       if (tmpnamelen > 0 && tmpnamelen < 32)
 	filename[tdlen + 1 + tmpnamelen] = '\0';

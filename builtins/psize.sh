@@ -27,7 +27,7 @@ echo ""
 
 #
 # Try to avoid tempfile races.  We can't really check for the file's
-# existance before we run psize.aux, because `test -e' is not portable,
+# existence before we run psize.aux, because `test -e' is not portable,
 # `test -h' (test for symlinks) is not portable, and `test -f' only
 # checks for regular files.  If we used mktemp(1), we're ahead of the
 # game.

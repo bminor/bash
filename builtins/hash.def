@@ -1,7 +1,7 @@
 This file is hash.def, from which is created hash.c.
 It implements the builtin "hash" in Bash.
 
-Copyright (C) 1987-2010 Free Software Foundation, Inc.
+Copyright (C) 1987-2013 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -31,7 +31,7 @@ no arguments are given, information about remembered commands is displayed.
 Options:
   -d		forget the remembered location of each NAME
   -l		display in a format that may be reused as input
-  -p pathname	use PATHNAME is the full pathname of NAME
+  -p pathname	use PATHNAME as the full pathname of NAME
   -r		forget all remembered locations
   -t		print the remembered location of each NAME, preceding
 		each location with the corresponding NAME if multiple
@@ -276,6 +276,7 @@ list_hashed_filename_targets (list, fmt)
 	    printf ("%s\t", l->word->word);
 	  printf ("%s\n", target);
 	}
+      free (target);
     }
 
   return (all_found ? EXECUTION_SUCCESS : EXECUTION_FAILURE);

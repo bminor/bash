@@ -23,7 +23,7 @@ $PRODUCES ulimit.c
 $BUILTIN ulimit
 $FUNCTION ulimit_builtin
 $DEPENDS_ON !_MINIX
-$SHORT_DOC ulimit [-SHacdefilmnpqrstuvx] [limit]
+$SHORT_DOC ulimit [-SHabcdefilmnpqrstuvxT] [limit]
 Modify shell resource limits.
 
 Provides control over the resources available to the shell and processes
@@ -50,6 +50,9 @@ Options:
   -u	the maximum number of user processes
   -v	the size of virtual memory
   -x	the maximum number of file locks
+  -T    the maximum number of threads
+
+Not all options are available on all platforms.
 
 If LIMIT is given, it is the new value of the specified resource; the
 special LIMIT values `soft', `hard', and `unlimited' stand for the
@@ -70,7 +73,7 @@ $END
 #include <config.h>
 
 #include "../bashtypes.h"
-#ifndef _MINIX
+#if defined (HAVE_SYS_PARAM_H)
 #  include <sys/param.h>
 #endif
 
@@ -165,6 +168,10 @@ extern int errno;
 #  define RLIMIT_MAXUPROC	RLIMIT_NPROC
 #else
 #  define RLIMIT_MAXUPROC	260
+#endif
+
+#if !defined (RLIMIT_PTHREAD) && defined (RLIMIT_NTHR)
+#  define RLIMIT_PTHREAD RLIMIT_NTHR
 #endif
 
 #if !defined (RLIM_INFINITY)

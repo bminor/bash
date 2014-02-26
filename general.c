@@ -1,6 +1,6 @@
 /* general.c -- Stuff that is used by all files. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2011 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -21,7 +21,7 @@
 #include "config.h"
 
 #include "bashtypes.h"
-#ifndef _MINIX
+#if defined (HAVE_SYS_PARAM_H)
 #  include <sys/param.h>
 #endif
 #include "posixstat.h"
@@ -40,6 +40,7 @@
 
 #include "shell.h"
 #include "test.h"
+#include "trap.h"
 
 #include <tilde/tilde.h>
 
@@ -171,6 +172,9 @@ legal_number (string, result)
   if (result)
     *result = 0;
 
+  if (string == 0)
+    return 0;
+
   errno = 0;
   value = strtoimax (string, &ep, 10);
   if (errno || ep == string)
@@ -182,7 +186,7 @@ legal_number (string, result)
 
   /* If *string is not '\0' but *ep is '\0' on return, the entire string
      is valid. */
-  if (string && *string && *ep == '\0')
+  if (*string && *ep == '\0')
     {
       if (result)
 	*result = value;
@@ -398,7 +402,8 @@ check_dev_tty ()
 	return;
       tty_fd = open (tty, O_RDWR|O_NONBLOCK);
     }
-  close (tty_fd);
+  if (tty_fd >= 0)
+    close (tty_fd);
 }
 
 /* Return 1 if PATH1 and PATH2 are the same file.  This is kind of
@@ -562,7 +567,7 @@ file_iswdir (fn)
 /* Return 1 if STRING is "." or "..", optionally followed by a directory
    separator */
 int
-dot_or_dotdot (string)
+path_dot_or_dotdot (string)
      const char *string;
 {
   if (string == 0 || *string == '\0' || *string != '.')
@@ -766,7 +771,7 @@ trim_pathname (name, maxlen)
   *nbeg++ = '.';
 
   nlen = nend - ntail;
-  memcpy (nbeg, ntail, nlen);
+  memmove (nbeg, ntail, nlen);
   nbeg[nlen] = '\0';
 
   return name;
@@ -980,7 +985,13 @@ bash_tilde_expand (s, assign_p)
 
   old_immed = interrupt_immediately;
   old_term = terminate_immediately;
-  interrupt_immediately = terminate_immediately = 1;
+  /* We want to be able to interrupt tilde expansion. Ordinarily, we can just
+     jump to top_level, but we don't want to run any trap commands in a signal
+     handler context.  We might be able to get away with just checking for
+     things like SIGINT and SIGQUIT. */
+  if (any_signals_trapped () < 0)
+    interrupt_immediately = 1;
+  terminate_immediately = 1;
 
   tilde_additional_prefixes = assign_p == 0 ? (char **)0
   					    : (assign_p == 2 ? bash_tilde_prefixes2 : bash_tilde_prefixes);
@@ -989,8 +1000,12 @@ bash_tilde_expand (s, assign_p)
 
   r = (*s == '~') ? unquoted_tilde_word (s) : 1;
   ret = r ? tilde_expand (s) : savestring (s);
+
   interrupt_immediately = old_immed;
   terminate_immediately = old_term;
+
+  QUIT;
+
   return (ret);
 }
 

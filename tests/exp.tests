@@ -22,14 +22,14 @@ expect "<^A>"
 recho `echo ''`
 expect "<^A>"
 recho `echo ""`
-expect "<^B>"
-recho `echo ''`
-expect "<^B>"
-recho `echo ""`
+expect "<^?>"
+recho `echo ''`
+expect "<^?>"
+recho `echo ""`
 expect "<^A>"
 recho `echo `
-expect "<^B>"
-recho `echo `
+expect "<^?>"
+recho `echo `
 
 # Test null strings without variable expansion
 expect "<abcdefgh>"
@@ -89,16 +89,16 @@ unset xxx yyy
 # Test the unquoted special quoting characters
 expect "<^A>"
 recho 
-expect "<^B>"
-recho 
+expect "<^?>"
+recho 
 expect "<^A>"
 recho ""
-expect "<^B>"
-recho ""
+expect "<^?>"
+recho ""
 expect "<^A>"
 recho ''
-expect "<^B>"
-recho ''
+expect "<^?>"
+recho ''
 
 # Test expansion of a variable that is unset
 expect nothing
@@ -139,9 +139,9 @@ expect '<a> <b>'
 FOO=`echo 'a b' | tr ' ' '\012'`
 recho $FOO
 
-# This should give argv[1] = ^A argv[2] = ^B
-expect '<^A> <^B>'
-FOO=`echo ' ' | tr ' ' '\012'`
+# This should give argv[1] = ^A argv[2] = ^?
+expect '<^A> <^?>'
+FOO=`echo ' ' | tr ' ' '\012'`
 recho $FOO
 
 # Test quoted and unquoted globbing characters
@@ -153,14 +153,14 @@ recho "\.\./*/"
 
 # Test patterns that come up when the shell quotes funny character
 # combinations
-expect '<^A^B^A^B>'
-recho ''
+expect '<^A^?^A^?>'
+recho ''
 expect '<^A^A>'
 recho ''
-expect '<^A^B>'
-recho ''
-expect '<^A^A^B>'
-recho ''
+expect '<^A^?>'
+recho ''
+expect '<^A^A^?>'
+recho ''
 
 # More tests of "$@"
 set abc def ghi jkl
@@ -386,3 +386,7 @@ ${THIS_SH} ./exp2.sub
 ${THIS_SH} ./exp3.sub
 
 ${THIS_SH} ./exp4.sub
+
+${THIS_SH} ./exp5.sub
+
+${THIS_SH} ./exp6.sub

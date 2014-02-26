@@ -109,7 +109,7 @@ mkdir_builtin (list)
   umask (original_umask);
 
   nmode = (S_IRWXU | S_IRWXG | S_IRWXO) & ~original_umask;
-  parent_mode = nmode | (S_IWRITE|S_IEXEC);	/* u+wx */
+  parent_mode = nmode | (S_IWUSR|S_IXUSR);	/* u+wx */
 
   /* Adjust new mode based on mode argument */
   nmode &= omode;

@@ -20,7 +20,7 @@ bar ()
     exec {v}> $TMPFILE;
     echo $v
 }
-11
+10
 line 1
 line 2
 line 3
@@ -35,11 +35,11 @@ EOF
 
     echo $v
 }
-11
+10
 foo 1
 foo 2
 foo 3
-11
+10
 /bin/bash
 /bin/csh
 /bin/ksh
@@ -64,7 +64,7 @@ iclosev ()
 /bin/zsh
 ./vredir3.sub: line 4: v: ambiguous redirect
 after
-11 12
+10 11
 a
 a
 swizzle is a function
@@ -75,7 +75,7 @@ swizzle ()
     exec {stdin}<&$fd0;
     exec {stdout}>&$fd1
 }
-13 11
+12 10
 a
 a
 swizzle is a function
@@ -87,8 +87,6 @@ swizzle ()
     exec {stdout}>&$fd1-
 }
 ok 1
-./vredir6.sub: redirection error: cannot duplicate fd: Invalid argument
-./vredir6.sub: line 10: /dev/null: Invalid argument
 ./vredir6.sub: redirection error: cannot duplicate fd: Invalid argument
 ./vredir6.sub: line 13: v: Invalid argument
 unset

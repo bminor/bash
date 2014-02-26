@@ -32,7 +32,7 @@
 
 #include "bashtypes.h"
 
-#if !defined (HAVE_LIMITS_H)
+#if !defined (HAVE_LIMITS_H) && defined (HAVE_SYS_PARAM_H)
 #  include <sys/param.h>
 #endif
 
@@ -50,6 +50,7 @@ extern int errno;
 #endif /* !_POSIX_VERSION */
 #include "posixstat.h"
 #include "filecntl.h"
+#include "stat-time.h"
 
 #include "bashintl.h"
 
@@ -156,7 +157,7 @@ integer_expected_error (pch)
 }
 
 /* Increment our position in the argument list.  Check that we're not
-   past the end of the argument list.  This check is supressed if the
+   past the end of the argument list.  This check is suppressed if the
    argument is FALSE.  Made a macro for efficiency. */
 #define advance(f) do { ++pos; if (f && pos >= argc) beyond (); } while (0)
 #define unary_advance() do { advance (1); ++pos; } while (0)
@@ -289,19 +290,35 @@ term ()
 }
 
 static int
+stat_mtime (fn, st, ts)
+     char *fn;
+     struct stat *st;
+     struct timespec *ts;
+{
+  int r;
+
+  r = sh_stat (fn, st);
+  if (r < 0)
+    return r;
+  *ts = get_stat_mtime (st);
+  return 0;
+}
+
+static int
 filecomp (s, t, op)
      char *s, *t;
      int op;
 {
   struct stat st1, st2;
+  struct timespec ts1, ts2;
   int r1, r2;
 
-  if ((r1 = sh_stat (s, &st1)) < 0)
+  if ((r1 = stat_mtime (s, &st1, &ts1)) < 0)
     {
       if (op == EF)
 	return (FALSE);
     }
-  if ((r2 = sh_stat (t, &st2)) < 0)
+  if ((r2 = stat_mtime (t, &st2, &ts2)) < 0)
     {
       if (op == EF)
 	return (FALSE);
@@ -309,8 +326,8 @@ filecomp (s, t, op)
   
   switch (op)
     {
-    case OT: return (r1 < r2 || (r2 == 0 && st1.st_mtime < st2.st_mtime));
-    case NT: return (r1 > r2 || (r1 == 0 && st1.st_mtime > st2.st_mtime));
+    case OT: return (r1 < r2 || (r2 == 0 && timespec_cmp (ts1, ts2) < 0));
+    case NT: return (r1 > r2 || (r1 == 0 && timespec_cmp (ts1, ts2) > 0));
     case EF: return (same_file (s, t, &st1, &st2));
     }
   return (FALSE);
@@ -378,9 +395,11 @@ binary_test (op, arg1, arg2, flags)
     return (patmatch ? patcomp (arg1, arg2, EQ) : STREQ (arg1, arg2));
   else if ((op[0] == '>' || op[0] == '<') && op[1] == '\0')
     {
+#if defined (HAVE_STRCOLL)
       if (shell_compatibility_level > 40 && flags & TEST_LOCALE)
 	return ((op[0] == '>') ? (strcoll (arg1, arg2) > 0) : (strcoll (arg1, arg2) < 0));
       else
+#endif
 	return ((op[0] == '>') ? (strcmp (arg1, arg2) > 0) : (strcmp (arg1, arg2) < 0));
     }
   else if (op[0] == '!' && op[1] == '=' && op[2] == '\0')
@@ -603,7 +622,32 @@ unary_test (op, arg)
 
     case 'v':
       v = find_variable (arg);
-      return (v && var_isset (v) ? TRUE : FALSE);
+#if defined (ARRAY_VARS)
+      if (v == 0 && valid_array_reference (arg))
+	{
+	  char *t;
+	  t = array_value (arg, 0, 0, (int *)0, (arrayind_t *)0);
+	  return (t ? TRUE : FALSE);
+	}
+     else if (v && invisible_p (v) == 0 && array_p (v))
+	{
+	  char *t;
+	  /* [[ -v foo ]] == [[ -v foo[0] ]] */
+	  t = array_reference (array_cell (v), 0);
+	  return (t ? TRUE : FALSE);
+	}
+      else if (v && invisible_p (v) == 0 && assoc_p (v))
+	{
+	  char *t;
+	  t = assoc_reference (assoc_cell (v), "0");
+	  return (t ? TRUE : FALSE);
+	}
+#endif
+      return (v && invisible_p (v) == 0 && var_isset (v) ? TRUE : FALSE);
+
+    case 'R':
+      v = find_variable (arg);
+      return (v && invisible_p (v) == 0 && var_isset (v) && nameref_p (v) ? TRUE : FALSE);
     }
 
   /* We can't actually get here, but this shuts up gcc. */
@@ -801,7 +845,7 @@ test_command (margc, margv)
 
   USE_VAR(margc);
 
-  code = setjmp (test_exit_buf);
+  code = setjmp_nosigs (test_exit_buf);
 
   if (code)
     return (test_error_return);

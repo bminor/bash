@@ -2,11 +2,13 @@ Compatibility with previous versions
 ====================================
 
 This document details the incompatibilities between this version of bash,
-bash-4.1, and the previous widely-available versions, bash-2.x (which is
-still the `standard' version for a few Linux distributions) and bash-3.x. 
-These were discovered by users of bash-2.x and 3.x, so this list is not
-comprehensive.  Some of these incompatibilities occur between the current
-version and versions 2.0 and above.
+bash-4.3, and the previous widely-available versions, bash-3.x (which is
+still the `standard' version for Mac OS X), 4.0/4.1 (which are still
+standard on a few Linux distributions), and bash-4.2, the current
+widely-available version.  These were discovered by users of bash-2.x
+through 4.x, so this list is not comprehensive.  Some of these
+incompatibilities occur between the current version and versions 2.0 and
+above. 
 
 1.  Bash uses a new quoting syntax, $"...", to do locale-specific
     string translation.  Users who have relied on the (undocumented)
@@ -334,30 +336,58 @@ version and versions 2.0 and above.
     behavior (ASCII collating and strcmp(3)) by setting one of the
     `compatNN' shopt options, where NN is less than 41.
 
-45. Command substitutions now remove the caller's trap strings when trap is
+45. Bash-4.1 conforms to the current Posix specification for `set -u':
+    expansions of $@ and $* when there are no positional parameters do not
+    cause the shell to exit.
+
+46. Bash-4.1 implements the current Posix specification for `set -e' and
+    exits when any command fails, not just a simple command or pipeline.
+
+47. Command substitutions now remove the caller's trap strings when trap is
     run to set a new trap in the subshell.  Previous to bash-4.2, the old
     trap strings persisted even though the actual signal handlers were reset.
 
-46. When in Posix mode, a single quote is not treated specially in a
+48. When in Posix mode, a single quote is not treated specially in a
     double-quoted ${...} expansion, unless the expansion operator is
     # or % or the new `//', `^', or `,' expansions.  In particular, it
     does not define a new quoting context.  This is from Posix interpretation
     221.
 
-47. Posix mode shells no longer exit if a variable assignment error occurs
+49. Posix mode shells no longer exit if a variable assignment error occurs
     with an assignment preceding a command that is not a special builtin.
 
+50. Bash-4.2 attempts to preserve what the user typed when performing word
+    completion, instead of, for instance, expanding shell variable
+    references to their value.
+
+51. When in Posix mode, bash-4.2 exits if the filename supplied as an argument
+    to `.' is not found and the shell is not interactive.
+
+52. When compiled for strict Posix compatibility, bash-4.3 does not enable
+    history expansion by default in interactive shells, since it results in
+    a non-conforming environment.
+
+53. Bash-4.3 runs the replacement string in the pattern substitution word
+    expansion through quote removal.  The code already treats quote
+    characters in the replacement string as special; if it treats them as
+    special, then quote removal should remove them.
 
 Shell Compatibility Level
 =========================
 
 Bash-4.0 introduced the concept of a `shell compatibility level', specified
-as a set of options to the shopt builtin (compat31, compat32, compat40, and
-compat41 at this writing).  There is only one current compatibility level --
-each option is mutually exclusive.  This list does not mention behavior
-that is standard for a particular version (e.g., setting compat32 means that
-quoting the rhs of the regexp matching operator quotes special regexp
-characters in the word, which is default behavior in bash-3.2 and above).
+as a set of options to the shopt builtin (compat31, compat32, compat40, 
+compat41, and compat42 at this writing).  There is only one current
+compatibility level -- each option is mutually exclusive.  This list does not
+mention behavior that is standard for a particular version (e.g., setting
+compat32 means that quoting the rhs of the regexp matching operator quotes
+special regexp characters in the word, which is default behavior in bash-3.2
+and above).
+
+Bash-4.3 introduces a new shell variable: BASH_COMPAT.  The value assigned
+to this variable (a decimal version number like 4.2, or an integer
+corresponding to the compatNN option, like 42) determines the compatibility
+level.
 
 compat31 set
 	- the < and > operators to the [[ command do not consider the current
@@ -378,11 +408,15 @@ compat40 set
 
 compat41 set
 	- interrupting a command list such as "a ; b ; c" causes the execution
-	  of the entire list to be aborted (in versions before bash-4.0,
+	  of the entire list to be aborted (in versions before bash-4.1,
 	  interrupting one command in a list caused the next to be executed)
 	- when in posix mode, single quotes in the `word' portion of a
 	  double-quoted parameter expansion define a new quoting context and
 	  are treated specially
+
+compat42 set
+	- the replacement string in double-quoted pattern substitution is not
+	  run through quote removal, as in previous versions
 -------------------------------------------------------------------------------
 
 Copying and distribution of this file, with or without modification,

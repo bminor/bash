@@ -1,7 +1,7 @@
 This file is wait.def, from which is created wait.c.
 It implements the builtin "wait" in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2013 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -22,33 +22,36 @@ $BUILTIN wait
 $FUNCTION wait_builtin
 $DEPENDS_ON JOB_CONTROL
 $PRODUCES wait.c
-$SHORT_DOC wait [id]
+$SHORT_DOC wait [-n] [id ...]
 Wait for job completion and return exit status.
 
-Waits for the process identified by ID, which may be a process ID or a
+Waits for each process identified by an ID, which may be a process ID or a
 job specification, and reports its termination status.  If ID is not
 given, waits for all currently active child processes, and the return
 status is zero.  If ID is a a job specification, waits for all processes
-in the job's pipeline.
+in that job's pipeline.
+
+If the -n option is supplied, waits for the next job to terminate and
+returns its exit status.
 
 Exit Status:
-Returns the status of ID; fails if ID is invalid or an invalid option is
-given.
+Returns the status of the last ID; fails if ID is invalid or an invalid
+option is given.
 $END
 
 $BUILTIN wait
 $FUNCTION wait_builtin
 $DEPENDS_ON !JOB_CONTROL
-$SHORT_DOC wait [pid]
+$SHORT_DOC wait [pid ...]
 Wait for process completion and return exit status.
 
-Waits for the specified process and reports its termination status.  If
-PID is not given, all currently active child processes are waited for,
-and the return code is zero.  PID must be a process ID.
+Waits for each process specified by a PID and reports its termination status.
+If PID is not given, waits for all currently active child processes,
+and the return status is zero.  PID must be a process ID.
 
 Exit Status:
-Returns the status of ID; fails if ID is invalid or an invalid option is
-given.
+Returns the status of the last PID; fails if PID is invalid or an invalid
+option is given.
 $END
 
 #include <config.h>
@@ -82,6 +85,7 @@ procenv_t wait_intr_buf;
   do \
     { \
       interrupt_immediately = old_interrupt_immediately;\
+      wait_signal_received = 0; \
       return (s);\
     } \
   while (0)
@@ -90,17 +94,33 @@ int
 wait_builtin (list)
      WORD_LIST *list;
 {
-  int status, code;
+  int status, code, opt, nflag;
   volatile int old_interrupt_immediately;
 
   USE_VAR(list);
 
-  if (no_options (list))
-    return (EX_USAGE);
+  nflag = 0;
+  reset_internal_getopt ();
+  while ((opt = internal_getopt (list, "n")) != -1)
+    {
+      switch (opt)
+	{
+#if defined (JOB_CONTROL)
+	case 'n':
+	  nflag = 1;
+	  break;
+#endif
+	default:
+	  builtin_usage ();
+	  return (EX_USAGE);
+	}
+    }
   list = loptend;
 
   old_interrupt_immediately = interrupt_immediately;
+#if 0
   interrupt_immediately++;
+#endif
 
   /* POSIX.2 says:  When the shell is waiting (by means of the wait utility)
      for asynchronous commands to complete, the reception of a signal for
@@ -120,6 +140,16 @@ wait_builtin (list)
   /* We support jobs or pids.
      wait <pid-or-job> [pid-or-job ...] */
 
+#if defined (JOB_CONTROL)
+  if (nflag)
+    {
+      status = wait_for_any_job ();
+      if (status < 0)
+	status = 127;
+      WAIT_RETURN (status);
+    }
+#endif
+      
   /* But wait without any arguments means to wait for all of the shell's
      currently active background processes. */
   if (list == 0)

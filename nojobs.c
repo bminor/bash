@@ -3,7 +3,7 @@
 /* This file works under BSD, System V, minix, and Posix systems.  It does
    not implement job control. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2011 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -83,8 +83,8 @@ extern sigset_t top_level_mask;
 extern procenv_t wait_intr_buf;
 extern int wait_signal_received;
 
-pid_t last_made_pid = NO_PID;
-pid_t last_asynchronous_pid = NO_PID;
+volatile pid_t last_made_pid = NO_PID;
+volatile pid_t last_asynchronous_pid = NO_PID;
 
 /* Call this when you start making children. */
 int already_making_children = 0;
@@ -94,7 +94,10 @@ int shell_tty = -1;
 
 /* If this is non-zero, $LINES and $COLUMNS are reset after every process
    exits from get_tty_state(). */
-int check_window_size;
+int check_window_size = CHECKWINSIZE_DEFAULT;
+
+/* We don't have job control. */
+int job_control = 0;
 
 /* STATUS and FLAGS are only valid if pid != NO_PID
    STATUS is only valid if (flags & PROC_RUNNING) == 0 */
@@ -439,14 +442,21 @@ reap_zombie_children ()
   WAIT status;
 
   CHECK_TERMSIG;
+  CHECK_WAIT_INTR;
   while ((pid = waitpid (-1, (int *)&status, WNOHANG)) > 0)
     set_pid_status (pid, status);
 #  endif /* WNOHANG */
   CHECK_TERMSIG;
+  CHECK_WAIT_INTR;
 }
 #endif /* WAITPID */
 
 #if !defined (HAVE_SIGINTERRUPT) && defined (HAVE_POSIX_SIGNALS)
+
+#if !defined (SA_RESTART)
+#  define SA_RESTART 0
+#endif
+
 static int
 siginterrupt (sig, flag)
      int sig, flag;
@@ -491,11 +501,17 @@ make_child (command, async_p)
     sync_buffered_stream (default_buffered_input);
 #endif /* BUFFERED_INPUT */
 
+  /* XXX - block SIGTERM here and unblock in child after fork resets the
+     set of pending signals? */
+  RESET_SIGTERM;
+
   /* Create the child, handle severe errors.  Retry on EAGAIN. */
   forksleep = 1;
   while ((pid = fork ()) < 0 && errno == EAGAIN && forksleep < FORKSLEEP_MAX)
     {
       sys_error ("fork: retry");
+      RESET_SIGTERM;
+
 #if defined (HAVE_WAITPID)
       /* Posix systems with a non-blocking waitpid () system call available
 	 get another chance after zombies are reaped. */
@@ -509,9 +525,13 @@ make_child (command, async_p)
       forksleep <<= 1;
     }
 
+  if (pid != 0)
+    RESET_SIGTERM;
+
   if (pid < 0)
     {
       sys_error ("fork");
+      last_command_exit_value = EX_NOEXEC;
       throw_to_top_level ();
     }
 
@@ -597,6 +617,7 @@ wait_for_single_pid (pid)
   while ((got_pid = WAITPID (pid, &status, 0)) != pid)
     {
       CHECK_TERMSIG;
+      CHECK_WAIT_INTR;
       if (got_pid < 0)
 	{
 	  if (errno != EINTR && errno != ECHILD)
@@ -683,12 +704,12 @@ wait_sigint_handler (sig)
       signal_is_trapped (SIGINT) &&
       ((sigint_handler = trap_to_sighandler (SIGINT)) == trap_handler))
     {
-      last_command_exit_value = EXECUTION_FAILURE;
+      last_command_exit_value = 128+SIGINT;
       restore_sigint_handler ();
       interrupt_immediately = 0;
       trap_handler (SIGINT);	/* set pending_traps[SIGINT] */
       wait_signal_received = SIGINT;
-      longjmp (wait_intr_buf, 1);
+      SIGRETURN (0);
     }
 
   if (interrupt_immediately)
@@ -751,6 +772,7 @@ wait_for (pid)
   while ((got_pid = WAITPID (-1, &status, 0)) != pid) /* XXX was pid now -1 */
     {
       CHECK_TERMSIG;
+      CHECK_WAIT_INTR;
       if (got_pid < 0 && errno == ECHILD)
 	{
 #if !defined (_POSIX_VERSION)
@@ -773,6 +795,9 @@ wait_for (pid)
   if (got_pid >= 0)
     reap_zombie_children ();
 #endif /* HAVE_WAITPID */
+
+  CHECK_TERMSIG;
+  CHECK_WAIT_INTR;
 
   if (interactive_shell == 0)
     {
@@ -801,13 +826,17 @@ wait_for (pid)
   return_val = process_exit_status (status);
   last_command_exit_signal = get_termsig (status);
 
-#if !defined (DONT_REPORT_SIGPIPE)
-  if ((WIFSTOPPED (status) == 0) && WIFSIGNALED (status) &&
-	(WTERMSIG (status) != SIGINT))
+#if defined (DONT_REPORT_SIGPIPE) && defined (DONT_REPORT_SIGTERM)
+#  define REPORTSIG(x) ((x) != SIGINT && (x) != SIGPIPE && (x) != SIGTERM)
+#elif !defined (DONT_REPORT_SIGPIPE) && !defined (DONT_REPORT_SIGTERM)
+#  define REPORTSIG(x) ((x) != SIGINT)
+#elif defined (DONT_REPORT_SIGPIPE)
+#  define REPORTSIG(x) ((x) != SIGINT && (x) != SIGPIPE)
 #else
-  if ((WIFSTOPPED (status) == 0) && WIFSIGNALED (status) &&
-	(WTERMSIG (status) != SIGINT) && (WTERMSIG (status) != SIGPIPE))
+#  define REPORTSIG(x) ((x) != SIGINT && (x) != SIGTERM)
 #endif
+
+  if ((WIFSTOPPED (status) == 0) && WIFSIGNALED (status) && REPORTSIG(WTERMSIG (status)))
     {
       fprintf (stderr, "%s", j_strsignal (WTERMSIG (status)));
       if (WIFCORED (status))
@@ -822,6 +851,8 @@ wait_for (pid)
       else
 	get_tty_state ();
     }
+  else if (interactive_shell == 0 && subshell_environment == 0 && check_window_size)
+    get_new_window_size (0, (int *)0, (int *)0);
 
   return (return_val);
 }

@@ -1,7 +1,7 @@
 This file is exec.def, from which is created exec.c.
 It implements the builtin "exec" in Bash.
 
-Copyright (C) 1987-2010 Free Software Foundation, Inc.
+Copyright (C) 1987-2012 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -144,7 +144,7 @@ exec_builtin (list)
   args = strvec_from_word_list (list, 1, 0, (int *)NULL);
 
   /* A command with a slash anywhere in its name is not looked up in $PATH. */
-  command = absolute_program (args[0]) ? args[0] : search_for_command (args[0]);
+  command = absolute_program (args[0]) ? args[0] : search_for_command (args[0], 1);
 
   if (command == 0)
     {

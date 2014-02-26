@@ -42,6 +42,7 @@
 #include "error.h"
 #include "externs.h"
 #include "quit.h"
+#include "trap.h"
 
 #if !defined (errno)
 extern int errno;
@@ -83,24 +84,34 @@ getc_with_restart (stream)
     {
       while (1)
 	{
-	  CHECK_TERMSIG;
+	  QUIT;
+	  run_pending_traps ();
+
 	  local_bufused = read (fileno (stream), localbuf, sizeof(localbuf));
 	  if (local_bufused > 0)
 	    break;
+	  else if (local_bufused == 0)
+	    {
+	      local_index = 0;
+	      return EOF;
+	    }
 	  else if (errno == X_EAGAIN || errno == X_EWOULDBLOCK)
 	    {
 	      if (sh_unset_nodelay_mode (fileno (stream)) < 0)
 		{
 		  sys_error (_("cannot reset nodelay mode for fd %d"), fileno (stream));
+		  local_index = local_bufused = 0;
 		  return EOF;
 		}
 	      continue;
 	    }
-	  else if (local_bufused == 0 || errno != EINTR)
+	  else if (errno != EINTR)
 	    {
-	      local_index = 0;
+	      local_index = local_bufused = 0;
 	      return EOF;
 	    }
+	  else if (interrupt_state || terminating_signal)	/* QUIT; */
+	    local_index = local_bufused = 0;
 	}
       local_index = 0;
     }
@@ -301,7 +312,7 @@ save_bash_input (fd, new_fd)
    the buffered stream.  Make sure the file descriptor used to save bash
    input is set close-on-exec. Returns 0 on success, -1 on failure.  This
    works only if fd is > 0 -- if fd == 0 and bash is reading input from
-   fd 0, save_bash_input is used instead, to cooperate with input
+   fd 0, sync_buffered_stream is used instead, to cooperate with input
    redirection (look at redir.c:add_undo_redirect()). */
 int
 check_bash_input (fd)
@@ -450,7 +461,7 @@ close_buffered_fd (fd)
   return (close_buffered_stream (buffers[fd]));
 }
 
-/* Make the BUFFERED_STREAM associcated with buffers[FD] be BP, and return
+/* Make the BUFFERED_STREAM associated with buffers[FD] be BP, and return
    the old BUFFERED_STREAM. */
 BUFFERED_STREAM *
 set_buffered_stream (fd, bp)

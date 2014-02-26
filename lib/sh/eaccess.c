@@ -205,14 +205,16 @@ sh_eaccess (path, mode)
   if (path_is_devfd (path))
     return (sh_stataccess (path, mode));
 
-#if defined (HAVE_FACCESSAT) && defined (AT_EACCESS)
-  return (faccessat (AT_FDCWD, path, mode, AT_EACCESS));
-#elif defined (HAVE_EACCESS)		/* FreeBSD */
+#if (defined (HAVE_FACCESSAT) && defined (AT_EACCESS)) || defined (HAVE_EACCESS)
+#  if defined (HAVE_FACCESSAT) && defined (AT_EACCESS)
+  ret = faccessat (AT_FDCWD, path, mode, AT_EACCESS);
+#  else		/* HAVE_EACCESS */	/* FreeBSD */
   ret = eaccess (path, mode);	/* XXX -- not always correct for X_OK */
-#  if defined (__FreeBSD__)
+#  endif	/* HAVE_EACCESS */
+#  if defined (__FreeBSD__) || defined (SOLARIS)
   if (ret == 0 && current_user.euid == 0 && mode == X_OK)
     return (sh_stataccess (path, mode));
-#  endif
+#  endif	/* __FreeBSD__ || SOLARIS */
   return ret;
 #elif defined (EFF_ONLY_OK)		/* SVR4(?), SVR4.2 */
   return access (path, mode|EFF_ONLY_OK);
@@ -233,7 +235,6 @@ sh_eaccess (path, mode)
 	return (sh_stataccess (path, mode));
 #endif
       return ret;
-      
     }
 
   return (sh_stataccess (path, mode));

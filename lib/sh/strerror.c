@@ -23,7 +23,7 @@
 #if !defined (HAVE_STRERROR)
 
 #include <bashtypes.h>
-#ifndef _MINIX
+#if defined (HAVE_SYS_PARAM_H)
 #  include <sys/param.h>
 #endif
 

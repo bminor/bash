@@ -15,5 +15,10 @@ echo ab | {
 	echo $xyz
 }
 
+echo abc | {
+	read -N 4 -d$'\n' foo
+	echo $foo
+}
+
 read -n 1 < $0
 echo "$REPLY"

@@ -1,7 +1,7 @@
 This file is type.def, from which is created type.c.
 It implements the builtin "type" in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2011 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -353,7 +353,7 @@ describe_command (command, dflags)
 	  user_command_matches (command, FS_EXEC_ONLY, found_file);
 	  /* XXX - should that be FS_EXEC_PREFERRED? */
 
-      if (!full_path)
+      if (full_path == 0)
 	break;
 
       /* If we found the command as itself by looking through $PATH, it
@@ -375,7 +375,9 @@ describe_command (command, dflags)
 	  else if (dflags & (CDESC_REUSABLE|CDESC_PATH_ONLY|CDESC_SHORTDESC))
 	    {
 	      f = MP_DOCWD | ((dflags & CDESC_ABSPATH) ? MP_RMDOT : 0);
-	      full_path = sh_makepath ((char *)NULL, full_path, f);
+	      x = sh_makepath ((char *)NULL, full_path, f);
+	      free (full_path);
+	      full_path = x;
 	    }
 	}
       /* If we require a full path and don't have one, make one */

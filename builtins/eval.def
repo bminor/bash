@@ -53,6 +53,5 @@ eval_builtin (list)
     return (EX_USAGE);
   list = loptend;	/* skip over possible `--' */
 
-  /* Note that parse_and_execute () frees the string it is passed. */
-  return (list ? parse_and_execute (string_list (list), "eval", SEVAL_NOHIST) : EXECUTION_SUCCESS);
+  return (list ? evalstring (string_list (list), "eval", SEVAL_NOHIST) : EXECUTION_SUCCESS);
 }

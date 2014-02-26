@@ -1,6 +1,6 @@
 /* sig.c - interface for shell signal handlers and signal initialization. */
 
-/* Copyright (C) 1994-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2013 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -43,6 +43,7 @@
 #include "trap.h"
 
 #include "builtins/common.h"
+#include "builtins/builtext.h"
 
 #if defined (READLINE)
 #  include "bashline.h"
@@ -64,17 +65,22 @@ extern int parse_and_execute_level, shell_initialized;
 extern int history_lines_this_session;
 #endif
 extern int no_line_editing;
+extern int wait_signal_received;
+extern sh_builtin_func_t *this_shell_builtin;
 
 extern void initialize_siglist ();
 
 /* Non-zero after SIGINT. */
-volatile int interrupt_state = 0;
+volatile sig_atomic_t interrupt_state = 0;
 
 /* Non-zero after SIGWINCH */
-volatile int sigwinch_received = 0;
+volatile sig_atomic_t sigwinch_received = 0;
+
+/* Non-zero after SIGTERM */
+volatile sig_atomic_t sigterm_received = 0;
 
 /* Set to the value of any terminating signal received. */
-volatile int terminating_signal = 0;
+volatile sig_atomic_t terminating_signal = 0;
 
 /* The environment at the top-level R-E loop.  We use this in
    the case of error return. */
@@ -260,7 +266,7 @@ initialize_terminating_signals ()
       if (interactive_shell == 0 && XHANDLER (i) == SIG_IGN)
 	{
 	  sigaction (XSIG (i), &oact, &act);
-	  set_signal_ignored (XSIG (i));
+	  set_signal_hard_ignored (XSIG (i));
 	}
 #if defined (SIGPROF) && !defined (_MINIX)
       if (XSIG (i) == SIGPROF && XHANDLER (i) != SIG_DFL && XHANDLER (i) != SIG_IGN)
@@ -284,7 +290,7 @@ initialize_terminating_signals ()
       if (interactive_shell == 0 && XHANDLER (i) == SIG_IGN)
 	{
 	  signal (XSIG (i), SIG_IGN);
-	  set_signal_ignored (XSIG (i));
+	  set_signal_hard_ignored (XSIG (i));
 	}
 #ifdef SIGPROF
       if (XSIG (i) == SIGPROF && XHANDLER (i) != SIG_DFL && XHANDLER (i) != SIG_IGN)
@@ -319,7 +325,9 @@ initialize_shell_signals ()
   if (interactive)
     {
       set_signal_handler (SIGINT, sigint_sighandler);
-      set_signal_handler (SIGTERM, SIG_IGN);
+      get_original_signal (SIGTERM);
+      if (signal_is_hard_ignored (SIGTERM) == 0)
+	set_signal_handler (SIGTERM, sigterm_sighandler);
       set_sigwinch_handler ();
     }
 }
@@ -358,6 +366,8 @@ reset_terminating_signals ()
       signal (XSIG (i), XHANDLER (i));
     }
 #endif /* !HAVE_POSIX_SIGNALS */
+
+  termsigs_initialized = 0;
 }
 #undef XSIG
 #undef XHANDLER
@@ -389,6 +399,8 @@ throw_to_top_level ()
 
   if (interrupt_state)
     {
+      if (last_command_exit_value < 128)
+	last_command_exit_value = 128 + SIGINT;
       print_newline = 1;
       DELINTERRUPT;
     }
@@ -412,7 +424,8 @@ throw_to_top_level ()
 #endif /* JOB_CONTROL */
 
 #if defined (JOB_CONTROL) || defined (HAVE_POSIX_SIGNALS)
-  /* This should not be necessary on systems using sigsetjmp/siglongjmp. */
+  /* This needs to stay because jobs.c:make_child() uses it without resetting
+     the signal mask. */
   sigprocmask (SIG_SETMASK, &top_level_mask, (sigset_t *)NULL);
 #endif
 
@@ -516,6 +529,14 @@ termsig_sighandler (sig)
       termsig_handler (sig);
     }
 
+#if defined (READLINE)
+  /* Set the event hook so readline will call it after the signal handlers
+     finish executing, so if this interrupted character input we can get
+     quick response. */
+  if (interactive_shell && interactive && no_line_editing == 0)
+    bashline_set_event_hook ();
+#endif
+
   SIGRETURN (0);
 }
 
@@ -538,7 +559,11 @@ termsig_handler (sig)
     run_interrupt_trap ();
 
 #if defined (HISTORY)
-  if (interactive_shell && sig != SIGABRT)
+  /* If we don't do something like this, the history will not be saved when
+     an interactive shell is running in a terminal window that gets closed
+     with the `close' button.  We can't test for RL_STATE_READCMD because
+     readline no longer handles SIGTERM synchronously.  */
+  if (interactive_shell && interactive && (sig == SIGHUP || sig == SIGTERM) && remember_on_history)
     maybe_save_shell_history ();
 #endif /* HISTORY */
 
@@ -556,7 +581,7 @@ termsig_handler (sig)
   loop_level = continuing = breaking = funcnest = 0;
   executing_list = comsub_ignore_return = return_catch_flag = 0;
 
-  run_exit_trap ();
+  run_exit_trap ();	/* XXX - run exit trap possibly in signal context? */
   set_signal_handler (sig, SIG_DFL);
   kill (getpid (), sig);
 }
@@ -575,12 +600,28 @@ sigint_sighandler (sig)
   if (interrupt_state == 0)
     ADDINTERRUPT;
 
+  /* We will get here in interactive shells with job control active; allow
+     an interactive wait to be interrupted. */
+  if (this_shell_builtin && this_shell_builtin == wait_builtin)
+    {
+      last_command_exit_value = 128 + sig;
+      wait_signal_received = sig;
+      SIGRETURN (0);
+    }
+      
   if (interrupt_immediately)
     {
       interrupt_immediately = 0;
       last_command_exit_value = 128 + sig;
       throw_to_top_level ();
     }
+#if defined (READLINE)
+  /* Set the event hook so readline will call it after the signal handlers
+     finish executing, so if this interrupted character input we can get
+     quick response. */
+  else if (RL_ISSTATE (RL_STATE_SIGHANDLER))
+    bashline_set_event_hook ();
+#endif
 
   SIGRETURN (0);
 }
@@ -614,10 +655,17 @@ unset_sigwinch_handler ()
 #endif
 }
 
+sighandler
+sigterm_sighandler (sig)
+     int sig;
+{
+  sigterm_received = 1;		/* XXX - counter? */
+  SIGRETURN (0);
+}
+
 /* Signal functions used by the rest of the code. */
 #if !defined (HAVE_POSIX_SIGNALS)
 
-#if defined (JOB_CONTROL)
 /* Perform OPERATION on NEWSET, perhaps leaving information in OLDSET. */
 sigprocmask (operation, newset, oldset)
      int operation, *newset, *oldset;
@@ -636,7 +684,7 @@ sigprocmask (operation, newset, oldset)
       break;
 
     case SIG_SETMASK:
-      sigsetmask (new);
+      old = sigsetmask (new);
       break;
 
     default:
@@ -646,7 +694,6 @@ sigprocmask (operation, newset, oldset)
   if (oldset)
     *oldset = old;
 }
-#endif /* JOB_CONTROL */
 
 #else
 
@@ -671,12 +718,20 @@ set_signal_handler (sig, handler)
   /* XXX - bash-4.2 */
   /* We don't want a child death to interrupt interruptible system calls, even
      if we take the time to reap children */
+#if defined (SIGCHLD)
   if (sig == SIGCHLD)
+    act.sa_flags |= SA_RESTART;		/* XXX */
+#endif
+  /* If we're installing a SIGTERM handler for interactive shells, we want
+     it to be as close to SIG_IGN as possible. */
+  if (sig == SIGTERM && handler == sigterm_sighandler)
     act.sa_flags |= SA_RESTART;		/* XXX */
 
   sigemptyset (&act.sa_mask);
   sigemptyset (&oact.sa_mask);
-  sigaction (sig, &act, &oact);
-  return (oact.sa_handler);
+  if (sigaction (sig, &act, &oact) == 0)
+    return (oact.sa_handler);
+  else
+    return (SIG_DFL);
 }
 #endif /* HAVE_POSIX_SIGNALS */

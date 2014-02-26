@@ -1,6 +1,6 @@
 /* config.h -- Configuration file for bash. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009,2011-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -160,15 +160,21 @@
    memory contents on malloc() and free(). */
 #undef MEMSCRAMBLE
 
-/* Define AFS if you are using Transarc's AFS. */
-#undef AFS
-
 /* Define for case-modifying variable attributes; variables modified on
    assignment */
 #undef CASEMOD_ATTRS
 
 /* Define for case-modifying word expansions */
 #undef CASEMOD_EXPANSIONS
+
+/* Define to make the `direxpand' shopt option enabled by default. */
+#undef DIRCOMPLETE_EXPAND_DEFAULT
+
+/* Define to make the `globasciiranges' shopt option enabled by default. */
+#undef GLOBASCII_DEFAULT
+
+/* Define AFS if you are using Transarc's AFS. */
+#undef AFS
 
 #undef ENABLE_NLS
 
@@ -420,6 +426,16 @@
 
 #undef WEXITSTATUS_OFFSET
 
+#undef HAVE_STRUCT_TIMESPEC
+#undef TIME_H_DEFINES_STRUCT_TIMESPEC
+#undef SYS_TIME_H_DEFINES_STRUCT_TIMESPEC
+#undef PTHREAD_H_DEFINES_STRUCT_TIMESPEC
+
+#undef TYPEOF_STRUCT_STAT_ST_ATIM_IS_STRUCT_TIMESPEC
+#undef HAVE_STRUCT_STAT_ST_ATIMESPEC_TV_NSEC
+#undef HAVE_STRUCT_STAT_ST_ATIMENSEC
+#undef HAVE_STRUCT_STAT_ST_ATIM_ST__TIM_TV_NSEC
+
 /* Characteristics of definitions in the system header files. */
 
 #undef HAVE_GETPW_DECLS
@@ -427,6 +443,9 @@
 #undef HAVE_RESOURCE
 
 #undef HAVE_LIBC_FNM_EXTMATCH
+
+/* Define if you have <linux/audit.h> and it defines AUDIT_USER_TTY */
+#undef HAVE_DECL_AUDIT_USER_TTY
 
 #undef HAVE_DECL_CONFSTR
 
@@ -625,6 +644,9 @@
 /* Define if you have the iconv function.  */
 #undef HAVE_ICONV
 
+/* Define if you have the imaxdiv function.  */
+#undef HAVE_IMAXDIV
+
 /* Define if you have the inet_aton function.  */
 #undef HAVE_INET_ATON
 
@@ -636,12 +658,6 @@
 
 /* Define if you have the isgraph function.  */
 #undef HAVE_ISGRAPH
-
-/* Define if you have the isinf function in libc */
-#undef HAVE_ISINF_IN_LIBC
-
-/* Define if you have the isnan function in libc */
-#undef HAVE_ISNAN_IN_LIBC
 
 /* Define if you have the isprint function.  */
 #undef HAVE_ISPRINT
@@ -887,6 +903,9 @@
 /* Define if you have the wcwidth function.  */
 #undef HAVE_WCWIDTH
 
+/* and if it works */
+#undef WCWIDTH_BROKEN
+
 /* Presence of certain system include files. */
 
 /* Define if you have the <arpa/inet.h> header file. */
@@ -945,6 +964,9 @@
 
 /* Define if you have the <memory.h> header file.  */
 #undef HAVE_MEMORY_H
+
+/* Define if you have the <stdbool.h> header file. */
+#undef HAVE_STDBOOL_H
 
 /* Define if you have the <stddef.h> header file. */
 #undef HAVE_STDDEF_H
@@ -1034,6 +1056,8 @@
 
 #undef HAVE_LIBSOCKET
 
+/* Are we running the GNU C library, version 2.1 or later? */
+#undef GLIBC21
 
 /* Define if on MINIX.  */
 #undef _MINIX

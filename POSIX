@@ -40,146 +40,163 @@ The following list is what's changed when `POSIX mode' is in effect:
   8. Tilde expansion is only performed on assignments preceding a
      command name, rather than on all assignment statements on the line.
 
-  9. The default history file is `~/.sh_history' (this is the default
+  9. The `command' builtin does not prevent builtins that take
+     assignment statements as arguments from expanding them as
+     assignment statements; when not in POSIX mode, assignment builtins
+     lose their assignment statement expansion properties when preceded
+     by `command'.
+
+ 10. The default history file is `~/.sh_history' (this is the default
      value of `$HISTFILE').
 
- 10. The output of `kill -l' prints all the signal names on a single
+ 11. The output of `kill -l' prints all the signal names on a single
      line, separated by spaces, without the `SIG' prefix.
 
- 11. The `kill' builtin does not accept signal names with a `SIG'
+ 12. The `kill' builtin does not accept signal names with a `SIG'
      prefix.
 
- 12. Non-interactive shells exit if FILENAME in `.' FILENAME is not
+ 13. Non-interactive shells exit if FILENAME in `.' FILENAME is not
      found.
 
- 13. Non-interactive shells exit if a syntax error in an arithmetic
+ 14. Non-interactive shells exit if a syntax error in an arithmetic
      expansion results in an invalid expression.
 
- 14. Non-interactive shells exit if there is a syntax error in a script
+ 15. Non-interactive shells exit if there is a syntax error in a script
      read with the `.' or `source' builtins, or in a string processed by
      the `eval' builtin.
 
- 15. Redirection operators do not perform filename expansion on the word
+ 16. Redirection operators do not perform filename expansion on the word
      in the redirection unless the shell is interactive.
 
- 16. Redirection operators do not perform word splitting on the word in
+ 17. Redirection operators do not perform word splitting on the word in
      the redirection.
 
- 17. Function names must be valid shell `name's.  That is, they may not
+ 18. Function names must be valid shell `name's.  That is, they may not
      contain characters other than letters, digits, and underscores, and
      may not start with a digit.  Declaring a function with an invalid
      name causes a fatal syntax error in non-interactive shells.
 
- 18. POSIX special builtins are found before shell functions during
+ 19. Function names may not be the same as one of the POSIX special
+     builtins.
+
+ 20. POSIX special builtins are found before shell functions during
      command lookup.
 
- 19. The `time' reserved word may be used by itself as a command.  When
+ 21. The `time' reserved word may be used by itself as a command.  When
      used in this way, it displays timing statistics for the shell and
      its completed children.  The `TIMEFORMAT' variable controls the
      format of the timing information.
 
- 20. When parsing and expanding a ${...} expansion that appears within
+ 22. When parsing and expanding a ${...} expansion that appears within
      double quotes, single quotes are no longer special and cannot be
      used to quote a closing brace or other special character, unless
      the operator is one of those defined to perform pattern removal.
      In this case, they do not have to appear as matched pairs.
 
- 21. The parser does not recognize `time' as a reserved word if the next
+ 23. The parser does not recognize `time' as a reserved word if the next
      token begins with a `-'.
 
- 22. If a POSIX special builtin returns an error status, a
+ 24. If a POSIX special builtin returns an error status, a
      non-interactive shell exits.  The fatal errors are those listed in
      the POSIX standard, and include things like passing incorrect
      options, redirection errors, variable assignment errors for
      assignments preceding the command name, and so on.
 
- 23. A non-interactive shell exits with an error status if a variable
+ 25. A non-interactive shell exits with an error status if a variable
      assignment error occurs when no command name follows the assignment
      statements.  A variable assignment error occurs, for example, when
      trying to assign a value to a readonly variable.
 
- 24. A non-interactive shell exists with an error status if a variable
+ 26. A non-interactive shell exits with an error status if a variable
      assignment error occurs in an assignment statement preceding a
      special builtin, but not with any other simple command.
 
- 25. A non-interactive shell exits with an error status if the iteration
+ 27. A non-interactive shell exits with an error status if the iteration
      variable in a `for' statement or the selection variable in a
      `select' statement is a readonly variable.
 
- 26. Process substitution is not available.
+ 28. Process substitution is not available.
 
- 27. Assignment statements preceding POSIX special builtins persist in
+ 29. While variable indirection is available, it may not be applied to
+     the `#' and `?' special parameters.
+
+ 30. Assignment statements preceding POSIX special builtins persist in
      the shell environment after the builtin completes.
 
- 28. Assignment statements preceding shell function calls persist in the
+ 31. Assignment statements preceding shell function calls persist in the
      shell environment after the function returns, as if a POSIX
      special builtin command had been executed.
 
- 29. The `export' and `readonly' builtin commands display their output
+ 32. The `export' and `readonly' builtin commands display their output
      in the format required by POSIX.
 
- 30. The `trap' builtin displays signal names without the leading `SIG'.
+ 33. The `trap' builtin displays signal names without the leading `SIG'.
 
- 31. The `trap' builtin doesn't check the first argument for a possible
+ 34. The `trap' builtin doesn't check the first argument for a possible
      signal specification and revert the signal handling to the original
      disposition if it is, unless that argument consists solely of
      digits and is a valid signal number.  If users want to reset the
      handler for a given signal to the original disposition, they
      should use `-' as the first argument.
 
- 32. The `.' and `source' builtins do not search the current directory
+ 35. The `.' and `source' builtins do not search the current directory
      for the filename argument if it is not found by searching `PATH'.
 
- 33. Subshells spawned to execute command substitutions inherit the
+ 36. Subshells spawned to execute command substitutions inherit the
      value of the `-e' option from the parent shell.  When not in POSIX
      mode, Bash clears the `-e' option in such subshells.
 
- 34. Alias expansion is always enabled, even in non-interactive shells.
+ 37. Alias expansion is always enabled, even in non-interactive shells.
 
- 35. When the `alias' builtin displays alias definitions, it does not
+ 38. When the `alias' builtin displays alias definitions, it does not
      display them with a leading `alias ' unless the `-p' option is
      supplied.
 
- 36. When the `set' builtin is invoked without options, it does not
+ 39. When the `set' builtin is invoked without options, it does not
      display shell function names and definitions.
 
- 37. When the `set' builtin is invoked without options, it displays
+ 40. When the `set' builtin is invoked without options, it displays
      variable values without quotes, unless they contain shell
      metacharacters, even if the result contains nonprinting characters.
 
- 38. When the `cd' builtin is invoked in LOGICAL mode, and the pathname
+ 41. When the `cd' builtin is invoked in LOGICAL mode, and the pathname
      constructed from `$PWD' and the directory name supplied as an
      argument does not refer to an existing directory, `cd' will fail
      instead of falling back to PHYSICAL mode.
 
- 39. The `pwd' builtin verifies that the value it prints is the same as
+ 42. The `pwd' builtin verifies that the value it prints is the same as
      the current directory, even if it is not asked to check the file
      system with the `-P' option.
 
- 40. When listing the history, the `fc' builtin does not include an
+ 43. When listing the history, the `fc' builtin does not include an
      indication of whether or not a history entry has been modified.
 
- 41. The default editor used by `fc' is `ed'.
+ 44. The default editor used by `fc' is `ed'.
 
- 42. The `type' and `command' builtins will not report a non-executable
+ 45. The `type' and `command' builtins will not report a non-executable
      file as having been found, though the shell will attempt to
      execute such a file if it is the only so-named file found in
      `$PATH'.
 
- 43. The `vi' editing mode will invoke the `vi' editor directly when
+ 46. The `vi' editing mode will invoke the `vi' editor directly when
      the `v' command is run, instead of checking `$VISUAL' and
      `$EDITOR'.
 
- 44. When the `xpg_echo' option is enabled, Bash does not attempt to
+ 47. When the `xpg_echo' option is enabled, Bash does not attempt to
      interpret any arguments to `echo' as options.  Each argument is
      displayed, after escape characters are converted.
 
- 45. The `ulimit' builtin uses a block size of 512 bytes for the `-c'
+ 48. The `ulimit' builtin uses a block size of 512 bytes for the `-c'
      and `-f' options.
 
- 46. The arrival of `SIGCHLD'  when a trap is set on `SIGCHLD' does not
+ 49. The arrival of `SIGCHLD'  when a trap is set on `SIGCHLD' does not
      interrupt the `wait' builtin and cause it to return immediately.
      The trap command is run once for each child that exits.
+
+ 50. The `read' builtin may be interrupted by a signal for which a trap
+     has been set.  If Bash receives a trapped signal while executing
+     `read', the trap handler executes and `read' returns an exit
+     status greater than 128.
 
 
 There is other POSIX behavior that Bash does not implement by default

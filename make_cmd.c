@@ -280,7 +280,7 @@ make_arith_for_command (exprs, action, lineno)
   ARITH_FOR_COM *temp;
   WORD_LIST *init, *test, *step;
   char *s, *t, *start;
-  int nsemi;
+  int nsemi, i;
 
   init = test = step = (WORD_LIST *)NULL;
   /* Parse the string into the three component sub-expressions. */
@@ -292,10 +292,10 @@ make_arith_for_command (exprs, action, lineno)
 	s++;
       start = s;
       /* skip to the semicolon or EOS */
-      while (*s && *s != ';')
-	s++;
+      i = skip_to_delim (start, 0, ";", SD_NOJMP);
+      s = start + i;
 
-      t = (s > start) ? substring (start, 0, s - start) : (char *)NULL;
+      t = (i > 0) ? substring (start, 0, i) : (char *)NULL;
 
       nsemi++;
       switch (nsemi)
@@ -324,6 +324,9 @@ make_arith_for_command (exprs, action, lineno)
       else
 	parser_error (lineno, _("syntax error: `;' unexpected"));
       parser_error (lineno, _("syntax error: `((%s))'"), exprs->word->word);
+      free (init);
+      free (test);
+      free (step);
       last_command_exit_value = 2;
       return ((COMMAND *)NULL);
     }
@@ -790,7 +793,7 @@ make_function_def (name, command, lineno, lstart)
   bind_function_def (name->word, temp);
 #endif
 
-  temp->source_file = 0;
+  temp->source_file = temp->source_file ? savestring (temp->source_file) : 0;
   return (make_command (cm_function_def, (SIMPLE_COM *)temp));
 }
 

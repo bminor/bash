@@ -41,8 +41,6 @@
 
 #ifndef VMS
 #include <sys/types.h>		/* Some systems define `time_t' here.  */
-#else
-#include <stddef.h>
 #endif
 #include <time.h>
 

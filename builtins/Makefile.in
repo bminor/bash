@@ -1,6 +1,6 @@
 # This Makefile for building libbuiltins.a is in -*- text -*- for Emacs.
 #
-# Copyright (C) 1996-2009 Free Software Foundation, Inc.     
+# Copyright (C) 1996-2009 Free Software Foundation, Inc.
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -67,8 +67,8 @@ LIBS = @LIBS@
 LDFLAGS = @LDFLAGS@ $(LOCAL_LDFLAGS) $(CFLAGS)
 LDFLAGS_FOR_BUILD = @LDFLAGS_FOR_BUILD@ $(LOCAL_LDFLAGS) $(CFLAGS_FOR_BUILD)
 LOCAL_LDFLAGS = @LOCAL_LDFLAGS@
-#LIBS_FOR_BUILD = @LIBS_FOR_BUILD@
-LIBS_FOR_BUILD = $(LIBS)
+LIBS_FOR_BUILD = @LIBS_FOR_BUILD@
+#LIBS_FOR_BUILD = $(LIBS)
 
 BASHINCDIR = ${topdir}/include
 
@@ -84,6 +84,8 @@ LIBINTL_H = @LIBINTL_H@
 
 HELPDIR = @HELPDIR@
 MKDIRS = ${topdir}/support/mkdirs
+
+HELPFILES_TARGET = @HELPFILES_TARGET@
 
 INCLUDES = -I. -I.. @RL_INCLUDE@ -I$(topdir) -I$(BASHINCDIR) -I$(topdir)/lib -I$(srcdir) ${INTL_INC}
 
@@ -153,14 +155,32 @@ OFILES = builtins.o \
 	suspend.o test.o times.o trap.o type.o ulimit.o umask.o \
 	wait.o getopts.o shopt.o printf.o getopt.o bashgetopt.o complete.o
 
-CREATED_FILES = builtext.h builtins.c psize.aux pipesize.h
+CREATED_FILES = builtext.h builtins.c psize.aux pipesize.h tmpbuiltins.c \
+	tmpbuiltins.h
+CREATED_OBJECTS = tmpbuiltins.o gen-helpfiles.o mkbuiltins.o
 
-all: $(MKBUILTINS) libbuiltins.a
+all: $(MKBUILTINS) libbuiltins.a $(HELPFILES_TARGET)
+targets: libbuiltins.a $(HELPFILES_TARGET)
 
 libbuiltins.a: $(MKBUILTINS) $(OFILES) builtins.o
 	$(RM) $@
 	$(AR) $(ARFLAGS) $@ $(OFILES)
 	-$(RANLIB) $@
+
+tmpbuiltins.c:	$(MKBUILTINS) $(DEFSRC)
+	./$(MKBUILTINS) -externfile tmpbuiltins.h -structfile $@ \
+		-noproduction -nofunctions \
+		$(DIRECTDEFINE) $(HELPSTRINGS) $(DEFSRC)
+
+tmpbuiltins.h:	tmpbuiltins.c
+
+gen-helpfiles.o: ../config.h
+gen-helpfiles.o: gen-helpfiles.c
+	$(RM) $@
+	$(CC_FOR_BUILD) -c $(CCFLAGS_FOR_BUILD) $<
+
+gen-helpfiles:	tmpbuiltins.o gen-helpfiles.o
+	$(CC_FOR_BUILD) ${CCFLAGS_FOR_BUILD} $(LDFLAGS_FOR_BUILD) -o $@ gen-helpfiles.o tmpbuiltins.o $(LIBS_FOR_BUILD)
 
 builtext.h builtins.c: $(MKBUILTINS) $(DEFSRC)
 	@-if test -f builtins.c; then mv -f builtins.c old-builtins.c; fi
@@ -178,8 +198,8 @@ builtext.h builtins.c: $(MKBUILTINS) $(DEFSRC)
 		$(RM) old-builtins.c; \
 	 fi
 
-helpdoc:	$(MKBUILTINS) $(DEFSRC)
-	./$(MKBUILTINS) ${HELPDIRDEFINE} -noproduction $(DIRECTDEFINE) $(DEFSRC)
+helpdoc:	gen-helpfiles
+	./gen-helpfiles ${HELPDIRDEFINE}
 
 install-help:
 	@-if test -n "${HELPDIR}" && test -d helpfiles ; then \
@@ -207,15 +227,20 @@ common.o: common.c
 bashgetopt.o: bashgetopt.c
 getopt.o: getopt.c
 evalstring.o: evalstring.c          
-evalfile.o: evalfile.c  
+evalfile.o: evalfile.c
+
+tmpbuiltins.o: tmpbuiltins.c
+gen-helpfiles.o: gen-helpfiles.c
 
 ulimit.o: pipesize.h
 
 pipesize.h:	psize.aux
 	$(SHELL) $(srcdir)/psize.sh > $@
 
+# Technically this is wrong; the pipe size should be for the target system,
+# not the build host.
 psize.aux:	psize.c
-	$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) -o $@ $(srcdir)/psize.c
+	$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) ${LDFLAGS_FOR_BUILD} -o $@ $(srcdir)/psize.c
 
 documentation: builtins.texi
 
@@ -223,7 +248,8 @@ builtins.texi: $(MKBUILTINS)
 	./$(MKBUILTINS) -documentonly $(DEFSRC)
 
 clean:
-	$(RM) $(OFILES) $(CREATED_FILES) $(MKBUILTINS) mkbuiltins.o libbuiltins.a
+	$(RM) $(OFILES) $(CREATED_FILES) libbuiltins.a
+	$(RM) $(MKBUILTINS) gen-helpfiles $(CREATED_OBJECTS)
 	-test -d helpfiles && $(RM) -r helpfiles
 
 mostlyclean: 
@@ -547,7 +573,7 @@ shopt.o: $(topdir)/quit.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h
 shopt.o: $(topdir)/subst.h $(topdir)/externs.h $(BASHINCDIR)/maxpath.h
 shopt.o: $(topdir)/shell.h $(topdir)/syntax.h $(topdir)/unwind_prot.h $(topdir)/variables.h $(topdir)/conftypes.h
 shopt.o: $(srcdir)/common.h $(srcdir)/bashgetopt.h ../pathnames.h
-shopt.o: $(topdir)/bashhist.h
+shopt.o: $(topdir)/bashhist.h $(topdir)/bashline.h
 source.o: $(topdir)/command.h ../config.h $(BASHINCDIR)/memalloc.h
 source.o: $(topdir)/error.h $(topdir)/general.h $(topdir)/xmalloc.h $(topdir)/findcmd.h
 source.o: $(topdir)/quit.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h

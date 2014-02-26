@@ -55,15 +55,26 @@ get_env_value (varname)
   return ((char *)getenv (varname));
 }
 
+/* If we're not using $HOME, assume that the passwd file information won't
+   change while this shell instance is running. */
 char *
 get_home_dir ()
 {
-  char *home_dir;
+  static char *home_dir = (char *)NULL;
   struct passwd *entry;
 
-  home_dir = (char *)NULL;
+  if (home_dir)
+    return (home_dir);
+
+#if defined (HAVE_GETPWUID)
   entry = getpwuid (getuid ());
   if (entry)
-    home_dir = entry->pw_dir;
+    home_dir = savestring (entry->pw_dir);
+#endif
+
+#if defined (HAVE_GETPWENT)
+  endpwent ();		/* some systems need this */
+#endif
+
   return (home_dir);
 }

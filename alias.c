@@ -110,7 +110,7 @@ add_alias (name, value)
   alias_t *temp;
   int n;
 
-  if (!aliases)
+  if (aliases == 0)
     {
       initialize_aliases ();
       temp = (alias_t *)NULL;

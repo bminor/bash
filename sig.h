@@ -1,6 +1,6 @@
 /* sig.h -- header file for signal handler definitions. */
 
-/* Copyright (C) 1994-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2013 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -25,6 +25,10 @@
 
 #include "stdc.h"
 
+#if !defined (SIG_DFL)
+#  include <signal.h>		/* for sig_atomic_t */
+#endif
+
 #if !defined (SIGABRT) && defined (SIGIOT)
 #  define SIGABRT SIGIOT
 #endif
@@ -46,9 +50,6 @@ typedef RETSIGTYPE SigHandler __P((int));
 #else
 extern SigHandler *set_signal_handler __P((int, SigHandler *));	/* in sig.c */
 #endif /* _POSIX_VERSION */
-
-/* Definitions used by the job control code. */
-#if defined (JOB_CONTROL)
 
 #if !defined (SIGCHLD) && defined (SIGCLD)
 #  define SIGCHLD SIGCLD
@@ -96,22 +97,21 @@ do { \
   sigprocmask (SIG_BLOCK, &nvar, &ovar); \
 } while (0)
 
+#define UNBLOCK_SIGNAL(ovar) sigprocmask (SIG_SETMASK, &ovar, (sigset_t *) NULL)
+
 #if defined (HAVE_POSIX_SIGNALS)
-#  define BLOCK_CHILD(nvar, ovar) \
-	BLOCK_SIGNAL (SIGCHLD, nvar, ovar)
-#  define UNBLOCK_CHILD(ovar) \
-	sigprocmask (SIG_SETMASK, &ovar, (sigset_t *) NULL)
+#  define BLOCK_CHILD(nvar, ovar) BLOCK_SIGNAL (SIGCHLD, nvar, ovar)
+#  define UNBLOCK_CHILD(ovar) UNBLOCK_SIGNAL(ovar)
 #else /* !HAVE_POSIX_SIGNALS */
 #  define BLOCK_CHILD(nvar, ovar) ovar = sigblock (sigmask (SIGCHLD))
 #  define UNBLOCK_CHILD(ovar) sigsetmask (ovar)
 #endif /* !HAVE_POSIX_SIGNALS */
 
-#endif /* JOB_CONTROL */
-
 /* Extern variables */
-extern volatile int sigwinch_received;
+extern volatile sig_atomic_t sigwinch_received;
+extern volatile sig_atomic_t sigterm_received;
 
-extern int interrupt_immediately;
+extern int interrupt_immediately;	/* no longer used */
 extern int terminate_immediately;
 
 /* Functions from sig.c. */
@@ -128,6 +128,8 @@ extern void jump_to_top_level __P((int)) __attribute__((__noreturn__));
 extern sighandler sigwinch_sighandler __P((int));
 extern void set_sigwinch_handler __P((void));
 extern void unset_sigwinch_handler __P((void));
+
+extern sighandler sigterm_sighandler __P((int));
 
 /* Functions defined in trap.c. */
 extern SigHandler *set_sigint_handler __P((void));

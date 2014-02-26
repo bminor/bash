@@ -1,7 +1,7 @@
 /* mkbuiltins.c - Create builtins.c, builtext.h, and builtdoc.c from
    a single source file called builtins.def. */
 
-/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2011 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -84,6 +84,10 @@ int only_documentation = 0;
 
 /* Non-zero means to not do any productions. */
 int inhibit_production = 0;
+
+/* Non-zero means to not add functions (xxx_builtin) to the members of the
+   produced `struct builtin []' */
+int inhibit_functions = 0;
 
 /* Non-zero means to produce separate help files for each builtin, named by
    the builtin name, in `./helpfiles'. */
@@ -198,7 +202,7 @@ void remove_trailing_whitespace ();
 
 /* For each file mentioned on the command line, process it and
    write the information to STRUCTFILE and EXTERNFILE, while
-   creating the production file if neccessary. */
+   creating the production file if necessary. */
 int
 main (argc, argv)
      int argc;
@@ -222,6 +226,8 @@ main (argc, argv)
 	struct_filename = argv[arg_index++];
       else if (strcmp (arg, "-noproduction") == 0)
 	inhibit_production = 1;
+      else if (strcmp (arg, "-nofunctions") == 0)
+	inhibit_functions = 1;
       else if (strcmp (arg, "-document") == 0)
 	documentation_file = fopen (documentation_filename, "w");
       else if (strcmp (arg, "-D") == 0)
@@ -322,10 +328,13 @@ main (argc, argv)
 	fclose (externfile);
     }
 
+#if 0
+  /* This is now done by a different program */
   if (separate_helpfiles)
     {
       write_helpfiles (saved_builtins);
     }
+#endif
 
   if (documentation_file)
     {
@@ -390,7 +399,7 @@ copy_string_array (array)
   return (copy);
 }
 
-/* Add ELEMENT to ARRAY, growing the array if neccessary. */
+/* Add ELEMENT to ARRAY, growing the array if necessary. */
 void
 array_add (element, array)
      char *element;
@@ -519,6 +528,7 @@ extract_info (filename, structfile, externfile)
   if (nr == 0)
     {
       fprintf (stderr, "mkbuiltins: %s: skipping zero-length file\n", filename);
+      free (buffer);
       return;
     }
 
@@ -537,7 +547,7 @@ extract_info (filename, structfile, externfile)
     {
       array_add (&buffer[i], defs->lines);
 
-      while (buffer[i] != '\n' && i < file_size)
+      while (i < file_size && buffer[i] != '\n')
 	i++;
       buffer[i++] = '\0';
     }
@@ -1092,7 +1102,7 @@ char *structfile_header[] = {
   "/* This file is manufactured by ./mkbuiltins, and should not be",
   "   edited by hand.  See the source to mkbuiltins for details. */",
   "",
-  "/* Copyright (C) 1987-2009 Free Software Foundation, Inc.",
+  "/* Copyright (C) 1987-2012 Free Software Foundation, Inc.",
   "",
   "   This file is part of GNU Bash, the Bourne Again SHell.",
   "",
@@ -1138,7 +1148,7 @@ char *structfile_footer[] = {
   (char *)NULL
 };
 
-/* Write out any neccessary opening information for
+/* Write out any necessary opening information for
    STRUCTFILE and EXTERNFILE. */
 void
 write_file_headers (structfile, externfile)
@@ -1224,7 +1234,7 @@ write_builtins (defs, structfile, externfile)
 		{
 		  fprintf (structfile, "  { \"%s\", ", builtin->name);
 
-		  if (builtin->function)
+		  if (builtin->function && inhibit_functions == 0)
 		    fprintf (structfile, "%s, ", builtin->function);
 		  else
 		    fprintf (structfile, "(sh_builtin_func_t *)0x0, ");
@@ -1236,9 +1246,15 @@ write_builtins (defs, structfile, externfile)
 		    (builtin->flags & BUILTIN_FLAG_POSIX_BUILTIN) ? " | POSIX_BUILTIN" : "",
 		    document_name (builtin));
 
-		  fprintf
-		    (structfile, "     N_(\"%s\"), (char *)NULL },\n",
-		     builtin->shortdoc ? builtin->shortdoc : builtin->name);
+		  if (inhibit_functions)
+		    fprintf
+		      (structfile, "     N_(\"%s\"), \"%s\" },\n",
+		       builtin->shortdoc ? builtin->shortdoc : builtin->name,
+		       document_name (builtin));
+		  else
+		    fprintf
+		      (structfile, "     N_(\"%s\"), (char *)NULL },\n",
+		       builtin->shortdoc ? builtin->shortdoc : builtin->name);
 
 		}
 
@@ -1247,7 +1263,7 @@ write_builtins (defs, structfile, externfile)
 		   long documentation strings. */
 		save_builtin (builtin);
 
-	      /* Write out the matching #endif, if neccessary. */
+	      /* Write out the matching #endif, if necessary. */
 	      if (builtin->dependencies)
 		{
 		  if (externfile)
@@ -1305,6 +1321,26 @@ write_longdocs (stream, builtins)
       if (builtin->dependencies)
 	write_endifs (stream, builtin->dependencies->array);
 
+    }
+}
+
+void
+write_dummy_declarations (stream, builtins)
+     FILE *stream;
+     ARRAY *builtins;
+{
+  register int i;
+  BUILTIN_DESC *builtin;
+
+  for (i = 0; structfile_header[i]; i++)
+    fprintf (stream, "%s\n", structfile_header[i]);
+
+  for (i = 0; i < builtins->sindex; i++)
+    {
+      builtin = (BUILTIN_DESC *)builtins->array[i];
+
+      /* How to guarantee that no builtin is written more than once? */
+      fprintf (stream, "int %s () { return (0); }\n", builtin->function);
     }
 }
 
@@ -1407,7 +1443,7 @@ write_documentation (stream, documentation, indentation, flags)
 
   base_indent = (string_array && single_longdoc_strings && filename_p == 0) ? BASE_INDENT : 0;
 
-  for (i = 0, texinfo = (flags & TEXINFO); line = documentation[i]; i++)
+  for (i = 0, texinfo = (flags & TEXINFO); documentation && (line = documentation[i]); i++)
     {
       /* Allow #ifdef's to be written out verbatim, but don't put them into
 	 separate help files. */

@@ -32,7 +32,7 @@
 #endif
 
 #if !defined (getpagesize)
-#  ifndef _MINIX
+#  if defined (HAVE_SYS_PARAM_H)
 #    include <sys/param.h>
 #  endif
 #  if defined (PAGESIZE)

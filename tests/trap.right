@@ -75,6 +75,24 @@ command substitution
 trap: 8
 +[9] echo 4
 4
+exit subshell 1
+current shell
+exit subshell 2
+current shell
+current shell
+current shell
+outside 1
+outside 2
+outside 3
+outside 4
+sleep 2
+wait $!
+exit
+in trap EXIT
+sleep 2
+wait $!
+exit
+in trap EXIT
 caught a child death
 caught a child death
 caught a child death

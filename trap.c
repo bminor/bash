@@ -1,7 +1,7 @@
 /* trap.c -- Not the trap command, but useful functions for manipulating
    those objects.  The trap command is in builtins/trap.def. */
 
-/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2013 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -33,6 +33,8 @@
 
 #include "bashintl.h"
 
+#include <signal.h>
+
 #include "trap.h"
 
 #include "shell.h"
@@ -43,6 +45,11 @@
 #include "builtins.h"
 #include "builtins/common.h"
 #include "builtins/builtext.h"
+
+#if defined (READLINE)
+#  include <readline/readline.h>
+#  include "bashline.h"
+#endif
 
 #ifndef errno
 extern int errno;
@@ -68,8 +75,6 @@ static int sigmodes[BASH_NSIG];
 static void free_trap_command __P((int));
 static void change_signal __P((int, char *));
 
-static void get_original_signal __P((int));
-
 static int _run_trap_internal __P((int, char *));
 
 static void free_trap_string __P((int));
@@ -80,6 +85,9 @@ static void reset_or_restore_signal_handlers __P((sh_resetsig_func_t *));
 /* Variables used here but defined in other files. */
 extern int last_command_exit_value;
 extern int line_number;
+
+extern int sigalrm_seen;
+extern procenv_t alrmbuf;
 
 extern char *this_command_name;
 extern sh_builtin_func_t *this_shell_builtin;
@@ -92,7 +100,7 @@ extern WORD_LIST *subst_assign_varlist;
 SigHandler *original_signals[NSIG];
 
 /* For each signal, a slot for a string, which is a command to be
-   executed when that signal is recieved.  The slot can also contain
+   executed when that signal is received.  The slot can also contain
    DEFAULT_SIG, which means do whatever you were going to do before
    you were so rudely interrupted, or IGNORE_SIG, which says ignore
    this signal. */
@@ -112,6 +120,8 @@ int trap_saved_exit_value;
 
 /* The (trapped) signal received while executing in the `wait' builtin */
 int wait_signal_received;
+
+int trapped_signal_received;
 
 #define GETORIGSIG(sig) \
   do { \
@@ -176,7 +186,7 @@ initialize_traps ()
     }
 }
 
-#ifdef INCLUDE_UNUSED
+#ifdef DEBUG
 /* Return a printable representation of the trap handler for SIG. */
 static char *
 trap_handler_string (sig)
@@ -232,7 +242,7 @@ decode_signal (string, flags)
       if (name == 0 || name[0] == '\0')
 	continue;
 
-      /* Check name without the SIG prefix first case sensitivly or
+      /* Check name without the SIG prefix first case sensitively or
 	 insensitively depending on whether flags includes DSIG_NOCASE */
       if (STREQN (name, "SIG", 3))
 	{
@@ -267,8 +277,9 @@ void
 run_pending_traps ()
 {
   register int sig;
-  int old_exit_value, *token_state;
+  int old_exit_value;
   WORD_LIST *save_subst_varlist;
+  sh_parser_state_t pstate;
 #if defined (ARRAY_VARS)
   ARRAY *ps;
 #endif
@@ -276,7 +287,19 @@ run_pending_traps ()
   if (catch_flag == 0)		/* simple optimization */
     return;
 
-  catch_flag = 0;
+  if (running_trap > 0)
+    {
+#if defined (DEBUG)
+      internal_warning ("run_pending_traps: recursive invocation while running trap for signal %d", running_trap-1);
+#endif
+#if 0
+      return;			/* no recursive trap invocations */
+#else
+      ;
+#endif
+    }
+
+  catch_flag = trapped_signal_received = 0;
 
   /* Preserve $? when running trap. */
   old_exit_value = last_command_exit_value;
@@ -290,22 +313,14 @@ run_pending_traps ()
 	 while (pending_traps[sig]--) instead of the if statement. */
       if (pending_traps[sig])
 	{
-#if defined (HAVE_POSIX_SIGNALS)
-	  sigset_t set, oset;
+	  if (running_trap == sig+1)
+	    /*continue*/;
 
-	  sigemptyset (&set);
-	  sigemptyset (&oset);
-
-	  sigaddset (&set, sig);
-	  sigprocmask (SIG_BLOCK, &set, &oset);
-#else
-#  if defined (HAVE_BSD_SIGNALS)
-	  int oldmask = sigblock (sigmask (sig));
-#  endif
-#endif /* HAVE_POSIX_SIGNALS */
+	  running_trap = sig + 1;
 
 	  if (sig == SIGINT)
 	    {
+	      pending_traps[sig] = 0;	/* XXX */
 	      run_interrupt_trap ();
 	      CLRINTERRUPT;
 	    }
@@ -314,7 +329,26 @@ run_pending_traps ()
 		   trap_list[SIGCHLD] != (char *)IMPOSSIBLE_TRAP_HANDLER &&
 		   (sigmodes[SIGCHLD] & SIG_INPROGRESS) == 0)
 	    {
+	      sigmodes[SIGCHLD] |= SIG_INPROGRESS;
 	      run_sigchld_trap (pending_traps[sig]);	/* use as counter */
+	      sigmodes[SIGCHLD] &= ~SIG_INPROGRESS;
+	    }
+	  else if (sig == SIGCHLD &&
+		   trap_list[SIGCHLD] == (char *)IMPOSSIBLE_TRAP_HANDLER &&
+		   (sigmodes[SIGCHLD] & SIG_INPROGRESS) != 0)
+	    {
+	      /* This can happen when run_pending_traps is called while
+		 running a SIGCHLD trap handler. */
+	      running_trap = 0;
+	      /* want to leave pending_traps[SIGCHLD] alone here */
+	      continue;					/* XXX */
+	    }
+	  else if (sig == SIGCHLD && (sigmodes[SIGCHLD] & SIG_INPROGRESS))
+	    {
+	      /* whoops -- print warning? */
+	      running_trap = 0;		/* XXX */
+	      /* want to leave pending_traps[SIGCHLD] alone here */
+	      continue;
 	    }
 #endif
 	  else if (trap_list[sig] == (char *)DEFAULT_SIG ||
@@ -344,26 +378,27 @@ run_pending_traps ()
 	    }
 	  else
 	    {
-	      token_state = save_token_state ();
+	      /* XXX - should we use save_parser_state/restore_parser_state? */
+	      save_parser_state (&pstate);
 	      save_subst_varlist = subst_assign_varlist;
 	      subst_assign_varlist = 0;
 
-	      parse_and_execute (savestring (trap_list[sig]), "trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE);
-	      restore_token_state (token_state);
-	      free (token_state);
+#if defined (JOB_CONTROL)
+	      save_pipeline (1);	/* XXX only provides one save level */
+#endif
+	      /* XXX - set pending_traps[sig] = 0 here? */
+	      pending_traps[sig] = 0;
+	      evalstring (savestring (trap_list[sig]), "trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE);
+#if defined (JOB_CONTROL)
+	      restore_pipeline (1);
+#endif
 
 	      subst_assign_varlist = save_subst_varlist;
+	      restore_parser_state (&pstate);
 	    }
 
-	  pending_traps[sig] = 0;
-
-#if defined (HAVE_POSIX_SIGNALS)
-	  sigprocmask (SIG_SETMASK, &oset, (sigset_t *)NULL);
-#else
-#  if defined (HAVE_BSD_SIGNALS)
-	  sigsetmask (oldmask);
-#  endif
-#endif /* POSIX_VERSION */
+	  pending_traps[sig] = 0;	/* XXX - move before evalstring? */
+	  running_trap = 0;
 	}
     }
 
@@ -404,11 +439,22 @@ trap_handler (sig)
       catch_flag = 1;
       pending_traps[sig]++;
 
-      if (interrupt_immediately && this_shell_builtin && (this_shell_builtin == wait_builtin))
+      trapped_signal_received = sig;
+
+      if (this_shell_builtin && (this_shell_builtin == wait_builtin))
 	{
 	  wait_signal_received = sig;
-	  longjmp (wait_intr_buf, 1);
+	  if (interrupt_immediately)
+	    longjmp (wait_intr_buf, 1);
 	}
+
+#if defined (READLINE)
+      /* Set the event hook so readline will call it after the signal handlers
+	 finish executing, so if this interrupted character input we can get
+	 quick response. */
+      if (RL_ISSTATE (RL_STATE_SIGHANDLER) && interrupt_immediately == 0)
+        bashline_set_event_hook ();
+#endif
 
       if (interrupt_immediately)
 	run_pending_traps ();
@@ -417,6 +463,44 @@ trap_handler (sig)
     }
 
   SIGRETURN (0);
+}
+
+int
+first_pending_trap ()
+{
+  register int i;
+
+  for (i = 1; i < NSIG; i++)
+    if (pending_traps[i])
+      return i;
+  return -1;
+}
+
+int
+any_signals_trapped ()
+{
+  register int i;
+
+  for (i = 1; i < NSIG; i++)
+    if (sigmodes[i] & SIG_TRAPPED)
+      return i;
+  return -1;
+}
+
+void
+check_signals ()
+{
+  CHECK_ALRM;		/* set by the read builtin */
+  QUIT;
+}
+
+/* Convenience functions the rest of the shell can use */
+void
+check_signals_and_traps ()
+{
+  check_signals ();
+
+  run_pending_traps ();
 }
 
 #if defined (JOB_CONTROL) && defined (SIGCHLD)
@@ -453,6 +537,21 @@ set_impossible_sigchld_trap ()
   restore_default_signal (SIGCHLD);
   change_signal (SIGCHLD, (char *)IMPOSSIBLE_TRAP_HANDLER);
   sigmodes[SIGCHLD] &= ~SIG_TRAPPED;	/* maybe_set_sigchld_trap checks this */
+}
+
+/* Act as if we received SIGCHLD NCHILD times and increment
+   pending_traps[SIGCHLD] by that amount.  This allows us to still run the
+   SIGCHLD trap once for each exited child. */
+void
+queue_sigchld_trap (nchild)
+     int nchild;
+{
+  if (nchild > 0)
+    {
+      catch_flag = 1;
+      pending_traps[SIGCHLD] += nchild;
+      trapped_signal_received = SIGCHLD;
+    }
 }
 #endif /* JOB_CONTROL && SIGCHLD */
 
@@ -529,6 +628,8 @@ set_signal (sig, string)
      int sig;
      char *string;
 {
+  sigset_t set, oset;
+
   if (SPECIAL_TRAP (sig))
     {
       change_signal (sig, savestring (string));
@@ -559,9 +660,10 @@ set_signal (sig, string)
      environment in which it is safe to do so. */
   if ((sigmodes[sig] & SIG_NO_TRAP) == 0)
     {
-      set_signal_handler (sig, SIG_IGN);
+      BLOCK_SIGNAL (sig, set, oset);
       change_signal (sig, savestring (string));
       set_signal_handler (sig, trap_handler);
+      UNBLOCK_SIGNAL (oset);
     }
   else
     change_signal (sig, savestring (string));
@@ -598,7 +700,7 @@ change_signal (sig, value)
     sigmodes[sig] |= SIG_CHANGED;
 }
 
-static void
+void
 get_original_signal (sig)
      int sig;
 {
@@ -653,7 +755,11 @@ restore_default_signal (sig)
     return;
 
   /* If we aren't trapping this signal, don't bother doing anything else. */
-  if ((sigmodes[sig] & SIG_TRAPPED) == 0)
+  /* We special-case SIGCHLD and IMPOSSIBLE_TRAP_HANDLER (see above) as a
+     sentinel to determine whether or not disposition is reset to the default
+     while the trap handler is executing. */
+  if (((sigmodes[sig] & SIG_TRAPPED) == 0) &&
+      (sig != SIGCHLD || (sigmodes[sig] & SIG_INPROGRESS) == 0 || trap_list[sig] != (char *)IMPOSSIBLE_TRAP_HANDLER))
     return;
 
   /* Only change the signal handler for SIG if it allows it. */
@@ -728,11 +834,11 @@ run_exit_trap ()
       retval = trap_saved_exit_value;
       running_trap = 1;
 
-      code = setjmp (top_level);
+      code = setjmp_nosigs (top_level);
 
       /* If we're in a function, make sure return longjmps come here, too. */
       if (return_catch_flag)
-	function_code = setjmp (return_catch);
+	function_code = setjmp_nosigs (return_catch);
 
       if (code == 0 && function_code == 0)
 	{
@@ -765,6 +871,8 @@ run_trap_cleanup (sig)
   sigmodes[sig] &= ~(SIG_INPROGRESS|SIG_CHANGED);
 }
 
+#define RECURSIVE_SIG(s) (SPECIAL_TRAP(s) == 0)
+
 /* Run a trap command for SIG.  SIG is one of the signals the shell treats
    specially.  Returns the exit status of the executed trap command list. */
 static int
@@ -774,9 +882,11 @@ _run_trap_internal (sig, tag)
 {
   char *trap_command, *old_trap;
   int trap_exit_value, *token_state;
-  int save_return_catch_flag, function_code, flags;
+  volatile int save_return_catch_flag, function_code;
+  int flags;
   procenv_t save_return_catch;
   WORD_LIST *save_subst_varlist;
+  sh_parser_state_t pstate;
 #if defined (ARRAY_VARS)
   ARRAY *ps;
 #endif
@@ -786,7 +896,13 @@ _run_trap_internal (sig, tag)
      currently executing in the trap handler. */
   if ((sigmodes[sig] & SIG_TRAPPED) && ((sigmodes[sig] & SIG_IGNORED) == 0) &&
       (trap_list[sig] != (char *)IMPOSSIBLE_TRAP_HANDLER) &&
+#if 0
+      /* Uncomment this to allow some special signals to recursively execute
+	 trap handlers. */
+      (RECURSIVE_SIG (sig) || (sigmodes[sig] & SIG_INPROGRESS) == 0))
+#else
       ((sigmodes[sig] & SIG_INPROGRESS) == 0))
+#endif
     {
       old_trap = trap_list[sig];
       sigmodes[sig] |= SIG_INPROGRESS;
@@ -794,21 +910,25 @@ _run_trap_internal (sig, tag)
       trap_command =  savestring (old_trap);
 
       running_trap = sig + 1;
-      trap_saved_exit_value = last_command_exit_value;
+
 #if defined (ARRAY_VARS)
       ps = save_pipestatus_array ();
 #endif
 
-      token_state = save_token_state ();
+      save_parser_state (&pstate);
       save_subst_varlist = subst_assign_varlist;
       subst_assign_varlist = 0;
+
+#if defined (JOB_CONTROL)
+      save_pipeline (1);	/* XXX only provides one save level */
+#endif
 
       /* If we're in a function, make sure return longjmps come here, too. */
       save_return_catch_flag = return_catch_flag;
       if (return_catch_flag)
 	{
 	  COPY_PROCENV (return_catch, save_return_catch);
-	  function_code = setjmp (return_catch);
+	  function_code = setjmp_nosigs (return_catch);
 	}
 
       flags = SEVAL_NONINT|SEVAL_NOHIST;
@@ -817,13 +937,15 @@ _run_trap_internal (sig, tag)
       if (function_code == 0)
 	parse_and_execute (trap_command, tag, flags);
 
-      restore_token_state (token_state);
-      free (token_state);
+      trap_exit_value = last_command_exit_value;
+
+#if defined (JOB_CONTROL)
+      restore_pipeline (1);
+#endif
 
       subst_assign_varlist = save_subst_varlist;
+      restore_parser_state (&pstate);
 
-      trap_exit_value = last_command_exit_value;
-      last_command_exit_value = trap_saved_exit_value;
 #if defined (ARRAY_VARS)
       restore_pipestatus_array (ps);
 #endif
@@ -940,14 +1062,20 @@ run_interrupt_trap ()
 /* Free all the allocated strings in the list of traps and reset the trap
    values to the default.  Intended to be called from subshells that want
    to complete work done by reset_signal_handlers upon execution of a
-   subsequent `trap' command that changes a signal's disposition. */
+   subsequent `trap' command that changes a signal's disposition.  We need
+   to make sure that we duplicate the behavior of
+   reset_or_restore_signal_handlers and not change the disposition of signals
+   that are set to be ignored. */
 void
 free_trap_strings ()
 {
   register int i;
 
   for (i = 0; i < BASH_NSIG; i++)
-    free_trap_string (i);
+    {
+      if (trap_list[i] != (char *)IGNORE_SIG)
+	free_trap_string (i);
+    }
   trap_list[DEBUG_TRAP] = trap_list[EXIT_TRAP] = trap_list[ERROR_TRAP] = trap_list[RETURN_TRAP] = (char *)NULL;
 }
 
@@ -1045,7 +1173,7 @@ restore_original_signals ()
 }
 
 /* If a trap handler exists for signal SIG, then call it; otherwise just
-   return failure. */
+   return failure.  Returns 1 if it called the trap handler. */
 int
 maybe_call_trap_handler (sig)
      int sig;
@@ -1085,6 +1213,13 @@ signal_is_trapped (sig)
 }
 
 int
+signal_is_pending (sig)
+     int sig;
+{
+  return (pending_traps[sig]);
+}
+
+int
 signal_is_special (sig)
      int sig;
 {
@@ -1106,10 +1241,17 @@ signal_is_hard_ignored (sig)
 }
 
 void
-set_signal_ignored (sig)
+set_signal_hard_ignored (sig)
      int sig;
 {
   sigmodes[sig] |= SIG_HARD_IGNORE;
+  original_signals[sig] = SIG_IGN;
+}
+
+void
+set_signal_ignored (sig)
+     int sig;
+{
   original_signals[sig] = SIG_IGN;
 }
 

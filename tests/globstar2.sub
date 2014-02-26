@@ -1,0 +1,80 @@
+shopt -s globstar
+s()
+{
+  printf '== <%s> ==\n' "$@"
+}
+p()
+{
+  printf '<%q>\n' "$@"
+}
+
+mkdir -p /tmp/empty/a/a/a
+cd /tmp/empty
+
+# good
+p **
+p **/**
+p **/**/**
+
+rm -rf a
+mkdir -p /tmp/empty/{a,b}/{a,b}/{a,b}/{a,b}
+cd /tmp/empty
+
+# good
+s '**/a'
+p **/a
+
+# good
+s 'a/**'
+p a/**
+
+# good
+s '**'
+p **
+
+# good
+s '**/**'
+p **/**
+
+# good
+s '**/**/**'
+p **/**/**
+
+# good
+s '**/**/**/**/**'
+p **/**/**/**/**
+
+# good
+s '**/**/a'
+p **/**/a
+
+# good 
+s 'a/**/**'
+p a/**/**
+
+# good
+s 'a/**/**/**'
+p a/**/**/**
+
+# good
+s 'a/**/**/**/**'
+p a/**/**/**/**
+
+# same as ksh93
+s '**/a/**'
+p **/a/**
+
+# same as ksh93
+s '**/a/**/**'
+p **/a/**/**
+
+# same as ksh93
+s '**/a/**/**/**'
+p **/a/**/**/**
+
+# good
+s '**/**/a/**'
+p **/**/a/**
+
+cd -
+rm -rf /tmp/empty

@@ -75,8 +75,8 @@ really_munge_braces (array, real_start, real_end, gcd_zero)
 
   if (real_start == real_end)
     {
-      x = array[real_start] ? sh_backslash_quote (array[real_start] + gcd_zero)
- 			    : sh_backslash_quote (array[0]);
+      x = array[real_start] ? sh_backslash_quote (array[real_start] + gcd_zero, 0, 0)
+ 			    : sh_backslash_quote (array[0], 0, 0);
       return x;
     }
 
@@ -115,7 +115,7 @@ really_munge_braces (array, real_start, real_end, gcd_zero)
       if (start == end)
 	{
 	  x = savestring (array[start] + gcd_zero);
-	  subterm = sh_backslash_quote (x);
+	  subterm = sh_backslash_quote (x, 0, 0);
 	  free (x);
 	}
       else
@@ -126,7 +126,7 @@ really_munge_braces (array, real_start, real_end, gcd_zero)
 	  x = (char *)xmalloc (tlen + 1);
 	  strncpy (x, array[start] + gcd_zero, tlen);
 	  x[tlen] = '\0';
-	  subterm = sh_backslash_quote (x);
+	  subterm = sh_backslash_quote (x, 0, 0);
 	  free (x);
 	  result_size += strlen (subterm) + 1;
 	  result = (char *)xrealloc (result, result_size);

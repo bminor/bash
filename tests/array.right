@@ -130,8 +130,10 @@ value = new1 new2 new3
 ./array.tests: line 239: narray: unbound variable
 ./array1.sub: line 1: syntax error near unexpected token `('
 ./array1.sub: line 1: `printf "%s\n" -a a=(a 'b  c')'
-./array2.sub: line 1: syntax error near unexpected token `('
-./array2.sub: line 1: `declare -a ''=(a 'b c')'
+./array2.sub: line 1: declare: `[]=asdf': not a valid identifier
+./array2.sub: line 2: a[]: bad array subscript
+./array2.sub: line 4: syntax error near unexpected token `('
+./array2.sub: line 4: `declare -a ''=(a 'b c')'
 9
 9
 
@@ -207,9 +209,9 @@ e
 9
 2
 a b c
-argv[1] = <"-iname '"a>
-argv[2] = <"-iname '"b>
-argv[3] = <"-iname '"c>
+argv[1] = <-iname 'a>
+argv[2] = <-iname 'b>
+argv[3] = <-iname 'c>
 'hey'
 hey
 ''hey
@@ -224,20 +226,22 @@ argv[1] = <c d>
 argv[2] = <e f>
 argv[1] = <c d>
 argv[2] = <e f>
-argv[1] = <"-iname '"abc>
-argv[2] = <"-iname '"def>
 argv[1] = <-iname 'abc>
 argv[2] = <-iname 'def>
-argv[1] = <-iname \'abc>
-argv[2] = <-iname \'def>
+argv[1] = <-iname 'abc>
+argv[2] = <-iname 'def>
 argv[1] = <-iname>
-argv[2] = <'abc>
-argv[3] = <-iname>
-argv[4] = <'def>
-argv[1] = <"-iname '"abc>
-argv[2] = <"-iname '"def>
+argv[2] = <abc -iname def>
 argv[1] = <-iname 'abc>
 argv[2] = <-iname 'def>
+argv[1] = <-iname>
+argv[2] = <abc -iname def>
+argv[1] = <-iname 'abc>
+argv[2] = <-iname 'def>
+argv[1] = <-iname 'abc>
+argv[2] = <-iname 'def>
+argv[1] = <-iname>
+argv[2] = <abc -iname def>
 *.* OK
 1
 a1 2 3c
@@ -341,3 +345,46 @@ ednesday
 onday
 uesday
 ednesday
+version[agent]
+version.agent
+version[agent]
+version.agent
+version[agent] foo[bar]
+version.agent bowl
+foobar] foo foo[bar]
+bleh bbb bleh
+ab]
+bar
+1
+1
+1
+1
+1
+1
+main main
+function function
+function function
+declare -a x='([0]="0" [1]="1" [2]="2" [3]="3" [4]="4" [5]="5")'
+declare -a x='([0]="0" [1]="1" [2]="2" [3]="3" [4]="4")'
+declare -a x='([0]="0" [1]="1" [2]="2" [4]="4")'
+./array14.sub: line 11: [-10]: bad array subscript
+declare -a x='([0]="0" [1]="1" [2]="2" [3]="3" [4]="4")'
+declare -a x='([0]="0" [1]="1" [2]="2" [3]="3" [4]="4" [5]="five")'
+declare -a x='([0]="0" [1]="1" [2]="2" [3]="3" [4]="4" [5]="5")'
+declare -a x='([0]="0" [1]="1" [2]="2" [3]="3" [4]="4" [5]="5foo")'
+declare -a x='([0]="0" [1]="1" [2]="2" [3]="3" [4]="4" [5]="5")'
+declare -a x='([0]="0" [1]="1" [2]="2" [3]="3" [4]="4four" [5]="5")'
+strlen(4four) = 5
+1 2 xx 3
+1 2 0 3
+1 2 xx 3
+1 2 0 3
+1 2 xx 3
+foo index 1: ok
+foo index 2: ok
+foo: implicit reference to element 0: ok
+foo: arithmetic evaluation: ok
+bar: array with element zero unset: ok
+bar: element zero: ok
+qux: unset array: ok
+qux: unset array element 0: ok

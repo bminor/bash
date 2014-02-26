@@ -12,7 +12,8 @@ x[4]+=1
 echo ${x[@]}
 
 # trickier cases
-
+# post-bash-4.2: bash understands += in environment assignments preceding
+# command names
 a+=5 printenv a
 echo $a
 
@@ -81,3 +82,6 @@ readonly x+=7
 echo $x
 
 x+=5
+
+${THIS_SH} ./appendop1.sub
+${THIS_SH} ./appendop2.sub

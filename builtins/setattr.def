@@ -1,7 +1,7 @@
 This file is setattr.def, from which is created setattr.c.
 It implements the builtins "export" and "readonly", in Bash.
 
-Copyright (C) 1987-2010 Free Software Foundation, Inc.
+Copyright (C) 1987-2012 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -93,7 +93,8 @@ Options:
   -a	refer to indexed array variables
   -A	refer to associative array variables
   -f	refer to shell functions
-  -p	display a list of all readonly variables and functions
+  -p	display a list of all readonly variables or functions, depending on
+        whether or not the -f option is given
 
 An argument of `--' disables further option processing.
 
@@ -368,6 +369,9 @@ show_var_attributes (var, pattr, nodefs)
       if (integer_p (var))
 	flags[i++] = 'i';
 
+      if (nameref_p (var))
+	flags[i++] = 'n';
+
       if (readonly_p (var))
 	flags[i++] = 'r';
 
@@ -451,9 +455,31 @@ show_name_attributes (name, nodefs)
 {
   SHELL_VAR *var;
 
-  var = find_variable_internal (name, 1);
+#if 0
+  var = find_variable_tempenv (name);
+#else
+  var = find_variable_noref (name);
+#endif
 
   if (var && invisible_p (var) == 0)
+    {
+      show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
+      return (0);
+    }
+  else
+    return (1);
+}
+
+int
+show_func_attributes (name, nodefs)
+     char *name;
+     int nodefs;
+{
+  SHELL_VAR *var;
+
+  var = find_function (name);
+
+  if (var)
     {
       show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
       return (0);
@@ -467,7 +493,7 @@ set_var_attribute (name, attribute, undo)
      char *name;
      int attribute, undo;
 {
-  SHELL_VAR *var, *tv;
+  SHELL_VAR *var, *tv, *v;
   char *tvalue;
 
   if (undo)
@@ -484,7 +510,18 @@ set_var_attribute (name, attribute, undo)
 
 	  var = bind_variable (tv->name, tvalue, 0);
 	  var->attributes |= tv->attributes & ~att_tempvar;
-	  VSETATTR (tv, att_propagate);
+	  /* This avoids an error message when propagating a read-only var
+	     later on. */
+	  if (var->context == 0 && (attribute & att_readonly))
+	    {
+	      /* Don't bother to set the `propagate to the global variables
+		 table' flag if we've just bound the variable in that table */
+	      v = find_global_variable (tv->name);
+	      if (v != var)
+		VSETATTR (tv, att_propagate);
+	    }
+	  else
+	    VSETATTR (tv, att_propagate);
 	  if (var->context != 0)
 	    VSETATTR (var, att_propagate);
 	  SETVARATTR (tv, attribute, undo);	/* XXX */
@@ -495,7 +532,7 @@ set_var_attribute (name, attribute, undo)
 	}
       else
 	{
-	  var = find_variable_internal (name, 0);
+	  var = find_variable_notempenv (name);
 	  if (var == 0)
 	    {
 	      var = bind_variable (name, (char *)NULL, 0);

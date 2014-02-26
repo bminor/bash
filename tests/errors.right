@@ -8,14 +8,14 @@ unalias: usage: unalias [-a] name [name ...]
 declare -fr func
 ./errors.tests: line 36: func: readonly function
 ./errors.tests: line 39: unset: -x: invalid option
-unset: usage: unset [-f] [-v] [name ...]
+unset: usage: unset [-f] [-v] [-n] [name ...]
 ./errors.tests: line 42: unset: func: cannot unset: readonly function
 ./errors.tests: line 45: declare: func: readonly function
 ./errors.tests: line 49: unset: XPATH: cannot unset: readonly variable
 ./errors.tests: line 52: unset: `/bin/sh': not a valid identifier
 ./errors.tests: line 55: unset: cannot simultaneously unset a function and a variable
 ./errors.tests: line 58: declare: -z: invalid option
-declare: usage: declare [-aAfFgilrtux] [-p] [name[=value] ...]
+declare: usage: declare [-aAfFgilnrtux] [-p] [name[=value] ...]
 ./errors.tests: line 60: declare: `-z': not a valid identifier
 ./errors.tests: line 61: declare: `/bin/sh': not a valid identifier
 ./errors.tests: line 65: declare: cannot use `-f' to make functions
@@ -98,4 +98,16 @@ trap: usage: trap [-lp] [[arg] signal_spec ...]
 ./errors.tests: line 250: kill: `': not a pid or valid job spec
 kill: usage: kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]
 ./errors.tests: line 255: set: trackall: invalid option name
-./errors.tests: line 262: `!!': not a valid identifier
+./errors.tests: line 259: xx: readonly variable
+1
+./errors1.sub: line 1: .: -i: invalid option
+.: usage: . filename [arguments]
+./errors1.sub: line 9: shift: -4: shift count out of range
+./errors1.sub: line 14: break: -1: loop count out of range
+after f
+./errors2.sub: line 3: ${$NO_SUCH_VAR}: bad substitution
+1
+./errors3.sub: line 5: no_such_file: No such file or directory
+TEST
+./errors3.sub: line 7: no_such_file: No such file or directory
+./errors.tests: line 271: `!!': not a valid identifier

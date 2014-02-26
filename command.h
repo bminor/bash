@@ -76,7 +76,7 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define W_HASDOLLAR	0x000001	/* Dollar sign present. */
 #define W_QUOTED	0x000002	/* Some form of quote character is present. */
 #define W_ASSIGNMENT	0x000004	/* This word is a variable assignment. */
-#define W_GLOBEXP	0x000008	/* This word is the result of a glob expansion. */
+#define W_SPLITSPACE	0x000008	/* Split this word on " " regardless of IFS */
 #define W_NOSPLIT	0x000010	/* Do not perform word splitting on this word because ifs is empty string. */
 #define W_NOGLOB	0x000020	/* Do not perform globbing on this word. */
 #define W_NOSPLIT2	0x000040	/* Don't split word except for $@ expansion (using spaces) because context does not allow it. */
@@ -96,8 +96,11 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define W_NOPROCSUB	0x100000	/* don't perform process substitution */
 #define W_HASCTLESC	0x200000	/* word contains literal CTLESC characters */
 #define W_ASSIGNASSOC	0x400000	/* word looks like associative array assignment */
-#define W_ARRAYIND	0x800000	/* word is an array index being expanded */
-#define W_ASSNGLOBAL	0x1000000	/* word is a global assignment to declare (declare/typeset -g) */
+#define W_ASSIGNARRAY	0x800000	/* word looks like a compound indexed array assignment */
+#define W_ARRAYIND	0x1000000	/* word is an array index being expanded */
+#define W_ASSNGLOBAL	0x2000000	/* word is a global assignment to declare (declare/typeset -g) */
+#define W_NOBRACE	0x4000000	/* Don't perform brace expansion */
+#define W_ASSIGNINT	0x8000000	/* word is an integer assignment to declare */
 
 /* Possible values for subshell_environment */
 #define SUBSHELL_ASYNC	0x01	/* subshell caused by `command &' */
@@ -296,7 +299,7 @@ typedef struct arith_com {
 } ARITH_COM;
 #endif /* DPAREN_ARITHMETIC */
 
-/* The conditional command, [[...]].  This is a binary tree -- we slippped
+/* The conditional command, [[...]].  This is a binary tree -- we slipped
    a recursive-descent parser into the YACC grammar to parse it. */
 #define COND_AND	1
 #define COND_OR		2
@@ -355,6 +358,7 @@ typedef struct coproc {
   int c_wsave;
   int c_flags;
   int c_status;
+  int c_lock;
 } Coproc;
 
 typedef struct coproc_com {

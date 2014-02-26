@@ -1,6 +1,6 @@
 /* eval.c -- reading and evaluating commands. */
 
-/* Copyright (C) 1996-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2011 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -54,6 +54,10 @@ extern int need_here_doc;
 extern int current_command_number, current_command_line_count, line_number;
 extern int expand_aliases;
 
+#if defined (HAVE_POSIX_SIGNALS)
+extern sigset_t top_level_mask;
+#endif
+
 static void send_pwd_to_eterm __P((void));
 static sighandler alrm_catcher __P((int));
 
@@ -75,12 +79,13 @@ reader_loop ()
     {
       int code;
 
-      code = setjmp (top_level);
+      code = setjmp_nosigs (top_level);
 
 #if defined (PROCESS_SUBSTITUTION)
       unlink_fifo_list ();
 #endif /* PROCESS_SUBSTITUTION */
 
+      /* XXX - why do we set this every time through the loop? */
       if (interactive_shell && signal_is_ignored (SIGINT) == 0)
 	set_signal_handler (SIGINT, sigint_sighandler);
 
@@ -90,7 +95,7 @@ reader_loop ()
 
 	  switch (code)
 	    {
-	      /* Some kind of throw to top_level has occured. */
+	      /* Some kind of throw to top_level has occurred. */
 	    case FORCE_EOF:
 	    case ERREXIT:
 	    case EXITPROG:
@@ -118,6 +123,9 @@ reader_loop ()
 		  dispose_command (current_command);
 		  current_command = (COMMAND *)NULL;
 		}
+#if defined (HAVE_POSIX_SIGNALS)
+	      sigprocmask (SIG_SETMASK, &top_level_mask, (sigset_t *)NULL);
+#endif
 	      break;
 
 	    default:
@@ -190,12 +198,14 @@ alrm_catcher(i)
 static void
 send_pwd_to_eterm ()
 {
-  char *pwd;
+  char *pwd, *f;
 
+  f = 0;
   pwd = get_string_value ("PWD");
   if (pwd == 0)
-    pwd = get_working_directory ("eterm");
+    f = pwd = get_working_directory ("eterm");
   fprintf (stderr, "\032/%s\n", pwd);
+  free (f);
 }
 
 /* Call the YACC-generated parser and return the status of the parse.

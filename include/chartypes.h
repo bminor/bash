@@ -35,7 +35,7 @@
    eliminate the && through constant folding."
    Solaris defines some of these symbols so we must undefine them first.  */
 
-#if defined STDC_HEADERS || (!defined isascii && !defined HAVE_ISASCII)
+#if STDC_HEADERS || (!defined (isascii) && !HAVE_ISASCII)
 #  define IN_CTYPE_DOMAIN(c) 1
 #else
 #  define IN_CTYPE_DOMAIN(c) isascii(c)

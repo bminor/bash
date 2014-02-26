@@ -1,17 +1,22 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.16.1
-%%CreationDate: Mon Nov 19 13:06:55 2001
+%%Creator: groff version 1.19.2
+%%CreationDate: Tue Oct 22 11:07:52 2013
 %%DocumentNeededResources: font Times-Bold
 %%+ font Times-Italic
 %%+ font Times-Roman
 %%+ font Courier
-%%DocumentSuppliedResources: procset grops 1.16 1
+%%DocumentSuppliedResources: procset grops 1.19 2
 %%Pages: 11
 %%PageOrder: Ascend
+%%DocumentMedia: Default 612 792 0 () ()
 %%Orientation: Portrait
 %%EndComments
+%%BeginDefaults
+%%PageMedia: Default
+%%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.16 1
+%%BeginResource: procset grops 1.19 2
+%!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
 currentpacking
@@ -79,7 +84,7 @@ LS{
 /EP{
 level0 restore
 showpage
-}bind def
+}def
 /DA{
 newpath arcn stroke
 }bind def
@@ -109,11 +114,26 @@ TM setmatrix
 /ST/stroke load def
 /MT/moveto load def
 /CL/closepath load def
-/FL{
-currentgray exch setgray fill setgray
+/Fr{
+setrgbcolor fill
 }bind def
-/BL/fill load def
+/setcmykcolor where{
+pop
+/Fk{
+setcmykcolor fill
+}bind def
+}if
+/Fg{
+setgray fill
+}bind def
+/FL/fill load def
 /LW/setlinewidth load def
+/Cr/setrgbcolor load def
+/setcmykcolor where{
+pop
+/Ck/setcmykcolor load def
+}if
+/Cg/setgray load def
 /RE{
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
@@ -155,9 +175,9 @@ newpath
 /CNT countdictstack def
 userdict begin
 /showpage{}def
+/setpagedevice{}def
 }bind def
 /PEND{
-clear
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -167,13 +187,18 @@ pop
 setpacking
 }if
 %%EndResource
+%%EndProlog
+%%BeginSetup
+%%BeginFeature: *PageSize Default
+<< /PageSize [ 612 792 ] /ImagingBBox null >> setpagedevice
+%%EndFeature
 %%IncludeResource: font Times-Bold
 %%IncludeResource: font Times-Italic
 %%IncludeResource: font Times-Roman
 %%IncludeResource: font Courier
 grops begin/DEFS 1 dict def DEFS begin/u{.001 mul}bind def end/RES 72
 def/PL 792 def/LS false def/ENC0[/asciicircum/asciitilde/Scaron/Zcaron
-/scaron/zcaron/Ydieresis/trademark/quotesingle/.notdef/.notdef/.notdef
+/scaron/zcaron/Ydieresis/trademark/quotesingle/Euro/.notdef/.notdef
 /.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
 /.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
 /.notdef/.notdef/space/exclam/quotedbl/numbersign/dollar/percent
@@ -201,256 +226,254 @@ def/PL 792 def/LS false def/ENC0[/asciicircum/asciitilde/Scaron/Zcaron
 /ugrave/uacute/ucircumflex/udieresis/yacute/thorn/ydieresis]def
 /Courier@0 ENC0/Courier RE/Times-Roman@0 ENC0/Times-Roman RE
 /Times-Italic@0 ENC0/Times-Italic RE/Times-Bold@0 ENC0/Times-Bold RE
-%%EndProlog
+%%EndSetup
 %%Page: 1 1
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 12/Times-Bold@0 SF(Bash \255 The GNU shell*)227.904 123 Q/F1 10
-/Times-Italic@0 SF(Chet Rame)263.85 147 Q(y)-.3 E(Case W)221.72 159 Q
-(estern Reserve Univer)-.92 E(sity)-.1 E -.15(ch)250.425 171 S
-(et@po.cwru.edu).15 E/F2 10/Times-Bold@0 SF 2.5(1. Intr)72 207 R
-(oduction)-.18 E(Bash)97 222.6 Q/F3 10/Times-Roman@0 SF .904
+/Times-Italic@0 SF(Chet Rame)263.85 159 Q(y)-.3 E(Case W)221.72 171 Q
+(estern Reserve Univer)-.92 E(sity)-.1 E -.15(ch)250.425 183 S
+(et@po.cwru.edu).15 E/F2 10/Times-Bold@0 SF 2.5(1. Intr)72 219 R
+(oduction)-.18 E(Bash)97 234.6 Q/F3 10/Times-Roman@0 SF .904
 (is the shell, or command language interpreter)3.404 F 3.404(,t)-.4 G
 .904(hat will appear in the GNU operating system.)-3.404 F 1.075
-(The name is an acron)72 234.6 R 1.075(ym for the \231Bourne-Ag)-.15 F
+(The name is an acron)72 246.6 R 1.075(ym for the \231Bourne-Ag)-.15 F
 1.075(ain SHell\232, a pun on Ste)-.05 F 1.375 -.15(ve B)-.25 H 1.075
 (ourne, the author of the direct).15 F .206(ancestor of the current)72
-246.6 R/F4 8/Times-Roman@0 SF(UNIX)2.706 E F3 2.706<ae73>C(hell)-2.706 E
+258.6 R/F4 8/Times-Roman@0 SF(UNIX)2.706 E F3 2.706<ae73>C(hell)-2.706 E
 F1(/bin/sh)2.706 E F3 2.706(,w)C .205(hich appeared in the Se)-2.706 F
 -.15(ve)-.25 G .205(nth Edition Bell Labs Research v).15 F(er)-.15 E(-)
--.2 E(sion of)72 258.6 Q/F5 9/Times-Roman@0 SF(UNIX)2.5 E F3(.)A .387
-(Bash is an)97 274.2 R F2(sh)2.887 E F3 .387
+-.2 E(sion of)72 270.6 Q/F5 9/Times-Roman@0 SF(UNIX)2.5 E F3(.)A .387
+(Bash is an)97 286.2 R F2(sh)2.887 E F3 .387
 (\255compatible shell that incorporates useful features from the K)B
 .388(orn shell \()-.35 F F2(ksh)A F3 2.888(\)a)C .388(nd the C)-2.888 F
-.023(shell \()72 286.2 R F2(csh)A F3 .023
+.023(shell \()72 298.2 R F2(csh)A F3 .023
 (\), described later in this article.)B .022
 (It is ultimately intended to be a conformant implementation of the)
 5.022 F 3.568(IEEE POSIX Shell and Utilities speci\214cation \(IEEE W)72
-298.2 R 3.568(orking Group 1003.2\).)-.8 F 3.569(It of)8.569 F 3.569
-(fers functional)-.25 F(impro)72 310.2 Q -.15(ve)-.15 G(ments o).15 E
+310.2 R 3.568(orking Group 1003.2\).)-.8 F 3.569(It of)8.569 F 3.569
+(fers functional)-.25 F(impro)72 322.2 Q -.15(ve)-.15 G(ments o).15 E
 -.15(ve)-.15 G 2.5(rs).15 G 2.5(hf)-2.5 G(or both interacti)-2.5 E .3
 -.15(ve a)-.25 H(nd programming use.).15 E .697
-(While the GNU operating system will most lik)97 325.8 R .697
+(While the GNU operating system will most lik)97 337.8 R .697
 (ely include a v)-.1 F .697(ersion of the Berk)-.15 F(ele)-.1 E 3.197
-(ys)-.15 G .696(hell csh, Bash)-3.197 F .015(will be the def)72 337.8 R
+(ys)-.15 G .696(hell csh, Bash)-3.197 F .015(will be the def)72 349.8 R
 .015(ault shell.)-.1 F(Lik)5.015 E 2.515(eo)-.1 G .015(ther GNU softw)
 -2.515 F .016(are, Bash is quite portable.)-.1 F .016
 (It currently runs on nearly e)5.016 F -.15(ve)-.25 G(ry).15 E -.15(ve)
-72 349.8 S .523(rsion of).15 F F4(UNIX)3.023 E F3 .523(and a fe)3.023 F
+72 361.8 S .523(rsion of).15 F F4(UNIX)3.023 E F3 .523(and a fe)3.023 F
 3.023(wo)-.25 G .523
 (ther operating systems \255 an independently-supported port e)-3.023 F
 .523(xists for OS/2, and)-.15 F .706
-(there are rumors of ports to DOS and W)72 361.8 R(indo)-.4 E .706
+(there are rumors of ports to DOS and W)72 373.8 R(indo)-.4 E .706
 (ws NT)-.25 F 5.706(.P)-.74 G .706(orts to)-5.706 F F5(UNIX)3.206 E F3
 (-lik)A 3.206(es)-.1 G .706(ystems such as QNX and Minix)-3.206 F
-(are part of the distrib)72 373.8 Q(ution.)-.2 E .405
-(The original author of Bash w)97 389.4 R .405(as Brian F)-.1 F .405
+(are part of the distrib)72 385.8 Q(ution.)-.2 E .405
+(The original author of Bash w)97 401.4 R .405(as Brian F)-.1 F .405
 (ox, an emplo)-.15 F .405(yee of the Free Softw)-.1 F .405(are F)-.1 F
-2.905(oundation. The)-.15 F(cur)2.905 E(-)-.2 E(rent de)72 401.4 Q -.15
+2.905(oundation. The)-.15 F(cur)2.905 E(-)-.2 E(rent de)72 413.4 Q -.15
 (ve)-.25 G(loper and maintainer is Chet Rame).15 E 1.3 -.65(y, a v)-.15
 H(olunteer who w).45 E(orks at Case W)-.1 E(estern Reserv)-.8 E 2.5(eU)
 -.15 G(ni)-2.5 E -.15(ve)-.25 G(rsity).15 E(.)-.65 E F2 2.5(2. What')72
-425.4 R 2.5(sP)-.37 G(OSIX, anyway?)-2.5 E F1(POSIX)97 441 Q F3 .343
+437.4 R 2.5(sP)-.37 G(OSIX, anyway?)-2.5 E F1(POSIX)97 453 Q F3 .343
 (is a name originally coined by Richard Stallman for a f)2.843 F .343
-(amily of open system standards based)-.1 F(on)72 453 Q F5(UNIX)3.24 E
+(amily of open system standards based)-.1 F(on)72 465 Q F5(UNIX)3.24 E
 F3 5.74(.T)C .74(here are a number of aspects of)-5.74 F F5(UNIX)3.24 E
 F3 .74(under consideration for standardization, from the basic)3.24 F
-.192(system services at the system call and C library le)72 465 R -.15
+.192(system services at the system call and C library le)72 477 R -.15
 (ve)-.25 G 2.692(lt).15 G 2.692(oa)-2.692 G .192
 (pplications and tools to system administration and)-2.692 F 2.5
-(management. Each)72 477 R(area of standardization is assigned to a w)
+(management. Each)72 489 R(area of standardization is assigned to a w)
 2.5 E(orking group in the 1003 series.)-.1 E 2.814
-(The POSIX Shell and Utilities standard has been de)97 492.6 R -.15(ve)
+(The POSIX Shell and Utilities standard has been de)97 504.6 R -.15(ve)
 -.25 G 2.814(loped by IEEE W).15 F 2.813(orking Group 1003.2)-.8 F .254
 (\(POSIX.2\).\210 It concentrates on the command interpreter interf)72
-504.6 R .253(ace and utility programs commonly e)-.1 F -.15(xe)-.15 G
-(cuted).15 E 1.112(from the command line or by other programs.)72 516.6
+516.6 R .253(ace and utility programs commonly e)-.1 F -.15(xe)-.15 G
+(cuted).15 E 1.112(from the command line or by other programs.)72 528.6
 R 1.112(An initial v)6.112 F 1.113
 (ersion of the standard has been appro)-.15 F -.15(ve)-.15 G 3.613(da)
-.15 G(nd)-3.613 E .365(published by the IEEE, and w)72 528.6 R .365
+.15 G(nd)-3.613 E .365(published by the IEEE, and w)72 540.6 R .365
 (ork is currently underw)-.1 F .365(ay to update it.)-.1 F .365
 (There are four primary areas of w)5.365 F(ork)-.1 E
-(in the 1003.2 standard:)72 540.6 Q 21.5<8341>72 556.2 S .835
+(in the 1003.2 standard:)72 552.6 Q 21.5<8341>72 568.2 S .835
 (spects of the shell')-21.5 F 3.335(ss)-.55 G .835
 (yntax and command language.)-3.335 F 3.335(An)5.835 G .835
 (umber of special b)-3.335 F .835(uiltins such as)-.2 F F2(cd)3.335 E F3
-(and)3.335 E F2(exec)97 568.2 Q F3 .545(are being speci\214ed as part o\
+(and)3.335 E F2(exec)97 580.2 Q F3 .545(are being speci\214ed as part o\
 f the shell, since their functionality usually cannot be implemented)
-3.046 F(by a separate e)97 580.2 Q -.15(xe)-.15 G(cutable;).15 E 21.5
-<8341>72 595.8 S .926
+3.046 F(by a separate e)97 592.2 Q -.15(xe)-.15 G(cutable;).15 E 21.5
+<8341>72 607.8 S .926
 (set of utilities to be called by shell scripts and applications.)
 -18.074 F .927(Examples are programs lik)5.927 F(e)-.1 E F1 .927
-(sed, tr)3.427 F(,)-1.11 E F3(and)97 607.8 Q F1(awk.)2.797 E F3 .297
+(sed, tr)3.427 F(,)-1.11 E F3(and)97 619.8 Q F1(awk.)2.797 E F3 .297
 (Utilities commonly implemented as shell b)5.297 F .296
 (uiltins are described in this section, such as)-.2 F F2(test)2.796 E F3
-(and)97 619.8 Q F2(kill)3.422 E F3 5.922(.A)C 3.422(ne)-5.922 G .922
+(and)97 631.8 Q F2(kill)3.422 E F3 5.922(.A)C 3.422(ne)-5.922 G .922
 (xpansion of this section')-3.572 F 3.423(ss)-.55 G .923
 (cope, termed the User Portability Extension, or UPE, has)-3.423 F
-(standardized interacti)97 631.8 Q .3 -.15(ve p)-.25 H(rograms such as)
-.15 E F1(vi)2.5 E F3(and)2.5 E F1(mailx;)2.5 E F3 21.5<8341>72 647.4 S
+(standardized interacti)97 643.8 Q .3 -.15(ve p)-.25 H(rograms such as)
+.15 E F1(vi)2.5 E F3(and)2.5 E F1(mailx;)2.5 E F3 21.5<8341>72 659.4 S
 .288(group of functional interf)-18.712 F .287(aces to services pro)-.1
 F .287(vided by the shell, such as the traditional)-.15 F/F6 10
-/Courier@0 SF(system\(\))2.787 E F3 3.289(Cl)97 659.4 S .789
+/Courier@0 SF(system\(\))2.787 E F3 3.289(Cl)97 671.4 S .789
 (ibrary function.)-3.289 F .789(There are functions to perform shell w)
 5.789 F .789(ord e)-.1 F .79(xpansions, perform \214lename e)-.15 F
-(xpan-)-.15 E .324(sion \()97 671.4 R F1(globbing)A F3 .324
-(\), obtain v)B .323(alues of POSIX.2 system con\214guration v)-.25 F
-.323(ariables, retrie)-.25 F .623 -.15(ve v)-.25 H .323(alues of en)-.1
-F(viron-)-.4 E(ment v)97 683.4 Q(ariables \()-.25 E F6(getenv\(\))A F3
-(\), and other services;).833 E .32 LW 144 691.4 72 691.4 DL F4
-(*An earlier v)72 703.2 Q
+(xpan-)-.15 E 3.624(sion \()97 683.4 R F1(globbing)A F3 3.624
+(\), obtain v)B 3.624(alues of POSIX.2 system con\214guration v)-.25 F
+3.623(ariables, retrie)-.25 F 3.923 -.15(ve v)-.25 H 3.623(alues of)-.1
+F .32 LW 144 691.4 72 691.4 DL F4(*An earlier v)72 703.2 Q
 (ersion of this article appeared in The Linux Journal.)-.12 E(\210IEEE,)
 72 715 Q/F7 8/Times-Italic@0 SF 1.231(IEEE Standar)3.231 F 3.231(df)
 -.296 G 1.231(or Information T)-3.231 F(ec)-.736 E(hnolo)-.12 E 1.231
 (gy -- P)-.08 F 1.231(ortable Oper)-.64 F 1.232
 (ating System Interface \(POSIX\) P)-.12 F 1.232(art 2:)-.64 F
-(Shell and Utilities)72 725 Q F4 2(,1)C(992.)-2 E EP
+(Shell and Utilities)72 725 Q F4 2(,1)C(992.)-2 E 0 Cg EP
 %%Page: 2 2
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 10/Times-Roman@0 SF(-2-)282.17 48 Q 21.5<8341>72 84 S
-(suite of \231de)-19 E -.15(ve)-.25 G(lopment\232 utilities such as).15
-E/F1 10/Times-Italic@0 SF(c89)2.5 E F0(\(the POSIX.2 v)2.5 E(ersion of)
--.15 E F1(cc)2.5 E F0(\), and)A F1(yacc.)2.5 E F0 .483
-(Bash is concerned with the aspects of the shell')97 99.6 R 2.983(sb)
+/F0 10/Times-Roman@0 SF(-2-)282.17 48 Q(en)97 84 Q(vironment v)-.4 E
+(ariables \()-.25 E/F1 10/Courier@0 SF(getenv\(\))A F0
+(\), and other services;).833 E 21.5<8341>72 99.6 S(suite of \231de)-19
+E -.15(ve)-.25 G(lopment\232 utilities such as).15 E/F2 10
+/Times-Italic@0 SF(c89)2.5 E F0(\(the POSIX.2 v)2.5 E(ersion of)-.15 E
+F2(cc)2.5 E F0(\), and)A F2(yacc.)2.5 E F0 .483
+(Bash is concerned with the aspects of the shell')97 115.2 R 2.983(sb)
 -.55 G(eha)-2.983 E .484(vior de\214ned by POSIX.2.)-.2 F .484
 (The shell command)5.484 F 1.439
 (language has of course been standardized, including the basic \215o)72
-111.6 R 3.938(wc)-.25 G 1.438(ontrol and program e)-3.938 F -.15(xe)-.15
+127.2 R 3.938(wc)-.25 G 1.438(ontrol and program e)-3.938 F -.15(xe)-.15
 G 1.438(cution con-).15 F 1.284
-(structs, I/O redirection and pipelining, ar)72 123.6 R 1.284
+(structs, I/O redirection and pipelining, ar)72 139.2 R 1.284
 (gument handling, v)-.18 F 1.284(ariable e)-.25 F 1.284
-(xpansion, and quoting.)-.15 F(The)6.285 E F1(special)3.785 E F0 -.2(bu)
-72 135.6 S .676
+(xpansion, and quoting.)-.15 F(The)6.285 E F2(special)3.785 E F0 -.2(bu)
+72 151.2 S .676
 (iltins, which must be implemented as part of the shell to pro).2 F .676
 (vide the desired functionality)-.15 F 3.176(,a)-.65 G .676
-(re speci\214ed)-3.176 F .7(as being part of the shell; e)72 147.6 R .7
-(xamples of these are)-.15 F/F2 10/Times-Bold@0 SF -2.3 -.15(ev a)3.201
-H(l).15 E F0(and)3.201 E F2(export)3.201 E F0 5.701(.O)C .701
+(re speci\214ed)-3.176 F .7(as being part of the shell; e)72 163.2 R .7
+(xamples of these are)-.15 F/F3 10/Times-Bold@0 SF -2.3 -.15(ev a)3.201
+H(l).15 E F0(and)3.201 E F3(export)3.201 E F0 5.701(.O)C .701
 (ther utilities appear in the sections of)-5.701 F .256(POSIX.2 not de)
-72 159.6 R -.2(vo)-.25 G .256(ted to the shell which are commonly \(and\
+72 175.2 R -.2(vo)-.25 G .256(ted to the shell which are commonly \(and\
  in some cases must be\) implemented as b).2 F(uiltin)-.2 E .213
-(commands, such as)72 171.6 R F2 -.18(re)2.713 G(ad).18 E F0(and)2.713 E
-F2(test)2.713 E F0 5.213(.P)C .213
+(commands, such as)72 187.2 R F3 -.18(re)2.713 G(ad).18 E F0(and)2.713 E
+F3(test)2.713 E F0 5.213(.P)C .213
 (OSIX.2 also speci\214es aspects of the shell')-5.213 F 2.713(si)-.55 G
 (nteracti)-2.713 E .513 -.15(ve b)-.25 H(eha).15 E .214(vior as part)-.2
 F .598(of the UPE, including job control and command line editing.)72
-183.6 R .598(Interestingly enough, only)5.598 F F1(vi)3.098 E F0 .598
-(-style line edit-)B(ing commands ha)72 195.6 Q .3 -.15(ve b)-.2 H
-(een standardized;).15 E F1(emacs)2.5 E F0
+199.2 R .598(Interestingly enough, only)5.598 F F2(vi)3.098 E F0 .598
+(-style line edit-)B(ing commands ha)72 211.2 Q .3 -.15(ve b)-.2 H
+(een standardized;).15 E F2(emacs)2.5 E F0
 (editing commands were left out due to objections.)2.5 E 1.128
 (While POSIX.2 includes much of what the shell has traditionally pro)97
-211.2 R 1.129(vided, some important things)-.15 F(ha)72 223.2 Q .344
+226.8 R 1.129(vided, some important things)-.15 F(ha)72 238.8 Q .344
 -.15(ve b)-.2 H .044(een omitted as being \231be).15 F .044
 (yond its scope.)-.15 F 5.043<9a54>-.7 G .043
 (here is, for instance, no mention of a dif)-5.043 F .043
-(ference between a)-.25 F F1(lo)72 235.2 Q(gin)-.1 E F0 1.445
+(ference between a)-.25 F F2(lo)72 250.8 Q(gin)-.1 E F0 1.445
 (shell and an)3.945 F 3.945(yo)-.15 G 1.445(ther interacti)-3.945 F
 1.745 -.15(ve s)-.25 H 1.446
 (hell \(since POSIX.2 does not specify a login program\).).15 F 1.446
 (No \214x)6.446 F(ed)-.15 E(startup \214les are de\214ned, either \255 \
-the standard does not mention)72 247.2 Q F1(.pr)2.5 E(o\214le)-.45 E F0
-(.)A F2 2.5(3. Basic)72 271.2 R(Bash featur)2.5 E(es)-.18 E F0 1.448
-(Since the Bourne shell pro)97 286.8 R 1.448
+the standard does not mention)72 262.8 Q F2(.pr)2.5 E(o\214le)-.45 E F0
+(.)A F3 2.5(3. Basic)72 286.8 R(Bash featur)2.5 E(es)-.18 E F0 1.448
+(Since the Bourne shell pro)97 302.4 R 1.448
 (vides Bash with most of its philosophical underpinnings, Bash inherits)
--.15 F .64(most of its features and functionality from sh.)72 298.8 R
+-.15 F .64(most of its features and functionality from sh.)72 314.4 R
 .641(Bash implements all of the traditional sh \215o)5.641 F 3.141(wc)
--.25 G .641(ontrol con-)-3.141 F .8(structs \()72 310.8 R F1(for)A F0(,)
-A F1(if)3.3 E F0(,)A F1(while)3.3 E F0 3.3(,e)C 3.3(tc.\). All)-3.3 F
+-.25 G .641(ontrol con-)-3.141 F .8(structs \()72 326.4 R F2(for)A F0(,)
+A F2(if)3.3 E F0(,)A F2(while)3.3 E F0 3.3(,e)C 3.3(tc.\). All)-3.3 F
 .799(of the Bourne shell b)3.3 F .799
 (uiltins, including those not speci\214ed in the POSIX.2)-.2 F .536
-(standard, appear in Bash.)72 322.8 R(Shell)5.536 E F1(functions)3.036 E
+(standard, appear in Bash.)72 338.4 R(Shell)5.536 E F2(functions)3.036 E
 F0 3.036(,i)C .536(ntroduced in the SVR2 v)-3.036 F .537
 (ersion of the Bourne shell, are similar)-.15 F .779
-(to shell scripts, b)72 334.8 R .779
+(to shell scripts, b)72 350.4 R .779
 (ut are de\214ned using a special syntax and are e)-.2 F -.15(xe)-.15 G
 .779(cuted in the same process as the calling).15 F 2.841(shell. Bash)72
-346.8 R .341(has shell functions which beha)2.841 F .641 -.15(ve i)-.2 H
+362.4 R .341(has shell functions which beha)2.841 F .641 -.15(ve i)-.2 H
 2.841(naf).15 G .341(ashion upw)-2.941 F .342
 (ard-compatible with sh functions.)-.1 F .342(There are)5.342 F 1.447
-(certain shell v)72 358.8 R 1.446
+(certain shell v)72 374.4 R 1.446
 (ariables that Bash interprets in the same w)-.25 F 1.446
-(ay as sh, such as)-.1 F F2(PS1)3.946 E F0(,)A F2(IFS)3.946 E F0 3.946
-(,a)C(nd)-3.946 E F2 -.74(PA)3.946 G(TH)-.21 E F0 6.446(.B)C(ash)-6.446
-E 1.423(implements essentially the same grammar)72 370.8 R 3.924(,p)-.4
+(ay as sh, such as)-.1 F F3(PS1)3.946 E F0(,)A F3(IFS)3.946 E F0 3.946
+(,a)C(nd)-3.946 E F3 -.74(PA)3.946 G(TH)-.21 E F0 6.446(.B)C(ash)-6.446
+E 1.423(implements essentially the same grammar)72 386.4 R 3.924(,p)-.4
 G 1.424(arameter and v)-3.924 F 1.424(ariable e)-.25 F 1.424
 (xpansion semantics, redirection, and)-.15 F 1.06
-(quoting as the Bourne shell.)72 382.8 R 1.06(Where dif)6.06 F 1.06
+(quoting as the Bourne shell.)72 398.4 R 1.06(Where dif)6.06 F 1.06
 (ferences appear between the POSIX.2 standard and traditional sh)-.25 F
-(beha)72 394.8 Q(vior)-.2 E 2.5(,B)-.4 G(ash follo)-2.5 E(ws POSIX.)-.25
-E 1.608(The K)97 410.4 R 1.608(orn Shell \()-.35 F F2(ksh)A F0 4.108
-(\)i)C 4.108(sad)-4.108 G 1.608
-(escendent of the Bourne shell written at A)-4.108 F 1.609
-(T&T Bell Laboratories by)-1.11 F(Da)72 422.4 Q 1.059(vid K)-.2 F 3.559
-(orn\207. It)-.35 F(pro)3.559 E 1.059
+(beha)72 410.4 Q(vior)-.2 E 2.5(,B)-.4 G(ash follo)-2.5 E(ws POSIX.)-.25
+E 1.608(The K)97 426 R 1.608(orn Shell \()-.35 F F3(ksh)A F0 4.108(\)i)C
+4.108(sad)-4.108 G 1.608(escendant of the Bourne shell written at A)
+-4.108 F 1.609(T&T Bell Laboratories by)-1.11 F(Da)72 438 Q 1.059(vid K)
+-.2 F 3.559(orn\207. It)-.35 F(pro)3.559 E 1.059
 (vides a number of useful features that POSIX and Bash ha)-.15 F 1.359
 -.15(ve a)-.2 H 3.558(dopted. Man).15 F 3.558(yo)-.15 G 3.558(ft)-3.558
-G(he)-3.558 E(interacti)72 434.4 Q 1.312 -.15(ve f)-.25 H 1.012
+G(he)-3.558 E(interacti)72 450 Q 1.312 -.15(ve f)-.25 H 1.012
 (acilities in POSIX.2 ha).05 F 1.312 -.15(ve t)-.2 H 1.012
 (heir roots in the ksh: for e).15 F 1.013
-(xample, the POSIX and ksh job control)-.15 F -.1(fa)72 446.4 S .513
+(xample, the POSIX and ksh job control)-.15 F -.1(fa)72 462 S .513
 (cilities are nearly identical. Bash includes features from the K).1 F
 .513(orn Shell for both interacti)-.35 F .813 -.15(ve u)-.25 H .513
-(se and shell).15 F 3.905(programming. F)72 458.4 R 1.405
+(se and shell).15 F 3.905(programming. F)72 474 R 1.405
 (or programming, Bash pro)-.15 F 1.405(vides v)-.15 F 1.405
-(ariables such as)-.25 F F2(RANDOM)3.905 E F0(and)3.905 E F2(REPL)3.905
-E(Y)-.92 E F0 3.905(,t)C(he)-3.905 E F2(typeset)3.905 E F0 -.2(bu)72
-470.4 S .398(iltin, the ability to remo).2 F .698 -.15(ve s)-.15 H .398
+(ariables such as)-.25 F F3(RANDOM)3.905 E F0(and)3.905 E F3(REPL)3.905
+E(Y)-.92 E F0 3.905(,t)C(he)-3.905 E F3(typeset)3.905 E F0 -.2(bu)72 486
+S .398(iltin, the ability to remo).2 F .698 -.15(ve s)-.15 H .398
 (ubstrings from v).15 F .398
-(ariables based on patterns, and shell arithmetic.)-.25 F F2(RANDOM)
-5.397 E F0 -.15(ex)72 482.4 S .489
+(ariables based on patterns, and shell arithmetic.)-.25 F F3(RANDOM)
+5.397 E F0 -.15(ex)72 498 S .489
 (pands to a random number each time it is referenced; assigning a v).15
-F .49(alue to)-.25 F F2(RANDOM)2.99 E F0 .49(seeds the random)2.99 F
-.055(number generator)72 494.4 R(.)-.55 E F2(REPL)5.055 E(Y)-.92 E F0
-.054(is the def)2.554 F .054(ault v)-.1 F .054(ariable used by the)-.25
-F F2 -.18(re)2.554 G(ad).18 E F0 -.2(bu)2.554 G .054(iltin when no v).2
-F .054(ariable names are sup-)-.25 F .742(plied as ar)72 506.4 R 3.243
-(guments. The)-.18 F F2(typeset)3.243 E F0 -.2(bu)3.243 G .743
+F .49(alue to)-.25 F F3(RANDOM)2.99 E F0 .49(seeds the random)2.99 F
+.055(number generator)72 510 R(.)-.55 E F3(REPL)5.055 E(Y)-.92 E F0 .054
+(is the def)2.554 F .054(ault v)-.1 F .054(ariable used by the)-.25 F F3
+-.18(re)2.554 G(ad).18 E F0 -.2(bu)2.554 G .054(iltin when no v).2 F
+.054(ariable names are sup-)-.25 F .742(plied as ar)72 522 R 3.243
+(guments. The)-.18 F F3(typeset)3.243 E F0 -.2(bu)3.243 G .743
 (iltin is used to de\214ne v).2 F .743(ariables and gi)-.25 F 1.043 -.15
-(ve t)-.25 H .743(hem attrib).15 F .743(utes such as)-.2 F F2 -.18(re)
-3.243 G(ad-).18 E(only)72 518.4 Q F0 5.512(.B)C .512
-(ash arithmetic allo)-5.512 F .512(ws the e)-.25 F -.25(va)-.25 G .511
-(luation of an e).25 F .511
-(xpression and the substitution of the result.)-.15 F .511(Shell v)5.511
-F(ari-)-.25 E .222
-(ables may be used as operands, and the result of an e)72 530.4 R .222
+(ve t)-.25 H .743(hem attrib).15 F .743(utes such as)-.2 F F3 -.18(re)
+3.243 G(ad-).18 E(only)72 534 Q F0 5.512(.B)C .512(ash arithmetic allo)
+-5.512 F .512(ws the e)-.25 F -.25(va)-.25 G .511(luation of an e).25 F
+.511(xpression and the substitution of the result.)-.15 F .511(Shell v)
+5.511 F(ari-)-.25 E .222
+(ables may be used as operands, and the result of an e)72 546 R .222
 (xpression may be assigned to a v)-.15 F 2.722(ariable. Nearly)-.25 F
-.222(all of)2.722 F(the operators from the C language are a)72 542.4 Q
--.25(va)-.2 G(ilable, with the same precedence rules:).25 E/F3 10
-/Courier@0 SF 6($e)97 560.4 S(cho $\(\(3 + 5 * 32\)\))-6 E(163)97 572.4
-Q F0 -.15(Fo)72 594 S 3.24(ri).15 G(nteracti)-3.24 E 1.04 -.15(ve u)-.25
-H .74(se, Bash implements ksh-style aliases and b).15 F .74
-(uiltins such as)-.2 F F2(fc)3.24 E F0 .74(\(discussed belo)3.24 F .74
-(w\) and)-.25 F F2(jobs)3.24 E F0(.)A .291(Bash aliases allo)72 606 R
-2.791(was)-.25 G .291(tring to be substituted for a command name.)-2.791
-F(The)5.291 E 2.791(yc)-.15 G .291(an be used to create a mnemonic)
--2.791 F .568(for a)72 618 R/F4 9/Times-Roman@0 SF(UNIX)3.068 E F0 .568
-(command name \()3.068 F F3 .568(alias del=rm)B F0 .568(\), to e)B .567
+.222(all of)2.722 F(the operators from the C language are a)72 558 Q
+-.25(va)-.2 G(ilable, with the same precedence rules:).25 E F1 6($e)97
+576 S(cho $\(\(3 + 5 * 32\)\))-6 E(163)97 588 Q F0 -.15(Fo)72 609.6 S
+3.24(ri).15 G(nteracti)-3.24 E 1.04 -.15(ve u)-.25 H .74
+(se, Bash implements ksh-style aliases and b).15 F .74(uiltins such as)
+-.2 F F3(fc)3.24 E F0 .74(\(discussed belo)3.24 F .74(w\) and)-.25 F F3
+(jobs)3.24 E F0(.)A .291(Bash aliases allo)72 621.6 R 2.791(was)-.25 G
+.291(tring to be substituted for a command name.)-2.791 F(The)5.291 E
+2.791(yc)-.15 G .291(an be used to create a mnemonic)-2.791 F .568
+(for a)72 633.6 R/F4 9/Times-Roman@0 SF(UNIX)3.068 E F0 .568
+(command name \()3.068 F F1 .568(alias del=rm)B F0 .568(\), to e)B .567
 (xpand a single w)-.15 F .567(ord to a comple)-.1 F 3.067(xc)-.15 G .567
-(ommand \()-3.067 F F3(alias)A .255
-(news='xterm -g 80x45 -title trn -e trn -e -S1 -N &')72 630 R F0 .255
-(\), or to ensure that a command)B(is in)72 642 Q -.2(vo)-.4 G -.1(ke).2
-G 2.5(dw).1 G(ith a basic set of options \()-2.5 E F3
-(alias ls="/bin/ls -F")A F0(\).)A .293(The C shell \()97 657.6 R F2(csh)
+(ommand \()-3.067 F F1(alias)A .255
+(news='xterm -g 80x45 -title trn -e trn -e -S1 -N &')72 645.6 R F0 .255
+(\), or to ensure that a command)B(is in)72 657.6 Q -.2(vo)-.4 G -.1(ke)
+.2 G 2.5(dw).1 G(ith a basic set of options \()-2.5 E F1
+(alias ls="/bin/ls -F")A F0(\).)A .293(The C shell \()97 673.2 R F3(csh)
 A F0 .293(\)\207, originally written by Bill Jo)B 2.792(yw)-.1 G .292
 (hile at Berk)-2.792 F(ele)-.1 E 1.592 -.65(y, i)-.15 H 2.792(sw).65 G
 .292(idely used and quite popular)-2.792 F 1.499(for its interacti)72
-669.6 R 1.799 -.15(ve f)-.25 H 3.999(acilities. Bash).05 F 1.499
+685.2 R 1.799 -.15(ve f)-.25 H 3.999(acilities. Bash).05 F 1.499
 (includes a csh-compatible history e)3.999 F 1.5
-(xpansion mechanism \(\231! history\232\),)-.15 F .019(brace e)72 681.6
-R .018(xpansion, access to a stack of directories via the)-.15 F F2
-(pushd)2.518 E F0(,)A F2(popd)2.518 E F0 2.518(,a)C(nd)-2.518 E F2(dirs)
+(xpansion mechanism \(\231! history\232\),)-.15 F .019(brace e)72 697.2
+R .018(xpansion, access to a stack of directories via the)-.15 F F3
+(pushd)2.518 E F0(,)A F3(popd)2.518 E F0 2.518(,a)C(nd)-2.518 E F3(dirs)
 2.518 E F0 -.2(bu)2.518 G .018(iltins, and tilde e).2 F(xpansion,)-.15 E
-1.293(to generate users' home directories.)72 693.6 R -.35(Ti)6.294 G
+1.293(to generate users' home directories.)72 709.2 R -.35(Ti)6.294 G
 1.294(lde e).35 F 1.294(xpansion has also been adopted by both the K)
--.15 F 1.294(orn Shell and)-.35 F .32 LW 144 708.2 72 708.2 DL/F5 8
-/Times-Roman@0 SF(\207Morris Bolsk)72 720 Q 2(ya)-.12 G(nd Da)-2 E
+-.15 F 1.294(orn Shell and)-.35 F .32 LW 144 717.2 72 717.2 DL/F5 8
+/Times-Roman@0 SF(\207Morris Bolsk)72 727.2 Q 2(ya)-.12 G(nd Da)-2 E
 (vid K)-.16 E(orn,)-.28 E/F6 8/Times-Italic@0 SF(The K)2 E
 (ornShell Command and Pr)-.32 E -.08(og)-.36 G -.12(ra).08 G
 (mming Langua).12 E -.08(ge)-.08 G F5 2(,P).08 G(rentice Hall, 1989.)-2
-E EP
+E 0 Cg EP
 %%Page: 3 3
 %%BeginPageSetup
 BP
@@ -520,10 +543,10 @@ tput of the command contained within the parentheses, with)-.15 F .664
 (xpansion, the ability to de\214ne a v)-.15 F(ariable)-.25 E .283
 (and a function with the same name, local v)72 398.4 R .282
 (ariables in shell functions, the ability to enable and disable indi-)
--.25 F .547(vidual b)72 410.4 R .547
-(uiltins or write a function to replace a b)-.2 F .547
-(uiltin, or a means to e)-.2 F .547
-(xport a shell function to a child pro-)-.15 F(cess.)72 422.4 Q .32
+-.25 F 1.532(vidual b)72 410.4 R 1.532
+(uiltins or write a function to replace a b)-.2 F 1.533
+(uiltin, or a means to e)-.2 F 1.533(xport a shell function to a child)
+-.15 F(process.)72 422.4 Q .32
 (Bash has closed a long-standing shell security hole by not using the)97
 438 R F1($IFS)2.82 E F0 -.25(va)2.82 G .32(riable to split each w).25 F
 (ord)-.1 E 1.254(read by the shell, b)72 450 R 1.254
@@ -580,11 +603,11 @@ E F1($ENV)2.842 E F0 2.841(,i)C 2.841(fs)-2.841 G .341
 (on out here.)-.1 F(Interestingly)5.158 E 2.658(,t)-.65 G .158(he ne)
 -2.658 F .159(xt release of ksh will change to reading)-.15 F F1($ENV)
 2.659 E .32 LW 144 705.2 72 705.2 DL/F4 8/Times-Roman@0 SF .559
-(\207Bill Jo)72 717 R 1.599 -.52(y, A)-.08 H 2.559(nI).52 G .559
+(\207Bill Jo)72 715.2 R 1.599 -.52(y, A)-.08 H 2.559(nI).52 G .559
 (ntroduction to the C Shell,)-2.559 F/F5 8/Times-Italic@0 SF .558
 (UNIX User')2.558 F 2.558(sS)-.32 G .558(upplementary Documents)-2.558 F
 F4 2.558(,U)C(ni)-2.558 E -.12(ve)-.2 G .558(rsity of California at).12
-F(Berk)72 727 Q(ele)-.08 E 1.04 -.52(y, 1)-.12 H(986.).52 E EP
+F(Berk)72 725.2 Q(ele)-.08 E 1.04 -.52(y, 1)-.12 H(986.).52 E 0 Cg EP
 %%Page: 4 4
 %%BeginPageSetup
 BP
@@ -696,7 +719,7 @@ R -.15(ey)-.1 G 1.196(map to which subsequent k).15 F 1.496 -.15(ey b)
 -3.031 G -.15(ve)-3.281 G 3.031(nw).15 G .531
 (hat happens when readline w)-3.031 F .531(ants to ring the terminal')
 -.1 F 3.03(sb)-.55 G 3.03(ell. All)-3.03 F .53(of these v)3.03 F
-(ariables)-.25 E EP
+(ariables)-.25 E 0 Cg EP
 %%Page: 5 5
 %%BeginPageSetup
 BP
@@ -724,9 +747,9 @@ S(repare to type a quoted word -- insert open and close double)-6 E 6
 249.6 Q($endif)97 261.6 Q F0 .322(There is a readline command to re-rea\
 d the \214le, so users can edit the \214le, change some bindings, and b\
 e)72 283.2 R(gin)-.15 E(to use them almost immediately)72 295.2 Q(.)-.65
-E .851(Bash implements the)97 310.8 R F1(bind)3.351 E F0 -.2(bu)3.351 G
-.851(iltin for more dyamic control of readline than the startup \214le \
-permits.).2 F F1(Bind)72 322.8 Q F0 .25(is used in se)2.75 F -.15(ve)
+E .518(Bash implements the)97 310.8 R F1(bind)3.018 E F0 -.2(bu)3.018 G
+.518(iltin for more dynamic control of readline than the startup \214le\
+ permits.).2 F F1(Bind)72 322.8 Q F0 .25(is used in se)2.75 F -.15(ve)
 -.25 G .25(ral w).15 F 2.75(ays. In)-.1 F/F3 10/Times-Italic@0 SF(list)
 2.75 E F0 .25(mode, it can display the current k)2.75 F .55 -.15(ey b)
 -.1 H .25(indings, list all the readline edit-).15 F .149(ing directi)72
@@ -781,11 +804,11 @@ lly quite good at determining what type of completion to attempt.)72
 (and the readline library)72 570 R 5.077(.B)-.65 G .077(ash pro)-5.077 F
 .077(vides v)-.15 F .077(ariables \()-.25 F F1($HISTFILE)A F0(,)A F1
 ($HISTSIZE)2.577 E F0 2.577(,a)C(nd)-2.577 E F1($HISTCONTR)2.577 E(OL)
--.3 E F0 2.577(\)a)C(nd)-2.577 E(the)72 582 Q F1(history)2.89 E F0(and)
-2.89 E F1(fc)2.89 E F0 -.2(bu)2.89 G .39
-(iltins to manipulate the history list.).2 F .391(The v)5.391 F .391
-(alue of)-.25 F F1($HISTFILE)2.891 E F0 .391(specifes the \214le where)
-2.891 F .49(Bash writes the command history on e)72 594 R .489
+-.3 E F0 2.577(\)a)C(nd)-2.577 E(the)72 582 Q F1(history)2.759 E F0(and)
+2.759 E F1(fc)2.759 E F0 -.2(bu)2.759 G .259
+(iltins to manipulate the history list.).2 F .26(The v)5.259 F .26
+(alue of)-.25 F F1($HISTFILE)2.76 E F0 .26(speci\214es the \214le where)
+2.76 F .49(Bash writes the command history on e)72 594 R .489
 (xit and reads it on startup.)-.15 F F1($HISTSIZE)5.489 E F0 .489
 (is used to limit the number)2.989 F .642(of commands sa)72 606 R -.15
 (ve)-.2 G 3.142(di).15 G 3.142(nt)-3.142 G .642(he history)-3.142 F(.)
@@ -820,7 +843,7 @@ or a string typed by the user)72 690 R(.)-.55 E(Finally)72 702 Q 2.535
 -.15(xe)-.15 G 1.022(cution of pre).15 F 1.022(vious commands v)-.25 F
 1.022(ery similar to csh \(\231bang history\232, so)-.15 F
 (called because the e)72 726 Q
-(xclamation point introduces a history substitution\):)-.15 E EP
+(xclamation point introduces a history substitution\):)-.15 E 0 Cg EP
 %%Page: 6 6
 %%BeginPageSetup
 BP
@@ -903,7 +926,7 @@ e)-.15 F .104(when opened.)72 648 R .103
 (xpansion. Process)-.15 F .103(substitution can be used to com-)2.603 F
 (pare the outputs of tw)72 660 Q 2.5(od)-.1 G(if)-2.5 E(ferent v)-.25 E
 (ersions of an application as part of a re)-.15 E(gression test:)-.15 E
-F1 6($c)97 678 S(mp <\(old_prog\) <\(new_prog\))-6 E EP
+F1 6($c)97 678 S(mp <\(old_prog\) <\(new_prog\))-6 E 0 Cg EP
 %%Page: 7 7
 %%BeginPageSetup
 BP
@@ -998,7 +1021,7 @@ G .367
 E(/usr/local/bin)97 624 Q 6($/)97 636 S(bin/pwd)-6 E
 (/net/share/sun4/local/bin)97 648 Q 6($c)97 660 S 6(d.)-6 G(.)-6 E 6($p)
 97 672 S(wd)-6 E(/usr/local)97 684 Q 6($/)97 696 S(bin/pwd)-6 E
-(/net/share/sun4/local)97 708 Q 6($c)97 720 S 6(d.)-6 G(.)-6 E EP
+(/net/share/sun4/local)97 708 Q 6($c)97 720 S 6(d.)-6 G(.)-6 E 0 Cg EP
 %%Page: 8 8
 %%BeginPageSetup
 BP
@@ -1097,7 +1120,7 @@ such)-2.931 F .136
 (nting the use of these sequences in earlier v).15 F .559(ersions, b)
 -.15 F .559(ut the readline redisplay algorithm assumed)-.2 F
 (each character occupied ph)72 720 Q(ysical screen space and w)-.05 E
-(ould wrap lines prematurely)-.1 E(.)-.65 E EP
+(ould wrap lines prematurely)-.1 E(.)-.65 E 0 Cg EP
 %%Page: 9 9
 %%BeginPageSetup
 BP
@@ -1244,7 +1267,7 @@ F F1(HISTIGNORE)4.286 E F0 4.285(,w)C 1.785(hich w)-4.285 F 1.785
 (mentation to be printed by the)72 697.2 R F1(help)3.851 E F0 1.351
 (command \(possibly present in the shared object as well\).)3.851 F
 1.351(It w)6.351 F(ould)-.1 E(manage the details of e)72 709.2 Q
-(xtending the internal table of b)-.15 E(uiltins.)-.2 E EP
+(xtending the internal table of b)-.15 E(uiltins.)-.2 E 0 Cg EP
 %%Page: 10 10
 %%BeginPageSetup
 BP
@@ -1256,14 +1279,14 @@ BP
 (command, which prints)3.292 F 1.412(the v)72 96 R 1.412
 (alues of system con\214guration v)-.25 F 1.411
 (ariables de\214ned by POSIX.2, and a)-.25 F F1(diso)3.911 E(wn)-.1 E F0
--.2(bu)3.911 G 1.411(iltin, which causes a).2 F 1.347
-(shell running with job control acti)72 108 R 1.647 -.15(ve t)-.25 H
-3.847<6f99>.15 G(for)-3.847 E 1.347
-(get about\232 one or more background jobs in its internal jobs)-.18 F
-3.465(table. Using)72 120 R F1(getconf)3.465 E F0 3.465(,f)C .965(or e)
--3.465 F .965(xample, a user could retrie)-.15 F 1.264 -.15(ve a v)-.25
-H .964(alue for)-.1 F F1($P)3.464 E -.95(AT)-.74 G(H).95 E F0 .964
-(guaranteed to \214nd all of the)3.464 F .884
+-.2(bu)3.911 G 1.411(iltin, which causes a).2 F .547
+(shell running with job control acti)72 108 R .847 -.15(ve t)-.25 H
+3.047<6f99>.15 G(for)-3.047 E .547
+(get about\232 one or more background jobs in its internal jobs ta-)-.18
+F 3.866(ble. Using)72 120 R F1(getconf)3.866 E F0 3.866(,f)C 1.366(or e)
+-3.866 F 1.366(xample, a user could retrie)-.15 F 1.666 -.15(ve a v)-.25
+H 1.365(alue for)-.1 F F1($P)3.865 E -.95(AT)-.74 G(H).95 E F0 1.365
+(guaranteed to \214nd all of the)3.865 F .884
 (POSIX standard utilities, or \214nd out ho)72 132 R 3.385(wl)-.25 G
 .885
 (ong \214lenames may be in the \214le system containing a speci\214ed)
@@ -1368,7 +1391,7 @@ E F0(for more information.)2.5 E .694(Bash is also distrib)97 656.4 R
 -.15(ve)-.25 G .948(ral Linux distrib).15 F .948
 (utions \(more about the dif)-.2 F .948
 (ference in a moment\), and as contrib)-.25 F(uted)-.2 E .32 LW 144
-676.4 72 676.4 DL/F5 8/Times-Roman@0 SF .781
+678.2 72 678.2 DL/F5 8/Times-Roman@0 SF .781
 (\207S. R. Bourne, \231UNIX T)72 688.2 R .781(ime-Sharing System:)-.28 F
 .781(The UNIX Shell\232,)4.781 F/F6 8/Times-Italic@0 SF .78
 (Bell System T)2.78 F(ec)-.736 E .78(hnical J)-.12 F(ournal)-.2 E F5
@@ -1377,7 +1400,8 @@ E F0(for more information.)2.5 E .694(Bash is also distrib)97 656.4 R
 (f, \231Rc \255 A Shell for Plan 9 and)-.2 F/F7 7/Times-Roman@0 SF(UNIX)
 2.432 E F5(systems\232,)2.432 E F6(Pr)2.432 E .432
 (oc. of the Summer 1990 EUUG Confer)-.36 F(ence)-.296 E F5 2.432(,L)C
-(on-)-2.432 E(don, July)72 720 Q 2(,1)-.52 G(990, pp. 21-33.)-2 E EP
+(on-)-2.432 E(don, July)72 720 Q 2(,1)-.52 G(990, pp. 21-33.)-2 E 0 Cg
+EP
 %%Page: 11 11
 %%BeginPageSetup
 BP
@@ -1410,9 +1434,9 @@ F .8(It is suf)5.8 F .8(\214ciently portable to run on nearly e)-.25 F
 (ral thousand re).15 F 1.515(gular users, and their feedback has)-.15 F
 (helped to mak)72 235.2 Q 2.5(ei)-.1 G 2.5(ta)-2.5 G 2.5(sg)-2.5 G
 (ood as it is today \255 a testament to the bene\214ts of free softw)
--2.5 E(are.)-.1 E .32 LW 144 708.2 72 708.2 DL/F4 8/Times-Roman@0 SF
+-2.5 E(are.)-.1 E .32 LW 144 710 72 710 DL/F4 8/Times-Roman@0 SF
 (*BSD/386 is a trademark of Berk)72 720 Q(ele)-.08 E 2(yS)-.12 G(oftw)-2
-E(are Design, Inc.)-.08 E EP
+E(are Design, Inc.)-.08 E 0 Cg EP
 %%Trailer
 end
 %%EOF

@@ -24,20 +24,23 @@ job 7 returns 0
 4
 0
 i killed it
+12
+[1]-  Running                 sleep 20 &
+[3]+  Running                 sleep 20 &
 0
-./jobs.tests: line 19: wait: %1: no such job
-./jobs.tests: line 24: fg: no job control
+./jobs.tests: line 22: wait: %1: no such job
+./jobs.tests: line 27: fg: no job control
 wait-for-pid
 wait-errors
-./jobs.tests: line 37: wait: `1-1': not a pid or valid job spec
-./jobs.tests: line 38: wait: `-4': not a pid or valid job spec
+./jobs.tests: line 40: wait: `1-1': not a pid or valid job spec
+./jobs.tests: line 41: wait: `-4': not a pid or valid job spec
 wait-for-background-pids
 async list wait-for-background-pids
 async list wait for child
 forked
 wait-when-no-children
 wait-for-job
-./jobs.tests: line 60: wait: %2: no such job
+./jobs.tests: line 63: wait: %2: no such job
 127
 async list wait-for-job
 forked
@@ -50,19 +53,19 @@ sleep 5
 fg-bg 4
 sleep 5
 fg-bg 5
-./jobs.tests: line 87: fg: %2: no such job
-./jobs.tests: line 88: bg: job 1 already in background
+./jobs.tests: line 90: fg: %2: no such job
+./jobs.tests: line 91: bg: job 1 already in background
 fg-bg 6
-./jobs.tests: line 95: fg: -s: invalid option
+./jobs.tests: line 98: fg: -s: invalid option
 fg: usage: fg [job_spec]
-./jobs.tests: line 96: bg: -s: invalid option
+./jobs.tests: line 99: bg: -s: invalid option
 bg: usage: bg [job_spec ...]
-./jobs.tests: line 101: disown: -s: invalid option
+./jobs.tests: line 104: disown: -s: invalid option
 disown: usage: disown [-h] [-ar] [jobspec ...]
-./jobs.tests: line 105: disown: %1: no such job
-./jobs.tests: line 108: disown: %2: no such job
+./jobs.tests: line 108: disown: %1: no such job
+./jobs.tests: line 111: disown: %2: no such job
 wait-for-non-child
-./jobs.tests: line 111: wait: pid 1 is not a child of this shell
+./jobs.tests: line 114: wait: pid 1 is not a child of this shell
 127
 3 -- 1 2 3 -- 1 - 2 - 3
 [1]   Running                 sleep 300 &
@@ -72,8 +75,8 @@ running jobs:
 [1]   Running                 sleep 300 &
 [2]-  Running                 sleep 350 &
 [3]+  Running                 sleep 400 &
-./jobs.tests: line 128: kill: %4: no such job
-./jobs.tests: line 130: jobs: %4: no such job
+./jobs.tests: line 131: kill: %4: no such job
+./jobs.tests: line 133: jobs: %4: no such job
 current job:
 [3]+  Running                 sleep 400 &
 previous job:

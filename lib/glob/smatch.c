@@ -43,15 +43,25 @@
 #define STREQ(a, b) ((a)[0] == (b)[0] && strcmp(a, b) == 0)
 #define STREQN(a, b, n) ((a)[0] == (b)[0] && strncmp(a, b, n) == 0)
 
+#ifndef GLOBASCII_DEFAULT
+#  define GLOBASCII_DEFAULT 0
+#endif
+
+int glob_asciirange = GLOBASCII_DEFAULT;
+
 /* We use strcoll(3) for range comparisons in bracket expressions,
    even though it can have unwanted side effects in locales
    other than POSIX or US.  For instance, in the de locale, [A-Z] matches
-   all characters. */
+   all characters.  If GLOB_ASCIIRANGE is non-zero, and we're not forcing
+   the use of strcoll (e.g., for explicit collating symbols), we use
+   straight ordering as if in the C locale. */
 
 #if defined (HAVE_STRCOLL)
 /* Helper function for collating symbol equivalence. */
-static int rangecmp (c1, c2)
+static int
+rangecmp (c1, c2, forcecoll)
      int c1, c2;
+     int forcecoll;
 {
   static char s1[2] = { ' ', '\0' };
   static char s2[2] = { ' ', '\0' };
@@ -64,6 +74,9 @@ static int rangecmp (c1, c2)
   if (c1 == c2)
     return (0);
 
+  if (forcecoll == 0 && glob_asciirange)
+    return (c1 - c2);
+
   s1[0] = c1;
   s2[0] = c2;
 
@@ -72,7 +85,7 @@ static int rangecmp (c1, c2)
   return (c1 - c2);
 }
 #else /* !HAVE_STRCOLL */
-#  define rangecmp(c1, c2)	((int)(c1) - (int)(c2))
+#  define rangecmp(c1, c2, f)	((int)(c1) - (int)(c2))
 #endif /* !HAVE_STRCOLL */
 
 #if defined (HAVE_STRCOLL)
@@ -80,7 +93,7 @@ static int
 collequiv (c1, c2)
      int c1, c2;
 {
-  return (rangecmp (c1, c2) == 0);
+  return (rangecmp (c1, c2, 1) == 0);
 }
 #else
 #  define collequiv(c1, c2)	((c1) == (c2))
@@ -214,14 +227,14 @@ is_cclass (c, name)
 #define COLLSYM			collsym
 #define PARSE_COLLSYM		parse_collsym
 #define BRACKMATCH		brackmatch
-#define PATSCAN			patscan
+#define PATSCAN			glob_patscan
 #define STRCOMPARE		strcompare
 #define EXTMATCH		extmatch
 #define STRCHR(S, C)		strchr((S), (C))
 #define STRCOLL(S1, S2)		strcoll((S1), (S2))
 #define STRLEN(S)		strlen(S)
 #define STRCMP(S1, S2)		strcmp((S1), (S2))
-#define RANGECMP(C1, C2)	rangecmp((C1), (C2))
+#define RANGECMP(C1, C2, F)	rangecmp((C1), (C2), (F))
 #define COLLEQUIV(C1, C2)	collequiv((C1), (C2))
 #define CTYPE_T			enum char_class
 #define IS_CCLASS(C, S)		is_cclass((C), (S))
@@ -244,14 +257,18 @@ is_cclass (c, name)
 extern char *mbsmbchar __P((const char *));
 
 static int
-rangecmp_wc (c1, c2)
+rangecmp_wc (c1, c2, forcecoll)
      wint_t c1, c2;
+     int forcecoll;
 {
   static wchar_t s1[2] = { L' ', L'\0' };
   static wchar_t s2[2] = { L' ', L'\0' };
 
   if (c1 == c2)
     return 0;
+
+  if (forcecoll == 0 && glob_asciirange && c1 <= UCHAR_MAX && c2 <= UCHAR_MAX)
+    return ((int)(c1 - c2));
 
   s1[0] = c1;
   s2[0] = c2;
@@ -263,7 +280,7 @@ static int
 collequiv_wc (c, equiv)
      wint_t c, equiv;
 {
-  return (!(c - equiv));
+  return (c == equiv);
 }
 
 /* Helper function for collating symbol. */
@@ -342,14 +359,14 @@ is_wcclass (wc, name)
 #define COLLSYM			collwcsym
 #define PARSE_COLLSYM		parse_collwcsym
 #define BRACKMATCH		brackmatch_wc
-#define PATSCAN			patscan_wc
+#define PATSCAN			glob_patscan_wc
 #define STRCOMPARE		wscompare
 #define EXTMATCH		extmatch_wc
 #define STRCHR(S, C)		wcschr((S), (C))
 #define STRCOLL(S1, S2)		wcscoll((S1), (S2))
 #define STRLEN(S)		wcslen(S)
 #define STRCMP(S1, S2)		wcscmp((S1), (S2))
-#define RANGECMP(C1, C2)	rangecmp_wc((C1), (C2))
+#define RANGECMP(C1, C2, F)	rangecmp_wc((C1), (C2), (F))
 #define COLLEQUIV(C1, C2)	collequiv_wc((C1), (C2))
 #define CTYPE_T			enum char_class
 #define IS_CCLASS(C, S)		is_wcclass((C), (S))
@@ -369,13 +386,7 @@ xstrmatch (pattern, string, flags)
   wchar_t *wpattern, *wstring;
   size_t plen, slen, mplen, mslen;
 
-#if 0
-  plen = strlen (pattern);
-  mplen = mbstrlen (pattern);
-  if (plen == mplen && strlen (string) == mbstrlen (string))
-#else
   if (mbsmbchar (string) == 0 && mbsmbchar (pattern) == 0)
-#endif
     return (internal_strmatch ((unsigned char *)pattern, (unsigned char *)string, flags));
 
   if (MB_CUR_MAX == 1)

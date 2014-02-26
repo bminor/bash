@@ -1,6 +1,6 @@
 /* bashhist.c -- bash interface to the GNU history library. */
 
-/* Copyright (C) 1993-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,7 +24,7 @@
 
 #if defined (HAVE_UNISTD_H)
 #  ifdef _MINIX
-#    include <sys/types.h>
+ #    include <sys/types.h>
 #  endif
 #  include <unistd.h>
 #endif
@@ -351,6 +351,7 @@ void
 save_history ()
 {
   char *hf;
+  int r;
 
   hf = get_string_value ("HISTFILE");
   if (hf && *hf && file_exists (hf))
@@ -360,9 +361,9 @@ save_history ()
       using_history ();
 
       if (history_lines_this_session <= where_history () || force_append_history)
-	append_history (history_lines_this_session, hf);
+	r = append_history (history_lines_this_session, hf);
       else
-	write_history (hf);
+	r = write_history (hf);
       sv_histsize ("HISTFILESIZE");
     }
 }
@@ -648,8 +649,11 @@ hc_erasedups (line)
    commenting out the rest of the command when the entire command is saved as
    a single history entry (when COMMAND_ORIENTED_HISTORY is enabled).  If
    LITERAL_HISTORY is set, we're saving lines in the history with embedded
-   newlines, so it's OK to save comment lines.  We also make sure to save
-   multiple-line quoted strings or other constructs. */
+   newlines, so it's OK to save comment lines.  If we're collecting the body
+   of a here-document, we should act as if literal_history is enabled, because
+   we want to save the entire contents of the here-document as it was
+   entered.  We also make sure to save multiple-line quoted strings or other
+   constructs. */
 void
 maybe_add_history (line)
      char *line;
@@ -662,7 +666,7 @@ maybe_add_history (line)
   if (current_command_line_count > 1)
     {
       if (current_command_first_line_saved &&
-	  (literal_history || dstack.delimiter_depth != 0 || shell_comment (line) == 0))
+	  ((parser_state & PST_HEREDOC) || literal_history || dstack.delimiter_depth != 0 || shell_comment (line) == 0))
 	bash_add_history (line);
       return;
     }
@@ -735,7 +739,17 @@ bash_add_history (line)
   add_it = 1;
   if (command_oriented_history && current_command_line_count > 1)
     {
-      chars_to_add = literal_history ? "\n" : history_delimiting_chars (line);
+      /* The second and subsequent lines of a here document have the trailing
+	 newline preserved.  We don't want to add extra newlines here, but we
+	 do want to add one after the first line (which is the command that
+	 contains the here-doc specifier).  parse.y:history_delimiting_chars()
+	 does the right thing to take care of this for us.  We don't want to
+	 add extra newlines if the user chooses to enable literal_history,
+	 so we have to duplicate some of what that function does here. */
+      if ((parser_state & PST_HEREDOC) && literal_history && current_command_line_count > 2 && line[strlen (line) - 1] == '\n')
+	chars_to_add = "";
+      else
+	chars_to_add = literal_history ? "\n" : history_delimiting_chars (line);
 
       using_history ();
       current = previous_history ();

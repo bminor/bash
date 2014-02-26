@@ -28,6 +28,11 @@
 #include "imalloc.h"
 #include "table.h"
 
+#ifdef SHELL
+extern int interrupt_immediately, running_trap;
+extern int signal_is_trapped __P((int));
+#endif
+
 extern int malloc_register;
 
 #ifdef MALLOC_REGISTER
@@ -168,6 +173,18 @@ mregister_alloc (tag, mem, size, file, line)
      int line;
 {
   mr_table_t *tentry;
+  sigset_t set, oset;
+  int blocked_sigs;
+
+  /* Block all signals in case we are executed from a signal handler. */
+  blocked_sigs = 0;
+#ifdef SHELL
+  if (interrupt_immediately || running_trap || signal_is_trapped (SIGINT) || signal_is_trapped (SIGCHLD))
+#endif
+    {
+      _malloc_block_signals (&set, &oset);
+      blocked_sigs = 1;
+    }
 
   tentry = find_entry (mem, FIND_ALLOC);
 
@@ -175,6 +192,8 @@ mregister_alloc (tag, mem, size, file, line)
     {
       /* oops.  table is full.  punt. */
       fprintf (stderr, _("register_alloc: alloc table is full with FIND_ALLOC?\n"));
+      if (blocked_sigs)
+	_malloc_unblock_signals (&set, &oset);
       return;
     }
   
@@ -194,6 +213,9 @@ mregister_alloc (tag, mem, size, file, line)
 
   if (tentry != &mem_overflow)
     table_allocated++;
+
+  if (blocked_sigs)
+    _malloc_unblock_signals (&set, &oset);
 }
 
 void
@@ -204,6 +226,18 @@ mregister_free (mem, size, file, line)
      int line;
 {
   mr_table_t *tentry;
+  sigset_t set, oset;
+  int blocked_sigs;
+
+  /* Block all signals in case we are executed from a signal handler. */
+  blocked_sigs = 0;
+#ifdef SHELL
+  if (interrupt_immediately || running_trap || signal_is_trapped (SIGINT) || signal_is_trapped (SIGCHLD))
+#endif
+    {
+      _malloc_block_signals (&set, &oset);
+      blocked_sigs = 1;
+    }
 
   tentry = find_entry (mem, FIND_EXIST);
   if (tentry == 0)
@@ -212,6 +246,8 @@ mregister_free (mem, size, file, line)
 #if 0
       fprintf (stderr, "register_free: %p not in allocation table?\n", mem);
 #endif
+      if (blocked_sigs)
+	_malloc_unblock_signals (&set, &oset);
       return;
     }
   if (tentry->flags & MT_FREE)
@@ -228,6 +264,9 @@ mregister_free (mem, size, file, line)
 
   if (tentry != &mem_overflow)
     table_allocated--;
+
+  if (blocked_sigs)
+    _malloc_unblock_signals (&set, &oset);
 }
 
 /* If we ever add more flags, this will require changes. */

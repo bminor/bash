@@ -133,7 +133,7 @@ substring (string, start, end)
 
   len = end - start;
   result = (char *)xmalloc (len + 1);
-  strncpy (result, string + start, len);
+  memcpy (result, string + start, len);
   result[len] = '\0';
   return (result);
 }
@@ -158,7 +158,7 @@ strsub (string, pat, rep, global)
 	  if (replen)
 	    RESIZE_MALLOCED_BUFFER (temp, templen, replen, tempsize, (replen * 2));
 
-	  for (r = rep; *r; )
+	  for (r = rep; *r; )	/* can rep == "" */
 	    temp[templen++] = *r++;
 
 	  i += patlen ? patlen : 1;	/* avoid infinite recursion */

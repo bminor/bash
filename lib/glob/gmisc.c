@@ -200,6 +200,24 @@ bad_bracket:
 }
 #endif
 
+int
+extglob_pattern_p (pat)
+     char *pat;
+{
+  switch (pat[0])
+    {
+    case '*':
+    case '+':
+    case '!':
+    case '@':
+      return (pat[1] == LPAREN);
+    default:
+      return 0;
+    }
+    
+  return 0;
+}
+
 /* Return 1 of the first character of STRING could match the first
    character of pattern PAT.  Used to avoid n2 calls to strmatch(). */
 int

@@ -254,6 +254,15 @@ kill -INT
 # bad shell option names
 set -o trackall		# bash is not ksh
 
+# problem with versions through bash-4.2
+readonly xx=5
+echo $((xx=5))
+echo $?
+
+${THIS_SH} ./errors1.sub
+${THIS_SH} ./errors2.sub
+${THIS_SH} ./errors3.sub
+
 # this must be last!
 # in posix mode, a function name must be a valid identifier
 # this can't go in posix2.tests, since it causes the shell to exit

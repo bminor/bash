@@ -92,3 +92,22 @@ echo $i
 
 for     ((i=0; i < 20; i++)) { : ; }
 echo $i
+
+# added post-bash-4.2
+for (( i = j = k = 1; i % 9 || (j *= -1, $( ((i%9)) || printf " " >&2; echo 0), k++ <= 10); i += j ))
+do
+printf "$i"
+done
+
+echo
+
+( for (( i = j = k = 1; i % 9 || (j *= -1, $( ((i%9)) || printf " " >&2; echo 0), k++ <= 10); i += j ))
+do
+printf "$i"
+done )
+
+echo
+
+for (( i = 4; ;i--)) ; do echo $i; if (( $i == 0 )); then break; fi; done
+
+for (( i = 4;;i--)) ; do echo $i; if (( $i == 0 )); then break; fi; done

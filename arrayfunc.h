@@ -33,6 +33,8 @@
 extern SHELL_VAR *convert_var_to_array __P((SHELL_VAR *));
 extern SHELL_VAR *convert_var_to_assoc __P((SHELL_VAR *));
 
+extern char *make_array_variable_value __P((SHELL_VAR *, arrayind_t, char *, char *, int));
+
 extern SHELL_VAR *bind_array_variable __P((char *, arrayind_t, char *, int));
 extern SHELL_VAR *bind_array_element __P((SHELL_VAR *, arrayind_t, char *, int));
 extern SHELL_VAR *assign_array_element __P((char *, char *, int));
@@ -54,7 +56,7 @@ extern int skipsubscript __P((const char *, int, int));
 extern void print_array_assignment __P((SHELL_VAR *, int));
 extern void print_assoc_assignment __P((SHELL_VAR *, int));
 
-extern arrayind_t array_expand_index __P((char *, int));
+extern arrayind_t array_expand_index __P((SHELL_VAR *, char *, int));
 extern int valid_array_reference __P((char *));
 extern char *array_value __P((char *, int, int, int *, arrayind_t *));
 extern char *get_array_value __P((char *, int, int *, arrayind_t *));
@@ -63,6 +65,12 @@ extern char *array_keys __P((char *, int));
 
 extern char *array_variable_name __P((char *, char **, int *));
 extern SHELL_VAR *array_variable_part __P((char *, char **, int *));
+
+#else
+
+#define AV_ALLOWALL	0
+#define AV_QUOTED	0
+#define AV_USEIND	0
 
 #endif
 

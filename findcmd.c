@@ -1,6 +1,6 @@
 /* findcmd.c -- Functions to search for commands by name. */
 
-/* Copyright (C) 1997-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -49,6 +49,7 @@ extern int errno;
 #endif
 
 extern int posixly_correct;
+extern int last_command_exit_value;
 
 /* Static functions defined and used in this file. */
 static char *_find_user_command_internal __P((const char *, int));
@@ -235,7 +236,7 @@ _find_user_command_internal (name, flags)
 
   /* Search for the value of PATH in both the temporary environments and
      in the regular list of variables. */
-  if (var = find_variable_internal ("PATH", 1))	/* XXX could be array? */
+  if (var = find_variable_tempenv ("PATH"))	/* XXX could be array? */
     path_list = value_cell (var);
   else
     path_list = (char *)NULL;
@@ -296,10 +297,13 @@ get_next_path_element (path_list, path_index_pointer)
 
 /* Look for PATHNAME in $PATH.  Returns either the hashed command
    corresponding to PATHNAME or the first instance of PATHNAME found
-   in $PATH.  Returns a newly-allocated string. */
+   in $PATH.  If (FLAGS&1) is non-zero, insert the instance of PATHNAME
+   found in $PATH into the command hash table.  Returns a newly-allocated
+   string. */
 char *
-search_for_command (pathname)
+search_for_command (pathname, flags)
      const char *pathname;
+     int flags;
 {
   char *hashed_file, *command;
   int temp_path, st;
@@ -309,7 +313,7 @@ search_for_command (pathname)
 
   /* If PATH is in the temporary environment for this command, don't use the
      hash table to search for the full pathname. */
-  path = find_variable_internal ("PATH", 1);
+  path = find_variable_tempenv ("PATH");
   temp_path = path && tempvar_p (path);
   if (temp_path == 0 && path)
     path = (SHELL_VAR *)NULL;
@@ -352,7 +356,7 @@ search_for_command (pathname)
 	}
       else
 	command = find_user_command (pathname);
-      if (command && hashing_enabled && temp_path == 0)
+      if (command && hashing_enabled && temp_path == 0 && (flags & 1))
 	phash_insert ((char *)pathname, command, dot_found_in_search, 1);	/* XXX fix const later */
     }
   return (command);
@@ -398,7 +402,8 @@ user_command_matches (name, flags, state)
 	  name_len = strlen (name);
 	  file_to_lose_on = (char *)NULL;
 	  dot_found_in_search = 0;
-      	  stat (".", &dotinfo);
+	  if (stat (".", &dotinfo) < 0)
+	    dotinfo.st_dev = dotinfo.st_ino = 0;	/* so same_file won't match */
 	  path_list = get_string_value ("PATH");
       	  path_index = 0;
 	}
@@ -569,7 +574,8 @@ find_user_command_in_path (name, path_list, flags)
 
   file_to_lose_on = (char *)NULL;
   name_len = strlen (name);
-  stat (".", &dotinfo);
+  if (stat (".", &dotinfo) < 0)
+    dotinfo.st_dev = dotinfo.st_ino = 0;
   path_index = 0;
 
   while (path_list[path_index])

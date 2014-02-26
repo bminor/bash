@@ -35,13 +35,18 @@ sequences, which are converted and copied to the standard output; and
 format specifications, each of which causes printing of the next successive
 argument.
 
-In addition to the standard format specifications described in printf(1)
-and printf(3), printf interprets:
+In addition to the standard format specifications described in printf(1),
+printf interprets:
 
   %b	expand backslash escape sequences in the corresponding argument
   %q	quote the argument in a way that can be reused as shell input
   %(fmt)T output the date-time string resulting from using FMT as a format
         string for strftime(3)
+
+The format is re-used as necessary to consume all of the arguments.  If
+there are fewer arguments than the format requires,  extra format
+specifications behave as if a zero value or null string, as appropriate,
+had been supplied.
 
 Exit Status:
 Returns success unless an invalid option is given or a write or assignment
@@ -158,7 +163,8 @@ extern int errno;
       else if (vbuf) \
 	vbuf[0] = 0; \
       terminate_immediately--; \
-      fflush (stdout); \
+      if (ferror (stdout) == 0) \
+	fflush (stdout); \
       if (ferror (stdout)) \
 	{ \
 	  sh_wrerror (); \
@@ -460,7 +466,8 @@ printf_builtin (list)
 		    timefmt[2] = '\0';
 		  }
 		/* argument is seconds since the epoch with special -1 and -2 */
-		arg = getintmax ();
+		/* default argument is equivalent to -1; special case */
+		arg = garglist ? getintmax () : -1;
 		if (arg == -1)
 		  secs = NOW;		/* roughly date +%s */
 		else if (arg == -2)
@@ -471,7 +478,12 @@ printf_builtin (list)
 		sv_tz ("TZ");		/* XXX -- just make sure */
 #endif
 		tm = localtime (&secs);
-		n = strftime (timebuf, sizeof (timebuf), timefmt, tm);
+		if (tm == 0)
+		  {
+		    secs = 0;
+		    tm = localtime (&secs);
+		  }
+		n = tm ? strftime (timebuf, sizeof (timebuf), timefmt, tm) : 0;
 		free (timefmt);
 		if (n == 0)
 		  timebuf[0] = '\0';
@@ -483,8 +495,11 @@ printf_builtin (list)
 		n = printstr (start, timebuf, strlen (timebuf), fieldwidth, precision);	/* XXX - %s for now */
 		if (n < 0)
 		  {
-		    sh_wrerror ();
-		    clearerr (stdout);
+		    if (ferror (stdout) == 0)
+		      {
+			sh_wrerror ();
+			clearerr (stdout);
+		      }
 		    PRETURN (EXECUTION_FAILURE);
 		  }
 		break;
@@ -524,8 +539,11 @@ printf_builtin (list)
 		    r = printstr (start, xp, rlen, fieldwidth, precision);
 		    if (r < 0)
 		      {
-		        sh_wrerror ();
-			clearerr (stdout);
+			if (ferror (stdout) == 0)
+			  {
+		            sh_wrerror ();
+			    clearerr (stdout);
+			  }
 		        retval = EXECUTION_FAILURE;
 		      }
 		    free (xp);
@@ -548,7 +566,7 @@ printf_builtin (list)
 		else if (ansic_shouldquote (p))
 		  xp = ansic_quote (p, 0, (int *)0);
 		else
-		  xp = sh_backslash_quote (p);
+		  xp = sh_backslash_quote (p, 0, 1);
 		if (xp)
 		  {
 		    /* Use printstr to get fieldwidth and precision right. */
@@ -647,8 +665,7 @@ printf_builtin (list)
 
       if (ferror (stdout))
 	{
-	  sh_wrerror ();
-	  clearerr (stdout);
+	  /* PRETURN will print error message. */
 	  PRETURN (EXECUTION_FAILURE);
 	}
     }
@@ -681,12 +698,9 @@ printstr (fmt, string, len, fieldwidth, precision)
 #endif
   int padlen, nc, ljust, i;
   int fw, pr;			/* fieldwidth and precision */
+  intmax_t mfw, mpr;
 
-#if 0
-  if (string == 0 || *string == '\0')
-#else
   if (string == 0 || len == 0)
-#endif
     return 0;
 
 #if 0
@@ -697,6 +711,8 @@ printstr (fmt, string, len, fieldwidth, precision)
 
   ljust = fw = 0;
   pr = -1;
+  mfw = 0;
+  mpr = -1;
 
   /* skip flags */
   while (strchr (SKIP1, *fmt))
@@ -706,7 +722,7 @@ printstr (fmt, string, len, fieldwidth, precision)
       fmt++;
     }
 
-  /* get fieldwidth, if present */
+  /* get fieldwidth, if present.  rely on caller to clamp fieldwidth at INT_MAX */
   if (*fmt == '*')
     {
       fmt++;
@@ -719,9 +735,11 @@ printstr (fmt, string, len, fieldwidth, precision)
     }
   else if (DIGIT (*fmt))
     {
-      fw = *fmt++ - '0';
+      mfw = *fmt++ - '0';
       while (DIGIT (*fmt))
-	fw = (fw * 10) + (*fmt++ - '0');
+	mfw = (mfw * 10) + (*fmt++ - '0');
+      /* Error if fieldwidth > INT_MAX here? */
+      fw = (mfw < 0 || mfw > INT_MAX) ? INT_MAX : mfw;
     }
 
   /* get precision, if present */
@@ -735,9 +753,11 @@ printstr (fmt, string, len, fieldwidth, precision)
 	}
       else if (DIGIT (*fmt))
 	{
-	  pr = *fmt++ - '0';
+	  mpr = *fmt++ - '0';
 	  while (DIGIT (*fmt))
-	    pr = (pr * 10) + (*fmt++ - '0');
+	    mpr = (mpr * 10) + (*fmt++ - '0');
+	  /* Error if precision > INT_MAX here? */
+	  pr = (mpr < 0 || mpr > INT_MAX) ? INT_MAX : mpr;
 	}
     }
 
@@ -745,7 +765,7 @@ printstr (fmt, string, len, fieldwidth, precision)
   /* If we remove this, get rid of `s'. */
   if (*fmt != 'b' && *fmt != 'q')
     {
-      internal_error ("format parsing problem: %s", s);
+      internal_error (_("format parsing problem: %s"), s);
       fw = pr = 0;
     }
 #endif
@@ -861,7 +881,7 @@ tescape (estart, cp, lenp, sawc)
 	    *cp = '\\';
 	    return 0;
 	  }
-	if (uvalue <= UCHAR_MAX)
+	if (uvalue <= 0x7f)		/* <= 0x7f translates directly */
 	  *cp = uvalue;
 	else
 	  {
@@ -1089,6 +1109,9 @@ getint ()
 
   ret = getintmax ();
 
+  if (garglist == 0)
+    return ret;
+
   if (ret > INT_MAX)
     {
       printf_erange (garglist->word->word);
@@ -1229,12 +1252,19 @@ bind_printf_variable (name, value, flags)
      char *value;
      int flags;
 {
+  SHELL_VAR *v;
+
 #if defined (ARRAY_VARS)
   if (valid_array_reference (name) == 0)
-    return (bind_variable (name, value, flags));
+    v = bind_variable (name, value, flags);
   else
-    return (assign_array_element (name, value, flags));
+    v = assign_array_element (name, value, flags);
 #else /* !ARRAY_VARS */
-  return bind_variable (name, value, flags);
+  v = bind_variable (name, value, flags);
 #endif /* !ARRAY_VARS */
+
+  if (v && readonly_p (v) == 0 && noassign_p (v) == 0)
+    VUNSETATTR (v, att_invisible);
+
+  return v;
 }

@@ -95,6 +95,14 @@ ok 1
 ok 2
 ok 3
 ok 4
+var=${a[*]}   ... one:::two:three:::four
+var="${a[*]}" ... one:::two:three:::four
+var=$*        ... one:::two:three:::four
+var="$*"      ... one:::two:three:::four
+var=${a[@]}   ... one:::two three:::four
+var="${a[@]}" ... one:::two three:::four
+var=$@        ... one:::two three:::four
+var="$@"      ... one:::two three:::four
 xa|xb|xc
 xa|xb|xc
 a|b|c
@@ -166,3 +174,111 @@ ab
 cd
 ok 1
 ok 2
+argv[1] = <a  b>
+argv[2] = <c  d>
+argv[1] = <a>
+argv[2] = <b>
+argv[3] = <c>
+argv[4] = <d>
+argv[1] = <a  b c  d>
+argv[1] = <a  b c  d>
+<1> <2> <3> <4> <5 1> 
+<1 1> <2> <3> <4> <5> 
+<11> <2> <3> <4> <51> 
+<1 1> <2> <3> <4> <5 1> 
+<11> <2> <3> <4> <51> 
+<1> <2> <3> <4> <51> 
+<11> <2> <3> <4> <5> 
+<1> <2> <3> <4> <51> 
+<11> <2> <3> <4> <5> 
+<1> <2> <3> <4> <5foo> 
+<1> <2> <3> <4> <51> 
+<1> <2> <3> <4> <5foo> 
+<1> <2> <3> <4> <51> 
+<11> <2> <3> <4> <5> 
+<1> <2> <3> <4> <51> 
+<11> <2> <3> <4> <5> 
+<1> <2> <3> <4> <5foo> 
+second set:
+<1 2> <3> <4> <5 1 2> 
+<1 2 1 2> <3> <4> <5> 
+<1 21 2> <3> <4> <51 2> 
+<1 2 1 2> <3> <4> <5 1 2> 
+<1> <21 2> <3> <4> <51> <2> 
+<1 2> <3> <4> <51> <2> 
+<1> <21 2> <3> <4> <5> 
+<1 2> <3> <4> <51 2> 
+<1 21 2> <3> <4> <5> 
+<1 2> <3> <4> <5foo> 
+<1> <2> <3> <4> <51> <2> 
+<1> <2> <3> <4> <5foo> 
+<1 2> <3> <4> <51 2> 
+<1 21 2> <3> <4> <5> 
+<1 2> <3> <4> <51 2> 
+<1 21 2> <3> <4> <5> 
+<1 2> <3> <4> <5foo> 
+third set:
+
+"${@:2}a3 a2" a$1    #works as long as $1 and 3 are swapped
+set y za3 a2 ax
+0
+declare -a a='([0]="y" [1]="za3 a2" [2]="ax")'
+
+"${@:2}b$1 b2" b3    #fails!  why?
+set y zbx b2 b3
+0
+declare -a b='([0]="y" [1]="zbx b2" [2]="b3")'
+
+${@:2}c$1 c2 c3     #works as long as quoting omitted
+set y zcx c2 c3
+0
+declare -a c='([0]="y" [1]="zcx" [2]="c2" [3]="c3")'
+argv[1] = <>
+argv[2] = <x>
+argv[1] = <>
+argv[2] = <x>
+1
+argv[1] = <>
+argv[2] = <>
+argv[3] = <x>
+argv[1] = <>
+argv[2] = <x>
+argv[1] = <>
+argv[2] = <>
+argv[3] = <x>
+argv[1] = <>
+argv[2] = <x>
+argv[1] = <>
+argv[2] = <x>
+argv[1] = <>
+argv[1] = <>
+argv[1] = <>
+argv[1] = <>
+argv[1] = <AwR>
+argv[1] = <AwR>
+argv[1] = <AR>
+argv[1] = <AwR>
+argv[1] = <AR>
+argv[1] = <AR>
+argv[1] = <AwR>
+argv[1] = <AwR>
+argv[1] = <A^?R>
+argv[1] = <AwR>
+argv[1] = <AwR>
+argv[1] = <A^?R>
+<a> <b> <ca> <b> <c-a-b-c> 
+after 1: IFS -
+argv[1] = <a-b-c>
+<a> <b> <c> <da> <b c> <d-a-b c-d> 
+after 2: IFS -
+argv[1] = <a-b c-d>
+argv[1] = <a>
+argv[2] = <b>
+argv[3] = <c>
+argv[4] = <d>
+argv[1] = <a b c d>
+argv[1] = <a>
+argv[2] = <b>
+argv[3] = <c>
+argv[4] = <d>
+argv[1] = <a b c d>

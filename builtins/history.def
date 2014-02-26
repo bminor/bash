@@ -324,9 +324,10 @@ push_history (list)
      If you don't want history -s to remove the compound command from the
      history, change #if 0 to #if 1 below. */
 #if 0
-  if (hist_last_line_pushed == 0 && hist_last_line_added && bash_delete_last_history () == 0)
+  if (remember_on_history && hist_last_line_pushed == 0 &&
+	hist_last_line_added && bash_delete_last_history () == 0)
 #else
-  if (hist_last_line_pushed == 0 &&
+  if (remember_on_history && hist_last_line_pushed == 0 &&
 	(hist_last_line_added ||
 	  (current_command_line_count > 0 && current_command_first_line_saved && command_oriented_history))
       && bash_delete_last_history () == 0)

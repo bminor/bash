@@ -1,6 +1,6 @@
 /* xmbsrtowcs.c -- replacement function for mbsrtowcs */
 
-/* Copyright (C) 2002-2010 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2013 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -166,7 +166,7 @@ xdupmbstowcs2 (destp, src)
   do
     {
       end_or_backslash = strchrnul(p, '\\');
-      nms = (end_or_backslash - p);
+      nms = end_or_backslash - p;
       if (*end_or_backslash == '\0')
 	nms++;
 
@@ -283,6 +283,8 @@ xdupmbstowcs (destp, indicesp, src)
     {
       if (destp)
 	*destp = NULL;
+      if (indicesp)
+	*indicesp = NULL;
       return (size_t)-1;
     }
 
@@ -298,6 +300,8 @@ xdupmbstowcs (destp, indicesp, src)
   if (wsbuf == NULL)
     {
       *destp = NULL;
+      if (indicesp)
+        *indicesp = NULL;
       return (size_t)-1;
     }
 
@@ -309,6 +313,7 @@ xdupmbstowcs (destp, indicesp, src)
 	{
 	  free (wsbuf);
 	  *destp = NULL;
+	  *indicesp = NULL;
 	  return (size_t)-1;
 	}
     }
@@ -343,6 +348,8 @@ xdupmbstowcs (destp, indicesp, src)
 	  free (wsbuf);
 	  FREE (indices);
 	  *destp = NULL;
+	  if (indicesp)
+	    *indicesp = NULL;
 	  return (size_t)-1;
 	}
 
@@ -362,18 +369,22 @@ xdupmbstowcs (destp, indicesp, src)
 	      free (wsbuf);
 	      FREE (indices);
 	      *destp = NULL;
+	      if (indicesp)
+		*indicesp = NULL;
 	      return (size_t)-1;
 	    }
 	  wsbuf = wstmp;
 
 	  if (indicesp)
 	    {
-	      idxtmp = (char **) realloc (indices, wsbuf_size * sizeof (char **));
+	      idxtmp = (char **) realloc (indices, wsbuf_size * sizeof (char *));
 	      if (idxtmp == NULL)
 		{
 		  free (wsbuf);
 		  free (indices);
 		  *destp = NULL;
+		  if (indicesp)
+		    *indicesp = NULL;
 		  return (size_t)-1;
 		}
 	      indices = idxtmp;

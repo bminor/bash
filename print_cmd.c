@@ -1,6 +1,6 @@
 /* print_command -- A way to make readable commands from a command tree. */
 
-/* Copyright (C) 1989-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2011 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -113,6 +113,9 @@ FILE *xtrace_fp = 0;
 
 #define CHECK_XTRACE_FP	xtrace_fp = (xtrace_fp ? xtrace_fp : stderr)
 
+/* shell expansion characters: used in print_redirection_list */
+#define EXPCHAR(c) ((c) == '{' || (c) == '~' || (c) == '$' || (c) == '`')
+
 #define PRINT_DEFERRED_HEREDOCS(x) \
   do { \
     if (deferred_heredocs) \
@@ -131,7 +134,8 @@ static REDIRECT *deferred_heredocs;
 static int group_command_nesting;
 
 /* A buffer to indicate the indirection level (PS4) when set -x is enabled. */
-static char indirection_string[100];
+static char *indirection_string = 0;
+static int indirection_stringsiz = 0;
 
 /* Print COMMAND (a command tree) on standard output. */
 void
@@ -418,17 +422,20 @@ indirection_level_string ()
   register int i, j;
   char *ps4;
   char ps4_firstc[MB_LEN_MAX+1];
-  int ps4_firstc_len, ps4_len;
+  int ps4_firstc_len, ps4_len, ineed, old;
 
-  indirection_string[0] = '\0';
   ps4 = get_string_value ("PS4");
+  if (indirection_string == 0)
+    indirection_string = xmalloc (indirection_stringsiz = 100);
+  indirection_string[0] = '\0';
 
   if (ps4 == 0 || *ps4 == '\0')
     return (indirection_string);
 
-  change_flag ('x', FLAG_OFF);
+  old = change_flag ('x', FLAG_OFF);
   ps4 = decode_prompt_string (ps4);
-  change_flag ('x', FLAG_ON);
+  if (old)
+    change_flag ('x', FLAG_ON);
 
   if (ps4 == 0 || *ps4 == '\0')
     return (indirection_string);
@@ -436,7 +443,7 @@ indirection_level_string ()
 #if defined (HANDLE_MULTIBYTE)
   ps4_len = strnlen (ps4, MB_CUR_MAX);
   ps4_firstc_len = MBLEN (ps4, ps4_len);
-  if (ps4_firstc_len == 1 || ps4_firstc_len == 0 || MB_INVALIDCH (ps4_firstc_len))
+  if (ps4_firstc_len == 1 || ps4_firstc_len == 0 || ps4_firstc_len < 0)
     {
       ps4_firstc[0] = ps4[0];
       ps4_firstc[ps4_firstc_len = 1] = '\0';
@@ -447,8 +454,17 @@ indirection_level_string ()
   ps4_firstc[0] = ps4[0];
   ps4_firstc[ps4_firstc_len = 1] = '\0';
 #endif
-      
-  for (i = j = 0; ps4_firstc[0] && j < indirection_level && i < 99; i += ps4_firstc_len, j++)
+
+  /* Dynamically resize indirection_string so we have room for everything
+     and we don't have to truncate ps4 */
+  ineed = (ps4_firstc_len * indirection_level) + strlen (ps4);
+  if (ineed > indirection_stringsiz - 1)
+    {
+      indirection_stringsiz = ineed + 1;
+      indirection_string = xrealloc (indirection_string, indirection_stringsiz);
+    }
+
+  for (i = j = 0; ps4_firstc[0] && j < indirection_level && i < indirection_stringsiz - 1; i += ps4_firstc_len, j++)
     {
       if (ps4_firstc_len == 1)
 	indirection_string[i] = ps4_firstc[0];
@@ -456,7 +472,7 @@ indirection_level_string ()
 	memcpy (indirection_string+i, ps4_firstc, ps4_firstc_len);
     }      
 
-  for (j = ps4_firstc_len; *ps4 && ps4[j] && i < 99; i++, j++)
+  for (j = ps4_firstc_len; *ps4 && ps4[j] && i < indirection_stringsiz - 1; i++, j++)
     indirection_string[i] = ps4[j];
 
   indirection_string[i] = '\0';
@@ -854,6 +870,21 @@ print_cond_command (cond)
 
 #ifdef DEBUG
 void
+debug_print_word_list (s, list, sep)
+     char *s;
+     WORD_LIST *list;
+     char *sep;
+{
+  WORD_LIST *w;
+
+  if (s)
+    fprintf (stderr, "%s: ", s);
+  for (w = list; w; w = w->next)
+    fprintf (stderr, "%s%s", w->word->word, w->next ? sep : "");
+  fprintf (stderr, "\n");
+}
+
+void
 debug_print_cond_command (cond)
      COND_COM *cond;
 {
@@ -959,7 +990,7 @@ print_deferred_heredocs (cstring)
       cprintf (" ");
       print_heredoc_header (hdtail);
     }
-  if (cstring[0] && (cstring[0] != ';' || cstring[1]))
+  if (cstring && cstring[0] && (cstring[0] != ';' || cstring[1]))
     cprintf ("%s", cstring); 
   if (deferred_heredocs)
     cprintf ("\n");
@@ -983,6 +1014,7 @@ print_redirection_list (redirects)
      REDIRECT *redirects;
 {
   REDIRECT *heredocs, *hdtail, *newredir;
+  char *rw;
 
   heredocs = (REDIRECT *)NULL;
   hdtail = heredocs;
@@ -1004,10 +1036,12 @@ print_redirection_list (redirects)
 	  else
 	    hdtail = heredocs = newredir;
 	}
-      else if (redirects->instruction == r_duplicating_output_word && redirects->redirector.dest == 1)
+      else if (redirects->instruction == r_duplicating_output_word && (redirects->flags & REDIR_VARASSIGN) == 0 && redirects->redirector.dest == 1)
 	{
 	  /* Temporarily translate it as the execution code does. */
-	  redirects->instruction = r_err_and_out;
+	  rw = redirects->redirectee.filename->word;
+	  if (rw && *rw != '-' && DIGIT (*rw) == 0 && EXPCHAR (*rw) == 0)
+	    redirects->instruction = r_err_and_out;
 	  print_redirection (redirects);
 	  redirects->instruction = r_duplicating_output_word;
 	}
@@ -1104,7 +1138,7 @@ print_redirection (redirect)
 	cprintf ("{%s}", redir_word->word);
       else if (redirector != 1)
 	cprintf ("%d", redirector);
-      cprintf (">|%s", redirectee->word);
+      cprintf (">| %s", redirectee->word);
       break;
 
     case r_appending_to:
@@ -1215,11 +1249,11 @@ print_redirection (redirect)
       break;
 
     case r_err_and_out:
-      cprintf ("&>%s", redirectee->word);
+      cprintf ("&> %s", redirectee->word);
       break;
 
     case r_append_err_and_out:
-      cprintf ("&>>%s", redirectee->word);
+      cprintf ("&>> %s", redirectee->word);
       break;
     }
 }
@@ -1259,6 +1293,7 @@ print_function_def (func)
   make_command_string_internal (cmdcopy->type == cm_group
 					? cmdcopy->value.Group->command
 					: cmdcopy);
+  /* XXX - PRINT_DEFERRED_HEREDOCS (""); ? */
 
   remove_unwind_protect ();
   indentation -= indentation_amount;
@@ -1330,6 +1365,7 @@ named_function_string (name, command, flags)
   make_command_string_internal (cmdcopy->type == cm_group
 					? cmdcopy->value.Group->command
 					: cmdcopy);
+  /* XXX - PRINT_DEFERRED_HEREDOCS (""); ? */
 
   indentation = old_indent;
   indentation_amount = old_amount;
@@ -1358,7 +1394,8 @@ named_function_string (name, command, flags)
 	  }
 #else
       if (result[2] == '\n')	/* XXX -- experimental */
-	strcpy (result + 2, result + 3);
+	memmove (result + 2, result + 3, strlen (result) - 2);
+	
 #endif
     }
 
@@ -1394,7 +1431,7 @@ indent (amount)
   for (i = 0; amount > 0; amount--)
     indentation_string[i++] = ' ';
   indentation_string[i] = '\0';
-  cprintf (indentation_string);
+  cprintf ("%s", indentation_string);
 }
 
 static void
@@ -1490,6 +1527,8 @@ cprintf (control, va_alist)
 	  command_string_index += arg_len;
 	}
     }
+
+  va_end (args);
 
   the_printed_command[command_string_index] = '\0';
 }

@@ -1,6 +1,6 @@
 /* locale.c - Miscellaneous internationalization functions. */
 
-/* Copyright (C) 1996-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2009,2012 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -26,6 +26,10 @@
 #  include <unistd.h>
 #endif
 
+#if HAVE_LANGINFO_CODESET
+#  include <langinfo.h>
+#endif
+
 #include "bashintl.h"
 #include "bashansi.h"
 #include <stdio.h>
@@ -38,6 +42,9 @@
 #ifndef errno
 extern int errno;
 #endif
+
+int locale_utf8locale;	/* unused for now */
+int locale_mb_cur_max;	/* value of MB_CUR_MAX for current locale (LC_CTYPE) */
 
 extern int dump_translatable_strings, dump_po_strings;
 
@@ -61,6 +68,7 @@ static char *lang;
 static int reset_locale_vars __P((void));
 
 static void locale_setblanks __P((void));
+static int locale_isutf8 __P((char *));
 
 /* Set the value of default_locale and make the current locale the
    system default locale.  This should be called very early in main(). */
@@ -74,6 +82,8 @@ set_default_locale ()
 #endif /* HAVE_SETLOCALE */
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
+
+  locale_mb_cur_max = MB_CUR_MAX;
 }
 
 /* Set default values for LC_CTYPE, LC_COLLATE, LC_MESSAGES, LC_NUMERIC and
@@ -92,6 +102,8 @@ set_default_locale_vars ()
     {
       setlocale (LC_CTYPE, lc_all);
       locale_setblanks ();
+      locale_mb_cur_max = MB_CUR_MAX;
+      u32reset ();
     }
 #  endif
 
@@ -126,10 +138,8 @@ set_default_locale_vars ()
     {
       FREE (default_domain);
       default_domain = savestring (val);
-#if 0
-      /* Don't want to override the shell's textdomain as the default */
-      textdomain (default_domain);
-#endif
+      if (default_dir && *default_dir)
+	bindtextdomain (default_domain, default_dir);
     }
 
   val = get_string_value ("TEXTDOMAINDIR");
@@ -157,10 +167,8 @@ set_locale_var (var, value)
     {
       FREE (default_domain);
       default_domain = value ? savestring (value) : (char *)NULL;
-#if 0
-      /* Don't want to override the shell's textdomain as the default */
-      textdomain (default_domain);
-#endif
+      if (default_dir && *default_dir)
+	bindtextdomain (default_domain, default_dir);
       return (1);
     }
   else if (var[0] == 'T')			/* TEXTDOMAINDIR */
@@ -194,6 +202,8 @@ set_locale_var (var, value)
 	    internal_warning(_("setlocale: LC_ALL: cannot change locale (%s): %s"), lc_all, strerror (errno));
 	}
       locale_setblanks ();
+      locale_mb_cur_max = MB_CUR_MAX;
+      u32reset ();
       return r;
 #else
       return (1);
@@ -208,6 +218,8 @@ set_locale_var (var, value)
 	{
 	  x = setlocale (LC_CTYPE, get_locale_var ("LC_CTYPE"));
 	  locale_setblanks ();
+	  locale_mb_cur_max = MB_CUR_MAX;
+	  u32reset ();
 	}
 #  endif
     }
@@ -267,7 +279,7 @@ set_lang (var, value)
       lang = (char *)xmalloc (1);
       lang[0] = '\0';
     }
-    
+
   return ((lc_all == 0 || *lc_all == 0) ? reset_locale_vars () : 0);
 }
 
@@ -339,6 +351,8 @@ reset_locale_vars ()
 #  endif
 
   locale_setblanks ();  
+  locale_mb_cur_max = MB_CUR_MAX;
+  u32reset ();
 
 #endif
   return 1;
@@ -531,4 +545,19 @@ locale_setblanks ()
       else
 	sh_syntaxtab[x] &= ~(CSHBRK|CBLANK);
     }
+}
+
+static int
+locale_isutf8 (lspec)
+     char *lspec;
+{
+  char *cp;
+
+#if HAVE_LANGINFO_CODESET
+  cp = nl_langinfo (CODESET);
+  return (STREQ (cp, "UTF-8") || STREQ (cp, "utf8"));
+#else
+  /* Take a shot */
+  return (strstr (lspec, "UTF-8") || strstr (lspec, "utf8"));
+#endif
 }

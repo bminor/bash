@@ -66,11 +66,10 @@ zmapfd (fd, ostr, fn)
 	}
       else if (nr < 0)
 	{
-	  rval = -1;
 	  free (result);
 	  if (ostr)
 	    *ostr = (char *)NULL;
-	  break;
+	  return -1;
 	}
 
       RESIZE_MALLOCED_BUFFER (result, rind, nr, rsize, 128);

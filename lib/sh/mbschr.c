@@ -27,6 +27,8 @@
 #include "bashansi.h"
 #include "shmbutil.h"
 
+extern int locale_mb_cur_max;
+
 #undef mbschr
 
 /* In some locales, the non-first byte of some multibyte characters have
@@ -51,7 +53,7 @@ mbschr (s, c)
      GBK, GB18030, SHIFT_JIS, and JOHAB.  They exhibit the problem only
      when c >= 0x30.  We can therefore use the faster bytewise search if
      c <= 0x30. */
-  if ((unsigned char)c >= '0' && MB_CUR_MAX > 1)
+  if ((unsigned char)c >= '0' && locale_mb_cur_max > 1)
     {
       pos = (char *)s;
       memset (&state, '\0', sizeof(mbstate_t));
@@ -59,9 +61,14 @@ mbschr (s, c)
 
       while (strlength > 0)
 	{
-	  mblength = mbrlen (pos, strlength, &state);
-	  if (mblength == (size_t)-2 || mblength == (size_t)-1 || mblength == (size_t)0)
+	  if (is_basic (*pos))
 	    mblength = 1;
+	  else
+	    {
+	      mblength = mbrlen (pos, strlength, &state);
+	      if (mblength == (size_t)-2 || mblength == (size_t)-1 || mblength == (size_t)0)
+	        mblength = 1;
+	    }
 
 	  if (mblength == 1 && c == (unsigned char)*pos)
 	    return pos;

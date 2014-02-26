@@ -1,5 +1,7 @@
 # See whether or not we can use `diff -a'
-( diff -a ./printf.tests ./printf.tests >/dev/null 2>&1 ) && AFLAG=-a
+#( diff -a ./printf.tests ./printf.tests >/dev/null 2>&1 ) && AFLAG=-a
 
-${THIS_SH} ./printf.tests > /tmp/xx 2>&1
-diff $AFLAG /tmp/xx printf.right && rm -f /tmp/xx
+# use cat -v (and assume it's there) to make control chars visible
+${THIS_SH} ./printf.tests 2>&1 | cat -v > /tmp/xx 
+#diff $AFLAG /tmp/xx printf.right && rm -f /tmp/xx
+diff /tmp/xx printf.right && rm -f /tmp/xx

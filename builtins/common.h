@@ -145,6 +145,8 @@ extern void set_bashopts __P((void));
 extern void parse_bashopts __P((char *));
 extern void initialize_bashopts __P((int));
 
+extern void set_compatibility_opts __P((void));
+
 /* Functions from type.def */
 extern int describe_command __P((char *, int));
 
@@ -153,6 +155,7 @@ extern int set_or_show_attributes __P((WORD_LIST *, int, int));
 extern int show_all_var_attributes __P((int, int));
 extern int show_var_attributes __P((SHELL_VAR *, int, int));
 extern int show_name_attributes __P((char *, int));
+extern int show_func_attributes __P((char *, int));
 extern void set_var_attribute __P((char *, int, int));
 
 /* Functions from pushd.def */
@@ -163,6 +166,7 @@ extern WORD_LIST *get_directory_stack __P((int));
 
 /* Functions from evalstring.c */
 extern int parse_and_execute __P((char *, const char *, int));
+extern int evalstring __P((char *, const char *, int));
 extern void parse_and_execute_cleanup __P((void));
 extern int parse_string __P((char *, const char *, int, char **));
 

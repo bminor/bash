@@ -85,7 +85,7 @@ INC = -I. -I.. -I$(topdir) -I$(topdir)/lib -I$(topdir)/builtins \
 
 ALLPROG = print truefalse sleep pushd finfo logname basename dirname \
 	  tty pathchk tee head mkdir rmdir printenv id whoami \
-	  uname sync push ln unlink cut realpath getconf strftime mypid
+	  uname sync push ln unlink realpath strftime mypid
 OTHERPROG = necho hello cat
 
 all:	$(SHOBJ_STATUS)
@@ -109,9 +109,6 @@ print:	print.o
 
 necho:	necho.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ necho.o $(SHOBJ_LIBS)
-
-getconf: getconf.o
-	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ getconf.o $(SHOBJ_LIBS)
 
 hello:	hello.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ hello.o $(SHOBJ_LIBS)
@@ -179,9 +176,6 @@ ln:	ln.o
 unlink:	unlink.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ unlink.o $(SHOBJ_LIBS)
 
-cut:	cut.o
-	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ cut.o $(SHOBJ_LIBS)
-
 realpath:	realpath.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ realpath.o $(SHOBJ_LIBS)
 
@@ -229,7 +223,6 @@ tee.o: tee.c
 head.o: head.c
 rmdir.o: rmdir.c
 necho.o: necho.c
-getconf.o: getconf.c
 hello.o: hello.c
 cat.o: cat.c
 printenv.o: printenv.c

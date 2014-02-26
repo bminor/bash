@@ -46,8 +46,8 @@
 #include "command.h"
 #include "general.h"
 #include "unwind_prot.h"
-#include "quit.h"
 #include "sig.h"
+#include "quit.h"
 #include "error.h"	/* for internal_warning */
 
 /* Structure describing a saved variable and the value to restore it to.  */

@@ -96,3 +96,40 @@ EOF
 a:file
 b:file
 c:file
+bb is a function
+bb () 
+{ 
+    ( cat  <<EOF
+foo
+bar
+EOF
+ )
+    echo after subshell
+}
+mkcoprocs is a function
+mkcoprocs () 
+{ 
+    coproc a { 
+        cat  <<EOF1
+producer 1
+EOF1
+
+    }
+    coproc b { 
+        cat  <<EOF2
+producer 2
+EOF2
+
+    }
+    echo "coprocs created"
+}
+mkcoprocs is a function
+mkcoprocs () 
+{ 
+    coproc COPROC ( b cat  <<EOF
+heredoc
+body
+EOF
+ )
+    echo "coprocs created"
+}

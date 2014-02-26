@@ -2,7 +2,7 @@ This file is mapfile.def, from which is created mapfile.c.
 It implements the builtin "mapfile" in Bash.
 
 Copyright (C) 2005-2006 Rocky Bernstein for Free Software Foundation, Inc.
-Copyright (C) 2008-2010 Free Software Foundation, Inc.
+Copyright (C) 2008-2012 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -125,7 +125,7 @@ run_callback (callback, curindex, curline)
 #endif
   snprintf (execstr, execlen, "%s %d %s", callback, curindex, qline);
   free (qline);
-  return parse_and_execute (execstr, NULL, flags);
+  return evalstring (execstr, NULL, flags);
 }
 
 static void
@@ -172,6 +172,8 @@ mapfile (fd, line_count_goal, origin, nskip, callback_quantum, callback, array_n
       builtin_error (_("%s: not an indexed array"), array_name);
       return (EXECUTION_FAILURE);
     }
+  else if (invisible_p (entry))
+    VUNSETATTR (entry, att_invisible);	/* no longer invisible */
       
   if (flags & MAPF_CLEARARRAY)
     array_flush (array_cell (entry));
@@ -193,7 +195,6 @@ mapfile (fd, line_count_goal, origin, nskip, callback_quantum, callback, array_n
   line_length = 0;    
 
   /* Reset the buffer for bash own stream */
-  interrupt_immediately++;
   for (array_index = origin, line_count = 1; 
  	zgetline (fd, &line, &line_length, unbuffered_read) != -1;
 	array_index++) 
@@ -212,6 +213,8 @@ mapfile (fd, line_count_goal, origin, nskip, callback_quantum, callback, array_n
 	    zsyncfd (fd);
 	}
 
+      /* XXX - bad things can happen if the callback modifies ENTRY, e.g.,
+	 unsetting it or changing it to a non-indexed-array type. */
       bind_array_element (entry, array_index, line, 0);
 
       /* Have we exceeded # of lines to store? */
@@ -225,7 +228,6 @@ mapfile (fd, line_count_goal, origin, nskip, callback_quantum, callback, array_n
   if (unbuffered_read == 0)
     zsyncfd (fd);
 
-  interrupt_immediately--;
   return EXECUTION_SUCCESS;
 }
 

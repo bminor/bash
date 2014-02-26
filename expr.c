@@ -1,6 +1,6 @@
 /* expr.c -- arithmetic expression evaluation. */
 
-/* Copyright (C) 1990-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1990-2013 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -63,7 +63,7 @@
  Implementation is a recursive-descent parser.
 
  Chet Ramey
- chet@ins.CWRU.Edu
+ chet@po.cwru.edu
 */
 
 #include "config.h"
@@ -82,12 +82,13 @@
 #include "bashintl.h"
 
 #include "shell.h"
+#include "typemax.h"		/* INTMAX_MAX, INTMAX_MIN */
 
 /* Because of the $((...)) construct, expressions may include newlines.
    Here is a macro which accepts newlines, tabs and spaces as whitespace. */
 #define cr_whitespace(c) (whitespace(c) || ((c) == '\n'))
 
-/* Size be which the expression stack grows when neccessary. */
+/* Size be which the expression stack grows when necessary. */
 #define EXPR_STACK_GROW_SIZE 10
 
 /* Maximum amount of recursion allowed.  This prevents a non-integer
@@ -188,7 +189,9 @@ static void	pushexp __P((void));
 static void	popexp __P((void));
 static void	expr_unwind __P((void));
 static void	expr_bind_variable __P((char *, char *));
+#if defined (ARRAY_VARS)
 static void	expr_bind_array_element __P((char *, arrayind_t, char *));
+#endif
 
 static intmax_t subexpr __P((char *));
 
@@ -309,10 +312,15 @@ static void
 expr_bind_variable (lhs, rhs)
      char *lhs, *rhs;
 {
-  (void)bind_int_variable (lhs, rhs);
+  SHELL_VAR *v;
+
+  v = bind_int_variable (lhs, rhs);
+  if (v && (readonly_p (v) || noassign_p (v)))
+    longjmp (evalbuf, 1);	/* variable assignment error */
   stupidly_hack_special_variables (lhs);
 }
 
+#if defined (ARRAY_VARS)
 /* Rewrite tok, which is of the form vname[expression], to vname[ind], where
    IND is the already-calculated value of expression. */
 static void
@@ -333,11 +341,12 @@ expr_bind_array_element (tok, ind, rhs)
 
   sprintf (lhs, "%s[%s]", vname, istr);		/* XXX */
   
-  expr_bind_variable (lhs, rhs);
 /*itrace("expr_bind_array_element: %s=%s", lhs, rhs);*/
+  expr_bind_variable (lhs, rhs);
   free (vname);
   free (lhs);
 }
+#endif /* ARRAY_VARS */
 
 /* Evaluate EXPR, and return the arithmetic result.  If VALIDP is
    non-null, a zero is stored into the location to which it points
@@ -366,7 +375,7 @@ evalexp (expr, validp)
 
   FASTCOPY (evalbuf, oevalbuf, sizeof (evalbuf));
 
-  c = setjmp (evalbuf);
+  c = setjmp_nosigs (evalbuf);
 
   if (c)
     {
@@ -450,6 +459,9 @@ expassign ()
   register intmax_t value;
   char *lhs, *rhs;
   arrayind_t lind;
+#if defined (HAVE_IMAXDIV)
+  imaxdiv_t idiv;
+#endif
 
   value = expcond ();
   if (curtok == EQ || curtok == OP_ASSIGN)
@@ -468,6 +480,7 @@ expassign ()
 	  lvalue = value;
 	}
 
+      /* XXX - watch out for pointer aliasing issues here */
       lhs = savestring (tokstr);
       /* save ind in case rhs is string var and evaluation overwrites it */
       lind = curlval.ind;
@@ -490,10 +503,18 @@ expassign ()
 	      lvalue *= value;
 	      break;
 	    case DIV:
-	      lvalue /= value;
-	      break;
 	    case MOD:
-	      lvalue %= value;
+	      if (lvalue == INTMAX_MIN && value == -1)
+		lvalue = (op == DIV) ? INTMAX_MIN : 0;
+	      else
+#if HAVE_IMAXDIV
+		{
+		  idiv = imaxdiv (lvalue, value);
+		  lvalue = (op == DIV) ? idiv.quot : idiv.rem;
+		}
+#else
+	        lvalue = (op == DIV) ? lvalue / value : lvalue % value;
+#endif
 	      break;
 	    case PLUS:
 	      lvalue += value;
@@ -527,16 +548,22 @@ expassign ()
       rhs = itos (value);
       if (noeval == 0)
 	{
+#if defined (ARRAY_VARS)
 	  if (lind != -1)
 	    expr_bind_array_element (lhs, lind, rhs);
 	  else
+#endif
 	    expr_bind_variable (lhs, rhs);
 	}
+      if (curlval.tokstr && curlval.tokstr == tokstr)
+	init_lvalue (&curlval);
+
       free (rhs);
       free (lhs);
       FREE (tokstr);
       tokstr = (char *)NULL;		/* For freeing on errors. */
     }
+
   return (value);
 }
 
@@ -654,6 +681,7 @@ expbor ()
       readtok ();
       val2 = expbxor ();
       val1 = val1 | val2;
+      lasttok = NUM;
     }
 
   return (val1);
@@ -672,6 +700,7 @@ expbxor ()
       readtok ();
       val2 = expband ();
       val1 = val1 ^ val2;
+      lasttok = NUM;
     }
 
   return (val1);
@@ -690,6 +719,7 @@ expband ()
       readtok ();
       val2 = exp5 ();
       val1 = val1 & val2;
+      lasttok = NUM;
     }
 
   return (val1);
@@ -712,6 +742,7 @@ exp5 ()
 	val1 = (val1 == val2);
       else if (op == NEQ)
 	val1 = (val1 != val2);
+      lasttok = NUM;
     }
   return (val1);
 }
@@ -740,6 +771,7 @@ exp4 ()
 	val1 = val1 < val2;
       else			/* (op == GT) */
 	val1 = val1 > val2;
+      lasttok = NUM;
     }
   return (val1);
 }
@@ -763,6 +795,7 @@ expshift ()
 	val1 = val1 << val2;
       else
 	val1 = val1 >> val2;
+      lasttok = NUM;
     }
 
   return (val1);
@@ -786,6 +819,7 @@ exp3 ()
 	val1 += val2;
       else if (op == MINUS)
 	val1 -= val2;
+      lasttok = NUM;
     }
   return (val1);
 }
@@ -794,6 +828,9 @@ static intmax_t
 exp2 ()
 {
   register intmax_t val1, val2;
+#if defined (HAVE_IMAXDIV)
+  imaxdiv_t idiv;
+#endif
 
   val1 = exppower ();
 
@@ -802,27 +839,67 @@ exp2 ()
 	 (curtok == MOD))
     {
       int op = curtok;
+      char *stp, *sltp;
 
+      stp = tp;
       readtok ();
 
       val2 = exppower ();
 
+      /* Handle division by 0 and twos-complement arithmetic overflow */
       if (((op == DIV) || (op == MOD)) && (val2 == 0))
 	{
 	  if (noeval == 0)
-	    evalerror (_("division by 0"));
+	    {
+	      sltp = lasttp;
+	      lasttp = stp;
+	      while (lasttp && *lasttp && whitespace (*lasttp))
+		lasttp++;
+	      evalerror (_("division by 0"));
+	      lasttp = sltp;
+	    }
 	  else
 	    val2 = 1;
 	}
+      else if (op == MOD && val1 == INTMAX_MIN && val2 == -1)
+	{
+	  val1 = 0;
+	  continue;
+	}
+      else if (op == DIV && val1 == INTMAX_MIN && val2 == -1)
+	val2 = 1;
 
       if (op == MUL)
 	val1 *= val2;
-      else if (op == DIV)
-	val1 /= val2;
-      else if (op == MOD)
-	val1 %= val2;
+      else if (op == DIV || op == MOD)
+#if defined (HAVE_IMAXDIV)
+	{
+	  idiv = imaxdiv (val1, val2);
+	  val1 = (op == DIV) ? idiv.quot : idiv.rem;
+	}
+#else
+	val1 = (op == DIV) ? val1 / val2 : val1 % val2;
+#endif
+      lasttok = NUM;
     }
   return (val1);
+}
+
+static intmax_t
+ipow (base, exp)
+     intmax_t base, exp;
+{
+  intmax_t result;
+
+  result = 1;
+  while (exp)
+    {
+      if (exp & 1)
+	result *= base;
+      exp >>= 1;
+      base *= base;
+    }
+  return result;
 }
 
 static intmax_t
@@ -835,13 +912,12 @@ exppower ()
     {
       readtok ();
       val2 = exppower ();	/* exponentiation is right-associative */
+      lasttok = NUM;
       if (val2 == 0)
 	return (1);
       if (val2 < 0)
 	evalerror (_("exponent less than 0"));
-      for (c = 1; val2--; c *= val1)
-	;
-      val1 = c;
+      val1 = ipow (val1, val2);
     }
   return (val1);
 }
@@ -855,21 +931,25 @@ exp1 ()
     {
       readtok ();
       val = !exp1 ();
+      lasttok = NUM;
     }
   else if (curtok == BNOT)
     {
       readtok ();
       val = ~exp1 ();
+      lasttok = NUM;
     }
   else if (curtok == MINUS)
     {
       readtok ();
       val = - exp1 ();
+      lasttok = NUM;
     }
   else if (curtok == PLUS)
     {
       readtok ();
       val = exp1 ();
+      lasttok = NUM;
     }
   else
     val = exp0 ();
@@ -899,9 +979,11 @@ exp0 ()
       vincdec = itos (v2);
       if (noeval == 0)
 	{
+#if defined (ARRAY_VARS)
 	  if (curlval.ind != -1)
 	    expr_bind_array_element (curlval.tokstr, curlval.ind, vincdec);
 	  else
+#endif
 	    expr_bind_variable (tokstr, vincdec);
 	}
       free (vincdec);
@@ -912,6 +994,7 @@ exp0 ()
     }
   else if (curtok == LPAR)
     {
+      /* XXX - save curlval here?  Or entire expression context? */
       readtok ();
       val = EXP_HIGHEST ();
 
@@ -945,9 +1028,11 @@ exp0 ()
 	      vincdec = itos (v2);
 	      if (noeval == 0)
 		{
+#if defined (ARRAY_VARS)
 		  if (curlval.ind != -1)
 		    expr_bind_array_element (curlval.tokstr, curlval.ind, vincdec);
 		  else
+#endif
 		    expr_bind_variable (tokstr, vincdec);
 		}
 	      free (vincdec);
@@ -955,11 +1040,11 @@ exp0 ()
  	    }
  	  else
  	    {
+	      /* XXX - watch out for pointer aliasing issues here */
 	      if (stok == STR)	/* free new tokstr before old one is restored */
 		FREE (tokstr);
 	      RESTORETOK (&ec);
  	    }
-
 	}
 	  
       readtok ();
@@ -1048,8 +1133,8 @@ expr_streval (tok, e, lvalue)
 	jump_to_top_level (FORCE_EOF);
     }
 
-  ind = -1;
 #if defined (ARRAY_VARS)
+  ind = -1;
   /* Second argument of 0 to get_array_value means that we don't allow
      references like array[@].  In this case, get_array_value is just
      like get_variable_value in that it does not return newly-allocated
@@ -1066,7 +1151,11 @@ expr_streval (tok, e, lvalue)
       lvalue->tokstr = tok;	/* XXX */
       lvalue->tokval = tval;
       lvalue->tokvar = v;	/* XXX */
+#if defined (ARRAY_VARS)
       lvalue->ind = ind;
+#else
+      lvalue->ind = -1;
+#endif
     }
 	  
   return (tval);

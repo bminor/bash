@@ -179,6 +179,9 @@ ${THIS_SH} ./source5.sub
 # test bugs in sourcing non-regular files, fixed post-bash-3.2
 ${THIS_SH} ./source6.sub
 
+# test bugs with source called from multiline aliases and other contexts
+${THIS_SH} ./source7.sub
+
 # in posix mode, assignment statements preceding special builtins are
 # reflected in the shell environment.  `.' and `eval' need special-case
 # code.
@@ -249,6 +252,9 @@ ${THIS_SH} ./builtins2.sub
 
 # test behavior of declare -g
 ${THIS_SH} ./builtins3.sub
+
+# test behavior of using declare to create variables without assigning values
+${THIS_SH} ./builtins4.sub
 
 # this must be last -- it is a fatal error
 exit status

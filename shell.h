@@ -96,6 +96,8 @@ extern int startup_state;
 extern int subshell_environment;
 extern int shell_compatibility_level;
 
+extern int locale_mb_cur_max;
+
 /* Structure to pass around that holds a bitmap of file descriptors
    to close, and the size of that structure.  Used in execute_cmd.c. */
 struct fd_bitmap {
@@ -171,9 +173,9 @@ typedef struct _sh_parser_state_t {
 
 typedef struct _sh_input_line_state_t {
   char *input_line;
-  int input_line_index;
-  int input_line_size;
-  int input_line_len;
+  size_t input_line_index;
+  size_t input_line_size;
+  size_t input_line_len;
 } sh_input_line_state_t;
 
 /* Let's try declaring these here. */

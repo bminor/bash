@@ -7,7 +7,7 @@
  * chet@ins.cwru.edu
  */
 
-/* Copyright (C) 2008,2009 Free Software Foundation, Inc.
+/* Copyright (C) 2008,2009,2011 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -65,7 +65,7 @@ assoc_flush (hash)
 {
   hash_flush (hash, 0);
 }
-     
+
 int
 assoc_insert (hash, key, value)
      HASH_TABLE *hash;
@@ -85,6 +85,29 @@ assoc_insert (hash, key, value)
   FREE (b->data);
   b->data = value ? savestring (value) : (char *)0;
   return (0);
+}
+
+/* Like assoc_insert, but returns b->data instead of freeing it */
+PTR_T
+assoc_replace (hash, key, value)
+     HASH_TABLE *hash;
+     char *key;
+     char *value;
+{
+  BUCKET_CONTENTS *b;
+  PTR_T t;
+
+  b = hash_search (key, hash, HASH_CREATE);
+  if (b == 0)
+    return (PTR_T)0;
+  /* If we are overwriting an existing element's value, we're not going to
+     use the key.  Nothing in the array assignment code path frees the key
+     string, so we can free it here to avoid a memory leak. */
+  if (b->key != key)
+    free (key);
+  t = b->data;
+  b->data = value ? savestring (value) : (char *)0;
+  return t;
 }
 
 void
@@ -510,7 +533,7 @@ assoc_to_string (h, sep, quoted)
     return (savestring (""));
 
   result = NULL;
-  list = NULL;
+  l = list = NULL;
   /* This might be better implemented directly, but it's simple to implement
      by converting to a word list first, possibly quoting the data, then
      using list_string */
@@ -528,6 +551,8 @@ assoc_to_string (h, sep, quoted)
   l = REVERSE_LIST(list, WORD_LIST *);
 
   result = l ? string_list_internal (l, sep) : savestring ("");
+  dispose_words (l);  
+
   return result;
 }
 

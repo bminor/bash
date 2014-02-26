@@ -179,7 +179,7 @@ variable expansion semantics, redirection, and quoting as the
 Bourne shell.  Where differences appear between the POSIX.2
 standard and traditional sh behavior, Bash follows POSIX.
 .PP
-The Korn Shell (\fBksh\fP) is a descendent of the Bourne shell written
+The Korn Shell (\fBksh\fP) is a descendant of the Bourne shell written
 at AT&T Bell Laboratories by David Korn\(dg.  It provides a number of
 useful features that POSIX and Bash have adopted.  Many of the
 interactive facilities in POSIX.2 have their roots in the ksh:
@@ -491,7 +491,7 @@ some bindings, and begin to use them almost immediately.
 .PP
 Bash implements the
 .B bind
-builtin for more dyamic control of readline than the startup file
+builtin for more dynamic control of readline than the startup file
 permits.
 .B Bind
 is used in several ways.  In
@@ -544,7 +544,7 @@ and
 builtins to manipulate the history list.
 The value of
 .B $HISTFILE
-specifes the file where Bash writes the command history on exit and
+specifies the file where Bash writes the command history on exit and
 reads it on startup.
 .B $HISTSIZE
 is used to limit the number of commands saved in the history.

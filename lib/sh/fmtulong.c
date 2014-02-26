@@ -1,6 +1,6 @@
 /* fmtulong.c -- Convert unsigned long int to string. */
 
-/* Copyright (C) 1998-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1998-2011 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -98,8 +98,9 @@ fmtulong (ui, base, buf, len, flags)
   if (base < 2 || base > 64)
     {
 #if 1
+      /* XXX - truncation possible with long translation */
       strncpy (buf, _("invalid base"), len - 1);
-      buf[len] = '\0';
+      buf[len-1] = '\0';
       errno = EINVAL;
       return (p = buf);
 #else

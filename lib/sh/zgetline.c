@@ -50,7 +50,7 @@ typedef ssize_t creadfunc_t __P((int, char *));
    The differences are
    	(1) using file descriptor instead of FILE *,
 	(2) the order of arguments; the file descriptor comes the first, and
-	(3) the addtion of thired argument, UNBUFFERED_READ; this argument
+	(3) the addition of third argument, UNBUFFERED_READ; this argument
 	    controls whether get_line uses buffering or not to get a byte data
 	    from FD. get_line uses zreadc if UNBUFFERED_READ is zero; and
 	    uses zread if UNBUFFERED_READ is non-zero.

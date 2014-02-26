@@ -40,6 +40,7 @@ extern char *shell_name;
 #endif
 
 extern int shell_initialized;
+extern int builtin_ignoring_errexit;
 
 /* -c, -s invocation options -- not really flags, but they show up in $- */
 extern int want_pending_command, read_from_stdin;
@@ -59,7 +60,9 @@ int mark_modified_vars = 0;
 int asynchronous_notification = 0;
 
 /* Non-zero means exit immediately if a command exits with a non-zero
-   exit status. */
+   exit status.  The first is what controls set -e; the second is what
+   bash uses internally. */
+int errexit_flag = 0;
 int exit_immediately_on_error = 0;
 
 /* Non-zero means disable filename globbing. */
@@ -126,7 +129,11 @@ int hashing_enabled = 1;
 #if defined (BANG_HISTORY)
 /* Non-zero means that we are doing history expansion.  The default.
    This means !22 gets the 22nd line of history. */
+#  if defined (STRICT_POSIX)
+int history_expansion = 0;
+#  else
 int history_expansion = 1;
+#  endif
 #endif /* BANG_HISTORY */
 
 /* Non-zero means that we allow comments to appear in interactive commands. */
@@ -175,7 +182,7 @@ const struct flags_alist shell_flags[] = {
 #if defined (JOB_CONTROL)
   { 'b', &asynchronous_notification },
 #endif /* JOB_CONTROL */
-  { 'e', &exit_immediately_on_error },
+  { 'e', &errexit_flag },
   { 'f', &disallow_filename_globbing },
   { 'h', &hashing_enabled },
   { 'i', &forced_interactive },
@@ -250,7 +257,6 @@ change_flag (flag, on_or_off)
     return (FLAG_ERROR);
 
   old_value = *value;
-
   *value = (on_or_off == FLAG_ON) ? 1 : 0;
 
   /* Special cases for a few flags. */
@@ -268,6 +274,11 @@ change_flag (flag, on_or_off)
       set_job_control (on_or_off == FLAG_ON);
       break;
 #endif /* JOB_CONTROL */
+
+    case 'e':
+      if (builtin_ignoring_errexit == 0)
+	exit_immediately_on_error = errexit_flag;
+      break;
 
     case 'n':
       if (interactive_shell)

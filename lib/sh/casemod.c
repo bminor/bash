@@ -36,8 +36,10 @@
 #include <ctype.h>
 #include <xmalloc.h>
 
+#include <shmbchar.h>
 #include <shmbutil.h>
 #include <chartypes.h>
+#include <typemax.h>
 
 #include <glob/strmatch.h>
 
@@ -67,6 +69,10 @@
 
 extern char *substring __P((char *, int, int));
 
+#ifndef UCHAR_MAX
+#  define UCHAR_MAX	TYPE_MAXIMUM(unsigned char)
+#endif
+
 #if defined (HANDLE_MULTIBYTE)
 static wchar_t
 cval (s, i)
@@ -78,7 +84,7 @@ cval (s, i)
   int l;
   mbstate_t mps;  
 
-  if (MB_CUR_MAX == 1)
+  if (MB_CUR_MAX == 1 || is_basic (s[i]))
     return ((wchar_t)s[i]);
   l = strlen (s);
   if (i >= (l - 1))
@@ -140,8 +146,10 @@ sh_modcase (string, pat, flags)
       if (iswalnum (wc) == 0)
 	{
 	  inword = 0;
+#if 0
 	  ADVANCE_CHAR (ret, end, start);
 	  continue;
+#endif
 	}
 
       if (pat)
@@ -202,8 +210,11 @@ sh_modcase (string, pat, flags)
       else
 	nop = flags;
 
-      if (MB_CUR_MAX == 1 || isascii (wc))
+      /* Need to check UCHAR_MAX since wc may have already been converted to a
+	 wide character by cval() */
+      if (MB_CUR_MAX == 1 || (wc <= UCHAR_MAX && is_basic ((int)wc)))
 	{
+singlebyte:
 	  switch (nop)
 	  {
 	  default:
@@ -220,15 +231,18 @@ sh_modcase (string, pat, flags)
 	{
 	  m = mbrtowc (&wc, string + start, end - start, &state);
 	  if (MB_INVALIDCH (m))
-	    wc = (wchar_t)string[start];
+	    {
+	      wc = (unsigned char)string[start];
+	      goto singlebyte;
+	    }
 	  else if (MB_NULLWCH (m))
 	    wc = L'\0';
 	  switch (nop)
 	  {
 	  default:
 	  case CASE_NOOP:  nwc = wc; break;
-	  case CASE_UPPER:  nwc = TOUPPER (wc); break;
-	  case CASE_LOWER:  nwc = TOLOWER (wc); break;
+	  case CASE_UPPER:  nwc = _to_wupper (wc); break;
+	  case CASE_LOWER:  nwc = _to_wlower (wc); break;
 	  case CASE_TOGGLEALL:
 	  case CASE_TOGGLE: nwc = TOGGLE (wc); break;
 	  }

@@ -109,11 +109,16 @@ _evalfile (filename, flags)
   GET_ARRAY_FROM_VAR ("BASH_ARGC", bash_argc_v, bash_argc_a);
 #  endif
 #endif
-  
+
   fd = open (filename, O_RDONLY);
 
   if (fd < 0 || (fstat (fd, &finfo) == -1))
     {
+      i = errno;
+      if (fd >= 0)
+	close (fd);
+      errno = i;
+
 file_error_and_exit:
       if (((flags & FEVAL_ENOENTOK) == 0) || errno != ENOENT)
 	file_error (filename);
@@ -133,11 +138,13 @@ file_error_and_exit:
   if (S_ISDIR (finfo.st_mode))
     {
       (*errfunc) (_("%s: is a directory"), filename);
+      close (fd);
       return ((flags & FEVAL_BUILTIN) ? EXECUTION_FAILURE : -1);
     }
   else if ((flags & FEVAL_REGFILE) && S_ISREG (finfo.st_mode) == 0)
     {
       (*errfunc) (_("%s: not a regular file"), filename);
+      close (fd);
       return ((flags & FEVAL_BUILTIN) ? EXECUTION_FAILURE : -1);
     }
 
@@ -146,6 +153,7 @@ file_error_and_exit:
   if (file_size != finfo.st_size || file_size + 1 < file_size)
     {
       (*errfunc) (_("%s: file is too large"), filename);
+      close (fd);
       return ((flags & FEVAL_BUILTIN) ? EXECUTION_FAILURE : -1);
     }      
 
@@ -251,7 +259,7 @@ file_error_and_exit:
   if (flags & FEVAL_BUILTIN)
     result = EXECUTION_SUCCESS;
 
-  return_val = setjmp (return_catch);
+  return_val = setjmp_nosigs (return_catch);
 
   /* If `return' was seen outside of a function, but in the script, then
      force parse_and_execute () to clean up. */

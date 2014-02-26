@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include "bashtypes.h"
 #include "posixstat.h"
-#ifndef _MINIX
+#if defined (HAVE_SYS_PARAM_H)
 #  include <sys/param.h>
 #endif
 #if defined (HAVE_UNISTD_H)
@@ -267,7 +267,10 @@ file_mod_date_changed (i)
   file = mailfiles[i]->name;
   mtime = mailfiles[i]->mod_time;
 
-  if ((mailstat (file, &finfo) == 0) && (finfo.st_size > 0))
+  if (mailstat (file, &finfo) != 0)
+    return (0);
+
+  if (finfo.st_size > 0)
     return (mtime < finfo.st_mtime);
 
   if (finfo.st_size == 0 && mailfiles[i]->file_size > 0)
@@ -288,7 +291,10 @@ file_access_date_changed (i)
   file = mailfiles[i]->name;
   atime = mailfiles[i]->access_time;
 
-  if ((mailstat (file, &finfo) == 0) && (finfo.st_size > 0))
+  if (mailstat (file, &finfo) != 0)
+    return (0);
+
+  if (finfo.st_size > 0)
     return (atime < finfo.st_atime);
 
   return (0);

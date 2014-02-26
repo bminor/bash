@@ -21,7 +21,7 @@
 #include <config.h>
 
 #include <bashtypes.h>
-#ifndef _MINIX
+#if defined (HAVE_SYS_PARAM_H)
 #  include <sys/param.h>
 #endif
 #include <posixstat.h>
@@ -269,7 +269,7 @@ sh_realpath (pathname, resolved)
       wd = get_working_directory ("sh_realpath");
       if (wd == 0)
 	return ((char *)NULL);
-      tdir = sh_makepath ((char *)pathname, wd, 0);
+      tdir = sh_makepath (wd, (char *)pathname, 0);
       free (wd);
     }
   else

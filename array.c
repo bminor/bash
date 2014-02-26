@@ -58,7 +58,11 @@ static char *array_to_string_internal __P((ARRAY_ELEMENT *, ARRAY_ELEMENT *, cha
 static ARRAY *lastarray = 0;
 static ARRAY_ELEMENT *lastref = 0;
 
-#define IS_LASTREF(a)	((a) == lastarray)
+#define IS_LASTREF(a)	(lastarray && (a) == lastarray)
+
+#define LASTREF_START(a, i) \
+	(IS_LASTREF(a) && i >= element_index(lastref)) ? lastref \
+						       : element_forw(a->head)
 
 #define INVALIDATE_LASTREF(a) \
 do { \
@@ -610,7 +614,7 @@ ARRAY	*a;
 arrayind_t	i;
 char	*v;
 {
-	register ARRAY_ELEMENT *new, *ae;
+	register ARRAY_ELEMENT *new, *ae, *start;
 
 	if (a == 0)
 		return(-1);
@@ -627,10 +631,17 @@ char	*v;
 		SET_LASTREF(a, new);
 		return(0);
 	}
+#if OPTIMIZE_SEQUENTIAL_ARRAY_ASSIGNMENT
 	/*
-	 * Otherwise we search for the spot to insert it.
+	 * Otherwise we search for the spot to insert it.  The lastref
+	 * handle optimizes the case of sequential or almost-sequential
+	 * assignments that are not at the end of the array.
 	 */
-	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae)) {
+	start = LASTREF_START(a, i);
+#else
+	start = element_forw(ae->head);
+#endif
+	for (ae = start; ae != a->head; ae = element_forw(ae)) {
 		if (element_index(ae) == i) {
 			/*
 			 * Replacing an existing element.
@@ -647,6 +658,7 @@ char	*v;
 			return(0);
 		}
 	}
+	array_dispose_element(new);
 	INVALIDATE_LASTREF(a);
 	return (-1);		/* problem */
 }
@@ -660,18 +672,28 @@ array_remove(a, i)
 ARRAY	*a;
 arrayind_t	i;
 {
-	register ARRAY_ELEMENT *ae;
+	register ARRAY_ELEMENT *ae, *start;
 
 	if (a == 0 || array_empty(a))
 		return((ARRAY_ELEMENT *) NULL);
-	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae))
+	start = LASTREF_START(a, i);
+	for (ae = start; ae != a->head; ae = element_forw(ae))
 		if (element_index(ae) == i) {
 			ae->next->prev = ae->prev;
 			ae->prev->next = ae->next;
 			a->num_elements--;
 			if (i == array_max_index(a))
 				a->max_index = element_index(ae->prev);
+#if 0
 			INVALIDATE_LASTREF(a);
+#else
+			if (ae->next != a->head)
+				SET_LASTREF(a, ae->next);
+			else if (ae->prev != a->head)
+				SET_LASTREF(a, ae->prev);
+			else
+				INVALIDATE_LASTREF(a);
+#endif
 			return(ae);
 		}
 	return((ARRAY_ELEMENT *) NULL);
@@ -685,18 +707,14 @@ array_reference(a, i)
 ARRAY	*a;
 arrayind_t	i;
 {
-	register ARRAY_ELEMENT *ae;
+	register ARRAY_ELEMENT *ae, *start;
 
 	if (a == 0 || array_empty(a))
 		return((char *) NULL);
 	if (i > array_max_index(a))
-		return((char *)NULL);
-	/* Keep roving pointer into array to optimize sequential access */
-	if (lastref && IS_LASTREF(a))
-		ae = (i >= element_index(lastref)) ? lastref : element_forw(a->head);
-	else
-		ae = element_forw(a->head);
-	for ( ; ae != a->head; ae = element_forw(ae))
+		return((char *)NULL);	/* Keep roving pointer into array to optimize sequential access */
+	start = LASTREF_START(a, i);
+	for (ae = start; ae != a->head; ae = element_forw(ae))
 		if (element_index(ae) == i) {
 			SET_LASTREF(a, ae);
 			return(element_value(ae));

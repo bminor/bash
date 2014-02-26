@@ -21,7 +21,7 @@
 #include <config.h>
 
 #include <bashtypes.h>
-#ifndef _MINIX
+#if defined (HAVE_SYS_PARAM_H)
 #  include <sys/param.h>
 #endif
 
@@ -124,7 +124,7 @@ dup2 (fd1, fd2)
 /*
  * Return the total number of available file descriptors.
  *
- * On some systems, like 4.2BSD and its descendents, there is a system call
+ * On some systems, like 4.2BSD and its descendants, there is a system call
  * that returns the size of the descriptor table: getdtablesize().  There are
  * lots of ways to emulate this on non-BSD systems.
  *

@@ -207,6 +207,10 @@ case "$@" in
 *)	echo bad 4;;
 esac
 
+# tests for the effect of quoting $* and $@ in an assignment context (plus
+# arrays) -- bugs through bash 4.2
+${THIS_SH} ./dollar-at-star1.sub
+
 # tests for special expansion of "$*" and "${array[*]}" when used with other
 # expansions -- bugs through bash-2.05b
 ${THIS_SH} ./dollar-star1.sub
@@ -234,5 +238,23 @@ ${THIS_SH} ./dollar-star4.sub
 
 # tests for expansions of $* when IFS is null
 ${THIS_SH} ./dollar-star5.sub
+
+# tests for inappropriate word splitting through bash-4.2
+${THIS_SH} ./dollar-at4.sub
+
+# tests for problems with "$@" preceded and followed by other quoted expansions
+# through bash-4.2
+${THIS_SH} ./dollar-at5.sub
+
+# tests for problems with "${@:1}" and other expansions with null entries
+# in positional parameters
+${THIS_SH} ./dollar-at6.sub
+
+# tests for expansions of $* when $1 == ""; problem through bash-4.2
+${THIS_SH} ./dollar-star6.sub
+
+# tests for expansions of $* (unquoted) when IFS changes (e.g., ${IFS:=-})
+# problem through bash-4.2
+${THIS_SH} ./dollar-star7.sub
 
 exit 0

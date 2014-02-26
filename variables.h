@@ -1,6 +1,6 @@
 /* variables.h -- data structures for shell variables. */
 
-/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -112,8 +112,9 @@ typedef struct _vlist {
 #define att_uppercase	0x0000100	/* word converted to uppercase on assignment */
 #define att_lowercase	0x0000200	/* word converted to lowercase on assignment */
 #define att_capcase	0x0000400	/* word capitalized on assignment */
+#define att_nameref	0x0000800	/* word is a name reference */
 
-#define user_attrs	(att_exported|att_readonly|att_integer|att_local|att_trace|att_uppercase|att_lowercase|att_capcase)
+#define user_attrs	(att_exported|att_readonly|att_integer|att_local|att_trace|att_uppercase|att_lowercase|att_capcase|att_nameref)
 
 #define attmask_user	0x0000fff
 
@@ -144,6 +145,7 @@ typedef struct _vlist {
 #define uppercase_p(var)	((((var)->attributes) & (att_uppercase)))
 #define lowercase_p(var)	((((var)->attributes) & (att_lowercase)))
 #define capcase_p(var)		((((var)->attributes) & (att_capcase)))
+#define nameref_p(var)		((((var)->attributes) & (att_nameref)))
 
 #define invisible_p(var)	((((var)->attributes) & (att_invisible)))
 #define non_unsettable_p(var)	((((var)->attributes) & (att_nounset)))
@@ -159,6 +161,9 @@ typedef struct _vlist {
 #define function_cell(var)	(COMMAND *)((var)->value)
 #define array_cell(var)		(ARRAY *)((var)->value)
 #define assoc_cell(var)		(HASH_TABLE *)((var)->value)
+#define nameref_cell(var)	((var)->value)		/* so it can change later */
+
+#define NAMEREF_MAX	8	/* only 8 levels of nameref indirection */
 
 #define var_isnull(var)		((var)->value == 0)
 #define var_isset(var)		((var)->value != 0)
@@ -168,6 +173,7 @@ typedef struct _vlist {
 #define var_setfunc(var, func)	((var)->value = (char *)(func))
 #define var_setarray(var, arr)	((var)->value = (char *)(arr))
 #define var_setassoc(var, arr)	((var)->value = (char *)(arr))
+#define var_setref(var, str)	((var)->value = (str))
 
 /* Make VAR be auto-exported. */
 #define set_auto_export(var) \
@@ -233,12 +239,21 @@ extern SHELL_VAR *var_lookup __P((const char *, VAR_CONTEXT *));
 extern SHELL_VAR *find_function __P((const char *));
 extern FUNCTION_DEF *find_function_def __P((const char *));
 extern SHELL_VAR *find_variable __P((const char *));
+extern SHELL_VAR *find_variable_noref __P((const char *));
+extern SHELL_VAR *find_variable_last_nameref __P((const char *));
+extern SHELL_VAR *find_global_variable_last_nameref __P((const char *));
+extern SHELL_VAR *find_variable_nameref __P((SHELL_VAR *));
 extern SHELL_VAR *find_variable_internal __P((const char *, int));
-extern SHELL_VAR *find_tempenv_variable __P((const char *));
+extern SHELL_VAR *find_variable_tempenv __P((const char *));
+extern SHELL_VAR *find_variable_notempenv __P((const char *));
 extern SHELL_VAR *find_global_variable __P((const char *));
+extern SHELL_VAR *find_global_variable_noref __P((const char *));
+extern SHELL_VAR *find_shell_variable __P((const char *));
+extern SHELL_VAR *find_tempenv_variable __P((const char *));
 extern SHELL_VAR *copy_variable __P((SHELL_VAR *));
 extern SHELL_VAR *make_local_variable __P((const char *));
 extern SHELL_VAR *bind_variable __P((const char *, char *, int));
+extern SHELL_VAR *bind_global_variable __P((const char *, char *, int));
 extern SHELL_VAR *bind_function __P((const char *, COMMAND *));
 
 extern void bind_function_def __P((const char *, FUNCTION_DEF *));
@@ -273,8 +288,10 @@ extern SHELL_VAR *bind_var_to_int __P((char *, intmax_t));
 extern int assign_in_env __P((WORD_DESC *, int));
 
 extern int unbind_variable __P((const char *));
+extern int unbind_nameref __P((const char *));
 extern int unbind_func __P((const char *));
 extern int unbind_function_def __P((const char *));
+extern int delete_var __P((const char *, VAR_CONTEXT *));
 extern int makunbound __P((const char *, VAR_CONTEXT *));
 extern int kill_local_variable __P((const char *));
 extern void delete_all_variables __P((HASH_TABLE *));
@@ -327,7 +344,7 @@ extern void print_var_function __P((SHELL_VAR *));
 
 #if defined (ARRAY_VARS)
 extern SHELL_VAR *make_new_array_variable __P((char *));
-extern SHELL_VAR *make_local_array_variable __P((char *));
+extern SHELL_VAR *make_local_array_variable __P((char *, int));
 
 extern SHELL_VAR *make_new_assoc_variable __P((char *));
 extern SHELL_VAR *make_local_assoc_variable __P((char *));
@@ -362,6 +379,7 @@ extern void sv_optind __P((char *));
 extern void sv_opterr __P((char *));
 extern void sv_locale __P((char *));
 extern void sv_xtracefd __P((char *));
+extern void sv_shcompat __P((char *));
 
 #if defined (READLINE)
 extern void sv_comp_wordbreaks __P((char *));
@@ -384,8 +402,12 @@ extern void sv_histchars __P((char *));
 extern void sv_histtimefmt __P((char *));
 #endif /* HISTORY */
 
-#if defined (HAVE_TZSET) && defined (PROMPT_STRING_DECODE)
+#if defined (HAVE_TZSET)
 extern void sv_tz __P((char *));
+#endif
+
+#if defined (JOB_CONTROL)
+extern void sv_childmax __P((char *));
 #endif
 
 #endif /* !_VARIABLES_H_ */

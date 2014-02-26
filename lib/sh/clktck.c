@@ -21,7 +21,9 @@
 #include <config.h>
 
 #include <bashtypes.h>
-#include <sys/param.h>
+#if defined (HAVE_SYS_PARAM_H)
+#  include <sys/param.h>
+#endif
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>

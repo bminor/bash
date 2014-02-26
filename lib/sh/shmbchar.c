@@ -1,4 +1,4 @@
-/* Copyright (C) 2001, 2006, 2009, 2010 Free Software Foundation, Inc.
+/* Copyright (C) 2001, 2006, 2009, 2010, 2012 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -88,5 +88,26 @@ mbsmbchar (s)
 	return t;
     }
   return 0;
+}
+
+int
+sh_mbsnlen(src, srclen, maxlen)
+     const char *src;
+     size_t srclen;
+     int maxlen;
+{
+  int count;
+  int sind;
+  DECLARE_MBSTATE;
+
+  for (sind = count = 0; src[sind]; )
+    {
+      count++;		/* number of multibyte characters */
+      ADVANCE_CHAR (src, srclen, sind);
+      if (sind > maxlen)
+        break;
+    }
+
+  return count;
 }
 #endif

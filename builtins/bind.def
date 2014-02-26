@@ -25,7 +25,7 @@ $PRODUCES bind.c
 $BUILTIN bind
 $DEPENDS_ON READLINE
 $FUNCTION bind_builtin
-$SHORT_DOC bind [-lpvsPVS] [-m keymap] [-f filename] [-q name] [-u name] [-r keyseq] [-x keyseq:shell-command] [keyseq:readline-function or readline-command]
+$SHORT_DOC bind [-lpsvPSVX] [-m keymap] [-f filename] [-q name] [-u name] [-r keyseq] [-x keyseq:shell-command] [keyseq:readline-function or readline-command]
 Set Readline key bindings and variables.
 
 Bind a key sequence to a Readline function or a macro, or set a
@@ -54,6 +54,8 @@ Options:
   -f  filename       Read key bindings from FILENAME.
   -x  keyseq:shell-command	Cause SHELL-COMMAND to be executed when
 				KEYSEQ is entered.
+  -X		     List key sequences bound with -x and associated commands
+                     in a form that can be reused as input.
 
 Exit Status:
 bind returns 0 unless an unrecognized option is given or an error occurs.
@@ -104,6 +106,7 @@ extern int no_line_editing;
 #define SSFLAG  0x0400
 #define UFLAG	0x0800
 #define XFLAG	0x1000
+#define XXFLAG	0x2000
 
 int
 bind_builtin (list)
@@ -138,7 +141,7 @@ bind_builtin (list)
   rl_outstream = stdout;
 
   reset_internal_getopt ();  
-  while ((opt = internal_getopt (list, "lvpVPsSf:q:u:m:r:x:")) != EOF)
+  while ((opt = internal_getopt (list, "lvpVPsSXf:q:u:m:r:x:")) != EOF)
     {
       switch (opt)
 	{
@@ -187,6 +190,9 @@ bind_builtin (list)
 	  flags |= XFLAG;
 	  cmd_seq = list_optarg;
 	  break;
+	case 'X':
+	  flags |= XXFLAG;
+	  break;
 	default:
 	  builtin_usage ();
 	  BIND_RETURN (EX_USAGE);
@@ -201,7 +207,7 @@ bind_builtin (list)
   if ((flags & MFLAG) && map_name)
     {
       kmap = rl_get_keymap_by_name (map_name);
-      if (!kmap)
+      if (kmap == 0)
 	{
 	  builtin_error (_("`%s': invalid keymap name"), map_name);
 	  BIND_RETURN (EXECUTION_FAILURE);
@@ -264,6 +270,9 @@ bind_builtin (list)
 
   if (flags & XFLAG)
     return_code = bind_keyseq_to_unix_command (cmd_seq);
+
+  if (flags & XXFLAG)
+    return_code = print_unix_command_map ();
 
   /* Process the rest of the arguments as binding specifications. */
   while (list)

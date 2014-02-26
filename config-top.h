@@ -46,6 +46,11 @@
    when a job like `cat jobs.c | exit 1' terminates due to a SIGPIPE. */
 #define DONT_REPORT_SIGPIPE
 
+/* Define DONT_REPORT_SIGTERM if you don't want to see `Terminates' message
+   when a job exits due to SIGTERM, since that's the default signal sent
+   by the kill builtin. */
+/* #define DONT_REPORT_SIGTERM */
+
 /* Define DONT_REPORT_BROKEN_PIPE_WRITE_ERRORS if you don't want builtins
    like `echo' and `printf' to report errors when output does not succeed
    due to EPIPE. */
@@ -54,7 +59,7 @@
 /* The default value of the PATH variable. */
 #ifndef DEFAULT_PATH_VALUE
 #define DEFAULT_PATH_VALUE \
-  "/usr/gnu/bin:/usr/local/bin:/bin:/usr/bin:."
+  "/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:."
 #endif
 
 /* The value for PATH when invoking `command -p'.  This is only used when
@@ -109,3 +114,21 @@
 
 /* Define if you want to include code in shell.c to support wordexp(3) */
 /* #define WORDEXP_OPTION */
+
+/* Define as 1 if you want to enable code that implements multiple coprocs */
+#ifndef MULTIPLE_COPROCS
+#  define MULTIPLE_COPROCS 0
+#endif
+
+/* Define to 0 if you want the checkwinsize option off by default, 1 if you
+   want it on. */
+#define CHECKWINSIZE_DEFAULT	0
+
+/* Define to 1 if you want to optimize for sequential array assignment when
+   using indexed arrays, 0 if you want bash-4.2 behavior, which favors
+   random access but is O(N) for each array assignment. */
+#define OPTIMIZE_SEQUENTIAL_ARRAY_ASSIGNMENT	1
+
+/* Define to 1 if you want to be able to export indexed arrays to processes
+   using the foo=([0]=one [1]=two) and so on */
+/* #define ARRAY_EXPORT 1 */
