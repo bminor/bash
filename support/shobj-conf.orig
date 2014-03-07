@@ -193,19 +193,8 @@ darwin*)
 		;;
 	# Darwin 8 == Mac OS X 10.4; Mac OS X 10.N == Darwin N+4
 	*)
-		case "${host_os}" in
-		darwin[89]*|darwin1[012]*)
-			SHOBJ_ARCHFLAGS='-arch_only `/usr/bin/arch`'
-			;;
-		 *) 	# Mac OS X 10.9 (Mavericks) and later
-			SHOBJ_ARCHFLAGS=
-			# for 32 and 64bit universal library
-			#SHOBJ_ARCHFLAGS='-arch i386 -arch x86_64'
-			#SHOBJ_CFLAGS=${SHOBJ_CFLAGS}' -arch i386 -arch x86_64'
-			;;
-		 esac
-		 SHOBJ_LDFLAGS="-dynamiclib -dynamic -undefined dynamic_lookup ${SHOBJ_ARCHFLAGS}"
-		 SHLIB_XLDFLAGS="-dynamiclib ${SHOBJ_ARCHFLAGS}"' -install_name $(libdir)/`echo $@ | sed "s:\\..*::"`.$(SHLIB_MAJOR).$(SHLIB_LIBSUFF) -current_version $(SHLIB_MAJOR)$(SHLIB_MINOR) -compatibility_version $(SHLIB_MAJOR) -v'
+		SHOBJ_LDFLAGS='-dynamiclib -dynamic -undefined dynamic_lookup -arch_only `/usr/bin/arch`'
+		SHLIB_XLDFLAGS='-dynamiclib -arch_only `/usr/bin/arch` -install_name $(libdir)/`echo $@ | sed "s:\\..*::"`.$(SHLIB_MAJOR).$(SHLIB_LIBSUFF) -current_version $(SHLIB_MAJOR)$(SHLIB_MINOR) -compatibility_version $(SHLIB_MAJOR) -v'
 		;;
 	esac
 

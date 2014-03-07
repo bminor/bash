@@ -26,6 +26,7 @@
 #  include <unistd.h>
 #endif
 
+#include <signal.h>
 #include <errno.h>
 
 #if !defined (errno)
@@ -37,6 +38,7 @@ extern int errno;
 #endif
 
 extern void check_signals_and_traps (void);
+extern int signal_is_trapped (int);
 
 /* Read LEN bytes from FD into BUF.  Retry the read on EINTR.  Any other
    error causes the loop to break. */
@@ -48,8 +50,22 @@ zread (fd, buf, len)
 {
   ssize_t r;
 
+#if 0
+#if defined (HAVE_SIGINTERRUPT)
+  if (signal_is_trapped (SIGCHLD))
+    siginterrupt (SIGCHLD, 1);
+#endif
+#endif
+
   while ((r = read (fd, buf, len)) < 0 && errno == EINTR)
     check_signals_and_traps ();	/* XXX - should it be check_signals()? */
+
+#if 0 
+#if defined (HAVE_SIGINTERRUPT)
+  siginterrupt (SIGCHLD, 0);
+#endif
+#endif
+
   return r;
 }
 

@@ -211,5 +211,9 @@ ${THIS_SH} ./varenv4.sub
 # more scoping and declaration problems with -g and arrays through bash-4.2
 ${THIS_SH} ./varenv5.sub
 
+# variable scoping in the presence of nameref
+${THIS_SH} ./varenv6.sub
+
 # make sure variable scoping is done right
 tt() { typeset a=b;echo a=$a; };a=z;echo a=$a;tt;echo a=$a
+
