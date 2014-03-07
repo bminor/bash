@@ -3826,6 +3826,7 @@ initialize_job_control (force)
 	    {
 	      SigHandler *ottin;
 
+itrace("initialize_job_control: shell_pgrp (%d) != terminal_pgrp (%d)", shell_pgrp, terminal_pgrp);
 	      ottin = set_signal_handler(SIGTTIN, SIG_DFL);
 	      kill (0, SIGTTIN);
 	      set_signal_handler (SIGTTIN, ottin);

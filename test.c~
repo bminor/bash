@@ -646,7 +646,7 @@ unary_test (op, arg)
       return (v && invisible_p (v) == 0 && var_isset (v) ? TRUE : FALSE);
 
     case 'R':
-      v = find_variable_noref (arg);
+      v = find_variable (arg);
       return ((v && invisible_p (v) == 0 && var_isset (v) && nameref_p (v)) ? TRUE : FALSE);
     }
 

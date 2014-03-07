@@ -265,7 +265,7 @@ esac
 
 ${RMAIL} $SMARGS < "$TEMPFILE1" || {
 	cat "$TEMPFILE1" >> $HOME/dead.bashbug
-	echo "$0: mail failed: report saved in $HOME/dead.bashbug" >&2
+	echo "$0: mail to ${BUGADDR} failed: report saved in $HOME/dead.bashbug" >&2
 }
 
 exit 0

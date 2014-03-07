@@ -1784,7 +1784,7 @@ char    **v;
         exit (w == 0);  /* exit 0 if wcwidth broken */
 }
 ],
-bash_cv_wcwidth_broken=yes, bash_cv_wcwdith_broken=no, bash_cv_wcwidth_broken=no)])
+bash_cv_wcwidth_broken=yes, bash_cv_wcwidth_broken=no, bash_cv_wcwidth_broken=no)])
 if test "$bash_cv_wcwidth_broken" = yes; then
         AC_DEFINE(WCWIDTH_BROKEN, 1, [wcwidth is usually not broken])
 fi

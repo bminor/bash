@@ -933,12 +933,10 @@ exit_shell (s)
   if (interactive_shell && login_shell && hup_on_exit)
     hangup_all_jobs ();
 
-  /* If this shell is interactive, or job control is active, terminate all
-     stopped jobs and restore the original terminal process group.  Don't do
-     this if we're in a subshell and calling exit_shell after, for example,
-     a failed word expansion.  We want to do this even if the shell is not
-     interactive because we set the terminal's process group when job control
-     is enabled regardless of the interactive status. */
+  /* If this shell is interactive, terminate all stopped jobs and
+     restore the original terminal process group.  Don't do this if we're
+     in a subshell and calling exit_shell after, for example, a failed
+     word expansion. */
   if (subshell_environment == 0)
     end_job_control ();
 #endif /* JOB_CONTROL */
