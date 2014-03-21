@@ -304,7 +304,7 @@ run_pending_traps ()
   catch_flag = trapped_signal_received = 0;
 
   /* Preserve $? when running trap. */
-  old_exit_value = last_command_exit_value;
+  trap_saved_exit_value = old_exit_value = last_command_exit_value;
 #if defined (ARRAY_VARS)
   ps = save_pipestatus_array ();
 #endif
@@ -894,6 +894,7 @@ _run_trap_internal (sig, tag)
 #endif
 
   trap_exit_value = function_code = 0;
+  trap_saved_exit_value = last_command_exit_value;
   /* Run the trap only if SIG is trapped and not ignored, and we are not
      currently executing in the trap handler. */
   if ((sigmodes[sig] & SIG_TRAPPED) && ((sigmodes[sig] & SIG_IGNORED) == 0) &&

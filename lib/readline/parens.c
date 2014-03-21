@@ -117,7 +117,7 @@ rl_insert_close (count, invoking_key)
 
       /* Emacs might message or ring the bell here, but I don't. */
       if (match_point < 0)
-	return -1;
+	return 1;
 
       FD_ZERO (&readfds);
       FD_SET (fileno (rl_instream), &readfds);

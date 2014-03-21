@@ -5910,3 +5910,62 @@ parse.y
 	  posix mode if dolbrace_state == DOLBRACE_QUOTE2 (pattern
 	  substitution).  Fixes bug reported by David Sines
 	  <dave.gma@googlemail.com>
+
+				   3/10
+				   ----
+lib/readline/readline.c
+	- _rl_dispatch_callback: treat a return value of -1 as the end of
+	  a command dispatch sequence if the current context doesn't
+	  indicate that we're reading a multi-key sequence
+	  ((cxt->flags & KSEQ_SUBSEQ) == 0).  Turn off the multikey flag
+	  and free the context chain in this case.  Fixes one bug reported
+	  by Felix Yan <felixonmars@gmail.com> to bug-readline list
+	- _rl_dispatch_callback: treat a return value of > 0 the same as 0
+	  and return from the function, since only values < 0 cause us to
+	  simulate recursion.  Rest of fix for bug tracked down by
+	  Anatol Pomozov <anatol.pomozov@gmail.com>
+
+				   3/11
+				   ----
+
+execute_cmd.c
+	- execute_in_subshell: if a longjmp occurs, set result to
+	  EXECUTION_FAILURE only if last_command_exit_value == EXECUTION_SUCCESS;
+	  use value of last_command_exit_value otherwise.  Fixes cosmetic
+	  issue reported by Dennis Lambe Jr. <malsyned@malsyned.net>
+
+doc/bash.1
+	- shell-kill-word and shell-backward-kill-word should be documented
+	  as unbound by default.  Report from Oliver Hartley
+	  <ohartley@talktalk.net>
+
+trap.c
+	- run_pending_traps: save value of $? before running trap commands in
+	  trap_saved_exit_value, like run_exit_trap
+	- _run_trap_internal: save value of $? before running trap commands in
+	  trap_saved_exit_value, like run_exit_trap
+
+builtins/common.c
+	- get_exitstat: when running `return' in a trap action, and it is not
+	  supplied an argument, use the saved exit status in
+	  trap_saved_exit_value.  Fixes Posix problem reported by
+	  Eduardo A. Bustamante López <dualbus@gmail.com>
+
+				   3/13
+				   ----
+lib/sh/shquote.c
+	- sh_contains_quotes: new function, returns true if a given string
+	  contains any of the shell quote characters (single quote, double
+	  quote, or backslash)
+
+externs.h
+	- sh_contains_quotes: new extern declaration
+
+pcomplete.c
+	- pcomp_filename_completion_function: more changes for the benefit of
+	  bash-completion: if the argument is not the same as the original
+	  argument passed to the programmable completion code (pcomp_curtxt),
+	  and we are being run by compgen as part of a completion, dequote the
+	  argument as bash-completion expects.  Fix for the complete-word-
+	  with-quoted-special-chars problem with bash-completion
+

@@ -185,6 +185,7 @@ rl_gather_tyi ()
 #endif
 
   chars_avail = 0;
+  input = 0;
   tty = fileno (rl_instream);
 
 #if defined (HAVE_SELECT)
@@ -204,6 +205,8 @@ rl_gather_tyi ()
   result = ioctl (tty, FIONREAD, &chars_avail);
   if (result == -1 && errno == EIO)
     return -1;
+  if (result == -1)
+    chars_avail = 0;
 #endif
 
 #if defined (O_NDELAY)

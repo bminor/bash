@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Sun Feb  2 16:21:40 EST 2014
+.\"	Last Change: Wed Mar 12 09:29:03 EDT 2014
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2014 February 2" "GNU Bash 4.3"
+.TH BASH 1 "2014 March 12" "GNU Bash 4.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -976,7 +976,9 @@ The \fIbody\fP of the function is the compound command
 .I compound\-command 
 (see \fBCompound Commands\fP above).
 That command is usually a \fIlist\fP of commands between { and }, but
-may be any command listed under \fBCompound Commands\fP above.
+may be any command listed under \fBCompound Commands\fP above,
+with one exception: If the \fBfunction\fP reserved word is used, but the
+parentheses are not supplied, the braces are required.
 \fIcompound\-command\fP is executed whenever \fIname\fP is specified as the
 name of a simple command.
 When in \fIposix mode\fP, \fIname\fP may not be the name of one of the
@@ -5907,12 +5909,12 @@ Word boundaries are the same as those used by \fBforward\-word\fP.
 Kill the word behind point.
 Word boundaries are the same as those used by \fBbackward\-word\fP.
 .TP
-.B shell\-kill\-word  (M\-d)
+.B shell\-kill\-word
 Kill from point to the end of the current word, or if between
 words, to the end of the next word.
 Word boundaries are the same as those used by \fBshell\-forward\-word\fP.
 .TP
-.B shell\-backward\-kill\-word (M\-Rubout)
+.B shell\-backward\-kill\-word
 Kill the word behind point.
 Word boundaries are the same as those used by \fBshell\-backward\-word\fP.
 .TP

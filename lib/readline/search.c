@@ -411,7 +411,7 @@ rl_noninc_forward_search_again (count, key)
   if (!noninc_search_string)
     {
       rl_ding ();
-      return (-1);
+      return (1);
     }
   r = noninc_dosearch (noninc_search_string, 1);
   return (r != 1);
@@ -428,7 +428,7 @@ rl_noninc_reverse_search_again (count, key)
   if (!noninc_search_string)
     {
       rl_ding ();
-      return (-1);
+      return (1);
     }
   r = noninc_dosearch (noninc_search_string, -1);
   return (r != 1);

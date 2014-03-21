@@ -771,9 +771,7 @@ pcomp_filename_completion_function (text, state)
       	 argument before calling compgen. */
       /* We could check whether gen_shell_function_matches is in the call
 	 stack by checking whether the gen-shell-function-matches tag is in
-	 the unwind-protect stack, but there's no function to do that yet.
-	 We could simply check whether we're executing in a function by
-	 checking variable_context, and may end up doing that. */
+	 the unwind-protect stack, but there's no function to do that yet. */
       else if (iscompgen && iscompleting && rl_filename_dequoting_function &&
 	       pcomp_curtxt && text &&
 	       STREQ (pcomp_curtxt, text) == 0 &&

@@ -70,6 +70,7 @@ extern int errno;
 extern int indirection_level, subshell_environment;
 extern int line_number;
 extern int last_command_exit_value;
+extern int trap_saved_exit_value;
 extern int running_trap;
 extern int posixly_correct;
 extern char *this_command_name, *shell_name;
@@ -494,7 +495,11 @@ get_exitstat (list)
     list = list->next;
 
   if (list == 0)
-    return (last_command_exit_value);      
+    {
+      if (this_shell_builtin == return_builtin && running_trap)
+	return (trap_saved_exit_value);
+      return (last_command_exit_value);
+    }
 
   arg = list->word->word;
   if (arg == 0 || legal_number (arg, &sval) == 0)

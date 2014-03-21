@@ -218,7 +218,7 @@ int return_catch_value;
 procenv_t return_catch;
 
 /* The value returned by the last synchronous command. */
-int last_command_exit_value;
+volatile int last_command_exit_value;
 
 /* Whether or not the last command (corresponding to last_command_exit_value)
    was terminated by a signal, and, if so, which one. */
@@ -1567,7 +1567,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   if (result == EXITPROG)
     invert = 0, return_code = last_command_exit_value;
   else if (result)
-    return_code = EXECUTION_FAILURE;
+    return_code = (last_command_exit_value == EXECUTION_SUCCESS) ? EXECUTION_FAILURE : last_command_exit_value;
   else if (function_value)
     return_code = return_catch_value;
   else
