@@ -976,9 +976,7 @@ _run_trap_internal (sig, tag)
 	  COPY_PROCENV (save_return_catch, return_catch);
 	  if (function_code)
 	    {
-#if 0
 	      from_return_trap = sig == RETURN_TRAP;
-#endif
 	      longjmp (return_catch, 1);
 	    }
 	}

@@ -3380,7 +3380,10 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	    dolbrace_state = DOLBRACE_QUOTE;
           /* ${param/[/]pat/rep} */
 	  else if MBTEST(dolbrace_state == DOLBRACE_PARAM && ch == '/' && retind > 1)
+{
+itrace("parse_matched_pair: dolbrace_state -> DOLBRACE_QUOTE2");
 	    dolbrace_state = DOLBRACE_QUOTE2;	/* XXX */
+}
           /* ${param^[^]pat} */
 	  else if MBTEST(dolbrace_state == DOLBRACE_PARAM && ch == '^' && retind > 1)
 	    dolbrace_state = DOLBRACE_QUOTE;
@@ -3429,6 +3432,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 		  /* FLAG POSIX INTERP 221 */
 		  if ((shell_compatibility_level > 42) && (rflags & P_DQUOTE) && (dolbrace_state == DOLBRACE_QUOTE2) && (flags & P_DOLBRACE))
 		    {
+itrace("parse_matched_pair: calling sh_single_quote on %s", ttrans);
 		      nestret = sh_single_quote (ttrans);
 		      free (ttrans);
 		      nestlen = strlen (nestret);

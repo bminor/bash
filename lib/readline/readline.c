@@ -964,7 +964,7 @@ _rl_dispatch_subseq (key, map, got_subseq)
 #if defined (VI_MODE)
   if (rl_editing_mode == vi_mode && _rl_keymap == vi_movement_keymap &&
       key != ANYOTHERKEY &&
-      rl_key_sequence_length == 1 &&	/* XXX */
+      _rl_dispatching_keymap == vi_movement_keymap &&
       _rl_vi_textmod_command (key))
     _rl_vi_set_last (key, rl_numeric_arg, rl_arg_sign);
 #endif

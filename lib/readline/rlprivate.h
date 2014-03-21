@@ -410,6 +410,7 @@ extern void _rl_vi_initialize_line PARAMS((void));
 extern void _rl_vi_reset_last PARAMS((void));
 extern void _rl_vi_set_last PARAMS((int, int, int));
 extern int _rl_vi_textmod_command PARAMS((int));
+extern int _rl_vi_motion_command PARAMS((int));
 extern void _rl_vi_done_inserting PARAMS((void));
 extern int _rl_vi_domove_callback PARAMS((_rl_vimotion_cxt *));
 

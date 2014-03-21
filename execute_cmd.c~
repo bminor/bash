@@ -4396,6 +4396,9 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   GET_ARRAY_FROM_VAR ("BASH_LINENO", bash_lineno_v, bash_lineno_a);
 #endif
 
+if (running_trap)
+  itrace("execute_function: running_trap = %d");
+
   tc = (COMMAND *)copy_command (function_cell (var));
   if (tc && (flags & CMD_IGNORE_RETURN))
     tc->flags |= CMD_IGNORE_RETURN;

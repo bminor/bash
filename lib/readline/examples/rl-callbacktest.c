@@ -1,16 +1,25 @@
 /* Standard include files. stdio.h is required. */
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 /* Used for select(2) */
 #include <sys/types.h>
 #include <sys/select.h>
 
+#include <errno.h>
 #include <stdio.h>
 
 /* Standard readline include files. */
-#include <readline/readline.h>
-#include <readline/history.h>
+#if defined (READLINE_LIBRARY)
+#  include "readline.h"
+#  include "history.h"
+#else
+#  include <readline/readline.h>
+#  include <readline/history.h>
+#endif
+
+extern int errno;
 
 static void cb_linehandler (char *);
 
@@ -65,7 +74,7 @@ main (int c, char **v)
       FD_SET (fileno (rl_instream), &fds);    
 
       r = select (FD_SETSIZE, &fds, NULL, NULL, NULL);
-      if (r < 0)
+      if (r < 0 && errno != EINTR)
 	{
 	  perror ("rltest: select");
 	  rl_callback_handler_remove ();

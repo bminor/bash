@@ -192,6 +192,13 @@ _rl_vi_textmod_command (c)
   return (member (c, vi_textmod));
 }
 
+int
+_rl_vi_motion_command (c)
+     int c;
+{
+  return (member (c, vi_motion));
+}
+
 static void
 _rl_vi_replace_insert (count)
      int count;

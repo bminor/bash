@@ -183,6 +183,7 @@ ITEMLIST it_variables = { LIST_DYNAMIC, it_init_variables, (STRINGLIST *)0 };
 
 COMPSPEC *pcomp_curcs;
 const char *pcomp_curcmd;
+const char *pcomp_curtxt;
 
 #ifdef DEBUG
 /* Debugging code */
@@ -753,6 +754,15 @@ pcomp_filename_completion_function (text, state)
 	     quoted strings. */
 	  dfn = (*rl_filename_dequoting_function) ((char *)text, rl_completion_quote_character);
 	}
+      /* Intended to solve a mismatched assumption by bash-completion.  If
+	 the text to be completed is empty, but bash-completion turns it into
+	 a quoted string ('') assuming that this code will dequote it before
+	 calling readline, do the dequoting. */
+      else if (iscompgen && iscompleting &&
+	       pcomp_curtxt && *pcomp_curtxt == 0 &&
+	       text && (*text == '\'' || *text == '"') && text[1] == text[0] && text[2] == 0 && 
+	       rl_filename_dequoting_function)
+	  dfn = (*rl_filename_dequoting_function) ((char *)text, rl_completion_quote_character);
       else
 	dfn = savestring (text);
     }
@@ -1522,7 +1532,7 @@ gen_progcomp_completions (ocmd, cmd, word, start, end, foundp, retryp, lastcs)
      COMPSPEC **lastcs;
 {
   COMPSPEC *cs, *oldcs;
-  const char *oldcmd;
+  const char *oldcmd, *oldtxt;
   STRINGLIST *ret;
 
   cs = progcomp_search (ocmd);
@@ -1545,14 +1555,17 @@ gen_progcomp_completions (ocmd, cmd, word, start, end, foundp, retryp, lastcs)
 
   oldcs = pcomp_curcs;
   oldcmd = pcomp_curcmd;
+  oldtxt = pcomp_curtxt;
 
   pcomp_curcs = cs;
   pcomp_curcmd = cmd;
+  pcomp_curtxt = word;
 
   ret = gen_compspec_completions (cs, cmd, word, start, end, foundp);
 
   pcomp_curcs = oldcs;
   pcomp_curcmd = oldcmd;
+  pcomp_curtxt = oldtxt;
 
   /* We need to conditionally handle setting *retryp here */
   if (retryp)
