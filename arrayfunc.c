@@ -597,6 +597,11 @@ assign_compound_array_list (var, nlist, flags)
       if (assoc_p (var))
 	{
 	  val = expand_assignment_string_to_string (val, 0);
+	  if (val == 0)
+	    {
+	      val = (char *)xmalloc (1);
+	      val[0] = '\0';	/* like do_assignment_internal */
+	    }
 	  free_val = 1;
 	}
 
