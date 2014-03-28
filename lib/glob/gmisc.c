@@ -210,6 +210,7 @@ extglob_pattern_p (pat)
     case '+':
     case '!':
     case '@':
+    case '?':
       return (pat[1] == LPAREN);
     default:
       return 0;
