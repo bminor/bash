@@ -646,8 +646,8 @@ unary_test (op, arg)
       return (v && invisible_p (v) == 0 && var_isset (v) ? TRUE : FALSE);
 
     case 'R':
-      v = find_variable (arg);
-      return (v && invisible_p (v) == 0 && var_isset (v) && nameref_p (v) ? TRUE : FALSE);
+      v = find_variable_noref (arg);
+      return ((v && invisible_p (v) == 0 && var_isset (v) && nameref_p (v)) ? TRUE : FALSE);
     }
 
   /* We can't actually get here, but this shuts up gcc. */
@@ -723,6 +723,7 @@ test_unop (op)
     case 'o': case 'p': case 'r': case 's': case 't':
     case 'u': case 'v': case 'w': case 'x': case 'z':
     case 'G': case 'L': case 'O': case 'S': case 'N':
+    case 'R':
       return (1);
     }
 
