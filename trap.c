@@ -920,7 +920,8 @@ _run_trap_internal (sig, tag)
       subst_assign_varlist = 0;
 
 #if defined (JOB_CONTROL)
-      save_pipeline (1);	/* XXX only provides one save level */
+      if (sig != DEBUG_TRAP)	/* run_debug_trap does this */
+	save_pipeline (1);	/* XXX only provides one save level */
 #endif
 
       /* If we're in a function, make sure return longjmps come here, too. */
@@ -940,7 +941,8 @@ _run_trap_internal (sig, tag)
       trap_exit_value = last_command_exit_value;
 
 #if defined (JOB_CONTROL)
-      restore_pipeline (1);
+      if (sig != DEBUG_TRAP)	/* run_debug_trap does this */
+	restore_pipeline (1);
 #endif
 
       subst_assign_varlist = save_subst_varlist;
