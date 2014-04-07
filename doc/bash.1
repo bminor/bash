@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed Mar 12 09:29:03 EDT 2014
+.\"	Last Change: Tue Mar 18 16:26:29 EDT 2014
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2014 March 12" "GNU Bash 4.3"
+.TH BASH 1 "2014 March 18" "GNU Bash 4.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -3963,7 +3963,7 @@ on that line are not affected by the new alias.
 This behavior is also an issue when functions are executed.
 Aliases are expanded when a function definition is read,
 not when the function is executed, because a function definition
-is itself a compound command.  As a consequence, aliases
+is itself a command.  As a consequence, aliases
 defined in a function are not available until after that
 function is executed.  To be safe, always put
 alias definitions on a separate line, and do not use
@@ -8727,7 +8727,13 @@ to its caller.
 If 
 .I n
 is omitted, the return status is that of the last command
-executed in the function body.  If
+executed in the function body.
+If \fBreturn\fP is executed by a trap handler, the last command used to
+determine the status is the last command executed before the trap handler.
+if \fBreturn\fP is executed during a \fBDEBUG\fP trap, the last command
+used to determine the status is the last command executed by the trap
+handler before \fBreturn\fP was invoked.
+If
 .B return
 is used outside a function,
 but during execution of a script by the 
@@ -9371,8 +9377,8 @@ next command is skipped and not executed.
 .B 3.
 If the command run by the \fBDEBUG\fP trap returns a value of 2, and the
 shell is executing in a subroutine (a shell function or a shell script
-executed by the \fB.\fP or \fBsource\fP builtins), a call to
-\fBreturn\fP is simulated.
+executed by the \fB.\fP or \fBsource\fP builtins), the shell simulates
+a call to \fBreturn\fP.
 .TP
 .B 4.
 .SM

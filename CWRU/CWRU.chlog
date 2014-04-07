@@ -5875,6 +5875,13 @@ test.c
 	- test_unop: add back missing 'R' case.  Fixes bug reported by
 	  NBaH <nbah@sfr.fr>
 
+				    3/2
+				    ---
+jobs.c
+	- end_job_control: if job control is active, we changed the terminal's
+	  process group, so make sure we restore it.  Fixes bug reported by
+	  Eduardo A. Bustamante López <dualbus@gmail.com>
+
 				    3/7
 				    ---
 pcomplete.c
@@ -5969,3 +5976,70 @@ pcomplete.c
 	  argument as bash-completion expects.  Fix for the complete-word-
 	  with-quoted-special-chars problem with bash-completion
 
+				   3/17
+				   ----
+execute_cmd.c
+	- execute_intern_function: when in posix mode, make defining a function
+	  with the same name as a special builtin a fatal error only when the
+	  shell is not interactive. Interactive shells display an error
+	  message and go on.  From a discussion with Doug McIlroy
+	  <doug@cs.dartmouth.edu>
+
+				   3/18
+				   ----
+arrayfunc.c
+	- assign_compound_array_list: when using expand_assignment_string_to_string
+	  to expand the value in a ( [x]=y ) compound assignment, make sure
+	  that we convert 0x0 to "" when expanding [x]= so it doesn't appear as
+	  if the index is unset.  Fixes bug reported by Geir Hauge
+	  <geir.hauge@gmail.com>
+
+builtins/common.c
+	- get_exitstat: update fix of 3/11 to allow the DEBUG trap to use the
+	  current value of $? instead of the value it had before the trap
+	  action was run.  This is one reason the DEBUG trap exists, and
+	  extended debug mode uses it.  Might want to do this only in Posix
+	  mode
+
+doc/{bash.1,bashref.texi}
+	- return: add language cribbed from Posix saying what happens when
+	  return is run without an argument from a trap, including the DEBUG
+	  trap exception
+
+				   3/19
+				   ----
+lib/glob/gmisc.c
+	- extglob_pattern_p: make sure ?(patlist) is flagged as an extglob
+	  pattern
+
+lib/glob/glob.c
+	- extglob_skipname: rewrite to handle patterns that begin but do not
+	  end with an extglob pattern; change test for easy case and loop
+	  through patterns accordingly.  Fixes problem with matching filenames
+	  with a leading dot reported by Stephane Chazelas
+	  <stephane.chazelas@gmail.com>
+	- wextglob_skipname: make analogous changes
+
+				   3/20
+				   ----
+Makefile.in
+	- pass -DDEBUG down to builds in readline and history directories
+
+lib/readline/util.c
+	- _rl_trace and related functions are now only compiled in if DEBUG
+	  is defined
+
+lib/readline/Makefile.in
+	- substitute @DEBUG@ and pass -DDEBUG, if necessary, to compilation
+	  in LOCAL_CFLAGS
+
+				   3/21
+				   ----
+parse.y
+	- shell_getc: when checking whether or not to reallocate
+	  shell_input_line to add trailing newline, don't try to subtract from
+	  shell_input_line_size.  size_t is unsigned, so if its value is less
+	  than 3 (like, say, 2), size-3 is a very large number and the string
+	  will not be reallocated.  Use len+3 > size instead of len > size-3.
+	  Fixes bug reported in
+	  https://bugs.launchpad.net/ubuntu/+source/bash/+bug/1295467

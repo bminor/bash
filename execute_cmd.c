@@ -5356,7 +5356,7 @@ execute_intern_function (name, funcdef)
     {
       internal_error (_("`%s': is a special builtin"), name->word);
       last_command_exit_value = EX_BADUSAGE;
-      jump_to_top_level (ERREXIT);
+      jump_to_top_level (interactive_shell ? DISCARD : ERREXIT);
     }
 
   var = find_function (name->word);

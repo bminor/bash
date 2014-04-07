@@ -496,7 +496,13 @@ get_exitstat (list)
 
   if (list == 0)
     {
-      if (this_shell_builtin == return_builtin && running_trap)
+      /* If we're not running the DEBUG trap, the return builtin, when not
+	 given any arguments, uses the value of $? before the trap ran.  If
+	 given an argument, return uses it.  This means that the trap can't
+	 change $?.  The DEBUG trap gets to change $?, though, since that is
+	 part of its reason for existing, and because the extended debug mode
+	 does things with the return value. */
+      if (this_shell_builtin == return_builtin && running_trap > 0 && running_trap != DEBUG_TRAP+1)
 	return (trap_saved_exit_value);
       return (last_command_exit_value);
     }

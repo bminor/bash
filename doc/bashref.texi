@@ -603,8 +603,8 @@ the command was terminated by signal @var{n}.
 @cindex pipeline
 @cindex commands, pipelines
 
-A @code{pipeline} is a sequence of simple commands separated by one of
-the control operators @samp{|} or @samp{|&}.
+A @code{pipeline} is a sequence of one or more commands separated by
+one of the control operators @samp{|} or @samp{|&}.
 
 @rwindex time
 @rwindex !
@@ -3502,6 +3502,11 @@ Cause a shell function to stop executing and return the value @var{n}
 to its caller.
 If @var{n} is not supplied, the return value is the exit status of the
 last command executed in the function.
+If @code{return} is executed by a trap handler, the last command used to
+determine the status is the last command executed before the trap handler.
+if @code{return} is executed during a @code{DEBUG} trap, the last command
+used to determine the status is the last command executed by the trap
+handler before @code{return} was invoked.
 @code{return} may also be used to terminate execution of a script
 being executed with the @code{.} (@code{source}) builtin,
 returning either @var{n} or
@@ -5038,8 +5043,8 @@ next command is skipped and not executed.
 @item
 If the command run by the @code{DEBUG} trap returns a value of 2, and the
 shell is executing in a subroutine (a shell function or a shell script
-executed by the @code{.} or @code{source} builtins), a call to
-@code{return} is simulated.
+executed by the @code{.} or @code{source} builtins), the shell simulates
+a call to @code{return}.
 
 @item
 @code{BASH_ARGC} and @code{BASH_ARGV} are updated as described in their
@@ -6731,7 +6736,7 @@ on that line are not affected by the new alias.
 This behavior is also an issue when functions are executed.
 Aliases are expanded when a function definition is read,
 not when the function is executed, because a function definition
-is itself a compound command.  As a consequence, aliases
+is itself a command.  As a consequence, aliases
 defined in a function are not available until after that
 function is executed.  To be safe, always put
 alias definitions on a separate line, and do not use @code{alias}
