@@ -777,6 +777,7 @@ pcomp_filename_completion_function (text, state)
       else if (iscompgen && iscompleting && rl_filename_dequoting_function &&
 	       pcomp_curtxt && text &&
 	       STREQ (pcomp_curtxt, text) == 0 &&
+	       variable_context &&
 	       sh_contains_quotes (text))	/* guess */
 	dfn = (*rl_filename_dequoting_function) ((char *)text, rl_completion_quote_character);
       else

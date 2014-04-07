@@ -506,7 +506,7 @@ rl_yank (count, ignore)
   if (rl_kill_ring == 0)
     {
       _rl_abort_internal ();
-      return 1;
+      return -1;
     }
 
   _rl_set_mark_at_pos (rl_point);
@@ -528,7 +528,7 @@ rl_yank_pop (count, key)
       !rl_kill_ring)
     {
       _rl_abort_internal ();
-      return 1;
+      return -1;
     }
 
   l = strlen (rl_kill_ring[rl_kill_index]);
@@ -546,7 +546,7 @@ rl_yank_pop (count, key)
   else
     {
       _rl_abort_internal ();
-      return 1;
+      return -1;
     }
 }
 
@@ -575,7 +575,7 @@ rl_yank_nth_arg_internal (count, ignore, history_skip)
   if (entry == 0)
     {
       rl_ding ();
-      return 1;
+      return -1;
     }
 
   arg = history_arg_extract (count, count, entry->line);
@@ -583,7 +583,7 @@ rl_yank_nth_arg_internal (count, ignore, history_skip)
     {
       rl_ding ();
       FREE (arg);
-      return 1;
+      return -1;
     }
 
   rl_begin_undo_group ();

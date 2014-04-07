@@ -471,7 +471,7 @@ rl_vi_end_word (count, key)
   if (count < 0)
     {
       rl_ding ();
-      return 1;
+      return -1;
     }
 
   if (_rl_uppercase_p (key))
@@ -1541,7 +1541,7 @@ rl_vi_rubout (count, key)
   if (rl_point == 0)
     {
       rl_ding ();
-      return 1;
+      return -1;
     }
 
   opoint = rl_point;
@@ -1572,7 +1572,7 @@ rl_vi_delete (count, key)
   if (rl_end == 0)
     {
       rl_ding ();
-      return 1;
+      return -1;
     }
 
   if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
@@ -1657,13 +1657,13 @@ rl_vi_char_search (count, key)
   if (key == ';' || key == ',')
     {
       if (_rl_cs_orig_dir == 0)
-	return 1;
+	return -1;
 #if defined (HANDLE_MULTIBYTE)
       if (_rl_vi_last_search_mblen == 0)
-	return 1;
+	return -1;
 #else
       if (_rl_vi_last_search_char == 0)
-	return 1;
+	return -1;
 #endif
       _rl_cs_dir = (key == ';') ? _rl_cs_orig_dir : -_rl_cs_orig_dir;
     }
@@ -1762,7 +1762,7 @@ rl_vi_match (ignore, key)
 	{
 	  rl_point = pos;
 	  rl_ding ();
-	  return 1;
+	  return -1;
 	}
     }
 
@@ -1792,7 +1792,7 @@ rl_vi_match (ignore, key)
 	  else
 	    {
 	      rl_ding ();
-	      return 1;
+	      return -1;
 	    }
 	}
     }
@@ -1816,7 +1816,7 @@ rl_vi_match (ignore, key)
 	  else
 	    {
 	      rl_ding ();
-	      return 1;
+	      return -1;
 	    }
 	}
     }
@@ -2090,7 +2090,7 @@ _rl_vi_set_mark ()
   if (ch < 0 || ch < 'a' || ch > 'z')	/* make test against 0 explicit */
     {
       rl_ding ();
-      return 1;
+      return -1;
     }
   ch -= 'a';
   vi_mark_chars[ch] = rl_point;
@@ -2142,14 +2142,14 @@ _rl_vi_goto_mark ()
   else if (ch < 0 || ch < 'a' || ch > 'z')	/* make test against 0 explicit */
     {
       rl_ding ();
-      return 1;
+      return -1;
     }
 
   ch -= 'a';
   if (vi_mark_chars[ch] == -1)
     {
       rl_ding ();
-      return 1;
+      return -1;
     }
   rl_point = vi_mark_chars[ch];
   return 0;

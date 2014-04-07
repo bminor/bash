@@ -1087,7 +1087,7 @@ static const int precs[] = { 0, 100, 10, 1 };
 static int
 decpoint ()
 {
-  struct lconv *lv;
+  struct lconv lv;
 
   lv = localeconv ();
   return (lv && lv->decimal_point && lv->decimal_point[0]) ? lv->decimal_point[0] : '.';

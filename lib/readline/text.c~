@@ -1519,7 +1519,7 @@ _rl_char_search_internal (count, dir, schar)
 #endif
 
   if (dir == 0)
-    return 1;
+    return -1;
 
   pos = rl_point;
   inc = (dir < 0) ? -1 : 1;
@@ -1528,7 +1528,7 @@ _rl_char_search_internal (count, dir, schar)
       if ((dir < 0 && pos <= 0) || (dir > 0 && pos >= rl_end))
 	{
 	  rl_ding ();
-	  return 1;
+	  return -1;
 	}
 
 #if defined (HANDLE_MULTIBYTE)
@@ -1583,7 +1583,7 @@ _rl_char_search (count, fdir, bdir)
   mb_len = _rl_read_mbchar (mbchar, MB_LEN_MAX);
 
   if (mb_len <= 0)
-    return 1;
+    return -1;
 
   if (count < 0)
     return (_rl_char_search_internal (-count, bdir, mbchar, mb_len));
@@ -1602,7 +1602,7 @@ _rl_char_search (count, fdir, bdir)
   RL_UNSETSTATE(RL_STATE_MOREINPUT);
 
   if (c < 0)
-    return 1;
+    return -1;
 
   if (count < 0)
     return (_rl_char_search_internal (-count, bdir, c));

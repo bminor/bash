@@ -1547,7 +1547,7 @@ attempt_shell_completion (text, start, end)
 	}
       /* empty command name following command separator */
       else if (s >= e && n[0] == '\0' && text[0] == '\0' && start > 0 &&
-		was_assignment == 0 && member (rl_line_buffer[start-1], COMMAND_SEPARATORS))
+		was_assignment == 0 && member (rl_line_buffer[start], COMMAND_SEPARATORS))
 	{
 	  foundcs = 0;
 	  in_command_position = 1;
