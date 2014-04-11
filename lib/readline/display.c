@@ -2677,7 +2677,8 @@ _rl_clean_up_for_exit ()
 {
   if (_rl_echoing_p)
     {
-      _rl_move_vert (_rl_vis_botlin);
+      if (_rl_vis_botlin > 0)	/* minor optimization plus bug fix */
+	_rl_move_vert (_rl_vis_botlin);
       _rl_vis_botlin = 0;
       fflush (rl_outstream);
       rl_restart_output (1, 0);
