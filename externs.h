@@ -324,6 +324,7 @@ extern char *sh_un_double_quote __P((char *));
 extern char *sh_backslash_quote __P((char *, const char *, int));
 extern char *sh_backslash_quote_for_double_quotes __P((char *));
 extern int sh_contains_shell_metas __P((char *));
+extern int sh_contains_quotes __P((char *));
 
 /* declarations for functions defined in lib/sh/spell.c */
 extern int spname __P((char *, char *));

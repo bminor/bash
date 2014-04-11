@@ -311,3 +311,17 @@ sh_contains_shell_metas (string)
 
   return (0);
 }
+
+int
+sh_contains_quotes (string)
+     char *string;
+{
+  char *s;
+
+  for (s = string; s && *s; s++)
+    {
+      if (*s == '\'' || *s == '"' || *s == '\\')
+	return 1;
+    }
+  return 0;
+}
