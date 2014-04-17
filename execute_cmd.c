@@ -3265,7 +3265,7 @@ execute_case_command (case_command)
   ignore_return = case_command->flags & CMD_IGNORE_RETURN;
 
   begin_unwind_frame ("case");
-  add_unwind_protect ((Function *)xfree, word);
+  add_unwind_protect (xfree, word);
 
 #define EXIT_CASE()  goto exit_case_command
 
