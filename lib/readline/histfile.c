@@ -540,7 +540,7 @@ mmap_error:
       }
 
 #ifdef HISTORY_USE_MMAP
-    if (msync (buffer, buffer_size, 0) != 0 || munmap (buffer, buffer_size) != 0)
+    if (msync (buffer, buffer_size, MS_ASYNC) != 0 || munmap (buffer, buffer_size) != 0)
       rv = errno;
 #else
     if (write (file, buffer, buffer_size) < 0)

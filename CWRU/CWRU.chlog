@@ -6103,3 +6103,10 @@ execute_cmd.c
 	- mkfmt: use decpoint() to get decimal point instead of unconditionally
 	  using `.'.  Fixes bug reported by Andrey Tataranovich
 	  <tataranovich@gmail.com> in debian bug 741669
+
+				   4/10
+				   ----
+lib/readline/rltypedefs.h
+	- add back old Function/VFunction/etc typedefs, since other packages
+	  (python, samba) use them. Mark as deprecated using gcc and clang
+	  attributes.  Report and fix from Max Horn <max@quendi.de>

@@ -7,6 +7,7 @@ FROOT=bash-$DATE
 DIR=$PARENT/$FROOT
 TARF=${FROOT}.tar
 SRC=/usr/homes/chet/src/bash/src
+REMHOST=jenna
 
 fflag= sflag= dflag=
 while getopts "dfsp:" opt
@@ -55,8 +56,6 @@ cd $PARENT || exit 1
 tar cvf ${TARF} $FROOT
 
 gzip -v ${TARF}
-
-REMHOST=z4
 
 if [ -n "$sflag" ]; then
 	scp ${TARF}.gz ${REMHOST}:
