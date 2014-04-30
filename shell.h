@@ -168,7 +168,8 @@ typedef struct _sh_parser_state_t {
   /* flags state affecting the parser */
   int expand_aliases;
   int echo_input_at_read;
-  
+  int need_here_doc;
+
 } sh_parser_state_t;
 
 typedef struct _sh_input_line_state_t {

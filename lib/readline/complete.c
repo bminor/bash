@@ -642,7 +642,7 @@ stat_char (filename)
 	character = '*';
     }
 
-  free (f);
+  xfree (f);
   return (character);
 }
 #endif /* VISIBLE_STATS */
@@ -926,7 +926,7 @@ print_filename (to_print, full_pathname, prefix_bytes)
 		{
 		  dn = savestring (new_full_pathname);
 		  (*rl_filename_stat_hook) (&dn);
-		  free (new_full_pathname);
+		  xfree (new_full_pathname);
 		  new_full_pathname = dn;
 		}
 	      if (path_isdir (new_full_pathname))

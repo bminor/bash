@@ -382,11 +382,7 @@ describe_command (command, dflags)
 	}
       /* If we require a full path and don't have one, make one */
       else if ((dflags & CDESC_ABSPATH) && ABSPATH (full_path) == 0)
-	{
-	  x = sh_makepath ((char *)NULL, full_path, MP_DOCWD|MP_RMDOT);
-	  free (full_path);
-	  full_path = x;
-	}
+	full_path = sh_makepath ((char *)NULL, full_path, MP_DOCWD|MP_RMDOT);
 
       found_file++;
       found = 1;

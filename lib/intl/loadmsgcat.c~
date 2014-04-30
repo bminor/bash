@@ -978,11 +978,7 @@ _nl_load_domain (domain_file, domainbinding)
 
       data = (struct mo_file_header *) malloc (size);
       if (data == NULL)
-	{
-	  if (use_mmap == 0)
-	    close (fd);
-	  return;
-	}
+	return;
 
       to_read = size;
       read_ptr = (char *) data;

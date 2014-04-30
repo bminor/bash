@@ -3597,6 +3597,7 @@ run_sigchld_trap (nchild)
   unwind_protect_int (jobs_list_frozen);
   unwind_protect_pointer (the_pipeline);
   unwind_protect_pointer (subst_assign_varlist);
+  unwind_protect_pointer (this_shell_builtin);
 
   /* We have to add the commands this way because they will be run
      in reverse order of adding.  We don't want maybe_set_sigchld_trap ()

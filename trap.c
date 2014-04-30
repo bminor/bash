@@ -548,6 +548,7 @@ void
 queue_sigchld_trap (nchild)
      int nchild;
 {
+itrace("queue_sigchld_trap: %d", nchild);
   if (nchild > 0)
     {
       catch_flag = 1;

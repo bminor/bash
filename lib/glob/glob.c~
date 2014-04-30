@@ -1235,12 +1235,7 @@ glob_filename (pathname, flags)
 		(char **)realloc (result, (result_size + l) * sizeof (char *));
 
 	      if (result == NULL)
-		{
-		  for (l = 0; array[l]; ++l)
-		    free (array[l]);
-		  free ((char *)array);
-		  goto memory_error;
-		}
+		goto memory_error;
 
 	      for (l = 0; array[l] != NULL; ++l)
 		result[result_size++ - 1] = array[l];

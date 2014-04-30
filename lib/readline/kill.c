@@ -278,7 +278,7 @@ rl_backward_kill_line (direction, ignore)
     return (rl_kill_line (1, ignore));
   else
     {
-      if (!rl_point)
+      if (rl_point == 0)
 	rl_ding ();
       else
 	{

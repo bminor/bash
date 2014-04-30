@@ -2054,10 +2054,10 @@ read_secondary_line (remove_quoted_newline)
 #if defined (HISTORY)
   if (ret && remember_on_history && (parser_state & PST_HEREDOC))
     {
-      /* To make adding the the here-document body right, we need to rely
-	 on history_delimiting_chars() returning \n for the first line of
-	 the here-document body and the null string for the second and
-	 subsequent lines, so we avoid double newlines.
+      /* To make adding the here-document body right, we need to rely on
+	 history_delimiting_chars() returning \n for the first line of the
+	 here-document body and the null string for the second and subsequent
+	 lines, so we avoid double newlines.
 	 current_command_line_count == 2 for the first line of the body. */
 
       current_command_line_count++;
@@ -2642,7 +2642,7 @@ gather_here_documents ()
   int r;
 
   r = 0;
-  while (need_here_doc)
+  while (need_here_doc > 0)
     {
       parser_state |= PST_HEREDOC;
       make_here_document (redir_stack[r++], line_number);
@@ -6075,6 +6075,7 @@ save_parser_state (ps)
 
   ps->expand_aliases = expand_aliases;
   ps->echo_input_at_read = echo_input_at_read;
+  ps->need_here_doc = need_here_doc;
 
   ps->token = token;
   ps->token_buffer_size = token_buffer_size;
@@ -6123,6 +6124,7 @@ restore_parser_state (ps)
 
   expand_aliases = ps->expand_aliases;
   echo_input_at_read = ps->echo_input_at_read;
+  need_here_doc = ps->need_here_doc;
 
   FREE (token);
   token = ps->token;

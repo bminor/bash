@@ -50,11 +50,11 @@
 
 #include "bashansi.h"
 
-#if DEBUG_MKTIME
+#if DEBUG
 #include <stdio.h>
 /* Make it work even if the system's libc has its own mktime routine.  */
 #define mktime my_mktime
-#endif /* DEBUG_MKTIME */
+#endif /* DEBUG */
 
 #ifndef __P
 #if defined (__GNUC__) || (defined (__STDC__) && __STDC__)
@@ -303,7 +303,7 @@ __mktime_internal (tp, convert, offset)
 weak_alias (mktime, timelocal)
 #endif
 
-#if DEBUG_MKTIME
+#if DEBUG
 
 static int
 not_equal_tm (a, b)
@@ -414,7 +414,7 @@ main (argc, argv)
   return status;
 }
 
-#endif /* DEBUG_MKTIME */
+#endif /* DEBUG */
 
 /*
 Local Variables:

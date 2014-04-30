@@ -1122,17 +1122,19 @@ the history as necessary.  This is an incremental search.
 
 @item forward-search-history (C-s)
 Search forward starting at the current line and moving `down' through
-the the history as necessary.  This is an incremental search.
+the history as necessary.  This is an incremental search.
 
 @item non-incremental-reverse-search-history (M-p)
 Search backward starting at the current line and moving `up'
 through the history as necessary using a non-incremental search
 for a string supplied by the user.
+The search string may match anywhere in a history line.
 
 @item non-incremental-forward-search-history (M-n)
 Search forward starting at the current line and moving `down'
-through the the history as necessary using a non-incremental search
+through the history as necessary using a non-incremental search
 for a string supplied by the user.
+The search string may match anywhere in a history line.
 
 @item history-search-forward ()
 Search forward through the history for the string of characters
@@ -1275,7 +1277,7 @@ By default, this command is unbound.
 Kill the text from point to the end of the line.
 
 @item backward-kill-line (C-x Rubout)
-Kill backward to the beginning of the line.
+Kill backward from the cursor to the beginning of the current line.
 
 @item unix-line-discard (C-u)
 Kill backward from the cursor to the beginning of the current line.

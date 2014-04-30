@@ -5736,7 +5736,7 @@ parameter_brace_expand_word (name, var_is_special, quoted, pflags, indp)
   char *temp, *tt;
   intmax_t arg_index;
   SHELL_VAR *var;
-  int atype, rflags;
+  int atype, rflags, contains_dollar_at, quoted_dollar_at;
   arrayind_t ind;
 
   ret = 0;
@@ -5765,8 +5765,8 @@ parameter_brace_expand_word (name, var_is_special, quoted, pflags, indp)
       tt[sindex = 0] = '$';
       strcpy (tt + 1, name);
 
-      ret = param_expand (tt, &sindex, quoted, (int *)NULL, (int *)NULL,
-			  (int *)NULL, (int *)NULL, pflags);
+      ret = param_expand (tt, &sindex, quoted, (int *)NULL, &contains_dollar_at,
+			  &quoted_dollar_at, (int *)NULL, pflags);
       free (tt);
     }
 #if defined (ARRAY_VARS)

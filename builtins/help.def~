@@ -432,7 +432,6 @@ wdispcolumn (i, buf, bufsize, width, height)
   if (((i << 1) >= num_shell_builtins) || (i+height >= num_shell_builtins))
     {
       printf ("\n");
-      free (wcstr);
       return;
     }
 
@@ -447,7 +446,6 @@ wdispcolumn (i, buf, bufsize, width, height)
     {
       /* for now */
       printf ("%c%s\n", (shell_builtins[i+height].flags & BUILTIN_ENABLED) ? ' ' : '*', helpdoc);
-      free (wcstr);
       return;
     }
 
