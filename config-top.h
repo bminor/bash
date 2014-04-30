@@ -79,6 +79,9 @@
    reply to the select query is an empty line. */
 #define KSH_COMPATIBLE_SELECT
 
+/* Default interactive shell startup file. */
+#define DEFAULT_BASHRC "~/.bashrc"
+
 /* System-wide .bashrc file for interactive shells. */
 /* #define SYS_BASHRC "/etc/bash.bashrc" */
 

@@ -3024,7 +3024,10 @@ pos_params (string, start, end, quoted)
   for (i = start ? 1 : 0; params && i < start; i++)
     params = params->next;
   if (params == 0)
-    return ((char *)NULL);
+    {
+      dispose_words (save);
+      return ((char *)NULL);
+    }
   for (h = t = params; params && i < end; i++)
     {
       t = params;
@@ -5915,6 +5918,14 @@ parameter_brace_expand_indir (name, var_is_special, quoted, quoted_dollar_atp, c
     }
 
   t = parameter_brace_find_indir (name, var_is_special, quoted, 0);
+  if (t == 0 || *t == 0)
+    {
+      report_error (_("%s: invalid indirect expansion"), name);
+      w = alloc_word_desc ();
+      w->word = &expand_param_error;
+      w->flags = 0;
+      return w;
+    }
 
   chk_atstar (t, quoted, quoted_dollar_atp, contains_dollar_at);
   if (t == 0)
@@ -5937,7 +5948,7 @@ parameter_brace_expand_rhs (name, value, c, quoted, qdollaratp, hasdollarat)
 {
   WORD_DESC *w;
   WORD_LIST *l;
-  char *t, *t1, *temp;
+  char *t, *t1, *temp, *vname;
   int hasdol;
 
   /* If the entire expression is between double quotes, we want to treat
@@ -6008,16 +6019,42 @@ parameter_brace_expand_rhs (name, value, c, quoted, qdollaratp, hasdollarat)
   t = temp ? savestring (temp) : savestring ("");
   t1 = dequote_string (t);
   free (t);
+
+  /* bash-4.4/5.0 */
+  vname = name;
+  if (*name == '!' &&
+      (legal_variable_starter ((unsigned char)name[1]) || DIGIT (name[1]) || VALID_INDIR_PARAM (name[1])))
+    {
+      vname = parameter_brace_find_indir (name + 1, SPECIAL_VAR (name, 1), quoted, 1);
+      if (vname == 0 || *vname == 0)
+	{
+	  report_error (_("%s: invalid indirect expansion"), name);
+	  free (vname);
+	  dispose_word (w);
+	  return &expand_wdesc_error;
+	}
+      if (legal_identifier (vname) == 0)
+	{
+	  report_error (_("%s: invalid variable name"), vname);
+	  free (vname);
+	  dispose_word (w);
+	  return &expand_wdesc_error;
+	}
+    }
+    
 #if defined (ARRAY_VARS)
-  if (valid_array_reference (name))
-    assign_array_element (name, t1, 0);
+  if (valid_array_reference (vname))
+    assign_array_element (vname, t1, 0);
   else
 #endif /* ARRAY_VARS */
-  bind_variable (name, t1, 0);
+  bind_variable (vname, t1, 0);
 #if 0
-  if (STREQ (name, "IFS") == 0)
+  if (STREQ (vname, "IFS") == 0)
 #endif
-    stupidly_hack_special_variables (name);
+    stupidly_hack_special_variables (vname);
+
+  if (vname != name)
+    free (vname);
 
   /* From Posix group discussion Feb-March 2010.  Issue 7 0000221 */
   free (temp);
@@ -6381,6 +6418,7 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
 					|| VALID_INDIR_PARAM (varname[1]));
   if (want_indir)
     vname = parameter_brace_find_indir (varname+1, SPECIAL_VAR (varname, 1), quoted, 1);
+    /* XXX - what if vname == 0 || *vname == 0 ? */
   else
     vname = varname;
     

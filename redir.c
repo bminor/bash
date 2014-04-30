@@ -410,8 +410,11 @@ write_here_document (fd, redirectee)
 	 may need to be reconsidered later. */
       if ((fd2 = dup (fd)) < 0 || (fp = fdopen (fd2, "w")) == NULL)
 	{
+	  old = errno;
 	  if (fd2 >= 0)
 	    close (fd2);
+	  dispose_words (tlist);
+	  errno = old;
 	  return (errno);
 	}
       errno = 0;
@@ -902,7 +905,10 @@ do_redirection_internal (redirect, flags)
 		}
 	    }
 	  else if ((fd != redirector) && (dup2 (fd, redirector) < 0))
-	    return (errno);
+	    {
+	      close (fd);	/* dup2 failed? must be fd limit issue */
+	      return (errno);
+	    }
 
 #if defined (BUFFERED_INPUT)
 	  /* Do not change the buffered stream for an implicit redirection

@@ -834,7 +834,7 @@ int	quoted;
 						rsize, rsize);
 			strcpy(result + rlen, t);
 			rlen += reg;
-			if (quoted && t)
+			if (quoted)
 				free(t);
 			/*
 			 * Add a separator only after non-null elements.

@@ -3818,7 +3818,8 @@ initialize_job_control (force)
 	{
 	  shell_pgrp = getpid ();
 	  setpgid (0, shell_pgrp);
-	  tcsetpgrp (shell_tty, shell_pgrp);
+	  if (shell_tty != -1)
+	    tcsetpgrp (shell_tty, shell_pgrp);
 	}
 
       while ((terminal_pgrp = tcgetpgrp (shell_tty)) != -1)

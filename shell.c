@@ -191,7 +191,7 @@ int have_devfd = 0;
 #endif
 
 /* The name of the .(shell)rc file. */
-static char *bashrc_file = "~/.bashrc";
+static char *bashrc_file = DEFAULT_BASHRC;
 
 /* Non-zero means to act more like the Bourne shell on startup. */
 static int act_like_sh;
@@ -1801,7 +1801,7 @@ shell_reinitialize ()
 
   /* Ensure that the default startup file is used.  (Except that we don't
      execute this file for reinitialized shells). */
-  bashrc_file = "~/.bashrc";
+  bashrc_file = DEFAULT_BASHRC;
 
   /* Delete all variables and functions.  They will be reinitialized when
      the environment is parsed. */

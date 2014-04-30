@@ -858,6 +858,8 @@ run_exit_trap ()
 	retval = trap_saved_exit_value;
 
       running_trap = 0;
+      array_dispose (ps);
+
       return retval;
     }
 

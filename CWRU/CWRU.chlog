@@ -6149,3 +6149,47 @@ builtins/hash.def
 	- print_portable_hash_info: single-quote pathnames and hashed filenames
 	  that contain shell metacharacters.  Fixes bug reported by
 	  <g1pi@libero.it> in debian bash bug #739853
+
+				   4/23
+				   ----
+{bashhist,bashline}.c
+builtins{bind,help,type}.def
+lib/glob/glob.c, lib/intl/{loadmsgcat,localealias}.c,lib/sh/mktime.c
+	- fixes to memory leaks uncovered by coverity scan
+
+				   4/24
+				   ----
+{bashhist,subst,redir,assoc,jobs,array,trap}.c
+lib/intl/l10flist.c
+builtins/complete.def
+	- fixes to memory leaks and other resource usage problems uncovered by
+	  coverity scan
+
+redir.c
+	- do_redirection_internal: if dup2 fails (presumably because of a
+	  resource limit), close the file descriptor we opened before returning
+	  error
+
+				   4/25
+				   ----
+config-top.h
+	- DEFAULT_BASHRC: new define with the name of the default shell
+	  startup file
+
+bashline.c
+	- bash_directory_completion_matches: don't dequote the directory name.
+	  If rl_completion_found_quote is non-zero, readline will dequote the
+	  filename itself.  Fixes bug reported by Clark Wang
+	  <dearvoid@gmail.com>
+
+				   4/27
+				   ----
+subst.c
+	- parameter_brace_expand_indir: if parameter_brace_find_indir returns
+	  NULL or "", report an error and return &expand_param_error so the
+	  error can propagate up
+	- parameter_brace_expand_rhs: if parameter_brace_find_indir returns
+	  NULL or "", or if it returns something that is not a valid identifier,
+	  report an error and return &expand_wdesc_error so the error can
+	  propagate up.  Fixes bug reported by Andre Holzhey
+	  <andre.holzhey@gmx.de>

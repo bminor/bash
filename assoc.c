@@ -277,7 +277,10 @@ int starsub, quoted;
   for (i = 1; l && i < start; i++)
     l = l->next;
   if (l == 0)
-    return ((char *)NULL);
+    {
+      dispose_words (save);
+      return ((char *)NULL);
+    }
   for (j = 0,h = t = l; l && j < nelem; j++)
     {
       t = l;
