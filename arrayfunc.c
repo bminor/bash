@@ -934,11 +934,7 @@ array_variable_part (s, subp, lenp)
   var = find_variable (t);
 
   free (t);
-#if 0
-  return (var == 0 || invisible_p (var)) ? (SHELL_VAR *)0 : var;
-#else
   return var;	/* now return invisible variables; caller must handle */
-#endif
 }
 
 #define INDEX_ERROR() \

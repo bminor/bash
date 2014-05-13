@@ -83,6 +83,11 @@
 
 #define ifsname(s)	((s)[0] == 'I' && (s)[1] == 'F' && (s)[2] == 'S' && (s)[3] == '\0')
 
+/* flags for find_variable_internal */
+
+#define FV_FORCETEMPENV		0x01
+#define FV_SKIPINVISIBLE	0x02
+
 extern char **environ;
 
 /* Variables used here and defined in other files. */
@@ -1795,15 +1800,17 @@ var_lookup (name, vcontext)
 */
 
 SHELL_VAR *
-find_variable_internal (name, force_tempenv)
+find_variable_internal (name, flags)
      const char *name;
-     int force_tempenv;
+     int flags;
 {
   SHELL_VAR *var;
-  int search_tempenv;
+  int search_tempenv, force_tempenv;
   VAR_CONTEXT *vc;
 
   var = (SHELL_VAR *)NULL;
+
+  force_tempenv = (flags & FV_FORCETEMPENV);
 
   /* If explicitly requested, first look in the temporary environment for
      the variable.  This allows constructs such as "foo=x eval 'echo $foo'"
@@ -1815,22 +1822,24 @@ find_variable_internal (name, force_tempenv)
   if (search_tempenv && temporary_env)		
     var = hash_lookup (name, temporary_env);
 
-  vc = shell_variables;
-#if 0
-if (search_tempenv == 0 && /* (subshell_environment & SUBSHELL_COMSUB) && */
-    expanding_redir &&
-    (this_shell_builtin == eval_builtin || this_shell_builtin == command_builtin))
-  {
-  itrace("find_variable_internal: search_tempenv == 0: skipping VC_BLTNENV");
-  while (vc && (vc->flags & VC_BLTNENV))
-    vc = vc->down;
-  if (vc == 0)
-    vc = shell_variables;
-  }
-#endif
-
   if (var == 0)
-    var = var_lookup (name, vc);
+    {
+      if ((flags & FV_SKIPINVISIBLE) == 0)
+	var = var_lookup (name, shell_variables);
+      else
+	{
+	  /* essentially var_lookup expanded inline so we can check for
+	     att_invisible */
+	  for (vc = shell_variables; vc; vc = vc->down)
+	    {
+	      var = hash_lookup (name, vc->table);
+	      if (var && invisible_p (var))
+		var = 0;
+	      if (var)
+		break;
+	    }
+	}
+    }
 
   if (var == 0)
     return ((SHELL_VAR *)NULL);
@@ -1844,7 +1853,7 @@ SHELL_VAR *
 find_variable_nameref (v)
      SHELL_VAR *v;
 {
-  int level;
+  int level, flags;
   char *newname;
   SHELL_VAR *orig, *oldv;
 
@@ -1859,7 +1868,10 @@ find_variable_nameref (v)
       if (newname == 0 || *newname == '\0')
 	return ((SHELL_VAR *)0);
       oldv = v;
-      v = find_variable_internal (newname, (expanding_redir == 0 && (assigning_in_environment || executing_builtin)));
+      flags = 0;
+      if (expanding_redir == 0 && (assigning_in_environment || executing_builtin))
+	flags |= FV_FORCETEMPENV;
+      v = find_variable_internal (newname, flags);
       if (v == orig || v == oldv)
 	{
 	  internal_warning (_("%s: circular name reference"), orig->name);
@@ -1876,7 +1888,7 @@ find_variable_last_nameref (name)
 {
   SHELL_VAR *v, *nv;
   char *newname;
-  int level;
+  int level, flags;
 
   nv = v = find_variable_noref (name);
   level = 0;
@@ -1889,7 +1901,10 @@ find_variable_last_nameref (name)
       if (newname == 0 || *newname == '\0')
 	return ((SHELL_VAR *)0);
       nv = v;
-      v = find_variable_internal (newname, (expanding_redir == 0 && (assigning_in_environment || executing_builtin)));
+      flags = 0;
+      if (expanding_redir == 0 && (assigning_in_environment || executing_builtin))
+	flags |= FV_FORCETEMPENV;
+      v = find_variable_internal (newname, flags);
     }
   return nv;
 }
@@ -2010,7 +2025,7 @@ find_variable_tempenv (name)
 {
   SHELL_VAR *var;
 
-  var = find_variable_internal (name, 1);
+  var = find_variable_internal (name, FV_FORCETEMPENV);
   if (var && nameref_p (var))
     var = find_variable_nameref (var);
   return (var);
@@ -2081,9 +2096,52 @@ find_variable (name)
      const char *name;
 {
   SHELL_VAR *v;
+  int flags;
 
   last_table_searched = 0;
-  v = find_variable_internal (name, (expanding_redir == 0 && (assigning_in_environment || executing_builtin)));
+  flags = 0;
+  if (expanding_redir == 0 && (assigning_in_environment || executing_builtin))
+    flags |= FV_FORCETEMPENV;
+  v = find_variable_internal (name, flags);
+  if (v && nameref_p (v))
+    v = find_variable_nameref (v);
+  return v;
+}
+
+/* Find the first instance of NAME in the variable context chain; return first
+   one found without att_invisible set; return 0 if no non-invisible instances
+   found. */
+SHELL_VAR *
+find_variable_no_invisible (name)
+     const char *name;
+{
+  SHELL_VAR *v;
+  int flags;
+
+  last_table_searched = 0;
+  flags = FV_SKIPINVISIBLE;
+  if (expanding_redir == 0 && (assigning_in_environment || executing_builtin))
+    flags |= FV_FORCETEMPENV;
+  v = find_variable_internal (name, flags);
+  if (v && nameref_p (v))
+    v = find_variable_nameref (v);
+  return v;
+}
+
+/* Find the first instance of NAME in the variable context chain; return first
+   one found even if att_invisible set. */
+SHELL_VAR *
+find_variable_for_assignment (name)
+     const char *name;
+{
+  SHELL_VAR *v;
+  int flags;
+
+  last_table_searched = 0;
+  flags = 0;
+  if (expanding_redir == 0 && (assigning_in_environment || executing_builtin))
+    flags |= FV_FORCETEMPENV;
+  v = find_variable_internal (name, flags);
   if (v && nameref_p (v))
     v = find_variable_nameref (v);
   return v;
@@ -2094,8 +2152,12 @@ find_variable_noref (name)
      const char *name;
 {
   SHELL_VAR *v;
+  int flags;
 
-  v = find_variable_internal (name, (expanding_redir == 0 && (assigning_in_environment || executing_builtin)));
+  flags = 0;
+  if (expanding_redir == 0 && (assigning_in_environment || executing_builtin))
+    flags |= FV_FORCETEMPENV;
+  v = find_variable_internal (name, flags);
   return v;
 }
 
@@ -2197,10 +2259,7 @@ make_local_variable (name)
   /* local foo; local foo;  is a no-op. */
   old_var = find_variable (name);
   if (old_var && local_p (old_var) && old_var->context == variable_context)
-    {
-      VUNSETATTR (old_var, att_invisible);	/* XXX */
-      return (old_var);
-    }
+    return (old_var);
 
   was_tmpvar = old_var && tempvar_p (old_var);
   /* If we're making a local variable in a shell function, the temporary env
@@ -2279,7 +2338,7 @@ make_local_variable (name)
   if (ifsname (name))
     setifs (new_var);
 
-  if (was_tmpvar == 0)
+  if (was_tmpvar == 0 && no_invisible_vars == 0)
     VSETATTR (new_var, att_invisible);	/* XXX */
   return (new_var);
 }

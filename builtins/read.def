@@ -442,7 +442,10 @@ read_builtin (list)
       add_unwind_protect (reset_alarm, (char *)NULL);
 #if defined (READLINE)
       if (edit)
-	add_unwind_protect (reset_attempted_completion_function, (char *)NULL);
+	{
+	  add_unwind_protect (reset_attempted_completion_function, (char *)NULL);
+	  add_unwind_protect (bashline_reset_event_hook, (char *)NULL);
+	}
 #endif
       falarm (tmsec, tmusec);
     }
@@ -1021,6 +1024,7 @@ edit_line (p, itext)
 
   old_attempted_completion_function = rl_attempted_completion_function;
   rl_attempted_completion_function = (rl_completion_func_t *)NULL;
+  bashline_set_event_hook ();
   if (itext)
     {
       old_startup_hook = rl_startup_hook;
@@ -1032,6 +1036,7 @@ edit_line (p, itext)
 
   rl_attempted_completion_function = old_attempted_completion_function;
   old_attempted_completion_function = (rl_completion_func_t *)NULL;
+  bashline_reset_event_hook ();
 
   if (ret == 0)
     return ret;

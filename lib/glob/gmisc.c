@@ -388,7 +388,7 @@ glob_dirscan (pat, dirsep)
 {
   char *p, *d, *pe, *se;
 
-  d = pe = 0;
+  d = pe = se = 0;
   for (p = pat; p && *p; p++)
     {
       if (extglob_pattern_p (p))

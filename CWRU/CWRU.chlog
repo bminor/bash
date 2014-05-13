@@ -6230,3 +6230,43 @@ lib/glob/glob.c
 	  extglob is enabled, use glob_dirscan to find the real last occurrence
 	  of `/' to avoid being confused by slashes in extglob patterns.  Fix
 	  for bug reported by Pierre Gaston <pierre.gaston@gmail.com>
+
+				    5/6
+				    ---
+variables.c
+	- make_local_variable: only set the att_invisible attribute if
+	  no_invisible_vars isn't set
+	- find_variable_for_assignment: new function, intended to be called by
+	  code that eventually wants to assign a value to the variable; will not
+	  skip invisible variables; currently identical to find_variable
+	- find_variable_no_invisible: new function, finds the first visible
+	  instance of variable with a given name in the variable context chain;
+	  eventually will be used to replace find_variable; separate right now
+	  for testing
+
+variables.h
+	- find_variable_for_assignment: extern declaration
+	- find_variable_no_invisible: extern declaration
+
+				    5/7
+				    ---
+variables.c
+	- make_local_variable: don't clear `invisible' attribute if we are
+	  returning an existing local variable at the right context.  Let the
+	  upper layers do that. Fixes bug reported by Dan Douglas
+	  <ormaaj@gmail.com>
+
+				    5/8
+				    ---
+lib/readline/input.c
+	- rl_getc: call RL_CHECK_SIGNALS if a read(2) is interrupted (-1/EINTR)
+	  by SIGALRM or SIGVTALRM (placeholder for non-keyboard-generated
+	  signals of interest)
+
+builtins/read.def
+	- edit_line: call bashline_set_event_hook and
+	  bashline_reset_event_hook around call to readline(), so the right
+	  signal handling happens
+	- read_builtin: make sure we add an unwind_protect call to
+	  bashline_reset_event_hook.  These changes fix bug reported in
+	  https://bugs.launchpad.net/ubuntu/+source/bash/+bug/1317476
