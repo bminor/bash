@@ -123,6 +123,8 @@ static char **glob_dir_to_array __P((char *, char **, int));
 extern char *glob_patscan __P((char *, char *, int));
 extern wchar_t *glob_patscan_wc __P((wchar_t *, wchar_t *, int));
 
+extern char *glob_dirscan __P((char *, int));
+
 /* Compile `glob_loop.c' for single-byte characters. */
 #define CHAR	unsigned char
 #define INT	int
@@ -187,6 +189,9 @@ extglob_skipname (pat, dname, flags)
   se = pp + strlen (pp) - 1;		/* end of string */
   pe = glob_patscan (pp, se, 0);	/* end of extglob pattern (( */
   /* we should check for invalid extglob pattern here */
+  if (pe == 0)
+    return 0;
+
   /* if pe != se we have more of the pattern at the end of the extglob
      pattern. Check the easy case first ( */
   if (pe == se && *pe == ')' && (t = strchr (pp, '|')) == 0)
@@ -1015,7 +1020,7 @@ glob_filename (pathname, flags)
 {
   char **result;
   unsigned int result_size;
-  char *directory_name, *filename, *dname;
+  char *directory_name, *filename, *dname, *fn;
   unsigned int directory_len;
   int free_dirname;			/* flag */
   int dflags;
@@ -1031,6 +1036,18 @@ glob_filename (pathname, flags)
 
   /* Find the filename.  */
   filename = strrchr (pathname, '/');
+#if defined (EXTENDED_GLOB)
+  if (filename && extended_glob)
+    {
+      fn = glob_dirscan (pathname, '/');
+#if DEBUG_MATCHING
+      if (fn != filename)
+	fprintf (stderr, "glob_filename: glob_dirscan: fn (%s) != filename (%s)\n", fn ? fn : "(null)", filename);
+#endif
+      filename = fn;
+    }
+#endif
+
   if (filename == NULL)
     {
       filename = pathname;

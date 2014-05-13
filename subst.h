@@ -280,10 +280,11 @@ extern char *cond_expand_word __P((WORD_DESC *, int));
 #define SD_NOJMP	0x01	/* don't longjmp on fatal error. */
 #define SD_INVERT	0x02	/* look for chars NOT in passed set */
 #define SD_NOQUOTEDELIM	0x04	/* don't let single or double quotes act as delimiters */
-#define SD_NOSKIPCMD	0x08	/* don't skip over $(, <(, or >( command/process substitution */
+#define SD_NOSKIPCMD	0x08	/* don't skip over $(, <(, or >( command/process substitution; parse them as commands */
 #define SD_EXTGLOB	0x10	/* skip over extended globbing patterns if appropriate */
 #define SD_IGNOREQUOTE	0x20	/* single and double quotes are not special */
 #define SD_GLOB		0x40	/* skip over glob patterns like bracket expressions */
+#define SD_NOPROCSUB	0x80	/* don't parse process substitutions as commands */
 
 extern int skip_to_delim __P((char *, int, char *, int));
 

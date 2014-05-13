@@ -6185,11 +6185,48 @@ bashline.c
 				   4/27
 				   ----
 subst.c
-	- parameter_brace_expand_indir: if parameter_brace_find_indir returns
-	  NULL or "", report an error and return &expand_param_error so the
-	  error can propagate up
 	- parameter_brace_expand_rhs: if parameter_brace_find_indir returns
 	  NULL or "", or if it returns something that is not a valid identifier,
 	  report an error and return &expand_wdesc_error so the error can
 	  propagate up.  Fixes bug reported by Andre Holzhey
 	  <andre.holzhey@gmx.de>
+
+				   4/29
+				   ----
+subst.c
+	- parameter_brace_substring: don't short-circuit right away if the
+	  value is NULL but we are looking at the positional parameters.  Part
+	  of fix for bug reported by Pierre Gaston <pierre.gaston@gmail.com>
+	- pos_params: if there are no positional parameters, only short-circuit
+	  if we are looking for $1 and above.  Rest of fix for bug reported
+	  by Pierre Gaston <pierre.gaston@gmail.com>
+
+subst.h
+	- SD_NOPROCSUB: new flag for skip_to_delim, means to not allow any
+	  process subsitutions (should not have overloaded SD_NOSKIPCMD)
+
+subst.c
+	- skip_to_delim: honor SD_NOPROCSUB flag
+
+make_cmd.c
+	- make_arith_for_expr: set W_NOPROCSUB flag in the created word
+	- make_arith_for_command: set SD_NOPROCSUB in the flags argument to
+	  skip_to_delim so we don't treat <( or >( as a process substitution
+	  (we won't evaluate them in eval_arith_for_expr anyway).  Fixes
+	  bug reported by Pierre Gaston <pierre.gaston@gmail.com>
+
+				    5/1
+				    ---
+lib/glob/gmisc.c
+	- glob_dirscan: new function, takes a pattern and a directory separator
+	  argument and advances the pattern to the last occurrence of the
+	  separator. Like strrchr, but understands extended glob patterns and
+	  uses glob_patscan to skip over them
+
+lib/glob/glob.c
+	- extglob_skipname: if the extended globbing pattern is invalid, don't
+	  skip the name
+	- glob_filename: if there is a slash in the pattern to be matched, and
+	  extglob is enabled, use glob_dirscan to find the real last occurrence
+	  of `/' to avoid being confused by slashes in extglob patterns.  Fix
+	  for bug reported by Pierre Gaston <pierre.gaston@gmail.com>

@@ -1708,7 +1708,7 @@ skip_to_delim (string, start, delims, flags)
      char *delims;
      int flags;
 {
-  int i, pass_next, backq, si, c, invert, skipquote, skipcmd;
+  int i, pass_next, backq, si, c, invert, skipquote, skipcmd, noprocsub;
   size_t slen;
   char *temp, open[3];
   DECLARE_MBSTATE;
@@ -1718,6 +1718,7 @@ skip_to_delim (string, start, delims, flags)
     no_longjmp_on_fatal_error = 1;
   invert = (flags & SD_INVERT);
   skipcmd = (flags & SD_NOSKIPCMD) == 0;
+  noprocsub = (flags & SD_NOPROCSUB);
 
   i = start;
   pass_next = backq = 0;
@@ -1780,7 +1781,7 @@ skip_to_delim (string, start, delims, flags)
 	  continue;
 	}
 #if defined (PROCESS_SUBSTITUTION)
-      else if (skipcmd && (c == '<' || c == '>') && string[i+1] == LPAREN)
+      else if (skipcmd && noprocsub == 0 && (c == '<' || c == '>') && string[i+1] == LPAREN)
 	{
 	  si = i + 2;
 	  if (string[si] == '\0')
@@ -3012,7 +3013,7 @@ pos_params (string, start, end, quoted)
     return ((char *)NULL);
 
   save = params = list_rest_of_args ();
-  if (save == 0)
+  if (save == 0 && start > 0)
     return ((char *)NULL);
 
   if (start == 0)		/* handle ${@:0[:x]} specially */
@@ -5918,14 +5919,6 @@ parameter_brace_expand_indir (name, var_is_special, quoted, quoted_dollar_atp, c
     }
 
   t = parameter_brace_find_indir (name, var_is_special, quoted, 0);
-  if (t == 0 || *t == 0)
-    {
-      report_error (_("%s: invalid indirect expansion"), name);
-      w = alloc_word_desc ();
-      w->word = &expand_param_error;
-      w->flags = 0;
-      return w;
-    }
 
   chk_atstar (t, quoted, quoted_dollar_atp, contains_dollar_at);
   if (t == 0)
@@ -6552,7 +6545,7 @@ parameter_brace_substring (varname, value, ind, substr, quoted, flags)
   char *temp, *val, *tt, *oname;
   SHELL_VAR *v;
 
-  if (value == 0)
+  if (value == 0 && ((varname[0] != '@' && varname[0] != '*') || varname[1]))
     return ((char *)NULL);
 
   oname = this_command_name;
@@ -8279,6 +8272,9 @@ add_string:
 	case '<':
 	case '>':
 	  {
+	    /* bash-4.4/bash-5.0
+	       XXX - technically this should only be expanded at the start
+	       of a word */
 	    if (string[++sindex] != LPAREN || (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (word->flags & (W_DQUOTE|W_NOPROCSUB)) || posixly_correct)
 	      {
 		sindex--;	/* add_character: label increments sindex */

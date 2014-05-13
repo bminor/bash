@@ -261,6 +261,9 @@ make_arith_for_expr (s)
     return ((WORD_LIST *)NULL);
   wd = make_word (s);
   wd->flags |= W_NOGLOB|W_NOSPLIT|W_QUOTED|W_DQUOTE;	/* no word splitting or globbing */
+#if defined (PROCESS_SUBSTITUTION)
+  wd->flags |= W_NOPROCSUB;	/* no process substitution */
+#endif
   result = make_word_list (wd, (WORD_LIST *)NULL);
   return result;
 }
@@ -292,7 +295,7 @@ make_arith_for_command (exprs, action, lineno)
 	s++;
       start = s;
       /* skip to the semicolon or EOS */
-      i = skip_to_delim (start, 0, ";", SD_NOJMP);
+      i = skip_to_delim (start, 0, ";", SD_NOJMP|SD_NOPROCSUB);
       s = start + i;
 
       t = (i > 0) ? substring (start, 0, i) : (char *)NULL;

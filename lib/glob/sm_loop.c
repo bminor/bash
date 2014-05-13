@@ -533,7 +533,8 @@ matched:
    embedded () and [].  If DELIM is 0, we scan until a matching `)'
    because we're scanning a `patlist'.  Otherwise, we scan until we see
    DELIM.  In all cases, we never scan past END.  The return value is the
-   first character after the matching DELIM. */
+   first character after the matching DELIM or NULL if the pattern is
+   empty or invalid. */
 /*static*/ CHAR *
 PATSCAN (string, end, delim)
      CHAR *string, *end;
