@@ -1637,7 +1637,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
   /* If we are changing the number of invisible characters in a line, and
      the spot of first difference is before the end of the invisible chars,
      lendiff needs to be adjusted. */
-  if (current_line == 0 && !_rl_horizontal_scroll_mode &&
+  if (current_line == 0 && /* !_rl_horizontal_scroll_mode && */
       current_invis_chars != visible_wrap_offset)
     {
       if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
@@ -1825,8 +1825,13 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	      else
 		_rl_last_c_pos += bytes_to_insert;
 
+	      /* XXX - we only want to do this if we are at the end of the line
+		 so we move there with _rl_move_cursor_relative */
 	      if (_rl_horizontal_scroll_mode && ((oe-old) > (ne-new)))
-		goto clear_rest_of_line;
+		{
+		  _rl_move_cursor_relative (ne-new, new);
+		  goto clear_rest_of_line;
+		}
 	    }
 	}
       /* Otherwise, print over the existing material. */
