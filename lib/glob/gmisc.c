@@ -42,6 +42,8 @@
 #define WLPAREN         L'('
 #define WRPAREN         L')'
 
+extern char *glob_patscan __P((char *, char *, int));
+
 /* Return 1 of the first character of WSTRING could match the first
    character of pattern WPAT.  Wide character version. */
 int
@@ -374,4 +376,35 @@ bad_bracket:
     }
 
   return matlen;
+}
+
+/* Skip characters in PAT and return the final occurrence of DIRSEP.  This
+   is only called when extended_glob is set, so we have to skip over extglob
+   patterns x(...) */
+char *
+glob_dirscan (pat, dirsep)
+     char *pat;
+     int dirsep;
+{
+  char *p, *d, *pe, *se;
+
+  d = pe = se = 0;
+  for (p = pat; p && *p; p++)
+    {
+      if (extglob_pattern_p (p))
+	{
+	  if (se == 0)
+	    se = p + strlen (p) - 1;
+	  pe = glob_patscan (p + 2, se, 0);
+	  if (pe == 0)
+	    continue;
+	  else if (*pe == 0)
+	    break;
+	  p = pe - 1;	/* will do increment above */
+	  continue;
+	}
+      if (*p ==  dirsep)
+	d = p;
+    }
+  return d;
 }
