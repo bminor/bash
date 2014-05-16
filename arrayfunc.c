@@ -179,6 +179,7 @@ bind_array_var_internal (entry, ind, key, value, flags)
     array_insert (array_cell (entry), ind, newval);
   FREE (newval);
 
+  VUNSETATTR (entry, att_invisible);	/* no longer invisible */
   return (entry);
 }
 
