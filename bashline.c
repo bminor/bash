@@ -4167,9 +4167,16 @@ bash_directory_completion_matches (text)
   int qc;
 
   qc = rl_dispatching ? rl_completion_quote_character : 0;  
-  dfn = bash_dequote_filename ((char *)text, qc);
+  /* If rl_completion_found_quote != 0, rl_completion_matches will call the
+     filename dequoting function, causing the directory name to be dequoted
+     twice. */
+  if (rl_dispatching && rl_completion_found_quote == 0)
+    dfn = bash_dequote_filename ((char *)text, qc);
+  else
+    dfn = (char *)text;
   m1 = rl_completion_matches (dfn, rl_filename_completion_function);
-  free (dfn);
+  if (dfn != text)
+    free (dfn);
 
   if (m1 == 0 || m1[0] == 0)
     return m1;
