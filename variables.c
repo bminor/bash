@@ -2197,10 +2197,7 @@ make_local_variable (name)
   /* local foo; local foo;  is a no-op. */
   old_var = find_variable (name);
   if (old_var && local_p (old_var) && old_var->context == variable_context)
-    {
-      VUNSETATTR (old_var, att_invisible);	/* XXX */
-      return (old_var);
-    }
+    return (old_var);
 
   was_tmpvar = old_var && tempvar_p (old_var);
   /* If we're making a local variable in a shell function, the temporary env
