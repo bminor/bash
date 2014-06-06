@@ -2274,7 +2274,7 @@ make_local_variable (name)
      set in hash_lookup and only (so far) checked here. */
   if (was_tmpvar && old_var->context == variable_context && last_table_searched != temporary_env)
     {
-      VUNSETATTR (old_var, att_invisible);
+      VUNSETATTR (old_var, att_invisible);	/* XXX */
       return (old_var);
     }
   if (was_tmpvar)

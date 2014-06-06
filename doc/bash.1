@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue Mar 18 16:26:29 EDT 2014
+.\"	Last Change: Mon May 12 10:32:53 EDT 2014
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2014 March 18" "GNU Bash 4.3"
+.TH BASH 1 "2014 May 12" "GNU Bash 4.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1252,9 +1252,10 @@ A variable can be assigned the \fInameref\fP attribute using the
 (see the descriptions of \fBdeclare\fP and \fBlocal\fP below)
 to create a \fInameref\fP, or a reference to another variable.
 This allows variables to be manipulated indirectly.
-Whenever the nameref variable is referenced or assigned to, the operation
-is actually performed on the variable specified by the nameref variable's
-value.
+Whenever the nameref variable is referenced, assigned to, unset, or has
+its attributes modified (other than the \fInameref\P attribute itself), the
+operation is actually performed on the variable specified by the nameref
+variable's value.
 A nameref is commonly used within shell functions to refer to a variable
 whose name is passed as an argument to the function.
 For instance, if a variable name is passed to a shell function as its first
@@ -1267,13 +1268,14 @@ argument, running
 .sp .5
 inside the function creates a nameref variable \fBref\fP whose value is
 the variable name passed as the first argument.
-References and assignments to \fBref\fP are treated as references and
-assignments to the variable whose name was passed as \fB$1\fP.
+References and assignments to \fBref\fP, and changes to its attributes,
+are treated as references, assignments, and attribute modifications
+to the variable whose name was passed as \fB$1\fP.
 If the control variable in a \fBfor\fP loop has the nameref attribute,
 the list of words can be a list of shell variables, and a name reference
 will be established for each word in the list, in turn, when the loop is
 executed.
-Array variables cannot be given the \fB\-n\fP attribute.
+Array variables cannot be given the \fB\nameref\fP attribute.
 However, nameref variables can reference array variables and subscripted
 array variables.
 Namerefs can be unset using the \fB\-n\fP option to the \fBunset\fP builtin.
@@ -7489,10 +7491,11 @@ The upper-case attribute is disabled.
 Give each \fIname\fP the \fInameref\fP attribute, making
 it a name reference to another variable.
 That other variable is defined by the value of \fIname\fP.
-All references and assignments to \fIname\fP, except for changing the
+All references, assignments, and attribute modifications
+to \fIname\fP, except for changing the
 \fB\-n\fP attribute itself, are performed on the variable referenced by
 \fIname\fP's value.
-The \fB\-n\fP attribute cannot be applied to array variables.
+The nameref attribute cannot be applied to array variables.
 .TP
 .B \-r
 Make \fIname\fPs readonly.  These names cannot then be assigned values

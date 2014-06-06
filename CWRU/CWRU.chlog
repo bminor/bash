@@ -6150,6 +6150,14 @@ builtins/hash.def
 	  that contain shell metacharacters.  Fixes bug reported by
 	  <g1pi@libero.it> in debian bash bug #739853
 
+				   4/20
+				   ----
+lib/readline/display.c
+	- When using horizontal scrolling, the redisplay code erases too much
+	  of the line containing successful results, so make sure we only
+	  erase to the end of the line after making sure we move the cursor
+	  to the end.  Fixes bug reported by <Trond.Endrestol@ximalas.info>
+
 				   4/23
 				   ----
 {bashhist,bashline}.c
@@ -6270,3 +6278,16 @@ builtins/read.def
 	- read_builtin: make sure we add an unwind_protect call to
 	  bashline_reset_event_hook.  These changes fix bug reported in
 	  https://bugs.launchpad.net/ubuntu/+source/bash/+bug/1317476
+
+				   5/12
+				   ----
+doc/{bash.1,bashref.texi}
+	- clarify language to make it clear that changing attributes of a
+	  nameref variable (e.g., export), actually changes the attributes of
+	  the referenced variable.  Fixes omission noted by Jeff Haemer
+	  <jeffrey.haemer@gmail.com>
+
+arrayfunc.c
+	- bind_array_var_internal: make sure ENTRY no longer has invisible
+	  attribute before returning.  Fixes bug reported by Geir Hauge
+	  <geir.hauge@gmail.com>
