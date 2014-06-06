@@ -525,7 +525,7 @@ rl_getc (stream)
 #undef X_EWOULDBLOCK
 #undef X_EAGAIN
 
-/* fprintf(stderr, "rl_getc: result = %d errno = %d\n", result, errno); */
+fprintf(stderr, "rl_getc: result = %d errno = %d\n", result, errno); 
 
       /* If the error that we received was EINTR, then try again,
 	 this is simply an interrupted system call to read ().  We allow
