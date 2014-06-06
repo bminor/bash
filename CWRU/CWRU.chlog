@@ -6291,3 +6291,11 @@ arrayfunc.c
 	- bind_array_var_internal: make sure ENTRY no longer has invisible
 	  attribute before returning.  Fixes bug reported by Geir Hauge
 	  <geir.hauge@gmail.com>
+
+				   5/22
+				   ----
+execute_cmd.c
+	- shell_execve: if execve fails and we return 127 or 126, make sure to
+	  set last_command_exit_value if a call to file_error or report_error
+	  causes the shell to exit.  This ensures that the shell exits with
+	  the right value.

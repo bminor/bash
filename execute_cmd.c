@@ -4735,7 +4735,6 @@ execute_builtin_or_function (words, builtin, var, redirects,
   char *ofifo_list;
 #endif
 
-
 #if defined (PROCESS_SUBSTITUTION)  
   ofifo = num_fifos ();
   ofifo_list = copy_fifo_list (&osize);
@@ -5219,6 +5218,8 @@ shell_execve (command, args, env)
      Maybe it is something we can hack ourselves. */
   if (i != ENOEXEC)
     {
+      /* make sure this is set correctly for file_error/report_error */
+      last_command_exit_value = (i == ENOENT) ?  EX_NOTFOUND : EX_NOEXEC; /* XXX Posix.2 says that exit status is 126 */
       if (file_isdir (command))
 #if defined (EISDIR)
 	internal_error (_("%s: %s"), command, strerror (EISDIR));
@@ -5266,7 +5267,7 @@ shell_execve (command, args, env)
 	  errno = i;
 	  file_error (command);
 	}
-      return ((i == ENOENT) ? EX_NOTFOUND : EX_NOEXEC);	/* XXX Posix.2 says that exit status is 126 */
+      return (last_command_exit_value);
     }
 
   /* This file is executable.
