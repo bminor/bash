@@ -265,6 +265,8 @@ extern char *copy_fifo_list __P((int *));
 extern void unlink_new_fifos __P((char *, int));
 extern void close_new_fifos __P((char *, int));
 
+extern void clear_fifo_list __P((void));
+
 extern WORD_LIST *list_string_with_quotes __P((char *));
 
 #if defined (ARRAY_VARS)

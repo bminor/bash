@@ -911,8 +911,12 @@ exit_shell (s)
   fflush (stderr);
 
 #if defined (READLINE)
-  if (RL_ISSTATE (RL_STATE_TERMPREPPED) && rl_deprep_term_function)
-    (*rl_deprep_term_function) ();
+  if (RL_ISSTATE (RL_STATE_TERMPREPPED))
+{
+itrace("exit_shell: rl_term_prepped: calling rl_deprep_term_function");
+if (rl_deprep_term_function)
+  (*rl_deprep_term_function) ();
+}
 #endif
 
   /* Do trap[0] if defined.  Allow it to override the exit status

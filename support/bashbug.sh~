@@ -62,7 +62,7 @@ while [ $# -gt 0 ]; do
 	--version)	shift ; do_version=y ;;
 	--)		shift ; break ;;
 	-*)		echo "bashbug: ${1}: invalid option" >&2
-			echo "$USAGE" >&2
+			echo "$USAGE" >& 2
 			exit 2 ;;
 	*)		break ;;
 	esac
