@@ -6299,3 +6299,14 @@ execute_cmd.c
 	  set last_command_exit_value if a call to file_error or report_error
 	  causes the shell to exit.  This ensures that the shell exits with
 	  the right value.
+
+				    6/6
+				    ---
+shell.c
+	- drop_priv_mode: print an error message on setuid() failure, optionally
+	  exit if errno == EAGAIN, as it can be on Linux when RLIMIT_NPROC for
+	  the target user is exceeded.
+
+config-top.h
+	- EXIT_ON_SETUID_FAILURE: new settable define, will cause the shell to
+	  exit if setuid fails with errno == EAGAIN

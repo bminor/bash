@@ -821,7 +821,7 @@ for_command:	FOR WORD newline_list DO compound_list DONE
 arith_for_command:	FOR ARITH_FOR_EXPRS list_terminator newline_list DO compound_list DONE
 				{
 				  $$ = make_arith_for_command ($2, $6, arith_for_lineno);
-				  if (word_top > 0) word_top--; 
+				  if (word_top > 0) word_top--;
 				}
 	|		FOR ARITH_FOR_EXPRS list_terminator newline_list '{' compound_list '}'
 				{

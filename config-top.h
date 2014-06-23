@@ -135,3 +135,7 @@
 /* Define to 1 if you want to be able to export indexed arrays to processes
    using the foo=([0]=one [1]=two) and so on */
 /* #define ARRAY_EXPORT 1 */
+
+/* Defined to 1 if you want the shell to exit if it is running setuid and its
+   attempt to drop privilege using setuid(getuid()) fails with errno == EAGAIN */
+/* #define EXIT_ON_SETUID_FAILURE 1 */

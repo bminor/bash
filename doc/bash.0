@@ -673,25 +673,27 @@ PPAARRAAMMEETTEERRSS
        the  ddeeccllaarree or llooccaall builtin commands (see the descriptions of ddeeccllaarree
        and llooccaall below) to create a _n_a_m_e_r_e_f, or a reference to  another  vari-
        able.   This  allows  variables to be manipulated indirectly.  Whenever
-       the nameref variable is referenced or assigned  to,  the  operation  is
-       actually  performed on the variable specified by the nameref variable's
-       value.  A nameref is commonly used within shell functions to refer to a
-       variable  whose  name  is  passed  as an argument to the function.  For
-       instance, if a variable name is passed to a shell function as its first
-       argument, running
-              declare -n ref=$1
-       inside  the  function creates a nameref variable rreeff whose value is the
-       variable name passed as the first argument.  References and assignments
-       to  rreeff are treated as references and assignments to the variable whose
-       name was passed as $$11.  If the control variable in a ffoorr loop  has  the
-       nameref  attribute, the list of words can be a list of shell variables,
-       and a name reference will be established for each word in the list,  in
-       turn,  when  the loop is executed.  Array variables cannot be given the
-       --nn attribute.  However, nameref variables can reference array variables
-       and  subscripted  array  variables.  Namerefs can be unset using the --nn
-       option to the uunnsseett builtin.  Otherwise, if uunnsseett is executed with  the
-       name  of  a nameref variable as an argument, the variable referenced by
-       the nameref variable will be unset.
+       the nameref variable is referenced, assigned  to,  unset,  or  has  its
+       attributes  modified  (other  than  the _n_a_m_e_r_e_f_P _a_t_t_r_i_b_u_t_e _i_t_s_e_l_f_)_, _t_h_e
+       _o_p_e_r_a_t_i_o_n _i_s _a_c_t_u_a_l_l_y  _p_e_r_f_o_r_m_e_d  _o_n  _t_h_e  _v_a_r_i_a_b_l_e  _s_p_e_c_i_f_i_e_d  _b_y  _t_h_e
+       _n_a_m_e_r_e_f  _v_a_r_i_a_b_l_e_'_s  _v_a_l_u_e_.   _A  _n_a_m_e_r_e_f  _i_s _c_o_m_m_o_n_l_y _u_s_e_d _w_i_t_h_i_n _s_h_e_l_l
+       _f_u_n_c_t_i_o_n_s _t_o _r_e_f_e_r _t_o _a _v_a_r_i_a_b_l_e _w_h_o_s_e _n_a_m_e _i_s _p_a_s_s_e_d _a_s _a_n _a_r_g_u_m_e_n_t _t_o
+       _t_h_e  _f_u_n_c_t_i_o_n_.   _F_o_r  _i_n_s_t_a_n_c_e_, _i_f _a _v_a_r_i_a_b_l_e _n_a_m_e _i_s _p_a_s_s_e_d _t_o _a _s_h_e_l_l
+       _f_u_n_c_t_i_o_n _a_s _i_t_s _f_i_r_s_t _a_r_g_u_m_e_n_t_, _r_u_n_n_i_n_g
+              _d_e_c_l_a_r_e _-_n _r_e_f_=_$_1
+       _i_n_s_i_d_e _t_h_e _f_u_n_c_t_i_o_n _c_r_e_a_t_e_s _a _n_a_m_e_r_e_f _v_a_r_i_a_b_l_e rreeff _w_h_o_s_e _v_a_l_u_e  _i_s  _t_h_e
+       _v_a_r_i_a_b_l_e _n_a_m_e _p_a_s_s_e_d _a_s _t_h_e _f_i_r_s_t _a_r_g_u_m_e_n_t_.  _R_e_f_e_r_e_n_c_e_s _a_n_d _a_s_s_i_g_n_m_e_n_t_s
+       _t_o rreeff_, _a_n_d _c_h_a_n_g_e_s _t_o  _i_t_s  _a_t_t_r_i_b_u_t_e_s_,  _a_r_e  _t_r_e_a_t_e_d  _a_s  _r_e_f_e_r_e_n_c_e_s_,
+       _a_s_s_i_g_n_m_e_n_t_s_, _a_n_d _a_t_t_r_i_b_u_t_e _m_o_d_i_f_i_c_a_t_i_o_n_s _t_o _t_h_e _v_a_r_i_a_b_l_e _w_h_o_s_e _n_a_m_e _w_a_s
+       _p_a_s_s_e_d _a_s $$11_.  _I_f _t_h_e _c_o_n_t_r_o_l _v_a_r_i_a_b_l_e _i_n _a ffoorr _l_o_o_p  _h_a_s  _t_h_e  _n_a_m_e_r_e_f
+       _a_t_t_r_i_b_u_t_e_,  _t_h_e  _l_i_s_t  _o_f _w_o_r_d_s _c_a_n _b_e _a _l_i_s_t _o_f _s_h_e_l_l _v_a_r_i_a_b_l_e_s_, _a_n_d _a
+       _n_a_m_e _r_e_f_e_r_e_n_c_e _w_i_l_l _b_e _e_s_t_a_b_l_i_s_h_e_d _f_o_r _e_a_c_h _w_o_r_d _i_n _t_h_e _l_i_s_t_, _i_n  _t_u_r_n_,
+       _w_h_e_n  _t_h_e _l_o_o_p _i_s _e_x_e_c_u_t_e_d_.  _A_r_r_a_y _v_a_r_i_a_b_l_e_s _c_a_n_n_o_t _b_e _g_i_v_e_n _t_h_e 00mmeerreeff
+       _a_t_t_r_i_b_u_t_e_.  _H_o_w_e_v_e_r_, _n_a_m_e_r_e_f _v_a_r_i_a_b_l_e_s _c_a_n  _r_e_f_e_r_e_n_c_e  _a_r_r_a_y  _v_a_r_i_a_b_l_e_s
+       _a_n_d  _s_u_b_s_c_r_i_p_t_e_d  _a_r_r_a_y  _v_a_r_i_a_b_l_e_s_.  _N_a_m_e_r_e_f_s _c_a_n _b_e _u_n_s_e_t _u_s_i_n_g _t_h_e --nn
+       _o_p_t_i_o_n _t_o _t_h_e uunnsseett _b_u_i_l_t_i_n_.  _O_t_h_e_r_w_i_s_e_, _i_f uunnsseett _i_s _e_x_e_c_u_t_e_d _w_i_t_h  _t_h_e
+       _n_a_m_e  _o_f  _a _n_a_m_e_r_e_f _v_a_r_i_a_b_l_e _a_s _a_n _a_r_g_u_m_e_n_t_, _t_h_e _v_a_r_i_a_b_l_e _r_e_f_e_r_e_n_c_e_d _b_y
+       _t_h_e _n_a_m_e_r_e_f _v_a_r_i_a_b_l_e _w_i_l_l _b_e _u_n_s_e_t_.
 
    PPoossiittiioonnaall PPaarraammeetteerrss
        A _p_o_s_i_t_i_o_n_a_l _p_a_r_a_m_e_t_e_r is a parameter denoted by one  or  more  digits,
@@ -3939,7 +3941,7 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
        bbiinndd [--mm _k_e_y_m_a_p] --ff _f_i_l_e_n_a_m_e
        bbiinndd [--mm _k_e_y_m_a_p] --xx _k_e_y_s_e_q:_s_h_e_l_l_-_c_o_m_m_a_n_d
        bbiinndd [--mm _k_e_y_m_a_p] _k_e_y_s_e_q:_f_u_n_c_t_i_o_n_-_n_a_m_e
-       bbiinndd _r_e_a_d_l_i_n_e_-_c_o_m_m_a_n_d
+       bbiinndd [--mm _k_e_y_m_a_p] _k_e_y_s_e_q:_r_e_a_d_l_i_n_e_-_c_o_m_m_a_n_d
               Display  current  rreeaaddlliinnee key and function bindings, bind a key
               sequence to a rreeaaddlliinnee function or  macro,  or  set  a  rreeaaddlliinnee
               variable.   Each  non-option  argument  is a command as it would
@@ -4274,11 +4276,11 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
                      attribute is disabled.
               --nn     Give each _n_a_m_e the _n_a_m_e_r_e_f attribute, making  it  a  name
                      reference  to  another  variable.  That other variable is
-                     defined by the value of _n_a_m_e.  All references and assign-
-                     ments  to  _n_a_m_e,  except  for  changing  the --nn attribute
-                     itself, are  performed  on  the  variable  referenced  by
-                     _n_a_m_e's  value.   The  --nn  attribute  cannot be applied to
-                     array variables.
+                     defined by the value of _n_a_m_e.   All  references,  assign-
+                     ments,  and  attribute  modifications to _n_a_m_e, except for
+                     changing the --nn attribute itself, are  performed  on  the
+                     variable   referenced   by  _n_a_m_e's  value.   The  nameref
+                     attribute cannot be applied to array variables.
               --rr     Make _n_a_m_es readonly.  These names cannot then be assigned
                      values by subsequent assignment statements or unset.
               --tt     Give  each  _n_a_m_e  the  _t_r_a_c_e attribute.  Traced functions
@@ -5734,4 +5736,4 @@ BBUUGGSS
 
 
 
-GNU Bash 4.3                     2014 March 18                         BASH(1)
+GNU Bash 4.3                      2014 May 12                          BASH(1)
