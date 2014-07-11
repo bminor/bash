@@ -82,7 +82,7 @@ extern char *extract_arithmetic_subst __P((char *, int *));
 /* Extract the <( or >( construct in STRING, and return a new string.
    Start extracting at (SINDEX) as if we had just seen "<(".
    Make (SINDEX) get the position just after the matching ")". */
-extern char *extract_process_subst __P((char *, char *, int *));
+extern char *extract_process_subst __P((char *, char *, int *, int));
 #endif /* PROCESS_SUBSTITUTION */
 
 /* Extract the name of the variable to bind to from the assignment string. */

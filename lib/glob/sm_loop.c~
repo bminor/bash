@@ -223,8 +223,7 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 
 	  /* If we stop at a slash in the pattern and we are looking for a
 	     pathname ([star]/foo), then consume enough of the string to stop
-	     at any slash and then try to match the rest of the pattern.  If
-	     the string doesn't contain a slash, fail */
+	     at any slash and then try to match the rest of the pattern */
 	  if (c == L('/') && (flags & FNM_PATHNAME))
 	    {
 	      while (n < se && *n != L('/'))
@@ -233,7 +232,7 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 		return 0;
 	      return FNM_NOMATCH;	/* XXX */
 	    }
-
+	  else
 	  /* General case, use recursion. */
 	  {
 	    U_CHAR c1;

@@ -194,7 +194,7 @@ unwind_protect_tag_on_stack (tag)
     {
       if (elt->head.cleanup == 0 && STREQ (elt->arg.v, tag))
 	return 1;
-      elt = elt->head.next;
+      elt = unwind_protect_list->head.next;
     }
   return 0;
 }

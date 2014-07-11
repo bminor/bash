@@ -368,7 +368,6 @@ history_truncate_file (fname, lines)
   buffer = (char *)malloc (file_size + 1);
   if (buffer == 0)
     {
-      rv = errno;
       close (file);
       goto truncate_exit;
     }

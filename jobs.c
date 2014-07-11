@@ -4325,10 +4325,14 @@ itrace("mark_dead_jobs_as_notified: child_max = %d ndead = %d ndeadproc = %d", j
 
 /* Here to allow other parts of the shell (like the trap stuff) to
    freeze and unfreeze the jobs list. */
-void
+int
 freeze_jobs_list ()
 {
+  int o;
+
+  o = jobs_list_frozen;
   jobs_list_frozen = 1;
+  return o;
 }
 
 void

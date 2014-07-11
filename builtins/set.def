@@ -1,7 +1,7 @@
 This file is set.def, from which is created set.c.
 It implements the "set" and "unset" builtins in Bash.
 
-Copyright (C) 1987-2012 Free Software Foundation, Inc.
+Copyright (C) 1987-2014 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -178,6 +178,8 @@ static int bash_set_history __P((int, char *));
 
 static const char * const on = "on";
 static const char * const off = "off";
+
+static int previous_option_value;
 
 /* A struct used to match long options for set -o to the corresponding
    option letter or internal variable.  The functions can be called to
@@ -425,12 +427,13 @@ set_minus_o_option (on_or_off, option_name)
 	{
 	  if (o_options[i].letter == 0)
 	    {
+	      previous_option_value = GET_BINARY_O_OPTION_VALUE (i, o_options[i].name);
 	      SET_BINARY_O_OPTION_VALUE (i, on_or_off, option_name);
 	      return (EXECUTION_SUCCESS);
 	    }
 	  else
 	    {
-	      if (change_flag (o_options[i].letter, on_or_off) == FLAG_ERROR)
+	      if ((previous_option_value = change_flag (o_options[i].letter, on_or_off)) == FLAG_ERROR)
 		{
 		  sh_invalidoptname (option_name);
 		  return (EXECUTION_FAILURE);

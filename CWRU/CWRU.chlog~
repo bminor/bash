@@ -6395,16 +6395,10 @@ lib/glob/sm_loop.c
 	  pattern against the portion of the string after the next `/'.  Picked
 	  up from gnulib/glibc
 
+
 pathexp.c
 	- split_ignorespec: since split_ignorespec gets globbing patterns,
 	  make sure we call skip_to_delim with the SD_GLOB flag so delimiters
 	  that occur within bracket expressions don't delimit the pattern.
 	  Fixes problem with [[:digit:]] in GLOBIGNORE reported by Ian Kelling
 	  <ian@iankelling.org>
-
-unwind_prot.c
-	- unwind_protect_tag_on_stack: new function, returns 1 if unwind-protect
-	  frame corresponding to `tag' argument is on unwind-protect stack
-
-unwind_prot.h
-	- unwind_protect_tag_on_stack: extern declaration
