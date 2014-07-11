@@ -6395,10 +6395,94 @@ lib/glob/sm_loop.c
 	  pattern against the portion of the string after the next `/'.  Picked
 	  up from gnulib/glibc
 
-
 pathexp.c
 	- split_ignorespec: since split_ignorespec gets globbing patterns,
 	  make sure we call skip_to_delim with the SD_GLOB flag so delimiters
 	  that occur within bracket expressions don't delimit the pattern.
 	  Fixes problem with [[:digit:]] in GLOBIGNORE reported by Ian Kelling
 	  <ian@iankelling.org>
+
+unwind_prot.c
+	- unwind_protect_tag_on_stack: new function, returns 1 if unwind-protect
+	  frame corresponding to `tag' argument is on unwind-protect stack
+
+unwind_prot.h
+	- unwind_protect_tag_on_stack: extern declaration
+
+				   6/30
+				   ----
+lib/readline/misc.c
+	- _rl_revert_all_lines: set entry->data to 0 after assigning it to
+	  rl_undo_list to avoid pointer aliasing problems that would result
+	  in entry->line being freed by an undo.  The subsequent free would
+	  be a double free.  Report and fix from Jared Yanovich
+	  <slovichon@gmail.com>
+
+subst.c
+	- command_substitute: other shells do not appear to inherit the -v
+	  option when reading and executing command substitutions.  Reported
+	  by Ondrej Oprala <ooprala@redhat.com>
+
+				    7/1
+				    ---
+config-top.h
+	- CHECKHASH_DEFAULT: new define that supplies the default value for
+	  check_hashed_filenames (`checkhash' shopt option); still 0 by default
+
+findcmd.c
+	- check_hashed_filenames: initialize using CHECKHASH_DEFAULT
+
+lib/readline/histexpand.c
+	- history_expand: double quotes can inhibit recognition of the history
+	  comment character if history_quotes_inhibit_expansion is non-zero
+
+lib/readline/doc/{history.3,hstech.texi}
+	- history_quotes_inhibit_expansion: expand definition to note that it
+	  inhibits scanning for the history comment character as well; correct
+	  typo to make it clear that it only works on double-quoted strings
+
+lib/sh/zgetline.c
+	- add new fourth argument: DELIM, allows delimiter to be something
+	  other than newline (if DELIM != '\n', UNBUFFERED_READ should be
+	  non-zero)
+	- UNBUFFERED_READ is now fifth argument
+	- check character against DELIM rather than strictly newline
+
+externs.h
+	- zgetline: change function prototype for extern declaration
+
+builtins/mapfile.def
+	- mapfile: change calling sequence for zgetline calls
+	- mapfile_builtin: new -d option: DELIM, like in read builtin
+	- mapfile_builtin: pass `delim' to mapfile() as new argument; default
+	  to '\n' unless -d option supplied
+	- mapfile: take new DELIM argument, pass to zgetline
+	- mapfile: if DELIM != '\n', set unbuffered_read to 1
+
+doc/{bash.1,bashref.texi}
+	- mapfile: document new `-d DELIM' option
+
+				    7/5
+				    ---
+lib/readline/histfile.c
+	- history_truncate_file: if there is an error writing the truncated
+	  history list back to the history file, use the same strategy as
+	  history_do_write: create a backup file, rename the history file to
+	  the backup file, and restore the original history file from the
+	  backup file name if the write or the close fails.  Suggestion from
+	  Chen Gang <gang.chen.5i5j@gmail.com> to bug-readline
+
+execute_cmd.c
+	- evalnest, evalnest_max: new variables establishing maximum number of
+	  recursive `eval' calls; current max is 4096
+	- execute_builtin: unwind-protect value of evalnest around calls to
+	  eval builtin. Suggested by Oliver Morais <oliver.morais@gmail.com>
+
+builtins/setattr.def
+	- show_name_attributes: show a variable's attributes even if it's
+	  invisible (don't show any value since it has none). This means that
+	  declare -p var will display VAR's attributes even when var marked
+	  as invisible.  Feature request from Peggy Russell
+	  <prusselltechgroup@gmail.com>
+	- show_var_attributes: don't print assignment if array or assoc
+	  attribute is set but variable marked as invisible

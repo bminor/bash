@@ -284,7 +284,10 @@ int line_number_for_err_trap;
 
 /* A sort of function nesting level counter */
 int funcnest = 0;
-int funcnest_max = 0;		/* bash-4.2 */
+int funcnest_max = 0;
+
+int evalnest = 0;		/* bash-4.4/bash-5.0 */
+int evalnest_max = 4096;
 
 volatile int from_return_trap = 0;
 
@@ -4355,6 +4358,19 @@ execute_builtin (builtin, words, flags, subshell)
 	}
     }
 
+  if (subshell == 0 && builtin == eval_builtin)
+    {
+      if (evalnest_max > 0 && evalnest >= evalnest_max)
+	{
+	  internal_error (_("eval: maximum eval nesting level exceeded (%d)"), evalnest);
+	  evalnest = 0;
+	  jump_to_top_level (DISCARD);
+	}
+      unwind_protect_int (evalnest);
+      /* The test for subshell == 0 above doesn't make a difference */
+      evalnest++;	/* execute_subshell_builtin_or_function sets this to 0 */
+    }
+
   /* `return' does a longjmp() back to a saved environment in execute_function.
      If a variable assignment list preceded the command, and the shell is
      running in POSIX mode, we need to merge that into the shell_variables
@@ -4661,6 +4677,8 @@ execute_subshell_builtin_or_function (words, redirects, builtin, var,
 
   /* A subshell is neither a login shell nor interactive. */
   login_shell = interactive = 0;
+  if (builtin == eval_builtin)
+    evalnest = 0;
 
   if (async)
     subshell_environment |= SUBSHELL_ASYNC;
@@ -5185,7 +5203,7 @@ initialize_subshell ()
   parse_and_execute_level = 0;		/* nothing left to restore it */
 
   /* We're no longer inside a shell function. */
-  variable_context = return_catch_flag = funcnest = 0;
+  variable_context = return_catch_flag = funcnest = evalnest = 0;
 
   executing_list = 0;		/* XXX */
 

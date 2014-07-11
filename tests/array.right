@@ -11,10 +11,10 @@ declare -a BASH_ARGV='()'
 declare -a BASH_LINENO='([0]="0")'
 declare -a BASH_SOURCE='([0]="./array.tests")'
 declare -a DIRSTACK='()'
-declare -a FUNCNAME='([0]="main")'
+declare -a FUNCNAME
 declare -a a='([0]="abcde" [1]="" [2]="bdef")'
-declare -a b='()'
-declare -ar c='()'
+declare -a b
+declare -ar c
 abcde bdef
 abcde bdef
 abcde
@@ -28,21 +28,21 @@ hello world
 bdef hello world test expression test 2
 ./array.tests: line 76: readonly: `a[5]': not a valid identifier
 declare -ar a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression" [15]="test 2")'
-declare -ar c='()'
+declare -ar c
 declare -ar a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression" [15]="test 2")'
-declare -ar c='()'
+declare -ar c
 readonly -a a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression" [15]="test 2")'
-readonly -a c='()'
+readonly -a c
 a test
 declare -a BASH_ARGC='()'
 declare -a BASH_ARGV='()'
 declare -a BASH_LINENO='([0]="0")'
 declare -a BASH_SOURCE='([0]="./array.tests")'
 declare -a DIRSTACK='()'
-declare -a FUNCNAME='([0]="main")'
+declare -a FUNCNAME
 declare -ar a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression" [15]="test 2")'
 declare -a b='([0]="this" [1]="is" [2]="a" [3]="test" [4]="" [5]="/etc/passwd")'
-declare -ar c='()'
+declare -ar c
 declare -a d='([1]="" [2]="bdef" [5]="hello world" [6]="test" [9]="ninth element")'
 declare -a e='([0]="test")'
 declare -a f='([0]="" [1]="bdef" [2]="hello world" [3]="test" [4]="ninth element")'
@@ -62,10 +62,10 @@ declare -a BASH_ARGV='()'
 declare -a BASH_LINENO='([0]="0")'
 declare -a BASH_SOURCE='([0]="./array.tests")'
 declare -a DIRSTACK='()'
-declare -a FUNCNAME='([0]="main")'
+declare -a FUNCNAME
 declare -ar a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression" [15]="test 2")'
 declare -a b='([0]="this" [1]="is" [2]="a" [3]="test" [4]="" [5]="/etc/passwd")'
-declare -ar c='()'
+declare -ar c
 declare -a d='([1]="test test")'
 declare -a f='([0]="" [1]="bdef" [2]="hello world" [3]="test" [4]="ninth element")'
 ./array.tests: line 119: unset: ps1: not an array variable
@@ -79,10 +79,10 @@ declare -a BASH_ARGV='()'
 declare -a BASH_LINENO='([0]="0")'
 declare -a BASH_SOURCE='([0]="./array.tests")'
 declare -a DIRSTACK='()'
-declare -a FUNCNAME='([0]="main")'
+declare -a FUNCNAME
 declare -ar a='([1]="" [2]="bdef" [5]="hello world" [6]="test expression" [15]="test 2")'
 declare -a b='([0]="this" [1]="is" [2]="a" [3]="test" [4]="" [5]="/etc/passwd")'
-declare -ar c='()'
+declare -ar c
 declare -a d='([1]="test test")'
 declare -a f='([0]="" [1]="bdef" [2]="hello world" [3]="test" [4]="ninth element")'
 declare -a rv='([0]="this" [1]="is" [2]="a" [3]="test" [4]="of" [5]="read" [6]="using" [7]="arrays")'

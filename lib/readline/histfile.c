@@ -319,13 +319,14 @@ history_truncate_file (fname, lines)
      const char *fname;
      int lines;
 {
-  char *buffer, *filename, *bp, *bp1;		/* bp1 == bp+1 */
+  char *buffer, *filename, *bakname, *bp, *bp1;		/* bp1 == bp+1 */
   int file, chars_read, rv;
   struct stat finfo;
   size_t file_size;
 
   buffer = (char *)NULL;
   filename = history_filename (fname);
+  bakname = 0;
   file = filename ? open (filename, O_RDONLY|O_BINARY, 0666) : -1;
   rv = 0;
 
@@ -410,7 +411,17 @@ history_truncate_file (fname, lines)
 
   /* Write only if there are more lines in the file than we want to
      truncate to. */
-  if (bp > buffer && ((file = open (filename, O_WRONLY|O_TRUNC|O_BINARY, 0600)) != -1))
+  if (bp <= buffer)
+    {
+      rv = 0;
+      goto truncate_exit;
+    }
+
+  bakname = history_backupfile (filename);
+  if (filename && bakname)
+    rename (filename, bakname);
+
+  if ((file = open (filename, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY, 0600)) != -1)
     {
       if (write (file, bp, chars_read - (bp - buffer)) < 0)
 	rv = errno;
@@ -423,12 +434,20 @@ history_truncate_file (fname, lines)
       if (close (file) < 0 && rv == 0)
 	rv = errno;
     }
+  else
+    rv = errno;
 
  truncate_exit:
-
   FREE (buffer);
 
+  if (rv != 0 && filename && bakname)
+    rename (bakname, filename);
+  else if (rv == 0 && bakname)
+    unlink (bakname);
+
   xfree (filename);
+  FREE (bakname);
+
   return rv;
 }
 
