@@ -6496,3 +6496,12 @@ tests/array.right
 	  and
 		declare -a foo
 	  are not equivalent
+
+				   7/22
+				   ----
+subst.c
+	- parameter_brace_expand: after calling parameter_brace_expand_indir,
+	  turn off the W_ARRAYIND flag in the word it returns, because there
+	  is no way for it to return the index that should be used, and the
+	  rest of the function assumes that IND is valid if W_ARRAYIND is set.
+	  Fixes bug reported by Corentin Peuvrel <cpeuvrel@pom-monitoring.com>
