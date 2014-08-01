@@ -534,7 +534,15 @@ rl_getc (stream)
 	return (RL_ISSTATE (RL_STATE_READCMD) ? READERR : EOF);
       else if (_rl_caught_signal == SIGHUP || _rl_caught_signal == SIGTERM)
 	return (RL_ISSTATE (RL_STATE_READCMD) ? READERR : EOF);
+      /* keyboard-generated signals of interest */
       else if (_rl_caught_signal == SIGINT || _rl_caught_signal == SIGQUIT)
+        RL_CHECK_SIGNALS ();
+      /* non-keyboard-generated signals of interest */
+      else if (_rl_caught_signal == SIGALRM
+#if defined (SIGVTALRM)
+		|| _rl_caught_signal == SIGVTALRM
+#endif
+	      )
         RL_CHECK_SIGNALS ();
 
       if (rl_signal_event_hook)
