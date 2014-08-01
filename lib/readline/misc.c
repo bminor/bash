@@ -461,6 +461,7 @@ _rl_revert_all_lines ()
 	    saved_undo_list = 0;
 	  /* Set up rl_line_buffer and other variables from history entry */
 	  rl_replace_from_history (entry, 0);	/* entry->line is now current */
+	  entry->data = 0;			/* entry->data is now current undo list */
 	  /* Undo all changes to this history entry */
 	  while (rl_undo_list)
 	    rl_do_undo ();
@@ -468,7 +469,6 @@ _rl_revert_all_lines ()
 	     the timestamp. */
 	  FREE (entry->line);
 	  entry->line = savestring (rl_line_buffer);
-	  entry->data = 0;
 	}
       entry = previous_history ();
     }
