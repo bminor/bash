@@ -2409,7 +2409,16 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 #endif
       lstdin = wait_for (lastpid);
 #if defined (JOB_CONTROL)
-      exec_result = job_exit_status (lastpipe_jid);
+      /* If wait_for removes the job from the jobs table, use result of last
+	 command as pipeline's exit status as usual.  The jobs list can get
+	 frozen and unfrozen at inconvenient times if there are multiple pipelines
+	 running simultaneously. */
+      if (INVALID_JOB (lastpipe_jid) == 0)
+	exec_result = job_exit_status (lastpipe_jid);
+      else if (pipefail_opt)
+	exec_result = exec_result | lstdin;	/* XXX */
+      /* otherwise we use exec_result */
+        
 #endif
       unfreeze_jobs_list ();
     }
