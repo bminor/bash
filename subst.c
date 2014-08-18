@@ -1192,12 +1192,18 @@ extract_arithmetic_subst (string, sindex)
    Start extracting at (SINDEX) as if we had just seen "<(".
    Make (SINDEX) get the position of the matching ")". */ /*))*/
 char *
-extract_process_subst (string, starter, sindex)
+extract_process_subst (string, starter, sindex, xflags)
      char *string;
      char *starter;
      int *sindex;
+     int xflags;
 {
+#if 0
   return (extract_delimited_string (string, sindex, starter, "(", ")", SX_COMMAND));
+#else
+  xflags |= (no_longjmp_on_fatal_error ? SX_NOLONGJMP : 0);
+  return (xparse_dolparen (string, string+*sindex, sindex, xflags));
+#endif
 }
 #endif /* PROCESS_SUBSTITUTION */
 
@@ -1785,7 +1791,7 @@ skip_to_delim (string, start, delims, flags)
 	  si = i + 2;
 	  if (string[si] == '\0')
 	    CQ_RETURN(si);
-	  temp = extract_process_subst (string, (c == '<') ? "<(" : ">(", &si);
+	  temp = extract_process_subst (string, (c == '<') ? "<(" : ">(", &si, 0);
 	  free (temp);		/* no SX_ALLOC here */
 	  i = si;
 	  if (string[i] == '\0')
@@ -8249,7 +8255,7 @@ add_string:
 	    else
 	      t_index = sindex + 1; /* skip past both '<' and LPAREN */
 
-	    temp1 = extract_process_subst (string, (c == '<') ? "<(" : ">(", &t_index); /*))*/
+	    temp1 = extract_process_subst (string, (c == '<') ? "<(" : ">(", &t_index, 0); /*))*/
 	    sindex = t_index;
 
 	    /* If the process substitution specification is `<()', we want to
