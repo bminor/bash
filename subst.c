@@ -7374,7 +7374,13 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
     }
 
   if (want_indir)
-    tdesc = parameter_brace_expand_indir (name + 1, var_is_special, quoted, quoted_dollar_atp, contains_dollar_at);
+    {
+      tdesc = parameter_brace_expand_indir (name + 1, var_is_special, quoted, quoted_dollar_atp, contains_dollar_at);
+      /* Turn off the W_ARRAYIND flag because there is no way for this function
+	 to return the index we're supposed to be using. */
+      if (tdesc && tdesc->flags)
+	tdesc->flags &= ~W_ARRAYIND;
+    }
   else
     tdesc = parameter_brace_expand_word (name, var_is_special, quoted, PF_IGNUNBOUND|(pflags&(PF_NOSPLIT2|PF_ASSIGNRHS)), &ind);
 
