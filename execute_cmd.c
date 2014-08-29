@@ -1469,7 +1469,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   login_shell = interactive = 0;
 
   if (user_subshell)
-    subshell_environment = SUBSHELL_PAREN;
+    subshell_environment = SUBSHELL_PAREN;	/* XXX */
   else
     {
       subshell_environment = 0;			/* XXX */
@@ -2432,9 +2432,17 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   if (lastpipe_flag)
     {
 #if defined (JOB_CONTROL)
-      append_process (savestring (the_printed_command), dollar_dollar_pid, exec_result, lastpipe_jid);
-#endif
+      if (INVALID_JOB (lastpipe_jid) == 0)
+        {
+          append_process (savestring (the_printed_command_except_trap), dollar_dollar_pid, exec_result, lastpipe_jid);
+          lstdin = wait_for (lastpid);
+        }
+      else
+        lstdin = wait_for_single_pid (lastpid);		/* checks bgpids list */
+#else
       lstdin = wait_for (lastpid);
+#endif
+
 #if defined (JOB_CONTROL)
       /* If wait_for removes the job from the jobs table, use result of last
 	 command as pipeline's exit status as usual.  The jobs list can get
@@ -3973,7 +3981,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	  already_forked = 1;
 	  simple_command->flags |= CMD_NO_FORK;
 
-	  subshell_environment = SUBSHELL_FORK;
+	  subshell_environment = SUBSHELL_FORK;		/* XXX */
 	  if (pipe_in != NO_PIPE || pipe_out != NO_PIPE)
 	    subshell_environment |= SUBSHELL_PIPE;
 	  if (async)
@@ -5000,7 +5008,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
       if (async)
 	interactive = 0;
 
-      subshell_environment = SUBSHELL_FORK;
+      subshell_environment = SUBSHELL_FORK;	/* XXX */
 
       if (redirects && (do_redirections (redirects, RX_ACTIVE) != 0))
 	{

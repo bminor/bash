@@ -99,6 +99,8 @@ int check_window_size = CHECKWINSIZE_DEFAULT;
 /* We don't have job control. */
 int job_control = 0;
 
+int running_in_background = 0;	/* can't tell without job control */
+
 /* STATUS and FLAGS are only valid if pid != NO_PID
    STATUS is only valid if (flags & PROC_RUNNING) == 0 */
 struct proc_status {

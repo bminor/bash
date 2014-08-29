@@ -223,6 +223,9 @@ PROCESS *the_pipeline = (PROCESS *)NULL;
 /* If this is non-zero, do job control. */
 int job_control = 1;
 
+/* Are we running in background? (terminal_pgrp != shell_pgrp) */
+int running_in_background = 0;
+
 /* Call this when you start making children. */
 int already_making_children = 0;
 
@@ -640,10 +643,11 @@ stop_pipeline (async, deferred)
 	   * the parent gives it away.
 	   *
 	   * Don't give the terminal away if this shell is an asynchronous
-	   * subshell.
+	   * subshell or if we're a (presumably non-interactive) shell running
+	   * in the background.
 	   *
 	   */
-	  if (job_control && newjob->pgrp && (subshell_environment&SUBSHELL_ASYNC) == 0)
+	  if (job_control && newjob->pgrp && (subshell_environment&SUBSHELL_ASYNC) == 0 && running_in_background == 0)
 	    maybe_give_terminal_to (shell_pgrp, newjob->pgrp, 0);
 	}
     }
@@ -1824,7 +1828,7 @@ make_child (command, async_p)
 	     In this case, we don't want to give the terminal to the
 	     shell's process group (we could be in the middle of a
 	     pipeline, for example). */
-	  if (async_p == 0 && pipeline_pgrp != shell_pgrp && ((subshell_environment&SUBSHELL_ASYNC) == 0))
+	  if (async_p == 0 && pipeline_pgrp != shell_pgrp && ((subshell_environment&SUBSHELL_ASYNC) == 0) && running_in_background == 0)
 	    give_terminal_to (pipeline_pgrp, 0);
 
 #if defined (PGRP_PIPE)
@@ -2580,7 +2584,9 @@ itrace("wait_for: blocking wait for %d returns %d child = %p", (int)pid, r, chil
 if (job == NO_JOB)
   itrace("wait_for: job == NO_JOB, giving the terminal to shell_pgrp (%ld)", (long)shell_pgrp);
 #endif
-      give_terminal_to (shell_pgrp, 0);
+      /* Don't modify terminal pgrp if we are running in the background */
+      if (running_in_background == 0)
+	give_terminal_to (shell_pgrp, 0);
     }
 
   /* If the command did not exit cleanly, or the job is just
@@ -3790,6 +3796,7 @@ initialize_job_control (force)
       job_control = 0;
       original_pgrp = NO_PID;
       shell_tty = fileno (stderr);
+      terminal_pgrp = tcgetpgrp (shell_tty);	/* for checking later */
     }
   else
     {
@@ -3889,6 +3896,8 @@ initialize_job_control (force)
       if (job_control == 0)
 	internal_error (_("no job control in this shell"));
     }
+
+  running_in_background = terminal_pgrp != shell_pgrp;
 
   if (shell_tty != fileno (stderr))
     SET_CLOSE_ON_EXEC (shell_tty);
@@ -4088,7 +4097,7 @@ maybe_give_terminal_to (opgrp, npgrp, flags)
   else if (tpgrp != opgrp)
     {
 #if defined (DEBUG)
-      internal_warning ("maybe_give_terminal_to: terminal pgrp == %d shell pgrp = %d new pgrp = %d", tpgrp, opgrp, npgrp);
+      internal_warning ("%d: maybe_give_terminal_to: terminal pgrp == %d shell pgrp = %d new pgrp = %d in_background = %d", (int)getpid(), tpgrp, opgrp, npgrp, running_in_background);
 #endif
       return -1;
     }
@@ -4351,6 +4360,21 @@ set_job_control (arg)
 
   old = job_control;
   job_control = arg;
+
+  if (terminal_pgrp == NO_PID)
+    terminal_pgrp = tcgetpgrp (shell_tty);
+  
+  running_in_background = (terminal_pgrp != shell_pgrp);
+
+#if 0
+  if (interactive_shell == 0 && running_in_background == 0 && job_control != old)
+    {
+      if (job_control)
+	initialize_job_signals ();
+      else
+	default_tty_job_signals ();
+    }
+#endif
 
   /* If we're turning on job control, reset pipeline_pgrp so make_child will
      put new child processes into the right pgrp */
