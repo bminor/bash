@@ -6505,3 +6505,63 @@ subst.c
 	  is no way for it to return the index that should be used, and the
 	  rest of the function assumes that IND is valid if W_ARRAYIND is set.
 	  Fixes bug reported by Corentin Peuvrel <cpeuvrel@pom-monitoring.com>
+
+				    8/2
+				    ---
+parse.y
+	- read_token_word: if we read a character that will end a command
+	  substitution, don't skip over quoted newlines when we read an
+	  additional character to figure out whether it's a two-character
+	  token. This lets the higher layers deal with quoted newlines after
+	  the command substitution. Fixes bug reported by EmanueL Czirai
+	  <amanual@riseup.net>
+
+				   8/11
+				   ----
+execute_cmd.c
+	- execute_pipeline: check whether lastpipe_jid corresponds to a valid
+	  job before calling append_process, for the same reason as fix from
+	  6/19.  Fixes bug reported by <lolilolicon@gmail.com>
+
+				   8/12
+				   ----
+lib/sh/unicode.c
+	- stub_charset: use strncpy instead of strcpy because we are copying
+	  into a local fixed-length buffer.  Fixes vulnerability reported by
+	  <romerox.adrian@gmail.com>
+
+execute_cmd.c
+	- execute_pipeline: if we don't call append_process, call
+	  wait_for_single_pid to get the status of `lastpid', since that will
+	  check the status of already-reaped processes.  Fixes spurious error
+	  message about non-existent process from fix of 8/11
+
+				   8/15
+				   ----
+jobs.c
+	- running_in_background: new variable, keeps track of whether or not we
+	  are running in the background (not perfect yet)
+	- initialize_job_control: even if we are not turning on job control,
+	  get the terminal pgrp so we can use it later
+	- {set_job_control,initialize_job_control}: set running_in_background
+	  to 1 if terminal pgrp != shell pgrp
+	- {stop_pipeline,make_child,wait_for}: if we are running in the
+	  background, don't mess with the terminal's process group; assume that
+	  the parent shell will do that.  Fixes bug reprted by Greg Wooledge
+	  <wooledg@eeg.ccf.org>
+
+shell.c
+	- shell_reinitialize: reset running_in_background back to 0
+
+				   8/24
+				   ----
+execute_cmd.c
+	- {execute_connection,execute_command_internal}: make sure that
+	  asynchronous commands always set $? to 0 and are not affected by the
+	  command's exit status being inverted using `!'.  Fixes bug reported
+	  by Vincent Lefevre <vincent@vinc17.net>
+
+lib/readline/display.c
+	- rl_message: call vsnprintf with full msg_bufsiz, since it counts 
+	  one fewer than the buffer length passed as an argument.  Bug report
+	  and fix from Dylan Cali <calid1984@gmail.com>

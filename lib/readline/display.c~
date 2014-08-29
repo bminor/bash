@@ -2246,7 +2246,7 @@ rl_message (va_alist)
     msg_buf = xmalloc (msg_bufsiz = 128);
 
 #if defined (HAVE_VSNPRINTF)
-  bneed = vsnprintf (msg_buf, msg_bufsiz, format, args);
+  bneed = vsnprintf (msg_buf, msg_bufsiz - 1, format, args);
   if (bneed >= msg_bufsiz - 1)
     {
       msg_bufsiz = bneed + 1;

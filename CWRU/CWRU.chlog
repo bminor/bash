@@ -6552,3 +6552,16 @@ jobs.c
 
 shell.c
 	- shell_reinitialize: reset running_in_background back to 0
+
+				   8/24
+				   ----
+execute_cmd.c
+	- {execute_connection,execute_command_internal}: make sure that
+	  asynchronous commands always set $? to 0 and are not affected by the
+	  command's exit status being inverted using `!'.  Fixes bug reported
+	  by Vincent Lefevre <vincent@vinc17.net>
+
+lib/readline/display.c
+	- rl_message: call vsnprintf with full msg_bufsiz, since it counts 
+	  one fewer than the buffer length passed as an argument.  Bug report
+	  and fix from Dylan Cali <calid1984@gmail.com>

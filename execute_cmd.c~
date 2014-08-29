@@ -2547,6 +2547,7 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       line_number_for_err_trap = line_number;
       exec_result = execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close);
 
+itrace("execute_connection: execute_pipeline returns %d asynchronous = %d", exec_result, asynchronous);
       if (asynchronous)
 	{
 	  exec_result = EXECUTION_SUCCESS;
