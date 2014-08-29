@@ -3063,11 +3063,6 @@ read_token (command)
 
       parser_state &= ~PST_ASSIGNOK;
 
-      /* If we are parsing a command substitution and we have read a character
-	 that marks the end of it, don't bother to skip over quoted newlines
-	 when we read the next token. We're just interested in a character
-	 that will turn this into a two-character token, so we let the higher
-	 layers deal with quoted newlines following the command substitution. */
       if ((parser_state & PST_CMDSUBST) && character == shell_eof_token)
 	peek_char = shell_getc (0);
       else

@@ -6505,13 +6505,3 @@ subst.c
 	  is no way for it to return the index that should be used, and the
 	  rest of the function assumes that IND is valid if W_ARRAYIND is set.
 	  Fixes bug reported by Corentin Peuvrel <cpeuvrel@pom-monitoring.com>
-
-				    8/2
-				    ---
-parse.y
-	- read_token_word: if we read a character that will end a command
-	  substitution, don't skip over quoted newlines when we read an
-	  additional character to figure out whether it's a two-character
-	  token. This lets the higher layers deal with quoted newlines after
-	  the command substitution. Fixes bug reported by EmanueL Czirai
-	  <amanual@riseup.net>
