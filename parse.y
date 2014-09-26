@@ -2953,6 +2953,8 @@ reset_parser ()
   FREE (word_desc_to_read);
   word_desc_to_read = (WORD_DESC *)NULL;
 
+  eol_ungetc_lookahead = 0;
+
   current_token = '\n';		/* XXX */
   last_read_token = '\n';
   token_to_read = '\n';
