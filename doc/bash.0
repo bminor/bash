@@ -21,10 +21,10 @@ DDEESSCCRRIIPPTTIIOONN
        1003.1).  BBaasshh can be configured to be POSIX-conformant by default.
 
 OOPPTTIIOONNSS
-       All  of  the  single-character shell options documented in the descrip-
-       tion of the sseett builtin command can be used as options when  the  shell
-       is invoked.  In addition, bbaasshh interprets the following options when it
-       is invoked:
+       All of the single-character shell options documented in the description
+       of the sseett builtin command can be used as options  when  the  shell  is
+       invoked.  In addition, bbaasshh interprets the following options when it is
+       invoked:
 
        --cc        If the --cc option is present, then commands are read from  the
                  first non-option argument _c_o_m_m_a_n_d___s_t_r_i_n_g.  If there are argu-
@@ -108,7 +108,7 @@ OOPPTTIIOONNSS
               The shell becomes restricted (see RREESSTTRRIICCTTEEDD SSHHEELLLL below).
 
        ----vveerrbboossee
-              Equivalent to  --vv.
+              Equivalent to --vv.
 
        ----vveerrssiioonn
               Show version information for this instance of bbaasshh on the  stan-
@@ -455,21 +455,21 @@ SSHHEELLLL GGRRAAMMMMAARR
               each _p_a_t_t_e_r_n in turn, using the same matching rules as for path-
               name  expansion  (see  PPaatthhnnaammee  EExxppaannssiioonn  below).  The _w_o_r_d is
               expanded using tilde expansion, parameter  and  variable  expan-
-              sion,  arithmetic  substitution,  command  substitution, process
-              substitution  and  quote  removal.   Each  _p_a_t_t_e_r_n  examined  is
-              expanded  using  tilde  expansion, parameter and variable expan-
-              sion, arithmetic substitution, command substitution, and process
-              substitution.   If  the shell option nnooccaasseemmaattcchh is enabled, the
-              match is performed without regard  to  the  case  of  alphabetic
-              characters.   When  a  match is found, the corresponding _l_i_s_t is
-              executed.  If the ;;;; operator is used, no subsequent matches are
-              attempted  after  the first pattern match.  Using ;;&& in place of
-              ;;;; causes execution to continue with the  _l_i_s_t  associated  with
-              the  next  set of patterns.  Using ;;;;&& in place of ;;;; causes the
-              shell to test the next pattern list in the  statement,  if  any,
-              and execute any associated _l_i_s_t on a successful match.  The exit
-              status is zero if no pattern matches.  Otherwise, it is the exit
-              status of the last command executed in _l_i_s_t.
+              sion,  arithmetic  expansion, command substitution, process sub-
+              stitution and quote removal.  Each _p_a_t_t_e_r_n examined is  expanded
+              using  tilde expansion, parameter and variable expansion, arith-
+              metic expansion, command substitution, and process substitution.
+              If  the  shell  option nnooccaasseemmaattcchh is enabled, the match is per-
+              formed without regard to  the  case  of  alphabetic  characters.
+              When  a  match is found, the corresponding _l_i_s_t is executed.  If
+              the ;;;; operator is used, no  subsequent  matches  are  attempted
+              after  the  first pattern match.  Using ;;&& in place of ;;;; causes
+              execution to continue with the _l_i_s_t associated with the next set
+              of  patterns.  Using ;;;;&& in place of ;;;; causes the shell to test
+              the next pattern list in the statement, if any, and execute  any
+              associated  _l_i_s_t on a successful match.  The exit status is zero
+              if no pattern matches.  Otherwise, it is the exit status of  the
+              last command executed in _l_i_s_t.
 
        iiff _l_i_s_t; tthheenn _l_i_s_t; [ eelliiff _l_i_s_t; tthheenn _l_i_s_t; ] ... [ eellssee _l_i_s_t; ] ffii
               The  iiff  _l_i_s_t is executed.  If its exit status is zero, the tthheenn
@@ -680,26 +680,26 @@ PPAARRAAMMEETTEERRSS
        and llooccaall below) to create a _n_a_m_e_r_e_f, or a reference to  another  vari-
        able.   This  allows  variables to be manipulated indirectly.  Whenever
        the nameref variable is referenced, assigned  to,  unset,  or  has  its
-       attributes  modified  (other  than  the _n_a_m_e_r_e_f_P _a_t_t_r_i_b_u_t_e _i_t_s_e_l_f_)_, _t_h_e
-       _o_p_e_r_a_t_i_o_n _i_s _a_c_t_u_a_l_l_y  _p_e_r_f_o_r_m_e_d  _o_n  _t_h_e  _v_a_r_i_a_b_l_e  _s_p_e_c_i_f_i_e_d  _b_y  _t_h_e
-       _n_a_m_e_r_e_f  _v_a_r_i_a_b_l_e_'_s  _v_a_l_u_e_.   _A  _n_a_m_e_r_e_f  _i_s _c_o_m_m_o_n_l_y _u_s_e_d _w_i_t_h_i_n _s_h_e_l_l
-       _f_u_n_c_t_i_o_n_s _t_o _r_e_f_e_r _t_o _a _v_a_r_i_a_b_l_e _w_h_o_s_e _n_a_m_e _i_s _p_a_s_s_e_d _a_s _a_n _a_r_g_u_m_e_n_t _t_o
-       _t_h_e  _f_u_n_c_t_i_o_n_.   _F_o_r  _i_n_s_t_a_n_c_e_, _i_f _a _v_a_r_i_a_b_l_e _n_a_m_e _i_s _p_a_s_s_e_d _t_o _a _s_h_e_l_l
-       _f_u_n_c_t_i_o_n _a_s _i_t_s _f_i_r_s_t _a_r_g_u_m_e_n_t_, _r_u_n_n_i_n_g
-              _d_e_c_l_a_r_e _-_n _r_e_f_=_$_1
-       _i_n_s_i_d_e _t_h_e _f_u_n_c_t_i_o_n _c_r_e_a_t_e_s _a _n_a_m_e_r_e_f _v_a_r_i_a_b_l_e rreeff _w_h_o_s_e _v_a_l_u_e  _i_s  _t_h_e
-       _v_a_r_i_a_b_l_e _n_a_m_e _p_a_s_s_e_d _a_s _t_h_e _f_i_r_s_t _a_r_g_u_m_e_n_t_.  _R_e_f_e_r_e_n_c_e_s _a_n_d _a_s_s_i_g_n_m_e_n_t_s
-       _t_o rreeff_, _a_n_d _c_h_a_n_g_e_s _t_o  _i_t_s  _a_t_t_r_i_b_u_t_e_s_,  _a_r_e  _t_r_e_a_t_e_d  _a_s  _r_e_f_e_r_e_n_c_e_s_,
-       _a_s_s_i_g_n_m_e_n_t_s_, _a_n_d _a_t_t_r_i_b_u_t_e _m_o_d_i_f_i_c_a_t_i_o_n_s _t_o _t_h_e _v_a_r_i_a_b_l_e _w_h_o_s_e _n_a_m_e _w_a_s
-       _p_a_s_s_e_d _a_s $$11_.  _I_f _t_h_e _c_o_n_t_r_o_l _v_a_r_i_a_b_l_e _i_n _a ffoorr _l_o_o_p  _h_a_s  _t_h_e  _n_a_m_e_r_e_f
-       _a_t_t_r_i_b_u_t_e_,  _t_h_e  _l_i_s_t  _o_f _w_o_r_d_s _c_a_n _b_e _a _l_i_s_t _o_f _s_h_e_l_l _v_a_r_i_a_b_l_e_s_, _a_n_d _a
-       _n_a_m_e _r_e_f_e_r_e_n_c_e _w_i_l_l _b_e _e_s_t_a_b_l_i_s_h_e_d _f_o_r _e_a_c_h _w_o_r_d _i_n _t_h_e _l_i_s_t_, _i_n  _t_u_r_n_,
-       _w_h_e_n  _t_h_e _l_o_o_p _i_s _e_x_e_c_u_t_e_d_.  _A_r_r_a_y _v_a_r_i_a_b_l_e_s _c_a_n_n_o_t _b_e _g_i_v_e_n _t_h_e 00mmeerreeff
-       _a_t_t_r_i_b_u_t_e_.  _H_o_w_e_v_e_r_, _n_a_m_e_r_e_f _v_a_r_i_a_b_l_e_s _c_a_n  _r_e_f_e_r_e_n_c_e  _a_r_r_a_y  _v_a_r_i_a_b_l_e_s
-       _a_n_d  _s_u_b_s_c_r_i_p_t_e_d  _a_r_r_a_y  _v_a_r_i_a_b_l_e_s_.  _N_a_m_e_r_e_f_s _c_a_n _b_e _u_n_s_e_t _u_s_i_n_g _t_h_e --nn
-       _o_p_t_i_o_n _t_o _t_h_e uunnsseett _b_u_i_l_t_i_n_.  _O_t_h_e_r_w_i_s_e_, _i_f uunnsseett _i_s _e_x_e_c_u_t_e_d _w_i_t_h  _t_h_e
-       _n_a_m_e  _o_f  _a _n_a_m_e_r_e_f _v_a_r_i_a_b_l_e _a_s _a_n _a_r_g_u_m_e_n_t_, _t_h_e _v_a_r_i_a_b_l_e _r_e_f_e_r_e_n_c_e_d _b_y
-       _t_h_e _n_a_m_e_r_e_f _v_a_r_i_a_b_l_e _w_i_l_l _b_e _u_n_s_e_t_.
+       attributes  modified  (other  than  the  _n_a_m_e_r_e_f attribute itself), the
+       operation is actually  performed  on  the  variable  specified  by  the
+       nameref  variable's  value.   A  nameref  is commonly used within shell
+       functions to refer to a variable whose name is passed as an argument to
+       the  function.   For  instance, if a variable name is passed to a shell
+       function as its first argument, running
+              declare -n ref=$1
+       inside the function creates a nameref variable rreeff whose value  is  the
+       variable name passed as the first argument.  References and assignments
+       to rreeff, and changes to  its  attributes,  are  treated  as  references,
+       assignments, and attribute modifications to the variable whose name was
+       passed as $$11.  If the control variable in a ffoorr loop  has  the  nameref
+       attribute,  the  list  of words can be a list of shell variables, and a
+       name reference will be established for each word in the list, in  turn,
+       when  the loop is executed.  Array variables cannot be given the 00mmeerreeff
+       attribute.  However, nameref variables can  reference  array  variables
+       and  subscripted  array  variables.  Namerefs can be unset using the --nn
+       option to the uunnsseett builtin.  Otherwise, if uunnsseett is executed with  the
+       name  of  a nameref variable as an argument, the variable referenced by
+       the nameref variable will be unset.
 
    PPoossiittiioonnaall PPaarraammeetteerrss
        A _p_o_s_i_t_i_o_n_a_l _p_a_r_a_m_e_t_e_r is a parameter denoted by one  or  more  digits,
@@ -1320,9 +1320,9 @@ PPAARRAAMMEETTEERRSS
        explicitly declare an array.  There is no maximum limit on the size  of
        an  array, nor any requirement that members be indexed or assigned con-
        tiguously.  Indexed arrays are  referenced  using  integers  (including
-       arithmetic  expressions)   and  are  zero-based; associative arrays are
-       referenced using arbitrary strings.  Unless  otherwise  noted,  indexed
-       array indices must be non-negative integers.
+       arithmetic expressions) and are zero-based; associative arrays are ref-
+       erenced using arbitrary strings.  Unless otherwise noted, indexed array
+       indices must be non-negative integers.
 
        An  indexed  array is created automatically if any variable is assigned
        to using the syntax _n_a_m_e[_s_u_b_s_c_r_i_p_t]=_v_a_l_u_e.  The _s_u_b_s_c_r_i_p_t is treated as
@@ -2181,7 +2181,7 @@ FFUUNNCCTTIIOONNSS
        tion while the function is executing.
 
        All other aspects of the  shell  execution  environment  are  identical
-       between a function and its caller with these exceptions:  the DDEEBBUUGG and
+       between  a function and its caller with these exceptions: the DDEEBBUUGG and
        RREETTUURRNN traps (see the description  of  the  ttrraapp  builtin  under  SSHHEELLLL
        BBUUIILLTTIINN  CCOOMMMMAANNDDSS below) are not inherited unless the function has been
        given the ttrraaccee attribute (see the description of the  ddeeccllaarree  builtin
@@ -2576,7 +2576,7 @@ EEXXIITT SSTTAATTUUSS
        _w_a_i_t_p_i_d system call or equivalent function.  Exit statuses fall between
        0  and  255, though, as explained below, the shell may use values above
        125 specially.  Exit statuses from shell builtins and compound commands
-       are  also limited to this range. Under certain circumstances, the shell
+       are also limited to this range.  Under certain circumstances, the shell
        will use special values to indicate specific failure modes.
 
        For the shell's purposes, a command which exits with a zero exit status
@@ -2833,7 +2833,7 @@ RREEAADDLLIINNEE
    RReeaaddlliinnee KKeeyy BBiinnddiinnggss
        The syntax for controlling key bindings in the _i_n_p_u_t_r_c file is  simple.
        All  that is required is the name of the command or the text of a macro
-       and a key sequence to which it should be bound. The name may be  speci-
+       and a key sequence to which it should be bound.  The name may be speci-
        fied in one of two ways: as a symbolic key name, possibly with _M_e_t_a_- or
        _C_o_n_t_r_o_l_- prefixes, or as a key sequence.
 
@@ -3545,7 +3545,7 @@ RREEAADDLLIINNEE
               Without a numeric argument,  the  value  of  the  readline  ccoomm--
               mmeenntt--bbeeggiinn  variable is inserted at the beginning of the current
               line.  If a numeric argument is supplied, this command acts as a
-              toggle:   if  the characters at the beginning of the line do not
+              toggle:  if  the  characters at the beginning of the line do not
               match the value of ccoommmmeenntt--bbeeggiinn, the value is inserted,  other-
               wise the characters in ccoommmmeenntt--bbeeggiinn are deleted from the begin-
               ning of the line.  In either case, the line is accepted as if  a
@@ -3927,7 +3927,7 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               AAlliiaass with no arguments or with the --pp option prints the list of
               aliases  in  the form aalliiaass _n_a_m_e=_v_a_l_u_e on standard output.  When
               arguments are supplied, an alias is defined for each _n_a_m_e  whose
-              _v_a_l_u_e is given.  A trailing space in  _v_a_l_u_e causes the next word
+              _v_a_l_u_e  is given.  A trailing space in _v_a_l_u_e causes the next word
               to be checked for alias substitution when the alias is expanded.
               For  each  _n_a_m_e  in the argument list for which no _v_a_l_u_e is sup-
               plied, the name and  value  of  the  alias  is  printed.   AAlliiaass
@@ -4033,7 +4033,7 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               directory  names in CCDDPPAATTHH are separated by a colon (:).  A null
               directory name in CCDDPPAATTHH is the same as the  current  directory,
               i.e., ``..''.  If _d_i_r begins with a slash (/), then CCDDPPAATTHH is not
-              used. The --PP option causes ccdd  to  use  the  physical  directory
+              used.  The --PP option causes ccdd to  use  the  physical  directory
               structure  by  resolving symbolic links while traversing _d_i_r and
               before processing instances of _._. in _d_i_r (see also the --PP option
               to the sseett builtin command); the --LL option forces symbolic links
@@ -4934,18 +4934,18 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
                       is effective only when job control is enabled.
               --ee      Exit  immediately  if a _p_i_p_e_l_i_n_e (which may consist of a
                       single _s_i_m_p_l_e _c_o_m_m_a_n_d), a _l_i_s_t, or  a  _c_o_m_p_o_u_n_d  _c_o_m_m_a_n_d
-                      (see  SSHHEELLLL  GGRRAAMMMMAARR above),  exits with a non-zero sta-
-                      tus.  The shell does not exit if the command that  fails
-                      is  part  of  the  command  list immediately following a
-                      wwhhiillee or uunnttiill keyword, part of the test  following  the
-                      iiff  or eelliiff reserved words, part of any command executed
-                      in a &&&& or |||| list  except  the  command  following  the
-                      final  &&&& or ||||, any command in a pipeline but the last,
-                      or if the command's return value is being inverted  with
-                      !!.   If a compound command other than a subshell returns
-                      a non-zero status because a command failed while --ee  was
-                      being  ignored, the shell does not exit.  A trap on EERRRR,
-                      if set, is executed before the shell exits.  This option
+                      (see SSHHEELLLL GGRRAAMMMMAARR above), exits with a non-zero status.
+                      The shell does not exit if the  command  that  fails  is
+                      part  of  the command list immediately following a wwhhiillee
+                      or uunnttiill keyword, part of the test following the  iiff  or
+                      eelliiff  reserved  words, part of any command executed in a
+                      &&&& or |||| list except the command following the final  &&&&
+                      or ||||, any command in a pipeline but the last, or if the
+                      command's return value is being inverted with !!.   If  a
+                      compound  command  other  than a subshell returns a non-
+                      zero status because a command failed while --ee was  being
+                      ignored,  the  shell  does  not exit.  A trap on EERRRR, if
+                      set, is executed before the shell  exits.   This  option
                       applies to the shell environment and each subshell envi-
                       ronment separately (see  CCOOMMMMAANNDD  EEXXEECCUUTTIIOONN  EENNVVIIRROONNMMEENNTT
                       above), and may cause subshells to exit before executing
@@ -5256,7 +5256,7 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
                              simulates a call to rreettuurrnn.
                       44..     BBAASSHH__AARRGGCC  and BBAASSHH__AARRGGVV are updated as described
                              in their descriptions above.
-                      55..     Function tracing is enabled:   command  substitu-
+                      55..     Function tracing is  enabled:  command  substitu-
                              tion, shell functions, and subshells invoked with
                              (( _c_o_m_m_a_n_d )) inherit the DDEEBBUUGG and RREETTUURRNN traps.
                       66..     Error tracing is enabled:  command  substitution,

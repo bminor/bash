@@ -42,7 +42,7 @@
 \entry{parameters}{18}{parameters}
 \entry{variable, shell}{18}{variable, shell}
 \entry{shell variable}{18}{shell variable}
-\entry{parameters, positional}{19}{parameters, positional}
+\entry{parameters, positional}{20}{parameters, positional}
 \entry{parameters, special}{20}{parameters, special}
 \entry{expansion}{21}{expansion}
 \entry{brace expansion}{21}{brace expansion}
@@ -62,18 +62,18 @@
 \entry{pathname expansion}{30}{pathname expansion}
 \entry{pattern matching}{30}{pattern matching}
 \entry{matching, pattern}{30}{matching, pattern}
-\entry{redirection}{31}{redirection}
+\entry{redirection}{32}{redirection}
 \entry{command expansion}{35}{command expansion}
 \entry{command execution}{36}{command execution}
 \entry{command search}{36}{command search}
-\entry{execution environment}{36}{execution environment}
-\entry{environment}{37}{environment}
+\entry{execution environment}{37}{execution environment}
+\entry{environment}{38}{environment}
 \entry{exit status}{38}{exit status}
-\entry{signal handling}{38}{signal handling}
+\entry{signal handling}{39}{signal handling}
 \entry{shell script}{39}{shell script}
 \entry{special builtin}{68}{special builtin}
-\entry{login shell}{81}{login shell}
-\entry{interactive shell}{81}{interactive shell}
+\entry{login shell}{82}{login shell}
+\entry{interactive shell}{82}{interactive shell}
 \entry{startup files}{82}{startup files}
 \entry{interactive shell}{83}{interactive shell}
 \entry{shell, interactive}{83}{shell, interactive}

@@ -67,7 +67,7 @@ Shell and Utilities portion of the IEEE POSIX specification
 .B Bash
 can be configured to be POSIX-conformant by default.
 .SH OPTIONS
-All of the  single-character shell options documented in the
+All of the single-character shell options documented in the
 description of the \fBset\fR builtin command can be used as options
 when the shell is invoked.
 In addition, \fBbash\fR
@@ -239,7 +239,7 @@ The shell becomes restricted (see
 below).
 .TP
 .B \-\-verbose
-Equivalent to  \fB\-v\fP.
+Equivalent to \fB\-v\fP.
 .TP
 .B \-\-version
 Show version information for this instance of
@@ -255,7 +255,7 @@ option has been supplied, the first argument is assumed to
 be the name of a file containing shell commands.
 If
 .B bash
-is invoked in this fashion, 
+is invoked in this fashion,
 .B $0
 is set to the name of the file, and the positional parameters
 are set to the remaining arguments.
@@ -272,7 +272,7 @@ for the script.
 .SH INVOCATION
 A \fIlogin shell\fP is one whose first character of argument zero is a
 .BR \- ,
-or one started with the 
+or one started with the
 .B \-\-login
 option.
 .PP
@@ -454,7 +454,7 @@ The following definitions are used throughout the rest of this
 document.
 .PD 0
 .TP
-.B blank 
+.B blank
 A space or tab.
 .TP
 .B word
@@ -463,7 +463,7 @@ Also known as a
 .BR token .
 .TP
 .B name
-A 
+A
 .I word
 consisting only of alphanumeric characters and underscores, and
 beginning with an alphabetic character or an underscore.  Also
@@ -495,8 +495,8 @@ The following words are recognized as reserved when unquoted and either
 the first word of a simple command (see
 .SM
 .B SHELL GRAMMAR
-below) or the third word of a 
-.B case 
+below) or the third word of a
+.B case
 or
 .B for
 command:
@@ -729,7 +729,7 @@ to be matched as a string.
 An additional binary operator, \fB=~\fP, is available, with the same
 precedence as \fB==\fP and \fB!=\fP.
 When it is used, the string to the right of the operator is considered
-an extended regular expression and matched accordingly (as in \fIregex\fP(3)).  
+an extended regular expression and matched accordingly (as in \fIregex\fP(3)).
 The return value is 0 if the string matches
 the pattern, and 1 otherwise.
 If the regular expression is syntactically incorrect, the conditional
@@ -889,7 +889,7 @@ last command executed in \fIlist\fP.
 [ \fBelif\fP \fIlist\fP; \fBthen\fP \fIlist\fP; ] ... \
 [ \fBelse\fP \fIlist\fP; ] \fBfi\fP
 The
-.B if 
+.B if
 .I list
 is executed.  If its exit status is zero, the
 \fBthen\fP \fIlist\fP is executed.  Otherwise, each \fBelif\fP
@@ -977,7 +977,7 @@ This defines a function named \fIname\fP.
 The reserved word \fBfunction\fP is optional.
 If the \fBfunction\fP reserved word is supplied, the parentheses are optional.
 The \fIbody\fP of the function is the compound command
-.I compound\-command 
+.I compound\-command
 (see \fBCompound Commands\fP above).
 That command is usually a \fIlist\fP of commands between { and }, but
 may be any command listed under \fBCompound Commands\fP above,
@@ -1017,7 +1017,7 @@ option enabled does not allow comments.  The
 option is on by default in interactive shells.
 .SH QUOTING
 \fIQuoting\fP is used to remove the special meaning of certain
-characters or words to the shell.  Quoting can be used to 
+characters or words to the shell.  Quoting can be used to
 disable special treatment for special characters, to prevent
 reserved words from being recognized as such, and to prevent
 parameter expansion.
@@ -1108,19 +1108,19 @@ backspace
 .TP
 .B \eE
 an escape character
-.TP   
+.TP
 .B \ef
 form feed
-.TP  
+.TP
 .B \en
 new line
-.TP     
+.TP
 .B \er
 carriage return
 .TP
 .B \et
 horizontal tab
-.TP   
+.TP
 .B \ev
 vertical tab
 .TP
@@ -1132,7 +1132,7 @@ single quote
 .TP
 .B \e\(dq
 double quote
-.TP   
+.TP
 .B \e\fInnn\fP
 the eight-bit character whose value is the octal value \fInnn\fP
 (one to three digits)
@@ -1321,8 +1321,7 @@ expands to a separate word.
 In contexts where it is performed, those words
 are subject to further word splitting and pathname expansion.
 When the expansion occurs within double quotes, it expands to a single word
-with the value of each parameter separated by the first character
-of the 
+with the value of each parameter separated by the first character of the
 .SM
 .B IFS
 special variable.  That is, "\fB$*\fP" is equivalent
@@ -1349,7 +1348,7 @@ If the double-quoted expansion occurs within a word, the expansion of
 the first parameter is joined with the beginning part of the original
 word, and the expansion of the last parameter is joined with the last
 part of the original word.
-When there are no positional parameters, "\fB$@\fP" and 
+When there are no positional parameters, "\fB$@\fP" and
 .B $@
 expand to nothing (i.e., they are removed).
 .TP
@@ -1700,7 +1699,7 @@ information.
 .B GROUPS
 An array variable containing the list of groups of which the current
 user is a member.
-Assignments to    
+Assignments to
 .SM
 .B GROUPS
 have no effect and return an error status.
@@ -1838,7 +1837,7 @@ builtin command when no arguments are supplied.
 .B SECONDS
 Each time this parameter is
 referenced, the number of seconds since shell invocation is returned.  If a
-value is assigned to 
+value is assigned to
 .SM
 .BR SECONDS ,
 the value returned upon subsequent
@@ -2031,7 +2030,7 @@ If the list of values includes
 lines which begin with a
 .B space
 character are not saved in the history list.
-A value of 
+A value of
 .I ignoredups
 causes lines matching the previous history entry to not be saved.
 A value of
@@ -2233,11 +2232,11 @@ If this variable is unset, or set to a value that is not a number
 greater than or equal to zero, the shell disables mail checking.
 .TP
 .B MAILPATH
-A colon-separated list of filenames to be checked for mail. 
+A colon-separated list of filenames to be checked for mail.
 The message to be printed when mail arrives in a particular file
 may be specified by separating the filename from the message with a `?'.
 When used in the text of the message, \fB$_\fP expands to the name of
-the current mailfile. 
+the current mailfile.
 Example:
 .RS
 .PP
@@ -2470,7 +2469,7 @@ There is no maximum
 limit on the size of an array, nor any requirement that members
 be indexed or assigned contiguously.
 Indexed arrays are referenced using integers (including arithmetic
-expressions)  and are zero-based; associative arrays are referenced
+expressions) and are zero-based; associative arrays are referenced
 using arbitrary strings.
 Unless otherwise noted, indexed array indices must be non-negative integers.
 .PP
@@ -2548,7 +2547,7 @@ referencing the array with a subscript of 0.
 If the
 .I subscript
 used to reference an element of an indexed array
-evaluates to a number less than zero, it is 
+evaluates to a number less than zero, it is
 interpreted as relative to one greater than the maximum index of the array,
 so negative indices count back from the end of the
 array, and an index of \-1 references the last element.
@@ -2583,7 +2582,7 @@ builtins each accept a
 option to specify an indexed array and a
 .B \-A
 option to specify an associative array.
-If both options are supplied, 
+If both options are supplied,
 .B \-A
 takes precedence.
 The
@@ -2718,7 +2717,7 @@ If strict compatibility with
 is desired, start
 .B bash
 with the
-.B +B 
+.B +B
 option or disable brace expansion with the
 .B +B
 option to the
@@ -2924,7 +2923,7 @@ zero.
 Substring expansion applied to an associative array produces undefined
 results.
 .sp 1
-Substring indexing is zero-based unless the positional parameters 
+Substring indexing is zero-based unless the positional parameters
 are used, in which case the indexing starts at 1 by default.
 If \fIoffset\fP is 0, and the positional parameters are used, \fB$0\fP is
 prefixed to the list.
@@ -2963,7 +2962,7 @@ If
 .I parameter
 is
 .B *
-or 
+or
 .BR @ ,
 the value substituted is the number of positional parameters.
 If
@@ -2986,7 +2985,7 @@ ${\fIparameter\fP\fB#\fP\fIword\fP}
 ${\fIparameter\fP\fB##\fP\fIword\fP}
 .PD
 \fBRemove matching prefix pattern\fP.
-The 
+The
 .I word
 is expanded to produce a pattern just as in pathname
 expansion.  If the pattern matches the beginning of
@@ -3196,7 +3195,7 @@ the file will provide input for \fIlist\fP.  If the
 argument should be read to obtain the output of \fIlist\fP.
 .PP
 When available, process substitution is performed
-simultaneously with parameter and variable expansion, 
+simultaneously with parameter and variable expansion,
 command substitution,
 and arithmetic expansion.
 .SS Word Splitting
@@ -3301,7 +3300,7 @@ If no matching filenames are found,
 and the shell option
 .B nullglob
 is not enabled, the word is left unchanged.
-If the 
+If the
 .B nullglob
 option is set, and no matches are found,
 the word is removed.
@@ -3437,7 +3436,7 @@ shell variable to
 or enable the
 .B globasciiranges
 shell option.
-A 
+A
 .B \-
 may be matched by including it as the first or last character
 in the set.
@@ -3468,7 +3467,7 @@ The \fBword\fP character class matches letters, digits, and the character _.
 .if n .sp 1
 Within
 .B [
-and 
+and
 .BR ] ,
 an \fIequivalence class\fP can be specified using the syntax
 \fB[=\fP\fIc\fP\fB=]\fP, which matches all characters with the
@@ -3479,7 +3478,7 @@ the character \fIc\fP.
 .if n .sp 1
 Within
 .B [
-and 
+and
 .BR ] ,
 the syntax \fB[.\fP\fIsymbol\fP\fB.]\fP matches the collating symbol
 \fIsymbol\fP.
@@ -3567,14 +3566,14 @@ If it expands to more than one word,
 .B bash
 reports an error.
 .PP
-Note that the order of redirections is significant.  For example, 
+Note that the order of redirections is significant.  For example,
 the command
 .RS
 .PP
 ls \fB>\fP dirlist 2\fB>&\fP1
 .RE
 .PP
-directs both standard output and standard error to the file 
+directs both standard output and standard error to the file
 .IR dirlist ,
 while the command
 .RS
@@ -4005,7 +4004,7 @@ is executing.
 .PP
 All other aspects of the shell execution
 environment are identical between a function and its caller
-with these exceptions:  the
+with these exceptions: the
 .SM
 .B DEBUG
 and
@@ -4454,7 +4453,7 @@ If the program is a file beginning with
 the remainder of the first line specifies an interpreter
 for the program.  The shell executes the
 specified interpreter on operating systems that do not
-handle this executable format themselves.  The arguments to the 
+handle this executable format themselves.  The arguments to the
 interpreter consist of a single optional argument following the
 interpreter name on the first line of the program, followed
 by the name of the program, followed by the command
@@ -4513,7 +4512,7 @@ traps caught by the shell are reset to the values inherited from the
 shell's parent, and traps ignored by the shell are ignored
 .PP
 A command invoked in this separate environment cannot affect the
-shell's execution environment. 
+shell's execution environment.
 .PP
 Command substitution, commands grouped with parentheses,
 and asynchronous commands are invoked in a
@@ -4536,7 +4535,7 @@ shell as modified by redirections.
 When a program is invoked it is given an array of strings
 called the
 .IR environment .
-This is a list of 
+This is a list of
 \fIname\fP\-\fIvalue\fP pairs, of the form
 .IR "name\fR=\fPvalue" .
 .PP
@@ -4573,7 +4572,7 @@ parameter assignments, as described above in
 These assignment statements affect only the environment seen
 by that command.
 .PP
-If the 
+If the
 .B \-k
 option is set (see the
 .B set
@@ -4594,11 +4593,11 @@ The exit status of an executed command is the value returned by the
 \fIwaitpid\fP system call or equivalent function.  Exit statuses
 fall between 0 and 255, though, as explained below, the shell may
 use values above 125 specially.  Exit statuses from shell builtins and
-compound commands are also limited to this range. Under certain
+compound commands are also limited to this range.  Under certain
 circumstances, the shell will use special values to indicate specific
 failure modes.
 .PP
-For the shell's purposes, a command which exits with a 
+For the shell's purposes, a command which exits with a
 zero exit status has succeeded.  An exit status of zero
 indicates success.  A non-zero exit status indicates failure.
 When a command terminates on a fatal signal \fIN\fP, \fBbash\fP uses
@@ -4613,7 +4612,7 @@ the exit status is greater than zero.
 .PP
 Shell builtin commands return a status of 0 (\fItrue\fP) if
 successful, and non-zero (\fIfalse\fP) if an error occurs
-while they execute. 
+while they execute.
 All builtins return an exit status of 2 to indicate incorrect usage,
 generally invalid options or missing arguments.
 .PP
@@ -4679,12 +4678,12 @@ to ensure that they receive the
 .BR SIGHUP .
 To prevent the shell from
 sending the signal to a particular job, it should be removed from the
-jobs table with the 
+jobs table with the
 .B disown
 builtin (see
 .SM
 .B "SHELL BUILTIN COMMANDS"
-below) or marked 
+below) or marked
 to not receive
 .SM
 .B SIGHUP
@@ -4696,14 +4695,14 @@ If the
 shell option has been set with
 .BR shopt ,
 .B bash
-sends a 
+sends a
 .SM
 .B SIGHUP
 to all jobs when an interactive login shell exits.
 .PP
 If \fBbash\fP is waiting for a command to complete and receives a signal
 for which a trap has been set, the trap will not be executed until
-the command completes. 
+the command completes.
 When \fBbash\fP is waiting for an asynchronous command via the \fBwait\fP
 builtin, the reception of a signal for which a trap has been set will
 cause the \fBwait\fP builtin to return immediately with an exit status
@@ -4757,7 +4756,7 @@ user so specifies with \f(CWstty tostop\fP, write to the
 terminal.
 Background processes which attempt to read from (write to when
 \f(CWstty tostop\fP is in effect) the
-terminal are sent a 
+terminal are sent a
 .SM
 .B SIGTTIN (SIGTTOU)
 signal by the kernel's terminal driver, 
@@ -4774,7 +4773,7 @@ Typing the
 character (typically
 .BR ^Z ,
 Control-Z) while a process is running
-causes that process to be stopped and returns control to 
+causes that process to be stopped and returns control to
 .BR bash .
 Typing the
 .I "delayed suspend"
@@ -4824,7 +4823,7 @@ refer to the shell's notion of the
 .IR "current job" ,
 which is the last job stopped while it was in
 the foreground or started in the background.
-The 
+The
 .I "previous job"
 may be referenced using
 .BR %\- .
@@ -4855,7 +4854,7 @@ Normally,
 .B bash
 waits until it is about to print a prompt before reporting
 changes in a job's status so as to not interrupt
-any other output.  If the 
+any other output.  If the
 .B \-b
 option to the
 .B set
@@ -4876,12 +4875,12 @@ warning message, and, if the \fBcheckjobs\fP option is enabled, lists the
 jobs and their statuses.
 The
 .B jobs
-command may then be used to inspect their status. 
+command may then be used to inspect their status.
 If a second attempt to exit is made without an intervening command,
 the shell does not print another warning, and any stopped
 jobs are terminated.
 .SH PROMPTING
-When executing interactively, 
+When executing interactively,
 .B bash
 displays the primary prompt
 .SM
@@ -5045,10 +5044,10 @@ builtin.
 .PP
 In this section, the Emacs-style notation is used to denote
 keystrokes.  Control keys are denoted by C\-\fIkey\fR, e.g., C\-n
-means Control\-N.  Similarly, 
+means Control\-N.  Similarly,
 .I meta
 keys are denoted by M\-\fIkey\fR, so M\-x means Meta\-X.  (On keyboards
-without a 
+without a
 .I meta
 key, M\-\fIx\fP means ESC \fIx\fP, i.e., press the Escape key
 then the
@@ -5066,7 +5065,7 @@ which normally act as a repeat count.
 Sometimes, however, it is the sign of the argument that is significant.
 Passing a negative argument to a command that acts in the forward
 direction (e.g., \fBkill\-line\fP) causes that command to act in a
-backward direction. 
+backward direction.
 Commands whose behavior with arguments deviates from this are noted
 below.
 .PP
@@ -5074,7 +5073,7 @@ When a command is described as \fIkilling\fP text, the text
 deleted is saved for possible future retrieval
 (\fIyanking\fP).  The killed text is saved in a
 \fIkill ring\fP.  Consecutive kills cause the text to be
-accumulated into one unit, which can be yanked all at once. 
+accumulated into one unit, which can be yanked all at once.
 Commands which do not kill text separate the chunks of text
 on the kill ring.
 .SS "Readline Initialization"
@@ -5097,7 +5096,7 @@ Lines beginning with a \fB$\fP indicate conditional constructs.
 Other lines denote key bindings and variable settings.
 .PP
 The default key-bindings may be changed with an
-.I inputrc 
+.I inputrc
 file.
 Other programs that use this library may add their own commands
 and bindings.
@@ -5111,7 +5110,7 @@ or
 .RS
 C\-Meta\-u: universal\-argument
 .RE
-into the 
+into the
 .I inputrc
 would make M\-C\-u execute the readline command
 .IR universal\-argument .
@@ -5137,7 +5136,7 @@ The syntax for controlling key bindings in the
 .I inputrc
 file is simple.  All that is required is the name of the
 command or the text of a macro and a key sequence to which
-it should be bound. The name may be specified in one of two ways:
+it should be bound.  The name may be specified in one of two ways:
 as a symbolic key name, possibly with \fIMeta\-\fP or \fIControl\-\fP
 prefixes, or as a key sequence.
 .PP
@@ -5193,7 +5192,7 @@ is again bound to the function
 .I "C\-x C\-r"
 is bound to the function
 .BR re\-read\-init\-file ,
-and 
+and
 .I "ESC [ 1 1 ~"
 is bound to insert the text
 .if t \f(CWFunction Key 1\fP.
@@ -5319,7 +5318,7 @@ equivalents.
 .TP
 .B colored\-stats (Off)
 If set to \fBOn\fP, readline displays possible completions using different
-colors to indicate their file type.     
+colors to indicate their file type.
 The color definitions are taken from the value of the \fBLS_COLORS\fP
 environment variable.
 .TP
@@ -5463,7 +5462,7 @@ have a slash appended (subject to the value of
 .TP
 .B match\-hidden\-files (On)
 This variable, when set to \fBOn\fP, causes readline to match files whose
-names begin with a `.' (hidden files) when performing filename 
+names begin with a `.' (hidden files) when performing filename
 completion.
 If set to \fBOff\fP, the leading `.' must be
 supplied by the user in the filename to be completed.
@@ -5485,9 +5484,9 @@ to display a screenful of possible completions at a time.
 .B print\-completions\-horizontally (Off)
 If set to \fBOn\fP, readline will display completions with matches
 sorted horizontally in alphabetical order, rather than down the screen.
-.TP 
+.TP
 .B revert\-all\-at\-newline (Off)
-If set to \fBOn\fP, readline will undo all changes to history lines 
+If set to \fBOn\fP, readline will undo all changes to history lines
 before returning when \fBaccept\-line\fP is executed.  By default,
 history lines may be modified and retain individual undo lists across
 calls to \fBreadline\fP.
@@ -5534,7 +5533,7 @@ compilation features of the C preprocessor which allows key
 bindings and variable settings to be performed as the result
 of tests.  There are four parser directives used.
 .IP \fB$if\fP
-The 
+The
 .B $if
 construct allows bindings to be made based on the
 editing mode, the terminal being used, or the application using
@@ -5865,7 +5864,7 @@ Negative arguments have no effect.
 Drag the word before point past the word after point,
 moving point over that word as well.
 If point is at the end of the line, this transposes
-the last two words on the line.   
+the last two words on the line.
 .TP
 .B upcase\-word (M\-u)
 Uppercase the current (or following) word.  With a negative argument,
@@ -5885,7 +5884,7 @@ switches to overwrite mode.  With an explicit non-positive numeric
 argument, switches to insert mode.  This command affects only
 \fBemacs\fP mode; \fBvi\fP mode does overwrite differently.
 Each call to \fIreadline()\fP starts in insert mode.
-In overwrite mode, characters bound to \fBself\-insert\fP replace   
+In overwrite mode, characters bound to \fBself\-insert\fP replace
 the text at point rather than pushing the text to the right.
 Characters bound to \fBbackward\-delete\-char\fP replace the character
 before point with a space.  By default, this command is unbound.
@@ -5908,7 +5907,7 @@ The killed text is saved on the kill-ring.
 .B kill\-whole\-line
 Kill all characters on the current line, no matter where point is.
 .TP
-.B kill\-word  (M\-d)
+.B kill\-word (M\-d)
 Kill from point to the end of the current word, or if between
 words, to the end of the next word.
 Word boundaries are the same as those used by \fBforward\-word\fP.
@@ -6172,10 +6171,10 @@ but usually bound to ESC\-[.
 Without a numeric argument, the value of the readline
 .B comment\-begin
 variable is inserted at the beginning of the current line.
-If a numeric argument is supplied, this command acts as a toggle:  if
+If a numeric argument is supplied, this command acts as a toggle: if
 the characters at the beginning of the line do not match the value
 of \fBcomment\-begin\fP, the value is inserted, otherwise
-the characters in \fBcomment\-begin\fP are deleted from the beginning of 
+the characters in \fBcomment\-begin\fP are deleted from the beginning of
 the line.
 In either case, the line is accepted as if a newline had been typed.
 The default value of
@@ -6286,7 +6285,7 @@ Shell quoting is honored.
 Each word is then expanded using
 brace expansion, tilde expansion, parameter and variable expansion,
 command substitution, and arithmetic expansion,
-as described above under 
+as described above under
 .SM
 .BR EXPANSION .
 The results are split using the rules described above under
@@ -6308,7 +6307,7 @@ and
 .B COMP_TYPE
 variables are assigned values as described above under
 \fBShell Variables\fP.
-If a shell function is being invoked, the 
+If a shell function is being invoked, the
 .SM
 .B COMP_WORDS
 and
@@ -6376,7 +6375,7 @@ generate no matches.
 .PP
 When a compspec indicates that directory name completion is desired,
 the programmable completion functions force readline to append a slash
-to completed names which are symbolic links to directories, subject to  
+to completed names which are symbolic links to directories, subject to
 the value of the \fBmark\-directories\fP readline variable, regardless
 of the setting of the \fBmark-symlinked\-directories\fP readline variable.
 .PP
@@ -6680,7 +6679,7 @@ The entire command line typed so far.
 .SS Word Designators
 .PP
 Word designators are used to select desired words from the event.
-A 
+A
 .B :
 separates the event specification from the word designator.
 It may be omitted if the word designator begins with a
@@ -6884,7 +6883,7 @@ option prints the list of aliases in the form
 \fBalias\fP \fIname\fP=\fIvalue\fP on standard output.
 When arguments are supplied, an alias is defined for
 each \fIname\fP whose \fIvalue\fP is given.
-A trailing space in  \fIvalue\fP causes the next word to be
+A trailing space in \fIvalue\fP causes the next word to be
 checked for alias substitution when the alias is expanded.
 For each \fIname\fP in the argument list for which no \fIvalue\fP
 is supplied, the name and value of the alias is printed.
@@ -7041,7 +7040,7 @@ Returns the context of any active subroutine call (a shell function or
 a script executed with the \fB.\fP or \fBsource\fP builtins).
 Without \fIexpr\fP, \fBcaller\fP displays the line number and source
 filename of the current subroutine call.
-If a non-negative integer is supplied as \fIexpr\fP, \fBcaller\fP 
+If a non-negative integer is supplied as \fIexpr\fP, \fBcaller\fP
 displays the line number, subroutine name, and source file corresponding
 to that position in the current execution call stack.  This extra
 information may be used, for example, to print a stack trace.  The
@@ -7078,7 +7077,7 @@ begins with a slash (/),
 then
 .SM
 .B CDPATH
-is not used. The
+is not used.  The
 .B \-P
 option causes \fBcd\fP to use the physical directory structure
 by resolving symbolic links while traversing \fIdir\fP and
@@ -7123,8 +7122,8 @@ Run
 .I command
 with
 .I args
-suppressing the normal shell function lookup. Only builtin
-commands or commands found in the
+suppressing the normal shell function lookup.
+Only builtin commands or commands found in the
 .SM
 .B PATH
 are executed.  If the
@@ -7247,7 +7246,7 @@ Tell readline not to append a space (the default) to words completed at
 the end of the line.
 .TP 8
 .B plusdirs
-After any matches defined by the compspec are generated, 
+After any matches defined by the compspec are generated,
 directory name completion is attempted and any
 matches are added to the results of the other actions.
 .RE
@@ -7559,7 +7558,7 @@ or an attempt is made to display a non-existent function with \fB\-f\fP.
 Without options, displays the list of currently remembered directories.
 The default display is on a single line with directory names separated
 by spaces.
-Directories are added to the list with the 
+Directories are added to the list with the
 .B pushd
 command; the
 .B popd
@@ -7758,7 +7757,7 @@ become the arguments to \fIcommand\fP.
 If the
 .B \-l
 option is supplied,
-the shell places a dash at the beginning of the zeroth argument passed to 
+the shell places a dash at the beginning of the zeroth argument passed to
 .IR command .
 This is what
 .IR login (1)
@@ -7804,10 +7803,9 @@ is executed before the shell terminates.
 The supplied
 .I names
 are marked for automatic export to the environment of
-subsequently executed commands.  If the 
+subsequently executed commands.  If the
 .B \-f
-option is given,
-the 
+option is given, the
 .I names
 refer to functions.
 If no
@@ -7847,7 +7845,7 @@ and
 may be specified as a string (to locate the last command beginning
 with that string) or as a number (an index into the history list,
 where a negative number is used as an offset from the current
-command number).  If 
+command number).  If
 .I last
 is not specified it is set to
 the current command for listing (so that
@@ -8004,7 +8002,7 @@ If the variable
 .SM
 .B OPTERR
 is set to 0, no error messages will be displayed, even if the first
-character of 
+character of
 .I optstring
 is not a colon.
 .sp 1
@@ -8048,7 +8046,7 @@ error occurs.
 .TP
 \fBhash\fP [\fB\-lr\fP] [\fB\-p\fP \fIfilename\fP] [\fB\-dt\fP] [\fIname\fP]
 Each time \fBhash\fP is invoked,
-the full pathname of the command 
+the full pathname of the command
 .I name
 is determined by searching
 the directories in
@@ -8121,7 +8119,7 @@ The return status is 0 unless no command matches
 .PD
 With no options, display the command
 history list with line numbers.  Lines listed
-with a 
+with a
 .B *
 have been modified.  An argument of
 .I n
@@ -8311,7 +8309,7 @@ returns 1; 0 is returned otherwise.
 .TP
 \fBlocal\fP [\fIoption\fP] [\fIname\fP[=\fIvalue\fP] ...]
 For each argument, a local variable named
-.I name 
+.I name
 is created, and assigned
 .IR value .
 The \fIoption\fP can be any of the options accepted by \fBdeclare\fP.
@@ -8342,9 +8340,9 @@ Exit a login shell.
 .PD
 Read lines from the standard input into the indexed array variable
 .IR array ,
-or from file descriptor 
+or from file descriptor
 .IR fd
-if the 
+if the
 .B \-u
 option is supplied.
 The variable
@@ -8393,13 +8391,13 @@ Specify the number of lines read between each call to
 .PP
 If
 .B \-C
-is specified without 
+is specified without
 .BR \-c ,
 the default quantum is 5000.
 When \fIcallback\fP is evaluated, it is supplied the index of the next
 array element to be assigned and the line to be assigned to that element
 as additional arguments.
-\fIcallback\fP is evaluated after the line is read but before the 
+\fIcallback\fP is evaluated after the line is read but before the
 array element is assigned.
 .PP
 If not supplied with an explicit origin, \fBmapfile\fP will clear \fIarray\fP
@@ -8450,7 +8448,7 @@ the next to last.
 .PP
 If the
 .B popd
-command is successful, a 
+command is successful, a
 .B dirs
 is performed as well, and the return status is 0.
 .B popd
@@ -8549,7 +8547,7 @@ to the \fBcd\fP builtin.
 .PP
 If the
 .B pushd
-command is successful, a 
+command is successful, a
 .B dirs
 is performed as well.
 If the first form is used,
@@ -8568,7 +8566,7 @@ fails.
 Print the absolute pathname of the current working directory.
 The pathname printed contains no symbolic links if the
 .B \-P
-option is supplied or the 
+option is supplied or the
 .B \-o physical
 option to the
 .B set
@@ -8592,7 +8590,7 @@ to the last
 .IR name .
 If there are fewer words read from the input stream than names,
 the remaining names are assigned empty values.
-The characters in 
+The characters in
 .SM
 .B IFS
 are used to split the line into words using the same rules the shell
@@ -8737,7 +8735,7 @@ that is not a function.
 Causes a function to stop executing and return the value specified by
 .I n
 to its caller.
-If 
+If
 .I n
 is omitted, the return status is that of the last command
 executed in the function body.
@@ -8749,7 +8747,7 @@ handler before \fBreturn\fP was invoked.
 If
 .B return
 is used outside a function,
-but during execution of a script by the 
+but during execution of a script by the
 .B .
 (\fBsource\fP) command, it causes the shell to stop executing
 that script and return either
@@ -8779,7 +8777,7 @@ In \fIposix\fP mode, only shell variables are listed.
 The output is sorted according to the current locale.
 When options are specified, they set or unset shell attributes.
 Any arguments remaining after option processing are treated
-as values for the positional parameters and are assigned, in order, to 
+as values for the positional parameters and are assigned, in order, to
 .BR $1 ,
 .BR $2 ,
 .B ...
@@ -8805,13 +8803,13 @@ or a \fIcompound command\fP
 (see
 .SM
 .B SHELL GRAMMAR
-above),  exits with a non-zero status.
+above), exits with a non-zero status.
 The shell does not exit if the
 command that fails is part of the command list immediately following a
 .B while
 or
 .B until
-keyword, 
+keyword,
 part of the test following the
 .B if
 or
@@ -8849,7 +8847,7 @@ call completes.
 .TP 8
 .B \-f
 Disable pathname expansion.
-.TP 8 
+.TP 8
 .B \-h
 Remember the location of commands as they are looked up for execution.
 This is enabled by default.
@@ -8871,9 +8869,9 @@ When a background job completes, the shell prints a line
 containing its exit status.
 .TP 8
 .B \-n
-Read commands but do not execute them.  This may be used to 
-check a shell script for syntax errors.  This is ignored by
-interactive shells.
+Read commands but do not execute them.
+This may be used to check a shell script for syntax errors.
+This is ignored by interactive shells.
 .TP 8
 .B \-o \fIoption\-name\fP
 The \fIoption\-name\fP can be one of the following:
@@ -9079,7 +9077,7 @@ does not overwrite an existing file with the
 .BR >& ,
 and
 .B <>
-redirection operators.  This may be overridden when 
+redirection operators.  This may be overridden when
 creating output files by using the redirection operator
 .B >|
 instead of
@@ -9151,7 +9149,7 @@ If
 .I n
 is 0, no parameters are changed.
 If
-.I n 
+.I n
 is not given, it is assumed to be 1.
 If
 .I n
@@ -9355,7 +9353,7 @@ attempts spelling correction on directory names during word completion
 if the directory name initially supplied does not exist.
 .TP 8
 .B dotglob
-If set, 
+If set,
 .B bash
 includes filenames beginning with a `.' in the results of pathname
 expansion.
@@ -9402,12 +9400,12 @@ and
 are updated as described in their descriptions above.
 .TP
 .B 5.
-Function tracing is enabled:  command substitution, shell functions, and
+Function tracing is enabled: command substitution, shell functions, and
 subshells invoked with \fB(\fP \fIcommand\fP \fB)\fP inherit the
 \fBDEBUG\fP and \fBRETURN\fP traps.
 .TP
 .B 6.
-Error tracing is enabled:  command substitution, shell functions, and
+Error tracing is enabled: command substitution, shell functions, and
 subshells invoked with \fB(\fP \fIcommand\fP \fB)\fP inherit the
 \fBERR\fP trap.
 .RE
@@ -9478,7 +9476,7 @@ is being used, a user is given the opportunity to re-edit a
 failed history substitution.
 .TP 8
 .B histverify
-If set, and 
+If set, and
 .B readline
 is being used, the results of history substitution are not immediately
 passed to the shell parser.  Instead, the resulting line is loaded into
@@ -9529,7 +9527,7 @@ above).
 The value may not be changed.
 .TP 8
 .B mailwarn
-If set, and a file that \fBbash\fP is checking for mail has been  
+If set, and a file that \fBbash\fP is checking for mail has been
 accessed since the last time it was checked, the message ``The mail in
 \fImailfile\fP has been read'' is displayed.
 .TP 8
@@ -9698,7 +9696,7 @@ under
 the result of the expression is the result of the binary test using
 the first and third arguments as operands.
 The \fB\-a\fP and \fB\-o\fP operators are considered binary operators
-when there are three arguments.  
+when there are three arguments.
 If the first argument is \fB!\fP, the value is the negation of
 the two-argument test using the second and third arguments.
 If the first argument is exactly \fB(\fP and the third argument is
@@ -9709,7 +9707,7 @@ Otherwise, the expression is false.
 4 arguments
 If the first argument is \fB!\fP, the result is the negation of
 the three-argument expression composed of the remaining arguments.
-Otherwise, the expression is parsed and evaluated according to 
+Otherwise, the expression is parsed and evaluated according to
 precedence using the rules listed above.
 .TP
 5 or more arguments
@@ -9740,7 +9738,7 @@ is absent (and there is a single \fIsigspec\fP) or
 each specified signal is
 reset to its original disposition (the value it had
 upon entrance to the shell).
-If 
+If
 .I arg
 is the null string the signal specified by each
 .I sigspec
@@ -9812,9 +9810,9 @@ is
 .BR ERR ,
 the command
 .I arg
-is executed whenever a 
+is executed whenever a
 a pipeline (which may consist of a single simple
-command), a list, or a compound command returns a 
+command), a list, or a compound command returns a
 non\-zero exit status,
 subject to the following conditions.
 The
@@ -9825,7 +9823,7 @@ command is part of the command list immediately following a
 .B while
 or
 .B until
-keyword, 
+keyword,
 part of the test in an
 .I if
 statement, part of a command executed in a
@@ -9850,7 +9848,7 @@ is invalid; otherwise
 returns true.
 .TP
 \fBtype\fP [\fB\-aftpP\fP] \fIname\fP [\fIname\fP ...]
-With no options, 
+With no options,
 indicate how each
 .I name
 would be interpreted if used as a command name.
@@ -9864,7 +9862,7 @@ prints a string which is one of
 .IR function ,
 .IR builtin ,
 or
-.I file 
+.I file
 if
 .I name
 is an alias, shell reserved word, function, builtin, or disk file,
@@ -9901,18 +9899,18 @@ If a command is hashed,
 and
 .B \-P
 print the hashed value, which is not necessarily the file that appears
-first in 
+first in
 .SM
 .BR PATH .
 If the
 .B \-a
-option is used, 
+option is used,
 .B type
 prints all of the places that contain
-an executable named 
+an executable named
 .IR name .
 This includes aliases and functions,
-if and only if the 
+if and only if the
 .B \-p
 option is not also used.
 The table of hashed commands is not consulted
@@ -10038,7 +10036,7 @@ or an error occurs while setting a new limit.
 .RE
 .TP
 \fBumask\fP [\fB\-p\fP] [\fB\-S\fP] [\fImode\fP]
-The user file-creation mask is set to 
+The user file-creation mask is set to
 .IR mode .
 If
 .I mode
@@ -10325,7 +10323,7 @@ this manual page should be directed to
 .PP
 It's too big and too slow.
 .PP
-There are some subtle differences between 
+There are some subtle differences between
 .B bash
 and traditional versions of
 .BR sh ,

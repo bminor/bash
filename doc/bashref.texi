@@ -1011,7 +1011,7 @@ to be matched as a string.
 An additional binary operator, @samp{=~}, is available, with the same
 precedence as @samp{==} and @samp{!=}.
 When it is used, the string to the right of the operator is considered
-an extended regular expression and matched accordingly (as in @i{regex}3)).  
+an extended regular expression and matched accordingly (as in @i{regex}3)).
 The return value is 0 if the string matches
 the pattern, and 1 otherwise.
 If the regular expression is syntactically incorrect, the conditional
@@ -1578,9 +1578,8 @@ expands to a separate word.
 In contexts where it is performed, those words
 are subject to further word splitting and pathname expansion.
 When the expansion occurs within double quotes, it expands to a single word
-with the value of each parameter separated by the first character
-of the @env{IFS}
-special variable.  That is, @code{"$*"} is equivalent
+with the value of each parameter separated by the first character of the
+@env{IFS} special variable.  That is, @code{"$*"} is equivalent
 to @code{"$1@var{c}$2@var{c}@dots{}"}, where @var{c}
 is the first character of the value of the @code{IFS}
 variable.
@@ -2951,7 +2950,7 @@ shell's parent, and traps ignored by the shell are ignored
 @end itemize
 
 A command invoked in this separate environment cannot affect the
-shell's execution environment. 
+shell's execution environment.
 
 Command substitution, commands grouped with parentheses,
 and asynchronous commands are invoked in a
@@ -3086,7 +3085,7 @@ an interactive login shell exits.
 
 If Bash is waiting for a command to complete and receives a signal
 for which a trap has been set, the trap will not be executed until
-the command completes. 
+the command completes.
 When Bash is waiting for an asynchronous
 command via the @code{wait} builtin, the reception of a signal for
 which a trap has been set will cause the @code{wait} builtin to return
@@ -3178,7 +3177,7 @@ This section briefly describes the builtins which Bash inherits from
 the Bourne Shell, as well as the builtin commands which are unique
 to or have been extended in Bash.
 
-Several builtin commands are described in other chapters:  builtin
+Several builtin commands are described in other chapters: builtin
 commands which provide the Bash interface to the job control
 facilities (@pxref{Job Control Builtins}), the directory stack
 (@pxref{Directory Stack Builtins}), the command history
@@ -3619,7 +3618,7 @@ Otherwise, the expression is false.
 @item 4 arguments
 If the first argument is @samp{!}, the result is the negation of
 the three-argument expression composed of the remaining arguments.
-Otherwise, the expression is parsed and evaluated according to 
+Otherwise, the expression is parsed and evaluated according to
 precedence using the rules listed above.
 
 @item 5 or more arguments
@@ -3679,7 +3678,7 @@ each time a shell function or a script executed with the @code{.} or
 If a @var{sigspec} is @code{ERR}, the command @var{arg} 
 is executed whenever
 a pipeline (which may consist of a single simple
-command), a list, or a compound command returns a 
+command), a list, or a compound command returns a
 non-zero exit status,
 subject to the following conditions.
 The @code{ERR} trap is not executed if the failed command is part of the
@@ -3886,7 +3885,7 @@ a script executed with the @code{.} or @code{source} builtins).
 
 Without @var{expr}, @code{caller} displays the line number and source
 filename of the current subroutine call.
-If a non-negative integer is supplied as @var{expr}, @code{caller} 
+If a non-negative integer is supplied as @var{expr}, @code{caller}
 displays the line number, subroutine name, and source file corresponding
 to that position in the current execution call stack.  This extra
 information may be used, for example, to print a stack trace.  The
@@ -4215,12 +4214,12 @@ The @option{-c} option specifies @var{quantum}.
 Specify the number of lines read between each call to @var{callback}.
 @end table
 
-If @option{-C} is specified without @option{-c}, 
+If @option{-C} is specified without @option{-c},
 the default quantum is 5000.
 When @var{callback}  is evaluated, it is supplied the index of the next
 array element to be assigned and the line to be assigned to that element
 as additional arguments.
-@var{callback} is evaluated after the line is read but before the 
+@var{callback} is evaluated after the line is read but before the
 array element is assigned.
 
 If not supplied with an explicit origin, @code{mapfile} will clear @var{array}
@@ -4649,8 +4648,8 @@ When a background job completes, the shell prints a line
 containing its exit status.
 
 @item -n
-Read commands but do not execute them; this may be used to check a
-script for syntax errors.
+Read commands but do not execute them.
+This may be used to check a script for syntax errors.
 This option is ignored by interactive shells.
 
 @item -o @var{option-name}
@@ -5059,12 +5058,12 @@ a call to @code{return}.
 descriptions (@pxref{Bash Variables}).
 
 @item
-Function tracing is enabled:  command substitution, shell functions, and
+Function tracing is enabled: command substitution, shell functions, and
 subshells invoked with @code{( @var{command} )} inherit the
 @code{DEBUG} and @code{RETURN} traps.
 
 @item
-Error tracing is enabled:  command substitution, shell functions, and
+Error tracing is enabled: command substitution, shell functions, and
 subshells invoked with @code{( @var{command} )} inherit the
 @code{ERR} trap.
 @end enumerate
@@ -5155,7 +5154,7 @@ The shell sets this option if it is started as a login shell
 The value may not be changed.
 
 @item mailwarn
-If set, and a file that Bash is checking for mail has been  
+If set, and a file that Bash is checking for mail has been
 accessed since the last time it was checked, the message
 @code{"The mail in @var{mailfile} has been read"} is displayed.
 
@@ -6854,7 +6853,7 @@ Referencing an array variable without a subscript is equivalent to
 referencing with a subscript of 0. 
 If the @var{subscript}
 used to reference an element of an indexed array
-evaluates to a number less than zero, it is 
+evaluates to a number less than zero, it is
 interpreted as relative to one greater than the maximum index of the array,
 so negative indices count back from the end of the array,
 and an index of -1 refers to the last element.

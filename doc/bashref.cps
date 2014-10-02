@@ -36,10 +36,10 @@
 \entry {directory stack}{90}
 \initial {E}
 \entry {editing command lines}{102}
-\entry {environment}{37}
+\entry {environment}{38}
 \entry {evaluation, arithmetic}{87}
 \entry {event designators}{135}
-\entry {execution environment}{36}
+\entry {execution environment}{37}
 \entry {exit status}{3, 38}
 \entry {expansion}{21}
 \entry {expansion, arithmetic}{29}
@@ -67,7 +67,7 @@
 \entry {initialization file, readline}{104}
 \entry {installation}{138}
 \entry {interaction, readline}{101}
-\entry {interactive shell}{81, 83}
+\entry {interactive shell}{82, 83}
 \entry {internationalization}{7}
 \initial {J}
 \entry {job}{3}
@@ -77,7 +77,7 @@
 \entry {killing text}{103}
 \initial {L}
 \entry {localization}{7}
-\entry {login shell}{81}
+\entry {login shell}{82}
 \initial {M}
 \entry {matching, pattern}{30}
 \entry {metacharacter}{3}
@@ -90,7 +90,7 @@
 \initial {P}
 \entry {parameter expansion}{23}
 \entry {parameters}{18}
-\entry {parameters, positional}{19}
+\entry {parameters, positional}{20}
 \entry {parameters, special}{20}
 \entry {pathname expansion}{30}
 \entry {pattern matching}{30}
@@ -107,7 +107,7 @@
 \entry {quoting, ANSI}{6}
 \initial {R}
 \entry {Readline, how to use}{100}
-\entry {redirection}{31}
+\entry {redirection}{32}
 \entry {reserved word}{3}
 \entry {restricted shell}{93}
 \entry {return status}{4}
@@ -118,7 +118,7 @@
 \entry {shell variable}{18}
 \entry {shell, interactive}{83}
 \entry {signal}{4}
-\entry {signal handling}{38}
+\entry {signal handling}{39}
 \entry {special builtin}{4, 68}
 \entry {startup files}{82}
 \entry {suspending jobs}{97}
