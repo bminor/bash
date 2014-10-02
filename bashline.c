@@ -4263,7 +4263,7 @@ bash_event_hook ()
      check_signals will call QUIT, which will eventually longjmp to top_level,
      calling run_interrupt_trap along the way.  The check for sigalrm_seen is
      to clean up the read builtin's state. */
-  if (interrupt_state || sigalrm_seen)
+  if (terminating_signal || interrupt_state || sigalrm_seen)
     rl_cleanup_after_signal ();
   bashline_reset_event_hook ();
   check_signals_and_traps ();	/* XXX */

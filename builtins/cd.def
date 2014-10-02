@@ -436,7 +436,10 @@ cd_builtin (list)
 	FREE (temp);
     }
 
-  builtin_error ("%s: %s", dirname, strerror (errno));
+  temp = printable_filename (dirname, 0);
+  builtin_error ("%s: %s", temp, strerror (errno));
+  if (temp != dirname)
+    free (temp);
   return (EXECUTION_FAILURE);
 }
 

@@ -115,7 +115,7 @@ bind_builtin (list)
   int return_code;
   Keymap kmap, saved_keymap;
   int flags, opt;
-  char *initfile, *map_name, *fun_name, *unbind_name, *remove_seq, *cmd_seq;
+  char *initfile, *map_name, *fun_name, *unbind_name, *remove_seq, *cmd_seq, *t;
 
   if (no_line_editing)
     {
@@ -193,6 +193,7 @@ bind_builtin (list)
 	case 'X':
 	  flags |= XXFLAG;
 	  break;
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  BIND_RETURN (EX_USAGE);
@@ -248,7 +249,10 @@ bind_builtin (list)
     {
       if (rl_read_init_file (initfile) != 0)
 	{
-	  builtin_error (_("%s: cannot read: %s"), initfile, strerror (errno));
+	  t = printable_filename (initfile, 0);
+	  builtin_error (_("%s: cannot read: %s"), t, strerror (errno));
+	  if (t != initfile)
+	    free (t);
 	  BIND_RETURN (EXECUTION_FAILURE);
 	}
     }

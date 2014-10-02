@@ -5058,8 +5058,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 	  if (hookf == 0)
 	    {
 	      /* Make sure filenames are displayed using printable characters */
-	      if (ansic_shouldquote (pathname))
-		pathname = ansic_quote (pathname, 0, NULL);
+	      pathname = printable_filename (pathname, 0);
 	      internal_error (_("%s: command not found"), pathname);
 	      exit (EX_NOTFOUND);	/* Posix.2 says the exit status is 127 */
 	    }

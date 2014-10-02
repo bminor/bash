@@ -232,8 +232,8 @@ print_portable_hash_info (item)
 {
   char *fp, *fn;
 
-  fp = sh_contains_shell_metas (pathdata(item)->path) ? sh_single_quote (pathdata(item)->path) : pathdata(item)->path;
-  fn = sh_contains_shell_metas (item->key) ? sh_single_quote (item->key) : item->key;
+  fp = printable_filename (pathdata(item)->path, 1);
+  fn = printable_filename (item->key, 1);
   printf ("builtin hash -p %s %s\n", fp, fn);
   if (fp != pathdata(item)->path)
     free (fp);

@@ -313,6 +313,7 @@ extern char *base_pathname __P((char *));
 extern char *full_pathname __P((char *));
 extern char *polite_directory_format __P((char *));
 extern char *trim_pathname __P((char *, int));
+extern char *printable_filename __P((char *, int));
 
 extern char *extract_colon_unit __P((char *, int *));
 

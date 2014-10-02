@@ -119,7 +119,7 @@ source_builtin (list)
      WORD_LIST *list;
 {
   int result;
-  char *filename, *debug_trap;
+  char *filename, *debug_trap, *x;
 
   if (no_options (list))
     return (EX_USAGE);
@@ -152,7 +152,10 @@ source_builtin (list)
     {
       if (source_searches_cwd == 0)
 	{
-	  builtin_error (_("%s: file not found"), list->word->word);
+	  x = printable_filename (list->word->word, 0);
+	  builtin_error (_("%s: file not found"), x);
+	  if (x != list->word->word)
+	    free (x);
 	  if (posixly_correct && interactive_shell == 0 && executing_command_builtin == 0)
 	    {
 	      last_command_exit_value = 1;

@@ -309,7 +309,10 @@ dyn_load_builtin (list, flags, filename)
 
   if (handle == 0)
     {
-      builtin_error (_("cannot open shared object %s: %s"), filename, dlerror ());
+      name = printable_filename (filename, 0);
+      builtin_error (_("cannot open shared object %s: %s"), name, dlerror ());
+      if (name != filename)
+	free (name);
       return (EXECUTION_FAILURE);
     }
 
@@ -332,8 +335,11 @@ dyn_load_builtin (list, flags, filename)
       b = (struct builtin *)dlsym (handle, struct_name);
       if (b == 0)
 	{
+	  name = printable_filename (filename, 0);
 	  builtin_error (_("cannot find %s in shared object %s: %s"),
-			  struct_name, filename, dlerror ());
+			  struct_name, name, dlerror ());
+	  if (name != filename)
+	    free (name);
 	  free (struct_name);
 	  continue;
 	}

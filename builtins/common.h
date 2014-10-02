@@ -35,7 +35,7 @@ do { \
     } \
 } while (0)
 
-#define CASE_HELPOPT() \
+#define CASE_HELPOPT \
   case GETOPT_HELP: \
     builtin_help (); \
     return (EX_USAGE)
@@ -48,6 +48,8 @@ do { \
 #define SEVAL_RESETLINE	0x010
 #define SEVAL_PARSEONLY	0x020
 #define SEVAL_NOLONGJMP 0x040
+#define SEVAL_FUNCDEF	0x080		/* only allow function definitions */
+#define SEVAL_ONECMD	0x100		/* only allow a single command */
 
 /* Flags for describe_command, shared between type.def and command.def */
 #define CDESC_ALL		0x001	/* type -a */
@@ -137,6 +139,9 @@ extern void getopts_reset __P((int));
 
 /* Functions from help.def */
 extern void builtin_help __P((void));
+
+/* Functions from read.def */
+extern void read_tty_cleanup __P((void));
 
 /* Functions from set.def */
 extern int minus_o_option_value __P((char *));

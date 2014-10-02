@@ -6279,6 +6279,11 @@ builtins/read.def
 	  bashline_reset_event_hook.  These changes fix bug reported in
 	  https://bugs.launchpad.net/ubuntu/+source/bash/+bug/1317476
 
+bashline.c
+	- bash_event_hook: make sure we clean up the readline state by calling
+	  rl_cleanup_after_signal if sigalrm_seen is non-zero.  The read builtin
+	  sets this when it times out
+
 				   5/12
 				   ----
 doc/{bash.1,bashref.texi}
@@ -6684,7 +6689,110 @@ builtins/common.c
 
 builtins/command.def
 	- use CASE_HELPOPT() to handle --help after calling internal_getopt()
+	  (command)
 
 builtins/{colon,echo,test}.def
-	- do not recognize --help (:/true/false/echo/test
-)
+	- do not recognize --help (:/true/false/echo/test)
+
+				    9/8
+				    ---
+sig.c
+	- termsig_sighandler: if readline is active now, set the bashline event
+	  hook. Old code just set it for interactive shells.  Part of fix for
+	  bug reported by <mickael9@gmail.com>
+
+bashline.c
+	- bash_event_hook: call rl_cleanup_after_signal if terminating_signal
+	  is non-zero, since check_signals_and_traps() will cause the shell to
+	  exit if it is and we want to clean up the readline state first.  Rest
+	  of fix for bug reported by <mickael9@gmail.com>
+
+				    9/9
+				    ---
+jobs.c
+	- waitchld: when running the wait builtin in posix mode, with a trap set
+	  on SIGCHLD, use queue_sigchld_trap instead of trap_handler (SIGCHLD),
+	  otherwise you will lose SIGCHLDs when children_exited > 1.  Fixes bug
+	  reported by <crispusfairbairn@gmail.com>
+
+builtins/read.def
+	- read_builtin: if we are changing the tty settings, call
+	  initialize_terminating_signals so we have a chance to catch all
+	  terminating signals and potentially clean up the terminal before
+	  exiting
+	- read_builtin: tty_modified: new variable, set to 1 if we change the
+	  terminal attributes and have to call ttyrestore() to restore them
+	- if one of the `reads' returns -1/EINTR due to a terminating signal,
+	  and we have modified the terminal, call ttyrestore before calling
+	  CHECK_TERMSIG
+	- ttyrestore: set tty_modified to 0 when called
+
+				   9/10
+				   ----
+builtins/read.def
+	- termsave: now global to file so other functions can use it
+	- read_tty_cleanup: if tty_modified is non-zero, call ttycleanup to restore
+	  old terminal settings and turn off tty_modified
+
+sig.c
+	- termsig_handler: call read_tty_cleanup if currently executing read
+	  builtin; it does the right thing.  Final piece of fix for bug reported
+	  by Jan Rome <jan.rome@gmail.com>
+
+				   9/11
+				   ----
+general.c
+	- printable_filename: general function to return a printable representation
+	  of a string (presumed to be a filename)
+
+general.h
+	- extern declaration for printable_filename
+
+execute_cmd.c
+	- execute_disk_command: use printable_filename
+
+builtins/{bind,cd,enable,hash,source}.def
+	- use printable_filename as appropriate when printing error messages.
+	  From a suggestion by Vincent Lefevre <vincent@vinc17.net>
+
+builtins/bind.def
+	- use CASE_HELPOPT() to handle --help after calling internal_getopt()
+	  (bind)
+
+				   9/12
+				   ----
+builtins/common.h
+	- SEVAL_FUNCDEF: new flag for parse_and_execute; it means that we only
+	  accept a single function definition command, as when we are importing
+	  functions from the environment
+	- SEVAL_ONECMD: new flag for parse_and_execute; for future use
+
+builtins/evalstring.c
+	- parse_and_execute: if the SEVAL_FUNCDEF flag is set, disallow anything
+	  but a function definition command
+
+variables.c
+	- initialize_shell_variables: don't allow functions with invalid names
+	  to be imported from the environment, even though we still allow them
+	  to be defined
+	- initialize_shell_variables: when importing function definitions from
+	  the environment, call parse_and_execute with the SEVAL_FUNCDEF flag
+	  to force the command to be just a function definition
+
+subst.c
+	- param_expand: when expanding a $name variable expansion, make sure that
+	  the variable is visible and set before following the nameref chain
+	- param_expand: when expanding a $name variable expansion and following the
+	  nameref chain, make sure the resulting variable is visible and set
+	  before using it
+
+				   9/13
+				   ----
+variables.c
+	- initialize_shell_variables: when importing function definitions from
+	  environment, use SEVAL_ONECMD flag for parse_and_execute
+
+builtins/evalstring.c
+	- parse_and_execute: if SEVAL_ONECMD flag set, return immediately after
+	  calling execute_command_internal.  Final piece for fix for bug
+	  reported by Stephane Chazelas <stephane.chazelas@gmail.com>

@@ -73,6 +73,7 @@ $END
 #include "bashgetopt.h"
 
 extern int wait_signal_received;
+extern int last_command_exit_signal;
 
 procenv_t wait_intr_buf;
 
@@ -133,6 +134,7 @@ wait_builtin (list)
   code = setjmp (wait_intr_buf);
   if (code)
     {
+      last_command_exit_signal = wait_signal_received;
       status = 128 + wait_signal_received;
       WAIT_RETURN (status);
     }
