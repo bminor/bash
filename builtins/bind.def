@@ -1,7 +1,7 @@
 This file is bind.def, from which is created bind.c.
 It implements the builtin "bind" in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2014 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -141,7 +141,7 @@ bind_builtin (list)
   rl_outstream = stdout;
 
   reset_internal_getopt ();  
-  while ((opt = internal_getopt (list, "lvpVPsSXf:q:u:m:r:x:")) != EOF)
+  while ((opt = internal_getopt (list, "lvpVPsSXf:q:u:m:r:x:")) != -1)
     {
       switch (opt)
 	{

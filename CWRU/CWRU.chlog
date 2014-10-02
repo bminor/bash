@@ -6615,3 +6615,76 @@ variables.c
 	  recursively) instead of bind_variable_internal, so invalid variable
 	  names (like arr[0]) don't get created.  Fixes bug reported by
 	  <lolilolicon@gmail.com>
+
+				    9/3
+				    ---
+execute_cmd.c
+	- evalnest_max,sourcenest_max: initialize from EVALNEST_MAX and
+	  SOURCENEST_MAX, respectively.  Feature suggested by
+	  <bogun.dmitriy@gmail.com>
+
+config-top.h
+	- define EVALNEST_MAX and SOURCENEST_MAX to 0
+
+				    9/6
+				    ---
+bashline.c
+	- find_cmd_start: fix to (crudely) deal with >| token; even though
+	  skip_to_delim finds `|' as a delimiter, we call it again and use
+	  what the second call finds.  Fixes bug reported by Dan Jacobson
+	  <jidanni@jidanni.org>
+
+findcmd.c
+	- find_in_path_element: if in posix mode, do not expand a literal
+	  tilde in a $PATH element
+
+doc/bashref.texi
+	- add change to tilde expansion in $PATH elements to posix mode
+	  description
+
+builtins/common.h
+	- ISHELP: new define for builtins that do their own option parsing
+	  and don't use internal_getopt(); checks whether argument is --help
+	- CHECK_HELPOPT: convenience define to help builtins that do their
+	  own option parsing to check for --help with one line of code
+	- CASE_HELPOPT: convenience define to help builtins that use
+	  internal_getopt() check for --help with one line of code
+
+builtins/help.def
+	- builtin_help: new function, prints out --help output for current
+	  builtin
+
+builtins/{kill,let,pushd}.def
+	- add CHECK_HELPOPT to builtins that use ISOPTION; call builtin_help
+	  and return EX_USAGE (kill/let/pushd/popd/dirs)
+
+builtins/{caller,fg_bg}.def
+	- use CHECK_HELPOPT to recognize --help, since these builtins perform
+	  checks that can cause them to return before calling no_options
+	  (caller/fg/bg)
+
+builtins/{exit,return}.def
+	- use CHECK_HELPOPT to recognize --help before calling get_exitstat()
+	  (return/exit/logout)
+
+builtins/{break,shift}.def
+	- use CHECK_HELPOPT to recognize --help before any other checks
+	  (break/continue/shift)
+
+builtins/bashgetopt.h
+	- GETOPT_EOF: convenience define
+	- GETOPT_HELP: new define, to indicate internal_getopt saw --help
+
+builtins/bashgetopt.c
+	- internal_getopt: return GETOPT_HELP for --help
+
+builtins/common.c
+	- no_options: recognize --help, call builtin_help and return 2
+	  (builtin/eval/source/./times)
+
+builtins/command.def
+	- use CASE_HELPOPT() to handle --help after calling internal_getopt()
+
+builtins/{colon,echo,test}.def
+	- do not recognize --help (:/true/false/echo/test
+)

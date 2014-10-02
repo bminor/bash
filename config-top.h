@@ -143,3 +143,11 @@
 /* Define to 1 if you want the shell to re-check $PATH if a hashed filename
    no longer exists.  This behavior is the default in Posix mode. */
 #define CHECKHASH_DEFAULT 0
+
+/* Define to the maximum level of recursion you want for the eval builtin.
+   0 means the limit is not active. */
+#define EVALNEST_MAX 0
+
+/* Define to the maximum level of recursion you want for the source/. builtin.
+   0 means the limit is not active. */
+#define SOURCENEST_MAX 0

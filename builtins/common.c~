@@ -176,16 +176,9 @@ int
 no_options (list)
      WORD_LIST *list;
 {
-  int opt;
-
   reset_internal_getopt ();
-  if ((opt = internal_getopt (list, "")) != -1)
+  if (internal_getopt (list, "") != -1)
     {
-      if (opt == GETOPT_HELP)
-	{
-	  builtin_help ();
-	  return (2);
-	}
       builtin_usage ();
       return (1);
     }

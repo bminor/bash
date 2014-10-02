@@ -1,7 +1,7 @@
 This file is declare.def, from which is created declare.c.
 It implements the builtins "declare" and "local" in Bash.
 
-Copyright (C) 1987-2012 Free Software Foundation, Inc.
+Copyright (C) 1987-2014 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -150,7 +150,7 @@ declare_internal (list, local_var)
   flags_on = flags_off = any_failed = assign_error = pflag = nodefs = mkglobal = 0;
   refvar = (SHELL_VAR *)NULL;
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, DECLARE_OPTS)) != EOF)
+  while ((opt = internal_getopt (list, DECLARE_OPTS)) != -1)
     {
       flags = list_opttype == '+' ? &flags_off : &flags_on;
 

@@ -96,7 +96,6 @@ kill_builtin (list)
       builtin_usage ();
       return (EX_USAGE);
     }
-  CHECK_HELPOPT (list);
 
   any_succeeded = listing = saw_signal = 0;
   sig = SIGTERM;
@@ -136,6 +135,11 @@ kill_builtin (list)
 	{
 	  list = list->next;
 	  break;
+	}
+      else if (ISHELP (word))
+	{
+	  builtin_help ();
+	  return (EX_USAGE);
 	}
       else if (ISOPTION (word, '?'))
 	{

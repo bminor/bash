@@ -478,7 +478,7 @@ find_in_path_element (name, path, flags, name_len, dotinfop)
   int status;
   char *full_path, *xpath;
 
-  xpath = (posixly_correct == 0 && *path == '~') ? bash_tilde_expand (path, 0) : path;
+  xpath = (*path == '~') ? bash_tilde_expand (path, 0) : path;
 
   /* Remember the location of "." in the path, in all its forms
      (as long as they begin with a `.', e.g. `./.') */

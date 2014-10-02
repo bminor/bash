@@ -287,10 +287,10 @@ int funcnest = 0;
 int funcnest_max = 0;
 
 int evalnest = 0;		/* bash-4.4/bash-5.0 */
-int evalnest_max = 0;
+int evalnest_max = EVALNEST_MAX;
 
 int sourcenest = 0;
-int sourcenest_max = 0;
+int sourcenest_max = SOURCENEST_MAX;
 
 volatile int from_return_trap = 0;
 

@@ -197,17 +197,16 @@ builtin_help ()
   int ind;
   ptrdiff_t d;
 
+itrace("builtin_help: this_command_name = %s", this_command_name);
+
   current_builtin = builtin_address_internal (this_command_name, 0);
   if (current_builtin == 0)
     return;
 
   d = current_builtin - shell_builtins;
+itrace("builtin_help: current_builtin = %p diff = %d", current_builtin, (int)d);
 
-#if defined (__STDC__)
   ind = (int)d;
-#else
-  ind = (int)d / sizeof (struct builtin);
-#endif
 
   printf ("%s: %s\n", this_command_name, _(shell_builtins[ind].short_doc));
   show_longdoc (ind);  

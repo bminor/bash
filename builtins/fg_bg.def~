@@ -107,7 +107,11 @@ bg_builtin (list)
 {
   int r;
 
-  CHECK_HELPOPT (list);
+  if (list && list->word && ISHELP (list->word->word))
+    {
+      builtin_help ();
+      return (EX_USAGE);
+    }
 
   if (job_control == 0)
     {

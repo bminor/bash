@@ -86,7 +86,11 @@ let_builtin (list)
   intmax_t ret;
   int expok;
 
-  CHECK_HELPOPT (list);
+  if (list && list->word && ISHELP (list->word->word))
+    {
+      builtin_help ();
+      return (EX_USAGE);
+    }
 
   /* Skip over leading `--' argument. */
   if (list && list->word && ISOPTION (list->word->word, '-'))

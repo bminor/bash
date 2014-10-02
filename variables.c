@@ -2687,7 +2687,6 @@ bind_variable (name, value, flags)
   SHELL_VAR *v, *nv;
   VAR_CONTEXT *vc, *nvc;
   int level;
-  char *newname;
 
   if (shell_variables == 0)
     create_variable_tables ();

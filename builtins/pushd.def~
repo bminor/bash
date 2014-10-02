@@ -406,7 +406,11 @@ dirs_builtin (list)
   intmax_t i;
   char *temp, *w;
 
-  CHECK_HELPOPT (list);
+  if (list && list->word && ISHELP (list->word->word))
+    {
+      builtin_help ();
+      return (EX_USAGE);
+    }
   for (flags = vflag = index_flag = 0, desired_index = -1, w = ""; list; list = list->next)
     {
       if (ISOPTION (list->word->word, 'l'))
