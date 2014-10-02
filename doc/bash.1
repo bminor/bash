@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue Jul  1 15:51:28 PDT 2014
+.\"	Last Change: Wed Aug 27 08:43:44 EDT 2014
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2014 July 1" "GNU Bash 4.3"
+.TH BASH 1 "2014 August 27" "GNU Bash 4.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -82,8 +82,12 @@ option is present, then commands are read from the first non-option argument
 .IR command_string .
 If there are arguments after the
 .IR command_string ,
-they are assigned to the positional parameters, starting with
-.BR $0 .
+the first argument is assigned to
+.B $0
+and any remaining arguments are assigned to the positional parameters.
+The assignment to
+.B $0
+sets the name of the shell, which is used in warning and error messages.
 .TP
 .B \-i
 If the

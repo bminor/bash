@@ -226,6 +226,10 @@ parse_and_execute (string, from_file, flags)
   code = should_jump_to_top_level = 0;
   last_result = EXECUTION_SUCCESS;
 
+  /* We need to reset enough of the token state so we can start fresh. */
+  if (current_token == yacc_EOF)
+    current_token = '\n';		/* reset_parser() ? */
+
   with_input_from_string (string, from_file);
   while (*(bash_input.location.string))
     {

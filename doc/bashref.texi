@@ -6092,10 +6092,13 @@ invocation which are not available with the @code{set} builtin.
 
 @table @code
 @item -c
-Read and execute commands from the first non-option @var{argument}
-after processing the options, then exit. 
-Any remaining arguments are assigned to the
-positional parameters, starting with @code{$0}.
+Read and execute commands from the first non-option argument
+@var{command_string}, then exit. 
+If there are arguments after the @var{command_string},
+the first argument is assigned to @code{$0}
+and any remaining arguments are assigned to the positional parameters.
+The assignment to @code{$0} sets the name of the shell, which is used
+in warning and error messages.
 
 @item -i
 Force the shell to run interactively.  Interactive shells are

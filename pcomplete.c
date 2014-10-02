@@ -300,7 +300,11 @@ filter_stringlist (sl, filterpat, text)
 
   npat = shouldexp_filterpat (filterpat) ? preproc_filterpat (filterpat, text) : filterpat;
 
+#if defined (EXTENDED_GLOB)
+  not = (npat[0] == '!' && (extended_glob == 0 || npat[1] != '('));	/*)*/
+#else
   not = (npat[0] == '!');
+#endif
   t = not ? npat + 1 : npat;
 
   ret = strlist_create (sl->list_size);

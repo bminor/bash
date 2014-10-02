@@ -287,7 +287,10 @@ int funcnest = 0;
 int funcnest_max = 0;
 
 int evalnest = 0;		/* bash-4.4/bash-5.0 */
-int evalnest_max = 4096;
+int evalnest_max = 0;
+
+int sourcenest = 0;
+int sourcenest_max = 0;
 
 volatile int from_return_trap = 0;
 
@@ -4389,6 +4392,19 @@ execute_builtin (builtin, words, flags, subshell)
       /* The test for subshell == 0 above doesn't make a difference */
       evalnest++;	/* execute_subshell_builtin_or_function sets this to 0 */
     }
+  else if (subshell == 0 && builtin == source_builtin)
+    {
+      if (sourcenest_max > 0 && sourcenest >= sourcenest_max)
+	{
+	  internal_error (_("%s: maximum source nesting level exceeded (%d)"), this_command_name, sourcenest);
+	  sourcenest = 0;
+	  jump_to_top_level (DISCARD);
+	}
+      unwind_protect_int (sourcenest);
+      /* The test for subshell == 0 above doesn't make a difference */
+      sourcenest++;	/* execute_subshell_builtin_or_function sets this to 0 */
+    }
+
 
   /* `return' does a longjmp() back to a saved environment in execute_function.
      If a variable assignment list preceded the command, and the shell is
@@ -4698,6 +4714,8 @@ execute_subshell_builtin_or_function (words, redirects, builtin, var,
   login_shell = interactive = 0;
   if (builtin == eval_builtin)
     evalnest = 0;
+  else if (builtin == source_builtin)
+    sourcenest = 0;
 
   if (async)
     subshell_environment |= SUBSHELL_ASYNC;
@@ -5222,7 +5240,7 @@ initialize_subshell ()
   parse_and_execute_level = 0;		/* nothing left to restore it */
 
   /* We're no longer inside a shell function. */
-  variable_context = return_catch_flag = funcnest = evalnest = 0;
+  variable_context = return_catch_flag = funcnest = evalnest = sourcenest = 0;
 
   executing_list = 0;		/* XXX */
 

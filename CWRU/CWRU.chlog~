@@ -6477,6 +6477,8 @@ execute_cmd.c
 	  recursive `eval' calls; current max is 4096
 	- execute_builtin: unwind-protect value of evalnest around calls to
 	  eval builtin. Suggested by Oliver Morais <oliver.morais@gmail.com>
+	- {initialize_subshell,execute_subshell_builtin_or_function}: reset
+	  evalnest to 0 in a subshell
 
 builtins/setattr.def
 	- show_name_attributes: show a variable's attributes even if it's
@@ -6565,3 +6567,42 @@ lib/readline/display.c
 	- rl_message: call vsnprintf with full msg_bufsiz, since it counts 
 	  one fewer than the buffer length passed as an argument.  Bug report
 	  and fix from Dylan Cali <calid1984@gmail.com>
+
+				   8/26
+				   ----
+builtins/evalstring.c
+	- evalstring: if CURRENT_TOKEN == yacc_EOF, reset it to newline.  This is
+	  instead of calling reset_parser(); that might still be needed.  Fixes
+	  bug with eval and a subsequent statement ending with EOF reported by
+	  <jim.avera@gmail.org>
+
+pcomplete.c
+	- filter_stringlist: when extglob is on, a leading ! in the filter
+	  pattern should be left alone when it introduces a !(pat) pattern;
+	  otherwise it messes up the pattern.  Fixes bug reported by David
+	  Korn <dgkorn@gmail.com>
+
+				   8/27
+				   ----
+doc/{bash.1,bashref.texi}
+	- clarify the behavior of bash when given the -c option, since $0 is
+	  technically not a positional parameter.  Bug reported by Stephane
+	  Chazelas <stephane.chazelas@gmail.com>
+
+				   8/28
+				   ----
+lib/readline/history.c
+	- add_history: use history_max_entries (if history is stifled) or
+	  DEFAULT_HISTORY_INITIAL_SIZE if not (new define, defaults to 502)
+	  to size the initial allocation of the history array.  Assumption
+	  is that this will reduce the number of allocations
+
+				   8/29
+				   ----
+execute_command.c:
+	- sourcenest, sourcenest_max: new variables used to track level of
+	  sourced files and (maybe) one day catch infinite source recursion
+	- execute_builtin: if current source level exceeds sourcenest_max,
+	  trigger an error and jump back to the top level
+	- {initialize_subshell,execute_subshell_builtin_or_function}: reset
+	  sourcenest to 0 in a subshell
