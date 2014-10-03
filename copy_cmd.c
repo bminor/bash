@@ -126,7 +126,7 @@ copy_redirect (redirect)
     {
     case r_reading_until:
     case r_deblank_reading_until:
-      new_redirect->here_doc_eof = savestring (redirect->here_doc_eof);
+      new_redirect->here_doc_eof = redirect->here_doc_eof ? savestring (redirect->here_doc_eof) : 0;
       /*FALLTHROUGH*/
     case r_reading_string:
     case r_appending_to:
