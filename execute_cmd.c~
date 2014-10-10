@@ -5416,9 +5416,7 @@ shell_execve (command, args, env)
 
   unbind_args ();	/* remove the positional parameters */
 
-#if defined (PROCESS_SUBSTITUTION)
   clear_fifo_list ();	/* pipe fds are what they are now */
-#endif
 
   longjmp (subshell_top_level, 1);
   /*NOTREACHED*/

@@ -959,7 +959,7 @@ describe_pid (pid)
   fprintf (stderr, "%ld\n", (long) pid);
 }
 
-void
+int
 freeze_jobs_list ()
 {
 }

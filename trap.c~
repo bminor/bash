@@ -857,9 +857,7 @@ run_exit_trap ()
 	retval = trap_saved_exit_value;
 
       running_trap = 0;
-#if defined (ARRAY_VARS)
       array_dispose (ps);
-#endif
 
       return retval;
     }

@@ -906,11 +906,3 @@ initialize_shell_builtins ()
   qsort (shell_builtins, num_shell_builtins, sizeof (struct builtin),
     (QSFUNC *)shell_builtin_compare);
 }
-
-#if !defined (HELP_BUILTIN)
-void
-builtin_help ()
-{
-  printf ("%s: %s\n", this_command_name, _("help not available in this version"));
-}
-#endif
