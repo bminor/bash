@@ -6790,7 +6790,8 @@ subst.c
 				   ----
 variables.c
 	- initialize_shell_variables: when importing function definitions from
-	  environment, use SEVAL_ONECMD flag for parse_and_execute
+	  environment, use SEVAL_ONECMD flag for parse_and_execute.  Part of
+	  CVE-2014-6271
 
 builtins/evalstring.c
 	- parse_and_execute: if SEVAL_ONECMD flag set, return immediately after
@@ -6812,11 +6813,12 @@ parse.y
 parse.y
 	- push_heredoc: new function, pushes a here-doc redirection onto
 	  redir_stack handling overflow of redir_stack. Exits on overflow.
-	  Original fix from Florian Weimer <fweimer@redhat.com>
+	  Original fix from Florian Weimer <fweimer@redhat.com>.  Fix for
+	  CVE-2014-7186
 	- change straight assignments to redir_stack to call push_redir
 	- add one to size of word_lineno stack to avoid off-by-one error
 	  below in read_token_word. Overflow just results in line numbers
-	  being wrong
+	  being wrong.  Fix for CVE-2014-7187
 
 				   9/27
 				   ----
@@ -6846,4 +6848,72 @@ copy_cmd.c
 	- copy_redirects: before calling savestring on here_doc_eof, make
 	  sure it's not NULL (it could have been the result of a here
 	  document delimited by EOF or EOS).  Fixes bug reported by
-	  Michal Zalewski <lcamtuf@coredump.cx>.
+	  Michal Zalewski <lcamtuf@coredump.cx>.  Fix for CVE-2014-6277
+
+make_cmd.c
+	- make_redirection: initialize here_doc_eof member to NULL.  Rest of
+	  fix for CVE-2014-6277
+
+				   9/29
+				   ----
+parse.y
+	- current_input_line_state: return a sh_input_line_state_t containing
+	  the current shell_input_line and its index and size variables
+
+shell.h
+	- current_input_line_state: extern declaration
+
+builtins/evalstring.c
+	- parse_and_execute: call reset_parser() before returning if
+	  SEVAL_ONECMD set.  Fixes bug reported by Michal Zalewski
+	  <lcamtuf@coredump.cx> and designated CVE-2014-6278
+	- parse_and_execute: if we parse a function definition when
+	  SEVAL_FUNCDEF is set, but don't consume the entire passed string,
+	  throw an error, reset the parser, and return.  Part of fix for
+	  CVE-2014-6278
+	- parse_and_execute: if parsing the shell function definition when
+	  SEVAL_FUNCDEF is set transforms the function name (e.g., if it
+	  begins with a newline or begins or ends with whitespace), throw
+	  an error, reset the parser, and return.  Fixes bug reported by
+	  Eric Kobrin <ekobrin@akamai.com>
+
+				   10/2
+				   ----
+jobs.c
+	- bgp_prune: don't do anything if bgpids.npid == 0 or bgpids.list == NULL.
+	  This can happen if something gets run before the job control framework
+	  is initialized.  Bug report from <mancha1@zoho.com>
+
+				   10/3
+				   ----
+parse.y
+	- xparse_dolparen: don't set token_to_read to newline after calling
+	  parse_string() and cleaning up when the shell is not interactive.  This
+	  makes the parser thing it's ok to read new commands even if it's not in
+	  a state where that should be possible.  Underlying fix for bug reported
+	  by Michal Zalewski <lcamtuf@coredump.cx> and designated CVE-6278
+	- parser_remaining_input: new function, returns the portion of
+	  shell_input_line that hasn't yet been read
+	- current_input_line_state: removed
+
+shell.h
+	- parser_remaining_input: extern declaration
+	- current_input_line_state: removed
+
+builtins/evalstring.c
+	- parse_and_execute: change code that checks whether parse_command has
+	  consumed the entire passed string when SEVAL_FUNCDEF is used to use
+	  parser_remaining_input instead of messing around with (new)
+	  current_input_line_state.  Part of fix for CVE-2014-6278
+
+variables.c
+	- initialize_shell_variables: if we don't call parse_and_execute, free the
+	  temporary string, since parse_and_execute won't.  Report and fix from
+	  Eric Kobrin <ekobrin@akamai.com>
+
+				   10/4
+				   ----
+print_cmd.c
+	- print_function_def: when in posix mode, print shell function
+	  definitions as posix specifies them, without the leading
+	  `function' keyword

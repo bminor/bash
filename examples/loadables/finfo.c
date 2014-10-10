@@ -459,7 +459,7 @@ char	**argv;
 void
 builtin_usage()
 {
-	fprintf(stderr, "%s: usage: %s [-%s] [file ...]\n", prog, OPTIONS);
+	fprintf(stderr, "%s: usage: %s [-%s] [file ...]\n", prog, prog, OPTIONS);
 }
 
 #ifndef HAVE_STRERROR

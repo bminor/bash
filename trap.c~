@@ -424,6 +424,7 @@ trap_handler (sig)
       SIGRETURN (0);
     }
 
+itrace("trap_handler: received %d", sig);
   if ((sig >= NSIG) ||
       (trap_list[sig] == (char *)DEFAULT_SIG) ||
       (trap_list[sig] == (char *)IGNORE_SIG))
@@ -857,7 +858,9 @@ run_exit_trap ()
 	retval = trap_saved_exit_value;
 
       running_trap = 0;
+#if defined (ARRAY_VARS)
       array_dispose (ps);
+#endif
 
       return retval;
     }

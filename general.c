@@ -245,13 +245,34 @@ check_identifier (word, check_word)
     return (1);
 }
 
+/* Return 1 if STRING is a function name that the shell will import from
+   the environment.  Currently we reject attempts to import shell functions
+   containing slashes, beginning with newlines or containing blanks.  In
+   Posix mode, we require that STRING be a valid shell identifier.  Not
+   used yet. */
 int
-legal_function_name (string)
+importable_function_name (string, len)
      char *string;
+     size_t len;
 {
   if (absolute_program (string))	/* don't allow slash */
     return 0;
+  if (*string == '\n')			/* can't start with a newline */
+    return 0;
+  if (shellblank (*string) || shellblank(string[len-1]))
+    return 0;
   return (posixly_correct ? legal_identifier (string) : 1);
+}
+
+int
+exportable_function_name (string)
+     char *string;
+{
+  if (absolute_program (string))
+    return 0;
+  if (mbschr (string, '=') != 0)
+    return 0;
+  return 1;
 }
 
 /* Return 1 if STRING comprises a valid alias name.  The shell accepts

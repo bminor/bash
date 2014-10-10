@@ -2538,6 +2538,16 @@ shell_ungetc (c)
     eol_ungetc_lookahead = c;
 }
 
+char *
+parser_remaining_input ()
+{
+  if (shell_input_line == 0)
+    return 0;
+  if (shell_input_line_index < 0 || shell_input_line_index >= shell_input_line_len)
+    return '\0';	/* XXX */
+  return (shell_input_line + shell_input_line_index);
+}
+
 #ifdef INCLUDE_UNUSED
 /* Back the input pointer up by one, effectively `ungetting' a character. */
 static void
@@ -4034,6 +4044,7 @@ xparse_dolparen (base, string, indp, flags)
   /*(*/
   parser_state |= PST_CMDSUBST|PST_EOFTOKEN;	/* allow instant ')' */ /*(*/
   shell_eof_token = ')';
+
   parse_string (string, "command substitution", sflags, &ep);
 
   shell_eof_token = orig_eof_token;
@@ -4041,8 +4052,8 @@ xparse_dolparen (base, string, indp, flags)
   reset_parser ();
   /* reset_parser clears shell_input_line and associated variables */
   restore_input_line_state (&ls);
-  if (interactive)
-    token_to_read = 0;
+
+  token_to_read = 0;
 
   /* Need to find how many characters parse_and_execute consumed, update
      *indp, if flags != 0, copy the portion of the string parsed into RET

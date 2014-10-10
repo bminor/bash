@@ -772,6 +772,9 @@ bgp_prune ()
 {
   struct pidstat *ps;
 
+  if (bgpids.npid == 0 || bgpids.list == 0)
+    return;		/* just paranoia */
+
   while (bgpids.npid > js.c_childmax)
     {
       ps = bgpids.list;

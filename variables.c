@@ -380,10 +380,12 @@ initialize_shell_variables (env, privmode)
 	  memcpy (temp_string + namelen + 1, string, string_length + 1);
 
 	  /* Don't import function names that are invalid identifiers from the
-	     environment, though we still allow them to be defined as shell
-	     variables. */
+	     environment in posix mode, though we still allow them to be defined as
+	     shell variables. */
 	  if (absolute_program (tname) == 0 && (posixly_correct == 0 || legal_identifier (tname)))
 	    parse_and_execute (temp_string, tname, SEVAL_NONINT|SEVAL_NOHIST|SEVAL_FUNCDEF|SEVAL_ONECMD);
+	  else
+	    free (temp_string);		/* parse_and_execute does this */
 
 	  if (temp_var = find_function (tname))
 	    {
