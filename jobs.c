@@ -1942,12 +1942,42 @@ ignore_tty_job_signals ()
   set_signal_handler (SIGTTOU, SIG_IGN);
 }
 
+/* Reset the tty-generated job control signals to SIG_DFL unless that signal
+   was ignored at entry to the shell, in which case we need to set it to
+   SIG_IGN in the child.  We can't rely on resetting traps, since the hard
+   ignored signals can't be trapped. */
 void
 default_tty_job_signals ()
 {
-  set_signal_handler (SIGTSTP, SIG_DFL);
-  set_signal_handler (SIGTTIN, SIG_DFL);
-  set_signal_handler (SIGTTOU, SIG_DFL);
+  if (signal_is_trapped (SIGTSTP) == 0 && signal_is_hard_ignored (SIGTSTP))
+    set_signal_handler (SIGTSTP, SIG_IGN);
+  else
+    set_signal_handler (SIGTSTP, SIG_DFL);
+
+  if (signal_is_trapped (SIGTTIN) == 0 && signal_is_hard_ignored (SIGTTIN))
+    set_signal_handler (SIGTTIN, SIG_IGN);
+  else
+    set_signal_handler (SIGTTIN, SIG_DFL);
+
+  if (signal_is_trapped (SIGTTOU) == 0 && signal_is_hard_ignored (SIGTTOU))
+    set_signal_handler (SIGTTOU, SIG_IGN);
+  else
+    set_signal_handler (SIGTTOU, SIG_DFL);
+}
+
+/* Called once in a parent process. */
+void
+get_original_tty_job_signals ()
+{
+  static int fetched = 0;
+
+  if (fetched == 0)
+    {
+      get_original_signal (SIGTSTP);
+      get_original_signal (SIGTTIN);
+      get_original_signal (SIGTTOU);
+      fetched = 1;
+    }
 }
 
 /* When we end a job abnormally, or if we stop a job, we set the tty to the
@@ -3840,7 +3870,7 @@ initialize_job_control (force)
 	    {
 	      SigHandler *ottin;
 
-	      ottin = set_signal_handler(SIGTTIN, SIG_DFL);
+	      ottin = set_signal_handler (SIGTTIN, SIG_DFL);
 	      kill (0, SIGTTIN);
 	      set_signal_handler (SIGTTIN, ottin);
 	      continue;
@@ -4007,7 +4037,7 @@ initialize_job_signals ()
       old_ttin = set_signal_handler (SIGTTIN, sigstop_sighandler);
       old_ttou = set_signal_handler (SIGTTOU, sigstop_sighandler);
     }
-  /* Leave these things alone for non-interactive shells without job
+  /* Leave disposition unmodified for non-interactive shells without job
      control. */
 }
 

@@ -186,6 +186,8 @@ initialize_traps ()
       GETORIGSIG (SIGTERM);
       sigmodes[SIGTERM] |= SIG_SPECIAL;
     }
+
+  get_original_tty_job_signals ();
 }
 
 #ifdef DEBUG

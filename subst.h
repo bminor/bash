@@ -32,14 +32,16 @@
    expanding a pattern ${var%#[#%]pattern} in an expansion surrounded
    by double quotes. Q_DOLBRACE means we are expanding a ${...} word, so
    backslashes should also escape { and } and be removed. */
-#define Q_DOUBLE_QUOTES  0x01
-#define Q_HERE_DOCUMENT  0x02
-#define Q_KEEP_BACKSLASH 0x04
-#define Q_PATQUOTE	 0x08
-#define Q_QUOTED	 0x10
-#define Q_ADDEDQUOTES	 0x20
-#define Q_QUOTEDNULL	 0x40
-#define Q_DOLBRACE	 0x80
+#define Q_DOUBLE_QUOTES  0x001
+#define Q_HERE_DOCUMENT  0x002
+#define Q_KEEP_BACKSLASH 0x004
+#define Q_PATQUOTE	 0x008
+#define Q_QUOTED	 0x010
+#define Q_ADDEDQUOTES	 0x020
+#define Q_QUOTEDNULL	 0x040
+#define Q_DOLBRACE	 0x080
+#define Q_ARITH		 0x100	/* expanding string for arithmetic evaluation */
+#define Q_ARRAYSUB	 0x200	/* expanding indexed array subscript */
 
 /* Flag values controlling how assignment statements are treated. */
 #define ASS_APPEND	0x0001

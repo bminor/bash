@@ -584,10 +584,36 @@ void
 default_tty_job_signals ()
 {
 #if defined (SIGTSTP)
-  set_signal_handler (SIGTSTP, SIG_DFL);
-  set_signal_handler (SIGTTIN, SIG_DFL);
-  set_signal_handler (SIGTTOU, SIG_DFL);
+  if (signal_is_trapped (SIGTSTP) == 0 && signal_is_hard_ignored (SIGTSTP))
+    set_signal_handler (SIGTSTP, SIG_IGN);
+  else
+    set_signal_handler (SIGTSTP, SIG_DFL);
+  if (signal_is_trapped (SIGTTIN) == 0 && signal_is_hard_ignored (SIGTTIN))
+    set_signal_handler (SIGTTIN, SIG_IGN);
+  else
+    set_signal_handler (SIGTTIN, SIG_DFL);
+  if (signal_is_trapped (SIGTTOU) == 0 && signal_is_hard_ignored (SIGTTOU))
+    set_signal_handler (SIGTTOU, SIG_IGN);
+  else
+    set_signal_handler (SIGTTOU, SIG_DFL);
 #endif
+}
+
+/* Called once in a parent process. */
+void
+get_original_tty_job_signals ()
+{
+  static int fetched = 0;
+
+  if (fetched == 0)
+    {
+#if defined (SIGTSTP)
+      get_original_signal (SIGTSTP);
+      get_original_signal (SIGTTIN);
+      get_original_signal (SIGTTOU);
+#endif
+      fetched = 1;
+    }
 }
 
 /* Wait for a single pid (PID) and return its exit status.  Called by

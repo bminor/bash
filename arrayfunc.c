@@ -858,7 +858,7 @@ array_expand_index (var, s, len)
   exp = (char *)xmalloc (len);
   strncpy (exp, s, len - 1);
   exp[len - 1] = '\0';
-  t = expand_arith_string (exp, 0);
+  t = expand_arith_string (exp, Q_DOUBLE_QUOTES|Q_ARITH|Q_ARRAYSUB);	/* XXX - Q_ARRAYSUB for future use */
   this_command_name = (char *)NULL;
   val = evalexp (t, &expok);
   free (t);

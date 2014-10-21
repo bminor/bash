@@ -6957,3 +6957,66 @@ execute_cmd.c
 	  when entering a function so break and continue in functions don't
 	  break loops running outside of the function. Fix picked up from
 	  dash via Herbert Xu <herbert@gnodor.apana.org.au>
+
+				   10/13
+				   -----
+doc/Makefile.in
+	- bashref.pdf: create using texi2dvi --pdf rather than postprocessing the
+	  dvi file, so we have PDF bookmarks and links.  Fix from
+	  Siep Kroonenberg <siepo@cybercomm.nl>
+
+				   10/14
+				   -----
+subst.h
+	- Q_ARITH: new quoting flag. Semantics are per Posix's spec for arithmetic
+	  expansion: act as if string is quoted, but don't treat double quotes
+	  specially (in this case, they will be removed by quote removal)
+	- Q_ARRAYSUB: new quoting flag, indicates we are expanding an indexed array
+	  subscript
+
+subst.c
+	- expand_arith_string: if we are not expanding the string, but we saw a quote
+	  with Q_ARITH specified as one of quoting flags, perform quote removal even
+	  if Q_DOUBLE_QUOTES is specified
+	- param_expand: change calls to expand_arith_string for $[ and $(( cases to
+	  specify Q_ARITH.  Now $(( "$x" )) and $(( "x" )) work if x has a value that
+	  evaluates to a valid number, as Posix specifies
+	- expand_word_internal: add test for quoted&Q_ARITH to the tilde case, so we
+	  continue to perform tilde expansion in arithmetic contexts
+	- expand_word_internal: if quoted&Q_ARITH, continue processing when we see a
+	  `"', acting as if the double quote isn't present (already Q_DOUBLE_QUOTED)
+
+arrayfunc.c
+	- array_expand_index: pass Q_DOUBLE_QUOTED|Q_ARITH|Q_ARRAYSUB as quoted argument
+	  in call to expand_arith_string.  This inhibits word splitting
+	  (Q_DOUBLE_QUOTED) while discarding double quotes (Q_ARITH), identical to the
+	  quote flags passed while expanding $(( )) and $[ ].  Q_ARRAYSUB reserved for
+	  future use.  Fixes problem reported by Stephane Chazelas
+	  <stephane.chazelas@gmail.com>
+
+				   10/16
+				   -----
+subst.c
+	- parameter_brace_expand_word: if the PF_ASSIGNRHS flag is set and we
+	  are expanding what looks like an array subscripted with @ or *,
+	  make sure the variable we're expanding is actually an array before
+	  we add Q_DOUBLE_QUOTES to the flags.  If we don't, things like
+	  scalar[@] will remain quoted.  Fixes ubuntu bug 1381567
+	  https://bugs.launchpad.net/ubuntu/+source/bash/+bug/1381567
+
+				   10/17
+				   -----
+{jobs,nojobs}.c
+	- get_original_tty_job_signals: get original signal dispostions for
+	  SIGTSTP, SIGTTIN, SIGTTOU before we start manipulating them in
+	  make_child
+	- default_tty_job_signals: make sure we set SIGTSTP, SIGTTIN, or
+	  SIGTTOU to SIG_IGN if they were ignored at shell startup instead of
+	  unconditionally setting them to SIG_DFL.  Fixes bug reported by
+	  idallen@idallen.ca
+
+jobs.h
+	- get_original_tty_job_signals: extern declaration
+
+trap.c
+	- initialize_traps: add call to get_original_tty_job_signals

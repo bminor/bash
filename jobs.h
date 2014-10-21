@@ -239,6 +239,7 @@ extern void restart_job_control __P((void));
 extern void set_sigchld_handler __P((void));
 extern void ignore_tty_job_signals __P((void));
 extern void default_tty_job_signals __P((void));
+extern void get_original_tty_job_signals __P((void));
 
 extern void init_job_stats __P((void));
 

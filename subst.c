@@ -3214,6 +3214,8 @@ expand_arith_string (string, quoted)
 	ret = (char *)NULL;
       FREE (td.word);
     }
+  else if (saw_quote && (quoted & Q_ARITH))
+    ret = string_quote_removal (string, quoted);
   else if (saw_quote && ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) == 0))
     ret = string_quote_removal (string, quoted);
   else
@@ -5824,13 +5826,19 @@ parameter_brace_expand_word (name, var_is_special, quoted, pflags, indp)
 expand_arrayref:
       /* XXX - does this leak if name[@] or name[*]? */
       if (pflags & PF_ASSIGNRHS)
-        {
-          temp = array_variable_name (name, &tt, (int *)0);
-          if (ALL_ELEMENT_SUB (tt[0]) && tt[1] == ']')
-	    temp = array_value (name, quoted|Q_DOUBLE_QUOTES, 0, &atype, &ind);
+	{
+	  var = array_variable_part (name, &tt, (int *)0);
+	  if (ALL_ELEMENT_SUB (tt[0]) && tt[1] == ']')
+	    {
+	      /* Only treat as double quoted if array variable */
+	      if (var && (array_p (var) || assoc_p (var)))
+		temp = array_value (name, quoted|Q_DOUBLE_QUOTES, 0, &atype, &ind);
+	      else		
+		temp = array_value (name, quoted, 0, &atype, &ind);
+	    }
 	  else
 	    temp = array_value (name, quoted, 0, &atype, &ind);
-        }
+	}
       else
 	temp = array_value (name, quoted, 0, &atype, &ind);
       if (atype == 0 && temp)
@@ -8008,7 +8016,7 @@ param_expand (string, sindex, quoted, expanded_something,
 	    }
 
 	  /* Expand variables found inside the expression. */
-	  temp1 = expand_arith_string (temp2, Q_DOUBLE_QUOTES);
+	  temp1 = expand_arith_string (temp2, Q_DOUBLE_QUOTES|Q_ARITH);
 	  free (temp2);
 
 arithsub:
@@ -8062,7 +8070,7 @@ comsub:
 	}	  
 
        /* Do initial variable expansion. */
-      temp1 = expand_arith_string (temp, Q_DOUBLE_QUOTES);
+      temp1 = expand_arith_string (temp, Q_DOUBLE_QUOTES|Q_ARITH);
 
       goto arithsub;
 
@@ -8410,10 +8418,12 @@ add_string:
 	case '~':
 	  /* If the word isn't supposed to be tilde expanded, or we're not
 	     at the start of a word or after an unquoted : or = in an
-	     assignment statement, we don't do tilde expansion. */
+	     assignment statement, we don't do tilde expansion.  If we don't want
+	     tilde expansion when expanding words to be passed to the arithmetic
+	     evaluator, remove the check for Q_ARITH. */
 	  if ((word->flags & (W_NOTILDE|W_DQUOTE)) ||
 	      (sindex > 0 && ((word->flags & W_ITILDE) == 0)) ||
-	      (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
+	      ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) && ((quoted & Q_ARITH) == 0)))
 	    {
 	      word->flags &= ~W_ITILDE;
 	      if (isexp == 0 && (word->flags & (W_NOSPLIT|W_NOSPLIT2)) == 0 && isifs (c) && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) == 0)
@@ -8597,7 +8607,7 @@ add_twochars:
 	  break;
 
 	case '"':
-	  if ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
+	  if ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) && ((quoted & Q_ARITH) == 0))
 	    goto add_character;
 
 	  t_index = ++sindex;
