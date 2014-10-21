@@ -6949,11 +6949,3 @@ shell.c
 	  importing shell functions) and initialize_shell_options (to inhibit
 	  parsing $SHELLOPTS) and initialize_bashopts (to inhibit parsing
 	  $BASHOPTS).  Report from <paulfm@umn.edu>
-
-				   10/12
-				   -----
-execute_cmd.c
-	- execute_function: unwind-protect loop_level, set loop_level to 0
-	  when entering a function so break and continue in functions don't
-	  break loops running outside of the function. Fix picked up from
-	  dash via Herbert Xu <herbert@gnodor.apana.org.au>

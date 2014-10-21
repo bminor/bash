@@ -4494,7 +4494,8 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
       unwind_protect_pointer (this_shell_function);
       unwind_protect_int (loop_level);
       unwind_protect_int (funcnest);
-      unwind_protect_int (loop_level);
+      unwind_protect_int (breaking);
+      unwind_protect_int (continuing);
     }
   else
     push_context (var->name, subshell, temporary_env);	/* don't unwind-protect for subshells */
@@ -4585,7 +4586,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
     stop_pipeline (async, (COMMAND *)NULL);
 #endif
 
-  loop_level = 0;
+  breaking = continuing = 0;
 
   fc = tc;
 

@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed Aug 27 08:43:44 EDT 2014
+.\"	Last Change: Tue Oct  7 11:42:56 EDT 2014
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2014 August 27" "GNU Bash 4.3"
+.TH BASH 1 "2014 October 7" "GNU Bash 4.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -3754,13 +3754,13 @@ current source until a line containing only
 (with no trailing blanks)
 is seen.  All of
 the lines read up to that point are then used as the standard
-input for a command.
+input (or file descriptor \fIn\fP if \fIn\fP is specified) for a command.
 .PP
 The format of here-documents is:
 .RS
 .PP
 .nf
-\fB<<\fP[\fB\-\fP]\fIword\fP
+[\fIn\fP]\fB<<\fP[\fB\-\fP]\fIword\fP
         \fIhere-document\fP
 \fIdelimiter\fP
 .fi
@@ -3802,7 +3802,7 @@ A variant of here documents, the format is:
 .RS
 .PP
 .nf
-\fB<<<\fP\fIword\fP
+[\fIn\fP]\fB<<<\fP\fIword\fP
 .fi
 .RE
 .PP
@@ -3811,8 +3811,9 @@ brace expansion, tilde expansion, parameter and variable expansion,
 command substitution, arithmetic expansion, and quote removal.
 Pathname expansion and word splitting are not performed.
 The result is supplied as a single string to the command on its
-standard input.
+standard input (or file descriptor \fIn\fP if \fIn\fP is specified).
 .SS "Duplicating File Descriptors"
+
 .PP
 The redirection operator
 .RS

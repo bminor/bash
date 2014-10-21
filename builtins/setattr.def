@@ -302,6 +302,12 @@ set_or_show_attributes (list, attribute, nodefs)
 	      else if (assoc_only && assoc_p (var) == 0)
 		continue;
 #endif
+
+	      /* If we imported a variable that's not a valid identifier, don't
+		 show it in any lists. */
+	      if ((var->attributes & (att_invisible|att_imported)) == (att_invisible|att_imported))
+		continue;
+
 	      if ((var->attributes & attribute))
 		{
 		  show_var_attributes (var, READONLY_OR_EXPORT, nodefs);

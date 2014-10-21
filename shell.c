@@ -1715,6 +1715,7 @@ static void
 shell_initialize ()
 {
   char hostname[256];
+  int should_be_restricted;
 
   /* Line buffer output for stderr and stdout. */
   if (shell_initialized == 0)
@@ -1753,11 +1754,15 @@ shell_initialize ()
   /* Initialize our interface to the tilde expander. */
   tilde_initialize ();
 
+#if defined (RESTRICTED_SHELL)
+  should_be_restricted = shell_is_restricted (shell_name);
+#endif
+
   /* Initialize internal and environment variables.  Don't import shell
      functions from the environment if we are running in privileged or
      restricted mode or if the shell is running setuid. */
 #if defined (RESTRICTED_SHELL)
-  initialize_shell_variables (shell_environment, privileged_mode||restricted||running_setuid);
+  initialize_shell_variables (shell_environment, privileged_mode||restricted||should_be_restricted||running_setuid);
 #else
   initialize_shell_variables (shell_environment, privileged_mode||running_setuid);
 #endif
@@ -1775,8 +1780,8 @@ shell_initialize ()
      running in privileged or restricted mode or if the shell is running
      setuid. */
 #if defined (RESTRICTED_SHELL)
-  initialize_shell_options (privileged_mode||restricted||running_setuid);
-  initialize_bashopts (privileged_mode||restricted||running_setuid);
+  initialize_shell_options (privileged_mode||restricted||should_be_restricted||running_setuid);
+  initialize_bashopts (privileged_mode||restricted||should_be_restricted||running_setuid);
 #else
   initialize_shell_options (privileged_mode||running_setuid);
   initialize_bashopts (privileged_mode||running_setuid);

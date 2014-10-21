@@ -40,7 +40,7 @@ ${THIS_SH} ./exportfunc2.sub
 
 env BASH_FUNC_foo%%="() { 000(){>0;}&000(){ 0;}<<0 0" ${THIS_SH} -c foo 2>/dev/null
 env BASH_FUNC_foo%%="() { 000(){>0;}&000(){ 0;}<<`perl -e '{print "A"x100000}'` 0" ${THIS_SH} -c foo 2>/dev/null
-${THIS_SH} -c "f(){ x(){ _;}; x(){ _;}<<a;}"
+${THIS_SH} -c "f(){ x(){ _;}; x(){ _;}<<a;}" 2>/dev/null
 
 # CVE-2014-6278
 
