@@ -94,6 +94,8 @@ static void readline_initialize_everything PARAMS((void));
 static void bind_arrow_keys_internal PARAMS((Keymap));
 static void bind_arrow_keys PARAMS((void));
 
+static void bind_bracketed_paste_prefix PARAMS((void));
+
 static void readline_default_bindings PARAMS((void));
 static void reset_default_bindings PARAMS((void));
 
@@ -305,6 +307,11 @@ int _rl_echo_control_chars = 1;
 /* Non-zero means to prefix the displayed prompt with a character indicating
    the editing mode: @ for emacs, : for vi-command, + for vi-insert. */
 int _rl_show_mode_in_prompt = 0;
+
+/* Non-zero means to attempt to put the terminal in `bracketed paste mode',
+   where it will prefix pasted text with an escape sequence and send
+   another to mark the end of the paste. */
+int _rl_enable_bracketed_paste = 0;
 
 /* **************************************************************** */
 /*								    */
@@ -1179,6 +1186,10 @@ readline_initialize_everything ()
   /* Try to bind a common arrow key prefix, if not already bound. */
   bind_arrow_keys ();
 
+  /* Bind the bracketed paste prefix assuming that the user will enable
+     it on terminals that support it. */
+  bind_bracketed_paste_prefix ();
+
   /* If the completion parser's default word break characters haven't
      been set yet, then do so now. */
   if (rl_completer_word_break_characters == (char *)NULL)
@@ -1289,6 +1300,22 @@ bind_arrow_keys ()
 #endif
 }
 
+static void
+bind_bracketed_paste_prefix ()
+{
+  Keymap xkeymap;
+
+  xkeymap = _rl_keymap;
+
+  _rl_keymap = emacs_standard_keymap;
+  rl_bind_keyseq_if_unbound (BRACK_PASTE_PREF, rl_bracketed_paste_begin);
+  
+  _rl_keymap = vi_insertion_keymap;
+  rl_bind_keyseq_if_unbound (BRACK_PASTE_PREF, rl_bracketed_paste_begin);
+
+  _rl_keymap = xkeymap;
+}
+  
 /* **************************************************************** */
 /*								    */
 /*		Saving and Restoring Readline's state		    */

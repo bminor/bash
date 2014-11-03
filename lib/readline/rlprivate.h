@@ -293,6 +293,16 @@ extern int _rl_isearch_callback PARAMS((_rl_search_cxt *));
 
 extern int _rl_search_getchar PARAMS((_rl_search_cxt *));
 
+/* kill.c */
+#define BRACK_PASTE_PREF	"\033[200~"
+#define BRACK_PASTE_SUFF	"\033[201~"
+
+#define BRACK_PASTE_LAST	'~'
+#define BRACK_PASTE_SLEN	6
+
+#define BRACK_PASTE_INIT	"\033[?2004h"
+#define BRACK_PASTE_FINI	"\033[?2004l"
+
 /* macro.c */
 extern void _rl_with_macro_input PARAMS((char *));
 extern int _rl_next_macro_key PARAMS((void));
@@ -476,6 +486,7 @@ extern int _rl_bind_stty_chars;
 extern int _rl_revert_all_at_newline;
 extern int _rl_echo_control_chars;
 extern int _rl_show_mode_in_prompt;
+extern int _rl_enable_bracketed_paste;
 extern char *_rl_comment_begin;
 extern unsigned char _rl_parsing_conditionalized_out;
 extern Keymap _rl_keymap;

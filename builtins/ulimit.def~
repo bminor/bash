@@ -23,7 +23,7 @@ $PRODUCES ulimit.c
 $BUILTIN ulimit
 $FUNCTION ulimit_builtin
 $DEPENDS_ON !_MINIX
-$SHORT_DOC ulimit [-SHabcdefiklmnpqrstuvxPT] [limit]
+$SHORT_DOC ulimit [-SHabcdefilmnpqrstuvxT] [limit]
 Modify shell resource limits.
 
 Provides control over the resources available to the shell and processes
@@ -39,7 +39,7 @@ Options:
   -e	the maximum scheduling priority (`nice')
   -f	the maximum size of files written by the shell and its children
   -i	the maximum number of pending signals
-  -k	the maximum number of kqueues allocated for this process
+  -k    the maximum number of kqueues allocated for this process
   -l	the maximum size a process may lock into memory
   -m	the maximum resident set size
   -n	the maximum number of open file descriptors
@@ -51,7 +51,6 @@ Options:
   -u	the maximum number of user processes
   -v	the size of virtual memory
   -x	the maximum number of file locks
-  -P	the maximum number of pseudoterminals
   -T    the maximum number of threads
 
 Not all options are available on all platforms.
@@ -231,9 +230,6 @@ typedef struct {
 } RESOURCE_LIMITS;
 
 static RESOURCE_LIMITS limits[] = {
-#ifdef RLIMIT_NPTS
-  { 'P',	RLIMIT_NPTS,  1,	"number of pseudoterminals",	(char *)NULL },
-#endif
 #ifdef RLIMIT_PTHREAD
   { 'T',	RLIMIT_PTHREAD,  1,	"number of threads",	(char *)NULL },
 #endif

@@ -357,7 +357,6 @@ initialize_shell_variables (env, privmode)
 
       temp_var = (SHELL_VAR *)NULL;
 
-#if defined (FUNCTION_IMPORT)
       /* If exported function, define it now.  Don't import functions from
 	 the environment in privileged mode. */
       if (privmode == 0 && read_but_dont_execute == 0 && 
@@ -407,7 +406,6 @@ initialize_shell_variables (env, privmode)
 	  /* Restore original suffix */
 	  tname[namelen] = BASHFUNC_SUFFIX[0];
 	}
-#endif /* FUNCTION_IMPORT */
 #if defined (ARRAY_VARS)
 #  if ARRAY_EXPORT
       /* Array variables may not yet be exported. */
@@ -422,7 +420,11 @@ initialize_shell_variables (env, privmode)
 	}
 #  endif /* ARRAY_EXPORT */
 #endif
+#if 0
+      else if (legal_identifier (name))
+#else
       else
+#endif
 	{
 	  ro = 0;
 	  if (posixly_correct && STREQ (name, "SHELLOPTS"))

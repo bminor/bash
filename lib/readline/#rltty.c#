@@ -667,12 +667,7 @@ rl_prep_terminal (meta_flag)
 
   nprep = TPX_PREPPED;
 
-  if (_rl_enable_bracketed_paste)
-    {
-      fprintf (rl_outstream, BRACK_PASTE_INIT);
-      nprep |= TPX_BRACKPASTE;
-    }
-
+  if (_rl_enab
   fflush (rl_outstream);
   terminal_prepped = nprep;
   RL_SETSTATE(RL_STATE_TERMPREPPED);
@@ -686,16 +681,13 @@ rl_deprep_terminal ()
 {
   int tty;
 
-  if (terminal_prepped == 0)
+  if (!terminal_prepped)
     return;
 
   /* Try to keep this function from being interrupted. */
   _rl_block_sigint ();
 
   tty = rl_instream ? fileno (rl_instream) : fileno (stdin);
-
-  if (terminal_prepped & TPX_BRACKPASTE)
-    fprintf (rl_outstream, BRACK_PASTE_FINI);
 
   if (_rl_enable_keypad)
     _rl_control_keypad (0);

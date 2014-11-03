@@ -656,6 +656,56 @@ rl_yank_last_arg (count, key)
   return retval;
 }
 
+/* Having read the special escape sequence denoting the beginning of a
+   `bracketed paste' sequence, read the rest of the pasted input until the
+   closing sequence and insert the pasted text as a single unit without
+   interpretation. */
+int
+rl_bracketed_paste_begin (count, key)
+     int count, key;
+{
+  int retval, c;
+  size_t len, cap;
+  char *buf;
+
+  retval = 1;
+  len = 0;
+  buf = xmalloc (cap = 64);
+
+  RL_SETSTATE (RL_STATE_MOREINPUT);
+  while ((c = rl_read_key ()) >= 0)
+    {
+      if (RL_ISSTATE (RL_STATE_MACRODEF))
+	_rl_add_macro_char (c);
+
+      if (c == '\r')		/* XXX */
+	c = '\n';
+
+      if (len == cap)
+	buf = xrealloc (buf, cap *= 2);
+
+      buf[len++] = c;
+      if (len >= BRACK_PASTE_SLEN && c == BRACK_PASTE_LAST &&
+	  STREQN (buf + len - BRACK_PASTE_SLEN, BRACK_PASTE_SUFF, BRACK_PASTE_SLEN))
+	{
+	  len -= BRACK_PASTE_SLEN;
+	  break;
+	}
+    }
+  RL_UNSETSTATE (RL_STATE_MOREINPUT);
+
+  if (c >= 0)
+    {
+      if (len == cap)
+	buf = xrealloc (buf, cap + 1);
+      buf[len] = '\0';
+      retval = rl_insert_text (buf);
+    }
+
+  xfree (buf);
+  return (retval);
+}
+
 /* A special paste command for users of Cygnus's cygwin32. */
 #if defined (__CYGWIN__)
 #include <windows.h>

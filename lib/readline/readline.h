@@ -172,6 +172,7 @@ extern int rl_yank PARAMS((int, int));
 extern int rl_yank_pop PARAMS((int, int));
 extern int rl_yank_nth_arg PARAMS((int, int));
 extern int rl_yank_last_arg PARAMS((int, int));
+extern int rl_bracketed_paste_begin PARAMS((int, int));
 /* Not available unless __CYGWIN__ is defined. */
 #ifdef __CYGWIN__
 extern int rl_paste_from_clipboard PARAMS((int, int));

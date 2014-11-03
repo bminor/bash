@@ -81,4 +81,17 @@ recho ${foo=$@}
 recho "$foo"
 
 shift $#
-unset foo
+unset foo x
+
+set -- a b
+x=abc
+
+IFS=
+printf "<%s>\n" ${x#$*}
+printf "<%s>\n" "${x#$*}"
+
+x=abcd
+set a c
+IFS='?'
+printf "<%s>\n" ${x#$*}
+printf "<%s>\n" "${x#$*}"

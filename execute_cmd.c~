@@ -4453,10 +4453,17 @@ maybe_restore_getopt_state (gs)
 
   /* If we have a local copy of OPTIND and it's at the right (current)
      context, then we restore getopt's internal state.  If not, we just
-     let it go.  We know there is a local OPTIND if gs->gs_flags & 1.
-     This is set below in execute_function() before the context is run. */
+     let it go. */
+  /* XXX - if this happens after the pop_context we won't find any local
+     variable because it will have been destroyed.  If it happens before
+     the pop_context the call to sv_optind may overwrite what we reset
+     here.  We need a way to remember that we have a local copy of
+     OPTIND before pop_context destroys any local variable. */
   if (gs->gs_flags & 1)
-    sh_getopt_restore_istate (gs);
+{
+itrace("maybe_restore_getopts_state: local OPTIND");
+  sh_getopt_restore_istate (gs);
+}
   else
     free (gs);
 }
