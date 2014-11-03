@@ -6048,11 +6048,12 @@ parameter_brace_expand_rhs (name, value, c, quoted, qdollaratp, hasdollarat)
     }
   else if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && hasdol)
     {
+itrace("parameter_brace_expand_rhs: expanded to nothing with hasdol");
       /* Posix interp 221 changed the rules on this.  The idea is that
 	 something like "$xxx$@" should expand the same as "${foo-$xxx$@}"
 	 when foo and xxx are unset.  The problem is that it's not in any
-	 way backwards compatible and few other shells do it.  We're eventually
-	 going to try and split the difference (heh) a little bit here. */
+	 way backwards compatible and few other shells do it.  We're going
+	 to try and split the difference (heh) a little bit here. */
       /* hasdol == 1 means we saw a quoted dollar at.  */
 
       /* The brace expansion occurred between double quotes and there was

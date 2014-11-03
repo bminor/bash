@@ -7020,3 +7020,20 @@ jobs.h
 
 trap.c
 	- initialize_traps: add call to get_original_tty_job_signals
+
+				   10/22
+				   -----
+subst.c
+	- expand_string_for_rhs: when expanding in this context (rhs of a word
+	  expansion or pattern removal), we don't perform word splitting, so
+	  we don't want to split $* if IFS is empty.  Fixes bug reported by
+	  Stephane Chazelas <stephane.chazelas@gmail.com>
+
+				   10/23
+				   -----
+subst.c
+	- param_expand: when expanding $* in a pattern context where the
+	  expansion is quoted (Q_PATQUOTE), don't quote the expansion --
+	  the outer quotes don't make the characters in the expansion of
+	  $* special.  Posix interp 221.  Reported by Stephane Chazelas
+	  <stephane.chazelas@gmail.com>
