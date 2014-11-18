@@ -290,8 +290,13 @@ load_history ()
   if (hf && *hf && file_exists (hf))
     {
       read_history (hf);
+      /* We have read all of the lines from the history file, even if we
+	 read more lines than $HISTSIZE.  Remember the total number of lines
+	 we read so we don't count the last N lines as new over and over
+	 again. */
+      history_lines_in_file = history_lines_read_from_file;
       using_history ();
-      history_lines_in_file = where_history ();
+      /* history_lines_in_file = where_history () + history_base - 1; */
     }
 }
 
@@ -377,7 +382,7 @@ maybe_append_history (filename)
   struct stat buf;
 
   result = EXECUTION_SUCCESS;
-  if (history_lines_this_session && (history_lines_this_session <= where_history ()))
+  if (history_lines_this_session > 0 && (history_lines_this_session <= where_history ()))
     {
       /* If the filename was supplied, then create it if necessary. */
       if (stat (filename, &buf) == -1 && errno == ENOENT)
@@ -391,6 +396,8 @@ maybe_append_history (filename)
 	  close (fd);
 	}
       result = append_history (history_lines_this_session, filename);
+      /* Pretend we already read these lines from the file because we just
+	 added them */
       history_lines_in_file += history_lines_this_session;
       history_lines_this_session = 0;
     }
@@ -406,7 +413,7 @@ maybe_save_shell_history ()
   char *hf;
 
   result = 0;
-  if (history_lines_this_session)
+  if (history_lines_this_session > 0)
     {
       hf = get_string_value ("HISTFILE");
 
@@ -433,7 +440,8 @@ maybe_save_shell_history ()
 	  else
 	    {
 	      result = write_history (hf);
-	      history_lines_in_file = history_lines_this_session;
+	      history_lines_in_file = history_lines_written_to_file;
+	      /* history_lines_in_file = where_history () + history_base - 1; */
 	    }
 	  history_lines_this_session = 0;
 

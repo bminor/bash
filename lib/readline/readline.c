@@ -1344,6 +1344,7 @@ rl_save_state (sp)
   sp->lastfunc = rl_last_func;
   sp->insmode = rl_insert_mode;
   sp->edmode = rl_editing_mode;
+  sp->kseq = rl_executing_keyseq;
   sp->kseqlen = rl_key_sequence_length;
   sp->inf = rl_instream;
   sp->outf = rl_outstream;
@@ -1352,6 +1353,12 @@ rl_save_state (sp)
 
   sp->catchsigs = rl_catch_signals;
   sp->catchsigwinch = rl_catch_sigwinch;
+
+  sp->entryfunc = rl_completion_entry_function;
+  sp->menuentryfunc = rl_menu_completion_entry_function;
+  sp->ignorefunc = rl_ignore_some_completions_function;
+  sp->attemptfunc = rl_attempted_completion_function;
+  sp->wordbreakchars = rl_completer_word_break_characters;
 
   return (0);
 }
@@ -1378,6 +1385,7 @@ rl_restore_state (sp)
   rl_last_func = sp->lastfunc;
   rl_insert_mode = sp->insmode;
   rl_editing_mode = sp->edmode;
+  rl_executing_keyseq = sp->kseq;
   rl_key_sequence_length = sp->kseqlen;
   rl_instream = sp->inf;
   rl_outstream = sp->outf;
@@ -1386,6 +1394,12 @@ rl_restore_state (sp)
 
   rl_catch_signals = sp->catchsigs;
   rl_catch_sigwinch = sp->catchsigwinch;
+
+  rl_completion_entry_function = sp->entryfunc;
+  rl_menu_completion_entry_function = sp->menuentryfunc;
+  rl_ignore_some_completions_function = sp->ignorefunc;
+  rl_attempted_completion_function = sp->attemptfunc;
+  rl_completer_word_break_characters = sp->wordbreakchars;
 
   return (0);
 }

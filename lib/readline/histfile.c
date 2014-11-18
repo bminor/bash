@@ -102,6 +102,16 @@ extern int errno;
 /* If non-zero, we write timestamps to the history file in history_do_write() */
 int history_write_timestamps = 0;
 
+/* Immediately after a call to read_history() or read_history_range(), this
+   will return the number of lines just read from the history file in that
+   call. */
+int history_lines_read_from_file = 0;
+
+/* Immediately after a call to write_history() or history_do_write(), this
+   will return the number of lines just written to the history file in that
+   call.  This also works with history_truncate_file. */
+int history_lines_written_to_file = 0;
+
 /* Does S look like the beginning of a history timestamp entry?  Placeholder
    for more extensive tests. */
 #define HIST_TIMESTAMP_START(s)		(*(s) == history_comment_char && isdigit ((s)[1]) )
@@ -188,6 +198,8 @@ read_history_range (filename, from, to)
 #else
   int overflow_errno = EIO;
 #endif
+
+  history_lines_read_from_file = 0;
 
   buffer = last_ts = (char *)NULL;
   input = history_filename (filename);
@@ -301,6 +313,8 @@ read_history_range (filename, from, to)
 	line_start = line_end + 1;
       }
 
+  history_lines_read_from_file = current_line;
+
   FREE (input);
 #ifndef HISTORY_USE_MMAP
   FREE (buffer);
@@ -320,15 +334,17 @@ history_truncate_file (fname, lines)
      int lines;
 {
   char *buffer, *filename, *bakname, *bp, *bp1;		/* bp1 == bp+1 */
-  int file, chars_read, rv;
+  int file, chars_read, rv, orig_lines, exists;
   struct stat finfo;
   size_t file_size;
+
+  history_lines_written_to_file = 0;
 
   buffer = (char *)NULL;
   filename = history_filename (fname);
   bakname = 0;
   file = filename ? open (filename, O_RDONLY|O_BINARY, 0666) : -1;
-  rv = 0;
+  rv = exists = 0;
 
   /* Don't try to truncate non-regular files. */
   if (file == -1 || fstat (file, &finfo) == -1)
@@ -338,6 +354,7 @@ history_truncate_file (fname, lines)
 	close (file);
       goto truncate_exit;
     }
+  exists = 1;
 
   if (S_ISREG (finfo.st_mode) == 0)
     {
@@ -383,6 +400,7 @@ history_truncate_file (fname, lines)
       goto truncate_exit;
     }
 
+  orig_lines = lines;
   /* Count backwards from the end of buffer until we have passed
      LINES lines.  bp1 is set funny initially.  But since bp[1] can't
      be a comment character (since it's off the end) and *bp can't be
@@ -414,6 +432,8 @@ history_truncate_file (fname, lines)
   if (bp <= buffer)
     {
       rv = 0;
+      /* No-op if LINES == 0 at this point */
+      history_lines_written_to_file = orig_lines - lines;
       goto truncate_exit;
     }
 
@@ -440,10 +460,19 @@ history_truncate_file (fname, lines)
  truncate_exit:
   FREE (buffer);
 
+  history_lines_written_to_file = orig_lines - lines;
+
   if (rv != 0 && filename && bakname)
     rename (bakname, filename);
   else if (rv == 0 && bakname)
     unlink (bakname);
+
+  /* Make sure the new filename is owned by the same user as the old.  If one
+     user is running this, it's a no-op.  If the shell is running after sudo
+     with a shared history file, we don't want to leave the history file
+     owned by root. */
+  if (rv == 0 && exists)
+    chown (filename, finfo.st_uid, finfo.st_gid);
 
   xfree (filename);
   FREE (bakname);
@@ -451,7 +480,7 @@ history_truncate_file (fname, lines)
   return rv;
 }
 
-/* Workhorse function for writing history.  Writes NELEMENT entries
+/* Workhorse function for writing history.  Writes the last NELEMENT entries
    from the history list to FILENAME.  OVERWRITE is non-zero if you
    wish to replace FILENAME with the entries. */
 static int
@@ -461,9 +490,12 @@ history_do_write (filename, nelements, overwrite)
 {
   register int i;
   char *output, *bakname;
-  int file, mode, rv;
+  int file, mode, rv, exists;
+  struct stat finfo;
 #ifdef HISTORY_USE_MMAP
   size_t cursize;
+
+  history_lines_written_to_file = 0;
 
   mode = overwrite ? O_RDWR|O_CREAT|O_TRUNC|O_BINARY : O_RDWR|O_APPEND|O_BINARY;
 #else
@@ -471,6 +503,7 @@ history_do_write (filename, nelements, overwrite)
 #endif
   output = history_filename (filename);
   bakname = (overwrite && output) ? history_backupfile (output) : 0;
+  exists = output ? (stat (output, &finfo) == 0) : 0;
 
   if (output && bakname)
     rename (output, bakname);
@@ -569,6 +602,8 @@ mmap_error:
 #endif
   }
 
+  history_lines_written_to_file = nelements;
+
   if (close (file) < 0 && rv == 0)
     rv = errno;
 
@@ -576,6 +611,13 @@ mmap_error:
     rename (bakname, output);
   else if (rv == 0 && bakname)
     unlink (bakname);
+
+  /* Make sure the new filename is owned by the same user as the old.  If one
+     user is running this, it's a no-op.  If the shell is running after sudo
+     with a shared history file, we don't want to leave the history file
+     owned by root. */
+  if (rv == 0 && exists)
+    chown (output, finfo.st_uid, finfo.st_gid);
 
   FREE (output);
   FREE (bakname);

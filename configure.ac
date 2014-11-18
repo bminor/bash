@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.3, version 4.064])dnl
+AC_REVISION([for Bash 4.3, version 4.065])dnl
 
 define(bashvers, 4.3)
 define(relstatus, maint)
@@ -726,6 +726,7 @@ AC_CHECK_HEADER(sys/ptem.h, , ,[[
 
 dnl special checks for libc functions
 AC_FUNC_ALLOCA
+AC_FUNC_CHOWN
 AC_FUNC_GETPGRP
 AC_FUNC_SETVBUF_REVERSED
 AC_FUNC_VPRINTF

@@ -5031,7 +5031,10 @@ sv_histsize (name)
 	  else if (hmax >= 0)	/* truncate HISTFILE if HISTFILESIZE >= 0 */
 	    {
 	      history_truncate_file (get_string_value ("HISTFILE"), hmax);
-	      if (hmax <= history_lines_in_file)
+	      /* If we just shrank the history file to fewer lines than we've
+		 already read, make sure we adjust our idea of how many lines
+		 we have read from the file. */
+	      if (hmax < history_lines_in_file)
 		history_lines_in_file = hmax;
 	    }
 	}

@@ -134,6 +134,7 @@ wait_builtin (list)
   code = setjmp (wait_intr_buf);
   if (code)
     {
+itrace("wait_builtin: longjmp to wait_intr_buf");
       last_command_exit_signal = wait_signal_received;
       status = 128 + wait_signal_received;
       WAIT_RETURN (status);

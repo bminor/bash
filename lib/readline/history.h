@@ -241,6 +241,10 @@ extern char **history_tokenize PARAMS((const char *));
 extern int history_base;
 extern int history_length;
 extern int history_max_entries;
+
+extern int history_lines_read_from_file;
+extern int history_lines_written_to_file;
+
 extern char history_expansion_char;
 extern char history_subst_char;
 extern char *history_word_delimiters;

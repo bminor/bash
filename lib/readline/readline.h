@@ -894,6 +894,7 @@ struct readline_state {
   rl_command_func_t *lastfunc;
   int insmode;
   int edmode;
+  char *kseq;
   int kseqlen;
   FILE *inf;
   FILE *outf;
@@ -907,9 +908,17 @@ struct readline_state {
   /* search state */
 
   /* completion state */
+  rl_compentry_func_t *entryfunc;
+  rl_compentry_func_t *menuentryfunc;
+  rl_compentry_func_t *ignorefunc;
+  rl_compentry_func_t *attemptfunc;
+  char *wordbreakchars;
+  
 
   /* options state */
 
+  /* hook state */
+  
   /* reserved for future expansion, so the struct size doesn't change */
   char reserved[64];
 };

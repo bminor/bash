@@ -7136,3 +7136,43 @@ variables.c
 
 doc/bashref.texi
 	- --enable_function-import: document new configuration option
+
+				   11/5
+				   ----
+lib/readline/history.c
+	- history_lines_read_from_file: new variable, set by read_history and
+	  read_history_range to the actual number of lines read from the
+	  history file.  The value is valid immediately after a call to one
+	  of those functions
+	- history_lines_written_to_file: new variable, set by write_history,
+	  history_do_write, and history_truncate_file to the actual number of
+	  lines written to the history file.  The value is valid immediately
+	  after a call to one of those functions
+
+variables.c
+	- sv_histsize: set history_lines_in_file after history_truncate_file()
+	  only if hmax < history_lines_in_file (lines we've already read); a
+	  cosmetic change only
+
+bashhist.c
+	- load_history: set history_lines_in_file after read_history() from
+	  history_lines_read_from_file, since read_history reads all of the
+	  lines from the history file even if it's more than $HISTSIZE
+	- maybe_save_shell_history: after calling write_history(), set
+	  history_lines_in_file to history_lines_written_to_file, since we
+	  can assume that we read everyhing we just wrote
+
+builtins/history.def
+	- history_builtin: after calling read_history (history -r), set the
+	  new value of history_lines_in_file, for the same reason as above
+	- history_builtin: after calling read_history_range (history -n), set
+	  history_lines_in_file from history_lines_read_from_file
+
+				   11/6
+				   ----
+lib/readline/histfile.c
+	- history_truncate_file: since we move the old file to a backup copy
+	  before truncating, make sure the new file is owned by the same uid
+	  as the old
+	- history_do_write: use chown in the same way as history_truncate_file
+
