@@ -4084,10 +4084,7 @@ bash_execute_unix_command (count, key)
   array_needs_making = 1;
 
   /* and restore the readline buffer and display after command execution. */
-  /* If we clear the last line of the prompt above, redraw only that last
-     line.  If the command returns 124, we redraw unconditionally as in
-     previous versions. */
-  if (ce && r != 124)
+  if (ce)
     rl_redraw_prompt_last_line ();
   else
     rl_forced_update_display ();

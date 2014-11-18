@@ -401,6 +401,9 @@ maybe_append_history (filename)
       history_lines_in_file += history_lines_this_session;
       history_lines_this_session = 0;
     }
+  else
+    history_lines_this_session = 0;	/* reset if > where_history() */
+
   return (result);
 }
 

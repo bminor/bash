@@ -106,6 +106,7 @@ _rl_print_filename_color (void)
   s = &_rl_color_indicator[C_FILE];
   if (s->string != NULL)
     {
+      /* Need to reset so not dealing with attribute combinations */
       if (is_colored (C_NORM))
 	restore_default_color ();
       _rl_put_indicator (&_rl_color_indicator[C_LEFT]);

@@ -662,19 +662,6 @@ colored_stat_end ()
   _rl_prep_non_filename_text ();
   _rl_put_indicator (&_rl_color_indicator[C_CLR_TO_EOL]);
 }
-
-static int
-colored_prefix_start ()
-{
-  _rl_set_normal_color ();
-  return (_rl_print_filename_color ());
-}
-
-static void
-colored_prefix_end ()
-{
-  colored_stat_end ();		/* for now */
-}
 #endif
 
 /* Return the portion of PATHNAME that should be output when listing
