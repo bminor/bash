@@ -28,8 +28,13 @@
 
 #include "bashansi.h"
 #include "shmbutil.h"
+#include "chartypes.h"
 
 #include "stdc.h"
+
+#ifndef FNM_CASEFOLD
+#  include "strmatch.h"
+#endif
 
 #ifndef LPAREN
 #  define LPAREN '('
@@ -46,11 +51,15 @@
 extern char *glob_patscan __P((char *, char *, int));
 extern wchar_t *glob_patscan_wc __P((wchar_t *, wchar_t *, int));
 
+#define FOLD(c) ((flags & FNM_CASEFOLD) && iswupper (c) ? towlower (c) : (c))
+
 /* Return 1 of the first character of WSTRING could match the first
-   character of pattern WPAT.  Wide character version. */
+   character of pattern WPAT.  Wide character version.  FLAGS is a
+   subset of strmatch flags; used to do case-insensitive matching for now. */
 int
-match_pattern_wchar (wpat, wstring)
+match_pattern_wchar (wpat, wstring, flags)
      wchar_t *wpat, *wstring;
+     int flags;
 {
   wchar_t wc;
 
@@ -60,9 +69,9 @@ match_pattern_wchar (wpat, wstring)
   switch (wc = *wpat++)
     {
     default:
-      return (*wstring == wc);
+      return (FOLD(*wstring) == FOLD(wc));
     case L'\\':
-      return (*wstring == *wpat);
+      return (FOLD(*wstring) == FOLD(*wpat));
     case L'?':
       return (*wpat == WLPAREN ? 1 : (*wstring != L'\0'));
     case L'*':
@@ -70,7 +79,7 @@ match_pattern_wchar (wpat, wstring)
     case L'+':
     case L'!':
     case L'@':
-      return (*wpat == WLPAREN ? 1 : (*wstring == wc));
+      return (*wpat == WLPAREN ? 1 : (FOLD(*wstring) == FOLD(wc)));
     case L'[':
       return (*wstring != L'\0');
     }
@@ -223,11 +232,19 @@ extglob_pattern_p (pat)
   return 0;
 }
 
+#undef FOLD
+#define FOLD(c) ((flags & FNM_CASEFOLD) \
+	? TOLOWER ((unsigned char)c) \
+	: ((unsigned char)c))
+
 /* Return 1 of the first character of STRING could match the first
-   character of pattern PAT.  Used to avoid n2 calls to strmatch(). */
+   character of pattern PAT.  Used to avoid n2 calls to strmatch().
+   FLAGS is a subset of strmatch flags; used to do case-insensitive
+   matching for now. */
 int
-match_pattern_char (pat, string)
+match_pattern_char (pat, string, flags)
      char *pat, *string;
+     int flags;
 {
   char c;
 
@@ -237,9 +254,9 @@ match_pattern_char (pat, string)
   switch (c = *pat++)
     {
     default:
-      return (*string == c);
+      return (FOLD(*string) == FOLD(c));
     case '\\':
-      return (*string == *pat);
+      return (FOLD(*string) == FOLD(*pat));
     case '?':
       return (*pat == LPAREN ? 1 : (*string != '\0'));
     case '*':
@@ -247,7 +264,7 @@ match_pattern_char (pat, string)
     case '+':
     case '!':
     case '@':
-      return (*pat == LPAREN ? 1 : (*string == c));
+      return (*pat == LPAREN ? 1 : (FOLD(*string) == FOLD(c)));
     case '[':
       return (*string != '\0');
     }

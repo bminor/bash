@@ -310,7 +310,7 @@ filter_stringlist (sl, filterpat, text)
   ret = strlist_create (sl->list_size);
   for (i = 0; i < sl->list_len; i++)
     {
-      m = strmatch (t, sl->list[i], FNMATCH_EXTFLAG);
+      m = strmatch (t, sl->list[i], FNMATCH_EXTFLAG | FNMATCH_IGNCASE);
       if ((not && m == FNM_NOMATCH) || (not == 0 && m != FNM_NOMATCH))
 	free (sl->list[i]);
       else

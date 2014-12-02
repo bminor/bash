@@ -4564,8 +4564,7 @@ static WORD_LIST **dollar_arg_stack = (WORD_LIST **)NULL;
 static int dollar_arg_stack_slots;
 static int dollar_arg_stack_index;
 
-/* XXX - we might want to consider pushing and popping the `getopts' state
-   when we modify the positional parameters. */
+/* XXX - should always be followed by remember_args () */
 void
 push_context (name, is_subshell, tempvars)
      char *name;	/* function name */

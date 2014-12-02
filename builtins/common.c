@@ -411,6 +411,8 @@ remember_args (list, destructive)
 
   if (destructive)
     set_dollar_vars_changed ();
+
+  invalidate_cached_quoted_dollar_at ();
 }
 
 static int changed_dollar_vars;

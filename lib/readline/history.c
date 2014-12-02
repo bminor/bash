@@ -288,7 +288,7 @@ add_history (string)
       for (i = 0; i < history_length; i++)
 	the_history[i] = the_history[i + 1];
 #else
-      memmove (the_history, the_history + 1, history_length * sizeof (HIST_ENTRY));
+      memmove (the_history, the_history + 1, history_length * sizeof (HIST_ENTRY *));
 #endif
 
       history_base++;

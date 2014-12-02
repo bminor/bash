@@ -286,6 +286,14 @@ printf_builtin (list)
       return (EX_USAGE);
     }
 
+  /* Allow printf -v var "" to act like var="" */
+  if (vflag && list->word->word && list->word->word[0] == '\0')
+    {
+      bind_printf_variable (vname, "", 0);
+      stupidly_hack_special_variables (vname);
+      return (EXECUTION_SUCCESS);
+    }
+
   if (list->word->word == 0 || list->word->word[0] == '\0')
     return (EXECUTION_SUCCESS);
 

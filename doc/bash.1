@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Sat Nov  1 20:00:51 EDT 2014
+.\"	Last Change: Fri Nov 21 08:07:56 EST 2014
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2014 November 1" "GNU Bash 4.3"
+.TH BASH 1 "2014 November 21" "GNU Bash 4.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -50,8 +50,8 @@ bash \- GNU Bourne-Again SHell
 [options]
 [command_string | file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989-2013 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989-2013 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-2014 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-2014 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
 is an \fBsh\fR-compatible command language interpreter that
@@ -716,9 +716,9 @@ right of the operator is considered a pattern and matched according
 to the rules described below under \fBPattern Matching\fP,
 as if the \fBextglob\fP shell option were enabled.
 The \fB=\fP operator is equivalent to \fB==\fP.
-If the shell option
+If the
 .B nocasematch
-is enabled, the match is performed without regard to the case
+shell option is enabled, the match is performed without regard to the case
 of alphabetic characters.
 The return value is 0 if the string matches (\fB==\fP) or does not match
 (\fB!=\fP) the pattern, and 1 otherwise.
@@ -734,9 +734,9 @@ The return value is 0 if the string matches
 the pattern, and 1 otherwise.
 If the regular expression is syntactically incorrect, the conditional
 expression's return value is 2.
-If the shell option
+If the
 .B nocasematch
-is enabled, the match is performed without regard to the case
+shell option is enabled, the match is performed without regard to the case
 of alphabetic characters.
 Any part of the pattern may be quoted to force the quoted portion
 to be matched as a string.
@@ -869,9 +869,9 @@ command substitution, process substitution and quote removal.
 Each \fIpattern\fP examined is expanded using tilde
 expansion, parameter and variable expansion, arithmetic expansion,
 command substitution, and process substitution.
-If the shell option
+If the
 .B nocasematch
-is enabled, the match is performed without regard to the case
+shell option is enabled, the match is performed without regard to the case
 of alphabetic characters.
 When a match is found, the corresponding \fIlist\fP is executed.
 If the \fB;;\fP operator is used, no subsequent matches are attempted after
@@ -3057,6 +3057,10 @@ If \fIpattern\fP begins with \fB%\fP, it must match at the end
 of the expanded value of \fIparameter\fP.
 If \fIstring\fP is null, matches of \fIpattern\fP are deleted
 and the \fB/\fP following \fIpattern\fP may be omitted.
+If the
+.B nocasematch
+shell option is enabled, the match is performed without regard to the case
+of alphabetic characters.
 If
 .I parameter
 is
@@ -3349,6 +3353,10 @@ is set, each matching filename that also matches one of the patterns in
 .SM
 .B GLOBIGNORE
 is removed from the list of matches.
+If the \fBnocaseglob\fP option is set, the matching against the patterns in
+.SM
+.B GLOBIGNORE
+is performed without regard to case.
 The filenames
 .B ``.''
 and
@@ -5317,6 +5325,12 @@ If set to \fBOn\fP, readline attempts to bind the control characters
 treated specially by the kernel's terminal driver to their readline
 equivalents.
 .TP
+.B colored\-completion\-prefix (Off)
+If set to \fBOn\fP, when listing completions, readline displays the
+common prefix of the set of possible completions using a different color.
+The color definitions are taken from the value of the \fBLS_COLORS\fP
+environment variable.
+.TP
 .B colored\-stats (Off)
 If set to \fBOn\fP, readline displays possible completions using different
 colors to indicate their file type.
@@ -5378,6 +5392,13 @@ When set to \fBOn\fP, on operating systems that indicate they support it,
 readline echoes a character corresponding to a signal generated from the
 keyboard.
 .TP
+.B enable\-bracketed\-paste (Off)
+When set to \fBOn\fP, readline will configure the terminal in a way
+that will enable it to insert each paste into the editing buffer as a
+single string of characters, instead of treating each character as if
+it had been read from the keyboard.  This can prevent pasted characters
+from being interpreted as editing commands.
+.TP
 .B enable\-keypad (Off)
 When set to \fBOn\fP, readline will try to enable the application
 keypad when it is called.  Some systems need this to enable the
@@ -5434,6 +5455,15 @@ equivalent to \fIemacs\-standard\fP.  The default value is
 the value of
 .B editing\-mode
 also affects the default keymap.
+.TP
+.B emacs\-mode\-string (@)
+This string is displayed immediately before the last line of the primary
+prompt when emacs editing mode is active.  The value is expanded like a
+key binding, so the standard set of meta- and control prefixes and
+backslash escape sequences is available.
+Use the \e1 and \e2 escapes to begin and end sequences of
+non-printing characters, which can be used to embed a terminal control
+sequence into the mode string.
 .TP
 .B keyseq\-timeout (500)
 Specifies the duration \fIreadline\fP will wait for a character when reading an
@@ -5521,6 +5551,26 @@ performing completion in the middle of a word.  If enabled, readline
 does not insert characters from the completion that match characters
 after point in the word being completed, so portions of the word
 following the cursor are not duplicated.
+.TP
+.B vi\-cmd\-mode\-string ((cmd))
+This string is displayed immediately before the last line of the primary
+prompt when vi editing mode is active and in command mode.
+The value is expanded like a
+key binding, so the standard set of meta- and control prefixes and
+backslash escape sequences is available.
+Use the \e1 and \e2 escapes to begin and end sequences of
+non-printing characters, which can be used to embed a terminal control
+sequence into the mode string.
+.TP
+.B vi\-ins\-mode\-string ((ins))
+This string is displayed immediately before the last line of the primary
+prompt when vi editing mode is active and in insertion mode.
+The value is expanded like a
+key binding, so the standard set of meta- and control prefixes and
+backslash escape sequences is available.
+Use the \e1 and \e2 escapes to begin and end sequences of
+non-printing characters, which can be used to embed a terminal control
+sequence into the mode string.
 .TP
 .B visible\-stats (Off)
 If set to \fBOn\fP, a character denoting a file's type as reported
@@ -6348,6 +6398,10 @@ is removed before attempting a match.
 Any completion that matches the pattern will be removed from the list.
 A leading \fB!\fP negates the pattern; in this case any completion
 not matching the pattern will be removed.
+If the
+.B nocasematch
+shell option is enabled, the match is performed without regard to the case
+of alphabetic characters.
 .PP
 Finally, any prefix and suffix specified with the \fB\-P\fP and \fB\-S\fP
 options are added to each member of the completion list, and the result is
@@ -9555,7 +9609,8 @@ above).
 If set,
 .B bash
 matches patterns in a case\-insensitive fashion when performing matching
-while executing \fBcase\fP or \fB[[\fP conditional commands.
+while executing \fBcase\fP or \fB[[\fP conditional commands,
+or when filtering possible completions as part of programmable completion.
 .TP 8
 .B nullglob
 If set,

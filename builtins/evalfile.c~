@@ -130,7 +130,7 @@ file_error_and_exit:
 	}
 
       return ((flags & FEVAL_BUILTIN) ? EXECUTION_FAILURE
-      				      : ((errno == ENOENT && (flags & FEVAL_ENOENTOK) != 0) ? 0 : -1));
+      				      : ((errno == ENOENT && (flags & FEVAL_ENOENTOK) == 0) ? 0 : -1));
     }
 
   errfunc = ((flags & FEVAL_BUILTIN) ? builtin_error : internal_error);

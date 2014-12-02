@@ -108,6 +108,7 @@ maybe_pop_dollar_vars ()
   if (debugging_mode)
     pop_args ();	/* restore BASH_ARGC and BASH_ARGV */
   set_dollar_vars_unchanged ();
+  invalidate_cached_quoted_dollar_at ();	/* just invalidate to be safe */
 }
 
 /* Read and execute commands from the file passed as argument.  Guess what.

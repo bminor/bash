@@ -4,7 +4,7 @@
 /* ``Have a little faith, there's magic in the night.  You ain't a
      beauty, but, hey, you're alright.'' */
 
-/* Copyright (C) 1987-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2014 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -190,6 +190,8 @@ int fail_glob_expansion;
 char *glob_argv_flags;
 static int glob_argv_flags_size;
 #endif
+
+static WORD_LIST *cached_quoted_dollar_at = 0;
 
 static WORD_LIST expand_word_error, expand_word_fatal;
 static WORD_DESC expand_wdesc_error, expand_wdesc_fatal;
@@ -4174,7 +4176,7 @@ match_upattern (string, pat, mtype, sp, ep)
     }
   else
     npat = pat;
-  c = strmatch (npat, string, FNMATCH_EXTFLAG);
+  c = strmatch (npat, string, FNMATCH_EXTFLAG | FNMATCH_IGNCASE);
   if (npat != pat)
     free (npat);
   if (c == FNM_NOMATCH)
@@ -4190,7 +4192,7 @@ match_upattern (string, pat, mtype, sp, ep)
     case MATCH_ANY:
       for (p = string; p <= end; p++)
 	{
-	  if (match_pattern_char (pat, p))
+	  if (match_pattern_char (pat, p, FNMATCH_IGNCASE))
 	    {
 	      p1 = (mlen == -1) ? end : p + mlen;
 	      /* p1 - p = length of portion of string to be considered
@@ -4206,7 +4208,7 @@ match_upattern (string, pat, mtype, sp, ep)
 	      for ( ; p1 >= p; p1--)
 		{
 		  c = *p1; *p1 = '\0';
-		  if (strmatch (pat, p, FNMATCH_EXTFLAG) == 0)
+		  if (strmatch (pat, p, FNMATCH_EXTFLAG | FNMATCH_IGNCASE) == 0)
 		    {
 		      *p1 = c;
 		      *sp = p;
@@ -4226,13 +4228,13 @@ match_upattern (string, pat, mtype, sp, ep)
       return (0);
 
     case MATCH_BEG:
-      if (match_pattern_char (pat, string) == 0)
+      if (match_pattern_char (pat, string, FNMATCH_IGNCASE) == 0)
 	return (0);
 
       for (p = (mlen == -1) ? end : string + mlen; p >= string; p--)
 	{
 	  c = *p; *p = '\0';
-	  if (strmatch (pat, string, FNMATCH_EXTFLAG) == 0)
+	  if (strmatch (pat, string, FNMATCH_EXTFLAG | FNMATCH_IGNCASE) == 0)
 	    {
 	      *p = c;
 	      *sp = string;
@@ -4250,7 +4252,7 @@ match_upattern (string, pat, mtype, sp, ep)
     case MATCH_END:
       for (p = end - ((mlen == -1) ? len : mlen); p <= end; p++)
 	{
-	  if (strmatch (pat, p, FNMATCH_EXTFLAG) == 0)
+	  if (strmatch (pat, p, FNMATCH_EXTFLAG | FNMATCH_IGNCASE) == 0)
 	    {
 	      *sp = p;
 	      *ep = end;
@@ -4268,6 +4270,9 @@ match_upattern (string, pat, mtype, sp, ep)
 }
 
 #if defined (HANDLE_MULTIBYTE)
+
+#define WFOLD(c) (match_ignore_case && iswupper (c) ? towlower (c) : (c))
+
 /* Match WPAT anywhere in WSTRING and return the match boundaries.
    This returns 1 in case of a successful match, 0 otherwise.  Wide
    character version. */
@@ -4312,7 +4317,7 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
     }
   else
     nwpat = wpat;
-  len = wcsmatch (nwpat, wstring, FNMATCH_EXTFLAG);
+  len = wcsmatch (nwpat, wstring, FNMATCH_EXTFLAG | FNMATCH_IGNCASE);
   if (nwpat != wpat)
     free (nwpat);
   if (len == FNM_NOMATCH)
@@ -4326,7 +4331,7 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
     case MATCH_ANY:
       for (n = 0; n <= wstrlen; n++)
 	{
-	  n2 = simple ? (*wpat == wstring[n]) : match_pattern_wchar (wpat, wstring + n);
+	  n2 = simple ? (WFOLD(*wpat) == WFOLD(wstring[n])) : match_pattern_wchar (wpat, wstring + n, FNMATCH_IGNCASE);
 	  if (n2)
 	    {
 	      n1 = (mlen == -1) ? wstrlen : n + mlen;
@@ -4336,7 +4341,7 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
 	      for ( ; n1 >= n; n1--)
 		{
 		  wc = wstring[n1]; wstring[n1] = L'\0';
-		  if (wcsmatch (wpat, wstring + n, FNMATCH_EXTFLAG) == 0)
+		  if (wcsmatch (wpat, wstring + n, FNMATCH_EXTFLAG | FNMATCH_IGNCASE) == 0)
 		    {
 		      wstring[n1] = wc;
 		      *sp = indices[n];
@@ -4354,13 +4359,13 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
       return (0);
 
     case MATCH_BEG:
-      if (match_pattern_wchar (wpat, wstring) == 0)
+      if (match_pattern_wchar (wpat, wstring, FNMATCH_IGNCASE) == 0)
 	return (0);
 
       for (n = (mlen == -1) ? wstrlen : mlen; n >= 0; n--)
 	{
 	  wc = wstring[n]; wstring[n] = L'\0';
-	  if (wcsmatch (wpat, wstring, FNMATCH_EXTFLAG) == 0)
+	  if (wcsmatch (wpat, wstring, FNMATCH_EXTFLAG | FNMATCH_IGNCASE) == 0)
 	    {
 	      wstring[n] = wc;
 	      *sp = indices[0];
@@ -4378,7 +4383,7 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
     case MATCH_END:
       for (n = wstrlen - ((mlen == -1) ? wstrlen : mlen); n <= wstrlen; n++)
 	{
-	  if (wcsmatch (wpat, wstring + n, FNMATCH_EXTFLAG) == 0)
+	  if (wcsmatch (wpat, wstring + n, FNMATCH_EXTFLAG | FNMATCH_IGNCASE) == 0)
 	    {
 	      *sp = indices[n];
 	      *ep = indices[wstrlen];
@@ -4394,6 +4399,7 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
 
   return (0);
 }
+#undef WFOLD
 #endif /* HANDLE_MULTIBYTE */
 
 static int
@@ -8197,6 +8203,13 @@ return0:
   return ret;
 }
 
+void
+invalidate_cached_quoted_dollar_at ()
+{
+  dispose_words (cached_quoted_dollar_at);
+  cached_quoted_dollar_at = 0;
+}
+
 /* Make a word list which is the result of parameter and variable
    expansion, command substitution, arithmetic substitution, and
    quote removal of WORD.  Return a pointer to a WORD_LIST which is
@@ -8277,6 +8290,23 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
   char twochars[2];
 
   DECLARE_MBSTATE;
+
+  /* OK, let's see if we can optimize a common idiom: "$@" */
+  if (STREQ (word->word, "\"$@\"") &&
+      (word->flags == (W_HASDOLLAR|W_QUOTED)) &&
+      dollar_vars[1])		/* XXX - check IFS here as well? */
+    {
+      if (contains_dollar_at)
+	*contains_dollar_at = 1;
+      if (expanded_something)
+	*expanded_something = 1;
+      if (cached_quoted_dollar_at)
+	return (copy_word_list (cached_quoted_dollar_at));
+      list = list_rest_of_args ();
+      list = quote_list (list);
+      cached_quoted_dollar_at = copy_word_list (list);
+      return (list);
+    }
 
   istring = (char *)xmalloc (istring_size = DEFAULT_INITIAL_ARRAY_SIZE);
   istring[istring_index = 0] = '\0';

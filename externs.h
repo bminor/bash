@@ -506,11 +506,11 @@ extern void zsyncfd __P((int));
 extern int zwrite __P((int, char *, size_t));
 
 /* declarations for functions defined in lib/glob/gmisc.c */
-extern int match_pattern_char __P((char *, char *));
+extern int match_pattern_char __P((char *, char *, int));
 extern int umatchlen __P((char *, size_t));
 
 #if defined (HANDLE_MULTIBYTE)
-extern int match_pattern_wchar __P((wchar_t *, wchar_t *));
+extern int match_pattern_wchar __P((wchar_t *, wchar_t *, int));
 extern int wmatchlen __P((wchar_t *, size_t));
 #endif
 

@@ -92,7 +92,9 @@ PSPDF       = gs -sPAPERSIZE=${PAPERSIZE} -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -s
 MKDIRS      = ${SUPPORT_SRCDIR}/mkdirs
 
 # This should be a program that converts troff to an ascii-readable format
-NROFF	    = groff -Tascii
+# added the -P -c for benefit of Mac OS X, which insists on adding colors if
+# it's not present
+NROFF	    = groff -Tascii -P -c
 
 # This should be a program that converts troff to postscript
 GROFF	    = groff

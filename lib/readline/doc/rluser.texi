@@ -433,6 +433,14 @@ If set to @samp{on}, Readline attempts to briefly move the cursor to an
 opening parenthesis when a closing parenthsis is inserted.  The default
 is @samp{off}.
 
+@item colored-completion-prefix
+@vindex colored-completion-prefix
+If set to @samp{on}, when listing completions, Readline displays the
+common prefix of the set of possible completions using a different color.
+The color definitions are taken from the value of the @env{LS_COLORS}
+environment variable.
+The default is @samp{off}.
+
 @item colored-stats
 @vindex colored-stats
 If set to @samp{on}, Readline displays possible completions using different
@@ -511,7 +519,7 @@ set to either @samp{emacs} or @samp{vi}.
 This string is displayed immediately before the last line of the primary
 prompt when emacs editing mode is active.  The value is expanded like a
 key binding, so the standard set of meta- and control prefixes and
-backslash escape sequences is available (@pxref{Key Bindings}).
+backslash escape sequences is available.
 Use the @samp{\1} and @samp{\2} escapes to begin and end sequences of
 non-printing characters, which can be used to embed a terminal control
 sequence into the mode string.
@@ -699,8 +707,8 @@ The default value is @samp{off}.
 @item show-mode-in-prompt
 @vindex show-mode-in-prompt
 If set to @samp{on}, add a character to the beginning of the prompt
-indicating the editing mode: emacs (@samp{@@}), vi command (@samp{:}),
-or vi insertion (@samp{+}).
+indicating the editing mode: emacs, vi command, or vi insertion.
+The mode strings are user-settable.
 The default value is @samp{off}.
 
 @item skip-completed-text
@@ -723,7 +731,7 @@ This string is displayed immediately before the last line of the primary
 prompt when vi editing mode is active and in command mode.
 The value is expanded like a
 key binding, so the standard set of meta- and control prefixes and
-backslash escape sequences is available (@pxref{Key Bindings}).
+backslash escape sequences is available.
 Use the @samp{\1} and @samp{\2} escapes to begin and end sequences of
 non-printing characters, which can be used to embed a terminal control
 sequence into the mode string.
@@ -735,7 +743,7 @@ This string is displayed immediately before the last line of the primary
 prompt when vi editing mode is active and in insertion mode.
 The value is expanded like a
 key binding, so the standard set of meta- and control prefixes and
-backslash escape sequences is available (@pxref{Key Bindings}).
+backslash escape sequences is available.
 Use the @samp{\1} and @samp{\2} escapes to begin and end sequences of
 non-printing characters, which can be used to embed a terminal control
 sequence into the mode string.
@@ -1848,6 +1856,10 @@ is removed before attempting a match.
 Any completion that matches the pattern will be removed from the list.
 A leading @samp{!} negates the pattern; in this case any completion
 not matching the pattern will be removed.
+If the @code{nocasematch} shell option
+(see the description of @code{shopt} in @ref{The Shopt Builtin})
+is enabled, the match is performed without regard to the case
+of alphabetic characters.
 
 Finally, any prefix and suffix specified with the @option{-P} and @option{-S}
 options are added to each member of the completion list, and the result is

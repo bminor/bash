@@ -2018,6 +2018,7 @@ void
 rl_redraw_prompt_last_line ()
 {
   char *t;
+
   t = strrchr (rl_display_prompt, '\n');
   if (t)
     redraw_prompt (++t);

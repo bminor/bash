@@ -1414,13 +1414,8 @@ start_debugger ()
   exit_immediately_on_error = 0;
 
   r = force_execute_file (DEBUGGER_START_FILE, 1);
-  if (r < 0)
-    {
-      internal_warning ("cannot start debugger; debugging mode disabled");
-      debugging_mode = function_trace_mode = 0;
-    }
-  else
-    function_trace_mode = 1;
+itrace("start_debugger: force_execute_file returns %d", r);
+  function_trace_mode = 1;
 
   exit_immediately_on_error += old_errexit;
 #endif

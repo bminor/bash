@@ -868,7 +868,7 @@ case @var{word} in [ [(] @var{pattern} [| @var{pattern}]@dots{}) @var{command-li
 
 @code{case} will selectively execute the @var{command-list} corresponding to
 the first @var{pattern} that matches @var{word}.
-If the shell option @code{nocasematch}
+If the @code{nocasematch} shell option
 (see the description of @code{shopt} in @ref{The Shopt Builtin})
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
@@ -999,7 +999,7 @@ right of the operator is considered a pattern and matched according
 to the rules described below in @ref{Pattern Matching},
 as if the @code{extglob} shell option were enabled.
 The @samp{=} operator is identical to @samp{==}.
-If the shell option @code{nocasematch}
+If the @code{nocasematch} shell option
 (see the description of @code{shopt} in @ref{The Shopt Builtin})
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
@@ -1016,7 +1016,7 @@ The return value is 0 if the string matches
 the pattern, and 1 otherwise.
 If the regular expression is syntactically incorrect, the conditional
 expression's return value is 2.
-If the shell option @code{nocasematch}
+If the @code{nocasematch} shell option
 (see the description of @code{shopt} in @ref{The Shopt Builtin})
 is enabled, the match is performed without regard to the case
 of alphabetic characters.
@@ -2149,6 +2149,10 @@ If @var{pattern} begins with @samp{%}, it must match at the end
 of the expanded value of @var{parameter}.
 If @var{string} is null, matches of @var{pattern} are deleted
 and the @code{/} following @var{pattern} may be omitted.
+If the @code{nocasematch} shell option   
+(see the description of @code{shopt} in @ref{The Shopt Builtin})
+is enabled, the match is performed without regard to the case   
+of alphabetic characters.
 If @var{parameter} is @samp{@@} or @samp{*},
 the substitution operation is applied to each positional
 parameter in turn, and the expansion is the resultant list.
@@ -2357,7 +2361,10 @@ The @env{GLOBIGNORE}
 shell variable may be used to restrict the set of filenames matching a
 pattern.  If @env{GLOBIGNORE}
 is set, each matching filename that also matches one of the patterns in
-@env{GLOBIGNORE} is removed from the list of matches.  The filenames
+@env{GLOBIGNORE} is removed from the list of matches.
+If the @code{nocaseglob} option is set, the matching against the patterns in
+@env{GLOBIGNORE} is performed without regard to case.
+The filenames
 @file{.} and @file{..}
 are always ignored when @env{GLOBIGNORE}
 is set and not null.
@@ -5177,7 +5184,8 @@ performing filename expansion.
 @item nocasematch
 If set, Bash matches patterns in a case-insensitive fashion when
 performing matching while executing @code{case} or @code{[[}
-conditional commands.
+conditional commands,
+or when filtering possible completions as part of programmable completion.
 
 @item nullglob
 If set, Bash allows filename patterns which match no

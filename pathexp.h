@@ -43,6 +43,7 @@ extern char *glob_error_return;
 #endif /* !EXTENDED_GLOB */
 
 #define FNMATCH_IGNCASE		(match_ignore_case ? FNM_CASEFOLD : 0)
+#define FNMATCH_NOCASEGLOB	(glob_ignore_case ? FNM_CASEFOLD : 0)
 
 extern int glob_dot_filenames;
 extern int extended_glob;

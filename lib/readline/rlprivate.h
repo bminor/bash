@@ -185,6 +185,7 @@ extern int rl_visible_stats;
 #endif /* VISIBLE_STATS */
 #if defined (COLOR_SUPPORT)
 extern int _rl_colored_stats;
+extern int _rl_colored_completion_prefix;
 #endif
 
 /* readline.c */

@@ -113,6 +113,8 @@ static int stat_char PARAMS((char *));
 #if defined (COLOR_SUPPORT)
 static int colored_stat_start PARAMS((char *));
 static void colored_stat_end PARAMS((void));
+static int colored_prefix_start PARAMS((void));
+static void colored_prefix_end PARAMS((void));
 #endif
 
 static int path_isdir PARAMS((const char *));
@@ -209,6 +211,8 @@ int rl_visible_stats = 0;
 /* Non-zero means to use colors to indicate file type when listing possible
    completions.  The colors used are taken from $LS_COLORS, if set. */
 int _rl_colored_stats = 0;
+
+int _rl_colored_completion_prefix = 1;
 #endif
 
 /* If non-zero, when completing in the middle of a word, don't insert
@@ -667,7 +671,7 @@ static int
 colored_prefix_start ()
 {
   _rl_set_normal_color ();
-  return (_rl_print_filename_color ());
+  return (_rl_print_prefix_color ());
 }
 
 static void
@@ -778,6 +782,7 @@ fnprint (to_print, prefix_bytes)
 {
   int printed_len, w;
   const char *s;
+  int common_prefix_len;
 #if defined (HANDLE_MULTIBYTE)
   mbstate_t ps;
   const char *end;
@@ -789,14 +794,14 @@ fnprint (to_print, prefix_bytes)
   memset (&ps, 0, sizeof (mbstate_t));
 #endif
 
-  printed_len = 0;
+  printed_len = common_prefix_len = 0;
 
   /* Don't print only the ellipsis if the common prefix is one of the
      possible completions */
   if (to_print[prefix_bytes] == '\0')
     prefix_bytes = 0;
 
-  if (prefix_bytes)
+  if (prefix_bytes && _rl_completion_prefix_display_length > 0)
     {
       char ellipsis;
 
@@ -805,6 +810,15 @@ fnprint (to_print, prefix_bytes)
 	putc (ellipsis, rl_outstream);
       printed_len = ELLIPSIS_LEN;
     }
+#if defined (COLOR_SUPPORT)
+  else if (prefix_bytes && _rl_colored_completion_prefix > 0)
+    {
+      common_prefix_len = prefix_bytes;
+      prefix_bytes = 0;
+      /* XXX - print color indicator start here */
+      colored_prefix_start ();
+    }
+#endif
 
   s = to_print + prefix_bytes;
   while (*s)
@@ -854,6 +868,13 @@ fnprint (to_print, prefix_bytes)
 	  s++;
 	  printed_len++;
 #endif
+	}
+      if (common_prefix_len > 0 && (s - to_print) >= common_prefix_len)
+	{
+	  /* printed bytes = s - to_print */
+	  /* printed bytes should never be > but check for paranoia's sake */
+	  colored_prefix_end ();
+	  common_prefix_len = 0;
 	}
     }
 
@@ -1515,7 +1536,7 @@ rl_display_match_list (matches, len, max)
   if (_rl_completion_prefix_display_length > 0)
     {
       t = printable_part (matches[0]);
-      temp = strrchr (t, '/');
+      temp = strrchr (t, '/');		/* XXX - why check again? */
       common_length = temp ? fnwidth (temp) : fnwidth (t);
       sind = temp ? strlen (temp) : strlen (t);
 
@@ -1524,6 +1545,14 @@ rl_display_match_list (matches, len, max)
       else
 	common_length = sind = 0;
     }
+#if defined (COLOR_SUPPORT)
+  else if (_rl_colored_completion_prefix > 0)
+    {
+      t = printable_part (matches[0]);
+      common_length = fnwidth (t);
+      sind = RL_STRLEN (t);
+    }
+#endif
 
   /* How many items of MAX length can we fit in the screen window? */
   cols = complete_get_screenwidth ();

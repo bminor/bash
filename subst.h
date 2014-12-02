@@ -319,4 +319,6 @@ extern unsigned char ifs_firstc;
 /* Is the first character of STRING a quoted NULL character? */
 #define QUOTED_NULL(string) ((string)[0] == CTLNUL && (string)[1] == '\0')
 
+extern void invalidate_cached_quoted_dollar_at __P((void));
+
 #endif /* !_SUBST_H_ */

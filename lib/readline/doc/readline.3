@@ -6,10 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri May 16 09:35:15 EDT 2014
-
+.\"	Last Change: Wed Nov 19 18:32:58 EST 2014
 .\"
-.TH READLINE 3 "2014 May 16" "GNU Readline 6.3"
+.TH READLINE 3 "2014 November 19" "GNU Readline 6.3"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -35,8 +34,8 @@ readline \- get a line from a user with editing
 \fBreadline\fP (\fIconst char *prompt\fP);
 .fi
 .SH COPYRIGHT
-.if n Readline is Copyright (C) 1989\-2011 Free Software Foundation,  Inc.
-.if t Readline is Copyright \(co 1989\-2011 Free Software Foundation, Inc.
+.if n Readline is Copyright (C) 1989\-2014 Free Software Foundation,  Inc.
+.if t Readline is Copyright \(co 1989\-2014 Free Software Foundation, Inc.
 .SH DESCRIPTION
 .LP
 .B readline
@@ -79,10 +78,10 @@ treated as a newline.
 .LP
 An Emacs-style notation is used to denote
 keystrokes.  Control keys are denoted by C\-\fIkey\fR, e.g., C\-n
-means Control\-N.  Similarly, 
+means Control\-N.  Similarly,
 .I meta
 keys are denoted by M\-\fIkey\fR, so M\-x means Meta\-X.  (On keyboards
-without a 
+without a
 .I meta
 key, M\-\fIx\fP means ESC \fIx\fP, i.e., press the Escape key
 then the
@@ -99,14 +98,15 @@ Readline commands may be given numeric
 which normally act as a repeat count.  Sometimes, however, it is the
 sign of the argument that is significant.  Passing a negative argument
 to a command that acts in the forward direction (e.g., \fBkill\-line\fP)
-causes that command to act in a backward direction.  Commands whose
-behavior with arguments deviates from this are noted.
+causes that command to act in a backward direction.
+Commands whose behavior with arguments deviates from this are noted
+below.
 .PP
 When a command is described as \fIkilling\fP text, the text
 deleted is saved for possible future retrieval
 (\fIyanking\fP).  The killed text is saved in a
 \fIkill ring\fP.  Consecutive kills cause the text to be
-accumulated into one unit, which can be yanked all at once. 
+accumulated into one unit, which can be yanked all at once.
 Commands which do not kill text separate the chunks of text
 on the kill ring.
 .SH INITIALIZATION FILE
@@ -139,7 +139,7 @@ or
 C\-Meta\-u: universal\-argument
 .RE
 .sp
-into the 
+into the
 .I inputrc
 would make M\-C\-u execute the readline command
 .IR universal\-argument .
@@ -168,7 +168,7 @@ The syntax for controlling key bindings in the
 .I inputrc
 file is simple.  All that is required is the name of the
 command or the text of a macro and a key sequence to which
-it should be bound. The name may be specified in one of two ways:
+it should be bound.  The name may be specified in one of two ways:
 as a symbolic key name, possibly with \fIMeta\-\fP or \fIControl\-\fP
 prefixes, or as a key sequence.
 The name and key sequence are separated by a colon.  There can be no
@@ -226,7 +226,7 @@ is again bound to the function
 .I "C-x C-r"
 is bound to the function
 .BR re\-read\-init\-file ,
-and 
+and
 .I "ESC [ 1 1 ~"
 is bound to insert the text
 .if t \f(CWFunction Key 1\fP.
@@ -356,9 +356,15 @@ readline equivalents.
 If set to \fBOn\fP, readline attempts to briefly move the cursor to an
 opening parenthesis when a closing parenthsis is inserted.
 .TP
+.B colored\-completion\-prefix (Off)
+If set to \fBOn\fP, when listing completions, readline displays the
+common prefix of the set of possible completions using a different color.
+The color definitions are taken from the value of the \fBLS_COLORS\fP
+environment variable.
+.TP
 .B colored\-stats (Off)
 If set to \fBOn\fP, readline displays possible completions using different
-colors to indicate their file type.     
+colors to indicate their file type.
 The color definitions are taken from the value of the \fBLS_COLORS\fP
 environment variable.
 .TP
@@ -494,6 +500,15 @@ The value of
 .B editing\-mode
 also affects the default keymap.
 .TP
+.B emacs\-mode\-string (@)
+This string is displayed immediately before the last line of the primary
+prompt when emacs editing mode is active.  The value is expanded like a
+key binding, so the standard set of meta- and control prefixes and
+backslash escape sequences is available.
+Use the \e1 and \e2 escapes to begin and end sequences of
+non-printing characters, which can be used to embed a terminal control 
+sequence into the mode string.
+.TP
 .B keyseq\-timeout (500)
 Specifies the duration \fIreadline\fP will wait for a character when reading an
 ambiguous key sequence (one that can form a complete key sequence using
@@ -522,7 +537,7 @@ have a slash appended (subject to the value of
 .TP
 .B match\-hidden\-files (On)
 This variable, when set to \fBOn\fP, causes readline to match files whose 
-names begin with a `.' (hidden files) when performing filename     
+names begin with a `.' (hidden files) when performing filename
 completion.
 If set to \fBOff\fP, the leading `.' must be
 supplied by the user in the filename to be completed.
@@ -570,8 +585,8 @@ of ringing the bell.
 .TP
 .B show\-mode\-in\-prompt (Off)
 If set to \fBOn\fP, add a character to the beginning of the prompt
-indicating the editing mode: emacs (@), vi command (:) or vi      
-insertion (+).
+indicating the editing mode: emacs, vi command, or vi insertion.
+The mode strings are user-settable.
 .TP
 .B skip\-completed\-text (Off)
 If set to \fBOn\fP, this alters the default completion behavior when
@@ -580,6 +595,26 @@ performing completion in the middle of a word.  If enabled, readline
 does not insert characters from the completion that match characters
 after point in the word being completed, so portions of the word
 following the cursor are not duplicated.
+.TP
+.B vi\-cmd\-mode\-string ((cmd))
+This string is displayed immediately before the last line of the primary
+prompt when vi editing mode is active and in command mode.
+The value is expanded like a
+key binding, so the standard set of meta- and control prefixes and
+backslash escape sequences is available.
+Use the \e1 and \e2 escapes to begin and end sequences of
+non-printing characters, which can be used to embed a terminal control
+sequence into the mode string.
+.TP
+.B vi\-ins\-mode\-string ((ins))
+This string is displayed immediately before the last line of the primary
+prompt when vi editing mode is active and in insertion mode.  
+The value is expanded like a
+key binding, so the standard set of meta- and control prefixes and  
+backslash escape sequences is available.
+Use the \e1 and \e2 escapes to begin and end sequences of
+non-printing characters, which can be used to embed a terminal control 
+sequence into the mode string.
 .TP
 .B visible\-stats (Off)
 If set to \fBOn\fP, a character denoting a file's type as reported  
@@ -593,7 +628,7 @@ compilation features of the C preprocessor which allows key
 bindings and variable settings to be performed as the result
 of tests.  There are four parser directives used.
 .IP \fB$if\fP
-The 
+The
 .B $if
 construct allows bindings to be made based on the
 editing mode, the terminal being used, or the application using
@@ -899,7 +934,7 @@ switches to overwrite mode.  With an explicit non-positive numeric
 argument, switches to insert mode.  This command affects only
 \fBemacs\fP mode; \fBvi\fP mode does overwrite differently.
 Each call to \fIreadline()\fP starts in insert mode.
-In overwrite mode, characters bound to \fBself\-insert\fP replace   
+In overwrite mode, characters bound to \fBself\-insert\fP replace
 the text at point rather than pushing the text to the right.
 Characters bound to \fBbackward\-delete\-char\fP replace the character
 before point with a space.  By default, this command is unbound.
@@ -922,7 +957,7 @@ The killed text is saved on the kill-ring.
 .B kill\-whole\-line
 Kill all characters on the current line, no matter where point is.
 .TP
-.B kill\-word  (M\-d)
+.B kill\-word (M\-d)
 Kill from point the end of the current word, or if between
 words, to the end of the next word.  Word boundaries are the same as
 those used by \fBforward\-word\fP.
@@ -1129,7 +1164,7 @@ but usually bound to ESC\-[.
 Without a numeric argument, the value of the readline
 .B comment\-begin
 variable is inserted at the beginning of the current line.
-If a numeric argument is supplied, this command acts as a toggle:  if
+If a numeric argument is supplied, this command acts as a toggle: if
 the characters at the beginning of the line do not match the value   
 of \fBcomment\-begin\fP, the value is inserted, otherwise             
 the characters in \fBcomment-begin\fP are deleted from the beginning of

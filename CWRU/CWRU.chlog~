@@ -7392,20 +7392,3 @@ builtins/source.def
 	- maybe_pop_dollar_vars: call invalidate_cached_quoted_dollar_at just
 	  to be safe
 
-				   11/23
-				   -----
-builtins/evalfile.c
-	- _evalfile: return -1 if errno == ENOENT and the flags don't include
-	  FEVAL_ENOENTOK.  If we print an error message we should return an
-	  error
-	- force_execute_file: new function, reads and executes commands from
-	  a file but returns an error if file  doesn't exist
-
-builtins/common.h
-	- force_execute_file: new extern declaration
-
-shell.c
-	- main: call start_debugger even if dollar_vars[1] == 0 if the shell
-	  isn't interactive (interactive_shell == 0)
-	- start_debugger: call force_execute_file instead of maybe_execute_file;
-	  turn off debugging mode if it returns value < 0

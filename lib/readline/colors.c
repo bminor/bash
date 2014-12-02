@@ -99,11 +99,12 @@ _rl_set_normal_color (void)
 }
 
 bool
-_rl_print_filename_color (void)
+_rl_print_prefix_color (void)
 {
   struct bin_str *s;
 
-  s = &_rl_color_indicator[C_FILE];
+  /* What do we want to use for the prefix? Let's try cyan first, see colors.h */
+  s = &_rl_color_indicator[C_PREFIX];
   if (s->string != NULL)
     {
       if (is_colored (C_NORM))

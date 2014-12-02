@@ -1479,6 +1479,7 @@ static const struct {
   { "blink-matching-paren",	&rl_blink_matching_paren,	V_SPECIAL },
   { "byte-oriented",		&rl_byte_oriented,		0 },
 #if defined (COLOR_SUPPORT)
+  { "colored-completion-prefix",&_rl_colored_completion_prefix,	0 },
   { "colored-stats",		&_rl_colored_stats,		0 },
 #endif
   { "completion-ignore-case",	&_rl_completion_case_fold,	0 },
