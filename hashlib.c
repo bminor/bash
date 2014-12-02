@@ -179,6 +179,7 @@ hash_search (string, table, flags)
 
   for (list = table->bucket_array ? table->bucket_array[bucket] : 0; list; list = list->next)
     {
+      /* This is the comparison function */
       if (hv == list->khash && STREQ (list->key, string))
 	{
 	  list->times_found++;
@@ -402,13 +403,22 @@ fatal_error (const char *format, ...)
   abort();
 }
 
+void
+internal_warning (const char *format, ...)
+{
+}
+
 main ()
 {
   char string[256];
   int count = 0;
   BUCKET_CONTENTS *tt;
 
+#if defined (TEST_NBUCKETS)
+  table = hash_create (TEST_NBUCKETS);
+#else
   table = hash_create (0);
+#endif
 
   for (;;)
     {

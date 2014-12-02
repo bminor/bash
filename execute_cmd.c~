@@ -4487,8 +4487,6 @@ restore_funcarray_state (fa)
   GET_ARRAY_FROM_VAR ("FUNCNAME", nfv, funcname_a);
   if (nfv == fa->funcname_v)
     array_pop (funcname_a);
-
-  free (fa);
 }
 #endif
 
@@ -4508,7 +4506,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   ARRAY *funcname_a;
   volatile ARRAY *bash_source_a;
   volatile ARRAY *bash_lineno_a;
-  struct func_array_state *fa;
+  struct func_array_state fa;
 #endif
   FUNCTION_DEF *shell_fn;
   char *sfile, *t;
@@ -4623,18 +4621,6 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   free (t);
 #endif
 
-#if defined (ARRAY_VARS)
-  fa = (struct func_array_state *)xmalloc (sizeof (struct func_array_state));
-  fa->source_a = bash_source_a;
-  fa->source_v = bash_source_v;
-  fa->lineno_a = bash_lineno_a;
-  fa->lineno_v = bash_lineno_v;
-  fa->funcname_a = funcname_a;
-  fa->funcname_v = funcname_v;
-  if (subshell == 0)
-    add_unwind_protect (restore_funcarray_state, fa);
-#endif
-
   /* The temporary environment for a function is supposed to apply to
      all commands executed within the function body. */
 
@@ -4712,11 +4698,20 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
 
   if (subshell == 0)
     run_unwind_frame ("function_calling");
-#if defined (ARRAY_VARS)
-  else
-    restore_funcarray_state (fa);
-#endif
 
+#if defined (ARRAY_VARS)
+  /* These two variables cannot be unset, and cannot be affected by the
+     function. */
+  array_pop ((ARRAY *)bash_source_a);
+  array_pop ((ARRAY *)bash_lineno_a);
+
+  /* FUNCNAME can be unset, and so can potentially be changed by the
+     function. */
+  GET_ARRAY_FROM_VAR ("FUNCNAME", nfv, funcname_a);
+  if (nfv == funcname_v)
+    array_pop (funcname_a);
+#endif
+  
   if (variable_context == 0 || this_shell_function == 0)
     {
       make_funcname_visible (0);

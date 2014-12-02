@@ -277,7 +277,6 @@ static char *array_var_assignment __P((SHELL_VAR *, int, int));
 static char *pos_params_assignment __P((WORD_LIST *, int, int));
 static char *string_transform __P((int, SHELL_VAR *, char *));
 static char *list_transform __P((int, SHELL_VAR *, WORD_LIST *, int, int));
-static char *parameter_list_transform __P((int, int, int));
 #if defined ARRAY_VARS
 static char *array_transform __P((int, SHELL_VAR *, char *, int));
 #endif
@@ -4692,6 +4691,27 @@ parameter_brace_remove_pattern (varname, value, ind, patstr, rtype, quoted, flag
   FREE (pattern);
   return temp1;
 }    
+
+static char *
+sh_quote_reusable (s, flags)
+     char *s;
+     int flags;
+{
+  char *ret;
+
+  if (s == 0)
+    return s;
+  else if (*s == 0)
+    ret = savestring ("''");
+  else if (ansic_shouldquote (s))
+    ret = ansic_quote (s, 0, (int *)0);
+  else if (flags)
+    ret = sh_backslash_quote (s, 0, 1);
+  else
+    ret = sh_single_quote (s);
+
+  return ret;
+}
 
 static char *
 string_var_assignment (v, s)

@@ -605,6 +605,7 @@ declare_internal (list, local_var)
 	  VUNSETATTR (var, flags_off);
 
 #if defined (ARRAY_VARS)
+	  aflags |= ASS_FORCE;
 	  if (offset && compound_array_assign)
 	    assign_array_var_from_string (var, value, aflags);
 	  else if (simple_array_assign && subscript_start)

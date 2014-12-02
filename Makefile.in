@@ -882,7 +882,7 @@ depends: force
 
 #### PRIVATE TARGETS ####
 hashtest:	hashlib.c
-	$(CC) -DTEST_HASHING $(CCFLAGS) -o $@ $(srcdir)/hashlib.c
+	$(CC) -DTEST_HASHING $(CCFLAGS) $(TEST_NBUCKETS) -o $@ $(srcdir)/hashlib.c xmalloc.o $(INTL_LIB)
 
 ############################ DEPENDENCIES ###############################
 

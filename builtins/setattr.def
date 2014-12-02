@@ -348,18 +348,12 @@ show_all_var_attributes (v, nodefs)
   return (any_failed == 0 ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
 }
 
-/* Show the attributes for shell variable VAR.  If NODEFS is non-zero,
-   don't show function definitions along with the name.  If PATTR is
-   non-zero, it indicates we're being called from `export' or `readonly'.
-   In POSIX mode, this prints the name of the calling builtin (`export'
-   or `readonly') instead of `declare', and doesn't print function defs
-   when called by `export' or `readonly'. */
 int
-show_var_attributes (var, pattr, nodefs)
+var_attribute_string (var, pattr, flags)
      SHELL_VAR *var;
-     int pattr, nodefs;
+     int pattr;
+     char *flags;	/* filled in with attributes */
 {
-  char flags[16], *x;
   int i;
 
   i = 0;
@@ -417,6 +411,24 @@ show_var_attributes (var, pattr, nodefs)
     }
 
   flags[i] = '\0';
+  return i;
+}
+
+/* Show the attributes for shell variable VAR.  If NODEFS is non-zero,
+   don't show function definitions along with the name.  If PATTR is
+   non-zero, it indicates we're being called from `export' or `readonly'.
+   In POSIX mode, this prints the name of the calling builtin (`export'
+   or `readonly') instead of `declare', and doesn't print function defs
+   when called by `export' or `readonly'. */
+int
+show_var_attributes (var, pattr, nodefs)
+     SHELL_VAR *var;
+     int pattr, nodefs;
+{
+  char flags[MAX_ATTRIBUTES], *x;
+  int i;
+
+  i = var_attribute_string (var, pattr, flags);
 
   /* If we're printing functions with definitions, print the function def
      first, then the attributes, instead of printing output that can't be

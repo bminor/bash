@@ -498,9 +498,7 @@ assign_compound_array_list (var, nlist, flags)
 
   for (list = nlist; list; list = list->next)
     {
-      /* Don't allow var+=(values) to make assignments in VALUES append to
-	 existing values by default. */
-      iflags = flags & ~ASS_APPEND;
+      iflags = flags;
       w = list->word->word;
 
       /* We have a word of the form [ind]=value */

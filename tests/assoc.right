@@ -12,7 +12,7 @@ declare -A BASH_ALIASES='()'
 declare -A BASH_CMDS='()'
 declare -Ai chaff='([one]="10" [zero]="5" )'
 declare -Ar waste='([version]="4.0-devel" [source]="./assoc.tests" [lineno]="28" [pid]="42134" )'
-declare -A wheat='([one]="a" [zero]="0" [two]="b" [three]="c" )'
+declare -A wheat='([two]="b" [three]="c" [one]="a" [zero]="0" )'
 declare -A chaff='([one]="10" ["hello world"]="flip" [zero]="5" )'
 ./assoc.tests: line 38: unset: waste: cannot unset: readonly variable
 ./assoc.tests: line 39: chaff[*]: bad array subscript
@@ -47,16 +47,16 @@ argv[3] = <blat>
 argv[1] = <qux qix blat>
 argv[1] = <16>
 argv[1] = <16>
-argv[1] = <flix>
-argv[2] = <6>
+argv[1] = <6>
+argv[2] = <flix>
 argv[1] = <six>
 argv[2] = <foo>
 argv[3] = <bar>
 argv[1] = <six>
 argv[2] = <foo bar>
 8
-/usr/local/bin . /bin /sbin /usr/sbin /usr/bin /bin /usr/ucb
-bin . bin sbin sbin bin bin ucb
+. /sbin /usr/bin /bin /usr/ucb /usr/local/bin /bin /usr/sbin
+. sbin bin bin ucb bin bin sbin
 bin
 / / / / / / /
 /
@@ -65,16 +65,16 @@ argv[1] = </>
 argv[1] = <sbin>
 argv[1] = </>
 8
-/usr/local/bin . /bin /sbin /usr/sbin /usr/bin /bin /usr/ucb
-bin . bin sbin sbin bin bin ucb
+. /sbin /usr/bin /bin /usr/ucb /usr/local/bin /bin /usr/sbin
+. sbin bin bin ucb bin bin sbin
 / / / / / / /
 8
 4 -- /bin
-^usr^local^bin . ^bin ^sbin ^usr^sbin ^usr^bin ^bin ^usr^ucb
-^usr^local^bin . ^bin ^sbin ^usr^sbin ^usr^bin ^bin ^usr^ucb
-\usr/local/bin . \bin \sbin \usr/sbin \usr/bin \bin \usr/ucb
-\usr\local\bin . \bin \sbin \usr\sbin \usr\bin \bin \usr\ucb
-\usr\local\bin . \bin \sbin \usr\sbin \usr\bin \bin \usr\ucb
+. ^sbin ^usr^bin ^bin ^usr^ucb ^usr^local^bin ^bin ^usr^sbin
+. ^sbin ^usr^bin ^bin ^usr^ucb ^usr^local^bin ^bin ^usr^sbin
+. \sbin \usr/bin \bin \usr/ucb \usr/local/bin \bin \usr/sbin
+. \sbin \usr\bin \bin \usr\ucb \usr\local\bin \bin \usr\sbin
+. \sbin \usr\bin \bin \usr\ucb \usr\local\bin \bin \usr\sbin
 ([a]=1)
 
 qux foo
@@ -137,11 +137,11 @@ abc
 def
 def
 ./assoc5.sub: line 13: declare: `myarray[foo[bar]=bleh': not a valid identifier
-abc def bleh
-myarray=(["a]a"]="abc" ["]"]="def" ["a]=test1;#a"]="123" [foo]="bleh" )
+bleh abc def
+myarray=(["a]=test1;#a"]="123" [foo]="bleh" ["a]a"]="abc" ["]"]="def" )
 
 123
-myarray=(["a]a"]="abc" ["a]=test2;#a"]="def" ["]"]="def" ["a]=test1;#a"]="123" [foo]="bleh" )
+myarray=(["a]=test1;#a"]="123" [foo]="bleh" ["a]a"]="abc" ["a]=test2;#a"]="def" ["]"]="def" )
 bar"bie
 doll
 declare -A foo='(["bar\"bie"]="doll" )'

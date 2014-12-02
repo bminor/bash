@@ -7409,3 +7409,115 @@ shell.c
 	  isn't interactive (interactive_shell == 0)
 	- start_debugger: call force_execute_file instead of maybe_execute_file;
 	  turn off debugging mode if it returns value < 0
+
+				   11/24
+				   -----
+hashlib.h
+	- DEFAULT_HASH_BUCKETS: doubled to 128, cost in memory use is small but
+	  changes traversal order when not sorting results
+
+				   11/25
+				   -----
+doc/{bash.1,bashref.texi}
+	- make it clearer, by breaking it out into a separate paragraph, that
+	  referencing an array without a subscript is equivalent to referencing
+	  it with subscript 0
+	- add text saying that referencing any variable using a valid subscript
+	  is OK
+
+				   11/28
+				   -----
+
+arrayfunc.c
+	- bind_array_variable, bind_assoc_variable: allow binding value to a
+	  readonly variable if the ASS_FORCE flag is set in the FLAGS
+	  argument
+
+subst.h
+	- ASS_FORCE: new assignment flag; means to allow assignment even if
+	  variable is marked readonly
+
+builtins/declare.def
+	- when assigning a value to an array or assoc variable using
+	  something like `declare -r foo=bar' where foo is an existing array
+	  variable, pass the ASS_FORCE to assign_array_var_from_string so
+	  the assignment is allowed.  Fixes debian bug 765759
+	  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=765759
+
+builtins/setattr.def
+	- var_attribute_string: new function to return (as argument) a char
+	  array with attribute flag values for a given variable; returns the
+	  length of the array
+
+lib/sh/shquote.c
+	- sh_quote_reusable: function returning a version of its string
+	  argument that is quoted for reuse
+
+externs.h
+	- sh_quote_reusable: extern declaration
+
+builtins/common.h
+	- MAX_ATTRIBUTES: define used to size arrays for attribute flag
+	  characters
+	- var_attribute_string: new extern function declaration
+
+subst.c
+	- array_remove_pattern: fixed a bug where `var' instead of `v' was
+	  tested for invisible attribute
+	- get_var_and_type: fill in a valid *VARP if returning VT_VARIABLE
+	  because callers may need to use it
+	- parameter_brace_transform: family of functions to implement the new
+	  mksh-inspired ${param@spec} transformation word expansions.  Some
+	  of the operators transform the (expanded) value of the parameter,
+	  the rest expand to information about the parameter itself
+	  (array_transform, parameter_list_transform, list_transform,
+	  string_transform, pos_params_assignment, array_var_assignment,
+	  string_var_assignment)
+	- parameter_brace_expand: changes to parse the new `@' word expansion
+	  operator and call parameter_brace_transform appropriately
+	- parameter_brace_expand: make sure we handle ${#@} as we have before
+	  even in the presence of the new `@' operator
+
+variables.c
+	- push_temp_var: make sure to call bind_variable_internal with the
+	  ASS_FORCE flag so we override readonly variables created with
+	  something like `tempvar=foo declare -r foo'.
+	- bind_variable_internal: honor ASS_FORCE flag to allow binding even
+	  if a variable is readonly
+
+execute_cmd.c
+	- struct func_array_state: new state to save state of BASH_LINENO,
+	  BASH_SOURCE, and FUNCNAME during function execution so it can be
+	  restored on a jump to top level
+	- restore_funcarray_state: new function to restore func_array_state
+	- execute_function: fill in func_array_state variable, add unwind-
+	  protect to restore it on jump to top level, call explicitly at
+	  end of function if subshell != 0 (may not be necessary, but safe
+	  for now).  Fixes bug with local assignments to FUNCNAME reported
+	  by Arfrever Frehtes Taifersar Arahesis <arfrever.fta@gmail.com>
+
+				   11/29
+				   -----
+arrayfunc.c
+	- assign_compound_array_list: turn off ASS_APPEND flag when processing
+	  each individual assignment inside the parens in var+=(...).  The
+	  outer += should not affect assignments to existing subscripts;
+	  those should be treated like usual assignments unless += supplied
+	  inside the parens.  Bug report from Maarten Billemont
+	  <lhunath@lyndir.com>, fix from Eduardo A. Bustamante López
+	  <dualbus@gmail.com>
+
+config.h.in
+	- HAVE_PSELECT: define if pselect(2) available
+
+configure.ac
+	- check for pselect(2), define HAVE_PSELECT if found
+
+lib/readline/input.c
+	- rl_getc: use pselect(2) to wait for input ready on readline's
+	  input fd or for a signal to arrive, will handle SIGWINCH (which
+	  does not interrupt read(2)) and thus allow resize to happen without
+	  having to wait to read more input.  Only works if pselect available
+	  and returns -1/EINTR on a signal even if the signal was installed
+	  with SA_RESTART.  From a suggestion from Egmont Koblinger
+	  <egmont@gmail.com>

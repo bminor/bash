@@ -2634,7 +2634,7 @@ bind_variable_internal (name, value, table, hflags, aflags)
   else
     {
 assign_value:
-      if ((readonly_p (entry) && (aflags & ASS_FORCE) == 0) || noassign_p (entry))
+      if (readonly_p (entry) || noassign_p (entry))
 	{
 	  if (readonly_p (entry))
 	    err_readonly (name);

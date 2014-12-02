@@ -1,0 +1,37 @@
+foo()
+{
+	local -a myvar=()
+	local -r myvar=0
+
+	echo "${myvar[@]}"
+	declare -p myvar
+}
+
+foo2()
+{
+	local -i myvar=0
+	local -r myvar=1
+
+	echo "${myvar}"
+	declare -p myvar
+}
+
+declare -a outside=()
+declare -r outside
+declare -p outside
+
+outside1=1
+declare -ir outside1
+declare -p outside1
+
+tempenv=foo declare -r tempenv
+echo tempenv = $tempenv
+
+foo
+foo2
+
+tempvar1=foo declare -r tempvar1
+echo ${tempvar1@A}
+
+tempvar2=bar declare -r tempvar2=qux
+echo ${tempvar2@A}

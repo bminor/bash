@@ -570,6 +570,38 @@ c Value = 10 20 40 80
 c Sub = 0 2 4 8
 <1> <2> <3> <4> <5> 
 <10> <20> <40> <80> 
+<>
+<>
+<>
+<>
+<'ab '\''cd'\'' ef'> 
+./new-exp10.sub: line 11: ${x@C}: bad substitution
+<'ab'> <'cd ef'> <''> <'gh'> 
+<'ab' 'cd ef' '' 'gh'> 
+<'ab'> <'cd> <ef'> <''> <'gh'> 
+<'ab'> <'cd> <ef'> <''> <'gh'> 
+<'ab cd'> 
+<'4'> <'ab cd'> 
+<> 
+argv[1] = <host(2)[4.3]$ >
+< 	
+>
+<' \t\n'>
+< 	
+>
+<$' \t\n'>
+declare -r x='ab '\''cd'\'' ef'
+set -- 'ab' 'cd ef' '' 'gh' 
+declare -a A=([0]="ab" [1]="cd ef" [2]="" [3]="gh") 
+declare -a B=() 
+declare -A A=([two]="b c" [three]="" [four]="de" [one]="1" ) 
+r
+a 
+A 
+ir
+a b c d e
+5
+a5b
 argv[1] = </>
 argv[1] = </>
-./new-exp.tests: line 584: ABXD: parameter unset
+./new-exp.tests: line 587: ABXD: parameter unset

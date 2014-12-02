@@ -74,6 +74,9 @@ do { \
 #define ARGS_FUNC		0x02
 #define ARGS_SETBLTIN		0x04
 
+/* Maximum number of attribute letters */
+#define MAX_ATTRIBUTES		16
+
 /* Functions from common.c */
 extern void builtin_error __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
 extern void builtin_warning __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
@@ -180,6 +183,7 @@ extern int show_var_attributes __P((SHELL_VAR *, int, int));
 extern int show_name_attributes __P((char *, int));
 extern int show_func_attributes __P((char *, int));
 extern void set_var_attribute __P((char *, int, int));
+extern int var_attribute_string __P((SHELL_VAR *, int, char *));
 
 /* Functions from pushd.def */
 extern char *get_dirstack_from_string __P((char *));
