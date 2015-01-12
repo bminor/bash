@@ -2709,7 +2709,7 @@ bind_variable (name, value, flags)
      shell_variables table.  This allows sourced scripts to modify values
      given to them in a temporary environment while modifying the variable
      value that the caller sees. */
-  if (temporary_env)
+  if (temporary_env && value)		/* XXX - can value be null here? */
     bind_tempenv_variable (name, value);
 
   /* XXX -- handle local variables here. */
@@ -3929,6 +3929,17 @@ merge_temporary_env ()
 {
   if (temporary_env)
     dispose_temporary_env (push_temp_var);
+}
+
+void
+flush_temporary_env ()
+{
+  if (temporary_env)
+    {
+      hash_flush (temporary_env, free_variable_hash_data);
+      hash_dispose (temporary_env);
+      temporary_env = (HASH_TABLE *)NULL;
+    }
 }
 
 /* **************************************************************** */

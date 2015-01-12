@@ -4504,7 +4504,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   COMMAND *tc, *fc, *save_current;
   char *debug_trap, *error_trap, *return_trap;
 #if defined (ARRAY_VARS)
-  SHELL_VAR *funcname_v, *nfv, *bash_source_v, *bash_lineno_v;
+  SHELL_VAR *funcname_v, *bash_source_v, *bash_lineno_v;
   ARRAY *funcname_a;
   volatile ARRAY *bash_source_a;
   volatile ARRAY *bash_lineno_a;
@@ -4513,6 +4513,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   FUNCTION_DEF *shell_fn;
   char *sfile, *t;
   sh_getopt_state_t *gs;
+  SHELL_VAR *gv;
 
   USE_VAR(fc);
 
@@ -4706,8 +4707,8 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
     pop_args ();
 
   /* If we have a local copy of OPTIND, note it in the saved getopts state. */
-  nfv = find_variable ("OPTIND");
-  if (nfv && nfv->context == variable_context)
+  gv = find_variable ("OPTIND");
+  if (gv && gv->context == variable_context)
     gs->gs_flags |= 1;
 
   if (subshell == 0)

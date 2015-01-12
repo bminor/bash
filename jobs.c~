@@ -2600,7 +2600,7 @@ itrace("wait_for: blocking wait for %d returns %d child = %p", (int)pid, r, chil
 					     : (child ? process_exit_signal (child->status) : 0);
 
   /* XXX */
-  if ((job != NO_JOB && JOBSTATE (job) == JSTOPPED) || (child && WIFSTOPPED (child->status)))
+  if ((job != NO_JOB && JOBSTATE (job) == JSTOPPED) || WIFSTOPPED (child->status))
     termination_state = 128 + WSTOPSIG (child->status);
 
   if (job == NO_JOB || IS_JOBCONTROL (job))

@@ -5700,7 +5700,7 @@ command_substitute (string, quoted)
       last_command_exit_value = EX_WEXPCOMSUB;
       jump_to_top_level (EXITPROG);
     }
-
+itrace("command_substitute: after check, committed to fork");
   /* We're making the assumption here that the command substitution will
      eventually run a command from the file system.  Since we'll run
      maybe_make_export_env in this subshell before executing that command,

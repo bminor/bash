@@ -322,6 +322,7 @@ extern void dispose_used_env_vars __P((void));
 extern void dispose_function_env __P((void));
 extern void dispose_builtin_env __P((void));
 extern void merge_temporary_env __P((void));
+extern void flush_temporary_env __P((void));
 extern void merge_builtin_env __P((void));
 extern void kill_all_local_variables __P((void));
 

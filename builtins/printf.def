@@ -767,6 +767,8 @@ printstr (fmt, string, len, fieldwidth, precision)
 	  /* Error if precision > INT_MAX here? */
 	  pr = (mpr < 0 || mpr > INT_MAX) ? INT_MAX : mpr;
 	}
+      else
+	pr = 0;		/* "a null digit string is treated as zero" */
     }
 
 #if 0
