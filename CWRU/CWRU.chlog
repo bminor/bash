@@ -7613,7 +7613,7 @@ builtins/declare.def
 	  is of the form (word) and is assigned to an array variable like so:
 	  declare -x var=$value.  Bug reported by Stephane Chazelas
 	  <stephane.chazelas@gmail.com>. Will eventually be contingent on
-	  compatibility level > 43, but not there yet
+	  compatibility level > 43, but not there yet. TENTATIVE
 
 				   12/15
 				   -----
@@ -7637,6 +7637,8 @@ execute_cmd.c
 	  like `declare -al foo=(UPONE UPTWO UPTHREE)' not being lowercased on
 	  assignment reported by Linda Walsh <bash@tlinx.org>
 
+
+
 				   12/18
 				   -----
 lib/readline/readline.c
@@ -7653,4 +7655,47 @@ lib/readline/readline.c
 	  EOF immediately, since lastc isn't available.  Fix for problem
 	  most recently identified by Jiri Kukacka <jiri.kukacka@orcle.com>,
 	  it has come up in the past
+
+				   12/21
+				   -----
+builtins/declare.def
+	- declare_internal: keep track of whether or not an assignment statement
+	  argument to declare is an array subscript assignment; need to
+	  differentiate assignments from straight declarations (declare a[4])
+	  which are accepted for backwards compatibility
+	- assignment statements like declare a[2]=foo are now treated as
+	  straight subscript assignment statements if a already exists as an
+	  array variable
+	- declare foo='(1 2 3)' is treated as an assignment to foo[0] if foo
+	  exists and is an array, just as it would be if it were an assignment
+	  statement and `declare' was not present.  All this from a proposal
+	  by Stephane Chazelas <stephane.chazelas@gmail.com>
+
+				   12/22
+				   -----
+builtins/read.def
+	- read_tty_modified: function to tell the rest of the shell if the
+	  read builtin has modified the tty
+	- read_builtin: make sure to initialize terminating signals before
+	  installing a SIGALRM signal handler in case we modify the tty as
+	  well as ask for a timeout; the subsequent call to
+	  initialize_terminating_signals would overwrite the read-builtin-
+	  local SIGALRM handler
+
+builtins/common.h
+	- read_tty_modified: new extern declaration
+
+shell.c
+	- exit_shell: if read_tty_modified() returns true, call read_tty_cleanup
+	  to undo the terminal modifications. Extension of previous fixes;
+	  fixes bug with read -s reported by Richard W. Marsden
+	  <richard@marsden.nu>
+
+
+				   12/23
+				   -----
+builtins/setattr.def
+	- show_var_attributes: call print_array_assignment and print_assoc_assignment
+	  with a `not quoted' flag so the assignment statements are not
+	  surrounded by single quotes.  Caused changes to a lot of test output
 

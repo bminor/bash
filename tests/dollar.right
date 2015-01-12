@@ -348,17 +348,17 @@ third set:
 "${@:2}a3 a2" a$1    #works as long as $1 and 3 are swapped
 set y za3 a2 ax
 0
-declare -a a='([0]="y" [1]="za3 a2" [2]="ax")'
+declare -a a=([0]="y" [1]="za3 a2" [2]="ax")
 
 "${@:2}b$1 b2" b3    #fails!  why?
 set y zbx b2 b3
 0
-declare -a b='([0]="y" [1]="zbx b2" [2]="b3")'
+declare -a b=([0]="y" [1]="zbx b2" [2]="b3")
 
 ${@:2}c$1 c2 c3     #works as long as quoting omitted
 set y zcx c2 c3
 0
-declare -a c='([0]="y" [1]="zcx" [2]="c2" [3]="c3")'
+declare -a c=([0]="y" [1]="zcx" [2]="c2" [3]="c3")
 argv[1] = <>
 argv[2] = <x>
 argv[1] = <>

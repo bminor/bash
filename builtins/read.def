@@ -439,6 +439,8 @@ read_builtin (list)
 	  retval = 128+SIGALRM;
 	  goto assign_vars;
 	}
+      if (interactive_shell == 0)
+	initialize_terminating_signals ();
       old_alrm = set_signal_handler (SIGALRM, sigalrm);
       add_unwind_protect (reset_alarm, (char *)NULL);
 #if defined (READLINE)
@@ -995,6 +997,12 @@ read_tty_cleanup ()
 {
   if (tty_modified)
     ttyrestore (&termsave);
+}
+
+int
+read_tty_modified ()
+{
+  return (tty_modified);
 }
 
 #if defined (READLINE)

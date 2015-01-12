@@ -1,23 +1,23 @@
-declare -A BASH_ALIASES='()'
-declare -A BASH_CMDS='()'
+declare -A BASH_ALIASES=()
+declare -A BASH_CMDS=()
 declare -A fluff
-declare -A BASH_ALIASES='()'
-declare -A BASH_CMDS='()'
-declare -A fluff='([bar]="two" [foo]="one" )'
-declare -A fluff='([bar]="two" [foo]="one" )'
-declare -A fluff='([bar]="two" )'
-declare -A fluff='([bar]="newval" [qux]="assigned" )'
+declare -A BASH_ALIASES=()
+declare -A BASH_CMDS=()
+declare -A fluff=([bar]="two" [foo]="one" )
+declare -A fluff=([bar]="two" [foo]="one" )
+declare -A fluff=([bar]="two" )
+declare -A fluff=([bar]="newval" [qux]="assigned" )
 ./assoc.tests: line 26: chaff: four: must use subscript when assigning associative array
-declare -A BASH_ALIASES='()'
-declare -A BASH_CMDS='()'
-declare -Ai chaff='([one]="10" [zero]="5" )'
-declare -Ar waste='([version]="4.0-devel" [source]="./assoc.tests" [lineno]="28" [pid]="42134" )'
-declare -A wheat='([two]="b" [three]="c" [one]="a" [zero]="0" )'
-declare -A chaff='([one]="10" ["hello world"]="flip" [zero]="5" )'
+declare -A BASH_ALIASES=()
+declare -A BASH_CMDS=()
+declare -Ai chaff=([one]="10" [zero]="5" )
+declare -Ar waste=([version]="4.0-devel" [source]="./assoc.tests" [lineno]="28" [pid]="42134" )
+declare -A wheat=([two]="b" [three]="c" [one]="a" [zero]="0" )
+declare -A chaff=([one]="10" ["hello world"]="flip" [zero]="5" )
 ./assoc.tests: line 38: unset: waste: cannot unset: readonly variable
 ./assoc.tests: line 39: chaff[*]: bad array subscript
 ./assoc.tests: line 40: [*]=12: invalid associative array key
-declare -A chaff='([one]="a" ["hello world"]="flip" )'
+declare -A chaff=([one]="a" ["hello world"]="flip" )
 flip
 argv[1] = <a>
 argv[2] = <flip>
@@ -34,11 +34,11 @@ argv[1] = <a flip multiple words>
 ./assoc.tests: line 57: declare: chaff: cannot destroy array variables in this way
 ./assoc.tests: line 59: chaff[*]: bad array subscript
 ./assoc.tests: line 60: [*]=12: invalid associative array key
-declare -A wheat='([six]="6" ["foo bar"]="qux qix" )'
+declare -A wheat=([six]="6" ["foo bar"]="qux qix" )
 argv[1] = <qux>
 argv[2] = <qix>
 argv[1] = <qux qix>
-declare -A wheat='([six]="6" ["foo bar"]="qux qix" )'
+declare -A wheat=([six]="6" ["foo bar"]="qux qix" )
 argv[1] = <2>
 argv[1] = <7>
 argv[1] = <qux>
@@ -101,9 +101,9 @@ argv[2] = </usr/sbin/foo>
 argv[3] = <cd /blat ; echo $PWD>
 argv[4] = </usr/local/bin/qux -l>
 outside: outside
-declare -A BASH_ALIASES='()'
-declare -A BASH_CMDS='()'
-declare -A afoo='([six]="six" ["foo bar"]="foo quux" )'
+declare -A BASH_ALIASES=()
+declare -A BASH_CMDS=()
+declare -A afoo=([six]="six" ["foo bar"]="foo quux" )
 argv[1] = <inside:>
 argv[2] = <six>
 argv[3] = <foo quux>
@@ -144,49 +144,49 @@ myarray=(["a]=test1;#a"]="123" [foo]="bleh" ["a]a"]="abc" ["]"]="def" )
 myarray=(["a]=test1;#a"]="123" [foo]="bleh" ["a]a"]="abc" ["a]=test2;#a"]="def" ["]"]="def" )
 bar"bie
 doll
-declare -A foo='(["bar\"bie"]="doll" )'
+declare -A foo=(["bar\"bie"]="doll" )
 bar"bie
 doll
-declare -A foo='(["bar\"bie"]="doll" )'
+declare -A foo=(["bar\"bie"]="doll" )
 bar"bie
 doll
-declare -A foo='(["bar\"bie"]="doll" )'
+declare -A foo=(["bar\"bie"]="doll" )
 bar"bie
 doll
-declare -A foo='(["bar\"bie"]="doll" )'
+declare -A foo=(["bar\"bie"]="doll" )
 bar"bie
 doll
-declare -A foo='(["bar\"bie"]="doll" )'
+declare -A foo=(["bar\"bie"]="doll" )
 bar'bie
 doll
-declare -A foo='(["bar'\''bie"]="doll" )'
+declare -A foo=(["bar'bie"]="doll" )
 bar'bie
 doll
-declare -A foo='(["bar'\''bie"]="doll" )'
+declare -A foo=(["bar'bie"]="doll" )
 bar'bie
 doll
-declare -A foo='(["bar'\''bie"]="doll" )'
+declare -A foo=(["bar'bie"]="doll" )
 bar'bie
 doll
-declare -A foo='(["bar'\''bie"]="doll" )'
+declare -A foo=(["bar'bie"]="doll" )
 bar'bie
 doll
-declare -A foo='(["bar'\''bie"]="doll" )'
+declare -A foo=(["bar'bie"]="doll" )
 bar$bie
 doll
-declare -A foo='(["bar\$bie"]="doll" )'
+declare -A foo=(["bar\$bie"]="doll" )
 bar[bie
 doll
-declare -A foo='(["bar[bie"]="doll" )'
+declare -A foo=(["bar[bie"]="doll" )
 bar`bie
 doll
-declare -A foo='(["bar\`bie"]="doll" )'
+declare -A foo=(["bar\`bie"]="doll" )
 bar\]bie
 doll
-declare -A foo='(["bar\\]bie"]="doll" )'
+declare -A foo=(["bar\\]bie"]="doll" )
 bar${foo}bie
 doll
-declare -A foo='(["bar\${foo}bie"]="doll" )'
+declare -A foo=(["bar\${foo}bie"]="doll" )
 bar
 after printf
 after use: 0

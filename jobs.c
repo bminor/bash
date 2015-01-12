@@ -2492,7 +2492,7 @@ wait_for (pid)
 	 job to finish.  Otherwise, we are waiting for the child to finish.
 	 We check for JDEAD in case the job state has been set by waitchld
 	 after receipt of a SIGCHLD. */
-      if (job == NO_JOB)
+      if (job == NO_JOB)		/* XXX -- && pid != ANY_PID ? */
 	job = find_job (pid, 0, NULL);
 
       /* waitchld() takes care of setting the state of the job.  If the job

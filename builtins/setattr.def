@@ -1,7 +1,7 @@
 This file is setattr.def, from which is created setattr.c.
 It implements the builtins "export" and "readonly", in Bash.
 
-Copyright (C) 1987-2012 Free Software Foundation, Inc.
+Copyright (C) 1987-2014 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -452,9 +452,9 @@ show_var_attributes (var, pattr, nodefs)
   if (invisible_p (var) && (array_p (var) || assoc_p (var)))
     printf ("%s\n", var->name);
   else if (array_p (var))
-    print_array_assignment (var, 1);
+    print_array_assignment (var, 0);
   else if (assoc_p (var))
-    print_assoc_assignment (var, 1);
+    print_assoc_assignment (var, 0);
   else
 #endif
   /* force `readonly' and `export' to not print out function definitions
