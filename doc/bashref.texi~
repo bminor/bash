@@ -1875,16 +1875,12 @@ or when @var{parameter} is followed by a character that is not to be
 interpreted as part of its name.
 
 If the first character of @var{parameter} is an exclamation point (!),
-and @var{parameter} is not a @var{nameref},
 it introduces a level of variable indirection.
 Bash uses the value of the variable formed from the rest of
 @var{parameter} as the name of the variable; this variable is then
 expanded and that value is used in the rest of the substitution, rather
 than the value of @var{parameter} itself.
 This is known as @code{indirect expansion}.
-If @var{parameter} is a nameref, this expands to the name of the
-variable referenced by @var{parameter} instead of performing the
-complete indirect expansion.
 The exceptions to this are the expansions of $@{!@var{prefix}*@}
 and $@{!@var{name}[@@]@}
 described below.

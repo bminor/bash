@@ -1432,9 +1432,9 @@ yy_readline_get ()
   int line_len;
   unsigned char c;
 
-  if (!current_readline_line)
+  if (current_readline_line == 0)
     {
-      if (!bash_readline_initialized)
+      if (bash_readline_initialized == 0)
 	initialize_readline ();
 
 #if defined (JOB_CONTROL)

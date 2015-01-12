@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Sat Dec 20 13:51:56 EST 2014
+.\"	Last Change: Fri Nov 28 18:21:13 EST 2014
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2014 December 20" "GNU Bash 4.3"
+.TH BASH 1 "2014 November 28" "GNU Bash 4.3"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2815,16 +2815,12 @@ The \fIparameter\fP is a shell parameter as described above
 .PD
 .PP
 If the first character of \fIparameter\fP is an exclamation point (\fB!\fP),
-and \fIparameter\fP is not a \fInameref\fP,
 it introduces a level of variable indirection.
 \fBBash\fP uses the value of the variable formed from the rest of
 \fIparameter\fP as the name of the variable; this variable is then
 expanded and that value is used in the rest of the substitution, rather
 than the value of \fIparameter\fP itself.
 This is known as \fIindirect expansion\fP.
-If \fIparameter\fP is a nameref, this expands to the name of the
-variable referenced by \fIparameter\fP instead of performing the
-complete indirect expansion.
 The exceptions to this are the expansions of ${\fB!\fP\fIprefix\fP\fB*\fP} and
 ${\fB!\fP\fIname\fP[\fI@\fP]} described below.
 The exclamation point must immediately follow the left brace in order to

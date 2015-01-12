@@ -586,10 +586,9 @@ readline_internal_charloop ()
 #endif
 	}
 
-      /* EOF typed to a non-blank line is ^D the first time, EOF the second
-	 time in a row.  This won't return any partial line read from the tty.
-	 If we want to change this, to force any existing line to be returned
-	 when read(2) reads EOF, for example, this is the place to change. */
+      /* EOF typed to a non-blank line is a <NL>.  If we want to change this,
+	 to force any existing line to be ignored when read(2) reads EOF,
+	 for example, this is the place to change. */
       if (c == EOF && rl_end)
 	{
 	  if (RL_SIG_RECEIVED ())
@@ -612,9 +611,7 @@ readline_internal_charloop ()
 	}
 
       /* The character _rl_eof_char typed to blank line, and not as the
-	 previous character is interpreted as EOF.  This doesn't work when
-	 READLINE_CALLBACKS is defined, so hitting a series of ^Ds will
-	 erase all the chars on the line and then return EOF. */
+	 previous character is interpreted as EOF. */
       if (((c == _rl_eof_char && lastc != c) || c == EOF) && rl_end == 0)
 	{
 #if defined (READLINE_CALLBACKS)

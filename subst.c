@@ -404,11 +404,6 @@ dump_word_flags (flags)
       f &= ~W_ASSNGLOBAL;
       fprintf (stderr, "W_ASSNGLOBAL%s", f ? "|" : "");
     }
-  if (f & W_ASSIGNINT)
-    {
-      f &= ~W_ASSIGNINT;
-      fprintf (stderr, "W_ASSIGNINT%s", f ? "|" : "");
-    }
   if (f & W_COMPASSIGN)
     {
       f &= ~W_COMPASSIGN;
@@ -9978,7 +9973,7 @@ shell_expand_word_list (tlist, eflags)
       if ((tlist->word->flags & (W_COMPASSIGN|W_ASSIGNARG)) == (W_COMPASSIGN|W_ASSIGNARG))
 	{
 	  int t;
-	  char opts[8], opti;
+	  char opts[16], opti;
 
 	  opti = 0;
 	  if (tlist->word->flags & (W_ASSIGNASSOC|W_ASSNGLOBAL|W_ASSIGNARRAY))
@@ -10001,11 +9996,43 @@ shell_expand_word_list (tlist, eflags)
 	  else if (tlist->word->flags & W_ASSNGLOBAL)
 	    opts[opti++] = 'g';
 
-#if 0
-	  /* If we have special handling note the integer attribute */
-	  if (opti > 0 && (tlist->word->flags & W_ASSIGNINT))
-	    opts[opti++] = 'i';
-#endif
+	  /* If we have special handling note the integer attribute and others
+	     that transform the value upon assignment.  What we do is take all
+	     of the option arguments and scan through them looking for options
+	     that cause such transformations, and add them to the `opts' array. */
+/*	  if (opti > 0) */
+	    {
+	      char omap[128];
+	      int oind;
+	      WORD_LIST *l;
+
+	      memset (omap, '\0', sizeof (omap));
+	      for (l = orig_list->next; l != tlist; l = l->next)
+		{
+		  if (l->word->word[0] != '-')
+		    break;	/* non-option argument */
+		  if (l->word->word[0] == '-' && l->word->word[1] == '-' && l->word->word[2] == 0)
+		    break;	/* -- signals end of options */
+		  for (oind = 1; l->word->word[oind]; oind++)
+		    switch (l->word->word[oind])
+		      {
+			case 'i':
+			case 'l':
+			case 'u':
+			case 'c':
+			  omap[l->word->word[oind]] = 1;
+			  if (opti == 0)
+			    opts[opti++] = '-';
+			  break;
+			default:
+			  break;
+		      }
+		}
+
+	      for (oind = 0; oind < sizeof (omap); oind++)
+		if (omap[oind])
+		  opts[opti++] = oind;
+	    }
 
 	  opts[opti] = '\0';
 	  if (opti > 0)

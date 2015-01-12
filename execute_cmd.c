@@ -3876,13 +3876,11 @@ fix_assignment_words (words)
 #endif
 	if (global)
 	  w->word->flags |= W_ASSNGLOBAL;
-	if (integer)
-	  w->word->flags |= W_ASSIGNINT;
       }
 #if defined (ARRAY_VARS)
     /* Note that we saw an associative array option to a builtin that takes
        assignment statements.  This is a bit of a kludge. */
-    else if (w->word->word[0] == '-' && (strchr (w->word->word+1, 'A') || strchr (w->word->word+1, 'a') || strchr (w->word->word+1, 'g')))
+    else if (w->word->word[0] == '-' && (strpbrk (w->word->word+1, "Aag") != 0))
 #else
     else if (w->word->word[0] == '-' && strchr (w->word->word+1, 'g'))
 #endif
@@ -3903,8 +3901,6 @@ fix_assignment_words (words)
 	  array = 1;
 	if ((wcmd->word->flags & W_ASSNBLTIN) && strchr (w->word->word+1, 'g'))
 	  global = 1;
-	if ((wcmd->word->flags & W_ASSNBLTIN) && strchr (w->word->word+1, 'i'))
-	  integer = 1;
       }
 }
 
