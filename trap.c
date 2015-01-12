@@ -890,9 +890,9 @@ _run_trap_internal (sig, tag)
 {
   char *trap_command, *old_trap;
   int trap_exit_value, *token_state;
-  volatile int save_return_catch_flag, function_code;
+  volatile int save_return_catch_flag, function_code, top_level_code, old_int;
   int flags;
-  procenv_t save_return_catch;
+  procenv_t save_return_catch, save_top_level;
   WORD_LIST *save_subst_varlist;
   sh_parser_state_t pstate;
 #if defined (ARRAY_VARS)
@@ -919,6 +919,9 @@ _run_trap_internal (sig, tag)
       trap_command =  savestring (old_trap);
 
       running_trap = sig + 1;
+
+      old_int = interrupt_state;	/* temporarily suppress pending interrupts */
+      CLRINTERRUPT;
 
 #if defined (ARRAY_VARS)
       ps = save_pipestatus_array ();
@@ -963,6 +966,7 @@ _run_trap_internal (sig, tag)
 
       running_trap = 0;
       sigmodes[sig] &= ~SIG_INPROGRESS;
+      interrupt_state = old_int;
 
       if (sigmodes[sig] & SIG_CHANGED)
 	{

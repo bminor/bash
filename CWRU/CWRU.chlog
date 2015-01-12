@@ -7811,3 +7811,30 @@ lib/readline/display.c
 	- delete_chars: if compiled with ncurses on Windows, this code can
 	  work, so build it in if NCURSES_VERSION defined
 	- open_some_spaces: ditto
+
+				    1/6
+				    ---
+doc/{bash.1,bashref.texi}
+	- minor grammar and typo corrections from TonyMc <afmcc@btinternet.com>
+
+				    1/8
+				    ---
+sig.c
+	- throw_to_top_level: only attempt to run the interrupt trap if SIGINT
+	  is trapped -- minor optimization
+	- throw_to_top_level: if we are running a trap, call run_trap_cleanup
+	  to turn off the sigmodes flags
+
+trap.c
+	- _run_trap_internal: temporarily suppress pending SIGINTs while running
+	  one of the traps the shell handles internally (e.g., ERR).  Fixes bug
+	  reported by Keith Thompson <keithsthompson@gmail.com>
+
+				   1/10
+				   ----
+bashhist.c
+	- bash_history_inhibit_expansion: use skip_to_delim with the history
+	  expansion character to see whether or not the instance of the
+	  history expansion character should be skipped because, for instance,
+	  it is in a command substitution.  Fixes issue reported by
+	  Zigmund.Ozean@zig-home.localdomain

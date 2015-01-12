@@ -57,6 +57,7 @@
 extern int last_command_exit_value;
 extern int last_command_exit_signal;
 extern int return_catch_flag;
+extern int running_trap;
 extern int loop_level, continuing, breaking, funcnest;
 extern int executing_list;
 extern int comsub_ignore_return;
@@ -413,11 +414,15 @@ throw_to_top_level ()
   last_command_exit_value |= 128;
 
   /* Run any traps set on SIGINT. */
-  run_interrupt_trap ();
+  if (signal_is_trapped (SIGINT))
+    run_interrupt_trap ();
 
   /* Clean up string parser environment. */
   while (parse_and_execute_level)
     parse_and_execute_cleanup ();
+
+  if (running_trap)
+    run_trap_cleanup (running_trap - 1);
 
 #if defined (JOB_CONTROL)
   give_terminal_to (shell_pgrp, 0);

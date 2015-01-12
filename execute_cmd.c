@@ -878,7 +878,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 		unwind_protect_tag_on_stack ("saved-redirects"))
 	    run_unwind_frame ("saved-redirects");
 #endif
-  
+
 	  jump_to_top_level (ERREXIT);
 	}
 
