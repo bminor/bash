@@ -1607,6 +1607,8 @@ rl_display_match_list (matches, len, max)
 		  temp = printable_part (matches[l]);
 		  printed_len = print_filename (temp, matches[l], sind);
 
+fflush(rl_outstream);
+usleep(500000);
 		  if (j + 1 < limit)
 		    for (k = 0; k < max - printed_len; k++)
 		      putc (' ', rl_outstream);

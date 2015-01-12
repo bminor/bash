@@ -7567,3 +7567,49 @@ subst.c
 subst.c
 	- command_substitute: short-circuit without forking on a command string
 	  that consists entirely of <blank>s and newlines
+
+jobs.c
+	- make_child: changes to allow interrupts through if fork fails and
+	  we are sleeping for `forksleep' seconds
+	- waitchld: make things a little more resilient if CHILD ends up NULL
+
+				   12/12
+				   -----
+lib/readline/complete.c
+	- rl_display_match_list: when calculating common prefix to display in
+	  color, make sure we correctly handle a common prefix with a trailing
+	  `/' as we do when checking whether or not to add an ellipis.
+	  printable_part() doesn't return the whole pathname if it ends in a
+	  slash, to avoid printing null strings, so we have to make sure we
+	  have the entire prefix
+
+lib/readline/complete.c
+	- _rl_complete_display_matches_interrupt: new variable, set to 1 by
+	  _rl_complete_sigcleanup to let rl_display_match_list know it has
+	  freed the match list
+	- display_matches: check for signals during the printing loops with
+	  RL_SIG_RECEIVED(), return immediately if there is a pending signal
+	  (might not want to do this if it's SIGWINCH -- CHECK)
+	- rl_complete_internal: if _rl_complete_display_matches_interrupt
+	  set after calling display_matches, just null out `matches' since
+	  it's already been freed and call any application-set signal hook
+
+				   12/14
+				   -----
+parse.y
+	- time_command_acceptable: if the token before a newline is `|',
+	  return 0, since it's not really valid to time inside a pipeline.
+	  Only handles a single newline but allows things like
+		echo a |
+		 time cat
+	  to invoke /usr/bin/time, which is probably enough to catch the
+	  stray carriage return.  Fixes bug reported by Andre Majorel
+	  <aym-ung@teaser.fr>
+
+builtins/declare.def
+	- declare_internal: don't try to perform compound assignments unless
+	  the WORD_DESC has flags including W_COMPASSIGN (maybe should check
+	  W_ASSIGNMENT as well), avoiding unexpected evaluation if a word
+	  is of the form (word) and is assigned to an array variable like so:
+	  declare -x var=$value.  Bug reported by Stephane Chazelas
+	  <stephane.chazelas@gmail.com>

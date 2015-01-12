@@ -93,3 +93,24 @@ x="${z/#[^;][^;]}"
 echo $x
 x="${z/%[^;][^;]}"
 echo $x
+
+# post-bash-4.3 changes to make pattern replacement honor nocasematch variable
+unset string
+string=abcd
+
+shopt -s nocasematch
+
+echo ${string//A/z}
+echo ${string//BC/x}
+echo ${string//[BC]/x}
+echo ${string//[bC]/x}
+echo ${string//?/z}
+
+LC_ALL=C
+echo ${string//A/z}
+echo ${string//BC/x}
+echo ${string//[BC]/x}
+echo ${string//[bC]/x}
+echo ${string//?/z}
+
+

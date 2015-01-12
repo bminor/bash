@@ -542,11 +542,7 @@ declare_internal (list, local_var)
 	      int vlen;
 	      vlen = STRLEN (value);
 /*itrace("declare_builtin: name = %s value = %s flags = %d", name, value, wflags);*/
-#if 0	/* bash-4.4 */
-	      if (value[0] == '(' && value[vlen-1] == ')' && (shell_compatibility_level <= 43 || (wflags & W_COMPASSIGN)))
-#else
 	      if (value[0] == '(' && value[vlen-1] == ')' && (wflags & W_COMPASSIGN))
-#endif
 		compound_array_assign = 1;
 	      else
 		simple_array_assign = 1;
