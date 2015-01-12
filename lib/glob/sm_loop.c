@@ -831,6 +831,7 @@ fprintf(stderr, "extmatch: flags = %d\n", flags);
 #undef STRCOLL
 #undef STRLEN
 #undef STRCMP
+#undef MEMCHR
 #undef COLLEQUIV
 #undef RANGECMP
 #undef L

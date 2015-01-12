@@ -65,7 +65,7 @@ extern int unquoted_glob_pattern_p __P((char *));
 extern char *quote_string_for_globbing __P((const char *, int));
 
 extern int glob_char_p __P((const char *));
-extern char *quote_globbing_chars __P((char *));
+extern char *quote_globbing_chars __P((const char *));
 
 /* Call the glob library to do globbing on PATHNAME. */
 extern char **shell_glob_filename __P((const char *));

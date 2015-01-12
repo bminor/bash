@@ -706,8 +706,8 @@ rl_bracketed_paste_begin (count, key)
   return (retval);
 }
 
-/* A special paste command for Windows users.. */
-#if defined (_WIN32)
+/* A special paste command for users of Cygnus's cygwin32. */
+#if defined (__CYGWIN__)
 #include <windows.h>
 
 int
@@ -741,4 +741,4 @@ rl_paste_from_clipboard (count, key)
     }
   return (0);
 }
-#endif /* _WIN32 */
+#endif /* __CYGWIN__ */

@@ -57,11 +57,7 @@ static int find_matching_open PARAMS((char *, int, int));
 
 /* Non-zero means try to blink the matching open parenthesis when the
    close parenthesis is inserted. */
-#if defined (HAVE_SELECT)
-int rl_blink_matching_paren = 1;
-#else /* !HAVE_SELECT */
 int rl_blink_matching_paren = 0;
-#endif /* !HAVE_SELECT */
 
 static int _paren_blink_usec = 500000;
 

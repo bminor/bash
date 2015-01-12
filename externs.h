@@ -150,7 +150,7 @@ extern int find_index_in_alist __P((char *, STRING_INT_ALIST *, int));
 
 extern char *substring __P((const char *, int, int));
 extern char *strsub __P((char *, char *, char *, int));
-extern char *strcreplace __P((char *, int, char *, int));
+extern char *strcreplace __P((char *, int, const char *, int));
 extern void strip_leading __P((char *));
 extern void strip_trailing __P((char *, int, int));
 extern void xbcopy __P((char *, char *, int));
@@ -324,8 +324,8 @@ extern char *sh_un_double_quote __P((char *));
 extern char *sh_backslash_quote __P((char *, const char *, int));
 extern char *sh_backslash_quote_for_double_quotes __P((char *));
 extern char *sh_quote_reusable __P((char *, int));
-extern int sh_contains_shell_metas __P((char *));
-extern int sh_contains_quotes __P((char *));
+extern int sh_contains_shell_metas __P((const char *));
+extern int sh_contains_quotes __P((const char *));
 
 /* declarations for functions defined in lib/sh/spell.c */
 extern int spname __P((char *, char *));

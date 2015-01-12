@@ -30,6 +30,8 @@
 #include "bashansi.h"
 #include <stdio.h>
 
+#include <signal.h>
+
 #include "bashintl.h"
 
 #include "shell.h"

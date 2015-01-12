@@ -4210,7 +4210,12 @@ and assigned @var{value}.
 The @var{option} can be any of the options accepted by @code{declare}.
 @code{local} can only be used within a function; it makes the variable
 @var{name} have a visible scope restricted to that function and its
-children.  The return status is zero unless @code{local} is used outside
+children.
+If @var{name} is @samp{-}, the set of shell options is made local to the
+function in which @code{local} is invoked: shell options changed using
+the @code{set} builtin inside the function are restored to their original
+values when the function returns.
+The return status is zero unless @code{local} is used outside
 a function, an invalid @var{name} is supplied, or @var{name} is a
 readonly variable.
 

@@ -1,7 +1,7 @@
 This file is set.def, from which is created set.c.
 It implements the "set" and "unset" builtins in Bash.
 
-Copyright (C) 1987-2014 Free Software Foundation, Inc.
+Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -322,6 +322,41 @@ get_minus_o_opts ()
     ret[i] = o_options[i].name;
   ret[i] = (char *)NULL;
   return ret;
+}
+
+char *
+get_current_options ()
+{
+  char *temp;
+  int i;
+
+  temp = (char *)xmalloc (1 + N_O_OPTIONS);
+  for (i = 0; o_options[i].name; i++)
+    {
+      if (o_options[i].letter)
+	temp[i] = *(find_flag (o_options[i].letter));
+      else
+	temp[i] = GET_BINARY_O_OPTION_VALUE (i, o_options[i].name);
+    }
+  temp[i] = '\0';
+  return (temp);
+}
+
+void
+set_current_options (bitmap)
+     const char *bitmap;
+{
+  int i;
+
+  if (bitmap == 0)
+    return;
+  for (i = 0; o_options[i].name; i++)
+    {
+      if (o_options[i].letter)
+	change_flag (o_options[i].letter, bitmap[i] ? FLAG_ON : FLAG_OFF);
+      else
+	SET_BINARY_O_OPTION_VALUE (i, bitmap[i] ? FLAG_ON : FLAG_OFF, o_options[i].name);
+    }
 }
 
 static int

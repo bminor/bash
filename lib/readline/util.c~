@@ -55,7 +55,6 @@
 
 #include "rlprivate.h"
 #include "xmalloc.h"
-#include "rlshell.h"
 
 /* **************************************************************** */
 /*								    */
@@ -515,18 +514,11 @@ _rl_trace (va_alist)
 int
 _rl_tropen ()
 {
-  char fnbuf[128], *x;
+  char fnbuf[128];
 
   if (_rl_tracefp)
     fclose (_rl_tracefp);
-#if defined (_WIN32) && !defined (__CYGWIN__)
-  x = sh_get_env_value ("TEMP");
-  if (x == 0)
-    x = ".";
-#else
-  x = "/var/tmp";
-#endif
-  sprintf (fnbuf, "%s/rltrace.%ld", x, (long)getpid());
+  sprintf (fnbuf, "/var/tmp/rltrace.%ld", (long)getpid());
   unlink(fnbuf);
   _rl_tracefp = fopen (fnbuf, "w+");
   return _rl_tracefp != 0;

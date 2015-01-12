@@ -2556,7 +2556,7 @@ static void
 open_some_spaces (col)
      int col;
 {
-#if !defined (__MSDOS__) && (!defined (__MINGW32__) || defined (NCURSES_VERSION))
+#if !defined (__MSDOS__) && !defined (__MINGW32__)
   char *buffer;
   register int i;
 
@@ -2585,7 +2585,7 @@ open_some_spaces (col)
       for (i = col; i--; )
 	tputs (_rl_term_ic, 1, _rl_output_character_function);
     }
-#endif /* !__MSDOS__ && (!__MINGW32__ || NCURSES_VERSION)*/
+#endif /* !__MSDOS__ && !__MINGW32__ */
 }
 
 /* Delete COUNT characters from the display line. */
@@ -2596,7 +2596,7 @@ delete_chars (count)
   if (count > _rl_screenwidth)	/* XXX */
     return;
 
-#if !defined (__MSDOS__) && (!defined (__MINGW32__) || defined (NCURSES_VERSION))
+#if !defined (__MSDOS__) && !defined (__MINGW32__)
   if (_rl_term_DC && *_rl_term_DC)
     {
       char *buffer;
@@ -2609,7 +2609,7 @@ delete_chars (count)
 	while (count--)
 	  tputs (_rl_term_dc, 1, _rl_output_character_function);
     }
-#endif /* !__MSDOS__ && (!__MINGW32__ || NCURSES_VERSION)*/
+#endif /* !__MSDOS__ && !__MINGW32__ */
 }
 
 void

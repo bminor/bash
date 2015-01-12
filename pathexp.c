@@ -313,10 +313,11 @@ endpat:
 
 char *
 quote_globbing_chars (string)
-     char *string;
+     const char *string;
 {
   size_t slen;
-  char *temp, *s, *t, *send;
+  char *temp, *t;
+  const char *s, *send;
   DECLARE_MBSTATE;
 
   slen = strlen (string);

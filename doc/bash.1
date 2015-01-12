@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Sat Dec 20 13:51:56 EST 2014
+.\"	Last Change: Thu Jan  1 14:40:18 EST 2015
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2014 December 20" "GNU Bash 4.3"
+.TH BASH 1 "2015 January 1" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -50,8 +50,8 @@ bash \- GNU Bourne-Again SHell
 [options]
 [command_string | file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989-2014 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989-2014 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-2015 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-2015 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
 is an \fBsh\fR-compatible command language interpreter that
@@ -8421,7 +8421,7 @@ evaluates to 0,
 .B let
 returns 1; 0 is returned otherwise.
 .TP
-\fBlocal\fP [\fIoption\fP] [\fIname\fP[=\fIvalue\fP] ...]
+\fBlocal\fP [\fIoption\fP] [\fIname\fP[=\fIvalue\fP] ... | \- ]
 For each argument, a local variable named
 .I name
 is created, and assigned
@@ -8432,6 +8432,10 @@ When
 is used within a function, it causes the variable
 .I name
 to have a visible scope restricted to that function and its children.
+If \fIname\fP is \-, the set of shell options is made local to the function
+in which \fBlocal\fP is invoked: shell options changed using the
+\fBset\fP builtin inside the function are restored to their original values
+when the function returns.
 With no operands,
 .B local
 writes a list of local variables to the standard output.  It is

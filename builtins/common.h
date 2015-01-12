@@ -1,6 +1,6 @@
 /* common.h -- extern declarations for functions defined in common.c. */
 
-/* Copyright (C) 1993-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -159,6 +159,9 @@ extern void initialize_shell_options __P((int));
 
 extern void reset_shell_options __P((void));
 
+extern char *get_current_options __P((void));
+extern void set_current_options __P((const char *));
+
 /* Functions from shopt.def */
 extern void reset_shopt_options __P((void));
 extern char **get_shopt_options __P((void));
@@ -197,6 +200,7 @@ extern int parse_and_execute __P((char *, const char *, int));
 extern int evalstring __P((char *, const char *, int));
 extern void parse_and_execute_cleanup __P((void));
 extern int parse_string __P((char *, const char *, int, char **));
+extern int should_suppress_fork __P((COMMAND *));
 
 /* Functions from evalfile.c */
 extern int maybe_execute_file __P((const char *, int));

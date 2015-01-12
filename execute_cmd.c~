@@ -2623,6 +2623,7 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	    second->flags |= CMD_IGNORE_RETURN;
 	  if (should_suppress_fork (second))
 	    {
+itrace ("execute_command_internal: should_suppress_fork returns TRUE");
 	      second->flags |= CMD_NO_FORK;
 	      second->value.Simple->flags |= CMD_NO_FORK;
 	    }

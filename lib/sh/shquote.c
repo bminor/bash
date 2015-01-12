@@ -34,6 +34,7 @@
 #include <xmalloc.h>
 
 extern char *ansic_quote __P((char *, int, int *));
+extern int ansic_shouldquote __P((const char *));
 
 /* Default set of characters that should be backslash-quoted in strings */
 static const char bstab[256] =
@@ -307,9 +308,9 @@ sh_quote_reusable (s, flags)
 
 int
 sh_contains_shell_metas (string)
-     char *string;
+     const char *string;
 {
-  char *s;
+  const char *s;
 
   for (s = string; s && *s; s++)
     {
@@ -342,9 +343,9 @@ sh_contains_shell_metas (string)
 
 int
 sh_contains_quotes (string)
-     char *string;
+     const char *string;
 {
-  char *s;
+  const char *s;
 
   for (s = string; s && *s; s++)
     {

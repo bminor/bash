@@ -95,22 +95,6 @@ static int ibuffer_space PARAMS((void));
 static int rl_get_char PARAMS((int *));
 static int rl_gather_tyi PARAMS((void));
 
-/* Windows isatty returns true for every character device, including the null
-   device, so we need to perform additional checks. */
-#if defined (_WIN32) && !defined (__CYGWIN__)
-#include <io.h>
-#define WIN32_LEAN_AND_MEAN 1
-#include <windows.h>
-
-int
-win32_isatty (int fd)
-{
-  return (_isatty (fd) ? ((((long) (HANDLE) _get_osfhandle (fd)) & 3) == 3) ? 0);
-}
-
-#define isatty(x)	win32_isatty(x)
-#endif
-
 /* **************************************************************** */
 /*								    */
 /*			Character Input Buffering       	    */

@@ -495,10 +495,8 @@ declare_internal (list, local_var)
 	  if (var == 0)
 	    var = mkglobal ? find_global_variable (name) : find_variable (name);
 
-#if defined (ARRAY_VARS)
 	  var_exists = var != 0;
 	  array_exists = var && (array_p (var) || assoc_p (var));
-#endif
 
 	  if (var == 0)
 	    {

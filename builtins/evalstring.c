@@ -96,6 +96,19 @@ restore_lastcom (x)
   the_printed_command_except_trap = x;
 }
 
+int
+should_suppress_fork (command)
+     COMMAND *command;
+{
+  return (startup_state == 2 && parse_and_execute_level == 1 &&
+	  running_trap == 0 &&
+	  *bash_input.location.string == '\0' &&
+	  command->type == cm_simple &&
+	  signal_is_trapped (EXIT_TRAP) == 0 &&
+	  command->redirects == 0 && command->value.Simple->redirects == 0 &&
+	  ((command->flags & CMD_TIME_PIPELINE) == 0) &&
+	  ((command->flags & CMD_INVERT_RETURN) == 0));
+}
 /* How to force parse_and_execute () to clean up after itself. */
 void
 parse_and_execute_cleanup ()
@@ -357,14 +370,7 @@ parse_and_execute (string, from_file, flags)
 	       * THEN
 	       *   tell the execution code that we don't need to fork
 	       */
-	      if (startup_state == 2 && parse_and_execute_level == 1 &&
-		  running_trap == 0 &&
-		  *bash_input.location.string == '\0' &&
-		  command->type == cm_simple &&
-		  signal_is_trapped (EXIT_TRAP) == 0 &&
-		  command->redirects == 0 && command->value.Simple->redirects == 0 &&
-		  ((command->flags & CMD_TIME_PIPELINE) == 0) &&
-		  ((command->flags & CMD_INVERT_RETURN) == 0))
+	      if (should_suppress_fork (command))
 		{
 		  command->flags |= CMD_NO_FORK;
 		  command->value.Simple->flags |= CMD_NO_FORK;

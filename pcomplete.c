@@ -117,7 +117,7 @@ static int it_init_setopts __P((ITEMLIST *));
 static int it_init_shopts __P((ITEMLIST *));
 
 static int shouldexp_filterpat __P((char *));
-static char *preproc_filterpat __P((char *, char *));
+static char *preproc_filterpat __P((char *, const char *));
 
 static void init_itemlist_from_varlist __P((ITEMLIST *, SVFUNC *));
 
@@ -273,7 +273,7 @@ shouldexp_filterpat (s)
 static char *
 preproc_filterpat (pat, text)
      char *pat;
-     char *text;
+     const char *text;
 {
   char *ret;
 
@@ -289,7 +289,8 @@ preproc_filterpat (pat, text)
 STRINGLIST *
 filter_stringlist (sl, filterpat, text)
      STRINGLIST *sl;
-     char *filterpat, *text;
+     char *filterpat;
+     const char *text;
 {
   int i, m, not;
   STRINGLIST *ret;

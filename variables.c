@@ -1,6 +1,6 @@
 /* variables.c -- Functions for hacking shell variables. */
 
-/* Copyright (C) 1987-2014 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -4421,7 +4421,9 @@ push_func_var (data)
 
   var = (SHELL_VAR *)data;
 
-  if (tempvar_p (var) && (posixly_correct || (var->attributes & att_propagate)))
+  if (local_p (var) && STREQ (var->name, "-"))
+    set_current_options (value_cell (var));
+  else if (tempvar_p (var) && (posixly_correct || (var->attributes & att_propagate)))
     {
       /* Make sure we have a hash table to store the variable in while it is
 	 being propagated down to the global variables table.  Create one if

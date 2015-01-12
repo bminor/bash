@@ -1,11 +1,11 @@
 dnl
-dnl Configure script for bash-4.3
+dnl Configure script for bash-4.4
 dnl
 dnl report bugs to chet@po.cwru.edu
 dnl
 dnl Process this file with autoconf to produce a configure script.
 
-# Copyright (C) 1987-2013 Free Software Foundation, Inc.
+# Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -21,10 +21,10 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.3, version 4.066])dnl
+AC_REVISION([for Bash 4.4, version 4.067])dnl
 
-define(bashvers, 4.3)
-define(relstatus, maint)
+define(bashvers, 4.4)
+define(relstatus, devel)
 
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
 
@@ -408,6 +408,14 @@ AC_SUBST(HELPINSTALL)
 AC_SUBST(HELPFILES_TARGET)
 AC_SUBST(HELPSTRINGS)
 
+dnl We want these before the checks, so the checks can modify their values.
+if test -z "$CFLAGS"; then
+	AUTO_CFLAGS="-g ${GCC+-O2} ${GCC+-Wno-parentheses}"
+	AUTO_LDFLAGS="-g ${GCC+-O2}"
+else
+	AUTO_CFLAGS= AUTO_LDFLAGS=
+fi
+
 echo ""
 echo "Beginning configuration for bash-$BASHVERS-$RELSTATUS for ${host_cpu}-${host_vendor}-${host_os}"
 echo ""
@@ -465,17 +473,14 @@ AC_SUBST(SIGNAMES_O)
 
 dnl END changes for cross-building
 
-dnl We want these before the checks, so the checks can modify their values.
-if test -z "$CFLAGS"; then
-	AUTO_CFLAGS="-g ${GCC+-O2}"
-	AUTO_LDFLAGS="-g ${GCC+-O2}"
-else
-	AUTO_CFLAGS= AUTO_LDFLAGS=
-fi
-
 dnl default values
 CFLAGS=${CFLAGS-"$AUTO_CFLAGS"}
 # LDFLAGS=${LDFLAGS="$AUTO_LDFLAGS"}	# XXX
+
+# turn off paren warnings in gcc
+if test "$GCC" = yes && test -n "$DEBUG"; then
+	CFLAGS="$CFLAGS -Wno-parentheses -Wno-format-security"
+fi
 
 dnl handle options that alter how bash is compiled and linked
 dnl these must come after the test for cc/gcc
