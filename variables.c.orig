@@ -2516,27 +2516,10 @@ bind_variable_internal (name, value, table, hflags, aflags)
      HASH_TABLE *table;
      int hflags, aflags;
 {
-  char *newname, *newval;
+  char *newval;
   SHELL_VAR *entry;
-#if defined (ARRAY_VARS)
-  arrayind_t ind;
-  char *subp;
-  int sublen;
-#endif
 
-  newname = 0;
-#if defined (ARRAY_VARS)
-  if ((aflags & ASS_FROMREF) && (hflags & HASH_NOSRCH) == 0 && valid_array_reference (name))
-    {
-      newname = array_variable_name (name, &subp, &sublen);
-      if (newname == 0)
-	return (SHELL_VAR *)NULL;	/* XXX */
-      entry = hash_lookup (newname, table);
-    }
-  else
-#endif
   entry = (hflags & HASH_NOSRCH) ? (SHELL_VAR *)NULL : hash_lookup (name, table);
-
   /* Follow the nameref chain here if this is the global variables table */
   if (entry && nameref_p (entry) && (invisible_p (entry) == 0) && table == global_variables->table)
     {
@@ -2567,16 +2550,6 @@ bind_variable_internal (name, value, table, hflags, aflags)
       var_setvalue (entry, make_variable_value (entry, value, 0));
       }
     }
-#if defined (ARRAY_VARS)
-  else if (entry == 0 && newname)
-    {
-      entry = make_new_array_variable (newname);	/* indexed array by default */
-      if (entry == 0)
-	return entry;
-      ind = array_expand_index (name, subp, sublen);
-      bind_array_element (entry, ind, value, aflags);
-    }
-#endif
   else if (entry == 0)
     {
       entry = make_new_variable (name, table);
@@ -2697,8 +2670,7 @@ bind_variable (name, value, flags)
 			 normal. */
 		      if (nameref_cell (nv) == 0)
 			return (bind_variable_internal (nv->name, value, nvc->table, 0, flags));
-		      /* XXX - bug here with ref=array[index] */
-		      return (bind_variable_internal (nameref_cell (nv), value, nvc->table, 0, flags|ASS_FROMREF));
+		      return (bind_variable_internal (nameref_cell (nv), value, nvc->table, 0, flags));
 		    }
 		  else
 		    v = nv;
