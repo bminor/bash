@@ -532,8 +532,10 @@ termsig_sighandler (sig)
 #if defined (READLINE)
   /* Set the event hook so readline will call it after the signal handlers
      finish executing, so if this interrupted character input we can get
-     quick response. */
-  if (interactive_shell && interactive && no_line_editing == 0)
+     quick response.  If readline is active or has modified the terminal we
+     need to set this no matter what the signal is, though the check for
+     RL_STATE_TERMPREPPED is possibly redundant. */
+  if (RL_ISSTATE (RL_STATE_SIGHANDLER) || RL_ISSTATE (RL_STATE_TERMPREPPED))
     bashline_set_event_hook ();
 #endif
 

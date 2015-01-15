@@ -122,6 +122,10 @@ extern void bash_logout __P((void));
 /* Functions from getopts.def */
 extern void getopts_reset __P((int));
 
+/* Functions from read.def */
+extern void read_tty_cleanup __P((void));
+extern int read_tty_modified __P((void));
+
 /* Functions from set.def */
 extern int minus_o_option_value __P((char *));
 extern void list_minus_o_opts __P((int, int));
