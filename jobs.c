@@ -3339,7 +3339,9 @@ itrace("waitchld: waitpid returns %d block = %d", pid, block);
       if (posixly_correct && this_shell_builtin && this_shell_builtin == wait_builtin)
 	{
 	  interrupt_immediately = 0;
-	  trap_handler (SIGCHLD);	/* set pending_traps[SIGCHLD] */
+	  /* This was trap_handler (SIGCHLD) but that can lose traps if
+	     children_exited > 1 */
+	  queue_sigchld_trap (children_exited);
 	  wait_signal_received = SIGCHLD;
 	  /* If we're in a signal handler, let CHECK_WAIT_INTR pick it up;
 	     run_pending_traps will call run_sigchld_trap later  */
