@@ -553,8 +553,16 @@ add_character:
 	 do until we have a real isearch-undo. */
       if (cxt->search_string_index == 0)
 	rl_ding ();
-      else
+      else if (MB_CUR_MAX == 1 || rl_byte_oriented)
 	cxt->search_string[--cxt->search_string_index] = '\0';
+      else
+	{
+	  wstart = _rl_find_prev_mbchar (cxt->search_string, cxt->search_string_index, MB_FIND_NONZERO);
+	  if (wstart >= 0)
+	    cxt->search_string[cxt->search_string_index = wstart] = '\0';
+	  else
+	    rl_ding ();
+	}
       break;
 
     case -4:	/* C-G, abort */

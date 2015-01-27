@@ -226,10 +226,12 @@ bash_history_inhibit_expansion (string, i)
   else if (extended_glob && i > 1 && string[i+1] == '(' && member (')', string + i + 2))
     return (1);
 #endif
+#if 0	/* bash-4.4 */
   /* Make sure the history expansion should not be skipped by quoting or
      command/process substitution. */
   else if (t = skip_to_delim (string, 0, hx, SD_NOJMP) > 0 && t > i)
     return (1);
+#endif
   else
     return (0);
 }

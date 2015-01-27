@@ -631,8 +631,6 @@ bashline_reset ()
   rl_filename_stat_hook = bash_filename_stat_hook;
 
   bashline_reset_event_hook ();
-
-  rl_sort_completion_matches = 1;
 }
 
 /* Contains the line to push into readline. */
@@ -1430,8 +1428,6 @@ attempt_shell_completion (text, start, end)
   set_filename_bstab (rl_filename_quote_characters);
   set_directory_hook ();
   rl_filename_stat_hook = bash_filename_stat_hook;
-
-  rl_sort_completion_matches = 1;	/* sort by default */
 
   /* Determine if this could be a command word.  It is if it appears at
      the start of the line (ignoring preceding whitespace), or if it

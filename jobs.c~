@@ -2510,7 +2510,6 @@ wait_for (pid)
 	  struct sigaction act, oact;
 	  sigset_t nullset, chldset;
 
-	  queue_sigchld = 1;
 	  sigemptyset (&nullset);
 	  sigemptyset (&chldset);
 	  sigprocmask (SIG_SETMASK, &nullset, &chldset);

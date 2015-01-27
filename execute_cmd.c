@@ -3122,6 +3122,8 @@ select_query (list, list_len, prompt, print_menu)
 	  return ((char *)NULL);
 	}
       repl_string = get_string_value ("REPLY");
+      if (repl_string == 0)
+	return ((char *)NULL);
       if (*repl_string == 0)
 	{
 	  print_menu = 1;

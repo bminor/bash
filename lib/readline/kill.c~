@@ -550,40 +550,6 @@ rl_yank_pop (count, key)
     }
 }
 
-#if defined (VI_MODE)
-int
-rl_vi_yank_pop (count, key)
-     int count, key;
-{
-  int l, n;
-
-  if (((rl_last_func != rl_vi_yank_pop) && (rl_last_func != rl_vi_put)) ||
-      !rl_kill_ring)
-    {
-      _rl_abort_internal ();
-      return 1;
-    }
-
-  l = strlen (rl_kill_ring[rl_kill_index]);
-  n = rl_point - l;
-  if (n >= 0 && STREQN (rl_line_buffer + n, rl_kill_ring[rl_kill_index], l))
-    {
-      rl_delete_text (n, rl_point);
-      rl_point = n;
-      rl_kill_index--;
-      if (rl_kill_index < 0)
-	rl_kill_index = rl_kill_ring_length - 1;
-      rl_vi_put (1, 'p');
-      return 0;
-    }
-  else
-    {
-      _rl_abort_internal ();
-      return 1;
-    }
-}
-#endif /* VI_MODE */
-
 /* Yank the COUNTh argument from the previous history line, skipping
    HISTORY_SKIP lines before looking for the `previous line'. */
 static int

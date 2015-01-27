@@ -2455,6 +2455,7 @@ rl_filename_completion_function (text, state)
   static int filename_len;
   char *temp, *dentry, *convfn;
   int dirlen, dentlen, convlen;
+  int tilde_dirname;
   struct dirent *entry;
 
   /* If we don't have any state, then do some initialization. */
@@ -2512,11 +2513,13 @@ rl_filename_completion_function (text, state)
       else
 	users_dirname = savestring (dirname);
 
+      tilde_dirname = 0;
       if (*dirname == '~')
 	{
 	  temp = tilde_expand (dirname);
 	  xfree (dirname);
 	  dirname = temp;
+	  tilde_dirname = 1;
 	}
 
       /* We have saved the possibly-dequoted version of the directory name
@@ -2535,7 +2538,7 @@ rl_filename_completion_function (text, state)
 	  xfree (users_dirname);
 	  users_dirname = savestring (dirname);
 	}
-      else if (rl_completion_found_quote && rl_filename_dequoting_function)
+      else if (tilde_dirname == 0 && rl_completion_found_quote && rl_filename_dequoting_function)
 	{
 	  /* delete single and double quotes */
 	  xfree (dirname);
