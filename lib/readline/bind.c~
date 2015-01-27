@@ -542,7 +542,7 @@ rl_translate_keyseq (seq, array, len)
 	    case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7':
 	      i++;
-	      for (temp = 2, c -= '0'; ISOCTAL ((unsigned char)seq[i]) && temp--; i++)
+	      for (temp = 2, c -= '0'; ISOCTAL (seq[i]) && temp--; i++)
 	        c = (c * 8) + OCTVALUE (seq[i]);
 	      i--;	/* auto-increment in for loop */
 	      array[l++] = c & largest_char;

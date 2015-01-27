@@ -52,6 +52,9 @@
 #include "mailcheck.h"
 
 #include "shmbutil.h"
+#if defined (HAVE_MBSTR_H) && defined (HAVE_MBSCHR)
+#  include <mbstr.h>		/* mbschr */
+#endif
 #include "typemax.h"
 
 #include "builtins/getopt.h"

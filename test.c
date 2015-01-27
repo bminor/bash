@@ -225,6 +225,7 @@ and ()
  *	'-'('G'|'L'|'O'|'S'|'N') filename
  * 	'-t' [int]
  *	'-'('z'|'n') string
+ *	'-'('v'|'R') varname
  *	'-o' option
  *	string
  *	string ('!='|'='|'==') string

@@ -33,6 +33,9 @@
 #include "pathexp.h"
 
 #include "shmbutil.h"
+#if defined (HAVE_MBSTR_H) && defined (HAVE_MBSCHR)
+#  include <mbstr.h>		/* mbschr */
+#endif
 
 #include "builtins/common.h"
 

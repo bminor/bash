@@ -227,6 +227,8 @@ singlebyte:
       else
 	{
 	  m = mbrtowc (&wc, string + start, end - start, &state);
+if (m == 1)
+  itrace("sh_modcase: mbrtowc returns 1 for single byte char");
 	  if (MB_INVALIDCH (m) || m == 1)
 	    {
 	      wc = (unsigned char)string[start];

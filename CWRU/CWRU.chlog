@@ -7902,3 +7902,38 @@ lib/readline/funmap.c
 
 lib/readline/readline.h
 	- rl_vi_yank_pop: extern declaration
+
+				   1/21
+				   ----
+lib/sh/shquote.c
+	- sh_backslash_quote: change to understand and handle multibyte
+	  characters, using is_basic, COPY_CHAR_P.  See
+	  https://bugzilla.redhat.com/show_bug.cgi?id=1184320 for original
+	  report
+
+				   1/23
+				   ----
+include/posixjmp.h
+	- use setjmp_sigs instead of redefined setjmp, it fails on Cygwin.
+	  Report from Eric Blake <eblake@redhat.com>
+
+builtins/wait.def,shell.c
+	- use setjmp_sigs instead of setjmp call, since setjmp no longer
+	  redefined to something known
+
+include/chartypes.h, lib/readline/chardefs.h
+	- make sure all ctype.h macros are called with unsigned char args,
+	  casting to make sure
+
+lib/sh/casemod.c
+	- sh_modcase: don't assume that the upper and lower case versions of a
+	  character are the same width, so don't try to do the conversion in
+	  place: convert and copy the converted characters one or more at a
+	  time to the returned string
+	- sh_modcase: since upper and lower case versions of same character
+	  may have different widths in some locales, don't shortcut and assume
+	  that we can do single-byte case modification (toupper) with a
+	  single-byte input character (e.g., `i').  Fix for problem reported
+	  by Stephane Chazelas <stephane.chazelas@gmail.com>
+
+	

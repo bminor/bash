@@ -33,6 +33,9 @@
 #include "syntax.h"
 #include <xmalloc.h>
 
+#include "shmbchar.h"
+#include "shmbutil.h"
+
 extern char *ansic_quote __P((char *, int, int *));
 extern int ansic_shouldquote __P((const char *));
 
@@ -231,13 +234,25 @@ sh_backslash_quote (string, table, flags)
      int flags;
 {
   int c;
-  char *result, *r, *s, *backslash_table;
+  size_t slen;
+  char *result, *r, *s, *backslash_table, *send;
+  DECLARE_MBSTATE;
 
-  result = (char *)xmalloc (2 * strlen (string) + 1);
+  slen = strlen (string);
+  send = string + slen;
+  result = (char *)xmalloc (2 * slen + 1);
 
   backslash_table = table ? table : (char *)bstab;
   for (r = result, s = string; s && (c = *s); s++)
     {
+#if defined (HANDLE_MULTIBYTE)
+      if (MB_CUR_MAX > 1 && is_basic (c) == 0)
+	{
+	  COPY_CHAR_P (r, s, send);
+	  s--;		/* compensate for auto-increment in loop above */
+	  continue;
+	}
+#endif
       if (backslash_table[c] == 1)
 	*r++ = '\\';
       else if (c == '#' && s == string)			/* comment char */

@@ -93,16 +93,17 @@ the word is assumed to be  a variable name.  If that variable has a value,
 its value is used for DIR.
 
 Options:
-    -L	force symbolic links to be followed: resolve symbolic links in
-	DIR after processing instances of `..'
-    -P	use the physical directory structure without following symbolic
-	links: resolve symbolic links in DIR before processing instances
-	of `..'
-    -e	if the -P option is supplied, and the current working directory
-	cannot be determined successfully, exit with a non-zero status
+  -L	force symbolic links to be followed: resolve symbolic
+		links in DIR after processing instances of `..'
+  -P	use the physical directory structure without following
+		symbolic links: resolve symbolic links in DIR before
+		processing instances of `..'
+  -e	if the -P option is supplied, and the current working
+		directory cannot be determined successfully, exit with
+		a non-zero status
 #if defined (O_XATTR)
-    -@  on systems that support it, present a file with extended attributes
-        as a directory containing the file attributes
+  -@	on systems that support it, present a file with extended
+		attributes as a directory containing the file attributes
 #endif
 
 The default is to follow symbolic links, as if `-L' were specified.
@@ -450,7 +451,7 @@ Print the name of the current working directory.
 
 Options:
   -L	print the value of $PWD if it names the current working
-	directory
+		directory
   -P	print the physical directory, without any symbolic links
 
 By default, `pwd' behaves as if `-L' were specified.

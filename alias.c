@@ -42,6 +42,10 @@
 #  include "pcomplete.h"
 #endif
 
+#if defined (HAVE_MBSTR_H) && defined (HAVE_MBSCHR)
+#  include <mbstr.h>		/* mbschr */
+#endif
+
 #define ALIAS_HASH_BUCKETS	16	/* must be power of two */
 
 typedef int sh_alias_map_func_t __P((alias_t *));

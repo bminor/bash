@@ -5409,14 +5409,14 @@ sv_shcompat (name)
       return;
     }
   /* Handle decimal-like compatibility version specifications: 4.2 */
-  if (ISDIGIT (val[0]) && val[1] == '.' && ISDIGIT (val[2]) && val[3] == 0)
+  if (isdigit (val[0]) && val[1] == '.' && isdigit (val[2]) && val[3] == 0)
     {
       tens = val[0] - '0';
       ones = val[2] - '0';
       compatval = tens*10 + ones;
     }
   /* Handle integer-like compatibility version specifications: 42 */
-  else if (ISDIGIT (val[0]) && ISDIGIT (val[1]) && val[2] == 0)
+  else if (isdigit (val[0]) && isdigit (val[1]) && val[2] == 0)
     {
       tens = val[0] - '0';
       ones = val[1] - '0';

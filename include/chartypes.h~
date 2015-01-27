@@ -46,11 +46,11 @@
 #endif
 
 #if !defined (isprint) && !defined (HAVE_ISPRINT)
-#  define isprint(c) (isalpha((unsigned char)c) || isdigit((unsigned char)c) || ispunct((unsigned char)c))
+#  define isprint(c) (isalpha(c) || isdigit(c) || ispunct(c))
 #endif
 
 #if defined (isblank) || defined (HAVE_ISBLANK)
-#  define ISBLANK(c) (IN_CTYPE_DOMAIN (c) && isblank ((unsigned char)c))
+#  define ISBLANK(c) (IN_CTYPE_DOMAIN (c) && isblank (c))
 #else
 #  define ISBLANK(c) ((c) == ' ' || (c) == '\t')
 #endif
@@ -58,7 +58,7 @@
 #if defined (isgraph) || defined (HAVE_ISGRAPH)
 #  define ISGRAPH(c) (IN_CTYPE_DOMAIN (c) && isgraph (c))
 #else
-#  define ISGRAPH(c) (IN_CTYPE_DOMAIN (c) && isprint ((unsigned char)c) && !isspace ((unsigned char)c))
+#  define ISGRAPH(c) (IN_CTYPE_DOMAIN (c) && isprint (c) && !isspace (c))
 #endif
 
 #if !defined (isxdigit) && !defined (HAVE_ISXDIGIT)

@@ -31,16 +31,17 @@ from file descriptor FD if the -u option is supplied.  The variable MAPFILE
 is the default ARRAY.
 
 Options:
-  -n count	Copy at most COUNT lines.  If COUNT is 0, all lines are copied.
-  -O origin	Begin assigning to ARRAY at index ORIGIN.  The default index is 0.
-  -s count 	Discard the first COUNT lines read.
-  -t		Remove a trailing newline from each line read.
-  -u fd		Read lines from file descriptor FD instead of the standard input.
-  -C callback	Evaluate CALLBACK each time QUANTUM lines are read.
-  -c quantum	Specify the number of lines read between each call to CALLBACK.
+  -n count	Copy at most COUNT lines.  If COUNT is 0, all lines are copied
+  -O origin	Begin assigning to ARRAY at index ORIGIN.  The default index is 0
+  -s count	Discard the first COUNT lines read
+  -t	Remove a trailing newline from each line read
+  -u fd	Read lines from file descriptor FD instead of the standard input
+  -C callback	Evaluate CALLBACK each time QUANTUM lines are read
+  -c quantum	Specify the number of lines read between each call to
+			CALLBACK
 
 Arguments:
-  ARRAY		Array variable name to use for file data.
+  ARRAY	Array variable name to use for file data
 
 If -C is supplied without -c, the default quantum is 5000.  When
 CALLBACK is evaluated, it is supplied the index of the next array

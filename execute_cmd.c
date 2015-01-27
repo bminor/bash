@@ -100,6 +100,10 @@ extern int errno;
 #  include "bashhist.h"
 #endif
 
+#if defined (HAVE_MBSTR_H) && defined (HAVE_MBSCHR)
+#  include <mbstr.h>		/* mbschr */
+#endif
+
 #if defined (ARRAY_VARS)
 struct func_array_state
   {

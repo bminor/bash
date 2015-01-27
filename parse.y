@@ -3813,7 +3813,7 @@ eof_error:
       /* If we can read a reserved word, try to read one. */
       if (tflags & LEX_RESWDOK)
 	{
-	  if MBTEST(islower (ch))
+	  if MBTEST(islower ((unsigned char)ch))
 	    {
 	      /* Add this character. */
 	      RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
@@ -3841,7 +3841,7 @@ eof_error:
 	     RESWDOK flag, but reset the reserved word length counter so we
 	     can read another one. */
 	  else if MBTEST(((tflags & LEX_INCASE) == 0) &&
-			  (isblank(ch) || ch == '\n') &&
+			  (isblank((unsigned char)ch) || ch == '\n') &&
 			  lex_rwlen == 2 &&
 			  STREQN (ret + retind - 2, "do", 2))
 	    {
@@ -3866,7 +3866,7 @@ eof_error:
 #if 0
 	  /* If we find a space or tab but have read something and it's not
 	     `do', turn off the reserved-word-ok flag */
-	  else if MBTEST(isblank (ch) && lex_rwlen > 0)
+	  else if MBTEST(isblank ((unsigned char)ch) && lex_rwlen > 0)
 	    {
 	      tflags &= ~LEX_RESWDOK;
 /*itrace("parse_comsub:%d: found `%c', lex_reswordok -> 0", line_number, ch);*/

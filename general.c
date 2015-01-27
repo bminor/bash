@@ -42,6 +42,10 @@
 #include "test.h"
 #include "trap.h"
 
+#if defined (HAVE_MBSTR_H) && defined (HAVE_MBSCHR)
+#  include <mbstr.h>		/* mbschr */
+#endif
+
 #include <tilde/tilde.h>
 
 #if !defined (errno)

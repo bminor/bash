@@ -132,12 +132,6 @@ extern int _rl_walphabetic PARAMS((wchar_t));
 #  define WCWIDTH(wc)	wcwidth(wc)
 #endif
 
-#if defined (WCWIDTH_BROKEN)
-#  define IS_COMBINING_CHAR(x)	(WCWIDTH(x) == 0 && iswcntrl(x) == 0)
-#else
-#  define IS_COMBINING_CHAR(x)	(WCWIDTH(x) == 0)
-#endif
-
 #else /* !HANDLE_MULTIBYTE */
 
 #undef MB_LEN_MAX

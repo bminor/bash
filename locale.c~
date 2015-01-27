@@ -535,7 +535,7 @@ locale_setblanks ()
 
   for (x = 0; x < sh_syntabsiz; x++)
     {
-      if (isblank ((unsigned char)x))
+      if (isblank (x))
 	sh_syntaxtab[x] |= CSHBRK|CBLANK;
       else if (member (x, shell_break_chars))
 	{

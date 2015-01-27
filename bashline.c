@@ -55,6 +55,10 @@
 #include "shmbutil.h"
 #include "trap.h"
 
+#if defined (HAVE_MBSTR_H) && defined (HAVE_MBSCHR)
+#  include <mbstr.h>		/* mbschr */
+#endif
+
 #include "builtins/common.h"
 
 #include <readline/rlconf.h>
