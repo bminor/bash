@@ -41,7 +41,7 @@ extern volatile sig_atomic_t terminating_signal;
 #define CHECK_ALRM \
   do { \
     if (sigalrm_seen) \
-      longjmp (alrmbuf, 1); \
+      sh_longjmp (alrmbuf, 1); \
   } while (0)
 
 #define SETINTERRUPT interrupt_state = 1
@@ -64,7 +64,7 @@ extern volatile sig_atomic_t terminating_signal;
 #define CHECK_WAIT_INTR \
   do { \
     if (wait_signal_received && this_shell_builtin && (this_shell_builtin == wait_builtin)) \
-      longjmp (wait_intr_buf, 1); \
+      sh_longjmp (wait_intr_buf, 1); \
   } while (0)
 
 #define RESET_SIGTERM \

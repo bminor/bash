@@ -87,7 +87,8 @@ reader_loop ()
       unlink_fifo_list ();
 #endif /* PROCESS_SUBSTITUTION */
 
-      /* XXX - why do we set this every time through the loop? */
+      /* XXX - why do we set this every time through the loop?  And why do
+	 it if SIGINT is trapped in an interactive shell? */
       if (interactive_shell && signal_is_ignored (SIGINT) == 0)
 	set_signal_handler (SIGINT, sigint_sighandler);
 

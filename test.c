@@ -101,7 +101,7 @@ extern int errno;
 static procenv_t test_exit_buf;
 static int test_error_return;
 #define test_exit(val) \
-	do { test_error_return = val; longjmp (test_exit_buf, 1); } while (0)
+	do { test_error_return = val; sh_longjmp (test_exit_buf, 1); } while (0)
 
 extern int sh_stat __P((const char *, struct stat *));
 

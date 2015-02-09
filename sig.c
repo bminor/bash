@@ -1,6 +1,6 @@
 /* sig.c - interface for shell signal handlers and signal initialization. */
 
-/* Copyright (C) 1994-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -413,15 +413,15 @@ throw_to_top_level ()
 				(last_command_exit_value - 128) : 0;
   last_command_exit_value |= 128;
 
-  /* Run any traps set on SIGINT. */
+  /* Run any traps set on SIGINT, mostly for interactive shells */
   if (signal_is_trapped (SIGINT))
-    run_interrupt_trap ();
+    run_interrupt_trap (1);
 
   /* Clean up string parser environment. */
   while (parse_and_execute_level)
     parse_and_execute_cleanup ();
 
-  if (running_trap)
+  if (running_trap > 0)
     run_trap_cleanup (running_trap - 1);
 
 #if defined (JOB_CONTROL)
@@ -469,7 +469,7 @@ void
 jump_to_top_level (value)
      int value;
 {
-  longjmp (top_level, value);
+  sh_longjmp (top_level, value);
 }
 
 sighandler
@@ -563,7 +563,7 @@ termsig_handler (sig)
 
   /* I don't believe this condition ever tests true. */
   if (sig == SIGINT && signal_is_trapped (SIGINT))
-    run_interrupt_trap ();
+    run_interrupt_trap (0);
 
 #if defined (HISTORY)
   /* If we don't do something like this, the history will not be saved when

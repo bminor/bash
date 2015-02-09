@@ -1,6 +1,6 @@
 /* execute_cmd.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -5495,7 +5495,7 @@ shell_execve (command, args, env)
   clear_fifo_list ();	/* pipe fds are what they are now */
 #endif
 
-  longjmp (subshell_top_level, 1);
+  sh_longjmp (subshell_top_level, 1);
   /*NOTREACHED*/
 }
 

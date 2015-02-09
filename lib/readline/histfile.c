@@ -116,6 +116,10 @@ int history_lines_written_to_file = 0;
    for more extensive tests. */
 #define HIST_TIMESTAMP_START(s)		(*(s) == history_comment_char && isdigit ((unsigned char)(s)[1]) )
 
+static char *history_backupfile __P((const char *));
+static int histfile_backup __P((const char *, const char *));
+static int histfile_restore __P((const char *, const char *));
+
 /* Return the string that should be used in the place of this
    filename.  This only matters when you don't specify the
    filename to read_history (), or write_history (). */
@@ -165,17 +169,14 @@ history_backupfile (filename)
   ssize_t n;
   struct stat fs;
 
-  fn = filename;
-#if defined (HAVE_LSTAT)
-  if (lstat (filename, &fs) == 0 && S_ISLNK (fs.st_mode))
+  fn = filename;  
+#if defined (HAVE_READLINK)
+  /* Follow symlink to avoid backing up symlink itself; call will fail if
+     not a symlink */
+  if ((n = readlink (filename, linkbuf, sizeof (linkbuf) - 1)) > 0)
     {
-      if ((n = readlink (filename, linkbuf, sizeof (linkbuf) - 1)) > 0)
-	{
-	  linkbuf[n] = '\0';
-	  fn = linkbuf;
-	}
-      else
-        fn = filename;
+      linkbuf[n] = '\0';
+      fn = linkbuf;
     }
 #endif
       
@@ -347,11 +348,41 @@ read_history_range (filename, from, to)
 }
 
 static int
-backup (fn, back)
-     const char *fn;
+histfile_backup (filename, back)
+     const char *filename;
      const char *back;
 {
-  return (rename (fn, back));
+#if defined (HAVE_READLINK)
+  char linkbuf[PATH_MAX+1];
+  ssize_t n;
+
+  /* Follow to target of symlink to avoid renaming symlink itself */
+  if ((n = readlink (filename, linkbuf, sizeof (linkbuf) - 1)) > 0)
+    {
+      linkbuf[n] = '\0';
+      return (rename (linkbuf, back));
+    }
+#endif
+  return (rename (filename, back));
+}
+
+static int
+histfile_restore (backup, orig)
+     const char *backup;
+     const char *orig;
+{
+#if defined (HAVE_READLINK)
+  char linkbuf[PATH_MAX+1];
+  ssize_t n;
+
+  /* Follow to target of symlink to avoid renaming symlink itself */
+  if ((n = readlink (orig, linkbuf, sizeof (linkbuf) - 1)) > 0)
+    {
+      linkbuf[n] = '\0';
+      return (rename (backup, linkbuf));
+    }
+#endif
+  return (rename (backup, orig));
 }
 
 /* Truncate the history file FNAME, leaving only LINES trailing lines.
@@ -470,7 +501,7 @@ history_truncate_file (fname, lines)
   if (filename && bakname)
     {
       /* XXX - need to check case where filename is a symlink */
-      if (rename (filename, bakname) < 0)
+      if (histfile_backup (filename, bakname) < 0)
 	{
 	  free (bakname);	/* no backups if rename fails */
 	  bakname = 0;
@@ -499,7 +530,7 @@ history_truncate_file (fname, lines)
   history_lines_written_to_file = orig_lines - lines;
 
   if (rv != 0 && filename && bakname)
-    rename (bakname, filename);
+    histfile_restore (bakname, filename);
   else if (rv == 0 && bakname)
     unlink (bakname);
 
@@ -551,7 +582,7 @@ history_do_write (filename, nelements, overwrite)
   if (output && bakname)
     {
       /* XXX - need to check case where output is a symlink */
-      if (rename (output, bakname) < 0)		/* no backups if rename fails */
+      if (histfile_backup (output, bakname) < 0)		/* no backups if rename fails */
 	{
 	  free (bakname);
 	  bakname = 0;
@@ -565,7 +596,7 @@ history_do_write (filename, nelements, overwrite)
     {
       rv = errno;
       if (output && bakname)
-        rename (bakname, output);
+        histfile_restore (bakname, output);
       FREE (output);
       FREE (bakname);
       return (rv);
@@ -610,7 +641,7 @@ mmap_error:
 	rv = errno;
 	close (file);
 	if (output && bakname)
-	  rename (bakname, output);
+	  histfile_restore (bakname, output);
 	FREE (output);
 	FREE (bakname);
 	return rv;
@@ -622,7 +653,7 @@ mmap_error:
       	rv = errno;
 	close (file);
 	if (output && bakname)
-	  rename (bakname, output);
+	  histfile_restore (bakname, output);
 	FREE (output);
 	FREE (bakname);
 	return rv;
@@ -658,7 +689,7 @@ mmap_error:
     rv = errno;
 
   if (rv != 0 && output && bakname)
-    rename (bakname, output);
+    histfile_restore (bakname, output);
   else if (rv == 0 && bakname)
     unlink (bakname);
 

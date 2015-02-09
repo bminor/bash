@@ -1,6 +1,6 @@
 /* expr.c -- arithmetic expression evaluation. */
 
-/* Copyright (C) 1990-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1990-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -316,7 +316,7 @@ expr_bind_variable (lhs, rhs)
 
   v = bind_int_variable (lhs, rhs);
   if (v && (readonly_p (v) || noassign_p (v)))
-    longjmp (evalbuf, 1);	/* variable assignment error */
+    sh_longjmp (evalbuf, 1);	/* variable assignment error */
   stupidly_hack_special_variables (lhs);
 }
 
@@ -1416,7 +1416,7 @@ evalerror (msg)
   internal_error (_("%s%s%s: %s (error token is \"%s\")"),
 		   name ? name : "", name ? ": " : "", t,
 		   msg, (lasttp && *lasttp) ? lasttp : "");
-  longjmp (evalbuf, 1);
+  sh_longjmp (evalbuf, 1);
 }
 
 /* Convert a string to an intmax_t integer, with an arbitrary base.

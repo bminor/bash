@@ -1,6 +1,6 @@
 /* evalstring.c - evaluate a string as one or more shell commands. */
 
-/* Copyright (C) 1996-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -644,7 +644,7 @@ evalstring (string, from_file, flags)
       if (rcatch && return_catch_flag)
 	{
 	  return_catch_value = r;
-	  longjmp (return_catch, 1);
+	  sh_longjmp (return_catch, 1);
 	}
     }
     

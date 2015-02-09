@@ -111,11 +111,8 @@ _rl_abort_internal ()
   RL_UNSETSTATE (RL_STATE_MULTIKEY);	/* XXX */
 
   rl_last_func = (rl_command_func_t *)NULL;
-#if defined (HAVE_POSIX_SIGSETJMP)
-  siglongjmp (_rl_top_level, 1);
-#else
-  longjmp (_rl_top_level, 1);
-#endif
+
+  _rl_longjmp (_rl_top_level, 1);
   return (0);
 }
 

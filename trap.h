@@ -95,7 +95,7 @@ extern void get_all_original_signals __P((void));
 extern char *signal_name __P((int));
 
 extern int decode_signal __P((char *, int));
-extern void run_interrupt_trap __P((void));
+extern void run_interrupt_trap __P((int));
 extern int maybe_call_trap_handler __P((int));
 extern int signal_is_special __P((int));
 extern int signal_is_trapped __P((int));

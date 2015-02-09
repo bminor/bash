@@ -3,7 +3,7 @@
 /* This file works with both POSIX and BSD systems.  It implements job
    control. */
 
-/* Copyright (C) 1989-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -2299,7 +2299,7 @@ wait_sigint_handler (sig)
 	  if (interrupt_immediately)
 	    {
 	      interrupt_immediately = 0;
-	      longjmp (wait_intr_buf, 1);
+	      sh_longjmp (wait_intr_buf, 1);
 	    }
 	  else
 	    /* Let CHECK_WAIT_INTR handle it in wait_for/waitchld */
@@ -3391,7 +3391,7 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
 	  /* If we're in a signal handler, let CHECK_WAIT_INTR pick it up;
 	     run_pending_traps will call run_sigchld_trap later  */
 	  if (sigchld == 0)
-	    longjmp (wait_intr_buf, 1);
+	    sh_longjmp (wait_intr_buf, 1);
 	}
       /* If not in posix mode and not executing the wait builtin, queue the
 	 signal for later handling.  Run the trap immediately if we are

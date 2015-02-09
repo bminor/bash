@@ -117,6 +117,9 @@ rl_bind_key (key, function)
      int key;
      rl_command_func_t *function;
 {
+  char keyseq[3];
+  int l;
+
   if (key < 0)
     return (key);
 
@@ -135,8 +138,24 @@ rl_bind_key (key, function)
       return (key);
     }
 
-  _rl_keymap[key].type = ISFUNC;
-  _rl_keymap[key].function = function;
+  /* If it's bound to a function or macro, just overwrite.  Otherwise we have
+     to treat it as a key sequence so rl_generic_bind handles shadow keymaps
+     for us.  If we are binding '\' make sure to escape it so it makes it
+     through the call to rl_translate_keyseq. */
+  if (_rl_keymap[key].type != ISKMAP)
+    {
+      _rl_keymap[key].type = ISFUNC;
+      _rl_keymap[key].function = function;
+    }
+  else
+    {
+      l = 0;
+      if (key == '\\')
+	keyseq[l++] = '\\';
+      keyseq[l++] = key;
+      keyseq[l] = '\0';
+      rl_bind_keyseq (keyseq, function);
+    }
   rl_binding_keymap = _rl_keymap;
   return (0);
 }

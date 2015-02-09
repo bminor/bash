@@ -7945,3 +7945,57 @@ lib/readline/histfile.c
 	  original.  Report from Jonathan Hankins <jhankins@homewood.k12.al.us>
 	- history_do_write: don't attempt to back up non-regular files.
 	  Report from Jonathan Hankins <jhankins@homewood.k12.al.us>
+
+				    2/2
+				    ---
+trap.c
+	- run_interrupt_trap: now takes an argument indicating whether or not
+	  it was called just before a longjmp to top_level; change callers
+	- run_interrupt_trap: if running a trap and we are being called before
+	  a longjmp to top_level, call run_trap_cleanup on running trap so
+	  a QUIT call while running a DEBUG trap, for instance, doesn't leave
+	  sigmodes[DEBUG_TRAP] including SIG_INPROGRESS.  Fixes bug reported
+	  by Chih-Chieh Chou <ccchou@gmail.com>
+
+sig.c
+	- throw_to_top_level: change call to run_interrupt_trap to pass arg 1
+	- termsig_handler: change call to run_interrupt_trap
+
+trap.h
+	- run_interrupt_trap: update extern prototype declaration
+
+				    2/4
+				    ---
+lib/readline/histfile.c
+	- histfile_backup, histfile_restore: new functions to back up and restore
+	  history file to `filename-', following (one level of) symlinks through
+	  so we don't rename the symlink itself.  From a suggestion by
+	  Jonathan Hankins <jhankins@homewood.k12.al.us>
+
+assoc.c
+	- assoc_to_assign: if an index happens to be `@' or `*', make sure it's
+	  double-quoted.  Bug report from Greg Wooledge <wooledg@eeg.ccf.org>
+
+				    2/5
+				    ---
+lib/readline/bind.c
+	- rl_bind_key: if we are rebinding a key that is not bound to a
+	  function or a macro, construct a key sequence and pass it to
+	  rl_bind_keyseq.  Make sure that '\' when it is used as a key is
+	  changed to "\\" so it can survive rl_translate_keyseq.  Fixes
+	  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=776743
+
+				    2/8
+				    ---
+include/posixjmp.h
+	- _rl_longjmp, sh_longjmp: new defines, expand to siglongjmp or longjmp
+	  depending on autoconf results, used to avoid redefining longjmp,
+	  remove _OPENNT conditional code.  Report from Eric Blake
+	  <eblake@redhat.com>
+
+{bashjmp,quit}.h,{execute_cmd,expr,jobs,sig,trap}.c,builtins/{evalstring.c,return.def}
+	- change calls to longjmp to use sh_longjmp
+
+lib/readline/util.c
+	- change calls to longjmp to use _rl_longjmp
+

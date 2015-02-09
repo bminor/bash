@@ -1,7 +1,7 @@
 /* trap.c -- Not the trap command, but useful functions for manipulating
    those objects.  The trap command is in builtins/trap.def. */
 
-/* Copyright (C) 1987-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -325,7 +325,7 @@ run_pending_traps ()
 	  if (sig == SIGINT)
 	    {
 	      pending_traps[sig] = 0;	/* XXX */
-	      run_interrupt_trap ();
+	      run_interrupt_trap (0);
 	      CLRINTERRUPT;
 	    }
 #if defined (JOB_CONTROL) && defined (SIGCHLD)
@@ -442,14 +442,13 @@ trap_handler (sig)
 
       catch_flag = 1;
       pending_traps[sig]++;
-
       trapped_signal_received = sig;
 
       if (this_shell_builtin && (this_shell_builtin == wait_builtin))
 	{
 	  wait_signal_received = sig;
 	  if (interrupt_immediately)
-	    longjmp (wait_intr_buf, 1);
+	    sh_longjmp (wait_intr_buf, 1);
 	}
 
 #if defined (READLINE)
@@ -964,8 +963,8 @@ _run_trap_internal (sig, tag)
       restore_pipestatus_array (ps);
 #endif
 
-      running_trap = 0;
       sigmodes[sig] &= ~SIG_INPROGRESS;
+      running_trap = 0;
       interrupt_state = old_int;
 
       if (sigmodes[sig] & SIG_CHANGED)
@@ -990,7 +989,7 @@ _run_trap_internal (sig, tag)
 #if 0
 	      from_return_trap = sig == RETURN_TRAP;
 #endif
-	      longjmp (return_catch, 1);
+	      sh_longjmp (return_catch, 1);
 	    }
 	}
     }
@@ -1039,7 +1038,7 @@ run_debug_trap ()
       if (debugging_mode && trap_exit_value == 2 && return_catch_flag)
 	{
 	  return_catch_value = trap_exit_value;
-	  longjmp (return_catch, 1);
+	  sh_longjmp (return_catch, 1);
 	}
 #endif
     }
@@ -1074,8 +1073,11 @@ run_return_trap ()
 /* Run a trap set on SIGINT.  This is called from throw_to_top_level (), and
    declared here to localize the trap functions. */
 void
-run_interrupt_trap ()
+run_interrupt_trap (will_throw)
+     int will_throw;	/* from throw_to_top_level? */
 {
+  if (will_throw && running_trap > 0)
+    run_trap_cleanup (running_trap - 1);
   _run_trap_internal (SIGINT, "interrupt trap");
 }
 
@@ -1204,7 +1206,7 @@ maybe_call_trap_handler (sig)
       switch (sig)
 	{
 	case SIGINT:
-	  run_interrupt_trap ();
+	  run_interrupt_trap (0);
 	  break;
 	case EXIT_TRAP:
 	  run_exit_trap ();
