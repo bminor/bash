@@ -159,12 +159,29 @@ static char *
 history_backupfile (filename)
      const char *filename;
 {
-  char *ret;
+  const char *fn;
+  char *ret, linkbuf[PATH_MAX+1];
   size_t len;
+  ssize_t n;
+  struct stat fs;
 
-  len = strlen (filename);
+  fn = filename;
+#if defined (HAVE_LSTAT)
+  if (lstat (filename, &fs) == 0 && S_ISLNK (fs.st_mode))
+    {
+      if ((n = readlink (filename, linkbuf, sizeof (linkbuf) - 1)) > 0)
+	{
+	  linkbuf[n] = '\0';
+	  fn = linkbuf;
+	}
+      else
+        fn = filename;
+    }
+#endif
+      
+  len = strlen (fn);
   ret = xmalloc (len + 2);
-  strcpy (ret, filename);
+  strcpy (ret, fn);
   ret[len] = '-';
   ret[len+1] = '\0';
   return ret;
@@ -329,6 +346,14 @@ read_history_range (filename, from, to)
   return (0);
 }
 
+static int
+backup (fn, back)
+     const char *fn;
+     const char *back;
+{
+  return (rename (fn, back));
+}
+
 /* Truncate the history file FNAME, leaving only LINES trailing lines.
    If FNAME is NULL, then use ~/.history.  Returns 0 on success, errno
    on failure. */
@@ -443,7 +468,14 @@ history_truncate_file (fname, lines)
 
   bakname = history_backupfile (filename);
   if (filename && bakname)
-    rename (filename, bakname);
+    {
+      /* XXX - need to check case where filename is a symlink */
+      if (rename (filename, bakname) < 0)
+	{
+	  free (bakname);	/* no backups if rename fails */
+	  bakname = 0;
+	}
+    }
 
   if ((file = open (filename, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY, 0600)) != -1)
     {
@@ -509,8 +541,22 @@ history_do_write (filename, nelements, overwrite)
   bakname = (overwrite && output) ? history_backupfile (output) : 0;
   exists = output ? (stat (output, &finfo) == 0) : 0;
 
+  /* Don't bother backing up if output doesn't exist yet */
+  if (exists == 0 || S_ISREG (finfo.st_mode) == 0)
+    {
+      free (bakname);	/* no backups if not a regular file */
+      bakname = 0;
+    }
+
   if (output && bakname)
-    rename (output, bakname);
+    {
+      /* XXX - need to check case where output is a symlink */
+      if (rename (output, bakname) < 0)		/* no backups if rename fails */
+	{
+	  free (bakname);
+	  bakname = 0;
+	}
+    }
 
   file = output ? open (output, mode, 0600) : -1;
   rv = 0;

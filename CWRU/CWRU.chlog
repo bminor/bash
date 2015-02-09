@@ -7936,4 +7936,12 @@ lib/sh/casemod.c
 	  single-byte input character (e.g., `i').  Fix for problem reported
 	  by Stephane Chazelas <stephane.chazelas@gmail.com>
 
-	
+				   1/31
+				   ----
+lib/readline/histfile.c
+	- history_truncate_file, history_do_write: if the first rename(2)
+	  of the history file to the backup file fails, set the backup file
+	  name to NULL to prevent any later attempts to restore the
+	  original.  Report from Jonathan Hankins <jhankins@homewood.k12.al.us>
+	- history_do_write: don't attempt to back up non-regular files.
+	  Report from Jonathan Hankins <jhankins@homewood.k12.al.us>

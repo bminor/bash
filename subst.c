@@ -5592,8 +5592,8 @@ read_comsub (fd, quoted, rflag)
 
       if (c == 0)
 	{
-#if 0
-	  internal_warning ("read_comsub: ignored null byte in input");
+#if 1
+	  internal_warning ("command substitution: ignored null byte in input");
 #endif
 	  continue;
 	}
