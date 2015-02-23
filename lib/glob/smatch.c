@@ -334,6 +334,8 @@ is_wcclass (wc, name)
 
   memset (&state, '\0', sizeof (mbstate_t));
   mbs = (char *) malloc (wcslen(name) * MB_CUR_MAX + 1);
+  if (mbs == 0)
+    return -1;
   mbslength = wcsrtombs (mbs, (const wchar_t **)&name, (wcslen(name) * MB_CUR_MAX + 1), &state);
 
   if (mbslength == (size_t)-1 || mbslength == (size_t)-2)

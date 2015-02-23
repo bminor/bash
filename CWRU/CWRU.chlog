@@ -7999,3 +7999,41 @@ include/posixjmp.h
 lib/readline/util.c
 	- change calls to longjmp to use _rl_longjmp
 
+				   2/18
+				   ----
+variables.c
+	- bind_int_variable: make sure `v' is non-null before making it visible
+
+				   2/19
+				   ----
+arrayfunc.c
+	- assign_array_var_from_word_list: after assignment, mark variable as no
+	  longer invisible
+	- assign_array_var_from_string: after assignment, mark variable as no
+	  longer invisible
+
+builtins/declare.def
+	- declare_internal: add warning if an attempt is made to use a quoted
+	  compound assignment as an argument to declare (declare -a foo='( 1 2 )');
+	  backwards compatible with bash-4.3. Still a tentative change
+
+				   2/20
+				   ----
+lib/glob/smatch.c
+	- is_wcclass: check malloc() return value, return -1 if it fails
+	  Report from Tobias Stoeckmann <tobias@stoeckmann.org>
+
+lib/sh/shmatch.c
+	- sh_regmatch: check malloc() return value, handle NULL value if it
+	  fails.  Report from Tobias Stoeckmann <tobias@stoeckmann.org>
+
+				   2/22
+				   ----
+lib/readline/doc/rltech.texi
+	- rl_callback_handler_install: note that the handler function should
+	  free the line it receives, as with readline.  Suggested by
+	  Ulf Magnusson <ulfalizer@gmail.com>
+	- Readline Signal Handling: note that application needs to clean up
+	  readline's terminal state if it wants to handle a signal before
+	  the line handler restores it.  Suggested by Ulf Magnusson
+	  <ulfalizer@gmail.com>

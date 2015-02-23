@@ -2872,10 +2872,12 @@ bind_int_variable (lhs, rhs)
 #endif
     v = bind_variable (lhs, rhs, 0);
 
-  if (v && isint)
-    VSETATTR (v, att_integer);
-
-  VUNSETATTR (v, att_invisible);
+  if (v)
+    {
+      if (isint)
+	VSETATTR (v, att_integer);
+      VUNSETATTR (v, att_invisible);
+    }
 
   return (v);
 }

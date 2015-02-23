@@ -1307,6 +1307,8 @@ expanded value of @var{prompt}.  Save the value of @var{lhandler} to
 use as a handler function to call when a complete line of input has been
 entered.
 The handler function receives the text of the line as an argument.
+As with @code{readline()}, the handler function should @code{free} the
+line when it it finished with it.
 @end deftypefun
 
 @deftypefun void rl_callback_read_char (void)
@@ -1532,7 +1534,14 @@ resetting the terminal to its original state.  If the application's signal
 handler does more than update its idea of the terminal size and return (for
 example, a @code{longjmp} back to a main processing loop), it @emph{must}
 call @code{rl_cleanup_after_signal()} (described below), to restore the
-terminal state. 
+terminal state.
+
+When an application is using the callback interface
+(@pxref{Alternate Interface}), Readline installs signal handlers only for
+the duration of the call to @code{rl_callback_read_char}.  Applications
+using the callback interface should be prepared to clean up Readline's
+state if they wish to handle the signal before the line handler completes
+and restores the terminal state.
 
 Readline provides two variables that allow application writers to
 control whether or not it will catch certain signals and act on them

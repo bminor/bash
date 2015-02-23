@@ -2,7 +2,7 @@
  * shmatch.c -- shell interface to posix regular expression matching.
  */
 
-/* Copyright (C) 2003 Free Software Foundation, Inc.
+/* Copyright (C) 2003-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -79,7 +79,8 @@ sh_regmatch (string, pattern, flags)
   matches = NULL;
 #endif
 
-  if (regexec (&regex, string, regex.re_nsub + 1, matches, 0))
+  /* man regexec: NULL PMATCH ignored if NMATCH == 0 */
+  if (regexec (&regex, string, matches ? regex.re_nsub + 1 : 0, matches, 0))
     result = EXECUTION_FAILURE;
   else
     result = EXECUTION_SUCCESS;		/* match */
@@ -95,7 +96,7 @@ sh_regmatch (string, pattern, flags)
   rematch = make_new_array_variable ("BASH_REMATCH");
   amatch = array_cell (rematch);
 
-  if ((flags & SHMAT_SUBEXP) && result == EXECUTION_SUCCESS && subexp_str)
+  if (matches && (flags & SHMAT_SUBEXP) && result == EXECUTION_SUCCESS && subexp_str)
     {
       for (subexp_ind = 0; subexp_ind <= regex.re_nsub; subexp_ind++)
 	{
