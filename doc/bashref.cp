@@ -51,26 +51,26 @@
 \entry{expansion, tilde}{22}{expansion, tilde}
 \entry{parameter expansion}{23}{parameter expansion}
 \entry{expansion, parameter}{23}{expansion, parameter}
-\entry{command substitution}{28}{command substitution}
+\entry{command substitution}{29}{command substitution}
 \entry{expansion, arithmetic}{29}{expansion, arithmetic}
 \entry{arithmetic expansion}{29}{arithmetic expansion}
-\entry{process substitution}{29}{process substitution}
-\entry{word splitting}{29}{word splitting}
+\entry{process substitution}{30}{process substitution}
+\entry{word splitting}{30}{word splitting}
 \entry{expansion, filename}{30}{expansion, filename}
 \entry{expansion, pathname}{30}{expansion, pathname}
 \entry{filename expansion}{30}{filename expansion}
 \entry{pathname expansion}{30}{pathname expansion}
-\entry{pattern matching}{30}{pattern matching}
-\entry{matching, pattern}{30}{matching, pattern}
+\entry{pattern matching}{31}{pattern matching}
+\entry{matching, pattern}{31}{matching, pattern}
 \entry{redirection}{32}{redirection}
-\entry{command expansion}{35}{command expansion}
-\entry{command execution}{36}{command execution}
-\entry{command search}{36}{command search}
+\entry{command expansion}{36}{command expansion}
+\entry{command execution}{37}{command execution}
+\entry{command search}{37}{command search}
 \entry{execution environment}{37}{execution environment}
 \entry{environment}{38}{environment}
-\entry{exit status}{38}{exit status}
+\entry{exit status}{39}{exit status}
 \entry{signal handling}{39}{signal handling}
-\entry{shell script}{39}{shell script}
+\entry{shell script}{40}{shell script}
 \entry{special builtin}{68}{special builtin}
 \entry{login shell}{82}{login shell}
 \entry{interactive shell}{82}{interactive shell}
@@ -103,16 +103,16 @@
 \entry{kill ring}{103}{kill ring}
 \entry{initialization file, readline}{104}{initialization file, readline}
 \entry{variables, readline}{105}{variables, readline}
-\entry{programmable completion}{124}{programmable completion}
-\entry{completion builtins}{126}{completion builtins}
-\entry{History, how to use}{132}{History, how to use}
-\entry{command history}{133}{command history}
-\entry{history list}{133}{history list}
-\entry{history builtins}{133}{history builtins}
-\entry{history expansion}{135}{history expansion}
-\entry{event designators}{135}{event designators}
-\entry{history events}{135}{history events}
-\entry{installation}{138}{installation}
-\entry{configuration}{138}{configuration}
-\entry{Bash installation}{138}{Bash installation}
-\entry{Bash configuration}{138}{Bash configuration}
+\entry{programmable completion}{126}{programmable completion}
+\entry{completion builtins}{128}{completion builtins}
+\entry{History, how to use}{133}{History, how to use}
+\entry{command history}{134}{command history}
+\entry{history list}{134}{history list}
+\entry{history builtins}{134}{history builtins}
+\entry{history expansion}{136}{history expansion}
+\entry{event designators}{136}{event designators}
+\entry{history events}{136}{history events}
+\entry{installation}{139}{installation}
+\entry{configuration}{139}{configuration}
+\entry{Bash installation}{139}{Bash installation}
+\entry{Bash configuration}{139}{Bash configuration}

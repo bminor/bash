@@ -1,4 +1,4 @@
-BASH_BUILTINS(1)                                              BASH_BUILTINS(1)
+BASH_BUILTINS(1)            General Commands Manual           BASH_BUILTINS(1)
 
 
 
@@ -195,10 +195,10 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               various  shell  variables  set  by  the  programmable completion
               facilities, while available, will not have useful values.
 
-              The matches will be generated in the same way  as  if  the  pro-
-              grammable  completion  code  had  generated them directly from a
-              completion specification with the same flags.  If _w_o_r_d is speci-
-              fied, only those completions matching _w_o_r_d will be displayed.
+              The matches will be generated in the same way as if the program-
+              mable completion code had generated them directly from a comple-
+              tion specification with the same flags.  If _w_o_r_d  is  specified,
+              only those completions matching _w_o_r_d will be displayed.
 
               The  return  value is true unless an invalid option is supplied,
               or no matches were generated.
@@ -207,49 +207,51 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
        _p_a_t] [--WW _w_o_r_d_l_i_s_t] [--FF _f_u_n_c_t_i_o_n] [--CC _c_o_m_m_a_n_d]
               [--XX _f_i_l_t_e_r_p_a_t] [--PP _p_r_e_f_i_x] [--SS _s_u_f_f_i_x] _n_a_m_e [_n_a_m_e _._._.]
        ccoommpplleettee --pprr [--DDEE] [_n_a_m_e ...]
-              Specify how arguments to each _n_a_m_e should be completed.  If  the
-              --pp  option  is supplied, or if no options are supplied, existing
-              completion specifications are printed in a way that allows  them
+              Specify  how arguments to each _n_a_m_e should be completed.  If the
+              --pp option is supplied, or if no options are  supplied,  existing
+              completion  specifications are printed in a way that allows them
               to be reused as input.  The --rr option removes a completion spec-
-              ification for each _n_a_m_e, or, if no _n_a_m_es are supplied, all  com-
+              ification  for each _n_a_m_e, or, if no _n_a_m_es are supplied, all com-
               pletion  specifications.   The  --DD  option  indicates  that  the
-              remaining options and actions should apply  to  the  ``default''
-              command  completion;  that is, completion attempted on a command
-              for which no completion has previously  been  defined.   The  --EE
-              option  indicates  that the remaining options and actions should
-              apply to  ``empty''  command  completion;  that  is,  completion
+              remaining  options  and  actions should apply to the ``default''
+              command completion; that is, completion attempted on  a  command
+              for  which  no  completion  has previously been defined.  The --EE
+              option indicates that the remaining options and  actions  should
+              apply  to  ``empty''  command  completion;  that  is, completion
               attempted on a blank line.
 
-              The  process  of  applying  these completion specifications when
-              word completion is  attempted  is  described  above  under  PPrroo--
-              ggrraammmmaabbllee CCoommpplleettiioonn.
+              The process of applying  these  completion  specifications  when
+              word  completion  is attempted is described above under PPrrooggrraamm--
+              mmaabbllee CCoommpplleettiioonn.
 
-              Other  options,  if specified, have the following meanings.  The
-              arguments to the --GG, --WW, and --XX options (and, if necessary,  the
-              --PP  and --SS options) should be quoted to protect them from expan-
+              Other options, if specified, have the following  meanings.   The
+              arguments  to the --GG, --WW, and --XX options (and, if necessary, the
+              --PP and --SS options) should be quoted to protect them from  expan-
               sion before the ccoommpplleettee builtin is invoked.
               --oo _c_o_m_p_-_o_p_t_i_o_n
-                      The _c_o_m_p_-_o_p_t_i_o_n controls several aspects  of  the  comp-
-                      spec's  behavior beyond the simple generation of comple-
+                      The  _c_o_m_p_-_o_p_t_i_o_n  controls  several aspects of the comp-
+                      spec's behavior beyond the simple generation of  comple-
                       tions.  _c_o_m_p_-_o_p_t_i_o_n may be one of:
                       bbaasshhddeeffaauulltt
                               Perform the rest of the default bbaasshh completions
                               if the compspec generates no matches.
-                      ddeeffaauulltt Use  readline's  default  filename completion if
+                      ddeeffaauulltt Use readline's default  filename  completion  if
                               the compspec generates no matches.
                       ddiirrnnaammeess
-                              Perform directory name completion if  the  comp-
+                              Perform  directory  name completion if the comp-
                               spec generates no matches.
                       ffiilleennaammeess
-                              Tell  readline that the compspec generates file-
-                              names, so it can perform  any  filename-specific
-                              processing  (like  adding  a  slash to directory
-                              names, quoting special characters, or  suppress-
-                              ing  trailing spaces).  Intended to be used with
+                              Tell readline that the compspec generates  file-
+                              names,  so  it can perform any filename-specific
+                              processing (like adding  a  slash  to  directory
+                              names,  quoting special characters, or suppress-
+                              ing trailing spaces).  Intended to be used  with
                               shell functions.
-                      nnooqquuoottee Tell readline not to quote the  completed  words
-                              if  they are filenames (quoting filenames is the
+                      nnooqquuoottee Tell  readline  not to quote the completed words
+                              if they are filenames (quoting filenames is  the
                               default).
+                      nnoossoorrtt  Tell  readline  not to sort the list of possible
+                              completions alphabetically.
                       nnoossppaaccee Tell  readline  not  to  append  a  space   (the
                               default)  to  words  completed at the end of the
                               line.
@@ -290,9 +292,9 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                               --kk.
                       rruunnnniinngg Names of running jobs, if job control is active.
                       sseerrvviiccee Service names.  May also be specified as --ss.
-                      sseettoopptt  Valid arguments for the --oo  option  to  the  sseett
+                      sseettoopptt  Valid  arguments  for  the  --oo option to the sseett
                               builtin.
-                      sshhoopptt   Shell  option  names  as  accepted  by the sshhoopptt
+                      sshhoopptt   Shell option names  as  accepted  by  the  sshhoopptt
                               builtin.
                       ssiiggnnaall  Signal names.
                       ssttooppppeedd Names of stopped jobs, if job control is active.
@@ -334,118 +336,118 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                       ated by the preceding options and  arguments,  and  each
                       completion  matching _f_i_l_t_e_r_p_a_t is removed from the list.
                       A leading !! in _f_i_l_t_e_r_p_a_t negates the  pattern;  in  this
-                      case,  any completion not matching _f_i_l_t_e_r_p_a_t is removed.
+                      case, any completion not matching _f_i_l_t_e_r_p_a_t is removed.
 
-              The return value is true unless an invalid option  is  supplied,
-              an  option  other than --pp or --rr is supplied without a _n_a_m_e argu-
-              ment, an attempt is made to remove  a  completion  specification
+              The  return  value is true unless an invalid option is supplied,
+              an option other than --pp or --rr is supplied without a  _n_a_m_e  argu-
+              ment,  an  attempt  is made to remove a completion specification
               for a _n_a_m_e for which no specification exists, or an error occurs
               adding a completion specification.
 
        ccoommppoopptt [--oo _o_p_t_i_o_n] [--DDEE] [++oo _o_p_t_i_o_n] [_n_a_m_e]
               Modify  completion  options  for  each  _n_a_m_e  according  to  the
-              _o_p_t_i_o_ns,  or  for the currently-executing completion if no _n_a_m_es
-              are supplied.  If no _o_p_t_i_o_ns are given, display  the  completion
-              options  for  each _n_a_m_e or the current completion.  The possible
-              values of _o_p_t_i_o_n  are  those  valid  for  the  ccoommpplleettee  builtin
-              described  above.   The  --DD  option indicates that the remaining
+              _o_p_t_i_o_ns, or for the currently-executing completion if  no  _n_a_m_es
+              are  supplied.   If no _o_p_t_i_o_ns are given, display the completion
+              options for each _n_a_m_e or the current completion.   The  possible
+              values  of  _o_p_t_i_o_n  are  those  valid  for  the ccoommpplleettee builtin
+              described above.  The --DD option  indicates  that  the  remaining
               options should apply to the ``default'' command completion; that
-              is,  completion  attempted  on a command for which no completion
-              has previously been defined.  The --EE option indicates  that  the
-              remaining  options should apply to ``empty'' command completion;
+              is, completion attempted on a command for  which  no  completion
+              has  previously  been defined.  The --EE option indicates that the
+              remaining options should apply to ``empty'' command  completion;
               that is, completion attempted on a blank line.
 
-              The return value is true unless an invalid option  is  supplied,
+              The  return  value is true unless an invalid option is supplied,
               an attempt is made to modify the options for a _n_a_m_e for which no
               completion specification exists, or an output error occurs.
 
        ccoonnttiinnuuee [_n]
               Resume the next iteration of the enclosing ffoorr, wwhhiillee, uunnttiill, or
-              sseelleecctt  loop.   If  _n  is specified, resume at the _nth enclosing
-              loop.  _n must be >= 1.  If _n  is  greater  than  the  number  of
-              enclosing  loops,  the  last  enclosing  loop (the ``top-level''
+              sseelleecctt loop.  If _n is specified, resume  at  the  _nth  enclosing
+              loop.   _n  must  be  >=  1.   If _n is greater than the number of
+              enclosing loops, the  last  enclosing  loop  (the  ``top-level''
               loop) is resumed.  The return value is 0 unless _n is not greater
               than or equal to 1.
 
        ddeeccllaarree [--aaAAffFFggiillnnrrttuuxx] [--pp] [_n_a_m_e[=_v_a_l_u_e] ...]
        ttyyppeesseett [--aaAAffFFggiillnnrrttuuxx] [--pp] [_n_a_m_e[=_v_a_l_u_e] ...]
-              Declare  variables and/or give them attributes.  If no _n_a_m_es are
-              given then display the values of variables.  The --pp option  will
+              Declare variables and/or give them attributes.  If no _n_a_m_es  are
+              given  then display the values of variables.  The --pp option will
               display the attributes and values of each _n_a_m_e.  When --pp is used
-              with _n_a_m_e arguments, additional options, other than --ff  and  --FF,
-              are  ignored.   When  --pp  is supplied without _n_a_m_e arguments, it
-              will display the attributes and values of all  variables  having
+              with  _n_a_m_e  arguments, additional options, other than --ff and --FF,
+              are ignored.  When --pp is supplied  without  _n_a_m_e  arguments,  it
+              will  display  the attributes and values of all variables having
               the attributes specified by the additional options.  If no other
-              options  are  supplied  with  --pp,  ddeeccllaarree  will   display   the
-              attributes  and  values  of  all shell variables.  The --ff option
-              will restrict the display to shell  functions.   The  --FF  option
-              inhibits  the display of function definitions; only the function
-              name and attributes are printed.  If the eexxttddeebbuugg  shell  option
-              is  enabled  using  sshhoopptt,  the source file name and line number
-              where the function is defined are displayed  as  well.   The  --FF
+              options   are   supplied  with  --pp,  ddeeccllaarree  will  display  the
+              attributes and values of all shell  variables.   The  --ff  option
+              will  restrict  the  display  to shell functions.  The --FF option
+              inhibits the display of function definitions; only the  function
+              name  and  attributes are printed.  If the eexxttddeebbuugg shell option
+              is enabled using sshhoopptt, the source file  name  and  line  number
+              where  the  function  is  defined are displayed as well.  The --FF
               option implies --ff.  The --gg option forces variables to be created
-              or modified at the global scope, even when ddeeccllaarree  is  executed
-              in  a  shell  function.   It is ignored in all other cases.  The
-              following options can be used to restrict  output  to  variables
+              or  modified  at the global scope, even when ddeeccllaarree is executed
+              in a shell function.  It is ignored in  all  other  cases.   The
+              following  options  can  be used to restrict output to variables
               with the specified attribute or to give variables attributes:
-              --aa     Each  _n_a_m_e  is  an  indexed  array  variable  (see AArrrraayyss
+              --aa     Each _n_a_m_e  is  an  indexed  array  variable  (see  AArrrraayyss
                      above).
-              --AA     Each _n_a_m_e is an associative array  variable  (see  AArrrraayyss
+              --AA     Each  _n_a_m_e  is  an associative array variable (see AArrrraayyss
                      above).
               --ff     Use function names only.
               --ii     The variable is treated as an integer; arithmetic evalua-
-                     tion (see AARRIITTHHMMEETTIICC EEVVAALLUUAATTIIOONN above) is performed  when
+                     tion  (see AARRIITTHHMMEETTIICC EEVVAALLUUAATTIIOONN above) is performed when
                      the variable is assigned a value.
-              --ll     When  the  variable  is  assigned a value, all upper-case
-                     characters are converted to lower-case.   The  upper-case
+              --ll     When the variable is assigned  a  value,  all  upper-case
+                     characters  are  converted to lower-case.  The upper-case
                      attribute is disabled.
-              --nn     Give  each  _n_a_m_e  the _n_a_m_e_r_e_f attribute, making it a name
-                     reference to another variable.  That  other  variable  is
-                     defined  by  the  value of _n_a_m_e.  All references, assign-
-                     ments, and attribute modifications to  _n_a_m_e,  except  for
-                     changing  the  --nn  attribute itself, are performed on the
-                     variable  referenced  by  _n_a_m_e's  value.    The   nameref
+              --nn     Give each _n_a_m_e the _n_a_m_e_r_e_f attribute, making  it  a  name
+                     reference  to  another  variable.  That other variable is
+                     defined by the value of _n_a_m_e.   All  references,  assign-
+                     ments,  and  attribute  modifications to _n_a_m_e, except for
+                     changing the --nn attribute itself, are  performed  on  the
+                     variable   referenced   by  _n_a_m_e's  value.   The  nameref
                      attribute cannot be applied to array variables.
               --rr     Make _n_a_m_es readonly.  These names cannot then be assigned
                      values by subsequent assignment statements or unset.
-              --tt     Give each _n_a_m_e the  _t_r_a_c_e  attribute.   Traced  functions
-                     inherit  the  DDEEBBUUGG  and  RREETTUURRNN  traps  from the calling
-                     shell.  The trace attribute has no  special  meaning  for
+              --tt     Give  each  _n_a_m_e  the  _t_r_a_c_e attribute.  Traced functions
+                     inherit the DDEEBBUUGG  and  RREETTUURRNN  traps  from  the  calling
+                     shell.   The  trace  attribute has no special meaning for
                      variables.
-              --uu     When  the  variable  is  assigned a value, all lower-case
-                     characters are converted to upper-case.   The  lower-case
+              --uu     When the variable is assigned  a  value,  all  lower-case
+                     characters  are  converted to upper-case.  The lower-case
                      attribute is disabled.
-              --xx     Mark  _n_a_m_es  for  export  to  subsequent commands via the
+              --xx     Mark _n_a_m_es for export  to  subsequent  commands  via  the
                      environment.
 
-              Using `+' instead of `-' turns off the attribute  instead,  with
+              Using  `+'  instead of `-' turns off the attribute instead, with
               the exceptions that ++aa may not be used to destroy an array vari-
-              able and ++rr will not remove the readonly attribute.   When  used
+              able  and  ++rr will not remove the readonly attribute.  When used
               in a function, ddeeccllaarree and ttyyppeesseett make each _n_a_m_e local, as with
               the llooccaall command, unless the --gg option is supplied.  If a vari-
-              able  name  is  followed by =_v_a_l_u_e, the value of the variable is
-              set to _v_a_l_u_e.  When using --aa or --AA and the  compound  assignment
-              syntax  to  create array variables, additional attributes do not
+              able name is followed by =_v_a_l_u_e, the value of  the  variable  is
+              set  to  _v_a_l_u_e.  When using --aa or --AA and the compound assignment
+              syntax to create array variables, additional attributes  do  not
               take effect until subsequent assignments.  The return value is 0
-              unless  an  invalid option is encountered, an attempt is made to
-              define a function using ``-f foo=bar'', an attempt  is  made  to
-              assign  a  value  to  a readonly variable, an attempt is made to
-              assign a value to an array variable without using  the  compound
-              assignment  syntax (see AArrrraayyss above), one of the _n_a_m_e_s is not a
-              valid shell variable name, an attempt is made to turn off  read-
-              only  status for a readonly variable, an attempt is made to turn
+              unless an invalid option is encountered, an attempt is  made  to
+              define  a  function  using ``-f foo=bar'', an attempt is made to
+              assign a value to a readonly variable, an  attempt  is  made  to
+              assign  a  value to an array variable without using the compound
+              assignment syntax (see AArrrraayyss above), one of the _n_a_m_e_s is not  a
+              valid  shell variable name, an attempt is made to turn off read-
+              only status for a readonly variable, an attempt is made to  turn
               off array status for an array variable, or an attempt is made to
               display a non-existent function with --ff.
 
        ddiirrss [[--ccllppvv]] [[++_n]] [[--_n]]
-              Without  options,  displays  the  list  of  currently remembered
-              directories.  The default display  is  on  a  single  line  with
-              directory  names  separated by spaces.  Directories are added to
-              the list with  the  ppuusshhdd  command;  the  ppooppdd  command  removes
+              Without options,  displays  the  list  of  currently  remembered
+              directories.   The  default  display  is  on  a single line with
+              directory names separated by spaces.  Directories are  added  to
+              the  list  with  the  ppuusshhdd  command;  the  ppooppdd command removes
               entries from the list.
               --cc     Clears  the  directory  stack  by  deleting  all  of  the
                      entries.
-              --ll     Produces a listing  using  full  pathnames;  the  default
+              --ll     Produces  a  listing  using  full  pathnames; the default
                      listing format uses a tilde to denote the home directory.
               --pp     Print the directory stack with one entry per line.
               --vv     Print the directory stack with one entry per  line,  pre-
@@ -544,101 +546,101 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               returns failure.  An interactive shell returns  failure  if  the
               file cannot be executed.  If _c_o_m_m_a_n_d is not specified, any redi-
               rections take effect in the current shell, and the return status
-              is  0.  If there is a redirection error, the return status is 1.
+              is 0.  If there is a redirection error, the return status is 1.
 
        eexxiitt [_n]
-              Cause the shell to exit with a status of _n.  If  _n  is  omitted,
+              Cause  the  shell  to exit with a status of _n.  If _n is omitted,
               the exit status is that of the last command executed.  A trap on
               EEXXIITT is executed before the shell terminates.
 
        eexxppoorrtt [--ffnn] [_n_a_m_e[=_w_o_r_d]] ...
        eexxppoorrtt --pp
-              The supplied _n_a_m_e_s are marked for automatic export to the  envi-
-              ronment  of subsequently executed commands.  If the --ff option is
-              given, the _n_a_m_e_s refer to functions.  If no _n_a_m_e_s are given,  or
-              if  the  --pp  option is supplied, a list of names of all exported
-              variables is printed.  The --nn option causes the export  property
+              The  supplied _n_a_m_e_s are marked for automatic export to the envi-
+              ronment of subsequently executed commands.  If the --ff option  is
+              given,  the _n_a_m_e_s refer to functions.  If no _n_a_m_e_s are given, or
+              if the --pp option is supplied, a list of names  of  all  exported
+              variables  is printed.  The --nn option causes the export property
               to be removed from each _n_a_m_e.  If a variable name is followed by
               =_w_o_r_d, the value of the variable is set to _w_o_r_d.  eexxppoorrtt returns
               an exit status of 0 unless an invalid option is encountered, one
-              of the _n_a_m_e_s is not a valid shell variable name, or --ff  is  sup-
+              of  the  _n_a_m_e_s is not a valid shell variable name, or --ff is sup-
               plied with a _n_a_m_e that is not a function.
 
        ffcc [--ee _e_n_a_m_e] [--llnnrr] [_f_i_r_s_t] [_l_a_s_t]
        ffcc --ss [_p_a_t=_r_e_p] [_c_m_d]
-              The  first  form  selects a range of commands from _f_i_r_s_t to _l_a_s_t
-              from the history list and  displays  or  edits  and  re-executes
-              them.   _F_i_r_s_t  and  _l_a_s_t may be specified as a string (to locate
-              the last command beginning with that string) or as a number  (an
-              index  into the history list, where a negative number is used as
-              an offset from the current command  number).   If  _l_a_s_t  is  not
-              specified  it is set to the current command for listing (so that
-              ``fc -l -10'' prints the last 10 commands) and to  _f_i_r_s_t  other-
-              wise.   If _f_i_r_s_t is not specified it is set to the previous com-
+              The first form selects a range of commands from  _f_i_r_s_t  to  _l_a_s_t
+              from  the  history  list  and  displays or edits and re-executes
+              them.  _F_i_r_s_t and _l_a_s_t may be specified as a  string  (to  locate
+              the  last command beginning with that string) or as a number (an
+              index into the history list, where a negative number is used  as
+              an  offset  from  the  current  command number).  If _l_a_s_t is not
+              specified it is set to the current command for listing (so  that
+              ``fc  -l  -10'' prints the last 10 commands) and to _f_i_r_s_t other-
+              wise.  If _f_i_r_s_t is not specified it is set to the previous  com-
               mand for editing and -16 for listing.
 
-              The --nn option suppresses the command numbers when listing.   The
-              --rr  option reverses the order of the commands.  If the --ll option
-              is given, the commands are listed on  standard  output.   Other-
-              wise,  the editor given by _e_n_a_m_e is invoked on a file containing
-              those commands.  If _e_n_a_m_e is not given, the value of the  FFCCEEDDIITT
-              variable  is used, and the value of EEDDIITTOORR if FFCCEEDDIITT is not set.
-              If neither variable is set, _v_i is used.  When  editing  is  com-
+              The  --nn option suppresses the command numbers when listing.  The
+              --rr option reverses the order of the commands.  If the --ll  option
+              is  given,  the  commands are listed on standard output.  Other-
+              wise, the editor given by _e_n_a_m_e is invoked on a file  containing
+              those  commands.  If _e_n_a_m_e is not given, the value of the FFCCEEDDIITT
+              variable is used, and the value of EEDDIITTOORR if FFCCEEDDIITT is not  set.
+              If  neither  variable  is set, _v_i is used.  When editing is com-
               plete, the edited commands are echoed and executed.
 
-              In  the  second form, _c_o_m_m_a_n_d is re-executed after each instance
-              of _p_a_t is replaced by _r_e_p.  _C_o_m_m_a_n_d is intepreted  the  same  as
-              _f_i_r_s_t  above.  A useful alias to use with this is ``r="fc -s"'',
-              so that typing ``r cc'' runs the  last  command  beginning  with
+              In the second form, _c_o_m_m_a_n_d is re-executed after  each  instance
+              of  _p_a_t  is  replaced by _r_e_p.  _C_o_m_m_a_n_d is intepreted the same as
+              _f_i_r_s_t above.  A useful alias to use with this is ``r="fc  -s"'',
+              so  that  typing  ``r  cc'' runs the last command beginning with
               ``cc'' and typing ``r'' re-executes the last command.
 
-              If  the  first  form  is  used,  the return value is 0 unless an
-              invalid option is encountered or _f_i_r_s_t or _l_a_s_t  specify  history
-              lines  out  of  range.  If the --ee option is supplied, the return
+              If the first form is used, the  return  value  is  0  unless  an
+              invalid  option  is encountered or _f_i_r_s_t or _l_a_s_t specify history
+              lines out of range.  If the --ee option is  supplied,  the  return
               value is the value of the last command executed or failure if an
               error occurs with the temporary file of commands.  If the second
-              form is used, the return status is that of the  command  re-exe-
-              cuted,  unless  _c_m_d  does  not  specify a valid history line, in
+              form  is  used, the return status is that of the command re-exe-
+              cuted, unless _c_m_d does not specify  a  valid  history  line,  in
               which case ffcc returns failure.
 
        ffgg [_j_o_b_s_p_e_c]
-              Resume _j_o_b_s_p_e_c in the foreground, and make it the  current  job.
+              Resume  _j_o_b_s_p_e_c  in the foreground, and make it the current job.
               If _j_o_b_s_p_e_c is not present, the shell's notion of the _c_u_r_r_e_n_t _j_o_b
-              is used.  The return value is that of the  command  placed  into
-              the  foreground,  or failure if run when job control is disabled
+              is  used.   The  return value is that of the command placed into
+              the foreground, or failure if run when job control  is  disabled
               or, when run with job control enabled, if _j_o_b_s_p_e_c does not spec-
-              ify  a  valid  job  or  _j_o_b_s_p_e_c specifies a job that was started
+              ify a valid job or _j_o_b_s_p_e_c specifies  a  job  that  was  started
               without job control.
 
        ggeettooppttss _o_p_t_s_t_r_i_n_g _n_a_m_e [_a_r_g_s]
-              ggeettooppttss is used by shell procedures to parse positional  parame-
-              ters.   _o_p_t_s_t_r_i_n_g  contains  the  option characters to be recog-
-              nized; if a character is followed by  a  colon,  the  option  is
-              expected  to have an argument, which should be separated from it
-              by white space.  The colon and question mark characters may  not
-              be  used as option characters.  Each time it is invoked, ggeettooppttss
-              places the next option in the shell variable _n_a_m_e,  initializing
+              ggeettooppttss  is used by shell procedures to parse positional parame-
+              ters.  _o_p_t_s_t_r_i_n_g contains the option  characters  to  be  recog-
+              nized;  if  a  character  is  followed by a colon, the option is
+              expected to have an argument, which should be separated from  it
+              by  white space.  The colon and question mark characters may not
+              be used as option characters.  Each time it is invoked,  ggeettooppttss
+              places  the next option in the shell variable _n_a_m_e, initializing
               _n_a_m_e if it does not exist, and the index of the next argument to
               be processed into the variable OOPPTTIINNDD.  OOPPTTIINNDD is initialized to
-              1  each  time  the  shell or a shell script is invoked.  When an
-              option requires an argument, ggeettooppttss places that  argument  into
-              the  variable OOPPTTAARRGG.  The shell does not reset OOPPTTIINNDD automati-
-              cally; it must be  manually  reset  between  multiple  calls  to
+              1 each time the shell or a shell script  is  invoked.   When  an
+              option  requires  an argument, ggeettooppttss places that argument into
+              the variable OOPPTTAARRGG.  The shell does not reset OOPPTTIINNDD  automati-
+              cally;  it  must  be  manually  reset  between multiple calls to
               ggeettooppttss within the same shell invocation if a new set of parame-
               ters is to be used.
 
-              When the end of options is encountered,  ggeettooppttss  exits  with  a
-              return  value  greater than zero.  OOPPTTIINNDD is set to the index of
+              When  the  end  of  options is encountered, ggeettooppttss exits with a
+              return value greater than zero.  OOPPTTIINNDD is set to the  index  of
               the first non-option argument, and _n_a_m_e is set to ?.
 
-              ggeettooppttss normally parses the positional parameters, but  if  more
+              ggeettooppttss  normally  parses the positional parameters, but if more
               arguments are given in _a_r_g_s, ggeettooppttss parses those instead.
 
-              ggeettooppttss  can  report errors in two ways.  If the first character
-              of _o_p_t_s_t_r_i_n_g is a colon, _s_i_l_e_n_t error  reporting  is  used.   In
-              normal  operation,  diagnostic messages are printed when invalid
-              options or missing option arguments  are  encountered.   If  the
-              variable  OOPPTTEERRRR  is  set  to  0, no error messages will be dis-
+              ggeettooppttss can report errors in two ways.  If the  first  character
+              of  _o_p_t_s_t_r_i_n_g  is  a  colon, _s_i_l_e_n_t error reporting is used.  In
+              normal operation, diagnostic messages are printed  when  invalid
+              options  or  missing  option  arguments are encountered.  If the
+              variable OOPPTTEERRRR is set to 0, no  error  messages  will  be  dis-
               played, even if the first character of _o_p_t_s_t_r_i_n_g is not a colon.
 
               If an invalid option is seen, ggeettooppttss places ? into _n_a_m_e and, if
@@ -740,99 +742,103 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               lowing meanings:
               --ll     List process IDs in addition to the normal information.
               --nn     Display  information  only  about  jobs that have changed
-                     status since the user was last notified of their  status.
-              --pp     List  only  the  process  ID  of  the job's process group
+                     status since the user was last notified of their status.
+              --pp     List only the process  ID  of  the  job's  process  group
                      leader.
               --rr     Display only running jobs.
               --ss     Display only stopped jobs.
 
-              If _j_o_b_s_p_e_c is given, output is restricted to  information  about
-              that  job.   The  return status is 0 unless an invalid option is
+              If  _j_o_b_s_p_e_c  is given, output is restricted to information about
+              that job.  The return status is 0 unless an  invalid  option  is
               encountered or an invalid _j_o_b_s_p_e_c is supplied.
 
               If the --xx option is supplied, jjoobbss replaces any _j_o_b_s_p_e_c found in
-              _c_o_m_m_a_n_d  or  _a_r_g_s  with  the corresponding process group ID, and
+              _c_o_m_m_a_n_d or _a_r_g_s with the corresponding  process  group  ID,  and
               executes _c_o_m_m_a_n_d passing it _a_r_g_s, returning its exit status.
 
        kkiillll [--ss _s_i_g_s_p_e_c | --nn _s_i_g_n_u_m | --_s_i_g_s_p_e_c] [_p_i_d | _j_o_b_s_p_e_c] ...
        kkiillll --ll [_s_i_g_s_p_e_c | _e_x_i_t___s_t_a_t_u_s]
-              Send the signal named by _s_i_g_s_p_e_c  or  _s_i_g_n_u_m  to  the  processes
-              named  by  _p_i_d or _j_o_b_s_p_e_c.  _s_i_g_s_p_e_c is either a case-insensitive
-              signal name such as SSIIGGKKIILLLL (with or without the SSIIGG prefix)  or
-              a  signal  number; _s_i_g_n_u_m is a signal number.  If _s_i_g_s_p_e_c is not
-              present, then SSIIGGTTEERRMM is assumed.  An argument of --ll  lists  the
-              signal  names.   If any arguments are supplied when --ll is given,
-              the names of the signals  corresponding  to  the  arguments  are
+              Send  the  signal  named  by  _s_i_g_s_p_e_c or _s_i_g_n_u_m to the processes
+              named by _p_i_d or _j_o_b_s_p_e_c.  _s_i_g_s_p_e_c is either  a  case-insensitive
+              signal  name such as SSIIGGKKIILLLL (with or without the SSIIGG prefix) or
+              a signal number; _s_i_g_n_u_m is a signal number.  If _s_i_g_s_p_e_c  is  not
+              present,  then  SSIIGGTTEERRMM is assumed.  An argument of --ll lists the
+              signal names.  If any arguments are supplied when --ll  is  given,
+              the  names  of  the  signals  corresponding to the arguments are
               listed, and the return status is 0.  The _e_x_i_t___s_t_a_t_u_s argument to
-              --ll is a number specifying either a signal  number  or  the  exit
-              status  of  a process terminated by a signal.  kkiillll returns true
-              if at least one signal was successfully sent,  or  false  if  an
+              --ll  is  a  number  specifying either a signal number or the exit
+              status of a process terminated by a signal.  kkiillll  returns  true
+              if  at  least  one  signal was successfully sent, or false if an
               error occurs or an invalid option is encountered.
 
        lleett _a_r_g [_a_r_g ...]
               Each _a_r_g is an arithmetic expression to be evaluated (see AARRIITTHH--
-              MMEETTIICC EEVVAALLUUAATTIIOONN above).  If the last _a_r_g evaluates  to  0,  lleett
+              MMEETTIICC  EEVVAALLUUAATTIIOONN  above).   If the last _a_r_g evaluates to 0, lleett
               returns 1; 0 is returned otherwise.
 
-       llooccaall [_o_p_t_i_o_n] [_n_a_m_e[=_v_a_l_u_e] ...]
-              For  each  argument, a local variable named _n_a_m_e is created, and
-              assigned _v_a_l_u_e.  The _o_p_t_i_o_n can be any of the  options  accepted
+       llooccaall [_o_p_t_i_o_n] [_n_a_m_e[=_v_a_l_u_e] ... | - ]
+              For each argument, a local variable named _n_a_m_e is  created,  and
+              assigned  _v_a_l_u_e.   The _o_p_t_i_o_n can be any of the options accepted
               by ddeeccllaarree.  When llooccaall is used within a function, it causes the
-              variable _n_a_m_e to have a visible scope restricted to  that  func-
-              tion and its children.  With no operands, llooccaall writes a list of
-              local variables to the standard output.  It is an error  to  use
-              llooccaall when not within a function.  The return status is 0 unless
-              llooccaall is used outside a function, an invalid _n_a_m_e  is  supplied,
-              or _n_a_m_e is a readonly variable.
+              variable  _n_a_m_e  to have a visible scope restricted to that func-
+              tion and its children.  If _n_a_m_e is -, the set of  shell  options
+              is  made  local to the function in which llooccaall is invoked: shell
+              options changed using the sseett builtin inside  the  function  are
+              restored  to  their  original  values when the function returns.
+              With no operands, llooccaall writes a list of local variables to  the
+              standard  output.  It is an error to use llooccaall when not within a
+              function.  The return status is 0 unless llooccaall is used outside a
+              function,  an  invalid  _n_a_m_e  is supplied, or _n_a_m_e is a readonly
+              variable.
 
        llooggoouutt Exit a login shell.
 
-       mmaappffiillee  [--dd  _d_e_l_i_m] [--nn _c_o_u_n_t] [--OO _o_r_i_g_i_n] [--ss _c_o_u_n_t] [--tt] [--uu _f_d] [--CC
+       mmaappffiillee [--dd _d_e_l_i_m] [--nn _c_o_u_n_t] [--OO _o_r_i_g_i_n] [--ss _c_o_u_n_t] [--tt] [--uu  _f_d]  [--CC
        _c_a_l_l_b_a_c_k] [--cc _q_u_a_n_t_u_m] [_a_r_r_a_y]
        rreeaaddaarrrraayy [--dd _d_e_l_i_m] [--nn _c_o_u_n_t] [--OO _o_r_i_g_i_n] [--ss _c_o_u_n_t] [--tt] [--uu _f_d] [--CC
        _c_a_l_l_b_a_c_k] [--cc _q_u_a_n_t_u_m] [_a_r_r_a_y]
-              Read  lines from the standard input into the indexed array vari-
-              able _a_r_r_a_y, or from file descriptor _f_d if the --uu option is  sup-
-              plied.   The variable MMAAPPFFIILLEE is the default _a_r_r_a_y.  Options, if
+              Read lines from the standard input into the indexed array  vari-
+              able  _a_r_r_a_y, or from file descriptor _f_d if the --uu option is sup-
+              plied.  The variable MMAAPPFFIILLEE is the default _a_r_r_a_y.  Options,  if
               supplied, have the following meanings:
-              --dd     The first character of _d_e_l_i_m is used  to  terminate  each
+              --dd     The  first  character  of _d_e_l_i_m is used to terminate each
                      input line, rather than newline.
-              --nn     Copy  at  most _c_o_u_n_t lines.  If _c_o_u_n_t is 0, all lines are
+              --nn     Copy at most _c_o_u_n_t lines.  If _c_o_u_n_t is 0, all  lines  are
                      copied.
-              --OO     Begin assigning to _a_r_r_a_y at index  _o_r_i_g_i_n.   The  default
+              --OO     Begin  assigning  to  _a_r_r_a_y at index _o_r_i_g_i_n.  The default
                      index is 0.
               --ss     Discard the first _c_o_u_n_t lines read.
               --tt     Remove a trailing newline from each line read.
-              --uu     Read  lines  from file descriptor _f_d instead of the stan-
+              --uu     Read lines from file descriptor _f_d instead of  the  stan-
                      dard input.
-              --CC     Evaluate _c_a_l_l_b_a_c_k each time _q_u_a_n_t_u_m lines are read.   The
+              --CC     Evaluate  _c_a_l_l_b_a_c_k each time _q_u_a_n_t_u_m lines are read.  The
                      --cc option specifies _q_u_a_n_t_u_m.
-              --cc     Specify  the  number  of  lines read between each call to
+              --cc     Specify the number of lines read  between  each  call  to
                      _c_a_l_l_b_a_c_k.
 
-              If --CC is specified without --cc,  the  default  quantum  is  5000.
+              If  --CC  is  specified  without  --cc, the default quantum is 5000.
               When _c_a_l_l_b_a_c_k is evaluated, it is supplied the index of the next
               array element to be assigned and the line to be assigned to that
-              element  as  additional  arguments.  _c_a_l_l_b_a_c_k is evaluated after
+              element as additional arguments.  _c_a_l_l_b_a_c_k  is  evaluated  after
               the line is read but before the array element is assigned.
 
-              If not supplied with an  explicit  origin,  mmaappffiillee  will  clear
+              If  not  supplied  with  an  explicit origin, mmaappffiillee will clear
               _a_r_r_a_y before assigning to it.
 
-              mmaappffiillee  returns successfully unless an invalid option or option
-              argument is supplied, _a_r_r_a_y is invalid or  unassignable,  or  if
+              mmaappffiillee returns successfully unless an invalid option or  option
+              argument  is  supplied,  _a_r_r_a_y is invalid or unassignable, or if
               _a_r_r_a_y is not an indexed array.
 
        ppooppdd [-nn] [+_n] [-_n]
-              Removes  entries  from  the directory stack.  With no arguments,
-              removes the top directory from the stack, and performs a  ccdd  to
+              Removes entries from the directory stack.   With  no  arguments,
+              removes  the  top directory from the stack, and performs a ccdd to
               the new top directory.  Arguments, if supplied, have the follow-
               ing meanings:
-              --nn     Suppresses the normal change of directory  when  removing
-                     directories  from  the  stack,  so that only the stack is
+              --nn     Suppresses  the  normal change of directory when removing
+                     directories from the stack, so that  only  the  stack  is
                      manipulated.
-              ++_n     Removes the _nth entry counting from the left of the  list
-                     shown  by  ddiirrss, starting with zero.  For example: ``popd
+              ++_n     Removes  the _nth entry counting from the left of the list
+                     shown by ddiirrss, starting with zero.  For  example:  ``popd
                      +0'' removes the first directory, ``popd +1'' the second.
               --_n     Removes the _nth entry counting from the right of the list
                      shown by ddiirrss, starting with zero.  For  example:  ``popd
@@ -862,64 +868,64 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                      corresponding _a_r_g_u_m_e_n_t (except that \\cc terminates output,
                      backslashes  in \\'', \\"", and \\?? are not removed, and octal
                      escapes beginning with \\00 may contain up to four digits).
-              %%qq     causes  pprriinnttff  to output the corresponding _a_r_g_u_m_e_n_t in a
+              %%qq     causes pprriinnttff to output the corresponding _a_r_g_u_m_e_n_t  in  a
                      format that can be reused as shell input.
               %%((_d_a_t_e_f_m_t))TT
-                     causes pprriinnttff to output the  date-time  string  resulting
-                     from  using  _d_a_t_e_f_m_t  as a format string for _s_t_r_f_t_i_m_e(3).
+                     causes  pprriinnttff  to  output the date-time string resulting
+                     from using _d_a_t_e_f_m_t as a format  string  for  _s_t_r_f_t_i_m_e(3).
                      The corresponding _a_r_g_u_m_e_n_t is an integer representing the
-                     number  of seconds since the epoch.  Two special argument
-                     values may be used: -1 represents the current  time,  and
-                     -2  represents  the  time  the  shell was invoked.  If no
-                     argument is specified, conversion behaves as  if  -1  had
-                     been  given.   This  is  an exception to the usual pprriinnttff
+                     number of seconds since the epoch.  Two special  argument
+                     values  may  be used: -1 represents the current time, and
+                     -2 represents the time the  shell  was  invoked.   If  no
+                     argument  is  specified,  conversion behaves as if -1 had
+                     been given.  This is an exception  to  the  usual  pprriinnttff
                      behavior.
 
-              Arguments to non-string format specifiers are treated as C  con-
+              Arguments  to non-string format specifiers are treated as C con-
               stants, except that a leading plus or minus sign is allowed, and
-              if the leading character is a single or double quote, the  value
+              if  the leading character is a single or double quote, the value
               is the ASCII value of the following character.
 
-              The  _f_o_r_m_a_t  is  reused as necessary to consume all of the _a_r_g_u_-
+              The _f_o_r_m_a_t is reused as necessary to consume all  of  the  _a_r_g_u_-
               _m_e_n_t_s.  If the _f_o_r_m_a_t requires more _a_r_g_u_m_e_n_t_s than are supplied,
-              the  extra  format  specifications  behave as if a zero value or
-              null string, as appropriate,  had  been  supplied.   The  return
+              the extra format specifications behave as if  a  zero  value  or
+              null  string,  as  appropriate,  had  been supplied.  The return
               value is zero on success, non-zero on failure.
 
        ppuusshhdd [--nn] [+_n] [-_n]
        ppuusshhdd [--nn] [_d_i_r]
-              Adds  a  directory to the top of the directory stack, or rotates
-              the stack, making the new top of the stack the  current  working
+              Adds a directory to the top of the directory stack,  or  rotates
+              the  stack,  making the new top of the stack the current working
               directory.  With no arguments, exchanges the top two directories
-              and returns 0, unless the directory stack is empty.   Arguments,
+              and  returns 0, unless the directory stack is empty.  Arguments,
               if supplied, have the following meanings:
-              --nn     Suppresses  the  normal  change  of directory when adding
-                     directories to the stack,  so  that  only  the  stack  is
+              --nn     Suppresses the normal change  of  directory  when  adding
+                     directories  to  the  stack,  so  that  only the stack is
                      manipulated.
-              ++_n     Rotates  the  stack  so  that the _nth directory (counting
-                     from the left of the list shown by  ddiirrss,  starting  with
+              ++_n     Rotates the stack so that  the  _nth  directory  (counting
+                     from  the  left  of the list shown by ddiirrss, starting with
                      zero) is at the top.
-              --_n     Rotates  the  stack  so  that the _nth directory (counting
-                     from the right of the list shown by ddiirrss,  starting  with
+              --_n     Rotates the stack so that  the  _nth  directory  (counting
+                     from  the  right of the list shown by ddiirrss, starting with
                      zero) is at the top.
               _d_i_r    Adds _d_i_r to the directory stack at the top, making it the
-                     new current working directory as if it had been  supplied
+                     new  current working directory as if it had been supplied
                      as the argument to the ccdd builtin.
 
               If the ppuusshhdd command is successful, a ddiirrss is performed as well.
-              If the first form is used, ppuusshhdd returns 0 unless the cd to  _d_i_r
-              fails.   With the second form, ppuusshhdd returns 0 unless the direc-
-              tory stack is empty, a non-existent directory stack  element  is
-              specified,  or the directory change to the specified new current
+              If  the first form is used, ppuusshhdd returns 0 unless the cd to _d_i_r
+              fails.  With the second form, ppuusshhdd returns 0 unless the  direc-
+              tory  stack  is empty, a non-existent directory stack element is
+              specified, or the directory change to the specified new  current
               directory fails.
 
        ppwwdd [--LLPP]
-              Print the absolute pathname of the  current  working  directory.
+              Print  the  absolute  pathname of the current working directory.
               The pathname printed contains no symbolic links if the --PP option
               is supplied or the --oo pphhyyssiiccaall option to the sseett builtin command
-              is  enabled.  If the --LL option is used, the pathname printed may
-              contain symbolic links.  The return status is 0 unless an  error
-              occurs  while  reading  the  name of the current directory or an
+              is enabled.  If the --LL option is used, the pathname printed  may
+              contain  symbolic links.  The return status is 0 unless an error
+              occurs while reading the name of the  current  directory  or  an
               invalid option is supplied.
 
        rreeaadd [--eerrss] [--aa _a_n_a_m_e] [--dd _d_e_l_i_m] [--ii _t_e_x_t] [--nn _n_c_h_a_r_s] [--NN _n_c_h_a_r_s] [--pp
@@ -953,7 +959,7 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                      placed into the editing buffer before editing begins.
               --nn _n_c_h_a_r_s
                      rreeaadd  returns after reading _n_c_h_a_r_s characters rather than
-                     waiting for a complete line of input, but honor a  delim-
+                     waiting for a complete line of input, but honors a delim-
                      iter  if fewer than _n_c_h_a_r_s characters are read before the
                      delimiter.
               --NN _n_c_h_a_r_s
@@ -1045,9 +1051,9 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               ues for the positional parameters and are assigned, in order, to
               $$11,  $$22,  ......   $$_n.   Options,  if specified, have the following
               meanings:
-              --aa      Automatically mark variables  and  functions  which  are
-                      modified  or  created  for  export to the environment of
-                      subsequent commands.
+              --aa      Each variable or function that is created or modified is
+                      given  the export attribute and marked for export to the
+                      environment of subsequent commands.
               --bb      Report the status of terminated background jobs  immedi-
                       ately, rather than before the next primary prompt.  This
                       is effective only when job control is enabled.
@@ -1341,8 +1347,8 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               ddiirreexxppaanndd
                       If  set,  bbaasshh replaces directory names with the results
                       of word expansion when performing  filename  completion.
-                      This  changes  the  contents  of  the  readline  editing
-                      buffer.  If not set, bbaasshh attempts to preserve what  the
+                      This  changes  the contents of the readline editing buf-
+                      fer.  If not set, bbaasshh attempts  to  preserve  what  the
                       user typed.
               ddiirrssppeellll
                       If  set,  bbaasshh attempts spelling correction on directory
@@ -1466,7 +1472,9 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               nnooccaasseemmaattcchh
                       If  set,  bbaasshh  matches  patterns  in a case-insensitive
                       fashion when performing matching while executing ccaassee or
-                      [[[[ conditional commands.
+                      [[[[ conditional commands, when performing pattern substi-
+                      tution word expansions, or when filtering possible  com-
+                      pletions as part of programmable completion.
               nnuullllgglloobb
                       If  set,  bbaasshh allows patterns which match no files (see
                       PPaatthhnnaammee EExxppaannssiioonn above) to expand to  a  null  string,
@@ -1638,7 +1646,7 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               function lookup, as with the ccoommmmaanndd builtin.  ttyyppee returns true
               if all of the arguments are found, false if any are not found.
 
-       uulliimmiitt [--HHSSTTaabbccddeeffiillmmnnppqqrrssttuuvvxx [_l_i_m_i_t]]
+       uulliimmiitt [--HHSSaabbccddeeffiikkllmmnnppqqrrssttuuvvxxPPTT [_l_i_m_i_t]]
               Provides control over the resources available to the  shell  and
               to  processes started by it, on systems that allow such control.
               The --HH and --SS options specify that the hard or soft limit is set
@@ -1662,6 +1670,7 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               --ff     The maximum size of files written by the  shell  and  its
                      children
               --ii     The maximum number of pending signals
+              --kk     The maximum number of kqueues that may be allocated
               --ll     The maximum size that may be locked into memory
               --mm     The  maximum resident set size (many systems do not honor
                      this limit)
@@ -1677,15 +1686,16 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               --vv     The maximum amount of virtual  memory  available  to  the
                      shell and, on some systems, to its children
               --xx     The maximum number of file locks
+              --PP     The maximum number of pseudoterminals
               --TT     The maximum number of threads
 
               If  _l_i_m_i_t  is given, and the --aa option is not used, _l_i_m_i_t is the
               new value of the specified resource.  If  no  option  is  given,
               then  --ff is assumed.  Values are in 1024-byte increments, except
               for --tt, which is in seconds; --pp, which is in units  of  512-byte
-              blocks;  and --TT, --bb, --nn, and --uu, which are unscaled values.  The
-              return status is 0 unless an invalid option or argument is  sup-
-              plied, or an error occurs while setting a new limit.
+              blocks;  and --PP, --TT, --bb, --kk, --nn, and --uu, which are unscaled val-
+              ues.  The return status is 0 unless an invalid option  or  argu-
+              ment is supplied, or an error occurs while setting a new limit.
 
        uummaasskk [--pp] [--SS] [_m_o_d_e]
               The user file-creation mask is set to _m_o_d_e.  If _m_o_d_e begins with

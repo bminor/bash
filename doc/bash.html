@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2014 August 27<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2015 January 19<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -42,7 +42,7 @@ bash - GNU Bourne-Again SHell
 <H3>COPYRIGHT</H3>
 
 
-Bash is Copyright &#169; 1989-2013 by the Free Software Foundation, Inc.
+Bash is Copyright &#169; 1989-2015 by the Free Software Foundation, Inc.
 <A NAME="lbAE">&nbsp;</A>
 <H3>DESCRIPTION</H3>
 
@@ -941,10 +941,10 @@ right of the operator is considered a pattern and matched according
 to the rules described below under <B>Pattern Matching</B>,
 as if the <B>extglob</B> shell option were enabled.
 The <B>=</B> operator is equivalent to <B>==</B>.
-If the shell option
+If the
 <B>nocasematch</B>
 
-is enabled, the match is performed without regard to the case
+shell option is enabled, the match is performed without regard to the case
 of alphabetic characters.
 The return value is 0 if the string matches (<B>==</B>) or does not match
 (<B>!=</B>) the pattern, and 1 otherwise.
@@ -961,10 +961,10 @@ The return value is 0 if the string matches
 the pattern, and 1 otherwise.
 If the regular expression is syntactically incorrect, the conditional
 expression's return value is 2.
-If the shell option
+If the
 <B>nocasematch</B>
 
-is enabled, the match is performed without regard to the case
+shell option is enabled, the match is performed without regard to the case
 of alphabetic characters.
 Any part of the pattern may be quoted to force the quoted portion
 to be matched as a string.
@@ -1119,10 +1119,10 @@ command substitution, process substitution and quote removal.
 Each <I>pattern</I> examined is expanded using tilde
 expansion, parameter and variable expansion, arithmetic expansion,
 command substitution, and process substitution.
-If the shell option
+If the
 <B>nocasematch</B>
 
-is enabled, the match is performed without regard to the case
+shell option is enabled, the match is performed without regard to the case
 of alphabetic characters.
 When a match is found, the corresponding <I>list</I> is executed.
 If the <B>;;</B> operator is used, no subsequent matches are attempted after
@@ -1643,7 +1643,7 @@ If the control variable in a <B>for</B> loop has the nameref attribute,
 the list of words can be a list of shell variables, and a name reference
 will be established for each word in the list, in turn, when the loop is
 executed.
-Array variables cannot be given the <B>meref</B> attribute.
+Array variables cannot be given the <B>nameref</B> attribute.
 However, nameref variables can reference array variables and subscripted
 array variables.
 Namerefs can be unset using the <B>-n</B> option to the <B>unset</B> builtin.
@@ -3229,8 +3229,6 @@ of the special parameters <B>*</B> and <B>@</B> (see
 above).  ${#<I>name</I>[<I>subscript</I>]} expands to the length of
 ${<I>name</I>[<I>subscript</I>]}.  If <I>subscript</I> is <B>*</B> or
 <B>@</B>, the expansion is the number of elements in the array.
-Referencing an array variable without a subscript is equivalent to
-referencing the array with a subscript of 0.
 If the
 <I>subscript</I>
 
@@ -3239,6 +3237,14 @@ evaluates to a number less than zero, it is
 interpreted as relative to one greater than the maximum index of the array,
 so negative indices count back from the end of the
 array, and an index of -1 references the last element.
+<P>
+
+Referencing an array variable without a subscript is equivalent to
+referencing the array with a subscript of 0.
+Any reference to a variable using a valid subscript is legal, and
+<B>bash</B>
+
+will create an array if necessary.
 <P>
 
 An array variable is considered set if a subscript has been assigned a
@@ -3580,12 +3586,16 @@ The <I>parameter</I> is a shell parameter as described above
 <P>
 
 If the first character of <I>parameter</I> is an exclamation point (<B>!</B>),
+and <I>parameter</I> is not a <I>nameref</I>,
 it introduces a level of variable indirection.
 <B>Bash</B> uses the value of the variable formed from the rest of
 <I>parameter</I> as the name of the variable; this variable is then
 expanded and that value is used in the rest of the substitution, rather
 than the value of <I>parameter</I> itself.
 This is known as <I>indirect expansion</I>.
+If <I>parameter</I> is a nameref, this expands to the name of the
+variable referenced by <I>parameter</I> instead of performing the
+complete indirect expansion.
 The exceptions to this are the expansions of ${<B>!</B><I>prefix</I><B>*</B>} and
 ${<B>!</B><I>name</I>[<I>@</I>]} described below.
 The exclamation point must immediately follow the left brace in order to
@@ -3850,6 +3860,11 @@ If <I>pattern</I> begins with <B>%</B>, it must match at the end
 of the expanded value of <I>parameter</I>.
 If <I>string</I> is null, matches of <I>pattern</I> are deleted
 and the <B>/</B> following <I>pattern</I> may be omitted.
+If the
+<B>nocasematch</B>
+
+shell option is enabled, the match is performed without regard to the case
+of alphabetic characters.
 If
 <I>parameter</I>
 
@@ -3915,6 +3930,71 @@ or
 
 the case modification operation is applied to each member of the
 array in turn, and the expansion is the resultant list.
+<DT>${<I>parameter</I><B>@</B><I>operator</I>}<DD>
+<B>Parameter transformation</B>.
+The expansion is either a transformation of the value of <I>parameter</I>
+or information about <I>parameter</I> itself, depending on the value of
+<I>operator</I>.  Each <I>operator</I> is a single letter:
+<P>
+<DL COMPACT><DT><DD>
+
+<DL COMPACT>
+<DT><B>Q</B>
+
+<DD>
+The expansion is a string that is the value of <I>parameter</I> quoted in a
+format that can be reused as input.
+<DT><B>E</B>
+
+<DD>
+The expansion is a string that is the value of <I>parameter</I> with backslash
+escape sequences expanded as with the <B>$'...'</B> quoting mechansim.
+<DT><B>P</B>
+
+<DD>
+The expansion is a string that is the result of expanding the value of
+<I>parameter</I> as if it were a prompt string (see <B>PROMPTING</B> below).
+<DT><B>A</B>
+
+<DD>
+The expansion is a string in the form of a <B>declare</B> command that, if
+evaluated, will recreate <I>parameter</I> with its attributes and value.
+<DT><B>a</B>
+
+<DD>
+The expansion is a string consisting of flag values representing
+<I>parameter</I>'s attributes.
+
+</DL>
+<P>
+
+If
+<I>parameter</I>
+
+is
+<B>@</B>
+
+or
+<B>*</B>,
+
+the operation is applied to each positional
+parameter in turn, and the expansion is the resultant list.
+If
+<I>parameter</I>
+
+is an array variable subscripted with
+<B>@</B>
+
+or
+<B>*</B>,
+
+the case modification operation is applied to each member of the
+array in turn, and the expansion is the resultant list.
+<P>
+The result of the expansion is subject to word splitting and pathname
+expansion as described below.
+</DL>
+
 </DL>
 <A NAME="lbBC">&nbsp;</A>
 <H4>Command Substitution</H4>
@@ -4232,6 +4312,11 @@ is set, each matching filename that also matches one of the patterns in
 
 </FONT>
 is removed from the list of matches.
+If the <B>nocaseglob</B> option is set, the matching against the patterns in
+<FONT SIZE=-1><B>GLOBIGNORE</B>
+
+</FONT>
+is performed without regard to case.
 The filenames
 <B>``.''</B>
 
@@ -4785,7 +4870,7 @@ current source until a line containing only
 (with no trailing blanks)
 is seen.  All of
 the lines read up to that point are then used as the standard
-input for a command.
+input (or file descriptor <I>n</I> if <I>n</I> is specified) for a command.
 <P>
 
 The format of here-documents is:
@@ -4793,7 +4878,7 @@ The format of here-documents is:
 <P>
 
 <PRE>
-<B>&lt;&lt;</B>[<B>-</B>]<I>word</I>
+[<I>n</I>]<B>&lt;&lt;</B>[<B>-</B>]<I>word</I>
         <I>here-document</I>
 <I>delimiter</I>
 </PRE>
@@ -4853,7 +4938,7 @@ A variant of here documents, the format is:
 <P>
 
 <PRE>
-<B>&lt;&lt;&lt;</B><I>word</I>
+[<I>n</I>]<B>&lt;&lt;&lt;</B><I>word</I>
 </PRE>
 
 </DL>
@@ -4865,10 +4950,11 @@ brace expansion, tilde expansion, parameter and variable expansion,
 command substitution, arithmetic expansion, and quote removal.
 Pathname expansion and word splitting are not performed.
 The result is supplied as a single string to the command on its
-standard input.
+standard input (or file descriptor <I>n</I> if <I>n</I> is specified).
 <A NAME="lbBQ">&nbsp;</A>
 <H4>Duplicating File Descriptors</H4>
 
+<P>
 <P>
 
 The redirection operator
@@ -5346,7 +5432,7 @@ is a decimal number between 2 and 64 representing the arithmetic
 base, and <I>n</I> is a number in that base.
 If <I>base#</I> is omitted, then base 10 is used.
 When specifying <I>n</I>,
-the digits greater&lt; than 9 are represented by the lowercase letters,
+the digits greater than 9 are represented by the lowercase letters,
 the uppercase letters, @, and _, in that order.
 If <I>base</I> is less than or equal to 36, lowercase and uppercase
 letters may be used interchangeably to represent numbers between 10
@@ -6843,6 +6929,13 @@ If set to <B>audible</B>, readline attempts to ring the terminal's bell.
 If set to <B>On</B>, readline attempts to bind the control characters
 treated specially by the kernel's terminal driver to their readline
 equivalents.
+<DT><B>colored-completion-prefix (Off)</B>
+
+<DD>
+If set to <B>On</B>, when listing completions, readline displays the
+common prefix of the set of possible completions using a different color.
+The color definitions are taken from the value of the <B>LS_COLORS</B>
+environment variable.
 <DT><B>colored-stats (Off)</B>
 
 <DD>
@@ -6919,6 +7012,14 @@ or
 When set to <B>On</B>, on operating systems that indicate they support it,
 readline echoes a character corresponding to a signal generated from the
 keyboard.
+<DT><B>enable-bracketed-paste (Off)</B>
+
+<DD>
+When set to <B>On</B>, readline will configure the terminal in a way
+that will enable it to insert each paste into the editing buffer as a
+single string of characters, instead of treating each character as if
+it had been read from the keyboard.  This can prevent pasted characters
+from being interpreted as editing commands.
 <DT><B>enable-keypad (Off)</B>
 
 <DD>
@@ -6942,7 +7043,7 @@ attempts word completion.
 If set to <B>On</B>, the history code attempts to place point at the
 same location on each history line retrieved with <B>previous-history</B>
 or <B>next-history</B>.
-<DT><B>history-size (0)</B>
+<DT><B>history-size (unset)</B>
 
 <DD>
 Set the maximum number of history entries saved in the history list.
@@ -6989,6 +7090,16 @@ the value of
 <B>editing-mode</B>
 
 also affects the default keymap.
+<DT><B>emacs-mode-string (@)</B>
+
+<DD>
+This string is displayed immediately before the last line of the primary
+prompt when emacs editing mode is active.  The value is expanded like a
+key binding, so the standard set of meta- and control prefixes and
+backslash escape sequences is available.
+Use the \1 and \2 escapes to begin and end sequences of
+non-printing characters, which can be used to embed a terminal control
+sequence into the mode string.
 <DT><B>keyseq-timeout (500)</B>
 
 <DD>
@@ -7092,6 +7203,28 @@ performing completion in the middle of a word.  If enabled, readline
 does not insert characters from the completion that match characters
 after point in the word being completed, so portions of the word
 following the cursor are not duplicated.
+<DT><B>vi-cmd-mode-string ((cmd))</B>
+
+<DD>
+This string is displayed immediately before the last line of the primary
+prompt when vi editing mode is active and in command mode.
+The value is expanded like a
+key binding, so the standard set of meta- and control prefixes and
+backslash escape sequences is available.
+Use the \1 and \2 escapes to begin and end sequences of
+non-printing characters, which can be used to embed a terminal control
+sequence into the mode string.
+<DT><B>vi-ins-mode-string ((ins))</B>
+
+<DD>
+This string is displayed immediately before the last line of the primary
+prompt when vi editing mode is active and in insertion mode.
+The value is expanded like a
+key binding, so the standard set of meta- and control prefixes and
+backslash escape sequences is available.
+Use the \1 and \2 escapes to begin and end sequences of
+non-printing characters, which can be used to embed a terminal control
+sequence into the mode string.
 <DT><B>visible-stats (Off)</B>
 
 <DD>
@@ -7133,7 +7266,7 @@ key bindings, perhaps to bind the key sequences output by the
 terminal's function keys.  The word on the right side of the
 <B>=</B>
 
-is tested against the both full name of the terminal and the portion
+is tested against both the full name of the terminal and the portion
 of the terminal name before the first <B>-</B>.  This allows
 <I>sun</I>
 
@@ -7677,7 +7810,7 @@ If the command is followed by digits, executing
 
 again ends the numeric argument, but is otherwise ignored.
 As a special case, if this command is immediately followed by a
-character that is neither a digit or minus sign, the argument count
+character that is neither a digit nor minus sign, the argument count
 for the next command is multiplied by four.
 The argument count is initially one, so executing this function the
 first time makes the argument count four, a second time makes the
@@ -8144,6 +8277,11 @@ is removed before attempting a match.
 Any completion that matches the pattern will be removed from the list.
 A leading <B>!</B> negates the pattern; in this case any completion
 not matching the pattern will be removed.
+If the
+<B>nocasematch</B>
+
+shell option is enabled, the match is performed without regard to the case
+of alphabetic characters.
 <P>
 
 Finally, any prefix and suffix specified with the <B>-P</B> and <B>-S</B>
@@ -9270,6 +9408,10 @@ Intended to be used with shell functions.
 <DD>
 Tell readline not to quote the completed words if they are filenames
 (quoting filenames is the default).
+<DT><B>nosort</B>
+
+<DD>
+Tell readline not to sort the list of possible completions alphabetically.
 <DT><B>nospace</B>
 
 <DD>
@@ -10581,7 +10723,7 @@ evaluates to 0,
 <B>let</B>
 
 returns 1; 0 is returned otherwise.
-<DT><B>local</B> [<I>option</I>] [<I>name</I>[=<I>value</I>] ...]<DD>
+<DT><B>local</B> [<I>option</I>] [<I>name</I>[=<I>value</I>] ... | - ]<DD>
 For each argument, a local variable named
 <I>name</I>
 
@@ -10596,6 +10738,10 @@ is used within a function, it causes the variable
 <I>name</I>
 
 to have a visible scope restricted to that function and its children.
+If <I>name</I> is -, the set of shell options is made local to the function
+in which <B>local</B> is invoked: shell options changed using the
+<B>set</B> builtin inside the function are restored to their original values
+when the function returns.
 With no operands,
 <B>local</B>
 
@@ -10982,7 +11128,7 @@ buffer before editing begins.
 
 <DD>
 <B>read</B> returns after reading <I>nchars</I> characters rather than
-waiting for a complete line of input, but honor a delimiter if fewer
+waiting for a complete line of input, but honors a delimiter if fewer
 than <I>nchars</I> characters are read before the delimiter.
 <DT><B>-N </B><I>nchars</I>
 
@@ -11166,8 +11312,9 @@ Options, if specified, have the following meanings:
 <DT><B>-a</B>
 
 <DD>
-Automatically mark variables and functions which are modified or
-created for export to the environment of subsequent commands.
+Each variable or function that is created or modified is given the
+export attribute and marked for export to the environment of
+subsequent commands.
 <DT><B>-b</B>
 
 <DD>
@@ -12166,7 +12313,9 @@ If set,
 <B>bash</B>
 
 matches patterns in a case-insensitive fashion when performing matching
-while executing <B>case</B> or <B>[[</B> conditional commands.
+while executing <B>case</B> or <B>[[</B> conditional commands,
+when performing pattern substitution word expansions,
+or when filtering possible completions as part of programmable completion.
 <DT><B>nullglob</B>
 
 <DD>
@@ -12626,7 +12775,7 @@ option suppresses shell function lookup, as with the <B>command</B> builtin.
 
 returns true if all of the arguments are found, false if
 any are not found.
-<DT><B>ulimit</B> [<B>-HSTabcdefilmnpqrstuvx</B> [<I>limit</I>]]<DD>
+<DT><B>ulimit</B> [<B>-HSabcdefiklmnpqrstuvxPT</B> [<I>limit</I>]]<DD>
 Provides control over the resources available to the shell and to
 processes started by it, on systems that allow such control.
 The <B>-H</B> and <B>-S</B> options specify that the hard or soft limit is
@@ -12687,6 +12836,10 @@ The maximum size of files written by the shell and its children
 
 <DD>
 The maximum number of pending signals
+<DT><B>-k</B>
+
+<DD>
+The maximum number of kqueues that may be allocated
 <DT><B>-l</B>
 
 <DD>
@@ -12733,6 +12886,10 @@ some systems, to its children
 
 <DD>
 The maximum number of file locks
+<DT><B>-P</B>
+
+<DD>
+The maximum number of pseudoterminals
 <DT><B>-T</B>
 
 <DD>
@@ -12760,9 +12917,13 @@ which is in seconds;
 
 which is in units of 512-byte blocks;
 and
+<B>-P</B>,
+
 <B>-T</B>,
 
 <B>-b</B>,
+
+<B>-k</B>,
 
 <B>-n</B>,
 
@@ -13186,7 +13347,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.3<TH ALIGN=CENTER width=33%>2014 August 27<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2015 January 19<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13292,6 +13453,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 15 September 2014 12:02:02 EDT
+Time: 23 February 2015 09:20:49 EST
 </BODY>
 </HTML>

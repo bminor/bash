@@ -616,7 +616,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
       /* Fork a subshell, turn off the subshell bit, turn off job
 	 control and call execute_command () on the command again. */
-      line_number_for_err_trap = line_number;
+      line_number_for_err_trap = line_number;	/* XXX - save value? */
       tcmd = make_command_string (command);
       paren_pid = make_child (savestring (tcmd), asynchronous);
 
@@ -2565,7 +2565,7 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       invert = (command->flags & CMD_INVERT_RETURN) != 0;
       ignore_return = (command->flags & CMD_IGNORE_RETURN) != 0;
 
-      line_number_for_err_trap = line_number;
+      line_number_for_err_trap = line_number;	/* XXX - save value? */
       exec_result = execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close);
 
       if (asynchronous)
@@ -4553,6 +4553,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
       add_unwind_protect (maybe_restore_getopt_state, gs);
       add_unwind_protect (pop_context, (char *)NULL);
       unwind_protect_int (line_number);
+      unwind_protect_int (line_number_for_err_trap);
       unwind_protect_int (return_catch_flag);
       unwind_protect_jmp_buf (return_catch);
       add_unwind_protect (dispose_command, (char *)tc);

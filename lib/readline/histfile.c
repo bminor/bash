@@ -1,6 +1,6 @@
 /* histfile.c - functions to manipulate the history file. */
 
-/* Copyright (C) 1989-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2015 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -34,6 +34,10 @@
 #endif
 
 #include <stdio.h>
+
+#if defined (HAVE_LIMITS_H)
+#  include <limits.h>
+#endif
 
 #include <sys/types.h>
 #if ! defined (_MINIX) && defined (HAVE_SYS_FILE_H)
@@ -98,6 +102,10 @@ extern int errno;
 
 #include "rlshell.h"
 #include "xmalloc.h"
+
+#if !defined (PATH_MAX)
+#  define PATH_MAX	1024	/* default */
+#endif
 
 /* If non-zero, we write timestamps to the history file in history_do_write() */
 int history_write_timestamps = 0;
@@ -530,7 +538,10 @@ history_truncate_file (fname, lines)
   history_lines_written_to_file = orig_lines - lines;
 
   if (rv != 0 && filename && bakname)
-    histfile_restore (bakname, filename);
+    {
+      histfile_restore (bakname, filename);
+      history_lines_written_to_file = 0;
+    }
   else if (rv == 0 && bakname)
     unlink (bakname);
 
@@ -689,7 +700,10 @@ mmap_error:
     rv = errno;
 
   if (rv != 0 && output && bakname)
-    histfile_restore (bakname, output);
+    {
+      histfile_restore (bakname, output);
+      history_lines_written_to_file = 0;
+    }
   else if (rv == 0 && bakname)
     unlink (bakname);
 

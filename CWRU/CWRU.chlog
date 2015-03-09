@@ -8037,3 +8037,18 @@ lib/readline/doc/rltech.texi
 	  readline's terminal state if it wants to handle a signal before
 	  the line handler restores it.  Suggested by Ulf Magnusson
 	  <ulfalizer@gmail.com>
+
+				   2/24
+				   ----
+lib/readline/histfile.c
+	- history_do_write,history_truncate_file: if the write fails, make sure
+	  to set history_lines_written_to_file to 0 so we don't lose those
+	  history entries
+
+				   2/27
+				   ----
+execute_cmd.c
+	- execute_function: unwind-protect the value of line_number_for_err_trap,
+	  so a function that returns a non-zero value and triggers an ERR trap
+	  has the right value for LINENO. Any simple command in the function
+	  body can change it.  Bug report from Paul Donohue <gnu@paulsd.com>
