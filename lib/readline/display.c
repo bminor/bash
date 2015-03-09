@@ -755,7 +755,7 @@ rl_redisplay ()
      contents of the command line? */
   while (lpos >= _rl_screenwidth)
     {
-      int z;
+      int z, p;
       /* fix from Darin Johnson <darin@acuson.com> for prompt string with
          invisible characters that is longer than the screen width.  The
          prompt_invis_chars_first_line variable could be made into an array
@@ -777,7 +777,15 @@ rl_redisplay ()
 	          break;
 		}
 	      else if (z == _rl_screenwidth)
-	        break;
+		{
+		  /* If we are in the middle or at the end of a multibyte
+		     character, we want to move to the start, then find out
+		     where it ends so we know where to insert the newline.
+		     If this isn't a multibyte character, its the same as num++ */
+		  p = _rl_find_prev_mbchar (local_prompt, num, MB_FIND_ANY);
+		  num = _rl_find_next_mbchar (local_prompt, p, 1, MB_FIND_ANY);
+		  break;
+		}
 	      num++;
 	    }
           temp = num;

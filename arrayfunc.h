@@ -57,7 +57,7 @@ extern void print_array_assignment __P((SHELL_VAR *, int));
 extern void print_assoc_assignment __P((SHELL_VAR *, int));
 
 extern arrayind_t array_expand_index __P((SHELL_VAR *, char *, int));
-extern int valid_array_reference __P((char *));
+extern int valid_array_reference __P((char *, int));
 extern char *array_value __P((char *, int, int, int *, arrayind_t *));
 extern char *get_array_value __P((char *, int, int *, arrayind_t *));
 

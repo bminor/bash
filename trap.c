@@ -296,8 +296,9 @@ run_pending_traps ()
 #if defined (DEBUG)
       internal_warning ("run_pending_traps: recursive invocation while running trap for signal %d", running_trap-1);
 #endif
-#if 0
-      return;			/* no recursive trap invocations */
+#if defined (SIGWINCH)
+      if (running_trap == SIGWINCH+1 && pending_traps[SIGWINCH])
+	return;			/* no recursive SIGWINCH trap invocations */
 #else
       ;
 #endif
@@ -1160,6 +1161,7 @@ reset_or_restore_signal_handlers (reset)
 	}
       else if (sigmodes[i] & SIG_SPECIAL)
 	(*reset) (i);
+      pending_traps[i] = 0;	/* XXX */
     }
 
   /* Command substitution and other child processes don't inherit the

@@ -4934,7 +4934,7 @@ got_token:
       /* can use token; already copied to the_word */
       token[token_index-1] = '\0';
 #if defined (ARRAY_VARS)
-      if (legal_identifier (token+1) || valid_array_reference (token+1))
+      if (legal_identifier (token+1) || valid_array_reference (token+1, 0))
 #else
       if (legal_identifier (token+1))
 #endif

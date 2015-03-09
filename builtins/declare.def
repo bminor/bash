@@ -325,7 +325,7 @@ declare_internal (list, local_var)
       if (flags_on & att_nameref)
 	{
 #if defined (ARRAY_VARIABLES)
-	  if (valid_array_reference (name))
+	  if (valid_array_reference (name, 0))
 	    {
 	      builtin_error (_("%s: reference variable cannot be an array"), name);
 	      assign_error++;
@@ -350,7 +350,7 @@ declare_internal (list, local_var)
       if (t = strchr (name, '['))	/* ] */
 	{
 	  /* If offset != 0 we have already validated any array reference */
-	  if (offset == 0 && valid_array_reference (name) == 0)
+	  if (offset == 0 && valid_array_reference (name, 0) == 0)
 	    {
 	      sh_invalidid (name);
 	      assign_error++;

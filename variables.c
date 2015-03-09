@@ -2602,7 +2602,7 @@ bind_variable_internal (name, value, table, hflags, aflags)
       newval = nameref_cell (entry);
 #if defined (ARRAY_VARS)
       /* declare -n foo=x[2] */
-      if (valid_array_reference (newval))
+      if (valid_array_reference (newval, 0))
         /* XXX - should it be aflags? */
 	entry = assign_array_element (newval, make_variable_value (entry, value, 0), aflags);
       else
@@ -2733,7 +2733,7 @@ bind_variable (name, value, flags)
 		      if (nameref_cell (nv) == 0)
 			return (bind_variable_internal (nv->name, value, nvc->table, 0, flags));
 #if defined (ARRAY_VARS)
-		      else if (valid_array_reference (nameref_cell (nv)))
+		      else if (valid_array_reference (nameref_cell (nv), 0))
 			return (assign_array_element (nameref_cell (nv), value, flags));
 		      else
 #endif
@@ -2800,7 +2800,7 @@ bind_variable_value (var, value, aflags)
     {
       t = make_variable_value (var, value, aflags);
 #if defined (ARRAY_VARS)
-      if ((aflags & ASS_NAMEREF) && (t == 0 || *t == 0 || (legal_identifier (t) == 0 && valid_array_reference (t) == 0)))
+      if ((aflags & ASS_NAMEREF) && (t == 0 || *t == 0 || (legal_identifier (t) == 0 && valid_array_reference (t, 0) == 0)))
 #else
       if ((aflags & ASS_NAMEREF) && (t == 0 || *t == 0 || legal_identifier (t) == 0))
 #endif
@@ -2844,7 +2844,7 @@ bind_int_variable (lhs, rhs)
 
   isint = isarr = implicitarray = 0;
 #if defined (ARRAY_VARS)
-  if (valid_array_reference (lhs))
+  if (valid_array_reference (lhs, 0))
     {
       isarr = 1;
       v = array_variable_part (lhs, (char **)0, (int *)0);

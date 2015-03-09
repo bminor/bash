@@ -6010,7 +6010,7 @@ valid_brace_expansion_word (name, var_is_special)
   else if (var_is_special)
     return 1;
 #if defined (ARRAY_VARS)
-  else if (valid_array_reference (name))
+  else if (valid_array_reference (name, 0))
     return 1;
 #endif /* ARRAY_VARS */
   else if (legal_identifier (name))
@@ -6054,7 +6054,7 @@ chk_atstar (name, quoted, quoted_dollar_atp, contains_dollar_at)
 
   /* Now check for ${array[@]} and ${array[*]} */
 #if defined (ARRAY_VARS)
-  else if (valid_array_reference (name))
+  else if (valid_array_reference (name, 0))
     {
       temp1 = mbschr (name, '[');
       if (temp1 && temp1[1] == '@' && temp1[2] == ']')
@@ -6127,7 +6127,7 @@ parameter_brace_expand_word (name, var_is_special, quoted, pflags, indp)
       free (tt);
     }
 #if defined (ARRAY_VARS)
-  else if (valid_array_reference (name))
+  else if (valid_array_reference (name, 0))
     {
 expand_arrayref:
       /* XXX - does this leak if name[@] or name[*]? */
@@ -6188,7 +6188,7 @@ expand_arrayref:
       temp = nameref_cell (var);
 #if defined (ARRAY_VARS)
       /* Handle expanding nameref whose value is x[n] */
-      if (temp && *temp && valid_array_reference (temp))
+      if (temp && *temp && valid_array_reference (temp, 0))
 	{
 	  name = temp;
 	  goto expand_arrayref;
@@ -6402,7 +6402,7 @@ parameter_brace_expand_rhs (name, value, c, quoted, qdollaratp, hasdollarat)
     }
     
 #if defined (ARRAY_VARS)
-  if (valid_array_reference (vname))
+  if (valid_array_reference (vname, 0))
     assign_array_element (vname, t1, 0);
   else
 #endif /* ARRAY_VARS */
@@ -6459,7 +6459,7 @@ valid_length_expression (name)
 	  ((sh_syntaxtab[(unsigned char) name[1]] & CSPECVAR) && name[2] == '\0') ||  /* special param */
 	  (DIGIT (name[1]) && all_digits (name + 1)) ||	/* ${#11} */
 #if defined (ARRAY_VARS)
-	  valid_array_reference (name + 1) ||			/* ${#a[7]} */
+	  valid_array_reference (name + 1, 0) ||		/* ${#a[7]} */
 #endif
 	  legal_identifier (name + 1));				/* ${#PS1} */
 }
@@ -6509,7 +6509,7 @@ parameter_brace_expand_length (name)
       FREE (t);
     }
 #if defined (ARRAY_VARS)
-  else if (valid_array_reference (name + 1))
+  else if (valid_array_reference (name + 1, 0))
     number = array_length_reference (name + 1);
 #endif /* ARRAY_VARS */
   else
@@ -6784,7 +6784,7 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
   *varp = (SHELL_VAR *)NULL;
 
 #if defined (ARRAY_VARS)
-  if (valid_array_reference (vname))
+  if (valid_array_reference (vname, 0))
     {
       v = array_variable_part (vname, &temp, (int *)0);
       /* If we want to signal array_value to use an already-computed index,
@@ -7733,7 +7733,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 #if defined (ARRAY_VARS)      
   /* Process ${!ARRAY[@]} and ${!ARRAY[*]} expansion. */ /* [ */
   if (want_indir && string[sindex - 1] == RBRACE &&
-      string[sindex - 2] == ']' && valid_array_reference (name+1))
+      string[sindex - 2] == ']' && valid_array_reference (name+1, 0))
     {
       char *x, *x1;
 
@@ -7802,7 +7802,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
     }
 
 #if defined (ARRAY_VARS)
-  if (valid_array_reference (name))
+  if (valid_array_reference (name, 0))
     chk_atstar (name, quoted, quoted_dollar_atp, contains_dollar_at);
 #endif
 
@@ -8470,7 +8470,7 @@ comsub:
 	{
 	  temp = nameref_cell (var);
 #if defined (ARRAY_VARS)
-	  if (temp && *temp && valid_array_reference (temp))
+	  if (temp && *temp && valid_array_reference (temp, 0))
 	    {
 	      tdesc = parameter_brace_expand_word (temp, SPECIAL_VAR (temp, 0), quoted, pflags, (arrayind_t *)NULL);
 	      if (tdesc == &expand_wdesc_error || tdesc == &expand_wdesc_fatal)

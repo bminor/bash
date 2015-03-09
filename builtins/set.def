@@ -835,7 +835,7 @@ unset_builtin (list)
 
 #if defined (ARRAY_VARS)
       unset_array = 0;
-      if (!unset_function && valid_array_reference (name))
+      if (!unset_function && valid_array_reference (name, 0))
 	{
 	  t = strchr (name, '[');
 	  *t++ = '\0';

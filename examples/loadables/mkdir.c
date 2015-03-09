@@ -52,7 +52,7 @@ int
 mkdir_builtin (list)
      WORD_LIST *list;
 {
-  int opt, pflag, omode, rval, octal, nmode, parent_mode, um;
+  int opt, pflag, omode, rval, nmode, parent_mode;
   char *mode;
   WORD_LIST *l;
 
@@ -90,7 +90,6 @@ mkdir_builtin (list)
 	  builtin_error ("invalid file mode: %s", mode);
 	  return (EXECUTION_FAILURE);
 	}
-      octal = 1;
     }
   else if (mode)
     {
@@ -101,7 +100,6 @@ mkdir_builtin (list)
 	  builtin_error ("invalid file mode: %s", mode);
 	  return (EXECUTION_FAILURE);
 	}
-      octal = 0;
     }
 
   /* Make the new mode */

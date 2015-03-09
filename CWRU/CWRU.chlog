@@ -8052,3 +8052,54 @@ execute_cmd.c
 	  so a function that returns a non-zero value and triggers an ERR trap
 	  has the right value for LINENO. Any simple command in the function
 	  body can change it.  Bug report from Paul Donohue <gnu@paulsd.com>
+
+				    3/5
+				    ---
+lib/sh/shquote.c
+	- sh_backslash_quote: cast `c' to `unsigned char' before using as
+	  index into backslash_table.  Report and fix from
+	  alexeyv.90@gmail.com
+
+arrayfunc.[ch]
+	- valid_array_reference: added second `flags' argument for future use;
+	  currently unused
+
+parse.y,{redir,subst,variables,test}.c
+builtins/{declare,printf,read,set}.def
+	- valid_array_reference: changed callers
+
+				    3/7
+				    ---
+lib/readline/signals.c
+	- _rl_handle_signal: if readline gets a SIGTSTP or SIGTTIN, block
+	  SIGTTOU so a backgrounded readline can reset the terminal settings
+	  appropriately, otherwise the terminal state and readline's idea
+	  of it can get messed up.  Original report from Dave Wysochanski
+	  <dwysocha@redhat.com> and Dave Anderson <anderson@redhat.com>
+
+trap.c
+	- run_pending_traps: don't allow recursive SIGWINCH trap invocations;
+	  they're wasteful and trying to handle a stream of signals while a
+	  user resizes the terminal can lead to malloc errors trying to save
+	  and restore the_pipeline multiple times.  Problem reported most
+	  recently by Martin M. S. Pederson (Fedora bash bug 1197768
+	  https://bugzilla.redhat.com/show_bug.cgi?id=1197768)
+	- reset_or_restore_signal_handlers: set pending_traps to 0 for all
+	  signals when forking a child. TENTATIVE fix
+
+jobs.c
+	- {save,restore}_pipeline: block SIGCHLD while manipulating the_pipeline
+	  like cleanup_the_pipeline does. XXX - may not be necessary
+
+lib/readline/display.c
+	- rl_redisplay: fixed case where multibyte character in the prompt
+	  (e.g., \u03bb) in the last screen column causes problems with line
+	  wrapping because the newline marker is put in the middle of the
+	  multibyte char.  Most recently reported on Ubuntu by
+	  <sterpe@gmail.com>
+
+pathexp.c
+	- quote_string_for_globbing: if a bracket expression doesn't have a
+	  closing right bracket, rescan it from just after the opening
+	  bracket without treating it as a bracket expression.  Bug report
+	  from Stephane Chazelas <stephane.chazelas@gmail.com>

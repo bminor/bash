@@ -253,7 +253,7 @@ sh_backslash_quote (string, table, flags)
 	  continue;
 	}
 #endif
-      if (backslash_table[c] == 1)
+      if (backslash_table[(unsigned char)c] == 1)
 	*r++ = '\\';
       else if (c == '#' && s == string)			/* comment char */
 	*r++ = '\\';

@@ -1379,7 +1379,7 @@ redir_varvalue (redir)
   w = redir->redirector.filename->word;		/* shorthand */
   /* XXX - handle set -u here? */
 #if defined (ARRAY_VARS)
-  if (vr = valid_array_reference (w))
+  if (vr = valid_array_reference (w, 0))
     v = array_variable_part (w, &sub, &len);
   else
 #endif

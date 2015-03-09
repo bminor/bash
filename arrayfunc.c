@@ -830,8 +830,9 @@ print_assoc_assignment (var, quoted)
 
 /* Return 1 if NAME is a properly-formed array reference v[sub]. */
 int
-valid_array_reference (name)
+valid_array_reference (name, flags)
      char *name;
+     int flags;
 {
   char *t;
   int r, len;

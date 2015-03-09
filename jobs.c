@@ -435,10 +435,14 @@ void
 save_pipeline (clear)
      int clear;
 {
+  sigset_t set, oset;
+
+  BLOCK_CHILD (set, oset);
   saved_pipeline = the_pipeline;
   if (clear)
     the_pipeline = (PROCESS *)NULL;
   saved_already_making_children = already_making_children;
+  UNBLOCK_CHILD (oset);
 }
 
 void
@@ -446,10 +450,14 @@ restore_pipeline (discard)
      int discard;
 {
   PROCESS *old_pipeline;
+  sigset_t set, oset;
 
+  BLOCK_CHILD (set, oset);
   old_pipeline = the_pipeline;
   the_pipeline = saved_pipeline;
   already_making_children = saved_already_making_children;
+  UNBLOCK_CHILD (oset);
+
   if (discard && old_pipeline)
     discard_pipeline (old_pipeline);
 }

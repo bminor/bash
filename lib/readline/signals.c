@@ -215,13 +215,23 @@ _rl_handle_signal (sig)
       rl_free_line_state ();
       /* FALLTHROUGH */
 
-    case SIGTERM:
-    case SIGHUP:
 #if defined (SIGTSTP)
     case SIGTSTP:
-    case SIGTTOU:
     case SIGTTIN:
+#  if defined (HAVE_POSIX_SIGNALS)
+      /* Block SIGTTOU so we can restore the terminal settings to something
+	 sane without stopping on SIGTTOU if we have been placed into the
+	 background.  Even trying to get the current terminal pgrp with
+	 tcgetpgrp() will generate SIGTTOU, so we don't bother.  Don't bother
+	 doing this if we've been stopped on SIGTTOU; it's aready too late. */
+      sigemptyset (&set);
+      sigaddset (&set, SIGTTOU);
+      sigprocmask (SIG_BLOCK, &set, (sigset_t *)NULL);
+#  endif
+    case SIGTTOU:
 #endif /* SIGTSTP */
+    case SIGTERM:
+    case SIGHUP:
 #if defined (SIGALRM)
     case SIGALRM:
 #endif
@@ -232,6 +242,10 @@ _rl_handle_signal (sig)
       rl_cleanup_after_signal ();
 
 #if defined (HAVE_POSIX_SIGNALS)
+      /* Unblock SIGTTOU blocked above */
+      if (sig == SIGTTIN || sig == SIGTSTP)
+	sigprocmask (SIG_UNBLOCK, &set, (sigset_t *)NULL);
+
       sigemptyset (&set);
       sigprocmask (SIG_BLOCK, (sigset_t *)NULL, &set);
       sigdelset (&set, sig);

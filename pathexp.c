@@ -184,6 +184,7 @@ quote_string_for_globbing (pathname, qflags)
   char *temp;
   register int i, j;
   int brack, cclass, collsym, equiv, c, last_was_backslash;
+  int savei, savej;
 
   temp = (char *)xmalloc (2 * strlen (pathname) + 1);
 
@@ -226,6 +227,8 @@ quote_string_for_globbing (pathname, qflags)
 	{
 	  brack = 1;
 	  temp[j++] = pathname[i++];	/* open bracket */
+	  savej = j;
+	  savei = i;
 	  c = pathname[i++];	/* c == char after open bracket */
 	  do
 	    {
@@ -282,7 +285,19 @@ quote_string_for_globbing (pathname, qflags)
 	      else
 		temp[j++] = c;
 	    }
-	  while ((c = pathname[i++]) != ']');
+	  while (((c = pathname[i++]) != ']') && c != 0);
+
+	  /* If we don't find the closing bracket before we hit the end of
+	     the string, rescan string without treating it as a bracket
+	     expression (has implications for backslash and special ERE
+	     chars) */
+	  if (c == 0)
+	    {
+	      i = savei - 1;	/* -1 for autoincrement above */
+	      j = savej;
+	      continue;
+	    }
+
 	  temp[j++] = c;	/* closing right bracket */
 	  i--;			/* increment will happen above in loop */
 	  continue;		/* skip double assignment below */

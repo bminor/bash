@@ -624,7 +624,7 @@ unary_test (op, arg)
     case 'v':
       v = find_variable (arg);
 #if defined (ARRAY_VARS)
-      if (v == 0 && valid_array_reference (arg))
+      if (v == 0 && valid_array_reference (arg, 0))
 	{
 	  char *t;
 	  t = array_value (arg, 0, 0, (int *)0, (arrayind_t *)0);
