@@ -8103,3 +8103,34 @@ pathexp.c
 	  closing right bracket, rescan it from just after the opening
 	  bracket without treating it as a bracket expression.  Bug report
 	  from Stephane Chazelas <stephane.chazelas@gmail.com>
+
+				    3/9
+				    ---
+subst.c
+	- process_substitute: keep the last pipeline created to run a process
+	  substitution in LAST_PROCSUB_CHILD; discard it when another one is
+	  created
+
+jobs.[ch]
+	- discard_pipeline: now global, so process_substitute can call it
+
+jobs.c
+	- last_procsub_child: new variable, set and modified only by the process
+	  substitution code
+	- find_pipeline: if the requested pid is in LAST_PROCSUB_CHILD, return it;
+	  analogous to the way this code handles the_pipeline
+	- waitchld: if we find a child via find_pipeline that is a part of the
+	  last process substitution child, mark that child appropriately.  If
+	  the child is dead, add it to the bgp list.  This and the previous change
+	  allow waiting for the most recent process substitution (the one
+	  corresponding to $!).  Original report from Stephane Chazelas
+	  <stephane.chazelas@gmail.com>
+
+				   3/10
+				   ----
+arrayfunc.c
+	- unbind_array_element: make sure skipsubscript() doesn't try to parse
+	  embedded quotes in the subscript, since this has already been through
+	  one round of word expansion before calling the unset builtin.  (This
+	  function is only called by the unset builtin).  Fixes bug reported by
+	  <vampyrebat@gmail.com>

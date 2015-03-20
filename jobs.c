@@ -233,6 +233,8 @@ int already_making_children = 0;
    exits from get_tty_state(). */
 int check_window_size = CHECKWINSIZE_DEFAULT;
 
+PROCESS *last_procsub_child = (PROCESS *)NULL;
+
 /* Functions local to this file. */
 
 static sighandler wait_sigint_handler __P((int));
@@ -273,7 +275,6 @@ static void cleanup_dead_jobs __P((void));
 static int processes_in_job __P((int));
 static void realloc_jobs_list __P((void));
 static int compact_jobs_list __P((int));
-static int discard_pipeline __P((PROCESS *));
 static void add_process __P((char *, pid_t));
 static void print_pipeline __P((PROCESS *, int, int, FILE *));
 static void pretty_print_job __P((int, int, FILE *));
@@ -445,7 +446,7 @@ save_pipeline (clear)
   UNBLOCK_CHILD (oset);
 }
 
-void
+PROCESS *
 restore_pipeline (discard)
      int discard;
 {
@@ -459,7 +460,11 @@ restore_pipeline (discard)
   UNBLOCK_CHILD (oset);
 
   if (discard && old_pipeline)
-    discard_pipeline (old_pipeline);
+    {
+      discard_pipeline (old_pipeline);
+      return ((PROCESS *)NULL);
+    }
+  return old_pipeline;
 }
 
 /* Start building a pipeline.  */
@@ -1090,7 +1095,7 @@ nohup_job (job_index)
 }
 
 /* Get rid of the data structure associated with a process chain. */
-static int
+int
 discard_pipeline (chain)
      register PROCESS *chain;
 {
@@ -1344,6 +1349,20 @@ find_pipeline (pid, alive_only, jobp)
 	  p = p->next;
 	}
       while (p != the_pipeline);
+    }
+  /* Now look in the last process substitution pipeline, since that sets $! */
+  if (last_procsub_child)
+    {
+      p = last_procsub_child;
+      do
+	{
+	  /* Return it if we found it.  Don't ever return a recycled pid. */
+	  if (p->pid == pid && ((alive_only == 0 && PRECYCLED(p) == 0) || PALIVE(p)))
+	    return (p);
+
+	  p = p->next;
+	}
+      while (p != last_procsub_child);
     }
 
   job = find_job (pid, alive_only, &p);
@@ -3363,6 +3382,12 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
 	    js.c_reaped++;
 	}
         
+#if defined (PROCESS_SUBSTITUTION)
+      /* XXX - should we make this unconditional and not depend on last procsub? */
+      if (child && child == last_procsub_child && child->running == PS_DONE)
+	bgp_add (child->pid, process_exit_status (child->status));	/* XXX */
+#endif	  
+
       if (job == NO_JOB)
 	continue;
 

@@ -174,6 +174,10 @@ extern int expanding_redir;
 extern int tempenv_assign_error;
 extern int builtin_ignoring_errexit;
 
+#if defined (JOB_CONTROL) && defined (PROCESS_SUBSTITUTION)
+extern PROCESS *last_procsub_child;
+#endif
+
 #if !defined (HAVE_WCSDUP) && defined (HANDLE_MULTIBYTE)
 extern wchar_t *wcsdup __P((const wchar_t *));
 #endif
@@ -5459,7 +5463,12 @@ process_substitute (string, open_for_read_in_child)
   if (pid > 0)
     {
 #if defined (JOB_CONTROL)
-      restore_pipeline (1);
+      if (last_procsub_child)
+	{
+	  discard_pipeline (last_procsub_child);
+	  last_procsub_child = (PROCESS *)NULL;
+	}
+      last_procsub_child = restore_pipeline (0);
 #endif
 
 #if !defined (HAVE_DEV_FD)

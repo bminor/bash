@@ -1,6 +1,6 @@
 /* arrayfunc.c -- High-level array functions used by other parts of the shell. */
 
-/* Copyright (C) 2001-2011 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -737,7 +737,7 @@ unbind_array_element (var, sub)
   char *akey;
   ARRAY_ELEMENT *ae;
 
-  len = skipsubscript (sub, 0, 0);
+  len = skipsubscript (sub, 0, (var && assoc_p(var)));
   if (sub[len] != ']' || len == 0)
     {
       builtin_error ("%s[%s: %s", var->name, sub, _(bash_badsub_errmsg));

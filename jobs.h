@@ -176,9 +176,10 @@ extern void making_children __P((void));
 extern void stop_making_children __P((void));
 extern void cleanup_the_pipeline __P((void));
 extern void save_pipeline __P((int));
-extern void restore_pipeline __P((int));
+extern PROCESS *restore_pipeline __P((int));
 extern void start_pipeline __P((void));
 extern int stop_pipeline __P((int, COMMAND *));
+extern int discard_pipeline __P((PROCESS *));
 extern void append_process __P((char *, pid_t, int, int));
 
 extern void delete_job __P((int, int));
