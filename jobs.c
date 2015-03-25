@@ -866,6 +866,15 @@ cleanup_dead_jobs ()
 	delete_job (i, 0);
     }
 
+#if defined (PROCESS_SUBSTITUTION)
+  if (last_procsub_child && last_procsub_child->running == PS_DONE)
+    {
+      bgp_add (last_procsub_child->pid, process_exit_status (last_procsub_child->status));	/* XXX */
+      discard_pipeline (last_procsub_child);
+      last_procsub_child = (PROCESS *)NULL;
+    }
+#endif
+
 #if defined (COPROCESS_SUPPORT)
   coproc_reap ();
 #endif
@@ -3381,12 +3390,6 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
 	  if (job != NO_JOB)
 	    js.c_reaped++;
 	}
-        
-#if defined (PROCESS_SUBSTITUTION)
-      /* XXX - should we make this unconditional and not depend on last procsub? */
-      if (child && child == last_procsub_child && child->running == PS_DONE)
-	bgp_add (child->pid, process_exit_status (child->status));	/* XXX */
-#endif	  
 
       if (job == NO_JOB)
 	continue;

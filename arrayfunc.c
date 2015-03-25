@@ -479,7 +479,7 @@ assign_compound_array_list (var, nlist, flags)
   ARRAY *a;
   HASH_TABLE *h;
   WORD_LIST *list;
-  char *w, *val, *nval;
+  char *w, *val, *nval, *savecmd;
   int len, iflags, free_val;
   arrayind_t ind, last_ind;
   char *akey;
@@ -614,10 +614,12 @@ assign_compound_array_list (var, nlist, flags)
 	  free_val = 1;
 	}
 
+      savecmd = this_command_name;
       if (integer_p (var))
 	this_command_name = (char *)NULL;	/* no command name for errors */
       bind_array_var_internal (var, ind, akey, val, iflags);
       last_ind++;
+      this_command_name = savecmd;
 
       if (free_val)
 	free (val);
@@ -747,8 +749,13 @@ unbind_array_element (var, sub)
 
   if (ALL_ELEMENT_SUB (sub[0]) && sub[1] == 0)
     {
-      unbind_variable (var->name);
-      return (0);
+      if (array_p (var) || assoc_p (var))
+	{
+	  unbind_variable (var->name);	/* XXX -- {array,assoc}_flush ? */
+	  return (0);
+	}
+      else
+	return -2;	/* don't allow this to unset scalar variables */
     }
 
   if (assoc_p (var))
@@ -763,7 +770,7 @@ unbind_array_element (var, sub)
       assoc_remove (assoc_cell (var), akey);
       free (akey);
     }
-  else
+  else if (array_p (var))
     {
       ind = array_expand_index (var, sub, len+1);
       /* negative subscripts to indexed arrays count back from end */
@@ -777,6 +784,19 @@ unbind_array_element (var, sub)
       ae = array_remove (array_cell (var), ind);
       if (ae)
 	array_dispose_element (ae);
+    }
+  else	/* array_p (var) == 0 && assoc_p (var) == 0 */
+    {
+      akey = this_command_name;
+      ind = array_expand_index (var, sub, len+1);
+      this_command_name = akey;
+      if (ind == 0)
+	{
+	  unbind_variable (var->name);
+	  return (0);
+	}
+      else
+	return -2;	/* any subscript other than 0 is invalid with scalar variables */
     }
 
   return 0;
@@ -864,7 +884,7 @@ array_expand_index (var, s, len)
      char *s;
      int len;
 {
-  char *exp, *t;
+  char *exp, *t, *savecmd;
   int expok;
   arrayind_t val;
 
@@ -872,8 +892,10 @@ array_expand_index (var, s, len)
   strncpy (exp, s, len - 1);
   exp[len - 1] = '\0';
   t = expand_arith_string (exp, Q_DOUBLE_QUOTES|Q_ARITH|Q_ARRAYSUB);	/* XXX - Q_ARRAYSUB for future use */
+  savecmd = this_command_name;
   this_command_name = (char *)NULL;
   val = evalexp (t, &expok);
+  this_command_name = savecmd;
   free (t);
   free (exp);
   if (expok == 0)

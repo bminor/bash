@@ -128,10 +128,9 @@ _rl_print_color_indicator (char *f)
 
   const char* name;
   char *filename;
-  struct stat astat;
+  struct stat astat, linkstat;
   mode_t mode;
-  int linkok;
-
+  int linkok;	/* 1 == ok, 0 == dangling symlink, -1 == missing */
   int stat_ok;
 
   name = f;
@@ -150,10 +149,20 @@ _rl_print_color_indicator (char *f)
 #else
   stat_ok = stat(name, &astat);
 #endif
-  if( stat_ok == 0 ) {
-    mode = astat.st_mode;
-    linkok = 1; //f->linkok;
-  }
+  if (stat_ok == 0)
+    {
+      mode = astat.st_mode;
+#if defined (HAVE_LSTAT)
+      if (S_ISLNK (mode))
+	{
+	  linkok = stat (name, &linkstat) == 0;
+	  if (linkok && strncmp (_rl_color_indicator[C_LINK].string, "target", 6) == 0)
+	    mode = linkstat.st_mode;
+	}
+      else
+#endif
+	linkok = 1;
+    }
   else
     linkok = -1;
 
@@ -161,6 +170,8 @@ _rl_print_color_indicator (char *f)
 
   if (linkok == -1 && _rl_color_indicator[C_MISSING].string != NULL)
     colored_filetype = C_MISSING;
+  else if (linkok == 0 && S_ISLNK(mode) && _rl_color_indicator[C_ORPHAN].string != NULL)
+    colored_filetype = C_ORPHAN;	/* dangling symlink */
   else if(stat_ok != 0)
     {
       static enum indicator_no filetype_indicator[] = FILETYPE_INDICATORS;
@@ -201,10 +212,7 @@ _rl_print_color_indicator (char *f)
 #endif
         }
       else if (S_ISLNK (mode))
-        colored_filetype = ((linkok == 0
-                 && (!strncmp (_rl_color_indicator[C_LINK].string, "target", 6)
-                     || _rl_color_indicator[C_ORPHAN].string))
-                ? C_ORPHAN : C_LINK);
+        colored_filetype = C_LINK;
       else if (S_ISFIFO (mode))
         colored_filetype = C_FIFO;
       else if (S_ISSOCK (mode))

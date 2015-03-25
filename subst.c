@@ -321,7 +321,7 @@ static int shouldexp_replacement __P((char *));
 
 static char *pos_params_pat_subst __P((char *, char *, char *, int));
 
-static char *parameter_brace_patsub __P((char *, char *, int, char *, int, int));
+static char *parameter_brace_patsub __P((char *, char *, int, char *, int, int, int));
 
 static char *pos_params_casemod __P((char *, char *, int, int));
 static char *parameter_brace_casemod __P((char *, char *, int, int, char *, int, int));
@@ -7172,11 +7172,11 @@ pos_params_pat_subst (string, pat, rep, mflags)
    and the string to substitute.  QUOTED is a flags word containing
    the type of quoting currently in effect. */
 static char *
-parameter_brace_patsub (varname, value, ind, patsub, quoted, flags)
+parameter_brace_patsub (varname, value, ind, patsub, quoted, pflags, flags)
      char *varname, *value;
      int ind;
      char *patsub;
-     int quoted, flags;
+     int quoted, pflags, flags;
 {
   int vtype, mflags, starsub, delim;
   char *val, *temp, *pat, *rep, *p, *lpatsub, *tt;
@@ -7211,6 +7211,9 @@ parameter_brace_patsub (varname, value, ind, patsub, quoted, flags)
 
   if (starsub)
     mflags |= MATCH_STARSUB;
+
+  if (pflags & PF_ASSIGNRHS)
+    mflags |= MATCH_ASSIGNRHS;
 
   /* If the pattern starts with a `/', make sure we skip over it when looking
      for the replacement delimiter. */
@@ -7812,7 +7815,16 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 
 #if defined (ARRAY_VARS)
   if (valid_array_reference (name, 0))
-    chk_atstar (name, quoted, quoted_dollar_atp, contains_dollar_at);
+    {
+      int qflags;
+
+      qflags = quoted;
+      /* If in a context where word splitting will not take place, treat as
+	 if double-quoted.  Has effects with $* and ${array[*]} */
+      if (pflags & PF_ASSIGNRHS)
+	qflags |= Q_DOUBLE_QUOTES;
+      chk_atstar (name, qflags, quoted_dollar_atp, contains_dollar_at);
+    }
 #endif
 
   var_is_set = temp != (char *)0;
@@ -7879,7 +7891,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
     }
   else if (want_patsub)
     {
-      temp1 = parameter_brace_patsub (name, temp, ind, value, quoted, (tflag & W_ARRAYIND) ? AV_USEIND : 0);
+      temp1 = parameter_brace_patsub (name, temp, ind, value, quoted, pflags, (tflag & W_ARRAYIND) ? AV_USEIND : 0);
       FREE (name);
       FREE (value);
       FREE (temp);
@@ -8077,7 +8089,7 @@ param_expand (string, sindex, quoted, expanded_something,
      int *sindex, quoted, *expanded_something, *contains_dollar_at;
      int *quoted_dollar_at_p, *had_quoted_null_p, pflags;
 {
-  char *temp, *temp1, uerror[3];
+  char *temp, *temp1, uerror[3], *savecmd;
   int zindex, t_index, expok;
   unsigned char c;
   intmax_t number;
@@ -8369,8 +8381,10 @@ param_expand (string, sindex, quoted, expanded_something,
 
 arithsub:
 	  /* No error messages. */
+	  savecmd = this_command_name;
 	  this_command_name = (char *)NULL;
 	  number = evalexp (temp1, &expok);
+	  this_command_name = savecmd;
 	  free (temp);
 	  free (temp1);
 	  if (expok == 0)
@@ -9330,6 +9344,17 @@ finished_with_string:
 	    free (tstring);
 	  goto set_word_flags;
 	}
+      /* This is the attempt to make $* in an assignment context (a=$*) and
+	 array variables subscripted with * in an assignment context (a=${foo[*]})
+	 behave similarly.  It has side effects that, though they increase
+	 compatibility with other shells, are not backwards compatible. */
+#if 0
+      else if (has_dollar_at && quoted == 0 && ifs_chars && (word->flags & W_ASSIGNRHS))
+	{
+	  tword = make_bare_word (istring);
+	  goto set_word_flags;
+	}
+#endif
       else if (has_dollar_at && ifs_chars)
 	list = list_string (istring, *ifs_chars ? ifs_chars : " ", 1);
       else
@@ -10135,6 +10160,7 @@ expand_word_list_internal (list, eflags)
 {
   WORD_LIST *new_list, *temp_list;
   int tint;
+  char *savecmd;
 
   tempenv_assign_error = 0;
   if (list == 0)
@@ -10152,8 +10178,10 @@ expand_word_list_internal (list, eflags)
 		 into the shell's environment. */
 	      for (temp_list = subst_assign_varlist; temp_list; temp_list = temp_list->next)
 		{
+		  savecmd = this_command_name;
 		  this_command_name = (char *)NULL;	/* no arithmetic errors */
 		  tint = do_word_assignment (temp_list->word, 0);
+		  this_command_name = savecmd;
 		  /* Variable assignment errors in non-interactive shells
 		     running in Posix.2 mode cause the shell to exit. */
 		  if (tint == 0)
@@ -10217,10 +10245,12 @@ expand_word_list_internal (list, eflags)
       
       for (temp_list = subst_assign_varlist; temp_list; temp_list = temp_list->next)
 	{
+	  savecmd = this_command_name;
 	  this_command_name = (char *)NULL;
 	  assigning_in_environment = (assign_func == assign_in_env);
 	  tint = (*assign_func) (temp_list->word, is_builtin_or_func);
 	  assigning_in_environment = 0;
+	  this_command_name = savecmd;
 	  /* Variable assignment errors in non-interactive shells running
 	     in Posix.2 mode cause the shell to exit. */
 	  if (tint == 0)

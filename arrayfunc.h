@@ -29,6 +29,7 @@
 #define AV_ALLOWALL	0x001
 #define AV_QUOTED	0x002
 #define AV_USEIND	0x004
+#define AV_USEVAL	0x008	/* XXX - should move this */
 
 extern SHELL_VAR *convert_var_to_array __P((SHELL_VAR *));
 extern SHELL_VAR *convert_var_to_assoc __P((SHELL_VAR *));

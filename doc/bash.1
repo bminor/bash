@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Jan 19 14:47:31 EST 2015
+.\"	Last Change: Sat Mar 21 20:10:48 EDT 2015
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2015 January 19" "GNU Bash 4.4"
+.TH BASH 1 "2015 March 21" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -277,6 +277,7 @@ or one started with the
 option.
 .PP
 An \fIinteractive\fP shell is one started without non-option arguments
+(unless \fB\-s\fP is specified)
 and without the
 .B \-c
 option
@@ -8494,7 +8495,7 @@ The default index is 0.
 Discard the first \fIcount\fP lines read.
 .TP
 .B \-t
-Remove a trailing newline from each line read.
+Remove a trailing \fIdelim\fP (default newline) from each line read.
 .TP
 .B \-u
 Read lines from file descriptor \fIfd\fP instead of the standard input.

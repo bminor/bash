@@ -653,6 +653,13 @@ set_builtin (list)
     {
       switch (flag_name)
 	{
+	  case 'i':	/* don't allow set -i */
+	    s[0] = list_opttype;
+	    s[1] = 'i';
+	    s[2] = '\0';
+	    sh_invalidopt (s);
+	    builtin_usage ();
+	    return (EX_USAGE);
 	  case '?':
 	    builtin_usage ();
 	    return (list_optopt == '?' ? EXECUTION_SUCCESS : EX_USAGE);
@@ -887,17 +894,15 @@ unset_builtin (list)
 #if defined (ARRAY_VARS)
       if (var && unset_array)
 	{
-	  if (array_p (var) == 0 && assoc_p (var) == 0)
+	  /* Let unbind_array_element decide what to do with non-array vars */
+	  tem = unbind_array_element (var, t);
+	  if (tem == -2 && array_p (var) == 0 && assoc_p (var) == 0)
 	    {
 	      builtin_error (_("%s: not an array variable"), var->name);
 	      NEXT_VARIABLE ();
 	    }
-	  else
-	    {
-	      tem = unbind_array_element (var, t);
-	      if (tem == -1)
-		any_failed++;
-	    }
+	  else if (tem < 0)
+	    any_failed++;
 	}
       else
 #endif /* ARRAY_VARS */

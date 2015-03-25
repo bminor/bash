@@ -2,7 +2,7 @@ This file is mapfile.def, from which is created mapfile.c.
 It implements the builtin "mapfile" in Bash.
 
 Copyright (C) 2005-2006 Rocky Bernstein for Free Software Foundation, Inc.
-Copyright (C) 2008-2012 Free Software Foundation, Inc.
+Copyright (C) 2008-2015 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -23,7 +23,7 @@ $PRODUCES mapfile.c
 
 $BUILTIN mapfile
 $FUNCTION mapfile_builtin
-$SHORT_DOC mapfile [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c quantum] [array]
+$SHORT_DOC mapfile [-d delim] [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c quantum] [array]
 Read lines from the standard input into an indexed array variable.
 
 Read lines from the standard input into the indexed array variable ARRAY, or
@@ -31,10 +31,11 @@ from file descriptor FD if the -u option is supplied.  The variable MAPFILE
 is the default ARRAY.
 
 Options:
+  -d delim	Use DELIM to terminate lines, instead of newline
   -n count	Copy at most COUNT lines.  If COUNT is 0, all lines are copied
   -O origin	Begin assigning to ARRAY at index ORIGIN.  The default index is 0
   -s count	Discard the first COUNT lines read
-  -t	Remove a trailing newline from each line read
+  -t	Remove a trailing DELIM from each line read (default newline)
   -u fd	Read lines from file descriptor FD instead of the standard input
   -C callback	Evaluate CALLBACK each time QUANTUM lines are read
   -c quantum	Specify the number of lines read between each call to
@@ -132,13 +133,14 @@ run_callback (callback, curindex, curline)
 }
 
 static void
-do_chop(line)
-     char * line;
+do_chop(line, delim)
+     char *line;
+     unsigned char delim;
 {
   int length;
 
   length = strlen (line);
-  if (length && line[length-1] == '\n') 
+  if (length && line[length-1] == delim) 
     line[length-1] = '\0';
 }
 
@@ -208,7 +210,7 @@ mapfile (fd, line_count_goal, origin, nskip, callback_quantum, callback, array_n
     {
       /* Remove trailing newlines? */
       if (flags & MAPF_CHOP)
-	do_chop (line);
+	do_chop (line, delim);
 	  
       /* Has a callback been registered and if so is it time to call it? */
       if (callback && line_count && (line_count % callback_quantum) == 0) 

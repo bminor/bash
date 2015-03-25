@@ -232,7 +232,7 @@ print_alias (alias, flags)
 
   value = sh_single_quote (alias->value);
   if (flags & AL_REUSABLE)
-    printf ("alias ");
+    printf ("alias %s", (alias->name && alias->name[0] == '-') ? "-- " : "");
   printf ("%s=%s\n", alias->name, value);
   free (value);
 

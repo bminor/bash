@@ -52,6 +52,7 @@ extern int errno;
 #include "flags.h"
 #include "execute_cmd.h"
 #include "redir.h"
+#include "trap.h"
 
 #if defined (BUFFERED_INPUT)
 #  include "input.h"

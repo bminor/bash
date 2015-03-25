@@ -8134,3 +8134,77 @@ arrayfunc.c
 	  one round of word expansion before calling the unset builtin.  (This
 	  function is only called by the unset builtin).  Fixes bug reported by
 	  <vampyrebat@gmail.com>
+
+				   3/17
+				   ----
+jobs.c
+	- waitchld: move code that adds the last process substitution pid to the
+	  bgpids array from waitchld (where it can call malloc in a signal handler
+	  context) to cleanup_dead_jobs
+
+				   3/19
+				   ----
+subst.c
+	- parameter_brace_expand: if expanding an array in a context where word
+	  splitting will not take place (W_ASSIGNRHS only for now), make sure to
+	  pass the double-quoted flag to chk_atstar so we don't get the unquoted
+	  $* behavior, which will cause unwanted word splitting.  Fixes bug
+	  reported by isabella parakiss <izaberina@gmail.com>
+
+arrayfunc.c
+	- unbind_array_element: don't assume that caller will check and pass only
+	  array variables; don't allow non-array variables to be unset using the
+	  `@' or `*' subscripts and don't allow any subscripts other than 0;
+	  return -2 in those cases
+	- unbind_array_element: unset a non-array variable if passed a subscript
+	  of `0' (e.g., `unbind "scalar[0]"').  This is new functionality that
+	  parallels the ${scalar[0]} expansion
+
+builtins/set.def
+	- unset_builtin: don't check whether a variable is an array if it's
+	  referenced using array syntax (scalar[0]); pass it to
+	  unbind_array_element anyway and check the result.  This means that
+	  `unset scalar' and `unset scalar[0]' are equivalent
+
+				   3/20
+				   ----
+builtins/set.def
+	- set_builtin: make `-i' an invalid option, unconditionally for now.
+	  From a bug-bash discussion started by Peng Yu <pengyu.ut@gmail.com>
+
+				   3/21
+				   ----
+lib/readline/colors.c
+	- _rl_print_color_indicator: handle dangling symlinks (C_ORPHAN) and
+	  the `target' specifier for links (dereference S_ISLNK if the target
+	  exists).  Bug report and fix from andreas@stapelspeicher.org
+
+{arrayfunc,subst}.c
+	- add code to save and restore this_command_name in places that set
+	  this_command_name to NULL to prevent error messages from arithmetic
+	  evaluation.  Fixes bug reported by brian.carpenter@gmail.com
+
+builtins/mapfile.def
+	- do_chop: remove a new DELIM argument from the line, instead of
+	  unconditionally removing newline
+	- mapfile: if -d delim is supplied and we are breaking fields at DELIM,
+	  remove DELIM if the -t option is supplied by passing DELIM to do_chop().
+	  Suggested by Geir Hauge <geir.hauge@gmail.com>
+
+doc/{bash.1,bashref.texi}
+	- mapfile: document new -t option behavior, defaults are the same
+
+builtins/alias.def
+	- print_alias: if the first character of an alias name is `-', add a
+	  `-- ' after `alias' to avoid option errors when trying to reuse the
+	  output.  Bug report and fix on savannah from Pasha Bolokhov
+	  <pasha.bolokhov@gmail.com>
+
+				   3/22
+				   ----
+builtins/declare.def
+	- declare_internal: if creating a variable does not return a valid
+	  variable in VAR, check for null variable before dereferencing it.
+	  This happens with nameref variables referencing variables set to
+	  the empty string.
+	  Fixes bug reported by Arthur200000 <arthur200126@163.com> 

@@ -82,7 +82,8 @@ extern int EOF_Reached;
 
 #define MATCH_GLOBREP	0x010
 #define MATCH_QUOTED	0x020
-#define MATCH_STARSUB	0x040
+#define MATCH_ASSIGNRHS	0x040
+#define MATCH_STARSUB	0x080
 
 /* Some needed external declarations. */
 extern char **shell_environment;
