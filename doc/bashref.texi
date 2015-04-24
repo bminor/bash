@@ -6252,7 +6252,9 @@ and executes commands from the first one that exists and is readable.
 The @option{--noprofile} option may be used when the shell is started to
 inhibit this behavior.
 
-When a login shell exits, Bash reads and executes commands from
+When an interactive login shell exits,
+or a non-interactive login shell executes the @code{exit} builtin command,
+Bash reads and executes commands from
 the file @file{~/.bash_logout}, if it exists.
 
 @subsubheading Invoked as an interactive non-login shell

@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Sat Mar 21 20:10:48 EDT 2015
+.\"	Last Change: Mon Mar 23 11:25:25 EDT 2015
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2015 March 21" "GNU Bash 4.4"
+.TH BASH 1 "2015 March 23" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -324,7 +324,8 @@ The
 .B \-\-noprofile
 option may be used when the shell is started to inhibit this behavior.
 .PP
-When a login shell exits,
+When an interactive login shell exits,
+or a non-interactive login shell executes the \fBexit\fP builtin command,
 .B bash
 reads and executes commands from the file \fI~/.bash_logout\fP, if it
 exists.
