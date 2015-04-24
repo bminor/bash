@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue Jul  1 16:38:38 PDT 2014
+.\"	Last Change: Mon Apr  6 14:13:28 EDT 2015
 .\"
-.TH HISTORY 3 "2014 July 1" "GNU History 6.3"
+.TH HISTORY 3 "2014 April 6" "GNU History 6.3"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -441,9 +441,12 @@ return a pointer to that entry.  If there is no previous entry, return
 a \fBNULL\fP pointer.
 
 .Fn1 "HIST_ENTRY *" next_history "void"
-Move the current history offset forward to the next history entry, and
-return the a pointer to that entry.  If there is no next entry, return
-a \fBNULL\fP pointer.
+If the current history offset is not already at the end of the history
+list, move the current history offset forward to the next history entry,
+and return the a pointer to that entry.
+If there is no next entry, return a \fBNULL\fP pointer.
+If this function returns \fBNULL\fP, the current history offset is at the
+end of the history list.
 
 .SS Searching the History List
 

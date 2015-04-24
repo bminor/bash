@@ -189,7 +189,7 @@ source_builtin (list)
     {
       debug_trap = savestring (debug_trap);
       add_unwind_protect (xfree, debug_trap);
-      add_unwind_protect (set_debug_trap, debug_trap);
+      add_unwind_protect (maybe_set_debug_trap, debug_trap);
       restore_default_signal (DEBUG_TRAP);
     }
 

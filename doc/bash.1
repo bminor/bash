@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Mar 23 11:25:25 EDT 2015
+.\"	Last Change: Fri Apr 10 15:04:46 EDT 2015
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2015 March 23" "GNU Bash 4.4"
+.TH BASH 1 "2015 April 10" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -6987,6 +6987,12 @@ is not searched.
 If any \fIarguments\fP are supplied, they become the positional
 parameters when \fIfilename\fP is executed.  Otherwise the positional
 parameters are unchanged.
+If the \fB\-T\fP option is enabled, \fBsource\fP inherits any trap on
+\fBDEBUG\fP; if it is not, any \fBDEBUG\fP trap string is saved and
+restored around the call to \fBsource\fP, and \fBsource\fP unsets the
+\fBDEBUG\fP trap while it executes.
+If \fB\-T\fP is not set, and the sourced file changes
+the \fBDEBUG\fP trap, the new value is retained when \fBsource\fP completes.
 The return status is the status of the last command exited within
 the script (0 if no commands are executed), and false if
 .I filename
@@ -8766,6 +8772,9 @@ than waiting for a complete line of input, unless EOF is encountered or
 Delimiter characters encountered in the input are
 not treated specially and do not cause \fBread\fP to return until
 \fInchars\fP characters are read.
+The result is not split on the characters in \fBIFS\fP; the intent is
+that the variable is assigned exactly the characters read
+(with the exception of backslash; see the \fB\-r\fP option below).
 .TP
 .B \-p \fIprompt\fP
 Display \fIprompt\fP on standard error, without a

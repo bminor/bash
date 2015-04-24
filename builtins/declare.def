@@ -526,7 +526,10 @@ declare_internal (list, local_var)
 		    VSETATTR (var, att_invisible);
 		}
 	      if (var == 0)
-		NEXT_VARIABLE ();
+		{
+		  /* Has to appear in brackets */
+		  NEXT_VARIABLE ();
+		}
 	    }
 	  /* Can't take an existing array variable and make it a nameref */
 	  else if ((array_p (var) || assoc_p (var)) && (flags_on & att_nameref))

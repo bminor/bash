@@ -270,9 +270,12 @@ a @code{NULL} pointer.
 @end deftypefun
 
 @deftypefun {HIST_ENTRY *} next_history (void)
-Move the current history offset forward to the next history entry, and
-return the a pointer to that entry.  If there is no next entry, return
-a @code{NULL} pointer.
+If the current history offset is not already at the end of the history
+list, move the current history offset forward to the next history entry,
+and return the a pointer to that entry.
+If there is no next entry, return a @code{NULL} pointer.
+If this function returns @code{NULL}, the current history offset is at the
+end of the history list.
 @end deftypefun
 
 @node Searching the History List

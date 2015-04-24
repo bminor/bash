@@ -124,9 +124,9 @@ int history_lines_written_to_file = 0;
    for more extensive tests. */
 #define HIST_TIMESTAMP_START(s)		(*(s) == history_comment_char && isdigit ((unsigned char)(s)[1]) )
 
-static char *history_backupfile __P((const char *));
-static int histfile_backup __P((const char *, const char *));
-static int histfile_restore __P((const char *, const char *));
+static char *history_backupfile PARAMS((const char *));
+static int histfile_backup PARAMS((const char *, const char *));
+static int histfile_restore PARAMS((const char *, const char *));
 
 /* Return the string that should be used in the place of this
    filename.  This only matters when you don't specify the

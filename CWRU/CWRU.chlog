@@ -8215,3 +8215,91 @@ doc/{bash.1,bashref.texi}
 	- INVOCATION: add language to make it clear that non-interactive login
 	  shells execute ~/.bash_logout if they run the `exit' builtin.  From a
 	  question from Christoph Anton Mitterer <calestyo@scientia.net>
+
+				    4/6
+				    ---
+subst.c
+	- process_substitute: increment and decrement subshell_level around calls
+	  to parse_and_execute, as in command substitution, so $BASH_SUBSHELL
+	  gets new values in the subshell.  Fixes inconsistency pointed out by
+	  Peng Yu <pengyu.ut@gmail.com>
+
+doc/{bash.1,bashref.texi}
+	- read: add clarifying text to note that the -N option does not split on
+	  $IFS, but does retain backslash as an escape character subject to -r.
+	  Report from isabella parakiss <izaberina@gmail.com>
+
+builtins/declare.def
+	- declare_internal: unless it's the last statement in a {...} block,
+	  NEXT_VARIABLE must be protected by braces.  Bug introduced in patch
+	  from 3/22, reported by Eduardo A. Bustamante López
+	  <dualbus@gmail.com>
+
+				    4/7
+				    ---
+parse.y
+	- shell_getc: if bash is reading input from a string that ends with an
+	  unquoted backslash, add another backslash instead of a newline, since
+	  the backslash and newline will disappear in normal processing.  Fixes
+	  bug with `bash -c 'eval \\; echo y' ' skipping the eval command and
+	  setting incorrect exit status, and `bash -ic 'eval \\; echo y' '
+	  seeing EOF on empty line and exiting before the echo.  Keep track of
+	  backslash state with last_was_backslash; set in char reading loop.
+	  Fixes bug reported by Eduardo A. Bustamante López <dualbus@gmail.com>
+
+				    4/8
+				    ---
+shell.c
+	- main: check for $INSIDE_EMACS as well as $EMACS when deciding whether
+	  or not bash is being run in a GNU emacs shell window.  Don't bother
+	  checking whether $TERM is unset because variable initialization sets
+	  it to `dumb' if unset.  Fixes from Paul Eggert <eggert@CS.UCLA.EDU>
+
+parse.y
+	- push_token: new function, rotates current_token through last_read_token,
+	  saving old values like yylex() does, sets current_token to argument
+
+evalfile.c
+	- _evalfile: if current_token is yacc_EOF, push a newline as the value
+	  of current_token instead, using push_token().  yacc_EOF can result if
+	  sourced file doesn't end with a newline but does end with an unescaped
+	  backslash.  Fixes bug reported by Pedro Gimeno
+	  <pgwr-842@personal.formauri.es>
+
+lib/readline/histfile.c
+	- use PARAMS(x) instead of __P(x).  Bug reported by Evan Gates
+	  <evan.gates@gmail.com>
+
+				    4/9
+				    ---
+execute_cmd.c
+	- execute_simple_command: if we haven't already forked, and we have created
+	  FIFOs, turn off the no-fork optimization in the simple command's flags.
+	  Originally reported to savannah by Kuang-che Wu as
+	  https://savannah.gnu.org/support/index.php?108732
+
+				   4/10
+				   ----
+trap.c
+	- trap_if_untrapped: new function, sets a trap on a signal if that signal
+	  is not already trapped
+	- maybe_set_debug_trap: new function, sets DEBUG trap to command string
+	  argument only if it's not already trapped
+
+trap.h
+	- maybe_set_debug_trap: new extern declaration
+
+
+builtins/source.def
+	- source_builtin: if the -T option isn't set, use maybe_set_debug_trap in
+	  the unwind-protect instead of unconditionally restoring the old trap
+	  string. That means if the sourced file changes the DEBUG trap, that new
+	  trap will persist instead of being undone when the old value is restored.
+	  Fixes bug reported by Scott Bronson <bronson@rinspin.com>
+
+builtins/evalstring.c
+	- parse_string: before we jump to top_level, if we are at the `bottom' of
+	  the parse_and_execute stack (parse_and_execute_level == 0), call
+	  top_level_cleanup() before jumping so the right cleanup happens (e.g.,
+	  cleaning up redirections and other state).  Fixes bug reported by
+	  Sam Liddicott <sam@liddicott.com>

@@ -43,6 +43,8 @@
 #include "../execute_cmd.h"
 #include "../trap.h"
 
+#include <y.tab.h>
+
 #if defined (HISTORY)
 #  include "../bashhist.h"
 #endif
@@ -71,6 +73,7 @@ extern int indirection_level, subshell_environment;
 extern int return_catch_flag, return_catch_value;
 extern int last_command_exit_value;
 extern int executing_command_builtin;
+extern int current_token;		/* parse.y */
 
 /* How many `levels' of sourced files we have. */
 int sourcelevel = 0;
@@ -301,6 +304,11 @@ file_error_and_exit:
     }
 #  endif
 #endif
+
+  /* If we end up with EOF after sourcing a file, which can happen when the file
+     doesn't end with a newline, pretend that it did. */
+  if (current_token == yacc_EOF)
+    push_token ('\n');		/* XXX */
 
   return ((flags & FEVAL_BUILTIN) ? result : 1);
 }

@@ -5549,7 +5549,9 @@ process_substitute (string, open_for_read_in_child)
      environment for variable lookups. */
   expanding_redir = 0;
 
+  subshell_level++;
   result = parse_and_execute (string, "process substitution", (SEVAL_NONINT|SEVAL_NOHIST));
+  subshell_level--;
 
 #if !defined (HAVE_DEV_FD)
   /* Make sure we close the named pipe in the child before we exit. */

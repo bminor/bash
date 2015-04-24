@@ -3273,6 +3273,12 @@ if @var{filename} is not found in @env{$PATH}.
 If any @var{arguments} are supplied, they become the positional
 parameters when @var{filename} is executed.  Otherwise the positional
 parameters are unchanged.
+If the @option{-T} option is enabled, @code{source} inherits any trap on
+@code{DEBUG}; if it is not, any @code{DEBUG} trap string is saved and
+restored around the call to @code{source}, and @code{source} unsets the
+@code{DEBUG} trap while it executes.
+If @option{-T} is not set, and the sourced file changes
+the @code{DEBUG} trap, the new value is retained when @code{source} completes.
 The return status is the exit status of the last command executed, or
 zero if no commands are executed.  If @var{filename} is not found, or
 cannot be read, the return status is non-zero.
@@ -4391,6 +4397,9 @@ than waiting for a complete line of input, unless EOF is encountered or
 Delimiter characters encountered in the input are
 not treated specially and do not cause @code{read} to return until
 @var{nchars} characters are read.
+The result is not split on the characters in @code{IFS}; the intent is
+that the variable is assigned exactly the characters read
+(with the exception of backslash; see the @option{-r} option below).
 
 @item -p @var{prompt}
 Display @var{prompt}, without a trailing newline, before attempting

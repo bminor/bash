@@ -558,7 +558,11 @@ itrace("parse_string: longjmp executed: code = %d", code);
   run_unwind_frame (PS_TAG);
 
   if (should_jump_to_top_level)
-    jump_to_top_level (code);
+    {
+      if (parse_and_execute_level == 0)
+	top_level_cleanup ();
+      jump_to_top_level (code);
+    }
 
   return (nc);
 }

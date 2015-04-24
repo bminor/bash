@@ -581,12 +581,13 @@ main (argc, argv, env)
       emacs = get_string_value ("EMACS");
 
       /* Not sure any emacs terminal emulator sets TERM=emacs any more */
-      no_line_editing |= term && (STREQ (term, "emacs"));
+      no_line_editing |= STREQ (term, "emacs");
       no_line_editing |= emacs && emacs[0] == 't' && emacs[1] == '\0' && STREQ (term, "dumb");
+      no_line_editing |= get_string_value ("INSIDE_EMACS") != 0;
 
       /* running_under_emacs == 2 for `eterm' */
-      running_under_emacs = (emacs != 0) || (term && STREQN (term, "emacs", 5));
-      running_under_emacs += term && STREQN (term, "eterm", 5) && emacs && strstr (emacs, "term");
+      running_under_emacs = (emacs != 0) || STREQN (term, "emacs", 5);
+      running_under_emacs += STREQN (term, "eterm", 5) && emacs && strstr (emacs, "term");
 
       if (running_under_emacs)
 	gnu_error_format = 1;

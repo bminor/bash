@@ -72,15 +72,17 @@ extern int errno;
    assumes this. */
 static int sigmodes[BASH_NSIG];
 
-static void free_trap_command __P((int));
-static void change_signal __P((int, char *));
+static void free_trap_command (int);
+static void change_signal (int, char *);
 
-static int _run_trap_internal __P((int, char *));
+static int _run_trap_internal (int, char *);
 
-static void free_trap_string __P((int));
-static void reset_signal __P((int));
-static void restore_signal __P((int));
-static void reset_or_restore_signal_handlers __P((sh_resetsig_func_t *));
+static void free_trap_string (int);
+static void reset_signal (int);
+static void restore_signal (int);
+static void reset_or_restore_signal_handlers (sh_resetsig_func_t *);
+
+static void trap_if_untrapped (int, char *);
 
 /* Variables used here but defined in other files. */
 extern int last_command_exit_value;
@@ -559,11 +561,35 @@ queue_sigchld_trap (nchild)
 }
 #endif /* JOB_CONTROL && SIGCHLD */
 
+/* Set a trap for SIG only if SIG is not already trapped. */
+static inline void
+trap_if_untrapped (sig, command)
+     int sig;
+     char *command;
+{
+  if ((sigmodes[sig] & SIG_TRAPPED) == 0)
+    set_signal (sig, command);
+}
+
 void
 set_debug_trap (command)
      char *command;
 {
   set_signal (DEBUG_TRAP, command);
+}
+
+/* Separate function to call when functions and sourced files want to restore
+   the original version of the DEBUG trap before returning.  Unless the -T
+   option is set, source saves the old debug trap and unsets the trap.  If the
+   sourced file changes the DEBUG trap, SIG_TRAPPED will be set and we don't
+   bother restoring the original trap string.
+
+   Currently only source calls this. */
+void
+maybe_set_debug_trap (command)
+     char *command;
+{
+  trap_if_untrapped (DEBUG_TRAP, command);
 }
 
 void

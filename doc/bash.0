@@ -130,27 +130,29 @@ IINNVVOOCCAATTIIOONN
        A  _l_o_g_i_n _s_h_e_l_l is one whose first character of argument zero is a --, or
        one started with the ----llooggiinn option.
 
-       An _i_n_t_e_r_a_c_t_i_v_e shell is one started without  non-option  arguments  and
-       without the --cc option whose standard input and error are both connected
-       to terminals (as determined by _i_s_a_t_t_y(3)), or one started with  the  --ii
-       option.   PPSS11 is set and $$-- includes ii if bbaasshh is interactive, allowing
-       a shell script or a startup file to test this state.
+       An _i_n_t_e_r_a_c_t_i_v_e  shell  is  one  started  without  non-option  arguments
+       (unless --ss is specified) and without the --cc option whose standard input
+       and error are both connected to terminals (as determined by _i_s_a_t_t_y(3)),
+       or  one  started  with  the --ii option.  PPSS11 is set and $$-- includes ii if
+       bbaasshh is interactive, allowing a shell script or a startup file to  test
+       this state.
 
-       The following paragraphs describe how bbaasshh executes its startup  files.
-       If  any  of  the files exist but cannot be read, bbaasshh reports an error.
-       Tildes are expanded in filenames as described below under TTiillddee  EExxppaann--
+       The  following paragraphs describe how bbaasshh executes its startup files.
+       If any of the files exist but cannot be read, bbaasshh  reports  an  error.
+       Tildes  are expanded in filenames as described below under TTiillddee EExxppaann--
        ssiioonn in the EEXXPPAANNSSIIOONN section.
 
-       When  bbaasshh is invoked as an interactive login shell, or as a non-inter-
-       active shell with the ----llooggiinn option, it first reads and executes  com-
-       mands  from  the file _/_e_t_c_/_p_r_o_f_i_l_e, if that file exists.  After reading
+       When bbaasshh is invoked as an interactive login shell, or as a  non-inter-
+       active  shell with the ----llooggiinn option, it first reads and executes com-
+       mands from the file _/_e_t_c_/_p_r_o_f_i_l_e, if that file exists.   After  reading
        that file, it looks for _~_/_._b_a_s_h___p_r_o_f_i_l_e, _~_/_._b_a_s_h___l_o_g_i_n, and _~_/_._p_r_o_f_i_l_e,
-       in  that order, and reads and executes commands from the first one that
-       exists and is readable.  The ----nnoopprrooffiillee option may be  used  when  the
+       in that order, and reads and executes commands from the first one  that
+       exists  and  is  readable.  The ----nnoopprrooffiillee option may be used when the
        shell is started to inhibit this behavior.
 
-       When  a  login  shell  exits, bbaasshh reads and executes commands from the
-       file _~_/_._b_a_s_h___l_o_g_o_u_t, if it exists.
+       When an interactive login shell exits, or a non-interactive login shell
+       executes  the  eexxiitt  builtin  command, bbaasshh reads and executes commands
+       from the file _~_/_._b_a_s_h___l_o_g_o_u_t, if it exists.
 
        When an interactive shell that is not a login shell  is  started,  bbaasshh
        reads  and executes commands from _~_/_._b_a_s_h_r_c, if that file exists.  This
@@ -4761,138 +4763,139 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               --OO     Begin  assigning  to  _a_r_r_a_y at index _o_r_i_g_i_n.  The default
                      index is 0.
               --ss     Discard the first _c_o_u_n_t lines read.
-              --tt     Remove a trailing newline from each line read.
-              --uu     Read lines from file descriptor _f_d instead of  the  stan-
+              --tt     Remove a trailing _d_e_l_i_m (default newline) from each  line
+                     read.
+              --uu     Read  lines  from file descriptor _f_d instead of the stan-
                      dard input.
-              --CC     Evaluate  _c_a_l_l_b_a_c_k each time _q_u_a_n_t_u_m lines are read.  The
+              --CC     Evaluate _c_a_l_l_b_a_c_k each time _q_u_a_n_t_u_m lines are read.   The
                      --cc option specifies _q_u_a_n_t_u_m.
-              --cc     Specify the number of lines read  between  each  call  to
+              --cc     Specify  the  number  of  lines read between each call to
                      _c_a_l_l_b_a_c_k.
 
-              If  --CC  is  specified  without  --cc, the default quantum is 5000.
+              If --CC is specified without --cc,  the  default  quantum  is  5000.
               When _c_a_l_l_b_a_c_k is evaluated, it is supplied the index of the next
               array element to be assigned and the line to be assigned to that
-              element as additional arguments.  _c_a_l_l_b_a_c_k  is  evaluated  after
+              element  as  additional  arguments.  _c_a_l_l_b_a_c_k is evaluated after
               the line is read but before the array element is assigned.
 
-              If  not  supplied  with  an  explicit origin, mmaappffiillee will clear
+              If not supplied with an  explicit  origin,  mmaappffiillee  will  clear
               _a_r_r_a_y before assigning to it.
 
-              mmaappffiillee returns successfully unless an invalid option or  option
-              argument  is  supplied,  _a_r_r_a_y is invalid or unassignable, or if
+              mmaappffiillee  returns successfully unless an invalid option or option
+              argument is supplied, _a_r_r_a_y is invalid or  unassignable,  or  if
               _a_r_r_a_y is not an indexed array.
 
        ppooppdd [-nn] [+_n] [-_n]
-              Removes entries from the directory stack.   With  no  arguments,
-              removes  the  top directory from the stack, and performs a ccdd to
+              Removes  entries  from  the directory stack.  With no arguments,
+              removes the top directory from the stack, and performs a  ccdd  to
               the new top directory.  Arguments, if supplied, have the follow-
               ing meanings:
-              --nn     Suppresses  the  normal change of directory when removing
-                     directories from the stack, so that  only  the  stack  is
+              --nn     Suppresses the normal change of directory  when  removing
+                     directories  from  the  stack,  so that only the stack is
                      manipulated.
-              ++_n     Removes  the _nth entry counting from the left of the list
-                     shown by ddiirrss, starting with zero.  For  example:  ``popd
+              ++_n     Removes the _nth entry counting from the left of the  list
+                     shown  by  ddiirrss, starting with zero.  For example: ``popd
                      +0'' removes the first directory, ``popd +1'' the second.
               --_n     Removes the _nth entry counting from the right of the list
-                     shown by ddiirrss, starting with zero.  For  example:  ``popd
-                     -0''  removes the last directory, ``popd -1'' the next to
+                     shown  by  ddiirrss, starting with zero.  For example: ``popd
+                     -0'' removes the last directory, ``popd -1'' the next  to
                      last.
 
-              If the ppooppdd command is successful, a ddiirrss is performed as  well,
-              and  the  return  status is 0.  ppooppdd returns false if an invalid
+              If  the ppooppdd command is successful, a ddiirrss is performed as well,
+              and the return status is 0.  ppooppdd returns false  if  an  invalid
               option is encountered, the directory stack is empty, a non-exis-
               tent directory stack entry is specified, or the directory change
               fails.
 
        pprriinnttff [--vv _v_a_r] _f_o_r_m_a_t [_a_r_g_u_m_e_n_t_s]
-              Write the formatted _a_r_g_u_m_e_n_t_s to the standard output  under  the
-              control  of  the  _f_o_r_m_a_t.  The --vv option causes the output to be
-              assigned to the variable _v_a_r rather than being  printed  to  the
+              Write  the  formatted _a_r_g_u_m_e_n_t_s to the standard output under the
+              control of the _f_o_r_m_a_t.  The --vv option causes the  output  to  be
+              assigned  to  the  variable _v_a_r rather than being printed to the
               standard output.
 
-              The  _f_o_r_m_a_t  is a character string which contains three types of
-              objects: plain characters, which are simply copied  to  standard
-              output,  character  escape  sequences,  which  are converted and
-              copied to the standard output, and format  specifications,  each
-              of  which  causes  printing of the next successive _a_r_g_u_m_e_n_t.  In
+              The _f_o_r_m_a_t is a character string which contains three  types  of
+              objects:  plain  characters, which are simply copied to standard
+              output, character escape  sequences,  which  are  converted  and
+              copied  to  the standard output, and format specifications, each
+              of which causes printing of the next  successive  _a_r_g_u_m_e_n_t.   In
               addition to the standard _p_r_i_n_t_f(1) format specifications, pprriinnttff
               interprets the following extensions:
               %%bb     causes pprriinnttff to expand backslash escape sequences in the
                      corresponding _a_r_g_u_m_e_n_t (except that \\cc terminates output,
-                     backslashes  in \\'', \\"", and \\?? are not removed, and octal
+                     backslashes in \\'', \\"", and \\?? are not removed, and  octal
                      escapes beginning with \\00 may contain up to four digits).
-              %%qq     causes pprriinnttff to output the corresponding _a_r_g_u_m_e_n_t  in  a
+              %%qq     causes  pprriinnttff  to output the corresponding _a_r_g_u_m_e_n_t in a
                      format that can be reused as shell input.
               %%((_d_a_t_e_f_m_t))TT
-                     causes  pprriinnttff  to  output the date-time string resulting
-                     from using _d_a_t_e_f_m_t as a format  string  for  _s_t_r_f_t_i_m_e(3).
+                     causes pprriinnttff to output the  date-time  string  resulting
+                     from  using  _d_a_t_e_f_m_t  as a format string for _s_t_r_f_t_i_m_e(3).
                      The corresponding _a_r_g_u_m_e_n_t is an integer representing the
-                     number of seconds since the epoch.  Two special  argument
-                     values  may  be used: -1 represents the current time, and
-                     -2 represents the time the  shell  was  invoked.   If  no
-                     argument  is  specified,  conversion behaves as if -1 had
-                     been given.  This is an exception  to  the  usual  pprriinnttff
+                     number  of seconds since the epoch.  Two special argument
+                     values may be used: -1 represents the current  time,  and
+                     -2  represents  the  time  the  shell was invoked.  If no
+                     argument is specified, conversion behaves as  if  -1  had
+                     been  given.   This  is  an exception to the usual pprriinnttff
                      behavior.
 
-              Arguments  to non-string format specifiers are treated as C con-
+              Arguments to non-string format specifiers are treated as C  con-
               stants, except that a leading plus or minus sign is allowed, and
-              if  the leading character is a single or double quote, the value
+              if the leading character is a single or double quote, the  value
               is the ASCII value of the following character.
 
-              The _f_o_r_m_a_t is reused as necessary to consume all  of  the  _a_r_g_u_-
+              The  _f_o_r_m_a_t  is  reused as necessary to consume all of the _a_r_g_u_-
               _m_e_n_t_s.  If the _f_o_r_m_a_t requires more _a_r_g_u_m_e_n_t_s than are supplied,
-              the extra format specifications behave as if  a  zero  value  or
-              null  string,  as  appropriate,  had  been supplied.  The return
+              the  extra  format  specifications  behave as if a zero value or
+              null string, as appropriate,  had  been  supplied.   The  return
               value is zero on success, non-zero on failure.
 
        ppuusshhdd [--nn] [+_n] [-_n]
        ppuusshhdd [--nn] [_d_i_r]
-              Adds a directory to the top of the directory stack,  or  rotates
-              the  stack,  making the new top of the stack the current working
+              Adds  a  directory to the top of the directory stack, or rotates
+              the stack, making the new top of the stack the  current  working
               directory.  With no arguments, exchanges the top two directories
-              and  returns 0, unless the directory stack is empty.  Arguments,
+              and returns 0, unless the directory stack is empty.   Arguments,
               if supplied, have the following meanings:
-              --nn     Suppresses the normal change  of  directory  when  adding
-                     directories  to  the  stack,  so  that  only the stack is
+              --nn     Suppresses  the  normal  change  of directory when adding
+                     directories to the stack,  so  that  only  the  stack  is
                      manipulated.
-              ++_n     Rotates the stack so that  the  _nth  directory  (counting
-                     from  the  left  of the list shown by ddiirrss, starting with
+              ++_n     Rotates  the  stack  so  that the _nth directory (counting
+                     from the left of the list shown by  ddiirrss,  starting  with
                      zero) is at the top.
-              --_n     Rotates the stack so that  the  _nth  directory  (counting
-                     from  the  right of the list shown by ddiirrss, starting with
+              --_n     Rotates  the  stack  so  that the _nth directory (counting
+                     from the right of the list shown by ddiirrss,  starting  with
                      zero) is at the top.
               _d_i_r    Adds _d_i_r to the directory stack at the top, making it the
-                     new  current working directory as if it had been supplied
+                     new current working directory as if it had been  supplied
                      as the argument to the ccdd builtin.
 
               If the ppuusshhdd command is successful, a ddiirrss is performed as well.
-              If  the first form is used, ppuusshhdd returns 0 unless the cd to _d_i_r
-              fails.  With the second form, ppuusshhdd returns 0 unless the  direc-
-              tory  stack  is empty, a non-existent directory stack element is
-              specified, or the directory change to the specified new  current
+              If the first form is used, ppuusshhdd returns 0 unless the cd to  _d_i_r
+              fails.   With the second form, ppuusshhdd returns 0 unless the direc-
+              tory stack is empty, a non-existent directory stack  element  is
+              specified,  or the directory change to the specified new current
               directory fails.
 
        ppwwdd [--LLPP]
-              Print  the  absolute  pathname of the current working directory.
+              Print the absolute pathname of the  current  working  directory.
               The pathname printed contains no symbolic links if the --PP option
               is supplied or the --oo pphhyyssiiccaall option to the sseett builtin command
-              is enabled.  If the --LL option is used, the pathname printed  may
-              contain  symbolic links.  The return status is 0 unless an error
-              occurs while reading the name of the  current  directory  or  an
+              is  enabled.  If the --LL option is used, the pathname printed may
+              contain symbolic links.  The return status is 0 unless an  error
+              occurs  while  reading  the  name of the current directory or an
               invalid option is supplied.
 
        rreeaadd [--eerrss] [--aa _a_n_a_m_e] [--dd _d_e_l_i_m] [--ii _t_e_x_t] [--nn _n_c_h_a_r_s] [--NN _n_c_h_a_r_s] [--pp
        _p_r_o_m_p_t] [--tt _t_i_m_e_o_u_t] [--uu _f_d] [_n_a_m_e ...]
-              One line is read from the  standard  input,  or  from  the  file
-              descriptor  _f_d supplied as an argument to the --uu option, and the
+              One  line  is  read  from  the  standard input, or from the file
+              descriptor _f_d supplied as an argument to the --uu option, and  the
               first word is assigned to the first _n_a_m_e, the second word to the
-              second  _n_a_m_e, and so on, with leftover words and their interven-
-              ing separators assigned to the last _n_a_m_e.  If  there  are  fewer
+              second _n_a_m_e, and so on, with leftover words and their  interven-
+              ing  separators  assigned  to the last _n_a_m_e.  If there are fewer
               words read from the input stream than names, the remaining names
-              are assigned empty values.  The characters in IIFFSS  are  used  to
-              split  the  line  into words using the same rules the shell uses
+              are  assigned  empty  values.  The characters in IIFFSS are used to
+              split the line into words using the same rules  the  shell  uses
               for expansion (described above under WWoorrdd SSpplliittttiinngg).  The back-
-              slash  character  (\\)  may be used to remove any special meaning
+              slash character (\\) may be used to remove  any  special  meaning
               for the next character read and for line continuation.  Options,
               if supplied, have the following meanings:
               --aa _a_n_a_m_e
@@ -4901,27 +4904,30 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
                      new  values  are  assigned.   Other  _n_a_m_e  arguments  are
                      ignored.
               --dd _d_e_l_i_m
-                     The first character of _d_e_l_i_m is  used  to  terminate  the
+                     The  first  character  of  _d_e_l_i_m is used to terminate the
                      input line, rather than newline.
               --ee     If the standard input is coming from a terminal, rreeaaddlliinnee
-                     (see RREEAADDLLIINNEE above) is used to obtain the  line.   Read-
-                     line  uses  the  current (or default, if line editing was
+                     (see  RREEAADDLLIINNEE  above) is used to obtain the line.  Read-
+                     line uses the current (or default, if  line  editing  was
                      not previously active) editing settings.
               --ii _t_e_x_t
-                     If rreeaaddlliinnee is being used  to  read  the  line,  _t_e_x_t  is
+                     If  rreeaaddlliinnee  is  being  used  to  read the line, _t_e_x_t is
                      placed into the editing buffer before editing begins.
               --nn _n_c_h_a_r_s
-                     rreeaadd  returns after reading _n_c_h_a_r_s characters rather than
+                     rreeaadd returns after reading _n_c_h_a_r_s characters rather  than
                      waiting for a complete line of input, but honors a delim-
-                     iter  if fewer than _n_c_h_a_r_s characters are read before the
+                     iter if fewer than _n_c_h_a_r_s characters are read before  the
                      delimiter.
               --NN _n_c_h_a_r_s
-                     rreeaadd returns  after  reading  exactly  _n_c_h_a_r_s  characters
-                     rather  than waiting for a complete line of input, unless
-                     EOF is encountered or rreeaadd times out.  Delimiter  charac-
-                     ters  encountered  in the input are not treated specially
-                     and do not cause rreeaadd to return until  _n_c_h_a_r_s  characters
-                     are read.
+                     rreeaadd  returns  after  reading  exactly  _n_c_h_a_r_s characters
+                     rather than waiting for a complete line of input,  unless
+                     EOF  is encountered or rreeaadd times out.  Delimiter charac-
+                     ters encountered in the input are not  treated  specially
+                     and  do  not cause rreeaadd to return until _n_c_h_a_r_s characters
+                     are read.  The result is not split on the  characters  in
+                     IIFFSS;  the intent is that the variable is assigned exactly
+                     the characters read (with the exception of backslash; see
+                     the --rr option below).
               --pp _p_r_o_m_p_t
                      Display _p_r_o_m_p_t on standard error, without a trailing new-
                      line, before attempting to read any input.  The prompt is
@@ -5826,4 +5832,4 @@ BBUUGGSS
 
 
 
-GNU Bash 4.4                    2015 January 19                        BASH(1)
+GNU Bash 4.4                     2015 April 6                          BASH(1)

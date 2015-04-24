@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2015 January 19<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2015 April 6<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -351,6 +351,7 @@ option.
 <P>
 
 An <I>interactive</I> shell is one started without non-option arguments
+(unless <B>-s</B> is specified)
 and without the
 <B>-c</B>
 
@@ -413,7 +414,8 @@ The
 option may be used when the shell is started to inhibit this behavior.
 <P>
 
-When a login shell exits,
+When an interactive login shell exits,
+or a non-interactive login shell executes the <B>exit</B> builtin command,
 <B>bash</B>
 
 reads and executes commands from the file <A HREF="file:~/.bash_logout"><I>~/.bash_logout</I></A>, if it
@@ -10813,7 +10815,7 @@ Discard the first <I>count</I> lines read.
 <DT><B>-t</B>
 
 <DD>
-Remove a trailing newline from each line read.
+Remove a trailing <I>delim</I> (default newline) from each line read.
 <DT><B>-u</B>
 
 <DD>
@@ -11139,6 +11141,9 @@ than waiting for a complete line of input, unless EOF is encountered or
 Delimiter characters encountered in the input are
 not treated specially and do not cause <B>read</B> to return until
 <I>nchars</I> characters are read.
+The result is not split on the characters in <B>IFS</B>; the intent is
+that the variable is assigned exactly the characters read
+(with the exception of backslash; see the <B>-r</B> option below).
 <DT><B>-p </B><I>prompt</I>
 
 <DD>
@@ -13347,7 +13352,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2015 January 19<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2015 April 6<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13453,6 +13458,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 23 February 2015 09:20:49 EST
+Time: 06 April 2015 13:59:15 EDT
 </BODY>
 </HTML>

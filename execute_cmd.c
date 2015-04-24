@@ -4292,10 +4292,12 @@ run_builtin:
     command_line = savestring (the_printed_command_except_trap ? the_printed_command_except_trap : "");
 
 #if defined (PROCESS_SUBSTITUTION)
-  if ((subshell_environment & SUBSHELL_COMSUB) && (simple_command->flags & CMD_NO_FORK) && fifos_pending() > 0)
+  /* The old code did not test already_forked and only did this if
+     subshell_environment&SUBSHELL_COMSUB != 0 (comsubs and procsubs). Other
+     uses of the no-fork optimization left FIFOs in $TMPDIR */
+  if (already_forked == 0 && (simple_command->flags & CMD_NO_FORK) && fifos_pending() > 0)
     simple_command->flags &= ~CMD_NO_FORK;
 #endif
-
   result = execute_disk_command (words, simple_command->redirects, command_line,
 			pipe_in, pipe_out, async, fds_to_close,
 			simple_command->flags);

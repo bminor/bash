@@ -2208,11 +2208,12 @@ shell_getc (remove_quoted_newline)
      int remove_quoted_newline;
 {
   register int i;
-  int c, truncating;
+  int c, truncating, last_was_backslash;
   unsigned char uc;
 
   QUIT;
 
+  last_was_backslash = 0;
   if (sigwinch_received)
     {
       sigwinch_received = 0;
@@ -2343,6 +2344,8 @@ shell_getc (remove_quoted_newline)
 	      current_command_line_count++;
 	      break;
 	    }
+
+	  last_was_backslash = last_was_backslash == 0 && c == '\\';
 	}
 
       shell_input_line_index = 0;
@@ -2437,7 +2440,14 @@ shell_getc (remove_quoted_newline)
 	    shell_input_line = (char *)xrealloc (shell_input_line,
 					1 + (shell_input_line_size += 2));
 
-	  shell_input_line[shell_input_line_len] = '\n';
+	  /* Don't add a newline to a string that ends with a backslash if we're
+	     going to be removing quoted newlines, since that will eat the
+	     backslash.  Add another backslash instead (will be removed by
+	     word expansion). */
+	  if (bash_input.type == st_string && expanding_alias() == 0 && last_was_backslash && c == EOF && remove_quoted_newline)
+	    shell_input_line[shell_input_line_len] = '\\';
+	  else
+	    shell_input_line[shell_input_line_len] = '\n';
 	  shell_input_line[shell_input_line_len + 1] = '\0';
 
 	  set_line_mbstate ();
@@ -2597,6 +2607,17 @@ execute_variable_command (command, vname)
 
   if (token_to_read == '\n')	/* reset_parser was called */
     token_to_read = 0;
+}
+
+void
+push_token (x)
+     int x;
+{
+  two_tokens_ago = token_before_that;
+  token_before_that = last_read_token;
+  last_read_token = current_token;
+
+  current_token = x;
 }
 
 /* Place to remember the token.  We try to keep the buffer
