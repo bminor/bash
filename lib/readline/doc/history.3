@@ -442,11 +442,15 @@ a \fBNULL\fP pointer.
 
 .Fn1 "HIST_ENTRY *" next_history "void"
 If the current history offset is not already at the end of the history
-list, move the current history offset forward to the next history entry,
-and return the a pointer to that entry.
-If there is no next entry, return a \fBNULL\fP pointer.
-If this function returns \fBNULL\fP, the current history offset is at the
-end of the history list.
+list, move the current history offset forward to the next history entry.
+If the incremented history offset refers to a valid history entry, return
+a pointer to that entry.
+If there is no next entry, as when the history offset before being
+incremented refers to the last valid entry in the history list, return
+a \fBNULL\fP pointer.
+If this function returns \fBNULL\fP, the current history offset when the
+function returns (possibly incremented as described above)
+is at the end of the history list.
 
 .SS Searching the History List
 

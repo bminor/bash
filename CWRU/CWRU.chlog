@@ -8298,8 +8298,47 @@ builtins/source.def
 	  Fixes bug reported by Scott Bronson <bronson@rinspin.com>
 
 builtins/evalstring.c
-	- parse_string: before we jump to top_level, if we are at the `bottom' of
-	  the parse_and_execute stack (parse_and_execute_level == 0), call
+	- parse_string: before we jump to top_level, if we are at the `bottom'
+	  of the parse_and_execute stack (parse_and_execute_level == 0), call
 	  top_level_cleanup() before jumping so the right cleanup happens (e.g.,
 	  cleaning up redirections and other state).  Fixes bug reported by
 	  Sam Liddicott <sam@liddicott.com>
+
+				   4/15
+				   ----
+jobs.c
+	- delete_job: only add J_ASYNC (and not J_FOREGROUND) jobs to the
+	  bgpids array, since Posix says shells only need to save the status
+	  of async jobs.  Report and fix from John Fremlin <john@fb.com>
+
+				   4/17
+				   ----
+pcomplib.c
+	- COMPLETE_HASH_BUCKETS: increase to 256 since bash-completion is
+	  over 300 completions by now
+
+variables.c
+	- VARIABLES_HASH_BUCKETS: constant used to size shell variables hash
+	  table instead of relying on hash library default.  Used in calls
+	  to hash_create in create_variable_tables(), push_temp_var(), and
+	  push_func_var().  Currently set to 1024 because why not?  From a
+	  discussion starting at
+	  https://lists.gnu.org/archive/html/bug-bash/2015-04/msg00089.html
+	- initialize_shell_variables: if FUNCTION_IMPORT is not defined, the
+	  nested conditional compilation causes syntax errors.  Bug and fix
+	  from Eric Blake <eblake@redhat.com>
+
+configure.ac
+	- function-import: fix typo, assign to correct variable.  Found as the
+	  result of a report by Eric Blake <eblake@redhat.com>
+
+shell.c
+	- open_shell_script: check whether or not file argument is a
+	  directory before opening; Posix says that implementations may open
+	  a directory with O_RDONLY.  Bug report from
+	  Eduardo A. Bustamante López <dualbus@gmail.com>
+
+				   4/19
+				   ----
+ulimit.def
+	- fix typo in limits[] declaration of `k'

@@ -1,0 +1,39 @@
+#if defined (READLINE_AUTOCOMPLETE)
+/* Return the list of completions for the text between START and END.
+   FOUND_QUOTE is non-zero if we're completing a quoted word; if so,
+   QUOTE_CHAR is the delimiter.  If NONTRIVIAL_P is nonzero, it gets
+   set to a flag saying whether or not the completion added anything
+   to the word.  Not part of rl_complete_internal because it's too
+   hard to separate functions without postprocess_matches possibly being
+   called twice; here to support the autocompletion code. */
+char **
+_rl_generate_completions (start, end, found_quote, quote_char, nontrivial_p)
+     int start, end, found_quote, quote_char, *nontrivial_p;
+{
+  rl_compentry_func_t *our_func;
+  char *text;
+  char **matches;
+
+  our_func = rl_completion_entry_function
+		? rl_completion_entry_function
+		: rl_filename_completion_function;
+  text = rl_copy_text (start, end);
+  matches = gen_completion_matches (text, start, end, our_func, found_quote, quote_char);
+
+  /* *nontrivial_p is set if the common prefix adds something to the word
+     being completed. */
+  if (nontrivial_p)
+    *nontrivial_p = matches && strcmp (text, matches[0]) != 0;
+
+  free (text);
+
+  /* Postprocess the matches */
+  if (matches == 0)
+    return (char **)0;
+
+  if (postprocess_matches (&matches, rl_filename_completion_desired) == 0)
+    return (char **)0;
+
+  return 0;
+}
+#endif

@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.4, version 4.067])dnl
+AC_REVISION([for Bash 4.4, version 4.068])dnl
 
 define(bashvers, 4.4)
 define(relstatus, devel)
@@ -235,7 +235,7 @@ AC_ARG_ENABLE(disabled-builtins, AC_HELP_STRING([--enable-disabled-builtins], [a
 AC_ARG_ENABLE(dparen-arithmetic, AC_HELP_STRING([--enable-dparen-arithmetic], [include ((...)) command]), opt_dparen_arith=$enableval)
 AC_ARG_ENABLE(extended-glob, AC_HELP_STRING([--enable-extended-glob], [include ksh-style extended pattern matching]), opt_extended_glob=$enableval)
 AC_ARG_ENABLE(extended-glob-default, AC_HELP_STRING([--enable-extended-glob-default], [force extended pattern matching to be enabled by default]), opt_extglob_default=$enableval)
-AC_ARG_ENABLE(funtion-import, AC_HELP_STRING([--enable-function-import], [allow bash to import exported function definitions by default]), opt_extglob_default=$enableval)
+AC_ARG_ENABLE(function-import, AC_HELP_STRING([--enable-function-import], [allow bash to import exported function definitions by default]), opt_function_import=$enableval)
 AC_ARG_ENABLE(glob-asciiranges-default, AC_HELP_STRING([--enable-glob-asciiranges-default], [force bracket range expressions in pattern matching to use the C locale by default]), opt_globascii_default=$enableval)
 AC_ARG_ENABLE(help-builtin, AC_HELP_STRING([--enable-help-builtin], [include the help builtin]), opt_help=$enableval)
 AC_ARG_ENABLE(history, AC_HELP_STRING([--enable-history], [turn on command history]), opt_history=$enableval)

@@ -178,7 +178,7 @@ executable_file (file)
   int s;
 
   s = file_status (file);
-#if defined EISDIR
+#if defined (EISDIR)
   if (s & FS_DIRECTORY)
     errno = EISDIR;	/* let's see if we can improve error messages */
 #endif

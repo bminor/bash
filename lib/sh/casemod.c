@@ -141,7 +141,7 @@ sh_modcase (string, pat, flags)
   inword = 0;
   while (start < end)
     {
-      wc = cval (string, start);
+      wc = cval ((char *)string, start);
 
       if (iswalnum (wc) == 0)
 	inword = 0;
@@ -150,7 +150,7 @@ sh_modcase (string, pat, flags)
 	{
 	  next = start;
 	  ADVANCE_CHAR (string, end, next);
-	  s = substring (string, start, next);
+	  s = substring ((char *)string, start, next);
 	  match = strmatch (pat, s, FNM_EXTMATCH) != FNM_NOMATCH;
 	  free (s);
 	  if (match == 0)

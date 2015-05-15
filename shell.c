@@ -1470,6 +1470,17 @@ open_shell_script (script_name)
       exit ((e == ENOENT) ? EX_NOTFOUND : EX_NOINPUT);
     }
 
+  if (file_isdir (filename))
+    {
+#if defined (EISDIR)
+      errno = EISDIR;
+#else
+      errno = EINVAL;
+#endif
+      file_error (filename);
+      exit (EX_NOINPUT);
+    }
+
   free (dollar_vars[0]);
   dollar_vars[0] = exec_argv0 ? savestring (exec_argv0) : savestring (script_name);
   if (exec_argv0)

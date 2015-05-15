@@ -1043,10 +1043,9 @@ delete_job (job_index, dflags)
   if (temp == 0)
     return;
 
-  if ((dflags & DEL_NOBGPID) == 0)
+  if ((dflags & DEL_NOBGPID) == 0 && (temp->flags & (J_ASYNC|J_FOREGROUND)) == J_ASYNC)
     {
       proc = find_last_proc (job_index, 0);
-      /* Could do this just for J_ASYNC jobs, but we save all. */
       if (proc)
 	bgp_add (proc->pid, process_exit_status (proc->status));
     }

@@ -79,6 +79,7 @@
 #  include "pcomplete.h"
 #endif
 
+#define VARIABLES_HASH_BUCKETS	1024	/* must be power of two */
 #define TEMPENV_HASH_BUCKETS	4	/* must be power of two */
 
 #define ifsname(s)	((s)[0] == 'I' && (s)[1] == 'F' && (s)[2] == 'S' && (s)[3] == '\0')
@@ -310,7 +311,7 @@ create_variable_tables ()
     {
       shell_variables = global_variables = new_var_context ((char *)NULL, 0);
       shell_variables->scope = 0;
-      shell_variables->table = hash_create (0);
+      shell_variables->table = hash_create (VARIABLES_HASH_BUCKETS);
     }
 
   if (shell_functions == 0)
@@ -407,22 +408,23 @@ initialize_shell_variables (env, privmode)
 	  /* Restore original suffix */
 	  tname[namelen] = BASHFUNC_SUFFIX[0];
 	}
+      else
 #endif /* FUNCTION_IMPORT */
 #if defined (ARRAY_VARS)
 #  if ARRAY_EXPORT
       /* Array variables may not yet be exported. */
-      else if (*string == '(' && string[1] == '[' && string[strlen (string) - 1] == ')')
+      if (*string == '(' && string[1] == '[' && string[strlen (string) - 1] == ')')
 	{
 	  string_length = 1;
 	  temp_string = extract_array_assignment_list (string, &string_length);
-	  temp_var = assign_array_from_string (name, temp_string);
+	  temp_var = assign_array_from_string (name, temp_string, 0);
 	  FREE (temp_string);
 	  VSETATTR (temp_var, (att_exported | att_imported));
 	  array_needs_making = 1;
 	}
+      else
 #  endif /* ARRAY_EXPORT */
 #endif
-      else
 	{
 	  ro = 0;
 	  if (posixly_correct && STREQ (name, "SHELLOPTS"))
@@ -3837,7 +3839,7 @@ push_temp_var (data)
     {
       if (shell_variables == global_variables)
 	/* shouldn't happen */
-	binding_table = shell_variables->table = global_variables->table = hash_create (0);
+	binding_table = shell_variables->table = global_variables->table = hash_create (VARIABLES_HASH_BUCKETS);
       else
 	binding_table = shell_variables->table = hash_create (TEMPENV_HASH_BUCKETS);
     }
@@ -4053,13 +4055,13 @@ make_env_array_from_var_list (vars)
 #if defined (ARRAY_VARS)
       else if (array_p (var))
 #  if ARRAY_EXPORT
-	value = array_to_assignment_string (array_cell (var));
+	value = array_to_assign (array_cell (var), 0);
 #  else
 	continue;	/* XXX array vars cannot yet be exported */
 #  endif /* ARRAY_EXPORT */
       else if (assoc_p (var))
 #  if 0
-	value = assoc_to_assignment_string (assoc_cell (var));
+	value = assoc_to_assign (assoc_cell (var), 0);
 #  else
 	continue;	/* XXX associative array vars cannot yet be exported */
 #  endif
@@ -4431,7 +4433,7 @@ push_func_var (data)
 	 being propagated down to the global variables table.  Create one if
 	 we have to */
       if ((vc_isfuncenv (shell_variables) || vc_istempenv (shell_variables)) && shell_variables->table == 0)
-	shell_variables->table = hash_create (0);
+	shell_variables->table = hash_create (VARIABLES_HASH_BUCKETS);
       /* XXX - should we set v->context here? */
       v = bind_variable_internal (var->name, value_cell (var), shell_variables->table, 0, 0);
       if (shell_variables == global_variables)
