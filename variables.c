@@ -80,6 +80,7 @@
 #endif
 
 #define VARIABLES_HASH_BUCKETS	1024	/* must be power of two */
+#define FUNCTIONS_HASH_BUCKETS	512
 #define TEMPENV_HASH_BUCKETS	4	/* must be power of two */
 
 #define ifsname(s)	((s)[0] == 'I' && (s)[1] == 'F' && (s)[2] == 'S' && (s)[3] == '\0')
@@ -315,11 +316,11 @@ create_variable_tables ()
     }
 
   if (shell_functions == 0)
-    shell_functions = hash_create (0);
+    shell_functions = hash_create (FUNCTIONS_HASH_BUCKETS);
 
 #if defined (DEBUGGER)
   if (shell_function_defs == 0)
-    shell_function_defs = hash_create (0);
+    shell_function_defs = hash_create (FUNCTIONS_HASH_BUCKETS);
 #endif
 }
 

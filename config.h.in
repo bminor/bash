@@ -21,6 +21,17 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
+/* Template settings for autoconf */
+
+#undef __EXTENSIONS__
+#undef _ALL_SOURCE
+#undef _GNU_SOURCE
+#undef _POSIX_SOURCE
+#undef _POSIX_1_SOURCE
+#undef _POSIX_PTHREAD_SEMANTICS
+#undef _TANDEM_SOURCE
+#undef _MINIX
+
 /* Configuration feature settings controllable by autoconf. */
 
 /* Define JOB_CONTROL if your operating system supports
@@ -204,6 +215,7 @@
 #undef HAVE_LONG_DOUBLE
 
 #undef PROTOTYPES
+#undef __PROTOTYPES
 
 #undef __CHAR_UNSIGNED__
 
@@ -994,6 +1006,9 @@
 /* Define if you have the <sys/file.h> header file.  */
 #undef HAVE_SYS_FILE_H
 
+/* Define if you have the <sys/ioctl.h> header file.  */
+#undef HAVE_SYS_IOCTL_H
+
 /* Define if you have the <sys/ndir.h> header file.  */
 #undef HAVE_SYS_NDIR_H
 
@@ -1069,9 +1084,6 @@
 
 /* Are we running the GNU C library, version 2.1 or later? */
 #undef GLIBC21
-
-/* Define if on MINIX.  */
-#undef _MINIX
 
 /* Are we running SVR5 (UnixWare 7)? */
 #undef SVR5

@@ -390,9 +390,7 @@ main (argc, argv, env)
   xtrace_init ();
 
 #if defined (USING_BASH_MALLOC) && defined (DEBUG) && !defined (DISABLE_MALLOC_WRAPPERS)
-#  if 1
-  malloc_set_register (1);
-#  endif
+  malloc_set_register (0);	/* XXX - change to 1 for malloc debugging */
 #endif
 
   check_dev_tty ();
@@ -511,8 +509,6 @@ main (argc, argv, env)
       arg_index++;
     }
   this_command_name = (char *)NULL;
-
-  cmd_init();		/* initialize the command object caches */
 
   /* First, let the outside world know about our interactive status.
      A shell is interactive if the `-i' flag was given, or if all of
@@ -683,6 +679,8 @@ main (argc, argv, env)
       exit_shell (last_command_exit_value);
     }
 #endif
+
+  cmd_init();		/* initialize the command object caches */
 
   if (command_execution_string)
     {
@@ -1470,6 +1468,14 @@ open_shell_script (script_name)
       exit ((e == ENOENT) ? EX_NOTFOUND : EX_NOINPUT);
     }
 
+  free (dollar_vars[0]);
+  dollar_vars[0] = exec_argv0 ? savestring (exec_argv0) : savestring (script_name);
+  if (exec_argv0)
+    {
+      free (exec_argv0);
+      exec_argv0 = (char *)NULL;
+    }
+
   if (file_isdir (filename))
     {
 #if defined (EISDIR)
@@ -1479,14 +1485,6 @@ open_shell_script (script_name)
 #endif
       file_error (filename);
       exit (EX_NOINPUT);
-    }
-
-  free (dollar_vars[0]);
-  dollar_vars[0] = exec_argv0 ? savestring (exec_argv0) : savestring (script_name);
-  if (exec_argv0)
-    {
-      free (exec_argv0);
-      exec_argv0 = (char *)NULL;
     }
 
 #if defined (ARRAY_VARS)
@@ -1521,7 +1519,14 @@ open_shell_script (script_name)
 	{
 	  e = errno;
 	  if ((fstat (fd, &sb) == 0) && S_ISDIR (sb.st_mode))
-	    internal_error (_("%s: is a directory"), filename);
+	    {
+#if defined (EISDIR)
+	      errno = EISDIR;
+	      file_error (filename);
+#else	      
+	      internal_error (_("%s: Is a directory"), filename);
+#endif
+	    }
 	  else
 	    {
 	      errno = e;

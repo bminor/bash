@@ -160,6 +160,7 @@ itos.o: itos.c
 mailstat.o: mailstat.c
 makepath.o: makepath.c
 mbscasecmp.o: mbscasecmp.c
+mbschr.o: mbschr.c
 mbscmp.o: mbscmp.c
 memset.o: memset.c
 mktime.o: mktime.c
@@ -177,6 +178,7 @@ shtty.o: shtty.c
 snprintf.o: snprintf.c
 spell.o: spell.c
 strcasecmp.o: strcasecmp.c
+strchrnul.o: strchrnul.c
 strerror.o: strerror.c
 strftime.o: strftime.c
 strcasestr.o: strcasestr.c
@@ -197,11 +199,12 @@ timeval.o: timeval.c
 tmpfile.o: tmpfile.c
 uconvert.o: uconvert.c
 ufuncs.o: ufuncs.c
+unicode.o: unicode.c
 vprint.o: vprint.c
 wcsdup.o: wcsdup.c
 wcsnwidth.o: wcsnwidth.c
 wcswidth.o: wcswidth.c
-mbschr.o: mbschr.c
+winsize.o: winsize.c
 zcatfd.o: zcatfd.c
 zmapfd.o: zmapfd.c
 zgetline.o: zgetline.c
@@ -234,6 +237,7 @@ itos.o: ${BUILD_DIR}/config.h
 mailstat.o: ${BUILD_DIR}/config.h
 makepath.o: ${BUILD_DIR}/config.h
 mbscasecmp.o: ${BUILD_DIR}/config.h
+mbschr.o: ${BUILD_DIR}/config.h
 mbscmp.o: ${BUILD_DIR}/config.h
 memset.o: ${BUILD_DIR}/config.h
 mktime.o: ${BUILD_DIR}/config.h
@@ -251,6 +255,7 @@ shtty.o: ${BUILD_DIR}/config.h
 snprintf.o: ${BUILD_DIR}/config.h
 spell.o: ${BUILD_DIR}/config.h
 strcasecmp.o: ${BUILD_DIR}/config.h
+strchrnul.o: ${BUILD_DIR}/config.h
 strerror.o: ${BUILD_DIR}/config.h
 strftime.o: ${BUILD_DIR}/config.h
 strcasestr.o: ${BUILD_DIR}/config.h
@@ -271,11 +276,12 @@ timeval.o: ${BUILD_DIR}/config.h
 tmpfile.o: ${BUILD_DIR}/config.h
 uconvert.o: ${BUILD_DIR}/config.h
 ufuncs.o: ${BUILD_DIR}/config.h
+unicode.o: ${BUILD_DIR}/config.h
 vprint.o: ${BUILD_DIR}/config.h
 wcsdup.o: ${BUILD_DIR}/config.h
 wcsnwidth.o: ${BUILD_DIR}/config.h
 wcswidth.o: ${BUILD_DIR}/config.h
-mbschr.o: ${BUILD_DIR}/config.h
+winsize.o: ${BUILD_DIR}/config.h
 zcatfd.o: ${BUILD_DIR}/config.h
 zgetline.o: ${BUILD_DIR}/config.h
 zmapfd.o: ${BUILD_DIR}/config.h
@@ -581,3 +587,11 @@ fnxform.o: ${topdir}/bashtypes.h
 fnxform.o: ${topdir}/bashintl.h ${LIBINTL_H} ${BASHINCDIR}/gettext.h
 
 shmbchar.o: ${BASHINCDIR}/shmbchar.h
+
+unicode.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+unicode.o: ${BASHINCDIR}/stdc.h
+unicode.o: ${topdir}/xmalloc.h
+
+winsize.o: ${BASHINCDIR}/stdc.h
+winsize.o: ${topdir}/xmalloc.h
+winsize.o: ${topdir}/bashtypes.h

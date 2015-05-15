@@ -1871,7 +1871,7 @@ make_child (command, async_p)
 	     In this case, we don't want to give the terminal to the
 	     shell's process group (we could be in the middle of a
 	     pipeline, for example). */
-	  if (async_p == 0 && pipeline_pgrp != shell_pgrp && ((subshell_environment&SUBSHELL_ASYNC) == 0) && running_in_background == 0)
+	  if (async_p == 0 && pipeline_pgrp != shell_pgrp && ((subshell_environment&(SUBSHELL_ASYNC|SUBSHELL_PIPE)) == 0) && running_in_background == 0)
 	    give_terminal_to (pipeline_pgrp, 0);
 
 #if defined (PGRP_PIPE)
@@ -2658,8 +2658,8 @@ itrace("wait_for: blocking wait for %d returns %d child = %p", (int)pid, r, chil
 if (job == NO_JOB)
   itrace("wait_for: job == NO_JOB, giving the terminal to shell_pgrp (%ld)", (long)shell_pgrp);
 #endif
-      /* Don't modify terminal pgrp if we are running in the background */
-      if (running_in_background == 0)
+      /* Don't modify terminal pgrp if we are running in background or a subshell */
+      if (running_in_background == 0 && subshell_environment == 0)
 	give_terminal_to (shell_pgrp, 0);
     }
 

@@ -177,7 +177,8 @@ bind.o: history.h rlstdc.h
 callback.o: rlconf.h ansi_stdlib.h
 callback.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
 callback.o: readline.h keymaps.h rltypedefs.h chardefs.h tilde.h rlstdc.h
-compat.o: rlstdc.h
+compat.o: ${BUILD_DIR}/config.h
+compat.o: rlstdc.h rltypedefs.h
 complete.o: ansi_stdlib.h posixdir.h posixstat.h
 complete.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
 complete.o: readline.h keymaps.h rltypedefs.h chardefs.h tilde.h rlstdc.h
@@ -239,6 +240,7 @@ readline.o: posixstat.h ansi_stdlib.h posixjmp.h
 rltty.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
 rltty.o: rltty.h
 rltty.o: readline.h keymaps.h rltypedefs.h chardefs.h tilde.h rlstdc.h
+savestring.o: ${BUILD_DIR}/config.h
 search.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
 search.o: readline.h keymaps.h rltypedefs.h chardefs.h tilde.h
 search.o: ansi_stdlib.h history.h rlstdc.h

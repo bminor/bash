@@ -18,15 +18,15 @@ trap -- 'echo [$LINENO] debug' DEBUG
 [24] debug
 func[16] funcdebug
 funcdebug line
-[26] debug
+./trap.tests[26] funcdebug
 trap -- 'echo exiting' EXIT
 trap -- 'echo aborting' SIGHUP
 trap -- 'echo aborting' SIGINT
 trap -- 'echo aborting' SIGQUIT
 trap -- 'echo aborting' SIGABRT
 trap -- 'echo aborting' SIGTERM
-trap -- 'echo [$LINENO] debug' DEBUG
-[28] debug
+trap -- 'echo ${FUNCNAME:-$0}[$LINENO] funcdebug' DEBUG
+./trap.tests[28] funcdebug
 ./trap.tests[33] debug
 ./trap.tests[34] debug
 func2[30] debug

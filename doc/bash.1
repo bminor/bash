@@ -6948,7 +6948,8 @@ require \fB\-\-\fP to prevent this interpretation.
 No effect; the command does nothing beyond expanding
 .I arguments
 and performing any specified
-redirections.  A zero exit code is returned.
+redirections.
+The return status is zero.
 .TP
 \fB .\| \fP \fIfilename\fP [\fIarguments\fP]
 .PD 0
@@ -8816,8 +8817,8 @@ If no
 are supplied, the line read is assigned to the variable
 .SM
 .BR REPLY .
-The return code is zero, unless end-of-file is encountered, \fBread\fP
-times out (in which case the return code is greater than 128),
+The exit status is zero, unless end-of-file is encountered, \fBread\fP
+times out (in which case the status is greater than 128),
 a variable assignment error (such as assigning to a readonly variable) occurs,
 or an invalid file descriptor is supplied as the argument to \fB\-u\fP.
 .RE

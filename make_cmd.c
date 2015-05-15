@@ -61,8 +61,8 @@ extern int last_command_exit_value;
 sh_obj_cache_t wdcache = {0, 0, 0};
 sh_obj_cache_t wlcache = {0, 0, 0};
 
-#define WDCACHESIZE	60
-#define WLCACHESIZE	60
+#define WDCACHESIZE	128
+#define WLCACHESIZE	128
 
 static COMMAND *make_for_or_select __P((enum command_type, WORD_DESC *, WORD_LIST *, COMMAND *, int));
 #if defined (ARITH_FOR_COMMAND)

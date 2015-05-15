@@ -8342,3 +8342,74 @@ shell.c
 				   ----
 ulimit.def
 	- fix typo in limits[] declaration of `k'
+
+				   4/20
+				   ----
+configure.ac
+	- add template definitions set by AC_USE_SYSTEM_EXTENSIONS from a report
+	  from Andreas Schwab <schwab@linux-m68k.org>
+
+variables.c
+	- FUNCTIONS_HASH_BUCKETS: constant used to size the hash tables used for
+	  shell functions and the text of shell function definitions.  Initially
+	  set to 512, even though it's a really rare case that someone has more
+	  than around 150 functions, even with bash-completion
+
+				   4/21
+				   ----
+shell.c
+	- main: malloc_set_register: change arg to 0 to disable keeping track of
+	  allocations and frees in table; change to 1 for malloc debugging on
+	  demand.  Table is too small to keep effective track of allocations on
+	  a modern system, need to use something like valgrind
+
+				   4/22
+				   ----
+shell.c
+	- main: move cmd_init() (initialize word desc and word list object caches)
+	  after startup files are read so the cache doesn't get filled up with
+	  semi-permanent storage for shell functions and variables
+
+execute_cmd.c
+	- execute_function: use maybe_set_debug_trap in the same way as source
+	  builtin change from 4/10 to allow functions to reset a DEBUG trap
+	  when set -T not in effect.  From a report by Peng Yu
+	  <pengyu.ut@gmail.com>
+
+				   4/23
+				   ----
+execute_cmd.c
+	- execute_disk_command: don't overwrite value of subshell_environment
+	  by assigning SUBSHELL_FORK; just OR in SUBSHELL_FORK so something
+	  like SUBSHELL_ASYNC or SUBSHELL_PIPE is preserved
+
+jobs.c
+	- wait_for: don't call give_terminal_to if running in a subshell
+	  environment, not just if running_in_background is set; don't want
+	  shell functions waiting for a process to complete in a pipeline to
+	  give the terminal to the wrong process group.  Part of fix for bug
+	  reported by Valentin Bajrami <valentin.bajrami@gmail.com>
+	- make_child: child process should not try to give the terminal to the
+	  pipeline_pgrp if running as part of a pipeline (SUBSHELL_PIPE in
+	  subshell_environment); functions in execute_cmd.c don't set that
+	  flag until after make_child returns and the child process is running.
+	  Rest of fix for bug reported by Valentin Bajrami
+	  <valentin.bajrami@gmail.com>
+
+				   4/24
+				   ----
+redir.c
+	- redirection_error: if the redirection involves {varname}, only use
+	  `varname' in the error message if the error code is < 0 (one of the
+	  internal redirection errors, like ambiguous or bad variable name);
+	  otherwise the issue is probably with the filename and should be treated
+	  as usual.  Fixes problem reported by Dr. David Alan Gilbert
+	  <dgilbert@redhat.com>
+
+configure.ac,config.h.in
+	- sys/ioctl.h: add check in AC_CHECK_HEADERS macro, define HAVE_SYS_IOCTL_H
+
+lib/readline/{rltty,terminal}.c
+	- sys/ioctl.h: include unconditionally for ioctl declaration, avoid issues
+	  with `implicit declaration' warnings.  Issue originally raised on gdb
+	  list by Chen Gang <xili_gchen_5257@hotmail.com>

@@ -51,15 +51,14 @@
 /* System-specific feature definitions and include files. */
 #include "rldefs.h"
 
-#if defined (GWINSZ_IN_SYS_IOCTL) && !defined (TIOCGWINSZ)
-#  include <sys/ioctl.h>
-#endif /* GWINSZ_IN_SYS_IOCTL && !TIOCGWINSZ */
-
 #ifdef __MSDOS__
 #  include <pc.h>
 #endif
 
 #include "rltty.h"
+#if defined (HAVE_SYS_IOCTL_H)
+#  include <sys/ioctl.h>		/* include for declaration of ioctl */
+#endif
 #include "tcap.h"
 
 /* Some standard library routines. */

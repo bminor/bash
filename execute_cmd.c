@@ -4588,7 +4588,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
 	{
 	  debug_trap = savestring (debug_trap);
 	  add_unwind_protect (xfree, debug_trap);
-	  add_unwind_protect (set_debug_trap, debug_trap);
+	  add_unwind_protect (maybe_set_debug_trap, debug_trap);
 	}
       restore_default_signal (DEBUG_TRAP);
     }
@@ -5115,7 +5115,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
       if (async)
 	interactive = 0;
 
-      subshell_environment = SUBSHELL_FORK;	/* XXX */
+      subshell_environment |= SUBSHELL_FORK;	/* XXX - was just = */
 
       if (redirects && (do_redirections (redirects, RX_ACTIVE) != 0))
 	{

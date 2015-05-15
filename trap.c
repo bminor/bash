@@ -580,11 +580,10 @@ set_debug_trap (command)
 
 /* Separate function to call when functions and sourced files want to restore
    the original version of the DEBUG trap before returning.  Unless the -T
-   option is set, source saves the old debug trap and unsets the trap.  If the
-   sourced file changes the DEBUG trap, SIG_TRAPPED will be set and we don't
-   bother restoring the original trap string.
-
-   Currently only source calls this. */
+   option is set, source and shell function execution save the old debug trap
+   and unset the trap.  If the function or sourced file changes the DEBUG trap,
+   SIG_TRAPPED will be set and we don't bother restoring the original trap string.
+   This is used by both functions and the source builtin. */
 void
 maybe_set_debug_trap (command)
      char *command;

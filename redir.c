@@ -116,7 +116,7 @@ redirection_error (temp, error)
   int oflags;
 
   allocname = 0;
-  if (temp->rflags & REDIR_VARASSIGN)
+  if ((temp->rflags & REDIR_VARASSIGN) && error < 0)
     filename = allocname = savestring (temp->redirector.filename->word);
   else if (temp->redirector.dest < 0)
     /* This can happen when read_token_word encounters overflow, like in
