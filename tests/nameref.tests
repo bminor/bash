@@ -108,6 +108,13 @@ readonly foo=one
 assignvar foo two three four
 echo $foo
 
+var=abcde
+x=var
+declare -n v=var
+# these two should display the same
+echo ${!x//c/x}
+echo ${v//c/x}
+
 ${THIS_SH} ./nameref1.sub
 ${THIS_SH} ./nameref2.sub
 ${THIS_SH} ./nameref3.sub
@@ -116,3 +123,4 @@ ${THIS_SH} ./nameref5.sub
 ${THIS_SH} ./nameref6.sub
 ${THIS_SH} ./nameref7.sub
 ${THIS_SH} ./nameref8.sub
+${THIS_SH} ./nameref9.sub

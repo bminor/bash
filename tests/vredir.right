@@ -90,3 +90,14 @@ ok 1
 ./vredir6.sub: redirection error: cannot duplicate fd: Invalid argument
 ./vredir6.sub: line 13: /dev/null: Invalid argument
 unset
+12 10
+a
+a
+swizzle is a function
+swizzle () 
+{ 
+    exec {fd[0]}<&0;
+    exec {fd[1]}>&1;
+    exec {stdin}<&${fd[0]}-;
+    exec {stdout}>&${fd[1]}-
+}

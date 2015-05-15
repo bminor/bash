@@ -64,7 +64,7 @@ match_pattern_wchar (wpat, wstring, flags)
   wchar_t wc;
 
   if (*wstring == 0)
-    return (0);
+    return (*wpat == L'*');	/* XXX  - allow only * to match empty string */
 
   switch (wc = *wpat++)
     {
@@ -249,7 +249,7 @@ match_pattern_char (pat, string, flags)
   char c;
 
   if (*string == 0)
-    return (0);
+    return (*pat == '*');	/* XXX - allow only * to match empty string */
 
   switch (c = *pat++)
     {

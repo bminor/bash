@@ -194,4 +194,45 @@ scalar: 0
 scalar: 1
 scalar: 0
 scalar: 0
-./builtins.tests: line 263: exit: status: numeric argument required
+all set:
+one
+two
+f1 () 
+{ 
+    echo f1
+}
+f2 () 
+{ 
+    echo f2
+}
+all unset:
+unset1
+unset2
+./builtins6.sub: line 28: declare: f1: not found
+./builtins6.sub: line 28: declare: f2: not found
+all reset:
+one-one
+two-one
+f1 () 
+{ 
+    echo f1
+}
+f2 () 
+{ 
+    echo f2
+}
+vars unset:
+unset1
+unset2
+f1 () 
+{ 
+    echo f1
+}
+f2 () 
+{ 
+    echo f2
+}
+funcs unset:
+one-two
+two-two
+./builtins.tests: line 266: exit: status: numeric argument required

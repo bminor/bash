@@ -59,8 +59,15 @@ argv[1] = <4>
 argv[1] = <op>
 argv[1] = <abcdefghijklmnop>
 argv[1] = <abcdefghijklmnop>
-./new-exp.tests: line 172: ABX: unbound variable
-./new-exp.tests: line 176: $6: cannot assign in this way
+argv[1] = <a>
+argv[2] = <b>
+argv[3] = <c>
+argv[4] = <d>
+argv[1] = <a>
+argv[2] = <b c>
+argv[3] = <d>
+./new-exp.tests: line 180: ABX: unbound variable
+./new-exp.tests: line 184: $6: cannot assign in this way
 argv[1] = <xxcde>
 argv[1] = <axxde>
 argv[1] = <abxyz>
@@ -169,7 +176,7 @@ this is test 2
 ./new-exp2.sub: line 42: 1111111111111111111111: command not found
 
 argv[1] = <6>
-./new-exp.tests: line 277: ${#:}: bad substitution
+./new-exp.tests: line 285: ${#:}: bad substitution
 argv[1] = <'>
 argv[1] = <">
 argv[1] = <"hello">
@@ -398,13 +405,13 @@ argv[6] = <w>
 argv[7] = <x>
 argv[8] = <y>
 argv[9] = <z>
-./new-exp.tests: line 482: $9: unbound variable
-./new-exp.tests: line 483: 9: unbound variable
-./new-exp.tests: line 484: UNSET: unbound variable
-./new-exp.tests: line 485: UNSET: unbound variable
-./new-exp.tests: line 486: UNSET: unbound variable
-./new-exp.tests: line 487: UNSET: unbound variable
-./new-exp.tests: line 488: UNSET: unbound variable
+./new-exp.tests: line 490: $9: unbound variable
+./new-exp.tests: line 491: 9: unbound variable
+./new-exp.tests: line 492: UNSET: unbound variable
+./new-exp.tests: line 493: UNSET: unbound variable
+./new-exp.tests: line 494: UNSET: unbound variable
+./new-exp.tests: line 495: UNSET: unbound variable
+./new-exp.tests: line 496: UNSET: unbound variable
 argv[1] = <5>
 argv[1] = <#>
 argv[1] = <#>
@@ -433,7 +440,7 @@ Case05---3---A:B:C---
 Case06---1---A B C::---
 Case07---3---A:B:C---
 Case08---3---A:B:C---
-./new-exp.tests: line 508: ${$(($#-1))}: bad substitution
+./new-exp.tests: line 516: ${$(($#-1))}: bad substitution
 argv[1] = <a>
 argv[2] = <b>
 argv[3] = <c>
@@ -450,7 +457,7 @@ argv[1] = <a>
 argv[1] = <a>
 argv[2] = <b>
 argv[1] = <>
-./new-exp.tests: line 527: $(($# - 2)): substring expression < 0
+./new-exp.tests: line 535: $(($# - 2)): substring expression < 0
 argv[1] = <bin>
 argv[2] = <bin>
 argv[3] = <ucb>
@@ -614,4 +621,4 @@ a b c d e
 a5b
 argv[1] = </>
 argv[1] = </>
-./new-exp.tests: line 587: ABXD: parameter unset
+./new-exp.tests: line 595: ABXD: parameter unset

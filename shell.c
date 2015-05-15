@@ -160,6 +160,7 @@ int autocd = 0;
    This is a superset of the information provided by interactive_shell.
 */
 int startup_state = 0;
+int reading_shell_script = 0;
 
 /* Special debugging helper. */
 int debugging_login_shell = 0;
@@ -390,7 +391,7 @@ main (argc, argv, env)
   xtrace_init ();
 
 #if defined (USING_BASH_MALLOC) && defined (DEBUG) && !defined (DISABLE_MALLOC_WRAPPERS)
-  malloc_set_register (0);	/* XXX - change to 1 for malloc debugging */
+  malloc_set_register (1);	/* XXX - change to 1 for malloc debugging */
 #endif
 
   check_dev_tty ();
@@ -680,7 +681,8 @@ main (argc, argv, env)
     }
 #endif
 
-  cmd_init();		/* initialize the command object caches */
+  cmd_init ();		/* initialize the command object caches */
+  uwp_init ();
 
   if (command_execution_string)
     {
@@ -721,7 +723,7 @@ main (argc, argv, env)
   /* Bind remaining args to $1 ... $n */
   arg_index = bind_args (argv, arg_index, argc, 1);
 
-  if (debugging_mode && locally_skip_execution == 0 && running_setuid == 0 && (dollar_vars[1] || interactive_shell == 0))
+  if (debugging_mode && locally_skip_execution == 0 && running_setuid == 0 && (reading_shell_script || interactive_shell == 0))
     start_debugger ();
 
   /* Do the things that should be done only for interactive shells. */
@@ -965,6 +967,7 @@ sh_exit (s)
 #if defined (MALLOC_DEBUG) && defined (USING_BASH_MALLOC)
   if (malloc_trace_at_exit)
     trace_malloc_stats (get_name_for_error (), (char *)NULL);
+  /* mlocation_write_table (); */
 #endif
 
   exit (s);
@@ -1465,7 +1468,7 @@ open_shell_script (script_name)
     {
       e = errno;
       file_error (filename);
-      exit ((e == ENOENT) ? EX_NOTFOUND : EX_NOINPUT);
+      sh_exit ((e == ENOENT) ? EX_NOTFOUND : EX_NOINPUT);
     }
 
   free (dollar_vars[0]);
@@ -1484,7 +1487,7 @@ open_shell_script (script_name)
       errno = EINVAL;
 #endif
       file_error (filename);
-      exit (EX_NOINPUT);
+      sh_exit (EX_NOINPUT);
     }
 
 #if defined (ARRAY_VARS)
@@ -1586,6 +1589,8 @@ open_shell_script (script_name)
     init_interactive_script ();
 
   free (filename);
+
+  reading_shell_script = 1;
   return (fd);
 }
 

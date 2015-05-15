@@ -4912,7 +4912,7 @@ got_token:
 #endif
     CHECK_FOR_RESERVED_WORD (token);
 
-  the_word = (WORD_DESC *)xmalloc (sizeof (WORD_DESC));
+  the_word = alloc_word_desc ();
   the_word->word = (char *)xmalloc (1 + token_index);
   the_word->flags = 0;
   strcpy (the_word->word, token);
@@ -6258,8 +6258,7 @@ set_line_mbstate ()
   if (shell_input_line == NULL)
     return;
   len = strlen (shell_input_line);	/* XXX - shell_input_line_len ? */
-  FREE (shell_input_line_property);
-  shell_input_line_property = (char *)xmalloc (len + 1);
+  shell_input_line_property = (char *)xrealloc (shell_input_line_property, len + 1);
 
   memset (&prevs, '\0', sizeof (mbstate_t));
   for (i = previ = 0; i < len; i++)

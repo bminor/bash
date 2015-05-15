@@ -14,9 +14,10 @@ declare -Ai chaff=([one]="10" [zero]="5" )
 declare -Ar waste=([version]="4.0-devel" [source]="./assoc.tests" [lineno]="28" [pid]="42134" )
 declare -A wheat=([two]="b" [three]="c" [one]="a" [zero]="0" )
 declare -A chaff=([one]="10" ["hello world"]="flip" [zero]="5" )
-./assoc.tests: line 38: unset: waste: cannot unset: readonly variable
-./assoc.tests: line 39: chaff[*]: bad array subscript
-./assoc.tests: line 40: [*]=12: invalid associative array key
+./assoc.tests: line 38: waste: readonly variable
+./assoc.tests: line 39: unset: waste: cannot unset: readonly variable
+./assoc.tests: line 40: chaff[*]: bad array subscript
+./assoc.tests: line 41: [*]=12: invalid associative array key
 declare -A chaff=([one]="a" ["hello world"]="flip" )
 flip
 argv[1] = <a>
@@ -31,9 +32,9 @@ argv[2] = <flip>
 argv[3] = <multiple>
 argv[4] = <words>
 argv[1] = <a flip multiple words>
-./assoc.tests: line 57: declare: chaff: cannot destroy array variables in this way
-./assoc.tests: line 59: chaff[*]: bad array subscript
-./assoc.tests: line 60: [*]=12: invalid associative array key
+./assoc.tests: line 58: declare: chaff: cannot destroy array variables in this way
+./assoc.tests: line 60: chaff[*]: bad array subscript
+./assoc.tests: line 61: [*]=12: invalid associative array key
 declare -A wheat=([six]="6" ["foo bar"]="qux qix" )
 argv[1] = <qux>
 argv[2] = <qix>
@@ -190,3 +191,7 @@ declare -A foo=(["bar\${foo}bie"]="doll" )
 bar
 after printf
 after use: 0
+declare -A assoc=([0]="assoc" )
+assoc
+declare -A assoc=([two]="twoless" [three]="three" [one]="onemore" )
+declare -Ar assoc=([two]="twoless" [three]="three" [one]="onemore" )

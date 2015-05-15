@@ -643,7 +643,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	  if (s)
 	    subshell_exit (last_command_exit_value);
 	  else
-	    exit (last_command_exit_value);
+	    sh_exit (last_command_exit_value);
 	  /* NOTREACHED */
         }
       else
@@ -3926,7 +3926,7 @@ is_dirname (pathname)
   int ret;
 
   temp = search_for_command (pathname, 0);
-  ret = (temp ? file_isdir (temp) : file_isdir (pathname));
+  ret = temp ? file_isdir (temp) : file_isdir (pathname);
   free (temp);
   return ret;
 }
@@ -4086,7 +4086,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 				     pipe_in, pipe_out,
 				     already_forked ? 0 : async);
       if (already_forked)
-	exit (result);
+	sh_exit (result);
       else
 	{
 	  bind_lastarg ((char *)NULL);
@@ -4283,6 +4283,7 @@ run_builtin:
 
   if (autocd && interactive && words->word && is_dirname (words->word->word))
     {
+      words = make_word_list (make_word ("--"), words);
       words = make_word_list (make_word ("cd"), words);
       xtrace_print_word_list (words, 0);
       goto run_builtin;
@@ -4850,14 +4851,14 @@ execute_subshell_builtin_or_function (words, redirects, builtin, var,
 	  fflush (stdout);
 	  if (r == EX_USAGE)
 	    r = EX_BADUSAGE;
-	  exit (r);
+	  sh_exit (r);
 	}
     }
   else
     {
       r = execute_function (var, words, flags, fds_to_close, async, 1);
       fflush (stdout);
-      exit (r);
+      sh_exit (r);
     }
 }
 

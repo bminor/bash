@@ -35,6 +35,7 @@ chaff[hello world]=flip
 declare -p chaff
 
 # TEST - errors
+waste[stuff]=other
 unset waste
 chaff[*]=12
 chaff=( [one]=a [*]=12 )
@@ -186,3 +187,21 @@ ${THIS_SH} ./assoc5.sub
 ${THIS_SH} ./assoc6.sub
 
 ${THIS_SH} ./assoc7.sub
+
+# test converting between scalars and assoc arrays
+unset assoc
+assoc=assoc
+declare -A assoc
+declare -p assoc
+echo ${assoc[@]}
+
+# weird syntax required to append to multiple existing array elements using
+# compound assignment syntax
+unset assoc
+declare -A assoc 
+assoc=( [one]=one [two]=two [three]=three )
+assoc+=( [one]+=more [two]+=less )
+declare -p assoc
+
+readonly -A assoc
+declare -p assoc

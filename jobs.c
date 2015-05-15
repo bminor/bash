@@ -1489,7 +1489,7 @@ j_strsignal (s)
   if (x == 0)
     {
       x = retcode_name_buffer;
-      sprintf (x, _("Signal %d"), s);
+      snprintf (x, sizeof(retcode_name_buffer), _("Signal %d"), s);
     }
   return x;
 }
@@ -1512,7 +1512,7 @@ printable_job_status (j, p, format)
       else
 	{
 	  temp = retcode_name_buffer;
-	  sprintf (temp, _("Stopped(%s)"), signal_name (WSTOPSIG (p->status)));
+	  snprintf (temp, sizeof(retcode_name_buffer), _("Stopped(%s)"), signal_name (WSTOPSIG (p->status)));
 	}
     }
   else if (RUNNING (j))
@@ -1528,11 +1528,14 @@ printable_job_status (j, p, format)
 	  temp = retcode_name_buffer;
 	  es = WEXITSTATUS (p->status);
 	  if (es == 0)
-	    strcpy (temp, _("Done"));
+	    {
+	      strncpy (temp, _("Done"), sizeof (retcode_name_buffer) - 1);
+	      temp[sizeof (retcode_name_buffer) - 1] = '\0';
+	    }
 	  else if (posixly_correct)
-	    sprintf (temp, _("Done(%d)"), es);
+	    snprintf (temp, sizeof(retcode_name_buffer), _("Done(%d)"), es);
 	  else
-	    sprintf (temp, _("Exit %d"), es);
+	    snprintf (temp, sizeof(retcode_name_buffer), _("Exit %d"), es);
 	}
       else
 	temp = _("Unknown status");
@@ -2708,6 +2711,14 @@ if (job == NO_JOB)
 		 well, so the loop can be broken.  This doesn't call the
 		 SIGINT signal handler; maybe it should. */
 	      if (signal_is_trapped (SIGINT) == 0 && (loop_level || (shell_compatibility_level > 32 && executing_list)))
+		ADDINTERRUPT;
+	      /* Call any SIGINT trap handler if the shell is running a loop, so
+		 the loop can be broken.  This seems more useful and matches the
+		 behavior when the shell is running a builtin command in a loop
+		 when it is interrupted.  Change ADDINTERRUPT to
+		 trap_handler (SIGINT) to run the trap without interrupting the
+		 loop. */
+	      else if (signal_is_trapped (SIGINT) && loop_level)
 		ADDINTERRUPT;
 	      else
 		{

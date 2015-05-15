@@ -50,6 +50,7 @@
 
 #define HISTORY_WORD_DELIMITERS		" \t\n;&()|<>"
 #define HISTORY_QUOTE_CHARACTERS	"\"'`"
+#define HISTORY_EVENT_DELIMITERS	"^$*%-"
 
 #define slashify_in_quotes "\\`\"$"
 
@@ -61,6 +62,10 @@ static char *subst_lhs;
 static char *subst_rhs;
 static int subst_lhs_len;
 static int subst_rhs_len;
+
+/* Characters that delimit history event specifications and separate event
+   specifications from word designators.  Static for now */
+static char *history_event_delimiter_chars = HISTORY_EVENT_DELIMITERS;
 
 static char *get_history_word_specifier PARAMS((char *, char *, int *));
 static int history_tokenize_word PARAMS((const char *, int));
@@ -112,7 +117,6 @@ rl_linebuf_func_t *history_inhibit_expansion_function;
 
 /* The last string searched for by a !?string? search. */
 static char *search_string;
-
 /* The last string matched by a !?string? search. */
 static char *search_match;
 
@@ -225,6 +229,7 @@ get_history_event (string, caller_index, delimiting_quote)
 
 #endif /* HANDLE_MULTIBYTE */
       if ((!substring_okay && (whitespace (c) || c == ':' ||
+          (history_event_delimiter_chars && member (c, history_event_delimiter_chars)) ||
 	  (history_search_delimiter_chars && member (c, history_search_delimiter_chars)) ||
 	  string[i] == delimiting_quote)) ||
 	  string[i] == '\n' ||
@@ -873,7 +878,7 @@ history_expand_internal (string, start, qc, end_index_ptr, ret_string, current_l
    1) If expansions did take place
    2) If the `p' modifier was given and the caller should print the result
 
-  If an error ocurred in expansion, then OUTPUT contains a descriptive
+  If an error occurred in expansion, then OUTPUT contains a descriptive
   error message. */
 
 #define ADD_STRING(s) \

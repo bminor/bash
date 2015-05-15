@@ -167,6 +167,14 @@ recho ${a-$z}
 expect nothing
 recho ${!1-$z}
 
+set -- a 'b c' d
+unset foo
+foo=@
+expect '<a> <b> <c> <d>'
+recho ${!foo}
+expect '<a> <b c> <d>'
+recho "${!foo}"
+
 set -u
 expect $0: ABX: unbound variable
 ( recho ${ABX} )

@@ -407,9 +407,7 @@ fd_ispipe (fd)
      int fd;
 {
   errno = 0;
-  if (lseek ((fd), 0L, SEEK_CUR) < 0)
-    return (errno == ESPIPE);
-  return 0;
+  return ((lseek (fd, 0L, SEEK_CUR) < 0) && (errno == ESPIPE));
 }
 
 /* There is a bug in the NeXT 2.1 rlogind that causes opens

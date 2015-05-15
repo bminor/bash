@@ -60,7 +60,10 @@ ansicstr (string, len, flags, sawc, rlen)
     return ((char *)NULL);
 
 #if defined (HANDLE_MULTIBYTE)
-  ret = (char *)xmalloc (4*len + 1);
+  temp = 4*len + 1;
+  if (temp < 12)
+    temp = 12;				/* ensure enough for eventual u32cesc */
+  ret = (char *)xmalloc (temp);
 #else
   ret = (char *)xmalloc (2*len + 1);	/* 2*len for possible CTLESC */
 #endif

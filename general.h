@@ -124,7 +124,7 @@ typedef struct {
   int token;
 } STRING_INT_ALIST;
 
-/* A macro to avoid making an unneccessary function call. */
+/* A macro to avoid making an unnecessary function call. */
 #define REVERSE_LIST(list, type) \
   ((list && list->next) ? (type)list_reverse ((GENERIC_LIST *)list) \
 			: (type)(list))

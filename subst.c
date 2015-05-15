@@ -595,6 +595,7 @@ quoted_strchr (s, c, flags)
   return ((char *)NULL);
 }
 
+#if defined (INCLUDE_UNUSED)
 /* Return 1 if CHARACTER appears in an unquoted portion of
    STRING.  Return 0 otherwise.  CHARACTER must be a single-byte character. */
 static int
@@ -679,6 +680,7 @@ unquoted_substring (substr, string)
     }
   return (0);
 }
+#endif
 
 /* Most of the substitutions must be done in parallel.  In order
    to avoid using tons of unclear goto's, I have some functions
@@ -4435,7 +4437,7 @@ match_pattern (string, pat, mtype, sp, ep)
   size_t slen, plen, mslen, mplen;
 #endif
 
-  if (string == 0 || *string == 0 || pat == 0 || *pat == 0)
+  if (string == 0 || pat == 0 || *pat == 0)
     return (0);
 
 #if defined (HANDLE_MULTIBYTE)
@@ -4709,7 +4711,7 @@ string_var_assignment (v, s)
 
   val = sh_quote_reusable (s, 0);
   i = var_attribute_string (v, 0, flags);
-  ret = (char *)xmalloc (i + strlen (val) + strlen (v->name) + 16);
+  ret = (char *)xmalloc (i + strlen (val) + strlen (v->name) + 16 + MAX_ATTRIBUTES);
   if (i > 0)
     sprintf (ret, "declare -%s %s=%s", flags, v->name, val);
   else
@@ -7001,6 +7003,7 @@ parameter_brace_substring (varname, value, ind, substr, quoted, flags)
 /*								*/
 /****************************************************************/
 
+#if 0	/* Unused */
 static int
 shouldexp_replacement (s)
      char *s;
@@ -7016,6 +7019,7 @@ shouldexp_replacement (s)
     }
   return 0;
 }
+#endif
 
 char *
 pat_subst (string, pat, rep, mflags)
@@ -7041,6 +7045,8 @@ pat_subst (string, pat, rep, mflags)
    *	    with REP and return the result.
    *	2.  A null pattern with mtype == MATCH_END means to append REP to
    *	    STRING and return the result.
+   *	3.  A null STRING with a matching pattern means to append REP to
+   *	    STRING and return the result.
    * These don't understand or process `&' in the replacement string.
    */
   if ((pat == 0 || *pat == 0) && (mtype == MATCH_BEG || mtype == MATCH_END))
@@ -7062,11 +7068,17 @@ pat_subst (string, pat, rep, mflags)
 	}
       return (ret);
     }
+  else if (*string == 0 && (match_pattern (string, pat, mtype, &s, &e) != 0))
+    {
+      ret = (char *)xmalloc (STRLEN (rep) + 1);
+      strcpy (ret, rep);
+      return (ret);
+    }
 
   ret = (char *)xmalloc (rsize = 64);
   ret[0] = '\0';
 
-  for (replen = STRLEN (rep), rptr = 0, str = string;;)
+  for (replen = STRLEN (rep), rptr = 0, str = string; *str;)
     {
       if (match_pattern (str, pat, mtype, &s, &e) == 0)
 	break;

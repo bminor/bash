@@ -64,6 +64,17 @@ extern void mregister_describe_mem ();
 extern void mregister_dump_table __P((void));
 extern void mregister_table_init __P((void));
 
+typedef struct ma_table {
+	char *file;
+	int line;
+	int nalloc;
+} ma_table_t;
+
+extern void mlocation_register_alloc __P((const char *, int));
+extern void mlocation_table_init __P((void));
+extern void mlocation_dump_table __P((void));
+extern void mlocation_write_table __P((void));
+
 /* NOTE:  HASH_MIX taken from dmalloc (http://dmalloc.com) */
 
 /*
