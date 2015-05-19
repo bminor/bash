@@ -404,6 +404,9 @@ assign_array_var_from_word_list (var, list, flags)
       (*var->assign_func) (var, l->word->word, i, 0);
     else
       array_insert (a, i, l->word->word);
+
+  VUNSETATTR (var, att_invisible);	/* no longer invisible */
+
   return var;
 }
 
@@ -634,6 +637,10 @@ assign_array_var_from_string (var, value, flags)
 
   if (nlist)
     dispose_words (nlist);
+
+  if (var)
+    VUNSETATTR (var, att_invisible);	/* no longer invisible */
+
   return (var);
 }
 
