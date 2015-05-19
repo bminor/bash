@@ -751,9 +751,11 @@ unset_builtin (list)
   WORD_LIST *list;
 {
   int unset_function, unset_variable, unset_array, opt, nameref, any_failed;
+  int global_unset_func, global_unset_var;
   char *name;
 
   unset_function = unset_variable = unset_array = nameref = any_failed = 0;
+  global_unset_func = global_unset_var = 0;
 
   reset_internal_getopt ();
   while ((opt = internal_getopt (list, "fnv")) != -1)
@@ -761,10 +763,10 @@ unset_builtin (list)
       switch (opt)
 	{
 	case 'f':
-	  unset_function = 1;
+	  global_unset_func = 1;
 	  break;
 	case 'v':
-	  unset_variable = 1;
+	  global_unset_var = 1;
 	  break;
 	case 'n':
 	  nameref = 1;
@@ -777,7 +779,7 @@ unset_builtin (list)
 
   list = loptend;
 
-  if (unset_function && unset_variable)
+  if (global_unset_func && global_unset_var)
     {
       builtin_error (_("cannot simultaneously unset a function and a variable"));
       return (EXECUTION_FAILURE);
@@ -794,6 +796,9 @@ unset_builtin (list)
 #endif
 
       name = list->word->word;
+
+      unset_function = global_unset_func;
+      unset_variable = global_unset_var;
 
 #if defined (ARRAY_VARS)
       unset_array = 0;
