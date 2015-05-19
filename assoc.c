@@ -436,6 +436,8 @@ assoc_to_assign (hash, quoted)
 #if 1
 	if (sh_contains_shell_metas (tlist->key))
 	  istr = sh_double_quote (tlist->key);
+	else if (ALL_ELEMENT_SUB (tlist->key[0]) && tlist->key[1] == '\0')
+	  istr = sh_double_quote (tlist->key);	
 	else
 	  istr = tlist->key;	
 #else
