@@ -78,13 +78,15 @@ stub_charset ()
   s = strrchr (locale, '.');
   if (s)
     {
-      strcpy (charsetbuf, s+1);
+      strncpy (charsetbuf, s+1, sizeof (charsetbuf) - 1);
+      charsetbuf[sizeof (charsetbuf) - 1] = '\0';
       t = strchr (charsetbuf, '@');
       if (t)
 	*t = 0;
       return charsetbuf;
     }
-  strcpy (charsetbuf, locale);
+  strncpy (charsetbuf, locale, sizeof (charsetbuf) - 1);
+  charsetbuf[sizeof (charsetbuf) - 1] = '\0';
   return charsetbuf;
 }
 #endif
