@@ -178,7 +178,7 @@ static const FUNMAP default_funmap[] = {
   { "vi-fword", rl_vi_fword },
   { "vi-goto-mark", rl_vi_goto_mark },
   { "vi-insert-beg", rl_vi_insert_beg },
-  { "vi-insertion-mode", rl_vi_insertion_mode },
+  { "vi-insertion-mode", rl_vi_insert_mode },
   { "vi-match", rl_vi_match },
   { "vi-movement-mode", rl_vi_movement_mode },
   { "vi-next-word", rl_vi_next_word },

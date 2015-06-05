@@ -213,6 +213,10 @@ _rl_handle_signal (sig)
     case SIGINT:
       _rl_reset_completion_state ();
       rl_free_line_state ();
+#if defined (READLINE_CALLBACKS)
+      rl_callback_sigcleanup ();
+#endif
+
       /* FALLTHROUGH */
 
 #if defined (SIGTSTP)

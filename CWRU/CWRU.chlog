@@ -8642,3 +8642,85 @@ builtins/shopt.def
 	  is enabled, and turns off when extdebug is disabled.  The documentation
 	  has always said that shopt does this.  Report from Peng Yu
 	  <pengyu.ut@gmail.com>
+
+				   5/27
+				   ----
+findcmd.[ch]
+	- add support for EXECIGNORE shell variable, list of extglob patterns that
+	  prevent matching filenames from being identified as executable files
+
+variables.c
+	- EXECIGNORE: arrange for findcmd.c:setup_exec_ignore to be called when
+	  $EXECIGNORE changes
+
+variables.h
+	- sv_execignore: extern declaration
+
+doc/{bash.1,bashref.texi}
+	- document EXECIGNORE variable
+
+				   5/28
+				   ----
+lib/readline/callback.c
+	- rl_callback_sigcleanup: new function, cleans up and unsets any state
+	  rl_callback_read_char uses.  Intended to be used after a signal
+
+lib/readline/signals.c
+	- _rl_handle_signal: call rl_callback_sigcleanup on SIGINT.  Fixes bug
+	  reported to python group by Martin Panter <vadmium+floss@gmail.com>
+
+lib/readline/isearch.c
+	- _rl_isearch_cleanup: now a public function so rl_callback_cleanup can
+	  call it
+
+lib/readline/search.c
+	- _rl_nsearch_cleanup: now a public function so rl_callback_cleanup can
+	  call it
+
+lib/readline/rlprivate.h
+	- _rl_[in]search_cleanup: extern declarations
+
+lib/readline/readline.h
+	- rl_callback_sigcleanup: new extern declaration
+
+lib/readline/doc/rltech.texi
+	- rl_callback_sigcleanup: documented
+
+lib/readline/readline.h
+	- bump readline version to 7.0 due to addition of rl_callback_sigcleanup
+
+				   5/29
+				   ----
+builtins/declare.def
+	- declare_internal: if we are trying to change attributes or value for a
+	  nameref variable whose value points to an unset variable, make sure we
+	  create a new variable whose name is the value of the nameref variable.
+	  That is,
+
+		declare -n foo=bar
+		unset foo	# unsets bar
+		declare -i foo
+
+	  should create a (invisible) variable named `bar' with the integer
+	  attribute.  Fixes problem reported by Greg Wooledge
+	  <wooledg@eeg.ccf.org>
+
+builtins/set.def
+	- unset_builtin: if we find a nameref variable when we look it up with
+	  find_variable (the returned variable has a name different from what
+	  we looked up), make sure we use that new name for the rest of the
+	  function rather than rely on unbind_variable to do the same thing as
+	  find_variable.  Fixes problem reported by Greg Wooledge
+	  <wooledg@eeg.ccf.org>
+	- unset_builtin: if we try to unset a nameref variable whose value is
+	  not a set variable, make sure we don't try to unset the nameref itself,
+	  but rather the variable it points to.  This ensures that the following
+	  always works as it should
+
+		declare -n foo=bar
+		unset foo	# unsets bar and leaves foo unchanged
+
+lib/readline/funmap.c
+	- vi-insertion-mode: make sure it maps to rl_vi_insert_mode, which is
+	  actually what the `i' keybinding in vi_movement_keymap maps to.
+	  Cosmetic fix from isabella parakiss <izaberina@gmail.com>

@@ -66,7 +66,6 @@ static int rl_search_history PARAMS((int, int));
 
 static _rl_search_cxt *_rl_isearch_init PARAMS((int));
 static void _rl_isearch_fini PARAMS((_rl_search_cxt *));
-static int _rl_isearch_cleanup PARAMS((_rl_search_cxt *, int));
 
 /* Last line found by the current incremental search, so we don't `find'
    identical lines many times in a row.  Now part of isearch context. */
@@ -724,7 +723,7 @@ add_character:
   return 1;
 }
 
-static int
+int
 _rl_isearch_cleanup (cxt, r)
      _rl_search_cxt *cxt;
      int r;

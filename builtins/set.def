@@ -877,6 +877,10 @@ unset_builtin (list)
 	  NEXT_VARIABLE ();
 	}
 
+      /* if we have a nameref we want to use it */
+      if (var && unset_function == 0 && nameref == 0 && STREQ (name, name_cell(var)) == 0)
+	name = name_cell (var);
+
       /* Posix.2 says try variables first, then functions.  If we would
 	 find a function after unsuccessfully searching for a variable,
 	 note that we're acting on a function now as if -f were
@@ -911,7 +915,15 @@ unset_builtin (list)
 	}
       else
 #endif /* ARRAY_VARS */
-      tem = unset_function ? unbind_func (name) : (nameref ? unbind_nameref (name) : unbind_variable (name));
+      /* If we're trying to unset a nameref variable whose value isn't a set
+	 variable, make sure we still try to unset the nameref's value */
+      if (var == 0 && nameref == 0 && unset_function == 0)
+	{
+	  var = find_variable_last_nameref (name);
+	  tem = (var && nameref_p (var)) ? unbind_variable (nameref_cell (var)) : unbind_variable (name);
+	}
+      else
+	tem = unset_function ? unbind_func (name) : (nameref ? unbind_nameref (name) : unbind_variable (name));
 
       /* This is what Posix.2 says:  ``If neither -f nor -v
 	 is specified, the name refers to a variable; if a variable by

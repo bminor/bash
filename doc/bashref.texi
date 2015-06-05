@@ -5662,6 +5662,16 @@ Similar to @code{BASH_ENV}; used when the shell is invoked in
 The numeric effective user id of the current user.  This variable
 is readonly.
 
+@item EXECIGNORE
+A colon-separated list of extended glob patterns (@pxref{Pattern Matching})
+defining the list of filenames to be ignored by command search.
+Files whose full pathnames match one of these patterns are not considered
+executable files for the purposes of completion and command execution.
+This does not affect the behavior of the @code{[}, @code{test}, and @code{[[}
+commands.
+Use this variable to ignore shared library files that have the executable
+bit set, but are not executable files.
+
 @item FCEDIT
 The editor used as a default by the @option{-e} option to the @code{fc}
 builtin command.

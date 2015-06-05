@@ -292,6 +292,7 @@ extern void _rl_scxt_dispose PARAMS((_rl_search_cxt *, int));
 
 extern int _rl_isearch_dispatch PARAMS((_rl_search_cxt *, int));
 extern int _rl_isearch_callback PARAMS((_rl_search_cxt *));
+extern int _rl_isearch_cleanup PARAMS((_rl_search_cxt *, int));
 
 extern int _rl_search_getchar PARAMS((_rl_search_cxt *));
 
@@ -346,6 +347,7 @@ extern int _rl_restore_tty_signals PARAMS((void));
 
 /* search.c */
 extern int _rl_nsearch_callback PARAMS((_rl_search_cxt *));
+extern int _rl_nsearch_cleanup PARAMS((_rl_search_cxt *, int));
 
 /* signals.c */
 extern void _rl_signal_handler PARAMS((int));

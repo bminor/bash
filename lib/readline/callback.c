@@ -291,4 +291,27 @@ _rl_callback_data_dispose (arg)
   xfree (arg);
 }
 
+/* Make sure that this agrees with cases in rl_callback_read_char */
+void
+rl_callback_sigcleanup ()
+{
+  if (RL_ISSTATE (RL_STATE_CALLBACK) == 0)
+    return;
+
+  if (RL_ISSTATE (RL_STATE_ISEARCH))
+    _rl_isearch_cleanup (_rl_iscxt, 0);
+  else if (RL_ISSTATE (RL_STATE_NSEARCH))
+    _rl_nsearch_cleanup (_rl_nscxt, 0);
+  else if (RL_ISSTATE (RL_STATE_VIMOTION))
+    RL_UNSETSTATE (RL_STATE_VIMOTION);
+  else if (RL_ISSTATE (RL_STATE_NUMERICARG))
+    {
+      _rl_argcxt = 0;
+      RL_UNSETSTATE (RL_STATE_NUMERICARG);
+    }
+  else if (RL_ISSTATE (RL_STATE_MULTIKEY))
+    RL_UNSETSTATE (RL_STATE_MULTIKEY);
+
+  _rl_callback_func = 0;
+}
 #endif

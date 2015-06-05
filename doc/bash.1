@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Apr 10 15:04:46 EDT 2015
+.\"	Last Change: Wed May 27 14:55:39 EDT 2015
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2015 April 10" "GNU Bash 4.4"
+.TH BASH 1 "2015 May 27" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1990,6 +1990,16 @@ Similar to
 .SM
 .BR BASH_ENV ;
 used when the shell is invoked in POSIX mode.
+.TP
+.B EXECIGNORE
+A colon-separated list of extended glob patterns (see \fBPattern Matching\fP)
+defining the list of filenames to be ignored by command search.
+Files whose full pathnames match one of these patterns are not considered
+executable files for the purposes of completion and command execution.
+This does not affect the behavior of the \fB[\fP, \fBtest\fP, and \fB[[\fP
+commands.
+Use this variable to ignore shared library files that have the executable
+bit set, but are not executable files.
 .TP
 .B FCEDIT
 The default editor for the

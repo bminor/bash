@@ -133,3 +133,37 @@ idx2
 idX2
 idx2
 idX2
+declare -n foo="x[\$zero]"
+42
+declare -a x=([0]="4")
+declare -n foo="x[\$(echo 0)]"
+4
+comsub
+x[i=0]
+comsub
+4
+comsub
+4
+comsub
+4
+declare -n foo="somevariable"
+./nameref10.sub: line 38: typeset: somevariable: not found
+foo =
+declare -n foo="somevariable"
+declare -A somevariable=([jug]="brown" )
+./nameref10.sub: line 45: warning: foo=([jug]="brown" ): quoted compound array assignment deprecated
+declare -n foo="somevariable"
+declare -A somevariable=([jug]="brown" )
+declare -n foo="somevariable"
+./nameref10.sub: line 49: typeset: somevariable: not found
+./nameref10.sub: line 51: typeset: foo: not found
+./nameref10.sub: line 51: typeset: somevariable: not found
+declare -n foo="bar"
+./nameref10.sub: line 55: typeset: bar: not found
+declare -n foo="bar"
+./nameref10.sub: line 57: typeset: bar: not found
+declare -n foo="bar"
+declare -i bar="8"
+8
+declare -n foo="bar"
+./nameref10.sub: line 64: typeset: bar: not found

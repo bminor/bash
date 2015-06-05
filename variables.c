@@ -4735,6 +4735,8 @@ static struct name_and_function special_vars[] = {
   { "COMP_WORDBREAKS", sv_comp_wordbreaks },
 #endif
 
+  { "EXECIGNORE", sv_execignore },
+
   { "FUNCNEST", sv_funcnest },
 
   { "GLOBIGNORE", sv_globignore },
@@ -4924,6 +4926,14 @@ sv_funcnest (name)
     funcnest_max = num;
 }
 
+/* What to do when EXECIGNORE changes. */
+void
+sv_execignore (name)
+     char *name;
+{
+  setup_exec_ignore (name);
+}
+
 /* What to do when GLOBIGNORE changes. */
 void
 sv_globignore (name)
@@ -4985,7 +4995,7 @@ sv_winsize (name)
     return;
 
   v = find_variable (name);
-  if (v == 0 || var_isnull (v))
+  if (v == 0 || var_isset (v) == 0)
     rl_reset_screen_size ();
   else
     {

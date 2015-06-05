@@ -80,7 +80,6 @@ static int rl_history_search_internal PARAMS((int, int));
 static void rl_history_search_reinit PARAMS((int));
 
 static _rl_search_cxt *_rl_nsearch_init PARAMS((int, int));
-static int _rl_nsearch_cleanup PARAMS((_rl_search_cxt *, int));
 static void _rl_nsearch_abort PARAMS((_rl_search_cxt *));
 static int _rl_nsearch_dispatch PARAMS((_rl_search_cxt *, int));
 
@@ -224,7 +223,7 @@ _rl_nsearch_init (dir, pchar)
   return cxt;
 }
 
-static int
+int
 _rl_nsearch_cleanup (cxt, r)
      _rl_search_cxt *cxt;
      int r;

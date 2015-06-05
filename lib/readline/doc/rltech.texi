@@ -1328,6 +1328,14 @@ the terminal settings are modified for Readline's use again.
 @code{NULL} line.
 @end deftypefun
 
+@deftypefun void rl_callback_sigcleanup (void)
+Clean up any internal state the callback interface uses to maintain state
+between calls to rl_callback_read_char (e.g., the state of any active
+incremental searches).  This is intended to be used by applications that
+wish to perform their own signal handling; Readline's internal signal handler
+calls this when appropriate.
+@end deftypefun
+
 @deftypefun void rl_callback_handler_remove (void)
 Restore the terminal to its initial state and remove the line handler.
 You may call this function from within a callback as well as independently.

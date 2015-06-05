@@ -1,6 +1,6 @@
 /* findcmd.h - functions from findcmd.c. */
 
-/* Copyright (C) 1997-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -31,5 +31,6 @@ extern char *find_user_command __P((const char *));
 extern char *find_path_file __P((const char *));
 extern char *search_for_command __P((const char *, int));
 extern char *user_command_matches __P((const char *, int, int));
+extern void setup_exec_ignore __P((char *));
 
 #endif /* _FINDCMD_H_ */

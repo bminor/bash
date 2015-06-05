@@ -39,9 +39,9 @@ extern "C" {
 #endif
 
 /* Hex-encoded Readline version number. */
-#define RL_READLINE_VERSION	0x0604		/* Readline 6.4 */
-#define RL_VERSION_MAJOR	6
-#define RL_VERSION_MINOR	4
+#define RL_READLINE_VERSION	0x0700		/* Readline 7.0 */
+#define RL_VERSION_MAJOR	7
+#define RL_VERSION_MINOR	0
 
 /* Readline data structures. */
 
@@ -220,6 +220,7 @@ extern int rl_insert_close PARAMS((int, int));
 extern void rl_callback_handler_install PARAMS((const char *, rl_vcpfunc_t *));
 extern void rl_callback_read_char PARAMS((void));
 extern void rl_callback_handler_remove PARAMS((void));
+extern void rl_callback_sigcleanup PARAMS((void));
 
 /* Things for vi mode. Not available unless readline is compiled -DVI_MODE. */
 /* VI-mode bindable commands. */

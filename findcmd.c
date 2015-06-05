@@ -1,6 +1,6 @@
 /* findcmd.c -- Functions to search for commands by name. */
 
-/* Copyright (C) 1997-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -44,6 +44,8 @@
 #include "hashcmd.h"
 #include "findcmd.h"	/* matching prototypes and declarations */
 
+#include <glob/strmatch.h>
+
 #if !defined (errno)
 extern int errno;
 #endif
@@ -77,6 +79,36 @@ int check_hashed_filenames = CHECKHASH_DEFAULT;
    containing the file of interest. */
 int dot_found_in_search = 0;
 
+/* Set up EXECIGNORE; a blacklist of patterns that executable files should not
+   match. */
+static struct ignorevar execignore =
+{
+  "EXECIGNORE",
+  NULL,
+  0,
+  NULL,
+  NULL
+};
+
+void
+setup_exec_ignore (varname)
+     char *varname;
+{
+  setup_ignore_patterns (&execignore);
+}
+
+static int
+exec_name_should_ignore (name)
+     const char *name;
+{
+  struct ign *p;
+
+  for (p = execignore.ignores; p && p->val; p++)
+    if (strmatch (p->val, (char *)name, FNM_EXTMATCH|FNM_CASEFOLD) != FNM_NOMATCH)
+      return 1;
+  return 0;
+}
+
 /* Return some flags based on information about this file.
    The EXISTS bit is non-zero if the file is found.
    The EXECABLE bit is non-zero the file is executble.
@@ -104,7 +136,7 @@ file_status (name)
      file access mechanisms into account.  eaccess uses the effective
      user and group IDs, not the real ones.  We could use sh_eaccess,
      but we don't want any special treatment for /dev/fd. */
-  if (eaccess (name, X_OK) == 0)
+  if (exec_name_should_ignore (name) == 0 && eaccess (name, X_OK) == 0)
     r |= FS_EXECABLE;
   if (eaccess (name, R_OK) == 0)
     r |= FS_READABLE;
@@ -114,7 +146,7 @@ file_status (name)
   /* We have to use access(2) to determine access because AFS does not
      support Unix file system semantics.  This may produce wrong
      answers for non-AFS files when ruid != euid.  I hate AFS. */
-  if (access (name, X_OK) == 0)
+  if (exec_name_should_ignore (name) == 0 && access (name, X_OK) == 0)
     r |= FS_EXECABLE;
   if (access (name, R_OK) == 0)
     r |= FS_READABLE;
@@ -131,7 +163,7 @@ file_status (name)
   if (current_user.euid == (uid_t)0)
     {
       r |= FS_READABLE;
-      if (finfo.st_mode & S_IXUGO)
+      if (exec_name_should_ignore (name) == 0 && (finfo.st_mode & S_IXUGO))
 	r |= FS_EXECABLE;
       return r;
     }
@@ -139,7 +171,7 @@ file_status (name)
   /* If we are the owner of the file, the owner bits apply. */
   if (current_user.euid == finfo.st_uid)
     {
-      if (finfo.st_mode & S_IXUSR)
+      if (exec_name_should_ignore (name) == 0 && (finfo.st_mode & S_IXUSR))
 	r |= FS_EXECABLE;
       if (finfo.st_mode & S_IRUSR)
 	r |= FS_READABLE;
@@ -148,7 +180,7 @@ file_status (name)
   /* If we are in the owning group, the group permissions apply. */
   else if (group_member (finfo.st_gid))
     {
-      if (finfo.st_mode & S_IXGRP)
+      if (exec_name_should_ignore (name) == 0 && (finfo.st_mode & S_IXGRP))
 	r |= FS_EXECABLE;
       if (finfo.st_mode & S_IRGRP)
 	r |= FS_READABLE;

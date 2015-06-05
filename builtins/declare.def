@@ -340,6 +340,14 @@ declare_internal (list, local_var)
 	      assign_error++;
 	      NEXT_VARIABLE ();
 	    }
+#if 0
+	  if (value && *value && legal_identifier (value) == 0)
+	    {
+	      builtin_error (_("%s: invalid variable name for name reference"), value);
+	      assign_error++;
+	      NEXT_VARIABLE ();
+	    }
+#endif
 	}
 
 #if defined (ARRAY_VARS)
@@ -492,6 +500,26 @@ declare_internal (list, local_var)
 		var = mkglobal ? find_global_variable (nameref_cell (refvar)) : find_variable (nameref_cell (refvar));
 	    }
 
+	  /* See if we are trying to set flags or value for an existing nameref
+	     that points to a non-existent variable: e.g.,
+		declare -n foo=bar
+		unset foo	# unsets bar
+		declare -i foo
+		foo=4+4
+		declare -p foo */
+	  if (var == 0 && (flags_on || flags_off || offset))
+	    {
+	      refvar = mkglobal ? find_global_variable_last_nameref (name) : find_variable_last_nameref (name);
+	      if (refvar && nameref_p (refvar) == 0)
+		refvar = 0;
+	      if (refvar)
+		var = mkglobal ? find_global_variable (nameref_cell (refvar)) : find_variable (nameref_cell (refvar));
+	      if (refvar && var == 0)
+		{
+		  free (name);
+		  name = savestring (nameref_cell (refvar));
+		}
+	    }
 	  if (var == 0)
 	    var = mkglobal ? find_global_variable (name) : find_variable (name);
 
@@ -540,6 +568,14 @@ declare_internal (list, local_var)
 	    }
 	  else if (flags_on & att_nameref)
 	    {
+#if 0
+	      if (nameref_p (var) == 0 && var_isset (var) && var_isnull (var) == 0 && legal_identifier (value_cell (var)) == 0)
+		{
+		  builtin_error (_("%s: invalid variable name for name reference"), value_cell (var));
+		  any_failed++;
+		  NEXT_VARIABLE ();
+		}
+#endif
 	      /* ksh93 compat: turning on nameref attribute turns off -ilu */
 	      VUNSETATTR (var, att_integer|att_uppercase|att_lowercase|att_capcase);
 	    }
