@@ -246,6 +246,13 @@ sh_backslash_quote (string, table, flags)
   for (r = result, s = string; s && (c = *s); s++)
     {
 #if defined (HANDLE_MULTIBYTE)
+      /* XXX - isascii, even if is_basic(c) == 0 - works in most cases. */
+      if (c >= 0 && c <= 127 && backslash_table[(unsigned char)c] == 1)
+	{
+	  *r++ = '\\';
+	  *r++ = c;
+	  continue;
+	}
       if (MB_CUR_MAX > 1 && is_basic (c) == 0)
 	{
 	  COPY_CHAR_P (r, s, send);

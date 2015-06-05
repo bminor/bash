@@ -8518,3 +8518,43 @@ subst.c
 	- pat_subst: change to allow empty strings to be replaced as long as
 	  pattern matches empty string.  Report and fix from isabella parakiss
 	  <izaberina@gmail.com>
+
+				   5/12
+				   ----
+lib/sh/strtrans.c
+	- ansic_wshouldquote: make behavior consistent in the event of an
+	  invalid multibyte sequence: return 1 to the caller so the string
+	  will be $'...' quoted
+
+builtins/cd.def
+	- cd_builtin: print the right error message even if printable_filename
+	  changes errno (e.g., EILSEQ)
+
+lib/sh/shquote.c
+	- sh_backslash_quote: in multibyte locales, even if is_basic does not
+	  return true, backslash-quote an ASCII character that backslash_table
+	  says should be quoted.  Part of fix for bug reported by Igor
+	  Bogomazov <ygrex@ygrex.ru>
+
+bashline.c
+	- directory_exists: new function, dequotes the string argument, removes
+	  any trailing slash, and returns true if the result is a valid
+	  existing filename
+	- bash_filename_stat_hook,bash_directory_completion_hook: use
+	  directory_exists instead of calling lstat/stat on the quoted
+	  directory name.  Rest of fix for bug reported by Igor Bogomazov
+	  <ygrex@ygrex.ru>
+
+				   5/15
+				   ----
+aclocal.m4
+	- BASH_CHECK_MULTIBYTE: when checking for locale_charset, add $LIBINTL to
+	  $LIBS.  If we're using the included lib/intl/libintl.a, it will include
+	  a version of locale_charset
+
+				   5/17
+				   ----
+lib/readline/bind.c
+	- sv_isrchterm: make sure we check for v[end] == 0 while in the loop
+	  looking for whitespace.  Bug report and fix from Sergio Durigan
+	  Junior <sergiodj@sergiodj.net>

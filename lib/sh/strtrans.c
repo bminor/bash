@@ -312,8 +312,9 @@ ansic_wshouldquote (string)
 
   slen = mbstowcs (wcstr, string, 0);
 
-  if (slen == -1)
-    slen = 0;
+  if (slen == (size_t)-1)
+    return 1;
+
   wcstr = (wchar_t *)xmalloc (sizeof (wchar_t) * (slen + 1));
   mbstowcs (wcstr, string, slen + 1);
 

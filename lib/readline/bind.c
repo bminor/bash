@@ -1859,7 +1859,7 @@ sv_isrchterm (value)
     }
   else
     {
-      for (beg = end = 0; whitespace (v[end]) == 0; end++)
+      for (beg = end = 0; v[end] && whitespace (v[end]) == 0; end++)
 	;
     }
 

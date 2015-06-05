@@ -29,5 +29,25 @@ readonly xx=1
 case 1 in $((xx++)) ) echo hi1 ;; *) echo hi2; esac
 echo ${xx}.$?
 
+unset var empty
+
+var=
+case ']' in
+[$var]*[$var])	echo matches 1;;
+*)		echo no match 1 ;;
+esac
+
+case abc in ( [] ) echo yes ;; ( * ) echo no ;; esac
+empty=''
+case abc in ( ["$empty"] ) echo yes ;; ( * ) echo no ;; esac
+
+case abc in ( [] | [!a-z]* ) echo yes ;; ( * ) echo no ;; esac
+empty=''
+case abc in ( ["$empty"] | [!a-z]* ) echo yes ;; ( * ) echo no ;; esac
+
+case abc in (["$empty"]|[!a-z]*) echo yes ;; (*) echo no ;; esac
+
+case " " in ( [" "] ) echo ok;; ( * ) echo no;; esac
+
 # tests of quote removal and pattern matching
 ${THIS_SH} ./case1.sub

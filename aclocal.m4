@@ -1793,7 +1793,7 @@ fi
 
 if test "$am_cv_func_iconv" = yes; then
 	OLDLIBS="$LIBS"
-	LIBS="$LIBS $LIBICONV"
+	LIBS="$LIBS $LIBINTL $LIBICONV"
 	AC_CHECK_FUNCS(locale_charset)
 	LIBS="$OLDLIBS"
 fi

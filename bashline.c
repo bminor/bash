@@ -141,6 +141,8 @@ static int executable_completion __P((const char *, int));
 static rl_icppfunc_t *save_directory_hook __P((void));
 static void restore_directory_hook __P((rl_icppfunc_t));
 
+static int directory_exists __P((const char *));
+
 static void cleanup_expansion_error __P((void));
 static void maybe_make_readline_line __P((char *));
 static void set_up_new_line __P((char *));
@@ -3077,6 +3079,30 @@ restore_directory_hook (hookf)
     rl_directory_rewrite_hook = hookf;
 }
 
+/* Check whether not the (dequoted) version of DIRNAME, with any trailing slash
+   removed, exists. */
+static int
+directory_exists (dirname)
+     const char *dirname;
+{
+  char *new_dirname;
+  int dirlen, r;
+  struct stat sb;
+
+  /* First, dequote the directory name */
+  new_dirname = bash_dequote_filename (dirname, rl_completion_quote_character);
+  dirlen = STRLEN (new_dirname);
+  if (new_dirname[dirlen - 1] == '/')
+    new_dirname[dirlen - 1] = '\0';
+#if defined (HAVE_LSTAT)
+  r = lstat (new_dirname, &sb) == 0;
+#else
+  r = stat (new_dirname, &sb) == 0;
+#endif
+  free (new_dirname);
+  return (r);
+}
+  
 /* Expand a filename before the readline completion code passes it to stat(2).
    The filename will already have had tilde expansion performed. */
 static int
@@ -3095,11 +3121,7 @@ bash_filename_stat_hook (dirname)
   else if (t = mbschr (local_dirname, '`'))	/* XXX */
     should_expand_dirname = '`';
 
-#if defined (HAVE_LSTAT)
-  if (should_expand_dirname && lstat (local_dirname, &sb) == 0)
-#else
-  if (should_expand_dirname && stat (local_dirname, &sb) == 0)
-#endif
+  if (should_expand_dirname && directory_exists (local_dirname))
     should_expand_dirname = 0;
   
   if (should_expand_dirname)  
@@ -3163,7 +3185,8 @@ bash_directory_completion_hook (dirname)
      char **dirname;
 {
   char *local_dirname, *new_dirname, *t;
-  int return_value, should_expand_dirname, nextch, closer;
+  int return_value, should_expand_dirname, nextch, closer, changed;
+  size_t local_dirlen;
   WORD_LIST *wl;
   struct stat sb;
 
@@ -3192,11 +3215,7 @@ bash_directory_completion_hook (dirname)
 	should_expand_dirname = '`';
     }
 
-#if defined (HAVE_LSTAT)
-  if (should_expand_dirname && lstat (local_dirname, &sb) == 0)
-#else
-  if (should_expand_dirname && stat (local_dirname, &sb) == 0)
-#endif
+  if (should_expand_dirname && directory_exists (local_dirname))
     should_expand_dirname = 0;
 
   if (should_expand_dirname)  

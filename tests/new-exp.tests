@@ -452,6 +452,19 @@ recho ${xxx//%${zzz}}
 recho ${xxx//#${zzz}/}
 recho ${xxx//#${zzz}}
 
+# make sure null strings are replaced appropriately
+unset var
+var=
+echo "${var/#/x}"
+echo "${var/*/x}"
+echo "${var//*/x}"
+
+var=abc
+echo "${var/#/x}"
+echo "${var/*/x}"
+echo "${var//*/x}"
+unset var
+
 # another case that caused a core dump in bash-2.0
 XPATH=/usr/bin:/bin:/usr/local/bin:/usr/gnu/bin::/usr/bin/X11:/sbin:/usr/sbin
 

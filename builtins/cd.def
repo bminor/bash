@@ -262,7 +262,7 @@ cd_builtin (list)
      WORD_LIST *list;
 {
   char *dirname, *cdpath, *path, *temp;
-  int path_index, no_symlinks, opt, lflag;
+  int path_index, no_symlinks, opt, lflag, e;
 
 #if defined (RESTRICTED_SHELL)
   if (restricted)
@@ -437,8 +437,9 @@ cd_builtin (list)
 	FREE (temp);
     }
 
+  e = errno;
   temp = printable_filename (dirname, 0);
-  builtin_error ("%s: %s", temp, strerror (errno));
+  builtin_error ("%s: %s", temp, strerror (e));
   if (temp != dirname)
     free (temp);
   return (EXECUTION_FAILURE);
