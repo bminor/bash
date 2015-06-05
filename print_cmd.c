@@ -803,7 +803,7 @@ print_if_command (if_command)
   newline ("fi");
 }
 
-#if defined (DPAREN_ARITHMETIC)
+#if defined (DPAREN_ARITHMETIC) || defined (ARITH_FOR_COMMAND)
 void
 print_arith_command (arith_cmd_list)
      WORD_LIST *arith_cmd_list;

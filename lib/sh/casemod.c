@@ -112,7 +112,7 @@ sh_modcase (string, pat, flags)
 #if defined (HANDLE_MULTIBYTE)
   wchar_t nwc;
   char mb[MB_LEN_MAX+1];
-  int mlen;
+  int mlen, mb_cur_max;
   size_t m;
   mbstate_t state;
 #endif
@@ -130,6 +130,7 @@ sh_modcase (string, pat, flags)
 
   start = 0;
   end = strlen (string);
+  mb_cur_max = MB_CUR_MAX;
 
   ret = (char *)xmalloc (2*end + 1);
   retind = 0;
@@ -209,7 +210,7 @@ sh_modcase (string, pat, flags)
 
       /* Can't short-circuit, some locales have multibyte upper and lower
 	 case equivalents of single-byte ascii characters (e.g., Turkish) */
-      if (MB_CUR_MAX == 1)
+      if (mb_cur_max == 1)
 	{
 singlebyte:
 	  switch (nop)

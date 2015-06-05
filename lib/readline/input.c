@@ -514,10 +514,6 @@ rl_getc (stream)
       FD_ZERO (&readfds);
       FD_SET (fileno (stream), &readfds);
       result = pselect (fileno (stream) + 1, &readfds, NULL, NULL, NULL, &empty_set);
-#  if 0
-      if (result < 0 && errno == EINTR)
-	goto handle_error;
-#  endif
 #endif
       if (result >= 0)
 	result = read (fileno (stream), &c, sizeof (unsigned char));

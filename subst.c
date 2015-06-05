@@ -2501,7 +2501,7 @@ list_string (string, separators, quoted)
 	extract a word, stopping at a separator
 	skip sequences of spc, tab, or nl as long as they are separators
      This obeys the field splitting rules in Posix.2. */
-  slen = (MB_CUR_MAX > 1) ? strlen (string) : 1;
+  slen = (MB_CUR_MAX > 1) ? STRLEN (string) : 1;
   for (result = (WORD_LIST *)NULL, sindex = 0; string[sindex]; )
     {
       /* Don't need string length in ADVANCE_CHAR or string_extract_verbatim
@@ -2632,7 +2632,7 @@ get_word_from_string (stringp, separators, endptr)
   sindex = 0;
   /* Don't need string length in ADVANCE_CHAR or string_extract_verbatim
      unless multibyte chars are possible. */
-  slen = (MB_CUR_MAX > 1) ? strlen (s) : 1;
+  slen = (MB_CUR_MAX > 1) ? STRLEN (s) : 1;
   current_word = string_extract_verbatim (s, slen, &sindex, separators, xflags);
 
   /* Set ENDPTR to the first character after the end of the word. */
@@ -8642,6 +8642,7 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
   int split_on_spaces;
   int tflag;
   int pflags;			/* flags passed to param_expand */
+  int mb_cur_max;
 
   int assignoff;		/* If assignment, offset of `=' */
 
@@ -8678,9 +8679,11 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
   string = word->word;
   if (string == 0)
     goto finished_with_string;
+  mb_cur_max = MB_CUR_MAX;
+
   /* Don't need the string length for the SADD... and COPY_ macros unless
      multibyte characters are possible. */
-  string_size = (MB_CUR_MAX > 1) ? strlen (string) : 1;
+  string_size = (mb_cur_max > 1) ? strlen (string) : 1;
 
   if (contains_dollar_at)
     *contains_dollar_at = 0;
@@ -8702,7 +8705,7 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
 	case CTLESC:
 	  sindex++;
 #if HANDLE_MULTIBYTE
-	  if (MB_CUR_MAX > 1 && string[sindex])
+	  if (mb_cur_max > 1 && string[sindex])
 	    {
 	      SADD_MBQCHAR_BODY(temp, string, sindex, string_size);
 	    }
@@ -9210,10 +9213,10 @@ add_twochars:
 	      else
 		{
 #if HANDLE_MULTIBYTE
-		  if (MB_CUR_MAX > 1)
+		  if (mb_cur_max > 1)
 		    sindex--;
 
-		  if (MB_CUR_MAX > 1)
+		  if (mb_cur_max > 1)
 		    {
 		      SADD_MBQCHAR_BODY(temp, string, sindex, string_size);
 		    }

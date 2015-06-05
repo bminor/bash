@@ -284,7 +284,8 @@ _rl_callback_data_alloc (count)
   return arg;
 }
 
-void _rl_callback_data_dispose (arg)
+void
+_rl_callback_data_dispose (arg)
      _rl_callback_generic_arg *arg;
 {
   xfree (arg);

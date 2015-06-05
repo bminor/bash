@@ -545,6 +545,9 @@ extern int _rl_screenchars;
 extern int _rl_terminal_can_insert;
 extern int _rl_term_autowrap;
 
+/* text.c */
+extern int _rl_optimize_typeahead;
+
 /* undo.c */
 extern int _rl_doing_an_undo;
 extern int _rl_undo_group_level;

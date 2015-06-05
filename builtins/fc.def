@@ -158,6 +158,12 @@ static char *fc_readline __P((FILE *));
 static void fc_addhist __P((char *));
 #endif
 
+static void
+set_verbose_flag ()
+{
+  echo_input_at_read = verbose_flag;
+}
+
 /* String to execute on a file that we want to edit. */
 #define FC_EDIT_COMMAND "${FCEDIT:-${EDITOR:-vi}}"
 #if defined (STRICT_POSIX)
@@ -451,9 +457,9 @@ fc_builtin (list)
   begin_unwind_frame ("fc builtin");
   add_unwind_protect ((Function *)xfree, fn);
   add_unwind_protect (unlink, fn);
-  unwind_protect_int (echo_input_at_read);
+  add_unwind_protect (set_verbose_flag, (char *)NULL);
   echo_input_at_read = 1;
-    
+
   retval = fc_execute_file (fn);
 
   run_unwind_frame ("fc builtin");

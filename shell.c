@@ -262,7 +262,7 @@ static const struct {
 #if defined (RESTRICTED_SHELL)
   { "restricted", Int, &restricted, (char **)0x0 },
 #endif
-  { "verbose", Int, &echo_input_at_read, (char **)0x0 },
+  { "verbose", Int, &verbose_flag, (char **)0x0 },
   { "version", Int, &do_version, (char **)0x0 },
 #if defined (WORDEXP_OPTION)
   { "wordexp", Int, &wordexp_only, (char **)0x0 },
@@ -460,7 +460,7 @@ main (argc, argv, env)
 
   /* Find full word arguments first. */
   arg_index = parse_long_options (argv, arg_index, argc);
-
+  
   if (want_initial_help)
     {
       show_shell_usage (stdout, 1);
@@ -472,6 +472,8 @@ main (argc, argv, env)
       show_shell_version (1);
       exit (EXECUTION_SUCCESS);
     }
+
+  echo_input_at_read = verbose_flag;	/* --verbose given */
 
   /* All done with full word options; do standard shell option parsing.*/
   this_command_name = shell_name;	/* for error reporting */

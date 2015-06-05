@@ -71,6 +71,8 @@ static int _rl_char_search_callback PARAMS((_rl_callback_generic_arg *));
    rl_insert_text.  Text blocks larger than this are divided. */
 #define TEXT_COUNT_MAX	1024
 
+int _rl_optimize_typeahead = 1;	/* rl_insert tries to read typeahead */
+
 /* **************************************************************** */
 /*								    */
 /*			Insert and Delete			    */
@@ -890,8 +892,42 @@ int
 rl_insert (count, c)
      int count, c;
 {
-  return (rl_insert_mode == RL_IM_INSERT ? _rl_insert_char (count, c)
-  					 : _rl_overwrite_char (count, c));
+  int r, n, x;
+
+  r = (rl_insert_mode == RL_IM_INSERT) ? _rl_insert_char (count, c) : _rl_overwrite_char (count, c);
+
+  /* XXX -- attempt to batch-insert pending input that maps to self-insert */
+  x = 0;
+  n = (unsigned short)-2;
+  while (_rl_optimize_typeahead &&
+	 (RL_ISSTATE (RL_STATE_INPUTPENDING|RL_STATE_MACROINPUT) == 0) &&
+	 _rl_pushed_input_available () == 0 &&
+	 _rl_input_queued (0) &&
+	 (n = rl_read_key ()) > 0 &&
+	 _rl_keymap[(unsigned char)n].type == ISFUNC &&
+	 _rl_keymap[(unsigned char)n].function == rl_insert)
+    {
+      r = (rl_insert_mode == RL_IM_INSERT) ? _rl_insert_char (1, n) : _rl_overwrite_char (1, n);
+      /* _rl_insert_char keeps its own set of pending characters to compose a
+	 complete multibyte character, and only returns 1 if it sees a character
+	 that's part of a multibyte character but too short to complete one.  We
+	 can try to read another character in the hopes that we will get the
+	 next one or just punt.  Right now we try to read another character.
+	 We don't want to call rl_insert_next if _rl_insert_char has already
+	 stored the character in the pending_bytes array because that will
+	 result in doubled input. */
+      n = (unsigned short)-2;
+      x++;		/* count of bytes of typeahead read, currently unused */
+      if (r == 1)	/* read partial multibyte character */
+	continue;
+      if (rl_done || r != 0)
+	break;
+    }
+
+  if (n != (unsigned short)-2)		/* -2 = sentinel value for having inserted N */
+    r = rl_execute_next (n);
+
+  return r;
 }
 
 /* Insert the next typed character verbatim. */

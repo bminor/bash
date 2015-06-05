@@ -233,7 +233,7 @@ sh_backslash_quote (string, table, flags)
      char *table;
      int flags;
 {
-  int c;
+  int c, mb_cur_max;
   size_t slen;
   char *result, *r, *s, *backslash_table, *send;
   DECLARE_MBSTATE;
@@ -243,6 +243,8 @@ sh_backslash_quote (string, table, flags)
   result = (char *)xmalloc (2 * slen + 1);
 
   backslash_table = table ? table : (char *)bstab;
+  mb_cur_max = MB_CUR_MAX;
+
   for (r = result, s = string; s && (c = *s); s++)
     {
 #if defined (HANDLE_MULTIBYTE)
@@ -253,7 +255,7 @@ sh_backslash_quote (string, table, flags)
 	  *r++ = c;
 	  continue;
 	}
-      if (MB_CUR_MAX > 1 && is_basic (c) == 0)
+      if (mb_cur_max > 1 && is_basic (c) == 0)
 	{
 	  COPY_CHAR_P (r, s, send);
 	  s--;		/* compensate for auto-increment in loop above */

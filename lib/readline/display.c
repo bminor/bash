@@ -586,6 +586,7 @@ rl_redisplay ()
   int wc_width;
   mbstate_t ps;
   int _rl_wrapped_multicolumn = 0;
+  int mb_cur_max = MB_CUR_MAX;
 #endif
 
   if (_rl_echoing_p == 0)
@@ -764,7 +765,7 @@ rl_redisplay ()
          prompts that exceed two physical lines?
          Additional logic fix from Edward Catmur <ed@catmur.co.uk> */
 #if defined (HANDLE_MULTIBYTE)
-      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0 && prompt_multibyte_chars > 0)
+      if (mb_cur_max > 1 && rl_byte_oriented == 0 && prompt_multibyte_chars > 0)
 	{
 	  n0 = num;
           temp = local_prompt_len;
@@ -802,7 +803,7 @@ rl_redisplay ()
 
       inv_lbreaks[++newlines] = temp;
 #if defined (HANDLE_MULTIBYTE)
-      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0 && prompt_multibyte_chars > 0)
+      if (mb_cur_max > 1 && rl_byte_oriented == 0 && prompt_multibyte_chars > 0)
 	lpos -= _rl_col_width (local_prompt, n0, num, 1);
       else
 #endif
@@ -819,7 +820,7 @@ rl_redisplay ()
   lb_linenum = 0;
 #if defined (HANDLE_MULTIBYTE)
   in = 0;
-  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+  if (mb_cur_max > 1 && rl_byte_oriented == 0)
     {
       memset (&ps, 0, sizeof (mbstate_t));
       /* XXX - what if wc_bytes ends up <= 0? check for MB_INVALIDCH */
@@ -835,7 +836,7 @@ rl_redisplay ()
       c = (unsigned char)rl_line_buffer[in];
 
 #if defined (HANDLE_MULTIBYTE)
-      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+      if (mb_cur_max > 1 && rl_byte_oriented == 0)
 	{
 	  if (MB_INVALIDCH (wc_bytes))
 	    {
@@ -944,7 +945,7 @@ rl_redisplay ()
       else
 	{
 #if defined (HANDLE_MULTIBYTE)
-	  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+	  if (mb_cur_max > 1 && rl_byte_oriented == 0)
 	    {
 	      register int i;
 
@@ -980,7 +981,7 @@ rl_redisplay ()
 	}
 
 #if defined (HANDLE_MULTIBYTE)
-      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+      if (mb_cur_max > 1 && rl_byte_oriented == 0)
 	{
 	  in += wc_bytes;
 	  /* XXX - what if wc_bytes ends up <= 0? check for MB_INVALIDCH */
@@ -1028,7 +1029,7 @@ rl_redisplay ()
 	     not the first.  */
 	  if (out >= _rl_screenchars)
 	    {
-	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+	      if (mb_cur_max > 1 && rl_byte_oriented == 0)
 		out = _rl_find_prev_mbchar (line, _rl_screenchars, MB_FIND_ANY);
 	      else
 		out = _rl_screenchars - 1;
@@ -1076,10 +1077,10 @@ rl_redisplay ()
 		 time update_line is called, then we can assume in our
 		 calculations that o_cpos does not need to be adjusted by
 		 wrap_offset. */
-	      if (linenum == 0 && (MB_CUR_MAX > 1 && rl_byte_oriented == 0) && OLD_CPOS_IN_PROMPT())
+	      if (linenum == 0 && (mb_cur_max > 1 && rl_byte_oriented == 0) && OLD_CPOS_IN_PROMPT())
 		_rl_last_c_pos -= prompt_invis_chars_first_line;	/* XXX - was wrap_offset */
 	      else if (linenum == prompt_last_screen_line && prompt_physical_chars > _rl_screenwidth &&
-			(MB_CUR_MAX > 1 && rl_byte_oriented == 0) &&
+			(mb_cur_max > 1 && rl_byte_oriented == 0) &&
 			cpos_adjusted == 0 &&
 			_rl_last_c_pos != o_cpos &&
 			_rl_last_c_pos > (prompt_last_invisible - _rl_screenwidth - prompt_invis_chars_first_line))
@@ -1096,7 +1097,7 @@ rl_redisplay ()
 		  (wrap_offset > visible_wrap_offset) &&
 		  (_rl_last_c_pos < visible_first_line_len))
 		{
-		  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+		  if (mb_cur_max > 1 && rl_byte_oriented == 0)
 		    nleft = _rl_screenwidth - _rl_last_c_pos;
 		  else
 		    nleft = _rl_screenwidth + wrap_offset - _rl_last_c_pos;
@@ -1148,7 +1149,7 @@ rl_redisplay ()
 		 the physical cursor position on the screen stays the same,
 		 but the buffer position needs to be adjusted to account
 		 for invisible characters. */
-	      if ((MB_CUR_MAX == 1 || rl_byte_oriented) && cursor_linenum == 0 && wrap_offset)
+	      if ((mb_cur_max == 1 || rl_byte_oriented) && cursor_linenum == 0 && wrap_offset)
 		_rl_last_c_pos += wrap_offset;
 	    }
 
@@ -1175,7 +1176,7 @@ rl_redisplay ()
 		_rl_output_some_chars ("*", 1);
 
 	      _rl_output_some_chars (local_prompt, nleft);
-	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+	      if (mb_cur_max > 1 && rl_byte_oriented == 0)
 		_rl_last_c_pos = _rl_col_width (local_prompt, 0, nleft, 1) - wrap_offset + modmark;
 	      else
 		_rl_last_c_pos = nleft + modmark;
@@ -1199,7 +1200,7 @@ rl_redisplay ()
 	  if (wrap_offset && cursor_linenum == 0 && nleft < _rl_last_c_pos)
 	    {
 	      /* TX == new physical cursor position in multibyte locale. */
-	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+	      if (mb_cur_max > 1 && rl_byte_oriented == 0)
 		tx = _rl_col_width (&visible_line[pos], 0, nleft, 1) - visible_wrap_offset;
 	      else
 		tx = nleft;
@@ -1214,7 +1215,7 @@ rl_redisplay ()
 	     _rl_last_c_pos as an absolute cursor position, but moving to a
 	     point specified by a buffer position (NLEFT) that doesn't take
 	     invisible characters into account. */
-	  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+	  if (mb_cur_max > 1 && rl_byte_oriented == 0)
 	    _rl_move_cursor_relative (nleft, &invisible_line[pos]);
 	  else if (nleft != _rl_last_c_pos)
 	    _rl_move_cursor_relative (nleft, &invisible_line[pos]);
@@ -1295,7 +1296,7 @@ rl_redisplay ()
 		       _rl_screenwidth + (lmargin ? 0 : wrap_offset),
 		       0);
 
-	  if ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) &&
+	  if ((mb_cur_max > 1 && rl_byte_oriented == 0) &&
 		displaying_prompt_first_line && OLD_CPOS_IN_PROMPT())
 	    _rl_last_c_pos -= prompt_invis_chars_first_line;	/* XXX - was wrap_offset */
 

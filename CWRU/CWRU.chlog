@@ -8558,3 +8558,87 @@ lib/readline/bind.c
 	- sv_isrchterm: make sure we check for v[end] == 0 while in the loop
 	  looking for whitespace.  Bug report and fix from Sergio Durigan
 	  Junior <sergiodj@sergiodj.net>
+
+lib/sh/shmbchar.c
+	- mbstrlen,mbsmbchar: move calculation of MB_CUR_MAX out of loop;
+	  calculate it once at beginning
+
+lib/sh/mbscmp.c
+	- mbscmp: move calculation of MB_CUR_MAX out of loop; calculate it once
+	  at beginning
+
+lib/sh/mbscasecmp.c
+	- mbscasecmp: move calculation of MB_CUR_MAX out of loop; calculate it once
+	  at beginning
+
+lib/sh/shquote.c
+	- sh_backslash_quote: move calculation of MB_CUR_MAX out of loop;
+	  calculate it once at beginning
+
+lib/sh/casemod.c
+	- sh_modcase: move calculation of MB_CUR_MAX out of loop; calculate it once
+	  at beginning
+
+subst.c
+	- expand_word_internal: move calculation of MB_CUR_MAX out of loops;
+	  calculate it once at beginning of function (XXX should use
+	  locale_mb_cur_max)
+
+				   5/22
+				   ----
+lib/readline/rlmbutil.h
+	- _rl_wcwidth: new function, short-circuits wcwidth calls for ASCII
+	  printable characters, returns 1 for those
+	- WCWIDTH: call _rl_wcwidth instead of wcwidth
+
+lib/readline/display.c
+	- rl_redisplay: move calculation of MB_CUR_MAX out of loop; calculate
+	  it once at beginning.  Report and patch from Ole Laursen
+	  <ole.laursen@gmail.com>
+
+				   5/24
+				   ----
+lib/readline/text.c
+	- rl_insert: change to attempt to batch-insert pending typeahead (not
+	  pushed input or input from a macro) that maps to rl_insert.  An
+	  attempt to suppress redisplay until readline reads all typeahead --
+	  pasted input, for instance.  Inspired by report from Ole Laursen
+	  <ole.laursen@gmail.com>.  XXX - need to make this a bindable
+	  variable; already controlled by _rl_optimize_typeahead
+
+lib/readline/rlprivate.h
+	- _rl_optimize_typeahead: extern declaration
+
+lib/readline/doc/{hstech.texi,history.3}
+	- next_history: clarify under what circumstances the history offset is
+	  incremented; suggestion from Glenn Golden <gdg@zplane.com>
+
+print_cmd.c
+	- print_arith_command: should be compiled in if either DPAREN_ARITHMETIC
+	  or ARITH_FOR_COMMAND is defined.  Report from Flavio Medeiros
+	  <flaviomotamederios@gmail.com>
+
+flags.c
+	- change_flag: new variable verbose_flag, set when `v' flag modified;
+	  sets value of echo_input_at_read correspondingly
+
+flags.h
+	- verbose_flag: new extern declaration
+
+shell.c
+	- long_options: --verbose now sets verbose_flag
+	- main: set echo_input_at_read from verbose_flag after parsing any
+	  long options
+
+builtins/fc.def
+	- fc_builtin: don't unwind-protect echo_input_at_read directly; set it
+	  to 1 before calling fc_execute_file as before, and reset it to value
+	  of global verbose_flag using set_verbose_flag called from an
+	  unwind_protect.  Report from isabella parakiss <izaberina@gmail.com>
+
+builtins/shopt.def
+	- shopt_set_debug_mode: new function, called when the extdebug shell
+	  option changes.  Right now, it sets function_trace_mode when extdebug
+	  is enabled, and turns off when extdebug is disabled.  The documentation
+	  has always said that shopt does this.  Report from Peng Yu
+	  <pengyu.ut@gmail.com>

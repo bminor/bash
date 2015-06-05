@@ -44,7 +44,7 @@ extern int
   mark_modified_vars, errexit_flag, exit_immediately_on_error,
   disallow_filename_globbing,
   place_keywords_in_env, read_but_dont_execute,
-  just_one_command, unbound_vars_is_error, echo_input_at_read,
+  just_one_command, unbound_vars_is_error, echo_input_at_read, verbose_flag,
   echo_command_at_execute, no_invisible_vars, noclobber,
   hashing_enabled, forced_interactive, privileged_mode, jobs_m_flag,
   asynchronous_notification, interactive_comments, no_symbolic_links,

@@ -131,6 +131,8 @@ static int set_restricted_shell __P((char *, int));
 static int shopt_set_complete_direxpand __P((char *, int));
 #endif
 
+static int shopt_set_debug_mode __P((char *, int));
+
 static int shopt_login_shell;
 static int shopt_compat31;
 static int shopt_compat32;
@@ -170,7 +172,7 @@ static struct {
   { "execfail", &no_exit_on_failed_exec, (shopt_set_func_t *)NULL },
   { "expand_aliases", &expand_aliases, (shopt_set_func_t *)NULL },
 #if defined (DEBUGGER)
-  { "extdebug", &debugging_mode, (shopt_set_func_t *)NULL },
+  { "extdebug", &debugging_mode, shopt_set_debug_mode },
 #endif
 #if defined (EXTENDED_GLOB)
   { "extglob", &extended_glob, (shopt_set_func_t *)NULL },
@@ -514,6 +516,16 @@ set_shellopts_after_change (option_name, mode)
 {
   set_shellopts ();
   return (0);
+}
+
+static int
+shopt_set_debug_mode (option_name, mode)
+     char *option_name;
+     int mode;
+{
+#if defined (DEBUGGER)
+  function_trace_mode = debugging_mode;
+#endif
 }
 
 static int
