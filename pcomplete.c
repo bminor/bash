@@ -1194,7 +1194,7 @@ gen_shell_function_matches (cs, cmd, text, line, ind, lwords, nw, cw, foundp)
    	$1 == command name	(command being completed)
 	$2 == word to be completed (possibly null)
 	$3 == previous word
-   and run in with command substitution.  Parse the results, one word
+   and run it with command substitution.  Parse the results, one word
    per line, with backslashes allowed to escape newlines.  Build a
    STRINGLIST from the results and return it. */
 

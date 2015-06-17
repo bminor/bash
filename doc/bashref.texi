@@ -4601,9 +4601,14 @@ When setting new limits, if neither @option{-H} nor @option{-S} is supplied,
 both the hard and soft limits are set.
 If no option is given, then @option{-f} is assumed.  Values are in 1024-byte
 increments, except for @option{-t}, which is in seconds; @option{-p},
-which is in units of 512-byte blocks; and @option{-P}, @option{-T},
+which is in units of 512-byte blocks;
+@option{-P},
+@option{-T},
 @option{-b},
-@option{-k}, @option{-n} and @option{-u}, which are unscaled values.
+@option{-k},
+@option{-n} and @option{-u}, which are unscaled values;
+and, when in @sc{posix} Mode (@pxref{Bash POSIX Mode}),
+@option{-c} and @option{-f}, which are in 512-byte increments.
 
 The return status is zero unless an invalid option or argument is supplied,
 or an error occurs while setting a new limit.

@@ -48,3 +48,15 @@ func()
 func
 echo outside: $var
 
+unset -f f
+unset VAR1 VAR2
+export VAR1=abc VAR2=abc
+
+f()
+{
+	local VAR1; local VAR2
+	echo local: ${VAR1-unset1} ${VAR2-unset2}
+	printenv VAR1 ; printenv VAR2
+}
+
+f

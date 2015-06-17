@@ -5037,12 +5037,13 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
      int cmdflags;
 {
   char *pathname, *command, **args;
-  int nofork, result;
+  int nofork, stdpath, result;
   pid_t pid;
   SHELL_VAR *hookf;
   WORD_LIST *wl;
 
-  nofork = (cmdflags & CMD_NO_FORK);  /* Don't fork, just exec, if no pipes */
+  stdpath = (cmdflags & CMD_STDPATH);	/* use command -p path */
+  nofork = (cmdflags & CMD_NO_FORK);	/* Don't fork, just exec, if no pipes */
   pathname = words->word->word;
 
   result = EXECUTION_SUCCESS;
@@ -5063,7 +5064,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
     }
 #endif /* RESTRICTED_SHELL */
 
-  command = search_for_command (pathname, 1);
+  command = search_for_command (pathname, CMDSRCH_HASH|(stdpath ? CMDSRCH_STDPATH : 0));
 
   if (command)
     {

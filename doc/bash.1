@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed May 27 14:55:39 EDT 2015
+.\"	Last Change: Fri Jun  5 14:38:09 EDT 2015
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2015 May 27" "GNU Bash 4.4"
+.TH BASH 1 "2015 June 5" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -10176,7 +10176,6 @@ is assumed.  Values are in 1024-byte increments, except for
 which is in seconds;
 .BR \-p ,
 which is in units of 512-byte blocks;
-and
 .BR \-P ,
 .BR \-T ,
 .BR \-b ,
@@ -10184,7 +10183,12 @@ and
 .BR \-n ,
 and
 .BR \-u ,
-which are unscaled values.
+which are unscaled values;
+and, when in Posix mode,
+.B \-c
+and
+.BR \-f ,
+which are in 512-byte increments.
 The return status is 0 unless an invalid option or argument is supplied,
 or an error occurs while setting a new limit.
 .RE

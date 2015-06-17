@@ -8724,3 +8724,86 @@ lib/readline/funmap.c
 	- vi-insertion-mode: make sure it maps to rl_vi_insert_mode, which is
 	  actually what the `i' keybinding in vi_movement_keymap maps to.
 	  Cosmetic fix from isabella parakiss <izaberina@gmail.com>
+
+				    6/2
+				    ---
+general.c
+	- conf_standard_path: moved get_standard_path here from command.def; made
+	  public function
+
+general.h
+	- conf_standard_path: extern declaration
+
+
+				    6/3
+				    ---
+parse.y
+	- parse_matched_pair: make sure that command substitution constructs
+	  within ${...} expansions are parsed as such using parse_comsub, so the
+	  P_FIRSTCLOSE flag doesn't stop parsing if a right brace appears within
+	  the comsub.  Report from Christos Zoulas <christos@zoulas.com>
+
+findcmd.c
+	- search_for_command: take two new flags for FLAGS arg: CMDSRCH_STDPATH,
+	  which means use the command -p path, and CMDSRCH_TEMPENV, currently
+	  unused.  Existing flag value of 1 now CMDSRCH_HASH
+	- search_for_command: don't set `path' to NULL if it wasn't found in
+	  the temporary environment; we can use it later
+	- search_for_command: look for the hashed file if temp_path == 0, not
+	  if we set path back to 0 (or path lookup failed)
+	- search_for_command: just call find_user_command_in_path with a
+	  pathlist argument that's set depending on the flags passed
+	- find_in_path: new function, just calls find_user_command_in_path at 
+	  this point
+	- search_for_command: don't put non-existent files into the hash table
+
+findcmd.h
+	- CMDSRCH_*: new flags for search_for_command
+	- find_in_path: extern declaration
+
+execute_cmd.c
+	- execute_disk_command: check for CMD_STDPATH and call search_for_command
+	  with CMDSRCH_STDPATH if it's set
+
+builtins/command.def
+	- command_builtin: if -p given without -v or -V, set the CMD_STDPATH flag
+	  in the simple command we construct from the rest of the argument list.
+	  This fixes the command -p cmd issue with changing $PATH for the duration
+	  of `cmd's execution reported by <sdowdy@rap.ucar.edu>
+
+builtins/common.h
+	- CDESC_STDPATH: new flag for describe_command; means to use standard path
+	  for command -pv or -pV
+
+builtins/command.def
+	- command_builtin: if -p given with -v or -V, pass the CDESC_STDPATH flag
+	  to describe_command
+
+builtins/type.def
+	- describe_command: if given the CDESC_STDPATH flag, use find_in_path with
+	  the conf_standard_path() result. Since `all' will never be on with this
+	  flag, at least not yet, we can allocate and free the path list.  Fixes
+	  the bug of a temporary environment value for PATH preceding a
+	  `command -pv' or `command -pV' persisting when the command finishes and
+	  means we use fewer unwind-protects
+
+				    6/4
+				    ---
+Makefile.in (plus other Makefile.ins)
+	- VPATH: remove `.' from VPATH value.  It's not needed any more and it
+	  trips a GNU make 4.1 bug on Cygwin.  Report and fix from Eric Blake
+	  <eblake@redhat.com>
+
+lib/readline/histfile.c
+	- history_tempfile: new function, takes history file name as template
+	  and creates a temp file name including the PID
+	- history_truncate_file, history_do_write: instead of creating backup
+	  and restoring it on failure, use history_tempfile to create a temp
+	  file name, write to it, then rename to original history filename
+	  (handling symlinks using history_restore()).  Original report and
+	  patch from Russell Stuart <russell-savannah@stuart.id.au>
+
+doc/{bash.1,bashref.texi}
+	- ulimit: clarify that -c and -f are in increments of 512 bytes when
+	  in posix mode.  Fix from Robin Johnson <robbat2@gentoo.org> via
+	  <vapier@gentoo.org>

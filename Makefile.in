@@ -1,4 +1,4 @@
-# Makefile for bash-4.3, version 4.12
+# Makefile for bash-4.3, version 4.13
 #
 # Copyright (C) 1996-2012 Free Software Foundation, Inc.
 
@@ -61,7 +61,7 @@ topdir = @top_srcdir@
 BUILD_DIR = @BUILD_DIR@
 top_builddir = @BUILD_DIR@
 srcdir = @srcdir@
-VPATH = .:@srcdir@
+VPATH = @srcdir@
 
 @SET_MAKE@
 CC = @CC@
@@ -1453,7 +1453,8 @@ builtins/wait.o: ${BASHINCDIR}/chartypes.h pathnames.h
 builtins/complete.o: config.h shell.h syntax.h bashjmp.h ${BASHINCDIR}/posixjmp.h sig.h
 builtins/complete.o: unwind_prot.h variables.h arrayfunc.h conftypes.h
 builtins/complete.o: bashtypes.h bashansi.h ${BASHINCDIR}/ansi_stdlib.h
-builtins/complete.o: builtins.h pathnames.h
+builtins/complete.o: builtins.h pathnames.h general.h
+builtins/complete.o: bashtypes.h ${BASHINCDIR}/chartypes.h xmalloc.h
 builtins/complete.o: pcomplete.h
 builtins/complete.o: ${DEFSRC}/common.h ${DEFSRC}/bashgetopt.h
 builtins/mapfile.o: command.h config.h ${BASHINCDIR}/memalloc.h error.h general.h xmalloc.h ${BASHINCDIR}/maxpath.h

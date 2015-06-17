@@ -329,15 +329,17 @@ get_next_path_element (path_list, path_index_pointer)
 
 /* Look for PATHNAME in $PATH.  Returns either the hashed command
    corresponding to PATHNAME or the first instance of PATHNAME found
-   in $PATH.  If (FLAGS&1) is non-zero, insert the instance of PATHNAME
-   found in $PATH into the command hash table.  Returns a newly-allocated
-   string. */
+   in $PATH.  If (FLAGS&CMDSRCH_HASH) is non-zero, insert the instance of
+   PATHNAME found in $PATH into the command hash table.  If (FLAGS&CMDSRCH_STDPATH)
+   is non-zero, we are running in a `command -p' environment and should use
+   the Posix standard path.
+   Returns a newly-allocated string. */
 char *
 search_for_command (pathname, flags)
      const char *pathname;
      int flags;
 {
-  char *hashed_file, *command;
+  char *hashed_file, *command, *pathlist;
   int temp_path, st;
   SHELL_VAR *path;
 
@@ -347,13 +349,11 @@ search_for_command (pathname, flags)
      hash table to search for the full pathname. */
   path = find_variable_tempenv ("PATH");
   temp_path = path && tempvar_p (path);
-  if (temp_path == 0 && path)
-    path = (SHELL_VAR *)NULL;
 
   /* Don't waste time trying to find hashed data for a pathname
      that is already completely specified or if we're using a command-
      specific value for PATH. */
-  if (path == 0 && absolute_program (pathname) == 0)
+  if (temp_path == 0 && absolute_program (pathname) == 0)
     hashed_file = phash_search (pathname);
 
   /* If a command found in the hash table no longer exists, we need to
@@ -379,18 +379,34 @@ search_for_command (pathname, flags)
     command = savestring (pathname);
   else
     {
-      /* If $PATH is in the temporary environment, we've already retrieved
-	 it, so don't bother trying again. */
-      if (temp_path)
-	{
-	  command = find_user_command_in_path (pathname, value_cell (path),
-					       FS_EXEC_PREFERRED|FS_NODIRS);
-	}
+      if (flags & CMDSRCH_STDPATH)
+	pathlist = conf_standard_path ();
+      else if (temp_path || path)
+	pathlist = value_cell (path);
       else
-	command = find_user_command (pathname);
-      if (command && hashing_enabled && temp_path == 0 && (flags & 1))
-	phash_insert ((char *)pathname, command, dot_found_in_search, 1);	/* XXX fix const later */
+	pathlist = 0;
+
+      command = find_user_command_in_path (pathname, pathlist, FS_EXEC_PREFERRED|FS_NODIRS);
+
+      if (command && hashing_enabled && temp_path == 0 && (flags & CMDSRCH_HASH))
+	{
+	  /* If we found the full pathname the same as the command name, the
+	     command probably doesn't exist.  Don't put it into the hash
+	     table. */
+	  if (STREQ (command, pathname))
+	    {
+	      st = file_status (command);
+	      if (st & FS_EXECABLE)
+	        phash_insert ((char *)pathname, command, dot_found_in_search, 1);
+	    }
+	  else
+	    phash_insert ((char *)pathname, command, dot_found_in_search, 1);
+	}
+
+      if (flags & CMDSRCH_STDPATH)
+	free (pathlist);
     }
+
   return (command);
 }
 
@@ -652,4 +668,15 @@ find_user_command_in_path (name, path_list, flags)
     }
 
   return (file_to_lose_on);
+}
+
+/* External interface to find a command given a $PATH.  Separate from
+   find_user_command_in_path to allow future customization. */
+char *
+find_in_path (name, path_list, flags)
+     const char *name;
+     char *path_list;
+     int flags;
+{
+  return (find_user_command_in_path (name, path_list, flags));
 }

@@ -1,6 +1,6 @@
 /* general.c -- Stuff that is used by all files. */
 
-/* Copyright (C) 1987-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1228,4 +1228,39 @@ get_group_array (ngp)
   if (ngp)
     *ngp = ngroups;
   return group_iarray;
+}
+
+/* **************************************************************** */
+/*								    */
+/*	  Miscellaneous functions				    */
+/*								    */
+/* **************************************************************** */
+
+/* Return a value for PATH that is guaranteed to find all of the standard
+   utilities.  This uses Posix.2 configuration variables, if present.  It
+   uses a value defined in config.h as a last resort. */
+char *
+conf_standard_path ()
+{
+#if defined (_CS_PATH) && defined (HAVE_CONFSTR)
+  char *p;
+  size_t len;
+
+  len = (size_t)confstr (_CS_PATH, (char *)NULL, (size_t)0);
+  if (len > 0)
+    {
+      p = (char *)xmalloc (len + 2);
+      *p = '\0';
+      confstr (_CS_PATH, p, len);
+      return (p);
+    }
+  else
+    return (savestring (STANDARD_UTILS_PATH));
+#else /* !_CS_PATH || !HAVE_CONFSTR  */
+#  if defined (CS_PATH)
+  return (savestring (CS_PATH));
+#  else
+  return (savestring (STANDARD_UTILS_PATH));
+#  endif /* !CS_PATH */
+#endif /* !_CS_PATH || !HAVE_CONFSTR */
 }

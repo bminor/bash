@@ -3535,7 +3535,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	      APPEND_NESTRET ();
 	      FREE (nestret);
 	    }
-	  else if ((flags & P_ARRAYSUB) && (tflags & LEX_WASDOL) && (ch == '(' || ch == '{' || ch == '['))	/* ) } ] */
+	  else if ((flags & (P_ARRAYSUB|P_DOLBRACE)) && (tflags & LEX_WASDOL) && (ch == '(' || ch == '{' || ch == '['))	/* ) } ] */
 	    goto parse_dollar_word;
 	}
       /* Parse an old-style command substitution within double quotes as a

@@ -174,6 +174,7 @@ typedef struct element {
 #define CMD_COMMAND_BUILTIN 0x0800 /* command executed by `command' builtin */
 #define CMD_COPROC_SUBSHELL 0x1000
 #define CMD_LASTPIPE	    0x2000
+#define CMD_STDPATH	    0x4000	/* use standard path for command lookup */
 
 /* What a command looks like. */
 typedef struct command {

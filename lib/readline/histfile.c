@@ -125,6 +125,7 @@ int history_lines_written_to_file = 0;
 #define HIST_TIMESTAMP_START(s)		(*(s) == history_comment_char && isdigit ((unsigned char)(s)[1]) )
 
 static char *history_backupfile PARAMS((const char *));
+static char *history_tempfile PARAMS((const char *));
 static int histfile_backup PARAMS((const char *, const char *));
 static int histfile_restore PARAMS((const char *, const char *));
 
@@ -193,6 +194,46 @@ history_backupfile (filename)
   strcpy (ret, fn);
   ret[len] = '-';
   ret[len+1] = '\0';
+  return ret;
+}
+  
+static char *
+history_tempfile (filename)
+     const char *filename;
+{
+  const char *fn;
+  char *ret, linkbuf[PATH_MAX+1];
+  size_t len;
+  ssize_t n;
+  struct stat fs;
+  int pid;
+
+  fn = filename;  
+#if defined (HAVE_READLINK)
+  /* Follow symlink so tempfile created in the same directory as any symlinked
+     history file; call will fail if not a symlink */
+  if ((n = readlink (filename, linkbuf, sizeof (linkbuf) - 1)) > 0)
+    {
+      linkbuf[n] = '\0';
+      fn = linkbuf;
+    }
+#endif
+      
+  len = strlen (fn);
+  ret = xmalloc (len + 11);
+  strcpy (ret, fn);
+
+  pid = (int)getpid ();
+
+  /* filename-PID.tmp */
+  ret[len] = '-';
+  ret[len+1] = (pid / 10000 % 10) + '0';
+  ret[len+2] = (pid / 1000 % 10) + '0';
+  ret[len+3] = (pid / 100 % 10) + '0';
+  ret[len+4] = (pid / 10 % 10) + '0';
+  ret[len+5] = (pid % 10) + '0';
+  strcpy (ret + len + 6, ".tmp");
+
   return ret;
 }
   
@@ -355,6 +396,8 @@ read_history_range (filename, from, to)
   return (0);
 }
 
+/* Save FILENAME to BACK, handling case where FILENAME is a symlink
+   (e.g., ~/.bash_history -> .histfiles/.bash_history.$HOSTNAME) */
 static int
 histfile_backup (filename, back)
      const char *filename;
@@ -374,6 +417,8 @@ histfile_backup (filename, back)
   return (rename (filename, back));
 }
 
+/* Restore ORIG from BACKUP handling case where ORIG is a symlink
+   (e.g., ~/.bash_history -> .histfiles/.bash_history.$HOSTNAME) */
 static int
 histfile_restore (backup, orig)
      const char *backup;
@@ -394,14 +439,14 @@ histfile_restore (backup, orig)
 }
 
 /* Truncate the history file FNAME, leaving only LINES trailing lines.
-   If FNAME is NULL, then use ~/.history.  Returns 0 on success, errno
-   on failure. */
+   If FNAME is NULL, then use ~/.history.  Writes a new file and renames
+   it to the original name.  Returns 0 on success, errno on failure. */
 int
 history_truncate_file (fname, lines)
      const char *fname;
      int lines;
 {
-  char *buffer, *filename, *bakname, *bp, *bp1;		/* bp1 == bp+1 */
+  char *buffer, *filename, *tempname, *bp, *bp1;		/* bp1 == bp+1 */
   int file, chars_read, rv, orig_lines, exists;
   struct stat finfo;
   size_t file_size;
@@ -410,7 +455,7 @@ history_truncate_file (fname, lines)
 
   buffer = (char *)NULL;
   filename = history_filename (fname);
-  bakname = 0;
+  tempname = 0;
   file = filename ? open (filename, O_RDONLY|O_BINARY, 0666) : -1;
   rv = exists = 0;
 
@@ -505,26 +550,12 @@ history_truncate_file (fname, lines)
       goto truncate_exit;
     }
 
-  bakname = history_backupfile (filename);
-  if (filename && bakname)
-    {
-      /* XXX - need to check case where filename is a symlink */
-      if (histfile_backup (filename, bakname) < 0)
-	{
-	  free (bakname);	/* no backups if rename fails */
-	  bakname = 0;
-	}
-    }
+  tempname = history_tempfile (filename);
 
-  if ((file = open (filename, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY, 0600)) != -1)
+  if ((file = open (tempname, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY, 0600)) != -1)
     {
       if (write (file, bp, chars_read - (bp - buffer)) < 0)
 	rv = errno;
-
-#if defined (__BEOS__)
-      /* BeOS ignores O_TRUNC. */
-      ftruncate (file, chars_read - (bp - buffer));
-#endif
 
       if (close (file) < 0 && rv == 0)
 	rv = errno;
@@ -537,13 +568,15 @@ history_truncate_file (fname, lines)
 
   history_lines_written_to_file = orig_lines - lines;
 
-  if (rv != 0 && filename && bakname)
+  if (rv == 0 && filename && tempname)
+    rv = histfile_restore (tempname, filename);
+
+  if (rv != 0)
     {
-      histfile_restore (bakname, filename);
+      if (tempname)
+	unlink (tempname);
       history_lines_written_to_file = 0;
     }
-  else if (rv == 0 && bakname)
-    unlink (bakname);
 
   /* Make sure the new filename is owned by the same user as the old.  If one
      user is running this, it's a no-op.  If the shell is running after sudo
@@ -553,7 +586,7 @@ history_truncate_file (fname, lines)
     chown (filename, finfo.st_uid, finfo.st_gid);
 
   xfree (filename);
-  FREE (bakname);
+  FREE (tempname);
 
   return rv;
 }
@@ -567,7 +600,7 @@ history_do_write (filename, nelements, overwrite)
      int nelements, overwrite;
 {
   register int i;
-  char *output, *bakname;
+  char *output, *tempname, *histname;
   int file, mode, rv, exists;
   struct stat finfo;
 #ifdef HISTORY_USE_MMAP
@@ -579,26 +612,10 @@ history_do_write (filename, nelements, overwrite)
 #else
   mode = overwrite ? O_WRONLY|O_CREAT|O_TRUNC|O_BINARY : O_WRONLY|O_APPEND|O_BINARY;
 #endif
-  output = history_filename (filename);
-  bakname = (overwrite && output) ? history_backupfile (output) : 0;
-  exists = output ? (stat (output, &finfo) == 0) : 0;
-
-  /* Don't bother backing up if output doesn't exist yet */
-  if (exists == 0 || S_ISREG (finfo.st_mode) == 0)
-    {
-      free (bakname);	/* no backups if not a regular file */
-      bakname = 0;
-    }
-
-  if (output && bakname)
-    {
-      /* XXX - need to check case where output is a symlink */
-      if (histfile_backup (output, bakname) < 0)		/* no backups if rename fails */
-	{
-	  free (bakname);
-	  bakname = 0;
-	}
-    }
+  histname = history_filename (filename);
+  tempname = (overwrite && histname) ? history_tempfile (histname) : 0;
+  output = tempname ? tempname : histname;
+  exists = histname ? (stat (histname, &finfo) == 0) : 0;
 
   file = output ? open (output, mode, 0600) : -1;
   rv = 0;
@@ -606,10 +623,8 @@ history_do_write (filename, nelements, overwrite)
   if (file == -1)
     {
       rv = errno;
-      if (output && bakname)
-        histfile_restore (bakname, output);
-      FREE (output);
-      FREE (bakname);
+      FREE (histname);
+      FREE (tempname);
       return (rv);
     }
 
@@ -651,10 +666,10 @@ history_do_write (filename, nelements, overwrite)
 mmap_error:
 	rv = errno;
 	close (file);
-	if (output && bakname)
-	  histfile_restore (bakname, output);
-	FREE (output);
-	FREE (bakname);
+	if (tempname)
+	  unlink (tempname);
+	FREE (histname);
+	FREE (tempname);
 	return rv;
       }
 #else    
@@ -663,10 +678,10 @@ mmap_error:
       {
       	rv = errno;
 	close (file);
-	if (output && bakname)
-	  histfile_restore (bakname, output);
-	FREE (output);
-	FREE (bakname);
+	if (tempname)
+	  unlink (tempname);
+	FREE (histname);
+	FREE (tempname);
 	return rv;
       }
 #endif
@@ -699,23 +714,25 @@ mmap_error:
   if (close (file) < 0 && rv == 0)
     rv = errno;
 
-  if (rv != 0 && output && bakname)
+  if (rv == 0 && histname && tempname)
+    rv = histfile_restore (tempname, histname);
+
+  if (rv != 0)
     {
-      histfile_restore (bakname, output);
+      if (tempname)
+	unlink (tempname);
       history_lines_written_to_file = 0;
     }
-  else if (rv == 0 && bakname)
-    unlink (bakname);
 
   /* Make sure the new filename is owned by the same user as the old.  If one
      user is running this, it's a no-op.  If the shell is running after sudo
      with a shared history file, we don't want to leave the history file
      owned by root. */
   if (rv == 0 && exists)
-    chown (output, finfo.st_uid, finfo.st_gid);
+    chown (histname, finfo.st_uid, finfo.st_gid);
 
-  FREE (output);
-  FREE (bakname);
+  FREE (histname);
+  FREE (tempname);
 
   return (rv);
 }

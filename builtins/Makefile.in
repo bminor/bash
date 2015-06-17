@@ -36,7 +36,7 @@ EXEEXT = @EXEEXT@
 prefix = @prefix@
 
 srcdir = @srcdir@
-VPATH = .:@srcdir@
+VPATH = @srcdir@
 topdir = @top_srcdir@
 
 datarootdir = @datarootdir@
@@ -635,7 +635,8 @@ complete.o: ../config.h ../pathnames.h
 complete.o: ${topdir}/shell.h $(topdir)/syntax.h ${topdir}/bashjmp.h ${BASHINCDIR}/posixjmp.h ${topdir}/sig.h  
 complete.o: ${topdir}/unwind_prot.h ${topdir}/variables.h
 complete.o: ${topdir}/bashtypes.h ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
-complete.o: ${topdir}/builtins.h
+complete.o: ${topdir}/builtins.h ${topdir}/general.h
+complete.o: ${topdir}/bashtypes.h ${BASHINCDIR}/chartypes.h ${topdir}/xmalloc.h
 complete.o: ${topdir}/pcomplete.h
 complete.o: ${srcdir}/common.h ${srcdir}/bashgetopt.h
 mapfile.o: $(topdir)/command.h ../config.h $(BASHINCDIR)/memalloc.h

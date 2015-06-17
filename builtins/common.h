@@ -60,6 +60,7 @@ do { \
 #define CDESC_FORCE_PATH	0x020	/* type -ap or type -P */
 #define CDESC_NOFUNCS		0x040	/* type -f */
 #define CDESC_ABSPATH		0x080	/* convert to absolute path, no ./ */
+#define CDESC_STDPATH		0x100	/* command -p */
 
 /* Flags for get_job_by_name */
 #define JM_PREFIX		0x01	/* prefix of job name */
