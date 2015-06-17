@@ -126,7 +126,7 @@ static int wait_sigint_received;
 static long child_max = -1L;
 
 static void alloc_pid_list __P((void));
-static int find_proc_slot __P((void));
+static int find_proc_slot __P((pid_t));
 static int find_index_by_pid __P((pid_t));
 static int find_status_by_pid __P((pid_t));
 static int process_exit_status __P((WAIT));
@@ -170,12 +170,13 @@ alloc_pid_list ()
 /* Return the offset within the PID_LIST array of an empty slot.  This can
    create new slots if all of the existing slots are taken. */
 static int
-find_proc_slot ()
+find_proc_slot (pid)
+     pid_t pid;
 {
   register int i;
 
   for (i = 0; i < pid_list_size; i++)
-    if (pid_list[i].pid == NO_PID)
+    if (pid_list[i].pid == NO_PID || pid_list[i].pid == pid)
       return (i);
 
   if (i == pid_list_size)
@@ -331,7 +332,7 @@ add_pid (pid, async)
 {
   int slot;
 
-  slot = find_proc_slot ();
+  slot = find_proc_slot (pid);
 
   pid_list[slot].pid = pid;
   pid_list[slot].status = -1;

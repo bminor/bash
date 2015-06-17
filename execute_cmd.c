@@ -630,7 +630,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       if (paren_pid == 0)
         {
 	  /* We want to run the exit trap for forced {} subshells, and we
-	     want to note this before execute_in_subshell modifies the
+	     want to note this before execute_in_subshell[B modifies the
 	     COMMAND struct.  Need to keep in mind that execute_in_subshell
 	     runs the exit trap for () subshells itself. */
 	  /* This handles { command; } & */
@@ -1553,7 +1553,9 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   if (user_subshell)
     {
       stdin_redir = stdin_redirects (command->redirects);
-      restore_default_signal (EXIT_TRAP);
+#if 0
+      restore_default_signal (EXIT_TRAP);	/* XXX - reset_signal_handlers above */
+#endif
     }
 
   /* If this is an asynchronous command (command &), we want to
@@ -1637,7 +1639,9 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       return_code = run_exit_trap ();
     }
 
-  subshell_level--;
+#if 0
+  subshell_level--;		/* don't bother, caller will just exit */
+#endif
   return (return_code);
   /* NOTREACHED */
 }
@@ -2645,10 +2649,13 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   return exec_result;
 }
 
+/* The test used to be only for interactive_shell, but we don't want to report
+   job status when the shell is not interactive or when job control isn't
+   enabled. */
 #define REAP() \
   do \
     { \
-      if (!interactive_shell) \
+      if (job_control == 0 || interactive_shell == 0) \
 	reap_dead_jobs (); \
     } \
   while (0)
@@ -5499,6 +5506,8 @@ shell_execve (command, args, env)
 #if defined (PROCESS_SUBSTITUTION)
   clear_fifo_list ();	/* pipe fds are what they are now */
 #endif
+
+  reset_parser ();
 
   sh_longjmp (subshell_top_level, 1);
   /*NOTREACHED*/

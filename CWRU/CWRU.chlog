@@ -8807,3 +8807,66 @@ doc/{bash.1,bashref.texi}
 	- ulimit: clarify that -c and -f are in increments of 512 bytes when
 	  in posix mode.  Fix from Robin Johnson <robbat2@gentoo.org> via
 	  <vapier@gentoo.org>
+
+				    6/9
+				    ---
+execute_cmd.c
+	- execute_in_subshell: don't call restore_default_signal for the exit
+	  trap, reset_signal_handlers already does the right thing and keeps
+	  the trap string around; no need to kill trap string.  Bug report
+	  from Miroslav Koskar <mk@mkoskar.com>
+
+				   6/11
+				   ----
+nojobs.c
+	- find_proc_slot: now takes pid as an argument to avoid finding old
+	  procs when pids wrap around
+	- add_pid: pass pid to find_proc_slot to avoid multiple instances of
+	  the same pid in the list when pids wrap around.  Fixes bug reported
+	  by Roy Keene <rkeene@rkeene.org>
+
+execute_cmd.c
+	- REAP: test for job_control == 0 also to determine whether or not
+	  to call reap_dead_jobs, since shells without job control enabled
+	  don't report on background process status
+
+doc/bash.1,lib/readline/doc/hsuser.texi
+	- history: clarify documentation of -a option to note that it will not
+	  append the same line to the history file more than once.  Fixes
+	  problem reported by Reuben Thomas <rrt@sc3d.org>
+
+				   6/12
+				   ----
+execute_cmd.c
+	- execute_in_subshell: don't bother decrementing subshell_level before
+	  this returns; the caller will just exit.  This means that
+	  $BASH_SUBSHELL will have consistent values in the subshell and any
+	  subsequent exit trap.  Fixes bug reported by Miroslav Koskar
+	  <mk@mkoskar.com>
+	- shell_execve: before longjmp to subshell_top_level, call reset_parser
+	  to free up any input line and stack of pushed strings
+
+parse.y
+	- mk_alexpansion: if the last character of the alias is a shell
+	  metacharacter, don't add a space to the string following the alias
+	  value, since that will change the meaning of the command.  THIS IS
+	  NOT BACKWARDS COMPATIBLE AND MAY REQUIRE REVERTING. Inspired by an
+	  email message from Jilles Tjoelker <jilles@stack.nl> to austin
+	  group
+
+				   6/13
+				   ----
+subst.c
+	- dequote_string: don't turn strings consisting of a single CTLESC
+	  into empty strings; return them unmodified.  The idea is that there
+	  is nothing to quote.  This means that something like
+		c=$'\001'
+		x=$c
+	  results in x containing '\001' when IFS=$'\001'.  See if this will
+	  cause problems by adding a debugging statement in the code
+
+
+
+
+
+	  

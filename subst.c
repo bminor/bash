@@ -3750,6 +3750,11 @@ dequote_string (string)
   char *result, *send;
   DECLARE_MBSTATE;
 
+#if defined (DEBUG)
+if (string[0] == CTLESC && string[1] == 0)
+  itrace("dequote_string: string with bare CTLESC");
+#endif
+
   slen = strlen (string);
 
   t = result = (char *)xmalloc (slen + 1);
@@ -3757,6 +3762,14 @@ dequote_string (string)
   if (QUOTED_NULL (string))
     {
       result[0] = '\0';
+      return (result);
+    }
+
+  /* A string consisting of only a single CTLESC should pass through unchanged */
+  if (string[0] == CTLESC && string[1] == 0)
+    {
+      result[0] = CTLESC;
+      result[1] = '\0';
       return (result);
     }
 
