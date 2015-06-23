@@ -1,6 +1,13 @@
+: ${TMPDIR:=/tmp}
+TMPOUT=${TMPDIR}/coproc-wait-$BASHPID
+
 coproc { echo a b c; sleep 2; }
 
-echo $COPROC_PID
+case $COPROC_PID in
+[0-9]*)	;;
+*)	echo COPROC_PID not integer ;;
+esac
+
 echo ${COPROC[@]}
 
 read LINE <&${COPROC[0]}
@@ -10,7 +17,11 @@ wait $COPROC_PID
 
 coproc REFLECT { cat - ; }
 
-echo $REFLECT_PID
+case $REFLECT_PID in
+[0-9]*)	;;
+*)	echo REFLECT_PID not integer ;;
+esac
+
 echo ${REFLECT[@]}
 
 echo flop >&${REFLECT[1]}
@@ -19,11 +30,19 @@ read LINE <&${REFLECT[0]}
 echo $LINE
 
 kill $REFLECT_PID
-wait $REFLECT_PID
+wait $REFLECT_PID >$TMPOUT 2>&1 || echo "coproc.tests: REFLECT: status $?"
+grep -q 'Terminated.*coproc.*REFLECT' < $TMPOUT || {
+	echo "coproc.tests: wait for REFLECT failed" >&2
+}
+rm -f $TMPOUT
 
 coproc xcase -n -u
 
-echo $COPROC_PID
+case $COPROC_PID in
+[0-9]*)	;;
+*)	echo COPROC_PID not integer ;;
+esac
+
 echo ${COPROC[@]}
 
 echo foo >&${COPROC[1]}

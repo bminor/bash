@@ -2732,6 +2732,8 @@ static int open_brace_count;
 		break; \
 	      if (word_token_alist[i].token == TIME && time_command_acceptable () == 0) \
 		break; \
+	      if ((parser_state & PST_CASEPAT) && last_read_token == '|' && word_token_alist[i].token == ESAC) \
+		break; /* Posix grammar rule 4 */ \
 	      if (word_token_alist[i].token == ESAC) \
 		parser_state &= ~(PST_CASEPAT|PST_CASESTMT); \
 	      else if (word_token_alist[i].token == CASE) \

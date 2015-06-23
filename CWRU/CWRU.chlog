@@ -6731,8 +6731,8 @@ builtins/read.def
 				   ----
 builtins/read.def
 	- termsave: now global to file so other functions can use it
-	- read_tty_cleanup: if tty_modified is non-zero, call ttycleanup to restore
-	  old terminal settings and turn off tty_modified
+	- read_tty_cleanup: if tty_modified is non-zero, call ttycleanup to
+	  restore old terminal settings and turn off tty_modified
 
 sig.c
 	- termsig_handler: call read_tty_cleanup if currently executing read
@@ -6742,8 +6742,8 @@ sig.c
 				   9/11
 				   ----
 general.c
-	- printable_filename: general function to return a printable representation
-	  of a string (presumed to be a filename)
+	- printable_filename: general function to return a printable
+	  representation of a string (presumed to be a filename)
 
 general.h
 	- extern declaration for printable_filename
@@ -6889,7 +6889,7 @@ jobs.c
 parse.y
 	- xparse_dolparen: don't set token_to_read to newline after calling
 	  parse_string() and cleaning up when the shell is not interactive.  This
-	  makes the parser thing it's ok to read new commands even if it's not in
+	  makes the parser think it's ok to read new commands even if it's not in
 	  a state where that should be possible.  Underlying fix for bug reported
 	  by Michal Zalewski <lcamtuf@coredump.cx> and designated CVE-6278
 	- parser_remaining_input: new function, returns the portion of
@@ -6907,9 +6907,9 @@ builtins/evalstring.c
 	  current_input_line_state.  Part of fix for CVE-2014-6278
 
 variables.c
-	- initialize_shell_variables: if we don't call parse_and_execute, free the
-	  temporary string, since parse_and_execute won't.  Report and fix from
-	  Eric Kobrin <ekobrin@akamai.com>
+	- initialize_shell_variables: if we don't call parse_and_execute, free
+	  the temporary string, since parse_and_execute won't.  Report and fix
+	  from Eric Kobrin <ekobrin@akamai.com>
 
 				   10/4
 				   ----
@@ -6938,7 +6938,8 @@ builtins/setattr.def
 	- set_or_show_attributes: don't show identifiers that are invisible
 	  and imported from the environment, since that combination of
 	  attributes means that the imported variable is not a valid shell
-	  identifier.  Report from Stephane Chazelas <stephane.chazelas@gmail.com>
+	  identifier.  Report from Stephane Chazelas
+	  <stephane.chazelas@gmail.com>
 
 				   10/8
 				   ----
@@ -6961,38 +6962,40 @@ execute_cmd.c
 				   10/13
 				   -----
 doc/Makefile.in
-	- bashref.pdf: create using texi2dvi --pdf rather than postprocessing the
-	  dvi file, so we have PDF bookmarks and links.  Fix from
+	- bashref.pdf: create using texi2dvi --pdf rather than postprocessing
+	  the dvi file, so we have PDF bookmarks and links.  Fix from
 	  Siep Kroonenberg <siepo@cybercomm.nl>
 
 				   10/14
 				   -----
 subst.h
-	- Q_ARITH: new quoting flag. Semantics are per Posix's spec for arithmetic
-	  expansion: act as if string is quoted, but don't treat double quotes
-	  specially (in this case, they will be removed by quote removal)
-	- Q_ARRAYSUB: new quoting flag, indicates we are expanding an indexed array
-	  subscript
+	- Q_ARITH: new quoting flag. Semantics are per Posix's spec for
+	  arithmetic expansion: act as if string is quoted, but don't treat
+	  double quotes specially (in this case, they will be removed by quote
+	  removal)
+	- Q_ARRAYSUB: new quoting flag, indicates we are expanding an indexed
+	  array subscript
 
 subst.c
-	- expand_arith_string: if we are not expanding the string, but we saw a quote
-	  with Q_ARITH specified as one of quoting flags, perform quote removal even
-	  if Q_DOUBLE_QUOTES is specified
-	- param_expand: change calls to expand_arith_string for $[ and $(( cases to
-	  specify Q_ARITH.  Now $(( "$x" )) and $(( "x" )) work if x has a value that
-	  evaluates to a valid number, as Posix specifies
-	- expand_word_internal: add test for quoted&Q_ARITH to the tilde case, so we
-	  continue to perform tilde expansion in arithmetic contexts
-	- expand_word_internal: if quoted&Q_ARITH, continue processing when we see a
-	  `"', acting as if the double quote isn't present (already Q_DOUBLE_QUOTED)
+	- expand_arith_string: if we are not expanding the string, but we saw
+	  a quote with Q_ARITH specified as one of quoting flags, perform
+	  quote removal even if Q_DOUBLE_QUOTES is specified
+	- param_expand: change calls to expand_arith_string for $[ and $((
+	  cases to specify Q_ARITH.  Now $(( "$x" )) and $(( "x" )) work if x
+	  has a value that evaluates to a valid number, as Posix specifies
+	- expand_word_internal: add test for quoted&Q_ARITH to the tilde case,
+	  so we continue to perform tilde expansion in arithmetic contexts
+	- expand_word_internal: if quoted&Q_ARITH, continue processing when we
+	  see a `"', acting as if the double quote isn't present (already
+	  Q_DOUBLE_QUOTED)
 
 arrayfunc.c
-	- array_expand_index: pass Q_DOUBLE_QUOTED|Q_ARITH|Q_ARRAYSUB as quoted argument
-	  in call to expand_arith_string.  This inhibits word splitting
-	  (Q_DOUBLE_QUOTED) while discarding double quotes (Q_ARITH), identical to the
-	  quote flags passed while expanding $(( )) and $[ ].  Q_ARRAYSUB reserved for
-	  future use.  Fixes problem reported by Stephane Chazelas
-	  <stephane.chazelas@gmail.com>
+	- array_expand_index: pass Q_DOUBLE_QUOTED|Q_ARITH|Q_ARRAYSUB as quoted
+	  argument in call to expand_arith_string.  This inhibits word
+	  splitting (Q_DOUBLE_QUOTED) while discarding double quotes (Q_ARITH),
+	  identical to the quote flags passed while expanding $(( )) and $[ ].
+	  Q_ARRAYSUB reserved for future use.  Fixes problem reported by
+	  Stephane Chazelas <stephane.chazelas@gmail.com>
 
 				   10/16
 				   -----
@@ -7116,11 +7119,13 @@ execute_cmd.c
 	  function body iff the funtion declared a local copy of OPTIND
 	- execute_function: save sh_getopt state before executing function body
 	- execute_function: note in getopt_state->flags whether or not the
-	  function declared a local copy of OPTIND; used by maybe_restore_getopt_state
+	  function declared a local copy of OPTIND; used by
+	  maybe_restore_getopt_state
 	- execute_function: maybe restore sh_getopt state before returning via
 	  call to maybe_restore_getopt_state.  Fixes bugs with getopts and
-	  state between calls reported in 2011 by Bernd Eggink <monoped@sudrala.de>
-	  and in 2014 by Oyvind Hvidsten <oyvind.hvidsten@dampir.no>
+	  state between calls reported in 2011 by Bernd Eggink
+	  <monoped@sudrala.de> and in 2014 by Oyvind Hvidsten
+	  <oyvind.hvidsten@dampir.no>
 
 configure.ac
 	- enable-function-import: new option, controls whether function imports
@@ -7131,8 +7136,8 @@ config.h.in
 	- FUNCTION_IMPORT: define controlled by enable-function-import above
 
 variables.c
-	- initialize_shell_variables: include code to import function definitions
-	  from the environment if FUNCTION_IMPORT is defined
+	- initialize_shell_variables: include code to import function
+	  definitions from the environment if FUNCTION_IMPORT is defined
 
 doc/bashref.texi
 	- --enable_function-import: document new configuration option
@@ -7779,8 +7784,8 @@ lib/readline/parens.c
 	  <markkarpov@opmbx.org>
 
 builtins/declare.def
-	- declare_internal: use get_current_options instead of get_current_flags,
-	  so `local -' can be generalized
+	- declare_internal: use get_current_options instead of
+	  get_current_flags, so `local -' can be generalized
 
 variables.c
 	- push_func_var: use set_current_options instead of set_current_flags
@@ -7842,10 +7847,10 @@ bashhist.c
 				   1/14
 				   ----
 lib/readline/isearch.c
-	- _rl_isearch_dispatch: if we are in a multibyte locale, make sure to use
-	  _rl_find_prev_mbchar when trying to delete characters from the search
-	  string, instead of just chopping off the previous byte.  Fixes bug
-	  reported by Kyrylo Shpytsya <kshpitsa@gmail.com>
+	- _rl_isearch_dispatch: if we are in a multibyte locale, make sure to
+	  use _rl_find_prev_mbchar when trying to delete characters from the
+	  search string, instead of just chopping off the previous byte.
+	  Fixes bug reported by Kyrylo Shpytsya <kshpitsa@gmail.com>
 
 lib/readline/complete.c
 	- rl_filename_completion_function: if we tilde-expand `dirname', make
@@ -8117,13 +8122,13 @@ jobs.[ch]
 jobs.c
 	- last_procsub_child: new variable, set and modified only by the process
 	  substitution code
-	- find_pipeline: if the requested pid is in LAST_PROCSUB_CHILD, return it;
-	  analogous to the way this code handles the_pipeline
+	- find_pipeline: if the requested pid is in LAST_PROCSUB_CHILD, return
+	  it; analogous to the way this code handles the_pipeline
 	- waitchld: if we find a child via find_pipeline that is a part of the
 	  last process substitution child, mark that child appropriately.  If
-	  the child is dead, add it to the bgp list.  This and the previous change
-	  allow waiting for the most recent process substitution (the one
-	  corresponding to $!).  Original report from Stephane Chazelas
+	  the child is dead, add it to the bgp list.  This and the previous
+	  change allow waiting for the most recent process substitution (the
+	  one corresponding to $!).  Original report from Stephane Chazelas
 	  <stephane.chazelas@gmail.com>
 
 				   3/10
@@ -8138,24 +8143,24 @@ arrayfunc.c
 				   3/17
 				   ----
 jobs.c
-	- waitchld: move code that adds the last process substitution pid to the
-	  bgpids array from waitchld (where it can call malloc in a signal handler
-	  context) to cleanup_dead_jobs
+	- waitchld: move code that adds the last process substitution pid to
+	  the bgpids array from waitchld (where it can call malloc in a signal
+	  handler context) to cleanup_dead_jobs
 
 				   3/19
 				   ----
 subst.c
 	- parameter_brace_expand: if expanding an array in a context where word
-	  splitting will not take place (W_ASSIGNRHS only for now), make sure to
-	  pass the double-quoted flag to chk_atstar so we don't get the unquoted
-	  $* behavior, which will cause unwanted word splitting.  Fixes bug
-	  reported by isabella parakiss <izaberina@gmail.com>
+	  splitting will not take place (W_ASSIGNRHS only for now), make sure
+	  to pass the double-quoted flag to chk_atstar so we don't get the
+	  unquoted $* behavior, which will cause unwanted word splitting.
+	  Fixes bug reported by isabella parakiss <izaberina@gmail.com>
 
 arrayfunc.c
-	- unbind_array_element: don't assume that caller will check and pass only
-	  array variables; don't allow non-array variables to be unset using the
-	  `@' or `*' subscripts and don't allow any subscripts other than 0;
-	  return -2 in those cases
+	- unbind_array_element: don't assume that caller will check and pass
+	  only array variables; don't allow non-array variables to be unset
+	  using the `@' or `*' subscripts and don't allow any subscripts other
+	  than 0; return -2 in those cases
 	- unbind_array_element: unset a non-array variable if passed a subscript
 	  of `0' (e.g., `unbind "scalar[0]"').  This is new functionality that
 	  parallels the ${scalar[0]} expansion
@@ -8219,15 +8224,15 @@ doc/{bash.1,bashref.texi}
 				    4/6
 				    ---
 subst.c
-	- process_substitute: increment and decrement subshell_level around calls
-	  to parse_and_execute, as in command substitution, so $BASH_SUBSHELL
-	  gets new values in the subshell.  Fixes inconsistency pointed out by
-	  Peng Yu <pengyu.ut@gmail.com>
+	- process_substitute: increment and decrement subshell_level around
+	  calls to parse_and_execute, as in command substitution, so
+	  $BASH_SUBSHELL gets new values in the subshell.  Fixes inconsistency
+	  pointed out by Peng Yu <pengyu.ut@gmail.com>
 
 doc/{bash.1,bashref.texi}
-	- read: add clarifying text to note that the -N option does not split on
-	  $IFS, but does retain backslash as an escape character subject to -r.
-	  Report from isabella parakiss <izaberina@gmail.com>
+	- read: add clarifying text to note that the -N option does not split
+	  on $IFS, but does retain backslash as an escape character subject
+	  to -r.  Report from isabella parakiss <izaberina@gmail.com>
 
 builtins/declare.def
 	- declare_internal: unless it's the last statement in a {...} block,
@@ -8273,16 +8278,16 @@ lib/readline/histfile.c
 				    4/9
 				    ---
 execute_cmd.c
-	- execute_simple_command: if we haven't already forked, and we have created
-	  FIFOs, turn off the no-fork optimization in the simple command's flags.
-	  Originally reported to savannah by Kuang-che Wu as
+	- execute_simple_command: if we haven't already forked, and we have
+	  created FIFOs, turn off the no-fork optimization in the simple
+	  command's flags. Originally reported to savannah by Kuang-che Wu as
 	  https://savannah.gnu.org/support/index.php?108732
 
 				   4/10
 				   ----
 trap.c
-	- trap_if_untrapped: new function, sets a trap on a signal if that signal
-	  is not already trapped
+	- trap_if_untrapped: new function, sets a trap on a signal if that
+	  signal is not already trapped
 	- maybe_set_debug_trap: new function, sets DEBUG trap to command string
 	  argument only if it's not already trapped
 
@@ -8291,11 +8296,12 @@ trap.h
 
 
 builtins/source.def
-	- source_builtin: if the -T option isn't set, use maybe_set_debug_trap in
-	  the unwind-protect instead of unconditionally restoring the old trap
-	  string. That means if the sourced file changes the DEBUG trap, that new
-	  trap will persist instead of being undone when the old value is restored.
-	  Fixes bug reported by Scott Bronson <bronson@rinspin.com>
+	- source_builtin: if the -T option isn't set, use maybe_set_debug_trap
+	  in the unwind-protect instead of unconditionally restoring the old
+	  trap string. That means if the sourced file changes the DEBUG trap,
+	  that new trap will persist instead of being undone when the old
+	  value is restored. Fixes bug reported by Scott Bronson
+	  <bronson@rinspin.com>
 
 builtins/evalstring.c
 	- parse_string: before we jump to top_level, if we are at the `bottom'
@@ -8366,9 +8372,9 @@ shell.c
 				   4/22
 				   ----
 shell.c
-	- main: move cmd_init() (initialize word desc and word list object caches)
-	  after startup files are read so the cache doesn't get filled up with
-	  semi-permanent storage for shell functions and variables
+	- main: move cmd_init() (initialize word desc and word list object
+	  caches) after startup files are read so the cache doesn't get filled
+	  up with semi-permanent storage for shell functions and variables
 
 execute_cmd.c
 	- execute_function: use maybe_set_debug_trap in the same way as source
@@ -8410,20 +8416,20 @@ configure.ac,config.h.in
 	- sys/ioctl.h: add check in AC_CHECK_HEADERS macro, define HAVE_SYS_IOCTL_H
 
 lib/readline/{rltty,terminal}.c
-	- sys/ioctl.h: include unconditionally for ioctl declaration, avoid issues
-	  with `implicit declaration' warnings.  Issue originally raised on gdb
-	  list by Chen Gang <xili_gchen_5257@hotmail.com>
+	- sys/ioctl.h: include unconditionally for ioctl declaration, avoid
+	  issues with `implicit declaration' warnings.  Issue originally
+	  raised on gdb list by Chen Gang <xili_gchen_5257@hotmail.com>
 
 				   4/27
 				   ----
 lib/malloc/table.c
 	- mem_table: now a circular buffer showing the state of the last
-	  REG_TABLE_SIZE allocations rather than a hash table that quickly fills
-	  up
+	  REG_TABLE_SIZE allocations rather than a hash table that quickly
+	  fills up
 
 builtins/declare.def
-	- typeset_builtin: add -n to list of supported options.  Omission reported
-	  by Valentin Bajrami <valentin.bajrami@gmail.com>
+	- typeset_builtin: add -n to list of supported options.  Omission
+	  reported by Valentin Bajrami <valentin.bajrami@gmail.com>
 
 unwind_prot.c
 	- use object caches instead of malloc/free to allocate and deallocate
@@ -8548,9 +8554,9 @@ bashline.c
 				   5/15
 				   ----
 aclocal.m4
-	- BASH_CHECK_MULTIBYTE: when checking for locale_charset, add $LIBINTL to
-	  $LIBS.  If we're using the included lib/intl/libintl.a, it will include
-	  a version of locale_charset
+	- BASH_CHECK_MULTIBYTE: when checking for locale_charset, add $LIBINTL
+	  to $LIBS.  If we're using the included lib/intl/libintl.a, it will
+	  include a version of locale_charset
 
 				   5/17
 				   ----
@@ -8568,16 +8574,16 @@ lib/sh/mbscmp.c
 	  at beginning
 
 lib/sh/mbscasecmp.c
-	- mbscasecmp: move calculation of MB_CUR_MAX out of loop; calculate it once
-	  at beginning
+	- mbscasecmp: move calculation of MB_CUR_MAX out of loop; calculate it
+	  once at beginning
 
 lib/sh/shquote.c
 	- sh_backslash_quote: move calculation of MB_CUR_MAX out of loop;
 	  calculate it once at beginning
 
 lib/sh/casemod.c
-	- sh_modcase: move calculation of MB_CUR_MAX out of loop; calculate it once
-	  at beginning
+	- sh_modcase: move calculation of MB_CUR_MAX out of loop; calculate it
+	  once at beginning
 
 subst.c
 	- expand_word_internal: move calculation of MB_CUR_MAX out of loops;
@@ -8639,15 +8645,16 @@ builtins/fc.def
 builtins/shopt.def
 	- shopt_set_debug_mode: new function, called when the extdebug shell
 	  option changes.  Right now, it sets function_trace_mode when extdebug
-	  is enabled, and turns off when extdebug is disabled.  The documentation
-	  has always said that shopt does this.  Report from Peng Yu
-	  <pengyu.ut@gmail.com>
+	  is enabled, and turns off when extdebug is disabled.  The
+	  documentation has always said that shopt does this.  Report from
+	  Peng Yu <pengyu.ut@gmail.com>
 
 				   5/27
 				   ----
 findcmd.[ch]
-	- add support for EXECIGNORE shell variable, list of extglob patterns that
-	  prevent matching filenames from being identified as executable files
+	- add support for EXECIGNORE shell variable, list of extglob patterns
+	  that prevent matching filenames from being identified as executable
+	  files
 
 variables.c
 	- EXECIGNORE: arrange for findcmd.c:setup_exec_ignore to be called when
@@ -8692,10 +8699,10 @@ lib/readline/readline.h
 				   5/29
 				   ----
 builtins/declare.def
-	- declare_internal: if we are trying to change attributes or value for a
-	  nameref variable whose value points to an unset variable, make sure we
-	  create a new variable whose name is the value of the nameref variable.
-	  That is,
+	- declare_internal: if we are trying to change attributes or value for
+	  a nameref variable whose value points to an unset variable, make
+	  sure we create a new variable whose name is the value of the nameref
+	  variable. That is,
 
 		declare -n foo=bar
 		unset foo	# unsets bar
@@ -8713,9 +8720,9 @@ builtins/set.def
 	  find_variable.  Fixes problem reported by Greg Wooledge
 	  <wooledg@eeg.ccf.org>
 	- unset_builtin: if we try to unset a nameref variable whose value is
-	  not a set variable, make sure we don't try to unset the nameref itself,
-	  but rather the variable it points to.  This ensures that the following
-	  always works as it should
+	  not a set variable, make sure we don't try to unset the nameref
+	  itself, but rather the variable it points to.  This ensures that the
+	  following always works as it should
 
 		declare -n foo=bar
 		unset foo	# unsets bar and leaves foo unchanged
@@ -8739,9 +8746,9 @@ general.h
 				    ---
 parse.y
 	- parse_matched_pair: make sure that command substitution constructs
-	  within ${...} expansions are parsed as such using parse_comsub, so the
-	  P_FIRSTCLOSE flag doesn't stop parsing if a right brace appears within
-	  the comsub.  Report from Christos Zoulas <christos@zoulas.com>
+	  within ${...} expansions are parsed as such using parse_comsub, so
+	  the P_FIRSTCLOSE flag doesn't stop parsing if a right brace appears
+	  within the comsub.  Report from Christos Zoulas <christos@zoulas.com>
 
 findcmd.c
 	- search_for_command: take two new flags for FLAGS arg: CMDSRCH_STDPATH,
@@ -8766,26 +8773,27 @@ execute_cmd.c
 	  with CMDSRCH_STDPATH if it's set
 
 builtins/command.def
-	- command_builtin: if -p given without -v or -V, set the CMD_STDPATH flag
-	  in the simple command we construct from the rest of the argument list.
-	  This fixes the command -p cmd issue with changing $PATH for the duration
-	  of `cmd's execution reported by <sdowdy@rap.ucar.edu>
+	- command_builtin: if -p given without -v or -V, set the CMD_STDPATH
+	  flag in the simple command we construct from the rest of the
+	  argument list.  This fixes the command -p cmd issue with changing
+	  $PATH for the duration  of `cmd's execution reported by
+	  <sdowdy@rap.ucar.edu>
 
 builtins/common.h
-	- CDESC_STDPATH: new flag for describe_command; means to use standard path
-	  for command -pv or -pV
+	- CDESC_STDPATH: new flag for describe_command; means to use standard
+	  path for command -pv or -pV
 
 builtins/command.def
-	- command_builtin: if -p given with -v or -V, pass the CDESC_STDPATH flag
-	  to describe_command
+	- command_builtin: if -p given with -v or -V, pass the CDESC_STDPATH
+	  flag to describe_command
 
 builtins/type.def
-	- describe_command: if given the CDESC_STDPATH flag, use find_in_path with
-	  the conf_standard_path() result. Since `all' will never be on with this
-	  flag, at least not yet, we can allocate and free the path list.  Fixes
-	  the bug of a temporary environment value for PATH preceding a
-	  `command -pv' or `command -pV' persisting when the command finishes and
-	  means we use fewer unwind-protects
+	- describe_command: if given the CDESC_STDPATH flag, use find_in_path
+	  with the conf_standard_path() result. Since `all' will never be on
+	  with this flag, at least not yet, we can allocate and free the path
+	  list.  Fixes the bug of a temporary environment value for PATH
+	  preceding a `command -pv' or `command -pV' persisting when the
+	  command finishes and means we use fewer unwind-protects
 
 				    6/4
 				    ---
@@ -8865,8 +8873,27 @@ subst.c
 	  results in x containing '\001' when IFS=$'\001'.  See if this will
 	  cause problems by adding a debugging statement in the code
 
+				   6/15
+				   ----
+parse.y
+	- CHECK_FOR_RESERVED_WORD: don't return ESAC when you read `esac'
+	  after a `|' while in a case pattern list (parser_state & PST_CASEPAT).
+	  This is Posix grammar rule 4
+	  (http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_10_02)
 
+				   6/16
+				   ----
+jobs.c
+	- wait_for: make sure we queue SIGCHLD signals if a SIGCHLD trap
+	  handler is running (signal_in_progress or IMPOSSIBLE_TRAP_HANDLER),
+	  since we allow recursive trap invocations now
+	- wait_for: make sure we treat SIGCHLD as trapped if the trap handler
+	  is set to IMPOSSIBLE_TRAP_HANDLER so we don't miss signals during
+	  calls to run_sigchld_trap()
 
-
-
-	  
+trap.c
+	- run_pending_traps: since we allow recursive trap handler invocations,
+	  make sure we set pending_traps[SIGCHLD] to 0 while we mark the
+	  signal handler in progress (SIG_INPROGRESS) and don't reset it to 0
+	  after run_sigchld_trap returns in case more SIGCHLDs have been
+	  queued while it's running

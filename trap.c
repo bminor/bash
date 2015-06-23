@@ -283,7 +283,7 @@ void
 run_pending_traps ()
 {
   register int sig;
-  int old_exit_value;
+  int old_exit_value, x;
   WORD_LIST *save_subst_varlist;
   sh_parser_state_t pstate;
 #if defined (ARRAY_VARS)
@@ -337,8 +337,15 @@ run_pending_traps ()
 		   (sigmodes[SIGCHLD] & SIG_INPROGRESS) == 0)
 	    {
 	      sigmodes[SIGCHLD] |= SIG_INPROGRESS;
-	      run_sigchld_trap (pending_traps[sig]);	/* use as counter */
+	      x = pending_traps[sig];
+	      pending_traps[sig] = 0;
+	      run_sigchld_trap (x);	/* use as counter */
+	      running_trap = 0;
 	      sigmodes[SIGCHLD] &= ~SIG_INPROGRESS;
+	      /* continue here rather than reset pending_traps[SIGCHLD] below in
+		 case there are recursive calls to run_pending_traps and children
+		 have been reaped while run_sigchld_trap was running. */
+	      continue;
 	    }
 	  else if (sig == SIGCHLD &&
 		   trap_list[SIGCHLD] == (char *)IMPOSSIBLE_TRAP_HANDLER &&

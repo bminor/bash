@@ -2,9 +2,9 @@ Compatibility with previous versions
 ====================================
 
 This document details the incompatibilities between this version of bash,
-bash-4.3, and the previous widely-available versions, bash-3.x (which is
-still the `standard' version for Mac OS X), 4.0/4.1 (which are still
-standard on a few Linux distributions), and bash-4.2, the current
+bash-4.4, and the previous widely-available versions, bash-3.x (which is
+still the `standard' version for Mac OS X), 4.1/4.2 (which are still
+standard on a few Linux distributions), and bash-4.3, the current
 widely-available version.  These were discovered by users of bash-2.x
 through 4.x, so this list is not comprehensive.  Some of these
 incompatibilities occur between the current version and versions 2.0 and
@@ -389,6 +389,9 @@ to this variable (a decimal version number like 4.2, or an integer
 corresponding to the compatNN option, like 42) determines the compatibility
 level.
 
+Bash-4.4 has begun deprecating older compatibility levels.  Eventually, the
+options will be removed in favor of the BASH_COMPAT variable.
+
 compat31 set
 	- the < and > operators to the [[ command do not consider the current
 	  locale when comparing strings; they use ASCII ordering
@@ -417,6 +420,12 @@ compat41 set
 compat42 set
 	- the replacement string in double-quoted pattern substitution is not
 	  run through quote removal, as in previous versions
+
+compat43 set
+	- the shell does not print a warning message if an attempt is made to
+	  use a quoted compound assignment as an argument to declare
+	  (declare -a foo='(1 2)')
+
 -------------------------------------------------------------------------------
 
 Copying and distribution of this file, with or without modification,

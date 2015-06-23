@@ -139,6 +139,7 @@ static int shopt_compat32;
 static int shopt_compat40;
 static int shopt_compat41;
 static int shopt_compat42;
+static int shopt_compat43;
 
 typedef int shopt_set_func_t __P((char *, int));
 
@@ -163,6 +164,7 @@ static struct {
   { "compat40", &shopt_compat40, set_compatibility_level },
   { "compat41", &shopt_compat41, set_compatibility_level },
   { "compat42", &shopt_compat42, set_compatibility_level },
+  { "compat43", &shopt_compat43, set_compatibility_level },
 #if defined (READLINE)
   { "complete_fullquote", &complete_fullquote, (shopt_set_func_t *)NULL},
   { "direxpand", &dircomplete_expand, shopt_set_complete_direxpand },
@@ -549,7 +551,7 @@ set_compatibility_level (option_name, mode)
   if (mode)
     {
       shopt_compat31 = shopt_compat32 = 0;
-      shopt_compat40 = shopt_compat41 = shopt_compat42 = 0;
+      shopt_compat40 = shopt_compat41 = shopt_compat42 = shopt_compat43 = 0;
       ind = find_shopt (option_name);
       *shopt_vars[ind].value = mode;
     }
@@ -565,6 +567,8 @@ set_compatibility_level (option_name, mode)
     shell_compatibility_level = 41;
   else if (shopt_compat42)
     shell_compatibility_level = 42;
+  else if (shopt_compat43)
+    shell_compatibility_level = 43;
   else
     shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
 
@@ -576,11 +580,14 @@ set_compatibility_level (option_name, mode)
 void
 set_compatibility_opts ()
 {
-  shopt_compat31 = shopt_compat32 = shopt_compat40 = shopt_compat41 = shopt_compat42 = 0;
+  shopt_compat31 = shopt_compat32 = 0;
+  shopt_compat40 = shopt_compat41 = shopt_compat42 = shopt_compat43 = 0;
   switch (shell_compatibility_level)
     {
       case DEFAULT_COMPAT_LEVEL:
 	break;
+      case 43:
+	shopt_compat43 = 1; break;
       case 42:
 	shopt_compat42 = 1; break;
       case 41:

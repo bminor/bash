@@ -171,6 +171,18 @@ if [ "$val1" != "'#abcd'" ]; then
 	testfail "variable quoting 4"
 fi
 
+# these are Posix.2 shell grammar rule 4, problems through bash-4.3
+newtest
+case esac in (foo|esac) ;; *) testfail "case esac test 1" ;; esac
+newtest
+case esac in foo|esac) ;; *) testfail "case esac test 2" ;; esac
+
+# these are supposed to be syntax errors
+newtest
+eval 'case esac in (esac) ;; *) echo "case esac test 3" ;; esac'
+newtest
+eval 'case esac in esac) ;; *) echo "case esac test 4";; esac'
+
 if [ $exitval = 0 ]; then
     echo "All tests passed"
 else
