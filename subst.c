@@ -3751,8 +3751,8 @@ dequote_string (string)
   DECLARE_MBSTATE;
 
 #if defined (DEBUG)
-if (string[0] == CTLESC && string[1] == 0)
-  itrace("dequote_string: string with bare CTLESC");
+  if (string[0] == CTLESC && string[1] == 0)
+    internal_inform ("dequote_string: string with bare CTLESC");
 #endif
 
   slen = strlen (string);

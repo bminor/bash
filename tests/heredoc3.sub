@@ -49,9 +49,10 @@ hello
     END    
 echo end hello
 
-cat <<x*x & touch 'x*x'
+cat <<x*x >/dev/null & touch 'x*x'
 x star x
 x*x
+wait $!
 echo end 'x*x'
 rm 'x*x'
 

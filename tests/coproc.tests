@@ -29,12 +29,14 @@ read LINE <&${REFLECT[0]}
 
 echo $LINE
 
+exec 2>$TMPOUT		# catch stray job termination messages
 kill $REFLECT_PID
 wait $REFLECT_PID >$TMPOUT 2>&1 || echo "coproc.tests: REFLECT: status $?"
 grep -q 'Terminated.*coproc.*REFLECT' < $TMPOUT || {
 	echo "coproc.tests: wait for REFLECT failed" >&2
 }
 rm -f $TMPOUT
+exec 2>&1
 
 coproc xcase -n -u
 

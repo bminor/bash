@@ -1,3 +1,4 @@
+olddir=$PWD
 EMPTY=/tmp/empty
 
 shopt -s globstar
@@ -78,5 +79,5 @@ p **/a/**/**/**
 s '**/**/a/**'
 p **/**/a/**
 
-cd -
+cd "$olddir"
 rm -rf $EMPTY

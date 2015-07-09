@@ -88,19 +88,19 @@ hits	command
 blat qux sh foo
 /sbin/blat /usr/local/bin/qux /bin/sh /usr/sbin/foo
 
-foo qux
-argv[1] = </usr/sbin/foo>
-argv[2] = </usr/local/bin/qux>
-argv[3] = <-l>
+qux foo
+argv[1] = </usr/local/bin/qux>
+argv[2] = <-l>
+argv[3] = </usr/sbin/foo>
 alias blat='cd /blat ; echo $PWD'
 alias foo='/usr/sbin/foo'
 alias qux='/usr/local/bin/qux -l'
 alias sh='/bin/bash --login -o posix'
-sh foo blat qux
-argv[1] = </bin/bash --login -o posix>
-argv[2] = </usr/sbin/foo>
-argv[3] = <cd /blat ; echo $PWD>
-argv[4] = </usr/local/bin/qux -l>
+blat qux sh foo
+argv[1] = <cd /blat ; echo $PWD>
+argv[2] = </usr/local/bin/qux -l>
+argv[3] = </bin/bash --login -o posix>
+argv[4] = </usr/sbin/foo>
 outside: outside
 declare -A BASH_ALIASES=()
 declare -A BASH_CMDS=()

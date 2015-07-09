@@ -8927,3 +8927,16 @@ parse.y
 	  lex_rwlen to 0 along with lex_wlen if we are in a position where we
 	  can read a reserved word.  Fixes bug reported by  Nathan Neulinger
 	  <nneul@neulinger.org>
+
+				   6/30
+				   ----
+sig.h
+	- include <signal.h> unconditionally and rely on guards in sig.h to
+	  keep from including it more than once.  Irix 6.5 defines SIG_DFL
+	  in other files and defeats the test of SIG_DFL.  Fixes bug
+	  reported by Klaus Ziegler <klausz@haus-gisela.de>
+
+alias.c
+	- ALIAS_HASH_BUCKETS: table size increased to 64
+
+[bash-4.4-alpha frozen]

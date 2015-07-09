@@ -3425,7 +3425,7 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
 
   /* Call a SIGCHLD trap handler for each child that exits, if one is set. */
   if (job_control && children_exited &&
-      (signal_is_trapped (SIGCHLD) || trap_list[SIGCHLD] == IMPOSSIBLE_TRAP_HANDLER) &&
+      (signal_is_trapped (SIGCHLD) || trap_list[SIGCHLD] == (char *)IMPOSSIBLE_TRAP_HANDLER) &&
       trap_list[SIGCHLD] != (char *)IGNORE_SIG)
     {
       if (posixly_correct && this_shell_builtin && this_shell_builtin == wait_builtin)
@@ -3447,7 +3447,7 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
 	queue_sigchld_trap (children_exited);
       else if (signal_in_progress (SIGCHLD))
 	queue_sigchld_trap (children_exited);     
-      else if (trap_list[SIGCHLD] == IMPOSSIBLE_TRAP_HANDLER)
+      else if (trap_list[SIGCHLD] == (char *)IMPOSSIBLE_TRAP_HANDLER)
 	queue_sigchld_trap (children_exited);
       else if (running_trap)
 	queue_sigchld_trap (children_exited);

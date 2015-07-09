@@ -1442,7 +1442,7 @@ yy_readline_get ()
 	give_terminal_to (shell_pgrp, 0);
 #endif /* JOB_CONTROL */
 
-      old_sigint = (SigHandler *)IMPOSSIBLE_TRAP_HANDLER;
+      old_sigint = IMPOSSIBLE_TRAP_HANDLER;
       if (signal_is_ignored (SIGINT) == 0)
 	{
 	  /* interrupt_immediately++; */
