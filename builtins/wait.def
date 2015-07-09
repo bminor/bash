@@ -136,6 +136,7 @@ wait_builtin (list)
     {
       last_command_exit_signal = wait_signal_received;
       status = 128 + wait_signal_received;
+      wait_sigint_cleanup ();
       WAIT_RETURN (status);
     }
 
