@@ -8897,3 +8897,33 @@ trap.c
 	  signal handler in progress (SIG_INPROGRESS) and don't reset it to 0
 	  after run_sigchld_trap returns in case more SIGCHLDs have been
 	  queued while it's running
+
+				   6/22
+				   ----
+lib/readline/readline.c
+	- _rl_dispatch_subseq: if we shadowed any function, not just self-
+	  insert, bind that function to the key we shadowed and dispatch on it.
+	  This preserves and dispatches off the original key, not ANYOTHERKEY,
+	  and makes sure we are dispatching from a keymap with the right key
+	  binding.  Fixes bug reported by Carlos Pita
+	  <carlosjosepita@gmail.com>
+
+				   6/23
+				   ----
+bashline.c
+	- attempt_shell_completion: don't read past the end of rl_line_buffer
+	  while skipping assignment statements before command names.  Fix for
+	  bug reported by Hanno Böck <hanno@hboeck.de>
+
+lib/readline/parens.c
+	- _rl_enable_paren_matching: make paren matching work in vi insert
+	  mode. Really, this time.  Bug report from Carlos Pita
+	  <carlosjosepita@gmail.com>
+
+				   6/29
+				   ----
+parse.y
+	- parse_comsub: when starting to parse a word, make sure that we set
+	  lex_rwlen to 0 along with lex_wlen if we are in a position where we
+	  can read a reserved word.  Fixes bug reported by  Nathan Neulinger
+	  <nneul@neulinger.org>

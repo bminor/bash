@@ -68,16 +68,32 @@ _rl_enable_paren_matching (on_or_off)
      int on_or_off;
 {
   if (on_or_off)
-    {	/* ([{ */
+    {
+      /* ([{ */
       rl_bind_key_in_map (')', rl_insert_close, emacs_standard_keymap);
       rl_bind_key_in_map (']', rl_insert_close, emacs_standard_keymap);
       rl_bind_key_in_map ('}', rl_insert_close, emacs_standard_keymap);
+
+#if defined (VI_MODE)
+      /* ([{ */
+      rl_bind_key_in_map (')', rl_insert_close, vi_insertion_keymap);
+      rl_bind_key_in_map (']', rl_insert_close, vi_insertion_keymap);
+      rl_bind_key_in_map ('}', rl_insert_close, vi_insertion_keymap);
+#endif
     }
   else
-    {	/* ([{ */
+    {
+      /* ([{ */
       rl_bind_key_in_map (')', rl_insert, emacs_standard_keymap);
       rl_bind_key_in_map (']', rl_insert, emacs_standard_keymap);
       rl_bind_key_in_map ('}', rl_insert, emacs_standard_keymap);
+
+#if defined (VI_MODE)
+      /* ([{ */
+      rl_bind_key_in_map (')', rl_insert, vi_insertion_keymap);
+      rl_bind_key_in_map (']', rl_insert, vi_insertion_keymap);
+      rl_bind_key_in_map ('}', rl_insert, vi_insertion_keymap);
+#endif
     }
 }
 

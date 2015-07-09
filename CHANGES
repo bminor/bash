@@ -1,5 +1,5 @@
 This document details the changes between this version, bash-4.4-alpha, and
-the previous version, bash-4.3-release. [THROUGH 4/2015]
+the previous version, bash-4.3-release.
 
 1.  Changes to Bash
 
@@ -267,7 +267,9 @@ ffff. Fixed a bug that caused redirections to not be undone on some syntax
 
 gggg. Bash only adds asynchronous commands to the table of background pids
       whose status it remembers, to avoid it growing too large during scripts
-      that create and reap large numbers of child processes.
+      that create and reap large numbers of child processes.  This means that
+      `wait' no longer works on synchronous jobs, but $? can be used to get
+      the exit status in those cases.
 
 hhhh. Bash now checks whether or not a shell script argument is a directory
       before trying to open it; Posix says implementations may allow open(2)
@@ -313,6 +315,10 @@ tttt. Fixed a bug that caused interactive shells compiled without job control
 
 uuuu. `esac' should not be recognized as a reserved word when it appears as the
       second or later pattern in a case statement pattern list.
+
+vvvv. Fixed a bug that caused the completion code to read past the end of the
+      readline line buffer while skipping assignment statements to find the
+      command name.
 
 2.  Changes to Readline
 
@@ -361,6 +367,12 @@ o.  Fixed a bug that caused history expansion to disregard characters that are
 
 p.  Fixed a bug that could cause reading past the end of a string when reading
     the value when binding the set of isearch terminators.
+
+q.  Fixed a bug that caused readline commands that depend on knowing which
+    key invoked them to misbehave when dispatching key sequences that are
+    prefixes of other key bindings.
+
+r.  Paren matching now works in vi insert mode.
 
 3.  New Features in Bash
 

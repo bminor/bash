@@ -105,7 +105,7 @@ static int rl_gather_tyi PARAMS((void));
 int
 win32_isatty (int fd)
 {
-  return (_isatty (fd) ? ((((long) (HANDLE) _get_osfhandle (fd)) & 3) == 3) ? 0);
+  return (_isatty (fd) ? ((((long) (HANDLE) _get_osfhandle (fd)) & 3) == 3) : 0);
 }
 
 #define isatty(x)	win32_isatty(x)

@@ -1527,6 +1527,12 @@ attempt_shell_completion (text, start, end)
       e = find_cmd_end (end);
       do
 	{
+	  /* Don't read past the end of rl_line_buffer */
+	  if (s > rl_end)
+	    {
+	      s1 = s = e1;
+	      break;
+	    }
 	  /* Skip over assignment statements preceding a command name.  If we
 	     don't find a command name at all, we can perform command name
 	     completion.  If we find a partial command name, we should perform

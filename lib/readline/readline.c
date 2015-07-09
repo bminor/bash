@@ -1023,11 +1023,13 @@ _rl_subseq_result (r, map, key, got_subseq)
       func = m[ANYOTHERKEY].function;
       if (type == ISFUNC && func == rl_do_lowercase_version)
 	r = _rl_dispatch (_rl_to_lower (key), map);
-      else if (type == ISFUNC && func == rl_insert)
+      else if (type == ISFUNC)
 	{
-	  /* If the function that was shadowed was self-insert, we
-	     somehow need a keymap with map[key].func == self-insert.
-	     Let's use this one. */
+	  /* If we shadowed a function, whatever it is, we somehow need a
+	     keymap with map[key].func == shadowed-function.
+	     Let's use this one.  Then we can dispatch using the original
+	     key, since there are commands (e.g., in vi mode) for which it
+	     matters. */
 	  nt = m[key].type;
 	  nf = m[key].function;
 
@@ -1038,6 +1040,7 @@ _rl_subseq_result (r, map, key, got_subseq)
 	  m[key].function = nf;
 	}
       else
+	/* We probably shadowed a keymap, so keep going. */
 	r = _rl_dispatch (ANYOTHERKEY, m);
     }
   else if (r && map[ANYOTHERKEY].function)

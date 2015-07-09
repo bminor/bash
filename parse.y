@@ -3747,6 +3747,8 @@ eof_error:
 /*itrace("parse_comsub:%d: lex_inword -> 1 ch = `%c' (%d)", line_number, ch, __LINE__);*/
 	      tflags |= LEX_INWORD;
 	      lex_wlen = 0;
+	      if (tflags & LEX_RESWDOK)
+		lex_rwlen = 0;
 	    }
 	}
 
@@ -3868,7 +3870,7 @@ eof_error:
 			  lex_rwlen == 2 &&
 			  STREQN (ret + retind - 2, "do", 2))
 	    {
-/*itrace("parse_comsub:%d: lex_incase == 1 found `%c', found \"do\"", line_number, ch);*/
+/*itrace("parse_comsub:%d: lex_incase == 0 found `%c', found \"do\"", line_number, ch);*/
 	      lex_rwlen = 0;
 	    }
 	  else if MBTEST((tflags & LEX_INCASE) && ch != '\n')
