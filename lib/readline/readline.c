@@ -151,7 +151,7 @@ static int running_in_emacs;
 #endif
 
 /* Flags word encapsulating the current readline state. */
-int rl_readline_state = RL_STATE_NONE;
+unsigned long rl_readline_state = RL_STATE_NONE;
 
 /* The current offset in the current input line. */
 int rl_point;
@@ -846,7 +846,7 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	  /* Special case rl_do_lowercase_version (). */
 	  if (func == rl_do_lowercase_version)
 	    /* Should we do anything special if key == ANYOTHERKEY? */
-	    return (_rl_dispatch (_rl_to_lower (key), map));
+	    return (_rl_dispatch (_rl_to_lower ((unsigned char)key), map));
 
 	  rl_executing_keymap = map;
 	  rl_executing_key = key;
@@ -1022,7 +1022,7 @@ _rl_subseq_result (r, map, key, got_subseq)
       type = m[ANYOTHERKEY].type;
       func = m[ANYOTHERKEY].function;
       if (type == ISFUNC && func == rl_do_lowercase_version)
-	r = _rl_dispatch (_rl_to_lower (key), map);
+	r = _rl_dispatch (_rl_to_lower ((unsigned char)key), map);
       else if (type == ISFUNC)
 	{
 	  /* If we shadowed a function, whatever it is, we somehow need a

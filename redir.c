@@ -121,10 +121,7 @@ redirection_error (temp, error)
   else if ((temp->rflags & REDIR_VARASSIGN) == 0 && temp->redirector.dest < 0)
     /* This can happen when read_token_word encounters overflow, like in
        exec 4294967297>x */
-{
-itrace("redirection_error: temp->redirector.dest = %d", temp->redirector.dest);
     filename = _("file descriptor out of range");
-}
 #ifdef EBADF
   /* This error can never involve NOCLOBBER */
   else if (error != NOCLOBBER_REDIRECT && temp->redirector.dest >= 0 && error == EBADF)

@@ -875,13 +875,11 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	  last_command_exit_value = exec_result;
 	  run_pending_traps ();
 
-#if 0	  /* XXX - bash-4.4 or bash-5.0 */
 	  /* Undo redirections before running exit trap on the way out of
 	     set -e. Report by Mark Farrell 5/19/2014 */
 	  if (exit_immediately_on_error && signal_is_trapped (0) &&
 		unwind_protect_tag_on_stack ("saved-redirects"))
 	    run_unwind_frame ("saved-redirects");
-#endif
 
 	  jump_to_top_level (ERREXIT);
 	}
@@ -2629,11 +2627,6 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	  second = command->value.Connection->second;
 	  if (ignore_return && second)
 	    second->flags |= CMD_IGNORE_RETURN;
-	  if (should_suppress_fork (second))
-	    {
-	      second->flags |= CMD_NO_FORK;
-	      second->value.Simple->flags |= CMD_NO_FORK;
-	    }
 
 	  exec_result = execute_command (second);
 	}

@@ -114,8 +114,8 @@ enum filetype
     arg_directory
   };
 
-/* Prefix color, currently same as directory */
-#define C_PREFIX	C_DIR
+/* Prefix color, currently same as socket */
+#define C_PREFIX	C_SOCK
 
 extern void _rl_put_indicator (const struct bin_str *ind);
 extern void _rl_set_normal_color (void);

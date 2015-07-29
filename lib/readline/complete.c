@@ -128,7 +128,7 @@ static int get_y_or_n PARAMS((int));
 static int _rl_internal_pager PARAMS((int));
 static char *printable_part PARAMS((char *));
 static int fnwidth PARAMS((const char *));
-static int fnprint PARAMS((const char *, int));
+static int fnprint PARAMS((const char *, int, const char *));
 static int print_filename PARAMS((char *, char *, int));
 
 static char **gen_completion_matches PARAMS((char *, int, int, rl_compentry_func_t *, int, int));
@@ -212,6 +212,8 @@ int rl_visible_stats = 0;
    completions.  The colors used are taken from $LS_COLORS, if set. */
 int _rl_colored_stats = 0;
 
+/* Non-zero means to use a color (currently magenta) to indicate the common
+   prefix of a set of possible word completions. */
 int _rl_colored_completion_prefix = 1;
 #endif
 
@@ -798,9 +800,10 @@ fnwidth (string)
 #define ELLIPSIS_LEN	3
 
 static int
-fnprint (to_print, prefix_bytes)
+fnprint (to_print, prefix_bytes, real_pathname)
      const char *to_print;
      int prefix_bytes;
+     const char *real_pathname;
 {
   int printed_len, w;
   const char *s;
@@ -819,9 +822,16 @@ fnprint (to_print, prefix_bytes)
   printed_len = common_prefix_len = 0;
 
   /* Don't print only the ellipsis if the common prefix is one of the
-     possible completions */
-  if (to_print[prefix_bytes] == '\0')
+     possible completions.  Only cut off prefix_bytes if we're going to be
+     printing the ellipsis, which takes precedence over coloring the
+     completion prefix (see print_filename() below). */
+  if (_rl_completion_prefix_display_length > 0 && to_print[prefix_bytes] == '\0')
     prefix_bytes = 0;
+
+#if defined (COLOR_SUPPORT)
+  if (_rl_colored_stats && (prefix_bytes == 0 || _rl_colored_completion_prefix <= 0))
+    colored_stat_start (real_pathname);
+#endif
 
   if (prefix_bytes && _rl_completion_prefix_display_length > 0)
     {
@@ -893,12 +903,22 @@ fnprint (to_print, prefix_bytes)
 	}
       if (common_prefix_len > 0 && (s - to_print) >= common_prefix_len)
 	{
+#if defined (COLOR_SUPPORT)
 	  /* printed bytes = s - to_print */
 	  /* printed bytes should never be > but check for paranoia's sake */
 	  colored_prefix_end ();
+	  if (_rl_colored_stats)
+	    colored_stat_start (real_pathname);		/* XXX - experiment */
+#endif
 	  common_prefix_len = 0;
 	}
     }
+
+#if defined (COLOR_SUPPORT)
+  /* XXX - unconditional for now */
+  if (_rl_colored_stats)
+    colored_stat_end ();
+#endif
 
   return printed_len;
 }
@@ -920,7 +940,7 @@ print_filename (to_print, full_pathname, prefix_bytes)
   /* Defer printing if we want to prefix with a color indicator */
   if (_rl_colored_stats == 0 || rl_filename_completion_desired == 0)
 #endif
-    printed_len = fnprint (to_print, prefix_bytes);
+    printed_len = fnprint (to_print, prefix_bytes, to_print);
 
   if (rl_filename_completion_desired && (
 #if defined (VISIBLE_STATS)
@@ -989,13 +1009,10 @@ print_filename (to_print, full_pathname, prefix_bytes)
 		extension_char = '/';
 	    }
 
+	  /* Move colored-stats code inside fnprint() */
 #if defined (COLOR_SUPPORT)
 	  if (_rl_colored_stats)
-	    {
-	      colored_stat_start (new_full_pathname);
-	      printed_len = fnprint (to_print, prefix_bytes);
-	      colored_stat_end ();
-	    }
+	    printed_len = fnprint (to_print, prefix_bytes, new_full_pathname);
 #endif
 
 	  xfree (new_full_pathname);
@@ -1012,15 +1029,11 @@ print_filename (to_print, full_pathname, prefix_bytes)
 	    if (_rl_complete_mark_directories && path_isdir (s))
 	      extension_char = '/';
 
+	  /* Move colored-stats code inside fnprint() */
 #if defined (COLOR_SUPPORT)
 	  if (_rl_colored_stats)
-	    {
-	      colored_stat_start (s);
-	      printed_len = fnprint (to_print, prefix_bytes);
-	      colored_stat_end ();
-	    }
+	    printed_len = fnprint (to_print, prefix_bytes, s);
 #endif
-
 	}
 
       xfree (s);

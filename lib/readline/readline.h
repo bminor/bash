@@ -493,7 +493,7 @@ extern int rl_readline_version;			/* e.g., 0x0402 */
 extern int rl_gnu_readline_p;
 
 /* Flags word encapsulating the current readline state. */
-extern int rl_readline_state;
+extern unsigned long rl_readline_state;
 
 /* Says which editing mode readline is currently using.  1 means emacs mode;
    0 means vi mode. */

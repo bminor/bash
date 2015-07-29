@@ -9006,3 +9006,77 @@ subst.c
 	  introducing a `@' operator, but instead retains its meaning as all
 	  variables whose name begins with vvv.  Fixes bug reported by
 	  konsolebox <konsolebox@gmail.com>
+
+				   7/14
+				   ----
+execute_cmd.c
+	- execute_connection: remove the fork optimization from and AND_AND
+	  and OR_OR cases; it has trouble with `a && b && c', since the `&&'
+	  is left-associative.  Putting that code here can result in unwanted
+	  fork optimizations since the `b' will end up as `second' on a
+	  recursive call to execute_command.  Bug reported by Mike Frysinger
+	  <vapier@gentoo.org>
+
+builtins/evalstring.c
+	- optimize_fork: moved code from execute_connection to here; checks
+	  whether the RHS of a && or || passes the suppress_fork() tests and
+	  turns on the NO_FORK bit if so
+	- parse_and_execute: if suppress_fork() tests fail, check whether the
+	  command to be executed is a connection and attempt to optimize the
+	  fork for the right side using optimize_fork().  The key is dealing
+	  with the entire command passed to `bash -c' or `eval'
+
+builtins/common.h
+	- optimize_fork: new extern declaration
+
+execute_cmd.c
+	- execute_command_internal: enable code put in to undo redirections
+	  before exiting the shell due to `set -e' in the case of a shell
+	  function that gets command-not-found or a syntax error.  Reported
+	  back in May, 2014 by Mark Ferrell <major@homeonderanged.org>
+
+bashhist.c
+	- bash_history_inhibit_expansion: enable change from 1/10 that skips
+	  over history expansion character in command and process
+	  substitution
+
+				   7/15
+				   ----
+lib/readline/{history,undo}.c
+	- replace_history_data now _hs_replace_history_data
+
+				   7/16
+				   ----
+lib/readline/readline.c
+	- make sure _rl_to_lower doesn't ever get characters that are outside
+	  of its valid range by casting arg to unsigned char
+
+lib/readline/colors.h
+	- change completion prefix color (C_PREFIX) to be the same as C_SOCK,
+	  which is less likely to collide with file type colorings (magenta)
+
+lib/readline/complete.c
+	- fnprint: now takes an additional argument: the full, expanded pathname
+	  corresponding to the `toprint' argument
+	- fnprint: don't zero out prefix_bytes if we're not printing the
+	  ellipisis but we still want to use prefix_bytes for displaying
+	  the common prefix in a color
+	- print_filename: move colored-stats display responsibility into fnprint
+	- fnprint: change so colored-prefix and colored-stats can cooperate
+	  and display filenames with multiple colors: one for the prefix and
+	  one for the file type.  The prefix is displayed in the prefix color
+	  and the remainder of the pathname, if any, is displayed in the color
+	  corresponding to the file type.  Report and suggestion from Mike
+	  Frysinger <vapier@gentoo.org>
+
+				   7/17
+				   ----
+lib/readline/readline.[ch]
+	- rl_readline_state: now unsigned long
+
+				   7/18
+				   ----
+lib/readline/history.h
+	- history_offset: now declared here, was always a global variable
+	- copy_history_entry: now declared here, part of the public interface
+	- alloc_history_entry: now declared here, part of the public interface

@@ -109,6 +109,20 @@ should_suppress_fork (command)
 	  ((command->flags & CMD_TIME_PIPELINE) == 0) &&
 	  ((command->flags & CMD_INVERT_RETURN) == 0));
 }
+
+int
+optimize_fork (command)
+     COMMAND *command;
+{
+  if (command->type == cm_connection &&
+      (command->value.Connection->connector == AND_AND || command->value.Connection->connector == OR_OR) &&
+      should_suppress_fork (command->value.Connection->second))
+    {
+      command->value.Connection->second->flags |= CMD_NO_FORK;
+      command->value.Connection->second->value.Simple->flags |= CMD_NO_FORK;
+    }
+}
+     
 /* How to force parse_and_execute () to clean up after itself. */
 void
 parse_and_execute_cleanup ()
@@ -375,6 +389,8 @@ parse_and_execute (string, from_file, flags)
 		  command->flags |= CMD_NO_FORK;
 		  command->value.Simple->flags |= CMD_NO_FORK;
 		}
+	      else if (command->type == cm_connection)
+		optimize_fork (command);
 #endif /* ONESHOT */
 
 	      /* See if this is a candidate for $( <file ). */

@@ -405,7 +405,7 @@ replace_history_entry (which, line, data)
    WHICH >= 0 means to replace that particular history entry's data, as
    long as it matches OLD. */
 void
-replace_history_data (which, old, new)
+_hs_replace_history_data (which, old, new)
      int which;
      histdata_t *old, *new;
 {
