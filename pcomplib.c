@@ -96,7 +96,7 @@ compspec_copy (cs)
 
   new = (COMPSPEC *)xmalloc (sizeof (COMPSPEC));
 
-  new->refcount = cs->refcount;
+  new->refcount = 1; 	/* was cs->refcount, but this is a fresh copy */
   new->actions = cs->actions;
   new->options = cs->options;
 

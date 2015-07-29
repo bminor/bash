@@ -76,6 +76,7 @@ extern int wait_signal_received;
 extern int last_command_exit_signal;
 
 procenv_t wait_intr_buf;
+int wait_intr_flag;
 
 /* Wait for the pid in LIST to stop or die.  If no arguments are given, then
    wait for all of the active background processes of the shell and return
@@ -87,6 +88,7 @@ procenv_t wait_intr_buf;
     { \
       interrupt_immediately = old_interrupt_immediately;\
       wait_signal_received = 0; \
+      wait_intr_flag = 0; \
       return (s);\
     } \
   while (0)
@@ -131,11 +133,14 @@ wait_builtin (list)
 
      We handle SIGINT here; it's the only one that needs to be treated
      specially (I think), since it's handled specially in {no,}jobs.c. */
+  wait_intr_flag = 1;
   code = setjmp_sigs (wait_intr_buf);
+
   if (code)
     {
       last_command_exit_signal = wait_signal_received;
       status = 128 + wait_signal_received;
+      wait_sigint_cleanup ();
       WAIT_RETURN (status);
     }
 

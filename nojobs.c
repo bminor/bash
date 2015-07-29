@@ -81,10 +81,13 @@ extern sh_builtin_func_t *this_shell_builtin;
 extern sigset_t top_level_mask;
 #endif
 extern procenv_t wait_intr_buf;
+extern int wait_intr_flag;
 extern int wait_signal_received;
 
 volatile pid_t last_made_pid = NO_PID;
 volatile pid_t last_asynchronous_pid = NO_PID;
+
+static int queue_sigchld, waiting_for_child;	/* dummy declarations */
 
 /* Call this when you start making children. */
 int already_making_children = 0;
@@ -702,6 +705,11 @@ wait_for_background_pids ()
 
   mark_dead_jobs_as_notified (1);
   cleanup_dead_jobs ();
+}
+
+void
+wait_sigint_cleanup ()
+{
 }
 
 /* Make OLD_SIGINT_HANDLER the SIGINT signal handler. */

@@ -8939,4 +8939,70 @@ sig.h
 alias.c
 	- ALIAS_HASH_BUCKETS: table size increased to 64
 
+				    7/7
+				    ---
+
+{jobs,nojobs}.c
+	- wait_sigint_cleanup: new function, to be called by longjmp targets
+	  for wait_intr_buf. Performs any necessary cleanup of internal waitchld
+	  state before going back to top level
+
+jobs.h
+	- wait_sigint_cleanup: new extern declaration
+
+builtins/wait.def
+	- wait_builtin: call wait_sigint_cleanup after longjmp back to
+	  wait_intr_buf on interrupt
+
 [bash-4.4-alpha frozen]
+
+				    7/7
+				    ---
+bashline.c
+	- attempt_shell_completion: when skipping assignment statements, don't
+	  skip past rl_point to find the word on which to perform programmable
+	  completion.  Fixes bug reported by Hanno Böck <hanno@hboeck.de>
+
+				   7/10
+				   ----
+
+pcomplib.c
+	- compspec_copy: set the refcount on the copy to 1, since it's a freshly
+	  allocated copy and there are no other pointers to it.  Fixes memory
+	  leak from gen_progcomp_completions
+
+lib/readline/complete.c
+	- printable_part: if the pathname passed is just `/', just return it
+	  instead of potentially reading before the `/'.  Fixes bug reported
+	  by Hanno Böck <hanno@hboeck.de>
+
+				   7/11
+				   ----
+support/man2html.c
+	- change calls to malloc to use xmalloc; provide standard xmalloc
+	  definition.  Report from Bill Parker <wp02855@gmail.com>
+
+builtins/wait.def
+	- wait_intr_flag: set to denote validity of wait_intr_buf as target
+	  for longjmp; reset by WAIT_RETURN macro; should always be 0 when
+	  wait_builtin returns
+
+quit.h
+	- CHECK_WAIT_INTR: now also checks wait_intr_flag to ensure valid state
+	  of wait_intr_buf before sh_longjmp
+
+{jobs,nojobs}.c
+	- wait_intr_flag: extern declaration for use by CHECK_WAIT_INTR
+
+sig.c
+	- wait_intr_flag: set back to 0 every place the shell resets state after
+	  a jump to top_level
+	- sigint_sighandler: only set wait_signal_received if wait_intr_flag
+	  indicates that the wait builtin has correctly set wait_intr_buf.
+	  Final fix for bug reported by Ondrej Oprala <ooprala@redhat.com>
+
+subst.c
+	- parameter_brace_expand: fix so that ${!vvv@} is not interpreted as
+	  introducing a `@' operator, but instead retains its meaning as all
+	  variables whose name begins with vvv.  Fixes bug reported by
+	  konsolebox <konsolebox@gmail.com>

@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2015 April 6<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2015 June 11<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -2536,6 +2536,17 @@ Similar to
 
 </FONT>
 used when the shell is invoked in POSIX mode.
+<DT><B>EXECIGNORE</B>
+
+<DD>
+A colon-separated list of extended glob patterns (see <B>Pattern Matching</B>)
+defining the list of filenames to be ignored by command search.
+Files whose full pathnames match one of these patterns are not considered
+executable files for the purposes of completion and command execution.
+This does not affect the behavior of the <B>[</B>, <B>test</B>, and <B>[[</B>
+commands.
+Use this variable to ignore shared library files that have the executable
+bit set, but are not executable files.
 <DT><B>FCEDIT</B>
 
 <DD>
@@ -8923,7 +8934,8 @@ No effect; the command does nothing beyond expanding
 <I>arguments</I>
 
 and performing any specified
-redirections.  A zero exit code is returned.
+redirections.
+The return status is zero.
 <DT><B> . </B> <I>filename</I> [<I>arguments</I>]<DD>
 
 <DT><B>source</B> <I>filename</I> [<I>arguments</I>]<DD>
@@ -8970,6 +8982,12 @@ is not searched.
 If any <I>arguments</I> are supplied, they become the positional
 parameters when <I>filename</I> is executed.  Otherwise the positional
 parameters are unchanged.
+If the <B>-T</B> option is enabled, <B>source</B> inherits any trap on
+<B>DEBUG</B>; if it is not, any <B>DEBUG</B> trap string is saved and
+restored around the call to <B>source</B>, and <B>source</B> unsets the
+<B>DEBUG</B> trap while it executes.
+If <B>-T</B> is not set, and the sourced file changes
+the <B>DEBUG</B> trap, the new value is retained when <B>source</B> completes.
 The return status is the status of the last command exited within
 the script (0 if no commands are executed), and false if
 <I>filename</I>
@@ -10525,8 +10543,9 @@ Delete the history entry at position <I>offset</I>.
 <DT><B>-a</B>
 
 <DD>
-Append the ``new'' history lines (history lines entered since the
-beginning of the current <B>bash</B> session) to the history file.
+Append the ``new'' history lines to the history file.
+These are history lines entered since the beginning of the current
+<B>bash</B> session, but not already appended to the history file.
 <DT><B>-n</B>
 
 <DD>
@@ -11194,8 +11213,8 @@ are supplied, the line read is assigned to the variable
 <FONT SIZE=-1><B>REPLY</B>.
 
 </FONT>
-The return code is zero, unless end-of-file is encountered, <B>read</B>
-times out (in which case the return code is greater than 128),
+The exit status is zero, unless end-of-file is encountered, <B>read</B>
+times out (in which case the status is greater than 128),
 a variable assignment error (such as assigning to a readonly variable) occurs,
 or an invalid file descriptor is supplied as the argument to <B>-u</B>.
 </DL>
@@ -12921,7 +12940,6 @@ which is in seconds;
 <B>-p</B>,
 
 which is in units of 512-byte blocks;
-and
 <B>-P</B>,
 
 <B>-T</B>,
@@ -12935,7 +12953,14 @@ and
 and
 <B>-u</B>,
 
-which are unscaled values.
+which are unscaled values;
+and, when in Posix mode,
+<B>-c</B>
+
+and
+<B>-f</B>,
+
+which are in 512-byte increments.
 The return status is 0 unless an invalid option or argument is supplied,
 or an error occurs while setting a new limit.
 </DL>
@@ -13352,7 +13377,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2015 April 6<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2015 June 11<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13458,6 +13483,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 06 April 2015 13:59:15 EDT
+Time: 10 July 2015 10:23:17 EDT
 </BODY>
 </HTML>

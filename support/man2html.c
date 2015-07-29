@@ -169,6 +169,19 @@ stralloc(int len)
 	return new;
 }
 
+void *
+xmalloc (size_t size)
+{
+	void *ret;
+
+	ret = malloc (size);
+	if (ret == 0) {
+		fprintf(stderr, "man2html: out of memory");
+		exit(EXIT_FAILURE);
+	}
+	return ret;
+}
+
 /*
  * Some systems don't have strdup so lets use our own - which can also
  * check for out of memory.
@@ -1252,9 +1265,9 @@ scan_format(char *c, TABLEROW ** result, int *maxcol)
 	if (*result) {
 		clear_table(*result);
 	}
-	layout = currow = (TABLEROW *) malloc(sizeof(TABLEROW));
+	layout = currow = (TABLEROW *) xmalloc(sizeof(TABLEROW));
 	currow->next = currow->prev = NULL;
-	currow->first = curfield = (TABLEITEM *) malloc(sizeof(TABLEITEM));
+	currow->first = curfield = (TABLEITEM *) xmalloc(sizeof(TABLEITEM));
 	*curfield = emptyfield;
 	while (*c && *c != '.') {
 		switch (*c) {
@@ -1273,7 +1286,7 @@ scan_format(char *c, TABLEROW ** result, int *maxcol)
 		case '^':
 		case '_':
 			if (curfield->align) {
-				curfield->next = (TABLEITEM *) malloc(sizeof(TABLEITEM));
+				curfield->next = (TABLEITEM *) xmalloc(sizeof(TABLEITEM));
 				curfield = curfield->next;
 				*curfield = emptyfield;
 			}
@@ -1353,11 +1366,11 @@ scan_format(char *c, TABLEROW ** result, int *maxcol)
 			break;
 		case ',':
 		case '\n':
-			currow->next = (TABLEROW *) malloc(sizeof(TABLEROW));
+			currow->next = (TABLEROW *) xmalloc(sizeof(TABLEROW));
 			currow->next->prev = currow;
 			currow = currow->next;
 			currow->next = NULL;
-			curfield = currow->first = (TABLEITEM *) malloc(sizeof(TABLEITEM));
+			curfield = currow->first = (TABLEITEM *) xmalloc(sizeof(TABLEITEM));
 			*curfield = emptyfield;
 			c++;
 			break;
@@ -1396,20 +1409,20 @@ next_row(TABLEROW * tr)
 	} else {
 		TABLEITEM *ti, *ti2;
 
-		tr->next = (TABLEROW *) malloc(sizeof(TABLEROW));
+		tr->next = (TABLEROW *) xmalloc(sizeof(TABLEROW));
 		tr->next->prev = tr;
 		ti = tr->first;
 		tr = tr->next;
 		tr->next = NULL;
 		if (ti)
-			tr->first = ti2 = (TABLEITEM *) malloc(sizeof(TABLEITEM));
+			tr->first = ti2 = (TABLEITEM *) xmalloc(sizeof(TABLEITEM));
 		else
 			tr->first = ti2 = NULL;
 		while (ti != ti2) {
 			*ti2 = *ti;
 			ti2->contents = NULL;
 			if ((ti = ti->next)) {
-				ti2->next = (TABLEITEM *) malloc(sizeof(TABLEITEM));
+				ti2->next = (TABLEITEM *) xmalloc(sizeof(TABLEITEM));
 			}
 			ti2 = ti2->next;
 		}
@@ -1500,17 +1513,17 @@ scan_table(char *c)
 		if ((*c == '_' || *c == '=') && (c[1] == itemsep || c[1] == '\n')) {
 			if (c[-1] == '\n' && c[1] == '\n') {
 				if (currow->prev) {
-					currow->prev->next = (TABLEROW *) malloc(sizeof(TABLEROW));
+					currow->prev->next = (TABLEROW *) xmalloc(sizeof(TABLEROW));
 					currow->prev->next->next = currow;
 					currow->prev->next->prev = currow->prev;
 					currow->prev = currow->prev->next;
 				} else {
-					currow->prev = layout = (TABLEROW *) malloc(sizeof(TABLEROW));
+					currow->prev = layout = (TABLEROW *) xmalloc(sizeof(TABLEROW));
 					currow->prev->prev = NULL;
 					currow->prev->next = currow;
 				}
 				curfield = currow->prev->first =
-					(TABLEITEM *) malloc(sizeof(TABLEITEM));
+					(TABLEITEM *) xmalloc(sizeof(TABLEITEM));
 				*curfield = emptyfield;
 				curfield->align = *c;
 				curfield->colspan = maxcol;
@@ -2245,7 +2258,7 @@ scan_request(char *c)
 				while (de && de->nr != i)
 					de = de->next;
 				if (!de) {
-					de = (STRDEF *) malloc(sizeof(STRDEF));
+					de = (STRDEF *) xmalloc(sizeof(STRDEF));
 					de->nr = i;
 					de->slen = 0;
 					de->next = strdef;
@@ -2294,7 +2307,7 @@ scan_request(char *c)
 				if (!de) {
 					char   *h;
 
-					de = (STRDEF *) malloc(sizeof(STRDEF));
+					de = (STRDEF *) xmalloc(sizeof(STRDEF));
 					de->nr = i;
 					de->slen = 0;
 					de->next = strdef;
@@ -2987,7 +3000,7 @@ scan_request(char *c)
 				while (intd && intd->nr != i)
 					intd = intd->next;
 				if (!intd) {
-					intd = (INTDEF *) malloc(sizeof(INTDEF));
+					intd = (INTDEF *) xmalloc(sizeof(INTDEF));
 					intd->nr = i;
 					intd->val = 0;
 					intd->incr = 0;
@@ -3060,7 +3073,7 @@ scan_request(char *c)
 							free(de->st);
 						de->st = h;
 					} else {
-						de = (STRDEF *) malloc(sizeof(STRDEF));
+						de = (STRDEF *) xmalloc(sizeof(STRDEF));
 						de->nr = i;
 						de->next = defdef;
 						de->st = h;
@@ -3973,6 +3986,7 @@ scan_troff_mandoc(char *c, int san, char **result)
 	return ret;
 }
 
+int
 main(int argc, char **argv)
 {
 	FILE   *f;

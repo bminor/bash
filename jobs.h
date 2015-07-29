@@ -221,6 +221,8 @@ extern int wait_for __P((pid_t));
 extern int wait_for_job __P((int));
 extern int wait_for_any_job __P((void));
 
+extern void wait_sigint_cleanup __P((void));
+
 extern void notify_and_cleanup __P((void));
 extern void reap_dead_jobs __P((void));
 extern int start_job __P((int, int));

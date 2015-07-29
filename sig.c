@@ -67,6 +67,7 @@ extern int history_lines_this_session;
 #endif
 extern int no_line_editing;
 extern int wait_signal_received;
+extern int wait_intr_flag;
 extern sh_builtin_func_t *this_shell_builtin;
 
 extern void initialize_siglist ();
@@ -389,7 +390,7 @@ top_level_cleanup ()
 
   run_unwind_protects ();
   loop_level = continuing = breaking = funcnest = 0;
-  executing_list = comsub_ignore_return = return_catch_flag = 0;
+  executing_list = comsub_ignore_return = return_catch_flag = wait_intr_flag = 0;
 }
 
 /* What to do when we've been interrupted, and it is safe to handle it. */
@@ -447,7 +448,7 @@ throw_to_top_level ()
 
   run_unwind_protects ();
   loop_level = continuing = breaking = funcnest = 0;
-  executing_list = comsub_ignore_return = return_catch_flag = 0;
+  executing_list = comsub_ignore_return = return_catch_flag = wait_intr_flag = 0;
 
   if (interactive && print_newline)
     {
@@ -589,7 +590,7 @@ termsig_handler (sig)
 
   /* Reset execution context */
   loop_level = continuing = breaking = funcnest = 0;
-  executing_list = comsub_ignore_return = return_catch_flag = 0;
+  executing_list = comsub_ignore_return = return_catch_flag = wait_intr_flag = 0;
 
   run_exit_trap ();	/* XXX - run exit trap possibly in signal context? */
   set_signal_handler (sig, SIG_DFL);
@@ -615,7 +616,8 @@ sigint_sighandler (sig)
   if (this_shell_builtin && this_shell_builtin == wait_builtin)
     {
       last_command_exit_value = 128 + sig;
-      wait_signal_received = sig;
+      if (wait_intr_flag)
+	wait_signal_received = sig;
       SIGRETURN (0);
     }
       

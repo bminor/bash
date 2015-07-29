@@ -165,6 +165,7 @@ extern sh_builtin_func_t *this_shell_builtin;
 extern char *shell_name, *this_command_name;
 extern sigset_t top_level_mask;
 extern procenv_t wait_intr_buf;
+extern int wait_intr_flag;
 extern int wait_signal_received;
 extern WORD_LIST *subst_assign_varlist;
 
@@ -2301,6 +2302,14 @@ static int wait_sigint_received;
 static int child_caught_sigint;
 static int waiting_for_child;
 
+/* Clean up state after longjmp to wait_intr_buf */
+void
+wait_sigint_cleanup ()
+{
+  queue_sigchld = 0;
+  waiting_for_child = 0;
+}
+
 static void
 restore_sigint_handler ()
 {
@@ -3317,6 +3326,10 @@ waitchld (wpid, block)
 #if 0
 if (wpid != -1 && block)
   itrace("waitchld: blocking waitpid returns %d", pid);
+#endif
+#if 0
+if (wpid != -1)
+  itrace("waitchld: %s waitpid returns %d", block?"blocking":"non-blocking", pid);
 #endif
       /* WCONTINUED may be rejected by waitpid as invalid even when defined */
       if (wcontinued && pid < 0 && errno == EINVAL)

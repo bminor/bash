@@ -7592,6 +7592,13 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
       name[1] = '\0';
       t_index++;
     }
+  else if (*name == '!' && t_index > sindex && string[t_index] == '@' && string[t_index+1] == '}')
+    {
+      name = (char *)xrealloc (name, t_index - sindex + 2);
+      name[t_index - sindex] = '@';
+      name[t_index - sindex + 1] = '\0';
+      t_index++;
+    }
 
   ret = 0;
   tflag = 0;

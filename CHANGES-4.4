@@ -323,6 +323,10 @@ vvvv. Fixed a bug that caused the completion code to read past the end of the
 wwww. Fixed a bug that caused case statements within loops contained in a
       command substitution to be parsed incorrectly.
 
+xxxx. Fixed a bug that could cause SIGCHLD handling to be delayed after
+      running `wait' with no arguments and interrupting it with ^C without
+      a trap handler installed.
+
 2.  Changes to Readline
 
 a.  A bug that caused vi-mode `.' to be unable to redo `c', `d', and `y'
