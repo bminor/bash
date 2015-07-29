@@ -427,6 +427,7 @@ extern int _rl_vi_textmod_command PARAMS((int));
 extern int _rl_vi_motion_command PARAMS((int));
 extern void _rl_vi_done_inserting PARAMS((void));
 extern int _rl_vi_domove_callback PARAMS((_rl_vimotion_cxt *));
+extern int _rl_vi_domove_motion_cleanup PARAMS((int, _rl_vimotion_cxt *));
 
 /*************************************************************************
  * Undocumented private variables					 *

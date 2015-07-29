@@ -3103,7 +3103,7 @@ directory_exists (dirname)
   struct stat sb;
 
   /* First, dequote the directory name */
-  new_dirname = bash_dequote_filename (dirname, rl_completion_quote_character);
+  new_dirname = bash_dequote_filename ((char *)dirname, rl_completion_quote_character);
   dirlen = STRLEN (new_dirname);
   if (new_dirname[dirlen - 1] == '/')
     new_dirname[dirlen - 1] = '\0';

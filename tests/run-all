@@ -1,5 +1,13 @@
 #! /bin/sh
 
+: ${TMPDIR:=/tmp}
+export TMPDIR
+
+BASH_TMPOUT=/tmp/xx	# for now
+export BASH_TMPOUT
+
+trap 'rm -f $BASH_TMPOUT' 0
+
 PATH=.:$PATH	# just to get recho/zecho/printenv if not run via `make tests'
 export PATH
 
@@ -13,7 +21,7 @@ export THIS_SH
 
 ${THIS_SH} ./version
 
-rm -f /tmp/xx
+rm -f ${BASH_TMPOUT}
 
 echo Any output from any test, unless otherwise noted, indicates a possible anomaly
 

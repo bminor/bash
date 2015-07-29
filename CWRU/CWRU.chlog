@@ -9072,7 +9072,8 @@ lib/readline/complete.c
 				   7/17
 				   ----
 lib/readline/readline.[ch]
-	- rl_readline_state: now unsigned long
+	- rl_readline_state: now unsigned long, prepare for more than 32 states
+
 
 				   7/18
 				   ----
@@ -9080,3 +9081,87 @@ lib/readline/history.h
 	- history_offset: now declared here, was always a global variable
 	- copy_history_entry: now declared here, part of the public interface
 	- alloc_history_entry: now declared here, part of the public interface
+
+				   7/20
+				   ----
+lib/readline/readline.h
+	- RL_STATE_CHARSEARCH: new state, for vi mode character search.  Was
+	  previously handled by simply setting _rl_callback_func
+
+lib/readline/vi_mode.c
+	- rl_domove_motion_callback: split into two functions, remaining code
+	  after _rl_dispatch call goes into new function
+	  _rl_vi_domove_motion_cleanup
+	- rl_vi_char_search: set RL_STATE_CHARSEARCH
+	- rl_vi_char_search: sets `i2' member of callback data to the key used
+	  to invoke the char search
+	- _rl_vi_callback_char_search: unset RL_STATE_CHARSEARCH after reading
+	  the character to find
+	- _rl_vi_domove_motion_cleanup: make sure RL_STATE_VIMOTION is unset in
+	  all cases where this function returns
+	- _rl_vi_domove_motion_cleanup: use `end' member of vi motion context
+	  as value of rl_end to restore after adding blank at end of line in
+	  rl_domove_motion_callback; avoids need to keep `old_end' and somehow
+	  pass it between the two functions
+
+lib/readline/rlprivate.h
+	- _rl_vi_domove_motion_cleanup: new extern declaration
+
+lib/readline/callback.c
+	- rl_callback_read_char: handle RL_STATE_CHARSEARCH, including case
+	  where char search is vi motion command for d/c/y/m and RL_STATE_VIMOTION
+	  is set when this is called.  Last of set of fixes for bug reported
+	  by Carlos Pita <carlosjosepita@gmail.com> with vi-mode `dty' command
+	  in callback mode
+
+				   7/21
+				   ----
+subst.c
+	- command_substitute, process_substitute: add QUIT call in the child
+	  after restoring original signal handlers to catch post-fork SIGINT
+	  or terminating signal
+
+jobs.c,nojobs.c
+	- make_child: after forking, clear interrupt_state in child
+	  before restoring signal mask so children get their own set of
+	  interrupts
+
+				   7/22
+				   ----
+lib/sh/shquote.c
+	- sh_double_quote: since all uses of the return value from this function
+	  are for display and not subject to subsequent expansion, we don't
+	  need to protect CTLESC and CTLNUL with CTLESC.  Bug report and fix
+	  from isabella parakiss <izaberina@gmail.com>
+
+parse.y
+	- decode_prompt_string: need to protect literal instances of CTLESC
+	  and CTLNUL with CTLESC, even if they are not coming out of one of
+	  the backslash-expansions
+
+subst.c
+	- make_internal_declare: fixed memory leak; make_internal_declare should
+	  free the memory it allocates to construct the word list.  From Red
+	  Hat bug 1245233; https://bugzilla.redhat.com/show_bug.cgi?id=1245233
+
+lib/readline/readline.c
+	- _rl_dispatch_subseq: when checking whether an ESC in vi insert mode
+	  should be treated as part of a key sequence or as a single char,
+	  make sure we are getting input from the keyboard before we check
+	  _rl_input_queued().  If we are getting input from a macro, this
+	  causes a needless delay.  Report from Carlos Pita
+	  <carlosjosepita@gmail.com>
+
+				   7/23
+				   ----
+input.c
+	- save_bash_input: before checking to see whether or not a new fd has a
+	  stale associated buffer, make sure that the new fd is within bounds.
+	  Bug report and fix from Alexey Makhalov <makhaloff@gmail.com>
+
+
+				   7/24
+				   ----
+doc/{bash.1,bashref.texi}
+	- note that the `return' builtin accepts arguments beginning with `-'
+	  without requiring `--'

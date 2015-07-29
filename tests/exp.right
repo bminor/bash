@@ -218,3 +218,15 @@ argv[3] = <^C>
 argv[4] = <^C>
 ./exp7.sub: line 10: INFORM: dequote_string: string with bare CTLESC
 argv[1] = <^A>
+argv[1] = <x^Ay^?z>
+argv[1] = <x^Ay^?z>
+declare -- var="xyz"
+argv[1] = <declare>
+argv[2] = <-->
+argv[3] = <var="x^Ay^?z">
+declare -- var="x\001y\177z"$
+argv[1] = <$'x\001y\177z'>
+argv[1] = <x^Ay^?z>
+var=$'x\001y\177z'$
+argv[1] = <x^Ay^?z>
+declare -a array=([0]="x\001y\177z")$

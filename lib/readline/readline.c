@@ -916,8 +916,10 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	     default) or a timeout determined by the value of `keyseq-timeout' */
 	  /* _rl_keyseq_timeout specified in milliseconds; _rl_input_queued
 	     takes microseconds, so multiply by 1000 */
-	  if (rl_editing_mode == vi_mode && key == ESC && map == vi_insertion_keymap
-	      && _rl_input_queued ((_rl_keyseq_timeout > 0) ? _rl_keyseq_timeout*1000 : 0) == 0)
+	  if (rl_editing_mode == vi_mode && key == ESC && map == vi_insertion_keymap &&
+	      (RL_ISSTATE (RL_STATE_INPUTPENDING|RL_STATE_MACROINPUT) == 0) &&
+              _rl_pushed_input_available () == 0 &&
+	      _rl_input_queued ((_rl_keyseq_timeout > 0) ? _rl_keyseq_timeout*1000 : 0) == 0)
 	    return (_rl_dispatch (ANYOTHERKEY, FUNCTION_TO_KEYMAP (map, key)));
 #endif
 
@@ -954,7 +956,7 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	  /* Tentative inter-character timeout for potential multi-key
 	     sequences?  If no input within timeout, abort sequence and
 	     act as if we got non-matching input. */
-	  /* _rl_keyseq_timeout specified in milliseconds; _rl_input_queued
+	  /* _rl_keyseq_timeout specified in milliseconds; _rl_input_queued[B
 	     takes microseconds, so multiply by 1000 */
 	  if (_rl_keyseq_timeout > 0 &&
 	  	(RL_ISSTATE (RL_STATE_INPUTPENDING|RL_STATE_MACROINPUT) == 0) &&

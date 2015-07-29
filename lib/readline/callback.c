@@ -161,6 +161,36 @@ rl_callback_read_char ()
 	  CALLBACK_READ_RETURN ();
 	}
 #if defined (VI_MODE)
+      /* States that can occur while in state VIMOTION have to be checked
+	 before RL_STATE_VIMOTION */
+      else if (RL_ISSTATE (RL_STATE_CHARSEARCH))
+	{
+	  int k;
+
+	  k = _rl_callback_data->i2;
+
+	  eof = (*_rl_callback_func) (_rl_callback_data);
+	  /* If the function `deregisters' itself, make sure the data is
+	     cleaned up. */
+	  if (_rl_callback_func == 0)	/* XXX - just sanity check */
+	    {
+	      if (_rl_callback_data)
+		{
+		  _rl_callback_data_dispose (_rl_callback_data);
+		  _rl_callback_data = 0;
+		}
+	    }
+
+	  /* Messy case where vi motion command can be char search */
+	  if (RL_ISSTATE (RL_STATE_VIMOTION))
+	    {
+	      _rl_vi_domove_motion_cleanup (k, _rl_vimvcxt);
+	      _rl_internal_char_cleanup ();
+	      CALLBACK_READ_RETURN ();	      
+	    }
+
+	  _rl_internal_char_cleanup ();
+	}
       else if (RL_ISSTATE (RL_STATE_VIMOTION))
 	{
 	  eof = _rl_vi_domove_callback (_rl_vimvcxt);
@@ -311,6 +341,8 @@ rl_callback_sigcleanup ()
     }
   else if (RL_ISSTATE (RL_STATE_MULTIKEY))
     RL_UNSETSTATE (RL_STATE_MULTIKEY);
+  if (RL_ISSTATE (RL_STATE_CHARSEARCH))
+    RL_UNSETSTATE (RL_STATE_CHARSEARCH);
 
   _rl_callback_func = 0;
 }

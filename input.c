@@ -272,7 +272,7 @@ save_bash_input (fd, new_fd)
       return -1;
     }
 
-  if (buffers[nfd])
+  if (nfd < nbuffers && buffers[nfd])
     {
       /* What's this?  A stray buffer without an associated open file
 	 descriptor?  Free up the buffer and report the error. */

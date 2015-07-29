@@ -5629,6 +5629,10 @@ not_escape:
       else
 	{
 	  RESIZE_MALLOCED_BUFFER (result, result_index, 3, result_size, PROMPT_GROWTH);
+	  /* dequote_string should take care of removing this if we are not
+	     performing the rest of the word expansions. */
+	  if (c == CTLESC || c == CTLNUL)
+	    result[result_index++] = CTLESC;
 	  result[result_index++] = c;
 	  result[result_index] = '\0';
 	}

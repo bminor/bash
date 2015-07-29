@@ -1096,28 +1096,55 @@ static int
 rl_domove_motion_callback (m)
      _rl_vimotion_cxt *m;
 {
-  int c, save, r;
-  int old_end;
+  int c;
 
   _rl_vi_last_motion = c = m->motion;
 
   /* Append a blank character temporarily so that the motion routines
-     work right at the end of the line. */
-  old_end = rl_end;
+     work right at the end of the line.  Original value of rl_end is saved
+     as m->end. */
   rl_line_buffer[rl_end++] = ' ';
   rl_line_buffer[rl_end] = '\0';
 
   _rl_dispatch (c, _rl_keymap);
 
-  /* Remove the blank that we added. */
-  rl_end = old_end;
+#if defined (READLINE_CALLBACKS)
+  if (RL_ISSTATE (RL_STATE_CALLBACK))
+    {
+      /* Messy case where char search can be vi motion command; see rest of
+	 details in callback.c.  vi_char_search and callback_char_search just
+	 set and unset the CHARSEARCH state.  This is where any vi motion
+	 command that needs to set its own state should be handled, with any
+	 corresponding code to manage that state in callback.c */
+      if (RL_ISSTATE (RL_STATE_CHARSEARCH))
+	return 0;
+      else
+	return (_rl_vi_domove_motion_cleanup (c, m));
+    }
+#endif
+
+  return (_rl_vi_domove_motion_cleanup (c, m));
+}
+
+int
+_rl_vi_domove_motion_cleanup (c, m)
+     int c;
+     _rl_vimotion_cxt *m;
+{
+  int r;
+
+  /* Remove the blank that we added in rl_domove_motion_callback. */
+  rl_end = m->end;
   rl_line_buffer[rl_end] = '\0';
   if (rl_point > rl_end)
     rl_point = rl_end;
 
   /* No change in position means the command failed. */
   if (rl_mark == rl_point)
-    return (-1);
+    {
+      RL_UNSETSTATE (RL_STATE_VIMOTION);
+      return (-1);
+    }
 
   /* rl_vi_f[wW]ord () leaves the cursor on the first character of the next
      word.  If we are not at the end of the line, and we are on a
@@ -1625,7 +1652,10 @@ _rl_vi_callback_char_search (data)
 #endif
 
   if (c <= 0)
-    return -1;
+    {
+      RL_UNSETSTATE (RL_STATE_CHARSEARCH);
+      return -1;
+    }
 
 #if !defined (HANDLE_MULTIBYTE)
   _rl_vi_last_search_char = c;
@@ -1633,6 +1663,7 @@ _rl_vi_callback_char_search (data)
 
   _rl_callback_func = 0;
   _rl_want_redisplay = 1;
+  RL_UNSETSTATE (RL_STATE_CHARSEARCH);
 
 #if defined (HANDLE_MULTIBYTE)
   return (_rl_char_search_internal (data->count, _rl_cs_dir, _rl_vi_last_search_mbchar, _rl_vi_last_search_mblen));
@@ -1697,7 +1728,9 @@ rl_vi_char_search (count, key)
 	{
 	  _rl_callback_data = _rl_callback_data_alloc (count);
 	  _rl_callback_data->i1 = _rl_cs_dir;
+	  _rl_callback_data->i2 = key;
 	  _rl_callback_func = _rl_vi_callback_char_search;
+	  RL_SETSTATE (RL_STATE_CHARSEARCH);
 	  return (0);
 	}
 #endif

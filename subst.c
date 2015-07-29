@@ -5453,6 +5453,7 @@ process_substitute (string, open_for_read_in_child)
       free_pushed_string_input ();
       /* Cancel traps, in trap.c. */
       restore_original_signals ();	/* XXX - what about special builtins? bash-4.2 */
+      QUIT;	/* catch any interrupts we got post-fork */
       setup_async_signals ();
       subshell_environment |= SUBSHELL_COMSUB|SUBSHELL_PROCSUB;
     }
@@ -5766,6 +5767,7 @@ command_substitute (string, quoted)
 	 trap strings.  Set a flag noting that we have to free the
 	 trap strings if we run trap to change a signal disposition. */
       reset_signal_handlers ();
+      QUIT;	/* catch any interrupts we got post-fork */
       subshell_environment |= SUBSHELL_RESETTRAP;
     }
 
@@ -10004,7 +10006,7 @@ make_internal_declare (word, option)
      char *word;
      char *option;
 {
-  int t;
+  int t, r;
   WORD_LIST *wl;
   WORD_DESC *w;
 
@@ -10016,7 +10018,10 @@ make_internal_declare (word, option)
   wl = make_word_list (w, (WORD_LIST *)NULL);
   wl = make_word_list (make_word (option), wl);
 
-  return (declare_builtin (wl));  
+  r = declare_builtin (wl);
+
+  dispose_words (wl);
+  return r;
 }  
 #endif
 

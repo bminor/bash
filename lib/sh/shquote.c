@@ -148,8 +148,11 @@ sh_double_quote (string)
       /* Backslash-newline disappears within double quotes, so don't add one. */
       if ((sh_syntaxtab[c] & CBSDQUOTE) && c != '\n')
 	*r++ = '\\';
+#if 0
+      /* Assume that the string will not be further expanded. */
       else if (c == CTLESC || c == CTLNUL)
 	*r++ = CTLESC;		/* could be '\\'? */
+#endif
 
       *r++ = c;
     }

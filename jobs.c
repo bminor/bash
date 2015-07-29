@@ -1841,6 +1841,8 @@ make_child (command, async_p)
       unset_bash_input (0);
 #endif /* BUFFERED_INPUT */
 
+      CLRINTERRUPT;	/* XXX - children have their own interrupt state */
+
       /* Restore top-level signal mask. */
       sigprocmask (SIG_SETMASK, &top_level_mask, (sigset_t *)NULL);
 

@@ -1,0 +1,17 @@
+var=$'x\001y\177z'
+
+recho "$var"
+recho $var
+
+declare -p var
+recho $(declare -p var)
+
+declare -p var | sed -n l
+
+recho ${var@Q}
+recho ${var@P}
+echo ${var@A} | sed -n l
+
+array=( "$var" )
+recho ${array[@]}
+echo ${array[@]@A} | sed -n l
