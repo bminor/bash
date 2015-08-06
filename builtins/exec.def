@@ -210,6 +210,8 @@ exec_builtin (list)
 #if defined (JOB_CONTROL)
   if (subshell_environment == 0)
     end_job_control ();
+  if (interactive || job_control)
+    default_tty_job_signals ();		/* undo initialize_job_signals */
 #endif /* JOB_CONTROL */
 
   exit_value = shell_execve (command, args, env);

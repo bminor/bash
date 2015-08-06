@@ -4601,7 +4601,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
 	{
 	  error_trap = savestring (error_trap);
 	  add_unwind_protect (xfree, error_trap);
-	  add_unwind_protect (set_error_trap, error_trap);
+	  add_unwind_protect (maybe_set_error_trap, error_trap);
 	}
       restore_default_signal (ERROR_TRAP);
     }

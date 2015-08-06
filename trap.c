@@ -606,6 +606,13 @@ set_error_trap (command)
 }
 
 void
+maybe_set_error_trap (command)
+     char *command;
+{
+  trap_if_untrapped (ERROR_TRAP, command);
+}
+
+void
 set_return_trap (command)
      char *command;
 {

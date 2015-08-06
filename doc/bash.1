@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Jul 24 11:33:12 EDT 2015
+.\"	Last Change: Fri Jul 31 11:16:37 EDT 2015
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2015 July 24" "GNU Bash 4.4"
+.TH BASH 1 "2015 July 31" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -477,8 +477,8 @@ A character that, when unquoted, separates words.  One of the following:
 .br
 .RS
 .PP
-.if t \fB|  &  ;  (  )  <  >  space  tab\fP
-.if n \fB|  & ; ( ) < > space tab\fP
+.if t \fB|  &  ;  (  )  <  >  space  tab  newline\fP
+.if n \fB|  & ; ( ) < > space tab newline\fP
 .RE
 .PP
 .TP
@@ -7589,8 +7589,8 @@ The
 option inhibits the display of function definitions; only the
 function name and attributes are printed.
 If the \fBextdebug\fP shell option is enabled using \fBshopt\fP,
-the source file name and line number where the function is defined
-are displayed as well.  The
+the source file name and line number where each \fIname\fP
+is defined are displayed as well.  The
 .B \-F
 option implies
 .BR \-f .

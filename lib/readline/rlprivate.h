@@ -125,10 +125,11 @@ typedef struct __rl_keyseq_context
   int flags;
   int subseq_arg;
   int subseq_retval;		/* XXX */
-  Keymap dmap;
-
-  Keymap oldmap;
   int okey;
+
+  Keymap dmap;
+  Keymap oldmap;
+
   struct __rl_keyseq_context *ocxt;
   int childval;
 } _rl_keyseq_cxt;

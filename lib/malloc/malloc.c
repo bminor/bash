@@ -866,8 +866,8 @@ internal_free (mem, file, line, flags)
       p = (union mhead *) ap - 1;
     }
 
-#if defined (MALLOC_TRACE) || defined (MALLOC_REGISTER)
-  if (malloc_trace || malloc_register)
+#if defined (MALLOC_TRACE) || defined (MALLOC_REGISTER) || defined (MALLOC_WATCH)
+  if (malloc_trace || malloc_register || _malloc_nwatch > 0)
     ubytes = p->mh_nbytes;
 #endif
 

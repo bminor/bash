@@ -98,6 +98,7 @@ extern char *strerror ();
 
 static int validate_path ();
 
+int
 pathchk_builtin (list)
      WORD_LIST *list;
 {
@@ -323,7 +324,7 @@ validate_path (path, portability)
       if (!last_elem)
 	{
 	  exists = dir_ok (path);
-	  if (dir_ok == 0)
+	  if (exists == 0)
 	    {
 	      free (parent);
 	      return 1;
@@ -370,8 +371,8 @@ validate_path (path, portability)
   free (parent);
   if (strlen (path) > path_max)
     {
-      builtin_error ("path `%s' has length %d; exceeds limit of %d",
-	     path, strlen (path), path_max);
+      builtin_error ("path `%s' has length %lu; exceeds limit of %d",
+	     path, (unsigned long)strlen (path), path_max);
       return 1;
     }
 

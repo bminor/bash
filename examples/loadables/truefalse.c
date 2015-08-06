@@ -25,12 +25,14 @@
 #include "builtins.h"
 #include "common.h"
 
+int
 true_builtin (list)
      WORD_LIST *list;
 {
   return EXECUTION_SUCCESS;
 }
 
+int
 false_builtin (list)
      WORD_LIST *list;
 {

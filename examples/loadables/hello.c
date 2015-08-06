@@ -29,9 +29,7 @@
 
 #include <stdio.h>
 
-#include "builtins.h"
-#include "shell.h"
-#include "bashgetopt.h"
+#include "loadables.h"
 
 /* A builtin `xxx' is normally implemented with an `xxx_builtin' function.
    If you're converting a command that uses the normal Unix argc/argv

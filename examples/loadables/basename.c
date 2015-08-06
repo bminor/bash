@@ -31,6 +31,7 @@
 #include "shell.h"
 #include "common.h"
 
+int
 basename_builtin (list)
      WORD_LIST *list;
 {

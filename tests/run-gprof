@@ -1,4 +1,11 @@
 #! /bin/sh
+: ${TMPDIR:=/tmp}
+export TMPDIR
+
+BASH_TSTOUT=/tmp/xx	# for now
+export BASH_TSTOUT
+
+trap 'rm -f $BASH_TSTOUT' 0
 
 PATH=.:$PATH	# just to get recho/zecho/printenv if not run via `make tests'
 export PATH
@@ -15,7 +22,7 @@ rm -f gmon.sum
 
 ${THIS_SH} ./version
 
-rm -f /tmp/xx
+rm -f "$BASH_TSTOUT"
 
 # prime the pump; gprof complains if gmon.sum is empty
 [ -f bash.gmon ] && gprof -s ${THIS_SH} bash.gmon >/dev/null

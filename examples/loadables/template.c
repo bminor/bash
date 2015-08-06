@@ -11,9 +11,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include "builtins.h"
-#include "shell.h"
-#include "bashgetopt.h"
+#include "loadables.h"
 
 #if !defined (errno)
 extern int errno;
@@ -21,6 +19,7 @@ extern int errno;
 
 extern char *strerror ();
 
+int
 template_builtin (list)
      WORD_LIST *list;
 {

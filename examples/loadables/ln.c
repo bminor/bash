@@ -50,6 +50,7 @@ typedef int unix_link_syscall_t __P((const char *, const char *));
 static unix_link_syscall_t *linkfn;
 static int dolink ();
 
+int
 ln_builtin (list)
      WORD_LIST *list;
 {

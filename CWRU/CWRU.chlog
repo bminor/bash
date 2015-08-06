@@ -9165,3 +9165,50 @@ input.c
 doc/{bash.1,bashref.texi}
 	- note that the `return' builtin accepts arguments beginning with `-'
 	  without requiring `--'
+
+				   7/27
+				   ----
+examples/loadables/Makefile.in
+	- add variables and targets to support `make install'; installs supported
+	  builtins in $(libdir)/bash
+
+				   7/28
+				   ----
+lib/readline/{readline,rlprivate}.h, lib/readline/display.c
+	- rearrange some structure members for better alignment and to reduce
+	  padding.  Fix from <git-dpa@aegee.org>
+
+tests/run-*
+	- use BASH_TSTOUT instead of hardcoded /tmp/xx as output file
+
+trap.[ch]
+	- maybe_set_error_trap: set a trap for the ERR trap if it is not already
+	  trapped; similar to maybe_set_debug_trap back from 4/10
+
+lib/malloc/malloc.c
+	- internal_free: make sure `ubytes' is initialized if MALLOC_WATCH is defined
+	  and we'll be passing it to _malloc_ckwatch.  Report from Flavio Medeiros
+	  <flaviomotamederios@gmail.com>
+
+execute_cmd.c
+	- execute_function: use maybe_set_error_trap in the same way as
+	  maybe_set_debug_trap.  Fixes bug reported by David Waddell
+	  <David.Waddell@owmobility.com>
+
+				   7/29
+				   ----
+jobs.c
+	- wait_for: no longer need to call job_signal_status when checking whether
+	  a comsub shell reaped a child that died due to SIGINT; code now uses
+	  child_caught_sigint
+
+				   7/30
+				   ----
+builtins/exec.def
+	- exec_builtin: after call to restore_original_signals, need to call
+	  default_tty_job_signals to undo changes done by initialize_job_signals.
+	  Fix for problem reported by Andreas Schwab <schwab@suse.de>
+
+doc/{bash.1,bashref.texi}
+	- clarify definition of metacharacter to explicitly include newline;
+	  prompted by report from George Gallo <georgeggallo@gmail.com>

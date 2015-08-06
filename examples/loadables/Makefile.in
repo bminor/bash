@@ -27,11 +27,21 @@ infodir = @infodir@
 includedir = @includedir@
 
 datarootdir = @datarootdir@
+loadablesdir = ${libdir}/bash
 
 topdir = @top_srcdir@
 BUILD_DIR = @BUILD_DIR@
 srcdir = @srcdir@
 VPATH = @srcdir@
+
+# Support an alternate destination root directory for package building
+DESTDIR =
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALLMODE= -m 0755
 
 @SET_MAKE@
 CC = @CC@
@@ -51,6 +61,8 @@ LOCAL_DEFS = @LOCAL_DEFS@
 CPPFLAGS = @CPPFLAGS@
 
 BASHINCDIR = ${topdir}/include
+
+SUPPORT_SRC = $(topdir)/support/
 
 LIBBUILD = ${BUILD_DIR}/lib
 
@@ -75,7 +87,7 @@ SHOBJ_XLDFLAGS = @SHOBJ_XLDFLAGS@
 SHOBJ_LIBS = @SHOBJ_LIBS@
 SHOBJ_STATUS = @SHOBJ_STATUS@
 
-INC = -I. -I.. -I$(topdir) -I$(topdir)/lib -I$(topdir)/builtins \
+INC = -I. -I.. -I$(topdir) -I$(topdir)/lib -I$(topdir)/builtins -I${srcdir} \
       -I$(BASHINCDIR) -I$(BUILD_DIR) -I$(LIBBUILD) \
       -I$(BUILD_DIR)/builtins $(INTL_INC)
 
@@ -83,10 +95,10 @@ INC = -I. -I.. -I$(topdir) -I$(topdir)/lib -I$(topdir)/builtins \
 	$(SHOBJ_CC) $(SHOBJ_CFLAGS) $(CCFLAGS) $(INC) -c -o $@ $<
 
 
-ALLPROG = print truefalse sleep pushd finfo logname basename dirname \
+ALLPROG = print truefalse sleep finfo logname basename dirname \
 	  tty pathchk tee head mkdir rmdir printenv id whoami \
 	  uname sync push ln unlink realpath strftime mypid
-OTHERPROG = necho hello cat
+OTHERPROG = necho hello cat pushd
 
 all:	$(SHOBJ_STATUS)
 
@@ -209,6 +221,17 @@ mostlyclean:	clean
 distclean maintainer-clean: clean
 	$(RM) Makefile pushd.c
 	-( cd perl && ${MAKE} ${MFLAGS} $@ )
+
+installdirs:
+	@${SHELL} $(SUPPORT_SRC)mkinstalldirs $(DESTDIR)$(loadablesdir)
+
+install:	all installdirs
+	@echo installing example loadable builtins in $(DESTDIR)${loadablesdir}
+	@for prog in ${ALLPROG}; do \
+		echo $$prog ; \
+		$(INSTALL_PROGRAM) $(INSTALLMODE) $$prog $(DESTDIR)$(loadablesdir)/$$prog ;\
+	done
+
 
 print.o: print.c
 truefalse.o: truefalse.c

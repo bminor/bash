@@ -169,6 +169,8 @@ extern int wait_intr_flag;
 extern int wait_signal_received;
 extern WORD_LIST *subst_assign_varlist;
 
+extern SigHandler **original_signals;
+
 static struct jobstats zerojs = { -1L, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NO_JOB, NO_JOB, 0, 0 };
 struct jobstats js = { -1L, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NO_JOB, NO_JOB, 0, 0 };
 
@@ -2745,7 +2747,7 @@ if (job == NO_JOB)
 	     something like a while loop or a for loop, simulate getting
 	     and being killed by the SIGINT to pass the status back to our
 	     parent. */
-	  s = job_signal_status (job);
+/*	  s = job_signal_status (job);		/* XXX - no longer needed */
 
 	  if (child_caught_sigint == 0 && signal_is_trapped (SIGINT) == 0)
 	    {
@@ -3645,7 +3647,7 @@ set_job_status_and_cleanup (job)
 		 In this case, we have to fix things up.  What a crock. */
 	      if (temp_handler == trap_handler && signal_is_trapped (SIGINT) == 0)
 		  temp_handler = trap_to_sighandler (SIGINT);
-		restore_sigint_handler ();
+	      restore_sigint_handler ();
 	      if (temp_handler == SIG_DFL)
 		termsig_handler (SIGINT);	/* XXX */
 	      else if (temp_handler != SIG_IGN)

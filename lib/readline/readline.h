@@ -884,8 +884,8 @@ struct readline_state {
   int point;
   int end;
   int mark;
-  char *buffer;
   int buflen;
+  char *buffer;
   UNDO_LIST *ul;
   char *prompt;
 
@@ -900,9 +900,10 @@ struct readline_state {
   int edmode;
   char *kseq;
   int kseqlen;
+
+  int pendingin;
   FILE *inf;
   FILE *outf;
-  int pendingin;
   char *macro;
 
   /* signal state */

@@ -60,6 +60,7 @@ extern int	errno;
 
 extern char	*sh_realpath();
 
+int
 realpath_builtin(list)
 WORD_LIST	*list;
 {
