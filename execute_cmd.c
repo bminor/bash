@@ -1304,11 +1304,12 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
      int asynchronous, pipe_in, pipe_out;
      struct fd_bitmap *fds_to_close;
 {
-  int rv, posix_time, old_flags, nullcmd;
+  int rv, posix_time, old_flags, nullcmd, code;
   time_t rs, us, ss;
   int rsf, usf, ssf;
   int cpu;
   char *time_format;
+  volatile procenv_t save_top_level;
 
 #if defined (HAVE_GETRUSAGE) && defined (HAVE_GETTIMEOFDAY)
   struct timeval real, user, sys;
@@ -1355,9 +1356,13 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
     }
 
   old_flags = command->flags;
+  COPY_PROCENV (top_level, save_top_level);
   command->flags &= ~(CMD_TIME_PIPELINE|CMD_TIME_POSIX);
-  rv = execute_command_internal (command, asynchronous, pipe_in, pipe_out, fds_to_close);
+  code = setjmp_nosigs (top_level);
+  if (code == NOT_JUMPED)
+    rv = execute_command_internal (command, asynchronous, pipe_in, pipe_out, fds_to_close);
   command->flags = old_flags;
+  COPY_PROCENV (save_top_level, top_level);
 
   rs = us = ss = 0;
   rsf = usf = ssf = cpu = 0;
@@ -1415,6 +1420,9 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
     }
   if (time_format && *time_format)
     print_formatted_time (stderr, time_format, rs, rsf, us, usf, ss, ssf, cpu);
+
+  if (code)
+    sh_longjmp (top_level, code);
 
   return rv;
 }

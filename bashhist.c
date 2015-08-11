@@ -316,6 +316,7 @@ bash_clear_history ()
 {
   clear_history ();
   history_lines_this_session = 0;
+  /* XXX - reset history_lines_read_from_file? */
 }
 
 /* Delete and free the history list entry at offset I. */

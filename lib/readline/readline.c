@@ -930,6 +930,16 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	  /* Allocate new context here.  Use linked contexts (linked through
 	     cxt->ocxt) to simulate recursion */
 #if defined (READLINE_CALLBACKS)
+#  if defined (VI_MODE)
+	  /* If we're redoing a vi mode command and we know there is a shadowed
+	     function corresponding to this key, just call it -- all the redoable
+	     vi mode commands already have all the input they need, and rl_vi_redo
+	     assumes that one call to rl_dispatch is sufficient to complete the
+	     command. */
+	  if (_rl_vi_redoing && RL_ISSTATE (RL_STATE_CALLBACK) &&
+	      map[ANYOTHERKEY].function != 0)
+	    return (_rl_subseq_result (-2, map, key, got_subseq));
+#  endif
 	  if (RL_ISSTATE (RL_STATE_CALLBACK))
 	    {
 	      /* Return 0 only the first time, to indicate success to
@@ -992,6 +1002,7 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	}
       break;
     }
+
 #if defined (VI_MODE)
   if (rl_editing_mode == vi_mode && _rl_keymap == vi_movement_keymap &&
       key != ANYOTHERKEY &&
@@ -1037,7 +1048,9 @@ _rl_subseq_result (r, map, key, got_subseq)
 
 	  m[key].type = type;
 	  m[key].function = func;
-	  r = _rl_dispatch (key, m);
+	  /* Don't change _rl_dispatching_keymap, set it here */
+	  _rl_dispatching_keymap = map;		/* previous map */
+	  r = _rl_dispatch_subseq (key, m, 0);
 	  m[key].type = nt;
 	  m[key].function = nf;
 	}

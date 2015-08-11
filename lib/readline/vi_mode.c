@@ -67,6 +67,9 @@ int _rl_vi_last_command = 'i';	/* default `.' puts you in insert mode */
 
 _rl_vimotion_cxt *_rl_vimvcxt = 0;
 
+/* Non-zero indicates we are redoing a vi-mode command with `.' */
+int _rl_vi_redoing;
+
 /* Non-zero means enter insertion mode. */
 static int _rl_vi_doing_insert;
 
@@ -99,8 +102,6 @@ static int _rl_vi_last_search_char;
 static int _rl_vi_last_replacement;
 
 static int _rl_vi_last_key_before_insert;
-
-static int vi_redoing;
 
 /* Text modification commands.  These are the `redoable' commands. */
 static const char * const vi_textmod = "_*\\AaIiCcDdPpYyRrSsXx~";
@@ -241,7 +242,7 @@ rl_vi_redo (count, c)
     }
 
   r = 0;
-  vi_redoing = 1;
+  _rl_vi_redoing = 1;
   /* If we're redoing an insert with `i', stuff in the inserted text
      and do not go into insertion mode. */
   if (_rl_vi_last_command == 'i' && vi_insert_buffer && *vi_insert_buffer)
@@ -287,7 +288,8 @@ rl_vi_redo (count, c)
     }
   else
     r = _rl_dispatch (_rl_vi_last_command, _rl_keymap);
-  vi_redoing = 0;
+
+  _rl_vi_redoing = 0;
 
   return (r);
 }
@@ -1335,12 +1337,12 @@ rl_vi_delete_to (count, key)
       _rl_vimvcxt->motion = '$';
       r = rl_domove_motion_callback (_rl_vimvcxt);
     }
-  else if (vi_redoing && _rl_vi_last_motion != 'd')	/* `dd' is special */
+  else if (_rl_vi_redoing && _rl_vi_last_motion != 'd')	/* `dd' is special */
     {
       _rl_vimvcxt->motion = _rl_vi_last_motion;
       r = rl_domove_motion_callback (_rl_vimvcxt);
     }
-  else if (vi_redoing)		/* handle redoing `dd' here */
+  else if (_rl_vi_redoing)		/* handle redoing `dd' here */
     {
       _rl_vimvcxt->motion = _rl_vi_last_motion;
       rl_mark = rl_end;
@@ -1385,7 +1387,7 @@ vi_change_dispatch (m)
   if ((_rl_to_upper (m->motion) == 'W') && rl_point < m->start)
     rl_point = m->start;
 
-  if (vi_redoing)
+  if (_rl_vi_redoing)
     {
       if (vi_insert_buffer && *vi_insert_buffer)
 	rl_begin_undo_group ();
@@ -1425,12 +1427,12 @@ rl_vi_change_to (count, key)
       _rl_vimvcxt->motion = '$';
       r = rl_domove_motion_callback (_rl_vimvcxt);
     }
-  else if (vi_redoing && _rl_vi_last_motion != 'c')	/* `cc' is special */
+  else if (_rl_vi_redoing && _rl_vi_last_motion != 'c')	/* `cc' is special */
     {
       _rl_vimvcxt->motion = _rl_vi_last_motion;
       r = rl_domove_motion_callback (_rl_vimvcxt);
     }
-  else if (vi_redoing)		/* handle redoing `cc' here */
+  else if (_rl_vi_redoing)		/* handle redoing `cc' here */
     {
       _rl_vimvcxt->motion = _rl_vi_last_motion;
       rl_mark = rl_end;
@@ -1494,12 +1496,12 @@ rl_vi_yank_to (count, key)
       _rl_vimvcxt->motion = '$';
       r = rl_domove_motion_callback (_rl_vimvcxt);
     }
-  else if (vi_redoing && _rl_vi_last_motion != 'y')	/* `yy' is special */
+  else if (_rl_vi_redoing && _rl_vi_last_motion != 'y')	/* `yy' is special */
     {
       _rl_vimvcxt->motion = _rl_vi_last_motion;
       r = rl_domove_motion_callback (_rl_vimvcxt);
     }
-  else if (vi_redoing)			/* handle redoing `yy' here */
+  else if (_rl_vi_redoing)			/* handle redoing `yy' here */
     {
       _rl_vimvcxt->motion = _rl_vi_last_motion;
       rl_mark = rl_end;
@@ -1719,7 +1721,7 @@ rl_vi_char_search (count, key)
 	  break;
 	}
 
-      if (vi_redoing)
+      if (_rl_vi_redoing)
 	{
 	  /* set target and tlen below */
 	}
@@ -1955,7 +1957,7 @@ rl_vi_change_char (count, key)
   int c;
   char mb[MB_LEN_MAX];
 
-  if (vi_redoing)
+  if (_rl_vi_redoing)
     {
       c = _rl_vi_last_replacement;
       mb[0] = c;
@@ -1983,7 +1985,7 @@ rl_vi_subst (count, key)
      int count, key;
 {
   /* If we are redoing, rl_vi_change_to will stuff the last motion char */
-  if (vi_redoing == 0)
+  if (_rl_vi_redoing == 0)
     rl_stuff_char ((key == 'S') ? 'c' : 'l');	/* `S' == `cc', `s' == `cl' */
 
   return (rl_vi_change_to (count, 'c'));

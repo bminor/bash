@@ -873,7 +873,7 @@ extern int rl_inhibit_completion;
 #define RL_STATE_CHARSEARCH	0x0800000	/* vi mode char search */
 #define RL_STATE_REDISPLAYING	0x1000000	/* updating terminal display */
 
-#define RL_STATE_DONE		0x1000000	/* done; accepted line */
+#define RL_STATE_DONE		0x2000000	/* done; accepted line */
 
 #define RL_SETSTATE(x)		(rl_readline_state |= (x))
 #define RL_UNSETSTATE(x)	(rl_readline_state &= ~(x))

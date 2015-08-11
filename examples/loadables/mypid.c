@@ -5,6 +5,11 @@
  * Then, from within bash, enable -f ./mypid enable_mypid, where ./mypid
  * is the binary obtained from running make. Hereafter, `${MYPID}'
  * is a shell builtin variable.
+ *
+ * This defines an unload hook function that is called when the builtin is
+ * deleted with enable -d that will unbind the MYPID variable so future
+ * references to it do not attempt to access memory that is no longer part
+ * of this process's address space.
  */
 
 #include <stdio.h>
@@ -54,6 +59,12 @@ enable_mypid_builtin(WORD_LIST *list)
   INIT_DYNAMIC_VAR ("MYPID", (char *)NULL, get_mypid, assign_mypid);
 
   return 0;
+}
+
+void
+enable_mypid_builtin_unload (char *s)
+{
+  unbind_variable ("MYPID");
 }
 
 char const *enable_mypid_doc[] = {

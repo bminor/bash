@@ -65,7 +65,7 @@ extern void mregister_dump_table __P((void));
 extern void mregister_table_init __P((void));
 
 typedef struct ma_table {
-	char *file;
+	const char *file;
 	int line;
 	int nalloc;
 } ma_table_t;

@@ -111,7 +111,7 @@ static int stat_char PARAMS((char *));
 #endif
 
 #if defined (COLOR_SUPPORT)
-static int colored_stat_start PARAMS((char *));
+static int colored_stat_start PARAMS((const char *));
 static void colored_stat_end PARAMS((void));
 static int colored_prefix_start PARAMS((void));
 static void colored_prefix_end PARAMS((void));
@@ -676,7 +676,7 @@ stat_char (filename)
 #if defined (COLOR_SUPPORT)
 static int
 colored_stat_start (filename)
-     char *filename;
+     const char *filename;
 {
   _rl_set_normal_color ();
   return (_rl_print_color_indicator (filename));

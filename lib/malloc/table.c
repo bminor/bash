@@ -340,7 +340,7 @@ mlocation_register_alloc (file, line)
      int line;
 {
   ma_table_t *lentry;
-  char *nfile;
+  const char *nfile;
 
   if (file == 0)
     {

@@ -309,7 +309,7 @@ static int speeds[] =
   };
 
 __private_extern__
-void
+int
 tputs (str, nlines, outfun)
      register char *str;
      int nlines;
@@ -335,7 +335,7 @@ tputs (str, nlines, outfun)
 #endif
 
   if (!str)
-    return;
+    return -1;
 
   while (*str >= '0' && *str <= '9')
     {
@@ -372,6 +372,8 @@ tputs (str, nlines, outfun)
 
   while (padcount-- > 0)
     (*outfun) (PC);
+
+  return 0;
 }
 
 /* Finding the termcap entry in the termcap data base.  */

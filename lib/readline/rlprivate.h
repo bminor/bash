@@ -558,6 +558,7 @@ extern int _rl_undo_group_level;
 
 /* vi_mode.c */
 extern int _rl_vi_last_command;
+extern int _rl_vi_redoing;
 extern _rl_vimotion_cxt *_rl_vimvcxt;
 
 #endif /* _RL_PRIVATE_H_ */

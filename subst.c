@@ -247,7 +247,7 @@ static char *string_extract __P((char *, int *, char *, int));
 static char *string_extract_double_quoted __P((char *, int *, int));
 static inline char *string_extract_single_quoted __P((char *, int *));
 static inline int skip_single_quoted __P((const char *, size_t, int));
-static int skip_double_quoted __P((char *, size_t, int));
+static int skip_double_quoted __P((char *, size_t, int, int));
 static char *extract_delimited_string __P((char *, int *, char *, char *, char *, int));
 static char *extract_dollar_brace_string __P((char *, int *, int, int));
 static int skip_matched_pair __P((const char *, int, int, int, int));
@@ -631,7 +631,7 @@ unquoted_member (character, string)
 	  break;
 
 	case '"':
-	  sindex = skip_double_quoted (string, slen, ++sindex);
+	  sindex = skip_double_quoted (string, slen, ++sindex, 0);
 	  break;
 	}
     }
@@ -670,7 +670,7 @@ unquoted_substring (substr, string)
 	  break;
 
 	case '"':
-	  sindex = skip_double_quoted (string, slen, ++sindex);
+	  sindex = skip_double_quoted (string, slen, ++sindex, 0);
 	  break;
 
 	default:
@@ -969,7 +969,7 @@ add_one_character:
 
 /* This should really be another option to string_extract_double_quoted. */
 static int
-skip_double_quoted (string, slen, sind)
+skip_double_quoted (string, slen, sind, flags)
      char *string;
      size_t slen;
      int sind;
@@ -1012,7 +1012,7 @@ skip_double_quoted (string, slen, sind)
 	{
 	  si = i + 2;
 	  if (string[i + 1] == LPAREN)
-	    ret = extract_command_subst (string, &si, SX_NOALLOC);
+	    ret = extract_command_subst (string, &si, SX_NOALLOC|(flags&SX_COMPLETE));
 	  else
 	    ret = extract_dollar_brace_string (string, &si, Q_DOUBLE_QUOTES, SX_NOALLOC);
 
@@ -1191,7 +1191,7 @@ extract_command_subst (string, sindex, xflags)
      int *sindex;
      int xflags;
 {
-  if (string[*sindex] == LPAREN)
+  if (string[*sindex] == LPAREN || (xflags & SX_COMPLETE))
     return (extract_delimited_string (string, sindex, "$(", "(", ")", xflags|SX_COMMAND)); /*)*/
   else
     {
@@ -1376,7 +1376,7 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
 	{
 	  si = i + 1;
 	  i = (c == '\'') ? skip_single_quoted (string, slen, si)
-			  : skip_double_quoted (string, slen, si);
+			  : skip_double_quoted (string, slen, si, 0);
 	  continue;
 	}
 
@@ -1502,7 +1502,7 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
       if (c == '"')
 	{
 	  si = i + 1;
-	  i = skip_double_quoted (string, slen, si);
+	  i = skip_double_quoted (string, slen, si, 0);
 	  /* skip_XXX_quoted leaves index one past close quote */
 	  continue;
 	}
@@ -1689,7 +1689,7 @@ skip_matched_pair (string, start, open, close, flags)
       else if ((flags & 1) == 0 && (c == '\'' || c == '"'))
 	{
 	  i = (c == '\'') ? skip_single_quoted (ss, slen, ++i)
-			  : skip_double_quoted (ss, slen, ++i);
+			  : skip_double_quoted (ss, slen, ++i, 0);
 	  /* no increment, the skip functions increment past the closing quote. */
 	}
       else if ((flags&1) == 0 && c == '$' && (string[i+1] == LPAREN || string[i+1] == LBRACE))
@@ -1738,7 +1738,8 @@ skip_to_delim (string, start, delims, flags)
      char *delims;
      int flags;
 {
-  int i, pass_next, backq, si, c, invert, skipquote, skipcmd, noprocsub;
+  int i, pass_next, backq, si, c;
+  int invert, skipquote, skipcmd, noprocsub, completeflag;
   size_t slen;
   char *temp, open[3];
   DECLARE_MBSTATE;
@@ -1749,6 +1750,7 @@ skip_to_delim (string, start, delims, flags)
   invert = (flags & SD_INVERT);
   skipcmd = (flags & SD_NOSKIPCMD) == 0;
   noprocsub = (flags & SD_NOPROCSUB);
+  completeflag = (flags & SD_COMPLETE) ? SX_COMPLETE : 0;
 
   i = start;
   pass_next = backq = 0;
@@ -1791,7 +1793,7 @@ skip_to_delim (string, start, delims, flags)
       else if (c == '\'' || c == '"')
 	{
 	  i = (c == '\'') ? skip_single_quoted (string, slen, ++i)
-			  : skip_double_quoted (string, slen, ++i);
+			  : skip_double_quoted (string, slen, ++i, completeflag);
 	  /* no increment, the skip functions increment past the closing quote. */
 	}
       else if (c == '$' && ((skipcmd && string[i+1] == LPAREN) || string[i+1] == LBRACE))
@@ -1913,7 +1915,7 @@ char_is_quoted (string, eindex)
       else if (c == '\'' || c == '"')
 	{
 	  i = (c == '\'') ? skip_single_quoted (string, slen, ++i)
-			  : skip_double_quoted (string, slen, ++i);
+			  : skip_double_quoted (string, slen, ++i, SX_COMPLETE);
 	  if (i > eindex)
 	    CQ_RETURN(1);
 	  /* no increment, the skip_xxx functions go one past end */
@@ -1962,7 +1964,7 @@ unclosed_pair (string, eindex, openstr)
       else if (string[i] == '\'' || string[i] == '"')
 	{
 	  i = (string[i] == '\'') ? skip_single_quoted (string, slen, i)
-				  : skip_double_quoted (string, slen, i);
+				  : skip_double_quoted (string, slen, i, SX_COMPLETE);
 	  if (i > eindex)
 	    return 0;
 	}
@@ -2725,7 +2727,7 @@ list_string_with_quotes (string)
       else if (c == '\'')
 	i = skip_single_quoted (s, s_len, ++i);
       else if (c == '"')
-	i = skip_double_quoted (s, s_len, ++i);
+	i = skip_double_quoted (s, s_len, ++i, 0);
       else if (c == 0 || spctabnl (c))
 	{
 	  /* We have found the end of a token.  Make a word out of it and
@@ -7535,7 +7537,7 @@ chk_arithsub (s, len)
 	  break;
 
 	case '"':
-	  i = skip_double_quoted ((char *)s, len, ++i);
+	  i = skip_double_quoted ((char *)s, len, ++i, 0);
 	  break;
 	}
     }
@@ -7677,7 +7679,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 	member (c, "%:=+/") && string[sindex] == RBRACE)
     {
       temp = (char *)NULL;
-      goto bad_substitution;
+      goto bad_substitution;	/* XXX - substitution error */
     }
 
   /* Indirect expansion begins with a `!'.  A valid indirect expansion is
@@ -7704,7 +7706,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
       if (string[sindex - 1] != RBRACE || (valid_length_expression (name) == 0))
 	{
 	  temp = (char *)NULL;
-	  goto bad_substitution;
+	  goto bad_substitution;	/* substitution error */
 	}
 
       number = parameter_brace_expand_length (name);
@@ -7819,7 +7821,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 					var_is_special) == 0)
     {
       temp = (char *)NULL;
-      goto bad_substitution;
+      goto bad_substitution;		/* substitution error */
     }
 
   if (want_indir)
@@ -7878,7 +7880,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
       if (string[sindex] == RBRACE)
 	sindex++;
       else
-	goto bad_substitution;
+	goto bad_substitution;		/* substitution error */
     }
   else
     value = (char *)NULL;
@@ -7973,25 +7975,31 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
     {
     default:
     case '\0':
-    bad_substitution:
+bad_substitution:
       last_command_exit_value = EXECUTION_FAILURE;
       report_error (_("%s: bad substitution"), string ? string : "??");
       FREE (value);
       FREE (temp);
       free (name);
-      return &expand_wdesc_error;
+      if (shell_compatibility_level <= 43)
+	return &expand_wdesc_error;
+      else
+	return ((posixly_correct && interactive_shell == 0) ? &expand_wdesc_fatal : &expand_wdesc_error);
 
     case RBRACE:
       break;
 
     case '@':
       temp1 = parameter_brace_transform (name, temp, ind, value, c, quoted, (tflag & W_ARRAYIND) ? AV_USEIND : 0);
-      if (temp1 == &expand_param_error || temp1 == &expand_param_fatal)
-	goto bad_substitution;
-
       free (temp);
       free (value);
       free (name);
+      if (temp1 == &expand_param_error || temp1 == &expand_param_fatal)
+	{
+	  last_command_exit_value = EXECUTION_FAILURE;
+	  report_error (_("%s: bad substitution"), string ? string : "??");
+	  return (temp1 == &expand_param_error ? &expand_wdesc_error : &expand_wdesc_fatal);
+	}
 
       ret = alloc_word_desc ();
       ret->word = temp1;

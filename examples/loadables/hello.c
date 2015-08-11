@@ -56,6 +56,23 @@ hello_builtin (list)
   return (EXECUTION_SUCCESS);
 }
 
+int
+hello_builtin_load (s)
+     char *s;
+{
+  printf ("hello builtin loaded\n");
+  fflush (stdout);
+  return (1);
+}
+
+void
+hello_builtin_unload (s)
+     char *s;
+{
+  printf ("hello builtin unloaded\n");
+  fflush (stdout);
+}
+
 /* An array of strings forming the `long' documentation for a builtin xxx,
    which is printed by `help xxx'.  It must end with a NULL.  By convention,
    the first line is a short description. */

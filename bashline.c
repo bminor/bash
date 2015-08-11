@@ -1319,13 +1319,13 @@ find_cmd_start (start)
   /* Flags == SD_NOJMP only because we want to skip over command substitutions
      in assignment statements.  Have to test whether this affects `standalone'
      command substitutions as individual words. */
-  while (((s = skip_to_delim (rl_line_buffer, os, COMMAND_SEPARATORS, SD_NOJMP/*|SD_NOSKIPCMD*/)) <= start) &&
+  while (((s = skip_to_delim (rl_line_buffer, os, COMMAND_SEPARATORS, SD_NOJMP|SD_COMPLETE/*|SD_NOSKIPCMD*/)) <= start) &&
 	 rl_line_buffer[s])
     {
       /* Handle >| token crudely; treat as > not | */
       if (rl_line_buffer[s] == '|' && rl_line_buffer[s-1] == '>')
 	{
-	  ns = skip_to_delim (rl_line_buffer, s+1, COMMAND_SEPARATORS, SD_NOJMP/*|SD_NOSKIPCMD*/);
+	  ns = skip_to_delim (rl_line_buffer, s+1, COMMAND_SEPARATORS, SD_NOJMP|SD_COMPLETE/*|SD_NOSKIPCMD*/);
 	  if (ns > start || rl_line_buffer[ns] == 0)
 	    return os;
 	  os = ns+1;
@@ -1342,7 +1342,7 @@ find_cmd_end (end)
 {
   register int e;
 
-  e = skip_to_delim (rl_line_buffer, end, COMMAND_SEPARATORS, SD_NOJMP);
+  e = skip_to_delim (rl_line_buffer, end, COMMAND_SEPARATORS, SD_NOJMP|SD_COMPLETE);
   return e;
 }
 
@@ -1358,7 +1358,7 @@ find_cmd_name (start, sp, ep)
     ;
 
   /* skip until a shell break character */
-  e = skip_to_delim (rl_line_buffer, s, "()<>;&| \t\n", SD_NOJMP);
+  e = skip_to_delim (rl_line_buffer, s, "()<>;&| \t\n", SD_NOJMP|SD_COMPLETE);
 
   name = substring (rl_line_buffer, s, e);
 

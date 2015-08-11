@@ -92,6 +92,11 @@ static void delete_builtin __P((struct builtin *));
 static int local_dlclose __P((void *));
 #endif
 
+#define STRUCT_SUFFIX	"_struct"
+/* for now */
+#define LOAD_SUFFIX	"_builtin_load"
+#define UNLOAD_SUFFIX	"_builtin_unload"
+
 static void list_some_builtins __P((int));
 static int enable_shell_command __P((char *, int));
 
@@ -290,8 +295,9 @@ dyn_load_builtin (list, flags, filename)
   WORD_LIST *l;
   void *handle;
   
-  int total, size, new, replaced;
-  char *struct_name, *name;
+  int total, size, new, replaced, r;
+  char *struct_name, *name, *funcname;
+  sh_load_func_t *loadfunc;
   struct builtin **new_builtins, *b, *new_shell_builtins, *old_builtin;
 
   if (list == 0)
@@ -330,7 +336,7 @@ dyn_load_builtin (list, flags, filename)
       size = strlen (name);
       struct_name = (char *)xmalloc (size + 8);
       strcpy (struct_name, name);
-      strcpy (struct_name + size, "_struct");
+      strcpy (struct_name + size, STRUCT_SUFFIX);
 
       b = (struct builtin *)dlsym (handle, struct_name);
       if (b == 0)
@@ -344,7 +350,22 @@ dyn_load_builtin (list, flags, filename)
 	  continue;
 	}
 
-      free (struct_name);
+      funcname = xrealloc (struct_name, size + sizeof (LOAD_SUFFIX) + 1);
+      strcpy (funcname, name);
+      strcpy (funcname + size, LOAD_SUFFIX);
+
+      loadfunc = (sh_load_func_t *)dlsym (handle, funcname);
+      if (loadfunc)
+	{
+	  r = (*loadfunc) (name);
+	  if (r == 0)
+	    {
+	      builtin_error (_("load function for %s returns failure (%d): not loaded"), r);
+	      free (funcname);
+	      continue;
+	    }
+	}
+      free (funcname);
 
       b->flags &= ~STATIC_BUILTIN;
       if (flags & SPECIAL)
@@ -452,7 +473,9 @@ dyn_unload_builtin (name)
 {
   struct builtin *b;
   void *handle;
-  int ref, i;
+  char *funcname;
+  sh_unload_func_t *unloadfunc;
+  int ref, i, size;
 
   b = builtin_address_internal (name, 1);
   if (b == 0)
@@ -472,6 +495,17 @@ dyn_unload_builtin (name)
       if (shell_builtins[i].handle == b->handle)
 	ref++;
     }
+
+  /* Call any unload function */
+  size = strlen (name);
+  funcname = xmalloc (size + sizeof (UNLOAD_SUFFIX) + 1);
+  strcpy (funcname, name);
+  strcpy (funcname + size, UNLOAD_SUFFIX);
+
+  unloadfunc = (sh_unload_func_t *)dlsym (handle, funcname);
+  if (unloadfunc)
+    (*unloadfunc) (name);	/* void function */
+  free (funcname);
 
   /* Don't remove the shared object unless the reference count of builtins
      using it drops to zero. */

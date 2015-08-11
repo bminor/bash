@@ -9212,3 +9212,106 @@ builtins/exec.def
 doc/{bash.1,bashref.texi}
 	- clarify definition of metacharacter to explicitly include newline;
 	  prompted by report from George Gallo <georgeggallo@gmail.com>
+
+				    8/3
+				    ---
+lib/readline/search.c
+	- _rl_free_history_entry: should be void, not int.  Report from
+	  Dilyan Palauzov <dilyan.palauzov@aegee.org>
+
+general.h
+	- sh_load_func_t, sh_unload_func_t: new function pointer types, used by
+	  enable for load and unload hook functions
+
+builtins/enable.def
+	- dyn_load_builtin: attempt to execute a function named BUILTIN_builtin_load,
+	  where BUILTIN is the name of the command being loaded.  If that function
+	  returns 0, the load fails
+	- dyn_unload_builtin: attempt to execute a function named BUILTIN_builtin_unload,
+	  where BUILTIN is the name of the command being unloaded.  It offers a
+	  dynamic builtin a way to clean up after itself.  Inspired by suggestion
+	  from Piotr Grzybowski <narsil.pl@gmail.com> in response to a bug report
+	  from isabella parakiss <izaberina@gmail.com>
+
+				    8/6
+				    ---
+lib/readline/colors.[ch]
+	- _rl_print_color_indicator: now takes `const char *' argument
+
+lib/readline/complete.c
+	- colored_stat_start: now takes `const char *' argument
+
+lib/malloc/table.h
+	- ma_table_t: `file' member is now `const char *'
+
+lib/malloc/table.c
+	- mlocation_register_alloc: make sure variable assigned to `file' in
+	  ma_table_t is of type `const char *'.  Fixes from Dilyan Palauzov
+	  <dilyan.palauzov@aegee.org>
+
+lib/termcap/termcap.[ch]
+	- tputs: should return int instead of void
+
+lib/readline/readline.h
+	- RL_STATE_DONE: correct value, avoid collision
+
+lib/readline/vi_mode.c
+	- _rl_vi_redoing: now global, added _rl_ prefix to `vi_redoing'
+
+lib/readline/readline.c
+	- _rl_subseq_result: call _rl_dispatch_subseq instead of rl_dispatch to
+	  avoid changing _rl_dispatching_keymap
+	- _rl_subseq_result: in the -2 case, set _rl_dispatching_keymap to the
+	  map passed as an argument.  Without this, vi mode doesn't call
+	  rl_vi_set_last when it should
+	- _rl_dispatch_subseq: if redoing a vi mode command with `.'
+	  (_rl_vi_redoing != 0) in callback mode and we're indirecting into another
+	  keymap that has shadowed the key corresponding to the command we are
+	  redoing, just call _rl_subseq_result immediately: vi redo doesn't need
+	  to read any additional input, and rl_vi_redo assumes that a single call
+	  to rl_dispatch is sufficient.  Fixes bug reported by Carlos Pita
+	  <carlosjosepita@gmail.com>
+
+				    8/7
+				    ---
+subst.c
+	- parameter_brace_expand: if a substitution (parameter expansion) error
+	  occurs, and shell_compatibility_level is <= 43, return expansion error
+	  as in all previous versions.  If shell_compatibility_level is > 43,
+	  a posix-mode non-interactive shell will consider this a fatal error.
+	  Problem reported by Christian Neukirchen <chneukirchen@gmail.com>
+
+doc/bashref.texi
+	- documented that word expansion errors cause fatal errors in posix mode
+	  non-interactive shells
+
+				    8/8
+				    ---
+subst.h
+	- SD_COMPLETE: skip_to_delim being called as part of word completion
+	- SX_COMPLETE: one of the string_extract functions being called as
+	  part of word completion
+
+bashline.c
+	- find_cmd_start,find_cmd_end,find_cmd_name: call skip_to_delim with
+	  SD_COMPLETE flag
+
+subst.c
+	- skip_double_quoted: takes new flags argument; changed callers
+	- skip_double_quoted: if flags argument includes SX_COMPLETE, pass it
+	  to extract_command_subst
+	- extract_command_subst: if flags&SX_COMPLETE, call
+	  extract_delimited_string instead of xparse_dolparen, since completion
+	  may call this for unterminated command substitutions.  Fixes
+	  (imperfectly) bug reported by Ingo Ruhnke <grumbel@gmail.com>
+	- skip_to_delim: if passed the SD_COMPLETE flag, pass the SX_COMPLETE
+	  flag to skip_double_quoted 
+	- char_is_quoted: pass SX_COMPLETE flag to skip_double_quoted
+	- unclosed_pair: pass SX_COMPLETE flag to skip_double_quoted
+
+				    8/9
+				    ---
+execute_cmd.c
+	- time_command: catch longjmps to top_level and print command timing
+	  statistics even after a jump to top_level.  Fixes issue reported by
+	  Sam Watkins <sam@nipl.net>
