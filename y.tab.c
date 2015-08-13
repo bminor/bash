@@ -6020,6 +6020,8 @@ eof_error:
 /*itrace("parse_comsub:%d: lex_inword -> 1 ch = `%c' (%d)", line_number, ch, __LINE__);*/
 	      tflags |= LEX_INWORD;
 	      lex_wlen = 0;
+	      if (tflags & LEX_RESWDOK)
+		lex_rwlen = 0;
 	    }
 	}
 
