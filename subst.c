@@ -5782,7 +5782,7 @@ expand_arrayref:
       /* XXX - does this leak if name[@] or name[*]? */
       if (pflags & PF_ASSIGNRHS)
         {
-          temp = array_variable_name (name, &tt, (int *)0);
+          var = array_variable_part (name, &tt, (int *)0);
           if (ALL_ELEMENT_SUB (tt[0]) && tt[1] == ']')
 	    temp = array_value (name, quoted|Q_DOUBLE_QUOTES, 0, &atype, &ind);
 	  else
