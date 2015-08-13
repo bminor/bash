@@ -689,6 +689,8 @@ printable_part (pathname)
 
   if (temp == 0 || *temp == '\0')
     return (pathname);
+  else if (temp[1] == 0 && temp == pathname)
+    return (pathname);
   /* If the basename is NULL, we might have a pathname like '/usr/src/'.
      Look for a previous slash and, if one is found, return the portion
      following that slash.  If there's no previous slash, just return the
