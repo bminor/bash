@@ -323,7 +323,7 @@ static SigHandler *old_tstp, *old_ttou, *old_ttin;
 static SigHandler *old_cont = (SigHandler *)SIG_DFL;
 
 /* A place to temporarily save the current pipeline. */
-static PROCESS *saved_pipeline;
+static struct pipeline_saver *saved_pipeline;
 static int saved_already_making_children;
 
 /* Set this to non-zero whenever you don't want the jobs list to change at
@@ -435,14 +435,29 @@ cleanup_the_pipeline ()
     discard_pipeline (disposer);
 }
 
+struct pipeline_saver *
+alloc_pipeline_saver ()
+{
+  struct pipeline_saver *ret;
+
+  ret = (struct pipeline_saver *)xmalloc (sizeof (struct pipeline_saver));
+  ret->pipeline = 0;
+  ret->next = 0;
+  return ret;
+}
+
 void
 save_pipeline (clear)
      int clear;
 {
   sigset_t set, oset;
+  struct pipeline_saver *saver;
 
   BLOCK_CHILD (set, oset);
-  saved_pipeline = the_pipeline;
+  saver = alloc_pipeline_saver ();
+  saver->pipeline = the_pipeline;
+  saver->next = saved_pipeline;
+  saved_pipeline = saver;
   if (clear)
     the_pipeline = (PROCESS *)NULL;
   saved_already_making_children = already_making_children;
@@ -455,10 +470,14 @@ restore_pipeline (discard)
 {
   PROCESS *old_pipeline;
   sigset_t set, oset;
+  struct pipeline_saver *saver;
 
   BLOCK_CHILD (set, oset);
   old_pipeline = the_pipeline;
-  the_pipeline = saved_pipeline;
+  the_pipeline = saved_pipeline->pipeline;
+  saver = saved_pipeline;
+  saved_pipeline = saved_pipeline->next;
+  free (saver);
   already_making_children = saved_already_making_children;
   UNBLOCK_CHILD (oset);
 

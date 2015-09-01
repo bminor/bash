@@ -9315,3 +9315,73 @@ execute_cmd.c
 	- time_command: catch longjmps to top_level and print command timing
 	  statistics even after a jump to top_level.  Fixes issue reported by
 	  Sam Watkins <sam@nipl.net>
+
+				   8/10
+				   ----
+config-top.h
+	- OPENLOG_OPTS: if SYSLOG_HISTORY is defined, define to LOG_PID, so each
+	  message is tagged with the pid
+
+bashhist.h
+	- bash_syslog_history: the first time it's called, call openlog with
+	  OPENLOG_OPTS and SYSLOG_FACILITY
+
+				   8/11
+				   ----
+doc/{bash.1,bashref.texi}
+	- GROUPS,FUNCNAME: change description to note that assignments are silently
+	  ignored, but do not return an error (which would constitute an assignment
+	  error and cause posix mode shells to abort).  Problem pointed out by
+	  Grzegorz Bajson <gbajson@gmail.com>
+
+				   8/12
+				   ----
+subst.c
+	- parameter_brace_expand_indir: if the value of the indirectly expanded
+	  variable isn't something that the shell would expand if it were inside
+	  ${}, error out right away before calling parameter_brace_expand_word.
+	  Fixes problem reported by isabella parakiss <izaberina@gmail.com>
+	- parameter_brace_expand: handle returning &expand_wdesc_error or
+	  &expand_wdesc_fatal from parameter_brace_expand_indir in case it does
+	  that someday
+
+				   8/13
+				   ----
+jobs.c
+	- {save,restore}_pipeline: saved_pipeline now a linked list of pipelines,
+	  new ones allocated in save_pipeline and freed in restore_pipeline.  This
+	  allow multiple nested calls to save_pipeline (e.g., in traps and then in
+	  process substitution).  Fix for bug reported by isabella parakiss
+	  <izaberina@gmail.com>
+
+print_cmd.c
+	- named_function_string: if printing a function with the same name as a
+	  reserved word, add the `function ' keyword before the name to avoid
+	  parsing problems when trying to reuse it as input.  Fix for bug
+	  reported by isabella parakiss <izaberina@gmail.com>
+
+				   8/14
+				   ----
+lib/readline/text.c
+	- rl_insert: when optimizing typeahead, make sure we set rl_last_func
+	  ourselves if we set pending input, since the mainline code path
+	  won't set rl_last_func if input is pending.  Fixes bug reported by
+	  Hiroo Hayashi <hiroo.hayashi@computer.org>
+
+				   8/15
+				   ----
+builtins/type.def
+	- describe_command: if using the short description (CDESC_SHORTDESC) in
+	  posix mode, describe posix special builtins as such.  Requested by
+	  Stephane Chazelas <stephane.chazelas@gmail.com>
+
+builtins/enable.def
+	- BASH_LOADABLES_PATH: a colon-separated list of directories where bash
+	  looks for loadable builtins specified as arguments to `enable -f'
+
+doc/{bash.1,bashref.texi}
+	- BASH_LOADABLES_PATH: document new shell variable
+
+configure.ac,Makefile.in,builtins/Makefile.in
+	- loadablesdir: set in configure, substitute into Makefiles.  Reserved
+	  for future use

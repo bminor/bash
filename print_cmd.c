@@ -1339,7 +1339,11 @@ named_function_string (name, command, flags)
   deferred_heredocs = 0;
 
   if (name && *name)
-    cprintf ("%s ", name);
+    {
+      if (find_reserved_word (name) >= 0)
+	cprintf ("function ");
+      cprintf ("%s ", name);
+    }
 
   cprintf ("() ");
 

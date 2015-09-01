@@ -5503,6 +5503,11 @@ where each corresponding member of @var{FUNCNAME} was invoked.
 referenced within another shell function). 
 Use @code{LINENO} to obtain the current line number.
 
+@item BASH_LOADABLES_PATH
+A colon-separated list of directories in which the shell looks for
+dynamically loadable builtins specified by the
+@code{enable} command.
+
 @item BASH_REMATCH
 An array variable whose members are assigned by the @samp{=~} binary
 operator to the @code{[[} conditional command
@@ -5698,7 +5703,7 @@ shell function.
 The bottom-most element (the one with the highest index)
 is @code{"main"}.
 This variable exists only when a shell function is executing.
-Assignments to @env{FUNCNAME} have no effect and return an error status.
+Assignments to @env{FUNCNAME} have no effect.
 If @env{FUNCNAME} is unset, it loses its special properties, even if
 it is subsequently reset.
 
@@ -5725,7 +5730,7 @@ of matches.
 @item GROUPS
 An array variable containing the list of groups of which the current    
 user is a member.
-Assignments to @env{GROUPS} have no effect and return an error status.
+Assignments to @env{GROUPS} have no effect.
 If @env{GROUPS} is unset, it loses its special properties, even if it is
 subsequently reset.
 
@@ -6992,6 +6997,7 @@ The directory stack is a list of recently-visited directories.  The
 the current directory, and the @code{popd} builtin removes specified
 directories from the stack and changes the current directory to
 the directory removed.  The @code{dirs} builtin displays the contents
+of the directory stack.  The current directory is always the "top"
 of the directory stack.
 
 The contents of the directory stack are also visible
@@ -7040,13 +7046,11 @@ with zero.
 popd [-n] [+@var{N} | -@var{N}]
 @end example
 
-Remove the top entry from the directory stack, and @code{cd}
-to the new top directory.
 When no arguments are given, @code{popd}
 removes the top directory from the stack and
-performs a @code{cd} to the new top directory.  The
-elements are numbered from 0 starting at the first directory listed with
-@code{dirs}; that is, @code{popd} is equivalent to @code{popd +0}.
+performs a @code{cd} to the new top directory.
+The elements are numbered from 0 starting at the first directory
+listed with @code{dirs}; that is, @code{popd} is equivalent to @code{popd +0}.
 
 @table @code
 @item -n
@@ -7068,12 +7072,13 @@ pushd [-n] [@var{+N} | @var{-N} | @var{dir}]
 
 Save the current directory on the top of the directory stack
 and then @code{cd} to @var{dir}.
-With no arguments, @code{pushd} exchanges the top two directories.
+With no arguments, @code{pushd} exchanges the top two directories
+and makes the new top the current directory.
 
 @table @code
 @item -n
-Suppresses the normal change of directory when adding directories
-to the stack, so that only the stack is manipulated.
+Suppresses the normal change of directory when rotating or
+adding directories to the stack, so that only the stack is manipulated.
 @item +@var{N}
 Brings the @var{N}th directory (counting from the left of the
 list printed by @code{dirs}, starting with zero) to the top of
@@ -7083,7 +7088,7 @@ Brings the @var{N}th directory (counting from the right of the
 list printed by @code{dirs}, starting with zero) to the top of
 the list by rotating the stack.
 @item @var{dir}
-Makes the current working directory be the top of the stack, making
+Makes @var{dir} be the top of the stack, making
 it the new current directory as if it had been supplied as an argument
 to the @code{cd} builtin.
 @end table

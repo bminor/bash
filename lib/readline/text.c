@@ -925,7 +925,12 @@ rl_insert (count, c)
     }
 
   if (n != (unsigned short)-2)		/* -2 = sentinel value for having inserted N */
-    r = rl_execute_next (n);
+    {
+      /* setting rl_pending_input inhibits setting rl_last_func so we do it
+	 ourselves here */
+      rl_last_func = rl_insert; 
+      r = rl_execute_next (n);
+    }
 
   return r;
 }

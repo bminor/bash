@@ -66,6 +66,7 @@ $END
 #include "../flags.h"
 #include "common.h"
 #include "bashgetopt.h"
+#include "findcmd.h"
 
 #if defined (PROGRAMMABLE_COMPLETION)
 #  include "../pcomplete.h"
@@ -299,6 +300,7 @@ dyn_load_builtin (list, flags, filename)
   char *struct_name, *name, *funcname;
   sh_load_func_t *loadfunc;
   struct builtin **new_builtins, *b, *new_shell_builtins, *old_builtin;
+  char *loadables_path, *load_path;
 
   if (list == 0)
     return (EXECUTION_FAILURE);
@@ -307,10 +309,31 @@ dyn_load_builtin (list, flags, filename)
 #define RTLD_LAZY 1
 #endif
 
+  handle = 0;
+  if (absolute_program (filename) == 0)
+    {
+      loadables_path = get_string_value ("BASH_LOADABLES_PATH");
+      if (loadables_path)
+	{
+	  load_path = find_in_path (filename, loadables_path, FS_NODIRS|FS_EXEC_PREFERRED);
+	  if (load_path)
+	    {
 #if defined (_AIX)
-  handle = dlopen (filename, RTLD_NOW|RTLD_GLOBAL);
+	      handle = dlopen (load_path, RTLD_NOW|RTLD_GLOBAL);
 #else
-  handle = dlopen (filename, RTLD_LAZY);
+	      handle = dlopen (load_path, RTLD_LAZY);
+#endif /* !_AIX */
+	      free (load_path);
+	    }
+	}
+    }
+
+  /* Fall back to current directory for now */
+  if (handle == 0)
+#if defined (_AIX)
+    handle = dlopen (filename, RTLD_NOW|RTLD_GLOBAL);
+#else
+    handle = dlopen (filename, RTLD_LAZY);
 #endif /* !_AIX */
 
   if (handle == 0)

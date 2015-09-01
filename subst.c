@@ -6313,6 +6313,16 @@ parameter_brace_expand_indir (name, var_is_special, quoted, quoted_dollar_atp, c
   if (t == 0)
     return (WORD_DESC *)NULL;
 
+  if (valid_brace_expansion_word (t, SPECIAL_VAR (t, 0)) == 0)
+    {
+      report_error (_("%s: bad substitution"), t);
+      free (t);
+      w = alloc_word_desc ();
+      w->word = &expand_param_error;
+      w->flags = 0;
+      return (w);
+    }
+	
   w = parameter_brace_expand_word (t, SPECIAL_VAR(t, 0), quoted, 0, 0);
   free (t);
 
@@ -7827,6 +7837,11 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
   if (want_indir)
     {
       tdesc = parameter_brace_expand_indir (name + 1, var_is_special, quoted, quoted_dollar_atp, contains_dollar_at);
+      if (tdesc == &expand_wdesc_error || tdesc == &expand_wdesc_fatal)
+	{
+	  temp = (char *)NULL;
+	  goto bad_substitution;
+	}
       /* Turn off the W_ARRAYIND flag because there is no way for this function
 	 to return the index we're supposed to be using. */
       if (tdesc && tdesc->flags)

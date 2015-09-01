@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Jul 31 11:16:37 EDT 2015
+.\"	Last Change: Sat Aug 15 15:17:33 EDT 2015
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2015 July 31" "GNU Bash 4.4"
+.TH BASH 1 "2015 August 15" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1520,6 +1520,12 @@ Use
 .B LINENO
 to obtain the current line number.
 .TP
+.B BASH_LOADABLES_PATH
+A colon-separated list of directories in which the shell looks for
+dynamically loadable builtins specified by the
+.B enable
+command.
+.TP
 .B BASH_REMATCH
 An array variable whose members are assigned by the \fB=~\fP binary
 operator to the \fB[[\fP conditional command.
@@ -1681,7 +1687,7 @@ This variable exists only when a shell function is executing.
 Assignments to
 .SM
 .B FUNCNAME
-have no effect and return an error status.
+have no effect.
 If
 .SM
 .B FUNCNAME
@@ -1704,7 +1710,7 @@ user is a member.
 Assignments to
 .SM
 .B GROUPS
-have no effect and return an error status.
+have no effect.
 If
 .SM
 .B GROUPS
@@ -8656,15 +8662,15 @@ The return value is zero on success, non-zero on failure.
 .PD
 Adds a directory to the top of the directory stack, or rotates
 the stack, making the new top of the stack the current working
-directory.  With no arguments, exchanges the top two directories
+directory.  With no arguments, \fBpushd\fP exchanges the top two directories
 and returns 0, unless the directory stack is empty.
 Arguments, if supplied, have the following meanings:
 .RS
 .PD 0
 .TP
 .B \-n
-Suppresses the normal change of directory when adding directories
-to the stack, so that only the stack is manipulated.
+Suppresses the normal change of directory when rotating or
+adding directories to the stack, so that only the stack is manipulated.
 .TP
 \fB+\fP\fIn\fP
 Rotates the stack so that the \fIn\fPth directory

@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.4, version 4.071])dnl
+AC_REVISION([for Bash 4.4, version 4.072])dnl
 
 define(bashvers, 4.4)
 define(relstatus, alpha)
@@ -1190,6 +1190,12 @@ AC_SUBST(BUILD_DIR)
 # Some versions of autoconf don't substitute these automatically
 AC_SUBST(datarootdir)
 AC_SUBST(localedir)
+
+# directory where we install dynamically loadable builtins
+if test -z "$loadablesdir"; then
+	loadablesdir='${libdir}/bash'
+fi
+AC_SUBST(loadablesdir)
 
 AC_SUBST(YACC)
 AC_SUBST(AR)

@@ -320,6 +320,7 @@ run_pending_traps ()
 	 while (pending_traps[sig]--) instead of the if statement. */
       if (pending_traps[sig])
 	{
+itrace("run_pending_traps: %d: %d", sig, pending_traps[sig]);
 	  if (running_trap == sig+1)
 	    /*continue*/;
 
@@ -403,6 +404,7 @@ run_pending_traps ()
 	      /* XXX - set pending_traps[sig] = 0 here? */
 	      pending_traps[sig] = 0;
 	      evalstring (savestring (trap_list[sig]), "trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE);
+itrace("run_pending_traps: evalstring returns");
 #if defined (JOB_CONTROL)
 	      restore_pipeline (1);
 #endif

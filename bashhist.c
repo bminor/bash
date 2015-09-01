@@ -730,11 +730,24 @@ check_add_history (line, force)
 #if defined (SYSLOG_HISTORY)
 #define SYSLOG_MAXLEN 600
 
+extern char *shell_name;
+
+#ifndef OPENLOG_OPTS
+#define OPENLOG_OPTS 0
+#endif
+
 void
 bash_syslog_history (line)
      const char *line;
 {
   char trunc[SYSLOG_MAXLEN];
+  static int first = 1;
+
+  if (first)
+    {
+      openlog (shell_name, OPENLOG_OPTS, SYSLOG_FACILITY);
+      first = 0;
+    }
 
   if (strlen(line) < SYSLOG_MAXLEN)
     syslog (SYSLOG_FACILITY|SYSLOG_LEVEL, "HISTORY: PID=%d UID=%d %s", getpid(), current_user.uid, line);
