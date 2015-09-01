@@ -621,6 +621,13 @@ set_return_trap (command)
   set_signal (RETURN_TRAP, command);
 }
 
+void
+maybe_set_return_trap (command)
+     char *command;
+{
+  trap_if_untrapped (RETURN_TRAP, command);
+}
+
 #ifdef INCLUDE_UNUSED
 void
 set_sigint_trap (command)

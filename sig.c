@@ -612,12 +612,12 @@ sigint_sighandler (sig)
     ADDINTERRUPT;
 
   /* We will get here in interactive shells with job control active; allow
-     an interactive wait to be interrupted. */
-  if (this_shell_builtin && this_shell_builtin == wait_builtin)
+     an interactive wait to be interrupted.  wait_intr_flag is only set during
+     the execution of the wait builtin and when wait_intr_buf is valid. */
+  if (wait_intr_flag)
     {
       last_command_exit_value = 128 + sig;
-      if (wait_intr_flag)
-	wait_signal_received = sig;
+      wait_signal_received = sig;
       SIGRETURN (0);
     }
       

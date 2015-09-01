@@ -9385,3 +9385,84 @@ doc/{bash.1,bashref.texi}
 configure.ac,Makefile.in,builtins/Makefile.in
 	- loadablesdir: set in configure, substitute into Makefiles.  Reserved
 	  for future use
+
+				   8/18
+				   ----
+subst.c
+	- shell_expand_word_list: if make_internal_declare fails, make sure to
+	  propagate that error return back and make the assignment statement fail.
+	  Fixes seg fault reported by Sergey Tselikh <stselikh@gmail.com>
+
+				   8/20
+				   ----
+builtins/declare.def
+	- declare_internal: made a slight tweak to the warning message about
+	  quoted compound assignments by printing it only if the array (indexed
+	  or assoc) does not already exist
+
+				   8/21
+				   ----
+braces.c
+	- mkseq: call strvec_dispose before throw_to_top_level if we saw SIGINT
+	  to avoid a memory leak
+
+trap.c
+	- maybe_set_return_trap: set the RETURN trap to string if it's not already
+	  trapped, in the same way as the debug and error traps
+
+execute_cmd.c
+	- execute_function: use maybe_set_return_trap to allow functions to set
+	  return traps that persist across calls even if function tracing is
+	  enabled
+
+lib/readline/input.c
+	- rl_gather_tyi: make sure errno reset to 0 after select call, for
+	  ioctl and read
+	- rl_gather_tyi: if read returns -1/EIO, return -1
+	- rl_read_key: if rl_gather_tyi returns -1/EIO, return READERR if in
+	  RL_STATE_READCMD (reading command in readline_internal_char), EOF
+	  if not (like rl_getc). Continue to return '\n' on other errors;
+	  rl_done = 1 in any case.  Fix for issue reported by
+	  Lubomir Rintel <lkundrak@v3.sk>
+
+lib/readline/{misc,text,vi_mode}.c
+	- fix return values from rl_read_key to handle < 0
+
+				   8/22
+				   ----
+
+parse.y
+	- parsing_redirection: macro that expands to true if the last read
+	  token (always passed as an argument) is a redirection token that
+	  will leave us reading a word that's the target of the redirection
+	- command_token_position: make sure that even if the parser state
+	  indicates we are reading a simple command (PST_REDIRLIST), we do
+	  not perform alias expansion on a WORD that is part of a redirection,
+	  using parsing_redirection() to do so.  Fixes but reported to Red Hat
+	  by Robert Alm Nilsson <rorialni@gmail.com>
+	  https://bugzilla.redhat.com/show_bug.cgi?id=795795
+
+builtins/declare.def
+	- declare_internal: only print the warning now if the variable is not
+	  already an array or if we are not creating an array with -a or -A,
+	  cuts down the spurious warnings
+	- declare_internal: even if the rhs of the assignment looks like a
+	  compound array, if we're not assigning to an existing array or we're
+	  not creating an array, make it an array subscript assignment.  This
+	  means things like declare a[1]='(foo)' and a[1]='(foo)' behave
+	  identically
+
+builtins/help.def
+	- wdispcolumn: change use of displen and add new dispchars variable to
+	  deal with locales where each wide character does not take up one
+	  column position.  Fix for bug reported by Mingye (Arthur) Wang
+	  <arthur200126@hotmail.com>
+
+				   8/23
+				   ----
+sig.c
+	- sigint_sighandler: if we get a SIGINT while this_shell_builtin ==
+	  wait_builtin, perform the special handling only if wait_intr_flag
+	  is non-zero, don't just use it to set wait_sigint_received.  This
+	  makes sure we run bashline_set_event_hook.  Fixes bug reported by
+	  isabella parakiss <izaberina@gmail.com>

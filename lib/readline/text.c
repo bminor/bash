@@ -610,7 +610,7 @@ rl_skip_csi_sequence (count, key)
   while (ch >= 0x20 && ch < 0x40);
   RL_UNSETSTATE (RL_STATE_MOREINPUT);
 
-  return 0;
+  return (ch < 0);
 }
 
 int
@@ -622,6 +622,8 @@ rl_arrow_keys (count, c)
   RL_SETSTATE(RL_STATE_MOREINPUT);
   ch = rl_read_key ();
   RL_UNSETSTATE(RL_STATE_MOREINPUT);
+  if (ch < 0)
+    return (1);
 
   switch (_rl_to_upper (ch))
     {

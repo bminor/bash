@@ -128,7 +128,7 @@ _rl_arg_dispatch (cxt, c)
 
   /* If we see a key bound to `universal-argument' after seeing digits,
       it ends the argument but is otherwise ignored. */
-  if (_rl_keymap[c].type == ISFUNC && _rl_keymap[c].function == rl_universal_argument)
+  if (c >= 0 && _rl_keymap[c].type == ISFUNC && _rl_keymap[c].function == rl_universal_argument)
     {
       if ((cxt & NUM_SAWDIGITS) == 0)
 	{
@@ -268,6 +268,8 @@ _rl_arg_callback (cxt)
   int c, r;
 
   c = _rl_arg_getchar ();
+  if (c < 0)
+    return (1);		/* EOF */
 
   if (_rl_argcxt & NUM_READONE)
     {

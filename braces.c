@@ -420,7 +420,12 @@ mkseq (start, end, incr, type, width)
   do
     {
 #if defined (SHELL)
-      QUIT;		/* XXX - memory leak here */
+      if (ISINTERRUPT)
+        {
+          strvec_dispose (result);
+          result = (char **)NULL;
+        }
+      QUIT;
 #endif
       if (type == ST_INT)
 	result[i++] = t = itos (n);

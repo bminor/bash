@@ -374,7 +374,7 @@ dispcolumn (i, buf, bufsize, width, height)
      int width, height;
 {
   int j;
-  int displen;
+  int dispcols;
   char *helpdoc;
 
   /* first column */
@@ -391,9 +391,9 @@ dispcolumn (i, buf, bufsize, width, height)
       return;
     }
 
-  displen = strlen (buf);
+  dispcols = strlen (buf);
   /* two spaces */
-  for (j = displen; j < width; j++)
+  for (j = dispcols; j < width; j++)
     putc (' ', stdout);
 
   /* second column */
@@ -416,7 +416,7 @@ wdispcolumn (i, buf, bufsize, width, height)
      int width, height;
 {
   int j;
-  int displen;
+  int dispcols, dispchars;
   char *helpdoc;
   wchar_t *wcstr;
   size_t slen, n;
@@ -446,13 +446,18 @@ wdispcolumn (i, buf, bufsize, width, height)
     if (wcstr[j] == L'\n' || wcstr[j] == L'\t')
       wcstr[j] = L' ';
 
-  displen = wcsnwidth (wcstr+1, slen, width - 2) + 1;	/* +1 for ' ' or '*' */
-  
+  /* dispchars == number of characters that will be displayed */
+  dispchars = wcsnwidth (wcstr+1, slen, width - 2);
+  /* dispcols == number of columns required to display DISPCHARS */
+  dispcols = wcswidth (wcstr+1, dispchars) + 1;	/* +1 for ' ' or '*' */
+
   wcstr[0] = (shell_builtins[i].flags & BUILTIN_ENABLED) ? L' ' : L'*';
 
-  /* This assumes each wide char takes up one column position when displayed */
-  wcstr[width - 2] = L'>';		/* indicate truncation */
-  wcstr[width - 1] = L'\0';
+  if (dispcols >= width-2)
+    {
+      wcstr[dispchars] = L'>';		/* indicate truncation */
+      wcstr[dispchars+1] = L'\0';
+    }
 
   printf ("%ls", wcstr);
   if (((i << 1) >= num_shell_builtins) || (i+height >= num_shell_builtins))
@@ -463,7 +468,7 @@ wdispcolumn (i, buf, bufsize, width, height)
     }
 
   /* at least one space */
-  for (j = displen; j < width; j++)
+  for (j = dispcols; j < width; j++)
     putc (' ', stdout);
 
   /* second column */
@@ -488,13 +493,20 @@ wdispcolumn (i, buf, bufsize, width, height)
     if (wcstr[j] == L'\n' || wcstr[j] == L'\t')
       wcstr[j] = L' ';
 
-  displen = wcsnwidth (wcstr+1, slen, width - 2);
+  /* dispchars == number of characters that will be displayed */
+  dispchars = wcsnwidth (wcstr+1, slen, width - 2);
+  dispcols = wcswidth (wcstr+1, dispchars) + 1;	/* +1 for ' ' or '*' */
   
   wcstr[0] = (shell_builtins[i+height].flags & BUILTIN_ENABLED) ? L' ' : L'*';
 
-  /* This assumes each wide char takes up one column position when displayed */
-  wcstr[width - 3] = L'>';		/* indicate truncation */
-  wcstr[width - 2] = L'\0';
+  /* The dispchars-1 is there for terminals that behave strangely when you
+     have \n in the nth column for terminal width n; this is what bash-4.3
+     did. */
+  if (dispcols >= width - 2)
+    {
+      wcstr[dispchars-1] = L'>';		/* indicate truncation */
+      wcstr[dispchars] = L'\0';
+    }
 
   printf ("%ls\n", wcstr);
 

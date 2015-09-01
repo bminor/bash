@@ -6160,7 +6160,6 @@ parameter_brace_expand_word (name, var_is_special, quoted, pflags, indp)
   else if (valid_array_reference (name, 0))
     {
 expand_arrayref:
-      /* XXX - does this leak if name[@] or name[*]? */
       if (pflags & PF_ASSIGNRHS)
 	{
 	  var = array_variable_part (name, &tt, (int *)0);
@@ -10138,7 +10137,14 @@ shell_expand_word_list (tlist, eflags)
 
 	  opts[opti] = '\0';
 	  if (opti > 0)
-	    make_internal_declare (tlist->word->word, opts);
+	    {
+	      t = make_internal_declare (tlist->word->word, opts);
+	      if (t != EXECUTION_SUCCESS)
+		{
+		  last_command_exit_value = t;
+		  exp_jump_to_top_level (DISCARD);
+		}
+	    }
 
 	  t = do_word_assignment (tlist->word, 0);
 	  if (t == 0)

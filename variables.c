@@ -2219,9 +2219,9 @@ get_variable_value (var)
 
 /* Return the string value of a variable.  Return NULL if the variable
    doesn't exist.  Don't cons a new string.  This is a potential memory
-   leak if the variable is found in the temporary environment.  Since
-   functions and variables have separate name spaces, returns NULL if
-   var_name is a shell function only. */
+   leak if the variable is found in the temporary environment, but doesn't
+   leak in practice.  Since    functions and variables have separate name
+   spaces, returns NULL if var_name is a shell function only. */
 char *
 get_string_value (var_name)
      const char *var_name;

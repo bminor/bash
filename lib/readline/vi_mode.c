@@ -1280,8 +1280,8 @@ _rl_vi_domove_callback (m)
   int c, r;
 
   m->motion = c = rl_vi_domove_getchar (m);
-  /* XXX - what to do if this returns -1?  Should we return 1 for eof to
-     callback code? */
+  if (c < 0)
+    return 1;		/* EOF */
   r = rl_domove_read_callback (m);
 
   return ((r == 0) ? r : 1);	/* normalize return values */

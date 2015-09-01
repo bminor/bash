@@ -4626,7 +4626,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
 	{
 	  return_trap = savestring (return_trap);
 	  add_unwind_protect (xfree, return_trap);
-	  add_unwind_protect (set_return_trap, return_trap);
+	  add_unwind_protect (maybe_set_return_trap, return_trap);
 	}
       restore_default_signal (RETURN_TRAP);
     }

@@ -76,6 +76,7 @@ extern void set_return_trap __P((char *));
 
 extern void maybe_set_debug_trap __P((char *));
 extern void maybe_set_error_trap __P((char *));
+extern void maybe_set_return_trap __P((char *));
 
 extern void set_sigint_trap __P((char *));
 extern void set_signal __P((int, char *));

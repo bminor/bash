@@ -50,6 +50,8 @@ extern volatile sig_atomic_t terminating_signal;
 #define ADDINTERRUPT interrupt_state++
 #define DELINTERRUPT interrupt_state--
 
+#define ISINTERRUPT interrupt_state != 0
+
 /* The same sort of thing, this time just for signals that would ordinarily
    cause the shell to terminate. */
 

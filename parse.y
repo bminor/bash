@@ -1,6 +1,6 @@
 /* parse.y - Yacc grammar for bash. */
 
-/* Copyright (C) 1989-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -2710,10 +2710,27 @@ gather_here_documents ()
    brace partner. */
 static int open_brace_count;
 
+/* In the following three macros, `token' is always last_read_token */
+
+/* Are we in the middle of parsing a redirection where we are about to read
+   a word?  This is used to make sure alias expansion doesn't happen in the
+   middle of a redirection, even though we're parsing a simple command. */
+#define parsing_redirection(token) \
+  (token == '<' || token == '>' || \
+   token == GREATER_GREATER || token == GREATER_BAR || \
+   token == LESS_GREATER || token == LESS_LESS_MINUS || \
+   token == LESS_LESS || token == LESS_LESS_LESS || \
+   token == LESS_AND || token == GREATER_AND || token == AND_GREATER)
+
+/* Is `token' one that will allow a WORD to be read in a command position?
+   We can read a simple command name on which we should attempt alias expansion
+   or we can read an assignment statement. */
 #define command_token_position(token) \
-  (((token) == ASSIGNMENT_WORD) || (parser_state&PST_REDIRLIST) || \
+  (((token) == ASSIGNMENT_WORD) || \
+   ((parser_state&PST_REDIRLIST) && parsing_redirection(token) == 0) || \
    ((token) != SEMI_SEMI && (token) != SEMI_AND && (token) != SEMI_SEMI_AND && reserved_word_acceptable(token)))
 
+/* Are we in a position where we can read an assignment statement? */
 #define assignment_acceptable(token) \
   (command_token_position(token) && ((parser_state & PST_CASEPAT) == 0))
 
