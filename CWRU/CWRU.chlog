@@ -9514,3 +9514,48 @@ examples/loadables/Makefile.in
 	  an example
 	- uninstall-supported,uninistall-unsupported: uninstall targets,
 	  make uninstall chooses one based on $(SHOBJ_STATUS)
+
+				   8/31
+				   ----
+lib/glob/Makefile.in
+	- CPPFLAGS: move after ${INCLUDES} so library-specific include paths
+	  take precedence.  This is what the other parts of the shell do.
+	  Report from Poor Yorick <org.gnu.lists.bug-bash@pooryorick.com>
+
+builtins/read.def
+	- reset_alarm: cancel alarm before restoring signal handler to avoid
+	  possible race condition.  Report and fix from Oleg Popov
+	  <dev-random@mail.ru>
+
+subst.c
+	- string_extract_verbatim: if SEPARATORS is "'", don't short-circuit
+	  to string_extract_single_quoted unless the SX_NOCTLESC flag is set.
+	  Callers expect this function to honor CTLESC, even to quote a single
+	  quote.  Fixes bug reported by isabella parakiss <izaberina@gmail.com>
+	  and several others
+
+				    9/2
+				    ---
+include/chartypes.h
+	- TOCTRL: handle '?' by special-casing it to 0x7f.  Fixes a problem
+	  with $'\c?' reported by Helmut Karlowski <helmut.karlowski@ish.de>
+
+redir.c
+	- write_here_string: don't word-split the here string document.  The
+	  bash documentation has always said this doesn't happen, even though
+	  bash has done so for years, and other shells that implement here-
+	  strings don't perform any word splitting.  The practical effect is
+	  that sequences of IFS characters are collapsed to spaces.  Fixes
+	  bug reported by Clint Hepner <clint.hepner@gmail.com>
+
+				    9/3
+				    ---
+doc/{bash.1,bashref.texi}
+	- add \? to the list of backslash escapes expanded by $'...' ANSI-C
+	  quoting.  It was expanded but not documented
+
+lib/readline/util.c
+	- _rl_audit_tty: updated from Red Hat patch
+
+lib/readline/readline.c
+	- HAVE_DECL_AUDIT_USER_TTY: correct #define check

@@ -1100,7 +1100,7 @@ string_extract_verbatim (string, slen, sindex, charlist, flags)
   char *temp;
   DECLARE_MBSTATE;
 
-  if (charlist[0] == '\'' && charlist[1] == '\0')
+  if ((flags & SX_NOCTLESC) && charlist[0] == '\'' && charlist[1] == '\0')
     {
       temp = string_extract_single_quoted (string, sindex);
       --*sindex;	/* leave *sindex at separator character */

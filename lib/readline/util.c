@@ -551,6 +551,7 @@ _rl_settracefp (fp)
 
 #if HAVE_DECL_AUDIT_USER_TTY && defined (ENABLE_TTY_AUDIT_SUPPORT)
 #include <sys/socket.h>
+#include <libaudit.h>
 #include <linux/audit.h>
 #include <linux/netlink.h>
 
@@ -559,42 +560,33 @@ void
 _rl_audit_tty (string)
      char *string;
 {
+  struct audit_message req;
   struct sockaddr_nl addr;
-  struct msghdr msg;
-  struct nlmsghdr nlm;
-  struct iovec iov[2];
   size_t size;
   int fd;
 
-  fd = socket (AF_NETLINK, SOCK_RAW, NETLINK_AUDIT);
+  fd = socket (PF_NETLINK, SOCK_RAW, NETLINK_AUDIT);
   if (fd < 0)
     return;
   size = strlen (string) + 1;
 
-  nlm.nlmsg_len = NLMSG_LENGTH (size);
-  nlm.nlmsg_type = AUDIT_USER_TTY;
-  nlm.nlmsg_flags = NLM_F_REQUEST;
-  nlm.nlmsg_seq = 0;
-  nlm.nlmsg_pid = 0;
+  if (NLMSG_SPACE (size) > MAX_AUDIT_MESSAGE_LENGTH)
+    return;
 
-  iov[0].iov_base = &nlm;
-  iov[0].iov_len = sizeof (nlm);
-  iov[1].iov_base = string;
-  iov[1].iov_len = size;
+  memset (&req, 0, sizeof(req));
+  req.nlh.nlmsg_len = NLMSG_SPACE (size);
+  req.nlh.nlmsg_type = AUDIT_USER_TTY;
+  req.nlh.nlmsg_flags = NLM_F_REQUEST;
+  req.nlh.nlmsg_seq = 0;
+  if (size && string)
+    memcpy (NLMSG_DATA(&req.nlh), string, size);
+  memset (&addr, 0, sizeof(addr));
 
   addr.nl_family = AF_NETLINK;
   addr.nl_pid = 0;
   addr.nl_groups = 0;
 
-  msg.msg_name = &addr;
-  msg.msg_namelen = sizeof (addr);
-  msg.msg_iov = iov;
-  msg.msg_iovlen = 2;
-  msg.msg_control = NULL;
-  msg.msg_controllen = 0;
-  msg.msg_flags = 0;
-
-  (void)sendmsg (fd, &msg, 0);
+  sendto (fd, &req, req.nlh.nlmsg_len, 0, (struct sockaddr*)&addr, sizeof(addr));
   close (fd);
 }
 #endif
