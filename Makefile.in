@@ -1,4 +1,4 @@
-# Makefile for bash-4.4, version 4.15
+# Makefile for bash-4.4, version 4.17
 #
 # Copyright (C) 1996-2015 Free Software Foundation, Inc.
 
@@ -43,6 +43,7 @@ datadir = @datadir@
 localedir = @localedir@
 
 loadablesdir = @loadablesdir@
+headersdir = @headersdir@
 
 docdir = @docdir@
 
@@ -445,6 +446,19 @@ HSOURCES = shell.h flags.h trap.h hashcmd.h hashlib.h jobs.h builtins.h \
 
 SOURCES	 = $(CSOURCES) $(HSOURCES) $(BUILTIN_DEFS)
 
+# headers in top-level source directory that get installed by install-headers
+INSTALLED_HEADERS = shell.h bashjmp.h command.h syntax.h general.h error.h \
+		    variables.h array.h assoc.h arrayfunc.h quit.h dispose_cmd.h \
+		    make_cmd.h subst.h sig.h externs.h builtins.h \
+		    bashtypes.h xmalloc.h config-top.h config-bot.h \
+		    bashintl.h bashansi.h bashjmp.h alias.h hashlib.h \
+		    conftypes.h unwind_prot.h jobs.h siglist.h
+INSTALLED_BUILTINS_HEADERS = bashgetopt.h common.h getopt.h
+INSTALLED_INCFILES =	 posixstat.h ansi_stdlib.h filecntl.h posixdir.h \
+	memalloc.h stdc.h posixjmp.h posixwait.h posixtime.h systimes.h \
+	unionwait.h maxpath.h shtty.h typemax.h ocache.h chartypes.h gettext.h \
+	posixstat.h shmbchar.h shmbutil.h stat-time.h
+
 # header files chosen based on running of configure
 SIGNAMES_H = @SIGNAMES_H@
 
@@ -523,7 +537,7 @@ PO_DIR = $(dot)/po/
 SIGNAMES_SUPPORT = $(SUPPORT_SRC)mksignames.c
 
 SUPPORT_SRC = $(srcdir)/support/
-SDIR = $(dot)/support/
+SDIR = $(dot)/support
 
 TESTS_SUPPORT = recho$(EXEEXT) zecho$(EXEEXT) printenv$(EXEEXT) xcase$(EXEEXT)
 CREATED_SUPPORT = signames.h recho$(EXEEXT) zecho$(EXEEXT) printenv$(EXEEXT) \
@@ -538,12 +552,17 @@ CREATED_MAKEFILES = Makefile builtins/Makefile doc/Makefile \
 		    lib/readline/Makefile lib/glob/Makefile \
 		    lib/sh/Makefile lib/tilde/Makefile lib/malloc/Makefile \
 		    lib/termcap/Makefile examples/loadables/Makefile \
+		    examples/loadables/Makefile.inc \
 		    examples/loadables/perl/Makefile support/Makefile \
 		    lib/intl/Makefile po/Makefile po/Makefile.in
+CREATED_HEADERS = signames.h config.h pathnames.h version.h y.tab.h \
+		  ${DEFDIR}/builtext.h
 
 OTHER_DOCS = $(srcdir)/CHANGES $(srcdir)/COMPAT $(srcdir)/NEWS $(srcdir)/POSIX \
 	$(srcdir)/RBASH $(srcdir)/README
 OTHER_INSTALLED_DOCS = CHANGES COMPAT NEWS POSIX RBASH README
+
+LOADABLES_DIR = ${top_builddir}/examples/loadables
 
 # Keep GNU Make from exporting the entire environment for small machines.
 .NOEXPORT:
@@ -736,6 +755,9 @@ $(srcdir)/configure:	$(srcdir)/configure.ac $(srcdir)/aclocal.m4 $(srcdir)/confi
 reconfig: force
 	sh $(srcdir)/configure -C
 
+loadables:
+	cd $(LOADABLES_DIR) && $(MAKE) $(MFLAGS) all
+
 #newversion:	mkversion
 #	$(RM) .build
 #	./mkversion -dir $(srcdir) -dist
@@ -776,11 +798,40 @@ install:	.made installdirs
 		infodir=$(infodir) htmldir=$(htmldir) DESTDIR=$(DESTDIR) $@ )
 	-( cd $(DEFDIR) ; $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 	-( cd $(PO_DIR) ; $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
+	-( cd $(LOADABLES_DIR) && $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 
 install-strip:
 	$(MAKE) $(MFLAGS) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' \
 		prefix=${prefix} exec_prefix=${exec_prefix} \
 		DESTDIR=$(DESTDIR) install
+
+install-headers-dirs:
+	@${SHELL} $(SUPPORT_SRC)mkinstalldirs $(DESTDIR)$(headersdir)
+	@${SHELL} $(SUPPORT_SRC)mkinstalldirs $(DESTDIR)$(headersdir)/builtins
+	@${SHELL} $(SUPPORT_SRC)mkinstalldirs $(DESTDIR)$(headersdir)/include
+	@${SHELL} $(SUPPORT_SRC)mkinstalldirs $(DESTDIR)$(libdir)/pkgconfig
+
+install-headers: install-headers-dirs
+	@for hf in $(INSTALLED_HEADERS) ; do \
+		${INSTALL_DATA} $(srcdir)/"$$hf" $(DESTDIR)$(headersdir)/$$hf; \
+	done
+	@for hf in $(INSTALLED_INCFILES) ; do \
+		${INSTALL_DATA} $(BASHINCDIR)/"$$hf" $(DESTDIR)$(headersdir)/include/$$hf; \
+	done
+	@for hf in $(INSTALLED_BUILTINS_HEADERS) ; do \
+		${INSTALL_DATA} $(BUILTIN_SRCDIR)/"$$hf" $(DESTDIR)$(headersdir)/builtins/$$hf; \
+	done
+	@for hf in $(CREATED_HEADERS) ; do \
+		${INSTALL_DATA} $(BUILD_DIR)/"$$hf" $(DESTDIR)$(headersdir)/$$hf; \
+	done
+	$(INSTALL_DATA) $(SDIR)/bash.pc $(DESTDIR)$(libdir)/pkgconfig/bash.pc
+
+uninstall-headers:
+	-( cd $(DESTDIR)$(headersdir) && $(RM) $(INSTALLED_HEADERS) )
+	-( cd $(DESTDIR)$(headersdir)/include && $(RM) $(INSTALLED_INCFILES) )
+	-( cd $(DESTDIR)$(headersdir)/builtins && $(RM) $(INSTALLED_BUILTINS_HEADERS) )
+	-( cd $(DESTDIR)$(headersdir) && $(RM) $(CREATED_HEADERS) )
+	-( $(RM) $(DESTDIR)$(libdir)/pkgconfig/bash.pc )
 
 uninstall:	.made
 	$(RM) $(DESTDIR)$(bindir)/$(Program) $(DESTDIR)$(bindir)/bashbug
@@ -790,6 +841,7 @@ uninstall:	.made
 		man3dir=$(man3dir) man3ext=$(man3ext) \
 		infodir=$(infodir) htmldir=$(htmldir) DESTDIR=$(DESTDIR) $@ )
 	-( cd $(PO_DIR) ; $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
+	-( cd $(LOADABLES_DIR) && $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 
 .PHONY: basic-clean clean realclean maintainer-clean distclean mostlyclean maybe-clean
 
@@ -808,6 +860,7 @@ clean:	basic-clean
 		(cd $$libdir && test -f Makefile && $(MAKE) $(MFLAGS) $@) ;\
 	done
 	-( cd $(PO_DIR) ; $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
+	-( cd $(LOADABLES_DIR) && $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 	$(RM) $(CREATED_SUPPORT)
 
 mostlyclean: basic-clean
@@ -818,6 +871,7 @@ mostlyclean: basic-clean
 		(cd $$libdir && test -f Makefile && $(MAKE) $(MFLAGS) $@) ;\
 	done
 	-( cd $(PO_DIR) ; $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
+	-( cd $(LOADABLES_DIR) && $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 
 distclean:	basic-clean maybe-clean
 	( cd $(DOCDIR) && $(MAKE) $(MFLAGS) $@ )
@@ -827,6 +881,7 @@ distclean:	basic-clean maybe-clean
 		(cd $$libdir && test -f Makefile && $(MAKE) $(MFLAGS) $@) ;\
 	done
 	-( cd $(PO_DIR) ; $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
+	-( cd $(LOADABLES_DIR) && $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 	$(RM) $(CREATED_CONFIGURE) tags TAGS 
 	$(RM) $(CREATED_SUPPORT) Makefile $(CREATED_MAKEFILES) pathnames.h
 
@@ -841,6 +896,7 @@ maintainer-clean:	basic-clean
 		(cd $$libdir && test -f Makefile && $(MAKE) $(MFLAGS) $@) ;\
 	done
 	-( cd $(PO_DIR) ; $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
+	-( cd $(LOADABLES_DIR) && $(MAKE) $(MFLAGS) DESTDIR=$(DESTDIR) $@ )
 	$(RM) $(CREATED_CONFIGURE) $(CREATED_MAKEFILES)
 	$(RM) $(CREATED_SUPPORT) Makefile pathnames.h
 

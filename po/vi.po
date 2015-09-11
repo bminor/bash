@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash-4.3-rc2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-06-17 11:03-0400\n"
+"POT-Creation-Date: 2015-08-25 10:07-0400\n"
 "PO-Revision-Date: 2014-02-01 13:11+0700\n"
 "Last-Translator: Trần Ngọc Quân <vnwildman@gmail.com>\n"
 "Language-Team: Vietnamese <translation-team-vi@lists.sourceforge.net>\n"
@@ -26,7 +26,7 @@ msgstr ""
 msgid "bad array subscript"
 msgstr "sai chỉ số mảng"
 
-#: arrayfunc.c:360 builtins/declare.def:640
+#: arrayfunc.c:360 builtins/declare.def:647
 #, c-format
 msgid "%s: cannot convert indexed to associative array"
 msgstr "%s: không thể chuyển đổi mảng kiểu chỉ số sang mảng kết hợp"
@@ -51,21 +51,21 @@ msgstr "%s: %s: phải sử dụng chỉ số phụ khi gán mảng kết hợp"
 msgid "%s: cannot create: %s"
 msgstr "%s: không thể tạo: %s"
 
-#: bashline.c:4062
+#: bashline.c:4075
 msgid "bash_execute_unix_command: cannot find keymap for command"
 msgstr "bash_execute_unix_command: không tìm thấy ánh xạ cho câu lệnh"
 
-#: bashline.c:4156
+#: bashline.c:4169
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr "%s: ký tự khác khoảng trắng đầu tiên không phải là “\"”"
 
-#: bashline.c:4185
+#: bashline.c:4198
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr "thiếu dấu đóng “%c” trong %s"
 
-#: bashline.c:4219
+#: bashline.c:4232
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: thiếu dấu hai chấm phân cách"
@@ -80,7 +80,7 @@ msgstr "khai triển ngoặc ôm: không thể phân bổ bộ nhớ cho %s"
 msgid "brace expansion: failed to allocate memory for %d elements"
 msgstr "khai triển ngoặc ôm: gặp lỗi khi phân bổ bộ nhớ cho `%d' phần tử"
 
-#: braces.c:452
+#: braces.c:457
 #, c-format
 msgid "brace expansion: failed to allocate memory for `%s'"
 msgstr "khai triển ngoặc ôm: gặp lỗi khi phân bổ bộ nhớ cho `%s'"
@@ -221,7 +221,7 @@ msgstr "%s: sai đặc tả tín hiệu"
 msgid "`%s': not a pid or valid job spec"
 msgstr "“%s”: không phải một pid hoặc đặc tả công việc hợp lệ"
 
-#: builtins/common.c:272 error.c:488
+#: builtins/common.c:272 error.c:510
 #, c-format
 msgid "%s: readonly variable"
 msgstr "%s: biến chỉ đọc"
@@ -324,7 +324,7 @@ msgstr "hiện thời không thực thi chức năng tự hoàn thiện"
 msgid "can only be used in a function"
 msgstr "chỉ có thể dùng trong một hàm"
 
-#: builtins/declare.def:330 builtins/declare.def:565
+#: builtins/declare.def:330 builtins/declare.def:566
 #, c-format
 msgid "%s: reference variable cannot be an array"
 msgstr "%s: biến tham chiếu không thể là một mảng"
@@ -334,7 +334,7 @@ msgstr "%s: biến tham chiếu không thể là một mảng"
 msgid "%s: nameref variable self references not allowed"
 msgstr "%s: biến nameref tự tham chiếu là không được phép"
 
-#: builtins/declare.def:346 builtins/declare.def:574 subst.c:6228 subst.c:8537
+#: builtins/declare.def:346 builtins/declare.def:575 subst.c:6244 subst.c:8581
 #, c-format
 msgid "%s: invalid variable name for name reference"
 msgstr "%s: tên biến không hợp lệ cho một tham chiếu tên"
@@ -343,51 +343,56 @@ msgstr "%s: tên biến không hợp lệ cho một tham chiếu tên"
 msgid "cannot use `-f' to make functions"
 msgstr "không thể dùng “-f” để tạo hàm"
 
-#: builtins/declare.def:436 execute_cmd.c:5545
+#: builtins/declare.def:436 execute_cmd.c:5546
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: hàm chỉ đọc"
 
-#: builtins/declare.def:614
+#: builtins/declare.def:620
 #, c-format
 msgid "%s: quoted compound array assignment deprecated"
 msgstr ""
 
-#: builtins/declare.def:627
+#: builtins/declare.def:634
 #, c-format
 msgid "%s: cannot destroy array variables in this way"
 msgstr "%s: không thể hủy biến mảng bằng cách này"
 
-#: builtins/declare.def:634 builtins/read.def:749
+#: builtins/declare.def:641 builtins/read.def:749
 #, c-format
 msgid "%s: cannot convert associative to indexed array"
 msgstr "%s: không thể chuyển đổi mảng kết hợp sang mảng chỉ số"
 
-#: builtins/enable.def:137 builtins/enable.def:145
+#: builtins/enable.def:143 builtins/enable.def:151
 msgid "dynamic loading not available"
 msgstr "không có chức năng nạp động"
 
-#: builtins/enable.def:313
+#: builtins/enable.def:342
 #, c-format
 msgid "cannot open shared object %s: %s"
 msgstr "không thể mở đối tượng dùng chung %s: %s"
 
-#: builtins/enable.def:339
+#: builtins/enable.def:368
 #, c-format
 msgid "cannot find %s in shared object %s: %s"
 msgstr "không tìm thấy %s trong đối tượng dùng chung %s: %s"
 
-#: builtins/enable.def:465
+#: builtins/enable.def:386
+#, c-format
+msgid "load function for %s returns failure (%d): not loaded"
+msgstr ""
+
+#: builtins/enable.def:511
 #, c-format
 msgid "%s: not dynamically loaded"
 msgstr "%s không được nạp động"
 
-#: builtins/enable.def:480
+#: builtins/enable.def:537
 #, c-format
 msgid "%s: cannot delete: %s"
 msgstr "%s: không thể xoá: %s"
 
-#: builtins/evalfile.c:143 builtins/hash.def:171 execute_cmd.c:5386
+#: builtins/evalfile.c:143 builtins/hash.def:171 execute_cmd.c:5387
 #, c-format
 msgid "%s: is a directory"
 msgstr "%s: là thư mục"
@@ -407,7 +412,7 @@ msgstr "%s: tập tin quá lớn"
 msgid "%s: cannot execute binary file"
 msgstr "%s: không thể thực hiện tập tin nhị phân"
 
-#: builtins/exec.def:154 builtins/exec.def:156 builtins/exec.def:228
+#: builtins/exec.def:154 builtins/exec.def:156 builtins/exec.def:230
 #, c-format
 msgid "%s: cannot execute: %s"
 msgstr "%s: không thể thực thi: %s"
@@ -496,7 +501,7 @@ msgstr ""
 msgid "%s: cannot open: %s"
 msgstr "%s: không thể mở: %s"
 
-#: builtins/help.def:513
+#: builtins/help.def:525
 #, c-format
 msgid ""
 "These shell commands are defined internally.  Type `help' to see this list.\n"
@@ -854,17 +859,22 @@ msgstr "%s là từ khoá của hệ vỏ\n"
 msgid "%s is a function\n"
 msgstr "%s là một hàm\n"
 
-#: builtins/type.def:297
+#: builtins/type.def:299
+#, fuzzy, c-format
+msgid "%s is a special shell builtin\n"
+msgstr "%s là lệnh dựng sẵn hệ vỏ\n"
+
+#: builtins/type.def:301
 #, c-format
 msgid "%s is a shell builtin\n"
 msgstr "%s là lệnh dựng sẵn hệ vỏ\n"
 
-#: builtins/type.def:318 builtins/type.def:403
+#: builtins/type.def:323 builtins/type.def:408
 #, c-format
 msgid "%s is %s\n"
 msgstr "%s là %s\n"
 
-#: builtins/type.def:338
+#: builtins/type.def:343
 #, c-format
 msgid "%s is hashed (%s)\n"
 msgstr "%s được băm (%s)\n"
@@ -907,7 +917,7 @@ msgstr "“%c”: toán tử chế độ ký hiệu không hợp lệ"
 msgid "`%c': invalid symbolic mode character"
 msgstr "“%c”: ký tự chế độ ký hiệu không hợp lệ"
 
-#: error.c:90 error.c:325 error.c:327 error.c:329
+#: error.c:90 error.c:347 error.c:349 error.c:351
 msgid " line "
 msgstr " dòng "
 
@@ -921,23 +931,28 @@ msgstr "lệnh cuối: %s\n"
 msgid "Aborting..."
 msgstr "Hủy bỏ..."
 
-#: error.c:440
+#: error.c:287
+#, c-format
+msgid "INFORM: "
+msgstr ""
+
+#: error.c:462
 msgid "unknown command error"
 msgstr "lỗi lệnh không rõ"
 
-#: error.c:441
+#: error.c:463
 msgid "bad command type"
 msgstr "kiểu lệnh sai"
 
-#: error.c:442
+#: error.c:464
 msgid "bad connector"
 msgstr "bộ kết nối sai"
 
-#: error.c:443
+#: error.c:465
 msgid "bad jump"
 msgstr "nhảy sai"
 
-#: error.c:481
+#: error.c:503
 #, c-format
 msgid "%s: unbound variable"
 msgstr "%s: biến chưa liên kết"
@@ -952,61 +967,61 @@ msgstr "\aquá thời hạn đợi dữ liệu nhập: tự động đăng xuấ
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr "không thể chuyển hướng đầu vào chuẩn từ /dev/null: %s"
 
-#: execute_cmd.c:1286
+#: execute_cmd.c:1284
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "ĐỊNH DẠNG THỜI GIAN: “%c”: ký tự định dạng không hợp lệ"
 
-#: execute_cmd.c:2344
+#: execute_cmd.c:2350
 msgid "pipe error"
 msgstr "lỗi ống dẫn"
 
-#: execute_cmd.c:4419
+#: execute_cmd.c:4420
 #, fuzzy, c-format
 msgid "eval: maximum eval nesting level exceeded (%d)"
 msgstr "%s: vượt quá mức độ tối đa các hàm lồng nhau (%d)."
 
-#: execute_cmd.c:4431
+#: execute_cmd.c:4432
 #, fuzzy, c-format
 msgid "%s: maximum source nesting level exceeded (%d)"
 msgstr "%s: vượt quá mức độ tối đa các hàm lồng nhau (%d)."
 
-#: execute_cmd.c:4540
+#: execute_cmd.c:4541
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
 msgstr "%s: vượt quá mức độ tối đa các hàm lồng nhau (%d)."
 
-#: execute_cmd.c:5061
+#: execute_cmd.c:5062
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: bị hạn chế: không thể dùng “/” trong tên lệnh"
 
-#: execute_cmd.c:5149
+#: execute_cmd.c:5150
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: không tìm thấy lệnh"
 
-#: execute_cmd.c:5384
+#: execute_cmd.c:5385
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: execute_cmd.c:5421
+#: execute_cmd.c:5422
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: bộ thông dịch sai"
 
-#: execute_cmd.c:5458
+#: execute_cmd.c:5459
 #, c-format
 msgid "%s: cannot execute binary file: %s"
 msgstr "%s: không thể thực hiện tập tin nhị phân: %s"
 
-#: execute_cmd.c:5536
+#: execute_cmd.c:5537
 #, c-format
 msgid "`%s': is a special builtin"
 msgstr "“%s”: là lệnh dựng sẵn đặc biệt"
 
-#: execute_cmd.c:5588
+#: execute_cmd.c:5589
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "không thể nhân đôi fd %d thành fd %d"
@@ -1081,7 +1096,7 @@ msgstr "%s: lỗi biểu thức\n"
 msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: không thể truy cập thư mục cấp trên"
 
-#: input.c:102 subst.c:5529
+#: input.c:102 subst.c:5545
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "không thể đặt lại chế độ “nodelay” cho fd %d"
@@ -1097,149 +1112,149 @@ msgid "save_bash_input: buffer already exists for new fd %d"
 msgstr "save_bash_input: đã có bộ đệm cho fd mới %d"
 
 # Nghĩa chữ ?
-#: jobs.c:487
+#: jobs.c:509
 msgid "start_pipeline: pgrp pipe"
 msgstr "start_pipeline: pgrp pipe"
 
-#: jobs.c:922
+#: jobs.c:944
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr "pid được tánh nhánh %d có vẻ đang chạy trong công việc %d"
 
-#: jobs.c:1041
+#: jobs.c:1063
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "đang xoá công việc bị dừng chạy %d với nhóm tiến trình %ld"
 
-#: jobs.c:1145
+#: jobs.c:1167
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
 msgstr "add_process: tiến trình %5ld (%s) trong the_pipeline"
 
-#: jobs.c:1148
+#: jobs.c:1170
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr "add_process: pid %5ld (%s) được đánh dấu vẫn hoạt động"
 
-#: jobs.c:1477
+#: jobs.c:1499
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "describe_pid: %ld: không có pid như vậy"
 
-#: jobs.c:1492
+#: jobs.c:1514
 #, c-format
 msgid "Signal %d"
 msgstr "Tín hiệu %d"
 
-#: jobs.c:1506 jobs.c:1532
+#: jobs.c:1528 jobs.c:1554
 msgid "Done"
 msgstr "Xong"
 
-#: jobs.c:1511 siglist.c:123
+#: jobs.c:1533 siglist.c:123
 msgid "Stopped"
 msgstr "Bị dừng"
 
-#: jobs.c:1515
+#: jobs.c:1537
 #, c-format
 msgid "Stopped(%s)"
 msgstr "Bị dừng(%s)"
 
-#: jobs.c:1519
+#: jobs.c:1541
 msgid "Running"
 msgstr "Đang chạy"
 
-#: jobs.c:1536
+#: jobs.c:1558
 #, c-format
 msgid "Done(%d)"
 msgstr "Xong(%d)"
 
-#: jobs.c:1538
+#: jobs.c:1560
 #, c-format
 msgid "Exit %d"
 msgstr "Thoát %d"
 
-#: jobs.c:1541
+#: jobs.c:1563
 msgid "Unknown status"
 msgstr "Không rõ trạng thái"
 
-#: jobs.c:1628
+#: jobs.c:1650
 #, c-format
 msgid "(core dumped) "
 msgstr "(xuất ra core)"
 
-#: jobs.c:1647
+#: jobs.c:1669
 #, c-format
 msgid "  (wd: %s)"
 msgstr "  (wd: %s)"
 
-#: jobs.c:1869
+#: jobs.c:1893
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr "setpgid tiến trình con (%ld thành %ld)"
 
-#: jobs.c:2218 nojobs.c:634
+#: jobs.c:2242 nojobs.c:639
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: pid %ld không phải là tiến trình con của hệ vỏ này"
 
-#: jobs.c:2465
+#: jobs.c:2497
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for: Không có mục ghi về tiến trình %ld"
 
-#: jobs.c:2785
+#: jobs.c:2817
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: công việc %d bị dừng chạy"
 
-#: jobs.c:3077
+#: jobs.c:3109
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: công việc bị chấm dứt"
 
-#: jobs.c:3086
+#: jobs.c:3118
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: công việc %d đã đang chạy nền"
 
-#: jobs.c:3311
+#: jobs.c:3343
 msgid "waitchld: turning on WNOHANG to avoid indefinite block"
 msgstr "waitchld: đang bật WNOHANG để tránh bị chặn vô hạn"
 
-#: jobs.c:3810
+#: jobs.c:3846
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s: dòng %d: "
 
-#: jobs.c:3824 nojobs.c:872
+#: jobs.c:3860 nojobs.c:882
 #, c-format
 msgid " (core dumped)"
 msgstr " (xuất ra core)"
 
-#: jobs.c:3836 jobs.c:3849
+#: jobs.c:3872 jobs.c:3885
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(wd ngay: %s)\n"
 
-#: jobs.c:3881
+#: jobs.c:3917
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: getpgrp bị lỗi"
 
-#: jobs.c:3944
+#: jobs.c:3980
 msgid "initialize_job_control: line discipline"
 msgstr "initialize_job_control: kỷ luật dòng"
 
 # Nghĩa chữ : dừng dịch
-#: jobs.c:3954
+#: jobs.c:3990
 msgid "initialize_job_control: setpgid"
 msgstr "initialize_job_control: setpgid"
 
-#: jobs.c:3975 jobs.c:3984
+#: jobs.c:4011 jobs.c:4020
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "không thể đặt nhóm tiến trình cuối cùng (%d)"
 
-#: jobs.c:3989
+#: jobs.c:4025
 msgid "no job control in this shell"
 msgstr "không có điều khiển công việc trong hệ vỏ này"
 
@@ -1398,99 +1413,99 @@ msgstr "make_redirection: chỉ dẫn chuyển hướng “%d” nằm ngoài ph
 msgid "maximum here-document count exceeded"
 msgstr ""
 
-#: parse.y:3354 parse.y:3637
+#: parse.y:3371 parse.y:3654
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "gặp kết thúc tập tin bất thường trong khi tìm “%c” tương ứng"
 
-#: parse.y:4247
+#: parse.y:4266
 msgid "unexpected EOF while looking for `]]'"
 msgstr "gặp kết thúc tập tin bất thường trong khi tìm “]]”"
 
-#: parse.y:4252
+#: parse.y:4271
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr "gặp lỗi cú pháp trong biểu thức điều kiện: thẻ bài bất thường “%s”"
 
-#: parse.y:4256
+#: parse.y:4275
 msgid "syntax error in conditional expression"
 msgstr "gặp lỗi cú pháp trong biểu thức điều kiện"
 
-#: parse.y:4334
+#: parse.y:4353
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr "gặp thẻ bài bất thường “%s”, cần “)”"
 
-#: parse.y:4338
+#: parse.y:4357
 msgid "expected `)'"
 msgstr "cần “)”"
 
-#: parse.y:4366
+#: parse.y:4385
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr "đối số bất thường “%s” cho toán tử một ngôi điều kiện"
 
-#: parse.y:4370
+#: parse.y:4389
 msgid "unexpected argument to conditional unary operator"
 msgstr "đối số bất thường cho toán tử một ngôi điều kiện"
 
-#: parse.y:4416
+#: parse.y:4435
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr "thẻ bài bất thường “%s”, cần toán tử hai ngôi điều kiện"
 
-#: parse.y:4420
+#: parse.y:4439
 msgid "conditional binary operator expected"
 msgstr "cần toán tử hai ngôi điều kiện"
 
-#: parse.y:4442
+#: parse.y:4461
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr "đối số bất thường “%s” cho toán tử hai ngôi điều kiện"
 
-#: parse.y:4446
+#: parse.y:4465
 msgid "unexpected argument to conditional binary operator"
 msgstr "đối số bất thường cho toán tử hai ngôi điều kiện"
 
-#: parse.y:4457
+#: parse.y:4476
 #, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr "gặp thẻ bài bất thường “%c” trong câu lệnh điều kiện"
 
-#: parse.y:4460
+#: parse.y:4479
 #, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr "gặp thẻ bài bất thường “%s” trong câu lệnh điều kiện"
 
-#: parse.y:4464
+#: parse.y:4483
 #, c-format
 msgid "unexpected token %d in conditional command"
 msgstr "gặp thẻ bài bất thường “%d” trong câu lệnh điều kiện"
 
-#: parse.y:5814
+#: parse.y:5837
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "có lỗi cú pháp ở gần thẻ bài bất thường “%s”"
 
-#: parse.y:5832
+#: parse.y:5855
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "lỗi cú pháp ở gần “%s”"
 
-#: parse.y:5842
+#: parse.y:5865
 msgid "syntax error: unexpected end of file"
 msgstr "lỗi cú pháp: kết thúc tập tin bất thường"
 
-#: parse.y:5842
+#: parse.y:5865
 msgid "syntax error"
 msgstr "lỗi cú pháp"
 
-#: parse.y:5904
+#: parse.y:5927
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "Dùng \"%s\" để rời hệ vỏ.\n"
 
-#: parse.y:6066
+#: parse.y:6089
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "gặp kết thúc tập tin bất thường trong khi tìm “)” tương ứng"
 
@@ -1524,45 +1539,45 @@ msgstr "xtrace_set: con trỏ tập tin NULL"
 msgid "xtrace fd (%d) != fileno xtrace fp (%d)"
 msgstr "xtrace fd (%d) != fileno xtrace fp (%d)"
 
-#: print_cmd.c:1523
+#: print_cmd.c:1527
 #, c-format
 msgid "cprintf: `%c': invalid format character"
 msgstr "cprintf: “%c”: ký tự định dạng không hợp lệ"
 
-#: redir.c:126 redir.c:174
+#: redir.c:124 redir.c:171
 msgid "file descriptor out of range"
 msgstr "bộ mô tả tập tin ở ngoại phạm vi"
 
-#: redir.c:181
+#: redir.c:178
 #, c-format
 msgid "%s: ambiguous redirect"
 msgstr "%s: chuyển hướng chưa rõ ràng"
 
-#: redir.c:185
+#: redir.c:182
 #, c-format
 msgid "%s: cannot overwrite existing file"
 msgstr "%s: không thể ghi đè lên tập tin đã có"
 
-#: redir.c:190
+#: redir.c:187
 #, c-format
 msgid "%s: restricted: cannot redirect output"
 msgstr "%s: bị hạn chế: không thể chuyển hướng kết xuất"
 
-#: redir.c:195
+#: redir.c:192
 #, c-format
 msgid "cannot create temp file for here-document: %s"
 msgstr "không thể tạo tập tin tạm thời cho tài liệu này: %s"
 
-#: redir.c:199
+#: redir.c:196
 #, c-format
 msgid "%s: cannot assign fd to variable"
 msgstr "%s: không thể gán fd vào biến"
 
-#: redir.c:589
+#: redir.c:586
 msgid "/dev/(tcp|udp)/host/port not supported without networking"
 msgstr "/dev/(tcp|udp)/host/port không được hỗ trợ nếu không có mạng"
 
-#: redir.c:871 redir.c:986 redir.c:1047 redir.c:1212
+#: redir.c:868 redir.c:983 redir.c:1044 redir.c:1209
 msgid "redirection error: cannot duplicate fd"
 msgstr "lỗi chuyển hướng: không thể nhân đôi fd"
 
@@ -1646,7 +1661,17 @@ msgstr ""
 "Dùng lệnh “bashbug” để thông báo lỗi.\n"
 "Báo cáo các lỗi dịch cho: <http://translationproject.org/team/vi.html>.\n"
 
-#: sig.c:701
+#: shell.c:1921
+#, c-format
+msgid "bash home page: <http://www.gnu.org/software/bash>\n"
+msgstr ""
+
+#: shell.c:1922
+#, c-format
+msgid "General help using GNU software: <http://www.gnu.org/gethelp/>\n"
+msgstr ""
+
+#: sig.c:703
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
 msgstr "sigprocmask: %d: thao tác không hợp lệ"
@@ -1825,89 +1850,89 @@ msgstr "Tín hiệu lạ #%d"
 msgid "bad substitution: no closing `%s' in %s"
 msgstr "sai chỉ số phụ: không có đóng “%s” trong %s"
 
-#: subst.c:2882
+#: subst.c:2897
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr "%s: không thể gán danh sách cho bộ phận của mảng"
 
-#: subst.c:5421 subst.c:5437
+#: subst.c:5436 subst.c:5452
 msgid "cannot make pipe for process substitution"
 msgstr "không thể tạo ống dẫn để thay thế tiến trình"
 
-#: subst.c:5469
+#: subst.c:5485
 msgid "cannot make child for process substitution"
 msgstr "không thể tạo tiến trình con để thay thế tiến trình"
 
-#: subst.c:5519
+#: subst.c:5535
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "không thể mở ống dẫn đặt tên %s để đọc"
 
-#: subst.c:5521
+#: subst.c:5537
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "không thể mở ống dẫn có tên %s để ghi"
 
-#: subst.c:5539
+#: subst.c:5555
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "không thể nhân đôi ống dẫn đặt tên %s thành fd %d"
 
-#: subst.c:5746
+#: subst.c:5762
 msgid "cannot make pipe for command substitution"
 msgstr "không thể tạo ống dẫn để thay thế lệnh"
 
-#: subst.c:5784
+#: subst.c:5801
 msgid "cannot make child for command substitution"
 msgstr "không thể tạo tiến trình con để thay thế lệnh"
 
-#: subst.c:5803
+#: subst.c:5820
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr "command_substitute: không thể nhân đôi ống dẫn thành fd 1"
 
-#: subst.c:6416
-#, fuzzy, c-format
-msgid "%s: invalid indirect expansion"
-msgstr "%s: sai số lượng dòng"
-
-#: subst.c:6423
-#, fuzzy, c-format
-msgid "%s: invalid variable name"
-msgstr "“%s”: tên bí danh không hợp lệ"
-
-#: subst.c:6470
-#, c-format
-msgid "%s: parameter null or not set"
-msgstr "%s: tham số null hoặc chưa được đặt"
-
-#: subst.c:6742 subst.c:6757
-#, c-format
-msgid "%s: substring expression < 0"
-msgstr "%s: biểu thức chuỗi con < 0"
-
-#: subst.c:7969
+#: subst.c:6330 subst.c:8007 subst.c:8027
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: thay thế sai"
 
-#: subst.c:8061
+#: subst.c:6442
+#, fuzzy, c-format
+msgid "%s: invalid indirect expansion"
+msgstr "%s: sai số lượng dòng"
+
+#: subst.c:6449
+#, fuzzy, c-format
+msgid "%s: invalid variable name"
+msgstr "“%s”: tên bí danh không hợp lệ"
+
+#: subst.c:6496
+#, c-format
+msgid "%s: parameter null or not set"
+msgstr "%s: tham số null hoặc chưa được đặt"
+
+#: subst.c:6768 subst.c:6783
+#, c-format
+msgid "%s: substring expression < 0"
+msgstr "%s: biểu thức chuỗi con < 0"
+
+#: subst.c:8105
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: không thể gán bằng cách này"
 
-#: subst.c:8400
+#: subst.c:8444
 msgid ""
 "future versions of the shell will force evaluation as an arithmetic "
 "substitution"
 msgstr ""
 "phiên bản hệ vỏ mới sẽ ép buộc ước lượng dưới dạng một hàm thay thế số học"
 
-#: subst.c:8940
+#: subst.c:8984
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "sai thay thế: không có \"`\" đóng trong %s"
 
-#: subst.c:9878
+#: subst.c:9922
 #, c-format
 msgid "no match: %s"
 msgstr "không khớp: %s"
@@ -1948,12 +1973,12 @@ msgstr "thiếu “]”"
 msgid "invalid signal number"
 msgstr "số thứ tự tín hiệu không hợp lệ"
 
-#: trap.c:385
+#: trap.c:386
 #, c-format
 msgid "run_pending_traps: bad value in trap_list[%d]: %p"
 msgstr "run_pending_traps: giá trị sai trong danh sách trap_list[%d]: %p"
 
-#: trap.c:389
+#: trap.c:390
 #, c-format
 msgid ""
 "run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself"
@@ -1961,7 +1986,7 @@ msgstr ""
 "run_pending_traps: bộ xử lý tín hiệu là SIG_DFL, đang gửi lại %d (%s) cho "
 "chính mình"
 
-#: trap.c:442
+#: trap.c:444
 #, c-format
 msgid "trap_handler: bad signal %d"
 msgstr "trap_handler: tín hiệu sai %d"
@@ -2041,9 +2066,9 @@ msgstr "%s: %s: sai đặt giá trị cho bộ mô tả tập tin vết"
 msgid "%s: %s: compatibility value out of range"
 msgstr "%s: %s: giá trị so sánh nằm ngoài phạm vi"
 
-#: version.c:46 version2.c:46
+#: version.c:46
 #, fuzzy
-msgid "Copyright (C) 2014 Free Software Foundation, Inc."
+msgid "Copyright (C) 2015 Free Software Foundation, Inc."
 msgstr "Tác quyền (C) năm 2014 của Tổ chức Quỹ Phần mềm Tự do, Inc."
 
 #: version.c:47 version2.c:47
@@ -2066,6 +2091,11 @@ msgstr "Đây là phần mềm tự do; bạn có quyền sửa đổi và phát
 #: version.c:92 version2.c:92
 msgid "There is NO WARRANTY, to the extent permitted by law."
 msgstr "Ở đây KHÔNG BẢO HÀNH GÌ CẢ, với điều kiện được pháp luật cho phép."
+
+#: version2.c:46
+#, fuzzy
+msgid "Copyright (C) 2014 Free Software Foundation, Inc."
+msgstr "Tác quyền (C) năm 2014 của Tổ chức Quỹ Phần mềm Tự do, Inc."
 
 #: xmalloc.c:91
 #, c-format
@@ -2412,8 +2442,9 @@ msgstr ""
 "HẬU-TỐ] [TÊN ...]"
 
 #: builtins.c:233
+#, fuzzy
 msgid ""
-"compgen [-abcdefgjksuv] [-o option]  [-A action] [-G globpat] [-W wordlist]  "
+"compgen [-abcdefgjksuv] [-o option] [-A action] [-G globpat] [-W wordlist]  "
 "[-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]"
 msgstr ""
 "compgen [-abcdefgjksuv] [-o TÙY-CHỌN]  [-A HÀNH-ĐỘNG] [-G MẪU-GLOB] [-W DANH-"

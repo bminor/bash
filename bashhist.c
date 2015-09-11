@@ -229,7 +229,7 @@ bash_history_inhibit_expansion (string, i)
 
   /* Make sure the history expansion should not be skipped by quoting or
      command/process substitution. */
-  else if ((t = skip_to_delim (string, 0, hx, SD_NOJMP)) > 0 && t > i)
+  else if ((t = skip_to_delim (string, 0, hx, SD_NOJMP|SD_HISTEXP)) > 0 && t > i)
     return (1);
   else
     return (0);

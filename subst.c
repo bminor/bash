@@ -1738,8 +1738,8 @@ skip_to_delim (string, start, delims, flags)
      char *delims;
      int flags;
 {
-  int i, pass_next, backq, si, c;
-  int invert, skipquote, skipcmd, noprocsub, completeflag;
+  int i, pass_next, backq, dquote, si, c;
+  int invert, skipquote, skipcmd, noprocsub, completeflag, histexp;
   size_t slen;
   char *temp, open[3];
   DECLARE_MBSTATE;
@@ -1750,10 +1750,11 @@ skip_to_delim (string, start, delims, flags)
   invert = (flags & SD_INVERT);
   skipcmd = (flags & SD_NOSKIPCMD) == 0;
   noprocsub = (flags & SD_NOPROCSUB);
+  histexp = (flags & SD_HISTEXP);
   completeflag = (flags & SD_COMPLETE) ? SX_COMPLETE : 0;
 
   i = start;
-  pass_next = backq = 0;
+  pass_next = backq = dquote = 0;
   while (c = string[i])
     {
       /* If this is non-zero, we should not let quote characters be delimiters
@@ -1790,12 +1791,24 @@ skip_to_delim (string, start, delims, flags)
 	}
       else if (skipquote == 0 && invert == 0 && member (c, delims))
 	break;
-      else if (c == '\'' || c == '"')
+      /* the usual case is to use skip_xxx_quoted, but we don't skip over double
+	 quoted strings when looking for the history expansion character as a
+	 delimiter. */
+      else if (histexp && dquote && c == '\'')
+        {
+          i++;
+          continue;
+        }
+      else if (c == '\'')
+	i = skip_single_quoted (string, slen, ++i);
+      else if (histexp && c == '"')
 	{
-	  i = (c == '\'') ? skip_single_quoted (string, slen, ++i)
-			  : skip_double_quoted (string, slen, ++i, completeflag);
-	  /* no increment, the skip functions increment past the closing quote. */
-	}
+	  dquote = 1 - dquote;
+	  i++;
+	  continue;
+	}     
+      else if (c == '"')
+	i = skip_double_quoted (string, slen, ++i, completeflag);
       else if (c == '$' && ((skipcmd && string[i+1] == LPAREN) || string[i+1] == LBRACE))
 	{
 	  si = i + 2;

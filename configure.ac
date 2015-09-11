@@ -21,10 +21,10 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.4, version 4.072])dnl
+AC_REVISION([for Bash 4.4, version 4.073])dnl
 
 define(bashvers, 4.4)
-define(relstatus, alpha)
+define(relstatus, beta)
 
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
 
@@ -1196,6 +1196,10 @@ if test -z "$loadablesdir"; then
 	loadablesdir='${libdir}/bash'
 fi
 AC_SUBST(loadablesdir)
+if test -z "$headersdir"; then
+	headersdir='$(includedir)/$(PACKAGE_NAME)'
+fi
+AC_SUBST(headersdir)
 
 AC_SUBST(YACC)
 AC_SUBST(AR)
@@ -1222,7 +1226,9 @@ AC_OUTPUT([Makefile builtins/Makefile lib/readline/Makefile lib/glob/Makefile \
 	  lib/intl/Makefile \
 	  lib/malloc/Makefile lib/sh/Makefile lib/termcap/Makefile \
 	  lib/tilde/Makefile doc/Makefile support/Makefile po/Makefile.in \
-	  examples/loadables/Makefile examples/loadables/perl/Makefile],
+	  examples/loadables/Makefile examples/loadables/Makefile.inc \
+	  examples/loadables/perl/Makefile \
+	  support/bash.pc],
 [
 # Makefile uses this timestamp file to record whether config.h is up to date.
 echo timestamp > stamp-h

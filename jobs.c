@@ -2766,8 +2766,6 @@ if (job == NO_JOB)
 	     something like a while loop or a for loop, simulate getting
 	     and being killed by the SIGINT to pass the status back to our
 	     parent. */
-/*	  s = job_signal_status (job);		/* XXX - no longer needed */
-
 	  if (child_caught_sigint == 0 && signal_is_trapped (SIGINT) == 0)
 	    {
 	      UNBLOCK_CHILD (oset);

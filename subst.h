@@ -292,6 +292,7 @@ extern char *cond_expand_word __P((WORD_DESC *, int));
 #define SD_GLOB		0x040	/* skip over glob patterns like bracket expressions */
 #define SD_NOPROCSUB	0x080	/* don't parse process substitutions as commands */
 #define SD_COMPLETE	0x100	/* skip_to_delim during completion */
+#define SD_HISTEXP	0x200	/* skip_to_delim during history expansion */
 
 extern int skip_to_delim __P((char *, int, char *, int));
 

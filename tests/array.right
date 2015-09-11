@@ -33,9 +33,6 @@ declare -ar a=([1]="" [2]="bdef" [5]="hello world" [6]="test expression" [15]="t
 declare -ar c
 readonly -a a=([1]="" [2]="bdef" [5]="hello world" [6]="test expression" [15]="test 2")
 readonly -a c
-./array.tests: line 86: warning: d=([1]="" [2]="bdef" [5]="hello world" "test"): quoted compound array assignment deprecated
-./array.tests: line 90: warning: e[10]=(test): quoted compound array assignment deprecated
-./array.tests: line 93: warning: f=("${d[@]}"): quoted compound array assignment deprecated
 a test
 declare -a BASH_ARGC=()
 declare -a BASH_ARGV=()
@@ -379,10 +376,8 @@ declare -a x=([0]="0" [1]="1" [2]="2" [3]="3" [4]="4" [5]="5")
 declare -a x=([0]="0" [1]="1" [2]="2" [3]="3" [4]="4four" [5]="5")
 strlen(4four) = 5
 1 2 0 3
-./array15.sub: line 6: warning: foo=(1 2 xx 3): quoted compound array assignment deprecated
 1 2 0 3
 1 2 0 3
-./array15.sub: line 14: warning: foo=(1 2 xx 3): quoted compound array assignment deprecated
 1 2 0 3
 1 2 0 3
 foo index 1: ok
@@ -438,68 +433,51 @@ argv[1] = <->
 argv[2] = <->
 argv[1] = <  >
 declare -a foo=([0]="( zeroind )")
-./array19.sub: line 13: warning: foo=( zeroind ): quoted compound array assignment deprecated
 declare -a foo=([0]="zeroind")
-./array19.sub: line 17: warning: foo=( zeroind ): quoted compound array assignment deprecated
 declare -a foo=([0]="zeroind")
 declare -a foo=([0]="[0]=bar")
 declare -a foo=([0]="[0]=bar")
 declare -a foo=([0]="[0]=bar")
 declare -- a="(1 2 3)"
-./array19.sub: line 41: warning: a=(1 2 3): quoted compound array assignment deprecated
 declare -a a=([0]="1" [1]="2" [2]="3")
-./array19.sub: line 46: warning: a=(1 2 3): quoted compound array assignment deprecated
 ./array19.sub: line 46: a: 1: must use subscript when assigning associative array
 ./array19.sub: line 46: a: 2: must use subscript when assigning associative array
 ./array19.sub: line 46: a: 3: must use subscript when assigning associative array
 declare -A a=()
 declare -- a="([0]=a [1]=b)"
-./array19.sub: line 55: warning: a=([0]=a [1]=b): quoted compound array assignment deprecated
 declare -a a=([0]="a" [1]="b")
-./array19.sub: line 60: warning: a=([0]=a [1]=b): quoted compound array assignment deprecated
 declare -A a=([0]="a" [1]="b" )
 declare -a var=([0]="[\$(echo" [1]="total" [2]="0)]=1" [3]="[2]=2]")
 declare -a var=([0]="[\$(echo total 0)]=1 [2]=2]")
 declare -a var=([0]="[\$(echo" [1]="total" [2]="0)]=1" [3]="[2]=2]")
-./array19.sub: line 81: warning: var=([$(echo total 0)]=1 [2]=2]): quoted compound array assignment deprecated
 ./array19.sub: line 81: total 0: syntax error in expression (error token is "0")
 declare -a var=()
 declare -al foo=([0]="abcde" [1]="two" [2]="three")
-./array19.sub: line 99: warning: foo=(AbCdE): quoted compound array assignment deprecated
 declare -al foo=([0]="abcde")
 declare -al ar=([0]="one" [1]="two" [2]="three")
 declare -a a=([2]="foo")
 declare -a a=([2]="foo")
 declare -a a=([1]="(var)" [2]="foo")
 ./array19.sub: line 120: warning: a[1]=(var): quoted compound array assignment deprecated
-declare -a a=([0]="var")
+declare -a a=([1]="(var)")
 declare -a a=([0]="1" [1]="2" [2]="(1 2 3)")
 declare -a a=([0]="1" [1]="2" [2]="(1 2 3)")
-./array19.sub: line 137: warning: a=(1 2 3): quoted compound array assignment deprecated
 declare -a a=([0]="1" [1]="2" [2]="3")
-./array19.sub: line 143: warning: a=(1 2 3): quoted compound array assignment deprecated
 declare -a a=([0]="1" [1]="2" [2]="3")
-./array19.sub: line 148: warning: a=(1 2 3): quoted compound array assignment deprecated
 declare -a a=([0]="1" [1]="2" [2]="3")
 declare -- a="a b"
 declare -- b="/scratch/bash"
 declare -- c="(1 2)"
 declare -- d="(\$a)"
 declare -- e="(\$(echo Darwin))"
-./array19.sub: line 162: warning: c=(1 2): quoted compound array assignment deprecated
-./array19.sub: line 162: warning: d=($a): quoted compound array assignment deprecated
-./array19.sub: line 162: warning: e=($(echo Darwin)): quoted compound array assignment deprecated
 declare -a a=([0]="a b")
 declare -a b=([0]="/scratch/bash")
 declare -a c=([0]="1" [1]="2")
 declare -a d=([0]="a" [1]="b")
 declare -a e=([0]="Darwin")
-./array19.sub: line 166: warning: c=(1 2): quoted compound array assignment deprecated
 ./array19.sub: line 166: c: 1: must use subscript when assigning associative array
 ./array19.sub: line 166: c: 2: must use subscript when assigning associative array
-./array19.sub: line 166: warning: d=($a): quoted compound array assignment deprecated
 ./array19.sub: line 166: d: $a: must use subscript when assigning associative array
-./array19.sub: line 166: warning: e=($(echo Darwin)): quoted compound array assignment deprecated
 ./array19.sub: line 166: e: $(echo Darwin): must use subscript when assigning associative array
 declare -A a=([0]="a b" )
 declare -A b=([0]="/scratch/bash" )
