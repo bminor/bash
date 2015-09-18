@@ -712,13 +712,20 @@ main (argc, argv, env)
       arg_index++;
     }
   else if (interactive == 0)
-    /* In this mode, bash is reading a script from stdin, which is a
-       pipe or redirected file. */
+    {
+      /* In this mode, bash is reading a script from stdin, which is a
+	 pipe or redirected file. */
 #if defined (BUFFERED_INPUT)
-    default_buffered_input = fileno (stdin);	/* == 0 */
+      default_buffered_input = fileno (stdin);	/* == 0 */
 #else
-    setbuf (default_input, (char *)NULL);
+      setbuf (default_input, (char *)NULL);
 #endif /* !BUFFERED_INPUT */
+      read_from_stdin = 1;
+    }
+  else if (arg_index == argc)
+    /* "If there are no operands and the -c option is not specified, the -s
+       option shall be assumed." */
+    read_from_stdin = 1;
 
   set_bash_input ();
 

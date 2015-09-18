@@ -96,6 +96,17 @@ bb. Aliases whose value ends in a shell metacharacter now expand in a way to
     allow them to be `pasted' to the next token, which can potentially change
     the meaning of a command (e.g., turning `&' into `&&').
 
+cc. `make install' now installs the example loadable builtins and a set of
+    bash headers to use when developing new loadable builtins.
+
+dd. `enable -f' now attempts to call functions named BUILTIN_builtin_load when
+    loading BUILTIN, and BUILTIN_builtin_unload when deleting it.  This allows
+    loadable builtins to run initialization and cleanup code.
+
+ee. There is a new BASH_LOADABLES_PATH variable containing a list of directories
+    where the `enable -f' command looks for shared objects containing loadable
+    builtins.
+
 2.  New Features in Readline
 
 a.  The history truncation code now uses the same error recovery mechansim as

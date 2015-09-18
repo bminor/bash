@@ -9169,8 +9169,8 @@ doc/{bash.1,bashref.texi}
 				   7/27
 				   ----
 examples/loadables/Makefile.in
-	- add variables and targets to support `make install'; installs supported
-	  builtins in $(libdir)/bash
+	- add variables and targets to support `make install'; installs
+	  supported builtins in $(libdir)/bash
 
 				   7/28
 				   ----
@@ -9186,9 +9186,9 @@ trap.[ch]
 	  trapped; similar to maybe_set_debug_trap back from 4/10
 
 lib/malloc/malloc.c
-	- internal_free: make sure `ubytes' is initialized if MALLOC_WATCH is defined
-	  and we'll be passing it to _malloc_ckwatch.  Report from Flavio Medeiros
-	  <flaviomotamederios@gmail.com>
+	- internal_free: make sure `ubytes' is initialized if MALLOC_WATCH is
+	  defined and we'll be passing it to _malloc_ckwatch.  Report from
+	  Flavio Medeiros <flaviomotamederios@gmail.com>
 
 execute_cmd.c
 	- execute_function: use maybe_set_error_trap in the same way as
@@ -9198,9 +9198,9 @@ execute_cmd.c
 				   7/29
 				   ----
 jobs.c
-	- wait_for: no longer need to call job_signal_status when checking whether
-	  a comsub shell reaped a child that died due to SIGINT; code now uses
-	  child_caught_sigint
+	- wait_for: no longer need to call job_signal_status when checking
+	  whether a comsub shell reaped a child that died due to SIGINT; code
+	  now uses child_caught_sigint
 
 				   7/30
 				   ----
@@ -9225,13 +9225,13 @@ general.h
 
 builtins/enable.def
 	- dyn_load_builtin: attempt to execute a function named BUILTIN_builtin_load,
-	  where BUILTIN is the name of the command being loaded.  If that function
-	  returns 0, the load fails
+	  where BUILTIN is the name of the command being loaded.  If that
+	  function returns 0, the load fails
 	- dyn_unload_builtin: attempt to execute a function named BUILTIN_builtin_unload,
 	  where BUILTIN is the name of the command being unloaded.  It offers a
-	  dynamic builtin a way to clean up after itself.  Inspired by suggestion
-	  from Piotr Grzybowski <narsil.pl@gmail.com> in response to a bug report
-	  from isabella parakiss <izaberina@gmail.com>
+	  dynamic builtin a way to clean up after itself.  Inspired by
+	  suggestion from Piotr Grzybowski <narsil.pl@gmail.com> in response
+	  to a bug report from isabella parakiss <izaberina@gmail.com>
 
 				    8/6
 				    ---
@@ -9265,12 +9265,12 @@ lib/readline/readline.c
 	  map passed as an argument.  Without this, vi mode doesn't call
 	  rl_vi_set_last when it should
 	- _rl_dispatch_subseq: if redoing a vi mode command with `.'
-	  (_rl_vi_redoing != 0) in callback mode and we're indirecting into another
-	  keymap that has shadowed the key corresponding to the command we are
-	  redoing, just call _rl_subseq_result immediately: vi redo doesn't need
-	  to read any additional input, and rl_vi_redo assumes that a single call
-	  to rl_dispatch is sufficient.  Fixes bug reported by Carlos Pita
-	  <carlosjosepita@gmail.com>
+	  (_rl_vi_redoing != 0) in callback mode and we're indirecting into
+	  another keymap that has shadowed the key corresponding to the command
+	  we are redoing, just call _rl_subseq_result immediately: vi redo
+	  doesn't need to read any additional input, and rl_vi_redo assumes
+	  that a single call to rl_dispatch is sufficient.  Fixes bug reported
+	  by Carlos Pita <carlosjosepita@gmail.com>
 
 				    8/7
 				    ---
@@ -9329,10 +9329,10 @@ bashhist.h
 				   8/11
 				   ----
 doc/{bash.1,bashref.texi}
-	- GROUPS,FUNCNAME: change description to note that assignments are silently
-	  ignored, but do not return an error (which would constitute an assignment
-	  error and cause posix mode shells to abort).  Problem pointed out by
-	  Grzegorz Bajson <gbajson@gmail.com>
+	- GROUPS,FUNCNAME: change description to note that assignments are
+	  silently ignored, but do not return an error (which would constitute
+	  an assignment error and cause posix mode shells to abort).  Problem
+	  pointed out by Grzegorz Bajson <gbajson@gmail.com>
 
 				   8/12
 				   ----
@@ -9349,10 +9349,10 @@ subst.c
 				   ----
 jobs.c
 	- {save,restore}_pipeline: saved_pipeline now a linked list of pipelines,
-	  new ones allocated in save_pipeline and freed in restore_pipeline.  This
-	  allow multiple nested calls to save_pipeline (e.g., in traps and then in
-	  process substitution).  Fix for bug reported by isabella parakiss
-	  <izaberina@gmail.com>
+	  new ones allocated in save_pipeline and freed in restore_pipeline.
+	  This allow multiple nested calls to save_pipeline (e.g., in traps
+	  and then in process substitution).  Fix for bug reported by isabella
+	  parakiss <izaberina@gmail.com>
 
 print_cmd.c
 	- named_function_string: if printing a function with the same name as a
@@ -9390,8 +9390,8 @@ configure.ac,Makefile.in,builtins/Makefile.in
 				   ----
 subst.c
 	- shell_expand_word_list: if make_internal_declare fails, make sure to
-	  propagate that error return back and make the assignment statement fail.
-	  Fixes seg fault reported by Sergey Tselikh <stselikh@gmail.com>
+	  propagate that error return back and make the assignment statement
+	  fail. Fixes seg fault reported by Sergey Tselikh <stselikh@gmail.com>
 
 				   8/20
 				   ----
@@ -9407,8 +9407,8 @@ braces.c
 	  to avoid a memory leak
 
 trap.c
-	- maybe_set_return_trap: set the RETURN trap to string if it's not already
-	  trapped, in the same way as the debug and error traps
+	- maybe_set_return_trap: set the RETURN trap to string if it's not
+	  already trapped, in the same way as the debug and error traps
 
 execute_cmd.c
 	- execute_function: use maybe_set_return_trap to allow functions to set
@@ -9470,12 +9470,12 @@ sig.c
 				   8/25
 				   ----
 subst.h
-	- SD_HISTEXP: new flag for skip_to_delim, indicates we are looking for the
-	  history expansion character (special double quote handling)
-	- skip_to_delim: handle SD_HISTEXP flag, changes double quote handling to
-	  be similar to history library: don't call skip_double_quote, make sure
-	  single quotes aren't special in double quotes, but continue to skip
-	  over $(), ${}, and other similar constructs
+	- SD_HISTEXP: new flag for skip_to_delim, indicates we are looking for
+	  the history expansion character (special double quote handling)
+	- skip_to_delim: handle SD_HISTEXP flag, changes double quote handling
+	  to be similar to history library: don't call skip_double_quote, make
+	  sure single quotes aren't special in double quotes, but continue to
+	  skip over $(), ${}, and other similar constructs
 
 				   8/27
 				   ----
@@ -9559,3 +9559,14 @@ lib/readline/util.c
 
 lib/readline/readline.c
 	- HAVE_DECL_AUDIT_USER_TTY: correct #define check
+
+				   9/13
+				   ----
+shell.c
+	- read_from_stdin: make sure value set to 1 appropriately if the shell
+	  is reading from standard input, as Posix seems to specify (?)
+
+lib/readline/kill.c
+	- _rl_copy_to_kill_ring: don't assume that rl_kill_ring has been
+	  allocated if _rl_last_command_was_kill is non-zero; make sure it's
+	  non-null before indexing into it
