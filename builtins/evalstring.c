@@ -573,10 +573,14 @@ itrace("parse_string: longjmp executed: code = %d", code);
 
   run_unwind_frame (PS_TAG);
 
+  /* If we return < 0, the caller (xparse_dolparen) will jump_to_top_level for
+     us, after doing cleanup */
   if (should_jump_to_top_level)
     {
       if (parse_and_execute_level == 0)
 	top_level_cleanup ();
+      if (code == DISCARD)
+	return -DISCARD;
       jump_to_top_level (code);
     }
 

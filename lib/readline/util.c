@@ -549,7 +549,7 @@ _rl_settracefp (fp)
 #endif /* DEBUG */
 
 
-#if HAVE_DECL_AUDIT_USER_TTY && defined (ENABLE_TTY_AUDIT_SUPPORT)
+#if HAVE_DECL_AUDIT_USER_TTY && defined (HAVE_LIBAUDIT_H) && defined (ENABLE_TTY_AUDIT_SUPPORT)
 #include <sys/socket.h>
 #include <libaudit.h>
 #include <linux/audit.h>

@@ -386,7 +386,7 @@ readline (prompt)
     RL_SETSTATE (RL_STATE_CALLBACK);
 #endif
 
-#if HAVE_DECL_AUDIT_USER_TTY && defined (ENABLE_TTY_AUDIT_SUPPORT)
+#if HAVE_DECL_AUDIT_USER_TTY && defined (HAVE_LIBAUDIT_H) && defined (ENABLE_TTY_AUDIT_SUPPORT)
   if (value)
     _rl_audit_tty (value);
 #endif

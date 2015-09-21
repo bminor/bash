@@ -43,10 +43,16 @@
 #  include <unistd.h>
 #endif
 
+#include <errno.h>
+
 #include "history.h"
 #include "histlib.h"
 
 #include "xmalloc.h"
+
+#if !defined (errno)
+extern int errno;
+#endif
 
 /* How big to make the_history when we first allocate it. */
 #define DEFAULT_HISTORY_INITIAL_SIZE	502
@@ -239,7 +245,10 @@ history_get_time (hist)
   ts = hist->timestamp;
   if (ts[0] != history_comment_char)
     return 0;
+  errno = 0;
   t = (time_t) strtol (ts + 1, (char **)NULL, 10);		/* XXX - should use strtol() here */
+  if (errno == ERANGE)
+    return (time_t)0;
   return t;
 }
 

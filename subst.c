@@ -1290,6 +1290,15 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
     {
       c = string[i];
 
+      /* If a recursive call or a call to ADVANCE_CHAR leaves the index beyond
+	 the end of the string, catch it and cut the loop. */
+      if (i > slen)
+	{
+	  i = slen;
+	  c = string[i = slen];
+	  break;
+	}
+
       if (c == 0)
 	break;
 
@@ -2792,6 +2801,8 @@ do_compound_assignment (name, value, flags)
         v = make_local_array_variable (name, 0);
       if (v)
 	assign_compound_array_list (v, list, flags);
+      if (list)
+	dispose_words (list);
     }
   /* In a function but forcing assignment in global context */
   else if (mkglobal && variable_context)
@@ -2808,6 +2819,8 @@ do_compound_assignment (name, value, flags)
 	v = convert_var_to_array (v);
       if (v)
 	assign_compound_array_list (v, list, flags);
+      if (list)
+	dispose_words (list);
     }
   else
     v = assign_array_from_string (name, value, flags);
@@ -6828,7 +6841,15 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
     /* XXX - what if vname == 0 || *vname == 0 ? */
   else
     vname = varname;
-    
+
+  if (vname == 0)
+    {
+      vtype = VT_VARIABLE;
+      *varp = (SHELL_VAR *)NULL;
+      *valp = (char *)NULL;
+      return (vtype);
+    }
+
   /* This sets vtype to VT_VARIABLE or VT_POSPARMS */
   vtype = (vname[0] == '@' || vname[0] == '*') && vname[1] == '\0';
   if (vtype == VT_POSPARMS && vname[0] == '*')
@@ -7109,8 +7130,12 @@ pat_subst (string, pat, rep, mflags)
     }
   else if (*string == 0 && (match_pattern (string, pat, mtype, &s, &e) != 0))
     {
-      ret = (char *)xmalloc (STRLEN (rep) + 1);
-      strcpy (ret, rep);
+      replen = STRLEN (rep);
+      ret = (char *)xmalloc (replen + 1);
+      if (replen == 0)
+	ret[0] = '\0';
+      else
+	strcpy (ret, rep);
       return (ret);
     }
 
@@ -7123,22 +7148,22 @@ pat_subst (string, pat, rep, mflags)
 	break;
       l = s - str;
 
-      if (rxpand)
+      if (rep && rxpand)
         {
-          int x;
-          mlen = e - s;
-          mstr = xmalloc (mlen + 1);
+	  int x;
+	  mlen = e - s;
+	  mstr = xmalloc (mlen + 1);
 	  for (x = 0; x < mlen; x++)
 	    mstr[x] = s[x];
-          mstr[mlen] = '\0';
-          rstr = strcreplace (rep, '&', mstr, 0);
-          rslen = strlen (rstr);
+	  mstr[mlen] = '\0';
+	  rstr = strcreplace (rep, '&', mstr, 0);
+	  rslen = strlen (rstr);
         }
       else
-        {
-          rstr = rep;
-          rslen = replen;
-        }
+	{
+	  rstr = rep;
+	  rslen = replen;
+	}
         
       RESIZE_MALLOCED_BUFFER (ret, rptr, (l + rslen), rsize, 64);
 

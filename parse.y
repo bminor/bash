@@ -268,8 +268,6 @@ int parser_state;
 
 /* Variables to manage the task of reading here documents, because we need to
    defer the reading until after a complete command has been collected. */
-#define HEREDOC_MAX 16
-
 static REDIRECT *redir_stack[HEREDOC_MAX];
 int need_here_doc;
 
@@ -2703,6 +2701,7 @@ gather_here_documents ()
       make_here_document (redir_stack[r++], line_number);
       parser_state &= ~PST_HEREDOC;
       need_here_doc--;
+      redir_stack[r - 1] = 0;		/* XXX */
     }
 }
 
@@ -4094,7 +4093,7 @@ xparse_dolparen (base, string, indp, flags)
   parser_state |= PST_CMDSUBST|PST_EOFTOKEN;	/* allow instant ')' */ /*(*/
   shell_eof_token = ')';
 
-  parse_string (string, "command substitution", sflags, &ep);
+  nc = parse_string (string, "command substitution", sflags, &ep);
 
   shell_eof_token = orig_eof_token;
   restore_parser_state (&ps);
@@ -4103,6 +4102,11 @@ xparse_dolparen (base, string, indp, flags)
   restore_input_line_state (&ls);
 
   token_to_read = 0;
+
+  /* If parse_string returns < 0, we need to jump to top level with the
+     negative of the return value */
+  if (nc < 0)
+    jump_to_top_level (-nc);	/* XXX */
 
   /* Need to find how many characters parse_and_execute consumed, update
      *indp, if flags != 0, copy the portion of the string parsed into RET
@@ -6143,6 +6147,8 @@ sh_parser_state_t *
 save_parser_state (ps)
      sh_parser_state_t *ps;
 {
+  int i;
+
   if (ps == 0)
     ps = (sh_parser_state_t *)xmalloc (sizeof (sh_parser_state_t));
   if (ps == 0)
@@ -6177,6 +6183,16 @@ save_parser_state (ps)
   ps->echo_input_at_read = echo_input_at_read;
   ps->need_here_doc = need_here_doc;
 
+#if 0
+  for (i = 0; i < HEREDOC_MAX; i++)
+    ps->redir_stack[i] = redir_stack[i];
+#else
+  if (need_here_doc == 0)
+    ps->redir_stack[0] = 0;
+  else
+    memcpy (ps->redir_stack, redir_stack, sizeof (redir_stack[0]) * HEREDOC_MAX);
+#endif
+
   ps->token = token;
   ps->token_buffer_size = token_buffer_size;
   /* Force reallocation on next call to read_token_word */
@@ -6190,6 +6206,8 @@ void
 restore_parser_state (ps)
      sh_parser_state_t *ps;
 {
+  int i;
+
   if (ps == 0)
     return;
 
@@ -6225,6 +6243,16 @@ restore_parser_state (ps)
   expand_aliases = ps->expand_aliases;
   echo_input_at_read = ps->echo_input_at_read;
   need_here_doc = ps->need_here_doc;
+
+#if 0
+  for (i = 0; i < HEREDOC_MAX; i++)
+    redir_stack[i] = ps->redir_stack[i];
+#else
+  if (need_here_doc == 0)
+    redir_stack[0] = 0;
+  else
+    memcpy (redir_stack, ps->redir_stack, sizeof (redir_stack[0]) * HEREDOC_MAX);
+#endif
 
   FREE (token);
   token = ps->token;

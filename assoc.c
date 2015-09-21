@@ -436,17 +436,19 @@ assoc_to_assign (hash, quoted)
   for (i = 0; i < hash->nbuckets; i++)
     for (tlist = hash_items (i, hash); tlist; tlist = tlist->next)
       {
-#if 1
-	if (sh_contains_shell_metas (tlist->key))
+	if (ansic_shouldquote (tlist->key))
+	  istr = ansic_quote (tlist->key, 0, (int *)0);
+	else if (sh_contains_shell_metas (tlist->key))
 	  istr = sh_double_quote (tlist->key);
 	else if (ALL_ELEMENT_SUB (tlist->key[0]) && tlist->key[1] == '\0')
 	  istr = sh_double_quote (tlist->key);	
 	else
 	  istr = tlist->key;	
-#else
-	istr = tlist->key;
-#endif
-	vstr = tlist->data ? sh_double_quote ((char *)tlist->data) : (char *)0;
+
+	vstr = tlist->data ? (ansic_shouldquote ((char *)tlist->data) ?
+				ansic_quote ((char *)tlist->data, 0, (int *)0) :
+				sh_double_quote ((char *)tlist->data))
+			   : (char *)0;
 
 	elen = STRLEN (istr) + 8 + STRLEN (vstr);
 	RESIZE_MALLOCED_BUFFER (ret, rlen, (elen+1), rsize, rsize);

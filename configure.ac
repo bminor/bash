@@ -798,6 +798,7 @@ AC_REPLACE_FUNCS(dprintf)
 AC_REPLACE_FUNCS(strchrnul)
 AC_REPLACE_FUNCS(strdup)
 
+AC_CHECK_HEADERS(libaudit.h)
 AC_CHECK_DECLS([AUDIT_USER_TTY],,, [[#include <linux/audit.h>]])
 
 AC_CHECK_DECLS([confstr])

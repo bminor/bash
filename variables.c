@@ -338,7 +338,7 @@ initialize_shell_variables (env, privmode)
 
   create_variable_tables ();
 
-  for (string_index = 0; string = env[string_index++]; )
+  for (string_index = 0; env && (string = env[string_index++]); )
     {
       char_index = 0;
       name = string;
@@ -796,7 +796,7 @@ adjust_shell_level (change)
   shell_level = old_level + change;
   if (shell_level < 0)
     shell_level = 0;
-  else if (shell_level > 1000)
+  else if (shell_level >= 1000)
     {
       internal_warning (_("shell level (%d) too high, resetting to 1"), shell_level);
       shell_level = 1;
@@ -844,16 +844,25 @@ void
 set_pwd ()
 {
   SHELL_VAR *temp_var, *home_var;
-  char *temp_string, *home_string;
+  char *temp_string, *home_string, *current_dir;
 
   home_var = find_variable ("HOME");
   home_string = home_var ? value_cell (home_var) : (char *)NULL;
 
   temp_var = find_variable ("PWD");
+  /* Follow posix rules for importing PWD */
   if (temp_var && imported_p (temp_var) &&
       (temp_string = value_cell (temp_var)) &&
+      temp_string[0] == '/' &&
       same_file (temp_string, ".", (struct stat *)NULL, (struct stat *)NULL))
-    set_working_directory (temp_string);
+    {
+      current_dir = sh_canonpath (temp_string, PATH_CHECKDOTDOT|PATH_CHECKEXISTS);
+      if (current_dir == 0)
+	current_dir = get_working_directory ("shell_init");
+      else 
+	set_working_directory (current_dir);
+      free (current_dir);
+    }
   else if (home_string && interactive_shell && login_shell &&
 	   same_file (home_string, ".", (struct stat *)NULL, (struct stat *)NULL))
     {
