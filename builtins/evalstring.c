@@ -110,7 +110,7 @@ should_suppress_fork (command)
 	  ((command->flags & CMD_INVERT_RETURN) == 0));
 }
 
-int
+void
 optimize_fork (command)
      COMMAND *command;
 {

@@ -205,7 +205,7 @@ make_buffered_stream (fd, buffer, bufsize)
   if (bufsize == 1)
     bp->b_flag |= B_UNBUFF;
   if (O_TEXT && (fcntl (fd, F_GETFL) & O_TEXT) != 0)
-    bp->b_flag |= O_TEXT;
+    bp->b_flag |= B_TEXT;
   return (bp);
 }
 

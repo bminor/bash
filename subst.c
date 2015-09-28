@@ -5873,8 +5873,8 @@ command_substitute (string, quoted)
         {
           builtin_ignoring_errexit = 0;
 	  change_flag ('e', FLAG_OFF);
-	  set_shellopts ();
         }
+      set_shellopts ();
 
       /* If we are expanding a redirection, we can dispose of any temporary
 	 environment we received, since redirections are not supposed to have

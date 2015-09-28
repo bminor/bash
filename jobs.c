@@ -3393,6 +3393,13 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
       if (pid <= 0)
 	continue;	/* jumps right to the test */
 
+      /* Linux kernels appear to signal the parent but not interrupt the
+	 waitpid() (or restart it even without SA_RESTART) on SIGINT, so if
+	 we saw a SIGINT and the process exited or died due to some other
+	 signal, assume the child caught the SIGINT. */
+      if (wait_sigint_received && (WIFSIGNALED (status) == 0 || WTERMSIG (status) != SIGINT))
+	child_caught_sigint = 1;
+
       /* If the child process did die due to SIGINT, forget our assumption
 	 that it caught or otherwise handled it. */
       if (WIFSIGNALED (status) && WTERMSIG (status) == SIGINT)
@@ -3624,13 +3631,17 @@ set_job_status_and_cleanup (job)
 	 seen it, and wait_sigint_received is non-zero, because keyboard
 	 signals are sent to process groups) or via kill(2) to the foreground
 	 process by another process (or itself).  If the shell did receive the
-	 SIGINT, it needs to perform normal SIGINT processing. */
+	 SIGINT, it needs to perform normal SIGINT processing.  XXX - should
+	 this change its behavior depending on whether the last command in an
+	 pipeline exited due to SIGINT, or any process in the pipeline?  Right
+	 now it does this if any process in the pipeline exits due to SIGINT. */
       else if (wait_sigint_received &&
 	      child_caught_sigint == 0 &&
 	      IS_FOREGROUND (job) && IS_JOBCONTROL (job) == 0)
 	{
 	  int old_frozen;
 
+itrace("waitchld: special handling for SIGINT");
 	  wait_sigint_received = 0;
 
 	  /* If SIGINT is trapped, set the exit status so that the trap

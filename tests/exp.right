@@ -228,5 +228,9 @@ declare -- var="x\001y\177z"$
 argv[1] = <$'x\001y\177z'>
 argv[1] = <x^Ay^?z>
 var=$'x\001y\177z'
+./exp8.sub: line 16: xyz: syntax error: invalid arithmetic operator (error token is "z")
+declare -a array=()
+declare -a array=([0]=$'x\001y\177z')
 argv[1] = <x^Ay^?z>
-declare -a array=([0]="x\001y\177z")$
+declare -a array=([0]=$'x\001y\177z')
+declare -A array=([$'x\001y\177z']=$'a\242b\002c' )

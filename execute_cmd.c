@@ -4046,6 +4046,9 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	  last_asynchronous_pid = old_last_async_pid;
 
 	  CHECK_SIGTERM;
+
+	  if (async)
+	    subshell_level++;		/* not for pipes yet */
 	}
       else
 	{
@@ -4066,6 +4069,8 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	  return (result);
 	}
     }
+
+  QUIT;		/* XXX */
 
   /* If we are re-running this as the result of executing the `command'
      builtin, do not expand the command words a second time. */
@@ -4237,7 +4242,8 @@ run_builtin:
 	      setup_async_signals ();
 	    }
 
-	  subshell_level++;
+	  if (async == 0)
+	    subshell_level++;
 	  execute_subshell_builtin_or_function
 	    (words, simple_command->redirects, builtin, func,
 	     pipe_in, pipe_out, async, fds_to_close,
@@ -5464,6 +5470,7 @@ shell_execve (command, args, env)
   /* We have committed to attempting to execute the contents of this file
      as shell commands. */
 
+  reset_parser ();
   initialize_subshell ();
 
   set_sigint_handler ();
@@ -5507,8 +5514,6 @@ shell_execve (command, args, env)
 #if defined (PROCESS_SUBSTITUTION)
   clear_fifo_list ();	/* pipe fds are what they are now */
 #endif
-
-  reset_parser ();
 
   sh_longjmp (subshell_top_level, 1);
   /*NOTREACHED*/

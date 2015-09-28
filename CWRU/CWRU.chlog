@@ -9656,3 +9656,32 @@ lib/readline/history.c
 	- history_get_time: handle strtol overflows caused by malicious
 	  modifications to timestamps in the history file.  Fixes issue
 	  reported by rens@endoria.net
+
+				   9/21
+				   ----
+lib/readline/rlconf.h
+	- ENABLE_AUDIT_TTY_SUPPORT: now undefined (off) by default
+
+				   9/24
+				   ----
+jobs.c
+	- waitchld: if we get a SIGINT while waiting for a child to exit, but the
+	  kernel doesn't interrupt the waitpid(2) call, assume the child caught
+	  SIGINT if it exited for some reason other than SIGINT.  Fix suggested
+	  by Stephane Chazelas <stephane.chazelas@gmail.com>
+
+input.c
+	- make_buffered_stream: use B_TEXT in buffered stream flags instead
+	  of (typo) O_TEXT.  Report and fix from Eric Blake <eblake@redhat.com>
+
+				   9/27
+				   ----
+execute_cmd.c
+	- shell_execve: call reset_parser before calling initialize_subshell,
+	  which calls delete_all_aliases.  reset_parser wants to free the
+	  pushed string list, which has pointers back into the alias table
+	  (use after free)
+	- execute_simple_command: if we fork for an async command, make sure
+	  the child process increments shell_level before performing any
+	  word expansions, so $BASH_SUBSHELL is incremented.  Fixes issue
+	  reported by ziyunfei <446240525@qq.com>
