@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2015 August 15<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2015 October 2<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -1453,6 +1453,10 @@ single quote
 
 <DD>
 double quote
+<DT><B>\?</B>
+
+<DD>
+question mark
 <DT><B>\</B><I>nnn</I>
 
 <DD>
@@ -3978,7 +3982,8 @@ The expansion is a string that is the result of expanding the value of
 <DT><B>A</B>
 
 <DD>
-The expansion is a string in the form of a <B>declare</B> command that, if
+The expansion is a string in the form of
+an assignment statement or <B>declare</B> command that, if
 evaluated, will recreate <I>parameter</I> with its attributes and value.
 <DT><B>a</B>
 
@@ -8584,7 +8589,9 @@ quotes are considered one word.
 History expansions are introduced by the appearance of the
 history expansion character, which is <B>!</B> by default.
 Only backslash (<B>\</B>) and single quotes can quote
-the history expansion character.
+the history expansion character, but the history expansion character is
+also treated as quoted if it immediately precedes the closing double quote
+in a double-quoted string.
 <P>
 
 Several characters inhibit history expansion if found immediately
@@ -10684,7 +10691,7 @@ returning its exit status.
 
 <DT><B>kill</B> [<B>-s</B> <I>sigspec</I> | <B>-n</B> <I>signum</I> | <B>-</B><I>sigspec</I>] [<I>pid</I> | <I>jobspec</I>] ...<DD>
 
-<DT><B>kill</B> <B>-l</B> [<I>sigspec</I> | <I>exit_status</I>]<DD>
+<DT><B>kill</B> <B>-l</B>|<B>-L</B> [<I>sigspec</I> | <I>exit_status</I>]<DD>
 
 Send the signal named by
 <I>sigspec</I>
@@ -10734,6 +10741,10 @@ The <I>exit_status</I> argument to
 
 is a number specifying either a signal number or the exit status of
 a process terminated by a signal.
+The
+<B>-L</B>
+
+option is equivalent to <B>-l</B>.
 <B>kill</B>
 
 returns true if at least one signal was successfully sent, or false
@@ -12041,6 +12052,16 @@ If set,
 
 does not process the replacement string in the pattern substitution word
 expansion using quote removal.
+<DT><B>compat43</B>
+
+<DD>
+If set,
+<B>bash</B>
+
+does not print a warning message if an attempt is made to use a quoted compound
+array assignment as an argument to <B>declare</B>, and makes word expansion errors
+non-fatal errors that cause the current command to fail (the default behavior is
+to make them fatal errors that cause the shell to exit).
 <DT><B>complete_fullquote</B>
 
 <DD>
@@ -13387,7 +13408,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2015 August 15<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2015 October 2<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13493,6 +13514,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 18 August 2015 16:27:16 EDT
+Time: 02 October 2015 07:16:35 EDT
 </BODY>
 </HTML>

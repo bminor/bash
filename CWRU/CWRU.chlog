@@ -9584,9 +9584,9 @@ builtins/exec.def
 	  pointer to shell_execve
 
 variables.c
-	- set_pwd: only believe $PWD if it begins with a slash; try to canonicalize
-	  it and set it to physical path if canonicalization fails.  Reported by
-	  ziyunfei <446240525@qq.com>
+	- set_pwd: only believe $PWD if it begins with a slash; try to
+	  canonicalize it and set it to physical path if canonicalization fails.
+	  Reported by ziyunfei <446240525@qq.com>
 
 				   9/17
 				   ----
@@ -9598,14 +9598,15 @@ subst.c
 variables.c
 	- adjust_shell_level: clamp the value of shell_level at 1000 and reset
 	  there, instead of > 1000, since the itos replacement code doesn't
-	  handle the value 1000.  Fixes bug reported by ziyunfei <446240525@qq.com>
+	  handle the value 1000.  Fixes bug reported by ziyunfei
+	  <446240525@qq.com>
 
 shell.h,parse.y
-	- save_parser_state,restore_parser_state: now save and restore redir_stack,
-	  short-circuiting if need_here_doc == 0.  If we save a non-zero value for
-	  need_here_doc, we have to make sure there is something valid for
-	  gather_here_documents to work on.  Fixes bug reported by
-	  Brian Carpenter <brian.carpenter@gmail.com>
+	- save_parser_state,restore_parser_state: now save and restore
+	  redir_stack, short-circuiting if need_here_doc == 0.  If we save a
+	  non-zero value for need_here_doc, we have to make sure there is
+	  something valid for gather_here_documents to work on.  Fixes bug
+	  reported by Brian Carpenter <brian.carpenter@gmail.com>
 
 				   9/18
 				   ----
@@ -9685,3 +9686,36 @@ execute_cmd.c
 	  the child process increments shell_level before performing any
 	  word expansions, so $BASH_SUBSHELL is incremented.  Fixes issue
 	  reported by ziyunfei <446240525@qq.com>
+
+				   10/1
+				   ----
+builtins/kill.def
+	- kill_builtin: make -L equivalent to -l for compatibility with other (Linux)
+	  versions of kill
+
+doc/{bash.1,bashref.texi}
+	- kill: document new `-L' option
+
+				   10/2
+				   ----
+[bash-4.4-beta frozen]
+
+				   10/5
+				   ----
+doc/{bash.1,bashref.texi}
+	- LC_TIME: document that the shell recognizes it and calls setlocale
+	  when it changes; and that the shell uses it for time formatting
+
+				   10/6
+				   ----
+subst.c
+	- skip_single_quoted: now takes an additional `flags' argument, like
+	  skip_double_quoted; changed callers
+	- skip_single_quoted: now pays attention to SX_COMPLETE flag, allows
+	  backslash to escape single quote, like $'...' allows
+	- skip_to_delim: added case where we are completing and we are
+	  skipping over a $'...' string to call skip_single_quoted with
+	  SX_COMPLETE flag to allow backslash to quote single quote.  Fixes
+	  bug reported by Daniel Colascione <dancol@dancol.org>
+	- char_is_quoted: make analogous changes to handle $'...' so we can
+	  accommodate $'ab \' cd'

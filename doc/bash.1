@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Sep  3 15:09:13 EDT 2015
+.\"	Last Change: Mon Oct  5 14:32:44 EDT 2015
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2015 September 3" "GNU Bash 4.4"
+.TH BASH 1 "2015 October 5" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2224,6 +2224,10 @@ strings preceded by a \fB$\fP.
 .TP
 .B LC_NUMERIC
 This variable determines the locale category used for number formatting.
+.TP
+.B LC_TIME
+This variable determines the locale category used for data and time
+formatting.
 .TP
 .B LINES
 Used by the \fBselect\fP compound command to determine the column length
@@ -8404,7 +8408,7 @@ returning its exit status.
 \fBkill\fP [\fB\-s\fP \fIsigspec\fP | \fB\-n\fP \fIsignum\fP | \fB\-\fP\fIsigspec\fP] [\fIpid\fP | \fIjobspec\fP] ...
 .PD 0
 .TP
-\fBkill\fP \fB\-l\fP [\fIsigspec\fP | \fIexit_status\fP]
+\fBkill\fP \fB\-l\fP|\fB\-L\fP [\fIsigspec\fP | \fIexit_status\fP]
 .PD
 Send the signal named by
 .I sigspec
@@ -8441,6 +8445,9 @@ The \fIexit_status\fP argument to
 .B \-l
 is a number specifying either a signal number or the exit status of
 a process terminated by a signal.
+The
+.B \-L
+option is equivalent to \fB\-l\fP.
 .B kill
 returns true if at least one signal was successfully sent, or false
 if an error occurs or an invalid option is encountered.
@@ -9475,6 +9482,14 @@ If set,
 .B bash
 does not process the replacement string in the pattern substitution word
 expansion using quote removal.
+.TP 8
+.B compat43
+If set,
+.B bash
+does not print a warning message if an attempt is made to use a quoted compound
+array assignment as an argument to \fBdeclare\fP, and makes word expansion errors
+non-fatal errors that cause the current command to fail (the default behavior is
+to make them fatal errors that cause the shell to exit).
 .TP 8
 .B complete_fullquote
 If set,

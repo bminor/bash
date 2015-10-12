@@ -81,9 +81,40 @@ z.  Bash no longer splits the expansion of here-strings, as the documentation
     has always said.
 
 aa. Bash now puts `s' in the value of $- if the shell is reading from standard
-    input.
+    input, as Posix requires.
 
-bb. Fixed a bug that caused the shell to crash if invoked with a NULL environment.
+bb. Fixed a bug that caused the shell to crash if invoked with a NULL
+    environment.
+
+cc. The shell now only trusts an inherited value for $PWD if it begins with a
+    `/'.
+
+dd. Fixed a memory leak when creating local array variables and assigning to
+    them using compound assignment with the `declare' builtin.
+
+ee. Fixed a bug that could cause the shell to crash when processing nested here
+    documents inside a command substitution.
+
+ff. Array keys and values are now displayed using $'...' quoting where
+    appropriate.
+
+gg. Fixed a bug that could cause the shell to crash if the replacement string
+    in pattern substitution was NULL.
+
+hh. Fixed a bug that could cause the shell to crash if a command substitution
+    contained a non-fatal syntax error.
+
+ii. Fixed a bug that could cause the shell to crash if variable indirection
+    resulted in a NULL variable.
+
+jj. Fixed a bug that could cause the shell to crash if a long string contained
+    multiple unterminated parameter expansion constructs.
+
+kk. Improved the code that acts on SIGINT received while waiting for a child
+    process only if the child exits due to SIGINT.
+
+ll. $BASH_SUBSHELL now has more consistent values in asynchronous simple
+    commands.
 
 2.  Changes to Readline
 
@@ -105,6 +136,11 @@ e.  Fixed a bug that caused problems with applications that supply their own
 f.  When read returns -1/EIO when attempting to read a key, return an error
     instead of line termination back to the caller.
 
+g.  Updated tty auditing feature based on patch from Red Hat.
+
+h.  Fixed a bug that could cause the history library to crash on overflows
+    introduced by malicious editing of timestamps in the history file.
+
 3.  New Features in Bash
 
 a.  `make install' now installs the example loadable builtins and a set of
@@ -117,6 +153,12 @@ b.  `enable -f' now attempts to call functions named BUILTIN_builtin_load when
 c.  There is a new BASH_LOADABLES_PATH variable containing a list of directories
     where the `enable -f' command looks for shared objects containing loadable
     builtins.
+
+d.  The `complete_fullquote' option to `shopt' changes filename completion to
+    quote all shell metacharacters in filenames and directory names.
+
+e.  The `kill' builtin now has a `-L' option, equivalent to `-l', for
+    compatibility with Linux standalone versions of kill.
 
 4.  New Features in Readline
 ------------------------------------------------------------------------------
@@ -358,7 +400,7 @@ www. Fixes for upper and lower-casing multibyte characters, some locales have
      bytes.
 
 xxx. Fixed a bug that caused the ERR trap in a shell function to have the
-     right value for $LINENO.
+     wrong value for $LINENO.
 
 yyy. Fixed a bug that resulted in incorrect quoting of regexps for the =~
      operator when an open brace appears without a close brace.
@@ -497,9 +539,9 @@ o.  Fixed a bug that caused history expansion to disregard characters that are
 p.  Fixed a bug that could cause reading past the end of a string when reading
     the value when binding the set of isearch terminators.
 
-q.  Fixed a bug that caused readline commands that depend on knowing which  
+q.  Fixed a bug that caused readline commands that depend on knowing which
     key invoked them to misbehave when dispatching key sequences that are
-    prefixes of other key bindings. 
+    prefixes of other key bindings.
 
 r.  Paren matching now works in vi insert mode.
 
@@ -565,7 +607,7 @@ r.  Executing the rhs of && and || will no longer cause the shell to fork if
     it's not necessary.
 
 s.  The `local' builtin takes a new argument: `-', which will cause it to save
-    and the single-letter shell options and restore their previous values at
+    the single-letter shell options and restore their previous values at
     function return.
 
 t.  `complete' and `compgen' have a new `-o nosort' option, which forces

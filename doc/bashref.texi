@@ -5066,6 +5066,13 @@ If set, Bash
 does not process the replacement string in the pattern substitution word
 expansion using quote removal.
 
+@item compat43
+If set, Bash
+does not print a warning message if an attempt is made to use a quoted compound
+array assignment as an argument to @code{declare}, and makes word expansion errors
+non-fatal errors that cause the current command to fail (the default behavior is
+to make them fatal errors that cause the shell to exit).
+
 @item complete_fullquote
 If set, Bash
 quotes all shell metacharacters in filenames and directory names when
@@ -5887,6 +5894,10 @@ strings preceded by a @samp{$} (@pxref{Locale Translation}).
 
 @item LC_NUMERIC
 This variable determines the locale category used for number formatting.
+
+@item LC_TIME
+This variable determines the locale category used for data and time
+formatting.
 
 @item LINENO
 The line number in the script or shell function currently executing.
@@ -7714,7 +7725,7 @@ passing it @var{argument}s, returning its exit status.
 @btindex kill
 @example
 kill [-s @var{sigspec}] [-n @var{signum}] [-@var{sigspec}] @var{jobspec} or @var{pid}
-kill -l [@var{exit_status}]
+kill -l|-L [@var{exit_status}]
 @end example
 
 Send a signal specified by @var{sigspec} or @var{signum} to the process
@@ -7729,6 +7740,7 @@ signals corresponding to the arguments are listed, and the return status
 is zero.
 @var{exit_status} is a number specifying a signal number or the exit
 status of a process terminated by a signal.
+The @option{-L} option is equivalent to @option{-l}.
 The return status is zero if at least one signal was successfully sent,
 or non-zero if an error occurs or an invalid option is encountered.
 

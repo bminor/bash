@@ -246,7 +246,7 @@ static char *string_extract_verbatim __P((char *, size_t, int *, char *, int));
 static char *string_extract __P((char *, int *, char *, int));
 static char *string_extract_double_quoted __P((char *, int *, int));
 static inline char *string_extract_single_quoted __P((char *, int *));
-static inline int skip_single_quoted __P((const char *, size_t, int));
+static inline int skip_single_quoted __P((const char *, size_t, int, int));
 static int skip_double_quoted __P((char *, size_t, int, int));
 static char *extract_delimited_string __P((char *, int *, char *, char *, char *, int));
 static char *extract_dollar_brace_string __P((char *, int *, int, int));
@@ -627,7 +627,7 @@ unquoted_member (character, string)
 	  break;
 
 	case '\'':
-	  sindex = skip_single_quoted (string, slen, ++sindex);
+	  sindex = skip_single_quoted (string, slen, ++sindex, 0);
 	  break;
 
 	case '"':
@@ -666,7 +666,7 @@ unquoted_substring (substr, string)
 	  break;
 
 	case '\'':
-	  sindex = skip_single_quoted (string, slen, ++sindex);
+	  sindex = skip_single_quoted (string, slen, ++sindex, 0);
 	  break;
 
 	case '"':
@@ -1063,18 +1063,26 @@ string_extract_single_quoted (string, sindex)
   return (t);
 }
 
+/* Skip over a single-quoted string.  We overload the SX_COMPLETE flag to mean
+   that we are splitting out words for completion and have encountered a $'...'
+   string, which allows backslash-escaped single quotes. */
 static inline int
-skip_single_quoted (string, slen, sind)
+skip_single_quoted (string, slen, sind, flags)
      const char *string;
      size_t slen;
      int sind;
+     int flags;
 {
   register int c;
   DECLARE_MBSTATE;
 
   c = sind;
   while (string[c] && string[c] != '\'')
-    ADVANCE_CHAR (string, slen, c);
+    {
+      if ((flags & SX_COMPLETE) && string[c] == '\\' && string[c+1] == '\'' && string[c+2])
+	ADVANCE_CHAR (string, slen, c);
+      ADVANCE_CHAR (string, slen, c);
+    }
 
   if (string[c])
     c++;
@@ -1191,12 +1199,15 @@ extract_command_subst (string, sindex, xflags)
      int *sindex;
      int xflags;
 {
+  char *ret;
+
   if (string[*sindex] == LPAREN || (xflags & SX_COMPLETE))
     return (extract_delimited_string (string, sindex, "$(", "(", ")", xflags|SX_COMMAND)); /*)*/
   else
     {
       xflags |= (no_longjmp_on_fatal_error ? SX_NOLONGJMP : 0);
-      return (xparse_dolparen (string, string+*sindex, sindex, xflags));
+      ret = xparse_dolparen (string, string+*sindex, sindex, xflags);
+      return ret;
     }
 }
 
@@ -1384,7 +1395,7 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
       if (c == '\'' || c == '"')
 	{
 	  si = i + 1;
-	  i = (c == '\'') ? skip_single_quoted (string, slen, si)
+	  i = (c == '\'') ? skip_single_quoted (string, slen, si, 0)
 			  : skip_double_quoted (string, slen, si, 0);
 	  continue;
 	}
@@ -1524,7 +1535,7 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
 	  else
 	    {
 	      si = i + 1;
-	      i = skip_single_quoted (string, slen, si);
+	      i = skip_single_quoted (string, slen, si, 0);
 	    }
 
           continue;
@@ -1697,7 +1708,7 @@ skip_matched_pair (string, start, open, close, flags)
 	}
       else if ((flags & 1) == 0 && (c == '\'' || c == '"'))
 	{
-	  i = (c == '\'') ? skip_single_quoted (ss, slen, ++i)
+	  i = (c == '\'') ? skip_single_quoted (ss, slen, ++i, 0)
 			  : skip_double_quoted (ss, slen, ++i, 0);
 	  /* no increment, the skip functions increment past the closing quote. */
 	}
@@ -1808,8 +1819,13 @@ skip_to_delim (string, start, delims, flags)
           i++;
           continue;
         }
+      /* special case for programmable completion which takes place before
+         parser converts backslash-escaped single quotes between $'...' to
+         `regular' single-quoted strings. */
+      else if (completeflag && i > 0 && string[i-1] == '$' && c == '\'')
+	i = skip_single_quoted (string, slen, ++i, SX_COMPLETE);
       else if (c == '\'')
-	i = skip_single_quoted (string, slen, ++i);
+	i = skip_single_quoted (string, slen, ++i, 0);
       else if (histexp && c == '"')
 	{
 	  dquote = 1 - dquote;
@@ -1934,9 +1950,16 @@ char_is_quoted (string, eindex)
 	  i++;
 	  continue;
 	}
+      else if (c == '$' && string[i+1] == '\'' && string[i+2])
+	{
+	  i += 2;
+	  i = skip_single_quoted (string, slen, i, SX_COMPLETE);
+	  if (i > eindex)
+	    CQ_RETURN (i);
+	}
       else if (c == '\'' || c == '"')
 	{
-	  i = (c == '\'') ? skip_single_quoted (string, slen, ++i)
+	  i = (c == '\'') ? skip_single_quoted (string, slen, ++i, 0)
 			  : skip_double_quoted (string, slen, ++i, SX_COMPLETE);
 	  if (i > eindex)
 	    CQ_RETURN(1);
@@ -1983,9 +2006,10 @@ unclosed_pair (string, eindex, openstr)
 	  openc = 1 - openc;
 	  i += olen;
 	}
+      /* XXX - may want to handle $'...' specially here */
       else if (string[i] == '\'' || string[i] == '"')
 	{
-	  i = (string[i] == '\'') ? skip_single_quoted (string, slen, i)
+	  i = (string[i] == '\'') ? skip_single_quoted (string, slen, i, 0)
 				  : skip_double_quoted (string, slen, i, SX_COMPLETE);
 	  if (i > eindex)
 	    return 0;
@@ -2747,7 +2771,7 @@ list_string_with_quotes (string)
 	    i++;
 	}
       else if (c == '\'')
-	i = skip_single_quoted (s, s_len, ++i);
+	i = skip_single_quoted (s, s_len, ++i, 0);
       else if (c == '"')
 	i = skip_double_quoted (s, s_len, ++i, 0);
       else if (c == 0 || spctabnl (c))
@@ -7580,7 +7604,7 @@ chk_arithsub (s, len)
 	  break;
 
 	case '\'':
-	  i = skip_single_quoted (s, len, ++i);
+	  i = skip_single_quoted (s, len, ++i, 0);
 	  break;
 
 	case '"':

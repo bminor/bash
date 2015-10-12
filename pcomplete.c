@@ -1297,7 +1297,7 @@ command_line_to_word_list (line, llen, sentinel, nwp, cwp)
 #else
   delims = rl_completer_word_break_characters;
 #endif
-  ret = split_at_delims (line, llen, delims, sentinel, SD_NOQUOTEDELIM, nwp, cwp);
+  ret = split_at_delims (line, llen, delims, sentinel, SD_NOQUOTEDELIM|SD_COMPLETE, nwp, cwp);
   return (ret);
 }
 

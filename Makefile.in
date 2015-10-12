@@ -929,9 +929,11 @@ symlinks:
 dist:	force
 	@echo Bash distributions are created using $(srcdir)/support/mkdist.
 	@echo Here is a sample of the necessary commands:
-	@echo $(Program) $(srcdir)/support/mkdist -m $(srcdir)/MANIFEST -s $(srcdir) -r ${PACKAGE} $(PACKAGE_VERSION)
-	@echo tar cf $(PACKAGE)-${PACKAGE_VERSION}.tar ${PACKAGE}-$(PACKAGE_VERSION)
-	@echo gzip $(PACKAGE)-$(PACKAGE_VERSION).tar
+	@echo $(Program) $(srcdir)/support/mkdist -m $(srcdir)/MANIFEST -s $(srcdir) -r ${PACKAGE} -t $(PACKAGE_VERSION)
+
+xdist:	force
+	( cd $(DOCDIR) && $(MAKE) $(MFLAGS) $@ )
+	( cd po && $(MAKE) $(MFLAGS) $@ )
 
 depend:	depends
 
