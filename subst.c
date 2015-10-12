@@ -159,6 +159,10 @@ int assigning_in_environment;
    SIGCHLD trap and so it can be saved and restored by the trap handlers. */
 WORD_LIST *subst_assign_varlist = (WORD_LIST *)NULL;
 
+/* Tell the expansion functions to not longjmp back to top_level on fatal
+   errors.  Enabled when doing completion and prompt string expansion. */
+int no_longjmp_on_fatal_error = 0;
+
 /* Extern functions and variables from different files. */
 extern int last_command_exit_value, last_command_exit_signal;
 extern int subshell_environment, line_number;
@@ -204,10 +208,6 @@ static WORD_LIST expand_word_error, expand_word_fatal;
 static WORD_DESC expand_wdesc_error, expand_wdesc_fatal;
 static char expand_param_error, expand_param_fatal;
 static char extract_string_error, extract_string_fatal;
-
-/* Tell the expansion functions to not longjmp back to top_level on fatal
-   errors.  Enabled when doing completion and prompt string expansion. */
-static int no_longjmp_on_fatal_error = 0;
 
 /* Set by expand_word_unsplit; used to inhibit splitting and re-joining
    $* on $IFS, primarily when doing assignment statements. */
@@ -1639,7 +1639,7 @@ unquote_bang (string)
 }
 #endif
 
-#define CQ_RETURN(x) do { no_longjmp_on_fatal_error = 0; return (x); } while (0)
+#define CQ_RETURN(x) do { no_longjmp_on_fatal_error = oldjmp; return (x); } while (0)
 
 /* This function assumes s[i] == open; returns with s[ret] == close; used to
    parse array subscripts.  FLAGS & 1 means to not attempt to skip over
@@ -1651,12 +1651,13 @@ skip_matched_pair (string, start, open, close, flags)
      const char *string;
      int start, open, close, flags;
 {
-  int i, pass_next, backq, si, c, count;
+  int i, pass_next, backq, si, c, count, oldjmp;
   size_t slen;
   char *temp, *ss;
   DECLARE_MBSTATE;
 
   slen = strlen (string + start) + start;
+  oldjmp = no_longjmp_on_fatal_error;
   no_longjmp_on_fatal_error = 1;
 
   i = start + 1;		/* skip over leading bracket */
@@ -1758,13 +1759,14 @@ skip_to_delim (string, start, delims, flags)
      char *delims;
      int flags;
 {
-  int i, pass_next, backq, dquote, si, c;
+  int i, pass_next, backq, dquote, si, c, oldjmp;
   int invert, skipquote, skipcmd, noprocsub, completeflag, histexp;
   size_t slen;
   char *temp, open[3];
   DECLARE_MBSTATE;
 
   slen = strlen (string + start) + start;
+  oldjmp = no_longjmp_on_fatal_error;
   if (flags & SD_NOJMP)
     no_longjmp_on_fatal_error = 1;
   invert = (flags & SD_INVERT);
@@ -1925,11 +1927,12 @@ char_is_quoted (string, eindex)
      char *string;
      int eindex;
 {
-  int i, pass_next, c;
+  int i, pass_next, c, oldjmp;
   size_t slen;
   DECLARE_MBSTATE;
 
   slen = strlen (string);
+  oldjmp = no_longjmp_on_fatal_error;
   no_longjmp_on_fatal_error = 1;
   i = pass_next = 0;
   while (i <= eindex)

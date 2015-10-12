@@ -9719,3 +9719,34 @@ subst.c
 	  bug reported by Daniel Colascione <dancol@dancol.org>
 	- char_is_quoted: make analogous changes to handle $'...' so we can
 	  accommodate $'ab \' cd'
+
+				   10/11
+				   -----
+subst.c,bashjmp.h
+	- no_longjmp_on_fatal_error: now global so other parts of the shell can
+	  use it
+
+arrayfunc.c
+	- expand_array_index: if no_longjmp_on_fatal_error is non-zero, don't
+	  longjmp to top_level, just return 0.  Fixes bug reported by
+	  isabella parakiss <izaberina@gmail.com>
+
+subst.c
+	- CQ_RETURN: restore old value of no_longjmp_on_fatal_error (oldjmp);
+	  make sure all callers (skip_matched_pair, skip_to_delim,
+	  char_is_quoted) save no_longjmp_on_fatal_error to oldjmp before
+	  setting it to 1
+
+expr.c
+	- expr_streval: if longjmping after an unbound variable error, jump
+	  back to expr toplevel (evalbuf) if no_longjmp_on_fatal_error is set
+	  in an interactive shell
+
+variables.c
+	- push_func_var: if pushing an array variable, such as when a variable
+	  in the temporary environment is promoted to an array by mapfile when
+	  the shell is in posix mode (so variable assignments preceding special
+	  builtins or shell functions persist in the shell environment after
+	  the builtin returns), make sure to copy the array or hash table so
+	  the variable is duplicated correctly.  Fixes seg fault reported by
+	  Linda Walsh <bash@tlinx.org>

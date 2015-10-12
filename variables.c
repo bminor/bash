@@ -4446,6 +4446,13 @@ push_func_var (data)
 	shell_variables->table = hash_create (VARIABLES_HASH_BUCKETS);
       /* XXX - should we set v->context here? */
       v = bind_variable_internal (var->name, value_cell (var), shell_variables->table, 0, 0);
+#if defined (ARRAY_VARS)
+      if (array_p (var) || assoc_p (var))
+	{
+	  FREE (value_cell (v));
+	  var_setvalue (v, array_p (var) ? array_copy (array_cell (var)) : assoc_copy (assoc_cell (var)));
+	}
+#endif	  
       if (shell_variables == global_variables)
 	var->attributes &= ~(att_tempvar|att_propagate);
       else

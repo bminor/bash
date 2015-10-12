@@ -1123,6 +1123,9 @@ expr_streval (tok, e, lvalue)
 	FREE (value);	/* array_variable_name returns new memory */
 #endif
 
+      if (no_longjmp_on_fatal_error && interactive_shell)
+	sh_longjmp (evalbuf, 1);
+
       if (interactive_shell)
 	{
 	  expr_unwind ();

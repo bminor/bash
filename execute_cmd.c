@@ -4444,7 +4444,6 @@ execute_builtin (builtin, words, flags, subshell)
       sourcenest++;	/* execute_subshell_builtin_or_function sets this to 0 */
     }
 
-
   /* `return' does a longjmp() back to a saved environment in execute_function.
      If a variable assignment list preceded the command, and the shell is
      running in POSIX mode, we need to merge that into the shell_variables
