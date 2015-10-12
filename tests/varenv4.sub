@@ -42,3 +42,17 @@ g()
 
 f
 echo FIN: v = $v, w = $w
+
+# problem with error return propagation through bash-4.3
+unset -f aaa bbb
+unset unique
+
+aaa() {
+    declare -g -a unique=()
+}
+bbb() {
+    declare -g -A unique=()
+}
+aaa
+bbb
+echo after bbb: $?

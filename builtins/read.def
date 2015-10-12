@@ -165,8 +165,9 @@ sigalrm (s)
 static void
 reset_alarm ()
 {
-  set_signal_handler (SIGALRM, old_alrm);
+  /* Cancel alarm before restoring signal handler. */
   falarm (0, 0);
+  set_signal_handler (SIGALRM, old_alrm);
 }
 
 /* Read the value of the shell variables whose names follow.

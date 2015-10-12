@@ -88,8 +88,10 @@ file_head (fp, cnt)
 	    break;
 	}
     }
+  return (EXECUTION_SUCCESS);
 }
 
+int
 head_builtin (list)
      WORD_LIST *list;
 {

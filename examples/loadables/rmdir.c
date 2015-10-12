@@ -32,6 +32,7 @@
 extern int errno;
 #endif
 
+int
 rmdir_builtin (list)
      WORD_LIST *list;
 {

@@ -1,6 +1,6 @@
 /* redir.c -- Functions to perform input and output redirection. */
 
-/* Copyright (C) 1997-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -121,10 +121,7 @@ redirection_error (temp, error)
   else if ((temp->rflags & REDIR_VARASSIGN) == 0 && temp->redirector.dest < 0)
     /* This can happen when read_token_word encounters overflow, like in
        exec 4294967297>x */
-{
-itrace("redirection_error: temp->redirector.dest = %d", temp->redirector.dest);
     filename = _("file descriptor out of range");
-}
 #ifdef EBADF
   /* This error can never involve NOCLOBBER */
   else if (error != NOCLOBBER_REDIRECT && temp->redirector.dest >= 0 && error == EBADF)
@@ -328,7 +325,7 @@ write_here_string (fd, redirectee)
   /* Now that we've changed the variable search order to ignore the temp
      environment, see if we need to change the cached IFS values. */
   sv_ifs ("IFS");
-  herestr = expand_string_to_string (redirectee->word, 0);
+  herestr = expand_string_unsplit_to_string (redirectee->word, 0);
   expanding_redir = 0;
   /* Now we need to change the variable search order back to include the temp
      environment.  We force the temp environment search by forcing

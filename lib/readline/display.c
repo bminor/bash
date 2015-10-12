@@ -83,8 +83,8 @@ struct line_state
     int *lbreaks;
     int lbsize;
 #if defined (HANDLE_MULTIBYTE)
-    int *wrapped_line;
     int wbsize;
+    int *wrapped_line;
 #endif
   };
 

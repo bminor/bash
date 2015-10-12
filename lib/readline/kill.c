@@ -97,7 +97,7 @@ _rl_copy_to_kill_ring (text, append)
   int slot;
 
   /* First, find the slot to work with. */
-  if (_rl_last_command_was_kill == 0)
+  if (_rl_last_command_was_kill == 0 || rl_kill_ring == 0)
     {
       /* Get a new slot.  */
       if (rl_kill_ring == 0)

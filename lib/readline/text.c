@@ -610,7 +610,7 @@ rl_skip_csi_sequence (count, key)
   while (ch >= 0x20 && ch < 0x40);
   RL_UNSETSTATE (RL_STATE_MOREINPUT);
 
-  return 0;
+  return (ch < 0);
 }
 
 int
@@ -622,6 +622,8 @@ rl_arrow_keys (count, c)
   RL_SETSTATE(RL_STATE_MOREINPUT);
   ch = rl_read_key ();
   RL_UNSETSTATE(RL_STATE_MOREINPUT);
+  if (ch < 0)
+    return (1);
 
   switch (_rl_to_upper (ch))
     {
@@ -925,7 +927,12 @@ rl_insert (count, c)
     }
 
   if (n != (unsigned short)-2)		/* -2 = sentinel value for having inserted N */
-    r = rl_execute_next (n);
+    {
+      /* setting rl_pending_input inhibits setting rl_last_func so we do it
+	 ourselves here */
+      rl_last_func = rl_insert; 
+      r = rl_execute_next (n);
+    }
 
   return r;
 }

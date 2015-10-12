@@ -28,6 +28,7 @@
 #include "bashgetopt.h"
 #include "common.h"
 
+int
 whoami_builtin (list)
      WORD_LIST *list;
 {

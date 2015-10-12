@@ -120,7 +120,7 @@ _rl_print_prefix_color (void)
   
 /* Returns whether any color sequence was printed. */
 bool
-_rl_print_color_indicator (char *f)
+_rl_print_color_indicator (const char *f)
 {
   enum indicator_no colored_filetype;
   COLOR_EXT_TYPE *ext;	/* Color extension */

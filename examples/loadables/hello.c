@@ -29,9 +29,7 @@
 
 #include <stdio.h>
 
-#include "builtins.h"
-#include "shell.h"
-#include "bashgetopt.h"
+#include "loadables.h"
 
 /* A builtin `xxx' is normally implemented with an `xxx_builtin' function.
    If you're converting a command that uses the normal Unix argc/argv
@@ -56,6 +54,23 @@ hello_builtin (list)
   printf("hello world\n");
   fflush (stdout);
   return (EXECUTION_SUCCESS);
+}
+
+int
+hello_builtin_load (s)
+     char *s;
+{
+  printf ("hello builtin loaded\n");
+  fflush (stdout);
+  return (1);
+}
+
+void
+hello_builtin_unload (s)
+     char *s;
+{
+  printf ("hello builtin unloaded\n");
+  fflush (stdout);
 }
 
 /* An array of strings forming the `long' documentation for a builtin xxx,

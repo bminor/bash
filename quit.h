@@ -50,6 +50,8 @@ extern volatile sig_atomic_t terminating_signal;
 #define ADDINTERRUPT interrupt_state++
 #define DELINTERRUPT interrupt_state--
 
+#define ISINTERRUPT interrupt_state != 0
+
 /* The same sort of thing, this time just for signals that would ordinarily
    cause the shell to terminate. */
 
@@ -63,7 +65,7 @@ extern volatile sig_atomic_t terminating_signal;
 
 #define CHECK_WAIT_INTR \
   do { \
-    if (wait_signal_received && this_shell_builtin && (this_shell_builtin == wait_builtin)) \
+    if (wait_intr_flag && wait_signal_received && this_shell_builtin && (this_shell_builtin == wait_builtin)) \
       sh_longjmp (wait_intr_buf, 1); \
   } while (0)
 

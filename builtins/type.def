@@ -294,7 +294,12 @@ describe_command (command, dflags)
       if (dflags & CDESC_TYPE)
 	puts ("builtin");
       else if (dflags & CDESC_SHORTDESC)
-	printf (_("%s is a shell builtin\n"), command);
+	{
+	  if (posixly_correct && find_special_builtin (command) != 0)
+	    printf (_("%s is a special shell builtin\n"), command);
+	  else
+	    printf (_("%s is a shell builtin\n"), command);
+	}
       else if (dflags & CDESC_REUSABLE)
 	printf ("%s\n", command);
 

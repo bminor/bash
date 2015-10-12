@@ -226,12 +226,11 @@ bash_history_inhibit_expansion (string, i)
   else if (extended_glob && i > 1 && string[i+1] == '(' && member (')', string + i + 2))
     return (1);
 #endif
-#if 0	/* bash-4.4 */
+
   /* Make sure the history expansion should not be skipped by quoting or
      command/process substitution. */
-  else if (t = skip_to_delim (string, 0, hx, SD_NOJMP) > 0 && t > i)
+  else if ((t = skip_to_delim (string, 0, hx, SD_NOJMP|SD_HISTEXP)) > 0 && t > i)
     return (1);
-#endif
   else
     return (0);
 }
@@ -317,6 +316,7 @@ bash_clear_history ()
 {
   clear_history ();
   history_lines_this_session = 0;
+  /* XXX - reset history_lines_read_from_file? */
 }
 
 /* Delete and free the history list entry at offset I. */
@@ -730,11 +730,24 @@ check_add_history (line, force)
 #if defined (SYSLOG_HISTORY)
 #define SYSLOG_MAXLEN 600
 
+extern char *shell_name;
+
+#ifndef OPENLOG_OPTS
+#define OPENLOG_OPTS 0
+#endif
+
 void
 bash_syslog_history (line)
      const char *line;
 {
   char trunc[SYSLOG_MAXLEN];
+  static int first = 1;
+
+  if (first)
+    {
+      openlog (shell_name, OPENLOG_OPTS, SYSLOG_FACILITY);
+      first = 0;
+    }
 
   if (strlen(line) < SYSLOG_MAXLEN)
     syslog (SYSLOG_FACILITY|SYSLOG_LEVEL, "HISTORY: PID=%d UID=%d %s", getpid(), current_user.uid, line);

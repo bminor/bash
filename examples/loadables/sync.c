@@ -28,6 +28,7 @@
 #include "shell.h"
 #include "bashgetopt.h"
 
+int
 sync_builtin (list)
      WORD_LIST *list;
 {

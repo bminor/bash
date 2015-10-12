@@ -1,6 +1,6 @@
 /* input.c -- character input functions for readline. */
 
-/* Copyright (C) 1994-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2015 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -216,8 +216,8 @@ rl_gather_tyi ()
 #endif
 
   result = -1;
-#if defined (FIONREAD)
   errno = 0;
+#if defined (FIONREAD)
   result = ioctl (tty, FIONREAD, &chars_avail);
   if (result == -1 && errno == EIO)
     return -1;
@@ -236,6 +236,8 @@ rl_gather_tyi ()
       fcntl (tty, F_SETFL, tem);
       if (chars_avail == -1 && errno == EAGAIN)
 	return 0;
+      if (chars_avail == -1 && errno == EIO)
+	return -1;
       if (chars_avail == 0)	/* EOF */
 	{
 	  rl_stuff_char (EOF);
@@ -464,7 +466,7 @@ rl_read_key ()
 	      if ((r = rl_gather_tyi ()) < 0)	/* XXX - EIO */
 		{
 		  rl_done = 1;
-		  return ('\n');
+		  return (errno == EIO ? (RL_ISSTATE (RL_STATE_READCMD) ? READERR : EOF) : '\n');
 		}
 	      else if (r > 0)			/* read something */
 		continue;

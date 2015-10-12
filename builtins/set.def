@@ -932,6 +932,8 @@ unset_builtin (list)
       if (tem == -1 && unset_function == 0 && unset_variable == 0)
 	tem = unbind_func (name);
 
+      name = list->word->word;		/* reset above for namerefs */
+
       /* SUSv3, POSIX.1-2001 say:  ``Unsetting a variable or function that
 	 was not previously set shall not be considered an error.'' */
 

@@ -61,6 +61,11 @@ typedef struct process {
   char *command;	/* The particular program that is running. */
 } PROCESS;
 
+struct pipeline_saver {
+  struct process *pipeline;
+  struct pipeline_saver *next;
+};
+
 /* PALIVE really means `not exited' */
 #define PSTOPPED(p)	(WIFSTOPPED((p)->status))
 #define PRUNNING(p)	((p)->running == PS_RUNNING)

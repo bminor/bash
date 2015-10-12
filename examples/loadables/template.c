@@ -11,9 +11,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include "builtins.h"
-#include "shell.h"
-#include "bashgetopt.h"
+#include "loadables.h"
 
 #if !defined (errno)
 extern int errno;
@@ -21,6 +19,7 @@ extern int errno;
 
 extern char *strerror ();
 
+int
 template_builtin (list)
      WORD_LIST *list;
 {
@@ -40,6 +39,22 @@ template_builtin (list)
   list = loptend;
 
   return (rval);
+}
+
+/* Called when `template' is enabled and loaded from the shared object.  If this
+   function returns 0, the load fails. */
+int
+template_builtin_load (name)
+     char *name;
+{
+  return (1);
+}
+
+/* Called when `template' is disabled. */
+void
+template_builtin_unload (name)
+     char *name;
+{
 }
 
 char *template_doc[] = {

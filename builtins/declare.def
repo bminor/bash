@@ -289,7 +289,7 @@ declare_internal (list, local_var)
       int offset, aflags, wflags;
 #if defined (ARRAY_VARS)
       int making_array_special, compound_array_assign, simple_array_assign;
-      int var_exists, array_exists, array_subscript_assignment;
+      int var_exists, array_exists, creating_array, array_subscript_assignment;
 #endif
 
       name = savestring (list->word->word);
@@ -351,7 +351,7 @@ declare_internal (list, local_var)
 	}
 
 #if defined (ARRAY_VARS)
-      var_exists = array_exists = 0;
+      var_exists = array_exists = creating_array = 0;
       compound_array_assign = simple_array_assign = 0;
       array_subscript_assignment = 0;
       subscript_start = (char *)NULL;
@@ -526,6 +526,7 @@ declare_internal (list, local_var)
 #if defined (ARRAY_VARS)
 	  var_exists = var != 0;
 	  array_exists = var && (array_p (var) || assoc_p (var));
+	  creating_array = flags_on & (att_array|att_assoc);
 #endif
 
 	  if (var == 0)
@@ -601,9 +602,9 @@ declare_internal (list, local_var)
 #if defined (ARRAY_VARS)
 	  /* make declare a[2]=foo as similar to a[2]=foo as possible if
 	     a is already an array or assoc variable. */
-	  if (array_subscript_assignment && array_exists && (flags_on & (att_array|att_assoc)) == 0)
+	  if (array_subscript_assignment && array_exists && creating_array == 0)
 	    simple_array_assign = 1;
-	  else if ((making_array_special || (flags_on & (att_array|att_assoc)) || array_p (var) || assoc_p (var)) && offset)
+	  else if ((making_array_special || creating_array || array_exists) && offset)
 	    {
 	      int vlen;
 	      vlen = STRLEN (value);
@@ -611,8 +612,14 @@ declare_internal (list, local_var)
 	      if (shell_compatibility_level > 43 && (wflags & W_COMPASSIGN) == 0 &&
 			value[0] == '(' && value[vlen-1] == ')')
 		{
-		  internal_warning (_("%s: quoted compound array assignment deprecated"), list->word->word);
-		  compound_array_assign = 1;
+		  /* The warning is only printed when using compound assignment
+		     to an array variable that doesn't already exist.  We use
+		     creating_array to allow things like
+		     declare -a foo$bar='(abc)' to work. */		     
+		  if (array_exists == 0 && creating_array == 0)
+		    internal_warning (_("%s: quoted compound array assignment deprecated"), list->word->word);
+		  compound_array_assign = array_exists || creating_array;
+		  simple_array_assign = making_array_special;
 		}
 	      else if (value[0] == '(' && value[vlen-1] == ')' && (shell_compatibility_level < 44 || (wflags & W_COMPASSIGN)))
 		compound_array_assign = 1;

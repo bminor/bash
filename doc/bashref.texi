@@ -243,7 +243,7 @@ A mechanism by which users can selectively stop (suspend) and restart
 @item metacharacter
 @cindex metacharacter
 A character that, when unquoted, separates words.  A metacharacter is
-a @code{blank} or one of the following characters:
+a @code{space}, @code{tab}, @code{newline}, or one of the following characters:
 @samp{|}, @samp{&}, @samp{;}, @samp{(}, @samp{)}, @samp{<}, or
 @samp{>}.
 
@@ -500,6 +500,8 @@ backslash
 single quote
 @item \"
 double quote
+@item \?
+question mark
 @item \@var{nnn}
 the eight-bit character whose value is the octal value @var{nnn}
 (one to three digits)
@@ -2207,7 +2209,8 @@ escape sequences expanded as with the @code{$'@dots{}'} quoting mechansim.
 The expansion is a string that is the result of expanding the value of
 @var{parameter} as if it were a prompt string (@pxref{Controlling the Prompt}).
 @item A
-The expansion is a string in the form of a @code{declare} command that, if
+The expansion is a string in the form of
+an assignment statement or @code{declare} command that, if
 evaluated, will recreate @var{parameter} with its attributes and value.
 @item a
 The expansion is a string consisting of flag values representing
@@ -3236,7 +3239,8 @@ options preceded by @samp{-} accepts @samp{--}
 to signify the end of the options.
 The @code{:}, @code{true}, @code{false}, and @code{test}
 builtins do not accept options and do not treat @samp{--} specially.
-The @code{exit}, @code{logout}, @code{break}, @code{continue}, @code{let},
+The @code{exit}, @code{logout}, @code{return},
+@code{break}, @code{continue}, @code{let},
 and @code{shift} builtins accept and process arguments beginning
 with @samp{-} without requiring @samp{--}.
 Other builtins that accept arguments but are not specified as accepting
@@ -3997,7 +4001,7 @@ The @option{-F} option inhibits the display of function definitions;
 only the function name and attributes are printed.
 If the @code{extdebug} shell option is enabled using @code{shopt}
 (@pxref{The Shopt Builtin}), the source file name and line number where
-the function is defined are displayed as well.
+each @var{name} is defined are displayed as well.
 @option{-F} implies @option{-f}.
 
 The @option{-g} option forces variables to be created or modified at
@@ -5062,6 +5066,13 @@ If set, Bash
 does not process the replacement string in the pattern substitution word
 expansion using quote removal.
 
+@item compat43
+If set, Bash
+does not print a warning message if an attempt is made to use a quoted compound
+array assignment as an argument to @code{declare}, and makes word expansion errors
+non-fatal errors that cause the current command to fail (the default behavior is
+to make them fatal errors that cause the shell to exit).
+
 @item complete_fullquote
 If set, Bash
 quotes all shell metacharacters in filenames and directory names when
@@ -5502,6 +5513,11 @@ where each corresponding member of @var{FUNCNAME} was invoked.
 referenced within another shell function). 
 Use @code{LINENO} to obtain the current line number.
 
+@item BASH_LOADABLES_PATH
+A colon-separated list of directories in which the shell looks for
+dynamically loadable builtins specified by the
+@code{enable} command.
+
 @item BASH_REMATCH
 An array variable whose members are assigned by the @samp{=~} binary
 operator to the @code{[[} conditional command
@@ -5697,7 +5713,7 @@ shell function.
 The bottom-most element (the one with the highest index)
 is @code{"main"}.
 This variable exists only when a shell function is executing.
-Assignments to @env{FUNCNAME} have no effect and return an error status.
+Assignments to @env{FUNCNAME} have no effect.
 If @env{FUNCNAME} is unset, it loses its special properties, even if
 it is subsequently reset.
 
@@ -5724,7 +5740,7 @@ of matches.
 @item GROUPS
 An array variable containing the list of groups of which the current    
 user is a member.
-Assignments to @env{GROUPS} have no effect and return an error status.
+Assignments to @env{GROUPS} have no effect.
 If @env{GROUPS} is unset, it loses its special properties, even if it is
 subsequently reset.
 
@@ -6991,6 +7007,7 @@ The directory stack is a list of recently-visited directories.  The
 the current directory, and the @code{popd} builtin removes specified
 directories from the stack and changes the current directory to
 the directory removed.  The @code{dirs} builtin displays the contents
+of the directory stack.  The current directory is always the "top"
 of the directory stack.
 
 The contents of the directory stack are also visible
@@ -7010,6 +7027,7 @@ dirs [-clpv] [+@var{N} | -@var{N}]
 Display the list of currently remembered directories.  Directories
 are added to the list with the @code{pushd} command; the
 @code{popd} command removes directories from the list.
+The current directory is always the first directory in the stack.
 
 @table @code
 @item -c
@@ -7039,13 +7057,11 @@ with zero.
 popd [-n] [+@var{N} | -@var{N}]
 @end example
 
-Remove the top entry from the directory stack, and @code{cd}
-to the new top directory.
 When no arguments are given, @code{popd}
 removes the top directory from the stack and
-performs a @code{cd} to the new top directory.  The
-elements are numbered from 0 starting at the first directory listed with
-@code{dirs}; that is, @code{popd} is equivalent to @code{popd +0}.
+performs a @code{cd} to the new top directory.
+The elements are numbered from 0 starting at the first directory
+listed with @code{dirs}; that is, @code{popd} is equivalent to @code{popd +0}.
 
 @table @code
 @item -n
@@ -7067,12 +7083,13 @@ pushd [-n] [@var{+N} | @var{-N} | @var{dir}]
 
 Save the current directory on the top of the directory stack
 and then @code{cd} to @var{dir}.
-With no arguments, @code{pushd} exchanges the top two directories.
+With no arguments, @code{pushd} exchanges the top two directories
+and makes the new top the current directory.
 
 @table @code
 @item -n
-Suppresses the normal change of directory when adding directories
-to the stack, so that only the stack is manipulated.
+Suppresses the normal change of directory when rotating or
+adding directories to the stack, so that only the stack is manipulated.
 @item +@var{N}
 Brings the @var{N}th directory (counting from the left of the
 list printed by @code{dirs}, starting with zero) to the top of
@@ -7082,7 +7099,7 @@ Brings the @var{N}th directory (counting from the right of the
 list printed by @code{dirs}, starting with zero) to the top of
 the list by rotating the stack.
 @item @var{dir}
-Makes the current working directory be the top of the stack, making
+Makes @var{dir} be the top of the stack, making
 it the new current directory as if it had been supplied as an argument
 to the @code{cd} builtin.
 @end table
@@ -7305,6 +7322,9 @@ is not found.
 @item
 Non-interactive shells exit if a syntax error in an arithmetic expansion
 results in an invalid expression.
+
+@item
+Non-interactive shells exit on word expansion errors.
 
 @item
 Non-interactive shells exit if there is a syntax error in a script read
@@ -7701,7 +7721,7 @@ passing it @var{argument}s, returning its exit status.
 @btindex kill
 @example
 kill [-s @var{sigspec}] [-n @var{signum}] [-@var{sigspec}] @var{jobspec} or @var{pid}
-kill -l [@var{exit_status}]
+kill -l|-L [@var{exit_status}]
 @end example
 
 Send a signal specified by @var{sigspec} or @var{signum} to the process
@@ -7716,6 +7736,7 @@ signals corresponding to the arguments are listed, and the return status
 is zero.
 @var{exit_status} is a number specifying a signal number or the exit
 status of a process terminated by a signal.
+The @option{-L} option is equivalent to @option{-l}.
 The return status is zero if at least one signal was successfully sent,
 or non-zero if an error occurs or an invalid option is encountered.
 

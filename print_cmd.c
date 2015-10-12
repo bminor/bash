@@ -41,6 +41,7 @@
 #include "shell.h"
 #include "flags.h"
 #include <y.tab.h>	/* use <...> so we pick it up from the build directory */
+#include "input.h"
 
 #include "shmbutil.h"
 
@@ -1339,7 +1340,11 @@ named_function_string (name, command, flags)
   deferred_heredocs = 0;
 
   if (name && *name)
-    cprintf ("%s ", name);
+    {
+      if (find_reserved_word (name) >= 0)
+	cprintf ("function ");
+      cprintf ("%s ", name);
+    }
 
   cprintf ("() ");
 

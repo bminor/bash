@@ -493,7 +493,7 @@ extern int rl_readline_version;			/* e.g., 0x0402 */
 extern int rl_gnu_readline_p;
 
 /* Flags word encapsulating the current readline state. */
-extern int rl_readline_state;
+extern unsigned long rl_readline_state;
 
 /* Says which editing mode readline is currently using.  1 means emacs mode;
    0 means vi mode. */
@@ -870,9 +870,10 @@ extern int rl_inhibit_completion;
 #define RL_STATE_VIMOTION	0x0100000	/* reading vi motion arg */
 #define RL_STATE_MULTIKEY	0x0200000	/* reading multiple-key command */
 #define RL_STATE_VICMDONCE	0x0400000	/* entered vi command mode at least once */
-#define RL_STATE_REDISPLAYING	0x0800000	/* updating terminal display */
+#define RL_STATE_CHARSEARCH	0x0800000	/* vi mode char search */
+#define RL_STATE_REDISPLAYING	0x1000000	/* updating terminal display */
 
-#define RL_STATE_DONE		0x1000000	/* done; accepted line */
+#define RL_STATE_DONE		0x2000000	/* done; accepted line */
 
 #define RL_SETSTATE(x)		(rl_readline_state |= (x))
 #define RL_UNSETSTATE(x)	(rl_readline_state &= ~(x))
@@ -883,8 +884,8 @@ struct readline_state {
   int point;
   int end;
   int mark;
-  char *buffer;
   int buflen;
+  char *buffer;
   UNDO_LIST *ul;
   char *prompt;
 
@@ -899,9 +900,10 @@ struct readline_state {
   int edmode;
   char *kseq;
   int kseqlen;
+
+  int pendingin;
   FILE *inf;
   FILE *outf;
-  int pendingin;
   char *macro;
 
   /* signal state */

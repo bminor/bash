@@ -165,8 +165,11 @@ extern sh_builtin_func_t *this_shell_builtin;
 extern char *shell_name, *this_command_name;
 extern sigset_t top_level_mask;
 extern procenv_t wait_intr_buf;
+extern int wait_intr_flag;
 extern int wait_signal_received;
 extern WORD_LIST *subst_assign_varlist;
+
+extern SigHandler **original_signals;
 
 static struct jobstats zerojs = { -1L, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NO_JOB, NO_JOB, 0, 0 };
 struct jobstats js = { -1L, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NO_JOB, NO_JOB, 0, 0 };
@@ -320,7 +323,7 @@ static SigHandler *old_tstp, *old_ttou, *old_ttin;
 static SigHandler *old_cont = (SigHandler *)SIG_DFL;
 
 /* A place to temporarily save the current pipeline. */
-static PROCESS *saved_pipeline;
+static struct pipeline_saver *saved_pipeline;
 static int saved_already_making_children;
 
 /* Set this to non-zero whenever you don't want the jobs list to change at
@@ -432,14 +435,29 @@ cleanup_the_pipeline ()
     discard_pipeline (disposer);
 }
 
+struct pipeline_saver *
+alloc_pipeline_saver ()
+{
+  struct pipeline_saver *ret;
+
+  ret = (struct pipeline_saver *)xmalloc (sizeof (struct pipeline_saver));
+  ret->pipeline = 0;
+  ret->next = 0;
+  return ret;
+}
+
 void
 save_pipeline (clear)
      int clear;
 {
   sigset_t set, oset;
+  struct pipeline_saver *saver;
 
   BLOCK_CHILD (set, oset);
-  saved_pipeline = the_pipeline;
+  saver = alloc_pipeline_saver ();
+  saver->pipeline = the_pipeline;
+  saver->next = saved_pipeline;
+  saved_pipeline = saver;
   if (clear)
     the_pipeline = (PROCESS *)NULL;
   saved_already_making_children = already_making_children;
@@ -452,10 +470,14 @@ restore_pipeline (discard)
 {
   PROCESS *old_pipeline;
   sigset_t set, oset;
+  struct pipeline_saver *saver;
 
   BLOCK_CHILD (set, oset);
   old_pipeline = the_pipeline;
-  the_pipeline = saved_pipeline;
+  the_pipeline = saved_pipeline->pipeline;
+  saver = saved_pipeline;
+  saved_pipeline = saved_pipeline->next;
+  free (saver);
   already_making_children = saved_already_making_children;
   UNBLOCK_CHILD (oset);
 
@@ -1840,6 +1862,8 @@ make_child (command, async_p)
       unset_bash_input (0);
 #endif /* BUFFERED_INPUT */
 
+      CLRINTERRUPT;	/* XXX - children have their own interrupt state */
+
       /* Restore top-level signal mask. */
       sigprocmask (SIG_SETMASK, &top_level_mask, (sigset_t *)NULL);
 
@@ -2742,8 +2766,6 @@ if (job == NO_JOB)
 	     something like a while loop or a for loop, simulate getting
 	     and being killed by the SIGINT to pass the status back to our
 	     parent. */
-	  s = job_signal_status (job);
-
 	  if (child_caught_sigint == 0 && signal_is_trapped (SIGINT) == 0)
 	    {
 	      UNBLOCK_CHILD (oset);
@@ -3371,6 +3393,13 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
       if (pid <= 0)
 	continue;	/* jumps right to the test */
 
+      /* Linux kernels appear to signal the parent but not interrupt the
+	 waitpid() (or restart it even without SA_RESTART) on SIGINT, so if
+	 we saw a SIGINT and the process exited or died due to some other
+	 signal, assume the child caught the SIGINT. */
+      if (wait_sigint_received && (WIFSIGNALED (status) == 0 || WTERMSIG (status) != SIGINT))
+	child_caught_sigint = 1;
+
       /* If the child process did die due to SIGINT, forget our assumption
 	 that it caught or otherwise handled it. */
       if (WIFSIGNALED (status) && WTERMSIG (status) == SIGINT)
@@ -3602,13 +3631,17 @@ set_job_status_and_cleanup (job)
 	 seen it, and wait_sigint_received is non-zero, because keyboard
 	 signals are sent to process groups) or via kill(2) to the foreground
 	 process by another process (or itself).  If the shell did receive the
-	 SIGINT, it needs to perform normal SIGINT processing. */
+	 SIGINT, it needs to perform normal SIGINT processing.  XXX - should
+	 this change its behavior depending on whether the last command in an
+	 pipeline exited due to SIGINT, or any process in the pipeline?  Right
+	 now it does this if any process in the pipeline exits due to SIGINT. */
       else if (wait_sigint_received &&
 	      child_caught_sigint == 0 &&
 	      IS_FOREGROUND (job) && IS_JOBCONTROL (job) == 0)
 	{
 	  int old_frozen;
 
+itrace("waitchld: special handling for SIGINT");
 	  wait_sigint_received = 0;
 
 	  /* If SIGINT is trapped, set the exit status so that the trap
@@ -3642,7 +3675,7 @@ set_job_status_and_cleanup (job)
 		 In this case, we have to fix things up.  What a crock. */
 	      if (temp_handler == trap_handler && signal_is_trapped (SIGINT) == 0)
 		  temp_handler = trap_to_sighandler (SIGINT);
-		restore_sigint_handler ();
+	      restore_sigint_handler ();
 	      if (temp_handler == SIG_DFL)
 		termsig_handler (SIGINT);	/* XXX */
 	      else if (temp_handler != SIG_IGN)

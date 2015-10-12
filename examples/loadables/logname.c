@@ -35,6 +35,7 @@
 extern int errno;
 #endif
 
+int
 logname_builtin (list)
      WORD_LIST *list;
 {

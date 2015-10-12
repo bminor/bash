@@ -875,13 +875,11 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	  last_command_exit_value = exec_result;
 	  run_pending_traps ();
 
-#if 0	  /* XXX - bash-4.4 or bash-5.0 */
 	  /* Undo redirections before running exit trap on the way out of
 	     set -e. Report by Mark Farrell 5/19/2014 */
 	  if (exit_immediately_on_error && signal_is_trapped (0) &&
 		unwind_protect_tag_on_stack ("saved-redirects"))
 	    run_unwind_frame ("saved-redirects");
-#endif
 
 	  jump_to_top_level (ERREXIT);
 	}
@@ -1306,11 +1304,12 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
      int asynchronous, pipe_in, pipe_out;
      struct fd_bitmap *fds_to_close;
 {
-  int rv, posix_time, old_flags, nullcmd;
+  int rv, posix_time, old_flags, nullcmd, code;
   time_t rs, us, ss;
   int rsf, usf, ssf;
   int cpu;
   char *time_format;
+  volatile procenv_t save_top_level;
 
 #if defined (HAVE_GETRUSAGE) && defined (HAVE_GETTIMEOFDAY)
   struct timeval real, user, sys;
@@ -1357,9 +1356,13 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
     }
 
   old_flags = command->flags;
+  COPY_PROCENV (top_level, save_top_level);
   command->flags &= ~(CMD_TIME_PIPELINE|CMD_TIME_POSIX);
-  rv = execute_command_internal (command, asynchronous, pipe_in, pipe_out, fds_to_close);
+  code = setjmp_nosigs (top_level);
+  if (code == NOT_JUMPED)
+    rv = execute_command_internal (command, asynchronous, pipe_in, pipe_out, fds_to_close);
   command->flags = old_flags;
+  COPY_PROCENV (save_top_level, top_level);
 
   rs = us = ss = 0;
   rsf = usf = ssf = cpu = 0;
@@ -1417,6 +1420,9 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
     }
   if (time_format && *time_format)
     print_formatted_time (stderr, time_format, rs, rsf, us, usf, ss, ssf, cpu);
+
+  if (code)
+    sh_longjmp (top_level, code);
 
   return rv;
 }
@@ -2629,11 +2635,6 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	  second = command->value.Connection->second;
 	  if (ignore_return && second)
 	    second->flags |= CMD_IGNORE_RETURN;
-	  if (should_suppress_fork (second))
-	    {
-	      second->flags |= CMD_NO_FORK;
-	      second->value.Simple->flags |= CMD_NO_FORK;
-	    }
 
 	  exec_result = execute_command (second);
 	}
@@ -4045,6 +4046,9 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	  last_asynchronous_pid = old_last_async_pid;
 
 	  CHECK_SIGTERM;
+
+	  if (async)
+	    subshell_level++;		/* not for pipes yet */
 	}
       else
 	{
@@ -4065,6 +4069,8 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	  return (result);
 	}
     }
+
+  QUIT;		/* XXX */
 
   /* If we are re-running this as the result of executing the `command'
      builtin, do not expand the command words a second time. */
@@ -4236,7 +4242,8 @@ run_builtin:
 	      setup_async_signals ();
 	    }
 
-	  subshell_level++;
+	  if (async == 0)
+	    subshell_level++;
 	  execute_subshell_builtin_or_function
 	    (words, simple_command->redirects, builtin, func,
 	     pipe_in, pipe_out, async, fds_to_close,
@@ -4608,7 +4615,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
 	{
 	  error_trap = savestring (error_trap);
 	  add_unwind_protect (xfree, error_trap);
-	  add_unwind_protect (set_error_trap, error_trap);
+	  add_unwind_protect (maybe_set_error_trap, error_trap);
 	}
       restore_default_signal (ERROR_TRAP);
     }
@@ -4625,7 +4632,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
 	{
 	  return_trap = savestring (return_trap);
 	  add_unwind_protect (xfree, return_trap);
-	  add_unwind_protect (set_return_trap, return_trap);
+	  add_unwind_protect (maybe_set_return_trap, return_trap);
 	}
       restore_default_signal (RETURN_TRAP);
     }
@@ -5463,6 +5470,7 @@ shell_execve (command, args, env)
   /* We have committed to attempting to execute the contents of this file
      as shell commands. */
 
+  reset_parser ();
   initialize_subshell ();
 
   set_sigint_handler ();
@@ -5506,8 +5514,6 @@ shell_execve (command, args, env)
 #if defined (PROCESS_SUBSTITUTION)
   clear_fifo_list ();	/* pipe fds are what they are now */
 #endif
-
-  reset_parser ();
 
   sh_longjmp (subshell_top_level, 1);
   /*NOTREACHED*/

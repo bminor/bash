@@ -58,7 +58,7 @@ _rl_search_cxt *_rl_nscxt = 0;
 extern HIST_ENTRY *_rl_saved_line_for_history;
 
 /* Functions imported from the rest of the library. */
-extern int _rl_free_history_entry PARAMS((HIST_ENTRY *));
+extern void _rl_free_history_entry PARAMS((HIST_ENTRY *));
 
 static char *noninc_search_string = (char *) NULL;
 static int noninc_history_pos;

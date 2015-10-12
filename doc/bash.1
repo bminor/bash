@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Jun 11 16:26:00 EDT 2015
+.\"	Last Change: Fri Oct  2 07:15:57 EDT 2015
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2015 June 11" "GNU Bash 4.4"
+.TH BASH 1 "2015 October 2" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -477,8 +477,8 @@ A character that, when unquoted, separates words.  One of the following:
 .br
 .RS
 .PP
-.if t \fB|  &  ;  (  )  <  >  space  tab\fP
-.if n \fB|  & ; ( ) < > space tab\fP
+.if t \fB|  &  ;  (  )  <  >  space  tab  newline\fP
+.if n \fB|  & ; ( ) < > space tab newline\fP
 .RE
 .PP
 .TP
@@ -1135,6 +1135,9 @@ single quote
 .B \e\(dq
 double quote
 .TP
+.B \e?
+question mark
+.TP
 .B \e\fInnn\fP
 the eight-bit character whose value is the octal value \fInnn\fP
 (one to three digits)
@@ -1520,6 +1523,12 @@ Use
 .B LINENO
 to obtain the current line number.
 .TP
+.B BASH_LOADABLES_PATH
+A colon-separated list of directories in which the shell looks for
+dynamically loadable builtins specified by the
+.B enable
+command.
+.TP
 .B BASH_REMATCH
 An array variable whose members are assigned by the \fB=~\fP binary
 operator to the \fB[[\fP conditional command.
@@ -1681,7 +1690,7 @@ This variable exists only when a shell function is executing.
 Assignments to
 .SM
 .B FUNCNAME
-have no effect and return an error status.
+have no effect.
 If
 .SM
 .B FUNCNAME
@@ -1704,7 +1713,7 @@ user is a member.
 Assignments to
 .SM
 .B GROUPS
-have no effect and return an error status.
+have no effect.
 If
 .SM
 .B GROUPS
@@ -3161,7 +3170,8 @@ The expansion is a string that is the result of expanding the value of
 \fIparameter\fP as if it were a prompt string (see \fBPROMPTING\fP below).
 .TP
 .B A
-The expansion is a string in the form of a \fBdeclare\fP command that, if
+The expansion is a string in the form of
+an assignment statement or \fBdeclare\fP command that, if
 evaluated, will recreate \fIparameter\fP with its attributes and value.
 .TP
 .B a
@@ -6698,7 +6708,9 @@ quotes are considered one word.
 History expansions are introduced by the appearance of the
 history expansion character, which is \^\fB!\fP\^ by default.
 Only backslash (\^\fB\e\fP\^) and single quotes can quote
-the history expansion character.
+the history expansion character, but the history expansion character is
+also treated as quoted if it immediately precedes the closing double quote
+in a double-quoted string.
 .PP
 Several characters inhibit history expansion if found immediately
 following the history expansion character, even if it is unquoted:
@@ -6944,7 +6956,8 @@ accepts
 to signify the end of the options.
 The \fB:\fP, \fBtrue\fP, \fBfalse\fP, and \fBtest\fP builtins
 do not accept options and do not treat \fB\-\-\fP specially.
-The \fBexit\fP, \fBlogout\fP, \fBbreak\fP, \fBcontinue\fP, \fBlet\fP,
+The \fBexit\fP, \fBlogout\fP, \fBreturn\fP,
+\fBbreak\fP, \fBcontinue\fP, \fBlet\fP,
 and \fBshift\fP builtins accept and process arguments beginning with
 \fB\-\fP without requiring \fB\-\-\fP.
 Other builtins that accept arguments but are not specified as accepting
@@ -7588,8 +7601,8 @@ The
 option inhibits the display of function definitions; only the
 function name and attributes are printed.
 If the \fBextdebug\fP shell option is enabled using \fBshopt\fP,
-the source file name and line number where the function is defined
-are displayed as well.  The
+the source file name and line number where each \fIname\fP
+is defined are displayed as well.  The
 .B \-F
 option implies
 .BR \-f .
@@ -7699,6 +7712,7 @@ Directories are added to the list with the
 command; the
 .B popd
 command removes entries from the list.
+The current directory is always the first directory in the stack.
 .RS
 .PD 0
 .TP
@@ -8390,7 +8404,7 @@ returning its exit status.
 \fBkill\fP [\fB\-s\fP \fIsigspec\fP | \fB\-n\fP \fIsignum\fP | \fB\-\fP\fIsigspec\fP] [\fIpid\fP | \fIjobspec\fP] ...
 .PD 0
 .TP
-\fBkill\fP \fB\-l\fP [\fIsigspec\fP | \fIexit_status\fP]
+\fBkill\fP \fB\-l\fP|\fB\-L\fP [\fIsigspec\fP | \fIexit_status\fP]
 .PD
 Send the signal named by
 .I sigspec
@@ -8427,6 +8441,9 @@ The \fIexit_status\fP argument to
 .B \-l
 is a number specifying either a signal number or the exit status of
 a process terminated by a signal.
+The
+.B \-L
+option is equivalent to \fB\-l\fP.
 .B kill
 returns true if at least one signal was successfully sent, or false
 if an error occurs or an invalid option is encountered.
@@ -8655,15 +8672,15 @@ The return value is zero on success, non-zero on failure.
 .PD
 Adds a directory to the top of the directory stack, or rotates
 the stack, making the new top of the stack the current working
-directory.  With no arguments, exchanges the top two directories
+directory.  With no arguments, \fBpushd\fP exchanges the top two directories
 and returns 0, unless the directory stack is empty.
 Arguments, if supplied, have the following meanings:
 .RS
 .PD 0
 .TP
 .B \-n
-Suppresses the normal change of directory when adding directories
-to the stack, so that only the stack is manipulated.
+Suppresses the normal change of directory when rotating or
+adding directories to the stack, so that only the stack is manipulated.
 .TP
 \fB+\fP\fIn\fP
 Rotates the stack so that the \fIn\fPth directory
@@ -9461,6 +9478,14 @@ If set,
 .B bash
 does not process the replacement string in the pattern substitution word
 expansion using quote removal.
+.TP 8
+.B compat43
+If set,
+.B bash
+does not print a warning message if an attempt is made to use a quoted compound
+array assignment as an argument to \fBdeclare\fP, and makes word expansion errors
+non-fatal errors that cause the current command to fail (the default behavior is
+to make them fatal errors that cause the shell to exit).
 .TP 8
 .B complete_fullquote
 If set,

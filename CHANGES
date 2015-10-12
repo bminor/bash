@@ -1,3 +1,164 @@
+This document details the changes between this version, bash-4.4-beta, and
+the previous version, bash-4.4-alpha.
+
+1.  Change to Bash
+
+a.  Fixed two bugs that caused out-of-bounds reads when skipping over assignment
+    statements while finding the word on which to perform programmable
+    completion.
+
+b.  Fixed a memory leak in programmable completion.
+
+c.  Fixed a bug that could cause the shell to crash when interrupting the
+    wait builtin.
+
+d.  Fixed a bug that caused ${!vvv@} to be interpreted as introducing the new
+    `@' operator.
+
+e.  Fixed a bug that caused the && and || operators to be incorrectly optimized.
+
+f.  The shell now undoes redirections before exiting the shell when the `-e'
+    option is enabled, and a shell function fails.
+
+g.  History expansion now skips over the history expansion character in command
+    and process substitution.
+
+h.  Fixed a bug that caused stray '\001' characters to be added to the output
+    of `declare -p'.
+
+i.  Fixed a memory leak when processing declare commands that perform compound
+    array assignments.
+
+j.  Fixed a bug that could cause the shell to crash when reading input from a
+    file and the limit on open file descriptors is high.
+
+k.  Fixed a bug that caused the ERR and RETURN traps to be unset if they were
+    set in a shell function but unset previously.
+
+l.  Fixed a bug that caused several signals to be ignored if `exec' failed in
+    an interactive shell.
+
+m.  A posix-mode non-interactive shell now considers a parameter expansion error
+    to be a fatal error.
+
+n.  The `time' command now prints timing statistics for failed commands when
+    the -e option is enabled.
+
+o.  Fixed a bug that caused the shell to crash when attempting to indirectly
+    expand a shell variable with an invalid name.
+
+p.  Fixed a bug that caused the shell to crash when running a trap containing
+    a process substitution.
+
+q.  Bash now prints the keyword `function' before a function with the same name
+    as a reserved word when using `declare -f' to avoid parse errors when
+    reusing the output as input.
+
+r.  Fixed a bug that caused the shell to crash when using declare -g to attempt
+    to redefine an existing global indexed array variable as an associative
+    array.
+
+s.  Fixed a memory leak that occurred when interrupting brace expansions
+    generating a sequence.
+
+t.  Fixed a bug that resulted in alias expansion in redirections.
+
+u.  The `declare -a' and `declare -A' commands now print fewer warnings when
+    attempting to create and initialize an array at the same time, but
+    relying on word expansions to construct the compound assignment.
+
+v.  The `help' builtin now behaves better in locales where each wide
+    character occupies more than one display column.
+
+w.  The `read' builtin no longer has a possible race condition when a timeout
+    occurs.
+
+x.  Fixed several expansion problems encountered when IFS="'".
+
+y.  Fixed a problem with the expansion of $'\c?'.
+
+z.  Bash no longer splits the expansion of here-strings, as the documentation
+    has always said.
+
+aa. Bash now puts `s' in the value of $- if the shell is reading from standard
+    input, as Posix requires.
+
+bb. Fixed a bug that caused the shell to crash if invoked with a NULL
+    environment.
+
+cc. The shell now only trusts an inherited value for $PWD if it begins with a
+    `/'.
+
+dd. Fixed a memory leak when creating local array variables and assigning to
+    them using compound assignment with the `declare' builtin.
+
+ee. Fixed a bug that could cause the shell to crash when processing nested here
+    documents inside a command substitution.
+
+ff. Array keys and values are now displayed using $'...' quoting where
+    appropriate.
+
+gg. Fixed a bug that could cause the shell to crash if the replacement string
+    in pattern substitution was NULL.
+
+hh. Fixed a bug that could cause the shell to crash if a command substitution
+    contained a non-fatal syntax error.
+
+ii. Fixed a bug that could cause the shell to crash if variable indirection
+    resulted in a NULL variable.
+
+jj. Fixed a bug that could cause the shell to crash if a long string contained
+    multiple unterminated parameter expansion constructs.
+
+kk. Improved the code that acts on SIGINT received while waiting for a child
+    process only if the child exits due to SIGINT.
+
+ll. $BASH_SUBSHELL now has more consistent values in asynchronous simple
+    commands.
+
+2.  Changes to Readline
+
+a.  Colored completion prefixes are now displayed using a different color, less
+    likely to collide with files.
+
+b.  Fixed a bug that caused vi-mode character search to misbehave when
+    running in callback mode.
+
+c.  Fixed a bug that caused output to be delayed when input is coming from a
+    macro in vi-mode.
+
+d.  Fixed a bug that caused the vi-mode `.' command to misbehave when redoing
+    a multi-key key sequence via a macro.
+
+e.  Fixed a bug that caused problems with applications that supply their own
+    input function when performing completion.
+
+f.  When read returns -1/EIO when attempting to read a key, return an error
+    instead of line termination back to the caller.
+
+g.  Updated tty auditing feature based on patch from Red Hat.
+
+h.  Fixed a bug that could cause the history library to crash on overflows
+    introduced by malicious editing of timestamps in the history file.
+
+3.  New Features in Bash
+
+a.  `make install' now installs the example loadable builtins and a set of
+    bash headers to use when developing new loadable builtins.
+
+b.  `enable -f' now attempts to call functions named BUILTIN_builtin_load when
+    loading BUILTIN, and BUILTIN_builtin_unload when deleting it.  This allows
+    loadable builtins to run initialization and cleanup code.
+
+c.  There is a new BASH_LOADABLES_PATH variable containing a list of directories
+    where the `enable -f' command looks for shared objects containing loadable
+    builtins.
+
+d.  The `kill' builtin now has a `-L' option, equivalent to `-l', for compatibility
+    with Linux standalone versions of kill.
+
+4.  New Features in Readline
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-4.4-alpha, and
 the previous version, bash-4.3-release.
 
@@ -236,7 +397,7 @@ www. Fixes for upper and lower-casing multibyte characters, some locales have
      bytes.
 
 xxx. Fixed a bug that caused the ERR trap in a shell function to have the
-     right value for $LINENO.
+     wrong value for $LINENO.
 
 yyy. Fixed a bug that resulted in incorrect quoting of regexps for the =~
      operator when an open brace appears without a close brace.
@@ -322,6 +483,10 @@ vvvv. Fixed a bug that caused the completion code to read past the end of the
 
 wwww. Fixed a bug that caused case statements within loops contained in a
       command substitution to be parsed incorrectly.
+
+xxxx. Fixed a bug that could cause SIGCHLD handling to be delayed after
+      running `wait' with no arguments and interrupting it with ^C without
+      a trap handler installed.
 
 2.  Changes to Readline
 
@@ -439,7 +604,7 @@ r.  Executing the rhs of && and || will no longer cause the shell to fork if
     it's not necessary.
 
 s.  The `local' builtin takes a new argument: `-', which will cause it to save
-    and the single-letter shell options and restore their previous values at
+    the single-letter shell options and restore their previous values at
     function return.
 
 t.  `complete' and `compgen' have a new `-o nosort' option, which forces
@@ -1277,7 +1442,7 @@ y.  The {x}<word redirection feature now allows words like {array[ind]} and
     can use variables with special meanings to the shell (e.g., BASH_XTRACEFD).
 
 z.  There is a new CHILD_MAX special shell variable; its value controls the
-    number of exited child statues the shell remembers.
+    number of exited child statuses the shell remembers.
 
 aa. There is a new configuration option (--enable-direxpand-default) that
     causes the `direxpand' shell option to be enabled by default.

@@ -81,6 +81,7 @@ extern sh_builtin_func_t *this_shell_builtin;
 extern sigset_t top_level_mask;
 #endif
 extern procenv_t wait_intr_buf;
+extern int wait_intr_flag;
 extern int wait_signal_received;
 
 volatile pid_t last_made_pid = NO_PID;
@@ -545,6 +546,8 @@ make_child (command, async_p)
 #if defined (BUFFERED_INPUT)
       unset_bash_input (0);
 #endif /* BUFFERED_INPUT */
+
+      CLRINTERRUPT;	/* XXX - children have their own interrupt state */
 
 #if defined (HAVE_POSIX_SIGNALS)
       /* Restore top-level signal mask. */

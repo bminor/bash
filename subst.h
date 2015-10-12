@@ -62,6 +62,7 @@
 #define SX_ARITHSUB	0x0080	/* extracting $(( ... )) (currently unused) */
 #define SX_POSIXEXP	0x0100	/* extracting new Posix pattern removal expansions in extract_dollar_brace_string */
 #define SX_WORD		0x0200	/* extracting word in ${param op word} */
+#define SX_COMPLETE	0x0400	/* extracting word for completion */
 
 /* Remove backslashes which are quoting backquotes from STRING.  Modifies
    STRING, and returns a pointer to it. */
@@ -282,14 +283,16 @@ extern char *cond_expand_word __P((WORD_DESC *, int));
 #endif
 
 /* Flags for skip_to_delim */
-#define SD_NOJMP	0x01	/* don't longjmp on fatal error. */
-#define SD_INVERT	0x02	/* look for chars NOT in passed set */
-#define SD_NOQUOTEDELIM	0x04	/* don't let single or double quotes act as delimiters */
-#define SD_NOSKIPCMD	0x08	/* don't skip over $(, <(, or >( command/process substitution; parse them as commands */
-#define SD_EXTGLOB	0x10	/* skip over extended globbing patterns if appropriate */
-#define SD_IGNOREQUOTE	0x20	/* single and double quotes are not special */
-#define SD_GLOB		0x40	/* skip over glob patterns like bracket expressions */
-#define SD_NOPROCSUB	0x80	/* don't parse process substitutions as commands */
+#define SD_NOJMP	0x001	/* don't longjmp on fatal error. */
+#define SD_INVERT	0x002	/* look for chars NOT in passed set */
+#define SD_NOQUOTEDELIM	0x004	/* don't let single or double quotes act as delimiters */
+#define SD_NOSKIPCMD	0x008	/* don't skip over $(, <(, or >( command/process substitution; parse them as commands */
+#define SD_EXTGLOB	0x010	/* skip over extended globbing patterns if appropriate */
+#define SD_IGNOREQUOTE	0x020	/* single and double quotes are not special */
+#define SD_GLOB		0x040	/* skip over glob patterns like bracket expressions */
+#define SD_NOPROCSUB	0x080	/* don't parse process substitutions as commands */
+#define SD_COMPLETE	0x100	/* skip_to_delim during completion */
+#define SD_HISTEXP	0x200	/* skip_to_delim during history expansion */
 
 extern int skip_to_delim __P((char *, int, char *, int));
 

@@ -29,7 +29,7 @@ extern char *tgetstr (const char *name, char **area);
 
 extern char PC;
 extern short ospeed;
-extern void tputs (const char *string, int nlines, int (*outfun) (int));
+extern int tputs (const char *string, int nlines, int (*outfun) (int));
 
 extern char *tparam (const char *ctlstring, char *buffer, int size, ...);
 

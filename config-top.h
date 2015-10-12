@@ -113,6 +113,7 @@
 #if defined (SYSLOG_HISTORY)
 #  define SYSLOG_FACILITY LOG_USER
 #  define SYSLOG_LEVEL LOG_INFO
+#  define OPENLOG_OPTS LOG_PID
 #endif
 
 /* Define if you want to include code in shell.c to support wordexp(3) */

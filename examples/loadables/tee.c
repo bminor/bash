@@ -60,6 +60,7 @@ extern int interrupt_immediately;
 
 extern char *strerror ();
 
+int
 tee_builtin (list)
      WORD_LIST *list;
 {

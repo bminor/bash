@@ -5,5 +5,5 @@ echo "warning: \`/tmp/bash-notthere' not being found or \`/' being a directory" 
 echo "warning: produce diff output, please do not consider this a test failure" >&2
 echo "warning: if diff output differing only in the location of the bash" >&2
 echo "warning: binary appears, please do not consider this a test failure" >&2
-${THIS_SH} ./execscript > /tmp/xx 2>&1
-diff /tmp/xx exec.right && rm -f /tmp/xx
+${THIS_SH} ./execscript > ${BASH_TSTOUT} 2>&1
+diff ${BASH_TSTOUT} exec.right && rm -f ${BASH_TSTOUT}

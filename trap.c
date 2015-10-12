@@ -606,10 +606,24 @@ set_error_trap (command)
 }
 
 void
+maybe_set_error_trap (command)
+     char *command;
+{
+  trap_if_untrapped (ERROR_TRAP, command);
+}
+
+void
 set_return_trap (command)
      char *command;
 {
   set_signal (RETURN_TRAP, command);
+}
+
+void
+maybe_set_return_trap (command)
+     char *command;
+{
+  trap_if_untrapped (RETURN_TRAP, command);
 }
 
 #ifdef INCLUDE_UNUSED
@@ -924,7 +938,7 @@ _run_trap_internal (sig, tag)
   int trap_exit_value, *token_state;
   volatile int save_return_catch_flag, function_code, top_level_code, old_int;
   int flags;
-  procenv_t save_return_catch, save_top_level;
+  procenv_t save_return_catch;
   WORD_LIST *save_subst_varlist;
   sh_parser_state_t pstate;
 #if defined (ARRAY_VARS)

@@ -219,6 +219,9 @@ typedef int sh_ignore_func_t __P((const char *));	/* sh_icpfunc_t */
 typedef int sh_assign_func_t __P((const char *));
 typedef int sh_wassign_func_t __P((WORD_DESC *, int));
 
+typedef int sh_load_func_t __P((char *));
+typedef void sh_unload_func_t __P((char *));
+
 typedef int sh_builtin_func_t __P((WORD_LIST *)); /* sh_wlist_func_t */
 
 #endif /* SH_FUNCTION_TYPEDEF */

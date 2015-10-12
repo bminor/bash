@@ -151,7 +151,7 @@ static int running_in_emacs;
 #endif
 
 /* Flags word encapsulating the current readline state. */
-int rl_readline_state = RL_STATE_NONE;
+unsigned long rl_readline_state = RL_STATE_NONE;
 
 /* The current offset in the current input line. */
 int rl_point;
@@ -386,7 +386,7 @@ readline (prompt)
     RL_SETSTATE (RL_STATE_CALLBACK);
 #endif
 
-#if HAVE_DECL_AUDIT_TTY && defined (ENABLE_TTY_AUDIT_SUPPORT)
+#if HAVE_DECL_AUDIT_USER_TTY && defined (HAVE_LIBAUDIT_H) && defined (ENABLE_TTY_AUDIT_SUPPORT)
   if (value)
     _rl_audit_tty (value);
 #endif
@@ -846,7 +846,7 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	  /* Special case rl_do_lowercase_version (). */
 	  if (func == rl_do_lowercase_version)
 	    /* Should we do anything special if key == ANYOTHERKEY? */
-	    return (_rl_dispatch (_rl_to_lower (key), map));
+	    return (_rl_dispatch (_rl_to_lower ((unsigned char)key), map));
 
 	  rl_executing_keymap = map;
 	  rl_executing_key = key;
@@ -916,8 +916,10 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	     default) or a timeout determined by the value of `keyseq-timeout' */
 	  /* _rl_keyseq_timeout specified in milliseconds; _rl_input_queued
 	     takes microseconds, so multiply by 1000 */
-	  if (rl_editing_mode == vi_mode && key == ESC && map == vi_insertion_keymap
-	      && _rl_input_queued ((_rl_keyseq_timeout > 0) ? _rl_keyseq_timeout*1000 : 0) == 0)
+	  if (rl_editing_mode == vi_mode && key == ESC && map == vi_insertion_keymap &&
+	      (RL_ISSTATE (RL_STATE_INPUTPENDING|RL_STATE_MACROINPUT) == 0) &&
+              _rl_pushed_input_available () == 0 &&
+	      _rl_input_queued ((_rl_keyseq_timeout > 0) ? _rl_keyseq_timeout*1000 : 0) == 0)
 	    return (_rl_dispatch (ANYOTHERKEY, FUNCTION_TO_KEYMAP (map, key)));
 #endif
 
@@ -928,6 +930,16 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	  /* Allocate new context here.  Use linked contexts (linked through
 	     cxt->ocxt) to simulate recursion */
 #if defined (READLINE_CALLBACKS)
+#  if defined (VI_MODE)
+	  /* If we're redoing a vi mode command and we know there is a shadowed
+	     function corresponding to this key, just call it -- all the redoable
+	     vi mode commands already have all the input they need, and rl_vi_redo
+	     assumes that one call to rl_dispatch is sufficient to complete the
+	     command. */
+	  if (_rl_vi_redoing && RL_ISSTATE (RL_STATE_CALLBACK) &&
+	      map[ANYOTHERKEY].function != 0)
+	    return (_rl_subseq_result (-2, map, key, got_subseq));
+#  endif
 	  if (RL_ISSTATE (RL_STATE_CALLBACK))
 	    {
 	      /* Return 0 only the first time, to indicate success to
@@ -954,7 +966,7 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	  /* Tentative inter-character timeout for potential multi-key
 	     sequences?  If no input within timeout, abort sequence and
 	     act as if we got non-matching input. */
-	  /* _rl_keyseq_timeout specified in milliseconds; _rl_input_queued
+	  /* _rl_keyseq_timeout specified in milliseconds; _rl_input_queued[B
 	     takes microseconds, so multiply by 1000 */
 	  if (_rl_keyseq_timeout > 0 &&
 	  	(RL_ISSTATE (RL_STATE_INPUTPENDING|RL_STATE_MACROINPUT) == 0) &&
@@ -990,6 +1002,7 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	}
       break;
     }
+
 #if defined (VI_MODE)
   if (rl_editing_mode == vi_mode && _rl_keymap == vi_movement_keymap &&
       key != ANYOTHERKEY &&
@@ -1022,7 +1035,7 @@ _rl_subseq_result (r, map, key, got_subseq)
       type = m[ANYOTHERKEY].type;
       func = m[ANYOTHERKEY].function;
       if (type == ISFUNC && func == rl_do_lowercase_version)
-	r = _rl_dispatch (_rl_to_lower (key), map);
+	r = _rl_dispatch (_rl_to_lower ((unsigned char)key), map);
       else if (type == ISFUNC)
 	{
 	  /* If we shadowed a function, whatever it is, we somehow need a
@@ -1035,7 +1048,9 @@ _rl_subseq_result (r, map, key, got_subseq)
 
 	  m[key].type = type;
 	  m[key].function = func;
-	  r = _rl_dispatch (key, m);
+	  /* Don't change _rl_dispatching_keymap, set it here */
+	  _rl_dispatching_keymap = map;		/* previous map */
+	  r = _rl_dispatch_subseq (key, m, 0);
 	  m[key].type = nt;
 	  m[key].function = nf;
 	}
