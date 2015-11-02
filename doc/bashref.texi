@@ -5403,7 +5403,6 @@ current directory.
 A null directory name may appear as two adjacent colons, or as an initial
 or trailing colon.
 
-
 @item PS1
 The primary prompt string.  The default value is @samp{\s-\v\$ }.
 @xref{Controlling the Prompt}, for the complete list of escape
@@ -5972,6 +5971,11 @@ If set to a number greater than zero, the value is used as the number of
 trailing directory components to retain when expanding the @code{\w} and
 @code{\W} prompt string escapes (@pxref{Controlling the Prompt}).
 Characters removed are replaced with an ellipsis.
+
+@item PS0
+The value of this parameter is expanded like @var{PS1}
+and displayed by interactive shells after reading a command
+and before the command is executed.
 
 @item PS3
 The value of this variable is used as the prompt for the

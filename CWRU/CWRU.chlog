@@ -9866,3 +9866,27 @@ builtins/{set,ulimit}.def
 builtins/*.def
 	- make sure to consistently use builtin_help() instead of mix of that
 	  function and builtin_usage()
+
+				   10/29
+				   -----
+doc/{bash.1,bashref.texi}
+	- BASH_CMDS, BASH_ALIASES: note that removing elements from these
+	  array variables is not currently reflected in the command hash
+	  table and alias list, respectively.  Reported by isabella parakiss
+	  <izaberina@gmail.com>
+
+				   10/30
+				   -----
+eval.c
+	- reader_loop: if PS0 is set in an interactive shell, expand and display it
+	  after reading a (complete) command but before executing it.  This differs
+	  from the DEBUG trap because the DEBUG trap is executed once for each
+	  simple command (and some others, like each time through a for loop).  From
+	  a patch submitted by Dan Stromberg <dstromberglists@gmail.com>
+
+parse.y
+	- prompt_again: set ps0_prompt from $PS0 in an interactive shell
+
+doc/{bash.1,bashref.texi}
+	- PS0: document new prompt string
+

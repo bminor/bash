@@ -232,6 +232,9 @@ char *secondary_prompt = SPROMPT;
 /* PROMPT_STRING_POINTER points to one of these, never to an actual string. */
 char *ps1_prompt, *ps2_prompt;
 
+/* Displayed after reading a command but before executing it in an interactive shell */
+char *ps0_prompt;
+
 /* Handle on the current prompt string.  Indirectly points through
    ps1_ or ps2_prompt. */
 char **prompt_string_pointer = (char **)NULL;
@@ -5224,6 +5227,8 @@ prompt_again ()
 
   ps1_prompt = get_string_value ("PS1");
   ps2_prompt = get_string_value ("PS2");
+
+  ps0_prompt = get_string_value ("PS0");
 
   if (!prompt_string_pointer)
     prompt_string_pointer = &ps1_prompt;

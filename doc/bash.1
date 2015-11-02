@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue Oct 20 10:48:01 EDT 2015
+.\"	Last Change: Fri Oct 30 10:00:57 EDT 2015
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2015 October 20" "GNU Bash 4.4"
+.TH BASH 1 "2015 October 30" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1454,8 +1454,13 @@ that do not require \fBbash\fP to be re-initialized.
 .B BASH_ALIASES
 An associative array variable whose members correspond to the internal
 list of aliases as maintained by the \fBalias\fP builtin.
-Elements added to this array appear in the alias list; unsetting array
-elements cause aliases to be removed from the alias list.
+Elements added to this array appear in the alias list; however,
+unsetting array elements currently does not cause aliases to be removed
+from the alias list.
+If
+.B BASH_ALIASES
+is unset, it loses its special properties, even if it is
+subsequently reset.
 .TP
 .B BASH_ARGC
 An array variable whose values are the number of parameters in each
@@ -1496,8 +1501,13 @@ builtin below)
 .B BASH_CMDS
 An associative array variable whose members correspond to the internal
 hash table of commands as maintained by the \fBhash\fP builtin.
-Elements added to this array appear in the hash table; unsetting array
-elements cause commands to be removed from the hash table.
+Elements added to this array appear in the hash table; however,
+unsetting array elements currently does not cause command names to be removed
+from the hash table.
+If
+.B BASH_ALIASES
+is unset, it loses its special properties, even if it is
+subsequently reset.
 .TP
 .B BASH_COMMAND
 The command currently being executed or about to be executed, unless the
@@ -2327,6 +2337,13 @@ trailing directory components to retain when expanding the \fB\ew\fP and
 .SM
 .B PROMPTING
 below).  Characters removed are replaced with an ellipsis.
+.TP
+.B PS0
+The value of this parameter is expanded (see
+.SM
+.B PROMPTING
+(below) and displayed by interactive shells after reading a command
+and before the command is executed.
 .TP
 .B PS1
 The value of this parameter is expanded (see
