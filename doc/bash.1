@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Oct  5 14:32:44 EDT 2015
+.\"	Last Change: Tue Oct 13 17:03:11 EDT 2015
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2015 October 5" "GNU Bash 4.4"
+.TH BASH 1 "2015 October 11" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -8638,9 +8638,8 @@ In addition to the standard \fIprintf\fP(1) format specifications,
 .B %b
 causes
 \fBprintf\fP to expand backslash escape sequences in the corresponding
-\fIargument\fP (except that \fB\ec\fP terminates output, backslashes in
-\fB\e\(aq\fP, \fB\e"\fP, and \fB\e?\fP are not removed, and octal escapes
-beginning with \fB\e0\fP may contain up to four digits).
+\fIargument\fP
+in the same way as \fBecho \-e\fP.
 .TP
 .B %q
 causes \fBprintf\fP to output the corresponding
@@ -9487,9 +9486,13 @@ expansion using quote removal.
 If set,
 .B bash
 does not print a warning message if an attempt is made to use a quoted compound
-array assignment as an argument to \fBdeclare\fP, and makes word expansion errors
+array assignment as an argument to \fBdeclare\fP,
+makes word expansion errors
 non-fatal errors that cause the current command to fail (the default behavior is
-to make them fatal errors that cause the shell to exit).
+to make them fatal errors that cause the shell to exit),
+and does not reset the
+loop state when a shell function is executed (this allows \fBbreak\fP or
+\fBcontinue\fP in a shell function to affect loops in the caller's context).
 .TP 8
 .B complete_fullquote
 If set,

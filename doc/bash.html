@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2015 October 2<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2015 October 11<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -2829,6 +2829,11 @@ strings preceded by a <B>$</B>.
 
 <DD>
 This variable determines the locale category used for number formatting.
+<DT><B>LC_TIME</B>
+
+<DD>
+This variable determines the locale category used for data and time
+formatting.
 <DT><B>LINES</B>
 
 <DD>
@@ -10980,9 +10985,8 @@ In addition to the standard <I>printf</I>(1) format specifications,
 <DD>
 causes
 <B>printf</B> to expand backslash escape sequences in the corresponding
-<I>argument</I> (except that <B>\c</B> terminates output, backslashes in
-<B>\aq</B>, <B>\&quot;</B>, and <B>\?</B> are not removed, and octal escapes
-beginning with <B>\0</B> may contain up to four digits).
+<I>argument</I>
+in the same way as <B>echo -e</B>.
 <DT><B>%q</B>
 
 <DD>
@@ -12059,9 +12063,13 @@ If set,
 <B>bash</B>
 
 does not print a warning message if an attempt is made to use a quoted compound
-array assignment as an argument to <B>declare</B>, and makes word expansion errors
+array assignment as an argument to <B>declare</B>,
+makes word expansion errors
 non-fatal errors that cause the current command to fail (the default behavior is
-to make them fatal errors that cause the shell to exit).
+to make them fatal errors that cause the shell to exit),
+and does not reset the
+loop state when a shell function is executed (this allows <B>break</B> or
+<B>continue</B> in a shell function to affect loops in the caller's context).
 <DT><B>complete_fullquote</B>
 
 <DD>
@@ -13408,7 +13416,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2015 October 2<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2015 October 11<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13514,6 +13522,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 02 October 2015 07:16:35 EDT
+Time: 15 October 2015 10:10:58 EDT
 </BODY>
 </HTML>

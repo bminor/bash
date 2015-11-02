@@ -580,13 +580,13 @@ rl_redisplay ()
   int inv_botlin, lb_botlin, lb_linenum, o_cpos;
   int newlines, lpos, temp, n0, num, prompt_lines_estimate;
   char *prompt_this_line;
+  int mb_cur_max = MB_CUR_MAX;
 #if defined (HANDLE_MULTIBYTE)
   wchar_t wc;
   size_t wc_bytes;
   int wc_width;
   mbstate_t ps;
   int _rl_wrapped_multicolumn = 0;
-  int mb_cur_max = MB_CUR_MAX;
 #endif
 
   if (_rl_echoing_p == 0)
@@ -1029,9 +1029,11 @@ rl_redisplay ()
 	     not the first.  */
 	  if (out >= _rl_screenchars)
 	    {
+#if defined (HANDLE_MULTIBYTE)
 	      if (mb_cur_max > 1 && rl_byte_oriented == 0)
 		out = _rl_find_prev_mbchar (line, _rl_screenchars, MB_FIND_ANY);
 	      else
+#endif
 		out = _rl_screenchars - 1;
 	    }
 

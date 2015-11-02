@@ -9750,3 +9750,35 @@ variables.c
 	  the builtin returns), make sure to copy the array or hash table so
 	  the variable is duplicated correctly.  Fixes seg fault reported by
 	  Linda Walsh <bash@tlinx.org>
+
+				   10/13
+				   -----
+variables.c
+	- initialize_shell_variables: add call to sv_shcompat, so BASH_COMPAT can
+	  be set in the initial environment
+
+execute_cmd.c
+	- execute_function: set loop_level to 0 only if shell_compatibility_level
+	  is greater than bash-4.3; this was kind of an incompatible change
+
+COMPAT,doc/{bash.1,bashref.texi}
+	- compat43: added loop_level changes to description
+
+				   10/15
+				   -----
+lib/sh/casemod.c,lib/readline/display.c
+	- make sure mb_cur_max variable is defined outside of HANDLE_MULTIBYTE
+	  if it's used outside HANDLE_MULTIBYTE.  Fixes from Greg Wooledge
+	  <wooledg@eeg.ccf.org>
+
+support/Makefile.in
+	- bash.pc: remove as part of distclean, not clean.  Report from Andreas
+	  Schwab <schwab@linux-m68k.org>
+
+				   10/17
+				   -----
+subst.c
+	- array_var_assignment: make sure to call quote_string or quote_escapes
+	  on the assignment string, so spaces in the assignment survive word
+	  splitting.  Fixes bug reported by isabella parakiss
+	  <izaberina@gmail.com>

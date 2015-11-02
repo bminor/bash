@@ -641,6 +641,8 @@ initialize_shell_variables (env, privmode)
   if (temp_var && imported_p (temp_var))
     sv_xtracefd (temp_var->name);
 
+  sv_shcompat ("BASH_COMPAT");
+
   /* Initialize the dynamic variables, and seed their values. */
   initialize_dynamic_variables ();
 }

@@ -427,6 +427,10 @@ compat43 set
 	  (declare -a foo='(1 2)')
 	- word expansion errors are considered non-fatal errors that cause the
 	  current command to fail, even in Posix mode
+	- when executing a shell function, the loop state (while/until/etc.) is
+	  not reset, so `break' or `continue' in a shell function will break or
+	  continue loops in the calling context.  Bash-4.4 and later reset the
+	  loop state to prevent this.
 
 -------------------------------------------------------------------------------
 

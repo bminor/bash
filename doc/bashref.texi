@@ -4311,10 +4311,8 @@ interprets the following extensions:
 @table @code
 @item %b
 Causes @code{printf} to expand backslash escape sequences in the
-corresponding @var{argument},
-except that @samp{\c} terminates output, backslashes in
-@samp{\'}, @samp{\"}, and @samp{\?} are not removed, and octal escapes
-beginning with @samp{\0} may contain up to four digits.
+corresponding @var{argument} in the same way as @code{echo -e}
+(@pxref{Bash Builtins}).
 @item %q
 Causes @code{printf} to output the
 corresponding @var{argument} in a format that can be reused as shell input.
@@ -5069,9 +5067,13 @@ expansion using quote removal.
 @item compat43
 If set, Bash
 does not print a warning message if an attempt is made to use a quoted compound
-array assignment as an argument to @code{declare}, and makes word expansion errors
+array assignment as an argument to @code{declare},
+makes word expansion errors
 non-fatal errors that cause the current command to fail (the default behavior is
-to make them fatal errors that cause the shell to exit).
+to make them fatal errors that cause the shell to exit),
+and does not reset the
+loop state when a shell function is executed (this allows @code{break} or
+@code{continue} in a shell function to affect loops in the caller's context).
 
 @item complete_fullquote
 If set, Bash

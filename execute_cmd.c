@@ -4678,7 +4678,8 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
     stop_pipeline (async, (COMMAND *)NULL);
 #endif
 
-  loop_level = 0;
+  if (shell_compatibility_level > 43)
+    loop_level = 0;
 
   fc = tc;
 

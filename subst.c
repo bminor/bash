@@ -4808,6 +4808,12 @@ array_var_assignment (v, itype, quoted)
       val[1] = ')';
       val[2] = 0;
     }
+  else
+    {
+      ret = (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) ? quote_string (val) : quote_escapes (val);
+      free (val);
+      val = ret;
+    }
   i = var_attribute_string (v, 0, flags);
   ret = (char *)xmalloc (i + strlen (val) + strlen (v->name) + 16);
   sprintf (ret, "declare -%s %s=%s", flags, v->name, val);

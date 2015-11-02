@@ -875,9 +875,7 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               addition to the standard _p_r_i_n_t_f(1) format specifications, pprriinnttff
               interprets the following extensions:
               %%bb     causes pprriinnttff to expand backslash escape sequences in the
-                     corresponding _a_r_g_u_m_e_n_t (except that \\cc terminates output,
-                     backslashes  in \\'', \\"", and \\?? are not removed, and octal
-                     escapes beginning with \\00 may contain up to four digits).
+                     corresponding _a_r_g_u_m_e_n_t in the same way as eecchhoo --ee.
               %%qq     causes pprriinnttff to output the corresponding _a_r_g_u_m_e_n_t  in  a
                      format that can be reused as shell input.
               %%((_d_a_t_e_f_m_t))TT
@@ -1346,158 +1344,161 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               ccoommppaatt4433
                       If set, bbaasshh does not print  a  warning  message  if  an
                       attempt  is  made to use a quoted compound array assign-
-                      ment as an argument to ddeeccllaarree, and makes word expansion
+                      ment as an argument to  ddeeccllaarree,  makes  word  expansion
                       errors  non-fatal  errors that cause the current command
                       to fail (the default behavior  is  to  make  them  fatal
-                      errors that cause the shell to exit).
+                      errors that cause the shell to exit), and does not reset
+                      the loop state when a shell function is  executed  (this
+                      allows  bbrreeaakk  or ccoonnttiinnuuee in a shell function to affect
+                      loops in the caller's context).
               ccoommpplleettee__ffuullllqquuoottee
-                      If  set,  bbaasshh  quotes all shell metacharacters in file-
-                      names and directory names  when  performing  completion.
+                      If set, bbaasshh quotes all shell  metacharacters  in  file-
+                      names  and  directory  names when performing completion.
                       If not set, bbaasshh removes metacharacters such as the dol-
-                      lar sign from the set of characters that will be  quoted
-                      in  completed filenames when these metacharacters appear
-                      in shell variable references in words to  be  completed.
-                      This  means  that  dollar  signs  in variable names that
-                      expand to directories will not be quoted;  however,  any
-                      dollar  signs appearing in filenames will not be quoted,
-                      either.  This is active only when bash  is  using  back-
-                      slashes  to quote completed filenames.  This variable is
-                      set by default, which is the default  bash  behavior  in
+                      lar  sign from the set of characters that will be quoted
+                      in completed filenames when these metacharacters  appear
+                      in  shell  variable references in words to be completed.
+                      This means that dollar  signs  in  variable  names  that
+                      expand  to  directories will not be quoted; however, any
+                      dollar signs appearing in filenames will not be  quoted,
+                      either.   This  is  active only when bash is using back-
+                      slashes to quote completed filenames.  This variable  is
+                      set  by  default,  which is the default bash behavior in
                       versions through 4.2.
               ddiirreexxppaanndd
-                      If  set,  bbaasshh replaces directory names with the results
-                      of word expansion when performing  filename  completion.
-                      This  changes  the contents of the readline editing buf-
-                      fer.  If not set, bbaasshh attempts  to  preserve  what  the
+                      If set, bbaasshh replaces directory names with  the  results
+                      of  word  expansion when performing filename completion.
+                      This changes the contents of the readline  editing  buf-
+                      fer.   If  not  set,  bbaasshh attempts to preserve what the
                       user typed.
               ddiirrssppeellll
-                      If  set,  bbaasshh attempts spelling correction on directory
-                      names during word completion if the directory name  ini-
+                      If set, bbaasshh attempts spelling correction  on  directory
+                      names  during word completion if the directory name ini-
                       tially supplied does not exist.
-              ddoottgglloobb If  set, bbaasshh includes filenames beginning with a `.' in
+              ddoottgglloobb If set, bbaasshh includes filenames beginning with a `.'  in
                       the results of pathname expansion.
               eexxeeccffaaiill
                       If set, a non-interactive shell will not exit if it can-
-                      not  execute  the  file  specified as an argument to the
-                      eexxeecc builtin command.  An  interactive  shell  does  not
+                      not execute the file specified as  an  argument  to  the
+                      eexxeecc  builtin  command.   An  interactive shell does not
                       exit if eexxeecc fails.
               eexxppaanndd__aalliiaasseess
-                      If  set,  aliases  are expanded as described above under
+                      If set, aliases are expanded as  described  above  under
                       AALLIIAASSEESS.  This option is enabled by default for interac-
                       tive shells.
               eexxttddeebbuugg
-                      If  set,  behavior  intended  for  use  by  debuggers is
+                      If set,  behavior  intended  for  use  by  debuggers  is
                       enabled:
                       11..     The --FF option to the ddeeccllaarree builtin displays the
                              source file name and line number corresponding to
                              each function name supplied as an argument.
-                      22..     If the command run by the DDEEBBUUGG  trap  returns  a
-                             non-zero  value,  the next command is skipped and
+                      22..     If  the  command  run by the DDEEBBUUGG trap returns a
+                             non-zero value, the next command is  skipped  and
                              not executed.
-                      33..     If the command run by the DDEEBBUUGG  trap  returns  a
-                             value  of 2, and the shell is executing in a sub-
-                             routine (a shell function or a shell script  exe-
-                             cuted  by  the  ..  or ssoouurrccee builtins), the shell
+                      33..     If  the  command  run by the DDEEBBUUGG trap returns a
+                             value of 2, and the shell is executing in a  sub-
+                             routine  (a shell function or a shell script exe-
+                             cuted by the .. or  ssoouurrccee  builtins),  the  shell
                              simulates a call to rreettuurrnn.
-                      44..     BBAASSHH__AARRGGCC and BBAASSHH__AARRGGVV are updated as  described
+                      44..     BBAASSHH__AARRGGCC  and BBAASSHH__AARRGGVV are updated as described
                              in their descriptions above.
-                      55..     Function  tracing  is  enabled: command substitu-
+                      55..     Function tracing is  enabled:  command  substitu-
                              tion, shell functions, and subshells invoked with
                              (( _c_o_m_m_a_n_d )) inherit the DDEEBBUUGG and RREETTUURRNN traps.
-                      66..     Error  tracing  is enabled: command substitution,
-                             shell functions, and  subshells  invoked  with  ((
+                      66..     Error tracing is enabled:  command  substitution,
+                             shell  functions,  and  subshells  invoked with ((
                              _c_o_m_m_a_n_d )) inherit the EERRRR trap.
               eexxttgglloobb If set, the extended pattern matching features described
                       above under PPaatthhnnaammee EExxppaannssiioonn are enabled.
               eexxttqquuoottee
-                      If set, $$'_s_t_r_i_n_g' and  $$"_s_t_r_i_n_g"  quoting  is  performed
-                      within   $${{_p_a_r_a_m_e_t_e_r}}   expansions  enclosed  in  double
+                      If  set,  $$'_s_t_r_i_n_g'  and  $$"_s_t_r_i_n_g" quoting is performed
+                      within  $${{_p_a_r_a_m_e_t_e_r}}  expansions  enclosed   in   double
                       quotes.  This option is enabled by default.
               ffaaiillgglloobb
-                      If set, patterns which fail to  match  filenames  during
+                      If  set,  patterns  which fail to match filenames during
                       pathname expansion result in an expansion error.
               ffoorrccee__ffiiggnnoorree
-                      If  set,  the  suffixes  specified  by the FFIIGGNNOORREE shell
-                      variable cause words to be ignored when performing  word
+                      If set, the suffixes  specified  by  the  FFIIGGNNOORREE  shell
+                      variable  cause words to be ignored when performing word
                       completion even if the ignored words are the only possi-
                       ble  completions.   See  SSHHEELLLL  VVAARRIIAABBLLEESS  above  for  a
-                      description  of  FFIIGGNNOORREE.   This  option  is  enabled by
+                      description of  FFIIGGNNOORREE.   This  option  is  enabled  by
                       default.
               gglloobbaasscciiiirraannggeess
-                      If set,  range  expressions  used  in  pattern  matching
-                      bracket  expressions (see PPaatttteerrnn MMaattcchhiinngg above) behave
-                      as if in the traditional C locale when  performing  com-
+                      If  set,  range  expressions  used  in  pattern matching
+                      bracket expressions (see PPaatttteerrnn MMaattcchhiinngg above)  behave
+                      as  if  in the traditional C locale when performing com-
                       parisons.   That  is,  the  current  locale's  collating
-                      sequence is not taken into account, so bb will  not  col-
-                      late  between  AA  and  BB,  and upper-case and lower-case
+                      sequence  is  not taken into account, so bb will not col-
+                      late between AA and  BB,  and  upper-case  and  lower-case
                       ASCII characters will collate together.
               gglloobbssttaarr
                       If set, the pattern **** used in a pathname expansion con-
-                      text  will  match all files and zero or more directories
-                      and subdirectories.  If the pattern is followed by a  //,
+                      text will match all files and zero or  more  directories
+                      and  subdirectories.  If the pattern is followed by a //,
                       only directories and subdirectories match.
               ggnnuu__eerrrrffmmtt
                       If set, shell error messages are written in the standard
                       GNU error message format.
               hhiissttaappppeenndd
-                      If set, the history list is appended to the  file  named
-                      by  the  value  of  the HHIISSTTFFIILLEE variable when the shell
+                      If  set,  the history list is appended to the file named
+                      by the value of the HHIISSTTFFIILLEE  variable  when  the  shell
                       exits, rather than overwriting the file.
               hhiissttrreeeeddiitt
-                      If set, and rreeaaddlliinnee is being used, a user is given  the
+                      If  set, and rreeaaddlliinnee is being used, a user is given the
                       opportunity to re-edit a failed history substitution.
               hhiissttvveerriiffyy
-                      If  set, and rreeaaddlliinnee is being used, the results of his-
-                      tory substitution are  not  immediately  passed  to  the
-                      shell  parser.   Instead,  the  resulting line is loaded
+                      If set, and rreeaaddlliinnee is being used, the results of  his-
+                      tory  substitution  are  not  immediately  passed to the
+                      shell parser.  Instead, the  resulting  line  is  loaded
                       into the rreeaaddlliinnee editing buffer, allowing further modi-
                       fication.
               hhoossttccoommpplleettee
                       If set, and rreeaaddlliinnee is being used, bbaasshh will attempt to
-                      perform hostname completion when a word containing  a  @@
-                      is   being  completed  (see  CCoommpplleettiinngg  under  RREEAADDLLIINNEE
+                      perform  hostname  completion when a word containing a @@
+                      is  being  completed  (see  CCoommpplleettiinngg  under   RREEAADDLLIINNEE
                       above).  This is enabled by default.
               hhuuppoonneexxiitt
                       If set, bbaasshh will send SSIIGGHHUUPP to all jobs when an inter-
                       active login shell exits.
               iinntteerraaccttiivvee__ccoommmmeennttss
                       If set, allow a word beginning with ## to cause that word
-                      and all remaining characters on that line to be  ignored
-                      in  an  interactive  shell  (see  CCOOMMMMEENNTTSS above).  This
+                      and  all remaining characters on that line to be ignored
+                      in an interactive  shell  (see  CCOOMMMMEENNTTSS  above).   This
                       option is enabled by default.
               llaassttppiippee
-                      If set, and job control is not active,  the  shell  runs
+                      If  set,  and  job control is not active, the shell runs
                       the last command of a pipeline not executed in the back-
                       ground in the current shell environment.
-              lliitthhiisstt If set, and the ccmmddhhiisstt option  is  enabled,  multi-line
+              lliitthhiisstt If  set,  and  the ccmmddhhiisstt option is enabled, multi-line
                       commands are saved to the history with embedded newlines
                       rather than using semicolon separators where possible.
               llooggiinn__sshheellll
-                      The shell sets this option if it is started as  a  login
-                      shell  (see  IINNVVOOCCAATTIIOONN  above).   The  value may not be
+                      The  shell  sets this option if it is started as a login
+                      shell (see IINNVVOOCCAATTIIOONN above).   The  value  may  not  be
                       changed.
               mmaaiillwwaarrnn
-                      If set, and a file that bbaasshh is checking  for  mail  has
-                      been  accessed  since  the last time it was checked, the
-                      message ``The mail in _m_a_i_l_f_i_l_e has been read''  is  dis-
+                      If  set,  and  a file that bbaasshh is checking for mail has
+                      been accessed since the last time it  was  checked,  the
+                      message  ``The  mail in _m_a_i_l_f_i_l_e has been read'' is dis-
                       played.
               nnoo__eemmppttyy__ccmmdd__ccoommpplleettiioonn
-                      If  set,  and  rreeaaddlliinnee  is  being  used,  bbaasshh will not
+                      If set, and  rreeaaddlliinnee  is  being  used,  bbaasshh  will  not
                       attempt to search the PPAATTHH for possible completions when
                       completion is attempted on an empty line.
               nnooccaasseegglloobb
-                      If  set,  bbaasshh  matches  filenames in a case-insensitive
+                      If set, bbaasshh matches  filenames  in  a  case-insensitive
                       fashion when performing pathname expansion (see PPaatthhnnaammee
                       EExxppaannssiioonn above).
               nnooccaasseemmaattcchh
-                      If  set,  bbaasshh  matches  patterns  in a case-insensitive
+                      If set, bbaasshh  matches  patterns  in  a  case-insensitive
                       fashion when performing matching while executing ccaassee or
                       [[[[ conditional commands, when performing pattern substi-
-                      tution word expansions, or when filtering possible  com-
+                      tution  word expansions, or when filtering possible com-
                       pletions as part of programmable completion.
               nnuullllgglloobb
-                      If  set,  bbaasshh allows patterns which match no files (see
-                      PPaatthhnnaammee EExxppaannssiioonn above) to expand to  a  null  string,
+                      If set, bbaasshh allows patterns which match no  files  (see
+                      PPaatthhnnaammee  EExxppaannssiioonn  above)  to expand to a null string,
                       rather than themselves.
               pprrooggccoommpp
                       If set, the programmable completion facilities (see PPrroo--
@@ -1505,50 +1506,50 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                       enabled by default.
               pprroommppttvvaarrss
                       If set, prompt strings undergo parameter expansion, com-
-                      mand  substitution,  arithmetic  expansion,  and   quote
-                      removal  after  being expanded as described in PPRROOMMPPTTIINNGG
+                      mand   substitution,  arithmetic  expansion,  and  quote
+                      removal after being expanded as described  in  PPRROOMMPPTTIINNGG
                       above.  This option is enabled by default.
               rreessttrriicctteedd__sshheellll
-                      The  shell  sets  this  option  if  it  is  started   in
+                      The   shell  sets  this  option  if  it  is  started  in
                       restricted mode (see RREESSTTRRIICCTTEEDD SSHHEELLLL below).  The value
-                      may not be changed.  This is not reset when the  startup
-                      files  are  executed, allowing the startup files to dis-
+                      may  not be changed.  This is not reset when the startup
+                      files are executed, allowing the startup files  to  dis-
                       cover whether or not a shell is restricted.
               sshhiifftt__vveerrbboossee
-                      If set, the sshhiifftt builtin prints an error  message  when
+                      If  set,  the sshhiifftt builtin prints an error message when
                       the shift count exceeds the number of positional parame-
                       ters.
               ssoouurrcceeppaatthh
                       If set, the ssoouurrccee (..) builtin uses the value of PPAATTHH to
-                      find  the  directory  containing the file supplied as an
+                      find the directory containing the file  supplied  as  an
                       argument.  This option is enabled by default.
               xxppgg__eecchhoo
-                      If  set,  the  eecchhoo  builtin  expands   backslash-escape
+                      If   set,  the  eecchhoo  builtin  expands  backslash-escape
                       sequences by default.
 
        ssuussppeenndd [--ff]
-              Suspend  the execution of this shell until it receives a SSIIGGCCOONNTT
+              Suspend the execution of this shell until it receives a  SSIIGGCCOONNTT
               signal.  A login shell cannot be suspended; the --ff option can be
               used to override this and force the suspension.  The return sta-
-              tus is 0 unless the shell is a login shell and --ff  is  not  sup-
+              tus  is  0  unless the shell is a login shell and --ff is not sup-
               plied, or if job control is not enabled.
 
        tteesstt _e_x_p_r
        [[ _e_x_p_r ]]
               Return a status of 0 (true) or 1 (false) depending on the evalu-
               ation of the conditional expression _e_x_p_r.  Each operator and op-
-              erand  must be a separate argument.  Expressions are composed of
-              the primaries described  above  under  CCOONNDDIITTIIOONNAALL  EEXXPPRREESSSSIIOONNSS.
-              tteesstt  does not accept any options, nor does it accept and ignore
+              erand must be a separate argument.  Expressions are composed  of
+              the  primaries  described  above  under CCOONNDDIITTIIOONNAALL EEXXPPRREESSSSIIOONNSS.
+              tteesstt does not accept any options, nor does it accept and  ignore
               an argument of ---- as signifying the end of options.
 
-              Expressions may  be  combined  using  the  following  operators,
+              Expressions  may  be  combined  using  the  following operators,
               listed  in  decreasing  order  of  precedence.   The  evaluation
-              depends on the number of arguments; see below.  Operator  prece-
+              depends  on the number of arguments; see below.  Operator prece-
               dence is used when there are five or more arguments.
               !! _e_x_p_r True if _e_x_p_r is false.
               (( _e_x_p_r ))
-                     Returns  the value of _e_x_p_r.  This may be used to override
+                     Returns the value of _e_x_p_r.  This may be used to  override
                      the normal precedence of operators.
               _e_x_p_r_1 -aa _e_x_p_r_2
                      True if both _e_x_p_r_1 and _e_x_p_r_2 are true.
@@ -1565,120 +1566,120 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                      null.
               2 arguments
                      If the first argument is !!, the expression is true if and
-                     only  if the second argument is null.  If the first argu-
-                     ment is one of the  unary  conditional  operators  listed
-                     above  under  CCOONNDDIITTIIOONNAALL  EEXXPPRREESSSSIIOONNSS, the expression is
+                     only if the second argument is null.  If the first  argu-
+                     ment  is  one  of  the unary conditional operators listed
+                     above under CCOONNDDIITTIIOONNAALL EEXXPPRREESSSSIIOONNSS,  the  expression  is
                      true if the unary test is true.  If the first argument is
                      not a valid unary conditional operator, the expression is
                      false.
               3 arguments
                      The following conditions are applied in the order listed.
-                     If  the  second argument is one of the binary conditional
+                     If the second argument is one of the  binary  conditional
                      operators listed above under CCOONNDDIITTIIOONNAALL EEXXPPRREESSSSIIOONNSS, the
                      result of the expression is the result of the binary test
-                     using the first and third arguments as operands.  The  --aa
-                     and  --oo  operators  are  considered binary operators when
-                     there are three arguments.  If the first argument  is  !!,
-                     the  value is the negation of the two-argument test using
+                     using  the first and third arguments as operands.  The --aa
+                     and --oo operators are  considered  binary  operators  when
+                     there  are  three arguments.  If the first argument is !!,
+                     the value is the negation of the two-argument test  using
                      the second and third arguments.  If the first argument is
                      exactly (( and the third argument is exactly )), the result
-                     is the one-argument test of the second argument.   Other-
+                     is  the one-argument test of the second argument.  Other-
                      wise, the expression is false.
               4 arguments
                      If the first argument is !!, the result is the negation of
-                     the three-argument expression composed of  the  remaining
+                     the  three-argument  expression composed of the remaining
                      arguments.  Otherwise, the expression is parsed and eval-
-                     uated according to  precedence  using  the  rules  listed
+                     uated  according  to  precedence  using  the rules listed
                      above.
               5 or more arguments
-                     The  expression  is  parsed  and  evaluated  according to
+                     The expression  is  parsed  and  evaluated  according  to
                      precedence using the rules listed above.
 
-              When used with tteesstt or [[, the << and  >>  operators  sort  lexico-
+              When  used  with  tteesstt  or [[, the << and >> operators sort lexico-
               graphically using ASCII ordering.
 
-       ttiimmeess  Print  the  accumulated  user and system times for the shell and
+       ttiimmeess  Print the accumulated user and system times for  the  shell  and
               for processes run from the shell.  The return status is 0.
 
        ttrraapp [--llpp] [[_a_r_g] _s_i_g_s_p_e_c ...]
-              The command _a_r_g is to  be  read  and  executed  when  the  shell
-              receives  signal(s)  _s_i_g_s_p_e_c.   If _a_r_g is absent (and there is a
-              single _s_i_g_s_p_e_c) or --, each specified  signal  is  reset  to  its
-              original  disposition  (the  value  it  had upon entrance to the
-              shell).  If _a_r_g is the null string the signal specified by  each
-              _s_i_g_s_p_e_c  is ignored by the shell and by the commands it invokes.
-              If _a_r_g is not present and --pp has been supplied,  then  the  trap
-              commands  associated  with  each  _s_i_g_s_p_e_c  are displayed.  If no
-              arguments are supplied or if only --pp is given, ttrraapp  prints  the
-              list  of  commands  associated  with each signal.  The --ll option
-              causes the shell to print a list of signal names and their  cor-
-              responding  numbers.   Each  _s_i_g_s_p_e_c  is  either  a  signal name
-              defined in <_s_i_g_n_a_l_._h>, or a signal  number.   Signal  names  are
+              The  command  _a_r_g  is  to  be  read  and executed when the shell
+              receives signal(s) _s_i_g_s_p_e_c.  If _a_r_g is absent (and  there  is  a
+              single  _s_i_g_s_p_e_c)  or  --,  each  specified signal is reset to its
+              original disposition (the value it  had  upon  entrance  to  the
+              shell).   If _a_r_g is the null string the signal specified by each
+              _s_i_g_s_p_e_c is ignored by the shell and by the commands it  invokes.
+              If  _a_r_g  is  not present and --pp has been supplied, then the trap
+              commands associated with each  _s_i_g_s_p_e_c  are  displayed.   If  no
+              arguments  are  supplied or if only --pp is given, ttrraapp prints the
+              list of commands associated with each  signal.   The  --ll  option
+              causes  the shell to print a list of signal names and their cor-
+              responding numbers.   Each  _s_i_g_s_p_e_c  is  either  a  signal  name
+              defined  in  <_s_i_g_n_a_l_._h>,  or  a signal number.  Signal names are
               case insensitive and the SSIIGG prefix is optional.
 
-              If  a  _s_i_g_s_p_e_c  is  EEXXIITT (0) the command _a_r_g is executed on exit
-              from the shell.  If a _s_i_g_s_p_e_c is DDEEBBUUGG, the command _a_r_g is  exe-
-              cuted  before  every  _s_i_m_p_l_e _c_o_m_m_a_n_d, _f_o_r command, _c_a_s_e command,
-              _s_e_l_e_c_t command, every arithmetic _f_o_r  command,  and  before  the
-              first  command  executes  in a shell function (see SSHHEELLLL GGRRAAMMMMAARR
-              above).  Refer to the description of the eexxttddeebbuugg option to  the
+              If a _s_i_g_s_p_e_c is EEXXIITT (0) the command _a_r_g  is  executed  on  exit
+              from  the shell.  If a _s_i_g_s_p_e_c is DDEEBBUUGG, the command _a_r_g is exe-
+              cuted before every _s_i_m_p_l_e _c_o_m_m_a_n_d, _f_o_r  command,  _c_a_s_e  command,
+              _s_e_l_e_c_t  command,  every  arithmetic  _f_o_r command, and before the
+              first command executes in a shell function  (see  SSHHEELLLL  GGRRAAMMMMAARR
+              above).   Refer to the description of the eexxttddeebbuugg option to the
               sshhoopptt builtin for details of its effect on the DDEEBBUUGG trap.  If a
               _s_i_g_s_p_e_c is RREETTUURRNN, the command _a_r_g is executed each time a shell
               function or a script executed with the .. or ssoouurrccee builtins fin-
               ishes executing.
 
-              If a _s_i_g_s_p_e_c is EERRRR, the command _a_r_g is executed  whenever  a  a
+              If  a  _s_i_g_s_p_e_c  is EERRRR, the command _a_r_g is executed whenever a a
               pipeline (which may consist of a single simple command), a list,
               or a compound command returns a non-zero exit status, subject to
-              the  following  conditions.  The EERRRR trap is not executed if the
+              the following conditions.  The EERRRR trap is not executed  if  the
               failed command is part of the command list immediately following
-              a  wwhhiillee  or uunnttiill keyword, part of the test in an _i_f statement,
+              a wwhhiillee or uunnttiill keyword, part of the test in an  _i_f  statement,
               part of a command executed in a &&&& or |||| list except the command
-              following  the final &&&& or ||||, any command in a pipeline but the
-              last, or if the command's return value is being  inverted  using
-              !!.   These  are  the  same conditions obeyed by the eerrrreexxiitt (--ee)
+              following the final &&&& or ||||, any command in a pipeline but  the
+              last,  or  if the command's return value is being inverted using
+              !!.  These are the same conditions obeyed  by  the  eerrrreexxiitt  (--ee)
               option.
 
-              Signals ignored upon entry to the shell  cannot  be  trapped  or
-              reset.   Trapped signals that are not being ignored are reset to
+              Signals  ignored  upon  entry  to the shell cannot be trapped or
+              reset.  Trapped signals that are not being ignored are reset  to
               their original values in a subshell or subshell environment when
-              one  is  created.   The return status is false if any _s_i_g_s_p_e_c is
+              one is created.  The return status is false if  any  _s_i_g_s_p_e_c  is
               invalid; otherwise ttrraapp returns true.
 
        ttyyppee [--aaffttppPP] _n_a_m_e [_n_a_m_e ...]
-              With no options, indicate how each _n_a_m_e would be interpreted  if
+              With  no options, indicate how each _n_a_m_e would be interpreted if
               used as a command name.  If the --tt option is used, ttyyppee prints a
-              string which is one of _a_l_i_a_s,  _k_e_y_w_o_r_d,  _f_u_n_c_t_i_o_n,  _b_u_i_l_t_i_n,  or
-              _f_i_l_e  if  _n_a_m_e  is  an  alias,  shell  reserved  word, function,
-              builtin, or disk file, respectively.  If the _n_a_m_e is not  found,
-              then  nothing  is  printed,  and  an  exit  status  of  false is
-              returned.  If the --pp option is used,  ttyyppee  either  returns  the
+              string  which  is  one  of _a_l_i_a_s, _k_e_y_w_o_r_d, _f_u_n_c_t_i_o_n, _b_u_i_l_t_i_n, or
+              _f_i_l_e if  _n_a_m_e  is  an  alias,  shell  reserved  word,  function,
+              builtin,  or disk file, respectively.  If the _n_a_m_e is not found,
+              then nothing  is  printed,  and  an  exit  status  of  false  is
+              returned.   If  the  --pp  option is used, ttyyppee either returns the
               name of the disk file that would be executed if _n_a_m_e were speci-
               fied as a command name, or nothing if ``type -t name'' would not
-              return  _f_i_l_e.  The --PP option forces a PPAATTHH search for each _n_a_m_e,
+              return _f_i_l_e.  The --PP option forces a PPAATTHH search for each  _n_a_m_e,
               even if ``type -t name'' would not return _f_i_l_e.  If a command is
               hashed, --pp and --PP print the hashed value, which is not necessar-
-              ily the file that appears first in PPAATTHH.  If the  --aa  option  is
-              used,  ttyyppee  prints all of the places that contain an executable
+              ily  the  file  that appears first in PPAATTHH.  If the --aa option is
+              used, ttyyppee prints all of the places that contain  an  executable
               named _n_a_m_e.  This includes aliases and functions, if and only if
               the --pp option is not also used.  The table of hashed commands is
-              not consulted when using --aa.  The  --ff  option  suppresses  shell
+              not  consulted  when  using  --aa.  The --ff option suppresses shell
               function lookup, as with the ccoommmmaanndd builtin.  ttyyppee returns true
               if all of the arguments are found, false if any are not found.
 
        uulliimmiitt [--HHSSaabbccddeeffiikkllmmnnppqqrrssttuuvvxxPPTT [_l_i_m_i_t]]
-              Provides control over the resources available to the  shell  and
-              to  processes started by it, on systems that allow such control.
+              Provides  control  over the resources available to the shell and
+              to processes started by it, on systems that allow such  control.
               The --HH and --SS options specify that the hard or soft limit is set
-              for  the  given resource.  A hard limit cannot be increased by a
-              non-root user once it is set; a soft limit may be  increased  up
-              to  the value of the hard limit.  If neither --HH nor --SS is speci-
+              for the given resource.  A hard limit cannot be increased  by  a
+              non-root  user  once it is set; a soft limit may be increased up
+              to the value of the hard limit.  If neither --HH nor --SS is  speci-
               fied, both the soft and hard limits are set.  The value of _l_i_m_i_t
               can be a number in the unit specified for the resource or one of
               the special values hhaarrdd, ssoofftt, or uunnlliimmiitteedd, which stand for the
-              current  hard  limit,  the  current  soft  limit,  and no limit,
-              respectively.  If _l_i_m_i_t is omitted, the  current  value  of  the
-              soft  limit  of the resource is printed, unless the --HH option is
+              current hard limit,  the  current  soft  limit,  and  no  limit,
+              respectively.   If  _l_i_m_i_t  is  omitted, the current value of the
+              soft limit of the resource is printed, unless the --HH  option  is
               given.  When more than one resource is specified, the limit name
               and unit are printed before the value.  Other options are inter-
               preted as follows:
@@ -1687,12 +1688,12 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               --cc     The maximum size of core files created
               --dd     The maximum size of a process's data segment
               --ee     The maximum scheduling priority ("nice")
-              --ff     The maximum size of files written by the  shell  and  its
+              --ff     The  maximum  size  of files written by the shell and its
                      children
               --ii     The maximum number of pending signals
               --kk     The maximum number of kqueues that may be allocated
               --ll     The maximum size that may be locked into memory
-              --mm     The  maximum resident set size (many systems do not honor
+              --mm     The maximum resident set size (many systems do not  honor
                      this limit)
               --nn     The maximum number of open file descriptors (most systems
                      do not allow this value to be set)
@@ -1701,53 +1702,53 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               --rr     The maximum real-time scheduling priority
               --ss     The maximum stack size
               --tt     The maximum amount of cpu time in seconds
-              --uu     The  maximum  number  of  processes available to a single
+              --uu     The maximum number of processes  available  to  a  single
                      user
-              --vv     The maximum amount of virtual  memory  available  to  the
+              --vv     The  maximum  amount  of  virtual memory available to the
                      shell and, on some systems, to its children
               --xx     The maximum number of file locks
               --PP     The maximum number of pseudoterminals
               --TT     The maximum number of threads
 
-              If  _l_i_m_i_t  is given, and the --aa option is not used, _l_i_m_i_t is the
-              new value of the specified resource.  If  no  option  is  given,
-              then  --ff is assumed.  Values are in 1024-byte increments, except
-              for --tt, which is in seconds; --pp, which is in units  of  512-byte
-              blocks;  --PP,  --TT, --bb, --kk, --nn, and --uu, which are unscaled values;
+              If _l_i_m_i_t is given, and the --aa option is not used, _l_i_m_i_t  is  the
+              new  value  of  the  specified resource.  If no option is given,
+              then --ff is assumed.  Values are in 1024-byte increments,  except
+              for  --tt,  which is in seconds; --pp, which is in units of 512-byte
+              blocks; --PP, --TT, --bb, --kk, --nn, and --uu, which are  unscaled  values;
               and, when in Posix mode, --cc and --ff, which are in 512-byte incre-
               ments.  The return status is 0 unless an invalid option or argu-
               ment is supplied, or an error occurs while setting a new limit.
 
        uummaasskk [--pp] [--SS] [_m_o_d_e]
               The user file-creation mask is set to _m_o_d_e.  If _m_o_d_e begins with
-              a  digit,  it is interpreted as an octal number; otherwise it is
-              interpreted as a symbolic mode mask similar to that accepted  by
-              _c_h_m_o_d(1).   If _m_o_d_e is omitted, the current value of the mask is
-              printed.  The --SS option causes the mask to be  printed  in  sym-
-              bolic  form;  the  default output is an octal number.  If the --pp
+              a digit, it is interpreted as an octal number; otherwise  it  is
+              interpreted  as a symbolic mode mask similar to that accepted by
+              _c_h_m_o_d(1).  If _m_o_d_e is omitted, the current value of the mask  is
+              printed.   The  --SS  option causes the mask to be printed in sym-
+              bolic form; the default output is an octal number.   If  the  --pp
               option is supplied, and _m_o_d_e is omitted, the output is in a form
               that may be reused as input.  The return status is 0 if the mode
-              was successfully changed or if no _m_o_d_e  argument  was  supplied,
+              was  successfully  changed  or if no _m_o_d_e argument was supplied,
               and false otherwise.
 
        uunnaalliiaass [-aa] [_n_a_m_e ...]
-              Remove  each  _n_a_m_e  from  the list of defined aliases.  If --aa is
-              supplied, all alias definitions are removed.  The  return  value
+              Remove each _n_a_m_e from the list of defined  aliases.   If  --aa  is
+              supplied,  all  alias definitions are removed.  The return value
               is true unless a supplied _n_a_m_e is not a defined alias.
 
        uunnsseett [-ffvv] [-nn] [_n_a_m_e ...]
-              For  each  _n_a_m_e,  remove the corresponding variable or function.
+              For each _n_a_m_e, remove the corresponding  variable  or  function.
               If the --vv option is given, each _n_a_m_e refers to a shell variable,
-              and  that  variable  is removed.  Read-only variables may not be
-              unset.  If --ff is specified, each _n_a_m_e refers to  a  shell  func-
-              tion,  and the function definition is removed.  If the --nn option
-              is supplied, and _n_a_m_e is a variable with the _n_a_m_e_r_e_f  attribute,
-              _n_a_m_e  will  be unset rather than the variable it references.  --nn
-              has no effect if the --ff option is supplied.  If no  options  are
-              supplied,  each  _n_a_m_e refers to a variable; if there is no vari-
-              able by that name, any function with that name is  unset.   Each
-              unset  variable  or  function  is  removed  from the environment
-              passed to subsequent commands.  If any of CCOOMMPP__WWOORRDDBBRREEAAKKSS,  RRAANN--
+              and that variable is removed.  Read-only variables  may  not  be
+              unset.   If  --ff  is specified, each _n_a_m_e refers to a shell func-
+              tion, and the function definition is removed.  If the --nn  option
+              is  supplied, and _n_a_m_e is a variable with the _n_a_m_e_r_e_f attribute,
+              _n_a_m_e will be unset rather than the variable it  references.   --nn
+              has  no  effect if the --ff option is supplied.  If no options are
+              supplied, each _n_a_m_e refers to a variable; if there is  no  vari-
+              able  by  that name, any function with that name is unset.  Each
+              unset variable or  function  is  removed  from  the  environment
+              passed  to subsequent commands.  If any of CCOOMMPP__WWOORRDDBBRREEAAKKSS, RRAANN--
               DDOOMM, SSEECCOONNDDSS, LLIINNEENNOO, HHIISSTTCCMMDD, FFUUNNCCNNAAMMEE, GGRROOUUPPSS, or DDIIRRSSTTAACCKK are
               unset, they lose their special properties, even if they are sub-
               sequently reset.  The exit status is true unless a _n_a_m_e is read-
@@ -1756,12 +1757,12 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
        wwaaiitt [--nn] [_n _._._.]
               Wait for each specified child process and return its termination
               status.  Each _n may be a process ID or a job specification; if a
-              job spec is given, all processes  in  that  job's  pipeline  are
-              waited  for.  If _n is not given, all currently active child pro-
+              job  spec  is  given,  all  processes in that job's pipeline are
+              waited for.  If _n is not given, all currently active child  pro-
               cesses are waited for, and the return status is zero.  If the --nn
-              option  is  supplied,  wwaaiitt  waits  for any job to terminate and
-              returns its exit status.  If _n specifies a non-existent  process
-              or  job, the return status is 127.  Otherwise, the return status
+              option is supplied, wwaaiitt waits for  any  job  to  terminate  and
+              returns  its exit status.  If _n specifies a non-existent process
+              or job, the return status is 127.  Otherwise, the return  status
               is the exit status of the last process or job waited for.
 
 SSEEEE AALLSSOO
