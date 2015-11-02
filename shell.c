@@ -38,7 +38,9 @@
 #include <signal.h>
 #include <errno.h>
 #include "filecntl.h"
-#include <pwd.h>
+#if defined (HAVE_PWD_H)
+#  include <pwd.h>
+#endif
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>

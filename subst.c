@@ -149,6 +149,9 @@ size_t ifs_firstc_len;
 unsigned char ifs_firstc;
 #endif
 
+/* If non-zero, command substitution inherits the value of errexit option */
+int inherit_errexit = 0;
+
 /* Sentinel to tell when we are performing variable assignments preceding a
    command name and putting them into the environment.  Used to make sure
    we use the temporary environment when looking up variable values. */
@@ -1761,6 +1764,7 @@ skip_to_delim (string, start, delims, flags)
 {
   int i, pass_next, backq, dquote, si, c, oldjmp;
   int invert, skipquote, skipcmd, noprocsub, completeflag, histexp;
+  int arithexp, skipcol;
   size_t slen;
   char *temp, open[3];
   DECLARE_MBSTATE;
@@ -1774,6 +1778,9 @@ skip_to_delim (string, start, delims, flags)
   noprocsub = (flags & SD_NOPROCSUB);
   histexp = (flags & SD_HISTEXP);
   completeflag = (flags & SD_COMPLETE) ? SX_COMPLETE : 0;
+
+  arithexp = (flags & SD_ARITHEXP);
+  skipcol = 0;
 
   i = start;
   pass_next = backq = dquote = 0;
@@ -1811,6 +1818,18 @@ skip_to_delim (string, start, delims, flags)
 	  i++;
 	  continue;
 	}
+      else if (arithexp && skipcol && c == ':')
+	{
+	  skipcol--;
+	  i++;
+	  continue;
+	}
+      else if (arithexp && c == '?')
+	{
+	  skipcol++;
+	  i++;
+	  continue;
+	}
       else if (skipquote == 0 && invert == 0 && member (c, delims))
 	break;
       /* the usual case is to use skip_xxx_quoted, but we don't skip over double
@@ -1836,6 +1855,19 @@ skip_to_delim (string, start, delims, flags)
 	}     
       else if (c == '"')
 	i = skip_double_quoted (string, slen, ++i, completeflag);
+      else if (c == LPAREN && arithexp)
+        {
+          si = i + 1;
+          if (string[si] == '\0')
+	    CQ_RETURN(si);
+
+	  temp = extract_delimited_string (string, &si, "(", "(", ")", SX_NOALLOC); /* ) */
+	  i = si;
+	  if (string[i] == '\0')	/* don't increment i past EOS in loop */
+	    break;
+	  i++;
+	  continue;         
+        }
       else if (c == '$' && ((skipcmd && string[i+1] == LPAREN) || string[i+1] == LBRACE))
 	{
 	  si = i + 2;
@@ -5900,9 +5932,9 @@ command_substitute (string, quoted)
 	 substitutions. */
       change_flag ('v', FLAG_OFF);
 
-      /* When not in POSIX mode, command substitution does not inherit
-	 the -e flag. */
-      if (posixly_correct == 0)
+      /* When inherit_errexit option is not enabled, command substitution does
+	 not inherit the -e flag.  It is enabled when Posix mode is enabled */
+      if (inherit_errexit == 0)
         {
           builtin_ignoring_errexit = 0;
 	  change_flag ('e', FLAG_OFF);
@@ -6657,6 +6689,7 @@ parameter_brace_expand_length (name)
    the first DELIM, instead of using strchr(3).  Two rules:
 	1.  If the substring contains a `(', read until closing `)'.
 	2.  If the substring contains a `?', read past one `:' for each `?'.
+   The SD_ARITHEXP flag to skip_to_delim takes care of doing this.
 */
 
 static char *
@@ -6664,51 +6697,13 @@ skiparith (substr, delim)
      char *substr;
      int delim;
 {
-  size_t sublen;
-  int skipcol, pcount, i;
-  DECLARE_MBSTATE;
+  int i;
+  char delims[2];
 
-  sublen = strlen (substr);
-  i = skipcol = pcount = 0;
-  while (substr[i])
-    {
-      /* Balance parens */
-      if (substr[i] == LPAREN)
-	{
-	  pcount++;
-	  i++;
-	  continue;
-	}
-      if (substr[i] == RPAREN && pcount)
-	{
-	  pcount--;
-	  i++;
-	  continue;
-	}
-      if (pcount)
-	{
-	  ADVANCE_CHAR (substr, sublen, i);
-	  continue;
-	}
+  delims[0] = delim;
+  delims[1] = '\0';
 
-      /* Skip one `:' for each `?' */
-      if (substr[i] == ':' && skipcol)
-	{
-	  skipcol--;
-	  i++;
-	  continue;
-	}
-      if (substr[i] == delim)
-	break;
-      if (substr[i] == '?')
-	{
-	  skipcol++;
-	  i++;
-	  continue;
-	}
-      ADVANCE_CHAR (substr, sublen, i);
-    }
-
+  i = skip_to_delim (substr, 0, delims, SD_ARITHEXP);
   return (substr + i);
 }
 

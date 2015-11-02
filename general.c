@@ -58,6 +58,7 @@ extern int check_hashed_filenames;
 extern int source_uses_path;
 extern int source_searches_cwd;
 extern int posixly_correct;
+extern int inherit_errexit;
 
 static char *bash_special_tilde_expansions __P((char *));
 static int unquoted_tilde_word __P((const char *));
@@ -75,6 +76,7 @@ posix_initialize (on)
   if (on != 0)
     {
       interactive_comments = source_uses_path = expand_aliases = 1;
+      inherit_errexit = 1;
       source_searches_cwd = 0;
     }
 

@@ -660,6 +660,7 @@ set_builtin (list)
 	    sh_invalidopt (s);
 	    builtin_usage ();
 	    return (EX_USAGE);
+	  CASE_HELPOPT;
 	  case '?':
 	    builtin_usage ();
 	    return (list_optopt == '?' ? EXECUTION_SUCCESS : EX_USAGE);
@@ -816,6 +817,7 @@ unset_builtin (list)
 	case 'n':
 	  nameref = 1;
 	  break;
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);

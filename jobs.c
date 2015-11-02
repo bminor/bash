@@ -97,6 +97,10 @@ extern int killpg __P((pid_t, int));
 #define MAX_JOBS_IN_ARRAY 128		/* testing */
 #endif
 
+/* XXX for now */
+#define PIDSTAT_TABLE_SZ 4096
+#define BGPIDS_TABLE_SZ 512
+
 /* Flag values for second argument to delete_job */
 #define DEL_WARNSTOPPED		1	/* warn about deleting stopped jobs */
 #define DEL_NOBGPID		2	/* don't add pgrp leader to bgpids */
@@ -174,6 +178,7 @@ extern SigHandler **original_signals;
 static struct jobstats zerojs = { -1L, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NO_JOB, NO_JOB, 0, 0 };
 struct jobstats js = { -1L, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NO_JOB, NO_JOB, 0, 0 };
 
+ps_index_t pidstat_table[PIDSTAT_TABLE_SZ];
 struct bgpids bgpids = { 0, 0, 0 };
 
 /* The array of known jobs. */
@@ -293,12 +298,19 @@ static void restore_sigint_handler __P((void));
 static void pipe_read __P((int *));
 #endif
 
-static struct pidstat *bgp_alloc __P((pid_t, int));
+/* Hash table manipulation */
+
+static ps_index_t *pshash_getbucket __P((pid_t));
+static void pshash_delindex __P((ps_index_t));
+
+/* Saved background process status management */
 static struct pidstat *bgp_add __P((pid_t, int));
 static int bgp_delete __P((pid_t));
 static void bgp_clear __P((void));
 static int bgp_search __P((pid_t));
-static void bgp_prune __P((void));
+
+static ps_index_t bgp_getindex __P((void));
+static void bgp_resize __P((void));	/* XXX */
 
 #if defined (ARRAY_VARS)
 static int *pstatuses;		/* list of pipeline statuses */
@@ -693,20 +705,82 @@ stop_pipeline (async, deferred)
 }
 
 /* Functions to manage the list of exited background pids whose status has
-   been saved. */
+   been saved.
 
-static struct pidstat *
-bgp_alloc (pid, status)
-     pid_t pid;
-     int status;
+   pidstat_table:
+
+   The current implementation is a hash table using a single (separate) arena
+   for storage that can be allocated and freed as a unit.  The size of the hash
+   table is a multiple of PIDSTAT_TABLE_SZ (4096) and multiple PIDs that hash
+   to the same value are chained through the bucket_next and bucket_prev
+   pointers (basically coalesced hashing for collision resolution).
+
+   bgpids.storage:
+
+   All pid/status storage is done using the circular buffer bgpids.storage.
+   This must contain at least js.c_childmax entries.  The circular buffer is
+   used to supply the ordered list Posix requires ("the last CHILD_MAX
+   processes").  To avoid searching the entire storage table for a given PID,
+   the hash table (pidstat_table) holds pointers into the storage arena and
+   uses a doubly-linked list of cells (bucket_next/bucket_prev, also pointers
+   into the arena) to implement collision resolution. */
+
+/* The number of elements in bgpids.storage always has to be > js.c_childmax for
+   the circular buffer to work right. */
+static void
+bgp_resize ()
 {
-  struct pidstat *ps;
+  ps_index_t nsize;
+  ps_index_t psi;
 
-  ps = (struct pidstat *)xmalloc (sizeof (struct pidstat));
-  ps->pid = pid;
-  ps->status = status;
-  ps->next = (struct pidstat *)0;
-  return ps;
+  if (bgpids.nalloc == 0)
+    {
+      /* invalidate hash table when bgpids table is reallocated */
+      for (psi = 0; psi < PIDSTAT_TABLE_SZ; psi++)
+        pidstat_table[psi] = NO_PIDSTAT;
+      nsize = BGPIDS_TABLE_SZ;	/* should be power of 2 */
+      bgpids.head = 0;
+    }
+  else
+    nsize = bgpids.nalloc;
+
+  while (nsize < js.c_childmax)
+    nsize *= 2;
+
+  if (bgpids.nalloc < js.c_childmax)
+    {
+      bgpids.storage = (struct pidstat *)xrealloc (bgpids.storage, nsize * sizeof (struct pidstat));
+
+      for (psi = bgpids.nalloc; psi < nsize; psi++)
+	bgpids.storage[psi].pid = NO_PID;
+
+      bgpids.nalloc = nsize;
+
+    }
+  else if (bgpids.head >= bgpids.nalloc)	/* wrap around */
+    bgpids.head = 0;
+}
+
+static ps_index_t
+bgp_getindex ()
+{
+  ps_index_t psi;
+
+  if (bgpids.nalloc < js.c_childmax || bgpids.head >= bgpids.nalloc)
+    bgp_resize ();
+
+  pshash_delindex (bgpids.head);		/* XXX - clear before reusing */
+  return bgpids.head++;
+}
+
+static ps_index_t *
+pshash_getbucket (pid)
+     pid_t pid;
+{
+  unsigned long hash;		/* XXX - u_bits32_t */
+
+  hash = pid * 0x9e370001UL;
+  return (&pidstat_table[hash % PIDSTAT_TABLE_SZ]);
 }
 
 static struct pidstat *
@@ -714,61 +788,75 @@ bgp_add (pid, status)
      pid_t pid;
      int status;
 {
+  ps_index_t *bucket, psi;
   struct pidstat *ps;
 
-  ps = bgp_alloc (pid, status);
+  bucket = pshash_getbucket (pid);
+  psi = bgp_getindex ();
+  ps = &bgpids.storage[psi];
 
-  if (bgpids.list == 0)
-    {
-      bgpids.list = bgpids.end = ps;
-      bgpids.npid = 0;			/* just to make sure */
-    }
-  else
-    {
-      bgpids.end->next = ps;
-      bgpids.end = ps;
-    }
+  ps->pid = pid;
+  ps->status = status;
+  ps->bucket_next = *bucket;
+  ps->bucket_prev = NO_PIDSTAT;
+
   bgpids.npid++;
 
+#if 0
   if (bgpids.npid > js.c_childmax)
     bgp_prune ();
+#endif
+
+  if (ps->bucket_next != NO_PIDSTAT)
+    bgpids.storage[ps->bucket_next].bucket_prev = psi;
+
+  *bucket = psi;		/* set chain head in hash table */
 
   return ps;
+}
+
+static void
+pshash_delindex (psi)
+     ps_index_t psi;
+{
+  struct pidstat *ps;
+
+  ps = &bgpids.storage[psi];
+  if (ps->pid == NO_PID)
+    return;
+
+  if (ps->bucket_next != NO_PID)
+    bgpids.storage[ps->bucket_next].bucket_prev = ps->bucket_prev;
+  if (ps->bucket_prev != NO_PID)
+    bgpids.storage[ps->bucket_prev].bucket_next = ps->bucket_next;
+  else
+    *(pshash_getbucket (ps->pid)) = ps->bucket_next;
 }
 
 static int
 bgp_delete (pid)
      pid_t pid;
 {
-  struct pidstat *prev, *p;
+  ps_index_t psi;
 
-  for (prev = p = bgpids.list; p; prev = p, p = p->next)
-    if (p->pid == pid)
-      {
-	prev->next = p->next;	/* remove from list */
-	break;
-      }
+  if (bgpids.storage == 0 || bgpids.nalloc == 0 || bgpids.npid == 0)
+    return 0;
 
-  if (p == 0)
+  /* Search chain using hash to find bucket in pidstat_table */
+  for (psi = *(pshash_getbucket (pid)); psi != NO_PIDSTAT; psi = bgpids.storage[psi].bucket_next)
+    if (bgpids.storage[psi].pid == pid)
+      break;
+
+  if (psi == NO_PIDSTAT)
     return 0;		/* not found */
 
 #if defined (DEBUG)
   itrace("bgp_delete: deleting %d", pid);
 #endif
 
-  /* Housekeeping in the border cases. */
-  if (p == bgpids.list)
-    bgpids.list = bgpids.list->next;
-  else if (p == bgpids.end)
-    bgpids.end = prev;
+  pshash_delindex (psi);	/* hash table management */
 
   bgpids.npid--;
-  if (bgpids.npid == 0)
-    bgpids.list = bgpids.end = 0;
-  else if (bgpids.npid == 1)
-    bgpids.end = bgpids.list;		/* just to make sure */
-
-  free (p);
   return 1;
 }
 
@@ -776,48 +864,45 @@ bgp_delete (pid)
 static void
 bgp_clear ()
 {
-  struct pidstat *ps, *p;
+  if (bgpids.storage == 0 || bgpids.nalloc == 0)
+    return;
 
-  for (ps = bgpids.list; ps; )
-    {
-      p = ps;
-      ps = ps->next;
-      free (p);
-    }
-  bgpids.list = bgpids.end = 0;
+  free (bgpids.storage);
+
+  bgpids.storage = 0;
+  bgpids.nalloc = 0;
+  bgpids.head = 0;
+
   bgpids.npid = 0;
 }
 
 /* Search for PID in the list of saved background pids; return its status if
-   found.  If not found, return -1. */
+   found.  If not found, return -1.  We hash to the right spot in pidstat_table
+   and follow the bucket chain to the end. */
 static int
 bgp_search (pid)
      pid_t pid;
 {
-  struct pidstat *ps;
+  ps_index_t psi;
 
-  for (ps = bgpids.list ; ps; ps = ps->next)
-    if (ps->pid == pid)
-      return ps->status;
+  if (bgpids.storage == 0 || bgpids.nalloc == 0 || bgpids.npid == 0)
+    return -1;
+
+  /* Search chain using hash to find bucket in pidstat_table */
+  for (psi = *(pshash_getbucket (pid)); psi != NO_PIDSTAT; psi = bgpids.storage[psi].bucket_next)
+    if (bgpids.storage[psi].pid == pid)
+      return (bgpids.storage[psi].status);
+
   return -1;
 }
 
+#if 0
 static void
 bgp_prune ()
 {
-  struct pidstat *ps;
-
-  if (bgpids.npid == 0 || bgpids.list == 0)
-    return;		/* just paranoia */
-
-  while (bgpids.npid > js.c_childmax)
-    {
-      ps = bgpids.list;
-      bgpids.list = bgpids.list->next;
-      free (ps);
-      bgpids.npid--;
-    }
+  return;
 }
+#endif
 
 /* Reset the values of js.j_lastj and js.j_firstj after one or both have
    been deleted.  The caller should check whether js.j_njobs is 0 before
@@ -3641,7 +3726,6 @@ set_job_status_and_cleanup (job)
 	{
 	  int old_frozen;
 
-itrace("waitchld: special handling for SIGINT");
 	  wait_sigint_received = 0;
 
 	  /* If SIGINT is trapped, set the exit status so that the trap
@@ -4051,6 +4135,11 @@ initialize_job_control (force)
   if (js.c_childmax < 0)
     js.c_childmax = DEFAULT_CHILD_MAX;
 
+#if 0
+  if (js.c_childmax > MAX_CHILD_MAX)
+    js.c_childmax = MAX_CHILD_MAX;
+#endif
+
   return job_control;
 }
 
@@ -4271,7 +4360,12 @@ delete_all_jobs (running_only)
 	    itrace("delete_all_jobs: job %d non-null after js.j_lastj (%d)", i, js.j_lastj);
 #endif
 	  if (jobs[i] && (running_only == 0 || (running_only && RUNNING(i))))
-	    delete_job (i, DEL_WARNSTOPPED);
+	    /* We don't want to add any of these pids to bgpids.  If running_only
+	       is non-zero, we don't want to add running jobs to the list.
+	       If we are interested in all jobs, not just running jobs, and
+	       we are going to clear the bgpids list below (bgp_clear()), we
+	       don't need to bother. */
+	    delete_job (i, DEL_WARNSTOPPED|DEL_NOBGPID);
 	}
       if (running_only == 0)
 	{
@@ -4421,6 +4515,11 @@ mark_dead_jobs_as_notified (force)
     js.c_childmax = getmaxchild ();
   if (js.c_childmax < 0)
     js.c_childmax = DEFAULT_CHILD_MAX;
+
+#if 0
+  if (js.c_childmax > MAX_CHILD_MAX)
+    js.c_childmax = MAX_CHILD_MAX;
+#endif
 
   /* Don't do anything if the number of dead processes is less than CHILD_MAX
      and we're not forcing a cleanup. */

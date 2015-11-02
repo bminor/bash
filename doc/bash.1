@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue Oct 13 17:03:11 EDT 2015
+.\"	Last Change: Tue Oct 20 10:48:01 EDT 2015
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2015 October 11" "GNU Bash 4.4"
+.TH BASH 1 "2015 October 20" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -3217,8 +3217,8 @@ or
 .RE
 .PP
 .B Bash
-performs the expansion by executing \fIcommand\fP and
-replacing the command substitution with the standard output of the
+performs the expansion by executing \fIcommand\fP in a subshell environment
+and replacing the command substitution with the standard output of the
 command, with any trailing newlines deleted.
 Embedded newlines are not deleted, but they may be removed during
 word splitting.
@@ -3269,19 +3269,23 @@ is invalid,
 prints a message indicating failure and no substitution occurs.
 .SS Process Substitution
 .PP
-\fIProcess substitution\fP is supported on systems that support named
-pipes (\fIFIFOs\fP) or the \fB/dev/fd\fP method of naming open files.
+\fIProcess substitution\fP allows a process's input or output to be
+referred to using a filename.
 It takes the form of
 \fB<(\fP\fIlist\^\fP\fB)\fP
 or
 \fB>(\fP\fIlist\^\fP\fB)\fP.
-The process \fIlist\fP is run with its input or output connected to a
-\fIFIFO\fP or some file in \fB/dev/fd\fP.  The name of this file is
+The process \fIlist\fP is run asynchronously, and its input or output
+appears as a filename.
+This filename is
 passed as an argument to the current command as the result of the
-expansion.  If the \fB>(\fP\fIlist\^\fP\fB)\fP form is used, writing to
+expansion.
+If the \fB>(\fP\fIlist\^\fP\fB)\fP form is used, writing to
 the file will provide input for \fIlist\fP.  If the
 \fB<(\fP\fIlist\^\fP\fB)\fP form is used, the file passed as an
 argument should be read to obtain the output of \fIlist\fP.
+Process substitution is supported on systems that support named
+pipes (\fIFIFOs\fP) or the \fB/dev/fd\fP method of naming open files.
 .PP
 When available, process substitution is performed
 simultaneously with parameter and variable expansion,
@@ -3325,9 +3329,10 @@ If
 .B IFS
 has a value other than the default, then sequences of
 the whitespace characters
-.B space
+.BR space ,
+.BR tab ,
 and
-.B tab
+.B newline
 are ignored at the beginning and end of the
 word, as long as the whitespace character is in the
 value of

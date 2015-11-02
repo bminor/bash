@@ -64,13 +64,13 @@ shell_version_string ()
   if (tt[0] == '\0')
     {
       if (release_status)
-#if defined (HAVE_SNPRINTF)
+#if HAVE_SNPRINTF
 	snprintf (tt, sizeof (tt), "%s.%d(%d)-%s", dist_version, patch_level, build_version, release_status);
 #else
 	sprintf (tt, "%s.%d(%d)-%s", dist_version, patch_level, build_version, release_status);
 #endif
       else
-#if defined (HAVE_SNPRINTF)
+#if HAVE_SNPRINTF
 	snprintf (tt, sizeof (tt), "%s.%d(%d)", dist_version, patch_level, build_version);
 #else
 	sprintf (tt, "%s.%d(%d)", dist_version, patch_level, build_version);

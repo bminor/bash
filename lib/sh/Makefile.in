@@ -409,12 +409,14 @@ shmatch.o: ${BUILD_DIR}/pathnames.h ${topdir}/externs.h
 
 shquote.o: ${BASHINCDIR}/stdc.h ${topdir}/bashansi.h
 shquote.o: ${BASHINCDIR}/ansi_stdlib.h ${topdir}/xmalloc.h
+shquote.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 
 shtty.o: ${BASHINCDIR}/shtty.h
 shtty.o: ${BASHINCDIR}/stdc.h
 
 snprintf.o: ${BASHINCDIR}/stdc.h ${topdir}/bashansi.h ${topdir}/xmalloc.h
 snprintf.o: ${BASHINCDIR}/ansi_stdlib.h ${BASHINCDIR}/chartypes.h
+snprintf.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 snprintf.o: ${BASHINCDIR}/typemax.h
 
 spell.o: ${topdir}/bashtypes.h
@@ -493,6 +495,7 @@ strtrans.o: ${topdir}/array.h ${topdir}/hashlib.h ${topdir}/quit.h
 strtrans.o: ${topdir}/unwind_prot.h ${topdir}/dispose_cmd.h
 strtrans.o: ${topdir}/make_cmd.h ${topdir}/subst.h ${topdir}/sig.h
 strtrans.o: ${BUILD_DIR}/pathnames.h ${topdir}/externs.h
+strtrans.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 #strtrans.o: ${BUILD_DIR}/version.h
 
 times.o: ${BASHINCDIR}/systimes.h
@@ -603,6 +606,7 @@ fnxform.o: ${topdir}/bashtypes.h
 fnxform.o: ${topdir}/bashintl.h ${LIBINTL_H} ${BASHINCDIR}/gettext.h
 
 shmbchar.o: ${BASHINCDIR}/shmbchar.h
+shmbchar.o: ${BASHINCDIR}/shmbutil.h
 
 unicode.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 unicode.o: ${BASHINCDIR}/stdc.h

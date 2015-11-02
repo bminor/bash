@@ -531,6 +531,7 @@ printf.o: $(topdir)/subst.h $(topdir)/externs.h $(topdir)/sig.h
 printf.o: ../pathnames.h $(topdir)/shell.h $(topdir)/syntax.h $(topdir)/unwind_prot.h
 printf.o: $(topdir)/variables.h $(topdir)/conftypes.h $(BASHINCDIR)/stdc.h $(srcdir)/bashgetopt.h
 printf.o: $(topdir)/bashtypes.h ${srcdir}/common.h $(BASHINCDIR)/chartypes.h
+printf.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 printf.o: ../pathnames.h
 pushd.o: $(topdir)/command.h ../config.h $(BASHINCDIR)/memalloc.h
 pushd.o: $(topdir)/error.h $(topdir)/general.h $(topdir)/xmalloc.h
@@ -545,6 +546,7 @@ read.o: $(topdir)/quit.h $(topdir)/dispose_cmd.h $(topdir)/make_cmd.h
 read.o: $(topdir)/subst.h $(topdir)/externs.h $(BASHINCDIR)/maxpath.h
 read.o: $(topdir)/shell.h $(topdir)/syntax.h $(topdir)/unwind_prot.h $(topdir)/variables.h $(topdir)/conftypes.h
 read.o: $(BASHINCDIR)/shtty.h $(topdir)/sig.h
+read.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 read.o: $(topdir)/arrayfunc.h ../pathnames.h
 return.o: $(topdir)/command.h ../config.h $(BASHINCDIR)/memalloc.h
 return.o: $(topdir)/error.h $(topdir)/general.h $(topdir)/xmalloc.h

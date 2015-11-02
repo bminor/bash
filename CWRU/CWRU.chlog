@@ -9754,12 +9754,13 @@ variables.c
 				   10/13
 				   -----
 variables.c
-	- initialize_shell_variables: add call to sv_shcompat, so BASH_COMPAT can
-	  be set in the initial environment
+	- initialize_shell_variables: add call to sv_shcompat, so BASH_COMPAT
+	  can be set in the initial environment
 
 execute_cmd.c
 	- execute_function: set loop_level to 0 only if shell_compatibility_level
-	  is greater than bash-4.3; this was kind of an incompatible change
+	  is greater than bash-4.3; this was kind of an incompatible change.
+	  Report from Carlos Pita <carolosjosepita@gmail.com>
 
 COMPAT,doc/{bash.1,bashref.texi}
 	- compat43: added loop_level changes to description
@@ -9782,3 +9783,86 @@ subst.c
 	  on the assignment string, so spaces in the assignment survive word
 	  splitting.  Fixes bug reported by isabella parakiss
 	  <izaberina@gmail.com>
+
+				   10/20
+				   -----
+doc/{bash.1,bashref.texi}
+	- word splitting: make sure that newline is listed as one of the IFS
+	  whitespace characters.  Fixes omission reported by ziyunfei
+	  <446240525@qq.com>
+
+lib/readline/histfile.c
+	- history_do_write: make sure that we only create and use the tempfile if
+	  the history file exists and is a regular file.  Reported several times,
+	  most recent check the result of a report from <marko.teiste@gmail.com>
+
+				   10/22
+				   -----
+jobs.c
+	- delete_all_jobs: if running_only == 0, we are eventually going to
+	  clear the bgpids list, so don't bother to add pids to it in
+	  delete_job (call with DEL_NOBGPID flag if running_only == 0)
+
+				   10/24
+				   -----
+jobs.[ch]
+	- bgpids: new implementation from a patch from John Fremlin
+	  <john@fb.com>, uses an array for the list of the last CHILD_MAX
+	  terminated background pids, and a separate hash table to search it.
+	  The storage can be freed as a unit, and the size of the hash table
+	  (currently 4096) is independent of the size of the bgpids table
+
+subst.c
+	- inherit_errexit: new variable to control whether or not command
+	  substitution inherits the -e (errexit) option.  Disabled by default
+
+general.c
+	- posix_initialize: set inherit_errexit = 1 when Posix mode is enabled
+
+builtins/shopt.def
+	- inherit_errexit: new shell option, tracks value of inherit_errexit,
+	  allows command substitution to inherit the setting of errexit without
+	  posix mode.  From a request and patch submitted by Christoph Gysin
+	  <christoph.gysin@gmail.com>
+
+{version,version2}.c
+	- use #if HAVE_SNPRINTF instead of #if defined in case configure
+	  decides to #define it to 0.  Fixes problem reported by Klaus Ziegler
+	  <klausz@haus-gisela.de>
+
+configure.ac
+	- when checking for sys/resource.h, make sure to include <sys/time.h>
+	  for the benefit of both old systems that require it and new versions
+ 	  of autoconf that require a header file to compile to report its
+	  presence.  Reported by Klaus Ziegler <klausz@haus-gisela.de>
+
+				   10/26
+				   -----
+subst.h
+	- SD_ARITHEXP: new flag value for skip_to_delim, supports parsing
+	  arithmetic expressions in parameter expansions
+
+subst.c
+	- skip_to_delim: handle SD_ARITHEXP flag by skipping parentheses for
+	  subexpressions and allowing ?: expression to not terminate an
+	  arithmetic expression delimited by `:'
+	- skiparith: just call skip_to_delim with the SD_ARITHEXP option and
+	  the right delimiter string and return the right result.  Fixes bug
+	  reported by <grishalevit@gmail.com>
+
+include/shmbchar.h
+	- strip out everything except what is needed to support is_basic and
+	  similar functions, since the mbchar_t typedef apparently conflicts
+	  with some AIX-specific type definition.  Problem reported by
+	  Michael Felt <aixtools@gmail.com>
+
+				   10/27
+				   -----
+builtins/{set,ulimit}.def
+	- {set,ulimit}_builtin: make sure that --help is treated the same as
+	  -? and prints a message and returns.  Fixes bug reported by ziyunfei
+	  <446240525@qq.com>
+
+builtins/*.def
+	- make sure to consistently use builtin_help() instead of mix of that
+	  function and builtin_usage()

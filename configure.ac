@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.4, version 4.073])dnl
+AC_REVISION([for Bash 4.4, version 4.074])dnl
 
 define(bashvers, 4.4)
 define(relstatus, beta)
@@ -717,7 +717,7 @@ AC_CHECK_HEADERS(unistd.h stdlib.h stdarg.h varargs.h limits.h string.h \
 		 stdbool.h stddef.h stdint.h netdb.h pwd.h grp.h strings.h \
 		 regex.h syslog.h ulimit.h)
 AC_CHECK_HEADERS(sys/pte.h sys/stream.h sys/select.h sys/file.h sys/ioctl.h \
-		 sys/resource.h sys/param.h sys/socket.h sys/stat.h \
+		 sys/param.h sys/socket.h sys/stat.h \
 		 sys/time.h sys/times.h sys/types.h sys/wait.h)
 AC_CHECK_HEADERS(netinet/in.h arpa/inet.h)
 
@@ -726,6 +726,14 @@ dnl exists
 AC_CHECK_HEADER(sys/ptem.h, , ,[[
 #if HAVE_SYS_STREAM_H
 #  include <sys/stream.h>
+#endif
+]])
+
+dnl SunOS 4 needs to include <sys/time.h> before <sys/resource.h> to compile
+dnl autoconf complains about presence but inability to compile
+AC_CHECK_HEADER(sys/resource.h, AC_DEFINE(HAVE_SYS_RESOURCE_H), [], [[
+#if HAVE_SYS_TIME_H
+#  include <sys/time.h>
 #endif
 ]])
 

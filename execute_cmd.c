@@ -58,6 +58,7 @@ extern int errno;
 #endif
 
 #define NEED_FPURGE_DECL
+#define NEED_SH_SETLINEBUF_DECL
 
 #include "bashansi.h"
 #include "bashintl.h"

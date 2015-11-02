@@ -316,9 +316,12 @@ getopts_builtin (list)
     }
 
   reset_internal_getopt ();
-  if (internal_getopt (list, "") != -1)
+  if ((ret = internal_getopt (list, "")) != -1)
     {
-      builtin_usage ();
+      if (ret == GETOPT_HELP)
+	builtin_help ();
+      else
+	builtin_usage ();
       return (EX_USAGE);
     }
   list = loptend;

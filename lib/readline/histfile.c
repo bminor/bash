@@ -613,9 +613,10 @@ history_do_write (filename, nelements, overwrite)
   mode = overwrite ? O_WRONLY|O_CREAT|O_TRUNC|O_BINARY : O_WRONLY|O_APPEND|O_BINARY;
 #endif
   histname = history_filename (filename);
-  tempname = (overwrite && histname) ? history_tempfile (histname) : 0;
-  output = tempname ? tempname : histname;
   exists = histname ? (stat (histname, &finfo) == 0) : 0;
+
+  tempname = (overwrite && exists && S_ISREG (finfo.st_mode)) ? history_tempfile (histname) : 0;
+  output = tempname ? tempname : histname;
 
   file = output ? open (output, mode, 0600) : -1;
   rv = 0;

@@ -14,7 +14,7 @@ This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Bash Reference Manual},
 for @code{Bash}, Version @value{VERSION}.
 
-Copyright @copyright{} 1988--2014 Free Software Foundation, Inc.
+Copyright @copyright{} 1988--2015 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -2246,8 +2246,8 @@ or
 @end example
 
 @noindent
-Bash performs the expansion by executing @var{command} and
-replacing the command substitution with the standard output of the
+Bash performs the expansion by executing @var{command} in a subshell environment
+and replacing the command substitution with the standard output of the
 command, with any trailing newlines deleted.
 Embedded newlines are not deleted, but they may be removed during
 word splitting.
@@ -2296,8 +2296,8 @@ failure to the standard error and no substitution occurs.
 @subsection Process Substitution
 @cindex process substitution
 
-Process substitution is supported on systems that support named
-pipes (@sc{fifo}s) or the @file{/dev/fd} method of naming open files.
+Process substitution allows a process's input or output to be
+referred to using a filename.
 It takes the form of 
 @example
 <(@var{list})
@@ -2308,16 +2308,20 @@ or
 >(@var{list})
 @end example
 @noindent
-The process @var{list} is run with its input or output connected to a
-@sc{fifo} or some file in @file{/dev/fd}.  The name of this file is
+The process @var{list} is run asynchronously, and its input or output 
+appears as a filename.
+This filename is
 passed as an argument to the current command as the result of the
-expansion.  If the @code{>(@var{list})} form is used, writing to
+expansion.
+If the @code{>(@var{list})} form is used, writing to
 the file will provide input for @var{list}.  If the
 @code{<(@var{list})} form is used, the file passed as an
 argument should be read to obtain the output of @var{list}.
 Note that no space may appear between the @code{<} or @code{>}
 and the left parenthesis, otherwise the construct would be interpreted
 as a redirection.
+Process substitution is supported on systems that support named
+pipes (@sc{fifo}s) or the @file{/dev/fd} method of naming open files.
 
 When available, process substitution is performed simultaneously with
 parameter and variable expansion, command substitution, and arithmetic
@@ -2341,7 +2345,7 @@ at the beginning and end of the results of the previous
 expansions are ignored, and any sequence of @env{IFS}
 characters not at the beginning or end serves to delimit words.
 If @env{IFS} has a value other than the default, then sequences of
-the whitespace characters @code{space} and @code{tab}
+the whitespace characters @code{space}, @code{tab}, and @code{newline}
 are ignored at the beginning and end of the
 word, as long as the whitespace character is in the
 value of @env{IFS} (an @env{IFS} whitespace character).

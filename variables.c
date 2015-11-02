@@ -4452,7 +4452,10 @@ push_func_var (data)
       if (array_p (var) || assoc_p (var))
 	{
 	  FREE (value_cell (v));
-	  var_setvalue (v, array_p (var) ? array_copy (array_cell (var)) : assoc_copy (assoc_cell (var)));
+	  if (array_p (var))
+	    var_setarray (v, array_copy (array_cell (var)));
+	  else
+	    var_setassoc (v, assoc_copy (assoc_cell (var)));
 	}
 #endif	  
       if (shell_variables == global_variables)

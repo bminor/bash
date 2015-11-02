@@ -90,6 +90,7 @@ extern int autocd;
 extern int glob_star;
 extern int glob_asciirange;
 extern int lastpipe_opt;
+extern int inherit_errexit;
 
 #if defined (EXTENDED_GLOB)
 extern int extended_glob;
@@ -196,6 +197,7 @@ static struct {
   { "hostcomplete", &perform_hostname_completion, shopt_enable_hostname_completion },
 #endif
   { "huponexit", &hup_on_exit, (shopt_set_func_t *)NULL },
+  { "inherit_errexit", &inherit_errexit, (shopt_set_func_t *)NULL },
   { "interactive_comments", &interactive_comments, set_shellopts_after_change },
   { "lastpipe", &lastpipe_opt, (shopt_set_func_t *)NULL },
 #if defined (HISTORY)
@@ -271,6 +273,7 @@ shopt_builtin (list)
 	case 'p':
 	  flags |= PFLAG;
 	  break;
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);
