@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.4, version 4.074])dnl
+AC_REVISION([for Bash 4.4, version 4.075])dnl
 
 define(bashvers, 4.4)
 define(relstatus, beta)
@@ -1120,6 +1120,8 @@ case "${host_os}-${CC}" in
 aix4.2*-*gcc*)	LOCAL_LDFLAGS="-Xlinker -bexpall -Xlinker -brtl" ;;
 aix4.2*)	LOCAL_LDFLAGS="-bexpall -brtl" ;;
 bsdi4*-*gcc*)	LOCAL_LDFLAGS="-rdynamic" ;;	# allow dynamic loading, like Linux
+bsdi5*-*gcc*)	LOCAL_LDFLAGS="-rdynamic" ;;	# allow dynamic loading, like Linux
+hpux11*-gcc*)	LOCAL_LDFLAGS="-Wl,-E" ;;	# allow dynamic loading
 esac
 
 dnl FreeBSD-3.x can have either a.out or ELF

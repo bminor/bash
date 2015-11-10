@@ -1,4 +1,4 @@
-\input texinfo.tex @c -*- texinfo -*-
+input texinfo.tex @c -*- texinfo -*-
 @c %**start of header
 @setfilename bashref.info
 @settitle Bash Reference Manual
@@ -5222,6 +5222,11 @@ by default.
 If set, Bash will send @code{SIGHUP} to all jobs when an interactive
 login shell exits (@pxref{Signals}).
 
+@item inherit_errexit
+If set, command substitution inherits the value of the @code{errexit} option,
+instead of unsetting it in the subshell environment.
+This option is enabled when @sc{posix} mode is enabled.
+
 @item interactive_comments
 Allow a word beginning with @samp{#}
 to cause that word and all remaining characters on that
@@ -5447,8 +5452,12 @@ that do not require Bash to be re-initialized.
 An associative array variable whose members correspond to the internal
 list of aliases as maintained by the @code{alias} builtin.
 (@pxref{Bourne Shell Builtins}).
-Elements added to this array appear in the alias list; unsetting array
-elements cause aliases to be removed from the alias list.
+Elements added to this array appear in the alias list; however,
+unsetting array elements currently does not cause aliases to be removed
+from the alias list.
+If @code{BASH_ALIASES}
+is unset, it loses its special properties, even if it is
+subsequently reset.
 
 @item BASH_ARGC
 An array variable whose values are the number of parameters in each
@@ -5477,8 +5486,12 @@ builtin).
 An associative array variable whose members correspond to the internal
 hash table of commands as maintained by the @code{hash} builtin
 (@pxref{Bourne Shell Builtins}).
-Elements added to this array appear in the hash table; unsetting array
-elements cause commands to be removed from the hash table.
+Elements added to this array appear in the hash table; however,
+unsetting array elements currently does not cause command names to be removed
+from the hash table.
+If @code{BASH_CMDS}
+is unset, it loses its special properties, even if it is
+subsequently reset.
 
 @item BASH_COMMAND
 The command currently being executed or about to be executed, unless the
@@ -6475,6 +6488,7 @@ signals @code{SIGTTIN}, @code{SIGTTOU}, and @code{SIGTSTP}.
 Bash expands and displays @env{PS1} before reading the first line
 of a command, and expands and displays @env{PS2} before reading the
 second and subsequent lines of a multi-line command.
+Bash displays @env{PS0} after it reads a command but before executing it.
 
 @item
 Bash executes the value of the @env{PROMPT_COMMAND} variable as a command
@@ -7450,8 +7464,11 @@ The @code{.} and @code{source} builtins do not search the current directory
 for the filename argument if it is not found by searching @env{PATH}.
 
 @item
-Subshells spawned to execute command substitutions inherit the value of
-the @option{-e} option from the parent shell.  When not in @sc{posix} mode,
+Enabling @sc{posix} mode has the effect of setting the
+@code{inherit_errexit} option, so
+subshells spawned to execute command substitutions inherit the value of
+the @option{-e} option from the parent shell.
+When the @code{inherit_errexit} option is not enabled,
 Bash clears the @option{-e} option in such subshells.
 
 @item

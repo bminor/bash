@@ -3394,6 +3394,7 @@ cond_expand_word (w, special)
 	  qflags = QGLOB_CVTNULL;
 	  if (special == 2)
 	    qflags |= QGLOB_REGEXP;
+	  word_list_remove_quoted_nulls (l);
 	  p = string_list (l);
 	  r = quote_string_for_globbing (p, qflags);
 	  free (p);

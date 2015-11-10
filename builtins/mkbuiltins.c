@@ -1132,6 +1132,8 @@ char *structfile_header[] = {
   "   the list of shell reserved control structures, like `if' and `while'.",
   "   The end of the list is denoted with a NULL name field. */",
   "",
+  "/* TRANSLATORS: Please do not translate command names in descriptions */",
+  "",
   "#include \"../builtins.h\"",
   (char *)NULL
   };

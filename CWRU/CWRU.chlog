@@ -9890,3 +9890,15 @@ parse.y
 doc/{bash.1,bashref.texi}
 	- PS0: document new prompt string
 
+				   11/3
+				   ----
+subst.c
+	- cond_expand_node: if special > 0, remove quoted nulls from the word
+	  list, since no word splitting takes place.  Fixes bug reported by
+	  Corentin Peuvrel <cpeuvrel@pom-monitoring.com>
+
+				   11/4
+				   ----
+doc/{bash.1,builtins.texi}
+	- inherit_errexit: add to shopt description; modify Posix mode
+	  description
