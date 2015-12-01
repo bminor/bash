@@ -1847,7 +1847,9 @@ skip_to_delim (string, start, delims, flags)
 	i = skip_single_quoted (string, slen, ++i, SX_COMPLETE);
       else if (c == '\'')
 	i = skip_single_quoted (string, slen, ++i, 0);
-      else if (histexp && c == '"')
+      /* The posixly_correct test makes posix-mode shells allow double quotes
+	 to quote the history expansio character */
+      else if (histexp && posixly_correct == 0 && c == '"')
 	{
 	  dquote = 1 - dquote;
 	  i++;

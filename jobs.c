@@ -2125,9 +2125,18 @@ get_original_tty_job_signals ()
 
   if (fetched == 0)
     {
-      get_original_signal (SIGTSTP);
-      get_original_signal (SIGTTIN);
-      get_original_signal (SIGTTOU);
+      if (interactive_shell)
+	{
+	  set_original_signal (SIGTSTP, SIG_DFL);
+	  set_original_signal (SIGTTIN, SIG_DFL);
+	  set_original_signal (SIGTTOU, SIG_DFL);
+	}
+      else
+	{
+	  get_original_signal (SIGTSTP);
+	  get_original_signal (SIGTTIN);
+	  get_original_signal (SIGTTOU);
+	}
       fetched = 1;
     }
 }
@@ -2779,7 +2788,7 @@ if (job == NO_JOB)
   itrace("wait_for: job == NO_JOB, giving the terminal to shell_pgrp (%ld)", (long)shell_pgrp);
 #endif
       /* Don't modify terminal pgrp if we are running in background or a subshell */
-      if (running_in_background == 0 && subshell_environment == 0)
+      if (running_in_background == 0 && (subshell_environment&(SUBSHELL_ASYNC|SUBSHELL_PIPE)) == 0)
 	give_terminal_to (shell_pgrp, 0);
     }
 

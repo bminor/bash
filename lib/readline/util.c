@@ -198,12 +198,14 @@ rl_tilde_expand (ignore, key)
       xfree (homedir);
       return (0);
     }
-  else if (rl_line_buffer[start] != '~')
+  else if (start >= 0 && rl_line_buffer[start] != '~')
     {
       for (; !whitespace (rl_line_buffer[start]) && start >= 0; start--)
         ;
       start++;
     }
+  else if (start < 0)
+    start = 0;
 
   end = start;
   do
