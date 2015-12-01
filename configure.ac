@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.4, version 4.075])dnl
+AC_REVISION([for Bash 4.4, version 4.076])dnl
 
 define(bashvers, 4.4)
 define(relstatus, beta)
@@ -792,7 +792,7 @@ AC_REPLACE_FUNCS(rename)
 dnl checks for c library functions
 AC_CHECK_FUNCS(bcopy bzero confstr faccessat fnmatch \
 		getaddrinfo gethostbyname getservbyname getservent inet_aton \
-		imaxdiv memmove pathconf putenv raise regcomp regexec \
+		imaxdiv memmove pathconf putenv raise random regcomp regexec \
 		setenv setlinebuf setlocale setvbuf siginterrupt strchr \
 		sysconf syslog tcgetattr times ttyname tzset unsetenv)
 

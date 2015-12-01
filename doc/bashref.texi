@@ -450,6 +450,11 @@ Enclosing characters in double quotes (@samp{"}) preserves the literal value
 of all characters within the quotes, with the exception of
 @samp{$}, @samp{`}, @samp{\},
 and, when history expansion is enabled, @samp{!}.
+When the shell is in
+@sc{posix} mode (@pxref{Bash POSIX Mode}),
+the @samp{!} has no special meaning
+within double quotes, even when history expansion is enabled.
+The characters
 The characters @samp{$} and @samp{`}
 retain their special meaning within double quotes (@pxref{Shell Expansions}).
 The backslash retains its special meaning only when followed by one of
@@ -5046,7 +5051,10 @@ bash-4.1 and later use the current locale's collation sequence and strcoll(3).
 If set, Bash
 changes its behavior to that of version 3.2 with respect to locale-specific
 string comparison when using the @code{[[}
-conditional command's @samp{<} and @samp{>} operators (see previous item).
+conditional command's @samp{<} and @samp{>} operators (see previous item)
+and the effect of interrupting a command list.
+Bash versions 3.2 and earlier continue with the next command in the list
+after one terminates due to an interrupt.
 
 @item compat40
 If set, Bash
@@ -5704,7 +5712,7 @@ The numeric effective user id of the current user.  This variable
 is readonly.
 
 @item EXECIGNORE
-A colon-separated list of extended glob patterns (@pxref{Pattern Matching})
+A colon-separated list of shell patterns (@pxref{Pattern Matching})
 defining the list of filenames to be ignored by command search.
 Files whose full pathnames match one of these patterns are not considered
 executable files for the purposes of completion and command execution.
@@ -5712,6 +5720,8 @@ This does not affect the behavior of the @code{[}, @code{test}, and @code{[[}
 commands.
 Use this variable to ignore shared library files that have the executable
 bit set, but are not executable files.
+The pattern matching honors the setting of the @code{extglob} shell 
+option.
 
 @item FCEDIT
 The editor used as a default by the @option{-e} option to the @code{fc}
@@ -5756,6 +5766,8 @@ be ignored by filename expansion.
 If a filename matched by a filename expansion pattern also matches one
 of the patterns in @env{GLOBIGNORE}, it is removed from the list
 of matches.
+The pattern matching honors the setting of the @code{extglob} shell
+option.
 
 @item GROUPS
 An array variable containing the list of groups of which the current    
@@ -5832,6 +5844,8 @@ before attempting a match.
 The second and subsequent lines of a multi-line compound command are
 not tested, and are added to the history regardless of the value of
 @env{HISTIGNORE}.
+The pattern matching honors the setting of the @code{extglob} shell
+option.
 
 @env{HISTIGNORE} subsumes the function of @env{HISTCONTROL}.  A
 pattern of @samp{&} is identical to @code{ignoredups}, and a
@@ -7305,9 +7319,7 @@ is stopped is `Stopped(@var{signame})', where @var{signame} is, for
 example, @code{SIGTSTP}.
 
 @item
-The @code{bg} builtin uses the required format to describe each job placed
-in the background, which does not include an indication of whether the job
-is the current or previous job.
+Alias expansion is always enabled, even in non-interactive shells.
 
 @item
 Reserved words appearing in a context where reserved words are recognized
@@ -7328,38 +7340,8 @@ Tilde expansion is only performed on assignments preceding a command
 name, rather than on all assignment statements on the line.
 
 @item
-The @code{command} builtin does not prevent builtins that take assignment
-statements as arguments from expanding them as assignment statements;
-when not in @sc{posix} mode, assignment builtins lose their assignment
-statement expansion properties when preceded by @code{command}.
-
-@item
 The default history file is @file{~/.sh_history} (this is the
 default value of @env{$HISTFILE}).
-
-@item
-The output of @samp{kill -l} prints all the signal names on a single line,
-separated by spaces, without the @samp{SIG} prefix.
-
-@item
-The @code{kill} builtin does not accept signal names with a @samp{SIG}
-prefix.
-
-@item
-Non-interactive shells exit if @var{filename} in @code{.} @var{filename}
-is not found.
-
-@item
-Non-interactive shells exit if a syntax error in an arithmetic expansion
-results in an invalid expression.
-
-@item
-Non-interactive shells exit on word expansion errors.
-
-@item
-Non-interactive shells exit if there is a syntax error in a script read
-with the @code{.} or @code{source} builtins, or in a string processed by
-the @code{eval} builtin.
 
 @item
 Redirection operators do not perform filename expansion on the word
@@ -7406,6 +7388,10 @@ The parser does not recognize @code{time} as a reserved word if the next
 token begins with a @samp{-}.
 
 @item
+The @samp{!} character does not introduce history expansion within a
+double-quoted string, even if the @code{histexpand} option is enabled.
+
+@item
 If a @sc{posix} special builtin returns an error status, a
 non-interactive shell exits.  The fatal errors are those listed in
 the @sc{posix} standard, and include things like passing incorrect options,
@@ -7430,6 +7416,22 @@ variable in a @code{for} statement or the selection variable in a
 @code{select} statement is a readonly variable.
 
 @item
+Non-interactive shells exit if @var{filename} in @code{.} @var{filename}
+is not found.
+
+@item
+Non-interactive shells exit if a syntax error in an arithmetic expansion
+results in an invalid expression.
+
+@item
+Non-interactive shells exit on word expansion errors.
+
+@item
+Non-interactive shells exit if there is a syntax error in a script read
+with the @code{.} or @code{source} builtins, or in a string processed by
+the @code{eval} builtin.
+
+@item
 Process substitution is not available.
 
 @item
@@ -7444,6 +7446,25 @@ persist in the shell environment after the builtin completes.
 Assignment statements preceding shell function calls persist in the
 shell environment after the function returns, as if a @sc{posix}
 special builtin command had been executed.
+
+@item
+The @code{command} builtin does not prevent builtins that take assignment
+statements as arguments from expanding them as assignment statements;
+when not in @sc{posix} mode, assignment builtins lose their assignment
+statement expansion properties when preceded by @code{command}.
+
+@item
+The @code{bg} builtin uses the required format to describe each job placed
+in the background, which does not include an indication of whether the job
+is the current or previous job.
+
+@item
+The output of @samp{kill -l} prints all the signal names on a single line,
+separated by spaces, without the @samp{SIG} prefix.
+
+@item
+The @code{kill} builtin does not accept signal names with a @samp{SIG}
+prefix.
 
 @item
 The @code{export} and @code{readonly} builtin commands display their
@@ -7472,9 +7493,6 @@ subshells spawned to execute command substitutions inherit the value of
 the @option{-e} option from the parent shell.
 When the @code{inherit_errexit} option is not enabled,
 Bash clears the @option{-e} option in such subshells.
-
-@item
-Alias expansion is always enabled, even in non-interactive shells.
 
 @item
 When the @code{alias} builtin displays alias definitions, it does not
@@ -7793,7 +7811,7 @@ of the shell, the return status is 127.
 @item disown
 @btindex disown
 @example
-disown [-ar] [-h] [@var{jobspec} @dots{}]
+disown [-ar] [-h] [@var{jobspec} @dots{} | @var{pid} @dots{} ]
 @end example
 
 Without options, remove each @var{jobspec} from the table of

@@ -145,7 +145,7 @@ _rl_find_next_mbchar_internal (string, seed, count, find_non_zero)
   return point;
 }
 
-static int
+/*static*/ int
 _rl_find_prev_mbchar_internal (string, seed, find_non_zero)
      char *string;
      int seed, find_non_zero;

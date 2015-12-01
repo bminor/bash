@@ -355,8 +355,9 @@ fc_execute_file (filename)
   int flags;
 
   /* We want these commands to show up in the history list if
-     remember_on_history is set. */
-  flags = FEVAL_ENOENTOK|FEVAL_HISTORY|FEVAL_REGFILE;
+     remember_on_history is set.  We use FEVAL_BUILTIN to return
+     the result of parse_and_execute. */
+  flags = FEVAL_ENOENTOK|FEVAL_HISTORY|FEVAL_REGFILE|FEVAL_BUILTIN;
   return (_evalfile (filename, flags));
 }
 #endif /* HISTORY */

@@ -9940,7 +9940,6 @@ subst.c
 	  double quotes to quote the history expansion character.  TENTATIVE
 	  CHANGE, inspired by
 	  https://savannah.gnu.org/support/index.php?108491
-	  NEEDS DOCUMENTATION
 
 				   11/14
 				   -----
@@ -9949,3 +9948,81 @@ jobs.c
 	  shell_pgrp if not running in the background and subshell_environment
 	  indicates we're not in a pipeline and not an async command.  Fixes
 	  bug reported by konsolebox <konsolebox@gmail.com>
+
+				   11/16
+				   -----
+doc/{bash.1,bashref.texi}
+	- document new posix-mode behavior of not giving ! special meaning
+	  within double quotes, even if histexpand is enabled
+
+				   11/17
+				   -----
+builtins/evalfile.c
+	- fc_execute_file: pass FEVAL_BUILTIN flag to _evalfile so it returns
+	  the value of parse_and_execute after executing the commands in the
+	  file.  Fixes bug reported by Chris Marusich <cmmarusich@gmail.com>
+
+				   11/20
+				   -----
+subst.c
+	- process_substitute: don't unconditionally set pipeline_pgrp to
+	  shell_pgrp; do that only if pipeline_pgrp == 0 (we haven't forked
+	  yet) or if we know we haven't forked for a command, a pipeline,
+	  or an async command.  Fixes bug reported by
+	  <gnu.20.drkshadow@spamgourmet.com>
+	  as https://savannah.gnu.org/support/index.php?108593
+
+				   11/24
+				   -----
+variables.c
+	- set_pwd: inherit the value of OLDPWD from the initial environment
+	  if it names a directory.  From a report from John Wiersba
+	  <jrw32982@yahoo.com>
+
+builtins/set.def
+	- -T: fix help text to note that the DEBUG and RETURN traps are both
+	  inherited if this is set.  Report from Grisha Levin
+	  <grishalevit@gmail.com>
+
+doc/{bash.1,bashref.texi}
+	- HISTIGNORE,GLOBIGNORE: note that the pattern matching is subject to
+	  the setting of the `extglob' variable.  Clarification raised by
+	  Aharon Robbins <arnold@skeeve.com>
+
+builtins/jobs.def,doc/{bash.1,bashref.texi}
+	- disown: add text to synopsis making it clear that disown takes a
+	  pid argument.  From a report from Matthew Stanfield
+	  <matthew@i-dig.info>
+
+findcmd.c,doc/{bash.1,bashref.texi}
+	- EXECIGNORE: change pattern matching to use FNMATCH_EXTFLAG like other
+	  IGNORE variables.  From a report from Aharon Robbins <arnold@skeeve.com>
+
+trap.c
+	- _run_trap_internal: make sure to catch and use return values supplied
+	  as arguments to `return'; instead of just catching return, make sure
+	  we use return_catch_value as well.  Fixes bug reported by
+	  Grisha Levit <grishalevit@gmail.com>, affects RETURN, DEBUG, ERROR
+	  traps
+
+				   11/30
+				   -----
+lib/readline/display.c
+	- rl_redisplay: fix code that deals with prompts that contain
+	  multibyte characters whose physical length is longer than the screen
+	  width (so the prompt line wraps) to deal with invisible characters
+	  in the prompt and set the inv_lbreaks offsets correctly and set
+	  lpos appropriately
+	- _rl_move_cursor_relative: always called with either visible line or
+	  invisible line. Decide whether we are being called with the invisible
+	  line (or a portion thereof) as the DATA argument; make sure to account
+	  for invisible characters in the last line of the prompt by offsetting
+	  the desired buffer offset (NEW) by where DATA starts in invisible line
+	  and checking whether that is past the last invisible character in
+	  the prompt
+	- _rl_move_cursor_relative: do the same for the visible line by using
+	  the visible line lbreaks array instead of _rl_screenwidth, since
+	  that fails in the presence of multibyte characters (buffer offset
+	  vs. physical screen position).  These fix bug with prompts with
+	  multibyte characters and invisible characters that are longer than
+	  the screen width reported by Ryo Furue <ryofurue@gmail.com>

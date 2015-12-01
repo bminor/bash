@@ -104,7 +104,7 @@ exec_name_should_ignore (name)
   struct ign *p;
 
   for (p = execignore.ignores; p && p->val; p++)
-    if (strmatch (p->val, (char *)name, FNM_EXTMATCH|FNM_CASEFOLD) != FNM_NOMATCH)
+    if (strmatch (p->val, (char *)name, FNMATCH_EXTFLAG|FNM_CASEFOLD) != FNM_NOMATCH)
       return 1;
   return 0;
 }

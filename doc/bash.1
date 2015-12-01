@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed Nov  4 09:56:06 EST 2015
+.\"	Last Change: Mon Nov 16 10:54:48 EST 2015
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2015 November 4" "GNU Bash 4.4"
+.TH BASH 1 "2015 November 16" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1061,6 +1061,8 @@ of all characters within the quotes, with the exception of
 .BR \e ,
 and, when history expansion is enabled,
 .BR ! .
+When the shell is in \fIposix mode\fP, the \fB!\fP has no special meaning
+within double quotes, even when history expansion is enabled.
 The characters
 .B $
 and
@@ -2011,7 +2013,7 @@ Similar to
 used when the shell is invoked in POSIX mode.
 .TP
 .B EXECIGNORE
-A colon-separated list of extended glob patterns (see \fBPattern Matching\fP)
+A colon-separated list of shell patterns (see \fBPattern Matching\fP)
 defining the list of filenames to be ignored by command search.
 Files whose full pathnames match one of these patterns are not considered
 executable files for the purposes of completion and command execution.
@@ -2019,6 +2021,8 @@ This does not affect the behavior of the \fB[\fP, \fBtest\fP, and \fB[[\fP
 commands.
 Use this variable to ignore shared library files that have the executable
 bit set, but are not executable files.
+The pattern matching honors the setting of the \fBextglob\fP shell
+option.
 .TP
 .B FCEDIT
 The default editor for the
@@ -2120,6 +2124,8 @@ The second and subsequent lines of a multi-line compound command are
 not tested, and are added to the history regardless of the value of
 .SM
 .BR HISTIGNORE .
+The pattern matching honors the setting of the \fBextglob\fP shell
+option.
 .TP
 .B HISTSIZE
 The number of commands to remember in the command history (see
@@ -3492,6 +3498,8 @@ option is disabled when
 .SM
 .B GLOBIGNORE
 is unset.
+The pattern matching honors the setting of the \fBextglob\fP shell
+option.
 .PP
 \fBPattern Matching\fP
 .PP
@@ -7778,7 +7786,7 @@ invalid option is supplied or \fIn\fP indexes beyond the end
 of the directory stack.
 .RE
 .TP
-\fBdisown\fP [\fB\-ar\fP] [\fB\-h\fP] [\fIjobspec\fP ...]
+\fBdisown\fP [\fB\-ar\fP] [\fB\-h\fP] [\fIjobspec\fP ... | \fIpid\fP ... ]
 Without options, remove each
 .I jobspec
 from the table of active jobs.
@@ -9480,7 +9488,10 @@ If set,
 .B bash
 changes its behavior to that of version 3.2 with respect to
 locale-specific string comparison when using the \fB[[\fP
-conditional command's \fB<\fP and \fB>\fP operators (see previous item).
+conditional command's \fB<\fP and \fB>\fP operators (see previous item)
+and the effect of interrupting a command list.
+Bash versions 3.2 and earlier continue with the next command in the list
+after one terminates due to an interrupt.
 .TP 8
 .B compat40
 If set,

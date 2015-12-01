@@ -1848,7 +1848,7 @@ skip_to_delim (string, start, delims, flags)
       else if (c == '\'')
 	i = skip_single_quoted (string, slen, ++i, 0);
       /* The posixly_correct test makes posix-mode shells allow double quotes
-	 to quote the history expansio character */
+	 to quote the history expansion character */
       else if (histexp && posixly_correct == 0 && c == '"')
 	{
 	  dquote = 1 - dquote;
@@ -5538,7 +5538,8 @@ process_substitute (string, open_for_read_in_child)
 
 #if defined (JOB_CONTROL)
   old_pipeline_pgrp = pipeline_pgrp;
-  pipeline_pgrp = shell_pgrp;
+  if (pipeline_pgrp == 0 || (subshell_environment & (SUBSHELL_PIPE|SUBSHELL_FORK|SUBSHELL_ASYNC)) == 0)
+    pipeline_pgrp = shell_pgrp;
   save_pipeline (1);
 #endif /* JOB_CONTROL */
 

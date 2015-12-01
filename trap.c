@@ -994,9 +994,12 @@ _run_trap_internal (sig, tag)
       if (sig != DEBUG_TRAP && sig != RETURN_TRAP && sig != ERROR_TRAP)
 	flags |= SEVAL_RESETLINE;
       if (function_code == 0)
-	parse_and_execute (trap_command, tag, flags);
-
-      trap_exit_value = last_command_exit_value;
+        {
+	  parse_and_execute (trap_command, tag, flags);
+	  trap_exit_value = last_command_exit_value;
+        }
+      else
+        trap_exit_value = return_catch_value;
 
 #if defined (JOB_CONTROL)
       if (sig != DEBUG_TRAP)	/* run_debug_trap does this */

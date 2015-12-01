@@ -884,10 +884,15 @@ set_pwd ()
     }
 
   /* According to the Single Unix Specification, v2, $OLDPWD is an
-     `environment variable' and therefore should be auto-exported.
-     Make a dummy invisible variable for OLDPWD, and mark it as exported. */
-  temp_var = bind_variable ("OLDPWD", (char *)NULL, 0);
-  VSETATTR (temp_var, (att_exported | att_invisible));
+     `environment variable' and therefore should be auto-exported.  If we
+     don't find OLDPWD in the environment, or it doesn't name a directory,
+     make a dummy invisible variable for OLDPWD, and mark it as exported. */
+  temp_var = find_variable ("OLDPWD");
+  if (temp_var == 0 || value_cell (temp_var) == 0 || file_isdir (value_cell (temp_var)) == 0)
+    {
+      temp_var = bind_variable ("OLDPWD", (char *)NULL, 0);
+      VSETATTR (temp_var, (att_exported | att_invisible));
+    }
 }
 
 /* Make a variable $PPID, which holds the pid of the shell's parent.  */
