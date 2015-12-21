@@ -217,5 +217,9 @@ ${THIS_SH} ./varenv6.sub
 # variable declaration problems with arrays and readonly local variables
 ${THIS_SH} ./varenv7.sub
 
+# variable visibility problems with process substitution subshells in
+# redirections
+${THIS_SH} ./varenv8.sub
+
 # make sure variable scoping is done right
 tt() { typeset a=b;echo a=$a; };a=z;echo a=$a;tt;echo a=$a

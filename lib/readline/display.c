@@ -1637,6 +1637,11 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
   if (_rl_last_v_pos != current_line)
     {
       _rl_move_vert (current_line);
+      /* We have moved up to a new screen line.  This line may or may not have
+         invisible characters on it, but we do our best to recalculate
+         visible_wrap_offset based on what we know. */
+      if (current_line == 0)
+	visible_wrap_offset = prompt_invis_chars_first_line;	/* XXX */
       if ((MB_CUR_MAX == 1 || rl_byte_oriented) && current_line == 0 && visible_wrap_offset)
 	_rl_last_c_pos += visible_wrap_offset;
     }
@@ -1648,16 +1653,31 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
      string, then redraw the entire prompt string.  We can only do this
      reliably if the terminal supports a `cr' capability.
 
+     This can also happen if the prompt string has changed, and the first
+     difference in the line is in the middle of the prompt string, after a
+     sequence of invisible characters (worst case) and before the end of
+     the prompt.  In this case, we have to redraw the entire prompt string
+     so that the entire sequence of invisible characters is drawn.  We need
+     to handle the worst case, when the difference is after (or in the middle
+     of) a sequence of invisible characters that changes the text color and
+     before the sequence that restores the text color to normal.  Then we have
+     to make sure that the lines still differ -- if they don't, we can
+     return immediately.
+
      This is not an efficiency hack -- there is a problem with redrawing
      portions of the prompt string if they contain terminal escape
      sequences (like drawing the `unbold' sequence without a corresponding
      `bold') that manifests itself on certain terminals. */
 
   lendiff = local_prompt_len;
+  if (lendiff > nmax)
+    lendiff = nmax;
   od = ofd - old;	/* index of first difference in visible line */
+  nd = nfd - new;
   if (current_line == 0 && !_rl_horizontal_scroll_mode &&
       _rl_term_cr && lendiff > prompt_visible_length && _rl_last_c_pos > 0 &&
-      od >= lendiff && _rl_last_c_pos < PROMPT_ENDING_INDEX)
+      (((od > 0 || nd > 0) && (od < PROMPT_ENDING_INDEX || nd < PROMPT_ENDING_INDEX)) ||
+		((od >= lendiff) && _rl_last_c_pos < PROMPT_ENDING_INDEX)))
     {
 #if defined (__MSDOS__)
       putc ('\r', rl_outstream);
@@ -1676,6 +1696,43 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	}
       else
 	_rl_last_c_pos = lendiff + modmark;
+
+      /* Now if we have printed the prompt string because the first difference
+	 was within the prompt, see if we need to recompute where the lines
+	 differ.  Check whether where we are now is past the last place where
+	 the old and new lines are the same and short-circuit now if we are. */
+      if ((od < PROMPT_ENDING_INDEX || nd < PROMPT_ENDING_INDEX) &&
+          omax == nmax &&
+	  lendiff > (ols-old) && lendiff > (nls-new))
+	return;
+
+      /* XXX - we need to fix up our calculations if we are now past the
+	 old ofd/nfd and the prompt length (or line length) has changed.
+	 We punt on the problem and do a dumb update.  We'd like to be able
+	 to just output the prompt from the beginning of the line up to the
+	 first difference, but you don't know the number of invisible
+	 characters in that case.
+	 This needs a lot of work to be efficient. */
+      if ((od < PROMPT_ENDING_INDEX || nd < PROMPT_ENDING_INDEX))
+	{
+	  nfd = new + lendiff;	/* number of characters we output above */
+	  nd = lendiff;
+
+	  /* Do a dumb update and return */
+	  temp = ne - nfd;
+	  if (temp > 0)
+	    {
+	      _rl_output_some_chars (nfd, temp);
+	      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+		_rl_last_c_pos += _rl_col_width (new, nd, ne - new, 1);
+	      else
+		_rl_last_c_pos += temp;
+	    }
+	  if (nmax < omax)
+	    goto clear_rest_of_line;	/* XXX */
+	  else
+	    return;
+	}
     }
 
   o_cpos = _rl_last_c_pos;
@@ -1837,11 +1894,15 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	     char in the current line (which implies we just output some invisible
 	     characters) we need to adjust _rl_last_c_pos, since it represents
 	     a physical character position. */
+	  /* The current_line*rl_screenwidth+prompt_invis_chars_first_line is a
+	     crude attempt to compute how far into the new line buffer we are.
+	     It doesn't work well in the face of multibyte characters and needs
+	     to be rethought. XXX */
 	  if ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) &&
 		current_line == prompt_last_screen_line && wrap_offset &&
 		displaying_prompt_first_line &&
 		wrap_offset != prompt_invis_chars_first_line &&
-		((nfd-new) < (prompt_last_invisible-(current_line*_rl_screenwidth))))
+		((nfd-new) < (prompt_last_invisible-(current_line*_rl_screenwidth+prompt_invis_chars_first_line))))
 	    {
 	      _rl_last_c_pos -= wrap_offset - prompt_invis_chars_first_line;
 	      cpos_adjusted = 1;

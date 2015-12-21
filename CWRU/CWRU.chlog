@@ -10118,3 +10118,38 @@ subst.c
 	  process should not have access to any temporary environment the
 	  parent has.  Call flush_tempenv() in the child process to get rid
 	  of it.  Fix for bug reported by Clint Hepner <clint.hepner@gmail.com>
+
+				   12/9
+				   ----
+jobs.c
+	- waitchld: if in posix mode and attempting to let SIGCHLD interrupt the
+	  wait builtin, make sure wait_intr_flag is non-zero before trying to
+	  longjmp to wait_intr_buf.  Fixes bug reported by Aharon Robbins
+	  <arnold@skeeve.com>
+
+				   12/10
+				   -----
+lib/readline/display.c
+	- update_line: if a prompt containing invisible characters changes,
+	  and the change is within the prompt string, we need to redraw the
+	  entire prompt.  After that redraw, if the cursor position is after
+	  the first index where the old and new lines differ, we can short-
+	  circuit the update if the line length stays the same
+	- update_line: if we redraw the entire prompt string because the prompt
+	  contains invisible characters and the first difference is in the
+	  middle of the prompt, we possibly need to adjust our idea of the
+	  first differing character in the old and new lines.  We punt and do
+	  a dumb update in this case.  Fixes bug with dynamic vi-mode mode
+	  strings containing invisible characters reported by Dylan Cali
+	  <calid1984@gmail.com>
+
+				   12/11
+				   -----
+lib/readline/display.c
+	- update_line: if we move up to a new screen line, we need to recompute
+	  the number of invisible characters on the new current line
+	  (visible_wrap_offset).  Fixes bug reported to bug-readline by
+	  Per Bothner <per@bothner.com>
+	- update_line: update code that attempts to compute where we are in
+	  the new line buffer.  Fixes `vt100' bug reported to bug-readline by
+	  Per Bothner <per@bothner.com>

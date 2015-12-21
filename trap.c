@@ -96,6 +96,7 @@ extern volatile int from_return_trap;
 extern char *this_command_name;
 extern sh_builtin_func_t *this_shell_builtin;
 extern procenv_t wait_intr_buf;
+extern int wait_intr_flag;
 extern int return_catch_flag, return_catch_value;
 extern int subshell_level;
 extern WORD_LIST *subst_assign_varlist;
@@ -457,7 +458,7 @@ trap_handler (sig)
       if (this_shell_builtin && (this_shell_builtin == wait_builtin))
 	{
 	  wait_signal_received = sig;
-	  if (interrupt_immediately)
+	  if (interrupt_immediately && wait_intr_flag)
 	    sh_longjmp (wait_intr_buf, 1);
 	}
 
