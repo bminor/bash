@@ -10153,3 +10153,26 @@ lib/readline/display.c
 	- update_line: update code that attempts to compute where we are in
 	  the new line buffer.  Fixes `vt100' bug reported to bug-readline by
 	  Per Bothner <per@bothner.com>
+
+				   12/18
+				   -----
+execute_cmd.c
+	- execute_function: unwind-protect and restore BASH_ARGC and BASH_ARGV
+	- restore_funcarray_state: now global
+
+execute_cmd.h
+	- make func_array_state type global, add extern function declaration
+	  for restore_funcarray_state
+
+builtins/evalfile.c
+	- _evalfile: use restore_funcarray_state and pop_args as unwind-protects
+	  to restore BASH_{SOURCE,LINENO,ARGC,ARGV} and FUNCNAME on interrupts.
+	  Fixes bug reported back on 11/10 by Grisha Levit
+	  <grishalevit@gmail.com>
+
+				   12/20
+				   -----
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: after removing the only character from the
+	  search string with DEL, leaving the search string empty, don't match
+	  the previous line if we didn't have a match before

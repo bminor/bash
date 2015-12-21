@@ -105,18 +105,6 @@ extern int errno;
 #  include <mbstr.h>		/* mbschr */
 #endif
 
-#if defined (ARRAY_VARS)
-struct func_array_state
-  {
-    ARRAY *funcname_a;
-    SHELL_VAR *funcname_v;
-    ARRAY *source_a;
-    SHELL_VAR *source_v;
-    ARRAY *lineno_a;
-    SHELL_VAR *lineno_v;
-  };
-#endif
-
 extern int dollar_dollar_pid;
 extern int posixly_correct;
 extern int expand_aliases;
@@ -4504,7 +4492,7 @@ maybe_restore_getopt_state (gs)
 }
 
 #if defined (ARRAY_VARS)
-static void
+void
 restore_funcarray_state (fa)
      struct func_array_state *fa;
 {
@@ -4674,7 +4662,11 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
 
   /* Update BASH_ARGV and BASH_ARGC */
   if (debugging_mode)
-    push_args (words->next);
+    {
+      push_args (words->next);
+      if (subshell == 0)
+	add_unwind_protect (pop_args, 0);
+    }
 
   /* Number of the line on which the function body starts. */
   line_number = function_line_number = tc->line;
@@ -4734,10 +4726,6 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
       showing_function_line = 0;
     }
 
-  /* Restore BASH_ARGC and BASH_ARGV */
-  if (debugging_mode)
-    pop_args ();
-
   /* If we have a local copy of OPTIND, note it in the saved getopts state. */
   gv = find_variable ("OPTIND");
   if (gv && gv->context == variable_context)
@@ -4747,7 +4735,12 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
     run_unwind_frame ("function_calling");
 #if defined (ARRAY_VARS)
   else
-    restore_funcarray_state (fa);
+    {
+      restore_funcarray_state (fa);
+      /* Restore BASH_ARGC and BASH_ARGV */
+      if (debugging_mode)
+	pop_args ();
+    }
 #endif
 
   if (variable_context == 0 || this_shell_function == 0)

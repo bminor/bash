@@ -3565,7 +3565,6 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
     {
       if (posixly_correct && this_shell_builtin && this_shell_builtin == wait_builtin)
 	{
-itrace("waitchld: this_shell_builtin == wait_builtin got %d children wait_intr_flag = %d", children_exited, wait_intr_flag);
 	  interrupt_immediately = 0;
 	  /* This was trap_handler (SIGCHLD) but that can lose traps if
 	     children_exited > 1 */

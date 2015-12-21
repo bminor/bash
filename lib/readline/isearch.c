@@ -560,8 +560,12 @@ add_character:
 	  if (wstart >= 0)
 	    cxt->search_string[cxt->search_string_index = wstart] = '\0';
 	  else
-	    rl_ding ();
+	    cxt->search_string[cxt->search_string_index = 0] = '\0';
 	}
+
+      if (cxt->search_string_index == 0)
+	rl_ding ();
+
       break;
 
     case -4:	/* C-G, abort */
@@ -654,6 +658,12 @@ add_character:
 
   for (cxt->sflags &= ~(SF_FOUND|SF_FAILED);; )
     {
+      if (cxt->search_string_index == 0)
+	{
+	  cxt->sflags |= SF_FAILED;
+	  break;
+	}
+
       limit = cxt->sline_len - cxt->search_string_index + 1;
 
       /* Search the current line. */
