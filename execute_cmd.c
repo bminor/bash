@@ -3869,19 +3869,20 @@ fix_assignment_words (words)
   for (wcmd = words; wcmd; wcmd = wcmd->next)
     if ((wcmd->word->flags & W_ASSIGNMENT) == 0)
       break;
+  /* Posix (post-2008) says that `command' doesn't change whether
+     or not the builtin it shadows is a `declaration command', even
+     though it removes other special builtin properties.  In Posix
+     mode, we skip over one or more instances of `command' and
+     deal with the next word as the assignment builtin. */
+  while (posixly_correct && wcmd && wcmd->word && wcmd->word->word && STREQ (wcmd->word->word, "command"))
+    wcmd = wcmd->next;
 
   for (w = wcmd; w; w = w->next)
     if (w->word->flags & W_ASSIGNMENT)
       {
+      	/* Lazy builtin lookup, only do it if we find an assignment */
 	if (b == 0)
 	  {
-	    /* Posix (post-2008) says that `command' doesn't change whether
-	       or not the builtin it shadows is a `declaration command', even
-	       though it removes other special builtin properties.  In Posix
-	       mode, we skip over one or more instances of `command' and
-	       deal with the next word as the assignment builtin. */
-	    while (posixly_correct && wcmd && wcmd->word && wcmd->word->word && STREQ (wcmd->word->word, "command"))
-	      wcmd = wcmd->next;
 	    b = builtin_address_internal (wcmd->word->word, 0);
 	    if (b == 0 || (b->flags & ASSIGNMENT_BUILTIN) == 0)
 	      return;
@@ -3897,6 +3898,12 @@ fix_assignment_words (words)
 #endif
 	if (global)
 	  w->word->flags |= W_ASSNGLOBAL;
+
+	/* If we have an assignment builtin that does not create local variables,
+	   make sure we create global variables even if we internally call
+	   `declare' */
+	if (b && ((b->flags & (ASSIGNMENT_BUILTIN|LOCALVAR_BUILTIN)) == ASSIGNMENT_BUILTIN))
+	  w->word->flags |= W_ASSNGLOBAL;
       }
 #if defined (ARRAY_VARS)
     /* Note that we saw an associative array option to a builtin that takes
@@ -3908,8 +3915,6 @@ fix_assignment_words (words)
       {
 	if (b == 0)
 	  {
-	    while (posixly_correct && wcmd && wcmd->word && wcmd->word->word && STREQ (wcmd->word->word, "command"))
-	      wcmd = wcmd->next;
 	    b = builtin_address_internal (wcmd->word->word, 0);
 	    if (b == 0 || (b->flags & ASSIGNMENT_BUILTIN) == 0)
 	      return;
@@ -4364,12 +4369,11 @@ execute_builtin (builtin, words, flags, subshell)
      WORD_LIST *words;
      int flags, subshell;
 {
-  int old_e_flag, result, eval_unwind;
+  int result, eval_unwind, ignexit_flag, old_e_flag;
   int isbltinenv;
   char *error_trap;
 
   error_trap = 0;
-  old_e_flag = exit_immediately_on_error;
 
   /* The eval builtin calls parse_and_execute, which does not know about
      the setting of flags, and always calls the execution functions with
@@ -4393,6 +4397,7 @@ execute_builtin (builtin, words, flags, subshell)
 	  restore_default_signal (ERROR_TRAP);
 	}
       exit_immediately_on_error = 0;
+      ignexit_flag = builtin_ignoring_errexit;
       builtin_ignoring_errexit = 1;
       eval_unwind = 1;
     }
@@ -4469,8 +4474,8 @@ execute_builtin (builtin, words, flags, subshell)
 
   if (eval_unwind)
     {
-      exit_immediately_on_error = errexit_flag;
-      builtin_ignoring_errexit = 0;
+      builtin_ignoring_errexit = ignexit_flag;
+      exit_immediately_on_error = builtin_ignoring_errexit ? 0 : errexit_flag;
       if (error_trap)
 	{
 	  set_error_trap (error_trap);

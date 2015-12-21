@@ -47,6 +47,11 @@ extern int errno;
 #define DEFAULT_TMPDIR		"."	/* bogus default, should be changed */
 #define DEFAULT_NAMEROOT	"shtmp"
 
+/* Use ANSI-C rand() interface if random(3) is not available */
+#if !HAVE_RANDOM
+#define random() rand()
+#endif
+
 extern pid_t dollar_dollar_pid;
 
 static char *get_sys_tmpdir __P((void));

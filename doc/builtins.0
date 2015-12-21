@@ -469,7 +469,7 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               The return value is 0 unless an invalid option is supplied or  _n
               indexes beyond the end of the directory stack.
 
-       ddiissoowwnn [--aarr] [--hh] [_j_o_b_s_p_e_c ...]
+       ddiissoowwnn [--aarr] [--hh] [_j_o_b_s_p_e_c ... | _p_i_d ... ]
               Without  options,  remove  each _j_o_b_s_p_e_c from the table of active
               jobs.  If _j_o_b_s_p_e_c is not present, and neither the --aa nor the  --rr
               option  is  supplied, the _c_u_r_r_e_n_t _j_o_b is used.  If the --hh option
@@ -1319,148 +1319,156 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                       If set, bbaasshh changes its behavior to that of version 3.2
                       with  respect  to locale-specific string comparison when
                       using the [[[[ conditional command's  <<  and  >>  operators
-                      (see previous item).
+                      (see  previous  item)  and  the effect of interrupting a
+                      command list.  Bash versions 3.2  and  earlier  continue
+                      with  the  next command in the list after one terminates
+                      due to an interrupt.
               ccoommppaatt4400
                       If set, bbaasshh changes its behavior to that of version 4.0
-                      with respect to locale-specific string  comparison  when
-                      using  the  [[[[  conditional  command's << and >> operators
-                      (see description of ccoommppaatt3311) and the effect  of  inter-
-                      rupting  a  command  list.   Bash versions 4.0 and later
-                      interrupt the list as if the shell received  the  inter-
-                      rupt;  previous  versions continue with the next command
+                      with  respect  to locale-specific string comparison when
+                      using the [[[[ conditional command's  <<  and  >>  operators
+                      (see  description  of ccoommppaatt3311) and the effect of inter-
+                      rupting a command list.  Bash  versions  4.0  and  later
+                      interrupt  the  list as if the shell received the inter-
+                      rupt; previous versions continue with the  next  command
                       in the list.
               ccoommppaatt4411
-                      If set, bbaasshh, when in _p_o_s_i_x mode, treats a single  quote
-                      in  a  double-quoted  parameter  expansion  as a special
-                      character.  The single quotes must match (an  even  num-
-                      ber)  and  the  characters between the single quotes are
-                      considered quoted.  This is the behavior of  posix  mode
-                      through  version 4.1.  The default bash behavior remains
+                      If  set, bbaasshh, when in _p_o_s_i_x mode, treats a single quote
+                      in a double-quoted  parameter  expansion  as  a  special
+                      character.   The  single quotes must match (an even num-
+                      ber) and the characters between the  single  quotes  are
+                      considered  quoted.   This is the behavior of posix mode
+                      through version 4.1.  The default bash behavior  remains
                       as in previous versions.
               ccoommppaatt4422
-                      If set, bbaasshh does not process the replacement string  in
-                      the  pattern  substitution  word  expansion  using quote
+                      If  set, bbaasshh does not process the replacement string in
+                      the pattern  substitution  word  expansion  using  quote
                       removal.
               ccoommppaatt4433
-                      If set, bbaasshh does not print  a  warning  message  if  an
-                      attempt  is  made to use a quoted compound array assign-
-                      ment as an argument to  ddeeccllaarree,  makes  word  expansion
-                      errors  non-fatal  errors that cause the current command
-                      to fail (the default behavior  is  to  make  them  fatal
+                      If  set,  bbaasshh  does  not  print a warning message if an
+                      attempt is made to use a quoted compound  array  assign-
+                      ment  as  an  argument  to ddeeccllaarree, makes word expansion
+                      errors non-fatal errors that cause the  current  command
+                      to  fail  (the  default  behavior  is to make them fatal
                       errors that cause the shell to exit), and does not reset
-                      the loop state when a shell function is  executed  (this
-                      allows  bbrreeaakk  or ccoonnttiinnuuee in a shell function to affect
+                      the  loop  state when a shell function is executed (this
+                      allows bbrreeaakk or ccoonnttiinnuuee in a shell function  to  affect
                       loops in the caller's context).
               ccoommpplleettee__ffuullllqquuoottee
-                      If set, bbaasshh quotes all shell  metacharacters  in  file-
-                      names  and  directory  names when performing completion.
+                      If  set,  bbaasshh  quotes all shell metacharacters in file-
+                      names and directory names  when  performing  completion.
                       If not set, bbaasshh removes metacharacters such as the dol-
-                      lar  sign from the set of characters that will be quoted
-                      in completed filenames when these metacharacters  appear
-                      in  shell  variable references in words to be completed.
-                      This means that dollar  signs  in  variable  names  that
-                      expand  to  directories will not be quoted; however, any
-                      dollar signs appearing in filenames will not be  quoted,
-                      either.   This  is  active only when bash is using back-
-                      slashes to quote completed filenames.  This variable  is
-                      set  by  default,  which is the default bash behavior in
+                      lar sign from the set of characters that will be  quoted
+                      in  completed filenames when these metacharacters appear
+                      in shell variable references in words to  be  completed.
+                      This  means  that  dollar  signs  in variable names that
+                      expand to directories will not be quoted;  however,  any
+                      dollar  signs appearing in filenames will not be quoted,
+                      either.  This is active only when bash  is  using  back-
+                      slashes  to quote completed filenames.  This variable is
+                      set by default, which is the default  bash  behavior  in
                       versions through 4.2.
               ddiirreexxppaanndd
-                      If set, bbaasshh replaces directory names with  the  results
-                      of  word  expansion when performing filename completion.
-                      This changes the contents of the readline  editing  buf-
-                      fer.   If  not  set,  bbaasshh attempts to preserve what the
+                      If  set,  bbaasshh replaces directory names with the results
+                      of word expansion when performing  filename  completion.
+                      This  changes  the contents of the readline editing buf-
+                      fer.  If not set, bbaasshh attempts  to  preserve  what  the
                       user typed.
               ddiirrssppeellll
-                      If set, bbaasshh attempts spelling correction  on  directory
-                      names  during word completion if the directory name ini-
+                      If  set,  bbaasshh attempts spelling correction on directory
+                      names during word completion if the directory name  ini-
                       tially supplied does not exist.
-              ddoottgglloobb If set, bbaasshh includes filenames beginning with a `.'  in
+              ddoottgglloobb If  set, bbaasshh includes filenames beginning with a `.' in
                       the results of pathname expansion.
               eexxeeccffaaiill
                       If set, a non-interactive shell will not exit if it can-
-                      not execute the file specified as  an  argument  to  the
-                      eexxeecc  builtin  command.   An  interactive shell does not
+                      not  execute  the  file  specified as an argument to the
+                      eexxeecc builtin command.  An  interactive  shell  does  not
                       exit if eexxeecc fails.
               eexxppaanndd__aalliiaasseess
-                      If set, aliases are expanded as  described  above  under
+                      If  set,  aliases  are expanded as described above under
                       AALLIIAASSEESS.  This option is enabled by default for interac-
                       tive shells.
               eexxttddeebbuugg
-                      If set,  behavior  intended  for  use  by  debuggers  is
+                      If  set,  behavior  intended  for  use  by  debuggers is
                       enabled:
                       11..     The --FF option to the ddeeccllaarree builtin displays the
                              source file name and line number corresponding to
                              each function name supplied as an argument.
-                      22..     If  the  command  run by the DDEEBBUUGG trap returns a
-                             non-zero value, the next command is  skipped  and
+                      22..     If the command run by the DDEEBBUUGG  trap  returns  a
+                             non-zero  value,  the next command is skipped and
                              not executed.
-                      33..     If  the  command  run by the DDEEBBUUGG trap returns a
-                             value of 2, and the shell is executing in a  sub-
-                             routine  (a shell function or a shell script exe-
-                             cuted by the .. or  ssoouurrccee  builtins),  the  shell
+                      33..     If the command run by the DDEEBBUUGG  trap  returns  a
+                             value  of 2, and the shell is executing in a sub-
+                             routine (a shell function or a shell script  exe-
+                             cuted  by  the  ..  or ssoouurrccee builtins), the shell
                              simulates a call to rreettuurrnn.
-                      44..     BBAASSHH__AARRGGCC  and BBAASSHH__AARRGGVV are updated as described
+                      44..     BBAASSHH__AARRGGCC and BBAASSHH__AARRGGVV are updated as  described
                              in their descriptions above.
-                      55..     Function tracing is  enabled:  command  substitu-
+                      55..     Function  tracing  is  enabled: command substitu-
                              tion, shell functions, and subshells invoked with
                              (( _c_o_m_m_a_n_d )) inherit the DDEEBBUUGG and RREETTUURRNN traps.
-                      66..     Error tracing is enabled:  command  substitution,
-                             shell  functions,  and  subshells  invoked with ((
+                      66..     Error  tracing  is enabled: command substitution,
+                             shell functions, and  subshells  invoked  with  ((
                              _c_o_m_m_a_n_d )) inherit the EERRRR trap.
               eexxttgglloobb If set, the extended pattern matching features described
                       above under PPaatthhnnaammee EExxppaannssiioonn are enabled.
               eexxttqquuoottee
-                      If  set,  $$'_s_t_r_i_n_g'  and  $$"_s_t_r_i_n_g" quoting is performed
-                      within  $${{_p_a_r_a_m_e_t_e_r}}  expansions  enclosed   in   double
+                      If set, $$'_s_t_r_i_n_g' and  $$"_s_t_r_i_n_g"  quoting  is  performed
+                      within   $${{_p_a_r_a_m_e_t_e_r}}   expansions  enclosed  in  double
                       quotes.  This option is enabled by default.
               ffaaiillgglloobb
-                      If  set,  patterns  which fail to match filenames during
+                      If set, patterns which fail to  match  filenames  during
                       pathname expansion result in an expansion error.
               ffoorrccee__ffiiggnnoorree
-                      If set, the suffixes  specified  by  the  FFIIGGNNOORREE  shell
-                      variable  cause words to be ignored when performing word
+                      If  set,  the  suffixes  specified  by the FFIIGGNNOORREE shell
+                      variable cause words to be ignored when performing  word
                       completion even if the ignored words are the only possi-
                       ble  completions.   See  SSHHEELLLL  VVAARRIIAABBLLEESS  above  for  a
-                      description of  FFIIGGNNOORREE.   This  option  is  enabled  by
+                      description  of  FFIIGGNNOORREE.   This  option  is  enabled by
                       default.
               gglloobbaasscciiiirraannggeess
-                      If  set,  range  expressions  used  in  pattern matching
-                      bracket expressions (see PPaatttteerrnn MMaattcchhiinngg above)  behave
-                      as  if  in the traditional C locale when performing com-
+                      If set,  range  expressions  used  in  pattern  matching
+                      bracket  expressions (see PPaatttteerrnn MMaattcchhiinngg above) behave
+                      as if in the traditional C locale when  performing  com-
                       parisons.   That  is,  the  current  locale's  collating
-                      sequence  is  not taken into account, so bb will not col-
-                      late between AA and  BB,  and  upper-case  and  lower-case
+                      sequence is not taken into account, so bb will  not  col-
+                      late  between  AA  and  BB,  and upper-case and lower-case
                       ASCII characters will collate together.
               gglloobbssttaarr
                       If set, the pattern **** used in a pathname expansion con-
-                      text will match all files and zero or  more  directories
-                      and  subdirectories.  If the pattern is followed by a //,
+                      text  will  match all files and zero or more directories
+                      and subdirectories.  If the pattern is followed by a  //,
                       only directories and subdirectories match.
               ggnnuu__eerrrrffmmtt
                       If set, shell error messages are written in the standard
                       GNU error message format.
               hhiissttaappppeenndd
-                      If  set,  the history list is appended to the file named
-                      by the value of the HHIISSTTFFIILLEE  variable  when  the  shell
+                      If set, the history list is appended to the  file  named
+                      by  the  value  of  the HHIISSTTFFIILLEE variable when the shell
                       exits, rather than overwriting the file.
               hhiissttrreeeeddiitt
-                      If  set, and rreeaaddlliinnee is being used, a user is given the
+                      If set, and rreeaaddlliinnee is being used, a user is given  the
                       opportunity to re-edit a failed history substitution.
               hhiissttvveerriiffyy
-                      If set, and rreeaaddlliinnee is being used, the results of  his-
-                      tory  substitution  are  not  immediately  passed to the
-                      shell parser.  Instead, the  resulting  line  is  loaded
+                      If  set, and rreeaaddlliinnee is being used, the results of his-
+                      tory substitution are  not  immediately  passed  to  the
+                      shell  parser.   Instead,  the  resulting line is loaded
                       into the rreeaaddlliinnee editing buffer, allowing further modi-
                       fication.
               hhoossttccoommpplleettee
                       If set, and rreeaaddlliinnee is being used, bbaasshh will attempt to
-                      perform  hostname  completion when a word containing a @@
-                      is  being  completed  (see  CCoommpplleettiinngg  under   RREEAADDLLIINNEE
+                      perform hostname completion when a word containing  a  @@
+                      is   being  completed  (see  CCoommpplleettiinngg  under  RREEAADDLLIINNEE
                       above).  This is enabled by default.
               hhuuppoonneexxiitt
                       If set, bbaasshh will send SSIIGGHHUUPP to all jobs when an inter-
                       active login shell exits.
+              iinnhheerriitt__eerrrreexxiitt
+                      If  set,  command substitution inherits the value of the
+                      eerrrreexxiitt option, instead of unsetting it in the  subshell
+                      environment.   This option is enabled when _p_o_s_i_x _m_o_d_e is
+                      enabled.
               iinntteerraaccttiivvee__ccoommmmeennttss
                       If set, allow a word beginning with ## to cause that word
                       and  all remaining characters on that line to be ignored
@@ -1628,7 +1636,7 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               function or a script executed with the .. or ssoouurrccee builtins fin-
               ishes executing.
 
-              If  a  _s_i_g_s_p_e_c  is EERRRR, the command _a_r_g is executed whenever a a
+              If  a  _s_i_g_s_p_e_c  is  EERRRR,  the command _a_r_g is executed whenever a
               pipeline (which may consist of a single simple command), a list,
               or a compound command returns a non-zero exit status, subject to
               the following conditions.  The EERRRR trap is not executed  if  the

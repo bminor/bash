@@ -10026,3 +10026,95 @@ lib/readline/display.c
 	  vs. physical screen position).  These fix bug with prompts with
 	  multibyte characters and invisible characters that are longer than
 	  the screen width reported by Ryo Furue <ryofurue@gmail.com>
+
+				   12/1
+				   ----
+parse.y,make_cmd.c
+	- here_doc_first_line: new variable, set to non-zero to indicate the
+	  first line of possibly multiple here documents associated with the
+	  current command.  Set in parse.y:gather_here_documents() before
+	  reading any here documents, set to 0 after reading the first line
+	  of any here document in make_cmd.c:make_here_document().
+
+parse.y
+	- history_delimiting_chars: if parser_state indicates we are reading
+	  a here document, don't use current_command_line_count to see whether
+	  or not we're on the first line of a here document -- it can be fooled
+	  by multi-line commands (or even backslash-escaped newlines).  Use
+	  here_doc_first_line to check that directly.  Fixes bug reported by
+	  Geoffrey Allott <geoffrey@allott.email>
+
+shell.h,parse.y
+	- save and restore here_doc_first_line as part of the shell's parser
+	  state
+
+lib/sh/tmpfile.c
+	- use ANSI-C rand() interface if random() not available.  Fixes problem
+	  with linking on (ancient) Solaris 2.4 reported by Klaus Ziegler
+	  <klausz@haus-gisela.de>
+
+				   12/2
+				   ----
+aclocal.m4
+	- RL_LIB_READLINE_VERSION: if cross-compiling, assume current version
+	  of readline if cross-compiling bash while using an external readline
+	  library.  Fix from Barry Davis <barry_davis@stormagic.com>
+
+execute_cmd.c
+	- execute_builtin: save and restore value of builtin_ignoring_errexit
+	  instead of assuming we can set it back to 0 -- the ignore-errexit
+	  cases might be nested
+	- execute_builtin: after a builtin executes and eval_unwind is set,
+	  set exit_immediately_on_error to 0 if builtin_ignoring_errexit is
+	  set, and back to the value of errexit otherwise, just like the
+	  code that sets -e does.  Fixes short-circuiting bug reported by
+	  Marcin Swigon <swigon.mar@gmail.com>
+
+				   12/5
+				   ----
+builtins/setattr.def
+	- set_or_show_attributes: instead of using a fixed string for the
+	  options argument to `declare', which results in export adding the
+	  readonly attribute, build the option string dynamically like in
+	  subst.c:shell_expand_word_list()
+	- set_or_show_attributes: don't add the -r option to declare if the
+	  attribute passed as an argument doesn't include att_readonly; add
+	  -x if the attribute includes att_exported
+	- set_or_show_attributes: add the -g option to declare so readonly
+	  and export in functions that go through this code path don't create
+	  local variables.  Part of fix for bug reported by ziyunfei
+	  <446240525@qq.com>
+
+execute_cmd.c
+	- make_internal_declare: if we have an assignment builtin that isn't
+	  supposed to create local variables (export/readonly), make sure to
+	  add the W_ASSNGLOBAL flag to each assignment statement word.
+	  Part of fix for bug reported by ziyunfei <446240525@qq.com> where
+	  readonly can create local variables when invoked with a compound
+	  array assignment as an argument within a shell function
+
+subst.c
+	- make_internal_declare: added third argument: command name.  Not used
+	  in any useful way yet
+	- do_compound_assignment: handle attempted assignments to readonly
+	  variables and print error messages, like bind_variable does and the
+	  callers expect. This means that assignments to readonly array
+	  variables can't go through a code path that allows them to fail
+	  silently
+
+doc/Makefile.in
+	- uninstall: run install-info --delete after removing the installed
+	  info file to update the directory file
+
+execute_cmd.c
+	- execute_disk_command: since we still (and have always) perform
+	  redirections in child processes, we need to mark that state so
+	  we know that we're in a child process.  subshell_performing_redirections
+	  is the new variable; non-zero when executing do_redirections()
+
+subst.c
+	- process_substitute: if we are executing process substitution in a
+	  redirection expansion context (expanding_redir == 1), the child
+	  process should not have access to any temporary environment the
+	  parent has.  Call flush_tempenv() in the child process to get rid
+	  of it.  Fix for bug reported by Clint Hepner <clint.hepner@gmail.com>

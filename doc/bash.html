@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2015 October 11<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2015 November 16<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -1354,6 +1354,8 @@ of all characters within the quotes, with the exception of
 and, when history expansion is enabled,
 <B>!</B>.
 
+When the shell is in <I>posix mode</I>, the <B>!</B> has no special meaning
+within double quotes, even when history expansion is enabled.
 The characters
 <B>$</B>
 
@@ -1870,8 +1872,14 @@ that do not require <B>bash</B> to be re-initialized.
 <DD>
 An associative array variable whose members correspond to the internal
 list of aliases as maintained by the <B>alias</B> builtin.
-Elements added to this array appear in the alias list; unsetting array
-elements cause aliases to be removed from the alias list.
+Elements added to this array appear in the alias list; however,
+unsetting array elements currently does not cause aliases to be removed
+from the alias list.
+If
+<B>BASH_ALIASES</B>
+
+is unset, it loses its special properties, even if it is
+subsequently reset.
 <DT><B>BASH_ARGC</B>
 
 <DD>
@@ -1923,8 +1931,14 @@ builtin below)
 <DD>
 An associative array variable whose members correspond to the internal
 hash table of commands as maintained by the <B>hash</B> builtin.
-Elements added to this array appear in the hash table; unsetting array
-elements cause commands to be removed from the hash table.
+Elements added to this array appear in the hash table; however,
+unsetting array elements currently does not cause command names to be removed
+from the hash table.
+If
+<B>BASH_CMDS</B>
+
+is unset, it loses its special properties, even if it is
+subsequently reset.
 <DT><B>BASH_COMMAND</B>
 
 <DD>
@@ -2551,7 +2565,7 @@ used when the shell is invoked in POSIX mode.
 <DT><B>EXECIGNORE</B>
 
 <DD>
-A colon-separated list of extended glob patterns (see <B>Pattern Matching</B>)
+A colon-separated list of shell patterns (see <B>Pattern Matching</B>)
 defining the list of filenames to be ignored by command search.
 Files whose full pathnames match one of these patterns are not considered
 executable files for the purposes of completion and command execution.
@@ -2559,6 +2573,8 @@ This does not affect the behavior of the <B>[</B>, <B>test</B>, and <B>[[</B>
 commands.
 Use this variable to ignore shared library files that have the executable
 bit set, but are not executable files.
+The pattern matching honors the setting of the <B>extglob</B> shell
+option.
 <DT><B>FCEDIT</B>
 
 <DD>
@@ -2683,6 +2699,8 @@ not tested, and are added to the history regardless of the value of
 <FONT SIZE=-1><B>HISTIGNORE</B>.
 
 </FONT>
+The pattern matching honors the setting of the <B>extglob</B> shell
+option.
 <DT><B>HISTSIZE</B>
 
 <DD>
@@ -2960,6 +2978,15 @@ trailing directory components to retain when expanding the <B>\w</B> and
 
 </FONT>
 below).  Characters removed are replaced with an ellipsis.
+<DT><B>PS0</B>
+
+<DD>
+The value of this parameter is expanded (see
+<FONT SIZE=-1><B>PROMPTING</B>
+
+</FONT>
+below) and displayed by interactive shells after reading a command
+and before the command is executed.
 <DT><B>PS1</B>
 
 <DD>
@@ -4049,8 +4076,8 @@ or
 
 <B>Bash</B>
 
-performs the expansion by executing <I>command</I> and
-replacing the command substitution with the standard output of the
+performs the expansion by executing <I>command</I> in a subshell environment
+and replacing the command substitution with the standard output of the
 command, with any trailing newlines deleted.
 Embedded newlines are not deleted, but they may be removed during
 word splitting.
@@ -4121,19 +4148,23 @@ prints a message indicating failure and no substitution occurs.
 
 <P>
 
-<I>Process substitution</I> is supported on systems that support named
-pipes (<I>FIFOs</I>) or the <B>/dev/fd</B> method of naming open files.
+<I>Process substitution</I> allows a process's input or output to be
+referred to using a filename.
 It takes the form of
 <B>&lt;(</B><I>list</I><B>)</B>
 or
 <B>&gt;(</B><I>list</I><B>)</B>.
-The process <I>list</I> is run with its input or output connected to a
-<I>FIFO</I> or some file in <B>/dev/fd</B>.  The name of this file is
+The process <I>list</I> is run asynchronously, and its input or output
+appears as a filename.
+This filename is
 passed as an argument to the current command as the result of the
-expansion.  If the <B>&gt;(</B><I>list</I><B>)</B> form is used, writing to
+expansion.
+If the <B>&gt;(</B><I>list</I><B>)</B> form is used, writing to
 the file will provide input for <I>list</I>.  If the
 <B>&lt;(</B><I>list</I><B>)</B> form is used, the file passed as an
 argument should be read to obtain the output of <I>list</I>.
+Process substitution is supported on systems that support named
+pipes (<I>FIFOs</I>) or the <B>/dev/fd</B> method of naming open files.
 <P>
 
 When available, process substitution is performed
@@ -4191,10 +4222,12 @@ If
 </FONT>
 has a value other than the default, then sequences of
 the whitespace characters
-<B>space</B>
+<B>space</B>,
+
+<B>tab</B>,
 
 and
-<B>tab</B>
+<B>newline</B>
 
 are ignored at the beginning and end of the
 word, as long as the whitespace character is in the
@@ -4387,6 +4420,8 @@ option is disabled when
 
 </FONT>
 is unset.
+The pattern matching honors the setting of the <B>extglob</B> shell
+option.
 <P>
 
 <B>Pattern Matching</B>
@@ -4980,12 +5015,12 @@ The <I>word</I> undergoes
 brace expansion, tilde expansion, parameter and variable expansion,
 command substitution, arithmetic expansion, and quote removal.
 Pathname expansion and word splitting are not performed.
-The result is supplied as a single string to the command on its
+The result is supplied as a single string, with a newline appended,
+to the command on its
 standard input (or file descriptor <I>n</I> if <I>n</I> is specified).
 <A NAME="lbBQ">&nbsp;</A>
 <H4>Duplicating File Descriptors</H4>
 
-<P>
 <P>
 
 The redirection operator
@@ -6379,6 +6414,12 @@ when it is ready to read a command, and the secondary prompt
 
 </FONT>
 when it needs more input to complete a command.
+<B>Bash</B>
+
+displays
+<B>PS0</B>
+
+after it reads a command but before executing it.
 <B>Bash</B>
 
 allows these prompt strings to be customized by inserting a number of
@@ -9881,7 +9922,7 @@ invalid option is supplied or <I>n</I> indexes beyond the end
 of the directory stack.
 </DL>
 
-<DT><B>disown</B> [<B>-ar</B>] [<B>-h</B>] [<I>jobspec</I> ...]<DD>
+<DT><B>disown</B> [<B>-ar</B>] [<B>-h</B>] [<I>jobspec</I> ... | <I>pid</I> ... ]<DD>
 Without options, remove each
 <I>jobspec</I>
 
@@ -12023,7 +12064,10 @@ If set,
 
 changes its behavior to that of version 3.2 with respect to
 locale-specific string comparison when using the <B>[[</B>
-conditional command's <B>&lt;</B> and <B>&gt;</B> operators (see previous item).
+conditional command's <B>&lt;</B> and <B>&gt;</B> operators (see previous item)
+and the effect of interrupting a command list.
+Bash versions 3.2 and earlier continue with the next command in the list
+after one terminates due to an interrupt.
 <DT><B>compat40</B>
 
 <DD>
@@ -12303,6 +12347,12 @@ If set, <B>bash</B> will send
 
 </FONT>
 to all jobs when an interactive login shell exits.
+<DT><B>inherit_errexit</B>
+
+<DD>
+If set, command substitution inherits the value of the <B>errexit</B> option,
+instead of unsetting it in the subshell environment.
+This option is enabled when <I>posix mode</I> is enabled.
 <DT><B>interactive_comments</B>
 
 <DD>
@@ -12690,7 +12740,7 @@ is
 the command
 <I>arg</I>
 
-is executed whenever a
+is executed whenever
 a pipeline (which may consist of a single simple
 command), a list, or a compound command returns a
 non-zero exit status,
@@ -13416,7 +13466,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2015 October 11<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2015 November 16<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13522,6 +13572,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 15 October 2015 10:10:58 EDT
+Time: 03 December 2015 13:58:28 EST
 </BODY>
 </HTML>

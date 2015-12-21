@@ -58,6 +58,8 @@ extern int line_number, current_command_line_count, parser_state;
 extern int last_command_exit_value;
 extern int shell_initialized;
 
+int here_doc_first_line = 0;
+
 /* Object caching */
 sh_obj_cache_t wdcache = {0, 0, 0};
 sh_obj_cache_t wlcache = {0, 0, 0};
@@ -623,6 +625,7 @@ make_here_document (temp, lineno)
       register char *line;
       int len;
 
+      here_doc_first_line = 0;
       line = full_line;
       line_number++;
 
@@ -674,6 +677,7 @@ document_done:
       document[0] = '\0';
     }
   temp->redirectee.filename->word = document;
+  here_doc_first_line = 0;
 }
 
 /* Generate a REDIRECT from SOURCE, DEST, and INSTRUCTION.

@@ -1,7 +1,7 @@
 This file is setattr.def, from which is created setattr.c.
 It implements the builtins "export" and "readonly", in Bash.
 
-Copyright (C) 1987-2014 Free Software Foundation, Inc.
+Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -134,6 +134,8 @@ set_or_show_attributes (list, attribute, nodefs)
 #if defined (ARRAY_VARS)
   WORD_LIST *nlist, *tlist;
   WORD_DESC *w;
+  char optw[8];
+  int opti;
 #endif
 
   functions_only = arrays_only = assoc_only = 0;
@@ -238,8 +240,24 @@ set_or_show_attributes (list, attribute, nodefs)
 		{
 		  tlist = list->next;
 		  list->next = (WORD_LIST *)NULL;
-		  w = arrays_only ? make_word ("-ra") : make_word ("-rA");
+		  /* Add -g to avoid readonly/export creating local variables:
+		     only local/declare/typeset create local variables */
+		  opti = 0;
+		  optw[opti++] = '-';
+		  optw[opti++] = 'g';
+		  if (attribute & att_readonly)
+		    optw[opti++] = 'r';
+		  if (attribute & att_exported)
+		    optw[opti++] = 'x';
+		  if (arrays_only)
+		    optw[opti++] = 'a';
+		  else
+		    optw[opti++] = 'A';
+		  optw[opti] = '\0';
+
+		  w = make_word (optw);
 		  nlist = make_word_list (w, list);
+
 		  opt = declare_builtin (nlist);
 		  if (opt != EXECUTION_SUCCESS)
 		    assign_error++;

@@ -125,6 +125,7 @@ extern char *dist_version;
 extern int patch_level;
 extern int dump_translatable_strings, dump_po_strings;
 extern sh_builtin_func_t *last_shell_builtin, *this_shell_builtin;
+extern int here_doc_first_line;
 #if defined (BUFFERED_INPUT)
 extern int bash_input_fd_changed;
 #endif
@@ -2698,6 +2699,7 @@ gather_here_documents ()
   int r;
 
   r = 0;
+  here_doc_first_line = 1;
   while (need_here_doc > 0)
     {
       parser_state |= PST_HEREDOC;
@@ -2706,6 +2708,7 @@ gather_here_documents ()
       need_here_doc--;
       redir_stack[r - 1] = 0;		/* XXX */
     }
+  here_doc_first_line = 0;		/* just in case */
 }
 
 /* When non-zero, an open-brace used to create a group is awaiting a close
@@ -3021,6 +3024,7 @@ reset_parser ()
 #endif
 
   parser_state = 0;
+  here_doc_first_line = 0;
 
 #if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
   if (pushed_string_list)
@@ -5156,7 +5160,7 @@ history_delimiting_chars (line)
 	  last_was_heredoc = 0;
 	  return "\n";
 	}
-      return (current_command_line_count == 2 ? "\n" : "");
+      return (here_doc_first_line ? "\n" : "");
     }
 
   if (parser_state & PST_COMPASSIGN)
@@ -5191,7 +5195,8 @@ history_delimiting_chars (line)
       last_was_heredoc = 1;
       return "\n";
     }
-
+  else if ((parser_state & PST_HEREDOC) == 0 && current_command_line_count > 1 && need_here_doc > 0)
+    return "\n";
   else if (token_before_that == WORD && two_tokens_ago == FOR)
     {
       /* Tricky.  `for i\nin ...' should not have a semicolon, but
@@ -6187,6 +6192,7 @@ save_parser_state (ps)
   ps->expand_aliases = expand_aliases;
   ps->echo_input_at_read = echo_input_at_read;
   ps->need_here_doc = need_here_doc;
+  ps->here_doc_first_line = here_doc_first_line;
 
 #if 0
   for (i = 0; i < HEREDOC_MAX; i++)
@@ -6248,6 +6254,7 @@ restore_parser_state (ps)
   expand_aliases = ps->expand_aliases;
   echo_input_at_read = ps->echo_input_at_read;
   need_here_doc = ps->need_here_doc;
+  here_doc_first_line = ps->here_doc_first_line;
 
 #if 0
   for (i = 0; i < HEREDOC_MAX; i++)

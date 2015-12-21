@@ -172,6 +172,7 @@ typedef struct _sh_parser_state_t {
   int expand_aliases;
   int echo_input_at_read;
   int need_here_doc;
+  int here_doc_first_line;
 
   /* structures affecting the parser */
   REDIRECT *redir_stack[HEREDOC_MAX];

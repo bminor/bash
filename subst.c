@@ -4,7 +4,7 @@
 /* ``Have a little faith, there's magic in the night.  You ain't a
      beauty, but, hey, you're alright.'' */
 
-/* Copyright (C) 1987-2014 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -344,7 +344,7 @@ static WORD_LIST *glob_expand_word_list __P((WORD_LIST *, int));
 static WORD_LIST *brace_expand_word_list __P((WORD_LIST *, int));
 #endif
 #if defined (ARRAY_VARS)
-static int make_internal_declare __P((char *, char *));
+static int make_internal_declare __P((char *, char *, char *));
 #endif
 static WORD_LIST *shell_expand_word_list __P((WORD_LIST *, int));
 static WORD_LIST *expand_word_list_internal __P((WORD_LIST *, int));
@@ -2855,6 +2855,12 @@ do_compound_assignment (name, value, flags)
   if (mklocal && variable_context)
     {
       v = find_variable (name);
+      if (v && ((readonly_p (v) && (flags & ASS_FORCE) == 0) || noassign_p (v)))
+	{
+	  if (v && readonly_p (v))
+	    err_readonly (name);
+	  return (v);	/* XXX */
+	}
       list = expand_compound_array_assignment (v, value, flags);
       if (mkassoc)
 	v = make_local_assoc_variable (name);
@@ -2869,6 +2875,12 @@ do_compound_assignment (name, value, flags)
   else if (mkglobal && variable_context)
     {
       v = find_global_variable (name);
+      if (v && ((readonly_p (v) && (flags & ASS_FORCE) == 0) || noassign_p (v)))
+	{
+	  if (v && readonly_p (v))
+	    err_readonly (name);
+	  return (v);	/* XXX */
+	}
       list = expand_compound_array_assignment (v, value, flags);
       if (v == 0 && mkassoc)
 	v = make_new_assoc_variable (name);
@@ -2884,7 +2896,15 @@ do_compound_assignment (name, value, flags)
 	dispose_words (list);
     }
   else
-    v = assign_array_from_string (name, value, flags);
+    {
+      v = assign_array_from_string (name, value, flags);
+      if (v && ((readonly_p (v) && (flags & ASS_FORCE) == 0) || noassign_p (v)))
+	{
+	  if (v && readonly_p (v))
+	    err_readonly (name);
+	  return (v);	/* XXX */
+	}
+    }
 
   return (v);
 }
@@ -5553,6 +5573,12 @@ process_substitute (string, open_for_read_in_child)
       QUIT;	/* catch any interrupts we got post-fork */
       setup_async_signals ();
       subshell_environment |= SUBSHELL_COMSUB|SUBSHELL_PROCSUB;
+
+      /* if we're expanding a redirection, we shouldn't have access to the
+	 temporary environment, but commands in the subshell should have
+	 access to their own temporary environment. */
+      if (expanding_redir)
+        flush_temporary_env ();
     }
 
 #if defined (JOB_CONTROL)
@@ -5659,7 +5685,10 @@ process_substitute (string, open_for_read_in_child)
 #endif /* HAVE_DEV_FD */
 
   /* subshells shouldn't have this flag, which controls using the temporary
-     environment for variable lookups. */
+     environment for variable lookups.  We have already flushed the temporary
+     environment above in the case we're expanding a redirection, so processes
+     executed by this command need to be able to set it independently of their
+     parent. */
   expanding_redir = 0;
 
   subshell_level++;
@@ -10094,9 +10123,10 @@ brace_expand_word_list (tlist, eflags)
 /* Take WORD, a compound associative array assignment, and internally run
    'declare -A w', where W is the variable name portion of WORD. */
 static int
-make_internal_declare (word, option)
+make_internal_declare (word, option, cmd)
      char *word;
      char *option;
+     char *cmd;
 {
   int t, r;
   WORD_LIST *wl;
@@ -10122,12 +10152,16 @@ shell_expand_word_list (tlist, eflags)
      WORD_LIST *tlist;
      int eflags;
 {
-  WORD_LIST *expanded, *orig_list, *new_list, *next, *temp_list;
+  WORD_LIST *expanded, *orig_list, *new_list, *next, *temp_list, *wcmd;
   int expanded_something, has_dollar_at;
   char *temp_string;
 
   /* We do tilde expansion all the time.  This is what 1003.2 says. */
   new_list = (WORD_LIST *)NULL;
+  for (wcmd = tlist; wcmd; wcmd = wcmd->next)
+    if (wcmd->word->flags & W_ASSNBLTIN)
+      break;
+
   for (orig_list = tlist; tlist; tlist = next)
     {
       temp_string = tlist->word->word;
@@ -10208,7 +10242,7 @@ shell_expand_word_list (tlist, eflags)
 	  opts[opti] = '\0';
 	  if (opti > 0)
 	    {
-	      t = make_internal_declare (tlist->word->word, opts);
+	      t = make_internal_declare (tlist->word->word, opts, wcmd ? wcmd->word->word : (char *)0);
 	      if (t != EXECUTION_SUCCESS)
 		{
 		  last_command_exit_value = t;
