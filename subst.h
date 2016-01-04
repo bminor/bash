@@ -1,6 +1,6 @@
 /* subst.h -- Names of externally visible functions in subst.c. */
 
-/* Copyright (C) 1993-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -296,6 +296,10 @@ extern char *cond_expand_word __P((WORD_DESC *, int));
 #define SD_ARITHEXP	0x400	/* skip_to_delim during arithmetic expansion */
 
 extern int skip_to_delim __P((char *, int, char *, int));
+
+#if defined (BANG_HISTORY)
+extern int skip_to_histexp __P((char *, int, char *, int));
+#endif
 
 #if defined (READLINE)
 extern int char_is_quoted __P((char *, int));

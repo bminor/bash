@@ -94,4 +94,3 @@ struct builtin hello_struct = {
 	"hello",		/* usage synopsis; becomes short_doc */
 	0			/* reserved for internal use */
 };
-	

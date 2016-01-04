@@ -2369,6 +2369,8 @@ shell_getc (remove_quoted_newline)
 	  if (current_delimiter (dstack) == '\'')
 	    history_expansion_inhibited = 1;
 #  endif
+	  /* Calling with a third argument of 1 allows remember_on_history to
+	     determine whether or not the line is saved to the history list */
 	  expansions = pre_process_line (shell_input_line, 1, 1);
 #  if defined (BANG_HISTORY)
 	  history_expansion_inhibited = old_hist;

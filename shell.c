@@ -1695,6 +1695,9 @@ init_interactive ()
 {
   expand_aliases = interactive_shell = startup_state = 1;
   interactive = 1;
+#if defined (HISTORY)
+  remember_on_history = enable_history_list = 1;	/* XXX */
+#endif
 }
 
 static void
@@ -1718,6 +1721,9 @@ init_interactive_script ()
 {
   init_noninteractive ();
   expand_aliases = interactive_shell = startup_state = 1;
+#if defined (HISTORY)
+  remember_on_history = enable_history_list = 1;	/* XXX */
+#endif
 }
 
 void
@@ -1860,7 +1866,7 @@ shell_reinitialize ()
   /* XXX - should we set jobs_m_flag to 0 here? */
 
 #if defined (HISTORY)
-  bash_history_reinit (0);
+  bash_history_reinit (enable_history_list = 0);
 #endif /* HISTORY */
 
 #if defined (RESTRICTED_SHELL)

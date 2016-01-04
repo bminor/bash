@@ -1763,7 +1763,7 @@ skip_to_delim (string, start, delims, flags)
      int flags;
 {
   int i, pass_next, backq, dquote, si, c, oldjmp;
-  int invert, skipquote, skipcmd, noprocsub, completeflag, histexp;
+  int invert, skipquote, skipcmd, noprocsub, completeflag;
   int arithexp, skipcol;
   size_t slen;
   char *temp, open[3];
@@ -1776,7 +1776,6 @@ skip_to_delim (string, start, delims, flags)
   invert = (flags & SD_INVERT);
   skipcmd = (flags & SD_NOSKIPCMD) == 0;
   noprocsub = (flags & SD_NOPROCSUB);
-  histexp = (flags & SD_HISTEXP);
   completeflag = (flags & SD_COMPLETE) ? SX_COMPLETE : 0;
 
   arithexp = (flags & SD_ARITHEXP);
@@ -1835,11 +1834,6 @@ skip_to_delim (string, start, delims, flags)
       /* the usual case is to use skip_xxx_quoted, but we don't skip over double
 	 quoted strings when looking for the history expansion character as a
 	 delimiter. */
-      else if (histexp && dquote && c == '\'')
-        {
-          i++;
-          continue;
-        }
       /* special case for programmable completion which takes place before
          parser converts backslash-escaped single quotes between $'...' to
          `regular' single-quoted strings. */
@@ -1847,14 +1841,6 @@ skip_to_delim (string, start, delims, flags)
 	i = skip_single_quoted (string, slen, ++i, SX_COMPLETE);
       else if (c == '\'')
 	i = skip_single_quoted (string, slen, ++i, 0);
-      /* The posixly_correct test makes posix-mode shells allow double quotes
-	 to quote the history expansion character */
-      else if (histexp && posixly_correct == 0 && c == '"')
-	{
-	  dquote = 1 - dquote;
-	  i++;
-	  continue;
-	}     
       else if (c == '"')
 	i = skip_double_quoted (string, slen, ++i, completeflag);
       else if (c == LPAREN && arithexp)
@@ -1946,6 +1932,128 @@ skip_to_delim (string, start, delims, flags)
 
   CQ_RETURN(i);
 }
+
+#if defined (BANG_HISTORY)
+/* Skip to the history expansion character (delims[0]), paying attention to
+   quoted strings and command and process substitution.  This is a stripped-
+   down version of skip_to_delims.  The essential difference is that this
+   resets the quoting state when starting a command substitution */
+int
+skip_to_histexp (string, start, delims, flags)
+     char *string;
+     int start;
+     char *delims;
+     int flags;
+{
+  int i, pass_next, backq, dquote, si, c, oldjmp;
+  int histexp_comsub, histexp_backq, old_dquote;
+  size_t slen;
+  char *temp, open[3];
+  DECLARE_MBSTATE;
+
+  slen = strlen (string + start) + start;
+  oldjmp = no_longjmp_on_fatal_error;
+  if (flags & SD_NOJMP)
+    no_longjmp_on_fatal_error = 1;
+
+  histexp_comsub = histexp_backq = old_dquote = 0;
+
+  i = start;
+  pass_next = backq = dquote = 0;
+  while (c = string[i])
+    {
+      if (pass_next)
+	{
+	  pass_next = 0;
+	  if (c == 0)
+	    CQ_RETURN(i);
+	  ADVANCE_CHAR (string, slen, i);
+	  continue;
+	}
+      else if (c == '\\')
+	{
+	  pass_next = 1;
+	  i++;
+	  continue;
+	}
+      else if (backq && c == '`')
+	{
+	  backq = 0;
+	  histexp_backq--;
+	  dquote = old_dquote;
+	  i++;
+	  continue;
+	}
+      else if (c == '`')
+	{
+	  backq = 1;
+	  histexp_backq++;
+	  old_dquote = dquote;		/* simple - one level for now */
+	  dquote = 0;
+	  i++;
+	  continue;
+	}
+      /* When in double quotes, act as if the double quote is a member of
+	 history_no_expand_chars, like the history library does */
+      else if (dquote && c == delims[0] && string[i+1] == '"')
+	{
+	  i++;
+	  continue;
+	}
+      else if (c == delims[0])
+	break;
+      /* the usual case is to use skip_xxx_quoted, but we don't skip over double
+	 quoted strings when looking for the history expansion character as a
+	 delimiter. */
+      else if (dquote && c == '\'')
+        {
+          i++;
+          continue;
+        }
+      else if (c == '\'')
+	i = skip_single_quoted (string, slen, ++i, 0);
+      /* The posixly_correct test makes posix-mode shells allow double quotes
+	 to quote the history expansion character */
+      else if (posixly_correct == 0 && c == '"')
+	{
+	  dquote = 1 - dquote;
+	  i++;
+	  continue;
+	}     
+      else if (c == '"')
+	i = skip_double_quoted (string, slen, ++i, 0);
+#if defined (PROCESS_SUBSTITUTION)
+      else if ((c == '$' || c == '<' || c == '>') && string[i+1] == LPAREN && string[i+2] != LPAREN)
+#else
+      else if (c == '$' && string[i+1] == LPAREN && string[i+2] != LPAREN)
+#endif
+        {
+	  if (string[i+2] == '\0')
+	    CQ_RETURN(i+2);
+	  i += 2;
+	  histexp_comsub++;
+	  old_dquote = dquote;
+	  dquote = 0;
+        }
+      else if (histexp_comsub && c == RPAREN)
+	{
+	  histexp_comsub--;
+	  dquote = old_dquote;
+	  i++;
+	  continue;
+	}
+      else if (backq)		/* placeholder */
+	{
+	  ADVANCE_CHAR (string, slen, i);
+	  continue;
+	}
+      else
+	ADVANCE_CHAR (string, slen, i);
+    }
+
+  CQ_RETURN(i);
+}
+#endif /* BANG_HISTORY */
 
 #if defined (READLINE)
 /* Return 1 if the portion of STRING ending at EINDEX is quoted (there is
@@ -6488,18 +6596,28 @@ parameter_brace_expand_rhs (name, value, c, quoted, qdollaratp, hasdollarat)
     free (temp);
   if (l)
     {
+      /* If l->next is not null, we know that TEMP contained "$@", since that
+	 is the only expansion that creates more than one word. */
+      if (qdollaratp && ((hasdol && quoted) || l->next))
+	*qdollaratp = 1;
+
       /* The expansion of TEMP returned something.  We need to treat things
 	  slightly differently if HASDOL is non-zero.  If we have "$@", the
 	  individual words have already been quoted.  We need to turn them
 	  into a string with the words separated by the first character of
 	  $IFS without any additional quoting, so string_list_dollar_at won't
-	  do the right thing.  We use string_list_dollar_star instead. */
-      temp = (hasdol || l->next) ? string_list_dollar_star (l) : string_list (l);
+	  do the right thing.  If IFS is null, we want "$@" to split into
+	  separate arguments, not be concatenated, so we use string_list_internal
+	  and mark the word to be split on spaces later.  We use
+	  string_list_dollar_star for "$@" otherwise. */
+      if (l->next && ifs_is_null)
+	{
+	  temp = string_list_internal (l, " ");
+	  w->flags |= W_SPLITSPACE;
+	}
+      else
+	temp = (hasdol || l->next) ? string_list_dollar_star (l) : string_list (l);
 
-      /* If l->next is not null, we know that TEMP contained "$@", since that
-	 is the only expansion that creates more than one word. */
-      if (qdollaratp && ((hasdol && quoted) || l->next))
-	*qdollaratp = 1;
       /* If we have a quoted null result (QUOTED_NULL(temp)) and the word is
 	 a quoted null (l->next == 0 && QUOTED_NULL(l->word->word)), the
 	 flags indicate it (l->word->flags & W_HASQUOTEDNULL), and the
@@ -9477,7 +9595,9 @@ finished_with_string:
 	 with the first character of $IFS, so we split on $IFS.  If
 	 SPLIT_ON_SPACES is set, we expanded $* (unquoted) with IFS either
 	 unset or null, and we want to make sure that we split on spaces
-	 regardless of what else has happened to IFS since the expansion. */
+	 regardless of what else has happened to IFS since the expansion,
+	 or we expanded "$@" with IFS null and we need to split the positional
+	 parameters into separate words. */
       if (split_on_spaces)
 	list = list_string (istring, " ", 1);	/* XXX quoted == 1? */
       /* If we have $@ (has_dollar_at != 0) and we are in a context where we

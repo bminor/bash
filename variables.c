@@ -503,7 +503,11 @@ initialize_shell_variables (env, privmode)
 #endif
       set_if_not ("PS2", secondary_prompt);
     }
-  set_if_not ("PS4", "+ ");
+
+  if (current_user.euid == 0)
+    bind_variable ("PS4", "+", 0);
+  else
+    set_if_not ("PS4", "+ ");
 
   /* Don't allow IFS to be imported from the environment. */
   temp_var = bind_variable ("IFS", " \t\n", 0);

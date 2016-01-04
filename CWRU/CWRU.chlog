@@ -10176,3 +10176,109 @@ lib/readline/isearch.c
 	- _rl_isearch_dispatch: after removing the only character from the
 	  search string with DEL, leaving the search string empty, don't match
 	  the previous line if we didn't have a match before
+
+				   12/22
+				   -----
+bashhist.c
+	- enable_history_list,remember_on_history: initialize to 0 instead of 1
+
+shell.c
+	- init_interactive,init_interactive_script: set enable_history_list and
+	  remember_on_history to 1 (defaults)
+
+				   12/23
+				   -----
+variables.c
+	- initialize_shell_variables: don't inherit PS4 from the environment
+	  if the shell is running with euid == 0; just reset it to `+'.  This
+	  is a known potential vulnerability, since PS4 expansion performs
+	  command substitution in the root shell's context before displaying
+	  it.  Discussion started by up201407890@alunos.dcc.fc.up.pt
+
+bashhist.c
+	- bash_history_reinit: initialize remember_on_history to the value of
+	  enable_history_list (set -o history).  Fixes bug reported by
+	  Stephane Chazelas <stephane.chazelas@gmail.com> with command-line
+	  option `-o history' not having any effect
+
+				   12/28
+				   -----
+lib/readline/{history.h,histfile.c}
+	- history_file_version: new int variable, reserved for future use
+	- history_multiline_entries: new int variable, can be set by the
+	  calling application to enable reading multi-line history entries
+	  from the history file (currently undocumented)
+
+lib/readline/history.c
+	- _hs_append_history_line: new function, append a line passed as an
+	  argument to a specified history entry, used to create multi-line
+	  history entries
+
+lib/readline/histfile.c
+	- read_history_range: implement a heuristic that temporarily sets the
+	  history comment character if the first line read from the history
+	  file looks like it has is a timestamp (#[:digit:]) so we can read
+	  timestamps from the history file properly.  Originally reported
+	  back in March 2015 by Christoph Anton Mitterer <calestyo@gmail.com>
+	- read_history_range: make sure history_multiline_entries is non-zero
+	  if the history file looks like it has timestamps
+	- read_history_range: if we think we have a history file with timestamps
+	  and we read more than one non-timestamp consecutive history lines,
+	  assume they are part of a single multi-line history entry and paste
+	  them together using _hs_append_history_line.  Feature most recently
+	  requested by james harvey <jamespharvey20@gmail.com>, also suggested
+	  by Christoph Anton Mitterer <calestyo@gmail.com>
+
+examples/loadables/setpgid.c
+	- setpgid: new loadable builtin, originally contributed by Jason
+	  Vas Dias <jason.vas.dias@gmail.com>
+
+				   12/29
+				   -----
+bashhist.c
+	- bash_history_inhibit_expansion: fix cases where a history expansion
+	  should be skipped because it's in a command or process substitution
+	  but there is another history expansion preceding the substitution
+	  on the command line.  Don't let the previous history expansion fool
+	  the function into saying the command substitution history expansion
+	  should be performed
+
+builtins/evalstring.c
+	- parse_prologue: always unwind-protect history_expansion_inhibited,
+	  since history expansion can be enabled in non-interactive shells,
+	  and calling eval once in a non-interactive shell inhibits history
+	  expansion forever even if `set -o histexpand' was run before the
+	  eval
+
+builtins/common.h
+	- SEVAL_NOHISTEXP: new flag for parse_and_execute/parse_string; means
+	  to not perform history expansion (decouple from SEVAL_NOHIST, which
+	  now means to not remember commands on history); changed all callers
+	  that had SEVAL_NOHIST to have SEVAL_NOHIST|SEVAL_NOHISTEXP
+
+builtins/evalstring.c
+	- parse_prologue: instead of calling bash_history_disable, set
+	  remember_on_history to 0 if SEVAL_NOHIST and history_expansion_inhibited
+	  to 1 if SEVAL_NOHISTEXP
+
+				   12/30
+				   -----
+subst.c
+	- skip_to_histexp: new function, a stripped-down version of skip_to_delim.
+	  Used to skip to the next unquoted instance of the history expansion
+	  character, handles peculiar quoting and command/process substitution
+	  requirements.  Better fix for bug reported by
+	  Zigmund.Ozean@zig-home.localdomain back in January, prompted by report
+	  from Keith Thompson <keithsthompson@gmail.com>
+
+bashhist.c
+	- bash_history_inhibit_expansion: use skip_to_histexp instead of
+	  skip_to_delim
+
+subst.c
+	- parameter_brace_expand_rhs: if the rhs of an expansion is "$@" and
+	  IFS is null, we need to separate the (quoted) positional parameters
+	  in the returned word with a space, and mark the word as needing to
+	  be split on spaces (W_SPLITSPACE).  Fix for issues reported back in
+	  October 2014 as the result of an austin-group discussion, and just
+	  re-reported by Martijn Dekker <martijn@inlv.org>

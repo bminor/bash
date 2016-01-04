@@ -1,6 +1,6 @@
 /* history.h -- the names of functions that you can call in history. */
 
-/* Copyright (C) 1989-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2015 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -262,6 +262,10 @@ extern char *history_search_delimiter_chars;
 extern int history_quotes_inhibit_expansion;
 
 extern int history_write_timestamps;
+
+/* These two are undocumented; the second is reserved for future use */
+extern int history_multiline_entries;
+extern int history_file_version;
 
 /* Backwards compatibility */
 extern int max_input_history;

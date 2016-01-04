@@ -83,8 +83,8 @@ static struct ignorevar histignore =
 /* Non-zero means to remember lines typed to the shell on the history
    list.  This is different than the user-controlled behaviour; this
    becomes zero when we read lines from a file, for example. */
-int remember_on_history = 1;
-int enable_history_list = 1;	/* value for `set -o history' */
+int remember_on_history = 0;
+int enable_history_list = 0;	/* value for `set -o history' */
 
 /* The number of lines that Bash has added to this history session.  The
    difference between the number of the top element in the history list
@@ -99,6 +99,8 @@ int history_lines_in_file;
 /* Non-zero means do no history expansion on this line, regardless
    of what history_expansion says. */
 int history_expansion_inhibited;
+/* If non-zero, double quotes can quote the history expansion character. */
+int double_quotes_inhibit_history_expansion = 0;
 #endif
 
 /* With the old default, every line was saved in the history individually.
@@ -229,8 +231,18 @@ bash_history_inhibit_expansion (string, i)
 
   /* Make sure the history expansion should not be skipped by quoting or
      command/process substitution. */
-  else if ((t = skip_to_delim (string, 0, hx, SD_NOJMP|SD_HISTEXP)) > 0 && t > i)
-    return (1);
+  else if ((t = skip_to_histexp (string, 0, hx, SD_NOJMP|SD_HISTEXP)) > 0)
+    {
+      /* Skip instances of history expansion appearing on the line before
+	 this one. */
+      while (t < i)
+	{
+	  t = skip_to_histexp (string, t+1, hx, SD_NOJMP|SD_HISTEXP);
+	  if (t <= 0)
+	    return 0;
+	}
+      return (t > i);
+    }
   else
     return (0);
 }
@@ -252,9 +264,9 @@ bash_history_reinit (interact)
 {
 #if defined (BANG_HISTORY)
   history_expansion = interact != 0;
-  history_expansion_inhibited = 1;
+  history_expansion_inhibited = 1;	/* XXX */
 #endif
-  remember_on_history = enable_history_list = interact != 0;
+  remember_on_history = enable_history_list;
   history_inhibit_expansion_function = bash_history_inhibit_expansion;
 }
 
@@ -270,7 +282,7 @@ bash_history_disable ()
 void
 bash_history_enable ()
 {
-  remember_on_history = 1;
+  remember_on_history = enable_history_list = 1;
 #if defined (BANG_HISTORY)
   history_expansion_inhibited = 0;
 #endif
