@@ -10282,3 +10282,60 @@ subst.c
 	  be split on spaces (W_SPLITSPACE).  Fix for issues reported back in
 	  October 2014 as the result of an austin-group discussion, and just
 	  re-reported by Martijn Dekker <martijn@inlv.org>
+
+				 1/4/2016
+				 --------
+execute_cmd.c
+	- execute_simple_command: if autocd is set, invoke a function named
+	  `cd' if one exists, instead of the shell builtin.  Feature requested
+	  by transl8czech@gmail.com
+
+builtins/mkbuiltins.c
+	- if a command's short description is the same as its name (e.g., `true'),
+	  don't mark the short doc to be translated.  Report and fix from
+	  Benno Schulenberg <bensberg@justemail.net>
+
+				    1/6
+				    ---
+subst.c
+	- command_substitute,process_substitute: before replacing the file
+	  descriptor underlying stdout (fd 1), make sure to purge any pending
+	  stdio output that hasn't been written successfully, even after a
+	  call to fflush().  Fixes bug reported by cks@cs.toronto.edu
+
+				    1/7
+				    ---
+builtins/{echo,printf}.def
+	- echo_builtin,printf_builtin: don't use terminate_immediately; use
+	  calls to QUIT in the body of the print loop after writes and flushes.
+	  Fixes problem with running the signal handler and exit trap in a
+	  signal context and other bug reported by cks@cs.toronto.edu
+
+builtins/common.c
+	- sh_chkwrite: put in calls to QUIT to catch signals that interrupt
+	  writes
+
+shell.c
+	- get_current_user_info: protect endpwent() with #ifdef HAVE_GETPWENT.
+	  Fixes bug reported by pb <p-bauer-schriesheim@t-online.de>
+
+				    1/8
+				    ---
+lib/readline/bind.c
+	- _rl_init_file_error: now a varargs function so it can take format
+	  strings and arguments and pass them to vfprintf
+	- rl_parse_and_bind: print a warning if we encounter a key binding
+	  string with one or more hyphens but we don't find a valid modifier
+	  (`control', `meta', etc.).  Prompted by a report from Andrew Kurn
+	  <kurn@sfu.ca>
+	- rl_parse_and_bind: improve several existing error messages now that
+	  _rl_init_file_error takes a variable number of arguments
+	- rl_variable_bind: print error message upon encountering unknown
+	  variable
+
+				   1/10
+				   ----
+lib/readline/bind.c
+	- rl_parse_and_bind: if a `bare' keybinding is supplied without any
+	  terminating `:' or whitespace separating it from the command to be
+	  bound, signal an error

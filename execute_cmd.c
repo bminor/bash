@@ -4294,6 +4294,7 @@ run_builtin:
       words = make_word_list (make_word ("--"), words);
       words = make_word_list (make_word ("cd"), words);
       xtrace_print_word_list (words, 0);
+      func = find_function ("cd");
       goto run_builtin;
     }
 

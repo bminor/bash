@@ -5766,6 +5766,11 @@ process_substitute (string, open_for_read_in_child)
   fd = child_pipe_fd;
 #endif /* HAVE_DEV_FD */
 
+  /* Discard  buffered stdio output before replacing the underlying file
+     descriptor. */
+  if (open_for_read_in_child == 0)
+    fpurge (stdout);
+
   if (dup2 (fd, open_for_read_in_child ? 0 : 1) < 0)
     {
       sys_error (_("cannot duplicate named pipe %s as fd %d"), pathname,
@@ -6033,6 +6038,10 @@ command_substitute (string, quoted)
       set_sigint_handler ();	/* XXX */
 
       free_pushed_string_input ();
+
+      /* Discard  buffered stdio output before replacing the underlying file
+	 descriptor. */
+      fpurge (stdout);
 
       if (dup2 (fildes[1], 1) < 0)
 	{

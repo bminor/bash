@@ -343,7 +343,9 @@ int
 sh_chkwrite (s)
      int s;
 {
+  QUIT;
   fflush (stdout);
+  QUIT;
   if (ferror (stdout))
     {
       sh_wrerror ();

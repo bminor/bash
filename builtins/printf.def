@@ -116,6 +116,7 @@ extern int errno;
       vbadd (b, 1); \
     else \
       putchar (c); \
+    QUIT; \
   } while (0)
 
 #define PF(f, func) \
@@ -131,6 +132,7 @@ extern int errno;
     else \
       nw = vflag ? vbprintf (f, func) : printf (f, func); \
     tw += nw; \
+    QUIT; \
     if (ferror (stdout)) \
       { \
 	sh_wrerror (); \
@@ -143,6 +145,7 @@ extern int errno;
 #define PRETURN(value) \
   do \
     { \
+      QUIT; \
       if (vflag) \
 	{ \
 	  bind_printf_variable  (vname, vbuf, 0); \
@@ -162,9 +165,9 @@ extern int errno;
 	} \
       else if (vbuf) \
 	vbuf[0] = 0; \
-      terminate_immediately--; \
       if (ferror (stdout) == 0) \
 	fflush (stdout); \
+      QUIT; \
       if (ferror (stdout)) \
 	{ \
 	  sh_wrerror (); \
@@ -307,8 +310,6 @@ printf_builtin (list)
   if (format == 0 || *format == 0)
     return (EXECUTION_SUCCESS);
 
-  terminate_immediately++;
-	  
   /* Basic algorithm is to scan the format string for conversion
      specifications -- once one is found, find out if the field
      width or precision is a '*'; if it is, gather up value.  Note,
@@ -418,6 +419,7 @@ printf_builtin (list)
 	  modstart[0] = convch;
 	  modstart[1] = '\0';
 
+	  QUIT;
 	  switch(convch)
 	    {
 	    case 'c':

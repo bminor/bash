@@ -1258,16 +1258,28 @@ write_builtins (defs, structfile, externfile)
 		    (builtin->flags & BUILTIN_FLAG_POSIX_BUILTIN) ? " | POSIX_BUILTIN" : "",
 		    document_name (builtin));
 
-		  if (inhibit_functions)
-		    fprintf
-		      (structfile, "     N_(\"%s\"), \"%s\" },\n",
-		       builtin->shortdoc ? builtin->shortdoc : builtin->name,
-		       document_name (builtin));
+		  /* Don't translate short document summaries that are identical
+		     to command names */
+		  if (builtin->shortdoc && strcmp (builtin->name, builtin->shortdoc) == 0)
+		    {
+		      if (inhibit_functions)
+			fprintf (structfile, "     \"%s\", \"%s\" },\n",
+			  builtin->shortdoc ? builtin->shortdoc : builtin->name,
+			  document_name (builtin));
+		      else
+			fprintf (structfile, "     \"%s\", (char *)NULL },\n",
+			  builtin->shortdoc ? builtin->shortdoc : builtin->name);
+		    }
 		  else
-		    fprintf
-		      (structfile, "     N_(\"%s\"), (char *)NULL },\n",
-		       builtin->shortdoc ? builtin->shortdoc : builtin->name);
-
+		    {
+		      if (inhibit_functions)
+			fprintf (structfile, "     N_(\"%s\"), \"%s\" },\n",
+			  builtin->shortdoc ? builtin->shortdoc : builtin->name,
+			  document_name (builtin));
+		      else
+			fprintf (structfile, "     N_(\"%s\"), (char *)NULL },\n",
+			  builtin->shortdoc ? builtin->shortdoc : builtin->name);
+		    }
 		}
 
 	      if (structfile || separate_helpfiles)
