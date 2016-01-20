@@ -5694,6 +5694,8 @@ process_substitute (string, open_for_read_in_child)
   stop_making_children ();
   /* XXX - should we only do this in the parent? (as in command subst) */
   pipeline_pgrp = old_pipeline_pgrp;
+#else
+  stop_making_children ();
 #endif /* JOB_CONTROL */
 
   if (pid < 0)

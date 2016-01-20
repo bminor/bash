@@ -384,7 +384,7 @@ dyn_load_builtin (list, flags, filename)
 	  r = (*loadfunc) (name);
 	  if (r == 0)
 	    {
-	      builtin_error (_("load function for %s returns failure (%d): not loaded"), r);
+	      builtin_error (_("load function for %s returns failure (%d): not loaded"), name, r);
 	      free (funcname);
 	      continue;
 	    }

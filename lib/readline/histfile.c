@@ -475,7 +475,7 @@ history_truncate_file (fname, lines)
      int lines;
 {
   char *buffer, *filename, *tempname, *bp, *bp1;		/* bp1 == bp+1 */
-  int file, chars_read, rv, orig_lines, exists;
+  int file, chars_read, rv, orig_lines, exists, r;
   struct stat finfo;
   size_t file_size;
 
@@ -611,7 +611,7 @@ history_truncate_file (fname, lines)
      with a shared history file, we don't want to leave the history file
      owned by root. */
   if (rv == 0 && exists)
-    chown (filename, finfo.st_uid, finfo.st_gid);
+    r = chown (filename, finfo.st_uid, finfo.st_gid);
 
   xfree (filename);
   FREE (tempname);
@@ -758,7 +758,7 @@ mmap_error:
      with a shared history file, we don't want to leave the history file
      owned by root. */
   if (rv == 0 && exists)
-    chown (histname, finfo.st_uid, finfo.st_gid);
+    mode = chown (histname, finfo.st_uid, finfo.st_gid);
 
   FREE (histname);
   FREE (tempname);

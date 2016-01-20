@@ -10339,3 +10339,49 @@ lib/readline/bind.c
 	- rl_parse_and_bind: if a `bare' keybinding is supplied without any
 	  terminating `:' or whitespace separating it from the command to be
 	  bound, signal an error
+
+				   1/11
+				   ----
+execute_cmd.c
+	- process_substitute: when compiled without job control (JOB_CONTROL not
+	  defined), make sure we call stop_making_children like we do in the job
+	  control code branch, so already_making_children is reset to 0.  This
+	  is what command substitution does.  Fixes bug reported by Alastair
+	  Hughes <hobbitalastair@yandex.com>
+
+				   1/12
+				   ----
+execute_cmd.c
+	- execute_in_subshell: if a user subshell (`(command)') or other shell
+	  compound command has an input pipe, note for later by setting
+	  stdin_redir.  This will inhibit the implicit redirection of standard
+	  input from /dev/null for async commands executed as part of this
+	  subshell.  Fixes bug reported by Martin D Kealey <martin@kurahaupo.gen.nz>
+	- execute_simple_command: if the shell forks to execute this command
+	  because it has an input pipe, set stdin_redir to inhibit later redirection
+	  from /dev/null for async commands
+
+				   1/13
+				   ----
+execute_cmd.c
+	- HASH_BANG_BUFSIZE: use #define for size of buffer used in
+	  READ_SAMPLE_BUF instead of straight constant 80
+	- HASH_BANG_BUFSIZ: increase to 128 because Linux allows 128 chars in
+	  exec header.  Reported by Ludovic Courtès <ludo@gnu.org>
+
+configure.ac
+	- remove support for purify and purecoverage
+	- change release level to `rc1'
+
+				   1/15
+				   ----
+builtins/enable.def
+	- dyn_load_builtin: fix missing argument to builtin_error if load function
+	  returns an error.  Fix from Aharon Robbins <arnold@skeeve.com>
+
+				   1/18
+				   ----
+builtins/history.def
+	- histtime: display a better error message for invalid timestamps; use
+	  existing `??' string for empty/missing timestamps or invalid history
+	  entries.  Suggestion from Reuben Thomas <rrt@sc3d.org>

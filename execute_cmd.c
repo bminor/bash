@@ -619,7 +619,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       if (paren_pid == 0)
         {
 	  /* We want to run the exit trap for forced {} subshells, and we
-	     want to note this before execute_in_subshell[B modifies the
+	     want to note this before execute_in_subshell modifies the
 	     COMMAND struct.  Need to keep in mind that execute_in_subshell
 	     runs the exit trap for () subshells itself. */
 	  /* This handles { command; } & */
@@ -1544,14 +1544,19 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   /* If this is a user subshell, set a flag if stdin was redirected.
      This is used later to decide whether to redirect fd 0 to
      /dev/null for async commands in the subshell.  This adds more
-     sh compatibility, but I'm not sure it's the right thing to do. */
+     sh compatibility, but I'm not sure it's the right thing to do.
+     Note that an input pipe to a compound command suffices to inhibit
+     the implicit /dev/null redirection for asynchronous commands
+     executed as part of that compound command. */
   if (user_subshell)
     {
-      stdin_redir = stdin_redirects (command->redirects);
+      stdin_redir = stdin_redirects (command->redirects) || pipe_in != NO_PIPE;
 #if 0
       restore_default_signal (EXIT_TRAP);	/* XXX - reset_signal_handlers above */
 #endif
     }
+  else if (shell_control_structure (command->type) && pipe_in != NO_PIPE)
+    stdin_redir = 1;
 
   /* If this is an asynchronous command (command &), we want to
      redirect the standard input from /dev/null in the absence of
@@ -4031,6 +4036,10 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	  if (fds_to_close)
 	    close_fd_bitmap (fds_to_close);
 
+	  /* If we fork because of an input pipe, note input pipe for later to
+	     inhibit async commands from redirecting stdin from /dev/null */
+	  stdin_redir |= pipe_in != NO_PIPE;
+
 	  do_piping (pipe_in, pipe_out);
 	  pipe_in = pipe_out = NO_PIPE;
 #if defined (COPROCESS_SUPPORT)
@@ -5349,13 +5358,15 @@ initialize_subshell ()
 #  define SETOSTYPE(x)
 #endif
 
+#define HASH_BANG_BUFSIZ	128
+
 #define READ_SAMPLE_BUF(file, buf, len) \
   do \
     { \
       fd = open(file, O_RDONLY); \
       if (fd >= 0) \
 	{ \
-	  len = read (fd, buf, 80); \
+	  len = read (fd, buf, HASH_BANG_BUFSIZ); \
 	  close (fd); \
 	} \
       else \
@@ -5371,7 +5382,7 @@ shell_execve (command, args, env)
      char **args, **env;
 {
   int larray, i, fd;
-  char sample[80];
+  char sample[HASH_BANG_BUFSIZ];
   int sample_len;
 
   SETOSTYPE (0);		/* Some systems use for USG/POSIX semantics */

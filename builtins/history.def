@@ -260,6 +260,9 @@ histtime (hlist, histtimefmt)
   t = history_get_time (hlist);
   if (t)
     strftime (timestr, sizeof (timestr), histtimefmt, localtime (&t));
+  else if (hlist->timestamp && hlist->timestamp[0])
+    snprintf (timestr, sizeof (timestr), _("%s: invalid timestamp"),
+	(hlist->timestamp[0] == '#') ? hlist->timestamp + 1: hlist->timestamp);
   else
     strcpy (timestr, "??");
   return timestr;
