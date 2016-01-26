@@ -1157,7 +1157,7 @@ last command executed, or zero if no condition tested true.
 The <B>while</B> command continuously executes the list
 <I>list-2</I> as long as the last command in the list <I>list-1</I> returns
 an exit status of zero.  The <B>until</B> command is identical
-to the <B>while</B> command, except that the test is negated;
+to the <B>while</B> command, except that the test is negated:
 <I>list-2</I>
 
 is executed as long as the last command in
@@ -4265,11 +4265,15 @@ If the value of
 is null, no word splitting occurs.
 <P>
 
-Explicit null arguments (<B>&quot;&quot;</B> or <B>aqaq</B>) are retained.
+Explicit null arguments (<B>&quot;&quot;</B> or <B>aqaq</B>) are retained
+and passed to commands as empty strings.
 Unquoted implicit null arguments, resulting from the expansion of
 parameters that have no values, are removed.
 If a parameter with no value is expanded within double quotes, a
-null argument results and is retained.
+null argument results and is retained
+and passed to a command as an empty string.
+When a quoted null argument appears as part of a word whose expansion is
+non-null, the null argument is removed.
 <P>
 
 Note that if no expansion occurs, no splitting
@@ -9127,7 +9131,8 @@ names are
 vi-move, vi-command</I>, and
 <I>vi-insert</I>.
 
-<I>vi</I> is equivalent to <I>vi-command</I>; <I>emacs</I> is
+<I>vi</I> is equivalent to <I>vi-command</I> (<I>vi-move</I> is also
+a synonym); <I>emacs</I> is
 equivalent to <I>emacs-standard</I>.
 <DT><B>-l</B>
 
@@ -10657,7 +10662,7 @@ associated with each history entry is written to the history file,
 marked with the history comment character.
 When the history file is read, lines beginning with the history
 comment character followed immediately by a digit are interpreted
-as timestamps for the previous history line.
+as timestamps for the following history entry.
 The return value is 0 unless an invalid option is encountered, an
 error occurs while reading or writing the history file, an invalid
 <I>offset</I> is supplied as an argument to <B>-d</B>, or the
@@ -13572,6 +13577,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 03 December 2015 13:58:28 EST
+Time: 20 January 2016 13:59:15 EST
 </BODY>
 </HTML>

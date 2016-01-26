@@ -563,8 +563,7 @@ readline_internal_charloop ()
 	{
 	  /* Then initialize the argument and number of keys read. */
 	  _rl_reset_argument ();
-	  rl_key_sequence_length = 0;
-	  rl_executing_keyseq[0] = 0;
+	  rl_executing_keyseq[rl_key_sequence_length = 0] = '\0';
 	}
 
       RL_SETSTATE(RL_STATE_READCMD);

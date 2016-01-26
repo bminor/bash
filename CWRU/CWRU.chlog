@@ -10385,3 +10385,11 @@ builtins/history.def
 	- histtime: display a better error message for invalid timestamps; use
 	  existing `??' string for empty/missing timestamps or invalid history
 	  entries.  Suggestion from Reuben Thomas <rrt@sc3d.org>
+
+				   1/21
+				   ----
+lib/readline/text.c
+	- rl_insert: when trying to optimize typeahead, make sure to reset the
+	  key sequence and key sequence length when we read a character that is
+	  not bound to self-insert.  Bug report from Geir Hauge
+	  <geir.hauge@gmail.com>

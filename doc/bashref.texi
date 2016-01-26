@@ -2359,11 +2359,15 @@ whitespace characters, delimits a field.  A sequence of @env{IFS}
 whitespace characters is also treated as a delimiter.
 If the value of @env{IFS} is null, no word splitting occurs.
 
-Explicit null arguments (@code{""} or @code{''}) are retained.
+Explicit null arguments (@code{""} or @code{''}) are retained
+and passed to commands as empty strings.
 Unquoted implicit null arguments, resulting from the expansion of
 parameters that have no values, are removed.
 If a parameter with no value is expanded within double quotes, a
-null argument results and is retained.
+null argument results and is retained
+and passed to a command as an empty string.
+When a quoted null argument appears as part of a word whose expansion is
+non-null, the null argument is removed.
 
 Note that if no expansion occurs, no splitting
 is performed.

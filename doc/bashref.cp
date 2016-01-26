@@ -42,7 +42,7 @@
 \entry{parameters}{18}{parameters}
 \entry{variable, shell}{18}{variable, shell}
 \entry{shell variable}{18}{shell variable}
-\entry{parameters, positional}{20}{parameters, positional}
+\entry{parameters, positional}{19}{parameters, positional}
 \entry{parameters, special}{20}{parameters, special}
 \entry{expansion}{21}{expansion}
 \entry{brace expansion}{21}{brace expansion}
@@ -54,7 +54,7 @@
 \entry{command substitution}{29}{command substitution}
 \entry{expansion, arithmetic}{29}{expansion, arithmetic}
 \entry{arithmetic expansion}{29}{arithmetic expansion}
-\entry{process substitution}{30}{process substitution}
+\entry{process substitution}{29}{process substitution}
 \entry{word splitting}{30}{word splitting}
 \entry{expansion, filename}{30}{expansion, filename}
 \entry{expansion, pathname}{30}{expansion, pathname}

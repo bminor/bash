@@ -3384,11 +3384,15 @@ If the value of
 .B IFS
 is null, no word splitting occurs.
 .PP
-Explicit null arguments (\^\f3"\^"\fP or \^\f3\(aq\^\(aq\fP\^) are retained.
+Explicit null arguments (\^\f3"\^"\fP or \^\f3\(aq\^\(aq\fP\^) are retained
+and passed to commands as empty strings.
 Unquoted implicit null arguments, resulting from the expansion of
 parameters that have no values, are removed.
 If a parameter with no value is expanded within double quotes, a
-null argument results and is retained.
+null argument results and is retained
+and passed to a command as an empty string.
+When a quoted null argument appears as part of a word whose expansion is
+non-null, the null argument is removed.
 .PP
 Note that if no expansion occurs, no splitting
 is performed.

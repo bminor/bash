@@ -2917,11 +2917,15 @@ whitespace characters, delimits a field.  A sequence of <code>IFS</code>
 whitespace characters is also treated as a delimiter.
 If the value of <code>IFS</code> is null, no word splitting occurs.
 </p>
-<p>Explicit null arguments (<code>&quot;&quot;</code> or <code>''</code>) are retained.
+<p>Explicit null arguments (<code>&quot;&quot;</code> or <code>''</code>) are retained
+and passed to commands as empty strings.
 Unquoted implicit null arguments, resulting from the expansion of
 parameters that have no values, are removed.
 If a parameter with no value is expanded within double quotes, a
-null argument results and is retained.
+null argument results and is retained
+and passed to a command as an empty string.
+When a quoted null argument appears as part of a word whose expansion is
+non-null, the null argument is removed.
 </p>
 <p>Note that if no expansion occurs, no splitting
 is performed.
@@ -4541,8 +4545,8 @@ names are
 <code>vi-move</code>,
 <code>vi-command</code>, and
 <code>vi-insert</code>.
-<code>vi</code> is equivalent to <code>vi-command</code>;
-<code>emacs</code> is equivalent to <code>emacs-standard</code>.
+<code>vi</code> is equivalent to <code>vi-command</code> (<code>vi-move</code> is also a
+synonym); <code>emacs</code> is equivalent to <code>emacs-standard</code>.
 </p>
 </dd>
 <dt><code>-l</code></dt>
@@ -9934,8 +9938,9 @@ Acceptable <code>keymap</code> names are
 <code>vi-move</code>,
 <code>vi-command</code>, and
 <code>vi-insert</code>.
-<code>vi</code> is equivalent to <code>vi-command</code>; <code>emacs</code> is
-equivalent to <code>emacs-standard</code>.  The default value is <code>emacs</code>.
+<code>vi</code> is equivalent to <code>vi-command</code> (<code>vi-move</code> is also a
+synonym); <code>emacs</code> is equivalent to <code>emacs-standard</code>.
+The default value is <code>emacs</code>.
 The value of the <code>editing-mode</code> variable also affects the
 default keymap.
 </p>
@@ -12151,7 +12156,7 @@ associated with each history entry is written to the history file,
 marked with the history comment character.
 When the history file is read, lines beginning with the history
 comment character followed immediately by a digit are interpreted
-as timestamps for the previous history line.
+as timestamps for the following history entry.
 </p>
 <p>The builtin command <code>fc</code> may be used to list or edit and re-execute
 a portion of the history list.

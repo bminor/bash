@@ -90,7 +90,7 @@
 \initial {P}
 \entry {parameter expansion}{23}
 \entry {parameters}{18}
-\entry {parameters, positional}{20}
+\entry {parameters, positional}{19}
 \entry {parameters, special}{20}
 \entry {pathname expansion}{30}
 \entry {pattern matching}{31}
@@ -99,7 +99,7 @@
 \entry {POSIX Mode}{95}
 \entry {process group}{3}
 \entry {process group ID}{3}
-\entry {process substitution}{30}
+\entry {process substitution}{29}
 \entry {programmable completion}{128}
 \entry {prompting}{93}
 \initial {Q}

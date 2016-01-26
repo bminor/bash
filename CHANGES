@@ -1,3 +1,149 @@
+This document details the changes between this version, bash-4.4-rc1, and
+the previous version, bash-4.4-beta.
+
+1.  Changes to Bash
+
+a.  Fixed several problems with bash completion not special-casing bash syntax
+    constructs.
+
+b.  Fixed a bug that caused the mapfile builtin to not create array variables
+    when a variable of the same name appears in the temporary environment.
+
+c.  Fixed a bug that caused prompt expansion to loop when PS1 contained a
+    syntax error.
+
+d.  Fixed a bug that caused the ${array[@]@A} expansion to split the results even
+    when double-quoted.
+
+e.  There is a new implementation of the code that saves the last CHILD_MAX
+    exited background pids so their status can be queried later.
+
+f.  Bash-4.4 can now be configured and built on very old versions of Solaris 2.
+
+g.  Fixed problems with --help support for several builtins.
+
+h.  Fixed values added to BASH_SOURCE and BASH_LINENO for functions inherited from
+    the environment.
+
+i.  Fixed a bug that caused background processes run from non-interactive shells
+    with job control enabled to place the terminal in the wrong process group
+    under certain circumstances.
+
+j.  Fixed a bug that caused `fc' to return an incorrect exit status when
+    executing commands from the history list.
+
+k.  Fixed a bug that caused the shell to exit when a process substitution received
+    a SIGINT when run in certain terminal emulators.
+
+l.  EXECIGNORE now honors the setting of `extglob' when attempting to match
+    executable names.
+
+m.  Fixed a bug where `return' used the wrong exit status when executed in a
+    DEBUG trap.
+
+n.  Fixed a bug that caused a command containing a here-document and an escaped
+    newline to be stored in the history list incorrectly.
+
+o.  Fixed a bug that caused set -e to be honored in cases of builtins invoking
+    other builtins when it should be ignored.
+
+p.  Fixed a bug that caused `readonly' and `export' to create local array
+    variables when used within shell functions.
+
+q.  Fixed a bug that allowed subshells begun to execute process substitutions to
+    have access to the command's temporary environment.
+
+r.  Fixed a bug that could cause the shell to dump core when receiving a SIGCHLD
+    for which a trap has been set while running in posix mode.
+
+s.  Fixed a bug that caused bash to not restore BASH_ARGC, BASH_ARGV, BASH_SOURCE,
+    BASH_LINENO, and FUNCNAME if the shell received a SIGINT while reading
+    commands from a file while executing  `.'.
+
+t.  Fixed a bug that caused the `-o history' option to have no effect when
+    supplied on the command line when starting a new shell.
+
+u.  Fixed a bug that caused history expansions occurring in command substitutions
+    to not be performed.
+
+v.  Fixed a bug that caused `eval' run in a non-interactive shell to disable
+    history expansion for the remainder of the shell script, even if the script
+    had previously enabled it.
+
+w.  Fixed a bug that caused "$@" to not expand to multiple words when IFS is set
+    to the empty string.
+
+x.  Fixed a bug that caused process and command substitution to inherit output
+    buffered in the stdio library but not written.
+
+y.  Fixed a bug that caused a terminating signal received during `echo' to run
+    an exit trap in a signal handler context.
+
+z.  Fixed a bug that caused a builtin command containing a process substitution to
+    return the wrong exit status.
+
+aa. Fixed a bug that caused `()' subshells with piped input to incorrectly redirect
+    the standard input of some of the commands in the subshell from /dev/null.
+
+bb. The history builtin now uses more descriptive error messages for missing or
+    invalid timestamps.
+
+2.  Changes to Readline
+
+a.  The history file writing functions only attempt to create and use a backup
+    history file if the history file exists and is a regular file.
+
+b.  Fixed an out-of-bounds read in readline's internal tilde expansion interface.
+
+c.  Fixed several redisplay bugs with prompt strings containing multibyte
+    and non-visible characters whose physical length is longer than the screen
+    width.
+
+d.  Fixed a redisplay bug with prompt strings containing invisible characters
+    whose physical length exceeds the screen width and using incremental search.
+
+e.  Readline prints more descriptive error messages when it encounters errors
+    while reading an inputrc file.
+
+3.  New Features in Bash
+
+a.  BASH_COMPAT can be inherited and set from the shell's initial environment.
+
+b.  inherit_errexit: a new `shopt' option that, when set, causes command
+    substitutions to inherit the -e option.  By default, those subshells disable
+    -e.  It's enabled as part of turning on posix mode.
+
+c.  New prompt string: PS0.  Expanded and displayed by interactive shells after
+    reading a complete command but before executing it.
+
+d.  Interactive shells now behave as if SIGTSTP/SIGTTIN/SIGTTOU are set to SIG_DFL
+    when the shell is started, so they are set to SIG_DFL in child processes.
+
+e.  Posix-mode shells now allow double quotes to quote the history expansion
+    character.
+
+f.  OLDPWD can be inherited from the environment if it names a directory.
+
+g.  Shells running as root no longer inherit PS4 from the environment, closing a
+    security hole involving PS4 expansion performing command substitution.
+
+h.  If executing an implicit `cd' when the `autocd' option is set, bash will now
+    invoke a function named `cd' if one exists before executing the `cd' builtin.
+
+4.  New Features in Readline
+
+a.  If an incremental search string has its last character removed with DEL, the
+    resulting empty search string no longer matches the previous line.
+
+b.  If readline reads a history file that begins with `#' (or the value of
+    the history comment character) and has enabled history timestamps, the history
+    entries are assumed to be delimited by timestamps.  This allows multi-line
+    history entries.
+
+c.  Readline now throws an error if it parses a key binding without a terminating
+    `:' or whitespace.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-4.4-beta, and
 the previous version, bash-4.4-alpha.
 
