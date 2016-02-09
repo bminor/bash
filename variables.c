@@ -647,6 +647,9 @@ initialize_shell_variables (env, privmode)
 
   sv_shcompat ("BASH_COMPAT");
 
+  /* Allow FUNCNEST to be inherited from the environment. */
+  sv_funcnest ("FUNCNEST");
+
   /* Initialize the dynamic variables, and seed their values. */
   initialize_dynamic_variables ();
 }
