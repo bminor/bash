@@ -2,7 +2,7 @@
  * tmpfile.c - functions to create and safely open temp files for the shell.
  */
 
-/* Copyright (C) 2000 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Nov 16 10:54:48 EST 2015
+.\"	Last Change: Wed Jan 27 14:48:54 EST 2016
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2015 November 16" "GNU Bash 4.4"
+.TH BASH 1 "2016 January 27" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -50,8 +50,8 @@ bash \- GNU Bourne-Again SHell
 [options]
 [command_string | file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989-2015 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989-2015 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-2016 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-2016 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
 is an \fBsh\fR-compatible command language interpreter that
@@ -3393,6 +3393,9 @@ null argument results and is retained
 and passed to a command as an empty string.
 When a quoted null argument appears as part of a word whose expansion is
 non-null, the null argument is removed.
+That is, the word
+\f(CW\-d\(aq\^\(aq\fP becomes \f(CW\-d\fP after word splitting and
+null argument removal.
 .PP
 Note that if no expansion occurs, no splitting
 is performed.
@@ -8780,13 +8783,16 @@ invalid option is supplied.
 .TP
 \fBread\fP [\fB\-ers\fP] [\fB\-a\fP \fIaname\fP] [\fB\-d\fP \fIdelim\fP] [\fB\-i\fP \fItext\fP] [\fB\-n\fP \fInchars\fP] [\fB\-N\fP \fInchars\fP] [\fB\-p\fP \fIprompt\fP] [\fB\-t\fP \fItimeout\fP] [\fB\-u\fP \fIfd\fP] [\fIname\fP ...]
 One line is read from the standard input, or from the file descriptor
-\fIfd\fP supplied as an argument to the \fB\-u\fP option, and the first word
+\fIfd\fP supplied as an argument to the \fB\-u\fP option,
+split into words as described above under \fBWord Splitting\fP,
+and the first word
 is assigned to the first
 .IR name ,
 the second word to the second
 .IR name ,
-and so on, with leftover words and their intervening separators assigned
-to the last
+and so on.
+If there are more words than names, the remaining words and their
+intervening delimiters are assigned to the last
 .IR name .
 If there are fewer words read from the input stream than names,
 the remaining names are assigned empty values.

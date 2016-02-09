@@ -1,6 +1,6 @@
 /* evalfile.c - read and evaluate commands from a file or file descriptor */
 
-/* Copyright (C) 1996-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

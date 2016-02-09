@@ -1,6 +1,6 @@
 /* winsize.c - handle window size changes and information. */
 
-/* Copyright (C) 2005 Free Software Foundation, Inc.
+/* Copyright (C) 2005-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

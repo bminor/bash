@@ -1,6 +1,6 @@
 /* rlmbutil.h -- utility functions for multibyte characters. */
 
-/* Copyright (C) 2001-2009 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2015 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      

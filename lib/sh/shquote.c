@@ -1,6 +1,6 @@
 /* shquote - functions to quote and dequote strings */
 
-/* Copyright (C) 1999 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

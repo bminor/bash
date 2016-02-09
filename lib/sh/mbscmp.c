@@ -1,6 +1,6 @@
 /* mbscmp - multibyte string comparison. */
 
-/* Copyright (C) 1995 Free Software Foundation, Inc.
+/* Copyright (C) 1995-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

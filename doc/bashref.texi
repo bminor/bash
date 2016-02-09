@@ -14,7 +14,7 @@ This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Bash Reference Manual},
 for @code{Bash}, Version @value{VERSION}.
 
-Copyright @copyright{} 1988--2015 Free Software Foundation, Inc.
+Copyright @copyright{} 1988--2016 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -2368,6 +2368,9 @@ null argument results and is retained
 and passed to a command as an empty string.
 When a quoted null argument appears as part of a word whose expansion is
 non-null, the null argument is removed.
+That is, the word
+@code{-d''} becomes @code{-d} after word splitting and
+null argument removal.
 
 Note that if no expansion occurs, no splitting
 is performed.
@@ -4361,9 +4364,13 @@ read [-ers] [-a @var{aname}] [-d @var{delim}] [-i @var{text}] [-n @var{nchars}]
 @end example
 
 One line is read from the standard input, or from the file descriptor
-@var{fd} supplied as an argument to the @option{-u} option, and the first word
+@var{fd} supplied as an argument to the @option{-u} option,
+split into words as described above in @ref{Word Splitting},
+and the first word
 is assigned to the first @var{name}, the second word to the second @var{name},
-and so on, with leftover words and their intervening separators assigned
+and so on.
+If there are more words than names,
+the remaining words and their intervening delimiters are assigned
 to the last @var{name}.
 If there are fewer words read from the input stream than names,
 the remaining names are assigned empty values.
