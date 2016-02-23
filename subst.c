@@ -8040,6 +8040,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 	      tflag |= W_DOLLARAT;
 	    }	    
 
+	  free (name);
 	  free (temp1);
 	  *indexp = sindex;
 

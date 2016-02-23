@@ -768,7 +768,11 @@ parse_bashopts (value)
     {
       ind = find_shopt (vname);
       if (ind >= 0)
-        *shopt_vars[ind].value = 1;
+	{
+          *shopt_vars[ind].value = 1;
+	  if (shopt_vars[ind].set_func)
+	    (*shopt_vars[ind].set_func) (shopt_vars[ind].name, 1);
+	}
       free (vname);
     }
 }

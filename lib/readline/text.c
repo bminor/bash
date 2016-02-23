@@ -572,7 +572,7 @@ rl_refresh_line (ignore1, ignore2)
 
   _rl_clear_to_eol (0);		/* arg of 0 means to not use spaces */
 
-  rl_forced_update_display ();
+  rl_redraw_prompt_last_line ();
   rl_display_fixed = 1;
 
   return 0;

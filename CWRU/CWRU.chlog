@@ -10420,3 +10420,40 @@ bashhist.c
 	- bash_history_inhibit_expansion: function should be compiled in only if
 	  BANG_HISTORY is defined.  Report from isabella parakiss
 	  <izaberina@gmail.com>
+
+[bash-4.4-rc1 frozen]
+
+				   2/15
+				   ----
+lib/readline/text.c
+	- rl_refresh_line: call rl_redraw_prompt_last_line instead of
+	  rl_forced_update_display to avoid redrawing all lines of a multiline
+	  prompt (overwriting the last line of the multiline prompt in the
+	  process).  Report from Hugh Davenport <hugh@davenport.net.nz>
+
+				   2/18
+				   ----
+subst.c
+	- parameter_brace_expand: when processing ${!name[@]}, make sure to
+	  free `name' before returning the list of keys to avoid a memory leak.
+	  Fixes bug reported by Emilio PastorMira <Emilio.PastorMira@utimaco.com>
+
+				   2/19
+				   ----
+trap.c
+	- free_trap_strings: when freeing the `special' traps (NSIG to BASH_NSIG),
+	  check whether or not the `signal' is trapped, as it would be if the
+	  subshell inherited it (errtrace) and don't free the trap string in that
+	  case.  Fixes bug reported by Jan Klötzke <jan@kloetzke.net>
+
+				   2/21
+				   ----
+lib/sh/netconn.c
+	- isnetconn: return false if getpeername fails with errno == EBADF.
+	  Bug and fix from Andrew Gregory <andrew.gregory.8@gmail.com>
+
+builtins/shopt.def
+	- parse_bashopts: when reading BASHOPTS from the environment, make
+	  sure to call any set functions associated with a variable, instead
+	  of just setting the value to 1.  Report and fix from
+	  Vehlow, Jörg <Joerg.Vehlow@kratzer-automation.com>
