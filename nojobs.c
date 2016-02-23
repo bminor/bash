@@ -46,6 +46,7 @@
 #include "shell.h"
 #include "jobs.h"
 #include "execute_cmd.h"
+#include "trap.h"
 
 #include "builtins/builtext.h"	/* for wait_builtin */
 
@@ -83,6 +84,8 @@ extern sigset_t top_level_mask;
 extern procenv_t wait_intr_buf;
 extern int wait_intr_flag;
 extern int wait_signal_received;
+
+extern void set_original_signal __P((int, SigHandler *));
 
 volatile pid_t last_made_pid = NO_PID;
 volatile pid_t last_asynchronous_pid = NO_PID;
@@ -416,6 +419,7 @@ reap_dead_jobs ()
 }
 
 /* Initialize the job control mechanism, and set up the tty stuff. */
+int
 initialize_job_control (force)
      int force;
 {
@@ -423,6 +427,7 @@ initialize_job_control (force)
 
   if (interactive)
     get_tty_state ();
+  return 0;
 }
 
 /* Setup this shell to handle C-C, etc. */
@@ -927,6 +932,7 @@ static TTYSTRUCT shell_tty_info;
 static int got_tty_state;
 
 /* Fill the contents of shell_tty_info with the current tty info. */
+int
 get_tty_state ()
 {
   int tty;
@@ -939,6 +945,7 @@ get_tty_state ()
       if (check_window_size)
 	get_new_window_size (0, (int *)0, (int *)0);
     }
+  return 0;
 }
 
 /* Make the current tty use the state in shell_tty_info. */
@@ -958,10 +965,12 @@ set_tty_state ()
 }
 
 /* Give the terminal to PGRP.  */
+int
 give_terminal_to (pgrp, force)
      pid_t pgrp;
      int force;
 {
+  return 0;
 }
 
 /* Stop a pipeline. */
@@ -1008,6 +1017,7 @@ describe_pid (pid)
 int
 freeze_jobs_list ()
 {
+  return 0;
 }
 
 void

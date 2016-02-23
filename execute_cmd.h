@@ -77,6 +77,8 @@ extern void coproc_unsetvars __P((struct coproc *));
 extern void close_all_files __P((void));
 #endif
 
+#if defined (ARRAY_VARS)
 extern void restore_funcarray_state __P((struct func_array_state *));
+#endif
 
 #endif /* _EXECUTE_CMD_H_ */

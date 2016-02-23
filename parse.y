@@ -69,6 +69,8 @@
 
 #if defined (JOB_CONTROL)
 #  include "jobs.h"
+#else
+extern int cleanup_dead_jobs __P((void));
 #endif /* JOB_CONTROL */
 
 #if defined (ALIAS)

@@ -175,6 +175,8 @@ extern WORD_LIST *subst_assign_varlist;
 
 extern SigHandler **original_signals;
 
+extern void set_original_signal __P((int, SigHandler *));
+
 static struct jobstats zerojs = { -1L, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NO_JOB, NO_JOB, 0, 0 };
 struct jobstats js = { -1L, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NO_JOB, NO_JOB, 0, 0 };
 

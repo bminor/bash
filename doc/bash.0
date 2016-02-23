@@ -225,7 +225,7 @@ DDEEFFIINNIITTIIOONNSS
        ccoonnttrrooll ooppeerraattoorr
               A _t_o_k_e_n that performs a control function.  It is one of the fol-
               lowing symbols:
-              |||| && &&&& ;; ;;;; (( )) || ||&& <<nneewwlliinnee>>
+              |||| && &&&& ;; ;;;; ;;&& ;;;;&& (( )) || ||&& <<nneewwlliinnee>>
 
 RREESSEERRVVEEDD WWOORRDDSS
        _R_e_s_e_r_v_e_d _w_o_r_d_s are words that have a special meaning to the shell.  The
@@ -4934,17 +4934,19 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
        rreeaadd [--eerrss] [--aa _a_n_a_m_e] [--dd _d_e_l_i_m] [--ii _t_e_x_t] [--nn _n_c_h_a_r_s] [--NN _n_c_h_a_r_s] [--pp
        _p_r_o_m_p_t] [--tt _t_i_m_e_o_u_t] [--uu _f_d] [_n_a_m_e ...]
               One line is read from the  standard  input,  or  from  the  file
-              descriptor  _f_d supplied as an argument to the --uu option, and the
+              descriptor  _f_d  supplied  as an argument to the --uu option, split
+              into words as described above  under  WWoorrdd  SSpplliittttiinngg,  and  the
               first word is assigned to the first _n_a_m_e, the second word to the
-              second  _n_a_m_e, and so on, with leftover words and their interven-
-              ing separators assigned to the last _n_a_m_e.  If  there  are  fewer
-              words read from the input stream than names, the remaining names
-              are assigned empty values.  The characters in IIFFSS  are  used  to
-              split  the  line  into words using the same rules the shell uses
-              for expansion (described above under WWoorrdd SSpplliittttiinngg).  The back-
-              slash  character  (\\)  may be used to remove any special meaning
-              for the next character read and for line continuation.  Options,
-              if supplied, have the following meanings:
+              second _n_a_m_e, and so on.  If there are more words than names, the
+              remaining words and their intervening delimiters are assigned to
+              the last _n_a_m_e.  If there are fewer words  read  from  the  input
+              stream  than  names, the remaining names are assigned empty val-
+              ues.  The characters in IIFFSS are used  to  split  the  line  into
+              words  using  the  same  rules  the  shell  uses  for  expansion
+              (described above under WWoorrdd SSpplliittttiinngg).  The backslash character
+              (\\) may be used to remove any special meaning for the next char-
+              acter read and for line  continuation.   Options,  if  supplied,
+              have the following meanings:
               --aa _a_n_a_m_e
                      The words are assigned to sequential indices of the array
                      variable _a_n_a_m_e, starting at 0.  _a_n_a_m_e is unset before any
@@ -5898,4 +5900,4 @@ BBUUGGSS
 
 
 
-GNU Bash 4.4                    2016 January 25                        BASH(1)
+GNU Bash 4.4                    2016 February 8                        BASH(1)

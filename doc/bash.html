@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2016 January 25<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2016 February 8<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -638,7 +638,7 @@ symbols:
 <DL COMPACT><DT><DD>
 <P>
 
-<B>||  &amp;  &amp;&amp;  ;  ;;  (  )  |  |&amp;    &lt;newline&gt;</B>
+<B>||  &amp;  &amp;&amp;  ;  ;;  ;&amp;  ;;&amp;  (  )  |  |&amp;    &lt;newline&gt;</B>
 
 </DL>
 
@@ -11155,15 +11155,18 @@ reading the name of the current directory or an
 invalid option is supplied.
 <DT><B>read</B> [<B>-ers</B>] [<B>-a</B> <I>aname</I>] [<B>-d</B> <I>delim</I>] [<B>-i</B> <I>text</I>] [<B>-n</B> <I>nchars</I>] [<B>-N</B> <I>nchars</I>] [<B>-p</B> <I>prompt</I>] [<B>-t</B> <I>timeout</I>] [<B>-u</B> <I>fd</I>] [<I>name</I> ...]<DD>
 One line is read from the standard input, or from the file descriptor
-<I>fd</I> supplied as an argument to the <B>-u</B> option, and the first word
+<I>fd</I> supplied as an argument to the <B>-u</B> option,
+split into words as described above under <B>Word Splitting</B>,
+and the first word
 is assigned to the first
 <I>name</I>,
 
 the second word to the second
 <I>name</I>,
 
-and so on, with leftover words and their intervening separators assigned
-to the last
+and so on.
+If there are more words than names, the remaining words and their
+intervening delimiters are assigned to the last
 <I>name</I>.
 
 If there are fewer words read from the input stream than names,
@@ -13474,7 +13477,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2016 January 25<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2016 February 8<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13580,6 +13583,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 25 January 2016 10:12:33 EST
+Time: 08 February 2016 10:17:49 EST
 </BODY>
 </HTML>

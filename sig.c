@@ -72,6 +72,10 @@ extern sh_builtin_func_t *this_shell_builtin;
 
 extern void initialize_siglist ();
 
+#if !defined (JOB_CONTROL)
+extern void initialize_job_signals __P((void));
+#endif
+
 /* Non-zero after SIGINT. */
 volatile sig_atomic_t interrupt_state = 0;
 

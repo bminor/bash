@@ -105,9 +105,14 @@ d.  Fixed a redisplay bug with prompt strings containing invisible characters
 e.  Readline prints more descriptive error messages when it encounters errors
     while reading an inputrc file.
 
+f.  Fixed a bug in the character insertion code that attempts to optimize
+    typeahead when it reads a character that is not bound to self-insert and
+    resets the key sequence state.
+
 3.  New Features in Bash
 
-a.  BASH_COMPAT can be inherited and set from the shell's initial environment.
+a.  BASH_COMPAT and FUNCNEST can be inherited and set from the shell's initial
+    environment.
 
 b.  inherit_errexit: a new `shopt' option that, when set, causes command
     substitutions to inherit the -e option.  By default, those subshells disable

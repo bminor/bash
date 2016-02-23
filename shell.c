@@ -59,6 +59,9 @@
 
 #if defined (JOB_CONTROL)
 #include "jobs.h"
+#else
+extern int initialize_job_control __P((int));
+extern int get_tty_state __P((void));
 #endif /* JOB_CONTROL */
 
 #include "input.h"
