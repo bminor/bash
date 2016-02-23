@@ -55,6 +55,7 @@ extern int last_command_exit_value, stdin_redir;
 extern int need_here_doc;
 extern int current_command_number, current_command_line_count, line_number;
 extern int expand_aliases;
+extern char *ps0_prompt;
 
 #if defined (HAVE_POSIX_SIGNALS)
 extern sigset_t top_level_mask;
@@ -160,6 +161,22 @@ reader_loop ()
 
 	      executing = 1;
 	      stdin_redir = 0;
+
+	      /* If the shell is interactive, expand and display $PS0 after reading a
+		 command (possibly a list or pipeline) and before executing it. */
+	      if (interactive && ps0_prompt)
+		{
+		  char *ps0_string;
+
+		  ps0_string = decode_prompt_string (ps0_prompt);
+		  if (ps0_string && *ps0_string)
+		    {
+		      fprintf (stderr, "%s", ps0_string);
+		      fflush (stderr);
+		    }
+		  free (ps0_string);
+		}
+
 	      execute_command (current_command);
 
 	    exec_done:

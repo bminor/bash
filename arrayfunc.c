@@ -902,6 +902,8 @@ array_expand_index (var, s, len)
     {
       last_command_exit_value = EXECUTION_FAILURE;
 
+      if (no_longjmp_on_fatal_error)
+	return 0;
       top_level_cleanup ();      
       jump_to_top_level (DISCARD);
     }

@@ -1,7 +1,7 @@
 /* mkbuiltins.c - Create builtins.c, builtext.h, and builtdoc.c from
    a single source file called builtins.def. */
 
-/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -71,7 +71,8 @@ extern char *strcpy ();
 /* Flag values that builtins can have. */
 #define BUILTIN_FLAG_SPECIAL	0x01
 #define BUILTIN_FLAG_ASSIGNMENT 0x02
-#define BUILTIN_FLAG_POSIX_BUILTIN 0x04
+#define BUILTIN_FLAG_LOCALVAR	0x04
+#define BUILTIN_FLAG_POSIX_BUILTIN 0x08
 
 #define BASE_INDENT	4
 
@@ -159,6 +160,11 @@ char *assignment_builtins[] =
   (char *)NULL
 };
 
+char *localvar_builtins[] =
+{
+  "declare", "local", "typeset", (char *)NULL
+};
+
 /* The builtin commands that are special to the POSIX search order. */
 char *posix_builtins[] =
 {
@@ -170,6 +176,7 @@ char *posix_builtins[] =
 /* Forward declarations. */
 static int is_special_builtin ();
 static int is_assignment_builtin ();
+static int is_localvar_builtin ();
 static int is_posix_builtin ();
 
 #if !defined (HAVE_RENAME)
@@ -820,6 +827,8 @@ builtin_handler (self, defs, arg)
     new->flags |= BUILTIN_FLAG_SPECIAL;
   if (is_assignment_builtin (name))
     new->flags |= BUILTIN_FLAG_ASSIGNMENT;
+  if (is_localvar_builtin (name))
+    new->flags |= BUILTIN_FLAG_LOCALVAR;
   if (is_posix_builtin (name))
     new->flags |= BUILTIN_FLAG_POSIX_BUILTIN;
 
@@ -1132,6 +1141,8 @@ char *structfile_header[] = {
   "   the list of shell reserved control structures, like `if' and `while'.",
   "   The end of the list is denoted with a NULL name field. */",
   "",
+  "/* TRANSLATORS: Please do not translate command names in descriptions */",
+  "",
   "#include \"../builtins.h\"",
   (char *)NULL
   };
@@ -1239,23 +1250,36 @@ write_builtins (defs, structfile, externfile)
 		  else
 		    fprintf (structfile, "(sh_builtin_func_t *)0x0, ");
 
-		  fprintf (structfile, "%s%s%s%s, %s_doc,\n",
+		  fprintf (structfile, "%s%s%s%s%s, %s_doc,\n",
 		    "BUILTIN_ENABLED | STATIC_BUILTIN",
 		    (builtin->flags & BUILTIN_FLAG_SPECIAL) ? " | SPECIAL_BUILTIN" : "",
 		    (builtin->flags & BUILTIN_FLAG_ASSIGNMENT) ? " | ASSIGNMENT_BUILTIN" : "",
+		    (builtin->flags & BUILTIN_FLAG_LOCALVAR) ? " | LOCALVAR_BUILTIN" : "",
 		    (builtin->flags & BUILTIN_FLAG_POSIX_BUILTIN) ? " | POSIX_BUILTIN" : "",
 		    document_name (builtin));
 
-		  if (inhibit_functions)
-		    fprintf
-		      (structfile, "     N_(\"%s\"), \"%s\" },\n",
-		       builtin->shortdoc ? builtin->shortdoc : builtin->name,
-		       document_name (builtin));
+		  /* Don't translate short document summaries that are identical
+		     to command names */
+		  if (builtin->shortdoc && strcmp (builtin->name, builtin->shortdoc) == 0)
+		    {
+		      if (inhibit_functions)
+			fprintf (structfile, "     \"%s\", \"%s\" },\n",
+			  builtin->shortdoc ? builtin->shortdoc : builtin->name,
+			  document_name (builtin));
+		      else
+			fprintf (structfile, "     \"%s\", (char *)NULL },\n",
+			  builtin->shortdoc ? builtin->shortdoc : builtin->name);
+		    }
 		  else
-		    fprintf
-		      (structfile, "     N_(\"%s\"), (char *)NULL },\n",
-		       builtin->shortdoc ? builtin->shortdoc : builtin->name);
-
+		    {
+		      if (inhibit_functions)
+			fprintf (structfile, "     N_(\"%s\"), \"%s\" },\n",
+			  builtin->shortdoc ? builtin->shortdoc : builtin->name,
+			  document_name (builtin));
+		      else
+			fprintf (structfile, "     N_(\"%s\"), (char *)NULL },\n",
+			  builtin->shortdoc ? builtin->shortdoc : builtin->name);
+		    }
 		}
 
 	      if (structfile || separate_helpfiles)
@@ -1605,6 +1629,13 @@ is_assignment_builtin (name)
      char *name;
 {
   return (_find_in_table (name, assignment_builtins));
+}
+
+static int
+is_localvar_builtin (name)
+     char *name;
+{
+  return (_find_in_table (name, localvar_builtins));
 }
 
 static int

@@ -1,7 +1,7 @@
 This file is exec.def, from which is created exec.c.
 It implements the builtin "exec" in Bash.
 
-Copyright (C) 1987-2012 Free Software Foundation, Inc.
+Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -119,6 +119,7 @@ exec_builtin (list)
 	case 'a':
 	  argv0 = list_optarg;
 	  break;
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);

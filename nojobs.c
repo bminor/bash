@@ -614,9 +614,18 @@ get_original_tty_job_signals ()
   if (fetched == 0)
     {
 #if defined (SIGTSTP)
-      get_original_signal (SIGTSTP);
-      get_original_signal (SIGTTIN);
-      get_original_signal (SIGTTOU);
+      if (interactive_shell)
+	{
+	  set_original_signal (SIGTSTP, SIG_DFL);
+	  set_original_signal (SIGTTIN, SIG_DFL);
+	  set_original_signal (SIGTTOU, SIG_DFL);
+	}
+      else
+	{
+	  get_original_signal (SIGTSTP);
+	  get_original_signal (SIGTTIN);
+	  get_original_signal (SIGTTOU);
+	}
 #endif
       fetched = 1;
     }

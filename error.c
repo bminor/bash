@@ -284,6 +284,7 @@ internal_inform (format, va_alist)
   va_list args;
 
   error_prolog (1);
+  /* TRANSLATORS: this is a prefix for informational messages. */
   fprintf (stderr, _("INFORM: "));
 
   SH_VA_START (args, format);

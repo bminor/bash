@@ -58,6 +58,7 @@ extern int errno;
 #endif
 
 #define NEED_FPURGE_DECL
+#define NEED_SH_SETLINEBUF_DECL
 
 #include "bashansi.h"
 #include "bashintl.h"
@@ -102,18 +103,6 @@ extern int errno;
 
 #if defined (HAVE_MBSTR_H) && defined (HAVE_MBSCHR)
 #  include <mbstr.h>		/* mbschr */
-#endif
-
-#if defined (ARRAY_VARS)
-struct func_array_state
-  {
-    ARRAY *funcname_a;
-    SHELL_VAR *funcname_v;
-    ARRAY *source_a;
-    SHELL_VAR *source_v;
-    ARRAY *lineno_a;
-    SHELL_VAR *lineno_v;
-  };
 #endif
 
 extern int dollar_dollar_pid;
@@ -630,7 +619,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       if (paren_pid == 0)
         {
 	  /* We want to run the exit trap for forced {} subshells, and we
-	     want to note this before execute_in_subshell[B modifies the
+	     want to note this before execute_in_subshell modifies the
 	     COMMAND struct.  Need to keep in mind that execute_in_subshell
 	     runs the exit trap for () subshells itself. */
 	  /* This handles { command; } & */
@@ -1555,14 +1544,19 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   /* If this is a user subshell, set a flag if stdin was redirected.
      This is used later to decide whether to redirect fd 0 to
      /dev/null for async commands in the subshell.  This adds more
-     sh compatibility, but I'm not sure it's the right thing to do. */
+     sh compatibility, but I'm not sure it's the right thing to do.
+     Note that an input pipe to a compound command suffices to inhibit
+     the implicit /dev/null redirection for asynchronous commands
+     executed as part of that compound command. */
   if (user_subshell)
     {
-      stdin_redir = stdin_redirects (command->redirects);
+      stdin_redir = stdin_redirects (command->redirects) || pipe_in != NO_PIPE;
 #if 0
       restore_default_signal (EXIT_TRAP);	/* XXX - reset_signal_handlers above */
 #endif
     }
+  else if (shell_control_structure (command->type) && pipe_in != NO_PIPE)
+    stdin_redir = 1;
 
   /* If this is an asynchronous command (command &), we want to
      redirect the standard input from /dev/null in the absence of
@@ -3868,19 +3862,20 @@ fix_assignment_words (words)
   for (wcmd = words; wcmd; wcmd = wcmd->next)
     if ((wcmd->word->flags & W_ASSIGNMENT) == 0)
       break;
+  /* Posix (post-2008) says that `command' doesn't change whether
+     or not the builtin it shadows is a `declaration command', even
+     though it removes other special builtin properties.  In Posix
+     mode, we skip over one or more instances of `command' and
+     deal with the next word as the assignment builtin. */
+  while (posixly_correct && wcmd && wcmd->word && wcmd->word->word && STREQ (wcmd->word->word, "command"))
+    wcmd = wcmd->next;
 
   for (w = wcmd; w; w = w->next)
     if (w->word->flags & W_ASSIGNMENT)
       {
+      	/* Lazy builtin lookup, only do it if we find an assignment */
 	if (b == 0)
 	  {
-	    /* Posix (post-2008) says that `command' doesn't change whether
-	       or not the builtin it shadows is a `declaration command', even
-	       though it removes other special builtin properties.  In Posix
-	       mode, we skip over one or more instances of `command' and
-	       deal with the next word as the assignment builtin. */
-	    while (posixly_correct && wcmd && wcmd->word && wcmd->word->word && STREQ (wcmd->word->word, "command"))
-	      wcmd = wcmd->next;
 	    b = builtin_address_internal (wcmd->word->word, 0);
 	    if (b == 0 || (b->flags & ASSIGNMENT_BUILTIN) == 0)
 	      return;
@@ -3896,6 +3891,12 @@ fix_assignment_words (words)
 #endif
 	if (global)
 	  w->word->flags |= W_ASSNGLOBAL;
+
+	/* If we have an assignment builtin that does not create local variables,
+	   make sure we create global variables even if we internally call
+	   `declare' */
+	if (b && ((b->flags & (ASSIGNMENT_BUILTIN|LOCALVAR_BUILTIN)) == ASSIGNMENT_BUILTIN))
+	  w->word->flags |= W_ASSNGLOBAL;
       }
 #if defined (ARRAY_VARS)
     /* Note that we saw an associative array option to a builtin that takes
@@ -3907,8 +3908,6 @@ fix_assignment_words (words)
       {
 	if (b == 0)
 	  {
-	    while (posixly_correct && wcmd && wcmd->word && wcmd->word->word && STREQ (wcmd->word->word, "command"))
-	      wcmd = wcmd->next;
 	    b = builtin_address_internal (wcmd->word->word, 0);
 	    if (b == 0 || (b->flags & ASSIGNMENT_BUILTIN) == 0)
 	      return;
@@ -4036,6 +4035,10 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	     is < 2. */
 	  if (fds_to_close)
 	    close_fd_bitmap (fds_to_close);
+
+	  /* If we fork because of an input pipe, note input pipe for later to
+	     inhibit async commands from redirecting stdin from /dev/null */
+	  stdin_redir |= pipe_in != NO_PIPE;
 
 	  do_piping (pipe_in, pipe_out);
 	  pipe_in = pipe_out = NO_PIPE;
@@ -4300,6 +4303,7 @@ run_builtin:
       words = make_word_list (make_word ("--"), words);
       words = make_word_list (make_word ("cd"), words);
       xtrace_print_word_list (words, 0);
+      func = find_function ("cd");
       goto run_builtin;
     }
 
@@ -4363,12 +4367,11 @@ execute_builtin (builtin, words, flags, subshell)
      WORD_LIST *words;
      int flags, subshell;
 {
-  int old_e_flag, result, eval_unwind;
+  int result, eval_unwind, ignexit_flag, old_e_flag;
   int isbltinenv;
   char *error_trap;
 
   error_trap = 0;
-  old_e_flag = exit_immediately_on_error;
 
   /* The eval builtin calls parse_and_execute, which does not know about
      the setting of flags, and always calls the execution functions with
@@ -4392,6 +4395,7 @@ execute_builtin (builtin, words, flags, subshell)
 	  restore_default_signal (ERROR_TRAP);
 	}
       exit_immediately_on_error = 0;
+      ignexit_flag = builtin_ignoring_errexit;
       builtin_ignoring_errexit = 1;
       eval_unwind = 1;
     }
@@ -4444,7 +4448,6 @@ execute_builtin (builtin, words, flags, subshell)
       sourcenest++;	/* execute_subshell_builtin_or_function sets this to 0 */
     }
 
-
   /* `return' does a longjmp() back to a saved environment in execute_function.
      If a variable assignment list preceded the command, and the shell is
      running in POSIX mode, we need to merge that into the shell_variables
@@ -4469,8 +4472,8 @@ execute_builtin (builtin, words, flags, subshell)
 
   if (eval_unwind)
     {
-      exit_immediately_on_error = errexit_flag;
-      builtin_ignoring_errexit = 0;
+      builtin_ignoring_errexit = ignexit_flag;
+      exit_immediately_on_error = builtin_ignoring_errexit ? 0 : errexit_flag;
       if (error_trap)
 	{
 	  set_error_trap (error_trap);
@@ -4499,7 +4502,7 @@ maybe_restore_getopt_state (gs)
 }
 
 #if defined (ARRAY_VARS)
-static void
+void
 restore_funcarray_state (fa)
      struct func_array_state *fa;
 {
@@ -4669,7 +4672,11 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
 
   /* Update BASH_ARGV and BASH_ARGC */
   if (debugging_mode)
-    push_args (words->next);
+    {
+      push_args (words->next);
+      if (subshell == 0)
+	add_unwind_protect (pop_args, 0);
+    }
 
   /* Number of the line on which the function body starts. */
   line_number = function_line_number = tc->line;
@@ -4679,7 +4686,8 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
     stop_pipeline (async, (COMMAND *)NULL);
 #endif
 
-  loop_level = 0;
+  if (shell_compatibility_level > 43)
+    loop_level = 0;
 
   fc = tc;
 
@@ -4728,10 +4736,6 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
       showing_function_line = 0;
     }
 
-  /* Restore BASH_ARGC and BASH_ARGV */
-  if (debugging_mode)
-    pop_args ();
-
   /* If we have a local copy of OPTIND, note it in the saved getopts state. */
   gv = find_variable ("OPTIND");
   if (gv && gv->context == variable_context)
@@ -4741,7 +4745,12 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
     run_unwind_frame ("function_calling");
 #if defined (ARRAY_VARS)
   else
-    restore_funcarray_state (fa);
+    {
+      restore_funcarray_state (fa);
+      /* Restore BASH_ARGC and BASH_ARGV */
+      if (debugging_mode)
+	pop_args ();
+    }
 #endif
 
   if (variable_context == 0 || this_shell_function == 0)
@@ -5349,13 +5358,15 @@ initialize_subshell ()
 #  define SETOSTYPE(x)
 #endif
 
+#define HASH_BANG_BUFSIZ	128
+
 #define READ_SAMPLE_BUF(file, buf, len) \
   do \
     { \
       fd = open(file, O_RDONLY); \
       if (fd >= 0) \
 	{ \
-	  len = read (fd, buf, 80); \
+	  len = read (fd, buf, HASH_BANG_BUFSIZ); \
 	  close (fd); \
 	} \
       else \
@@ -5371,7 +5382,7 @@ shell_execve (command, args, env)
      char **args, **env;
 {
   int larray, i, fd;
-  char sample[80];
+  char sample[HASH_BANG_BUFSIZ];
   int sample_len;
 
   SETOSTYPE (0);		/* Some systems use for USG/POSIX semantics */

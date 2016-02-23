@@ -3,7 +3,10 @@
 : ${TMPDIR:=/tmp}
 export TMPDIR
 
-BASH_TSTOUT=/tmp/xx	# for now
+# basic /bin/sh syntax
+SUFFIX=`${THIS_SH} -c 'echo $(( $RANDOM + $BASHPID ))'`
+
+BASH_TSTOUT=${TMPDIR}/bashtst-$SUFFIX	# for now
 export BASH_TSTOUT
 
 trap 'rm -f $BASH_TSTOUT' 0
@@ -30,7 +33,7 @@ do
 	case $x in
 	$0|run-minimal|run-gprof)	;;
 	*.orig|*~) ;;
-	*)	echo $x ; sh $x ;;
+	*)	echo $x ; sh $x ; rm -f ${BASH_TSTOUT} ;;
 	esac
 done
 

@@ -1,4 +1,4 @@
-# Makefile for bash-4.4, version 4.17
+# Makefile for bash-4.4, version 4.18
 #
 # Copyright (C) 1996-2015 Free Software Foundation, Inc.
 
@@ -89,10 +89,8 @@ TESTSCRIPT = @TESTSCRIPT@
 
 DEBUGGER_START_FILE = @DEBUGGER_START_FILE@
 
-#If you have purify, and want to use it, uncomment this definition or
-# run the make as `make PURIFY=purify'
-# or run configure with the --with-purify argument.
-PURIFY = @PURIFY@
+#If you have purify, and want to use it, run the make as `make PURIFY=purify'
+#PURIFY = @PURIFY@
 
 # Here is a rule for making .o files from .c files that does not
 # force the type of the machine (like -M_MACHINE) into the flags.
@@ -567,7 +565,7 @@ LOADABLES_DIR = ${top_builddir}/examples/loadables
 # Keep GNU Make from exporting the entire environment for small machines.
 .NOEXPORT:
 
-.made: $(Program) bashbug
+.made: $(Program) bashbug $(SDIR)/man2html$(EXEEXT)
 	@echo "$(Program) last made for a $(Machine) running $(OS)" >.made
 
 $(Program):  .build $(OBJECTS) $(BUILTINS_DEP) $(LIBDEP)
@@ -718,6 +716,9 @@ ${DEFDIR}/bashgetopt.o:	$(BUILTIN_SRCDIR)/bashgetopt.c
 
 ${DEFDIR}/builtext.h: $(BUILTIN_DEFS)
 	@(cd $(DEFDIR) && $(MAKE) $(MFLAGS) builtext.h ) || exit 1
+
+$(SDIR)/man2html$(EXEEXT):	${SUPPORT_SRC}/man2html.c
+	@(cd $(SDIR) && $(MAKE) $(MFLAGS) all ) || exit 1
 
 # For the justification of the following Makefile rules, see node
 # `Automatic Remaking' in GNU Autoconf documentation.
@@ -1077,6 +1078,7 @@ print_cmd.o: shell.h syntax.h config.h bashjmp.h ${BASHINCDIR}/posixjmp.h comman
 print_cmd.o: general.h xmalloc.h bashtypes.h variables.h arrayfunc.h conftypes.h array.h hashlib.h
 print_cmd.o: quit.h ${BASHINCDIR}/maxpath.h unwind_prot.h dispose_cmd.h
 print_cmd.o: make_cmd.h subst.h sig.h pathnames.h externs.h 
+print_cmd.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 print_cmd.o: ${GRAM_H} $(DEFSRC)/common.h
 redir.o: config.h bashtypes.h ${BASHINCDIR}/posixstat.h bashansi.h ${BASHINCDIR}/ansi_stdlib.h ${BASHINCDIR}/filecntl.h
 redir.o: ${BASHINCDIR}/memalloc.h shell.h syntax.h bashjmp.h ${BASHINCDIR}/posixjmp.h command.h ${BASHINCDIR}/stdc.h error.h
@@ -1205,6 +1207,7 @@ pcomplete.o: ${BASHINCDIR}/stdc.h hashlib.h pcomplete.h shell.h syntax.h
 pcomplete.o: bashjmp.h command.h general.h xmalloc.h error.h variables.h arrayfunc.h conftypes.h quit.h
 pcomplete.o: unwind_prot.h dispose_cmd.h make_cmd.h subst.h sig.h pathnames.h
 pcomplete.o: externs.h ${BASHINCDIR}/maxpath.h execute_cmd.h 
+pcomplete.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 pcomplete.o: ${DEFDIR}/builtext.h
 
 # library support files
@@ -1233,6 +1236,7 @@ bracecomp.o: general.h xmalloc.h bashtypes.h variables.h arrayfunc.h conftypes.h
 bracecomp.o: array.h hashlib.h alias.h builtins.h 
 bracecomp.o: quit.h ${BASHINCDIR}/maxpath.h unwind_prot.h dispose_cmd.h
 bracecomp.o: make_cmd.h subst.h sig.h pathnames.h externs.h 
+bracecomp.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 
 # library dependencies
 
@@ -1439,6 +1443,7 @@ builtins/printf.o: config.h ${BASHINCDIR}/memalloc.h bashjmp.h command.h error.h
 builtins/printf.o: general.h xmalloc.h quit.h dispose_cmd.h make_cmd.h subst.h
 builtins/printf.o: externs.h sig.h pathnames.h shell.h syntax.h unwind_prot.h
 builtins/printf.o: variables.h arrayfunc.h conftypes.h ${BASHINCDIR}/stdc.h $(DEFSRC)/bashgetopt.h
+builtins/printf.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 builtins/printf.o: ${BASHINCDIR}/chartypes.h 
 builtins/pushd.o: command.h config.h ${BASHINCDIR}/memalloc.h error.h general.h xmalloc.h ${BASHINCDIR}/maxpath.h
 builtins/pushd.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h ${BASHINCDIR}/stdc.h
@@ -1447,6 +1452,7 @@ builtins/pushd.o: $(DEFSRC)/common.h pathnames.h
 builtins/read.o: command.h config.h ${BASHINCDIR}/memalloc.h error.h general.h xmalloc.h ${BASHINCDIR}/maxpath.h
 builtins/read.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h ${BASHINCDIR}/stdc.h
 builtins/read.o: shell.h syntax.h bashjmp.h ${BASHINCDIR}/posixjmp.h sig.h unwind_prot.h variables.h arrayfunc.h conftypes.h 
+builtins/read.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 builtins/read.o: pathnames.h
 builtins/return.o: command.h config.h ${BASHINCDIR}/memalloc.h error.h general.h xmalloc.h ${BASHINCDIR}/maxpath.h
 builtins/return.o: quit.h dispose_cmd.h make_cmd.h subst.h externs.h ${BASHINCDIR}/stdc.h

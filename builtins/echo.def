@@ -1,7 +1,7 @@
 This file is echo.def, from which is created echo.c.
 It implements the builtin "echo" in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -161,7 +161,6 @@ just_echo:
 
   clearerr (stdout);	/* clear error before writing and testing success */
 
-  terminate_immediately++;
   while (list)
     {
       i = len = 0;
@@ -180,6 +179,7 @@ just_echo:
 	  fflush (stdout);	/* Fix for bug in SunOS 5.5 printf(3) */
 #endif
 	}
+      QUIT;
       if (do_v9 && temp)
 	free (temp);
       list = list->next;
@@ -190,11 +190,11 @@ just_echo:
 	}
       if (list)
 	putchar(' ');
+      QUIT;
     }
 
   if (display_return)
     putchar ('\n');
 
-  terminate_immediately--;
   return (sh_chkwrite (EXECUTION_SUCCESS));
 }

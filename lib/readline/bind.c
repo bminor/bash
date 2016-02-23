@@ -1,6 +1,6 @@
 /* bind.c -- key binding and startup file support for the readline library. */
 
-/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -74,8 +74,13 @@ Keymap rl_binding_keymap;
 
 static int _rl_skip_to_delim PARAMS((char *, int, int));
 
+#if defined (USE_VARARGS) && defined (PREFER_STDARG)
+static void _rl_init_file_error (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));
+#else
+static void _rl_init_file_error ();
+#endif
+
 static char *_rl_read_file PARAMS((char *, size_t *));
-static void _rl_init_file_error PARAMS((const char *));
 static int _rl_read_init_file PARAMS((const char *, int));
 static int glean_key_from_name PARAMS((char *));
 
@@ -989,14 +994,35 @@ _rl_read_init_file (filename, include_level)
 }
 
 static void
-_rl_init_file_error (msg)
-     const char *msg;
+#if defined (PREFER_STDARG)
+_rl_init_file_error (const char *format, ...)
+#else
+_rl_init_file_error (va_alist)
+     va_dcl
+#endif
 {
+  va_list args;
+#if defined (PREFER_VARARGS)
+  char *format;
+#endif
+
+#if defined (PREFER_STDARG)
+  va_start (args, format);
+#else
+  va_start (args);
+  format = va_arg (args, char *);
+#endif
+
+  fprintf (stderr, "readline: ");
   if (currently_reading_init_file)
-    _rl_errmsg ("%s: line %d: %s\n", current_readline_init_file,
-		     current_readline_init_lineno, msg);
-  else
-    _rl_errmsg ("%s", msg);
+    fprintf (stderr, "%s: line %d: ", current_readline_init_file,
+		     current_readline_init_lineno);
+
+  vfprintf (stderr, format, args);
+  fprintf (stderr, "\n");
+  fflush (stderr);
+
+  va_end (args);
 }
 
 /* **************************************************************** */
@@ -1216,7 +1242,7 @@ handle_parser_directive (statement)
       }
 
   /* display an error message about the unknown parser directive */
-  _rl_init_file_error ("unknown parser directive");
+  _rl_init_file_error ("%s: unknown parser directive", directive);
   return (1);
 }
 
@@ -1262,7 +1288,7 @@ rl_parse_and_bind (string)
 {
   char *funname, *kname;
   register int c, i;
-  int key, equivalency;
+  int key, equivalency, foundmod, foundsep;
 
   while (string && whitespace (*string))
     string++;
@@ -1292,7 +1318,7 @@ rl_parse_and_bind (string)
       /* If we didn't find a closing quote, abort the line. */
       if (string[i] == '\0')
         {
-          _rl_init_file_error ("no closing `\"' in key binding");
+          _rl_init_file_error ("%s: no closing `\"' in key binding", string);
           return 1;
         }
       else
@@ -1303,6 +1329,8 @@ rl_parse_and_bind (string)
   for (; (c = string[i]) && c != ':' && c != ' ' && c != '\t'; i++ );
 
   equivalency = (c == ':' && string[i + 1] == '=');
+
+  foundsep = c != 0;
 
   /* Mark the end of the command (or keyname). */
   if (string[i])
@@ -1393,6 +1421,12 @@ remove_trailing:
       return 0;
     }
 
+  if (foundsep == 0)
+    {
+      _rl_init_file_error ("%s: no key sequence terminator", string);
+      return 1;
+    }
+
   /* If this is a new-style key-binding, then do the binding with
      rl_bind_keyseq ().  Otherwise, let the older code deal with it. */
   if (*string == '"')
@@ -1449,11 +1483,24 @@ remove_trailing:
   key = glean_key_from_name (kname);
 
   /* Add in control and meta bits. */
+  foundmod = 0;
   if (substring_member_of_array (string, _rl_possible_control_prefixes))
-    key = CTRL (_rl_to_upper (key));
+    {
+      key = CTRL (_rl_to_upper (key));
+      foundmod = 1;
+    }
 
   if (substring_member_of_array (string, _rl_possible_meta_prefixes))
-    key = META (key);
+    {
+      key = META (key);
+      foundmod = 1;
+    }
+
+  if (foundmod == 0 && kname != string)
+    {
+      _rl_init_file_error ("%s: unknown key modifier", string);
+      return 1;
+    }
 
   /* Temporary.  Handle old-style keyname with macro-binding. */
   if (*funname == '\'' || *funname == '"')
@@ -1480,6 +1527,7 @@ remove_trailing:
 #endif /* PREFIX_META_HACK */
   else
     rl_bind_key (key, rl_named_function (funname));
+
   return 0;
 }
 
@@ -1681,10 +1729,14 @@ rl_variable_bind (name, value)
 
   i = find_string_var (name);
 
-  /* For the time being, unknown variable names or string names without a
-     handler function are simply ignored. */
+  /* For the time being, string names without a handler function are simply
+     ignored. */
   if (i < 0 || string_varlist[i].set_func == 0)
-    return 0;
+    {
+      if (i < 0)
+	_rl_init_file_error ("%s: unknown variable name", name);
+      return 0;
+    }
 
   v = (*string_varlist[i].set_func) (value);
   return v;

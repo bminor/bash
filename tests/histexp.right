@@ -143,3 +143,49 @@ echo a b c d 2 > /dev/null
 \!
 \!
 \!
+a
+b
+c
+echo "#!/bin/bash" set -o posix
+#!/bin/bash set -o posix
+!!
+!!
+a
+echo $(echo echo a)
+echo a
+a
+echo echo a $(echo echo a)
+echo a echo a
+b
+!! $(echo !!)
+c
+echo "echo c" "$(echo echo c)"
+echo c echo c
+d
+echo "echo d" $(echo "echo d")
+echo d echo d
+e
+!! !!
+f
+!!
+f
+!!
+g
+echo "echo g"
+echo g
+g
+eval echo "echo g"
+echo g
+a
+cat < <(echo echo a)
+echo a
+b
+echo echo b `echo echo b`
+echo b echo b
+c
+!
+d
+!
+e
+! !
+./histexp4.sub: line 20: !': event not found

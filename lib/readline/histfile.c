@@ -1,6 +1,6 @@
 /* histfile.c - functions to manipulate the history file. */
 
-/* Copyright (C) 1989-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2016 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -107,8 +107,18 @@ extern int errno;
 #  define PATH_MAX	1024	/* default */
 #endif
 
+extern void _hs_append_history_line PARAMS((int, const char *));
+
+/* history file version; currently unused */
+int history_file_version = 1;
+
 /* If non-zero, we write timestamps to the history file in history_do_write() */
 int history_write_timestamps = 0;
+
+/* If non-zero, we assume that a history file that starts with a timestamp
+   uses timestamp-delimited entries and can include multi-line history
+   entries. Used by read_history_range */
+int history_multiline_entries = 0;
 
 /* Immediately after a call to read_history() or read_history_range(), this
    will return the number of lines just read from the history file in that
@@ -259,7 +269,7 @@ read_history_range (filename, from, to)
 {
   register char *line_start, *line_end, *p;
   char *input, *buffer, *bufend, *last_ts;
-  int file, current_line, chars_read;
+  int file, current_line, chars_read, has_timestamps, reset_comment_char;
   struct stat finfo;
   size_t file_size;
 #if defined (EFBIG)
@@ -336,6 +346,19 @@ read_history_range (filename, from, to)
   bufend = buffer + chars_read;
   current_line = 0;
 
+  /* Heuristic: the history comment character rarely changes, so assume we
+     have timestamps if the buffer starts with `#[:digit:]' and temporarily
+     set history_comment_char so timestamp parsing works right */
+  reset_comment_char = 0;
+  if (history_comment_char == '\0' && buffer[0] == '#' && isdigit ((unsigned char)buffer[1]))
+    {
+      history_comment_char = '#';
+      reset_comment_char = 1;
+    }
+
+  has_timestamps = HIST_TIMESTAMP_START (buffer);
+  history_multiline_entries += has_timestamps && history_write_timestamps;  
+
   /* Skip lines until we are at FROM. */
   for (line_start = line_end = buffer; line_end < bufend && current_line < from; line_end++)
     if (*line_end == '\n')
@@ -362,7 +385,10 @@ read_history_range (filename, from, to)
 	  {
 	    if (HIST_TIMESTAMP_START(line_start) == 0)
 	      {
-		add_history (line_start);
+	      	if (last_ts == NULL && history_multiline_entries)
+		  _hs_append_history_line (history_length - 1, line_start);
+		else
+		  add_history (line_start);
 		if (last_ts)
 		  {
 		    add_history_time (last_ts);
@@ -385,6 +411,8 @@ read_history_range (filename, from, to)
       }
 
   history_lines_read_from_file = current_line;
+  if (reset_comment_char)
+    history_comment_char = '\0';
 
   FREE (input);
 #ifndef HISTORY_USE_MMAP
@@ -447,7 +475,7 @@ history_truncate_file (fname, lines)
      int lines;
 {
   char *buffer, *filename, *tempname, *bp, *bp1;		/* bp1 == bp+1 */
-  int file, chars_read, rv, orig_lines, exists;
+  int file, chars_read, rv, orig_lines, exists, r;
   struct stat finfo;
   size_t file_size;
 
@@ -583,7 +611,7 @@ history_truncate_file (fname, lines)
      with a shared history file, we don't want to leave the history file
      owned by root. */
   if (rv == 0 && exists)
-    chown (filename, finfo.st_uid, finfo.st_gid);
+    r = chown (filename, finfo.st_uid, finfo.st_gid);
 
   xfree (filename);
   FREE (tempname);
@@ -613,9 +641,10 @@ history_do_write (filename, nelements, overwrite)
   mode = overwrite ? O_WRONLY|O_CREAT|O_TRUNC|O_BINARY : O_WRONLY|O_APPEND|O_BINARY;
 #endif
   histname = history_filename (filename);
-  tempname = (overwrite && histname) ? history_tempfile (histname) : 0;
-  output = tempname ? tempname : histname;
   exists = histname ? (stat (histname, &finfo) == 0) : 0;
+
+  tempname = (overwrite && exists && S_ISREG (finfo.st_mode)) ? history_tempfile (histname) : 0;
+  output = tempname ? tempname : histname;
 
   file = output ? open (output, mode, 0600) : -1;
   rv = 0;
@@ -729,7 +758,7 @@ mmap_error:
      with a shared history file, we don't want to leave the history file
      owned by root. */
   if (rv == 0 && exists)
-    chown (histname, finfo.st_uid, finfo.st_gid);
+    mode = chown (histname, finfo.st_uid, finfo.st_gid);
 
   FREE (histname);
   FREE (tempname);

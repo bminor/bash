@@ -1,7 +1,7 @@
 This file is enable.def, from which is created enable.c.
 It implements the builtin "enable" in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -151,6 +151,7 @@ enable_builtin (list)
 	  builtin_error (_("dynamic loading not available"));
 	  return (EX_USAGE);
 #endif /* HAVE_DLCLOSE */
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);
@@ -383,7 +384,7 @@ dyn_load_builtin (list, flags, filename)
 	  r = (*loadfunc) (name);
 	  if (r == 0)
 	    {
-	      builtin_error (_("load function for %s returns failure (%d): not loaded"), r);
+	      builtin_error (_("load function for %s returns failure (%d): not loaded"), name, r);
 	      free (funcname);
 	      continue;
 	    }

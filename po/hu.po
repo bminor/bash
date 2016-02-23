@@ -1,14 +1,15 @@
 # Hungarian translation for bash.
-# Copyright (C) 2010 Free Software Foundation, Inc.
+# Copyright (C) 2010, 2016 Free Software Foundation, Inc.
 # This file is distributed under the same license as the bash package.
 #
-# Mate Ory <orymate@ubuntu.com>, 2010.
+# Mate Ory <orymate@ubuntu.com>, 2010, 2016.
+# Gabor Kelemen <kelemeng@gnome.hu>, 2016.
 msgid ""
 msgstr ""
-"Project-Id-Version: bash-4.1\n"
+"Project-Id-Version: bash 4.4-beta1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-02 07:21-0400\n"
-"PO-Revision-Date: 2010-08-06 17:44+0200\n"
+"POT-Creation-Date: 2016-02-10 07:59-0500\n"
+"PO-Revision-Date: 2016-01-03 23:59+0100\n"
 "Last-Translator: Mate Ory <orymate@ubuntu.com>\n"
 "Language-Team: Hungarian <translation-team-hu@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -16,12 +17,13 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: hu\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Lokalize 1.5\n"
 
 #: arrayfunc.c:54
 msgid "bad array subscript"
 msgstr "Hibás tömbindex"
 
-#: arrayfunc.c:360 builtins/declare.def:647
+#: arrayfunc.c:360 builtins/declare.def:648
 #, c-format
 msgid "%s: cannot convert indexed to associative array"
 msgstr "%s: nem lehetséges az indexelt tömb asszociatívvá alakítása"
@@ -41,7 +43,7 @@ msgstr "%s: a nem-szám indexnek való értékadás nem lehetséges"
 msgid "%s: %s: must use subscript when assigning associative array"
 msgstr "%s: %s: asszociatív tömbhöz való értékadásnál meg kell adni az indexet"
 
-#: bashhist.c:405
+#: bashhist.c:417
 #, c-format
 msgid "%s: cannot create: %s"
 msgstr "%s: nem hozható létre: %s"
@@ -69,17 +71,19 @@ msgstr "%s: hiányzó kettőspont-elválasztó"
 #: braces.c:321
 #, c-format
 msgid "brace expansion: cannot allocate memory for %s"
-msgstr ""
+msgstr "szögleteszárójel-kiegészítés: Nem foglalható memória ehhez: %s"
 
 #: braces.c:413
 #, c-format
 msgid "brace expansion: failed to allocate memory for %d elements"
 msgstr ""
+"szögleteszárójel-kiegészítés: nem sikerült a memóriafoglalás %d elem számára"
 
 #: braces.c:457
 #, c-format
 msgid "brace expansion: failed to allocate memory for `%s'"
 msgstr ""
+"szögleteszárójel-kiegészítés: nem sikerült a memóriafoglalás „%s” számára"
 
 #: builtins/alias.def:132
 #, c-format
@@ -139,15 +143,15 @@ msgstr ""
 "    \n"
 "    EXPR nélkül a "
 
-#: builtins/cd.def:320
+#: builtins/cd.def:321
 msgid "HOME not set"
 msgstr "Nincs beállítva HOME"
 
-#: builtins/cd.def:328 builtins/common.c:167 test.c:878
+#: builtins/cd.def:329 builtins/common.c:167 test.c:878
 msgid "too many arguments"
 msgstr "túl sok argumentum"
 
-#: builtins/cd.def:339
+#: builtins/cd.def:340
 msgid "OLDPWD not set"
 msgstr "Nincs beállítva OLDPWD"
 
@@ -166,7 +170,7 @@ msgstr "figyelmeztetés: "
 msgid "%s: usage: "
 msgstr "%s: használat: "
 
-#: builtins/common.c:199 shell.c:509 shell.c:800
+#: builtins/common.c:199 shell.c:511 shell.c:802
 #, c-format
 msgid "%s: option requires an argument"
 msgstr "%s: a kapcsolónak kötelező argumentuma van"
@@ -181,7 +185,7 @@ msgstr "%s: a kötelező argumentum egy szám"
 msgid "%s: not found"
 msgstr "%s: nem található"
 
-#: builtins/common.c:222 shell.c:813
+#: builtins/common.c:222 shell.c:815
 #, c-format
 msgid "%s: invalid option"
 msgstr "%s: érvénytelen kapcsoló"
@@ -191,7 +195,7 @@ msgstr "%s: érvénytelen kapcsoló"
 msgid "%s: invalid option name"
 msgstr "%s: érvénytelen kapcsolónév"
 
-#: builtins/common.c:236 general.c:240 general.c:245
+#: builtins/common.c:236 general.c:242 general.c:247
 #, c-format
 msgid "`%s': not a valid identifier"
 msgstr "„%s”: érvénytelen azonosító"
@@ -204,7 +208,7 @@ msgstr "érvénytelen oktális szám"
 msgid "invalid hex number"
 msgstr "érvénytelen hexadecimális szám"
 
-#: builtins/common.c:250 expr.c:1470
+#: builtins/common.c:250 expr.c:1473
 msgid "invalid number"
 msgstr "érvénytelen szám"
 
@@ -218,7 +222,7 @@ msgstr "%s: érvénytelen szignálmegadás"
 msgid "`%s': not a pid or valid job spec"
 msgstr "„%s”: nem pid vagy munkaazonosító"
 
-#: builtins/common.c:272 error.c:510
+#: builtins/common.c:272 error.c:511
 #, c-format
 msgid "%s: readonly variable"
 msgstr "%s: csak olvasható változó"
@@ -280,40 +284,40 @@ msgstr "hiba a terminálattribútum beállításakor: %s"
 msgid "error getting terminal attributes: %s"
 msgstr "hiba a terminálattribútum lekérdezésekor: %s"
 
-#: builtins/common.c:583
+#: builtins/common.c:585
 #, c-format
 msgid "%s: error retrieving current directory: %s: %s\n"
 msgstr "%s: hiba a munkakönyvtár lekérdezésekor: %s: %s\n"
 
-#: builtins/common.c:649 builtins/common.c:651
+#: builtins/common.c:651 builtins/common.c:653
 #, c-format
 msgid "%s: ambiguous job spec"
 msgstr "%s: kétértelmű munkamegadás"
 
-#: builtins/common.c:916
+#: builtins/common.c:918
 msgid "help not available in this version"
-msgstr ""
+msgstr "ebben a verzióban nem érhető el súgó"
 
 #: builtins/complete.def:278
 #, c-format
 msgid "%s: invalid action name"
 msgstr "%s: érvénytelen műveletnév"
 
-#: builtins/complete.def:451 builtins/complete.def:646
-#: builtins/complete.def:856
+#: builtins/complete.def:452 builtins/complete.def:647
+#: builtins/complete.def:857
 #, c-format
 msgid "%s: no completion specification"
 msgstr "%s: nincs kiegészítés meghatározva"
 
-#: builtins/complete.def:698
+#: builtins/complete.def:699
 msgid "warning: -F option may not work as you expect"
 msgstr "figyelmeztetés: a -F kapcsoló nem a várt módon működhet"
 
-#: builtins/complete.def:700
+#: builtins/complete.def:701
 msgid "warning: -C option may not work as you expect"
 msgstr "figyelmeztetés: a -C kapcsoló nem a várt módon működhet"
 
-#: builtins/complete.def:829
+#: builtins/complete.def:830
 msgid "not currently executing completion function"
 msgstr "jelenleg nincs kiegészítési függvény végrehajtás alatt"
 
@@ -321,41 +325,41 @@ msgstr "jelenleg nincs kiegészítési függvény végrehajtás alatt"
 msgid "can only be used in a function"
 msgstr "csak függvényben használható"
 
-#: builtins/declare.def:330 builtins/declare.def:566
+#: builtins/declare.def:331 builtins/declare.def:567
 #, c-format
 msgid "%s: reference variable cannot be an array"
-msgstr ""
+msgstr "%s: a referenciaváltozó nem lehet tömb"
 
-#: builtins/declare.def:339
+#: builtins/declare.def:340
 #, c-format
 msgid "%s: nameref variable self references not allowed"
-msgstr ""
+msgstr "%s: a névhivatkozás változó önhivatkozása nem engedélyezett"
 
-#: builtins/declare.def:346 builtins/declare.def:575 subst.c:6257 subst.c:8606
-#, fuzzy, c-format
+#: builtins/declare.def:347 builtins/declare.def:576 subst.c:6474 subst.c:8796
+#, c-format
 msgid "%s: invalid variable name for name reference"
-msgstr "%s: %s: érvénytelen érték a trace fájlleíróhoz"
+msgstr "%s: érvénytelen változóérték a névhivatkozáshoz"
 
-#: builtins/declare.def:424
+#: builtins/declare.def:425
 msgid "cannot use `-f' to make functions"
 msgstr "nem használható a „-f” függvény létrehozására"
 
-#: builtins/declare.def:436 execute_cmd.c:5551
+#: builtins/declare.def:437 execute_cmd.c:5562
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: csak olvasható függvény"
 
-#: builtins/declare.def:620
+#: builtins/declare.def:621
 #, c-format
 msgid "%s: quoted compound array assignment deprecated"
-msgstr ""
+msgstr "%s: az idézőjelezett összetett tömb értékadása elavult"
 
-#: builtins/declare.def:634
+#: builtins/declare.def:635
 #, c-format
 msgid "%s: cannot destroy array variables in this way"
 msgstr "%s: ilyen módon nem lehet tömböt megszüntetni"
 
-#: builtins/declare.def:641 builtins/read.def:750
+#: builtins/declare.def:642 builtins/read.def:751
 #, c-format
 msgid "%s: cannot convert associative to indexed array"
 msgstr "%s: nem lehetséges az asszociatív tömb indexeltté alakítása"
@@ -364,52 +368,52 @@ msgstr "%s: nem lehetséges az asszociatív tömb indexeltté alakítása"
 msgid "dynamic loading not available"
 msgstr "a dinamikus betöltés nem érhető el"
 
-#: builtins/enable.def:342
+#: builtins/enable.def:343
 #, c-format
 msgid "cannot open shared object %s: %s"
 msgstr "megosztott objektumfájl megnyitása sikertelen: %s: %s"
 
-#: builtins/enable.def:368
+#: builtins/enable.def:369
 #, c-format
 msgid "cannot find %s in shared object %s: %s"
 msgstr "%s nem található a(z) %s megosztott objektumfájlban: %s"
 
-#: builtins/enable.def:386
+#: builtins/enable.def:387
 #, c-format
 msgid "load function for %s returns failure (%d): not loaded"
-msgstr ""
+msgstr "%s betöltési függvénye hibát ad vissza (%d): nincs betöltve"
 
-#: builtins/enable.def:511
+#: builtins/enable.def:512
 #, c-format
 msgid "%s: not dynamically loaded"
 msgstr "%s: nem dinamikusan van betöltve"
 
-#: builtins/enable.def:537
+#: builtins/enable.def:538
 #, c-format
 msgid "%s: cannot delete: %s"
 msgstr "%s: nem törölhető: %s"
 
-#: builtins/evalfile.c:143 builtins/hash.def:171 execute_cmd.c:5393
+#: builtins/evalfile.c:144 builtins/hash.def:172 execute_cmd.c:5404
 #, c-format
 msgid "%s: is a directory"
 msgstr "%s egy könyvtár"
 
-#: builtins/evalfile.c:149
+#: builtins/evalfile.c:150
 #, c-format
 msgid "%s: not a regular file"
 msgstr "%s: nem normál fájl"
 
-#: builtins/evalfile.c:158
+#: builtins/evalfile.c:159
 #, c-format
 msgid "%s: file is too large"
 msgstr "%s: a fájl túl nagy"
 
-#: builtins/evalfile.c:193 builtins/evalfile.c:211 shell.c:1551
+#: builtins/evalfile.c:194 builtins/evalfile.c:212 shell.c:1553
 #, c-format
 msgid "%s: cannot execute binary file"
 msgstr "%s: bináris nem hajtható végre"
 
-#: builtins/exec.def:155 builtins/exec.def:157 builtins/exec.def:234
+#: builtins/exec.def:156 builtins/exec.def:158 builtins/exec.def:235
 #, c-format
 msgid "%s: cannot execute: %s"
 msgstr "%s: nem hajtható végre: %s"
@@ -433,20 +437,20 @@ msgstr "Vannak leállított munkák.\n"
 msgid "There are running jobs.\n"
 msgstr "Vannak futó munkák.\n"
 
-#: builtins/fc.def:268
+#: builtins/fc.def:269
 msgid "no command found"
 msgstr "nincs ilyen parancs"
 
-#: builtins/fc.def:326 builtins/fc.def:375
+#: builtins/fc.def:327 builtins/fc.def:376
 msgid "history specification"
 msgstr "előzményválasztás"
 
-#: builtins/fc.def:396
+#: builtins/fc.def:397
 #, c-format
 msgid "%s: cannot open temp file: %s"
 msgstr "%s: az átmeneti fájl nem nyitható meg: %s"
 
-#: builtins/fg_bg.def:153 builtins/jobs.def:282
+#: builtins/fg_bg.def:153 builtins/jobs.def:283
 msgid "current"
 msgstr "aktuális"
 
@@ -469,25 +473,24 @@ msgstr "%s: a kapcsolónak kötelező argumentuma van – %c\n"
 msgid "hashing disabled"
 msgstr "a hashelés le van tiltva"
 
-#: builtins/hash.def:138
+#: builtins/hash.def:139
 #, c-format
 msgid "%s: hash table empty\n"
 msgstr "%s: a hashtábla üres\n"
 
-#: builtins/hash.def:253
+#: builtins/hash.def:254
 #, c-format
 msgid "hits\tcommand\n"
 msgstr "t.szám\tparancs\n"
 
-# fuck.
-#: builtins/help.def:134
+#: builtins/help.def:135
 #, c-format
 msgid "Shell commands matching keyword `"
 msgid_plural "Shell commands matching keywords `"
 msgstr[0] "A következő kifejezésre illeszkedő parancsok: „"
 msgstr[1] "A következő kifejezésekre illeszkedő parancsok: „"
 
-#: builtins/help.def:186
+#: builtins/help.def:187
 #, c-format
 msgid ""
 "no help topics match `%s'.  Try `help help' or `man -k %s' or `info %s'."
@@ -495,12 +498,12 @@ msgstr ""
 "nem illeszkedik egy szócikk sem a következőre: „%s”.\n"
 "A „help help”, „man -k '%s'” vagy „info '%s'” parancsok segíthetnek."
 
-#: builtins/help.def:225
+#: builtins/help.def:226
 #, c-format
 msgid "%s: cannot open: %s"
 msgstr "%s: nem nyitható meg: %s"
 
-#: builtins/help.def:525
+#: builtins/help.def:526
 #, c-format
 msgid ""
 "These shell commands are defined internally.  Type `help' to see this list.\n"
@@ -519,15 +522,20 @@ msgstr ""
 "A parancs nevét követő csillag (*) azt jelzi, hogy le van tiltva.\n"
 "\n"
 
-#: builtins/history.def:154
+#: builtins/history.def:155
 msgid "cannot use more than one of -anrw"
 msgstr "a következő kapcsolók kizárják egymást: -anrw"
 
-#: builtins/history.def:186
+#: builtins/history.def:187
 msgid "history position"
 msgstr "előzménypozíció"
 
-#: builtins/history.def:371
+#: builtins/history.def:264
+#, fuzzy, c-format
+msgid "%s: invalid timestamp"
+msgstr "%s: érvénytelen argumentum"
+
+#: builtins/history.def:375
 #, c-format
 msgid "%s: history expansion failed"
 msgstr "%s: sikertelen előzményből való kiegészítés"
@@ -584,56 +592,56 @@ msgstr "%s: érvénytelen tömbkezdet"
 msgid "%s: invalid callback quantum"
 msgstr "%s: érvénytelen parancshívási távolság"
 
-#: builtins/mapfile.def:349
+#: builtins/mapfile.def:350
 msgid "empty array variable name"
 msgstr "üres tömbváltozó-név"
 
-#: builtins/mapfile.def:370
+#: builtins/mapfile.def:371
 msgid "array variable support required"
 msgstr "a tömbök használata nincs támogatva"
 
-#: builtins/printf.def:410
+#: builtins/printf.def:412
 #, c-format
 msgid "`%s': missing format character"
 msgstr "„%s”: hiányzó formátumkarakter"
 
-#: builtins/printf.def:464
-#, fuzzy, c-format
+#: builtins/printf.def:467
+#, c-format
 msgid "`%c': invalid time format specification"
-msgstr "%s: érvénytelen időkorlát-megadás"
+msgstr "„%c”: érvénytelen időformátum-megadás"
 
-#: builtins/printf.def:666
+#: builtins/printf.def:669
 #, c-format
 msgid "`%c': invalid format character"
 msgstr "„%c”: érvénytelen formátumkarakter"
 
-#: builtins/printf.def:692
+#: builtins/printf.def:695
 #, c-format
 msgid "warning: %s: %s"
 msgstr "figyelmeztetés: %s: %s"
 
-#: builtins/printf.def:778
+#: builtins/printf.def:781
 #, c-format
 msgid "format parsing problem: %s"
-msgstr ""
+msgstr "formátumfeldolgozási probléma: %s"
 
-#: builtins/printf.def:875
+#: builtins/printf.def:878
 msgid "missing hex digit for \\x"
 msgstr "hiányzó hexadecimális számjegy a következőhöz: \\x"
 
-#: builtins/printf.def:890
-#, fuzzy, c-format
+#: builtins/printf.def:893
+#, c-format
 msgid "missing unicode digit for \\%c"
-msgstr "hiányzó hexadecimális számjegy a következőhöz: \\x"
+msgstr "hiányzó unicode számjegy a következőhöz: \\%c"
 
 #: builtins/pushd.def:199
 msgid "no other directory"
 msgstr "nincs másik könyvtár"
 
 #: builtins/pushd.def:360
-#, fuzzy, c-format
+#, c-format
 msgid "%s: invalid argument"
-msgstr "%s: érvénytelen korlátérték"
+msgstr "%s: érvénytelen argumentum"
 
 #: builtins/pushd.def:475
 msgid "<no current directory>"
@@ -670,20 +678,22 @@ msgid ""
 "by\n"
 "\tdirs when invoked without options, starting with zero."
 msgstr ""
-"Megjeleníti a jelenleg megjegyzett könyvtárakat. A könyvtárakat a „pushd”\n"
-"paranccsal lehet a verembe rakni; és a „popd” paranccsal kivenni.\n"
+"Megjeleníti a jelenleg megjegyzett könyvtárakat. A könyvtárakat a\n"
+"    „pushd” paranccsal lehet a verembe rakni; és a „popd” paranccsal "
+"kivenni.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -c       a könyvtárverem törlése az összes elem eltávolításával\n"
-"      -l       a saját könyvtárat ne rövidítse a listázáskor egy tilde (~)\n"
-"      -p       a könyvtárverem kiírása soronként egy elemmel\n"
-"      -v       a könyvtárverem kiírása soronként egy elemmel, a vermen\n"
-"               belüli pozíció jelölésével\n"
+"      -c\ta könyvtárverem törlése az összes elem eltávolításával\n"
+"      -l\ta saját könyvtárat ne rövidítse a listázáskor egy tilde (~)\n"
+"      -p\ta könyvtárverem kiírása soronként egy elemmel\n"
+"      -v\ta könyvtárverem kiírása soronként egy elemmel, a vermen\n"
+"    \tbelüli pozíció jelölésével\n"
 "    \n"
 "    Argumentumok:\n"
-"      +N       N darab bejegyzést jelenít meg az argumentum nélkül a dirs\n"
-"               által megjelenített listán balról számolva, nullától kezdve\n"
-"      -N       N darab bejegyzést jelenít meg a listából jobbról számolva"
+"      +N\tN darab bejegyzést jelenít meg az argumentum nélkül a dirs\n"
+"    \táltal megjelenített listán balról számolva, nullától kezdve.\n"
+"      -N\tN darab bejegyzést jelenít meg az argumentum nélkül a dirs\n"
+"    \táltal megjelenített listán jobbról számolva, nullától kezdve."
 
 #: builtins/pushd.def:718
 msgid ""
@@ -709,25 +719,25 @@ msgid ""
 "    \n"
 "    The `dirs' builtin displays the directory stack."
 msgstr ""
-"Egy könyvtárat tesz a könyvtárverem tetejére, vagy forgatja a vermet, az új\n"
-"felső elemmé a jelenlegi munkakönyvtárat téve. Argumentumok nélkül hívva a\n"
-"két felső könyvtárat cseréli meg.\n"
+"Egy könyvtárat tesz a könyvtárverem tetejére, vagy forgatja a vermet,\n"
+"    az új felső elemmé a jelenlegi munkakönyvtárat téve. Argumentumok\n"
+"    nélkül hívva a két felső könyvtárat cseréli meg.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -n       Ne váltson könyvtárat hozzáadáskor, vagyis csak a\n"
-"       vermet változtassa.\n"
+"      -n\tNe váltson könyvtárat hozzáadáskor, vagyis csak a\n"
+"    \tvermet változtassa.\n"
 "    \n"
 "    Argumentumok:\n"
-"      +N       Úgy forgatja a vermet, hogy az N-edik könyvtár (0-tól\n"
-"       kezdve, a „dirs” által kiírt listán balról számolva)\n"
-"       kerüljön a verem tetejére.\n"
+"      +N\tÚgy forgatja a vermet, hogy az N-edik könyvtár (0-tól\n"
+"    \tkezdve, a „dirs” által kiírt listán balról számolva)\n"
+"    \tkerüljön a verem tetejére.\n"
 "    \n"
-"      -N       Úgy forgatja a vermet, hogy az N-edik könyvtár (0-tól\n"
-"       kezdve, a „dirs” által kiírt listán jobbról számolva)\n"
-"       kerüljön a verem tetejére.\n"
+"      -N\tÚgy forgatja a vermet, hogy az N-edik könyvtár (0-tól\n"
+"    \tkezdve, a „dirs” által kiírt listán jobbról számolva)\n"
+"    \tkerüljön a verem tetejére.\n"
 "    \n"
-"      dir      A verem tetejére helyezi KTÁR könyvtárat, és ugyanezt\n"
-"       állítja be új munkakönyvtárnak.\n"
+"      dir\tA verem tetejére helyezi KTÁR könyvtárat, és ugyanezt\n"
+"    \tállítja be új munkakönyvtárnak.\n"
 "    \n"
 "    A „dirs” beépített parancs listázza a könyvtárvermet."
 
@@ -751,20 +761,20 @@ msgid ""
 "    \n"
 "    The `dirs' builtin displays the directory stack."
 msgstr ""
-"Elemeket vesz ki a könyvtárveremből. Argumentumok nélkül kiveszi a legfel-\n"
-"ső elemet, és a kivett elemre állítja az új munkakönyvtárat.\n"
+"Elemeket vesz ki a könyvtárveremből. Argumentumok nélkül kiveszi a\n"
+"    legfelső elemet, és a kivett elemre állítja az új munkakönyvtárat.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -n   Ne váltson könyvtárat eltávolításkor, vagyis csak a vermet\n"
-"           változtassa.\n"
+"      -n\tNe váltson könyvtárat eltávolításkor, vagyis csak a vermet\n"
+"    \tváltoztassa.\n"
 "    \n"
 "    Argumentumok:\n"
-"      +N   Eltávolítja az N-edik elemet a „dirs” által kiírt listán, nullá-\n"
-"           tól, balról számolva. Pl. a „popd +0” az első, míg a „popd +1” a\n"
-"           könyvtárat távolítja el.\n"
-"      -N   Eltávolítja az N-edik elemet a „dirs” által kiírt listán, nullá-\n"
-"           tól, jobbról számolva. Pl. a „popd -0” az utolsó, a „popd -1” az\n"
-"           utolsó előtti könyvtárat távolítja el.\n"
+"      +N\tEltávolítja az N-edik elemet a „dirs” által kiírt listán,\n"
+"    \tnullától, balról számolva. Pl. a „popd +0” az első, míg a\n"
+"    \t„popd +1” a második könyvtárat távolítja el.\n"
+"      -N\tEltávolítja az N-edik elemet a „dirs” által kiírt listán,\n"
+"    \tnullától, jobbról számolva. Pl. a „popd -0” az utolsó,\n"
+"    \ta „popd -1” az utolsó előtti könyvtárat távolítja el.\n"
 "    \n"
 "    A „dirs” beépített parancs listázza a könyvtárvermet."
 
@@ -773,7 +783,7 @@ msgstr ""
 msgid "%s: invalid timeout specification"
 msgstr "%s: érvénytelen időkorlát-megadás"
 
-#: builtins/read.def:695
+#: builtins/read.def:696
 #, c-format
 msgid "read error: %d: %s"
 msgstr "olvasási hiba: %d: %s"
@@ -784,45 +794,45 @@ msgstr ""
 "csak függvényből vagy source-olt parancsfájlból lehet „return”-nel "
 "visszatérni"
 
-#: builtins/set.def:829
+#: builtins/set.def:831
 msgid "cannot simultaneously unset a function and a variable"
 msgstr "nem lehet egyszerre függvényt és változót megszüntetni"
 
-#: builtins/set.def:876
+#: builtins/set.def:878
 #, c-format
 msgid "%s: cannot unset"
 msgstr "%s: nem szüntethető meg"
 
-#: builtins/set.def:897
+#: builtins/set.def:899
 #, c-format
 msgid "%s: cannot unset: readonly %s"
 msgstr "%s: nem szüntethető meg: csak olvasható %s"
 
-#: builtins/set.def:910
+#: builtins/set.def:912
 #, c-format
 msgid "%s: not an array variable"
 msgstr "%s: nem egy tömbváltozó"
 
-#: builtins/setattr.def:188
+#: builtins/setattr.def:191
 #, c-format
 msgid "%s: not a function"
 msgstr "%s: nem függvény"
 
-#: builtins/setattr.def:193
-#, fuzzy, c-format
+#: builtins/setattr.def:196
+#, c-format
 msgid "%s: cannot export"
-msgstr "%s: nem szüntethető meg"
+msgstr "%s: nem exportálható"
 
 #: builtins/shift.def:73 builtins/shift.def:79
 msgid "shift count"
 msgstr "shift-szám"
 
-#: builtins/shopt.def:283
+#: builtins/shopt.def:286
 msgid "cannot set and unset shell options simultaneously"
 msgstr ""
 "nem lehet egyszerre beállítani és törölni parancsértelmező-beállításokat"
 
-#: builtins/shopt.def:350
+#: builtins/shopt.def:353
 #, c-format
 msgid "%s: invalid shell option name"
 msgstr "%s: érvénytelen parancsértelmezőkapcsoló-név"
@@ -836,88 +846,88 @@ msgstr "fájlnévargumentum szükséges"
 msgid "%s: file not found"
 msgstr "%s: a fájl nem található"
 
-#: builtins/suspend.def:101
+#: builtins/suspend.def:102
 msgid "cannot suspend"
 msgstr "nem lehet szüneteltetni"
 
-#: builtins/suspend.def:111
+#: builtins/suspend.def:112
 msgid "cannot suspend a login shell"
 msgstr "nem lehet bejelentkező parancsértelmezőt szüneteltetni"
 
-#: builtins/type.def:235
+#: builtins/type.def:236
 #, c-format
 msgid "%s is aliased to `%s'\n"
 msgstr "%s egy alias a következőre: „%s”\n"
 
-#: builtins/type.def:256
+#: builtins/type.def:257
 #, c-format
 msgid "%s is a shell keyword\n"
-msgstr "%s nem parancsértelmező-kulcsszó\n"
+msgstr "%s egy parancsértelmező-kulcsszó\n"
 
-#: builtins/type.def:275
+#: builtins/type.def:276
 #, c-format
 msgid "%s is a function\n"
 msgstr "%s egy függvény\n"
 
-#: builtins/type.def:299
-#, fuzzy, c-format
+#: builtins/type.def:300
+#, c-format
 msgid "%s is a special shell builtin\n"
-msgstr "%s egy beépített parancs\n"
+msgstr "%s egy speciális beépített parancs\n"
 
-#: builtins/type.def:301
+#: builtins/type.def:302
 #, c-format
 msgid "%s is a shell builtin\n"
 msgstr "%s egy beépített parancs\n"
 
-#: builtins/type.def:323 builtins/type.def:408
+#: builtins/type.def:324 builtins/type.def:409
 #, c-format
 msgid "%s is %s\n"
-msgstr "%s egy %s\n"
+msgstr "%s: %s\n"
 
-#: builtins/type.def:343
+#: builtins/type.def:344
 #, c-format
 msgid "%s is hashed (%s)\n"
 msgstr "%s hashelve van (%s)\n"
 
-#: builtins/ulimit.def:397
+#: builtins/ulimit.def:398
 #, c-format
 msgid "%s: invalid limit argument"
 msgstr "%s: érvénytelen korlátérték"
 
-#: builtins/ulimit.def:423
+#: builtins/ulimit.def:424
 #, c-format
 msgid "`%c': bad command"
 msgstr "„%c”: érvénytelen parancs"
 
-#: builtins/ulimit.def:452
+#: builtins/ulimit.def:453
 #, c-format
 msgid "%s: cannot get limit: %s"
 msgstr "%s: nem kérdezhető le a korlát: %s"
 
-#: builtins/ulimit.def:478
+#: builtins/ulimit.def:479
 msgid "limit"
 msgstr "korlát"
 
-#: builtins/ulimit.def:490 builtins/ulimit.def:790
+#: builtins/ulimit.def:491 builtins/ulimit.def:791
 #, c-format
 msgid "%s: cannot modify limit: %s"
 msgstr "%s: nem módosítható a korlát: %s"
 
-#: builtins/umask.def:114
+#: builtins/umask.def:115
 msgid "octal number"
 msgstr "oktális szám"
 
-#: builtins/umask.def:231
+#: builtins/umask.def:232
 #, c-format
 msgid "`%c': invalid symbolic mode operator"
 msgstr "„%c”: érvénytelen szimbolikus módoperátor"
 
-#: builtins/umask.def:286
+#: builtins/umask.def:287
 #, c-format
 msgid "`%c': invalid symbolic mode character"
 msgstr "„%c”: érvénytelen szimbolikus módkarakter"
 
-#: error.c:90 error.c:347 error.c:349 error.c:351
+#: error.c:90 error.c:348 error.c:350 error.c:352
 msgid " line "
 msgstr " sor: "
 
@@ -931,97 +941,98 @@ msgstr "utolsó parancs: %s\n"
 msgid "Aborting..."
 msgstr "Megszakítás..."
 
-#: error.c:287
+#. TRANSLATORS: this is a prefix for informational messages.
+#: error.c:288
 #, c-format
 msgid "INFORM: "
-msgstr ""
+msgstr "INFORM: "
 
-#: error.c:462
+#: error.c:463
 msgid "unknown command error"
 msgstr "hiba: érvénytelen parancs"
 
-#: error.c:463
+#: error.c:464
 msgid "bad command type"
 msgstr "hibás parancstípus"
 
-#: error.c:464
+#: error.c:465
 msgid "bad connector"
 msgstr "hibás csatlakozó"
 
-#: error.c:465
+#: error.c:466
 msgid "bad jump"
 msgstr "hibás ugrás"
 
-#: error.c:503
+#: error.c:504
 #, c-format
 msgid "%s: unbound variable"
 msgstr "%s: kötetlen változó"
 
-#: eval.c:192
+#: eval.c:209
 #, c-format
 msgid "\atimed out waiting for input: auto-logout\n"
 msgstr "\aidőtúllépés bemenetre várva: automatikus kijelentkezés\n"
 
-#: execute_cmd.c:538
+#: execute_cmd.c:527
 #, c-format
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr "szabványos bemenet /dev/null-ra állítása sikertelen: %s"
 
-#: execute_cmd.c:1284
+#: execute_cmd.c:1273
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "IDŐFORMÁTUM: „%c”: érvénytelen formátumkarakter"
 
-#: execute_cmd.c:2350
+#: execute_cmd.c:2344
 msgid "pipe error"
 msgstr "hibás csővezeték"
 
-#: execute_cmd.c:4426
+#: execute_cmd.c:4430
 #, c-format
 msgid "eval: maximum eval nesting level exceeded (%d)"
-msgstr ""
+msgstr "eval: a maximális eval beágyazási szint túllépve (%d)"
 
-#: execute_cmd.c:4438
+#: execute_cmd.c:4442
 #, c-format
 msgid "%s: maximum source nesting level exceeded (%d)"
-msgstr ""
+msgstr "%s: a maximális source beágyazási szint túllépve (%d)"
 
-#: execute_cmd.c:4547
+#: execute_cmd.c:4550
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
-msgstr ""
+msgstr "%s: a maximális függvénybeágyazási szint túllépve (%d)"
 
-#: execute_cmd.c:5068
+#: execute_cmd.c:5077
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: korlátozott: nem adható meg „/” a parancsok nevében"
 
-#: execute_cmd.c:5156
+#: execute_cmd.c:5165
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: parancs nem található"
 
-#: execute_cmd.c:5391
-#, fuzzy, c-format
+#: execute_cmd.c:5402
+#, c-format
 msgid "%s: %s"
-msgstr "%s egy %s\n"
+msgstr "%s: %s"
 
-#: execute_cmd.c:5428
+#: execute_cmd.c:5439
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: rossz parancsértelmező"
 
-#: execute_cmd.c:5465
-#, fuzzy, c-format
+#: execute_cmd.c:5476
+#, c-format
 msgid "%s: cannot execute binary file: %s"
-msgstr "%s: bináris nem hajtható végre"
+msgstr "%s: a bináris nem hajtható végre: %s"
 
-#: execute_cmd.c:5542
-#, fuzzy, c-format
+#: execute_cmd.c:5553
+#, c-format
 msgid "`%s': is a special builtin"
-msgstr "%s egy beépített parancs\n"
+msgstr "„%s”: egy speciális beépített parancs"
 
-#: execute_cmd.c:5594
+#: execute_cmd.c:5605
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "nem lehet duplikálni a(z) %d. fájlleírót a(z) %d. helyre"
@@ -1066,37 +1077,37 @@ msgstr "prefix növelés vagy csökkentés után azonosító kell következzen"
 msgid "missing `)'"
 msgstr "hiányzó „)”"
 
-#: expr.c:1053 expr.c:1390
+#: expr.c:1053 expr.c:1393
 msgid "syntax error: operand expected"
 msgstr "szintaktikai hiba: operandus kell következzen"
 
-#: expr.c:1392
+#: expr.c:1395
 msgid "syntax error: invalid arithmetic operator"
 msgstr "szintaktikai hiba: érvénytelen aritmetikai operátor"
 
-#: expr.c:1416
+#: expr.c:1419
 #, c-format
 msgid "%s%s%s: %s (error token is \"%s\")"
 msgstr "%s%s%s: %s (hibás token: „%s”)"
 
-#: expr.c:1474
+#: expr.c:1477
 msgid "invalid arithmetic base"
 msgstr "érvénytelen számrendszer"
 
-#: expr.c:1494
+#: expr.c:1497
 msgid "value too great for base"
 msgstr "túl nagy érték a számrendszerhez"
 
-#: expr.c:1543
+#: expr.c:1546
 #, c-format
 msgid "%s: expression error\n"
 msgstr "%s: hibás kifejezés\n"
 
-#: general.c:67
+#: general.c:68
 msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: nem érhetőek el a szülőkönyvtárak"
 
-#: input.c:102 subst.c:5558
+#: input.c:102 subst.c:5763
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "nem lehet újraindítani a nodelay módot a(z) %d. fájlleíróhoz"
@@ -1112,148 +1123,148 @@ msgstr ""
 msgid "save_bash_input: buffer already exists for new fd %d"
 msgstr "save_bash_input: már van puffer a(z) %d. fájlleíróhoz"
 
-#: jobs.c:509
+#: jobs.c:521
 msgid "start_pipeline: pgrp pipe"
 msgstr "start_pipeline: pgrp csővezeték"
 
-#: jobs.c:944
+#: jobs.c:1029
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr "a(z) %d számú forkolt pid a(z) %d számú munkában jelent meg"
 
-#: jobs.c:1063
+#: jobs.c:1148
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "%d. számú megállított munka törlése a %ld számú folyamatcsoporttal"
 
-#: jobs.c:1167
+#: jobs.c:1252
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
 msgstr "add_process: %5ld. folyamat (%s) a the_pipeline-ban"
 
-#: jobs.c:1170
+#: jobs.c:1255
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr "add_process: %5ld. folyamat (%s) még élőként van jelölve"
 
-#: jobs.c:1499
+#: jobs.c:1584
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "describe_pid: %ld: nincs ilyen pid"
 
-#: jobs.c:1514
+#: jobs.c:1599
 #, c-format
 msgid "Signal %d"
 msgstr "%d. szignál"
 
-#: jobs.c:1528 jobs.c:1554
+#: jobs.c:1613 jobs.c:1639
 msgid "Done"
 msgstr "Kész"
 
-#: jobs.c:1533 siglist.c:123
+#: jobs.c:1618 siglist.c:123
 msgid "Stopped"
 msgstr "Megállítva"
 
-#: jobs.c:1537
+#: jobs.c:1622
 #, c-format
 msgid "Stopped(%s)"
 msgstr "Megállítva(%s)"
 
-#: jobs.c:1541
+#: jobs.c:1626
 msgid "Running"
 msgstr "Fut"
 
-#: jobs.c:1558
+#: jobs.c:1643
 #, c-format
 msgid "Done(%d)"
 msgstr "Kész(%d)"
 
-#: jobs.c:1560
+#: jobs.c:1645
 #, c-format
 msgid "Exit %d"
 msgstr "Kilépett(%d)"
 
-#: jobs.c:1563
+#: jobs.c:1648
 msgid "Unknown status"
 msgstr "Ismeretlen állapot"
 
-#: jobs.c:1650
+#: jobs.c:1735
 #, c-format
 msgid "(core dumped) "
 msgstr "(core készült) "
 
-#: jobs.c:1669
+#: jobs.c:1754
 #, c-format
 msgid "  (wd: %s)"
 msgstr " (mk: %s)"
 
-#: jobs.c:1893
+#: jobs.c:1978
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr "gyermek setpgid (innen: %ld ide: %ld)"
 
-#: jobs.c:2242 nojobs.c:639
+#: jobs.c:2336 nojobs.c:648
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: %ld. számú folyamat nem gyermeke ennek a parancsértelmezőnek"
 
-#: jobs.c:2497
+#: jobs.c:2591
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for: Nincs bejegyzés %ld. számú folyamatról"
 
-#: jobs.c:2815
+#: jobs.c:2909
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: %d. számú munka le lett állítva"
 
-#: jobs.c:3107
+#: jobs.c:3201
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: a munka be lett fejezve"
 
-#: jobs.c:3116
+#: jobs.c:3210
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: %d. számú munka már a háttérben van"
 
-#: jobs.c:3341
+#: jobs.c:3435
 msgid "waitchld: turning on WNOHANG to avoid indefinite block"
 msgstr "waitchld: WNOHANG bekapcsolása a korlátlan blokk elkerülésére"
 
-#: jobs.c:3855
+#: jobs.c:3948
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s: %d. sor: "
 
-#: jobs.c:3869 nojobs.c:882
+#: jobs.c:3962 nojobs.c:891
 #, c-format
 msgid " (core dumped)"
 msgstr " (core készült)"
 
-#: jobs.c:3881 jobs.c:3894
+#: jobs.c:3974 jobs.c:3987
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(mk most: %s)\n"
 
-#: jobs.c:3926
+#: jobs.c:4019
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: getpgrp sikertelen"
 
-#: jobs.c:3989
+#: jobs.c:4082
 msgid "initialize_job_control: line discipline"
 msgstr "initialize_job_control: line discipline"
 
-#: jobs.c:3999
+#: jobs.c:4092
 msgid "initialize_job_control: setpgid"
 msgstr "initialize_job_control: setpgid"
 
-#: jobs.c:4020 jobs.c:4029
+#: jobs.c:4113 jobs.c:4122
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "nem állítható be a terminál folyamatcsoportja (%d)"
 
-#: jobs.c:4034
+#: jobs.c:4127
 msgid "no job control in this shell"
 msgstr "nincsen munkakezelés ebben a parancsértelmezőben"
 
@@ -1378,131 +1389,131 @@ msgstr "Új levél a következőben: $_"
 msgid "The mail in %s has been read\n"
 msgstr "A(z) „%s” helyen lévő levél el van olvasva\n"
 
-#: make_cmd.c:326
+#: make_cmd.c:329
 msgid "syntax error: arithmetic expression required"
 msgstr "szintaktikai hiba: aritmetikai kifejezés szükséges"
 
-#: make_cmd.c:328
+#: make_cmd.c:331
 msgid "syntax error: `;' unexpected"
 msgstr "szintaktikai hiba: váratlan „;”"
 
-#: make_cmd.c:329
+#: make_cmd.c:332
 #, c-format
 msgid "syntax error: `((%s))'"
 msgstr "szintaktikai hiba: „((%s))”"
 
-#: make_cmd.c:581
+#: make_cmd.c:584
 #, c-format
 msgid "make_here_document: bad instruction type %d"
 msgstr "make_here_document: hibás utasítástípus: %d"
 
-#: make_cmd.c:665
+#: make_cmd.c:669
 #, c-format
 msgid "here-document at line %d delimited by end-of-file (wanted `%s')"
 msgstr "a(z) %d. sorban kezdett heredocot EOF zárja („%s” helyett)"
 
-#: make_cmd.c:763
+#: make_cmd.c:768
 #, c-format
 msgid "make_redirection: redirection instruction `%d' out of range"
 msgstr "make_redirection: %d. átirányító utasítás kívül esik a tartományon"
 
-#: parse.y:2685
+#: parse.y:2691
 msgid "maximum here-document count exceeded"
-msgstr ""
+msgstr "a maximális here-document szám túllépve"
 
-#: parse.y:3370 parse.y:3653
+#: parse.y:3379 parse.y:3662
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "váratlan EOF „%c” helyett"
 
-#: parse.y:4270
+#: parse.y:4279
 msgid "unexpected EOF while looking for `]]'"
 msgstr "váratlan EOF „]]” helyett"
 
-#: parse.y:4275
+#: parse.y:4284
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr "szintaktikai hiba a feltételben: váratlan token: „%s”"
 
-#: parse.y:4279
+#: parse.y:4288
 msgid "syntax error in conditional expression"
 msgstr "szintaktikai hiba a feltételben"
 
-#: parse.y:4357
+#: parse.y:4366
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr "váratlan token (%s) „)” helyett"
 
-#: parse.y:4361
+#: parse.y:4370
 msgid "expected `)'"
 msgstr "„)” szükséges"
 
-#: parse.y:4389
+#: parse.y:4398
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr "váratlan argumentum (%s) feltételes egyoperandusú operátorhoz"
 
-#: parse.y:4393
+#: parse.y:4402
 msgid "unexpected argument to conditional unary operator"
 msgstr "váratlan argumentum feltételes egyoperandusú operátorhoz"
 
-#: parse.y:4439
+#: parse.y:4448
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr "váratlan token (%s), feltételes kétoperandusú operátor szükséges"
 
-#: parse.y:4443
+#: parse.y:4452
 msgid "conditional binary operator expected"
 msgstr "feltételes kétoperandusú operátor szükséges"
 
-#: parse.y:4465
+#: parse.y:4474
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr "váratlan argumentum (%s) feltételes kétoperandusú operátorhoz"
 
-#: parse.y:4469
+#: parse.y:4478
 msgid "unexpected argument to conditional binary operator"
 msgstr "váratlan argumentum feltételes kétoperandusú operátorhoz"
 
-#: parse.y:4480
+#: parse.y:4489
 #, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr "váratlan token (%c) feltételes parancsban"
 
-#: parse.y:4483
+#: parse.y:4492
 #, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr "váratlan token (%s) feltételes parancsban"
 
-#: parse.y:4487
+#: parse.y:4496
 #, c-format
 msgid "unexpected token %d in conditional command"
 msgstr "váratlan token (%d) feltételes parancsban"
 
-#: parse.y:5841
+#: parse.y:5853
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "szintaktikai hiba „%s” váratlan token közelében"
 
-#: parse.y:5859
+#: parse.y:5871
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "szintaktikai hiba „%s” közelében"
 
-#: parse.y:5869
+#: parse.y:5881
 msgid "syntax error: unexpected end of file"
 msgstr "szintaktikai hiba: váratlan fájlvége"
 
-#: parse.y:5869
+#: parse.y:5881
 msgid "syntax error"
 msgstr "szintaktikai hiba"
 
-#: parse.y:5931
+#: parse.y:5943
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "„%s” használatával lehet elhagyni a parancsértelmezőt.\n"
 
-#: parse.y:6093
+#: parse.y:6105
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "váratlan EOF „)” helyett"
 
@@ -1577,96 +1588,97 @@ msgstr "/dev/(tcp|udp)/host/port nincs támogatva hálózat nélkül"
 msgid "redirection error: cannot duplicate fd"
 msgstr "átirányítási hiba: nem lehet duplikálni a fájlleírót"
 
-#: shell.c:342
+#: shell.c:344
 msgid "could not find /tmp, please create!"
 msgstr "nem található /tmp, hozza létre!"
 
-#: shell.c:346
+#: shell.c:348
 msgid "/tmp must be a valid directory name"
 msgstr "/tmp érvényes könyvtárnév kell legyen"
 
-#: shell.c:902
+#: shell.c:904
 #, c-format
 msgid "%c%c: invalid option"
 msgstr "%c%c: érvénytelen kapcsoló"
 
-#: shell.c:1257
-#, fuzzy, c-format
+#: shell.c:1259
+#, c-format
 msgid "cannot set uid to %d: effective uid %d"
-msgstr "nem lehet újraindítani a nodelay módot a(z) %d. fájlleíróhoz"
+msgstr "az uid nem állítható be %d értékre: a hatásos uid %d"
 
-#: shell.c:1264
-#, fuzzy, c-format
+#: shell.c:1266
+#, c-format
 msgid "cannot set gid to %d: effective gid %d"
-msgstr "nem lehet újraindítani a nodelay módot a(z) %d. fájlleíróhoz"
+msgstr "a gid nem állítható be %d értékre: a hatásos gid %d"
 
-#: shell.c:1539
-#, fuzzy, c-format
+#: shell.c:1541
+#, c-format
 msgid "%s: Is a directory"
-msgstr "%s egy könyvtár"
+msgstr "%s: ez egy könyvtár"
 
-#: shell.c:1744
+#: shell.c:1752
 msgid "I have no name!"
 msgstr "Nincs nevem!"
 
-#: shell.c:1895
+#: shell.c:1905
 #, c-format
 msgid "GNU bash, version %s-(%s)\n"
 msgstr "GNU bash, %s-(%s) verzió\n"
 
-#: shell.c:1896
+#: shell.c:1906
 #, c-format
 msgid ""
 "Usage:\t%s [GNU long option] [option] ...\n"
 "\t%s [GNU long option] [option] script-file ...\n"
 msgstr ""
-"Használat:     %s [GNU hosszú kapcsoló] [kapcsoló] ...\n"
-"       %s [GNU hosszú kapcsoló] [kapcsoló] parancsfájl ...\n"
+"Használat:\t%s [GNU hosszú kapcsoló] [kapcsoló] ...\n"
+"\t%s [GNU hosszú kapcsoló] [kapcsoló] parancsfájl ...\n"
 
-#: shell.c:1898
+#: shell.c:1908
 msgid "GNU long options:\n"
 msgstr "GNU hosszú kapcsolók:\n"
 
-#: shell.c:1902
+#: shell.c:1912
 msgid "Shell options:\n"
 msgstr "Parancsértelmező-kapcsolók:\n"
 
-#: shell.c:1903
-#, fuzzy
+#: shell.c:1913
 msgid "\t-ilrsD or -c command or -O shopt_option\t\t(invocation only)\n"
-msgstr "\t-irsD vagy -c parancs vagy -O shopt_option\t\t(csak hívás)\n"
+msgstr "\t-ilrsD vagy -c parancs vagy -O shopt_option\t\t(csak hívás)\n"
 
-#: shell.c:1918
+#: shell.c:1928
 #, c-format
 msgid "\t-%s or -o option\n"
 msgstr "\t-%s vagy -o kapcsoló\n"
 
-#: shell.c:1924
+#: shell.c:1934
 #, c-format
 msgid "Type `%s -c \"help set\"' for more information about shell options.\n"
 msgstr ""
 "A „%s -c \"help set\"” további információt ad a parancsértelmező-"
 "beállításokról.\n"
 
-#: shell.c:1925
+#: shell.c:1935
 #, c-format
 msgid "Type `%s -c help' for more information about shell builtin commands.\n"
 msgstr "A „%s -c help” további információt ad a beépített parancsokról.\n"
 
-#: shell.c:1926
+#: shell.c:1936
 #, c-format
 msgid "Use the `bashbug' command to report bugs.\n"
 msgstr "A „bashbug” paranccsal jelenthet hibákat.\n"
 
-#: shell.c:1928
+#: shell.c:1938
 #, c-format
 msgid "bash home page: <http://www.gnu.org/software/bash>\n"
-msgstr ""
+msgstr "a bash honlapja: <http://www.gnu.org/software/bash>\n"
 
-#: shell.c:1929
+#: shell.c:1939
 #, c-format
 msgid "General help using GNU software: <http://www.gnu.org/gethelp/>\n"
 msgstr ""
+"Általános segítség a GNU szoftverek használatához: <http://www.gnu.org/"
+"gethelp/>\n"
 
 #: sig.c:703
 #, c-format
@@ -1842,82 +1854,82 @@ msgstr "Ismeretlen szignál #"
 msgid "Unknown Signal #%d"
 msgstr "%d. számú ismeretlen szignál"
 
-#: subst.c:1401 subst.c:1559
+#: subst.c:1415 subst.c:1573
 #, c-format
 msgid "bad substitution: no closing `%s' in %s"
 msgstr "hibás helyettesítés: nincs záró „%s” a következőben: %s"
 
-#: subst.c:2910
+#: subst.c:3099
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr "%s: lista nem adható tömbelemnek értékül"
 
-#: subst.c:5449 subst.c:5465
+#: subst.c:5645 subst.c:5661
 msgid "cannot make pipe for process substitution"
 msgstr "nem hozható létre a csővezeték a folyamatbehelyettesítéshez"
 
-#: subst.c:5498
+#: subst.c:5703
 msgid "cannot make child for process substitution"
 msgstr "nem hozható létre a gyermek a folyamatbehelyettesítéshez"
 
-#: subst.c:5548
+#: subst.c:5753
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "nem nyitható meg olvasásra a(z) %s csővezeték"
 
-#: subst.c:5550
+#: subst.c:5755
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "nem nyitható meg írásra a(z) %s csővezeték"
 
-#: subst.c:5568
+#: subst.c:5778
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "nem duplikálható a(z) %s csővezeték %d. fájlleíróként"
 
-#: subst.c:5775
+#: subst.c:5988
 msgid "cannot make pipe for command substitution"
 msgstr "nem hozható létre csővezeték a parancsbehelyettesítéshez"
 
-#: subst.c:5814
+#: subst.c:6027
 msgid "cannot make child for command substitution"
 msgstr "nem hozható létre gyermek a parancsbehelyettesítéshez"
 
-#: subst.c:5833
+#: subst.c:6050
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr "command_substitute: nem duplikálható a csővezeték 1. fájlleíróként"
 
-#: subst.c:6343 subst.c:8032 subst.c:8052
+#: subst.c:6560 subst.c:8222 subst.c:8242
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: rossz helyettesítés"
 
-#: subst.c:6455
-#, fuzzy, c-format
+#: subst.c:6682
+#, c-format
 msgid "%s: invalid indirect expansion"
-msgstr "%s: sorok száma érvénytelen"
+msgstr "%s: az indirekt kiegészítés érvénytelen"
 
-#: subst.c:6462
-#, fuzzy, c-format
+#: subst.c:6689
+#, c-format
 msgid "%s: invalid variable name"
-msgstr "„%s”: érvénytelen alias-név"
+msgstr "%s: érvénytelen változónév"
 
-#: subst.c:6509
+#: subst.c:6736
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: a paraméter null vagy nincs beállítva"
 
-#: subst.c:6781 subst.c:6796
+#: subst.c:6971 subst.c:6986
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: részkarakterlánc-kifejezés < 0"
 
-#: subst.c:8130
+#: subst.c:8320
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: nem lehet így értéket adni"
 
-#: subst.c:8469
+#: subst.c:8659
 msgid ""
 "future versions of the shell will force evaluation as an arithmetic "
 "substitution"
@@ -1925,12 +1937,12 @@ msgstr ""
 "a parancsértelmező későbbi verziói kötelezővé teszik majd az aritmetikai "
 "kiértékelést"
 
-#: subst.c:9009
+#: subst.c:9199
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "hibás helyettesítés: nincs záró „`” a következőben: %s"
 
-#: subst.c:9947
+#: subst.c:10139
 #, c-format
 msgid "no match: %s"
 msgstr "nincs találat: %s"
@@ -1967,23 +1979,23 @@ msgstr "%s: kétoperandusú operátor szükséges"
 msgid "missing `]'"
 msgstr "hiányzó „]”"
 
-#: trap.c:223
+#: trap.c:224
 msgid "invalid signal number"
 msgstr "érvénytelen szignálszám"
 
-#: trap.c:385
+#: trap.c:386
 #, c-format
 msgid "run_pending_traps: bad value in trap_list[%d]: %p"
 msgstr "run_pending_traps: rossz érték a trap_list[%d]-ban: %p"
 
-#: trap.c:389
+#: trap.c:390
 #, c-format
 msgid ""
 "run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself"
 msgstr ""
 "run_pending_traps: szignálkezelő a SIG_DFL, %d (%s) újraküldése önmagunknak"
 
-#: trap.c:442
+#: trap.c:443
 #, c-format
 msgid "trap_handler: bad signal %d"
 msgstr "trap_handler: rossz szignál: %d"
@@ -1993,83 +2005,82 @@ msgstr "trap_handler: rossz szignál: %d"
 msgid "error importing function definition for `%s'"
 msgstr "hiba a függvénydefiníció betöltésekor: „%s”"
 
-#: variables.c:801
+#: variables.c:810
 #, c-format
 msgid "shell level (%d) too high, resetting to 1"
 msgstr "a parancsértelmező szintje (%d) túl magas, visszaállítás 1-re"
 
-#: variables.c:1902
-#, fuzzy, c-format
+#: variables.c:1916
+#, c-format
 msgid "%s: circular name reference"
-msgstr "%s: %s: érvénytelen érték a trace fájlleíróhoz"
+msgstr "%s: körkörös névhivatkozás"
 
-#: variables.c:2314
+#: variables.c:2328
 msgid "make_local_variable: no function context at current scope"
 msgstr "make_local_variable: nincs függvénykörnyezet az aktuális látókörben"
 
-#: variables.c:2333
-#, fuzzy, c-format
+#: variables.c:2347
+#, c-format
 msgid "%s: variable may not be assigned value"
-msgstr "%s: nem lehet változóhoz fájlleírót rendelni"
+msgstr "%s: nem lehet a változóhoz értéket rendelni"
 
-#: variables.c:3739
+#: variables.c:3753
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: nincs függvénykörnyezet az aktuális látókörben"
 
-#: variables.c:4016
+#: variables.c:4030
 #, c-format
 msgid "%s has null exportstr"
 msgstr "%s exportstr-je null"
 
-#: variables.c:4021 variables.c:4030
+#: variables.c:4035 variables.c:4044
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "érvénytelen karakter (%d) %s exportstr-jében"
 
-#: variables.c:4036
+#: variables.c:4050
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "nincs „=” %s exportstr-jében"
 
-#: variables.c:4471
+#: variables.c:4495
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr "pop_var_context: shell_variables feje nem egy függvénykörnyezet"
 
-#: variables.c:4484
+#: variables.c:4508
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: nincs global_variables környezet"
 
-#: variables.c:4558
+#: variables.c:4582
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr "pop_scope: shell_variables feje nem egy átmeneti környezeti látókör"
 
-#: variables.c:5402
+#: variables.c:5426
 #, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: %s: nem nyitható meg FILE-ként"
 
-#: variables.c:5407
+#: variables.c:5431
 #, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%s: %s: érvénytelen érték a trace fájlleíróhoz"
 
-#: variables.c:5452
-#, fuzzy, c-format
+#: variables.c:5476
+#, c-format
 msgid "%s: %s: compatibility value out of range"
-msgstr "%s: %s kívül esik a tartományon"
+msgstr "%s: %s: a kompatibilitási érték kívül esik a tartományon"
 
 #: version.c:46
-#, fuzzy
 msgid "Copyright (C) 2015 Free Software Foundation, Inc."
-msgstr "Copyright © 2009 Free Software Foundation, Inc."
+msgstr "Copyright © 2015 Free Software Foundation, Inc."
 
 #: version.c:47 version2.c:47
 msgid ""
 "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl."
 "html>\n"
 msgstr ""
-"A licenc GPLv3+: a GNU GPL 3. vagy újabb változata <http://gnu.org/licenses/"
-"gpl.html>\n"
+"A licenc GPLv3+: a GNU GPL 3. vagy újabb változata\n"
+"<http://gnu.org/licenses/gpl.html>\n"
 
 #: version.c:86 version2.c:86
 #, c-format
@@ -2077,19 +2088,16 @@ msgid "GNU bash, version %s (%s)\n"
 msgstr "GNU bash, %s (%s) verzió\n"
 
 #: version.c:91 version2.c:91
-#, fuzzy
 msgid "This is free software; you are free to change and redistribute it."
-msgstr "Ez egy szabad szoftver, terjesztheti és/vagy módosíthatja.\n"
+msgstr "Ez egy szabad szoftver, terjesztheti és/vagy módosíthatja."
 
 #: version.c:92 version2.c:92
-#, fuzzy
 msgid "There is NO WARRANTY, to the extent permitted by law."
-msgstr "NINCS GARANCIA, a törvény által engedélyezett mértékig.\n"
+msgstr "NINCS GARANCIA, a törvény által engedélyezett mértékig."
 
 #: version2.c:46
-#, fuzzy
 msgid "Copyright (C) 2014 Free Software Foundation, Inc."
-msgstr "Copyright © 2009 Free Software Foundation, Inc."
+msgstr "Copyright © 2014 Free Software Foundation, Inc."
 
 #: xmalloc.c:91
 #, c-format
@@ -2111,132 +2119,117 @@ msgstr "%s: %s:%d nem lehetséges %lu byte foglalása (%lu byte lett foglalva)"
 msgid "%s: %s:%d: cannot allocate %lu bytes"
 msgstr "%s: %s:%d nem lehetséges %lu byte foglalása"
 
-#: builtins.c:43
+#: builtins.c:45
 msgid "alias [-p] [name[=value] ... ]"
 msgstr "alias [-p] [név[=érték] ... ]"
 
-#: builtins.c:47
+#: builtins.c:49
 msgid "unalias [-a] name [name ...]"
 msgstr "unalias [-a] név [név ...]"
 
-#: builtins.c:51
-#, fuzzy
+#: builtins.c:53
 msgid ""
 "bind [-lpsvPSVX] [-m keymap] [-f filename] [-q name] [-u name] [-r keyseq] [-"
 "x keyseq:shell-command] [keyseq:readline-function or readline-command]"
 msgstr ""
-"bind [-lpvsPVS] [-m kiosztás] [-f fájlnév] [-q név] [-u név] [-r billkomb] [-"
-"x billkomb:shell-parancs] [billkomb:readline-függvény vagy readline-parancs]"
+"bind [-lpsvPSVX] [-m kiosztás] [-f fájlnév] [-q név] [-u név] [-r billkomb] "
+"[-x billkomb:shell-parancs] [billkomb:readline-függvény vagy readline-"
+"parancs]"
 
-#: builtins.c:54
+#: builtins.c:56
 msgid "break [n]"
 msgstr "break [n]"
 
-#: builtins.c:56
+#: builtins.c:58
 msgid "continue [n]"
 msgstr "continue [n]"
 
-#: builtins.c:58
+#: builtins.c:60
 msgid "builtin [shell-builtin [arg ...]]"
 msgstr "builtin [shell-builtin [arg ...]]"
 
-#: builtins.c:61
+#: builtins.c:63
 msgid "caller [expr]"
 msgstr "caller [kif]"
 
-#: builtins.c:64
-#, fuzzy
-msgid "cd [-L|[-P [-e]] [-@]] [dir]"
-msgstr "cd [-L|-P] [ktár]"
-
 #: builtins.c:66
+msgid "cd [-L|[-P [-e]] [-@]] [dir]"
+msgstr "cd [-L|[-P [-e]] [-@]] [ktár]"
+
+#: builtins.c:68
 msgid "pwd [-LP]"
 msgstr "pwd [-LP]"
 
-#: builtins.c:68
-msgid ":"
-msgstr ":"
-
-#: builtins.c:70
-msgid "true"
-msgstr "true"
-
-#: builtins.c:72
-msgid "false"
-msgstr "false"
-
-#: builtins.c:74
+#: builtins.c:76
 msgid "command [-pVv] command [arg ...]"
 msgstr "command [-pVv] parancs [arg ...]"
 
-#: builtins.c:76
-#, fuzzy
-msgid "declare [-aAfFgilnrtux] [-p] [name[=value] ...]"
-msgstr "declare [-aAfFilrtux] [-p] [név[=érték] ...]"
-
 #: builtins.c:78
-#, fuzzy
-msgid "typeset [-aAfFgilnrtux] [-p] name[=value] ..."
-msgstr "typeset [-aAfFilrtux] [-p] név[=érték] ..."
+msgid "declare [-aAfFgilnrtux] [-p] [name[=value] ...]"
+msgstr "declare [-aAfFgilnrtux] [-p] [név[=érték] ...]"
 
 #: builtins.c:80
+msgid "typeset [-aAfFgilnrtux] [-p] name[=value] ..."
+msgstr "typeset [-aAfFgilnrtux] [-p] név[=érték] ..."
+
+#: builtins.c:82
 msgid "local [option] name[=value] ..."
 msgstr "local [kapcsoló] név[=érték] ..."
 
-#: builtins.c:83
+#: builtins.c:85
 msgid "echo [-neE] [arg ...]"
 msgstr "echo [-neE] [arg ...]"
 
-#: builtins.c:87
+#: builtins.c:89
 msgid "echo [-n] [arg ...]"
 msgstr "echo [-n] [arg ...]"
 
-#: builtins.c:90
+#: builtins.c:92
 msgid "enable [-a] [-dnps] [-f filename] [name ...]"
 msgstr "enable [-a] [-dnps] [-f fájlnév] [név ...]"
 
-#: builtins.c:92
+#: builtins.c:94
 msgid "eval [arg ...]"
 msgstr "eval [arg ...]"
 
-#: builtins.c:94
+#: builtins.c:96
 msgid "getopts optstring name [arg]"
 msgstr "getopts opciók név [arg]"
 
-#: builtins.c:96
+#: builtins.c:98
 msgid "exec [-cl] [-a name] [command [arguments ...]] [redirection ...]"
 msgstr "exec [-cl] [-a név] [parancs [argumentumok ...]] [átirányítás ...]"
 
-#: builtins.c:98
+#: builtins.c:100
 msgid "exit [n]"
 msgstr "exit [n]"
 
-#: builtins.c:100
+#: builtins.c:102
 msgid "logout [n]"
 msgstr "logout [n]"
 
-#: builtins.c:103
+#: builtins.c:105
 msgid "fc [-e ename] [-lnr] [first] [last] or fc -s [pat=rep] [command]"
 msgstr ""
 "fc [-e ename] [-lnr] [első] [utolsó] vagy fc -s [minta=csere] [parancs]"
 
-#: builtins.c:107
+#: builtins.c:109
 msgid "fg [job_spec]"
 msgstr "fg [munkaszám]"
 
-#: builtins.c:111
+#: builtins.c:113
 msgid "bg [job_spec ...]"
 msgstr "bg [munkaszám ...]"
 
-#: builtins.c:114
+#: builtins.c:116
 msgid "hash [-lr] [-p pathname] [-dt] [name ...]"
 msgstr "hash [-lr] [-p útvonal] [-dt] [név ...]"
 
-#: builtins.c:117
+#: builtins.c:119
 msgid "help [-dms] [pattern ...]"
 msgstr "help [-dms] [minta ...]"
 
-#: builtins.c:121
+#: builtins.c:123
 msgid ""
 "history [-c] [-d offset] [n] or history -anrw [filename] or history -ps arg "
 "[arg...]"
@@ -2244,15 +2237,16 @@ msgstr ""
 "history [-c] [-d szám] [n] vagy history -anrw [fájlnév] vagy history -ps arg "
 "[arg...]"
 
-#: builtins.c:125
+#: builtins.c:127
 msgid "jobs [-lnprs] [jobspec ...] or jobs -x command [args]"
 msgstr "jobs [-lnprs] [munkaszám ...] vagy jobs -x parancs [args]"
 
-#: builtins.c:129
-msgid "disown [-h] [-ar] [jobspec ...]"
+#: builtins.c:131
+#, fuzzy
+msgid "disown [-h] [-ar] [jobspec ... | pid ...]"
 msgstr "disown [-h] [-ar] [munkaszám ...]"
 
-#: builtins.c:132
+#: builtins.c:134
 msgid ""
 "kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l "
 "[sigspec]"
@@ -2260,117 +2254,107 @@ msgstr ""
 "kill [-s szignál | -n szignálszám | -szignál] pid | munkaszám ... vagy kill -"
 "l [szignál]"
 
-#: builtins.c:134
+#: builtins.c:136
 msgid "let arg [arg ...]"
 msgstr "let arg [arg ...]"
 
-#: builtins.c:136
+#: builtins.c:138
 msgid ""
 "read [-ers] [-a array] [-d delim] [-i text] [-n nchars] [-N nchars] [-p "
 "prompt] [-t timeout] [-u fd] [name ...]"
 msgstr ""
-"read [-ers] [-a tömb] [-d elválasztó] [-i szöveg] [-n nchars] [-N nchars] [-"
-"p prompt] [-t időkeret] [-u fd] [név ...]"
+"read [-ers] [-a tömb] [-d elválasztó] [-i szöveg] [-n szám] [-N szám] [-p "
+"prompt] [-t időkeret] [-u fd] [név ...]"
 
-#: builtins.c:138
+#: builtins.c:140
 msgid "return [n]"
 msgstr "return [n]"
 
-#: builtins.c:140
-#, fuzzy
-msgid "set [-abefhkmnptuvxBCHP] [-o option-name] [--] [arg ...]"
-msgstr "set [--abefhkmnptuvxBCHP] [-o beállításnév] [arg ...]"
-
 #: builtins.c:142
-#, fuzzy
-msgid "unset [-f] [-v] [-n] [name ...]"
-msgstr "unset [-f] [-v] [név ...]"
+msgid "set [-abefhkmnptuvxBCHP] [-o option-name] [--] [arg ...]"
+msgstr "set [--abefhkmnptuvxBCHP] [-o beállításnév] [--] [arg ...]"
 
 #: builtins.c:144
+msgid "unset [-f] [-v] [-n] [name ...]"
+msgstr "unset [-f] [-v] [-n] [név ...]"
+
+#: builtins.c:146
 msgid "export [-fn] [name[=value] ...] or export -p"
 msgstr "export [-fn] [név[=érték] ...] vagy export -p"
 
-#: builtins.c:146
-#, fuzzy
-msgid "readonly [-aAf] [name[=value] ...] or readonly -p"
-msgstr "readonly [-af] [név[=érték] ...] vagy readonly -p"
-
 #: builtins.c:148
+msgid "readonly [-aAf] [name[=value] ...] or readonly -p"
+msgstr "readonly [-aAf] [név[=érték] ...] vagy readonly -p"
+
+#: builtins.c:150
 msgid "shift [n]"
 msgstr "shift [n]"
 
-#: builtins.c:150
+#: builtins.c:152
 msgid "source filename [arguments]"
 msgstr "source fájlnév [argumentumok]"
 
-#: builtins.c:152
+#: builtins.c:154
 msgid ". filename [arguments]"
 msgstr ". fájlnév [argumentumok]"
 
-#: builtins.c:155
+#: builtins.c:157
 msgid "suspend [-f]"
 msgstr "suspend [-f]"
 
-#: builtins.c:158
-msgid "test [expr]"
-msgstr "test [expr]"
-
 #: builtins.c:160
+msgid "test [expr]"
+msgstr "test [kifejezés]"
+
+#: builtins.c:162
 msgid "[ arg... ]"
 msgstr "[ arg... ]"
 
-#: builtins.c:162
-msgid "times"
-msgstr "times"
-
-#: builtins.c:164
+#: builtins.c:166
 msgid "trap [-lp] [[arg] signal_spec ...]"
 msgstr "trap [-lp] [[arg] szignál ...]"
 
-#: builtins.c:166
+#: builtins.c:168
 msgid "type [-afptP] name [name ...]"
 msgstr "type [-afptP] név [név ...]"
 
-#: builtins.c:169
-#, fuzzy
+#: builtins.c:171
 msgid "ulimit [-SHabcdefiklmnpqrstuvxPT] [limit]"
-msgstr "ulimit [-SHacdefilmnpqrstuvx] [korlát]"
+msgstr "ulimit [-SHabcdefiklmnpqrstuvxPT] [korlát]"
 
-#: builtins.c:172
+#: builtins.c:174
 msgid "umask [-p] [-S] [mode]"
 msgstr "umask [-p] [-S] [mód]"
 
-#: builtins.c:175
-#, fuzzy
+#: builtins.c:177
 msgid "wait [-n] [id ...]"
-msgstr "wait [id]"
+msgstr "wait [-n] [id ...]"
 
-#: builtins.c:179
-#, fuzzy
+#: builtins.c:181
 msgid "wait [pid ...]"
-msgstr "wait [id]"
+msgstr "wait [pid ...]"
 
-#: builtins.c:182
+#: builtins.c:184
 msgid "for NAME [in WORDS ... ] ; do COMMANDS; done"
 msgstr "for NÉV [in SZAVAK ... ] ; do PARANCSOK; done"
 
-#: builtins.c:184
+#: builtins.c:186
 msgid "for (( exp1; exp2; exp3 )); do COMMANDS; done"
 msgstr "for (( kif1; kif2; kif3 )); do PARANCSOK; done"
 
-#: builtins.c:186
+#: builtins.c:188
 msgid "select NAME [in WORDS ... ;] do COMMANDS; done"
 msgstr "select NÉV [in SZAVAK ... ;] do PARANCSOK; done"
 
-#: builtins.c:188
+#: builtins.c:190
 msgid "time [-p] pipeline"
 msgstr "time [-p] csővezeték"
 
-#: builtins.c:190
+#: builtins.c:192
 msgid "case WORD in [PATTERN [| PATTERN]...) COMMANDS ;;]... esac"
 msgstr "case SZÓ in [MINTA [| MINTA]...) PARANCSOK ;;]... esac"
 
-#: builtins.c:192
+#: builtins.c:194
 msgid ""
 "if COMMANDS; then COMMANDS; [ elif COMMANDS; then COMMANDS; ]... [ else "
 "COMMANDS; ] fi"
@@ -2378,63 +2362,63 @@ msgstr ""
 "if PARANCSOK; then PARANCSOK; [ elif PARANCSOK; then PARANCSOK; ]... [ else "
 "PARANCSOK; ] fi"
 
-#: builtins.c:194
+#: builtins.c:196
 msgid "while COMMANDS; do COMMANDS; done"
 msgstr "while PARANCSOK; do PARANCSOK; done"
 
-#: builtins.c:196
+#: builtins.c:198
 msgid "until COMMANDS; do COMMANDS; done"
 msgstr "until PARANCSOK; do PARANCSOK; done"
 
-#: builtins.c:198
+#: builtins.c:200
 msgid "coproc [NAME] command [redirections]"
 msgstr "coproc [NÉV] parancs [átirányítások]"
 
-#: builtins.c:200
+#: builtins.c:202
 msgid "function name { COMMANDS ; } or name () { COMMANDS ; }"
 msgstr "function név { PARANCSOK ; } vagy név () { PARANCSOK ; }"
 
-#: builtins.c:202
+#: builtins.c:204
 msgid "{ COMMANDS ; }"
 msgstr "{ PARANCSOK ; }"
 
-#: builtins.c:204
+#: builtins.c:206
 msgid "job_spec [&]"
 msgstr "munkaszám [&]"
 
-#: builtins.c:206
+#: builtins.c:208
 msgid "(( expression ))"
 msgstr "(( kifejezés ))"
 
-#: builtins.c:208
+#: builtins.c:210
 msgid "[[ expression ]]"
 msgstr "[[ kifejezés ]]"
 
-#: builtins.c:210
+#: builtins.c:212
 msgid "variables - Names and meanings of some shell variables"
-msgstr "variables - Néhány változó neve és jelentése"
+msgstr "variables - Néhány parancsértelmező-változó neve és jelentése"
 
-#: builtins.c:213
+#: builtins.c:215
 msgid "pushd [-n] [+N | -N | dir]"
 msgstr "pushd [-n] [+N | -N | ktár]"
 
-#: builtins.c:217
+#: builtins.c:219
 msgid "popd [-n] [+N | -N]"
 msgstr "popd [-n] [+N | -N]"
 
-#: builtins.c:221
+#: builtins.c:223
 msgid "dirs [-clpv] [+N] [-N]"
 msgstr "dirs [-clpv] [+N] [-N]"
 
-#: builtins.c:224
+#: builtins.c:226
 msgid "shopt [-pqsu] [-o] [optname ...]"
 msgstr "shopt [-pqsu] [-o] [optnév ...]"
 
-#: builtins.c:226
+#: builtins.c:228
 msgid "printf [-v var] format [arguments]"
 msgstr "printf [-v változó] formátum [argumentumok]"
 
-#: builtins.c:229
+#: builtins.c:231
 msgid ""
 "complete [-abcdefgjksuv] [-pr] [-DE] [-o option] [-A action] [-G globpat] [-"
 "W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S "
@@ -2444,30 +2428,28 @@ msgstr ""
 "globminta] [-W szólista] [-F függvény] [-C parancs] [-X szűrőminta] [-P "
 "prefixum] [-S szuffixum] [név ...]"
 
-#: builtins.c:233
-#, fuzzy
+#: builtins.c:235
 msgid ""
 "compgen [-abcdefgjksuv] [-o option] [-A action] [-G globpat] [-W wordlist]  "
 "[-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]"
 msgstr ""
-"compgen [-abcdefgjksuv] [-o beállítás]  [-A művelet] [-G globminta] [-W "
+"compgen [-abcdefgjksuv] [-o beállítás] [-A művelet] [-G globminta] [-W "
 "szólista]  [-F függvény] [-C parancs] [-X szűrőminta] [-P prefixum] [-S "
 "szuffixum] [szó]"
 
-#: builtins.c:237
+#: builtins.c:239
 msgid "compopt [-o|+o option] [-DE] [name ...]"
 msgstr "compopt [-o|+o beállítás] [-DE] [név ...]"
 
-#: builtins.c:240
-#, fuzzy
+#: builtins.c:242
 msgid ""
 "mapfile [-d delim] [-n count] [-O origin] [-s count] [-t] [-u fd] [-C "
 "callback] [-c quantum] [array]"
 msgstr ""
-"mapfile [-n szám] [-O kezdet] [-s szám] [-t] [-u fd] [-C parancs] [-c "
-"távolság] [tömb]"
+"mapfile [-d elválasztó] [-n szám] [-O kezdet] [-s szám] [-t] [-u fd] [-C "
+"parancs] [-c távolság] [tömb]"
 
-#: builtins.c:242
+#: builtins.c:244
 msgid ""
 "readarray [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c "
 "quantum] [array]"
@@ -2475,8 +2457,7 @@ msgstr ""
 "readarray [-n szám] [-O kezdet] [-s szám] [-t] [-u fd] [-C parancs] [-c "
 "távolság] [tömb]"
 
-#: builtins.c:254
-#, fuzzy
+#: builtins.c:256
 msgid ""
 "Define or display aliases.\n"
 "    \n"
@@ -2497,21 +2478,21 @@ msgid ""
 msgstr ""
 "Aliasok definiálása vagy kiírása.\n"
 "    \n"
-"    Argumentumok nélkül az „alias” kiír egy újrahasználható listát a meglé-\n"
-"    vő aliasokról „alias NÉV=ÉRTÉK' formában a szabványos kimenetre.\n"
+"    Argumentumok nélkül az „alias” kiír egy újrahasználható listát a "
+"meglévő\n"
+"    aliasokról „alias NÉV=ÉRTÉK' formában a szabványos kimenetre.\n"
 "    \n"
 "    Különben egy NÉV nevű aliast definiál ÉRTÉK értékkel. Az ÉRTÉK végén a\n"
-"    záró szóköz lehetővé teszi a következő szó számára is az aliashelyette-\n"
-"    sítést.\n"
+"    záró szóköz lehetővé teszi a következő szó számára is az\n"
+"    aliashelyettesítést.\n"
 "    \n"
-"    Beállítások:\n"
-"      -p       Kiír minden aliast a fenti formában\n"
+"    Kapcsolók:\n"
+"      -p\tkiír minden aliast a fenti formában\n"
 "    \n"
 "    Kilépési kód:\n"
 "    igazzal tér vissza, kivéve ha nincs megadott NÉV nevű alias definiálva."
 
-#: builtins.c:276
-#, fuzzy
+#: builtins.c:278
 msgid ""
 "Remove each NAME from the list of defined aliases.\n"
 "    \n"
@@ -2522,13 +2503,12 @@ msgid ""
 msgstr ""
 "Minden NÉV eltávolítása a definiált aliasok közül.\n"
 "    \n"
-"    Beállítások:\n"
-"      -a       minden definíció törlése.\n"
+"    Kapcsolók:\n"
+"      -a\tminden definíció törlése\n"
 "    \n"
 "    Sikeresen tér vissza, kivéve ha nincs megadott NÉV nevű alias."
 
-#: builtins.c:289
-#, fuzzy
+#: builtins.c:291
 msgid ""
 "Set Readline key bindings and variables.\n"
 "    \n"
@@ -2572,13 +2552,15 @@ msgstr ""
 "Readline billentyűkötések és változók beállítása.\n"
 "    \n"
 "    Egy billentyűsorozat hozzárendelése Readline függvényhez vagy makróhoz,\n"
-"    vagy Readline változó beállítása. A beállítás nélküli szintaxis mege-\n"
-"    gyezik az ~/.inputrc-ben találhatóval, de kell legyen egy argumentuma:\n"
+"    vagy Readline változó beállítása. A beállítás nélküli szintaxis "
+"megegyezik\n"
+"    az ~/.inputrc-ben találhatóval, de kell legyen egy argumentuma:\n"
 "    pl. bind '\"\\C-x\\C-r\": re-read-init-file'.\n"
 "    \n"
-"    Beállítások:\n"
-"      -m  kiosztás       KIOSZTÁS használata kiosztásként a parancs hatásá-\n"
-"                         nak idejére. Elfogadható kiosztásnevek: emacs,\n"
+"    Kapcsolók:\n"
+"      -m  kiosztás       A KIOSZTÁS használata kiosztásként a parancs "
+"hatásának\n"
+"                         idejére. Elfogadható kiosztásnevek: emacs,\n"
 "                         emacs-standard, emacs-meta, emacs-ctlx, vi, vi-\n"
 "                         move, vi-command és vi-insert.\n"
 "      -l                 Nevek és függvények listázása.\n"
@@ -2586,26 +2568,30 @@ msgstr ""
 "      -p                 Függvények és kötések listázása újrahasználható\n"
 "                         formában.\n"
 "      -S                 Makrókat végrehajtó billentyűkombinációk és "
-"értéke-\n"
-"                         ik listázása.\n"
+"értékeik\n"
+"                         listázása.\n"
 "      -s                 Makrókat végrehajtó billentyűkombinációk és "
-"értéke-\n"
-"                         ik listázása újrahasználható formában.\n"
+"értékeik\n"
+"                         listázása újrahasználható formában.\n"
 "      -V                 Változónevek és értékek listázása.\n"
 "      -v                 Változónevek és értékek listázása újrahasználható\n"
 "                         formában.\n"
 "      -q  függvénynév    A függvényhez tartozó billentyűkombináció "
 "lekérése.\n"
-"      -u  függvénynév    Össze adott függvényhez tartozó billentyűkombiná-\n"
-"                         ció törlése.\n"
+"      -u  függvénynév    Össze adott függvényhez tartozó "
+"billentyűkombináció\n"
+"                         törlése.\n"
 "      -r  billkomb       A BILLKOMB-hoz tartozó kötések törlése.\n"
 "      -f  fájlnév        Kötések olvasása FÁJLNÉV fájlból.\n"
-"      -x  billkomb:shell-parancs    SHELL-PARANCS végrehajtása BILLKOMB-ra.\n"
+"      -x  billkomb:shell-parancs\tSHELL-PARANCS végrehajtása BILLKOMB-ra.\n"
+"      -X                 A -x használatával kötött billentyűkombinációk\n"
+"                         és a társított parancsok kiírása, bemenetként\n"
+"                         újrahasználható formában.\n"
 "    \n"
 "    Kilépési kód:\n"
 "    a bind 0-val tér vissza, ha nincs ismeretlen kapcsoló vagy hiba."
 
-#: builtins.c:328
+#: builtins.c:330
 msgid ""
 "Exit for, while, or until loops.\n"
 "    \n"
@@ -2615,15 +2601,15 @@ msgid ""
 "    Exit Status:\n"
 "    The exit status is 0 unless N is not greater than or equal to 1."
 msgstr ""
-"Kilép a for, while vagy until ciklusokból.\n"
+"Kilépés a for, while vagy until ciklusokból.\n"
 "    \n"
-"    Kilép egy FOR, WHILE vagy UNTIL ciklusból. Ha N meg van adva, akkor N\n"
+"    Kilépés egy FOR, WHILE vagy UNTIL ciklusból. Ha N meg van adva, akkor N\n"
 "    egymásba ágyazott ciklusból lép ki.\n"
 "    \n"
 "    Kilépési kód:\n"
 "    A kilépési kód 0, ha N >= 1."
 
-#: builtins.c:340
+#: builtins.c:342
 msgid ""
 "Resume for, while, or until loops.\n"
 "    \n"
@@ -2633,16 +2619,15 @@ msgid ""
 "    Exit Status:\n"
 "    The exit status is 0 unless N is not greater than or equal to 1."
 msgstr ""
-"Újrakezdi a for, while vagy until ciklust.\n"
+"A for, while vagy until ciklus újrakezdése.\n"
 "    \n"
 "    A következő iterációtól folytatja a FOR, WHILE vagy UNTIL ciklust.\n"
-"    If N is specified, resumes the Nth enclosing loop.\n"
 "    Ha N meg van adva, akkor N egymásba ágyazott ciklusból lép ki.\n"
 "    \n"
 "    Kilépési kód:\n"
 "    A kilépési kód 0, ha N >= 1."
 
-#: builtins.c:352
+#: builtins.c:354
 msgid ""
 "Execute shell builtins.\n"
 "    \n"
@@ -2665,7 +2650,7 @@ msgstr ""
 "    Továbbadja a SHELL-BUILTIN kilépési kódját vagy hamissal tér vissza,\n"
 "    ha nincs ilyen parancs."
 
-#: builtins.c:367
+#: builtins.c:369
 msgid ""
 "Return the context of the current subroutine call.\n"
 "    \n"
@@ -2680,9 +2665,9 @@ msgid ""
 "    Returns 0 unless the shell is not executing a shell function or EXPR\n"
 "    is invalid."
 msgstr ""
-"Visszaadja az aktuális szubrutinhívás környezetét.\n"
+"Az aktuális szubrutinhívás környezetének visszaadása.\n"
 "    \n"
-"    KIF nélkül \"$sor $fájlnév\" formátumú eredményt ad. KIF-fel pedig\n"
+"    KIF nélkül \"$sor $fájlnév\" formátumú eredményt ad. A KIF-fel pedig\n"
 "    \"$sor $szubrutin $fájlnév\" formátumút; ez hasznos lehet stack trace\n"
 "    kiírásához.\n"
 "    \n"
@@ -2690,11 +2675,10 @@ msgstr ""
 "    lépjen vissza; a verem tetején a 0-s keret van.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    0-val tér vissza, ha érvényes KIF és valóban függvényt hajt végre a pa-\n"
-"    rancsértelmező."
+"    0-val tér vissza, ha érvényes a KIF és valóban függvényt hajt végre a\n"
+"    parancsértelmező."
 
-#: builtins.c:385
-#, fuzzy
+#: builtins.c:387
 msgid ""
 "Change the shell working directory.\n"
 "    \n"
@@ -2738,33 +2722,44 @@ msgid ""
 "when\n"
 "    -P is used; non-zero otherwise."
 msgstr ""
-"A parancsértelmező munkakönyvtárát váltja.\n"
+"A parancsértelmező munkakönyvtárának váltása.\n"
 "    \n"
-"    A munkakönyvtára KTÁR-ra váltja. Elhagyása esetén a HOME környezeti\n"
+"    A munkakönyvtár átváltása a KTÁR-ra. Elhagyása esetén a HOME környezeti\n"
 "    változóban lévő könyvtárra vált.\n"
 "    \n"
 "    A CDPATH környezeti változó adja meg a KTÁR keresési útvonalait. Az\n"
-"    útvonalakat kettőspont (:) válassza el. Egy üres könyvtárnév az aktu-\n"
-"    ális könyvtárat jelenti. Ha KTÁR „/” jellel kezdődik, a CDPATH értéke\n"
+"    útvonalakat kettőspont (:) választja el. Egy üres könyvtárnév az "
+"aktuális\n"
+"    könyvtárat jelenti. Ha a KTÁR „/” jellel kezdődik, a CDPATH értéke\n"
 "    nincs figyelembe véve.\n"
 "    \n"
-"    Ha a könyvtár nem létezik, és a „cdable_vars” parancsértelmező-beállí-\n"
-"    tás aktív, KTÁR egy változónévként lesz használva. Ha a változónak van\n"
+"    Ha a könyvtár nem létezik, és a „cdable_vars” parancsértelmező-"
+"beállítás\n"
+"    aktív, a KTÁR változónévként lesz használva. Ha a változónak van\n"
 "    értéke, az lesz KTÁR-értékként használva.\n"
 "    \n"
 "    Kapcsolók:\n"
-"        -L     szimbolikus linkek szigorú követése\n"
-"        -P     a fizikai könyvtárfa használata a szimbolikus linkek "
-"követése\n"
-"       helyett\n"
+"      -L\tszimbolikus linkek szigorú követése\n"
+"      -P\ta fizikai könyvtárfa használata a szimbolikus linkek követése\n"
+"       helyett: szimbolikus linkek feloldása a KTÁR-ban a „..” \n"
+"    \t\telőfordulásainak feldolgozása előtt\n"
+"      -e\tha a -P kapcsoló meg van adva, és az aktuális munkakönyvtár\n"
+"    \t\tnem határozható meg sikeresen, kilépés nem nulla állapottal\n"
+"      -@\taz azt támogató rendszereken a kibővített attribútumokkal\n"
+"    \t\trendelkező fájlok megjelenítése a fájlattribútumokat tartalmazó\n"
+"    \t\tkönyvtárként\n"
 "    \n"
 "    Az alapértelmezett a szimbolikus linkek követése, mintha „-L” lenne\n"
 "    megadva.\n"
+"    A „..” feldolgozása a közvetlenül előtte lévő útvonalnév-összetevő\n"
+"    eltávolításával történik, visszamenve egy osztásjelig vagy a KTÁR "
+"kezdetéig.\n"
+"    \n"
 "    Kilépési kód:\n"
-"    0-val tér vissza, ha könyvtárat váltott; más értéket különben."
+"    0-val tér vissza, ha könyvtárat váltott és ha a -P használatakor a $PWD\n"
+"    sikeresen beállításra kerül; más értéket különben."
 
-#: builtins.c:423
-#, fuzzy
+#: builtins.c:425
 msgid ""
 "Print the name of the current working directory.\n"
 "    \n"
@@ -2782,18 +2777,17 @@ msgstr ""
 "Az aktuális munkakönyvtár útvonalának kiírása.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -L       $PWD értékének kiírása, ha az a munkakönyvtár érvényes\n"
-"       neve\n"
-"      -P       a fizikai könyvtár kiírása, szimbolikus linkek nélkül\n"
+"      -L\t$PWD értékének kiírása, ha az a munkakönyvtár érvényes neve\n"
+"      -P\ta fizikai könyvtár kiírása, szimbolikus linkek nélkül\n"
 "    \n"
 "    Az alapértelmezett a szimbolikus linkek követése, mintha „-L” lenne\n"
 "    megadva.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    0-val tér vissza, kivéve ha érvénytelen kapcsolót kapott vagy nem le-\n"
-"    het olvasni a munkakönyvtárat."
+"    0-val tér vissza, kivéve ha érvénytelen kapcsolót kapott vagy nem lehet\n"
+"    olvasni a munkakönyvtárat."
 
-#: builtins.c:440
+#: builtins.c:442
 msgid ""
 "Null command.\n"
 "    \n"
@@ -2809,7 +2803,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Mindig sikeres."
 
-#: builtins.c:451
+#: builtins.c:453
 msgid ""
 "Return a successful result.\n"
 "    \n"
@@ -2821,7 +2815,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Mindig sikeres."
 
-#: builtins.c:460
+#: builtins.c:462
 msgid ""
 "Return an unsuccessful result.\n"
 "    \n"
@@ -2833,8 +2827,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Mindig sikertelen."
 
-#: builtins.c:469
-#, fuzzy
+#: builtins.c:471
 msgid ""
 "Execute a simple command or display information about commands.\n"
 "    \n"
@@ -2852,26 +2845,25 @@ msgid ""
 "    Exit Status:\n"
 "    Returns exit status of COMMAND, or failure if COMMAND is not found."
 msgstr ""
-"Egy parancsot hajt végre vagy információt jelenít meg róla.\n"
+"Parancs végrehajtása vagy információk megjelenítése róla.\n"
 "    \n"
-"    Végrehajtja a PARANCS parancsot ARGUMENTUMOK argumentumokkal a függ-\n"
-"    vényfeloldás végrehajtása nélkül; vagy információt jelenít meg a pa-\n"
-"    rancsról. Használható programok futtatására, ha azonos nevű függvény\n"
+"    Végrehajtja a PARANCS parancsot ARGUMENTUMOK argumentumokkal a\n"
+"    függvényfeloldás végrehajtása nélkül; vagy információt jelenít meg a\n"
+"    parancsról. Használható programok futtatására, ha azonos nevű függvény\n"
 "    létezik.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -p       alapértelmezett érték használata PATH helyett, amely ga-\n"
-"               rantáltan megtalál minden szabványos eszközt      -v       "
-"egy leírást ad a PARANCS parancsról a „type” beépített pa-\n"
-"               rancshoz hasonló módon\n"
-"      -V       minden PARANCS-ról egy részletesebb leírást ad\n"
+"      -p       alapértelmezett érték használata PATH helyett, amely\n"
+"               garantáltan megtalál minden szabványos eszközt\n"
+"      -v       egy leírást ad a PARANCS parancsról a „type” beépített\n"
+"               parancshoz hasonló módon\n"
+"      -V       részletesebb leírást ad minden PARANCSRÓL\n"
 "    \n"
 "    Kilépési kód:\n"
-"    PARANCS kilépési kódjával tér vissza, vagy hibát jelez, ha nem talál-\n"
-"    ható PARANCS."
+"    A PARANCS kilépési kódjával tér vissza, vagy hibát jelez, ha nem\n"
+"    található a PARANCS."
 
-#: builtins.c:488
-#, fuzzy
+#: builtins.c:490
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
@@ -2910,52 +2902,55 @@ msgid ""
 "    Returns success unless an invalid option is supplied or a variable\n"
 "    assignment error occurs."
 msgstr ""
-"Változóértékeket és jellemzőket állít be.\n"
+"Változóértékek és attribútumok beállítása.\n"
 "    \n"
-"    Változók deklarálása és jellemzők adása. Ha nincs NÉV megadva, kilis-\n"
-"    tázza az összes változó jellemzőit és értékét.\n"
+"    Változók deklarálása és attribútumok megadása. Ha nincs NÉV megadva,\n"
+"    kiírja az összes változó attribútumait és értékét.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -f       művelet és megjelenítés korlátozása függvénynevekre és\n"
-"               -definíciókra\n"
-"      -F       megjelenítés korlátozása függvénynevekre (és sor számára,\n"
-"               valamint a forrásfájl nevére hibakereséskor)\n"
-"      -p       minden NÉV jellemzőinek és értékének kiírása\n"
+"      -f\tművelet és megjelenítés korlátozása függvénynevekre és\n"
+"      \t\t-definíciókra\n"
+"      -F\tmegjelenítés korlátozása függvénynevekre (és sor számára,\n"
+"      \t\tvalamint a forrásfájl nevére hibakereséskor)\n"
+"      -g\tglobális változók létrehozása parancsértelmező-függvényben való\n"
+"      \t\thasználatkor, egyébként figyelmen kívül marad\n"
+"      -p\tminden NÉV attribútumainak és értékének kiírása\n"
 "    \n"
-"    Jellemzőket állító kapcsolók:\n"
-"      -a       NÉV indexelt tömbbé alakítása (ha támogatott)\n"
-"      -A       NÉV asszociatív tömbbé alakítása (ha támogatott)\n"
-"      -i       minden NÉV kapjon „integer” jellemzőt\n"
-"      -l       NÉV-hez való értékadáskor kisbetűssé konvertálás\n"
-"      -r       minden NÉV legyen csak olvasható\n"
-"      -t       minden NÉV kapjon „trace” jellemzőt\n"
-"      -u       NÉV-hez való érékadáskor nagybetűssé konvertálás\n"
-"      -x       minden NÉV exportálása\n"
+"    Attribútumokat állító kapcsolók:\n"
+"      -a\tNÉV indexelt tömbbé alakítása (ha támogatott)\n"
+"      -A\tNÉV asszociatív tömbbé alakítása (ha támogatott)\n"
+"      -i\tminden NÉV kapjon „integer” attribútumot\n"
+"      -l\ta NÉV kisbetűssé konvertálása értékadáskor\n"
+"      -n\ta NÉV hivatkozás legyen az értékében megadott változóra\n"
+"      -r\tminden NÉV legyen csak olvasható\n"
+"      -t\tminden NÉV kapjon „trace” attribútumot\n"
+"      -u\ta NÉV nagybetűssé konvertálása értékadáskor\n"
+"      -x\tminden NÉV exportálása\n"
 "    \n"
-"    A „-” helyett „+” használata kikapcsolja az adott jellemzőt.\n"
+"    A „-” helyett „+” használata kikapcsolja az adott attribútumot.\n"
 "    \n"
-"    Az integer jellemzővel rendelkező változókhoz való értékadáskor arit-\n"
-"    metikai kiértékelés történik (lásd a „let” parancsot).\n"
+"    Az integer attribútummal rendelkező változókhoz való értékadáskor\n"
+"    aritmetikai kiértékelés történik (lásd a „let” parancsot).\n"
 "    \n"
-"    Függvénytörzsben „declare”-t használva minden NÉV helyi lesz, hasonló-\n"
-"    an a „local” parancshoz.\n"
+"    Függvénytörzsben „declare”-t használva minden NÉV helyi lesz, hasonlóan\n"
+"    a „local” parancshoz. A „-g” kapcsoló elnyomja ezt a viselkedést.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    Sikerrel tér vissza, kivéve ha érvénytelen kapcsolót kap, vagy hiba\n"
-"    történt."
+"    Sikerrel tér vissza, kivéve ha érvénytelen kapcsolót kap, vagy "
+"értékadási\n"
+"    hiba történik."
 
-#: builtins.c:528
+#: builtins.c:530
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
 "    Obsolete.  See `help declare'."
 msgstr ""
-"Változóértékeket és jellemzőket állít be.\n"
+"Változóértékek és attribútumok beállítása.\n"
 "    \n"
 "    Elavult. Lásd „help declare”."
 
-#: builtins.c:536
-#, fuzzy
+#: builtins.c:538
 msgid ""
 "Define local variables.\n"
 "    \n"
@@ -2971,18 +2966,17 @@ msgid ""
 msgstr ""
 "Helyi változók definiálása.\n"
 "    \n"
-"    Egy NÉV nevű helyi változót hoz létre, és ÉRTÉK értéket ad neki. KAP-\n"
-"    CSOLÓ tetszőleges „declare” által elfogadott kapcsoló lehet.\n"
+"    Egy NÉV nevű helyi változót hoz létre, és ÉRTÉK értéket ad neki.\n"
+"    A KAPCSOLÓ tetszőleges, a „declare” által elfogadott kapcsoló lehet.\n"
 "    \n"
 "    A helyi változók csak a függvényen belül használhatóak, nem láthatóak\n"
-"    az őket definiáló függvényen és azok gyermekein kívül.\n"
+"    az őket definiáló függvényen és annak gyermekein kívül.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    Sikerrel tér vissza, kivéve ha érvénytelen kapcsolót kap, hiba\n"
-"    történt, vagy nem függvényben lett hívva."
+"    Sikerrel tér vissza, kivéve ha érvénytelen kapcsolót kap, értékadási\n"
+"    hiba történik, vagy nem függvényben lett hívva."
 
-#: builtins.c:553
-#, fuzzy
+#: builtins.c:555
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -3020,30 +3014,31 @@ msgstr ""
 "    Argumentumok és egy újsor kiírása a szabványos kimenetre.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -n       ne fűzzön hozzá újsort\n"
-"      -e       az alábbi escape-szekvenciák értelmezése\n"
-"      -E       escape-szekvenciák értelmezésének tiltása\n"
+"      -n\tne fűzzön hozzá újsort\n"
+"      -e\taz alábbi escape-szekvenciák értelmezése\n"
+"      -E\tescape-szekvenciák értelmezésének tiltása\n"
 "    \n"
 "    Az „echo”a következő visszaper-escape-karaktereket értelmezi:\n"
-"      \\a      terminálcsengő\n"
-"      \\b      visszatörlés (backspace)\n"
-"      \\c      további kimenet elnyelése\n"
-"      \\e      escape-karakter\n"
-"      \\f      lapdobás-karakter\n"
-"      \\n      újsor-karakter\n"
-"      \\r      kocsivissza-karakter\n"
-"      \\t      vízszintes tabulátor\n"
-"      \\v      függőleges tabulátor\n"
-"      \\\\     visszaper (\\)\n"
-"      \\0nnn   az oktális NNN ASCII-kódú karakter. NNN 0–3\n"
-"               oktális számjegy lehet\n"
-"      \\xHH    az a 8 bites karakter, amelynek értéke HH\n"
-"               (hexadecimálisan). HH egy vagy két hexaszámjegy lehet\n"
+"      \\a\tterminálcsengő\n"
+"      \\b\tvisszatörlés (backspace)\n"
+"      \\c\ttovábbi kimenet elnyelése\n"
+"      \\e\tescape-karakter\n"
+"      \\E\tescape-karakter\n"
+"      \\f\tlapdobás-karakter\n"
+"      \\n\tújsor-karakter\n"
+"      \\r\tkocsivissza-karakter\n"
+"      \\t\tvízszintes tabulátor\n"
+"      \\v\tfüggőleges tabulátor\n"
+"      \\\\\tvisszaper (\\)\n"
+"      \\0nnn\taz oktális NNN ASCII-kódú karakter. NNN 0–3\n"
+"      \t\toktális számjegy lehet\n"
+"      \\xHH\taz a 8 bites karakter, amelynek értéke HH\n"
+"      \t\t(hexadecimálisan). HH egy vagy két hexaszámjegy lehet\n"
 "    \n"
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, kivéve írási hiba esetén."
 
-#: builtins.c:589
+#: builtins.c:591
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -3060,12 +3055,12 @@ msgstr ""
 "    Argumentumok és egy újsor kiírása a szabványos kimenetre.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -n       ne fűzzön hozzá újsort\n"
+"      -n\tne fűzzön hozzá újsort\n"
 "    \n"
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, kivéve írási hiba esetén."
 
-#: builtins.c:604
+#: builtins.c:606
 msgid ""
 "Enable and disable shell builtins.\n"
 "    \n"
@@ -3094,20 +3089,19 @@ msgstr ""
 "Parancsértelmező beépített parancsainak engedélyezése és tiltása.\n"
 "    \n"
 "    Beépített parancsokat engedélyez és tilt. Egy parancs letiltásával az\n"
-"    elérési út beírása nélkül lehet beépített paranccsal megegyező nevű-\n"
+"    elérési út beírása nélkül lehet beépített paranccsal megegyező nevű\n"
 "    programot futtatni.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -a       a beépített parancsok és azok állapotának listázása\n"
-"      -n       minden NÉV tiltása vagy a tiltott parancsok listázása\n"
-"      -p       a beépített parancsokat listázza újrahasználható formában\n"
-"      -s       csak a Posix „special” beépített parancsokat listázza\n"
+"      -a\ta beépített parancsok és azok állapotának listázása\n"
+"      -n\tminden NÉV tiltása vagy a tiltott parancsok listázása\n"
+"      -p\ta beépített parancsokat listázza újrahasználható formában\n"
+"      -s\tcsak a Posix „special” beépített parancsokat listázza\n"
 "    \n"
 "    Dinamikus betöltést szabályozó kapcsolók:\n"
-"      -f       NÉV nevű beépített parancs betöltése a FÁJLNÉV megosztott "
-"objek-\n"
-"               tumfájlból\n"
-"      -d       egy -f kapcsolóval betöltött parancs eltávolítása\n"
+"      -f\tNÉV nevű beépített parancs betöltése a FÁJLNÉV megosztott\n"
+"      \t\tobjektumfájlból\n"
+"      -d\tegy -f kapcsolóval betöltött parancs eltávolítása\n"
 "    \n"
 "    Kapcsolók nélkül minden NÉV engedélyezésre kerül\n"
 "    \n"
@@ -3115,10 +3109,10 @@ msgstr ""
 "    használja az „enable -n test” parancsot.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    Sikerrel tér vissza, kivéve ha NÉV nem egy beépített parancs, vagy hi-\n"
-"    ba történt."
+"    Sikerrel tér vissza, kivéve ha a NÉV nem egy beépített parancs, vagy\n"
+"    hiba történt."
 
-#: builtins.c:632
+#: builtins.c:634
 msgid ""
 "Execute arguments as a shell command.\n"
 "    \n"
@@ -3135,10 +3129,9 @@ msgstr ""
 "    végre a parancsértelmező.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    A parancs kilépési kódjával tér vissza, vagy sikerrel, ha üres a pa-\n"
-"    rancs."
+"    A parancs kilépési kódjával tér vissza, vagy sikerrel, ha üres a parancs."
 
-#: builtins.c:644
+#: builtins.c:646
 msgid ""
 "Parse option arguments.\n"
 "    \n"
@@ -3189,31 +3182,34 @@ msgstr ""
 "    \n"
 "    Minden végrehajtáskor a getopts a $név változóba helyezi a következő\n"
 "    kapcsolót (szükség esetén inicializálva a változót). A kapcsoló indexe\n"
-"    az OPTIND változóba kerül. Az OPTIND változót a parancsértelmező indu-\n"
-"    láskor 1-re inicializálja. Ha a kapcsolónak paramétere van, ennek ér-\n"
-"    téke az OPTARG változóba kerül.\n"
+"    az OPTIND változóba kerül. Az OPTIND változót a parancsértelmező "
+"induláskor\n"
+"    1-re inicializálja. Ha a kapcsolónak paramétere van, ennek értéke\n"
+"    az OPTARG változóba kerül.\n"
 "    \n"
-"    A getopts két módon tud hibát jelezni. Elnémítható a hibajelzés az OP-\n"
-"    CIÓK kettősponttal való kezdésével. Ebben a módban nem kerül kiírásra\n"
-"    hibaüzenet. Ha a getopts érvénytelen opciót talál, ezt az OPTARG vál-\n"
-"    tozóba írja. Ha hiányzik egy kötelező paraméter, a $név változóba egy\n"
-"    kettőspont kerül, és a talált karakter OPTARG-ba kerül.\n"
-"    Ha a getopts nincs néma módban, és érvénytelen kapcsolót talál, $név-\n"
-"    be egy kérdőjel kerül, OPTARG törlésre kerül, és hibaüzenetet ír ki.\n"
+"    A getopts két módon tud hibát jelezni. Elnémítható a hibajelzés az "
+"OPCIÓK\n"
+"    kettősponttal való kezdésével. Ebben a módban nem kerül kiírásra\n"
+"    hibaüzenet. Ha a getopts érvénytelen opciót talál, ezt az OPTARG\n"
+"    változóba írja. Ha hiányzik egy kötelező paraméter, a $név változóba "
+"egy\n"
+"    kettőspont kerül, és a talált karakter az OPTARG-ba kerül.\n"
+"    Ha a getopts nincs néma módban, és érvénytelen kapcsolót talál, $NÉV-be\n"
+"    egy kérdőjel kerül, az OPTARG törlésre kerül, és hibaüzenetet ír ki.\n"
 "    \n"
-"    Ha az OPTERR változó 0-ra van állítva, a getopts letiltja a hibaüzene-\n"
-"    tet, akkor is, ha nem kettősponttal kezdődik az OPCIÓK. OPTERR alapér-\n"
-"    téke 1.\n"
+"    Ha az OPTERR változó 0-ra van állítva, a getopts letiltja a "
+"hibaüzenetet,\n"
+"    akkor is, ha nem kettősponttal kezdődik az OPCIÓK. Az OPTERR alapértéke "
+"1.\n"
 "    \n"
-"    A getopts alapvetően pozicionális paramétereket értelmezi ($0–$9), de\n"
+"    A getopts alapvetően a pozicionális paramétereket értelmezi ($0–$9), de\n"
 "    több argumentum esetén mindet kezeli.\n"
 "    \n"
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, ha kapcsolót talált, sikertelenül, ha elfogytak a\n"
-"    kapcsolók vagy hiba történt."
+"    kapcsolók, vagy hiba történt."
 
-#: builtins.c:686
-#, fuzzy
+#: builtins.c:688
 msgid ""
 "Replace the shell with the given command.\n"
 "    \n"
@@ -3237,35 +3233,38 @@ msgid ""
 msgstr ""
 "A parancsértelmező felváltása a megadott paranccsal.\n"
 "    \n"
-"    PARANCS végrehajtása, kicserélve a parancsértelmezőt a megadott prog-\n"
-"    rammal. ARGUMENTUMOK lesznek a PARANCS argumentumai. Ha nincs PARANCS\n"
-"    megadva, a futó shellre kerülnek érvényesítésre az átirányítások.\n"
+"    A PARANCS végrehajtása, kicserélve a parancsértelmezőt a megadott\n"
+"    programmal. Az ARGUMENTUMOK lesznek a PARANCS argumentumai. Ha nincs\n"
+"    PARANCS megadva, a futó parancsértelmezőben kerülnek érvényesítésre\n"
+"    az átirányítások.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -a név   NÉV átadása PARANCS-nak $0-ként\n"
-"      -c       PARANCS végrehajtása üres környezettel\n"
-"      -l       PARANCS-nak egy „-” átadása $0-ként\n"
+"      -a név\ta NÉV átadása a PARANCSNAK $0-ként\n"
+"      -c\ta PARANCS végrehajtása üres környezettel\n"
+"      -l\ta PARANCSNAK egy „-” átadása $0-ként\n"
 "    \n"
-"    Ha a parancs nem hajtható végre, a nem interaktív parancsértelmező ki-\n"
-"    lép, kivéve, ha az „execfail” parancsértelmező-beállítás él.\n"
+"    Ha a parancs nem hajtható végre, a nem interaktív parancsértelmező "
+"kilép,\n"
+"    kivéve, ha az „execfail” parancsértelmező-beállítás él.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    Sikerrel tér vissza, kivéve, ha PARANCS nem található vagy sikertelen\n"
+"    Sikerrel tér vissza, kivéve, ha a PARANCS nem található vagy sikertelen\n"
 "    az átirányítás."
 
-#: builtins.c:707
+#: builtins.c:709
 msgid ""
 "Exit the shell.\n"
 "    \n"
 "    Exits the shell with a status of N.  If N is omitted, the exit status\n"
 "    is that of the last command executed."
 msgstr ""
-"Kilép a parancsértelmezőből.\n"
+"Kilépés a parancsértelmezőből.\n"
 "    \n"
-"    Kilép a parancsértelmezőből N kilépési kóddal. Ha N hiányzik, az utol-\n"
-"    só parancs kilépési kódjával lép ki."
+"    Kilép a parancsértelmezőből N kilépési kóddal. Ha az N hiányzik, az "
+"utolsó\n"
+"    parancs kilépési kódjával lép ki."
 
-#: builtins.c:716
+#: builtins.c:718
 msgid ""
 "Exit a login shell.\n"
 "    \n"
@@ -3273,12 +3272,12 @@ msgid ""
 "executed\n"
 "    in a login shell."
 msgstr ""
-"Kilép a bejelentkező parancsértelmezőből.\n"
+"Kilépés a bejelentkező parancsértelmezőből.\n"
 "    \n"
-"    Kilép a bejelentkező parancsértelmezőből N kilépési kóddal. Hibával\n"
+"    Kilép a bejelentkező parancsértelmezőből az N kilépési kóddal. Hibával\n"
 "    tér vissza, ha nem bejelentkező parancsértelmezőből hívják."
 
-#: builtins.c:726
+#: builtins.c:728
 msgid ""
 "Display or execute commands from the history list.\n"
 "    \n"
@@ -3309,30 +3308,34 @@ msgid ""
 msgstr ""
 "Parancsok megjelenítése vagy végrehajtása az előzményből.\n"
 "    \n"
-"    Az fc segítségével lehet korábbi parancsokat kiírni, módosítani és új-\n"
-"    ból végrehajtani.\n"
-"    ELSŐ és UTOLSÓ lehetnek egy tartományt meghatározó számok, vagy ELSŐ\n"
+"    Az fc segítségével lehet korábbi parancsokat kiírni, módosítani és "
+"újból\n"
+"    végrehajtani.\n"
+"    Az ELSŐ és UTOLSÓ lehetnek egy tartományt meghatározó számok, vagy az "
+"ELSŐ\n"
 "    lehet egy karakterlánc, amely az utolsó így kezdődő parancsot jelöli.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -e ENAME szerkesztő kiválasztása. Az alapértelmezett az FCEDIT,\n"
-"       majd EDITOR, végül a vi\n"
-"      -l       szerkesztés helyett a sorok listázása\n"
-"      -n       sorok számának elhagyása listázáskor\n"
-"      -r       sorrend megcserélése (legújabbakkal kezdi a listázást)\n"
+"      -e ENAME\tszerkesztő kiválasztása. Az alapértelmezett az FCEDIT,\n"
+"      \t\tmajd EDITOR, végül a vi\n"
+"      -l\tszerkesztés helyett a sorok listázása\n"
+"      -n\tsorok számának elhagyása listázáskor\n"
+"      -r\tsorrend megcserélése (legújabbakkal kezdi a listázást)\n"
 "    \n"
-"    Az „fc -s [minta=csere] [parancs]” formával PARANCS... újból végrehaj-\n"
-"    tásra kerül miután a régi=új behelyettesítés megtörtént.\n"
+"    Az „fc -s [minta=csere] [parancs]” formával PARANCS... újból "
+"végrehajtásra\n"
+"    kerül, miután a régi=új behelyettesítés megtörtént.\n"
 "    \n"
 "    Hasznos lehet az „alias r='fc -s'” használata, mivel így pl. az „r cc”\n"
 "    parancs végrehajtja az utolsó „cc”-vel kezdődő parancsot, míg „r” meg-\n"
 "    ismétli az utolsó parancsot.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    Sikert vagy a végrehajtott parancs kilépési kódját adja; nullától el-\n"
-"    térőt hiba esetén."
+"    Sikert vagy a végrehajtott parancs kilépési kódját adja; nullától "
+"eltérőt\n"
+"    hiba esetén."
 
-#: builtins.c:756
+#: builtins.c:758
 msgid ""
 "Move job to the foreground.\n"
 "    \n"
@@ -3343,17 +3346,18 @@ msgid ""
 "    Exit Status:\n"
 "    Status of command placed in foreground, or failure if an error occurs."
 msgstr ""
-"A munka előtérbe hozása.\n"
+"Munka előtérbe hozása.\n"
 "    \n"
 "    A MUNKASZÁM által meghatározott munkát az előtérbe hozza, az aktuális\n"
-"    munkává téve azt. Ha nincs MUNKASZÁM, a parancsértelmező által meg-\n"
-"    jegyzett aktuális munkára vonatkozik a parancs.\n"
+"    munkává téve azt. Ha nincs MUNKASZÁM, a parancsértelmező által "
+"megjegyzett\n"
+"    aktuális munkára vonatkozik a parancs.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    Az előtérbe hozott parancs állapota (annak kilépésekor), vagy nemnulla\n"
+"    Az előtérbe hozott parancs állapota (annak kilépésekor), vagy nem nulla\n"
 "    hiba esetén."
 
-#: builtins.c:771
+#: builtins.c:773
 msgid ""
 "Move jobs to the background.\n"
 "    \n"
@@ -3366,18 +3370,18 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless job control is not enabled or an error occurs."
 msgstr ""
-"Munkák háttérbe küldése.\n"
+"Munka háttérbe küldése.\n"
 "    \n"
 "    A MUNKASZÁM által meghatározott munkákat háttérbe küldi, mintha „&”\n"
-"    jellel a parancs végén lettek volna indítva. Ha nincs MUNKASZÁM, a pa-\n"
-"    rancsértelmező által megjegyzett aktuális munkára vonatkozik a parancs.\n"
+"    jellel a parancs végén lettek volna indítva. Ha nincs MUNKASZÁM, a\n"
+"    parancsértelmező által megjegyzett aktuális munkára vonatkozik a "
+"parancs.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    Sikerrel tér vissza, kivéve ha a munkakezelés le van tiltva, vagy hi-\n"
-"    ba történt."
+"    Sikerrel tér vissza, kivéve ha a munkakezelés le van tiltva, vagy\n"
+"    hiba történt."
 
-#: builtins.c:785
-#, fuzzy
+#: builtins.c:787
 msgid ""
 "Remember or display program locations.\n"
 "    \n"
@@ -3402,26 +3406,25 @@ msgid ""
 msgstr ""
 "Programok helyének megjegyzése vagy megjelenítése.\n"
 "    \n"
-"    Meghatározza vagy megjegyzi a teljes útvonalát minden megadott NÉV\n"
-"    parancsnak. Ha nincs NÉV megadva, az összes megjegyzett parancsot lis-\n"
-"    tázza.\n"
+"    Meghatározza és megjegyzi minden megadott NÉV parancs teljes útvonalát.\n"
+"    Ha nincs NÉV megadva, az összes megjegyzett parancsot listázza.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -d               minden megjegyzett NÉV helyének elfelejtése\n"
-"      -l               bemenetként újrahasználható formátumban listázzon\n"
-"      -p útvonal       ÚTVONAL használata NÉV helyeként\n"
-"      -r               minden megjegyzett hely elfelejtése\n"
-"      -t               minden megadott NÉV megjegyzett helyének kiírása,\n"
-"                       több név esetén a helyek előtt a NÉV kiírása\n"
+"      -d\tminden megjegyzett NÉV helyének elfelejtése\n"
+"      -l\tbemenetként újrahasználható formátumban listázzon\n"
+"      -p útvonal\taz ÚTVONAL használata a NÉV teljes útvonalaként\n"
+"      -r\tminden megjegyzett hely elfelejtése\n"
+"      -t\tminden megadott NÉV megjegyzett helyének kiírása,\n"
+"      \t\ttöbb név esetén a helyek előtt a NÉV kiírása\n"
 "    Argumentumok:\n"
-"      NÉV      Minden NEV-et megkeres a $PATH-ban, és hozzáadja a megjegy-\n"
-"               zettek listájához.    \n"
+"      NÉV\tMinden NÉV megkeresése a $PATH-ban, és hozzáadása a\n"
+"    \t\tmegjegyzettek listájához.\n"
+"    \n"
 "    Kilépési kód:\n"
-"    Sikerrel tér vissza, kivéve, ha NÉV nem található vagy érvénytelen kap-\n"
-"    csolót kap."
+"    Sikerrel tér vissza, kivéve, ha a NÉV nem található vagy érvénytelen\n"
+"    kapcsolót kap."
 
-#: builtins.c:810
-#, fuzzy
+#: builtins.c:812
 msgid ""
 "Display information about builtin commands.\n"
 "    \n"
@@ -3445,21 +3448,22 @@ msgstr ""
 "Tájékoztatás megjelenítése beépített parancsokról.\n"
 "    \n"
 "    Rövid leírásokat jelenít meg a beépített parancsokról. Ha MINTA meg\n"
-"    van adva, részletes segítséget ad az összes illeszkedő parancsról, kü-\n"
-"    lönben a témákat listázza.\n"
+"    van adva, részletes segítséget ad az összes illeszkedő parancsról,\n"
+"    különben a témákat listázza.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -d       minden témáról rövid leírás listázása\n"
-"      -m       man-szerű formátum használata\n"
-"      -s       csak rövid használati útmutató kiírása minden találathoz\n"
+"      -d\tminden témáról rövid leírás listázása\n"
+"      -m\tman-szerű formátum használata\n"
+"      -s\tcsak rövid használati útmutató kiírása minden, a MINTÁNAK\n"
+"    \t\tmegfelelő témáról\n"
 "    \n"
 "    Argumentumok:\n"
-"      MINTA    Témakört meghatározó minta\n"
+"      MINTA\tTémakört meghatározó minta\n"
 "    \n"
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, kivéve ha nincs találat vagy hibás kapcsolót kap."
 
-#: builtins.c:834
+#: builtins.c:836
 #, fuzzy
 msgid ""
 "Display or manipulate the history list.\n"
@@ -3473,10 +3477,10 @@ msgid ""
 "    \n"
 "      -a\tappend history lines from this session to the history file\n"
 "      -n\tread all history lines not already read from the history file\n"
+"    \t\tand append them to the history list\n"
 "      -r\tread the history file and append the contents to the history\n"
 "    \t\tlist\n"
 "      -w\twrite the current history to the history file\n"
-"    \t\tand append them to the history list\n"
 "    \n"
 "      -p\tperform history expansion on each ARG and display the result\n"
 "    \t\twithout storing it in the history list\n"
@@ -3493,38 +3497,39 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or an error occurs."
 msgstr ""
-"Megjeleníti vagy módosítja az előzményeket.\n"
+"Az előzmények megjelenítése vagy módosítása.\n"
 "    \n"
-"    Megjeleníti az előzménylistát sorszámokkal, minden módosított bejegy-\n"
-"    zést az elején „*”-gal megjelölve. N megadása esetén az utolsó N be-\n"
-"    jegyzést listázza.\n"
+"    Megjeleníti az előzménylistát sorszámokkal, minden módosított "
+"bejegyzést\n"
+"    az elején „*”-gal megjelölve. N megadása esetén az utolsó N\n"
+"    bejegyzést listázza.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -c       minden előzmény törlése\n"
-"      -d szám  a SZÁM számú bejegyzés törlése\n"
-"      -a       a futó munkamenet előzményeinek központi fájlba írása\n"
-"      -n       minden olvasatlan előzménysor kiírása az előzményfájlból\n"
-"      -r       előzményfájl beolvasása és előzménylistához írása\n"
-"      -w       az aktuális előzmények előzményfájlba írása és előzmény-\n"
-"       listához írása\n"
+"      -c\tminden előzmény törlése\n"
+"      -d szám\ta SZÁM számú bejegyzés törlése\n"
+"      -a\ta futó munkamenet előzményeinek központi fájlba írása\n"
+"      -n\tminden olvasatlan előzménysor kiírása az előzményfájlból\n"
+"      -r\telőzményfájl beolvasása és előzménylistához írása\n"
+"      -w\taz aktuális előzmények előzményfájlba írása és\n"
+"      \t\telőzménylistához írása\n"
 "    \n"
-"      -p       előzménykiegészítés végrehajtása minden ARGumentumon és az\n"
-"       eredmény kiírása előzménylistán való tárolás nélkül\n"
-"      -s       ARGumentumok hozzáírása egyetlen bejegyzésként a listához\n"
+"      -p\telőzménykiegészítés végrehajtása minden ARGUMENTUMON, és az\n"
+"      \t\teredmény kiírása előzménylistán való tárolás nélkül\n"
+"      -s\tARGUMENTUMOK hozzáírása egyetlen bejegyzésként a listához\n"
 "    \n"
-"    Ha FÁJLNÉV is meg van adva, az lesz előzményfájlként használva. Külön-\n"
-"    ben $HISTFILE értéke, vagy ennek híján ~/.bash_history.\n"
+"    Ha FÁJLNÉV is meg van adva, az lesz előzményfájlként használva. "
+"Különben\n"
+"    a HISTFILE értéke, vagy ennek híján ~/.bash_history.\n"
 "    \n"
-"    Ha a $HISTTIMEFORMAT változó be van állítva, és nem üres, akkor értéke\n"
-"    lesz használva az strftime(3) formátumparamétereként a kijelzett be-\n"
-"    jegyzések időbélyegeinek megjelenítéséhez. Különben nem ír ki időt.\n"
+"    Ha a HISTTIMEFORMAT változó be van állítva, és nem üres, akkor értéke\n"
+"    lesz használva az strftime(3) formátumparamétereként a kijelzett\n"
+"    bejegyzések időbélyegeinek megjelenítéséhez. Különben nem ír ki időt.\n"
 "    \n"
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, kivéve ha érvénytelen kapcsolót kap, vagy hiba\n"
 "    történik."
 
-#: builtins.c:870
-#, fuzzy
+#: builtins.c:872
 msgid ""
 "Display status of jobs.\n"
 "    \n"
@@ -3553,23 +3558,23 @@ msgstr ""
 "    munka jelenik meg, különben az összes aktív.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -l       folyamatazonosítók megjelenítése a többi adaton túl\n"
-"      -n       csak azon folyamatok listázása, amelyek állapota változott\n"
-"               az utolsó értesítés óta\n"
-"      -p       csak folyamatazonosítók listázása\n"
-"      -r       csak a futó munkák megjelenítése\n"
-"      -s       csak a megállított munkák megjelenítése\n"
+"      -l\tfolyamatazonosítók megjelenítése a többi adaton túl\n"
+"      -n\tcsak azon folyamatok listázása, amelyek állapota változott\n"
+"    \t\taz utolsó értesítés óta\n"
+"      -p\tcsak folyamatazonosítók listázása\n"
+"      -r\tcsak a futó munkák megjelenítése\n"
+"      -s\tcsak a megállított munkák megjelenítése\n"
 "    \n"
-"    Ha -x meg van adva, PARANCS kerül futtatásra úgy, hogy minden argumen-\n"
-"    tum a meghatározott munkához tartozó folyamatcsoport vezetőjének PID-\n"
-"    jére cserélődik.\n"
+"    Ha -x meg van adva, PARANCS kerül futtatásra úgy, hogy minden "
+"argumentum\n"
+"    a meghatározott munkához tartozó folyamatcsoport vezetőjének PID-jére\n"
+"    cserélődik.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    Sikerrel tér vissza, ha nem kap érvénytelen kapcsolót és nem történik\n"
-"    hiba. -x használata esetén PARANCS kilépési kódjával tér vissza."
+"    Sikerrel tér vissza, ha nem kap érvénytelen kapcsolót, és nem történik\n"
+"    hiba. -x használata esetén a PARANCS kilépési kódjával tér vissza."
 
-#: builtins.c:897
-#, fuzzy
+#: builtins.c:899
 msgid ""
 "Remove jobs from current shell.\n"
 "    \n"
@@ -3587,21 +3592,21 @@ msgid ""
 msgstr ""
 "Munkák eltávolítása az aktuális parancsértelmezőből.\n"
 "    \n"
-"    Eltávolít minden MUNKASZÁM munkát az aktív munkák táblájából. MUNKA-\n"
-"    SZÁM megadása nélkül a parancsértelmező által megjegyzett aktuális\n"
+"    Eltávolít minden MUNKASZÁM munkát az aktív munkák táblájából. A "
+"MUNKASZÁM\n"
+"    megadása nélkül a parancsértelmező által megjegyzett aktuális\n"
 "    munkát távolítja el.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -a       minden munka eltávolítása, ha nincs MUNKASZÁM megadva\n"
-"      -h       minden MUNKASZÁM megjelölése úgy, hogy nem kell továbbadni\n"
-"       nekik a parancsértelmező által kapott SIGHUP-ot\n"
-"      -r       csak futó munkák eltávolítása\n"
+"      -a\tminden munka eltávolítása, ha nincs MUNKASZÁM megadva\n"
+"      -h\tminden MUNKASZÁM megjelölése úgy, hogy nem kell továbbadni\n"
+"      \t\tnekik a parancsértelmező által kapott SIGHUP-ot\n"
+"      -r\tcsak futó munkák eltávolítása\n"
 "    \n"
 "    Kilépési kód:\n"
-"    Sikerrel tér vissza, ha nem kap érvénytelen kapcsolót vagy MUNKASZÁM-\n"
-"    ot."
+"    Sikerrel tér vissza, ha nem kap érvénytelen kapcsolót vagy MUNKASZÁMOT"
 
-#: builtins.c:916
+#: builtins.c:918
 #, fuzzy
 msgid ""
 "Send a signal to a job.\n"
@@ -3615,6 +3620,7 @@ msgid ""
 "      -n sig\tSIG is a signal number\n"
 "      -l\tlist the signal names; if arguments follow `-l' they are\n"
 "    \t\tassumed to be signal numbers for which names should be listed\n"
+"      -L\tsynonym for -l\n"
 "    \n"
 "    Kill is a shell builtin for two reasons: it allows job IDs to be used\n"
 "    instead of process IDs, and allows processes to be killed if the limit\n"
@@ -3625,26 +3631,27 @@ msgid ""
 msgstr ""
 "Szignál küldése munkának.\n"
 "    \n"
-"    PID vagy MUNKASZÁM által meghatározott folyamatoknak SZIGNÁL vagy\n"
-"    SZIGNÁLSZÁM szignál küldése. Ha sem SZIGNÁL, sem SZIGNÁLSZÁM nincs\n"
-"    megadva, akkor SIGTERM az alapértelmezés.\n"
+"    PID vagy MUNKASZÁM által meghatározott folyamatoknak a SZIGNÁL vagy\n"
+"    SZIGNÁLSZÁM szignál küldése. Ha sem a SZIGNÁL, sem a SZIGNÁLSZÁM nincs\n"
+"    megadva, akkor a SIGTERM az alapértelmezés.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -s sig   SIG egy szignálnév\n"
-"      -n sig   SIG egy szignálszám\n"
-"      -l       a szignálnevek listázása; ha argumentumok is követik, akkor\n"
-"               az általuk meghatározott szignálok nevei kerülnek listázásra\n"
+"      -s sig\ta SIG egy szignálnév\n"
+"      -n sig\taSIG egy szignálszám\n"
+"      -l\ta szignálnevek listázása; ha argumentumok is követik, akkor\n"
+"    \t\taz általuk meghatározott szignálok nevei kerülnek listázásra\n"
+"      -L\ta -l szinonimája\n"
 "    \n"
 "    A kill két okból beépített parancs: így lehetővé teszi munkaszámok\n"
-"    használatát PID helyett, továbbá lehetségessé válik folyamatok kilövé-\n"
-"    se, ha a folyamatok számának korlátja kimerült.\n"
+"    használatát PID helyett, továbbá lehetségessé válik folyamatok "
+"kilövése,\n"
+"    ha a folyamatok számának korlátja kimerült.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    Sikerrel tér vissza, ha nem kap érvénytelen kapcsolót és nem történik\n"
+"    Sikerrel tér vissza, ha nem kap érvénytelen kapcsolót, és nem történik\n"
 "    hiba."
 
-#: builtins.c:939
-#, fuzzy
+#: builtins.c:942
 msgid ""
 "Evaluate arithmetic expressions.\n"
 "    \n"
@@ -3690,32 +3697,32 @@ msgid ""
 msgstr ""
 "Aritmetikai kifejezés kiértékelése.\n"
 "    \n"
-"    Minden ARGumentum kiértékelése aritmetikai kifejezésként. A kiértéke-\n"
-"    lés fix szélességű egészek esetén túlcsordulás-ellenőrzés nélkül törté-\n"
-"    nik, de a nullával való osztás hibát okoz. Az alábbi operátorok soron-\n"
-"    ként azonos precedenciaszinten vannak. A precedencia az alábbi sorrend-\n"
-"    ben csökken:\n"
+"    Minden ARGUMENTUM kiértékelése aritmetikai kifejezésként. A kiértékelés\n"
+"    fix szélességű egészek esetén túlcsordulás-ellenőrzés nélkül történik,\n"
+"    de a nullával való osztás hibát okoz. Az alábbi operátorok soronként\n"
+"    azonos precedenciaszinten vannak. A precedencia az alábbi sorrendben\n"
+"    csökken:\n"
 "    \n"
-"       id++, id--      változó postfix-növelése, -csökkentése\n"
-"       ++id, --id      változó prefix-növelése, -csökkentése\n"
-"       -, +            mínusz, plusz előjel\n"
-"       !, ~            logikai és bitenkénti negált\n"
-"       **              hatványozás\n"
-"       *, /, %         szorzás, osztás, maradék\n"
-"       +, -            összeadás, kivonás\n"
-"       <<, >>          bitenkénti eltolás balra, jobb\n"
-"       <=, >=, <, >    összehasonlítás\n"
-"       ==, !=          egyenlőség, egyenlőtlenség\n"
-"       &               bitenkénti ÉS\n"
-"       ^               bitenkénti kizáró vagy\n"
-"       |               bitenkénti VAGY\n"
-"       &&              logikai ÉS\n"
-"       ||              logikai VAGY\n"
-"       kif ? kif : kif\n"
-"                       feltételes operátor\n"
-"       =, *=, /=, %=,\n"
-"       +=, -=, <<=, >>=,\n"
-"       &=, ^=, |=      értékadás\n"
+"    \tid++, id--\tváltozó postfix-növelése, -csökkentése\n"
+"    \t++id, --id\tváltozó prefix-növelése, -csökkentése\n"
+"    \t-, +\t\tmínusz, plusz előjel\n"
+"    \t!, ~\t\tlogikai és bitenkénti negált\n"
+"    \t**\t\thatványozás\n"
+"    \t*, /, %\t\tszorzás, osztás, maradék\n"
+"    \t+, -\t\tösszeadás, kivonás\n"
+"    \t<<, >>\t\tbitenkénti eltolás balra, jobb\n"
+"    \t<=, >=, <, >\tösszehasonlítás\n"
+"    \t==, !=\t\tegyenlőség, egyenlőtlenség\n"
+"    \t&\t\tbitenkénti ÉS\n"
+"    \t^\t\tbitenkénti kizáró vagy (XOR)\n"
+"    \t|\t\tbitenkénti VAGY\n"
+"    \t&&\t\tlogikai ÉS\n"
+"    \t||\t\tlogikai VAGY\n"
+"    \tkif ? kif : kif\n"
+"    \t\t\tfeltételes operátor\n"
+"    \t=, *=, /=, %=,\n"
+"    \t+=, -=, <<=, >>=,\n"
+"    \t&=, ^=, |=      értékadás\n"
 "    \n"
 "    Parancsértelmező-változók is lehetnek operandusok. A változók nevének\n"
 "    helyére értékük kerül (fix szélességű egészként) a kifejezésben. Nem\n"
@@ -3727,8 +3734,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Ha az utolsó argumentum 0, a let 1-gyel tér vissza, különben 0-val."
 
-#: builtins.c:984
-#, fuzzy
+#: builtins.c:987
 msgid ""
 "Read a line from the standard input and split it into fields.\n"
 "    \n"
@@ -3779,43 +3785,45 @@ msgid ""
 "occurs,\n"
 "    or an invalid file descriptor is supplied as the argument to -u."
 msgstr ""
-"Beolvas egy sort a szabványos bemenetről és mezőkre osztja.\n"
+"Egy sor beolvasása a szabványos bemenetről, és mezőkre osztása.\n"
 "    \n"
-"    Egy sort olvas be a szabványos bemenetről, vagy az FD fájlleíróból, ha\n"
+"    Egy sor beolvasása a szabványos bemenetről, vagy az FD fájlleíróból, ha\n"
 "    meg van adva a -u kapcsoló. A sor mezőkre lesz osztva a szódarabolás\n"
-"    szabályai szerint. Az első szó az elős NÉV nevű változó értéke lesz, a\n"
-"    második a másodiké stb. A szóelválasztó karaktereket az $IFS adja.\n"
+"    szabályai szerint. Az első szó az első NÉV nevű változó értéke lesz, a\n"
+"    második a másodiké stb. A szóelválasztó karaktereket az $IFS adja meg.\n"
 "    \n"
-"    Ha nincs NÉV megadva, a beolvasott sor a $REPLY változóba kerül.\n"
+"    Ha nincs NÉV megadva, a beolvasott sor a REPLY változóba kerül.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -a tömb    a beolvasott szavak TÖMB tömb 0-tól kezdve egymást követő\n"
-"                 indexű elemeibe kerülnek\n"
-"      -d elvál   ELVÁL első karakteréig olvasson az újsor helyett\n"
-"      -e         a sor beolvasása Readline használatával interaktívan\n"
-"      -i szöveg  SZÖVEG használata kezdeti szövegként (Readlinehoz)\n"
-"      -n szám    SZÁM karakter beolvasása után térjen vissza, ne várjon egy\n"
-"                 újsorra, de vegye figyelembe az elválasztót, ha kevesebb\n"
-"                 mint SZÁM karaktert olvasott be az elválasztóig\n"
-"      -N szám    pontosan akkor térjen vissza, ha SZÁM karaktert olva-\n"
-"                 sott be, kivéve az EOF elérését és az időtúllépést, az el-\n"
-"                 választó figyelmen kívül hagyva\n"
-"      -p prompt  írja ki a PROMPT értékét olvasás előtt a sor elejére\n"
-"      -r         tiltsa le a „\\” kezdetű escape-ek használatát\n"
-"      -s         terminálról érkező bemenet ne visszhangozzon\n"
-"      -t idő     IDŐ leteltével jelezzen hibát, ha nem tudott egy teljes\n"
-"                 sort beolvasni. A $TMOUT változó értéke az alapértelmezett\n"
-"                 időkorlát. IDŐ lehet tizedestört is. Ha idő 0, csak akkor\n"
-"                 lesz sikeres a beolvasás, ha az adott fájlleírón már ol-\n"
-"                 vasható a bemenet. Időtúllépés esetén a kilépési kód >128\n"
-"      -u fd      fájl beolvasása FD. fájlleíróból a szabványos bemenet he-\n"
-"                 lyett\n"
+"      -a tömb\ta beolvasott szavak TÖMB tömb 0-tól kezdve egymást követő\n"
+"      \t\tindexű elemeibe kerülnek\n"
+"      -d elválasztó\taz ELVÁLASZTÓ első karakteréig olvasson az újsor\n"
+"      \t\thelyett\n"
+"      -e\ta sor beolvasása Readline használatával interaktívan\n"
+"      -i szöveg\ta SZÖVEG használata kezdeti szövegként (Readline-hoz)\n"
+"      -n szám\tSZÁM karakter beolvasása után térjen vissza, ne várjon\n"
+"      \t\tújsorra, de vegye figyelembe az elválasztót, ha kevesebb\n"
+"      \t\tmint SZÁM karaktert olvasott be az elválasztóig\n"
+"      -N szám\tpontosan akkor térjen vissza, ha SZÁM karaktert olvasott\n"
+"      \t\tbe, kivéve az EOF elérését és az időtúllépést, az\n"
+"      \t\telválasztókat figyelmen kívül hagyva\n"
+"      -p prompt\tírja ki a PROMPT értékét olvasás előtt a sor elejére,\n"
+"      \t\tzáró újsor nélkül\n"
+"      -r\ttiltsa le a „\\” kezdetű escape-ek használatát\n"
+"      -s\tterminálról érkező bemenet ne visszhangozzon\n"
+"      -t idő\tIDŐ leteltével jelezzen hibát, ha nem tudott egy teljes\n"
+"      \t\tsort beolvasni. A $TMOUT változó értéke az alapértelmezett\n"
+"      \t\tidőkorlát. Az IDŐ lehet tizedestört is. Ha idő 0, csak akkor\n"
+"      \t\tlesz sikeres a beolvasás, ha az adott fájlleírón már\n"
+"      \t\tolvasható a bemenet. Időtúllépés esetén a kilépési kód >128\n"
+"      -u fd\tfájl beolvasása az FD. fájlleíróból a szabványos bemenet\n"
+"      \t\thelyett\n"
 "    \n"
 "    Kilépési kód:\n"
 "    A kilépési kód nulla, kivéve ha EOF-ot ér a beolvasás, időtúllépéskor\n"
-"    vagy érvénytelen fájlleíró megadásakor."
+"    (ekkor > 128) vagy érvénytelen fájlleíró megadásakor a -u kapcsolónak."
 
-#: builtins.c:1031
+#: builtins.c:1034
 msgid ""
 "Return from a shell function.\n"
 "    \n"
@@ -3829,14 +3837,15 @@ msgstr ""
 "Visszatér egy függvényből.\n"
 "    \n"
 "    Egy függvény vagy egy „source”-olt parancsfájl adott N kilépési kóddal\n"
-"    való visszatérését okozza. Ha N nincs megadva, az utolsó parancs kilé-\n"
-"    pési kódjával tér vissza.\n"
+"    való visszatérését okozza. Ha N nincs megadva, az utolsó parancs "
+"kilépési\n"
+"    kódjával tér vissza.\n"
 "    \n"
 "    Kilépési kód:\n"
 "    N-nel tér vissza, kivéve ha nem függvényből vagy parancsfájlból akar\n"
 "    visszatérni – ekkor sikertelenséget jelez."
 
-#: builtins.c:1044
+#: builtins.c:1047
 #, fuzzy
 msgid ""
 "Set or unset values of shell options and positional parameters.\n"
@@ -3905,7 +3914,8 @@ msgid ""
 "          by default when the shell is interactive.\n"
 "      -P  If set, do not resolve symbolic links when executing commands\n"
 "          such as cd which change the current directory.\n"
-"      -T  If set, the DEBUG trap is inherited by shell functions.\n"
+"      -T  If set, the DEBUG and RETURN traps are inherited by shell "
+"functions.\n"
 "      --  Assign any remaining arguments to the positional parameters.\n"
 "          If there are no remaining arguments, the positional parameters\n"
 "          are unset.\n"
@@ -3923,9 +3933,8 @@ msgid ""
 msgstr ""
 "Parancsértelmező-beállítások és pozicionális paraméterek állítása, törlése.\n"
 "    \n"
-"    Parancsértelmező-jellemzők és pozicionális paraméterek értékeinek mó-\n"
-"    dosítása, parancsértelmező-változók neveinek és értékeinek kiírása.\n"
-"    display the names and values of shell variables.\n"
+"    Parancsértelmező-attribútumok és pozicionális paraméterek értékeinek\n"
+"    módosítása, parancsértelmező-változók neveinek és értékeinek kiírása.\n"
 "    \n"
 "    Kapcsolók:\n"
 "      -a  A módosított vagy létrehozott változó exportálásra jelölése\n"
@@ -3972,8 +3981,9 @@ msgstr ""
 "              vi           vi-szerű sorszerkesztés\n"
 "              xtrace       mint -x\n"
 "      -p  Mindig be van kapcsolva, ha a valós és effektív felhasználó nem\n"
-"          egyezik. Letiltja az $ENV fájl értelmezését és a parancsértelme-\n"
-"          ző-függvények betöltését. A kapcsoló kikapcsolása az effektív\n"
+"          egyezik. Letiltja az $ENV fájl értelmezését és a "
+"parancsértelmező-\n"
+"          függvények betöltését. A kapcsoló kikapcsolása az effektív\n"
 "          uid és gid valósra állítását okozza\n"
 "      -t  Egyetlen parancs beolvasása és végrehajtás után kilépés\n"
 "      -u  Nem létező változók behelyettesítése legyen hiba\n"
@@ -3984,23 +3994,29 @@ msgstr ""
 "      -E  Az ERR csapdát öröklik a függvények\n"
 "      -H  Felkiáltójeles előzményhelyettesítés engedélyezése. Interaktív\n"
 "          parancsértelmezőnél alapértelmezés\n"
-"      -P  Parancsok végrehajtásánál szimbolikus linkek követésének tiltá-\n"
-"          sa (például cd esetében)\n"
+"      -P  Parancsok végrehajtásánál szimbolikus linkek követésének tiltása\n"
+"          (például cd esetében)\n"
 "      -T  A DEBUG csapdát öröklik a függvények\n"
+"      --  A további argumentumok hozzárendelése a pozicionális "
+"paraméterekhez.\n"
+"          Ha nincsenek további argumentumok, akkora a pozicionális "
+"paraméterek\n"
+"          törlésre kerülnek.\n"
 "      -   A további argumentumok pozicionális paraméterekhez rendelése\n"
 "          A -x és -v kapcsolók ki vannak kapcsolva.\n"
 "    \n"
 "    „-” helyett „+” használatával a kapcsolók tilthatóak. A kapcsolók a\n"
-"    parancsértelmező indításakor is állíthatóak. Az érvényben lévő kapcso-\n"
-"    lók a $- változóban vannak. A záró nem értelmezhető argumentumok pozi-\n"
-"    cionális paraméterek lesznek (rendre $1, $2 ... $n). Ha nincs ARG, min-\n"
-"    den parancsértelmező-változó kiírásra kerül.\n"
+"    parancsértelmező indításakor is állíthatóak. Az érvényben lévő "
+"kapcsolók\n"
+"    a $- változóban vannak. A záró nem értelmezhető argumentumok "
+"pozicionális\n"
+"    paraméterek lesznek (rendre $1, $2 ... $n). Ha nincs ARG, minden\n"
+"    parancsértelmező-változó kiírásra kerül.\n"
 "    \n"
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, kivéve ha érvénytelen kapcsolót kap."
 
-#: builtins.c:1129
-#, fuzzy
+#: builtins.c:1132
 msgid ""
 "Unset values and attributes of shell variables and functions.\n"
 "    \n"
@@ -4021,16 +4037,20 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or a NAME is read-only."
 msgstr ""
-"Parancsértelmező-változók, -függvények és -jellemzők törlése.\n"
+"Parancsértelmező-változók és -függvények értékeinek és jellemzőinek "
+"törlése.\n"
 "    \n"
 "    Minden NÉV nevű függvény vagy változó törlése.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -f       minden NÉV függvény\n"
-"      -v       minden NÉV változó\n"
+"      -f\tminden NÉV függvény\n"
+"      -v\tminden NÉV változó\n"
+"      -n\tminden NÉV névhivatkozás, és a változó törlése az általa\n"
+"    \t\thivatkozott változó helyett\n"
 "    \n"
-"    Kapcsolók nélkül az unset először változót, sikertelenség esetén függ-\n"
-"    vényt próbál törölni.\n"
+"    Kapcsolók nélkül az unset először változót, sikertelenség esetén "
+"függvényt\n"
+"    próbál törölni.\n"
 "    \n"
 "    Néhány változót nem lehet törölni, lásd „readonly”.\n"
 "    \n"
@@ -4038,7 +4058,7 @@ msgstr ""
 "    Sikerrel tér vissza, kivéve ha hibás kapcsolót kap, vagy egy NÉV csak\n"
 "    olvasható."
 
-#: builtins.c:1151
+#: builtins.c:1154
 msgid ""
 "Set export attribute for shell variables.\n"
 "    \n"
@@ -4056,24 +4076,23 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or NAME is invalid."
 msgstr ""
-"Exportálásra jelöl egy parancsértelmező-változót.\n"
+"Parancsértelmező-változók exportálás attribútumának beállítása.\n"
 "    \n"
 "    Minden NÉV automatikus környezeti változóvá exportálásra jelölése. Így\n"
-"    minden ezután kiadott parancs környezetében megjelenik. Ha ÉRTÉK is\n"
+"    minden ezután kiadott parancs környezetében megjelenik. Ha az ÉRTÉK is\n"
 "    meg van adva, értékadás is történik.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -f       parancsértelmező-függvényekre vonatkozzon\n"
-"      -n       export-jellemző eltávolítása minden NÉV-ről\n"
-"      -p       összes exportált változó és függvény listázása\n"
+"      -f\tparancsértelmező-függvényekre vonatkozzon\n"
+"      -n\texport attribútum eltávolítása minden NÉVRŐL\n"
+"      -p\tösszes exportált változó és függvény listázása\n"
 "    \n"
 "    Egy „--” argumentum letiltja a további kapcsolóértelmezést.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    Sikerrel tér vissza, kivéve ha érvénytelen kapcsolót vagy NEV-et kap."
+"    Sikerrel tér vissza, kivéve ha érvénytelen kapcsolót vagy NEVET kap."
 
-#: builtins.c:1170
-#, fuzzy
+#: builtins.c:1173
 msgid ""
 "Mark shell variables as unchangeable.\n"
 "    \n"
@@ -4095,22 +4114,23 @@ msgid ""
 msgstr ""
 "Parancsértelmező-változó változtathatatlannak jelölése.\n"
 "    \n"
-"    Minden NÉV csak olvashatóvá állítása. A továbbiakban a NEV-ek értéke\n"
-"    értékadással nem változtatható. Ha ÉRTÉK is van megadva, az írásvéde-\n"
-"    lem bekapcsolása előtt értékadás is történik.\n"
+"    Minden NÉV csak olvashatóvá állítása. A továbbiakban a NEVEK értéke\n"
+"    értékadással nem változtatható. Ha ÉRTÉK is van megadva, az írásvédelem\n"
+"    bekapcsolása előtt értékadás is történik.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -a       indexelt tömbváltozókra vonatkozik\n"
-"      -A       asszociatív tömbváltozókra vonatkozik\n"
-"      -f       függvényekre vonatkozik\n"
-"      -p       az összes csak olvasható változó és függvény listázása\n"
+"      -a\tindexelt tömbváltozókra vonatkozik\n"
+"      -A\tasszociatív tömbváltozókra vonatkozik\n"
+"      -f\tfüggvényekre vonatkozik\n"
+"      -p\taz összes csak olvasható változó vagy függvény listázása\n"
+"      \t\taz -f kapcsoló megadásától függően\n"
 "    \n"
 "    Egy „--” argumentum letiltja a további kapcsolóértelmezést.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    Sikerrel tér vissza, kivéve ha érvénytelen kapcsolót vagy NEV-et kap."
+"    Sikerrel tér vissza, kivéve ha érvénytelen kapcsolót vagy NEVET kap."
 
-#: builtins.c:1192
+#: builtins.c:1195
 msgid ""
 "Shift positional parameters.\n"
 "    \n"
@@ -4128,7 +4148,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, kivéve ha N negatív vagy nagyobb mint $#."
 
-#: builtins.c:1204 builtins.c:1219
+#: builtins.c:1207 builtins.c:1222
 msgid ""
 "Execute commands from a file in the current shell.\n"
 "    \n"
@@ -4143,15 +4163,17 @@ msgid ""
 msgstr ""
 "Parancsok végrehajtása fájlból a futó parancsértelmezőben.\n"
 "    \n"
-"    FÁJLNÉV fájlból a parancsok beolvasása és végrehajtása. A fájlnév meg-\n"
-"    találásához a $PATH által felsorolt könyvtárakban keres. Az ARGumentu-\n"
-"    mok pozicionális paraméterek lesznek FÁJLNÉV végrehajtásakor.\n"
+"    A FÁJLNÉV fájlból a parancsok beolvasása és végrehajtása. A fájlnév\n"
+"    megtalálásához a $PATH által felsorolt könyvtárakban keres. Az "
+"ARGUMENTUMOK\n"
+"    pozicionális paraméterek lesznek a FÁJLNÉV végrehajtásakor.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    Az utolsó FÁJLNÉV-beli parancs kilépési kódjával tér vissza; sikerte-\n"
-"    lenül, ha FÁJLNÉV nem olvasható."
+"    A FÁJLNÉV utolsó parancsának kilépési kódjával tér vissza; "
+"sikertelenül,\n"
+"    ha a FÁJLNÉV nem olvasható."
 
-#: builtins.c:1235
+#: builtins.c:1238
 msgid ""
 "Suspend shell execution.\n"
 "    \n"
@@ -4167,18 +4189,17 @@ msgstr ""
 "Parancsvégrehajtás felfüggesztése.\n"
 "    \n"
 "    A futó parancsértelmező végrehajtásának felfüggesztése SIGCONT szignál\n"
-"    érkezéséig. Ha nincs erőltetve, bejelentkező parancsértelmezőt nem\n"
+"    érkezéséig. Ha nincs erőltetve, bejelentkezési parancsértelmező nem\n"
 "    függeszthető fel.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -f       felfüggesztés erőltetése bejelentkező parancsértelmezőn is\n"
+"      -f\tfelfüggesztés erőltetése bejelentkezési parancsértelmezőn is\n"
 "    \n"
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, kivéve ha a munkakezelés nem támogatott vagy hiba\n"
 "    történt."
 
-#: builtins.c:1251
-#, fuzzy
+#: builtins.c:1254
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -4262,12 +4283,13 @@ msgid ""
 msgstr ""
 "Feltételes kifejezések kiértékelése.\n"
 "    \n"
-"    0-val (igaz) vagy 1-gyel (hamis) lép ki a KIFejezés értékétől függően.\n"
-"    A kifejezéseknek egy vagy két operandusa lehet. Az egyoperandusú kife-\n"
-"    jezések többnyire fájlok állapotát vizsgálják. Karakterláncokat és\n"
+"    0-val (igaz) vagy 1-gyel (hamis) lép ki a KIFEJEZÉS értékétől függően.\n"
+"    A kifejezéseknek egy vagy két operandusa lehet. Az egyoperandusú "
+"kifejezések\n"
+"    többnyire fájlok állapotát vizsgálják. Karakterláncokat és\n"
 "    számokat is lehet összehasonlítani.\n"
 "    \n"
-"    Fájl-operátorok:\n"
+"    Fájloperátorok:\n"
 "    \n"
 "      -a FÁJL        Igaz, ha a fájl létezik.\n"
 "      -b FÁJL        Igaz, ha a fájl blokkeszköz.\n"
@@ -4317,9 +4339,14 @@ msgstr ""
 "    \n"
 "      -o BEÁLLÍTÁS   Igaz, ha a parancsértelmező-beállítás engedélyezve\n"
 "                     van.\n"
-"      ! KIF          Igaz, ha kif hamis.\n"
-"      KIF1 -a KIF2   Igaz, ha kif1 ÉS kif2 is igaz.\n"
-"      KIF1 -o KIF2   Igaz, ha kif1 VAGY kif2 igaz.\n"
+"      -v VÁLT        Igaz, ha a VÁLT parancsértelmező-változó be van "
+"állítva.\n"
+"      -R VÁLT        Igaz, ha a VÁLT parancsértelmező-változó be van "
+"állítva,\n"
+"                     és névhivatkozás.\n"
+"      ! KIF          Igaz, ha KIF hamis.\n"
+"      KIF1 -a KIF2   Igaz, ha KIF1 ÉS KIF2 is igaz.\n"
+"      KIF1 -o KIF2   Igaz, ha KIF1 VAGY KIF2 igaz.\n"
 "    \n"
 "      arg1 OP arg2   Aritmetikai összehasonlítások. OP lehet: -eq, -ne,\n"
 "                     -lt, -le, -gt vagy -ge.\n"
@@ -4329,10 +4356,11 @@ msgstr ""
 "    vagy egyenlő, mint ARG2.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    Sikerrel tér vissza, ha KIF igaz; sikertelenséggel, ha KIF hamis vagy\n"
+"    Sikerrel tér vissza, ha a KIF igaz; sikertelenséggel, ha a KIF hamis, "
+"vagy\n"
 "    érvénytelen argumentumokat kap."
 
-#: builtins.c:1333
+#: builtins.c:1336
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -4342,10 +4370,9 @@ msgstr ""
 "Feltételes kifejezések kiértékelése.\n"
 "    \n"
 "    Ez a „test” beépített parancs szinonimája, de annyiban eltér tőle,\n"
-"    hogy az utolsó argumentuma „]” kell legyen – a nyitó „]”-lel összhang-\n"
-"    ban."
+"    hogy az utolsó argumentuma „]” kell legyen – a nyitó „]”-lel összhangban."
 
-#: builtins.c:1342
+#: builtins.c:1345
 msgid ""
 "Display process times.\n"
 "    \n"
@@ -4358,13 +4385,13 @@ msgid ""
 msgstr ""
 "Végrehajtási idők kiírása.\n"
 "    \n"
-"    Megjeleníti a kumulált felhasználói- és rendszergépidőt, amelyet a pa-\n"
-"    rancsértelmező és gyermekfolyamatai használtak.    \n"
+"    Megjeleníti a kumulált felhasználói- és rendszergépidőt, amelyet a\n"
+"    parancsértelmező és gyermekfolyamatai használtak.\n"
+"    \n"
 "    Kilépési kód:\n"
 "    Mindig sikeres."
 
-#: builtins.c:1354
-#, fuzzy
+#: builtins.c:1357
 msgid ""
 "Trap signals and other events.\n"
 "    \n"
@@ -4409,35 +4436,45 @@ msgid ""
 msgstr ""
 "Szignálok és más események elfogása.\n"
 "    \n"
-"    Meghatároz és aktivál eseménykezelőket, amelyek szignálok és más kör-\n"
-"    rülmények bekövetkezésekor futnak.\n"
+"    Meghatároz és aktivál eseménykezelőket, amelyek szignálok érkezésekor\n"
+"    vagy más körülmények bekövetkezésekor futnak.\n"
 "    \n"
-"    ARG az a parancs, amelyet a parancsértelmező beolvas és végrehajt a\n"
-"    SZIGNÁL(ok) bekövetkezésekor. Ha ARG hiányzik (és egy SZIGNÁL van meg-\n"
-"    adva) vagy ARG egy „-”, akkor minden szignálkezelő visszaáll az alap-\n"
-"    értelmezett viselkedésre. Ha ARG üres, akkor a megadott SZIGNÁL-ok be-\n"
-"    következésekor nem történik semmi a parancsértelmezőben és új gyermek-\n"
-"    folyamataiban.\n"
+"    Az ARG az a parancs, amelyet a parancsértelmező beolvas és végrehajt a\n"
+"    SZIGNÁLOK bekövetkezésekor. Ha az ARG hiányzik (és egy SZIGNÁL van\n"
+"    megadva) vagy az ARG egy „-”, akkor minden szignálkezelő visszaáll az\n"
+"    alapértelmezett viselkedésre. Ha az ARG üres, akkor a megadott "
+"SZIGNÁLOK\n"
+"    bekövetkezésekor nem történik semmi a parancsértelmezőben és új\n"
+"    gyermekfolyamataiban.\n"
 "    \n"
-"    Ha a SZIGNÁL értéke EXIT (0), ARG a parancsértelmezőből való kilépéskor\n"
-"    fut. Ha értéke DEBUG, ARG minden parancs előtt fut. Ha nincsenek argu-\n"
-"    mentumok, a trap kilistázza az összes szignált és parancsot.\n"
+"    Ha a SZIGNÁL értéke EXIT (0), az ARG a parancsértelmezőből való "
+"kilépéskor\n"
+"    fut. Ha értéke DEBUG, az ARG minden parancs előtt fut. Ha a SZIGNÁL "
+"értéke\n"
+"    RETURN, az ARG a . vagy source kulcsszó használatával futtatott "
+"függvény\n"
+"    vagy parancsfájl befejeződésekor fut le. Ha az érték ERR, akkor az ARG "
+"a\n"
+"    parancsok olyan hibáikor fut le, amikor a parancsértelmező kilépne a -e\n"
+"    kapcsoló használatakor.\n"
+"    \n"
+"    Argumentumok nélkül a trap kilistázza az összes szignált és parancsot.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -l       a rendszeren érvényes szignálnevek és sorszámaik kilistázása\n"
-"      -p       kilistázza a trap által beállított eseménykezelőket\n"
+"      -l\ta rendszeren érvényes szignálnevek és sorszámaik kilistázása\n"
+"      -p\tkilistázza a trap által beállított eseménykezelőket\n"
 "    \n"
-"    SZIGNÁL értéke egy trap -l által kilistázott szignálnév vagy szám.\n"
-"    A szignálnevek kis- és nagybetűkre érzéketlenek, a SIG előtag elhagy-\n"
-"    ható. Szignált a parancsértelmezőnek a „kill -szignál $$” paranccsal\n"
+"    A SZIGNÁL értéke a <signal.h>-ban megtalálható szignálnév vagy szám.\n"
+"    A szignálnevek kis- és nagybetűkre érzéketlenek, a SIG előtag "
+"elhagyható.\n"
+"    Szignált a parancsértelmezőnek a „kill -szignál $$” paranccsal\n"
 "    lehet küldeni.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    Sikerrel tér vissza, kivéve ha SZIGNÁL érvénytelen vagy érvénytelen\n"
+"    Sikerrel tér vissza, kivéve ha a SZIGNÁL érvénytelen, vagy érvénytelen\n"
 "    kapcsolót kap."
 
-#: builtins.c:1390
-#, fuzzy
+#: builtins.c:1393
 msgid ""
 "Display information about command type.\n"
 "    \n"
@@ -4466,31 +4503,30 @@ msgid ""
 "    Returns success if all of the NAMEs are found; fails if any are not "
 "found."
 msgstr ""
-"Tájékoztat egy parancs típusáról.\n"
+"Tájékoztatás egy parancs típusáról.\n"
 "    \n"
-"    Minden NÉV-ra kiírja, hogy hogy lenne értelmezve parancsnévként.\n"
-"    \n"
-"    Kapcsolók:\n"
-"      -a       minden NÉV-re illeszkedő futtatható parancs felsorolása,\n"
-"               beleértve az aliasokat, beépített parancsokat, és a függvé-\n"
-"               nyeket (ha „-p” nem tiltja)\n"
-"      -f       függvényeket ne keressen\n"
-"      -P       csak a PATH-ban keresse NEV-et, akkor is, ha van ilyen nevű\n"
-"               alias, parancs vagy függvény\n"
-"      -p       a végrehajtható fájl nevét írja ki, ha amely végrehajtódna\n"
-"               a parancs kiadásakor. Ha ez nem fájl lenne, nem ír ki semmit\n"
-"      -t       egyetlen szót ír ki, amely NÉV típusát jelzi: „alias”,\n"
-"               „keyword” (kulcsszó), „function” (függvény), „builtin” (be-\n"
-"               épített parancs), „file” (fájl) vagy „” (nem található)\n"
+"    Minden NÉV esetén kiírja, hogy hogy lenne értelmezve parancsnévként.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      NÉV      Értelmezendő parancsnév.\n"
+"      -a\tminden NÉVRE illeszkedő futtatható parancs felsorolása,\n"
+"      \t\tbeleértve az aliasokat, beépített parancsokat, és a\n"
+"      \t\tfüggvényeket (ha „-p” nem tiltja)\n"
+"      -f\tfüggvényeket ne keressen\n"
+"      -P\tcsak a PATH-ban keresse a NEVET, akkor is, ha van ilyen nevű\n"
+"      \t\talias, parancs vagy függvény\n"
+"      -p\ta végrehajtható fájl nevét írja ki, ha amely végrehajtódna\n"
+"      \t\ta parancs kiadásakor. Ha ez nem fájl lenne, nem ír ki semmit\n"
+"      -t\tegyetlen szót ír ki, amely NÉV típusát jelzi: „alias”,\n"
+"      \t\t„keyword” (kulcsszó), „function” (függvény), „builtin”\n"
+"      \t\t(beépített parancs), „file” (fájl) vagy „” (nem található)\n"
+"    \n"
+"    Kapcsolók:\n"
+"      NÉV\tÉrtelmezendő parancsnév.\n"
 "    \n"
 "    Kilépési kód:\n"
 "    Sikerrel lép ki, ha minden NÉV megtalálható, sikertelenül, ha nem."
 
-#: builtins.c:1421
-#, fuzzy
+#: builtins.c:1424
 msgid ""
 "Modify shell resource limits.\n"
 "    \n"
@@ -4540,45 +4576,52 @@ msgid ""
 msgstr ""
 "Parancsértelmező erőforráskorlátjainak beállítása.\n"
 "    \n"
-"    Szabályozási lehetőséget ad a parancsértelmező által elérhető erőfor-\n"
-"    rások korlátozásához, ha a rendszer támogatja.\n"
+"    Szabályozási lehetőséget ad a parancsértelmező által elérhető "
+"erőforrások\n"
+"    korlátozásához, ha a rendszer támogatja.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -S       a puha (soft) korlátozás használata\n"
-"      -H       a kemény (hard) korlátozás használata\n"
-"      -a       az összes aktuális korlátozás kilistázása\n"
-"      -b       foglalatok (socket) puffermérete\n"
-"      -c       core fájlok maximális mérete (0 tiltja)\n"
-"      -d       folyamatok maximális adatszegmens-mérete\n"
-"      -e       a maximális ütemezési prioritás (nice)\n"
-"      -f       a parancsértelmező és gyermekei által írható legnagyobb fájl\n"
-"      -i       várakozó szignálok maximális száma\n"
-"      -l       folyamatonként foglalható memória maximális mérete\n"
-"      -m       a maximálisan operatív memóriában tartható terület mérete\n"
-"      -n       nyitott fájlleírók maximális száma\n"
-"      -p       a csővezetékpuffer mérete\n"
-"      -q       a Posix üzenetsorokban tartható byte-ok száma\n"
-"      -r       a maximális valós idejű ütemezési prioritás\n"
-"      -s       maximális veremméret\n"
-"      -t       maximális processzoridő másodpercekben\n"
-"      -u       felhasználói folyamatok maximális száma\n"
-"      -v       virtuális memória mérete\n"
-"      -x       fájlzárolások maximális száma\n"
+"      -S\ta puha (soft) korlátozás használata\n"
+"      -H\ta kemény (hard) korlátozás használata\n"
+"      -a\taz összes aktuális korlátozás kilistázása\n"
+"      -b\tfoglalatok (socket) puffermérete\n"
+"      -c\tcore fájlok maximális mérete (0 tiltja)\n"
+"      -d\tfolyamatok maximális adatszegmens-mérete\n"
+"      -e\ta maximális ütemezési prioritás (nice)\n"
+"      -f\ta parancsértelmező és gyermekei által írható legnagyobb fájl\n"
+"      -i\tvárakozó szignálok maximális száma\n"
+"      -k\ta folyamathoz lefoglalt kqueue-k maximális száma\n"
+"      -l\tfolyamatonként foglalható memória maximális mérete\n"
+"      -m\ta maximálisan operatív memóriában tartható terület mérete\n"
+"      -n\tnyitott fájlleírók maximális száma\n"
+"      -p\ta csővezetékpuffer mérete\n"
+"      -q\ta POSIX üzenetsorokban tartható byte-ok száma\n"
+"      -r\ta maximális valós idejű ütemezési prioritás\n"
+"      -s\tmaximális veremméret\n"
+"      -t\tmaximális processzoridő másodpercekben\n"
+"      -u\tfelhasználói folyamatok maximális száma\n"
+"      -v\tvirtuális memória mérete\n"
+"      -x\tfájlzárolások maximális száma\n"
+"      -P\tpszeudoterminálok maximális száma\n"
+"      -T\tszálak maximális száma\n"
 "    \n"
-"    Ha KORLÁT meg van adva, az lesz az új értéke a megadott erőforrásnak.\n"
+"    Nem minden kapcsoló érhető el minden platformon.\n"
+"    \n"
+"    Ha a KORLÁT meg van adva, az lesz az új értéke a megadott erőforrásnak.\n"
 "    Speciális KORLÁT-értékek: „hard” (jelenlegi kemény korlát értéke),\n"
-"    „soft” (jelenlegi puha korlát értéke) és „unlimited” (korlátozás nél-\n"
-"    kül).\n"
+"    „soft” (jelenlegi puha korlát értéke) és „unlimited” (korlátozás "
+"nélkül).\n"
 "    Ha nincs kapcsoló megadva, -f az alapértelmezett.\n"
 "    \n"
-"    Az értékek 1024 byte-os egységekben értendőek, kivéve a -t, amely má-\n"
-"    sodpercekben, a -p, amely 512 byte-okban, valamint a -u, amely darab-\n"
-"    ban értendő.\n"
+"    Az értékek 1024 byte-os egységekben értendőek, kivéve a -t, amely\n"
+"    másodpercekben, a -p, amely 512 byte-okban, valamint a -u, amely "
+"darabban\n"
+"    értendő.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    Sikerrel tér vissza, kivéve érvénytelen kapcsoló és hiba esetében."
+"    Sikerrel tér vissza, kivéve érvénytelen kapcsoló vagy hiba esetében."
 
-#: builtins.c:1471
+#: builtins.c:1474
 msgid ""
 "Display or set file mode mask.\n"
 "    \n"
@@ -4595,26 +4638,26 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless MODE is invalid or an invalid option is given."
 msgstr ""
-"Kiírja vagy beállítja a fájlmódmaszkot.\n"
+"A fájlmódmaszk kiírása vagy beállítása.\n"
 "    \n"
-"    Beállítja a fájllétrehozási maszkot MÓD-ra. Ha MÓD hiányzik, az aktuá-\n"
-"    lis értékét írja ki.\n"
+"    Beállítja a fájllétrehozási maszkot a MÓDRA. Ha a MÓD hiányzik, az\n"
+"    aktuális értékét írja ki.\n"
 "    Fájlok létrehozásakor az alapértelmezett jogokból ki lesznek maszkolva\n"
 "    az itt megadott bitek. Ez nem akadályozza meg, hogy a program vagy a\n"
 "    felhasználó később megváltoztassa a fájl jogait.\n"
 "    \n"
-"    Ha MÓD számjeggyel kezdődik, oktális számként lesz értelmezve; egyéb-\n"
-"    ként a chmod(1) által használt szimbolikus formátumban.\n"
+"    Ha a MÓD számjeggyel kezdődik, oktális számként lesz értelmezve; "
+"egyébként\n"
+"    a chmod(1) által használt szimbolikus formátumban.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -p    ha MÓD hiányzik, a kimenet újrahasználó formátumot használjon\n"
-"      -S    a kimenet használja a szimbolikus formát (különben oktálisat)\n"
+"      -p\tha a MÓD hiányzik, a kimenet újrahasználható formátumban legyen\n"
+"      -S\ta kimenet használja a szimbolikus formát (különben oktálisat)\n"
 "    \n"
 "    Kilépési kód:\n"
-"    Sikerrel lép ki, kivéve ha MÓD vagy egy kapcsoló érvénytelen."
+"    Sikerrel lép ki, kivéve ha a MÓD vagy egy kapcsoló érvénytelen."
 
-#: builtins.c:1491
-#, fuzzy
+#: builtins.c:1494
 msgid ""
 "Wait for job completion and return exit status.\n"
 "    \n"
@@ -4633,19 +4676,23 @@ msgid ""
 "    Returns the status of the last ID; fails if ID is invalid or an invalid\n"
 "    option is given."
 msgstr ""
-"Munka befejezésének megvárása és a kilépési kód visszaadása.\n"
+"Munka befejezésének megvárása, és a kilépési kód visszaadása.\n"
 "    \n"
-"    ID számú folyamat befejezésére vár, majd jelzi a kilépési kódját. ID\n"
-"    lehet egy PID vagy egy %MUNKASZÁM. Ha nincs ID megadva, bármelyik\n"
-"    gyermekfolyamat befejezésekor visszatér, 0-val. Ha ID munkaszám, a\n"
-"    csővezeték összes folyamatát bevárja.\n"
+"    Az ID számú folyamat befejezésére vár, majd jelzi a kilépési kódját.\n"
+"    Az ID lehet egy PID vagy egy %MUNKASZÁM. Ha az ID nincs megadva, minden\n"
+"    aktív gyermekfolyamat befejezését bevárja, és nullával tér vissza. Ha "
+"az\n"
+"    ID munkaszám, a csővezeték összes folyamatát bevárja.\n"
+"    \n"
+"    Ha a -n kapcsoló meg van adva, megvárja a következő feladat "
+"befejezését,\n"
+"    és annak kilépési kódját adja vissza.\n"
 "    \n"
 "    Kilépési kód:\n"
 "    ID kilépési kódjával tér vissza; érvénytelen ID vagy kapcsoló esetén\n"
 "    sikertelenül."
 
-#: builtins.c:1512
-#, fuzzy
+#: builtins.c:1515
 msgid ""
 "Wait for process completion and return exit status.\n"
 "    \n"
@@ -4659,16 +4706,18 @@ msgid ""
 "invalid\n"
 "    option is given."
 msgstr ""
-"Munka befejezésének megvárása és a kilépési kód visszaadása.\n"
+"Folyamat befejezésének megvárása, és a kilépési kód visszaadása.\n"
 "    \n"
-"    ID számú folyamat befejezésére vár, majd jelzi a kilépési kódját. ID\n"
-"    egy folyamatazonosító kell legyen.\n"
+"    A PID számú folyamat befejezésére vár, majd jelzi a kilépési kódját.\n"
+"    Ha nincs megadva PID, minden aktív gyermekfolyamatot bevár, és nullával\n"
+"    tér vissza. A PID egy folyamatazonosító kell legyen.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    ID kilépési kódjával tér vissza; érvénytelen ID vagy kapcsoló esetén\n"
-"    sikertelenül."
+"    Az utolsó PID kilépési kódjával tér vissza; érvénytelen PID vagy "
+"kapcsoló\n"
+"    esetén sikertelenül."
 
-#: builtins.c:1527
+#: builtins.c:1530
 msgid ""
 "Execute commands for each member in a list.\n"
 "    \n"
@@ -4684,13 +4733,13 @@ msgstr ""
 "    \n"
 "    A „for” ciklus végrehajt egy parancssorozatot a megadott listán. Ha az\n"
 "    „in SZAVAK ...;” rész hiányzik, „in \"$@\"” az alapértelmezés. Minden\n"
-"    iterációnál NÉV értéke a SZAVAK lista megfelelő elemére lesz állítva,\n"
-"    és így futnak a PARANCSOK.\n"
+"    iterációnál a NÉV értéke a SZAVAK lista megfelelő elemére lesz állítva,\n"
+"    és így futnak le a PARANCSOK.\n"
 "    \n"
 "    Kilépési kód:\n"
 "    Az utolsó parancs kilépési kódját adja vissza."
 
-#: builtins.c:1541
+#: builtins.c:1544
 msgid ""
 "Arithmetic for loop.\n"
 "    \n"
@@ -4709,18 +4758,19 @@ msgstr ""
 "Aritmetikai for-ciklus.\n"
 "    \n"
 "    Ekvivalens a következővel:\n"
-"       (( KIF1 ))\n"
-"       while (( KIF2 )); do\n"
-"               PARANCSOK\n"
-"               (( KIF3 ))\n"
-"       done\n"
-"    KIF1, KIF2 és KIF3 aritmetikai kifejezések. Ha valamelyik el van hagy-\n"
-"    va, úgy működik, mintha értéke 1 lenne.\n"
+"    \t(( KIF1 ))\n"
+"    \twhile (( KIF2 )); do\n"
+"    \t\tPARANCSOK\n"
+"    \t\t(( KIF3 ))\n"
+"    \tdone\n"
+"    A KIF1, KIF2 és KIF3 aritmetikai kifejezések. Ha valamelyik el van "
+"hagyva,\n"
+"    akkor úgy működik, mintha értéke 1 lenne.\n"
 "    \n"
 "    Kilépési kód:\n"
 "    Az utolsó parancs kilépési kódját adja."
 
-#: builtins.c:1559
+#: builtins.c:1562
 msgid ""
 "Select words from a list and execute commands.\n"
 "    \n"
@@ -4739,24 +4789,24 @@ msgid ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 msgstr ""
-"A felhasználóval kiválasztat a listából egy elemet és végrehajt rá egy pa-\n"
-"rancsot.\n"
+"Szavak kiválasztása egy listából, és egy parancs végrehajtása rá.\n"
 "    \n"
-"    A SZAVAK kiértékelésre kerülnek és egy szólistát képeznek. A szavak a\n"
-"    szabványos hibakimenetre kerülnek soronként, sorszámozva. Ezután meg-\n"
-"    jelenik a $PS3 és egy sorszámot vár a szabványos bemeneten. Érvényes\n"
-"    sorszám megadásakor a PARANCSOKAT végrehajtja úgy, hogy NÉV a megfelelő\n"
-"    sorszámú elem értékét kapja. Ezután újból megjelenik $PS3 és újból le-\n"
-"    het választani. EOF bemenet és break parancs esetén fejeződik be a hu-\n"
-"    rok. Érvénytelen választás esetén szintén új prompt jelenik meg. Üres\n"
-"    sor beolvasásakor a lehetőségek is újra megjelennek. A beolvasott sor\n"
-"    a REPLY változóba kerül. Ha elmarad az „in SZAVAK” rész, „in \"$@\"”\n"
-"    az alapértelmezés.\n"
+"    A SZAVAK kiértékelésre kerülnek, és egy szólistát képeznek. A szavak a\n"
+"    szabványos hibakimenetre kerülnek soronként, sorszámozva. Ha az\n"
+"    „in SZAVAK ...;” rész hiányzik, „in \"$@\"” az alapértelmezés. Ezután\n"
+"    megjelenik a PS3 prompt, és egy sorszámot vár a szabványos bemeneten.\n"
+"    Érvényes sorszám megadásakor a PARANCSOKAT végrehajtja úgy, hogy a NÉV\n"
+"    a megfelelő sorszámú elem értékét kapja. Ha a sor üres, újból "
+"megjelennek\n"
+"    a SZAVAK és a prompt, és újból lehet választani. A parancs EOF bemenet\n"
+"    esetén fejeződik be. Bármely más érték beolvasásakor a NÉV null lesz.\n"
+"    A beolvasott sor a REPLY változóba kerül. A PARANCSOK minden választás\n"
+"    után végrehajtásra kerülnek egy break parancs végrehajtásáig.\n"
 "    \n"
 "    Kilépési kód:\n"
 "    Az utolsó parancs kilépési kódját adja vissza."
 
-#: builtins.c:1580
+#: builtins.c:1583
 msgid ""
 "Report time consumed by pipeline's execution.\n"
 "    \n"
@@ -4771,22 +4821,22 @@ msgid ""
 "    Exit Status:\n"
 "    The return status is the return status of PIPELINE."
 msgstr ""
-"A csővezeték végrehajtási idejét írja ki.\n"
+"A csővezeték végrehajtási idejének kiírása.\n"
 "    \n"
-"    CSŐVEZETÉK végrehajtása és egy összefoglaló kiírása a végrehajtás köz-\n"
-"    ben eltelt valós időről, a használt felhasználói- és rendszergépidők-\n"
-"    ről CSŐVEZETÉK befejeződésekor.\n"
+"    A CSŐVEZETÉK végrehajtása és egy összefoglaló kiírása a végrehajtás "
+"közben\n"
+"    eltelt valós időről, a használt felhasználói- és rendszergépidőkről\n"
+"    a CSŐVEZETÉK befejeződésekor.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -p       az összefoglaló megjelenítése a hordozható Posix formában\n"
+"      -p\taz összefoglaló megjelenítése a hordozható POSIX formában\n"
 "    \n"
-"    A TIMEFORMAT változó értéke felhasználásra kerül a kimenet formázása-\n"
-"    kor.\n"
+"    A TIMEFORMAT változó értéke felhasználásra kerül a kimenet formázásakor\n"
 "    \n"
 "    Kilépési kód:\n"
 "    A kilépési kód a CSŐVEZETÉK kilépési kódja lesz."
 
-#: builtins.c:1597
+#: builtins.c:1600
 msgid ""
 "Execute commands based on pattern matching.\n"
 "    \n"
@@ -4798,14 +4848,15 @@ msgid ""
 msgstr ""
 "Parancsok végrehajtása mintaillesztés alapján.\n"
 "    \n"
-"    PARANCSOK végrehajtása azon SZAVAKon, amelyek illeszkednek a MINTÁ-ra.\n"
-"    Több mintát „|” jellel lehet elválasztani. A minták a fájlnév-helyet-\n"
-"    tesítés formátumát használják.\n"
+"    A PARANCSOK végrehajtása azon SZAVAKON, amelyek illeszkednek a MINTÁRA.\n"
+"    Több mintát „|” jellel lehet elválasztani. A minták a fájlnév-"
+"helyettesítés\n"
+"    formátumát használják.\n"
 "    \n"
 "    Kilépési kód:\n"
 "    Az utolsó parancs kilépési kódját adja vissza."
 
-#: builtins.c:1609
+#: builtins.c:1612
 msgid ""
 "Execute commands based on conditional.\n"
 "    \n"
@@ -4829,16 +4880,16 @@ msgstr ""
 "    \n"
 "    Az „if PARANCSOK” lista végrehajtásra kerül. Ha kilépési kódja nulla,\n"
 "    akkor a „then PARANCSOK” lista kerül végrehajtásra. Ha nem, akkor az\n"
-"    első nullával kilépő „elif PARANCSOK” listához tartozó „then PARARAN-\n"
-"    CSOK” lista kerül végrehajtásra. Ha egyik sem teljesül, az „else PA-\n"
-"    RANCSOK” lista kerül végrehajtásra. Az egész szerkezet kilépési kódja\n"
+"    első nullával kilépő „elif PARANCSOK” listához tartozó „then PARANCSOK”\n"
+"    lista kerül végrehajtásra. Ha egyik sem teljesül, az „else\n"
+"    PARANCSOK” lista kerül végrehajtásra. Az egész szerkezet kilépési kódja\n"
 "    az utoljára végrehajtott parancs kilépési kódja, vagy nulla, ha nem\n"
 "    teljesült egyik feltétel sem.\n"
 "    \n"
 "    Kilépési kód:\n"
 "    Az utoljára végrehajtott parancs kilépési kódja."
 
-#: builtins.c:1626
+#: builtins.c:1629
 msgid ""
 "Execute commands as long as a test succeeds.\n"
 "    \n"
@@ -4850,13 +4901,14 @@ msgid ""
 msgstr ""
 "Parancsok végrehajtása amíg a feltétel teljesül.\n"
 "    \n"
-"    PARANCSOK végrehajtása addig, amíg a „while PARANCSOK” utolsó paran-\n"
-"    csa nullával lép ki.\n"
+"    A PARANCSOK végrehajtása addig, amíg a „while PARANCSOK” utolsó "
+"parancsa\n"
+"    nullával lép ki.\n"
 "    \n"
 "    Kilépési kód:\n"
 "    Az utolsónak végrehajtott parancs kilépési kódja."
 
-#: builtins.c:1638
+#: builtins.c:1641
 msgid ""
 "Execute commands as long as a test does not succeed.\n"
 "    \n"
@@ -4868,13 +4920,14 @@ msgid ""
 msgstr ""
 "Parancsok végrehajtása amíg a feltétel nem teljesül.\n"
 "    \n"
-"    PARANCSOK végrehajtása addig, amíg a „until PARANCSOK” utolsó paran-\n"
-"    csa nem nullával lép ki.\n"
+"    A PARANCSOK értelmezése és végrehajtása addig, amíg az „until "
+"PARANCSOK”\n"
+"    utolsó parancsa nem nullával lép ki.\n"
 "    \n"
 "    Kilépési kód:\n"
 "    Az utolsónak végrehajtott parancs kilépési kódja."
 
-#: builtins.c:1650
+#: builtins.c:1653
 msgid ""
 "Create a coprocess named NAME.\n"
 "    \n"
@@ -4888,15 +4941,15 @@ msgid ""
 msgstr ""
 "Egy NÉV nevű társfolyamat létrehozása.\n"
 "    \n"
-"    PARANCS aszinkron végrehajtása, a szabványos ki- és bemenet átirányí-\n"
-"    tásával egy-egy csővezetékbe, amelyek fájlleírói a NÉV tömb 0-s és 1-\n"
-"    es elemeibe kerülnek a végrehajtó parancsértelmezőben. Az alapértelme-\n"
-"    zett név: „COPROC”.\n"
+"    A PARANCS aszinkron végrehajtása, a szabványos ki- és bemenet\n"
+"    átirányításával egy-egy csővezetékbe, amelyek fájlleírói a NÉV tömb\n"
+"    0-s és 1-es elemeibe kerülnek a végrehajtó parancsértelmezőben.\n"
+"    Az alapértelmezett NÉV: „COPROC”.\n"
 "    \n"
 "    Kilépési kód:\n"
 "    A PARANCS kilépési kódjával tér vissza."
 
-#: builtins.c:1664
+#: builtins.c:1667
 msgid ""
 "Define shell function.\n"
 "    \n"
@@ -4911,15 +4964,16 @@ msgid ""
 msgstr ""
 "Parancsértelmező-függvény definiálása.\n"
 "    \n"
-"    Létrehoz egy NÉV nevű függvényt. Ha NÉV parancsként végrehajtásra ke-\n"
-"    rül, PARANCSOK futnak a hívó parancsértelmező környezetében. NÉV hívá-\n"
-"    sakor az argumentumok a függvényből $1...$n néven érhetőek el, míg a\n"
+"    Létrehoz egy NÉV nevű függvényt. Ha a NÉV parancsként végrehajtásra\n"
+"    kerül, a PARANCSOK futnak a hívó parancsértelmező környezetében. A NÉV\n"
+"    hívásakor az argumentumok a függvényből $1...$n néven érhetőek el, míg "
+"a\n"
 "    függvény neve $FUNCNAME-ként.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    Sikerrel tér vissza, kivéve ha NÉV csak olvasható."
+"    Sikerrel tér vissza, kivéve ha a NÉV csak olvasható."
 
-#: builtins.c:1678
+#: builtins.c:1681
 msgid ""
 "Group commands as a unit.\n"
 "    \n"
@@ -4937,7 +4991,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Az utolsó parancs kilépési kódját adja vissza."
 
-#: builtins.c:1690
+#: builtins.c:1693
 msgid ""
 "Resume job in foreground.\n"
 "    \n"
@@ -4950,16 +5004,18 @@ msgid ""
 "    Exit Status:\n"
 "    Returns the status of the resumed job."
 msgstr ""
-"Egy munkát előtérbe hoz.\n"
+"Egy munka előtérbe hozása.\n"
 "    \n"
 "    Megegyezik az „fg” parancs MUNKASZÁM argumentumával. Egy megszakított\n"
-"    vagy háttérben futó munkát hoz előtérbe. MUNKASZÁM lehet munkanév vagy\n"
+"    vagy háttérben futó munkát hoz előtérbe. A MUNKASZÁM lehet munkanév "
+"vagy\n"
 "    munkaazonosító is. Egy záró „&” megadása a munkát háttérbe küldi, mint\n"
-"    a „bg” parancs.    \n"
+"    a „bg” parancs.\n"
+"    \n"
 "    Kilépési kód:\n"
 "    A visszaállított parancs kilépési kódjával lép ki."
 
-#: builtins.c:1705
+#: builtins.c:1708
 msgid ""
 "Evaluate arithmetic expression.\n"
 "    \n"
@@ -4969,15 +5025,15 @@ msgid ""
 "    Exit Status:\n"
 "    Returns 1 if EXPRESSION evaluates to 0; returns 0 otherwise."
 msgstr ""
-"Aritmetikai kifejezéseket értékel ki.\n"
+"Aritmetikai kifejezések kiértékelése.\n"
 "    \n"
-"    A KIFEJEZÉS az aritmetikai kiértékelés szabályai szerint kerülnek ki-\n"
-"    értékelésre. Megyegyezik a „let KIFEJEZÉS” paranccsal.\n"
+"    A KIFEJEZÉS az aritmetikai kiértékelés szabályai szerint kerül\n"
+"    kiértékelésre. Megegyezik a „let KIFEJEZÉS” paranccsal.\n"
 "    \n"
 "    Kilépési kód:\n"
 "    1-gyel tér vissza, ha KIFEJEZÉS értéke 0, különben 0-val."
 
-#: builtins.c:1717
+#: builtins.c:1720
 msgid ""
 "Execute conditional command.\n"
 "    \n"
@@ -5010,23 +5066,23 @@ msgstr ""
 "    függően. A kifejezések a „test” parancs által használt primitívekből\n"
 "    épülnek fel, és a következő operátorokkal keverhetőek.\n"
 "    \n"
-"      ( KIFEJEZÉS )    KIFEJEZÉS értékét adja vissza\n"
-"      ! KIFEJEZÉS      Igaz, ha KIFEJEZÉS hamis\n"
-"      KIF1 && KIF2     Igaz, ha KIF1 és KIF2 is igaz\n"
-"      KIF1 || KIF2     Igaz, ha KIF1 vagy KIF2 igaz\n"
+"      ( KIFEJEZÉS )\tA KIFEJEZÉS értékét adja vissza\n"
+"      ! KIFEJEZÉS\tIgaz, ha a KIFEJEZÉS hamis\n"
+"      KIF1 && KIF2\tIgaz, ha KIF1 és KIF2 is igaz\n"
+"      KIF1 || KIF2\tIgaz, ha KIF1 vagy KIF2 igaz\n"
 "    \n"
-"    Az „==” és „!=” operátorok használatánál a jobbérték mintaként értel-\n"
-"    meződik, és fájlnévillesztés történik. A hasonlóan működő „=~” operá-\n"
-"    tor használatakor a jobbérték reguláris kifejezésként kerül illesztés-\n"
-"    re.\n"
+"    Az „==” és „!=” operátorok használatánál a jobbérték mintaként\n"
+"    értelmeződik, és fájlnévillesztés történik. A hasonlóan működő „=~”\n"
+"    operátor használatakor a jobbérték reguláris kifejezésként kerül\n"
+"    illesztésre.\n"
 "    \n"
-"    Az „&&” és „||” operátorok rövidzár-tulajdonságúak, vagyis KIF2-t nem\n"
+"    Az „&&” és „||” operátorok rövidzár tulajdonságúak, vagyis KIF2-t nem\n"
 "    értékelik ki, ha KIF1-ből is megállapítható a kifejezés értéke.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    0 vagy 1 a KIFEJEZÉS-től függően."
+"    0 vagy 1 a KIFEJEZÉSTŐL függően."
 
-#: builtins.c:1743
+#: builtins.c:1746
 msgid ""
 "Common shell variable names and usage.\n"
 "    \n"
@@ -5081,54 +5137,53 @@ msgid ""
 msgstr ""
 "Közös parancsértelmező-változók és használatuk.\n"
 "    \n"
-"    BASH_VERSION   Verzióadatok erről a Bash-ről\n"
-"    CDPATH     Kettőspontokkal elválasztott könyvtárlista, amelyekben a\n"
-"               „cd” keres\n"
-"    GLOBIGNORE Kettőspontokkal elválasztott mintalista, amelyekre illesz-\n"
-"               kedő nevű fájlok nem kerülnek útvonal-kiegészítésre\n"
-"    HISTFILE   A parancselőzményeket tároló fájl neve\n"
-"    HISTFILESIZE   Az előzményfájl maximális hossza sorokban\n"
-"    HISTSIZE   A parancsértelmező által kezelt előzménysorok maximális\n"
-"               száma\n"
-"    HOME       A saját könyvtár teljes abszolút útvonala\n"
-"    HOSTNAME   A parancsértelmezőt futtató gép neve\n"
-"    HOSTTYPE   A Bash-t futtató CPU típusa\n"
-"    IGNOREEOF  A parancsértelmező viselkedését állítja, hogy mit tegyen,\n"
-"               ha egy sor elején EOF karaktert kap bemenetén. Ha ez a vál-\n"
-"               tozó létezik, az értékében megadott számú EOF karaktert nem\n"
-"               vesz figyelembe (alapértelmezetten 10). Ha nincs beállítva,\n"
-"               EOF-ra kilép a parancsértelmező\n"
-"    MACHTYPE   A Bash-t futtató gépet leíró karakterlánc\n"
-"    MAILCHECK  Megadott számú másodpercenként keres a Bash új leveleket\n"
-"    MAILPATH   Kettőspontokkal elválasztott fájlnévlista, ahol a Bash\n"
-"               új leveleket keres\n"
-"    OSTYPE     A Bash-t futtató gépen futó UNIX-változat neve (verziója)\n"
-"    PATH       Kettőspontokkal elválasztott könyvtárlista, amelyekben a\n"
-"               Bash futtatható programokat keres parancsvégrehajtáskor\n"
-"    PROMPT_COMMAND Az elsődleges prompt kiírása előtt végrehajtandó pa-\n"
-"               rancs\n"
-"    PS1        Az elsődleges prompt\n"
-"    PS2        A másodlagos prompt\n"
-"    PWD        Az aktuális könyvtár teljes útvonala\n"
-"    SHELLOPTS  Az engedélyezett shell-beállítások kettőspontokkal elválasz-\n"
-"               tott listája\n"
-"    TERM       Az aktuális termináltípus neve\n"
-"    TIMEFORMAT A „time” parancs által használt időformátum\n"
-"    auto_resume    Nem üres érték esetén egy egy szóból álló parancs elő-\n"
-"               ször a megszakított munkák nevei között lesz keresve. Talá-\n"
-"               lat esetén a munka előtérbe kerül. „exact” érték esetén\n"
-"               pontosan megegyező nevet keres, „substring” esetén tetsző-\n"
-"               leges egyezést, minden más érték esetén a szó elején keres\n"
-"    histchars  Előzménykiegészítést és gyors cserét vezérlő karaktereket\n"
-"               ad meg. Az első karakter az előzménybehelyettesítő karak-\n"
-"               ter (általában „!”), a második a gyorscsere-karakter (álta-\n"
-"               lában „^”), a harmadik pedig az előzménymegjegyzés (általá-\n"
-"               ban „#”)\n"
-"    HISTIGNORE Kettőspontokkal elválasztott mintalista, amely mintákra\n"
-"               illeszkedő parancsok nem kerülnek az előzmények közé\n"
+"    BASH_VERSION\tVerzióadatok erről a Bash-ről\n"
+"    CDPATH\tKettőspontokkal elválasztott könyvtárlista, amelyekben a\n"
+"    \t\t„cd” keres\n"
+"    GLOBIGNORE\tKettőspontokkal elválasztott mintalista, amelyekre\n"
+"    \t\tilleszkedő nevű fájlok nem kerülnek útvonal-kiegészítésre\n"
+"    HISTFILE\tA parancselőzményeket tároló fájl neve\n"
+"    HISTFILESIZE\tAz előzményfájl maximális hossza sorokban\n"
+"    HISTSIZE\tA parancsértelmező által kezelt előzménysorok maximális\n"
+"    \t\tszáma\n"
+"    HOME\tA saját könyvtár teljes abszolút útvonala\n"
+"    HOSTNAME\tA parancsértelmezőt futtató gép neve\n"
+"    HOSTTYPE\tA Bash-t futtató CPU típusa\n"
+"    IGNOREEOF\tA parancsértelmező viselkedését állítja, hogy mit tegyen,\n"
+"    \t\tha egy sor elején EOF karaktert kap bemenetén. Ha ez a változó\n"
+"    \t\tlétezik, az értékében megadott számú EOF karaktert nem\n"
+"    \t\tvesz figyelembe (alapértelmezetten 10). Ha nincs beállítva,\n"
+"    \t\tEOF-ra kilép a parancsértelmező\n"
+"    MACHTYPE\tA Bash-t futtató gépet leíró karakterlánc\n"
+"    MAILCHECK\tMegadott számú másodpercenként keres a Bash új leveleket\n"
+"    MAILPATH\tKettőspontokkal elválasztott fájlnévlista, ahol a Bash\n"
+"    \t\túj leveleket keres\n"
+"    OSTYPE\tA Bash-t futtató gépen futó UNIX-változat neve (verziója)\n"
+"    PATH\tKettőspontokkal elválasztott könyvtárlista, amelyekben a\n"
+"    \t\tBash futtatható programokat keres parancsvégrehajtáskor\n"
+"    PROMPT_COMMAND\tAz elsődleges prompt kiírása előtt végrehajtandó\n"
+"    \t\t\tparancs\n"
+"    PS1\t\tAz elsődleges prompt\n"
+"    PS2\t\tA másodlagos prompt\n"
+"    PWD\t\tAz aktuális könyvtár teljes útvonala\n"
+"    SHELLOPTS\tAz engedélyezett parancsértelmező-beállítások "
+"kettőspontokkal\n"
+"    \t\telválasztott listája\n"
+"    TERM\tAz aktuális termináltípus neve\n"
+"    TIMEFORMAT\tA „time” parancs által használt időformátum\n"
+"    auto_resume\tNem üres érték esetén egy egy szóból álló parancs először\n"
+"    \t\ta megszakított munkák nevei között lesz keresve. Találat\n"
+"    \t\tesetén a munka előtérbe kerül. „exact” érték esetén\n"
+"    \t\tpontosan megegyező nevet keres, „substring” esetén tetszőleges\n"
+"    \t\tegyezést, minden más érték esetén a szó elején keres\n"
+"    histchars\tElőzménykiegészítést és gyors cserét vezérlő karaktereket\n"
+"    \t\tad meg. Az első karakter az előzménybehelyettesítő karakter\n"
+"    \t\t(általában „!”), a második a gyorscsere-karakter (általában\n"
+"    \t\t„^”), a harmadik pedig az előzménymegjegyzés (általában „#”)\n"
+"    HISTIGNORE\tKettőspontokkal elválasztott mintalista, amely mintákra\n"
+"    \t\tilleszkedő parancsok nem kerülnek az előzmények közé\n"
 
-#: builtins.c:1800
-#, fuzzy
+#: builtins.c:1803
 msgid ""
 "Add directories to stack.\n"
 "    \n"
@@ -5158,35 +5213,35 @@ msgid ""
 "    Returns success unless an invalid argument is supplied or the directory\n"
 "    change fails."
 msgstr ""
-"Könyvtárakat tesz a verembe.\n"
+"Könyvtárak verembe tétele.\n"
 "   \n"
 "    Egy könyvtárat tesz a könyvtárverem tetejére, vagy forgatja a vermet,\n"
-"    az új felső elemmé a jelenlegi munkakönyvtárat téve. Argumentumok nél-\n"
-"    kül hívva a két felső könyvtárat cseréli meg.\n"
+"    az új felső elemmé a jelenlegi munkakönyvtárat téve. Argumentumok\n"
+"    nélkül hívva a két felső könyvtárat cseréli meg.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -n       Ne váltson könyvtárat hozzáadáskor, vagyis csak a\n"
-"       vermet változtassa.\n"
+"      -n\tNe váltson könyvtárat hozzáadáskor, vagyis csak a\n"
+"    \t\tvermet változtassa.\n"
 "    \n"
 "    Argumentumok:\n"
-"      +N       Úgy forgatja a vermet, hogy az N-edik könyvtár (0-tól\n"
-"       kezdve, a „dirs” által kiírt listán balról számolva)\n"
-"       kerüljön a verem tetejére.\n"
+"      +N\tÚgy forgatja a vermet, hogy az N-edik könyvtár (0-tól\n"
+"    \t\tkezdve, a „dirs” által kiírt listán balról számolva)\n"
+"    \t\tkerüljön a verem tetejére.\n"
 "    \n"
-"      -N       Úgy forgatja a vermet, hogy az N-edik könyvtár (0-tól\n"
-"       kezdve, a „dirs” által kiírt listán jobbról számolva)\n"
-"       kerüljön a verem tetejére.\n"
+"      -N\tÚgy forgatja a vermet, hogy az N-edik könyvtár (0-tól\n"
+"    \t\tkezdve, a „dirs” által kiírt listán jobbról számolva)\n"
+"    \t\tkerüljön a verem tetejére.\n"
 "    \n"
-"      dir      A verem tetejére helyezi KTÁR könyvtárat, és ugyanezt\n"
-"       állítja be új munkakönyvtárnak.\n"
+"      ktár\tA verem tetejére helyezi KTÁR könyvtárat, és ugyanezt\n"
+"    \t\tállítja be új munkakönyvtárnak.\n"
 "    \n"
-"    A „dirs” beépített parancs listázza a könyvtárvermet.    \n"
+"    A „dirs” beépített parancs listázza a könyvtárvermet.\n"
+"    \n"
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, kivéve érvénytelen argumentum vagy könyvtárváltás\n"
 "    során történő hiba esetén."
 
-#: builtins.c:1834
-#, fuzzy
+#: builtins.c:1837
 msgid ""
 "Remove directories from stack.\n"
 "    \n"
@@ -5212,30 +5267,30 @@ msgid ""
 "    Returns success unless an invalid argument is supplied or the directory\n"
 "    change fails."
 msgstr ""
-"Elemek eltávolítása a veremből.\n"
+"Könyvtárak eltávolítása a veremből.\n"
 "    \n"
-"    Elemeket vesz ki a könyvtárveremből. Argumentumok nélkül kiveszi a \n"
+"    Elemeket vesz ki a könyvtárveremből. Argumentumok nélkül kiveszi a\n"
 "    legfelső elemet, és a kivett elemre állítja az új munkakönyvtárat.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -n   Ne váltson könyvtárat eltávolításkor, vagyis csak a vermet\n"
-"           változtassa.\n"
+"      -n\tNe váltson könyvtárat eltávolításkor, vagyis csak a vermet\n"
+"    \t\tváltoztassa.\n"
 "    \n"
 "    Argumentumok:\n"
-"      +N   Eltávolítja az N-edik elemet a „dirs” által kiírt listán, nullá-\n"
-"           tól, balról számolva. Pl. a „popd +0” az első, míg a „popd +1” a\n"
-"           könyvtárat távolítja el.\n"
-"      -N   Eltávolítja az N-edik elemet a „dirs” által kiírt listán, nullá-\n"
-"           tól, jobbról számolva. Pl. a „popd -0” az utolsó, a „popd -1” az\n"
-"           utolsó előtti könyvtárat távolítja el.\n"
+"      +N\tEltávolítja az N-edik elemet a „dirs” által kiírt listán,\n"
+"    \t\tnullától, balról számolva. Pl. a „popd +0” az első, míg a\n"
+"    \t\t„popd +1” a második könyvtárat távolítja el.\n"
+"      -N\tEltávolítja az N-edik elemet a „dirs” által kiírt listán,\n"
+"    \t\tnullától, jobbról számolva. Pl. a „popd -0” az utolsó,\n"
+"    \t\ta „popd -1” az utolsó előtti könyvtárat távolítja el.\n"
 "    \n"
-"    A „dirs” beépített parancs listázza a könyvtárvermet.    \n"
+"    A „dirs” beépített parancs listázza a könyvtárvermet.\n"
+"    \n"
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, kivéve érvénytelen argumentum vagy könyvtárváltás\n"
 "    során történő hiba esetén."
 
-#: builtins.c:1864
-#, fuzzy
+#: builtins.c:1867
 msgid ""
 "Display directory stack.\n"
 "    \n"
@@ -5266,25 +5321,26 @@ msgstr ""
 "A könyvtárverem megjelenítése.\n"
 "    \n"
 "    Megjeleníti a jelenleg megjegyzett könyvtárakat. A könyvtárakat a\n"
-"    „pushd” paranccsal lehet a verembe rakni; és a „popd” paranccsal kiven-\n"
-"    ni.\n"
+"    „pushd” paranccsal lehet a verembe rakni; és a „popd” paranccsal "
+"kivenni.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -c       a könyvtárverem törlése az összes elem eltávolításával\n"
-"      -l       a saját könyvtárat ne rövidítse a listázáskor egy tilde (~)\n"
-"      -p       a könyvtárverem kiírása soronként egy elemmel\n"
-"      -v       a könyvtárverem kiírása soronként egy elemmel, a vermen\n"
-"               belüli pozíció jelölésével\n"
+"      -c\ta könyvtárverem törlése az összes elem eltávolításával\n"
+"      -l\ta saját könyvtárat ne rövidítse a listázáskor egy tilde (~)\n"
+"      -p\ta könyvtárverem kiírása soronként egy elemmel\n"
+"      -v\ta könyvtárverem kiírása soronként egy elemmel, a vermen\n"
+"    \t\tbelüli pozíció jelölésével\n"
 "    \n"
 "    Argumentumok:\n"
-"      +N       N darab bejegyzést jelenít meg az argumentum nélkül a dirs\n"
-"               által megjelenített listán balról számolva, nullától kezdve\n"
-"      -N       N darab bejegyzést jelenít meg a listából jobbról "
-"számolva    \n"
+"      +N\tN darab bejegyzést jelenít meg az argumentum nélkül a dirs\n"
+"    \t\táltal megjelenített listán balról számolva, nullától kezdve.\n"
+"      -N\tN darab bejegyzést jelenít meg az argumentum nélkül a dirs\n"
+"    \t\táltal megjelenített listán jobbról számolva, nullától kezdve.\n"
+"    \n"
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, kivéve érvénytelen argumentum vagy hiba esetén."
 
-#: builtins.c:1895
+#: builtins.c:1898
 msgid ""
 "Set and unset shell options.\n"
 "    \n"
@@ -5311,18 +5367,17 @@ msgstr ""
 "    állapotát.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -o       OPTNEVek korlátozása a „set -o”-val használtakra\n"
-"      -p       minden kapcsoló kilistázása állapottal\n"
-"      -q       kimenet elnyelése\n"
-"      -s       minden OPTNÉV engedélyezése\n"
-"      -u       minden OPTNÉV tiltása\n"
+"      -o\tOPTNEVEK korlátozása a „set -o”-val használtakra\n"
+"      -p\tminden kapcsoló kilistázása az állapotuk jelzésével\n"
+"      -q\tkimenet elnyelése\n"
+"      -s\tminden OPTNÉV engedélyezése\n"
+"      -u\tminden OPTNÉV tiltása\n"
 "    \n"
 "    Kilépési kód:\n"
-"    Sikerrel tér vissza, ha OPTNÉV engedélyezve van; sikertelenül, ha hi-\n"
-"    bás kapcsolókat kap vagy OPTNÉV tiltva van."
+"    Sikerrel tér vissza, ha az OPTNÉV engedélyezve van; sikertelenül, ha\n"
+"    hibás kapcsolókat kap vagy az OPTNÉV tiltva van."
 
-#: builtins.c:1916
-#, fuzzy
+#: builtins.c:1919
 msgid ""
 "Formats and prints ARGUMENTS under control of the FORMAT.\n"
 "    \n"
@@ -5360,31 +5415,39 @@ msgid ""
 "assignment\n"
 "    error occurs."
 msgstr ""
-"FORMÁTUM alapján kiírja az ARGUMENTUMOKat.\n"
+"FORMÁTUM alapján az ARGUMENTUMOK kiírása.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -v változó       kimenet VÁLTOZÓ nevű változóba írása a szabványos\n"
-"                       kimenet helyett\n"
+"      -v változó\ta kimenet VÁLTOZÓ nevű változóba írása a szabványos\n"
+"    \t\t\tkimenet helyett\n"
 "    \n"
-"    FORMÁTUM egy karakterlánc, amely három típusú primitívekből áll: egy-\n"
-"    szerű karakterek, amelyeket a parancs a kimenetre másol; escape-karak-\n"
-"    tersorozatok, amelyeket átalakítva másol a kimenetre; valamint formá-\n"
-"    tumjelzők, amelyek rendre a következő argumentum kiírását szabályoz-\n"
-"    zák.\n"
+"    A FORMÁTUM egy karakterlánc, amely három fajta primitívből áll:\n"
+"    egyszerű karakterek, amelyeket a parancs a kimenetre másol; escape-\n"
+"    karaktersorozatok, amelyeket átalakítva másol a kimenetre; valamint\n"
+"    formátumjelzők, amelyek rendre a következő argumentum kiírását\n"
+"    szabályozzák.\n"
 "    \n"
-"    A printf(1) és printf(3) által használt szokásos jelzőkön túl a követ-\n"
-"    kezőket ismeri a printf parancs:\n"
+"    A printf(1) által használt szokásos jelzőkön túl a\n"
+"    következőket ismeri a printf parancs:\n"
 "    \n"
-"      %b       karakterlánc kiírása az escape-szekvenciák értelmezése után\n"
-"      %q       argumentum idézőjelezése olyan módon, hogy parancsértelmező\n"
-"               bemeneteként használható legyen\n"
+"      %b\tkarakterlánc kiírása az escape-szekvenciák értelmezése után\n"
+"      %q\targumentum idézőjelezése olyan módon, hogy parancsértelmező\n"
+"    \t\tbemeneteként használható legyen\n"
+"      %(fmt)T\tdátum-idő karakterlánc kiírása az FMT mint strftime(3)\n"
+"    \t\tformátum-karakterlánc használatával\n"
+"    \n"
+"    A formátum szükség szerint újrafelhasználásra kerül az összes "
+"argumentum\n"
+"    elfogyasztásához. Ha kevesebb argumentum van a formátumnak "
+"szükségesnél,\n"
+"    az extra formátumjelzők úgy viselkednek, mintha nulla érték vagy null\n"
+"    karakterlánc lett volna megadva.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    Sikerrel tér vissza, kivéve ha hibás kapcsolókat kap, vagy az írás/ér-\n"
-"    tékadás hibával járt."
+"    Sikerrel tér vissza, kivéve ha hibás kapcsolókat kap, vagy az írás/\n"
+"    értékadás hibával járt."
 
-#: builtins.c:1950
-#, fuzzy
+#: builtins.c:1953
 msgid ""
 "Specify how arguments are to be completed by Readline.\n"
 "    \n"
@@ -5412,27 +5475,28 @@ msgid ""
 msgstr ""
 "Megadja, hogy a Readline hogyan egészítse ki az argumentumokat.\n"
 "    \n"
-"    Minden NÉV-hez megadja, hogyan egészítse ki a Readline az argumentumo-\n"
-"    kat. Ha nincsenek kapcsolók megadva, a jelenlegi érték kerül kiírásra,\n"
+"    Minden NÉVHEZ megadja, hogyan egészítse ki a Readline az "
+"argumentumokat.\n"
+"    Ha nincsenek kapcsolók megadva, a jelenlegi érték kerül kiírásra,\n"
 "    újrafelhasználható módon.\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -p       meglévő kiegészítésmegadások listázása újrahasználható módon\n"
-"      -r       kiegészítésmegadások törlése minden NÉV-től; vagy ha nincs\n"
-"               NÉV megadva, az összes törlése\n"
-"      -D       kiegészítések és műveletek alkalmazása alapértelmezésben, ha\n"
-"               az adott parancshoz nincs kiegészítés megadva\n"
-"      -E       kiegészítések és műveletek alkalmazása az „üres” parancsok-\n"
-"               ra, vagyis a sor elején\n"
+"      -p\tmeglévő kiegészítésmegadások listázása újrahasználható módon\n"
+"      -r\tkiegészítésmegadások törlése minden NÉVTŐL; vagy ha nincs\n"
+"    \t\tNÉV megadva, az összes törlése\n"
+"      -D\tkiegészítések és műveletek alkalmazása alapértelmezésben, ha\n"
+"    \t\taz adott parancshoz nincs kiegészítés megadva\n"
+"      -E\tkiegészítések és műveletek alkalmazása az „üres” parancsokra,\n"
+"    \t\tvagyis a sor elején\n"
 "    \n"
-"    Kiegészítéskor a műveletek a nagybetűs kapcsolók felsorolásának sor-\n"
-"    rendjében kísérli meg a Readline. A -D elsőbbséget élvez a -E-vel szem-\n"
-"    ben.\n"
+"    Kiegészítéskor a műveletek a nagybetűs kapcsolók felsorolásának\n"
+"    sorrendjében kísérli meg a Readline. A -D elsőbbséget élvez a -E-vel\n"
+"    szemben.\n"
 "    \n"
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, kivéve érvénytelen kapcsoló és hiba esetén."
 
-#: builtins.c:1978
+#: builtins.c:1981
 msgid ""
 "Display possible completions depending on the options.\n"
 "    \n"
@@ -5446,15 +5510,15 @@ msgid ""
 msgstr ""
 "Lehetséges kiegészítések megjelenítése a kapcsolóktól függően.\n"
 "    \n"
-"    Függvényben való használatra szolgál a lehetséges kiegészítések gene-\n"
-"    rálása céljából. Ha az elhagyható SZÓ argumentum is meg van adva, SZÓ-\n"
-"    ra elölről illeszkedő találatok jelennek csak meg.\n"
+"    Függvényben való használatra szolgál a lehetséges kiegészítések "
+"generálása\n"
+"    céljából. Ha az elhagyható SZÓ argumentum is meg van adva, a SZÓRA\n"
+"    elölről illeszkedő találatok jelennek csak meg.\n"
 "    \n"
 "    Kilépési kód:\n"
 "    Sikerrel lép ki, kivéve érvénytelen kapcsoló vagy hiba esetén."
 
-#: builtins.c:1993
-#, fuzzy
+#: builtins.c:1996
 msgid ""
 "Modify or display completion options.\n"
 "    \n"
@@ -5486,33 +5550,32 @@ msgid ""
 msgstr ""
 "Kiegészítési beállítások módosítása vagy kiírása.\n"
 "    \n"
-"    Kiegészítési beállítások listázása minden NÉV-hez, vagy ha nincs NÉV\n"
-"    megadva, akkor az éppen zajló kiegészítésre. Ha nincs KAPCSOLÓ megad-\n"
-"    va, kiírja a kiegészítési beállításokat minden NÉV-hez vagy az aktuá-\n"
-"    lis kiegészítéshez.\n"
+"    Kiegészítési beállítások listázása minden NÉVHEZ, vagy ha nincs NÉV\n"
+"    megadva, akkor az éppen zajló kiegészítésre. Ha nincs KAPCSOLÓ megadva,\n"
+"    kiírja a kiegészítési beállításokat minden NÉVHEZ vagy az aktuális\n"
+"    kiegészítéshez.\n"
 "    \n"
 "    Kapcsolók:\n"
-"       -o kapcsoló     KAPCSOLÓ kiegészítései beállítás bekapcsolása minden\n"
-"                       NÉV-hez\n"
-"       -D              Az alapértelmezett kiegészítés beállításainak módo-\n"
-"                       sítása\n"
-"       -E              Az üres kiegészítés beállításainak módosítása\n"
+"    \t-o kapcsoló\ta KAPCSOLÓ kiegészítési beállítás megadása minden NÉVHEZ\n"
+"    \t-D\tAz alapértelmezett kiegészítés beállításainak módosítása\n"
+"    \t-E\tAz üres kiegészítés beállításainak módosítása\n"
 "    \n"
-"    „-o” helyett „+o” használatával a beállítás kikapcsolható.\n"
+"    A „-o” helyett „+o” használatával a beállítás kikapcsolható.\n"
 "    \n"
 "    Argumentumok:\n"
 "    \n"
 "    Minden NÉV egy parancsra vonatkozik, amelyhez egy kiegészítést előzőleg\n"
-"    meg kell adni a „complete” paranccsal. Ha nincs NÉV megadva, a compopt-\n"
-"    ot egy éppen kiegészítéseket generáló függvényből kell hívni, és a zaj-\n"
-"    ló generálásra fog vonatkozni.\n"
+"    meg kell adni a „complete” paranccsal. Ha nincs NÉV megadva, a compopt-"
+"ot\n"
+"    egy éppen kiegészítéseket generáló függvényből kell hívni, és a zajló\n"
+"    generálásra fog vonatkozni.\n"
 "    \n"
 "    Kilépési kód:\n"
-"    Sikerrel lép ki, kivéve ha érvénytelen kapcsolókat kap, vagy NÉV nincs\n"
+"    Sikerrel lép ki, kivéve ha érvénytelen kapcsolókat kap, vagy a NÉV "
+"nincs\n"
 "    még megadva."
 
-#: builtins.c:2023
-#, fuzzy
+#: builtins.c:2026
 msgid ""
 "Read lines from the standard input into an indexed array variable.\n"
 "    \n"
@@ -5555,26 +5618,28 @@ msgid ""
 msgstr ""
 "Sorok beolvasása a szabványos bemenetről egy indexelt tömbbe.\n"
 "    \n"
-"    Sorok beolvasása a szabványos bemenetről – vagy -u megadása esetén FD\n"
-"    fájlleíróból – egy megadott nevű TÖMB-be (elhagyása esetén $ARRAY-be).\n"
+"    Sorok beolvasása a szabványos bemenetről – vagy a -u megadása esetén az "
+"FD\n"
+"    fájlleíróból – egy megadott nevű TÖMBBE (elhagyása esetén az ARRAY-be).\n"
 "    \n"
 "    Kapcsolók:\n"
-"      -n szám          Legfeljebb SZÁM sor másolása. Ha szám 0, minden sor\n"
-"                       másolásra kerül\n"
-"      -O kezdet        KEZDET számú indextől kezdje a TÖMB-be másolást.\n"
-"                       Alapértelmezés: 0\n"
-"      -s szám          Az első SZÁM sor eldobása olvasáskor\n"
-"      -t               A sorok végéről a záró újsor eltávolítása\n"
-"      -u fd            Szabványos bemenet helyett FD fájlleíróból olvasson\n"
-"      -C parancs       PARANCS végrehajtása minden TÁVOLSÁG sor után\n"
-"      -c távolság      PARANCS végrehajtásai között beolvasott sorok száma\n"
+"      -d elvál\tAz ELVÁL használata sorlezáróként újsor helyett\n"
+"      -n szám\tLegfeljebb SZÁM sor másolása. Ha a SZÁM 0, minden sor\n"
+"      \t\tmásolásra kerül\n"
+"      -O kezdet\tKEZDET számú indextől kezdje a TÖMB-be másolást.\n"
+"      \t\tAlapértelmezés: 0\n"
+"      -s szám\tAz első SZÁM sor eldobása olvasáskor\n"
+"      -t\tA sorok végéről a záró ELVÁL (alapesetben: újsor) eltávolítása\n"
+"      -u fd\tSzabványos bemenet helyett az FD fájlleíróból olvasson\n"
+"      -C parancs\tA PARANCS végrehajtása minden TÁVOLSÁG sor után\n"
+"      -c távolság\tA PARANCS végrehajtásai között beolvasott sorok száma\n"
 "    \n"
 "    Argumentumok:\n"
-"      TÖMB             Beolvasáshoz használt tömb neve\n"
+"      TÖMB\tBeolvasáshoz használt tömb neve\n"
 "    \n"
-"    Ha -C -c nélkül van megadva, az alapértelmezett távolság 5000.\n"
-"    PARANCS végrehajtásakor utolsó argumentumként a parancs megkapja a kö-\n"
-"    vetkező beolvasandó elem indexét.\n"
+"    Ha a -C -c nélkül van megadva, az alapértelmezett távolság 5000.\n"
+"    A PARANCS végrehajtásakor utolsó argumentumként a parancs megkapja a\n"
+"    következő beolvasandó elem indexét.\n"
 "    \n"
 "    Ha nincs KEZDET megadva, a mapfile törli a TÖMB tömböt olvasás előtt.\n"
 "    \n"
@@ -5582,7 +5647,7 @@ msgstr ""
 "    Sikerrel tér vissza, kivéve érvénytelen kapcsoló vagy csak olvasható,\n"
 "    vagy nem indexelt TÖMB megadása esetén."
 
-#: builtins.c:2059
+#: builtins.c:2062
 msgid ""
 "Read lines from a file into an array variable.\n"
 "    \n"
@@ -5590,24 +5655,19 @@ msgid ""
 msgstr ""
 "Sorok olvasása egy tömbváltozóba.\n"
 "    \n"
-"    „mapfile” szinonimája."
+"    A „mapfile” szinonimája."
 
-#, fuzzy
-#~ msgid "Copyright (C) 2012 Free Software Foundation, Inc."
-#~ msgstr "Copyright © 2009 Free Software Foundation, Inc."
+#~ msgid ":"
+#~ msgstr ":"
 
-#~ msgid "Copyright (C) 2009 Free Software Foundation, Inc.\n"
-#~ msgstr "Copyright © 2009 Free Software Foundation, Inc.\n"
+#~ msgid "true"
+#~ msgstr "true"
 
-#~ msgid ""
-#~ "License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl."
-#~ "html>\n"
-#~ msgstr ""
-#~ "A licenc GPLv2+: a GNU GPL 2. vagy újabb változata <http://gnu.org/"
-#~ "licenses/gpl.html>\n"
+#~ msgid "false"
+#~ msgstr "false"
 
-#~ msgid "wait [pid]"
-#~ msgstr "wait [pid]"
+#~ msgid "times"
+#~ msgstr "times"
 
 #~ msgid ""
 #~ ".  With EXPR, returns\n"
@@ -5630,3 +5690,13 @@ msgstr ""
 #~ "    Az EXPR értéke azt adja meg, hogy a jelenlegihez képest milyen "
 #~ "mélyre\n"
 #~ "    lépjen vissza; a verem tetején a 0-s keret van."
+
+#~ msgid "Copyright (C) 2009 Free Software Foundation, Inc.\n"
+#~ msgstr "Copyright © 2009 Free Software Foundation, Inc.\n"
+
+#~ msgid ""
+#~ "License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl."
+#~ "html>\n"
+#~ msgstr ""
+#~ "A licenc GPLv2+: a GNU GPL 2. vagy újabb változata <http://gnu.org/"
+#~ "licenses/gpl.html>\n"

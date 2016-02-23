@@ -38,7 +38,9 @@
 #include <signal.h>
 #include <errno.h>
 #include "filecntl.h"
-#include <pwd.h>
+#if defined (HAVE_PWD_H)
+#  include <pwd.h>
+#endif
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
@@ -1693,6 +1695,9 @@ init_interactive ()
 {
   expand_aliases = interactive_shell = startup_state = 1;
   interactive = 1;
+#if defined (HISTORY)
+  remember_on_history = enable_history_list = 1;	/* XXX */
+#endif
 }
 
 static void
@@ -1716,6 +1721,9 @@ init_interactive_script ()
 {
   init_noninteractive ();
   expand_aliases = interactive_shell = startup_state = 1;
+#if defined (HISTORY)
+  remember_on_history = enable_history_list = 1;	/* XXX */
+#endif
 }
 
 void
@@ -1746,7 +1754,9 @@ get_current_user_info ()
 	  current_user.shell = savestring ("/bin/sh");
 	  current_user.home_dir = savestring ("/");
 	}
+#if defined (HAVE_GETPWENT)
       endpwent ();
+#endif
     }
 }
 
@@ -1858,7 +1868,7 @@ shell_reinitialize ()
   /* XXX - should we set jobs_m_flag to 0 here? */
 
 #if defined (HISTORY)
-  bash_history_reinit (0);
+  bash_history_reinit (enable_history_list = 0);
 #endif /* HISTORY */
 
 #if defined (RESTRICTED_SHELL)

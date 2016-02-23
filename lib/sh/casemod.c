@@ -109,10 +109,11 @@ sh_modcase (string, pat, flags)
   int inword, c, nc, nop, match, usewords;
   char *ret, *s;
   wchar_t wc;
+  int mb_cur_max;
 #if defined (HANDLE_MULTIBYTE)
   wchar_t nwc;
   char mb[MB_LEN_MAX+1];
-  int mlen, mb_cur_max;
+  int mlen;
   size_t m;
   mbstate_t state;
 #endif

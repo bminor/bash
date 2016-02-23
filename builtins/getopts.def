@@ -1,7 +1,7 @@
 This file is getopts.def, from which is created getopts.c.
 It implements the builtin "getopts" in Bash.
 
-Copyright (C) 1987-2004 Free Software Foundation, Inc.
+Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -316,9 +316,12 @@ getopts_builtin (list)
     }
 
   reset_internal_getopt ();
-  if (internal_getopt (list, "") != -1)
+  if ((ret = internal_getopt (list, "")) != -1)
     {
-      builtin_usage ();
+      if (ret == GETOPT_HELP)
+	builtin_help ();
+      else
+	builtin_usage ();
       return (EX_USAGE);
     }
   list = loptend;

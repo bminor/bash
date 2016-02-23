@@ -503,7 +503,11 @@ initialize_shell_variables (env, privmode)
 #endif
       set_if_not ("PS2", secondary_prompt);
     }
-  set_if_not ("PS4", "+ ");
+
+  if (current_user.euid == 0)
+    bind_variable ("PS4", "+", 0);
+  else
+    set_if_not ("PS4", "+ ");
 
   /* Don't allow IFS to be imported from the environment. */
   temp_var = bind_variable ("IFS", " \t\n", 0);
@@ -640,6 +644,11 @@ initialize_shell_variables (env, privmode)
   temp_var = find_variable ("BASH_XTRACEFD");
   if (temp_var && imported_p (temp_var))
     sv_xtracefd (temp_var->name);
+
+  sv_shcompat ("BASH_COMPAT");
+
+  /* Allow FUNCNEST to be inherited from the environment. */
+  sv_funcnest ("FUNCNEST");
 
   /* Initialize the dynamic variables, and seed their values. */
   initialize_dynamic_variables ();
@@ -882,10 +891,15 @@ set_pwd ()
     }
 
   /* According to the Single Unix Specification, v2, $OLDPWD is an
-     `environment variable' and therefore should be auto-exported.
-     Make a dummy invisible variable for OLDPWD, and mark it as exported. */
-  temp_var = bind_variable ("OLDPWD", (char *)NULL, 0);
-  VSETATTR (temp_var, (att_exported | att_invisible));
+     `environment variable' and therefore should be auto-exported.  If we
+     don't find OLDPWD in the environment, or it doesn't name a directory,
+     make a dummy invisible variable for OLDPWD, and mark it as exported. */
+  temp_var = find_variable ("OLDPWD");
+  if (temp_var == 0 || value_cell (temp_var) == 0 || file_isdir (value_cell (temp_var)) == 0)
+    {
+      temp_var = bind_variable ("OLDPWD", (char *)NULL, 0);
+      VSETATTR (temp_var, (att_exported | att_invisible));
+    }
 }
 
 /* Make a variable $PPID, which holds the pid of the shell's parent.  */
@@ -4446,6 +4460,16 @@ push_func_var (data)
 	shell_variables->table = hash_create (VARIABLES_HASH_BUCKETS);
       /* XXX - should we set v->context here? */
       v = bind_variable_internal (var->name, value_cell (var), shell_variables->table, 0, 0);
+#if defined (ARRAY_VARS)
+      if (array_p (var) || assoc_p (var))
+	{
+	  FREE (value_cell (v));
+	  if (array_p (var))
+	    var_setarray (v, array_copy (array_cell (var)));
+	  else
+	    var_setassoc (v, assoc_copy (assoc_cell (var)));
+	}
+#endif	  
       if (shell_variables == global_variables)
 	var->attributes &= ~(att_tempvar|att_propagate);
       else

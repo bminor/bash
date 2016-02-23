@@ -411,7 +411,7 @@ compat40 set
 
 compat41 set
 	- interrupting a command list such as "a ; b ; c" causes the execution
-	  of the entire list to be aborted (in versions before bash-4.1,
+	  of the entire list to be aborted (in versions before bash-4.0,
 	  interrupting one command in a list caused the next to be executed)
 	- when in posix mode, single quotes in the `word' portion of a
 	  double-quoted parameter expansion define a new quoting context and
@@ -427,6 +427,10 @@ compat43 set
 	  (declare -a foo='(1 2)')
 	- word expansion errors are considered non-fatal errors that cause the
 	  current command to fail, even in Posix mode
+	- when executing a shell function, the loop state (while/until/etc.) is
+	  not reset, so `break' or `continue' in a shell function will break or
+	  continue loops in the calling context.  Bash-4.4 and later reset the
+	  loop state to prevent this.
 
 -------------------------------------------------------------------------------
 

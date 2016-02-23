@@ -290,7 +290,7 @@ _register_dump_table(fp)
     {
       entry = mem_table[i];
       if (entry.mem)
-	fprintf (fp, "%s[%d] %p:%d:%s:%s:%s:%d:%d:%d\n",
+	fprintf (fp, "%s[%d] %p:%zu:%s:%s:%s:%d:%d:%d\n",
 						(i == table_bucket_index) ? "*" : "",
 						i,
 						entry.mem, entry.size,

@@ -1,3 +1,318 @@
+This document details the changes between this version, bash-4.4-rc1, and
+the previous version, bash-4.4-beta.
+
+1.  Changes to Bash
+
+a.  Fixed several problems with bash completion not special-casing bash syntax
+    constructs.
+
+b.  Fixed a bug that caused the mapfile builtin to not create array variables
+    when a variable of the same name appears in the temporary environment.
+
+c.  Fixed a bug that caused prompt expansion to loop when PS1 contained a
+    syntax error.
+
+d.  Fixed a bug that caused the ${array[@]@A} expansion to split the results even
+    when double-quoted.
+
+e.  There is a new implementation of the code that saves the last CHILD_MAX
+    exited background pids so their status can be queried later.
+
+f.  Bash-4.4 can now be configured and built on very old versions of Solaris 2.
+
+g.  Fixed problems with --help support for several builtins.
+
+h.  Fixed values added to BASH_SOURCE and BASH_LINENO for functions inherited from
+    the environment.
+
+i.  Fixed a bug that caused background processes run from non-interactive shells
+    with job control enabled to place the terminal in the wrong process group
+    under certain circumstances.
+
+j.  Fixed a bug that caused `fc' to return an incorrect exit status when
+    executing commands from the history list.
+
+k.  Fixed a bug that caused the shell to exit when a process substitution received
+    a SIGINT when run in certain terminal emulators.
+
+l.  EXECIGNORE now honors the setting of `extglob' when attempting to match
+    executable names.
+
+m.  Fixed a bug where `return' used the wrong exit status when executed in a
+    DEBUG trap.
+
+n.  Fixed a bug that caused a command containing a here-document and an escaped
+    newline to be stored in the history list incorrectly.
+
+o.  Fixed a bug that caused set -e to be honored in cases of builtins invoking
+    other builtins when it should be ignored.
+
+p.  Fixed a bug that caused `readonly' and `export' to create local array
+    variables when used within shell functions.
+
+q.  Fixed a bug that allowed subshells begun to execute process substitutions to
+    have access to the command's temporary environment.
+
+r.  Fixed a bug that could cause the shell to dump core when receiving a SIGCHLD
+    for which a trap has been set while running in posix mode.
+
+s.  Fixed a bug that caused bash to not restore BASH_ARGC, BASH_ARGV, BASH_SOURCE,
+    BASH_LINENO, and FUNCNAME if the shell received a SIGINT while reading
+    commands from a file while executing  `.'.
+
+t.  Fixed a bug that caused the `-o history' option to have no effect when
+    supplied on the command line when starting a new shell.
+
+u.  Fixed a bug that caused history expansions occurring in command substitutions
+    to not be performed.
+
+v.  Fixed a bug that caused `eval' run in a non-interactive shell to disable
+    history expansion for the remainder of the shell script, even if the script
+    had previously enabled it.
+
+w.  Fixed a bug that caused "$@" to not expand to multiple words when IFS is set
+    to the empty string.
+
+x.  Fixed a bug that caused process and command substitution to inherit output
+    buffered in the stdio library but not written.
+
+y.  Fixed a bug that caused a terminating signal received during `echo' to run
+    an exit trap in a signal handler context.
+
+z.  Fixed a bug that caused a builtin command containing a process substitution to
+    return the wrong exit status.
+
+aa. Fixed a bug that caused `()' subshells with piped input to incorrectly redirect
+    the standard input of some of the commands in the subshell from /dev/null.
+
+bb. The history builtin now uses more descriptive error messages for missing or
+    invalid timestamps.
+
+2.  Changes to Readline
+
+a.  The history file writing functions only attempt to create and use a backup
+    history file if the history file exists and is a regular file.
+
+b.  Fixed an out-of-bounds read in readline's internal tilde expansion interface.
+
+c.  Fixed several redisplay bugs with prompt strings containing multibyte
+    and non-visible characters whose physical length is longer than the screen
+    width.
+
+d.  Fixed a redisplay bug with prompt strings containing invisible characters
+    whose physical length exceeds the screen width and using incremental search.
+
+e.  Readline prints more descriptive error messages when it encounters errors
+    while reading an inputrc file.
+
+f.  Fixed a bug in the character insertion code that attempts to optimize
+    typeahead when it reads a character that is not bound to self-insert and
+    resets the key sequence state.
+
+3.  New Features in Bash
+
+a.  BASH_COMPAT and FUNCNEST can be inherited and set from the shell's initial
+    environment.
+
+b.  inherit_errexit: a new `shopt' option that, when set, causes command
+    substitutions to inherit the -e option.  By default, those subshells disable
+    -e.  It's enabled as part of turning on posix mode.
+
+c.  New prompt string: PS0.  Expanded and displayed by interactive shells after
+    reading a complete command but before executing it.
+
+d.  Interactive shells now behave as if SIGTSTP/SIGTTIN/SIGTTOU are set to SIG_DFL
+    when the shell is started, so they are set to SIG_DFL in child processes.
+
+e.  Posix-mode shells now allow double quotes to quote the history expansion
+    character.
+
+f.  OLDPWD can be inherited from the environment if it names a directory.
+
+g.  Shells running as root no longer inherit PS4 from the environment, closing a
+    security hole involving PS4 expansion performing command substitution.
+
+h.  If executing an implicit `cd' when the `autocd' option is set, bash will now
+    invoke a function named `cd' if one exists before executing the `cd' builtin.
+
+4.  New Features in Readline
+
+a.  If an incremental search string has its last character removed with DEL, the
+    resulting empty search string no longer matches the previous line.
+
+b.  If readline reads a history file that begins with `#' (or the value of
+    the history comment character) and has enabled history timestamps, the history
+    entries are assumed to be delimited by timestamps.  This allows multi-line
+    history entries.
+
+c.  Readline now throws an error if it parses a key binding without a terminating
+    `:' or whitespace.
+
+------------------------------------------------------------------------------
+This document details the changes between this version, bash-4.4-beta, and
+the previous version, bash-4.4-alpha.
+
+1.  Changes to Bash
+
+a.  Fixed two bugs that caused out-of-bounds reads when skipping over assignment
+    statements while finding the word on which to perform programmable
+    completion.
+
+b.  Fixed a memory leak in programmable completion.
+
+c.  Fixed a bug that could cause the shell to crash when interrupting the
+    wait builtin.
+
+d.  Fixed a bug that caused ${!vvv@} to be interpreted as introducing the new
+    `@' operator.
+
+e.  Fixed a bug that caused the && and || operators to be incorrectly optimized.
+
+f.  The shell now undoes redirections before exiting the shell when the `-e'
+    option is enabled, and a shell function fails.
+
+g.  History expansion now skips over the history expansion character in command
+    and process substitution.
+
+h.  Fixed a bug that caused stray '\001' characters to be added to the output
+    of `declare -p'.
+
+i.  Fixed a memory leak when processing declare commands that perform compound
+    array assignments.
+
+j.  Fixed a bug that could cause the shell to crash when reading input from a
+    file and the limit on open file descriptors is high.
+
+k.  Fixed a bug that caused the ERR and RETURN traps to be unset if they were
+    set in a shell function but unset previously.
+
+l.  Fixed a bug that caused several signals to be ignored if `exec' failed in
+    an interactive shell.
+
+m.  A posix-mode non-interactive shell now considers a parameter expansion error
+    to be a fatal error.
+
+n.  The `time' command now prints timing statistics for failed commands when
+    the -e option is enabled.
+
+o.  Fixed a bug that caused the shell to crash when attempting to indirectly
+    expand a shell variable with an invalid name.
+
+p.  Fixed a bug that caused the shell to crash when running a trap containing
+    a process substitution.
+
+q.  Bash now prints the keyword `function' before a function with the same name
+    as a reserved word when using `declare -f' to avoid parse errors when
+    reusing the output as input.
+
+r.  Fixed a bug that caused the shell to crash when using declare -g to attempt
+    to redefine an existing global indexed array variable as an associative
+    array.
+
+s.  Fixed a memory leak that occurred when interrupting brace expansions
+    generating a sequence.
+
+t.  Fixed a bug that resulted in alias expansion in redirections.
+
+u.  The `declare -a' and `declare -A' commands now print fewer warnings when
+    attempting to create and initialize an array at the same time, but
+    relying on word expansions to construct the compound assignment.
+
+v.  The `help' builtin now behaves better in locales where each wide
+    character occupies more than one display column.
+
+w.  The `read' builtin no longer has a possible race condition when a timeout
+    occurs.
+
+x.  Fixed several expansion problems encountered when IFS="'".
+
+y.  Fixed a problem with the expansion of $'\c?'.
+
+z.  Bash no longer splits the expansion of here-strings, as the documentation
+    has always said.
+
+aa. Bash now puts `s' in the value of $- if the shell is reading from standard
+    input, as Posix requires.
+
+bb. Fixed a bug that caused the shell to crash if invoked with a NULL
+    environment.
+
+cc. The shell now only trusts an inherited value for $PWD if it begins with a
+    `/'.
+
+dd. Fixed a memory leak when creating local array variables and assigning to
+    them using compound assignment with the `declare' builtin.
+
+ee. Fixed a bug that could cause the shell to crash when processing nested here
+    documents inside a command substitution.
+
+ff. Array keys and values are now displayed using $'...' quoting where
+    appropriate.
+
+gg. Fixed a bug that could cause the shell to crash if the replacement string
+    in pattern substitution was NULL.
+
+hh. Fixed a bug that could cause the shell to crash if a command substitution
+    contained a non-fatal syntax error.
+
+ii. Fixed a bug that could cause the shell to crash if variable indirection
+    resulted in a NULL variable.
+
+jj. Fixed a bug that could cause the shell to crash if a long string contained
+    multiple unterminated parameter expansion constructs.
+
+kk. Improved the code that acts on SIGINT received while waiting for a child
+    process only if the child exits due to SIGINT.
+
+ll. $BASH_SUBSHELL now has more consistent values in asynchronous simple
+    commands.
+
+2.  Changes to Readline
+
+a.  Colored completion prefixes are now displayed using a different color, less
+    likely to collide with files.
+
+b.  Fixed a bug that caused vi-mode character search to misbehave when
+    running in callback mode.
+
+c.  Fixed a bug that caused output to be delayed when input is coming from a
+    macro in vi-mode.
+
+d.  Fixed a bug that caused the vi-mode `.' command to misbehave when redoing
+    a multi-key key sequence via a macro.
+
+e.  Fixed a bug that caused problems with applications that supply their own
+    input function when performing completion.
+
+f.  When read returns -1/EIO when attempting to read a key, return an error
+    instead of line termination back to the caller.
+
+g.  Updated tty auditing feature based on patch from Red Hat.
+
+h.  Fixed a bug that could cause the history library to crash on overflows
+    introduced by malicious editing of timestamps in the history file.
+
+3.  New Features in Bash
+
+a.  `make install' now installs the example loadable builtins and a set of
+    bash headers to use when developing new loadable builtins.
+
+b.  `enable -f' now attempts to call functions named BUILTIN_builtin_load when
+    loading BUILTIN, and BUILTIN_builtin_unload when deleting it.  This allows
+    loadable builtins to run initialization and cleanup code.
+
+c.  There is a new BASH_LOADABLES_PATH variable containing a list of directories
+    where the `enable -f' command looks for shared objects containing loadable
+    builtins.
+
+d.  The `complete_fullquote' option to `shopt' changes filename completion to
+    quote all shell metacharacters in filenames and directory names.
+
+e.  The `kill' builtin now has a `-L' option, equivalent to `-l', for
+    compatibility with Linux standalone versions of kill.
+
+4.  New Features in Readline
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-4.4-alpha, and
 the previous version, bash-4.3-release.
 
@@ -236,7 +551,7 @@ www. Fixes for upper and lower-casing multibyte characters, some locales have
      bytes.
 
 xxx. Fixed a bug that caused the ERR trap in a shell function to have the
-     right value for $LINENO.
+     wrong value for $LINENO.
 
 yyy. Fixed a bug that resulted in incorrect quoting of regexps for the =~
      operator when an open brace appears without a close brace.
@@ -323,6 +638,10 @@ vvvv. Fixed a bug that caused the completion code to read past the end of the
 wwww. Fixed a bug that caused case statements within loops contained in a
       command substitution to be parsed incorrectly.
 
+xxxx. Fixed a bug that could cause SIGCHLD handling to be delayed after
+      running `wait' with no arguments and interrupting it with ^C without
+      a trap handler installed.
+
 2.  Changes to Readline
 
 a.  A bug that caused vi-mode `.' to be unable to redo `c', `d', and `y'
@@ -371,9 +690,9 @@ o.  Fixed a bug that caused history expansion to disregard characters that are
 p.  Fixed a bug that could cause reading past the end of a string when reading
     the value when binding the set of isearch terminators.
 
-q.  Fixed a bug that caused readline commands that depend on knowing which  
+q.  Fixed a bug that caused readline commands that depend on knowing which
     key invoked them to misbehave when dispatching key sequences that are
-    prefixes of other key bindings. 
+    prefixes of other key bindings.
 
 r.  Paren matching now works in vi insert mode.
 
@@ -439,7 +758,7 @@ r.  Executing the rhs of && and || will no longer cause the shell to fork if
     it's not necessary.
 
 s.  The `local' builtin takes a new argument: `-', which will cause it to save
-    and the single-letter shell options and restore their previous values at
+    the single-letter shell options and restore their previous values at
     function return.
 
 t.  `complete' and `compgen' have a new `-o nosort' option, which forces

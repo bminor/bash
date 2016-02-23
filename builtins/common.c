@@ -1,6 +1,6 @@
 /* common.c - utility functions for all builtins */
 
-/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -343,7 +343,9 @@ int
 sh_chkwrite (s)
      int s;
 {
+  QUIT;
   fflush (stdout);
+  QUIT;
   if (ferror (stdout))
     {
       sh_wrerror ();

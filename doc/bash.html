@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2015 October 2<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2016 February 8<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -42,7 +42,7 @@ bash - GNU Bourne-Again SHell
 <H3>COPYRIGHT</H3>
 
 
-Bash is Copyright &#169; 1989-2015 by the Free Software Foundation, Inc.
+Bash is Copyright &#169; 1989-2016 by the Free Software Foundation, Inc.
 <A NAME="lbAE">&nbsp;</A>
 <H3>DESCRIPTION</H3>
 
@@ -638,7 +638,7 @@ symbols:
 <DL COMPACT><DT><DD>
 <P>
 
-<B>||  &amp;  &amp;&amp;  ;  ;;  (  )  |  |&amp;    &lt;newline&gt;</B>
+<B>||  &amp;  &amp;&amp;  ;  ;;  ;&amp;  ;;&amp;  (  )  |  |&amp;    &lt;newline&gt;</B>
 
 </DL>
 
@@ -1157,7 +1157,7 @@ last command executed, or zero if no condition tested true.
 The <B>while</B> command continuously executes the list
 <I>list-2</I> as long as the last command in the list <I>list-1</I> returns
 an exit status of zero.  The <B>until</B> command is identical
-to the <B>while</B> command, except that the test is negated;
+to the <B>while</B> command, except that the test is negated:
 <I>list-2</I>
 
 is executed as long as the last command in
@@ -1354,6 +1354,8 @@ of all characters within the quotes, with the exception of
 and, when history expansion is enabled,
 <B>!</B>.
 
+When the shell is in <I>posix mode</I>, the <B>!</B> has no special meaning
+within double quotes, even when history expansion is enabled.
 The characters
 <B>$</B>
 
@@ -1870,8 +1872,14 @@ that do not require <B>bash</B> to be re-initialized.
 <DD>
 An associative array variable whose members correspond to the internal
 list of aliases as maintained by the <B>alias</B> builtin.
-Elements added to this array appear in the alias list; unsetting array
-elements cause aliases to be removed from the alias list.
+Elements added to this array appear in the alias list; however,
+unsetting array elements currently does not cause aliases to be removed
+from the alias list.
+If
+<B>BASH_ALIASES</B>
+
+is unset, it loses its special properties, even if it is
+subsequently reset.
 <DT><B>BASH_ARGC</B>
 
 <DD>
@@ -1923,8 +1931,14 @@ builtin below)
 <DD>
 An associative array variable whose members correspond to the internal
 hash table of commands as maintained by the <B>hash</B> builtin.
-Elements added to this array appear in the hash table; unsetting array
-elements cause commands to be removed from the hash table.
+Elements added to this array appear in the hash table; however,
+unsetting array elements currently does not cause command names to be removed
+from the hash table.
+If
+<B>BASH_CMDS</B>
+
+is unset, it loses its special properties, even if it is
+subsequently reset.
 <DT><B>BASH_COMMAND</B>
 
 <DD>
@@ -2551,7 +2565,7 @@ used when the shell is invoked in POSIX mode.
 <DT><B>EXECIGNORE</B>
 
 <DD>
-A colon-separated list of extended glob patterns (see <B>Pattern Matching</B>)
+A colon-separated list of shell patterns (see <B>Pattern Matching</B>)
 defining the list of filenames to be ignored by command search.
 Files whose full pathnames match one of these patterns are not considered
 executable files for the purposes of completion and command execution.
@@ -2559,6 +2573,8 @@ This does not affect the behavior of the <B>[</B>, <B>test</B>, and <B>[[</B>
 commands.
 Use this variable to ignore shared library files that have the executable
 bit set, but are not executable files.
+The pattern matching honors the setting of the <B>extglob</B> shell
+option.
 <DT><B>FCEDIT</B>
 
 <DD>
@@ -2683,6 +2699,8 @@ not tested, and are added to the history regardless of the value of
 <FONT SIZE=-1><B>HISTIGNORE</B>.
 
 </FONT>
+The pattern matching honors the setting of the <B>extglob</B> shell
+option.
 <DT><B>HISTSIZE</B>
 
 <DD>
@@ -2829,6 +2847,11 @@ strings preceded by a <B>$</B>.
 
 <DD>
 This variable determines the locale category used for number formatting.
+<DT><B>LC_TIME</B>
+
+<DD>
+This variable determines the locale category used for data and time
+formatting.
 <DT><B>LINES</B>
 
 <DD>
@@ -2955,6 +2978,15 @@ trailing directory components to retain when expanding the <B>\w</B> and
 
 </FONT>
 below).  Characters removed are replaced with an ellipsis.
+<DT><B>PS0</B>
+
+<DD>
+The value of this parameter is expanded (see
+<FONT SIZE=-1><B>PROMPTING</B>
+
+</FONT>
+below) and displayed by interactive shells after reading a command
+and before the command is executed.
 <DT><B>PS1</B>
 
 <DD>
@@ -4044,8 +4076,8 @@ or
 
 <B>Bash</B>
 
-performs the expansion by executing <I>command</I> and
-replacing the command substitution with the standard output of the
+performs the expansion by executing <I>command</I> in a subshell environment
+and replacing the command substitution with the standard output of the
 command, with any trailing newlines deleted.
 Embedded newlines are not deleted, but they may be removed during
 word splitting.
@@ -4116,19 +4148,23 @@ prints a message indicating failure and no substitution occurs.
 
 <P>
 
-<I>Process substitution</I> is supported on systems that support named
-pipes (<I>FIFOs</I>) or the <B>/dev/fd</B> method of naming open files.
+<I>Process substitution</I> allows a process's input or output to be
+referred to using a filename.
 It takes the form of
 <B>&lt;(</B><I>list</I><B>)</B>
 or
 <B>&gt;(</B><I>list</I><B>)</B>.
-The process <I>list</I> is run with its input or output connected to a
-<I>FIFO</I> or some file in <B>/dev/fd</B>.  The name of this file is
+The process <I>list</I> is run asynchronously, and its input or output
+appears as a filename.
+This filename is
 passed as an argument to the current command as the result of the
-expansion.  If the <B>&gt;(</B><I>list</I><B>)</B> form is used, writing to
+expansion.
+If the <B>&gt;(</B><I>list</I><B>)</B> form is used, writing to
 the file will provide input for <I>list</I>.  If the
 <B>&lt;(</B><I>list</I><B>)</B> form is used, the file passed as an
 argument should be read to obtain the output of <I>list</I>.
+Process substitution is supported on systems that support named
+pipes (<I>FIFOs</I>) or the <B>/dev/fd</B> method of naming open files.
 <P>
 
 When available, process substitution is performed
@@ -4186,10 +4222,12 @@ If
 </FONT>
 has a value other than the default, then sequences of
 the whitespace characters
-<B>space</B>
+<B>space</B>,
+
+<B>tab</B>,
 
 and
-<B>tab</B>
+<B>newline</B>
 
 are ignored at the beginning and end of the
 word, as long as the whitespace character is in the
@@ -4227,11 +4265,18 @@ If the value of
 is null, no word splitting occurs.
 <P>
 
-Explicit null arguments (<B>&quot;&quot;</B> or <B>aqaq</B>) are retained.
+Explicit null arguments (<B>&quot;&quot;</B> or <B>aqaq</B>) are retained
+and passed to commands as empty strings.
 Unquoted implicit null arguments, resulting from the expansion of
 parameters that have no values, are removed.
 If a parameter with no value is expanded within double quotes, a
-null argument results and is retained.
+null argument results and is retained
+and passed to a command as an empty string.
+When a quoted null argument appears as part of a word whose expansion is
+non-null, the null argument is removed.
+That is, the word
+<TT>-daqaq</TT> becomes <TT>-d</TT> after word splitting and
+null argument removal.
 <P>
 
 Note that if no expansion occurs, no splitting
@@ -4382,6 +4427,8 @@ option is disabled when
 
 </FONT>
 is unset.
+The pattern matching honors the setting of the <B>extglob</B> shell
+option.
 <P>
 
 <B>Pattern Matching</B>
@@ -4975,12 +5022,12 @@ The <I>word</I> undergoes
 brace expansion, tilde expansion, parameter and variable expansion,
 command substitution, arithmetic expansion, and quote removal.
 Pathname expansion and word splitting are not performed.
-The result is supplied as a single string to the command on its
+The result is supplied as a single string, with a newline appended,
+to the command on its
 standard input (or file descriptor <I>n</I> if <I>n</I> is specified).
 <A NAME="lbBQ">&nbsp;</A>
 <H4>Duplicating File Descriptors</H4>
 
-<P>
 <P>
 
 The redirection operator
@@ -6374,6 +6421,12 @@ when it is ready to read a command, and the secondary prompt
 
 </FONT>
 when it needs more input to complete a command.
+<B>Bash</B>
+
+displays
+<B>PS0</B>
+
+after it reads a command but before executing it.
 <B>Bash</B>
 
 allows these prompt strings to be customized by inserting a number of
@@ -9081,7 +9134,8 @@ names are
 vi-move, vi-command</I>, and
 <I>vi-insert</I>.
 
-<I>vi</I> is equivalent to <I>vi-command</I>; <I>emacs</I> is
+<I>vi</I> is equivalent to <I>vi-command</I> (<I>vi-move</I> is also
+a synonym); <I>emacs</I> is
 equivalent to <I>emacs-standard</I>.
 <DT><B>-l</B>
 
@@ -9876,7 +9930,7 @@ invalid option is supplied or <I>n</I> indexes beyond the end
 of the directory stack.
 </DL>
 
-<DT><B>disown</B> [<B>-ar</B>] [<B>-h</B>] [<I>jobspec</I> ...]<DD>
+<DT><B>disown</B> [<B>-ar</B>] [<B>-h</B>] [<I>jobspec</I> ... | <I>pid</I> ... ]<DD>
 Without options, remove each
 <I>jobspec</I>
 
@@ -10611,7 +10665,7 @@ associated with each history entry is written to the history file,
 marked with the history comment character.
 When the history file is read, lines beginning with the history
 comment character followed immediately by a digit are interpreted
-as timestamps for the previous history line.
+as timestamps for the following history entry.
 The return value is 0 unless an invalid option is encountered, an
 error occurs while reading or writing the history file, an invalid
 <I>offset</I> is supplied as an argument to <B>-d</B>, or the
@@ -10980,9 +11034,8 @@ In addition to the standard <I>printf</I>(1) format specifications,
 <DD>
 causes
 <B>printf</B> to expand backslash escape sequences in the corresponding
-<I>argument</I> (except that <B>\c</B> terminates output, backslashes in
-<B>\aq</B>, <B>\&quot;</B>, and <B>\?</B> are not removed, and octal escapes
-beginning with <B>\0</B> may contain up to four digits).
+<I>argument</I>
+in the same way as <B>echo -e</B>.
 <DT><B>%q</B>
 
 <DD>
@@ -11102,15 +11155,18 @@ reading the name of the current directory or an
 invalid option is supplied.
 <DT><B>read</B> [<B>-ers</B>] [<B>-a</B> <I>aname</I>] [<B>-d</B> <I>delim</I>] [<B>-i</B> <I>text</I>] [<B>-n</B> <I>nchars</I>] [<B>-N</B> <I>nchars</I>] [<B>-p</B> <I>prompt</I>] [<B>-t</B> <I>timeout</I>] [<B>-u</B> <I>fd</I>] [<I>name</I> ...]<DD>
 One line is read from the standard input, or from the file descriptor
-<I>fd</I> supplied as an argument to the <B>-u</B> option, and the first word
+<I>fd</I> supplied as an argument to the <B>-u</B> option,
+split into words as described above under <B>Word Splitting</B>,
+and the first word
 is assigned to the first
 <I>name</I>,
 
 the second word to the second
 <I>name</I>,
 
-and so on, with leftover words and their intervening separators assigned
-to the last
+and so on.
+If there are more words than names, the remaining words and their
+intervening delimiters are assigned to the last
 <I>name</I>.
 
 If there are fewer words read from the input stream than names,
@@ -12019,7 +12075,10 @@ If set,
 
 changes its behavior to that of version 3.2 with respect to
 locale-specific string comparison when using the <B>[[</B>
-conditional command's <B>&lt;</B> and <B>&gt;</B> operators (see previous item).
+conditional command's <B>&lt;</B> and <B>&gt;</B> operators (see previous item)
+and the effect of interrupting a command list.
+Bash versions 3.2 and earlier continue with the next command in the list
+after one terminates due to an interrupt.
 <DT><B>compat40</B>
 
 <DD>
@@ -12059,9 +12118,13 @@ If set,
 <B>bash</B>
 
 does not print a warning message if an attempt is made to use a quoted compound
-array assignment as an argument to <B>declare</B>, and makes word expansion errors
+array assignment as an argument to <B>declare</B>,
+makes word expansion errors
 non-fatal errors that cause the current command to fail (the default behavior is
-to make them fatal errors that cause the shell to exit).
+to make them fatal errors that cause the shell to exit),
+and does not reset the
+loop state when a shell function is executed (this allows <B>break</B> or
+<B>continue</B> in a shell function to affect loops in the caller's context).
 <DT><B>complete_fullquote</B>
 
 <DD>
@@ -12295,6 +12358,12 @@ If set, <B>bash</B> will send
 
 </FONT>
 to all jobs when an interactive login shell exits.
+<DT><B>inherit_errexit</B>
+
+<DD>
+If set, command substitution inherits the value of the <B>errexit</B> option,
+instead of unsetting it in the subshell environment.
+This option is enabled when <I>posix mode</I> is enabled.
 <DT><B>interactive_comments</B>
 
 <DD>
@@ -12682,7 +12751,7 @@ is
 the command
 <I>arg</I>
 
-is executed whenever a
+is executed whenever
 a pipeline (which may consist of a single simple
 command), a list, or a compound command returns a
 non-zero exit status,
@@ -13408,7 +13477,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2015 October 2<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2016 February 8<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13514,6 +13583,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 02 October 2015 07:16:35 EDT
+Time: 08 February 2016 10:17:49 EST
 </BODY>
 </HTML>

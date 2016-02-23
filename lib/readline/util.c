@@ -1,6 +1,6 @@
 /* util.c -- readline utility functions */
 
-/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -198,12 +198,14 @@ rl_tilde_expand (ignore, key)
       xfree (homedir);
       return (0);
     }
-  else if (rl_line_buffer[start] != '~')
+  else if (start >= 0 && rl_line_buffer[start] != '~')
     {
       for (; !whitespace (rl_line_buffer[start]) && start >= 0; start--)
         ;
       start++;
     }
+  else if (start < 0)
+    start = 0;
 
   end = start;
   do

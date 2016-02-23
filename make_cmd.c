@@ -56,6 +56,9 @@
 
 extern int line_number, current_command_line_count, parser_state;
 extern int last_command_exit_value;
+extern int shell_initialized;
+
+int here_doc_first_line = 0;
 
 /* Object caching */
 sh_obj_cache_t wdcache = {0, 0, 0};
@@ -622,6 +625,7 @@ make_here_document (temp, lineno)
       register char *line;
       int len;
 
+      here_doc_first_line = 0;
       line = full_line;
       line_number++;
 
@@ -673,6 +677,7 @@ document_done:
       document[0] = '\0';
     }
   temp->redirectee.filename->word = document;
+  here_doc_first_line = 0;
 }
 
 /* Generate a REDIRECT from SOURCE, DEST, and INSTRUCTION.
@@ -793,11 +798,18 @@ make_function_def (name, command, lineno, lstart)
   if (bash_source_a && array_num_elements (bash_source_a) > 0)
     temp->source_file = array_reference (bash_source_a, 0);
 #endif
+  /* Assume that shell functions without a source file before the shell is
+     initialized come from the environment.  Otherwise default to "main"
+     (usually functions being defined interactively) */
+  if (temp->source_file == 0)
+    temp->source_file = shell_initialized ? "main" : "environment";
+
 #if defined (DEBUGGER)
   bind_function_def (name->word, temp);
 #endif
 
   temp->source_file = temp->source_file ? savestring (temp->source_file) : 0;
+
   return (make_command (cm_function_def, (SIMPLE_COM *)temp));
 }
 

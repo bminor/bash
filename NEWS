@@ -107,8 +107,35 @@ ee. There is a new BASH_LOADABLES_PATH variable containing a list of directories
     where the `enable -f' command looks for shared objects containing loadable
     builtins.
 
-ff. The `kill' builtin now has a `-L' option, equivalent to `-l', for compatibility
-    with Linux standalone versions of kill.
+ff. The `complete_fullquote' option to `shopt' changes filename completion to
+    quote all shell metacharacters in filenames and directory names.
+
+gg. The `kill' builtin now has a `-L' option, equivalent to `-l', for
+    compatibility with Linux standalone versions of kill.
+
+hh. BASH_COMPAT and FUNCNEST can be inherited and set from the shell's initial
+    environment.
+
+ii. inherit_errexit: a new `shopt' option that, when set, causes command
+    substitutions to inherit the -e option.  By default, those subshells disable
+    -e.  It's enabled as part of turning on posix mode.
+
+jj.  New prompt string: PS0.  Expanded and displayed by interactive shells after
+    reading a complete command but before executing it.
+
+kk.  Interactive shells now behave as if SIGTSTP/SIGTTIN/SIGTTOU are set to SIG_DFL
+    when the shell is started, so they are set to SIG_DFL in child processes.
+
+ll. Posix-mode shells now allow double quotes to quote the history expansion
+    character.
+
+mm. OLDPWD can be inherited from the environment if it names a directory.
+
+nn. Shells running as root no longer inherit PS4 from the environment, closing a
+    security hole involving PS4 expansion performing command substitution.
+
+oo.  If executing an implicit `cd' when the `autocd' option is set, bash will now
+    invoke a function named `cd' if one exists before executing the `cd' builtin.
 
 2.  New Features in Readline
 
@@ -143,6 +170,17 @@ h.  The insert-char function attempts to batch-insert all pending typeahead
 i.  rl_callback_sigcleanup: a new application function that can clean up and
     unset any state set by readline's callback mode.  Intended to be used
     after a signal.
+
+j.  If an incremental search string has its last character removed with DEL, the
+    resulting empty search string no longer matches the previous line.
+
+k.  If readline reads a history file that begins with `#' (or the value of
+    the history comment character) and has enabled history timestamps, the history
+    entries are assumed to be delimited by timestamps.  This allows multi-line
+    history entries.
+
+l.  Readline now throws an error if it parses a key binding without a terminating
+    `:' or whitespace.
 
 -------------------------------------------------------------------------------
 This is a terse description of the new features added to bash-4.3 since

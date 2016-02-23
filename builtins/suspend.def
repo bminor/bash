@@ -1,7 +1,7 @@
 This file is suspend.def, from which is created suspend.c.
 It implements the builtin "suspend" in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -89,6 +89,7 @@ suspend_builtin (list)
       case 'f':
 	force++;
 	break;
+      CASE_HELPOPT;
       default:
 	builtin_usage ();
 	return (EX_USAGE);

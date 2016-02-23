@@ -1,7 +1,7 @@
 /* readline.c -- a general facility for reading lines of input
    with emacs style editing and completion. */
 
-/* Copyright (C) 1987-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -563,8 +563,7 @@ readline_internal_charloop ()
 	{
 	  /* Then initialize the argument and number of keys read. */
 	  _rl_reset_argument ();
-	  rl_key_sequence_length = 0;
-	  rl_executing_keyseq[0] = 0;
+	  rl_executing_keyseq[rl_key_sequence_length = 0] = '\0';
 	}
 
       RL_SETSTATE(RL_STATE_READCMD);

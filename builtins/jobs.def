@@ -1,7 +1,7 @@
 This file is jobs.def, from which is created jobs.c.
 It implements the builtins "jobs" and "disown" in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -118,6 +118,7 @@ jobs_builtin (list)
 	  state = JSTATE_STOPPED;
 	  break;
 
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);
@@ -212,7 +213,7 @@ execute_list_with_replacements (list)
 $BUILTIN disown
 $FUNCTION disown_builtin
 $DEPENDS_ON JOB_CONTROL
-$SHORT_DOC disown [-h] [-ar] [jobspec ...]
+$SHORT_DOC disown [-h] [-ar] [jobspec ... | pid ...]
 Remove jobs from current shell.
 
 Removes each JOBSPEC argument from the table of active jobs.  Without

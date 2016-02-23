@@ -1,6 +1,6 @@
 /* history.c -- standalone history library */
 
-/* Copyright (C) 1989-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2015 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -405,6 +405,30 @@ replace_history_entry (which, line, data)
   the_history[which] = temp;
 
   return (old_value);
+}
+
+/* Append LINE to the history line at offset WHICH, adding a newline to the
+   end of the current line first.  This can be used to construct multi-line
+   history entries while reading lines from the history file. */
+void
+_hs_append_history_line (which, line)
+     int which;
+     const char *line;
+{
+  HIST_ENTRY *hent;
+  size_t newlen, curlen;
+  char *newline;
+
+  hent = the_history[which];
+  curlen = strlen (hent->line);
+  newlen = curlen + strlen (line) + 2;
+  newline = realloc (hent->line, newlen);
+  if (newline)
+    {
+      hent->line = newline;
+      hent->line[curlen++] = '\n';
+      strcpy (hent->line + curlen, line);
+    }
 }
 
 /* Replace the DATA in the specified history entries, replacing OLD with

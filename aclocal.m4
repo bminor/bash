@@ -1856,7 +1856,7 @@ main()
 ],
 ac_cv_rl_version=`cat conftest.rlv`,
 ac_cv_rl_version='0.0',
-ac_cv_rl_version='4.2')])
+ac_cv_rl_version='6.3')])
 
 CFLAGS="$_save_CFLAGS"
 LDFLAGS="$_save_LDFLAGS"

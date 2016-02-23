@@ -125,6 +125,7 @@ extern char *dist_version;
 extern int patch_level;
 extern int dump_translatable_strings, dump_po_strings;
 extern sh_builtin_func_t *last_shell_builtin, *this_shell_builtin;
+extern int here_doc_first_line;
 #if defined (BUFFERED_INPUT)
 extern int bash_input_fd_changed;
 #endif
@@ -231,6 +232,9 @@ char *secondary_prompt = SPROMPT;
 
 /* PROMPT_STRING_POINTER points to one of these, never to an actual string. */
 char *ps1_prompt, *ps2_prompt;
+
+/* Displayed after reading a command but before executing it in an interactive shell */
+char *ps0_prompt;
 
 /* Handle on the current prompt string.  Indirectly points through
    ps1_ or ps2_prompt. */
@@ -2308,7 +2312,7 @@ shell_getc (remove_quoted_newline)
 	      if (n <= 2)	/* we have to save 1 for the newline added below */
 		{
 		  if (truncating == 0)
-		    internal_warning("shell_getc: shell_input_line_size (%zu) exceeds SIZE_MAX (%llu): line truncated", shell_input_line_size, SIZE_MAX);
+		    internal_warning("shell_getc: shell_input_line_size (%zu) exceeds SIZE_MAX (%llu): line truncated", shell_input_line_size, (unsigned long)SIZE_MAX);
 		  shell_input_line[i] = '\0';
 		  truncating = 1;
 		}
@@ -2365,6 +2369,8 @@ shell_getc (remove_quoted_newline)
 	  if (current_delimiter (dstack) == '\'')
 	    history_expansion_inhibited = 1;
 #  endif
+	  /* Calling with a third argument of 1 allows remember_on_history to
+	     determine whether or not the line is saved to the history list */
 	  expansions = pre_process_line (shell_input_line, 1, 1);
 #  if defined (BANG_HISTORY)
 	  history_expansion_inhibited = old_hist;
@@ -2695,6 +2701,7 @@ gather_here_documents ()
   int r;
 
   r = 0;
+  here_doc_first_line = 1;
   while (need_here_doc > 0)
     {
       parser_state |= PST_HEREDOC;
@@ -2703,6 +2710,7 @@ gather_here_documents ()
       need_here_doc--;
       redir_stack[r - 1] = 0;		/* XXX */
     }
+  here_doc_first_line = 0;		/* just in case */
 }
 
 /* When non-zero, an open-brace used to create a group is awaiting a close
@@ -3018,6 +3026,7 @@ reset_parser ()
 #endif
 
   parser_state = 0;
+  here_doc_first_line = 0;
 
 #if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
   if (pushed_string_list)
@@ -5153,7 +5162,7 @@ history_delimiting_chars (line)
 	  last_was_heredoc = 0;
 	  return "\n";
 	}
-      return (current_command_line_count == 2 ? "\n" : "");
+      return (here_doc_first_line ? "\n" : "");
     }
 
   if (parser_state & PST_COMPASSIGN)
@@ -5188,7 +5197,8 @@ history_delimiting_chars (line)
       last_was_heredoc = 1;
       return "\n";
     }
-
+  else if ((parser_state & PST_HEREDOC) == 0 && current_command_line_count > 1 && need_here_doc > 0)
+    return "\n";
   else if (token_before_that == WORD && two_tokens_ago == FOR)
     {
       /* Tricky.  `for i\nin ...' should not have a semicolon, but
@@ -5224,6 +5234,8 @@ prompt_again ()
 
   ps1_prompt = get_string_value ("PS1");
   ps2_prompt = get_string_value ("PS2");
+
+  ps0_prompt = get_string_value ("PS0");
 
   if (!prompt_string_pointer)
     prompt_string_pointer = &ps1_prompt;
@@ -6182,6 +6194,7 @@ save_parser_state (ps)
   ps->expand_aliases = expand_aliases;
   ps->echo_input_at_read = echo_input_at_read;
   ps->need_here_doc = need_here_doc;
+  ps->here_doc_first_line = here_doc_first_line;
 
 #if 0
   for (i = 0; i < HEREDOC_MAX; i++)
@@ -6243,6 +6256,7 @@ restore_parser_state (ps)
   expand_aliases = ps->expand_aliases;
   echo_input_at_read = ps->echo_input_at_read;
   need_here_doc = ps->need_here_doc;
+  here_doc_first_line = ps->here_doc_first_line;
 
 #if 0
   for (i = 0; i < HEREDOC_MAX; i++)

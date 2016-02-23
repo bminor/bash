@@ -1,7 +1,7 @@
 This file is history.def, from which is created history.c.
 It implements the builtin "history" in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -31,14 +31,14 @@ entry with a `*'.  An argument of N lists only the last N entries.
 
 Options:
   -c	clear the history list by deleting all of the entries
-  -d offset	delete the history entry at offset OFFSET.
+  -d offset	delete the history entry at position OFFSET.
 
   -a	append history lines from this session to the history file
   -n	read all history lines not already read from the history file
+		and append them to the history list
   -r	read the history file and append the contents to the history
 		list
   -w	write the current history to the history file
-		and append them to the history list
 
   -p	perform history expansion on each ARG and display the result
 		without storing it in the history list
@@ -141,6 +141,7 @@ history_builtin (list)
 	  flags |= PFLAG;
 #endif
 	  break;
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);
@@ -259,6 +260,9 @@ histtime (hlist, histtimefmt)
   t = history_get_time (hlist);
   if (t)
     strftime (timestr, sizeof (timestr), histtimefmt, localtime (&t));
+  else if (hlist->timestamp && hlist->timestamp[0])
+    snprintf (timestr, sizeof (timestr), _("%s: invalid timestamp"),
+	(hlist->timestamp[0] == '#') ? hlist->timestamp + 1: hlist->timestamp);
   else
     strcpy (timestr, "??");
   return timestr;

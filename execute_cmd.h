@@ -1,6 +1,6 @@
 /* execute_cmd.h - functions from execute_cmd.c. */
 
-/* Copyright (C) 1993-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -22,6 +22,18 @@
 #define _EXECUTE_CMD_H_
 
 #include "stdc.h"
+
+#if defined (ARRAY_VARS)
+struct func_array_state
+  {
+    ARRAY *funcname_a;
+    SHELL_VAR *funcname_v;
+    ARRAY *source_a;
+    SHELL_VAR *source_v;
+    ARRAY *lineno_a;
+    SHELL_VAR *lineno_v;
+  };
+#endif
 
 extern struct fd_bitmap *new_fd_bitmap __P((int));
 extern void dispose_fd_bitmap __P((struct fd_bitmap *));
@@ -64,5 +76,7 @@ extern void coproc_unsetvars __P((struct coproc *));
 #if defined (PROCESS_SUBSTITUTION)
 extern void close_all_files __P((void));
 #endif
+
+extern void restore_funcarray_state __P((struct func_array_state *));
 
 #endif /* _EXECUTE_CMD_H_ */

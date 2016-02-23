@@ -168,8 +168,7 @@ parse_prologue (string, flags, tag)
   else
     unwind_protect_int (remember_on_history);	/* can be used in scripts */
 #  if defined (BANG_HISTORY)
-  if (interactive_shell)
-    unwind_protect_int (history_expansion_inhibited);
+  unwind_protect_int (history_expansion_inhibited);
 #  endif /* BANG_HISTORY */
 #endif /* HISTORY */
 
@@ -199,6 +198,10 @@ parse_prologue (string, flags, tag)
 #if defined (HISTORY)
   if (flags & SEVAL_NOHIST)
     bash_history_disable ();
+#  if defined (BANG_HISTORY)
+  if (flags & SEVAL_NOHISTEXP)
+    history_expansion_inhibited = 1;
+#  endif /* BANG_HISTORY */
 #endif /* HISTORY */
 }
 
@@ -211,6 +214,7 @@ parse_prologue (string, flags, tag)
    	(flags & SEVAL_NOHIST) -> call bash_history_disable ()
    	(flags & SEVAL_NOFREE) -> don't free STRING when finished
    	(flags & SEVAL_RESETLINE) -> reset line_number to 1
+   	(flags & SEVAL_NOHISTEXP) -> history_expansion_inhibited -> 1
 */
 
 int

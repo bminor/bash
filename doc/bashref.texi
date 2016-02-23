@@ -14,7 +14,7 @@ This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Bash Reference Manual},
 for @code{Bash}, Version @value{VERSION}.
 
-Copyright @copyright{} 1988--2014 Free Software Foundation, Inc.
+Copyright @copyright{} 1988--2016 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -212,7 +212,7 @@ than by an executable program somewhere in the file system.
 @cindex control operator
 A @code{token} that performs a control function.  It is a @code{newline}
 or one of the following:
-@samp{||}, @samp{&&}, @samp{&}, @samp{;}, @samp{;;},
+@samp{||}, @samp{&&}, @samp{&}, @samp{;}, @samp{;;}, @samp{;&}, @samp{;;&},
 @samp{|}, @samp{|&}, @samp{(}, or @samp{)}.
 
 @item exit status
@@ -450,6 +450,10 @@ Enclosing characters in double quotes (@samp{"}) preserves the literal value
 of all characters within the quotes, with the exception of
 @samp{$}, @samp{`}, @samp{\},
 and, when history expansion is enabled, @samp{!}.
+When the shell is in
+@sc{posix} mode (@pxref{Bash POSIX Mode}),
+the @samp{!} has no special meaning
+within double quotes, even when history expansion is enabled.
 The characters @samp{$} and @samp{`}
 retain their special meaning within double quotes (@pxref{Shell Expansions}).
 The backslash retains its special meaning only when followed by one of
@@ -2246,8 +2250,8 @@ or
 @end example
 
 @noindent
-Bash performs the expansion by executing @var{command} and
-replacing the command substitution with the standard output of the
+Bash performs the expansion by executing @var{command} in a subshell environment
+and replacing the command substitution with the standard output of the
 command, with any trailing newlines deleted.
 Embedded newlines are not deleted, but they may be removed during
 word splitting.
@@ -2296,8 +2300,8 @@ failure to the standard error and no substitution occurs.
 @subsection Process Substitution
 @cindex process substitution
 
-Process substitution is supported on systems that support named
-pipes (@sc{fifo}s) or the @file{/dev/fd} method of naming open files.
+Process substitution allows a process's input or output to be
+referred to using a filename.
 It takes the form of 
 @example
 <(@var{list})
@@ -2308,16 +2312,20 @@ or
 >(@var{list})
 @end example
 @noindent
-The process @var{list} is run with its input or output connected to a
-@sc{fifo} or some file in @file{/dev/fd}.  The name of this file is
+The process @var{list} is run asynchronously, and its input or output 
+appears as a filename.
+This filename is
 passed as an argument to the current command as the result of the
-expansion.  If the @code{>(@var{list})} form is used, writing to
+expansion.
+If the @code{>(@var{list})} form is used, writing to
 the file will provide input for @var{list}.  If the
 @code{<(@var{list})} form is used, the file passed as an
 argument should be read to obtain the output of @var{list}.
 Note that no space may appear between the @code{<} or @code{>}
 and the left parenthesis, otherwise the construct would be interpreted
 as a redirection.
+Process substitution is supported on systems that support named
+pipes (@sc{fifo}s) or the @file{/dev/fd} method of naming open files.
 
 When available, process substitution is performed simultaneously with
 parameter and variable expansion, command substitution, and arithmetic
@@ -2341,7 +2349,7 @@ at the beginning and end of the results of the previous
 expansions are ignored, and any sequence of @env{IFS}
 characters not at the beginning or end serves to delimit words.
 If @env{IFS} has a value other than the default, then sequences of
-the whitespace characters @code{space} and @code{tab}
+the whitespace characters @code{space}, @code{tab}, and @code{newline}
 are ignored at the beginning and end of the
 word, as long as the whitespace character is in the
 value of @env{IFS} (an @env{IFS} whitespace character).
@@ -2351,11 +2359,18 @@ whitespace characters, delimits a field.  A sequence of @env{IFS}
 whitespace characters is also treated as a delimiter.
 If the value of @env{IFS} is null, no word splitting occurs.
 
-Explicit null arguments (@code{""} or @code{''}) are retained.
+Explicit null arguments (@code{""} or @code{''}) are retained
+and passed to commands as empty strings.
 Unquoted implicit null arguments, resulting from the expansion of
 parameters that have no values, are removed.
 If a parameter with no value is expanded within double quotes, a
-null argument results and is retained.
+null argument results and is retained
+and passed to a command as an empty string.
+When a quoted null argument appears as part of a word whose expansion is
+non-null, the null argument is removed.
+That is, the word
+@code{-d''} becomes @code{-d} after word splitting and
+null argument removal.
 
 Note that if no expansion occurs, no splitting
 is performed.
@@ -2741,7 +2756,9 @@ The @var{word} undergoes
 brace expansion, tilde expansion, parameter and variable expansion,
 command substitution, arithmetic expansion, and quote removal.
 Pathname expansion and word splitting are not performed.
-The result is supplied as a single string to the command on its
+The result is supplied as a single string,
+with a newline appended,
+to the command on its
 standard input (or file descriptor @var{n} if @var{n} is specified).
 
 @subsection Duplicating File Descriptors
@@ -3856,8 +3873,8 @@ names are
 @code{vi-move},
 @code{vi-command}, and
 @code{vi-insert}.
-@code{vi} is equivalent to @code{vi-command};
-@code{emacs} is equivalent to @code{emacs-standard}.
+@code{vi} is equivalent to @code{vi-command} (@code{vi-move} is also a
+synonym); @code{emacs} is equivalent to @code{emacs-standard}.
 
 @item -l
 List the names of all Readline functions.
@@ -4311,10 +4328,8 @@ interprets the following extensions:
 @table @code
 @item %b
 Causes @code{printf} to expand backslash escape sequences in the
-corresponding @var{argument},
-except that @samp{\c} terminates output, backslashes in
-@samp{\'}, @samp{\"}, and @samp{\?} are not removed, and octal escapes
-beginning with @samp{\0} may contain up to four digits.
+corresponding @var{argument} in the same way as @code{echo -e}
+(@pxref{Bash Builtins}).
 @item %q
 Causes @code{printf} to output the
 corresponding @var{argument} in a format that can be reused as shell input.
@@ -4349,9 +4364,13 @@ read [-ers] [-a @var{aname}] [-d @var{delim}] [-i @var{text}] [-n @var{nchars}]
 @end example
 
 One line is read from the standard input, or from the file descriptor
-@var{fd} supplied as an argument to the @option{-u} option, and the first word
+@var{fd} supplied as an argument to the @option{-u} option,
+split into words as described above in @ref{Word Splitting},
+and the first word
 is assigned to the first @var{name}, the second word to the second @var{name},
-and so on, with leftover words and their intervening separators assigned
+and so on.
+If there are more words than names,
+the remaining words and their intervening delimiters are assigned
 to the last @var{name}.
 If there are fewer words read from the input stream than names,
 the remaining names are assigned empty values.
@@ -5042,7 +5061,10 @@ bash-4.1 and later use the current locale's collation sequence and strcoll(3).
 If set, Bash
 changes its behavior to that of version 3.2 with respect to locale-specific
 string comparison when using the @code{[[}
-conditional command's @samp{<} and @samp{>} operators (see previous item).
+conditional command's @samp{<} and @samp{>} operators (see previous item)
+and the effect of interrupting a command list.
+Bash versions 3.2 and earlier continue with the next command in the list
+after one terminates due to an interrupt.
 
 @item compat40
 If set, Bash
@@ -5069,9 +5091,13 @@ expansion using quote removal.
 @item compat43
 If set, Bash
 does not print a warning message if an attempt is made to use a quoted compound
-array assignment as an argument to @code{declare}, and makes word expansion errors
+array assignment as an argument to @code{declare},
+makes word expansion errors
 non-fatal errors that cause the current command to fail (the default behavior is
-to make them fatal errors that cause the shell to exit).
+to make them fatal errors that cause the shell to exit),
+and does not reset the
+loop state when a shell function is executed (this allows @code{break} or
+@code{continue} in a shell function to affect loops in the caller's context).
 
 @item complete_fullquote
 If set, Bash
@@ -5215,6 +5241,11 @@ by default.
 @item huponexit
 If set, Bash will send @code{SIGHUP} to all jobs when an interactive
 login shell exits (@pxref{Signals}).
+
+@item inherit_errexit
+If set, command substitution inherits the value of the @code{errexit} option,
+instead of unsetting it in the subshell environment.
+This option is enabled when @sc{posix} mode is enabled.
 
 @item interactive_comments
 Allow a word beginning with @samp{#}
@@ -5397,7 +5428,6 @@ current directory.
 A null directory name may appear as two adjacent colons, or as an initial
 or trailing colon.
 
-
 @item PS1
 The primary prompt string.  The default value is @samp{\s-\v\$ }.
 @xref{Controlling the Prompt}, for the complete list of escape
@@ -5442,8 +5472,12 @@ that do not require Bash to be re-initialized.
 An associative array variable whose members correspond to the internal
 list of aliases as maintained by the @code{alias} builtin.
 (@pxref{Bourne Shell Builtins}).
-Elements added to this array appear in the alias list; unsetting array
-elements cause aliases to be removed from the alias list.
+Elements added to this array appear in the alias list; however,
+unsetting array elements currently does not cause aliases to be removed
+from the alias list.
+If @code{BASH_ALIASES}
+is unset, it loses its special properties, even if it is
+subsequently reset.
 
 @item BASH_ARGC
 An array variable whose values are the number of parameters in each
@@ -5472,8 +5506,12 @@ builtin).
 An associative array variable whose members correspond to the internal
 hash table of commands as maintained by the @code{hash} builtin
 (@pxref{Bourne Shell Builtins}).
-Elements added to this array appear in the hash table; unsetting array
-elements cause commands to be removed from the hash table.
+Elements added to this array appear in the hash table; however,
+unsetting array elements currently does not cause command names to be removed
+from the hash table.
+If @code{BASH_CMDS}
+is unset, it loses its special properties, even if it is
+subsequently reset.
 
 @item BASH_COMMAND
 The command currently being executed or about to be executed, unless the
@@ -5684,7 +5722,7 @@ The numeric effective user id of the current user.  This variable
 is readonly.
 
 @item EXECIGNORE
-A colon-separated list of extended glob patterns (@pxref{Pattern Matching})
+A colon-separated list of shell patterns (@pxref{Pattern Matching})
 defining the list of filenames to be ignored by command search.
 Files whose full pathnames match one of these patterns are not considered
 executable files for the purposes of completion and command execution.
@@ -5692,6 +5730,8 @@ This does not affect the behavior of the @code{[}, @code{test}, and @code{[[}
 commands.
 Use this variable to ignore shared library files that have the executable
 bit set, but are not executable files.
+The pattern matching honors the setting of the @code{extglob} shell 
+option.
 
 @item FCEDIT
 The editor used as a default by the @option{-e} option to the @code{fc}
@@ -5736,6 +5776,8 @@ be ignored by filename expansion.
 If a filename matched by a filename expansion pattern also matches one
 of the patterns in @env{GLOBIGNORE}, it is removed from the list
 of matches.
+The pattern matching honors the setting of the @code{extglob} shell
+option.
 
 @item GROUPS
 An array variable containing the list of groups of which the current    
@@ -5812,6 +5854,8 @@ before attempting a match.
 The second and subsequent lines of a multi-line compound command are
 not tested, and are added to the history regardless of the value of
 @env{HISTIGNORE}.
+The pattern matching honors the setting of the @code{extglob} shell
+option.
 
 @env{HISTIGNORE} subsumes the function of @env{HISTCONTROL}.  A
 pattern of @samp{&} is identical to @code{ignoredups}, and a
@@ -5895,6 +5939,10 @@ strings preceded by a @samp{$} (@pxref{Locale Translation}).
 @item LC_NUMERIC
 This variable determines the locale category used for number formatting.
 
+@item LC_TIME
+This variable determines the locale category used for data and time
+formatting.
+
 @item LINENO
 The line number in the script or shell function currently executing.
 
@@ -5962,6 +6010,11 @@ If set to a number greater than zero, the value is used as the number of
 trailing directory components to retain when expanding the @code{\w} and
 @code{\W} prompt string escapes (@pxref{Controlling the Prompt}).
 Characters removed are replaced with an ellipsis.
+
+@item PS0
+The value of this parameter is expanded like @var{PS1}
+and displayed by interactive shells after reading a command
+and before the command is executed.
 
 @item PS3
 The value of this variable is used as the prompt for the
@@ -6461,6 +6514,7 @@ signals @code{SIGTTIN}, @code{SIGTTOU}, and @code{SIGTSTP}.
 Bash expands and displays @env{PS1} before reading the first line
 of a command, and expands and displays @env{PS2} before reading the
 second and subsequent lines of a multi-line command.
+Bash displays @env{PS0} after it reads a command but before executing it.
 
 @item
 Bash executes the value of the @env{PROMPT_COMMAND} variable as a command
@@ -7275,9 +7329,7 @@ is stopped is `Stopped(@var{signame})', where @var{signame} is, for
 example, @code{SIGTSTP}.
 
 @item
-The @code{bg} builtin uses the required format to describe each job placed
-in the background, which does not include an indication of whether the job
-is the current or previous job.
+Alias expansion is always enabled, even in non-interactive shells.
 
 @item
 Reserved words appearing in a context where reserved words are recognized
@@ -7298,38 +7350,8 @@ Tilde expansion is only performed on assignments preceding a command
 name, rather than on all assignment statements on the line.
 
 @item
-The @code{command} builtin does not prevent builtins that take assignment
-statements as arguments from expanding them as assignment statements;
-when not in @sc{posix} mode, assignment builtins lose their assignment
-statement expansion properties when preceded by @code{command}.
-
-@item
 The default history file is @file{~/.sh_history} (this is the
 default value of @env{$HISTFILE}).
-
-@item
-The output of @samp{kill -l} prints all the signal names on a single line,
-separated by spaces, without the @samp{SIG} prefix.
-
-@item
-The @code{kill} builtin does not accept signal names with a @samp{SIG}
-prefix.
-
-@item
-Non-interactive shells exit if @var{filename} in @code{.} @var{filename}
-is not found.
-
-@item
-Non-interactive shells exit if a syntax error in an arithmetic expansion
-results in an invalid expression.
-
-@item
-Non-interactive shells exit on word expansion errors.
-
-@item
-Non-interactive shells exit if there is a syntax error in a script read
-with the @code{.} or @code{source} builtins, or in a string processed by
-the @code{eval} builtin.
 
 @item
 Redirection operators do not perform filename expansion on the word
@@ -7376,6 +7398,10 @@ The parser does not recognize @code{time} as a reserved word if the next
 token begins with a @samp{-}.
 
 @item
+The @samp{!} character does not introduce history expansion within a
+double-quoted string, even if the @code{histexpand} option is enabled.
+
+@item
 If a @sc{posix} special builtin returns an error status, a
 non-interactive shell exits.  The fatal errors are those listed in
 the @sc{posix} standard, and include things like passing incorrect options,
@@ -7400,6 +7426,22 @@ variable in a @code{for} statement or the selection variable in a
 @code{select} statement is a readonly variable.
 
 @item
+Non-interactive shells exit if @var{filename} in @code{.} @var{filename}
+is not found.
+
+@item
+Non-interactive shells exit if a syntax error in an arithmetic expansion
+results in an invalid expression.
+
+@item
+Non-interactive shells exit on word expansion errors.
+
+@item
+Non-interactive shells exit if there is a syntax error in a script read
+with the @code{.} or @code{source} builtins, or in a string processed by
+the @code{eval} builtin.
+
+@item
 Process substitution is not available.
 
 @item
@@ -7414,6 +7456,25 @@ persist in the shell environment after the builtin completes.
 Assignment statements preceding shell function calls persist in the
 shell environment after the function returns, as if a @sc{posix}
 special builtin command had been executed.
+
+@item
+The @code{command} builtin does not prevent builtins that take assignment
+statements as arguments from expanding them as assignment statements;
+when not in @sc{posix} mode, assignment builtins lose their assignment
+statement expansion properties when preceded by @code{command}.
+
+@item
+The @code{bg} builtin uses the required format to describe each job placed
+in the background, which does not include an indication of whether the job
+is the current or previous job.
+
+@item
+The output of @samp{kill -l} prints all the signal names on a single line,
+separated by spaces, without the @samp{SIG} prefix.
+
+@item
+The @code{kill} builtin does not accept signal names with a @samp{SIG}
+prefix.
 
 @item
 The @code{export} and @code{readonly} builtin commands display their
@@ -7436,12 +7497,12 @@ The @code{.} and @code{source} builtins do not search the current directory
 for the filename argument if it is not found by searching @env{PATH}.
 
 @item
-Subshells spawned to execute command substitutions inherit the value of
-the @option{-e} option from the parent shell.  When not in @sc{posix} mode,
+Enabling @sc{posix} mode has the effect of setting the
+@code{inherit_errexit} option, so
+subshells spawned to execute command substitutions inherit the value of
+the @option{-e} option from the parent shell.
+When the @code{inherit_errexit} option is not enabled,
 Bash clears the @option{-e} option in such subshells.
-
-@item
-Alias expansion is always enabled, even in non-interactive shells.
 
 @item
 When the @code{alias} builtin displays alias definitions, it does not
@@ -7760,7 +7821,7 @@ of the shell, the return status is 127.
 @item disown
 @btindex disown
 @example
-disown [-ar] [-h] [@var{jobspec} @dots{}]
+disown [-ar] [-h] [@var{jobspec} @dots{} | @var{pid} @dots{} ]
 @end example
 
 Without options, remove each @var{jobspec} from the table of

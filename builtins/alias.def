@@ -1,7 +1,7 @@
 This file is alias.def, from which is created alias.c
 It implements the builtins "alias" and "unalias" in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -183,6 +183,7 @@ unalias_builtin (list)
 	case 'a':
 	  aflag = 1;
 	  break;
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);

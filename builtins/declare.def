@@ -65,7 +65,7 @@ $FUNCTION declare_builtin
 $SHORT_DOC typeset [-aAfFgilnrtux] [-p] name[=value] ...
 Set variable values and attributes.
 
-Obsolete.  See `help declare'.
+A synonym for `declare'.  See `help declare'.
 $END
 
 #include <config.h>
@@ -224,6 +224,7 @@ declare_internal (list, local_var)
 	    flags_off |= att_capcase|att_lowercase;
 	  break;
 #endif /* CASEMOD_ATTRS */
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);

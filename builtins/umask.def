@@ -1,7 +1,7 @@
 This file is umask.def, from which is created umask.c.
 It implements the builtin "umask" in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -91,6 +91,7 @@ umask_builtin (list)
 	case 'p':
 	  pflag++;
 	  break;
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);
