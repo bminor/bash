@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed Nov 19 18:32:58 EST 2014
+.\"	Last Change: Sun Feb 28 15:42:34 EST 2016
 .\"
-.TH READLINE 3 "2014 November 19" "GNU Readline 6.3"
+.TH READLINE 3 "2016 February 28" "GNU Readline 7.0"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -416,11 +416,18 @@ If set to \fBOn\fP, readline will convert characters with the
 eighth bit set to an ASCII key sequence
 by stripping the eighth bit and prefixing it with an
 escape character (in effect, using escape as the \fImeta prefix\fP).
+The default is \fIOn\fP, but readline will set it to \fIOff\fP if the
+locale contains eight-bit characters.
 .TP
 .B disable\-completion (Off)
 If set to \fBOn\fP, readline will inhibit word completion.  Completion 
 characters will be inserted into the line as if they had been
 mapped to \fBself-insert\fP.
+.TP
+.B echo\-control\-characters (On)
+When set to \fBOn\fP, on operating systems that indicate they support it,
+readline echoes a character corresponding to a signal generated from the
+keyboard.
 .TP
 .B editing\-mode (emacs)
 Controls whether readline begins with a set of key bindings similar
@@ -430,11 +437,6 @@ can be set to either
 .B emacs
 or
 .BR vi .
-.TP
-.B echo\-control\-characters (On)
-When set to \fBOn\fP, on operating systems that indicate they support it,
-readline echoes a character corresponding to a signal generated from the
-keyboard.
 .TP
 .B enable\-bracketed\-paste (Off)
 When set to \fBOn\fP, readline will configure the terminal in a way
@@ -469,6 +471,8 @@ are saved.
 If set to a value less than zero, the number of history entries is not
 limited.
 By default, the number of history entries is not limited.
+If an attempt is made to set \fIhistory\-size\fP to a non-numeric value,
+the maximum number of history entries will be set to 500.
 .TP
 .B horizontal\-scroll\-mode (Off)
 When set to \fBOn\fP, makes readline use a single line for display,
@@ -481,6 +485,8 @@ it will not clear the eighth bit in the characters it reads),
 regardless of what the terminal claims it can support.  The name
 .B meta\-flag
 is a synonym for this variable.
+The default is \fIOff\fP, but readline will set it to \fIOn\fP if the 
+locale contains eight-bit characters.
 .TP
 .B isearch\-terminators (``C\-[ C\-J'')
 The string of characters that should terminate an incremental
@@ -551,6 +557,8 @@ the list.
 If set to \fBOn\fP, readline will display characters with the
 eighth bit set directly rather than as a meta-prefixed escape
 sequence.
+The default is \fIOff\fP, but readline will set it to \fIOn\fP if the
+locale contains eight-bit characters.
 .TP
 .B page\-completions (On)
 If set to \fBOn\fP, readline uses an internal \fImore\fP-like pager

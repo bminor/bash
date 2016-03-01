@@ -10457,3 +10457,90 @@ builtins/shopt.def
 	  sure to call any set functions associated with a variable, instead
 	  of just setting the value to 1.  Report and fix from
 	  Vehlow, Jörg <Joerg.Vehlow@kratzer-automation.com>
+
+				   2/22
+				   ----
+lib/readline/complete.c
+	- rl_display_match_list: don't bother calling strrchr to check the
+	  return value from printable_part() if rl_filename_completion_desired
+	  is non-zero, since in that case printable_part just returns its
+	  argument.  Fixes git completion issue reported by
+	  Dilyan Palauzov <dilyan.palauzov@aegee.org>
+	- _rl_colored_completion_prefix: default is now 0, testing is complete
+
+				   2/23
+				   ----
+variables.c
+	- assign_hashcmd: if the shell is restricted, reject attempts to add
+	  pathnames containing slashes to the hash table, as the hash builtin
+	  does.  Fixes bug reported to savannah by Sylvain Beucler as
+	  https://savannah.gnu.org/support/?108969
+
+				   2/24
+				   ----
+subst.c
+	- NEED_FPURGE_DECL: need it before externs.h included, since fpurge
+	  is now used in this file.  Fixes warning reported by Mike
+	  Frysinger <vapier@gentoo.org>
+	- skip_double_quoted: add missing argument to declaration
+
+parse.y
+	- shell_getc: in call to internal_warning, use %lu to print an argument
+	  cast explicitly to unsigned long.  Fixes warning reported by Mike
+	  Frysinger <vapier@gentoo.org>
+
+				   2/27
+				   ----
+parse.y
+	- decode_prompt_string: quote result of \s expansion in case shell has
+	  been invoked with a pathname like '$(id)'.  Inspired by report from
+	  Travis Garrell <travis.garrell@oracle.com>
+	- decode_prompt_string: quote result of \h and \H expansions in the
+	  (unlikely) case that the hostname has been changed to something
+	  malicious including a command substitution.  From report from
+	  Travis Garrell <travis.garrell@oracle.com>
+
+builtins/getopts.def
+	- getopts_unbind_variable: new static function, just calls unbind_variable
+	  for now.  Placeholder for any future work to do something special if
+	  OPTARG is readonly.  Based on discussion started by Robert Elz
+	  <kre@munnari.oz.au>
+
+lib/readline/vi_mode.c
+	- rl_vi_unix_word_rubout: new function, implements ^W as Posix specifies
+	  it for vi mode, using whitespace and punctuation characters as word
+	  boundaries. Prompted by question from Carlos Pita
+	  <carolosjosepita@gmail.com>
+
+lib/readline/vi_keymap.c
+	- bind rl_vi_unix_word_rubout to ^W by default in both insert and
+	  command mode
+
+lib/readline/rltty.c
+	- _rl_bind_tty_special_chars: if in vi mode, bind the WERASE character
+	  to rl_vi_unix_word_rubout
+
+lib/readline/funmap.c
+	- vi-unix-word-rubout is new bindable name for rl_vi_unix_word_rubout
+
+lib/readline/readline.h
+	- rl_vi_unix_word_rubout: new extern declaration
+
+				   2/28
+				   ----
+doc/bash.1
+	- document readline blink-matching-paren variable
+	- document readline completion-display-width variable
+	- document readline completion-map-case variable
+	- note that the default value of history-size depends on the value of
+	  the HISTSIZE variable.  All from a message from Branden Robinson
+	  <g.branden.robinson@gmail.com>
+
+doc/bash.1,lib/readline/doc/{readline.3,rluser.texi}
+	- convert-meta: modify the description to note that readline will turn
+	  the default to off if the locale contains eight-bit characters
+	- input-meta: modify the description to note that readline will turn
+	  the default to on if the locale contains eight-bit characters
+	- output-meta: modify the description to note that readline will turn
+	  the default to on if the locale contains eight-bit characters.  From
+	  a message from Branden Robinson <g.branden.robinson@gmail.com>

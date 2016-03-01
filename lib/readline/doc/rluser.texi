@@ -499,13 +499,21 @@ The default limit is @code{100}.
 If set to @samp{on}, Readline will convert characters with the
 eighth bit set to an @sc{ascii} key sequence by stripping the eighth
 bit and prefixing an @key{ESC} character, converting them to a
-meta-prefixed key sequence.  The default value is @samp{on}.
+meta-prefixed key sequence.  The default value is @samp{on}, but
+will be set to @samp{off} if the locale is one that contains
+eight-bit characters.
 
 @item disable-completion
 @vindex disable-completion
 If set to @samp{On}, Readline will inhibit word completion.
 Completion  characters will be inserted into the line as if they had
 been mapped to @code{self-insert}.  The default is @samp{off}.
+
+@item echo-control-characters
+@vindex echo-control-characters
+When set to @samp{on}, on operating systems that indicate they support it,
+readline echoes a character corresponding to a signal generated from the
+keyboard.  The default is @samp{on}.
 
 @item editing-mode
 @vindex editing-mode
@@ -524,12 +532,6 @@ Use the @samp{\1} and @samp{\2} escapes to begin and end sequences of
 non-printing characters, which can be used to embed a terminal control
 sequence into the mode string.
 The default is @samp{@@}.
-
-@item echo-control-characters
-@vindex echo-control-characters
-When set to @samp{on}, on operating systems that indicate they support it,
-readline echoes a character corresponding to a signal generated from the
-keyboard.  The default is @samp{on}.
 
 @item enable-bracketed-paste
 @vindex enable-bracketed-paste
@@ -571,6 +573,8 @@ are saved.
 If set to a value less than zero, the number of history entries is not
 limited.
 By default, the number of history entries is not limited.
+If an attempt is made to set @var{history-size} to a non-numeric value,
+the maximum number of history entries will be set to 500.
 
 @item horizontal-scroll-mode
 @vindex horizontal-scroll-mode
@@ -586,8 +590,9 @@ this variable is set to @samp{off}.
 If set to @samp{on}, Readline will enable eight-bit input (it
 will not clear the eighth bit in the characters it reads),
 regardless of what the terminal claims it can support.  The
-default value is @samp{off}.  The name @code{meta-flag} is a
-synonym for this variable.
+default value is @samp{off}, but Readline will set it to @samp{on} if the 
+locale contains eight-bit characters.
+The name @code{meta-flag} is a synonym for this variable.
 
 @item isearch-terminators
 @vindex isearch-terminators
@@ -666,7 +671,9 @@ the list.  The default is @samp{off}.
 @vindex output-meta
 If set to @samp{on}, Readline will display characters with the
 eighth bit set directly rather than as a meta-prefixed escape
-sequence.  The default is @samp{off}.
+sequence.
+The default is @samp{off}, but Readline will set it to @samp{on} if the
+locale contains eight-bit characters.
 
 @item page-completions
 @vindex page-completions

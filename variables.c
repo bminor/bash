@@ -1628,6 +1628,13 @@ assign_hashcmd (self, value, ind, key)
      arrayind_t ind;
      char *key;
 {
+#if defined (RESTRICTED_SHELL)
+  if (restricted && strchr (value, '/'))
+    {
+      sh_restricted (value);
+      return (SHELL_VAR *)NULL;
+    }
+#endif
   phash_insert (key, value, 0, 0);
   return (build_hashcmd (self));
 }

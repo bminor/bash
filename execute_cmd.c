@@ -2118,6 +2118,7 @@ coproc_fdrestore (cp)
 void
 coproc_pidchk (pid, status)
      pid_t pid;
+     int status;
 {
   struct coproc *cp;
 

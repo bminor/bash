@@ -37,6 +37,8 @@
 #  include <unistd.h>
 #endif
 
+#define NEED_FPURGE_DECL
+
 #include "bashansi.h"
 #include "posixstat.h"
 #include "bashintl.h"
@@ -976,6 +978,7 @@ skip_double_quoted (string, slen, sind, flags)
      char *string;
      size_t slen;
      int sind;
+     int flags;
 {
   int c, i;
   char *ret;

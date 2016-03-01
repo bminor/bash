@@ -214,7 +214,7 @@ int _rl_colored_stats = 0;
 
 /* Non-zero means to use a color (currently magenta) to indicate the common
    prefix of a set of possible word completions. */
-int _rl_colored_completion_prefix = 1;
+int _rl_colored_completion_prefix = 0;
 #endif
 
 /* If non-zero, when completing in the middle of a word, don't insert
@@ -1571,7 +1571,8 @@ rl_display_match_list (matches, len, max)
   if (_rl_completion_prefix_display_length > 0)
     {
       t = printable_part (matches[0]);
-      temp = strrchr (t, '/');		/* check again in case of /usr/src/ */
+      /* check again in case of /usr/src/ */
+      temp = rl_filename_completion_desired ? strrchr (t, '/') : 0;
       common_length = temp ? fnwidth (temp) : fnwidth (t);
       sind = temp ? strlen (temp) : strlen (t);
 
@@ -1584,7 +1585,7 @@ rl_display_match_list (matches, len, max)
   else if (_rl_colored_completion_prefix > 0)
     {
       t = printable_part (matches[0]);
-      temp = strrchr (t, '/');
+      temp = rl_filename_completion_desired ? strrchr (t, '/') : 0;
       common_length = temp ? fnwidth (temp) : fnwidth (t);
       sind = temp ? RL_STRLEN (temp+1) : RL_STRLEN (t);		/* want portion after final slash */
     }
