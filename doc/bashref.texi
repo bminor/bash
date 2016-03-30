@@ -3801,7 +3801,7 @@ unset [-fnv] [@var{name}]
 
 Remove each variable or function @var{name}.
 If the @option{-v} option is given, each
-@var{name} refers to a shell variable and that variable is remvoved.
+@var{name} refers to a shell variable and that variable is removed.
 If the @option{-f} option is given, the @var{name}s refer to shell
 functions, and the function definition is removed.
 If the @option{-n} option is supplied, and @var{name} is a variable with
@@ -5723,11 +5723,14 @@ is readonly.
 
 @item EXECIGNORE
 A colon-separated list of shell patterns (@pxref{Pattern Matching})
-defining the list of filenames to be ignored by command search.
+defining the list of filenames to be ignored by command search using
+@code{PATH}.
 Files whose full pathnames match one of these patterns are not considered
-executable files for the purposes of completion and command execution.
+executable files for the purposes of completion and command execution
+via @code{PATH} lookup.
 This does not affect the behavior of the @code{[}, @code{test}, and @code{[[}
 commands.
+Full pathnames in the command hash table are not subject to @code{EXECIGNORE}.
 Use this variable to ignore shared library files that have the executable
 bit set, but are not executable files.
 The pattern matching honors the setting of the @code{extglob} shell 

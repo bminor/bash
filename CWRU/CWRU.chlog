@@ -10565,3 +10565,14 @@ lib/readline/readline.h
 
 lib/readline/doc/rltech.texi
 	- rl_clear_visible_line: add documentation
+
+				   3/19
+				   ----
+findcmd.c
+	- file_status: add inadvertently-dropped test for EXECIGNORE to the
+	  `other' bits check.  The check was in the original patch
+	- search_for_command: if the file should not be considered executable
+	  because it's in the EXECIGNORE blacklist, don't set file_to_lose_on,
+	  since the attempt to execute the last-ditch path will circumvent the
+	  EXECIGNORE setting.  Fixes bug reported by Dennis Williamson
+	  <dennistwilliamson@gmail.com>

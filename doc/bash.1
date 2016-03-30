@@ -2014,11 +2014,14 @@ used when the shell is invoked in POSIX mode.
 .TP
 .B EXECIGNORE
 A colon-separated list of shell patterns (see \fBPattern Matching\fP)
-defining the list of filenames to be ignored by command search.
+defining the list of filenames to be ignored by command search using
+\fBPATH\fP.
 Files whose full pathnames match one of these patterns are not considered
-executable files for the purposes of completion and command execution.
+executable files for the purposes of completion and command execution
+via \fBPATH\fP lookup.
 This does not affect the behavior of the \fB[\fP, \fBtest\fP, and \fB[[\fP
 commands.
+Full pathnames in the command hash table are not subject to \fBEXECIGNORE\fP.
 Use this variable to ignore shared library files that have the executable
 bit set, but are not executable files.
 The pattern matching honors the setting of the \fBextglob\fP shell
