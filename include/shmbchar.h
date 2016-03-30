@@ -34,9 +34,8 @@
 
 
 /* is_basic(c) tests whether the single-byte character c is in the
-   ISO C "basic character set".
-   This is a convenience function, and is in this file only to share code
-   between mbiter_multi.h and mbfile_multi.h.  */
+   ISO C "basic character set". */
+
 #if (' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
     && ('%' == 37) && ('&' == 38) && ('\'' == 39) && ('(' == 40) \
     && (')' == 41) && ('*' == 42) && ('+' == 43) && (',' == 44) \
@@ -79,6 +78,7 @@ is_basic (char c)
 {
   switch (c)
     {
+    case '\b': case '\r': case '\n':
     case '\t': case '\v': case '\f':
     case ' ': case '!': case '"': case '#': case '%':
     case '&': case '\'': case '(': case ')': case '*':
