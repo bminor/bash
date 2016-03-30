@@ -4080,8 +4080,12 @@ bash_execute_unix_command (count, key)
   ce = rl_get_termcap ("ce");
   if (ce)	/* clear current line */
     {
+#if 0
       fprintf (rl_outstream, "\r");
       tputs (ce, 1, putx);
+#else
+      rl_clear_visible_line ();
+#endif
       fflush (rl_outstream);
     }
   else

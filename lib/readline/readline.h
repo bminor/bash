@@ -379,6 +379,7 @@ extern void rl_redisplay PARAMS((void));
 extern int rl_on_new_line PARAMS((void));
 extern int rl_on_new_line_with_prompt PARAMS((void));
 extern int rl_forced_update_display PARAMS((void));
+extern int rl_clear_visible_line PARAMS((void));
 extern int rl_clear_message PARAMS((void));
 extern int rl_reset_line_state PARAMS((void));
 extern int rl_crlf PARAMS((void));
