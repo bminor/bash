@@ -4679,6 +4679,8 @@ set_maxchild (nchild)
 {
   static int lmaxchild = -1;
 
+itrace("set_maxchild (%d)", nchild);
+
   if (lmaxchild < 0)
     lmaxchild = getmaxchild ();
   if (lmaxchild < 0)

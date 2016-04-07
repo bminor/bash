@@ -10576,3 +10576,28 @@ findcmd.c
 	  since the attempt to execute the last-ditch path will circumvent the
 	  EXECIGNORE setting.  Fixes bug reported by Dennis Williamson
 	  <dennistwilliamson@gmail.com>
+
+				   3/28
+				   ----
+lib/readline/display.c
+	- rl_redisplay: when computing where the cursor should go (and the
+	  physical cursor position) after displaying the prompt, don't adjust
+	  the cursor position by wadjust if there are no multibyte chars in
+	  the prompt.  lpos is already a physical cursor position; _rl_screenwidth
+	  is the physical screen width, and we're not calling _rl_col_width and
+	  don't need to take invisible characters into account again.  Fixes
+	  bug reported by Andreas Schwab <schwab@linux-m68k.org>
+
+				    4/1
+				    ---
+parse.y
+	- parse_comsub: when we read `esac' followed by a break character,
+	  turn on the LEX_RESWDOK flag because we can now read another case
+	  statement or other compound command.  Fixes bug reported by
+	  Christian Franke <Christian.Franke@t-online.de>, original version
+	  of patch from Piotr Grzybowski <narsil.pl@gmail.com>
+	- parse_comsub: leave the reserved-word-ok flag set for four-char
+	  reserved words (then/else/elif/done/time) that can be followed by
+	  reserved words; set lex_rwlen to 0 so we know to start reading a
+	  new one
+

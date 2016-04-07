@@ -2566,11 +2566,14 @@ used when the shell is invoked in POSIX mode.
 
 <DD>
 A colon-separated list of shell patterns (see <B>Pattern Matching</B>)
-defining the list of filenames to be ignored by command search.
+defining the list of filenames to be ignored by command search using
+<B>PATH</B>.
 Files whose full pathnames match one of these patterns are not considered
-executable files for the purposes of completion and command execution.
+executable files for the purposes of completion and command execution
+via <B>PATH</B> lookup.
 This does not affect the behavior of the <B>[</B>, <B>test</B>, and <B>[[</B>
 commands.
+Full pathnames in the command hash table are not subject to <B>EXECIGNORE</B>.
 Use this variable to ignore shared library files that have the executable
 bit set, but are not executable files.
 The pattern matching honors the setting of the <B>extglob</B> shell
@@ -4964,10 +4967,10 @@ No parameter and variable expansion, command substitution,
 arithmetic expansion, or pathname expansion is performed on
 <I>word</I>.
 
-If any characters in
+If any part of
 <I>word</I>
 
-are quoted, the
+is quoted, the
 <I>delimiter</I>
 
 is the result of quote removal on
@@ -5396,7 +5399,7 @@ By default, no limit is imposed on the number of recursive calls.
 
 The shell allows arithmetic expressions to be evaluated, under
 certain circumstances (see the <B>let</B> and <B>declare</B> builtin
-commands and <B>Arithmetic Expansion</B>).
+commands, the <B>((</B> compound command, and <B>Arithmetic Expansion</B>).
 Evaluation is done in fixed-width integers with no check for overflow,
 though division by 0 is trapped and flagged as an error.
 The operators and their precedence, associativity, and values
@@ -7008,6 +7011,11 @@ If set to <B>audible</B>, readline attempts to ring the terminal's bell.
 If set to <B>On</B>, readline attempts to bind the control characters
 treated specially by the kernel's terminal driver to their readline
 equivalents.
+<DT><B>blink-matching-paren (Off)</B>
+
+<DD>
+If set to <B>On</B>, readline attempts to briefly move the cursor to an
+opening parenthesis when a closing parenthesis is inserted.
 <DT><B>colored-completion-prefix (Off)</B>
 
 <DD>
@@ -7036,11 +7044,26 @@ in emacs mode and to
 <B>#</B>
 
 in vi command mode.
+<DT><B>completion-display-width (-1)</B>
+
+<DD>
+The number of screen columns used to display possible matches
+when performing completion.
+The value is ignored if it is less than 0 or greater than the terminal
+screen width.
+A value of 0 will cause matches to be displayed one per line.
+The default value is -1.
 <DT><B>completion-ignore-case (Off)</B>
 
 <DD>
 If set to <B>On</B>, readline performs filename matching and completion
 in a case-insensitive fashion.
+<DT><B>completion-map-case (Off)</B>
+
+<DD>
+If set to <B>On</B>, and <B>completion-ignore-case</B> is enabled, readline
+treats hyphens (<I>-</I>) and underscores (<I>_</I>) as equivalent when
+performing case-insensitive filename matching and completion.
 <DT><B>completion-prefix-display-length (0)</B>
 
 <DD>
@@ -7066,12 +7089,20 @@ If set to <B>On</B>, readline will convert characters with the
 eighth bit set to an ASCII key sequence
 by stripping the eighth bit and prefixing an
 escape character (in effect, using escape as the <I>meta prefix</I>).
+The default is <I>On</I>, but readline will set it to <I>Off</I> if the
+locale contains eight-bit characters.
 <DT><B>disable-completion (Off)</B>
 
 <DD>
 If set to <B>On</B>, readline will inhibit word completion.  Completion
 characters will be inserted into the line as if they had been
 mapped to <B>self-insert</B>.
+<DT><B>echo-control-characters (On)</B>
+
+<DD>
+When set to <B>On</B>, on operating systems that indicate they support it,
+readline echoes a character corresponding to a signal generated from the
+keyboard.
 <DT><B>editing-mode (emacs)</B>
 
 <DD>
@@ -7085,12 +7116,6 @@ can be set to either
 or
 <B>vi</B>.
 
-<DT><B>echo-control-characters (On)</B>
-
-<DD>
-When set to <B>On</B>, on operating systems that indicate they support it,
-readline echoes a character corresponding to a signal generated from the
-keyboard.
 <DT><B>enable-bracketed-paste (Off)</B>
 
 <DD>
@@ -7130,7 +7155,10 @@ If set to zero, any existing history entries are deleted and no new entries
 are saved.
 If set to a value less than zero, the number of history entries is not
 limited.
-By default, the number of history entries is not limited.
+By default, the number of history entries is set to the value of the
+<B>HISTSIZE</B> shell variable.
+If an attempt is made to set <I>history-size</I> to a non-numeric value,
+the maximum number of history entries will be set to 500.
 <DT><B>horizontal-scroll-mode (Off)</B>
 
 <DD>
@@ -7141,11 +7169,13 @@ becomes longer than the screen width rather than wrapping to a new line.
 
 <DD>
 If set to <B>On</B>, readline will enable eight-bit input (that is,
-it will not strip the high bit from the characters it reads),
+it will not strip the eighth bit from the characters it reads),
 regardless of what the terminal claims it can support.  The name
 <B>meta-flag</B>
 
 is a synonym for this variable.
+The default is <I>Off</I>, but readline will set it to <I>On</I> if the
+locale contains eight-bit characters.
 <DT><B>isearch-terminators (``C-[C-J'')</B>
 
 <DD>
@@ -7229,6 +7259,8 @@ the list.
 If set to <B>On</B>, readline will display characters with the
 eighth bit set directly rather than as a meta-prefixed escape
 sequence.
+The default is <I>Off</I>, but readline will set it to <I>On</I> if the
+locale contains eight-bit characters.
 <DT><B>page-completions (On)</B>
 
 <DD>
@@ -13583,6 +13615,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 08 February 2016 10:17:49 EST
+Time: 29 March 2016 09:29:07 EDT
 </BODY>
 </HTML>

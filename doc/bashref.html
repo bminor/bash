@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 4.4, 8 February 2016).
+the Bash shell (version 4.4, 28 February 2016).
 
-This is Edition 4.4, last updated 8 February 2016,
+This is Edition 4.4, last updated 28 February 2016,
 of The GNU Bash Reference Manual,
 for Bash, Version 4.4.
 
@@ -285,10 +285,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 4.4, 8 February 2016).
+the Bash shell (version 4.4, 28 February 2016).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 4.4, last updated 8 February 2016,
+<p>This is Edition 4.4, last updated 28 February 2016,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 4.4.
 </p>
@@ -3327,7 +3327,7 @@ input (or file descriptor <var>n</var> if <var>n</var> is specified) for a comma
 
 <p>No parameter and variable expansion, command substitution,
 arithmetic expansion, or filename expansion is performed on
-<var>word</var>.  If any characters in <var>word</var> are quoted, the
+<var>word</var>.  If any part of <var>word</var> is quoted, the
 <var>delimiter</var> is the result of quote removal on <var>word</var>,
 and the lines in the here-document are not expanded.
 If <var>word</var> is unquoted,
@@ -4275,8 +4275,7 @@ less than zero, non-zero otherwise.
 <pre class="example">test <var>expr</var>
 </pre></div>
 
-<p>Evaluate a conditional express
-ion <var>expr</var> and return a status of 0
+<p>Evaluate a conditional expression <var>expr</var> and return a status of 0
 (true) or 1 (false).
 Each operator and operand must be a separate argument.
 Expressions are composed of the primaries described below in
@@ -4469,7 +4468,7 @@ results in permissions of <code>755</code>.
 
 <p>Remove each variable or function <var>name</var>.
 If the <samp>-v</samp> option is given, each
-<var>name</var> refers to a shell variable and that variable is remvoved.
+<var>name</var> refers to a shell variable and that variable is removed.
 If the <samp>-f</samp> option is given, the <var>name</var>s refer to shell
 functions, and the function definition is removed.
 If the <samp>-n</samp> option is supplied, and <var>name</var> is a variable with
@@ -6773,11 +6772,14 @@ is readonly.
 <a name="index-EXECIGNORE"></a>
 </dt>
 <dd><p>A colon-separated list of shell patterns (see <a href="#Pattern-Matching">Pattern Matching</a>)
-defining the list of filenames to be ignored by command search.
+defining the list of filenames to be ignored by command search using
+<code>PATH</code>.
 Files whose full pathnames match one of these patterns are not considered
-executable files for the purposes of completion and command execution.
+executable files for the purposes of completion and command execution
+via <code>PATH</code> lookup.
 This does not affect the behavior of the <code>[</code>, <code>test</code>, and <code>[[</code>
 commands.
+Full pathnames in the command hash table are not subject to <code>EXECIGNORE</code>.
 Use this variable to ignore shared library files that have the executable
 bit set, but are not executable files.
 The pattern matching honors the setting of the <code>extglob</code> shell 
@@ -8078,8 +8080,8 @@ Next: <a href="#Aliases" accesskey="n" rel="next">Aliases</a>, Previous: <a href
 <a name="index-arithmetic-evaluation"></a>
 
 <p>The shell allows arithmetic expressions to be evaluated, as one of
-the shell expansions or by the <code>let</code> and the <samp>-i</samp> option
-to the <code>declare</code> builtins.
+the shell expansions or by using the <code>((</code> compound command, the
+<code>let</code> builtin, or the <samp>-i</samp> option to the <code>declare</code> builtin.
 </p>
 <p>Evaluation is done in fixed-width integers with no check for overflow,
 though division by 0 is trapped and flagged as an error.
@@ -9822,7 +9824,9 @@ The default limit is <code>100</code>.
 <p>If set to &lsquo;<samp>on</samp>&rsquo;, Readline will convert characters with the
 eighth bit set to an <small>ASCII</small> key sequence by stripping the eighth
 bit and prefixing an <tt class="key">ESC</tt> character, converting them to a
-meta-prefixed key sequence.  The default value is &lsquo;<samp>on</samp>&rsquo;.
+meta-prefixed key sequence.  The default value is &lsquo;<samp>on</samp>&rsquo;, but
+will be set to &lsquo;<samp>off</samp>&rsquo; if the locale is one that contains
+eight-bit characters.
 </p>
 </dd>
 <dt><code>disable-completion</code></dt>
@@ -9830,6 +9834,13 @@ meta-prefixed key sequence.  The default value is &lsquo;<samp>on</samp>&rsquo;.
 <p>If set to &lsquo;<samp>On</samp>&rsquo;, Readline will inhibit word completion.
 Completion  characters will be inserted into the line as if they had
 been mapped to <code>self-insert</code>.  The default is &lsquo;<samp>off</samp>&rsquo;.
+</p>
+</dd>
+<dt><code>echo-control-characters</code></dt>
+<dd><a name="index-echo_002dcontrol_002dcharacters"></a>
+<p>When set to &lsquo;<samp>on</samp>&rsquo;, on operating systems that indicate they support it,
+readline echoes a character corresponding to a signal generated from the
+keyboard.  The default is &lsquo;<samp>on</samp>&rsquo;.
 </p>
 </dd>
 <dt><code>editing-mode</code></dt>
@@ -9850,13 +9861,6 @@ Use the &lsquo;<samp>\1</samp>&rsquo; and &lsquo;<samp>\2</samp>&rsquo; escapes 
 non-printing characters, which can be used to embed a terminal control
 sequence into the mode string.
 The default is &lsquo;<samp>@</samp>&rsquo;.
-</p>
-</dd>
-<dt><code>echo-control-characters</code></dt>
-<dd><a name="index-echo_002dcontrol_002dcharacters"></a>
-<p>When set to &lsquo;<samp>on</samp>&rsquo;, on operating systems that indicate they support it,
-readline echoes a character corresponding to a signal generated from the
-keyboard.  The default is &lsquo;<samp>on</samp>&rsquo;.
 </p>
 </dd>
 <dt><code>enable-bracketed-paste</code></dt>
@@ -9904,6 +9908,8 @@ are saved.
 If set to a value less than zero, the number of history entries is not
 limited.
 By default, the number of history entries is not limited.
+If an attempt is made to set <var>history-size</var> to a non-numeric value,
+the maximum number of history entries will be set to 500.
 </p>
 </dd>
 <dt><code>horizontal-scroll-mode</code></dt>
@@ -9921,8 +9927,9 @@ this variable is set to &lsquo;<samp>off</samp>&rsquo;.
 <p>If set to &lsquo;<samp>on</samp>&rsquo;, Readline will enable eight-bit input (it
 will not clear the eighth bit in the characters it reads),
 regardless of what the terminal claims it can support.  The
-default value is &lsquo;<samp>off</samp>&rsquo;.  The name <code>meta-flag</code> is a
-synonym for this variable.
+default value is &lsquo;<samp>off</samp>&rsquo;, but Readline will set it to &lsquo;<samp>on</samp>&rsquo; if the 
+locale contains eight-bit characters.
+The name <code>meta-flag</code> is a synonym for this variable.
 </p>
 </dd>
 <dt><code>isearch-terminators</code></dt>
@@ -10010,7 +10017,9 @@ the list.  The default is &lsquo;<samp>off</samp>&rsquo;.
 <dd><a name="index-output_002dmeta"></a>
 <p>If set to &lsquo;<samp>on</samp>&rsquo;, Readline will display characters with the
 eighth bit set directly rather than as a meta-prefixed escape
-sequence.  The default is &lsquo;<samp>off</samp>&rsquo;.
+sequence.
+The default is &lsquo;<samp>off</samp>&rsquo;, but Readline will set it to &lsquo;<samp>on</samp>&rsquo; if the
+locale contains eight-bit characters.
 </p>
 </dd>
 <dt><code>page-completions</code></dt>

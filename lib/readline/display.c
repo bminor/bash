@@ -826,7 +826,7 @@ rl_redisplay ()
 	lpos -= _rl_col_width (local_prompt, n0, num, 1) - wadjust;
       else
 #endif
-	lpos -= _rl_screenwidth - wadjust;
+	lpos -= _rl_screenwidth;	/* all physical cursor positions */
     }
 
   prompt_last_screen_line = newlines;

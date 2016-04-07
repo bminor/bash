@@ -6754,8 +6754,8 @@ may be positive or negative integers.
 @cindex arithmetic evaluation
 
 The shell allows arithmetic expressions to be evaluated, as one of
-the shell expansions or by the @code{let} and the @option{-i} option
-to the @code{declare} builtins.
+the shell expansions or by using the @code{((} compound command, the
+@code{let} builtin, or the @option{-i} option to the @code{declare} builtin.
 
 Evaluation is done in fixed-width integers with no check for overflow,
 though division by 0 is trapped and flagged as an error.
@@ -7567,6 +7567,10 @@ The @code{read} builtin may be interrupted by a signal for which a trap
 has been set.
 If Bash receives a trapped signal while executing @code{read}, the trap
 handler executes and @code{read} returns an exit status greater than 128.
+
+@item
+Bash removes an exited background process's status from the list of such
+statuses after the @code{wait} builtin is used to obtain it.
 
 @end enumerate
 
