@@ -1,6 +1,6 @@
 /* execute_cmd.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -2150,6 +2150,7 @@ coproc_setvars (cp)
   SHELL_VAR *v;
   char *namevar, *t;
   int l;
+  WORD_DESC w;
 #if defined (ARRAY_VARS)
   arrayind_t ind;
 #endif
@@ -2157,11 +2158,27 @@ coproc_setvars (cp)
   if (cp->c_name == 0)
     return;
 
+  /* We could do more here but right now we only check the name, warn if it's
+     not a valid identifier, and refuse to create variables with invalid names
+     if a coproc with such a name is supplied. */
+  w.word = cp->c_name;
+  w.flags = 0;
+  if (check_identifier (&w, 1) == 0)
+    return;
+
   l = strlen (cp->c_name);
   namevar = xmalloc (l + 16);
 
 #if defined (ARRAY_VARS)
   v = find_variable (cp->c_name);
+#  if 0
+  if (v && (readonly_p (v) || noassign_p (v)))
+    {
+      if (readonly_p (v))
+	err_readonly (cp->c_name);
+      return;
+    }
+#  endif
   if (v == 0)
     v = make_new_array_variable (cp->c_name);
   if (array_p (v) == 0)

@@ -3035,6 +3035,7 @@ reset_parser ()
     free_string_list ();
 #endif /* ALIAS || DPAREN_ARITHMETIC */
 
+  /* This is where we resynchronize to the next newline on error/reset */
   if (shell_input_line)
     {
       free (shell_input_line);

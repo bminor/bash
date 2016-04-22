@@ -1140,6 +1140,14 @@ that the terminal editing characters are bound to @code{rl_insert}.
 The bindings are performed in @var{kmap}.
 @end deftypefun
 
+@deftypefun int rl_tty_set_echoing (int value)
+Set Readline's idea of whether or not it is echoing output to its output
+stream (@var{rl_outstream}).  If @var{value} is 0, Readline does not display
+output to @var{rl_outstream}; any other value enables output.  The initial
+value is set when Readline initializes the terminal settings.
+This function returns the previous value.
+@end deftypefun
+
 @deftypefun int rl_reset_terminal (const char *terminal_name)
 Reinitialize Readline's idea of the terminal settings using
 @var{terminal_name} as the terminal type (e.g., @code{vt100}).

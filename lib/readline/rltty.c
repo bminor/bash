@@ -714,6 +714,19 @@ rl_deprep_terminal ()
   _rl_release_sigint ();
 }
 #endif /* !NO_TTY_DRIVER */
+
+/* Set readline's idea of whether or not it is echoing output to the terminal,
+   returning the old value. */
+int
+rl_tty_set_echoing (u)
+     int u;
+{
+  int o;
+
+  o = _rl_echoing_p;
+  _rl_echoing_p = u;
+  return o;
+}
 
 /* **************************************************************** */
 /*								    */

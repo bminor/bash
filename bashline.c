@@ -1,6 +1,6 @@
 /* bashline.c -- Bash's interface to the readline library. */
 
-/* Copyright (C) 1987-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -4080,7 +4080,7 @@ bash_execute_unix_command (count, key)
   ce = rl_get_termcap ("ce");
   if (ce)	/* clear current line */
     {
-#if 1
+#if 0
       fprintf (rl_outstream, "\r");
       tputs (ce, 1, putx);
 #else

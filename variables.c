@@ -3212,6 +3212,21 @@ unbind_nameref (name)
   return 0;
 }
 
+int
+check_unbind_variable (name)
+     const char *name;
+{
+  SHELL_VAR *v;
+
+  v = find_variable (name);
+  if (v && readonly_p (v))
+    {
+      builtin_error (_("%s: cannot unset: readonly %s"), name, "variable");
+      return -1;
+    }
+  return (unbind_variable (name));
+}
+
 /* Unset the shell function named NAME. */
 int
 unbind_func (name)

@@ -87,6 +87,9 @@ convert_var_to_array (var)
   VSETATTR (var, att_array);
   VUNSETATTR (var, att_invisible);
 
+  /* Make sure it's not marked as an associative array any more */
+  VUNSETATTR (var, att_assoc);
+
   return var;
 }
 
@@ -117,6 +120,9 @@ convert_var_to_assoc (var)
 
   VSETATTR (var, att_assoc);
   VUNSETATTR (var, att_invisible);
+
+  /* Make sure it's not marked as an indexed array any more */
+  VUNSETATTR (var, att_array);
 
   return var;
 }

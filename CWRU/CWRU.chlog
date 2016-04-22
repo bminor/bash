@@ -10632,3 +10632,47 @@ lib/glob/sm_loop.c
 	  * is the last character in the pattern until after we check the
 	  special cases for matching a `.'.  Fixes bugs reported back on 3/23
 	  by Isabella Parakiss <izaberina@gmail.com>
+
+				   4/13
+				   ----
+bashhist.c
+	- hc_erasedups: fix memory leak by freeing history entry returned by
+	  remove_history.  Bug and fix from Seiichi Ishitsuka
+	  <ishitsuka.sc@ncos.nec.co.jp>
+
+				   4/19
+				   ----
+config-top.h
+	- CD_COMPLAINS: now settable in config-top.h; enables (fatal) error
+	  messages if cd is given multiple directory arguments
+
+				   4/20
+				   ----
+execute_cmd.c
+	- coproc_setvars: refuse to create variables with names that are not
+	  valid identifiers.  Suggestion from Piotr Grzybowski
+	  <narsil.pl@gmail.com>
+
+rltty.c
+	- rl_tty_set_echoing: interface to set _rl_echoing_p, returning old
+	  value.  Inspired by gdb use of _rl_echoing_p when switching
+	  between terminal and curses modes described by Doug Evans
+	  <dje@google.com>
+
+bashline.c
+	- bash_execute_unix_command: use rl_clear_visible_line instead of
+	  erasing current line on the screen, inspired by same report from
+	  3/12.  Still tentative change
+
+configure.ac
+	- update release status to rc2, may skip this and go directly to
+	  release
+
+				   4/21
+				   ----
+arrayfunc.c
+	- convert_var_to_array: make sure that the newly-converted array
+	  variable is not marked as being an associative array.  Fixes bug
+	  reported by Grisha Levit <grishalevit@gmail.com>
+	- convert_var_to_assoc: make sure that the newly-converted associative
+	  array variable is not marked as being an indexed array

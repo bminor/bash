@@ -674,7 +674,9 @@ hc_erasedups (line)
       if (STREQ (temp->line, line))
 	{
 	  r = where_history ();
-	  remove_history (r);
+	  temp = remove_history (r);
+	  if (temp)
+	    free_history_entry (temp);
 	}
     }
   using_history ();

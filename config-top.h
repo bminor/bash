@@ -27,6 +27,10 @@
    error messages about `break' and `continue' out of context. */
 #define BREAK_COMPLAINS
 
+/* Define CD_COMPLAINS if you want the non-standard, but sometimes-desired
+   error messages about multiple directory arguments to `cd'. */
+#define CD_COMPLAINS
+
 /* Define BUFFERED_INPUT if you want the shell to do its own input
    buffering, rather than using stdio.  Do not undefine this; it's
    required to preserve semantics required by POSIX. */

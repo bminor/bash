@@ -294,6 +294,7 @@ extern SHELL_VAR *bind_var_to_int __P((char *, intmax_t));
 extern int assign_in_env __P((WORD_DESC *, int));
 
 extern int unbind_variable __P((const char *));
+extern int check_unbind_variable __P((const char *));
 extern int unbind_nameref __P((const char *));
 extern int unbind_func __P((const char *));
 extern int unbind_function_def __P((const char *));
