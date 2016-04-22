@@ -10601,3 +10601,34 @@ parse.y
 	  reserved words; set lex_rwlen to 0 so we know to start reading a
 	  new one
 
+				    4/7
+				    ---
+builtins/{alias,complete,jobs}.def
+	- {alias,compopt,disown}: add missing `CASE_HELPOPT;' so --help option
+	  prints help longdoc instead of builtin_usage()
+
+				    4/8
+				    ---
+arrayfunc.c
+	- assign_array_var_from_word_list: use bind_array_var_internal instead
+	  of inline code, so value conversions happen on assignment (case
+	  modification, arithmetic evaluation, etc).  Fixes bug reported by
+	  Geir Hauge <geir.hauge@gmail.com>
+
+				    4/9
+				    ---
+shell.c
+	- main: change the logic that determines whether or not bash is running
+	  under an emacs terminal emulator so it works with future versions of
+	  emacs, which will change to use only $INSIDE_EMACS.  Report and fix
+	  from Paul Eggert <eggert@cs.ucla.edu>
+
+lib/glob/sm_loop.c
+	- EXT: if we see ?(pat), we can match 0 or 1 times, so if we don't
+	  match, we should consume the extglob pattern and go on to attempt
+	  to match the rest of the pattern against the string.  Fixes bug
+	  reported by Isabella Parakiss <izaberina@gmail.com>
+	- GMATCH: in case `*', don't short-circuit and match anything if the
+	  * is the last character in the pattern until after we check the
+	  special cases for matching a `.'.  Fixes bugs reported back on 3/23
+	  by Isabella Parakiss <izaberina@gmail.com>

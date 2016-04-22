@@ -24,11 +24,11 @@ env -i BASH_FUNC_X%%='() { (a)=>\' ${THIS_SH} -c cve7169-bad 2>/dev/null
 : < cve7169-bad
 rm -f cve7169-bad
 
-echo cve7169-bad2 > bar
+echo cve7169-bad2 > $TMPDIR/bar
 rm -f cve7169-bad2
 eval  'X() { (a)>\' ; . ./bar 2>/dev/null
 : < cve7169-bad2
-rm -f cve7169-bad2 bar
+rm -f cve7169-bad2 $TMPDIR/bar
 
 # CVE-2014-7186
 ${THIS_SH} ./exportfunc1.sub

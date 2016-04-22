@@ -403,10 +403,7 @@ assign_array_var_from_word_list (var, list, flags)
   i = (flags & ASS_APPEND) ? array_max_index (a) + 1 : 0;
 
   for (l = list; l; l = l->next, i++)
-    if (var->assign_func)
-      (*var->assign_func) (var, l->word->word, i, 0);
-    else
-      array_insert (a, i, l->word->word);
+    bind_array_var_internal (var, i, 0, l->word->word, flags & ~ASS_APPEND);
 
   VUNSETATTR (var, att_invisible);	/* no longer invisible */
 

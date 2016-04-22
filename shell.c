@@ -573,25 +573,45 @@ main (argc, argv, env)
   set_default_locale_vars ();
 
   /*
-   * M-x term -> TERM=eterm EMACS=22.1 (term:0.96)	(eterm)
-   * M-x shell -> TERM=dumb EMACS=t			(no line editing)
-   * M-x terminal -> TERM=emacs-em7955 EMACS=		(line editing)
+   * M-x term -> TERM=eterm-color INSIDE_EMACS='251,term:0.96' (eterm)
+   * M-x shell -> TERM='dumb' INSIDE_EMACS='25.1,comint' (no line editing)
+   *
+   * Older versions of Emacs may set EMACS to 't' or to something like
+   * '22.1 (term:0.96)' instead of (or in addition to) setting INSIDE_EMACS.
+   * They may set TERM to 'eterm' instead of 'eterm-color'.  They may have
+   * a now-obsolete command that sets neither EMACS nor INSIDE_EMACS:
+   * M-x terminal -> TERM='emacs-em7955' (line editing)
    */
   if (interactive_shell)
     {
-      char *term, *emacs;
+      char *term, *emacs, *inside_emacs;;
+      int emacs_term, in_emacs;
 
       term = get_string_value ("TERM");
       emacs = get_string_value ("EMACS");
+      inside_emacs = get_string_value ("INSIDE_EMACS");
+
+      if (inside_emacs)
+	{
+	  emacs_term = strstr (inside_emacs, ",term:") != 0;
+	  in_emacs = 1;
+	}
+      else if (emacs)
+	{
+	  /* Infer whether we are in an older Emacs. */
+	  emacs_term = strstr (emacs, " (term:") != 0;
+	  in_emacs = emacs_term || STREQ (emacs, "t");
+	}
+      else
+	in_emacs = emacs_term = 0;
 
       /* Not sure any emacs terminal emulator sets TERM=emacs any more */
       no_line_editing |= STREQ (term, "emacs");
-      no_line_editing |= emacs && emacs[0] == 't' && emacs[1] == '\0' && STREQ (term, "dumb");
-      no_line_editing |= get_string_value ("INSIDE_EMACS") != 0;
+      no_line_editing |= in_emacs && STREQ (term, "dumb");
 
       /* running_under_emacs == 2 for `eterm' */
-      running_under_emacs = (emacs != 0) || STREQN (term, "emacs", 5);
-      running_under_emacs += STREQN (term, "eterm", 5) && emacs && strstr (emacs, "term");
+      running_under_emacs = in_emacs || STREQN (term, "emacs", 5);
+      running_under_emacs += emacs_term && STREQN (term, "eterm", 5);
 
       if (running_under_emacs)
 	gnu_error_format = 1;
