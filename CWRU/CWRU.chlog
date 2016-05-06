@@ -10676,3 +10676,41 @@ arrayfunc.c
 	  reported by Grisha Levit <grishalevit@gmail.com>
 	- convert_var_to_assoc: make sure that the newly-converted associative
 	  array variable is not marked as being an indexed array
+
+				   4/22
+				   ----
+builtins/evalstring.c
+	- should_suppress_fork: don't suppress the fork if there are any traps
+	  set, since that requires that we hang around to react to a signal or
+	  collect the command's exit status and run something.  Fixes bug
+	  reported by Brian Vandenberg <phantall@gmail.com>
+
+histexpand.c
+	- history_tokenize_word: handle >| as a single token.  Fix from
+	  Piotr Grzybowski <narsil.pl@gmail.com> from a report from
+	  idallen@idallen-fibe.dyndns.org
+
+				   4/24
+				   ----
+execute_cmd.
+	- coproc_setvars: don't overwrite readonly variables used as coproc
+	  names.  From a report from Grisha Levit <grishalevit@gmail.com>
+
+histexpand.c
+	- history_tokenize_word: handle strings of digits before redirections
+	  beginning with `<' or `>' as part of the redirection word; handle
+	  strings of digits following `<&' or `>&' as part of the redirection
+	  word.  Inspired by patch from  Piotr Grzybowski <narsil.pl@gmail.com>
+	  from a report from idallen@idallen-fibe.dyndns.org
+
+lib/readline/complete.c
+	- rl_display_match_list: if the common prefix is longer than any of
+	  the possible matches, set the length of the common prefix to 0 so
+	  the entire match gets printed for each match
+	- rl_display_match_list: make sure to output at least one space
+	  between each displayed match, even if the displayed length is
+	  longer than our computed max
+	- fnprint: if the length of the prefix (prefix_bytes) is greater than
+	  or equal to the length of the string to be printed (print_len), make
+	  sure to set the prefix length to 0 so the entire string is printed.
+	  From a report from Grisha Levit <grishalevit@gmail.com>

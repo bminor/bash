@@ -1421,7 +1421,7 @@ history_tokenize_word (string, ind)
      const char *string;
      int ind;
 {
-  register int i;
+  register int i, j;
   int delimiter, nestdelim, delimopen;
 
   i = ind;
@@ -1431,6 +1431,22 @@ history_tokenize_word (string, ind)
     {
       i++;
       return i;
+    }
+
+  if (isdigit (string[i]))
+    {
+      j = i;
+      while (string[j] && isdigit (string[j]))
+	j++;
+      if (string[j] == 0)
+	return (j);
+      if (string[j] == '<' || string[j] == '>')
+	i = j;			/* digit sequence is a file descriptor */
+      else
+	{
+	  i = j;
+	  goto get_word;	/* digit sequence is part of a word */
+	}
     }
 
   if (member (string[i], "<>;&|$"))
@@ -1446,8 +1462,16 @@ history_tokenize_word (string, ind)
 	  i += 2;
 	  return i;
 	}
-      else if ((peek == '&' && (string[i] == '>' || string[i] == '<')) ||
-		(peek == '>' && string[i] == '&'))
+      else if (peek == '&' && (string[i] == '>' || string[i] == '<'))
+	{
+	  j = i + 2;
+	  while (string[j] && isdigit (string[j]))	/* file descriptor */
+	    j++;
+	  if (string[j] =='-')		/* <&[digits]-, >&[digits]- */
+	    j++;
+	  return j;
+	}
+      else if ((peek == '>' && string[i] == '&') || (peek == '|' && string[i] == '>'))
 	{
 	  i += 2;
 	  return i;

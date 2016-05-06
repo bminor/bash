@@ -2171,14 +2171,14 @@ coproc_setvars (cp)
 
 #if defined (ARRAY_VARS)
   v = find_variable (cp->c_name);
-#  if 0
+
   if (v && (readonly_p (v) || noassign_p (v)))
     {
       if (readonly_p (v))
 	err_readonly (cp->c_name);
       return;
     }
-#  endif
+
   if (v == 0)
     v = make_new_array_variable (cp->c_name);
   if (array_p (v) == 0)
@@ -2229,7 +2229,7 @@ coproc_unsetvars (cp)
   unbind_variable (namevar);  
 
 #if defined (ARRAY_VARS)
-  unbind_variable (cp->c_name);
+  check_unbind_variable (cp->c_name);
 #else
   sprintf (namevar, "%s_READ", cp->c_name);
   unbind_variable (namevar);
