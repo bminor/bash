@@ -123,6 +123,8 @@ echo ${!var2}
 # history_comment_char
 echo ok 3 # !1200
 
+# bash versions through bash-4.3 fail this; they make the digit preceding the
+# > into a separate word, changing the meaning of the redirection
 shopt a b c d 2>/dev/null
 echo !shopt-1
 

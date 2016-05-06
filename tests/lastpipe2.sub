@@ -1,0 +1,20 @@
+shopt -s lastpipe
+echo -e 'A\nB' | while read letter; do
+    echo -e '1\n2' | while read digit; do
+        echo $letter$digit
+    done
+done
+
+myPipefunc()
+{
+    cat | tee $TMPDIR/outfile
+}
+echo HI | myPipefunc
+
+echo -e 'A\nB' | while read letter; do
+    echo -e '1\n2' | while read digit; do
+        echo $letter$digit | myPipefunc
+    done
+done
+
+rm -f $TMPDIR/outfile

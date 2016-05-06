@@ -10714,3 +10714,87 @@ lib/readline/complete.c
 	  or equal to the length of the string to be printed (print_len), make
 	  sure to set the prefix length to 0 so the entire string is printed.
 	  From a report from Grisha Levit <grishalevit@gmail.com>
+
+				   4/25
+				   ----
+subst.c
+	- command_substitute: update the conditions under which we give the
+	  terminal to pipeline_pgrp with give_terminal_to to the same ones
+	  where wait_for uses to decide whether to give the terminal back to
+	  shell_pgrp.  This code exists to undo the work wait_for does; it
+	  has to give the terminal back to pipeline_pgrp only under those
+	  conditions when wait_for gives it back to the shell pgrp.  Fix for
+	  bug reported by Paulo Bardes <bardes0022@gmail.com>
+
+				   4/26
+				   ----
+bashline.c
+	- bash_filename_stat_hook: temporarily disable the `nounset' shell
+	  option around calls to expand_prompt_string so we don't get error
+	  messages during completion.  Fixes issue reported by Eric Pruitt
+	  <eric.pruitt@gmail.com>
+
+				   4/27
+				   ----
+doc/{bash.1,bashref.texi}
+	- extdebug: clarify that having this option enabled at shell startup
+	  acts identically to --debugger.  From a report from Grisha Levit
+	  <grishalevit@gmail.com>
+
+jobs.[ch]
+	- wait_for_single_pid: now takes additional `int flags' argument
+
+{jobs,execute_cmd}.c,builtins/wait.def
+	- wait_for_single_pid: changed callers to add extra argument
+
+jobs.c
+	- wait_for_single_pid: if (flags & 1) == 0, don't print the error message
+	  if PID isn't found; changed execute_pipeline call when lastpipe is
+	  set
+
+				   4/28
+				   ----
+general.c
+	- bash_tilde_expand: try not setting interrupt_immediately or
+	  terminate_immediately; see what happens with networked password
+	  databases
+
+				   4/29
+				   ----
+subst.c
+	- parameter_brace_expand, parameter_brace_expand_rhs: now take an
+	  additional `pflags' argument from its caller so we can pass
+	  state
+	- parameter_brace_expand_rhs: if expand_string_for_rhs returns a
+	  quoted null, but l_hasdollat is set to 1, meaning we saw a quoted
+	  "$@" of some form, we need to turn off special handling of "$@"
+	  so something like "${@-${@-$@}}" expands to an empty string like
+	  Posix says it should.  Fixes bug reported by Grisha Levit
+	  <grishalevit@gmail.com>
+
+				    5/1
+				    ---
+variables.c
+	- bind_variable_internal: if we have a nameref variable with a valid
+	  array reference that is invalid for assignment (e.g., a[*]), and
+	  assign_array_element returns NULL, short-circuit and return NULL.
+	  Fixes bug reported by Grisha Levit <grishalevit@gmail.com>
+
+general.[ch]
+	- valid_nameref_value: new function, return 1 if passed argument is
+	  a valid variable name argument for a nameref variable: a valid
+	  identifier, a valid array reference, or a valid positional
+	  parameter.  Second argument indicates whether the value is to be
+	  used for an assignment; in this case, return an error if the name
+	  consists of all digits
+
+builtins/declare.def
+	- declare_internal: disallow values for nameref variables that don't
+	  pass the tests in valid_nameref_value.  Part of fix for bug
+	  reported by Grisha Levit <grishalevit@gmail.com>
+
+variables.c
+	- bind_variable_internal: if trying to assign a value to a nameref
+	  variable, throw an error if valid_nameref_value fails (with a second
+	  argument of 1).  More fixes for bug reported by Grisha Levit
+	  <grishalevit@gmail.com>

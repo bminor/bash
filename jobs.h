@@ -230,7 +230,7 @@ extern int set_tty_state __P((void));
 extern int job_exit_status __P((int));
 extern int job_exit_signal __P((int));
 
-extern int wait_for_single_pid __P((pid_t));
+extern int wait_for_single_pid __P((pid_t, int));
 extern void wait_for_background_pids __P((void));
 extern int wait_for __P((pid_t));
 extern int wait_for_job __P((int));

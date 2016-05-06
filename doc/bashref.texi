@@ -1513,7 +1513,7 @@ When applied to a string-valued variable, @var{value} is expanded and
 appended to the variable's value.
 
 A variable can be assigned the @var{nameref} attribute using the
-@option{-n} option to the \fBdeclare\fP or \fBlocal\fP builtin commands
+@option{-n} option to the @code{declare} or @code{local} builtin commands
 (@pxref{Bash Builtins})
 to create a @var{nameref}, or a reference to another variable.
 This allows variables to be manipulated indirectly.
@@ -5143,7 +5143,9 @@ If set, aliases are expanded as described below under Aliases,
 This option is enabled by default for interactive shells.
 
 @item extdebug
-If set, behavior intended for use by debuggers is enabled:
+If set at shell invocation, arrange to execute the debugger profile
+before the shell starts, identical to the @option{--debugger} option.
+If set after invocation, behavior intended for use by debuggers is enabled:
 
 @enumerate
 @item

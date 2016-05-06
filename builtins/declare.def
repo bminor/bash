@@ -341,8 +341,8 @@ declare_internal (list, local_var)
 	      assign_error++;
 	      NEXT_VARIABLE ();
 	    }
-#if 0
-	  if (value && *value && legal_identifier (value) == 0)
+#if 1
+	  if (value && *value && valid_nameref_value (value, 0) == 0)
 	    {
 	      builtin_error (_("%s: invalid variable name for name reference"), value);
 	      assign_error++;
@@ -402,6 +402,12 @@ declare_internal (list, local_var)
 	    var = make_local_array_variable (name, making_array_special);
 	  else
 #endif
+	  if (offset == 0 && (flags_on & att_nameref))
+	    {
+	      refvar = mkglobal ? find_global_variable_last_nameref (name) : find_variable_last_nameref (name);
+	      var = 0;
+	    }
+	  else
 	    var = make_local_variable (name);	/* sets att_invisible for new vars */
 	  if (var == 0)
 	    {
@@ -570,8 +576,8 @@ declare_internal (list, local_var)
 	    }
 	  else if (flags_on & att_nameref)
 	    {
-#if 0
-	      if (nameref_p (var) == 0 && var_isset (var) && var_isnull (var) == 0 && legal_identifier (value_cell (var)) == 0)
+#if 1
+	      if (nameref_p (var) == 0 && var_isset (var) && var_isnull (var) == 0 && valid_nameref_value (value_cell (var), 0) == 0)
 		{
 		  builtin_error (_("%s: invalid variable name for name reference"), value_cell (var));
 		  any_failed++;

@@ -2313,10 +2313,13 @@ find_last_pid (job, block)
    This low-level function prints an error message if PID is not
    a child of this shell.  It returns -1 if it fails, or whatever
    wait_for returns otherwise.  If the child is not found in the
-   jobs table, it returns 127. */
+   jobs table, it returns 127.  If FLAGS doesn't include 1, we
+   suppress the error message if PID isn't found. */
+
 int
-wait_for_single_pid (pid)
+wait_for_single_pid (pid, flags)
      pid_t pid;
+     int flags;
 {
   register PROCESS *child;
   sigset_t set, oset;
@@ -2335,7 +2338,8 @@ wait_for_single_pid (pid)
 
   if (child == 0)
     {
-      internal_error (_("wait: pid %ld is not a child of this shell"), (long)pid);
+      if (flags & 1)
+	internal_error (_("wait: pid %ld is not a child of this shell"), (long)pid);
       return (127);
     }
 
@@ -2395,7 +2399,7 @@ wait_for_background_pids ()
       UNBLOCK_CHILD (oset);
       QUIT;
       errno = 0;		/* XXX */
-      r = wait_for_single_pid (pid);
+      r = wait_for_single_pid (pid, 1);
       if (r == -1)
 	{
 	  /* If we're mistaken about job state, compensate. */
@@ -2789,7 +2793,11 @@ itrace("wait_for: blocking wait for %d returns %d child = %p", (int)pid, r, chil
 if (job == NO_JOB)
   itrace("wait_for: job == NO_JOB, giving the terminal to shell_pgrp (%ld)", (long)shell_pgrp);
 #endif
-      /* Don't modify terminal pgrp if we are running in background or a subshell */
+      /* Don't modify terminal pgrp if we are running in background or a
+	 subshell.  Make sure subst.c:command_substitute uses the same
+	 conditions to determine whether or not it should undo this and
+	 give the terminal to pipeline_pgrp. */
+      
       if (running_in_background == 0 && (subshell_environment&(SUBSHELL_ASYNC|SUBSHELL_PIPE)) == 0)
 	give_terminal_to (shell_pgrp, 0);
     }

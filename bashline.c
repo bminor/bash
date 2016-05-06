@@ -54,6 +54,7 @@
 #include "pathexp.h"
 #include "shmbutil.h"
 #include "trap.h"
+#include "flags.h"
 
 #if defined (HAVE_MBSTR_H) && defined (HAVE_MBSCHR)
 #  include <mbstr.h>		/* mbschr */
@@ -1648,6 +1649,11 @@ bash_default_completion (text, start, end, qc, compflags)
       else
 	{
 	  matches = rl_completion_matches (text, variable_completion_function);
+	  /* If a single match, see if it expands to a directory name and append
+	     a slash if it does.  This requires us to expand the variable name,
+	     so we don't want to display errors if the variable is unset.  This
+	     can happen with dynamic variables whose value has never been
+	     requested. */
 	  if (matches && matches[0] && matches[1] == 0)
 	    {
 	      t = savestring (matches[0]);
@@ -3124,6 +3130,7 @@ bash_filename_stat_hook (dirname)
 {
   char *local_dirname, *new_dirname, *t;
   int should_expand_dirname, return_value;
+  int global_nounset;
   WORD_LIST *wl;
   struct stat sb;
 
@@ -3140,7 +3147,12 @@ bash_filename_stat_hook (dirname)
   if (should_expand_dirname)  
     {
       new_dirname = savestring (local_dirname);
+      /* no error messages, and expand_prompt_string doesn't longjmp so we don't
+	 have to worry about restoring this setting. */
+      global_nounset = unbound_vars_is_error;
+      unbound_vars_is_error = 0;
       wl = expand_prompt_string (new_dirname, 0, W_NOCOMSUB);	/* does the right thing */
+      unbound_vars_is_error = global_nounset;
       if (wl)
 	{
 	  free (new_dirname);

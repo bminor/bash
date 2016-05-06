@@ -2486,7 +2486,7 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
           lstdin = wait_for (lastpid);
         }
       else
-        lstdin = wait_for_single_pid (lastpid);		/* checks bgpids list */
+        lstdin = wait_for_single_pid (lastpid, 0);		/* checks bgpids list */
 #else
       lstdin = wait_for (lastpid);
 #endif

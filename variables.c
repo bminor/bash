@@ -2629,15 +2629,26 @@ bind_variable_internal (name, value, table, hflags, aflags)
 
   /* The first clause handles `declare -n ref; ref=x;' */
   if (entry && invisible_p (entry) && nameref_p (entry))
-    goto assign_value;
+    {
+      if (valid_nameref_value (value, 1) == 0)
+	{
+	  sh_invalidid (value);
+	  return ((SHELL_VAR *)NULL);
+	}
+      goto assign_value;
+    }
   else if (entry && nameref_p (entry))
     {
       newval = nameref_cell (entry);
 #if defined (ARRAY_VARS)
       /* declare -n foo=x[2] */
       if (valid_array_reference (newval, 0))
-        /* XXX - should it be aflags? */
-	entry = assign_array_element (newval, make_variable_value (entry, value, 0), aflags);
+	{
+          /* XXX - should it be aflags? */
+	  entry = assign_array_element (newval, make_variable_value (entry, value, 0), aflags);
+	  if (entry == 0)
+	    return entry;
+	}
       else
 #endif
       {
