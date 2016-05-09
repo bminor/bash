@@ -1,0 +1,65 @@
+declare -n r
+declare -n r
+unset -n r
+
+r=foo
+declare -n r=/
+
+r=%
+declare -n r
+unset r
+
+declare -n r
+r=^
+declare -p r
+
+unset -n r
+
+declare -n foo
+declare -a foo
+declare -p foo
+foo[0]=7
+declare -p foo
+unset foo
+
+declare -n x
+declare x=42
+declare -p x
+
+declare -n -r RO=foo
+declare -p RO
+
+unset -n r; unset r
+
+f() { echo $r; }
+
+declare -n r
+r=/ /usr/bin/sum < /dev/null
+r=/ f
+
+unset -f f
+
+# the details of this may change; this will tell me when they do
+declare -n foo ; declare -i foo=7*6 ; declare -p foo
+unset -n foo
+declare -n foo ; declare -i foo ; foo=7*6 ; declare -p foo
+
+# used to be buggy
+f()
+{
+	unset var
+	declare -n ref=var
+	declare -n ref
+	declare -p ref
+}
+f
+
+unset -f f
+f()
+{
+	local var
+	declare -n ref=var
+	declare -n ref
+	declare -p ref
+}
+f

@@ -1220,7 +1220,7 @@ history_expand (hstring, output)
 		    ADD_STRING (temp);
 		  xfree (temp);
 		}
-	      only_printing = r == 1;
+	      only_printing += r == 1;
 	      i = eindex;
 	    }
 	  break;

@@ -347,9 +347,21 @@ find_or_make_array_variable (name, flags)
     {
       /* See if we have a nameref pointing to a variable that hasn't been
 	 created yet. */
-      var = find_variable_last_nameref (name);
+      var = find_variable_last_nameref (name, 1);
+      if (var && nameref_p (var) && invisible_p (var))
+	{
+	  internal_warning (_("%s: removing nameref attribute"), name);
+	  VUNSETATTR (var, att_nameref);
+	}
       if (var && nameref_p (var))
-	var = (flags & 2) ? make_new_assoc_variable (nameref_cell (var)) : make_new_array_variable (nameref_cell (var));
+	{
+	  if (valid_nameref_value (nameref_cell (var), 1) == 0)
+	    {
+	      sh_invalidid (nameref_cell (var));
+	      return ((SHELL_VAR *)NULL);
+	    }
+	  var = (flags & 2) ? make_new_assoc_variable (nameref_cell (var)) : make_new_array_variable (nameref_cell (var));
+	}
     }
 
   if (var == 0)

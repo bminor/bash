@@ -215,6 +215,8 @@ typedef struct _vlist {
 	      (var)->exportstr = (char *)NULL; \
 	    } \
 	} while (0)
+
+#define ifsname(s)	((s)[0] == 'I' && (s)[1] == 'F' && (s)[2] == 'S' && (s)[3] == '\0')
 	
 /* Stuff for hacking variables. */
 typedef int sh_var_map_func_t __P((SHELL_VAR *));
@@ -244,8 +246,8 @@ extern SHELL_VAR *find_function __P((const char *));
 extern FUNCTION_DEF *find_function_def __P((const char *));
 extern SHELL_VAR *find_variable __P((const char *));
 extern SHELL_VAR *find_variable_noref __P((const char *));
-extern SHELL_VAR *find_variable_last_nameref __P((const char *));
-extern SHELL_VAR *find_global_variable_last_nameref __P((const char *));
+extern SHELL_VAR *find_variable_last_nameref __P((const char *, int));
+extern SHELL_VAR *find_global_variable_last_nameref __P((const char *, int));
 extern SHELL_VAR *find_variable_nameref __P((SHELL_VAR *));
 extern SHELL_VAR *find_variable_internal __P((const char *, int));
 extern SHELL_VAR *find_variable_tempenv __P((const char *));

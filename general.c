@@ -227,6 +227,10 @@ legal_identifier (name)
   return (1);
 }
 
+/* Return 1 if NAME is a valid value that can be assigned to a nameref
+   variable.  The FOR_ASSIGNMENT flag is currently unused, but it could
+   be used to allow values to be stored and indirectly referenced, but
+   not used in assignments. */
 int
 valid_nameref_value (name, for_assignment)
      char *name;
@@ -240,8 +244,10 @@ valid_nameref_value (name, for_assignment)
   if (legal_identifier (name))
 #endif
     return 1;
+#if 0
   if (for_assignment == 0 && legal_number (name, &r))
     return 1;
+#endif
   return 0;
 }
 

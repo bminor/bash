@@ -1643,7 +1643,7 @@ programmable_completions (cmd, word, start, end, foundp)
 
       if (count > 32)
 	{
-	  internal_warning ("programmable_completion: %s: possible retry loop", cmd);
+	  internal_warning (_("programmable_completion: %s: possible retry loop"), cmd);
 	  break;
 	}
     }

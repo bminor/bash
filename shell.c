@@ -1455,11 +1455,13 @@ start_debugger ()
   r = force_execute_file (DEBUGGER_START_FILE, 1);
   if (r < 0)
     {
-      internal_warning ("cannot start debugger; debugging mode disabled");
-      debugging_mode = function_trace_mode = 0;
+      internal_warning (_("cannot start debugger; debugging mode disabled"));
+      debugging_mode = 0;
     }
-  else
-    function_trace_mode = 1;
+  error_trace_mode = function_trace_mode = debugging_mode;
+
+  set_shellopts ();
+  set_bashopts ();
 
   exit_immediately_on_error += old_errexit;
 #endif

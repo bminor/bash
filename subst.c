@@ -5645,7 +5645,7 @@ process_substitute (string, open_for_read_in_child)
 #else /* HAVE_DEV_FD */
   if (pipe (fildes) < 0)
     {
-      sys_error (_("cannot make pipe for process substitution"));
+      sys_error ("%s", _("cannot make pipe for process substitution"));
       return ((char *)NULL);
     }
   /* If OPEN_FOR_READ_IN_CHILD == 1, we want to use the write end of
@@ -5661,7 +5661,7 @@ process_substitute (string, open_for_read_in_child)
 
   if (pathname == 0)
     {
-      sys_error (_("cannot make pipe for process substitution"));
+      sys_error ("%s", _("cannot make pipe for process substitution"));
       return ((char *)NULL);
     }
 
@@ -5703,7 +5703,7 @@ process_substitute (string, open_for_read_in_child)
 
   if (pid < 0)
     {
-      sys_error (_("cannot make child for process substitution"));
+      sys_error ("%s", _("cannot make child for process substitution"));
       free (pathname);
 #if defined (HAVE_DEV_FD)
       close (parent_pipe_fd);
@@ -5864,7 +5864,7 @@ read_comsub (fd, quoted, rflag)
       if (c == 0)
 	{
 #if 1
-	  internal_warning ("command substitution: ignored null byte in input");
+	  internal_warning ("%s", _("command substitution: ignored null byte in input"));
 #endif
 	  continue;
 	}
@@ -5988,7 +5988,7 @@ command_substitute (string, quoted)
   /* Pipe the output of executing STRING into the current shell. */
   if (pipe (fildes) < 0)
     {
-      sys_error (_("cannot make pipe for command substitution"));
+      sys_error ("%s", _("cannot make pipe for command substitution"));
       goto error_exit;
     }
 
@@ -6050,7 +6050,7 @@ command_substitute (string, quoted)
 
       if (dup2 (fildes[1], 1) < 0)
 	{
-	  sys_error (_("command_substitute: cannot duplicate pipe as fd 1"));
+	  sys_error ("%s", _("command_substitute: cannot duplicate pipe as fd 1"));
 	  exit (EXECUTION_FAILURE);
 	}
 
@@ -6463,7 +6463,7 @@ expand_arrayref:
       else
 	temp = (char *)NULL;
     }
-  else if (var = find_variable_last_nameref (name))
+  else if (var = find_variable_last_nameref (name, 0))
     {
       temp = nameref_cell (var);
 #if defined (ARRAY_VARS)
@@ -6506,7 +6506,7 @@ parameter_brace_find_indir (name, var_is_special, quoted, find_nameref)
   WORD_DESC *w;
   SHELL_VAR *v;
 
-  if (find_nameref && var_is_special == 0 && (v = find_variable_last_nameref (name)) &&
+  if (find_nameref && var_is_special == 0 && (v = find_variable_last_nameref (name, 0)) &&
       nameref_p (v) && (t = nameref_cell (v)) && *t)
     return (savestring (t));
 
@@ -6546,7 +6546,7 @@ parameter_brace_expand_indir (name, var_is_special, quoted, quoted_dollar_atp, c
      bash performs an indirect lookup on foo[0] and expands the result;
      ksh93 expands bar[0].  We could do that here -- there are enough usable
      primitives to do that -- but do not at this point. */
-  if (var_is_special == 0 && (v = find_variable_last_nameref (name)))
+  if (var_is_special == 0 && (v = find_variable_last_nameref (name, 0)))
     {
       if (nameref_p (v) && (t = nameref_cell (v)) && *t)
 	{
@@ -8798,7 +8798,7 @@ comsub:
 	}
       else if (var && (invisible_p (var) || var_isset (var) == 0))
 	temp = (char *)NULL;
-      else if ((var = find_variable_last_nameref (temp1)) && var_isset (var) && invisible_p (var) == 0)
+      else if ((var = find_variable_last_nameref (temp1, 0)) && var_isset (var) && invisible_p (var) == 0)
 	{
 	  temp = nameref_cell (var);
 #if defined (ARRAY_VARS)

@@ -10798,3 +10798,146 @@ variables.c
 	  variable, throw an error if valid_nameref_value fails (with a second
 	  argument of 1).  More fixes for bug reported by Grisha Levit
 	  <grishalevit@gmail.com>
+
+				    5/2
+				    ---
+builtins/declare.def
+	- declare_internal: don't allow nameref attribute to be applied to an
+	  existing readonly variable; it can be used to circumvent readonly
+	  value.  Fix for bug reported by Grisha Levit <grishalevit@gmail.com>
+
+variables.[ch]
+	- find_variable_last_nameref, find_global_variable_last_nameref: takes a
+	  new flags argument.  If flags is non-zero, and we find a nameref
+	  variable that is unset (has no value), return that variable instead
+	  of NULL.
+
+{variables,execute_cmd,arrayfunc,subst}.c,builtins/{declare,set}.def
+	- find_variable_last_nameref, find_global_variable_last_nameref: change
+	  callers to add flags argument (initially 0)
+
+				    5/3
+				    ---
+variables.c
+	- bind_variable_internal: make sure we run the value of a namref variable
+	  through valid_nameref_value before doing the assignment.  This can go
+	  away if we stop allowing namerefs to refer to positional parameters
+
+execute_cmd.c
+	- execute_select_command: if bind_variable returns NULL, handle it as an
+	  error, as if attempting assignment to a readonly variable
+	- execute_for_command: use 1 as second argument to
+	  find_variable_last_nameref, so it will return an invisible nameref
+	  to assign for each variable in the list
+	- execute_for_command: if the current word in the list is an invalid
+	  identifier and the loop variable is a nameref, handle it as an error,
+	  as if attempting assignment to a readonly variable
+
+				    5/4
+				    ---
+variables.c
+	- bind_int_variable: add warning if assigning an int to a nameref
+	  variable
+	- assign_in_env: if assigning a variable in the temporary environment
+	  that is a namref, throw an error if trying to assign an invalid
+	  value
+	- bind_variable_value: use valid_nameref_value instead of calls to
+	  legal_identifier and valid_array_reference
+
+execute_cmd.c
+	- coproc_setvars: if we have a nameref variable as the coproc name, but
+	  it can't be assigned to for some reason, remove the nameref attribute
+	  and  issue a warning that we are doing so
+	- coproc_setvars: don't allow assignment to a nameref variable with an
+	  invalid variable name, using same code as find_or_make_array_variable
+
+general.c
+	- valid_nameref_value: disallow values consisting solely of digits,
+	  like the positional parameters
+
+builtins/declare.def
+	- declare_internal: don't call valid_nameref_value on the existing value
+	  of a variable that's being converted to a nameref -- that value is
+	  going to be thrown away and we've already checked the new value
+	- declare_internal: call bind_variable_value with the ASS_NAMEREF flag
+	  if we're assigning to an existing nameref variable (for instance,
+	  `declare -n x ; declare x=42')
+
+				    5/5
+				    ---
+variables.c
+	- make_local_variable: if we are being asked to create a local copy of
+	  a nameref variable from a prior scope (checked by looking up
+	  using find_variable_noref), use the nameref variable, not the variable
+	  it references (which we find using find_variable).  Bug report from
+	  Grisha Levit <grishalevit@gmail.com> ; fix by Piotr Grzybowski
+	  <narsil.pl@gmail.com>
+
+builtins/declare.def
+	- declare_internal: if asked to do the same thing as above (difference
+	  is declare -n r=foo in previous case; declare -n r in this one),
+	  don't follow reference var from a previous context.  Create a new
+	  local variable (using make_local_variable) and inherit attributes
+	  from previous scope's nameref as above
+
+				    5/6
+				    ---
+builtins/declare.def
+	- declare_internal: if we are assigning a value to an existing
+	  invisible nameref variable, validate value early so we don't end up
+	  removing the variable after the assignment fails
+
+builtins/shopt.def
+	- toggle_shopts: don't call set_bashopts here unless $BASHOPTS exists,
+	  since we don't want to set it up before it gets read from the
+	  environment. Keeping BASHOPTS read-only should keep users from
+	  unsetting it.  Fix from Grisha Levit <grishalevit@gmail.com>
+	- shopt_set_debug_mode: make sure error_trace_mode reflects the setting
+	  of extdebug.  This one is tentative.  Fix from Grisha Levit
+	  <grishalevit@gmail.com>
+	- shopt_set_debug_mode: call set_shellopts after setting error_trace_mode
+	  or function_trace_mode.  Fix from Grisha Levit <grishalevit@gmail.com>
+
+shell.c
+	- start_debugger: make sure that function_trace_mode and error_trace_mode
+	  reflect the value of debugging_mode, so they are both disabled if we
+	  disable debugging mode because we can't find the debugger start file.
+	  Fix from Grisha Levit <grishalevit@gmail.com>
+	- start_debugger: set $SHELLOPTS and $BASHOPTS to the option values are
+	  reflected if we change or set them here.  Fix from Grisha Levit
+	  <grishalevit@gmail.com>
+
+builtins/set.def
+	- reset_shell_options: add reset values for: posix, nolog, pipefail.
+	  Fix from Grisha Levit <grishalevit@gmail.com>
+
+builtins/shopt.def
+	- reset_shopt_options: add reset values for: autocd, checkjobs,
+	  complete_fullquote, dirspell, failglob, globstar, gnu_errfmt,
+	  huponexit, inherit_errexit, interactive_comments, lastpipe,
+	  no_empty_cmd_completion, progcomp.  Fix from Grisha Levit
+	  <grishalevit@gmail.com>
+	- reset_shopt_options: make sure the following options have the right
+	  defaults based on #defines: checkjobs, checkwinsize, direxpand,
+	  extglob, globasciiranges.  Fix from Grisha Levit
+	  <grishalevit@gmail.com>
+
+flags.c
+	- reset_shell_flags: add missing flags, re-initialize history_expansion
+	  based on STRICT_POSIX
+
+				    5/8
+				    ---
+lib/readline/histexpand.c
+	- history_expand: if any expansion returns 1 from history_expand_internal,
+	  indicating that :p was supplied, make it apply to the entire line
+	  like tcsh and csh.  Fixes bug reported by Dean Stanton
+	  <dstanton@tintri.com>
+
+variables.[ch]
+	- ifsname: move define to variables.h
+
+execute_cmd.c
+	- execute_for_command: check whether or not the word in the for command
+	  is IFS; call setifs every time the variable is assigned a value.
+	  Fixes bug report from Grisha Levit <grishalevit@gmail.com>

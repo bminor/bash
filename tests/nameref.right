@@ -166,3 +166,68 @@ declare -i bar="8"
 8
 declare -n foo="bar"
 ./nameref10.sub: line 64: typeset: bar: not found
+./nameref11.sub: line 1: declare: /: invalid variable name for name reference
+./nameref11.sub: line 2: declare: /: invalid variable name for name reference
+./nameref11.sub: line 3: `/': not a valid identifier
+./nameref11.sub: line 4: declare: `/': not a valid identifier
+./nameref11.sub: line 5: `/': not a valid identifier
+1) /
+#? ./nameref11.sub: line 6: `/': not a valid identifier
+x
+
+./nameref11.sub: line 7: ((: `0': not a valid identifier
+./nameref11.sub: line 8: declare: 0: invalid variable name for name reference
+./nameref11.sub: line 9: declare: /: invalid variable name for name reference
+./nameref11.sub: line 10: declare: /: invalid variable name for name reference
+./nameref11.sub: line 11: `/': not a valid identifier
+
+./nameref11.sub: line 12: `/': not a valid identifier
+./nameref11.sub: line 13: exec: `10': not a valid identifier
+./nameref11.sub: line 13: r: cannot assign fd to variable
+./nameref11.sub: line 14: warning: coproc: r: removing nameref attribute
+63
+./nameref11.sub: line 15: declare: RO: readonly variable
+./nameref11.sub: line 15: RO: readonly variable
+./nameref11.sub: line 16: declare: /: invalid variable name for name reference
+/
+./nameref11.sub: line 17: declare: /: invalid variable name for name reference
+./nameref11.sub: illegal option -- h
+./nameref11.sub: line 18: getopts: `?': not a valid identifier
+./nameref11.sub: line 19: warning: r: removing nameref attribute
+declare -a r=()
+./nameref11.sub: line 20: declare: r: reference variable cannot be an array
+./nameref11.sub: line 21: printf: `/': not a valid identifier
+./nameref12.sub: line 6: declare: /: invalid variable name for name reference
+./nameref12.sub: line 9: declare: %: invalid variable name for name reference
+./nameref12.sub: line 13: `^': not a valid identifier
+declare -n r
+declare -a foo
+declare -a foo=([0]="7")
+./nameref12.sub: line 26: declare: `42': not a valid identifier
+./nameref12.sub: line 27: declare: x: not found
+declare -nr RO="foo"
+./nameref12.sub: line 37: `/': not a valid identifier
+0 0
+./nameref12.sub: line 38: `/': not a valid identifier
+
+./nameref12.sub: line 43: declare: `7*6': not a valid identifier
+./nameref12.sub: line 43: declare: foo: not found
+./nameref12.sub: line 45: `7*6': not a valid identifier
+declare -n ref="var"
+declare -n ref="var"
+declare -- a
+declare -n r="a"
+declare -- a
+declare -n r="a"
+0
+declare -n r="P"
+declare -n ref="var"
+declare -- a
+declare -n r="a"
+0
+declare -n r
+declare -n r
+./nameref13.sub: line 88: typeset: 12345: invalid variable name for name reference
+declare -n foo
+./nameref13.sub: line 97: typeset: 12345: invalid variable name for name reference
+declare -n foo

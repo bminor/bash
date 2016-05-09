@@ -183,7 +183,9 @@ static int previous_option_value;
 
 /* A struct used to match long options for set -o to the corresponding
    option letter or internal variable.  The functions can be called to
-   dynamically generate values. */
+   dynamically generate values.  If you add a new variable name here
+   that doesn't have a corresponding single-character option letter, make
+   sure to set the value appropriately in reset_shell_options. */
 const struct {
   char *name;
   int letter;
@@ -623,10 +625,18 @@ initialize_shell_options (no_shellopts)
 void
 reset_shell_options ()
 {
+  pipefail_opt = 0;
+  ignoreeof = 0;
+
+#if defined (STRICT_POSIX)
+  posixly_correct = 1;
+#else
+  posixly_correct = 0;
+#endif
 #if defined (HISTORY)
+  dont_save_function_defs = 0;
   remember_on_history = enable_history_list = 1;
 #endif
-  ignoreeof = 0;
 }
 
 /* Set some flags from the word values in the input list.  If LIST is empty,
@@ -870,7 +880,7 @@ unset_builtin (list)
 
       /* Only search for functions here if -f supplied. */
       var = unset_function ? find_function (name)
-			   : (nameref ? find_variable_last_nameref (name) : find_variable (name));
+			   : (nameref ? find_variable_last_nameref (name, 0) : find_variable (name));
 
       /* Some variables (but not functions yet) cannot be unset, period. */
       if (var && unset_function == 0 && non_unsettable_p (var))
@@ -921,7 +931,7 @@ unset_builtin (list)
 	 variable, make sure we still try to unset the nameref's value */
       if (var == 0 && nameref == 0 && unset_function == 0)
 	{
-	  var = find_variable_last_nameref (name);
+	  var = find_variable_last_nameref (name, 0);
 	  tem = (var && nameref_p (var)) ? unbind_variable (nameref_cell (var)) : unbind_variable (name);
 	}
       else

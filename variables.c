@@ -1,6 +1,6 @@
 /* variables.c -- Functions for hacking shell variables. */
 
-/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -82,8 +82,6 @@
 #define VARIABLES_HASH_BUCKETS	1024	/* must be power of two */
 #define FUNCTIONS_HASH_BUCKETS	512
 #define TEMPENV_HASH_BUCKETS	4	/* must be power of two */
-
-#define ifsname(s)	((s)[0] == 'I' && (s)[1] == 'F' && (s)[2] == 'S' && (s)[3] == '\0')
 
 #define BASHFUNC_PREFIX		"BASH_FUNC_"
 #define BASHFUNC_PREFLEN	10	/* == strlen(BASHFUNC_PREFIX */
@@ -1929,8 +1927,9 @@ find_variable_nameref (v)
 
 /* Resolve the chain of nameref variables for NAME.  XXX - could change later */
 SHELL_VAR *
-find_variable_last_nameref (name)
+find_variable_last_nameref (name, vflags)
      const char *name;
+     int vflags;
 {
   SHELL_VAR *v, *nv;
   char *newname;
@@ -1945,7 +1944,11 @@ find_variable_last_nameref (name)
         return ((SHELL_VAR *)0);	/* error message here? */
       newname = nameref_cell (v);
       if (newname == 0 || *newname == '\0')
+#if 0
 	return ((SHELL_VAR *)0);
+#else
+	return ((vflags && invisible_p (v)) ? v : (SHELL_VAR *)0);
+#endif
       nv = v;
       flags = 0;
       if (expanding_redir == 0 && (assigning_in_environment || executing_builtin))
@@ -1957,8 +1960,9 @@ find_variable_last_nameref (name)
 
 /* Resolve the chain of nameref variables for NAME.  XXX - could change later */
 SHELL_VAR *
-find_global_variable_last_nameref (name)
+find_global_variable_last_nameref (name, vflags)
      const char *name;
+     int vflags;
 {
   SHELL_VAR *v, *nv;
   char *newname;
@@ -1973,7 +1977,11 @@ find_global_variable_last_nameref (name)
         return ((SHELL_VAR *)0);	/* error message here? */
       newname = nameref_cell (v);
       if (newname == 0 || *newname == '\0')
+#if 0
 	return ((SHELL_VAR *)0);
+#else
+	return ((vflags && invisible_p (v)) ? v : (SHELL_VAR *)0);
+#endif
       nv = v;
       v = find_global_variable_noref (newname);
     }
@@ -2297,15 +2305,28 @@ SHELL_VAR *
 make_local_variable (name)
      const char *name;
 {
-  SHELL_VAR *new_var, *old_var;
+  SHELL_VAR *new_var, *old_var, *old_ref;
   VAR_CONTEXT *vc;
   int was_tmpvar;
   char *tmp_value;
 
+  /* We don't want to follow the nameref chain when making local variables; we
+     just want to create them. */
+  old_ref = find_variable_noref (name);
+  if (old_ref && nameref_p (old_ref) == 0)
+    old_ref = 0;
   /* local foo; local foo;  is a no-op. */
   old_var = find_variable (name);
-  if (old_var && local_p (old_var) && old_var->context == variable_context)
+  if (old_ref == 0 && old_var && local_p (old_var) && old_var->context == variable_context)
     return (old_var);
+
+  /* local -n foo; local -n foo;  is a no-op. */
+  if (old_ref && local_p (old_ref) && old_ref->context == variable_context)
+    return (old_ref);
+
+  /* From here on, we want to use the refvar, not the variable it references */
+  if (old_ref)
+    old_var = old_ref;
 
   was_tmpvar = old_var && tempvar_p (old_var);
   /* If we're making a local variable in a shell function, the temporary env
@@ -2622,15 +2643,16 @@ bind_variable_internal (name, value, table, hflags, aflags)
       /* Let's see if we have a nameref referencing a variable that hasn't yet
 	 been created. */
       if (entry == 0)
-	entry = find_variable_last_nameref (name);	/* XXX */
+	entry = find_variable_last_nameref (name, 0);	/* XXX */
       if (entry == 0)					/* just in case */
         return (entry);
     }
 
-  /* The first clause handles `declare -n ref; ref=x;' */
+  /* The first clause handles `declare -n ref; ref=x;' or `declare -n ref;
+     declare -n ref' */
   if (entry && invisible_p (entry) && nameref_p (entry))
     {
-      if (valid_nameref_value (value, 1) == 0)
+      if (value && *value && valid_nameref_value (value, 0) == 0)
 	{
 	  sh_invalidid (value);
 	  return ((SHELL_VAR *)NULL);
@@ -2640,6 +2662,15 @@ bind_variable_internal (name, value, table, hflags, aflags)
   else if (entry && nameref_p (entry))
     {
       newval = nameref_cell (entry);
+#if 0
+      /* This check can go away if we stop allowing all-digit values for
+	 nameref variables. */
+      if (newval && *newval && valid_nameref_value (newval, 1) == 0)
+	{
+	  sh_invalidid (newval);
+	  return ((SHELL_VAR *)NULL);
+	}
+#endif
 #if defined (ARRAY_VARS)
       /* declare -n foo=x[2] */
       if (valid_array_reference (newval, 0))
@@ -2843,11 +2874,7 @@ bind_variable_value (var, value, aflags)
   else
     {
       t = make_variable_value (var, value, aflags);
-#if defined (ARRAY_VARS)
-      if ((aflags & ASS_NAMEREF) && (t == 0 || *t == 0 || (legal_identifier (t) == 0 && valid_array_reference (t, 0) == 0)))
-#else
-      if ((aflags & ASS_NAMEREF) && (t == 0 || *t == 0 || legal_identifier (t) == 0))
-#endif
+      if ((aflags & ASS_NAMEREF) && (t == 0 || *t == 0 || valid_nameref_value (t, 0) == 0))
 	{
 	  free (t);
 	  if (invis)
@@ -2923,6 +2950,9 @@ bind_int_variable (lhs, rhs)
       VUNSETATTR (v, att_invisible);
     }
 
+  if (v && nameref_p (v))
+    internal_warning (_("%s: assigning integer to name reference"), lhs);
+     
   return (v);
 }
 
@@ -3047,6 +3077,9 @@ assign_in_env (word, flags)
 	}
 
       var = find_variable (name);
+      if (var == 0)
+	var = find_variable_last_nameref (name, 1);
+	  
       if (var && (readonly_p (var) || noassign_p (var)))
 	{
 	  if (readonly_p (var))
@@ -3054,8 +3087,16 @@ assign_in_env (word, flags)
 	  free (name);
   	  return (0);
 	}
-
       temp = name + offset + 1;
+      if (var && nameref_p (var) && valid_nameref_value (temp, 0) == 0)
+	{
+	  /* If we're assigning a value to a nameref variable in the temp
+	     environment that's an invalid name, flag an error. */
+	  sh_invalidid (temp);
+	  free (name);
+	  return (0);
+	}
+
       value = expand_assignment_string_to_string (temp, 0);
 
       if (var && (aflags & ASS_APPEND))

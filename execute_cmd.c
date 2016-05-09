@@ -2172,13 +2172,31 @@ coproc_setvars (cp)
 #if defined (ARRAY_VARS)
   v = find_variable (cp->c_name);
 
+  /* This is the same code as in find_or_make_array_variable */
+  if (v == 0)
+    {
+      v = find_variable_last_nameref (cp->c_name, 1);
+      if (v && nameref_p (v) && invisible_p (v))
+	{
+	  internal_warning (_("coproc: %s: removing nameref attribute"), cp->c_name);
+	  VUNSETATTR (v, att_nameref);
+	}
+      if (v && nameref_p (v))
+	{
+	  if (valid_nameref_value (cp->c_name, 1) == 0)
+	    {
+	      sh_invalidid (cp->c_name);
+	      return;
+	    }
+	}
+    }
+
   if (v && (readonly_p (v) || noassign_p (v)))
     {
       if (readonly_p (v))
 	err_readonly (cp->c_name);
       return;
     }
-
   if (v == 0)
     v = make_new_array_variable (cp->c_name);
   if (array_p (v) == 0)
@@ -2255,7 +2273,7 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
   /* XXX -- can be removed after changes to handle multiple coprocs */
 #if !MULTIPLE_COPROCS
   if (sh_coproc.c_pid != NO_PID)
-    internal_warning ("execute_coproc: coproc [%d:%s] still exists", sh_coproc.c_pid, sh_coproc.c_name);
+    internal_warning (_("execute_coproc: coproc [%d:%s] still exists"), sh_coproc.c_pid, sh_coproc.c_name);
   coproc_init (&sh_coproc);
 #endif
 
@@ -2750,17 +2768,24 @@ execute_for_command (for_command)
 
       this_command_name = (char *)NULL;
       /* XXX - special ksh93 for command index variable handling */
-      v = find_variable_last_nameref (identifier);
+      v = find_variable_last_nameref (identifier, 1);
       if (v && nameref_p (v))
-        {
-          v = bind_variable_value (v, list->word->word, 0);
-        }
+	{
+	  if (valid_nameref_value (list->word->word, 1) == 0)
+	    {
+	      sh_invalidid (list->word->word);
+	      v = 0;
+	    }
+	  else
+	    v = bind_variable_value (v, list->word->word, 0);
+	}
       else
-        v = bind_variable (identifier, list->word->word, 0);
-      if (readonly_p (v) || noassign_p (v))
+	v = bind_variable (identifier, list->word->word, 0);
+
+      if (v == 0 || readonly_p (v) || noassign_p (v))
 	{
 	  line_number = save_line_number;
-	  if (readonly_p (v) && interactive_shell == 0 && posixly_correct)
+	  if (v && readonly_p (v) && interactive_shell == 0 && posixly_correct)
 	    {
 	      last_command_exit_value = EXECUTION_FAILURE;
 	      jump_to_top_level (FORCE_EOF);
@@ -2773,6 +2798,10 @@ execute_for_command (for_command)
 	      return (EXECUTION_FAILURE);
 	    }
 	}
+
+      if (ifsname (identifier))
+	setifs (v);
+
       retval = execute_command (for_command->action);
       REAP ();
       QUIT;
@@ -3250,9 +3279,9 @@ execute_select_command (select_command)
 	}
 
       v = bind_variable (identifier, selection, 0);
-      if (readonly_p (v) || noassign_p (v))
+      if (v == 0 || readonly_p (v) || noassign_p (v))
 	{
-	  if (readonly_p (v) && interactive_shell == 0 && posixly_correct)
+	  if (v && readonly_p (v) && interactive_shell == 0 && posixly_correct)
 	    {
 	      last_command_exit_value = EXECUTION_FAILURE;
 	      jump_to_top_level (FORCE_EOF);

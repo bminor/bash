@@ -1,7 +1,7 @@
 This file is declare.def, from which is created declare.c.
 It implements the builtins "declare" and "local" in Bash.
 
-Copyright (C) 1987-2015 Free Software Foundation, Inc.
+Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -404,8 +404,24 @@ declare_internal (list, local_var)
 #endif
 	  if (offset == 0 && (flags_on & att_nameref))
 	    {
-	      refvar = mkglobal ? find_global_variable_last_nameref (name) : find_variable_last_nameref (name);
-	      var = 0;
+	      /* First look for refvar at current scope */
+	      refvar = find_variable_last_nameref (name, 1);
+	      var = find_variable (name);
+	      /* VARIABLE_CONTEXT != 0, so we are attempting to create or modify
+		 the attributes for a local variable at the same scope.  If we've
+		 used a reference from a previous context to resolve VAR, we
+		 want to throw REFVAR and VAR away and create a new local var. */
+	      if (refvar && refvar->context != variable_context)
+		{
+		  refvar = 0;
+		  var = make_local_variable (name);
+		}
+	      else if (refvar && refvar->context == variable_context)
+		var = refvar;
+	      /* Maybe we just want to create a new local variable */
+	      else if (var == 0 || var->context != variable_context)
+		var = make_local_variable (name);
+	      /* otherwise we have a var at the right context */
 	    }
 	  else
 	    var = make_local_variable (name);	/* sets att_invisible for new vars */
@@ -488,7 +504,7 @@ declare_internal (list, local_var)
 	  if (var == 0 && (flags_on & att_nameref))
 	    {
 	      /* See if we are trying to modify an existing nameref variable */
-	      var = mkglobal ? find_global_variable_last_nameref (name) : find_variable_last_nameref (name);
+	      var = mkglobal ? find_global_variable_last_nameref (name, 1) : find_variable_last_nameref (name, 1);
 	      if (var && nameref_p (var) == 0)
 		var = 0;
 	    }
@@ -500,7 +516,7 @@ declare_internal (list, local_var)
 	  else if (var == 0 && (flags_off & att_nameref))
 	    {
 	      /* See if we are trying to modify an existing nameref variable */
-	      refvar = mkglobal ? find_global_variable_last_nameref (name) : find_variable_last_nameref (name);
+	      refvar = mkglobal ? find_global_variable_last_nameref (name, 0) : find_variable_last_nameref (name, 0);
 	      if (refvar && nameref_p (refvar) == 0)
 		refvar = 0;
 	      if (refvar)
@@ -516,7 +532,7 @@ declare_internal (list, local_var)
 		declare -p foo */
 	  if (var == 0 && (flags_on || flags_off || offset))
 	    {
-	      refvar = mkglobal ? find_global_variable_last_nameref (name) : find_variable_last_nameref (name);
+	      refvar = mkglobal ? find_global_variable_last_nameref (name, 0) : find_variable_last_nameref (name, 0);
 	      if (refvar && nameref_p (refvar) == 0)
 		refvar = 0;
 	      if (refvar)
@@ -574,16 +590,30 @@ declare_internal (list, local_var)
 	      assign_error++;
 	      NEXT_VARIABLE ();
 	    }
+	  else if (nameref_p (var) && (flags_on & att_nameref) == 0 && (flags_off & att_nameref) == 0 && offset && valid_nameref_value (value, 1) == 0)
+	    {
+	      builtin_error (_("%s: invalid variable name for name reference"), value);
+	      any_failed++;
+	      NEXT_VARIABLE ();
+	    }
 	  else if (flags_on & att_nameref)
 	    {
 #if 1
-	      if (nameref_p (var) == 0 && var_isset (var) && var_isnull (var) == 0 && valid_nameref_value (value_cell (var), 0) == 0)
+	      /* Check of offset is to allow an assignment to a nameref var as
+		 part of the declare word to override existing value */
+	      if (nameref_p (var) == 0 && var_isset (var) && var_isnull (var) == 0 && offset == 0 && valid_nameref_value (value_cell (var), 0) == 0)
 		{
 		  builtin_error (_("%s: invalid variable name for name reference"), value_cell (var));
 		  any_failed++;
 		  NEXT_VARIABLE ();
 		}
 #endif
+	      if (readonly_p (var))
+		{
+		  sh_readonly (name);
+		  any_failed++;
+		  NEXT_VARIABLE ();
+		}
 	      /* ksh93 compat: turning on nameref attribute turns off -ilu */
 	      VUNSETATTR (var, att_integer|att_uppercase|att_lowercase|att_capcase);
 	    }
@@ -722,10 +752,10 @@ declare_internal (list, local_var)
 	     bind_variable() */
 	  if (offset)
 	    {
-	      if (onref)
+	      if (onref || nameref_p (var))
 		aflags |= ASS_NAMEREF;
 	      v = bind_variable_value (var, value, aflags);
-	      if (v == 0 && onref)
+	      if (v == 0 && (onref || nameref_p (var)))
 		{
 		  sh_invalidid (value);
 		  assign_error++;

@@ -356,11 +356,17 @@ set_current_flags (bitmap)
 void
 reset_shell_flags ()
 {
-  mark_modified_vars = exit_immediately_on_error = disallow_filename_globbing = 0;
+  mark_modified_vars = disallow_filename_globbing = 0;
   place_keywords_in_env = read_but_dont_execute = just_one_command = 0;
-  noclobber = unbound_vars_is_error = echo_input_at_read = verbose_flag = 0;
+  noclobber = unbound_vars_is_error = 0;
   echo_command_at_execute = jobs_m_flag = forced_interactive = 0;
-  no_symbolic_links = no_invisible_vars = privileged_mode = pipefail_opt = 0;
+  no_symbolic_links = no_invisible_vars = 0;
+  privileged_mode = pipefail_opt = 0;
+
+  error_trace_mode = function_trace_mode = 0;
+
+  exit_immediately_on_error = errexit_flag = 0;
+  echo_input_at_read = verbose_flag = 0;
 
   hashing_enabled = interactive_comments = 1;
 
@@ -369,7 +375,11 @@ reset_shell_flags ()
 #endif
 
 #if defined (BANG_HISTORY)
+#  if defined (STRICT_POSIX)
+  history_expansion = 0;
+#  else
   history_expansion = 1;
+#  endif /* STRICT_POSIX */
 #endif
 
 #if defined (BRACE_EXPANSION)

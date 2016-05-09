@@ -1,7 +1,7 @@
 This file is shopt.def, from which is created shopt.c.
 It implements the Bash `shopt' builtin.
 
-Copyright (C) 1994-2015 Free Software Foundation, Inc.
+Copyright (C) 1994-2016 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -143,6 +143,9 @@ static int shopt_compat42;
 static int shopt_compat43;
 
 typedef int shopt_set_func_t __P((char *, int));
+
+/* If you add a new variable name here, make sure to set the default value
+   appropriately in reset_shopt_options. */
 
 static struct {
   char *name;
@@ -304,32 +307,67 @@ shopt_builtin (list)
 }
 
 /* Reset the options managed by `shopt' to the values they would have at
-   shell startup. */
+   shell startup.  Variables from shopt_vars. */
 void
 reset_shopt_options ()
 {
+  autocd = cdable_vars = cdspelling = 0;
+  check_hashed_filenames = CHECKHASH_DEFAULT;
+  check_window_size = CHECKWINSIZE_DEFAULT;
   allow_null_glob_expansion = glob_dot_filenames = 0;
-  cdable_vars = mail_warning = 0;
-  no_exit_on_failed_exec = print_shift_error = 0;
-  check_hashed_filenames = cdspelling = expand_aliases = 0;
-
+  no_exit_on_failed_exec = 0;
+  expand_aliases = 0;
+  extended_quote = 1;
+  fail_glob_expansion = 0;
+  glob_asciirange = GLOBASCII_DEFAULT;
+  glob_star = 0;
+  gnu_error_format = 0;
+  hup_on_exit = 0;
+  inherit_errexit = 0;
+  interactive_comments = 1;
+  lastpipe_opt = 0;
+  mail_warning = 0;
+  glob_ignore_case = match_ignore_case = 0;
+  print_shift_error = 0;
   source_uses_path = promptvars = 1;
 
-  check_window_size = CHECKWINSIZE_DEFAULT;
+#if defined (JOB_CONTROL)
+  check_jobs_at_exit = 0;
+#endif
 
 #if defined (EXTENDED_GLOB)
-  extended_glob = 0;
+  extended_glob = EXTGLOB_DEFAULT;
 #endif
 
 #if defined (HISTORY)
-  literal_history = force_append_history = 0;
+  literal_history = 0;
+  force_append_history = 0;
   command_oriented_history = 1;
 #endif
 
 #if defined (READLINE)
+  complete_fullquote = 1;
+  force_fignore = 1;
   hist_verify = history_reediting = 0;
   perform_hostname_completion = 1;
+#  if DIRCOMPLETE_EXPAND_DEFAULT
+  dircomplete_expand = 1;
+#  else
+  dircomplete_expand = 0;
 #endif
+  dircomplete_spelling = 0;
+  no_empty_command_completion = 0;
+#endif
+
+#if defined (PROGRAMMABLE_COMPLETION)
+  prog_completion_enabled = 1;
+#endif
+
+#if defined (DEFAULT_ECHO_TO_XPG) || defined (STRICT_POSIX)
+  xpg_echo = 1;
+#else
+  xpg_echo = 0;
+#endif /* DEFAULT_ECHO_TO_XPG */
 
   shopt_login_shell = login_shell;
 }
@@ -361,6 +399,7 @@ toggle_shopts (mode, list, quiet)
 {
   WORD_LIST *l;
   int ind, rval;
+  SHELL_VAR *v;
 
   for (l = list, rval = EXECUTION_SUCCESS; l; l = l->next)
     {
@@ -378,7 +417,9 @@ toggle_shopts (mode, list, quiet)
 	}
     }
 
-  set_bashopts ();
+  /* Don't set $BASHOPTS here if it hasn't already been initialized */
+  if (v = find_variable ("BASHOPTS"))
+    set_bashopts ();
   return (rval);
 }
 
@@ -529,7 +570,8 @@ shopt_set_debug_mode (option_name, mode)
      int mode;
 {
 #if defined (DEBUGGER)
-  function_trace_mode = debugging_mode;
+  error_trace_mode = function_trace_mode = debugging_mode;
+  set_shellopts ();
 #endif
   return (0);
 }
