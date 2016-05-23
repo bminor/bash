@@ -130,6 +130,12 @@ echo !shopt-1
 
 echo !shopt*
 
+# make sure a :p modifier anywhere on the line affects all history expansions
+echo one two three four
+echo !:2:p ; echo !$  
+echo one two three four
+echo !$ ; echo !:2:p
+
 ${THIS_SH} ./histexp1.sub
 ${THIS_SH} ./histexp2.sub
 ${THIS_SH} ./histexp3.sub

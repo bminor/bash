@@ -306,7 +306,7 @@ SSHHEELLLL GGRRAAMMMMAARR
        command to terminate in turn.  The return status is the exit status  of
        the last command executed.
 
-       AND  and  OR  lists are sequences of one of more pipelines separated by
+       AND  and  OR  lists are sequences of one or more pipelines separated by
        the &&&& and |||| control operators, respectively.  AND and  OR  lists  are
        executed with left associativity.  An AND list has the form
 
@@ -1238,7 +1238,7 @@ PPAARRAAMMEETTEERRSS
               value of PPAATTHH indicates the current directory.  A null directory
               name may appear as two adjacent colons,  or  as  an  initial  or
               trailing  colon.   The  default path is system-dependent, and is
-              set by the administrator who installs bbaasshh.  A common  value  is
+              set by the administrator who installs bbaasshh.  A common value is
               ``/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin''.
        PPOOSSIIXXLLYY__CCOORRRREECCTT
               If this variable is in the environment  when  bbaasshh  starts,  the
@@ -5409,8 +5409,10 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
                       AALLIIAASSEESS.  This option is enabled by default for interac-
                       tive shells.
               eexxttddeebbuugg
-                      If  set,  behavior  intended  for  use  by  debuggers is
-                      enabled:
+                      If  set  at  shell  invocation,  arrange  to execute the
+                      debugger profile before the shell starts,  identical  to
+                      the  ----ddeebbuuggggeerr option.  If set after invocation, behav-
+                      ior intended for use by debuggers is enabled:
                       11..     The --FF option to the ddeeccllaarree builtin displays the
                              source file name and line number corresponding to
                              each function name supplied as an argument.
@@ -5922,4 +5924,4 @@ BBUUGGSS
 
 
 
-GNU Bash 4.4                    2016 February 8                        BASH(1)
+GNU Bash 4.4                     2016 April 27                         BASH(1)

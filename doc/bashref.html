@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 4.4, 28 February 2016).
+the Bash shell (version 4.4, 27 April 2016).
 
-This is Edition 4.4, last updated 28 February 2016,
+This is Edition 4.4, last updated 27 April 2016,
 of The GNU Bash Reference Manual,
 for Bash, Version 4.4.
 
@@ -15,7 +15,7 @@ any later version published by the Free Software Foundation; with no
 Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 A copy of the license is included in the section entitled
 "GNU Free Documentation License". -->
-<!-- Created by GNU Texinfo 6.0, http://www.gnu.org/software/texinfo/ -->
+<!-- Created by GNU Texinfo 6.1, http://www.gnu.org/software/texinfo/ -->
 <head>
 <title>Bash Reference Manual</title>
 
@@ -50,9 +50,8 @@ pre.smalldisplay {font-family: inherit; font-size: smaller}
 pre.smallexample {font-size: smaller}
 pre.smallformat {font-family: inherit; font-size: smaller}
 pre.smalllisp {font-size: smaller}
-span.nocodebreak {white-space: nowrap}
 span.nolinebreak {white-space: nowrap}
-span.roman {font-family: serif; font-weight: normal}
+span.roman {font-family: initial; font-weight: normal}
 span.sansserif {font-family: sans-serif; font-weight: normal}
 ul.no-bullet {list-style: none}
 -->
@@ -285,10 +284,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 4.4, 28 February 2016).
+the Bash shell (version 4.4, 27 April 2016).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 4.4, last updated 28 February 2016,
+<p>This is Edition 4.4, last updated 27 April 2016,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 4.4.
 </p>
@@ -1962,7 +1961,7 @@ When applied to a string-valued variable, <var>value</var> is expanded and
 appended to the variable&rsquo;s value.
 </p>
 <p>A variable can be assigned the <var>nameref</var> attribute using the
-<samp>-n</samp> option to the \fBdeclare\fP or \fBlocal\fP builtin commands
+<samp>-n</samp> option to the <code>declare</code> or <code>local</code> builtin commands
 (see <a href="#Bash-Builtins">Bash Builtins</a>)
 to create a <var>nameref</var>, or a reference to another variable.
 This allows variables to be manipulated indirectly.
@@ -6010,7 +6009,9 @@ This option is enabled by default for interactive shells.
 </p>
 </dd>
 <dt><code>extdebug</code></dt>
-<dd><p>If set, behavior intended for use by debuggers is enabled:
+<dd><p>If set at shell invocation, arrange to execute the debugger profile
+before the shell starts, identical to the <samp>--debugger</samp> option.
+If set after invocation, behavior intended for use by debuggers is enabled:
 </p>
 <ol>
 <li> The <samp>-F</samp> option to the <code>declare</code> builtin (see <a href="#Bash-Builtins">Bash Builtins</a>)
@@ -8925,6 +8926,9 @@ has been set.
 If Bash receives a trapped signal while executing <code>read</code>, the trap
 handler executes and <code>read</code> returns an exit status greater than 128.
 
+</li><li> Bash removes an exited background process&rsquo;s status from the list of such
+statuses after the <code>wait</code> builtin is used to obtain it.
+
 </li></ol>
 
 <p>There is other <small>POSIX</small> behavior that Bash does not implement by
@@ -9670,9 +9674,11 @@ incorporating any changes that you might have made to it.
 <tr><td align="left" valign="top">&bull; <a href="#Readline-Init-File-Syntax" accesskey="1">Readline Init File Syntax</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Syntax for the commands in the inputrc file.
 </td></tr>
 <tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
 </pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Conditional-Init-Constructs" accesskey="2">Conditional Init Constructs</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Conditional key bindings in the inputrc file.
 </td></tr>
 <tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
 </pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Sample-Init-File" accesskey="3">Sample Init File</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">An example inputrc file.
 </td></tr>
 </table>
