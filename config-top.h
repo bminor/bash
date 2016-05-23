@@ -156,3 +156,7 @@
 /* Define to the maximum level of recursion you want for the source/. builtin.
    0 means the limit is not active. */
 #define SOURCENEST_MAX 0
+
+/* Define to use libc mktemp/mkstemp instead of replacements in lib/sh/tmpfile.c */
+#define USE_MKTEMP
+#define USE_MKSTEMP

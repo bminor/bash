@@ -538,8 +538,8 @@ set_var_attribute (name, attribute, undo)
      char *name;
      int attribute, undo;
 {
-  SHELL_VAR *var, *tv, *v;
-  char *tvalue;
+  SHELL_VAR *var, *tv, *v, *refvar;
+  char *tvalue, *refname;
 
   if (undo)
     var = find_variable (name);
@@ -554,6 +554,11 @@ set_var_attribute (name, attribute, undo)
 	  tvalue = var_isset (tv) ? savestring (value_cell (tv)) : savestring ("");
 
 	  var = bind_variable (tv->name, tvalue, 0);
+	  if (var == 0)
+	    {
+	      free (tvalue);
+	      return;		/* XXX - no error message here */
+	    }
 	  var->attributes |= tv->attributes & ~att_tempvar;
 	  /* This avoids an error message when propagating a read-only var
 	     later on. */
@@ -580,8 +585,20 @@ set_var_attribute (name, attribute, undo)
 	  var = find_variable_notempenv (name);
 	  if (var == 0)
 	    {
+	      /* We might have a nameref pointing to something that we can't
+		 resolve to a shell variable.  If we do, skip it.  We do a little
+		 checking just so we can print an error message. */
+	      refvar = find_variable_nameref_for_create (name, 0);
+	      if (refvar == INVALID_NAMEREF_VALUE)
+		return;
+	      /* Otherwise we probably have a nameref pointing to a variable
+		 that hasn't been created yet. bind_variable will take care
+		 of that. */
+	    }
+	  if (var == 0)
+	    {
 	      var = bind_variable (name, (char *)NULL, 0);
-	      if (no_invisible_vars == 0)
+	      if (var && no_invisible_vars == 0)
 		VSETATTR (var, att_invisible);
 	    }
 	  else if (var->context != 0)

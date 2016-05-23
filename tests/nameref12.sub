@@ -31,6 +31,8 @@ declare -p RO
 
 unset -n r; unset r
 
+# the details of this may change; currently we put namerefs and values into
+# the tempenv if the nameref value is an invalid variable name
 f() { echo $r; }
 
 declare -n r
@@ -63,3 +65,36 @@ f()
 	declare -p ref
 }
 f
+
+unset ref; unset -n ref
+unset var
+
+var=foo
+typeset -n ref=var[0]
+readonly ref
+typeset -p var
+
+var2=foo
+typeset -n ref2=var2
+readonly ref2
+typeset -p var2
+
+unset var
+unset -n ref ref2
+
+unset var; typeset -n ref=var
+ref[0]=foo
+typeset -p ref var
+unset -n ref
+
+unset var; typeset -n ref
+ref[0]=foo
+typeset -p ref
+unset -n ref
+
+ref=global
+f() { declare -n ref=var; ref[0]=foo1; }; f
+f() { declare -n ref=var; ref[0]=foo2; }; f
+declare -p ref var
+
+declare -p global

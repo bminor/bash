@@ -2175,19 +2175,14 @@ coproc_setvars (cp)
   /* This is the same code as in find_or_make_array_variable */
   if (v == 0)
     {
-      v = find_variable_last_nameref (cp->c_name, 1);
-      if (v && nameref_p (v) && invisible_p (v))
-	{
-	  internal_warning (_("coproc: %s: removing nameref attribute"), cp->c_name);
-	  VUNSETATTR (v, att_nameref);
-	}
+      v = find_variable_nameref_for_create (cp->c_name, 1);
+      if (v == INVALID_NAMEREF_VALUE)
+	return;
       if (v && nameref_p (v))
 	{
-	  if (valid_nameref_value (cp->c_name, 1) == 0)
-	    {
-	      sh_invalidid (cp->c_name);
-	      return;
-	    }
+	  free (cp->c_name);
+	  cp->c_name = savestring (nameref_cell (v));
+	  v = make_new_array_variable (cp->c_name);	  
 	}
     }
 
@@ -2244,7 +2239,7 @@ coproc_unsetvars (cp)
   namevar = xmalloc (l + 16);
 
   sprintf (namevar, "%s_PID", cp->c_name);
-  unbind_variable (namevar);  
+  unbind_variable_noref (namevar);  
 
 #if defined (ARRAY_VARS)
   check_unbind_variable (cp->c_name);
@@ -3812,7 +3807,8 @@ bind_lastarg (arg)
   if (arg == 0)
     arg = "";
   var = bind_variable ("_", arg, 0);
-  VUNSETATTR (var, att_exported);
+  if (var)
+    VUNSETATTR (var, att_exported);
 }
 
 /* Execute a null command.  Fork a subshell if the command uses pipes or is

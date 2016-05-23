@@ -344,7 +344,7 @@ declare_internal (list, local_var)
 #if 1
 	  if (value && *value && valid_nameref_value (value, 0) == 0)
 	    {
-	      builtin_error (_("%s: invalid variable name for name reference"), value);
+	      builtin_error (_("`%s': invalid variable name for name reference"), value);
 	      assign_error++;
 	      NEXT_VARIABLE ();
 	    }
@@ -570,7 +570,8 @@ declare_internal (list, local_var)
 	      else
 #endif
 	      if (offset)
-		var = mkglobal ? bind_global_variable (name, "", 0) : bind_variable (name, "", 0);
+	        /* We're just setting a temporary value here, so force assignment */
+		var = mkglobal ? bind_global_variable (name, (char *)NULL, ASS_FORCE) : bind_variable (name, (char *)NULL, ASS_FORCE);
 	      else
 		{
 		  var = mkglobal ? bind_global_variable (name, (char *)NULL, 0) : bind_variable (name, (char *)NULL, 0);
@@ -592,7 +593,7 @@ declare_internal (list, local_var)
 	    }
 	  else if (nameref_p (var) && (flags_on & att_nameref) == 0 && (flags_off & att_nameref) == 0 && offset && valid_nameref_value (value, 1) == 0)
 	    {
-	      builtin_error (_("%s: invalid variable name for name reference"), value);
+	      builtin_error (_("`%s': invalid variable name for name reference"), value);
 	      any_failed++;
 	      NEXT_VARIABLE ();
 	    }
@@ -601,9 +602,9 @@ declare_internal (list, local_var)
 #if 1
 	      /* Check of offset is to allow an assignment to a nameref var as
 		 part of the declare word to override existing value */
-	      if (nameref_p (var) == 0 && var_isset (var) && var_isnull (var) == 0 && offset == 0 && valid_nameref_value (value_cell (var), 0) == 0)
+	      if (nameref_p (var) == 0 && var_isset (var) && offset == 0 && valid_nameref_value (value_cell (var), 0) == 0)
 		{
-		  builtin_error (_("%s: invalid variable name for name reference"), value_cell (var));
+		  builtin_error (_("`%s': invalid variable name for name reference"), value_cell (var));
 		  any_failed++;
 		  NEXT_VARIABLE ();
 		}

@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.4, version 4.078])dnl
+AC_REVISION([for Bash 4.4, version 4.079])dnl
 
 define(bashvers, 4.4)
 define(relstatus, rc2)
@@ -783,6 +783,7 @@ AC_CHECK_FUNCS(bcopy bzero confstr faccessat fnmatch \
 AC_CHECK_FUNCS(vasprintf asprintf)
 AC_CHECK_FUNCS(isascii isblank isgraph isprint isspace isxdigit)
 AC_CHECK_FUNCS(getpwent getpwnam getpwuid)
+AC_CHECK_FUNCS(mkstemp)
 AC_REPLACE_FUNCS(getcwd memset)
 AC_REPLACE_FUNCS(strcasecmp strcasestr strerror strftime strnlen strpbrk strstr)
 AC_REPLACE_FUNCS(strtod strtol strtoul strtoll strtoull strtoimax strtoumax)

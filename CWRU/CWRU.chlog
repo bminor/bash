@@ -10941,3 +10941,159 @@ execute_cmd.c
 	- execute_for_command: check whether or not the word in the for command
 	  is IFS; call setifs every time the variable is assigned a value.
 	  Fixes bug report from Grisha Levit <grishalevit@gmail.com>
+
+				   5/16
+				   ----
+general.c
+	- valid_nameref_value: explicitly handle name == 0 and *name == 0 right
+	  away to save calls to legal_identifier
+
+builtins/declare.def
+	- declare_internal: if trying to set nameref attribute on a variable with
+	  a null value, flag as invalid assignment, just as if running
+	  `declare -n r=""'.  Fixes bug report from Grisha Levit
+	  <grishalevit@gmail.com>
+	- declare_internal: when creating a variable with a temporary value (""),
+	  use ASS_FORCE in the assignment flags to bypass name validity checks on
+	  nameref variable names
+
+variables.c
+	- bind_variable_internal: don't call valid_nameref_value if we're forcing
+	  assignment with (flags & ASS_FORCE)
+
+builtins/read.def
+	- read_builtin: handle bind_variable returning NULL when setting REPLY.
+	  Report and fix from Grisha Levit <grishalevit@gmail.com>
+
+builtins/setattr.def
+	- set_var_attribute: handle bind_variable returning NULL
+
+lib/sh/tmpfile.c
+	- sh_seedrand(): call srandom() to seed the random number generator
+	- sh_mktmpname, sh_mktmpfd: if we have random(), assume we have srandom()
+	  and seed the random number generator. Still looking for better value to
+	  see random number generator with
+
+variables.c
+	- check_unbind_variable: use internal_error instead of builtin_error
+
+{execute_cmd,variables}.c
+	- fix some places where bind_variable could return NULL and it was not
+	  checked.  Fix from Piotr Grzybowski <narsil.pl@gmail.com>
+
+				   5/17
+				   ----
+arrayfunc.c
+	- convert_var_to_{array,assoc}: make sure to turn off nameref attribute,
+	  since namerefs can't be arrays
+
+execute_cmd.c
+	- coproc_setvars: if the coproc name names a nameref, resolve the nameref
+	  and use it as the name of the coproc.  Suggested by Grisha Levit
+	  <grishalevit@gmail.com>
+
+subst.c
+	- command_substitute: don't bother calling QUIT after calling
+	  reset_signal_handlers in the child, kill the child with SIGINT in
+	  case we just reset the signal handler to SIG_DFL and we should just
+	  exit instead of throwing to top level.  Fixes bug reported by
+	  Grisha Levit <grishalevit@gmail.com>
+
+				   5/18
+				   ----
+variables.c
+	- find_variable_nameref_for_create: find a nameref variable whose value
+	  doesn't resolve to an existing variable and see whether or not that
+	  value is appropriate for a new variable to be created
+	- find_variable_nameref_for_assignment: find a nameref variable whose value
+	  doesn't resolve to an existing variable and see whether or not that
+	  value is appropriate for a new variable to be created.  Difference
+	  between _assignment and _create is that _assignment allows the nameref
+	  value to be a subscripted array reference
+
+builtins/setattr.def
+	- set_var_attribute: if variable lookup doesn't return anything, check
+	  for a nameref and make sure that any reference value is something we
+	  should be working on here, using find_variable_nameref_for_create().
+	  If it fails, error out and return, otherwise it's probably a reference
+	  to a variable that hasn't been set yet, so let bind_variable take care
+	  of that.  Report from Grisha Levit <grishalevit@gmail.com>
+
+arrayfunc.c
+	- bind_array_variable: if find_shell_variable returns NULL, check for a
+	  nameref using find_variable_nameref_for_create and create a new array
+	  variable with the value if it returns a valid nameref variable.
+	  Makes `unset var; declare -n ref=var ; ref[0]=foo' work right.
+	  Report from Grisha Levit <grishalevit@gmail.com>
+
+				   5/19
+				   ----
+variables.[ch]
+	- unbind_variable_noref: unset a variable NAME without following any
+	  nameref chain.  If the first instance of the variable with that name
+	  is a nameref, just unset that nameref variable.
+
+builtins/getopts.def
+	- getopts_unbind_variable: if OPTARG is going to be unbound, use
+	  unbind_variable_noref to unbind that name even if it is a nameref
+	  variable.  Issue raised by Grisha Levit <grishalevit@gmail.com>
+
+execute_cmd.c
+	- coproc_unsetvars: use unbind_variable_noref in case someone sets the
+	  coproc _PID variable as a nameref pointing to something read-only or
+	  strange.  Issue raised by Grisha Levit <grishalevit@gmail.com>
+
+builtins/set.def
+	- set_ignoreeof: use unbind_variable_noref to unset "IGNOREEOF" and
+	  "ignoreeof"
+	- set_posix_mode: use unbind_variable_noref to unset "POSIXLY_CORRECT"
+
+variables.c
+	- make_vers_array: use unbind_variable_noref to unset "BASH_VERSINFO"
+
+lib/sh/shmatch.c
+	- sh_regmatch: use unbind_variable_noref to unset "BASH_REMATCH"
+
+bashline.c
+	- bash_execute_unix_command: use check_unbind_variable to unset
+	  READLINE_LINE and READLINE_POINT
+
+pcomplete.c
+	- unbind_compfunc_variables: use unbind_variable_noref to unset COMP_LINE,
+	  COMP_POINT, COMP_WORDS, COMP_CWORD, COMP_TYPE, COMP_KEY
+	- gen_shell_function_matches: use unbind_variable_noref to unset COMPREPLY
+
+config-top.h
+	- USE_MKTEMP/USE_MKSTEMP: define by default to use libc version of mktemp
+	  and mkstemp in lib/sh/tmpfile.c.  Recommended by by Mike Frysinger
+	  <vapier@gentoo.org> to fix a FreeBSD problem
+
+configure.ac,config.h.in
+	- mkstemp: check for mkstemp, define HAVE_MKSTEMP if available
+
+config-bot.h
+	- USE_MKSTEMP: #undef if HAVE_MKSTEMP not defined
+
+				   5/22
+				   ----
+variables.c
+	- assign_in_env: if appending to a variable's value, make sure we call
+	  make_variable_value with the empty string if expand_assignment_string_to_string
+	  returns NULL, as do_assignment_internal does.  Fixes bug with
+	  `str=''; val=foo ; val+=str printenv val' reported by Grisha Levit
+	  <grishalevit@gmail.com>
+	- assign_in_env: if assigning to a nameref variable in the temporary
+	  environment, and the nameref has a valid value for assignment (even
+	  if the target variable is not set), resolve the nameref and create
+	  a variable in the temporary environment named by the nameref's value.
+	  If the nameref variable is invisible or isn't set to a valid value
+	  for assignment, just create a regular temporary variable with the
+	  nameref's name.  This provides a degree of ksh93 compatibility.
+	  Suggested by Grisha Levit <grishalevit@gmail.com>
+	- find_variable_nameref_context,find_variable_last_nameref_context:
+	  instead of returning NULL when detecting a loop, return a distinguished
+	  value: &nameref_maxloop_value
+	- bind_variable: catch nameref_maxloop_value so we can do different
+	  things based on whether or not we get it.  Right now we don't do
+	  anything different, but we could
+

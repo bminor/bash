@@ -106,16 +106,10 @@ getopts_unbind_variable (name)
      char *name;
 {
 #if 0
-  SHELL_VAR *v;
-
-  v = find_variable (name);
-  if (v && readonly_p (v))
-    {
-      builtin_error (_("%s: cannot unset: readonly %s"), name, "variable");
-      return -1;
-    }
-#endif
   return (unbind_variable (name));
+#else
+  return (unbind_variable_noref (name));
+#endif
 }
 
 static int

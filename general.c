@@ -238,16 +238,16 @@ valid_nameref_value (name, for_assignment)
 {
   intmax_t r;
 
+  if (name == 0 || *name == 0)
+    return 0;
+
 #if defined (ARRAY_VARS)  
   if (legal_identifier (name) || valid_array_reference (name, 0))
 #else
   if (legal_identifier (name))
 #endif
     return 1;
-#if 0
-  if (for_assignment == 0 && legal_number (name, &r))
-    return 1;
-#endif
+
   return 0;
 }
 

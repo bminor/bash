@@ -92,7 +92,7 @@ sh_regmatch (string, pattern, flags)
   /* Store the parenthesized subexpressions in the array BASH_REMATCH.
      Element 0 is the portion that matched the entire regexp.  Element 1
      is the part that matched the first subexpression, and so on. */
-  unbind_variable ("BASH_REMATCH");
+  unbind_variable_noref ("BASH_REMATCH");
   rematch = make_new_array_variable ("BASH_REMATCH");
   amatch = array_cell (rematch);
 

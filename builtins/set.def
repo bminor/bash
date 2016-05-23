@@ -367,11 +367,11 @@ set_ignoreeof (on_or_off, option_name)
      char *option_name;
 {
   ignoreeof = on_or_off == FLAG_ON;
-  unbind_variable ("ignoreeof");
+  unbind_variable_noref ("ignoreeof");
   if (ignoreeof)
     bind_variable ("IGNOREEOF", "10", 0); 
   else
-    unbind_variable ("IGNOREEOF");
+    unbind_variable_noref ("IGNOREEOF");
   sv_ignoreeof ("IGNOREEOF");
   return 0;
 }
@@ -383,7 +383,7 @@ set_posix_mode (on_or_off, option_name)
 {
   posixly_correct = on_or_off == FLAG_ON;
   if (posixly_correct == 0)
-    unbind_variable ("POSIXLY_CORRECT");
+    unbind_variable_noref ("POSIXLY_CORRECT");
   else
     bind_variable ("POSIXLY_CORRECT", "y", 0);
   sv_strict_posix ("POSIXLY_CORRECT");

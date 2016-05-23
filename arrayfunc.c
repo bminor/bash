@@ -90,6 +90,9 @@ convert_var_to_array (var)
   /* Make sure it's not marked as an associative array any more */
   VUNSETATTR (var, att_assoc);
 
+  /* Since namerefs can't be array variables, turn off nameref attribute */
+  VUNSETATTR (var, att_nameref);
+
   return var;
 }
 
@@ -123,6 +126,9 @@ convert_var_to_assoc (var)
 
   /* Make sure it's not marked as an indexed array any more */
   VUNSETATTR (var, att_array);
+
+  /* Since namerefs can't be array variables, turn off nameref attribute */
+  VUNSETATTR (var, att_nameref);
 
   return var;
 }
@@ -210,6 +216,15 @@ bind_array_variable (name, ind, value, flags)
 
   entry = find_shell_variable (name);
 
+  if (entry == (SHELL_VAR *) 0)
+    {
+      /* Is NAME a nameref variable that points to an unset variable? */
+      entry = find_variable_nameref_for_create (name, 0);
+      if (entry == INVALID_NAMEREF_VALUE)
+	return ((SHELL_VAR *)0);
+      if (entry && nameref_p (entry))
+	entry = make_new_array_variable (nameref_cell (entry));
+    }
   if (entry == (SHELL_VAR *) 0)
     entry = make_new_array_variable (name);
   else if ((readonly_p (entry) && (flags&ASS_FORCE) == 0) || noassign_p (entry))
@@ -984,7 +999,7 @@ array_variable_part (s, subp, lenp)
   t = array_variable_name (s, subp, lenp);
   if (t == 0)
     return ((SHELL_VAR *)NULL);
-  var = find_variable (t);
+  var = find_variable (t);		/* XXX - handle namerefs here? */
 
   free (t);
   return var;	/* now return invisible variables; caller must handle */

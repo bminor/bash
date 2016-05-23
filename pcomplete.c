@@ -1025,13 +1025,13 @@ static void
 unbind_compfunc_variables (exported)
      int exported;
 {
-  unbind_variable ("COMP_LINE");
-  unbind_variable ("COMP_POINT");
-  unbind_variable ("COMP_TYPE");
-  unbind_variable ("COMP_KEY");
+  unbind_variable_noref ("COMP_LINE");
+  unbind_variable_noref ("COMP_POINT");
+  unbind_variable_noref ("COMP_TYPE");
+  unbind_variable_noref ("COMP_KEY");
 #ifdef ARRAY_VARS
-  unbind_variable ("COMP_WORDS");
-  unbind_variable ("COMP_CWORD");
+  unbind_variable_noref ("COMP_WORDS");
+  unbind_variable_noref ("COMP_CWORD");
 #endif
   if (exported)
     array_needs_making = 1;
@@ -1183,7 +1183,7 @@ gen_shell_function_matches (cs, cmd, text, line, ind, lwords, nw, cw, foundp)
     }
 
   /* XXX - should we unbind COMPREPLY here? */
-  unbind_variable ("COMPREPLY");
+  unbind_variable_noref ("COMPREPLY");
 
   return (sl);
 #endif

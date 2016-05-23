@@ -4135,8 +4135,8 @@ bash_execute_unix_command (count, key)
 	}
     }      
 
-  unbind_variable ("READLINE_LINE");
-  unbind_variable ("READLINE_POINT");
+  check_unbind_variable ("READLINE_LINE");
+  check_unbind_variable ("READLINE_POINT");
   array_needs_making = 1;
 
   /* and restore the readline buffer and display after command execution. */

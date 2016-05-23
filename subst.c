@@ -6011,6 +6011,11 @@ command_substitute (string, quoted)
 	 trap strings.  Set a flag noting that we have to free the
 	 trap strings if we run trap to change a signal disposition. */
       reset_signal_handlers ();
+      if (ISINTERRUPT)
+	{
+	  kill (getpid (), SIGINT);
+	  CLRINTERRUPT;		/* if we're ignoring SIGINT somehow */
+	}	
       QUIT;	/* catch any interrupts we got post-fork */
       subshell_environment |= SUBSHELL_RESETTRAP;
     }
@@ -6040,6 +6045,9 @@ command_substitute (string, quoted)
 
   if (pid == 0)
     {
+      /* The currently executing shell is not interactive. */
+      interactive = 0;
+
       set_sigint_handler ();	/* XXX */
 
       free_pushed_string_input ();
@@ -6076,9 +6084,6 @@ command_substitute (string, quoted)
       freopen (NULL, "w", stdout);
       sh_setlinebuf (stdout);
 #endif /* __CYGWIN__ */
-
-      /* The currently executing shell is not interactive. */
-      interactive = 0;
 
       /* This is a subshell environment. */
       subshell_environment |= SUBSHELL_COMSUB;

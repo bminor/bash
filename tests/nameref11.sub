@@ -18,4 +18,24 @@ declare -n r=s; declare -n s; s=/ ; unset -n r; unset -n s
 declare -n r; getopts x r -h ; unset r; unset -n r
 declare -n r; mapfile r < /dev/null ; declare -p r; unset r ; unset -n r
 mapfile r < /dev/null; declare -n r ; unset r ; unset -n r
-declare -n r; printf -v r /
+declare -n r; printf -v r / ; unset -n r
+
+declare -n r; r="" ; unset -n r
+declare -n r="" ; unset -n r
+declare -n r; : ${r=} ; unset -n r
+declare -n r; printf -v r '' ; unset -n r
+r=""; declare -n r ; unset -n r
+export r
+
+# coproc tests, since coproc sets and unsets variables
+declare -r ROVAR=42
+declare -p ROVAR; coproc ROVAR { :; }; wait; declare -p ROVAR
+
+echo ${@:0}; coproc @ { :; }; wait ; echo ${@:0}
+
+declare -n ref=x; coproc ref { :; }; wait ; declare -p ref
+unset -n ref ; unset ref
+
+declare -r RO RO_PID; coproc RO { :; }; declare -p RO_PID; wait; declare -p RO RO_PID
+
+declare -r RO2=a; declare -n ref_PID=RO2; coproc ref { :; }; wait; declare -p RO2

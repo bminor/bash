@@ -217,6 +217,10 @@ typedef struct _vlist {
 	} while (0)
 
 #define ifsname(s)	((s)[0] == 'I' && (s)[1] == 'F' && (s)[2] == 'S' && (s)[3] == '\0')
+
+/* Special value for nameref with invalid value for creation or assignment */
+extern SHELL_VAR nameref_invalid_value;
+#define INVALID_NAMEREF_VALUE	(void *)&nameref_invalid_value
 	
 /* Stuff for hacking variables. */
 typedef int sh_var_map_func_t __P((SHELL_VAR *));
@@ -249,6 +253,8 @@ extern SHELL_VAR *find_variable_noref __P((const char *));
 extern SHELL_VAR *find_variable_last_nameref __P((const char *, int));
 extern SHELL_VAR *find_global_variable_last_nameref __P((const char *, int));
 extern SHELL_VAR *find_variable_nameref __P((SHELL_VAR *));
+extern SHELL_VAR *find_variable_nameref_for_create __P((const char *, int));
+extern SHELL_VAR *find_variable_nameref_for_assignment __P((const char *, int));
 extern SHELL_VAR *find_variable_internal __P((const char *, int));
 extern SHELL_VAR *find_variable_tempenv __P((const char *));
 extern SHELL_VAR *find_variable_notempenv __P((const char *));
@@ -298,6 +304,7 @@ extern int assign_in_env __P((WORD_DESC *, int));
 extern int unbind_variable __P((const char *));
 extern int check_unbind_variable __P((const char *));
 extern int unbind_nameref __P((const char *));
+extern int unbind_variable_noref __P((const char *));
 extern int unbind_func __P((const char *));
 extern int unbind_function_def __P((const char *));
 extern int delete_var __P((const char *, VAR_CONTEXT *));

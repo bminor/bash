@@ -176,6 +176,9 @@ static int export_env_size;
 static int winsize_assignment;		/* currently assigning to LINES or COLUMNS */
 #endif
 
+SHELL_VAR nameref_invalid_value;
+static SHELL_VAR nameref_maxloop_value;
+
 static HASH_TABLE *last_table_searched;	/* hash_lookup sets this */
 
 /* Some forward declarations. */
@@ -485,7 +488,8 @@ initialize_shell_variables (env, privmode)
     qnx_nidtostr (getnid (), node_name, sizeof (node_name));
 #  endif
     temp_var = bind_variable ("NODE", node_name, 0);
-    set_auto_export (temp_var);
+    if (temp_var)
+      set_auto_export (temp_var);
   }
 #endif
 
@@ -948,7 +952,7 @@ make_vers_array ()
   ARRAY *av;
   char *s, d[32], b[INT_STRLEN_BOUND(int) + 1];
 
-  unbind_variable ("BASH_VERSINFO");
+  unbind_variable_noref ("BASH_VERSINFO");
 
   vv = make_new_array_variable ("BASH_VERSINFO");
   av = array_cell (vv);
@@ -1898,7 +1902,7 @@ find_variable_nameref (v)
      SHELL_VAR *v;
 {
   int level, flags;
-  char *newname;
+  char *newname, *t;
   SHELL_VAR *orig, *oldv;
 
   level = 0;
@@ -1915,6 +1919,7 @@ find_variable_nameref (v)
       flags = 0;
       if (expanding_redir == 0 && (assigning_in_environment || executing_builtin))
 	flags |= FV_FORCETEMPENV;
+      /* We don't handle array subscripts here. */
       v = find_variable_internal (newname, flags);
       if (v == orig || v == oldv)
 	{
@@ -1944,15 +1949,12 @@ find_variable_last_nameref (name, vflags)
         return ((SHELL_VAR *)0);	/* error message here? */
       newname = nameref_cell (v);
       if (newname == 0 || *newname == '\0')
-#if 0
-	return ((SHELL_VAR *)0);
-#else
 	return ((vflags && invisible_p (v)) ? v : (SHELL_VAR *)0);
-#endif
       nv = v;
       flags = 0;
       if (expanding_redir == 0 && (assigning_in_environment || executing_builtin))
 	flags |= FV_FORCETEMPENV;
+      /* We don't accommodate array subscripts here. */
       v = find_variable_internal (newname, flags);
     }
   return nv;
@@ -1977,12 +1979,9 @@ find_global_variable_last_nameref (name, vflags)
         return ((SHELL_VAR *)0);	/* error message here? */
       newname = nameref_cell (v);
       if (newname == 0 || *newname == '\0')
-#if 0
-	return ((SHELL_VAR *)0);
-#else
 	return ((vflags && invisible_p (v)) ? v : (SHELL_VAR *)0);
-#endif
       nv = v;
+      /* We don't accommodate array subscripts here. */
       v = find_global_variable_noref (newname);
     }
   return nv;
@@ -2004,7 +2003,7 @@ find_nameref_at_context (v, vc)
     {
       level++;
       if (level > NAMEREF_MAX)
-        return ((SHELL_VAR *)NULL);
+        return (&nameref_maxloop_value);
       newname = nameref_cell (nv);
       if (newname == 0 || *newname == '\0')
         return ((SHELL_VAR *)NULL);      
@@ -2034,6 +2033,8 @@ find_variable_nameref_context (v, vc, nvcp)
   for (nv = v, nvc = vc; nvc; nvc = nvc->down)
     {
       nv2 = find_nameref_at_context (nv, nvc);
+      if (nv2 == &nameref_maxloop_value)
+	return (nv2);			/* XXX */
       if (nv2 == 0)
         continue;
       nv = nv2;
@@ -2063,6 +2064,8 @@ find_variable_last_nameref_context (v, vc, nvcp)
   for (nv = v, nvc = vc; nvc; nvc = nvc->down)
     {
       nv2 = find_nameref_at_context (nv, nvc);
+      if (nv2 == &nameref_maxloop_value)
+	return (nv2);			/* XXX */
       if (nv2 == 0)
 	continue;
       nv = nv2;
@@ -2070,6 +2073,58 @@ find_variable_last_nameref_context (v, vc, nvcp)
         *nvcp = nvc;
     }
   return (nameref_p (nv) ? nv : (SHELL_VAR *)NULL);
+}
+
+SHELL_VAR *
+find_variable_nameref_for_create (name, flags)
+     const char *name;
+     int flags;
+{
+  SHELL_VAR *var;
+
+  /* See if we have a nameref pointing to a variable that hasn't been
+     created yet. */
+  var = find_variable_last_nameref (name, 1);
+  if ((flags&1) && var && nameref_p (var) && invisible_p (var))
+    {
+      internal_warning (_("%s: removing nameref attribute"), name);
+      VUNSETATTR (var, att_nameref);
+    }
+  if (var && nameref_p (var))
+    {
+      if (legal_identifier (nameref_cell (var)) == 0)
+	{
+	  sh_invalidid (nameref_cell (var) ? nameref_cell (var) : "");
+	  return ((SHELL_VAR *)INVALID_NAMEREF_VALUE);
+	}
+    }
+  return (var);
+}
+
+SHELL_VAR *
+find_variable_nameref_for_assignment (name, flags)
+     const char *name;
+     int flags;
+{
+  SHELL_VAR *var;
+
+  /* See if we have a nameref pointing to a variable that hasn't been
+     created yet. */
+  var = find_variable_last_nameref (name, 1);
+  if (var && nameref_p (var) && invisible_p (var))	/* XXX - flags */
+    {
+      internal_warning (_("%s: removing nameref attribute"), name);
+      VUNSETATTR (var, att_nameref);
+    }
+  if (var && nameref_p (var))
+    {
+      if (valid_nameref_value (nameref_cell (var), 1) == 0)
+	{
+	  sh_invalidid (nameref_cell (var) ? nameref_cell (var) : "");
+	  return ((SHELL_VAR *)INVALID_NAMEREF_VALUE);
+	}
+    }
+  return (var);
 }
 
 /* Find a variable, forcing a search of the temporary environment first */
@@ -2652,7 +2707,7 @@ bind_variable_internal (name, value, table, hflags, aflags)
      declare -n ref' */
   if (entry && invisible_p (entry) && nameref_p (entry))
     {
-      if (value && *value && valid_nameref_value (value, 0) == 0)
+      if ((aflags & ASS_FORCE) == 0 && value && valid_nameref_value (value, 0) == 0)
 	{
 	  sh_invalidid (value);
 	  return ((SHELL_VAR *)NULL);
@@ -2814,8 +2869,26 @@ bind_variable (name, value, flags)
 #endif
 		      return (bind_variable_internal (nameref_cell (nv), value, nvc->table, 0, flags));
 		    }
+		  else if (nv == &nameref_maxloop_value)
+		    {
+		      internal_warning (_("%s: circular name reference"), v->name);
+#if 0
+		      return (bind_variable_value (v, value, flags|ASS_NAMEREF));
+#else
+		      return (bind_variable_internal (v->name, value, nvc->table, 0, flags));
+#endif
+		    }
 		  else
 		    v = nv;
+		}
+	      else if (nv == &nameref_maxloop_value)
+		{
+		  internal_warning (_("%s: circular name reference"), v->name);
+#if 0
+		  return (bind_variable_value (v, value, flags|ASS_NAMEREF));
+#else
+		  return (bind_variable_internal (v->name, value, nvc->table, 0, flags));
+#endif
 		}
 	      else
 	        v = nv;
@@ -3054,7 +3127,7 @@ assign_in_env (word, flags)
      int flags;
 {
   int offset, aflags;
-  char *name, *temp, *value;
+  char *name, *temp, *value, *newname;
   SHELL_VAR *var;
   const char *string;
 
@@ -3062,7 +3135,7 @@ assign_in_env (word, flags)
 
   aflags = 0;
   offset = assignment (string, 0);
-  name = savestring (string);
+  newname = name = savestring (string);
   value = (char *)NULL;
 
   if (name[offset] == '=')
@@ -3078,7 +3151,21 @@ assign_in_env (word, flags)
 
       var = find_variable (name);
       if (var == 0)
-	var = find_variable_last_nameref (name, 1);
+	{
+	  var = find_variable_last_nameref (name, 1);
+	  /* If we're assigning a value to a nameref variable in the temp
+	     environment, and the value of the nameref is valid for assignment,
+	     but the variable does not already exist, assign to the nameref
+	     target and add the target to the temporary environment.  This is
+	     what ksh93 does */
+	  if (var && nameref_p (var) && valid_nameref_value (nameref_cell (var), 1))
+	    {
+	      newname = nameref_cell (var);
+	      var = 0;		/* don't use it for append */
+	    }
+	}
+      else
+        newname = name_cell (var);	/* no-op if not nameref */
 	  
       if (var && (readonly_p (var) || noassign_p (var)))
 	{
@@ -3088,19 +3175,16 @@ assign_in_env (word, flags)
   	  return (0);
 	}
       temp = name + offset + 1;
-      if (var && nameref_p (var) && valid_nameref_value (temp, 0) == 0)
-	{
-	  /* If we're assigning a value to a nameref variable in the temp
-	     environment that's an invalid name, flag an error. */
-	  sh_invalidid (temp);
-	  free (name);
-	  return (0);
-	}
 
       value = expand_assignment_string_to_string (temp, 0);
 
       if (var && (aflags & ASS_APPEND))
 	{
+	  if (value == 0)
+	    {
+	      value = (char *)xmalloc (1);	/* like do_assignment_internal */
+	      value[0] = '\0';
+	    }
 	  temp = make_variable_value (var, value, aflags);
 	  FREE (value);
 	  value = temp;
@@ -3110,15 +3194,15 @@ assign_in_env (word, flags)
   if (temporary_env == 0)
     temporary_env = hash_create (TEMPENV_HASH_BUCKETS);
 
-  var = hash_lookup (name, temporary_env);
+  var = hash_lookup (newname, temporary_env);
   if (var == 0)
-    var = make_new_variable (name, temporary_env);
+    var = make_new_variable (newname, temporary_env);
   else
     FREE (value_cell (var));
 
   if (value == 0)
     {
-      value = (char *)xmalloc (1);	/* like do_assignment_internal */
+      value = (char *)xmalloc (1);	/* see above */
       value[0] = '\0';
     }
 
@@ -3127,12 +3211,12 @@ assign_in_env (word, flags)
   var->context = variable_context;	/* XXX */
 
   INVALIDATE_EXPORTSTR (var);
-  var->exportstr = mk_env_string (name, value, 0);
+  var->exportstr = mk_env_string (newname, value, 0);
 
   array_needs_making = 1;
 
   if (flags)
-    stupidly_hack_special_variables (name);
+    stupidly_hack_special_variables (newname);
 
   if (echo_command_at_execute)
     /* The Korn shell prints the `+ ' in front of assignment statements,
@@ -3264,6 +3348,19 @@ unbind_nameref (name)
   return 0;
 }
 
+/* Unbind the first instance of NAME, whether it's a nameref or not */
+int
+unbind_variable_noref (name)
+     const char *name;
+{
+  SHELL_VAR *v;
+
+  v = var_lookup (name, shell_variables);
+  if (v)
+    return makunbound (name, shell_variables);
+  return 0;
+}
+
 int
 check_unbind_variable (name)
      const char *name;
@@ -3273,7 +3370,7 @@ check_unbind_variable (name)
   v = find_variable (name);
   if (v && readonly_p (v))
     {
-      builtin_error (_("%s: cannot unset: readonly %s"), name, "variable");
+      internal_error (_("%s: cannot unset: readonly %s"), name, "variable");
       return -1;
     }
   return (unbind_variable (name));
@@ -3954,7 +4051,8 @@ push_temp_var (data)
       if  (binding_table == shell_variables->table)
 	shell_variables->flags |= VC_HASTMPVAR;
     }
-  v->attributes |= var->attributes;
+  if (v)
+    v->attributes |= var->attributes;
 
   if (find_special_var (var->name) >= 0)
     tempvar_list[tvlist_ind++] = savestring (var->name);
@@ -4548,7 +4646,8 @@ push_func_var (data)
 	var->attributes &= ~(att_tempvar|att_propagate);
       else
 	shell_variables->flags |= VC_HASTMPVAR;
-      v->attributes |= var->attributes;
+      if (v)
+	v->attributes |= var->attributes;
     }
   else
     stupidly_hack_special_variables (var->name);	/* XXX */
@@ -4636,7 +4735,8 @@ push_exported_var (data)
       v = bind_variable_internal (var->name, value_cell (var), shell_variables->table, 0, 0);
       if (shell_variables == global_variables)
 	var->attributes &= ~att_propagate;
-      v->attributes |= var->attributes;
+      if (v)
+	v->attributes |= var->attributes;
     }
   else
     stupidly_hack_special_variables (var->name);	/* XXX */
