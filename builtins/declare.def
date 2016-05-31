@@ -325,24 +325,46 @@ declare_internal (list, local_var)
 	 that is specific to nameref variables. */
       if (flags_on & att_nameref)
 	{
-#if defined (ARRAY_VARIABLES)
+#if defined (ARRAY_VARS)
 	  if (valid_array_reference (name, 0))
 	    {
 	      builtin_error (_("%s: reference variable cannot be an array"), name);
 	      assign_error++;
 	      NEXT_VARIABLE ();
 	    }
+	  else if (valid_array_reference (value, 0))
+	    {
+	      t = array_variable_name (value, (int *)NULL, (int *)NULL);
+	      if (t && STREQ (name, t))
+		{
+		  if (variable_context == 0)
+		    {
+		      free (t);
+		      builtin_error (_("%s: nameref variable self references not allowed"), name);
+		      assign_error++;
+		      NEXT_VARIABLE ();
+		    }
+		  else
+		    builtin_warning (_("%s: circular name reference"), name);
+		}
+	      free (t);
+	    }
 	  else
 #endif
-	  /* disallow self references at global scope */
-	  if (STREQ (name, value) && variable_context == 0)
+	  /* disallow self references at global scope, warn at function scope */
+	  if (STREQ (name, value))
 	    {
-	      builtin_error (_("%s: nameref variable self references not allowed"), name);
-	      assign_error++;
-	      NEXT_VARIABLE ();
+	      if (variable_context == 0)
+		{
+		  builtin_error (_("%s: nameref variable self references not allowed"), name);
+		  assign_error++;
+		  NEXT_VARIABLE ();
+		}
+	      else
+		builtin_warning (_("%s: circular name reference"), name);
 	    }
 #if 1
-	  if (value && *value && valid_nameref_value (value, 0) == 0)
+	  if (value && *value && (aflags & ASS_APPEND) == 0 && valid_nameref_value (value, 0) == 0)
 	    {
 	      builtin_error (_("`%s': invalid variable name for name reference"), value);
 	      assign_error++;
@@ -430,6 +452,12 @@ declare_internal (list, local_var)
 	      any_failed++;
 	      NEXT_VARIABLE ();
 	    }
+	  if (var && nameref_p (var) && readonly_p (var) && nameref_cell (var) && (flags_off & att_nameref))
+	    {
+	      sh_readonly (name);
+	      any_failed++;
+	      NEXT_VARIABLE ();
+	    }
 	}
       else
 	var = (SHELL_VAR *)NULL;
@@ -493,18 +521,33 @@ declare_internal (list, local_var)
 	      NEXT_VARIABLE ();
 	    }
 	}
-      else		/* declare -[aAirx] name [name...] */
+      else		/* declare -[aAinrx] name [name...] */
 	{
 	  /* Non-null if we just created or fetched a local variable. */
+#if 0
+	  /* This is bash-4.3 code. */
 	  /* Here's what ksh93 seems to do.  If we are modifying an existing
 	     nameref variable, we don't follow the nameref chain past the last
 	     nameref, and we set the nameref variable's value so future
 	     references to that variable will return the value of the variable
 	     we're assigning right now. */
+#else
+	  /* Here's what ksh93 seems to do as of the 2012 version: if we are
+	     using declare -n to modify the value of an existing nameref
+	     variable, don't follow the nameref chain at all and just search
+	     for a nameref at the current context.  If we have a nameref,
+	     modify its value (changing which variable it references). */
+#endif
 	  if (var == 0 && (flags_on & att_nameref))
 	    {
+#if 0
 	      /* See if we are trying to modify an existing nameref variable */
 	      var = mkglobal ? find_global_variable_last_nameref (name, 1) : find_variable_last_nameref (name, 1);
+#else
+	      /* See if we are trying to modify an existing nameref variable,
+		 but don't follow the nameref chain. */
+	      var = mkglobal ? find_global_variable_noref (name) : find_variable_noref (name);
+#endif
 	      if (var && nameref_p (var) == 0)
 		var = 0;
 	    }
@@ -519,6 +562,16 @@ declare_internal (list, local_var)
 	      refvar = mkglobal ? find_global_variable_last_nameref (name, 0) : find_variable_last_nameref (name, 0);
 	      if (refvar && nameref_p (refvar) == 0)
 		refvar = 0;
+	      /* If the nameref is readonly but doesn't have a value, ksh93
+		 allows the nameref attribute to be removed.  If it's readonly
+		 and has a value, even if the value doesn't reference an
+		 existing variable, we disallow the modification */
+	      if (refvar && nameref_cell (refvar) && readonly_p (refvar))
+		{
+		  sh_readonly (name);
+		  any_failed++;
+		  NEXT_VARIABLE ();
+		}
 	      if (refvar)
 		var = mkglobal ? find_global_variable (nameref_cell (refvar)) : find_variable (nameref_cell (refvar));
 	    }
@@ -574,7 +627,7 @@ declare_internal (list, local_var)
 		var = mkglobal ? bind_global_variable (name, (char *)NULL, ASS_FORCE) : bind_variable (name, (char *)NULL, ASS_FORCE);
 	      else
 		{
-		  var = mkglobal ? bind_global_variable (name, (char *)NULL, 0) : bind_variable (name, (char *)NULL, 0);
+		  var = mkglobal ? bind_global_variable (name, (char *)NULL, ASS_FORCE) : bind_variable (name, (char *)NULL, ASS_FORCE);
 		  if (var && no_invisible_vars == 0)
 		    VSETATTR (var, att_invisible);
 		}
@@ -622,7 +675,7 @@ declare_internal (list, local_var)
 	  /* Cannot use declare +r to turn off readonly attribute. */ 
 	  if (readonly_p (var) && (flags_off & att_readonly))
 	    {
-	      sh_readonly (name);
+	      sh_readonly (name_cell (var));
 	      any_failed++;
 	      NEXT_VARIABLE ();
 	    }
@@ -758,7 +811,8 @@ declare_internal (list, local_var)
 	      v = bind_variable_value (var, value, aflags);
 	      if (v == 0 && (onref || nameref_p (var)))
 		{
-		  sh_invalidid (value);
+		  if (valid_nameref_value (value, 0) == 0)
+		    sh_invalidid (value);
 		  assign_error++;
 		  /* XXX - unset this variable? or leave it as normal var? */
 		  delete_var (var->name, mkglobal ? global_variables : shell_variables);
@@ -801,9 +855,16 @@ declare_internal (list, local_var)
       flags_on |= onref;
       VUNSETATTR (var, offref);
       flags_off |= offref;
-      /* Yuck.  ksh93 compatibility */
+      /* Yuck.  ksh93 compatibility.  XXX - need to investigate more but
+	 definitely happens when turning off nameref attribute on nameref
+	 (see comments above).  Under no circumstances allow this to turn
+	 off readonly attribute on readonly nameref variable. */
       if (refvar)
- 	VUNSETATTR (refvar, flags_off);
+	{
+	  if (flags_off & att_readonly)
+	    flags_off &= ~att_readonly;
+ 	  VUNSETATTR (refvar, flags_off);
+	}
 
       stupidly_hack_special_variables (name);
 

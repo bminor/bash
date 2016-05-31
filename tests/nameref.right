@@ -27,7 +27,7 @@ changevar: expect <three four five>
 argv[1] = <three four five>
 expect <three four five>
 argv[1] = <three four five>
-./nameref.tests: line 93: bar: readonly variable
+./nameref.tests: line 93: foo: readonly variable
 ./nameref.tests: line 94: foo: readonly variable
 one
 one
@@ -111,6 +111,7 @@ ref -> two, value: 2
 ref -> three, value: 3
 final state: ref -> three, value: 3
 ./nameref6.sub: line 2: typeset: x: nameref variable self references not allowed
+./nameref6.sub: line 5: typeset: x[3]: reference variable cannot be an array
 ./nameref6.sub: line 12: typeset: x: reference variable cannot be an array
 the -- 1
 42 -- 0
@@ -120,10 +121,19 @@ y -- 0
 y -- 0
 bar
 unset
+./nameref8.sub: line 3: typeset: warning: v: circular name reference
+./nameref8.sub: line 3: warning: v: circular name reference
+./nameref8.sub: line 5: warning: v: circular name reference
 inside
 inside: two
 outside:
+./nameref8.sub: line 29: typeset: warning: x: circular name reference
+./nameref8.sub: line 29: warning: x: circular name reference
+./nameref8.sub: line 31: warning: x: circular name reference
 foo
+./nameref8.sub: line 38: typeset: warning: v: circular name reference
+./nameref8.sub: line 38: warning: v: circular name reference
+./nameref8.sub: line 38: warning: v: circular name reference
 local
 ./nameref8.sub: line 47: typeset: v: nameref variable self references not allowed
 ./nameref8.sub: line 54: warning: x: circular name reference
@@ -214,7 +224,7 @@ declare -r RO_PID
 ./nameref11.sub: line 39: RO: cannot unset: readonly variable
 declare -r RO="x"
 ./nameref11.sub: line 39: declare: RO_PID: not found
-./nameref11.sub: line 41: ref_PID: readonly variable
+./nameref11.sub: line 41: RO2: readonly variable
 declare -r RO2="a"
 ./nameref12.sub: line 6: declare: `/': invalid variable name for name reference
 ./nameref12.sub: line 9: declare: `%': invalid variable name for name reference
@@ -280,3 +290,82 @@ after
 declare -n ref="var"
 ./nameref14.sub: line 32: typeset: var: not found
 declare -n ref="var"
+./nameref15.sub: line 1: local: warning: a: circular name reference
+./nameref15.sub: line 1: `a[0]': not a valid identifier
+declare -a a=([0]="0")
+./nameref15.sub: line 1: local: warning: a: circular name reference
+./nameref15.sub: line 1: warning: a: circular name reference
+./nameref15.sub: line 1: warning: a: circular name reference
+declare -a a=([0]="X")
+declare -a b=([0]="X")
+./nameref15.sub: line 1: local: warning: a: circular name reference
+./nameref15.sub: line 1: `a[0]': not a valid identifier
+declare -a b=([0]="0")
+./nameref15.sub: line 19: typeset: warning: ref: circular name reference
+./nameref15.sub: line 19: warning: ref: circular name reference
+./nameref15.sub: line 20: warning: ref: circular name reference
+./nameref15.sub: line 21: warning: ref: circular name reference
+inside
+outside X
+./nameref15.sub: line 29: typeset: ref: nameref variable self references not allowed
+./nameref15.sub: line 31: ref: nameref variable self references not allowed
+./nameref15.sub: line 32: typeset: ref: not found
+declare -- ref="4"
+4
+declare -n foo="var[@]"
+declare -n ref="var[@]"
+./nameref15.sub: line 47: var[@]: bad array subscript
+declare -n bar="var[@]"
+./nameref15.sub: line 52: var[@]: bad array subscript
+declare -n r1="y"
+declare -n r2="x"
+./nameref16.sub: line 12: typeset: x: not found
+./nameref16.sub: line 12: typeset: y: not found
+declare -n r1="y"
+declare -n r2="x"
+./nameref16.sub: line 21: typeset: x: not found
+./nameref16.sub: line 21: typeset: y: not found
+declare -n r1="y"
+declare -n r2="x"
+./nameref16.sub: line 33: typeset: x: not found
+./nameref16.sub: line 33: typeset: y: not found
+declare -n r1="y"
+declare -n r2="x"
+declare -- x="one"
+declare -- y="two"
+./nameref17.sub: line 8: declare: bar: not found
+./nameref17.sub: line 9: unset: foo0: cannot unset: readonly variable
+declare -nr foo0="bar"
+declare -nr foo0="bar"
+declare -- bar
+./nameref17.sub: line 14: declare: foo0: readonly variable
+./nameref17.sub: line 15: declare: foo0: readonly variable
+declare -nr foo1
+./nameref17.sub: line 24: typeset: foo1: readonly variable
+declare -nr foo1
+declare -n foo2="bar"
+declare -r bar
+./nameref17.sub: line 35: bar: readonly variable
+./nameref17.sub: line 36: typeset: bar: readonly variable
+declare -n foo2="bar"
+declare -r bar
+declare -- bar3="three"
+./nameref17.sub: line 46: unset: foo3: cannot unset: readonly variable
+./nameref17.sub: line 49: declare: bar3: readonly variable
+declare -nr foo3="bar3"
+declare -r bar3="three"
+./nameref17.sub: line 51: declare: foo3: readonly variable
+declare -nr foo4="bar4"
+declare -- bar4="four"
+./nameref17.sub: line 63: typeset: foo4: readonly variable
+declare -nr foo4="bar4"
+declare -nr foo4="bar4"
+declare -- bar4="four"
+./nameref17.sub: line 79: typeset: foo4: readonly variable
+declare -nr foo4="bar4"
+declare -nr foo4="bar4"
+declare -- bar4="four"
+declare -nr foo5
+declare -r foo5
+declare -nr foo5
+declare -r foo5

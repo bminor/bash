@@ -283,6 +283,8 @@ static int variable_in_context __P((SHELL_VAR *));
 static int visible_array_vars __P((SHELL_VAR *));
 #endif
 
+static SHELL_VAR *find_variable_internal __P((const char *, int));
+
 static SHELL_VAR *find_nameref_at_context __P((SHELL_VAR *, VAR_CONTEXT *));
 static SHELL_VAR *find_variable_nameref_context __P((SHELL_VAR *, VAR_CONTEXT *, VAR_CONTEXT **));
 static SHELL_VAR *find_variable_last_nameref_context __P((SHELL_VAR *, VAR_CONTEXT *, VAR_CONTEXT **));
@@ -2767,7 +2769,7 @@ assign_value:
       if ((readonly_p (entry) && (aflags & ASS_FORCE) == 0) || noassign_p (entry))
 	{
 	  if (readonly_p (entry))
-	    err_readonly (name);
+	    err_readonly (name_cell (entry));
 	  return (entry);
 	}
 
@@ -2875,7 +2877,7 @@ bind_variable (name, value, flags)
 #if 0
 		      return (bind_variable_value (v, value, flags|ASS_NAMEREF));
 #else
-		      return (bind_variable_internal (v->name, value, nvc->table, 0, flags));
+		      v = 0;	/* backwards compat */
 #endif
 		    }
 		  else
@@ -2887,7 +2889,7 @@ bind_variable (name, value, flags)
 #if 0
 		  return (bind_variable_value (v, value, flags|ASS_NAMEREF));
 #else
-		  return (bind_variable_internal (v->name, value, nvc->table, 0, flags));
+		  v = 0;	/* backwards compat */
 #endif
 		}
 	      else
@@ -2947,7 +2949,20 @@ bind_variable_value (var, value, aflags)
   else
     {
       t = make_variable_value (var, value, aflags);
-      if ((aflags & ASS_NAMEREF) && (t == 0 || *t == 0 || valid_nameref_value (t, 0) == 0))
+      if (STREQ (name_cell (var), t))
+	{
+	  if (variable_context)
+	    internal_warning (_("%s: circular name reference"), name_cell (var));
+	  else
+	    {
+	      internal_error (_("%s: nameref variable self references not allowed"), name_cell (var));
+	      free (t);
+	      if (invis)
+		VSETATTR (var, att_invisible);	/* XXX */
+	      return ((SHELL_VAR *)NULL);
+	    }
+	}
+      if ((aflags & ASS_NAMEREF) && (valid_nameref_value (t, 0) == 0))
 	{
 	  free (t);
 	  if (invis)

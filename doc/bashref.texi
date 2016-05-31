@@ -1518,7 +1518,8 @@ A variable can be assigned the @var{nameref} attribute using the
 to create a @var{nameref}, or a reference to another variable.
 This allows variables to be manipulated indirectly.
 Whenever the nameref variable is referenced, assigned to, unset, or has
-its attributes modified (other than the nameref attribute itself), the
+its attributes modified (other than using or changing the nameref
+attribute itself), the
 operation is actually performed on the variable specified by the nameref
 variable's value.
 A nameref is commonly used within shell functions to refer to a variable
@@ -4052,7 +4053,7 @@ Give each @var{name} the @var{nameref} attribute, making
 it a name reference to another variable.
 That other variable is defined by the value of @var{name}.
 All references, assignments, and attribute modifications
-to @var{name}, except for changing the
+to @var{name}, except for those using or changing the
 @option{-n} attribute itself, are performed on the variable referenced by
 @var{name}'s value.
 The nameref attribute cannot be applied to array variables.

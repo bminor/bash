@@ -255,7 +255,7 @@ extern SHELL_VAR *find_global_variable_last_nameref __P((const char *, int));
 extern SHELL_VAR *find_variable_nameref __P((SHELL_VAR *));
 extern SHELL_VAR *find_variable_nameref_for_create __P((const char *, int));
 extern SHELL_VAR *find_variable_nameref_for_assignment __P((const char *, int));
-extern SHELL_VAR *find_variable_internal __P((const char *, int));
+/*extern SHELL_VAR *find_variable_internal __P((const char *, int));*/
 extern SHELL_VAR *find_variable_tempenv __P((const char *));
 extern SHELL_VAR *find_variable_notempenv __P((const char *));
 extern SHELL_VAR *find_global_variable __P((const char *));

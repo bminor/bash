@@ -1,0 +1,52 @@
+f() { local -n a=$1; a=X; }
+
+a=(0); f 'a[0]'
+while [[ -v a ]]; do declare -p a; unset a; done
+
+a=(0); f 'a'
+while [[ -v a ]]; do declare -p a; unset a; done
+
+b=(0); f 'b[0]'
+while [[ -v a ]]; do typeset -p a; unset a; done
+typeset -p b
+
+b=(0); f 'a[0]'
+while [[ -v a ]]; do typeset -p a; unset a; done
+typeset -p b
+
+add_X_echo()
+{
+	typeset -n ref=$1
+	ref+=X
+	echo inside $ref
+}
+
+ref=
+add_X_echo ref
+echo outside "$ref"
+unset ref
+
+typeset -n ref=ref
+
+typeset -n ref=re ref+=f
+typeset -p ref
+ref=4
+typeset -p ref
+
+export ref
+printenv ref
+
+unset ref ; unset -n ref
+unset foo; unset -n foo
+
+typeset -n foo=var[@]
+typeset -p foo
+typeset -n ref=var ref+=[@]
+typeset -p ref
+
+ref=42
+
+typeset -n bar
+bar=var[@]
+typeset -p bar
+bar=7

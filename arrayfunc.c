@@ -280,7 +280,7 @@ assign_array_element (name, value, flags)
 {
   char *sub, *vname;
   int sublen;
-  SHELL_VAR *entry;
+  SHELL_VAR *entry, *nv;
 
   vname = array_variable_name (name, &sub, &sublen);
 

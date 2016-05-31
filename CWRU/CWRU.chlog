@@ -11097,3 +11097,59 @@ variables.c
 	  things based on whether or not we get it.  Right now we don't do
 	  anything different, but we could
 
+				   5/24
+				   ----
+lib/readline/display.c
+	- update_line,_rl_move_cursor_relative: save value of MB_CUR_MAX in a
+	  variable and use it throughout the functions instead of recomputing it
+	  every time (which possibly costs a function call)
+
+				   5/25
+				   ----
+builtins/declare.def
+	- declare_internal: only check whether the value being assigned to a
+	  nameref variable is a valid identifier if we're not appending to an
+	  existing value.  Suggested by Grisha Levit <grishalevit@gmail.com>
+	- declare_internal: add a couple of more checks on nameref names:
+		o make sure `declare -n x[3]=y' is an error
+		o nameref variable self-references now produce a warning when in
+		  function scope
+		o nameref variable self-references using subscripted arrays
+		  (a=a[0]) now produce warnings at function scope and errors at
+		  global scope
+
+				   5/29
+				   ----
+builtins/declare.def
+	- declare_internal: use name of readonly variable when calling sh_readonly	
+	  instead of name passed as argument to declare in case we've followed
+	  a nameref chain
+	- declare_internal: when turning off attributes on a nameref variable
+	  after following the nameref chain and turning them off on the target
+	  variable, don't allow the readonly attribute to be removed.  This is
+	  primarily intended to turn off the nameref attribute.  Issue pointed
+	  out by Grisha Levit <grishalevit@gmail.com>
+	- declare_internal: if we are attempting to modify an existing global
+	  nameref variable, and the -n option is supplied, operate on the
+	  nameref variable itself, not the variable it references
+
+doc/{bash.1,bashref.texi}
+	- change the descriptions of namerefs and declare -n slightly to note
+	  that using the -n option to declare will operate on the nameref
+	  variable itself rather than the variable it references
+
+variables.c
+	- bind_variable_internal: if trying to assign to a read-only variable,
+	  print the error message using the variable's name instead of the
+	  name passed to bind_variable in case we followed a nameref
+
+builtins/declare.def
+	- declare_internal: when we're creating a (possibly invisible) variable
+	  as part of another operation, assigning NULL, make sure to use
+	  ASS_FORCE to avoid warning messages from any existing nameref
+	  variables we follow
+	- declare_internal: allow the nameref attribute to be removed from a
+	  readonly nameref variable without a value but do not allow it to be
+	  removed from a readonly nameref variable that has a value, even if it
+	  doesn't reference an existing variable.  This distinction is for ksh93
+	  compatibility.  Pointed out by Grisha Levit <grishalevit@gmail.com>
