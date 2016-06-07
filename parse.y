@@ -1961,6 +1961,13 @@ parser_restore_alias ()
 #endif
 }
 
+void
+clear_shell_input_line ()
+{
+  if (shell_input_line)
+    shell_input_line[shell_input_line_index = 0] = '\0';
+}
+
 /* Return a line of text, taken from wherever yylex () reads input.
    If there is no more input, then we return NULL.  If REMOVE_QUOTED_NEWLINE
    is non-zero, we remove unquoted \<newline> pairs.  This is used by
@@ -4696,7 +4703,7 @@ read_token_word (character)
 
   /* Non-zero means to ignore the value of the next character, and just
      to add it no matter what. */
- int pass_next_character;
+  int pass_next_character;
 
   /* The current delimiting character. */
   int cd;
@@ -4993,7 +5000,6 @@ read_token_word (character)
 	}
 
 got_character:
-
       if (character == CTLESC || character == CTLNUL)
 	{
 	  RESIZE_MALLOCED_BUFFER (token, token_index, 2, token_buffer_size,

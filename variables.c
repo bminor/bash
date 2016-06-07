@@ -2719,15 +2719,6 @@ bind_variable_internal (name, value, table, hflags, aflags)
   else if (entry && nameref_p (entry))
     {
       newval = nameref_cell (entry);
-#if 0
-      /* This check can go away if we stop allowing all-digit values for
-	 nameref variables. */
-      if (newval && *newval && valid_nameref_value (newval, 1) == 0)
-	{
-	  sh_invalidid (newval);
-	  return ((SHELL_VAR *)NULL);
-	}
-#endif
 #if defined (ARRAY_VARS)
       /* declare -n foo=x[2] */
       if (valid_array_reference (newval, 0))
@@ -2949,7 +2940,7 @@ bind_variable_value (var, value, aflags)
   else
     {
       t = make_variable_value (var, value, aflags);
-      if (STREQ (name_cell (var), t))
+      if ((aflags & (ASS_NAMEREF|ASS_FORCE)) == ASS_NAMEREF && check_selfref (name_cell (var), t, 0))
 	{
 	  if (variable_context)
 	    internal_warning (_("%s: circular name reference"), name_cell (var));

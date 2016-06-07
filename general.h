@@ -290,6 +290,7 @@ extern int importable_function_name __P((char *, size_t));
 extern int exportable_function_name __P((char *));
 extern int check_identifier __P((WORD_DESC *, int));
 extern int valid_nameref_value __P((char *, int));
+extern int check_selfref __P((const char *, const char *, int));
 extern int legal_alias_name __P((char *, int));
 extern int assignment __P((const char *, int));
 

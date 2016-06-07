@@ -291,6 +291,7 @@ declare -n ref="var"
 ./nameref14.sub: line 32: typeset: var: not found
 declare -n ref="var"
 ./nameref15.sub: line 1: local: warning: a: circular name reference
+./nameref15.sub: line 1: warning: a: circular name reference
 ./nameref15.sub: line 1: `a[0]': not a valid identifier
 declare -a a=([0]="0")
 ./nameref15.sub: line 1: local: warning: a: circular name reference
@@ -299,6 +300,7 @@ declare -a a=([0]="0")
 declare -a a=([0]="X")
 declare -a b=([0]="X")
 ./nameref15.sub: line 1: local: warning: a: circular name reference
+./nameref15.sub: line 1: warning: a: circular name reference
 ./nameref15.sub: line 1: `a[0]': not a valid identifier
 declare -a b=([0]="0")
 ./nameref15.sub: line 19: typeset: warning: ref: circular name reference
@@ -309,14 +311,15 @@ inside
 outside X
 ./nameref15.sub: line 29: typeset: ref: nameref variable self references not allowed
 ./nameref15.sub: line 31: ref: nameref variable self references not allowed
-./nameref15.sub: line 32: typeset: ref: not found
-declare -- ref="4"
+declare -n ref="re"
+declare -n ref="re"
+declare -- re="4"
 4
 declare -n foo="var[@]"
 declare -n ref="var[@]"
-./nameref15.sub: line 47: var[@]: bad array subscript
+./nameref15.sub: line 48: var[@]: bad array subscript
 declare -n bar="var[@]"
-./nameref15.sub: line 52: var[@]: bad array subscript
+./nameref15.sub: line 53: var[@]: bad array subscript
 declare -n r1="y"
 declare -n r2="x"
 ./nameref16.sub: line 12: typeset: x: not found

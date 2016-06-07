@@ -10294,7 +10294,12 @@ make_internal_declare (word, option, cmd)
   w = make_word (word);
 
   t = assignment (w->word, 0);
-  w->word[t] = '\0';
+  if (w->word[t] == '=')
+    {
+      w->word[t] = '\0';
+      if (w->word[t - 1] == '+')	/* cut off any append op */
+	w->word[t - 1] = '\0';
+    }
 
   wl = make_word_list (w, (WORD_LIST *)NULL);
   wl = make_word_list (make_word (option), wl);
@@ -10419,6 +10424,8 @@ shell_expand_word_list (tlist, eflags)
 	  /* Now transform the word as ksh93 appears to do and go on */
 	  t = assignment (tlist->word->word, 0);
 	  tlist->word->word[t] = '\0';
+	  if (tlist->word->word[t - 1] == '+')
+	    tlist->word->word[t - 1] = '\0';	/* cut off append op */
 	  tlist->word->flags &= ~(W_ASSIGNMENT|W_NOSPLIT|W_COMPASSIGN|W_ASSIGNARG|W_ASSIGNASSOC|W_ASSIGNARRAY);
 	}
 #endif

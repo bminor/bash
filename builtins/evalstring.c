@@ -267,6 +267,7 @@ parse_and_execute (string, from_file, flags)
     current_token = '\n';		/* reset_parser() ? */
 
   with_input_from_string (string, from_file);
+  clear_shell_input_line ();
   while (*(bash_input.location.string))
     {
       command = (COMMAND *)NULL;
@@ -497,7 +498,7 @@ parse_string (string, from_file, flags, endp)
   sigprocmask (SIG_BLOCK, (sigset_t *)NULL, &ps_sigmask);
 #endif
 
-/* itrace("parse_string: `%s'", string); */
+/*itrace("parse_string: `%s'", string);*/
   /* Reset the line number if the caller wants us to.  If we don't reset the
      line number, we have to subtract one, because we will add one just
      before executing the next command (resetting the line number sets it to

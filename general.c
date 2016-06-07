@@ -228,27 +228,54 @@ legal_identifier (name)
 }
 
 /* Return 1 if NAME is a valid value that can be assigned to a nameref
-   variable.  The FOR_ASSIGNMENT flag is currently unused, but it could
+   variable.  FLAGS can be 2, in which case the name is going to be used
+   to create a variable.  Other values are currently unused, but could
    be used to allow values to be stored and indirectly referenced, but
    not used in assignments. */
 int
-valid_nameref_value (name, for_assignment)
+valid_nameref_value (name, flags)
      char *name;
-     int for_assignment;
+     int flags;
 {
-  intmax_t r;
-
   if (name == 0 || *name == 0)
     return 0;
 
+  /* valid identifier */
 #if defined (ARRAY_VARS)  
-  if (legal_identifier (name) || valid_array_reference (name, 0))
+  if (legal_identifier (name) || (flags != 2 && valid_array_reference (name, 0)))
 #else
   if (legal_identifier (name))
 #endif
     return 1;
 
   return 0;
+}
+
+int
+check_selfref (name, value, flags)
+     const char *name;
+     const char *value;
+     int flags;
+{
+  char *t;
+
+  if (STREQ (name, value))
+    return 1;
+
+#if defined (ARRAY_VARS)
+  if (valid_array_reference (value, 0))
+    {
+      t = array_variable_name (value, (int *)NULL, (int *)NULL);
+      if (t && STREQ (name, t))
+	{
+	  free (t);
+	  return 1;
+	}
+      free (t);
+    }
+#endif
+
+  return 0;	/* not a self reference */
 }
 
 /* Make sure that WORD is a valid shell identifier, i.e.

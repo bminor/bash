@@ -11153,3 +11153,112 @@ builtins/declare.def
 	  removed from a readonly nameref variable that has a value, even if it
 	  doesn't reference an existing variable.  This distinction is for ksh93
 	  compatibility.  Pointed out by Grisha Levit <grishalevit@gmail.com>
+
+				   5/31
+				   ----
+builtins/declare.def
+	- declare_internal: if the call to bind_variable_value fails for some
+	  reason, make sure to restore the nameref attribute to flags_on and
+	  flags_off before calling NEXT_VARIABLE
+
+subst.c
+	- make_internal_declare: handle += append op
+	- shell_expand_word_list: when transforming assignment statement arguments
+	  to `declare', make sure to handle += append op to avoid passing invalid
+	  identifiers to declare.  Report by Grisha Levit <grishalevit@gmail.com>
+
+				    6/1
+				    ---
+builtins/declare.def
+	- declare_internal: if a nameref assignment fails, only call delete_var to
+	  delete the variable if we created it in declare_internal in the first
+	  place
+
+general.c
+	- check_selfref: new function, checks a NAME against a VALUE for nameref
+	  self-reference
+
+general.h
+	- check_selfref: extern declaration
+
+builtins/declare.def
+	- declare_internal: call check_selfref to determine whether a given NAME
+	  and VALUE constitute an invalid nameref variable self-reference
+
+variables.c
+	- bind_variable_internal: call check_selfref to determine whether a given
+	  NAME and VALUE constitute an invalid nameref variable self-reference
+
+				    6/2
+				    ---
+parse.y
+	- clear_shell_input_line: new function, clears contents of shell_input_line
+	  and sets index to 0, but doesn't free it
+
+externs.h
+	- clear_shell_input_line: extern declaration
+
+builtins/evalstring.c
+	- parse_and_execute: call clear_shell_input_line after setting input to
+	  string to be executed.  Fixes problem with command substitution and
+	  multi-line aliases reported by Grisha Levit <grishalevit@gmail.com>
+
+eval.c
+	- parse_command: only execute PROMPT_COMMAND if the shell is not
+	  currently expanding an alias; use the same tests as parse.y:SHOULD_PROMPT
+	  and parse.y:prompt_again() use to decide whether or not to print a
+	  prompt.  Fixes problems with PROMPT_COMMAND and multi-line aliases
+	  reported by Grisha Levit <grishalevit@gmail.com>
+
+builtins/set.def
+	- unset_builtin: changes to fix three problems reported by Grisha
+	  Levit <grishalevit@gmail.com>:
+		o if -n is supplied, we should not try to unset a function if
+		  a variable isn't found
+		o unsetting namerefs whose values are array references does
+		  not work
+		o unset -n n[0], where n is a nameref, would unset the referenced
+		  variable instead of `n'
+
+redir.c
+	- redir_varvalue: handle case where nameref var points to subscripted
+	  array reference.  Reported by Grisha Levit <grishalevit@gmail.com>
+
+variables.c
+	- bind_variable_value: make sure to call check_selfref only if aflags
+	  includes ASS_NAMEREF and not ASS_FORCE.  Reported by Grisha Levit
+	  <grishalevit@gmail.com>
+
+general.c
+	- valid_nameref_value: now understands a FLAGS value of 2 to mean that
+	  the name will be used to create a variable, so only legal_identifier
+	  matters
+
+arrayfunc.c
+	- find_or_make_array_variable: call valid_nameref_value with FLAGS value
+	  of 2 to indicate we will be creating a variable.  Fixes mapfile issue
+	  reported by Grisha Levit <grishalevit@gmail.com>
+
+				    6/5
+				    ---
+builtins/declare.def
+	- declare_internal: only pass ASS_FORCE as part of assignment flags to
+	  assignments concerning arrays
+	- declare_internal: when at the global scope, if we resolve a nameref
+	  and commit to using the new name, go back to to the beginning of the
+	  loop and use the new name in the checks and variable references.
+	  Make sure we construct the new name as a straight substitution of
+	  the nameref value into the old name, including array subscripts and
+	  rebuilding the correct values for `offset' and `value', since they
+	  are relative to the original value of name.
+	  Fixes several issues with checking use of subscripted array variables
+	  as nameref values
+	- declare_internal: when calling assign_array_element, make sure to pass
+	  ASS_APPEND if aflags includes it, so things like
+		declare -a var; var[1]=1; declare var[1]+=4
+	  append to the value appropriately and var[1] ends up being `14'
+
+arrayfunc.c
+	- valid_array_reference: make sure the array reference is properly
+	  terminated after the first subscript; return invalid if there is
+	  anything following the closing `]'

@@ -370,7 +370,7 @@ find_or_make_array_variable (name, flags)
 	}
       if (var && nameref_p (var))
 	{
-	  if (valid_nameref_value (nameref_cell (var), 1) == 0)
+	  if (valid_nameref_value (nameref_cell (var), 2) == 0)
 	    {
 	      sh_invalidid (nameref_cell (var));
 	      return ((SHELL_VAR *)NULL);
@@ -898,6 +898,8 @@ valid_array_reference (name, flags)
       /* Check for a properly-terminated non-blank subscript. */
       len = skipsubscript (t, 0, 0);
       if (t[len] != ']' || len == 1)
+	return 0;
+      if (t[len+1] != '\0')
 	return 0;
       for (r = 1; r < len; r++)
 	if (whitespace (t[r]) == 0)
