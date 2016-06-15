@@ -981,9 +981,6 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
   metaval = rl_variable_value ("input-meta");
   metaflag = RL_BOOLEAN_VARIABLE_VALUE (metaval);
   
-  /* Now, POSIX.1-2001 and SUSv3 say that the commands executed from the
-     temporary file should be placed into the history.  We don't do that
-     yet. */
   if (rl_deprep_term_function)
     (*rl_deprep_term_function) ();
   save_parser_state (&ps);

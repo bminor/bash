@@ -11262,3 +11262,11 @@ arrayfunc.c
 	- valid_array_reference: make sure the array reference is properly
 	  terminated after the first subscript; return invalid if there is
 	  anything following the closing `]'
+
+				   6/12
+				   ----
+variables.c
+	- bind_variable_internal: if asked to perform an array subscript
+	  assignment on a nameref variable, display a warning and remove the
+	  nameref attribute (as bash-4.3 did).  Reported by Dan Douglas
+	  <ormaaj@gmail.com>

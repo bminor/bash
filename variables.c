@@ -2689,8 +2689,8 @@ bind_variable_internal (name, value, table, hflags, aflags)
      HASH_TABLE *table;
      int hflags, aflags;
 {
-  char *newval;
-  SHELL_VAR *entry;
+  char *newval, *tname;
+  SHELL_VAR *entry, *tentry;
 
   entry = (hflags & HASH_NOSRCH) ? (SHELL_VAR *)NULL : hash_lookup (name, table);
   /* Follow the nameref chain here if this is the global variables table */
@@ -2720,11 +2720,22 @@ bind_variable_internal (name, value, table, hflags, aflags)
     {
       newval = nameref_cell (entry);
 #if defined (ARRAY_VARS)
-      /* declare -n foo=x[2] */
+      /* declare -n foo=x[2] ; foo=bar */
       if (valid_array_reference (newval, 0))
 	{
+tname = array_variable_name (newval, (char **)0, (int *)0);
+if (tname && (tentry = find_variable_noref (tname)) && nameref_p (tentry))
+  {
+    /* nameref variables can't be arrays */
+    internal_warning (_("%s: removing nameref attribute"), name_cell (tentry));
+#if 1
+    FREE (value_cell (tentry));		/* XXX - bash-4.3 compat */
+    var_setvalue (tentry, (char *)NULL);
+#endif
+    VUNSETATTR (tentry, att_nameref);
+  }
           /* XXX - should it be aflags? */
-	  entry = assign_array_element (newval, make_variable_value (entry, value, 0), aflags);
+	  entry = assign_array_element (newval, make_variable_value (entry, value, 0), aflags|ASS_NAMEREF);
 	  if (entry == 0)
 	    return entry;
 	}
