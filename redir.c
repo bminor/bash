@@ -671,7 +671,10 @@ redir_open (filename, flags, mode, ri)
 	  fd = open (filename, flags, mode);
 	  e = errno;
 	  if (fd < 0 && e == EINTR)
-	    QUIT;
+	    {
+	      QUIT;
+	      run_pending_traps ();
+	    }
 	  errno = e;
 	}
       while (fd < 0 && errno == EINTR);
