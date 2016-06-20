@@ -1905,6 +1905,7 @@ make_child (command, async_p)
       /* If we can't create any children, try to reap some dead ones. */
       waitchld (-1, 0);
 
+      errno = EAGAIN;		/* restore errno */
       sys_error ("fork: retry");
       RESET_SIGTERM;
 

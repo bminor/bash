@@ -320,6 +320,20 @@ declare -n ref="var[@]"
 ./nameref15.sub: line 48: var[@]: bad array subscript
 declare -n bar="var[@]"
 ./nameref15.sub: line 53: var[@]: bad array subscript
+declare -n a="b"
+declare -n b="a[1]"
+./nameref15.sub: line 61: warning: a: removing nameref attribute
+declare -a a=([1]="foo")
+declare -n b="a[1]"
+./nameref15.sub: line 66: warning: a: removing nameref attribute
+declare -a a=([1]="foo")
+declare -n b="a[1]"
+declare -n n="v"
+declare -a v=([1]="1")
+./nameref15.sub: line 82: typeset: n: not found
+declare -a v=([0]="0" [1]="1")
+declare -n n="v[1]"
+declare -a v=([0]="0")
 declare -n r1="y"
 declare -n r2="x"
 ./nameref16.sub: line 12: typeset: x: not found
@@ -372,3 +386,27 @@ declare -nr foo5
 declare -r foo5
 declare -nr foo5
 declare -r foo5
+./nameref18.sub: line 2: mapfile: `XXX[0]': not a valid identifier
+./nameref18.sub: line 3: declare: XXX[0]: not found
+./nameref18.sub: line 9: `XXX[0]': not a valid identifier
+./nameref18.sub: line 10: declare: XXX[0]: not found
+declare -n ref="XXX[0]"
+declare -a XXX=([0]="4")
+./nameref18.sub: line 24: `XXX[0]': not a valid identifier
+declare -n ref="XXX[0]"
+./nameref18.sub: line 25: declare: XXX[0]: not found
+./nameref18.sub: line 29: read: `XXX[0]': not a valid identifier
+./nameref18.sub: line 30: declare: XXX[0]: not found
+./nameref18.sub: line 35: `XXX[0]': not a valid identifier
+declare -n ref="XXX[0]"
+./nameref18.sub: line 38: `XXX[0]': not a valid identifier
+./nameref18.sub: line 38: declare: XXX[0]: not found
+declare -n ref="var[123]"
+./nameref18.sub: line 46: declare: var[123]: not found
+declare -a var=([123]="")
+declare -n ref="var[123]"
+./nameref18.sub: line 50: declare: var[123]: not found
+declare -a var=([123]="")
+declare -n ref="var[123]"
+./nameref18.sub: line 54: declare: var[123]: not found
+declare -a var=([123]="X")

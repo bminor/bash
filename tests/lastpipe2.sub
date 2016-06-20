@@ -18,3 +18,13 @@ echo -e 'A\nB' | while read letter; do
 done
 
 rm -f $TMPDIR/outfile
+
+unset -f myPipefunc
+myPipefunc()
+{
+    cat | read var
+    return 42
+}
+echo HI | myPipefunc
+
+echo $var -- $? -- ${PIPESTATUS[@]}

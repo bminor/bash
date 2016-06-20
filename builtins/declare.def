@@ -563,6 +563,21 @@ restart_new_var_name:
 	      if (refvar)
 		var = mkglobal ? find_global_variable (nameref_cell (refvar)) : find_variable (nameref_cell (refvar));
 	    }
+#if defined (ARRAY_VARS)
+	  /* If we have an array assignment to a nameref, remove the nameref
+	     attribute and go on. */
+	  else if (var == 0 && offset && array_subscript_assignment)
+	    {
+	      var = mkglobal ? find_global_variable_noref (name) : find_variable_noref (name);
+	      if (var && nameref_p (var))
+		{
+		  internal_warning (_("%s: removing nameref attribute"), name);
+		  FREE (value_cell (var));		/* XXX - bash-4.3 compat */
+		  var_setvalue (var, (char *)NULL);
+		  VUNSETATTR (var, att_nameref);
+		}
+	    }
+#endif
 
 	  /* See if we are trying to set flags or value for an existing nameref
 	     that points to a non-existent variable: e.g.,

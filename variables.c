@@ -2723,17 +2723,16 @@ bind_variable_internal (name, value, table, hflags, aflags)
       /* declare -n foo=x[2] ; foo=bar */
       if (valid_array_reference (newval, 0))
 	{
-tname = array_variable_name (newval, (char **)0, (int *)0);
-if (tname && (tentry = find_variable_noref (tname)) && nameref_p (tentry))
-  {
-    /* nameref variables can't be arrays */
-    internal_warning (_("%s: removing nameref attribute"), name_cell (tentry));
-#if 1
-    FREE (value_cell (tentry));		/* XXX - bash-4.3 compat */
-    var_setvalue (tentry, (char *)NULL);
-#endif
-    VUNSETATTR (tentry, att_nameref);
-  }
+	  tname = array_variable_name (newval, (char **)0, (int *)0);
+	  if (tname && (tentry = find_variable_noref (tname)) && nameref_p (tentry))
+	    {
+	      /* nameref variables can't be arrays */
+	      internal_warning (_("%s: removing nameref attribute"), name_cell (tentry));
+	      FREE (value_cell (tentry));		/* XXX - bash-4.3 compat */
+	      var_setvalue (tentry, (char *)NULL);
+	      VUNSETATTR (tentry, att_nameref);
+	    }
+	  free (tname);
           /* XXX - should it be aflags? */
 	  entry = assign_array_element (newval, make_variable_value (entry, value, 0), aflags|ASS_NAMEREF);
 	  if (entry == 0)
@@ -5399,7 +5398,7 @@ sv_ignoreeof (name)
   eof_encountered = 0;
 
   tmp_var = find_variable (name);
-  ignoreeof = tmp_var != 0;
+  ignoreeof = tmp_var && var_isset (tmp_var);
   temp = tmp_var ? value_cell (tmp_var) : (char *)NULL;
   if (temp)
     eof_encountered_limit = (*temp && all_digits (temp)) ? atoi (temp) : 10;
@@ -5448,7 +5447,10 @@ void
 sv_strict_posix (name)
      char *name;
 {
-  SET_INT_VAR (name, posixly_correct);
+  SHELL_VAR *var;
+
+  var = find_variable (name);
+  posixly_correct = var && var_isset (var);
   posix_initialize (posixly_correct);
 #if defined (READLINE)
   if (interactive_shell)

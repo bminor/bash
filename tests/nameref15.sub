@@ -51,3 +51,38 @@ typeset -n bar
 bar=var[@]
 typeset -p bar
 bar=7
+
+unset a b
+unset -n a b
+
+typeset -n a=b b
+b=a[1]
+typeset -p a b
+a=foo
+typeset -p a b
+
+unset a
+typeset -n a=b
+declare a=foo
+typeset -p a b
+
+unset n v
+unset -n n v
+
+v=(0 1)
+typeset -n n=v
+unset n[0]
+typeset -p n v
+
+unset -n n
+
+v=(0 1)
+typeset -n n=v
+unset -n n
+typeset -p n v
+
+v=(0 1)
+declare -n n=v[1]
+unset n
+declare -p n v
+

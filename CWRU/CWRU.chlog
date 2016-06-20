@@ -11270,3 +11270,26 @@ variables.c
 	  assignment on a nameref variable, display a warning and remove the
 	  nameref attribute (as bash-4.3 did).  Reported by Dan Douglas
 	  <ormaaj@gmail.com>
+
+				   6/14
+				   ----
+test.c
+	- posixtest: handle four-argument case where argv[1] == '(' and
+	  argv[4] == ')' by performing two-argument test on $2 and $3.  Reported
+	  by Joerg Schilling <Joerg.Schilling@fokus.fraunhofer.de>
+
+				   6/15
+				   ----
+variables.c
+	- sv_ignoreeof: make sure ignoreeof is set only if IGNOREEOF is set and
+	  has a value (no `local IGNOREEOF'). Reported by Grisha Levit
+	  <grishalevit@gmail.com>
+	- sv_strict_posix: make sure posixly_correct is set only if POSIXLY_CORRECT
+	  is set and has a value.  Reported by Grisha Levit <grishalevit@gmail.com>
+
+				   6/16
+				   ----
+builtins/declare.def
+	- declare_internal: analogous to 6/12 change; when performing an array
+	  subscript assignment on a nameref, display a warning, remove the
+	  nameref attribute, and go on

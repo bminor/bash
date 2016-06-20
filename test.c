@@ -823,6 +823,13 @@ posixtest ()
 	    value = !three_arguments ();
 	    break;
 	  }
+	else if (argv[pos][0] == '(' && argv[pos][1] == '\0' && argv[argc-1][0] == ')' && argv[argc-1][1] == '\0')
+	  {
+	    advance (1);
+	    value = two_arguments ();
+	    pos = argc;
+	    break;
+	  }
 	/* FALLTHROUGH */
       default:
 	value = expr ();
