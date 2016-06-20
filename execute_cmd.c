@@ -2405,9 +2405,17 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   if (lastpipe_flag)
     {
 #if defined (JOB_CONTROL)
-      append_process (savestring (the_printed_command), dollar_dollar_pid, exec_result, lastpipe_jid);
-#endif
+      if (INVALID_JOB (lastpipe_jid) == 0)
+        {
+          append_process (savestring (the_printed_command_except_trap), dollar_dollar_pid, exec_result, lastpipe_jid);
+          lstdin = wait_for (lastpid);
+        }
+      else
+        lstdin = wait_for_single_pid (lastpid);		/* checks bgpids list */
+#else
       lstdin = wait_for (lastpid);
+#endif
+
 #if defined (JOB_CONTROL)
       /* If wait_for removes the job from the jobs table, use result of last
 	 command as pipeline's exit status as usual.  The jobs list can get
