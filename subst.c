@@ -9561,7 +9561,14 @@ shell_expand_word_list (tlist, eflags)
 
 	  opts[opti] = '\0';
 	  if (opti > 0)
-	    make_internal_declare (tlist->word->word, opts);
+	    {
+	      t = make_internal_declare (tlist->word->word, opts);
+	      if (t != EXECUTION_SUCCESS)
+		{
+		  last_command_exit_value = t;
+		  exp_jump_to_top_level (DISCARD);
+		}
+	    }
 
 	  t = do_word_assignment (tlist->word, 0);
 	  if (t == 0)
