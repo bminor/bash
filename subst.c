@@ -8561,6 +8561,15 @@ param_expand (string, sindex, quoted, expanded_something,
 	      temp = string_list_dollar_at (list, quoted);
 	      if (quoted == 0 && (ifs_is_set == 0 || ifs_is_null))
 		tflag |= W_SPLITSPACE;
+	      /* If we're not quoted but we still don't want word splitting, make
+		 we quote the IFS characters to protect them from splitting (e.g.,
+		 when $@ is in the string as well). */
+	      else if (quoted == 0 && ifs_is_set && (pflags & PF_ASSIGNRHS))
+		{
+		  temp1 = quote_string (temp);
+		  free (temp);
+		  temp = temp1;
+		}
 	    }
 
 	  if (expand_no_split_dollar_star == 0 && contains_dollar_at)
@@ -9095,6 +9104,11 @@ add_string:
 		   string[sindex+1] == '~')
 	    word->flags |= W_ITILDE;
 #endif
+#if 0
+	  /* XXX - bash-5.0 */
+	  if (word->flags & W_ASSIGNARG)
+	    word->flags |= W_ASSIGNRHS;
+#endif
 	  if (isexp == 0 && (word->flags & (W_NOSPLIT|W_NOSPLIT2)) == 0 && isifs (c))
 	    goto add_ifs_character;
 	  else
@@ -9326,7 +9340,11 @@ add_twochars:
 	    {
 	      tword = alloc_word_desc ();
 	      tword->word = temp;
-
+#if 0
+	      /* XXX - bash-5.0 */
+	      if (word->flags & W_ASSIGNARG)
+		tword->flags |= word->flags & (W_ASSIGNARG|W_ASSIGNRHS);
+#endif
 	      temp = (char *)NULL;
 
 	      temp_has_dollar_at = 0;	/* XXX */

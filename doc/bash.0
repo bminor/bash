@@ -684,12 +684,12 @@ PPAARRAAMMEETTEERRSS
        and llooccaall below) to create a _n_a_m_e_r_e_f, or a reference to  another  vari-
        able.   This  allows  variables to be manipulated indirectly.  Whenever
        the nameref variable is referenced, assigned  to,  unset,  or  has  its
-       attributes  modified  (other  than  the  _n_a_m_e_r_e_f attribute itself), the
-       operation is actually  performed  on  the  variable  specified  by  the
-       nameref  variable's  value.   A  nameref  is commonly used within shell
-       functions to refer to a variable whose name is passed as an argument to
-       the  function.   For  instance, if a variable name is passed to a shell
-       function as its first argument, running
+       attributes modified (other than using or changing the _n_a_m_e_r_e_f attribute
+       itself), the operation is actually performed on the variable  specified
+       by  the  nameref  variable's  value.  A nameref is commonly used within
+       shell functions to refer to a variable whose name is passed as an argu-
+       ment  to the function.  For instance, if a variable name is passed to a
+       shell function as its first argument, running
               declare -n ref=$1
        inside the function creates a nameref variable rreeff whose value  is  the
        variable name passed as the first argument.  References and assignments
@@ -4427,9 +4427,9 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               --nn     Give each _n_a_m_e the _n_a_m_e_r_e_f attribute, making  it  a  name
                      reference  to  another  variable.  That other variable is
                      defined by the value of _n_a_m_e.   All  references,  assign-
-                     ments,  and  attribute  modifications to _n_a_m_e, except for
-                     changing the --nn attribute itself, are  performed  on  the
-                     variable   referenced   by  _n_a_m_e's  value.   The  nameref
+                     ments,  and attribute modifications to _n_a_m_e, except those
+                     using or changing the --nn attribute itself, are  performed
+                     on  the variable referenced by _n_a_m_e's value.  The nameref
                      attribute cannot be applied to array variables.
               --rr     Make _n_a_m_es readonly.  These names cannot then be assigned
                      values by subsequent assignment statements or unset.
@@ -5924,4 +5924,4 @@ BBUUGGSS
 
 
 
-GNU Bash 4.4                     2016 April 27                         BASH(1)
+GNU Bash 4.4                      2016 May 29                          BASH(1)

@@ -5517,6 +5517,7 @@ shell_execve (command, args, env)
       if (check_binary_file (sample, sample_len))
 	{
 	  internal_error (_("%s: cannot execute binary file: %s"), command, strerror (i));
+	  errno = i;
 	  return (EX_BINARY_FILE);
 	}
     }

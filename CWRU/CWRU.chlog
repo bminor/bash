@@ -11293,3 +11293,16 @@ builtins/declare.def
 	- declare_internal: analogous to 6/12 change; when performing an array
 	  subscript assignment on a nameref, display a warning, remove the
 	  nameref attribute, and go on
+
+				   6/21
+				   ----
+execute_cmd.c
+	- shell_execve: make sure errno is (re)set appropriately before returning
+	  error value on exec format error
+
+				   6/23
+				   ----
+execute_cmd.c
+	- param_expand: when expanding $* in a context where splitting is not
+	  desired (pflags & PF_ASSIGNRHS), make sure to quote the word and the
+	  included separators.  Reported by Dan Douglas <ormaaj@gmail.com>
