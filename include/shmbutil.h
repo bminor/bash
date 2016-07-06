@@ -499,5 +499,34 @@ extern int locale_mb_cur_max;	/* XXX */
 \
 	    goto add_string
 
+#  define SADD_MBCHAR_BODY(_dst, _src, _si, _srcsize) \
+\
+	    int i; \
+	    mbstate_t state_bak; \
+	    size_t mblength; \
+\
+	    i = is_basic (*((_src) + (_si))); \
+	    if (i) \
+	      mblength = 1; \
+	    else \
+	      { \
+		state_bak = state; \
+		mblength = mbrlen ((_src) + (_si), (_srcsize) - (_si), &state); \
+	      } \
+	    if (mblength == (size_t)-1 || mblength == (size_t)-2) \
+	      { \
+		state = state_bak; \
+		mblength = 1; \
+	      } \
+	    if (mblength < 1) \
+	      mblength = 1; \
+\
+	    (_dst) = (char *)xmalloc (mblength + 1); \
+	    for (i = 0; i < mblength; i++) \
+	      (_dst)[i+1] = (_src)[(_si)++]; \
+	    (_dst)[mblength+1] = '\0'; \
+\
+	    goto add_string
+
 #endif /* HANDLE_MULTIBYTE */
 #endif /* _SH_MBUTIL_H_ */

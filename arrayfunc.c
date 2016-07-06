@@ -1087,7 +1087,7 @@ array_value_internal (s, quoted, flags, rtype, indp)
 	  free (temp);
 	}
       else	/* ${name[@]} or unquoted ${name[*]} */
-	retval = string_list_dollar_at (l, quoted);	/* XXX - leak here */
+	retval = string_list_dollar_at (l, quoted, 0);	/* XXX - leak here */
 
       dispose_words (l);
     }
@@ -1204,7 +1204,7 @@ array_keys (s, quoted)
       free (temp);
     }
   else	/* ${!name[@]} or unquoted ${!name[*]} */
-    retval = string_list_dollar_at (l, quoted);
+    retval = string_list_dollar_at (l, quoted, 0);
 
   dispose_words (l);
   return retval;

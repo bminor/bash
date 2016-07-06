@@ -11306,3 +11306,27 @@ execute_cmd.c
 	- param_expand: when expanding $* in a context where splitting is not
 	  desired (pflags & PF_ASSIGNRHS), make sure to quote the word and the
 	  included separators.  Reported by Dan Douglas <ormaaj@gmail.com>
+
+				   6/30
+				   ----
+configure.ac
+	- release version is now `beta2'
+
+execute_cmd.c
+	- execute_simple_command: even if already_making_children is non-zero,
+	  don't call wait_for if last_made_pid == NO_PID.  Indirectly inspired
+	  by report from Nicolas Vivet <nicolas@nzx.io>
+
+				    7/2
+				    ---
+subst.c
+	- expand_word_internal: when adding an IFS character to the accumulated
+	  string, don't quote it if word expansion is not going to be
+	  performed ((word->flags & (W_NOSPLIT|W_NOSPLIT2)) == 0) in the
+	  default case.  This was already the case everwhere else, when we did
+	  `goto add_ifs_character;'.  Fixes bug reported by Ibrahim M. Ghazal
+	  <imgx64@gmail.com>
+
+subst.[ch],arrayfunc.c
+	- string_list_dollar_at: now takes a new third argument, currently
+	  reserved for future use; changed callers and declaration

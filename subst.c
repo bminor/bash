@@ -2514,9 +2514,10 @@ string_list_dollar_star (list)
    to quote the words in the list to preserve the positional parameters
    exactly. */
 char *
-string_list_dollar_at (list, quoted)
+string_list_dollar_at (list, quoted, flags)
      WORD_LIST *list;
      int quoted;
+     int flags;
 {
   char *ifs, *ret;
 #if defined (HANDLE_MULTIBYTE)
@@ -2613,7 +2614,7 @@ string_list_pos_params (pchar, list, quoted)
        string_list_dollar_star if the string is unquoted so we make sure that
        the elements of $@ are separated by the first character of $IFS for
        later splitting. */
-    ret = string_list_dollar_at (list, quoted);
+    ret = string_list_dollar_at (list, quoted, 0);
   else if (pchar == '@')
     ret = string_list_dollar_star (list);
   else
@@ -8021,7 +8022,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 	temp = string_list_dollar_star (xlist);
       else
 	{
-	  temp = string_list_dollar_at (xlist, quoted);
+	  temp = string_list_dollar_at (xlist, quoted, 0);
 	  if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && quoted_dollar_atp)
 	    *quoted_dollar_atp = 1;
 	  if (contains_dollar_at)
@@ -8558,7 +8559,7 @@ param_expand (string, sindex, quoted, expanded_something,
 	    temp = string_list_dollar_star (list);
 	  else
 	    {
-	      temp = string_list_dollar_at (list, quoted);
+	      temp = string_list_dollar_at (list, quoted, 0);
 	      if (quoted == 0 && (ifs_is_set == 0 || ifs_is_null))
 		tflag |= W_SPLITSPACE;
 	      /* If we're not quoted but we still don't want word splitting, make
@@ -8626,7 +8627,7 @@ param_expand (string, sindex, quoted, expanded_something,
 	 performed? Even when IFS is not the default, posix seems to imply
 	 that we behave like unquoted $* ?  Maybe we should use PF_NOSPLIT2
 	 here. */
-      temp = string_list_dollar_at (list, (pflags & PF_ASSIGNRHS) ? (quoted|Q_DOUBLE_QUOTES) : quoted);
+      temp = string_list_dollar_at (list, (pflags & PF_ASSIGNRHS) ? (quoted|Q_DOUBLE_QUOTES) : quoted, 0);
 
       tflag |= W_DOLLARAT;
       dispose_words (list);
@@ -9419,7 +9420,7 @@ add_twochars:
 		  /* Testing quoted_dollar_at makes sure that "$@" is
 		     split correctly when $IFS does not contain a space. */
 		  temp = quoted_dollar_at
-				? string_list_dollar_at (list, Q_DOUBLE_QUOTES)
+				? string_list_dollar_at (list, Q_DOUBLE_QUOTES, 0)
 				: string_list (quote_list (list));
 		  dispose_words (list);
 		  goto add_string;
@@ -9519,7 +9520,7 @@ add_twochars:
 	default:
 	  /* This is the fix for " $@ " */
 	add_ifs_character:
-	  if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (isexp == 0 && isifs (c)))
+	  if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (isexp == 0 && isifs (c) && (word->flags & (W_NOSPLIT|W_NOSPLIT2)) == 0))
 	    {
 	      if (string[sindex])	/* from old goto dollar_add_string */
 		sindex++;

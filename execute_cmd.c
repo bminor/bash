@@ -836,7 +836,9 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 #if !defined (JOB_CONTROL)
 	      /* Do not wait for asynchronous processes started from
 		 startup files. */
-	    if (last_made_pid != last_asynchronous_pid)
+	    if (last_made_pid != NO_PID && last_made_pid != last_asynchronous_pid)
+#else
+	    if (last_made_pid != NO_PID)
 #endif
 	    /* When executing a shell function that executes other
 	       commands, this causes the last simple command in
