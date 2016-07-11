@@ -1279,7 +1279,7 @@ check_redir (ti)
   /* Handle the two character tokens `>&', `<&', and `>|'.
      We are not in a command position after one of these. */
   this_char = rl_line_buffer[ti];
-  prev_char = rl_line_buffer[ti - 1];
+  prev_char = (ti > 0) ? rl_line_buffer[ti - 1] : 0;
 
   if ((this_char == '&' && (prev_char == '<' || prev_char == '>')) ||
       (this_char == '|' && prev_char == '>'))

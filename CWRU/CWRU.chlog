@@ -11163,9 +11163,10 @@ builtins/declare.def
 
 subst.c
 	- make_internal_declare: handle += append op
-	- shell_expand_word_list: when transforming assignment statement arguments
-	  to `declare', make sure to handle += append op to avoid passing invalid
-	  identifiers to declare.  Report by Grisha Levit <grishalevit@gmail.com>
+	- shell_expand_word_list: when transforming assignment statement
+	  arguments to `declare', make sure to handle += append op to avoid
+	  passing invalid identifiers to declare.  Report by Grisha Levit
+	  <grishalevit@gmail.com>
 
 				    6/1
 				    ---
@@ -11330,3 +11331,14 @@ subst.c
 subst.[ch],arrayfunc.c
 	- string_list_dollar_at: now takes a new third argument, currently
 	  reserved for future use; changed callers and declaration
+
+				    7/7
+				    ---
+[bash-4.4-beta2 frozen]
+
+				    7/9
+				    ---
+bashline.c
+	- check_redir: make sure that index is > 0 before checking previous
+	  char; fixes out of bounds read reported by Hanno Böck
+	  <hanno@hboeck.de>

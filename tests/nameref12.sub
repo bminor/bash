@@ -36,7 +36,7 @@ unset -n r; unset r
 f() { echo $r; }
 
 declare -n r
-r=/ /usr/bin/sum < /dev/null
+r=/ ${THIS_SH} < /dev/null
 r=/ f
 
 unset -f f
