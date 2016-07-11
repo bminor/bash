@@ -1381,10 +1381,29 @@ redir_varvalue (redir)
   /* XXX - handle set -u here? */
 #if defined (ARRAY_VARS)
   if (vr = valid_array_reference (w, 0))
-    v = array_variable_part (w, &sub, &len);
+    {
+      v = array_variable_part (w, &sub, &len);
+    }
   else
 #endif
-  v = find_variable (w);
+    {
+      v = find_variable (w);
+#if defined (ARRAY_VARS)
+      if (v == 0)
+	{
+	  v = find_variable_last_nameref (w, 0);
+	  if (v && nameref_p (v))
+	    {
+	      w = nameref_cell (v);
+	      if (vr = valid_array_reference (w, 0))
+		v = array_variable_part (w, &sub, &len);
+	      else
+	        v = find_variable (w);
+	    }
+	}
+#endif
+    }
+	
   if (v == 0 || invisible_p (v))
     return -1;
 

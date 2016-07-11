@@ -965,7 +965,7 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	  /* Tentative inter-character timeout for potential multi-key
 	     sequences?  If no input within timeout, abort sequence and
 	     act as if we got non-matching input. */
-	  /* _rl_keyseq_timeout specified in milliseconds; _rl_input_queued[B
+	  /* _rl_keyseq_timeout specified in milliseconds; _rl_input_queued
 	     takes microseconds, so multiply by 1000 */
 	  if (_rl_keyseq_timeout > 0 &&
 	  	(RL_ISSTATE (RL_STATE_INPUTPENDING|RL_STATE_MACROINPUT) == 0) &&

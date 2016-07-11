@@ -119,15 +119,15 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 	  break;
 
 	case '*':		/* Match zero or more characters */
-	  if (p == pe)
-	    return 0;
-	  
 	  if ((flags & FNM_PERIOD) && sc == L('.') &&
 	      (n == string || ((flags & FNM_PATHNAME) && n[-1] == L('/'))))
 	    /* `*' cannot match a `.' if it is the first character of the
 	       string or if it is the first character following a slash and
 	       we are matching a pathname. */
 	    return FNM_NOMATCH;
+
+	  if (p == pe)
+	    return 0;
 
 	  /* Collapse multiple consecutive `*' and `?', but make sure that
 	     one character of the string is consumed for each `?'. */
@@ -140,14 +140,26 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 	      else if ((flags & FNM_EXTMATCH) && c == L('?') && *p == L('(')) /* ) */
 		{
 		  CHAR *newn;
+
+#if 0
 		  for (newn = n; newn < se; ++newn)
 		    {
 		      if (EXTMATCH (c, newn, se, p, pe, flags) == 0)
 			return (0);
 		    }
-		  /* We didn't match.  If we have a `?(...)', we can match 0
-		     or 1 times. */
-		  return 0;
+#else
+		  /* We can match 0 or 1 times.  If we match, return success */
+		  if (EXTMATCH (c, n, se, p, pe, flags) == 0)
+		    return (0);
+#endif
+
+		  /* We didn't match the extended glob pattern, but
+		     that's OK, since we can match 0 or 1 occurrences.
+		     We need to skip the glob pattern and see if we
+		     match the rest of the string. */
+		  newn = PATSCAN (p + 1, pe, 0);
+		  /* If NEWN is 0, we have an ill-formed pattern. */
+		  p = newn ? newn : pe;
 		}
 #endif
 	      else if (c == L('?'))

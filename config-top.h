@@ -27,6 +27,10 @@
    error messages about `break' and `continue' out of context. */
 #define BREAK_COMPLAINS
 
+/* Define CD_COMPLAINS if you want the non-standard, but sometimes-desired
+   error messages about multiple directory arguments to `cd'. */
+#define CD_COMPLAINS
+
 /* Define BUFFERED_INPUT if you want the shell to do its own input
    buffering, rather than using stdio.  Do not undefine this; it's
    required to preserve semantics required by POSIX. */
@@ -152,3 +156,7 @@
 /* Define to the maximum level of recursion you want for the source/. builtin.
    0 means the limit is not active. */
 #define SOURCENEST_MAX 0
+
+/* Define to use libc mktemp/mkstemp instead of replacements in lib/sh/tmpfile.c */
+#define USE_MKTEMP
+#define USE_MKSTEMP

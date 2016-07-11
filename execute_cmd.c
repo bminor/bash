@@ -1,6 +1,6 @@
 /* execute_cmd.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -836,7 +836,9 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 #if !defined (JOB_CONTROL)
 	      /* Do not wait for asynchronous processes started from
 		 startup files. */
-	    if (last_made_pid != last_asynchronous_pid)
+	    if (last_made_pid != NO_PID && last_made_pid != last_asynchronous_pid)
+#else
+	    if (last_made_pid != NO_PID)
 #endif
 	    /* When executing a shell function that executes other
 	       commands, this causes the last simple command in
@@ -2118,6 +2120,7 @@ coproc_fdrestore (cp)
 void
 coproc_pidchk (pid, status)
      pid_t pid;
+     int status;
 {
   struct coproc *cp;
 
@@ -2149,6 +2152,7 @@ coproc_setvars (cp)
   SHELL_VAR *v;
   char *namevar, *t;
   int l;
+  WORD_DESC w;
 #if defined (ARRAY_VARS)
   arrayind_t ind;
 #endif
@@ -2156,11 +2160,40 @@ coproc_setvars (cp)
   if (cp->c_name == 0)
     return;
 
+  /* We could do more here but right now we only check the name, warn if it's
+     not a valid identifier, and refuse to create variables with invalid names
+     if a coproc with such a name is supplied. */
+  w.word = cp->c_name;
+  w.flags = 0;
+  if (check_identifier (&w, 1) == 0)
+    return;
+
   l = strlen (cp->c_name);
   namevar = xmalloc (l + 16);
 
 #if defined (ARRAY_VARS)
   v = find_variable (cp->c_name);
+
+  /* This is the same code as in find_or_make_array_variable */
+  if (v == 0)
+    {
+      v = find_variable_nameref_for_create (cp->c_name, 1);
+      if (v == INVALID_NAMEREF_VALUE)
+	return;
+      if (v && nameref_p (v))
+	{
+	  free (cp->c_name);
+	  cp->c_name = savestring (nameref_cell (v));
+	  v = make_new_array_variable (cp->c_name);	  
+	}
+    }
+
+  if (v && (readonly_p (v) || noassign_p (v)))
+    {
+      if (readonly_p (v))
+	err_readonly (cp->c_name);
+      return;
+    }
   if (v == 0)
     v = make_new_array_variable (cp->c_name);
   if (array_p (v) == 0)
@@ -2208,10 +2241,10 @@ coproc_unsetvars (cp)
   namevar = xmalloc (l + 16);
 
   sprintf (namevar, "%s_PID", cp->c_name);
-  unbind_variable (namevar);  
+  unbind_variable_noref (namevar);  
 
 #if defined (ARRAY_VARS)
-  unbind_variable (cp->c_name);
+  check_unbind_variable (cp->c_name);
 #else
   sprintf (namevar, "%s_READ", cp->c_name);
   unbind_variable (namevar);
@@ -2237,7 +2270,7 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
   /* XXX -- can be removed after changes to handle multiple coprocs */
 #if !MULTIPLE_COPROCS
   if (sh_coproc.c_pid != NO_PID)
-    internal_warning ("execute_coproc: coproc [%d:%s] still exists", sh_coproc.c_pid, sh_coproc.c_name);
+    internal_warning (_("execute_coproc: coproc [%d:%s] still exists"), sh_coproc.c_pid, sh_coproc.c_name);
   coproc_init (&sh_coproc);
 #endif
 
@@ -2468,7 +2501,7 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
           lstdin = wait_for (lastpid);
         }
       else
-        lstdin = wait_for_single_pid (lastpid);		/* checks bgpids list */
+        lstdin = wait_for_single_pid (lastpid, 0);		/* checks bgpids list */
 #else
       lstdin = wait_for (lastpid);
 #endif
@@ -2732,17 +2765,24 @@ execute_for_command (for_command)
 
       this_command_name = (char *)NULL;
       /* XXX - special ksh93 for command index variable handling */
-      v = find_variable_last_nameref (identifier);
+      v = find_variable_last_nameref (identifier, 1);
       if (v && nameref_p (v))
-        {
-          v = bind_variable_value (v, list->word->word, 0);
-        }
+	{
+	  if (valid_nameref_value (list->word->word, 1) == 0)
+	    {
+	      sh_invalidid (list->word->word);
+	      v = 0;
+	    }
+	  else
+	    v = bind_variable_value (v, list->word->word, 0);
+	}
       else
-        v = bind_variable (identifier, list->word->word, 0);
-      if (readonly_p (v) || noassign_p (v))
+	v = bind_variable (identifier, list->word->word, 0);
+
+      if (v == 0 || readonly_p (v) || noassign_p (v))
 	{
 	  line_number = save_line_number;
-	  if (readonly_p (v) && interactive_shell == 0 && posixly_correct)
+	  if (v && readonly_p (v) && interactive_shell == 0 && posixly_correct)
 	    {
 	      last_command_exit_value = EXECUTION_FAILURE;
 	      jump_to_top_level (FORCE_EOF);
@@ -2755,6 +2795,10 @@ execute_for_command (for_command)
 	      return (EXECUTION_FAILURE);
 	    }
 	}
+
+      if (ifsname (identifier))
+	setifs (v);
+
       retval = execute_command (for_command->action);
       REAP ();
       QUIT;
@@ -3232,9 +3276,9 @@ execute_select_command (select_command)
 	}
 
       v = bind_variable (identifier, selection, 0);
-      if (readonly_p (v) || noassign_p (v))
+      if (v == 0 || readonly_p (v) || noassign_p (v))
 	{
-	  if (readonly_p (v) && interactive_shell == 0 && posixly_correct)
+	  if (v && readonly_p (v) && interactive_shell == 0 && posixly_correct)
 	    {
 	      last_command_exit_value = EXECUTION_FAILURE;
 	      jump_to_top_level (FORCE_EOF);
@@ -3765,7 +3809,8 @@ bind_lastarg (arg)
   if (arg == 0)
     arg = "";
   var = bind_variable ("_", arg, 0);
-  VUNSETATTR (var, att_exported);
+  if (var)
+    VUNSETATTR (var, att_exported);
 }
 
 /* Execute a null command.  Fork a subshell if the command uses pipes or is
@@ -5474,6 +5519,7 @@ shell_execve (command, args, env)
       if (check_binary_file (sample, sample_len))
 	{
 	  internal_error (_("%s: cannot execute binary file: %s"), command, strerror (i));
+	  errno = i;
 	  return (EX_BINARY_FILE);
 	}
     }

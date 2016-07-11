@@ -87,6 +87,12 @@ convert_var_to_array (var)
   VSETATTR (var, att_array);
   VUNSETATTR (var, att_invisible);
 
+  /* Make sure it's not marked as an associative array any more */
+  VUNSETATTR (var, att_assoc);
+
+  /* Since namerefs can't be array variables, turn off nameref attribute */
+  VUNSETATTR (var, att_nameref);
+
   return var;
 }
 
@@ -117,6 +123,12 @@ convert_var_to_assoc (var)
 
   VSETATTR (var, att_assoc);
   VUNSETATTR (var, att_invisible);
+
+  /* Make sure it's not marked as an indexed array any more */
+  VUNSETATTR (var, att_array);
+
+  /* Since namerefs can't be array variables, turn off nameref attribute */
+  VUNSETATTR (var, att_nameref);
 
   return var;
 }
@@ -205,6 +217,15 @@ bind_array_variable (name, ind, value, flags)
   entry = find_shell_variable (name);
 
   if (entry == (SHELL_VAR *) 0)
+    {
+      /* Is NAME a nameref variable that points to an unset variable? */
+      entry = find_variable_nameref_for_create (name, 0);
+      if (entry == INVALID_NAMEREF_VALUE)
+	return ((SHELL_VAR *)0);
+      if (entry && nameref_p (entry))
+	entry = make_new_array_variable (nameref_cell (entry));
+    }
+  if (entry == (SHELL_VAR *) 0)
     entry = make_new_array_variable (name);
   else if ((readonly_p (entry) && (flags&ASS_FORCE) == 0) || noassign_p (entry))
     {
@@ -259,7 +280,7 @@ assign_array_element (name, value, flags)
 {
   char *sub, *vname;
   int sublen;
-  SHELL_VAR *entry;
+  SHELL_VAR *entry, *nv;
 
   vname = array_variable_name (name, &sub, &sublen);
 
@@ -341,9 +362,21 @@ find_or_make_array_variable (name, flags)
     {
       /* See if we have a nameref pointing to a variable that hasn't been
 	 created yet. */
-      var = find_variable_last_nameref (name);
+      var = find_variable_last_nameref (name, 1);
+      if (var && nameref_p (var) && invisible_p (var))
+	{
+	  internal_warning (_("%s: removing nameref attribute"), name);
+	  VUNSETATTR (var, att_nameref);
+	}
       if (var && nameref_p (var))
-	var = (flags & 2) ? make_new_assoc_variable (nameref_cell (var)) : make_new_array_variable (nameref_cell (var));
+	{
+	  if (valid_nameref_value (nameref_cell (var), 2) == 0)
+	    {
+	      sh_invalidid (nameref_cell (var));
+	      return ((SHELL_VAR *)NULL);
+	    }
+	  var = (flags & 2) ? make_new_assoc_variable (nameref_cell (var)) : make_new_array_variable (nameref_cell (var));
+	}
     }
 
   if (var == 0)
@@ -403,10 +436,7 @@ assign_array_var_from_word_list (var, list, flags)
   i = (flags & ASS_APPEND) ? array_max_index (a) + 1 : 0;
 
   for (l = list; l; l = l->next, i++)
-    if (var->assign_func)
-      (*var->assign_func) (var, l->word->word, i, 0);
-    else
-      array_insert (a, i, l->word->word);
+    bind_array_var_internal (var, i, 0, l->word->word, flags & ~ASS_APPEND);
 
   VUNSETATTR (var, att_invisible);	/* no longer invisible */
 
@@ -869,6 +899,8 @@ valid_array_reference (name, flags)
       len = skipsubscript (t, 0, 0);
       if (t[len] != ']' || len == 1)
 	return 0;
+      if (t[len+1] != '\0')
+	return 0;
       for (r = 1; r < len; r++)
 	if (whitespace (t[r]) == 0)
 	  return 1;
@@ -969,7 +1001,7 @@ array_variable_part (s, subp, lenp)
   t = array_variable_name (s, subp, lenp);
   if (t == 0)
     return ((SHELL_VAR *)NULL);
-  var = find_variable (t);
+  var = find_variable (t);		/* XXX - handle namerefs here? */
 
   free (t);
   return var;	/* now return invisible variables; caller must handle */
@@ -1055,7 +1087,7 @@ array_value_internal (s, quoted, flags, rtype, indp)
 	  free (temp);
 	}
       else	/* ${name[@]} or unquoted ${name[*]} */
-	retval = string_list_dollar_at (l, quoted);	/* XXX - leak here */
+	retval = string_list_dollar_at (l, quoted, 0);	/* XXX - leak here */
 
       dispose_words (l);
     }
@@ -1172,7 +1204,7 @@ array_keys (s, quoted)
       free (temp);
     }
   else	/* ${!name[@]} or unquoted ${!name[*]} */
-    retval = string_list_dollar_at (l, quoted);
+    retval = string_list_dollar_at (l, quoted, 0);
 
   dispose_words (l);
   return retval;

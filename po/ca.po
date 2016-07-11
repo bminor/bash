@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash-4.4-beta1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-02-10 07:59-0500\n"
+"POT-Creation-Date: 2016-07-06 10:32-0400\n"
 "PO-Revision-Date: 2015-10-18 13:33+0200\n"
 "Last-Translator: Ernest Adrogué Calveras <eadrogue@gmx.net>\n"
 "Language-Team: Catalan <ca@dodds.net>\n"
@@ -22,47 +22,53 @@ msgstr ""
 msgid "bad array subscript"
 msgstr "subíndex erroni"
 
-#: arrayfunc.c:360 builtins/declare.def:648
+#: arrayfunc.c:368 builtins/declare.def:574 variables.c:2092 variables.c:2118
+#: variables.c:2730
+#, c-format
+msgid "%s: removing nameref attribute"
+msgstr ""
+
+#: arrayfunc.c:393 builtins/declare.def:780
 #, c-format
 msgid "%s: cannot convert indexed to associative array"
 msgstr "%s: no es pot convertir el vector indexat en associatiu"
 
-#: arrayfunc.c:548
+#: arrayfunc.c:578
 #, c-format
 msgid "%s: invalid associative array key"
 msgstr "%s: clau incorrecta de vector associatiu"
 
-#: arrayfunc.c:550
+#: arrayfunc.c:580
 #, c-format
 msgid "%s: cannot assign to non-numeric index"
 msgstr "%s: no és possible assignar a un índex no-numèric"
 
-#: arrayfunc.c:595
+#: arrayfunc.c:625
 #, c-format
 msgid "%s: %s: must use subscript when assigning associative array"
 msgstr "%s: %s: l'assignació en vectors associatius requereix un subíndex"
 
-#: bashhist.c:417
+#: bashhist.c:421
 #, c-format
 msgid "%s: cannot create: %s"
 msgstr "%s: no es pot crear: %s"
 
-#: bashline.c:4075
+#: bashline.c:4084
 msgid "bash_execute_unix_command: cannot find keymap for command"
 msgstr ""
 "bash_execute_unix_command: no s'ha trobat el mapa de tecles per a l'ordre"
 
-#: bashline.c:4169
+#: bashline.c:4182
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr "%s: el primer caràcter no-blanc no és `\"'"
 
-#: bashline.c:4198
+#: bashline.c:4211
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr "falta un caràcter `%c' a %s"
 
-#: bashline.c:4232
+#: bashline.c:4245
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: falten dos punts `:' de separació"
@@ -82,7 +88,7 @@ msgstr "expansió de claus: ha fallat l'assignació de memòria per a %d element
 msgid "brace expansion: failed to allocate memory for `%s'"
 msgstr "expansió de claus: ha fallat l'assignació de memòria per a `%s'"
 
-#: builtins/alias.def:132
+#: builtins/alias.def:133
 #, c-format
 msgid "`%s': invalid alias name"
 msgstr "`%s': el nom de l'àlies no és valid"
@@ -141,11 +147,16 @@ msgstr ""
 msgid "HOME not set"
 msgstr "la variable HOME no està definida"
 
-#: builtins/cd.def:329 builtins/common.c:167 test.c:878
+#: builtins/cd.def:329 builtins/common.c:167 test.c:885
 msgid "too many arguments"
 msgstr "sobren arguments"
 
-#: builtins/cd.def:340
+#: builtins/cd.def:336
+#, fuzzy
+msgid "null directory"
+msgstr "no hi ha més directoris"
+
+#: builtins/cd.def:347
 msgid "OLDPWD not set"
 msgstr "la variable OLDPWD no està definida"
 
@@ -164,7 +175,7 @@ msgstr "atenció: "
 msgid "%s: usage: "
 msgstr "%s: sintaxi: "
 
-#: builtins/common.c:199 shell.c:511 shell.c:802
+#: builtins/common.c:199 shell.c:514 shell.c:825
 #, c-format
 msgid "%s: option requires an argument"
 msgstr "%s: l'opció requereix un argument"
@@ -179,7 +190,7 @@ msgstr "%s: fa falta un argument numèric"
 msgid "%s: not found"
 msgstr "%s: no s'ha trobat"
 
-#: builtins/common.c:222 shell.c:815
+#: builtins/common.c:222 shell.c:838
 #, c-format
 msgid "%s: invalid option"
 msgstr "%s: l'opció no és vàlida"
@@ -189,7 +200,7 @@ msgstr "%s: l'opció no és vàlida"
 msgid "%s: invalid option name"
 msgstr "%s: el nom de l'opció no és vàlid"
 
-#: builtins/common.c:236 general.c:242 general.c:247
+#: builtins/common.c:236 general.c:293 general.c:298
 #, c-format
 msgid "`%s': not a valid identifier"
 msgstr "`%s': no és un identificador vàlid"
@@ -299,7 +310,7 @@ msgid "%s: invalid action name"
 msgstr "%s: el nom de l'acció no és vàlid"
 
 #: builtins/complete.def:452 builtins/complete.def:647
-#: builtins/complete.def:857
+#: builtins/complete.def:858
 #, c-format
 msgid "%s: no completion specification"
 msgstr "%s: no hi ha especificació de compleció"
@@ -312,7 +323,7 @@ msgstr "atenció: l'opció -F pot no funcionar com us espereu"
 msgid "warning: -C option may not work as you expect"
 msgstr "atenció: l'opció -C pot no funcionar com us espereu"
 
-#: builtins/complete.def:830
+#: builtins/complete.def:831
 msgid "not currently executing completion function"
 msgstr "no s'està executant una funció de compleció"
 
@@ -320,42 +331,48 @@ msgstr "no s'està executant una funció de compleció"
 msgid "can only be used in a function"
 msgstr "només es pot utilitzar en una funció"
 
-#: builtins/declare.def:331 builtins/declare.def:567
+#: builtins/declare.def:332 builtins/declare.def:685
 #, c-format
 msgid "%s: reference variable cannot be an array"
 msgstr "%s: la variable referenciada no pot ser un vector"
 
-#: builtins/declare.def:340
+#: builtins/declare.def:343 variables.c:2959
 #, c-format
 msgid "%s: nameref variable self references not allowed"
 msgstr "%s: no és permès que una variable s'autoreferenciï"
 
-# buscar context
-#: builtins/declare.def:347 builtins/declare.def:576 subst.c:6474 subst.c:8796
+#: builtins/declare.def:348 variables.c:1928 variables.c:2877 variables.c:2889
+#: variables.c:2956
 #, c-format
-msgid "%s: invalid variable name for name reference"
+msgid "%s: circular name reference"
+msgstr "%s: la referència de nom és circular"
+
+# buscar context
+#: builtins/declare.def:353 builtins/declare.def:691 builtins/declare.def:702
+#, fuzzy, c-format
+msgid "`%s': invalid variable name for name reference"
 msgstr "%s: el nom de la variable referenciada no és vàlid"
 
-#: builtins/declare.def:425
+#: builtins/declare.def:463
 msgid "cannot use `-f' to make functions"
 msgstr "no és possible usar `-f' per a fer funcions"
 
-#: builtins/declare.def:437 execute_cmd.c:5562
+#: builtins/declare.def:475 execute_cmd.c:5608
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: funció de només-lectura"
 
-#: builtins/declare.def:621
+#: builtins/declare.def:753
 #, c-format
 msgid "%s: quoted compound array assignment deprecated"
 msgstr "%s: les assignacions compostes amb cometes estan desfasades"
 
-#: builtins/declare.def:635
+#: builtins/declare.def:767
 #, c-format
 msgid "%s: cannot destroy array variables in this way"
 msgstr "%s: no és possible destruir variables vector d'aquesta manera"
 
-#: builtins/declare.def:642 builtins/read.def:751
+#: builtins/declare.def:774 builtins/read.def:751
 #, c-format
 msgid "%s: cannot convert associative to indexed array"
 msgstr "%s: no es pot convertir el vector associatiu en indexat"
@@ -389,7 +406,7 @@ msgstr "%s: no s'ha carregat dinàmicament"
 msgid "%s: cannot delete: %s"
 msgstr "%s: no es pot eliminar: %s"
 
-#: builtins/evalfile.c:144 builtins/hash.def:172 execute_cmd.c:5404
+#: builtins/evalfile.c:144 builtins/hash.def:172 execute_cmd.c:5449
 #, c-format
 msgid "%s: is a directory"
 msgstr "%s: és un directori"
@@ -404,7 +421,7 @@ msgstr "%s: no és un fitxer ordinari"
 msgid "%s: file is too large"
 msgstr "%s: el fitxer és massa gran"
 
-#: builtins/evalfile.c:194 builtins/evalfile.c:212 shell.c:1553
+#: builtins/evalfile.c:194 builtins/evalfile.c:212 shell.c:1578
 #, c-format
 msgid "%s: cannot execute binary file"
 msgstr "%s: no es poden executar fitxers binaris"
@@ -447,7 +464,7 @@ msgid "%s: cannot open temp file: %s"
 msgstr "%s: no es pot obrir el fitxer temporal: %s"
 
 # fg  quan no hi ha cap tasca en segon pla
-#: builtins/fg_bg.def:153 builtins/jobs.def:283
+#: builtins/fg_bg.def:153 builtins/jobs.def:284
 msgid "current"
 msgstr "actual"
 
@@ -810,22 +827,22 @@ msgid "can only `return' from a function or sourced script"
 msgstr "només es pot fer `return' des d'una funció o script"
 
 # unset -f -v foo
-#: builtins/set.def:831
+#: builtins/set.def:841
 msgid "cannot simultaneously unset a function and a variable"
 msgstr "no és possible suprimir una funció i una variable alhora"
 
-#: builtins/set.def:878
+#: builtins/set.def:888
 #, c-format
 msgid "%s: cannot unset"
 msgstr "%s: no es pot suprimir"
 
 # unset UID
-#: builtins/set.def:899
+#: builtins/set.def:909 variables.c:3389
 #, c-format
 msgid "%s: cannot unset: readonly %s"
 msgstr "%s: no es pot suprimir: %s de només-lectura"
 
-#: builtins/set.def:912
+#: builtins/set.def:922
 #, c-format
 msgid "%s: not an array variable"
 msgstr "%s: no és una variable vector"
@@ -845,13 +862,13 @@ msgstr "%s: no es pot suprimir"
 msgid "shift count"
 msgstr "nombre de shifts"
 
-#: builtins/shopt.def:286
+#: builtins/shopt.def:289
 msgid "cannot set and unset shell options simultaneously"
 msgstr ""
 "no es poden activar i desactivar opcions de l'intèrpret al mateix temps"
 
 # shopt -s foo
-#: builtins/shopt.def:353
+#: builtins/shopt.def:391
 #, c-format
 msgid "%s: invalid shell option name"
 msgstr "%s: l'opció de l'intèrpret no és vàlida"
@@ -1006,62 +1023,67 @@ msgid "cannot redirect standard input from /dev/null: %s"
 msgstr "no s'ha pogut redirigir l'entrada estàndard des de /dev/null: %s"
 
 # error intern
-#: execute_cmd.c:1273
+#: execute_cmd.c:1275
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "TIMEFORMAT: `%c': el caràcter de format no és vàlid"
 
-#: execute_cmd.c:2344
+#: execute_cmd.c:2273
+#, c-format
+msgid "execute_coproc: coproc [%d:%s] still exists"
+msgstr ""
+
+#: execute_cmd.c:2377
 msgid "pipe error"
 msgstr "error de canalització"
 
-#: execute_cmd.c:4430
+#: execute_cmd.c:4475
 #, fuzzy, c-format
 msgid "eval: maximum eval nesting level exceeded (%d)"
 msgstr "%s: s'ha excedit el nivell màxim d'imbricació de funcions (%d)"
 
-#: execute_cmd.c:4442
+#: execute_cmd.c:4487
 #, fuzzy, c-format
 msgid "%s: maximum source nesting level exceeded (%d)"
 msgstr "%s: s'ha excedit el nivell màxim d'imbricació de funcions (%d)"
 
-#: execute_cmd.c:4550
+#: execute_cmd.c:4595
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
 msgstr "%s: s'ha excedit el nivell màxim d'imbricació de funcions (%d)"
 
-#: execute_cmd.c:5077
+#: execute_cmd.c:5122
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: restricció: no podeu especificar `/' en noms d'ordres"
 
-#: execute_cmd.c:5165
+#: execute_cmd.c:5210
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: no s'ha trobat l'ordre"
 
-#: execute_cmd.c:5402
+#: execute_cmd.c:5447
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: execute_cmd.c:5439
+#: execute_cmd.c:5484
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: intèrpret erroni"
 
 # error intern
-#: execute_cmd.c:5476
+#: execute_cmd.c:5521
 #, c-format
 msgid "%s: cannot execute binary file: %s"
 msgstr "%s: no es pot executar el fitxer binari: %s"
 
-#: execute_cmd.c:5553
+#: execute_cmd.c:5599
 #, c-format
 msgid "`%s': is a special builtin"
 msgstr "`%s': és una ordre interna especial"
 
-#: execute_cmd.c:5605
+#: execute_cmd.c:5651
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "no s'ha pogut duplicar l'fd %d com a fd %d"
@@ -1138,7 +1160,7 @@ msgstr "%s: expressió errònia\n"
 msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: els directoris superiors són inaccessibles"
 
-#: input.c:102 subst.c:5763
+#: input.c:102 subst.c:5767
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "no s'ha pogut restablir el mode nodelay per a l'fd %d"
@@ -1153,149 +1175,149 @@ msgstr "error en crear un fd nou a partir de l'fd %d"
 msgid "save_bash_input: buffer already exists for new fd %d"
 msgstr "save_bash_input: ja existia un buffer per al nou fd %d"
 
-#: jobs.c:521
+#: jobs.c:523
 msgid "start_pipeline: pgrp pipe"
 msgstr "start_pipeline: pgrp de la canalització"
 
-#: jobs.c:1029
+#: jobs.c:1031
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr "el pid bifurcat %d apareix a la tasca en execució %d"
 
-#: jobs.c:1148
+#: jobs.c:1150
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "s'elimina la tasca aturada %d amb grup de procés %ld"
 
-#: jobs.c:1252
+#: jobs.c:1254
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
 msgstr "add_process: procés %5ld (%s) a the_pipeline"
 
-#: jobs.c:1255
+#: jobs.c:1257
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr "add_process: el pid %5ld (%s) està marcat com a encara actiu"
 
-#: jobs.c:1584
+#: jobs.c:1586
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "describe_pid: %ld: no existeix tal pid"
 
-#: jobs.c:1599
+#: jobs.c:1601
 #, c-format
 msgid "Signal %d"
 msgstr "Senyal %d"
 
-#: jobs.c:1613 jobs.c:1639
+#: jobs.c:1615 jobs.c:1641
 msgid "Done"
 msgstr "Fet"
 
-#: jobs.c:1618 siglist.c:123
+#: jobs.c:1620 siglist.c:123
 msgid "Stopped"
 msgstr "Aturat"
 
-#: jobs.c:1622
+#: jobs.c:1624
 #, c-format
 msgid "Stopped(%s)"
 msgstr "Aturat(%s)"
 
-#: jobs.c:1626
+#: jobs.c:1628
 msgid "Running"
 msgstr "Executant-se"
 
-#: jobs.c:1643
+#: jobs.c:1645
 #, c-format
 msgid "Done(%d)"
 msgstr "Fet(%d)"
 
-#: jobs.c:1645
+#: jobs.c:1647
 #, c-format
 msgid "Exit %d"
 msgstr "Sortida %d"
 
-#: jobs.c:1648
+#: jobs.c:1650
 msgid "Unknown status"
 msgstr "Estat desconegut"
 
-#: jobs.c:1735
+#: jobs.c:1737
 #, c-format
 msgid "(core dumped) "
 msgstr "(s'ha bolcat la memòria)"
 
 # wd = working directory
-#: jobs.c:1754
+#: jobs.c:1756
 #, c-format
 msgid "  (wd: %s)"
 msgstr "  (dt: %s)"
 
-#: jobs.c:1978
+#: jobs.c:1981
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr "setpgid (de %ld a %ld) per al procés inferior"
 
-#: jobs.c:2336 nojobs.c:648
+#: jobs.c:2343 nojobs.c:653
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: el pid %ld no és un fill d'aquest intèrpret"
 
-#: jobs.c:2591
+#: jobs.c:2598
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for: No es té constància del procés %ld"
 
-#: jobs.c:2909
+#: jobs.c:2920
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: la tasca %d està aturada"
 
-#: jobs.c:3201
+#: jobs.c:3212
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: la tasca ha acabat"
 
-#: jobs.c:3210
+#: jobs.c:3221
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: la tasca %d ja es troba en segon pla"
 
-#: jobs.c:3435
+#: jobs.c:3446
 msgid "waitchld: turning on WNOHANG to avoid indefinite block"
 msgstr "waitchld: s'activa el WNOHANG per a evitar un bloqueig indefinit"
 
-#: jobs.c:3948
+#: jobs.c:3959
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s línia %d: "
 
-#: jobs.c:3962 nojobs.c:891
+#: jobs.c:3973 nojobs.c:896
 #, c-format
 msgid " (core dumped)"
 msgstr " (s'ha bolcat la memòria)"
 
-#: jobs.c:3974 jobs.c:3987
+#: jobs.c:3985 jobs.c:3998
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(dt ara: %s)\n"
 
-#: jobs.c:4019
+#: jobs.c:4030
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: getpgrp ha fallat"
 
-#: jobs.c:4082
+#: jobs.c:4093
 msgid "initialize_job_control: line discipline"
 msgstr "initialize_job_control: disciplina de línia"
 
-#: jobs.c:4092
+#: jobs.c:4103
 msgid "initialize_job_control: setpgid"
 msgstr "initialize_job_control: setpgid"
 
-#: jobs.c:4113 jobs.c:4122
+#: jobs.c:4124 jobs.c:4133
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "no s'ha pogut establir el grup de procés del terminal (%d)"
 
-#: jobs.c:4127
+#: jobs.c:4138
 msgid "no job control in this shell"
 msgstr "aquesta sessió no té control de tasques"
 
@@ -1447,104 +1469,111 @@ msgstr "document literal a la línia %d delimitat per EOF (volia `%s')"
 msgid "make_redirection: redirection instruction `%d' out of range"
 msgstr "make_redirection: instrucció de redirecció `%d' fora del domini"
 
-#: parse.y:2691
+#: parse.y:2324
+#, c-format
+msgid ""
+"shell_getc: shell_input_line_size (%zu) exceeds SIZE_MAX (%lu): line "
+"truncated"
+msgstr ""
+
+#: parse.y:2700
 msgid "maximum here-document count exceeded"
 msgstr "s'ha excedit el nombre màxim de documents literals"
 
 # "echo $(echo" en un script
-#: parse.y:3379 parse.y:3662
+#: parse.y:3390 parse.y:3748
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "EOF inesperat mentre es cercava un `%c'"
 
-#: parse.y:4279
+#: parse.y:4410
 msgid "unexpected EOF while looking for `]]'"
 msgstr "EOF inesperat mentre es cercava `]]'"
 
-#: parse.y:4284
+#: parse.y:4415
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr "error de sintaxi a l'expressió condicional: element `%s' inesperat"
 
-#: parse.y:4288
+#: parse.y:4419
 msgid "syntax error in conditional expression"
 msgstr "error de sintaxi a l'expressió condicional"
 
-#: parse.y:4366
+#: parse.y:4497
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr "element `%s' inesperat, s'esperava `)'"
 
-#: parse.y:4370
+#: parse.y:4501
 msgid "expected `)'"
 msgstr "s'esperava `)'"
 
-#: parse.y:4398
+#: parse.y:4529
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr "argument `%s' inesperat a l'operador unari condicional"
 
-#: parse.y:4402
+#: parse.y:4533
 msgid "unexpected argument to conditional unary operator"
 msgstr "argument inesperat a l'operador unari condicional"
 
-#: parse.y:4448
+#: parse.y:4579
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr "element `%s' inesperat, s'esperava un operador binari condicional"
 
-#: parse.y:4452
+#: parse.y:4583
 msgid "conditional binary operator expected"
 msgstr "s'esperava un operador binari condicional"
 
-#: parse.y:4474
+#: parse.y:4605
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr "argument inesperat `%s' a un operador binari condicional"
 
-#: parse.y:4478
+#: parse.y:4609
 msgid "unexpected argument to conditional binary operator"
 msgstr "argument inesperat a un operador binari condicional"
 
-#: parse.y:4489
+#: parse.y:4620
 #, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr "element `%c' inesperat en una ordre condicional"
 
-#: parse.y:4492
+#: parse.y:4623
 #, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr "element `%s' inesperat en una ordre condicional"
 
-#: parse.y:4496
+#: parse.y:4627
 #, c-format
 msgid "unexpected token %d in conditional command"
 msgstr "element `%d' inesperat en una ordre condicional"
 
-#: parse.y:5853
+#: parse.y:5995
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "error de sintaxi a prop de l'element inesperat `%s'"
 
-#: parse.y:5871
+#: parse.y:6013
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "error de sintaxi a prop de `%s'"
 
-#: parse.y:5881
+#: parse.y:6023
 msgid "syntax error: unexpected end of file"
 msgstr "error de sintaxi: final de fitxer inesperat"
 
-#: parse.y:5881
+#: parse.y:6023
 msgid "syntax error"
 msgstr "error de sintaxi"
 
-#: parse.y:5943
+#: parse.y:6085
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "Useu \"%s\" per a deixar l'intèrpret.\n"
 
-#: parse.y:6105
+#: parse.y:6247
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "EOF inesperat mentre es buscava un `)'"
 
@@ -1552,6 +1581,11 @@ msgstr "EOF inesperat mentre es buscava un `)'"
 #, c-format
 msgid "completion: function `%s' not found"
 msgstr "completion: la funció `%s' no s'ha trobat"
+
+#: pcomplete.c:1646
+#, c-format
+msgid "programmable_completion: %s: possible retry loop"
+msgstr ""
 
 #: pcomplib.c:182
 #, c-format
@@ -1620,45 +1654,49 @@ msgstr "/dev/(tcp|udp)/host/port no està suportat si no hi ha xarxa"
 msgid "redirection error: cannot duplicate fd"
 msgstr "error de redirecció: no es pot duplicar l'fd"
 
-#: shell.c:344
+#: shell.c:347
 msgid "could not find /tmp, please create!"
 msgstr "no s'ha trobat el directori /tmp, sisplau creeu-lo!"
 
-#: shell.c:348
+#: shell.c:351
 msgid "/tmp must be a valid directory name"
 msgstr "/tmp ha de ser un nom de directori vàlid"
 
-#: shell.c:904
+#: shell.c:927
 #, c-format
 msgid "%c%c: invalid option"
 msgstr "%c%c: l'opció no és vàlida"
 
-#: shell.c:1259
+#: shell.c:1282
 #, fuzzy, c-format
 msgid "cannot set uid to %d: effective uid %d"
 msgstr "no s'ha pogut restablir el mode nodelay per a l'fd %d"
 
-#: shell.c:1266
+#: shell.c:1289
 #, fuzzy, c-format
 msgid "cannot set gid to %d: effective gid %d"
 msgstr "no s'ha pogut restablir el mode nodelay per a l'fd %d"
 
-#: shell.c:1541
+#: shell.c:1458
+msgid "cannot start debugger; debugging mode disabled"
+msgstr ""
+
+#: shell.c:1566
 #, fuzzy, c-format
 msgid "%s: Is a directory"
 msgstr "%s: és un directori"
 
-#: shell.c:1752
+#: shell.c:1777
 msgid "I have no name!"
 msgstr "No teniu nom!"
 
-#: shell.c:1905
+#: shell.c:1930
 #, c-format
 msgid "GNU bash, version %s-(%s)\n"
 msgstr "GNU bash, versió %s-(%s)\n"
 
 #
-#: shell.c:1906
+#: shell.c:1931
 #, c-format
 msgid ""
 "Usage:\t%s [GNU long option] [option] ...\n"
@@ -1667,50 +1705,50 @@ msgstr ""
 "Sintaxi:\t%s [opció GNU llarga] [opció] ...\n"
 "\t\t%s [opció GNU llarga] [opció] fitxer-script ...\n"
 
-#: shell.c:1908
+#: shell.c:1933
 msgid "GNU long options:\n"
 msgstr "Opcions GNU llargues:\n"
 
-#: shell.c:1912
+#: shell.c:1937
 msgid "Shell options:\n"
 msgstr "Opcions de l'intèrpret:\n"
 
-#: shell.c:1913
+#: shell.c:1938
 msgid "\t-ilrsD or -c command or -O shopt_option\t\t(invocation only)\n"
 msgstr "\t-ilrsD, o -c ordre, o bé -O opció_intèrpret\t(només invocació)\n"
 
-#: shell.c:1928
+#: shell.c:1953
 #, c-format
 msgid "\t-%s or -o option\n"
 msgstr "\t-%s, o bé -o opció\n"
 
-#: shell.c:1934
+#: shell.c:1959
 #, c-format
 msgid "Type `%s -c \"help set\"' for more information about shell options.\n"
 msgstr ""
 "Feu `%s -c \"help set\"' per a informació sobre les opcions de l'intèrpret.\n"
 
-#: shell.c:1935
+#: shell.c:1960
 #, c-format
 msgid "Type `%s -c help' for more information about shell builtin commands.\n"
 msgstr "Feu `%s -c help' per a obtenir informació sobre les ordres internes.\n"
 
-#: shell.c:1936
+#: shell.c:1961
 #, c-format
 msgid "Use the `bashbug' command to report bugs.\n"
 msgstr "Feu servir l'ordre `bashbug' per a comunicar `bugs'.\n"
 
-#: shell.c:1938
+#: shell.c:1963
 #, c-format
 msgid "bash home page: <http://www.gnu.org/software/bash>\n"
 msgstr "pàgina web de bash: <http://www.gnu.org/software/bash>\n"
 
-#: shell.c:1939
+#: shell.c:1964
 #, c-format
 msgid "General help using GNU software: <http://www.gnu.org/gethelp/>\n"
 msgstr "Ajuda general per a programari GNU: <http://www.gnu.org/gethelp/>\n"
 
-#: sig.c:703
+#: sig.c:707
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
 msgstr "sigprocmask: %d: l'operació no és vàlida"
@@ -1886,94 +1924,105 @@ msgid "Unknown Signal #%d"
 msgstr "Senyal Desconegut #%d"
 
 # missatge similar a subst.c:75XX
-#: subst.c:1415 subst.c:1573
+#: subst.c:1418 subst.c:1576
 #, c-format
 msgid "bad substitution: no closing `%s' in %s"
 msgstr "substitució errònia: falta un `%s' a %s"
 
 # foo[1]=(1 2 3)
-#: subst.c:3099
+#: subst.c:3103
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr "%s: no és possible assignar llistes a l'element d'un vector"
 
-#: subst.c:5645 subst.c:5661
+#: subst.c:5649 subst.c:5665
 msgid "cannot make pipe for process substitution"
 msgstr "no s'ha pogut crear la canalització per a la substitució de procés"
 
-#: subst.c:5703
+#: subst.c:5707
 msgid "cannot make child for process substitution"
 msgstr "no s'ha pogut crear el fill per a la substitució de procés"
 
-#: subst.c:5753
+#: subst.c:5757
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "no s'ha pogut obrir la canalització %s amb permís de lectura"
 
-#: subst.c:5755
+#: subst.c:5759
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "no s'ha pogut obrir la canalització %s per a escriure-hi"
 
-#: subst.c:5778
+#: subst.c:5782
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "no s'ha pogut duplicar la canalització %s com a fd %d"
 
-#: subst.c:5988
+#: subst.c:5868
+#, fuzzy
+msgid "command substitution: ignored null byte in input"
+msgstr "subtitució errònia: no hi ha \"`\" final a %s"
+
+#: subst.c:5992
 msgid "cannot make pipe for command substitution"
 msgstr "no s'ha pogut crear la canalització per a la substitució d'ordre"
 
-#: subst.c:6027
+#: subst.c:6036
 msgid "cannot make child for command substitution"
 msgstr "no s'ha pogut crear un fill per a la substitució d'ordre"
 
-#: subst.c:6050
+#: subst.c:6062
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr "command_substitute: no s'ha pogut duplicar la canalització com a fd 1"
 
-#: subst.c:6560 subst.c:8222 subst.c:8242
+# buscar context
+#: subst.c:6488 subst.c:8834
+#, c-format
+msgid "%s: invalid variable name for name reference"
+msgstr "%s: el nom de la variable referenciada no és vàlid"
+
+#: subst.c:6574 subst.c:8249 subst.c:8269
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: substitució errònia"
 
-#: subst.c:6682
+#: subst.c:6708
 #, fuzzy, c-format
 msgid "%s: invalid indirect expansion"
 msgstr "%s: el nombre de línies no és vàlid"
 
-#: subst.c:6689
+#: subst.c:6715
 #, fuzzy, c-format
 msgid "%s: invalid variable name"
 msgstr "`%s': el nom de l'àlies no és valid"
 
-#: subst.c:6736
+#: subst.c:6762
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: paràmetre nul o no definit"
 
-#: subst.c:6971 subst.c:6986
+#: subst.c:6997 subst.c:7012
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: expressió de subcadena < 0"
 
-#: subst.c:8320
+#: subst.c:8348
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: no és possible assignar d'aquesta manera"
 
-#: subst.c:8659
+#: subst.c:8697
 msgid ""
 "future versions of the shell will force evaluation as an arithmetic "
 "substitution"
 msgstr "en futures versions s'evaluarà com a substitució aritmètica"
 
-#: subst.c:9199
+#: subst.c:9242
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "subtitució errònia: no hi ha \"`\" final a %s"
 
-#: subst.c:10139
+#: subst.c:10186
 #, c-format
 msgid "no match: %s"
 msgstr "cap coincidència: %s"
@@ -2006,7 +2055,7 @@ msgstr "%s: s'esperava un operador unari"
 msgid "%s: binary operator expected"
 msgstr "%s: s'esperava un operador binari"
 
-#: test.c:862
+#: test.c:869
 msgid "missing `]'"
 msgstr "falta un `]'"
 
@@ -2032,79 +2081,80 @@ msgstr ""
 msgid "trap_handler: bad signal %d"
 msgstr "trap_handler: senyal erroni %d"
 
-#: variables.c:406
+#: variables.c:409
 #, c-format
 msgid "error importing function definition for `%s'"
 msgstr "error en importar la definició de funció de `%s'"
 
-#: variables.c:810
+#: variables.c:814
 #, c-format
 msgid "shell level (%d) too high, resetting to 1"
 msgstr "el nivell de l'intèrpret (%d) és massa elevat, es restableix a 1"
 
-#: variables.c:1916
-#, c-format
-msgid "%s: circular name reference"
-msgstr "%s: la referència de nom és circular"
-
 # error intern
-#: variables.c:2328
+#: variables.c:2413
 msgid "make_local_variable: no function context at current scope"
 msgstr ""
 
-#: variables.c:2347
+#: variables.c:2432
 #, c-format
 msgid "%s: variable may not be assigned value"
 msgstr "%s: no és possible assignar un valor a la variable"
 
+# buscar context
+#: variables.c:3043
+#, fuzzy, c-format
+msgid "%s: assigning integer to name reference"
+msgstr "%s: el nom de la variable referenciada no és vàlid"
+
 # error intern
-#: variables.c:3753
+#: variables.c:3940
 msgid "all_local_variables: no function context at current scope"
 msgstr ""
 
-#: variables.c:4030
+#: variables.c:4218
 #, c-format
 msgid "%s has null exportstr"
 msgstr "%s: el paràmetre exportstr és nul"
 
-#: variables.c:4035 variables.c:4044
+#: variables.c:4223 variables.c:4232
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "el caràcter %d en el paràmetre exportstr de %s no és vàlid"
 
-#: variables.c:4050
+#: variables.c:4238
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "falta un `=' en el paràmetre exportstr de %s"
 
 # error intern
-#: variables.c:4495
+#: variables.c:4684
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr ""
 
 # error intern
-#: variables.c:4508
+#: variables.c:4697
 msgid "pop_var_context: no global_variables context"
 msgstr ""
 
 # error intern
-#: variables.c:4582
+#: variables.c:4772
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr ""
 
 # error intern
-#: variables.c:5426
+#: variables.c:5619
 #, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: %s: no s'ha pogut obrir com a FITXER"
 
 # error intern
-#: variables.c:5431
+#: variables.c:5624
 #, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr ""
 
-#: variables.c:5476
+#: variables.c:5669
 #, c-format
 msgid "%s: %s: compatibility value out of range"
 msgstr "%s: %s: el valor de compatibilitat és fora del domini"
@@ -2993,10 +3043,11 @@ msgstr ""
 "    Torna èxit, excepte si rep una opció invàlida o es produeix un error."
 
 #: builtins.c:530
+#, fuzzy
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
-"    Obsolete.  See `help declare'."
+"    A synonym for `declare'.  See `help declare'."
 msgstr ""
 "Assigna valors i atributs a variables.\n"
 "\n"
@@ -3544,7 +3595,7 @@ msgid ""
 "    \n"
 "    Options:\n"
 "      -c\tclear the history list by deleting all of the entries\n"
-"      -d offset\tdelete the history entry at offset OFFSET.\n"
+"      -d offset\tdelete the history entry at position OFFSET.\n"
 "    \n"
 "      -a\tappend history lines from this session to the history file\n"
 "      -n\tread all history lines not already read from the history file\n"
@@ -5045,6 +5096,7 @@ msgstr ""
 
 # help coproc
 #: builtins.c:1653
+#, fuzzy
 msgid ""
 "Create a coprocess named NAME.\n"
 "    \n"
@@ -5054,7 +5106,7 @@ msgid ""
 "    The default NAME is \"COPROC\".\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns the exit status of COMMAND."
+"    The coproc command returns an exit status of 0."
 msgstr ""
 "Crea un coprocés anomenat NOM.\n"
 "\n"

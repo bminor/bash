@@ -104,7 +104,7 @@ extern char *string_list __P((WORD_LIST *));
 extern char *string_list_dollar_star __P((WORD_LIST *));
 
 /* Expand $@ into a single string, obeying POSIX rules. */
-extern char *string_list_dollar_at __P((WORD_LIST *, int));
+extern char *string_list_dollar_at __P((WORD_LIST *, int, int));
 
 /* Turn the positional paramters into a string, understanding quoting and
    the various subtleties of using the first character of $IFS as the

@@ -1513,12 +1513,13 @@ When applied to a string-valued variable, @var{value} is expanded and
 appended to the variable's value.
 
 A variable can be assigned the @var{nameref} attribute using the
-@option{-n} option to the \fBdeclare\fP or \fBlocal\fP builtin commands
+@option{-n} option to the @code{declare} or @code{local} builtin commands
 (@pxref{Bash Builtins})
 to create a @var{nameref}, or a reference to another variable.
 This allows variables to be manipulated indirectly.
 Whenever the nameref variable is referenced, assigned to, unset, or has
-its attributes modified (other than the nameref attribute itself), the
+its attributes modified (other than using or changing the nameref
+attribute itself), the
 operation is actually performed on the variable specified by the nameref
 variable's value.
 A nameref is commonly used within shell functions to refer to a variable
@@ -2730,7 +2731,7 @@ The format of here-documents is:
 
 No parameter and variable expansion, command substitution,
 arithmetic expansion, or filename expansion is performed on
-@var{word}.  If any characters in @var{word} are quoted, the
+@var{word}.  If any part of @var{word} is quoted, the
 @var{delimiter} is the result of quote removal on @var{word},
 and the lines in the here-document are not expanded.
 If @var{word} is unquoted,
@@ -3621,8 +3622,7 @@ less than zero, non-zero otherwise.
 test @var{expr}
 @end example
 
-Evaluate a conditional express
-ion @var{expr} and return a status of 0
+Evaluate a conditional expression @var{expr} and return a status of 0
 (true) or 1 (false).
 Each operator and operand must be a separate argument.
 Expressions are composed of the primaries described below in
@@ -3801,7 +3801,7 @@ unset [-fnv] [@var{name}]
 
 Remove each variable or function @var{name}.
 If the @option{-v} option is given, each
-@var{name} refers to a shell variable and that variable is remvoved.
+@var{name} refers to a shell variable and that variable is removed.
 If the @option{-f} option is given, the @var{name}s refer to shell
 functions, and the function definition is removed.
 If the @option{-n} option is supplied, and @var{name} is a variable with
@@ -4053,7 +4053,7 @@ Give each @var{name} the @var{nameref} attribute, making
 it a name reference to another variable.
 That other variable is defined by the value of @var{name}.
 All references, assignments, and attribute modifications
-to @var{name}, except for changing the
+to @var{name}, except for those using or changing the
 @option{-n} attribute itself, are performed on the variable referenced by
 @var{name}'s value.
 The nameref attribute cannot be applied to array variables.
@@ -5144,7 +5144,9 @@ If set, aliases are expanded as described below under Aliases,
 This option is enabled by default for interactive shells.
 
 @item extdebug
-If set, behavior intended for use by debuggers is enabled:
+If set at shell invocation, arrange to execute the debugger profile
+before the shell starts, identical to the @option{--debugger} option.
+If set after invocation, behavior intended for use by debuggers is enabled:
 
 @enumerate
 @item
@@ -5723,11 +5725,14 @@ is readonly.
 
 @item EXECIGNORE
 A colon-separated list of shell patterns (@pxref{Pattern Matching})
-defining the list of filenames to be ignored by command search.
+defining the list of filenames to be ignored by command search using
+@code{PATH}.
 Files whose full pathnames match one of these patterns are not considered
-executable files for the purposes of completion and command execution.
+executable files for the purposes of completion and command execution
+via @code{PATH} lookup.
 This does not affect the behavior of the @code{[}, @code{test}, and @code{[[}
 commands.
+Full pathnames in the command hash table are not subject to @code{EXECIGNORE}.
 Use this variable to ignore shared library files that have the executable
 bit set, but are not executable files.
 The pattern matching honors the setting of the @code{extglob} shell 
@@ -6752,8 +6757,8 @@ may be positive or negative integers.
 @cindex arithmetic evaluation
 
 The shell allows arithmetic expressions to be evaluated, as one of
-the shell expansions or by the @code{let} and the @option{-i} option
-to the @code{declare} builtins.
+the shell expansions or by using the @code{((} compound command, the
+@code{let} builtin, or the @option{-i} option to the @code{declare} builtin.
 
 Evaluation is done in fixed-width integers with no check for overflow,
 though division by 0 is trapped and flagged as an error.
@@ -7565,6 +7570,10 @@ The @code{read} builtin may be interrupted by a signal for which a trap
 has been set.
 If Bash receives a trapped signal while executing @code{read}, the trap
 handler executes and @code{read} returns an exit status greater than 128.
+
+@item
+Bash removes an exited background process's status from the list of such
+statuses after the @code{wait} builtin is used to obtain it.
 
 @end enumerate
 

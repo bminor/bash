@@ -11,6 +11,7 @@
  * references to it do not attempt to access memory that is no longer part
  * of this process's address space.
  */
+#include <config.h>
 
 #include <stdio.h>
 #include <errno.h>
@@ -22,8 +23,11 @@
 #define INIT_DYNAMIC_VAR(var, val, gfunc, afunc) \
   do \
     { SHELL_VAR *v = bind_variable (var, (val), 0); \
-      v->dynamic_value = gfunc; \
-      v->assign_func = afunc; \
+      if (v) \
+	{ \
+	  v->dynamic_value = gfunc; \
+	  v->assign_func = afunc; \
+	} \
     } \
   while (0)
 

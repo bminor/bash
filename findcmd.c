@@ -189,7 +189,7 @@ file_status (name)
   /* Else we check whether `others' have permission to execute the file */
   else
     {
-      if (finfo.st_mode & S_IXOTH)
+      if (exec_name_should_ignore (name) == 0 && finfo.st_mode & S_IXOTH)
 	r |= FS_EXECABLE;
       if (finfo.st_mode & S_IROTH)
 	r |= FS_READABLE;
@@ -568,7 +568,7 @@ find_in_path_element (name, path, flags, name_len, dotinfop)
   /* The file is not executable, but it does exist.  If we prefer
      an executable, then remember this one if it is the first one
      we have found. */
-  if ((flags & FS_EXEC_PREFERRED) && file_to_lose_on == 0)
+  if ((flags & FS_EXEC_PREFERRED) && file_to_lose_on == 0 && exec_name_should_ignore (full_path) == 0)
     file_to_lose_on = savestring (full_path);
 
   /* If we want only executable files, or we don't want directories and

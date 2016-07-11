@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Feb  8 10:15:48 EST 2016
+.\"	Last Change: Sun May 29 13:48:21 EDT 2016
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2016 February 8" "GNU Bash 4.4"
+.TH BASH 1 "2016 May 29" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -628,7 +628,7 @@ are executed sequentially; the shell waits for each
 command to terminate in turn.  The return status is the
 exit status of the last command executed.
 .PP
-AND and OR lists are sequences of one of more pipelines separated by the
+AND and OR lists are sequences of one or more pipelines separated by the
 \fB&&\fP and \fB||\fP control operators, respectively.
 AND and OR lists are executed with left associativity.
 An AND list has the form
@@ -1266,7 +1266,8 @@ A variable can be assigned the \fInameref\fP attribute using the
 to create a \fInameref\fP, or a reference to another variable.
 This allows variables to be manipulated indirectly.
 Whenever the nameref variable is referenced, assigned to, unset, or has
-its attributes modified (other than the \fInameref\fP attribute itself), the
+its attributes modified (other than using or changing the \fInameref\fP
+attribute itself), the
 operation is actually performed on the variable specified by the nameref
 variable's value.
 A nameref is commonly used within shell functions to refer to a variable
@@ -2014,11 +2015,14 @@ used when the shell is invoked in POSIX mode.
 .TP
 .B EXECIGNORE
 A colon-separated list of shell patterns (see \fBPattern Matching\fP)
-defining the list of filenames to be ignored by command search.
+defining the list of filenames to be ignored by command search using
+\fBPATH\fP.
 Files whose full pathnames match one of these patterns are not considered
-executable files for the purposes of completion and command execution.
+executable files for the purposes of completion and command execution
+via \fBPATH\fP lookup.
 This does not affect the behavior of the \fB[\fP, \fBtest\fP, and \fB[[\fP
 commands.
+Full pathnames in the command hash table are not subject to \fBEXECIGNORE\fP.
 Use this variable to ignore shared library files that have the executable
 bit set, but are not executable files.
 The pattern matching honors the setting of the \fBextglob\fP shell
@@ -2319,8 +2323,10 @@ The default path is system-dependent,
 and is set by the administrator who installs
 .BR bash .
 A common value is
+.na
 .if t \f(CW/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin\fP.
 .if n ``/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin''.
+.ad
 .TP
 .B POSIXLY_CORRECT
 If this variable is in the environment when \fBbash\fP starts, the shell
@@ -3899,9 +3905,9 @@ The format of here-documents is:
 No parameter and variable expansion, command substitution,
 arithmetic expansion, or pathname expansion is performed on
 .IR word .
-If any characters in
+If any part of
 .I word
-are quoted, the
+is quoted, the
 .I delimiter
 is the result of quote removal on
 .IR word ,
@@ -4219,7 +4225,7 @@ By default, no limit is imposed on the number of recursive calls.
 .SH "ARITHMETIC EVALUATION"
 The shell allows arithmetic expressions to be evaluated, under
 certain circumstances (see the \fBlet\fP and \fBdeclare\fP builtin
-commands and \fBArithmetic Expansion\fP).
+commands, the \fB((\fP compound command, and \fBArithmetic Expansion\fP).
 Evaluation is done in fixed-width integers with no check for overflow,
 though division by 0 is trapped and flagged as an error.
 The operators and their precedence, associativity, and values
@@ -5451,6 +5457,10 @@ If set to \fBOn\fP, readline attempts to bind the control characters
 treated specially by the kernel's terminal driver to their readline
 equivalents.
 .TP
+.B blink\-matching\-paren (Off)
+If set to \fBOn\fP, readline attempts to briefly move the cursor to an
+opening parenthesis when a closing parenthesis is inserted.
+.TP
 .B colored\-completion\-prefix (Off)
 If set to \fBOn\fP, when listing completions, readline displays the
 common prefix of the set of possible completions using a different color.
@@ -5473,9 +5483,22 @@ in emacs mode and to
 .B #
 in vi command mode.
 .TP
+.B completion\-display\-width (-1)
+The number of screen columns used to display possible matches
+when performing completion.
+The value is ignored if it is less than 0 or greater than the terminal
+screen width.
+A value of 0 will cause matches to be displayed one per line.
+The default value is -1.
+.TP
 .B completion\-ignore\-case (Off)
 If set to \fBOn\fP, readline performs filename matching and completion
 in a case\-insensitive fashion.
+.TP
+.B completion\-map\-case (Off)
+If set to \fBOn\fP, and \fBcompletion\-ignore\-case\fP is enabled, readline
+treats hyphens (\fI\-\fP) and underscores (\fI_\fP) as equivalent when
+performing case\-insensitive filename matching and completion.
 .TP
 .B completion\-prefix\-display\-length (0)
 The length in characters of the common prefix of a list of possible
@@ -5498,11 +5521,18 @@ If set to \fBOn\fP, readline will convert characters with the
 eighth bit set to an ASCII key sequence
 by stripping the eighth bit and prefixing an
 escape character (in effect, using escape as the \fImeta prefix\fP).
+The default is \fIOn\fP, but readline will set it to \fIOff\fP if the
+locale contains eight-bit characters.
 .TP
 .B disable\-completion (Off)
 If set to \fBOn\fP, readline will inhibit word completion.  Completion
 characters will be inserted into the line as if they had been
 mapped to \fBself-insert\fP.
+.TP
+.B echo\-control\-characters (On)
+When set to \fBOn\fP, on operating systems that indicate they support it,
+readline echoes a character corresponding to a signal generated from the
+keyboard.
 .TP
 .B editing\-mode (emacs)
 Controls whether readline begins with a set of key bindings similar
@@ -5512,11 +5542,6 @@ can be set to either
 .B emacs
 or
 .BR vi .
-.TP
-.B echo\-control\-characters (On)
-When set to \fBOn\fP, on operating systems that indicate they support it,
-readline echoes a character corresponding to a signal generated from the
-keyboard.
 .TP
 .B enable\-bracketed\-paste (Off)
 When set to \fBOn\fP, readline will configure the terminal in a way
@@ -5550,7 +5575,10 @@ If set to zero, any existing history entries are deleted and no new entries
 are saved.
 If set to a value less than zero, the number of history entries is not
 limited.
-By default, the number of history entries is not limited.
+By default, the number of history entries is set to the value of the
+\fBHISTSIZE\fP shell variable.
+If an attempt is made to set \fIhistory\-size\fP to a non-numeric value,
+the maximum number of history entries will be set to 500.
 .TP
 .B horizontal\-scroll\-mode (Off)
 When set to \fBOn\fP, makes readline use a single line for display,
@@ -5559,10 +5587,12 @@ becomes longer than the screen width rather than wrapping to a new line.
 .TP
 .B input\-meta (Off)
 If set to \fBOn\fP, readline will enable eight-bit input (that is,
-it will not strip the high bit from the characters it reads),
+it will not strip the eighth bit from the characters it reads),
 regardless of what the terminal claims it can support.  The name
 .B meta\-flag
 is a synonym for this variable.
+The default is \fIOff\fP, but readline will set it to \fIOn\fP if the
+locale contains eight-bit characters.
 .TP
 .B isearch\-terminators (``C\-[C\-J'')
 The string of characters that should terminate an incremental
@@ -5633,6 +5663,8 @@ the list.
 If set to \fBOn\fP, readline will display characters with the
 eighth bit set directly rather than as a meta-prefixed escape
 sequence.
+The default is \fIOff\fP, but readline will set it to \fIOn\fP if the
+locale contains eight-bit characters.
 .TP
 .B page\-completions (On)
 If set to \fBOn\fP, readline uses an internal \fImore\fP-like pager
@@ -7692,7 +7724,7 @@ Give each \fIname\fP the \fInameref\fP attribute, making
 it a name reference to another variable.
 That other variable is defined by the value of \fIname\fP.
 All references, assignments, and attribute modifications
-to \fIname\fP, except for changing the
+to \fIname\fP, except those using or changing the
 \fB\-n\fP attribute itself, are performed on the variable referenced by
 \fIname\fP's value.
 The nameref attribute cannot be applied to array variables.
@@ -9598,7 +9630,9 @@ If set, aliases are expanded as described above under
 This option is enabled by default for interactive shells.
 .TP 8
 .B extdebug
-If set, behavior intended for use by debuggers is enabled:
+If set at shell invocation, arrange to execute the debugger profile
+before the shell starts, identical to the \fB\-\-debugger\fP option.
+If set after invocation, behavior intended for use by debuggers is enabled:
 .RS
 .TP
 .B 1.

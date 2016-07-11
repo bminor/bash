@@ -1,6 +1,6 @@
 /* funmap.c -- attach names to functions. */
 
-/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -194,6 +194,7 @@ static const FUNMAP default_funmap[] = {
   { "vi-set-mark", rl_vi_set_mark },
   { "vi-subst", rl_vi_subst },
   { "vi-tilde-expand", rl_vi_tilde_expand },
+  { "vi-unix-word-rubout", rl_vi_unix_word_rubout },
   { "vi-yank-arg", rl_vi_yank_arg },
   { "vi-yank-pop", rl_vi_yank_pop },
   { "vi-yank-to", rl_vi_yank_to },

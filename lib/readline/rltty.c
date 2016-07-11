@@ -1,7 +1,7 @@
 /* rltty.c -- functions to prepare and restore the terminal for readline's
    use. */
 
-/* Copyright (C) 1992-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2016 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -714,6 +714,19 @@ rl_deprep_terminal ()
   _rl_release_sigint ();
 }
 #endif /* !NO_TTY_DRIVER */
+
+/* Set readline's idea of whether or not it is echoing output to the terminal,
+   returning the old value. */
+int
+rl_tty_set_echoing (u)
+     int u;
+{
+  int o;
+
+  o = _rl_echoing_p;
+  _rl_echoing_p = u;
+  return o;
+}
 
 /* **************************************************************** */
 /*								    */
@@ -876,6 +889,11 @@ _rl_bind_tty_special_chars (kmap, ttybuff)
 #  endif /* VLNEXT && TERMIOS_TTY_DRIVER */
 
 #  if defined (VWERASE) && defined (TERMIOS_TTY_DRIVER)
+#    if defined (VI_MODE)
+  if (rl_editing_mode == vi_mode)
+    SET_SPECIAL (VWERASE, rl_vi_unix_word_rubout);
+  else
+#    endif
   SET_SPECIAL (VWERASE, rl_unix_word_rubout);
 #  endif /* VWERASE && TERMIOS_TTY_DRIVER */
 }

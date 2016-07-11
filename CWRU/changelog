@@ -10190,7 +10190,7 @@ shell.c
 				   -----
 variables.c
 	- initialize_shell_variables: don't inherit PS4 from the environment
-	  if the shell is running with euid == 0; just reset it to `+'.  This
+	  if the shell is running with euid == 0; just reset it to `+ '.  This
 	  is a known potential vulnerability, since PS4 expansion performs
 	  command substitution in the root shell's context before displaying
 	  it.  Discussion started by up201407890@alunos.dcc.fc.up.pt
@@ -10413,3 +10413,921 @@ variables.c
 	- initialize_shell_variables: allow FUNCNEST to set funcnest_max when
 	  imported from the environment.  Inspired by
 	  https://bugzilla.redhat.com/show_bug.cgi?id=1274553
+
+				   2/11
+				   ----
+bashhist.c
+	- bash_history_inhibit_expansion: function should be compiled in only if
+	  BANG_HISTORY is defined.  Report from isabella parakiss
+	  <izaberina@gmail.com>
+
+[bash-4.4-rc1 frozen]
+
+				   2/15
+				   ----
+lib/readline/text.c
+	- rl_refresh_line: call rl_redraw_prompt_last_line instead of
+	  rl_forced_update_display to avoid redrawing all lines of a multiline
+	  prompt (overwriting the last line of the multiline prompt in the
+	  process).  Report from Hugh Davenport <hugh@davenport.net.nz>
+
+				   2/18
+				   ----
+subst.c
+	- parameter_brace_expand: when processing ${!name[@]}, make sure to
+	  free `name' before returning the list of keys to avoid a memory leak.
+	  Fixes bug reported by Emilio PastorMira <Emilio.PastorMira@utimaco.com>
+
+				   2/19
+				   ----
+trap.c
+	- free_trap_strings: when freeing the `special' traps (NSIG to BASH_NSIG),
+	  check whether or not the `signal' is trapped, as it would be if the
+	  subshell inherited it (errtrace) and don't free the trap string in that
+	  case.  Fixes bug reported by Jan Klötzke <jan@kloetzke.net>
+
+				   2/21
+				   ----
+lib/sh/netconn.c
+	- isnetconn: return false if getpeername fails with errno == EBADF.
+	  Bug and fix from Andrew Gregory <andrew.gregory.8@gmail.com>
+
+builtins/shopt.def
+	- parse_bashopts: when reading BASHOPTS from the environment, make
+	  sure to call any set functions associated with a variable, instead
+	  of just setting the value to 1.  Report and fix from
+	  Vehlow, Jörg <Joerg.Vehlow@kratzer-automation.com>
+
+				   2/22
+				   ----
+lib/readline/complete.c
+	- rl_display_match_list: don't bother calling strrchr to check the
+	  return value from printable_part() if rl_filename_completion_desired
+	  is non-zero, since in that case printable_part just returns its
+	  argument.  Fixes git completion issue reported by
+	  Dilyan Palauzov <dilyan.palauzov@aegee.org>
+	- _rl_colored_completion_prefix: default is now 0, testing is complete
+
+				   2/23
+				   ----
+variables.c
+	- assign_hashcmd: if the shell is restricted, reject attempts to add
+	  pathnames containing slashes to the hash table, as the hash builtin
+	  does.  Fixes bug reported to savannah by Sylvain Beucler as
+	  https://savannah.gnu.org/support/?108969
+
+				   2/24
+				   ----
+subst.c
+	- NEED_FPURGE_DECL: need it before externs.h included, since fpurge
+	  is now used in this file.  Fixes warning reported by Mike
+	  Frysinger <vapier@gentoo.org>
+	- skip_double_quoted: add missing argument to declaration
+
+parse.y
+	- shell_getc: in call to internal_warning, use %lu to print an argument
+	  cast explicitly to unsigned long.  Fixes warning reported by Mike
+	  Frysinger <vapier@gentoo.org>
+
+				   2/27
+				   ----
+parse.y
+	- decode_prompt_string: quote result of \s expansion in case shell has
+	  been invoked with a pathname like '$(id)'.  Inspired by report from
+	  Travis Garrell <travis.garrell@oracle.com>
+	- decode_prompt_string: quote result of \h and \H expansions in the
+	  (unlikely) case that the hostname has been changed to something
+	  malicious including a command substitution.  From report from
+	  Travis Garrell <travis.garrell@oracle.com>
+
+builtins/getopts.def
+	- getopts_unbind_variable: new static function, just calls unbind_variable
+	  for now.  Placeholder for any future work to do something special if
+	  OPTARG is readonly.  Based on discussion started by Robert Elz
+	  <kre@munnari.oz.au>
+
+lib/readline/vi_mode.c
+	- rl_vi_unix_word_rubout: new function, implements ^W as Posix specifies
+	  it for vi mode, using whitespace and punctuation characters as word
+	  boundaries. Prompted by question from Carlos Pita
+	  <carolosjosepita@gmail.com>
+
+lib/readline/vi_keymap.c
+	- bind rl_vi_unix_word_rubout to ^W by default in both insert and
+	  command mode
+
+lib/readline/rltty.c
+	- _rl_bind_tty_special_chars: if in vi mode, bind the WERASE character
+	  to rl_vi_unix_word_rubout
+
+lib/readline/funmap.c
+	- vi-unix-word-rubout is new bindable name for rl_vi_unix_word_rubout
+
+lib/readline/readline.h
+	- rl_vi_unix_word_rubout: new extern declaration
+
+				   2/28
+				   ----
+doc/bash.1
+	- document readline blink-matching-paren variable
+	- document readline completion-display-width variable
+	- document readline completion-map-case variable
+	- note that the default value of history-size depends on the value of
+	  the HISTSIZE variable.  All from a message from Branden Robinson
+	  <g.branden.robinson@gmail.com>
+
+doc/bash.1,lib/readline/doc/{readline.3,rluser.texi}
+	- convert-meta: modify the description to note that readline will turn
+	  the default to off if the locale contains eight-bit characters
+	- input-meta: modify the description to note that readline will turn
+	  the default to on if the locale contains eight-bit characters
+	- output-meta: modify the description to note that readline will turn
+	  the default to on if the locale contains eight-bit characters.  From
+	  a message from Branden Robinson <g.branden.robinson@gmail.com>
+
+				    3/6
+				    ---
+examples/loadables/Makefile.in
+	- install-dev: make installdirs a prerequisite; don't rely on the
+	  install-supported target to create it first.  Bug with parallel
+	  install (`make -j 4 install') reported by Chris Staub
+	  <cstaub67@gmail.com>
+
+				   3/12
+				   ----
+lib/readline/display.c:
+	- rl_clear_visible_line: clear all screen lines occupied by the current
+	  visible readline line.  Inspired by report from Lauri Ranta
+	  <lauri.ranta@gmail.com>
+
+lib/readline/readline.h
+	- rl_clear_visible_line: extern declaration
+
+lib/readline/doc/rltech.texi
+	- rl_clear_visible_line: add documentation
+
+				   3/19
+				   ----
+findcmd.c
+	- file_status: add inadvertently-dropped test for EXECIGNORE to the
+	  `other' bits check.  The check was in the original patch
+	- search_for_command: if the file should not be considered executable
+	  because it's in the EXECIGNORE blacklist, don't set file_to_lose_on,
+	  since the attempt to execute the last-ditch path will circumvent the
+	  EXECIGNORE setting.  Fixes bug reported by Dennis Williamson
+	  <dennistwilliamson@gmail.com>
+
+				   3/28
+				   ----
+lib/readline/display.c
+	- rl_redisplay: when computing where the cursor should go (and the
+	  physical cursor position) after displaying the prompt, don't adjust
+	  the cursor position by wadjust if there are no multibyte chars in
+	  the prompt.  lpos is already a physical cursor position; _rl_screenwidth
+	  is the physical screen width, and we're not calling _rl_col_width and
+	  don't need to take invisible characters into account again.  Fixes
+	  bug reported by Andreas Schwab <schwab@linux-m68k.org>
+
+				    4/1
+				    ---
+parse.y
+	- parse_comsub: when we read `esac' followed by a break character,
+	  turn on the LEX_RESWDOK flag because we can now read another case
+	  statement or other compound command.  Fixes bug reported by
+	  Christian Franke <Christian.Franke@t-online.de>, original version
+	  of patch from Piotr Grzybowski <narsil.pl@gmail.com>
+	- parse_comsub: leave the reserved-word-ok flag set for four-char
+	  reserved words (then/else/elif/done/time) that can be followed by
+	  reserved words; set lex_rwlen to 0 so we know to start reading a
+	  new one
+
+				    4/7
+				    ---
+builtins/{alias,complete,jobs}.def
+	- {alias,compopt,disown}: add missing `CASE_HELPOPT;' so --help option
+	  prints help longdoc instead of builtin_usage()
+
+				    4/8
+				    ---
+arrayfunc.c
+	- assign_array_var_from_word_list: use bind_array_var_internal instead
+	  of inline code, so value conversions happen on assignment (case
+	  modification, arithmetic evaluation, etc).  Fixes bug reported by
+	  Geir Hauge <geir.hauge@gmail.com>
+
+				    4/9
+				    ---
+shell.c
+	- main: change the logic that determines whether or not bash is running
+	  under an emacs terminal emulator so it works with future versions of
+	  emacs, which will change to use only $INSIDE_EMACS.  Report and fix
+	  from Paul Eggert <eggert@cs.ucla.edu>
+
+lib/glob/sm_loop.c
+	- EXT: if we see ?(pat), we can match 0 or 1 times, so if we don't
+	  match, we should consume the extglob pattern and go on to attempt
+	  to match the rest of the pattern against the string.  Fixes bug
+	  reported by Isabella Parakiss <izaberina@gmail.com>
+	- GMATCH: in case `*', don't short-circuit and match anything if the
+	  * is the last character in the pattern until after we check the
+	  special cases for matching a `.'.  Fixes bugs reported back on 3/23
+	  by Isabella Parakiss <izaberina@gmail.com>
+
+				   4/13
+				   ----
+bashhist.c
+	- hc_erasedups: fix memory leak by freeing history entry returned by
+	  remove_history.  Bug and fix from Seiichi Ishitsuka
+	  <ishitsuka.sc@ncos.nec.co.jp>
+
+				   4/19
+				   ----
+config-top.h
+	- CD_COMPLAINS: now settable in config-top.h; enables (fatal) error
+	  messages if cd is given multiple directory arguments
+
+				   4/20
+				   ----
+execute_cmd.c
+	- coproc_setvars: refuse to create variables with names that are not
+	  valid identifiers.  Suggestion from Piotr Grzybowski
+	  <narsil.pl@gmail.com>
+
+rltty.c
+	- rl_tty_set_echoing: interface to set _rl_echoing_p, returning old
+	  value.  Inspired by gdb use of _rl_echoing_p when switching
+	  between terminal and curses modes described by Doug Evans
+	  <dje@google.com>
+
+bashline.c
+	- bash_execute_unix_command: use rl_clear_visible_line instead of
+	  erasing current line on the screen, inspired by same report from
+	  3/12.  Still tentative change
+
+configure.ac
+	- update release status to rc2, may skip this and go directly to
+	  release
+
+				   4/21
+				   ----
+arrayfunc.c
+	- convert_var_to_array: make sure that the newly-converted array
+	  variable is not marked as being an associative array.  Fixes bug
+	  reported by Grisha Levit <grishalevit@gmail.com>
+	- convert_var_to_assoc: make sure that the newly-converted associative
+	  array variable is not marked as being an indexed array
+
+				   4/22
+				   ----
+builtins/evalstring.c
+	- should_suppress_fork: don't suppress the fork if there are any traps
+	  set, since that requires that we hang around to react to a signal or
+	  collect the command's exit status and run something.  Fixes bug
+	  reported by Brian Vandenberg <phantall@gmail.com>
+
+histexpand.c
+	- history_tokenize_word: handle >| as a single token.  Fix from
+	  Piotr Grzybowski <narsil.pl@gmail.com> from a report from
+	  idallen@idallen-fibe.dyndns.org
+
+				   4/24
+				   ----
+execute_cmd.
+	- coproc_setvars: don't overwrite readonly variables used as coproc
+	  names.  From a report from Grisha Levit <grishalevit@gmail.com>
+
+histexpand.c
+	- history_tokenize_word: handle strings of digits before redirections
+	  beginning with `<' or `>' as part of the redirection word; handle
+	  strings of digits following `<&' or `>&' as part of the redirection
+	  word.  Inspired by patch from  Piotr Grzybowski <narsil.pl@gmail.com>
+	  from a report from idallen@idallen-fibe.dyndns.org
+
+lib/readline/complete.c
+	- rl_display_match_list: if the common prefix is longer than any of
+	  the possible matches, set the length of the common prefix to 0 so
+	  the entire match gets printed for each match
+	- rl_display_match_list: make sure to output at least one space
+	  between each displayed match, even if the displayed length is
+	  longer than our computed max
+	- fnprint: if the length of the prefix (prefix_bytes) is greater than
+	  or equal to the length of the string to be printed (print_len), make
+	  sure to set the prefix length to 0 so the entire string is printed.
+	  From a report from Grisha Levit <grishalevit@gmail.com>
+
+				   4/25
+				   ----
+subst.c
+	- command_substitute: update the conditions under which we give the
+	  terminal to pipeline_pgrp with give_terminal_to to the same ones
+	  where wait_for uses to decide whether to give the terminal back to
+	  shell_pgrp.  This code exists to undo the work wait_for does; it
+	  has to give the terminal back to pipeline_pgrp only under those
+	  conditions when wait_for gives it back to the shell pgrp.  Fix for
+	  bug reported by Paulo Bardes <bardes0022@gmail.com>
+
+				   4/26
+				   ----
+bashline.c
+	- bash_filename_stat_hook: temporarily disable the `nounset' shell
+	  option around calls to expand_prompt_string so we don't get error
+	  messages during completion.  Fixes issue reported by Eric Pruitt
+	  <eric.pruitt@gmail.com>
+
+				   4/27
+				   ----
+doc/{bash.1,bashref.texi}
+	- extdebug: clarify that having this option enabled at shell startup
+	  acts identically to --debugger.  From a report from Grisha Levit
+	  <grishalevit@gmail.com>
+
+jobs.[ch]
+	- wait_for_single_pid: now takes additional `int flags' argument
+
+{jobs,execute_cmd}.c,builtins/wait.def
+	- wait_for_single_pid: changed callers to add extra argument
+
+jobs.c
+	- wait_for_single_pid: if (flags & 1) == 0, don't print the error message
+	  if PID isn't found; changed execute_pipeline call when lastpipe is
+	  set
+
+				   4/28
+				   ----
+general.c
+	- bash_tilde_expand: try not setting interrupt_immediately or
+	  terminate_immediately; see what happens with networked password
+	  databases
+
+				   4/29
+				   ----
+subst.c
+	- parameter_brace_expand, parameter_brace_expand_rhs: now take an
+	  additional `pflags' argument from its caller so we can pass
+	  state
+	- parameter_brace_expand_rhs: if expand_string_for_rhs returns a
+	  quoted null, but l_hasdollat is set to 1, meaning we saw a quoted
+	  "$@" of some form, we need to turn off special handling of "$@"
+	  so something like "${@-${@-$@}}" expands to an empty string like
+	  Posix says it should.  Fixes bug reported by Grisha Levit
+	  <grishalevit@gmail.com>
+
+				    5/1
+				    ---
+variables.c
+	- bind_variable_internal: if we have a nameref variable with a valid
+	  array reference that is invalid for assignment (e.g., a[*]), and
+	  assign_array_element returns NULL, short-circuit and return NULL.
+	  Fixes bug reported by Grisha Levit <grishalevit@gmail.com>
+
+general.[ch]
+	- valid_nameref_value: new function, return 1 if passed argument is
+	  a valid variable name argument for a nameref variable: a valid
+	  identifier, a valid array reference, or a valid positional
+	  parameter.  Second argument indicates whether the value is to be
+	  used for an assignment; in this case, return an error if the name
+	  consists of all digits
+
+builtins/declare.def
+	- declare_internal: disallow values for nameref variables that don't
+	  pass the tests in valid_nameref_value.  Part of fix for bug
+	  reported by Grisha Levit <grishalevit@gmail.com>
+
+variables.c
+	- bind_variable_internal: if trying to assign a value to a nameref
+	  variable, throw an error if valid_nameref_value fails (with a second
+	  argument of 1).  More fixes for bug reported by Grisha Levit
+	  <grishalevit@gmail.com>
+
+				    5/2
+				    ---
+builtins/declare.def
+	- declare_internal: don't allow nameref attribute to be applied to an
+	  existing readonly variable; it can be used to circumvent readonly
+	  value.  Fix for bug reported by Grisha Levit <grishalevit@gmail.com>
+
+variables.[ch]
+	- find_variable_last_nameref, find_global_variable_last_nameref: takes a
+	  new flags argument.  If flags is non-zero, and we find a nameref
+	  variable that is unset (has no value), return that variable instead
+	  of NULL.
+
+{variables,execute_cmd,arrayfunc,subst}.c,builtins/{declare,set}.def
+	- find_variable_last_nameref, find_global_variable_last_nameref: change
+	  callers to add flags argument (initially 0)
+
+				    5/3
+				    ---
+variables.c
+	- bind_variable_internal: make sure we run the value of a namref variable
+	  through valid_nameref_value before doing the assignment.  This can go
+	  away if we stop allowing namerefs to refer to positional parameters
+
+execute_cmd.c
+	- execute_select_command: if bind_variable returns NULL, handle it as an
+	  error, as if attempting assignment to a readonly variable
+	- execute_for_command: use 1 as second argument to
+	  find_variable_last_nameref, so it will return an invisible nameref
+	  to assign for each variable in the list
+	- execute_for_command: if the current word in the list is an invalid
+	  identifier and the loop variable is a nameref, handle it as an error,
+	  as if attempting assignment to a readonly variable
+
+				    5/4
+				    ---
+variables.c
+	- bind_int_variable: add warning if assigning an int to a nameref
+	  variable
+	- assign_in_env: if assigning a variable in the temporary environment
+	  that is a namref, throw an error if trying to assign an invalid
+	  value
+	- bind_variable_value: use valid_nameref_value instead of calls to
+	  legal_identifier and valid_array_reference
+
+execute_cmd.c
+	- coproc_setvars: if we have a nameref variable as the coproc name, but
+	  it can't be assigned to for some reason, remove the nameref attribute
+	  and  issue a warning that we are doing so
+	- coproc_setvars: don't allow assignment to a nameref variable with an
+	  invalid variable name, using same code as find_or_make_array_variable
+
+general.c
+	- valid_nameref_value: disallow values consisting solely of digits,
+	  like the positional parameters
+
+builtins/declare.def
+	- declare_internal: don't call valid_nameref_value on the existing value
+	  of a variable that's being converted to a nameref -- that value is
+	  going to be thrown away and we've already checked the new value
+	- declare_internal: call bind_variable_value with the ASS_NAMEREF flag
+	  if we're assigning to an existing nameref variable (for instance,
+	  `declare -n x ; declare x=42')
+
+				    5/5
+				    ---
+variables.c
+	- make_local_variable: if we are being asked to create a local copy of
+	  a nameref variable from a prior scope (checked by looking up
+	  using find_variable_noref), use the nameref variable, not the variable
+	  it references (which we find using find_variable).  Bug report from
+	  Grisha Levit <grishalevit@gmail.com> ; fix by Piotr Grzybowski
+	  <narsil.pl@gmail.com>
+
+builtins/declare.def
+	- declare_internal: if asked to do the same thing as above (difference
+	  is declare -n r=foo in previous case; declare -n r in this one),
+	  don't follow reference var from a previous context.  Create a new
+	  local variable (using make_local_variable) and inherit attributes
+	  from previous scope's nameref as above
+
+				    5/6
+				    ---
+builtins/declare.def
+	- declare_internal: if we are assigning a value to an existing
+	  invisible nameref variable, validate value early so we don't end up
+	  removing the variable after the assignment fails
+
+builtins/shopt.def
+	- toggle_shopts: don't call set_bashopts here unless $BASHOPTS exists,
+	  since we don't want to set it up before it gets read from the
+	  environment. Keeping BASHOPTS read-only should keep users from
+	  unsetting it.  Fix from Grisha Levit <grishalevit@gmail.com>
+	- shopt_set_debug_mode: make sure error_trace_mode reflects the setting
+	  of extdebug.  This one is tentative.  Fix from Grisha Levit
+	  <grishalevit@gmail.com>
+	- shopt_set_debug_mode: call set_shellopts after setting error_trace_mode
+	  or function_trace_mode.  Fix from Grisha Levit <grishalevit@gmail.com>
+
+shell.c
+	- start_debugger: make sure that function_trace_mode and error_trace_mode
+	  reflect the value of debugging_mode, so they are both disabled if we
+	  disable debugging mode because we can't find the debugger start file.
+	  Fix from Grisha Levit <grishalevit@gmail.com>
+	- start_debugger: set $SHELLOPTS and $BASHOPTS to the option values are
+	  reflected if we change or set them here.  Fix from Grisha Levit
+	  <grishalevit@gmail.com>
+
+builtins/set.def
+	- reset_shell_options: add reset values for: posix, nolog, pipefail.
+	  Fix from Grisha Levit <grishalevit@gmail.com>
+
+builtins/shopt.def
+	- reset_shopt_options: add reset values for: autocd, checkjobs,
+	  complete_fullquote, dirspell, failglob, globstar, gnu_errfmt,
+	  huponexit, inherit_errexit, interactive_comments, lastpipe,
+	  no_empty_cmd_completion, progcomp.  Fix from Grisha Levit
+	  <grishalevit@gmail.com>
+	- reset_shopt_options: make sure the following options have the right
+	  defaults based on #defines: checkjobs, checkwinsize, direxpand,
+	  extglob, globasciiranges.  Fix from Grisha Levit
+	  <grishalevit@gmail.com>
+
+flags.c
+	- reset_shell_flags: add missing flags, re-initialize history_expansion
+	  based on STRICT_POSIX
+
+				    5/8
+				    ---
+lib/readline/histexpand.c
+	- history_expand: if any expansion returns 1 from history_expand_internal,
+	  indicating that :p was supplied, make it apply to the entire line
+	  like tcsh and csh.  Fixes bug reported by Dean Stanton
+	  <dstanton@tintri.com>
+
+variables.[ch]
+	- ifsname: move define to variables.h
+
+execute_cmd.c
+	- execute_for_command: check whether or not the word in the for command
+	  is IFS; call setifs every time the variable is assigned a value.
+	  Fixes bug report from Grisha Levit <grishalevit@gmail.com>
+
+				   5/16
+				   ----
+general.c
+	- valid_nameref_value: explicitly handle name == 0 and *name == 0 right
+	  away to save calls to legal_identifier
+
+builtins/declare.def
+	- declare_internal: if trying to set nameref attribute on a variable with
+	  a null value, flag as invalid assignment, just as if running
+	  `declare -n r=""'.  Fixes bug report from Grisha Levit
+	  <grishalevit@gmail.com>
+	- declare_internal: when creating a variable with a temporary value (""),
+	  use ASS_FORCE in the assignment flags to bypass name validity checks on
+	  nameref variable names
+
+variables.c
+	- bind_variable_internal: don't call valid_nameref_value if we're forcing
+	  assignment with (flags & ASS_FORCE)
+
+builtins/read.def
+	- read_builtin: handle bind_variable returning NULL when setting REPLY.
+	  Report and fix from Grisha Levit <grishalevit@gmail.com>
+
+builtins/setattr.def
+	- set_var_attribute: handle bind_variable returning NULL
+
+lib/sh/tmpfile.c
+	- sh_seedrand(): call srandom() to seed the random number generator
+	- sh_mktmpname, sh_mktmpfd: if we have random(), assume we have srandom()
+	  and seed the random number generator. Still looking for better value to
+	  see random number generator with
+
+variables.c
+	- check_unbind_variable: use internal_error instead of builtin_error
+
+{execute_cmd,variables}.c
+	- fix some places where bind_variable could return NULL and it was not
+	  checked.  Fix from Piotr Grzybowski <narsil.pl@gmail.com>
+
+				   5/17
+				   ----
+arrayfunc.c
+	- convert_var_to_{array,assoc}: make sure to turn off nameref attribute,
+	  since namerefs can't be arrays
+
+execute_cmd.c
+	- coproc_setvars: if the coproc name names a nameref, resolve the nameref
+	  and use it as the name of the coproc.  Suggested by Grisha Levit
+	  <grishalevit@gmail.com>
+
+subst.c
+	- command_substitute: don't bother calling QUIT after calling
+	  reset_signal_handlers in the child, kill the child with SIGINT in
+	  case we just reset the signal handler to SIG_DFL and we should just
+	  exit instead of throwing to top level.  Fixes bug reported by
+	  Grisha Levit <grishalevit@gmail.com>
+
+				   5/18
+				   ----
+variables.c
+	- find_variable_nameref_for_create: find a nameref variable whose value
+	  doesn't resolve to an existing variable and see whether or not that
+	  value is appropriate for a new variable to be created
+	- find_variable_nameref_for_assignment: find a nameref variable whose value
+	  doesn't resolve to an existing variable and see whether or not that
+	  value is appropriate for a new variable to be created.  Difference
+	  between _assignment and _create is that _assignment allows the nameref
+	  value to be a subscripted array reference
+
+builtins/setattr.def
+	- set_var_attribute: if variable lookup doesn't return anything, check
+	  for a nameref and make sure that any reference value is something we
+	  should be working on here, using find_variable_nameref_for_create().
+	  If it fails, error out and return, otherwise it's probably a reference
+	  to a variable that hasn't been set yet, so let bind_variable take care
+	  of that.  Report from Grisha Levit <grishalevit@gmail.com>
+
+arrayfunc.c
+	- bind_array_variable: if find_shell_variable returns NULL, check for a
+	  nameref using find_variable_nameref_for_create and create a new array
+	  variable with the value if it returns a valid nameref variable.
+	  Makes `unset var; declare -n ref=var ; ref[0]=foo' work right.
+	  Report from Grisha Levit <grishalevit@gmail.com>
+
+				   5/19
+				   ----
+variables.[ch]
+	- unbind_variable_noref: unset a variable NAME without following any
+	  nameref chain.  If the first instance of the variable with that name
+	  is a nameref, just unset that nameref variable.
+
+builtins/getopts.def
+	- getopts_unbind_variable: if OPTARG is going to be unbound, use
+	  unbind_variable_noref to unbind that name even if it is a nameref
+	  variable.  Issue raised by Grisha Levit <grishalevit@gmail.com>
+
+execute_cmd.c
+	- coproc_unsetvars: use unbind_variable_noref in case someone sets the
+	  coproc _PID variable as a nameref pointing to something read-only or
+	  strange.  Issue raised by Grisha Levit <grishalevit@gmail.com>
+
+builtins/set.def
+	- set_ignoreeof: use unbind_variable_noref to unset "IGNOREEOF" and
+	  "ignoreeof"
+	- set_posix_mode: use unbind_variable_noref to unset "POSIXLY_CORRECT"
+
+variables.c
+	- make_vers_array: use unbind_variable_noref to unset "BASH_VERSINFO"
+
+lib/sh/shmatch.c
+	- sh_regmatch: use unbind_variable_noref to unset "BASH_REMATCH"
+
+bashline.c
+	- bash_execute_unix_command: use check_unbind_variable to unset
+	  READLINE_LINE and READLINE_POINT
+
+pcomplete.c
+	- unbind_compfunc_variables: use unbind_variable_noref to unset COMP_LINE,
+	  COMP_POINT, COMP_WORDS, COMP_CWORD, COMP_TYPE, COMP_KEY
+	- gen_shell_function_matches: use unbind_variable_noref to unset COMPREPLY
+
+config-top.h
+	- USE_MKTEMP/USE_MKSTEMP: define by default to use libc version of mktemp
+	  and mkstemp in lib/sh/tmpfile.c.  Recommended by by Mike Frysinger
+	  <vapier@gentoo.org> to fix a FreeBSD problem
+
+configure.ac,config.h.in
+	- mkstemp: check for mkstemp, define HAVE_MKSTEMP if available
+
+config-bot.h
+	- USE_MKSTEMP: #undef if HAVE_MKSTEMP not defined
+
+				   5/22
+				   ----
+variables.c
+	- assign_in_env: if appending to a variable's value, make sure we call
+	  make_variable_value with the empty string if expand_assignment_string_to_string
+	  returns NULL, as do_assignment_internal does.  Fixes bug with
+	  `str=''; val=foo ; val+=str printenv val' reported by Grisha Levit
+	  <grishalevit@gmail.com>
+	- assign_in_env: if assigning to a nameref variable in the temporary
+	  environment, and the nameref has a valid value for assignment (even
+	  if the target variable is not set), resolve the nameref and create
+	  a variable in the temporary environment named by the nameref's value.
+	  If the nameref variable is invisible or isn't set to a valid value
+	  for assignment, just create a regular temporary variable with the
+	  nameref's name.  This provides a degree of ksh93 compatibility.
+	  Suggested by Grisha Levit <grishalevit@gmail.com>
+	- find_variable_nameref_context,find_variable_last_nameref_context:
+	  instead of returning NULL when detecting a loop, return a distinguished
+	  value: &nameref_maxloop_value
+	- bind_variable: catch nameref_maxloop_value so we can do different
+	  things based on whether or not we get it.  Right now we don't do
+	  anything different, but we could
+
+				   5/24
+				   ----
+lib/readline/display.c
+	- update_line,_rl_move_cursor_relative: save value of MB_CUR_MAX in a
+	  variable and use it throughout the functions instead of recomputing it
+	  every time (which possibly costs a function call)
+
+				   5/25
+				   ----
+builtins/declare.def
+	- declare_internal: only check whether the value being assigned to a
+	  nameref variable is a valid identifier if we're not appending to an
+	  existing value.  Suggested by Grisha Levit <grishalevit@gmail.com>
+	- declare_internal: add a couple of more checks on nameref names:
+		o make sure `declare -n x[3]=y' is an error
+		o nameref variable self-references now produce a warning when in
+		  function scope
+		o nameref variable self-references using subscripted arrays
+		  (a=a[0]) now produce warnings at function scope and errors at
+		  global scope
+
+				   5/29
+				   ----
+builtins/declare.def
+	- declare_internal: use name of readonly variable when calling sh_readonly	
+	  instead of name passed as argument to declare in case we've followed
+	  a nameref chain
+	- declare_internal: when turning off attributes on a nameref variable
+	  after following the nameref chain and turning them off on the target
+	  variable, don't allow the readonly attribute to be removed.  This is
+	  primarily intended to turn off the nameref attribute.  Issue pointed
+	  out by Grisha Levit <grishalevit@gmail.com>
+	- declare_internal: if we are attempting to modify an existing global
+	  nameref variable, and the -n option is supplied, operate on the
+	  nameref variable itself, not the variable it references
+
+doc/{bash.1,bashref.texi}
+	- change the descriptions of namerefs and declare -n slightly to note
+	  that using the -n option to declare will operate on the nameref
+	  variable itself rather than the variable it references
+
+variables.c
+	- bind_variable_internal: if trying to assign to a read-only variable,
+	  print the error message using the variable's name instead of the
+	  name passed to bind_variable in case we followed a nameref
+
+builtins/declare.def
+	- declare_internal: when we're creating a (possibly invisible) variable
+	  as part of another operation, assigning NULL, make sure to use
+	  ASS_FORCE to avoid warning messages from any existing nameref
+	  variables we follow
+	- declare_internal: allow the nameref attribute to be removed from a
+	  readonly nameref variable without a value but do not allow it to be
+	  removed from a readonly nameref variable that has a value, even if it
+	  doesn't reference an existing variable.  This distinction is for ksh93
+	  compatibility.  Pointed out by Grisha Levit <grishalevit@gmail.com>
+
+				   5/31
+				   ----
+builtins/declare.def
+	- declare_internal: if the call to bind_variable_value fails for some
+	  reason, make sure to restore the nameref attribute to flags_on and
+	  flags_off before calling NEXT_VARIABLE
+
+subst.c
+	- make_internal_declare: handle += append op
+	- shell_expand_word_list: when transforming assignment statement
+	  arguments to `declare', make sure to handle += append op to avoid
+	  passing invalid identifiers to declare.  Report by Grisha Levit
+	  <grishalevit@gmail.com>
+
+				    6/1
+				    ---
+builtins/declare.def
+	- declare_internal: if a nameref assignment fails, only call delete_var to
+	  delete the variable if we created it in declare_internal in the first
+	  place
+
+general.c
+	- check_selfref: new function, checks a NAME against a VALUE for nameref
+	  self-reference
+
+general.h
+	- check_selfref: extern declaration
+
+builtins/declare.def
+	- declare_internal: call check_selfref to determine whether a given NAME
+	  and VALUE constitute an invalid nameref variable self-reference
+
+variables.c
+	- bind_variable_internal: call check_selfref to determine whether a given
+	  NAME and VALUE constitute an invalid nameref variable self-reference
+
+				    6/2
+				    ---
+parse.y
+	- clear_shell_input_line: new function, clears contents of shell_input_line
+	  and sets index to 0, but doesn't free it
+
+externs.h
+	- clear_shell_input_line: extern declaration
+
+builtins/evalstring.c
+	- parse_and_execute: call clear_shell_input_line after setting input to
+	  string to be executed.  Fixes problem with command substitution and
+	  multi-line aliases reported by Grisha Levit <grishalevit@gmail.com>
+
+eval.c
+	- parse_command: only execute PROMPT_COMMAND if the shell is not
+	  currently expanding an alias; use the same tests as parse.y:SHOULD_PROMPT
+	  and parse.y:prompt_again() use to decide whether or not to print a
+	  prompt.  Fixes problems with PROMPT_COMMAND and multi-line aliases
+	  reported by Grisha Levit <grishalevit@gmail.com>
+
+builtins/set.def
+	- unset_builtin: changes to fix three problems reported by Grisha
+	  Levit <grishalevit@gmail.com>:
+		o if -n is supplied, we should not try to unset a function if
+		  a variable isn't found
+		o unsetting namerefs whose values are array references does
+		  not work
+		o unset -n n[0], where n is a nameref, would unset the referenced
+		  variable instead of `n'
+
+redir.c
+	- redir_varvalue: handle case where nameref var points to subscripted
+	  array reference.  Reported by Grisha Levit <grishalevit@gmail.com>
+
+variables.c
+	- bind_variable_value: make sure to call check_selfref only if aflags
+	  includes ASS_NAMEREF and not ASS_FORCE.  Reported by Grisha Levit
+	  <grishalevit@gmail.com>
+
+general.c
+	- valid_nameref_value: now understands a FLAGS value of 2 to mean that
+	  the name will be used to create a variable, so only legal_identifier
+	  matters
+
+arrayfunc.c
+	- find_or_make_array_variable: call valid_nameref_value with FLAGS value
+	  of 2 to indicate we will be creating a variable.  Fixes mapfile issue
+	  reported by Grisha Levit <grishalevit@gmail.com>
+
+				    6/5
+				    ---
+builtins/declare.def
+	- declare_internal: only pass ASS_FORCE as part of assignment flags to
+	  assignments concerning arrays
+	- declare_internal: when at the global scope, if we resolve a nameref
+	  and commit to using the new name, go back to to the beginning of the
+	  loop and use the new name in the checks and variable references.
+	  Make sure we construct the new name as a straight substitution of
+	  the nameref value into the old name, including array subscripts and
+	  rebuilding the correct values for `offset' and `value', since they
+	  are relative to the original value of name.
+	  Fixes several issues with checking use of subscripted array variables
+	  as nameref values
+	- declare_internal: when calling assign_array_element, make sure to pass
+	  ASS_APPEND if aflags includes it, so things like
+		declare -a var; var[1]=1; declare var[1]+=4
+	  append to the value appropriately and var[1] ends up being `14'
+
+arrayfunc.c
+	- valid_array_reference: make sure the array reference is properly
+	  terminated after the first subscript; return invalid if there is
+	  anything following the closing `]'
+
+				   6/12
+				   ----
+variables.c
+	- bind_variable_internal: if asked to perform an array subscript
+	  assignment on a nameref variable, display a warning and remove the
+	  nameref attribute (as bash-4.3 did).  Reported by Dan Douglas
+	  <ormaaj@gmail.com>
+
+				   6/14
+				   ----
+test.c
+	- posixtest: handle four-argument case where argv[1] == '(' and
+	  argv[4] == ')' by performing two-argument test on $2 and $3.  Reported
+	  by Joerg Schilling <Joerg.Schilling@fokus.fraunhofer.de>
+
+				   6/15
+				   ----
+variables.c
+	- sv_ignoreeof: make sure ignoreeof is set only if IGNOREEOF is set and
+	  has a value (no `local IGNOREEOF'). Reported by Grisha Levit
+	  <grishalevit@gmail.com>
+	- sv_strict_posix: make sure posixly_correct is set only if POSIXLY_CORRECT
+	  is set and has a value.  Reported by Grisha Levit <grishalevit@gmail.com>
+
+				   6/16
+				   ----
+builtins/declare.def
+	- declare_internal: analogous to 6/12 change; when performing an array
+	  subscript assignment on a nameref, display a warning, remove the
+	  nameref attribute, and go on
+
+				   6/21
+				   ----
+execute_cmd.c
+	- shell_execve: make sure errno is (re)set appropriately before returning
+	  error value on exec format error
+
+				   6/23
+				   ----
+execute_cmd.c
+	- param_expand: when expanding $* in a context where splitting is not
+	  desired (pflags & PF_ASSIGNRHS), make sure to quote the word and the
+	  included separators.  Reported by Dan Douglas <ormaaj@gmail.com>
+
+				   6/30
+				   ----
+configure.ac
+	- release version is now `beta2'
+
+execute_cmd.c
+	- execute_simple_command: even if already_making_children is non-zero,
+	  don't call wait_for if last_made_pid == NO_PID.  Indirectly inspired
+	  by report from Nicolas Vivet <nicolas@nzx.io>
+
+				    7/2
+				    ---
+subst.c
+	- expand_word_internal: when adding an IFS character to the accumulated
+	  string, don't quote it if word expansion is not going to be
+	  performed ((word->flags & (W_NOSPLIT|W_NOSPLIT2)) == 0) in the
+	  default case.  This was already the case everwhere else, when we did
+	  `goto add_ifs_character;'.  Fixes bug reported by Ibrahim M. Ghazal
+	  <imgx64@gmail.com>
+
+subst.[ch],arrayfunc.c
+	- string_list_dollar_at: now takes a new third argument, currently
+	  reserved for future use; changed callers and declaration

@@ -69,6 +69,8 @@
 
 #if defined (JOB_CONTROL)
 #  include "jobs.h"
+#else
+extern int cleanup_dead_jobs __P((void));
 #endif /* JOB_CONTROL */
 
 #if defined (ALIAS)
@@ -1959,6 +1961,13 @@ parser_restore_alias ()
 #endif
 }
 
+void
+clear_shell_input_line ()
+{
+  if (shell_input_line)
+    shell_input_line[shell_input_line_index = 0] = '\0';
+}
+
 /* Return a line of text, taken from wherever yylex () reads input.
    If there is no more input, then we return NULL.  If REMOVE_QUOTED_NEWLINE
    is non-zero, we remove unquoted \<newline> pairs.  This is used by
@@ -2312,7 +2321,7 @@ shell_getc (remove_quoted_newline)
 	      if (n <= 2)	/* we have to save 1 for the newline added below */
 		{
 		  if (truncating == 0)
-		    internal_warning("shell_getc: shell_input_line_size (%zu) exceeds SIZE_MAX (%llu): line truncated", shell_input_line_size, (unsigned long)SIZE_MAX);
+		    internal_warning(_("shell_getc: shell_input_line_size (%zu) exceeds SIZE_MAX (%lu): line truncated"), shell_input_line_size, (unsigned long)SIZE_MAX);
 		  shell_input_line[i] = '\0';
 		  truncating = 1;
 		}
@@ -3033,6 +3042,7 @@ reset_parser ()
     free_string_list ();
 #endif /* ALIAS || DPAREN_ARITHMETIC */
 
+  /* This is where we resynchronize to the next newline on error/reset */
   if (shell_input_line)
     {
       free (shell_input_line);
@@ -3316,7 +3326,8 @@ tokword:
 #define LEX_INHEREDOC	0x080
 #define LEX_HEREDELIM	0x100		/* reading here-doc delimiter */
 #define LEX_STRIPDOC	0x200		/* <<- strip tabs from here doc delim */
-#define LEX_INWORD	0x400
+#define LEX_QUOTEDDOC	0x400		/* here doc with quoted delim */
+#define LEX_INWORD	0x800
 
 #define COMSUB_META(ch)		((ch) == ';' || (ch) == '&' || (ch) == '|')
 
@@ -3608,6 +3619,81 @@ parse_dollar_word:
   return ret;
 }
 
+#if defined (DEBUG)
+static void
+dump_tflags (flags)
+     int flags;
+{
+  int f;
+
+  f = flags;
+  fprintf (stderr, "%d -> ", f);
+  if (f & LEX_WASDOL)
+    {
+      f &= ~LEX_WASDOL;
+      fprintf (stderr, "LEX_WASDOL%s", f ? "|" : "");
+    }
+  if (f & LEX_CKCOMMENT)
+    {
+      f &= ~LEX_CKCOMMENT;
+      fprintf (stderr, "LEX_CKCOMMENT%s", f ? "|" : "");
+    }
+  if (f & LEX_INCOMMENT)
+    {
+      f &= ~LEX_INCOMMENT;
+      fprintf (stderr, "LEX_INCOMMENT%s", f ? "|" : "");
+    }
+  if (f & LEX_PASSNEXT)
+    {
+      f &= ~LEX_PASSNEXT;
+      fprintf (stderr, "LEX_PASSNEXT%s", f ? "|" : "");
+    }
+  if (f & LEX_RESWDOK)
+    {
+      f &= ~LEX_RESWDOK;
+      fprintf (stderr, "LEX_RESWDOK%s", f ? "|" : "");
+    }
+  if (f & LEX_CKCASE)
+    {
+      f &= ~LEX_CKCASE;
+      fprintf (stderr, "LEX_CKCASE%s", f ? "|" : "");
+    }
+  if (f & LEX_INCASE)
+    {
+      f &= ~LEX_INCASE;
+      fprintf (stderr, "LEX_INCASE%s", f ? "|" : "");
+    }
+  if (f & LEX_INHEREDOC)
+    {
+      f &= ~LEX_INHEREDOC;
+      fprintf (stderr, "LEX_INHEREDOC%s", f ? "|" : "");
+    }
+  if (f & LEX_HEREDELIM)
+    {
+      f &= ~LEX_HEREDELIM;
+      fprintf (stderr, "LEX_HEREDELIM%s", f ? "|" : "");
+    }
+  if (f & LEX_STRIPDOC)
+    {
+      f &= ~LEX_STRIPDOC;
+      fprintf (stderr, "LEX_WASDOL%s", f ? "|" : "");
+    }
+  if (f & LEX_QUOTEDDOC)
+    {
+      f &= ~LEX_QUOTEDDOC;
+      fprintf (stderr, "LEX_QUOTEDDOC%s", f ? "|" : "");
+    }
+  if (f & LEX_INWORD)
+    {
+      f &= ~LEX_INWORD;
+      fprintf (stderr, "LEX_INWORD%s", f ? "|" : "");
+    }
+
+  fprintf (stderr, "\n");
+  fflush (stderr);
+}
+#endif
+
 /* Parse a $(...) command substitution.  This is messier than I'd like, and
    reproduces a lot more of the token-reading code than I'd like. */
 static char *
@@ -3685,7 +3771,7 @@ eof_error:
 		tind++;
 	      if (STREQN (ret + tind, heredelim, hdlen))
 		{
-		  tflags &= ~(LEX_STRIPDOC|LEX_INHEREDOC);
+		  tflags &= ~(LEX_STRIPDOC|LEX_INHEREDOC|LEX_QUOTEDDOC);
 /*itrace("parse_comsub:%d: found here doc end `%s'", line_number, ret + tind);*/
 		  free (heredelim);
 		  heredelim = 0;
@@ -3705,21 +3791,29 @@ eof_error:
       if ((tflags & LEX_INHEREDOC) && ch == close && count == 1)
 	{
 	  int tind;
-/*itrace("parse_comsub: in here doc, ch == close, retind - firstind = %d hdlen = %d retind = %d", retind-lex_firstind, hdlen, retind);*/
+/*itrace("parse_comsub:%d: in here doc, ch == close, retind - firstind = %d hdlen = %d retind = %d", line_number, retind-lex_firstind, hdlen, retind);*/
 	  tind = lex_firstind;
 	  while ((tflags & LEX_STRIPDOC) && ret[tind] == '\t')
 	    tind++;
 	  if (retind-tind == hdlen && STREQN (ret + tind, heredelim, hdlen))
 	    {
-	      tflags &= ~(LEX_STRIPDOC|LEX_INHEREDOC);
-/*itrace("parse_comsub:%d: found here doc end `%s'", line_number, ret + tind);*/
+	      tflags &= ~(LEX_STRIPDOC|LEX_INHEREDOC|LEX_QUOTEDDOC);
+/*itrace("parse_comsub:%d: found here doc end `%*s'", line_number, hdlen, ret + tind);*/
 	      free (heredelim);
 	      heredelim = 0;
 	      lex_firstind = -1;
 	    }
 	}
 
-      /* Don't bother counting parens or doing anything else if in a comment */
+      /* Don't bother counting parens or doing anything else if in a comment or
+	 here document (not exactly right for here-docs -- if we want to allow
+	 recursive calls to parse_comsub to have their own here documents,
+	 change the LEX_INHEREDOC to LEX_QUOTEDDOC here and uncomment the next
+	 clause below.  Note that to make this work completely, we need to make
+	 additional changes to allow xparse_dolparen to work right when the
+	 command substitution is parsed, because read_secondary_line doesn't know
+	 to recursively parse through command substitutions embedded in here-
+	 documents */
       if (tflags & (LEX_INCOMMENT|LEX_INHEREDOC))
 	{
 	  /* Add this character. */
@@ -3734,6 +3828,21 @@ eof_error:
 
 	  continue;
 	}
+#if 0
+      /* If we're going to recursively parse a command substitution inside a
+	 here-document, make sure we call parse_comsub recursively below.  See
+	 above for additional caveats. */
+      if ((tflags & LEX_INHEREDOC) && ((tflags & LEX_WASDOL) == 0 || ch != '(')) /*)*/
+	{
+	  /* Add this character. */
+	  RESIZE_MALLOCED_BUFFER (ret, retind, 1, retsize, 64);
+	  ret[retind++] = ch;
+	  if MBTEST(ch == '$')
+	    tflags |= LEX_WASDOL;
+	  else
+	    tflags &= ~LEX_WASDOL;
+	}
+#endif
 
       if (tflags & LEX_PASSNEXT)		/* last char was backslash */
 	{
@@ -3814,6 +3923,8 @@ eof_error:
 		  free (nestret);
 		  hdlen = STRLEN(heredelim);
 /*itrace("parse_comsub:%d: found here doc delimiter `%s' (%d)", line_number, heredelim, hdlen);*/
+		  if (STREQ (heredelim, nestret) == 0)
+		    tflags |= LEX_QUOTEDDOC;
 		}
 	      if (ch == '\n')
 		{
@@ -3876,14 +3987,34 @@ eof_error:
 	      if (STREQN (ret + retind - 4, "case", 4))
 		{
 		  tflags |= LEX_INCASE;
+		  tflags &= ~LEX_RESWDOK;
 /*itrace("parse_comsub:%d: found `case', lex_incase -> 1 lex_reswdok -> 0", line_number);*/
 		}
 	      else if (STREQN (ret + retind - 4, "esac", 4))
 		{
 		  tflags &= ~LEX_INCASE;
-/*itrace("parse_comsub:%d: found `esac', lex_incase -> 0 lex_reswdok -> 0", line_number);*/
+/*itrace("parse_comsub:%d: found `esac', lex_incase -> 0 lex_reswdok -> 1", line_number);*/
+		  tflags |= LEX_RESWDOK;
+		  lex_rwlen = 0;
 		}
-	      tflags &= ~LEX_RESWDOK;
+	      else if (STREQN (ret + retind - 4, "done", 4) ||
+		       STREQN (ret + retind - 4, "then", 4) ||
+		       STREQN (ret + retind - 4, "else", 4) ||
+		       STREQN (ret + retind - 4, "elif", 4) ||
+		       STREQN (ret + retind - 4, "time", 4))
+		{
+		  /* these are four-character reserved words that can be
+		     followed by a reserved word; anything else turns off
+		     the reserved-word-ok flag */
+/*itrace("parse_comsub:%d: found `%.4s', lex_reswdok -> 1", line_number, ret+retind-4);*/
+		  tflags |= LEX_RESWDOK;
+		  lex_rwlen = 0;
+		}
+	       else
+		{
+		  tflags &= ~LEX_RESWDOK;
+/*itrace("parse_comsub:%d: found `%.4s', lex_reswdok -> 0", line_number, ret+retind-4);*/
+		}
 	    }
 	  else if MBTEST((tflags & LEX_CKCOMMENT) && ch == '#' && (lex_rwlen == 0 || ((tflags & LEX_INWORD) && lex_wlen == 0)))
 	    ;	/* don't modify LEX_RESWDOK if we're starting a comment */
@@ -4572,7 +4703,7 @@ read_token_word (character)
 
   /* Non-zero means to ignore the value of the next character, and just
      to add it no matter what. */
- int pass_next_character;
+  int pass_next_character;
 
   /* The current delimiting character. */
   int cd;
@@ -4869,7 +5000,6 @@ read_token_word (character)
 	}
 
 got_character:
-
       if (character == CTLESC || character == CTLNUL)
 	{
 	  RESIZE_MALLOCED_BUFFER (token, token_index, 2, token_buffer_size,
@@ -5331,7 +5461,7 @@ decode_prompt_string (string)
 #if defined (PROMPT_STRING_DECODE)
   int result_size, result_index;
   int c, n, i;
-  char *temp, octal_string[4];
+  char *temp, *t_host, octal_string[4];
   struct tm *tm;  
   time_t the_time;
   char timebuf[128];
@@ -5479,7 +5609,11 @@ decode_prompt_string (string)
 
 	    case 's':
 	      temp = base_pathname (shell_name);
-	      temp = savestring (temp);
+	      /* Try to quote anything the user can set in the file system */
+	      if (promptvars || posixly_correct)
+		temp = sh_backslash_quote_for_double_quotes (temp);
+	      else
+		temp = savestring (temp);
 	      goto add_string;
 
 	    case 'v':
@@ -5569,9 +5703,17 @@ decode_prompt_string (string)
 
 	    case 'h':
 	    case 'H':
-	      temp = savestring (current_host_name);
-	      if (c == 'h' && (t = (char *)strchr (temp, '.')))
+	      t_host = savestring (current_host_name);
+	      if (c == 'h' && (t = (char *)strchr (t_host, '.')))
 		*t = '\0';
+	      if (promptvars || posixly_correct)
+		/* Make sure that expand_prompt_string is called with a
+		   second argument of Q_DOUBLE_QUOTES if we use this
+		   function here. */
+		temp = sh_backslash_quote_for_double_quotes (t_host);
+	      else
+		temp = savestring (t_host);
+	      free (t_host);
 	      goto add_string;
 
 	    case '#':

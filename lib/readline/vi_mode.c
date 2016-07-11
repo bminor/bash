@@ -1,7 +1,7 @@
 /* vi_mode.c -- A vi emulation mode for Bash.
    Derived from code written by Jeff Sparkes (jsparkes@bnr.ca).  */
 
-/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -1619,6 +1619,62 @@ rl_vi_delete (count, key)
 
   return (0);
 }
+
+/* This does what Posix specifies vi-mode C-w to do: using whitespace and
+   punctuation characters as the word boundaries. */
+
+#define vi_unix_word_boundary(c)	(whitespace(c) || ispunct(c))
+
+int
+rl_vi_unix_word_rubout (count, key)
+     int count, key;
+{
+  int orig_point;
+
+  if (rl_point == 0)
+    rl_ding ();
+  else
+    {
+      orig_point = rl_point;
+      if (count <= 0)
+	count = 1;
+
+      while (count--)
+	{
+	  /* This isn't quite what ksh93 does but it seems to match what the
+	     Posix description of sh specifies, with a few accommodations
+	     for sequences of whitespace characters between words and at
+	     the end of the line. */
+
+	  /* Skip over whitespace at the end of the line as a special case */
+	  if (rl_point > 0 && (rl_line_buffer[rl_point] == 0) &&
+		whitespace (rl_line_buffer[rl_point - 1]))
+	    while (--rl_point > 0 && whitespace (rl_line_buffer[rl_point]))
+	      ;
+
+	  /* If we're at the start of a word, move back to word boundary so we
+	     move back to the `preceding' word */
+	  if (rl_point > 0 && (vi_unix_word_boundary (rl_line_buffer[rl_point]) == 0) &&
+		vi_unix_word_boundary (rl_line_buffer[rl_point - 1]))
+	    rl_point--;
+
+	  /* If we are at a word boundary (whitespace/punct), move backward
+	     past a sequence of word boundary characters.  If we are at the
+	     end of a word (non-word boundary), move back to a word boundary */
+	  if (rl_point > 0 && vi_unix_word_boundary (rl_line_buffer[rl_point]))
+	    while (rl_point && vi_unix_word_boundary (rl_line_buffer[rl_point - 1]))
+	      rl_point--;
+	  else if (rl_point > 0 && vi_unix_word_boundary (rl_line_buffer[rl_point]) == 0)
+	    while (rl_point && (vi_unix_word_boundary (rl_line_buffer[rl_point - 1]) == 0))
+	      rl_point--;
+	}
+
+      rl_kill_text (orig_point, rl_point);
+    }
+
+  return 0;
+}
+
 
 int
 rl_vi_back_to_indent (count, key)

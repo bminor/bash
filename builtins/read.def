@@ -797,9 +797,10 @@ assign_vars:
 	}
       else
 	var = bind_variable ("REPLY", input_string, 0);
-      VUNSETATTR (var, att_invisible);
-      if (readonly_p (var) || noassign_p (var))
+      if (var == 0 || readonly_p (var) || noassign_p (var))
 	retval = EXECUTION_FAILURE;
+      else
+	VUNSETATTR (var, att_invisible);
 
       xfree (input_string);
       return (retval);

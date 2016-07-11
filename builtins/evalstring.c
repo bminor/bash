@@ -104,7 +104,12 @@ should_suppress_fork (command)
 	  running_trap == 0 &&
 	  *bash_input.location.string == '\0' &&
 	  command->type == cm_simple &&
+#if 0
 	  signal_is_trapped (EXIT_TRAP) == 0 &&
+	  signal_is_trapped (ERROR_TRAP) == 0 &&
+#else
+	  any_signals_trapped () < 0 &&
+#endif
 	  command->redirects == 0 && command->value.Simple->redirects == 0 &&
 	  ((command->flags & CMD_TIME_PIPELINE) == 0) &&
 	  ((command->flags & CMD_INVERT_RETURN) == 0));
@@ -262,6 +267,7 @@ parse_and_execute (string, from_file, flags)
     current_token = '\n';		/* reset_parser() ? */
 
   with_input_from_string (string, from_file);
+  clear_shell_input_line ();
   while (*(bash_input.location.string))
     {
       command = (COMMAND *)NULL;
@@ -384,7 +390,8 @@ parse_and_execute (string, from_file, flags)
 	       *   we're not going to run the exit trap AND
 	       *   we have a simple command without redirections AND
 	       *   the command is not being timed AND
-	       *   the command's return status is not being inverted
+	       *   the command's return status is not being inverted AND
+	       *   there aren't any traps in effect
 	       * THEN
 	       *   tell the execution code that we don't need to fork
 	       */
@@ -491,7 +498,7 @@ parse_string (string, from_file, flags, endp)
   sigprocmask (SIG_BLOCK, (sigset_t *)NULL, &ps_sigmask);
 #endif
 
-/* itrace("parse_string: `%s'", string); */
+/*itrace("parse_string: `%s'", string);*/
   /* Reset the line number if the caller wants us to.  If we don't reset the
      line number, we have to subtract one, because we will add one just
      before executing the next command (resetting the line number sets it to

@@ -1,4 +1,4 @@
-This is the Bash FAQ, version 4.13, for Bash version 4.3.
+This is the Bash FAQ, version 4.14, for Bash version 4.4.
 
 This document contains a set of frequently-asked questions concerning
 Bash, the GNU Bourne-Again Shell.  Bash is a freely-available command
@@ -2169,11 +2169,17 @@ You may also need
 
 Finally, you need to tell readline that you will be inputting and
 displaying eight-bit characters.  You use readline variables to do
-this.  These variables can be set in your .inputrc or using the bash
+this.  convert-meta says what to do if you read a character with its
+eighth bit set.  input-meta says whether to permit characters with the
+eighth bit at all.  output-meta determines how to display characters
+with the eighth bit set: if on, they are output directly; if it is off,
+such characters are displayed as a meta-prefixed escape sequence.
+
+These variables can be set in your .inputrc or using the bash
 `bind' builtin.  Here's an example using `bind':
 
 	bash$ bind 'set convert-meta off'
-	bash$ bind 'set meta-flag on'
+	bash$ bind 'set input-meta on'
 	bash$ bind 'set output-meta on'
 
 The `set' commands between the single quotes may also be placed

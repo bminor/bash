@@ -244,7 +244,10 @@ parse_command ()
   /* Allow the execution of a random command just before the printing
      of each primary prompt.  If the shell variable PROMPT_COMMAND
      is set then the value of it is the command to execute. */
-  if (interactive && bash_input.type != st_string)
+  /* The tests are a combination of SHOULD_PROMPT() and prompt_again() 
+     from parse.y, which are the conditions under which the prompt is
+     actually printed. */
+  if (interactive && bash_input.type != st_string && parser_expanding_alias() == 0)
     {
       command_to_execute = get_string_value ("PROMPT_COMMAND");
       if (command_to_execute)

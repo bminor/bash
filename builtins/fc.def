@@ -447,6 +447,13 @@ fc_builtin (list)
       return (EXECUTION_FAILURE);
     }
 
+#if defined (READLINE)
+  /* If we're executing as part of a dispatched readline commnand like
+     {emacs,vi}_edit_and_execute_command, the readline state will indicate it.
+     We could remove the partial command from the history, but ksh93 doesn't
+     so we stay compatible. */
+#endif
+
   /* Make sure parse_and_execute doesn't turn this off, even though a
      call to parse_and_execute farther up the function call stack (e.g.,
      if this is called by vi_edit_and_execute_command) may have already

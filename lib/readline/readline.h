@@ -1,6 +1,6 @@
 /* Readline.h -- the names of functions callable from within readline. */
 
-/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -253,6 +253,7 @@ extern int rl_vi_yank_pop PARAMS((int, int));
 extern int rl_vi_rubout PARAMS((int, int));
 extern int rl_vi_delete PARAMS((int, int));
 extern int rl_vi_back_to_indent PARAMS((int, int));
+extern int rl_vi_unix_word_rubout PARAMS((int, int));
 extern int rl_vi_first_print PARAMS((int, int));
 extern int rl_vi_char_search PARAMS((int, int));
 extern int rl_vi_match PARAMS((int, int));
@@ -378,6 +379,7 @@ extern void rl_redisplay PARAMS((void));
 extern int rl_on_new_line PARAMS((void));
 extern int rl_on_new_line_with_prompt PARAMS((void));
 extern int rl_forced_update_display PARAMS((void));
+extern int rl_clear_visible_line PARAMS((void));
 extern int rl_clear_message PARAMS((void));
 extern int rl_reset_line_state PARAMS((void));
 extern int rl_crlf PARAMS((void));

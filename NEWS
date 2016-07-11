@@ -120,22 +120,33 @@ ii. inherit_errexit: a new `shopt' option that, when set, causes command
     substitutions to inherit the -e option.  By default, those subshells disable
     -e.  It's enabled as part of turning on posix mode.
 
-jj.  New prompt string: PS0.  Expanded and displayed by interactive shells after
+jj. New prompt string: PS0.  Expanded and displayed by interactive shells after
     reading a complete command but before executing it.
 
-kk.  Interactive shells now behave as if SIGTSTP/SIGTTIN/SIGTTOU are set to SIG_DFL
-    when the shell is started, so they are set to SIG_DFL in child processes.
+kk. Interactive shells now behave as if SIGTSTP/SIGTTIN/SIGTTOU are set to
+    SIG_DFL when the shell is started, so they are set to SIG_DFL in child
+    processes.
 
 ll. Posix-mode shells now allow double quotes to quote the history expansion
     character.
 
 mm. OLDPWD can be inherited from the environment if it names a directory.
 
-nn. Shells running as root no longer inherit PS4 from the environment, closing a
-    security hole involving PS4 expansion performing command substitution.
+nn. Shells running as root no longer inherit PS4 from the environment, closing
+    a security hole involving PS4 expansion performing command substitution.
 
-oo.  If executing an implicit `cd' when the `autocd' option is set, bash will now
-    invoke a function named `cd' if one exists before executing the `cd' builtin.
+oo. If executing an implicit `cd' when the `autocd' option is set, bash will
+    now invoke a function named `cd' if one exists before executing the `cd'
+    builtin.
+
+pp. Value conversions (arithmetic expansions, case modification, etc.) now
+    happen when assigning elements of an array using compound assignment.
+
+qq. There is a new option settable in config-top.h that makes multiple
+    directory arguments to `cd' a fatal error.
+
+rr. Bash now uses mktemp() when creating internal temporary files; it produces
+    a warning at build time on many Linux systems.
 
 2.  New Features in Readline
 
@@ -181,6 +192,25 @@ k.  If readline reads a history file that begins with `#' (or the value of
 
 l.  Readline now throws an error if it parses a key binding without a terminating
     `:' or whitespace.
+
+m.  The default binding for ^W in vi mode now uses word boundaries specified
+    by Posix (vi-unix-word-rubout is bindable command name).
+
+n.  rl_clear_visible_line: new application-callable function; clears all
+    screen lines occupied by the current visible readline line.
+
+o.  rl_tty_set_echoing: application-callable function that controls whether
+    or not readline thinks it is echoing terminal output.
+
+p.  Handle >| and strings of digits preceding and following redirection
+    specifications as single tokens when tokenizing the line for history
+    expansion.
+
+q.  Fixed a bug with displaying completions when the prefix display length
+    is greater than the length of the completions to be displayed.
+
+r.  The :p history modifier now applies to the entire line, so any expansion
+    specifying :p causes the line to be printed instead of expanded.
 
 -------------------------------------------------------------------------------
 This is a terse description of the new features added to bash-4.3 since

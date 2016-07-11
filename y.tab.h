@@ -148,7 +148,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 331 "/usr/homes/chet/src/bash/src/parse.y" /* yacc.c:1909  */
+#line 333 "/usr/homes/chet/src/bash/src/parse.y" /* yacc.c:1909  */
 
   WORD_DESC *word;		/* the word that we read. */
   int number;			/* the number that we read. */
