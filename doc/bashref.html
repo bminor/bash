@@ -3179,7 +3179,10 @@ because the standard error was made a copy of the standard output
 before the standard output was redirected to <var>dirlist</var>.
 </p>
 <p>Bash handles several filenames specially when they are used in
-redirections, as described in the following table:
+redirections, as described in the following table.
+If the operating system on which Bash is running provides these
+special files, bash will use them; otherwise it will emulate them
+internally with the behavior described below.
 </p>
 <dl compact="compact">
 <dt><code>/dev/fd/<var>fd</var></code></dt>

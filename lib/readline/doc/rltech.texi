@@ -1591,6 +1591,22 @@ using the callback interface should be prepared to clean up Readline's
 state if they wish to handle the signal before the line handler completes
 and restores the terminal state.
 
+If an application using the callback interface wishes to have Readline
+install its signal handlers at the time the application calls
+@code{rl_callback_handler_install} and remove them only when a complete
+line of input has been read, it should set the
+@code{rl_persistent_signal_handlers} variable to a non-zero value.
+This allows an application to defer all of the handling of the signals
+Readline catches to Readline.
+Applications should use this variable with care; it can result in Readline
+catching signals and not acting on them (or allowing the application to react
+to them) until the application calls @code{rl_callback_read_char}.  This
+can result in an application becoming less responsive to keyboard signals
+like SIGINT.
+If an application does not want or need to perform any signal handling, or
+does not need to do any processing between calls to @code{rl_callback_read_char},
+setting this variable may be desirable.
+
 Readline provides two variables that allow application writers to
 control whether or not it will catch certain signals and act on them
 when they are received.  It is important that applications change the
@@ -1612,6 +1628,15 @@ Readline will install a signal handler for @code{SIGWINCH}.
 The default value of @code{rl_catch_sigwinch} is 1.
 @end deftypevar
 
+@deftypevar int rl_persistent_signal_handlers
+If an application using the callback interface wishes Readline's signal
+handlers to be installed and active during the set of calls to
+@code{rl_callback_read_char} that constitutes an entire single line,
+it should set this variable to a non-zero value.
+
+The default value of @code{rl_persistent_signal_handlers} is 0.
+@end deftypevar
+
 @deftypevar int rl_change_environment
 If this variable is set to a non-zero value,
 and Readline is handling @code{SIGWINCH}, Readline will modify the
@@ -1626,6 +1651,11 @@ to handle signals other than those Readline catches (@code{SIGHUP},
 for example), 
 Readline provides convenience functions to do the necessary terminal
 and internal state cleanup upon receipt of a signal.
+
+@deftypefun int rl_pending_signal (void)
+Return the signal number of the most recent signal Readline received but
+has not yet handled, or 0 if there is no pending signal.
+@end deftypefun
 
 @deftypefun void rl_cleanup_after_signal (void)
 This function will reset the state of the terminal to what it was before

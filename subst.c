@@ -109,6 +109,9 @@ extern int errno;
 #define WRPAREN		L')'
 #endif
 
+#define DOLLAR_AT_STAR(c)	((c) == '@' || (c) == '*')
+#define STR_DOLLAR_AT_STAR(s)	(DOLLAR_AT_STAR ((s)[0]) && (s)[1] == '\0')
+
 /* Evaluates to 1 if C is one of the shell's special parameters whose length
    can be taken, but is also one of the special expansion characters. */
 #define VALID_SPECIAL_LENGTH_PARAM(c) \
@@ -6797,7 +6800,7 @@ parameter_brace_expand_length (name)
 
   if (name[1] == '\0')			/* ${#} */
     number = number_of_args ();
-  else if ((name[1] == '@' || name[1] == '*') && name[2] == '\0')	/* ${#@}, ${#*} */
+  else if (DOLLAR_AT_STAR (name[1]) && name[2] == '\0')	/* ${#@}, ${#*} */
     number = number_of_args ();
   else if ((sh_syntaxtab[(unsigned char) name[1]] & CSPECVAR) && name[2] == '\0')
     {
@@ -7067,7 +7070,7 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
     }
 
   /* This sets vtype to VT_VARIABLE or VT_POSPARMS */
-  vtype = (vname[0] == '@' || vname[0] == '*') && vname[1] == '\0';
+  vtype = STR_DOLLAR_AT_STAR (vname);
   if (vtype == VT_POSPARMS && vname[0] == '*')
     vtype |= VT_STARSUB;
   *varp = (SHELL_VAR *)NULL;
@@ -7824,13 +7827,15 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
   int want_substring, want_indir, want_patsub, want_casemod;
   char *name, *value, *temp, *temp1;
   WORD_DESC *tdesc, *ret;
-  int t_index, sindex, c, tflag, modspec;
+  int t_index, sindex, c, tflag, modspec, all_element_arrayref;
   intmax_t number;
   arrayind_t ind;
 
   temp = temp1 = value = (char *)NULL;
   var_is_set = var_is_null = var_is_special = check_nullness = 0;
   want_substring = want_indir = want_patsub = want_casemod = 0;
+
+  all_element_arrayref = 0;
 
   sindex = *indexp;
   t_index = ++sindex;
@@ -8124,6 +8129,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
   if (valid_array_reference (name, 0))
     {
       int qflags;
+      char *t;
 
       qflags = quoted;
       /* If in a context where word splitting will not take place, treat as
@@ -8131,6 +8137,10 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
       if (pflags & PF_ASSIGNRHS)
 	qflags |= Q_DOUBLE_QUOTES;
       chk_atstar (name, qflags, quoted_dollar_atp, contains_dollar_at);
+      /* We duplicate a little code here */
+      t = mbschr (name, '[');
+      if (t && ALL_ELEMENT_SUB (t[1]) && t[2] == ']')
+        all_element_arrayref = 1;
     }
 #endif
 
@@ -8160,7 +8170,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
      variable error. */
   if (want_substring || want_patsub || want_casemod || c == '#' || c == '%' || c == RBRACE)
     {
-      if (var_is_set == 0 && unbound_vars_is_error && ((name[0] != '@' && name[0] != '*') || name[1]))
+      if (var_is_set == 0 && unbound_vars_is_error && ((name[0] != '@' && name[0] != '*') || name[1]) && all_element_arrayref == 0)
 	{
 	  last_command_exit_value = EXECUTION_FAILURE;
 	  err_unboundvar (name);

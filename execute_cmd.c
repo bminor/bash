@@ -2928,7 +2928,11 @@ execute_arith_for_command (arith_for_command)
      and the DEBUG trap. */
   line_number = arith_lineno = arith_for_command->line;
   if (variable_context && interactive_shell)
-    line_number -= function_line_number;
+    {
+      line_number -= function_line_number;
+      if (line_number < 0)
+	line_number = 0;
+    }
 
   /* Evaluate the initialization expression. */
   expresult = eval_arith_for_expr (arith_for_command->init, &expok);
@@ -3482,17 +3486,22 @@ execute_while_or_until (while_command, type)
          loop.  The job control code will set `breaking' to loop_level
          when a job in a loop is stopped with SIGTSTP.  If the stopped job
          is in the loop test, `breaking' will not be reset unless we do
-         this, and the shell will cease to execute commands. */
+         this, and the shell will cease to execute commands.  The same holds
+         true for `continue'. */
       if (type == CMD_WHILE && return_value != EXECUTION_SUCCESS)
 	{
 	  if (breaking)
 	    breaking--;
+	  if (continuing)
+	    continuing--;
 	  break;
 	}
       if (type == CMD_UNTIL && return_value == EXECUTION_SUCCESS)
 	{
 	  if (breaking)
 	    breaking--;
+	  if (continuing)
+	    continuing--;
 	  break;
 	}
 
@@ -3569,7 +3578,11 @@ execute_arith_command (arith_command)
   line_number = arith_command->line;
   /* If we're in a function, update the line number information. */
   if (variable_context && interactive_shell)
-    line_number -= function_line_number;
+    {
+      line_number -= function_line_number;
+      if (line_number < 0)
+	line_number = 0;
+    }      
 
   command_string_index = 0;
   print_arith_command (arith_command->exp);
@@ -3767,7 +3780,11 @@ execute_cond_command (cond_command)
   line_number = cond_command->line;
   /* If we're in a function, update the line number information. */
   if (variable_context && interactive_shell)
-    line_number -= function_line_number;
+    {
+      line_number -= function_line_number;
+      if (line_number < 0)
+	line_number = 0;
+    }
   command_string_index = 0;
   print_cond_command (cond_command);
 
@@ -4008,7 +4025,11 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 
   /* If we're in a function, update the line number information. */
   if (variable_context && interactive_shell && sourcelevel == 0)
-    line_number -= function_line_number;
+    {
+      line_number -= function_line_number;
+      if (line_number < 0)
+	line_number = 0;
+    }
 
   /* Remember what this command line looks like at invocation. */
   command_string_index = 0;
@@ -4619,6 +4640,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
       add_unwind_protect (pop_context, (char *)NULL);
       unwind_protect_int (line_number);
       unwind_protect_int (line_number_for_err_trap);
+      unwind_protect_int (function_line_number);
       unwind_protect_int (return_catch_flag);
       unwind_protect_jmp_buf (return_catch);
       add_unwind_protect (dispose_command, (char *)tc);

@@ -11342,3 +11342,65 @@ bashline.c
 	- check_redir: make sure that index is > 0 before checking previous
 	  char; fixes out of bounds read reported by Hanno Böck
 	  <hanno@hboeck.de>
+
+				   7/16
+				   ----
+subst.c
+	- parameter_brace_expand: if ${array[@]} or ${array[*]} is supplied
+	  with an unset (or empty) array, and -u is enabled, don't make it
+	  an unbound variable error, like $@ or $* when there are no
+	  positional parameters.  Based on report from Ian Allen
+	  <idallen@idallen-fibe.dyndns.org>
+
+lib/readline/signals.c
+	- rl_pending_signal(): return the number of any signal readline has
+	  caught but is waiting to handle
+
+lib/readline/callback.c
+	- rl_persistent_signal_handlers: new variable, restores readline-6.2
+	  signal handler semantics: installed at rl_callback_handler_install
+	  time and removed with rl_clear_signals when a complete line has
+	  been read
+	- _rl_callback_newline: call rl_set_signals if rl_persistent_signal_handlers
+	  is non-zero
+	- rl_callback_read_char: install signal handlers with rl_set_signals
+	  if rl_persistent_signal_handlers is 0 (the default)
+	- CALLBACK_READ_RETURN: uninstall signal handlers with rl_clear_signals
+	  only if rl_persistent_signal_handlers is 0 (the default)
+
+lib/readline/readline.h
+	- rl_pending_signal: new extern declaration
+	- rl_persistent_signal_handlers: new extern declaration
+
+				   7/19
+				   ----
+execute_cmd.c
+	- execute_while_or_until: make sure we decrement `continuing' the way
+	  we decrement `breaking' if the loop test indicates we will be
+	  breaking out of the loop.  That keeps `until continue' from
+	  keeping `continuing' set to 1.  Reported by Dan Douglas
+	  <ormaaj@gmail.com>
+
+				   7/20
+				   ----
+trap.c
+	- run_pending_traps,_run_trap_internal: save and restore temporary_env,
+	  set temporary_env to 0 before trap runs so traps don't inherit a
+	  command's temporary env.  Fixes bug with IFS assignment in tempenv
+	  and trap reported by Andriy Martynets <martynets@volia.ua>
+
+jobs.c
+	- run_sigchld_trap: save and restore temporary_env, set temporary_env
+	  to 0 before trap runs so traps don't inherit a command's temporary
+	  env (see above)
+
+				   7/21
+				   ----
+execute_cmd.c
+	- execute_function: unwind-protect function_line_number, in case we
+	  are executing a function inside another function.  Reported by
+	  Grisha Levit <grishalevit@gmail.com> in context of evaled functions
+	  and DEBUG traps
+	- execute_arith_for_command,execute_arith_command,execute_simple_command,
+	  execute_cond_command: make sure line_number doesn't go < 0 when
+	  adjusting it by function_line_number

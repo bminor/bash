@@ -1,6 +1,6 @@
 /* signals.c -- signal handling support for readline. */
 
-/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -585,6 +585,11 @@ rl_free_line_state ()
   _rl_reset_argument ();
 }
 
+int
+rl_pending_signal ()
+{
+  return (_rl_caught_signal);
+}
 #endif  /* HANDLE_SIGNALS */
 
 /* **************************************************************** */

@@ -2288,7 +2288,9 @@ Example:
 \fBMAILPATH\fP=\(aq/var/mail/bfox?"You have mail":~/shell\-mail?"$_ has mail!"\(aq
 .PP
 .B Bash
-supplies a default value for this variable, but the location of the user
+can be configured to supply
+a default value for this variable (there is no value by default),
+but the location of the user
 mail files that it uses is system dependent (e.g., /var/mail/\fB$USER\fP).
 .RE
 .TP
@@ -3724,7 +3726,10 @@ before the standard output was redirected to
 .IR dirlist .
 .PP
 \fBBash\fP handles several filenames specially when they are used in
-redirections, as described in the following table:
+redirections, as described in the following table.
+If the operating system on which \fBbash\fP is running provides these
+special files, bash will use them; otherwise it will emulate them
+internally with the behavior described below.
 .RS
 .PP
 .PD 0
