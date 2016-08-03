@@ -220,6 +220,11 @@ ${THIS_SH} ./dollar-at-star5.sub
 ${THIS_SH} ./dollar-at-star6.sub
 ${THIS_SH} ./dollar-at-star7.sub
 
+# tests for expansions of $@ and ${a[@]} (vs. $* and ${a[*]}) on the RHS of
+# assignment statements with non-default IFS: $@ expands to args or array
+# members separated by spaces
+${THIS_SH} ./dollar-at-star8.sub
+
 # tests for special expansion of "$*" and "${array[*]}" when used with other
 # expansions -- bugs through bash-2.05b
 ${THIS_SH} ./dollar-star1.sub

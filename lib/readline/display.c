@@ -119,6 +119,8 @@ static int _rl_col_width PARAMS((const char *, int, int, int));
    buffer index in others.  This macro is used when deciding whether the
    current cursor position is in the middle of a prompt string containing
    invisible characters.  XXX - might need to take `modmark' into account. */
+/* XXX - only valid when tested against _rl_last_c_pos; buffer indices need
+   to use prompt_last_invisible directly. */
 #define PROMPT_ENDING_INDEX \
   ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) ? prompt_physical_chars : prompt_last_invisible+1)
   
@@ -1674,10 +1676,10 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
   if (lendiff > nmax)
     lendiff = nmax;
   od = ofd - old;	/* index of first difference in visible line */
-  nd = nfd - new;
+  nd = nfd - new;	/* nd, od are buffer indexes */
   if (current_line == 0 && !_rl_horizontal_scroll_mode &&
       _rl_term_cr && lendiff > prompt_visible_length && _rl_last_c_pos > 0 &&
-      (((od > 0 || nd > 0) && (od < PROMPT_ENDING_INDEX || nd < PROMPT_ENDING_INDEX)) ||
+      (((od > 0 || nd > 0) && (od <= prompt_last_invisible || nd <= prompt_last_invisible)) ||
 		((od >= lendiff) && _rl_last_c_pos < PROMPT_ENDING_INDEX)))
     {
 #if defined (__MSDOS__)
@@ -1702,7 +1704,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	 was within the prompt, see if we need to recompute where the lines
 	 differ.  Check whether where we are now is past the last place where
 	 the old and new lines are the same and short-circuit now if we are. */
-      if ((od < PROMPT_ENDING_INDEX || nd < PROMPT_ENDING_INDEX) &&
+      if ((od <= prompt_last_invisible || nd <= prompt_last_invisible) &&
           omax == nmax &&
 	  lendiff > (ols-old) && lendiff > (nls-new))
 	return;
@@ -1714,7 +1716,7 @@ update_line (old, new, current_line, omax, nmax, inv_botlin)
 	 first difference, but you don't know the number of invisible
 	 characters in that case.
 	 This needs a lot of work to be efficient. */
-      if ((od < PROMPT_ENDING_INDEX || nd < PROMPT_ENDING_INDEX))
+      if ((od <= prompt_last_invisible || nd <= prompt_last_invisible))
 	{
 	  nfd = new + lendiff;	/* number of characters we output above */
 	  nd = lendiff;

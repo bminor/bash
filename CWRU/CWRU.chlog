@@ -11303,7 +11303,7 @@ execute_cmd.c
 
 				   6/23
 				   ----
-execute_cmd.c
+subst.c
 	- param_expand: when expanding $* in a context where splitting is not
 	  desired (pflags & PF_ASSIGNRHS), make sure to quote the word and the
 	  included separators.  Reported by Dan Douglas <ormaaj@gmail.com>
@@ -11404,3 +11404,68 @@ execute_cmd.c
 	- execute_arith_for_command,execute_arith_command,execute_simple_command,
 	  execute_cond_command: make sure line_number doesn't go < 0 when
 	  adjusting it by function_line_number
+
+				   7/23
+				   ----
+subst.c,command.h
+	- move the PF_ constants to command.h so other files can see them, now
+	  that PF_ASSIGNRHS has meaning to string_list_dollar_at
+
+arrayfunc.h
+	- AV_ASSIGNRHS: new flag, indicate that ${a[@]} is being expanded on
+	  the RHS of an assignment statement
+
+arrayfunc.c
+	- array_value_internal: if AV_ASSIGNRHS passed for ${a[@]}, pass
+	  PF_ASSIGNRHS to string_list_dollar_at to support args separated by
+	  spaces even if $IFS does not have the default value.  Reported by
+	  Dan Douglas <ormaaj@gmail.com>
+
+subst.c
+	- string_list_dollar_at: if FLAGS argument includes PF_ASSIGNRHS, obey
+	  rules for $@ on the RHS of an assignment statement: expand to
+	  postitional parameters separated by spaces no matter what the first
+	  character of $IFS is.  Reported by Dan Douglas <ormaaj@gmail.com>
+	- parameter_brace_expand_word: pass AV_ASSIGNRHS as flags value to
+	  array_value if PF_ASSIGNRHS is set and we are expanding an array
+	  variable subscripted by @ or *
+	- param_expand: pass pflags to string_list_dollar_at in case it contains
+	  PF_ASSIGNRHS
+	- expand_word_internal: if we have an assignment statement argument to
+	  a declaration builtin (W_ASSIGNARG), turn on W_ASSIGNRHS when we see
+	  the `=' to enable special $@ behavior
+	- expand_word_internal: if W_ASSIGNARG enabled in word flags, pass that
+	  flag and W_ASSIGNRHS to recursive call to expand_word_internal when
+	  expanding double-quoted string; handles "$@" when IFS is not the
+	  default value and word splitting will not be performed
+
+subst.c
+	- expand_word_internal: change case that handles '' (single-quoted
+	  empty string) to only discard it if we will not be performing word
+	  splitting (W_NOSPLIT|W_NOSPLIT2), since we need to add a quoted null
+	  argument if the subsequent characters will cause word splitting.
+	  This is how "" (double-quoted empty string) is handled after a bug
+	  fix back in August 2010.  Reported by Grisha Levit
+	  <grishalevit@gmail.com>, fix for Posix interp 888
+
+				   7/27
+				   ----
+subst.c
+	- param_expand: change fix from 6/23 (expanding $* in a context where
+	  word splitting is not performed) to make sure that $* expands to
+	  something before trying to quote the string.  Bug and fix from
+	  Andreas Schwab <schwab@suse.de>
+
+lib/readline/bind.c
+	- _rl_get_string_variable_value: fix a cut-and-paste error that caused
+	  the emacs mode string to be displayed for both vi insert and command
+	  mode strings.  Report and fix from Steve Jones <sjml@slohj.org>
+
+				   7/28
+				   ----
+lib/readline/display.c
+	- update_line: we can't use PROMPT_ENDING_INDEX unless we're testing
+	  against _rl_last_c_pos; if we are testing buffer indices, we need to
+	  use prompt_last_invisible directly.  Fixes mode string redisplay issue
+	  with short prompt strings reported by Steve Jones <sjml@slohj.org>
+

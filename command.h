@@ -101,6 +101,13 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define W_ASSNGLOBAL	0x2000000	/* word is a global assignment to declare (declare/typeset -g) */
 #define W_NOBRACE	0x4000000	/* Don't perform brace expansion */
 
+/* Flags for the `pflags' argument to param_expand() and various
+   parameter_brace_expand_xxx functions; also used for string_list_dollar_at */
+#define PF_NOCOMSUB	0x01	/* Do not perform command substitution */
+#define PF_IGNUNBOUND	0x02	/* ignore unbound vars even if -u set */
+#define PF_NOSPLIT2	0x04	/* same as W_NOSPLIT2 */
+#define PF_ASSIGNRHS	0x08	/* same as W_ASSIGNRHS */
+
 /* Possible values for subshell_environment */
 #define SUBSHELL_ASYNC	0x01	/* subshell caused by `command &' */
 #define SUBSHELL_PAREN	0x02	/* subshell caused by ( ... ) */
