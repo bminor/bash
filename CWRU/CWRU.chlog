@@ -10342,7 +10342,7 @@ lib/readline/bind.c
 
 				   1/11
 				   ----
-execute_cmd.c
+subst.c
 	- process_substitute: when compiled without job control (JOB_CONTROL not
 	  defined), make sure we call stop_making_children like we do in the job
 	  control code branch, so already_making_children is reset to 0.  This
@@ -11468,4 +11468,58 @@ lib/readline/display.c
 	  against _rl_last_c_pos; if we are testing buffer indices, we need to
 	  use prompt_last_invisible directly.  Fixes mode string redisplay issue
 	  with short prompt strings reported by Steve Jones <sjml@slohj.org>
+
+				    8/4
+				    ---
+nojobs.c
+	- without_job_control: new function, resets child state that's eventually
+	  used to decide whether or not to wait_for children
+
+execute_cmd.c
+	- initialize_subshell: call without_job_control in both the JOB_CONTROL and
+	  no job control paths so we can reset the state in subshells that will not
+	  cause them to wait_for children inappropriately.  Fixes bug reported by
+	  Dan Cross <crossd@gmail.com>
+
+				    8/5
+				    ---
+configure.ac
+	- release version is now `rc2'
+
+bashline.c
+	- command_word_completion_function: if direxpand is set, make sure to
+	  run hint_text through bash_directory_completion_hook, since
+	  readline will do that and we want to be able to match the results
+	  readline returns.  Fixes bug reported by Pat Somaru
+	  <tuf18542@temple.edu>
+
+command.h
+	- W_COMPLETE: new flag word value
+	- PF_COMPLETE: new flags value for param_expand
+
+subst.h
+	- SX_STRIPDQ: new flag, used for string_extract_double_quoted
+
+bashline.c
+	- bash_filename_stat_hook,bash_directory_completion_hook: pass W_COMPLETE
+	  flag to expand_prompt_string
+
+subst.c
+	- expand_word_internal: if W_COMPLETE in word->flags, pass PF_COMPLETE
+	  to param_expand
+	- param_expand: if PF_COMPLETE in pflags, pass SX_COMPLETE to
+	  extract_command_subst.  This allows `"$(echo ~/' to perform
+	  completion successfully
+	- string_extract_double_quoted: turn third argument into a flags arg,
+	  old STRIPDQ is now set if flags&SX_STRIPDQ
+	- string_extract_double_quoted: changed callers, if third argument was
+	  1, pass SX_STRIPDQ instead
+	- expand_word_internal: if W_COMPLETE in word->flags, pass SX_COMPLETE
+	  in flags to string_extract_double_quoted for case '"'
+	- string_extract_double_quoted: if SX_COMPLETE in flags, pass it to
+	  extract_command_subst
+	- expand_word_internal: if W_COMPLETE in word->flags, make sure W_COMPLETE
+	  is in temp word passed to recursive call to expand_word_internal to
+	  expand double-quoted string.  Fixes bug reported by John Passaro
+	  <john.a.passaro@gmail.com>
 

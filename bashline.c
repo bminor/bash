@@ -1845,7 +1845,9 @@ command_word_completion_function (hint_text, state)
       if (globpat || absolute_program (hint_text))
 	{
 	  /* Perform tilde expansion on what's passed, so we don't end up
-	     passing filenames with tildes directly to stat(). */
+	     passing filenames with tildes directly to stat().  The rest of
+	     the shell doesn't do variable expansion on the word following
+	     the tilde, so we don't do it here even if direxpand is set. */
 	  if (*hint_text == '~')
 	    {
 	      hint = bash_tilde_expand (hint_text, 0);
@@ -1858,6 +1860,11 @@ command_word_completion_function (hint_text, state)
 		  free (directory_part);
 		  directory_part = (char *)NULL;
 		}
+	    }
+	  else if (dircomplete_expand)
+	    {
+	      hint = savestring (hint_text);
+	      bash_directory_completion_hook (&hint);
 	    }
 	  else
 	    hint = savestring (hint_text);
@@ -3148,7 +3155,7 @@ bash_filename_stat_hook (dirname)
 	 have to worry about restoring this setting. */
       global_nounset = unbound_vars_is_error;
       unbound_vars_is_error = 0;
-      wl = expand_prompt_string (new_dirname, 0, W_NOCOMSUB);	/* does the right thing */
+      wl = expand_prompt_string (new_dirname, 0, W_NOCOMSUB|W_COMPLETE);	/* does the right thing */
       unbound_vars_is_error = global_nounset;
       if (wl)
 	{
@@ -3243,7 +3250,7 @@ bash_directory_completion_hook (dirname)
   if (should_expand_dirname)  
     {
       new_dirname = savestring (local_dirname);
-      wl = expand_prompt_string (new_dirname, 0, W_NOCOMSUB);	/* does the right thing */
+      wl = expand_prompt_string (new_dirname, 0, W_NOCOMSUB|W_COMPLETE);	/* does the right thing */
       if (wl)
 	{
 	  *dirname = string_list (wl);

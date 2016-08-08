@@ -137,6 +137,9 @@ nn. Shells running as root no longer inherit PS4 from the environment, closing a
 oo.  If executing an implicit `cd' when the `autocd' option is set, bash will now
     invoke a function named `cd' if one exists before executing the `cd' builtin.
 
+pp. Using ${a[@]} or ${a[*]} with an array without any assigned elements when
+    the nounset option is enabled no longer throws an unbound variable error.
+
 2.  New Features in Readline
 
 a.  The history truncation code now uses the same error recovery mechansim as
@@ -181,3 +184,11 @@ k.  If readline reads a history file that begins with `#' (or the value of
 
 l.  Readline now throws an error if it parses a key binding without a terminating
     `:' or whitespace.
+
+m.  New application-callable function: rl_pending_signal(): returns the signal
+    number of any signal readline has caught but not yet handled.
+    
+n.  New application-settable variable: rl_persistent_signal_handlers: if set to a
+    non-zero value, readline will enable the readline-6.2 signal handler behavior  
+    in callback mode: handlers are installed when rl_callback_handler_install is
+    called and removed removed when a complete line has been read.

@@ -498,6 +498,12 @@ dump_word_flags (flags)
       f &= ~W_HASDOLLAR;
       fprintf (stderr, "W_HASDOLLAR%s", f ? "|" : "");
     }
+  if (f & W_COMPLETE)
+    {
+      f &= ~W_COMPLETE;
+      fprintf (stderr, "W_COMPLETE%s", f ? "|" : "");
+    }
+  
   fprintf (stderr, "\n");
   fflush (stderr);
 }
@@ -814,9 +820,9 @@ string_extract (string, sindex, charlist, flags)
    Backslashes between the embedded double quotes are processed.  If STRIPDQ
    is zero, an unquoted `"' terminates the string. */
 static char *
-string_extract_double_quoted (string, sindex, stripdq)
+string_extract_double_quoted (string, sindex, flags)
      char *string;
-     int *sindex, stripdq;
+     int *sindex, flags;
 {
   size_t slen;
   char *send;
@@ -825,10 +831,13 @@ string_extract_double_quoted (string, sindex, stripdq)
   char *temp, *ret;		/* The new string we return. */
   int pass_next, backquote, si;	/* State variables for the machine. */
   int dquote;
+  int stripdq;
   DECLARE_MBSTATE;
 
   slen = strlen (string + *sindex) + *sindex;
   send = string + slen;
+
+  stripdq = (flags & SX_STRIPDQ);
 
   pass_next = backquote = dquote = 0;
   temp = (char *)xmalloc (1 + slen - *sindex);
@@ -912,7 +921,7 @@ add_one_character:
 
 	  si = i + 2;
 	  if (string[i + 1] == LPAREN)
-	    ret = extract_command_subst (string, &si, 0);
+	    ret = extract_command_subst (string, &si, (flags & SX_COMPLETE));
 	  else
 	    ret = extract_dollar_brace_string (string, &si, Q_DOUBLE_QUOTES, 0);
 
@@ -4751,7 +4760,7 @@ getpattern (value, quoted, expandpat)
   if (expandpat && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && *tword)
     {
       i = 0;
-      pat = string_extract_double_quoted (tword, &i, 1);
+      pat = string_extract_double_quoted (tword, &i, SX_STRIPDQ);
       free (tword);
       tword = pat;
     }
@@ -6617,7 +6626,7 @@ parameter_brace_expand_rhs (name, value, c, quoted, pflags, qdollaratp, hasdolla
   if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && *value)
     {
       sindex = 0;
-      temp = string_extract_double_quoted (value, &sindex, 1);
+      temp = string_extract_double_quoted (value, &sindex, SX_STRIPDQ);
     }
   else
     temp = value;
@@ -8688,7 +8697,9 @@ param_expand (string, sindex, quoted, expanded_something,
     case LPAREN:
       /* We have to extract the contents of this paren substitution. */
       t_index = zindex + 1;
-      temp = extract_command_subst (string, &t_index, 0);
+      /* XXX - might want to check for string[t_index+2] == LPAREN and parse
+	 as arithmetic substitution immediately. */
+      temp = extract_command_subst (string, &t_index, (pflags&PF_COMPLETE) ? SX_COMPLETE : 0);
       zindex = t_index;
 
       /* For Posix.2-style `$(( ))' arithmetic substitution,
@@ -9210,6 +9221,8 @@ add_string:
 	    pflags |= PF_NOSPLIT2;
 	  if (word->flags & W_ASSIGNRHS)
 	    pflags |= PF_ASSIGNRHS;
+	  if (word->flags & W_COMPLETE)
+	    pflags |= PF_COMPLETE;
 	  tword = param_expand (string, &sindex, quoted, expanded_something,
 			       &temp_has_dollar_at, &quoted_dollar_at,
 			       &had_quoted_null, pflags);
@@ -9348,7 +9361,7 @@ add_twochars:
 	    goto add_character;
 
 	  t_index = ++sindex;
-	  temp = string_extract_double_quoted (string, &sindex, 0);
+	  temp = string_extract_double_quoted (string, &sindex, (word->flags & W_COMPLETE) ? SX_COMPLETE : 0);
 
 	  /* If the quotes surrounded the entire string, then the
 	     whole word was quoted. */
@@ -9364,6 +9377,8 @@ add_twochars:
 	      /* XXX - bash-4.4/bash-5.0 */
 	      if (word->flags & W_ASSIGNARG)
 		tword->flags |= word->flags & (W_ASSIGNARG|W_ASSIGNRHS);	/* affects $@ */
+	      if (word->flags & W_COMPLETE)
+		tword->flags |= W_COMPLETE;	/* for command substitutions */
 
 	      temp = (char *)NULL;
 

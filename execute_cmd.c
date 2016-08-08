@@ -5384,9 +5384,10 @@ initialize_subshell ()
   history_lines_this_session = 0;
 #endif
 
-#if defined (JOB_CONTROL)
   /* Forget about the way job control was working. We are in a subshell. */
   without_job_control ();
+
+#if defined (JOB_CONTROL)
   set_sigchld_handler ();
   init_job_stats ();
 #endif /* JOB_CONTROL */
