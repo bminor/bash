@@ -11065,7 +11065,7 @@ pcomplete.c
 
 config-top.h
 	- USE_MKTEMP/USE_MKSTEMP: define by default to use libc version of mktemp
-	  and mkstemp in lib/sh/tmpfile.c.  Recommended by by Mike Frysinger
+	  and mkstemp in lib/sh/tmpfile.c.  Recommended by Mike Frysinger
 	  <vapier@gentoo.org> to fix a FreeBSD problem
 
 configure.ac,config.h.in
@@ -11523,3 +11523,60 @@ subst.c
 	  expand double-quoted string.  Fixes bug reported by John Passaro
 	  <john.a.passaro@gmail.com>
 
+				    8/9
+				    ---
+[bash-4.4-rc2 frozen]
+
+				   8/10
+				   ----
+subst.c
+	- sub_append_string: use size_t variable to store string length to
+	  avoid integer overflow.  Report from Siteshwar Vashisht
+	  <svashisht@redhat.com>
+	- sub_append_string: `size' argument is now pointer to size_t; changed
+	  istring_index in expand_word_internal to accommodate change
+
+lib/sh/ufuncs.c
+	- include "posixselect.h" if HAVE_SELECT is defined, make sure that
+	  fd_set and the rest are defined
+
+				   8/11
+				   ----
+lib/readline/histexpand.c
+	- history_tokenize_word: use ISDIGIT instead of isdigit for more
+	  argument checking
+	- "chardefs.h": include for ISDIGIT define and <ctype.h>.  Fix from
+	  Mike Frysinger <vapier@gentoo.org>
+
+lib/sh/eaccess.c,externs.h
+	- sh_eaccess: first argument now const char *
+	- sh_stataccess,sh_euidaccess: first argument now const char *, since
+	  sh_stat and sh_eaccess call them.
+	  Fix from Mike Frysinger <vapier@gentoo.org>
+
+lib/glob/glob.c
+	- sh_eaccess: change local prototype
+
+general.[ch]
+	- all_digits,legal_identifier,valid_nameref_value,importable_function_name,
+	  exportable_function_name,check_binary_file,file_exists,file_isdir,
+	  file_iswdir,same_file,make_absolute,valid_nameref_value: first
+	  argument (always identifier or filename) is now a `const char *';
+	  some second filename arguments now `const char *'.
+	  Fix from Mike Frysinger <vapier@gentoo.org>
+
+configure.ac,config.h.in
+	- uintptr_t: make sure it's defined to an integer type wide enough to
+	  hold a pointer
+
+lib/sh/tmpfile.c
+	- sh_seedrand: use `uintptr_t' to cast pointer value to int value,
+	  instead of allowing truncation to take place, since srandom takes
+	  an `unsigned int'.
+	  Fix from Mike Frysinger <vapier@gentoo.org>
+
+arrayfunc.[ch]
+	- valid_array_reference,array_variable_name,array_variable_part,
+	  array_value_internal,array_value,get_array_value: first argument
+	  (always variable name) now a `const char *'
+	  Fix from Mike Frysinger <vapier@gentoo.org>

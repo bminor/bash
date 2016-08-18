@@ -59,14 +59,14 @@ extern void print_array_assignment __P((SHELL_VAR *, int));
 extern void print_assoc_assignment __P((SHELL_VAR *, int));
 
 extern arrayind_t array_expand_index __P((SHELL_VAR *, char *, int));
-extern int valid_array_reference __P((char *, int));
-extern char *array_value __P((char *, int, int, int *, arrayind_t *));
-extern char *get_array_value __P((char *, int, int *, arrayind_t *));
+extern int valid_array_reference __P((const char *, int));
+extern char *array_value __P((const char *, int, int, int *, arrayind_t *));
+extern char *get_array_value __P((const char *, int, int *, arrayind_t *));
 
 extern char *array_keys __P((char *, int));
 
-extern char *array_variable_name __P((char *, char **, int *));
-extern SHELL_VAR *array_variable_part __P((char *, char **, int *));
+extern char *array_variable_name __P((const char *, char **, int *));
+extern SHELL_VAR *array_variable_part __P((const char *, char **, int *));
 
 #else
 

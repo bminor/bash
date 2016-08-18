@@ -125,7 +125,7 @@ sh_seedrand ()
       struct timeval tv;
   	      
       gettimeofday (&tv, NULL);
-      srandom (tv.tv_sec ^ tv.tv_usec ^ (getpid () << 16) ^ (unsigned int)&d);
+      srandom (tv.tv_sec ^ tv.tv_usec ^ (getpid () << 16) ^ (uintptr_t)&d);
       seeded = 1;
     }
 #endif

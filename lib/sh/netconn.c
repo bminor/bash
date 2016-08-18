@@ -44,7 +44,7 @@ int
 isnetconn (fd)
      int fd;
 {
-#if defined (HAVE_GETPEERNAME) && !defined (SVR4_2) && !defined (__BEOS__)
+#if defined (HAVE_SYS_SOCKET_H) && defined (HAVE_GETPEERNAME) && !defined (SVR4_2) && !defined (__BEOS__)
   int rv;
   socklen_t l;
   struct sockaddr sa;

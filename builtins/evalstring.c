@@ -241,8 +241,8 @@ parse_and_execute (string, from_file, flags)
 
 #if defined (HAVE_POSIX_SIGNALS)
   /* If we longjmp and are going to go on, use this to restore signal mask */
-  sigemptyset (&pe_sigmask);
-  sigprocmask (SIG_BLOCK, (sigset_t *)NULL, &pe_sigmask);
+  sigemptyset ((sigset_t *)&pe_sigmask);
+  sigprocmask (SIG_BLOCK, (sigset_t *)NULL, (sigset_t *)&pe_sigmask);
 #endif
 
   /* Reset the line number if the caller wants us to.  If we don't reset the
@@ -326,7 +326,7 @@ parse_and_execute (string, from_file, flags)
 		  dispose_command (command);	/* pe_dispose does this */
 #endif
 #if defined (HAVE_POSIX_SIGNALS)
-		  sigprocmask (SIG_SETMASK, &pe_sigmask, (sigset_t *)NULL);
+		  sigprocmask (SIG_SETMASK, (sigset_t *)&pe_sigmask, (sigset_t *)NULL);
 #endif
 		  continue;
 		}
@@ -494,8 +494,8 @@ parse_string (string, from_file, flags, endp)
 
 #if defined (HAVE_POSIX_SIGNALS)
   /* If we longjmp and are going to go on, use this to restore signal mask */
-  sigemptyset (&ps_sigmask);
-  sigprocmask (SIG_BLOCK, (sigset_t *)NULL, &ps_sigmask);
+  sigemptyset ((sigset_t *)&ps_sigmask);
+  sigprocmask (SIG_BLOCK, (sigset_t *)NULL, (sigset_t *)&ps_sigmask);
 #endif
 
 /*itrace("parse_string: `%s'", string);*/
@@ -547,7 +547,7 @@ itrace("parse_string: longjmp executed: code = %d", code);
 
 	    default:
 #if defined (HAVE_POSIX_SIGNALS)
-	      sigprocmask (SIG_SETMASK, &ps_sigmask, (sigset_t *)NULL);
+	      sigprocmask (SIG_SETMASK, (sigset_t *)&ps_sigmask, (sigset_t *)NULL);
 #endif
 	      command_error ("parse_string", CMDERR_BADJUMP, code, 0);
 	      break;

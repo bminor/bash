@@ -55,6 +55,9 @@
 
 static char *array_to_string_internal __P((ARRAY_ELEMENT *, ARRAY_ELEMENT *, char *, int));
 
+/* lastref should be moved into the array structure so each array can be
+   optimized separately */
+
 static ARRAY *lastarray = 0;
 static ARRAY_ELEMENT *lastref = 0;
 
@@ -719,7 +722,7 @@ arrayind_t	i;
 			SET_LASTREF(a, ae);
 			return(element_value(ae));
 		}
-	UNSET_LASTREF();
+	UNSET_LASTREF();		/* XXX SET_LASTREF(a, start) ? */
 	return((char *) NULL);
 }
 

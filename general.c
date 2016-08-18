@@ -154,9 +154,9 @@ print_rlimtype (n, addnl)
 /* Return non-zero if all of the characters in STRING are digits. */
 int
 all_digits (string)
-     char *string;
+     const char *string;
 {
-  register char *s;
+  register const char *s;
 
   for (s = string; *s; s++)
     if (DIGIT (*s) == 0)
@@ -211,9 +211,9 @@ legal_number (string, result)
    digit. */
 int
 legal_identifier (name)
-     char *name;
+     const char *name;
 {
-  register char *s;
+  register const char *s;
   unsigned char c;
 
   if (!name || !(c = *name) || (legal_variable_starter (c) == 0))
@@ -234,7 +234,7 @@ legal_identifier (name)
    not used in assignments. */
 int
 valid_nameref_value (name, flags)
-     char *name;
+     const char *name;
      int flags;
 {
   if (name == 0 || *name == 0)
@@ -254,7 +254,7 @@ valid_nameref_value (name, flags)
 int
 check_selfref (name, value, flags)
      const char *name;
-     const char *value;
+     char *value;
      int flags;
 {
   char *t;
@@ -309,7 +309,7 @@ check_identifier (word, check_word)
    used yet. */
 int
 importable_function_name (string, len)
-     char *string;
+     const char *string;
      size_t len;
 {
   if (absolute_program (string))	/* don't allow slash */
@@ -323,7 +323,7 @@ importable_function_name (string, len)
 
 int
 exportable_function_name (string)
-     char *string;
+     const char *string;
 {
   if (absolute_program (string))
     return 0;
@@ -337,10 +337,10 @@ exportable_function_name (string)
    parser (which disqualifies them from alias expansion anyway) and `/'. */
 int
 legal_alias_name (string, flags)
-     char *string;
+     const char *string;
      int flags;
 {
-  register char *s;
+  register const char *s;
 
   for (s = string; *s; s++)
     if (shellbreak (*s) || shellxquote (*s) || shellexp (*s) || (*s == '/'))
@@ -497,7 +497,7 @@ check_dev_tty ()
    corresponding to PATH1 and PATH2, respectively. */
 int
 same_file (path1, path2, stp1, stp2)
-     char *path1, *path2;
+     const char *path1, *path2;
      struct stat *stp1, *stp2;
 {
   struct stat st1, st2;
@@ -566,7 +566,7 @@ move_to_high_fd (fd, check_new, maxfd)
 
 int
 check_binary_file (sample, sample_len)
-     char *sample;
+     const char *sample;
      int sample_len;
 {
   register int i;
@@ -627,7 +627,7 @@ sh_closepipe (pv)
 
 int
 file_exists (fn)
-     char *fn;
+     const char *fn;
 {
   struct stat sb;
 
@@ -636,7 +636,7 @@ file_exists (fn)
 
 int
 file_isdir (fn)
-     char *fn;
+     const char *fn;
 {
   struct stat sb;
 
@@ -645,7 +645,7 @@ file_isdir (fn)
 
 int
 file_iswdir (fn)
-     char *fn;
+     const char *fn;
 {
   return (file_isdir (fn) && sh_eaccess (fn, W_OK) == 0);
 }
@@ -709,7 +709,7 @@ absolute_program (string)
    begin with. */
 char *
 make_absolute (string, dot_path)
-     char *string, *dot_path;
+     const char *string, *dot_path;
 {
   char *result;
 

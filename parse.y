@@ -5459,7 +5459,8 @@ decode_prompt_string (string)
   struct dstack save_dstack;
   int last_exit_value, last_comsub_pid;
 #if defined (PROMPT_STRING_DECODE)
-  int result_size, result_index;
+  size_t result_size;
+  int result_index;
   int c, n, i;
   char *temp, *t_host, octal_string[4];
   struct tm *tm;  

@@ -1,6 +1,6 @@
 /* arrayfunc.c -- High-level array functions used by other parts of the shell. */
 
-/* Copyright (C) 2001-2015 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -48,7 +48,7 @@ static SHELL_VAR *assign_array_element_internal __P((SHELL_VAR *, char *, char *
 
 static char *quote_assign __P((const char *));
 static void quote_array_assignment_chars __P((WORD_LIST *));
-static char *array_value_internal __P((char *, int, int, int *, arrayind_t *));
+static char *array_value_internal __P((const char *, int, int, int *, arrayind_t *));
 
 /* Standard error message to use when encountering an invalid array subscript */
 const char * const bash_badsub_errmsg = N_("bad array subscript");
@@ -881,7 +881,7 @@ print_assoc_assignment (var, quoted)
 /* Return 1 if NAME is a properly-formed array reference v[sub]. */
 int
 valid_array_reference (name, flags)
-     char *name;
+     const char *name;
      int flags;
 {
   char *t;
@@ -948,7 +948,8 @@ array_expand_index (var, s, len)
    in *LENP.  This returns newly-allocated memory. */
 char *
 array_variable_name (s, subp, lenp)
-     char *s, **subp;
+     const char *s;
+     char **subp;
      int *lenp;
 {
   char *t, *ret;
@@ -992,7 +993,8 @@ array_variable_name (s, subp, lenp)
    If LENP is non-null, the length of the subscript is returned in *LENP. */
 SHELL_VAR *
 array_variable_part (s, subp, lenp)
-     char *s, **subp;
+     const char *s;
+     char **subp;
      int *lenp;
 {
   char *t;
@@ -1029,7 +1031,7 @@ array_variable_part (s, subp, lenp)
    reference is name[@], and 0 otherwise. */
 static char *
 array_value_internal (s, quoted, flags, rtype, indp)
-     char *s;
+     const char *s;
      int quoted, flags, *rtype;
      arrayind_t *indp;
 {
@@ -1150,7 +1152,7 @@ array_value_internal (s, quoted, flags, rtype, indp)
    subscript contained in S, obeying quoting for subscripts * and @. */
 char *
 array_value (s, quoted, flags, rtype, indp)
-     char *s;
+     const char *s;
      int quoted, flags, *rtype;
      arrayind_t *indp;
 {
@@ -1163,7 +1165,7 @@ array_value (s, quoted, flags, rtype, indp)
    evaluator in expr.c. */
 char *
 get_array_value (s, flags, rtype, indp)
-     char *s;
+     const char *s;
      int flags, *rtype;
      arrayind_t *indp;
 {

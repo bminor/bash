@@ -705,11 +705,13 @@ unquoted_substring (substr, string)
 INLINE char *
 sub_append_string (source, target, indx, size)
      char *source, *target;
-     int *indx, *size;
+     int *indx;
+     size_t *size;
 {
   if (source)
     {
-      int srclen, n;
+      int n;
+      size_t srclen;
 
       srclen = STRLEN (source);
       if (srclen >= (int)(*size - *indx))
@@ -735,8 +737,9 @@ sub_append_string (source, target, indx, size)
 char *
 sub_append_number (number, target, indx, size)
      intmax_t number;
-     int *indx, *size;
      char *target;
+     int *indx;
+     size_t *size;
 {
   char *temp;
 
@@ -2375,7 +2378,7 @@ string_list_internal (list, sep)
 {
   register WORD_LIST *t;
   char *result, *r;
-  int word_len, sep_len, result_size;
+  size_t word_len, sep_len, result_size;
 
   if (list == 0)
     return ((char *)NULL);
@@ -4211,7 +4214,7 @@ remove_upattern (param, pattern, op)
      char *param, *pattern;
      int op;
 {
-  register int len;
+  register size_t len;
   register char *end;
   register char *p, *ret, c;
 
@@ -4423,7 +4426,8 @@ match_upattern (string, pat, mtype, sp, ep)
      int mtype;
      char **sp, **ep;
 {
-  int c, len, mlen;
+  int c, mlen;
+  size_t len;
   register char *p, *p1, *npat;
   char *end;
   int n1;
@@ -7182,7 +7186,8 @@ mb_substring (string, s, e)
      int s, e;
 {
   char *tt;
-  int start, stop, i, slen;
+  int start, stop, i;
+  size_t slen;
   DECLARE_MBSTATE;
 
   start = 0;
@@ -7323,7 +7328,8 @@ pat_subst (string, pat, rep, mflags)
      int mflags;
 {
   char *ret, *s, *e, *str, *rstr, *mstr;
-  int rsize, rptr, l, replen, mtype, rxpand, rslen, mlen;
+  int rptr, mtype, rxpand, mlen;
+  size_t rsize, l, replen, rslen;
 
   if (string  == 0)
     return (savestring (""));
@@ -8951,7 +8957,7 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
   char *istring;
 
   /* The current size of the above object. */
-  int istring_size;
+  size_t istring_size;
 
   /* Index into ISTRING. */
   int istring_index;

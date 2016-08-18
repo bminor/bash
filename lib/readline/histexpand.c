@@ -44,6 +44,7 @@
 
 #include "history.h"
 #include "histlib.h"
+#include "chardefs.h"
 
 #include "rlshell.h"
 #include "xmalloc.h"
@@ -1433,10 +1434,10 @@ history_tokenize_word (string, ind)
       return i;
     }
 
-  if (isdigit (string[i]))
+  if (ISDIGIT (string[i]))
     {
       j = i;
-      while (string[j] && isdigit (string[j]))
+      while (string[j] && ISDIGIT (string[j]))
 	j++;
       if (string[j] == 0)
 	return (j);
@@ -1465,7 +1466,7 @@ history_tokenize_word (string, ind)
       else if (peek == '&' && (string[i] == '>' || string[i] == '<'))
 	{
 	  j = i + 2;
-	  while (string[j] && isdigit (string[j]))	/* file descriptor */
+	  while (string[j] && ISDIGIT (string[j]))	/* file descriptor */
 	    j++;
 	  if (string[j] =='-')		/* <&[digits]-, >&[digits]- */
 	    j++;

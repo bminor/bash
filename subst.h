@@ -138,7 +138,7 @@ extern int do_word_assignment __P((WORD_DESC *, int));
    of space allocated to TARGET.  SOURCE can be NULL, in which
    case nothing happens.  Gets rid of SOURCE by free ()ing it.
    Returns TARGET in case the location has changed. */
-extern char *sub_append_string __P((char *, char *, int *, int *));
+extern char *sub_append_string __P((char *, char *, int *, size_t *));
 
 /* Append the textual representation of NUMBER to TARGET.
    INDEX and SIZE are as in SUB_APPEND_STRING. */
