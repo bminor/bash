@@ -2908,7 +2908,9 @@ Example:
 
 <B>Bash</B>
 
-supplies a default value for this variable, but the location of the user
+can be configured to supply
+a default value for this variable (there is no value by default),
+but the location of the user
 mail files that it uses is system dependent (e.g., /var/mail/<B>$USER</B>).
 </DL>
 
@@ -4709,7 +4711,10 @@ before the standard output was redirected to
 <P>
 
 <B>Bash</B> handles several filenames specially when they are used in
-redirections, as described in the following table:
+redirections, as described in the following table.
+If the operating system on which <B>bash</B> is running provides these
+special files, bash will use them; otherwise it will emulate them
+internally with the behavior described below.
 <DL COMPACT><DT><DD>
 <P>
 
@@ -13620,6 +13625,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 20 June 2016 15:38:21 EDT
+Time: 14 July 2016 11:48:02 EDT
 </BODY>
 </HTML>

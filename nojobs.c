@@ -639,12 +639,13 @@ get_original_tty_job_signals ()
 /* Wait for a single pid (PID) and return its exit status.  Called by
    the wait builtin. */
 int
-wait_for_single_pid (pid)
+wait_for_single_pid (pid, flags)
      pid_t pid;
+     int flags;
 {
   pid_t got_pid;
   WAIT status;
-  int pstatus, flags;
+  int pstatus;
 
   pstatus = find_status_by_pid (pid);
 
@@ -993,6 +994,14 @@ void
 stop_making_children ()
 {
   already_making_children = 0;
+}
+
+/* The name is kind of a misnomer, but it's what the job control code uses. */
+void
+without_job_control ()
+{
+  stop_making_children ();
+  last_made_pid = NO_PID;	/* XXX */
 }
 
 int

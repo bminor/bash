@@ -90,12 +90,6 @@ extern int errno;
 #define ST_SQUOTE	0x04	/* unused yet */
 #define ST_DQUOTE	0x08	/* unused yet */
 
-/* Flags for the `pflags' argument to param_expand() */
-#define PF_NOCOMSUB	0x01	/* Do not perform command substitution */
-#define PF_IGNUNBOUND	0x02	/* ignore unbound vars even if -u set */
-#define PF_NOSPLIT2	0x04	/* same as W_NOSPLIT2 */
-#define PF_ASSIGNRHS	0x08	/* same as W_ASSIGNRHS */
-
 /* These defs make it easier to use the editor. */
 #define LBRACE		'{'
 #define RBRACE		'}'
@@ -108,6 +102,9 @@ extern int errno;
 #define WLPAREN		L'('
 #define WRPAREN		L')'
 #endif
+
+#define DOLLAR_AT_STAR(c)	((c) == '@' || (c) == '*')
+#define STR_DOLLAR_AT_STAR(s)	(DOLLAR_AT_STAR ((s)[0]) && (s)[1] == '\0')
 
 /* Evaluates to 1 if C is one of the shell's special parameters whose length
    can be taken, but is also one of the special expansion characters. */
@@ -501,6 +498,12 @@ dump_word_flags (flags)
       f &= ~W_HASDOLLAR;
       fprintf (stderr, "W_HASDOLLAR%s", f ? "|" : "");
     }
+  if (f & W_COMPLETE)
+    {
+      f &= ~W_COMPLETE;
+      fprintf (stderr, "W_COMPLETE%s", f ? "|" : "");
+    }
+  
   fprintf (stderr, "\n");
   fflush (stderr);
 }
@@ -817,9 +820,9 @@ string_extract (string, sindex, charlist, flags)
    Backslashes between the embedded double quotes are processed.  If STRIPDQ
    is zero, an unquoted `"' terminates the string. */
 static char *
-string_extract_double_quoted (string, sindex, stripdq)
+string_extract_double_quoted (string, sindex, flags)
      char *string;
-     int *sindex, stripdq;
+     int *sindex, flags;
 {
   size_t slen;
   char *send;
@@ -828,10 +831,13 @@ string_extract_double_quoted (string, sindex, stripdq)
   char *temp, *ret;		/* The new string we return. */
   int pass_next, backquote, si;	/* State variables for the machine. */
   int dquote;
+  int stripdq;
   DECLARE_MBSTATE;
 
   slen = strlen (string + *sindex) + *sindex;
   send = string + slen;
+
+  stripdq = (flags & SX_STRIPDQ);
 
   pass_next = backquote = dquote = 0;
   temp = (char *)xmalloc (1 + slen - *sindex);
@@ -915,7 +921,7 @@ add_one_character:
 
 	  si = i + 2;
 	  if (string[i + 1] == LPAREN)
-	    ret = extract_command_subst (string, &si, 0);
+	    ret = extract_command_subst (string, &si, (flags & SX_COMPLETE));
 	  else
 	    ret = extract_dollar_brace_string (string, &si, Q_DOUBLE_QUOTES, 0);
 
@@ -2512,7 +2518,13 @@ string_list_dollar_star (list)
    <space><tab><newline>, IFS characters in the words in the list should
    also be split.  If IFS is null, and the word is not quoted, we need
    to quote the words in the list to preserve the positional parameters
-   exactly. */
+   exactly.
+   Valid values for the FLAGS argument are the PF_ flags in command.h,
+   the only one we care about is PF_ASSIGNRHS.  $@ is supposed to expand
+   to the positional parameters separated by spaces no matter what IFS is
+   set to if in a context where word splitting is not performed.  The only
+   one that we didn't handle before is assignment statement arguments to
+   declaration builtins like `declare'. */
 char *
 string_list_dollar_at (list, quoted, flags)
      WORD_LIST *list;
@@ -2538,7 +2550,13 @@ string_list_dollar_at (list, quoted, flags)
 #  if !defined (__GNUC__)
   sep = (char *)xmalloc (MB_CUR_MAX + 1);
 #  endif /* !__GNUC__ */
-  if (ifs && *ifs)
+  /* XXX - bash-4.4/bash-5.0 testing PF_ASSIGNRHS */
+  if (flags & PF_ASSIGNRHS)
+    {
+      sep[0] = ' ';
+      sep[1] = '\0';
+    }
+  else if (ifs && *ifs)
     {
       if (ifs_firstc_len == 1)
 	{
@@ -2557,7 +2575,8 @@ string_list_dollar_at (list, quoted, flags)
       sep[1] = '\0';
     }
 #else
-  sep[0] = (ifs == 0 || *ifs == 0) ? ' ' : *ifs;
+  /* XXX - bash-4.4/bash-5.0 test PF_ASSIGNRHS */
+  sep[0] = ((flags & PF_ASSIGNRHS) || ifs == 0 || *ifs == 0) ? ' ' : *ifs;
   sep[1] = '\0';
 #endif
 
@@ -4741,7 +4760,7 @@ getpattern (value, quoted, expandpat)
   if (expandpat && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && *tword)
     {
       i = 0;
-      pat = string_extract_double_quoted (tword, &i, 1);
+      pat = string_extract_double_quoted (tword, &i, SX_STRIPDQ);
       free (tword);
       tword = pat;
     }
@@ -6424,7 +6443,8 @@ expand_arrayref:
 	    {
 	      /* Only treat as double quoted if array variable */
 	      if (var && (array_p (var) || assoc_p (var)))
-		temp = array_value (name, quoted|Q_DOUBLE_QUOTES, 0, &atype, &ind);
+	        /* XXX - bash-4.4/bash-5.0 pass AV_ASSIGNRHS */
+		temp = array_value (name, quoted|Q_DOUBLE_QUOTES, AV_ASSIGNRHS, &atype, &ind);
 	      else		
 		temp = array_value (name, quoted, 0, &atype, &ind);
 	    }
@@ -6606,7 +6626,7 @@ parameter_brace_expand_rhs (name, value, c, quoted, pflags, qdollaratp, hasdolla
   if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && *value)
     {
       sindex = 0;
-      temp = string_extract_double_quoted (value, &sindex, 1);
+      temp = string_extract_double_quoted (value, &sindex, SX_STRIPDQ);
     }
   else
     temp = value;
@@ -6797,7 +6817,7 @@ parameter_brace_expand_length (name)
 
   if (name[1] == '\0')			/* ${#} */
     number = number_of_args ();
-  else if ((name[1] == '@' || name[1] == '*') && name[2] == '\0')	/* ${#@}, ${#*} */
+  else if (DOLLAR_AT_STAR (name[1]) && name[2] == '\0')	/* ${#@}, ${#*} */
     number = number_of_args ();
   else if ((sh_syntaxtab[(unsigned char) name[1]] & CSPECVAR) && name[2] == '\0')
     {
@@ -7067,7 +7087,7 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
     }
 
   /* This sets vtype to VT_VARIABLE or VT_POSPARMS */
-  vtype = (vname[0] == '@' || vname[0] == '*') && vname[1] == '\0';
+  vtype = STR_DOLLAR_AT_STAR (vname);
   if (vtype == VT_POSPARMS && vname[0] == '*')
     vtype |= VT_STARSUB;
   *varp = (SHELL_VAR *)NULL;
@@ -7824,13 +7844,15 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
   int want_substring, want_indir, want_patsub, want_casemod;
   char *name, *value, *temp, *temp1;
   WORD_DESC *tdesc, *ret;
-  int t_index, sindex, c, tflag, modspec;
+  int t_index, sindex, c, tflag, modspec, all_element_arrayref;
   intmax_t number;
   arrayind_t ind;
 
   temp = temp1 = value = (char *)NULL;
   var_is_set = var_is_null = var_is_special = check_nullness = 0;
   want_substring = want_indir = want_patsub = want_casemod = 0;
+
+  all_element_arrayref = 0;
 
   sindex = *indexp;
   t_index = ++sindex;
@@ -8124,6 +8146,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
   if (valid_array_reference (name, 0))
     {
       int qflags;
+      char *t;
 
       qflags = quoted;
       /* If in a context where word splitting will not take place, treat as
@@ -8131,6 +8154,10 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
       if (pflags & PF_ASSIGNRHS)
 	qflags |= Q_DOUBLE_QUOTES;
       chk_atstar (name, qflags, quoted_dollar_atp, contains_dollar_at);
+      /* We duplicate a little code here */
+      t = mbschr (name, '[');
+      if (t && ALL_ELEMENT_SUB (t[1]) && t[2] == ']')
+        all_element_arrayref = 1;
     }
 #endif
 
@@ -8160,7 +8187,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
      variable error. */
   if (want_substring || want_patsub || want_casemod || c == '#' || c == '%' || c == RBRACE)
     {
-      if (var_is_set == 0 && unbound_vars_is_error && ((name[0] != '@' && name[0] != '*') || name[1]))
+      if (var_is_set == 0 && unbound_vars_is_error && ((name[0] != '@' && name[0] != '*') || name[1]) && all_element_arrayref == 0)
 	{
 	  last_command_exit_value = EXECUTION_FAILURE;
 	  err_unboundvar (name);
@@ -8565,7 +8592,7 @@ param_expand (string, sindex, quoted, expanded_something,
 	      /* If we're not quoted but we still don't want word splitting, make
 		 we quote the IFS characters to protect them from splitting (e.g.,
 		 when $@ is in the string as well). */
-	      else if (quoted == 0 && ifs_is_set && (pflags & PF_ASSIGNRHS))
+	      else if (temp && quoted == 0 && ifs_is_set && (pflags & PF_ASSIGNRHS))
 		{
 		  temp1 = quote_string (temp);
 		  free (temp);
@@ -8627,7 +8654,8 @@ param_expand (string, sindex, quoted, expanded_something,
 	 performed? Even when IFS is not the default, posix seems to imply
 	 that we behave like unquoted $* ?  Maybe we should use PF_NOSPLIT2
 	 here. */
-      temp = string_list_dollar_at (list, (pflags & PF_ASSIGNRHS) ? (quoted|Q_DOUBLE_QUOTES) : quoted, 0);
+      /* XXX - bash-4.4/bash-5.0 passing PFLAGS */
+      temp = string_list_dollar_at (list, (pflags & PF_ASSIGNRHS) ? (quoted|Q_DOUBLE_QUOTES) : quoted, pflags);
 
       tflag |= W_DOLLARAT;
       dispose_words (list);
@@ -8669,7 +8697,9 @@ param_expand (string, sindex, quoted, expanded_something,
     case LPAREN:
       /* We have to extract the contents of this paren substitution. */
       t_index = zindex + 1;
-      temp = extract_command_subst (string, &t_index, 0);
+      /* XXX - might want to check for string[t_index+2] == LPAREN and parse
+	 as arithmetic substitution immediately. */
+      temp = extract_command_subst (string, &t_index, (pflags&PF_COMPLETE) ? SX_COMPLETE : 0);
       zindex = t_index;
 
       /* For Posix.2-style `$(( ))' arithmetic substitution,
@@ -9105,11 +9135,11 @@ add_string:
 		   string[sindex+1] == '~')
 	    word->flags |= W_ITILDE;
 #endif
-#if 0
-	  /* XXX - bash-5.0 */
+
+	  /* XXX - bash-4.4/bash-5.0 */
 	  if (word->flags & W_ASSIGNARG)
-	    word->flags |= W_ASSIGNRHS;
-#endif
+	    word->flags |= W_ASSIGNRHS;		/* affects $@ */
+
 	  if (isexp == 0 && (word->flags & (W_NOSPLIT|W_NOSPLIT2)) == 0 && isifs (c))
 	    goto add_ifs_character;
 	  else
@@ -9191,6 +9221,8 @@ add_string:
 	    pflags |= PF_NOSPLIT2;
 	  if (word->flags & W_ASSIGNRHS)
 	    pflags |= PF_ASSIGNRHS;
+	  if (word->flags & W_COMPLETE)
+	    pflags |= PF_COMPLETE;
 	  tword = param_expand (string, &sindex, quoted, expanded_something,
 			       &temp_has_dollar_at, &quoted_dollar_at,
 			       &had_quoted_null, pflags);
@@ -9329,7 +9361,7 @@ add_twochars:
 	    goto add_character;
 
 	  t_index = ++sindex;
-	  temp = string_extract_double_quoted (string, &sindex, 0);
+	  temp = string_extract_double_quoted (string, &sindex, (word->flags & W_COMPLETE) ? SX_COMPLETE : 0);
 
 	  /* If the quotes surrounded the entire string, then the
 	     whole word was quoted. */
@@ -9341,11 +9373,13 @@ add_twochars:
 	    {
 	      tword = alloc_word_desc ();
 	      tword->word = temp;
-#if 0
-	      /* XXX - bash-5.0 */
+
+	      /* XXX - bash-4.4/bash-5.0 */
 	      if (word->flags & W_ASSIGNARG)
-		tword->flags |= word->flags & (W_ASSIGNARG|W_ASSIGNRHS);
-#endif
+		tword->flags |= word->flags & (W_ASSIGNARG|W_ASSIGNRHS);	/* affects $@ */
+	      if (word->flags & W_COMPLETE)
+		tword->flags |= W_COMPLETE;	/* for command substitutions */
+
 	      temp = (char *)NULL;
 
 	      temp_has_dollar_at = 0;	/* XXX */
@@ -9369,7 +9403,7 @@ add_twochars:
 	      /* "$@" (a double-quoted dollar-at) expands into nothing,
 		 not even a NULL word, when there are no positional
 		 parameters. */
-	      if (list == 0 && has_dollar_at)
+	      if (list == 0 && temp_has_dollar_at)	/* XXX - was has_dollar_at */
 		{
 		  quoted_dollar_at++;
 		  break;
@@ -9389,7 +9423,7 @@ add_twochars:
 	      if (list && list->word && (list->word->flags & W_HASQUOTEDNULL))
 		had_quoted_null = 1;		/* XXX */
 
-	      if (has_dollar_at)
+	      if (temp_has_dollar_at)		/* XXX - was has_dollar_at */
 		{
 		  quoted_dollar_at++;
 		  if (contains_dollar_at)
@@ -9501,8 +9535,9 @@ add_twochars:
 	    remove_quoted_escapes (temp);	/* ??? */
 
 	  /* We do not want to add quoted nulls to strings that are only
-	     partially quoted; such nulls are discarded. */
-	  if (temp == 0 && (quoted_state == PARTIALLY_QUOTED))
+	     partially quoted; such nulls are discarded.  See above for the
+	     exception, which is when the string is going to be split. */
+	  if (temp == 0 && (quoted_state == PARTIALLY_QUOTED) && (word->flags & (W_NOSPLIT|W_NOSPLIT2)))
 	    continue;
 
 	  /* If we have a quoted null expansion, add a quoted NULL to istring. */
@@ -9604,6 +9639,8 @@ finished_with_string:
       /* According to sh, ksh, and Posix.2, if a word expands into nothing
 	 and a double-quoted "$@" appears anywhere in it, then the entire
 	 word is removed. */
+      /* XXX - exception appears to be that quoted null strings result in
+	 null arguments */
       else  if (quoted_state == UNQUOTED || quoted_dollar_at)
 	list = (WORD_LIST *)NULL;
 #if 0

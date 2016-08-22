@@ -442,6 +442,8 @@ extern void rl_cleanup_after_signal PARAMS((void));
 extern void rl_reset_after_signal PARAMS((void));
 extern void rl_free_line_state PARAMS((void));
 
+extern int rl_pending_signal PARAMS((void));
+
 extern void rl_echo_signal_char PARAMS((int)); 
 
 extern int rl_set_paren_blink_timeout PARAMS((int));
@@ -640,7 +642,7 @@ extern rl_compentry_func_t *rl_completion_entry_function;
 
 /* Optional generator for menu completion.  Default is
    rl_completion_entry_function (rl_filename_completion_function). */
- extern rl_compentry_func_t *rl_menu_completion_entry_function;
+extern rl_compentry_func_t *rl_menu_completion_entry_function;
 
 /* If rl_ignore_some_completions_function is non-NULL it is the address
    of a function to call after all of the possible matches have been
@@ -831,6 +833,14 @@ extern int rl_ignore_completion_duplicates;
 /* If this is non-zero, completion is (temporarily) inhibited, and the
    completion character will be inserted as any other. */
 extern int rl_inhibit_completion;
+
+/* Applications can set this to non-zero to have readline's signal handlers
+   installed during the entire duration of reading a complete line, as in
+   readline-6.2.  This should be used with care, because it can result in
+   readline receiving signals and not handling them until it's called again
+   via rl_callback_read_char, thereby stealing them from the application.
+   By default, signal handlers are only active while readline is active. */   
+extern int rl_persistent_signal_handlers;
 
 /* Input error; can be returned by (*rl_getc_function) if readline is reading
    a top-level command (RL_ISSTATE (RL_STATE_READCMD)). */

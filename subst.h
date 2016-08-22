@@ -63,6 +63,7 @@
 #define SX_POSIXEXP	0x0100	/* extracting new Posix pattern removal expansions in extract_dollar_brace_string */
 #define SX_WORD		0x0200	/* extracting word in ${param op word} */
 #define SX_COMPLETE	0x0400	/* extracting word for completion */
+#define SX_STRIPDQ	0x0800	/* strip double quotes when extracting double-quoted string */
 
 /* Remove backslashes which are quoting backquotes from STRING.  Modifies
    STRING, and returns a pointer to it. */

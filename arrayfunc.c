@@ -1087,7 +1087,8 @@ array_value_internal (s, quoted, flags, rtype, indp)
 	  free (temp);
 	}
       else	/* ${name[@]} or unquoted ${name[*]} */
-	retval = string_list_dollar_at (l, quoted, 0);	/* XXX - leak here */
+        /* XXX - bash-4.4/bash-5.0 test AV_ASSIGNRHS and pass PF_ASSIGNRHS */
+	retval = string_list_dollar_at (l, quoted, (flags & AV_ASSIGNRHS) ? PF_ASSIGNRHS : 0);	/* XXX - leak here */
 
       dispose_words (l);
     }

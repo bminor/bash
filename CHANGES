@@ -1,3 +1,53 @@
+This document details the changes between this version, bash-4.4-rc2, and
+the previous version, bash-4.4-beta2.
+
+1.  Changes to Bash
+
+a.  Fixed an out-of-bounds read in the redirection operator completion code.
+
+b.  Fixed execution context so `until continue' doesn't disable execution for
+    subsequent commands.
+
+c.  Fixed trap handling code so traps don't inherit a command's temporary
+    environment.
+
+d.  Fixed a bug that resulted in incorrect line numbers when a function is defined
+    as part of another function's execution.
+
+e.  Fixed a bug in the expansion of ${a[@]} in contexts where word splitting is not
+    performed and $IFS is not the default.
+
+f.  Fixed a bug that caused ''"$@" to not expand to an empty argument when there are
+    no positional parameters.
+
+g.  Fixed a bug that caused a shell compiled without job control to use the incorrect
+    exit status for builtin commands preceded by a command executed from the file
+    system that causes the shell to call waitpid().
+
+h.  Improved word completion for quoted strings containing unterminated command
+    substitutions with embedded double quotes.
+
+2.  Changes to Readline
+
+a.  Fixed a bug that caused mode strings to be displayed incorrectly if the prompt was
+    shorter than the mode string.
+
+3.  New Features in Bash
+
+a.  Using ${a[@]} or ${a[*]} with an array without any assigned elements when
+    the nounset option is enabled no longer throws an unbound variable error.
+
+4.  New Features in Readline
+
+a.  New application-callable function: rl_pending_signal(): returns the signal
+    number of any signal readline has caught but not yet handled.
+
+b.  New application-settable variable: rl_persistent_signal_handlers: if set to a
+    non-zero value, readline will enable the readline-6.2 signal handler behavior
+    in callback mode: handlers are installed when rl_callback_handler_install is
+    called and removed removed when a complete line has been read.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-4.4-beta2, and
 the previous version, bash-4.4-rc1.
 

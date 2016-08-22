@@ -50,6 +50,14 @@
 _rl_callback_func_t *_rl_callback_func = 0;
 _rl_callback_generic_arg *_rl_callback_data = 0;
 
+/* Applications can set this to non-zero to have readline's signal handlers
+   installed during the entire duration of reading a complete line, as in
+   readline-6.2.  This should be used with care, because it can result in
+   readline receiving signals and not handling them until it's called again
+   via rl_callback_read_char, thereby stealing them from the application.
+   By default, signal handlers are only active while readline is active. */   
+int rl_persistent_signal_handlers = 0;
+
 /* **************************************************************** */
 /*								    */
 /*			Callback Readline Functions		 */
@@ -82,6 +90,11 @@ _rl_callback_newline ()
 
       if (rl_prep_term_function)
 	(*rl_prep_term_function) (_rl_meta_flag);
+
+#if defined (HANDLE_SIGNALS)
+      if (rl_persistent_signal_handlers)
+	rl_set_signals ();
+#endif
     }
 
   readline_internal_setup ();
@@ -103,7 +116,8 @@ rl_callback_handler_install (prompt, linefunc)
 #if defined (HANDLE_SIGNALS)
 #define CALLBACK_READ_RETURN() \
   do { \
-    rl_clear_signals (); \
+    if (rl_persistent_signal_handlers == 0) \
+      rl_clear_signals (); \
     return; \
   } while (0)
 #else
@@ -140,7 +154,8 @@ rl_callback_read_char ()
 
 #if defined (HANDLE_SIGNALS)
   /* Install signal handlers only when readline has control. */
-  rl_set_signals ();
+  if (rl_persistent_signal_handlers == 0)
+    rl_set_signals ();
 #endif
 
   do

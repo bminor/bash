@@ -265,7 +265,7 @@ check_selfref (name, value, flags)
 #if defined (ARRAY_VARS)
   if (valid_array_reference (value, 0))
     {
-      t = array_variable_name (value, (int *)NULL, (int *)NULL);
+      t = array_variable_name (value, (char **)NULL, (int *)NULL);
       if (t && STREQ (name, t))
 	{
 	  free (t);

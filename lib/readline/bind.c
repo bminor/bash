@@ -2591,9 +2591,9 @@ _rl_get_string_variable_value (name)
   else if (_rl_stricmp (name, "emacs-mode-string") == 0)
     return (_rl_emacs_mode_str ? _rl_emacs_mode_str : RL_EMACS_MODESTR_DEFAULT);
   else if (_rl_stricmp (name, "vi-cmd-mode-string") == 0)
-    return (_rl_emacs_mode_str ? _rl_emacs_mode_str : RL_VI_CMD_MODESTR_DEFAULT);
+    return (_rl_vi_cmd_mode_str ? _rl_vi_cmd_mode_str : RL_VI_CMD_MODESTR_DEFAULT);
   else if (_rl_stricmp (name, "vi-ins-mode-string") == 0)
-    return (_rl_emacs_mode_str ? _rl_emacs_mode_str : RL_VI_INS_MODESTR_DEFAULT);
+    return (_rl_vi_ins_mode_str ? _rl_vi_ins_mode_str : RL_VI_INS_MODESTR_DEFAULT);
   else
     return (0);
 }

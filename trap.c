@@ -286,6 +286,7 @@ run_pending_traps ()
   register int sig;
   int old_exit_value, x;
   WORD_LIST *save_subst_varlist;
+  HASH_TABLE *save_tempenv;
   sh_parser_state_t pstate;
 #if defined (ARRAY_VARS)
   ARRAY *ps;
@@ -397,6 +398,8 @@ run_pending_traps ()
 	      save_parser_state (&pstate);
 	      save_subst_varlist = subst_assign_varlist;
 	      subst_assign_varlist = 0;
+	      save_tempenv = temporary_env;
+	      temporary_env = 0;	/* traps should not run with temporary env */
 
 #if defined (JOB_CONTROL)
 	      save_pipeline (1);	/* XXX only provides one save level */
@@ -410,6 +413,7 @@ run_pending_traps ()
 
 	      subst_assign_varlist = save_subst_varlist;
 	      restore_parser_state (&pstate);
+	      temporary_env = save_tempenv;
 	    }
 
 	  pending_traps[sig] = 0;	/* XXX - move before evalstring? */
@@ -941,6 +945,7 @@ _run_trap_internal (sig, tag)
   int flags;
   procenv_t save_return_catch;
   WORD_LIST *save_subst_varlist;
+  HASH_TABLE *save_tempenv;
   sh_parser_state_t pstate;
 #if defined (ARRAY_VARS)
   ARRAY *ps;
@@ -977,6 +982,8 @@ _run_trap_internal (sig, tag)
       save_parser_state (&pstate);
       save_subst_varlist = subst_assign_varlist;
       subst_assign_varlist = 0;
+      save_tempenv = temporary_env;
+      temporary_env = 0;	/* traps should not run with temporary env */
 
 #if defined (JOB_CONTROL)
       if (sig != DEBUG_TRAP)	/* run_debug_trap does this */
@@ -1013,6 +1020,8 @@ _run_trap_internal (sig, tag)
 #if defined (ARRAY_VARS)
       restore_pipestatus_array (ps);
 #endif
+
+      temporary_env = save_tempenv;
 
       sigmodes[sig] &= ~SIG_INPROGRESS;
       running_trap = 0;

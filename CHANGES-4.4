@@ -1,3 +1,179 @@
+This document details the changes between this version, bash-4.4-rc2, and
+the previous version, bash-4.4-beta2.
+
+1.  Changes to Bash
+
+a.  Fixed an out-of-bounds read in the redirection operator completion code.
+
+b.  Fixed execution context so `until continue' doesn't disable execution for
+    subsequent commands.
+
+c.  Fixed trap handling code so traps don't inherit a command's temporary
+    environment.
+
+d.  Fixed a bug that resulted in incorrect line numbers when a function is defined
+    as part of another function's execution.
+
+e.  Fixed a bug in the expansion of ${a[@]} in contexts where word splitting is not
+    performed and $IFS is not the default.
+
+f.  Fixed a bug that caused ''"$@" to not expand to an empty argument when there are
+    no positional parameters.
+
+g.  Fixed a bug that caused a shell compiled without job control to use the incorrect
+    exit status for builtin commands preceded by a command executed from the file
+    system that causes the shell to call waitpid().
+
+h.  Improved word completion for quoted strings containing unterminated command
+    substitutions with embedded double quotes.
+
+2.  Changes to Readline
+
+a.  Fixed a bug that caused mode strings to be displayed incorrectly if the prompt was
+    shorter than the mode string.
+
+3.  New Features in Bash
+
+a.  Using ${a[@]} or ${a[*]} with an array without any assigned elements when
+    the nounset option is enabled no longer throws an unbound variable error.
+
+4.  New Features in Readline
+
+a.  New application-callable function: rl_pending_signal(): returns the signal
+    number of any signal readline has caught but not yet handled.
+
+b.  New application-settable variable: rl_persistent_signal_handlers: if set to a
+    non-zero value, readline will enable the readline-6.2 signal handler behavior
+    in callback mode: handlers are installed when rl_callback_handler_install is
+    called and removed removed when a complete line has been read.
+
+------------------------------------------------------------------------------
+This document details the changes between this version, bash-4.4-beta2, and
+the previous version, bash-4.4-rc1.
+
+1.  Changes to Bash
+
+a.  Fixed a memory leak when processing ${!var[@]}.
+
+b.  Fixed a bug that caused subshells to free trap strings associated with
+    inherited signals.
+
+c.  Inheriting BASHOPTS from the environment now works to force actions
+    associated with enabling an option, instead of just marking the option
+    as enabled.
+
+d.  Fixed a bug that allowed assignments to BASH_CMDS when the shell was in
+    restricted mode.
+
+e.  Fixed a bug caused by an accidental omission of part of the original patch
+    for EXECIGNORE.
+
+e.  Prompt expansion now quotes the results of the \s, \h, and \H expansions.
+
+f.  Fixed a bug that caused parsing errors in command substitutions with
+    consecutive case statements separated by newlines.
+
+g.  Updated logic used to decide whether bash is running inside an emacs
+    terminal emulator to work with future emacs versions.
+
+h.  Fixed two extended pattern matching bugs caused by premature short-
+    circuiting.
+
+i.  Fixed a memory leak in the code that removes duplicate history entries.
+
+j.  There are a number of bug fixes to coproc, mapfile, declare, unset,
+    and assignment statements that prevent nameref variables from creating
+    and unsetting variables with invalid names.
+
+k.  Fixed a bug that caused variables to be inadvertently marked as both an
+    associative and an indexed array.
+
+l.  Fixed a bug that caused `bash -c' to not run a trap specified in the
+    command string.
+
+j.  There are a number of bug fixes to coproc, mapfile, declare, and assignment
+    statements that prevent nameref variables from overwriting or modifying
+    attributes of readonly variables.
+
+k.  Fixed a bug that caused command substitution to attempt to set the
+    terminal's process group incorrectly.
+    
+l.  Fixed a bug that could cause prompt string expansion to display error
+    messages when the `nounset' shell option is set.
+
+m.  Fixed a bug that caused "$@" to not expand to an empty string under the
+    circumstances when Posix says it should ("${@-${@-$@}}").
+
+n.  Fixed several bugs caused by referencing nameref variables whose values
+    are names of unset variables (or names that are valid for referencing
+    but not assignment), including creating variables in the temporary
+    environment.
+
+o.  Function tracing and error tracing are disabled if --debugger is supplied
+    at startup but the shell can't find the debugger start file.
+
+p.  Fixed a bug when IFS is used as the control variable in a for statement.
+
+q.  Fixed a bug with SIGINT received by a command substitution in an interactive
+    shell.
+
+r.  The checks for nameref variable self-references are more thorough.
+
+s.  Fixed several bugs with multi-line aliases.
+
+t.  Fixed `test' to handle the four-argument case where $1 == '(' and
+    $4 == ')'.
+
+u.  Fixed a bug in the expansion of $* in the cases where word splitting is
+    not performed.
+
+v.  Fixed a bug in execution of case statements where IFS includes the
+    pattern matching characters.
+
+2.  Changes to Readline
+
+a.  When refreshing the line as the result of a key sequence, Readline attempts
+    to redraw only the last line of a multiline prompt.
+
+b.  Fixed an issue that caused completion of git commands to display
+    incorrectly when using colored-completion-prefix.
+
+c.  Fixed several redisplay bugs having to do with multibyte characters and
+    invisible characters in prompt strings.
+
+3.  New Features in Bash
+
+a.  Value conversions (arithmetic expansions, case modification, etc.) now
+    happen when assigning elements of an array using compound assignment.
+
+b.  There is a new option settable in config-top.h that makes multiple
+    directory arguments to `cd' a fatal error.
+
+c.  Bash now uses mktemp() when creating internal temporary files; it produces
+    a warning at build time on many Linux systems.
+
+4.  New Features in Readline
+
+a.  The default binding for ^W in vi mode now uses word boundaries specified
+    by Posix (vi-unix-word-rubout is bindable command name).
+
+b.  rl_clear_visible_line: new application-callable function; clears all
+    screen lines occupied by the current visible readline line.
+
+c.  rl_tty_set_echoing: application-callable function that controls whether
+    or not readline thinks it is echoing terminal output.
+
+d.  Handle >| and strings of digits preceding and following redirection
+    specifications as single tokens when tokenizing the line for history
+    expansion.
+
+e.  Fixed a bug with displaying completions when the prefix display length
+    is greater than the length of the completions to be displayed.
+
+f.  The :p history modifier now applies to the entire line, so any expansion
+    specifying :p causes the line to be printed instead of expanded.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-4.4-rc1, and
 the previous version, bash-4.4-beta.
 

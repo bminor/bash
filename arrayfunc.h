@@ -30,6 +30,7 @@
 #define AV_QUOTED	0x002
 #define AV_USEIND	0x004
 #define AV_USEVAL	0x008	/* XXX - should move this */
+#define AV_ASSIGNRHS	0x010	/* no splitting, special case ${a[@]} */
 
 extern SHELL_VAR *convert_var_to_array __P((SHELL_VAR *));
 extern SHELL_VAR *convert_var_to_assoc __P((SHELL_VAR *));
@@ -72,6 +73,7 @@ extern SHELL_VAR *array_variable_part __P((char *, char **, int *));
 #define AV_ALLOWALL	0
 #define AV_QUOTED	0
 #define AV_USEIND	0
+#define AV_ASSIGNRHS	0
 
 #endif
 
