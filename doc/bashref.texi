@@ -6617,6 +6617,11 @@ and the @code{test} and @code{[} builtin commands.
 Expressions may be unary or binary.
 Unary expressions are often used to examine the status of a file.
 There are string operators and numeric comparison operators as well.
+Bash handles several filenames specially when they are used in
+expressions.
+If the operating system on which Bash is running provides these
+special files, Bash will use them; otherwise it will emulate them
+internally with this behavior:
 If the @var{file} argument to one of the primaries is of the form
 @file{/dev/fd/@var{N}}, then file descriptor @var{N} is checked.
 If the @var{file} argument to one of the primaries is one of

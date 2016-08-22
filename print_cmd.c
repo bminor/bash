@@ -1,6 +1,6 @@
 /* print_command -- A way to make readable commands from a command tree. */
 
-/* Copyright (C) 1989-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -515,7 +515,11 @@ xtrace_print_assignment (name, value, assign_list, xflags)
   fflush (xtrace_fp);
 }
 
-/* A function to print the words of a simple command when set -x is on. */
+/* A function to print the words of a simple command when set -x is on.  Also
+   used to print the word list in a for or select command header; in that case,
+   we suppress quoting the words because they haven't been expanded yet.
+   XTFLAGS&1 means to print $PS4; XTFLAGS&2 means to suppress quoting the
+   words in LIST. */
 void
 xtrace_print_word_list (list, xtflags)
      WORD_LIST *list;
@@ -526,7 +530,7 @@ xtrace_print_word_list (list, xtflags)
 
   CHECK_XTRACE_FP;
 
-  if (xtflags)
+  if (xtflags&1)
     fprintf (xtrace_fp, "%s", indirection_level_string ());
 
   for (w = list; w; w = w->next)
@@ -534,6 +538,8 @@ xtrace_print_word_list (list, xtflags)
       t = w->word->word;
       if (t == 0 || *t == '\0')
 	fprintf (xtrace_fp, "''%s", w->next ? " " : "");
+      else if (xtflags & 2)
+	fprintf (xtrace_fp, "%s%s", t, w->next ? " " : "");
       else if (sh_contains_shell_metas (t))
 	{
 	  x = sh_single_quote (t);
@@ -576,7 +582,7 @@ xtrace_print_for_command_head (for_command)
   CHECK_XTRACE_FP;
   fprintf (xtrace_fp, "%s", indirection_level_string ());
   fprintf (xtrace_fp, "for %s in ", for_command->name->word);
-  xtrace_print_word_list (for_command->map_list, 0);
+  xtrace_print_word_list (for_command->map_list, 2);
 }
 
 static void
@@ -634,7 +640,7 @@ xtrace_print_select_command_head (select_command)
   CHECK_XTRACE_FP;
   fprintf (xtrace_fp, "%s", indirection_level_string ());
   fprintf (xtrace_fp, "select %s in ", select_command->name->word);
-  xtrace_print_word_list (select_command->map_list, 0);
+  xtrace_print_word_list (select_command->map_list, 2);
 }
 
 static void

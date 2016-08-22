@@ -11580,3 +11580,24 @@ arrayfunc.[ch]
 	  array_value_internal,array_value,get_array_value: first argument
 	  (always variable name) now a `const char *'
 	  Fix from Mike Frysinger <vapier@gentoo.org>
+
+				   8/19
+				   ----
+print_cmd.c
+	- xtrace_print_word_list: if (xtflags & 2), don't try to quote the words in
+	  the LIST argument.  Intended to be used in places where the list has not
+	  yet been expanded
+	- xtrace_print_for_command_head: call xtrace_print_word_list with flags argument
+	  of 2.  Fixes issue reported by Aharon Robbins <arnold@skeeve.com>
+	- xtrace_print_select_command_head: call xtrace_print_word_list with flags
+	  argument of 2
+
+				   8/21
+				   ----
+lib/sh/netopen.c
+	- netopen: fix memory leak by freeing allocated path before error
+	  return.  Fix from Dmitry Goncharov <dgoncharov@users.sf.net>
+
+doc/{bash.1,bashref.texi}
+	- change conditional commands description to make it clearer that
+	  bash doesn't emulate /dev/fd if the OS provides it
