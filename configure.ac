@@ -21,10 +21,10 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.4, version 4.080])dnl
+AC_REVISION([for Bash 4.4, version 4.081])dnl
 
 define(bashvers, 4.4)
-define(relstatus, rc2)
+define(relstatus, releng)
 
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
 
@@ -42,7 +42,7 @@ RELSTATUS=relstatus
 
 dnl defaults for debug settings
 case "$RELSTATUS" in
-alp*|bet*|dev*|rc*|maint*)	DEBUG='-DDEBUG' MALLOC_DEBUG='-DMALLOC_DEBUG' ;;
+alp*|bet*|dev*|rc*|releng*|maint*)	DEBUG='-DDEBUG' MALLOC_DEBUG='-DMALLOC_DEBUG' ;;
 *)	DEBUG= MALLOC_DEBUG= ;;
 esac
 
@@ -462,7 +462,8 @@ CFLAGS=${CFLAGS-"$AUTO_CFLAGS"}
 # LDFLAGS=${LDFLAGS="$AUTO_LDFLAGS"}	# XXX
 
 # turn off paren warnings in gcc
-if test "$GCC" = yes && test -n "$DEBUG"; then
+if test "$GCC" = yes # && test -n "$DEBUG"
+then
 	CFLAGS="$CFLAGS -Wno-parentheses -Wno-format-security"
 fi
 

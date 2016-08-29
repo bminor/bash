@@ -178,17 +178,37 @@ j.  If an incremental search string has its last character removed with DEL, the
     resulting empty search string no longer matches the previous line.
 
 k.  If readline reads a history file that begins with `#' (or the value of
-    the history comment character) and has enabled history timestamps, the history
-    entries are assumed to be delimited by timestamps.  This allows multi-line
-    history entries.
+    the history comment character) and has enabled history timestamps, the
+    history entries are assumed to be delimited by timestamps.  This allows
+    multi-line history entries.
 
-l.  Readline now throws an error if it parses a key binding without a terminating
-    `:' or whitespace.
+l.  Readline now throws an error if it parses a key binding without a
+    terminating `:' or whitespace.
 
-m.  New application-callable function: rl_pending_signal(): returns the signal
+m.  The default binding for ^W in vi mode now uses word boundaries specified
+    by Posix (vi-unix-word-rubout is bindable command name).
+
+n.  rl_clear_visible_line: new application-callable function; clears all
+    screen lines occupied by the current visible readline line.
+
+o.  rl_tty_set_echoing: application-callable function that controls whether
+    or not readline thinks it is echoing terminal output.
+
+p.  Handle >| and strings of digits preceding and following redirection
+    specifications as single tokens when tokenizing the line for history
+    expansion.
+
+q.  Fixed a bug with displaying completions when the prefix display length
+    is greater than the length of the completions to be displayed.
+
+r.  The :p history modifier now applies to the entire line, so any expansion
+    specifying :p causes the line to be printed instead of expanded.
+
+s.  New application-callable function: rl_pending_signal(): returns the signal
     number of any signal readline has caught but not yet handled.
-    
-n.  New application-settable variable: rl_persistent_signal_handlers: if set to a
-    non-zero value, readline will enable the readline-6.2 signal handler behavior  
-    in callback mode: handlers are installed when rl_callback_handler_install is
-    called and removed removed when a complete line has been read.
+
+t.  New application-settable variable: rl_persistent_signal_handlers: if set
+    to a non-zero value, readline will enable the readline-6.2 signal handler
+    behavior in callback mode: handlers are installed when
+    rl_callback_handler_install is called and removed removed when a complete
+    line has been read.

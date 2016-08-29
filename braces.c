@@ -38,6 +38,12 @@
 
 #if defined (SHELL)
 #  include "shell.h"
+#else
+#  if defined (TEST)
+typedef char *WORD_DESC;
+typedef char **WORD_LIST;
+#define _(X)	X
+#  endif /* TEST */
 #endif /* SHELL */
 
 #include "typemax.h"		/* INTMAX_MIN, INTMAX_MAX */
@@ -287,7 +293,9 @@ expand_amble (text, tlen, flags)
   char *tem;
   int start, i, c;
 
+#if defined (SHELL)
   DECLARE_MBSTATE;
+#endif
 
   result = (char **)NULL;
 
@@ -301,7 +309,7 @@ expand_amble (text, tlen, flags)
 #else
       tem = (char *)xmalloc (1 + (i - start));
       strncpy (tem, &text[start], (i - start));
-      tem[i- start] = '\0';
+      tem[i - start] = '\0';
 #endif
 
       partial = brace_expand (tem);
@@ -319,6 +327,8 @@ expand_amble (text, tlen, flags)
 	  if (tresult == 0)
 	    {
 	      internal_error (_("brace expansion: cannot allocate memory for %s"), tem);
+	      free (tem);
+	      strvec_dispose (partial);
 	      strvec_dispose (result);
 	      result = (char **)NULL;
 	      return result;
@@ -333,7 +343,11 @@ expand_amble (text, tlen, flags)
 	  free (partial);
 	}
       free (tem);
+#if defined (SHELL)
       ADVANCE_CHAR (text, tlen, i);
+#else
+      i++;
+#endif
       start = i;
     }
   return (result);
@@ -623,7 +637,11 @@ brace_gobbler (text, tlen, indx, satisfy)
       if (pass_next)
 	{
 	  pass_next = 0;
+#if defined (SHELL)
 	  ADVANCE_CHAR (text, tlen, i);
+#else
+	  i++;
+#endif
 	  continue;
 	}
 
@@ -657,7 +675,11 @@ brace_gobbler (text, tlen, indx, satisfy)
 	  if (quoted == '"' && c == '$' && text[i+1] == '(')	/*)*/
 	    goto comsub;
 #endif
+#if defined (SHELL)
 	  ADVANCE_CHAR (text, tlen, i);
+#else
+	  i++;
+#endif
 	  continue;
 	}
 
@@ -710,7 +732,11 @@ comsub:
 	commas++;
 #endif
 
+#if defined (SHELL)
       ADVANCE_CHAR (text, tlen, i);
+#else
+      i++;
+#endif
     }
 
   *indx = i;
@@ -789,20 +815,29 @@ array_concat (arr1, arr2)
 #if defined (TEST)
 #include <stdio.h>
 
-fatal_error (format, arg1, arg2)
-     char *format, *arg1, *arg2;
+void *
+xmalloc(n)
+     size_t n;
 {
-  report_error (format, arg1, arg2);
-  exit (1);
+  return (malloc (n));
 }
 
-report_error (format, arg1, arg2)
+void *
+xrealloc(p, n)
+     void *p;
+     size_t n;
+{
+  return (realloc (p, n));
+}
+
+int
+internal_error (format, arg1, arg2)
      char *format, *arg1, *arg2;
 {
   fprintf (stderr, format, arg1, arg2);
   fprintf (stderr, "\n");
 }
-
+      
 main ()
 {
   char example[256];
@@ -826,7 +861,7 @@ main ()
       for (i = 0; result[i]; i++)
 	printf ("%s\n", result[i]);
 
-      free_array (result);
+      strvec_dispose (result);
     }
 }
 

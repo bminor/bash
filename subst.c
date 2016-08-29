@@ -2254,7 +2254,10 @@ split_at_delims (string, slen, delims, sentinel, flags, nwp, cwp)
   for (i = 0; member (string[i], d) && spctabnl (string[i]); i++)
     ;
   if (string[i] == '\0')
-    return (ret);
+    {
+      FREE (d2);
+      return (ret);
+    }
 
   ts = i;
   nw = 0;
@@ -4443,14 +4446,36 @@ match_upattern (string, pat, mtype, sp, ep)
   len = STRLEN (pat);
   if (pat[0] != '*' || (pat[0] == '*' && pat[1] == LPAREN && extended_glob) || pat[len - 1] != '*')
     {
+      int unescaped_backslash;
+      char *pp;
+
       p = npat = (char *)xmalloc (len + 3);
       p1 = pat;
       if (*p1 != '*' || (*p1 == '*' && p1[1] == LPAREN && extended_glob))
 	*p++ = '*';
       while (*p1)
 	*p++ = *p1++;
-      if (p1[-1] != '*' || p[-2] == '\\')
+#if 1
+      /* Need to also handle a pattern that ends with an unescaped backslash.
+	 For right now, we ignore it because the pattern matching code will
+	 fail the match anyway */
+      /* If the pattern ends with a `*' we leave it alone if it's preceded by
+	 an even number of backslashes, but if it's escaped by a backslash
+	 we need to add another `*'. */
+      if (p1[-1] == '*' && (unescaped_backslash = p1[-2] == '\\'))
+	{
+	  pp = p1 - 3;
+	  while (pp >= pat && *pp-- == '\\')
+	    unescaped_backslash = 1 - unescaped_backslash;
+	  if (unescaped_backslash)
+	    *p++ = '*';
+	}
+      else if (p1[-1] != '*')
 	*p++ = '*';
+#else 
+      if (p1[-1] != '*' || p1[-2] == '\\')
+	*p++ = '*';
+#endif
       *p = '\0';
     }
   else
@@ -4584,14 +4609,31 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
   len = wcslen (wpat);
   if (wpat[0] != L'*' || (wpat[0] == L'*' && wpat[1] == WLPAREN && extended_glob) || wpat[len - 1] != L'*')
     {
+      int unescaped_backslash;
+      wchar_t *wpp;
+
       wp = nwpat = (wchar_t *)xmalloc ((len + 3) * sizeof (wchar_t));
       wp1 = wpat;
       if (*wp1 != L'*' || (*wp1 == '*' && wp1[1] == WLPAREN && extended_glob))
 	*wp++ = L'*';
       while (*wp1 != L'\0')
 	*wp++ = *wp1++;
+#if 1
+      /* See comments above in match_upattern. */
+      if (wp1[-1] == L'*' && (unescaped_backslash = wp1[-2] == L'\\'))
+        {
+          wpp = wp1 - 3;
+          while (wpp >= wpat && *wpp-- == L'\\')
+            unescaped_backslash = 1 - unescaped_backslash;
+          if (unescaped_backslash)
+            *wp++ = L'*';
+        }
+      else if (wp1[-1] != L'*')
+        *wp++ = L'*';
+#else      
       if (wp1[-1] != L'*' || wp1[-2] == L'\\')
         *wp++ = L'*';
+#endif
       *wp = '\0';
     }
   else
@@ -7399,6 +7441,7 @@ pat_subst (string, pat, rep, mflags)
 	    mstr[x] = s[x];
 	  mstr[mlen] = '\0';
 	  rstr = strcreplace (rep, '&', mstr, 0);
+	  free (mstr);
 	  rslen = strlen (rstr);
         }
       else

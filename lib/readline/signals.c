@@ -235,7 +235,9 @@ _rl_handle_signal (sig)
     case SIGTTOU:
 #endif /* SIGTSTP */
     case SIGTERM:
+#if defined (SIGHUP)
     case SIGHUP:
+#endif
 #if defined (SIGALRM)
     case SIGALRM:
 #endif
@@ -415,7 +417,9 @@ rl_set_signals ()
 
       sigaddset (&bset, SIGINT);
       sigaddset (&bset, SIGTERM);
+#if defined (SIGHUP)
       sigaddset (&bset, SIGHUP);
+#endif
 #if defined (SIGQUIT)
       sigaddset (&bset, SIGQUIT);
 #endif
@@ -444,7 +448,9 @@ rl_set_signals ()
 
       rl_maybe_set_sighandler (SIGINT, rl_signal_handler, &old_int);
       rl_maybe_set_sighandler (SIGTERM, rl_signal_handler, &old_term);
+#if defined (SIGHUP)
       rl_maybe_set_sighandler (SIGHUP, rl_signal_handler, &old_hup);
+#endif
 #if defined (SIGQUIT)
       rl_maybe_set_sighandler (SIGQUIT, rl_signal_handler, &old_quit);
 #endif
@@ -509,7 +515,9 @@ rl_clear_signals ()
 	 overhead */
       rl_maybe_restore_sighandler (SIGINT, &old_int);
       rl_maybe_restore_sighandler (SIGTERM, &old_term);
+#if defined (SIGHUP)
       rl_maybe_restore_sighandler (SIGHUP, &old_hup);
+#endif
 #if defined (SIGQUIT)
       rl_maybe_restore_sighandler (SIGQUIT, &old_quit);
 #endif

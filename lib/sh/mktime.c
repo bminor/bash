@@ -75,12 +75,27 @@
 #define INT_MAX (~0 - INT_MIN)
 #endif
 
+/* True if the arithmetic type T is signed.  */
+#define TYPE_SIGNED(t) (! ((t) 0 < (t) -1))
+
+/* The maximum and minimum values for the integer type T.  These
+   macros have undefined behavior if T is signed and has padding bits.
+   If this is a problem for you, please let us know how to fix it for
+   your host.  */
+#define TYPE_MINIMUM(t) \
+  ((t) (! TYPE_SIGNED (t) \
+	? (t) 0 \
+	: ~ TYPE_MAXIMUM (t)))
+#define TYPE_MAXIMUM(t) \
+  ((t) (! TYPE_SIGNED (t) \
+	? (t) -1 \
+	: ((((t) 1 << (sizeof (t) * CHAR_BIT - 2)) - 1) * 2 + 1)))
+                  
 #ifndef TIME_T_MIN
-#define TIME_T_MIN (0 < (time_t) -1 ? (time_t) 0 \
-		    : ~ (time_t) 0 << (sizeof (time_t) * CHAR_BIT - 1))
+# define TIME_T_MIN TYPE_MINIMUM (time_t)
 #endif
 #ifndef TIME_T_MAX
-#define TIME_T_MAX (~ (time_t) 0 - TIME_T_MIN)
+# define TIME_T_MAX TYPE_MAXIMUM (time_t)
 #endif
 
 #define TM_YEAR_BASE 1900

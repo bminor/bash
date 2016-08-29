@@ -1,6 +1,6 @@
 /* xmalloc.c -- safe versions of malloc and realloc */
 
-/* Copyright (C) 1991-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the GNU Bourne Again SHell.
 
@@ -61,7 +61,7 @@ static size_t allocated;
 /*								    */
 /* **************************************************************** */
 
-#if defined (HAVE_SBRK)
+#if defined (HAVE_SBRK) && defined (USING_BASH_MALLOC)
 #define FINDBRK() \
 do { \
   if (brkfound == 0) \
@@ -86,7 +86,7 @@ allocerr (func, bytes)
      const char *func;
      size_t bytes;
 {
-#if defined (HAVE_SBRK)
+#if defined (HAVE_SBRK) && defined (USING_BASH_MALLOC)
       allocated = findbrk ();
       fatal_error (_("%s: cannot allocate %lu bytes (%lu bytes allocated)"), func, (unsigned long)bytes, (unsigned long)allocated);
 #else

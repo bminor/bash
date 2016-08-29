@@ -11601,3 +11601,51 @@ lib/sh/netopen.c
 doc/{bash.1,bashref.texi}
 	- change conditional commands description to make it clearer that
 	  bash doesn't emulate /dev/fd if the OS provides it
+
+				   8/22
+				   ----
+braces.c
+	- expand_amble: free partial and tem on failure to allocate memory
+	  for merged partial+result strvec.  Fix from Dmitry Goncharov
+	  <dgoncharov@users.sf.net>
+
+				   8/23
+				   ----
+jobs.c
+	- wait_for: don't call get_tty_state when a job finishes if we're
+	  running it as part of programmable completion.  We test
+	  rl_readline_state.  Fixes bug reported by Jaro Punta
+	  <silly8888@gmail.com>
+
+				   8/24
+				   ----
+subst.c
+	- pat_subst: fix memory leak (mstr).  Fix from Dmitry Goncharov
+	  <dgoncharov@users.sf.net>
+	- split_at_delims: fix memory leak (d2).  Fix from Dmitry Goncharov
+	  <dgoncharov@users.sf.net>
+
+				   8/26
+				   ----
+subst.c
+	- match_upattern,match_wpattern: make sure that a trailing `*' is
+	  not escaped (preceded by an odd number of backslashes) before we
+	  append a `*' when checking whether a pattern matches anywhere in
+	  the string
+
+lib/readline/{input,signals}.c
+	- protect instances of SIGQUIT with #ifdef SIGQUIT; apparently
+	  MinGW doesn't define it
+	- protect instances of SIGHUP with #ifdef SIGHUP; apparently
+	  MinGW doesn't define it.  From a report from Simon Sobisch
+	  <simonsobisch@gnu.org>
+
+xmalloc.o
+	- allocerr: only try to find the break and report it if we're using
+	  the bash malloc; there's no guarantee that any other malloc is
+	  using sbrk()
+
+doc/{bash.1,bashref.texi}
+	- quote removal: add paragraph mentioning quote removal to beginning
+	  of expansions section, referencing later paragraph.  Report from
+	  Michel Lanne <michel.lanne@gmail.com>

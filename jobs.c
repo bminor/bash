@@ -75,6 +75,10 @@
 #include "builtins/builtext.h"
 #include "builtins/common.h"
 
+#if defined (READLINE)
+# include <readline/readline.h>
+#endif
+
 #if !defined (errno)
 extern int errno;
 #endif /* !errno */
@@ -2834,6 +2838,11 @@ if (job == NO_JOB)
 		get_new_window_size (0, (int *)0, (int *)0);
 	    }
 	  else
+#if defined (READLINE)
+	    /* We don't want to do this if we are running a process during
+	       programmable completion. */
+	    if (RL_ISSTATE (RL_STATE_COMPLETING) == 0)
+#endif
 	    get_tty_state ();
 
 	  /* If job control is enabled, the job was started with job

@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 4.4, 29 May 2016).
+the Bash shell (version 4.4, 21 August 2016).
 
-This is Edition 4.4, last updated 29 May 2016,
+This is Edition 4.4, last updated 21 August 2016,
 of The GNU Bash Reference Manual,
 for Bash, Version 4.4.
 
@@ -284,10 +284,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 4.4, 29 May 2016).
+the Bash shell (version 4.4, 21 August 2016).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 4.4, last updated 29 May 2016,
+<p>This is Edition 4.4, last updated 21 August 2016,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 4.4.
 </p>
@@ -7902,6 +7902,11 @@ and the <code>test</code> and <code>[</code> builtin commands.
 <p>Expressions may be unary or binary.
 Unary expressions are often used to examine the status of a file.
 There are string operators and numeric comparison operators as well.
+Bash handles several filenames specially when they are used in
+expressions.
+If the operating system on which Bash is running provides these
+special files, Bash will use them; otherwise it will emulate them
+internally with this behavior:
 If the <var>file</var> argument to one of the primaries is of the form
 <samp>/dev/fd/<var>N</var></samp>, then file descriptor <var>N</var> is checked.
 If the <var>file</var> argument to one of the primaries is one of

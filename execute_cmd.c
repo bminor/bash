@@ -4722,11 +4722,11 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
 
 #if defined (ARRAY_VARS)
   fa = (struct func_array_state *)xmalloc (sizeof (struct func_array_state));
-  fa->source_a = bash_source_a;
+  fa->source_a = (ARRAY *)bash_source_a;
   fa->source_v = bash_source_v;
-  fa->lineno_a = bash_lineno_a;
+  fa->lineno_a = (ARRAY *)bash_lineno_a;
   fa->lineno_v = bash_lineno_v;
-  fa->funcname_a = funcname_a;
+  fa->funcname_a = (ARRAY *)funcname_a;
   fa->funcname_v = funcname_v;
   if (subshell == 0)
     add_unwind_protect (restore_funcarray_state, fa);

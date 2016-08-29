@@ -33,7 +33,7 @@
 \entry {control operator}{3}
 \entry {coprocess}{15}
 \initial {D}
-\entry {directory stack}{91}
+\entry {directory stack}{92}
 \initial {E}
 \entry {editing command lines}{104}
 \entry {environment}{38}

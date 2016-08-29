@@ -85,7 +85,7 @@
 \entry{arithmetic evaluation}{88}{arithmetic evaluation}
 \entry{alias expansion}{89}{alias expansion}
 \entry{arrays}{90}{arrays}
-\entry{directory stack}{91}{directory stack}
+\entry{directory stack}{92}{directory stack}
 \entry{prompting}{93}{prompting}
 \entry{restricted shell}{94}{restricted shell}
 \entry{POSIX Mode}{95}{POSIX Mode}
