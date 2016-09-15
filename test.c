@@ -101,7 +101,7 @@ extern int errno;
 static procenv_t test_exit_buf;
 static int test_error_return;
 #define test_exit(val) \
-	do { test_error_return = val; longjmp (test_exit_buf, 1); } while (0)
+	do { test_error_return = val; sh_longjmp (test_exit_buf, 1); } while (0)
 
 extern int sh_stat __P((const char *, struct stat *));
 
@@ -225,6 +225,7 @@ and ()
  *	'-'('G'|'L'|'O'|'S'|'N') filename
  * 	'-t' [int]
  *	'-'('z'|'n') string
+ *	'-'('v'|'R') varname
  *	'-o' option
  *	string
  *	string ('!='|'='|'==') string
@@ -623,7 +624,7 @@ unary_test (op, arg)
     case 'v':
       v = find_variable (arg);
 #if defined (ARRAY_VARS)
-      if (v == 0 && valid_array_reference (arg))
+      if (v == 0 && valid_array_reference (arg, 0))
 	{
 	  char *t;
 	  t = array_value (arg, 0, 0, (int *)0, (arrayind_t *)0);
@@ -820,6 +821,13 @@ posixtest ()
 	  {
 	    advance (1);
 	    value = !three_arguments ();
+	    break;
+	  }
+	else if (argv[pos][0] == '(' && argv[pos][1] == '\0' && argv[argc-1][0] == ')' && argv[argc-1][1] == '\0')
+	  {
+	    advance (1);
+	    value = two_arguments ();
+	    pos = argc;
 	    break;
 	  }
 	/* FALLTHROUGH */

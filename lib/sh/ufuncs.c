@@ -37,6 +37,10 @@
 #include <unistd.h>
 #endif
 
+#if defined (HAVE_SELECT)
+#  include "posixselect.h"
+#endif
+
 /* A version of `alarm' using setitimer if it's available. */
 
 #if defined (HAVE_SETITIMER)

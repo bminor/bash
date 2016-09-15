@@ -56,13 +56,16 @@
 
 extern int line_number, current_command_line_count, parser_state;
 extern int last_command_exit_value;
+extern int shell_initialized;
+
+int here_doc_first_line = 0;
 
 /* Object caching */
 sh_obj_cache_t wdcache = {0, 0, 0};
 sh_obj_cache_t wlcache = {0, 0, 0};
 
-#define WDCACHESIZE	60
-#define WLCACHESIZE	60
+#define WDCACHESIZE	128
+#define WLCACHESIZE	128
 
 static COMMAND *make_for_or_select __P((enum command_type, WORD_DESC *, WORD_LIST *, COMMAND *, int));
 #if defined (ARITH_FOR_COMMAND)
@@ -261,6 +264,9 @@ make_arith_for_expr (s)
     return ((WORD_LIST *)NULL);
   wd = make_word (s);
   wd->flags |= W_NOGLOB|W_NOSPLIT|W_QUOTED|W_DQUOTE;	/* no word splitting or globbing */
+#if defined (PROCESS_SUBSTITUTION)
+  wd->flags |= W_NOPROCSUB;	/* no process substitution */
+#endif
   result = make_word_list (wd, (WORD_LIST *)NULL);
   return result;
 }
@@ -292,7 +298,7 @@ make_arith_for_command (exprs, action, lineno)
 	s++;
       start = s;
       /* skip to the semicolon or EOS */
-      i = skip_to_delim (start, 0, ";", SD_NOJMP);
+      i = skip_to_delim (start, 0, ";", SD_NOJMP|SD_NOPROCSUB);
       s = start + i;
 
       t = (i > 0) ? substring (start, 0, i) : (char *)NULL;
@@ -619,6 +625,7 @@ make_here_document (temp, lineno)
       register char *line;
       int len;
 
+      here_doc_first_line = 0;
       line = full_line;
       line_number++;
 
@@ -670,6 +677,7 @@ document_done:
       document[0] = '\0';
     }
   temp->redirectee.filename->word = document;
+  here_doc_first_line = 0;
 }
 
 /* Generate a REDIRECT from SOURCE, DEST, and INSTRUCTION.
@@ -790,11 +798,18 @@ make_function_def (name, command, lineno, lstart)
   if (bash_source_a && array_num_elements (bash_source_a) > 0)
     temp->source_file = array_reference (bash_source_a, 0);
 #endif
+  /* Assume that shell functions without a source file before the shell is
+     initialized come from the environment.  Otherwise default to "main"
+     (usually functions being defined interactively) */
+  if (temp->source_file == 0)
+    temp->source_file = shell_initialized ? "main" : "environment";
+
 #if defined (DEBUGGER)
   bind_function_def (name->word, temp);
 #endif
 
   temp->source_file = temp->source_file ? savestring (temp->source_file) : 0;
+
   return (make_command (cm_function_def, (SIMPLE_COM *)temp));
 }
 

@@ -63,6 +63,7 @@ static void uprint();
 
 static int uname_flags;
 
+int
 uname_builtin (list)
      WORD_LIST *list;
 {

@@ -2,8 +2,8 @@
 
    Modified by Chet Ramey for Readline.
 
-   Copyright (C) 1985, 1988, 1990-1991, 1995-2010, 2012 Free Software Foundation,
-   Inc.
+   Copyright (C) 1985, 1988, 1990-1991, 1995-2010, 2012, 2015
+   Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -114,9 +114,13 @@ enum filetype
     arg_directory
   };
 
+/* Prefix color, currently same as socket */
+#define C_PREFIX	C_SOCK
+
 extern void _rl_put_indicator (const struct bin_str *ind);
 extern void _rl_set_normal_color (void);
-extern bool _rl_print_color_indicator (char *f);
+extern bool _rl_print_prefix_color (void);
+extern bool _rl_print_color_indicator (const char *f);
 extern void _rl_prep_non_filename_text (void);
 
 #endif /* !_COLORS_H_ */

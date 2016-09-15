@@ -62,7 +62,7 @@ while [ $# -gt 0 ]; do
 	--version)	shift ; do_version=y ;;
 	--)		shift ; break ;;
 	-*)		echo "bashbug: ${1}: invalid option" >&2
-			echo "$USAGE" >& 2
+			echo "$USAGE" >&2
 			exit 2 ;;
 	*)		break ;;
 	esac
@@ -265,7 +265,8 @@ esac
 
 ${RMAIL} $SMARGS < "$TEMPFILE1" || {
 	cat "$TEMPFILE1" >> $HOME/dead.bashbug
-	echo "$0: mail failed: report saved in $HOME/dead.bashbug" >&2
+	echo "$0: mail to ${BUGADDR} failed: report saved in $HOME/dead.bashbug" >&2
+	echo "$0: please send it manually to ${BUGADDR}" >&2
 }
 
 exit 0

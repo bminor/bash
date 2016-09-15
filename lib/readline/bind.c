@@ -1,6 +1,6 @@
 /* bind.c -- key binding and startup file support for the readline library. */
 
-/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -74,8 +74,13 @@ Keymap rl_binding_keymap;
 
 static int _rl_skip_to_delim PARAMS((char *, int, int));
 
+#if defined (USE_VARARGS) && defined (PREFER_STDARG)
+static void _rl_init_file_error (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));
+#else
+static void _rl_init_file_error ();
+#endif
+
 static char *_rl_read_file PARAMS((char *, size_t *));
-static void _rl_init_file_error PARAMS((const char *));
 static int _rl_read_init_file PARAMS((const char *, int));
 static int glean_key_from_name PARAMS((char *));
 
@@ -117,6 +122,9 @@ rl_bind_key (key, function)
      int key;
      rl_command_func_t *function;
 {
+  char keyseq[3];
+  int l;
+
   if (key < 0)
     return (key);
 
@@ -135,8 +143,24 @@ rl_bind_key (key, function)
       return (key);
     }
 
-  _rl_keymap[key].type = ISFUNC;
-  _rl_keymap[key].function = function;
+  /* If it's bound to a function or macro, just overwrite.  Otherwise we have
+     to treat it as a key sequence so rl_generic_bind handles shadow keymaps
+     for us.  If we are binding '\' make sure to escape it so it makes it
+     through the call to rl_translate_keyseq. */
+  if (_rl_keymap[key].type != ISKMAP)
+    {
+      _rl_keymap[key].type = ISFUNC;
+      _rl_keymap[key].function = function;
+    }
+  else
+    {
+      l = 0;
+      if (key == '\\')
+	keyseq[l++] = '\\';
+      keyseq[l++] = key;
+      keyseq[l] = '\0';
+      rl_bind_keyseq (keyseq, function);
+    }
   rl_binding_keymap = _rl_keymap;
   return (0);
 }
@@ -542,7 +566,7 @@ rl_translate_keyseq (seq, array, len)
 	    case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7':
 	      i++;
-	      for (temp = 2, c -= '0'; ISOCTAL (seq[i]) && temp--; i++)
+	      for (temp = 2, c -= '0'; ISOCTAL ((unsigned char)seq[i]) && temp--; i++)
 	        c = (c * 8) + OCTVALUE (seq[i]);
 	      i--;	/* auto-increment in for loop */
 	      array[l++] = c & largest_char;
@@ -970,14 +994,35 @@ _rl_read_init_file (filename, include_level)
 }
 
 static void
-_rl_init_file_error (msg)
-     const char *msg;
+#if defined (PREFER_STDARG)
+_rl_init_file_error (const char *format, ...)
+#else
+_rl_init_file_error (va_alist)
+     va_dcl
+#endif
 {
+  va_list args;
+#if defined (PREFER_VARARGS)
+  char *format;
+#endif
+
+#if defined (PREFER_STDARG)
+  va_start (args, format);
+#else
+  va_start (args);
+  format = va_arg (args, char *);
+#endif
+
+  fprintf (stderr, "readline: ");
   if (currently_reading_init_file)
-    _rl_errmsg ("%s: line %d: %s\n", current_readline_init_file,
-		     current_readline_init_lineno, msg);
-  else
-    _rl_errmsg ("%s", msg);
+    fprintf (stderr, "%s: line %d: ", current_readline_init_file,
+		     current_readline_init_lineno);
+
+  vfprintf (stderr, format, args);
+  fprintf (stderr, "\n");
+  fflush (stderr);
+
+  va_end (args);
 }
 
 /* **************************************************************** */
@@ -1197,7 +1242,7 @@ handle_parser_directive (statement)
       }
 
   /* display an error message about the unknown parser directive */
-  _rl_init_file_error ("unknown parser directive");
+  _rl_init_file_error ("%s: unknown parser directive", directive);
   return (1);
 }
 
@@ -1243,7 +1288,7 @@ rl_parse_and_bind (string)
 {
   char *funname, *kname;
   register int c, i;
-  int key, equivalency;
+  int key, equivalency, foundmod, foundsep;
 
   while (string && whitespace (*string))
     string++;
@@ -1273,7 +1318,7 @@ rl_parse_and_bind (string)
       /* If we didn't find a closing quote, abort the line. */
       if (string[i] == '\0')
         {
-          _rl_init_file_error ("no closing `\"' in key binding");
+          _rl_init_file_error ("%s: no closing `\"' in key binding", string);
           return 1;
         }
       else
@@ -1284,6 +1329,8 @@ rl_parse_and_bind (string)
   for (; (c = string[i]) && c != ':' && c != ' ' && c != '\t'; i++ );
 
   equivalency = (c == ':' && string[i + 1] == '=');
+
+  foundsep = c != 0;
 
   /* Mark the end of the command (or keyname). */
   if (string[i])
@@ -1374,6 +1421,12 @@ remove_trailing:
       return 0;
     }
 
+  if (foundsep == 0)
+    {
+      _rl_init_file_error ("%s: no key sequence terminator", string);
+      return 1;
+    }
+
   /* If this is a new-style key-binding, then do the binding with
      rl_bind_keyseq ().  Otherwise, let the older code deal with it. */
   if (*string == '"')
@@ -1430,11 +1483,24 @@ remove_trailing:
   key = glean_key_from_name (kname);
 
   /* Add in control and meta bits. */
+  foundmod = 0;
   if (substring_member_of_array (string, _rl_possible_control_prefixes))
-    key = CTRL (_rl_to_upper (key));
+    {
+      key = CTRL (_rl_to_upper (key));
+      foundmod = 1;
+    }
 
   if (substring_member_of_array (string, _rl_possible_meta_prefixes))
-    key = META (key);
+    {
+      key = META (key);
+      foundmod = 1;
+    }
+
+  if (foundmod == 0 && kname != string)
+    {
+      _rl_init_file_error ("%s: unknown key modifier", string);
+      return 1;
+    }
 
   /* Temporary.  Handle old-style keyname with macro-binding. */
   if (*funname == '\'' || *funname == '"')
@@ -1461,6 +1527,7 @@ remove_trailing:
 #endif /* PREFIX_META_HACK */
   else
     rl_bind_key (key, rl_named_function (funname));
+
   return 0;
 }
 
@@ -1479,6 +1546,7 @@ static const struct {
   { "blink-matching-paren",	&rl_blink_matching_paren,	V_SPECIAL },
   { "byte-oriented",		&rl_byte_oriented,		0 },
 #if defined (COLOR_SUPPORT)
+  { "colored-completion-prefix",&_rl_colored_completion_prefix,	0 },
   { "colored-stats",		&_rl_colored_stats,		0 },
 #endif
   { "completion-ignore-case",	&_rl_completion_case_fold,	0 },
@@ -1486,6 +1554,7 @@ static const struct {
   { "convert-meta",		&_rl_convert_meta_chars_to_ascii, 0 },
   { "disable-completion",	&rl_inhibit_completion,		0 },
   { "echo-control-characters",	&_rl_echo_control_chars,	0 },
+  { "enable-bracketed-paste",	&_rl_enable_bracketed_paste,	0 },
   { "enable-keypad",		&_rl_enable_keypad,		0 },
   { "enable-meta-key",		&_rl_enable_meta,		0 },
   { "expand-tilde",		&rl_complete_with_tilde_expansion, 0 },
@@ -1569,10 +1638,13 @@ static int sv_dispprefix PARAMS((const char *));
 static int sv_compquery PARAMS((const char *));
 static int sv_compwidth PARAMS((const char *));
 static int sv_editmode PARAMS((const char *));
+static int sv_emacs_modestr PARAMS((const char *));
 static int sv_histsize PARAMS((const char *));
 static int sv_isrchterm PARAMS((const char *));
 static int sv_keymap PARAMS((const char *));
 static int sv_seqtimeout PARAMS((const char *));
+static int sv_viins_modestr PARAMS((const char *));
+static int sv_vicmd_modestr PARAMS((const char *));
 
 static const struct {
   const char * const name;
@@ -1585,10 +1657,13 @@ static const struct {
   { "completion-prefix-display-length", V_INT,	sv_dispprefix },
   { "completion-query-items", V_INT,	sv_compquery },
   { "editing-mode",	V_STRING,	sv_editmode },
+  { "emacs-mode-string", V_STRING,	sv_emacs_modestr },  
   { "history-size",	V_INT,		sv_histsize },
   { "isearch-terminators", V_STRING,	sv_isrchterm },
   { "keymap",		V_STRING,	sv_keymap },
   { "keyseq-timeout",	V_INT,		sv_seqtimeout },
+  { "vi-cmd-mode-string", V_STRING,	sv_vicmd_modestr }, 
+  { "vi-ins-mode-string", V_STRING,	sv_viins_modestr }, 
   { (char *)NULL,	0, (_rl_sv_func_t *)0 }
 };
 
@@ -1605,7 +1680,7 @@ find_string_var (name)
 }
 
 /* A boolean value that can appear in a `set variable' command is true if
-   the value is null or empty, `on' (case-insenstive), or "1".  Any other
+   the value is null or empty, `on' (case-insensitive), or "1".  Any other
    values result in 0 (false). */
 static int
 bool_to_int (value)
@@ -1654,10 +1729,14 @@ rl_variable_bind (name, value)
 
   i = find_string_var (name);
 
-  /* For the time being, unknown variable names or string names without a
-     handler function are simply ignored. */
+  /* For the time being, string names without a handler function are simply
+     ignored. */
   if (i < 0 || string_varlist[i].set_func == 0)
-    return 0;
+    {
+      if (i < 0)
+	_rl_init_file_error ("%s: unknown variable name", name);
+      return 0;
+    }
 
   v = (*string_varlist[i].set_func) (value);
   return v;
@@ -1832,7 +1911,7 @@ sv_isrchterm (value)
     }
   else
     {
-      for (beg = end = 0; whitespace (v[end]) == 0; end++)
+      for (beg = end = 0; v[end] && whitespace (v[end]) == 0; end++)
 	;
     }
 
@@ -1846,7 +1925,96 @@ sv_isrchterm (value)
   xfree (v);
   return 0;
 }
-      
+
+extern char *_rl_emacs_mode_str;
+
+static int
+sv_emacs_modestr (value)
+     const char *value;
+{
+  if (value && *value)
+    {
+      FREE (_rl_emacs_mode_str);
+      _rl_emacs_mode_str = (char *)xmalloc (2 * strlen (value) + 1);
+      rl_translate_keyseq (value, _rl_emacs_mode_str, &_rl_emacs_modestr_len);
+      _rl_emacs_mode_str[_rl_emacs_modestr_len] = '\0';
+      return 0;
+    }
+  else if (value)
+    {
+      FREE (_rl_emacs_mode_str);
+      _rl_emacs_mode_str = (char *)xmalloc (1);
+      _rl_emacs_mode_str[_rl_emacs_modestr_len = 0] = '\0';
+      return 0;
+    }
+  else if (value == 0)
+    {
+      FREE (_rl_emacs_mode_str);
+      _rl_emacs_mode_str = 0;	/* prompt_modestr does the right thing */
+      _rl_emacs_modestr_len = 0;
+      return 0;
+    }
+  return 1;
+}
+
+static int
+sv_viins_modestr (value)
+     const char *value;
+{
+  if (value && *value)
+    {
+      FREE (_rl_vi_ins_mode_str);
+      _rl_vi_ins_mode_str = (char *)xmalloc (2 * strlen (value) + 1);
+      rl_translate_keyseq (value, _rl_vi_ins_mode_str, &_rl_vi_ins_modestr_len);
+      _rl_vi_ins_mode_str[_rl_vi_ins_modestr_len] = '\0';
+      return 0;
+    }
+  else if (value)
+    {
+      FREE (_rl_vi_ins_mode_str);
+      _rl_vi_ins_mode_str = (char *)xmalloc (1);
+      _rl_vi_ins_mode_str[_rl_vi_ins_modestr_len = 0] = '\0';
+      return 0;
+    }
+  else if (value == 0)
+    {
+      FREE (_rl_vi_ins_mode_str);
+      _rl_vi_ins_mode_str = 0;	/* prompt_modestr does the right thing */
+      _rl_vi_ins_modestr_len = 0;
+      return 0;
+    }
+  return 1;
+}
+
+static int
+sv_vicmd_modestr (value)
+     const char *value;
+{
+  if (value && *value)
+    {
+      FREE (_rl_vi_cmd_mode_str);
+      _rl_vi_cmd_mode_str = (char *)xmalloc (2 * strlen (value) + 1);
+      rl_translate_keyseq (value, _rl_vi_cmd_mode_str, &_rl_vi_cmd_modestr_len);
+      _rl_vi_cmd_mode_str[_rl_vi_cmd_modestr_len] = '\0';
+      return 0;
+    }
+  else if (value)
+    {
+      FREE (_rl_vi_cmd_mode_str);
+      _rl_vi_cmd_mode_str = (char *)xmalloc (1);
+      _rl_vi_cmd_mode_str[_rl_vi_cmd_modestr_len = 0] = '\0';
+      return 0;
+    }
+  else if (value == 0)
+    {
+      FREE (_rl_vi_cmd_mode_str);
+      _rl_vi_cmd_mode_str = 0;	/* prompt_modestr does the right thing */
+      _rl_vi_cmd_modestr_len = 0;
+      return 0;
+    }
+  return 1;
+}
+
 /* Return the character which matches NAME.
    For example, `Space' returns ' '. */
 
@@ -2420,6 +2588,12 @@ _rl_get_string_variable_value (name)
       sprintf (numbuf, "%d", _rl_keyseq_timeout);    
       return (numbuf);
     }
+  else if (_rl_stricmp (name, "emacs-mode-string") == 0)
+    return (_rl_emacs_mode_str ? _rl_emacs_mode_str : RL_EMACS_MODESTR_DEFAULT);
+  else if (_rl_stricmp (name, "vi-cmd-mode-string") == 0)
+    return (_rl_vi_cmd_mode_str ? _rl_vi_cmd_mode_str : RL_VI_CMD_MODESTR_DEFAULT);
+  else if (_rl_stricmp (name, "vi-ins-mode-string") == 0)
+    return (_rl_vi_ins_mode_str ? _rl_vi_ins_mode_str : RL_VI_INS_MODESTR_DEFAULT);
   else
     return (0);
 }

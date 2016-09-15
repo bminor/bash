@@ -27,6 +27,10 @@
    error messages about `break' and `continue' out of context. */
 #define BREAK_COMPLAINS
 
+/* Define CD_COMPLAINS if you want the non-standard, but sometimes-desired
+   error messages about multiple directory arguments to `cd'. */
+#define CD_COMPLAINS
+
 /* Define BUFFERED_INPUT if you want the shell to do its own input
    buffering, rather than using stdio.  Do not undefine this; it's
    required to preserve semantics required by POSIX. */
@@ -79,6 +83,9 @@
    reply to the select query is an empty line. */
 #define KSH_COMPATIBLE_SELECT
 
+/* Default interactive shell startup file. */
+#define DEFAULT_BASHRC "~/.bashrc"
+
 /* System-wide .bashrc file for interactive shells. */
 /* #define SYS_BASHRC "/etc/bash.bashrc" */
 
@@ -110,6 +117,7 @@
 #if defined (SYSLOG_HISTORY)
 #  define SYSLOG_FACILITY LOG_USER
 #  define SYSLOG_LEVEL LOG_INFO
+#  define OPENLOG_OPTS LOG_PID
 #endif
 
 /* Define if you want to include code in shell.c to support wordexp(3) */
@@ -132,3 +140,23 @@
 /* Define to 1 if you want to be able to export indexed arrays to processes
    using the foo=([0]=one [1]=two) and so on */
 /* #define ARRAY_EXPORT 1 */
+
+/* Define to 1 if you want the shell to exit if it is running setuid and its
+   attempt to drop privilege using setuid(getuid()) fails with errno == EAGAIN */
+/* #define EXIT_ON_SETUID_FAILURE 1 */
+
+/* Define to 1 if you want the shell to re-check $PATH if a hashed filename
+   no longer exists.  This behavior is the default in Posix mode. */
+#define CHECKHASH_DEFAULT 0
+
+/* Define to the maximum level of recursion you want for the eval builtin.
+   0 means the limit is not active. */
+#define EVALNEST_MAX 0
+
+/* Define to the maximum level of recursion you want for the source/. builtin.
+   0 means the limit is not active. */
+#define SOURCENEST_MAX 0
+
+/* Define to use libc mktemp/mkstemp instead of replacements in lib/sh/tmpfile.c */
+#define USE_MKTEMP
+#define USE_MKSTEMP

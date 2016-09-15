@@ -1,6 +1,6 @@
 /* redir.c -- Functions to perform input and output redirection. */
 
-/* Copyright (C) 1997-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -52,6 +52,7 @@ extern int errno;
 #include "flags.h"
 #include "execute_cmd.h"
 #include "redir.h"
+#include "trap.h"
 
 #if defined (BUFFERED_INPUT)
 #  include "input.h"
@@ -115,9 +116,9 @@ redirection_error (temp, error)
   int oflags;
 
   allocname = 0;
-  if (temp->rflags & REDIR_VARASSIGN)
+  if ((temp->rflags & REDIR_VARASSIGN) && error < 0)
     filename = allocname = savestring (temp->redirector.filename->word);
-  else if (temp->redirector.dest < 0)
+  else if ((temp->rflags & REDIR_VARASSIGN) == 0 && temp->redirector.dest < 0)
     /* This can happen when read_token_word encounters overflow, like in
        exec 4294967297>x */
     filename = _("file descriptor out of range");
@@ -324,7 +325,7 @@ write_here_string (fd, redirectee)
   /* Now that we've changed the variable search order to ignore the temp
      environment, see if we need to change the cached IFS values. */
   sv_ifs ("IFS");
-  herestr = expand_string_to_string (redirectee->word, 0);
+  herestr = expand_string_unsplit_to_string (redirectee->word, 0);
   expanding_redir = 0;
   /* Now we need to change the variable search order back to include the temp
      environment.  We force the temp environment search by forcing
@@ -410,8 +411,11 @@ write_here_document (fd, redirectee)
 	 may need to be reconsidered later. */
       if ((fd2 = dup (fd)) < 0 || (fp = fdopen (fd2, "w")) == NULL)
 	{
+	  old = errno;
 	  if (fd2 >= 0)
 	    close (fd2);
+	  dispose_words (tlist);
+	  errno = old;
 	  return (errno);
 	}
       errno = 0;
@@ -905,7 +909,10 @@ do_redirection_internal (redirect, flags)
 		}
 	    }
 	  else if ((fd != redirector) && (dup2 (fd, redirector) < 0))
-	    return (errno);
+	    {
+	      close (fd);	/* dup2 failed? must be fd limit issue */
+	      return (errno);
+	    }
 
 #if defined (BUFFERED_INPUT)
 	  /* Do not change the buffered stream for an implicit redirection
@@ -1373,11 +1380,30 @@ redir_varvalue (redir)
   w = redir->redirector.filename->word;		/* shorthand */
   /* XXX - handle set -u here? */
 #if defined (ARRAY_VARS)
-  if (vr = valid_array_reference (w))
-    v = array_variable_part (w, &sub, &len);
+  if (vr = valid_array_reference (w, 0))
+    {
+      v = array_variable_part (w, &sub, &len);
+    }
   else
 #endif
-  v = find_variable (w);
+    {
+      v = find_variable (w);
+#if defined (ARRAY_VARS)
+      if (v == 0)
+	{
+	  v = find_variable_last_nameref (w, 0);
+	  if (v && nameref_p (v))
+	    {
+	      w = nameref_cell (v);
+	      if (vr = valid_array_reference (w, 0))
+		v = array_variable_part (w, &sub, &len);
+	      else
+	        v = find_variable (w);
+	    }
+	}
+#endif
+    }
+	
   if (v == 0 || invisible_p (v))
     return -1;
 

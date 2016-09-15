@@ -1,6 +1,6 @@
 /* common.c - utility functions for all builtins */
 
-/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -70,6 +70,7 @@ extern int errno;
 extern int indirection_level, subshell_environment;
 extern int line_number;
 extern int last_command_exit_value;
+extern int trap_saved_exit_value;
 extern int running_trap;
 extern int posixly_correct;
 extern char *this_command_name, *shell_name;
@@ -175,9 +176,16 @@ int
 no_options (list)
      WORD_LIST *list;
 {
+  int opt;
+
   reset_internal_getopt ();
-  if (internal_getopt (list, "") != -1)
+  if ((opt = internal_getopt (list, "")) != -1)
     {
+      if (opt == GETOPT_HELP)
+	{
+	  builtin_help ();
+	  return (2);
+	}
       builtin_usage ();
       return (1);
     }
@@ -234,7 +242,7 @@ sh_invalidnum (s)
 {
   char *msg;
 
-  if (*s == '0' && isdigit (s[1]))
+  if (*s == '0' && isdigit ((unsigned char)s[1]))
     msg = _("invalid octal number");
   else if (*s == '0' && s[1] == 'x')
     msg = _("invalid hex number");
@@ -335,7 +343,9 @@ int
 sh_chkwrite (s)
      int s;
 {
+  QUIT;
   fflush (stdout);
+  QUIT;
   if (ferror (stdout))
     {
       sh_wrerror ();
@@ -403,6 +413,8 @@ remember_args (list, destructive)
 
   if (destructive)
     set_dollar_vars_changed ();
+
+  invalidate_cached_quoted_dollar_at ();
 }
 
 static int changed_dollar_vars;
@@ -494,7 +506,17 @@ get_exitstat (list)
     list = list->next;
 
   if (list == 0)
-    return (last_command_exit_value);      
+    {
+      /* If we're not running the DEBUG trap, the return builtin, when not
+	 given any arguments, uses the value of $? before the trap ran.  If
+	 given an argument, return uses it.  This means that the trap can't
+	 change $?.  The DEBUG trap gets to change $?, though, since that is
+	 part of its reason for existing, and because the extended debug mode
+	 does things with the return value. */
+      if (this_shell_builtin == return_builtin && running_trap > 0 && running_trap != DEBUG_TRAP+1)
+	return (trap_saved_exit_value);
+      return (last_command_exit_value);
+    }
 
   arg = list->word->word;
   if (arg == 0 || legal_number (arg, &sval) == 0)
@@ -888,3 +910,11 @@ initialize_shell_builtins ()
   qsort (shell_builtins, num_shell_builtins, sizeof (struct builtin),
     (QSFUNC *)shell_builtin_compare);
 }
+
+#if !defined (HELP_BUILTIN)
+void
+builtin_help ()
+{
+  printf ("%s: %s\n", this_command_name, _("help not available in this version"));
+}
+#endif

@@ -1,7 +1,7 @@
 /* vi_mode.c -- A vi emulation mode for Bash.
    Derived from code written by Jeff Sparkes (jsparkes@bnr.ca).  */
 
-/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -67,6 +67,9 @@ int _rl_vi_last_command = 'i';	/* default `.' puts you in insert mode */
 
 _rl_vimotion_cxt *_rl_vimvcxt = 0;
 
+/* Non-zero indicates we are redoing a vi-mode command with `.' */
+int _rl_vi_redoing;
+
 /* Non-zero means enter insertion mode. */
 static int _rl_vi_doing_insert;
 
@@ -99,8 +102,6 @@ static int _rl_vi_last_search_char;
 static int _rl_vi_last_replacement;
 
 static int _rl_vi_last_key_before_insert;
-
-static int vi_redoing;
 
 /* Text modification commands.  These are the `redoable' commands. */
 static const char * const vi_textmod = "_*\\AaIiCcDdPpYyRrSsXx~";
@@ -192,6 +193,13 @@ _rl_vi_textmod_command (c)
   return (member (c, vi_textmod));
 }
 
+int
+_rl_vi_motion_command (c)
+     int c;
+{
+  return (member (c, vi_motion));
+}
+
 static void
 _rl_vi_replace_insert (count)
      int count;
@@ -234,7 +242,7 @@ rl_vi_redo (count, c)
     }
 
   r = 0;
-  vi_redoing = 1;
+  _rl_vi_redoing = 1;
   /* If we're redoing an insert with `i', stuff in the inserted text
      and do not go into insertion mode. */
   if (_rl_vi_last_command == 'i' && vi_insert_buffer && *vi_insert_buffer)
@@ -280,7 +288,8 @@ rl_vi_redo (count, c)
     }
   else
     r = _rl_dispatch (_rl_vi_last_command, _rl_keymap);
-  vi_redoing = 0;
+
+  _rl_vi_redoing = 0;
 
   return (r);
 }
@@ -464,7 +473,7 @@ rl_vi_end_word (count, key)
   if (count < 0)
     {
       rl_ding ();
-      return -1;
+      return 1;
     }
 
   if (_rl_uppercase_p (key))
@@ -1089,28 +1098,55 @@ static int
 rl_domove_motion_callback (m)
      _rl_vimotion_cxt *m;
 {
-  int c, save, r;
-  int old_end;
+  int c;
 
   _rl_vi_last_motion = c = m->motion;
 
   /* Append a blank character temporarily so that the motion routines
-     work right at the end of the line. */
-  old_end = rl_end;
+     work right at the end of the line.  Original value of rl_end is saved
+     as m->end. */
   rl_line_buffer[rl_end++] = ' ';
   rl_line_buffer[rl_end] = '\0';
 
   _rl_dispatch (c, _rl_keymap);
 
-  /* Remove the blank that we added. */
-  rl_end = old_end;
+#if defined (READLINE_CALLBACKS)
+  if (RL_ISSTATE (RL_STATE_CALLBACK))
+    {
+      /* Messy case where char search can be vi motion command; see rest of
+	 details in callback.c.  vi_char_search and callback_char_search just
+	 set and unset the CHARSEARCH state.  This is where any vi motion
+	 command that needs to set its own state should be handled, with any
+	 corresponding code to manage that state in callback.c */
+      if (RL_ISSTATE (RL_STATE_CHARSEARCH))
+	return 0;
+      else
+	return (_rl_vi_domove_motion_cleanup (c, m));
+    }
+#endif
+
+  return (_rl_vi_domove_motion_cleanup (c, m));
+}
+
+int
+_rl_vi_domove_motion_cleanup (c, m)
+     int c;
+     _rl_vimotion_cxt *m;
+{
+  int r;
+
+  /* Remove the blank that we added in rl_domove_motion_callback. */
+  rl_end = m->end;
   rl_line_buffer[rl_end] = '\0';
   if (rl_point > rl_end)
     rl_point = rl_end;
 
   /* No change in position means the command failed. */
   if (rl_mark == rl_point)
-    return (-1);
+    {
+      RL_UNSETSTATE (RL_STATE_VIMOTION);
+      return (-1);
+    }
 
   /* rl_vi_f[wW]ord () leaves the cursor on the first character of the next
      word.  If we are not at the end of the line, and we are on a
@@ -1244,8 +1280,8 @@ _rl_vi_domove_callback (m)
   int c, r;
 
   m->motion = c = rl_vi_domove_getchar (m);
-  /* XXX - what to do if this returns -1?  Should we return 1 for eof to
-     callback code? */
+  if (c < 0)
+    return 1;		/* EOF */
   r = rl_domove_read_callback (m);
 
   return ((r == 0) ? r : 1);	/* normalize return values */
@@ -1301,12 +1337,12 @@ rl_vi_delete_to (count, key)
       _rl_vimvcxt->motion = '$';
       r = rl_domove_motion_callback (_rl_vimvcxt);
     }
-  else if (vi_redoing && _rl_vi_last_motion != 'd')	/* `dd' is special */
+  else if (_rl_vi_redoing && _rl_vi_last_motion != 'd')	/* `dd' is special */
     {
       _rl_vimvcxt->motion = _rl_vi_last_motion;
       r = rl_domove_motion_callback (_rl_vimvcxt);
     }
-  else if (vi_redoing)		/* handle redoing `dd' here */
+  else if (_rl_vi_redoing)		/* handle redoing `dd' here */
     {
       _rl_vimvcxt->motion = _rl_vi_last_motion;
       rl_mark = rl_end;
@@ -1351,7 +1387,7 @@ vi_change_dispatch (m)
   if ((_rl_to_upper (m->motion) == 'W') && rl_point < m->start)
     rl_point = m->start;
 
-  if (vi_redoing)
+  if (_rl_vi_redoing)
     {
       if (vi_insert_buffer && *vi_insert_buffer)
 	rl_begin_undo_group ();
@@ -1391,12 +1427,12 @@ rl_vi_change_to (count, key)
       _rl_vimvcxt->motion = '$';
       r = rl_domove_motion_callback (_rl_vimvcxt);
     }
-  else if (vi_redoing && _rl_vi_last_motion != 'c')	/* `cc' is special */
+  else if (_rl_vi_redoing && _rl_vi_last_motion != 'c')	/* `cc' is special */
     {
       _rl_vimvcxt->motion = _rl_vi_last_motion;
       r = rl_domove_motion_callback (_rl_vimvcxt);
     }
-  else if (vi_redoing)		/* handle redoing `cc' here */
+  else if (_rl_vi_redoing)		/* handle redoing `cc' here */
     {
       _rl_vimvcxt->motion = _rl_vi_last_motion;
       rl_mark = rl_end;
@@ -1460,12 +1496,12 @@ rl_vi_yank_to (count, key)
       _rl_vimvcxt->motion = '$';
       r = rl_domove_motion_callback (_rl_vimvcxt);
     }
-  else if (vi_redoing && _rl_vi_last_motion != 'y')	/* `yy' is special */
+  else if (_rl_vi_redoing && _rl_vi_last_motion != 'y')	/* `yy' is special */
     {
       _rl_vimvcxt->motion = _rl_vi_last_motion;
       r = rl_domove_motion_callback (_rl_vimvcxt);
     }
-  else if (vi_redoing)			/* handle redoing `yy' here */
+  else if (_rl_vi_redoing)			/* handle redoing `yy' here */
     {
       _rl_vimvcxt->motion = _rl_vi_last_motion;
       rl_mark = rl_end;
@@ -1534,7 +1570,7 @@ rl_vi_rubout (count, key)
   if (rl_point == 0)
     {
       rl_ding ();
-      return -1;
+      return 1;
     }
 
   opoint = rl_point;
@@ -1565,7 +1601,7 @@ rl_vi_delete (count, key)
   if (rl_end == 0)
     {
       rl_ding ();
-      return -1;
+      return 1;
     }
 
   if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
@@ -1583,6 +1619,62 @@ rl_vi_delete (count, key)
 
   return (0);
 }
+
+/* This does what Posix specifies vi-mode C-w to do: using whitespace and
+   punctuation characters as the word boundaries. */
+
+#define vi_unix_word_boundary(c)	(whitespace(c) || ispunct(c))
+
+int
+rl_vi_unix_word_rubout (count, key)
+     int count, key;
+{
+  int orig_point;
+
+  if (rl_point == 0)
+    rl_ding ();
+  else
+    {
+      orig_point = rl_point;
+      if (count <= 0)
+	count = 1;
+
+      while (count--)
+	{
+	  /* This isn't quite what ksh93 does but it seems to match what the
+	     Posix description of sh specifies, with a few accommodations
+	     for sequences of whitespace characters between words and at
+	     the end of the line. */
+
+	  /* Skip over whitespace at the end of the line as a special case */
+	  if (rl_point > 0 && (rl_line_buffer[rl_point] == 0) &&
+		whitespace (rl_line_buffer[rl_point - 1]))
+	    while (--rl_point > 0 && whitespace (rl_line_buffer[rl_point]))
+	      ;
+
+	  /* If we're at the start of a word, move back to word boundary so we
+	     move back to the `preceding' word */
+	  if (rl_point > 0 && (vi_unix_word_boundary (rl_line_buffer[rl_point]) == 0) &&
+		vi_unix_word_boundary (rl_line_buffer[rl_point - 1]))
+	    rl_point--;
+
+	  /* If we are at a word boundary (whitespace/punct), move backward
+	     past a sequence of word boundary characters.  If we are at the
+	     end of a word (non-word boundary), move back to a word boundary */
+	  if (rl_point > 0 && vi_unix_word_boundary (rl_line_buffer[rl_point]))
+	    while (rl_point && vi_unix_word_boundary (rl_line_buffer[rl_point - 1]))
+	      rl_point--;
+	  else if (rl_point > 0 && vi_unix_word_boundary (rl_line_buffer[rl_point]) == 0)
+	    while (rl_point && (vi_unix_word_boundary (rl_line_buffer[rl_point - 1]) == 0))
+	      rl_point--;
+	}
+
+      rl_kill_text (orig_point, rl_point);
+    }
+
+  return 0;
+}
+
 
 int
 rl_vi_back_to_indent (count, key)
@@ -1618,7 +1710,10 @@ _rl_vi_callback_char_search (data)
 #endif
 
   if (c <= 0)
-    return -1;
+    {
+      RL_UNSETSTATE (RL_STATE_CHARSEARCH);
+      return -1;
+    }
 
 #if !defined (HANDLE_MULTIBYTE)
   _rl_vi_last_search_char = c;
@@ -1626,6 +1721,7 @@ _rl_vi_callback_char_search (data)
 
   _rl_callback_func = 0;
   _rl_want_redisplay = 1;
+  RL_UNSETSTATE (RL_STATE_CHARSEARCH);
 
 #if defined (HANDLE_MULTIBYTE)
   return (_rl_char_search_internal (data->count, _rl_cs_dir, _rl_vi_last_search_mbchar, _rl_vi_last_search_mblen));
@@ -1650,13 +1746,13 @@ rl_vi_char_search (count, key)
   if (key == ';' || key == ',')
     {
       if (_rl_cs_orig_dir == 0)
-	return -1;
+	return 1;
 #if defined (HANDLE_MULTIBYTE)
       if (_rl_vi_last_search_mblen == 0)
-	return -1;
+	return 1;
 #else
       if (_rl_vi_last_search_char == 0)
-	return -1;
+	return 1;
 #endif
       _rl_cs_dir = (key == ';') ? _rl_cs_orig_dir : -_rl_cs_orig_dir;
     }
@@ -1681,7 +1777,7 @@ rl_vi_char_search (count, key)
 	  break;
 	}
 
-      if (vi_redoing)
+      if (_rl_vi_redoing)
 	{
 	  /* set target and tlen below */
 	}
@@ -1690,7 +1786,9 @@ rl_vi_char_search (count, key)
 	{
 	  _rl_callback_data = _rl_callback_data_alloc (count);
 	  _rl_callback_data->i1 = _rl_cs_dir;
+	  _rl_callback_data->i2 = key;
 	  _rl_callback_func = _rl_vi_callback_char_search;
+	  RL_SETSTATE (RL_STATE_CHARSEARCH);
 	  return (0);
 	}
 #endif
@@ -1755,7 +1853,7 @@ rl_vi_match (ignore, key)
 	{
 	  rl_point = pos;
 	  rl_ding ();
-	  return -1;
+	  return 1;
 	}
     }
 
@@ -1785,7 +1883,7 @@ rl_vi_match (ignore, key)
 	  else
 	    {
 	      rl_ding ();
-	      return -1;
+	      return 1;
 	    }
 	}
     }
@@ -1809,7 +1907,7 @@ rl_vi_match (ignore, key)
 	  else
 	    {
 	      rl_ding ();
-	      return -1;
+	      return 1;
 	    }
 	}
     }
@@ -1915,7 +2013,7 @@ rl_vi_change_char (count, key)
   int c;
   char mb[MB_LEN_MAX];
 
-  if (vi_redoing)
+  if (_rl_vi_redoing)
     {
       c = _rl_vi_last_replacement;
       mb[0] = c;
@@ -1943,7 +2041,7 @@ rl_vi_subst (count, key)
      int count, key;
 {
   /* If we are redoing, rl_vi_change_to will stuff the last motion char */
-  if (vi_redoing == 0)
+  if (_rl_vi_redoing == 0)
     rl_stuff_char ((key == 'S') ? 'c' : 'l');	/* `S' == `cc', `s' == `cl' */
 
   return (rl_vi_change_to (count, 'c'));
@@ -2083,7 +2181,7 @@ _rl_vi_set_mark ()
   if (ch < 0 || ch < 'a' || ch > 'z')	/* make test against 0 explicit */
     {
       rl_ding ();
-      return -1;
+      return 1;
     }
   ch -= 'a';
   vi_mark_chars[ch] = rl_point;
@@ -2135,14 +2233,14 @@ _rl_vi_goto_mark ()
   else if (ch < 0 || ch < 'a' || ch > 'z')	/* make test against 0 explicit */
     {
       rl_ding ();
-      return -1;
+      return 1;
     }
 
   ch -= 'a';
   if (vi_mark_chars[ch] == -1)
     {
       rl_ding ();
-      return -1;
+      return 1;
     }
   rl_point = vi_mark_chars[ch];
   return 0;

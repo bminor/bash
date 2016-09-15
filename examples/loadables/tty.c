@@ -30,6 +30,7 @@
 
 extern char *ttyname ();
 
+int
 tty_builtin (list)
      WORD_LIST *list;
 {

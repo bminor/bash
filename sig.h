@@ -25,9 +25,7 @@
 
 #include "stdc.h"
 
-#if !defined (SIG_DFL)
-#  include <signal.h>		/* for sig_atomic_t */
-#endif
+#include <signal.h>		/* for sig_atomic_t */
 
 #if !defined (SIGABRT) && defined (SIGIOT)
 #  define SIGABRT SIGIOT

@@ -82,7 +82,8 @@ extern int EOF_Reached;
 
 #define MATCH_GLOBREP	0x010
 #define MATCH_QUOTED	0x020
-#define MATCH_STARSUB	0x040
+#define MATCH_ASSIGNRHS	0x040
+#define MATCH_STARSUB	0x080
 
 /* Some needed external declarations. */
 extern char **shell_environment;
@@ -129,6 +130,8 @@ extern struct user_info current_user;
 #  define USE_VAR(x)
 #endif
 
+#define HEREDOC_MAX 16
+
 /* Structure in which to save partial parsing state when doing things like
    PROMPT_COMMAND and bash_execute_unix_command execution. */
 
@@ -169,7 +172,10 @@ typedef struct _sh_parser_state_t {
   int expand_aliases;
   int echo_input_at_read;
   int need_here_doc;
+  int here_doc_first_line;
 
+  /* structures affecting the parser */
+  REDIRECT *redir_stack[HEREDOC_MAX];
 } sh_parser_state_t;
 
 typedef struct _sh_input_line_state_t {

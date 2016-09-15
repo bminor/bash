@@ -140,3 +140,21 @@ bix ()
 }
 foo
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+1
+./redir11.sub: line 8: $a: Bad file descriptor
+./redir11.sub: line 9: $(echo $a): Bad file descriptor
+7
+after: 42
+./redir11.sub: line 24: echo: write error: Bad file descriptor
+./redir11.sub: line 25: echo: write error: Bad file descriptor
+./redir11.sub: line 26: $(a=4 foo): Bad file descriptor
+./redir11.sub: line 27: $(a=4 foo): Bad file descriptor
+./redir11.sub: line 30: $a: Bad file descriptor
+./redir11.sub: line 31: $(echo $a): Bad file descriptor
+./redir11.sub: line 39: $(ss= declare -i ss): ambiguous redirect
+after: 42
+a+=3
+foo
+foo
+./redir11.sub: line 53: $(echo $a): Bad file descriptor
+123

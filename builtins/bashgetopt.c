@@ -31,6 +31,8 @@
 #include "../shell.h"
 #include "common.h"
 
+#include "bashgetopt.h"
+
 #define ISOPT(s)	(((*(s) == '-') || (plus && *(s) == '+')) && (s)[1])
 #define NOTOPT(s)	(((*(s) != '-') && (!plus || *(s) != '+')) || (s)[1] == '\0')
 			
@@ -76,6 +78,10 @@ char		*opts;
 		    	lhead = (WORD_LIST *)NULL;
 		    	loptend = lcurrent;
 			return(-1);
+		} else if (ISHELP (lcurrent->word->word)) {
+			lhead = (WORD_LIST *)NULL;
+			loptend = lcurrent;
+			return (GETOPT_HELP);
 		} else if (lcurrent->word->word[0] == '-' &&
 			   lcurrent->word->word[1] == '-' &&
 			   lcurrent->word->word[2] == 0) {

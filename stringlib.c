@@ -184,7 +184,7 @@ char *
 strcreplace (string, c, text, do_glob)
      char *string;
      int c;
-     char *text;
+     const char *text;
      int do_glob;
 {
   char *ret, *p, *r, *t;

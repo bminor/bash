@@ -1,6 +1,6 @@
 # This Makefile is for the Bash/documentation directory -*- text -*-.
 #
-# Copyright (C) 2003-2013 Free Software Foundation, Inc.
+# Copyright (C) 2003-2015 Free Software Foundation, Inc.
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ RM	    = rm -f
 
 topdir = @top_srcdir@
 srcdir = @srcdir@
-VPATH = .:@srcdir@
+VPATH = @srcdir@
 
 prefix = @prefix@
 exec_prefix = @exec_prefix@
@@ -79,6 +79,8 @@ QUIETPS	    = #set this to -q to shut up dvips
 PAPERSIZE   = letter	# change to a4 for A4-size paper
 PSDPI       = 600	# could be 300 if you like
 DVIPS	    = dvips -D ${PSDPI} $(QUIETPS) -t ${PAPERSIZE} -o $@	# tricky
+# experimental; uses external texi2dvi for now; this needs pdftex to be present
+TEXI2PDF    = texi2dvi --pdf
 
 TEXINPUTDIR = $(RL_LIBDIR)/doc
 SET_TEXINPUTS = TEXINPUTS=.:$(TEXINPUTDIR):$$TEXINPUTS
@@ -90,7 +92,9 @@ PSPDF       = gs -sPAPERSIZE=${PAPERSIZE} -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -s
 MKDIRS      = ${SUPPORT_SRCDIR}/mkdirs
 
 # This should be a program that converts troff to an ascii-readable format
-NROFF	    = groff -Tascii
+# added the -P -c for benefit of Mac OS X, which insists on adding colors if
+# it's not present
+NROFF	    = groff -Tascii -P -c
 
 # This should be a program that converts troff to postscript
 GROFF	    = groff
@@ -146,13 +150,17 @@ BASHREF_FILES = $(srcdir)/bashref.texi $(srcdir)/fdl.texi $(srcdir)/version.texi
 	${RM} $@
 	-${DVIPS} $<
 
-all: ps info dvi text html
+#.texi.pdf:
+#	$(RM) $@
+#	-${TEXI2PDF} $<
+
+all: ps info dvi text html $(MAN2HTML)
 nodvi: ps info text html
 everything: all pdf
 
 PSFILES = bash.ps bashbug.ps article.ps builtins.ps rbash.ps 
 DVIFILES = bashref.dvi bashref.ps
-INFOFILES = bashref.info
+INFOFILES = bashref.info bash.info
 MAN0FILES = bash.0 bashbug.0 builtins.0 rbash.0
 HTMLFILES = bashref.html bash.html
 PDFFILES = bash.pdf bashref.pdf article.pdf rose94.pdf
@@ -170,17 +178,22 @@ bashref.dvi: $(BASHREF_FILES) $(HSUSER) $(RLUSER)
 bashref.info: $(BASHREF_FILES) $(HSUSER) $(RLUSER)
 	$(MAKEINFO) --no-split -I$(TEXINPUTDIR) $(srcdir)/bashref.texi
 
+# experimental
+bashref.pdf: $(BASHREF_FILES) $(HSUSER) $(RLUSER)
+	${SET_TEXINPUTS} $(TEXI2PDF) $(srcdir)/bashref.texi || { ${RM} $@ ; exit 1; }
+
+
 # can also use:
-#	$(MAKEINFO) --html --no-split -I$(TEXINPUTDIR) $(srcdir)/bashref.texi
+#	$(TEXI2HTML) -menu -monolithic -I $(TEXINPUTDIR) $(srcdir)/bashref.texi
 bashref.html: $(BASHREF_FILES) $(HSUSER) $(RLUSER)
-	$(TEXI2HTML) -menu -monolithic -I $(TEXINPUTDIR) $(srcdir)/bashref.texi
+	$(MAKEINFO) --html --no-split -I$(TEXINPUTDIR) $(srcdir)/bashref.texi
 
 bash.info: bashref.info
 	${SHELL} ${INFOPOST} < $(srcdir)/bashref.info > $@ ; \
 
 bash.txt: bash.1
 bash.ps: bash.1
-bash.html: bash.1 $(MAN2HTML)
+bash.html: bash.1
 bashbug.ps: bashbug.1
 builtins.ps: builtins.1 bash.1
 rbash.ps: rbash.1 bash.1
@@ -193,7 +206,9 @@ article.ps: article.ms
 bashref.ps: bashref.dvi
 
 article.pdf: article.ps
-bashref.pdf: bashref.dvi
+#bashref.pdf: bashref.dvi
+# experimental
+bashref.pdf: bashref.texi
 bash.pdf: bash.ps
 rose94.pdf: rose94.ps
 
@@ -232,7 +247,7 @@ installdirs:
 		$(SHELL) $(SUPPORT_SRCDIR)/mkinstalldirs $(DESTDIR)$(htmldir) ; \
 	fi
 	
-install: info installdirs bash.info
+install: info installdirs
 	-$(INSTALL_DATA) $(srcdir)/bash.1 $(DESTDIR)$(man1dir)/bash${man1ext}
 	-$(INSTALL_DATA) $(srcdir)/bashbug.1 $(DESTDIR)$(man1dir)/bashbug${man1ext}
 	-$(INSTALL_DATA) $(OTHER_DOCS) $(DESTDIR)$(docdir)
@@ -259,10 +274,20 @@ install_builtins:	installdirs
 
 install_everything:	install install_builtins
 
+install-html:	html
+	-if test -n "${htmldir}" ; then \
+		$(INSTALL_DATA) $(srcdir)/bash.html $(DESTDIR)$(htmldir) ; \
+		$(INSTALL_DATA) $(srcdir)/bashref.html $(DESTDIR)$(htmldir) ; \
+	fi
+
 uninstall:
 	-$(RM) $(DESTDIR)$(man1dir)/bash${man1ext} $(DESTDIR)$(man1dir)/bashbug${man1ext}
 	-$(RM) $(DESTDIR)$(man1dir)/bash_builtins${man1ext}
 	$(RM) $(DESTDIR)$(infodir)/bash.info
+# run install-info if it is present to update the info directory
+	if $(SHELL) -c 'install-info --version' >/dev/null 2>&1; then \
+		install-info --delete --dir-file=$(DESTDIR)$(infodir)/dir $(DESTDIR)$(infodir)/bash.info; \
+	else true; fi
 	-( cd $(DESTDIR)$(docdir) && $(RM) $(OTHER_INSTALLED_DOCS) )
 	-if test -n "$(htmldir)" ; then \
 		$(RM) $(DESTDIR)$(htmldir)/bash.html ; \
@@ -313,4 +338,4 @@ rbash:	bashref.texi
 	cmp -s RBASH ../RBASH || mv RBASH ../RBASH
 	$(RM) RBASH
 
-xdist: pdf inst posix rbash
+xdist: everything inst posix rbash

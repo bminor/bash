@@ -1,6 +1,6 @@
 /* strtrans.c - Translate and untranslate strings with ANSI-C escape sequences. */
 
-/* Copyright (C) 2000-2011 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -60,7 +60,10 @@ ansicstr (string, len, flags, sawc, rlen)
     return ((char *)NULL);
 
 #if defined (HANDLE_MULTIBYTE)
-  ret = (char *)xmalloc (4*len + 1);
+  temp = 4*len + 1;
+  if (temp < 12)
+    temp = 12;				/* ensure enough for eventual u32cesc */
+  ret = (char *)xmalloc (temp);
 #else
   ret = (char *)xmalloc (2*len + 1);	/* 2*len for possible CTLESC */
 #endif
@@ -309,8 +312,9 @@ ansic_wshouldquote (string)
 
   slen = mbstowcs (wcstr, string, 0);
 
-  if (slen == -1)
-    slen = 0;
+  if (slen == (size_t)-1)
+    return 1;
+
   wcstr = (wchar_t *)xmalloc (sizeof (wchar_t) * (slen + 1));
   mbstowcs (wcstr, string, slen + 1);
 

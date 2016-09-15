@@ -48,9 +48,12 @@ typedef ssize_t creadfunc_t __P((int, char *));
 /* Derived from GNU libc's getline.
    The behavior is almost the same as getline. See man getline.
    The differences are
-   	(1) using file descriptor instead of FILE *,
-	(2) the order of arguments; the file descriptor comes the first, and
-	(3) the addition of third argument, UNBUFFERED_READ; this argument
+   	(1) using file descriptor instead of FILE *;
+	(2) the order of arguments: the file descriptor comes first;
+	(3) the addition of a fourth argument, DELIM; sets the delimiter to
+	    be something other than newline if desired.  If setting DELIM,
+	    the next argument should be 1; and
+	(4) the addition of a fifth argument, UNBUFFERED_READ; this argument
 	    controls whether get_line uses buffering or not to get a byte data
 	    from FD. get_line uses zreadc if UNBUFFERED_READ is zero; and
 	    uses zread if UNBUFFERED_READ is non-zero.
@@ -58,10 +61,11 @@ typedef ssize_t creadfunc_t __P((int, char *));
    Returns number of bytes read or -1 on error. */
 
 ssize_t
-zgetline (fd, lineptr, n, unbuffered_read)
+zgetline (fd, lineptr, n, delim, unbuffered_read)
      int fd;
      char **lineptr;
      size_t *n;
+     int delim;
      int unbuffered_read;
 {
   int nr, retval;
@@ -110,7 +114,7 @@ zgetline (fd, lineptr, n, unbuffered_read)
       line[nr] = c;
       nr++;
 
-      if (c == '\n')
+      if (c == delim)
 	{
 	  line[nr] = '\0';
 	  break;

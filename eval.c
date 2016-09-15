@@ -30,6 +30,8 @@
 #include "bashansi.h"
 #include <stdio.h>
 
+#include <signal.h>
+
 #include "bashintl.h"
 
 #include "shell.h"
@@ -53,6 +55,7 @@ extern int last_command_exit_value, stdin_redir;
 extern int need_here_doc;
 extern int current_command_number, current_command_line_count, line_number;
 extern int expand_aliases;
+extern char *ps0_prompt;
 
 #if defined (HAVE_POSIX_SIGNALS)
 extern sigset_t top_level_mask;
@@ -85,7 +88,8 @@ reader_loop ()
       unlink_fifo_list ();
 #endif /* PROCESS_SUBSTITUTION */
 
-      /* XXX - why do we set this every time through the loop? */
+      /* XXX - why do we set this every time through the loop?  And why do
+	 it if SIGINT is trapped in an interactive shell? */
       if (interactive_shell && signal_is_ignored (SIGINT) == 0)
 	set_signal_handler (SIGINT, sigint_sighandler);
 
@@ -157,6 +161,22 @@ reader_loop ()
 
 	      executing = 1;
 	      stdin_redir = 0;
+
+	      /* If the shell is interactive, expand and display $PS0 after reading a
+		 command (possibly a list or pipeline) and before executing it. */
+	      if (interactive && ps0_prompt)
+		{
+		  char *ps0_string;
+
+		  ps0_string = decode_prompt_string (ps0_prompt);
+		  if (ps0_string && *ps0_string)
+		    {
+		      fprintf (stderr, "%s", ps0_string);
+		      fflush (stderr);
+		    }
+		  free (ps0_string);
+		}
+
 	      execute_command (current_command);
 
 	    exec_done:
@@ -224,7 +244,10 @@ parse_command ()
   /* Allow the execution of a random command just before the printing
      of each primary prompt.  If the shell variable PROMPT_COMMAND
      is set then the value of it is the command to execute. */
-  if (interactive && bash_input.type != st_string)
+  /* The tests are a combination of SHOULD_PROMPT() and prompt_again() 
+     from parse.y, which are the conditions under which the prompt is
+     actually printed. */
+  if (interactive && bash_input.type != st_string && parser_expanding_alias() == 0)
     {
       command_to_execute = get_string_value ("PROMPT_COMMAND");
       if (command_to_execute)

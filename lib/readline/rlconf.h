@@ -1,6 +1,6 @@
 /* rlconf.h -- readline configuration definitions */
 
-/* Copyright (C) 1992-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2015 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -64,6 +64,16 @@
 
 /* Define this if you want to enable code that talks to the Linux kernel
    tty auditing system. */
-#define ENABLE_TTY_AUDIT_SUPPORT
+/* #define ENABLE_TTY_AUDIT_SUPPORT */
+
+/* Defaults for the various editing mode indicators, inserted at the beginning
+   of the last (maybe only) line of the prompt if show-mode-in-prompt is on */
+#define RL_EMACS_MODESTR_DEFAULT	"@"
+#define RL_EMACS_MODESTR_DEFLEN		1
+
+#define RL_VI_INS_MODESTR_DEFAULT	"(ins)"
+#define RL_VI_INS_MODESTR_DEFLEN	5
+#define RL_VI_CMD_MODESTR_DEFAULT	"(cmd)"
+#define RL_VI_CMD_MODESTR_DEFLEN	5
 
 #endif /* _RLCONF_H_ */

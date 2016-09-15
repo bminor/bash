@@ -167,6 +167,14 @@ recho ${a-$z}
 expect nothing
 recho ${!1-$z}
 
+set -- a 'b c' d
+unset foo
+foo=@
+expect '<a> <b> <c> <d>'
+recho ${!foo}
+expect '<a> <b c> <d>'
+recho "${!foo}"
+
 set -u
 expect $0: ABX: unbound variable
 ( recho ${ABX} )
@@ -444,6 +452,19 @@ recho ${xxx//%${zzz}}
 recho ${xxx//#${zzz}/}
 recho ${xxx//#${zzz}}
 
+# make sure null strings are replaced appropriately
+unset var
+var=
+echo "${var/#/x}"
+echo "${var/*/x}"
+echo "${var//*/x}"
+
+var=abc
+echo "${var/#/x}"
+echo "${var/*/x}"
+echo "${var//*/x}"
+unset var
+
 # another case that caused a core dump in bash-2.0
 XPATH=/usr/bin:/bin:/usr/local/bin:/usr/gnu/bin::/usr/bin/X11:/sbin:/usr/sbin
 
@@ -572,6 +593,9 @@ ${THIS_SH} ./new-exp8.sub
 # tests to check whether things like indirect expansion of a variable whose
 # value is 'anothervar[@]' stop working
 ${THIS_SH} ./new-exp9.sub
+
+# new parameter transformation `@' expansion operator
+${THIS_SH} ./new-exp10.sub
 
 # problems with stray CTLNUL in bash-4.0-alpha
 unset a

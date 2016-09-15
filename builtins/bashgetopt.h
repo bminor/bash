@@ -25,6 +25,9 @@
 
 #include <stdc.h>
 
+#define GETOPT_EOF	-1
+#define GETOPT_HELP	-99
+
 extern char *list_optarg;
 
 extern int list_optopt;

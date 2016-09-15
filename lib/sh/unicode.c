@@ -1,6 +1,6 @@
 /* unicode.c - functions to convert unicode characters */
 
-/* Copyright (C) 2010-2012 Free Software Foundation, Inc.
+/* Copyright (C) 2010-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -236,7 +236,7 @@ u32toutf16 (c, s)
 }
 
 /* convert a single unicode-32 character into a multibyte string and put the
-   result in S, which must be large enough (at least MB_LEN_MAX bytes) */
+   result in S, which must be large enough (at least max(10,MB_LEN_MAX) bytes) */
 int
 u32cconv (c, s)
      unsigned long c;

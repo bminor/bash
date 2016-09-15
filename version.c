@@ -1,6 +1,6 @@
 /* version.c -- distribution and version numbers. */
 
-/* Copyright (C) 1989-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -43,7 +43,7 @@ const char * const release_status = (char *)0;
 #endif
 const char * const sccs_version = SCCSVERSION;
 
-const char * const bash_copyright = N_("Copyright (C) 2013 Free Software Foundation, Inc.");
+const char * const bash_copyright = N_("Copyright (C) 2016 Free Software Foundation, Inc.");
 const char * const bash_license = N_("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n");
 
 /* If == 31, shell compatible with bash-3.1, == 32 with bash-3.2, and so on */
@@ -64,13 +64,13 @@ shell_version_string ()
   if (tt[0] == '\0')
     {
       if (release_status)
-#if defined (HAVE_SNPRINTF)
+#if HAVE_SNPRINTF
 	snprintf (tt, sizeof (tt), "%s.%d(%d)-%s", dist_version, patch_level, build_version, release_status);
 #else
 	sprintf (tt, "%s.%d(%d)-%s", dist_version, patch_level, build_version, release_status);
 #endif
       else
-#if defined (HAVE_SNPRINTF)
+#if HAVE_SNPRINTF
 	snprintf (tt, sizeof (tt), "%s.%d(%d)", dist_version, patch_level, build_version);
 #else
 	sprintf (tt, "%s.%d(%d)", dist_version, patch_level, build_version);

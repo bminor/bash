@@ -55,6 +55,9 @@
 
 static char *array_to_string_internal __P((ARRAY_ELEMENT *, ARRAY_ELEMENT *, char *, int));
 
+/* lastref should be moved into the array structure so each array can be
+   optimized separately */
+
 static ARRAY *lastarray = 0;
 static ARRAY_ELEMENT *lastref = 0;
 
@@ -719,7 +722,7 @@ arrayind_t	i;
 			SET_LASTREF(a, ae);
 			return(element_value(ae));
 		}
-	UNSET_LASTREF();
+	UNSET_LASTREF();		/* XXX SET_LASTREF(a, start) ? */
 	return((char *) NULL);
 }
 
@@ -834,7 +837,7 @@ int	quoted;
 						rsize, rsize);
 			strcpy(result + rlen, t);
 			rlen += reg;
-			if (quoted && t)
+			if (quoted)
 				free(t);
 			/*
 			 * Add a separator only after non-null elements.
@@ -869,7 +872,10 @@ int	quoted;
 
 	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae)) {
 		is = inttostr (element_index(ae), indstr, sizeof(indstr));
-		valstr = element_value (ae) ? sh_double_quote (element_value(ae))
+		valstr = element_value (ae) ?
+				(ansic_shouldquote (element_value (ae)) ?
+				   ansic_quote (element_value(ae), 0, (int *)0) :
+				   sh_double_quote (element_value (ae)))
 					    : (char *)NULL;
 		elen = STRLEN (is) + 8 + STRLEN (valstr);
 		RESIZE_MALLOCED_BUFFER (result, rlen, (elen + 1), rsize, rsize);

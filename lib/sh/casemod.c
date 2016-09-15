@@ -1,6 +1,6 @@
 /* casemod.c -- functions to change case of strings */
 
-/* Copyright (C) 2008,2009 Free Software Foundation, Inc.
+/* Copyright (C) 2008,2009,2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -49,7 +49,7 @@
 #if !defined (HANDLE_MULTIBYTE)
 #  define cval(s, i)	((s)[(i)])
 #  define iswalnum(c)	(isalnum(c))
-#  define TOGGLE(x)	(ISUPPER (x) ? tolower (x) : (TOUPPER (x)))
+#  define TOGGLE(x)	(ISUPPER (x) ? tolower ((unsigned char)x) : (TOUPPER (x)))
 #else
 #  define TOGGLE(x)	(iswupper (x) ? towlower (x) : (_to_wupper(x)))
 #endif
@@ -105,10 +105,11 @@ sh_modcase (string, pat, flags)
      char *pat;
      int flags;
 {
-  int start, next, end;
+  int start, next, end, retind;
   int inword, c, nc, nop, match, usewords;
   char *ret, *s;
   wchar_t wc;
+  int mb_cur_max;
 #if defined (HANDLE_MULTIBYTE)
   wchar_t nwc;
   char mb[MB_LEN_MAX+1];
@@ -130,9 +131,10 @@ sh_modcase (string, pat, flags)
 
   start = 0;
   end = strlen (string);
+  mb_cur_max = MB_CUR_MAX;
 
-  ret = (char *)xmalloc (end + 1);
-  strcpy (ret, string);
+  ret = (char *)xmalloc (2*end + 1);
+  retind = 0;
 
   /* See if we are supposed to split on alphanumerics and operate on each word */
   usewords = (flags & CASE_USEWORDS);
@@ -141,26 +143,23 @@ sh_modcase (string, pat, flags)
   inword = 0;
   while (start < end)
     {
-      wc = cval (ret, start);
+      wc = cval ((char *)string, start);
 
       if (iswalnum (wc) == 0)
-	{
-	  inword = 0;
-#if 0
-	  ADVANCE_CHAR (ret, end, start);
-	  continue;
-#endif
-	}
+	inword = 0;
 
       if (pat)
 	{
 	  next = start;
-	  ADVANCE_CHAR (ret, end, next);
-	  s = substring (ret, start, next);
+	  ADVANCE_CHAR (string, end, next);
+	  s = substring ((char *)string, start, next);
 	  match = strmatch (pat, s, FNM_EXTMATCH) != FNM_NOMATCH;
 	  free (s);
 	  if (match == 0)
             {
+              /* copy unmatched portion */
+              memcpy (ret + retind, string + start, next - start);
+              retind += next - start;
               start = next;
               inword = 1;
               continue;
@@ -210,27 +209,27 @@ sh_modcase (string, pat, flags)
       else
 	nop = flags;
 
-      /* Need to check UCHAR_MAX since wc may have already been converted to a
-	 wide character by cval() */
-      if (MB_CUR_MAX == 1 || (wc <= UCHAR_MAX && is_basic ((int)wc)))
+      /* Can't short-circuit, some locales have multibyte upper and lower
+	 case equivalents of single-byte ascii characters (e.g., Turkish) */
+      if (mb_cur_max == 1)
 	{
 singlebyte:
 	  switch (nop)
-	  {
-	  default:
-	  case CASE_NOOP:  nc = wc; break;
-	  case CASE_UPPER:  nc = TOUPPER (wc); break;
-	  case CASE_LOWER:  nc = TOLOWER (wc); break;
-	  case CASE_TOGGLEALL:
-	  case CASE_TOGGLE: nc = TOGGLE (wc); break;
-	  }
-	  ret[start] = nc;
+	    {
+	    default:
+	    case CASE_NOOP:  nc = wc; break;
+	    case CASE_UPPER:  nc = TOUPPER (wc); break;
+	    case CASE_LOWER:  nc = TOLOWER (wc); break;
+	    case CASE_TOGGLEALL:
+	    case CASE_TOGGLE: nc = TOGGLE (wc); break;
+	    }
+	  ret[retind++] = nc;
 	}
 #if defined (HANDLE_MULTIBYTE)
       else
 	{
 	  m = mbrtowc (&wc, string + start, end - start, &state);
-	  if (MB_INVALIDCH (m))
+	  if (MB_INVALIDCH (m) || m == 1)
 	    {
 	      wc = (unsigned char)string[start];
 	      goto singlebyte;
@@ -238,28 +237,34 @@ singlebyte:
 	  else if (MB_NULLWCH (m))
 	    wc = L'\0';
 	  switch (nop)
-	  {
-	  default:
-	  case CASE_NOOP:  nwc = wc; break;
-	  case CASE_UPPER:  nwc = _to_wupper (wc); break;
-	  case CASE_LOWER:  nwc = _to_wlower (wc); break;
-	  case CASE_TOGGLEALL:
-	  case CASE_TOGGLE: nwc = TOGGLE (wc); break;
-	  }
-	  if  (nwc != wc)	/*  just skip unchanged characters */
+	    {
+	    default:
+	    case CASE_NOOP:  nwc = wc; break;
+	    case CASE_UPPER:  nwc = _to_wupper (wc); break;
+	    case CASE_LOWER:  nwc = _to_wlower (wc); break;
+	    case CASE_TOGGLEALL:
+	    case CASE_TOGGLE: nwc = TOGGLE (wc); break;
+	    }
+
+	  /* We don't have to convert `wide' characters that are in the
+	     unsigned char range back to single-byte `multibyte' characters. */
+	  if ((int)nwc <= UCHAR_MAX && is_basic ((int)nwc))
+	    ret[retind++] = nwc;
+	  else
 	    {
 	      mlen = wcrtomb (mb, nwc, &state);
 	      if (mlen > 0)
 		mb[mlen] = '\0';
-	      /* Assume the same width */
-	      strncpy (ret + start, mb, mlen);
+	      /* Don't assume the same width */
+	      strncpy (ret + retind, mb, mlen);
+	      retind += mlen;
 	    }
 	}
 #endif
 
-      /*  This assumes that the upper and lower case versions are the same width. */
-      ADVANCE_CHAR (ret, end, start);
+      ADVANCE_CHAR (string, end, start);
     }
 
+  ret[retind] = '\0';
   return ret;
 }

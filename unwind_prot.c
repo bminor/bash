@@ -49,6 +49,7 @@
 #include "sig.h"
 #include "quit.h"
 #include "error.h"	/* for internal_warning */
+#include "ocache.h"
 
 /* Structure describing a saved variable and the value to restore it to.  */
 typedef struct {
@@ -75,7 +76,6 @@ typedef union uwp {
   } sv;
 } UNWIND_ELT;
 
-
 static void without_interrupts __P((VFunction *, char *, char *));
 static void unwind_frame_discard_internal __P((char *, char *));
 static void unwind_frame_run_internal __P((char *, char *));
@@ -88,8 +88,24 @@ static void unwind_protect_mem_internal __P((char *, char *));
 
 static UNWIND_ELT *unwind_protect_list = (UNWIND_ELT *)NULL;
 
+/* Allocating from a cache of unwind-protect elements */
+#define UWCACHESIZE	128
+
+sh_obj_cache_t uwcache = {0, 0, 0};
+
+#if 0
 #define uwpalloc(elt)	(elt) = (UNWIND_ELT *)xmalloc (sizeof (UNWIND_ELT))
 #define uwpfree(elt)	free(elt)
+#else
+#define uwpalloc(elt)	ocache_alloc (uwcache, UNWIND_ELT, elt)
+#define uwpfree(elt)	ocache_free (uwcache, UNWIND_ELT, elt)
+#endif
+
+void
+uwp_init ()
+{
+  ocache_create (uwcache, UNWIND_ELT, UWCACHESIZE);
+}
 
 /* Run a function without interrupts.  This relies on the fact that the
    FUNCTION cannot change the value of interrupt_immediately.  (I.e., does
@@ -181,6 +197,22 @@ int
 have_unwind_protects ()
 {
   return (unwind_protect_list != 0);
+}
+
+int
+unwind_protect_tag_on_stack (tag)
+     const char *tag;
+{
+  UNWIND_ELT *elt;
+
+  elt = unwind_protect_list;
+  while (elt)
+    {
+      if (elt->head.cleanup == 0 && STREQ (elt->arg.v, tag))
+	return 1;
+      elt = elt->head.next;
+    }
+  return 0;
 }
 
 /* **************************************************************** */
@@ -348,10 +380,9 @@ print_unwind_protect_tags ()
   elt = unwind_protect_list;
   while (elt)
     {
-      unwind_protect_list = unwind_protect_list->head.next;
       if (elt->head.cleanup == 0)
         fprintf(stderr, "tag: %s\n", elt->arg.v);
-      elt = unwind_protect_list;
+      elt = elt->head.next;
     }
 }
 #endif

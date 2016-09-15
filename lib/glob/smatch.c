@@ -231,6 +231,7 @@ is_cclass (c, name)
 #define STRCOMPARE		strcompare
 #define EXTMATCH		extmatch
 #define STRCHR(S, C)		strchr((S), (C))
+#define MEMCHR(S, C, N)		memchr((S), (C), (N))
 #define STRCOLL(S1, S2)		strcoll((S1), (S2))
 #define STRLEN(S)		strlen(S)
 #define STRCMP(S1, S2)		strcmp((S1), (S2))
@@ -333,6 +334,8 @@ is_wcclass (wc, name)
 
   memset (&state, '\0', sizeof (mbstate_t));
   mbs = (char *) malloc (wcslen(name) * MB_CUR_MAX + 1);
+  if (mbs == 0)
+    return -1;
   mbslength = wcsrtombs (mbs, (const wchar_t **)&name, (wcslen(name) * MB_CUR_MAX + 1), &state);
 
   if (mbslength == (size_t)-1 || mbslength == (size_t)-2)
@@ -363,6 +366,7 @@ is_wcclass (wc, name)
 #define STRCOMPARE		wscompare
 #define EXTMATCH		extmatch_wc
 #define STRCHR(S, C)		wcschr((S), (C))
+#define MEMCHR(S, C, N)		wmemchr((S), (C), (N))
 #define STRCOLL(S1, S2)		wcscoll((S1), (S2))
 #define STRLEN(S)		wcslen(S)
 #define STRCMP(S1, S2)		wcscmp((S1), (S2))

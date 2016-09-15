@@ -1,6 +1,6 @@
 /* shell.c -- GNU's idea of the POSIX shell specification. */
 
-/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -38,7 +38,9 @@
 #include <signal.h>
 #include <errno.h>
 #include "filecntl.h"
-#include <pwd.h>
+#if defined (HAVE_PWD_H)
+#  include <pwd.h>
+#endif
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
@@ -57,6 +59,9 @@
 
 #if defined (JOB_CONTROL)
 #include "jobs.h"
+#else
+extern int initialize_job_control __P((int));
+extern int get_tty_state __P((void));
 #endif /* JOB_CONTROL */
 
 #include "input.h"
@@ -100,6 +105,7 @@ extern char *dist_version, *release_status;
 extern int patch_level, build_version;
 extern int shell_level;
 extern int subshell_environment;
+extern int running_in_background;
 extern int last_command_exit_value;
 extern int line_number;
 extern int expand_aliases;
@@ -159,6 +165,7 @@ int autocd = 0;
    This is a superset of the information provided by interactive_shell.
 */
 int startup_state = 0;
+int reading_shell_script = 0;
 
 /* Special debugging helper. */
 int debugging_login_shell = 0;
@@ -192,7 +199,7 @@ int have_devfd = 0;
 #endif
 
 /* The name of the .(shell)rc file. */
-static char *bashrc_file = "~/.bashrc";
+static char *bashrc_file = DEFAULT_BASHRC;
 
 /* Non-zero means to act more like the Bourne shell on startup. */
 static int act_like_sh;
@@ -260,7 +267,7 @@ static const struct {
 #if defined (RESTRICTED_SHELL)
   { "restricted", Int, &restricted, (char **)0x0 },
 #endif
-  { "verbose", Int, &echo_input_at_read, (char **)0x0 },
+  { "verbose", Int, &verbose_flag, (char **)0x0 },
   { "version", Int, &do_version, (char **)0x0 },
 #if defined (WORDEXP_OPTION)
   { "wordexp", Int, &wordexp_only, (char **)0x0 },
@@ -389,9 +396,7 @@ main (argc, argv, env)
   xtrace_init ();
 
 #if defined (USING_BASH_MALLOC) && defined (DEBUG) && !defined (DISABLE_MALLOC_WRAPPERS)
-#  if 1
-  malloc_set_register (1);
-#  endif
+  malloc_set_register (1);	/* XXX - change to 1 for malloc debugging */
 #endif
 
   check_dev_tty ();
@@ -414,7 +419,7 @@ main (argc, argv, env)
   mcheck (programming_error, (void (*) ())0);
 #endif /* USE_GNU_MALLOC_LIBRARY */
 
-  if (setjmp (subshell_top_level))
+  if (setjmp_sigs (subshell_top_level))
     {
       argc = subshell_argc;
       argv = subshell_argv;
@@ -460,7 +465,7 @@ main (argc, argv, env)
 
   /* Find full word arguments first. */
   arg_index = parse_long_options (argv, arg_index, argc);
-
+  
   if (want_initial_help)
     {
       show_shell_usage (stdout, 1);
@@ -472,6 +477,8 @@ main (argc, argv, env)
       show_shell_version (1);
       exit (EXECUTION_SUCCESS);
     }
+
+  echo_input_at_read = verbose_flag;	/* --verbose given */
 
   /* All done with full word options; do standard shell option parsing.*/
   this_command_name = shell_name;	/* for error reporting */
@@ -510,8 +517,6 @@ main (argc, argv, env)
       arg_index++;
     }
   this_command_name = (char *)NULL;
-
-  cmd_init();		/* initialize the command object caches */
 
   /* First, let the outside world know about our interactive status.
      A shell is interactive if the `-i' flag was given, or if all of
@@ -568,24 +573,45 @@ main (argc, argv, env)
   set_default_locale_vars ();
 
   /*
-   * M-x term -> TERM=eterm EMACS=22.1 (term:0.96)	(eterm)
-   * M-x shell -> TERM=dumb EMACS=t			(no line editing)
-   * M-x terminal -> TERM=emacs-em7955 EMACS=		(line editing)
+   * M-x term -> TERM=eterm-color INSIDE_EMACS='251,term:0.96' (eterm)
+   * M-x shell -> TERM='dumb' INSIDE_EMACS='25.1,comint' (no line editing)
+   *
+   * Older versions of Emacs may set EMACS to 't' or to something like
+   * '22.1 (term:0.96)' instead of (or in addition to) setting INSIDE_EMACS.
+   * They may set TERM to 'eterm' instead of 'eterm-color'.  They may have
+   * a now-obsolete command that sets neither EMACS nor INSIDE_EMACS:
+   * M-x terminal -> TERM='emacs-em7955' (line editing)
    */
   if (interactive_shell)
     {
-      char *term, *emacs;
+      char *term, *emacs, *inside_emacs;;
+      int emacs_term, in_emacs;
 
       term = get_string_value ("TERM");
       emacs = get_string_value ("EMACS");
+      inside_emacs = get_string_value ("INSIDE_EMACS");
+
+      if (inside_emacs)
+	{
+	  emacs_term = strstr (inside_emacs, ",term:") != 0;
+	  in_emacs = 1;
+	}
+      else if (emacs)
+	{
+	  /* Infer whether we are in an older Emacs. */
+	  emacs_term = strstr (emacs, " (term:") != 0;
+	  in_emacs = emacs_term || STREQ (emacs, "t");
+	}
+      else
+	in_emacs = emacs_term = 0;
 
       /* Not sure any emacs terminal emulator sets TERM=emacs any more */
-      no_line_editing |= term && (STREQ (term, "emacs"));
-      no_line_editing |= emacs && emacs[0] == 't' && emacs[1] == '\0' && STREQ (term, "dumb");
+      no_line_editing |= STREQ (term, "emacs");
+      no_line_editing |= in_emacs && STREQ (term, "dumb");
 
       /* running_under_emacs == 2 for `eterm' */
-      running_under_emacs = (emacs != 0) || (term && STREQN (term, "emacs", 5));
-      running_under_emacs += term && STREQN (term, "eterm", 5) && emacs && strstr (emacs, "term");
+      running_under_emacs = in_emacs || STREQN (term, "emacs", 5);
+      running_under_emacs += emacs_term && STREQN (term, "eterm", 5);
 
       if (running_under_emacs)
 	gnu_error_format = 1;
@@ -597,7 +623,7 @@ main (argc, argv, env)
   /* Give this shell a place to longjmp to before executing the
      startup files.  This allows users to press C-c to abort the
      lengthy startup. */
-  code = setjmp (top_level);
+  code = setjmp_sigs (top_level);
   if (code)
     {
       if (code == EXITPROG || code == ERREXIT)
@@ -682,6 +708,9 @@ main (argc, argv, env)
     }
 #endif
 
+  cmd_init ();		/* initialize the command object caches */
+  uwp_init ();
+
   if (command_execution_string)
     {
       arg_index = bind_args (argv, arg_index, argc, 0);
@@ -708,20 +737,27 @@ main (argc, argv, env)
       arg_index++;
     }
   else if (interactive == 0)
-    /* In this mode, bash is reading a script from stdin, which is a
-       pipe or redirected file. */
+    {
+      /* In this mode, bash is reading a script from stdin, which is a
+	 pipe or redirected file. */
 #if defined (BUFFERED_INPUT)
-    default_buffered_input = fileno (stdin);	/* == 0 */
+      default_buffered_input = fileno (stdin);	/* == 0 */
 #else
-    setbuf (default_input, (char *)NULL);
+      setbuf (default_input, (char *)NULL);
 #endif /* !BUFFERED_INPUT */
+      read_from_stdin = 1;
+    }
+  else if (arg_index == argc)
+    /* "If there are no operands and the -c option is not specified, the -s
+       option shall be assumed." */
+    read_from_stdin = 1;
 
   set_bash_input ();
 
   /* Bind remaining args to $1 ... $n */
   arg_index = bind_args (argv, arg_index, argc, 1);
 
-  if (debugging_mode && locally_skip_execution == 0 && running_setuid == 0 && dollar_vars[1])
+  if (debugging_mode && locally_skip_execution == 0 && running_setuid == 0 && (reading_shell_script || interactive_shell == 0))
     start_debugger ();
 
   /* Do the things that should be done only for interactive shells. */
@@ -942,10 +978,12 @@ exit_shell (s)
   if (interactive_shell && login_shell && hup_on_exit)
     hangup_all_jobs ();
 
-  /* If this shell is interactive, terminate all stopped jobs and
-     restore the original terminal process group.  Don't do this if we're
-     in a subshell and calling exit_shell after, for example, a failed
-     word expansion. */
+  /* If this shell is interactive, or job control is active, terminate all
+     stopped jobs and restore the original terminal process group.  Don't do
+     this if we're in a subshell and calling exit_shell after, for example,
+     a failed word expansion.  We want to do this even if the shell is not
+     interactive because we set the terminal's process group when job control
+     is enabled regardless of the interactive status. */
   if (subshell_environment == 0)
     end_job_control ();
 #endif /* JOB_CONTROL */
@@ -963,6 +1001,7 @@ sh_exit (s)
 #if defined (MALLOC_DEBUG) && defined (USING_BASH_MALLOC)
   if (malloc_trace_at_exit)
     trace_malloc_stats (get_name_for_error (), (char *)NULL);
+  /* mlocation_write_table (); */
 #endif
 
   exit (s);
@@ -1235,8 +1274,20 @@ uidget ()
 void
 disable_priv_mode ()
 {
-  setuid (current_user.uid);
-  setgid (current_user.gid);
+  int e;
+
+  if (setuid (current_user.uid) < 0)
+    {
+      e = errno;
+      sys_error (_("cannot set uid to %d: effective uid %d"), current_user.uid, current_user.euid);
+#if defined (EXIT_ON_SETUID_FAILURE)
+      if (e == EAGAIN)
+	exit (e);
+#endif
+    }
+  if (setgid (current_user.gid) < 0)
+    sys_error (_("cannot set gid to %d: effective gid %d"), current_user.gid, current_user.egid);
+
   current_user.euid = current_user.uid;
   current_user.egid = current_user.gid;
 }
@@ -1396,12 +1447,21 @@ start_debugger ()
 {
 #if defined (DEBUGGER) && defined (DEBUGGER_START_FILE)
   int old_errexit;
+  int r;
 
   old_errexit = exit_immediately_on_error;
   exit_immediately_on_error = 0;
 
-  maybe_execute_file (DEBUGGER_START_FILE, 1);
-  function_trace_mode = 1;
+  r = force_execute_file (DEBUGGER_START_FILE, 1);
+  if (r < 0)
+    {
+      internal_warning (_("cannot start debugger; debugging mode disabled"));
+      debugging_mode = 0;
+    }
+  error_trace_mode = function_trace_mode = debugging_mode;
+
+  set_shellopts ();
+  set_bashopts ();
 
   exit_immediately_on_error += old_errexit;
 #endif
@@ -1444,7 +1504,7 @@ open_shell_script (script_name)
     {
       e = errno;
       file_error (filename);
-      exit ((e == ENOENT) ? EX_NOTFOUND : EX_NOINPUT);
+      sh_exit ((e == ENOENT) ? EX_NOTFOUND : EX_NOINPUT);
     }
 
   free (dollar_vars[0]);
@@ -1453,6 +1513,17 @@ open_shell_script (script_name)
     {
       free (exec_argv0);
       exec_argv0 = (char *)NULL;
+    }
+
+  if (file_isdir (filename))
+    {
+#if defined (EISDIR)
+      errno = EISDIR;
+#else
+      errno = EINVAL;
+#endif
+      file_error (filename);
+      sh_exit (EX_NOINPUT);
     }
 
 #if defined (ARRAY_VARS)
@@ -1487,7 +1558,14 @@ open_shell_script (script_name)
 	{
 	  e = errno;
 	  if ((fstat (fd, &sb) == 0) && S_ISDIR (sb.st_mode))
-	    internal_error (_("%s: is a directory"), filename);
+	    {
+#if defined (EISDIR)
+	      errno = EISDIR;
+	      file_error (filename);
+#else	      
+	      internal_error (_("%s: Is a directory"), filename);
+#endif
+	    }
 	  else
 	    {
 	      errno = e;
@@ -1547,6 +1625,8 @@ open_shell_script (script_name)
     init_interactive_script ();
 
   free (filename);
+
+  reading_shell_script = 1;
   return (fd);
 }
 
@@ -1640,6 +1720,9 @@ init_interactive ()
 {
   expand_aliases = interactive_shell = startup_state = 1;
   interactive = 1;
+#if defined (HISTORY)
+  remember_on_history = enable_history_list = 1;	/* XXX */
+#endif
 }
 
 static void
@@ -1663,6 +1746,9 @@ init_interactive_script ()
 {
   init_noninteractive ();
   expand_aliases = interactive_shell = startup_state = 1;
+#if defined (HISTORY)
+  remember_on_history = enable_history_list = 1;	/* XXX */
+#endif
 }
 
 void
@@ -1693,7 +1779,9 @@ get_current_user_info ()
 	  current_user.shell = savestring ("/bin/sh");
 	  current_user.home_dir = savestring ("/");
 	}
+#if defined (HAVE_GETPWENT)
       endpwent ();
+#endif
     }
 }
 
@@ -1703,6 +1791,7 @@ static void
 shell_initialize ()
 {
   char hostname[256];
+  int should_be_restricted;
 
   /* Line buffer output for stderr and stdout. */
   if (shell_initialized == 0)
@@ -1741,11 +1830,15 @@ shell_initialize ()
   /* Initialize our interface to the tilde expander. */
   tilde_initialize ();
 
+#if defined (RESTRICTED_SHELL)
+  should_be_restricted = shell_is_restricted (shell_name);
+#endif
+
   /* Initialize internal and environment variables.  Don't import shell
      functions from the environment if we are running in privileged or
      restricted mode or if the shell is running setuid. */
 #if defined (RESTRICTED_SHELL)
-  initialize_shell_variables (shell_environment, privileged_mode||restricted||running_setuid);
+  initialize_shell_variables (shell_environment, privileged_mode||restricted||should_be_restricted||running_setuid);
 #else
   initialize_shell_variables (shell_environment, privileged_mode||running_setuid);
 #endif
@@ -1763,8 +1856,8 @@ shell_initialize ()
      running in privileged or restricted mode or if the shell is running
      setuid. */
 #if defined (RESTRICTED_SHELL)
-  initialize_shell_options (privileged_mode||restricted||running_setuid);
-  initialize_bashopts (privileged_mode||restricted||running_setuid);
+  initialize_shell_options (privileged_mode||restricted||should_be_restricted||running_setuid);
+  initialize_bashopts (privileged_mode||restricted||should_be_restricted||running_setuid);
 #else
   initialize_shell_options (privileged_mode||running_setuid);
   initialize_bashopts (privileged_mode||running_setuid);
@@ -1793,13 +1886,14 @@ shell_reinitialize ()
   /* Things that get 0. */
   login_shell = make_login_shell = interactive = executing = 0;
   debugging = do_version = line_number = last_command_exit_value = 0;
-  forced_interactive = interactive_shell = subshell_environment = 0;
+  forced_interactive = interactive_shell = 0;
+  subshell_environment = running_in_background = 0;
   expand_aliases = 0;
 
   /* XXX - should we set jobs_m_flag to 0 here? */
 
 #if defined (HISTORY)
-  bash_history_reinit (0);
+  bash_history_reinit (enable_history_list = 0);
 #endif /* HISTORY */
 
 #if defined (RESTRICTED_SHELL)
@@ -1808,7 +1902,7 @@ shell_reinitialize ()
 
   /* Ensure that the default startup file is used.  (Except that we don't
      execute this file for reinitialized shells). */
-  bashrc_file = "~/.bashrc";
+  bashrc_file = DEFAULT_BASHRC;
 
   /* Delete all variables and functions.  They will be reinitialized when
      the environment is parsed. */
@@ -1865,6 +1959,9 @@ show_shell_usage (fp, extra)
       fprintf (fp, _("Type `%s -c \"help set\"' for more information about shell options.\n"), shell_name);
       fprintf (fp, _("Type `%s -c help' for more information about shell builtin commands.\n"), shell_name);
       fprintf (fp, _("Use the `bashbug' command to report bugs.\n"));
+      fprintf (fp, "\n");
+      fprintf (fp, _("bash home page: <http://www.gnu.org/software/bash>\n"));
+      fprintf (fp, _("General help using GNU software: <http://www.gnu.org/gethelp/>\n"));
     }
 }
 

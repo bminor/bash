@@ -41,6 +41,7 @@
 #define SPECIAL_BUILTIN 0x08	/* This is a Posix `special' builtin. */
 #define ASSIGNMENT_BUILTIN 0x10	/* This builtin takes assignment statements. */
 #define POSIX_BUILTIN	0x20	/* This builtins is special in the Posix command search order. */
+#define LOCALVAR_BUILTIN   0x40	/* This builtin creates local variables */
 
 #define BASE_INDENT	4
 

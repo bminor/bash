@@ -122,3 +122,21 @@ echo ${!var2}
 # Bash-2.01[.1] fails this test -- it attempts history expansion after the
 # history_comment_char
 echo ok 3 # !1200
+
+# bash versions through bash-4.3 fail this; they make the digit preceding the
+# > into a separate word, changing the meaning of the redirection
+shopt a b c d 2>/dev/null
+echo !shopt-1
+
+echo !shopt*
+
+# make sure a :p modifier anywhere on the line affects all history expansions
+echo one two three four
+echo !:2:p ; echo !$  
+echo one two three four
+echo !$ ; echo !:2:p
+
+${THIS_SH} ./histexp1.sub
+${THIS_SH} ./histexp2.sub
+${THIS_SH} ./histexp3.sub
+${THIS_SH} ./histexp4.sub

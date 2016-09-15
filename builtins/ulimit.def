@@ -1,7 +1,7 @@
 This file is ulimit.def, from which is created ulimit.c.
 It implements the builtin "ulimit" in Bash.
 
-Copyright (C) 1987-2010 Free Software Foundation, Inc.
+Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -23,7 +23,7 @@ $PRODUCES ulimit.c
 $BUILTIN ulimit
 $FUNCTION ulimit_builtin
 $DEPENDS_ON !_MINIX
-$SHORT_DOC ulimit [-SHabcdefilmnpqrstuvxT] [limit]
+$SHORT_DOC ulimit [-SHabcdefiklmnpqrstuvxPT] [limit]
 Modify shell resource limits.
 
 Provides control over the resources available to the shell and processes
@@ -39,6 +39,7 @@ Options:
   -e	the maximum scheduling priority (`nice')
   -f	the maximum size of files written by the shell and its children
   -i	the maximum number of pending signals
+  -k	the maximum number of kqueues allocated for this process
   -l	the maximum size a process may lock into memory
   -m	the maximum resident set size
   -n	the maximum number of open file descriptors
@@ -50,7 +51,8 @@ Options:
   -u	the maximum number of user processes
   -v	the size of virtual memory
   -x	the maximum number of file locks
-  -T    the maximum number of threads
+  -P	the maximum number of pseudoterminals
+  -T	the maximum number of threads
 
 Not all options are available on all platforms.
 
@@ -131,10 +133,16 @@ extern int errno;
 #  define print_rlimtype(num, nl) printf ("%ld%s", num, nl ? "\n" : "")
 #endif
 
+/* Alternate names */
+
 /* Some systems use RLIMIT_NOFILE, others use RLIMIT_OFILE */
 #if defined (HAVE_RESOURCE) && defined (RLIMIT_OFILE) && !defined (RLIMIT_NOFILE)
 #  define RLIMIT_NOFILE RLIMIT_OFILE
 #endif /* HAVE_RESOURCE && RLIMIT_OFILE && !RLIMIT_NOFILE */
+
+#if defined (HAVE_RESOURCE) && defined (RLIMIT_POSIXLOCKS) && !defined (RLIMIT_LOCKS)
+#  define RLIMIT_LOCKS RLIMIT_POSIXLOCKS
+#endif /* HAVE_RESOURCE && RLIMIT_POSIXLOCKS && !RLIMIT_LOCKS */
 
 /* Some systems have these, some do not. */
 #ifdef RLIMIT_FSIZE
@@ -223,6 +231,9 @@ typedef struct {
 } RESOURCE_LIMITS;
 
 static RESOURCE_LIMITS limits[] = {
+#ifdef RLIMIT_NPTS
+  { 'P',	RLIMIT_NPTS,  1,	"number of pseudoterminals",	(char *)NULL },
+#endif
 #ifdef RLIMIT_PTHREAD
   { 'T',	RLIMIT_PTHREAD,  1,	"number of threads",	(char *)NULL },
 #endif
@@ -241,6 +252,9 @@ static RESOURCE_LIMITS limits[] = {
   { 'f',	RLIMIT_FILESIZE, POSIXBLK,	"file size",		"blocks" },
 #ifdef RLIMIT_SIGPENDING
   { 'i',	RLIMIT_SIGPENDING, 1,	"pending signals",	(char *)NULL },
+#endif
+#ifdef RLIMIT_KQUEUES
+  { 'k',	RLIMIT_KQUEUES, 1,	"max kqueues",		(char *)NULL },
 #endif
 #ifdef RLIMIT_MEMLOCK
   { 'l',	RLIMIT_MEMLOCK, 1024,	"max locked memory",	"kbytes" },
@@ -359,6 +373,7 @@ ulimit_builtin (list)
 	  mode |= LIMIT_HARD;
 	  break;
 
+	CASE_HELPOPT;
 	case '?':
 	  builtin_usage ();
 	  return (EX_USAGE);

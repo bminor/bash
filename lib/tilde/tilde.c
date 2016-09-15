@@ -236,7 +236,11 @@ tilde_expand (string)
       string += end;
 
       expansion = tilde_expand_word (tilde_word);
-      xfree (tilde_word);
+
+      if (expansion == 0)
+	expansion = tilde_word;
+      else
+	xfree (tilde_word);	
 
       len = strlen (expansion);
 #ifdef __CYGWIN__
@@ -360,6 +364,10 @@ tilde_expand_word (filename)
     {
       /* Prefix $HOME to the rest of the string. */
       expansion = sh_get_env_value ("HOME");
+#if defined (_WIN32)
+      if (expansion == 0)
+	expansion = sh_get_env_value ("APPDATA");
+#endif
 
       /* If there is no HOME variable, look up the directory in
 	 the password database. */

@@ -108,11 +108,13 @@ readonly foo=one
 assignvar foo two three four
 echo $foo
 
-${THIS_SH} ./nameref1.sub
-${THIS_SH} ./nameref2.sub
-${THIS_SH} ./nameref3.sub
-${THIS_SH} ./nameref4.sub
-${THIS_SH} ./nameref5.sub
-${THIS_SH} ./nameref6.sub
-${THIS_SH} ./nameref7.sub
-${THIS_SH} ./nameref8.sub
+var=abcde
+x=var
+declare -n v=var
+# these two should display the same
+echo ${!x//c/x}
+echo ${v//c/x}
+
+for testfile in ./nameref[0-9].sub ./nameref[1-9][0-9].sub ; do
+	${THIS_SH} "$testfile"
+done

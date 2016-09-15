@@ -26,6 +26,25 @@
 extern "C" {
 #endif
 
+/* Old-style, attempt to mark as deprecated in some way people will notice. */
+
+#if !defined (_FUNCTION_DEF)
+#  define _FUNCTION_DEF
+
+#if defined(__GNUC__) || defined(__clang__)
+typedef int Function () __attribute__ ((deprecated));
+typedef void VFunction () __attribute__ ((deprecated));
+typedef char *CPFunction () __attribute__ ((deprecated));
+typedef char **CPPFunction () __attribute__ ((deprecated));
+#else
+typedef int Function ();
+typedef void VFunction ();
+typedef char *CPFunction ();
+typedef char **CPPFunction ();
+#endif
+
+#endif /* _FUNCTION_DEF */
+
 /* New style. */
 
 #if !defined (_RL_FUNCTION_TYPEDEF)

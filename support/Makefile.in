@@ -28,7 +28,7 @@
 #
 topdir = @top_srcdir@
 srcdir = @srcdir@
-VPATH = .:@srcdir@
+VPATH = @srcdir@
 BUILD_DIR = @BUILD_DIR@
 
 RM	= rm -f
@@ -83,5 +83,6 @@ clean:
 
 distclean maintainer-clean mostlyclean: clean
 	$(RM) $(OBJ1)
+	$(RM) bash.pc
 
 man2html.o: man2html.c

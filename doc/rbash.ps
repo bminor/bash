@@ -1,9 +1,9 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.19.2
-%%CreationDate: Mon Feb 24 08:28:31 2014
+%%Creator: groff version 1.22.3
+%%CreationDate: Wed Aug 31 10:24:00 2016
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
-%%DocumentSuppliedResources: procset grops 1.19 2
+%%DocumentSuppliedResources: procset grops 1.22 3
 %%Pages: 1
 %%PageOrder: Ascend
 %%DocumentMedia: Default 612 792 0 () ()
@@ -13,7 +13,7 @@
 %%PageMedia: Default
 %%EndDefaults
 %%BeginProlog
-%%BeginResource: procset grops 1.19 2
+%%BeginResource: procset grops 1.22 3
 %!PS-Adobe-3.0 Resource-ProcSet
 /setpacking where{
 pop
@@ -71,6 +71,7 @@ exch pop add exch pop
 /level0 save def
 1 setlinecap
 1 setlinejoin
+DEFS/BPhook known{DEFS begin BPhook end}if
 72 RES div dup scale
 LS{
 90 rotate
@@ -136,7 +137,10 @@ pop
 findfont
 dup maxlength 1 index/FontName known not{1 add}if dict begin
 {
-1 index/FID ne{def}{pop pop}ifelse
+1 index/FID ne
+2 index/UniqueID ne
+and
+{def}{pop pop}ifelse
 }forall
 /Encoding exch def
 dup/FontName exch def
@@ -174,8 +178,10 @@ newpath
 userdict begin
 /showpage{}def
 /setpagedevice{}def
+mark
 }bind def
 /PEND{
+cleartomark
 countdictstack CNT sub{end}repeat
 level1 restore
 }bind def
@@ -226,47 +232,47 @@ def/PL 792 def/LS false def/ENC0[/asciicircum/asciitilde/Scaron/Zcaron
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 10/Times-Roman@0 SF(RB)72 48 Q 376.2(ASH\(1\) RB)-.35 F(ASH\(1\))
--.35 E/F1 10.95/Times-Bold@0 SF -.219(NA)72 84 S(ME).219 E F0
-(rbash \255 restricted bash, see)108 96 Q/F2 10/Times-Bold@0 SF(bash)2.5
-E F0(\(1\))A F1(RESTRICTED SHELL)72 112.8 Q F0(If)108 124.8 Q F2(bash)
-4.397 E F0 1.897(is started with the name)4.397 F F2(rbash)4.397 E F0
-4.397(,o)C 4.397(rt)-4.397 G(he)-4.397 E F2<ad72>4.397 E F0 1.896
+/F0 10/Times-Roman@0 SF(RB)72 48 Q 130.47(ASH\(1\) General)-.35 F
+(Commands Manual)2.5 E(RB)132.97 E(ASH\(1\))-.35 E/F1 10.95/Times-Bold@0
+SF -.219(NA)72 84 S(ME).219 E F0(rbash \255 restricted bash, see)108 96
+Q/F2 10/Times-Bold@0 SF(bash)2.5 E F0(\(1\))A F1(RESTRICTED SHELL)72
+112.8 Q F0(If)108 124.8 Q F2(bash)4.397 E F0 1.897
+(is started with the name)4.397 F F2(rbash)4.397 E F0 4.397(,o)C 4.397
+(rt)-4.397 G(he)-4.397 E F2<ad72>4.397 E F0 1.896
 (option is supplied at in)4.397 F -.2(vo)-.4 G 1.896
 (cation, the shell becomes).2 F 3.445(restricted. A)108 136.8 R .945
 (restricted shell is used to set up an en)3.445 F .946
 (vironment more controlled than the standard shell.)-.4 F(It)5.946 E
 (beha)108 148.8 Q -.15(ve)-.2 G 2.5(si).15 G(dentically to)-2.5 E F2
 (bash)2.5 E F0(with the e)2.5 E(xception that the follo)-.15 E
-(wing are disallo)-.25 E(wed or not performed:)-.25 E 32.5<8363>108
-165.6 S(hanging directories with)-32.5 E F2(cd)2.5 E F0 32.5<8373>108
-182.4 S(etting or unsetting the v)-32.5 E(alues of)-.25 E/F3 9
+(wing are disallo)-.25 E(wed or not performed:)-.25 E<83>108 165.6 Q
+(changing directories with)144 165.6 Q F2(cd)2.5 E F0<83>108 182.4 Q
+(setting or unsetting the v)144 182.4 Q(alues of)-.25 E/F3 9
 /Times-Bold@0 SF(SHELL)2.5 E/F4 9/Times-Roman@0 SF(,)A F3 -.666(PA)2.25
 G(TH)-.189 E F4(,)A F3(ENV)2.25 E F4(,)A F0(or)2.25 E F3 -.27(BA)2.5 G
-(SH_ENV).27 E F0 32.5<8373>108 199.2 S
-(pecifying command names containing)-32.5 E F2(/)2.5 E F0 32.5<8373>108
-216 S(pecifying a \214lename containing a)-32.5 E F2(/)2.5 E F0
-(as an ar)2.5 E(gument to the)-.18 E F2(.)2.5 E F0 -.2(bu)5 G
-(iltin command).2 E 32.5<8373>108 232.8 S .45
-(pecifying a \214lename containing a slash as an ar)-32.5 F .449
+(SH_ENV).27 E F0<83>108 199.2 Q(specifying command names containing)144
+199.2 Q F2(/)2.5 E F0<83>108 216 Q(specifying a \214lename containing a)
+144 216 Q F2(/)2.5 E F0(as an ar)2.5 E(gument to the)-.18 E F2(.)2.5 E
+F0 -.2(bu)5 G(iltin command).2 E<83>108 232.8 Q .45
+(specifying a \214lename containing a slash as an ar)144 232.8 R .449
 (gument to the)-.18 F F2<ad70>2.949 E F0 .449(option to the)2.949 F F2
 (hash)2.949 E F0 -.2(bu)2.949 G .449(iltin com-).2 F(mand)144 244.8 Q
-32.5<8369>108 261.6 S(mporting function de\214nitions from the shell en)
--32.5 E(vironment at startup)-.4 E 32.5<8370>108 278.4 S(arsing the v)
--32.5 E(alue of)-.25 E F3(SHELLOPTS)2.5 E F0(from the shell en)2.25 E
-(vironment at startup)-.4 E 32.5<8372>108 295.2 S(edirecting output usi\
-ng the >, >|, <>, >&, &>, and >> redirection operators)-32.5 E 32.5
-<8375>108 312 S(sing the)-32.5 E F2(exec)2.5 E F0 -.2(bu)2.5 G
-(iltin command to replace the shell with another command).2 E 32.5<8361>
-108 328.8 S(dding or deleting b)-32.5 E(uiltin commands with the)-.2 E
+<83>108 261.6 Q(importing function de\214nitions from the shell en)144
+261.6 Q(vironment at startup)-.4 E<83>108 278.4 Q(parsing the v)144
+278.4 Q(alue of)-.25 E F3(SHELLOPTS)2.5 E F0(from the shell en)2.25 E
+(vironment at startup)-.4 E<83>108 295.2 Q(redirecting output using the\
+ >, >|, <>, >&, &>, and >> redirection operators)144 295.2 Q<83>108 312
+Q(using the)144 312 Q F2(exec)2.5 E F0 -.2(bu)2.5 G
+(iltin command to replace the shell with another command).2 E<83>108
+328.8 Q(adding or deleting b)144 328.8 Q(uiltin commands with the)-.2 E
 F2<ad66>2.5 E F0(and)2.5 E F2<ad64>2.5 E F0(options to the)2.5 E F2
-(enable)2.5 E F0 -.2(bu)2.5 G(iltin command).2 E 32.5<8375>108 345.6 S
-(sing the)-32.5 E F2(enable)2.5 E F0 -.2(bu)2.5 G
-(iltin command to enable disabled shell b).2 E(uiltins)-.2 E 32.5<8373>
-108 362.4 S(pecifying the)-32.5 E F2<ad70>2.5 E F0(option to the)2.5 E
-F2(command)2.5 E F0 -.2(bu)2.5 G(iltin command).2 E 32.5<8374>108 379.2
-S(urning of)-32.5 E 2.5(fr)-.25 G(estricted mode with)-2.5 E F2(set +r)
-2.5 E F0(or)2.5 E F2(set +o r)2.5 E(estricted)-.18 E F0(.)A
+(enable)2.5 E F0 -.2(bu)2.5 G(iltin command).2 E<83>108 345.6 Q
+(using the)144 345.6 Q F2(enable)2.5 E F0 -.2(bu)2.5 G
+(iltin command to enable disabled shell b).2 E(uiltins)-.2 E<83>108
+362.4 Q(specifying the)144 362.4 Q F2<ad70>2.5 E F0(option to the)2.5 E
+F2(command)2.5 E F0 -.2(bu)2.5 G(iltin command).2 E<83>108 379.2 Q
+(turning of)144 379.2 Q 2.5(fr)-.25 G(estricted mode with)-2.5 E F2
+(set +r)2.5 E F0(or)2.5 E F2(set +o r)2.5 E(estricted)-.18 E F0(.)A
 (These restrictions are enforced after an)108 396 Q 2.5(ys)-.15 G
 (tartup \214les are read.)-2.5 E .429
 (When a command that is found to be a shell script is e)108 412.8 R -.15

@@ -309,7 +309,7 @@ get_locale_var (var)
   locale = lc_all;
 
   if (locale == 0 || *locale == 0)
-    locale = get_string_value (var);	/* XXX - mem leak? */
+    locale = get_string_value (var);	/* XXX - no mem leak */
   if (locale == 0 || *locale == 0)
     locale = lang;
   if (locale == 0 || *locale == 0)
@@ -535,7 +535,7 @@ locale_setblanks ()
 
   for (x = 0; x < sh_syntabsiz; x++)
     {
-      if (isblank (x))
+      if (isblank ((unsigned char)x))
 	sh_syntaxtab[x] |= CSHBRK|CBLANK;
       else if (member (x, shell_break_chars))
 	{

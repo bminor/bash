@@ -223,6 +223,52 @@ sh_getopt_restore_state (argv)
     nextchar = argv[sh_curopt] + sh_charindex;
 }
 
+sh_getopt_state_t *
+sh_getopt_alloc_istate ()
+{
+  sh_getopt_state_t *ret;
+
+  ret = (sh_getopt_state_t *)xmalloc (sizeof (sh_getopt_state_t));
+  return ret;
+}
+
+void
+sh_getopt_dispose_istate (gs)
+     sh_getopt_state_t *gs;
+{
+  free (gs);
+}
+
+sh_getopt_state_t *
+sh_getopt_save_istate ()
+{
+  sh_getopt_state_t *ret;
+
+  ret = sh_getopt_alloc_istate ();
+
+  ret->gs_optarg = sh_optarg;
+  ret->gs_optind = sh_optind;
+  ret->gs_curopt = sh_curopt;
+  ret->gs_nextchar = nextchar;		/* XXX */
+  ret->gs_charindex = sh_charindex;
+  ret->gs_flags = 0;			/* XXX for later use */
+
+  return ret;
+}
+
+void
+sh_getopt_restore_istate (state)
+     sh_getopt_state_t *state;
+{
+  sh_optarg = state->gs_optarg;
+  sh_optind = state->gs_optind;
+  sh_curopt = state->gs_curopt;
+  nextchar = state->gs_nextchar;	/* XXX - probably not usable */
+  sh_charindex = state->gs_charindex;
+
+  sh_getopt_dispose_istate (state);
+}
+
 #if 0
 void
 sh_getopt_debug_restore_state (argv)

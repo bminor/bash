@@ -1,6 +1,6 @@
 /* general.c -- Stuff that is used by all files. */
 
-/* Copyright (C) 1987-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -42,6 +42,10 @@
 #include "test.h"
 #include "trap.h"
 
+#if defined (HAVE_MBSTR_H) && defined (HAVE_MBSCHR)
+#  include <mbstr.h>		/* mbschr */
+#endif
+
 #include <tilde/tilde.h>
 
 #if !defined (errno)
@@ -53,6 +57,8 @@ extern int interactive_comments;
 extern int check_hashed_filenames;
 extern int source_uses_path;
 extern int source_searches_cwd;
+extern int posixly_correct;
+extern int inherit_errexit;
 
 static char *bash_special_tilde_expansions __P((char *));
 static int unquoted_tilde_word __P((const char *));
@@ -70,6 +76,7 @@ posix_initialize (on)
   if (on != 0)
     {
       interactive_comments = source_uses_path = expand_aliases = 1;
+      inherit_errexit = 1;
       source_searches_cwd = 0;
     }
 
@@ -147,9 +154,9 @@ print_rlimtype (n, addnl)
 /* Return non-zero if all of the characters in STRING are digits. */
 int
 all_digits (string)
-     char *string;
+     const char *string;
 {
-  register char *s;
+  register const char *s;
 
   for (s = string; *s; s++)
     if (DIGIT (*s) == 0)
@@ -204,9 +211,9 @@ legal_number (string, result)
    digit. */
 int
 legal_identifier (name)
-     char *name;
+     const char *name;
 {
-  register char *s;
+  register const char *s;
   unsigned char c;
 
   if (!name || !(c = *name) || (legal_variable_starter (c) == 0))
@@ -218,6 +225,57 @@ legal_identifier (name)
 	return (0);
     }
   return (1);
+}
+
+/* Return 1 if NAME is a valid value that can be assigned to a nameref
+   variable.  FLAGS can be 2, in which case the name is going to be used
+   to create a variable.  Other values are currently unused, but could
+   be used to allow values to be stored and indirectly referenced, but
+   not used in assignments. */
+int
+valid_nameref_value (name, flags)
+     const char *name;
+     int flags;
+{
+  if (name == 0 || *name == 0)
+    return 0;
+
+  /* valid identifier */
+#if defined (ARRAY_VARS)  
+  if (legal_identifier (name) || (flags != 2 && valid_array_reference (name, 0)))
+#else
+  if (legal_identifier (name))
+#endif
+    return 1;
+
+  return 0;
+}
+
+int
+check_selfref (name, value, flags)
+     const char *name;
+     char *value;
+     int flags;
+{
+  char *t;
+
+  if (STREQ (name, value))
+    return 1;
+
+#if defined (ARRAY_VARS)
+  if (valid_array_reference (value, 0))
+    {
+      t = array_variable_name (value, (char **)NULL, (int *)NULL);
+      if (t && STREQ (name, t))
+	{
+	  free (t);
+	  return 1;
+	}
+      free (t);
+    }
+#endif
+
+  return 0;	/* not a self reference */
 }
 
 /* Make sure that WORD is a valid shell identifier, i.e.
@@ -244,15 +302,45 @@ check_identifier (word, check_word)
     return (1);
 }
 
+/* Return 1 if STRING is a function name that the shell will import from
+   the environment.  Currently we reject attempts to import shell functions
+   containing slashes, beginning with newlines or containing blanks.  In
+   Posix mode, we require that STRING be a valid shell identifier.  Not
+   used yet. */
+int
+importable_function_name (string, len)
+     const char *string;
+     size_t len;
+{
+  if (absolute_program (string))	/* don't allow slash */
+    return 0;
+  if (*string == '\n')			/* can't start with a newline */
+    return 0;
+  if (shellblank (*string) || shellblank(string[len-1]))
+    return 0;
+  return (posixly_correct ? legal_identifier (string) : 1);
+}
+
+int
+exportable_function_name (string)
+     const char *string;
+{
+  if (absolute_program (string))
+    return 0;
+  if (mbschr (string, '=') != 0)
+    return 0;
+  return 1;
+}
+
 /* Return 1 if STRING comprises a valid alias name.  The shell accepts
    essentially all characters except those which must be quoted to the
    parser (which disqualifies them from alias expansion anyway) and `/'. */
 int
 legal_alias_name (string, flags)
-     char *string;
+     const char *string;
      int flags;
 {
-  register char *s;
+  register const char *s;
 
   for (s = string; *s; s++)
     if (shellbreak (*s) || shellxquote (*s) || shellexp (*s) || (*s == '/'))
@@ -372,9 +460,7 @@ fd_ispipe (fd)
      int fd;
 {
   errno = 0;
-  if (lseek ((fd), 0L, SEEK_CUR) < 0)
-    return (errno == ESPIPE);
-  return 0;
+  return ((lseek (fd, 0L, SEEK_CUR) < 0) && (errno == ESPIPE));
 }
 
 /* There is a bug in the NeXT 2.1 rlogind that causes opens
@@ -411,7 +497,7 @@ check_dev_tty ()
    corresponding to PATH1 and PATH2, respectively. */
 int
 same_file (path1, path2, stp1, stp2)
-     char *path1, *path2;
+     const char *path1, *path2;
      struct stat *stp1, *stp2;
 {
   struct stat st1, st2;
@@ -480,7 +566,7 @@ move_to_high_fd (fd, check_new, maxfd)
 
 int
 check_binary_file (sample, sample_len)
-     char *sample;
+     const char *sample;
      int sample_len;
 {
   register int i;
@@ -541,7 +627,7 @@ sh_closepipe (pv)
 
 int
 file_exists (fn)
-     char *fn;
+     const char *fn;
 {
   struct stat sb;
 
@@ -550,7 +636,7 @@ file_exists (fn)
 
 int
 file_isdir (fn)
-     char *fn;
+     const char *fn;
 {
   struct stat sb;
 
@@ -559,7 +645,7 @@ file_isdir (fn)
 
 int
 file_iswdir (fn)
-     char *fn;
+     const char *fn;
 {
   return (file_isdir (fn) && sh_eaccess (fn, W_OK) == 0);
 }
@@ -623,7 +709,7 @@ absolute_program (string)
    begin with. */
 char *
 make_absolute (string, dot_path)
-     char *string, *dot_path;
+     const char *string, *dot_path;
 {
   char *result;
 
@@ -775,6 +861,27 @@ trim_pathname (name, maxlen)
   nbeg[nlen] = '\0';
 
   return name;
+}
+
+/* Return a printable representation of FN without special characters.  The
+   caller is responsible for freeing memory if this returns something other
+   than its argument.  If FLAGS is non-zero, we are printing for portable
+   re-input and should single-quote filenames appropriately. */
+char *
+printable_filename (fn, flags)
+     char *fn;
+     int flags;
+{
+  char *newf;
+
+  if (ansic_shouldquote (fn))
+    newf = ansic_quote (fn, 0, NULL);
+  else if (flags && sh_contains_shell_metas (fn))
+    newf = sh_single_quote (fn);
+  else
+    newf = fn;
+
+  return newf;
 }
 
 /* Given a string containing units of information separated by colons,
@@ -983,6 +1090,7 @@ bash_tilde_expand (s, assign_p)
   int old_immed, old_term, r;
   char *ret;
 
+#if 0
   old_immed = interrupt_immediately;
   old_term = terminate_immediately;
   /* We want to be able to interrupt tilde expansion. Ordinarily, we can just
@@ -992,6 +1100,7 @@ bash_tilde_expand (s, assign_p)
   if (any_signals_trapped () < 0)
     interrupt_immediately = 1;
   terminate_immediately = 1;
+#endif
 
   tilde_additional_prefixes = assign_p == 0 ? (char **)0
   					    : (assign_p == 2 ? bash_tilde_prefixes2 : bash_tilde_prefixes);
@@ -1001,8 +1110,10 @@ bash_tilde_expand (s, assign_p)
   r = (*s == '~') ? unquoted_tilde_word (s) : 1;
   ret = r ? tilde_expand (s) : savestring (s);
 
+#if 0
   interrupt_immediately = old_immed;
   terminate_immediately = old_term;
+#endif
 
   QUIT;
 
@@ -1174,4 +1285,39 @@ get_group_array (ngp)
   if (ngp)
     *ngp = ngroups;
   return group_iarray;
+}
+
+/* **************************************************************** */
+/*								    */
+/*	  Miscellaneous functions				    */
+/*								    */
+/* **************************************************************** */
+
+/* Return a value for PATH that is guaranteed to find all of the standard
+   utilities.  This uses Posix.2 configuration variables, if present.  It
+   uses a value defined in config.h as a last resort. */
+char *
+conf_standard_path ()
+{
+#if defined (_CS_PATH) && defined (HAVE_CONFSTR)
+  char *p;
+  size_t len;
+
+  len = (size_t)confstr (_CS_PATH, (char *)NULL, (size_t)0);
+  if (len > 0)
+    {
+      p = (char *)xmalloc (len + 2);
+      *p = '\0';
+      confstr (_CS_PATH, p, len);
+      return (p);
+    }
+  else
+    return (savestring (STANDARD_UTILS_PATH));
+#else /* !_CS_PATH || !HAVE_CONFSTR  */
+#  if defined (CS_PATH)
+  return (savestring (CS_PATH));
+#  else
+  return (savestring (STANDARD_UTILS_PATH));
+#  endif /* !CS_PATH */
+#endif /* !_CS_PATH || !HAVE_CONFSTR */
 }

@@ -1,4 +1,4 @@
-/* Copyright (C) 2001, 2006, 2009, 2010, 2012 Free Software Foundation, Inc.
+/* Copyright (C) 2001, 2006, 2009, 2010, 2012, 2015 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -43,10 +43,11 @@ mbstrlen (s)
 {
   size_t clen, nc;
   mbstate_t mbs = { 0 }, mbsbak = { 0 };
-  int f;
+  int f, mb_cur_max;
 
   nc = 0;
-  while (*s && (clen = (f = is_basic (*s)) ? 1 : mbrlen(s, MB_CUR_MAX, &mbs)) != 0)
+  mb_cur_max = MB_CUR_MAX;
+  while (*s && (clen = (f = is_basic (*s)) ? 1 : mbrlen(s, mb_cur_max, &mbs)) != 0)
     {
       if (MB_INVALIDCH(clen))
 	{
@@ -71,13 +72,15 @@ mbsmbchar (s)
   char *t;
   size_t clen;
   mbstate_t mbs = { 0 };
+  int mb_cur_max;
 
+  mb_cur_max = MB_CUR_MAX;
   for (t = (char *)s; *t; t++)
     {
       if (is_basic (*t))
 	continue;
 
-      clen = mbrlen (t, MB_CUR_MAX, &mbs);
+      clen = mbrlen (t, mb_cur_max, &mbs);
 
       if (clen == 0)
         return 0;

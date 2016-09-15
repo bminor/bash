@@ -60,6 +60,8 @@ int
 exit_builtin (list)
      WORD_LIST *list;
 {
+  CHECK_HELPOPT (list);
+
   if (interactive)
     {
       fprintf (stderr, login_shell ? _("logout\n") : "exit\n");
@@ -83,6 +85,8 @@ int
 logout_builtin (list)
      WORD_LIST *list;
 {
+  CHECK_HELPOPT (list);
+
   if (login_shell == 0 /* && interactive */)
     {
       builtin_error (_("not login shell: use `exit'"));

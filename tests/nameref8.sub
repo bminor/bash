@@ -55,3 +55,7 @@ x=4
 echo x = $x
 
 unset -n v w x
+
+# can we keep local variables invisible when we add nameref attribute?
+function f { typeset x; typeset -n x; x=y; }
+f

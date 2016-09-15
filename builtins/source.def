@@ -1,7 +1,7 @@
 This file is source.def, from which is created source.c.
 It implements the builtins "." and  "source" in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -108,6 +108,7 @@ maybe_pop_dollar_vars ()
   if (debugging_mode)
     pop_args ();	/* restore BASH_ARGC and BASH_ARGV */
   set_dollar_vars_unchanged ();
+  invalidate_cached_quoted_dollar_at ();	/* just invalidate to be safe */
 }
 
 /* Read and execute commands from the file passed as argument.  Guess what.
@@ -119,7 +120,7 @@ source_builtin (list)
      WORD_LIST *list;
 {
   int result;
-  char *filename, *debug_trap;
+  char *filename, *debug_trap, *x;
 
   if (no_options (list))
     return (EX_USAGE);
@@ -152,7 +153,10 @@ source_builtin (list)
     {
       if (source_searches_cwd == 0)
 	{
-	  builtin_error (_("%s: file not found"), list->word->word);
+	  x = printable_filename (list->word->word, 0);
+	  builtin_error (_("%s: file not found"), x);
+	  if (x != list->word->word)
+	    free (x);
 	  if (posixly_correct && interactive_shell == 0 && executing_command_builtin == 0)
 	    {
 	      last_command_exit_value = 1;
@@ -185,7 +189,7 @@ source_builtin (list)
     {
       debug_trap = savestring (debug_trap);
       add_unwind_protect (xfree, debug_trap);
-      add_unwind_protect (set_debug_trap, debug_trap);
+      add_unwind_protect (maybe_set_debug_trap, debug_trap);
       restore_default_signal (DEBUG_TRAP);
     }
 

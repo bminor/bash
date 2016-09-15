@@ -3,6 +3,18 @@
 # run-minimal - a version of run-all for shells configured with
 #		--enable-minimal-config
 #
+
+: ${TMPDIR:=/tmp}
+export TMPDIR
+
+# basic /bin/sh syntax
+SUFFIX=`${THIS_SH} -c 'echo $(( $RANDOM + $BASHPID ))'`
+
+BASH_TSTOUT=${TMPDIR}/bashtst-$SUFFIX	# for now
+export BASH_TSTOUT
+
+trap 'rm -f $BASH_TSTOUT' 0
+
 PATH=.:$PATH	# just to get the right version of printenv
 export PATH
 
@@ -16,7 +28,7 @@ export THIS_SH
 
 ${THIS_SH} ./version.mini
 
-rm -f /tmp/xx
+rm -f "$BASH_TSTOUT"
 
 echo Testing ${THIS_SH}
 echo Any output from any test, unless otherwise noted, indicates a possible anomaly
@@ -31,6 +43,7 @@ do
 	run-precedence|run-quote|run-read|run-rhs-exp|run-strip|run-tilde) echo $x ; sh $x ;;
 	*)	;;
 	esac
+	rm -f "$BASH_TSTOUT"
 done
 
 exit 0

@@ -1,6 +1,6 @@
 /* arrayfunc.c -- High-level array functions used by other parts of the shell. */
 
-/* Copyright (C) 2001-2011 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -33,6 +33,9 @@
 #include "pathexp.h"
 
 #include "shmbutil.h"
+#if defined (HAVE_MBSTR_H) && defined (HAVE_MBSCHR)
+#  include <mbstr.h>		/* mbschr */
+#endif
 
 #include "builtins/common.h"
 
@@ -45,7 +48,7 @@ static SHELL_VAR *assign_array_element_internal __P((SHELL_VAR *, char *, char *
 
 static char *quote_assign __P((const char *));
 static void quote_array_assignment_chars __P((WORD_LIST *));
-static char *array_value_internal __P((char *, int, int, int *, arrayind_t *));
+static char *array_value_internal __P((const char *, int, int, int *, arrayind_t *));
 
 /* Standard error message to use when encountering an invalid array subscript */
 const char * const bash_badsub_errmsg = N_("bad array subscript");
@@ -84,6 +87,12 @@ convert_var_to_array (var)
   VSETATTR (var, att_array);
   VUNSETATTR (var, att_invisible);
 
+  /* Make sure it's not marked as an associative array any more */
+  VUNSETATTR (var, att_assoc);
+
+  /* Since namerefs can't be array variables, turn off nameref attribute */
+  VUNSETATTR (var, att_nameref);
+
   return var;
 }
 
@@ -114,6 +123,12 @@ convert_var_to_assoc (var)
 
   VSETATTR (var, att_assoc);
   VUNSETATTR (var, att_invisible);
+
+  /* Make sure it's not marked as an indexed array any more */
+  VUNSETATTR (var, att_array);
+
+  /* Since namerefs can't be array variables, turn off nameref attribute */
+  VUNSETATTR (var, att_nameref);
 
   return var;
 }
@@ -202,8 +217,17 @@ bind_array_variable (name, ind, value, flags)
   entry = find_shell_variable (name);
 
   if (entry == (SHELL_VAR *) 0)
+    {
+      /* Is NAME a nameref variable that points to an unset variable? */
+      entry = find_variable_nameref_for_create (name, 0);
+      if (entry == INVALID_NAMEREF_VALUE)
+	return ((SHELL_VAR *)0);
+      if (entry && nameref_p (entry))
+	entry = make_new_array_variable (nameref_cell (entry));
+    }
+  if (entry == (SHELL_VAR *) 0)
     entry = make_new_array_variable (name);
-  else if (readonly_p (entry) || noassign_p (entry))
+  else if ((readonly_p (entry) && (flags&ASS_FORCE) == 0) || noassign_p (entry))
     {
       if (readonly_p (entry))
 	err_readonly (name);
@@ -237,7 +261,7 @@ bind_assoc_variable (entry, name, key, value, flags)
   SHELL_VAR *dentry;
   char *newval;
 
-  if (readonly_p (entry) || noassign_p (entry))
+  if ((readonly_p (entry) && (flags&ASS_FORCE) == 0) || noassign_p (entry))
     {
       if (readonly_p (entry))
 	err_readonly (name);
@@ -256,7 +280,7 @@ assign_array_element (name, value, flags)
 {
   char *sub, *vname;
   int sublen;
-  SHELL_VAR *entry;
+  SHELL_VAR *entry, *nv;
 
   vname = array_variable_name (name, &sub, &sublen);
 
@@ -338,9 +362,21 @@ find_or_make_array_variable (name, flags)
     {
       /* See if we have a nameref pointing to a variable that hasn't been
 	 created yet. */
-      var = find_variable_last_nameref (name);
+      var = find_variable_last_nameref (name, 1);
+      if (var && nameref_p (var) && invisible_p (var))
+	{
+	  internal_warning (_("%s: removing nameref attribute"), name);
+	  VUNSETATTR (var, att_nameref);
+	}
       if (var && nameref_p (var))
-	var = (flags & 2) ? make_new_assoc_variable (nameref_cell (var)) : make_new_array_variable (nameref_cell (var));
+	{
+	  if (valid_nameref_value (nameref_cell (var), 2) == 0)
+	    {
+	      sh_invalidid (nameref_cell (var));
+	      return ((SHELL_VAR *)NULL);
+	    }
+	  var = (flags & 2) ? make_new_assoc_variable (nameref_cell (var)) : make_new_array_variable (nameref_cell (var));
+	}
     }
 
   if (var == 0)
@@ -400,10 +436,7 @@ assign_array_var_from_word_list (var, list, flags)
   i = (flags & ASS_APPEND) ? array_max_index (a) + 1 : 0;
 
   for (l = list; l; l = l->next, i++)
-    if (var->assign_func)
-      (*var->assign_func) (var, l->word->word, i, 0);
-    else
-      array_insert (a, i, l->word->word);
+    bind_array_var_internal (var, i, 0, l->word->word, flags & ~ASS_APPEND);
 
   VUNSETATTR (var, att_invisible);	/* no longer invisible */
 
@@ -476,7 +509,7 @@ assign_compound_array_list (var, nlist, flags)
   ARRAY *a;
   HASH_TABLE *h;
   WORD_LIST *list;
-  char *w, *val, *nval;
+  char *w, *val, *nval, *savecmd;
   int len, iflags, free_val;
   arrayind_t ind, last_ind;
   char *akey;
@@ -501,7 +534,9 @@ assign_compound_array_list (var, nlist, flags)
 
   for (list = nlist; list; list = list->next)
     {
-      iflags = flags;
+      /* Don't allow var+=(values) to make assignments in VALUES append to
+	 existing values by default. */
+      iflags = flags & ~ASS_APPEND;
       w = list->word->word;
 
       /* We have a word of the form [ind]=value */
@@ -609,10 +644,12 @@ assign_compound_array_list (var, nlist, flags)
 	  free_val = 1;
 	}
 
+      savecmd = this_command_name;
       if (integer_p (var))
 	this_command_name = (char *)NULL;	/* no command name for errors */
       bind_array_var_internal (var, ind, akey, val, iflags);
       last_ind++;
+      this_command_name = savecmd;
 
       if (free_val)
 	free (val);
@@ -732,7 +769,7 @@ unbind_array_element (var, sub)
   char *akey;
   ARRAY_ELEMENT *ae;
 
-  len = skipsubscript (sub, 0, 0);
+  len = skipsubscript (sub, 0, (var && assoc_p(var)));
   if (sub[len] != ']' || len == 0)
     {
       builtin_error ("%s[%s: %s", var->name, sub, _(bash_badsub_errmsg));
@@ -742,8 +779,13 @@ unbind_array_element (var, sub)
 
   if (ALL_ELEMENT_SUB (sub[0]) && sub[1] == 0)
     {
-      unbind_variable (var->name);
-      return (0);
+      if (array_p (var) || assoc_p (var))
+	{
+	  unbind_variable (var->name);	/* XXX -- {array,assoc}_flush ? */
+	  return (0);
+	}
+      else
+	return -2;	/* don't allow this to unset scalar variables */
     }
 
   if (assoc_p (var))
@@ -758,7 +800,7 @@ unbind_array_element (var, sub)
       assoc_remove (assoc_cell (var), akey);
       free (akey);
     }
-  else
+  else if (array_p (var))
     {
       ind = array_expand_index (var, sub, len+1);
       /* negative subscripts to indexed arrays count back from end */
@@ -772,6 +814,19 @@ unbind_array_element (var, sub)
       ae = array_remove (array_cell (var), ind);
       if (ae)
 	array_dispose_element (ae);
+    }
+  else	/* array_p (var) == 0 && assoc_p (var) == 0 */
+    {
+      akey = this_command_name;
+      ind = array_expand_index (var, sub, len+1);
+      this_command_name = akey;
+      if (ind == 0)
+	{
+	  unbind_variable (var->name);
+	  return (0);
+	}
+      else
+	return -2;	/* any subscript other than 0 is invalid with scalar variables */
     }
 
   return 0;
@@ -825,8 +880,9 @@ print_assoc_assignment (var, quoted)
 
 /* Return 1 if NAME is a properly-formed array reference v[sub]. */
 int
-valid_array_reference (name)
-     char *name;
+valid_array_reference (name, flags)
+     const char *name;
+     int flags;
 {
   char *t;
   int r, len;
@@ -843,6 +899,8 @@ valid_array_reference (name)
       len = skipsubscript (t, 0, 0);
       if (t[len] != ']' || len == 1)
 	return 0;
+      if (t[len+1] != '\0')
+	return 0;
       for (r = 1; r < len; r++)
 	if (whitespace (t[r]) == 0)
 	  return 1;
@@ -858,22 +916,26 @@ array_expand_index (var, s, len)
      char *s;
      int len;
 {
-  char *exp, *t;
+  char *exp, *t, *savecmd;
   int expok;
   arrayind_t val;
 
   exp = (char *)xmalloc (len);
   strncpy (exp, s, len - 1);
   exp[len - 1] = '\0';
-  t = expand_arith_string (exp, 0);
+  t = expand_arith_string (exp, Q_DOUBLE_QUOTES|Q_ARITH|Q_ARRAYSUB);	/* XXX - Q_ARRAYSUB for future use */
+  savecmd = this_command_name;
   this_command_name = (char *)NULL;
   val = evalexp (t, &expok);
+  this_command_name = savecmd;
   free (t);
   free (exp);
   if (expok == 0)
     {
       last_command_exit_value = EXECUTION_FAILURE;
 
+      if (no_longjmp_on_fatal_error)
+	return 0;
       top_level_cleanup ();      
       jump_to_top_level (DISCARD);
     }
@@ -886,7 +948,8 @@ array_expand_index (var, s, len)
    in *LENP.  This returns newly-allocated memory. */
 char *
 array_variable_name (s, subp, lenp)
-     char *s, **subp;
+     const char *s;
+     char **subp;
      int *lenp;
 {
   char *t, *ret;
@@ -930,7 +993,8 @@ array_variable_name (s, subp, lenp)
    If LENP is non-null, the length of the subscript is returned in *LENP. */
 SHELL_VAR *
 array_variable_part (s, subp, lenp)
-     char *s, **subp;
+     const char *s;
+     char **subp;
      int *lenp;
 {
   char *t;
@@ -939,14 +1003,10 @@ array_variable_part (s, subp, lenp)
   t = array_variable_name (s, subp, lenp);
   if (t == 0)
     return ((SHELL_VAR *)NULL);
-  var = find_variable (t);
+  var = find_variable (t);		/* XXX - handle namerefs here? */
 
   free (t);
-#if 0
-  return (var == 0 || invisible_p (var)) ? (SHELL_VAR *)0 : var;
-#else
   return var;	/* now return invisible variables; caller must handle */
-#endif
 }
 
 #define INDEX_ERROR() \
@@ -971,7 +1031,7 @@ array_variable_part (s, subp, lenp)
    reference is name[@], and 0 otherwise. */
 static char *
 array_value_internal (s, quoted, flags, rtype, indp)
-     char *s;
+     const char *s;
      int quoted, flags, *rtype;
      arrayind_t *indp;
 {
@@ -1029,7 +1089,8 @@ array_value_internal (s, quoted, flags, rtype, indp)
 	  free (temp);
 	}
       else	/* ${name[@]} or unquoted ${name[*]} */
-	retval = string_list_dollar_at (l, quoted);	/* XXX - leak here */
+        /* XXX - bash-4.4/bash-5.0 test AV_ASSIGNRHS and pass PF_ASSIGNRHS */
+	retval = string_list_dollar_at (l, quoted, (flags & AV_ASSIGNRHS) ? PF_ASSIGNRHS : 0);	/* XXX - leak here */
 
       dispose_words (l);
     }
@@ -1091,7 +1152,7 @@ array_value_internal (s, quoted, flags, rtype, indp)
    subscript contained in S, obeying quoting for subscripts * and @. */
 char *
 array_value (s, quoted, flags, rtype, indp)
-     char *s;
+     const char *s;
      int quoted, flags, *rtype;
      arrayind_t *indp;
 {
@@ -1104,7 +1165,7 @@ array_value (s, quoted, flags, rtype, indp)
    evaluator in expr.c. */
 char *
 get_array_value (s, flags, rtype, indp)
-     char *s;
+     const char *s;
      int flags, *rtype;
      arrayind_t *indp;
 {
@@ -1146,7 +1207,7 @@ array_keys (s, quoted)
       free (temp);
     }
   else	/* ${!name[@]} or unquoted ${!name[*]} */
-    retval = string_list_dollar_at (l, quoted);
+    retval = string_list_dollar_at (l, quoted, 0);
 
   dispose_words (l);
   return retval;

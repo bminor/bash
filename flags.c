@@ -1,7 +1,7 @@
 /* flags.c -- Everything about flags except the `set' command.  That
    is in builtins.c */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -90,6 +90,7 @@ int unbound_vars_is_error = 0;
 
 /* Non-zero means type out input lines after you read them. */
 int echo_input_at_read = 0;
+int verbose_flag = 0;
 
 /* Non-zero means type out the command definition after reading, but
    before executing. */
@@ -197,7 +198,7 @@ const struct flags_alist shell_flags[] = {
 #endif /* RESTRICTED_SHELL */
   { 't', &just_one_command },
   { 'u', &unbound_vars_is_error },
-  { 'v', &echo_input_at_read },
+  { 'v', &verbose_flag },
   { 'x', &echo_command_at_execute },
 
   /* New flags that control non-standard things. */
@@ -297,6 +298,9 @@ change_flag (flag, on_or_off)
       break;
 #endif
 
+    case 'v':
+      echo_input_at_read = verbose_flag;
+      break;
     }
 
   return (old_value);
@@ -324,14 +328,45 @@ which_set_flags ()
   return (temp);
 }
 
+char *
+get_current_flags ()
+{
+  char *temp;
+  int i;
+
+  temp = (char *)xmalloc (1 + NUM_SHELL_FLAGS);
+  for (i = 0; shell_flags[i].name; i++)
+    temp[i] = *(shell_flags[i].value);
+  temp[i] = '\0';
+  return (temp);
+}
+
+void
+set_current_flags (bitmap)
+     const char *bitmap;
+{
+  int i;
+
+  if (bitmap == 0)
+    return;
+  for (i = 0; shell_flags[i].name; i++)
+    *(shell_flags[i].value) = bitmap[i];
+}
+
 void
 reset_shell_flags ()
 {
-  mark_modified_vars = exit_immediately_on_error = disallow_filename_globbing = 0;
+  mark_modified_vars = disallow_filename_globbing = 0;
   place_keywords_in_env = read_but_dont_execute = just_one_command = 0;
-  noclobber = unbound_vars_is_error = echo_input_at_read = 0;
+  noclobber = unbound_vars_is_error = 0;
   echo_command_at_execute = jobs_m_flag = forced_interactive = 0;
-  no_symbolic_links = no_invisible_vars = privileged_mode = pipefail_opt = 0;
+  no_symbolic_links = no_invisible_vars = 0;
+  privileged_mode = pipefail_opt = 0;
+
+  error_trace_mode = function_trace_mode = 0;
+
+  exit_immediately_on_error = errexit_flag = 0;
+  echo_input_at_read = verbose_flag = 0;
 
   hashing_enabled = interactive_comments = 1;
 
@@ -340,7 +375,11 @@ reset_shell_flags ()
 #endif
 
 #if defined (BANG_HISTORY)
+#  if defined (STRICT_POSIX)
+  history_expansion = 0;
+#  else
   history_expansion = 1;
+#  endif /* STRICT_POSIX */
 #endif
 
 #if defined (BRACE_EXPANSION)

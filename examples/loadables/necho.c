@@ -25,6 +25,7 @@
 #include "builtins.h"
 #include "shell.h"
 
+int
 necho_builtin (list)
 WORD_LIST *list;
 {

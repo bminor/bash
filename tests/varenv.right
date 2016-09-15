@@ -60,12 +60,37 @@ FIN: asdf fdsa, asdf fdsa
 g: v = , w =
 f: v = , w =
 FIN: v = two, w = one
-declare -Ar FOOBAR='([foo]="bar" )'
-declare -Ar FOOBAR='([foo]="bar" )'
-declare -ar FOOBAR2='([0]="bar")'
-declare -ar FOOBAR2='([0]="bar")'
+./varenv4.sub: line 54: bbb: unique: cannot convert indexed to associative array
+after bbb: 1
+declare -Ar FOOBAR=([foo]="bar" )
+declare -Ar FOOBAR=([foo]="bar" )
+declare -ar FOOBAR2=([0]="bar")
+declare -ar FOOBAR2=([0]="bar")
 F OUTSIDE
 F OUTSIDE
+declare -ar outside=()
+declare -ir outside1="1"
+tempenv = foo
+0
+declare -ar myvar=([0]="0")
+1
+declare -ir myvar="1"
+declare -rx tempvar1='foo'
+declare -rx tempvar2='qux'
+./varenv7.sub: line 44: local: var: readonly variable
+inside: outside
+outside: outside
+local: unset1 unset2
+abc
+abc
+:1
+:2
+after: ----
+global:1
+global:2
+after: --global--
+after: ----
+x = :1:2
 a=z
 a=b
 a=z

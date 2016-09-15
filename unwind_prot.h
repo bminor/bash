@@ -21,6 +21,8 @@
 #if !defined (_UNWIND_PROT_H)
 #define _UNWIND_PROT_H
 
+extern void uwp_init __P((void));
+
 /* Run a function without interrupts. */
 extern void begin_unwind_frame __P((char *));
 extern void discard_unwind_frame __P((char *));
@@ -30,6 +32,7 @@ extern void remove_unwind_protect __P((void));
 extern void run_unwind_protects __P((void));
 extern void clear_unwind_protect_list __P((int));
 extern int have_unwind_protects __P((void));
+extern int unwind_protect_tag_on_stack __P((const char *));
 extern void uwp_init __P((void));
 
 /* Define for people who like their code to look a certain way. */

@@ -1,7 +1,7 @@
 This file is help.def, from which is created help.c.
 It implements the builtin "help" in Bash.
 
-Copyright (C) 1987-2013 Free Software Foundation, Inc.
+Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -34,7 +34,7 @@ Options:
   -d	output short description for each topic
   -m	display usage in pseudo-manpage format
   -s	output only a short usage synopsis for each topic matching
-	PATTERN
+		PATTERN
 
 Arguments:
   PATTERN	Pattern specifiying a help topic
@@ -58,6 +58,7 @@ $END
 #include <errno.h>
 
 #include <filecntl.h>
+#include <stddef.h>
 
 #include "../bashintl.h"
 
@@ -76,6 +77,9 @@ extern int errno;
 
 extern const char * const bash_copyright;
 extern const char * const bash_license;
+
+extern char *this_command_name;
+extern struct builtin *current_builtin;
 
 static void show_builtin_command_help __P((void));
 static int open_helpfile __P((char *));
@@ -109,6 +113,7 @@ help_builtin (list)
 	case 's':
 	  sflag = 1;
 	  break;
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);
@@ -185,6 +190,28 @@ help_builtin (list)
 
   fflush (stdout);
   return (EXECUTION_SUCCESS);
+}
+
+void
+builtin_help ()
+{
+  int ind;
+  ptrdiff_t d;
+
+  current_builtin = builtin_address_internal (this_command_name, 0);
+  if (current_builtin == 0)
+    return;
+
+  d = current_builtin - shell_builtins;
+
+#if defined (__STDC__)
+  ind = (int)d;
+#else
+  ind = (int)d / sizeof (struct builtin);
+#endif
+
+  printf ("%s: %s\n", this_command_name, _(shell_builtins[ind].short_doc));
+  show_longdoc (ind);  
 }
 
 static int
@@ -348,7 +375,7 @@ dispcolumn (i, buf, bufsize, width, height)
      int width, height;
 {
   int j;
-  int displen;
+  int dispcols;
   char *helpdoc;
 
   /* first column */
@@ -365,9 +392,9 @@ dispcolumn (i, buf, bufsize, width, height)
       return;
     }
 
-  displen = strlen (buf);
+  dispcols = strlen (buf);
   /* two spaces */
-  for (j = displen; j < width; j++)
+  for (j = dispcols; j < width; j++)
     putc (' ', stdout);
 
   /* second column */
@@ -390,7 +417,7 @@ wdispcolumn (i, buf, bufsize, width, height)
      int width, height;
 {
   int j;
-  int displen;
+  int dispcols, dispchars;
   char *helpdoc;
   wchar_t *wcstr;
   size_t slen, n;
@@ -420,23 +447,29 @@ wdispcolumn (i, buf, bufsize, width, height)
     if (wcstr[j] == L'\n' || wcstr[j] == L'\t')
       wcstr[j] = L' ';
 
-  displen = wcsnwidth (wcstr+1, slen, width - 2) + 1;	/* +1 for ' ' or '*' */
-  
+  /* dispchars == number of characters that will be displayed */
+  dispchars = wcsnwidth (wcstr+1, slen, width - 2);
+  /* dispcols == number of columns required to display DISPCHARS */
+  dispcols = wcswidth (wcstr+1, dispchars) + 1;	/* +1 for ' ' or '*' */
+
   wcstr[0] = (shell_builtins[i].flags & BUILTIN_ENABLED) ? L' ' : L'*';
 
-  /* This assumes each wide char takes up one column position when displayed */
-  wcstr[width - 2] = L'>';		/* indicate truncation */
-  wcstr[width - 1] = L'\0';
+  if (dispcols >= width-2)
+    {
+      wcstr[dispchars] = L'>';		/* indicate truncation */
+      wcstr[dispchars+1] = L'\0';
+    }
 
   printf ("%ls", wcstr);
   if (((i << 1) >= num_shell_builtins) || (i+height >= num_shell_builtins))
     {
       printf ("\n");
+      free (wcstr);
       return;
     }
 
   /* at least one space */
-  for (j = displen; j < width; j++)
+  for (j = dispcols; j < width; j++)
     putc (' ', stdout);
 
   /* second column */
@@ -446,6 +479,7 @@ wdispcolumn (i, buf, bufsize, width, height)
     {
       /* for now */
       printf ("%c%s\n", (shell_builtins[i+height].flags & BUILTIN_ENABLED) ? ' ' : '*', helpdoc);
+      free (wcstr);
       return;
     }
 
@@ -460,13 +494,20 @@ wdispcolumn (i, buf, bufsize, width, height)
     if (wcstr[j] == L'\n' || wcstr[j] == L'\t')
       wcstr[j] = L' ';
 
-  displen = wcsnwidth (wcstr+1, slen, width - 2);
+  /* dispchars == number of characters that will be displayed */
+  dispchars = wcsnwidth (wcstr+1, slen, width - 2);
+  dispcols = wcswidth (wcstr+1, dispchars) + 1;	/* +1 for ' ' or '*' */
   
   wcstr[0] = (shell_builtins[i+height].flags & BUILTIN_ENABLED) ? L' ' : L'*';
 
-  /* This assumes each wide char takes up one column position when displayed */
-  wcstr[width - 3] = L'>';		/* indicate truncation */
-  wcstr[width - 2] = L'\0';
+  /* The dispchars-1 is there for terminals that behave strangely when you
+     have \n in the nth column for terminal width n; this is what bash-4.3
+     did. */
+  if (dispcols >= width - 2)
+    {
+      wcstr[dispchars-1] = L'>';		/* indicate truncation */
+      wcstr[dispchars] = L'\0';
+    }
 
   printf ("%ls\n", wcstr);
 

@@ -1,6 +1,6 @@
 /* kill.c -- kill ring management. */
 
-/* Copyright (C) 1994 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2015 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -97,7 +97,7 @@ _rl_copy_to_kill_ring (text, append)
   int slot;
 
   /* First, find the slot to work with. */
-  if (_rl_last_command_was_kill == 0)
+  if (_rl_last_command_was_kill == 0 || rl_kill_ring == 0)
     {
       /* Get a new slot.  */
       if (rl_kill_ring == 0)
@@ -278,7 +278,7 @@ rl_backward_kill_line (direction, ignore)
     return (rl_kill_line (1, ignore));
   else
     {
-      if (!rl_point)
+      if (rl_point == 0)
 	rl_ding ();
       else
 	{
@@ -506,7 +506,7 @@ rl_yank (count, ignore)
   if (rl_kill_ring == 0)
     {
       _rl_abort_internal ();
-      return -1;
+      return 1;
     }
 
   _rl_set_mark_at_pos (rl_point);
@@ -528,7 +528,7 @@ rl_yank_pop (count, key)
       !rl_kill_ring)
     {
       _rl_abort_internal ();
-      return -1;
+      return 1;
     }
 
   l = strlen (rl_kill_ring[rl_kill_index]);
@@ -546,9 +546,43 @@ rl_yank_pop (count, key)
   else
     {
       _rl_abort_internal ();
-      return -1;
+      return 1;
     }
 }
+
+#if defined (VI_MODE)
+int
+rl_vi_yank_pop (count, key)
+     int count, key;
+{
+  int l, n;
+
+  if (((rl_last_func != rl_vi_yank_pop) && (rl_last_func != rl_vi_put)) ||
+      !rl_kill_ring)
+    {
+      _rl_abort_internal ();
+      return 1;
+    }
+
+  l = strlen (rl_kill_ring[rl_kill_index]);
+  n = rl_point - l;
+  if (n >= 0 && STREQN (rl_line_buffer + n, rl_kill_ring[rl_kill_index], l))
+    {
+      rl_delete_text (n, rl_point);
+      rl_point = n;
+      rl_kill_index--;
+      if (rl_kill_index < 0)
+	rl_kill_index = rl_kill_ring_length - 1;
+      rl_vi_put (1, 'p');
+      return 0;
+    }
+  else
+    {
+      _rl_abort_internal ();
+      return 1;
+    }
+}
+#endif /* VI_MODE */
 
 /* Yank the COUNTh argument from the previous history line, skipping
    HISTORY_SKIP lines before looking for the `previous line'. */
@@ -575,7 +609,7 @@ rl_yank_nth_arg_internal (count, ignore, history_skip)
   if (entry == 0)
     {
       rl_ding ();
-      return -1;
+      return 1;
     }
 
   arg = history_arg_extract (count, count, entry->line);
@@ -583,7 +617,7 @@ rl_yank_nth_arg_internal (count, ignore, history_skip)
     {
       rl_ding ();
       FREE (arg);
-      return -1;
+      return 1;
     }
 
   rl_begin_undo_group ();
@@ -656,8 +690,58 @@ rl_yank_last_arg (count, key)
   return retval;
 }
 
-/* A special paste command for users of Cygnus's cygwin32. */
-#if defined (__CYGWIN__)
+/* Having read the special escape sequence denoting the beginning of a
+   `bracketed paste' sequence, read the rest of the pasted input until the
+   closing sequence and insert the pasted text as a single unit without
+   interpretation. */
+int
+rl_bracketed_paste_begin (count, key)
+     int count, key;
+{
+  int retval, c;
+  size_t len, cap;
+  char *buf;
+
+  retval = 1;
+  len = 0;
+  buf = xmalloc (cap = 64);
+
+  RL_SETSTATE (RL_STATE_MOREINPUT);
+  while ((c = rl_read_key ()) >= 0)
+    {
+      if (RL_ISSTATE (RL_STATE_MACRODEF))
+	_rl_add_macro_char (c);
+
+      if (c == '\r')		/* XXX */
+	c = '\n';
+
+      if (len == cap)
+	buf = xrealloc (buf, cap *= 2);
+
+      buf[len++] = c;
+      if (len >= BRACK_PASTE_SLEN && c == BRACK_PASTE_LAST &&
+	  STREQN (buf + len - BRACK_PASTE_SLEN, BRACK_PASTE_SUFF, BRACK_PASTE_SLEN))
+	{
+	  len -= BRACK_PASTE_SLEN;
+	  break;
+	}
+    }
+  RL_UNSETSTATE (RL_STATE_MOREINPUT);
+
+  if (c >= 0)
+    {
+      if (len == cap)
+	buf = xrealloc (buf, cap + 1);
+      buf[len] = '\0';
+      retval = rl_insert_text (buf);
+    }
+
+  xfree (buf);
+  return (retval);
+}
+
+/* A special paste command for Windows users.. */
+#if defined (_WIN32)
 #include <windows.h>
 
 int
@@ -691,4 +775,4 @@ rl_paste_from_clipboard (count, key)
     }
   return (0);
 }
-#endif /* __CYGWIN__ */
+#endif /* _WIN32 */

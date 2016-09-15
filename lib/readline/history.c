@@ -1,6 +1,6 @@
 /* history.c -- standalone history library */
 
-/* Copyright (C) 1989-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2015 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -43,10 +43,19 @@
 #  include <unistd.h>
 #endif
 
+#include <errno.h>
+
 #include "history.h"
 #include "histlib.h"
 
 #include "xmalloc.h"
+
+#if !defined (errno)
+extern int errno;
+#endif
+
+/* How big to make the_history when we first allocate it. */
+#define DEFAULT_HISTORY_INITIAL_SIZE	502
 
 /* The number of slots to increase the_history by. */
 #define DEFAULT_HISTORY_GROW_SIZE 50
@@ -236,7 +245,10 @@ history_get_time (hist)
   ts = hist->timestamp;
   if (ts[0] != history_comment_char)
     return 0;
+  errno = 0;
   t = (time_t) strtol (ts + 1, (char **)NULL, 10);		/* XXX - should use strtol() here */
+  if (errno == ERANGE)
+    return (time_t)0;
   return t;
 }
 
@@ -279,9 +291,14 @@ add_history (string)
       if (the_history[0])
 	(void) free_history_entry (the_history[0]);
 
-      /* Copy the rest of the entries, moving down one slot. */
+      /* Copy the rest of the entries, moving down one slot.  Copy includes
+	 trailing NULL.  */
+#if 0
       for (i = 0; i < history_length; i++)
 	the_history[i] = the_history[i + 1];
+#else
+      memmove (the_history, the_history + 1, history_length * sizeof (HIST_ENTRY *));
+#endif
 
       history_base++;
     }
@@ -289,7 +306,10 @@ add_history (string)
     {
       if (history_size == 0)
 	{
-	  history_size = DEFAULT_HISTORY_GROW_SIZE;
+	  if (history_stifled && history_max_entries > 0)
+	    history_size = history_max_entries + 2;
+	  else
+	    history_size = DEFAULT_HISTORY_INITIAL_SIZE;
 	  the_history = (HIST_ENTRY **)xmalloc (history_size * sizeof (HIST_ENTRY *));
 	  history_length = 1;
 	}
@@ -305,7 +325,7 @@ add_history (string)
 	}
     }
 
-  temp = alloc_history_entry (string, hist_inittime ());
+  temp = alloc_history_entry ((char *)string, hist_inittime ());
 
   the_history[history_length] = (HIST_ENTRY *)NULL;
   the_history[history_length - 1] = temp;
@@ -387,6 +407,30 @@ replace_history_entry (which, line, data)
   return (old_value);
 }
 
+/* Append LINE to the history line at offset WHICH, adding a newline to the
+   end of the current line first.  This can be used to construct multi-line
+   history entries while reading lines from the history file. */
+void
+_hs_append_history_line (which, line)
+     int which;
+     const char *line;
+{
+  HIST_ENTRY *hent;
+  size_t newlen, curlen;
+  char *newline;
+
+  hent = the_history[which];
+  curlen = strlen (hent->line);
+  newlen = curlen + strlen (line) + 2;
+  newline = realloc (hent->line, newlen);
+  if (newline)
+    {
+      hent->line = newline;
+      hent->line[curlen++] = '\n';
+      strcpy (hent->line + curlen, line);
+    }
+}
+
 /* Replace the DATA in the specified history entries, replacing OLD with
    NEW.  WHICH says which one(s) to replace:  WHICH == -1 means to replace
    all of the history entries where entry->data == OLD; WHICH == -2 means
@@ -394,7 +438,7 @@ replace_history_entry (which, line, data)
    WHICH >= 0 means to replace that particular history entry's data, as
    long as it matches OLD. */
 void
-replace_history_data (which, old, new)
+_hs_replace_history_data (which, old, new)
      int which;
      histdata_t *old, *new;
 {

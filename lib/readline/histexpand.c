@@ -1,6 +1,6 @@
 /* histexpand.c -- history expansion. */
 
-/* Copyright (C) 1989-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2015 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -44,12 +44,14 @@
 
 #include "history.h"
 #include "histlib.h"
+#include "chardefs.h"
 
 #include "rlshell.h"
 #include "xmalloc.h"
 
 #define HISTORY_WORD_DELIMITERS		" \t\n;&()|<>"
 #define HISTORY_QUOTE_CHARACTERS	"\"'`"
+#define HISTORY_EVENT_DELIMITERS	"^$*%-"
 
 #define slashify_in_quotes "\\`\"$"
 
@@ -61,6 +63,10 @@ static char *subst_lhs;
 static char *subst_rhs;
 static int subst_lhs_len;
 static int subst_rhs_len;
+
+/* Characters that delimit history event specifications and separate event
+   specifications from word designators.  Static for now */
+static char *history_event_delimiter_chars = HISTORY_EVENT_DELIMITERS;
 
 static char *get_history_word_specifier PARAMS((char *, char *, int *));
 static int history_tokenize_word PARAMS((const char *, int));
@@ -112,7 +118,6 @@ rl_linebuf_func_t *history_inhibit_expansion_function;
 
 /* The last string searched for by a !?string? search. */
 static char *search_string;
-
 /* The last string matched by a !?string? search. */
 static char *search_match;
 
@@ -225,6 +230,7 @@ get_history_event (string, caller_index, delimiting_quote)
 
 #endif /* HANDLE_MULTIBYTE */
       if ((!substring_okay && (whitespace (c) || c == ':' ||
+          (history_event_delimiter_chars && member (c, history_event_delimiter_chars)) ||
 	  (history_search_delimiter_chars && member (c, history_search_delimiter_chars)) ||
 	  string[i] == delimiting_quote)) ||
 	  string[i] == '\n' ||
@@ -873,7 +879,7 @@ history_expand_internal (string, start, qc, end_index_ptr, ret_string, current_l
    1) If expansions did take place
    2) If the `p' modifier was given and the caller should print the result
 
-  If an error ocurred in expansion, then OUTPUT contains a descriptive
+  If an error occurred in expansion, then OUTPUT contains a descriptive
   error message. */
 
 #define ADD_STRING(s) \
@@ -991,6 +997,7 @@ history_expand (hstring, output)
 	     history expansion performed on it.
 	     Skip the rest of the line and break out of the loop. */
 	  if (history_comment_char && string[i] == history_comment_char &&
+	      dquote == 0 &&
 	      (i == 0 || member (string[i - 1], history_word_delimiters)))
 	    {
 	      while (string[i])
@@ -1149,7 +1156,8 @@ history_expand (hstring, output)
 	  }
 
 	case -2:		/* history_comment_char */
-	  if (i == 0 || member (string[i - 1], history_word_delimiters))
+	  if ((dquote == 0 || history_quotes_inhibit_expansion == 0) &&
+	      (i == 0 || member (string[i - 1], history_word_delimiters)))
 	    {
 	      temp = (char *)xmalloc (l - i + 1);
 	      strcpy (temp, string + i);
@@ -1213,7 +1221,7 @@ history_expand (hstring, output)
 		    ADD_STRING (temp);
 		  xfree (temp);
 		}
-	      only_printing = r == 1;
+	      only_printing += r == 1;
 	      i = eindex;
 	    }
 	  break;
@@ -1414,7 +1422,7 @@ history_tokenize_word (string, ind)
      const char *string;
      int ind;
 {
-  register int i;
+  register int i, j;
   int delimiter, nestdelim, delimopen;
 
   i = ind;
@@ -1424,6 +1432,22 @@ history_tokenize_word (string, ind)
     {
       i++;
       return i;
+    }
+
+  if (ISDIGIT (string[i]))
+    {
+      j = i;
+      while (string[j] && ISDIGIT (string[j]))
+	j++;
+      if (string[j] == 0)
+	return (j);
+      if (string[j] == '<' || string[j] == '>')
+	i = j;			/* digit sequence is a file descriptor */
+      else
+	{
+	  i = j;
+	  goto get_word;	/* digit sequence is part of a word */
+	}
     }
 
   if (member (string[i], "<>;&|$"))
@@ -1439,8 +1463,16 @@ history_tokenize_word (string, ind)
 	  i += 2;
 	  return i;
 	}
-      else if ((peek == '&' && (string[i] == '>' || string[i] == '<')) ||
-		(peek == '>' && string[i] == '&'))
+      else if (peek == '&' && (string[i] == '>' || string[i] == '<'))
+	{
+	  j = i + 2;
+	  while (string[j] && ISDIGIT (string[j]))	/* file descriptor */
+	    j++;
+	  if (string[j] =='-')		/* <&[digits]-, >&[digits]- */
+	    j++;
+	  return j;
+	}
+      else if ((peek == '>' && string[i] == '&') || (peek == '|' && string[i] == '>'))
 	{
 	  i += 2;
 	  return i;

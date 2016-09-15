@@ -75,6 +75,7 @@ typedef struct compspec {
 #define COPT_NOSPACE	(1<<5)
 #define COPT_BASHDEFAULT (1<<6)
 #define COPT_PLUSDIRS	(1<<7)
+#define COPT_NOSORT	(1<<8)
 
 /* List of items is used by the code that implements the programmable
    completions. */

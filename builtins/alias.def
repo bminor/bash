@@ -1,7 +1,7 @@
 This file is alias.def, from which is created alias.c
 It implements the builtins "alias" and "unalias" in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -33,7 +33,7 @@ A trailing space in VALUE causes the next word to be checked for
 alias substitution when the alias is expanded.
 
 Options:
-  -p	Print all defined aliases in a reusable format
+  -p	print all defined aliases in a reusable format
 
 Exit Status:
 alias returns true unless a NAME is supplied for which no alias has been
@@ -87,6 +87,7 @@ alias_builtin (list)
 	  pflag = 1;
 	  dflags |= AL_REUSABLE;
 	  break;
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);
@@ -160,7 +161,7 @@ $SHORT_DOC unalias [-a] name [name ...]
 Remove each NAME from the list of defined aliases.
 
 Options:
-  -a	remove all alias definitions.
+  -a	remove all alias definitions
 
 Return success unless a NAME is not an existing alias.
 $END
@@ -183,6 +184,7 @@ unalias_builtin (list)
 	case 'a':
 	  aflag = 1;
 	  break;
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);
@@ -232,7 +234,7 @@ print_alias (alias, flags)
 
   value = sh_single_quote (alias->value);
   if (flags & AL_REUSABLE)
-    printf ("alias ");
+    printf ("alias %s", (alias->name && alias->name[0] == '-') ? "-- " : "");
   printf ("%s=%s\n", alias->name, value);
   free (value);
 

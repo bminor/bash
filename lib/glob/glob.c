@@ -84,7 +84,7 @@ struct globval
   };
 
 extern void throw_to_top_level __P((void));
-extern int sh_eaccess __P((char *, int));
+extern int sh_eaccess __P((const char *, int));
 extern char *sh_makepath __P((const char *, const char *, int));
 extern int signal_is_pending __P((int));
 extern void run_pending_traps __P((void));
@@ -1061,7 +1061,10 @@ glob_filename (pathname, flags)
       directory_name = (char *) malloc (directory_len + 1);
 
       if (directory_name == 0)		/* allocation failed? */
-	return (NULL);
+	{
+	  free (result);
+	  return (NULL);
+	}
 
       bcopy (pathname, directory_name, directory_len);
       directory_name[directory_len] = '\0';
@@ -1249,7 +1252,12 @@ glob_filename (pathname, flags)
 		(char **)realloc (result, (result_size + l) * sizeof (char *));
 
 	      if (result == NULL)
-		goto memory_error;
+		{
+		  for (l = 0; array[l]; ++l)
+		    free (array[l]);
+		  free ((char *)array);
+		  goto memory_error;
+		}
 
 	      for (l = 0; array[l] != NULL; ++l)
 		result[result_size++ - 1] = array[l];
@@ -1281,7 +1289,11 @@ only_filename:
     {
       result = (char **) realloc ((char *) result, 2 * sizeof (char *));
       if (result == NULL)
-	return (NULL);
+	{
+	  if (free_dirname)
+	    free (directory_name);
+	  return (NULL);
+	}
       /* Handle GX_MARKDIRS here. */
       result[0] = (char *) malloc (directory_len + 1);
       if (result[0] == NULL)

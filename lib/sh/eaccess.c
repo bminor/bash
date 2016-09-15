@@ -53,9 +53,9 @@ extern int errno;
 #endif /* R_OK */
 
 static int path_is_devfd __P((const char *));
-static int sh_stataccess __P((char *, int));
+static int sh_stataccess __P((const char *, int));
 #if HAVE_DECL_SETREGID
-static int sh_euidaccess __P((char *, int));
+static int sh_euidaccess __P((const char *, int));
 #endif
 
 static int
@@ -135,7 +135,7 @@ sh_stat (path, finfo)
    executable.  This version uses stat(2). */
 static int
 sh_stataccess (path, mode)
-     char *path;
+     const char *path;
      int mode;
 {
   struct stat st;
@@ -172,7 +172,7 @@ sh_stataccess (path, mode)
    the effective and real uid and gid as appropriate. */
 static int
 sh_euidaccess (path, mode)
-     char *path;
+     const char *path;
      int mode;
 {
   int r, e;
@@ -197,7 +197,7 @@ sh_euidaccess (path, mode)
 
 int
 sh_eaccess (path, mode)
-     char *path;
+     const char *path;
      int mode;
 {
   int ret;

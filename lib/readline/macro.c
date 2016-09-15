@@ -219,7 +219,7 @@ rl_start_kbd_macro (ignore1, ignore2)
   if (RL_ISSTATE (RL_STATE_MACRODEF))
     {
       _rl_abort_internal ();
-      return -1;
+      return 1;
     }
 
   if (rl_explicit_arg)
@@ -244,7 +244,7 @@ rl_end_kbd_macro (count, ignore)
   if (RL_ISSTATE (RL_STATE_MACRODEF) == 0)
     {
       _rl_abort_internal ();
-      return -1;
+      return 1;
     }
 
   current_macro_index -= rl_key_sequence_length;

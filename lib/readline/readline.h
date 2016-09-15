@@ -1,6 +1,6 @@
 /* Readline.h -- the names of functions callable from within readline. */
 
-/* Copyright (C) 1987-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -39,9 +39,9 @@ extern "C" {
 #endif
 
 /* Hex-encoded Readline version number. */
-#define RL_READLINE_VERSION	0x0603		/* Readline 6.3 */
-#define RL_VERSION_MAJOR	6
-#define RL_VERSION_MINOR	3
+#define RL_READLINE_VERSION	0x0700		/* Readline 7.0 */
+#define RL_VERSION_MAJOR	7
+#define RL_VERSION_MINOR	0
 
 /* Readline data structures. */
 
@@ -172,8 +172,9 @@ extern int rl_yank PARAMS((int, int));
 extern int rl_yank_pop PARAMS((int, int));
 extern int rl_yank_nth_arg PARAMS((int, int));
 extern int rl_yank_last_arg PARAMS((int, int));
-/* Not available unless __CYGWIN__ is defined. */
-#ifdef __CYGWIN__
+extern int rl_bracketed_paste_begin PARAMS((int, int));
+/* Not available unless _WIN32 is defined. */
+#if defined (_WIN32)
 extern int rl_paste_from_clipboard PARAMS((int, int));
 #endif
 
@@ -219,6 +220,7 @@ extern int rl_insert_close PARAMS((int, int));
 extern void rl_callback_handler_install PARAMS((const char *, rl_vcpfunc_t *));
 extern void rl_callback_read_char PARAMS((void));
 extern void rl_callback_handler_remove PARAMS((void));
+extern void rl_callback_sigcleanup PARAMS((void));
 
 /* Things for vi mode. Not available unless readline is compiled -DVI_MODE. */
 /* VI-mode bindable commands. */
@@ -247,9 +249,11 @@ extern int rl_vi_column PARAMS((int, int));
 extern int rl_vi_delete_to PARAMS((int, int));
 extern int rl_vi_change_to PARAMS((int, int));
 extern int rl_vi_yank_to PARAMS((int, int));
+extern int rl_vi_yank_pop PARAMS((int, int));
 extern int rl_vi_rubout PARAMS((int, int));
 extern int rl_vi_delete PARAMS((int, int));
 extern int rl_vi_back_to_indent PARAMS((int, int));
+extern int rl_vi_unix_word_rubout PARAMS((int, int));
 extern int rl_vi_first_print PARAMS((int, int));
 extern int rl_vi_char_search PARAMS((int, int));
 extern int rl_vi_match PARAMS((int, int));
@@ -375,6 +379,7 @@ extern void rl_redisplay PARAMS((void));
 extern int rl_on_new_line PARAMS((void));
 extern int rl_on_new_line_with_prompt PARAMS((void));
 extern int rl_forced_update_display PARAMS((void));
+extern int rl_clear_visible_line PARAMS((void));
 extern int rl_clear_message PARAMS((void));
 extern int rl_reset_line_state PARAMS((void));
 extern int rl_crlf PARAMS((void));
@@ -389,6 +394,7 @@ extern int rl_show_char PARAMS((int));
 
 /* Undocumented in texinfo manual. */
 extern int rl_character_len PARAMS((int, int));
+extern void rl_redraw_prompt_last_line PARAMS((void));
 
 /* Save and restore internal prompt redisplay information. */
 extern void rl_save_prompt PARAMS((void));
@@ -435,6 +441,8 @@ extern int rl_clear_signals PARAMS((void));
 extern void rl_cleanup_after_signal PARAMS((void));
 extern void rl_reset_after_signal PARAMS((void));
 extern void rl_free_line_state PARAMS((void));
+
+extern int rl_pending_signal PARAMS((void));
 
 extern void rl_echo_signal_char PARAMS((int)); 
 
@@ -489,7 +497,7 @@ extern int rl_readline_version;			/* e.g., 0x0402 */
 extern int rl_gnu_readline_p;
 
 /* Flags word encapsulating the current readline state. */
-extern int rl_readline_state;
+extern unsigned long rl_readline_state;
 
 /* Says which editing mode readline is currently using.  1 means emacs mode;
    0 means vi mode. */
@@ -634,7 +642,7 @@ extern rl_compentry_func_t *rl_completion_entry_function;
 
 /* Optional generator for menu completion.  Default is
    rl_completion_entry_function (rl_filename_completion_function). */
- extern rl_compentry_func_t *rl_menu_completion_entry_function;
+extern rl_compentry_func_t *rl_menu_completion_entry_function;
 
 /* If rl_ignore_some_completions_function is non-NULL it is the address
    of a function to call after all of the possible matches have been
@@ -826,6 +834,14 @@ extern int rl_ignore_completion_duplicates;
    completion character will be inserted as any other. */
 extern int rl_inhibit_completion;
 
+/* Applications can set this to non-zero to have readline's signal handlers
+   installed during the entire duration of reading a complete line, as in
+   readline-6.2.  This should be used with care, because it can result in
+   readline receiving signals and not handling them until it's called again
+   via rl_callback_read_char, thereby stealing them from the application.
+   By default, signal handlers are only active while readline is active. */   
+extern int rl_persistent_signal_handlers;
+
 /* Input error; can be returned by (*rl_getc_function) if readline is reading
    a top-level command (RL_ISSTATE (RL_STATE_READCMD)). */
 #define READERR			(-2)
@@ -866,9 +882,10 @@ extern int rl_inhibit_completion;
 #define RL_STATE_VIMOTION	0x0100000	/* reading vi motion arg */
 #define RL_STATE_MULTIKEY	0x0200000	/* reading multiple-key command */
 #define RL_STATE_VICMDONCE	0x0400000	/* entered vi command mode at least once */
-#define RL_STATE_REDISPLAYING	0x0800000	/* updating terminal display */
+#define RL_STATE_CHARSEARCH	0x0800000	/* vi mode char search */
+#define RL_STATE_REDISPLAYING	0x1000000	/* updating terminal display */
 
-#define RL_STATE_DONE		0x1000000	/* done; accepted line */
+#define RL_STATE_DONE		0x2000000	/* done; accepted line */
 
 #define RL_SETSTATE(x)		(rl_readline_state |= (x))
 #define RL_UNSETSTATE(x)	(rl_readline_state &= ~(x))
@@ -879,8 +896,8 @@ struct readline_state {
   int point;
   int end;
   int mark;
-  char *buffer;
   int buflen;
+  char *buffer;
   UNDO_LIST *ul;
   char *prompt;
 
@@ -893,10 +910,12 @@ struct readline_state {
   rl_command_func_t *lastfunc;
   int insmode;
   int edmode;
+  char *kseq;
   int kseqlen;
+
+  int pendingin;
   FILE *inf;
   FILE *outf;
-  int pendingin;
   char *macro;
 
   /* signal state */
@@ -906,9 +925,16 @@ struct readline_state {
   /* search state */
 
   /* completion state */
+  rl_compentry_func_t *entryfunc;
+  rl_compentry_func_t *menuentryfunc;
+  rl_compignore_func_t *ignorefunc;
+  rl_completion_func_t *attemptfunc;
+  char *wordbreakchars;
 
   /* options state */
 
+  /* hook state */
+  
   /* reserved for future expansion, so the struct size doesn't change */
   char reserved[64];
 };

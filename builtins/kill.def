@@ -1,7 +1,7 @@
 This file is kill.def, from which is created kill.c.
 It implements the builtin "kill" in Bash.
 
-Copyright (C) 1987-2010 Free Software Foundation, Inc.
+Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -33,7 +33,8 @@ Options:
   -s sig	SIG is a signal name
   -n sig	SIG is a signal number
   -l	list the signal names; if arguments follow `-l' they are
-	assumed to be signal numbers for which names should be listed
+		assumed to be signal numbers for which names should be listed
+  -L	synonym for -l
 
 Kill is a shell builtin for two reasons: it allows job IDs to be used
 instead of process IDs, and allows processes to be killed if the limit
@@ -96,6 +97,7 @@ kill_builtin (list)
       builtin_usage ();
       return (EX_USAGE);
     }
+  CHECK_HELPOPT (list);
 
   any_succeeded = listing = saw_signal = 0;
   sig = SIGTERM;
@@ -107,7 +109,7 @@ kill_builtin (list)
     {
       word = list->word->word;
 
-      if (ISOPTION (word, 'l'))
+      if (ISOPTION (word, 'l') || ISOPTION (word, 'L'))
 	{
 	  listing++;
 	  list = list->next;

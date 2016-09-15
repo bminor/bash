@@ -321,7 +321,10 @@ read_alias_file (fname, fname_len)
 					? alias_len + value_len : 1024));
 		  char *new_pool = (char *) realloc (string_space, new_size);
 		  if (new_pool == NULL)
-		    return added;
+		    {
+		      fclose (fp);
+		      return added;
+		    }
 
 		  if (__builtin_expect (string_space != new_pool, 0))
 		    {

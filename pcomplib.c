@@ -37,7 +37,7 @@
 #include "shell.h"
 #include "pcomplete.h"
 
-#define COMPLETE_HASH_BUCKETS	128	/* must be power of two */
+#define COMPLETE_HASH_BUCKETS	256	/* must be power of two */
 
 #define STRDUP(x)	((x) ? savestring (x) : (char *)NULL)
 
@@ -96,7 +96,7 @@ compspec_copy (cs)
 
   new = (COMPSPEC *)xmalloc (sizeof (COMPSPEC));
 
-  new->refcount = cs->refcount;
+  new->refcount = 1; 	/* was cs->refcount, but this is a fresh copy */
   new->actions = cs->actions;
   new->options = cs->options;
 

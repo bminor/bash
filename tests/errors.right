@@ -35,7 +35,7 @@ hash: usage: hash [-lr] [-p pathname] [-dt] [name ...]
 ./errors.tests: line 106: hash: hashing disabled
 ./errors.tests: line 109: export: `AA[4]': not a valid identifier
 ./errors.tests: line 110: readonly: `AA[4]': not a valid identifier
-./errors.tests: line 113: [-2]: bad array subscript
+./errors.tests: line 113: unset: [-2]: bad array subscript
 ./errors.tests: line 117: AA: readonly variable
 ./errors.tests: line 121: AA: readonly variable
 ./errors.tests: line 129: shift: 5: shift count out of range
@@ -110,4 +110,27 @@ after f
 ./errors3.sub: line 5: no_such_file: No such file or directory
 TEST
 ./errors3.sub: line 7: no_such_file: No such file or directory
-./errors.tests: line 271: `!!': not a valid identifier
+1
+2
+./errors4.sub: line 7: var: readonly variable
+after readonly assignment
+./errors4.sub: line 13: break: x: numeric argument required
+1
+2
+./errors4.sub: line 7: var: readonly variable
+./errors5.sub: line 6: array: unbound variable
+./errors5.sub: line 7: array: unbound variable
+./errors5.sub: line 10: 7: unbound variable
+./errors5.sub: line 11: 7: unbound variable
+after 1: 1
+after 2: 1
+after 3: 1
+array after 1: 1
+array after 2: 1
+./errors6.sub: line 18: ${-3}: bad substitution
+./errors6.sub: line 19: -3: bad substitution
+after indir: 1
+./errors6.sub: line 18: ${-3}: bad substitution
+./errors6.sub: line 19: -3: bad substitution
+after indir: 1
+./errors.tests: line 278: `!!': not a valid identifier

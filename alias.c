@@ -1,7 +1,7 @@
 /* alias.c -- Not a full alias, but just the kind that we use in the
    shell.  Csh style alias is somewhere else (`over there, in a box'). */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -42,7 +42,11 @@
 #  include "pcomplete.h"
 #endif
 
-#define ALIAS_HASH_BUCKETS	16	/* must be power of two */
+#if defined (HAVE_MBSTR_H) && defined (HAVE_MBSCHR)
+#  include <mbstr.h>		/* mbschr */
+#endif
+
+#define ALIAS_HASH_BUCKETS	64	/* must be power of two */
 
 typedef int sh_alias_map_func_t __P((alias_t *));
 

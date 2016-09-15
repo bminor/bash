@@ -1,7 +1,7 @@
 @ignore
 This file documents the user interface to the GNU History library.
 
-Copyright (C) 1988-2014 Free Software Foundation, Inc.
+Copyright (C) 1988-2016 Free Software Foundation, Inc.
 Authored by Brian Fox and Chet Ramey.
 
 Permission is granted to make and distribute verbatim copies of this manual
@@ -242,6 +242,7 @@ is greater than the history length, return a @code{NULL} pointer.
 
 @deftypefun time_t history_get_time (HIST_ENTRY *entry)
 Return the time stamp associated with the history entry @var{entry}.
+If the timestamp is missing or invalid, return 0.
 @end deftypefun
 
 @deftypefun int history_total_bytes (void)
@@ -270,9 +271,11 @@ a @code{NULL} pointer.
 @end deftypefun
 
 @deftypefun {HIST_ENTRY *} next_history (void)
-Move the current history offset forward to the next history entry, and
-return the a pointer to that entry.  If there is no next entry, return
-a @code{NULL} pointer.
+If the current history offset refers to a valid history entry,
+increment the current history offset.
+If the possibly-incremented history offset refers to a valid history
+entry, return a pointer to that entry;
+otherwise, return a @code{BNULL} pointer.
 @end deftypefun
 
 @node Searching the History List
@@ -467,8 +470,8 @@ carriage return, and @samp{=}.
 @end deftypevar
 
 @deftypevar int history_quotes_inhibit_expansion
-If non-zero, single-quoted words are not scanned for the history expansion
-character.  The default value is 0.
+If non-zero, double-quoted words are not scanned for the history expansion
+character or the history comment character.  The default value is 0.
 @end deftypevar
 
 @deftypevar {rl_linebuf_func_t *} history_inhibit_expansion_function

@@ -1,6 +1,6 @@
 /* evalfile.c - read and evaluate commands from a file or file descriptor */
 
-/* Copyright (C) 1996-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -43,6 +43,8 @@
 #include "../execute_cmd.h"
 #include "../trap.h"
 
+#include <y.tab.h>
+
 #if defined (HISTORY)
 #  include "../bashhist.h"
 #endif
@@ -71,6 +73,7 @@ extern int indirection_level, subshell_environment;
 extern int return_catch_flag, return_catch_value;
 extern int last_command_exit_value;
 extern int executing_command_builtin;
+extern int current_token;		/* parse.y */
 
 /* How many `levels' of sourced files we have. */
 int sourcelevel = 0;
@@ -91,6 +94,7 @@ _evalfile (filename, flags)
 #if defined (ARRAY_VARS)
   SHELL_VAR *funcname_v, *nfv, *bash_source_v, *bash_lineno_v;
   ARRAY *funcname_a, *bash_source_a, *bash_lineno_a;
+  struct func_array_state *fa;
 #  if defined (DEBUGGER)
   SHELL_VAR *bash_argv_v, *bash_argc_v;
   ARRAY *bash_argv_a, *bash_argc_a;
@@ -130,7 +134,7 @@ file_error_and_exit:
 	}
 
       return ((flags & FEVAL_BUILTIN) ? EXECUTION_FAILURE
-      				      : ((errno == ENOENT) ? 0 : -1));
+      				      : ((errno == ENOENT && (flags & FEVAL_ENOENTOK) != 0) ? 0 : -1));
     }
 
   errfunc = ((flags & FEVAL_BUILTIN) ? builtin_error : internal_error);
@@ -240,6 +244,17 @@ file_error_and_exit:
   array_push (bash_lineno_a, t);
   free (t);
   array_push (funcname_a, "source");	/* not exactly right */
+
+  fa = (struct func_array_state *)xmalloc (sizeof (struct func_array_state));
+  fa->source_a = bash_source_a;
+  fa->source_v = bash_source_v;
+  fa->lineno_a = bash_lineno_a;
+  fa->lineno_v = bash_lineno_v;
+  fa->funcname_a = funcname_a;
+  fa->funcname_v = funcname_v;
+  if (flags & FEVAL_UNWINDPROT)
+    add_unwind_protect (restore_funcarray_state, fa);
+
 #  if defined (DEBUGGER)
   /* Have to figure out a better way to do this when `source' is supplied
      arguments */
@@ -248,6 +263,8 @@ file_error_and_exit:
       array_push (bash_argv_a, (char *)filename);
       tt[0] = '1'; tt[1] = '\0';
       array_push (bash_argc_a, tt);
+      if (flags & FEVAL_UNWINDPROT)
+	add_unwind_protect (pop_args, 0);
     }
 #  endif
 #endif
@@ -277,30 +294,27 @@ file_error_and_exit:
     {
       if (flags & FEVAL_NONINT)
 	interactive = old_interactive;
+#if defined (ARRAY_VARS)
+      restore_funcarray_state (fa);
+#  if defined (DEBUGGER)
+      if ((flags & FEVAL_NOPUSHARGS) == 0)
+	{
+	  /* Don't need to call pop_args here until we do something better
+	     when source is passed arguments (see above). */
+	  array_pop (bash_argc_a);
+	  array_pop (bash_argv_a);
+	}
+#  endif
+#endif
       return_catch_flag--;
       sourcelevel--;
       COPY_PROCENV (old_return_catch, return_catch);
     }
 
-#if defined (ARRAY_VARS)
-  /* These two variables cannot be unset, and cannot be affected by the
-     sourced file. */
-  array_pop (bash_source_a);
-  array_pop (bash_lineno_a);
-
-  /* FUNCNAME can be unset, and so can potentially be changed by the
-     sourced file. */
-  GET_ARRAY_FROM_VAR ("FUNCNAME", nfv, funcname_a);
-  if (nfv == funcname_v)
-    array_pop (funcname_a);
-#  if defined (DEBUGGER)
-  if ((flags & FEVAL_NOPUSHARGS) == 0)
-    {
-      array_pop (bash_argc_a);
-      array_pop (bash_argv_a);
-    }
-#  endif
-#endif
+  /* If we end up with EOF after sourcing a file, which can happen when the file
+     doesn't end with a newline, pretend that it did. */
+  if (current_token == yacc_EOF)
+    push_token ('\n');		/* XXX */
 
   return ((flags & FEVAL_BUILTIN) ? result : 1);
 }
@@ -322,6 +336,23 @@ maybe_execute_file (fname, force_noninteractive)
   return result;
 }
 
+int
+force_execute_file (fname, force_noninteractive)
+     const char *fname;
+     int force_noninteractive;
+{
+  char *filename;
+  int result, flags;
+
+  filename = bash_tilde_expand (fname, 0);
+  flags = 0;
+  if (force_noninteractive)
+    flags |= FEVAL_NONINT;
+  result = _evalfile (filename, flags);
+  free (filename);
+  return result;
+}
+
 #if defined (HISTORY)
 int
 fc_execute_file (filename)
@@ -330,8 +361,9 @@ fc_execute_file (filename)
   int flags;
 
   /* We want these commands to show up in the history list if
-     remember_on_history is set. */
-  flags = FEVAL_ENOENTOK|FEVAL_HISTORY|FEVAL_REGFILE;
+     remember_on_history is set.  We use FEVAL_BUILTIN to return
+     the result of parse_and_execute. */
+  flags = FEVAL_ENOENTOK|FEVAL_HISTORY|FEVAL_REGFILE|FEVAL_BUILTIN;
   return (_evalfile (filename, flags));
 }
 #endif /* HISTORY */

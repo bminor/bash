@@ -21,6 +21,17 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
+/* Template settings for autoconf */
+
+#undef __EXTENSIONS__
+#undef _ALL_SOURCE
+#undef _GNU_SOURCE
+#undef _POSIX_SOURCE
+#undef _POSIX_1_SOURCE
+#undef _POSIX_PTHREAD_SEMANTICS
+#undef _TANDEM_SOURCE
+#undef _MINIX
+
 /* Configuration feature settings controllable by autoconf. */
 
 /* Define JOB_CONTROL if your operating system supports
@@ -173,6 +184,9 @@
 /* Define to make the `globasciiranges' shopt option enabled by default. */
 #undef GLOBASCII_DEFAULT
 
+/* Define to allow functions to be imported from the environment. */
+#undef FUNCTION_IMPORT
+
 /* Define AFS if you are using Transarc's AFS. */
 #undef AFS
 
@@ -201,6 +215,7 @@
 #undef HAVE_LONG_DOUBLE
 
 #undef PROTOTYPES
+#undef __PROTOTYPES
 
 #undef __CHAR_UNSIGNED__
 
@@ -317,6 +332,9 @@
 
 /* Define to `unsigned long' if <stdint.h> doesn't define. */
 #undef uintmax_t
+
+/* Define to integer type wide enough to hold a pointer if <stdint.h> doesn't define. */
+#undef uintptr_t
  
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef uid_t
@@ -543,7 +561,6 @@
 
 #undef UNUSABLE_RT_SIGNALS
 
-
 /* Presence of system and C library functions. */
 
 /* Define if you have the asprintf function.  */
@@ -554,6 +571,9 @@
 
 /* Define if you have the bzero function.  */
 #undef HAVE_BZERO
+
+/* Define if you have the chown function.  */
+#undef HAVE_CHOWN
 
 /* Define if you have the confstr function.  */
 #undef HAVE_CONFSTR
@@ -719,14 +739,23 @@
 /* Define if you have the mkfifo function.  */
 #undef HAVE_MKFIFO
 
+/* Define if you have the mkstemp function.  */
+#undef HAVE_MKSTEMP
+
 /* Define if you have the pathconf function. */
 #undef HAVE_PATHCONF
+
+/* Define if you have the pselect function.  */
+#undef HAVE_PSELECT
 
 /* Define if you have the putenv function.  */
 #undef HAVE_PUTENV
 
 /* Define if you have the raise function. */
 #undef HAVE_RAISE
+
+/* Define if you have the random function. */
+#undef HAVE_RANDOM
 
 /* Define if you have the readlink function. */
 #undef HAVE_READLINK
@@ -926,6 +955,9 @@
 /* Define if you have the <langinfo.h> header file.  */
 #undef HAVE_LANGINFO_H
 
+/* Define if you have the <libaudit.h> header file. */
+#undef HAVE_LIBAUDIT_H
+
 /* Define if you have the <libintl.h> header file. */
 #undef HAVE_LIBINTL_H
 
@@ -934,6 +966,9 @@
 
 /* Define if you have the <locale.h> header file.  */
 #undef HAVE_LOCALE_H
+
+/* Define if you have the <mbstr.h> header file.  */
+#undef HAVE_MBSTR_H
 
 /* Define if you have the <ndir.h> header file.  */
 #undef HAVE_NDIR_H
@@ -982,6 +1017,9 @@
 
 /* Define if you have the <sys/file.h> header file.  */
 #undef HAVE_SYS_FILE_H
+
+/* Define if you have the <sys/ioctl.h> header file.  */
+#undef HAVE_SYS_IOCTL_H
 
 /* Define if you have the <sys/ndir.h> header file.  */
 #undef HAVE_SYS_NDIR_H
@@ -1058,9 +1096,6 @@
 
 /* Are we running the GNU C library, version 2.1 or later? */
 #undef GLIBC21
-
-/* Define if on MINIX.  */
-#undef _MINIX
 
 /* Are we running SVR5 (UnixWare 7)? */
 #undef SVR5

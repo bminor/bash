@@ -81,6 +81,8 @@ caller_builtin (list)
   char *funcname_s, *source_s, *lineno_s;
   intmax_t num;
 
+  CHECK_HELPOPT (list);
+
   GET_ARRAY_FROM_VAR ("FUNCNAME", funcname_v, funcname_a);
   GET_ARRAY_FROM_VAR ("BASH_SOURCE", bash_source_v, bash_source_a);
   GET_ARRAY_FROM_VAR ("BASH_LINENO", bash_lineno_v, bash_lineno_a);

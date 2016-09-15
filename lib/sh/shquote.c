@@ -1,6 +1,6 @@
 /* shquote - functions to quote and dequote strings */
 
-/* Copyright (C) 1999 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -28,9 +28,16 @@
 #endif
 
 #include <stdio.h>
+#include <stdc.h>
 
 #include "syntax.h"
 #include <xmalloc.h>
+
+#include "shmbchar.h"
+#include "shmbutil.h"
+
+extern char *ansic_quote __P((char *, int, int *));
+extern int ansic_shouldquote __P((const char *));
 
 /* Default set of characters that should be backslash-quoted in strings */
 static const char bstab[256] =
@@ -141,8 +148,11 @@ sh_double_quote (string)
       /* Backslash-newline disappears within double quotes, so don't add one. */
       if ((sh_syntaxtab[c] & CBSDQUOTE) && c != '\n')
 	*r++ = '\\';
+#if 0
+      /* Assume that the string will not be further expanded. */
       else if (c == CTLESC || c == CTLNUL)
 	*r++ = CTLESC;		/* could be '\\'? */
+#endif
 
       *r++ = c;
     }
@@ -226,15 +236,36 @@ sh_backslash_quote (string, table, flags)
      char *table;
      int flags;
 {
-  int c;
-  char *result, *r, *s, *backslash_table;
+  int c, mb_cur_max;
+  size_t slen;
+  char *result, *r, *s, *backslash_table, *send;
+  DECLARE_MBSTATE;
 
-  result = (char *)xmalloc (2 * strlen (string) + 1);
+  slen = strlen (string);
+  send = string + slen;
+  result = (char *)xmalloc (2 * slen + 1);
 
   backslash_table = table ? table : (char *)bstab;
+  mb_cur_max = MB_CUR_MAX;
+
   for (r = result, s = string; s && (c = *s); s++)
     {
-      if (backslash_table[c] == 1)
+#if defined (HANDLE_MULTIBYTE)
+      /* XXX - isascii, even if is_basic(c) == 0 - works in most cases. */
+      if (c >= 0 && c <= 127 && backslash_table[(unsigned char)c] == 1)
+	{
+	  *r++ = '\\';
+	  *r++ = c;
+	  continue;
+	}
+      if (mb_cur_max > 1 && is_basic (c) == 0)
+	{
+	  COPY_CHAR_P (r, s, send);
+	  s--;		/* compensate for auto-increment in loop above */
+	  continue;
+	}
+#endif
+      if (backslash_table[(unsigned char)c] == 1)
 	*r++ = '\\';
       else if (c == '#' && s == string)			/* comment char */
 	*r++ = '\\';
@@ -277,11 +308,36 @@ sh_backslash_quote_for_double_quotes (string)
 }
 #endif /* PROMPT_STRING_DECODE */
 
+char *
+sh_quote_reusable (s, flags)
+     char *s;
+     int flags;
+{
+  char *ret;
+
+  if (s == 0)
+    return s;
+  else if (*s == 0)
+    {
+      ret = (char *)xmalloc (3);
+      ret[0] = ret[1] = '\'';
+      ret[2] = '\0';
+    }
+  else if (ansic_shouldquote (s))
+    ret = ansic_quote (s, 0, (int *)0);
+  else if (flags)
+    ret = sh_backslash_quote (s, 0, 1);
+  else
+    ret = sh_single_quote (s);
+
+  return ret;
+}
+
 int
 sh_contains_shell_metas (string)
-     char *string;
+     const char *string;
 {
-  char *s;
+  const char *s;
 
   for (s = string; s && *s; s++)
     {
@@ -314,9 +370,9 @@ sh_contains_shell_metas (string)
 
 int
 sh_contains_quotes (string)
-     char *string;
+     const char *string;
 {
-  char *s;
+  const char *s;
 
   for (s = string; s && *s; s++)
     {

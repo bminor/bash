@@ -2,5 +2,5 @@ echo "warning: UNIX versions number signals and schedule processes differently."
 echo "warning: If output differing only in line numbers is produced, please" >&2
 echo "warning: do not consider this a test failure." >&2
 
-${THIS_SH} ./heredoc.tests > /tmp/xx 2>&1
-diff /tmp/xx heredoc.right && rm -f /tmp/xx
+${THIS_SH} ./heredoc.tests > ${BASH_TSTOUT} 2>&1
+diff ${BASH_TSTOUT} heredoc.right && rm -f ${BASH_TSTOUT}

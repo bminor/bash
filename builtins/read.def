@@ -1,7 +1,7 @@
 This file is read.def, from which is created read.c.
 It implements the builtin "read" in Bash.
 
-Copyright (C) 1987-2012 Free Software Foundation, Inc.
+Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -39,25 +39,27 @@ Options:
 		variable ARRAY, starting at zero
   -d delim	continue until the first character of DELIM is read, rather
 		than newline
-  -e		use Readline to obtain the line in an interactive shell
-  -i text	Use TEXT as the initial text for Readline
+  -e	use Readline to obtain the line in an interactive shell
+  -i text	use TEXT as the initial text for Readline
   -n nchars	return after reading NCHARS characters rather than waiting
-		for a newline, but honor a delimiter if fewer than NCHARS
-		characters are read before the delimiter
+		for a newline, but honor a delimiter if fewer than
+		NCHARS characters are read before the delimiter
   -N nchars	return only after reading exactly NCHARS characters, unless
-		EOF is encountered or read times out, ignoring any delimiter
+		EOF is encountered or read times out, ignoring any
+		delimiter
   -p prompt	output the string PROMPT without a trailing newline before
 		attempting to read
-  -r		do not allow backslashes to escape any characters
-  -s		do not echo input coming from a terminal
-  -t timeout	time out and return failure if a complete line of input is
-		not read within TIMEOUT seconds.  The value of the TMOUT
-		variable is the default timeout.  TIMEOUT may be a
-		fractional number.  If TIMEOUT is 0, read returns immediately,
-		without trying to read any data, returning success only if
-		input is available on the specified file descriptor.  The
-		exit status is greater than 128 if the timeout is exceeded
-  -u fd		read from file descriptor FD instead of the standard input
+  -r	do not allow backslashes to escape any characters
+  -s	do not echo input coming from a terminal
+  -t timeout	time out and return failure if a complete line of
+		input is not read within TIMEOUT seconds.  The value of the
+		TMOUT variable is the default timeout.  TIMEOUT may be a
+		fractional number.  If TIMEOUT is 0, read returns
+		immediately, without trying to read any data, returning
+		success only if input is available on the specified
+		file descriptor.  The exit status is greater than 128
+		if the timeout is exceeded
+  -u fd	read from file descriptor FD instead of the standard input
 
 Exit Status:
 The return code is zero, unless end-of-file is encountered, read times out
@@ -163,8 +165,9 @@ sigalrm (s)
 static void
 reset_alarm ()
 {
-  set_signal_handler (SIGALRM, old_alrm);
+  /* Cancel alarm before restoring signal handler. */
   falarm (0, 0);
+  set_signal_handler (SIGALRM, old_alrm);
 }
 
 /* Read the value of the shell variables whose names follow.
@@ -314,6 +317,7 @@ read_builtin (list)
 	case 'd':
 	  delim = *list_optarg;
 	  break;
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);
@@ -333,7 +337,7 @@ read_builtin (list)
   /* Convenience: check early whether or not the first of possibly several
      variable names is a valid identifier, and bail early if so. */
 #if defined (ARRAY_VARS)
-  if (list && legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word) == 0)
+  if (list && legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, 0) == 0)
 #else
   if (list && legal_identifier (list->word->word) == 0)
 #endif
@@ -793,7 +797,10 @@ assign_vars:
 	}
       else
 	var = bind_variable ("REPLY", input_string, 0);
-      VUNSETATTR (var, att_invisible);
+      if (var == 0 || readonly_p (var) || noassign_p (var))
+	retval = EXECUTION_FAILURE;
+      else
+	VUNSETATTR (var, att_invisible);
 
       xfree (input_string);
       return (retval);
@@ -812,7 +819,7 @@ assign_vars:
     {
       varname = list->word->word;
 #if defined (ARRAY_VARS)
-      if (legal_identifier (varname) == 0 && valid_array_reference (varname) == 0)
+      if (legal_identifier (varname) == 0 && valid_array_reference (varname, 0) == 0)
 #else
       if (legal_identifier (varname) == 0)
 #endif
@@ -860,7 +867,7 @@ assign_vars:
 
   /* Now assign the rest of the line to the last variable argument. */
 #if defined (ARRAY_VARS)
-  if (legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word) == 0)
+  if (legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, 0) == 0)
 #else
   if (legal_identifier (list->word->word) == 0)
 #endif
@@ -923,7 +930,7 @@ bind_read_variable (name, value)
   SHELL_VAR *v;
 
 #if defined (ARRAY_VARS)
-  if (valid_array_reference (name) == 0)
+  if (valid_array_reference (name, 0) == 0)
     v = bind_variable (name, value, 0);
   else
     v = assign_array_element (name, value, 0);

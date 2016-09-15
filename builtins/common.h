@@ -1,6 +1,6 @@
 /* common.h -- extern declarations for functions defined in common.c. */
 
-/* Copyright (C) 1993-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,6 +24,21 @@
 #include "stdc.h"
 
 #define ISOPTION(s, c)	(s[0] == '-' && !s[2] && s[1] == c)
+#define ISHELP(s)	(STREQ ((s), "--help"))
+
+#define CHECK_HELPOPT(l) \
+do { \
+  if ((l) && (l)->word && ISHELP((l)->word->word)) \
+    { \
+      builtin_help (); \
+      return (EX_USAGE); \
+    } \
+} while (0)
+
+#define CASE_HELPOPT \
+  case GETOPT_HELP: \
+    builtin_help (); \
+    return (EX_USAGE)
 
 /* Flag values for parse_and_execute () */
 #define SEVAL_NONINT	0x001
@@ -35,6 +50,7 @@
 #define SEVAL_NOLONGJMP 0x040
 #define SEVAL_FUNCDEF	0x080		/* only allow function definitions */
 #define SEVAL_ONECMD	0x100		/* only allow a single command */
+#define SEVAL_NOHISTEXP	0x200		/* inhibit history expansion */
 
 /* Flags for describe_command, shared between type.def and command.def */
 #define CDESC_ALL		0x001	/* type -a */
@@ -45,6 +61,7 @@
 #define CDESC_FORCE_PATH	0x020	/* type -ap or type -P */
 #define CDESC_NOFUNCS		0x040	/* type -f */
 #define CDESC_ABSPATH		0x080	/* convert to absolute path, no ./ */
+#define CDESC_STDPATH		0x100	/* command -p */
 
 /* Flags for get_job_by_name */
 #define JM_PREFIX		0x01	/* prefix of job name */
@@ -58,6 +75,9 @@
 #define ARGS_INVOC		0x01
 #define ARGS_FUNC		0x02
 #define ARGS_SETBLTIN		0x04
+
+/* Maximum number of attribute letters */
+#define MAX_ATTRIBUTES		16
 
 /* Functions from common.c */
 extern void builtin_error __P((const char *, ...))  __attribute__((__format__ (printf, 1, 2)));
@@ -122,6 +142,9 @@ extern void bash_logout __P((void));
 /* Functions from getopts.def */
 extern void getopts_reset __P((int));
 
+/* Functions from help.def */
+extern void builtin_help __P((void));
+
 /* Functions from read.def */
 extern void read_tty_cleanup __P((void));
 extern int read_tty_modified __P((void));
@@ -137,6 +160,9 @@ extern void parse_shellopts __P((char *));
 extern void initialize_shell_options __P((int));
 
 extern void reset_shell_options __P((void));
+
+extern char *get_current_options __P((void));
+extern void set_current_options __P((const char *));
 
 /* Functions from shopt.def */
 extern void reset_shopt_options __P((void));
@@ -163,6 +189,7 @@ extern int show_var_attributes __P((SHELL_VAR *, int, int));
 extern int show_name_attributes __P((char *, int));
 extern int show_func_attributes __P((char *, int));
 extern void set_var_attribute __P((char *, int, int));
+extern int var_attribute_string __P((SHELL_VAR *, int, char *));
 
 /* Functions from pushd.def */
 extern char *get_dirstack_from_string __P((char *));
@@ -175,9 +202,12 @@ extern int parse_and_execute __P((char *, const char *, int));
 extern int evalstring __P((char *, const char *, int));
 extern void parse_and_execute_cleanup __P((void));
 extern int parse_string __P((char *, const char *, int, char **));
+extern int should_suppress_fork __P((COMMAND *));
+extern void optimize_fork __P((COMMAND *));
 
 /* Functions from evalfile.c */
 extern int maybe_execute_file __P((const char *, int));
+extern int force_execute_file __P((const char *, int));
 extern int source_file __P((const char *, int));
 extern int fc_execute_file __P((const char *));
 

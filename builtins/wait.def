@@ -1,7 +1,7 @@
 This file is wait.def, from which is created wait.c.
 It implements the builtin "wait" in Bash.
 
-Copyright (C) 1987-2013 Free Software Foundation, Inc.
+Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -73,8 +73,10 @@ $END
 #include "bashgetopt.h"
 
 extern int wait_signal_received;
+extern int last_command_exit_signal;
 
 procenv_t wait_intr_buf;
+int wait_intr_flag;
 
 /* Wait for the pid in LIST to stop or die.  If no arguments are given, then
    wait for all of the active background processes of the shell and return
@@ -86,6 +88,7 @@ procenv_t wait_intr_buf;
     { \
       interrupt_immediately = old_interrupt_immediately;\
       wait_signal_received = 0; \
+      wait_intr_flag = 0; \
       return (s);\
     } \
   while (0)
@@ -110,6 +113,7 @@ wait_builtin (list)
 	  nflag = 1;
 	  break;
 #endif
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);
@@ -130,10 +134,14 @@ wait_builtin (list)
 
      We handle SIGINT here; it's the only one that needs to be treated
      specially (I think), since it's handled specially in {no,}jobs.c. */
-  code = setjmp (wait_intr_buf);
+  wait_intr_flag = 1;
+  code = setjmp_sigs (wait_intr_buf);
+
   if (code)
     {
+      last_command_exit_signal = wait_signal_received;
       status = 128 + wait_signal_received;
+      wait_sigint_cleanup ();
       WAIT_RETURN (status);
     }
 
@@ -171,7 +179,7 @@ wait_builtin (list)
 	  if (legal_number (w, &pid_value) && pid_value == (pid_t)pid_value)
 	    {
 	      pid = (pid_t)pid_value;
-	      status = wait_for_single_pid (pid);
+	      status = wait_for_single_pid (pid, 1);
 	    }
 	  else
 	    {

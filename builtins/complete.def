@@ -1,7 +1,7 @@
 This file is complete.def, from which is created complete.c.
 It implements the builtins "complete", "compgen", and "compopt" in Bash.
 
-Copyright (C) 1999-2011 Free Software Foundation, Inc.
+Copyright (C) 1999-2015 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -33,11 +33,11 @@ allows them to be reused as input.
 Options:
   -p	print existing completion specifications in a reusable format
   -r	remove a completion specification for each NAME, or, if no
-	NAMEs are supplied, all completion specifications
+		NAMEs are supplied, all completion specifications
   -D	apply the completions and actions as the default for commands
-	without any specific completion defined
+		without any specific completion defined
   -E	apply the completions and actions to "empty" commands --
-	completion attempted on a blank line
+		completion attempted on a blank line
 
 When completion is attempted, the actions are applied in the order the
 uppercase-letter options are listed above.  The -D option takes
@@ -138,6 +138,7 @@ static const struct _compopt {
   { "dirnames", COPT_DIRNAMES },
   { "filenames",COPT_FILENAMES},
   { "noquote", COPT_NOQUOTE },
+  { "nosort", COPT_NOSORT },
   { "nospace",	COPT_NOSPACE },
   { "plusdirs", COPT_PLUSDIRS },
   { (char *)NULL, 0 },
@@ -170,7 +171,7 @@ find_compopt (name)
 /* Build the actions and compspec options from the options specified in LIST.
    ACTP is a pointer to an unsigned long in which to place the bitmap of
    actions.  OPTP is a pointer to an unsigned long in which to place the
-   btmap of compspec options (arguments to `-o').  PP, if non-null, gets 1
+   bitmap of compspec options (arguments to `-o').  PP, if non-null, gets 1
    if -p is supplied; RP, if non-null, gets 1 if -r is supplied.
    If either is null, the corresponding option generates an error.
    This also sets variables corresponding to options that take arguments as
@@ -324,6 +325,7 @@ build_actions (list, flagp, actp, optp)
 	case 'X':
 	  Xarg = list_optarg;
 	  break;
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);
@@ -653,7 +655,7 @@ print_cmd_completions (list)
 $BUILTIN compgen
 $DEPENDS_ON PROGRAMMABLE_COMPLETION
 $FUNCTION compgen_builtin
-$SHORT_DOC compgen [-abcdefgjksuv] [-o option]  [-A action] [-G globpat] [-W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]
+$SHORT_DOC compgen [-abcdefgjksuv] [-o option] [-A action] [-G globpat] [-W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]
 Display possible completions depending on the options.
 
 Intended to be used from within a shell function generating possible
@@ -790,7 +792,7 @@ compopt_builtin (list)
   ret = EXECUTION_SUCCESS;
 
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "+o:DE")) != EOF)
+  while ((opt = internal_getopt (list, "+o:DE")) != -1)
     {
       opts = (list_opttype == '-') ? &opts_on : &opts_off;
 
@@ -811,6 +813,7 @@ compopt_builtin (list)
 	case 'E':
 	  Eflag = 1;
 	  break;
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);
@@ -866,6 +869,9 @@ compopt_builtin (list)
       pcomp_set_compspec_options (cs, opts_on, 1);
       pcomp_set_compspec_options (cs, opts_off, 0);
     }
+
+  if (wl)
+    dispose_words (wl);
 
   return (ret);
 }

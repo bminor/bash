@@ -1,7 +1,7 @@
 /* rlprivate.h -- functions and variables global to the readline library,
 		  but not intended for use by applications. */
 
-/* Copyright (C) 1999-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2015 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -44,6 +44,7 @@
 
 #define RL_SIG_RECEIVED() (_rl_caught_signal != 0)
 #define RL_SIGINT_RECEIVED() (_rl_caught_signal == SIGINT)
+#define RL_SIGWINCH_RECEIVED() (_rl_caught_signal == SIGWINCH)
 
 #define CUSTOM_REDISPLAY_FUNC() (rl_redisplay_function != rl_redisplay)
 #define CUSTOM_INPUT_FUNC() (rl_getc_function != rl_getc)
@@ -124,10 +125,11 @@ typedef struct __rl_keyseq_context
   int flags;
   int subseq_arg;
   int subseq_retval;		/* XXX */
-  Keymap dmap;
-
-  Keymap oldmap;
   int okey;
+
+  Keymap dmap;
+  Keymap oldmap;
+
   struct __rl_keyseq_context *ocxt;
   int childval;
 } _rl_keyseq_cxt;
@@ -185,6 +187,7 @@ extern int rl_visible_stats;
 #endif /* VISIBLE_STATS */
 #if defined (COLOR_SUPPORT)
 extern int _rl_colored_stats;
+extern int _rl_colored_completion_prefix;
 #endif
 
 /* readline.c */
@@ -290,8 +293,19 @@ extern void _rl_scxt_dispose PARAMS((_rl_search_cxt *, int));
 
 extern int _rl_isearch_dispatch PARAMS((_rl_search_cxt *, int));
 extern int _rl_isearch_callback PARAMS((_rl_search_cxt *));
+extern int _rl_isearch_cleanup PARAMS((_rl_search_cxt *, int));
 
 extern int _rl_search_getchar PARAMS((_rl_search_cxt *));
+
+/* kill.c */
+#define BRACK_PASTE_PREF	"\033[200~"
+#define BRACK_PASTE_SUFF	"\033[201~"
+
+#define BRACK_PASTE_LAST	'~'
+#define BRACK_PASTE_SLEN	6
+
+#define BRACK_PASTE_INIT	"\033[?2004h"
+#define BRACK_PASTE_FINI	"\033[?2004l"
 
 /* macro.c */
 extern void _rl_with_macro_input PARAMS((char *));
@@ -334,6 +348,7 @@ extern int _rl_restore_tty_signals PARAMS((void));
 
 /* search.c */
 extern int _rl_nsearch_callback PARAMS((_rl_search_cxt *));
+extern int _rl_nsearch_cleanup PARAMS((_rl_search_cxt *, int));
 
 /* signals.c */
 extern void _rl_signal_handler PARAMS((int));
@@ -410,8 +425,10 @@ extern void _rl_vi_initialize_line PARAMS((void));
 extern void _rl_vi_reset_last PARAMS((void));
 extern void _rl_vi_set_last PARAMS((int, int, int));
 extern int _rl_vi_textmod_command PARAMS((int));
+extern int _rl_vi_motion_command PARAMS((int));
 extern void _rl_vi_done_inserting PARAMS((void));
 extern int _rl_vi_domove_callback PARAMS((_rl_vimotion_cxt *));
+extern int _rl_vi_domove_motion_cleanup PARAMS((int, _rl_vimotion_cxt *));
 
 /*************************************************************************
  * Undocumented private variables					 *
@@ -446,6 +463,13 @@ extern int _rl_last_c_pos;
 extern int _rl_suppress_redisplay;
 extern int _rl_want_redisplay;
 
+extern char *_rl_emacs_mode_str;
+extern int _rl_emacs_modestr_len;
+extern char *_rl_vi_ins_mode_str;
+extern int _rl_vi_ins_modestr_len;
+extern char *_rl_vi_cmd_mode_str;
+extern int _rl_vi_cmd_modestr_len;
+
 /* isearch.c */
 extern char *_rl_isearch_terminators;
 
@@ -475,6 +499,7 @@ extern int _rl_bind_stty_chars;
 extern int _rl_revert_all_at_newline;
 extern int _rl_echo_control_chars;
 extern int _rl_show_mode_in_prompt;
+extern int _rl_enable_bracketed_paste;
 extern char *_rl_comment_begin;
 extern unsigned char _rl_parsing_conditionalized_out;
 extern Keymap _rl_keymap;
@@ -524,12 +549,16 @@ extern int _rl_screenchars;
 extern int _rl_terminal_can_insert;
 extern int _rl_term_autowrap;
 
+/* text.c */
+extern int _rl_optimize_typeahead;
+
 /* undo.c */
 extern int _rl_doing_an_undo;
 extern int _rl_undo_group_level;
 
 /* vi_mode.c */
 extern int _rl_vi_last_command;
+extern int _rl_vi_redoing;
 extern _rl_vimotion_cxt *_rl_vimvcxt;
 
 #endif /* _RL_PRIVATE_H_ */

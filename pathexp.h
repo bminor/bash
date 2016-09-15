@@ -1,6 +1,6 @@
 /* pathexp.h -- The shell interface to the globbing library. */
 
-/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -43,6 +43,7 @@ extern char *glob_error_return;
 #endif /* !EXTENDED_GLOB */
 
 #define FNMATCH_IGNCASE		(match_ignore_case ? FNM_CASEFOLD : 0)
+#define FNMATCH_NOCASEGLOB	(glob_ignore_case ? FNM_CASEFOLD : 0)
 
 extern int glob_dot_filenames;
 extern int extended_glob;
@@ -64,13 +65,13 @@ extern int unquoted_glob_pattern_p __P((char *));
 extern char *quote_string_for_globbing __P((const char *, int));
 
 extern int glob_char_p __P((const char *));
-extern char *quote_globbing_chars __P((char *));
+extern char *quote_globbing_chars __P((const char *));
 
 /* Call the glob library to do globbing on PATHNAME. */
 extern char **shell_glob_filename __P((const char *));
 
 /* Filename completion ignore.  Used to implement the "fignore" facility of
-   tcsh and GLOBIGNORE (like ksh-93 FIGNORE).
+   tcsh, GLOBIGNORE (like ksh-93 FIGNORE), and EXECIGNORE.
 
    It is passed a NULL-terminated array of (char *)'s that must be
    free()'d if they are deleted.  The first element (names[0]) is the
@@ -86,7 +87,7 @@ struct ign {
 typedef int sh_iv_item_func_t __P((struct ign *));
 
 struct ignorevar {
-  char *varname;	/* FIGNORE or GLOBIGNORE */
+  char *varname;	/* FIGNORE, GLOBIGNORE, or EXECIGNORE */
   struct ign *ignores;	/* Store the ignore strings here */
   int num_ignores;	/* How many are there? */
   char *last_ignoreval;	/* Last value of variable - cached for speed */

@@ -1,7 +1,7 @@
 /* readline.c -- a general facility for reading lines of input
    with emacs style editing and completion. */
 
-/* Copyright (C) 1987-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -94,6 +94,8 @@ static void readline_initialize_everything PARAMS((void));
 static void bind_arrow_keys_internal PARAMS((Keymap));
 static void bind_arrow_keys PARAMS((void));
 
+static void bind_bracketed_paste_prefix PARAMS((void));
+
 static void readline_default_bindings PARAMS((void));
 static void reset_default_bindings PARAMS((void));
 
@@ -149,7 +151,7 @@ static int running_in_emacs;
 #endif
 
 /* Flags word encapsulating the current readline state. */
-int rl_readline_state = RL_STATE_NONE;
+unsigned long rl_readline_state = RL_STATE_NONE;
 
 /* The current offset in the current input line. */
 int rl_point;
@@ -306,6 +308,11 @@ int _rl_echo_control_chars = 1;
    the editing mode: @ for emacs, : for vi-command, + for vi-insert. */
 int _rl_show_mode_in_prompt = 0;
 
+/* Non-zero means to attempt to put the terminal in `bracketed paste mode',
+   where it will prefix pasted text with an escape sequence and send
+   another to mark the end of the paste. */
+int _rl_enable_bracketed_paste = 0;
+
 /* **************************************************************** */
 /*								    */
 /*			Top Level Functions			    */
@@ -379,7 +386,7 @@ readline (prompt)
     RL_SETSTATE (RL_STATE_CALLBACK);
 #endif
 
-#if HAVE_DECL_AUDIT_TTY && defined (ENABLE_TTY_AUDIT_SUPPORT)
+#if HAVE_DECL_AUDIT_USER_TTY && defined (HAVE_LIBAUDIT_H) && defined (ENABLE_TTY_AUDIT_SUPPORT)
   if (value)
     _rl_audit_tty (value);
 #endif
@@ -525,10 +532,10 @@ readline_internal_charloop ()
   static int lastc, eof_found;
   int c, code, lk;
 
-  lastc = -1;
-  eof_found = 0;
+  lastc = EOF;
 
 #if !defined (READLINE_CALLBACKS)
+  eof_found = 0;
   while (rl_done == 0)
     {
 #endif
@@ -556,8 +563,7 @@ readline_internal_charloop ()
 	{
 	  /* Then initialize the argument and number of keys read. */
 	  _rl_reset_argument ();
-	  rl_key_sequence_length = 0;
-	  rl_executing_keyseq[0] = 0;
+	  rl_executing_keyseq[rl_key_sequence_length = 0] = '\0';
 	}
 
       RL_SETSTATE(RL_STATE_READCMD);
@@ -579,15 +585,36 @@ readline_internal_charloop ()
 #endif
 	}
 
-      /* EOF typed to a non-blank line is a <NL>.  If we want to change this,
-	 to force any existing line to be ignored when read(2) reads EOF,
-	 for example, this is the place to change. */
+      /* EOF typed to a non-blank line is ^D the first time, EOF the second
+	 time in a row.  This won't return any partial line read from the tty.
+	 If we want to change this, to force any existing line to be returned
+	 when read(2) reads EOF, for example, this is the place to change. */
       if (c == EOF && rl_end)
-	c = NEWLINE;
+	{
+	  if (RL_SIG_RECEIVED ())
+	    {
+	      RL_CHECK_SIGNALS ();
+	      if (rl_signal_event_hook)
+		(*rl_signal_event_hook) ();		/* XXX */
+	    }
+
+	  /* XXX - reading two consecutive EOFs returns EOF */
+	  if (RL_ISSTATE (RL_STATE_TERMPREPPED))
+	    {
+	      if (lastc == _rl_eof_char || lastc == EOF)
+		rl_end = 0;
+	      else
+	        c = _rl_eof_char;
+	    }
+	  else
+	    c = NEWLINE;
+	}
 
       /* The character _rl_eof_char typed to blank line, and not as the
-	 previous character is interpreted as EOF. */
-      if (((c == _rl_eof_char && lastc != c) || c == EOF) && !rl_end)
+	 previous character is interpreted as EOF.  This doesn't work when
+	 READLINE_CALLBACKS is defined, so hitting a series of ^Ds will
+	 erase all the chars on the line and then return EOF. */
+      if (((c == _rl_eof_char && lastc != c) || c == EOF) && rl_end == 0)
 	{
 #if defined (READLINE_CALLBACKS)
 	  RL_SETSTATE(RL_STATE_DONE);
@@ -818,7 +845,7 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	  /* Special case rl_do_lowercase_version (). */
 	  if (func == rl_do_lowercase_version)
 	    /* Should we do anything special if key == ANYOTHERKEY? */
-	    return (_rl_dispatch (_rl_to_lower (key), map));
+	    return (_rl_dispatch (_rl_to_lower ((unsigned char)key), map));
 
 	  rl_executing_keymap = map;
 	  rl_executing_key = key;
@@ -888,8 +915,10 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	     default) or a timeout determined by the value of `keyseq-timeout' */
 	  /* _rl_keyseq_timeout specified in milliseconds; _rl_input_queued
 	     takes microseconds, so multiply by 1000 */
-	  if (rl_editing_mode == vi_mode && key == ESC && map == vi_insertion_keymap
-	      && _rl_input_queued ((_rl_keyseq_timeout > 0) ? _rl_keyseq_timeout*1000 : 0) == 0)
+	  if (rl_editing_mode == vi_mode && key == ESC && map == vi_insertion_keymap &&
+	      (RL_ISSTATE (RL_STATE_INPUTPENDING|RL_STATE_MACROINPUT) == 0) &&
+              _rl_pushed_input_available () == 0 &&
+	      _rl_input_queued ((_rl_keyseq_timeout > 0) ? _rl_keyseq_timeout*1000 : 0) == 0)
 	    return (_rl_dispatch (ANYOTHERKEY, FUNCTION_TO_KEYMAP (map, key)));
 #endif
 
@@ -900,6 +929,16 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	  /* Allocate new context here.  Use linked contexts (linked through
 	     cxt->ocxt) to simulate recursion */
 #if defined (READLINE_CALLBACKS)
+#  if defined (VI_MODE)
+	  /* If we're redoing a vi mode command and we know there is a shadowed
+	     function corresponding to this key, just call it -- all the redoable
+	     vi mode commands already have all the input they need, and rl_vi_redo
+	     assumes that one call to rl_dispatch is sufficient to complete the
+	     command. */
+	  if (_rl_vi_redoing && RL_ISSTATE (RL_STATE_CALLBACK) &&
+	      map[ANYOTHERKEY].function != 0)
+	    return (_rl_subseq_result (-2, map, key, got_subseq));
+#  endif
 	  if (RL_ISSTATE (RL_STATE_CALLBACK))
 	    {
 	      /* Return 0 only the first time, to indicate success to
@@ -947,7 +986,7 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	}
       else
 	{
-	  _rl_abort_internal ();
+	  _rl_abort_internal ();	/* XXX */
 	  return -1;
 	}
       break;
@@ -962,6 +1001,7 @@ _rl_dispatch_subseq (key, map, got_subseq)
 	}
       break;
     }
+
 #if defined (VI_MODE)
   if (rl_editing_mode == vi_mode && _rl_keymap == vi_movement_keymap &&
       key != ANYOTHERKEY &&
@@ -994,22 +1034,27 @@ _rl_subseq_result (r, map, key, got_subseq)
       type = m[ANYOTHERKEY].type;
       func = m[ANYOTHERKEY].function;
       if (type == ISFUNC && func == rl_do_lowercase_version)
-	r = _rl_dispatch (_rl_to_lower (key), map);
-      else if (type == ISFUNC && func == rl_insert)
+	r = _rl_dispatch (_rl_to_lower ((unsigned char)key), map);
+      else if (type == ISFUNC)
 	{
-	  /* If the function that was shadowed was self-insert, we
-	     somehow need a keymap with map[key].func == self-insert.
-	     Let's use this one. */
+	  /* If we shadowed a function, whatever it is, we somehow need a
+	     keymap with map[key].func == shadowed-function.
+	     Let's use this one.  Then we can dispatch using the original
+	     key, since there are commands (e.g., in vi mode) for which it
+	     matters. */
 	  nt = m[key].type;
 	  nf = m[key].function;
 
 	  m[key].type = type;
 	  m[key].function = func;
-	  r = _rl_dispatch (key, m);
+	  /* Don't change _rl_dispatching_keymap, set it here */
+	  _rl_dispatching_keymap = map;		/* previous map */
+	  r = _rl_dispatch_subseq (key, m, 0);
 	  m[key].type = nt;
 	  m[key].function = nf;
 	}
       else
+	/* We probably shadowed a keymap, so keep going. */
 	r = _rl_dispatch (ANYOTHERKEY, m);
     }
   else if (r && map[ANYOTHERKEY].function)
@@ -1179,13 +1224,17 @@ readline_initialize_everything ()
   /* Try to bind a common arrow key prefix, if not already bound. */
   bind_arrow_keys ();
 
+  /* Bind the bracketed paste prefix assuming that the user will enable
+     it on terminals that support it. */
+  bind_bracketed_paste_prefix ();
+
   /* If the completion parser's default word break characters haven't
      been set yet, then do so now. */
   if (rl_completer_word_break_characters == (char *)NULL)
     rl_completer_word_break_characters = (char *)rl_basic_word_break_characters;
 
 #if defined (COLOR_SUPPORT)
-  if (_rl_colored_stats)
+  if (_rl_colored_stats || _rl_colored_completion_prefix)
     _rl_parse_colors ();
 #endif
 
@@ -1289,6 +1338,22 @@ bind_arrow_keys ()
 #endif
 }
 
+static void
+bind_bracketed_paste_prefix ()
+{
+  Keymap xkeymap;
+
+  xkeymap = _rl_keymap;
+
+  _rl_keymap = emacs_standard_keymap;
+  rl_bind_keyseq_if_unbound (BRACK_PASTE_PREF, rl_bracketed_paste_begin);
+  
+  _rl_keymap = vi_insertion_keymap;
+  rl_bind_keyseq_if_unbound (BRACK_PASTE_PREF, rl_bracketed_paste_begin);
+
+  _rl_keymap = xkeymap;
+}
+  
 /* **************************************************************** */
 /*								    */
 /*		Saving and Restoring Readline's state		    */
@@ -1317,6 +1382,7 @@ rl_save_state (sp)
   sp->lastfunc = rl_last_func;
   sp->insmode = rl_insert_mode;
   sp->edmode = rl_editing_mode;
+  sp->kseq = rl_executing_keyseq;
   sp->kseqlen = rl_key_sequence_length;
   sp->inf = rl_instream;
   sp->outf = rl_outstream;
@@ -1325,6 +1391,12 @@ rl_save_state (sp)
 
   sp->catchsigs = rl_catch_signals;
   sp->catchsigwinch = rl_catch_sigwinch;
+
+  sp->entryfunc = rl_completion_entry_function;
+  sp->menuentryfunc = rl_menu_completion_entry_function;
+  sp->ignorefunc = rl_ignore_some_completions_function;
+  sp->attemptfunc = rl_attempted_completion_function;
+  sp->wordbreakchars = rl_completer_word_break_characters;
 
   return (0);
 }
@@ -1351,6 +1423,7 @@ rl_restore_state (sp)
   rl_last_func = sp->lastfunc;
   rl_insert_mode = sp->insmode;
   rl_editing_mode = sp->edmode;
+  rl_executing_keyseq = sp->kseq;
   rl_key_sequence_length = sp->kseqlen;
   rl_instream = sp->inf;
   rl_outstream = sp->outf;
@@ -1359,6 +1432,12 @@ rl_restore_state (sp)
 
   rl_catch_signals = sp->catchsigs;
   rl_catch_sigwinch = sp->catchsigwinch;
+
+  rl_completion_entry_function = sp->entryfunc;
+  rl_menu_completion_entry_function = sp->menuentryfunc;
+  rl_ignore_some_completions_function = sp->ignorefunc;
+  rl_attempted_completion_function = sp->attemptfunc;
+  rl_completer_word_break_characters = sp->wordbreakchars;
 
   return (0);
 }

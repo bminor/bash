@@ -1,6 +1,6 @@
 /* search.c - code for non-incremental searching in emacs and vi modes. */
 
-/* Copyright (C) 1992-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2015 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -58,7 +58,7 @@ _rl_search_cxt *_rl_nscxt = 0;
 extern HIST_ENTRY *_rl_saved_line_for_history;
 
 /* Functions imported from the rest of the library. */
-extern int _rl_free_history_entry PARAMS((HIST_ENTRY *));
+extern void _rl_free_history_entry PARAMS((HIST_ENTRY *));
 
 static char *noninc_search_string = (char *) NULL;
 static int noninc_history_pos;
@@ -80,7 +80,6 @@ static int rl_history_search_internal PARAMS((int, int));
 static void rl_history_search_reinit PARAMS((int));
 
 static _rl_search_cxt *_rl_nsearch_init PARAMS((int, int));
-static int _rl_nsearch_cleanup PARAMS((_rl_search_cxt *, int));
 static void _rl_nsearch_abort PARAMS((_rl_search_cxt *));
 static int _rl_nsearch_dispatch PARAMS((_rl_search_cxt *, int));
 
@@ -224,7 +223,7 @@ _rl_nsearch_init (dir, pchar)
   return cxt;
 }
 
-static int
+int
 _rl_nsearch_cleanup (cxt, r)
      _rl_search_cxt *cxt;
      int r;
@@ -411,7 +410,7 @@ rl_noninc_forward_search_again (count, key)
   if (!noninc_search_string)
     {
       rl_ding ();
-      return (-1);
+      return (1);
     }
   r = noninc_dosearch (noninc_search_string, 1);
   return (r != 1);
@@ -428,7 +427,7 @@ rl_noninc_reverse_search_again (count, key)
   if (!noninc_search_string)
     {
       rl_ding ();
-      return (-1);
+      return (1);
     }
   r = noninc_dosearch (noninc_search_string, -1);
   return (r != 1);

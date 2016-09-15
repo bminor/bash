@@ -1,6 +1,6 @@
 /* history.h -- the names of functions that you can call in history. */
 
-/* Copyright (C) 1989-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2015 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -90,6 +90,13 @@ extern void add_history_time PARAMS((const char *));
    is the magic number that tells us which element to delete.  The
    elements are numbered from 0. */
 extern HIST_ENTRY *remove_history PARAMS((int));
+
+/* Allocate a history entry consisting of STRING and TIMESTAMP and return
+   a pointer to it. */
+extern HIST_ENTRY *alloc_history_entry PARAMS((char *, char *));
+
+/* Copy the history entry H, but not the (opaque) data pointer */
+extern HIST_ENTRY *copy_history_entry PARAMS((HIST_ENTRY *));
 
 /* Free the history entry H and return any application-specific data
    associated with it. */
@@ -241,6 +248,11 @@ extern char **history_tokenize PARAMS((const char *));
 extern int history_base;
 extern int history_length;
 extern int history_max_entries;
+extern int history_offset;
+
+extern int history_lines_read_from_file;
+extern int history_lines_written_to_file;
+
 extern char history_expansion_char;
 extern char history_subst_char;
 extern char *history_word_delimiters;
@@ -250,6 +262,10 @@ extern char *history_search_delimiter_chars;
 extern int history_quotes_inhibit_expansion;
 
 extern int history_write_timestamps;
+
+/* These two are undocumented; the second is reserved for future use */
+extern int history_multiline_entries;
+extern int history_file_version;
 
 /* Backwards compatibility */
 extern int max_input_history;

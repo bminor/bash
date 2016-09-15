@@ -31,6 +31,18 @@ recho `echo `
 expect "<^?>"
 recho `echo `
 
+expect "bar"
+recho ${foo:-"`echo bar`"}
+expect "<^A>"
+recho ${foo:-"`echo `"}
+expect "<^?>"
+recho ${foo:-"`echo `"}
+
+expect "<^A>"
+recho "`echo `"
+expect "<^?>"
+recho "`echo `"
+
 # Test null strings without variable expansion
 expect "<abcdefgh>"
 recho abcd""efgh
@@ -390,3 +402,6 @@ ${THIS_SH} ./exp4.sub
 ${THIS_SH} ./exp5.sub
 
 ${THIS_SH} ./exp6.sub
+${THIS_SH} ./exp7.sub
+${THIS_SH} ./exp8.sub
+${THIS_SH} ./exp9.sub

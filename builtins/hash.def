@@ -1,7 +1,7 @@
 This file is hash.def, from which is created hash.c.
 It implements the builtin "hash" in Bash.
 
-Copyright (C) 1987-2013 Free Software Foundation, Inc.
+Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -29,15 +29,15 @@ Determine and remember the full pathname of each command NAME.  If
 no arguments are given, information about remembered commands is displayed.
 
 Options:
-  -d		forget the remembered location of each NAME
-  -l		display in a format that may be reused as input
+  -d	forget the remembered location of each NAME
+  -l	display in a format that may be reused as input
   -p pathname	use PATHNAME as the full pathname of NAME
-  -r		forget all remembered locations
-  -t		print the remembered location of each NAME, preceding
+  -r	forget all remembered locations
+  -t	print the remembered location of each NAME, preceding
 		each location with the corresponding NAME if multiple
 		NAMEs are given
 Arguments:
-  NAME		Each NAME is searched for in $PATH and added to the list
+  NAME	Each NAME is searched for in $PATH and added to the list
 		of remembered commands.
 
 Exit Status:
@@ -115,6 +115,7 @@ hash_builtin (list)
 	case 't':
 	  list_targets = 1;
 	  break;
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);
@@ -230,7 +231,15 @@ static int
 print_portable_hash_info (item)
      BUCKET_CONTENTS *item;
 {
-  printf ("builtin hash -p %s %s\n", pathdata(item)->path, item->key);
+  char *fp, *fn;
+
+  fp = printable_filename (pathdata(item)->path, 1);
+  fn = printable_filename (item->key, 1);
+  printf ("builtin hash -p %s %s\n", fp, fn);
+  if (fp != pathdata(item)->path)
+    free (fp);
+  if (fn != item->key)
+    free (fn);
   return 0;
 }
 

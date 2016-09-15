@@ -103,6 +103,202 @@ var=${a[@]}   ... one:::two three:::four
 var="${a[@]}" ... one:::two three:::four
 var=$@        ... one:::two three:::four
 var="$@"      ... one:::two three:::four
+ok 1
+ok 2
+ok 3
+ok 4
+ok 5
+ok 6
+ok 7
+ok 8
+ok 9
+ok 10
+ok 11
+ok 12
+ok 13
+ok 14
+ok at 1
+ok at 2
+ok star 1
+ok star 2
+   ,foo
+   ,foo
+   ,foo
+   ,foo
+ok at 1
+ok at 2
+ok at 3
+ok star 1
+ok star 2
+ok star 3
+ok at-star 1
+ok at-star 2
+a b c
+a|b|c
+a b c
+a|b|c
+ok at 1
+ok at 2
+ok at 3
+ok at 4
+ok at 5
+ok at 1
+ok at 2
+ok at 3
+ok at 4
+ok at 5
+ok at 1
+ok at 2
+ok at 3
+ok at 4
+ok at 5
+ok at 6
+ok at 7
+ok at 8
+ok at 9
+argv[1] = <a>
+argv[1] = <a>
+argv[1] = <a>
+argv[1] = <a>
+argv[1] = <a>
+argv[1] = <a>
+argv[1] = <a>
+argv[1] = <one>
+argv[1] = <o>
+argv[1] = <o>
+argv[1] = <one>
+<123 abc> <def> <ghi 456> 
+<123 abc> <def> <ghi\ 456> 
+<c>
+a bc
+a b
+ab
+<a><b>
+a b
+a b
+<a><b><c><d>
+<a><b><c d>
+<a><b>
+<a:b>
+<a><b>
+<a b>
+abcd
+d
+abcd
+d
+c
+argv[1] = <a b>
+argv[1] = <abcd>
+argv[1] = <abcd>
+argv[1] = <a>
+argv[2] = <b>
+argv[1] = <a b>
+<c>
+<c>
+<d>
+<d>
+0
+0
+1
+1
+1
+0
+0
+0
+1
+0
+0
+0
+1
+after 1
+after 2
+after 3
+same as 1
+argv[1] = <>
+same as 2
+argv[1] = <>
+null fields
+argv[1] = <>
+argv[1] = <>
+null fields in rhs
+null string with unquoted $@
+argv[1] = <>
+null string with quoted $@
+assignment
+argv[1] = <>
+variable
+argv[1] = <>
+dollar-at
+argv[1] = <'a'>
+argv[2] = <'b'>
+argv[3] = <'c'>
+argv[1] = <'a'>
+argv[2] = <'b'>
+argv[3] = <'c'>
+argv[1] = <>
+argv[2] = <a>
+argv[3] = <>
+argv[4] = <>
+argv[5] = <b>
+argv[6] = <>
+argv[7] = <>
+argv[8] = <c>
+argv[1] = <'a'>
+argv[2] = <'b'>
+argv[3] = <'c'>
+argv[1] = <>
+argv[2] = <a>
+argv[3] = <>
+argv[4] = <>
+argv[5] = <b>
+argv[6] = <>
+argv[7] = <>
+argv[8] = <c>
+argv[1] = <'a'>
+argv[2] = <'b'>
+argv[3] = <'c'>
+argv[1] = <>
+argv[2] = <a>
+argv[1] = <'a'>
+argv[1] = <'a'>
+argv[2] = <'b'>
+argv[3] = <'c'>
+argv[1] = <'a'>
+argv[2] = <'b'>
+argv[3] = <'c'>
+|this|
+|is|
+|a|
+|test|
+
+|this|
+|is|
+|a|
+|test|
+
+|this|
+|is|
+|a|
+|test|
+
+|this|
+|this|
+
+|this is a test|
+|this is a test|
+|this|
+|is|
+|a|
+|test|
+|this|
+|is|
+|a|
+|test|
+
+a1=a b c a,b,c a b c a,b,c a b c a,b,c
+a2=a b c a,b,c a b c a,b,c a b c a,b,c
+a3=a b c a,b,c a b c a,b,c a b c a,b,c
+a4=a b c a,b,c a b c a,b,c a b c a,b,c
 xa|xb|xc
 xa|xb|xc
 a|b|c
@@ -222,17 +418,17 @@ third set:
 "${@:2}a3 a2" a$1    #works as long as $1 and 3 are swapped
 set y za3 a2 ax
 0
-declare -a a='([0]="y" [1]="za3 a2" [2]="ax")'
+declare -a a=([0]="y" [1]="za3 a2" [2]="ax")
 
 "${@:2}b$1 b2" b3    #fails!  why?
 set y zbx b2 b3
 0
-declare -a b='([0]="y" [1]="zbx b2" [2]="b3")'
+declare -a b=([0]="y" [1]="zbx b2" [2]="b3")
 
 ${@:2}c$1 c2 c3     #works as long as quoting omitted
 set y zcx c2 c3
 0
-declare -a c='([0]="y" [1]="zcx" [2]="c2" [3]="c3")'
+declare -a c=([0]="y" [1]="zcx" [2]="c2" [3]="c3")
 argv[1] = <>
 argv[2] = <x>
 argv[1] = <>

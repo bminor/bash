@@ -1,6 +1,6 @@
 /* complete.c -- filename completion for readline. */
 
-/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -111,8 +111,10 @@ static int stat_char PARAMS((char *));
 #endif
 
 #if defined (COLOR_SUPPORT)
-static int colored_stat_start PARAMS((char *));
+static int colored_stat_start PARAMS((const char *));
 static void colored_stat_end PARAMS((void));
+static int colored_prefix_start PARAMS((void));
+static void colored_prefix_end PARAMS((void));
 #endif
 
 static int path_isdir PARAMS((const char *));
@@ -126,7 +128,7 @@ static int get_y_or_n PARAMS((int));
 static int _rl_internal_pager PARAMS((int));
 static char *printable_part PARAMS((char *));
 static int fnwidth PARAMS((const char *));
-static int fnprint PARAMS((const char *, int));
+static int fnprint PARAMS((const char *, int, const char *));
 static int print_filename PARAMS((char *, char *, int));
 
 static char **gen_completion_matches PARAMS((char *, int, int, rl_compentry_func_t *, int, int));
@@ -172,7 +174,7 @@ int _rl_complete_mark_symlink_dirs = 0;
 int _rl_print_completions_horizontally;
 
 /* Non-zero means that case is not significant in filename completion. */
-#if defined (__MSDOS__) && !defined (__DJGPP__)
+#if (defined (__MSDOS__) && !defined (__DJGPP__)) || (defined (_WIN32) && !defined (__CYGWIN__))
 int _rl_completion_case_fold = 1;
 #else
 int _rl_completion_case_fold = 0;
@@ -209,6 +211,10 @@ int rl_visible_stats = 0;
 /* Non-zero means to use colors to indicate file type when listing possible
    completions.  The colors used are taken from $LS_COLORS, if set. */
 int _rl_colored_stats = 0;
+
+/* Non-zero means to use a color (currently magenta) to indicate the common
+   prefix of a set of possible word completions. */
+int _rl_colored_completion_prefix = 0;
 #endif
 
 /* If non-zero, when completing in the middle of a word, don't insert
@@ -404,6 +410,8 @@ static int completion_changed_buffer;
 /* The result of the query to the user about displaying completion matches */
 static int completion_y_or_n;
 
+static int _rl_complete_display_matches_interrupt = 0;
+
 /*************************************/
 /*				     */
 /*    Bindable completion functions  */
@@ -487,7 +495,10 @@ _rl_complete_sigcleanup (sig, ptr)
      void *ptr;
 {
   if (sig == SIGINT)	/* XXX - for now */
-    _rl_free_match_list ((char **)ptr);
+    {
+      _rl_free_match_list ((char **)ptr);
+      _rl_complete_display_matches_interrupt = 1;
+    }
 }
 
 /* Set default values for readline word completion.  These are the variables
@@ -505,6 +516,9 @@ set_completion_defaults (what_to_do)
 
   /* The completion entry function may optionally change this. */
   rl_completion_mark_symlink_dirs = _rl_complete_mark_symlink_dirs;
+
+  /* Reset private state. */
+  _rl_complete_display_matches_interrupt = 0;
 }
 
 /* The user must press "y" or "n". Non-zero return means "y" pressed. */
@@ -638,11 +652,23 @@ stat_char (filename)
 #endif
   else if (S_ISREG (finfo.st_mode))
     {
+#if defined (_WIN32) && !defined (__CYGWIN__)
+      char *ext;
+
+      /* Windows doesn't do access and X_OK; check file extension instead */
+      ext = strrchr (fn, '.');
+      if (ext && (_rl_stricmp (ext, ".exe") == 0 ||
+		  _rl_stricmp (ext, ".cmd") == 0 ||
+		  _rl_stricmp (ext, ".bat") == 0 ||
+		  _rl_stricmp (ext, ".com") == 0))
+	character = '*';
+#else
       if (access (filename, X_OK) == 0)
 	character = '*';
+#endif
     }
 
-  free (f);
+  xfree (f);
   return (character);
 }
 #endif /* VISIBLE_STATS */
@@ -650,7 +676,7 @@ stat_char (filename)
 #if defined (COLOR_SUPPORT)
 static int
 colored_stat_start (filename)
-     char *filename;
+     const char *filename;
 {
   _rl_set_normal_color ();
   return (_rl_print_color_indicator (filename));
@@ -661,6 +687,19 @@ colored_stat_end ()
 {
   _rl_prep_non_filename_text ();
   _rl_put_indicator (&_rl_color_indicator[C_CLR_TO_EOL]);
+}
+
+static int
+colored_prefix_start ()
+{
+  _rl_set_normal_color ();
+  return (_rl_print_prefix_color ());
+}
+
+static void
+colored_prefix_end ()
+{
+  colored_stat_end ();		/* for now */
 }
 #endif
 
@@ -682,7 +721,7 @@ printable_part (pathname)
     return (pathname);
 
   temp = strrchr (pathname, '/');
-#if defined (__MSDOS__)
+#if defined (__MSDOS__) || defined (_WIN32)
   if (temp == 0 && ISALPHA ((unsigned char)pathname[0]) && pathname[1] == ':')
     temp = pathname + 1;
 #endif
@@ -761,12 +800,14 @@ fnwidth (string)
 #define ELLIPSIS_LEN	3
 
 static int
-fnprint (to_print, prefix_bytes)
+fnprint (to_print, prefix_bytes, real_pathname)
      const char *to_print;
      int prefix_bytes;
+     const char *real_pathname;
 {
   int printed_len, w;
   const char *s;
+  int common_prefix_len, print_len;
 #if defined (HANDLE_MULTIBYTE)
   mbstate_t ps;
   const char *end;
@@ -774,18 +815,26 @@ fnprint (to_print, prefix_bytes)
   int width;
   wchar_t wc;
 
-  end = to_print + strlen (to_print) + 1;
+  print_len = strlen (to_print);
+  end = to_print + print_len + 1;
   memset (&ps, 0, sizeof (mbstate_t));
 #endif
 
-  printed_len = 0;
+  printed_len = common_prefix_len = 0;
 
   /* Don't print only the ellipsis if the common prefix is one of the
-     possible completions */
-  if (to_print[prefix_bytes] == '\0')
+     possible completions.  Only cut off prefix_bytes if we're going to be
+     printing the ellipsis, which takes precedence over coloring the
+     completion prefix (see print_filename() below). */
+  if (_rl_completion_prefix_display_length > 0 && prefix_bytes >= print_len)
     prefix_bytes = 0;
 
-  if (prefix_bytes)
+#if defined (COLOR_SUPPORT)
+  if (_rl_colored_stats && (prefix_bytes == 0 || _rl_colored_completion_prefix <= 0))
+    colored_stat_start (real_pathname);
+#endif
+
+  if (prefix_bytes && _rl_completion_prefix_display_length > 0)
     {
       char ellipsis;
 
@@ -794,6 +843,15 @@ fnprint (to_print, prefix_bytes)
 	putc (ellipsis, rl_outstream);
       printed_len = ELLIPSIS_LEN;
     }
+#if defined (COLOR_SUPPORT)
+  else if (prefix_bytes && _rl_colored_completion_prefix > 0)
+    {
+      common_prefix_len = prefix_bytes;
+      prefix_bytes = 0;
+      /* XXX - print color indicator start here */
+      colored_prefix_start ();
+    }
+#endif
 
   s = to_print + prefix_bytes;
   while (*s)
@@ -844,7 +902,24 @@ fnprint (to_print, prefix_bytes)
 	  printed_len++;
 #endif
 	}
+      if (common_prefix_len > 0 && (s - to_print) >= common_prefix_len)
+	{
+#if defined (COLOR_SUPPORT)
+	  /* printed bytes = s - to_print */
+	  /* printed bytes should never be > but check for paranoia's sake */
+	  colored_prefix_end ();
+	  if (_rl_colored_stats)
+	    colored_stat_start (real_pathname);		/* XXX - experiment */
+#endif
+	  common_prefix_len = 0;
+	}
     }
+
+#if defined (COLOR_SUPPORT)
+  /* XXX - unconditional for now */
+  if (_rl_colored_stats)
+    colored_stat_end ();
+#endif
 
   return printed_len;
 }
@@ -866,7 +941,7 @@ print_filename (to_print, full_pathname, prefix_bytes)
   /* Defer printing if we want to prefix with a color indicator */
   if (_rl_colored_stats == 0 || rl_filename_completion_desired == 0)
 #endif
-    printed_len = fnprint (to_print, prefix_bytes);
+    printed_len = fnprint (to_print, prefix_bytes, to_print);
 
   if (rl_filename_completion_desired && (
 #if defined (VISIBLE_STATS)
@@ -928,20 +1003,17 @@ print_filename (to_print, full_pathname, prefix_bytes)
 		{
 		  dn = savestring (new_full_pathname);
 		  (*rl_filename_stat_hook) (&dn);
-		  free (new_full_pathname);
+		  xfree (new_full_pathname);
 		  new_full_pathname = dn;
 		}
 	      if (path_isdir (new_full_pathname))
 		extension_char = '/';
 	    }
 
+	  /* Move colored-stats code inside fnprint() */
 #if defined (COLOR_SUPPORT)
 	  if (_rl_colored_stats)
-	    {
-	      colored_stat_start (new_full_pathname);
-	      printed_len = fnprint (to_print, prefix_bytes);
-	      colored_stat_end ();
-	    }
+	    printed_len = fnprint (to_print, prefix_bytes, new_full_pathname);
 #endif
 
 	  xfree (new_full_pathname);
@@ -958,15 +1030,11 @@ print_filename (to_print, full_pathname, prefix_bytes)
 	    if (_rl_complete_mark_directories && path_isdir (s))
 	      extension_char = '/';
 
+	  /* Move colored-stats code inside fnprint() */
 #if defined (COLOR_SUPPORT)
 	  if (_rl_colored_stats)
-	    {
-	      colored_stat_start (s);
-	      printed_len = fnprint (to_print, prefix_bytes);
-	      colored_stat_end ();
-	    }
+	    printed_len = fnprint (to_print, prefix_bytes, s);
 #endif
-
 	}
 
       xfree (s);
@@ -1504,15 +1572,29 @@ rl_display_match_list (matches, len, max)
   if (_rl_completion_prefix_display_length > 0)
     {
       t = printable_part (matches[0]);
-      temp = strrchr (t, '/');
+      /* check again in case of /usr/src/ */
+      temp = rl_filename_completion_desired ? strrchr (t, '/') : 0;
       common_length = temp ? fnwidth (temp) : fnwidth (t);
       sind = temp ? strlen (temp) : strlen (t);
+      if (common_length > max || sind > max)
+	common_length = sind = 0;
 
       if (common_length > _rl_completion_prefix_display_length && common_length > ELLIPSIS_LEN)
 	max -= common_length - ELLIPSIS_LEN;
       else
 	common_length = sind = 0;
     }
+#if defined (COLOR_SUPPORT)
+  else if (_rl_colored_completion_prefix > 0)
+    {
+      t = printable_part (matches[0]);
+      temp = rl_filename_completion_desired ? strrchr (t, '/') : 0;
+      common_length = temp ? fnwidth (temp) : fnwidth (t);
+      sind = temp ? RL_STRLEN (temp+1) : RL_STRLEN (t);		/* want portion after final slash */
+      if (common_length > max || sind > max)
+	common_length = sind = 0;
+    }
+#endif
 
   /* How many items of MAX length can we fit in the screen window? */
   cols = complete_get_screenwidth ();
@@ -1559,12 +1641,23 @@ rl_display_match_list (matches, len, max)
 		  printed_len = print_filename (temp, matches[l], sind);
 
 		  if (j + 1 < limit)
-		    for (k = 0; k < max - printed_len; k++)
-		      putc (' ', rl_outstream);
+		    {
+		      if (max <= printed_len)
+			putc (' ', rl_outstream);
+		      else
+			for (k = 0; k < max - printed_len; k++)
+			  putc (' ', rl_outstream);
+		    }
 		}
 	      l += count;
 	    }
 	  rl_crlf ();
+#if defined (SIGWINCH)
+	  if (RL_SIG_RECEIVED () && RL_SIGWINCH_RECEIVED() == 0)
+#else
+	  if (RL_SIG_RECEIVED ())
+#endif
+	    return;
 	  lines++;
 	  if (_rl_page_completions && lines >= (_rl_screenheight - 1) && i < count)
 	    {
@@ -1582,6 +1675,12 @@ rl_display_match_list (matches, len, max)
 	  temp = printable_part (matches[i]);
 	  printed_len = print_filename (temp, matches[i], sind);
 	  /* Have we reached the end of this line? */
+#if defined (SIGWINCH)
+	  if (RL_SIG_RECEIVED () && RL_SIGWINCH_RECEIVED() == 0)
+#else
+	  if (RL_SIG_RECEIVED ())
+#endif
+	    return;
 	  if (matches[i+1])
 	    {
 	      if (limit == 1 || (i && (limit > 1) && (i % limit) == 0))
@@ -1595,6 +1694,8 @@ rl_display_match_list (matches, len, max)
 			return;
 		    }
 		}
+	      else if (max <= printed_len)
+		putc (' ', rl_outstream);
 	      else
 		for (k = 0; k < max - printed_len; k++)
 		  putc (' ', rl_outstream);
@@ -2046,8 +2147,16 @@ rl_complete_internal (what_to_do)
 	{
 	  _rl_sigcleanup = _rl_complete_sigcleanup;
 	  _rl_sigcleanarg = matches;
+	  _rl_complete_display_matches_interrupt = 0;
 	}
       display_matches (matches);
+      if (_rl_complete_display_matches_interrupt)
+        {
+          matches = 0;		/* already freed by rl_complete_sigcleanup */
+          _rl_complete_display_matches_interrupt = 0;
+	  if (rl_signal_event_hook)
+	    (*rl_signal_event_hook) ();		/* XXX */
+        }
       _rl_sigcleanup = 0;
       _rl_sigcleanarg = 0;
       break;
@@ -2073,6 +2182,8 @@ rl_complete_internal (what_to_do)
 
   RL_UNSETSTATE(RL_STATE_COMPLETING);
   _rl_reset_completion_state ();
+
+  RL_CHECK_SIGNALS ();
   return 0;
 }
 
@@ -2372,6 +2483,7 @@ rl_filename_completion_function (text, state)
   static int filename_len;
   char *temp, *dentry, *convfn;
   int dirlen, dentlen, convlen;
+  int tilde_dirname;
   struct dirent *entry;
 
   /* If we don't have any state, then do some initialization. */
@@ -2395,7 +2507,7 @@ rl_filename_completion_function (text, state)
 
       temp = strrchr (dirname, '/');
 
-#if defined (__MSDOS__)
+#if defined (__MSDOS__) || defined (_WIN32)
       /* special hack for //X/... */
       if (dirname[0] == '/' && dirname[1] == '/' && ISALPHA ((unsigned char)dirname[2]) && dirname[3] == '/')
         temp = strrchr (dirname + 3, '/');
@@ -2406,7 +2518,7 @@ rl_filename_completion_function (text, state)
 	  strcpy (filename, ++temp);
 	  *temp = '\0';
 	}
-#if defined (__MSDOS__)
+#if defined (__MSDOS__) || (defined (_WIN32) && !defined (__CYGWIN__))
       /* searches from current directory on the drive */
       else if (ISALPHA ((unsigned char)dirname[0]) && dirname[1] == ':')
         {
@@ -2429,11 +2541,13 @@ rl_filename_completion_function (text, state)
       else
 	users_dirname = savestring (dirname);
 
+      tilde_dirname = 0;
       if (*dirname == '~')
 	{
 	  temp = tilde_expand (dirname);
 	  xfree (dirname);
 	  dirname = temp;
+	  tilde_dirname = 1;
 	}
 
       /* We have saved the possibly-dequoted version of the directory name
@@ -2452,7 +2566,7 @@ rl_filename_completion_function (text, state)
 	  xfree (users_dirname);
 	  users_dirname = savestring (dirname);
 	}
-      else if (rl_completion_found_quote && rl_filename_dequoting_function)
+      else if (tilde_dirname == 0 && rl_completion_found_quote && rl_filename_dequoting_function)
 	{
 	  /* delete single and double quotes */
 	  xfree (dirname);

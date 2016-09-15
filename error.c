@@ -274,6 +274,29 @@ internal_warning (format, va_alist)
 
 void
 #if defined (PREFER_STDARG)
+internal_inform (const char *format, ...)
+#else
+internal_inform (format, va_alist)
+     const char *format;
+     va_dcl
+#endif
+{
+  va_list args;
+
+  error_prolog (1);
+  /* TRANSLATORS: this is a prefix for informational messages. */
+  fprintf (stderr, _("INFORM: "));
+
+  SH_VA_START (args, format);
+
+  vfprintf (stderr, format, args);
+  fprintf (stderr, "\n");
+
+  va_end (args);
+}
+
+void
+#if defined (PREFER_STDARG)
 sys_error (const char *format, ...)
 #else
 sys_error (format, va_alist)

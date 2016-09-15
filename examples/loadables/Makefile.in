@@ -1,7 +1,7 @@
 #
 # Simple makefile for the sample loadable builtins
 #
-# Copyright (C) 1996-2009 Free Software Foundation, Inc.     
+# Copyright (C) 1996-2015 Free Software Foundation, Inc.
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -17,6 +17,9 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+PACKAGE = @PACKAGE_NAME@
+VERSION = @PACKAGE_VERSION@
+
 # Include some boilerplate Gnu makefile definitions.
 prefix = @prefix@
 
@@ -28,10 +31,22 @@ includedir = @includedir@
 
 datarootdir = @datarootdir@
 
+loadablesdir = @loadablesdir@
+headersdir = @headersdir@
+
 topdir = @top_srcdir@
 BUILD_DIR = @BUILD_DIR@
 srcdir = @srcdir@
-VPATH = .:@srcdir@
+VPATH = @srcdir@
+
+# Support an alternate destination root directory for package building
+DESTDIR =
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALLMODE= -m 0755
 
 @SET_MAKE@
 CC = @CC@
@@ -51,6 +66,8 @@ LOCAL_DEFS = @LOCAL_DEFS@
 CPPFLAGS = @CPPFLAGS@
 
 BASHINCDIR = ${topdir}/include
+
+SUPPORT_SRC = $(topdir)/support/
 
 LIBBUILD = ${BUILD_DIR}/lib
 
@@ -75,7 +92,7 @@ SHOBJ_XLDFLAGS = @SHOBJ_XLDFLAGS@
 SHOBJ_LIBS = @SHOBJ_LIBS@
 SHOBJ_STATUS = @SHOBJ_STATUS@
 
-INC = -I. -I.. -I$(topdir) -I$(topdir)/lib -I$(topdir)/builtins \
+INC = -I. -I.. -I$(topdir) -I$(topdir)/lib -I$(topdir)/builtins -I${srcdir} \
       -I$(BASHINCDIR) -I$(BUILD_DIR) -I$(LIBBUILD) \
       -I$(BUILD_DIR)/builtins $(INTL_INC)
 
@@ -83,10 +100,10 @@ INC = -I. -I.. -I$(topdir) -I$(topdir)/lib -I$(topdir)/builtins \
 	$(SHOBJ_CC) $(SHOBJ_CFLAGS) $(CCFLAGS) $(INC) -c -o $@ $<
 
 
-ALLPROG = print truefalse sleep pushd finfo logname basename dirname \
+ALLPROG = print truefalse sleep finfo logname basename dirname \
 	  tty pathchk tee head mkdir rmdir printenv id whoami \
-	  uname sync push ln unlink realpath strftime mypid
-OTHERPROG = necho hello cat
+	  uname sync push ln unlink realpath strftime mypid setpgid
+OTHERPROG = necho hello cat pushd
 
 all:	$(SHOBJ_STATUS)
 
@@ -98,7 +115,7 @@ unsupported:
 	@echo "${topdir}/support/shobj-conf script."
 	@echo "If your operating system provides facilities for dynamic"
 	@echo "loading of shared objects using the dlopen(3) interface,"
-	@echo "please update the script and re-run configure.
+	@echo "please update the script and re-run configure."
 	@echo "Please send the changes you made to bash-maintainers@gnu.org"
 	@echo "for inclusion in future bash releases."
 
@@ -185,6 +202,10 @@ strftime:	strftime.o
 mypid:	mypid.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ mypid.o $(SHOBJ_LIBS)
 
+
+setpgid:	setpgid.o
+	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ setpgid.o $(SHOBJ_LIBS)
+
 # pushd is a special case.  We use the same source that the builtin version
 # uses, with special compilation options.
 #
@@ -207,8 +228,35 @@ mostlyclean:	clean
 	-( cd perl && ${MAKE} ${MFLAGS} $@ )
 
 distclean maintainer-clean: clean
-	$(RM) Makefile pushd.c
+	$(RM) Makefile Makefile.inc pushd.c
 	-( cd perl && ${MAKE} ${MFLAGS} $@ )
+
+installdirs:
+	@${SHELL} $(SUPPORT_SRC)mkinstalldirs $(DESTDIR)$(loadablesdir)
+
+install-dev:	installdirs
+	@$(INSTALL_DATA) Makefile.inc $(DESTDIR)$(loadablesdir)/Makefile.inc
+	@( cd $(BUILD_DIR) && ${MAKE} ${MFLAGS} DESTDIR="$(DESTDIR)" install-headers)
+
+install-supported:	all installdirs install-dev
+	@echo installing example loadable builtins in $(DESTDIR)${loadablesdir}
+	@for prog in ${ALLPROG}; do \
+		echo $$prog ; \
+		$(INSTALL_PROGRAM) $(INSTALLMODE) $$prog $(DESTDIR)$(loadablesdir)/$$prog ;\
+	done
+
+uninstall-dev:
+	-$(RM) $(DESTDIR)$(loadablesdir)/Makefile.inc
+	-( cd $(BUILD_DIR) && ${MAKE} ${MFLAGS} DESTDIR="$(DESTDIR)" uninstall-headers)
+
+uninstall-supported:	uninstall-dev
+	-( cd $(DESTDIR)${loadablesdir} && $(RM) ${ALLPROG} )
+
+install-unsupported:
+uninstall-unsupported:
+
+install:	install-$(SHOBJ_STATUS)
+uninstall:	uninstall-$(SHOBJ_STATUS)
 
 print.o: print.c
 truefalse.o: truefalse.c
@@ -234,4 +282,4 @@ push.o: push.c
 mkdir.o: mkdir.c
 realpath.o: realpath.c
 strftime.o: strftime.c
-mypid.o: mypid.c
+setpgid.o: setpgid.c

@@ -103,6 +103,7 @@ extern char **brace_expand __P((char *));
 /* Miscellaneous functions from parse.y */
 extern int yyparse __P((void));
 extern int return_EOF __P((void));
+extern void push_token __P((int));
 extern char *xparse_dolparen __P((char *, char *, int *, int));
 extern void reset_parser __P((void));
 extern WORD_LIST *parse_string_to_word_list __P((char *, int, const char *));
@@ -114,6 +115,8 @@ extern void free_pushed_string_input __P((void));
 extern int parser_expanding_alias __P((void));
 extern void parser_save_alias __P((void));
 extern void parser_restore_alias __P((void));
+
+extern void clear_shell_input_line __P((void));
 
 extern char *decode_prompt_string __P((char *));
 
@@ -150,7 +153,7 @@ extern int find_index_in_alist __P((char *, STRING_INT_ALIST *, int));
 
 extern char *substring __P((const char *, int, int));
 extern char *strsub __P((char *, char *, char *, int));
-extern char *strcreplace __P((char *, int, char *, int));
+extern char *strcreplace __P((char *, int, const char *, int));
 extern void strip_leading __P((char *));
 extern void strip_trailing __P((char *, int, int));
 extern void xbcopy __P((char *, char *, int));
@@ -302,7 +305,7 @@ extern int sh_setlinebuf __P((FILE *));
 #endif
 
 /* declarations for functions defined in lib/sh/shaccess.c */
-extern int sh_eaccess __P((char *, int));
+extern int sh_eaccess __P((const char *, int));
 
 /* declarations for functions defined in lib/sh/shmatch.c */
 extern int sh_regmatch __P((const char *, const char *, int));
@@ -323,8 +326,9 @@ extern char *sh_mkdoublequoted __P((const char *, int, int));
 extern char *sh_un_double_quote __P((char *));
 extern char *sh_backslash_quote __P((char *, const char *, int));
 extern char *sh_backslash_quote_for_double_quotes __P((char *));
-extern int sh_contains_shell_metas __P((char *));
-extern int sh_contains_quotes __P((char *));
+extern char *sh_quote_reusable __P((char *, int));
+extern int sh_contains_shell_metas __P((const char *));
+extern int sh_contains_quotes __P((const char *));
 
 /* declarations for functions defined in lib/sh/spell.c */
 extern int spname __P((char *, char *));
@@ -487,7 +491,7 @@ extern void get_new_window_size __P((int, int *, int *));
 extern int zcatfd __P((int, int, char *));
 
 /* declarations for functions defined in lib/sh/zgetline.c */
-extern ssize_t zgetline __P((int, char **, size_t *, int));
+extern ssize_t zgetline __P((int, char **, size_t *, int, int));
 
 /* declarations for functions defined in lib/sh/zmapfd.c */
 extern int zmapfd __P((int, char **, char *));
@@ -506,11 +510,11 @@ extern void zsyncfd __P((int));
 extern int zwrite __P((int, char *, size_t));
 
 /* declarations for functions defined in lib/glob/gmisc.c */
-extern int match_pattern_char __P((char *, char *));
+extern int match_pattern_char __P((char *, char *, int));
 extern int umatchlen __P((char *, size_t));
 
 #if defined (HANDLE_MULTIBYTE)
-extern int match_pattern_wchar __P((wchar_t *, wchar_t *));
+extern int match_pattern_wchar __P((wchar_t *, wchar_t *, int));
 extern int wmatchlen __P((wchar_t *, size_t));
 #endif
 

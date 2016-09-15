@@ -52,10 +52,10 @@ mtrace_alloc (tag, mem, size, file, line)
     _mtrace_fp = stderr;
 
   if (_mtrace_verbose)
-    fprintf (_mtrace_fp, "alloc: %s: %p (%d bytes) from '%s:%d'\n",
+    fprintf (_mtrace_fp, "alloc: %s: %p (%zu bytes) from '%s:%d'\n",
 		tag, mem, size, file ? file : "unknown", line);
   else
-    fprintf (_mtrace_fp, "alloc:%p:%d:%s:%d\n",
+    fprintf (_mtrace_fp, "alloc:%p:%zu:%s:%d\n",
 		mem, size, file ? file : "unknown", line);
 }
 

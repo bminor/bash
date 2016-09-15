@@ -978,7 +978,11 @@ _nl_load_domain (domain_file, domainbinding)
 
       data = (struct mo_file_header *) malloc (size);
       if (data == NULL)
-	return;
+	{
+	  if (use_mmap == 0)
+	    close (fd);
+	  return;
+	}
 
       to_read = size;
       read_ptr = (char *) data;
@@ -1019,7 +1023,15 @@ _nl_load_domain (domain_file, domainbinding)
 
   domain = (struct loaded_domain *) malloc (sizeof (struct loaded_domain));
   if (domain == NULL)
-    return;
+    {
+#ifdef HAVE_MMAP
+      if (use_mmap)
+	munmap ((caddr_t) data, size);
+      else
+#endif
+	free (data);
+      return;
+    }
   domain_file->data = domain;
 
   domain->data = (char *) data;

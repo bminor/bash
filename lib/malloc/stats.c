@@ -110,7 +110,7 @@ _print_malloc_stats (s, fp)
     }
   fprintf (fp, "\nTotal bytes in use: %lu, total bytes free: %lu\n",
 	   totused, totfree);
-  fprintf (fp, "\nTotal bytes requested by application: %lu\n", _mstats.bytesreq);
+  fprintf (fp, "\nTotal bytes requested by application: %lu\n", (unsigned long)_mstats.bytesreq);
   fprintf (fp, "Total mallocs: %d, total frees: %d, total reallocs: %d (%d copies)\n",
 	   _mstats.nmal, _mstats.nfre, _mstats.nrealloc, _mstats.nrcopy);
   fprintf (fp, "Total sbrks: %d, total bytes via sbrk: %d\n",

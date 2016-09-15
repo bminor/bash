@@ -97,3 +97,17 @@ echo ${TEXT^^}
 
 echo ${TEXT2^}
 echo ${TEXT2^^}
+
+M1=${S1^^[aeiou]}
+M2=${U2,,[AEIOU]}
+
+echo ${M1} ${M1~}
+echo ${M2} ${M2~~}
+
+declare -l lower=aBcDe
+lower+=XyZ
+echo $lower
+
+declare -u upper=aBcDe
+upper+=xYZ
+echo $upper

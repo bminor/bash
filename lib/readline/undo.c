@@ -1,7 +1,6 @@
-/* readline.c -- a general facility for reading lines of input
-   with emacs style editing and completion. */
+/* undo.c - manage list of changes to lines, offering opportunity to undo them */
 
-/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -50,7 +49,7 @@
 #include "rlprivate.h"
 #include "xmalloc.h"
 
-extern void replace_history_data PARAMS((int, histdata_t *, histdata_t *));
+extern void _hs_replace_history_data PARAMS((int, histdata_t *, histdata_t *));
 
 /* Non-zero tells rl_delete_text and rl_insert_text to not add to
    the undo list. */
@@ -129,7 +128,7 @@ rl_free_undo_list ()
   orig_list = rl_undo_list;
   _rl_free_undo_list (rl_undo_list);
   rl_undo_list = (UNDO_LIST *)NULL;
-  replace_history_data (-1, (histdata_t *)orig_list, (histdata_t *)NULL);
+  _hs_replace_history_data (-1, (histdata_t *)orig_list, (histdata_t *)NULL);
 }
 
 UNDO_LIST *
@@ -245,7 +244,7 @@ rl_do_undo ()
 	  xfree (temp);
 	}
 
-      replace_history_data (-1, (histdata_t *)release, (histdata_t *)rl_undo_list);
+      _hs_replace_history_data (-1, (histdata_t *)release, (histdata_t *)rl_undo_list);
 
       xfree (release);
     }

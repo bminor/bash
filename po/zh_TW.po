@@ -1,481 +1,520 @@
-# Chinese translations for bash package.
+# Traditional Chinese translations for bash package.
 # Copyright (C) 2008 Free Software Foundation, Inc.
 # This file is distributed under the same license as the bash package.
 # Zi-You Dai <ioppooster@gmail.com>, 2008.
+# Mingye Wang (Arthur2e5) <arthur200126@hotmail.com>, 2015.
+# Wei-Lun Chao <bluebat@member.fsf.org>, 2015.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: bash-3.2\n"
+"Project-Id-Version: bash 4.3-rc2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-02-11 11:19-0500\n"
-"PO-Revision-Date: 2008-08-20 20:12+0800\n"
-"Last-Translator: Zi-You Dai  <ioppooster@gmail.com>\n"
-"Language-Team: Chinese (traditional)  <zh-l10n@linux.org.tw>\n"
-"Language: zh_TW\n"
+"POT-Creation-Date: 2016-09-10 12:42-0400\n"
+"PO-Revision-Date: 2015-08-27 13:36+0800\n"
+"Last-Translator: Wei-Lun Chao <bluebat@member.fsf.org>\n"
+"Language-Team: Chinese (traditional) <zh-l10n@linux.org.tw>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: zh_TW\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: arrayfunc.c:51
+#: arrayfunc.c:54
 msgid "bad array subscript"
+msgstr "陣列下標不正確"
+
+#: arrayfunc.c:368 builtins/declare.def:574 variables.c:2092 variables.c:2118
+#: variables.c:2730
+#, c-format
+msgid "%s: removing nameref attribute"
 msgstr ""
 
-#: arrayfunc.c:356 builtins/declare.def:566
+#: arrayfunc.c:393 builtins/declare.def:780
 #, c-format
 msgid "%s: cannot convert indexed to associative array"
-msgstr ""
+msgstr "%s: 無法將索引陣列轉化為關聯陣列"
 
-#: arrayfunc.c:539
-#, fuzzy, c-format
+#: arrayfunc.c:578
+#, c-format
 msgid "%s: invalid associative array key"
-msgstr "%s：無效的功能名稱"
+msgstr "%s: 無效的關聯陣列鍵值"
 
-#: arrayfunc.c:541
+#: arrayfunc.c:580
 #, c-format
 msgid "%s: cannot assign to non-numeric index"
-msgstr ""
+msgstr "%s: 無法指派為非數字的索引"
 
-#: arrayfunc.c:586
+#: arrayfunc.c:625
 #, c-format
 msgid "%s: %s: must use subscript when assigning associative array"
-msgstr ""
+msgstr "%s: %s: 指派為關聯陣列時必須使用下標"
 
-#: bashhist.c:388
+#: bashhist.c:421
 #, c-format
 msgid "%s: cannot create: %s"
-msgstr ""
+msgstr "%s: 無法建立: %s"
 
-#: bashline.c:3982
+#: bashline.c:4091
 msgid "bash_execute_unix_command: cannot find keymap for command"
-msgstr ""
+msgstr "bash_execute_unix_command: 無法為命令找到鍵對映"
 
-#: bashline.c:4069
+#: bashline.c:4189
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
-msgstr ""
+msgstr "%s: 第一個非空字元不是「\"」"
 
-#: bashline.c:4098
+#: bashline.c:4218
 #, c-format
 msgid "no closing `%c' in %s"
-msgstr ""
+msgstr "%2$s 中沒有閉合的「%1$c」"
 
-#: bashline.c:4132
+#: bashline.c:4252
 #, c-format
 msgid "%s: missing colon separator"
-msgstr ""
+msgstr "%s: 缺少冒號分隔符"
 
-#: braces.c:321
+#: braces.c:329
 #, c-format
 msgid "brace expansion: cannot allocate memory for %s"
-msgstr ""
+msgstr "大括號展開： 無法為 %s 分配記憶體"
 
-#: braces.c:413
+#: braces.c:427
 #, c-format
 msgid "brace expansion: failed to allocate memory for %d elements"
-msgstr ""
+msgstr "大括號展開： 為 %d 個元素分配記憶體失敗"
 
-#: braces.c:452
+#: braces.c:471
 #, c-format
 msgid "brace expansion: failed to allocate memory for `%s'"
-msgstr ""
+msgstr "大括號展開： 為「%s」分配記憶體失敗"
 
-#: builtins/alias.def:132
-#, fuzzy, c-format
+#: builtins/alias.def:133
+#, c-format
 msgid "`%s': invalid alias name"
-msgstr "%s：無效的功能名稱"
+msgstr "「%s」: 無效的別名"
 
 #: builtins/bind.def:123 builtins/bind.def:126
 msgid "line editing not enabled"
-msgstr ""
+msgstr "未啟用列編輯"
 
-#: builtins/bind.def:212
+#: builtins/bind.def:213
 #, c-format
 msgid "`%s': invalid keymap name"
-msgstr ""
+msgstr "「%s」: 無效的鍵對映名"
 
-#: builtins/bind.def:251
+#: builtins/bind.def:253
 #, c-format
 msgid "%s: cannot read: %s"
 msgstr "%s：不能讀取： %s"
 
-#: builtins/bind.def:266
+#: builtins/bind.def:270
 #, c-format
 msgid "`%s': cannot unbind"
-msgstr ""
+msgstr "「%s」: 無法解除繫結"
 
-#: builtins/bind.def:304 builtins/bind.def:334
+#: builtins/bind.def:308 builtins/bind.def:338
 #, c-format
 msgid "`%s': unknown function name"
-msgstr "`%s'：未知函數名稱"
-
-#: builtins/bind.def:312
-#, c-format
-msgid "%s is not bound to any keys.\n"
-msgstr ""
+msgstr "「%s」：不明函數名稱"
 
 #: builtins/bind.def:316
 #, c-format
+msgid "%s is not bound to any keys.\n"
+msgstr "%s 未與任何鍵繫結。\n"
+
+#: builtins/bind.def:320
+#, c-format
 msgid "%s can be invoked via "
-msgstr ""
+msgstr "%s 可以被呼叫，藉由"
 
-#: builtins/break.def:77 builtins/break.def:117
+#: builtins/break.def:79 builtins/break.def:121
 msgid "loop count"
-msgstr ""
+msgstr "迴圈計數"
 
-#: builtins/break.def:137
+#: builtins/break.def:141
 msgid "only meaningful in a `for', `while', or `until' loop"
-msgstr ""
+msgstr "僅在「for」，「while」， 或者「until」迴圈中有意義"
 
-#: builtins/caller.def:134
+#: builtins/caller.def:136
 msgid ""
 "Returns the context of the current subroutine call.\n"
 "    \n"
 "    Without EXPR, returns "
 msgstr ""
+"回傳當前子例程呼叫的語境\n"
+"    \n"
+"    不帶 EXPR 時，回傳"
 
-#: builtins/cd.def:319
+#: builtins/cd.def:321
 msgid "HOME not set"
 msgstr "HOME 沒有設置"
 
-#: builtins/cd.def:327 builtins/common.c:166 test.c:876
+#: builtins/cd.def:329 builtins/common.c:167 test.c:885
 msgid "too many arguments"
 msgstr "太多引數"
 
-#: builtins/cd.def:338
+#: builtins/cd.def:336
+#, fuzzy
+msgid "null directory"
+msgstr "無其他目錄"
+
+#: builtins/cd.def:347
 msgid "OLDPWD not set"
 msgstr "OLDPWD 沒有設置"
 
-#: builtins/common.c:101
+#: builtins/common.c:102
 #, c-format
 msgid "line %d: "
-msgstr ""
+msgstr "第 %d 列："
 
-#: builtins/common.c:139 error.c:265
-#, fuzzy, c-format
+#: builtins/common.c:140 error.c:265
+#, c-format
 msgid "warning: "
-msgstr "%s：警告："
+msgstr "警告："
 
-#: builtins/common.c:153
-#, fuzzy, c-format
+#: builtins/common.c:154
+#, c-format
 msgid "%s: usage: "
-msgstr "%s：警告："
+msgstr "%s: 用法："
 
-#: builtins/common.c:191 shell.c:506 shell.c:788
+#: builtins/common.c:199 shell.c:514 shell.c:825
 #, c-format
 msgid "%s: option requires an argument"
 msgstr "%s：選項需要一個引數"
 
-#: builtins/common.c:198
+#: builtins/common.c:206
 #, c-format
 msgid "%s: numeric argument required"
-msgstr "%s：數字引數必須"
+msgstr "%s：需要數字引數"
 
-#: builtins/common.c:205
+#: builtins/common.c:213
 #, c-format
 msgid "%s: not found"
 msgstr "%s：沒有找到"
 
-#: builtins/common.c:214 shell.c:801
+#: builtins/common.c:222 shell.c:838
 #, c-format
 msgid "%s: invalid option"
 msgstr "%s：無效選項"
 
-#: builtins/common.c:221
+#: builtins/common.c:229
 #, c-format
 msgid "%s: invalid option name"
-msgstr "%s：無效選項名"
+msgstr "%s：無效選項名稱"
 
-#: builtins/common.c:228 general.c:235 general.c:240
+#: builtins/common.c:236 general.c:293 general.c:298
 #, c-format
 msgid "`%s': not a valid identifier"
-msgstr "`%s'：不是一個有效的識別符"
+msgstr "「%s」：不是一個有效的識別符"
 
-#: builtins/common.c:238
-#, fuzzy
+#: builtins/common.c:246
 msgid "invalid octal number"
-msgstr "無效信號數"
+msgstr "無效的八進位數字"
 
-#: builtins/common.c:240
-#, fuzzy
+#: builtins/common.c:248
 msgid "invalid hex number"
-msgstr "%s：無效的號碼"
+msgstr "無效的十六進位數字"
 
-#: builtins/common.c:242 expr.c:1470
+#: builtins/common.c:250 expr.c:1473
 msgid "invalid number"
-msgstr ""
+msgstr "無效數字"
 
-#: builtins/common.c:250
+#: builtins/common.c:258
 #, c-format
 msgid "%s: invalid signal specification"
 msgstr "%s：無效的信號規格"
 
-#: builtins/common.c:257
+#: builtins/common.c:265
 #, c-format
 msgid "`%s': not a pid or valid job spec"
-msgstr "`%s'：不是一個 pid 或有效的工作規格"
+msgstr "「%s」：不是一個 pid 或有效的工作規格"
 
-#: builtins/common.c:264 error.c:488
+#: builtins/common.c:272 error.c:511
 #, c-format
 msgid "%s: readonly variable"
-msgstr "%s：只讀變數"
+msgstr "%s：唯讀的變數"
 
-#: builtins/common.c:272
+#: builtins/common.c:280
 #, c-format
 msgid "%s: %s out of range"
 msgstr "%s：%s 超出範圍"
 
-#: builtins/common.c:272 builtins/common.c:274
+#: builtins/common.c:280 builtins/common.c:282
 msgid "argument"
 msgstr "引數"
 
-#: builtins/common.c:274
+#: builtins/common.c:282
 #, c-format
 msgid "%s out of range"
 msgstr "%s 超出範圍"
 
-#: builtins/common.c:282
+#: builtins/common.c:290
 #, c-format
 msgid "%s: no such job"
-msgstr "%s：沒有此類的工作"
+msgstr "%s：沒有此類工作"
 
-#: builtins/common.c:290
+#: builtins/common.c:298
 #, c-format
 msgid "%s: no job control"
 msgstr "%s：沒有工作控制"
 
-#: builtins/common.c:292
+#: builtins/common.c:300
 msgid "no job control"
 msgstr "沒有工作控制"
 
-#: builtins/common.c:302
+#: builtins/common.c:310
 #, c-format
 msgid "%s: restricted"
-msgstr "%s：有限的"
-
-#: builtins/common.c:304
-msgid "restricted"
-msgstr "有限的"
+msgstr "%s：受限的"
 
 #: builtins/common.c:312
+msgid "restricted"
+msgstr "受限的"
+
+#: builtins/common.c:320
 #, c-format
 msgid "%s: not a shell builtin"
 msgstr "%s：不是一個內建 shell"
 
-#: builtins/common.c:321
+#: builtins/common.c:329
 #, c-format
 msgid "write error: %s"
 msgstr "寫入錯誤： %s"
 
-#: builtins/common.c:329
+#: builtins/common.c:337
 #, c-format
 msgid "error setting terminal attributes: %s"
-msgstr ""
+msgstr "設定終端屬性時出錯: %s"
 
-#: builtins/common.c:331
+#: builtins/common.c:339
 #, c-format
 msgid "error getting terminal attributes: %s"
-msgstr ""
+msgstr "獲取終端屬性時出錯: %s"
 
-#: builtins/common.c:563
+#: builtins/common.c:585
 #, c-format
 msgid "%s: error retrieving current directory: %s: %s\n"
 msgstr "%s：錯誤檢索當前目錄： %s： %s\n"
 
-#: builtins/common.c:629 builtins/common.c:631
+#: builtins/common.c:651 builtins/common.c:653
 #, c-format
 msgid "%s: ambiguous job spec"
-msgstr "%s：含糊的工作規格"
+msgstr "%s：模稜兩可的工作規格"
 
-#: builtins/complete.def:277
+#: builtins/common.c:918
+msgid "help not available in this version"
+msgstr ""
+
+#: builtins/complete.def:278
 #, c-format
 msgid "%s: invalid action name"
 msgstr "%s：無效的功能名稱"
 
-#: builtins/complete.def:450 builtins/complete.def:645
-#: builtins/complete.def:855
+#: builtins/complete.def:452 builtins/complete.def:647
+#: builtins/complete.def:858
 #, c-format
 msgid "%s: no completion specification"
 msgstr "%s：沒有完成的規格"
 
-#: builtins/complete.def:697
+#: builtins/complete.def:699
 msgid "warning: -F option may not work as you expect"
 msgstr "警告： -F 選項可能無法按預期工作"
 
-#: builtins/complete.def:699
+#: builtins/complete.def:701
 msgid "warning: -C option may not work as you expect"
 msgstr "警告： -C 選項可能無法按預期工作"
 
-#: builtins/complete.def:828
+#: builtins/complete.def:831
 msgid "not currently executing completion function"
-msgstr ""
+msgstr "當前未執行補完功能"
 
-#: builtins/declare.def:126
+#: builtins/declare.def:127
 msgid "can only be used in a function"
-msgstr "只能用在一個函數"
+msgstr "只能用在函數中"
 
-#: builtins/declare.def:315 builtins/declare.def:509
+#: builtins/declare.def:332 builtins/declare.def:685
 #, c-format
 msgid "%s: reference variable cannot be an array"
-msgstr ""
+msgstr "%s: 引用變數不能為陣列"
 
-#: builtins/declare.def:324
+#: builtins/declare.def:343 variables.c:2959
 #, c-format
 msgid "%s: nameref variable self references not allowed"
-msgstr ""
+msgstr "%s: 不允許名稱引用變數引用自身"
 
-#: builtins/declare.def:398
+#: builtins/declare.def:348 variables.c:1928 variables.c:2877 variables.c:2889
+#: variables.c:2956
+#, c-format
+msgid "%s: circular name reference"
+msgstr "%s: 迴圈變數名引用"
+
+#: builtins/declare.def:353 builtins/declare.def:691 builtins/declare.def:702
+#, fuzzy, c-format
+msgid "`%s': invalid variable name for name reference"
+msgstr "%s: 無效的引用變數名"
+
+#: builtins/declare.def:463
 msgid "cannot use `-f' to make functions"
-msgstr ""
+msgstr "無法用「-f」生成函數"
 
-#: builtins/declare.def:410 execute_cmd.c:5361
+#: builtins/declare.def:475 execute_cmd.c:5632
 #, c-format
 msgid "%s: readonly function"
-msgstr "%s：只讀函數"
+msgstr "%s：唯讀函數"
 
-#: builtins/declare.def:553
+#: builtins/declare.def:753
+#, c-format
+msgid "%s: quoted compound array assignment deprecated"
+msgstr ""
+
+#: builtins/declare.def:767
 #, c-format
 msgid "%s: cannot destroy array variables in this way"
-msgstr ""
+msgstr "%s: 無法以這種方式銷毀陣列變數"
 
-#: builtins/declare.def:560 builtins/read.def:733
+#: builtins/declare.def:774 builtins/read.def:751
 #, c-format
 msgid "%s: cannot convert associative to indexed array"
-msgstr ""
+msgstr "%s: 無法將關聯陣列轉化為索引陣列"
 
-#: builtins/enable.def:137 builtins/enable.def:145
+#: builtins/enable.def:143 builtins/enable.def:151
 msgid "dynamic loading not available"
-msgstr ""
+msgstr "動態載入不可用"
 
-#: builtins/enable.def:312
+#: builtins/enable.def:343
 #, c-format
 msgid "cannot open shared object %s: %s"
-msgstr ""
+msgstr "無法開啟共享物件 %s: %s"
 
-#: builtins/enable.def:335
+#: builtins/enable.def:369
 #, c-format
 msgid "cannot find %s in shared object %s: %s"
+msgstr "無法在共享物件 %2$s 中找到 %1$s: %3$s"
+
+#: builtins/enable.def:387
+#, c-format
+msgid "load function for %s returns failure (%d): not loaded"
 msgstr ""
 
-#: builtins/enable.def:459
+#: builtins/enable.def:512
 #, c-format
 msgid "%s: not dynamically loaded"
-msgstr ""
+msgstr "%s: 未以動態方式載入"
 
-#: builtins/enable.def:474
+#: builtins/enable.def:538
 #, c-format
 msgid "%s: cannot delete: %s"
-msgstr ""
+msgstr "%s: 無法刪除: %s"
 
-#: builtins/evalfile.c:140 builtins/hash.def:171 execute_cmd.c:5208
-#: shell.c:1481
+#: builtins/evalfile.c:144 builtins/hash.def:172 execute_cmd.c:5472
 #, c-format
 msgid "%s: is a directory"
-msgstr ""
+msgstr "%s: 是一個目錄"
 
-#: builtins/evalfile.c:146
+#: builtins/evalfile.c:150
 #, c-format
 msgid "%s: not a regular file"
-msgstr ""
+msgstr "%s: 不是常規檔案"
 
-#: builtins/evalfile.c:155
+#: builtins/evalfile.c:159
 #, c-format
 msgid "%s: file is too large"
-msgstr ""
+msgstr "%s: 檔案太大"
 
-#: builtins/evalfile.c:190 builtins/evalfile.c:208 shell.c:1491
+#: builtins/evalfile.c:194 builtins/evalfile.c:212 shell.c:1578
 #, c-format
 msgid "%s: cannot execute binary file"
-msgstr ""
+msgstr "%s: 無法執行二進位檔案"
 
-#: builtins/exec.def:154 builtins/exec.def:156 builtins/exec.def:228
+#: builtins/exec.def:156 builtins/exec.def:158 builtins/exec.def:235
 #, c-format
 msgid "%s: cannot execute: %s"
-msgstr ""
+msgstr "%s: 無法執行: %s"
 
-#: builtins/exit.def:65
+#: builtins/exit.def:67
 #, c-format
 msgid "logout\n"
-msgstr ""
+msgstr "登出\n"
 
-#: builtins/exit.def:88
+#: builtins/exit.def:92
 msgid "not login shell: use `exit'"
-msgstr ""
+msgstr "不是登入 shell: 使用「exit」"
 
-#: builtins/exit.def:120
+#: builtins/exit.def:124
 #, c-format
 msgid "There are stopped jobs.\n"
-msgstr ""
+msgstr "有停止的工作。\n"
 
-#: builtins/exit.def:122
+#: builtins/exit.def:126
 #, c-format
 msgid "There are running jobs.\n"
-msgstr ""
+msgstr "有執行中的工作。\n"
 
-#: builtins/fc.def:262
+#: builtins/fc.def:269
 msgid "no command found"
-msgstr ""
+msgstr "未找到命令"
 
-#: builtins/fc.def:320 builtins/fc.def:369
+#: builtins/fc.def:327 builtins/fc.def:376
 msgid "history specification"
-msgstr ""
+msgstr "歷史記錄規格"
 
-#: builtins/fc.def:390
+#: builtins/fc.def:397
 #, c-format
 msgid "%s: cannot open temp file: %s"
-msgstr ""
+msgstr "%s: 無法開啟臨時檔案: %s"
 
-#: builtins/fg_bg.def:149 builtins/jobs.def:282
+#: builtins/fg_bg.def:153 builtins/jobs.def:284
 msgid "current"
-msgstr ""
+msgstr "當前"
 
-#: builtins/fg_bg.def:158
+#: builtins/fg_bg.def:162
 #, c-format
 msgid "job %d started without job control"
-msgstr ""
+msgstr "在不帶工作控制的情況下啟動了工作 %d"
 
 #: builtins/getopt.c:110
 #, c-format
 msgid "%s: illegal option -- %c\n"
-msgstr ""
+msgstr "%s: 非法選項 -- %c\n"
 
 #: builtins/getopt.c:111
 #, c-format
 msgid "%s: option requires an argument -- %c\n"
-msgstr ""
+msgstr "%s: 選項需要一個引數 -- %c\n"
 
 #: builtins/hash.def:92
 msgid "hashing disabled"
-msgstr ""
+msgstr "已停用雜湊"
 
-#: builtins/hash.def:138
+#: builtins/hash.def:139
 #, c-format
 msgid "%s: hash table empty\n"
-msgstr ""
+msgstr "%s: 雜湊表為空\n"
 
-#: builtins/hash.def:245
-#, fuzzy, c-format
+#: builtins/hash.def:254
+#, c-format
 msgid "hits\tcommand\n"
-msgstr "最後的命令： %s\n"
+msgstr "命中\t命令\n"
 
-#: builtins/help.def:130
+#: builtins/help.def:135
 #, c-format
 msgid "Shell commands matching keyword `"
 msgid_plural "Shell commands matching keywords `"
-msgstr[0] ""
+msgstr[0] "Shell 命令，匹配關鍵詞 `"
 
-#: builtins/help.def:182
+#: builtins/help.def:187
 #, c-format
 msgid ""
 "no help topics match `%s'.  Try `help help' or `man -k %s' or `info %s'."
 msgstr ""
+"沒有與「%s」匹配的說明主題。嘗試「help help」或「man -k %s」或「info %s」。"
 
-#: builtins/help.def:199
+#: builtins/help.def:226
 #, c-format
 msgid "%s: cannot open: %s"
-msgstr ""
+msgstr "%s: 無法開啟: %s"
 
-#: builtins/help.def:485
+#: builtins/help.def:526
 #, c-format
 msgid ""
 "These shell commands are defined internally.  Type `help' to see this list.\n"
@@ -486,136 +525,148 @@ msgid ""
 "A star (*) next to a name means that the command is disabled.\n"
 "\n"
 msgstr ""
+"這些 shell 命令是內部定義的。請輸入「help」以獲取一個列表。\n"
+"輸入「help 名稱」以得到有關函數「名稱」的更多資訊。\n"
+"使用「info bash」來獲得關於 shell 的更多一般性資訊。\n"
+"使用「man -k」或「info」來獲取不在列表中命令的更多資訊。\n"
+"\n"
+"名稱旁邊的星號(*)表示該命令被停用。\n"
+"\n"
 
-#: builtins/history.def:154
+#: builtins/history.def:155
 msgid "cannot use more than one of -anrw"
-msgstr ""
+msgstr "最多能使用 -anrw 選項之一"
 
-#: builtins/history.def:186
+#: builtins/history.def:187
 msgid "history position"
-msgstr ""
+msgstr "歷史記錄位置"
 
-#: builtins/history.def:366
+#: builtins/history.def:264
+#, fuzzy, c-format
+msgid "%s: invalid timestamp"
+msgstr "%s: 無效引數"
+
+#: builtins/history.def:375
 #, c-format
 msgid "%s: history expansion failed"
-msgstr ""
+msgstr "%s: 歷史記錄擴充套件失敗"
 
 #: builtins/inlib.def:71
-#, fuzzy, c-format
+#, c-format
 msgid "%s: inlib failed"
-msgstr "%s：無效服務"
+msgstr "%s: inlib 失敗"
 
 #: builtins/jobs.def:109
 msgid "no other options allowed with `-x'"
-msgstr ""
+msgstr "其他選項不能與「-x」同時使用"
 
-#: builtins/kill.def:200
+#: builtins/kill.def:202
 #, c-format
 msgid "%s: arguments must be process or job IDs"
-msgstr ""
+msgstr "%s: 引數必須是行程或工作 ID"
 
-#: builtins/kill.def:263
+#: builtins/kill.def:265
 msgid "Unknown error"
-msgstr ""
+msgstr "不明錯誤"
 
-#: builtins/let.def:95 builtins/let.def:120 expr.c:583 expr.c:598
+#: builtins/let.def:97 builtins/let.def:122 expr.c:583 expr.c:598
 msgid "expression expected"
-msgstr ""
+msgstr "需要表示式"
 
-#: builtins/mapfile.def:172
+#: builtins/mapfile.def:178
 #, c-format
 msgid "%s: not an indexed array"
-msgstr ""
+msgstr "%s: 不是一個索引陣列"
 
-#: builtins/mapfile.def:259 builtins/read.def:302
+#: builtins/mapfile.def:272 builtins/read.def:306
 #, c-format
 msgid "%s: invalid file descriptor specification"
-msgstr ""
+msgstr "%s: 無效的檔案描述符規格"
 
-#: builtins/mapfile.def:267 builtins/read.def:309
+#: builtins/mapfile.def:280 builtins/read.def:313
 #, c-format
 msgid "%d: invalid file descriptor: %s"
-msgstr ""
+msgstr "%d: 無效的檔案描述符: %s"
 
-#: builtins/mapfile.def:276 builtins/mapfile.def:314
-#, fuzzy, c-format
+#: builtins/mapfile.def:289 builtins/mapfile.def:327
+#, c-format
 msgid "%s: invalid line count"
-msgstr "%s：無效選項"
+msgstr "%s: 無效的列數"
 
-#: builtins/mapfile.def:287
-#, fuzzy, c-format
+#: builtins/mapfile.def:300
+#, c-format
 msgid "%s: invalid array origin"
-msgstr "%s：無效選項"
+msgstr "%s: 無效的陣列原點"
 
-#: builtins/mapfile.def:304
-#, fuzzy, c-format
+#: builtins/mapfile.def:317
+#, c-format
 msgid "%s: invalid callback quantum"
-msgstr "%s：無效的功能名稱"
+msgstr "%s: 無效的回呼定量"
 
-#: builtins/mapfile.def:336
+#: builtins/mapfile.def:350
 msgid "empty array variable name"
-msgstr ""
+msgstr "空陣列變數名"
 
-#: builtins/mapfile.def:357
+#: builtins/mapfile.def:371
 msgid "array variable support required"
-msgstr ""
+msgstr "需要陣列變數支援"
 
-#: builtins/printf.def:402
+#: builtins/printf.def:412
 #, c-format
 msgid "`%s': missing format character"
-msgstr ""
+msgstr "「%s」: 缺少格式字元"
 
-#: builtins/printf.def:456
-#, fuzzy, c-format
+#: builtins/printf.def:467
+#, c-format
 msgid "`%c': invalid time format specification"
-msgstr "%s：無效的信號規格"
+msgstr "「%c」: 無效的時間格式規格"
 
-#: builtins/printf.def:658
+#: builtins/printf.def:669
 #, c-format
 msgid "`%c': invalid format character"
-msgstr ""
+msgstr "「%c」: 無效格式字元"
 
-#: builtins/printf.def:684
-#, fuzzy, c-format
+#: builtins/printf.def:695
+#, c-format
 msgid "warning: %s: %s"
-msgstr "%s：警告："
+msgstr "警告: %s: %s"
 
-#: builtins/printf.def:768
+#: builtins/printf.def:781
 #, c-format
 msgid "format parsing problem: %s"
-msgstr ""
+msgstr "格式解析問題: %s"
 
-#: builtins/printf.def:865
+#: builtins/printf.def:878
 msgid "missing hex digit for \\x"
-msgstr ""
+msgstr "使用了 \\x 但缺少十六進位數字"
 
-#: builtins/printf.def:880
+#: builtins/printf.def:893
 #, c-format
 msgid "missing unicode digit for \\%c"
-msgstr ""
+msgstr "使用了 \\%c 但缺少萬國碼數字"
 
-#: builtins/pushd.def:195
+#: builtins/pushd.def:199
 msgid "no other directory"
-msgstr ""
+msgstr "無其他目錄"
 
-#: builtins/pushd.def:354
-#, fuzzy, c-format
+#: builtins/pushd.def:360
+#, c-format
 msgid "%s: invalid argument"
-msgstr "%s：無效選項"
+msgstr "%s: 無效引數"
 
-#: builtins/pushd.def:468
+#: builtins/pushd.def:475
 msgid "<no current directory>"
-msgstr ""
+msgstr "<無當前目錄>"
 
-#: builtins/pushd.def:512
+#: builtins/pushd.def:519
 msgid "directory stack empty"
-msgstr ""
+msgstr "目錄堆疊為空"
 
-#: builtins/pushd.def:514
+#: builtins/pushd.def:521
 msgid "directory stack index"
-msgstr ""
+msgstr "目錄堆疊索引"
 
-#: builtins/pushd.def:689
+#: builtins/pushd.def:696
 msgid ""
 "Display the list of currently remembered directories.  Directories\n"
 "    find their way onto the list with the `pushd' command; you can get\n"
@@ -638,8 +689,26 @@ msgid ""
 "by\n"
 "\tdirs when invoked without options, starting with zero."
 msgstr ""
+"顯示當前記住的目錄列表。 目錄\n"
+"    藉由「pushd」命令加入這個列表；您可以\n"
+"    使用「popd」命令對列表進行遍歷。\n"
+"    \n"
+"    選項:\n"
+"      -c\t刪除所有元素以清除目錄堆疊\n"
+"      -l\t不印出與家目錄相關的以波浪號\n"
+"    \t為字首的目錄\n"
+"      -p\t每列一個條目印出目錄堆疊\n"
+"      -v\t以堆疊位置為字首，每列一個條目\n"
+"    \t印出目錄堆疊\n"
+"    \n"
+"    引數:\n"
+"      +N\t以 dirs 不帶選項輸出的順序，從左起第 N 個條目顯示列表，\n"
+"    \t從 0 開始。\n"
+"    \n"
+"      -N\t以 dirs 不帶選項輸出的順序，從右起第 N 個項目顯示列表，\n"
+"\t從 0 開始。"
 
-#: builtins/pushd.def:711
+#: builtins/pushd.def:718
 msgid ""
 "Adds a directory to the top of the directory stack, or rotates\n"
 "    the stack, making the new top of the stack the current working\n"
@@ -663,8 +732,29 @@ msgid ""
 "    \n"
 "    The `dirs' builtin displays the directory stack."
 msgstr ""
+"在目錄堆疊頂部加入一個目錄，或者論詢\n"
+"    目錄堆疊，是當前工作目錄成為新的堆疊頂端\n"
+"    不帶引數時，交換堆疊頂端的兩個目錄。\n"
+"    \n"
+"    選項：\n"
+"      -n\t抑制增加堆疊中目錄時通常變更目錄的操作，\n"
+"    \t從而只有堆疊被操作。\n"
+"    \n"
+"    引數：\n"
+"      +N\t輪轉堆疊使得第 N 個目錄(「dirs」的\n"
+"    \t輸出列表中左起，從 0 開始)\n"
+"    \t升至堆疊頂端。\n"
+"    \n"
+"      -N\t輪轉堆疊使得第 N 個目錄(「dirs」的\n"
+"    \t輸出列表中右起，從 0 開始)\n"
+"    \t升至堆疊頂端\n"
+"    \n"
+"      dir\t新增目錄至堆疊頂端，並\n"
+"    \t使其成為新的當前工作目錄。\n"
+"    \n"
+"   「dirs」內建命令顯示目錄堆疊。"
 
-#: builtins/pushd.def:736
+#: builtins/pushd.def:743
 msgid ""
 "Removes entries from the directory stack.  With no arguments, removes\n"
 "    the top directory from the stack, and changes to the new top directory.\n"
@@ -684,146 +774,173 @@ msgid ""
 "    \n"
 "    The `dirs' builtin displays the directory stack."
 msgstr ""
+"從目錄堆疊中刪除條目。不帶引數時，刪除\n"
+"    堆疊頂端目錄並變更至新的堆疊頂端目錄。\n"
+"    \n"
+"    選項：\n"
+"      -n\t抑制從堆疊中刪除目錄時通常變更目錄操作，\n"
+"    \t從而只有堆疊被操作。\n"
+"    \n"
+"    引數：\n"
+"      +N\t從「dirs」輸出的列表中，\n"
+"    \t刪除左起第 N 個條目，計數從 0 開始。例如：「popd +0」\n"
+"    \t刪除第一個目錄，「popd +1」刪除第二個。\n"
+"    \n"
+"      -N\t從「dirs」輸出的列表中，\n"
+"    \t刪除右起第 N 個條目，計數從 0 開始，例如：「popd -0」\n"
+"    \t刪除最後一個條目，「popd -1」刪除倒數第二個。\n"
+"    \n"
+"   「dirs」內建變數顯示目錄堆疊。"
 
-#: builtins/read.def:275
+#: builtins/read.def:279
 #, c-format
 msgid "%s: invalid timeout specification"
-msgstr ""
+msgstr "%s: 無效的逾時規格"
 
-#: builtins/read.def:678
+#: builtins/read.def:696
 #, c-format
 msgid "read error: %d: %s"
-msgstr ""
+msgstr "讀取錯誤: %d: %s"
 
-#: builtins/return.def:75
+#: builtins/return.def:71
 msgid "can only `return' from a function or sourced script"
-msgstr ""
+msgstr "只能從函數或者原始指令稿「return」"
 
-#: builtins/set.def:782
+#: builtins/set.def:841
 msgid "cannot simultaneously unset a function and a variable"
-msgstr ""
+msgstr "無法同時取消設定一個函數和一個變數"
 
-#: builtins/set.def:826
+#: builtins/set.def:888
 #, c-format
 msgid "%s: cannot unset"
-msgstr ""
+msgstr "%s: 無法取消設定"
 
-#: builtins/set.def:843
+#: builtins/set.def:909 variables.c:3389
 #, c-format
 msgid "%s: cannot unset: readonly %s"
-msgstr ""
+msgstr "%s: 無法取消設定: 唯讀 %s"
 
-#: builtins/set.def:854
+#: builtins/set.def:922
 #, c-format
 msgid "%s: not an array variable"
-msgstr ""
+msgstr "%s: 不是陣列變數"
 
-#: builtins/setattr.def:187
+#: builtins/setattr.def:191
 #, c-format
 msgid "%s: not a function"
-msgstr ""
+msgstr "%s: 不是函數"
 
-#: builtins/shift.def:71 builtins/shift.def:77
+#: builtins/setattr.def:196
+#, fuzzy, c-format
+msgid "%s: cannot export"
+msgstr "%s: 無法取消設定"
+
+#: builtins/shift.def:73 builtins/shift.def:79
 msgid "shift count"
-msgstr ""
+msgstr "位移計數"
 
-#: builtins/shopt.def:279
+#: builtins/shopt.def:289
 msgid "cannot set and unset shell options simultaneously"
-msgstr ""
+msgstr "無法同時設定和取消設定 shell 選項"
 
-#: builtins/shopt.def:346
+#: builtins/shopt.def:391
 #, c-format
 msgid "%s: invalid shell option name"
-msgstr ""
+msgstr "%s: 無效的 shell 選項名稱"
 
-#: builtins/source.def:130
+#: builtins/source.def:131
 msgid "filename argument required"
-msgstr ""
+msgstr "需要檔名引數"
 
-#: builtins/source.def:155
+#: builtins/source.def:157
 #, c-format
 msgid "%s: file not found"
-msgstr ""
+msgstr "%s: 檔案未找到"
 
-#: builtins/suspend.def:101
+#: builtins/suspend.def:102
 msgid "cannot suspend"
-msgstr ""
+msgstr "無法懸置"
 
-#: builtins/suspend.def:111
+#: builtins/suspend.def:112
 msgid "cannot suspend a login shell"
-msgstr ""
+msgstr "無法將登入 shell 懸置"
 
-#: builtins/type.def:234
+#: builtins/type.def:236
 #, c-format
 msgid "%s is aliased to `%s'\n"
-msgstr ""
+msgstr "%s 是「%s」的別名\n"
 
-#: builtins/type.def:255
+#: builtins/type.def:257
 #, c-format
 msgid "%s is a shell keyword\n"
-msgstr ""
+msgstr "%s 是 shell 關鍵字\n"
 
-#: builtins/type.def:274
+#: builtins/type.def:276
 #, c-format
 msgid "%s is a function\n"
-msgstr ""
+msgstr "%s 是一個函數\n"
 
-#: builtins/type.def:296
+#: builtins/type.def:300
+#, fuzzy, c-format
+msgid "%s is a special shell builtin\n"
+msgstr "%s 是 shell 內建\n"
+
+#: builtins/type.def:302
 #, c-format
 msgid "%s is a shell builtin\n"
-msgstr ""
+msgstr "%s 是 shell 內建\n"
 
-#: builtins/type.def:317 builtins/type.def:393
+#: builtins/type.def:324 builtins/type.def:409
 #, c-format
 msgid "%s is %s\n"
-msgstr ""
+msgstr "%s 是 %s\n"
 
-#: builtins/type.def:337
+#: builtins/type.def:344
 #, c-format
 msgid "%s is hashed (%s)\n"
-msgstr ""
+msgstr "%s 已進行雜湊操作(%s)\n"
 
-#: builtins/ulimit.def:383
+#: builtins/ulimit.def:398
 #, c-format
 msgid "%s: invalid limit argument"
-msgstr ""
+msgstr "%s: 無效的 limit 引數"
 
-#: builtins/ulimit.def:409
+#: builtins/ulimit.def:424
 #, c-format
 msgid "`%c': bad command"
-msgstr "`%c'：壞的命令"
+msgstr "「%c」：不當的命令"
 
-#: builtins/ulimit.def:438
+#: builtins/ulimit.def:453
 #, c-format
 msgid "%s: cannot get limit: %s"
-msgstr "%s：不能得到 limit： %s"
+msgstr "%s：不能得到 limit: %s"
 
-#: builtins/ulimit.def:464
+#: builtins/ulimit.def:479
 msgid "limit"
-msgstr ""
+msgstr "limit"
 
-#: builtins/ulimit.def:476 builtins/ulimit.def:776
+#: builtins/ulimit.def:491 builtins/ulimit.def:791
 #, c-format
 msgid "%s: cannot modify limit: %s"
-msgstr "%s：不能修改 limit： %s"
+msgstr "%s：不能修改 limit: %s"
 
-#: builtins/umask.def:114
+#: builtins/umask.def:115
 msgid "octal number"
-msgstr "八進制數"
+msgstr "八進位數字"
 
-#: builtins/umask.def:227
+#: builtins/umask.def:232
 #, c-format
 msgid "`%c': invalid symbolic mode operator"
-msgstr ""
+msgstr "「%c」: 無效的符號狀態運算子"
 
-#: builtins/umask.def:282
+#: builtins/umask.def:287
 #, c-format
 msgid "`%c': invalid symbolic mode character"
-msgstr ""
+msgstr "「%c」: 無效的符號狀態字元"
 
-#: error.c:90 error.c:325 error.c:327 error.c:329
+#: error.c:90 error.c:348 error.c:350 error.c:352
 msgid " line "
-msgstr ""
+msgstr " 列 "
 
 #: error.c:165
 #, c-format
@@ -833,323 +950,343 @@ msgstr "最後的命令： %s\n"
 #: error.c:173
 #, c-format
 msgid "Aborting..."
+msgstr "中止…"
+
+#. TRANSLATORS: this is a prefix for informational messages.
+#: error.c:288
+#, c-format
+msgid "INFORM: "
 msgstr ""
 
-#: error.c:440
+#: error.c:463
 msgid "unknown command error"
-msgstr "未知命令錯誤"
+msgstr "不明命令錯誤"
 
-#: error.c:441
+#: error.c:464
 msgid "bad command type"
-msgstr "壞的命令類型"
+msgstr "不當的命令類型"
 
-#: error.c:442
+#: error.c:465
 msgid "bad connector"
-msgstr "壞的連接器"
+msgstr "不當的連接器"
 
-#: error.c:443
+#: error.c:466
 msgid "bad jump"
-msgstr ""
+msgstr "錯誤的跳轉"
 
-#: error.c:481
+#: error.c:504
 #, c-format
 msgid "%s: unbound variable"
-msgstr ""
+msgstr "%s: 未繫結的變數"
 
-#: eval.c:189
+#: eval.c:209
 #, c-format
 msgid "\atimed out waiting for input: auto-logout\n"
-msgstr ""
+msgstr "\a 等待輸入逾時：自動登出\n"
 
-#: execute_cmd.c:512
+#: execute_cmd.c:527
 #, c-format
 msgid "cannot redirect standard input from /dev/null: %s"
-msgstr ""
+msgstr "無法從 /dev/null 重定向標準輸入: %s"
 
-#: execute_cmd.c:1233
+#: execute_cmd.c:1275
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
+msgstr "時間格式:「%c」: 無效的格式字元"
+
+#: execute_cmd.c:2273
+#, c-format
+msgid "execute_coproc: coproc [%d:%s] still exists"
 msgstr ""
 
-#: execute_cmd.c:2287
-#, fuzzy
+#: execute_cmd.c:2377
 msgid "pipe error"
-msgstr "寫入錯誤： %s"
+msgstr "管道錯誤"
 
-#: execute_cmd.c:4386
+#: execute_cmd.c:4496
+#, fuzzy, c-format
+msgid "eval: maximum eval nesting level exceeded (%d)"
+msgstr "%s: 超出最大函數巢狀層數 (%d)"
+
+#: execute_cmd.c:4508
+#, fuzzy, c-format
+msgid "%s: maximum source nesting level exceeded (%d)"
+msgstr "%s: 超出最大函數巢狀層數 (%d)"
+
+#: execute_cmd.c:4616
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
-msgstr ""
+msgstr "%s: 超出最大函數巢狀層數 (%d)"
 
-#: execute_cmd.c:4884
+#: execute_cmd.c:5144
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
-msgstr ""
+msgstr "%s: 受限的: 無法在命令名稱中使用「/」"
 
-#: execute_cmd.c:4973
+#: execute_cmd.c:5232
 #, c-format
 msgid "%s: command not found"
 msgstr "%s：命令找不到"
 
-#: execute_cmd.c:5206
+#: execute_cmd.c:5470
 #, c-format
 msgid "%s: %s"
-msgstr ""
+msgstr "%s: %s"
 
-#: execute_cmd.c:5243
+#: execute_cmd.c:5508
 #, c-format
 msgid "%s: %s: bad interpreter"
-msgstr ""
+msgstr "%s: %s: 不當的直譯器"
 
-#: execute_cmd.c:5280
-#, fuzzy, c-format
+#: execute_cmd.c:5545
+#, c-format
 msgid "%s: cannot execute binary file: %s"
-msgstr "%s：不能得到 limit： %s"
+msgstr "%s: 無法執行二進位檔案: %s"
 
-#: execute_cmd.c:5352
-#, fuzzy, c-format
+#: execute_cmd.c:5623
+#, c-format
 msgid "`%s': is a special builtin"
-msgstr "%s：不是一個內建 shell"
+msgstr "「%s」: 特殊內建"
 
-#: execute_cmd.c:5404
+#: execute_cmd.c:5675
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
-msgstr ""
+msgstr "無法複製檔案描述符 %d 到檔案描述符 %d"
 
 #: expr.c:259
 msgid "expression recursion level exceeded"
-msgstr ""
+msgstr "表示式遞迴層次超出範圍"
 
 #: expr.c:283
 msgid "recursion stack underflow"
-msgstr ""
+msgstr "遞迴堆疊下限溢位"
 
 #: expr.c:431
 msgid "syntax error in expression"
-msgstr "表達語法錯誤"
+msgstr "表示式語法錯誤"
 
 #: expr.c:475
 msgid "attempted assignment to non-variable"
-msgstr ""
+msgstr "嘗試指派給非變數"
 
 #: expr.c:495 expr.c:858
 msgid "division by 0"
-msgstr ""
+msgstr "除 0"
 
 #: expr.c:542
 msgid "bug: bad expassign token"
-msgstr ""
+msgstr "錯誤：不當的表示式字組"
 
 #: expr.c:595
 msgid "`:' expected for conditional expression"
-msgstr ""
+msgstr "條件表示式需要「:」"
 
 #: expr.c:919
 msgid "exponent less than 0"
-msgstr ""
+msgstr "指數小於 0"
 
 #: expr.c:976
 msgid "identifier expected after pre-increment or pre-decrement"
-msgstr ""
+msgstr "預增符或預減符後應跟有標識符"
 
 #: expr.c:1002
 msgid "missing `)'"
-msgstr ""
+msgstr "缺少「)」"
 
-#: expr.c:1053 expr.c:1390
+#: expr.c:1053 expr.c:1393
 msgid "syntax error: operand expected"
-msgstr ""
+msgstr "語法錯誤: 需要運算元"
 
-#: expr.c:1392
+#: expr.c:1395
 msgid "syntax error: invalid arithmetic operator"
-msgstr ""
+msgstr "語法錯誤: 無效的算術運算子"
 
-#: expr.c:1416
+#: expr.c:1419
 #, c-format
 msgid "%s%s%s: %s (error token is \"%s\")"
-msgstr ""
+msgstr "%s%s%s: %s (錯誤字組是「%s」)"
 
-#: expr.c:1474
+#: expr.c:1477
 msgid "invalid arithmetic base"
-msgstr ""
+msgstr "無效的算術進位"
 
-#: expr.c:1494
+#: expr.c:1497
 msgid "value too great for base"
-msgstr ""
+msgstr "數值太大不可為算術進位的基底"
 
-#: expr.c:1543
+#: expr.c:1546
 #, c-format
 msgid "%s: expression error\n"
-msgstr ""
+msgstr "%s: 表示式錯誤\n"
 
-#: general.c:62
+#: general.c:68
 msgid "getcwd: cannot access parent directories"
-msgstr ""
+msgstr "getcwd: 無法訪問上層目錄"
 
-#: input.c:102 subst.c:5168
+#: input.c:102 subst.c:5858
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
-msgstr ""
+msgstr "無法為檔案描述符 %d 重置無延遲模式"
 
 #: input.c:271
 #, c-format
 msgid "cannot allocate new file descriptor for bash input from fd %d"
-msgstr ""
+msgstr "無法從檔案描述符 %d 為 bash 的輸入獲取一個新的檔案描述符"
 
 #: input.c:279
 #, c-format
 msgid "save_bash_input: buffer already exists for new fd %d"
-msgstr ""
+msgstr "save_bash_input: 已經存在新的檔案描述符 %d 的緩衝區"
 
-#: jobs.c:471
+#: jobs.c:527
 msgid "start_pipeline: pgrp pipe"
-msgstr ""
+msgstr "start_pipeline: 行程群組管道"
 
-#: jobs.c:893
+#: jobs.c:1035
 #, c-format
 msgid "forked pid %d appears in running job %d"
-msgstr ""
+msgstr "生成的行程識別號 %d 顯示為執行中的工作 %d"
 
-#: jobs.c:1012
+#: jobs.c:1154
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
-msgstr ""
+msgstr "刪除行程群組 %2$ld 中已停止的工作 %1$d"
 
-#: jobs.c:1117
+#: jobs.c:1258
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
-msgstr ""
+msgstr "add_process: 行程 %5ld(%s) 進入 the_pipeline"
 
-#: jobs.c:1120
+#: jobs.c:1261
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
-msgstr ""
+msgstr "add_process: 行程識別號 %5ld(%s) 標註為仍活著"
 
-#: jobs.c:1435
+#: jobs.c:1590
 #, c-format
 msgid "describe_pid: %ld: no such pid"
-msgstr ""
+msgstr "describe_pid: %ld: 無此行程識別號"
 
-#: jobs.c:1450
+#: jobs.c:1605
 #, c-format
 msgid "Signal %d"
-msgstr ""
+msgstr "訊號 %d"
 
-#: jobs.c:1464 jobs.c:1489
+#: jobs.c:1619 jobs.c:1645
 msgid "Done"
-msgstr ""
+msgstr "已完成"
 
-#: jobs.c:1469 siglist.c:123
+#: jobs.c:1624 siglist.c:123
 msgid "Stopped"
-msgstr ""
+msgstr "已停止"
 
-#: jobs.c:1473
+#: jobs.c:1628
 #, c-format
 msgid "Stopped(%s)"
-msgstr ""
+msgstr "已停止(%s)"
 
-#: jobs.c:1477
+#: jobs.c:1632
 msgid "Running"
-msgstr ""
+msgstr "執行中"
 
-#: jobs.c:1491
+#: jobs.c:1649
 #, c-format
 msgid "Done(%d)"
-msgstr ""
+msgstr "已完成(%d)"
 
-#: jobs.c:1493
+#: jobs.c:1651
 #, c-format
 msgid "Exit %d"
-msgstr ""
+msgstr "退出 %d"
 
-#: jobs.c:1496
+#: jobs.c:1654
 msgid "Unknown status"
-msgstr ""
+msgstr "不明狀態"
 
-#: jobs.c:1583
+#: jobs.c:1741
 #, c-format
 msgid "(core dumped) "
-msgstr ""
+msgstr "(核心已傾印)"
 
-#: jobs.c:1602
+#: jobs.c:1760
 #, c-format
 msgid "  (wd: %s)"
-msgstr ""
+msgstr "  (工作目錄: %s)"
 
-#: jobs.c:1819
+#: jobs.c:1985
 #, c-format
 msgid "child setpgid (%ld to %ld)"
-msgstr ""
+msgstr "子行程 setpgid (%ld 到 %ld)"
 
-#: jobs.c:2138 nojobs.c:605
+#: jobs.c:2347 nojobs.c:654
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
-msgstr ""
+msgstr "wait: 行程識別號 %ld 不是當前 shell 的子行程"
 
-#: jobs.c:2385
+#: jobs.c:2602
 #, c-format
 msgid "wait_for: No record of process %ld"
-msgstr ""
+msgstr "wiat_for: 沒有行程 %ld 的記錄"
 
-#: jobs.c:2694
+#: jobs.c:2929
 #, c-format
 msgid "wait_for_job: job %d is stopped"
-msgstr ""
+msgstr "wait_for_job: 工作 %d 已停止"
 
-#: jobs.c:2986
+#: jobs.c:3221
 #, c-format
 msgid "%s: job has terminated"
-msgstr ""
+msgstr "%s: 工作已經終止"
 
-#: jobs.c:2995
+#: jobs.c:3230
 #, c-format
 msgid "%s: job %d already in background"
-msgstr ""
+msgstr "%s: 工作 %d 已在背景執行"
 
-#: jobs.c:3220
+#: jobs.c:3455
 msgid "waitchld: turning on WNOHANG to avoid indefinite block"
-msgstr ""
+msgstr "waitchld: 開啟 WNOHANG 以避免無限阻塞"
 
-#: jobs.c:3711
-#, fuzzy, c-format
+#: jobs.c:3970
+#, c-format
 msgid "%s: line %d: "
-msgstr "%s：警告："
+msgstr "%s: 第 %d 列："
 
-#: jobs.c:3725 nojobs.c:843
+#: jobs.c:3984 nojobs.c:897
 #, c-format
 msgid " (core dumped)"
-msgstr ""
+msgstr " (核心已傾印)"
 
-#: jobs.c:3737 jobs.c:3750
+#: jobs.c:3996 jobs.c:4009
 #, c-format
 msgid "(wd now: %s)\n"
-msgstr ""
+msgstr "(當前工作目錄：%s)\n"
 
-#: jobs.c:3782
+#: jobs.c:4041
 msgid "initialize_job_control: getpgrp failed"
-msgstr ""
+msgstr "initialize_job_control: getpgrp 失敗"
 
-#: jobs.c:3843
+#: jobs.c:4104
 msgid "initialize_job_control: line discipline"
-msgstr ""
+msgstr "initialize_job_control: 列規律"
 
-#: jobs.c:3853
+#: jobs.c:4114
 msgid "initialize_job_control: setpgid"
-msgstr ""
+msgstr "initialize_job_control: setpgid"
 
-#: jobs.c:3874 jobs.c:3883
+#: jobs.c:4135 jobs.c:4144
 #, c-format
 msgid "cannot set terminal process group (%d)"
-msgstr ""
+msgstr "無法設定終端行程群組(%d)"
 
-#: jobs.c:3888
+#: jobs.c:4149
 msgid "no job control in this shell"
-msgstr ""
+msgstr "此 shell 中無工作控制"
 
 #: lib/malloc/malloc.c:296
 #, c-format
 msgid "malloc: failed assertion: %s\n"
-msgstr ""
+msgstr "malloc: 主張失敗: %s\n"
 
 #: lib/malloc/malloc.c:312
 #, c-format
@@ -1157,67 +1294,68 @@ msgid ""
 "\r\n"
 "malloc: %s:%d: assertion botched\r\n"
 msgstr ""
+"\r\n"
+"malloc: %s:%d: 主張已修補\r\n"
 
 #: lib/malloc/malloc.c:313
-#, fuzzy
 msgid "unknown"
-msgstr "%s：主機未知"
+msgstr "不明"
 
 #: lib/malloc/malloc.c:801
 msgid "malloc: block on free list clobbered"
-msgstr ""
+msgstr "malloc: 空閒串列中的區塊損壞"
 
 #: lib/malloc/malloc.c:878
 msgid "free: called with already freed block argument"
-msgstr ""
+msgstr "free: 用已經釋放的區塊做為呼叫引數"
 
 #: lib/malloc/malloc.c:881
 msgid "free: called with unallocated block argument"
-msgstr ""
+msgstr "free: 用未分配的區塊做為呼叫引數"
 
 #: lib/malloc/malloc.c:900
 msgid "free: underflow detected; mh_nbytes out of range"
-msgstr ""
+msgstr "free: 檢測到下限溢位；mh_nbytes 超出範圍"
 
 #: lib/malloc/malloc.c:906
 msgid "free: start and end chunk sizes differ"
-msgstr ""
+msgstr "free: 啟始和末尾區塊大小不一致"
 
 #: lib/malloc/malloc.c:1005
 msgid "realloc: called with unallocated block argument"
-msgstr ""
+msgstr "realloc: 用未分配的區塊做為呼叫引數"
 
 #: lib/malloc/malloc.c:1020
 msgid "realloc: underflow detected; mh_nbytes out of range"
-msgstr ""
+msgstr "realloc: 檢測到下限溢位；mh_nbytes 超出範圍"
 
 #: lib/malloc/malloc.c:1026
 msgid "realloc: start and end chunk sizes differ"
-msgstr ""
+msgstr "realloc: 啟始和末尾區塊大小不一致"
 
-#: lib/malloc/table.c:194
+#: lib/malloc/table.c:191
 #, c-format
 msgid "register_alloc: alloc table is full with FIND_ALLOC?\n"
-msgstr ""
+msgstr "register_alloc: 分配表已經充滿了 FIND_ALLOC？\n"
 
-#: lib/malloc/table.c:203
+#: lib/malloc/table.c:200
 #, c-format
 msgid "register_alloc: %p already in table as allocated?\n"
-msgstr ""
+msgstr "register_alloc: %p 在表中顯示為已分配？\n"
 
-#: lib/malloc/table.c:256
+#: lib/malloc/table.c:253
 #, c-format
 msgid "register_free: %p already in table as free?\n"
-msgstr ""
+msgstr "register_free: %p 在表中顯示為已釋放？\n"
 
 #: lib/sh/fmtulong.c:102
 msgid "invalid base"
-msgstr ""
+msgstr "無效的基底"
 
 #: lib/sh/netopen.c:168
 #, c-format
 msgid "%s: host unknown"
-msgstr "%s：主機未知"
+msgstr "%s：不明的主機"
 
 #: lib/sh/netopen.c:175
 #, c-format
@@ -1227,31 +1365,31 @@ msgstr "%s：無效服務"
 #: lib/sh/netopen.c:306
 #, c-format
 msgid "%s: bad network path specification"
-msgstr "%s：壞的網路路徑規格"
+msgstr "%s：不當的網路路徑規格"
 
-#: lib/sh/netopen.c:346
+#: lib/sh/netopen.c:347
 msgid "network operations not supported"
 msgstr "不支持網路操作"
 
 #: locale.c:200
 #, c-format
 msgid "setlocale: LC_ALL: cannot change locale (%s)"
-msgstr ""
+msgstr "setlocale: LC_ALL: 無法變更語區選項 (%s)"
 
 #: locale.c:202
 #, c-format
 msgid "setlocale: LC_ALL: cannot change locale (%s): %s"
-msgstr ""
+msgstr "setlocale: LC_ALL: 無法變更語區選項 (%s): %s"
 
 #: locale.c:259
 #, c-format
 msgid "setlocale: %s: cannot change locale (%s)"
-msgstr ""
+msgstr "setlocale: %s: 無法變更語區選項 (%s)"
 
 #: locale.c:261
 #, c-format
 msgid "setlocale: %s: cannot change locale (%s): %s"
-msgstr ""
+msgstr "setlocale: %s: 無法變更語區選項 (%s): %s"
 
 #: mailcheck.c:439
 msgid "You have mail in $_"
@@ -1266,1029 +1404,1089 @@ msgstr "您有新郵件在 $_"
 msgid "The mail in %s has been read\n"
 msgstr "郵件在 %s 已閱讀\n"
 
-#: make_cmd.c:323
+#: make_cmd.c:329
 msgid "syntax error: arithmetic expression required"
-msgstr "語法錯誤：必須算術表達"
+msgstr "語法錯誤：需要算式"
 
-#: make_cmd.c:325
+#: make_cmd.c:331
 msgid "syntax error: `;' unexpected"
-msgstr "語法錯誤： `;' 意外"
+msgstr "語法錯誤：「;」意外"
 
-#: make_cmd.c:326
+#: make_cmd.c:332
 #, c-format
 msgid "syntax error: `((%s))'"
-msgstr "語法錯誤： `((%s))'"
+msgstr "語法錯誤：「((%s))」"
 
-#: make_cmd.c:578
+#: make_cmd.c:584
 #, c-format
 msgid "make_here_document: bad instruction type %d"
-msgstr "make_here_document：壞的指示類型 %d"
+msgstr "make_here_document：不當的指示類型 %d"
 
-#: make_cmd.c:662
+#: make_cmd.c:669
 #, c-format
 msgid "here-document at line %d delimited by end-of-file (wanted `%s')"
-msgstr ""
+msgstr "立即文件在第 %d 列被檔案結束符分隔 (需要「%s」)"
 
-#: make_cmd.c:759
+#: make_cmd.c:768
 #, c-format
 msgid "make_redirection: redirection instruction `%d' out of range"
-msgstr "make_redirection：重新導向指示 `%d' 超出範圍"
+msgstr "make_redirection：重新導向指示「%d」超出範圍"
 
-#: parse.y:3278 parse.y:3561
+#: parse.y:2324
+#, c-format
+msgid ""
+"shell_getc: shell_input_line_size (%zu) exceeds SIZE_MAX (%lu): line "
+"truncated"
+msgstr ""
+
+#: parse.y:2700
+msgid "maximum here-document count exceeded"
+msgstr ""
+
+#: parse.y:3390 parse.y:3748
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
-msgstr ""
+msgstr "尋找匹配的「%c」時遇到了未預期的檔案結束符"
 
-#: parse.y:4170
+#: parse.y:4410
 msgid "unexpected EOF while looking for `]]'"
-msgstr ""
+msgstr "尋找「]]」時遇到了未預期的檔案結束符"
 
-#: parse.y:4175
+#: parse.y:4415
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
-msgstr ""
+msgstr "條件表示式中有語法錯誤: 未預期的字組「%s」"
 
-#: parse.y:4179
+#: parse.y:4419
 msgid "syntax error in conditional expression"
-msgstr "語法錯誤，在有條件的表達"
+msgstr "語法錯誤，在有條件的表示式"
 
-#: parse.y:4257
+#: parse.y:4497
 #, c-format
 msgid "unexpected token `%s', expected `)'"
-msgstr ""
+msgstr "未預期的字組「%s」，需要「)」"
 
-#: parse.y:4261
+#: parse.y:4501
 msgid "expected `)'"
-msgstr "預期 `)'"
+msgstr "預期「)」"
 
-#: parse.y:4289
+#: parse.y:4529
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
-msgstr ""
+msgstr "一元條件運算子使用了未預期的引數「%s」"
 
-#: parse.y:4293
+#: parse.y:4533
 msgid "unexpected argument to conditional unary operator"
-msgstr ""
+msgstr "一元條件運算子使用了未預期的引數"
 
-#: parse.y:4339
+#: parse.y:4579
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
-msgstr ""
+msgstr "未預期的字組「%s」，需要二元條件運算子"
 
-#: parse.y:4343
+#: parse.y:4583
 msgid "conditional binary operator expected"
-msgstr ""
+msgstr "需要二元條件運算子"
 
-#: parse.y:4365
+#: parse.y:4605
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
-msgstr ""
+msgstr "二元條件運算子使用了未預期的引數「%s」"
 
-#: parse.y:4369
+#: parse.y:4609
 msgid "unexpected argument to conditional binary operator"
-msgstr ""
+msgstr "二元條件運算子使用了未預期的引數"
 
-#: parse.y:4380
+#: parse.y:4620
 #, c-format
 msgid "unexpected token `%c' in conditional command"
-msgstr ""
+msgstr "條件命令中有未預期的字組「%c」"
 
-#: parse.y:4383
+#: parse.y:4623
 #, c-format
 msgid "unexpected token `%s' in conditional command"
-msgstr ""
+msgstr "條件命令中有未預期的字組「%s」"
 
-#: parse.y:4387
+#: parse.y:4627
 #, c-format
 msgid "unexpected token %d in conditional command"
-msgstr ""
+msgstr "條件命令中有未預期的字組 %d"
 
-#: parse.y:5737
+#: parse.y:5996
 #, c-format
 msgid "syntax error near unexpected token `%s'"
-msgstr ""
+msgstr "未預期的字組「%s」附近有語法錯誤"
 
-#: parse.y:5755
+#: parse.y:6014
 #, c-format
 msgid "syntax error near `%s'"
-msgstr ""
+msgstr "「%s」附近有語法錯誤"
 
-#: parse.y:5765
+#: parse.y:6024
 msgid "syntax error: unexpected end of file"
-msgstr ""
+msgstr "語法錯誤: 未預期的檔案結尾"
 
-#: parse.y:5765
+#: parse.y:6024
 msgid "syntax error"
 msgstr "語法錯誤"
 
-#: parse.y:5827
+#: parse.y:6086
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
-msgstr ""
+msgstr "使用「%s」退出 shell 。\n"
 
-#: parse.y:5989
+#: parse.y:6248
 msgid "unexpected EOF while looking for matching `)'"
-msgstr ""
+msgstr "尋找匹配的「)」時遇到了未預期的檔案結束符"
 
-#: pcomplete.c:1094
+#: pcomplete.c:1126
 #, c-format
 msgid "completion: function `%s' not found"
+msgstr "補完: 未找到函數「%s」"
+
+#: pcomplete.c:1646
+#, c-format
+msgid "programmable_completion: %s: possible retry loop"
 msgstr ""
 
 #: pcomplib.c:182
 #, c-format
 msgid "progcomp_insert: %s: NULL COMPSPEC"
-msgstr ""
+msgstr "progcomp_insert: %s: 空的補完規格"
 
-#: print_cmd.c:300
+#: print_cmd.c:302
 #, c-format
 msgid "print_command: bad connector `%d'"
-msgstr ""
+msgstr "print_command: 錯誤的條件連接符「%d」"
 
-#: print_cmd.c:373
+#: print_cmd.c:375
 #, c-format
 msgid "xtrace_set: %d: invalid file descriptor"
-msgstr ""
+msgstr "xtrace_set: %d: 無效的檔案描述符"
 
-#: print_cmd.c:378
+#: print_cmd.c:380
 msgid "xtrace_set: NULL file pointer"
-msgstr ""
+msgstr "xtrace_set: 空的檔案指標"
 
-#: print_cmd.c:382
+#: print_cmd.c:384
 #, c-format
 msgid "xtrace fd (%d) != fileno xtrace fp (%d)"
-msgstr ""
+msgstr "xtrace fd (%d) != fileno xtrace fp (%d)"
 
-#: print_cmd.c:1518
+#: print_cmd.c:1534
 #, c-format
 msgid "cprintf: `%c': invalid format character"
-msgstr ""
+msgstr "cprintf:「%c」: 無效的格式字元"
 
-#: redir.c:123 redir.c:170
+#: redir.c:124 redir.c:171
 msgid "file descriptor out of range"
-msgstr ""
+msgstr "檔案描述符超出範圍"
 
-#: redir.c:177
+#: redir.c:178
 #, c-format
 msgid "%s: ambiguous redirect"
-msgstr ""
+msgstr "%s: 模稜兩可的重定向"
 
-#: redir.c:181
+#: redir.c:182
 #, c-format
 msgid "%s: cannot overwrite existing file"
-msgstr ""
+msgstr "%s: 無法覆寫已存在的檔案"
 
-#: redir.c:186
+#: redir.c:187
 #, c-format
 msgid "%s: restricted: cannot redirect output"
-msgstr ""
+msgstr "%s: 受限的: 無法重定向輸出"
 
-#: redir.c:191
+#: redir.c:192
 #, c-format
 msgid "cannot create temp file for here-document: %s"
-msgstr ""
+msgstr "無法為立即文件建立臨時檔案: %s"
 
-#: redir.c:195
-#, fuzzy, c-format
+#: redir.c:196
+#, c-format
 msgid "%s: cannot assign fd to variable"
-msgstr "%s：只讀變數"
+msgstr "%s: 無法將檔案描述符指派給變數"
 
-#: redir.c:582
+#: redir.c:586
 msgid "/dev/(tcp|udp)/host/port not supported without networking"
-msgstr ""
+msgstr "沒有網路時不支援 /dev/(tcp|udp)/host/port"
 
-#: redir.c:861 redir.c:973 redir.c:1034 redir.c:1199
+#: redir.c:868 redir.c:983 redir.c:1044 redir.c:1209
 msgid "redirection error: cannot duplicate fd"
-msgstr ""
+msgstr "重定向錯誤: 無法複製檔案描述符"
 
-#: shell.c:339
+#: shell.c:347
 msgid "could not find /tmp, please create!"
-msgstr ""
+msgstr "無法找到 /tmp ，請建立"
 
-#: shell.c:343
+#: shell.c:351
 msgid "/tmp must be a valid directory name"
-msgstr ""
+msgstr "/tmp 必須為有效的目錄名稱"
 
-#: shell.c:890
+#: shell.c:927
 #, c-format
 msgid "%c%c: invalid option"
 msgstr "%c%c：無效選項"
 
-#: shell.c:1682
+#: shell.c:1282
+#, fuzzy, c-format
+msgid "cannot set uid to %d: effective uid %d"
+msgstr "無法為檔案描述符 %d 重置無延遲模式"
+
+#: shell.c:1289
+#, fuzzy, c-format
+msgid "cannot set gid to %d: effective gid %d"
+msgstr "無法為檔案描述符 %d 重置無延遲模式"
+
+#: shell.c:1458
+msgid "cannot start debugger; debugging mode disabled"
+msgstr ""
+
+#: shell.c:1566
+#, fuzzy, c-format
+msgid "%s: Is a directory"
+msgstr "%s: 是一個目錄"
+
+#: shell.c:1777
 msgid "I have no name!"
 msgstr "我沒有名字！"
 
-#: shell.c:1827
+#: shell.c:1930
 #, c-format
 msgid "GNU bash, version %s-(%s)\n"
-msgstr ""
+msgstr "GNU bash，版本 %s-(%s)\n"
 
-#: shell.c:1828
+#: shell.c:1931
 #, c-format
 msgid ""
 "Usage:\t%s [GNU long option] [option] ...\n"
 "\t%s [GNU long option] [option] script-file ...\n"
 msgstr ""
-"用法：\t%s [GNU 長選項] [選項] ...\n"
-"\t%s [GNU 長選項] [選項] script-file ...\n"
+"用法：\t%s [GNU 長選項] [選項] …\n"
+"\t%s [GNU 長選項] [選項] 指令稿檔案 …\n"
 
-#: shell.c:1830
+#: shell.c:1933
 msgid "GNU long options:\n"
 msgstr "GNU 長選項：\n"
 
-#: shell.c:1834
+#: shell.c:1937
 msgid "Shell options:\n"
 msgstr "Shell 選項：\n"
 
-#: shell.c:1835
-#, fuzzy
+#: shell.c:1938
 msgid "\t-ilrsD or -c command or -O shopt_option\t\t(invocation only)\n"
-msgstr "\t-irsD 或 -c 命令或 -O shopt_option\t\t(只有引用)\n"
+msgstr "\t-irsD 或 -c <命令> 或 -O <shopt 選項>\t\t(僅適合呼叫)\n"
 
-#: shell.c:1850
+#: shell.c:1953
 #, c-format
 msgid "\t-%s or -o option\n"
 msgstr "\t-%s or -o 選項\n"
 
-#: shell.c:1856
+#: shell.c:1959
 #, c-format
 msgid "Type `%s -c \"help set\"' for more information about shell options.\n"
-msgstr "輸入 `%s -c \"help set\"' 更多訊息關於 shell 選項。\n"
+msgstr "輸入「%s -c \"help set\"」更多關於 shell 選項的訊息。\n"
 
-#: shell.c:1857
+#: shell.c:1960
 #, c-format
 msgid "Type `%s -c help' for more information about shell builtin commands.\n"
-msgstr "輸入 `%s -c help' 更多訊息關於內建 shell 命令。\n"
+msgstr "輸入「%s -c help」更多關於內建 shell 命令的訊息。\n"
 
-#: shell.c:1858
+#: shell.c:1961
 #, c-format
 msgid "Use the `bashbug' command to report bugs.\n"
-msgstr "使用 `bashbug' 命令報告臭蟲。\n"
+msgstr "使用「bashbug」命令通報程式錯誤。\n"
 
-#: sig.c:691
+#: shell.c:1963
+#, c-format
+msgid "bash home page: <http://www.gnu.org/software/bash>\n"
+msgstr ""
+
+#: shell.c:1964
+#, c-format
+msgid "General help using GNU software: <http://www.gnu.org/gethelp/>\n"
+msgstr ""
+
+#: sig.c:707
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
 msgstr "sigprocmask： %d：無效操作"
 
 #: siglist.c:48
 msgid "Bogus signal"
-msgstr ""
+msgstr "偽訊號"
 
 #: siglist.c:51
 msgid "Hangup"
-msgstr ""
+msgstr "結束通話"
 
 #: siglist.c:55
 msgid "Interrupt"
-msgstr ""
+msgstr "中斷"
 
 #: siglist.c:59
 msgid "Quit"
-msgstr ""
+msgstr "退出"
 
 #: siglist.c:63
 msgid "Illegal instruction"
-msgstr ""
+msgstr "非法的指令"
 
 #: siglist.c:67
 msgid "BPT trace/trap"
-msgstr ""
+msgstr "斷點追蹤/陷阱"
 
 #: siglist.c:75
 msgid "ABORT instruction"
-msgstr ""
+msgstr "放棄指令"
 
 #: siglist.c:79
 msgid "EMT instruction"
-msgstr ""
+msgstr "模擬器陷阱指令"
 
 #: siglist.c:83
 msgid "Floating point exception"
-msgstr ""
+msgstr "浮點數異常"
 
 #: siglist.c:87
 msgid "Killed"
-msgstr ""
+msgstr "已砍除"
 
 #: siglist.c:91
-#, fuzzy
 msgid "Bus error"
-msgstr "語法錯誤"
+msgstr "匯流排錯誤"
 
 #: siglist.c:95
 msgid "Segmentation fault"
-msgstr ""
+msgstr "區段錯誤"
 
 #: siglist.c:99
 msgid "Bad system call"
-msgstr ""
+msgstr "錯誤的系統呼叫"
 
 #: siglist.c:103
 msgid "Broken pipe"
-msgstr ""
+msgstr "管道中斷"
 
 #: siglist.c:107
 msgid "Alarm clock"
-msgstr ""
+msgstr "鬧鐘"
 
 #: siglist.c:111
-#, fuzzy
 msgid "Terminated"
-msgstr "有限的"
+msgstr "已終止"
 
 #: siglist.c:115
 msgid "Urgent IO condition"
-msgstr ""
+msgstr "緊急 I/O 狀況"
 
 #: siglist.c:119
 msgid "Stopped (signal)"
-msgstr ""
+msgstr "已停止(訊號)"
 
 #: siglist.c:127
 msgid "Continue"
-msgstr ""
+msgstr "繼續"
 
 #: siglist.c:135
 msgid "Child death or stop"
-msgstr ""
+msgstr "子行程已死或者停止"
 
 #: siglist.c:139
 msgid "Stopped (tty input)"
-msgstr ""
+msgstr "已停止(tty 輸入)"
 
 #: siglist.c:143
 msgid "Stopped (tty output)"
-msgstr ""
+msgstr "已停止(tty 輸出)"
 
 #: siglist.c:147
 msgid "I/O ready"
-msgstr ""
+msgstr "I/O 就緒"
 
 #: siglist.c:151
 msgid "CPU limit"
-msgstr ""
+msgstr "CPU 限制"
 
 #: siglist.c:155
 msgid "File limit"
-msgstr ""
+msgstr "檔案限制"
 
 #: siglist.c:159
 msgid "Alarm (virtual)"
-msgstr ""
+msgstr "警報(虛擬)"
 
 #: siglist.c:163
 msgid "Alarm (profile)"
-msgstr ""
+msgstr "警報(側寫)"
 
 #: siglist.c:167
 msgid "Window changed"
-msgstr ""
+msgstr "視窗已變更"
 
 #: siglist.c:171
 msgid "Record lock"
-msgstr ""
+msgstr "記錄鎖"
 
 #: siglist.c:175
 msgid "User signal 1"
-msgstr ""
+msgstr "使用者訊號 1"
 
 #: siglist.c:179
 msgid "User signal 2"
-msgstr ""
+msgstr "使用者訊號 2"
 
 #: siglist.c:183
 msgid "HFT input data pending"
-msgstr ""
+msgstr "HFT 待輸入資料"
 
 #: siglist.c:187
 msgid "power failure imminent"
-msgstr ""
+msgstr "即將停止電源"
 
 #: siglist.c:191
 msgid "system crash imminent"
-msgstr ""
+msgstr "系統即將崩潰"
 
 #: siglist.c:195
 msgid "migrate process to another CPU"
-msgstr ""
+msgstr "遷移行程至另一個 CPU"
 
 #: siglist.c:199
 msgid "programming error"
-msgstr ""
+msgstr "程式設計錯誤"
 
 #: siglist.c:203
 msgid "HFT monitor mode granted"
-msgstr ""
+msgstr "已授予 HFT 監視模式"
 
 #: siglist.c:207
 msgid "HFT monitor mode retracted"
-msgstr ""
+msgstr "已撤銷 HFT 監視模式"
 
 #: siglist.c:211
 msgid "HFT sound sequence has completed"
-msgstr ""
+msgstr "已完成 HFT 聲音序列"
 
 #: siglist.c:215
 msgid "Information request"
-msgstr ""
+msgstr "資訊請求"
 
 #: siglist.c:223
 msgid "Unknown Signal #"
-msgstr ""
+msgstr "不明訊號 #"
 
 #: siglist.c:225
 #, c-format
 msgid "Unknown Signal #%d"
-msgstr ""
+msgstr "不明訊號 #%d"
 
-#: subst.c:1362 subst.c:1520
+#: subst.c:1445 subst.c:1608
 #, c-format
 msgid "bad substitution: no closing `%s' in %s"
-msgstr ""
+msgstr "錯誤的替換: 在 %2$s 中沒有閉合的「%1$s」"
 
-#: subst.c:2847
+#: subst.c:3154
 #, c-format
 msgid "%s: cannot assign list to array member"
-msgstr ""
+msgstr "%s: 無法將串列指派給陣列成員"
 
-#: subst.c:5065 subst.c:5081
+#: subst.c:5740 subst.c:5756
 msgid "cannot make pipe for process substitution"
-msgstr ""
+msgstr "無法為行程替換建立管道"
 
-#: subst.c:5113
+#: subst.c:5798
 msgid "cannot make child for process substitution"
-msgstr ""
+msgstr "無法為行程替換建立子行程"
 
-#: subst.c:5158
+#: subst.c:5848
 #, c-format
 msgid "cannot open named pipe %s for reading"
-msgstr ""
+msgstr "無法開啟命名管道 %s 進 readline-"
 
-#: subst.c:5160
+#: subst.c:5850
 #, c-format
 msgid "cannot open named pipe %s for writing"
-msgstr ""
+msgstr "無法開啟命名管道 %s 進行寫入"
 
-#: subst.c:5178
+#: subst.c:5873
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
-msgstr ""
+msgstr "無法將命名管道 %s 做為檔案描述符 %d 複製"
 
-#: subst.c:5376
+#: subst.c:5959
+#, fuzzy
+msgid "command substitution: ignored null byte in input"
+msgstr "錯誤的替換: 在 %s 中沒有閉合的「`」"
+
+#: subst.c:6083
 msgid "cannot make pipe for command substitution"
-msgstr ""
+msgstr "無法為命令替換建立管道"
 
-#: subst.c:5414
+#: subst.c:6127
 msgid "cannot make child for command substitution"
-msgstr ""
+msgstr "無法為命令替換建立子行程"
 
-#: subst.c:5433
+#: subst.c:6153
 msgid "command_substitute: cannot duplicate pipe as fd 1"
-msgstr ""
+msgstr "command_substitute: 無法將管道複製為檔案描述符 1"
 
-#: subst.c:5837 subst.c:8050
+#: subst.c:6580 subst.c:8939
 #, c-format
 msgid "%s: invalid variable name for name reference"
-msgstr ""
+msgstr "%s: 無效的引用變數名"
 
-#: subst.c:6048
-#, c-format
-msgid "%s: parameter null or not set"
-msgstr ""
-
-#: subst.c:6320 subst.c:6335
-#, c-format
-msgid "%s: substring expression < 0"
-msgstr ""
-
-#: subst.c:7506
+#: subst.c:6666 subst.c:8351 subst.c:8371
 #, c-format
 msgid "%s: bad substitution"
-msgstr ""
+msgstr "%s: 錯誤的替換"
 
-#: subst.c:7583
+#: subst.c:6800
+#, fuzzy, c-format
+msgid "%s: invalid indirect expansion"
+msgstr "%s: 無效的列數"
+
+#: subst.c:6807
+#, fuzzy, c-format
+msgid "%s: invalid variable name"
+msgstr "「%s」: 無效的別名"
+
+#: subst.c:6854
+#, c-format
+msgid "%s: parameter null or not set"
+msgstr "%s: 參數為空或未設定"
+
+#: subst.c:7089 subst.c:7104
+#, c-format
+msgid "%s: substring expression < 0"
+msgstr "%s: 子串表示式 < 0"
+
+#: subst.c:8450
 #, c-format
 msgid "$%s: cannot assign in this way"
-msgstr ""
+msgstr "$%s: 無法如此指派"
 
-#: subst.c:7917
+#: subst.c:8802
 msgid ""
 "future versions of the shell will force evaluation as an arithmetic "
 "substitution"
-msgstr ""
+msgstr "未來版本的 shell 會強制以算術替換求值"
 
-#: subst.c:8421
+#: subst.c:9349
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
-msgstr ""
+msgstr "錯誤的替換: 在 %s 中沒有閉合的「`」"
 
-#: subst.c:9322
+#: subst.c:10298
 #, c-format
 msgid "no match: %s"
-msgstr ""
+msgstr "無匹配: %s"
 
 #: test.c:147
 msgid "argument expected"
-msgstr ""
+msgstr "需要引數"
 
 #: test.c:156
 #, c-format
 msgid "%s: integer expression expected"
-msgstr ""
+msgstr "%s: 需要整數表示式"
 
-#: test.c:264
+#: test.c:265
 msgid "`)' expected"
-msgstr ""
+msgstr "需要「)」"
 
-#: test.c:266
+#: test.c:267
 #, c-format
 msgid "`)' expected, found %s"
-msgstr ""
+msgstr "需要「)」，得到 %s"
 
-#: test.c:281 test.c:742 test.c:745
+#: test.c:282 test.c:744 test.c:747
 #, c-format
 msgid "%s: unary operator expected"
-msgstr ""
+msgstr "%s: 需要一元表示式"
 
-#: test.c:468 test.c:785
+#: test.c:469 test.c:787
 #, c-format
 msgid "%s: binary operator expected"
-msgstr ""
+msgstr "%s: 需要二元表示式"
 
-#: test.c:860
+#: test.c:869
 msgid "missing `]'"
-msgstr ""
+msgstr "缺少「]」"
 
-#: trap.c:217
+#: trap.c:224
 msgid "invalid signal number"
-msgstr "無效信號數"
+msgstr "無效信號數字"
 
-#: trap.c:371
+#: trap.c:387
 #, c-format
 msgid "run_pending_traps: bad value in trap_list[%d]: %p"
-msgstr ""
+msgstr "run_pending_traps: trap_list[%d] 中的錯誤值: %p"
 
-#: trap.c:375
+#: trap.c:391
 #, c-format
 msgid ""
 "run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself"
-msgstr "run_pending_traps： 信號處理是 SIG_DFL, resending %d (%s) to myself"
+msgstr "run_pending_traps： 信號處理是 SIG_DFL，resending %d (%s) to myself"
 
-#: trap.c:428
+#: trap.c:447
 #, c-format
 msgid "trap_handler: bad signal %d"
-msgstr "trap_handler：壞的信號 %d"
+msgstr "trap_handler：不當的信號 %d"
 
-#: variables.c:382
+#: variables.c:409
 #, c-format
 msgid "error importing function definition for `%s'"
-msgstr "錯誤，輸入的函數定義為 `%s'"
+msgstr "錯誤，輸入的函數定義為「%s」"
 
-#: variables.c:780
+#: variables.c:814
 #, c-format
 msgid "shell level (%d) too high, resetting to 1"
-msgstr ""
+msgstr "shell 層次 (%d) 太高，重置為 1"
 
-#: variables.c:1865
-#, c-format
-msgid "%s: circular name reference"
-msgstr ""
-
-#: variables.c:2228
+#: variables.c:2413
 msgid "make_local_variable: no function context at current scope"
-msgstr ""
+msgstr "make_local_variable: 當前作用域中沒有函數語境"
 
-#: variables.c:2247
-#, fuzzy, c-format
+#: variables.c:2432
+#, c-format
 msgid "%s: variable may not be assigned value"
-msgstr "%s：只讀變數"
+msgstr "%s: 變數不可指派值"
 
-#: variables.c:3646
+#: variables.c:3043
+#, fuzzy, c-format
+msgid "%s: assigning integer to name reference"
+msgstr "%s: 無效的引用變數名"
+
+#: variables.c:3940
 msgid "all_local_variables: no function context at current scope"
-msgstr ""
+msgstr "all_local_variables: 當前作用域中沒有函數語境"
 
-#: variables.c:3891
+#: variables.c:4218
 #, c-format
 msgid "%s has null exportstr"
-msgstr ""
+msgstr "%s 有空的 exportstr"
 
-#: variables.c:3896 variables.c:3905
+#: variables.c:4223 variables.c:4232
 #, c-format
 msgid "invalid character %d in exportstr for %s"
-msgstr ""
+msgstr "%2$s 的 exportstr 中有無效的字元 %1$d"
 
-#: variables.c:3911
+#: variables.c:4238
 #, c-format
 msgid "no `=' in exportstr for %s"
-msgstr ""
+msgstr "%s 的 exportstr 中沒有「=」"
 
-#: variables.c:4344
+#: variables.c:4684
 msgid "pop_var_context: head of shell_variables not a function context"
-msgstr ""
+msgstr "pop_var_context: shell_variables 的前端不是函數語境"
 
-#: variables.c:4357
+#: variables.c:4697
 msgid "pop_var_context: no global_variables context"
-msgstr ""
+msgstr "pop_var_context: 沒有 global_variables 語境"
 
-#: variables.c:4431
+#: variables.c:4772
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
-msgstr ""
+msgstr "pop_scope: shell_variables 的前端不是臨時環境作用域"
 
-#: variables.c:5257
-#, fuzzy, c-format
+#: variables.c:5619
+#, c-format
 msgid "%s: %s: cannot open as FILE"
-msgstr "%s：不能讀取： %s"
+msgstr "%s: %s: 無法做為檔案開啟"
 
-#: variables.c:5262
+#: variables.c:5624
 #, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
-msgstr ""
+msgstr "%s: %s: 追蹤檔案描述符的值無效"
 
-#: variables.c:5307
-#, fuzzy, c-format
+#: variables.c:5669
+#, c-format
 msgid "%s: %s: compatibility value out of range"
-msgstr "%s：%s 超出範圍"
+msgstr "%s: %s: 相容版本數值超出範圍"
 
-#: version.c:46
-msgid "Copyright (C) 2013 Free Software Foundation, Inc."
-msgstr ""
+#: version.c:46 version2.c:46
+#, fuzzy
+msgid "Copyright (C) 2016 Free Software Foundation, Inc."
+msgstr "著作權所有 (C) 2013 自由軟體基金會"
 
 #: version.c:47 version2.c:47
 msgid ""
 "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl."
 "html>\n"
 msgstr ""
+"許可證 GPLv3+: GNU GPL 許可證第三版或者更新版本 <http://gnu.org/licenses/gpl."
+"html>\n"
 
 #: version.c:86 version2.c:86
 #, c-format
 msgid "GNU bash, version %s (%s)\n"
-msgstr ""
+msgstr "GNU bash，版本 %s (%s)\n"
 
 #: version.c:91 version2.c:91
 msgid "This is free software; you are free to change and redistribute it."
-msgstr ""
+msgstr "本軟體是自由軟體，您可以自由地更改和重新發布。"
 
 #: version.c:92 version2.c:92
 msgid "There is NO WARRANTY, to the extent permitted by law."
-msgstr ""
-
-#: version2.c:46
-msgid "Copyright (C) 2012 Free Software Foundation, Inc."
-msgstr ""
+msgstr "在法律許可的情況下特此明示，本軟體不提供任何擔保。"
 
 #: xmalloc.c:91
 #, c-format
 msgid "%s: cannot allocate %lu bytes (%lu bytes allocated)"
-msgstr ""
+msgstr "%s: 無法分配 %lu 位元組 (已分配 %lu 位元組)"
 
 #: xmalloc.c:93
-#, fuzzy, c-format
+#, c-format
 msgid "%s: cannot allocate %lu bytes"
-msgstr "%s：不能讀取： %s"
+msgstr "%s: 無法分配 %lu 位元組"
 
 #: xmalloc.c:163
 #, c-format
 msgid "%s: %s:%d: cannot allocate %lu bytes (%lu bytes allocated)"
-msgstr ""
+msgstr "%s: %s:%d: 無法分配 %lu 位元組 (已分配 %lu 位元組)"
 
 #: xmalloc.c:165
 #, c-format
 msgid "%s: %s:%d: cannot allocate %lu bytes"
-msgstr ""
+msgstr "%s: %s:%d: 無法分配 %lu 位元組"
 
-#: builtins.c:43
+#: builtins.c:45
 msgid "alias [-p] [name[=value] ... ]"
-msgstr ""
+msgstr "alias [-p] [名稱[=值] … ]"
 
-#: builtins.c:47
+#: builtins.c:49
 msgid "unalias [-a] name [name ...]"
-msgstr ""
+msgstr "unalias [-a] 名稱 [名稱 …]"
 
-#: builtins.c:51
+#: builtins.c:53
 msgid ""
 "bind [-lpsvPSVX] [-m keymap] [-f filename] [-q name] [-u name] [-r keyseq] [-"
 "x keyseq:shell-command] [keyseq:readline-function or readline-command]"
 msgstr ""
-
-#: builtins.c:54
-msgid "break [n]"
-msgstr ""
+"bind [-lpvsPSVX] [-m 鍵對映] [-f 檔名] [-q 名稱] [-u 名稱] [-r 鍵序列] [-x 鍵"
+"序列:shell- 命令] [鍵序列:readline- 函數 或 readline- 命令]"
 
 #: builtins.c:56
-msgid "continue [n]"
-msgstr ""
+msgid "break [n]"
+msgstr "break [n]"
 
 #: builtins.c:58
+msgid "continue [n]"
+msgstr "continue [n]"
+
+#: builtins.c:60
 msgid "builtin [shell-builtin [arg ...]]"
-msgstr ""
+msgstr "builtin [shell 內建 [引數 …]]"
 
-#: builtins.c:61
+#: builtins.c:63
 msgid "caller [expr]"
-msgstr ""
-
-#: builtins.c:64
-msgid "cd [-L|[-P [-e]] [-@]] [dir]"
-msgstr ""
+msgstr "caller [表示式]"
 
 #: builtins.c:66
-msgid "pwd [-LP]"
-msgstr ""
+msgid "cd [-L|[-P [-e]] [-@]] [dir]"
+msgstr "cd [-L|[-P [-e]] [-@]] [目錄]"
 
 #: builtins.c:68
-msgid ":"
-msgstr ""
-
-#: builtins.c:70
-msgid "true"
-msgstr ""
-
-#: builtins.c:72
-msgid "false"
-msgstr ""
-
-#: builtins.c:74
-msgid "command [-pVv] command [arg ...]"
-msgstr ""
+msgid "pwd [-LP]"
+msgstr "pwd [-LP]"
 
 #: builtins.c:76
-msgid "declare [-aAfFgilnrtux] [-p] [name[=value] ...]"
-msgstr ""
+msgid "command [-pVv] command [arg ...]"
+msgstr "command [-pVv] 命令 [引數 …]"
 
 #: builtins.c:78
-msgid "typeset [-aAfFgilrtux] [-p] name[=value] ..."
-msgstr ""
+msgid "declare [-aAfFgilnrtux] [-p] [name[=value] ...]"
+msgstr "declare [-aAfFgilnrtux] [-p] [名稱[=值] …]"
 
 #: builtins.c:80
+#, fuzzy
+msgid "typeset [-aAfFgilnrtux] [-p] name[=value] ..."
+msgstr "typeset [-aAfFgilrtux] [-p] 名稱[=值] …"
+
+#: builtins.c:82
 msgid "local [option] name[=value] ..."
-msgstr ""
+msgstr "local [option] 名稱[=值] …"
 
-#: builtins.c:83
+#: builtins.c:85
 msgid "echo [-neE] [arg ...]"
-msgstr ""
+msgstr "echo [-neE] [引數 …]"
 
-#: builtins.c:87
+#: builtins.c:89
 msgid "echo [-n] [arg ...]"
-msgstr ""
-
-#: builtins.c:90
-msgid "enable [-a] [-dnps] [-f filename] [name ...]"
-msgstr ""
+msgstr "echo [-n] [引數 …]"
 
 #: builtins.c:92
-msgid "eval [arg ...]"
-msgstr ""
+msgid "enable [-a] [-dnps] [-f filename] [name ...]"
+msgstr "enable [-a] [-dnps] [-f 檔名] [名稱 …]"
 
 #: builtins.c:94
-msgid "getopts optstring name [arg]"
-msgstr ""
+msgid "eval [arg ...]"
+msgstr "eval [引數 …]"
 
 #: builtins.c:96
-msgid "exec [-cl] [-a name] [command [arguments ...]] [redirection ...]"
-msgstr ""
+msgid "getopts optstring name [arg]"
+msgstr "getopts 選項字串 名稱 [引數]"
 
 #: builtins.c:98
-msgid "exit [n]"
-msgstr ""
+msgid "exec [-cl] [-a name] [command [arguments ...]] [redirection ...]"
+msgstr "exec [-cl] [-a 名稱] [命令 [引數 …]] [重定向 …]"
 
 #: builtins.c:100
+msgid "exit [n]"
+msgstr "exit [n]"
+
+#: builtins.c:102
 msgid "logout [n]"
-msgstr ""
+msgstr "logout [n]"
 
-#: builtins.c:103
+#: builtins.c:105
 msgid "fc [-e ename] [-lnr] [first] [last] or fc -s [pat=rep] [command]"
-msgstr ""
+msgstr "fc [-e 編輯器名] [-lnr] [起始] [終結] 或 fc -s [模式=替換串] [命令]"
 
-#: builtins.c:107
+#: builtins.c:109
 msgid "fg [job_spec]"
-msgstr ""
+msgstr "fg [工作規格]"
 
-#: builtins.c:111
+#: builtins.c:113
 msgid "bg [job_spec ...]"
-msgstr ""
+msgstr "bg [工作規格 …]"
 
-#: builtins.c:114
+#: builtins.c:116
 msgid "hash [-lr] [-p pathname] [-dt] [name ...]"
-msgstr ""
+msgstr "hash [-lr] [-p 路徑名] [-dt] [名稱 …]"
 
-#: builtins.c:117
+#: builtins.c:119
 msgid "help [-dms] [pattern ...]"
-msgstr ""
+msgstr "help [-dms] [模式 …]"
 
-#: builtins.c:121
+#: builtins.c:123
 msgid ""
 "history [-c] [-d offset] [n] or history -anrw [filename] or history -ps arg "
 "[arg...]"
 msgstr ""
+"history [-c] [-d 偏移量] [n] 或 history -anrw [檔名] 或 history -ps 引數 [參"
+"數…]"
 
-#: builtins.c:125
+#: builtins.c:127
 msgid "jobs [-lnprs] [jobspec ...] or jobs -x command [args]"
-msgstr ""
+msgstr "jobs [-lnprs] [工作規格 …] 或 jobs -x 命令 [引數]"
 
-#: builtins.c:129
-msgid "disown [-h] [-ar] [jobspec ...]"
-msgstr ""
+#: builtins.c:131
+#, fuzzy
+msgid "disown [-h] [-ar] [jobspec ... | pid ...]"
+msgstr "disown [-h] [-ar] [工作規格 …]"
 
-#: builtins.c:132
+#: builtins.c:134
 msgid ""
 "kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l "
 "[sigspec]"
 msgstr ""
-
-#: builtins.c:134
-msgid "let arg [arg ...]"
-msgstr ""
+"kill [-s 訊號規格 | -n 訊號編號 | - 訊號規格] 行程識別號 | 工作規格 … 或 "
+"kill -l [訊號規格]"
 
 #: builtins.c:136
+msgid "let arg [arg ...]"
+msgstr "let 引數 [引數 …]"
+
+#: builtins.c:138
 msgid ""
 "read [-ers] [-a array] [-d delim] [-i text] [-n nchars] [-N nchars] [-p "
 "prompt] [-t timeout] [-u fd] [name ...]"
 msgstr ""
-
-#: builtins.c:138
-msgid "return [n]"
-msgstr ""
+"read [-ers] [-a 陣列] [-d 分隔符] [-i 緩衝區文字] [-n 讀取字元數] [-N 讀取字"
+"符數] [-p 提示符] [-t 逾時] [-u 檔案描述符] [名稱 …]"
 
 #: builtins.c:140
-msgid "set [-abefhkmnptuvxBCHP] [-o option-name] [--] [arg ...]"
-msgstr ""
+msgid "return [n]"
+msgstr "return [n]"
 
 #: builtins.c:142
-msgid "unset [-f] [-v] [-n] [name ...]"
-msgstr ""
+msgid "set [-abefhkmnptuvxBCHP] [-o option-name] [--] [arg ...]"
+msgstr "set [--abefhkmnptuvxBCHP] [-o 選項名] [--] [引數 …]"
 
 #: builtins.c:144
-msgid "export [-fn] [name[=value] ...] or export -p"
-msgstr ""
+msgid "unset [-f] [-v] [-n] [name ...]"
+msgstr "unset [-f] [-v] [-n] [名稱 …]"
 
 #: builtins.c:146
-msgid "readonly [-aAf] [name[=value] ...] or readonly -p"
-msgstr ""
+msgid "export [-fn] [name[=value] ...] or export -p"
+msgstr "export [-fn] [名稱[=值] …] 或 export -p"
 
 #: builtins.c:148
-msgid "shift [n]"
-msgstr ""
+msgid "readonly [-aAf] [name[=value] ...] or readonly -p"
+msgstr "readonly [-aAf] [名稱[=值] …] 或 readonly -p"
 
 #: builtins.c:150
-msgid "source filename [arguments]"
-msgstr ""
+msgid "shift [n]"
+msgstr "shift [n]"
 
 #: builtins.c:152
-#, fuzzy
+msgid "source filename [arguments]"
+msgstr "source 檔名 [引數]"
+
+#: builtins.c:154
 msgid ". filename [arguments]"
-msgstr "太多引數"
+msgstr "。檔名 [引數]"
 
-#: builtins.c:155
+#: builtins.c:157
 msgid "suspend [-f]"
-msgstr ""
-
-#: builtins.c:158
-msgid "test [expr]"
-msgstr ""
+msgstr "suspend [-f]"
 
 #: builtins.c:160
-msgid "[ arg... ]"
-msgstr ""
+msgid "test [expr]"
+msgstr "test [表示式]"
 
 #: builtins.c:162
-msgid "times"
-msgstr ""
-
-#: builtins.c:164
-msgid "trap [-lp] [[arg] signal_spec ...]"
-msgstr ""
+msgid "[ arg... ]"
+msgstr "[ 引數… ]"
 
 #: builtins.c:166
+msgid "trap [-lp] [[arg] signal_spec ...]"
+msgstr "trap [-lp] [[引數] 訊號規格 …]"
+
+#: builtins.c:168
 msgid "type [-afptP] name [name ...]"
-msgstr ""
+msgstr "type [-afptP] 名稱 [名稱 …]"
 
-#: builtins.c:169
-msgid "ulimit [-SHabcdefilmnpqrstuvxT] [limit]"
-msgstr ""
+#: builtins.c:171
+#, fuzzy
+msgid "ulimit [-SHabcdefiklmnpqrstuvxPT] [limit]"
+msgstr "ulimit [-SHabcdefilmnpqrstuvxT] [限制]"
 
-#: builtins.c:172
+#: builtins.c:174
 msgid "umask [-p] [-S] [mode]"
-msgstr ""
+msgstr "umask [-p] [-S] [模式]"
 
-#: builtins.c:175
+#: builtins.c:177
 msgid "wait [-n] [id ...]"
-msgstr ""
+msgstr "wait [-n] [編號 …]"
 
-#: builtins.c:179
+#: builtins.c:181
 msgid "wait [pid ...]"
-msgstr ""
-
-#: builtins.c:182
-msgid "for NAME [in WORDS ... ] ; do COMMANDS; done"
-msgstr ""
+msgstr "wait [行程識別號 …]"
 
 #: builtins.c:184
-msgid "for (( exp1; exp2; exp3 )); do COMMANDS; done"
-msgstr ""
+msgid "for NAME [in WORDS ... ] ; do COMMANDS; done"
+msgstr "for 名稱 [in 字詞 … ] ; do 命令 ; done"
 
 #: builtins.c:186
-msgid "select NAME [in WORDS ... ;] do COMMANDS; done"
-msgstr ""
+msgid "for (( exp1; exp2; exp3 )); do COMMANDS; done"
+msgstr "for (( 表示式1; 表示式2; 表示式3 )); do 命令 ; done"
 
 #: builtins.c:188
-msgid "time [-p] pipeline"
-msgstr ""
+msgid "select NAME [in WORDS ... ;] do COMMANDS; done"
+msgstr "select NAME [in 字詞 … ;] do 命令 ; done"
 
 #: builtins.c:190
-msgid "case WORD in [PATTERN [| PATTERN]...) COMMANDS ;;]... esac"
-msgstr ""
+msgid "time [-p] pipeline"
+msgstr "time [-p] 管道"
 
 #: builtins.c:192
+msgid "case WORD in [PATTERN [| PATTERN]...) COMMANDS ;;]... esac"
+msgstr "case 詞 in [模式 [| 模式]…) 命令 ;;]… esac"
+
+#: builtins.c:194
 msgid ""
 "if COMMANDS; then COMMANDS; [ elif COMMANDS; then COMMANDS; ]... [ else "
 "COMMANDS; ] fi"
-msgstr ""
-
-#: builtins.c:194
-msgid "while COMMANDS; do COMMANDS; done"
-msgstr ""
+msgstr "if 命令 ; then 命令 ; [ elif 命令 ; then 命令 ; ]… [ else 命令 ; ] fi"
 
 #: builtins.c:196
-msgid "until COMMANDS; do COMMANDS; done"
-msgstr ""
+msgid "while COMMANDS; do COMMANDS; done"
+msgstr "while 命令 ; do 命令 ; done"
 
 #: builtins.c:198
-msgid "coproc [NAME] command [redirections]"
-msgstr ""
+msgid "until COMMANDS; do COMMANDS; done"
+msgstr "until 命令 ; do 命令 ; done"
 
 #: builtins.c:200
-msgid "function name { COMMANDS ; } or name () { COMMANDS ; }"
-msgstr ""
+msgid "coproc [NAME] command [redirections]"
+msgstr "coproc [名稱] 命令 [重定向]"
 
 #: builtins.c:202
-msgid "{ COMMANDS ; }"
-msgstr ""
+msgid "function name { COMMANDS ; } or name () { COMMANDS ; }"
+msgstr "function 名稱 { 命令 ; } 或 name () { 命令 ; }"
 
 #: builtins.c:204
-msgid "job_spec [&]"
-msgstr ""
+msgid "{ COMMANDS ; }"
+msgstr "{ 命令 ; }"
 
 #: builtins.c:206
-msgid "(( expression ))"
-msgstr ""
+msgid "job_spec [&]"
+msgstr "job_spec [&]"
 
 #: builtins.c:208
-msgid "[[ expression ]]"
-msgstr ""
+msgid "(( expression ))"
+msgstr "(( 表示式 ))"
 
 #: builtins.c:210
+msgid "[[ expression ]]"
+msgstr "[[ 表示式 ]]"
+
+#: builtins.c:212
 msgid "variables - Names and meanings of some shell variables"
-msgstr ""
+msgstr "variables - 一些 shell 變數的名稱和含義"
 
-#: builtins.c:213
+#: builtins.c:215
 msgid "pushd [-n] [+N | -N | dir]"
-msgstr ""
+msgstr "pushd [-n] [+N | -N | 目錄]"
 
-#: builtins.c:217
+#: builtins.c:219
 msgid "popd [-n] [+N | -N]"
-msgstr ""
+msgstr "popd [-n] [+N | -N]"
 
-#: builtins.c:221
+#: builtins.c:223
 msgid "dirs [-clpv] [+N] [-N]"
-msgstr ""
-
-#: builtins.c:224
-msgid "shopt [-pqsu] [-o] [optname ...]"
-msgstr ""
+msgstr "dirs [-clpv] [+N] [-N]"
 
 #: builtins.c:226
-msgid "printf [-v var] format [arguments]"
-msgstr ""
+msgid "shopt [-pqsu] [-o] [optname ...]"
+msgstr "shopt [-pqsu] [-o] [選項名 …]"
 
-#: builtins.c:229
+#: builtins.c:228
+msgid "printf [-v var] format [arguments]"
+msgstr "printf [-v var] 格式 [引數]"
+
+#: builtins.c:231
 msgid ""
 "complete [-abcdefgjksuv] [-pr] [-DE] [-o option] [-A action] [-G globpat] [-"
 "W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S "
 "suffix] [name ...]"
 msgstr ""
+"complete [-abcdefgjksuv] [-pr] [-DE] [-o 選項] [-A 動作] [-G 全域模式] [-W 詞"
+"語列表]  [-F 函數] [-C 命令] [-X 過濾模式] [-P 字首] [-S 字尾] [名稱 …]"
 
-#: builtins.c:233
+#: builtins.c:235
+#, fuzzy
 msgid ""
-"compgen [-abcdefgjksuv] [-o option]  [-A action] [-G globpat] [-W wordlist]  "
+"compgen [-abcdefgjksuv] [-o option] [-A action] [-G globpat] [-W wordlist]  "
 "[-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]"
 msgstr ""
+"compgen [-abcdefgjksuv] [-o 選項]  [-A 動作] [-G 全域模式] [-W 字詞列表]  [-"
+"F 函數] [-C 命令] [-X 過濾模式] [-P 字首] [-S 字尾] [字詞]"
 
-#: builtins.c:237
+#: builtins.c:239
 msgid "compopt [-o|+o option] [-DE] [name ...]"
-msgstr ""
-
-#: builtins.c:240
-msgid ""
-"mapfile [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c "
-"quantum] [array]"
-msgstr ""
+msgstr "compopt [-o|+o 選項] [-DE] [名稱 …]"
 
 #: builtins.c:242
+#, fuzzy
+msgid ""
+"mapfile [-d delim] [-n count] [-O origin] [-s count] [-t] [-u fd] [-C "
+"callback] [-c quantum] [array]"
+msgstr ""
+"mapfile [-n 計數] [-O 起始序號] [-s 計數] [-t] [-u fd] [-C 回呼] [-c 定量] "
+"[陣列]"
+
+#: builtins.c:244
 msgid ""
 "readarray [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c "
 "quantum] [array]"
 msgstr ""
+"readarray [-n 計數] [-O 起始序號] [-s 計數] [-t] [-u fd] [-C 回呼] [-c 定量] "
+"[陣列]"
 
-#: builtins.c:254
+#: builtins.c:256
 #, fuzzy
 msgid ""
 "Define or display aliases.\n"
@@ -2301,31 +2499,48 @@ msgid ""
 "    alias substitution when the alias is expanded.\n"
 "    \n"
 "    Options:\n"
-"      -p\tPrint all defined aliases in a reusable format\n"
+"      -p\tprint all defined aliases in a reusable format\n"
 "    \n"
 "    Exit Status:\n"
 "    alias returns true unless a NAME is supplied for which no alias has "
 "been\n"
 "    defined."
 msgstr ""
-"`alias' with no arguments or with the -p option prints the list\n"
-"    of aliases in the form alias NAME=VALUE on standard output.\n"
-"    Otherwise, an alias is defined for each NAME whose VALUE is given.\n"
-"    A trailing space in VALUE causes the next word to be checked for\n"
-"    alias substitution when the alias is expanded.  Alias returns\n"
-"    true unless a NAME is given for which no alias has been defined."
+"定義或顯示別名。\n"
+"    \n"
+"    不帶引數時，「alias」以可重用的格式\n"
+"   「alias 名稱=值」在標準輸出裝置上印出別名列表。\n"
+"    \n"
+"    否則，對於每個給定值的名稱定義一個別名。\n"
+"    值末尾的空格會使下一個字詞被檢測\n"
+"    做為別名替換展開。\n"
+"    \n"
+"    選項：\n"
+"      -p\t以可重用的格式印出所有的已定義別名\n"
+"    \n"
+"    退出狀態：\n"
+"    除非一個沒有定義的名字被做為引數提供，否則 alias \n"
+"    回傳值為真。"
 
-#: builtins.c:276
+#: builtins.c:278
+#, fuzzy
 msgid ""
 "Remove each NAME from the list of defined aliases.\n"
 "    \n"
 "    Options:\n"
-"      -a\tremove all alias definitions.\n"
+"      -a\tremove all alias definitions\n"
 "    \n"
 "    Return success unless a NAME is not an existing alias."
 msgstr ""
+"從別名定義列表中刪除每一個 NAME。\n"
+"    \n"
+"    選項：\n"
+"      -a\t刪除所有的別名定義。\n"
+"    \n"
+"    回傳成功，除非 NAME 不是一個已存在的別名。"
 
-#: builtins.c:289
+#: builtins.c:291
+#, fuzzy
 msgid ""
 "Set Readline key bindings and variables.\n"
 "    \n"
@@ -2359,14 +2574,45 @@ msgid ""
 "      -f  filename       Read key bindings from FILENAME.\n"
 "      -x  keyseq:shell-command\tCause SHELL-COMMAND to be executed when\n"
 "    \t\t\t\tKEYSEQ is entered.\n"
-"      -X\t\t     List key sequences bound with -x and associated commands\n"
+"      -X                 List key sequences bound with -x and associated "
+"commands\n"
 "                         in a form that can be reused as input.\n"
 "    \n"
 "    Exit Status:\n"
 "    bind returns 0 unless an unrecognized option is given or an error occurs."
 msgstr ""
+"設定 Readline 鍵繫結和變數。\n"
+"    \n"
+"    繫結一個鍵序列到一個 Readline 函數或者巨集，或者設定一個\n"
+"    Readline 變數。非選項引數的語法和 ~/.inputrc 檔案中的等\n"
+"    同，但是必須做為一個引數被傳遞，\n"
+"    例如，bind '\"\\C-x\\C-r\": re-read-init-file'。\n"
+"    \n"
+"    選項：\n"
+"      -m  鍵對映      在此命令執行過程中使用指定的鍵對映。\n"
+"                     可被接受的鍵對映名字有 emacs、emacs-standard、emacs-"
+"meta、\n"
+"                     emacs-ctlx、vi、vi-move、vi-command、和 vi-insert。\n"
+"      -l             列出函數名稱。\n"
+"      -P             列出函數名稱和繫結。\n"
+"      -p             以可以重新用作輸入的格式列出函數名稱和繫結。\n"
+"      -S             列出可以啟動巨集的鍵序列以及它們的值\n"
+"      -s             以可以重新用作輸入的格式列出可以啟動巨集的鍵以及它們的"
+"值。\n"
+"      -V             列出變數名稱和它們的值\n"
+"      -v             以可以重新用作輸入的格式列出變數的名稱和它們的值\n"
+"      -q  函數名      查詢指定的函數可以由哪些鍵啟動。\n"
+"      -u  函數名      反繫結所有繫結至指定函數的鍵。\n"
+"      -r  鍵序列      取消指定鍵序列的繫結。\n"
+"      -f  檔名      從指定檔案中讀取鍵繫結。\n"
+"      -x  鍵序列:shell 命令\t當指定的鍵序列被輸入時，執行指定的 shell 命"
+"令。\n"
+"      -X             以可被重用的形式列出用 -x 繫結的鍵序列和命令。\n"
+"    \n"
+"    退出狀態：\n"
+"    除非使用了無法辨認的選項或者錯誤發生，否則回傳 0。"
 
-#: builtins.c:328
+#: builtins.c:330
 msgid ""
 "Exit for, while, or until loops.\n"
 "    \n"
@@ -2376,8 +2622,15 @@ msgid ""
 "    Exit Status:\n"
 "    The exit status is 0 unless N is not greater than or equal to 1."
 msgstr ""
+"退出 for、while 或 until 迴圈\n"
+"    \n"
+"    退出一個 FOR、WHILE 或 UNTIL 迴圈。如果指定了 N，則跳出 N 重\n"
+"    迴圈\n"
+"    \n"
+"    退出狀態：\n"
+"    退出狀態為 0 除非 N 不大於或等於 1。"
 
-#: builtins.c:340
+#: builtins.c:342
 msgid ""
 "Resume for, while, or until loops.\n"
 "    \n"
@@ -2387,8 +2640,15 @@ msgid ""
 "    Exit Status:\n"
 "    The exit status is 0 unless N is not greater than or equal to 1."
 msgstr ""
+"繼續 for、while 或 until 迴圈。\n"
+"    \n"
+"    繼續當前 FOR、WHILE 或 UNTIL 迴圈的下一步。\n"
+"    如果指定了 N， 則繼續當前的第 N 重迴圈。\n"
+"    \n"
+"    退出狀態：\n"
+"    退出狀態為 0 除非 N 不大於或等於 1。"
 
-#: builtins.c:352
+#: builtins.c:354
 msgid ""
 "Execute shell builtins.\n"
 "    \n"
@@ -2401,8 +2661,18 @@ msgid ""
 "    Returns the exit status of SHELL-BUILTIN, or false if SHELL-BUILTIN is\n"
 "    not a shell builtin.."
 msgstr ""
+"執行 shell 內建。\n"
+"    \n"
+"    帶引數 ARGs 執行 SHELL-BUILTIN 內建，並且不做命令查詢\n"
+"    在希望以 shell 函數的形式來重新實現 shell 內建，\n"
+"    並且希望在函數之內執行該 shell 內建的情況下有用處。\n"
+"    \n"
+"    退出狀態：\n"
+"    以 SHELL-BUILTIN 內建的退出狀態為準，或者如果 SHELL-BUILTIN 不是一個 "
+"shell 內建時\n"
+"    為假。。"
 
-#: builtins.c:367
+#: builtins.c:369
 msgid ""
 "Return the context of the current subroutine call.\n"
 "    \n"
@@ -2417,8 +2687,21 @@ msgid ""
 "    Returns 0 unless the shell is not executing a shell function or EXPR\n"
 "    is invalid."
 msgstr ""
+"回傳當前子呼叫的語境。\n"
+"    \n"
+"    不帶有 EXPR 時，回傳「$line $filename」。帶有 EXPR 時，回傳\n"
+"   「$line $subroutine $filename」；這個額外的資訊可以被用於提供\n"
+"    堆疊追蹤。\n"
+"    \n"
+"    EXPR 的值顯示了到當前呼叫框格需要回去多少個呼叫框格；頂部框格\n"
+"    是第 0 框格。\n"
+"    \n"
+"    退出狀態：\n"
+"    除非 shell 不在執行一個 shell 函數或者 EXPR 無效，否則回傳結\n"
+"    果為 0。"
 
-#: builtins.c:385
+#: builtins.c:387
+#, fuzzy
 msgid ""
 "Change the shell working directory.\n"
 "    \n"
@@ -2441,16 +2724,16 @@ msgid ""
 "    its value is used for DIR.\n"
 "    \n"
 "    Options:\n"
-"        -L\tforce symbolic links to be followed: resolve symbolic links in\n"
-"    \tDIR after processing instances of `..'\n"
-"        -P\tuse the physical directory structure without following symbolic\n"
-"    \tlinks: resolve symbolic links in DIR before processing instances\n"
-"    \tof `..'\n"
-"        -e\tif the -P option is supplied, and the current working directory\n"
-"    \tcannot be determined successfully, exit with a non-zero status\n"
-"        -@  on systems that support it, present a file with extended "
-"attributes\n"
-"            as a directory containing the file attributes\n"
+"      -L\tforce symbolic links to be followed: resolve symbolic\n"
+"    \t\tlinks in DIR after processing instances of `..'\n"
+"      -P\tuse the physical directory structure without following\n"
+"    \t\tsymbolic links: resolve symbolic links in DIR before\n"
+"    \t\tprocessing instances of `..'\n"
+"      -e\tif the -P option is supplied, and the current working\n"
+"    \t\tdirectory cannot be determined successfully, exit with\n"
+"    \t\ta non-zero status\n"
+"      -@\ton systems that support it, present a file with extended\n"
+"    \t\tattributes as a directory containing the file attributes\n"
 "    \n"
 "    The default is to follow symbolic links, as if `-L' were specified.\n"
 "    `..' is processed by removing the immediately previous pathname "
@@ -2462,14 +2745,44 @@ msgid ""
 "when\n"
 "    -P is used; non-zero otherwise."
 msgstr ""
+"變更 shell 工作目錄。\n"
+"    \n"
+"    變更當前目錄至 DIR 目錄。預設的 DIR 目錄是 shell 變數 HOME\n"
+"    的值。\n"
+"    \n"
+"    變數 CDPATH 定義了含有 DIR 的目錄搜尋路徑，其中不同的目錄名稱由冒號 (:)分"
+"隔。\n"
+"    一個空的目錄名稱表示當前目錄。如果要切換到的 DIR 由斜線 (/) 開頭，則 "
+"CDPATH\n"
+"    變數不會被使用。\n"
+"    \n"
+"    如果路徑找不到，並且 shell 選項「cdable_vars」被設定，則引數詞被假定為一"
+"個\n"
+"    變數名。如果該變數有值，則它的值被當做 DIR 目錄。\n"
+"    \n"
+"    選項：\n"
+"        -L\t強制跟隨符號鏈結: 在處理「..」之後解析 DIR 中的符號鏈結。\n"
+"        -P\t使用實體目錄結構而不跟隨符號鏈結: 在處理「..」之前解析 DIR 中的符"
+"號鏈結。\n"
+"        -e\t如果使用了 -P 引數，但不能成功確定當前工作目錄時，回傳非零的回傳"
+"值。\n"
+"        -@\t在支援擴展屬性的系統上，將一個有這些屬性的檔案當做有檔案屬性的目"
+"錄。\n"
+"    \n"
+"    預設情況下跟隨符號鏈結，如同指定「-L」。\n"
+"   「..」使用移除向前相鄰目錄名成員直到 DIR 開始或一個斜線的方式處理。\n"
+"    \n"
+"    退出狀態：\n"
+"    如果目錄變更，或在使用 -P 選項時 $PWD 修改成功時回傳 0，否則非零。"
 
-#: builtins.c:422
+#: builtins.c:425
+#, fuzzy
 msgid ""
 "Print the name of the current working directory.\n"
 "    \n"
 "    Options:\n"
 "      -L\tprint the value of $PWD if it names the current working\n"
-"    \tdirectory\n"
+"    \t\tdirectory\n"
 "      -P\tprint the physical directory, without any symbolic links\n"
 "    \n"
 "    By default, `pwd' behaves as if `-L' were specified.\n"
@@ -2478,8 +2791,18 @@ msgid ""
 "    Returns 0 unless an invalid option is given or the current directory\n"
 "    cannot be read."
 msgstr ""
+"印出當前工作目錄的名字。\n"
+"    \n"
+"    選項：\n"
+"      -L\t印出 $PWD 變數的值，如果它包含了當前的工作目錄\n"
+"      -P\t印出當前的實體路徑，不帶有任何的符號鏈結\n"
+"    \n"
+"    預設情況下，「pwd」的行為和帶「-L」選項一致\n"
+"    \n"
+"    退出狀態：\n"
+"    除非使用了無效選項或者當前目錄不可讀，否則回傳狀態為 0。"
 
-#: builtins.c:439
+#: builtins.c:442
 msgid ""
 "Null command.\n"
 "    \n"
@@ -2488,24 +2811,39 @@ msgid ""
 "    Exit Status:\n"
 "    Always succeeds."
 msgstr ""
+"空的命令。\n"
+"    \n"
+"    沒有效果； 此命令不做任何操作。\n"
+"    \n"
+"    退出狀態：\n"
+"    一律成功。"
 
-#: builtins.c:450
+#: builtins.c:453
 msgid ""
 "Return a successful result.\n"
 "    \n"
 "    Exit Status:\n"
 "    Always succeeds."
 msgstr ""
+"回傳一個成功結果。\n"
+"    \n"
+"    退出狀態：\n"
+"    一律成功。"
 
-#: builtins.c:459
+#: builtins.c:462
 msgid ""
 "Return an unsuccessful result.\n"
 "    \n"
 "    Exit Status:\n"
 "    Always fails."
 msgstr ""
+"回傳一個不成功的結果。\n"
+"    \n"
+"    退出狀態：\n"
+"    一律失敗。"
 
-#: builtins.c:468
+#: builtins.c:471
+#, fuzzy
 msgid ""
 "Execute a simple command or display information about commands.\n"
 "    \n"
@@ -2515,16 +2853,30 @@ msgid ""
 "    on disk when a function with the same name exists.\n"
 "    \n"
 "    Options:\n"
-"      -p\tuse a default value for PATH that is guaranteed to find all of\n"
-"    \tthe standard utilities\n"
-"      -v\tprint a description of COMMAND similar to the `type' builtin\n"
-"      -V\tprint a more verbose description of each COMMAND\n"
+"      -p    use a default value for PATH that is guaranteed to find all of\n"
+"            the standard utilities\n"
+"      -v    print a description of COMMAND similar to the `type' builtin\n"
+"      -V    print a more verbose description of each COMMAND\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns exit status of COMMAND, or failure if COMMAND is not found."
 msgstr ""
+"執行一個簡單命令或者顯示命令的相關資訊。\n"
+"    \n"
+"    帶 ARGS 引數執行 COMMAND 命令且抑制 shell 函數查詢，或顯示\n"
+"    指定的 COMMAND 命令的資訊。可以在存在相同名稱函數定義的\n"
+"    情況下被用於啟動磁碟上的命令。\n"
+"    \n"
+"    選項：\n"
+"      -p\t使用 PATH 變數的一個預設值以確保所有的標準工具都能被找到。\n"
+"      -v\t印出 COMMAND 命令的描述，和「type」內建相似\n"
+"      -V\t印出每個 COMMAND 命令的詳細描述\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳 COMMAND 命令的回傳狀態，或者當找不到 COMMAND 命令時失敗。"
 
-#: builtins.c:487
+#: builtins.c:490
+#, fuzzy
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
@@ -2534,9 +2886,9 @@ msgid ""
 "    Options:\n"
 "      -f\trestrict action or display to function names and definitions\n"
 "      -F\trestrict display to function names only (plus line number and\n"
-"    \tsource file when debugging)\n"
+"    \t\tsource file when debugging)\n"
 "      -g\tcreate global variables when used in a shell function; otherwise\n"
-"    \tignored\n"
+"    \t\tignored\n"
 "      -p\tdisplay the attributes and value of each NAME\n"
 "    \n"
 "    Options which set attributes:\n"
@@ -2563,15 +2915,51 @@ msgid ""
 "    Returns success unless an invalid option is supplied or a variable\n"
 "    assignment error occurs."
 msgstr ""
+"設定變數值和屬性。\n"
+"    \n"
+"    規格變數並且賦予它們屬性。如果沒用給定名稱，\n"
+"    則顯示所有變數的屬性和值。\n"
+"    \n"
+"    選項：\n"
+"      -f\t限制動作或顯示為只有函數名稱和定義\n"
+"      -F\t限制僅顯示函數名稱 (以及列號和原始檔名於偵錯時)\n"
+"      -g\t當用於 shell 函數內時建立全域變數 ; 否則忽略\n"
+"      -p\t顯示每個 NAME 變數的屬性和值\n"
+"    \n"
+"    設定屬性的選項：\n"
+"      -a\t使 NAME 成為索引陣列 (如果支援)\n"
+"      -A\t使 NAME 成為關聯陣列 (如果支援)\n"
+"      -i\t使 NAME 帶有「integer」(整數)屬性\n"
+"      -l\t將 NAME 在指派時轉為小寫\n"
+"      -n\t使 NAME 成為指向一個以其值為名稱的變數引用\n"
+"      -r\t將 NAME 變為唯讀\n"
+"      -t\t使 NAME 帶有「trace」(追蹤)屬性\n"
+"      -u\t將 NAME 在指派時轉為大寫\n"
+"      -x\t將 NAME 匯出\n"
+"    \n"
+"    用「+」代替「-」會關閉指定選項。\n"
+"    \n"
+"    帶有整數屬性的變數在指派時將使用算術求值(見\n"
+"   「let」命令)\n"
+"    \n"
+"    在函數中使用時，「declare」使 NAME 成為本地變數，和「local」\n"
+"    命令一致。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功除非使用了無效選項或者發生錯誤。"
 
-#: builtins.c:527
+#: builtins.c:530
+#, fuzzy
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
-"    Obsolete.  See `help declare'."
+"    A synonym for `declare'.  See `help declare'."
 msgstr ""
+"設定變數的值和屬性。\n"
+"    \n"
+"    廢棄。參見「help declare」。"
 
-#: builtins.c:535
+#: builtins.c:538
 msgid ""
 "Define local variables.\n"
 "    \n"
@@ -2585,8 +2973,20 @@ msgid ""
 "    Returns success unless an invalid option is supplied, a variable\n"
 "    assignment error occurs, or the shell is not executing a function."
 msgstr ""
+"定義本地變數。\n"
+"    \n"
+"    建立一個以 NAME 為名稱的變數，並且將 VALUE 指派給它。\n"
+"    OPTION 選項可以是任何能被「declare」接受的選項。\n"
+"    \n"
+"    本地變數只能在函數內部被使用，它們只能在定義它們的函數內\n"
+"    部以及子函數中可見。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，除非使用了無效的選項、發生了指派錯誤或者 shell 不在執行一個函"
+"數。"
 
-#: builtins.c:552
+#: builtins.c:555
+#, fuzzy
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -2612,15 +3012,42 @@ msgid ""
 "      \\v\tvertical tab\n"
 "      \\\\\tbackslash\n"
 "      \\0nnn\tthe character whose ASCII code is NNN (octal).  NNN can be\n"
-"    \t0 to 3 octal digits\n"
+"    \t\t0 to 3 octal digits\n"
 "      \\xHH\tthe eight-bit character whose value is HH (hexadecimal).  HH\n"
-"    \tcan be one or two hex digits\n"
+"    \t\tcan be one or two hex digits\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns success unless a write error occurs."
 msgstr ""
+"將引數寫入標準輸出。\n"
+"    \n"
+"    在標準輸出上，顯示用空格分割的 ARG 引數後跟一個換列。\n"
+"    \n"
+"    選項：\n"
+"      -n\t不要追加換列\n"
+"      -e\t啟用下列反斜線逸出的解釋\n"
+"      -E\t顯式地抑制對於反斜線逸出的解釋\n"
+"    \n"
+"   「echo」對下列反斜線字元進行逸出：\n"
+"      \\a\t警告(響鈴)\n"
+"      \\b\t退格\n"
+"      \\c\t抑制更多的輸出\n"
+"      \\e\t逸出字元\n"
+"      \\f\t換頁字元\n"
+"      \\n\t換列\n"
+"      \\r\t輸入鍵\n"
+"      \\t\t橫向製表符\n"
+"      \\v\t縱向製表符\n"
+"      \\\\\t反斜線\n"
+"      \\0nnn\t以 NNN (八進位)為 ASCII 碼的字元。 NNN 可以是 0 到 3 個八進位數"
+"字\n"
+"      \\xHH\t以 HH (十六進位)為值的八進位字元。HH 可以是一個或兩個十六進位數"
+"字\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功除非有寫入錯誤發生。"
 
-#: builtins.c:588
+#: builtins.c:591
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -2632,8 +3059,17 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless a write error occurs."
 msgstr ""
+"寫入引數至標準輸出裝置。\n"
+"    \n"
+"    在標準輸出裝置上顯示 ARGs 引數和一個換列。\n"
+"    \n"
+"    選項：\n"
+"      -n\t不附加換列\n"
+"    \n"
+"    退出狀態：\n"
+"    除非寫錯誤發生，否則回傳成功。"
 
-#: builtins.c:603
+#: builtins.c:606
 msgid ""
 "Enable and disable shell builtins.\n"
 "    \n"
@@ -2659,8 +3095,31 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless NAME is not a shell builtin or an error occurs."
 msgstr ""
+"啟用和停用 shell 內建。\n"
+"    \n"
+"    啟用和停用 shell 的內建命令。停用使您能夠執行一個和內建\n"
+"    命令同名磁碟上的命令，而無須使用完整的路徑名。\n"
+"    \n"
+"    \n"
+"    選項：\n"
+"      -a\t印出一個內建的列表，並顯示其中每一個是否啟用\n"
+"      -n\t停用每一個 NAME 內建或者顯示一個被停用的內建列表\n"
+"      -p\t以可重用的格式印出一個內建的列表\n"
+"      -s\t僅印出 Posix「special」 內建的名稱\n"
+"    \n"
+"    控制動態載入的選項：\n"
+"      -f\t從共享物件 FILENAME 檔案中載入 NAME 內建\n"
+"      -d\t刪除以 -f 選項載入的內建\n"
+"    \n"
+"    不帶選項時，每一個 NAME 內建都被啟用。\n"
+"    \n"
+"    如果要使用 $PATH 中找到的「test」而不是 shell 內建的版本，\n"
+"    輸入「enable -n test」。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，除非 NAME 不是一個 shell 內建或者有錯誤發生。"
 
-#: builtins.c:631
+#: builtins.c:634
 msgid ""
 "Execute arguments as a shell command.\n"
 "    \n"
@@ -2671,8 +3130,15 @@ msgid ""
 "    Exit Status:\n"
 "    Returns exit status of command or success if command is null."
 msgstr ""
+"將引數做為 shell 命令執行。\n"
+"    \n"
+"    將 ARGs 合成一個字串，用結果做為 shell 的輸入，\n"
+"    並且執行得到的命令。\n"
+"    \n"
+"    退出狀態：\n"
+"    以命令的狀態退出，或者在命令為空的情況下回傳成功。"
 
-#: builtins.c:643
+#: builtins.c:646
 msgid ""
 "Parse option arguments.\n"
 "    \n"
@@ -2712,8 +3178,46 @@ msgid ""
 "    Returns success if an option is found; fails if the end of options is\n"
 "    encountered or an error occurs."
 msgstr ""
+"解析選項引數。\n"
+"    \n"
+"    Getopts 被 shell 過程用於解析可定位的參數做為選項。\n"
+"    \n"
+"    \n"
+"    OPTSTRING 字串包含待識別的選項字母；如果一個字母後面跟\n"
+"    著分號，則該選項需要一個引數，而該引數應用空格與選項分開。\n"
+"    \n"
+"    \n"
+"    每次啟動時，getopts 會將下一個選項放到 shell 變數 $name\n"
+"    中，如果 name 變數不存在則先將其初始化，而下一個待處\n"
+"    理的引數序號放入 shell 變數 OPTIND 中。OPTIND 變數在每\n"
+"    次 shell 或者 shell 指令稿啟動時都被初始化為 1。當一個選項要\n"
+"    求有一個引數時，getopts 將引數放入 shell 變數 OPTARG\n"
+"    中。\n"
+"    \n"
+"    getopts 有兩種通報錯誤的方法。如果 OPTSTRING 變數的第\n"
+"    一個字元是冒號，getopts 使用沉默錯誤通報。在這種模式\n"
+"    下，不會印出錯誤訊息。如果看到了一個無效的選項，\n"
+"    getopts 將找到的選項字元放至 OPTARG 變數中。如果一個必\n"
+"    須的選項沒有找到，getopts 放一個「:」到 NAME 變數中並且設\n"
+"    置 OPTARG 變數為找到的選項字元。如果 getopts 不在沉默模\n"
+"    式中，並且遇到了一個無效的選項，getopts 放置一個「?」到 NAME \n"
+"    變數中並且取消設定 OPTARG 變數。如果必須的選項沒有找到，\n"
+"    一個「?」會被放入 NAME 變數中，OPTARG 將被取消設定，並且會\n"
+"    印出一個診斷資訊。\n"
+"    \n"
+"    如果 shell 變數 OPTERR 的值為 0，getopts 停用\n"
+"    錯誤資訊的印出，即使 OPTSTRING 變數的第一個字元不是一\n"
+"    個冒號。OPTERR 的預設值為 1。\n"
+"    \n"
+"    Getopts 通常解析可定位的引數($0 - $9)，不過如果提供了\n"
+"    更多的引數，它們反而會被解析。\n"
+"    \n"
+"    退出狀態：\n"
+"    如果一個選項被找到則回傳成功；如果遇到了選項的結尾或者\n"
+"    有錯誤發生則回傳失敗。"
 
-#: builtins.c:685
+#: builtins.c:688
+#, fuzzy
 msgid ""
 "Replace the shell with the given command.\n"
 "    \n"
@@ -2724,8 +3228,8 @@ msgid ""
 "    \n"
 "    Options:\n"
 "      -a name\tpass NAME as the zeroth argument to COMMAND\n"
-"      -c\t\texecute COMMAND with an empty environment\n"
-"      -l\t\tplace a dash in the zeroth argument to COMMAND\n"
+"      -c\texecute COMMAND with an empty environment\n"
+"      -l\tplace a dash in the zeroth argument to COMMAND\n"
 "    \n"
 "    If the command cannot be executed, a non-interactive shell exits, "
 "unless\n"
@@ -2735,16 +3239,36 @@ msgid ""
 "    Returns success unless COMMAND is not found or a redirection error "
 "occurs."
 msgstr ""
+"使用指定命令替換 shell。\n"
+"    \n"
+"    執行 COMMAND 命令，以指定的程式替換這個 shell。\n"
+"    ARGUMENTS 引數成為 COMMAND 命令的引數。如果\n"
+"    沒有指定 COMMAND 命令，則任何的重定向在當前 shell 中生效。\n"
+"    \n"
+"    選項：\n"
+"      -a 名稱\t做為第 0 個引數傳遞給 COMMAND 命令\n"
+"      -c\t\t在空環境中執行 COMMAND 命令\n"
+"      -l\t\t在 COMMAND 命令的第 0 個引數中加一個短線\n"
+"    \n"
+"    如果命令不能被執行，則退出一個非互動式的 shell，除非\n"
+"   shell 選項「execfail」已經設定。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功除非 COMMAND 命令沒有找到或者出現一個重定向錯誤。"
 
-#: builtins.c:706
+#: builtins.c:709
 msgid ""
 "Exit the shell.\n"
 "    \n"
 "    Exits the shell with a status of N.  If N is omitted, the exit status\n"
 "    is that of the last command executed."
 msgstr ""
+"退出 shell。\n"
+"    \n"
+"    以狀態 N 退出 shell。  如果 N 被省略，則退出狀態\n"
+"    為最後一個執行命令的退出狀態。"
 
-#: builtins.c:715
+#: builtins.c:718
 msgid ""
 "Exit a login shell.\n"
 "    \n"
@@ -2752,8 +3276,12 @@ msgid ""
 "executed\n"
 "    in a login shell."
 msgstr ""
+"退出一個登入 shell。\n"
+"    \n"
+"    以狀態 N 退出一個登入 shell。如果不在登入 shell 中執行，則\n"
+"    回傳一個錯誤。"
 
-#: builtins.c:725
+#: builtins.c:728
 msgid ""
 "Display or execute commands from the history list.\n"
 "    \n"
@@ -2782,8 +3310,31 @@ msgid ""
 "    Returns success or status of executed command; non-zero if an error "
 "occurs."
 msgstr ""
+"從歷史記錄列表中顯示或者執行命令。\n"
+"    \n"
+"    fc 被用於從歷史記錄列表中列出或者重新編輯並執行命令。\n"
+"    FIRST 和 LAST 變數可以是數字用於指定範圍，或者 FIRST 可以是\n"
+"    字串，意味著以這個字串開頭的最近一個命令。\n"
+"    \n"
+"    \n"
+"    選項：\n"
+"      -e ENAME\t選擇使用哪個編輯器。預設的是 FCEDIT，然後是 EDITOR，\n"
+"    \t\t然後是 vi\n"
+"      -l \t列出列而不編輯\n"
+"      -n\t列舉時省略列號\n"
+"      -r\t反轉列的順序(最新列在前)\n"
+"    \n"
+"    用「fc -s [模式=替換 …] [命令]」的格式，COMMAND 命令會在 OLD=NEW\n"
+"    替換之後被重新執行。\n"
+"    \n"
+"    r=「fc -s」是一個有用的別名，這樣的話輸入「r cc」會執行最後一個以「cc」\n"
+"    開頭的命令，輸入「r」會重新執行最後一個命令。\n"
+"    \n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，或者執行命令的狀態；如果錯誤發生則回傳非零。"
 
-#: builtins.c:755
+#: builtins.c:758
 msgid ""
 "Move job to the foreground.\n"
 "    \n"
@@ -2794,8 +3345,16 @@ msgid ""
 "    Exit Status:\n"
 "    Status of command placed in foreground, or failure if an error occurs."
 msgstr ""
+"將工作移至前臺。\n"
+"    \n"
+"    將以 JOB_SPEC 標識的工作放至前臺，使其成為\n"
+"    當前工作。如果 JOB_SPEC 不存在，shell 觀念中的當前工作 \n"
+"    將被使用。\n"
+"    \n"
+"    退出狀態：\n"
+"    放至前臺的命令狀態，或者當錯誤發生時為失敗。"
 
-#: builtins.c:770
+#: builtins.c:773
 msgid ""
 "Move jobs to the background.\n"
 "    \n"
@@ -2808,8 +3367,17 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless job control is not enabled or an error occurs."
 msgstr ""
+"移動工作至後臺。\n"
+"    \n"
+"    將 JOB_SPEC 標識的工作放至後臺，就像它們\n"
+"    是帶「&」啟動的一樣。如果 JOB_SPEC 不存在，shell 觀念中的\n"
+"    當前工作將會被使用。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功除非工作管理沒有啟用或者錯誤發生。"
 
-#: builtins.c:784
+#: builtins.c:787
+#, fuzzy
 msgid ""
 "Remember or display program locations.\n"
 "    \n"
@@ -2818,22 +3386,43 @@ msgid ""
 "displayed.\n"
 "    \n"
 "    Options:\n"
-"      -d\t\tforget the remembered location of each NAME\n"
-"      -l\t\tdisplay in a format that may be reused as input\n"
+"      -d\tforget the remembered location of each NAME\n"
+"      -l\tdisplay in a format that may be reused as input\n"
 "      -p pathname\tuse PATHNAME as the full pathname of NAME\n"
-"      -r\t\tforget all remembered locations\n"
-"      -t\t\tprint the remembered location of each NAME, preceding\n"
+"      -r\tforget all remembered locations\n"
+"      -t\tprint the remembered location of each NAME, preceding\n"
 "    \t\teach location with the corresponding NAME if multiple\n"
 "    \t\tNAMEs are given\n"
 "    Arguments:\n"
-"      NAME\t\tEach NAME is searched for in $PATH and added to the list\n"
+"      NAME\tEach NAME is searched for in $PATH and added to the list\n"
 "    \t\tof remembered commands.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns success unless NAME is not found or an invalid option is given."
 msgstr ""
+"記住或顯示程式位置。\n"
+"    \n"
+"    確定並記住每一個給定 NAME 名稱命令的完整路徑。\n"
+"    如果不提供引數，則顯示已經記住命令的資訊。\n"
+"    \n"
+"    選項：\n"
+"      -d\t\t忘記每一個已經記住的 NAME 的位置\n"
+"      -l\t\t以可做為輸入重用的格式顯示\n"
+"      -p pathname\t使用 pathname 路徑做為 NAME 命令的全路徑\n"
+"      -r\t\t忘記所有記住的位置\n"
+"      -t\t\t印出記住的每一個 NAME 名稱的位置，如果指定了多個\n"
+"    \t\tNAME 名稱，則每個位置前面會加上相應的 NAME 名稱\n"
+"    \t\t\n"
+"    引數：\n"
+"      NAME\t\t每個 NAME 名稱會在 $PATH 路徑變數中被搜尋，並且新增到記住的命"
+"令\n"
+"    列表中。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，除非 NAME 命令沒有找到或者使用了無效的選項。"
 
-#: builtins.c:809
+#: builtins.c:812
+#, fuzzy
 msgid ""
 "Display information about builtin commands.\n"
 "    \n"
@@ -2845,7 +3434,7 @@ msgid ""
 "      -d\toutput short description for each topic\n"
 "      -m\tdisplay usage in pseudo-manpage format\n"
 "      -s\toutput only a short usage synopsis for each topic matching\n"
-"    \tPATTERN\n"
+"    \t\tPATTERN\n"
 "    \n"
 "    Arguments:\n"
 "      PATTERN\tPattern specifiying a help topic\n"
@@ -2854,8 +3443,26 @@ msgid ""
 "    Returns success unless PATTERN is not found or an invalid option is "
 "given."
 msgstr ""
+"顯示內建命令的相關資訊。\n"
+"    \n"
+"    顯示內建命令的簡略資訊。如果指定了 PATTERN 模式，\n"
+"    給出所有匹配 PATTERN 模式命令的詳細說明，否則印出\n"
+"    一個說明主題列表\n"
+"    \n"
+"    選項：\n"
+"      -d\t輸出每個主題的簡短描述\n"
+"      -m\t以偽 man 手冊的格式顯示使用方法\n"
+"      -s\t為每一個匹配 PATTERN 模式的主題僅顯示一個用法\n"
+"    \t簡介\n"
+"    \n"
+"    引數：\n"
+"      PATTERN\tPattern 模式指定一個說明主題\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，除非 PATTERN 模式沒有找到或者使用了無效選項。"
 
-#: builtins.c:833
+#: builtins.c:836
+#, fuzzy
 msgid ""
 "Display or manipulate the history list.\n"
 "    \n"
@@ -2864,23 +3471,23 @@ msgid ""
 "    \n"
 "    Options:\n"
 "      -c\tclear the history list by deleting all of the entries\n"
-"      -d offset\tdelete the history entry at offset OFFSET.\n"
+"      -d offset\tdelete the history entry at position OFFSET.\n"
 "    \n"
 "      -a\tappend history lines from this session to the history file\n"
 "      -n\tread all history lines not already read from the history file\n"
+"    \t\tand append them to the history list\n"
 "      -r\tread the history file and append the contents to the history\n"
-"    \tlist\n"
+"    \t\tlist\n"
 "      -w\twrite the current history to the history file\n"
-"    \tand append them to the history list\n"
 "    \n"
 "      -p\tperform history expansion on each ARG and display the result\n"
-"    \twithout storing it in the history list\n"
+"    \t\twithout storing it in the history list\n"
 "      -s\tappend the ARGs to the history list as a single entry\n"
 "    \n"
 "    If FILENAME is given, it is used as the history file.  Otherwise,\n"
-"    if $HISTFILE has a value, that is used, else ~/.bash_history.\n"
+"    if HISTFILE has a value, that is used, else ~/.bash_history.\n"
 "    \n"
-"    If the $HISTTIMEFORMAT variable is set and not null, its value is used\n"
+"    If the HISTTIMEFORMAT variable is set and not null, its value is used\n"
 "    as a format string for strftime(3) to print the time stamp associated\n"
 "    with each displayed history entry.  No time stamps are printed "
 "otherwise.\n"
@@ -2888,8 +3495,35 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or an error occurs."
 msgstr ""
+"顯示或操縱歷史記錄列表。\n"
+"    \n"
+"    帶列號顯示歷史記錄列表，將每個被修改的條目加上字首「*」。\n"
+"    引數 N 會僅列出最後的 N 個條目。\n"
+"    \n"
+"    選項：\n"
+"      -c\t刪除所有條目從而清空歷史記錄列表。\n"
+"      -d 偏移量\t從指定位置刪除歷史記錄列表。\n"
+"    \n"
+"      -a\t將當前會話的歷史記錄列追加到歷史記錄檔案中\n"
+"      -n\t從歷史記錄檔案中讀取所有未被讀取的列\n"
+"      -r\t讀取歷史記錄檔案並將內容追加到歷史記錄列表中\n"
+"      -w\t將當前歷史記錄寫入到歷史記錄檔案中，並追加到歷史記錄列表中\n"
+"    \n"
+"      -p\t對每一個 ARG 引數展開歷史記錄並顯示結果，而不儲存到歷史記錄列表中\n"
+"      -s\t以單條記錄追加 ARG 到歷史記錄列表中\n"
+"    \n"
+"    如果給定了 FILENAME 檔名，則它將被做為歷史記錄檔案。否則\n"
+"    如果 $HISTFILE 變數有值的話使用之，不然使用 ~/.bash_history 檔案。\n"
+"    \n"
+"    如果 $HISTTIMEFORMAT 變數被設定並且不為空，它的值會被用於\n"
+"    strftime(3) 的格式字串來印出與每一個顯示的歷史記錄條目想關聯的時\n"
+"    間戳，否則不印出時間戳。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，除非使用了無效的選項或者發生錯誤。"
 
-#: builtins.c:869
+#: builtins.c:872
+#, fuzzy
 msgid ""
 "Display status of jobs.\n"
 "    \n"
@@ -2899,7 +3533,7 @@ msgid ""
 "    Options:\n"
 "      -l\tlists process IDs in addition to the normal information\n"
 "      -n\tlists only processes that have changed status since the last\n"
-"    \tnotification\n"
+"    \t\tnotification\n"
 "      -p\tlists process IDs only\n"
 "      -r\trestrict output to running jobs\n"
 "      -s\trestrict output to stopped jobs\n"
@@ -2912,8 +3546,27 @@ msgid ""
 "    Returns success unless an invalid option is given or an error occurs.\n"
 "    If -x is used, returns the exit status of COMMAND."
 msgstr ""
+"顯示工作狀態。\n"
+"    \n"
+"    列出活動的工作。JOBSPEC 限制僅輸出指定的工作。\n"
+"    不帶選項時，所有活動工作的狀態都會顯示。\n"
+"    \n"
+"    選項：\n"
+"      -l\t在正常資訊基礎上列出行程識別號\n"
+"      -n\t僅列出上次通告之後變更了狀態的行程\n"
+"      -p\t僅列出行程識別號\n"
+"      -r\t限制僅輸出執行中的工作\n"
+"      -s\t限制僅輸出停止的工作\n"
+"    \n"
+"    如果使用了 -x 選項，ARG 引數中的所有工作規格會被替換為該工作\n"
+"    的行程群組首領的行程識別號，然後執行 COMMAND 命令。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，除非使用了無效的選項或者有錯誤發生。\n"
+"    如果使用 -x 選項，則回傳 COMMAND 命令的退出狀態。"
 
-#: builtins.c:896
+#: builtins.c:899
+#, fuzzy
 msgid ""
 "Remove jobs from current shell.\n"
 "    \n"
@@ -2923,14 +3576,28 @@ msgid ""
 "    Options:\n"
 "      -a\tremove all jobs if JOBSPEC is not supplied\n"
 "      -h\tmark each JOBSPEC so that SIGHUP is not sent to the job if the\n"
-"    \tshell receives a SIGHUP\n"
+"    \t\tshell receives a SIGHUP\n"
 "      -r\tremove only running jobs\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns success unless an invalid option or JOBSPEC is given."
 msgstr ""
+"從當前 shell 中刪除工作。\n"
+"    \n"
+"    從活動工作表中刪除每一個 JOBSPEC 引數。不帶任何\n"
+"    JOBSPEC 引數時，shell 使用觀念中的當前工作。\n"
+"    \n"
+"    選項：\n"
+"      -a\t如果不提供 JOBSPEC 引數，則刪除所有工作\n"
+"      -h\t標識每個 JOBSPEC 工作，從而當 shell 接收到 SIGHUP\n"
+"    \t訊號時不傳送 SIGHUP 給指定工作\n"
+"      -r\t僅刪除執行中的工作\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功除非使用了無效的選項或者 JOBSPEC 規格。"
 
-#: builtins.c:915
+#: builtins.c:918
+#, fuzzy
 msgid ""
 "Send a signal to a job.\n"
 "    \n"
@@ -2942,7 +3609,8 @@ msgid ""
 "      -s sig\tSIG is a signal name\n"
 "      -n sig\tSIG is a signal number\n"
 "      -l\tlist the signal names; if arguments follow `-l' they are\n"
-"    \tassumed to be signal numbers for which names should be listed\n"
+"    \t\tassumed to be signal numbers for which names should be listed\n"
+"      -L\tsynonym for -l\n"
 "    \n"
 "    Kill is a shell builtin for two reasons: it allows job IDs to be used\n"
 "    instead of process IDs, and allows processes to be killed if the limit\n"
@@ -2951,8 +3619,25 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or an error occurs."
 msgstr ""
+"向一個工作傳送一個訊號。\n"
+"    \n"
+"    向以 PID 行程識別號或者 JOBSPEC 工作規格指定的行程傳送一個以\n"
+"    SIGSPEC 訊號規格或 SIGNUM 訊號編號命名的訊號。如果沒有指定\n"
+"    SIGSPEC 或 SIGNUM，那麼假定傳送 SIGTERM 訊號。\n"
+"    \n"
+"    選項：\n"
+"      -s sig\tSIG 是訊號名稱\n"
+"      -n sig\tSIG 是訊號編號\n"
+"      -l\t列出訊號名稱；如果引數後跟「-l」則被假設為訊號編號，\n"
+"    \t而相應的訊號名稱會被列出\n"
+"    \n"
+"    Kill 成為 shell 內建有兩個理由：它允許使用工作編號而不是行程識別號，\n"
+"    並且在可以建立的行程數上限達到時允許行程被砍除。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，除非使用了無效的選項或者有錯誤發生。"
 
-#: builtins.c:938
+#: builtins.c:942
 msgid ""
 "Evaluate arithmetic expressions.\n"
 "    \n"
@@ -2996,8 +3681,46 @@ msgid ""
 "    Exit Status:\n"
 "    If the last ARG evaluates to 0, let returns 1; let returns 0 otherwise."
 msgstr ""
+"求值算術表示式。\n"
+"    \n"
+"    將每個 ARG 參賽做為算術表示式來求值。求值的計算以定寬的整\n"
+"    數完成，不帶溢位檢測，不過除 0 是被置陷阱的並且會報一個錯\n"
+"    誤。下列運算子被按照相同的算術優先順序組合。列表的順序按照\n"
+"    優先順序從高至低。\n"
+"    \n"
+"    \n"
+"    \tid++, id--\t變數後置加，後置減\n"
+"    \t++id, --id\t變數前置加，前置減\n"
+"    \t-, +\t\t一元減法，一元加法\n"
+"    \t!, ~\t\t邏輯和位取反\n"
+"    \t**\t\t指數\n"
+"    \t*, /, %\t\t乘法，除法，取餘數\n"
+"    \t+, -\t\t增加，減少\n"
+"    \t<<, >>\t\t向左和向右按位移位\n"
+"    \t<=, >=, <, >\t比較\n"
+"    \t==, !=\t\t等於，不等於\n"
+"    \t&\t\t按位與\n"
+"    \t^\t\t按位異或\n"
+"    \t|\t\t按位或\n"
+"    \t&&\t\t邏輯與\n"
+"    \t||\t\t邏輯或\n"
+"    \texpr ? expr : expr\n"
+"    \t\t\t條件運算子\n"
+"    \t=, *=, /=, %=,\n"
+"    \t+=, -=, <<=, >>=,\n"
+"    \t&=, ^=, |=\t指派\n"
+"    \n"
+"    Shell 變數允許做為運算元。表示式中的變數名稱會以值取代\n"
+"    (強制轉換為定寬的整數)。表示式中的變數不需要開啟整數屬性。\n"
+"    \n"
+"    運算子按照優先順序進行求值。括號中的子表示式將被先求值，並可取代上述表示"
+"式規則。\n"
+"    \n"
+"    退出狀態：\n"
+"    如果最後一個 ARG 引數求值為 0，則 let 回傳 1； 否則 let 回傳 0。"
 
-#: builtins.c:983
+#: builtins.c:987
+#, fuzzy
 msgid ""
 "Read a line from the standard input and split it into fields.\n"
 "    \n"
@@ -3018,27 +3741,28 @@ msgid ""
 "    \t\tvariable ARRAY, starting at zero\n"
 "      -d delim\tcontinue until the first character of DELIM is read, rather\n"
 "    \t\tthan newline\n"
-"      -e\t\tuse Readline to obtain the line in an interactive shell\n"
-"      -i text\tUse TEXT as the initial text for Readline\n"
+"      -e\tuse Readline to obtain the line in an interactive shell\n"
+"      -i text\tuse TEXT as the initial text for Readline\n"
 "      -n nchars\treturn after reading NCHARS characters rather than waiting\n"
-"    \t\tfor a newline, but honor a delimiter if fewer than NCHARS\n"
-"    \t\tcharacters are read before the delimiter\n"
+"    \t\tfor a newline, but honor a delimiter if fewer than\n"
+"    \t\tNCHARS characters are read before the delimiter\n"
 "      -N nchars\treturn only after reading exactly NCHARS characters, "
 "unless\n"
-"    \t\tEOF is encountered or read times out, ignoring any delimiter\n"
+"    \t\tEOF is encountered or read times out, ignoring any\n"
+"    \t\tdelimiter\n"
 "      -p prompt\toutput the string PROMPT without a trailing newline before\n"
 "    \t\tattempting to read\n"
-"      -r\t\tdo not allow backslashes to escape any characters\n"
-"      -s\t\tdo not echo input coming from a terminal\n"
-"      -t timeout\ttime out and return failure if a complete line of input "
-"is\n"
-"    \t\tnot read within TIMEOUT seconds.  The value of the TMOUT\n"
-"    \t\tvariable is the default timeout.  TIMEOUT may be a\n"
-"    \t\tfractional number.  If TIMEOUT is 0, read returns immediately,\n"
-"    \t\twithout trying to read any data, returning success only if\n"
-"    \t\tinput is available on the specified file descriptor.  The\n"
-"    \t\texit status is greater than 128 if the timeout is exceeded\n"
-"      -u fd\t\tread from file descriptor FD instead of the standard input\n"
+"      -r\tdo not allow backslashes to escape any characters\n"
+"      -s\tdo not echo input coming from a terminal\n"
+"      -t timeout\ttime out and return failure if a complete line of\n"
+"    \t\tinput is not read within TIMEOUT seconds.  The value of the\n"
+"    \t\tTMOUT variable is the default timeout.  TIMEOUT may be a\n"
+"    \t\tfractional number.  If TIMEOUT is 0, read returns\n"
+"    \t\timmediately, without trying to read any data, returning\n"
+"    \t\tsuccess only if input is available on the specified\n"
+"    \t\tfile descriptor.  The exit status is greater than 128\n"
+"    \t\tif the timeout is exceeded\n"
+"      -u fd\tread from file descriptor FD instead of the standard input\n"
 "    \n"
 "    Exit Status:\n"
 "    The return code is zero, unless end-of-file is encountered, read times "
@@ -3047,8 +3771,45 @@ msgid ""
 "occurs,\n"
 "    or an invalid file descriptor is supplied as the argument to -u."
 msgstr ""
+"從標準輸入讀取一列並將其分為不同的區域。\n"
+"    \n"
+"    從標準輸入讀取單獨的一列，或者如果使用了 -u 選項，從檔案描述符 FD 中讀"
+"取。\n"
+"    該列被分割成區域，如同字詞分割一樣，並且第一個字詞被指派給第一個 NAME 變"
+"數，第二\n"
+"    個字詞被指派給第二個 NAME 變數，如此繼續，直到剩下所有的字詞被指派給最後"
+"一個 NAME\n"
+"    變數。只有 $IFS 變數中的字元被認做是字詞分隔符。\n"
+"    \n"
+"    如果沒有提供 NAME 變數，則讀取的列被存放在 REPLY 變數中。\n"
+"    \n"
+"    選項：\n"
+"      -a array\t將字詞指派給 ARRAY 陣列變數的序列索引成員，從零開始。\n"
+"      -d delim\t持續讀取直到讀入 DELIM 變數中的第一個字元，而不是換列符\n"
+"      -e\t在互動式 shell 中使用 Readline 獲取列\n"
+"      -i text\t使用 TEXT 文字做為 Readline 的初始文字\n"
+"      -n nchars\t讀取 nchars 個字元之後回傳，而不是等到讀取換列符。\n"
+"    \t\t但是分隔符仍然有效，如果遇到分隔符之前讀取了不足 nchars 個字元。\n"
+"      -N nchars\t在準確讀取了 nchars 個字元之後回傳，除非遇到檔案結束符或者讀"
+"取逾時，\n"
+"    \t\t任何的分隔符都被忽略\n"
+"      -p prompt\t在嘗試讀取之前輸出 PROMPT 提示符並且不帶\n"
+"    \t\t換列符\n"
+"      -r\t不允許反斜線逸出任何字元\n"
+"      -s\t不顯示終端的任何輸入\n"
+"      -t timeout\t如果在 TIMEOUT 秒內沒有讀取一個完整的列則逾時並且回傳失"
+"敗。\n"
+"    \t\tTMOUT 變數的值是預設逾時時間。\n"
+"    \t\tTIMEOUT 可以是小數。如果 TIMEOUT 是 0，那麼僅當在指定的檔案描述符上\n"
+"    \t\t輸入有效的時候，read 才回傳成功。\n"
+"    \t\t如果超過了逾時時間，則回傳狀態碼大於 128\n"
+"      -u fd\t從檔案描述符 FD 中讀取，而不是標準輸入\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳碼為零，除非遇到了檔案結束符，讀取逾時，或者無效的文\n"
+"    件描述符做為引數傳遞給了 -u 選項。"
 
-#: builtins.c:1028
+#: builtins.c:1034
 msgid ""
 "Return from a shell function.\n"
 "    \n"
@@ -3059,8 +3820,17 @@ msgid ""
 "    Exit Status:\n"
 "    Returns N, or failure if the shell is not executing a function or script."
 msgstr ""
+"從一個 shell 函數回傳。\n"
+"    \n"
+"    使一個函數或者被引用的指令稿以指定的回傳值 N 退出。\n"
+"    如果 N 被省略，則回傳狀態就是\n"
+"    函數或指令稿中的最後一個執行命令的狀態。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳 N，或者如果 shell 不在執行一個函數或引用指令稿時，失敗。"
 
-#: builtins.c:1041
+#: builtins.c:1047
+#, fuzzy
 msgid ""
 "Set or unset values of shell options and positional parameters.\n"
 "    \n"
@@ -3128,7 +3898,8 @@ msgid ""
 "          by default when the shell is interactive.\n"
 "      -P  If set, do not resolve symbolic links when executing commands\n"
 "          such as cd which change the current directory.\n"
-"      -T  If set, the DEBUG trap is inherited by shell functions.\n"
+"      -T  If set, the DEBUG and RETURN traps are inherited by shell "
+"functions.\n"
 "      --  Assign any remaining arguments to the positional parameters.\n"
 "          If there are no remaining arguments, the positional parameters\n"
 "          are unset.\n"
@@ -3144,8 +3915,84 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given."
 msgstr ""
+"設定或取消設定 shell 選項和位置參數的值。\n"
+"    \n"
+"    變更 shell 選項和位置引數的值，或者顯示 shell 變數的\n"
+"    名稱和值。\n"
+"    \n"
+"    選項：\n"
+"      -a  標記修改或者建立的變數為匯出。\n"
+"      -b  立即通告工作終結。\n"
+"      -e  如果一個命令以非零狀態退出，則立即退出。\n"
+"      -f  停用檔名生成(模式匹配)。\n"
+"      -h  當查詢命令時記住它們的位置\n"
+"      -k  所有的指派引數被放在命令的環境中，而不僅僅是\n"
+"          命令名稱之前的引數。\n"
+"      -m  啟用工作控制。\n"
+"      -n  讀取命令但不執行\n"
+"      -o 選項名\n"
+"          設定與選項名對應的變數：\n"
+"              allexport    與 -a 相同\n"
+"              braceexpand  與 -B 相同\n"
+"              emacs       使用 emacs 風格的列編輯介面\n"
+"              errexit      與 -e 相同\n"
+"              errtrace     與 -E 相同\n"
+"              functrace    與 -T 相同\n"
+"              hashall      與 -h 相同\n"
+"              histexpand   與 -H 相同\n"
+"              history      啟用命令歷史記錄\n"
+"              ignoreeof    shell 讀取檔案結束符時不會退出\n"
+"              interactive-comments\n"
+"                           允許在互動式命令中顯示註釋\n"
+"              keyword      與 -k 相同\n"
+"              monitor      與 -m 相同\n"
+"              noclobber    與 -C 相同\n"
+"              noexec       與 -n 相同\n"
+"              noglob       與 -f 相同\n"
+"              nolog        目前可接受但是被忽略\n"
+"              notify       與 -b 相同\n"
+"              nounset      與 -u 相同\n"
+"              onecmd       與 -t 相同\n"
+"              physical     與 -P 相同\n"
+"              pipefail     管道的回傳值是最後一個非零回傳值命令的回傳結果，\n"
+"                           或者當所有命令都回傳零時也為零。\n"
+"              posix        變更預設時和 Posix 標準不同的 bash 行為\n"
+"                           以匹配標準\n"
+"              privileged   與 -p 相同\n"
+"              verbose      與 -v 相同\n"
+"              vi           使用 vi 風格的列編輯介面\n"
+"              xtrace       與 -x 相同\n"
+"      -p  無論何時當真實的有效使用者身分不匹配時開啟。\n"
+"          停用對 $ENV 檔案的處理以及匯入 shell 函數。\n"
+"          關閉此選項會導致有效的使用者編號和群組編號設定\n"
+"          為真實的使用者編號和群組編號\n"
+"      -t  讀取並執行一個命令之後退出。\n"
+"      -u  替換時將為設定的變數當做錯誤對待。\n"
+"      -v  讀取 shell 輸入列時將它們印出。\n"
+"      -x  執行命令時印出它們以及引數。\n"
+"      -B  shell 將執行大括號擴充套件。\n"
+"      -C  設定之後禁止以重定向輸出的方式覆蓋常\n"
+"          規檔案。\n"
+"      -E  設定之後 ERR 陷阱會被 shell 函數繼承。\n"
+"      -H  啟用 ! 風格的歷史記錄替換。當 shell 是互動式的\n"
+"          時候這個標識位預設開啟。\n"
+"      -P  設定之後類似 cd 的會變更當前目錄的命令不\n"
+"          追蹤符號鏈結。\n"
+"      -T  設定之後 DEBUG 陷阱會被 shell 函數繼承。\n"
+"      -   任何剩餘的引數會被指派給位置引數。\n"
+"          -x 和 -v 選項已關閉。\n"
+"    \n"
+"    使用 + 而不是 - 會使標誌位被關閉。標誌位也可以在\n"
+"    shell 被啟動時使用。當前的標誌位設定可以在 $- 變\n"
+"    量中找到。剩餘的 ARG 引數是位置引數並且是按照\n"
+"    $1，$2，.。$n 的順序被指派的。如果沒有給定 ARG\n"
+"    引數，則印出所有的 shell 變數。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功除非使用了無效的引數。"
 
-#: builtins.c:1126
+#: builtins.c:1132
+#, fuzzy
 msgid ""
 "Unset values and attributes of shell variables and functions.\n"
 "    \n"
@@ -3155,7 +4002,7 @@ msgid ""
 "      -f\ttreat each NAME as a shell function\n"
 "      -v\ttreat each NAME as a shell variable\n"
 "      -n\ttreat each NAME as a name reference and unset the variable itself\n"
-"    \trather than the variable it references\n"
+"    \t\trather than the variable it references\n"
 "    \n"
 "    Without options, unset first tries to unset a variable, and if that "
 "fails,\n"
@@ -3166,8 +4013,24 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or a NAME is read-only."
 msgstr ""
+"取消設定 shell 變數和函數的值和屬性。\n"
+"    \n"
+"    對每一個 NAME 名稱，刪除對應的變數或函數。\n"
+"    \n"
+"    選項：\n"
+"      -f\t將每個 NAME 視為函數\n"
+"      -v\t將每個 NAME 視為變數\n"
+"      -n\t將每個 NAME 視為名稱引用，只取消其本身而非其指向的變數\n"
+"    \n"
+"    不帶選項時，unset 首先嘗試取消設定一個變數，如果失敗，再嘗試取消設定一個"
+"函數。\n"
+"    \n"
+"    某些變數不可以被取消設定；參見「readonly」。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，除非使用了無效的選項或者 NAME 名稱為唯讀。"
 
-#: builtins.c:1148
+#: builtins.c:1154
 msgid ""
 "Set export attribute for shell variables.\n"
 "    \n"
@@ -3185,8 +4048,23 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or NAME is invalid."
 msgstr ""
+"為 shell 變數設定匯出屬性。\n"
+"    \n"
+"    標記每個 NAME 名稱為自動匯出到後續命令執行的環境。如果提供了 VALUE\n"
+"    則匯出前將 VALUE 做為指派。\n"
+"    \n"
+"    選項：\n"
+"      -f\t指 shell 函數\n"
+"      -n\t刪除每個 NAME 名稱的匯出屬性\n"
+"      -p\t顯示所有匯出的變數和函數的列表\n"
+"    \n"
+"   「--」的引數停用進一步的選項處理。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，除非使用了無效的選項或者 NAME 名稱。"
 
-#: builtins.c:1167
+#: builtins.c:1173
+#, fuzzy
 msgid ""
 "Mark shell variables as unchangeable.\n"
 "    \n"
@@ -3198,17 +4076,31 @@ msgid ""
 "      -a\trefer to indexed array variables\n"
 "      -A\trefer to associative array variables\n"
 "      -f\trefer to shell functions\n"
-"      -p\tdisplay a list of all readonly variables or functions, depending "
-"on\n"
-"            whether or not the -f option is given\n"
+"      -p\tdisplay a list of all readonly variables or functions,\n"
+"    \t\tdepending on whether or not the -f option is given\n"
 "    \n"
 "    An argument of `--' disables further option processing.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns success unless an invalid option is given or NAME is invalid."
 msgstr ""
+"標記 shell 變數為不可變更。\n"
+"    \n"
+"    標記每一個 NAME 名稱為唯讀；這些 NAME 變數的值將不可以被後續的指派\n"
+"    操作所變更。如果提供了 VALUE，則在標記為唯讀之前將 VALUE 值指派給變數。\n"
+"    \n"
+"    選項：\n"
+"      -a\t指索引陣列變數\n"
+"      -A\t指關聯陣列變數\n"
+"      -f\t指 shell 函數\n"
+"      -p\t顯示唯讀變數或函數列表，取決於是否提供了 -f 選項\n"
+"    \n"
+"   「--」的引數停用進一步的選項處理。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，除非使用了無效的選項或者 NAME 名稱。"
 
-#: builtins.c:1189
+#: builtins.c:1195
 msgid ""
 "Shift positional parameters.\n"
 "    \n"
@@ -3218,8 +4110,15 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless N is negative or greater than $#."
 msgstr ""
+"移位位置參數。\n"
+"    \n"
+"    重新命名位置引數 $N+1、$N+2 … 到 $1、$2 … 如果沒有給定 N，\n"
+"    則假設為 1。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，除非 N 為負或者大於 $#。"
 
-#: builtins.c:1201 builtins.c:1216
+#: builtins.c:1207 builtins.c:1222
 msgid ""
 "Execute commands from a file in the current shell.\n"
 "    \n"
@@ -3232,8 +4131,16 @@ msgid ""
 "    Returns the status of the last command executed in FILENAME; fails if\n"
 "    FILENAME cannot be read."
 msgstr ""
+"在當前 shell 中執行一個檔案中的命令。\n"
+"    \n"
+"    在當前 shell 中讀取並執行 FILENAME 檔案中的命令。$PATH 變數中的\n"
+"    條目被用於尋找包含 FILENAME 檔案的目錄。如果提供了任何的 ARGUMENTS\n"
+"    引數，則它們將成為 FILENAME 檔案執行時的位置參數。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳 FILENAME 檔案中最後一個命令的狀態；如果 FILENAME 檔案不可讀則失敗。"
 
-#: builtins.c:1232
+#: builtins.c:1238
 msgid ""
 "Suspend shell execution.\n"
 "    \n"
@@ -3246,8 +4153,19 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless job control is not enabled or an error occurs."
 msgstr ""
+"懸置 shell 執行。\n"
+"    \n"
+"    懸置 shell 的執行直到收到 SIGCONT 訊號。\n"
+"    登入 shell 不可以被懸置，除非強制執行。\n"
+"    \n"
+"    選項：\n"
+"      -f\t強制懸置，即使是登入 shell。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，除非沒有啟用工作控制或者有錯誤發生。"
 
-#: builtins.c:1248
+#: builtins.c:1254
+#, fuzzy
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -3311,9 +4229,9 @@ msgid ""
 "    Other operators:\n"
 "    \n"
 "      -o OPTION      True if the shell option OPTION is enabled.\n"
-"      -v VAR\t True if the shell variable VAR is set\n"
-"      -R VAR\t True if the shell variable VAR is set and is a name "
-"reference.\n"
+"      -v VAR         True if the shell variable VAR is set.\n"
+"      -R VAR         True if the shell variable VAR is set and is a name\n"
+"                     reference.\n"
 "      ! EXPR         True if expr is false.\n"
 "      EXPR1 -a EXPR2 True if both expr1 AND expr2 are true.\n"
 "      EXPR1 -o EXPR2 True if either expr1 OR expr2 is true.\n"
@@ -3329,16 +4247,91 @@ msgid ""
 "    Returns success if EXPR evaluates to true; fails if EXPR evaluates to\n"
 "    false or an invalid argument is given."
 msgstr ""
+"對條件表示式進行求值。\n"
+"    \n"
+"    根據 EXPR 表示式的求值以狀態 0 (真) 或 1 (偽) 退出。\n"
+"    表示式可以是一元或者二元的。一元表示式通常用於檢測\n"
+"    檔案狀態。同時還有字串運算子和數字比較運算子。\n"
+"    \n"
+"    檔案運算子：\n"
+"    \n"
+"      -a 檔案        如果檔案存在則為真。\n"
+"      -b 檔案        如果檔案為區塊特殊檔案則為真。\n"
+"      -c 檔案        如果檔案為字元特殊檔案則為真。\n"
+"      -d 檔案        如果檔案為目錄則為真。\n"
+"      -e 檔案        如果檔案存在則為真。\n"
+"      -f 檔案        如果檔案存在且為常規檔案則為真。\n"
+"      -g 檔案        如果檔案的群組屬性設定開啟則為真。\n"
+"      -h 檔案        如果檔案為符號鏈結則為真。\n"
+"      -L 檔案        如果檔案為符號鏈結則為真。\n"
+"      -k 檔案        如果檔案的粘著位元已設定則為真。\n"
+"      -p 檔案        如果檔案為命名管道則為真。\n"
+"      -r 檔案        如果檔案對於您是可讀的則為真。\n"
+"      -s 檔案        如果檔案存在且不為空則為真。\n"
+"      -S 檔案        如果檔案是套接字則為真。\n"
+"      -t 檔案描述符   如果檔案描述符在終端上開啟則為真。\n"
+"      -u 檔案        如果檔案的使用者數列設定開啟則為真。\n"
+"      -w 檔案        如果檔案對您是可寫的則為真\n"
+"      -x 檔案        如果檔案對您是可執行的則為真。\n"
+"      -O 檔案        如果檔案是您所有的則為真。\n"
+"      -G 檔案        如果檔案是您的群組所有則為真。\n"
+"      -N 檔案        如果檔案上次被讀取之後修改過則為真。\n"
+"    \n"
+"      FILE1 -nt FILE2  如果 file1 檔案新於 file2 檔案則為真(根據\n"
+"                       修改日期)。\n"
+"    \n"
+"      FILE1 -ot FILE2  如果 file1 檔案舊於 file2 檔案則為真。\n"
+"    \n"
+"      FILE1 -ef FILE2  如果 file1 檔案是 file2 檔案的硬式鏈結則為真。\n"
+"    \n"
+"    字串運算子\n"
+"    \n"
+"      -z 字串      如果字串為空則為真。\n"
+"    \n"
+"      -n 字串\n"
+"         字串      如果字串不為空則為真。\n"
+"    \n"
+"      STRING1 = STRING2\n"
+"                     如果 string1 和 string2 字串相同則為真。\n"
+"      STRING1 != STRING2\n"
+"                     如果 string1 和 string2 字串不相同則為真。\n"
+"      STRING1 < STRING2\n"
+"                     如果按字典排序 string1 在 string2 串之前則為真。\n"
+"      STRING1 > STRING2\n"
+"                     如果按字典排序 string1 在 string2 串之前則為真。\n"
+"    \n"
+"    其他運算子：\n"
+"    \n"
+"      -o 選項        如果指定 shell 選項啟用則為真。\n"
+"      -v VAR\t 如果指定 Shell 變數 VAR 已指派則為真。\n"
+"      -R VAR\t 如果指定 Shell 變數 VAR 已指派且為名稱引用則為真。\n"
+"      ! EXPR         如果表示式 expr 為假則為真。\n"
+"      EXPR1 -a EXPR2 如果 expr1 和 expr2 都為真則為真。\n"
+"      EXPR1 -o EXPR2 如果 expr1 和 expr2 有一個為真則為真。\n"
+"    \n"
+"      arg1 OP arg2   算術測試。OP 運算子可以是 -eq、-ne、\n"
+"                     -lt、-le、-gt、或 -ge 之一。\n"
+"    \n"
+"    二元算術運算回傳真，如果 ARG1 引數等於、不等於、\n"
+"    小於、小於等於、大於、或者大於等於 ARG2 引數。\n"
+"    \n"
+"    退出狀態：\n"
+"    如果 EXPR 表示式求值為真則回傳成功；如果 EXPR 表示式求值\n"
+"    為假或者使用了無效的引數則回傳失敗。"
 
-#: builtins.c:1329
+#: builtins.c:1336
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
 "    This is a synonym for the \"test\" builtin, but the last argument must\n"
 "    be a literal `]', to match the opening `['."
 msgstr ""
+"求值條件表示式。\n"
+"    \n"
+"    是內建命令「test」的同義詞，但是最後一個引數必須是\n"
+"    字元「]」，以匹配起始的「[」。"
 
-#: builtins.c:1338
+#: builtins.c:1345
 msgid ""
 "Display process times.\n"
 "    \n"
@@ -3349,8 +4342,15 @@ msgid ""
 "    Exit Status:\n"
 "    Always succeeds."
 msgstr ""
+"顯示行程時間\n"
+"    \n"
+"    印出 shell 及其所有子行程的累計使用者空間和\n"
+"    系統空間執行時間。\n"
+"    \n"
+"    退出狀態：\n"
+"    一律成功。"
 
-#: builtins.c:1350
+#: builtins.c:1357
 msgid ""
 "Trap signals and other events.\n"
 "    \n"
@@ -3393,8 +4393,36 @@ msgid ""
 "    Returns success unless a SIGSPEC is invalid or an invalid option is "
 "given."
 msgstr ""
+"對訊號和其他事件設陷阱。\n"
+"    \n"
+"    定義一個處理器，在 shell 接收到訊號和其他條件下執行。\n"
+"    \n"
+"    ARG 引數是當 shell 接收到 SIGNAL_SPEC 訊號時讀取和執行的命令。\n"
+"    如果沒有指定 ARG 引數 (並且只給出一個 SIGNAL_SPEC 訊號) 或者\n"
+" ARG 引數為\n"
+"   「-」，每一個指定的引數會被重置為原始值。如果 ARG 引數是一個空串，則每一"
+"個\n"
+"    SIGNAL_SPEC 訊號會被 shell 和它啟動的命令忽略。\n"
+"    \n"
+"    如果一個 SIGNAL_SPEC 訊號是 EXIT (0) ，則 ARG 命令會在 shell 退出時被\n"
+"    執行。如果一個 SIGNAL_SPEC 訊號是 DEBUG，則 ARG 命令會在每一個簡單命\n"
+"    令之前執行。\n"
+"    \n"
+"    如果不提供引數，trap 印出列表顯示每一個與每一個訊號相關聯的命令。\n"
+"    \n"
+"    選項：\n"
+"      -l\t印出一個訊號名稱和它們對應的編號列表\n"
+"      -p\t印出與每個 SIGNAL_SPEC 訊號相關聯的陷阱命令\n"
+"    \n"
+"    每一個 SIGNAL_SPEC 訊號可以是 <signal.h> 中的訊號名稱或者訊號編號。\n"
+"    訊號名稱大小寫相符且可以使用 SIG 字首。訊號可用「kill - 訊號 $$」\n"
+"    傳送給 shell。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，除非使用了無效的選項或者 SIGSPEC。"
 
-#: builtins.c:1386
+#: builtins.c:1393
+#, fuzzy
 msgid ""
 "Display information about command type.\n"
 "    \n"
@@ -3403,18 +4431,18 @@ msgid ""
 "    \n"
 "    Options:\n"
 "      -a\tdisplay all locations containing an executable named NAME;\n"
-"    \tincludes aliases, builtins, and functions, if and only if\n"
-"    \tthe `-p' option is not also used\n"
+"    \t\tincludes aliases, builtins, and functions, if and only if\n"
+"    \t\tthe `-p' option is not also used\n"
 "      -f\tsuppress shell function lookup\n"
 "      -P\tforce a PATH search for each NAME, even if it is an alias,\n"
-"    \tbuiltin, or function, and returns the name of the disk file\n"
-"    \tthat would be executed\n"
+"    \t\tbuiltin, or function, and returns the name of the disk file\n"
+"    \t\tthat would be executed\n"
 "      -p\treturns either the name of the disk file that would be executed,\n"
-"    \tor nothing if `type -t NAME' would not return `file'.\n"
+"    \t\tor nothing if `type -t NAME' would not return `file'\n"
 "      -t\toutput a single word which is one of `alias', `keyword',\n"
-"    \t`function', `builtin', `file' or `', if NAME is an alias, shell\n"
-"    \treserved word, shell function, shell builtin, disk file, or not\n"
-"    \tfound, respectively\n"
+"    \t\t`function', `builtin', `file' or `', if NAME is an alias,\n"
+"    \t\tshell reserved word, shell function, shell builtin, disk file,\n"
+"    \t\tor not found, respectively\n"
 "    \n"
 "    Arguments:\n"
 "      NAME\tCommand name to be interpreted.\n"
@@ -3423,8 +4451,31 @@ msgid ""
 "    Returns success if all of the NAMEs are found; fails if any are not "
 "found."
 msgstr ""
+"顯示命令類型的資訊。\n"
+"    \n"
+"    對於每一個 NAME 名稱，指示如果做為命令它將如何被解釋。\n"
+"    \n"
+"    選項：\n"
+"      -a\t顯示所有包含名稱為 NAME 的可執行檔案的位置；\n"
+"    \t包括別名、內建和函數。僅當「-p」選項沒有使用時\n"
+"      -f\t抑制 shell 函數查詢\n"
+"      -P\t為每個 NAME 名稱驚醒 PATH 路徑搜尋，即使它是別名、\n"
+"    \t內建或函數，並且回傳將被執行的磁碟上檔案的名稱。\n"
+"      -p\t回傳將被執行的磁碟上檔案的名稱，或者當「type -t NAME」\n"
+"    \t不回傳「file」時，不回傳任何值。\n"
+"      -t\t回傳下列詞中的任何一個「alias」、「keyword」、\n"
+"    \t「function」、「builtin」、「file」或者「」，如果 NAME 是相應的\n"
+"    \t一個別名、shell 保留字、shell 函數、shell 內建、\n"
+"    \t磁碟檔案或沒有找到。\n"
+"    \n"
+"    引數：\n"
+"      NAME\t將要解析的命令。\n"
+"    \n"
+"    退出狀態：\n"
+"    如果所有的 NAME 命令都找到則回傳成功；任何找不到則失敗。"
 
-#: builtins.c:1417
+#: builtins.c:1424
+#, fuzzy
 msgid ""
 "Modify shell resource limits.\n"
 "    \n"
@@ -3442,6 +4493,7 @@ msgid ""
 "      -e\tthe maximum scheduling priority (`nice')\n"
 "      -f\tthe maximum size of files written by the shell and its children\n"
 "      -i\tthe maximum number of pending signals\n"
+"      -k\tthe maximum number of kqueues allocated for this process\n"
 "      -l\tthe maximum size a process may lock into memory\n"
 "      -m\tthe maximum resident set size\n"
 "      -n\tthe maximum number of open file descriptors\n"
@@ -3453,7 +4505,8 @@ msgid ""
 "      -u\tthe maximum number of user processes\n"
 "      -v\tthe size of virtual memory\n"
 "      -x\tthe maximum number of file locks\n"
-"      -T    the maximum number of threads\n"
+"      -P\tthe maximum number of pseudoterminals\n"
+"      -T\tthe maximum number of threads\n"
 "    \n"
 "    Not all options are available on all platforms.\n"
 "    \n"
@@ -3470,8 +4523,48 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is supplied or an error occurs."
 msgstr ""
+"修改 shell 資源限制。\n"
+"    \n"
+"    在允許此類控制的系統上，提供對於 shell 及其建立的行程所可用的\n"
+"    資源的控制。\n"
+"    \n"
+"    選項：\n"
+"      -S\t使用軟 (「soft」) 資源限制\n"
+"      -H\t使用硬 (「hard」) 資源限制\n"
+"      -a\t所有當前限制都被通報\n"
+"      -b\t套接字快取尺寸\n"
+"      -c\t建立核心檔案的最大尺寸\n"
+"      -d\t一個行程的資料區最大尺寸\n"
+"      -e\t最高的排程優先順序 (「nice」)\n"
+"      -f\t有 shell 及其子行程可以寫入的最大檔案尺寸\n"
+"      -i\t最多可以懸置的訊號數\n"
+"      -l\t一個行程可以鎖定的最大記憶體尺寸\n"
+"      -m\t最大的記憶體進駐尺寸\n"
+"      -n\t最多開啟的檔案描述符個數\n"
+"      -p\t管道緩衝區尺寸\n"
+"      -q\tPOSIX 資訊佇列的最大位元組數\n"
+"      -r\t實時排程的最大優先順序\n"
+"      -s\t最大堆疊尺寸\n"
+"      -t\t最大的 CPU 時間，以秒為單位\n"
+"      -u\t最大使用者行程數\n"
+"      -v\t虛擬記憶體尺寸\n"
+"      -x\t最大的檔案鎖數量\n"
+"      -T\t最大執行緒數量\n"
+"    \n"
+"    並非所有選項在所有系統上可用。\n"
+"    \n"
+"    如果提供了 LIMIT 變數，則它為指定資源的新值；特別的 LIMIT 值為\n"
+"   「soft」、「hard」和「unlimited」，分別表示當前的軟限制，硬限制和無限"
+"制。\n"
+"    否則印出指定資源的當前限制值，不帶選項則假定為 -f\n"
+"    \n"
+"    取值都是 1024 位元組為單位，除了 -t 以秒為單位，-p 以 512 位元組遞增，\n"
+"    -u 為無尺度的行程數量。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，除非使用了無效的選項或者錯誤發生。"
 
-#: builtins.c:1465
+#: builtins.c:1474
 msgid ""
 "Display or set file mode mask.\n"
 "    \n"
@@ -3488,8 +4581,22 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless MODE is invalid or an invalid option is given."
 msgstr ""
+"顯示或設定檔案模式遮罩。\n"
+"    \n"
+"    設定使用者檔案建立遮罩為 MODE 模式。如果省略了 MODE，則\n"
+"    印出當前遮罩的值。\n"
+"    \n"
+"    如果 MODE 模式以數字開頭，則被當做八進位數字解析；否則是一個\n"
+"    chmod(1) 可接收的符號模式串。\n"
+"    \n"
+"    選項：\n"
+"      -p\t如果省略 MDOE 模式，以可重用為輸入的格式輸入\n"
+"      -S\t以符號形式輸出，否則以八進位數字格式輸出\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，除非使用了無效的 MODE 模式或者選項。"
 
-#: builtins.c:1485
+#: builtins.c:1494
 msgid ""
 "Wait for job completion and return exit status.\n"
 "    \n"
@@ -3508,8 +4615,19 @@ msgid ""
 "    Returns the status of the last ID; fails if ID is invalid or an invalid\n"
 "    option is given."
 msgstr ""
+"等待工作完成並回傳退出狀態。\n"
+"    \n"
+"    等待以 ID 編號識別的行程，其中 ID 可以是行程編號或者工作規格，\n"
+"    並通報它的終止狀態。如果 ID 沒有給出，則等待所有的當前活躍子\n"
+"    行程，並且回傳狀態為零。如果 ID 是工作規格，等待工作管道中的\n"
+"    所有行程。\n"
+"    \n"
+"    若給定了 -n 選項，等待下一個工作完成並回傳其狀態。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳最後一個 ID 行程的狀態；如果使用了無效的 ID 或者選項則失敗。"
 
-#: builtins.c:1506
+#: builtins.c:1515
 msgid ""
 "Wait for process completion and return exit status.\n"
 "    \n"
@@ -3523,8 +4641,16 @@ msgid ""
 "invalid\n"
 "    option is given."
 msgstr ""
+"等待行程完成並且回傳退出狀態。\n"
+"    \n"
+"    等待指定行程並通報它的終止狀態。如果沒有提供 PID，則當前所有的活躍\n"
+"    子行程都會被等待，並且回傳碼為零。PID 必須為行程識別號。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳行程 ID 的狀態；如果 PID 是無效的行程識別號或者指定了無效的選項則失"
+"敗。"
 
-#: builtins.c:1521
+#: builtins.c:1530
 msgid ""
 "Execute commands for each member in a list.\n"
 "    \n"
@@ -3536,8 +4662,16 @@ msgid ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 msgstr ""
+"為列表中的每個成員執行命令。\n"
+"    \n"
+"   「for」迴圈為列表中的每個成員執行一系列的命令。如果沒有\n"
+"   「in WORDS ...;」則假定使用「in \"$@\"」。對於 WORDS 中的每\n"
+"    個元素，NAME 被設定為該元素，並且執行 COMMANDS 命令。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳最後執行命令的狀態。"
 
-#: builtins.c:1535
+#: builtins.c:1544
 msgid ""
 "Arithmetic for loop.\n"
 "    \n"
@@ -3553,8 +4687,21 @@ msgid ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 msgstr ""
+"算術 for 迴圈。\n"
+"    \n"
+"    等價於\n"
+"    \t(( EXP1 ))\n"
+"    \twhile (( EXP2 )); do\n"
+"    \t\tCOMMANDS\n"
+"    \t\t(( EXP3 ))\n"
+"    \tdone\n"
+"    EXP1、EXP2 和 EXP3 都是算術表示式。如果省略任何表示式，\n"
+"    則等同於使用了求值為 1 的表示式。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳最後執行命令的狀態。"
 
-#: builtins.c:1553
+#: builtins.c:1562
 msgid ""
 "Select words from a list and execute commands.\n"
 "    \n"
@@ -3573,8 +4720,21 @@ msgid ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 msgstr ""
+"從列表中選取詞並且執行命令。\n"
+"    \n"
+"    WORDS 變數被展開，生成一個字詞的列表。展開的字詞集合被印出\n"
+"    在標準錯誤輸出裝置上，每個以一個數字做字首。如果沒有「in WORDS」\n"
+"    則假定使用「in \"$@\"」。PS3 提示符會被顯示並且從標準輸入讀入一列\n"
+"    如果該列由被顯示字詞對應的數字組成，則 NAME 變數被設定為相應\n"
+"    的字詞。如果列為空，則 WORDS 變數和提示符被重新顯示。如果讀取了\n"
+"    檔案結束符，則命令完成。讀入任何其他的值會導致 NAME 變數被設定\n"
+"    為空。讀入的列被存放在變數 REPLY 中。COMMANDS 命令在每次選擇\n"
+"    之後執行直到執行一個 break 命令。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳最後一個執行命令的狀態。"
 
-#: builtins.c:1574
+#: builtins.c:1583
 msgid ""
 "Report time consumed by pipeline's execution.\n"
 "    \n"
@@ -3589,8 +4749,20 @@ msgid ""
 "    Exit Status:\n"
 "    The return status is the return status of PIPELINE."
 msgstr ""
+"通報管道執行的消耗時間。\n"
+"    \n"
+"    執行 PIPELINE 並且印出 PIPELINE 終結時實際時間、使用者 CPU 時間和系統\n"
+"    CPU 時間的總結。\n"
+"    \n"
+"    選項：\n"
+"      -p\t用可移植的 POSIX 格式印出用時總結。\n"
+"    \n"
+"    TIMEFORMAT 變數的值被做為輸出格式。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳狀態即 PIPELINE 的回傳狀態。"
 
-#: builtins.c:1591
+#: builtins.c:1600
 msgid ""
 "Execute commands based on pattern matching.\n"
 "    \n"
@@ -3600,8 +4772,15 @@ msgid ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 msgstr ""
+"基於模式匹配來執行命令。\n"
+"    \n"
+"    基於 PATTERN 模式匹配的字詞 WORD，有選擇的執行 COMMANDS 命令。\n"
+"   「|」用於分隔多個模式。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳最後一個執行命令的狀態。"
 
-#: builtins.c:1603
+#: builtins.c:1612
 msgid ""
 "Execute commands based on conditional.\n"
 "    \n"
@@ -3621,8 +4800,18 @@ msgid ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 msgstr ""
+"根據條件執行命令。\n"
+"    \n"
+"   「if COMMANDS」列表被執行。如果退出狀態為零，則執行「then COMMANDS」\n"
+"    列表。否則按順序執行每個「elif COMMANDS」列表，並且如果它的退出狀態為\n"
+"    零，則執行對應的「then COMMANDS」列表並且 if 命令終止。否則如果存在的\n"
+"    情況下，執行「else COMMANDS」列表。整個結構的退出狀態是最後一個執行\n"
+"    命令的狀態，或者如果沒有條件測試為真的話，則為零。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳最後一個執行命令的狀態。"
 
-#: builtins.c:1620
+#: builtins.c:1629
 msgid ""
 "Execute commands as long as a test succeeds.\n"
 "    \n"
@@ -3632,8 +4821,15 @@ msgid ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 msgstr ""
+"只要測試成功即執行命令。\n"
+"    \n"
+"    只要在「while」COMMANDS 中的最終命令回傳結果為 0，則\n"
+"    展開並執行 COMMANDS 命令。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳最後一個執行命令的狀態。"
 
-#: builtins.c:1632
+#: builtins.c:1641
 msgid ""
 "Execute commands as long as a test does not succeed.\n"
 "    \n"
@@ -3643,8 +4839,16 @@ msgid ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 msgstr ""
+"當測試不同過時執行命令。\n"
+"    \n"
+"   「until」COMMANDS 命令的最終命令回傳狀態不為 0 時，\n"
+"    展開並執行 COMMANDS 命令。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳最後一個執行命令的狀態。"
 
-#: builtins.c:1644
+#: builtins.c:1653
+#, fuzzy
 msgid ""
 "Create a coprocess named NAME.\n"
 "    \n"
@@ -3654,10 +4858,19 @@ msgid ""
 "    The default NAME is \"COPROC\".\n"
 "    \n"
 "    Exit Status:\n"
-"    Returns the exit status of COMMAND."
+"    The coproc command returns an exit status of 0."
 msgstr ""
+"建立一個以 NAME 為名的副行程。\n"
+"    \n"
+"    非同步執行 COMMANDS 命令，在執行 shell 中的陣列變數 NAME\n"
+"    的 0 號和 1 號元素做為檔案描述符，以一個管道連接命令\n"
+"    分別做為命令的標準輸出和輸入裝置。\n"
+"    預設的 NAME 是「COPROC」。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳 COMMAND 命令的退出狀態。"
 
-#: builtins.c:1658
+#: builtins.c:1667
 msgid ""
 "Define shell function.\n"
 "    \n"
@@ -3670,8 +4883,17 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless NAME is readonly."
 msgstr ""
+"定義 shell 函數。\n"
+"    \n"
+"    建立一個以 NAME 為名的 shell 函數。當做為一個簡單的命令啟用時，\n"
+"    NAME 函數執行呼叫 shell 語境中的 COMMANDs 命令。當 NAME\n"
+"    被啟用時，引數做為 $1…$n 被傳遞給函數，函數的名字儲存在變數\n"
+"    $FUNCNAME 中。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功除非 NAME 為唯讀。"
 
-#: builtins.c:1672
+#: builtins.c:1681
 msgid ""
 "Group commands as a unit.\n"
 "    \n"
@@ -3681,8 +4903,15 @@ msgid ""
 "    Exit Status:\n"
 "    Returns the status of the last command executed."
 msgstr ""
+"將命令組合為一個單元。\n"
+"    \n"
+"    執行群組中的命令集合。這是對整個命令集合\n"
+"    做重定向的方法之一。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳最後一個執行命令的狀態。"
 
-#: builtins.c:1684
+#: builtins.c:1693
 msgid ""
 "Resume job in foreground.\n"
 "    \n"
@@ -3695,8 +4924,18 @@ msgid ""
 "    Exit Status:\n"
 "    Returns the status of the resumed job."
 msgstr ""
+"在前臺繼續工作\n"
+"    \n"
+"    對於 JOB_SPEC 引數來說和「fg」命令等同。繼續一個\n"
+"    停止的或者後臺工作。JOB_SPEC 可以指定一個工作\n"
+"    名字或工作號。在 JOB_SPEC 後加上一個「&」將會把\n"
+"    工作放至後臺，就像工作規格被做為「bg」命令的引數\n"
+"    執行一樣。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳被繼續的工作狀態。"
 
-#: builtins.c:1699
+#: builtins.c:1708
 msgid ""
 "Evaluate arithmetic expression.\n"
 "    \n"
@@ -3706,8 +4945,15 @@ msgid ""
 "    Exit Status:\n"
 "    Returns 1 if EXPRESSION evaluates to 0; returns 0 otherwise."
 msgstr ""
+"求值算術表示式。\n"
+"    \n"
+"    表示式按照算術法則進行求值。\n"
+"    等價於「let 表示式」。\n"
+"    \n"
+"    退出狀態：\n"
+"    如果表示式求值為 0 則回傳 1；否則回傳 0。"
 
-#: builtins.c:1711
+#: builtins.c:1720
 msgid ""
 "Execute conditional command.\n"
 "    \n"
@@ -3734,8 +4980,28 @@ msgid ""
 "    Exit Status:\n"
 "    0 or 1 depending on value of EXPRESSION."
 msgstr ""
+"執行條件命令。\n"
+"    \n"
+"    根據條件表示式 EXPRESSION 的求值回傳狀態 0 或 1。表示式按照\n"
+"   「test」內建的相同條件組成，或者可以有下列運算子連接而成：\n"
+"    \n"
+"      ( EXPRESSION )\t回傳 EXPRESSION 表示式的值\n"
+"      ! EXPRESSION\t\t如果 EXPRESSION 表示式為假則為真，否則為假\n"
+"      EXPR1 && EXPR2\t如果 EXPR1 和 EXPR2 表示式均為真則為真，否則為假\n"
+"      EXPR1 || EXPR2\t如果 EXPR1 和 EXPR2 表示式中有一個為真則為真，否則為"
+"假\n"
+"    \n"
+"    當使用「==」和「!=」運算子時，運算子右邊的字串被用作模式並且執行一個\n"
+"    匹配。當使用「=~」運算子時，運算子右邊的字串被當做正則表示式來進行\n"
+"    匹配。\n"
+"    \n"
+"    運算子 && 和 || 將不對 EXPR2 表示式進行求值，如果 EXPR1 表示式足夠確定\n"
+"    整個表示式的值。\n"
+"    \n"
+"    退出狀態：\n"
+"    根據 EXPRESSION 的值為 0 或 1。"
 
-#: builtins.c:1737
+#: builtins.c:1746
 msgid ""
 "Common shell variable names and usage.\n"
 "    \n"
@@ -3788,8 +5054,50 @@ msgid ""
 "    HISTIGNORE\tA colon-separated list of patterns used to decide which\n"
 "    \t\tcommands should be saved on the history list.\n"
 msgstr ""
+"常用 shell 變數名稱和使用。\n"
+"    \n"
+"    BASH_VERSION\t當前 Bash 的版本資訊。\n"
+"    CDPATH\t用於「cd」命令引數搜尋分號分隔的目錄列表\n"
+"    GLOBIGNORE\t路徑擴充套件時忽略的檔名匹配模式列表，\n"
+"    \t\t以分號分隔。\n"
+"    HISTFILE\t您的命令歷史記錄存放的檔案名稱。\n"
+"    HISTFILESIZE\t歷史記錄檔案最多可以儲存的列數。\n"
+"    HISTSIZE\t一個執行的 shell 最多可以訪問的歷史記錄命令列數。\n"
+"    HOME\t您登入目錄的完整路徑。\n"
+"    HOSTNAME\t當前主機的主機名。\n"
+"    HOSTTYPE\t當前版本的 BASH 在其之上執行的 CPU 類型。\n"
+"    IGNOREEOF\t控制 shell 收到檔案結束符做為單一輸入後的\n"
+"    \t\t動作。如果設定這個變數，則它的值是 shell 退出之前在\n"
+"    \t\t一個空列上可以連續看到的檔案結束符數量(預設為 10)。\n"
+"    \t\t未設定時，檔案結束符標誌著輸入的結束。\n"
+"    MACHTYPE\t描述當前執行 Bash 的系統字串。\n"
+"    MAILCHECK\tBash 檢測新郵件的頻率，以秒為單位。\n"
+"    MAILPATH\tBash 從中檢測新郵件的檔案列表，以分號分隔。\n"
+"    OSTYPE\t執行 Bash 的 Unix 版本。\n"
+"    PATH\t當尋找命令時搜尋的目錄列表，以冒號分隔。\n"
+"    PROMPT_COMMAND\t印出每一個主提示符之前執行的命\n"
+"    \t\t令。\n"
+"    PS1\t\t主提示符字串。\n"
+"    PS2\t\t從提示符字串。\n"
+"    PWD\t\t當前目錄的完整路徑。\n"
+"    SHELLOPTS\t已啟用的 shell 選項列表，以冒號分隔。\n"
+"    TERM\t當前終端類型的名稱。\n"
+"    TIMEFORMAT\t以關鍵則「time」顯示的時間統計資訊的輸出\n"
+"    \t\t格式。\n"
+"    auto_resume\t非空時，一個單獨的命令詞會首先被在當前\n"
+"    \t\t停止的工作列表中搜索。如果找到則該工作被置於前臺。\n"
+"    \t\t如果值為「exact」則意味著命令詞必須精確匹配停止工作\n"
+"    \t\t列表中的命令。如果值為「substring」則意味著命令詞必\n"
+"    \t\t須匹配工作的一個子字串。任何其他的值意味著命令詞\n"
+"    \t\t必須是停止工作的一個字首。\n"
+"    histchars\t控制歷史記錄展開和快速替換的字元。第一個字元是\n"
+"    \t\t歷史記錄替換字元，通常是「!」。第二個字元是快速替換字元，\n"
+"    \t\t通常是「^」。第三個是歷史記錄註釋字元，通常是「#」。\n"
+"    HISTIGNORE\t用於決定哪些命令被存入歷史記錄檔案的模式\n"
+"    \t\t列表，以冒號分隔。\n"
 
-#: builtins.c:1794
+#: builtins.c:1803
+#, fuzzy
 msgid ""
 "Add directories to stack.\n"
 "    \n"
@@ -3799,19 +5107,19 @@ msgid ""
 "    \n"
 "    Options:\n"
 "      -n\tSuppresses the normal change of directory when adding\n"
-"    \tdirectories to the stack, so only the stack is manipulated.\n"
+"    \t\tdirectories to the stack, so only the stack is manipulated.\n"
 "    \n"
 "    Arguments:\n"
 "      +N\tRotates the stack so that the Nth directory (counting\n"
-"    \tfrom the left of the list shown by `dirs', starting with\n"
-"    \tzero) is at the top.\n"
+"    \t\tfrom the left of the list shown by `dirs', starting with\n"
+"    \t\tzero) is at the top.\n"
 "    \n"
 "      -N\tRotates the stack so that the Nth directory (counting\n"
-"    \tfrom the right of the list shown by `dirs', starting with\n"
-"    \tzero) is at the top.\n"
+"    \t\tfrom the right of the list shown by `dirs', starting with\n"
+"    \t\tzero) is at the top.\n"
 "    \n"
 "      dir\tAdds DIR to the directory stack at the top, making it the\n"
-"    \tnew current working directory.\n"
+"    \t\tnew current working directory.\n"
 "    \n"
 "    The `dirs' builtin displays the directory stack.\n"
 "    \n"
@@ -3819,8 +5127,29 @@ msgid ""
 "    Returns success unless an invalid argument is supplied or the directory\n"
 "    change fails."
 msgstr ""
+"從堆疊中刪除目錄。\n"
+"    \n"
+"    從目錄堆疊中刪除條目。不帶引數時，刪除堆疊頂端目錄，並變更至新的堆疊\n"
+"    頂端目錄。\n"
+"    \n"
+"    選項：\n"
+"      -n\t抑制從堆疊中刪除目錄時通常的目錄變換操作，從而僅對堆疊\n"
+"    \t進行操作。\n"
+"    \n"
+"    引數：\n"
+"      +N\t刪除第 N 個目錄 (「dirs」顯示的目錄列表中左起，從零開始)。\n"
+"    \t例如：「popd +0」刪除第一個目錄，「popd +1」刪除第二個。\n"
+"    \n"
+"      -N\t刪除第 N 個目錄 (「dirs」顯示的目錄列表中右起，從零開始)。\n"
+"    \t例如：「popd -0」刪除最後一個目錄，，「popd -1」刪除倒數第二個。\n"
+"    \n"
+"   「dirs」內建顯示目錄堆疊。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，除非使用了無效的引數或者目錄變換失敗。"
 
-#: builtins.c:1828
+#: builtins.c:1837
+#, fuzzy
 msgid ""
 "Remove directories from stack.\n"
 "    \n"
@@ -3829,16 +5158,16 @@ msgid ""
 "    \n"
 "    Options:\n"
 "      -n\tSuppresses the normal change of directory when removing\n"
-"    \tdirectories from the stack, so only the stack is manipulated.\n"
+"    \t\tdirectories from the stack, so only the stack is manipulated.\n"
 "    \n"
 "    Arguments:\n"
 "      +N\tRemoves the Nth entry counting from the left of the list\n"
-"    \tshown by `dirs', starting with zero.  For example: `popd +0'\n"
-"    \tremoves the first directory, `popd +1' the second.\n"
+"    \t\tshown by `dirs', starting with zero.  For example: `popd +0'\n"
+"    \t\tremoves the first directory, `popd +1' the second.\n"
 "    \n"
 "      -N\tRemoves the Nth entry counting from the right of the list\n"
-"    \tshown by `dirs', starting with zero.  For example: `popd -0'\n"
-"    \tremoves the last directory, `popd -1' the next to last.\n"
+"    \t\tshown by `dirs', starting with zero.  For example: `popd -0'\n"
+"    \t\tremoves the last directory, `popd -1' the next to last.\n"
 "    \n"
 "    The `dirs' builtin displays the directory stack.\n"
 "    \n"
@@ -3846,8 +5175,29 @@ msgid ""
 "    Returns success unless an invalid argument is supplied or the directory\n"
 "    change fails."
 msgstr ""
+"從堆疊中刪除目錄。\n"
+"    \n"
+"    從目錄堆疊中刪除條目。不帶引數時，刪除堆疊頂端目錄，並變更至新的堆疊\n"
+"    頂端目錄。\n"
+"    \n"
+"    選項：\n"
+"      -n\t抑制從堆疊中刪除目錄時通常的目錄變換操作，從而僅對堆疊\n"
+"    \t進行操作。\n"
+"    \n"
+"    引數：\n"
+"      +N\t刪除第 N 個目錄 (「dirs」顯示的目錄列表中左起，從零開始)。\n"
+"    \t例如：「popd +0」刪除第一個目錄，「popd +1」刪除第二個。\n"
+"    \n"
+"      -N\t刪除第 N 個目錄 (「dirs」顯示的目錄列表中右起，從零開始)。\n"
+"    \t例如：「popd -0」刪除最後一個目錄，，「popd -1」刪除倒數第二個。\n"
+"    \n"
+"   「dirs」內建顯示目錄堆疊。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，除非使用了無效的引數或者目錄變換失敗。"
 
-#: builtins.c:1858
+#: builtins.c:1867
+#, fuzzy
 msgid ""
 "Display directory stack.\n"
 "    \n"
@@ -3858,25 +5208,45 @@ msgid ""
 "    Options:\n"
 "      -c\tclear the directory stack by deleting all of the elements\n"
 "      -l\tdo not print tilde-prefixed versions of directories relative\n"
-"    \tto your home directory\n"
+"    \t\tto your home directory\n"
 "      -p\tprint the directory stack with one entry per line\n"
 "      -v\tprint the directory stack with one entry per line prefixed\n"
-"    \twith its position in the stack\n"
+"    \t\twith its position in the stack\n"
 "    \n"
 "    Arguments:\n"
-"      +N\tDisplays the Nth entry counting from the left of the list shown "
-"by\n"
-"    \tdirs when invoked without options, starting with zero.\n"
+"      +N\tDisplays the Nth entry counting from the left of the list\n"
+"    \t\tshown by dirs when invoked without options, starting with\n"
+"    \t\tzero.\n"
 "    \n"
-"      -N\tDisplays the Nth entry counting from the right of the list shown "
-"by\n"
-"    \tdirs when invoked without options, starting with zero.\n"
+"      -N\tDisplays the Nth entry counting from the right of the list\n"
+"    \t\tshown by dirs when invoked without options, starting with\n"
+"    \t\tzero.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns success unless an invalid option is supplied or an error occurs."
 msgstr ""
+"顯示目錄堆疊。\n"
+"    \n"
+"    顯示當前記住的目錄列表。藉由「pushd」命令可以將目錄存入列表\n"
+"    中；「popd」命令可用於遍歷彈出列表。\n"
+"    \n"
+"    選項：\n"
+"      -c\t刪除所有元素以清空目錄堆疊\n"
+"      -l\t不印出與主目錄相關的波浪號字首的目錄\n"
+"      -p\t每列一個條目印出目錄堆疊\n"
+"      -v\t每列一個條目，以堆疊中位置為字首印出目錄堆疊\n"
+"    \n"
+"    引數：\n"
+"      +N\t顯示 dirs 不帶選項啟動時顯示的目錄列表左起中第\n"
+"    \tN 個目錄，從零開始。\n"
+"    \n"
+"      -N\t顯示 dirs 不帶選項啟動時顯示的目錄列表右起中第\n"
+"    \tN 個目錄，從零開始。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，除非使用了無效的選項或者發生錯誤。"
 
-#: builtins.c:1887
+#: builtins.c:1898
 msgid ""
 "Set and unset shell options.\n"
 "    \n"
@@ -3896,8 +5266,25 @@ msgid ""
 "    Returns success if OPTNAME is enabled; fails if an invalid option is\n"
 "    given or OPTNAME is disabled."
 msgstr ""
+"設定和取消設定 shell 選項。\n"
+"    \n"
+"    變更每個 shell 選項 OPTNAME 的設定。不帶引數\n"
+"    時，列出所有 shell 選項並標註每一個選項是否被\n"
+"    設定。\n"
+"    \n"
+"    選項：\n"
+"      -o\t限制 OPTNAME 為定義用於「set -o」的選項\n"
+"      -p\t印出每個 shell 選項並標註它的狀態。\n"
+"      -q\t抑制輸出\n"
+"      -s\t啟用(設定)每個 OPTNAME 選項\n"
+"      -u\t停用(取消設定)每個 OPTNAME 選項\n"
+"    \n"
+"    退出狀態：\n"
+"    如果 OPTNAME 選項被啟用則回傳成功；如果是\n"
+"    無效的選項或 OPTNAME 被停用則失敗。"
 
-#: builtins.c:1908
+#: builtins.c:1919
+#, fuzzy
 msgid ""
 "Formats and prints ARGUMENTS under control of the FORMAT.\n"
 "    \n"
@@ -3914,15 +5301,15 @@ msgid ""
 "successive\n"
 "    argument.\n"
 "    \n"
-"    In addition to the standard format specifications described in "
-"printf(1),\n"
+"    In addition to the standard format specifications described in printf"
+"(1),\n"
 "    printf interprets:\n"
 "    \n"
 "      %b\texpand backslash escape sequences in the corresponding argument\n"
 "      %q\tquote the argument in a way that can be reused as shell input\n"
-"      %(fmt)T output the date-time string resulting from using FMT as a "
+"      %(fmt)T\toutput the date-time string resulting from using FMT as a "
 "format\n"
-"            string for strftime(3)\n"
+"    \t        string for strftime(3)\n"
 "    \n"
 "    The format is re-used as necessary to consume all of the arguments.  If\n"
 "    there are fewer arguments than the format requires,  extra format\n"
@@ -3935,8 +5322,25 @@ msgid ""
 "assignment\n"
 "    error occurs."
 msgstr ""
+"在 FORMAT 的控制下格式化並印出 ARGUMENTS 引數。\n"
+"    \n"
+"    選項：\n"
+"      -v var\t將輸出指派給 shell 變數 VAR 而不顯示在標準輸出上\n"
+"    \n"
+"    FORMAT 是包含三種物件的字串：簡單地被複製到標準輸出的普通字元；\n"
+"    被變換之後複製到標準輸入的逸出字元；以及每個都會影響到下個引數的印出格式"
+"化規格。\n"
+"    \n"
+"    在 printf(1) 中描述的標準控制規格之外，printf 解析：\n"
+"、    \n"
+"      %b\t擴充套件對應引數中的反斜線逸出序列\n"
+"      %q\t以可做為 shell 輸入的格式引用引數\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，除非使用了無效的選項或者發生寫入或指派錯誤。"
 
-#: builtins.c:1942
+#: builtins.c:1953
+#, fuzzy
 msgid ""
 "Specify how arguments are to be completed by Readline.\n"
 "    \n"
@@ -3949,11 +5353,11 @@ msgid ""
 "    Options:\n"
 "      -p\tprint existing completion specifications in a reusable format\n"
 "      -r\tremove a completion specification for each NAME, or, if no\n"
-"    \tNAMEs are supplied, all completion specifications\n"
+"    \t\tNAMEs are supplied, all completion specifications\n"
 "      -D\tapply the completions and actions as the default for commands\n"
-"    \twithout any specific completion defined\n"
+"    \t\twithout any specific completion defined\n"
 "      -E\tapply the completions and actions to \"empty\" commands --\n"
-"    \tcompletion attempted on a blank line\n"
+"    \t\tcompletion attempted on a blank line\n"
 "    \n"
 "    When completion is attempted, the actions are applied in the order the\n"
 "    uppercase-letter options are listed above.  The -D option takes\n"
@@ -3962,8 +5366,25 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is supplied or an error occurs."
 msgstr ""
+"規格 readline 如何完成讀取引數。\n"
+"    \n"
+"    規格對於每一個 NAME 名稱如何完成讀取引數。如果不帶選項，\n"
+"    現有的補完規格會以可以重用為輸入的格式印出。\n"
+"    \n"
+"    選項：\n"
+"      -p\t以可重用的格式印出現有的補完規格。\n"
+"      -r\t對於每個 NAME 名稱刪除補完規格，或者如果沒有提供 NAME\n"
+"    \t名稱，刪除所有的補完規格。\n"
+"      -D\t對於沒有補完規格定義的命令，設定預設的補完動作\n"
+"      -E\t對於「empty」命令設定補完動作，—— 對於空列的補完。\n"
+"    \n"
+"    嘗試補完時，按照上述大寫字母選項的順序進行動作。-D 選項優先\n"
+"    級高於 -E 選項。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，除非使用了無效的選項或者錯誤發生。"
 
-#: builtins.c:1970
+#: builtins.c:1981
 msgid ""
 "Display possible completions depending on the options.\n"
 "    \n"
@@ -3975,8 +5396,16 @@ msgid ""
 "    Exit Status:\n"
 "    Returns success unless an invalid option is supplied or an error occurs."
 msgstr ""
+"依據選項顯示可能的補完。\n"
+"    \n"
+"    意圖在能產生可能的補完 shell 函數內部使用。\n"
+"    如果提供了可選的 WORD 引數，則產生按照 WORD\n"
+"    進行的匹配。\n"
+"    \n"
+"    退出狀態：\n"
+"    除非使用了無效選項或者錯誤發生，否則回傳成功。"
 
-#: builtins.c:1985
+#: builtins.c:1996
 msgid ""
 "Modify or display completion options.\n"
 "    \n"
@@ -4006,8 +5435,30 @@ msgid ""
 "    Returns success unless an invalid option is supplied or NAME does not\n"
 "    have a completion specification defined."
 msgstr ""
+"修改或顯示補完選項。\n"
+"    \n"
+"    修改每個 NAME 名稱的補完選項，或如果沒有提供 NAME 名稱，執行當前的補"
+"完。\n"
+"    如果不帶選項，印出每個 NAME 名稱的補完選項或當前的補完規格。\n"
+"    \n"
+"    選項：\n"
+"    \t-o option\t為每個 NAME 名稱設定補完選項 option\n"
+"    \t-D\t\t為「default」命令補完變更選項\n"
+"    \t-E\t\t為「empty」命令補完變更選項\n"
+"    \n"
+"    使用「+o」而不是「-o」可以關閉指定的選項。\n"
+"    \n"
+"    引數：\n"
+"    \n"
+"    每個 NAME 名稱都對應一個之前以藉由「complete」內建定義了補完規格的\n"
+"    命令。如果不提供 NAME 名稱，當前生成補完的函數必須呼叫 compopt，\n"
+"    並且當前執行的補完生成器選項會被修改。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，除非使用了無效的選項或者 NAME 名稱沒有定義補完規格。"
 
-#: builtins.c:2015
+#: builtins.c:2026
+#, fuzzy
 msgid ""
 "Read lines from the standard input into an indexed array variable.\n"
 "    \n"
@@ -4018,20 +5469,21 @@ msgid ""
 "    is the default ARRAY.\n"
 "    \n"
 "    Options:\n"
+"      -d delim\tUse DELIM to terminate lines, instead of newline\n"
 "      -n count\tCopy at most COUNT lines.  If COUNT is 0, all lines are "
-"copied.\n"
+"copied\n"
 "      -O origin\tBegin assigning to ARRAY at index ORIGIN.  The default "
-"index is 0.\n"
-"      -s count \tDiscard the first COUNT lines read.\n"
-"      -t\t\tRemove a trailing newline from each line read.\n"
-"      -u fd\t\tRead lines from file descriptor FD instead of the standard "
-"input.\n"
-"      -C callback\tEvaluate CALLBACK each time QUANTUM lines are read.\n"
-"      -c quantum\tSpecify the number of lines read between each call to "
-"CALLBACK.\n"
+"index is 0\n"
+"      -s count\tDiscard the first COUNT lines read\n"
+"      -t\tRemove a trailing DELIM from each line read (default newline)\n"
+"      -u fd\tRead lines from file descriptor FD instead of the standard "
+"input\n"
+"      -C callback\tEvaluate CALLBACK each time QUANTUM lines are read\n"
+"      -c quantum\tSpecify the number of lines read between each call to\n"
+"    \t\t\tCALLBACK\n"
 "    \n"
 "    Arguments:\n"
-"      ARRAY\t\tArray variable name to use for file data.\n"
+"      ARRAY\tArray variable name to use for file data\n"
 "    \n"
 "    If -C is supplied without -c, the default quantum is 5000.  When\n"
 "    CALLBACK is evaluated, it is supplied the index of the next array\n"
@@ -4047,19 +5499,65 @@ msgid ""
 "or\n"
 "    not an indexed array."
 msgstr ""
+"從標準輸入讀取列到索引陣列變數中。\n"
+"    \n"
+"    從標準輸入讀取列到索引陣列變數 ARRAY 中，或者如果使用了 -u 選項，\n"
+"    從檔案描述符 FD 中讀取。MAPFILE 變數是預設的 ARRAY 變數。\n"
+"    \n"
+"    選項：\n"
+"      -n count\t最多複製 COUNT 列，如果 COUNT 為 0，則複製所有列。\n"
+"      -O origin\t從索引 ORIGIN 開始 指派給 ARRAY 變數。預設索引是 0。\n"
+"      -s count \t丟棄最先讀取的 COUNT 列。\n"
+"      -t\t\t從讀取的每列末尾刪除一個換列符。\n"
+"      -u fd\t\t從檔案描述符 FD 中讀取列而不是標準輸入。\n"
+"      -C callback\t每 QUANTUM 次讀列之後對 CALLBACK 回呼求值。\n"
+"      -c quantum\t定義每次呼叫 CALLBACK 回呼之間讀取的列數。\n"
+"    \n"
+"    引數：\n"
+"      ARRAY\t\t儲存資料使用的陣列變數\n"
+"    \n"
+"    如果使用了 -C 而沒有 -c，預設的定量是 5000。當對 CALLBACK 求值時，\n"
+"    下一個將被指派的陣列元素索引做為額外引數被傳遞。\n"
+"    \n"
+"    如果沒有顯式指定起始索引，mapfile 將在指派前清空 ARRAY 變數。\n"
+"    \n"
+"    退出狀態：\n"
+"    回傳成功，除非使用了無效的選項，或者 ARRAY 變數唯讀或不是索引陣列。"
 
-#: builtins.c:2049
+#: builtins.c:2062
 msgid ""
 "Read lines from a file into an array variable.\n"
 "    \n"
 "    A synonym for `mapfile'."
 msgstr ""
+"從一個檔案中讀取列到陣列變數中\n"
+"    \n"
+"    一個「mapfile」的同義詞。"
+
+#, fuzzy
+#~ msgid "Copyright (C) 2014 Free Software Foundation, Inc."
+#~ msgstr "著作權所有 (C) 2013 自由軟體基金會"
+
+#~ msgid ":"
+#~ msgstr ":"
+
+#~ msgid "true"
+#~ msgstr "true"
+
+#~ msgid "false"
+#~ msgstr "false"
+
+#~ msgid "times"
+#~ msgstr "times"
+
+#~ msgid "Copyright (C) 2012 Free Software Foundation, Inc."
+#~ msgstr "著作權所有 (C) 2013 自由軟體基金會。"
 
 #~ msgid "requesting resize"
 #~ msgstr "要求調整"
 
 #~ msgid "just resized"
-#~ msgstr "只是大小"
+#~ msgstr "只是調整大小"
 
 #~ msgid "bug: unknown operation"
-#~ msgstr "bug：未知操作"
+#~ msgstr "bug：不明操作"

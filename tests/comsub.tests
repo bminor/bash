@@ -41,4 +41,9 @@ bar'`
 echo $(recho 'foo\
 bar')
 
+# long-standing parse error in all versions up through bash-4.3
+echo ${foo:-$(echo a{b,c})} >/dev/null
+
 ${THIS_SH} ./comsub1.sub
+${THIS_SH} ./comsub2.sub
+${THIS_SH} ./comsub3.sub

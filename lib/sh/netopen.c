@@ -5,7 +5,7 @@
  * chet@ins.CWRU.Edu
  */
 
-/* Copyright (C) 1987-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -304,6 +304,7 @@ netopen (path)
   if (t == 0)
     {
       internal_error (_("%s: bad network path specification"), path);
+      free (np);
       return -1;
     }
   *t++ = '\0';

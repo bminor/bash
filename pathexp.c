@@ -184,6 +184,7 @@ quote_string_for_globbing (pathname, qflags)
   char *temp;
   register int i, j;
   int brack, cclass, collsym, equiv, c, last_was_backslash;
+  int savei, savej;
 
   temp = (char *)xmalloc (2 * strlen (pathname) + 1);
 
@@ -226,6 +227,8 @@ quote_string_for_globbing (pathname, qflags)
 	{
 	  brack = 1;
 	  temp[j++] = pathname[i++];	/* open bracket */
+	  savej = j;
+	  savei = i;
 	  c = pathname[i++];	/* c == char after open bracket */
 	  do
 	    {
@@ -282,7 +285,19 @@ quote_string_for_globbing (pathname, qflags)
 	      else
 		temp[j++] = c;
 	    }
-	  while ((c = pathname[i++]) != ']');
+	  while (((c = pathname[i++]) != ']') && c != 0);
+
+	  /* If we don't find the closing bracket before we hit the end of
+	     the string, rescan string without treating it as a bracket
+	     expression (has implications for backslash and special ERE
+	     chars) */
+	  if (c == 0)
+	    {
+	      i = savei - 1;	/* -1 for autoincrement above */
+	      j = savej;
+	      continue;
+	    }
+
 	  temp[j++] = c;	/* closing right bracket */
 	  i--;			/* increment will happen above in loop */
 	  continue;		/* skip double assignment below */
@@ -313,10 +328,11 @@ endpat:
 
 char *
 quote_globbing_chars (string)
-     char *string;
+     const char *string;
 {
   size_t slen;
-  char *temp, *s, *t, *send;
+  char *temp, *t;
+  const char *s, *send;
   DECLARE_MBSTATE;
 
   slen = strlen (string);
@@ -461,7 +477,7 @@ glob_name_is_acceptable (name)
   if (name[0] == '.' && (name[1] == '\0' || (name[1] == '.' && name[2] == '\0')))
     return (0);
 
-  flags = FNM_PATHNAME | FNMATCH_EXTFLAG;
+  flags = FNM_PATHNAME | FNMATCH_EXTFLAG | FNMATCH_NOCASEGLOB;
   for (p = globignore.ignores; p->val; p++)
     {
       if (strmatch (p->val, (char *)name, flags) != FNM_NOMATCH)
@@ -538,7 +554,7 @@ split_ignorespec (s, ip)
   if (s[i] == 0)
     return 0;
 
-  n = skip_to_delim (s, i, ":", SD_NOJMP|SD_EXTGLOB);
+  n = skip_to_delim (s, i, ":", SD_NOJMP|SD_EXTGLOB|SD_GLOB);
   t = substring (s, i, n);
 
   if (s[n] == ':')

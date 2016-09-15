@@ -4,6 +4,11 @@ argv[1] = <^?>
 argv[1] = <^?>
 argv[1] = <^A>
 argv[1] = <^?>
+argv[1] = <bar>
+argv[1] = <^A>
+argv[1] = <^?>
+argv[1] = <^A>
+argv[1] = <^?>
 argv[1] = <abcdefgh>
 argv[1] = <abcdefgh>
 argv[1] = <abcdefgh>
@@ -205,3 +210,125 @@ argv[1] = <correct>
 argv[2] = <a>
 argv[1] = <correct>
 argv[2] = <a>
+argv[1] = <^A>
+argv[1] = <3>
+argv[2] = <^C>
+argv[3] = <^C>
+argv[4] = <^C>
+argv[1] = <^A>
+argv[1] = <x^Ay^?z>
+argv[1] = <x^Ay^?z>
+declare -- var="xyz"
+argv[1] = <declare>
+argv[2] = <-->
+argv[3] = <var="x^Ay^?z">
+declare -- var="x\001y\177z"$
+argv[1] = <$'x\001y\177z'>
+argv[1] = <x^Ay^?z>
+var=$'x\001y\177z'
+./exp8.sub: line 16: xyz: syntax error: invalid arithmetic operator (error token is "z")
+declare -a array=()
+declare -a array=([0]=$'x\001y\177z')
+argv[1] = <x^Ay^?z>
+declare -a array=([0]=$'x\001y\177z')
+declare -A array=([$'x\001y\177z']=$'a\242b\002c' )
+abc
+def
+ghi
+jkl
+abc def ghi jkl
+xxabc
+def
+ghi
+jklyy
+xxabc def ghi jklyy
+abc
+def
+ghi
+jkl
+abc
+def ghi
+jkl
+abc
+def ghi
+jkl
+abc
+def ghi
+jkl
+xxabc
+def
+ghi
+jklyy
+xxabc
+def ghi
+jklyy
+abc
+def
+ghi
+jklabc
+def
+ghi
+jkl
+abc
+def ghi
+jklabc
+def ghi
+jkl
+abc:def ghi:jkl
+abc:def ghi:jkl
+abc:def ghi:jkl
+abc
+def ghi
+jkl
+abc:def ghi:jkl
+abc:def ghi:jkl
+abc
+def ghi
+jkl
+var=abc:def ghi:jkl
+abc:def ghi:jkl
+var=abc:def ghi:jkl
+abcdef ghijkl
+abcdef ghijkl
+abcdef ghijkl
+abcdef ghijkl
+abcdef ghijkl
+abcdef ghijkl
+abcdef ghijkl
+var=abcdef ghijkl
+abcdef ghijkl
+var=abcdef ghijkl
+abc
+def ghi
+jkl
+abc def ghi jkl
+abc def ghi jkl
+abc def ghi jkl
+abc
+def
+ghi
+jkl
+abc def ghi jkl
+abc def ghi jkl
+abc
+def
+ghi
+jkl
+var=abc def ghi jkl
+abc def ghi jkl
+var=abc def ghi jkl
+abc
+def ghi
+jkl
+[foo]
+[]
+[foo]
+[]
+[foo]
+[foo]
+[foo]
+[]
+[foo]
+[]
+[foo]
+[]

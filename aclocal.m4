@@ -1692,6 +1692,8 @@ AC_CHECK_HEADERS(wctype.h)
 AC_CHECK_HEADERS(wchar.h)
 AC_CHECK_HEADERS(langinfo.h)
 
+AC_CHECK_HEADERS(mbstr.h)
+
 AC_CHECK_FUNC(mbrlen, AC_DEFINE(HAVE_MBRLEN))
 AC_CHECK_FUNC(mbscasecmp, AC_DEFINE(HAVE_MBSCMP))
 AC_CHECK_FUNC(mbscmp, AC_DEFINE(HAVE_MBSCMP))
@@ -1784,14 +1786,14 @@ char    **v;
         exit (w == 0);  /* exit 0 if wcwidth broken */
 }
 ],
-bash_cv_wcwidth_broken=yes, bash_cv_wcwdith_broken=no, bash_cv_wcwidth_broken=no)])
+bash_cv_wcwidth_broken=yes, bash_cv_wcwidth_broken=no, bash_cv_wcwidth_broken=no)])
 if test "$bash_cv_wcwidth_broken" = yes; then
         AC_DEFINE(WCWIDTH_BROKEN, 1, [wcwidth is usually not broken])
 fi
 
 if test "$am_cv_func_iconv" = yes; then
 	OLDLIBS="$LIBS"
-	LIBS="$LIBS $LIBICONV"
+	LIBS="$LIBS $LIBINTL $LIBICONV"
 	AC_CHECK_FUNCS(locale_charset)
 	LIBS="$OLDLIBS"
 fi
@@ -1854,7 +1856,7 @@ main()
 ],
 ac_cv_rl_version=`cat conftest.rlv`,
 ac_cv_rl_version='0.0',
-ac_cv_rl_version='4.2')])
+ac_cv_rl_version='6.3')])
 
 CFLAGS="$_save_CFLAGS"
 LDFLAGS="$_save_LDFLAGS"

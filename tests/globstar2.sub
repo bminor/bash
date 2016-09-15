@@ -1,3 +1,6 @@
+olddir=$PWD
+EMPTY=/tmp/empty
+
 shopt -s globstar
 s()
 {
@@ -8,8 +11,8 @@ p()
   printf '<%q>\n' "$@"
 }
 
-mkdir -p /tmp/empty/a/a/a
-cd /tmp/empty
+mkdir -p $EMPTY/a/a/a
+cd $EMPTY
 
 # good
 p **
@@ -17,8 +20,8 @@ p **/**
 p **/**/**
 
 rm -rf a
-mkdir -p /tmp/empty/{a,b}/{a,b}/{a,b}/{a,b}
-cd /tmp/empty
+mkdir -p $EMPTY/{a,b}/{a,b}/{a,b}/{a,b}
+cd $EMPTY
 
 # good
 s '**/a'
@@ -76,5 +79,5 @@ p **/a/**/**/**
 s '**/**/a/**'
 p **/**/a/**
 
-cd -
-rm -rf /tmp/empty
+cd "$olddir"
+rm -rf $EMPTY

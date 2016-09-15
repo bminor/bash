@@ -180,6 +180,17 @@ echo ${BASH_REMATCH[@]}
 if [[ "123abc" == *?(a)bc ]]; then echo ok 42; else echo bad 42; fi
 if [[ "123abc" == *?(a)bc ]]; then echo ok 43; else echo bad 43; fi
 
+foo=""
+[[ bar == *"${foo,,}"* ]] && echo ok 1
+[[ bar == *${foo,,}* ]] && echo ok 2
+
+shopt -s extquote
+bs='\'
+del=$'\177'
+[[ bar == *$bs"$del"* ]] || echo ok 3
+[[ "" == "$foo" ]] && echo ok 4
+[[ "$del" == "${foo,,}" ]] || echo ok 5
+
 ${THIS_SH} ./cond-regexp1.sub
 
 ${THIS_SH} ./cond-regexp2.sub

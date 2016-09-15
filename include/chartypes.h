@@ -46,11 +46,11 @@
 #endif
 
 #if !defined (isprint) && !defined (HAVE_ISPRINT)
-#  define isprint(c) (isalpha(c) || isdigit(c) || ispunct(c))
+#  define isprint(c) (isalpha((unsigned char)c) || isdigit((unsigned char)c) || ispunct((unsigned char)c))
 #endif
 
 #if defined (isblank) || defined (HAVE_ISBLANK)
-#  define ISBLANK(c) (IN_CTYPE_DOMAIN (c) && isblank (c))
+#  define ISBLANK(c) (IN_CTYPE_DOMAIN (c) && isblank ((unsigned char)c))
 #else
 #  define ISBLANK(c) ((c) == ' ' || (c) == '\t')
 #endif
@@ -58,7 +58,7 @@
 #if defined (isgraph) || defined (HAVE_ISGRAPH)
 #  define ISGRAPH(c) (IN_CTYPE_DOMAIN (c) && isgraph (c))
 #else
-#  define ISGRAPH(c) (IN_CTYPE_DOMAIN (c) && isprint (c) && !isspace (c))
+#  define ISGRAPH(c) (IN_CTYPE_DOMAIN (c) && isprint ((unsigned char)c) && !isspace ((unsigned char)c))
 #endif
 
 #if !defined (isxdigit) && !defined (HAVE_ISXDIGIT)
@@ -67,16 +67,16 @@
 
 #undef ISPRINT
 
-#define ISPRINT(c) (IN_CTYPE_DOMAIN (c) && isprint (c))
-#define ISDIGIT(c) (IN_CTYPE_DOMAIN (c) && isdigit (c))
-#define ISALNUM(c) (IN_CTYPE_DOMAIN (c) && isalnum (c))
-#define ISALPHA(c) (IN_CTYPE_DOMAIN (c) && isalpha (c))
-#define ISCNTRL(c) (IN_CTYPE_DOMAIN (c) && iscntrl (c))
-#define ISLOWER(c) (IN_CTYPE_DOMAIN (c) && islower (c))
-#define ISPUNCT(c) (IN_CTYPE_DOMAIN (c) && ispunct (c))
-#define ISSPACE(c) (IN_CTYPE_DOMAIN (c) && isspace (c))
-#define ISUPPER(c) (IN_CTYPE_DOMAIN (c) && isupper (c))
-#define ISXDIGIT(c) (IN_CTYPE_DOMAIN (c) && isxdigit (c))
+#define ISPRINT(c) (IN_CTYPE_DOMAIN (c) && isprint ((unsigned char)c))
+#define ISDIGIT(c) (IN_CTYPE_DOMAIN (c) && isdigit ((unsigned char)c))
+#define ISALNUM(c) (IN_CTYPE_DOMAIN (c) && isalnum ((unsigned char)c))
+#define ISALPHA(c) (IN_CTYPE_DOMAIN (c) && isalpha ((unsigned char)c))
+#define ISCNTRL(c) (IN_CTYPE_DOMAIN (c) && iscntrl ((unsigned char)c))
+#define ISLOWER(c) (IN_CTYPE_DOMAIN (c) && islower ((unsigned char)c))
+#define ISPUNCT(c) (IN_CTYPE_DOMAIN (c) && ispunct ((unsigned char)c))
+#define ISSPACE(c) (IN_CTYPE_DOMAIN (c) && isspace ((unsigned char)c))
+#define ISUPPER(c) (IN_CTYPE_DOMAIN (c) && isupper ((unsigned char)c))
+#define ISXDIGIT(c) (IN_CTYPE_DOMAIN (c) && isxdigit ((unsigned char)c))
 
 #define ISLETTER(c)	(ISALPHA(c))
 
@@ -103,7 +103,7 @@
 #ifndef TOCTRL
    /* letter to control char -- ASCII.  The TOUPPER is in there so \ce and
       \cE will map to the same character in $'...' expansions. */
-#  define TOCTRL(x)	(TOUPPER(x) & 037)
+#  define TOCTRL(x)	((x) == '?' ? 0x7f : (TOUPPER(x) & 0x1f))
 #endif
 #ifndef UNCTRL
    /* control char to letter -- ASCII */

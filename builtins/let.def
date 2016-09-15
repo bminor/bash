@@ -86,6 +86,8 @@ let_builtin (list)
   intmax_t ret;
   int expok;
 
+  CHECK_HELPOPT (list);
+
   /* Skip over leading `--' argument. */
   if (list && list->word && ISOPTION (list->word->word, '-'))
     list = list->next;

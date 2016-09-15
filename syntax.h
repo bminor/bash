@@ -75,6 +75,8 @@ extern int sh_syntabsiz;
 
 #define shellblank(c)	(sh_syntaxtab[(unsigned char)(c)] & CBLANK)
 
+#define parserblank(c)	((c) == ' ' || (c) == '\t')
+
 #define issyntype(c, t)	((sh_syntaxtab[(unsigned char)(c)] & (t)) != 0)
 #define notsyntype(c,t) ((sh_syntaxtab[(unsigned char)(c)] & (t)) == 0)
 

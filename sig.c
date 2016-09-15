@@ -1,6 +1,6 @@
 /* sig.c - interface for shell signal handlers and signal initialization. */
 
-/* Copyright (C) 1994-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2015 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -57,6 +57,7 @@
 extern int last_command_exit_value;
 extern int last_command_exit_signal;
 extern int return_catch_flag;
+extern int running_trap;
 extern int loop_level, continuing, breaking, funcnest;
 extern int executing_list;
 extern int comsub_ignore_return;
@@ -66,9 +67,14 @@ extern int history_lines_this_session;
 #endif
 extern int no_line_editing;
 extern int wait_signal_received;
+extern int wait_intr_flag;
 extern sh_builtin_func_t *this_shell_builtin;
 
 extern void initialize_siglist ();
+
+#if !defined (JOB_CONTROL)
+extern void initialize_job_signals __P((void));
+#endif
 
 /* Non-zero after SIGINT. */
 volatile sig_atomic_t interrupt_state = 0;
@@ -388,7 +394,7 @@ top_level_cleanup ()
 
   run_unwind_protects ();
   loop_level = continuing = breaking = funcnest = 0;
-  executing_list = comsub_ignore_return = return_catch_flag = 0;
+  executing_list = comsub_ignore_return = return_catch_flag = wait_intr_flag = 0;
 }
 
 /* What to do when we've been interrupted, and it is safe to handle it. */
@@ -412,12 +418,16 @@ throw_to_top_level ()
 				(last_command_exit_value - 128) : 0;
   last_command_exit_value |= 128;
 
-  /* Run any traps set on SIGINT. */
-  run_interrupt_trap ();
+  /* Run any traps set on SIGINT, mostly for interactive shells */
+  if (signal_is_trapped (SIGINT))
+    run_interrupt_trap (1);
 
   /* Clean up string parser environment. */
   while (parse_and_execute_level)
     parse_and_execute_cleanup ();
+
+  if (running_trap > 0)
+    run_trap_cleanup (running_trap - 1);
 
 #if defined (JOB_CONTROL)
   give_terminal_to (shell_pgrp, 0);
@@ -442,7 +452,7 @@ throw_to_top_level ()
 
   run_unwind_protects ();
   loop_level = continuing = breaking = funcnest = 0;
-  executing_list = comsub_ignore_return = return_catch_flag = 0;
+  executing_list = comsub_ignore_return = return_catch_flag = wait_intr_flag = 0;
 
   if (interactive && print_newline)
     {
@@ -464,7 +474,7 @@ void
 jump_to_top_level (value)
      int value;
 {
-  longjmp (top_level, value);
+  sh_longjmp (top_level, value);
 }
 
 sighandler
@@ -558,7 +568,7 @@ termsig_handler (sig)
 
   /* I don't believe this condition ever tests true. */
   if (sig == SIGINT && signal_is_trapped (SIGINT))
-    run_interrupt_trap ();
+    run_interrupt_trap (0);
 
 #if defined (HISTORY)
   /* If we don't do something like this, the history will not be saved when
@@ -568,6 +578,9 @@ termsig_handler (sig)
   if (interactive_shell && interactive && (sig == SIGHUP || sig == SIGTERM) && remember_on_history)
     maybe_save_shell_history ();
 #endif /* HISTORY */
+
+  if (this_shell_builtin == read_builtin)
+    read_tty_cleanup ();
 
 #if defined (JOB_CONTROL)
   if (sig == SIGHUP && (interactive || (subshell_environment & (SUBSHELL_COMSUB|SUBSHELL_PROCSUB))))
@@ -581,7 +594,7 @@ termsig_handler (sig)
 
   /* Reset execution context */
   loop_level = continuing = breaking = funcnest = 0;
-  executing_list = comsub_ignore_return = return_catch_flag = 0;
+  executing_list = comsub_ignore_return = return_catch_flag = wait_intr_flag = 0;
 
   run_exit_trap ();	/* XXX - run exit trap possibly in signal context? */
   set_signal_handler (sig, SIG_DFL);
@@ -603,8 +616,9 @@ sigint_sighandler (sig)
     ADDINTERRUPT;
 
   /* We will get here in interactive shells with job control active; allow
-     an interactive wait to be interrupted. */
-  if (this_shell_builtin && this_shell_builtin == wait_builtin)
+     an interactive wait to be interrupted.  wait_intr_flag is only set during
+     the execution of the wait builtin and when wait_intr_buf is valid. */
+  if (wait_intr_flag)
     {
       last_command_exit_value = 128 + sig;
       wait_signal_received = sig;

@@ -73,7 +73,7 @@ extern unsigned int hash_string __P((const char *));
 		(BUCKET_CONTENTS *)NULL)
 
 /* Default number of buckets in the hash table. */
-#define DEFAULT_HASH_BUCKETS 64	/* was 107, then 53, must be power of two now */
+#define DEFAULT_HASH_BUCKETS 128	/* must be power of two */
 
 #define HASH_ENTRIES(ht)	((ht) ? (ht)->nentries : 0)
 

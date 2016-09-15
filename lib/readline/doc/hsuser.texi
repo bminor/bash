@@ -1,7 +1,7 @@
 @ignore
 This file documents the user interface to the GNU History library.
 
-Copyright (C) 1988--2014 Free Software Foundation, Inc.
+Copyright (C) 1988--2016 Free Software Foundation, Inc.
 Authored by Brian Fox and Chet Ramey.
 
 Permission is granted to make and distribute verbatim copies of this manual
@@ -102,7 +102,7 @@ associated with each history entry is written to the history file,
 marked with the history comment character.
 When the history file is read, lines beginning with the history
 comment character followed immediately by a digit are interpreted
-as timestamps for the previous history line.
+as timestamps for the following history entry.
 
 The builtin command @code{fc} may be used to list or edit and re-execute
 a portion of the history list.
@@ -202,9 +202,9 @@ Delete the history entry at position @var{offset}.
 displayed.
 
 @item -a
-Append the new
-history lines (history lines entered since the beginning of the
-current Bash session) to the history file.
+Append the new history lines to the history file.
+These are history lines entered since the beginning of the current
+Bash session, but not already appended to the history file.
 
 @item -n
 Append the history lines not already read from the history file
@@ -249,6 +249,11 @@ the input stream, making it easy to repeat commands, insert the
 arguments to a previous command into the current input line, or
 fix errors in previous commands quickly.
 
+@ifset BashFeatures
+History expansion is performed immediately after a complete line
+is read, before the shell breaks it into words.
+@end ifset
+
 History expansion takes place in two parts.  The first is to determine
 which line from the history list should be used during substitution.
 The second is to select portions of that line for inclusion into the
@@ -262,7 +267,9 @@ History expansions are introduced by the appearance of the
 history expansion character, which is @samp{!} by default.
 @ifset BashFeatures
 Only @samp{\} and @samp{'} may be used to escape the history expansion
-character.
+character, but the history expansion character is
+also treated as quoted if it immediately precedes the closing double quote
+in a double-quoted string. 
 @end ifset
 
 @ifset BashFeatures

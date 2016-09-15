@@ -1,6 +1,6 @@
 /* general.h -- defines that everybody likes to use. */
 
-/* Copyright (C) 1993-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -124,7 +124,7 @@ typedef struct {
   int token;
 } STRING_INT_ALIST;
 
-/* A macro to avoid making an unneccessary function call. */
+/* A macro to avoid making an unnecessary function call. */
 #define REVERSE_LIST(list, type) \
   ((list && list->next) ? (type)list_reverse ((GENERIC_LIST *)list) \
 			: (type)(list))
@@ -219,6 +219,9 @@ typedef int sh_ignore_func_t __P((const char *));	/* sh_icpfunc_t */
 typedef int sh_assign_func_t __P((const char *));
 typedef int sh_wassign_func_t __P((WORD_DESC *, int));
 
+typedef int sh_load_func_t __P((char *));
+typedef void sh_unload_func_t __P((char *));
+
 typedef int sh_builtin_func_t __P((WORD_LIST *)); /* sh_wlist_func_t */
 
 #endif /* SH_FUNCTION_TYPEDEF */
@@ -280,11 +283,15 @@ extern RLIMTYPE string_to_rlimtype __P((char *));
 extern void print_rlimtype __P((RLIMTYPE, int));
 #endif
 
-extern int all_digits __P((char *));
+extern int all_digits __P((const char *));
 extern int legal_number __P((const char *, intmax_t *));
-extern int legal_identifier __P((char *));
+extern int legal_identifier __P((const char *));
+extern int importable_function_name __P((const char *, size_t));
+extern int exportable_function_name __P((const char *));
 extern int check_identifier __P((WORD_DESC *, int));
-extern int legal_alias_name __P((char *, int));
+extern int valid_nameref_value __P((const char *, int));
+extern int check_selfref __P((const char *, char *, int));
+extern int legal_alias_name __P((const char *, int));
 extern int assignment __P((const char *, int));
 
 extern int sh_unset_nodelay_mode __P((int));
@@ -292,27 +299,28 @@ extern int sh_validfd __P((int));
 extern int fd_ispipe __P((int));
 extern void check_dev_tty __P((void));
 extern int move_to_high_fd __P((int, int, int));
-extern int check_binary_file __P((char *, int));
+extern int check_binary_file __P((const char *, int));
 
 #ifdef _POSIXSTAT_H_
-extern int same_file __P((char *, char *, struct stat *, struct stat *));
+extern int same_file __P((const char *, const char *, struct stat *, struct stat *));
 #endif
 
 extern int sh_openpipe __P((int *));
 extern int sh_closepipe __P((int *));
 
-extern int file_exists __P((char *));
-extern int file_isdir __P((char  *));
-extern int file_iswdir __P((char  *));
+extern int file_exists __P((const char *));
+extern int file_isdir __P((const char  *));
+extern int file_iswdir __P((const char  *));
 extern int path_dot_or_dotdot __P((const char *));
 extern int absolute_pathname __P((const char *));
 extern int absolute_program __P((const char *));
 
-extern char *make_absolute __P((char *, char *));
+extern char *make_absolute __P((const char *, const char *));
 extern char *base_pathname __P((char *));
 extern char *full_pathname __P((char *));
 extern char *polite_directory_format __P((char *));
 extern char *trim_pathname __P((char *, int));
+extern char *printable_filename __P((char *, int));
 
 extern char *extract_colon_unit __P((char *, int *));
 
@@ -323,5 +331,7 @@ extern char *bash_tilde_expand __P((const char *, int));
 extern int group_member __P((gid_t));
 extern char **get_group_list __P((int *));
 extern int *get_group_array __P((int *));
+
+extern char *conf_standard_path __P((void));
 
 #endif	/* _GENERAL_H_ */

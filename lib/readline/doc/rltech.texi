@@ -7,7 +7,7 @@ This document describes the GNU Readline Library, a utility for aiding
 in the consistency of user interface across discrete programs that need
 to provide a command line interface.
 
-Copyright (C) 1988--2014 Free Software Foundation, Inc.
+Copyright (C) 1988--2016 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -282,7 +282,7 @@ At the very least, it should be aware that it can be passed a
 negative argument.
 
 A command function should return 0 if its action completes successfully,
-and a non-zero value if some error occurs.
+and a value greater than zero if some error occurs.
 This is the convention obeyed by all of the builtin Readline bindable
 command functions.
 
@@ -963,6 +963,10 @@ redisplay.
 It should be used after setting @var{rl_already_prompted}.
 @end deftypefun
 
+@deftypefun int rl_clear_visible_line (void)
+Clear the screen lines corresponding to the current line's contents.
+@end deftypefun
+
 @deftypefun int rl_reset_line_state (void)
 Reset the display state to a clean state and redisplay the current line
 starting on a new line.
@@ -1020,7 +1024,7 @@ It returns the number of visible characters on the last line of the
 Applications may indicate that the prompt contains characters that take
 up no physical screen space when displayed by bracketing a sequence of
 such characters with the special markers @code{RL_PROMPT_START_IGNORE}
-and @code{RL_PROMPT_END_IGNORE} (declared in @file{readline.h}.  This may
+and @code{RL_PROMPT_END_IGNORE} (declared in @file{readline.h}).  This may
 be used to embed terminal-specific escape sequences in prompts.
 @end deftypefun
 
@@ -1134,6 +1138,14 @@ The bindings are performed in @var{kmap}.
 Reset the bindings manipulated by @code{rl_tty_set_default_bindings} so
 that the terminal editing characters are bound to @code{rl_insert}.
 The bindings are performed in @var{kmap}.
+@end deftypefun
+
+@deftypefun int rl_tty_set_echoing (int value)
+Set Readline's idea of whether or not it is echoing output to its output
+stream (@var{rl_outstream}).  If @var{value} is 0, Readline does not display
+output to @var{rl_outstream}; any other value enables output.  The initial
+value is set when Readline initializes the terminal settings.
+This function returns the previous value.
 @end deftypefun
 
 @deftypefun int rl_reset_terminal (const char *terminal_name)
@@ -1307,6 +1319,8 @@ expanded value of @var{prompt}.  Save the value of @var{lhandler} to
 use as a handler function to call when a complete line of input has been
 entered.
 The handler function receives the text of the line as an argument.
+As with @code{readline()}, the handler function should @code{free} the
+line when it it finished with it.
 @end deftypefun
 
 @deftypefun void rl_callback_read_char (void)
@@ -1326,9 +1340,17 @@ the terminal settings are modified for Readline's use again.
 @code{NULL} line.
 @end deftypefun
 
+@deftypefun void rl_callback_sigcleanup (void)
+Clean up any internal state the callback interface uses to maintain state
+between calls to rl_callback_read_char (e.g., the state of any active
+incremental searches).  This is intended to be used by applications that
+wish to perform their own signal handling; Readline's internal signal handler
+calls this when appropriate.
+@end deftypefun
+
 @deftypefun void rl_callback_handler_remove (void)
 Restore the terminal to its initial state and remove the line handler.
-This may be called from within a callback as well as independently.
+You may call this function from within a callback as well as independently.
 If the @var{lhandler} installed by @code{rl_callback_handler_install}
 does not exit the program, either this function or the function referred
 to by the value of @code{rl_deprep_term_function} should be called before
@@ -1413,11 +1435,15 @@ It understands the EOF character or "exit" to exit the program.
 @example
 /* Standard include files. stdio.h is required. */
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
+#include <locale.h>
 
 /* Used for select(2) */
 #include <sys/types.h>
 #include <sys/select.h>
+
+#include <signal.h>
 
 #include <stdio.h>
 
@@ -1426,9 +1452,19 @@ It understands the EOF character or "exit" to exit the program.
 #include <readline/history.h>
 
 static void cb_linehandler (char *);
+static void sighandler (int);
 
 int running;
+int sigwinch_received;
 const char *prompt = "rltest$ ";
+
+/* Handle SIGWINCH and window size changes when readline is not active and
+   reading a character. */
+static void
+sighandler (int sig)
+@{
+  sigwinch_received = 1;
+@}
 
 /* Callback function called for each line when accept-line executed, EOF
    seen, or EOF character read.  This sets a flag and returns; it could
@@ -1464,6 +1500,13 @@ main (int c, char **v)
   fd_set fds;
   int r;
 
+  /* Set the default locale values according to environment variables. */
+  setlocale (LC_ALL, "");
+
+  /* Handle window size changes when readline is not active and reading
+     characters. */
+  signal (SIGWINCH, sighandler);
+
   /* Install the line handler. */
   rl_callback_handler_install (prompt, cb_linehandler);
 
@@ -1478,12 +1521,19 @@ main (int c, char **v)
       FD_SET (fileno (rl_instream), &fds);    
 
       r = select (FD_SETSIZE, &fds, NULL, NULL, NULL);
-      if (r < 0)
+      if (r < 0 && errno != EINTR)
         @{
           perror ("rltest: select");
           rl_callback_handler_remove ();
           break;
         @}
+      if (sigwinch_received)
+	@{
+	  rl_resize_terminal ();
+	  sigwinch_received = 0;
+	@}
+      if (r < 0)
+	continue;     
 
       if (FD_ISSET (fileno (rl_instream), &fds))
         rl_callback_read_char ();
@@ -1532,7 +1582,30 @@ resetting the terminal to its original state.  If the application's signal
 handler does more than update its idea of the terminal size and return (for
 example, a @code{longjmp} back to a main processing loop), it @emph{must}
 call @code{rl_cleanup_after_signal()} (described below), to restore the
-terminal state. 
+terminal state.
+
+When an application is using the callback interface
+(@pxref{Alternate Interface}), Readline installs signal handlers only for
+the duration of the call to @code{rl_callback_read_char}.  Applications
+using the callback interface should be prepared to clean up Readline's
+state if they wish to handle the signal before the line handler completes
+and restores the terminal state.
+
+If an application using the callback interface wishes to have Readline
+install its signal handlers at the time the application calls
+@code{rl_callback_handler_install} and remove them only when a complete
+line of input has been read, it should set the
+@code{rl_persistent_signal_handlers} variable to a non-zero value.
+This allows an application to defer all of the handling of the signals
+Readline catches to Readline.
+Applications should use this variable with care; it can result in Readline
+catching signals and not acting on them (or allowing the application to react
+to them) until the application calls @code{rl_callback_read_char}.  This
+can result in an application becoming less responsive to keyboard signals
+like SIGINT.
+If an application does not want or need to perform any signal handling, or
+does not need to do any processing between calls to @code{rl_callback_read_char},
+setting this variable may be desirable.
 
 Readline provides two variables that allow application writers to
 control whether or not it will catch certain signals and act on them
@@ -1555,6 +1628,15 @@ Readline will install a signal handler for @code{SIGWINCH}.
 The default value of @code{rl_catch_sigwinch} is 1.
 @end deftypevar
 
+@deftypevar int rl_persistent_signal_handlers
+If an application using the callback interface wishes Readline's signal
+handlers to be installed and active during the set of calls to
+@code{rl_callback_read_char} that constitutes an entire single line,
+it should set this variable to a non-zero value.
+
+The default value of @code{rl_persistent_signal_handlers} is 0.
+@end deftypevar
+
 @deftypevar int rl_change_environment
 If this variable is set to a non-zero value,
 and Readline is handling @code{SIGWINCH}, Readline will modify the
@@ -1569,6 +1651,11 @@ to handle signals other than those Readline catches (@code{SIGHUP},
 for example), 
 Readline provides convenience functions to do the necessary terminal
 and internal state cleanup upon receipt of a signal.
+
+@deftypefun int rl_pending_signal (void)
+Return the signal number of the most recent signal Readline received but
+has not yet handled, or 0 if there is no pending signal.
+@end deftypefun
 
 @deftypefun void rl_cleanup_after_signal (void)
 This function will reset the state of the terminal to what it was before
@@ -1942,8 +2029,8 @@ where @var{matches} is the array of matching strings,
 @var{num_matches} is the number of strings in that array, and
 @var{max_length} is the length of the longest string in that array.
 Readline provides a convenience function, @code{rl_display_match_list},
-that takes care of doing the display to Readline's output stream.  That
-function may be called from this hook.
+that takes care of doing the display to Readline's output stream.
+You may call that function from this hook.
 @end deftypevar
 
 @deftypevar {const char *} rl_basic_word_break_characters

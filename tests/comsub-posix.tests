@@ -217,3 +217,16 @@ unset x
 # fixed after bash-4.0 released
 : $(case a in a) echo ;; # comment
 esac)
+
+# fixed after bash-4.3 released
+testing=$(
+    echo test | while read line; do
+        case $line in
+             test)  echo saw test ;;
+             *)     echo other ;;
+        esac
+    done
+)
+
+# recommended to be parsed as a nested comsub instead of arithsub
+echo $(( echo ab cde ) )
