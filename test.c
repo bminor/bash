@@ -670,7 +670,7 @@ test_binop (op)
   else if (op[2] == '\0' && op[1] == '~' && (op[0] == '=' || op[0] == '!'))
     return (1);
 #endif
-  else if (op[0] != '-' || op[2] == '\0' || op[3] != '\0')
+  else if (op[0] != '-' || op[1] == '\0' || op[2] == '\0' || op[3] != '\0')
     return (0);
   else
     {

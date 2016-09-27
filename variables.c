@@ -3030,7 +3030,7 @@ bind_int_variable (lhs, rhs)
     v = bind_array_variable (lhs, 0, rhs, 0);
   else
 #endif
-    v = bind_variable (lhs, rhs, 0);
+    v = bind_variable (lhs, rhs, 0);	/* why not use bind_variable_value? */
 
   if (v)
     {
@@ -3960,7 +3960,7 @@ static int
 visible_array_vars (var)
      SHELL_VAR *var;
 {
-  return (invisible_p (var) == 0 && array_p (var));
+  return (invisible_p (var) == 0 && (array_p (var) || assoc_p (var)));
 }
 
 SHELL_VAR **

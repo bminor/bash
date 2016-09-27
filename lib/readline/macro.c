@@ -49,6 +49,8 @@
 #include "rlprivate.h"
 #include "xmalloc.h"
 
+#define MAX_MACRO_LEVEL 16
+
 /* **************************************************************** */
 /*								    */
 /*			Hacking Keyboard Macros 		    */
@@ -83,12 +85,21 @@ struct saved_macro {
 /* The list of saved macros. */
 static struct saved_macro *macro_list = (struct saved_macro *)NULL;
 
+static int macro_level = 0;
+
 /* Set up to read subsequent input from STRING.
    STRING is free ()'ed when we are done with it. */
 void
 _rl_with_macro_input (string)
      char *string;
 {
+  if (macro_level > MAX_MACRO_LEVEL)
+    {
+      _rl_errmsg ("maximum macro execution nesting level exceeded");
+      _rl_abort_internal ();
+      return;
+    }
+
   _rl_push_executing_macro ();
   rl_executing_macro = string;
   executing_macro_index = 0;
@@ -146,6 +157,8 @@ _rl_push_executing_macro ()
   saver->string = rl_executing_macro;
 
   macro_list = saver;
+
+  macro_level++;
 }
 
 /* Discard the current macro, replacing it with the one
@@ -167,6 +180,8 @@ _rl_pop_executing_macro ()
       macro_list = macro_list->next;
       xfree (macro);
     }
+
+  macro_level--;
 
   if (rl_executing_macro == 0)
     RL_UNSETSTATE(RL_STATE_MACROINPUT);

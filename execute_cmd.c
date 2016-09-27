@@ -1532,11 +1532,9 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 
   set_sigint_handler ();
 
-#if defined (JOB_CONTROL)
   /* Delete all traces that there were any jobs running.  This is
      only for subshells. */
   without_job_control ();
-#endif /* JOB_CONTROL */
 
   if (fds_to_close)
     close_fd_bitmap (fds_to_close);
@@ -5162,6 +5160,11 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 
   if (command)
     {
+      /* If we're optimizing out the fork (implicit `exec'), decrement the
+	 shell level like `exec' would do. */
+      if (nofork && pipe_in == NO_PIPE && pipe_out == NO_PIPE)
+	adjust_shell_level (-1);
+
       maybe_make_export_env ();
       put_command_name_into_env (command);
     }

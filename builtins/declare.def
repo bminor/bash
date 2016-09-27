@@ -120,6 +120,13 @@ int
 local_builtin (list)
      register WORD_LIST *list;
 {
+  /* Catch a straight `local --help' before checking function context */
+  if (list && list->word && STREQ (list->word->word, "--help"))
+    {
+      builtin_help ();
+      return (EX_USAGE);
+    }
+    
   if (variable_context)
     return (declare_internal (list, 1));
   else

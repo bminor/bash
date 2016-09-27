@@ -760,9 +760,10 @@ quote_array_assignment_chars (list)
    `[' of an array subscript and removes the array element to which SUB
    expands from array VAR.  A subscript of `*' or `@' unsets the array. */
 int
-unbind_array_element (var, sub)
+unbind_array_element (var, sub, flags)
      SHELL_VAR *var;
      char *sub;
+     int flags;
 {
   int len;
   arrayind_t ind;
@@ -790,7 +791,7 @@ unbind_array_element (var, sub)
 
   if (assoc_p (var))
     {
-      akey = expand_assignment_string_to_string (sub, 0);     /* [ */
+      akey = (flags & 1) ? sub : expand_assignment_string_to_string (sub, 0);
       if (akey == 0 || *akey == 0)
 	{
 	  builtin_error ("[%s]: %s", sub, _(bash_badsub_errmsg));
@@ -798,7 +799,8 @@ unbind_array_element (var, sub)
 	  return -1;
 	}
       assoc_remove (assoc_cell (var), akey);
-      free (akey);
+      if (akey != sub)
+	free (akey);
     }
   else if (array_p (var))
     {
@@ -896,7 +898,7 @@ valid_array_reference (name, flags)
       if (r == 0)
 	return 0;
       /* Check for a properly-terminated non-blank subscript. */
-      len = skipsubscript (t, 0, 0);
+      len = skipsubscript (t, 0, flags);
       if (t[len] != ']' || len == 1)
 	return 0;
       if (t[len+1] != '\0')

@@ -744,14 +744,14 @@ command:	simple_command
 			  COMMAND *tc;
 
 			  tc = $1;
-			  if (tc->redirects)
+			  if (tc && tc->redirects)
 			    {
 			      register REDIRECT *t;
 			      for (t = tc->redirects; t->next; t = t->next)
 				;
 			      t->next = $2;
 			    }
-			  else
+			  else if (tc)
 			    tc->redirects = $2;
 			  $$ = $1;
 			}
@@ -830,21 +830,25 @@ for_command:	FOR WORD newline_list DO compound_list DONE
 arith_for_command:	FOR ARITH_FOR_EXPRS list_terminator newline_list DO compound_list DONE
 				{
 				  $$ = make_arith_for_command ($2, $6, arith_for_lineno);
+				  /* if ($$ == 0) YYERROR; */
 				  if (word_top > 0) word_top--;
 				}
 	|		FOR ARITH_FOR_EXPRS list_terminator newline_list '{' compound_list '}'
 				{
 				  $$ = make_arith_for_command ($2, $6, arith_for_lineno);
+				  /* if ($$ == 0) YYERROR; */
 				  if (word_top > 0) word_top--;
 				}
 	|		FOR ARITH_FOR_EXPRS DO compound_list DONE
 				{
 				  $$ = make_arith_for_command ($2, $4, arith_for_lineno);
+				  /* if ($$ == 0) YYERROR; */
 				  if (word_top > 0) word_top--;
 				}
 	|		FOR ARITH_FOR_EXPRS '{' compound_list '}'
 				{
 				  $$ = make_arith_for_command ($2, $4, arith_for_lineno);
+				  /* if ($$ == 0) YYERROR; */
 				  if (word_top > 0) word_top--;
 				}
 	;
@@ -928,14 +932,14 @@ function_body:	shell_command
 			     redirection.  The two are semantically equivalent,
 			     though -- the only difference is in how the
 			     command printing code displays the redirections. */
-			  if (tc->redirects)
+			  if (tc && tc->redirects)
 			    {
 			      register REDIRECT *t;
 			      for (t = tc->redirects; t->next; t = t->next)
 				;
 			      t->next = $2;
 			    }
-			  else
+			  else if (tc)
 			    tc->redirects = $2;
 			  $$ = $1;
 			}
@@ -958,14 +962,14 @@ coproc:		COPROC shell_command
 			  COMMAND *tc;
 
 			  tc = $2;
-			  if (tc->redirects)
+			  if (tc && tc->redirects)
 			    {
 			      register REDIRECT *t;
 			      for (t = tc->redirects; t->next; t = t->next)
 				;
 			      t->next = $3;
 			    }
-			  else
+			  else if (tc)
 			    tc->redirects = $3;
 			  $$ = make_coproc_command ("COPROC", $2);
 			  $$->flags |= CMD_WANT_SUBSHELL|CMD_COPROC_SUBSHELL;
@@ -980,14 +984,14 @@ coproc:		COPROC shell_command
 			  COMMAND *tc;
 
 			  tc = $3;
-			  if (tc->redirects)
+			  if (tc && tc->redirects)
 			    {
 			      register REDIRECT *t;
 			      for (t = tc->redirects; t->next; t = t->next)
 				;
 			      t->next = $4;
 			    }
-			  else
+			  else if (tc)
 			    tc->redirects = $4;
 			  $$ = make_coproc_command ($2->word, $3);
 			  $$->flags |= CMD_WANT_SUBSHELL|CMD_COPROC_SUBSHELL;
@@ -4512,7 +4516,7 @@ cond_term ()
       if (term)
 	term->flags |= CMD_INVERT_RETURN;
     }
-  else if (tok == WORD && yylval.word->word[0] == '-' && yylval.word->word[2] == 0 && test_unop (yylval.word->word))
+  else if (tok == WORD && yylval.word->word[0] == '-' && yylval.word->word[1] && yylval.word->word[2] == 0 && test_unop (yylval.word->word))
     {
       op = yylval.word;
       tok = read_token (READ);
@@ -4651,14 +4655,34 @@ token_is_assignment (t, i)
      char *t;
      int i;
 {
-  unsigned char c, c1;
   int r;
+
+#if !defined (USING_BASH_MALLOC)
+  static char *token = 0;
+
+  token = xrealloc (token, i + 3);
+  memcpy (token, t, i);
+  token[i] = '=';
+  token[i+1] = '\0';
+
+  r = assignment (token, (parser_state & PST_COMPASSIGN) != 0);
+
+  if (i + 3 > 4096)	/* keep it from getting too big */
+    {
+      free (token);
+      token = 0;
+    }
+#else
+  unsigned char c, c1;
 
   c = t[i]; c1 = t[i+1];
   t[i] = '='; t[i+1] = '\0';
   r = assignment (t, (parser_state & PST_COMPASSIGN) != 0);
   t[i] = c; t[i+1] = c1;
-  return r;
+#endif
+  /* XXX - check that r == i to avoid returning false positive for
+     t containing `=' before t[i]. */
+  return (r > 0 && r == i);
 }
 
 /* XXX - possible changes here for `+=' */

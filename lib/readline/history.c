@@ -57,6 +57,8 @@ extern int errno;
 /* How big to make the_history when we first allocate it. */
 #define DEFAULT_HISTORY_INITIAL_SIZE	502
 
+#define MAX_HISTORY_INITIAL_SIZE	8192
+
 /* The number of slots to increase the_history by. */
 #define DEFAULT_HISTORY_GROW_SIZE 50
 
@@ -307,7 +309,9 @@ add_history (string)
       if (history_size == 0)
 	{
 	  if (history_stifled && history_max_entries > 0)
-	    history_size = history_max_entries + 2;
+	    history_size = (history_max_entries > MAX_HISTORY_INITIAL_SIZE)
+				? MAX_HISTORY_INITIAL_SIZE
+				: history_max_entries + 2;
 	  else
 	    history_size = DEFAULT_HISTORY_INITIAL_SIZE;
 	  the_history = (HIST_ENTRY **)xmalloc (history_size * sizeof (HIST_ENTRY *));

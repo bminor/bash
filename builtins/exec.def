@@ -190,8 +190,11 @@ exec_builtin (list)
 
   /* Decrement SHLVL by 1 so a new shell started here has the same value,
      preserving the appearance.  After we do that, we need to change the
-     exported environment to include the new value. */
-  if (cleanenv == 0)
+     exported environment to include the new value.  If we've already forked
+     and are in a subshell, we don't want to decrement the shell level,
+     since we are `increasing' the level */
+
+  if (cleanenv == 0 && (subshell_environment & SUBSHELL_PAREN) == 0)
     adjust_shell_level (-1);
 
   if (cleanenv)

@@ -11719,3 +11719,130 @@ print_cmd.c
 	- print_deferred_heredocs: don't print heredoc headers, since they're
 	  now printed in print_redirection_list
 	- print_deferred_heredocs: use print_heredoc_bodies
+
+				   9/20
+				   ----
+builtins/mapfile.def
+	- readarray: update usage synopsis to include -d delim.  Report and
+	  fix from jhankins@homewood.k12.al.us
+
+test.c
+	- test_binop: if op[0] == '-', make sure op[1] != 0 before checking
+	  op[2] or op[3].  Fixes out-of-bounds read reported by Franco
+	  Costantini <franco.costantini.20@gmail.com>
+
+parse.y
+	- cond_term: if yylval.word->word[0] == '-' make sure word[1] != 0
+	  before checking word[2] and calling test_unop.  Fixes out-of-bounds
+	  read reported by Franco Costantini <franco.costantini.20@gmail.com>
+	- make sure to check all instances of the return value of the
+	  simple_command production before trying to hook redirections onto it,
+	  since it can potentially return NULL.
+	  Reported by Franco Costantini <franco.costantini.20@gmail.com>
+
+				   9/21
+				   ----
+parse.y
+	- token_is_assignment: make sure to check that the return value from
+	  assignment() finds the `=' we just added at index I to avoid false
+	  positives from g=g=g=g=g=g=().  Reported by Franco Costantini
+	  <franco.costantini.20@gmail.com>
+
+				   9/22
+				   ----
+parse.y
+	- token_is_assignment: if we're not using the bash malloc (which has
+	  guard bytes after the requested allocation size), use a new
+	  buffer so we can make sure it's big enough to hold the current
+	  token and at least two additional characters.  Reported by
+	  Franco Costantini <franco.costantini.20@gmail.com>
+
+				   9/23
+				   ----
+execute_command.c
+	- execute_in_subshell: call without_job_control for both job control
+	  and non-job-control builds to avoid waiting for last_made_pid
+	  inherited from parent shell.  Related to fix from 8/4 to
+	  initialize_subshell.  Fixes bug reported by Martijn Dekker
+	  <martijn@inlv.org>
+
+builtins/declare.def
+	- local_builtin: allow `local --help' to work even when not executing
+	  a function. Suggestion from Norm Abramovitz <norm@starkandwayne.com>
+
+				   9/25
+				   ----
+builtins/printf.def
+	- bexpand: if passed a null or empty string, return a newly-allocated
+	  empty string (so the return value can always be freed) instead of
+	  NULL.
+	- printstr: if passed a null string, treat it as if it were an empty
+	  string so any precision or fieldwidth arguments are handled
+	  correctly.  Report from isabella parakiss <izaberina@gmail.com>
+
+subst.c
+	- skip_matched_pair: make the flags argument of 1 affect whether or
+	  not backslash can quote characters in the string, so it affects
+	  all quoting mechanisms
+
+arrayfunc.c
+	- unbind_array_element: now takes a third (flags) argument; flags&1
+	  means to not expand an associative array index. This is only called
+	  from a shell builtin context, which means the argument should have
+	  already undergone word expansion, so it should be ok.  Will still
+	  be a problem for uses like "unset -v 'var[$ind]'", quoted to avoid
+	  globbing
+	- valid_array_reference: pass second flags argument to skipsubscript;
+	  still set to 0 by all callers
+
+arrayfunc.h
+	- unbind_array_element: updated prototype
+
+builtins/set.def
+	- unset_builtin: add third argument of 1 to unbind_array_element calls
+	  [TEMPORARILY DISABLED]
+	- unset_builtin: call valid_array_reference with second arg of 1 to
+	  handle unmatched pairs of quotes and [/]
+
+array.c
+	- array_reference: optimize access locality as well as sequential
+	  access by adding ability to start from last-accessed element and move
+	  backwards or forwards depending on the desired index.  Inspired by
+	  report from Tom McCurdy <tom.j.mccurdy@gmail.com> and followup from
+	  Christian Franke <Christian.Franke@t-online.de>
+
+variables.c
+	- all_array_variables: include associative arrays, not just indexed
+	  arrays.  Reported by Grisha Levit <grishalevit@gmail.com>
+
+execute_cmd.c
+	- execute_disk_command: if we're optimizing out the fork (CMD_NO_FORK),
+	  decrement the shell level so we don't end up incrementing it twice.
+	  We should decrement the shell level for an implicit exec like an
+	  explicit one.  Reported by Stephane Chazelas
+	  <stephane.chazelas@gmail.com>
+
+builtins/exec.def
+	- exec_builtin: don't bother to decrement the shell level if we are
+	  already in a `(command)' subshell.  Reported by Stephane Chazelas
+	  <stephane.chazelas@gmail.com>
+
+lib/readline/macro.c
+	- macro_level: count of macro nesting level, maintained by
+	  _rl_push_executing_macro and _rl_pop_executing macro
+	- _rl_with_macro_input: if current nesting level exceeds
+	  MAX_MACRO_LEVEL, abort the current command line with _rl_abort_internal
+	  and return to the top level.  Reported by Christian Klomp
+	  <christianklomp@gmail.com>
+
+lib/readine/history.c
+	- add_history: if allocating the history list for the first time,
+	  make sure the max history list size isn't so large that it will
+	  cause allocation errors.  Cap it at MAX_HISTORY_INITIAL_SIZE
+	  (8192).  Reported by Sean Zha <freeman_cha@hotmail.com>
+
+jobs.c
+	- wait_for: if a foreground job with job control enabled is killed by a
+	  SIGINT and sourcelevel != 0, act as if we received the SIGINT so the
+	  file sourcing can be terminated.  Reported by PePa
+	  <peterkelly@passchier.net>

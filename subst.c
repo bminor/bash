@@ -1683,7 +1683,8 @@ unquote_bang (string)
    parse array subscripts.  FLAGS & 1 means to not attempt to skip over
    matched pairs of quotes or backquotes, or skip word expansions; it is
    intended to be used after expansion has been performed and during final
-   assignment parsing (see arrayfunc.c:assign_compound_array_list()). */
+   assignment parsing (see arrayfunc.c:assign_compound_array_list()) or
+   during execution by a builtin which has already undergone word expansion. */
 static int
 skip_matched_pair (string, start, open, close, flags)
      const char *string;
@@ -1712,7 +1713,7 @@ skip_matched_pair (string, start, open, close, flags)
 	  ADVANCE_CHAR (string, slen, i);
 	  continue;
 	}
-      else if (c == '\\')
+      else if ((flags & 1) == 0 && c == '\\')
 	{
 	  pass_next = 1;
 	  i++;

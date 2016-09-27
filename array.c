@@ -67,6 +67,8 @@ static ARRAY_ELEMENT *lastref = 0;
 	(IS_LASTREF(a) && i >= element_index(lastref)) ? lastref \
 						       : element_forw(a->head)
 
+#define LASTREF(a)	IS_LASTREF(a) ? lastref : element_forw(a->head)
+
 #define INVALIDATE_LASTREF(a) \
 do { \
 	if ((a) == lastarray) { \
@@ -711,17 +713,31 @@ ARRAY	*a;
 arrayind_t	i;
 {
 	register ARRAY_ELEMENT *ae, *start;
+	arrayind_t startind;
+	int direction;
 
 	if (a == 0 || array_empty(a))
 		return((char *) NULL);
 	if (i > array_max_index(a))
 		return((char *)NULL);	/* Keep roving pointer into array to optimize sequential access */
-	start = LASTREF_START(a, i);
-	for (ae = start; ae != a->head; ae = element_forw(ae))
+	start = LASTREF(a);	/* lastref pointer */
+	startind = element_index(start);
+	if (i < startind/2) {	/* XXX - guess */
+		start = element_forw(a->head);
+		startind = element_index(start);
+		direction = 1;
+	} else if (i >= startind) {
+		direction = 1;
+	} else {
+		direction = -1;
+	}
+	for (ae = start; ae != a->head; ) {
 		if (element_index(ae) == i) {
 			SET_LASTREF(a, ae);
 			return(element_value(ae));
 		}
+		ae = (direction == 1) ? element_forw(ae) : element_back(ae);
+	}
 	UNSET_LASTREF();		/* XXX SET_LASTREF(a, start) ? */
 	return((char *) NULL);
 }

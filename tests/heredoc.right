@@ -20,7 +20,7 @@ jkl mno
 fff is a function
 fff () 
 { 
-    ed /tmp/foo  > /dev/null <<ENDOFINPUT
+    ed /tmp/foo <<ENDOFINPUT > /dev/null
 /^name/d
 w
 q
@@ -31,7 +31,7 @@ ENDOFINPUT
 fff is a function
 fff () 
 { 
-    ed /tmp/foo > /dev/null  <<ENDOFINPUT
+    ed /tmp/foo <<ENDOFINPUT > /dev/null
 /^name/d
 w
 q
@@ -43,11 +43,11 @@ foo is a function
 foo () 
 { 
     echo;
-    cat  <<END
+    cat <<END
 bar
 END
 
-    cat  <<EOF
+    cat <<EOF
 qux
 EOF
 

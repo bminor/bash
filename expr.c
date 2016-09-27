@@ -1267,7 +1267,7 @@ readtok ()
 #if defined (ARRAY_VARS)
       if (c == '[')
 	{
-	  e = skipsubscript (cp, 0, 0);
+	  e = skipsubscript (cp, 0, 1);		/* XXX - arg 3 was 0 */
 	  if (cp[e] == ']')
 	    {
 	      cp += e + 1;

@@ -2866,6 +2866,10 @@ if (job == NO_JOB)
 		 loop. */
 	      else if (signal_is_trapped (SIGINT) && loop_level)
 		ADDINTERRUPT;
+	      /* If an interactive shell with job control enabled is sourcing
+		 a file, allow the interrupt to terminate the file sourcing. */
+	      else if (interactive_shell && signal_is_trapped (SIGINT) == 0 && sourcelevel)
+		ADDINTERRUPT;
 	      else
 		{
 		  putchar ('\n');

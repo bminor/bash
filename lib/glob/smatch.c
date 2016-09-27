@@ -390,10 +390,10 @@ xstrmatch (pattern, string, flags)
   wchar_t *wpattern, *wstring;
   size_t plen, slen, mplen, mslen;
 
-  if (mbsmbchar (string) == 0 && mbsmbchar (pattern) == 0)
+  if (MB_CUR_MAX == 1)
     return (internal_strmatch ((unsigned char *)pattern, (unsigned char *)string, flags));
 
-  if (MB_CUR_MAX == 1)
+  if (mbsmbchar (string) == 0 && mbsmbchar (pattern) == 0)
     return (internal_strmatch ((unsigned char *)pattern, (unsigned char *)string, flags));
 
   n = xdupmbstowcs (&wpattern, NULL, pattern);

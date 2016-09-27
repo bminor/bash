@@ -711,8 +711,8 @@ printstr (fmt, string, len, fieldwidth, precision)
   int fw, pr;			/* fieldwidth and precision */
   intmax_t mfw, mpr;
 
-  if (string == 0 || len == 0)
-    return 0;
+  if (string == 0)
+    string = "";
 
 #if 0
   s = fmt;
@@ -955,7 +955,9 @@ bexpand (string, len, sawc, lenp)
 	*sawc = 0;
       if (lenp)
 	*lenp = 0;
-      return ((char *)NULL);
+      ret = (char *)xmalloc (1);
+      ret[0] = '\0';
+      return (ret);
     }
 
   ret = (char *)xmalloc (len + 1);

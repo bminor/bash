@@ -859,7 +859,7 @@ unset_builtin (list)
 
 #if defined (ARRAY_VARS)
       unset_array = 0;
-      if (!unset_function && nameref == 0 && valid_array_reference (name, 0))
+      if (!unset_function && nameref == 0 && valid_array_reference (name, 1))	/* XXX valid array reference second arg was 0 */
 	{
 	  t = strchr (name, '[');
 	  *t++ = '\0';
@@ -916,7 +916,11 @@ unset_builtin (list)
       if (var && unset_array)
 	{
 	  /* Let unbind_array_element decide what to do with non-array vars */
-	  tem = unbind_array_element (var, t);
+#if 0
+	  tem = unbind_array_element (var, t, 1);	/* XXX new third arg */
+#else
+	  tem = unbind_array_element (var, t, 0);	/* XXX new third arg */
+#endif
 	  if (tem == -2 && array_p (var) == 0 && assoc_p (var) == 0)
 	    {
 	      builtin_error (_("%s: not an array variable"), var->name);
@@ -938,8 +942,12 @@ unset_builtin (list)
 	      if (valid_array_reference (nameref_cell (var), 0))
 		{
 		  tname = savestring (nameref_cell (var));
-		  if (var = array_variable_part (tname, &t, 0))
-		    tem = unbind_array_element (var, t);
+		  if (var = array_variable_part (tname, &t, (int *)0))
+#if 0
+		    tem = unbind_array_element (var, t, 1);	/* XXX new third arg */
+#else
+		    tem = unbind_array_element (var, t, 0);	/* XXX new third arg */
+#endif
 		  free (tname);
 		}
 	      else
