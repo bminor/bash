@@ -10748,9 +10748,9 @@ jobs.[ch]
 	- wait_for_single_pid: changed callers to add extra argument
 
 jobs.c
-	- wait_for_single_pid: if (flags & 1) == 0, don't print the error message
-	  if PID isn't found; changed execute_pipeline call when lastpipe is
-	  set
+	- wait_for_single_pid: if (flags & 1) == 0, don't print the error
+	  message if PID isn't found; changed execute_pipeline call when
+	  lastpipe is set
 
 				   4/28
 				   ----
@@ -10807,8 +10807,8 @@ builtins/declare.def
 	  value.  Fix for bug reported by Grisha Levit <grishalevit@gmail.com>
 
 variables.[ch]
-	- find_variable_last_nameref, find_global_variable_last_nameref: takes a
-	  new flags argument.  If flags is non-zero, and we find a nameref
+	- find_variable_last_nameref, find_global_variable_last_nameref: takes
+	  a new flags argument.  If flags is non-zero, and we find a nameref
 	  variable that is unset (has no value), return that variable instead
 	  of NULL.
 
@@ -10819,13 +10819,14 @@ variables.[ch]
 				    5/3
 				    ---
 variables.c
-	- bind_variable_internal: make sure we run the value of a namref variable
-	  through valid_nameref_value before doing the assignment.  This can go
-	  away if we stop allowing namerefs to refer to positional parameters
+	- bind_variable_internal: make sure we run the value of a namref
+	  variable through valid_nameref_value before doing the assignment.
+	  This can go away if we stop allowing namerefs to refer to positional
+	  parameters
 
 execute_cmd.c
-	- execute_select_command: if bind_variable returns NULL, handle it as an
-	  error, as if attempting assignment to a readonly variable
+	- execute_select_command: if bind_variable returns NULL, handle it as
+	  an error, as if attempting assignment to a readonly variable
 	- execute_for_command: use 1 as second argument to
 	  find_variable_last_nameref, so it will return an invisible nameref
 	  to assign for each variable in the list
@@ -10949,17 +10950,17 @@ general.c
 	  away to save calls to legal_identifier
 
 builtins/declare.def
-	- declare_internal: if trying to set nameref attribute on a variable with
-	  a null value, flag as invalid assignment, just as if running
+	- declare_internal: if trying to set nameref attribute on a variable
+	  with a null value, flag as invalid assignment, just as if running
 	  `declare -n r=""'.  Fixes bug report from Grisha Levit
 	  <grishalevit@gmail.com>
-	- declare_internal: when creating a variable with a temporary value (""),
-	  use ASS_FORCE in the assignment flags to bypass name validity checks on
-	  nameref variable names
+	- declare_internal: when creating a variable with a temporary value
+	  (""), use ASS_FORCE in the assignment flags to bypass name validity
+	  checks on nameref variable names
 
 variables.c
-	- bind_variable_internal: don't call valid_nameref_value if we're forcing
-	  assignment with (flags & ASS_FORCE)
+	- bind_variable_internal: don't call valid_nameref_value if we're
+	  forcing assignment with (flags & ASS_FORCE)
 
 builtins/read.def
 	- read_builtin: handle bind_variable returning NULL when setting REPLY.
@@ -10970,9 +10971,9 @@ builtins/setattr.def
 
 lib/sh/tmpfile.c
 	- sh_seedrand(): call srandom() to seed the random number generator
-	- sh_mktmpname, sh_mktmpfd: if we have random(), assume we have srandom()
-	  and seed the random number generator. Still looking for better value to
-	  see random number generator with
+	- sh_mktmpname, sh_mktmpfd: if we have random(), assume we have
+	  srandom() and seed the random number generator. Still looking for
+	  better value to see random number generator with
 
 variables.c
 	- check_unbind_variable: use internal_error instead of builtin_error
@@ -10988,9 +10989,9 @@ arrayfunc.c
 	  since namerefs can't be arrays
 
 execute_cmd.c
-	- coproc_setvars: if the coproc name names a nameref, resolve the nameref
-	  and use it as the name of the coproc.  Suggested by Grisha Levit
-	  <grishalevit@gmail.com>
+	- coproc_setvars: if the coproc name names a nameref, resolve the
+	  nameref and use it as the name of the coproc.  Suggested by Grisha
+	  Levit <grishalevit@gmail.com>
 
 subst.c
 	- command_substitute: don't bother calling QUIT after calling
@@ -11005,11 +11006,11 @@ variables.c
 	- find_variable_nameref_for_create: find a nameref variable whose value
 	  doesn't resolve to an existing variable and see whether or not that
 	  value is appropriate for a new variable to be created
-	- find_variable_nameref_for_assignment: find a nameref variable whose value
-	  doesn't resolve to an existing variable and see whether or not that
-	  value is appropriate for a new variable to be created.  Difference
-	  between _assignment and _create is that _assignment allows the nameref
-	  value to be a subscripted array reference
+	- find_variable_nameref_for_assignment: find a nameref variable whose
+	  value doesn't resolve to an existing variable and see whether or not
+	  that value is appropriate for a new variable to be created.
+	  Difference between _assignment and _create is that _assignment
+	  allows the nameref value to be a subscripted array reference
 
 builtins/setattr.def
 	- set_var_attribute: if variable lookup doesn't return anything, check
@@ -11059,14 +11060,15 @@ bashline.c
 	  READLINE_LINE and READLINE_POINT
 
 pcomplete.c
-	- unbind_compfunc_variables: use unbind_variable_noref to unset COMP_LINE,
-	  COMP_POINT, COMP_WORDS, COMP_CWORD, COMP_TYPE, COMP_KEY
-	- gen_shell_function_matches: use unbind_variable_noref to unset COMPREPLY
+	- unbind_compfunc_variables: use unbind_variable_noref to unset
+	  COMP_LINE, COMP_POINT, COMP_WORDS, COMP_CWORD, COMP_TYPE, COMP_KEY
+	- gen_shell_function_matches: use unbind_variable_noref to unset
+	  COMPREPLY
 
 config-top.h
-	- USE_MKTEMP/USE_MKSTEMP: define by default to use libc version of mktemp
-	  and mkstemp in lib/sh/tmpfile.c.  Recommended by Mike Frysinger
-	  <vapier@gentoo.org> to fix a FreeBSD problem
+	- USE_MKTEMP/USE_MKSTEMP: define by default to use libc version of
+	  mktemp and mkstemp in lib/sh/tmpfile.c.  Recommended by Mike
+	  Frysinger <vapier@gentoo.org> to fix a FreeBSD problem
 
 configure.ac,config.h.in
 	- mkstemp: check for mkstemp, define HAVE_MKSTEMP if available
@@ -11091,8 +11093,8 @@ variables.c
 	  nameref's name.  This provides a degree of ksh93 compatibility.
 	  Suggested by Grisha Levit <grishalevit@gmail.com>
 	- find_variable_nameref_context,find_variable_last_nameref_context:
-	  instead of returning NULL when detecting a loop, return a distinguished
-	  value: &nameref_maxloop_value
+	  instead of returning NULL when detecting a loop, return a
+	  distinguished value: &nameref_maxloop_value
 	- bind_variable: catch nameref_maxloop_value so we can do different
 	  things based on whether or not we get it.  Right now we don't do
 	  anything different, but we could
@@ -11112,8 +11114,8 @@ builtins/declare.def
 	  existing value.  Suggested by Grisha Levit <grishalevit@gmail.com>
 	- declare_internal: add a couple of more checks on nameref names:
 		o make sure `declare -n x[3]=y' is an error
-		o nameref variable self-references now produce a warning when in
-		  function scope
+		o nameref variable self-references now produce a warning when
+		  in function scope
 		o nameref variable self-references using subscripted arrays
 		  (a=a[0]) now produce warnings at function scope and errors at
 		  global scope
@@ -11171,9 +11173,9 @@ subst.c
 				    6/1
 				    ---
 builtins/declare.def
-	- declare_internal: if a nameref assignment fails, only call delete_var to
-	  delete the variable if we created it in declare_internal in the first
-	  place
+	- declare_internal: if a nameref assignment fails, only call delete_var
+	  to delete the variable if we created it in declare_internal in the
+	  first place
 
 general.c
 	- check_selfref: new function, checks a NAME against a VALUE for nameref
@@ -11187,8 +11189,9 @@ builtins/declare.def
 	  and VALUE constitute an invalid nameref variable self-reference
 
 variables.c
-	- bind_variable_internal: call check_selfref to determine whether a given
-	  NAME and VALUE constitute an invalid nameref variable self-reference
+	- bind_variable_internal: call check_selfref to determine whether a
+	  given NAME and VALUE constitute an invalid nameref variable self-
+	  reference
 
 				    6/2
 				    ---
@@ -11218,8 +11221,8 @@ builtins/set.def
 		  a variable isn't found
 		o unsetting namerefs whose values are array references does
 		  not work
-		o unset -n n[0], where n is a nameref, would unset the referenced
-		  variable instead of `n'
+		o unset -n n[0], where n is a nameref, would unset the
+		  referenced variable instead of `n'
 
 redir.c
 	- redir_varvalue: handle case where nameref var points to subscripted
@@ -11254,8 +11257,8 @@ builtins/declare.def
 	  are relative to the original value of name.
 	  Fixes several issues with checking use of subscripted array variables
 	  as nameref values
-	- declare_internal: when calling assign_array_element, make sure to pass
-	  ASS_APPEND if aflags includes it, so things like
+	- declare_internal: when calling assign_array_element, make sure to
+	  pass ASS_APPEND if aflags includes it, so things like
 		declare -a var; var[1]=1; declare var[1]+=4
 	  append to the value appropriately and var[1] ends up being `14'
 
@@ -11276,8 +11279,8 @@ variables.c
 				   ----
 test.c
 	- posixtest: handle four-argument case where argv[1] == '(' and
-	  argv[4] == ')' by performing two-argument test on $2 and $3.  Reported
-	  by Joerg Schilling <Joerg.Schilling@fokus.fraunhofer.de>
+	  argv[4] == ')' by performing two-argument test on $2 and $3.
+	  Reported by Joerg Schilling <Joerg.Schilling@fokus.fraunhofer.de>
 
 				   6/15
 				   ----
@@ -11285,8 +11288,9 @@ variables.c
 	- sv_ignoreeof: make sure ignoreeof is set only if IGNOREEOF is set and
 	  has a value (no `local IGNOREEOF'). Reported by Grisha Levit
 	  <grishalevit@gmail.com>
-	- sv_strict_posix: make sure posixly_correct is set only if POSIXLY_CORRECT
-	  is set and has a value.  Reported by Grisha Levit <grishalevit@gmail.com>
+	- sv_strict_posix: make sure posixly_correct is set only if
+	  POSIXLY_CORRECT is set and has a value.  Reported by Grisha Levit
+	  <grishalevit@gmail.com>
 
 				   6/16
 				   ----
@@ -11298,8 +11302,8 @@ builtins/declare.def
 				   6/21
 				   ----
 execute_cmd.c
-	- shell_execve: make sure errno is (re)set appropriately before returning
-	  error value on exec format error
+	- shell_execve: make sure errno is (re)set appropriately before
+	  returning error value on exec format error
 
 				   6/23
 				   ----
@@ -11472,14 +11476,14 @@ lib/readline/display.c
 				    8/4
 				    ---
 nojobs.c
-	- without_job_control: new function, resets child state that's eventually
-	  used to decide whether or not to wait_for children
+	- without_job_control: new function, resets child state that's
+	  eventually used to decide whether or not to wait_for children
 
 execute_cmd.c
-	- initialize_subshell: call without_job_control in both the JOB_CONTROL and
-	  no job control paths so we can reset the state in subshells that will not
-	  cause them to wait_for children inappropriately.  Fixes bug reported by
-	  Dan Cross <crossd@gmail.com>
+	- initialize_subshell: call without_job_control in both the
+	  JOB_CONTROL and no job control paths so we can reset the state in
+	  subshells that will not cause them to wait_for children
+	  inappropriately.  Fixes bug reported by Dan Cross <crossd@gmail.com>
 
 				    8/5
 				    ---
@@ -11584,13 +11588,14 @@ arrayfunc.[ch]
 				   8/19
 				   ----
 print_cmd.c
-	- xtrace_print_word_list: if (xtflags & 2), don't try to quote the words in
-	  the LIST argument.  Intended to be used in places where the list has not
-	  yet been expanded
-	- xtrace_print_for_command_head: call xtrace_print_word_list with flags argument
-	  of 2.  Fixes issue reported by Aharon Robbins <arnold@skeeve.com>
-	- xtrace_print_select_command_head: call xtrace_print_word_list with flags
-	  argument of 2
+	- xtrace_print_word_list: if (xtflags & 2), don't try to quote the
+	  words in the LIST argument.  Intended to be used in places where
+	  the list has not yet been expanded
+	- xtrace_print_for_command_head: call xtrace_print_word_list with
+	  flags argument of 2.  Fixes issue reported by Aharon Robbins
+	  <arnold@skeeve.com>
+	- xtrace_print_select_command_head: call xtrace_print_word_list with
+	  flags argument of 2
 
 				   8/21
 				   ----
@@ -11649,3 +11654,26 @@ doc/{bash.1,bashref.texi}
 	- quote removal: add paragraph mentioning quote removal to beginning
 	  of expansions section, referencing later paragraph.  Report from
 	  Michel Lanne <michel.lanne@gmail.com>
+
+				   8/30
+				   ----
+lib/readline/input.c
+	- protect instances of SIGALRM and SIGWINCH with #ifdef; apparently
+	  MinGW doesn't define them.  From a report from Simon Sobisch
+	  <simonsobisch@gnu.org>
+
+subst.c
+	- SPECIAL_VAR: make sure name is not the empty string before going on,
+	  empty strings can result in unitialized reads
+	- CHECK_STRING_OVERRUN: semi-general macro to use in *extract* and
+	  similar functions to to check whether a function called to parse an
+	  embedded construct (like a backquoted command substitution) doesn't
+	  consume the entire string because it's unterminated
+	- skip_double_quoted: make sure other extraction functions don't
+	  consume the entire string (which they can if the construct is
+	  unterminated) before incrementing the index and going on.  Uses
+	  CHECK_STRING_OVERRUN
+	- extract_dollar_brace_string: check for unterminated embedded
+	  constructs consuming the entire string with CHECK_STRING_OVERRUN ('`')
+	- skip_matched_pair: use CHECK_STRING_OVERRUN to make sure unterminated
+	  embedded "`", $(, ${ don't cause out-of-bounds reads

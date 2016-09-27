@@ -581,14 +581,18 @@ handle_error:
 #endif
         RL_CHECK_SIGNALS ();
       /* non-keyboard-generated signals of interest */
+#if defined (SIGWINCH)
       else if (_rl_caught_signal == SIGWINCH)
 	RL_CHECK_SIGNALS ();
+#endif /* SIGWINCH */
+#if defined (SIGALRM)
       else if (_rl_caught_signal == SIGALRM
-#if defined (SIGVTALRM)
+#  if defined (SIGVTALRM)
 		|| _rl_caught_signal == SIGVTALRM
-#endif
+#  endif
 	      )
         RL_CHECK_SIGNALS ();
+#endif  /* SIGALRM */
 
       if (rl_signal_event_hook)
 	(*rl_signal_event_hook) ();

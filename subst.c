@@ -122,9 +122,24 @@ extern int errno;
 
 /* Evaluates to 1 if this is one of the shell's special variables. */
 #define SPECIAL_VAR(name, wi) \
- ((DIGIT (*name) && all_digits (name)) || \
+ (*name && ((DIGIT (*name) && all_digits (name)) || \
       (name[1] == '\0' && (sh_syntaxtab[(unsigned char)*name] & CSPECVAR)) || \
-      (wi && name[2] == '\0' && VALID_INDIR_PARAM (name[1])))
+      (wi && name[2] == '\0' && VALID_INDIR_PARAM (name[1]))))
+
+/* This can be used by all of the *_extract_* functions that have a similar
+   structure.  It can't just be wrapped in a do...while(0) loop because of
+   the embedded `break'. The dangling else accommodates a trailing semicolon;
+   we could also put in a do ; while (0) */
+
+   
+#define CHECK_STRING_OVERRUN(oind, ind, len, ch) \
+  if (ind >= len) \
+    { \
+      oind = len; \
+      ch = 0; \
+      break; \
+    } \
+  else \
 
 /* An expansion function that takes a string and a quoted flag and returns
    a WORD_LIST *.  Used as the type of the third argument to
@@ -1031,6 +1046,9 @@ skip_double_quoted (string, slen, sind, flags)
 	  else
 	    ret = extract_dollar_brace_string (string, &si, Q_DOUBLE_QUOTES, SX_NOALLOC);
 
+	  /* These can consume the entire string if they are unterminated */
+	  CHECK_STRING_OVERRUN (i, si, slen, c);
+
 	  i = si + 1;
 	  continue;
 	}
@@ -1519,6 +1537,9 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
 	{
 	  si = i + 1;
 	  t = string_extract (string, &si, "`", flags|SX_NOALLOC);
+
+	  CHECK_STRING_OVERRUN (i, si, slen, c);
+    
 	  i = si + 1;
 	  continue;
 	}
@@ -1571,6 +1592,8 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
         dolbrace_state = DOLBRACE_QUOTE;
       else if (dolbrace_state == DOLBRACE_PARAM && c == ',' && (i - *sindex) > 1)
         dolbrace_state = DOLBRACE_QUOTE;
+      /* This is intended to handle all of the [:]op expansions and the substring/
+	 length/pattern removal/pattern substitution expansions. */
       else if (dolbrace_state == DOLBRACE_PARAM && strchr ("#%^,~:-=?+/", c) != 0)
 	dolbrace_state = DOLBRACE_OP;
       else if (dolbrace_state == DOLBRACE_OP && strchr ("#%^,~:-=?+/", c) == 0)
@@ -1738,6 +1761,9 @@ skip_matched_pair (string, start, open, close, flags)
 	    temp = extract_delimited_string (ss, &si, "$(", "(", ")", SX_NOALLOC|SX_COMMAND); /* ) */
 	  else
 	    temp = extract_dollar_brace_string (ss, &si, 0, SX_NOALLOC);
+
+	  CHECK_STRING_OVERRUN (i, si, slen, c);
+
 	  i = si;
 	  if (string[i] == '\0')	/* don't increment i past EOS in loop */
 	    break;
