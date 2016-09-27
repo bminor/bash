@@ -538,7 +538,7 @@ then
 	RL_LIB_READLINE_VERSION
 
 	case "$ac_cv_rl_version" in
-	5*|6*|7*|8*|9*)	;;
+	7*|8*|9*)	;;
 	*)	opt_with_installed_readline=no 
 		AC_MSG_WARN([installed readline library is too old to be linked with bash])
 		AC_MSG_WARN([using private bash version])

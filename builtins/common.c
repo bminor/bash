@@ -767,7 +767,7 @@ display_signal_list (list, forcecols)
 	     mapped into signal numbers. */
 	  if (lsignum > 128)
 	    lsignum -= 128;
-	  if (lsignum < 0 || lsignum >= NSIG)
+	  if (lsignum <= 0 || lsignum >= NSIG)
 	    {
 	      sh_invalidsig (list->word->word);
 	      result = EXECUTION_FAILURE;

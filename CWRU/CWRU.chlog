@@ -11678,6 +11678,11 @@ subst.c
 	- skip_matched_pair: use CHECK_STRING_OVERRUN to make sure unterminated
 	  embedded "`", $(, ${ don't cause out-of-bounds reads
 
+parse.y
+	- parse_comsub: when parsing a here-document delimiter, make sure we
+	  don't try to use `nestret' after freeing it.  Fixes bug reported by
+	  Franco Costantini <franco.costantini.20@gmail.com>
+
 [bash-4.4 frozen]
 
 				   9/10
@@ -11692,7 +11697,25 @@ execute_cmd.c
 	  SUBSHELL_ASYNC if asynchronous is set as well as setting
 	  SUBSHELL_PAREN
 
-parse.y
-	- parse_comsub: when parsing a here-document delimiter, make sure we
-	  don't try to use `nestret' after freeing it.  Fixes bug reported by
-	  Franco Costantini <franco.costantini.20@gmail.com>
+				   9/17
+				   ----
+builtins/common.c
+	- display_signal_list: if 0 is supplied as an argument to kill -l,
+	  display a signal-out-of-range error.  Fixes bug reported by
+	  Martijn Dekker <martijn@inlv.org>
+
+				   9/18
+				   ----
+print_cmd.c
+	- print_heredoc_bodies: take a list of redirections, all here documents,
+	  and print the here-document bodies including the ending delimiter,
+	  followed by a newline
+	- print_redirection_list: print the heredoc headers the first time
+	  through the list of redirections so we print them in the same left-
+	  to-right order they're supplied; print the bodies and delimiters with
+	  print_heredoc_bodies after we print all the redirections if we're
+	  not printing a list of commands (printing_connection == 0).  Fix for
+	  problem reported by Isabella Parakiss <izaberina@gmail.com>
+	- print_deferred_heredocs: don't print heredoc headers, since they're
+	  now printed in print_redirection_list
+	- print_deferred_heredocs: use print_heredoc_bodies
