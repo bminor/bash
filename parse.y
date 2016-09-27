@@ -3920,11 +3920,11 @@ eof_error:
 		{
 		  nestret = substring (ret, lex_firstind, retind);
 		  heredelim = string_quote_removal (nestret, 0);
-		  free (nestret);
 		  hdlen = STRLEN(heredelim);
 /*itrace("parse_comsub:%d: found here doc delimiter `%s' (%d)", line_number, heredelim, hdlen);*/
 		  if (STREQ (heredelim, nestret) == 0)
 		    tflags |= LEX_QUOTEDDOC;
+		  free (nestret);
 		}
 	      if (ch == '\n')
 		{

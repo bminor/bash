@@ -1,3 +1,28 @@
+This document details the changes between this version, bash-4.4-release, and
+the previous version, bash-4.4-rc2.
+
+1.  Changes to Bash
+
+a.  Fixed a bug that could potentially result in a crash due to an integer
+    overflow.
+
+b.  Fixed a bug in where commands printed due to `set -x' could be incorrectly
+    quoted if being printed in contexts where they haven't yet been expanded.
+
+c.  Fixed several memory leaks.
+
+d.  Fixed a bug that could potentially cause the terminal attributes to be
+    set incorrectly by a command run from a programmable completion.
+
+e.  Fixed several potential buffer overflow issues in the word expansion code.
+
+2.  Changes to Readline
+
+3.  New Features in Bash
+
+4.  New Features in Readline
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-4.4-rc2, and
 the previous version, bash-4.4-beta2.
 
@@ -233,15 +258,15 @@ q.  Fixed a bug that allowed subshells begun to execute process substitutions
 r.  Fixed a bug that could cause the shell to dump core when receiving a
     SIGCHLD for which a trap has been set while running in posix mode.
 
-s.  Fixed a bug that caused bash to not restore BASH_ARGC, BASH_ARGV, BASH_SOURCE,
-    BASH_LINENO, and FUNCNAME if the shell received a SIGINT while reading
-    commands from a file while executing  `.'.
+s.  Fixed a bug that caused bash to not restore BASH_ARGC, BASH_ARGV,
+    BASH_SOURCE, BASH_LINENO, and FUNCNAME if the shell received a SIGINT
+    while reading commands from a file while executing  `.'.
 
 t.  Fixed a bug that caused the `-o history' option to have no effect when
     supplied on the command line when starting a new shell.
 
-u.  Fixed a bug that caused history expansions occurring in command substitutions
-    to not be performed.
+u.  Fixed a bug that caused history expansions occurring in command
+    substitutions to not be performed.
 
 v.  Fixed a bug that caused `eval' run in a non-interactive shell to disable
     history expansion for the remainder of the shell script, even if the script
@@ -592,7 +617,7 @@ dd. Fixed a bug that caused patterns containing `*' to match pathnames in cases
     where slashes must be matched explicitly.
 
 ee. Fixed a problem with patterns containing `:' in colon-separated variables
-    lik GLOBIGNORE. 
+    like GLOBIGNORE. 
 
 ff. Fixed a bug that caused indirect variable expansion using indexed arrays to
     always use index 0.
@@ -1004,4 +1029,3 @@ h.  The insert-char function attempts to batch-insert all pending typeahead
 i.  rl_callback_sigcleanup: a new application function that can clean up and
     unset any state set by readline's callback mode.  Intended to be used
     after a signal.
-

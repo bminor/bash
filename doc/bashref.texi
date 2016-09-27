@@ -7393,6 +7393,10 @@ builtins.
 during command lookup.
 
 @item
+When printing shell function definitions (e.g., by @code{type}), Bash does
+not print the @code{function} keyword.
+
+@item
 Literal tildes that appear as the first character in elements of
 the @env{PATH} variable are not expanded as described above
 under @ref{Tilde Expansion}.
@@ -7451,7 +7455,7 @@ Non-interactive shells exit if a syntax error in an arithmetic expansion
 results in an invalid expression.
 
 @item
-Non-interactive shells exit on word expansion errors.
+Non-interactive shells exit if a parameter expansion error occurs.
 
 @item
 Non-interactive shells exit if there is a syntax error in a script read
@@ -7464,6 +7468,11 @@ Process substitution is not available.
 @item
 While variable indirection is available, it may not be applied to the
 @samp{#} and @samp{?} special parameters.
+
+@item
+When expanding the @samp{*} special parameter in a pattern context where the
+expansion is double-quoted does not treat the @code{$*} as if it were
+double-quoted.
 
 @item
 Assignment statements preceding @sc{posix} special builtins

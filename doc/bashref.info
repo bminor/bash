@@ -2,9 +2,9 @@ This is bashref.info, produced by makeinfo version 6.1 from
 bashref.texi.
 
 This text is a brief description of the features that are present in the
-Bash shell (version 4.4, 26 August 2016).
+Bash shell (version 4.4, 7 September 2016).
 
-   This is Edition 4.4, last updated 26 August 2016, of 'The GNU Bash
+   This is Edition 4.4, last updated 7 September 2016, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 4.4.
 
    Copyright (C) 1988-2016 Free Software Foundation, Inc.
@@ -27,10 +27,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in the
-Bash shell (version 4.4, 26 August 2016).  The Bash home page is
+Bash shell (version 4.4, 7 September 2016).  The Bash home page is
 <http://www.gnu.org/software/bash/>.
 
-   This is Edition 4.4, last updated 26 August 2016, of 'The GNU Bash
+   This is Edition 4.4, last updated 7 September 2016, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 4.4.
 
    Bash contains features that appear in other popular shells, and some
@@ -6420,158 +6420,165 @@ startup files.
   14. POSIX special builtins are found before shell functions during
      command lookup.
 
-  15. Literal tildes that appear as the first character in elements of
+  15. When printing shell function definitions (e.g., by 'type'), Bash
+     does not print the 'function' keyword.
+
+  16. Literal tildes that appear as the first character in elements of
      the 'PATH' variable are not expanded as described above under *note
      Tilde Expansion::.
 
-  16. The 'time' reserved word may be used by itself as a command.  When
+  17. The 'time' reserved word may be used by itself as a command.  When
      used in this way, it displays timing statistics for the shell and
      its completed children.  The 'TIMEFORMAT' variable controls the
      format of the timing information.
 
-  17. When parsing and expanding a ${...} expansion that appears within
+  18. When parsing and expanding a ${...} expansion that appears within
      double quotes, single quotes are no longer special and cannot be
      used to quote a closing brace or other special character, unless
      the operator is one of those defined to perform pattern removal.
      In this case, they do not have to appear as matched pairs.
 
-  18. The parser does not recognize 'time' as a reserved word if the
+  19. The parser does not recognize 'time' as a reserved word if the
      next token begins with a '-'.
 
-  19. The '!' character does not introduce history expansion within a
+  20. The '!' character does not introduce history expansion within a
      double-quoted string, even if the 'histexpand' option is enabled.
 
-  20. If a POSIX special builtin returns an error status, a
+  21. If a POSIX special builtin returns an error status, a
      non-interactive shell exits.  The fatal errors are those listed in
      the POSIX standard, and include things like passing incorrect
      options, redirection errors, variable assignment errors for
      assignments preceding the command name, and so on.
 
-  21. A non-interactive shell exits with an error status if a variable
+  22. A non-interactive shell exits with an error status if a variable
      assignment error occurs when no command name follows the assignment
      statements.  A variable assignment error occurs, for example, when
      trying to assign a value to a readonly variable.
 
-  22. A non-interactive shell exits with an error status if a variable
+  23. A non-interactive shell exits with an error status if a variable
      assignment error occurs in an assignment statement preceding a
      special builtin, but not with any other simple command.
 
-  23. A non-interactive shell exits with an error status if the
+  24. A non-interactive shell exits with an error status if the
      iteration variable in a 'for' statement or the selection variable
      in a 'select' statement is a readonly variable.
 
-  24. Non-interactive shells exit if FILENAME in '.'  FILENAME is not
+  25. Non-interactive shells exit if FILENAME in '.'  FILENAME is not
      found.
 
-  25. Non-interactive shells exit if a syntax error in an arithmetic
+  26. Non-interactive shells exit if a syntax error in an arithmetic
      expansion results in an invalid expression.
 
-  26. Non-interactive shells exit on word expansion errors.
+  27. Non-interactive shells exit if a parameter expansion error occurs.
 
-  27. Non-interactive shells exit if there is a syntax error in a script
+  28. Non-interactive shells exit if there is a syntax error in a script
      read with the '.' or 'source' builtins, or in a string processed by
      the 'eval' builtin.
 
-  28. Process substitution is not available.
+  29. Process substitution is not available.
 
-  29. While variable indirection is available, it may not be applied to
+  30. While variable indirection is available, it may not be applied to
      the '#' and '?' special parameters.
 
-  30. Assignment statements preceding POSIX special builtins persist in
+  31. When expanding the '*' special parameter in a pattern context
+     where the expansion is double-quoted does not treat the '$*' as if
+     it were double-quoted.
+
+  32. Assignment statements preceding POSIX special builtins persist in
      the shell environment after the builtin completes.
 
-  31. Assignment statements preceding shell function calls persist in
+  33. Assignment statements preceding shell function calls persist in
      the shell environment after the function returns, as if a POSIX
      special builtin command had been executed.
 
-  32. The 'command' builtin does not prevent builtins that take
+  34. The 'command' builtin does not prevent builtins that take
      assignment statements as arguments from expanding them as
      assignment statements; when not in POSIX mode, assignment builtins
      lose their assignment statement expansion properties when preceded
      by 'command'.
 
-  33. The 'bg' builtin uses the required format to describe each job
+  35. The 'bg' builtin uses the required format to describe each job
      placed in the background, which does not include an indication of
      whether the job is the current or previous job.
 
-  34. The output of 'kill -l' prints all the signal names on a single
+  36. The output of 'kill -l' prints all the signal names on a single
      line, separated by spaces, without the 'SIG' prefix.
 
-  35. The 'kill' builtin does not accept signal names with a 'SIG'
+  37. The 'kill' builtin does not accept signal names with a 'SIG'
      prefix.
 
-  36. The 'export' and 'readonly' builtin commands display their output
+  38. The 'export' and 'readonly' builtin commands display their output
      in the format required by POSIX.
 
-  37. The 'trap' builtin displays signal names without the leading
+  39. The 'trap' builtin displays signal names without the leading
      'SIG'.
 
-  38. The 'trap' builtin doesn't check the first argument for a possible
+  40. The 'trap' builtin doesn't check the first argument for a possible
      signal specification and revert the signal handling to the original
      disposition if it is, unless that argument consists solely of
      digits and is a valid signal number.  If users want to reset the
      handler for a given signal to the original disposition, they should
      use '-' as the first argument.
 
-  39. The '.' and 'source' builtins do not search the current directory
+  41. The '.' and 'source' builtins do not search the current directory
      for the filename argument if it is not found by searching 'PATH'.
 
-  40. Enabling POSIX mode has the effect of setting the
+  42. Enabling POSIX mode has the effect of setting the
      'inherit_errexit' option, so subshells spawned to execute command
      substitutions inherit the value of the '-e' option from the parent
      shell.  When the 'inherit_errexit' option is not enabled, Bash
      clears the '-e' option in such subshells.
 
-  41. When the 'alias' builtin displays alias definitions, it does not
+  43. When the 'alias' builtin displays alias definitions, it does not
      display them with a leading 'alias ' unless the '-p' option is
      supplied.
 
-  42. When the 'set' builtin is invoked without options, it does not
+  44. When the 'set' builtin is invoked without options, it does not
      display shell function names and definitions.
 
-  43. When the 'set' builtin is invoked without options, it displays
+  45. When the 'set' builtin is invoked without options, it displays
      variable values without quotes, unless they contain shell
      metacharacters, even if the result contains nonprinting characters.
 
-  44. When the 'cd' builtin is invoked in LOGICAL mode, and the pathname
+  46. When the 'cd' builtin is invoked in LOGICAL mode, and the pathname
      constructed from '$PWD' and the directory name supplied as an
      argument does not refer to an existing directory, 'cd' will fail
      instead of falling back to PHYSICAL mode.
 
-  45. The 'pwd' builtin verifies that the value it prints is the same as
+  47. The 'pwd' builtin verifies that the value it prints is the same as
      the current directory, even if it is not asked to check the file
      system with the '-P' option.
 
-  46. When listing the history, the 'fc' builtin does not include an
+  48. When listing the history, the 'fc' builtin does not include an
      indication of whether or not a history entry has been modified.
 
-  47. The default editor used by 'fc' is 'ed'.
+  49. The default editor used by 'fc' is 'ed'.
 
-  48. The 'type' and 'command' builtins will not report a non-executable
+  50. The 'type' and 'command' builtins will not report a non-executable
      file as having been found, though the shell will attempt to execute
      such a file if it is the only so-named file found in '$PATH'.
 
-  49. The 'vi' editing mode will invoke the 'vi' editor directly when
+  51. The 'vi' editing mode will invoke the 'vi' editor directly when
      the 'v' command is run, instead of checking '$VISUAL' and
      '$EDITOR'.
 
-  50. When the 'xpg_echo' option is enabled, Bash does not attempt to
+  52. When the 'xpg_echo' option is enabled, Bash does not attempt to
      interpret any arguments to 'echo' as options.  Each argument is
      displayed, after escape characters are converted.
 
-  51. The 'ulimit' builtin uses a block size of 512 bytes for the '-c'
+  53. The 'ulimit' builtin uses a block size of 512 bytes for the '-c'
      and '-f' options.
 
-  52. The arrival of 'SIGCHLD' when a trap is set on 'SIGCHLD' does not
+  54. The arrival of 'SIGCHLD' when a trap is set on 'SIGCHLD' does not
      interrupt the 'wait' builtin and cause it to return immediately.
      The trap command is run once for each child that exits.
 
-  53. The 'read' builtin may be interrupted by a signal for which a trap
+  55. The 'read' builtin may be interrupted by a signal for which a trap
      has been set.  If Bash receives a trapped signal while executing
      'read', the trap handler executes and 'read' returns an exit status
      greater than 128.
 
-  54. Bash removes an exited background process's status from the list
+  56. Bash removes an exited background process's status from the list
      of such statuses after the 'wait' builtin is used to obtain it.
 
    There is other POSIX behavior that Bash does not implement by default
@@ -11344,134 +11351,134 @@ D.5 Concept Index
 
 
 Tag Table:
-Node: Top893
-Node: Introduction2809
-Node: What is Bash?3025
-Node: What is a shell?4139
-Node: Definitions6677
-Node: Basic Shell Features9628
-Node: Shell Syntax10847
-Node: Shell Operation11873
-Node: Quoting13166
-Node: Escape Character14466
-Node: Single Quotes14951
-Node: Double Quotes15299
-Node: ANSI-C Quoting16577
-Node: Locale Translation17830
-Node: Comments18726
-Node: Shell Commands19344
-Node: Simple Commands20216
-Node: Pipelines20847
-Node: Lists23590
-Node: Compound Commands25319
-Node: Looping Constructs26322
-Node: Conditional Constructs28785
-Node: Command Grouping39707
-Node: Coprocesses41186
-Node: GNU Parallel43018
-Node: Shell Functions46991
-Node: Shell Parameters52197
-Node: Positional Parameters56610
-Node: Special Parameters57510
-Node: Shell Expansions60847
-Node: Brace Expansion62941
-Node: Tilde Expansion65722
-Node: Shell Parameter Expansion68070
-Node: Command Substitution82202
-Node: Arithmetic Expansion83557
-Node: Process Substitution84489
-Node: Word Splitting85609
-Node: Filename Expansion87553
-Node: Pattern Matching89837
-Node: Quote Removal93535
-Node: Redirections93830
-Node: Executing Commands103250
-Node: Simple Command Expansion103920
-Node: Command Search and Execution105850
-Node: Command Execution Environment108186
-Node: Environment111170
-Node: Exit Status112829
-Node: Signals114499
-Node: Shell Scripts116466
-Node: Shell Builtin Commands118981
-Node: Bourne Shell Builtins121015
-Node: Bash Builtins141615
-Node: Modifying Shell Behavior170260
-Node: The Set Builtin170605
-Node: The Shopt Builtin181018
-Node: Special Builtins196817
-Node: Shell Variables197796
-Node: Bourne Shell Variables198233
-Node: Bash Variables200264
-Node: Bash Features228644
-Node: Invoking Bash229543
-Node: Bash Startup Files235492
-Node: Interactive Shells240595
-Node: What is an Interactive Shell?241005
-Node: Is this Shell Interactive?241654
-Node: Interactive Shell Behavior242469
-Node: Bash Conditional Expressions245844
-Node: Shell Arithmetic250084
-Node: Aliases252901
-Node: Arrays255449
-Node: The Directory Stack260533
-Node: Directory Stack Builtins261317
-Node: Controlling the Prompt264285
-Node: The Restricted Shell267031
-Node: Bash POSIX Mode268856
-Node: Job Control278909
-Node: Job Control Basics279369
-Node: Job Control Builtins284088
-Node: Job Control Variables288618
-Node: Command Line Editing289774
-Node: Introduction and Notation291445
-Node: Readline Interaction293068
-Node: Readline Bare Essentials294259
-Node: Readline Movement Commands296042
-Node: Readline Killing Commands297002
-Node: Readline Arguments298920
-Node: Searching299964
-Node: Readline Init File302150
-Node: Readline Init File Syntax303297
-Node: Conditional Init Constructs323484
-Node: Sample Init File326009
-Node: Bindable Readline Commands329126
-Node: Commands For Moving330330
-Node: Commands For History331473
-Node: Commands For Text335762
-Node: Commands For Killing339151
-Node: Numeric Arguments341632
-Node: Commands For Completion342771
-Node: Keyboard Macros346962
-Node: Miscellaneous Commands347649
-Node: Readline vi Mode353453
-Node: Programmable Completion354360
-Node: Programmable Completion Builtins361821
-Node: A Programmable Completion Example371707
-Node: Using History Interactively376959
-Node: Bash History Facilities377643
-Node: Bash History Builtins380644
-Node: History Interaction384641
-Node: Event Designators387605
-Node: Word Designators388824
-Node: Modifiers390461
-Node: Installing Bash391863
-Node: Basic Installation393000
-Node: Compilers and Options395691
-Node: Compiling For Multiple Architectures396432
-Node: Installation Names398095
-Node: Specifying the System Type398913
-Node: Sharing Defaults399629
-Node: Operation Controls400302
-Node: Optional Features401260
-Node: Reporting Bugs411517
-Node: Major Differences From The Bourne Shell412711
-Node: GNU Free Documentation License429563
-Node: Indexes454740
-Node: Builtin Index455194
-Node: Reserved Word Index462021
-Node: Variable Index464469
-Node: Function Index479928
-Node: Concept Index493085
+Node: Top897
+Node: Introduction2817
+Node: What is Bash?3033
+Node: What is a shell?4147
+Node: Definitions6685
+Node: Basic Shell Features9636
+Node: Shell Syntax10855
+Node: Shell Operation11881
+Node: Quoting13174
+Node: Escape Character14474
+Node: Single Quotes14959
+Node: Double Quotes15307
+Node: ANSI-C Quoting16585
+Node: Locale Translation17838
+Node: Comments18734
+Node: Shell Commands19352
+Node: Simple Commands20224
+Node: Pipelines20855
+Node: Lists23598
+Node: Compound Commands25327
+Node: Looping Constructs26330
+Node: Conditional Constructs28793
+Node: Command Grouping39715
+Node: Coprocesses41194
+Node: GNU Parallel43026
+Node: Shell Functions46999
+Node: Shell Parameters52205
+Node: Positional Parameters56618
+Node: Special Parameters57518
+Node: Shell Expansions60855
+Node: Brace Expansion62949
+Node: Tilde Expansion65730
+Node: Shell Parameter Expansion68078
+Node: Command Substitution82210
+Node: Arithmetic Expansion83565
+Node: Process Substitution84497
+Node: Word Splitting85617
+Node: Filename Expansion87561
+Node: Pattern Matching89845
+Node: Quote Removal93543
+Node: Redirections93838
+Node: Executing Commands103258
+Node: Simple Command Expansion103928
+Node: Command Search and Execution105858
+Node: Command Execution Environment108194
+Node: Environment111178
+Node: Exit Status112837
+Node: Signals114507
+Node: Shell Scripts116474
+Node: Shell Builtin Commands118989
+Node: Bourne Shell Builtins121023
+Node: Bash Builtins141623
+Node: Modifying Shell Behavior170268
+Node: The Set Builtin170613
+Node: The Shopt Builtin181026
+Node: Special Builtins196825
+Node: Shell Variables197804
+Node: Bourne Shell Variables198241
+Node: Bash Variables200272
+Node: Bash Features228652
+Node: Invoking Bash229551
+Node: Bash Startup Files235500
+Node: Interactive Shells240603
+Node: What is an Interactive Shell?241013
+Node: Is this Shell Interactive?241662
+Node: Interactive Shell Behavior242477
+Node: Bash Conditional Expressions245852
+Node: Shell Arithmetic250092
+Node: Aliases252909
+Node: Arrays255457
+Node: The Directory Stack260541
+Node: Directory Stack Builtins261325
+Node: Controlling the Prompt264293
+Node: The Restricted Shell267039
+Node: Bash POSIX Mode268864
+Node: Job Control279215
+Node: Job Control Basics279675
+Node: Job Control Builtins284394
+Node: Job Control Variables288924
+Node: Command Line Editing290080
+Node: Introduction and Notation291751
+Node: Readline Interaction293374
+Node: Readline Bare Essentials294565
+Node: Readline Movement Commands296348
+Node: Readline Killing Commands297308
+Node: Readline Arguments299226
+Node: Searching300270
+Node: Readline Init File302456
+Node: Readline Init File Syntax303603
+Node: Conditional Init Constructs323790
+Node: Sample Init File326315
+Node: Bindable Readline Commands329432
+Node: Commands For Moving330636
+Node: Commands For History331779
+Node: Commands For Text336068
+Node: Commands For Killing339457
+Node: Numeric Arguments341938
+Node: Commands For Completion343077
+Node: Keyboard Macros347268
+Node: Miscellaneous Commands347955
+Node: Readline vi Mode353759
+Node: Programmable Completion354666
+Node: Programmable Completion Builtins362127
+Node: A Programmable Completion Example372013
+Node: Using History Interactively377265
+Node: Bash History Facilities377949
+Node: Bash History Builtins380950
+Node: History Interaction384947
+Node: Event Designators387911
+Node: Word Designators389130
+Node: Modifiers390767
+Node: Installing Bash392169
+Node: Basic Installation393306
+Node: Compilers and Options395997
+Node: Compiling For Multiple Architectures396738
+Node: Installation Names398401
+Node: Specifying the System Type399219
+Node: Sharing Defaults399935
+Node: Operation Controls400608
+Node: Optional Features401566
+Node: Reporting Bugs411823
+Node: Major Differences From The Bourne Shell413017
+Node: GNU Free Documentation License429869
+Node: Indexes455046
+Node: Builtin Index455500
+Node: Reserved Word Index462327
+Node: Variable Index464775
+Node: Function Index480234
+Node: Concept Index493391
 
 End Tag Table

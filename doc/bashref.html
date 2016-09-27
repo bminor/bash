@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 4.4, 26 August 2016).
+the Bash shell (version 4.4, 7 September 2016).
 
-This is Edition 4.4, last updated 26 August 2016,
+This is Edition 4.4, last updated 7 September 2016,
 of The GNU Bash Reference Manual,
 for Bash, Version 4.4.
 
@@ -284,10 +284,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 4.4, 26 August 2016).
+the Bash shell (version 4.4, 7 September 2016).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 4.4, last updated 26 August 2016,
+<p>This is Edition 4.4, last updated 7 September 2016,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 4.4.
 </p>
@@ -8787,6 +8787,9 @@ builtins.
 </li><li> <small>POSIX</small> special builtins are found before shell functions
 during command lookup.
 
+</li><li> When printing shell function definitions (e.g., by <code>type</code>), Bash does
+not print the <code>function</code> keyword.
+
 </li><li> Literal tildes that appear as the first character in elements of
 the <code>PATH</code> variable are not expanded as described above
 under <a href="#Tilde-Expansion">Tilde Expansion</a>.
@@ -8834,7 +8837,7 @@ is not found.
 </li><li> Non-interactive shells exit if a syntax error in an arithmetic expansion
 results in an invalid expression.
 
-</li><li> Non-interactive shells exit on word expansion errors.
+</li><li> Non-interactive shells exit if a parameter expansion error occurs.
 
 </li><li> Non-interactive shells exit if there is a syntax error in a script read
 with the <code>.</code> or <code>source</code> builtins, or in a string processed by
@@ -8844,6 +8847,10 @@ the <code>eval</code> builtin.
 
 </li><li> While variable indirection is available, it may not be applied to the
 &lsquo;<samp>#</samp>&rsquo; and &lsquo;<samp>?</samp>&rsquo; special parameters.
+
+</li><li> When expanding the &lsquo;<samp>*</samp>&rsquo; special parameter in a pattern context where the
+expansion is double-quoted does not treat the <code>$*</code> as if it were
+double-quoted.
 
 </li><li> Assignment statements preceding <small>POSIX</small> special builtins
 persist in the shell environment after the builtin completes.

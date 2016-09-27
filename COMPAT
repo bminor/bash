@@ -372,6 +372,25 @@ above.
     characters in the replacement string as special; if it treats them as
     special, then quote removal should remove them.
 
+54. Bash-4.4 no longer considers a reference to ${a[@]} or ${a[*]}, where `a'
+    is an array without any elements set, to be a reference to an unset
+    variable.  This means that such a reference will not cause the shell to
+    exit when the `-u' option is enabled.
+
+55. Bash-4.4 allows double quotes to quote the history expansion character (!)
+    when in Posix mode, since Posix specifies the effects of double quotes.
+
+56. Bash-4.4 does not inherit $PS4 from the environment if running as root.
+
+57. Bash-4.4 doesn't allow a `break' or `continue' in a function to affect
+    loop execution in the calling context.
+
+58. Bash-4.4 no longer expands tildes in $PATH elements when in Posix mode.
+
+59. Bash-4.4 does not attempt to perform a compound array assignment if an
+    argument to `declare' or a similar builtin expands to a word that looks
+    like a compound array assignment (e.g. declare w=$x where x='(foo)').
+
 Shell Compatibility Level
 =========================
 

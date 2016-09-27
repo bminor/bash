@@ -1087,8 +1087,9 @@ run_debug_trap ()
       close_pgrp_pipe ();
       restore_pgrp_pipe (save_pipe);
 #  endif
-      if (pipeline_pgrp > 0)
+      if (pipeline_pgrp > 0 && ((subshell_environment & (SUBSHELL_ASYNC|SUBSHELL_PIPE)) == 0))
 	give_terminal_to (pipeline_pgrp, 1);
+
       notify_and_cleanup ();
 #endif
       

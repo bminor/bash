@@ -1492,7 +1492,11 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   login_shell = interactive = 0;
 
   if (user_subshell)
-    subshell_environment = SUBSHELL_PAREN;	/* XXX */
+    {
+      subshell_environment = SUBSHELL_PAREN;	/* XXX */
+      if (asynchronous)
+	subshell_environment |= SUBSHELL_ASYNC;
+    }
   else
     {
       subshell_environment = 0;			/* XXX */

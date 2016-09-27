@@ -11677,3 +11677,22 @@ subst.c
 	  constructs consuming the entire string with CHECK_STRING_OVERRUN ('`')
 	- skip_matched_pair: use CHECK_STRING_OVERRUN to make sure unterminated
 	  embedded "`", $(, ${ don't cause out-of-bounds reads
+
+[bash-4.4 frozen]
+
+				   9/10
+				   ----
+trap.c
+	- run_debug_trap: only give the terminal to pipeline_pgrp if
+	  subshell_environment doesn't include SUBSHELL_ASYNC|SUBSHELL_PIPE.
+	  Fixes bug reported by Matthew Giassa <matthew@giassa.net>
+
+execute_cmd.c
+	- execute_simple_command: if user_subshell is set, check and set
+	  SUBSHELL_ASYNC if asynchronous is set as well as setting
+	  SUBSHELL_PAREN
+
+parse.y
+	- parse_comsub: when parsing a here-document delimiter, make sure we
+	  don't try to use `nestret' after freeing it.  Fixes bug reported by
+	  Franco Costantini <franco.costantini.20@gmail.com>
