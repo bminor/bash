@@ -11952,3 +11952,55 @@ array.c
 array.c
 	- array_remove: short-circuit if asked to remove index after max
 	  index or before first index
+
+				   10/10
+				   -----
+lib/malloc/malloc.c
+	- internal_realloc: if we are requesting reallocation to the same size
+	  as the block's current size, short-circuit and return `mem' right
+	  after doing bounds check
+	- internal_realloc: if we are reducing the size of an allocation, and
+	  the new size fits in the next lower bin, just keep the same block
+	  and adjust the size, so we can avoid some copies
+
+parse.y
+	- set_line_mbstate: keep track of the allocated size of
+	  shell_input_line_property, only request reallocation if the size
+	  increases, but don't let it get too big
+
+				   10/11
+				   -----
+jobs.c
+	- wait_for_background_pids: make sure we wait for pid in
+	  last_procsub_child since it's not found in any job -- still needs
+	  more work to wait for multiple process substitutions
+
+subst.c
+	- process_substitute: if make_child fails, make sure we call
+	  restore_pipeline to undo the previous save_pipeline()
+
+				   10/15
+				   -----
+subst.c
+	- process_substitute,command_substitute: leave subshell_level (reflected
+	  as $BASH_SUBSHELL) intact for any exit trap instead of decrementing
+	  it.  Suggested by Martijn Dekker <martijn@inlv.org>
+
+builtins/evalstring.c
+	- optimize_subshell_command: new function, framework for optimizing
+	  out forks for command that have already forked and are executing
+	  in a subshell. Not used yet
+
+expr.c
+	- readtok: if we have a post-increment or post-decrement, and the
+	  previous token is not a string, check whether the previous token is
+	  a number that results from a pre-increment or pre-decrement, and
+	  make that an error.  Report from Conrad Hoffmann <ch@bitfehler.net>
+
+				   10/16
+				   -----
+aclocal.m4
+	- BASH_JOB_CONTROL_MISSING: convert from AC_TRY_RUN to AC_TRY_COMPILE
+	  with existing set of preprocessor defines, so it can work when
+	  cross-compiling.  Suggested by Felix Janda <felix.janda@posteo.de>
+

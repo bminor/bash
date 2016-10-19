@@ -1568,6 +1568,12 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   if (should_redir_stdin && stdin_redir == 0)
     async_redirect_stdin ();
 
+#if 0
+  /* bash-5.0 */
+  if (user_subshell && command->type == cm_subshell)
+    optimize_subshell_command (command->value.Subshell->command);
+#endif
+
   /* Do redirections, then dispose of them before recursive call. */
   if (command->redirects)
     {
@@ -1876,6 +1882,17 @@ cpl_searchbyname (name)
   return (struct cpelement *)NULL;
 }
 
+static pid_t
+cpl_firstactive ()
+{
+  struct cpelement *cpe;
+
+  for (cpe = coproc_list.head ; cpe; cpe = cpe->next)
+    if ((cpe->coproc->c_flags & COPROC_DEAD) == 0)
+      return cpe->coproc->c_pid;
+  return (pid_t)NO_PID;
+}
+
 #if 0
 static void
 cpl_prune ()
@@ -2147,6 +2164,15 @@ coproc_pidchk (pid, status)
     }
 }
 
+pid_t
+coproc_active ()
+{
+#if MULTIPLE_COPROCS
+  return (cpl_firstactive ());
+#else
+  return ((sh_coproc.c_flags & COPROC_DEAD) ? NO_PID : sh_coproc.c_pid);
+#endif
+}
 void
 coproc_setvars (cp)
      struct coproc *cp;
@@ -2308,6 +2334,8 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
   cp = coproc_alloc (command->value.Coproc->name, coproc_pid);
   cp->c_rfd = rpipe[0];
   cp->c_wfd = wpipe[1];
+
+  cp->c_flags |= COPROC_RUNNING;
 
   SET_CLOSE_ON_EXEC (cp->c_rfd);
   SET_CLOSE_ON_EXEC (cp->c_wfd);

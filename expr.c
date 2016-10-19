@@ -1368,6 +1368,14 @@ readtok ()
 	c = POWER;
       else if ((c == '-' || c == '+') && c1 == c && curtok == STR)
 	c = (c == '-') ? POSTDEC : POSTINC;
+      else if ((c == '-' || c == '+') && c1 == c && curtok == NUM && (lasttok == PREINC || lasttok == PREDEC))
+	{
+	  /* This catches something like --FOO++ */
+	  if (c == '-')
+	    evalerror ("--: assignment requires lvalue");
+	  else
+	    evalerror ("++: assignment requires lvalue");
+	}
       else if ((c == '-' || c == '+') && c1 == c)
 	{
 	  /* Quickly scan forward to see if this is followed by optional
@@ -1378,7 +1386,19 @@ readtok ()
 	  if (legal_variable_starter ((unsigned char)*xp))
 	    c = (c == '-') ? PREDEC : PREINC;
 	  else
+	    /* Could force parsing as preinc or predec and throw an error */
+#if 0
+	    {
+	      /* bash-5.0 */
+	      /* This catches something like --4++ */
+	      if (c == '-')
+		evalerror ("--: assignment requires lvalue");
+	      else
+		evalerror ("++: assignment requires lvalue");
+	    }
+#else
 	    cp--;	/* not preinc or predec, so unget the character */
+#endif
 	}
       else if (c1 == EQ && member (c, "*/%+-&^|"))
 	{

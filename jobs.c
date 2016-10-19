@@ -3,7 +3,7 @@
 /* This file works with both POSIX and BSD systems.  It implements job
    control. */
 
-/* Copyright (C) 1989-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -2372,11 +2372,12 @@ wait_for_single_pid (pid, flags)
 void
 wait_for_background_pids ()
 {
-  register int i, r, waited_for;
+  register int i, r;
+  int any_stopped, check_async;
   sigset_t set, oset;
   pid_t pid;
 
-  for (waited_for = 0;;)
+  for (any_stopped = 0, check_async = 1;;)
     {
       BLOCK_CHILD (set, oset);
 
@@ -2390,6 +2391,9 @@ wait_for_background_pids ()
 	  if (i > js.j_lastj && jobs[i])
 	    itrace("wait_for_background_pids: job %d non-null after js.j_lastj (%d)", i, js.j_lastj);
 #endif
+	  if (jobs[i] && STOPPED (i))
+	    any_stopped = 1;
+
 	  if (jobs[i] && RUNNING (i) && IS_FOREGROUND (i) == 0)
 	    break;
 	}
@@ -2405,16 +2409,31 @@ wait_for_background_pids ()
       QUIT;
       errno = 0;		/* XXX */
       r = wait_for_single_pid (pid, 1);
-      if (r == -1)
+      if (r == -1 && errno == ECHILD)
 	{
 	  /* If we're mistaken about job state, compensate. */
-	  if (errno == ECHILD)
-	    mark_all_jobs_as_dead ();
+	  check_async = 0;
+	  mark_all_jobs_as_dead ();
 	}
-      else
-	waited_for++;
     }
 
+#if defined (PROCESS_SUBSTITUTION)
+  if (last_procsub_child && last_procsub_child->pid != NO_PID)
+    r = wait_for (last_procsub_child->pid);
+#if 1
+  /* We don't want to wait indefinitely if we have stopped children. */
+  if (any_stopped == 0)
+    {
+      /* Check whether or not we have any unreaped children. */
+      while ((r = wait_for (ANY_PID)) >= 0)
+	{
+	  QUIT;
+	  CHECK_WAIT_INTR;
+	}
+    }
+#endif
+#endif
+      
   /* POSIX.2 says the shell can discard the statuses of all completed jobs if
      `wait' is called with no arguments. */
   mark_dead_jobs_as_notified (1);
@@ -2667,7 +2686,7 @@ wait_for (pid)
 	 job to finish.  Otherwise, we are waiting for the child to finish.
 	 We check for JDEAD in case the job state has been set by waitchld
 	 after receipt of a SIGCHLD. */
-      if (job == NO_JOB)		/* XXX -- && pid != ANY_PID ? */
+      if (job == NO_JOB && pid != ANY_PID)	/* XXX -- && pid != ANY_PID ? */
 	job = find_job (pid, 0, NULL);
 
       /* waitchld() takes care of setting the state of the job.  If the job

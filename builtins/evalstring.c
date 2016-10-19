@@ -127,6 +127,31 @@ optimize_fork (command)
       command->value.Connection->second->value.Simple->flags |= CMD_NO_FORK;
     }
 }
+
+void
+optimize_subshell_command (command)
+     COMMAND *command;
+{
+  if (running_trap == 0 &&
+      command->type == cm_simple &&
+      any_signals_trapped () < 0 &&
+      command->redirects == 0 && command->value.Simple->redirects == 0 &&
+      ((command->flags & CMD_TIME_PIPELINE) == 0) &&
+      ((command->flags & CMD_INVERT_RETURN) == 0))
+    {
+itrace("optimize_subshell_command: optimizing simple command");
+      command->flags |= CMD_NO_FORK;
+      command->value.Simple->flags |= CMD_NO_FORK;
+    }
+  else if (command->type == cm_connection &&
+	   (command->value.Connection->connector == AND_AND || command->value.Connection->connector == OR_OR))
+{
+itrace("optimize_subshell_command: attempting to optimize connection");
+    optimize_subshell_command (command->value.Connection->second);
+}
+  else
+    itrace("optimize_subshell_command: command type = %d", command->type);
+}
      
 /* How to force parse_and_execute () to clean up after itself. */
 void

@@ -5802,6 +5802,7 @@ process_substitute (string, open_for_read_in_child)
       close (parent_pipe_fd);
       close (child_pipe_fd);
 #endif /* HAVE_DEV_FD */
+      restore_pipeline (1);
       return ((char *)NULL);
     }
 
@@ -5904,7 +5905,7 @@ process_substitute (string, open_for_read_in_child)
 
   subshell_level++;
   result = parse_and_execute (string, "process substitution", (SEVAL_NONINT|SEVAL_NOHIST));
-  subshell_level--;
+  /* leave subshell level intact for any exit trap */
 
 #if !defined (HAVE_DEV_FD)
   /* Make sure we close the named pipe in the child before we exit. */
@@ -6241,7 +6242,7 @@ command_substitute (string, quoted)
 	{
 	  subshell_level++;
 	  rc = parse_and_execute (string, "command substitution", pflags|SEVAL_NOHIST);
-	  subshell_level--;
+	  /* leave subshell level intact for any exit trap */
 	}
 
       last_command_exit_value = rc;

@@ -218,6 +218,7 @@ static void print_prompt __P((void));
 #if defined (HANDLE_MULTIBYTE)
 static void set_line_mbstate __P((void));
 static char *shell_input_line_property = NULL;
+static size_t shell_input_line_propsize = 0;
 #else
 #  define set_line_mbstate()
 #endif
@@ -6481,6 +6482,10 @@ restore_input_line_state (ls)
  ************************************************/
 
 #if defined (HANDLE_MULTIBYTE)
+
+/* We don't let the property buffer get larger than this unless the line is */
+#define MAX_PROPSIZE 32768
+
 static void
 set_line_mbstate ()
 {
@@ -6492,7 +6497,19 @@ set_line_mbstate ()
   if (shell_input_line == NULL)
     return;
   len = strlen (shell_input_line);	/* XXX - shell_input_line_len ? */
-  shell_input_line_property = (char *)xrealloc (shell_input_line_property, len + 1);
+  if (len == 0)
+    return;
+  if (shell_input_line_propsize >= MAX_PROPSIZE && len < MAX_PROPSIZE>>1)
+    {
+      free (shell_input_line_property);
+      shell_input_line_property = 0;
+      shell_input_line_propsize = 0;
+    }
+  if (len+1 > shell_input_line_propsize)
+    {
+      shell_input_line_propsize = len + 1;
+      shell_input_line_property = (char *)xrealloc (shell_input_line_property, shell_input_line_propsize);
+    }
 
   memset (&prevs, '\0', sizeof (mbstate_t));
   for (i = previ = 0; i < len; i++)

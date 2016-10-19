@@ -1033,11 +1033,15 @@ internal_realloc (mem, n, file, line, flags)
   _mstats.bytesreq += (n < tocopy) ? 0 : n - tocopy;
 #endif
 
+  /* If we're reallocating to the same size as previously, return now */
+  if (n == p->mh_nbytes)
+    return mem;
+
   /* See if desired size rounds to same power of 2 as actual size. */
   nbytes = ALLOCATED_BYTES(n);
 
   /* If ok, use the same block, just marking its size as changed.  */
-  if (RIGHT_BUCKET(nbytes, nunits))
+  if (RIGHT_BUCKET(nbytes, nunits) || RIGHT_BUCKET(nbytes, nunits-1))
     {
 #if 0
       m = (char *)mem + p->mh_nbytes;

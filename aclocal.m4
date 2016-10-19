@@ -1,4 +1,4 @@
-dnl
+nl
 dnl Bash specific tests
 dnl
 dnl Some derived from PDKSH 5.1.3 autoconf tests
@@ -1357,7 +1357,7 @@ AC_DEFUN(BASH_SYS_JOB_CONTROL_MISSING,
 [AC_REQUIRE([BASH_SYS_SIGNAL_VINTAGE])
 AC_MSG_CHECKING(for presence of necessary job control definitions)
 AC_CACHE_VAL(bash_cv_job_control_missing,
-[AC_TRY_RUN([
+[AC_TRY_COMPILE([
 #include <sys/types.h>
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
@@ -1367,42 +1367,38 @@ AC_CACHE_VAL(bash_cv_job_control_missing,
 #endif
 #include <signal.h>
 
-/* Add more tests in here as appropriate. */
-main()
-{
+/* add more tests in here as appropriate */
+
 /* signal type */
 #if !defined (HAVE_POSIX_SIGNALS) && !defined (HAVE_BSD_SIGNALS)
-exit(1);
+#error
 #endif
 
 /* signals and tty control. */
 #if !defined (SIGTSTP) || !defined (SIGSTOP) || !defined (SIGCONT)
-exit (1);
+#error
 #endif
 
 /* process control */
 #if !defined (WNOHANG) || !defined (WUNTRACED) 
-exit(1);
+#error
 #endif
 
 /* Posix systems have tcgetpgrp and waitpid. */
 #if defined (_POSIX_VERSION) && !defined (HAVE_TCGETPGRP)
-exit(1);
+#error
 #endif
 
 #if defined (_POSIX_VERSION) && !defined (HAVE_WAITPID)
-exit(1);
+#error
 #endif
 
 /* Other systems have TIOCSPGRP/TIOCGPRGP and wait3. */
 #if !defined (_POSIX_VERSION) && !defined (HAVE_WAIT3)
-exit(1);
+#error
 #endif
 
-exit(0);
-}], bash_cv_job_control_missing=present, bash_cv_job_control_missing=missing,
-    [AC_MSG_WARN(cannot check job control if cross-compiling -- defaulting to missing)
-     bash_cv_job_control_missing=missing]
+], , bash_cv_job_control_missing=present, bash_cv_job_control_missing=missing
 )])
 AC_MSG_RESULT($bash_cv_job_control_missing)
 if test $bash_cv_job_control_missing = missing; then

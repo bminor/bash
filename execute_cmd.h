@@ -57,6 +57,7 @@ extern void coproc_flush __P((void));
 extern void coproc_close __P((struct coproc *));
 extern void coproc_closeall __P((void));
 extern void coproc_reap __P((void));
+extern pid_t coproc_active __P((void));
 
 extern void coproc_rclose __P((struct coproc *, int));
 extern void coproc_wclose __P((struct coproc *, int));

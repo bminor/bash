@@ -15202,12 +15202,6 @@ $as_echo_n "checking for presence of necessary job control definitions... " >&6;
 if ${bash_cv_job_control_missing+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  if test "$cross_compiling" = yes; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: cannot check job control if cross-compiling -- defaulting to missing" >&5
-$as_echo "$as_me: WARNING: cannot check job control if cross-compiling -- defaulting to missing" >&2;}
-     bash_cv_job_control_missing=missing
-
-else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -15220,50 +15214,53 @@ else
 #endif
 #include <signal.h>
 
-/* Add more tests in here as appropriate. */
-main()
-{
+/* add more tests in here as appropriate */
+
 /* signal type */
 #if !defined (HAVE_POSIX_SIGNALS) && !defined (HAVE_BSD_SIGNALS)
-exit(1);
+#error
 #endif
 
 /* signals and tty control. */
 #if !defined (SIGTSTP) || !defined (SIGSTOP) || !defined (SIGCONT)
-exit (1);
+#error
 #endif
 
 /* process control */
 #if !defined (WNOHANG) || !defined (WUNTRACED)
-exit(1);
+#error
 #endif
 
 /* Posix systems have tcgetpgrp and waitpid. */
 #if defined (_POSIX_VERSION) && !defined (HAVE_TCGETPGRP)
-exit(1);
+#error
 #endif
 
 #if defined (_POSIX_VERSION) && !defined (HAVE_WAITPID)
-exit(1);
+#error
 #endif
 
 /* Other systems have TIOCSPGRP/TIOCGPRGP and wait3. */
 #if !defined (_POSIX_VERSION) && !defined (HAVE_WAIT3)
-exit(1);
+#error
 #endif
 
-exit(0);
+
+int
+main ()
+{
+
+  ;
+  return 0;
 }
 _ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
+if ac_fn_c_try_compile "$LINENO"; then :
   bash_cv_job_control_missing=present
 else
   bash_cv_job_control_missing=missing
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
 
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bash_cv_job_control_missing" >&5

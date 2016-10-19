@@ -204,6 +204,7 @@ extern void parse_and_execute_cleanup __P((void));
 extern int parse_string __P((char *, const char *, int, char **));
 extern int should_suppress_fork __P((COMMAND *));
 extern void optimize_fork __P((COMMAND *));
+extern void optimize_subshell_command __P((COMMAND *));
 
 /* Functions from evalfile.c */
 extern int maybe_execute_file __P((const char *, int));
