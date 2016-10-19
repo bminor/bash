@@ -334,7 +334,7 @@ expr_bind_array_element (tok, ind, rhs)
   char ibuf[INT_STRLEN_BOUND (arrayind_t) + 1], *istr;
 
   istr = fmtumax (ind, 10, ibuf, sizeof (ibuf), 0);
-  vname = array_variable_name (tok, (char **)NULL, (int *)NULL);
+  vname = array_variable_name (tok, 0, (char **)NULL, (int *)NULL);
 
   llen = strlen (vname) + sizeof (ibuf) + 3;
   lhs = xmalloc (llen);
@@ -1102,7 +1102,7 @@ expr_streval (tok, e, lvalue)
 
   /* [[[[[ */
 #if defined (ARRAY_VARS)
-  v = (e == ']') ? array_variable_part (tok, (char **)0, (int *)0) : find_variable (tok);
+  v = (e == ']') ? array_variable_part (tok, 0, (char **)0, (int *)0) : find_variable (tok);
 #else
   v = find_variable (tok);
 #endif
@@ -1110,7 +1110,7 @@ expr_streval (tok, e, lvalue)
   if ((v == 0 || invisible_p (v)) && unbound_vars_is_error)
     {
 #if defined (ARRAY_VARS)
-      value = (e == ']') ? array_variable_name (tok, (char **)0, (int *)0) : tok;
+      value = (e == ']') ? array_variable_name (tok, 0, (char **)0, (int *)0) : tok;
 #else
       value = tok;
 #endif

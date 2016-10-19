@@ -420,12 +420,23 @@ _hs_append_history_line (which, line)
      const char *line;
 {
   HIST_ENTRY *hent;
-  size_t newlen, curlen;
+  size_t newlen, curlen, minlen;
   char *newline;
 
   hent = the_history[which];
   curlen = strlen (hent->line);
-  newlen = curlen + strlen (line) + 2;
+  minlen = curlen + strlen (line) + 2;	/* min space needed */
+  if (curlen > 256)		/* XXX - for now */
+    {
+      newlen = 512;		/* now realloc in powers of 2 */
+      /* we recalcluate every time; the operations are cheap */
+      while (newlen < minlen)
+	newlen <<= 1;
+    }
+  else
+    newlen = minlen;
+  /* Assume that realloc returns the same pointer and doesn't try a new
+     alloc/copy if the new size is the same as the one last passed. */
   newline = realloc (hent->line, newlen);
   if (newline)
     {

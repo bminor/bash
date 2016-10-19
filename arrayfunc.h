@@ -65,8 +65,8 @@ extern char *get_array_value __P((const char *, int, int *, arrayind_t *));
 
 extern char *array_keys __P((char *, int));
 
-extern char *array_variable_name __P((const char *, char **, int *));
-extern SHELL_VAR *array_variable_part __P((const char *, char **, int *));
+extern char *array_variable_name __P((const char *, int, char **, int *));
+extern SHELL_VAR *array_variable_part __P((const char *, int, char **, int *));
 
 #else
 

@@ -282,7 +282,7 @@ assign_array_element (name, value, flags)
   int sublen;
   SHELL_VAR *entry, *nv;
 
-  vname = array_variable_name (name, &sub, &sublen);
+  vname = array_variable_name (name, 0, &sub, &sublen);
 
   if (vname == 0)
     return ((SHELL_VAR *)NULL);
@@ -949,8 +949,9 @@ array_expand_index (var, s, len)
    in *SUBP. If LENP is non-null, the length of the subscript is returned
    in *LENP.  This returns newly-allocated memory. */
 char *
-array_variable_name (s, subp, lenp)
+array_variable_name (s, flags, subp, lenp)
      const char *s;
+     int flags;
      char **subp;
      int *lenp;
 {
@@ -967,7 +968,7 @@ array_variable_name (s, subp, lenp)
       return ((char *)NULL);
     }
   ind = t - s;
-  ni = skipsubscript (s, ind, 0);
+  ni = skipsubscript (s, ind, flags);	/* XXX - was 0 not flags */
   if (ni <= ind + 1 || s[ni] != ']')
     {
       err_badarraysub (s);
@@ -994,15 +995,16 @@ array_variable_name (s, subp, lenp)
    non-null, return a pointer to the start of the subscript in *SUBP.
    If LENP is non-null, the length of the subscript is returned in *LENP. */
 SHELL_VAR *
-array_variable_part (s, subp, lenp)
+array_variable_part (s, flags, subp, lenp)
      const char *s;
+     int flags;
      char **subp;
      int *lenp;
 {
   char *t;
   SHELL_VAR *var;
 
-  t = array_variable_name (s, subp, lenp);
+  t = array_variable_name (s, flags, subp, lenp);
   if (t == 0)
     return ((SHELL_VAR *)NULL);
   var = find_variable (t);		/* XXX - handle namerefs here? */
@@ -1044,7 +1046,7 @@ array_value_internal (s, quoted, flags, rtype, indp)
   WORD_LIST *l;
   SHELL_VAR *var;
 
-  var = array_variable_part (s, &t, &len);
+  var = array_variable_part (s, 0, &t, &len);
 
   /* Expand the index, even if the variable doesn't exist, in case side
      effects are needed, like ${w[i++]} where w is unset. */
@@ -1184,7 +1186,7 @@ array_keys (s, quoted)
   WORD_LIST *l;
   SHELL_VAR *var;
 
-  var = array_variable_part (s, &t, &len);
+  var = array_variable_part (s, 0, &t, &len);
 
   /* [ */
   if (var == 0 || ALL_ELEMENT_SUB (t[0]) == 0 || t[1] != ']')

@@ -11846,3 +11846,64 @@ jobs.c
 	  SIGINT and sourcelevel != 0, act as if we received the SIGINT so the
 	  file sourcing can be terminated.  Reported by PePa
 	  <peterkelly@passchier.net>
+
+				   9/26
+				   ----
+subst.c
+	- read_comsub: only warn once for null bytes in command substitution
+	  output, instead of once for every null byte
+
+arrayfunc.c
+	- array_variable_part: now takes a `flags' argument; changed all callers
+	  to initially pass 0
+	- array_variable_name: now takes a `flags' argument; changed all callers
+	  to initially pass 0
+	- array_variable_name: pass `flags' argument to skipsubscript instead
+	  of just passing 0
+
+arrayfunc.h
+	- array_variable_{name,part}: added new argument to prototypes
+
+				   9/29
+				   ----
+bashline.c
+	- bash_directory_completion_hook: don't bother to try and expand a
+	  ${ or $( that isn't complete; expand_prompt_string will complain.
+	  Fixes reports from John Passaro <john.a.passaro@gmail.com> and
+	  Valentin Bajrami <valentin.bajrami@gmail.com>
+
+lib/readline/history.c
+	- _hs_append_history_line: use a strategy that attempts to avoid
+	  realloc copying memory to a newly-allocated block if the history
+	  line we're appending to gets `too long' (currently 256 bytes).
+	  We reallocate in powers of 2 starting at 512, and rely on realloc
+	  not allocating a new block and copying into it if the size is the
+	  same as the last call to realloc.  Addresses issue raised by
+	  Hubert Schmid <h.schmid@gmx.de>
+
+trap.h
+	- check_signals: new extern declaration
+	- trapped_signal_received: new extern declaration
+
+builtins/read.def
+	- read_builtin: if one of the zread* functions returns < 0 (which
+	  usually only happens in Posix mode), make sure we call check_signals()
+	  before eventually calling run_pending_traps() because zread() isn't
+	  going to call it
+	- include trap.h for correct extern functions and variable declarations
+
+lib/sh/zread.c
+	- zread: if executing a builtin, call check_signals_and_traps() for
+	  backwards compatibility.  If not, call check_signals() only, because
+	  we don't want to run traps during, for instance, reading command
+	  substitution output.  Fixes race condition bug reported by Luiz Angelo
+	  Daros de Luca <luizluca@gmail.com>
+
+				   9/30
+				   ----
+subst.c
+	- command_substitute: reset parse_and_execute_level to 0 in the child
+	  process, since it's independent of the other parse_and_execute
+	  calls.  Adds command substitution inside other parse_and_execute
+	  calls optimizations to suppress forks, as suggested by
+	  Martijn Dekker <martijn@inlv.org>

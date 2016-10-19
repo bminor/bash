@@ -1382,7 +1382,7 @@ redir_varvalue (redir)
 #if defined (ARRAY_VARS)
   if (vr = valid_array_reference (w, 0))
     {
-      v = array_variable_part (w, &sub, &len);
+      v = array_variable_part (w, 0, &sub, &len);
     }
   else
 #endif
@@ -1396,7 +1396,7 @@ redir_varvalue (redir)
 	    {
 	      w = nameref_cell (v);
 	      if (vr = valid_array_reference (w, 0))
-		v = array_variable_part (w, &sub, &len);
+		v = array_variable_part (w, 0, &sub, &len);
 	      else
 	        v = find_variable (w);
 	    }

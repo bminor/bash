@@ -4931,7 +4931,7 @@ array_remove_pattern (var, pattern, patspec, varname, quoted)
   SHELL_VAR *v;
 
   /* compute itype from varname here */
-  v = array_variable_part (varname, &ret, 0);
+  v = array_variable_part (varname, 0, &ret, 0);
 
   /* XXX */
   if (v && invisible_p (v))
@@ -5198,7 +5198,7 @@ array_transform (xc, var, varname, quoted)
   SHELL_VAR *v;
 
   /* compute itype from varname here */
-  v = array_variable_part (varname, &ret, 0);
+  v = array_variable_part (varname, 0, &ret, 0);
 
   /* XXX */
   if (v && invisible_p (v))
@@ -5932,12 +5932,15 @@ read_comsub (fd, quoted, rflag)
   char *istring, buf[128], *bufp, *s;
   int istring_index, istring_size, c, tflag, skip_ctlesc, skip_ctlnul;
   ssize_t bufn;
+  int nullbyte;
 
   istring = (char *)NULL;
   istring_index = istring_size = bufn = tflag = 0;
 
   for (skip_ctlesc = skip_ctlnul = 0, s = ifs_value; s && *s; s++)
     skip_ctlesc |= *s == CTLESC, skip_ctlnul |= *s == CTLNUL;
+
+  nullbyte = 0;
 
   /* Read the output of the command through the pipe.  This may need to be
      changed to understand multibyte characters in the future. */
@@ -5957,7 +5960,11 @@ read_comsub (fd, quoted, rflag)
       if (c == 0)
 	{
 #if 1
-	  internal_warning ("%s", _("command substitution: ignored null byte in input"));
+	  if (nullbyte == 0)
+	    {
+	      internal_warning ("%s", _("command substitution: ignored null byte in input"));
+	      nullbyte = 1;
+	    }
 #endif
 	  continue;
 	}
@@ -6208,6 +6215,8 @@ command_substitute (string, quoted)
       remove_quoted_escapes (string);
 
       startup_state = 2;	/* see if we can avoid a fork */
+      parse_and_execute_level = 0;
+
       /* Give command substitution a place to jump back to on failure,
 	 so we don't go back up to main (). */
       result = setjmp_nosigs (top_level);
@@ -6310,7 +6319,7 @@ array_length_reference (s)
   HASH_TABLE *h;
   SHELL_VAR *var;
 
-  var = array_variable_part (s, &t, &len);
+  var = array_variable_part (s, 0, &t, &len);
 
   /* If unbound variables should generate an error, report one and return
      failure. */
@@ -6511,7 +6520,7 @@ parameter_brace_expand_word (name, var_is_special, quoted, pflags, indp)
 expand_arrayref:
       if (pflags & PF_ASSIGNRHS)
 	{
-	  var = array_variable_part (name, &tt, (int *)0);
+	  var = array_variable_part (name, 0, &tt, (int *)0);
 	  if (ALL_ELEMENT_SUB (tt[0]) && tt[1] == ']')
 	    {
 	      /* Only treat as double quoted if array variable */
@@ -7168,7 +7177,7 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
 #if defined (ARRAY_VARS)
   if (valid_array_reference (vname, 0))
     {
-      v = array_variable_part (vname, &temp, (int *)0);
+      v = array_variable_part (vname, 0, &temp, (int *)0);
       /* If we want to signal array_value to use an already-computed index,
 	 set LIND to that index */
       lind = (ind != INTMAX_MIN && (flags & AV_USEIND)) ? ind : 0;
@@ -8149,7 +8158,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
       char *x, *x1;
 
       temp1 = savestring (name + 1);
-      x = array_variable_name (temp1, &x1, (int *)0);	/* [ */
+      x = array_variable_name (temp1, 0, &x1, (int *)0);	/* [ */
       FREE (x);
       if (ALL_ELEMENT_SUB (x1[0]) && x1[1] == ']')
 	{

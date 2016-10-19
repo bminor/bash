@@ -2410,6 +2410,8 @@ without regard to the case of alphabetic characters.
 When a pattern is used for filename expansion, the character @samp{.}
 at the start of a filename or immediately following a slash
 must be matched explicitly, unless the shell option @code{dotglob} is set.
+The filenames @samp{.} and @samp{..} must always be matched explicitly,
+even if @code{dotglob} is set.
 When matching a filename, the slash character must always be
 matched explicitly.
 In other cases, the @samp{.} character is not treated specially.
@@ -5138,6 +5140,8 @@ if the directory name initially supplied does not exist.
 @item dotglob
 If set, Bash includes filenames beginning with a `.' in
 the results of filename expansion.
+The filenames @samp{.} and @samp{..} must always be matched explicitly,
+even if @code{dotglob} is set.
 
 @item execfail
 If this is set, a non-interactive shell will not exit if

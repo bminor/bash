@@ -3234,6 +3234,17 @@ bash_directory_completion_hook (dirname)
 	closer = '}';
       else
 	nextch = 0;
+
+      if (closer)
+	{
+	  int p;
+	  char delims[2];
+
+	  delims[0] = closer; delims[1] = 0;
+	  p = skip_to_delim (t, t - local_dirname + 1, delims, SD_NOJMP|SD_COMPLETE);
+	  if (t[p] != closer)
+	    should_expand_dirname = 0;
+	}
     }
   else if (local_dirname[0] == '~')
     should_expand_dirname = '~';

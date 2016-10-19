@@ -60,6 +60,8 @@
 
 extern char *trap_list[];
 
+extern int trapped_signal_received;
+
 /* Externally-visible functions declared in trap.c. */
 extern void initialize_traps __P((void));
 
@@ -112,6 +114,7 @@ extern int signal_in_progress __P((int));
 
 extern int first_pending_trap __P((void));
 extern int any_signals_trapped __P((void));
+extern void check_signals __P((void));
 extern void check_signals_and_traps __P((void));
 
 #endif /* _TRAP_H_ */

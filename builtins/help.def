@@ -260,7 +260,7 @@ show_desc (name, i)
      char *name;
      int i;
 {
-  register int j;
+  register int j, r;
   char **doc, *line;
   int fd, usefile;
 
@@ -272,8 +272,9 @@ show_desc (name, i)
       fd = open_helpfile (doc[0]);
       if (fd < 0)
 	return;
-      zmapfd (fd, &line, doc[0]);
+      r = zmapfd (fd, &line, doc[0]);
       close (fd);
+      /* XXX - handle errors if zmapfd returns < 0 */
     }
   else
     line = doc ? doc[0] : (char *)NULL;

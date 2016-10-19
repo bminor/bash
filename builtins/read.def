@@ -93,6 +93,7 @@ $END
 #include "../shell.h"
 #include "common.h"
 #include "bashgetopt.h"
+#include "trap.h"
 
 #include <shtty.h>
 
@@ -111,10 +112,7 @@ $END
 extern int errno;
 #endif
 
-extern void run_pending_traps __P((void));
-
 extern int posixly_correct;
-extern int trapped_signal_received;
 
 struct ttsave
 {
@@ -152,9 +150,8 @@ static struct ttsave termsave;
    avoids problems with the semi-tricky stuff we do with the xfree of
    input_string at the top of the unwind-protect list (see below). */
 
-/* Set a flag that CHECK_ALRM can check.  This relies on zread calling
-   trap.c:check_signals_and_traps(), which knows about sigalrm_seen and
-   alrmbuf. */
+/* Set a flag that CHECK_ALRM can check.  This relies on zread or read_builtin
+   calling trap.c:check_signals(), which knows about sigalrm_seen and alrmbuf. */
 static sighandler
 sigalrm (s)
      int s;
@@ -573,10 +570,6 @@ read_builtin (list)
 	  print_ps2 = 0;
 	}
 
-#if 0
-      if (posixly_correct == 0)
-	interrupt_immediately++;
-#endif
       reading = 1;
       if (unbuffered_read == 2)
 	retval = posixly_correct ? zreadintr (fd, &c, 1) : zreadn (fd, &c, nchars - nr);
@@ -585,15 +578,12 @@ read_builtin (list)
       else
 	retval = posixly_correct ? zreadcintr (fd, &c) : zreadc (fd, &c);
       reading = 0;
-#if 0
-      if (posixly_correct == 0)
-	interrupt_immediately--;
-#endif
 
       if (retval <= 0)
 	{
 	  if (retval < 0 && errno == EINTR)
 	    {
+	      check_signals ();		/* in case we didn't call zread via zreadc */
 	      lastsig = LASTSIG();
 	      if (lastsig == 0)
 		lastsig = trapped_signal_received;

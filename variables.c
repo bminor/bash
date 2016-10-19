@@ -2723,7 +2723,7 @@ bind_variable_internal (name, value, table, hflags, aflags)
       /* declare -n foo=x[2] ; foo=bar */
       if (valid_array_reference (newval, 0))
 	{
-	  tname = array_variable_name (newval, (char **)0, (int *)0);
+	  tname = array_variable_name (newval, 0, (char **)0, (int *)0);
 	  if (tname && (tentry = find_variable_noref (tname)) && nameref_p (tentry))
 	    {
 	      /* nameref variables can't be arrays */
@@ -3007,7 +3007,7 @@ bind_int_variable (lhs, rhs)
   if (valid_array_reference (lhs, 0))
     {
       isarr = 1;
-      v = array_variable_part (lhs, (char **)0, (int *)0);
+      v = array_variable_part (lhs, 0, (char **)0, (int *)0);
     }
   else
 #endif
