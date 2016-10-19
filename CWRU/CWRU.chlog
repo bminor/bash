@@ -11907,3 +11907,48 @@ subst.c
 	  calls.  Adds command substitution inside other parse_and_execute
 	  calls optimizations to suppress forks, as suggested by
 	  Martijn Dekker <martijn@inlv.org>
+
+				   10/3
+				   ----
+configure.ac
+	- SHOBJ_STATUS: make sure it defaults to unsupported and is substituted
+	  if the shobj-conf script isn't run.  Fixes `make install' bug with
+	  a minimal config reported by Andrew Tomazos <andrewtomazos@gmail.com>
+
+				   10/5
+				   ----
+support/shobj-conf
+	- darwin: set compatibility_version for a shared build of the readline
+	  library (the standalone readline distribution shares this file) to
+	  $(SHLIB_MAJOR)$(SHLIB_MINOR).  Recommendation from Max Horn
+	  <max@quendi.de>
+
+				   10/6
+				   ----
+array.h
+	- array_first_index: new convenience define
+
+array.c
+	- ADD_AFTER: new define, complement of ADD_BEFORE
+	- UNSET_LASTREF: now takes an array as an argument, prepping for move
+	  of lastref pointer into the array struct
+	- array_insert: check whether we are adding at the beginning of the
+	  array and take a fast path if so
+	- array_insert: use same strategy as array_reference to find the place
+	  to insert, starting from the last-referenced element and moving
+	  forward or back from there; use ADD_AFTER if moving backward
+	- array_insert: if replacing an existing element, just replace the
+	  value with new->value instead of the entire element
+	- array_reference: short-circuit quickly if looking for an element
+	  before the first assigned index
+	- array_reference: if we don't find the element, leave lastref pointing
+	  to the closest element under the assumption we will be assigning or
+	  looking for something close
+	- array_reference: take advantage of ordered indexes to short-circuit
+	  when looking for element that is not set
+
+				   10/7
+				   ----
+array.c
+	- array_remove: short-circuit if asked to remove index after max
+	  index or before first index

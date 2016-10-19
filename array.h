@@ -94,6 +94,7 @@ extern ARRAY *array_from_string __P((char *, char *));
 
 #define array_num_elements(a)	((a)->num_elements)
 #define array_max_index(a)	((a)->max_index)
+#define array_first_index(a)	((a)->head->next->ind)
 #define array_head(a)		((a)->head)
 #define array_empty(a)		((a)->num_elements == 0)
 

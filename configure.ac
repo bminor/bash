@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.4, version 4.082])dnl
+AC_REVISION([for Bash 4.4, version 4.083])dnl
 
 define(bashvers, 4.4)
 define(relstatus, maint)
@@ -1151,6 +1151,9 @@ then
 	AC_SUBST(SHOBJ_LIBS)
 	AC_SUBST(SHOBJ_STATUS)
 	AC_MSG_RESULT($SHOBJ_STATUS)
+else
+	SHOBJ_STATUS=unsupported
+	AC_SUBST(SHOBJ_STATUS)
 fi
 
 # try to create a directory tree if the source is elsewhere

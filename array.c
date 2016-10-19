@@ -9,7 +9,7 @@
  * chet@ins.cwru.edu
  */
 
-/* Copyright (C) 1997-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -52,6 +52,14 @@
 		ae->prev = new; \
 		new->next = ae; \
 	} while(0)
+	
+#define ADD_AFTER(ae, new) \
+	do { \
+		ae->next->prev = new; \
+		new->next = ae->next; \
+		new->prev = ae; \
+		ae->next = new; \
+	} while (0)
 
 static char *array_to_string_internal __P((ARRAY_ELEMENT *, ARRAY_ELEMENT *, char *, int));
 
@@ -83,7 +91,7 @@ do { \
 	lastref = (e); \
 } while (0)
 
-#define UNSET_LASTREF() \
+#define UNSET_LASTREF(a) \
 do { \
 	lastarray = 0; \
 	lastref = 0; \
@@ -95,7 +103,7 @@ array_create()
 	ARRAY	*r;
 	ARRAY_ELEMENT	*head;
 
-	r =(ARRAY *)xmalloc(sizeof(ARRAY));
+	r = (ARRAY *)xmalloc(sizeof(ARRAY));
 	r->type = array_indexed;
 	r->max_index = -1;
 	r->num_elements = 0;
@@ -620,6 +628,8 @@ arrayind_t	i;
 char	*v;
 {
 	register ARRAY_ELEMENT *new, *ae, *start;
+	arrayind_t startind;
+	int direction;
 
 	if (a == 0)
 		return(-1);
@@ -635,6 +645,12 @@ char	*v;
 		a->num_elements++;
 		SET_LASTREF(a, new);
 		return(0);
+	} else if (i < array_first_index(a)) {
+		/* Hook at the beginning */
+		ADD_AFTER(a->head, new);
+		a->num_elements++;
+		SET_LASTREF(a, new);
+		return(0);
 	}
 #if OPTIMIZE_SEQUENTIAL_ARRAY_ASSIGNMENT
 	/*
@@ -642,26 +658,48 @@ char	*v;
 	 * handle optimizes the case of sequential or almost-sequential
 	 * assignments that are not at the end of the array.
 	 */
-	start = LASTREF_START(a, i);
+	start = LASTREF(a);
+	/* Use same strategy as array_reference to avoid paying large penalty
+	   for semi-random assignment pattern. */
+	startind = element_index(start);
+	if (i < startind/2) {
+		start = element_forw(a->head);
+		startind = element_index(start);
+		direction = 1;
+	} else if (i >= startind) {
+		direction = 1;
+	} else {
+		direction = -1;
+	}
 #else
 	start = element_forw(ae->head);
+	startind = element_index(start);
+	direction = 1;
 #endif
-	for (ae = start; ae != a->head; ae = element_forw(ae)) {
+	for (ae = start; ae != a->head; ) {
 		if (element_index(ae) == i) {
 			/*
 			 * Replacing an existing element.
 			 */
-			array_dispose_element(new);
 			free(element_value(ae));
-			ae->value = v ? savestring(v) : (char *)NULL;
+			/* Just swap in the new value */
+			ae->value = new->value;
+			new->value = 0;
+			array_dispose_element(new);
 			SET_LASTREF(a, ae);
 			return(0);
-		} else if (element_index(ae) > i) {
+		} else if (direction == 1 && element_index(ae) > i) {
 			ADD_BEFORE(ae, new);
 			a->num_elements++;
 			SET_LASTREF(a, new);
 			return(0);
+		} else if (direction == -1 && element_index(ae) < i) {
+			ADD_AFTER(ae, new);
+			a->num_elements++;
+			SET_LASTREF(a, new);
+			return(0);
 		}
+		ae = direction == 1 ? element_forw(ae) : element_back(ae);
 	}
 	array_dispose_element(new);
 	INVALIDATE_LASTREF(a);
@@ -678,11 +716,27 @@ ARRAY	*a;
 arrayind_t	i;
 {
 	register ARRAY_ELEMENT *ae, *start;
+	arrayind_t startind;
+	int direction;
 
 	if (a == 0 || array_empty(a))
 		return((ARRAY_ELEMENT *) NULL);
-	start = LASTREF_START(a, i);
-	for (ae = start; ae != a->head; ae = element_forw(ae))
+	if (i > array_max_index(a) || i < array_first_index(a))
+		return((char *)NULL);	/* Keep roving pointer into array to optimize sequential access */
+	start = LASTREF(a);
+	/* Use same strategy as array_reference to avoid paying large penalty
+	   for semi-random assignment pattern. */
+	startind = element_index(start);
+	if (i < startind/2) {
+		start = element_forw(a->head);
+		startind = element_index(start);
+		direction = 1;
+	} else if (i >= startind) {
+		direction = 1;
+	} else {
+		direction = -1;
+	}
+	for (ae = start; ae != a->head; ) {
 		if (element_index(ae) == i) {
 			ae->next->prev = ae->prev;
 			ae->prev->next = ae->next;
@@ -701,6 +755,12 @@ arrayind_t	i;
 #endif
 			return(ae);
 		}
+		ae = (direction == 1) ? element_forw(ae) : element_back(ae);
+		if (direction == 1 && element_index(ae) > i)
+			break;
+		else if (direction == -1 && element_index(ae) < i)
+			break;
+	}
 	return((ARRAY_ELEMENT *) NULL);
 }
 
@@ -718,7 +778,7 @@ arrayind_t	i;
 
 	if (a == 0 || array_empty(a))
 		return((char *) NULL);
-	if (i > array_max_index(a))
+	if (i > array_max_index(a) || i < array_first_index(a))
 		return((char *)NULL);	/* Keep roving pointer into array to optimize sequential access */
 	start = LASTREF(a);	/* lastref pointer */
 	startind = element_index(start);
@@ -737,8 +797,24 @@ arrayind_t	i;
 			return(element_value(ae));
 		}
 		ae = (direction == 1) ? element_forw(ae) : element_back(ae);
+		/* Take advantage of index ordering to short-circuit */
+		/* If we don't find it, set the lastref pointer to the element
+		   that's `closest', assuming that the unsuccessful reference
+		   will quickly be followed by an assignment.  No worse than
+		   not changing it from the previous value or resetting it. */
+		if (direction == 1 && element_index(ae) > i) {
+			start = ae;	/* use for SET_LASTREF below */
+			break;
+		} else if (direction == -1 && element_index(ae) < i) {
+			start = ae;	/* use for SET_LASTREF below */
+			break;
+		}
 	}
-	UNSET_LASTREF();		/* XXX SET_LASTREF(a, start) ? */
+#if 0
+	UNSET_LASTREF(a);
+#else
+	SET_LASTREF(a, start);
+#endif
 	return((char *) NULL);
 }
 
