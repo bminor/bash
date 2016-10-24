@@ -12004,3 +12004,12 @@ aclocal.m4
 	  with existing set of preprocessor defines, so it can work when
 	  cross-compiling.  Suggested by Felix Janda <felix.janda@posteo.de>
 
+				   10/19
+				   -----
+variables.c
+	- get_bashpid: BASHPID is no longer readonly; assignments to it are
+	  just ignored.  Suggested by Martijn Dekker <martijn@inlv.org>
+
+doc/{bash.1,bashref.texi}
+	- BASHPID: note that assignments are ignored and unsetting BASHPID
+	  causes it to lose its special properties

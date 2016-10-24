@@ -5480,6 +5480,10 @@ reading any startup files.  This variable is readonly.
 Expands to the process ID of the current Bash process.
 This differs from @code{$$} under certain circumstances, such as subshells
 that do not require Bash to be re-initialized.
+Assignments to @env{BASHPID} have no effect.
+If @code{BASHPID}
+is unset, it loses its special properties, even if it is
+subsequently reset.
 
 @item BASH_ALIASES
 An associative array variable whose members correspond to the internal

@@ -1462,7 +1462,7 @@ get_bashpid (var)
   p = itos (pid);
 
   FREE (value_cell (var));
-  VSETATTR (var, att_integer|att_readonly);
+  VSETATTR (var, att_integer);	/* XXX - was also att_readonly */
   var_setvalue (var, p);
   return (var);
 }
@@ -1767,7 +1767,7 @@ initialize_dynamic_variables ()
   VSETATTR (v, att_integer);
 
   INIT_DYNAMIC_VAR ("BASHPID", (char *)NULL, get_bashpid, null_assign);
-  VSETATTR (v, att_integer|att_readonly);
+  VSETATTR (v, att_integer);
 
 #if defined (HISTORY)
   INIT_DYNAMIC_VAR ("HISTCMD", (char *)NULL, get_histcmd, (sh_var_assign_func_t *)NULL);

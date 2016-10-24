@@ -1453,6 +1453,14 @@ This variable is read-only.
 Expands to the process ID of the current \fBbash\fP process.
 This differs from \fB$$\fP under certain circumstances, such as subshells
 that do not require \fBbash\fP to be re-initialized.
+Assignments to
+.SM
+.B BASHPID
+have no effect.
+If
+.B BASHPID
+is unset, it loses its special properties, even if it is
+subsequently reset.
 .TP
 .B BASH_ALIASES
 An associative array variable whose members correspond to the internal
