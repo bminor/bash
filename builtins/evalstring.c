@@ -139,18 +139,12 @@ optimize_subshell_command (command)
       ((command->flags & CMD_TIME_PIPELINE) == 0) &&
       ((command->flags & CMD_INVERT_RETURN) == 0))
     {
-itrace("optimize_subshell_command: optimizing simple command");
       command->flags |= CMD_NO_FORK;
       command->value.Simple->flags |= CMD_NO_FORK;
     }
   else if (command->type == cm_connection &&
 	   (command->value.Connection->connector == AND_AND || command->value.Connection->connector == OR_OR))
-{
-itrace("optimize_subshell_command: attempting to optimize connection");
     optimize_subshell_command (command->value.Connection->second);
-}
-  else
-    itrace("optimize_subshell_command: command type = %d", command->type);
 }
      
 /* How to force parse_and_execute () to clean up after itself. */

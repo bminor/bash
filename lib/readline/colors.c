@@ -37,6 +37,10 @@
 #include "posixstat.h" // stat related macros (S_ISREG, ...)
 #include <fcntl.h> // S_ISUID
 
+#ifndef S_ISDIR
+#  define	S_ISDIR(m)	(((m) & S_IFMT) == S_IFDIR)
+#endif
+
 // strlen()
 #if defined (HAVE_STRING_H)
 #  include <string.h>
@@ -183,11 +187,17 @@ _rl_print_color_indicator (const char *f)
         {
           colored_filetype = C_FILE;
 
+#if defined (S_ISUID)
           if ((mode & S_ISUID) != 0 && is_colored (C_SETUID))
             colored_filetype = C_SETUID;
-          else if ((mode & S_ISGID) != 0 && is_colored (C_SETGID))
+          else
+#endif
+#if defined (S_ISGID)
+          if ((mode & S_ISGID) != 0 && is_colored (C_SETGID))
             colored_filetype = C_SETGID;
-          else if (is_colored (C_CAP) && 0) //f->has_capability)
+          else
+#endif
+          if (is_colored (C_CAP) && 0) //f->has_capability)
             colored_filetype = C_CAP;
           else if ((mode & S_IXUGO) != 0 && is_colored (C_EXEC))
             colored_filetype = C_EXEC;
@@ -211,12 +221,16 @@ _rl_print_color_indicator (const char *f)
             colored_filetype = C_STICKY;
 #endif
         }
+#if defined (S_ISLNK)
       else if (S_ISLNK (mode))
         colored_filetype = C_LINK;
+#endif
       else if (S_ISFIFO (mode))
         colored_filetype = C_FIFO;
+#if defined (S_ISSOCK)
       else if (S_ISSOCK (mode))
         colored_filetype = C_SOCK;
+#endif
       else if (S_ISBLK (mode))
         colored_filetype = C_BLK;
       else if (S_ISCHR (mode))

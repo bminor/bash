@@ -1110,19 +1110,6 @@ extern int timeval_to_cpu __P((struct timeval *, struct timeval *, struct timeva
 
 static const int precs[] = { 0, 100, 10, 1 };
 
-#if defined (HAVE_LOCALE_H) && defined (HAVE_LOCALECONV)
-static int
-decpoint ()
-{
-  struct lconv *lv;
-
-  lv = localeconv ();
-  return (lv && lv->decimal_point && lv->decimal_point[0]) ? lv->decimal_point[0] : '.';
-}
-#else
-#  define decpoint() '.'
-#endif
-
 /* Expand one `%'-prefixed escape sequence from a time format string. */
 static int
 mkfmt (buf, prec, lng, sec, sec_fraction)
@@ -1167,7 +1154,7 @@ mkfmt (buf, prec, lng, sec, sec_fraction)
      and 999. */
   if (prec != 0)
     {
-      buf[ind++] = decpoint ();
+      buf[ind++] = locale_decpoint ();
       for (aind = 1; aind <= prec; aind++)
 	{
 	  buf[ind++] = (sec_fraction / precs[aind]) + '0';

@@ -561,3 +561,21 @@ locale_isutf8 (lspec)
   return (strstr (lspec, "UTF-8") || strstr (lspec, "utf8"));
 #endif
 }
+
+#if defined (HAVE_LOCALECONV)
+int
+locale_decpoint ()
+{
+  struct lconv *lv;
+
+  lv = localeconv ();
+  return (lv && lv->decimal_point && lv->decimal_point[0]) ? lv->decimal_point[0] : '.';
+}
+#else
+#  undef locale_decpoint
+int
+locale_decpoint ()
+{
+  return '.';
+}
+#endif

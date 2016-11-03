@@ -1383,6 +1383,7 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
         {
           si = i + 2;
           t = extract_command_subst (string, &si, flags|SX_NOALLOC);
+          CHECK_STRING_OVERRUN (i, si, slen, c);
           i = si + 1;
           continue;
         }
@@ -1392,6 +1393,7 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
 	{
 	  si = i + len_opener;
 	  t = extract_delimited_string (string, &si, opener, alt_opener, closer, flags|SX_NOALLOC);
+	  CHECK_STRING_OVERRUN (i, si, slen, c);
 	  i = si + 1;
 	  continue;
 	}
@@ -1401,6 +1403,7 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
 	{
 	  si = i + len_alt_opener;
 	  t = extract_delimited_string (string, &si, alt_opener, alt_opener, closer, flags|SX_NOALLOC);
+	  CHECK_STRING_OVERRUN (i, si, slen, c);
 	  i = si + 1;
 	  continue;
 	}
@@ -1420,6 +1423,7 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
 	{
 	  si = i + 1;
 	  t = string_extract (string, &si, "`", flags|SX_NOALLOC);
+	  CHECK_STRING_OVERRUN (i, si, slen, c);
 	  i = si + 1;
 	  continue;
 	}
@@ -1473,6 +1477,8 @@ extract_delimited_string (string, sindex, opener, alt_opener, closer, flags)
    it should point to just after the first `{' found.  On exit, SINDEX
    gets the position of the matching `}'.  QUOTED is non-zero if this
    occurs inside double quotes. */
+/* XXX -- should this use skipsubscript to handle ${word[sub]}? (only do it
+   if dolbrace_state == DOLBRACE_PARAM) */
 /* XXX -- this is very similar to extract_delimited_string -- XXX */
 static char *
 extract_dollar_brace_string (string, sindex, quoted, flags)
@@ -1539,7 +1545,7 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
 	  t = string_extract (string, &si, "`", flags|SX_NOALLOC);
 
 	  CHECK_STRING_OVERRUN (i, si, slen, c);
-    
+
 	  i = si + 1;
 	  continue;
 	}
@@ -1550,6 +1556,9 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
 	{
 	  si = i + 2;
 	  t = extract_command_subst (string, &si, flags|SX_NOALLOC);
+
+	  CHECK_STRING_OVERRUN (i, si, slen, c);
+
 	  i = si + 1;
 	  continue;
 	}
@@ -1576,6 +1585,17 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
 
           continue;
 	}
+
+#if defined (ARRAY_VARS)
+      /* XXX - bash-5.0 */
+      if (c == '[' && dolbrace_state == DOLBRACE_PARAM)
+	{
+	  si = skipsubscript (string, i, 0);
+	  CHECK_STRING_OVERRUN (i, si, slen, c);
+	  if (string[si] == ']')
+	    c = string[i = si];
+	}
+#endif
 
       /* move past this character, which was not special. */
       ADVANCE_CHAR (string, slen, i);
@@ -1905,6 +1925,7 @@ skip_to_delim (string, start, delims, flags)
 	    temp = extract_delimited_string (string, &si, "$(", "(", ")", SX_NOALLOC|SX_COMMAND); /* ) */
 	  else
 	    temp = extract_dollar_brace_string (string, &si, 0, SX_NOALLOC);
+	  CHECK_STRING_OVERRUN (i, si, slen, c);
 	  i = si;
 	  if (string[i] == '\0')	/* don't increment i past EOS in loop */
 	    break;
@@ -1923,6 +1944,7 @@ skip_to_delim (string, start, delims, flags)
 	  temp = extract_process_subst (string, (c == '<') ? "<(" : ">(", &si, 0);
 	  free (temp);		/* XXX - not using SX_NOALLOC here yet */
 #endif
+	  CHECK_STRING_OVERRUN (i, si, slen, c);
 	  i = si;
 	  if (string[i] == '\0')
 	    break;
@@ -1942,6 +1964,7 @@ skip_to_delim (string, start, delims, flags)
 	  open[2] = '\0';
 	  temp = extract_delimited_string (string, &si, open, "(", ")", SX_NOALLOC); /* ) */
 
+	  CHECK_STRING_OVERRUN (i, si, slen, c);
 	  i = si;
 	  if (string[i] == '\0')	/* don't increment i past EOS in loop */
 	    break;
@@ -5810,10 +5833,7 @@ process_substitute (string, open_for_read_in_child)
     {
 #if defined (JOB_CONTROL)
       if (last_procsub_child)
-	{
-	  discard_pipeline (last_procsub_child);
-	  last_procsub_child = (PROCESS *)NULL;
-	}
+	discard_last_procsub_child ();
       last_procsub_child = restore_pipeline (0);
 #endif
 

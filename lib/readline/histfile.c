@@ -606,12 +606,14 @@ history_truncate_file (fname, lines)
       history_lines_written_to_file = 0;
     }
 
+#if defined (HAVE_CHOWN)
   /* Make sure the new filename is owned by the same user as the old.  If one
      user is running this, it's a no-op.  If the shell is running after sudo
      with a shared history file, we don't want to leave the history file
      owned by root. */
   if (rv == 0 && exists)
     r = chown (filename, finfo.st_uid, finfo.st_gid);
+#endif
 
   xfree (filename);
   FREE (tempname);
@@ -753,12 +755,14 @@ mmap_error:
       history_lines_written_to_file = 0;
     }
 
+#if defined (HAVE_CHOWN)
   /* Make sure the new filename is owned by the same user as the old.  If one
      user is running this, it's a no-op.  If the shell is running after sudo
      with a shared history file, we don't want to leave the history file
      owned by root. */
   if (rv == 0 && exists)
     mode = chown (histname, finfo.st_uid, finfo.st_gid);
+#endif
 
   FREE (histname);
   FREE (tempname);

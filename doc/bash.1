@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue Sep 27 14:02:28 EDT 2016
+.\"	Last Change: Tue Nov  1 16:05:17 EDT 2016
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2016 September 27" "GNU Bash 4.4"
+.TH BASH 1 "2016 November 1" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1509,6 +1509,19 @@ option to the
 .B shopt
 builtin below)
 .TP
+.B BASH_ARGV0
+When referenced, this variable expands to the name of the shell or shell
+script (identical to
+.BR $0 ;
+see the description of special parameter 0 above).
+Assignment to
+.B BASH_ARGV0
+causes the value assigned to also be assigned to \fB$0\fP.
+If
+.B BASH_ARGV0
+is unset, it loses its special properties, even if it is
+subsequently reset.
+.TP
 .B BASH_CMDS
 An associative array variable whose members correspond to the internal
 hash table of commands as maintained by the \fBhash\fP builtin.
@@ -1692,6 +1705,33 @@ Assignment to this variable will not change the current directory.
 If
 .SM
 .B DIRSTACK
+is unset, it loses its special properties, even if it is
+subsequently reset.
+.TP
+.B EPOCHREALTIME
+Each time this parameter is referenced, it expands to the number of seconds
+since the Unix Epoch (see \fItime\fP\fR(3)\fP) as a floating point value
+with micro-second granularity.
+Assignments to
+.SM
+.B EPOCHREALTIME
+are ignored.
+If
+.SM
+.B EPOCHREALTIME
+is unset, it loses its special properties, even if it is
+subsequently reset.
+.TP
+.B EPOCHSECONDS
+Each time this parameter is referenced, it expands to the number of seconds
+since the Unix Epoch (see \fItime\fP\fR(3)\fP).
+Assignments to
+.SM
+.B EPOCHSECONDS
+are ignored.
+If
+.SM
+.B EPOCHSECONDS
 is unset, it loses its special properties, even if it is
 subsequently reset.
 .TP
@@ -3704,6 +3744,9 @@ than or equal to 10 and assign it to \fIvarname\fP.
 If >&- or <&- is preceded
 by {\fIvarname\fP}, the value of \fIvarname\fP defines the file
 descriptor to close.
+If {\fIvarname\fP} is supplied, the redirection persists beyond
+the scope of the command, allowing the shell programmer to manage
+the file descriptor himself.
 .PP
 In the following descriptions, if the file descriptor number is
 omitted, and the first character of the redirection operator is

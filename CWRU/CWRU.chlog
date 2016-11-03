@@ -12013,3 +12013,130 @@ variables.c
 doc/{bash.1,bashref.texi}
 	- BASHPID: note that assignments are ignored and unsetting BASHPID
 	  causes it to lose its special properties
+
+				   10/28
+				   -----
+builtins/pushd.def
+	- popd_builtin: make sure to check the normalized stack offset
+	  (i.e., negatives counting back from the end of the stack) is within
+	  bounds before trying to free that stack entry.  Report from
+	  Fernando Muñoz <fernando@null-life.com>
+
+lib/readline/histfile.c
+	- chown: protect calls with HAVE_CHOWN.  Fixes for MinGW{64,32} from
+	  J. Peter Mugaas <jpmugaas@suddenlink.net>
+
+lib/readline/colors.c
+	- S_ISDIR: add define if missing
+	- S_ISUID, S_ISGID, S_ISLNK, S_ISSOCK: don't use unless defined.
+	  Fixes for MinGW{64,32} from J. Peter Mugaas <jpmugaas@suddenlink.net>
+
+bashhist.c
+	- current_command_line_comment: set to the most recent line in a
+	  possibly multi-line command that contains a shell comment; set in
+	  maybe_add_history and bash_add_history to either the current
+	  command number or -2
+	- maybe_add_history: set current_command_line_comment for first line
+	  of command
+	- bash_add_history: chars_to_add set to "\n" if the current command line
+	  is one greater than the previous line containing a comment
+	  (current_command_line_comment).  Fixes complaint from back in
+	  January, 2016 from Dave Rutherford <dave@evilpettingzoo.com>
+
+array.h
+	- lastref: move last-referenced pointer into each array struct, so all
+	  arrays can have reference locality
+
+array.c
+	- array_create: set lastref element to 0
+	- array_copy: if copying the lastref in array a, set the new lastref
+	  in the copy to the same element
+	- IS_LASTREF, LASTREF_START, LASTREF, INVALIDATE_LASTREF, SET_LASTREF,
+	  UNSET_LASTREF: change to use new array `lastref' member
+
+pathexp.c
+	- quote_string_for_globbing: if quoting for a regexp, make sure to
+	  skip and copy a leading `^' in a bracket expression, and skip and
+	  copy a subsequent `]' (after an optional `^'), so that leading
+	  bracket doesn't close the bracket expression.  Report from
+	  Stephane Chazelas <stephane.chazelas@gmail.com>
+
+				   10/29
+				   -----
+subst.c
+	- extract_delimited_string: add calls to CHECK_STRING_OVERRUN for
+	  $( inside $((, nested OPENERs, nested ALT_OPENERs, and backquotes
+	- skip_to_delim: add calls to CHECK_STRING_OVERRUN for $(, ${,
+	  process substitution
+	- extract_dollar_brace_string: add calls to CHECK_STRING_OVERRUN for
+	  $(
+	- extract_dollar_brace_string: use skipsubscript to skip over the
+	  array subscript in ${var[sub]} (non-quoted case uses string_extract,
+	  which already uses skipsubscript).  Tagged for bash-5.0
+
+				   10/30
+				   -----
+variables.c
+	- EPOCHSECONDS: new dynamic variable, time in seconds since Unix
+	  epoch; assignments are ignored.  Can be used on systems where
+	  strftime() doesn't support '%s'
+	- EPOCHREALTIME: new dynamic variable, time in seconds since Unix
+	  epoch with microsecond granularity
+
+doc/{bash.1,bashref.texi}
+	- EPOCHSECONDS documentation
+	- EPOCHREALTIME documentation
+
+execute_cmd.c
+	- decpoint: moved to locale.c, renamed locale_decpoint; changed callers
+
+{bashintl,externs}.h
+	- locale_decpoint: extern declaration or #define if support for
+	  localeconv() not there
+
+				   10/31
+				   -----
+lib/malloc/malloc.c
+	- posix_memalign: add new posix-mandated interface
+
+examples/loadables/rm.c
+	- rm: minimal loadable builtin, removes files and directories, only
+	  handles -r and -f options.  Original from Tim Ruehsen
+	  <tim.ruehsen@gmx.de>, heavily rewritten for inclusion as loadable
+
+examples/loadables/Makefile.in
+	- rm: add rules to build rm as one of the standard targets
+
+examples/loadables/stat.c
+	- stat: new loadable builtin that takes a filename and loads the info
+	  returned by stat(2) into an associative array specified by the -A
+	  argument (default STAT)
+
+				   11/1
+				   ----
+variables.c
+	- BASH_ARGV0: new dynamic variable, returns $0 on reference and sets
+	  $0 on assignment.  From a suggestion from  Rocky Bernstein <rocky@gnu.org>
+	  a few years ago
+
+doc/{bash.1,bashref.texi}
+	- BASH_ARGV0: document
+
+				   11/2
+				   ----
+lib/glob/sm_loop.c
+	- parse_collsym: make sure to not return an out-of-bounds read if a
+	  collating symbol is unterminated.  Fixes OOB read reported by
+	  op7ic \x00 <op7ica@gmail.com>
+	- brackmatch: after incrementing p, before checking whether it's a
+	  character range, check whether *p was NULL before the increment
+	  and short-circuit the bracket expression if it is
+
+jobs.c
+	- discard_last_procsub_child: new function, safely discards
+	  last_procsub_child and sets it to NULL
+
+subst.c
+	- process_substitute: call discard_last_procsub_child instead of
+	  calling discard_pipeline directly.  Fixes bug reported by
+	  Christian Weisgerber <naddy@mips.inka.de>

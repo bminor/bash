@@ -2567,6 +2567,9 @@ In this case, for each redirection operator except
 than 10 and assign it to @{@var{varname}@}.  If >&- or <&- is preceded
 by @{@var{varname}@}, the value of @var{varname} defines the file
 descriptor to close.
+If @{@var{varname}@} is supplied, the redirection persists beyond
+the scope of the command, allowing the shell programmer to manage
+the file descriptor himself.
 
 In the following descriptions, if the file descriptor number is
 omitted, and the first character of the redirection operator is
@@ -5519,6 +5522,16 @@ The shell sets @code{BASH_ARGV} only when in extended debugging mode
 for a description of the @code{extdebug} option to the @code{shopt}
 builtin).
 
+@item BASH_ARGV0
+When referenced, this variable expands to the name of the shell or shell
+script (identical to @code{$0}; @xref{Special Parameters},
+for the description of special parameter 0).
+Assignment to @code{BASH_ARGV0}
+causes the value assigned to also be assigned to @code{$0}.
+If @code{BASH_ARGV0}
+is unset, it loses its special properties, even if it is
+subsequently reset.
+
 @item BASH_CMDS
 An associative array variable whose members correspond to the internal
 hash table of commands as maintained by the @code{hash} builtin
@@ -5733,6 +5746,23 @@ Emacs shell buffer and disables line editing.
 @item ENV
 Similar to @code{BASH_ENV}; used when the shell is invoked in
 @sc{posix} Mode (@pxref{Bash POSIX Mode}).
+
+@item EPOCHREALTIME
+Each time this parameter is referenced, it expands to the number of seconds
+since the Unix Epoch as a floating point value with micro-second granularity
+(see the documentation for the C library function @var{time} for the
+definition of Epoch).
+Assignments to @env{EPOCHREALTIME} are ignored.
+If @env{EPOCHREALTIME} is unset, it loses its special properties, even if
+it is subsequently reset.
+
+@item EPOCHSECONDS
+Each time this parameter is referenced, it expands to the number of seconds
+since the Unix Epoch (see the documentation for the C library function
+@var{time} for the definition of Epoch).
+Assignments to @env{EPOCHSECONDS} are ignored.
+If @env{EPOCHSECONDS} is unset, it loses its special properties, even if
+it is subsequently reset.
 
 @item EUID
 The numeric effective user id of the current user.  This variable

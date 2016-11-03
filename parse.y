@@ -2816,6 +2816,9 @@ mk_alexpansion (s)
   strcpy (r, s);
   /* If the last character in the alias is a newline, don't add a trailing
      space to the expansion.  Works with shell_getc above. */
+  /* Need to do something about the case where the alias expansion contains
+     an unmatched quoted string, since appending this space affects the
+     subsequent output. */
   if (r[l - 1] != ' ' && r[l - 1] != '\n' && shellmeta(r[l - 1]) == 0)
     r[l++] = ' ';
   r[l] = '\0';
@@ -2839,9 +2842,11 @@ alias_expand_token (tokstr)
 	return (NO_EXPANSION);
 
       /* mk_alexpansion puts an extra space on the end of the alias expansion,
-         so the lookahead by the parser works right.  If this gets changed,
-         make sure the code in shell_getc that deals with reaching the end of
-         an expanded alias is changed with it. */
+	 so the lookahead by the parser works right (the alias needs to remain
+	 `in use' while parsing its last word to avoid alias recursion for
+	 something like "alias echo=echo").  If this gets changed, make sure
+	 the code in shell_getc that deals with reaching the end of an
+	 expanded alias is changed with it. */
       expanded = ap ? mk_alexpansion (ap->value) : (char *)NULL;
 
       if (expanded)

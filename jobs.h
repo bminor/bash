@@ -190,6 +190,7 @@ extern JOB **jobs;
 extern void making_children __P((void));
 extern void stop_making_children __P((void));
 extern void cleanup_the_pipeline __P((void));
+extern void discard_last_procsub_child __P((void));
 extern void save_pipeline __P((int));
 extern PROCESS *restore_pipeline __P((int));
 extern void start_pipeline __P((void));

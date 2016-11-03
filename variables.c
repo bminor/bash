@@ -221,6 +221,9 @@ static SHELL_VAR *get_lineno __P((SHELL_VAR *));
 static SHELL_VAR *assign_subshell __P((SHELL_VAR *, char *, arrayind_t, char *));
 static SHELL_VAR *get_subshell __P((SHELL_VAR *));
 
+static SHELL_VAR *get_epochseconds __P((SHELL_VAR *));
+static SHELL_VAR *get_epochrealtime __P((SHELL_VAR *));
+
 static SHELL_VAR *get_bashpid __P((SHELL_VAR *));
 
 #if defined (HISTORY)
@@ -1452,6 +1455,40 @@ get_subshell (var)
 }
 
 static SHELL_VAR *
+get_epochseconds (var)
+     SHELL_VAR *var;
+{
+  intmax_t now;
+  char *p;
+
+  now = NOW;
+  p = itos (now);
+
+  FREE (value_cell (var));
+  var_setvalue (var, p);
+  return (var);
+}
+
+static SHELL_VAR *
+get_epochrealtime (var)
+     SHELL_VAR *var;
+{
+  char buf[32];
+  char *p;
+  struct timeval tv;
+
+  gettimeofday (&tv, NULL);
+  snprintf (buf, sizeof (buf), "%u%c%06u", (unsigned)tv.tv_sec,
+					   locale_decpoint (),
+					   (unsigned)tv.tv_usec);
+
+  p = savestring (buf);
+  FREE (value_cell (var));
+  var_setvalue (var, p);
+  return (var);
+}
+
+static SHELL_VAR *
 get_bashpid (var)
      SHELL_VAR *var;
 {
@@ -1467,6 +1504,30 @@ get_bashpid (var)
   return (var);
 }
 
+static SHELL_VAR *
+get_bash_argv0 (var)
+     SHELL_VAR *var;
+{
+  char *p;
+
+  p = savestring (dollar_vars[0]);
+  FREE (value_cell (var));
+  var_setvalue (var, p);
+  return var;
+}
+
+static SHELL_VAR *
+assign_bash_argv0 (var, value, unused, key)
+     SHELL_VAR *var;
+     char *value;
+     arrayind_t unused;
+     char *key;
+{
+  FREE (dollar_vars[0]);
+  dollar_vars[0] = savestring (value);
+  return var;
+}
+  
 static SHELL_VAR *
 get_bash_command (var)
      SHELL_VAR *var;
@@ -1758,6 +1819,8 @@ initialize_dynamic_variables ()
 
   v = init_seconds_var ();
 
+  INIT_DYNAMIC_VAR ("BASH_ARGV0", (char *)NULL, get_bash_argv0, assign_bash_argv0);
+
   INIT_DYNAMIC_VAR ("BASH_COMMAND", (char *)NULL, get_bash_command, (sh_var_assign_func_t *)NULL);
   INIT_DYNAMIC_VAR ("BASH_SUBSHELL", (char *)NULL, get_subshell, assign_subshell);
 
@@ -1768,6 +1831,9 @@ initialize_dynamic_variables ()
 
   INIT_DYNAMIC_VAR ("BASHPID", (char *)NULL, get_bashpid, null_assign);
   VSETATTR (v, att_integer);
+
+  INIT_DYNAMIC_VAR ("EPOCHSECONDS", (char *)NULL, get_epochseconds, null_assign);
+  INIT_DYNAMIC_VAR ("EPOCHREALTIME", (char *)NULL, get_epochrealtime, null_assign);
 
 #if defined (HISTORY)
   INIT_DYNAMIC_VAR ("HISTCMD", (char *)NULL, get_histcmd, (sh_var_assign_func_t *)NULL);

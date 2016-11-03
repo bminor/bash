@@ -63,39 +63,17 @@
 
 static char *array_to_string_internal __P((ARRAY_ELEMENT *, ARRAY_ELEMENT *, char *, int));
 
-/* lastref should be moved into the array structure so each array can be
-   optimized separately */
-
-static ARRAY *lastarray = 0;
-static ARRAY_ELEMENT *lastref = 0;
-
-#define IS_LASTREF(a)	(lastarray && (a) == lastarray)
+#define IS_LASTREF(a)	(a->lastref)
 
 #define LASTREF_START(a, i) \
-	(IS_LASTREF(a) && i >= element_index(lastref)) ? lastref \
-						       : element_forw(a->head)
+	(IS_LASTREF(a) && i >= element_index(a->lastref)) ? a->lastref \
+						          : element_forw(a->head)
 
-#define LASTREF(a)	IS_LASTREF(a) ? lastref : element_forw(a->head)
+#define LASTREF(a)	(a->lastref ? a->lastref : element_forw(a->head))
 
-#define INVALIDATE_LASTREF(a) \
-do { \
-	if ((a) == lastarray) { \
-		lastarray = 0; \
-		lastref = 0; \
-	} \
-} while (0)
-
-#define SET_LASTREF(a, e) \
-do { \
-	lastarray = (a); \
-	lastref = (e); \
-} while (0)
-
-#define UNSET_LASTREF(a) \
-do { \
-	lastarray = 0; \
-	lastref = 0; \
-} while (0)
+#define INVALIDATE_LASTREF(a)	a->lastref = 0
+#define SET_LASTREF(a, e)	a->lastref = (e)
+#define UNSET_LASTREF(a)	a->lastref = 0;
 
 ARRAY *
 array_create()
@@ -107,6 +85,7 @@ array_create()
 	r->type = array_indexed;
 	r->max_index = -1;
 	r->num_elements = 0;
+	r->lastref = (ARRAY_ELEMENT *)0;
 	head = array_create_element(-1, (char *)NULL);	/* dummy head */
 	head->prev = head->next = head;
 	r->head = head;
@@ -159,6 +138,8 @@ ARRAY	*a;
 	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae)) {
 		new = array_create_element(element_index(ae), element_value(ae));
 		ADD_BEFORE(a1->head, new);
+		if (ae == LASTREF(a))
+			SET_LASTREF(a1, new);
 	}
 	return(a1);
 }
@@ -722,7 +703,7 @@ arrayind_t	i;
 	if (a == 0 || array_empty(a))
 		return((ARRAY_ELEMENT *) NULL);
 	if (i > array_max_index(a) || i < array_first_index(a))
-		return((char *)NULL);	/* Keep roving pointer into array to optimize sequential access */
+		return((ARRAY_ELEMENT *)NULL);	/* Keep roving pointer into array to optimize sequential access */
 	start = LASTREF(a);
 	/* Use same strategy as array_reference to avoid paying large penalty
 	   for semi-random assignment pattern. */

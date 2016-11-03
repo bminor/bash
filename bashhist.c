@@ -140,6 +140,11 @@ int command_oriented_history = 1;
    the history-manipluating builtins can see it. */
 int current_command_first_line_saved = 0;
 
+/* Set to the number of the most recent line of a possibly-multi-line command
+   that contains a shell comment.  Used by bash_add_history() to determine
+   whether to add a newline or a semicolon. */
+int current_command_line_comment = 0;
+
 /* Non-zero means to store newlines in the history list when using
    command_oriented_history rather than trying to use semicolons. */
 int literal_history;
@@ -597,16 +602,24 @@ pre_process_line (line, print_changes, addit)
 }
 
 /* Return 1 if the first non-whitespace character in LINE is a `#', indicating
- * that the line is a shell comment. */
+   that the line is a shell comment.  Return 2 if there is a comment after the
+   first non-whitespace character. Return 0 if the line does not contain a
+   comment. */
 static int
 shell_comment (line)
      char *line;
 {
   char *p;
+  int n;
 
+  if (line == 0)
+    return 0;
   for (p = line; p && *p && whitespace (*p); p++)
     ;
-  return (p && *p == '#');
+  if (p && *p == '#')
+    return 1;
+  n = skip_to_delim (line, p - line, "#", SD_NOJMP|SD_GLOB|SD_EXTGLOB|SD_COMPLETE);
+  return (line[n] == '#') ? 2 : 0;
 }
 
 #ifdef INCLUDE_UNUSED
@@ -708,13 +721,14 @@ maybe_add_history (line)
   if (current_command_line_count > 1)
     {
       if (current_command_first_line_saved &&
-	  ((parser_state & PST_HEREDOC) || literal_history || dstack.delimiter_depth != 0 || shell_comment (line) == 0))
+	  ((parser_state & PST_HEREDOC) || literal_history || dstack.delimiter_depth != 0 || shell_comment (line) != 1))
 	bash_add_history (line);
       return;
     }
 
   /* This is the first line of a (possible multi-line) command.  Note whether
      or not we should save the first line and remember it. */
+  current_command_line_comment = shell_comment (line) ? current_command_line_count : -2;
   current_command_first_line_saved = check_add_history (line, 0);
 }
 
@@ -803,11 +817,17 @@ bash_add_history (line)
 	 so we have to duplicate some of what that function does here. */
       if ((parser_state & PST_HEREDOC) && literal_history && current_command_line_count > 2 && line[strlen (line) - 1] == '\n')
 	chars_to_add = "";
+      else if (current_command_line_count == current_command_line_comment+1)
+	chars_to_add = "\n";
+      else if (literal_history)
+	chars_to_add = "\n";
       else
-	chars_to_add = literal_history ? "\n" : history_delimiting_chars (line);
+	chars_to_add = history_delimiting_chars (line);
 
       using_history ();
       current = previous_history ();
+
+      current_command_line_comment = shell_comment (line) ? current_command_line_count : -2;
 
       if (current)
 	{

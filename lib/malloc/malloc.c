@@ -100,6 +100,12 @@
 #  include "watch.h"
 #endif
 
+#ifdef powerof2
+#  undef powerof2
+#endif
+/* Could also use (((x) & -(x)) == (x)) */
+#define powerof2(x)	((((x) - 1) & (x)) == 0)
+
 /* System-specific omissions. */
 #ifdef HPUX
 #  define NO_VALLOC
@@ -1123,6 +1129,28 @@ internal_memalign (alignment, size, file, line, flags)
   p->mh_alloc = ISMEMALIGN;
 
   return aligned;
+}
+
+int
+posix_memalign (memptr, alignment, size)
+     void **memptr;
+     size_t alignment, size;
+{
+  void *mem;
+
+  /* Perform posix-mandated error checking here */
+  if ((alignment % sizeof (void *) != 0) || alignment == 0)
+    return EINVAL;
+  else if (powerof2 (alignment) == 0)
+    return EINVAL;
+
+  mem = internal_memalign (alignment, size, (char *)0, 0, 0);
+  if (mem != 0)
+    {
+      *memptr = mem;
+      return 0;
+    }
+  return ENOMEM;
 }
 
 #if !defined (NO_VALLOC)

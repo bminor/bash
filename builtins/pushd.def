@@ -365,7 +365,7 @@ popd_builtin (list)
 	break;
     }
 
-  if (which > directory_list_offset || (directory_list_offset == 0 && which == 0))
+  if (which > directory_list_offset || (which < -directory_list_offset) || (directory_list_offset == 0 && which == 0))
     {
       pushd_error (directory_list_offset, which_word ? which_word : "");
       return (EXECUTION_FAILURE);
@@ -387,6 +387,11 @@ popd_builtin (list)
 	 remove that directory from the list and shift the remainder
 	 of the list into place. */
       i = (direction == '+') ? directory_list_offset - which : which;
+      if (i < 0 || i > directory_list_offset)
+	{
+	  pushd_error (directory_list_offset, which_word ? which_word : "");
+	  return (EXECUTION_FAILURE);
+	}
       free (pushd_directory_list[i]);
       directory_list_offset--;
 

@@ -230,6 +230,16 @@ quote_string_for_globbing (pathname, qflags)
 	  savej = j;
 	  savei = i;
 	  c = pathname[i++];	/* c == char after open bracket */
+	  if (c == '^')		/* ignore pattern negation */
+	    {
+	      temp[j++] = c;
+	      c = pathname[i++];
+	    }
+	  if (c == ']')		/* ignore right bracket if first char */
+	    {
+	      temp[j++] = c;
+	      c = pathname[i++];
+	    }
 	  do
 	    {
 	      if (c == 0)

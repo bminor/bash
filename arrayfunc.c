@@ -1086,15 +1086,17 @@ array_value_internal (s, quoted, flags, rtype, indp)
 	    return ((char *) NULL);
 	}
 
+      /* Caller of array_value takes care of inspecting rtype and duplicating
+	 retval if rtype == 0, so this is not a memory leak */
       if (t[0] == '*' && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
 	{
 	  temp = string_list_dollar_star (l);
-	  retval = quote_string (temp);		/* XXX - leak here */
+	  retval = quote_string (temp);
 	  free (temp);
 	}
       else	/* ${name[@]} or unquoted ${name[*]} */
         /* XXX - bash-4.4/bash-5.0 test AV_ASSIGNRHS and pass PF_ASSIGNRHS */
-	retval = string_list_dollar_at (l, quoted, (flags & AV_ASSIGNRHS) ? PF_ASSIGNRHS : 0);	/* XXX - leak here */
+	retval = string_list_dollar_at (l, quoted, (flags & AV_ASSIGNRHS) ? PF_ASSIGNRHS : 0);
 
       dispose_words (l);
     }
