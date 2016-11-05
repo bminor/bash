@@ -81,7 +81,7 @@
 #else
 #  include <strings.h>
 #endif
-
+#include <errno.h>
 #include <stdio.h>
 
 /* Define getpagesize () if the system does not.  */
@@ -245,6 +245,10 @@ static const unsigned long binsizes[NBUCKETS] = {
 
 /* binsizes[x] == (1 << ((x) + 3)) */
 #define binsize(x)	binsizes[(x)]
+
+#if !defined (errno)
+extern int errno;
+#endif
 
 /* Declarations for internal functions */
 static PTR_T internal_malloc __P((size_t, const char *, int, int));

@@ -103,6 +103,9 @@ fprintf(stderr, "gmatch: pattern = %s; pe = %s\n", pattern, pe);
 	  break;
 
 	case L('\\'):		/* backslash escape removes special meaning */
+	  if (p == pe && sc == '\\' && (n+1 == se))
+	    break;
+
 	  if (p == pe)
 	    return FNM_NOMATCH;
 

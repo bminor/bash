@@ -2704,6 +2704,7 @@ shell_expand_line (count, ignore)
 {
   char *new_line;
   WORD_LIST *expanded_string;
+  WORD_DESC *w;
 
   new_line = 0;
 #if defined (BANG_HISTORY)
@@ -2733,9 +2734,19 @@ shell_expand_line (count, ignore)
 
       /* If there is variable expansion to perform, do that as a separate
 	 operation to be undone. */
+
+#if 1
+      w = alloc_word_desc ();
+      w->word = savestring (rl_line_buffer);
+      w->flags = rl_explicit_arg ? (W_NOPROCSUB|W_NOCOMSUB) : 0;
+      expanded_string = expand_word (w, rl_explicit_arg ? Q_HERE_DOCUMENT : 0);
+      dispose_word (w);
+#else
       new_line = savestring (rl_line_buffer);
       expanded_string = expand_string (new_line, 0);
       FREE (new_line);
+#endif
+
       if (expanded_string == 0)
 	{
 	  new_line = (char *)xmalloc (1);

@@ -12105,7 +12105,7 @@ examples/loadables/rm.c
 	  <tim.ruehsen@gmx.de>, heavily rewritten for inclusion as loadable
 
 examples/loadables/Makefile.in
-	- rm: add rules to build rm as one of the standard targets
+	- rm: add rules to build rm as one of the `other' targets
 
 examples/loadables/stat.c
 	- stat: new loadable builtin that takes a filename and loads the info
@@ -12140,3 +12140,62 @@ subst.c
 	- process_substitute: call discard_last_procsub_child instead of
 	  calling discard_pipeline directly.  Fixes bug reported by
 	  Christian Weisgerber <naddy@mips.inka.de>
+
+				   11/3
+				   ----
+shell.h
+	- EX_DISKFALLBACK: new special return status available to builtins;
+	  means to attempt to execute a disk command with the same name as
+	  the builtin
+
+examples/loadables/rm.c
+	- if we see the -i option, return EX_DISKFALLBACK
+
+execute_cmd.c
+	- execute_simple_command: if executing a builtin returns EX_DISKFALLBACK,
+	  try running execute_disk_command instead 
+
+bashline.c
+	- shell_expand_line: use expand_word to expand the readline line
+	  buffer, which allows us to pass flags with the word. If a numeric
+	  argument is supplied, do not perform quote removal (pass
+	  Q_HERE_DOCUMENT since here-doc quoting does the right thing) and
+	  do not perform command or process subsitution.  From a suggestion
+	  by Dabrien 'Dabe' Murphy <dabe@dabe.com> based on an old bug-bash
+	  discussion
+
+subst.c
+	- expand_word_internal: note that we have added a quoted IFS char to
+	  istring by setting sentinel has_quoted_ifs.  Usually we only add
+	  one if we are not going to be performing word splitting, but we
+	  will not perform word splitting if there's no expansion, so we need
+	  to take care of that case
+	- expand_word_internal: when performing final word split, if there are
+	  no expansions but has_quoted_ifs is non-zero, call remove_quoted_ifs()
+	  to remove any quoted ifs characters we added while processing
+	- remove_quoted_ifs: new function, removes CTLESC chars preceding
+	  (single-byte) chars in IFS. Used when we are not performing word
+	  splitting.  Fixes bug reported by Martijn Dekker <martijn@inlv.org>
+
+				   11/4
+				   ----
+lib/readline/macro.c
+	- _rl_peek_macro_key: return the next character from the current
+	  keyboard macro; the next character from the `next' keyboard macro,
+	  if there is one, if at the end of the current macro; or 0 to
+	  indicate that we are at the end of a keyboard macro sequence
+
+lib/readline/rlprivate.h
+	- _rl_peek_macro_key: extern declaration
+
+lib/readline/readline.c
+	- _rl_dispatch_subseq: add test for ESC at the end of a keyboard macro,
+	  which should cause the keyboard timeout for ESC to kick in.  The
+	  previous test didn't run the timeout code if executing from a macro,
+	  even if we had read the last character of the macro.  Fixes bug
+	  reported by Clark Wang <clarkw@vmware.com>
+
+lib/glob/sm_loop.c
+	- GMATCH: allow trailing backslash in pattern to explicitly match a
+	  backslash that is the last character in the string.  Bug report from
+	  Stephane Chazelas <stephane.chazelas@gmail.com>

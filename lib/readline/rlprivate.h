@@ -309,6 +309,7 @@ extern int _rl_search_getchar PARAMS((_rl_search_cxt *));
 
 /* macro.c */
 extern void _rl_with_macro_input PARAMS((char *));
+extern int _rl_peek_macro_key PARAMS((void));
 extern int _rl_next_macro_key PARAMS((void));
 extern int _rl_prev_macro_key PARAMS((void));
 extern void _rl_push_executing_macro PARAMS((void));

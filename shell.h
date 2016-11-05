@@ -72,6 +72,7 @@ extern int EOF_Reached;
 #define EX_REDIRFAIL	259	/* redirection failed */
 #define EX_BADASSIGN	260	/* variable assignment error */
 #define EX_EXPFAIL	261	/* word expansion failed */
+#define EX_DISKFALLBACK	262	/* fall back to disk command from builtin */
 
 /* Flag values that control parameter pattern substitution. */
 #define MATCH_ANY	0x000

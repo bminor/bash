@@ -122,7 +122,7 @@ rm_builtin (list)
   rval = EXECUTION_SUCCESS;
 
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "Rrf")) != -1)
+  while ((opt = internal_getopt (list, "Rrfi")) != -1)
     {
       switch (opt)
 	{
@@ -133,6 +133,8 @@ rm_builtin (list)
 	case 'f':
 	  force = 1;
 	  break;
+	case 'i':
+	  return (EX_DISKFALLBACK);
 	CASE_HELPOPT;
 	default:
 	  builtin_usage ();

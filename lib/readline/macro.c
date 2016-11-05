@@ -100,7 +100,10 @@ _rl_with_macro_input (string)
       return;
     }
 
-  _rl_push_executing_macro ();
+#if 0
+  if (rl_executing_macro)		/* XXX - later */
+#endif
+    _rl_push_executing_macro ();
   rl_executing_macro = string;
   executing_macro_index = 0;
   RL_SETSTATE(RL_STATE_MACROINPUT);
@@ -128,8 +131,22 @@ _rl_next_macro_key ()
       _rl_pop_executing_macro ();
   return c;
 #else
+  /* XXX - consider doing the same as the callback code, just not testing
+     whether we're running in callback mode */
   return (rl_executing_macro[executing_macro_index++]);
 #endif
+}
+
+int
+_rl_peek_macro_key ()
+{
+  if (rl_executing_macro == 0)
+    return (0);
+  if (rl_executing_macro[executing_macro_index] == 0 && (macro_list == 0 || macro_list->string == 0))
+    return (0);
+  if (rl_executing_macro[executing_macro_index] == 0 && macro_list && macro_list->string)
+    return (macro_list->string[0]);
+  return (rl_executing_macro[executing_macro_index]);
 }
 
 int

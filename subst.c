@@ -4149,11 +4149,43 @@ remove_quoted_escapes (string)
   return (string);
 }
 
-/* Perform quoted null character removal on STRING.  We don't allow any
-   quoted null characters in the middle or at the ends of strings because
-   of how expand_word_internal works.  remove_quoted_nulls () turns
-   STRING into an empty string iff it only consists of a quoted null,
-   and removes all unquoted CTLNUL characters. */
+/* Remove quoted $IFS characters from STRING.  Quoted IFS characters are
+   added to protect them from word splitting, but we need to remove them
+   if no word splitting takes place.  This returns newly-allocated memory,
+   so callers can use it to replace savestring(). */
+char *
+remove_quoted_ifs (string)
+     char *string;
+{
+  register size_t slen;
+  register int i, j, prev_i;
+  char *ret, *send;
+  DECLARE_MBSTATE;
+
+  slen = strlen (string);
+  send = string + slen;
+
+  i = j = 0;
+  ret = (char *)xmalloc (slen + 1);
+
+  while (i < slen)
+    {
+      if (string[i] == CTLESC)
+	{
+	  i++;
+	  if (string[i] == 0 || isifs (string[i]) == 0)
+	    ret[j++] = CTLESC;
+	  if (i == slen)
+	    break;
+	}
+
+      COPY_CHAR_I (ret, j, string, send, i);
+    }
+  ret[j] = '\0';
+
+  return (ret);
+}
+
 char *
 remove_quoted_nulls (string)
      char *string;
@@ -9084,8 +9116,10 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
 
   /* State flags */
   int had_quoted_null;
+  int has_quoted_ifs;		/* did we add a quoted $IFS character here? */
   int has_dollar_at, temp_has_dollar_at;
   int split_on_spaces;
+  int local_expanded;
   int tflag;
   int pflags;			/* flags passed to param_expand */
   int mb_cur_max;
@@ -9119,6 +9153,7 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
   istring = (char *)xmalloc (istring_size = DEFAULT_INITIAL_ARRAY_SIZE);
   istring[istring_index = 0] = '\0';
   quoted_dollar_at = had_quoted_null = has_dollar_at = 0;
+  has_quoted_ifs = 0;
   split_on_spaces = 0;
   quoted_state = UNQUOTED;
 
@@ -9247,7 +9282,10 @@ add_string:
 	    word->flags |= W_ASSIGNRHS;		/* affects $@ */
 
 	  if (isexp == 0 && (word->flags & (W_NOSPLIT|W_NOSPLIT2)) == 0 && isifs (c))
-	    goto add_ifs_character;
+	    {
+	      has_quoted_ifs++;
+	      goto add_ifs_character;
+	    }
 	  else
 	    goto add_character;
 
@@ -9320,6 +9358,7 @@ add_string:
 	case '$':
 	  if (expanded_something)
 	    *expanded_something = 1;
+	  local_expanded = 1;
 
 	  temp_has_dollar_at = 0;
 	  pflags = (word->flags & W_NOCOMSUB) ? PF_NOCOMSUB : 0;
@@ -9386,6 +9425,7 @@ add_string:
 		
 	    if (expanded_something)
 	      *expanded_something = 1;
+	    local_expanded = 1;
 
 	    if (word->flags & W_NOCOMSUB)
 	      /* sindex + 1 because string[sindex] == '`' */
@@ -9536,6 +9576,7 @@ add_twochars:
 		    *contains_dollar_at = 1;
 		  if (expanded_something)
 		    *expanded_something = 1;
+		  local_expanded = 1;
 		}
 	    }
 	  else
@@ -9663,6 +9704,8 @@ add_twochars:
 	add_ifs_character:
 	  if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (isexp == 0 && isifs (c) && (word->flags & (W_NOSPLIT|W_NOSPLIT2)) == 0))
 	    {
+	      if ((quoted&(Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) == 0)
+		has_quoted_ifs++;
 	      if (string[sindex])	/* from old goto dollar_add_string */
 		sindex++;
 	      if (c == 0)
@@ -9840,7 +9883,19 @@ finished_with_string:
 	list = list_string (istring, *ifs_chars ? ifs_chars : " ", 1);
       else
 	{
-	  tword = make_bare_word (istring);
+#if 0
+	  /* XXX might want to use *expanded_something == 0 instead of
+	     local_expanded here */
+	  if (local_expanded == 0 && has_quoted_ifs)
+#else
+	  if (expanded_something && *expanded_something == 0 && has_quoted_ifs)
+#endif
+	    {
+	      tword = alloc_word_desc ();
+	      tword->word = remove_quoted_ifs (istring);
+	    }
+	  else
+	    tword = make_bare_word (istring);
 set_word_flags:
 	  if ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) || (quoted_state == WHOLLY_QUOTED))
 	    tword->flags |= W_QUOTED;

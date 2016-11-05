@@ -1961,6 +1961,9 @@ make_child (command, async_p)
 	 signals to the default state for a new process. */
       pid_t mypid;
 
+      /* If this ends up being changed to modify or use `command' in the
+	 child process, go back and change callers who free `command' in
+	 the child process when this returns. */
       mypid = getpid ();
 #if defined (BUFFERED_INPUT)
       /* Close default_buffered_input if it's > 0.  We don't close it if it's

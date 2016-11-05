@@ -4096,13 +4096,15 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 
   if (dofork)
     {
+      char *p;
+
       /* Do this now, because execute_disk_command will do it anyway in the
 	 vast majority of cases. */
       maybe_make_export_env ();
 
       /* Don't let a DEBUG trap overwrite the command string to be saved with
 	 the process/job associated with this child. */
-      if (make_child (savestring (the_printed_command_except_trap), async) == 0)
+      if (make_child (p = savestring (the_printed_command_except_trap), async) == 0)
 	{
 	  already_forked = 1;
 	  simple_command->flags |= CMD_NO_FORK;
@@ -4135,6 +4137,8 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 
 	  if (async)
 	    subshell_level++;		/* not for pipes yet */
+
+FREE (p);
 	}
       else
 	{
@@ -4356,6 +4360,15 @@ run_builtin:
 			  last_command_exit_value = EXECUTION_FAILURE;
 			  jump_to_top_level (ERREXIT);
 			}
+		      break;
+		    case EX_DISKFALLBACK:
+		      /* XXX - experimental */
+itrace("execute_simple_command: fallback to file system");
+		      executing_builtin = old_builtin;
+		      executing_command_builtin = old_command_builtin;
+		      builtin = 0;
+		      /* XXX - redirections will have to be performed again */
+		      goto execute_from_filesystem;
 		    }
 		  result = builtin_status (result);
 		  if (builtin_is_special)
@@ -4390,6 +4403,7 @@ run_builtin:
       goto run_builtin;
     }
 
+execute_from_filesystem:
   if (command_line == 0)
     command_line = savestring (the_printed_command_except_trap ? the_printed_command_except_trap : "");
 
@@ -4958,6 +4972,15 @@ execute_subshell_builtin_or_function (words, redirects, builtin, var,
 	  fflush (stdout);
 	  if (r == EX_USAGE)
 	    r = EX_BADUSAGE;
+	  /* XXX - experimental */
+	  else if (r == EX_DISKFALLBACK)
+	    {
+	      char *command_line;
+itrace("execute_subshell_builtin_or_function: fall back to disk command");
+	      command_line = savestring (the_printed_command_except_trap ? the_printed_command_except_trap : "");
+	      r = execute_disk_command (words, (REDIRECT *)0, command_line,
+		  -1, -1, async, (struct fd_bitmap *)0, flags|CMD_NO_FORK);
+	    }
 	  sh_exit (r);
 	}
     }
