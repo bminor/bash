@@ -170,7 +170,10 @@ alloc_pid_list ()
 
   /* None of the newly allocated slots have process id's yet. */
   for (i = old; i < pid_list_size; i++)
-    pid_list[i].pid = NO_PID;
+    {
+      pid_list[i].pid = NO_PID;
+      pid_list[i].status = pid_list[i].flags = 0;
+    }
 }
 
 /* Return the offset within the PID_LIST array of an empty slot.  This can
@@ -399,8 +402,9 @@ cleanup_dead_jobs ()
 
   for (i = 0; i < pid_list_size; i++)
     {
-      if ((pid_list[i].flags & PROC_RUNNING) == 0 &&
-	  (pid_list[i].flags & PROC_NOTIFIED))
+      if (pid_list[i].pid != NO_PID &&
+	    (pid_list[i].flags & PROC_RUNNING) == 0 &&
+	    (pid_list[i].flags & PROC_NOTIFIED))
 	pid_list[i].pid = NO_PID;
     }
 

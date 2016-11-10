@@ -494,6 +494,8 @@ first_pending_trap ()
   return -1;
 }
 
+/* Return > 0 if any of the "real" signals (not fake signals like EXIT) are
+   trapped. */
 int
 any_signals_trapped ()
 {

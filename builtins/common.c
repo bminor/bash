@@ -782,13 +782,9 @@ display_signal_list (list, forcecols)
 	      list = list->next;
 	      continue;
 	    }
-#if defined (JOB_CONTROL)
 	  /* POSIX.2 says that `kill -l signum' prints the signal name without
 	     the `SIG' prefix. */
 	  printf ("%s\n", (this_shell_builtin == kill_builtin) ? name + 3 : name);
-#else
-	  printf ("%s\n", name);
-#endif
 	}
       else
 	{

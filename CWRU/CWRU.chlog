@@ -12008,7 +12008,7 @@ aclocal.m4
 				   -----
 variables.c
 	- get_bashpid: BASHPID is no longer readonly; assignments to it are
-	  just ignored.  Suggested by Martijn Dekker <martijn@inlv.org>
+	  just ignored.
 
 doc/{bash.1,bashref.texi}
 	- BASHPID: note that assignments are ignored and unsetting BASHPID
@@ -12199,3 +12199,92 @@ lib/glob/sm_loop.c
 	- GMATCH: allow trailing backslash in pattern to explicitly match a
 	  backslash that is the last character in the string.  Bug report from
 	  Stephane Chazelas <stephane.chazelas@gmail.com>
+
+				   11/5
+				   ----
+builtins/common.c
+	- display_signal_list: if displaying a signal name corresponding to an
+	  exit status > 128, don't display the SIG prefix at all.  Old code
+	  made displaying the SIG prefix dependent on JOB_CONTROL define.
+	  Report and fix from Martijn Dekker <martijn@inlv.org>
+
+execute_cmd.c
+	- execute_subshell_builtin_or_function: call without_job_control even
+	  if JOB_CONTROL is not defined. Similar to fix from 9/23.
+	  Report from Martijn Dekker <martijn@inlv.org>
+
+execute_cmd.c
+	- execute_simple_command: free memory allocated and passed to
+	  make_child in the child process if JOB_CONTROL is defined
+	- execute_command_internal: free memory allocated and passed to
+	  make_child in the child process created to run a () subshell or a
+	  compound command within a pipeline if JOB_CONTROL is defined
+	- execute_coproc: free memory allocated and passed to make_child in
+	  the child process if JOB_CONTROL is defined
+	- execute_disk_command: free memory allocated and passed to
+	  make_child in the child process if JOB_CONTROL is defined.  This
+	  series of fixes is the result of reports from
+	  Eduardo A. Bustamante López <dualbus@gmail.com>
+
+				   11/6
+				   ----
+lib/sh/unicode.c
+	- u32toutf16: fix to prevent outputting broken surrogate pairs for
+	  Japanese locales (ja_JP.UTF-8) on cygwin (which uses UTF-16 natively).
+	  Report and fix from Koichi MURASE <myoga.murase@gmail.com>
+
+builtins/trap.def
+	- trap_builtin: if OP is `-' (revert), set the SIGINT signal handler
+	  to sigint_sighandler if the shell is interactive and sourcing a
+	  file (interactive_shell && sourcelevel) or running a trap
+	  (interactive_shell && running_trap) even if it's not currently
+	  interactive.  Report from Martijn Dekker <martijn@inlv.org>
+
+builtins/read.def
+	- check for and read multibyte characters in all cases, not just when
+	  we are reading a specific number of characters, as long as
+	  mb_cur_max > 1
+
+subst.c
+	- expand_word_internal: some improvements to code that converts istring
+	  into a WORD_LIST * to avoid multiple allocations and copies of
+	  istring, which is already malloc'ed memory -- reduce number of malloc
+	  and free calls
+
+test.c
+	- unary_test: make sure if we test -v array[@] or array[*] that we
+	  free the return value from array_value
+
+				   11/8
+				   ----
+expr.c
+	- expcond: make sure to set `noeval' before reading tokens depending on
+	  the result of the conditional test, since readtok() can evaluate
+	  identifiers (and recursively those containing expressions).  Report
+	  and fix from Koichi MURASE <myoga.murase@gmail.com>
+
+builtins/evalstring.c
+	- should_suppress_fork: make sure to check for traps on EXIT and
+	  ERR, since any_signals_trapped() only checks for `real' signals,
+	  not the fake shell ones.  Fixes bug reported by Werner Fink
+	  <werner@suse.de>
+	- optimize_subshell_command: ditto
+
+				   11/9
+				   ----
+eval.c
+	- reader_loop: change so that we don't reset the SIGINT handler every
+	  time through the command loop in an interactive shell if the signal
+	  is trapped (as the comment noted).  Reported by Report from Martijn
+	  Dekker <martijn@inlv.org>
+
+subst.c
+	- parameter_brace_{patsub,remove_pattern,transform,casemod}: save and
+	  restore this_command_name while temporarily setting it for use in
+	  error messages.  Fixes use-after-free error reported by
+	  op7ic \x00 <op7ica@gmail.com>
+	- string_extract_verbatim: make sure when we increment i by 2 due to
+	  a CTLESC or CTLESC-CTLNUL that we don't read past the end of the
+	  string. This can happen if the string ends with an odd number of
+	  CTLESC chars. Fixes oob-read error reported by
+	  op7ic \x00 <op7ica@gmail.com>

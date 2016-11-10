@@ -578,14 +578,15 @@ expcond ()
   rval = cval = explor ();
   if (curtok == QUES)		/* found conditional expr */
     {
-      readtok ();
-      if (curtok == 0 || curtok == COL)
-	evalerror (_("expression expected"));
       if (cval == 0)
 	{
 	  set_noeval = 1;
 	  noeval++;
 	}
+
+      readtok ();
+      if (curtok == 0 || curtok == COL)
+	evalerror (_("expression expected"));
 
       val1 = EXP_HIGHEST ();
 
@@ -593,9 +594,7 @@ expcond ()
 	noeval--;
       if (curtok != COL)
 	evalerror (_("`:' expected for conditional expression"));
-      readtok ();
-      if (curtok == 0)
-	evalerror (_("expression expected"));
+
       set_noeval = 0;
       if (cval)
  	{
@@ -603,7 +602,11 @@ expcond ()
 	  noeval++;
  	}
 
+      readtok ();
+      if (curtok == 0)
+	evalerror (_("expression expected"));
       val2 = expcond ();
+
       if (set_noeval)
 	noeval--;
       rval = cval ? val1 : val2;

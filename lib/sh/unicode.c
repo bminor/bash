@@ -1,6 +1,6 @@
 /* unicode.c - functions to convert unicode characters */
 
-/* Copyright (C) 2010-2015 Free Software Foundation, Inc.
+/* Copyright (C) 2010-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -219,12 +219,12 @@ u32toutf16 (c, s)
   int l;
 
   l = 0;
-  if (c < 0x0d800)
+  if (c < 0x0d800 || (c >= 0x0e000 && c <= 0x0ffff))
     {
       s[0] = (unsigned short) (c & 0xFFFF);
       l = 1;
     }
-  else if (c >= 0x0e000 && c <= 0x010ffff)
+  else if (c >= 0x10000 && c <= 0x010ffff)
     {
       c -= 0x010000;
       s[0] = (unsigned short)((c >> 10) + 0xd800);

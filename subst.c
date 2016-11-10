@@ -1166,6 +1166,7 @@ string_extract_verbatim (string, slen, sindex, charlist, flags)
       if ((flags & SX_NOCTLESC) == 0 && c == CTLESC)
 	{
 	  i += 2;
+	  CHECK_STRING_OVERRUN (i, i, slen, c);
 	  continue;
 	}
       /* Even if flags contains SX_NOCTLESC, we let CTLESC quoting CTLNUL
@@ -1174,6 +1175,7 @@ string_extract_verbatim (string, slen, sindex, charlist, flags)
       else if ((flags & SX_NOESCCTLNUL) == 0 && c == CTLESC && string[i+1] == CTLNUL)
 	{
 	  i += 2;
+	  CHECK_STRING_OVERRUN (i, i, slen, c);
 	  continue;
 	}
 
@@ -2773,11 +2775,11 @@ list_string (string, separators, quoted)
 	extract a word, stopping at a separator
 	skip sequences of spc, tab, or nl as long as they are separators
      This obeys the field splitting rules in Posix.2. */
-  slen = (MB_CUR_MAX > 1) ? STRLEN (string) : 1;
+  slen = STRLEN (string);
   for (result = (WORD_LIST *)NULL, sindex = 0; string[sindex]; )
     {
-      /* Don't need string length in ADVANCE_CHAR or string_extract_verbatim
-	 unless multibyte chars are possible. */
+      /* Don't need string length in ADVANCE_CHAR unless multibyte chars are
+	 possible, but need it in string_extract_verbatim for bounds checking */
       current_word = string_extract_verbatim (string, slen, &sindex, separators, xflags);
       if (current_word == 0)
 	break;
@@ -2902,9 +2904,9 @@ get_word_from_string (stringp, separators, endptr)
 
      This obeys the field splitting rules in Posix.2. */
   sindex = 0;
-  /* Don't need string length in ADVANCE_CHAR or string_extract_verbatim
-     unless multibyte chars are possible. */
-  slen = (MB_CUR_MAX > 1) ? STRLEN (s) : 1;
+  /* Don't need string length in ADVANCE_CHAR unless multibyte chars are
+     possible, but need it in string_extract_verbatim for bounds checking */
+  slen = STRLEN (s);
   current_word = string_extract_verbatim (s, slen, &sindex, separators, xflags);
 
   /* Set ENDPTR to the first character after the end of the word. */
@@ -5015,17 +5017,21 @@ parameter_brace_remove_pattern (varname, value, ind, patstr, rtype, quoted, flag
      int rtype, quoted, flags;
 {
   int vtype, patspec, starsub;
-  char *temp1, *val, *pattern;
+  char *temp1, *val, *pattern, *oname;
   SHELL_VAR *v;
 
   if (value == 0)
     return ((char *)NULL);
 
+  oname = this_command_name;
   this_command_name = varname;
 
   vtype = get_var_and_type (varname, value, ind, quoted, flags, &v, &val);
   if (vtype == -1)
-    return ((char *)NULL);
+    {
+      this_command_name = oname;
+      return ((char *)NULL);
+    }
 
   starsub = vtype & VT_STARSUB;
   vtype &= ~VT_STARSUB;
@@ -5078,6 +5084,8 @@ parameter_brace_remove_pattern (varname, value, ind, patstr, rtype, quoted, flag
 	}
       break;
     }
+
+  this_command_name = oname;
 
   FREE (pattern);
   return temp1;
@@ -5285,18 +5293,22 @@ parameter_brace_transform (varname, value, ind, xform, rtype, quoted, flags)
      int rtype, quoted, flags;
 {
   int vtype, xc;
-  char *temp1, *val;
+  char *temp1, *val, *oname;
   SHELL_VAR *v;
 
   xc = xform[0];
   if (value == 0 && xc != 'A' && xc != 'a')
     return ((char *)NULL);
 
+  oname = this_command_name;
   this_command_name = varname;
 
   vtype = get_var_and_type (varname, value, ind, quoted, flags, &v, &val);
   if (vtype == -1)
-    return ((char *)NULL);
+    {
+      this_command_name = oname;
+      return ((char *)NULL);
+    }
 
   /* check for valid values of xc */
   switch (xc)
@@ -5308,6 +5320,7 @@ parameter_brace_transform (varname, value, ind, xform, rtype, quoted, flags)
     case 'Q':		/* quote reusably */
       break;
     default:
+      this_command_name = oname;
       return &expand_param_error;
     }
 
@@ -5350,6 +5363,7 @@ parameter_brace_transform (varname, value, ind, xform, rtype, quoted, flags)
       break;
     }
 
+  this_command_name = oname;
   return temp1;
 }
 
@@ -7631,17 +7645,21 @@ parameter_brace_patsub (varname, value, ind, patsub, quoted, pflags, flags)
      int quoted, pflags, flags;
 {
   int vtype, mflags, starsub, delim;
-  char *val, *temp, *pat, *rep, *p, *lpatsub, *tt;
+  char *val, *temp, *pat, *rep, *p, *lpatsub, *tt, *oname;
   SHELL_VAR *v;
 
   if (value == 0)
     return ((char *)NULL);
 
-  this_command_name = varname;
+  oname = this_command_name;
+  this_command_name = varname;		/* error messages */
 
   vtype = get_var_and_type (varname, value, ind, quoted, flags, &v, &val);
   if (vtype == -1)
-    return ((char *)NULL);
+    {
+      this_command_name = oname;
+      return ((char *)NULL);
+    }
 
   starsub = vtype & VT_STARSUB;
   vtype &= ~VT_STARSUB;
@@ -7769,6 +7787,8 @@ parameter_brace_patsub (varname, value, ind, patsub, quoted, pflags, flags)
   FREE (rep);
   free (lpatsub);
 
+  this_command_name = oname;
+
   return temp;
 }
 
@@ -7825,17 +7845,21 @@ parameter_brace_casemod (varname, value, ind, modspec, patspec, quoted, flags)
      int quoted, flags;
 {
   int vtype, starsub, modop, mflags, x;
-  char *val, *temp, *pat, *p, *lpat, *tt;
+  char *val, *temp, *pat, *p, *lpat, *tt, *oname;
   SHELL_VAR *v;
 
   if (value == 0)
     return ((char *)NULL);
 
+  oname = this_command_name;
   this_command_name = varname;
 
   vtype = get_var_and_type (varname, value, ind, quoted, flags, &v, &val);
   if (vtype == -1)
-    return ((char *)NULL);
+    {
+      this_command_name = oname;
+      return ((char *)NULL);
+    }
 
   starsub = vtype & VT_STARSUB;
   vtype &= ~VT_STARSUB;
@@ -7911,6 +7935,8 @@ parameter_brace_casemod (varname, value, ind, modspec, patspec, quoted, flags)
 
   FREE (pat);
   free (lpat);
+
+  this_command_name = oname;
 
   return temp;
 }
@@ -9779,7 +9805,9 @@ finished_with_string:
 	{
 	  istring[0] = CTLNUL;
 	  istring[1] = '\0';
-	  tword = make_bare_word (istring);
+	  tword = alloc_word_desc ();
+	  tword->word = istring;
+	  istring = 0;		/* avoid later free() */
 	  tword->flags |= W_HASQUOTEDNULL;		/* XXX */
 	  list = make_word_list (tword, (WORD_LIST *)NULL);
 	  if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
@@ -9792,22 +9820,16 @@ finished_with_string:
 	 null arguments */
       else  if (quoted_state == UNQUOTED || quoted_dollar_at)
 	list = (WORD_LIST *)NULL;
-#if 0
-      else
-	{
-	  tword = make_bare_word (istring);
-	  if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
-	    tword->flags |= W_QUOTED;
-	  list = make_word_list (tword, (WORD_LIST *)NULL);
-	}
-#else
       else
 	list = (WORD_LIST *)NULL;
-#endif
     }
   else if (word->flags & W_NOSPLIT)
     {
-      tword = make_bare_word (istring);
+      tword = alloc_word_desc ();
+      tword->word = istring;
+      if (had_quoted_null && QUOTED_NULL (istring))
+	tword->flags |= W_HASQUOTEDNULL;
+      istring = 0;		/* avoid later free() */
       if (word->flags & W_ASSIGNMENT)
 	tword->flags |= W_ASSIGNMENT;	/* XXX */
       if (word->flags & W_COMPASSIGN)
@@ -9820,8 +9842,6 @@ finished_with_string:
 	tword->flags |= W_NOEXPAND;	/* XXX */
       if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
 	tword->flags |= W_QUOTED;
-      if (had_quoted_null && QUOTED_NULL (istring))
-	tword->flags |= W_HASQUOTEDNULL;
       list = make_word_list (tword, (WORD_LIST *)NULL);
     }
   else
@@ -9855,47 +9875,36 @@ finished_with_string:
 	 double-quoted $@ while expanding it. */
       else if (has_dollar_at && quoted_dollar_at == 0 && ifs_chars && quoted == 0 && (word->flags & W_NOSPLIT2))
 	{
+	  tword = alloc_word_desc ();
 	  /* Only split and rejoin if we have to */
 	  if (*ifs_chars && *ifs_chars != ' ')
 	    {
 	      list = list_string (istring, *ifs_chars ? ifs_chars : " ", 1);
-	      tstring = string_list (list);
+	      tword->word = string_list (list);	
 	    }
 	  else
-	    tstring = istring;
-	  tword = make_bare_word (tstring);
-	  if (tstring != istring)
-	    free (tstring);
+	    tword->word = istring;
+	  if (had_quoted_null && QUOTED_NULL (istring))
+	    tword->flags |= W_HASQUOTEDNULL;	/* XXX */
+	  if (tword->word != istring)
+	    free (istring);
+	  istring = 0;			/* avoid later free() */
 	  goto set_word_flags;
 	}
-      /* This is the attempt to make $* in an assignment context (a=$*) and
-	 array variables subscripted with * in an assignment context (a=${foo[*]})
-	 behave similarly.  It has side effects that, though they increase
-	 compatibility with other shells, are not backwards compatible. */
-#if 0
-      else if (has_dollar_at && quoted == 0 && ifs_chars && (word->flags & W_ASSIGNRHS))
-	{
-	  tword = make_bare_word (istring);
-	  goto set_word_flags;
-	}
-#endif
       else if (has_dollar_at && ifs_chars)
 	list = list_string (istring, *ifs_chars ? ifs_chars : " ", 1);
       else
 	{
-#if 0
-	  /* XXX might want to use *expanded_something == 0 instead of
-	     local_expanded here */
-	  if (local_expanded == 0 && has_quoted_ifs)
-#else
+	  tword = alloc_word_desc ();
 	  if (expanded_something && *expanded_something == 0 && has_quoted_ifs)
-#endif
-	    {
-	      tword = alloc_word_desc ();
-	      tword->word = remove_quoted_ifs (istring);
-	    }
+	    tword->word = remove_quoted_ifs (istring);
 	  else
-	    tword = make_bare_word (istring);
+	    tword->word = istring;
+	  if (had_quoted_null && QUOTED_NULL (istring))
+	    tword->flags |= W_HASQUOTEDNULL;	/* XXX */
+	  if (tword->word != istring)
+	    free (istring);
+	  istring = 0;			/* avoid later free() */
 set_word_flags:
 	  if ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) || (quoted_state == WHOLLY_QUOTED))
 	    tword->flags |= W_QUOTED;
@@ -9909,8 +9918,6 @@ set_word_flags:
 	    tword->flags |= W_NOBRACE;
 	  if (word->flags & W_NOEXPAND)
 	    tword->flags |= W_NOEXPAND;
-	  if (had_quoted_null && QUOTED_NULL (istring))
-	    tword->flags |= W_HASQUOTEDNULL;	/* XXX */
 	  list = make_word_list (tword, (WORD_LIST *)NULL);
 	}
     }

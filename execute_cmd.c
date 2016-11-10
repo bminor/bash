@@ -602,12 +602,13 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
     {
       pid_t paren_pid;
       int s;
+      char *p;
 
       /* Fork a subshell, turn off the subshell bit, turn off job
 	 control and call execute_command () on the command again. */
       line_number_for_err_trap = line_number;	/* XXX - save value? */
       tcmd = make_command_string (command);
-      paren_pid = make_child (savestring (tcmd), asynchronous);
+      paren_pid = make_child (p = savestring (tcmd), asynchronous);
 
       if (user_subshell && signal_is_trapped (ERROR_TRAP) && 
 	  signal_in_progress (DEBUG_TRAP) == 0 && running_trap == 0)
@@ -618,6 +619,9 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
       if (paren_pid == 0)
         {
+#if defined (JOB_CONTROL)
+	  FREE (p);		/* child doesn't use pointer */
+#endif
 	  /* We want to run the exit trap for forced {} subshells, and we
 	     want to note this before execute_in_subshell modifies the
 	     COMMAND struct.  Need to keep in mind that execute_in_subshell
@@ -2279,7 +2283,7 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
   int rpipe[2], wpipe[2], estat, invert;
   pid_t coproc_pid;
   Coproc *cp;
-  char *tcmd;
+  char *tcmd, *p;
   sigset_t set, oset;
 
   /* XXX -- can be removed after changes to handle multiple coprocs */
@@ -2298,12 +2302,16 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
 
   BLOCK_SIGNAL (SIGCHLD, set, oset);
 
-  coproc_pid = make_child (savestring (tcmd), 1);
+  coproc_pid = make_child (p = savestring (tcmd), 1);
 
   if (coproc_pid == 0)
     {
       close (rpipe[0]);
       close (wpipe[1]);
+
+#if defined (JOB_CONTROL)
+      FREE (p);
+#endif
 
       UNBLOCK_SIGNAL (oset);
       estat = execute_in_subshell (command, 1, wpipe[0], rpipe[1], fds_to_close);
@@ -4138,7 +4146,9 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	  if (async)
 	    subshell_level++;		/* not for pipes yet */
 
-FREE (p);
+#if defined (JOB_CONTROL)
+	  FREE (p);			/* child doesn't use pointer */
+#endif
 	}
       else
 	{
@@ -4936,6 +4946,8 @@ execute_subshell_builtin_or_function (words, redirects, builtin, var,
     without_job_control ();
 
   set_sigchld_handler ();
+#else
+  without_job_control ();
 #endif /* JOB_CONTROL */
 
   set_sigint_handler ();
@@ -5166,7 +5178,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
      struct fd_bitmap *fds_to_close;
      int cmdflags;
 {
-  char *pathname, *command, **args;
+  char *pathname, *command, **args, *p;
   int nofork, stdpath, result;
   pid_t pid;
   SHELL_VAR *hookf;
@@ -5176,6 +5188,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
   nofork = (cmdflags & CMD_NO_FORK);	/* Don't fork, just exec, if no pipes */
   pathname = words->word->word;
 
+  p = 0;
   result = EXECUTION_SUCCESS;
 #if defined (RESTRICTED_SHELL)
   command = (char *)NULL;
@@ -5214,7 +5227,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
   if (nofork && pipe_in == NO_PIPE && pipe_out == NO_PIPE)
     pid = 0;
   else
-    pid = make_child (savestring (command_line), async);
+    pid = make_child (p = savestring (command_line), async);
 
   if (pid == 0)
     {
@@ -5225,6 +5238,10 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
       restore_original_signals ();
 
       CHECK_SIGTERM;
+
+#if defined (JOB_CONTROL)
+      FREE (p);
+#endif
 
       /* restore_original_signals may have undone the work done
 	 by make_child to ensure that SIGINT and SIGQUIT are ignored

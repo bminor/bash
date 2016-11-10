@@ -627,8 +627,12 @@ unary_test (op, arg)
       if (v == 0 && valid_array_reference (arg, 0))
 	{
 	  char *t;
-	  t = array_value (arg, 0, 0, (int *)0, (arrayind_t *)0);
-	  return (t ? TRUE : FALSE);
+	  int rtype, ret;
+	  t = array_value (arg, 0, 0, &rtype, (arrayind_t *)0);
+	  ret = t ? TRUE : FALSE;
+	  if (rtype > 0)	/* subscript is * or @ */
+	    free (t);
+	  return ret;
 	}
      else if (v && invisible_p (v) == 0 && array_p (v))
 	{

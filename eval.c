@@ -90,7 +90,7 @@ reader_loop ()
 
       /* XXX - why do we set this every time through the loop?  And why do
 	 it if SIGINT is trapped in an interactive shell? */
-      if (interactive_shell && signal_is_ignored (SIGINT) == 0)
+      if (interactive_shell && signal_is_ignored (SIGINT) == 0 && signal_is_trapped (SIGINT) == 0)
 	set_signal_handler (SIGINT, sigint_sighandler);
 
       if (code != NOT_JUMPED)

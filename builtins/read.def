@@ -181,6 +181,7 @@ read_builtin (list)
   int size, i, nr, pass_next, saw_escape, eof, opt, retval, code, print_ps2;
   int input_is_tty, input_is_pipe, unbuffered_read, skip_ctlesc, skip_ctlnul;
   int raw, edit, nchars, silent, have_timeout, ignore_delim, fd, lastsig, t_errno;
+  int mb_cur_max;
   unsigned int tmsec, tmusec;
   long ival, uval;
   intmax_t intval;
@@ -235,6 +236,7 @@ read_builtin (list)
   rlind = 0;
 #endif
 
+  mb_cur_max = MB_CUR_MAX;
   tmsec = tmusec = 0;		/* no timeout */
   nr = nchars = input_is_tty = input_is_pipe = unbuffered_read = have_timeout = 0;
   delim = '\n';		/* read until newline */
@@ -664,7 +666,11 @@ add_char:
       CHECK_ALRM;
 
 #if defined (HANDLE_MULTIBYTE)
-      if (nchars > 0 && MB_CUR_MAX > 1 && is_basic (c) == 0)
+#  if 0
+      if (nchars > 0 && mb_cur_max > 1 && is_basic (c) == 0)
+#  else
+      if (mb_cur_max > 1 && is_basic (c) == 0)
+#  endif
 	{
 	  input_string[i] = '\0';	/* for simplicity and debugging */
 	  i += read_mbchar (fd, input_string, i, c, unbuffered_read);
