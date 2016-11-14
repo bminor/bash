@@ -104,12 +104,9 @@ should_suppress_fork (command)
 	  running_trap == 0 &&
 	  *bash_input.location.string == '\0' &&
 	  command->type == cm_simple &&
-#if 0
 	  signal_is_trapped (EXIT_TRAP) == 0 &&
 	  signal_is_trapped (ERROR_TRAP) == 0 &&
-#else
 	  any_signals_trapped () < 0 &&
-#endif
 	  command->redirects == 0 && command->value.Simple->redirects == 0 &&
 	  ((command->flags & CMD_TIME_PIPELINE) == 0) &&
 	  ((command->flags & CMD_INVERT_RETURN) == 0));
