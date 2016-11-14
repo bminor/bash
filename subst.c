@@ -5808,10 +5808,7 @@ process_substitute (string, open_for_read_in_child)
     {
 #if defined (JOB_CONTROL)
       if (last_procsub_child)
-	{
-	  discard_pipeline (last_procsub_child);
-	  last_procsub_child = (PROCESS *)NULL;
-	}
+	discard_last_procsub_child ();
       last_procsub_child = restore_pipeline (0);
 #endif
 

@@ -453,6 +453,21 @@ cleanup_the_pipeline ()
     discard_pipeline (disposer);
 }
 
+void
+discard_last_procsub_child ()
+{
+  PROCESS *disposer;
+  sigset_t set, oset;
+
+  BLOCK_CHILD (set, oset);
+  disposer = last_procsub_child;
+  last_procsub_child = (PROCESS *)NULL;
+  UNBLOCK_CHILD (oset);
+
+  if (disposer)
+    discard_pipeline (disposer);
+}
+
 struct pipeline_saver *
 alloc_pipeline_saver ()
 {
