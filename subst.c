@@ -5931,12 +5931,15 @@ read_comsub (fd, quoted, rflag)
   char *istring, buf[128], *bufp, *s;
   int istring_index, istring_size, c, tflag, skip_ctlesc, skip_ctlnul;
   ssize_t bufn;
+  int nullbyte;
 
   istring = (char *)NULL;
   istring_index = istring_size = bufn = tflag = 0;
 
   for (skip_ctlesc = skip_ctlnul = 0, s = ifs_value; s && *s; s++)
     skip_ctlesc |= *s == CTLESC, skip_ctlnul |= *s == CTLNUL;
+
+  nullbyte = 0;
 
   /* Read the output of the command through the pipe.  This may need to be
      changed to understand multibyte characters in the future. */
@@ -5956,7 +5959,11 @@ read_comsub (fd, quoted, rflag)
       if (c == 0)
 	{
 #if 1
-	  internal_warning ("%s", _("command substitution: ignored null byte in input"));
+	  if (nullbyte == 0)
+	    {
+	      internal_warning ("%s", _("command substitution: ignored null byte in input"));
+	      nullbyte = 1;
+	    }
 #endif
 	  continue;
 	}
