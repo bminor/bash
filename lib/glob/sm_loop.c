@@ -330,6 +330,12 @@ PARSE_COLLSYM (p, vp)
   for (pc = 0; p[pc]; pc++)
     if (p[pc] == L('.') && p[pc+1] == L(']'))
       break;
+   if (p[pc] == 0)
+    {
+      if (vp)
+	*vp = INVALID;
+      return (p + pc);
+    }
    val = COLLSYM (p, pc);
    if (vp)
      *vp = val;
@@ -482,6 +488,9 @@ BRACKMATCH (p, test, flags)
 
       c = *p++;
       c = FOLD (c);
+
+      if (c == L('\0'))
+	return ((test == L('[')) ? savep : (CHAR *)0);
 
       if ((flags & FNM_PATHNAME) && c == L('/'))
 	/* [/] can never match when matching a pathname.  */
