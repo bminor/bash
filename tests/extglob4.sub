@@ -19,7 +19,7 @@ echo @(*|.!(|.))                # wrong, adds . and ..
 echo @(*|@(f))                  # ??
 echo @(*|@(ff))
 
-cd /
+cd $OLDPWD
 rm -rf $GTDIR
 
 [[ a = a*?(/)b ]] && echo bad match 1

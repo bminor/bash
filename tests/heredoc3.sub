@@ -1,4 +1,5 @@
 SAVEPWD=$PWD
+: ${TMPDIR:=/tmp}
 cd $TMPDIR || echo "heredoc3.sub: cannot cd to $TMPDIR" >&2
 
 text=$(cat <<EOF
@@ -70,6 +71,12 @@ hello
 \END
 END
 echo end 'hello<NL>\END'
+
+# gprof
+if [ -n "$GMON_OUT_PREFIX" ]; then
+	mv ${GMON_OUT_PREFIX}.[0-9]* "$SAVEPWD" >/dev/null 2>&1
+fi
+cd "$SAVEPWD"
 
 # this has to be last -- results in a syntax error
 # doesn't currently parse because EOF is not on a line by itself -- should it?

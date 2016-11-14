@@ -1157,6 +1157,35 @@ posix_memalign (memptr, alignment, size)
   return ENOMEM;
 }
 
+size_t
+malloc_usable_size (mem)
+     void *mem;
+{
+  register union mhead *p;
+  register char *ap;
+  register int maxbytes;
+
+
+  if ((ap = (char *)mem) == 0)
+    return 0;
+
+  /* Find the true start of the memory block to discover which bin */
+  p = (union mhead *) ap - 1;
+  if (p->mh_alloc == ISMEMALIGN)
+    {
+      ap -= p->mh_nbytes;
+      p = (union mhead *) ap - 1;
+    }
+
+  /* XXX - should we return 0 if ISFREE? */
+  maxbytes = binsize(p->mh_index);
+
+  /* So the usable size is the maximum number of bytes in the bin less the
+     malloc overhead */
+  maxbytes -= MOVERHEAD + MSLOP;
+  return (maxbytes);
+}
+
 #if !defined (NO_VALLOC)
 /* This runs into trouble with getpagesize on HPUX, and Multimax machines.
    Patching out seems cleaner than the ugly fix needed.  */

@@ -1516,6 +1516,8 @@ get_bash_argv0 (var)
   return var;
 }
 
+static char *static_shell_name = 0;
+
 static SHELL_VAR *
 assign_bash_argv0 (var, value, unused, key)
      SHELL_VAR *var;
@@ -1523,8 +1525,20 @@ assign_bash_argv0 (var, value, unused, key)
      arrayind_t unused;
      char *key;
 {
+  size_t vlen;
+
+  if (value == 0)
+    return var;
+
   FREE (dollar_vars[0]);
   dollar_vars[0] = savestring (value);
+
+  /* Need these gyrations because shell_name isn't dynamically allocated */
+  vlen = STRLEN (value);
+  static_shell_name = xrealloc (static_shell_name, vlen + 1);
+  strcpy (static_shell_name, value);
+  
+  shell_name = static_shell_name;
   return var;
 }
   

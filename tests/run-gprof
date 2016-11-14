@@ -18,15 +18,18 @@ export PATH
 : ${THIS_SH:=../bash}
 export THIS_SH
 
+GPROF="gprof"
+
 rm -f gmon.sum
 
 ${THIS_SH} ./version
 
 rm -f "$BASH_TSTOUT"
 
-# prime the pump; gprof complains if gmon.sum is empty
-[ -f bash.gmon ] && gprof -s ${THIS_SH} bash.gmon >/dev/null
+# prime the pump; ${GPROF} complains if gmon.sum is empty
+[ -f gmon.out ] && ${GPROF} -s ${THIS_SH} gmon.out >/dev/null
 
+export GMON_OUT_PREFIX=bash
 echo Any output from any test, unless otherwise noted, indicates a possible anomaly
 
 for x in run-*
@@ -35,25 +38,31 @@ do
 	$0|run-all|run-minimal|run-gprof)	;;
 	*.orig|*~) ;;
 	*)	echo $x ; sh $x
-		if [ -f /tmp/bash.gmon ]; then
-			if [ -f bash.gmon ]; then
-				gprof -s ${THIS_SH} gmon.sum bash.gmon /tmp/bash.gmon >/dev/null
+		if [ -f $TMPDIR/gmon.out ]; then
+			if [ -f gmon.out ]; then
+				${GPROF} -s ${THIS_SH} gmon.sum ${GMON_OUT_PREFIX}.[0-9]* $TMPDIR/${GMON_OUT_PREFIX}.[0-9]* >/dev/null
 			else
-				gprof -s ${THIS_SH} gmon.sum /tmp/bash.gmon >/dev/null				
+				${GPROF} -s ${THIS_SH} gmon.sum $TMPDIR/${GMON_OUT_PREFIX}.[0-9]* >/dev/null				
 			fi
 		else
-			gprof -s ${THIS_SH} gmon.sum bash.gmon >/dev/null
+			${GPROF} -s ${THIS_SH} gmon.sum ${GMON_OUT_PREFIX}.[0-9]* >/dev/null
 		fi
-		rm -f /tmp/bash.gmon bash.gmon
+		rm -f $TMPDIR/${GMON_OUT_PREFIX}.[0-9]* ${GMON_OUT_PREFIX}.[0-9]*
 		;;
 	esac
 done
 
-gprof -s ${THIS_SH} gmon.sum ./-specialname.gmon ./ohio-state.gmon > /dev/null
-rm -f ./-specialname.gmon ./ohio-state.gmon
+if [ -f ./-specialname.gmon ]; then
+	${GPROF} -s ${THIS_SH} gmon.sum ./-specialname.gmon > /dev/null
+	rm -f ./-specialname.gmon
+fi
+if [ -f ./ohio-state.gmon ]; then
+	${GPROF} -s ${THIS_SH} gmon.sum ./ohio-state.gmon > /dev/null
+	rm -f ./ohio-state.gmon
+fi
 
 if [ -f specialname.gmon ]; then
-	gprof -s ${THIS_SH} gmon.sum ./specialname.gmon > /dev/null
+	${GPROF} -s ${THIS_SH} gmon.sum ./specialname.gmon > /dev/null
 	rm -f specialname.gmon
 fi
 

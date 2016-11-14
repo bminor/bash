@@ -1794,6 +1794,8 @@ if test "$am_cv_func_iconv" = yes; then
 	LIBS="$OLDLIBS"
 fi
 
+AC_CHECK_SIZEOF(wchar_t, 4)
+
 ])
 
 dnl need: prefix exec_prefix libdir includedir CC TERMCAP_LIB
@@ -4190,4 +4192,35 @@ if test "$bash_cv_wexitstatus_offset" -gt 32 ; then
 fi
 AC_MSG_RESULT($bash_cv_wexitstatus_offset)
 AC_DEFINE_UNQUOTED([WEXITSTATUS_OFFSET], [$bash_cv_wexitstatus_offset], [Offset of exit status in wait status word])
+])
+
+AC_DEFUN([BASH_FUNC_SBRK],
+[
+  AC_CHECK_FUNCS_ONCE([sbrk])
+  if test X$ac_cv_func_sbrk = Xyes; then
+    AC_CACHE_CHECK([for working sbrk], [bash_cv_func_sbrk],
+      [AC_TRY_RUN([
+#include <stdlib.h>
+#include <unistd.h>
+
+int
+main(int c, char **v)
+{
+	void *x;
+
+	x = sbrk (4096);
+	exit ((x == (void *)-1) ? 1 : 0);
+}
+], bash_cv_func_sbrk=yes, bash_cv_func_snprintf=sbrk,
+   [AC_MSG_WARN([cannot check working sbrk if cross-compiling])
+    bash_cv_func_sbrk=yes]
+)])
+    if test $bash_cv_func_sbrk = no; then
+      ac_cv_func_sbrk=no
+    fi
+  fi
+  if test $ac_cv_func_sbrk = no; then
+    AC_DEFINE(HAVE_SBRK, 0,
+      [Define if you have a working sbrk function.])
+  fi
 ])

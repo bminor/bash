@@ -974,6 +974,7 @@ cleanup_dead_jobs ()
 {
   register int i;
   int os;
+  PROCESS *discard;
 
   if (js.j_jobslots == 0 || jobs_list_frozen)
     return;
@@ -998,8 +999,9 @@ cleanup_dead_jobs ()
   if (last_procsub_child && last_procsub_child->running == PS_DONE)
     {
       bgp_add (last_procsub_child->pid, process_exit_status (last_procsub_child->status));	/* XXX */
-      discard_pipeline (last_procsub_child);
+      discard = last_procsub_child;
       last_procsub_child = (PROCESS *)NULL;
+      discard_pipeline (discard);
     }
 #endif
 

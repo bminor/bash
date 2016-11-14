@@ -1304,7 +1304,7 @@ rl_redisplay ()
 	 right edge of the screen.  If LMARGIN is 0, we need to take the
 	 wrap offset into account. */
       t = lmargin + M_OFFSET (lmargin, wrap_offset) + _rl_screenwidth;
-      if (t < out)
+      if (t > 0 && t < out)
 	line[t - 1] = '>';
 
       if (rl_display_fixed == 0 || forced_display || lmargin != last_lmargin)

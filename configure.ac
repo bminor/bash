@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.4, version 4.083])dnl
+AC_REVISION([for Bash 4.4, version 4.086])dnl
 
 define(bashvers, 4.4)
 define(relstatus, maint)
@@ -472,7 +472,7 @@ dnl these must come after the test for cc/gcc
 if test "$opt_profiling" = "yes"; then
 	PROFILE_FLAGS=-pg
 	case "$host_os" in
-	solaris2*)	;;
+	solaris2*|linux*)	;;
 	*)		opt_static_link=yes ;;
 	esac
 	DEBUG= MALLOC_DEBUG=
@@ -488,7 +488,7 @@ if test "$opt_static_link" = yes; then
 	if test -n "$GCC" || test "$ac_cv_prog_gcc" = "yes"; then
 		STATIC_LD="-static" 
 		case "$host_os" in
-		solaris2*)	;;
+		solaris2*|linux*)	;;
 		*)		LDFLAGS="$LDFLAGS -static" ;;	# XXX experimental
 		esac
 	fi
@@ -500,7 +500,11 @@ fi
 if test "X$cross_compiling" = "Xno"; then
 	CC_FOR_BUILD=${CC_FOR_BUILD-'$(CC)'}
 	CPPFLAGS_FOR_BUILD=${CPPFLAGS_FOR_BUILD-"$CPPFLAGS"}	# XXX - should it be '$(CPPFLAGS)'
-	LDFLAGS_FOR_BUILD=${LDFLAGS_FOR_BUILD-'$(LDFLAGS)'}
+	if test X"$opt_profiling" = Xyes; then
+		LDFLAGS_FOR_BUILD=${LDFLAGS_FOR_BUILD-'$(BASE_LDFLAGS)'}
+	else
+		LDFLAGS_FOR_BUILD=${LDFLAGS_FOR_BUILD-'$(LDFLAGS)'}
+	fi
 	# CFLAGS set above to default value if not passed in environment
 	CFLAGS_FOR_BUILD=${CFLAGS-'$(CFLAGS)'}
 	LIBS_FOR_BUILD=${LIBS_FOR_BUILD-'$(LIBS)'}
@@ -770,7 +774,7 @@ AC_CHECK_FUNC(mkfifo,AC_DEFINE(HAVE_MKFIFO),AC_DEFINE(MKFIFO_MISSING))
 dnl checks for system calls
 AC_CHECK_FUNCS(dup2 eaccess fcntl getdtablesize getgroups gethostname \
 		getpagesize getpeername getrlimit getrusage gettimeofday \
-		kill killpg lstat pselect readlink sbrk select setdtablesize \
+		kill killpg lstat pselect readlink select setdtablesize \
 		setitimer tcgetpgrp uname ulimit waitpid)
 AC_REPLACE_FUNCS(rename)
 
@@ -979,6 +983,9 @@ BASH_STRUCT_WEXITSTATUS_OFFSET
 
 BASH_CHECK_TYPE_STRUCT_TIMESPEC
 BASH_STAT_TIME
+
+dnl checks for system calls
+BASH_FUNC_SBRK
 
 dnl presence and behavior of C library functions
 BASH_FUNC_STRSIGNAL

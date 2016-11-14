@@ -12288,3 +12288,70 @@ subst.c
 	  string. This can happen if the string ends with an odd number of
 	  CTLESC chars. Fixes oob-read error reported by
 	  op7ic \x00 <op7ica@gmail.com>
+
+				   11/11
+				   -----
+configure.ac,aclocal.m4
+	- BASH_FUNC_SBRK: make sure sbrk actually works, instead of being just
+	  a stub function like on several Linux distributions
+
+lib/malloc/malloc.c
+	- malloc_usable_size: return the maximum number of bytes available for
+	  a particular memory allocation (size of block allocated for it)
+
+				   11/12
+				   -----
+configure.ac
+	- changes to make --enable-profiling work on Linux (-pg, no static link,
+	  no -static in LDFLAGS)
+
+Makefile.in
+	- changes to make --enable-profiling work on Linux (take
+	  ${PROFILE_FLAGS} out of  BASE_CCFLAGS, add to CCFLAGS instead; add
+	  BASE_LDFLAGS define that doesn't include -pg or -static; use
+	  BASE_LDFLAGS in LDFLAGS; move ${PROFILE_FLAGS} and ${STATIC_LD} to
+	  LDFLAGS)
+
+tests/run-gprof
+	- changes to make profiling test suite with gprof work on Linux (set
+	  GMON_OUT_PREFIX to handle multiple profiled processes per test;
+	  change default filename to gmon.out from bash.gmon; look for
+	  gprof output files in ${TMPDIR} instead of /tmp; handle multiple
+	  profiling files starting with $GMON_OUT_PREFIX)
+
+locale.c
+	- locale_isutf8: use locale_charset() if it's available and nl_langinfo
+	  isn't
+	- locale_isutf8: add code to parse a locale specification and determine
+	  whether the encoding is UTF-8 (or utf8) in the absence of
+	  nl_langinfo and locale_charset
+	- set_default_locale: make sure to set locale_utf8locale early on
+	- locale_utf8locale: set via call to locale_isutf8 wherever LANG,
+	  LC_ALL, or LC_CTYPE is set
+
+				   11/13
+				   -----
+lib/readline/display.c
+	- rl_redisplay: handle report of potential integer overflow in
+	  horizontal display mode from Mateusz Lenik <mlen@mlen.pl>
+
+lib/sh/mbschr.c
+	- mbschr: if in a UTF-8 locale (locale_utf8locale) and we are looking
+	  for an ASCII character, use (essentially) strchr as a shortcut
+
+lib/sh/shmbchar.c
+	- utf8_{mbstrlen,mblen,mbsmbchar,mbsnlen}: UTF-8-specific replacement
+	  functions (should also be able to use utf8_mblen in subst.c:
+	  string_extract_verbatim)
+	- mbsmbchar: if locale_utf8locale is true, call utf8_mbsmbchar
+	- mbsmbchar: in UTF-8 locale, use utf8_mblen instead of mbrlen (not
+	  used if earlier shortcut taken)
+
+lib/sh/unicode.c
+	- u32cconv: don't use nl_langinfo early to call u32toutf8()
+	- u32cconv: use locale_utf8locale to set utf8locale
+	- u32cconv: when initializing (u32init == 0), use locale_charset, then
+	  nl_langinfo, then stub_charset to determine the charset
+	- u32cconv: even if we don't have iconv, if locale_utf8locale is non-
+	  zero, return u32toutf8
+

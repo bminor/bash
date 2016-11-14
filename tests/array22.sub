@@ -1,0 +1,34 @@
+# This isn't perfect behavior, but it establishes a baseline and will provide
+# a way to detect behavior changes
+
+echo a1
+a[0]= a[1]=; recho "${a[@]:-y}"
+unset a
+
+echo a2
+a[1]=; recho "${a[@]:-y}"
+unset a
+
+echo a3
+a[0]= a[1]=x; recho "${a[@]:-y}"
+unset a
+
+echo a4
+a[0]= a[1]=x; recho ${a[@]:+y}
+unset a
+
+echo p1
+set '' ''
+recho "${@:-y}"
+
+shift $#
+
+echo p2
+set '' x
+recho "${@:-y}"
+
+shift $#
+
+echo p3
+set '' x
+recho ${@:+y}

@@ -55,6 +55,8 @@ extern const char *locale_charset __P((void));
 extern char *get_locale_var __P((char *));
 #endif
 
+extern int locale_utf8locale;
+
 static int u32init = 0;
 static int utf8locale = 0;
 #if defined (HAVE_ICONV)
@@ -265,28 +267,20 @@ u32cconv (c, s)
     return n;
 #endif
 
-#if HAVE_NL_LANGINFO
-  codeset = nl_langinfo (CODESET);
-  if (STREQ (codeset, "UTF-8"))
-    {
-      n = u32toutf8 (c, s);
-      return n;
-    }
-#endif
-
 #if HAVE_ICONV
   /* this is mostly from coreutils-8.5/lib/unicodeio.c */
   if (u32init == 0)
     {
-#  if HAVE_LOCALE_CHARSET
-      charset = locale_charset ();	/* XXX - fix later */
-#  else
-      charset = stub_charset ();
-#  endif
-      if (STREQ (charset, "UTF-8"))
-	utf8locale = 1;
-      else
+      utf8locale = locale_utf8locale;
+      if (utf8locale == 0)
 	{
+#if HAVE_LOCALE_CHARSET
+	  charset = locale_charset ();
+#elif HAVE_NL_LANGINFO
+	  charset = nl_langinfo (CODESET);
+#else
+	  charset = stub_charset ();
+#endif
 	  localconv = iconv_open (charset, "UTF-8");
 	  if (localconv == (iconv_t)-1)
 	    /* We assume ASCII when presented with an unknown encoding. */
@@ -295,6 +289,8 @@ u32cconv (c, s)
       u32init = 1;
     }
 
+  /* NL_LANGINFO and locale_charset used when setting locale_utf8locale */
+  
   /* If we have a UTF-8 locale, convert to UTF-8 and return converted value. */
   n = u32toutf8 (c, s);
   if (utf8locale)
@@ -315,12 +311,8 @@ u32cconv (c, s)
 
   if (iconv (localconv, (ICONV_CONST char **)&iptr, &sn, &optr, &obytesleft) == (size_t)-1)
     {
-#if 1
       /* You get ISO C99 escape sequences if iconv fails */      
       n = u32tocesc (c, s);
-#else
-      /* You get UTF-8 if iconv fails */
-#endif
       return n;
     }
 
@@ -332,7 +324,10 @@ u32cconv (c, s)
   return (optr - obuf);
 #endif	/* HAVE_ICONV */
 
-  n = u32tocesc (c, s);	/* fallback is ISO C99 escape sequences */
+  if (locale_utf8locale)
+    n = u32toutf8 (c, s);
+  else
+    n = u32tocesc (c, s);	/* fallback is ISO C99 escape sequences */
   return n;
 }
 #else

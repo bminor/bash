@@ -4373,7 +4373,6 @@ run_builtin:
 		      break;
 		    case EX_DISKFALLBACK:
 		      /* XXX - experimental */
-itrace("execute_simple_command: fallback to file system");
 		      executing_builtin = old_builtin;
 		      executing_command_builtin = old_command_builtin;
 		      builtin = 0;
@@ -4988,7 +4987,7 @@ execute_subshell_builtin_or_function (words, redirects, builtin, var,
 	  else if (r == EX_DISKFALLBACK)
 	    {
 	      char *command_line;
-itrace("execute_subshell_builtin_or_function: fall back to disk command");
+
 	      command_line = savestring (the_printed_command_except_trap ? the_printed_command_except_trap : "");
 	      r = execute_disk_command (words, (REDIRECT *)0, command_line,
 		  -1, -1, async, (struct fd_bitmap *)0, flags|CMD_NO_FORK);
