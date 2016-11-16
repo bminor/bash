@@ -105,7 +105,14 @@ _rl_find_next_mbchar_internal (string, seed, count, find_non_zero)
       len = strlen (string + point);
       if (len == 0)
 	break;
-      tmp = mbrtowc (&wc, string+point, len, &ps);
+      if (_rl_utf8locale && UTF8_SINGLEBYTE(string[point]))
+	{
+	  tmp = 1;
+	  wc = (wchar_t) string[point];
+	  memset(&ps, 0, sizeof(mbstate_t));
+	}
+      else
+	tmp = mbrtowc (&wc, string+point, len, &ps);
       if (MB_INVALIDCH ((size_t)tmp))
 	{
 	  /* invalid bytes. assume a byte represents a character */
@@ -169,7 +176,7 @@ _rl_find_prev_mbchar_internal (string, seed, find_non_zero)
       tmp = mbrtowc (&wc, string + point, length - point, &ps);
       if (MB_INVALIDCH ((size_t)tmp))
 	{
-	  /* in this case, bytes are invalid or shorted to compose
+	  /* in this case, bytes are invalid or too short to compose
 	     multibyte char, so assume that the first byte represents
 	     a single character anyway. */
 	  tmp = 1;
@@ -283,10 +290,13 @@ _rl_adjust_point (string, point, ps)
   
   while (pos < point)
     {
-      tmp = mbrlen (string + pos, length - pos, ps);
+      if (_rl_utf8locale && UTF8_SINGLEBYTE(string[pos]))
+	tmp = 1;
+      else
+	tmp = mbrlen (string + pos, length - pos, ps);
       if (MB_INVALIDCH ((size_t)tmp))
 	{
-	  /* in this case, bytes are invalid or shorted to compose
+	  /* in this case, bytes are invalid or too short to compose
 	     multibyte char, so assume that the first byte represents
 	     a single character anyway. */
 	  pos++;
@@ -333,6 +343,8 @@ _rl_char_value (buf, ind)
   int l;
 
   if (MB_LEN_MAX == 1 || rl_byte_oriented)
+    return ((wchar_t) buf[ind]);
+  if (_rl_utf8locale && UTF8_SINGLEBYTE(buf[ind]))
     return ((wchar_t) buf[ind]);
   l = strlen (buf);
   if (ind >= l - 1)

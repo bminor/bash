@@ -99,6 +99,7 @@ extern int subshell_environment;
 extern int shell_compatibility_level;
 
 extern int locale_mb_cur_max;
+extern int locale_utf8locale;
 
 /* Structure to pass around that holds a bitmap of file descriptors
    to close, and the size of that structure.  Used in execute_cmd.c. */

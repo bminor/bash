@@ -45,6 +45,7 @@ extern int errno;
 
 int locale_utf8locale;	/* set but unused for now */
 int locale_mb_cur_max;	/* value of MB_CUR_MAX for current locale (LC_CTYPE) */
+int locale_shiftstates;
 
 extern int dump_translatable_strings, dump_po_strings;
 
@@ -85,6 +86,7 @@ set_default_locale ()
 
   locale_mb_cur_max = MB_CUR_MAX;
   locale_utf8locale = locale_isutf8 (default_locale);
+  locale_shiftstates = mblen ((char *)NULL, 0);
 }
 
 /* Set default values for LC_CTYPE, LC_COLLATE, LC_MESSAGES, LC_NUMERIC and
@@ -105,6 +107,7 @@ set_default_locale_vars ()
       locale_setblanks ();
       locale_mb_cur_max = MB_CUR_MAX;
       locale_utf8locale = locale_isutf8 (lc_all);
+      locale_shiftstates = mblen ((char *)NULL, 0);
       u32reset ();
     }
 #  endif
@@ -208,6 +211,7 @@ set_locale_var (var, value)
       /* if LC_ALL == "", reset_locale_vars has already called this */
       if (*lc_all && x)
 	locale_utf8locale = locale_isutf8 (lc_all);
+      locale_shiftstates = mblen ((char *)NULL, 0);
       u32reset ();
       return r;
 #else
@@ -227,6 +231,7 @@ set_locale_var (var, value)
 	  /* if setlocale() returns NULL, the locale is not changed */
 	  if (x)
 	    locale_utf8locale = locale_isutf8 (x);
+	  locale_shiftstates = mblen ((char *)NULL, 0);
 	  u32reset ();
 	}
 #  endif
@@ -363,6 +368,7 @@ reset_locale_vars ()
   locale_mb_cur_max = MB_CUR_MAX;
   if (x)
     locale_utf8locale = locale_isutf8 (x);
+  locale_shiftstates = mblen ((char *)NULL, 0);
   u32reset ();
 #endif
   return 1;

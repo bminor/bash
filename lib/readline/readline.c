@@ -1104,7 +1104,7 @@ rl_initialize ()
 {
   /* If we have never been called before, initialize the
      terminal and data structures. */
-  if (!rl_initialized)
+  if (rl_initialized == 0)
     {
       RL_SETSTATE(RL_STATE_INITIALIZING);
       readline_initialize_everything ();
@@ -1112,6 +1112,8 @@ rl_initialize ()
       rl_initialized++;
       RL_SETSTATE(RL_STATE_INITIALIZED);
     }
+  else
+    (void)_rl_init_locale ();	/* check current locale */
 
   /* Initialize the current line information. */
   _rl_init_line_state ();

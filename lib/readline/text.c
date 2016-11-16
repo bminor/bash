@@ -695,6 +695,12 @@ _rl_insert_char (count, c)
       incoming[1] = '\0';
       incoming_length = 1;
     }
+  else if (_rl_utf8locale && (c & 0x80) == 0)
+    {
+      incoming[0] = c;
+      incoming[1] = '\0';
+      incoming_length = 1;
+    }
   else
     {
       wchar_t wc;
@@ -739,6 +745,12 @@ _rl_insert_char (count, c)
 	     effect of mbstate is undefined. */
 	  memset (&ps, 0, sizeof (mbstate_t));
 	}
+      else if (ret == 1)
+	{
+	  incoming[0] = pending_bytes[0];
+	  incoming[incoming_length = 1] = '\0';
+	  pending_bytes_length = 0;
+	}
       else
 	{
 	  /* We successfully read a single multibyte character. */
@@ -761,8 +773,13 @@ _rl_insert_char (count, c)
       i = 0;
       while (i < string_size)
 	{
-	  strncpy (string + i, incoming, incoming_length);
-	  i += incoming_length;
+	  if (incoming_length == 1)
+	    string[i++] = *incoming;
+	  else
+	    {
+	      strncpy (string + i, incoming, incoming_length);
+	      i += incoming_length;
+	    }
 	}
       incoming_length = 0;
       stored_count = 0;
@@ -790,8 +807,13 @@ _rl_insert_char (count, c)
       i = 0;
       while (i < string_size)
 	{
-	  strncpy (string + i, incoming, incoming_length);
-	  i += incoming_length;
+	  if (incoming_length == 1)
+	    string[i++] = *incoming;
+	  else
+	    {
+	      strncpy (string + i, incoming, incoming_length);
+	      i += incoming_length;
+	    }
 	}
 
       while (count)

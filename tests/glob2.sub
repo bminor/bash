@@ -1,3 +1,5 @@
+. ./test-glue-functions
+
 var='ab\'
 
 case $var in
@@ -34,7 +36,7 @@ recho "$b"
 unset a b v
 
 recho "a${alpha}b"
-printf "%s" "a${alpha}b" | LC_ALL=C od -b
+printf "%s" "a${alpha}b" | LC_ALL=C od -b | _intl_normalize_spaces
 
 a=$'\u3b1'
 [[ $a = $a ]] && echo ok 6

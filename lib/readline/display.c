@@ -124,7 +124,6 @@ static int _rl_col_width PARAMS((const char *, int, int, int));
 #define PROMPT_ENDING_INDEX \
   ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) ? prompt_physical_chars : prompt_last_invisible+1)
   
-
 /* **************************************************************** */
 /*								    */
 /*			Display stuff				    */
@@ -844,8 +843,13 @@ rl_redisplay ()
   if (mb_cur_max > 1 && rl_byte_oriented == 0)
     {
       memset (&ps, 0, sizeof (mbstate_t));
-      /* XXX - what if wc_bytes ends up <= 0? check for MB_INVALIDCH */
-      wc_bytes = mbrtowc (&wc, rl_line_buffer, rl_end, &ps);
+      if (_rl_utf8locale && UTF8_SINGLEBYTE(rl_line_buffer[0]))
+	{
+	  wc = (wchar_t)rl_line_buffer[0];
+	  wc_bytes = 1;
+	}
+      else
+	wc_bytes = mbrtowc (&wc, rl_line_buffer, rl_end, &ps);
     }
   else
     wc_bytes = 1;
@@ -1005,13 +1009,18 @@ rl_redisplay ()
       if (mb_cur_max > 1 && rl_byte_oriented == 0)
 	{
 	  in += wc_bytes;
-	  /* XXX - what if wc_bytes ends up <= 0? check for MB_INVALIDCH */
-	  wc_bytes = mbrtowc (&wc, rl_line_buffer + in, rl_end - in, &ps);
+	  if (_rl_utf8locale && UTF8_SINGLEBYTE(rl_line_buffer[in]))
+	    {
+	      wc = (wchar_t)rl_line_buffer[in];
+	      wc_bytes = 1;
+	      memset (&ps, 0, sizeof (mbstate_t));	/* re-init state */
+	    }
+	  else
+	    wc_bytes = mbrtowc (&wc, rl_line_buffer + in, rl_end - in, &ps);
 	}
       else
         in++;
 #endif
-
     }
   line[out] = '\0';
   if (cpos_buffer_position < 0)
@@ -2961,7 +2970,13 @@ _rl_col_width (str, start, end, flags)
 
   while (point < start)
     {
-      tmp = mbrlen (str + point, max, &ps);
+      if (_rl_utf8locale && UTF8_SINGLEBYTE(str[point]))
+	{
+	  memset (&ps, 0, sizeof (mbstate_t));
+	  tmp = 1;
+	}
+      else
+	tmp = mbrlen (str + point, max, &ps);
       if (MB_INVALIDCH ((size_t)tmp))
 	{
 	  /* In this case, the bytes are invalid or too short to compose a
@@ -2990,7 +3005,13 @@ _rl_col_width (str, start, end, flags)
 
   while (point < end)
     {
-      tmp = mbrtowc (&wc, str + point, max, &ps);
+      if (_rl_utf8locale && UTF8_SINGLEBYTE(str[point]))
+	{
+	  tmp = 1;
+	  wc = (wchar_t) str[point];
+	}
+      else
+	tmp = mbrtowc (&wc, str + point, max, &ps);
       if (MB_INVALIDCH ((size_t)tmp))
 	{
 	  /* In this case, the bytes are invalid or too short to compose a

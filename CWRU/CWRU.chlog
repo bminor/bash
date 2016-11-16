@@ -12127,7 +12127,7 @@ doc/{bash.1,bashref.texi}
 lib/glob/sm_loop.c
 	- parse_collsym: make sure to not return an out-of-bounds read if a
 	  collating symbol is unterminated.  Fixes OOB read reported by
-	  op7ic \x00 <op7ica@gmail.com>
+	  Jerzy Kramarz <op7ica@gmail.com>
 	- brackmatch: after incrementing p, before checking whether it's a
 	  character range, check whether *p was NULL before the increment
 	  and short-circuit the bracket expression if it is
@@ -12282,12 +12282,12 @@ subst.c
 	- parameter_brace_{patsub,remove_pattern,transform,casemod}: save and
 	  restore this_command_name while temporarily setting it for use in
 	  error messages.  Fixes use-after-free error reported by
-	  op7ic \x00 <op7ica@gmail.com>
+	  Jerzy Kramarz <op7ica@gmail.com>
 	- string_extract_verbatim: make sure when we increment i by 2 due to
 	  a CTLESC or CTLESC-CTLNUL that we don't read past the end of the
 	  string. This can happen if the string ends with an odd number of
 	  CTLESC chars. Fixes oob-read error reported by
-	  op7ic \x00 <op7ica@gmail.com>
+	  Jerzy Kramarz <op7ica@gmail.com>
 
 				   11/11
 				   -----
@@ -12355,3 +12355,37 @@ lib/sh/unicode.c
 	- u32cconv: even if we don't have iconv, if locale_utf8locale is non-
 	  zero, return u32toutf8
 
+				   11/15
+				   -----
+lib/readline/nls.c
+	- _rl_init_locale: new function, split off code that determines current
+	  locale from _rl_init_eightbit, use it to set _rl_utf8locale
+
+lib/readiline/rlprivate.h
+	- _rl_init_locale: new extern declaration
+
+lib/readline/readline.c
+	- rl_initialize: if not initializing everything the first time, call
+	  _rl_init_locale to check current locale and set _rl_utf8locale
+
+lib/readline/text.c
+	- _rl_insert_char: optimize cases where we are inserting a single-byte
+	  character in a locale with multibyte characters
+	- _rl_insert_char: check whether character is single byte if we know
+	  we are in a UTF-8 locale, optimize single-byte case to avoid calls
+	  to mbrtowc and memmove/memcpy
+
+lib/readline/mbutil.c
+	- _rl_char_value: if we are in a UTF-8 locale (_rl_utf8locale) and the
+	  current character does not have the eighth bit set ((c & 0x80) == 0),
+	  return that char without bothering to call mbrtowc
+	- _rl_adjust_point: don't bother calling mbrlen if we are in a UTF-8
+	  locale and the current character is not a multibyte character
+	- _rl_find_next_mbchar_internal: if we are in a UTF-8 locale, use that
+	  to avoid calls to mbrtowc
+
+lib/readline/display.c
+	- _rl_col_width: if in a UTF-8 locale, take advantage of that to avoid
+	  calls to mbrlen and mbrtowc
+	- rl_redisplay: if in a UTF-8 locale, take advantage of that to avoid
+	  calls to mbrtowc

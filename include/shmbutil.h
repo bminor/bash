@@ -37,6 +37,7 @@ extern size_t mbstrlen __P((const char *));
 extern char *xstrchr __P((const char *, int));
 
 extern int locale_mb_cur_max;	/* XXX */
+extern int locale_utf8locale;	/* XXX */
 
 #ifndef MB_INVALIDCH
 #define MB_INVALIDCH(x)		((x) == (size_t)-1 || (x) == (size_t)-2)
@@ -108,6 +109,8 @@ extern int locale_mb_cur_max;	/* XXX */
 \
 	    _f = is_basic ((_str)[_i]); \
 	    if (_f) \
+	      mblength = 1; \
+	    else if (locale_utf8locale && (((_str)[_i] & 0x80) == 0)) \
 	      mblength = 1; \
 	    else \
 	      { \
@@ -266,6 +269,8 @@ extern int locale_mb_cur_max;	/* XXX */
 \
 	    _k = is_basic (*(_src)); \
 	    if (_k) \
+	      mblength = 1; \
+	    else if (locale_utf8locale && ((*(_src) & 0x80) == 0)) \
 	      mblength = 1; \
 	    else \
 	      { \

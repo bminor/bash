@@ -331,6 +331,7 @@ extern void _rl_set_insert_mode PARAMS((int, int));
 extern void _rl_revert_all_lines PARAMS((void));
 
 /* nls.c */
+extern char *_rl_init_locale PARAMS((void));
 extern int _rl_init_eightbit PARAMS((void));
 
 /* parens.c */
