@@ -121,7 +121,6 @@ extern int debugging_mode;
 static void shopt_error __P((char *));
 
 static int set_shellopts_after_change __P((char *, int));
-static int shopt_enable_hostname_completion __P((char *, int));
 static int set_compatibility_level __P((char *, int));
 
 #if defined (RESTRICTED_SHELL)
@@ -129,6 +128,7 @@ static int set_restricted_shell __P((char *, int));
 #endif
 
 #if defined (READLINE)
+static int shopt_enable_hostname_completion __P((char *, int));
 static int shopt_set_complete_direxpand __P((char *, int));
 #endif
 
@@ -576,6 +576,7 @@ shopt_set_debug_mode (option_name, mode)
   return (0);
 }
 
+#if defined (READLINE)
 static int
 shopt_enable_hostname_completion (option_name, mode)
      char *option_name;
@@ -583,6 +584,7 @@ shopt_enable_hostname_completion (option_name, mode)
 {
   return (enable_hostname_completion (mode));
 }
+#endif
 
 static int
 set_compatibility_level (option_name, mode)

@@ -12389,3 +12389,72 @@ lib/readline/display.c
 	  calls to mbrlen and mbrtowc
 	- rl_redisplay: if in a UTF-8 locale, take advantage of that to avoid
 	  calls to mbrtowc
+
+				   11/17
+				   -----
+lib/readline/histlib.h
+	- PATTERN_SEARCH: new flag for history search interfaces, means to
+	  search for a pattern as Posix specifies
+
+lib/readline/histsearch.c
+	- history_search_internal: now takes a `flags' argument instead of just
+	  an `anchored' argument to accommodate PATTERN_SEARCH
+	- _hs_history_patsearch: new internal interface to use when flags
+	  specify PATTERN_SEARCH
+
+lib/readline/rlprivate.h
+	- SF_PATTERN: new flag for non-incremental search contexts, means to
+	  treat search string as a pattern (maps to PATTERN_SEARCH)
+
+lib/readline/search.c
+	- noninc_dosearch: takes an additional `flags' argument for SF_PATTERN
+	- noninc_search_from_pos: takes an additional `flags' argument for
+	  SF_PATTERN
+	- noninc_dosearch: pass flags argument through to noninc_search_from_pos
+	- _rl_nsearch_init: if we are in vi command mode, and `pchar' (key used
+	  to invoke the search) is `?' or `/', add SF_PATTERN to the flags
+	  to conform to Posix spec for vi-mode editing
+	- _rl_nsearch_dosearch: if cxt->sflags indicates that we should do a
+	  pattern search, pass SF_PATTERN to noninc_search_from_pos
+	- rl_noninc_forward_search_again: if in vi command mode and key == `N',
+	  make sure flags arg passed to noninc_dosearch includes SF_PATTERN
+	- rl_noninc_reverse_search_again: if in vi command mode and key == `n',
+	  make sure flags arg passed to noninc_dosearch includes SF_PATTERN
+	- rl_history_search_internal: pass extra flags arg to noninc_search_from_pos
+
+				   11/18
+				   -----
+lib/readline/search.c
+	- noninc_search_from_pos: takes a new argument, a pointer to int where
+	  it stores the offset of the match in the history line (if non-NULL),
+	  modified callers
+	- rl_history_search_internal: pass newcol pointer to
+	  noninc_search_from_pos to avoid having to recompute the match offset
+	  in the matching history entry
+
+config.h.in
+	- define HAVE_FNMATCH if we have the fnmatch function (configure was
+	  already checking for it)
+
+lib/readline/histsearch.c
+	- _hs_history_patsearch: transform the pattern into one ending in a
+	  `*' to avoid having to perform multiple match attempts from each
+	  index in the history line
+	- history_search_internal: changes to handle pattern matching if
+	  PATTERN_SEARCH is in the flags and HAVE_FNMATCH is defined.  This
+	  makes vi-mode history searching treat the user-specified search
+	  string as an fnmatch pattern, as Posix requires.  Fixes issue
+	  reported by <jwdevel@gmail.com>
+
+				   11/19
+				   -----
+builtins/shopt.def
+	- shopt_enable_hostname_completion: only declare this if READLINE
+	  defined, since that's the only time it's used.  Reported by
+	  isabella parakiss <izaberina@gmail.com>
+
+				   11/20
+				   -----
+builtins/common.c
+	- display_signal_list: make `kill -l 0' print `EXIT', modifying change
+	  from 9/17

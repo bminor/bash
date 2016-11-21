@@ -1243,7 +1243,7 @@ gen_command_matches (cs, cmd, text, line, ind, lwords, nw, cw)
     }
   cscmd[cmdlen] = '\0';
 
-  tw = command_substitute (cscmd, 0);
+  tw = command_substitute (cscmd, 0, 0);
   csbuf = tw ? tw->word : (char *)NULL;
   if (tw)
     dispose_word_desc (tw);

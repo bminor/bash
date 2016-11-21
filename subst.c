@@ -3715,7 +3715,14 @@ expand_string_assignment (string, quoted)
 
   expand_no_split_dollar_star = 1;
 
+#if 0
+  /* Other shells (ksh93) do it this way, affects how $@ is expanded in
+     constructs like bar=${@#0} (preserves the spaces resulting from the
+     expansion of $@ in a context where you don't do word splitting) */
+  td.flags = W_ASSIGNRHS|W_NOSPLIT2;
+#else
   td.flags = W_ASSIGNRHS;
+#endif
   td.word = savestring (string);
   value = call_expand_word_internal (&td, quoted, 0, (int *)NULL, (int *)NULL);
   FREE (td.word);
@@ -6004,8 +6011,13 @@ read_comsub (fd, quoted, rflag)
   istring = (char *)NULL;
   istring_index = istring_size = bufn = tflag = 0;
 
+#if 0
   for (skip_ctlesc = skip_ctlnul = 0, s = ifs_value; s && *s; s++)
     skip_ctlesc |= *s == CTLESC, skip_ctlnul |= *s == CTLNUL;
+#else
+  skip_ctlesc = ifs_cmap[CTLESC];
+  skip_ctlnul = ifs_cmap[CTLNUL];
+#endif
 
   nullbyte = 0;
 
@@ -6108,9 +6120,10 @@ read_comsub (fd, quoted, rflag)
 /* Perform command substitution on STRING.  This returns a WORD_DESC * with the
    contained string possibly quoted. */
 WORD_DESC *
-command_substitute (string, quoted)
+command_substitute (string, quoted, flags)
      char *string;
      int quoted;
+     int flags;
 {
   pid_t pid, old_pid, old_pipeline_pgrp, old_async_pid;
   char *istring, *s;
@@ -8925,7 +8938,7 @@ comsub:
 	temp1 = substring (string, *sindex, zindex+1);
       else
 	{
-	  tdesc = command_substitute (temp, quoted);
+	  tdesc = command_substitute (temp, quoted, pflags&PF_ASSIGNRHS);
 	  temp1 = tdesc ? tdesc->word : (char *)NULL;
 	  if (tdesc)
 	    dispose_word_desc (tdesc);
@@ -9459,7 +9472,7 @@ add_string:
 	    else
 	      {
 		de_backslash (temp);
-		tword = command_substitute (temp, quoted);
+		tword = command_substitute (temp, quoted, 0);
 		temp1 = tword ? tword->word : (char *)NULL;
 		if (tword)
 		  dispose_word_desc (tword);

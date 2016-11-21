@@ -258,7 +258,7 @@ extern WORD_LIST *expand_words_no_vars __P((WORD_LIST *));
    command substitution, arithmetic expansion, and word splitting. */
 extern WORD_LIST *expand_words_shellexp __P((WORD_LIST *));
 
-extern WORD_DESC *command_substitute __P((char *, int));
+extern WORD_DESC *command_substitute __P((char *, int, int));
 extern char *pat_subst __P((char *, char *, char *, int));
 
 extern int fifos_pending __P((void));

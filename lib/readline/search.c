@@ -1,6 +1,6 @@
 /* search.c - code for non-incremental searching in emacs and vi modes. */
 
-/* Copyright (C) 1992-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2016 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -73,8 +73,8 @@ static char *history_search_string;
 static int history_string_size;
 
 static void make_history_line_current PARAMS((HIST_ENTRY *));
-static int noninc_search_from_pos PARAMS((char *, int, int));
-static int noninc_dosearch PARAMS((char *, int));
+static int noninc_search_from_pos PARAMS((char *, int, int, int, int *));
+static int noninc_dosearch PARAMS((char *, int, int));
 static int noninc_search PARAMS((int, int));
 static int rl_history_search_internal PARAMS((int, int));
 static void rl_history_search_reinit PARAMS((int));
@@ -112,11 +112,13 @@ make_history_line_current (entry)
    for STRING.  DIR < 0 means to search backwards through the history list,
    DIR >= 0 means to search forward. */
 static int
-noninc_search_from_pos (string, pos, dir)
+noninc_search_from_pos (string, pos, dir, flags, ncp)
      char *string;
-     int pos, dir;
+     int pos, dir, flags;
+     int *ncp;
 {
-  int ret, old;
+  int ret, old, sflags;
+  char *s;
 
   if (pos < 0)
     return -1;
@@ -126,11 +128,27 @@ noninc_search_from_pos (string, pos, dir)
     return -1;
 
   RL_SETSTATE(RL_STATE_SEARCH);
-  if (*string == '^')
+  /* These functions return the match offset in the line; history_offset gives
+     the matching line in the history list */
+  if (flags & SF_PATTERN)
+    {
+      s = string;
+      sflags = 0;		/* Non-anchored search */
+      if (*s == '^')
+	{
+	  sflags |= ANCHORED_SEARCH;
+	  s++;
+	}
+      ret = _hs_history_patsearch (string, dir, sflags);
+    }
+  else if (*string == '^')
     ret = history_search_prefix (string + 1, dir);
   else
     ret = history_search (string, dir);
   RL_UNSETSTATE(RL_STATE_SEARCH);
+
+  if (ncp)
+    *ncp = ret;		/* caller will catch -1 to indicate no-op */
 
   if (ret != -1)
     ret = where_history ();
@@ -143,9 +161,10 @@ noninc_search_from_pos (string, pos, dir)
    search is backwards through previous entries, else through subsequent
    entries.  Returns 1 if the search was successful, 0 otherwise. */
 static int
-noninc_dosearch (string, dir)
+noninc_dosearch (string, dir, flags)
      char *string;
      int dir;
+     int flags;
 {
   int oldpos, pos;
   HIST_ENTRY *entry;
@@ -156,7 +175,7 @@ noninc_dosearch (string, dir)
       return 0;
     }
 
-  pos = noninc_search_from_pos (string, noninc_history_pos + dir, dir);
+  pos = noninc_search_from_pos (string, noninc_history_pos + dir, dir, flags, (int *)0);
   if (pos == -1)
     {
       /* Search failed, current history position unchanged. */
@@ -197,6 +216,10 @@ _rl_nsearch_init (dir, pchar)
   cxt = _rl_scxt_alloc (RL_SEARCH_NSEARCH, 0);
   if (dir < 0)
     cxt->sflags |= SF_REVERSE;		/* not strictly needed */
+#if defined (VI_MODE)
+  if (VI_COMMAND_MODE() && (pchar == '?' || pchar == '/'))
+    cxt->sflags |= SF_PATTERN;
+#endif
 
   cxt->direction = dir;
   cxt->history_pos = cxt->save_line;
@@ -340,7 +363,7 @@ _rl_nsearch_dosearch (cxt)
     }
 
   rl_restore_prompt ();
-  return (noninc_dosearch (noninc_search_string, cxt->direction));
+  return (noninc_dosearch (noninc_search_string, cxt->direction, cxt->sflags&SF_PATTERN));
 }
 
 /* Search non-interactively through the history list.  DIR < 0 means to
@@ -400,7 +423,8 @@ rl_noninc_reverse_search (count, key)
 }
 
 /* Search forward through the history list for the last string searched
-   for.  If there is no saved search string, abort. */
+   for.  If there is no saved search string, abort.  If the vi-mode code
+   calls this, KEY will be `N'. */
 int
 rl_noninc_forward_search_again (count, key)
      int count, key;
@@ -412,12 +436,18 @@ rl_noninc_forward_search_again (count, key)
       rl_ding ();
       return (1);
     }
-  r = noninc_dosearch (noninc_search_string, 1);
+#if defined (VI_MODE)
+  if (VI_COMMAND_MODE() && key == 'N')
+    r = noninc_dosearch (noninc_search_string, 1, SF_PATTERN);
+  else
+#endif
+    r = noninc_dosearch (noninc_search_string, 1, 0);
   return (r != 1);
 }
 
 /* Reverse search in the history list for the last string searched
-   for.  If there is no saved search string, abort. */
+   for.  If there is no saved search string, abort.  If the vi-mode code
+   calls this, KEY will be `n'. */
 int
 rl_noninc_reverse_search_again (count, key)
      int count, key;
@@ -429,7 +459,12 @@ rl_noninc_reverse_search_again (count, key)
       rl_ding ();
       return (1);
     }
-  r = noninc_dosearch (noninc_search_string, -1);
+#if defined (VI_MODE)
+  if (VI_COMMAND_MODE() && key == 'n')
+    r = noninc_dosearch (noninc_search_string, -1, SF_PATTERN);
+  else
+#endif
+    r = noninc_dosearch (noninc_search_string, -1, 0);
   return (r != 1);
 }
 
@@ -455,7 +490,7 @@ rl_history_search_internal (count, dir)
      int count, dir;
 {
   HIST_ENTRY *temp;
-  int ret, oldpos;
+  int ret, oldpos, newcol;
   char *t;
 
   rl_maybe_save_line ();
@@ -469,7 +504,7 @@ rl_history_search_internal (count, dir)
   while (count)
     {
       RL_CHECK_SIGNALS ();
-      ret = noninc_search_from_pos (history_search_string, rl_history_search_pos + dir, dir);
+      ret = noninc_search_from_pos (history_search_string, rl_history_search_pos + dir, dir, 0, &newcol);
       if (ret == -1)
 	break;
 
@@ -512,12 +547,17 @@ rl_history_search_internal (count, dir)
   /* Copy the line we found into the current line buffer. */
   make_history_line_current (temp);
 
+  /* decide where to put rl_point -- need to change this for pattern search */
   if (rl_history_search_flags & ANCHORED_SEARCH)
     rl_point = rl_history_search_len;	/* easy case */
   else
     {
-      t = strstr (rl_line_buffer, history_search_string);
+#if 0
+      t = strstr (rl_line_buffer, history_search_string);	/* XXX */
       rl_point = t ? (int)(t - rl_line_buffer) + rl_history_search_len : rl_end;
+#else
+      rl_point = (newcol >= 0) ? newcol : rl_end;
+#endif
     }
   rl_mark = rl_end;
 

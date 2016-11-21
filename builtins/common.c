@@ -767,7 +767,7 @@ display_signal_list (list, forcecols)
 	     mapped into signal numbers. */
 	  if (lsignum > 128)
 	    lsignum -= 128;
-	  if (lsignum <= 0 || lsignum >= NSIG)
+	  if (lsignum < 0 || lsignum >= NSIG)
 	    {
 	      sh_invalidsig (list->word->word);
 	      result = EXECUTION_FAILURE;
@@ -784,7 +784,7 @@ display_signal_list (list, forcecols)
 	    }
 	  /* POSIX.2 says that `kill -l signum' prints the signal name without
 	     the `SIG' prefix. */
-	  printf ("%s\n", (this_shell_builtin == kill_builtin) ? name + 3 : name);
+	  printf ("%s\n", (this_shell_builtin == kill_builtin && signum > 0) ? name + 3 : name);
 	}
       else
 	{

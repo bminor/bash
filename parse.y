@@ -2977,9 +2977,9 @@ special_case_tokens (tokstr)
      the designers disagree. */
   if (esacs_needed_count)
     {
-      esacs_needed_count--;
-      if (STREQ (tokstr, "esac"))
+      if (last_read_token == IN && STREQ (tokstr, "esac"))
 	{
+	  esacs_needed_count--;
 	  parser_state &= ~PST_CASEPAT;
 	  return (ESAC);
 	}

@@ -64,6 +64,7 @@
 #define SF_FOUND		0x02
 #define SF_FAILED		0x04
 #define SF_CHGKMAP		0x08
+#define SF_PATTERN		0x10		/* unused so far */
 
 typedef struct  __rl_search_context
 {
