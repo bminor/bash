@@ -272,8 +272,8 @@ bash_history_reinit (interact)
      int interact;
 {
 #if defined (BANG_HISTORY)
-  history_expansion = interact != 0;
-  history_expansion_inhibited = 1;	/* XXX */
+  history_expansion = (interact == 0) ? histexp_flag : HISTEXPAND_DEFAULT;
+  history_expansion_inhibited = (interact == 0) ? 1 - histexp_flag : 0;	/* changed in bash_history_enable() */
   history_inhibit_expansion_function = bash_history_inhibit_expansion;
 #endif
   remember_on_history = enable_history_list;

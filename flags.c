@@ -130,11 +130,8 @@ int hashing_enabled = 1;
 #if defined (BANG_HISTORY)
 /* Non-zero means that we are doing history expansion.  The default.
    This means !22 gets the 22nd line of history. */
-#  if defined (STRICT_POSIX)
-int history_expansion = 0;
-#  else
-int history_expansion = 1;
-#  endif
+int history_expansion = HISTEXPAND_DEFAULT;
+int histexp_flag = 0;
 #endif /* BANG_HISTORY */
 
 /* Non-zero means that we allow comments to appear in interactive commands. */
@@ -211,7 +208,7 @@ const struct flags_alist shell_flags[] = {
   { 'C', &noclobber },
   { 'E', &error_trace_mode },
 #if defined (BANG_HISTORY)
-  { 'H', &history_expansion },
+  { 'H', &histexp_flag },
 #endif /* BANG_HISTORY */
   { 'I', &no_invisible_vars },
   { 'P', &no_symbolic_links },
@@ -265,6 +262,7 @@ change_flag (flag, on_or_off)
     {
 #if defined (BANG_HISTORY)
     case 'H':
+      history_expansion = histexp_flag;
       if (on_or_off == FLAG_ON)
 	bash_initialize_history ();
       break;

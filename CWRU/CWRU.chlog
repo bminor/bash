@@ -12458,3 +12458,107 @@ builtins/shopt.def
 builtins/common.c
 	- display_signal_list: make `kill -l 0' print `EXIT', modifying change
 	  from 9/17
+
+				   11/21
+				   -----
+subst.c
+	- expand_word_internal: when the shell encounters a backslash as the
+	  last character of the string, don't try to add a '\'0' to the end
+	  of the string if the string is quoted, just add a <CTLESC><\> and
+	  skip to the end of string processing.  Fixes oob-read error
+	  reported by Jerzy Kramarz <op7ica@gmail.com>
+
+test.c
+	- two_arguments: check argv[pos][1] before checking argv[pos][2] when
+	  looking for a unary argument.  Fixes oob-read error on single `-'
+	  in unary operator position reported by Jerzy Kramarz
+	  <op7ica@gmail.com>
+	- ANDOR: check s[1] before checking s[2] in case s[1] == end of string.
+	  Fixes oob-read error reported by Jerzy Kramarz <op7ica@gmail.com>
+
+subst.c
+	- command_substitute: now takes additional flags argument, changed one
+	  caller (param_expand) to pass through PF_ASSIGNRHS flag; other callers
+	  pass 0
+	- command_substitute: pass through flags argument to read_comsub
+	- read_comsub: now takes additional new flags argument to indicate
+	  whether or not the word is in a context where word splitting will
+	  eventually be performed
+	- read_comsub: if we are running in a context where word splitting
+	  will not take place (PF_ASSIGNRHS), we read a CTLESC, and CTLESC is
+	  in $IFS, add a CTLESC to make sure it gets through a round of
+	  dequoting
+
+				   11/23
+				   -----
+parse.y
+	- xparse_dolparen: since reset_parser frees the pushed string list,
+	  and this is supposed to be a separate parsing context, we need to
+	  save and restore pushed_string_list around the call to parse_string
+	  and reset_parser.  Fixes bug reported by Dan Douglas
+	  <ormaaj@gmail.com>
+
+bashhist.h
+	- HISTEXPAND_DEFAULT: default value of history_expansion, moved here
+	  from flags.c
+
+flags.[ch]
+	- histexp_flag: new variable, this is what set -H/set -o histexpand
+	  sets; history_expansion set to value of this variable; defaults to 0
+	- history_expansion: now set to HISTEXPAND_DEFAULT
+
+bashhist.c
+	- bash_history_reinit: if interact == 0, set history_expansion to the
+	  value of histexp_flag, to allow -H option to enable history
+	  expansion
+	- bash_history_reinit: if interact == 0, make sure
+	  history_expansion_inhibited is set opposite of histexp_flag, so
+	  enabling history expansion with -H invocation option turns off
+	  inhibited expansion. If interactive shell, we turn it off so
+	  history_expansion controls whether or not history expansion takes
+	  place. In practice, this function is always called with interact == 0,
+	  and -c command still doesn't perform history expansion
+
+shell.c
+	- init_interactive: make sure histexp_flag and history_expansion are
+	  identical in an interactive shell; allows both -H/+H option and
+	  default compilation options (HISTEXPAND_DEFAULT) to work
+
+				   11/24
+				   -----
+subst.c
+	- get_word_from_string: take advantage of the fact that SEPARATORS is
+	  always a (possibly local) copy of IFS, so build a local charmap of
+	  separators and use it instead of the (cached and possibly stale)
+	  ifs_cmap map and isifs macro.  Fixes bug with -N stripping leading
+	  whitespace reported by Clark Wang <clarkw@vmware.com>
+
+				   11/25
+				   -----
+builtins/read.def
+	- read_builtin: make `i' volatile, since auto variables are technically
+	  undefined after a longjmp, and a timeout on SIGALRM causes one.
+	  Fix suggested by Dmitry Goncharov <dgoncharov@users.sf.net>
+
+				   11/27
+				   -----
+parse.y
+	- shell_getc: if we are reading input from a string, and we get the
+	  ending '\0', and we are not expanding an alias, return EOF right
+	  away.  It might be an eval'ed string that has a syntax error.
+	  Fixes bug reported by Dan Douglas <ormaaj@gmail.com>
+
+				   11/28
+				   -----
+subst.c
+	- expand_word_internal: if we're expanding a quoted string containing
+	  a tilde as the first character of a word, only expand the tilde if
+	  we're expanding an array subscript (Q_ARRAYSUB), not if we're
+	  expanding any arithmetic expression (Q_ARITH).  This fixes a
+	  backwards compatibility issue with expressions like ~0 reported by
+	  Bize Ma <binaryzebra@gmail.com>
+
+subst.c
+	- parameter_brace_expand_indir: if the variable is not special and
+	  the indirect variable is unset (!variable where variable is unset),
+	  report an error.  Fixes omission reported by otenba@protonmail.com

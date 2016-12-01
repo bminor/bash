@@ -4381,7 +4381,10 @@ run_builtin:
 		    }
 		  result = builtin_status (result);
 		  if (builtin_is_special)
+{
+itrace("special builtin failed with flags = %d", simple_command->flags);
 		    special_builtin_failed = 1;
+}
 		}
 	      /* In POSIX mode, if there are assignment statements preceding
 		 a special builtin, they persist after the builtin

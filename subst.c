@@ -309,7 +309,7 @@ static char *parameter_brace_transform __P((char *, char *, int, char *, int, in
 
 static char *process_substitute __P((char *, int));
 
-static char *read_comsub __P((int, int, int *));
+static char *read_comsub __P((int, int, int, int *));
 
 #ifdef ARRAY_VARS
 static arrayind_t array_length_reference __P((char *));
@@ -2851,11 +2851,15 @@ list_string (string, separators, quoted)
 
 /* Parse a single word from STRING, using SEPARATORS to separate fields.
    ENDPTR is set to the first character after the word.  This is used by
-   the `read' builtin.  This is never called with SEPARATORS != $IFS;
-   it should be simplified.
+   the `read' builtin.
+   
+   This is never called with SEPARATORS != $IFS, and takes advantage of that.
 
    XXX - this function is very similar to list_string; they should be
 	 combined - XXX */
+
+#define islocalsep(c)	(local_cmap[(unsigned char)(c)] != 0)
+
 char *
 get_word_from_string (stringp, separators, endptr)
      char **stringp, *separators, **endptr;
@@ -2863,6 +2867,7 @@ get_word_from_string (stringp, separators, endptr)
   register char *s;
   char *current_word;
   int sindex, sh_style_split, whitesep, xflags;
+  unsigned char local_cmap[UCHAR_MAX+1];	/* really only need single-byte chars here */
   size_t slen;
 
   if (!stringp || !*stringp || !**stringp)
@@ -2872,20 +2877,23 @@ get_word_from_string (stringp, separators, endptr)
 				 separators[1] == '\t' &&
 				 separators[2] == '\n' &&
 				 separators[3] == '\0';
-  for (xflags = 0, s = ifs_value; s && *s; s++)
+  memset (local_cmap, '\0', sizeof (local_cmap));
+  for (xflags = 0, s = separators; s && *s; s++)
     {
       if (*s == CTLESC) xflags |= SX_NOCTLESC;
       if (*s == CTLNUL) xflags |= SX_NOESCCTLNUL;
+      local_cmap[(unsigned char)*s] = 1;	/* local charmap of separators */
     }
 
   s = *stringp;
   slen = 0;
 
   /* Remove sequences of whitespace at the beginning of STRING, as
-     long as those characters appear in IFS. */
-  if (sh_style_split || !separators || !*separators)
+     long as those characters appear in SEPARATORS.  This happens if
+     SEPARATORS == $' \t\n' or if IFS is unset. */
+  if (sh_style_split || separators == 0)
     {
-      for (; *s && spctabnl (*s) && isifs (*s); s++);
+      for (; *s && spctabnl (*s) && islocalsep (*s); s++);
 
       /* If the string is nothing but whitespace, update it and return. */
       if (!*s)
@@ -2925,19 +2933,19 @@ get_word_from_string (stringp, separators, endptr)
 
   /* Now skip sequences of space, tab, or newline characters if they are
      in the list of separators. */
-  while (s[sindex] && spctabnl (s[sindex]) && isifs (s[sindex]))
+  while (s[sindex] && spctabnl (s[sindex]) && islocalsep (s[sindex]))
     sindex++;
 
   /* If the first separator was IFS whitespace and the current character is
      a non-whitespace IFS character, it should be part of the current field
      delimiter, not a separate delimiter that would result in an empty field.
      Look at POSIX.2, 3.6.5, (3)(b). */
-  if (s[sindex] && whitesep && isifs (s[sindex]) && !spctabnl (s[sindex]))
+  if (s[sindex] && whitesep && islocalsep (s[sindex]) && !spctabnl (s[sindex]))
     {
       sindex++;
       /* An IFS character that is not IFS white space, along with any adjacent
 	 IFS white space, shall delimit a field. */
-      while (s[sindex] && spctabnl (s[sindex]) && isifs (s[sindex]))
+      while (s[sindex] && spctabnl (s[sindex]) && islocalsep(s[sindex]))
 	sindex++;
     }
 
@@ -3716,10 +3724,12 @@ expand_string_assignment (string, quoted)
   expand_no_split_dollar_star = 1;
 
 #if 0
-  /* Other shells (ksh93) do it this way, affects how $@ is expanded in
-     constructs like bar=${@#0} (preserves the spaces resulting from the
-     expansion of $@ in a context where you don't do word splitting) */
-  td.flags = W_ASSIGNRHS|W_NOSPLIT2;
+  /* Other shells (ksh93) do it this way, which affects how $@ is expanded
+     in constructs like bar=${@#0} (preserves the spaces resulting from the
+     expansion of $@ in a context where you don't do word splitting); Posix
+     interp 888 makes the expansion of $@ in contexts where word splitting
+     is not performed unspecified. */
+  td.flags = W_ASSIGNRHS|W_NOSPLIT2;		/* Posix interp 888 */
 #else
   td.flags = W_ASSIGNRHS;
 #endif
@@ -4542,7 +4552,7 @@ match_upattern (string, pat, mtype, sp, ep)
 
       p = npat = (char *)xmalloc (len + 3);
       p1 = pat;
-      if (*p1 != '*' || (*p1 == '*' && p1[1] == LPAREN && extended_glob))
+      if ((mtype != MATCH_BEG) && (*p1 != '*' || (*p1 == '*' && p1[1] == LPAREN && extended_glob)))
 	*p++ = '*';
       while (*p1)
 	*p++ = *p1++;
@@ -4553,7 +4563,7 @@ match_upattern (string, pat, mtype, sp, ep)
       /* If the pattern ends with a `*' we leave it alone if it's preceded by
 	 an even number of backslashes, but if it's escaped by a backslash
 	 we need to add another `*'. */
-      if (p1[-1] == '*' && (unescaped_backslash = p1[-2] == '\\'))
+      if ((mtype != MATCH_END) && (p1[-1] == '*' && (unescaped_backslash = p1[-2] == '\\')))
 	{
 	  pp = p1 - 3;
 	  while (pp >= pat && *pp-- == '\\')
@@ -4561,7 +4571,7 @@ match_upattern (string, pat, mtype, sp, ep)
 	  if (unescaped_backslash)
 	    *p++ = '*';
 	}
-      else if (p1[-1] != '*')
+      else if (mtype != MATCH_END && p1[-1] != '*')
 	*p++ = '*';
 #else 
       if (p1[-1] != '*' || p1[-2] == '\\')
@@ -5999,8 +6009,8 @@ process_substitute (string, open_for_read_in_child)
 /***********************************/
 
 static char *
-read_comsub (fd, quoted, rflag)
-     int fd, quoted;
+read_comsub (fd, quoted, flags, rflag)
+     int fd, quoted, flags;
      int *rflag;
 {
   char *istring, buf[128], *bufp, *s;
@@ -6011,13 +6021,8 @@ read_comsub (fd, quoted, rflag)
   istring = (char *)NULL;
   istring_index = istring_size = bufn = tflag = 0;
 
-#if 0
-  for (skip_ctlesc = skip_ctlnul = 0, s = ifs_value; s && *s; s++)
-    skip_ctlesc |= *s == CTLESC, skip_ctlnul |= *s == CTLNUL;
-#else
   skip_ctlesc = ifs_cmap[CTLESC];
   skip_ctlnul = ifs_cmap[CTLNUL];
-#endif
 
   nullbyte = 0;
 
@@ -6053,6 +6058,8 @@ read_comsub (fd, quoted, rflag)
 
       /* This is essentially quote_string inline */
       if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) /* || c == CTLESC || c == CTLNUL */)
+	istring[istring_index++] = CTLESC;
+      else if ((flags & PF_ASSIGNRHS) && skip_ctlesc && c == CTLESC)
 	istring[istring_index++] = CTLESC;
       /* Escape CTLESC and CTLNUL in the output to protect those characters
 	 from the rest of the word expansions (word splitting and globbing.)
@@ -6340,7 +6347,7 @@ command_substitute (string, quoted, flags)
       close (fildes[1]);
 
       tflag = 0;
-      istring = read_comsub (fildes[0], quoted, &tflag);
+      istring = read_comsub (fildes[0], quoted, flags, &tflag);
 
       close (fildes[0]);
 
@@ -6745,6 +6752,15 @@ parameter_brace_expand_indir (name, var_is_special, quoted, quoted_dollar_atp, c
 	}
     }
 
+  if (var_is_special == 0 && v == 0)
+    {
+      report_error (_("%s: invalid indirect expansion"), name);
+      w = alloc_word_desc ();
+      w->word = &expand_param_error;
+      w->flags = 0;
+      return (w);
+    }
+      
   t = parameter_brace_find_indir (name, var_is_special, quoted, 0);
 
   chk_atstar (t, quoted, quoted_dollar_atp, contains_dollar_at);
@@ -6753,7 +6769,7 @@ parameter_brace_expand_indir (name, var_is_special, quoted, quoted_dollar_atp, c
 
   if (valid_brace_expansion_word (t, SPECIAL_VAR (t, 0)) == 0)
     {
-      report_error (_("%s: bad substitution"), t);
+      report_error (_("%s: invalid variable name"), t);
       free (t);
       w = alloc_word_desc ();
       w->word = &expand_param_error;
@@ -9202,7 +9218,7 @@ expand_word_internal (word, quoted, isexp, contains_dollar_at, expanded_somethin
   mb_cur_max = MB_CUR_MAX;
 
   /* Don't need the string length for the SADD... and COPY_ macros unless
-     multibyte characters are possible. */
+     multibyte characters are possible, but do need it for bounds checking. */
   string_size = (mb_cur_max > 1) ? strlen (string) : 1;
 
   if (contains_dollar_at)
@@ -9351,10 +9367,13 @@ add_string:
 	     at the start of a word or after an unquoted : or = in an
 	     assignment statement, we don't do tilde expansion.  If we don't want
 	     tilde expansion when expanding words to be passed to the arithmetic
-	     evaluator, remove the check for Q_ARITH. */
+	     evaluator, remove the check for Q_ARITH.  Right now, the code
+	     suppresses tilde expansion when expanding in a pure arithmetic
+	     context, but allows it when expanding an array subscript.  This is
+	     for backwards compatibility, but I figure nobody's relying on it */
 	  if ((word->flags & (W_NOTILDE|W_DQUOTE)) ||
 	      (sindex > 0 && ((word->flags & W_ITILDE) == 0)) ||
-	      ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) && ((quoted & Q_ARITH) == 0)))
+	      ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) && ((quoted & Q_ARRAYSUB) == 0)))
 	    {
 	      word->flags &= ~W_ITILDE;
 	      if (isexp == 0 && (word->flags & (W_NOSPLIT|W_NOSPLIT2)) == 0 && isifs (c) && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) == 0)
@@ -9514,6 +9533,15 @@ add_string:
 	      istring[istring_index] = '\0';
 
 	      SCOPY_CHAR_I (twochars, CTLESC, c, string, sindex, string_size);
+	    }
+	  else if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && c == 0)
+	    {
+	      RESIZE_MALLOCED_BUFFER (istring, istring_index, 2, istring_size,
+				      DEFAULT_ARRAY_SIZE);
+	      istring[istring_index++] = CTLESC;
+	      istring[istring_index++] = '\\';
+	      istring[istring_index] = '\0';
+	      break;	      
 	    }
 	  else if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && ((sh_syntaxtab[c] & tflag) == 0))
 	    {

@@ -1722,6 +1722,7 @@ init_interactive ()
   interactive = 1;
 #if defined (HISTORY)
   remember_on_history = enable_history_list = 1;	/* XXX */
+  histexp_flag = history_expansion;			/* XXX */
 #endif
 }
 

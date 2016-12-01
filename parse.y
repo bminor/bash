@@ -2311,6 +2311,14 @@ shell_getc (remove_quoted_newline)
 #if 0
 	      internal_warning ("shell_getc: ignored null byte in input");
 #endif
+if (bash_input.type == st_string)
+  {
+    if (i == 0)
+      shell_input_line_terminator = EOF;
+    shell_input_line[i] = '\0';
+    c = EOF;
+    break;
+  }
 	      continue;
 	    }
 
@@ -3127,6 +3135,15 @@ read_token (command)
 
   if (character == EOF)
     {
+      EOF_Reached = 1;
+      return (yacc_EOF);
+    }
+
+  /* If we hit the end of the string and we're not expanding an alias (e.g.,
+     we are eval'ing a string that is an incomplete command), return EOF */
+  if (character == '\0' && bash_input.type == st_string && expanding_alias() == 0)
+    {
+itrace("shell_getc: bash_input.location.string = `%s'", bash_input.location.string);
       EOF_Reached = 1;
       return (yacc_EOF);
     }
@@ -4226,6 +4243,7 @@ xparse_dolparen (base, string, indp, flags)
   sh_input_line_state_t ls;
   int orig_ind, nc, sflags, orig_eof_token;
   char *ret, *s, *ep, *ostring;
+  STRING_SAVER *saved_pushed_strings;
 
   /*yydebug = 1;*/
   orig_ind = *indp;
@@ -4238,6 +4256,8 @@ xparse_dolparen (base, string, indp, flags)
   save_parser_state (&ps);
   save_input_line_state (&ls);
   orig_eof_token = shell_eof_token;
+  saved_pushed_strings = pushed_string_list;	/* separate parsing context */
+  pushed_string_list = (STRING_SAVER *)NULL;
 
   /*(*/
   parser_state |= PST_CMDSUBST|PST_EOFTOKEN;	/* allow instant ')' */ /*(*/
@@ -4251,6 +4271,8 @@ xparse_dolparen (base, string, indp, flags)
   /* reset_parser clears shell_input_line and associated variables */
   restore_input_line_state (&ls);
 
+  pushed_string_list = saved_pushed_strings;
+
   token_to_read = 0;
 
   /* If parse_string returns < 0, we need to jump to top level with the
@@ -4260,7 +4282,7 @@ xparse_dolparen (base, string, indp, flags)
 
   /* Need to find how many characters parse_and_execute consumed, update
      *indp, if flags != 0, copy the portion of the string parsed into RET
-     and return it.  If flags & 1 (EX_NOALLOC) we can return NULL. */
+     and return it.  If flags & 1 (SX_NOALLOC) we can return NULL. */
 
   /*(*/
   if (ep[-1] != ')')

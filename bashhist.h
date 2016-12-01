@@ -30,6 +30,12 @@
 
 #define HC_IGNBOTH	(HC_IGNSPACE|HC_IGNDUPS)
 
+#if defined (STRICT_POSIX)
+#  define HISTEXPAND_DEFAULT	0
+#else
+#  define HISTEXPAND_DEFAULT	1
+#endif
+
 extern int remember_on_history;
 extern int enable_history_list;		/* value for `set -o history' */
 extern int literal_history;		/* controlled by `shopt lithist' */

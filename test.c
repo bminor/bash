@@ -740,7 +740,7 @@ two_arguments ()
 {
   if (argv[pos][0] == '!' && argv[pos][1] == '\0')
     return (argv[pos + 1][0] == '\0');
-  else if (argv[pos][0] == '-' && argv[pos][2] == '\0')
+  else if (argv[pos][0] == '-' && argv[pos][1] && argv[pos][2] == '\0')
     {
       if (test_unop (argv[pos]))
 	return (unary_operator ());
@@ -753,7 +753,7 @@ two_arguments ()
   return (0);
 }
 
-#define ANDOR(s)  (s[0] == '-' && !s[2] && (s[1] == 'a' || s[1] == 'o'))
+#define ANDOR(s)  (s[0] == '-' && (s[1] == 'a' || s[1] == 'o') && s[2] == 0)
 
 /* This could be augmented to handle `-t' as equivalent to `-t 1', but
    POSIX requires that `-t' be given an argument. */

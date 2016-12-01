@@ -60,6 +60,7 @@ extern int brace_expansion;
 
 #if defined (BANG_HISTORY)
 extern int history_expansion;
+extern int histexp_flag;
 #endif /* BANG_HISTORY */
 
 #if defined (RESTRICTED_SHELL)
