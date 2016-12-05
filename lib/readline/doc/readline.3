@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Sun Feb 28 15:42:34 EST 2016
+.\"	Last Change: Wed Nov 30 10:06:13 PST 2016
 .\"
-.TH READLINE 3 "2016 February 28" "GNU Readline 7.0"
+.TH READLINE 3 "2016 November 30" "GNU Readline 7.0"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -438,6 +438,15 @@ can be set to either
 or
 .BR vi .
 .TP
+.B emacs\-mode\-string (@)
+This string is displayed immediately before the last line of the primary
+prompt when emacs editing mode is active.  The value is expanded like a
+key binding, so the standard set of meta- and control prefixes and
+backslash escape sequences is available.
+Use the \e1 and \e2 escapes to begin and end sequences of
+non-printing characters, which can be used to embed a terminal control 
+sequence into the mode string.
+.TP
 .B enable\-bracketed\-paste (Off)
 When set to \fBOn\fP, readline will configure the terminal in a way
 that will enable it to insert each paste into the editing buffer as a
@@ -505,15 +514,6 @@ equivalent to \fIemacs-standard\fP.  The default value is
 The value of
 .B editing\-mode
 also affects the default keymap.
-.TP
-.B emacs\-mode\-string (@)
-This string is displayed immediately before the last line of the primary
-prompt when emacs editing mode is active.  The value is expanded like a
-key binding, so the standard set of meta- and control prefixes and
-backslash escape sequences is available.
-Use the \e1 and \e2 escapes to begin and end sequences of
-non-printing characters, which can be used to embed a terminal control 
-sequence into the mode string.
 .TP
 .B keyseq\-timeout (500)
 Specifies the duration \fIreadline\fP will wait for a character when reading an
@@ -1120,9 +1120,10 @@ Abort the current editing command and
 ring the terminal's bell (subject to the setting of
 .BR bell\-style ).
 .TP
-.B do\-uppercase\-version (M\-a, M\-b, M\-\fIx\fP, ...)
-If the metafied character \fIx\fP is lowercase, run the command
-that is bound to the corresponding uppercase character.
+.B do\-lowercase\-version (M\-A, M\-B, M\-\fIx\fP, ...)
+If the metafied character \fIx\fP is uppercase, run the command
+that is bound to the corresponding metafied lowercase character.
+The behavior is undefined if \fIx\fP is already lowercase.
 .TP
 .B prefix\-meta (ESC)
 Metafy the next character typed.

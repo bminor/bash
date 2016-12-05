@@ -1216,14 +1216,14 @@ The search string must match at the beginning of a history line.
 This is a non-incremental search.
 By default, this command is unbound.
 
-@item history-substr-search-forward ()
+@item history-substring-search-forward ()
 Search forward through the history for the string of characters
 between the start of the current line and the point.
 The search string may match anywhere in a history line.
 This is a non-incremental search.
 By default, this command is unbound.
 
-@item history-substr-search-backward ()
+@item history-substring-search-backward ()
 Search backward through the history for the string of characters
 between the start of the current line and the point.
 The search string may match anywhere in a history line.
@@ -1590,9 +1590,10 @@ Abort the current editing command and
 ring the terminal's bell (subject to the setting of
 @code{bell-style}).
 
-@item do-uppercase-version (M-a, M-b, M-@var{x}, @dots{})
-If the metafied character @var{x} is lowercase, run the command
-that is bound to the corresponding uppercase character.
+@item do-lowercase-version (M-A, M-B, M-@var{x}, @dots{})
+If the metafied character @var{x} is upper case, run the command
+that is bound to the corresponding metafied lower case character.
+The behavior is undefined if @var{x} is already lower case.
 
 @item prefix-meta (@key{ESC})
 Metafy the next character typed.  This is for keyboards
@@ -1721,7 +1722,7 @@ Accept the current line for execution and fetch the next line
 relative to the current line from the history for editing.  Any
 argument is ignored.
 
-@item edit-and-execute-command (C-xC-e)
+@item edit-and-execute-command (C-x C-e)
 Invoke an editor on the current command line, and execute the result as shell
 commands.
 Bash attempts to invoke

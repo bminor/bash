@@ -50,6 +50,7 @@
 #define ASS_MKGLOBAL	0x0008	/* force global assignment */
 #define ASS_NAMEREF	0x0010	/* assigning to nameref variable */
 #define ASS_FORCE	0x0020	/* force assignment even to readonly variable */
+#define ASS_CHKLOCAL	0x0040	/* check local variable before assignment */
 
 /* Flags for the string extraction functions. */
 #define SX_NOALLOC	0x0001	/* just skip; don't return substring */

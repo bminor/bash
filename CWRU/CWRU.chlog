@@ -12561,4 +12561,72 @@ subst.c
 subst.c
 	- parameter_brace_expand_indir: if the variable is not special and
 	  the indirect variable is unset (!variable where variable is unset),
-	  report an error.  Fixes omission reported by otenba@protonmail.com
+	  report an error.  This is a slight incompatibility with previous
+	  versions, which did not differentiate between indirecting an unset
+	  variable and an indirect expansion resulting in an unset variable.
+	  Fixes omission reported by otenba@protonmail.com
+
+				   11/30
+				   -----
+lib/readline/doc/{rluser.texi,readline.3},doc/bash.1
+	- do-uppercase-version: since this doesn't actually exist, replace it
+	  with do-lowercase-version, with the caveat that do-lowercase-version
+	  results in undefined behavior if bound to a character that's
+	  already lowercase.  Suggested by Branden Robinson
+	  <g.branden.robinson@gmail.com>
+
+lib/readline/doc/rluser.texi
+	- history-substring-search-forward: was misspelled as "substr-search";
+	  ditto for search-backward
+
+doc/bash.1
+	- history-substring-search-{backward,forward}: add documentation, text
+	  straight from readline.3
+
+jobs.c
+	- initialize_job_control: if the terminal's process group is valid,
+	  but the shell is not the foreground process, check for terminating
+	  signals (like SIGHUP, which the kernel would send if the process
+	  group were orphaned) during the loop where we try to stop the shell
+	  if it's not in the foreground.  Not a perfect solution; the kernel
+	  might not send SIGHUP
+
+				   12/1
+				   ----
+jobs.c
+	- initialize_job_control: only go through the SIGTTIN loop 16 times at
+	  most before deciding we're in the background and probably a member of
+	  an orphaned process group; set original_pgrp to the terminal's pgrp
+	  (so the eventual give_terminal_to doesn't leave the terminal in the
+	  wrong pgrp); and bail on job control initialization
+
+tests/run-all
+	- unset SHELLOPTS to avoid its options `polluting' the test
+	  environment.  Suggestion from Vladimir Marek
+	  <Vladimir.Marek@oracle.com>
+
+tests/execscript
+	- use $PWD/exec8.sub to protect against someone who has a cd command
+	  in his bashrc.  Report from  Vladimir Marek
+	  <Vladimir.Marek@oracle.com> 
+
+				   12/2
+				   ----
+shell.c
+	- open_shell_script: call end_job_control before exiting the shell in
+	  case we were run as `bash -i script' and there is a problem with
+	  executing `script'.  If we don't, the terminal ends up in the wrong
+	  process group.  Fix from Clark Wang <clarkw@vmware.com>
+
+				   12/3
+				   ----
+parse.y
+	- read_comsub: if we look for a character following a `<' and it's
+	  not `<' (indicating that we don't have to read a here-document),
+	  make sure we push that character back and go through the loop again
+	  so we note the right word start location.  Fixes bug reported by
+	  parasite parasite <42parasite@gmail.com>
+
+subst.c
+	- parameter_brace_expand_indir: clean up checks for unset variables to
+	  minimize incompatibilities with previous versions

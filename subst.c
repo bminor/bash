@@ -223,7 +223,7 @@ static WORD_LIST *cached_quoted_dollar_at = 0;
 
 static WORD_LIST expand_word_error, expand_word_fatal;
 static WORD_DESC expand_wdesc_error, expand_wdesc_fatal;
-static char expand_param_error, expand_param_fatal;
+static char expand_param_error, expand_param_fatal, expand_param_unset;
 static char extract_string_error, extract_string_fatal;
 
 /* Set by expand_word_unsplit; used to inhibit splitting and re-joining
@@ -6752,7 +6752,11 @@ parameter_brace_expand_indir (name, var_is_special, quoted, quoted_dollar_atp, c
 	}
     }
 
-  if (var_is_special == 0 && v == 0)
+  /* An indirect reference to a positional parameter or a special parameter
+     is ok.  Indirect references to array references, as explained above, are
+     ok (currently).  Only references to unset variables are errors at this
+     point. */
+  if (legal_identifier (name) && v == 0)
     {
       report_error (_("%s: invalid indirect expansion"), name);
       w = alloc_word_desc ();
@@ -6764,6 +6768,25 @@ parameter_brace_expand_indir (name, var_is_special, quoted, quoted_dollar_atp, c
   t = parameter_brace_find_indir (name, var_is_special, quoted, 0);
 
   chk_atstar (t, quoted, quoted_dollar_atp, contains_dollar_at);
+
+#if defined (ARRAY_VARS)
+  /* Array references to unset variables are also an error */
+  if (t == 0 && valid_array_reference (name, 0))
+    {
+      v = array_variable_part (name, 0, (int *)0, (int *)0);
+      if (v == 0)
+	{
+	  report_error (_("%s: invalid indirect expansion"), name);
+	  w = alloc_word_desc ();
+	  w->word = &expand_param_error;
+	  w->flags = 0;
+	  return (w);
+	}
+      else
+        return (WORD_DESC *)NULL;      
+    }
+#endif
+
   if (t == 0)
     return (WORD_DESC *)NULL;
 
@@ -8311,6 +8334,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 	  temp = (char *)NULL;
 	  goto bad_substitution;
 	}
+
       /* Turn off the W_ARRAYIND flag because there is no way for this function
 	 to return the index we're supposed to be using. */
       if (tdesc && tdesc->flags)

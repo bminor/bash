@@ -1,6 +1,6 @@
 # From mksh
 
-set -o posix
+set -o posix ; shopt -u xpg_echo
 
 (echo 1 ${IFS+'}'z}) 2>&- || echo failed in 1
 (echo 2 "${IFS+'}'z}") 2>&- || echo failed in 2

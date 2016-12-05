@@ -217,14 +217,6 @@ pid_t pipeline_pgrp = (pid_t)0;
 int pgrp_pipe[2] = { -1, -1 };
 #endif
 
-#if 0
-/* The job which is current; i.e. the one that `%+' stands for. */
-int current_job = NO_JOB;
-
-/* The previous job; i.e. the one that `%-' stands for. */
-int previous_job = NO_JOB;
-#endif
-
 /* Last child made by the shell.  */
 volatile pid_t last_made_pid = NO_PID;
 
@@ -250,6 +242,8 @@ int check_window_size = CHECKWINSIZE_DEFAULT;
 PROCESS *last_procsub_child = (PROCESS *)NULL;
 
 /* Functions local to this file. */
+
+void debug_print_pgrps (void);
 
 static sighandler wait_sigint_handler __P((int));
 static sighandler sigchld_handler __P((int));
@@ -4074,7 +4068,7 @@ initialize_job_control (force)
      int force;
 {
   pid_t t;
-  int t_errno;
+  int t_errno, tty_sigs;
 
   t_errno = -1;
   shell_pgrp = getpgid (0);
@@ -4124,15 +4118,24 @@ initialize_job_control (force)
 	    tcsetpgrp (shell_tty, shell_pgrp);
 	}
 
+      tty_sigs = 0;
       while ((terminal_pgrp = tcgetpgrp (shell_tty)) != -1)
 	{
 	  if (shell_pgrp != terminal_pgrp)
 	    {
 	      SigHandler *ottin;
 
+	      CHECK_TERMSIG;
 	      ottin = set_signal_handler (SIGTTIN, SIG_DFL);
 	      kill (0, SIGTTIN);
 	      set_signal_handler (SIGTTIN, ottin);
+	      if (tty_sigs++ > 16)
+		{
+		  sys_error (_("initialize_job_control: no job control in background"));
+		  job_control = 0;
+		  original_pgrp = terminal_pgrp;	/* for eventual give_terminal_to */
+		  goto just_bail;
+		}
 	      continue;
 	    }
 	  break;
@@ -4192,6 +4195,7 @@ initialize_job_control (force)
 	internal_error (_("no job control in this shell"));
     }
 
+just_bail:
   running_in_background = terminal_pgrp != shell_pgrp;
 
   if (shell_tty != fileno (stderr))

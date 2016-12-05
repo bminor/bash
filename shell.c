@@ -1504,6 +1504,9 @@ open_shell_script (script_name)
     {
       e = errno;
       file_error (filename);
+#if defined (JOB_CONTROL)
+      end_job_control ();	/* just in case we were run as bash -i script */
+#endif
       sh_exit ((e == ENOENT) ? EX_NOTFOUND : EX_NOINPUT);
     }
 
@@ -1523,6 +1526,9 @@ open_shell_script (script_name)
       errno = EINVAL;
 #endif
       file_error (filename);
+#if defined (JOB_CONTROL)
+      end_job_control ();	/* just in case we were run as bash -i script */
+#endif
       sh_exit (EX_NOINPUT);
     }
 
@@ -1571,11 +1577,17 @@ open_shell_script (script_name)
 	      errno = e;
 	      file_error (filename);
 	    }
+#if defined (JOB_CONTROL)
+	  end_job_control ();	/* just in case we were run as bash -i script */
+#endif
 	  exit (EX_NOEXEC);
 	}
       else if (sample_len > 0 && (check_binary_file (sample, sample_len)))
 	{
 	  internal_error (_("%s: cannot execute binary file"), filename);
+#if defined (JOB_CONTROL)
+	  end_job_control ();	/* just in case we were run as bash -i script */
+#endif
 	  exit (EX_BINARY_FILE);
 	}
       /* Now rewind the file back to the beginning. */
