@@ -274,7 +274,7 @@ term ()
     value = binary_operator ();
 
   /* Might be a switch type argument */
-  else if (argv[pos][0] == '-' && argv[pos][2] == '\0')
+  else if (argv[pos][0] == '-' && argv[pos][1] &&  argv[pos][2] == '\0')
     {
       if (test_unop (argv[pos]))
 	value = unary_operator ();
@@ -718,7 +718,7 @@ int
 test_unop (op)
      char *op;
 {
-  if (op[0] != '-' || op[2] != 0)
+  if (op[0] != '-' || (op[1] && op[2] != 0))
     return (0);
 
   switch (op[1])

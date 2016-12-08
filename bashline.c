@@ -1173,7 +1173,10 @@ bash_backward_shellword (count, key)
 
   p = rl_point;
   slen = rl_end;
-  
+
+  if (p == rl_end && p > 0)
+    p--;  
+
   while (count)
     {
       if (p == 0)
@@ -1186,9 +1189,9 @@ bash_backward_shellword (count, key)
       while (p > 0)
 	{
 	  c = rl_line_buffer[p];
-	  if (WORDDELIM (c) && char_is_quoted (rl_line_buffer, p) == 0)
-	    BACKUP_CHAR (rl_line_buffer, slen, p);
-	  break;
+	  if (WORDDELIM (c) == 0 || char_is_quoted (rl_line_buffer, p))
+	    break;
+	  BACKUP_CHAR (rl_line_buffer, slen, p);
 	}
 
       if (p == 0)
@@ -1639,7 +1642,7 @@ bash_default_completion (text, start, end, qc, compflags)
   matches = (char **)NULL;
 
   /* New posix-style command substitution or variable name? */
-  if (!matches && *text == '$')
+  if (*text == '$')
     {
       if (qc != '\'' && text[1] == '(') /* ) */
 	matches = rl_completion_matches (text, command_subst_completion_function);

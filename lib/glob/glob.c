@@ -1018,7 +1018,7 @@ glob_filename (pathname, flags)
      char *pathname;
      int flags;
 {
-  char **result;
+  char **result, **new_result;
   unsigned int result_size;
   char *directory_name, *filename, *dname, *fn;
   unsigned int directory_len;
@@ -1248,16 +1248,16 @@ glob_filename (pathname, flags)
 	      while (array[l] != NULL)
 		++l;
 
-	      result =
-		(char **)realloc (result, (result_size + l) * sizeof (char *));
+	      new_result = (char **)realloc (result, (result_size + l) * sizeof (char *));
 
-	      if (result == NULL)
+	      if (new_result == NULL)
 		{
 		  for (l = 0; array[l]; ++l)
 		    free (array[l]);
 		  free ((char *)array);
 		  goto memory_error;
 		}
+	      result = new_result;
 
 	      for (l = 0; array[l] != NULL; ++l)
 		result[result_size++ - 1] = array[l];

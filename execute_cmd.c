@@ -2225,7 +2225,7 @@ coproc_setvars (cp)
 
   t = itos (cp->c_wfd);
   ind = 1;
-  bind_array_variable (cp->c_name, ind, t, 0);
+  v = bind_array_variable (cp->c_name, ind, t, 0);
   free (t);
 #else
   sprintf (namevar, "%s_READ", cp->c_name);
@@ -2240,7 +2240,7 @@ coproc_setvars (cp)
 
   sprintf (namevar, "%s_PID", cp->c_name);
   t = itos (cp->c_pid);
-  bind_variable (namevar, t, 0);
+  v = bind_variable (namevar, t, 0);
   free (t);
 
   free (namevar);
@@ -3798,7 +3798,6 @@ execute_cond_command (cond_command)
 {
   int retval, save_line_number;
 
-  retval = EXECUTION_SUCCESS;
   save_line_number = line_number;
 
   this_command_name = "[[";
@@ -3981,9 +3980,10 @@ fix_assignment_words (words)
 
 	/* If we have an assignment builtin that does not create local variables,
 	   make sure we create global variables even if we internally call
-	   `declare' */
+	   `declare'.  The CHKLOCAL flag means to set attributes or values on
+	   an existing local variable */
 	if (b && ((b->flags & (ASSIGNMENT_BUILTIN|LOCALVAR_BUILTIN)) == ASSIGNMENT_BUILTIN))
-	  w->word->flags |= W_ASSNGLOBAL;
+	  w->word->flags |= W_ASSNGLOBAL|W_CHKLOCAL;
       }
 #if defined (ARRAY_VARS)
     /* Note that we saw an associative array option to a builtin that takes
@@ -4086,7 +4086,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
   last_command_subst_pid = NO_PID;
   old_last_async_pid = last_asynchronous_pid;
 
-  already_forked = dofork = 0;
+  already_forked = 0;
 
   /* If we're in a pipeline or run in the background, set DOFORK so we
      make the child early, before word expansion.  This keeps assignment

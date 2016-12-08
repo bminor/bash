@@ -584,12 +584,9 @@ $(Program):  .build $(OBJECTS) $(BUILTINS_DEP) $(LIBDEP)
 	@echo "	  ***********************************************************"
 	@echo
 
-bashbug: $(SUPPORT_SRC)bashbug.sh config.h Makefile $(VERSPROG)
-	@sed -e "s%!MACHINE!%$(Machine)%" -e "s%!OS!%$(OS)%" \
-	     -e "s%!CFLAGS!%$(CCFLAGS)%" -e "s%!CC!%$(CC)%" \
-	     -e "s%!RELEASE!%$(Version)%" -e "s%!PATCHLEVEL!%$(PatchLevel)%" \
-	     -e "s%!MACHTYPE!%$(MACHTYPE)%" -e "s%!RELSTATUS!%$(RELSTATUS)%" \
-	     $(SUPPORT_SRC)bashbug.sh > $@
+bashbug: $(SDIR)/bashbug.sh config.h Makefile $(VERSPROG)
+	@sed -e "s%!PATCHLEVEL!%$(PatchLevel)%" \
+	     $(SDIR)/bashbug.sh > $@
 	@chmod a+rx bashbug
 
 strip:	$(Program) .made

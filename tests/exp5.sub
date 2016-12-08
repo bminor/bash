@@ -1,16 +1,14 @@
 # expansions involving patterns
-shopt -u xpg_echo
-
 var='[hello'
 echo "${var//[/}"
 
 red='\[\e[0;31m\]'
-echo "${red//\\[\\e/}"
+printf "%s\n" "${red//\\[\\e/}"
 
 foo="${red//\\[\\e/}"
 
 # foo == [0;31m\]
-echo "${foo//[0;31m\\/}"
+printf "%s\n" "${foo//[0;31m\\/}"
 
 echo "${var//[]/}"
 echo "${red//[]/}"

@@ -4729,7 +4729,7 @@ push_func_var (data)
       /* XXX - should we set v->context here? */
       v = bind_variable_internal (var->name, value_cell (var), shell_variables->table, 0, 0);
 #if defined (ARRAY_VARS)
-      if (array_p (var) || assoc_p (var))
+      if (v && (array_p (var) || assoc_p (var)))
 	{
 	  FREE (value_cell (v));
 	  if (array_p (var))

@@ -59,22 +59,22 @@ cat <<- EOF
 	EOF
 
 # check appending of text to file from here document
-rm -f /tmp/bash-zzz
-cat > /tmp/bash-zzz << EOF
+rm -f ${TMPDIR}/bash-zzz
+cat > ${TMPDIR}/bash-zzz << EOF
 abc
 EOF
-cat >> /tmp/bash-zzz << EOF
+cat >> ${TMPDIR}/bash-zzz << EOF
 def ghi
 jkl mno
 EOF
-cat /tmp/bash-zzz
-rm -f /tmp/bash-zzz
+cat ${TMPDIR}/bash-zzz
+rm -f ${TMPDIR}/bash-zzz
 
 # make sure command printing puts the here-document as the last redirection
 # on the line, and the function export code preserves syntactic correctness
 fff()
 {
-  ed /tmp/foo <<ENDOFINPUT >/dev/null
+  ed ${TMPDIR}/foo <<ENDOFINPUT >/dev/null
 /^name/d
 w
 q

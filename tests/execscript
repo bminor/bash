@@ -59,10 +59,10 @@ echo $?
 echo $?
 
 # kill two birds with one test -- test out the BASH_ENV code
-echo echo this is bashenv > /tmp/bashenv
-export BASH_ENV=/tmp/bashenv
+echo echo this is bashenv > $TMPDIR/bashenv
+export BASH_ENV=$TMPDIR/bashenv
 ${THIS_SH} ./exec3.sub
-rm -f /tmp/bashenv
+rm -f $TMPDIR/bashenv
 unset BASH_ENV
 
 # we're resetting the $PATH to empty, so this should be last

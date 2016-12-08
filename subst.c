@@ -518,6 +518,11 @@ dump_word_flags (flags)
       f &= ~W_COMPLETE;
       fprintf (stderr, "W_COMPLETE%s", f ? "|" : "");
     }
+  if (f & W_CHKLOCAL)
+    {
+      f &= ~W_CHKLOCAL;
+      fprintf (stderr, "W_CHKLOCAL%s", f ? "|" : "");
+    }
   
   fprintf (stderr, "\n");
   fflush (stderr);
@@ -3054,7 +3059,7 @@ do_compound_assignment (name, value, flags)
       v = find_variable (name);
       if (v && ((readonly_p (v) && (flags & ASS_FORCE) == 0) || noassign_p (v)))
 	{
-	  if (v && readonly_p (v))
+	  if (readonly_p (v))
 	    err_readonly (name);
 	  return (v);	/* XXX */
 	}
@@ -3074,7 +3079,7 @@ do_compound_assignment (name, value, flags)
       v = find_global_variable (name);
       if (v && ((readonly_p (v) && (flags & ASS_FORCE) == 0) || noassign_p (v)))
 	{
-	  if (v && readonly_p (v))
+	  if (readonly_p (v))
 	    err_readonly (name);
 	  return (v);	/* XXX */
 	}
@@ -3097,7 +3102,7 @@ do_compound_assignment (name, value, flags)
       v = assign_array_from_string (name, value, flags);
       if (v && ((readonly_p (v) && (flags & ASS_FORCE) == 0) || noassign_p (v)))
 	{
-	  if (v && readonly_p (v))
+	  if (readonly_p (v))
 	    err_readonly (name);
 	  return (v);	/* XXX */
 	}

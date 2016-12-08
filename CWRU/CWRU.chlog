@@ -12630,3 +12630,34 @@ parse.y
 subst.c
 	- parameter_brace_expand_indir: clean up checks for unset variables to
 	  minimize incompatibilities with previous versions
+
+				   12/5
+				   ----
+lib/readline/history.c
+	- add_history: don't update history_length until all of the updates to
+	  the_history are complete, so history_length is always consistent.
+	  Report and fix from Hong Cho <hong.cho@citrix.com>
+
+bashline.c
+	- bash_backward_shellword: fix to work better at the end of the line,
+	  with multiple trailing whitespace characters.  Inspired by report
+	  from Kirill Timofeev <kt97679@gmail.com>
+
+Makefile.in
+	- bashbug: use `^' as the sed delimiter instead of `%'; some compilers
+	  use `%' in CFLAGS.  Report from  Vladimir Marek
+	  <Vladimir.Marek@oracle.com> 
+
+				   12/6
+				   ----
+test.c
+	- test_unop: make sure op[1] != 0 before testing op[2]
+	- term: make sure argv[pos][1] != 0 before testing argv[pos][2].  Fixes
+	  oob-read reported by Jerzy Kramarz <op7ica@gmail.com>
+
+				   12/7
+				   ----
+lib/glob/glob.c
+	- glob_filename: assign the return value of realloc (results, ...) to
+	  a temp pointer, so if realloc returns NULL, we make sure we free
+	  results.  Report from Kirill Timofeev <kt97679@gmail.com>

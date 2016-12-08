@@ -2536,6 +2536,12 @@ Matches one of the given patterns.
 Matches anything except one of the given patterns.
 @end table
 
+Complicated extended pattern matching against long strings is slow,
+especially when the patterns contain alternations and the strings
+contain multiple matches.
+Using separate matches against shorter strings, or using arrays of
+strings instead of a single long string, may be faster.
+
 @node Quote Removal
 @subsection Quote Removal
 
