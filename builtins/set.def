@@ -916,11 +916,7 @@ unset_builtin (list)
       if (var && unset_array)
 	{
 	  /* Let unbind_array_element decide what to do with non-array vars */
-#if 0
-	  tem = unbind_array_element (var, t, 1);	/* XXX new third arg */
-#else
-	  tem = unbind_array_element (var, t, 0);	/* XXX new third arg */
-#endif
+	  tem = unbind_array_element (var, t, assoc_expand_once);	/* XXX new third arg */
 	  if (tem == -2 && array_p (var) == 0 && assoc_p (var) == 0)
 	    {
 	      builtin_error (_("%s: not an array variable"), var->name);
@@ -943,11 +939,7 @@ unset_builtin (list)
 		{
 		  tname = savestring (nameref_cell (var));
 		  if (var = array_variable_part (tname, 0, &t, (int *)0))
-#if 0
-		    tem = unbind_array_element (var, t, 1);	/* XXX new third arg */
-#else
-		    tem = unbind_array_element (var, t, 0);	/* XXX new third arg */
-#endif
+		    tem = unbind_array_element (var, t, assoc_expand_once);	/* XXX new third arg */
 		  free (tname);
 		}
 	      else

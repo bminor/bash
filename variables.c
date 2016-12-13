@@ -2686,14 +2686,14 @@ make_variable_value (var, value, flags)
       if (flags & ASS_APPEND)
 	{
 	  oval = value_cell (var);
-	  lval = evalexp (oval, &expok);	/* ksh93 seems to do this */
+	  lval = evalexp (oval, 0, &expok);	/* ksh93 seems to do this */
 	  if (expok == 0)
 	    {
 	      top_level_cleanup ();
 	      jump_to_top_level (DISCARD);
 	    }
 	}
-      rval = evalexp (value, &expok);
+      rval = evalexp (value, 0, &expok);
       if (expok == 0)
 	{
 	  top_level_cleanup ();

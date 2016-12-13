@@ -100,7 +100,7 @@ let_builtin (list)
 
   for (; list; list = list->next)
     {
-      ret = evalexp (list->word->word, &expok);
+      ret = evalexp (list->word->word, EXP_EXPANDED, &expok);
       if (expok == 0)
 	return (EXECUTION_FAILURE);
     }
@@ -124,7 +124,7 @@ exp_builtin (list)
     }
 
   exp = string_list (list);
-  ret = evalexp (exp, &expok);
+  ret = evalexp (exp, EXP_EXPANDED, &expok);
   (void)free (exp);
   return (((ret == 0) || (expok == 0)) ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
 }

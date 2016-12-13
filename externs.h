@@ -27,7 +27,9 @@
 #include "stdc.h"
 
 /* Functions from expr.c. */
-extern intmax_t evalexp __P((char *, int *));
+#define EXP_EXPANDED	0x01
+
+extern intmax_t evalexp __P((char *, int, int *));
 
 /* Functions from print_cmd.c. */
 #define FUNC_MULTILINE	0x01

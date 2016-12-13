@@ -180,6 +180,13 @@ WORD_LIST *subst_assign_varlist = (WORD_LIST *)NULL;
    errors.  Enabled when doing completion and prompt string expansion. */
 int no_longjmp_on_fatal_error = 0;
 
+/* Non-zero means to allow unmatched globbed filenames to expand to
+   a null file. */
+int allow_null_glob_expansion;
+
+/* Non-zero means to throw an error when globbing fails to match anything. */
+int fail_glob_expansion;
+
 /* Extern functions and variables from different files. */
 extern int last_command_exit_value, last_command_exit_signal;
 extern int subshell_environment, running_in_background;
@@ -195,6 +202,10 @@ extern int expanding_redir;
 extern int tempenv_assign_error;
 extern int builtin_ignoring_errexit;
 
+#if defined (ARRAY_VARS)
+extern int assoc_expand_once;
+#endif
+
 #if defined (JOB_CONTROL) && defined (PROCESS_SUBSTITUTION)
 extern PROCESS *last_procsub_child;
 #endif
@@ -202,13 +213,6 @@ extern PROCESS *last_procsub_child;
 #if !defined (HAVE_WCSDUP) && defined (HANDLE_MULTIBYTE)
 extern wchar_t *wcsdup __P((const wchar_t *));
 #endif
-
-/* Non-zero means to allow unmatched globbed filenames to expand to
-   a null file. */
-int allow_null_glob_expansion;
-
-/* Non-zero means to throw an error when globbing fails to match anything. */
-int fail_glob_expansion;
 
 #if 0
 /* Variables to keep track of which words in an expanded word list (the
@@ -7150,7 +7154,7 @@ verify_substring_values (v, value, substr, vtype, e1p, e2p)
     t = (char *)0;
 
   temp1 = expand_arith_string (substr, Q_DOUBLE_QUOTES);
-  *e1p = evalexp (temp1, &expok);
+  *e1p = evalexp (temp1, 0, &expok);
   free (temp1);
   if (expok == 0)
     return (0);
@@ -7208,7 +7212,7 @@ verify_substring_values (v, value, substr, vtype, e1p, e2p)
       temp1 = expand_arith_string (temp2, Q_DOUBLE_QUOTES);
       free (temp2);
       t[-1] = ':';
-      *e2p = evalexp (temp1, &expok);
+      *e2p = evalexp (temp1, 0, &expok);
       free (temp1);
       if (expok == 0)
 	return (0);
@@ -8959,7 +8963,7 @@ arithsub:
 	  /* No error messages. */
 	  savecmd = this_command_name;
 	  this_command_name = (char *)NULL;
-	  number = evalexp (temp1, &expok);
+	  number = evalexp (temp1, 0, &expok);
 	  this_command_name = savecmd;
 	  free (temp);
 	  free (temp1);

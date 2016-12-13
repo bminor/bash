@@ -171,6 +171,9 @@ static intmax_t	tokval;		/* current token value */
 static int	noeval;		/* set to 1 if no assignment to be done */
 static procenv_t evalbuf;
 
+/* set to 1 if the expression has already been run through word expansion */
+static int	already_expanded;
+
 static struct lvalue curlval = {0, 0, 0, -1};
 static struct lvalue lastlval = {0, 0, 0, -1};
 
@@ -221,6 +224,7 @@ extern char *this_command_name;
 extern int unbound_vars_is_error, last_command_exit_value;
 
 #if defined (ARRAY_VARS)
+extern int assoc_expand_once;
 extern const char * const bash_badsub_errmsg;
 #endif
 
@@ -362,8 +366,9 @@ expr_bind_array_element (tok, ind, rhs)
    safe to let the loop terminate when expr_depth == 0, without freeing up
    any of the expr_depth[0] stuff. */
 intmax_t
-evalexp (expr, validp)
+evalexp (expr, flags, validp)
      char *expr;
+     int flags;
      int *validp;
 {
   intmax_t val;
@@ -372,6 +377,7 @@ evalexp (expr, validp)
 
   val = 0;
   noeval = 0;
+  already_expanded = (flags&EXP_EXPANDED);
 
   FASTCOPY (evalbuf, oevalbuf, sizeof (evalbuf));
 
@@ -1095,17 +1101,20 @@ expr_streval (tok, e, lvalue)
   intmax_t tval;
 #if defined (ARRAY_VARS)
   arrayind_t ind;
+  int tflag, aflag;
 #endif
 
-/*itrace("expr_streval: %s: noeval = %d", tok, noeval);*/
+/*itrace("expr_streval: %s: noeval = %d expanded=%d", tok, noeval, already_expanded);*/
   /* If we are suppressing evaluation, just short-circuit here instead of
      going through the rest of the evaluator. */
   if (noeval)
     return (0);
 
+  tflag = assoc_expand_once && already_expanded;	/* for a start */
   /* [[[[[ */
 #if defined (ARRAY_VARS)
-  v = (e == ']') ? array_variable_part (tok, 0, (char **)0, (int *)0) : find_variable (tok);
+  aflag = (tflag) ? AV_NOEXPAND : 0;
+  v = (e == ']') ? array_variable_part (tok, tflag, (char **)0, (int *)0) : find_variable (tok);
 #else
   v = find_variable (tok);
 #endif
@@ -1113,7 +1122,7 @@ expr_streval (tok, e, lvalue)
   if ((v == 0 || invisible_p (v)) && unbound_vars_is_error)
     {
 #if defined (ARRAY_VARS)
-      value = (e == ']') ? array_variable_name (tok, 0, (char **)0, (int *)0) : tok;
+      value = (e == ']') ? array_variable_name (tok, tflag, (char **)0, (int *)0) : tok;
 #else
       value = tok;
 #endif
@@ -1145,7 +1154,7 @@ expr_streval (tok, e, lvalue)
      references like array[@].  In this case, get_array_value is just
      like get_variable_value in that it does not return newly-allocated
      memory or quote the results. */
-  value = (e == ']') ? get_array_value (tok, 0, (int *)NULL, &ind) : get_variable_value (v);
+  value = (e == ']') ? get_array_value (tok, aflag, (int *)NULL, &ind) : get_variable_value (v);
 #else
   value = get_variable_value (v);
 #endif
@@ -1564,7 +1573,7 @@ main (argc, argv)
 
   for (i = 1; i < argc; i++)
     {
-      v = evalexp (argv[i], &expok);
+      v = evalexp (argv[i], 0, &expok);
       if (expok == 0)
 	fprintf (stderr, _("%s: expression error\n"), argv[i]);
       else

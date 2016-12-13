@@ -43,6 +43,10 @@ extern char *this_command_name;
 extern int last_command_exit_value;
 extern int array_needs_making;
 
+/* This variable means to not expand associative array subscripts more than
+   once, when performing variable expansion. */
+int assoc_expand_once = 0;
+
 static SHELL_VAR *bind_array_var_internal __P((SHELL_VAR *, arrayind_t, char *, char *, int));
 static SHELL_VAR *assign_array_element_internal __P((SHELL_VAR *, char *, char *, char *, int, char *, int));
 
@@ -759,6 +763,7 @@ quote_array_assignment_chars (list)
 /* This function is called with SUB pointing to just after the beginning
    `[' of an array subscript and removes the array element to which SUB
    expands from array VAR.  A subscript of `*' or `@' unsets the array. */
+/* If FLAGS&1 we don't expand the subscript; we just use it as-is. */
 int
 unbind_array_element (var, sub, flags)
      SHELL_VAR *var;
@@ -770,7 +775,7 @@ unbind_array_element (var, sub, flags)
   char *akey;
   ARRAY_ELEMENT *ae;
 
-  len = skipsubscript (sub, 0, (var && assoc_p(var)));
+  len = skipsubscript (sub, 0, (flags&1) || (var && assoc_p(var)));
   if (sub[len] != ']' || len == 0)
     {
       builtin_error ("%s[%s: %s", var->name, sub, _(bash_badsub_errmsg));
@@ -928,7 +933,7 @@ array_expand_index (var, s, len)
   t = expand_arith_string (exp, Q_DOUBLE_QUOTES|Q_ARITH|Q_ARRAYSUB);	/* XXX - Q_ARRAYSUB for future use */
   savecmd = this_command_name;
   this_command_name = (char *)NULL;
-  val = evalexp (t, &expok);
+  val = evalexp (t, 0, &expok);
   this_command_name = savecmd;
   free (t);
   free (exp);
@@ -1046,7 +1051,7 @@ array_value_internal (s, quoted, flags, rtype, indp)
   WORD_LIST *l;
   SHELL_VAR *var;
 
-  var = array_variable_part (s, 0, &t, &len);
+  var = array_variable_part (s, (flags&AV_NOEXPAND) ? 1 : 0, &t, &len);	/* XXX */
 
   /* Expand the index, even if the variable doesn't exist, in case side
      effects are needed, like ${w[i++]} where w is unset. */
@@ -1126,7 +1131,10 @@ array_value_internal (s, quoted, flags, rtype, indp)
       else if (assoc_p (var))
 	{
 	  t[len - 1] = '\0';
-	  akey = expand_assignment_string_to_string (t, 0);	/* [ */
+	  if ((flags & AV_NOEXPAND) == 0)
+	    akey = expand_assignment_string_to_string (t, 0);	/* [ */
+	  else
+	    akey = savestring (t);
 	  t[len - 1] = ']';
 	  if (akey == 0 || *akey == 0)
 	    {

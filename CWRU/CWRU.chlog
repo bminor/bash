@@ -12661,3 +12661,91 @@ lib/glob/glob.c
 	- glob_filename: assign the return value of realloc (results, ...) to
 	  a temp pointer, so if realloc returns NULL, we make sure we free
 	  results.  Report from Kirill Timofeev <kt97679@gmail.com>
+
+				   12/12
+				   -----
+lib/sh/shquote.c
+	- sh_backslash_quote: if FLAGS&2, backslash-quote other single-byte
+	  characters that are in the current locale's <blank> character class
+
+builtins/printf.def
+	- printf_builtin: when processing the `%q' format, make sure to
+	  backslash quote all <blank> characters by making sure that FLAGS
+	  passed to sh_backslash_quote includes 2.  Fixes issue for certain
+	  iso-8859-1 locales where character 160 (octal 240, hex 0xa0) is a
+	  non-breaking space. Report from Stephane Chazelas
+	  <stephane.chazelas@gmail.com>
+
+lib/sh/eaccess.c
+	- sh_stat: if DEV_FD_STAT_BROKEN is defined, take /dev/fd/N and turn
+	  it into a stat on file descriptor N, as if /dev/fd were not
+	  available.  This is the case on some old versions of SunOS.  Report
+	  and patch from Dmitry Goncharov <dgoncharov@users.sf.net>
+
+config.h.in
+	- DEV_FD_STAT_BROKEN: add define
+
+configure.ac
+	- --enable-dev-fd-stat-broken: new command-line option, defines
+	  DEV_FD_STAT_BROKEN if supplied at configure time
+
+doc/bashref.texi
+	- --enable-dev-fd-stat-broken: document new command-line option for
+	  configure
+
+arrayfunc.c
+	- assoc_expand_once: new variable, declared here just because
+
+arrayfunc.h
+	- assoc_expand_once: extern declaration
+	- AV_NOEXPAND: new flag value for the array_value family of functions:
+	  means to not run associative array subscripts through word expansion
+
+builtins/set.def
+	- unset_builtin: call unbind_array_element with assoc_expand_once as
+	  third arg, controls whether we expand associative array subscripts
+	  (if 1, we suppress the usual expansion).  With accompanying shopt,
+	  provides backwards compatible option to solve problem with quotes
+	  and other characters in associative array subscripts pointed out
+	  most recently by Mingye Wang (Arthur2e5) <arthur200126@gmail.com>
+
+builtins/shopt.def
+	- assoc_expand_once: new option, controls value of internal variable
+	  with the same name. Currently undocumented because I'm not completely
+	  sold on the name
+
+expr.c
+	- evalexp: now takes a second argument, flags. Changed all callers in
+	  multiple other files (builtins/let.def,execute_cmd.c,arrayfunc.c,
+	  subst.c,test.c,variables.c)
+
+externs.h
+	- EXP_EXPANDED, new flag for second argument to evalexp
+
+builtins/let.def
+	- let_builtin: add EXP_EXPANDED to flags passed to evalexp
+
+execute_cmd.c
+	- execute_arith_command: add EXP_EXPANDED to flags passed to evalexp,
+	  since the command string is run through expand_words_no_vars before
+	  being evaluated
+
+expr.c
+	- set expression-global variable already_expanded if flags arg to
+	  evalexp contains EXP_EXPANDED
+	- if assoc_expand_once option set and already_expanded flag set, pass
+	  1 in flags to array_variable_part to skip over quotes and expansions
+	  in the subscript
+	- if those two variables set, pass AV_NOEXPAND as flag to
+	  get_array_value to prevent word expansions on the subscript
+
+arrayfunc.c
+	- if flags passed to unbind_array_element includes 1, pass flag on to
+	  skipsubscript so we don't expect matched quotes or process
+	  expansions in the subscript
+	- if flags to array_value_internal include AV_NOEXPAND, pass 1 as flag
+	  to array_variable_part to pass along to skipsubscript
+	- if flags to array_value_internal include AV_NOEXPAND, don't call
+	  expand_assignment_string_to_string; just use the unexpanded subscript
+	  to produce the key [THIS IS A WORK IN PROGRESS]
+

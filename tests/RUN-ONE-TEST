@@ -1,8 +1,11 @@
-BUILD_DIR=/usr/local/build/chet/bash/bash-current
+BUILD_DIR=/usr/local/build/bash/bash-current
 THIS_SH=$BUILD_DIR/bash
 PATH=$PATH:$BUILD_DIR
 
 export THIS_SH PATH
+
+: ${TMPDIR:=/tmp}
+export TMPDIR
 
 export BASH_TSTOUT=/tmp/xx
 rm -f ${BASH_TSTOUT}

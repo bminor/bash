@@ -8346,6 +8346,12 @@ Include support for coprocesses and the @code{coproc} reserved word
 @item --enable-debugger
 Include support for the bash debugger (distributed separately).
 
+@item --enable-dev-fd-stat-broken
+If calling @code{stat} on /dev/fd/@var{N} returns different results than
+calling @code{fstat} on file descriptor @var{N}, supply this option to
+enable a workaround.
+This has implications for conditional commands that test file attributes.
+
 @item --enable-direxpand-default
 Cause the @code{direxpand} shell option (@pxref{The Shopt Builtin})
 to be enabled by default when the shell starts.

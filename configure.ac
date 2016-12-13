@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.4, version 4.086])dnl
+AC_REVISION([for Bash 4.4, version 4.087])dnl
 
 define(bashvers, 4.4)
 define(relstatus, maint)
@@ -179,6 +179,7 @@ opt_extglob_default=no
 opt_dircomplete_expand_default=no
 opt_globascii_default=no
 opt_function_import=yes
+opt_dev_fd_stat_broken=no
 
 dnl options that affect how bash is compiled and linked
 opt_static_link=no
@@ -214,6 +215,7 @@ AC_ARG_ENABLE(cond-command, AC_HELP_STRING([--enable-cond-command], [enable the 
 AC_ARG_ENABLE(cond-regexp, AC_HELP_STRING([--enable-cond-regexp], [enable extended regular expression matching in conditional commands]), opt_cond_regexp=$enableval)
 AC_ARG_ENABLE(coprocesses, AC_HELP_STRING([--enable-coprocesses], [enable coprocess support and the coproc reserved word]), opt_coproc=$enableval)
 AC_ARG_ENABLE(debugger, AC_HELP_STRING([--enable-debugger], [enable support for bash debugger]), opt_debugger=$enableval)
+AC_ARG_ENABLE(dev-fd-stat-broken, AC_HELP_STRING([--enable-dev-fd-stat-broken], [enable this option if stat on /dev/fd/N and fstat on file descriptor N don't return the same results]), opt_dev_fd_stat_broken=$enableval)
 AC_ARG_ENABLE(direxpand-default, AC_HELP_STRING([--enable-direxpand-default], [enable the direxpand shell option by default]), opt_dircomplete_expand_default=$enableval)
 AC_ARG_ENABLE(directory-stack, AC_HELP_STRING([--enable-directory-stack], [enable builtins pushd/popd/dirs]), opt_dirstack=$enableval)
 AC_ARG_ENABLE(disabled-builtins, AC_HELP_STRING([--enable-disabled-builtins], [allow disabled builtins to still be invoked]), opt_disabled_builtins=$enableval)
@@ -346,6 +348,9 @@ AC_DEFINE(GLOBASCII_DEFAULT, 0)
 fi
 if test $opt_function_import = yes; then
 AC_DEFINE(FUNCTION_IMPORT)
+fi
+if test $opt_dev_fd_stat_broken = yes; then
+AC_DEFINE(DEV_FD_STAT_BROKEN)
 fi
 
 if test $opt_memscramble = yes; then

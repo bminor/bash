@@ -2911,7 +2911,7 @@ eval_arith_for_expr (l, okp)
 	 skip the command. */
 #if defined (DEBUGGER)
       if (debugging_mode == 0 || r == EXECUTION_SUCCESS)
-	expresult = evalexp (new->word->word, okp);
+	expresult = evalexp (new->word->word, 0, okp);
       else
 	{
 	  expresult = 0;
@@ -2919,7 +2919,7 @@ eval_arith_for_expr (l, okp)
 	    *okp = 1;
 	}
 #else
-      expresult = evalexp (new->word->word, okp);
+      expresult = evalexp (new->word->word, 0, okp);
 #endif
       dispose_words (new);
     }
@@ -3642,7 +3642,7 @@ execute_arith_command (arith_command)
   if (new)
     {
       exp = new->next ? string_list (new) : new->word->word;
-      expresult = evalexp (exp, &expok);
+      expresult = evalexp (exp, EXP_EXPANDED, &expok);
       line_number = save_line_number;
       if (exp != new->word->word)
 	free (exp);

@@ -118,6 +118,10 @@ extern char *shell_name;
 extern int debugging_mode;
 #endif
 
+#if defined (ARRAY_VARS)
+extern int assoc_expand_once;
+#endif
+
 static void shopt_error __P((char *));
 
 static int set_shellopts_after_change __P((char *, int));
@@ -153,6 +157,9 @@ static struct {
   shopt_set_func_t *set_func;
 } shopt_vars[] = {
   { "autocd", &autocd, (shopt_set_func_t *)NULL },
+#if defined (ARRAY_VARS)
+  { "assoc_expand_once", &assoc_expand_once, (shopt_set_func_t *)NULL },
+#endif
   { "cdable_vars", &cdable_vars, (shopt_set_func_t *)NULL },
   { "cdspell", &cdspelling, (shopt_set_func_t *)NULL },
   { "checkhash", &check_hashed_filenames, (shopt_set_func_t *)NULL },

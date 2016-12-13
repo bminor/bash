@@ -25,12 +25,17 @@
 
 #if defined (ARRAY_VARS)
 
+/* This variable means to not expand associative array subscripts more than
+   once, when performing variable expansion. */
+extern int assoc_expand_once;
+
 /* Flags for array_value_internal and callers array_value/get_array_value */
 #define AV_ALLOWALL	0x001
 #define AV_QUOTED	0x002
 #define AV_USEIND	0x004
 #define AV_USEVAL	0x008	/* XXX - should move this */
 #define AV_ASSIGNRHS	0x010	/* no splitting, special case ${a[@]} */
+#define AV_NOEXPAND	0x020	/* don't run assoc subscripts through word expansion */
 
 extern SHELL_VAR *convert_var_to_array __P((SHELL_VAR *));
 extern SHELL_VAR *convert_var_to_assoc __P((SHELL_VAR *));
