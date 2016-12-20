@@ -296,7 +296,7 @@ extern char *sh_get_env_value __P((const char *));
 extern char *make_variable_value __P((SHELL_VAR *, char *, int));
 
 extern SHELL_VAR *bind_variable_value __P((SHELL_VAR *, char *, int));
-extern SHELL_VAR *bind_int_variable __P((char *, char *));
+extern SHELL_VAR *bind_int_variable __P((char *, char *, int));
 extern SHELL_VAR *bind_var_to_int __P((char *, intmax_t));
 
 extern int assign_in_env __P((WORD_DESC *, int));

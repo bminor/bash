@@ -31,7 +31,8 @@ entry with a `*'.  An argument of N lists only the last N entries.
 
 Options:
   -c	clear the history list by deleting all of the entries
-  -d offset	delete the history entry at position OFFSET.
+  -d offset	delete the history entry at position OFFSET. Negative
+		offsets count back from the end of the history list
 
   -a	append history lines from this session to the history file
   -n	read all history lines not already read from the history file
@@ -104,7 +105,7 @@ int
 history_builtin (list)
      WORD_LIST *list;
 {
-  int flags, opt, result, old_history_lines, obase;
+  int flags, opt, result, old_history_lines, obase, ind;
   char *filename, *delete_arg;
   intmax_t delete_offset;
 
@@ -180,14 +181,30 @@ history_builtin (list)
 #endif
   else if (flags & DFLAG)
     {
-      if ((legal_number (delete_arg, &delete_offset) == 0)
-	  || (delete_offset < history_base)
-	  || (delete_offset > (history_base + history_length)))
+      if (legal_number (delete_arg, &delete_offset) == 0)
 	{
 	  sh_erange (delete_arg, _("history position"));
 	  return (EXECUTION_FAILURE);
 	}
-      opt = delete_offset;
+      /* check for negative offsets, count back from end of list */
+      if (delete_arg[0] == '-' && delete_offset < 0)
+	{
+	  ind = history_length + delete_offset;
+	  if (ind < history_base)
+	    {
+	      sh_erange (delete_arg, _("history position"));
+	      return (EXECUTION_FAILURE);
+	    }
+	  opt = ind + 1;	/* so history -d -1 deletes last history entry */
+	}
+      else if ((delete_offset < history_base) || (delete_offset > (history_base + history_length)))
+	{
+	  sh_erange (delete_arg, _("history position"));
+	  return (EXECUTION_FAILURE);
+	}
+      else
+	opt = delete_offset;
+
       result = bash_delete_histent (opt - history_base);
       /* Since remove_history changes history_length, this can happen if
 	 we delete the last history entry. */

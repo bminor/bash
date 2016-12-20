@@ -258,7 +258,7 @@ printf_builtin (list)
 	case 'v':
 	  vname = list_optarg;
 #if defined (ARRAY_VARS)
-	  if (legal_identifier (vname) || valid_array_reference (vname, 0))
+	  if (legal_identifier (vname) || valid_array_reference (vname, assoc_expand_once))
 #else
 	  if (legal_identifier (vname))
 #endif
@@ -1270,10 +1270,10 @@ bind_printf_variable (name, value, flags)
   SHELL_VAR *v;
 
 #if defined (ARRAY_VARS)
-  if (valid_array_reference (name, 0) == 0)
+  if (valid_array_reference (name, assoc_expand_once) == 0)
     v = bind_variable (name, value, flags);
   else
-    v = assign_array_element (name, value, flags);
+    v = assign_array_element (name, value, flags | (assoc_expand_once ? ASS_NOEXPAND : 0));
 #else /* !ARRAY_VARS */
   v = bind_variable (name, value, flags);
 #endif /* !ARRAY_VARS */

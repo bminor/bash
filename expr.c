@@ -82,6 +82,7 @@
 #include "bashintl.h"
 
 #include "shell.h"
+#include "subst.h"
 #include "typemax.h"		/* INTMAX_MAX, INTMAX_MIN */
 
 /* Because of the $((...)) construct, expressions may include newlines.
@@ -317,8 +318,10 @@ expr_bind_variable (lhs, rhs)
      char *lhs, *rhs;
 {
   SHELL_VAR *v;
+  int aflags;
 
-  v = bind_int_variable (lhs, rhs);
+  aflags = (assoc_expand_once && already_expanded) ? ASS_NOEXPAND : 0;
+  v = bind_int_variable (lhs, rhs, aflags);
   if (v && (readonly_p (v) || noassign_p (v)))
     sh_longjmp (evalbuf, 1);	/* variable assignment error */
   stupidly_hack_special_variables (lhs);
@@ -1150,10 +1153,11 @@ expr_streval (tok, e, lvalue)
 
 #if defined (ARRAY_VARS)
   ind = -1;
-  /* Second argument of 0 to get_array_value means that we don't allow
-     references like array[@].  In this case, get_array_value is just
-     like get_variable_value in that it does not return newly-allocated
-     memory or quote the results. */
+  /* If the second argument to get_array_value doesn't include AV_ALLOWALL,
+     we don't allow references like array[@].  In this case, get_array_value
+     is just like get_variable_value in that it does not return newly-allocated
+     memory or quote the results.  AFLAG is set above and is either AV_NOEXPAND
+     or 0. */
   value = (e == ']') ? get_array_value (tok, aflag, (int *)NULL, &ind) : get_variable_value (v);
 #else
   value = get_variable_value (v);

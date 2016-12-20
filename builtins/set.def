@@ -859,7 +859,7 @@ unset_builtin (list)
 
 #if defined (ARRAY_VARS)
       unset_array = 0;
-      if (!unset_function && nameref == 0 && valid_array_reference (name, 1))	/* XXX valid array reference second arg was 0 */
+      if (!unset_function && nameref == 0 && valid_array_reference (name, assoc_expand_once))	/* XXX valid array reference second arg was 0 */
 	{
 	  t = strchr (name, '[');
 	  *t++ = '\0';

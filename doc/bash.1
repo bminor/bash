@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed Nov 30 10:05:42 PST 2016
+.\"	Last Change: Fri Dec 16 11:45:56 EST 2016
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2016 November 30" "GNU Bash 4.4"
+.TH BASH 1 "2016 December 16" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -8468,6 +8468,10 @@ Clear the history list by deleting all the entries.
 .TP
 \fB\-d\fP \fIoffset\fP
 Delete the history entry at position \fIoffset\fP.
+If \fIoffset\fP is negative, it is interpreted as relative to one greater
+than the last history position, so negative indices count back from the
+end of the history, and an index of \-1 refers to the current
+\fBhistory -d\fP command.
 .TP
 .B \-a
 Append the ``new'' history lines to the history file.

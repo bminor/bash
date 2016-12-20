@@ -498,14 +498,27 @@ remove_history (which)
 {
   HIST_ENTRY *return_value;
   register int i;
+#if 1
+  int nentries;
+  HIST_ENTRY **start, **end;
+#endif
 
   if (which < 0 || which >= history_length || history_length ==  0 || the_history == 0)
     return ((HIST_ENTRY *)NULL);
 
   return_value = the_history[which];
 
+#if 1
+  /* Copy the rest of the entries, moving down one slot.  Copy includes
+     trailing NULL.  */
+  nentries = history_length - which;
+  start = the_history + which;
+  end = start + 1;
+  memmove (start, end, nentries * sizeof (HIST_ENTRY *));
+#else
   for (i = which; i < history_length; i++)
     the_history[i] = the_history[i + 1];
+#endif
 
   history_length--;
 

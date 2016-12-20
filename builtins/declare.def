@@ -295,6 +295,7 @@ declare_internal (list, local_var)
     {
       char *value, *name, *oldname;
       int offset, aflags, wflags, created_var, namelen;
+      int assoc_noexpand;
 #if defined (ARRAY_VARS)
       int making_array_special, compound_array_assign, simple_array_assign;
       int var_exists, array_exists, creating_array, array_subscript_assignment;
@@ -302,7 +303,8 @@ declare_internal (list, local_var)
 
       name = savestring (list->word->word);
       wflags = list->word->flags;
-      offset = assignment (name, 0);
+      assoc_noexpand = assoc_expand_once && (wflags & W_ASSIGNMENT);
+      offset = assignment (name, assoc_noexpand ? 2 : 0);
       aflags = 0;
       created_var = 0;
 
@@ -828,10 +830,13 @@ restart_new_var_name:
 	    assign_array_var_from_string (var, value, aflags|ASS_FORCE);
 	  else if (simple_array_assign && subscript_start)
 	    {
+	      int local_aflags;
 	      /* declare [-aA] name[N]=value */
 	      *subscript_start = '[';	/* ] */
 	      /* XXX - problem here with appending */
-	      var = assign_array_element (name, value, aflags&ASS_APPEND);	/* XXX - not aflags */
+	      local_aflags = aflags&ASS_APPEND;
+	      local_aflags |= assoc_noexpand ? ASS_NOEXPAND : 0;
+	      var = assign_array_element (name, value, local_aflags);	/* XXX - not aflags */
 	      *subscript_start = '\0';
 	      if (var == 0)	/* some kind of assignment error */
 		{

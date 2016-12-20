@@ -993,17 +993,17 @@ bind_compfunc_variables (line, ind, lwords, cw, exported)
   llen = MB_STRLEN (line);
   line[ind] = c;
   value = inttostr (llen, ibuf, sizeof(ibuf));
-  v = bind_int_variable ("COMP_POINT", value);
+  v = bind_int_variable ("COMP_POINT", value, 0);
   if (v && exported)
     VSETATTR(v, att_exported);
 
   value = inttostr (rl_completion_type, ibuf, sizeof (ibuf));
-  v = bind_int_variable ("COMP_TYPE", value);
+  v = bind_int_variable ("COMP_TYPE", value, 0);
   if (v && exported)
     VSETATTR(v, att_exported);
 
   value = inttostr (rl_completion_invoking_key, ibuf, sizeof (ibuf));
-  v = bind_int_variable ("COMP_KEY", value);
+  v = bind_int_variable ("COMP_KEY", value, 0);
   if (v && exported)
     VSETATTR(v, att_exported);
 
@@ -1014,7 +1014,7 @@ bind_compfunc_variables (line, ind, lwords, cw, exported)
 #ifdef ARRAY_VARS
       v = bind_comp_words (lwords);
       value = inttostr (cw, ibuf, sizeof(ibuf));
-      bind_int_variable ("COMP_CWORD", value);
+      bind_int_variable ("COMP_CWORD", value, 0);
 #endif
     }
   else

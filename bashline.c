@@ -4137,7 +4137,7 @@ bash_execute_unix_command (count, key)
     VSETATTR (v, att_exported);
   l = v ? value_cell (v) : 0;
   value = inttostr (rl_point, ibuf, sizeof (ibuf));
-  v = bind_int_variable ("READLINE_POINT", value);
+  v = bind_int_variable ("READLINE_POINT", value, 0);
   if (v)
     VSETATTR (v, att_exported);
   array_needs_making = 1;

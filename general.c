@@ -349,7 +349,8 @@ legal_alias_name (string, flags)
 }
 
 /* Returns non-zero if STRING is an assignment statement.  The returned value
-   is the index of the `=' sign. */
+   is the index of the `=' sign.  If FLAGS&1 we are expecting a compound assignment
+   and don't want an array subscript before the `='. */
 int
 assignment (string, flags)
      const char *string;
@@ -361,7 +362,7 @@ assignment (string, flags)
   c = string[indx = 0];
 
 #if defined (ARRAY_VARS)
-  if ((legal_variable_starter (c) == 0) && (flags == 0 || c != '[')) /* ] */
+  if ((legal_variable_starter (c) == 0) && ((flags&1) == 0 || c != '[')) /* ] */
 #else
   if (legal_variable_starter (c) == 0)
 #endif
@@ -377,7 +378,7 @@ assignment (string, flags)
 #if defined (ARRAY_VARS)
       if (c == '[')
 	{
-	  newi = skipsubscript (string, indx, 0);
+	  newi = skipsubscript (string, indx, (flags & 2) ? 1 : 0);
 	  if (string[newi++] != ']')
 	    return (0);
 	  if (string[newi] == '+' && string[newi+1] == '=')

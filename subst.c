@@ -8963,7 +8963,7 @@ arithsub:
 	  /* No error messages. */
 	  savecmd = this_command_name;
 	  this_command_name = (char *)NULL;
-	  number = evalexp (temp1, 0, &expok);
+	  number = evalexp (temp1, EXP_EXPANDED, &expok);
 	  this_command_name = savecmd;
 	  free (temp);
 	  free (temp1);

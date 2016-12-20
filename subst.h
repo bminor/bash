@@ -51,6 +51,7 @@
 #define ASS_NAMEREF	0x0010	/* assigning to nameref variable */
 #define ASS_FORCE	0x0020	/* force assignment even to readonly variable */
 #define ASS_CHKLOCAL	0x0040	/* check local variable before assignment */
+#define ASS_NOEXPAND	0x0080	/* don't expand associative array subscripts */
 
 /* Flags for the string extraction functions. */
 #define SX_NOALLOC	0x0001	/* just skip; don't return substring */

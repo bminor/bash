@@ -3076,18 +3076,19 @@ bind_variable_value (var, value, aflags)
    variable we set here, then turn it back on after binding as necessary. */
 
 SHELL_VAR *
-bind_int_variable (lhs, rhs)
+bind_int_variable (lhs, rhs, flags)
      char *lhs, *rhs;
+     int flags;
 {
   register SHELL_VAR *v;
   int isint, isarr, implicitarray;
 
   isint = isarr = implicitarray = 0;
 #if defined (ARRAY_VARS)
-  if (valid_array_reference (lhs, 0))
+  if (valid_array_reference (lhs, (flags & ASS_NOEXPAND) != 0))
     {
       isarr = 1;
-      v = array_variable_part (lhs, 0, (char **)0, (int *)0);
+      v = array_variable_part (lhs, (flags & ASS_NOEXPAND) != 0, (char **)0, (int *)0);
     }
   else
 #endif
@@ -3105,9 +3106,9 @@ bind_int_variable (lhs, rhs)
 
 #if defined (ARRAY_VARS)
   if (isarr)
-    v = assign_array_element (lhs, rhs, 0);
+    v = assign_array_element (lhs, rhs, flags);
   else if (implicitarray)
-    v = bind_array_variable (lhs, 0, rhs, 0);
+    v = bind_array_variable (lhs, 0, rhs, 0);	/* XXX - check on flags */
   else
 #endif
     v = bind_variable (lhs, rhs, 0);	/* why not use bind_variable_value? */
@@ -3133,7 +3134,7 @@ bind_var_to_int (var, val)
   char ibuf[INT_STRLEN_BOUND (intmax_t) + 1], *p;
 
   p = fmtulong (val, 10, ibuf, sizeof (ibuf), 0);
-  return (bind_int_variable (var, p));
+  return (bind_int_variable (var, p, 0));
 }
 
 /* Do a function binding to a variable.  You pass the name and

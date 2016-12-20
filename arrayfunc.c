@@ -276,7 +276,8 @@ bind_assoc_variable (entry, name, key, value, flags)
 }
 
 /* Parse NAME, a lhs of an assignment statement of the form v[s], and
-   assign VALUE to that array element by calling bind_array_variable(). */
+   assign VALUE to that array element by calling bind_array_variable().
+   Flags are ASS_ assignment flags */
 SHELL_VAR *
 assign_array_element (name, value, flags)
      char *name, *value;
@@ -286,7 +287,7 @@ assign_array_element (name, value, flags)
   int sublen;
   SHELL_VAR *entry, *nv;
 
-  vname = array_variable_name (name, 0, &sub, &sublen);
+  vname = array_variable_name (name, (flags & ASS_NOEXPAND) != 0, &sub, &sublen);
 
   if (vname == 0)
     return ((SHELL_VAR *)NULL);
@@ -321,7 +322,10 @@ assign_array_element_internal (entry, name, vname, sub, sublen, value, flags)
   if (entry && assoc_p (entry))
     {
       sub[sublen-1] = '\0';
-      akey = expand_assignment_string_to_string (sub, 0);	/* [ */
+      if ((flags & ASS_NOEXPAND) == 0)
+	akey = expand_assignment_string_to_string (sub, 0);	/* [ */
+      else
+	akey = savestring (sub);
       sub[sublen-1] = ']';
       if (akey == 0 || *akey == 0)
 	{

@@ -12749,3 +12749,73 @@ arrayfunc.c
 	  expand_assignment_string_to_string; just use the unexpanded subscript
 	  to produce the key [THIS IS A WORK IN PROGRESS]
 
+				   12/14
+				   -----
+subst.h
+	- ASS_NOEXPAND: assignment flag that inhibits expansion of associative
+	  array subscripts
+
+variables.c
+	- bind_int_variable: takes new flags arg; flags are taken from the
+	  ASS_ set of assignment flags, changed callers (bashline.c, expr.c,
+	  pcomplete.c)
+	- bind_int_variable: if flags includes ASS_NOEXPAND, pass 1 as flag to
+	  valid_array_reference and array_variable_part to pass along to
+	  skipsubscript, so we don't try to skip over quoted strings in the
+	  subscript
+	- bind_int_variable: pass flags along to assign_array_element
+
+variables.h
+	- bind_int_variable: updated extern declaration with new flags arg
+
+expr.c
+	- expr_bind_variable: if the assoc_expand_once option is enabled, and
+	  the flags to evalexp indicate that we have already run the expression
+	  through word expansion, pass ASS_NOEXPAND as flag to bind_int_variable
+
+arrayfunc.c
+	- assign_array_element: if flags includes ASS_NOEXPAND, pass 1 as flag
+	  to array_variable_name to pass along to skipsubscript
+	- assign_array_element: if flags includes ASS_NOEXPAND, don't run an
+	  associative array subscript through word expansion, just use as-is
+
+subst.c
+	- param_expand: call evalexp with EXP_EXPANDED flag for arithmetic
+	  substitution because the string has already been expanded with
+	  expand_arith_string
+
+				   12/15
+				   -----
+builtins/read.def
+	- read_builtin: use value of assoc_expand_once for valid_array_reference
+	  as with other uses
+	- bind_read_variable: if assoc_expand_once is set, pass ASS_NOEXPAND
+	  to assign_array_element
+
+general.c
+	- assignment: instead of checking whether flags == 0 to allow a `[',
+	  explicitly check for (flags&1) to disallow it.  This leaves the door
+	  open for additional flag values
+
+builtins/printf.def
+	- printf_builtin: use value of assoc_expand_once for
+	  valid_array_reference as with other uses
+	- bind_printf_variable: if assoc_expand_once is set, pass ASS_NOEXPAND
+	  to assign_array_element
+
+				   12/16
+				   -----
+builtins/history.def
+	- change history -d option to handle negative arguments; negative
+	  arguments offset from the end of the history list (last_position + 1
+	  so history -d -1 deletes the history -d command that just got
+	  added).  Original patch from Piotr Grzybowski <narsil.pl@gmail.com>
+
+doc/bash.1,lib/readline/doc/hsuser.texi
+	- documented new behavior of negative offsets for `history -d'
+
+				   12/17
+				   -----
+lib/readline/history.c
+	- remove_history: use memmove to move the history list around instead
+	  of a loop that copies pointers one at a time, similar to add_history

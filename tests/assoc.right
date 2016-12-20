@@ -195,3 +195,23 @@ declare -A assoc=([0]="assoc" )
 assoc
 declare -A assoc=([two]="twoless" [three]="three" [one]="onemore" )
 declare -Ar assoc=([two]="twoless" [three]="three" [one]="onemore" )
+declare -A b=(["\""]="" [")"]="" ["\\"]="" ["]"]="" ["\`"]="" )
+declare -A b=(["]"]="" ["\`"]="" )
+declare -A dict=(["\""]="1" ["'"]="3" ["\\"]="4" ["\`"]="2" )
+./assoc9.sub: line 23: unset: `dict["]': not a valid identifier
+./assoc9.sub: line 23: unset: `dict[']': not a valid identifier
+./assoc9.sub: line 23: unset: `dict[\]': not a valid identifier
+./assoc9.sub: line 23: unset: `dict[`]': not a valid identifier
+declare -A dict=(["\""]="1" ["'"]="3" ["\\"]="4" ["\`"]="2" )
+declare -A dict=(["\""]="1" ["'"]="3" ["\\"]="4" ["\`"]="2" )
+declare -A dict=()
+4
+4
+a[$b]= 5
+declare -A a=(["80's"]="Depeche Mode" )
+./assoc9.sub: line 71: read: `a[80's]': not a valid identifier
+declare -A a
+declare -A a=(["80's"]="Depeche Mode" )
+./assoc9.sub: line 83: printf: `a[80's]': not a valid identifier
+declare -A a
+declare -A a=(["80's"]="Depeche Mode" )
