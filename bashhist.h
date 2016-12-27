@@ -59,6 +59,7 @@ extern void bash_history_disable __P((void));
 extern void bash_history_enable __P((void));
 extern void bash_clear_history __P((void));
 extern int bash_delete_histent __P((int));
+extern int bash_delete_history_range __P((int, int));
 extern int bash_delete_last_history __P((void));
 extern void load_history __P((void));
 extern void save_history __P((void));

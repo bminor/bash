@@ -356,6 +356,21 @@ bash_delete_histent (i)
 }
 
 int
+bash_delete_history_range (first, last)
+     int first, last;
+{
+  register int i;
+  HIST_ENTRY **discard_list;
+
+  discard_list = remove_history_range (first, last);
+  for (i = 0; discard_list && discard_list[i]; i++)
+    free_history_entry (discard_list[i]);
+  history_lines_this_session -= i;
+
+  return 1;
+}
+
+int
 bash_delete_last_history ()
 {
   register int i;

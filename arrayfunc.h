@@ -63,7 +63,7 @@ extern int skipsubscript __P((const char *, int, int));
 extern void print_array_assignment __P((SHELL_VAR *, int));
 extern void print_assoc_assignment __P((SHELL_VAR *, int));
 
-extern arrayind_t array_expand_index __P((SHELL_VAR *, char *, int));
+extern arrayind_t array_expand_index __P((SHELL_VAR *, char *, int, int));
 extern int valid_array_reference __P((const char *, int));
 extern char *array_value __P((const char *, int, int, int *, arrayind_t *));
 extern char *get_array_value __P((const char *, int, int *, arrayind_t *));

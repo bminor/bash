@@ -47,6 +47,9 @@ extern int array_needs_making;
    once, when performing variable expansion. */
 int assoc_expand_once = 0;
 
+/* Ditto for indexed array subscripts */
+int array_expand_once = 1;
+
 static SHELL_VAR *bind_array_var_internal __P((SHELL_VAR *, arrayind_t, char *, char *, int));
 static SHELL_VAR *assign_array_element_internal __P((SHELL_VAR *, char *, char *, char *, int, char *, int));
 
@@ -337,7 +340,7 @@ assign_array_element_internal (entry, name, vname, sub, sublen, value, flags)
     }
   else
     {
-      ind = array_expand_index (entry, sub, sublen);
+      ind = array_expand_index (entry, sub, sublen, 0);
       /* negative subscripts to indexed arrays count back from end */
       if (entry && ind < 0)
 	ind = (array_p (entry) ? array_max_index (array_cell (entry)) : 0) + 1 + ind;
@@ -591,7 +594,7 @@ assign_compound_array_list (var, nlist, flags)
 
 	  if (array_p (var))
 	    {
-	      ind = array_expand_index (var, w + 1, len);
+	      ind = array_expand_index (var, w + 1, len, 0);
 	      /* negative subscripts to indexed arrays count back from end */
 	      if (ind < 0)
 		ind = array_max_index (array_cell (var)) + 1 + ind;
@@ -813,7 +816,7 @@ unbind_array_element (var, sub, flags)
     }
   else if (array_p (var))
     {
-      ind = array_expand_index (var, sub, len+1);
+      ind = array_expand_index (var, sub, len+1, 0);
       /* negative subscripts to indexed arrays count back from end */
       if (ind < 0)
 	ind = array_max_index (array_cell (var)) + 1 + ind;
@@ -829,7 +832,7 @@ unbind_array_element (var, sub, flags)
   else	/* array_p (var) == 0 && assoc_p (var) == 0 */
     {
       akey = this_command_name;
-      ind = array_expand_index (var, sub, len+1);
+      ind = array_expand_index (var, sub, len+1, 0);
       this_command_name = akey;
       if (ind == 0)
 	{
@@ -922,10 +925,11 @@ valid_array_reference (name, flags)
 
 /* Expand the array index beginning at S and extending LEN characters. */
 arrayind_t
-array_expand_index (var, s, len)
+array_expand_index (var, s, len, flags)
      SHELL_VAR *var;
      char *s;
      int len;
+     int flags;
 {
   char *exp, *t, *savecmd;
   int expok;
@@ -1117,7 +1121,7 @@ array_value_internal (s, quoted, flags, rtype, indp)
 	{
 	  if ((flags & AV_USEIND) == 0 || indp == 0)
 	    {
-	      ind = array_expand_index (var, t, len);
+	      ind = array_expand_index (var, t, len, 0);
 	      if (ind < 0)
 		{
 		  /* negative subscripts to indexed arrays count back from end */

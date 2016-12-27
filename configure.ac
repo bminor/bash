@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.4, version 4.087])dnl
+AC_REVISION([for Bash 4.4, version 4.088])dnl
 
 define(bashvers, 4.4)
 define(relstatus, maint)
@@ -1105,7 +1105,8 @@ solaris2*)	LOCAL_CFLAGS=-DSOLARIS ;;
 lynxos*)	LOCAL_CFLAGS=-DRECYCLES_PIDS ;;
 linux*)		LOCAL_LDFLAGS=-rdynamic		 # allow dynamic loading
 		case "`uname -r`" in
-		2.[[456789]]*|[[34]]*)	AC_DEFINE(PGRP_PIPE) ;;
+		1.*|2.[[0123]]*)	: ;;
+		*)	AC_DEFINE(PGRP_PIPE) ;;
 		esac ;;
 *qnx6*)		LOCAL_CFLAGS="-Dqnx -Dqnx6" LOCAL_LIBS="-lncurses" ;;
 *qnx*)		LOCAL_CFLAGS="-Dqnx -F -3s" LOCAL_LDFLAGS="-3s" LOCAL_LIBS="-lunix -lncurses" ;;

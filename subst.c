@@ -6464,7 +6464,7 @@ array_length_reference (s)
     }
   else
     {
-      ind = array_expand_index (var, t, len);
+      ind = array_expand_index (var, t, len, 0);
       /* negative subscripts to indexed arrays count back from end */
       if (var && array_p (var) && ind < 0)
 	ind = array_max_index (array_cell (var)) + 1 + ind;

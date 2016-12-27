@@ -504,7 +504,7 @@ b_fill_buffer (bp)
     nr = zread (bp->b_fd, bp->b_buffer, bp->b_size);
   if (nr <= 0)
     {
-      bp->b_used = 0;
+      bp->b_used = bp->b_inputp = 0;
       bp->b_buffer[0] = 0;
       if (nr == 0)
 	bp->b_flag |= B_EOF;

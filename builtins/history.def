@@ -106,7 +106,7 @@ history_builtin (list)
      WORD_LIST *list;
 {
   int flags, opt, result, old_history_lines, obase, ind;
-  char *filename, *delete_arg;
+  char *filename, *delete_arg, *range;
   intmax_t delete_offset;
 
   flags = 0;
@@ -179,6 +179,46 @@ history_builtin (list)
       return (sh_chkwrite (EXECUTION_SUCCESS));
     }
 #endif
+#if defined (BASH_50)	/* bash 5.0 */
+  else if ((flags & DFLAG) && (range = strchr (delete_arg[0] == '-' ? delete_arg + 1 : delete_arg, '-')))
+    {
+      intmax_t delete_start, delete_end;
+      *range++ = '\0';
+      if (legal_number (delete_arg, &delete_start) == 0 || legal_number (range, &delete_end) == 0)
+	{
+	  sh_erange (delete_arg, _("history position"));
+	  return (EXECUTION_FAILURE);
+	}
+      if (delete_arg[0] == '-' && delete_start < 0)
+        {
+	  /* the_history[history_length == 0x0, so this is correct */
+          delete_start += history_length;
+	  if (delete_start < history_base)
+	    {
+	      sh_erange (delete_arg, _("history position"));
+	      return (EXECUTION_FAILURE);
+	    }
+        }
+      /* numbers as displayed by display_history are offset by history_base */
+      else if (delete_start > 0)
+	delete_start -= history_base;
+      if (range[0] == '-' && delete_end < 0)
+        {
+          delete_end += history_length;
+	  if (delete_end < history_base)
+	    {
+	      sh_erange (delete_arg, _("history position"));
+	      return (EXECUTION_FAILURE);
+	    }
+        }
+      else if (delete_end > 0)
+	delete_end -= history_base;
+      result = bash_delete_history_range (delete_start, delete_end);
+      if (where_history () > history_length)
+	history_set_pos (history_length);
+      return (result ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
+    }
+#endif /* BASH_50 */
   else if (flags & DFLAG)
     {
       if (legal_number (delete_arg, &delete_offset) == 0)
@@ -189,13 +229,16 @@ history_builtin (list)
       /* check for negative offsets, count back from end of list */
       if (delete_arg[0] == '-' && delete_offset < 0)
 	{
+	  /* since the_history[history_length] == 0x0, this calculation means
+	     that history -d -1 will delete the last history entry, which at
+	     this point is the history -d -1 we just added. */
 	  ind = history_length + delete_offset;
 	  if (ind < history_base)
 	    {
 	      sh_erange (delete_arg, _("history position"));
 	      return (EXECUTION_FAILURE);
 	    }
-	  opt = ind + 1;	/* so history -d -1 deletes last history entry */
+	  opt = ind + history_base;	/* compensate for opt - history_base below */
 	}
       else if ((delete_offset < history_base) || (delete_offset > (history_base + history_length)))
 	{
@@ -205,6 +248,8 @@ history_builtin (list)
       else
 	opt = delete_offset;
 
+      /* Positive arguments from numbers as displayed by display_history need
+	 to be offset by history_base */
       result = bash_delete_histent (opt - history_base);
       /* Since remove_history changes history_length, this can happen if
 	 we delete the last history entry. */

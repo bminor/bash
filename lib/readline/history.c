@@ -525,6 +525,43 @@ remove_history (which)
   return (return_value);
 }
 
+HIST_ENTRY **
+remove_history_range (first, last)
+     int first, last;
+{
+  HIST_ENTRY **return_value;
+  register int i;
+  int nentries;
+  HIST_ENTRY **start, **end;
+
+  if (the_history == 0 || history_length == 0)
+    return ((HIST_ENTRY **)NULL);
+  if (first < 0 || first >= history_length || last < 0 || last >= history_length)
+    return ((HIST_ENTRY **)NULL);
+  if (first > last)
+    return (HIST_ENTRY **)NULL;
+
+  nentries = last - first + 1;
+  return_value = (HIST_ENTRY **)malloc ((nentries + 1) * sizeof (HIST_ENTRY *));
+  if (return_value == 0)
+    return return_value;
+
+  /* Return all the deleted entries in a list */
+  for (i = first ; i <= last; i++)
+    return_value[i - first] = the_history[i];
+  return_value[i - first] = (HIST_ENTRY *)NULL;
+
+  /* Copy the rest of the entries, moving down NENTRIES slots.  Copy includes
+     trailing NULL.  */
+  start = the_history + first;
+  end = the_history + last + 1;
+  memmove (start, end, (history_length - last) * sizeof (HIST_ENTRY *));
+
+  history_length -= nentries;
+
+  return (return_value);
+}
+
 /* Stifle the history list, remembering only MAX number of lines. */
 void
 stifle_history (max)
@@ -586,4 +623,5 @@ clear_history ()
     }
 
   history_offset = history_length = 0;
+  history_base = 1;		/* reset history base to default */
 }

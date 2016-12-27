@@ -12819,3 +12819,37 @@ doc/bash.1,lib/readline/doc/hsuser.texi
 lib/readline/history.c
 	- remove_history: use memmove to move the history list around instead
 	  of a loop that copies pointers one at a time, similar to add_history
+
+				   12/19
+				   -----
+configure.ac
+	- linux: make sure PGRP_PIPE is defined unconditionally for all kernel
+	  versions greater than 2.3.*
+
+lib/readline/history.c
+	- clear_history: when clearing the history, reset history_base to 1
+	  (its default)
+	- remove_history_range: new function, removes a set of history entries
+	  and returns them all for deallocation
+
+lib/readline/history.h
+	- remove_history_range: extern declaration
+
+				   12/20
+				   -----
+execute_cmd.c
+	- eval_arith_for_expr: pass EXP_EXPANDED to evalexp, since we run the
+	  expression through expand_words_no_vars
+
+				   12/21
+				   -----
+input.c
+	- b_fill_buffer: when read returns EOF or error, and we reset the
+	  buffer and pointers, reset the input pointer to 0.  Fixes issue
+	  reported by Stephane Chazelas <stephane.chazelas@gmail.com>
+
+				   12/22
+				   -----
+arrayfunc.[ch],subst.c
+	- array_expand_index: added new FLAGS argument, reserved for future use,
+	  changed callers

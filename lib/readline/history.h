@@ -86,10 +86,12 @@ extern void add_history PARAMS((const char *));
    STRING. */
 extern void add_history_time PARAMS((const char *));
 
-/* A reasonably useless function, only here for completeness.  WHICH
-   is the magic number that tells us which element to delete.  The
-   elements are numbered from 0. */
+/* Remove an entry from the history list.  WHICH is the magic number that
+   tells us which element to delete.  The elements are numbered from 0. */
 extern HIST_ENTRY *remove_history PARAMS((int));
+
+/* Remove a set of entries from the history list: FIRST to LAST, inclusive */
+extern HIST_ENTRY **remove_history_range PARAMS((int, int));
 
 /* Allocate a history entry consisting of STRING and TIMESTAMP and return
    a pointer to it. */

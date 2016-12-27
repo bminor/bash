@@ -2760,6 +2760,52 @@ make_variable_value (var, value, flags)
   return retval;
 }
 
+/* If we can optimize appending to string variables, say so */
+static int
+can_optimize_assignment (entry, value, aflags)
+     SHELL_VAR *entry;
+     char *value;
+     int aflags;
+{
+  if ((aflags & ASS_APPEND) == 0)
+    return 0;
+#if defined (ARRAY_VARS)
+  if (array_p (entry) || assoc_p (entry))
+    return 0;
+#endif
+  if (integer_p (entry) || uppercase_p (entry) || lowercase_p (entry) || capcase_p (entry))
+    return 0;
+  if (readonly_p (entry) || noassign_p (entry))
+    return 0;
+  return 1;
+}
+
+/* right now we optimize appends to string variables */
+static SHELL_VAR *
+optimized_assignment (entry, value, aflags)
+     SHELL_VAR *entry;
+     char *value;
+     int aflags;
+{
+  size_t len, vlen;
+  char *v, *new;
+
+  v = value_cell (entry);
+  len = STRLEN (v);
+  vlen = STRLEN (value);
+
+  new = (char *)xrealloc (v, len + vlen + 8);	/* for now */
+  if (vlen == 1)
+    {
+      new[len] = *value;
+      new[len+1] = '\0';
+    }
+  else
+    strcpy (new + len, value);
+  var_setvalue (entry, new);
+  return entry;
+}
+
 /* Bind a variable NAME to VALUE in the HASH_TABLE TABLE, which may be the
    temporary environment (but usually is not). */
 static SHELL_VAR *
@@ -2863,6 +2909,22 @@ assign_value:
       else
 #endif
 
+      /* If we can optimize the assignment, do so and return.  Right now, we
+	 optimize appends to string variables. */
+      if (can_optimize_assignment (entry, value, aflags))
+	{
+	  INVALIDATE_EXPORTSTR (entry);
+	  optimized_assignment (entry, value, aflags);
+
+	  if (mark_modified_vars)
+	    VSETATTR (entry, att_exported);
+
+	  if (exported_p (entry))
+	    array_needs_making = 1;
+
+	  return (entry);
+	}
+        
       newval = make_variable_value (entry, value, aflags);	/* XXX */
 
       /* Invalidate any cached export string */
