@@ -188,23 +188,8 @@ int allow_null_glob_expansion;
 int fail_glob_expansion;
 
 /* Extern functions and variables from different files. */
-extern int last_command_exit_value, last_command_exit_signal;
-extern int subshell_environment, running_in_background;
-extern int subshell_level, parse_and_execute_level, sourcelevel;
-extern int eof_encountered, line_number;
-extern int return_catch_flag, return_catch_value;
-extern pid_t dollar_dollar_pid;
-extern int posixly_correct;
-extern char *this_command_name;
 extern struct fd_bitmap *current_fds_to_close;
 extern int wordexp_only;
-extern int expanding_redir;
-extern int tempenv_assign_error;
-extern int builtin_ignoring_errexit;
-
-#if defined (ARRAY_VARS)
-extern int assoc_expand_once;
-#endif
 
 #if defined (JOB_CONTROL) && defined (PROCESS_SUBSTITUTION)
 extern PROCESS *last_procsub_child;
@@ -6782,7 +6767,7 @@ parameter_brace_expand_indir (name, var_is_special, quoted, quoted_dollar_atp, c
   /* Array references to unset variables are also an error */
   if (t == 0 && valid_array_reference (name, 0))
     {
-      v = array_variable_part (name, 0, (int *)0, (int *)0);
+      v = array_variable_part (name, 0, (char **)0, (int *)0);
       if (v == 0)
 	{
 	  report_error (_("%s: invalid indirect expansion"), name);

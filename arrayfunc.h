@@ -29,6 +29,9 @@
    once, when performing variable expansion. */
 extern int assoc_expand_once;
 
+/* The analog for indexed array subscripts */
+extern int array_expand_once;
+
 /* Flags for array_value_internal and callers array_value/get_array_value */
 #define AV_ALLOWALL	0x001
 #define AV_QUOTED	0x002

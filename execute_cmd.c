@@ -66,6 +66,7 @@ extern int errno;
 #include "memalloc.h"
 #include "shell.h"
 #include <y.tab.h>	/* use <...> so we pick it up from the build directory */
+#include "parser.h"
 #include "flags.h"
 #include "builtins.h"
 #include "hashlib.h"
@@ -105,27 +106,12 @@ extern int errno;
 #  include <mbstr.h>		/* mbschr */
 #endif
 
-extern int dollar_dollar_pid;
-extern int posixly_correct;
-extern int expand_aliases;
-extern int autocd;
-extern int breaking, continuing, loop_level;
-extern int parse_and_execute_level, running_trap, sourcelevel;
-extern int command_string_index, line_number;
-extern int dot_found_in_search;
-extern int already_making_children;
-extern int tempenv_assign_error;
-extern char *the_printed_command, *shell_name;
-extern pid_t last_command_subst_pid;
-extern sh_builtin_func_t *last_shell_builtin, *this_shell_builtin;
-extern char **subshell_argv, **subshell_envp;
-extern int subshell_argc;
+extern int command_string_index;
+extern char *the_printed_command;
 extern time_t shell_start_time;
 #if 0
 extern char *glob_argv_flags;
 #endif
-
-extern int job_control;	/* XXX */
 
 extern int close __P((int));
 
@@ -606,7 +592,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
       /* Fork a subshell, turn off the subshell bit, turn off job
 	 control and call execute_command () on the command again. */
-      line_number_for_err_trap = line_number;	/* XXX - save value? */
+      line_number_for_err_trap = line_number = command->value.Subshell->line;	/* XXX - save value? */
       tcmd = make_command_string (command);
       paren_pid = make_child (p = savestring (tcmd), asynchronous);
 
@@ -1420,9 +1406,8 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
      int pipe_in, pipe_out;
      struct fd_bitmap *fds_to_close;
 {
-  int user_subshell, return_code, function_value, should_redir_stdin, invert;
-  int ois, user_coproc;
-  int result;
+  volatile int user_subshell, user_coproc, invert;
+  int return_code, function_value, should_redir_stdin, ois, result;
   volatile COMMAND *tcom;
 
   USE_VAR(user_subshell);
@@ -2137,7 +2122,9 @@ coproc_pidchk (pid, status)
 #if MULTIPLE_COPROCS
   struct cpelement *cpe;
 
-  cpe = cpl_delete (pid);
+  /* We're not disposing the coproc because this is executed in a signal
+     handler context */
+  cpe = cpl_search (pid);
   cp = cpe ? cpe->coproc : 0;
 #else
   cp = getcoprocbypid (pid);
@@ -2283,7 +2270,7 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
   int rpipe[2], wpipe[2], estat, invert;
   pid_t coproc_pid;
   Coproc *cp;
-  char *tcmd, *p;
+  char *tcmd, *p, *name;
   sigset_t set, oset;
 
   /* XXX -- can be removed after changes to handle multiple coprocs */
@@ -2292,6 +2279,21 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
     internal_warning (_("execute_coproc: coproc [%d:%s] still exists"), sh_coproc.c_pid, sh_coproc.c_name);
   coproc_init (&sh_coproc);
 #endif
+
+  /* XXX - expand coproc name without splitting -- bash-5.0 */
+  /* could make this dependent on a shopt option */
+  name = expand_string_unsplit_to_string (command->value.Coproc->name, 0);
+  /* Optional check -- bash-5.0. */
+  if (legal_identifier (name) == 0)
+    {
+      internal_error (_("`%s': not a valid identifier"), name);
+      return (invert ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
+    }
+  else
+    {
+      free (command->value.Coproc->name);
+      command->value.Coproc->name = name;
+    }
 
   invert = (command->flags & CMD_INVERT_RETURN) != 0;
   command_string_index = 0;
@@ -2325,7 +2327,7 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
   close (rpipe[1]);
   close (wpipe[0]);
 
-  /* XXX - possibly run Coproc->name through word expansion? */
+  /* XXX - run Coproc->name through word expansion above -- bash-5.0 */
   cp = coproc_alloc (command->value.Coproc->name, coproc_pid);
   cp->c_rfd = rpipe[0];
   cp->c_wfd = wpipe[1];
@@ -2340,7 +2342,7 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
   UNBLOCK_SIGNAL (oset);
 
 #if 0
-  itrace ("execute_coproc: [%d] %s", coproc_pid, the_printed_command);
+  itrace ("execute_coproc (%s): [%d] %s", command->value.Coproc->name, coproc_pid, the_printed_command);
 #endif
 
   close_pipes (pipe_in, pipe_out);
@@ -3600,7 +3602,7 @@ execute_arith_command (arith_command)
 
   save_line_number = line_number;
   this_command_name = "((";	/* )) */
-  line_number = arith_command->line;
+  line_number_for_err_trap = line_number = arith_command->line;
   /* If we're in a function, update the line number information. */
   if (variable_context && interactive_shell)
     {
@@ -3801,7 +3803,7 @@ execute_cond_command (cond_command)
   save_line_number = line_number;
 
   this_command_name = "[[";
-  line_number = cond_command->line;
+  line_number_for_err_trap = line_number = cond_command->line;
   /* If we're in a function, update the line number information. */
   if (variable_context && interactive_shell)
     {

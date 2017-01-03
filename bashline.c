@@ -46,6 +46,7 @@
 
 #include "shell.h"
 #include "input.h"
+#include "parser.h"
 #include "builtins.h"
 #include "bashhist.h"
 #include "bashline.h"
@@ -200,19 +201,8 @@ static char *prog_complete_return __P((const char *, int));
 static char **prog_complete_matches;
 #endif
 
-/* Variables used here but defined in other files. */
-#if defined (BANG_HISTORY)
-extern int hist_verify;
-#endif
-
-extern int current_command_line_count, saved_command_line_count;
-extern int last_command_exit_value;
-extern int array_needs_making;
-extern int posixly_correct, no_symbolic_links;
-extern int sigalrm_seen;
-extern char *current_prompt_string, *ps1_prompt;
+extern int no_symbolic_links;
 extern STRING_INT_ALIST word_token_alist[];
-extern sh_builtin_func_t *last_shell_builtin, *this_shell_builtin;
 
 /* SPECIFIC_COMPLETION_FUNCTIONS specifies that we have individual
    completion functions which indicate what type of completion should be

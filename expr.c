@@ -82,6 +82,9 @@
 #include "bashintl.h"
 
 #include "shell.h"
+#include "arrayfunc.h"
+#include "execute_cmd.h"
+#include "flags.h"
 #include "subst.h"
 #include "typemax.h"		/* INTMAX_MAX, INTMAX_MIN */
 
@@ -221,11 +224,7 @@ static EXPR_CONTEXT **expr_stack;
 static int expr_depth;		   /* Location in the stack. */
 static int expr_stack_size;	   /* Number of slots already allocated. */
 
-extern char *this_command_name;
-extern int unbound_vars_is_error, last_command_exit_value;
-
 #if defined (ARRAY_VARS)
-extern int assoc_expand_once;
 extern const char * const bash_badsub_errmsg;
 #endif
 
@@ -320,7 +319,11 @@ expr_bind_variable (lhs, rhs)
   SHELL_VAR *v;
   int aflags;
 
+#if defined (ARRAY_VARS)
   aflags = (assoc_expand_once && already_expanded) ? ASS_NOEXPAND : 0;
+#else
+  aflags = 0;
+#endif
   v = bind_int_variable (lhs, rhs, aflags);
   if (v && (readonly_p (v) || noassign_p (v)))
     sh_longjmp (evalbuf, 1);	/* variable assignment error */
@@ -1113,7 +1116,10 @@ expr_streval (tok, e, lvalue)
   if (noeval)
     return (0);
 
+#if defined (ARRAY_VARS)
   tflag = assoc_expand_once && already_expanded;	/* for a start */
+#endif
+
   /* [[[[[ */
 #if defined (ARRAY_VARS)
   aflag = (tflag) ? AV_NOEXPAND : 0;

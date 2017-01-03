@@ -35,6 +35,7 @@
 #include "bashintl.h"
 
 #include "shell.h"
+#include "parser.h"
 #include "flags.h"
 #include "trap.h"
 
@@ -46,16 +47,6 @@
 #if defined (HISTORY)
 #  include "bashhist.h"
 #endif
-
-extern int EOF_reached;
-extern int indirection_level;
-extern int posixly_correct;
-extern int subshell_environment, running_under_emacs;
-extern int last_command_exit_value, stdin_redir;
-extern int need_here_doc;
-extern int current_command_number, current_command_line_count, line_number;
-extern int expand_aliases;
-extern char *ps0_prompt;
 
 #if defined (HAVE_POSIX_SIGNALS)
 extern sigset_t top_level_mask;

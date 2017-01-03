@@ -75,6 +75,7 @@ $END
 #include "../bashintl.h"
 
 #include "../shell.h"
+#include "../parser.h"
 #include "../bashhist.h"
 #include <readline/history.h>
 #include "bashgetopt.h"
@@ -83,9 +84,6 @@ $END
 #if !defined (errno)
 extern int errno;
 #endif
-
-extern int current_command_line_count;
-extern int force_append_history;	/* shopt -s histappend */
 
 static char *histtime __P((HIST_ENTRY *, const char *));
 static int display_history __P((WORD_LIST *));

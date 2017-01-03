@@ -61,15 +61,14 @@ $END
 
 #include "../shell.h"
 #include "../builtins.h"
+#include "../execute_cmd.h"
 #include "../flags.h"
 #include "../findcmd.h"
 #include "../hashcmd.h"
 #include "common.h"
 #include "bashgetopt.h"
 
-extern int posixly_correct;
 extern int dot_found_in_search;
-extern char *this_command_name;
 
 static int add_hashed_command __P((char *, int));
 static int print_hash_info __P((BUCKET_CONTENTS *));

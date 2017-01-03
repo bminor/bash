@@ -49,6 +49,7 @@
 #include "trap.h"
 
 #include "builtins/builtext.h"	/* for wait_builtin */
+#include "builtins/common.h"
 
 #define DEFAULT_CHILD_MAX 32
 
@@ -73,17 +74,9 @@
 extern int errno;
 #endif /* !errno */
 
-extern int interactive, interactive_shell, login_shell;
-extern int subshell_environment;
-extern int last_command_exit_value, last_command_exit_signal;
-extern int interrupt_immediately;
-extern sh_builtin_func_t *this_shell_builtin;
 #if defined (HAVE_POSIX_SIGNALS)
 extern sigset_t top_level_mask;
 #endif
-extern procenv_t wait_intr_buf;
-extern int wait_intr_flag;
-extern int wait_signal_received;
 
 extern void set_original_signal __P((int, SigHandler *));
 

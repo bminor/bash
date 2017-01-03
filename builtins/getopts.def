@@ -77,6 +77,7 @@ $END
 #include "../bashintl.h"
 
 #include "../shell.h"
+#include "../execute_cmd.h"
 #include "common.h"
 #include "bashgetopt.h"
 #include "getopt.h"
@@ -84,8 +85,6 @@ $END
 #define G_EOF		-1
 #define G_INVALID_OPT	-2
 #define G_ARG_MISSING	-3
-
-extern char *this_command_name;
 
 static int getopts_unbind_variable __P((char *));
 static int getopts_bind_variable __P((char *, char *));

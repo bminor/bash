@@ -88,9 +88,6 @@ $END
 #include "builtext.h"
 #include "bashgetopt.h"
 
-extern int array_needs_making;
-extern int posixly_correct;
-
 static int declare_internal __P((register WORD_LIST *, int));
 
 /* Declare or change variable attributes. */
@@ -303,7 +300,11 @@ declare_internal (list, local_var)
 
       name = savestring (list->word->word);
       wflags = list->word->flags;
+#if defined (ARRAY_VARS)
       assoc_noexpand = assoc_expand_once && (wflags & W_ASSIGNMENT);
+#else
+      assoc_noexpand = 0;
+#endif
       offset = assignment (name, assoc_noexpand ? 2 : 0);
       aflags = 0;
       created_var = 0;

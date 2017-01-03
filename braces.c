@@ -61,7 +61,9 @@ extern int errno;
 
 extern int asprintf __P((char **, const char *, ...)) __attribute__((__format__ (printf, 2, 3)));
 
+#if defined (NOTDEF)
 extern int last_command_exit_value;
+#endif
 
 /* Basic idea:
 

@@ -75,6 +75,7 @@ $END
 #include "../shell.h"
 #include "../builtins.h"
 #include "../flags.h"
+#include "../parser.h"
 #include "../bashhist.h"
 #include "maxpath.h"
 #include <readline/history.h>
@@ -84,11 +85,6 @@ $END
 #if !defined (errno)
 extern int errno;
 #endif /* !errno */
-
-extern int current_command_line_count;
-extern int literal_history;
-extern int posixly_correct;
-extern int subshell_environment, interactive_shell;
 
 extern int unlink __P((const char *));
 

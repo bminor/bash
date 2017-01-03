@@ -69,6 +69,7 @@ $END
 #include "../bashintl.h"
 
 #include "../shell.h"
+#include "../execute_cmd.h"
 #include "../flags.h"
 #include "../findcmd.h"
 #include "common.h"
@@ -78,10 +79,6 @@ $END
 #if !defined (errno)
 extern int errno;
 #endif /* !errno */
-
-extern int posixly_correct;
-extern int last_command_exit_value;
-extern int executing_command_builtin;
 
 static void maybe_pop_dollar_vars __P((void));
 

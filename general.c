@@ -39,8 +39,13 @@
 #include "bashintl.h"
 
 #include "shell.h"
+#include "parser.h"
+#include "flags.h"
+#include "findcmd.h"
 #include "test.h"
 #include "trap.h"
+
+#include "builtins/common.h"
 
 #if defined (HAVE_MBSTR_H) && defined (HAVE_MBSCHR)
 #  include <mbstr.h>		/* mbschr */
@@ -51,14 +56,6 @@
 #if !defined (errno)
 extern int errno;
 #endif /* !errno */
-
-extern int expand_aliases;
-extern int interactive_comments;
-extern int check_hashed_filenames;
-extern int source_uses_path;
-extern int source_searches_cwd;
-extern int posixly_correct;
-extern int inherit_errexit;
 
 static char *bash_special_tilde_expansions __P((char *));
 static int unquoted_tilde_word __P((const char *));

@@ -12853,3 +12853,106 @@ input.c
 arrayfunc.[ch],subst.c
 	- array_expand_index: added new FLAGS argument, reserved for future use,
 	  changed callers
+
+
+				   12/24
+				   -----
+variables.c
+	- can_optimize_assignment,optimized_assignment: see if we can detect
+	  whether or not we're trying to append a string to a string variable,
+	  and optimize that using realloc/strcpy.  Based on a log-ago
+	  suggestion from Aharon Robbins <arnold@skeeve.com>
+
+				   12/27
+				   -----
+builtins/help.def
+	- help_builtin: don't pass return value from ngettext() directly to
+	  printf
+
+				   12/28
+				   -----
+sig.c
+	- set_signal_handler: set SA_RESTART for SIGWINCH, so window size
+	  changes don't interrupt open/read/write.  Suggested by
+	  Andriy Prystupa <andriy.prystupa@globallogic.com> back in 10/2016
+
+				   12/30
+				   -----
+execute_cmd.c
+	- coproc_pidchk: if MULTIPLE_COPROCS, call cpl_search to find coproc
+	  associated with pid, don't remove it from the list with cpl_delete.
+	  Just mark as dead and wait for coproc_reap/cpl_reap to take care
+	  of disposing it
+	- execute_coproc: NEW FEATURE: run the coproc name through word
+	  expansion before creating the coproc; this allows unique coprocs
+	  to be created in loops. Originally requested way back in 2012 by
+	  Erik Brandsberg <ebrandsberg@juniper.net>
+
+command.h
+	- subshell_com: now has a line number member: line
+
+make_cmd.c
+	- make_subshell_command: assign current line number (line number of the
+	  ending right paren) to `line' member
+
+copy_cmd.c
+	- copy_subshell_command: copy the `line' member
+
+execute_command.c
+	- execute_command_internal: when executing a user subshell (`(command)'),
+	  set the line number and line number for the ERR trap from the line
+	  number saved in the subshell command struct.  Fix from
+	  Eduardo A. Bustamante López <dualbus@gmail.com>
+	- execute_arith_command: set line number for ERR trap from line number
+	  saved in the arith command struct.  Fix from
+	  Eduardo A. Bustamante López <dualbus@gmail.com>
+	- execute_cond_command: set line number for ERR trap from line number
+	  saved in the cond command struct.  Fix from
+	  Eduardo A. Bustamante López <dualbus@gmail.com>
+
+variables.c
+	- bind_variable_internal: move can_optimize_assignment call to the
+	  right place
+
+				   12/31
+				   -----
+variables.c
+	- find_variable_nameref: treat a circular variable reference as
+	  referring to a variable of that name in the global scope (for now),
+	  if one exists.  PROVISIONAL change: inspired by suggestion back in
+	  6/2016 by Grisha Levit <grishalevit@gmail.com>
+
+				 1/2/2017
+				 --------
+{expr,general,hashcmd}.c
+	- include flags.h for flag values
+
+make_cmd.c
+	- include shell.h instead of the files it includes
+
+flags.h
+	- new extern declarations for want_pending_command, read_from_stdin
+
+subst.h
+	- add extern declaration for expanding_redir, assigning_in_environment
+
+trap.h
+	- add extern declaration for running_trap
+
+execute_cmd.h
+	- added extern declarations for variables declared in execute_cmd.c,
+	  changed files that declare lots of extern variables
+
+shell.h
+	- added extern declarations for variables declared in shell.c,
+	  changed files that declare lots of extern variables 
+
+parser.h
+	- added extern declarations for variables declared in parse.y,
+	  changed files that declare lots of extern variables 
+
+[lots of changes to reduce the number of extern declarations in C and DEF files]
+
+parse.y
+	- xparse_dolparen: need ALIAS or DPAREN_ARITHMETIC to be defined to
+	  use STRING_SAVER

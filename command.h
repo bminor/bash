@@ -353,6 +353,7 @@ typedef struct group_com {
 
 typedef struct subshell_com {
   int flags;
+  int line;
   COMMAND *command;
 } SUBSHELL_COM;
 

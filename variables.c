@@ -47,6 +47,7 @@
 #define NEED_XTRACE_SET_DECL
 
 #include "shell.h"
+#include "parser.h"
 #include "flags.h"
 #include "execute_cmd.h"
 #include "findcmd.h"
@@ -96,30 +97,7 @@
 extern char **environ;
 
 /* Variables used here and defined in other files. */
-extern int posixly_correct;
-extern int line_number, line_number_base;
-extern int subshell_environment, indirection_level, subshell_level;
-extern int build_version, patch_level;
-extern int expanding_redir;
-extern int last_command_exit_value;
-extern char *dist_version, *release_status;
-extern char *shell_name;
-extern char *primary_prompt, *secondary_prompt;
-extern char *current_host_name;
-extern sh_builtin_func_t *this_shell_builtin;
-extern SHELL_VAR *this_shell_function;
-extern char *the_printed_command_except_trap;
-extern char *this_command_name;
-extern char *command_execution_string;
 extern time_t shell_start_time;
-extern int assigning_in_environment;
-extern int executing_builtin;
-extern int funcnest_max;
-
-#if defined (READLINE)
-extern int no_line_editing;
-extern int perform_hostname_completion;
-#endif
 
 /* The list of shell variables that the user has created at the global
    scope, or that came from the environment. */
@@ -2006,6 +1984,13 @@ find_variable_nameref (v)
       if (v == orig || v == oldv)
 	{
 	  internal_warning (_("%s: circular name reference"), orig->name);
+#if 1
+	  /* XXX - provisional change - bash-5.0 - circular refs go to
+	     global scope for resolution, without namerefs. */
+	  if (variable_context && v->context)
+	    return (find_global_variable_noref (v->name));
+	  else
+#endif
 	  return ((SHELL_VAR *)0);
 	}
     }
@@ -2903,12 +2888,6 @@ assign_value:
       /* Variables which are bound are visible. */
       VUNSETATTR (entry, att_invisible);
 
-#if defined (ARRAY_VARS)
-      if (assoc_p (entry) || array_p (entry))
-        newval = make_array_variable_value (entry, 0, "0", value, aflags);
-      else
-#endif
-
       /* If we can optimize the assignment, do so and return.  Right now, we
 	 optimize appends to string variables. */
       if (can_optimize_assignment (entry, value, aflags))
@@ -2924,7 +2903,12 @@ assign_value:
 
 	  return (entry);
 	}
-        
+
+#if defined (ARRAY_VARS)
+      if (assoc_p (entry) || array_p (entry))
+        newval = make_array_variable_value (entry, 0, "0", value, aflags);
+      else
+#endif
       newval = make_variable_value (entry, value, aflags);	/* XXX */
 
       /* Invalidate any cached export string */
@@ -5067,11 +5051,6 @@ pop_args ()
  *************************************************/
 
 /* Extern declarations for variables this code has to manage. */
-extern int eof_encountered, eof_encountered_limit, ignoreeof;
-
-#if defined (READLINE)
-extern int hostname_list_initialized;
-#endif
 
 /* An alist of name.function for each special variable.  Most of the
    functions don't do much, and in fact, this would be faster with a

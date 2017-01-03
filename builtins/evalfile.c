@@ -1,6 +1,6 @@
 /* evalfile.c - read and evaluate commands from a file or file descriptor */
 
-/* Copyright (C) 1996-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -36,6 +36,7 @@
 #include "../bashintl.h"
 
 #include "../shell.h"
+#include "../parser.h"
 #include "../jobs.h"
 #include "../builtins.h"
 #include "../flags.h"
@@ -67,13 +68,6 @@ extern int errno;
 #define FEVAL_CHECKBINARY	0x040
 #define FEVAL_REGFILE		0x080
 #define FEVAL_NOPUSHARGS	0x100
-
-extern int posixly_correct;
-extern int indirection_level, subshell_environment;
-extern int return_catch_flag, return_catch_value;
-extern int last_command_exit_value;
-extern int executing_command_builtin;
-extern int current_token;		/* parse.y */
 
 /* How many `levels' of sourced files we have. */
 int sourcelevel = 0;

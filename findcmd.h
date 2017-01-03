@@ -39,4 +39,9 @@ extern char *search_for_command __P((const char *, int));
 extern char *user_command_matches __P((const char *, int, int));
 extern void setup_exec_ignore __P((char *));
 
+extern int dot_found_in_search;
+
+/* variables managed via shopt */
+extern int check_hashed_filenames;
+
 #endif /* _FINDCMD_H_ */

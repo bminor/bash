@@ -26,6 +26,23 @@ add_X_echo ref
 echo outside "$ref"
 unset ref
 
+# same test, but assigning nameref variable circular reference directly
+xxx_func()
+{
+	typeset -n xxx=xxx
+	xxx=foo
+	declare -p xxx
+	echo $FUNCNAME: inside: xxx = $xxx
+}
+
+xxx=7
+echo before: $xxx
+xxx_func
+echo after: $xxx
+
+unset xxx
+unset -f xxx_func
+
 typeset -n ref=ref
 
 typeset -n ref=re ref+=f
@@ -85,4 +102,3 @@ v=(0 1)
 declare -n n=v[1]
 unset n
 declare -p n v
-

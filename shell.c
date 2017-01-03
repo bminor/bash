@@ -51,6 +51,7 @@
 #define NEED_SH_SETLINEBUF_DECL		/* used in externs.h */
 
 #include "shell.h"
+#include "parser.h"
 #include "flags.h"
 #include "trap.h"
 #include "mailcheck.h"
@@ -60,6 +61,7 @@
 #if defined (JOB_CONTROL)
 #include "jobs.h"
 #else
+extern int running_in_background;
 extern int initialize_job_control __P((int));
 extern int get_tty_state __P((void));
 #endif /* JOB_CONTROL */
@@ -101,18 +103,7 @@ extern int errno;
 extern char **environ;	/* used if no third argument to main() */
 #endif
 
-extern char *dist_version, *release_status;
-extern int patch_level, build_version;
-extern int shell_level;
-extern int subshell_environment;
-extern int running_in_background;
-extern int last_command_exit_value;
-extern int line_number;
-extern int expand_aliases;
-extern int array_needs_making;
 extern int gnu_error_format;
-extern char *primary_prompt, *secondary_prompt;
-extern char *this_command_name;
 
 /* Non-zero means that this shell has already been run; i.e. you should
    call shell_reinitialize () if you need to start afresh. */

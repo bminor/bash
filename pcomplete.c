@@ -84,10 +84,8 @@ typedef SHELL_VAR **SVFUNC ();
 extern char *strpbrk __P((char *, char *));
 #endif
 
-extern int array_needs_making;
 extern STRING_INT_ALIST word_token_alist[];
 extern char *signal_names[];
-extern sh_builtin_func_t *last_shell_builtin, *this_shell_builtin;
 
 #if defined (DEBUG)
 #if defined (PREFER_STDARG)

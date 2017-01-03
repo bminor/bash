@@ -45,6 +45,7 @@
 #define NEED_STRFTIME_DECL	/* used in externs.h */
 
 #include "shell.h"
+#include "execute_cmd.h"
 #include "typemax.h"		/* SIZE_MAX if needed */
 #include "trap.h"
 #include "flags.h"
@@ -119,20 +120,16 @@ extern int eof_encountered;
 extern int no_line_editing, running_under_emacs;
 extern int current_command_number;
 extern int sourcelevel, parse_and_execute_level;
-extern int posixly_correct;
-extern int last_command_exit_value;
 extern pid_t last_command_subst_pid;
-extern char *shell_name, *current_host_name;
 extern char *dist_version;
 extern int patch_level;
 extern int dump_translatable_strings, dump_po_strings;
 extern sh_builtin_func_t *last_shell_builtin, *this_shell_builtin;
-extern int here_doc_first_line;
-#if defined (BUFFERED_INPUT)
-extern int bash_input_fd_changed;
+
+#if !defined (errno)
+extern int errno;
 #endif
 
-extern int errno;
 /* **************************************************************** */
 /*								    */
 /*		    "Forward" declarations			    */
@@ -4246,7 +4243,9 @@ xparse_dolparen (base, string, indp, flags)
   sh_input_line_state_t ls;
   int orig_ind, nc, sflags, orig_eof_token;
   char *ret, *s, *ep, *ostring;
+#if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
   STRING_SAVER *saved_pushed_strings;
+#endif
 
   /*yydebug = 1;*/
   orig_ind = *indp;
@@ -4259,8 +4258,10 @@ xparse_dolparen (base, string, indp, flags)
   save_parser_state (&ps);
   save_input_line_state (&ls);
   orig_eof_token = shell_eof_token;
+#if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
   saved_pushed_strings = pushed_string_list;	/* separate parsing context */
   pushed_string_list = (STRING_SAVER *)NULL;
+#endif
 
   /*(*/
   parser_state |= PST_CMDSUBST|PST_EOFTOKEN;	/* allow instant ')' */ /*(*/
@@ -4274,7 +4275,9 @@ xparse_dolparen (base, string, indp, flags)
   /* reset_parser clears shell_input_line and associated variables */
   restore_input_line_state (&ls);
 
+#if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
   pushed_string_list = saved_pushed_strings;
+#endif
 
   token_to_read = 0;
 

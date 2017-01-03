@@ -91,12 +91,38 @@ extern char **shell_environment;
 extern WORD_LIST *rest_of_args;
 
 /* Generalized global variables. */
+extern char *command_execution_string;
+
 extern int debugging_mode;
 extern int executing, login_shell;
 extern int interactive, interactive_shell;
 extern int startup_state;
+extern int reading_shell_script;
+extern int shell_initialized;
 extern int subshell_environment;
+extern int current_command_number;
+extern int indirection_level;
 extern int shell_compatibility_level;
+extern int running_under_emacs;
+
+extern int posixly_correct;
+extern int no_line_editing;
+
+extern char *shell_name;
+extern char *current_host_name;
+
+extern int subshell_argc;
+extern char **subshell_argv;
+extern char **subshell_envp;
+
+/* variables managed using shopt */
+extern int hup_on_exit;
+extern int check_jobs_at_exit;
+extern int autocd;
+
+/* from version.c */
+extern int build_version, patch_level;
+extern char *dist_version, *release_status;
 
 extern int locale_mb_cur_max;
 extern int locale_utf8locale;

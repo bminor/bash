@@ -68,6 +68,7 @@
 #include "bashansi.h"
 #include "bashintl.h"
 #include "shell.h"
+#include "parser.h"
 #include "jobs.h"
 #include "execute_cmd.h"
 #include "flags.h"
@@ -162,19 +163,7 @@ extern int killpg __P((pid_t, int));
 typedef int sh_job_map_func_t __P((JOB *, int, int, int));
 
 /* Variables used here but defined in other files. */
-extern int subshell_environment, line_number;
-extern int posixly_correct, shell_level;
-extern int last_command_exit_value, last_command_exit_signal;
-extern int loop_level, breaking;
-extern int executing_list;
-extern int sourcelevel;
-extern int running_trap;
-extern sh_builtin_func_t *this_shell_builtin;
-extern char *shell_name, *this_command_name;
 extern sigset_t top_level_mask;
-extern procenv_t wait_intr_buf;
-extern int wait_intr_flag;
-extern int wait_signal_received;
 extern WORD_LIST *subst_assign_varlist;
 
 extern SigHandler **original_signals;

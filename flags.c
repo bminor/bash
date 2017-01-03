@@ -25,6 +25,7 @@
 #endif
 
 #include "shell.h"
+#include "execute_cmd.h"
 #include "flags.h"
 
 #if defined (BANG_HISTORY)
@@ -34,16 +35,6 @@
 #if defined (JOB_CONTROL)
 extern int set_job_control __P((int));
 #endif
-
-#if defined (RESTRICTED_SHELL)
-extern char *shell_name;
-#endif
-
-extern int shell_initialized;
-extern int builtin_ignoring_errexit;
-
-/* -c, -s invocation options -- not really flags, but they show up in $- */
-extern int want_pending_command, read_from_stdin;
 
 /* **************************************************************** */
 /*								    */

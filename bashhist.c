@@ -44,6 +44,7 @@
 
 #include "shell.h"
 #include "flags.h"
+#include "parser.h"
 #include "input.h"
 #include "parser.h"	/* for the struct dstack stuff. */
 #include "pathexp.h"	/* for the struct ignorevar stuff */
@@ -186,12 +187,6 @@ int hist_verify;
 
 /* Non-zero means to not save function definitions in the history list. */
 int dont_save_function_defs;
-
-/* Variables declared in other files used here. */
-extern int current_command_line_count;
-
-extern struct dstack dstack;
-extern int parser_state;
 
 #if defined (BANG_HISTORY)
 static int bash_history_inhibit_expansion __P((char *, int));
@@ -776,8 +771,6 @@ check_add_history (line, force)
 
 #if defined (SYSLOG_HISTORY)
 #define SYSLOG_MAXLEN 600
-
-extern char *shell_name;
 
 #ifndef OPENLOG_OPTS
 #define OPENLOG_OPTS 0

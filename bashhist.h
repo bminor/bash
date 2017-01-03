@@ -46,11 +46,19 @@ extern int history_expansion;
 extern int history_control;
 extern int command_oriented_history;
 extern int current_command_first_line_saved;
+extern int current_command_first_line_comment;
 extern int hist_last_line_added;
 extern int hist_last_line_pushed;
 
+extern int dont_save_function_defs;
+
+#  if defined (READLINE)
+extern int hist_verify;
+#  endif
+
 #  if defined (BANG_HISTORY)
 extern int history_expansion_inhibited;
+extern int double_quotes_inhibit_history_expansion;
 #  endif /* BANG_HISTORY */
 
 extern void bash_initialize_history __P((void));

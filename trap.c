@@ -38,7 +38,9 @@
 #include "trap.h"
 
 #include "shell.h"
+#include "execute_cmd.h"
 #include "flags.h"
+#include "parser.h"
 #include "input.h"	/* for save_token_state, restore_token_state */
 #include "jobs.h"
 #include "signames.h"
@@ -85,20 +87,10 @@ static void reset_or_restore_signal_handlers (sh_resetsig_func_t *);
 static void trap_if_untrapped (int, char *);
 
 /* Variables used here but defined in other files. */
-extern int last_command_exit_value;
-extern int line_number;
-
-extern int sigalrm_seen;
 extern procenv_t alrmbuf;
 
 extern volatile int from_return_trap;
 
-extern char *this_command_name;
-extern sh_builtin_func_t *this_shell_builtin;
-extern procenv_t wait_intr_buf;
-extern int wait_intr_flag;
-extern int return_catch_flag, return_catch_value;
-extern int subshell_level;
 extern WORD_LIST *subst_assign_varlist;
 
 /* The list of things to do originally, before we started trapping. */

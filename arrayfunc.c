@@ -30,6 +30,7 @@
 #include "bashintl.h"
 
 #include "shell.h"
+#include "execute_cmd.h"
 #include "pathexp.h"
 
 #include "shmbutil.h"
@@ -38,10 +39,6 @@
 #endif
 
 #include "builtins/common.h"
-
-extern char *this_command_name;
-extern int last_command_exit_value;
-extern int array_needs_making;
 
 /* This variable means to not expand associative array subscripts more than
    once, when performing variable expansion. */
@@ -938,12 +935,19 @@ array_expand_index (var, s, len, flags)
   exp = (char *)xmalloc (len);
   strncpy (exp, s, len - 1);
   exp[len - 1] = '\0';
+#if 0	/* XXX - not yet -- maybe bash-5.0 */
+  if ((flags & AV_NOEXPAND) == 0)
+    t = expand_arith_string (exp, Q_DOUBLE_QUOTES|Q_ARITH|Q_ARRAYSUB);	/* XXX - Q_ARRAYSUB for future use */
+  else
+    t = exp;
+#endif
   t = expand_arith_string (exp, Q_DOUBLE_QUOTES|Q_ARITH|Q_ARRAYSUB);	/* XXX - Q_ARRAYSUB for future use */
   savecmd = this_command_name;
   this_command_name = (char *)NULL;
   val = evalexp (t, 0, &expok);
   this_command_name = savecmd;
-  free (t);
+  if (t != exp)
+    free (t);
   free (exp);
   if (expok == 0)
     {
@@ -1121,7 +1125,7 @@ array_value_internal (s, quoted, flags, rtype, indp)
 	{
 	  if ((flags & AV_USEIND) == 0 || indp == 0)
 	    {
-	      ind = array_expand_index (var, t, len, 0);
+	      ind = array_expand_index (var, t, len, flags);
 	      if (ind < 0)
 		{
 		  /* negative subscripts to indexed arrays count back from end */

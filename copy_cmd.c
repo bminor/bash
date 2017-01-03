@@ -221,6 +221,7 @@ copy_subshell_command (com)
   new_subshell = (SUBSHELL_COM *)xmalloc (sizeof (SUBSHELL_COM));
   new_subshell->command = copy_command (com->command);
   new_subshell->flags = com->flags;
+  new_subshell->line = com->line;
   return (new_subshell);
 }
 

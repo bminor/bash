@@ -87,3 +87,16 @@ shopt -s assoc_expand_once
 
 printf -v a[$b] "%s" "Depeche Mode"
 typeset -p a
+
+unset a
+
+declare -A a
+x='$(date >&2)'
+a[$x]=5
+
+shopt -s assoc_expand_once
+echo $((1+a[$x]))
+echo $((1+a[\$x]))
+echo "1+${a[$x]}"
+
+declare -p a

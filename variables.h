@@ -236,6 +236,14 @@ extern int variable_context;
 extern char *dollar_vars[];
 extern char **export_env;
 
+extern int tempenv_assign_error;
+extern int array_needs_making;
+extern int shell_level;
+
+/* XXX */
+extern WORD_LIST *rest_of_args;
+extern pid_t dollar_dollar_pid;
+
 extern void initialize_shell_variables __P((char **, int));
 extern SHELL_VAR *set_if_not __P((char *, char *));
 

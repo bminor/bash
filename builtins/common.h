@@ -212,4 +212,29 @@ extern int force_execute_file __P((const char *, int));
 extern int source_file __P((const char *, int));
 extern int fc_execute_file __P((const char *));
 
+/* variables from common.c */
+extern sh_builtin_func_t *this_shell_builtin;
+extern sh_builtin_func_t *last_shell_builtin;
+
+/* variables from evalfile.c */
+extern int sourcelevel;
+
+/* variables from evalstring.c */
+extern int parse_and_execute_level;
+
+/* variables from break.def/continue.def */
+extern int breaking;
+extern int continuing;
+extern int loop_level;
+
+/* variables from read.def */
+extern int sigalrm_seen;
+
+/* variables from source.def */
+extern int source_searches_cwd;
+extern int source_uses_path;
+
+/* variables from wait.def */
+extern int wait_intr_flag;
+
 #endif /* !__COMMON_H */

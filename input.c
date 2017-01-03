@@ -36,12 +36,9 @@
 #include "bashansi.h"
 #include "bashintl.h"
 
-#include "command.h"
-#include "general.h"
+#include "shell.h"
 #include "input.h"
-#include "error.h"
 #include "externs.h"
-#include "quit.h"
 #include "trap.h"
 
 #if !defined (errno)
@@ -152,8 +149,6 @@ ungetc_with_restart (c, stream)
 #  undef min
 #endif
 #define min(a, b)	((a) > (b) ? (b) : (a))
-
-extern int interactive_shell;
 
 int bash_input_fd_changed;
 

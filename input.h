@@ -1,6 +1,6 @@
 /* input.h -- Structures and unions used for reading input. */
 
-/* Copyright (C) 1993-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -67,6 +67,7 @@ extern BUFFERED_STREAM **buffers;
 #endif
 
 extern int default_buffered_input;
+extern int bash_input_fd_changed;
 
 #endif /* BUFFERED_INPUT */
 

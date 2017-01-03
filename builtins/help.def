@@ -64,6 +64,7 @@ $END
 
 #include "../shell.h"
 #include "../builtins.h"
+#include "../execute_cmd.h"
 #include "../pathexp.h"
 #include "common.h"
 #include "bashgetopt.h"
@@ -77,9 +78,6 @@ extern int errno;
 
 extern const char * const bash_copyright;
 extern const char * const bash_license;
-
-extern char *this_command_name;
-extern struct builtin *current_builtin;
 
 static void show_builtin_command_help __P((void));
 static int open_helpfile __P((char *));
@@ -132,7 +130,7 @@ help_builtin (list)
 
   if (glob_pattern_p (list->word->word))
     {
-      printf (ngettext ("Shell commands matching keyword `", "Shell commands matching keywords `", (list->next ? 2 : 1)));
+      printf ("%s", ngettext ("Shell commands matching keyword `", "Shell commands matching keywords `", (list->next ? 2 : 1)));
       print_word_list (list, ", ");
       printf ("'\n\n");
     }

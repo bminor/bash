@@ -35,6 +35,7 @@
 #include "bashintl.h"
 
 #include "shell.h"
+#include "execute_cmd.h"
 #if defined (JOB_CONTROL)
 #include "jobs.h"
 #endif /* JOB_CONTROL */
@@ -53,22 +54,6 @@
 #if defined (HISTORY)
 #  include "bashhist.h"
 #endif
-
-extern int last_command_exit_value;
-extern int last_command_exit_signal;
-extern int return_catch_flag;
-extern int running_trap;
-extern int loop_level, continuing, breaking, funcnest;
-extern int executing_list;
-extern int comsub_ignore_return;
-extern int parse_and_execute_level, shell_initialized;
-#if defined (HISTORY)
-extern int history_lines_this_session;
-#endif
-extern int no_line_editing;
-extern int wait_signal_received;
-extern int wait_intr_flag;
-extern sh_builtin_func_t *this_shell_builtin;
 
 extern void initialize_siglist ();
 
@@ -736,6 +721,13 @@ set_signal_handler (sig, handler)
      if we take the time to reap children */
 #if defined (SIGCHLD)
   if (sig == SIGCHLD)
+    act.sa_flags |= SA_RESTART;		/* XXX */
+#endif
+  /* XXX - bash-5.0 */
+  /* Let's see if we can keep SIGWINCH from interrupting interruptible system
+     calls, like open(2)/read(2)/write(2) */
+#if defined (SIGWINCH)
+  if (sig == SIGWINCH)
     act.sa_flags |= SA_RESTART;		/* XXX */
 #endif
   /* If we're installing a SIGTERM handler for interactive shells, we want

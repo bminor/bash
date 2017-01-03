@@ -24,6 +24,16 @@
 #include "stdc.h"
 
 extern int bash_readline_initialized;
+extern int hostname_list_initialized;
+
+/* these are controlled via shopt */
+extern int perform_hostname_completion;
+extern int no_empty_command_completion;
+extern int force_fignore;
+extern int dircomplete_spelling;
+extern int dircomplete_expand;
+extern int dircomplete_expand_relpath;
+extern int complete_fullquote;
 
 extern void posix_readline_initialize __P((int));
 extern void reset_completer_word_break_chars __P((void));

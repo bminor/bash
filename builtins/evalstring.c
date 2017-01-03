@@ -1,6 +1,6 @@
 /* evalstring.c - evaluate a string as one or more shell commands. */
 
-/* Copyright (C) 1996-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -39,6 +39,7 @@
 #include "../jobs.h"
 #include "../builtins.h"
 #include "../flags.h"
+#include "../parser.h"
 #include "../input.h"
 #include "../execute_cmd.h"
 #include "../redir.h"
@@ -59,19 +60,6 @@ extern int errno;
 #endif
 
 #define IS_BUILTIN(s)	(builtin_address_internal(s, 0) != (struct builtin *)NULL)
-
-extern int indirection_level, subshell_environment;
-extern int line_number, line_number_for_err_trap;
-extern int current_token, shell_eof_token;
-extern int last_command_exit_value;
-extern int running_trap;
-extern int loop_level;
-extern int executing_list;
-extern int comsub_ignore_return;
-extern int posixly_correct;
-extern int return_catch_flag, return_catch_value;
-extern sh_builtin_func_t *this_shell_builtin;
-extern char *the_printed_command_except_trap;
 
 int parse_and_execute_level = 0;
 
