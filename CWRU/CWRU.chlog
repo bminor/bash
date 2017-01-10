@@ -12956,3 +12956,20 @@ parser.h
 parse.y
 	- xparse_dolparen: need ALIAS or DPAREN_ARITHMETIC to be defined to
 	  use STRING_SAVER
+
+				    1/3
+				    ---
+sig.c
+	- termsig_handler: don't call end_job_control if subshell_environment
+	  indicates that we're in a command or process substitution.
+	  Provisional fix for bug reported by Russell King <rmk@armlinux.org.uk>
+
+jobs.c
+	- end_job_control: only attempt to give the terminal back to
+	  original_pgrp if job_control != 0; don't test interactive_shell
+
+execute_cmd.c
+	- execute_disk_command: call QUIT after search_for_command, since
+	  the only time QUIT gets called is when the path is actually
+	  searched.  It doesn't happen for an absolute pathname.  Fix for
+	  bug reported by Russell King <rmk@armlinux.org.uk>

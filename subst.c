@@ -5882,7 +5882,9 @@ process_substitute (string, open_for_read_in_child)
       close (parent_pipe_fd);
       close (child_pipe_fd);
 #endif /* HAVE_DEV_FD */
+#if defined (JOB_CONTROL)
       restore_pipeline (1);
+#endif
       return ((char *)NULL);
     }
 

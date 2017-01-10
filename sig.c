@@ -570,7 +570,8 @@ termsig_handler (sig)
 #if defined (JOB_CONTROL)
   if (sig == SIGHUP && (interactive || (subshell_environment & (SUBSHELL_COMSUB|SUBSHELL_PROCSUB))))
     hangup_all_jobs ();
-  end_job_control ();
+  if ((subshell_environment & (SUBSHELL_COMSUB|SUBSHELL_PROCSUB)) == 0)
+    end_job_control ();
 #endif /* JOB_CONTROL */
 
 #if defined (PROCESS_SUBSTITUTION)

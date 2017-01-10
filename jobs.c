@@ -4707,7 +4707,7 @@ without_job_control ()
 void
 end_job_control ()
 {
-  if (interactive_shell || job_control)		/* XXX - should it be just job_control? */
+  if (job_control)
     {
       terminate_stopped_jobs ();
 

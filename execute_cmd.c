@@ -5212,6 +5212,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 #endif /* RESTRICTED_SHELL */
 
   command = search_for_command (pathname, CMDSRCH_HASH|(stdpath ? CMDSRCH_STDPATH : 0));
+  QUIT;
 
   if (command)
     {
