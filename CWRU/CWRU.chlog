@@ -12973,3 +12973,27 @@ execute_cmd.c
 	  the only time QUIT gets called is when the path is actually
 	  searched.  It doesn't happen for an absolute pathname.  Fix for
 	  bug reported by Russell King <rmk@armlinux.org.uk>
+
+				   1/16
+				   ----
+lib/glob/glob.c
+	- extglob_skipname,wextglob_skipname: if we don't find a reason to
+	  not skip the name in any subpattern (r returns 0 for any subpattern),
+	  return 1 because we should skip the name
+	- extglob_skipname,wextglob_skipname: if we don't find a reason to
+	  not skip the name in any subpattern, but the first part of the extglob
+	  pattern is a wildcard (`*(pat)'), check the rest of the pattern, if
+	  any, to decide whether or not to skip the name. Fixes bug reported
+	  by Grisha Levit <grishalevit@gmail.com>
+
+lib/glob/glob_loop.c
+	- CHAR -> GCHAR (unsigned char); change uses of CHAR to GCHAR
+	- extglob_skipname: move here from gmisc.c, generalize for regular
+	  and wide-char versions
+
+lib/glob/glob.c
+	- wchkname -> wskipname
+	- wskipname: now takes a third `flags' argument, like the other variants
+	  of skipname
+
+

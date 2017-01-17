@@ -213,25 +213,6 @@ bad_bracket:
 }
 #endif
 
-int
-extglob_pattern_p (pat)
-     char *pat;
-{
-  switch (pat[0])
-    {
-    case '*':
-    case '+':
-    case '!':
-    case '@':
-    case '?':
-      return (pat[1] == LPAREN);
-    default:
-      return 0;
-    }
-    
-  return 0;
-}
-
 #undef FOLD
 #define FOLD(c) ((flags & FNM_CASEFOLD) \
 	? TOLOWER ((unsigned char)c) \

@@ -16,16 +16,16 @@
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-static int INTERNAL_GLOB_PATTERN_P __P((const CHAR *));
+static int INTERNAL_GLOB_PATTERN_P __P((const GCHAR *));
 
 /* Return nonzero if PATTERN has any special globbing chars in it.
    Compiled twice, once each for single-byte and multibyte characters. */
 static int
 INTERNAL_GLOB_PATTERN_P (pattern)
-     const CHAR *pattern;
+     const GCHAR *pattern;
 {
-  register const CHAR *p;
-  register CHAR c;
+  register const GCHAR *p;
+  register GCHAR c;
   int bopen;
 
   p = pattern;
@@ -61,7 +61,30 @@ INTERNAL_GLOB_PATTERN_P (pattern)
   return 0;
 }
 
+#if EXTENDED_GLOB
+int
+EXTGLOB_PATTERN_P (pat)
+     const CHAR *pat;
+{
+  switch (pat[0])
+    {
+    case L('*'):
+    case L('+'):
+    case L('!'):
+    case L('@'):
+    case L('?'):
+      return (pat[1] == L('('));	/* ) */
+    default:
+      return 0;
+    }
+    
+  return 0;
+}
+#endif
+
+#undef EXTGLOB_PATTERN_P
 #undef INTERNAL_GLOB_PATTERN_P
 #undef L
 #undef INT
 #undef CHAR
+#undef GCHAR

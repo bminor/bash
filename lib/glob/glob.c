@@ -126,19 +126,23 @@ extern wchar_t *glob_patscan_wc __P((wchar_t *, wchar_t *, int));
 extern char *glob_dirscan __P((char *, int));
 
 /* Compile `glob_loop.c' for single-byte characters. */
-#define CHAR	unsigned char
+#define GCHAR	unsigned char
+#define CHAR	char
 #define INT	int
 #define L(CS)	CS
 #define INTERNAL_GLOB_PATTERN_P internal_glob_pattern_p
+#define EXTGLOB_PATTERN_P extglob_pattern_p
 #include "glob_loop.c"
 
 /* Compile `glob_loop.c' again for multibyte characters. */
 #if HANDLE_MULTIBYTE
 
+#define GCHAR	wchar_t
 #define CHAR	wchar_t
 #define INT	wint_t
 #define L(CS)	L##CS
 #define INTERNAL_GLOB_PATTERN_P internal_glob_wpattern_p
+#define EXTGLOB_PATTERN_P wextglob_pattern_p
 #include "glob_loop.c"
 
 #endif /* HANDLE_MULTIBYTE */
@@ -182,9 +186,10 @@ extglob_skipname (pat, dname, flags)
      int flags;
 {
   char *pp, *pe, *t, *se;
-  int n, r, negate;
+  int n, r, negate, wild;
 
   negate = *pat == '!';
+  wild = *pat == '*' || *pat == '?';
   pp = pat + 2;
   se = pp + strlen (pp) - 1;		/* end of string */
   pe = glob_patscan (pp, se, 0);	/* end of extglob pattern (( */
@@ -203,14 +208,19 @@ extglob_skipname (pat, dname, flags)
       r = skipname (pp, dname, flags);	/*(*/
 #endif
       *pe = ')';
+      if (wild && pe[1])	/* if we can match zero instances, check further */
+        return (skipname (pe+1, dname, flags));
       return r;
     }
 
   /* check every subpattern */
   while (t = glob_patscan (pp, pe, '|'))
     {
-      n = t[-1];
-      t[-1] = '\0';
+      n = t[-1];	/* ( */
+      if (extglob_pattern_p (pp) && n == ')')
+	t[-1] = n;	/* no-op for now */
+      else
+	t[-1] = '\0';
 #if defined (HANDLE_MULTIBYTE)
       r = mbskipname (pp, dname, flags);
 #else
@@ -222,12 +232,14 @@ extglob_skipname (pat, dname, flags)
       pp = t;
     }	/*(*/
 
-  /* glob_patscan might find end of pattern */
+  /* glob_patscan might find end of string */
   if (pp == se)
     return r;
 
   /* but if it doesn't then we didn't match a leading dot */
-  return 0;
+  if (wild && *pe)	/* if we can match zero instances, check further */
+    return (skipname (pe, dname, flags));
+  return 1;
 }
 #endif
 
@@ -263,8 +275,9 @@ skipname (pat, dname, flags)
 #if HANDLE_MULTIBYTE
 
 static int
-wchkname (pat_wc, dn_wc)
+wskipname (pat_wc, dn_wc, flags)
      wchar_t *pat_wc, *dn_wc;
+     int flags;
 {
   /* If a leading dot need not be explicitly matched, and the
      pattern doesn't start with a `.', don't match `.' or `..' */
@@ -291,9 +304,10 @@ wextglob_skipname (pat, dname, flags)
 {
 #if EXTENDED_GLOB
   wchar_t *pp, *pe, *t, n, *se;
-  int r, negate;
+  int r, negate, wild;
 
   negate = *pat == L'!';
+  wild = *pat == L'*' || *pat == L'?';
   pp = pat + 2;
   se = pp + wcslen (pp) - 1;	/*(*/
   pe = glob_patscan_wc (pp, se, 0);
@@ -301,17 +315,22 @@ wextglob_skipname (pat, dname, flags)
   if (pe == se && *pe == ')' && (t = wcschr (pp, L'|')) == 0)
     {
       *pe = L'\0';
-      r = wchkname (pp, dname); /*(*/
+      r = wskipname (pp, dname, flags); /*(*/
       *pe = L')';
+      if (wild && pe[1] != L'\0')
+        return (wskipname (pe+1, dname, flags));
       return r;
     }
 
   /* check every subpattern */
   while (t = glob_patscan_wc (pp, pe, '|'))
     {
-      n = t[-1];
-      t[-1] = L'\0';
-      r = wchkname (pp, dname);
+      n = t[-1];	/* ( */
+      if (wextglob_pattern_p (pp) && n == L')')
+	t[-1] = n;	/* no-op for now */
+      else
+	t[-1] = L'\0';
+      r = wskipname (pp, dname, flags);
       t[-1] = n;
       if (r == 0)
 	return 0;
@@ -322,9 +341,11 @@ wextglob_skipname (pat, dname, flags)
     return r;
 
   /* but if it doesn't then we didn't match a leading dot */
-  return 0;
+  if (wild && *pe != L'\0')
+    return (wskipname (pe, dname, flags));
+  return 1;
 #else
-  return (wchkname (pat, dname));
+  return (wskipname (pat, dname, flags));
 #endif
 }
 
@@ -355,7 +376,7 @@ mbskipname (pat, dname, flags)
 
   ret = 0;
   if (pat_n != (size_t)-1 && dn_n !=(size_t)-1)
-    ret = ext ? wextglob_skipname (pat_wc, dn_wc, flags) : wchkname (pat_wc, dn_wc);
+    ret = ext ? wextglob_skipname (pat_wc, dn_wc, flags) : wskipname (pat_wc, dn_wc, flags);
   else
     ret = skipname (pat, dname, flags);
 
