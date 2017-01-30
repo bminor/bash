@@ -76,6 +76,10 @@ extern int errno;
 #  define O_NDELAY O_NONBLOCK	/* Posix style */
 #endif
 
+#if defined (HAVE_PSELECT)
+extern sigset_t _rl_orig_sigset;
+#endif
+
 /* Non-null means it is a pointer to a function to run while waiting for
    character input. */
 rl_hook_func_t *rl_event_hook = (rl_hook_func_t *)NULL;
@@ -512,10 +516,15 @@ rl_getc (stream)
 #endif
       result = 0;
 #if defined (HAVE_PSELECT)
-      sigemptyset (&empty_set);
       FD_ZERO (&readfds);
       FD_SET (fileno (stream), &readfds);
+#  if defined (HANDLE_SIGNALS)
+      result = pselect (fileno (stream) + 1, &readfds, NULL, NULL, NULL, &_rl_orig_sigset);
+#  else
+      sigemptyset (&empty_set);
+      sigprocmask (SIG_BLOCK, (sigset_t *)NULL, &empty_set);
       result = pselect (fileno (stream) + 1, &readfds, NULL, NULL, NULL, &empty_set);
+#  endif /* HANDLE_SIGNALS */
 #endif
       if (result >= 0)
 	result = read (fileno (stream), &c, sizeof (unsigned char));

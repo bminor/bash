@@ -1455,6 +1455,7 @@ yy_readline_get ()
 	  old_sigint = (SigHandler *)set_signal_handler (SIGINT, sigint_sighandler);
 	}
 
+      sh_unset_nodelay_mode (fileno (rl_instream));	/* just in case */
       current_readline_line = readline (current_readline_prompt ?
       					  current_readline_prompt : "");
 
@@ -1617,19 +1618,9 @@ yy_stream_get ()
   result = EOF;
   if (bash_input.location.file)
     {
-#if 0
-      if (interactive)
-	interrupt_immediately++;
-#endif
-
       /* XXX - don't need terminate_immediately; getc_with_restart checks
 	 for terminating signals itself if read returns < 0 */
       result = getc_with_restart (bash_input.location.file);
-
-#if 0
-      if (interactive)
-	interrupt_immediately--;
-#endif
     }
   return (result);
 }
@@ -2308,14 +2299,16 @@ shell_getc (remove_quoted_newline)
 #if 0
 	      internal_warning ("shell_getc: ignored null byte in input");
 #endif
-if (bash_input.type == st_string)
-  {
-    if (i == 0)
-      shell_input_line_terminator = EOF;
-    shell_input_line[i] = '\0';
-    c = EOF;
-    break;
-  }
+	      /* If we get EOS while parsing a string, treat it as EOF so we
+		 don't just keep looping. Happens very rarely */
+	      if (bash_input.type == st_string)
+		{
+		  if (i == 0)
+		    shell_input_line_terminator = EOF;
+		  shell_input_line[i] = '\0';
+		  c = EOF;
+		  break;
+		}
 	      continue;
 	    }
 
@@ -3140,7 +3133,9 @@ read_token (command)
      we are eval'ing a string that is an incomplete command), return EOF */
   if (character == '\0' && bash_input.type == st_string && expanding_alias() == 0)
     {
+#if defined (DEBUG)
 itrace("shell_getc: bash_input.location.string = `%s'", bash_input.location.string);
+#endif
       EOF_Reached = 1;
       return (yacc_EOF);
     }

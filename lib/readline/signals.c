@@ -113,6 +113,10 @@ int _rl_susp_char = 0;
 static int signals_set_flag;
 static int sigwinch_set_flag;
 
+#if defined (HAVE_POSIX_SIGNALS)
+sigset_t _rl_orig_sigset;
+#endif /* !HAVE_POSIX_SIGNALS */
+
 /* **************************************************************** */
 /*					        		    */
 /*			   Signal Handling                          */
@@ -442,8 +446,8 @@ rl_set_signals ()
   if (rl_catch_signals && signals_set_flag == 0)
     {
 #if defined (HAVE_POSIX_SIGNALS)
-      sigemptyset (&oset);
-      sigprocmask (SIG_BLOCK, &bset, &oset);
+      sigemptyset (&_rl_orig_sigset);
+      sigprocmask (SIG_BLOCK, &bset, &_rl_orig_sigset);
 #endif
 
       rl_maybe_set_sighandler (SIGINT, rl_signal_handler, &old_int);
@@ -484,7 +488,14 @@ rl_set_signals ()
       signals_set_flag = 1;
 
 #if defined (HAVE_POSIX_SIGNALS)
-      sigprocmask (SIG_SETMASK, &oset, (sigset_t *)NULL);
+      sigprocmask (SIG_SETMASK, &_rl_orig_sigset, (sigset_t *)NULL);
+#endif
+    }
+  else if (rl_catch_signals == 0)
+    {
+#if defined (HAVE_POSIX_SIGNALS)
+      sigemptyset (&_rl_orig_sigset);
+      sigprocmask (SIG_BLOCK, (sigset_t *)NULL, &_rl_orig_sigset);
 #endif
     }
 
@@ -506,8 +517,6 @@ rl_clear_signals ()
 
   if (rl_catch_signals && signals_set_flag == 1)
     {
-      sigemptyset (&dummy.sa_mask);
-
       /* Since rl_maybe_set_sighandler doesn't override a SIG_IGN handler,
 	 we should in theory not have to restore a handler where
 	 old_xxx.sa_handler == SIG_IGN.  That's what rl_maybe_restore_sighandler

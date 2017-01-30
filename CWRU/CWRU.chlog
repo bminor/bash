@@ -13027,3 +13027,21 @@ subst.c
 	  after reading a double-quoted string, make sure the W_NOCOMSUB and
 	  W_NOPROCSUB flags make it to the recursive invocation.  Fixes bug
 	  reported by Jens Heyens <jens.heyens@cispa.saarland>
+
+				   1/23
+				   ----
+lib/readline/signals.c
+	- _rl_orig_sigset: original signal mask, set and restored by
+	  rl_set_signals (rl_clear_signals doesn't block signals).  If we
+	  are not installing signal handlers, just save signal mask each
+	  time rl_set_signals is called
+
+lib/readline/input.c
+	- rl_getc: use _rl_orig_sigmask in the call to pselect(), so we block
+	  the set of signals originally blocked by the calling application.
+	  Fixes bug reported by Frédéric Brière <fbriere@fbriere.net>
+
+parse.y
+	- yy_readline_get: try to unset NONBLOCK mode on readline's input
+	  file descriptor before calling readline(). Inspired by report from
+	  Siteshwar Vashisht <svashisht@redhat.com>
