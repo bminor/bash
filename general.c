@@ -445,6 +445,14 @@ sh_unset_nodelay_mode (fd)
   return 0;
 }
 
+/* Just a wrapper for the define in include/filecntl.h */
+int
+sh_setclexec (fd)
+     int fd;
+{
+  return (SET_CLOSE_ON_EXEC (fd));
+}
+
 /* Return 1 if file descriptor FD is valid; 0 otherwise. */
 int
 sh_validfd (fd)

@@ -295,6 +295,7 @@ extern int legal_alias_name __P((const char *, int));
 extern int assignment __P((const char *, int));
 
 extern int sh_unset_nodelay_mode __P((int));
+extern int sh_setclexec __P((int));
 extern int sh_validfd __P((int));
 extern int fd_ispipe __P((int));
 extern void check_dev_tty __P((void));

@@ -143,7 +143,7 @@ static int executable_completion __P((const char *, int));
 static rl_icppfunc_t *save_directory_hook __P((void));
 static void restore_directory_hook __P((rl_icppfunc_t));
 
-static int directory_exists __P((const char *));
+static int directory_exists __P((const char *, int));
 
 static void cleanup_expansion_error __P((void));
 static void maybe_make_readline_line __P((char *));
@@ -1157,7 +1157,7 @@ bash_backward_shellword (count, key)
   size_t slen;
   int sindex, c, p;
   DECLARE_MBSTATE;
-  
+
   if (count < 0)
     return (bash_forward_shellword (-count, key));
 
@@ -3106,18 +3106,20 @@ restore_directory_hook (hookf)
     rl_directory_rewrite_hook = hookf;
 }
 
-/* Check whether not the (dequoted) version of DIRNAME, with any trailing slash
-   removed, exists. */
+/* Check whether not DIRNAME, with any trailing slash removed, exists.  If
+   SHOULD_DEQUOTE is non-zero, we dequote the directory name first. */
 static int
-directory_exists (dirname)
+directory_exists (dirname, should_dequote)
      const char *dirname;
+     int should_dequote;
 {
   char *new_dirname;
   int dirlen, r;
   struct stat sb;
 
-  /* First, dequote the directory name */
-  new_dirname = bash_dequote_filename ((char *)dirname, rl_completion_quote_character);
+  /* We save the string and chop the trailing slash because stat/lstat behave
+     inconsistently if one is present. */
+  new_dirname = should_dequote ? bash_dequote_filename ((char *)dirname, rl_completion_quote_character) : savestring (dirname);
   dirlen = STRLEN (new_dirname);
   if (new_dirname[dirlen - 1] == '/')
     new_dirname[dirlen - 1] = '\0';
@@ -3149,7 +3151,7 @@ bash_filename_stat_hook (dirname)
   else if (t = mbschr (local_dirname, '`'))	/* XXX */
     should_expand_dirname = '`';
 
-  if (should_expand_dirname && directory_exists (local_dirname))
+  if (should_expand_dirname && directory_exists (local_dirname, 0))
     should_expand_dirname = 0;
   
   if (should_expand_dirname)  
@@ -3159,7 +3161,7 @@ bash_filename_stat_hook (dirname)
 	 have to worry about restoring this setting. */
       global_nounset = unbound_vars_is_error;
       unbound_vars_is_error = 0;
-      wl = expand_prompt_string (new_dirname, 0, W_NOCOMSUB|W_COMPLETE);	/* does the right thing */
+      wl = expand_prompt_string (new_dirname, 0, W_NOCOMSUB|W_NOPROCSUB|W_COMPLETE);	/* does the right thing */
       unbound_vars_is_error = global_nounset;
       if (wl)
 	{
@@ -3259,13 +3261,13 @@ bash_directory_completion_hook (dirname)
 	should_expand_dirname = '`';
     }
 
-  if (should_expand_dirname && directory_exists (local_dirname))
+  if (should_expand_dirname && directory_exists (local_dirname, 1))
     should_expand_dirname = 0;
 
   if (should_expand_dirname)  
     {
       new_dirname = savestring (local_dirname);
-      wl = expand_prompt_string (new_dirname, 0, W_NOCOMSUB|W_COMPLETE);	/* does the right thing */
+      wl = expand_prompt_string (new_dirname, 0, W_NOCOMSUB|W_NOPROCSUB|W_COMPLETE);	/* does the right thing */
       if (wl)
 	{
 	  *dirname = string_list (wl);

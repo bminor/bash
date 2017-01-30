@@ -9612,6 +9612,10 @@ add_twochars:
 		tword->flags |= word->flags & (W_ASSIGNARG|W_ASSIGNRHS);	/* affects $@ */
 	      if (word->flags & W_COMPLETE)
 		tword->flags |= W_COMPLETE;	/* for command substitutions */
+	      if (word->flags & W_NOCOMSUB)
+		tword->flags |= W_NOCOMSUB;
+	      if (word->flags & W_NOPROCSUB)
+		tword->flags |= W_NOPROCSUB;
 
 	      temp = (char *)NULL;
 

@@ -625,7 +625,10 @@ stat_char (filename)
 #endif
 
   if (r == -1)
-    return (0);
+    {
+      xfree (f);
+      return (0);
+    }
 
   character = 0;
   if (S_ISDIR (finfo.st_mode))

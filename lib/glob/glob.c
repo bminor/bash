@@ -1,6 +1,6 @@
 /* glob.c -- file-name wildcard pattern matching for Bash.
 
-   Copyright (C) 1985-2009 Free Software Foundation, Inc.
+   Copyright (C) 1985-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne-Again SHell.
    
@@ -123,6 +123,9 @@ static char **glob_dir_to_array __P((char *, char **, int));
 extern char *glob_patscan __P((char *, char *, int));
 extern wchar_t *glob_patscan_wc __P((wchar_t *, wchar_t *, int));
 
+/* And this from gmisc.c/gm_loop.c */
+extern int wextglob_pattern_p __P((wchar_t *));
+
 extern char *glob_dirscan __P((char *, int));
 
 /* Compile `glob_loop.c' for single-byte characters. */
@@ -131,7 +134,6 @@ extern char *glob_dirscan __P((char *, int));
 #define INT	int
 #define L(CS)	CS
 #define INTERNAL_GLOB_PATTERN_P internal_glob_pattern_p
-#define EXTGLOB_PATTERN_P extglob_pattern_p
 #include "glob_loop.c"
 
 /* Compile `glob_loop.c' again for multibyte characters. */
@@ -142,7 +144,6 @@ extern char *glob_dirscan __P((char *, int));
 #define INT	wint_t
 #define L(CS)	L##CS
 #define INTERNAL_GLOB_PATTERN_P internal_glob_wpattern_p
-#define EXTGLOB_PATTERN_P wextglob_pattern_p
 #include "glob_loop.c"
 
 #endif /* HANDLE_MULTIBYTE */
@@ -275,23 +276,23 @@ skipname (pat, dname, flags)
 #if HANDLE_MULTIBYTE
 
 static int
-wskipname (pat_wc, dn_wc, flags)
-     wchar_t *pat_wc, *dn_wc;
+wskipname (pat, dname, flags)
+     wchar_t *pat, *dname;
      int flags;
 {
   /* If a leading dot need not be explicitly matched, and the
      pattern doesn't start with a `.', don't match `.' or `..' */
-  if (noglob_dot_filenames == 0 && pat_wc[0] != L'.' &&
-	(pat_wc[0] != L'\\' || pat_wc[1] != L'.') &&
-	(dn_wc[0] == L'.' &&
-	  (dn_wc[1] == L'\0' || (dn_wc[1] == L'.' && dn_wc[2] == L'\0'))))
+  if (noglob_dot_filenames == 0 && pat[0] != L'.' &&
+	(pat[0] != L'\\' || pat[1] != L'.') &&
+	(dname[0] == L'.' &&
+	  (dname[1] == L'\0' || (dname[1] == L'.' && dname[2] == L'\0'))))
     return 1;
 
   /* If a leading dot must be explicitly matched, check to see if the
      pattern and dirname both have one. */
- else if (noglob_dot_filenames && dn_wc[0] == L'.' &&
-	pat_wc[0] != L'.' &&
-	   (pat_wc[0] != L'\\' || pat_wc[1] != L'.'))
+ else if (noglob_dot_filenames && dname[0] == L'.' &&
+	pat[0] != L'.' &&
+	   (pat[0] != L'\\' || pat[1] != L'.'))
     return 1;
 
   return 0;

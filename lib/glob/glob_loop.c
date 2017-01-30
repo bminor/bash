@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -61,28 +61,6 @@ INTERNAL_GLOB_PATTERN_P (pattern)
   return 0;
 }
 
-#if EXTENDED_GLOB
-int
-EXTGLOB_PATTERN_P (pat)
-     const CHAR *pat;
-{
-  switch (pat[0])
-    {
-    case L('*'):
-    case L('+'):
-    case L('!'):
-    case L('@'):
-    case L('?'):
-      return (pat[1] == L('('));	/* ) */
-    default:
-      return 0;
-    }
-    
-  return 0;
-}
-#endif
-
-#undef EXTGLOB_PATTERN_P
 #undef INTERNAL_GLOB_PATTERN_P
 #undef L
 #undef INT

@@ -12988,12 +12988,42 @@ lib/glob/glob.c
 
 lib/glob/glob_loop.c
 	- CHAR -> GCHAR (unsigned char); change uses of CHAR to GCHAR
-	- extglob_skipname: move here from gmisc.c, generalize for regular
-	  and wide-char versions
 
 lib/glob/glob.c
 	- wchkname -> wskipname
 	- wskipname: now takes a third `flags' argument, like the other variants
 	  of skipname
 
+				   1/17
+				   ----
+redir.c
+	- here_document_to_fd: set the file descriptor open for writing to the
+	  here document to be close-on-exec.  Fixes bug reported by
+	  Siteshwar Vashisht <svashisht@redhat.com>
 
+				   1/18
+				   ----
+{gmisc,gm_loop}.c
+	- match_pattern_char,match_pattern_wchar: moved to gm_loop.c (new file),
+	  compile twice for single and wide characters as with the rest of
+	  the functions
+	- umatchlen,wmatchlen: ditto
+	- extglob_pattern_p: move to gm_loop.c, generalize for regular and
+	  wide-char versions
+
+				   1/19
+				   ----
+lib/readline/complete.c
+	- stat_char: fix small memory leak if stat/lstat returns -1
+
+bashline.c
+	- bash_filename_stat_hook,bash_directory_completion_hook: make sure
+	  expand_prompt_string is caled wth W_NOPROCSUB flag
+	- directory_exists: don't dequote the filename passed as an argument;
+	  this function should never get quoted pathnames
+
+subst.c
+	- expand_word_internal: when calling expand_word_internal recursively
+	  after reading a double-quoted string, make sure the W_NOCOMSUB and
+	  W_NOPROCSUB flags make it to the recursive invocation.  Fixes bug
+	  reported by Jens Heyens <jens.heyens@cispa.saarland>

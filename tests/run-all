@@ -16,8 +16,14 @@ export PATH
 
 # unset BASH_ENV only if it is set
 [ "${BASH_ENV+set}" = "set" ] && unset BASH_ENV
-# ditto for SHELLOPTS
-[ "${SHELLOPTS+set}" = "set" ] && unset SHELLOPTS
+# can't reliably do it for SHELLOPTS; SHELLOPTS is readonly in bash
+if [ "${BASH_VERSION+set}" = "set" ]; then
+	export -n SHELLOPTS	# just make sure its not exported
+	set +o posix
+	typeset -p SHELLOPTS
+else
+	[ "${SHELLOPTS+set}" = "set" ] && unset SHELLOPTS 2>/dev/null
+fi
 
 : ${THIS_SH:=../bash}
 export THIS_SH
