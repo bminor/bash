@@ -3,7 +3,7 @@
 /* This file works with both POSIX and BSD systems.  It implements job
    control. */
 
-/* Copyright (C) 1989-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -2321,8 +2321,8 @@ find_last_pid (job, block)
    This low-level function prints an error message if PID is not
    a child of this shell.  It returns -1 if it fails, or whatever
    wait_for returns otherwise.  If the child is not found in the
-   jobs table, it returns 127.  If FLAGS doesn't include 1, we
-   suppress the error message if PID isn't found. */
+   jobs table, it returns 127.  If FLAGS doesn't include JWAIT_PERROR,
+   we suppress the error message if PID isn't found. */
 
 int
 wait_for_single_pid (pid, flags)
@@ -2331,7 +2331,7 @@ wait_for_single_pid (pid, flags)
 {
   register PROCESS *child;
   sigset_t set, oset;
-  int r, job;
+  int r, job, alive;
 
   BLOCK_CHILD (set, oset);
   child = find_pipeline (pid, 0, (int *)NULL);
@@ -2346,12 +2346,23 @@ wait_for_single_pid (pid, flags)
 
   if (child == 0)
     {
-      if (flags & 1)
+      if (flags & JWAIT_PERROR)
 	internal_error (_("wait: pid %ld is not a child of this shell"), (long)pid);
       return (127);
     }
 
-  r = wait_for (pid);
+  alive = 0;
+  do
+    {
+      r = wait_for (pid);
+      if ((flags & JWAIT_FORCE) == 0)
+	break;
+
+      BLOCK_CHILD (set, oset);
+      alive = PALIVE (child);
+      UNBLOCK_CHILD (oset);
+    }
+  while (alive);
 
   /* POSIX.2: if we just waited for a job, we can remove it from the jobs
      table. */
@@ -2411,7 +2422,7 @@ wait_for_background_pids ()
       UNBLOCK_CHILD (oset);
       QUIT;
       errno = 0;		/* XXX */
-      r = wait_for_single_pid (pid, 1);
+      r = wait_for_single_pid (pid, JWAIT_PERROR);
       if (r == -1 && errno == ECHILD)
 	{
 	  /* If we're mistaken about job state, compensate. */
@@ -2941,22 +2952,39 @@ wait_for_return:
 
 /* Wait for the last process in the pipeline for JOB.  Returns whatever
    wait_for returns: the last process's termination state or -1 if there
-   are no unwaited-for child processes or an error occurs. */
+   are no unwaited-for child processes or an error occurs.  If FLAGS
+   includes JWAIT_FORCE, we wait for the job to terminate, no just change
+   state */
 int
-wait_for_job (job)
+wait_for_job (job, flags)
      int job;
 {
   pid_t pid;
-  int r;
+  int r, state;
   sigset_t set, oset;
 
   BLOCK_CHILD(set, oset);
-  if (JOBSTATE (job) == JSTOPPED)
+  state = JOBSTATE (job);
+  if (state == JSTOPPED)
     internal_warning (_("wait_for_job: job %d is stopped"), job+1);
 
   pid = find_last_pid (job, 0);
   UNBLOCK_CHILD(oset);
-  r = wait_for (pid);
+
+  do
+    {
+      r = wait_for (pid);
+      if (r == -1 && errno == ECHILD)
+	mark_all_jobs_as_dead ();
+
+      if ((flags & JWAIT_FORCE) == 0)
+	break;
+
+      BLOCK_CHILD (set, oset);
+      state = (job != NO_JOB && jobs[job]) ? JOBSTATE (job) : JDEAD;
+      UNBLOCK_CHILD (oset);
+    }
+  while (state != JDEAD);
 
   /* POSIX.2: we can remove the job from the jobs table if we just waited
      for it. */
@@ -2973,7 +3001,7 @@ wait_for_job (job)
    the next exiting job, -1 if there are no background jobs.  The caller
    is responsible for translating -1 into the right return value. */
 int
-wait_for_any_job ()
+wait_for_any_job (flags)
 {
   pid_t pid;
   int i, r, waited_for;

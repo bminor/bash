@@ -1,7 +1,7 @@
 This file is wait.def, from which is created wait.c.
 It implements the builtin "wait" in Bash.
 
-Copyright (C) 1987-2015 Free Software Foundation, Inc.
+Copyright (C) 1987-2017 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -22,7 +22,7 @@ $BUILTIN wait
 $FUNCTION wait_builtin
 $DEPENDS_ON JOB_CONTROL
 $PRODUCES wait.c
-$SHORT_DOC wait [-n] [id ...]
+$SHORT_DOC wait [-fn] [id ...]
 Wait for job completion and return exit status.
 
 Waits for each process identified by an ID, which may be a process ID or a
@@ -33,6 +33,9 @@ in that job's pipeline.
 
 If the -n option is supplied, waits for the next job to terminate and
 returns its exit status.
+
+If the -f option is supplied, and job control is enabled, waits for the
+specified ID to terminate, instead of waiting for it to change status.
 
 Exit Status:
 Returns the status of the last ID; fails if ID is invalid or an invalid
@@ -97,20 +100,23 @@ int
 wait_builtin (list)
      WORD_LIST *list;
 {
-  int status, code, opt, nflag;
+  int status, code, opt, nflag, wflags;
   volatile int old_interrupt_immediately;
 
   USE_VAR(list);
 
-  nflag = 0;
+  nflag = wflags = 0;
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "n")) != -1)
+  while ((opt = internal_getopt (list, "nf")) != -1)
     {
       switch (opt)
 	{
 #if defined (JOB_CONTROL)
 	case 'n':
 	  nflag = 1;
+	  break;
+	case 'f':
+	  wflags |= JWAIT_FORCE;
 	  break;
 #endif
 	CASE_HELPOPT;
@@ -151,7 +157,7 @@ wait_builtin (list)
 #if defined (JOB_CONTROL)
   if (nflag)
     {
-      status = wait_for_any_job ();
+      status = wait_for_any_job (wflags);
       if (status < 0)
 	status = 127;
       WAIT_RETURN (status);
@@ -179,7 +185,7 @@ wait_builtin (list)
 	  if (legal_number (w, &pid_value) && pid_value == (pid_t)pid_value)
 	    {
 	      pid = (pid_t)pid_value;
-	      status = wait_for_single_pid (pid, 1);
+	      status = wait_for_single_pid (pid, wflags|JWAIT_PERROR);
 	    }
 	  else
 	    {
@@ -209,7 +215,7 @@ wait_builtin (list)
 
 	  /* Job spec used.  Wait for the last pid in the pipeline. */
 	  UNBLOCK_CHILD (oset);
-	  status = wait_for_job (job);
+	  status = wait_for_job (job, wflags);
 	}
 #endif /* JOB_CONTROL */
       else

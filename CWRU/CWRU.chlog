@@ -13045,3 +13045,73 @@ parse.y
 	- yy_readline_get: try to unset NONBLOCK mode on readline's input
 	  file descriptor before calling readline(). Inspired by report from
 	  Siteshwar Vashisht <svashisht@redhat.com>
+
+				   1/30
+				   ----
+parse.y
+	- parse_comsub: don't unconditionally set the LEX_WASDOL flag when we
+	  see a `$'; we should toggle it to accommodate things like $$.
+	  Fixes bug reported by Christian Weisgerber <naddy@mips.inka.de>
+	- parse_matched_pair: do the same thing with LEX_WASDOL
+
+				    2/1
+				    ---
+jobs.h
+	- JWAIT_PERROR,JWAIT_FORCE: new defines for the wait_for_ family of
+	  functions
+
+jobs.c
+	- wait_for_job, wait_for_any_job: take new flags argument for use by
+	  the wait builtin
+	- wait_for_job: if JWAIT_FORCE flag supplied, loop waiting for job to
+	  terminate instead of change state
+	- wait_for_single_pid: if JWAIT_FORCE flag supplied, loop waiting for
+	  child process to terminate instead of change state
+
+builtins/wait.def
+	- takes a new `-f' option, signifying to wait until the specified job 
+	  or process terminates, instead of changes state
+
+doc/{bash.1,bashref.texi}
+	- wait: document the new -f option and its behavior when job control
+	  is enabled
+	- job control: add a paragraph describing how the wait builtin changes
+	  behavior when job control is enabled: it returns when a job changes
+	  state
+
+				    2/2
+				    ---
+examples/loadables/fdflags.c
+	- fdflags: new loadable builtin to set and unset file descriptor flags
+	  (such as non-blocking, though bash undoes that) for descriptors bash
+	  has open. Developed in consultation with Christos Zoulas
+	  <christos@zoulas.com>
+
+				    2/3
+				    ---
+
+lib/readline/text.c
+	- rl_previous_screen_line: attempt to move to the same column on the
+	  previous screen line of the current readline buffer by moving back
+	  a number of characters equal to the screen width
+	- rl_next_screen_line: attempt to move to the same column on the
+	  next screen line of the current readline buffer by moving forward
+	  a number of characters equal to the screen width. Both originally
+	  suggested by Hans Ginzel <hans@matfyz.cz>
+
+lib/readline/readline.h
+	- rl_{next,previous}_screen_line: extern declarations
+
+lib/readline/funmap.c
+	- {next,previous}-screen-line: new bindable command names
+
+lib/readline/doc/{rluser.texi,readline.3}
+	- {next,previous}-screen-line: document behavior, including limitations
+
+				    2/5
+				    ---
+lib/readline/input.c
+	- rl_read_key: when reading input from a macro, make sure to return
+	  the next character as an unsigned char, so we handle multibyte
+	  character sequences correctly.  Report and fix from Grisha Levit
+	  <grishalevit@gmail.com>

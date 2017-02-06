@@ -110,6 +110,7 @@ static const FUNMAP default_funmap[] = {
   { "menu-complete", rl_menu_complete },
   { "menu-complete-backward", rl_backward_menu_complete },
   { "next-history", rl_get_next_history },
+  { "next-screen-line", rl_next_screen_line },
   { "non-incremental-forward-search-history", rl_noninc_forward_search },
   { "non-incremental-reverse-search-history", rl_noninc_reverse_search },
   { "non-incremental-forward-search-history-again", rl_noninc_forward_search_again },
@@ -121,6 +122,7 @@ static const FUNMAP default_funmap[] = {
 #endif
   { "possible-completions", rl_possible_completions },
   { "previous-history", rl_get_previous_history },
+  { "previous-screen-line", rl_previous_screen_line },
   { "print-last-kbd-macro", rl_print_last_kbd_macro },
   { "quoted-insert", rl_quoted_insert },
   { "re-read-init-file", rl_re_read_init_file },

@@ -1138,6 +1138,19 @@ Move back to the start of the current or previous word.
 Words are delimited by non-quoted shell metacharacters.
 @end ifset
 
+@item previous-screen-line ()
+Attempt to move point to the same physical screen column on the previous
+physical screen line. This will not have the desired effect if the current
+Readline line does not take up more than one physical line or if point is not
+greater than the length of the prompt plus the screen width.
+
+@item next-screen-line ()
+Attempt to move point to the same physical screen column on the next
+physical screen line. This will not have the desired effect if the current
+Readline line does not take up more than one physical line or if the length
+of the current Readline line is not greater than the length of the prompt
+plus the screen width.
+
 @item clear-screen (C-l)
 Clear the screen and redraw the current line,
 leaving the current line at the top of the screen.

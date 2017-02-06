@@ -98,6 +98,9 @@ extern int rl_clear_screen PARAMS((int, int));
 extern int rl_skip_csi_sequence PARAMS((int, int));
 extern int rl_arrow_keys PARAMS((int, int));
 
+extern int rl_previous_screen_line PARAMS((int, int));
+extern int rl_next_screen_line PARAMS((int, int));
+
 /* Bindable commands for inserting and deleting text. */
 extern int rl_insert PARAMS((int, int));
 extern int rl_quoted_insert PARAMS((int, int));

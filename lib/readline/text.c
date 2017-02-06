@@ -599,6 +599,24 @@ rl_clear_screen (count, key)
 }
 
 int
+rl_previous_screen_line (count, key)
+{
+  int c;
+
+  c = _rl_term_autowrap ? _rl_screenwidth : (_rl_screenwidth + 1);
+  return (rl_backward_char (c, key));
+}
+
+int
+rl_next_screen_line (count, key)
+{
+  int c;
+
+  c = _rl_term_autowrap ? _rl_screenwidth : (_rl_screenwidth + 1);
+  return (rl_forward_char (c, key));
+}
+
+int
 rl_skip_csi_sequence (count, key)
      int count, key;
 {

@@ -3625,7 +3625,7 @@ parse_dollar_word:
 
 	  FREE (nestret);
 	}
-      if MBTEST(ch == '$')
+      if MBTEST(ch == '$' && (tflags & LEX_WASDOL) == 0)
 	tflags |= LEX_WASDOL;
       else
 	tflags &= ~LEX_WASDOL;
@@ -4212,7 +4212,7 @@ eof_error:
 
 	  FREE (nestret);
 	}
-      if MBTEST(ch == '$')
+      if MBTEST(ch == '$' && (tflags & LEX_WASDOL) == 0)
 	tflags |= LEX_WASDOL;
       else
 	tflags &= ~LEX_WASDOL;

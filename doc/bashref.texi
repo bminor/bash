@@ -14,7 +14,7 @@ This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Bash Reference Manual},
 for @code{Bash}, Version @value{VERSION}.
 
-Copyright @copyright{} 1988--2016 Free Software Foundation, Inc.
+Copyright @copyright{} 1988--2017 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -7783,6 +7783,11 @@ The @code{jobs} command may then be used to inspect their status.
 If a second attempt to exit is made without an intervening command,
 Bash does not print another warning, and any stopped jobs are terminated.
 
+When the shell is waiting for a job or process using the @code{wait}
+builtin, and job control is enabled, @code{wait} will return when the
+job changes state. The @option{-f} option will force @code{wait} to wait
+until the job or process terminates before returning.
+
 @node Job Control Builtins
 @section Job Control Builtins
 
@@ -7879,7 +7884,7 @@ or non-zero if an error occurs or an invalid option is encountered.
 @item wait
 @btindex wait
 @example
-wait [-n] [@var{jobspec} or @var{pid} @dots{}]
+wait [-fn] [@var{jobspec} or @var{pid} @dots{}]
 @end example
 
 Wait until the child process specified by each process @sc{id} @var{pid}
@@ -7890,6 +7895,9 @@ If no arguments are given, all currently active child processes are
 waited for, and the return status is zero.
 If the @option{-n} option is supplied, @code{wait} waits for any job to
 terminate and returns its exit status.
+If the @option{-f} option is supplied, and job control is enabled,
+@code{wait} forces each @var{pid} or @var{jobspec} to terminate before
+returning its status, intead of returning when it changes status.
 If neither @var{jobspec} nor @var{pid} specifies an active child process
 of the shell, the return status is 127.
 

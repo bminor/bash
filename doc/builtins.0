@@ -713,7 +713,11 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               following meanings:
               --cc     Clear the history list by deleting all the entries.
               --dd _o_f_f_s_e_t
-                     Delete the history entry at position _o_f_f_s_e_t.
+                     Delete  the  history entry at position _o_f_f_s_e_t.  If _o_f_f_s_e_t
+                     is negative, it is interpreted as relative to one greater
+                     than the last history position, so negative indices count
+                     back from the end of the history,  and  an  index  of  -1
+                     refers to the current hhiissttoorryy --dd command.
               --aa     Append  the  ``new''  history  lines to the history file.
                      These are history lines entered since  the  beginning  of
                      the current bbaasshh session, but not already appended to the
@@ -1382,7 +1386,9 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
                       names  during word completion if the directory name ini-
                       tially supplied does not exist.
               ddoottgglloobb If set, bbaasshh includes filenames beginning with a `.'  in
-                      the results of pathname expansion.
+                      the  results of pathname expansion.  The filenames ````..''''
+                      and ````....''''  must always be matched explicitly,  even  if
+                      ddoottgglloobb is set.
               eexxeeccffaaiill
                       If set, a non-interactive shell will not exit if it can-
                       not execute the file specified as  an  argument  to  the
@@ -1767,16 +1773,19 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               sequently reset.  The exit status is true unless a _n_a_m_e is read-
               only.
 
-       wwaaiitt [--nn] [_n _._._.]
+       wwaaiitt [--ffnn] [_i_d _._._.]
               Wait for each specified child process and return its termination
-              status.  Each _n may be a process ID or a job specification; if a
-              job spec is given, all processes  in  that  job's  pipeline  are
-              waited  for.  If _n is not given, all currently active child pro-
+              status.   Each _i_d may be a process ID or a job specification; if
+              a job spec is given, all processes in that  job's  pipeline  are
+              waited for.  If _i_d is not given, all currently active child pro-
               cesses are waited for, and the return status is zero.  If the --nn
               option  is  supplied,  wwaaiitt  waits  for any job to terminate and
-              returns its exit status.  If _n specifies a non-existent  process
-              or  job, the return status is 127.  Otherwise, the return status
-              is the exit status of the last process or job waited for.
+              returns its exit status.  If the --ff option is supplied, and  job
+              control is enabled, wwaaiitt forces _i_d to terminate before returning
+              its status, intead of returning when it changes status.   If  _i_d
+              specifies  a  non-existent  process or job, the return status is
+              127.  Otherwise, the return status is the  exit  status  of  the
+              last process or job waited for.
 
 SSEEEE AALLSSOO
        bash(1), sh(1)

@@ -450,14 +450,14 @@ rl_read_key ()
 
   if (rl_pending_input)
     {
-      c = rl_pending_input;
+      c = rl_pending_input;	/* XXX - cast to unsigned char if > 0? */
       rl_clear_pending_input ();
     }
   else
     {
       /* If input is coming from a macro, then use that. */
       if (c = _rl_next_macro_key ())
-	return (c);
+	return ((unsigned char)c);
 
       /* If the user has an event function, then call it periodically. */
       if (rl_event_hook)
