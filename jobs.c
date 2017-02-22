@@ -848,8 +848,15 @@ bgp_delete (pid)
 
   /* Search chain using hash to find bucket in pidstat_table */
   for (psi = *(pshash_getbucket (pid)); psi != NO_PIDSTAT; psi = bgpids.storage[psi].bucket_next)
-    if (bgpids.storage[psi].pid == pid)
-      break;
+    {
+      if (bgpids.storage[psi].pid == pid)
+	break;
+      if (psi == bgpids.storage[psi].bucket_next)	/* catch reported bug */
+	{
+	  internal_warning ("bgp_delete: BUG: psi (%d) == storage[psi].bucket_next", psi);
+	  return 0;
+	}
+    }
 
   if (psi == NO_PIDSTAT)
     return 0;		/* not found */

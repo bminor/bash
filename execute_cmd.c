@@ -271,6 +271,8 @@ static int function_line_number;
    report the correct line number.  Kind of a hack. */
 static int showing_function_line;
 
+static int connection_count;
+
 /* $LINENO ($BASH_LINENO) for use by an ERR trap.  Global so parse_and_execute
    can save and restore it. */
 int line_number_for_err_trap;

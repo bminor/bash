@@ -13115,3 +13115,53 @@ lib/readline/input.c
 	  the next character as an unsigned char, so we handle multibyte
 	  character sequences correctly.  Report and fix from Grisha Levit
 	  <grishalevit@gmail.com>
+
+				    2/6
+				    ---
+shell.c
+	- --pretty-print: new invocation option, currently undocumented, dumps
+	  a pretty-printed version of a shell script given as an argument to
+	  stdout
+	- main: call pretty_print_loop() if we're in pretty-printing mode in
+	  a non-interactive shell
+
+eval.c
+	- pretty_print_loop: new function, similar to reader_loop, reads
+	  commands and prints them by displaying the result from
+	  make_command_string()
+
+externs.h
+	- pretty_print_loop: new extern declaration
+
+				    2/9
+				    ---
+doc/{bash.1,bashref.texi}
+	- here strings: correct documentation to note they do not undergo
+	  brace expansion. Report from Conor McCarthy <mr.spuratic@gmail.com>
+
+				    2/9
+				    ---
+lib/readline/display.c
+	- expand_prompt: instead of recomputing the line break offsets for
+	  prompts that span multiple screen lines on every call to rl_redisplay,
+	  do it here. Manage a local array local_prompt_newlines; set an offset
+	  every time `physchars' hits a multiple of the screen width.  Inspired
+	  by https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=843819
+	- rl_redisplay: don't calculate multi-line prompt line break indices
+	  here; use the values calculated by expand_prompt
+	- rl_{save,restore}_prompt: save and restore local_prompt_newlines
+
+				   2/11
+				   ----
+lib/readline/mbutil.c
+	- _rl_find_prev_mbchar_internal: since we're traversing the string
+	  from the beginning, shortcut non-multibyte characters in a UTF-8
+	  locale
+
+parse.y
+	- parse_comsub: if we are parsing a here document with a quoted
+	  delimiter (LEX_QUOTEDDOC), we should not remove <backslash><newline>
+	  pairs from the body of the here document.  Need to add LEX_QUOTEDDOC
+	  to the values in tflags when calling shell_getc.  Fixes bug reported
+	  by Michael Homer <michael.homer@ecs.vuw.ac.nz>, patch was originally
+	  contributed by Geir Hauge <geir.hauge@gmail.com>

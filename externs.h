@@ -94,6 +94,7 @@ extern void get_current_user_info __P((void));
 
 /* Functions from eval.c. */
 extern int reader_loop __P((void));
+extern int pretty_print_loop __P((void));
 extern int parse_command __P((void));
 extern int read_command __P((void));
 

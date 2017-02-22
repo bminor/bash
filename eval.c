@@ -193,6 +193,47 @@ reader_loop ()
   return (last_command_exit_value);
 }
 
+/* Pretty print shell scripts */
+int
+pretty_print_loop ()
+{
+  COMMAND *current_command;
+  char *command_to_print;
+  int code;
+  int global_posix_mode, last_was_newline;
+
+  global_posix_mode = posixly_correct;
+  last_was_newline = 0;
+  while (EOF_Reached == 0)
+    {
+      code = setjmp_nosigs (top_level);
+      if (code)
+        return (EXECUTION_FAILURE);
+      if (read_command() == 0)
+	{
+	  current_command = global_command;
+	  global_command = 0;
+	  posixly_correct = 1;			/* print posix-conformant */
+	  if (current_command && (command_to_print = make_command_string (current_command)))
+	    {
+	      printf ("%s\n", command_to_print);	/* for now */
+	      last_was_newline = 0;
+	    }
+	  else if (last_was_newline == 0)
+	    {
+	       printf ("\n");
+	       last_was_newline = 1;
+	    }
+	  posixly_correct = global_posix_mode;
+	  dispose_command (current_command);
+	}
+      else
+	return (EXECUTION_FAILURE);
+    }
+    
+  return (EXECUTION_SUCCESS);
+}
+
 static sighandler
 alrm_catcher(i)
      int i;

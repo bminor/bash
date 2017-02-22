@@ -1,6 +1,6 @@
 /* mbutil.c -- readline multibyte character utility functions */
 
-/* Copyright (C) 2001-2015 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2017 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -173,7 +173,14 @@ _rl_find_prev_mbchar_internal (string, seed, find_non_zero)
   prev = non_zero_prev = point = 0;
   while (point < seed)
     {
-      tmp = mbrtowc (&wc, string + point, length - point, &ps);
+      if (_rl_utf8locale && UTF8_SINGLEBYTE(string[point]))
+	{
+	  tmp = 1;
+	  wc = (wchar_t) string[point];
+	  memset(&ps, 0, sizeof(mbstate_t));
+	}
+      else
+	tmp = mbrtowc (&wc, string + point, length - point, &ps);
       if (MB_INVALIDCH ((size_t)tmp))
 	{
 	  /* in this case, bytes are invalid or too short to compose

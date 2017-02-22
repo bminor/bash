@@ -3757,7 +3757,7 @@ parse_comsub (qc, open, close, lenp, flags)
   while (count)
     {
 comsub_readchar:
-      ch = shell_getc (qc != '\'' && (tflags & (LEX_INCOMMENT|LEX_PASSNEXT)) == 0);
+      ch = shell_getc (qc != '\'' && (tflags & (LEX_INCOMMENT|LEX_PASSNEXT|LEX_QUOTEDDOC)) == 0);
 
       if (ch == EOF)
 	{

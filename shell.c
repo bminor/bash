@@ -223,6 +223,8 @@ int dump_po_strings;		/* Dump strings in $"..." in po format */
 int wordexp_only = 0;		/* Do word expansion only */
 int protected_mode = 0;		/* No command substitution with --wordexp */
 
+int pretty_print_mode = 0;	/* pretty-print a shell script */
+
 #if defined (STRICT_POSIX)
 int posixly_correct = 1;	/* Non-zero means posix.2 superset. */
 #else
@@ -251,6 +253,7 @@ static const struct {
   { "noprofile", Int, &no_profile, (char **)0x0 },
   { "norc", Int, &no_rc, (char **)0x0 },
   { "posix", Int, &posixly_correct, (char **)0x0 },
+  { "pretty-print", Int, &pretty_print_mode, (char **)0x0 },
 #if defined (WORDEXP_OPTION)
   { "protected", Int, &protected_mode, (char **)0x0 },
 #endif
@@ -778,6 +781,14 @@ main (argc, argv, env)
 #endif /* !ONESHOT */
 
   shell_initialized = 1;
+
+  if (pretty_print_mode && interactive_shell)
+    {
+      internal_warning (_("pretty-printing mode ignored in interactive shells"));
+      pretty_print_mode = 0;
+    }
+  if (pretty_print_mode)
+    exit_shell (pretty_print_loop ());
 
   /* Read commands until exit condition. */
   reader_loop ();

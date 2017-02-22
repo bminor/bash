@@ -251,6 +251,8 @@ static int modmark;
 
 static char *saved_local_prompt;
 static char *saved_local_prefix;
+static int *saved_local_prompt_newlines;
+
 static int saved_last_invisible;
 static int saved_visible_length;
 static int saved_prefix_length;
@@ -303,6 +305,8 @@ prompt_modestr (lenp)
 	PMT_MULTILINE	caller indicates that this is part of a multiline prompt
 */
 
+static int *local_prompt_newlines;
+
 static char *
 expand_prompt (pmt, flags, lp, lip, niflp, vlp)
      char *pmt;
@@ -311,7 +315,7 @@ expand_prompt (pmt, flags, lp, lip, niflp, vlp)
 {
   char *r, *ret, *p, *igstart, *nprompt, *ms;
   int l, rl, last, ignoring, ninvis, invfl, invflset, ind, pind, physchars;
-  int mlen;
+  int mlen, newlines, newlines_guess, bound;
 
   /* We only expand the mode string for the last line of a multiline prompt
      (a prompt with embedded newlines). */
@@ -344,6 +348,12 @@ expand_prompt (pmt, flags, lp, lip, niflp, vlp)
 
   l = strlen (nprompt);			/* XXX */
   r = ret = (char *)xmalloc (l + 1);
+
+  newlines_guess = (l / _rl_screenwidth) + 1;
+  local_prompt_newlines = (int *) xrealloc (local_prompt_newlines, sizeof (int) * (newlines_guess + 1));
+  local_prompt_newlines[newlines = 0] = 0;
+  for (rl = 1; rl <= newlines_guess; rl++)
+    local_prompt_newlines[rl] = -1;
 
   rl = physchars = 0;	/* mode string now part of nprompt */
   invfl = 0;	/* invisible chars in first line of prompt */
@@ -404,11 +414,25 @@ expand_prompt (pmt, flags, lp, lip, niflp, vlp)
 		ninvis++;		/* invisible chars byte counter */
 	    }
 
-	  if (invflset == 0 && rl >= _rl_screenwidth)
+	  if (invflset == 0 && physchars >= _rl_screenwidth)
 	    {
 	      invfl = ninvis;
 	      invflset = 1;
 	    }
+#if 0
+	  if (physchars >= ((newlines + 1) * _rl_screenwidth) && local_prompt_newlines[newlines+1] == -1)
+	    local_prompt_newlines[++newlines] = r - ret;
+#else
+	  if (physchars >= (bound = (newlines + 1) * _rl_screenwidth) && local_prompt_newlines[newlines+1] == -1)
+	    {
+	      int new;
+	      if (physchars > bound)		/* should rarely happen */
+		new = _rl_find_prev_mbchar (r, r - ret, MB_FIND_ANY);
+	      else
+	        new = r - ret;
+	      local_prompt_newlines[++newlines] = new;
+	    }
+#endif	  
 	}
     }
 
@@ -759,18 +783,9 @@ rl_redisplay ()
 
   /* what if lpos is already >= _rl_screenwidth before we start drawing the
      contents of the command line? */
-  while (lpos >= _rl_screenwidth)
+  if (lpos >= _rl_screenwidth)
     {
-      int z, p;
-      int nocorrect, wadjust;
-
-      nocorrect = 0;
-      /* Adjust depending on the invisible characters in the line.  We use a
-	 heuristic based on experience: invisible characters nearly always
-	 appear in the first and last lines of the prompt */
-      wadjust = (newlines == 0)
-		  ? prompt_invis_chars_first_line
-		  : ((newlines == prompt_lines_estimate) ? wrap_offset : prompt_invis_chars_first_line);
+      temp = 0;
 
       /* fix from Darin Johnson <darin@acuson.com> for prompt string with
          invisible characters that is longer than the screen width.  The
@@ -779,55 +794,18 @@ rl_redisplay ()
          probably too much work for the benefit gained.  How many people have
          prompts that exceed two physical lines?
          Additional logic fix from Edward Catmur <ed@catmur.co.uk> */
-#if defined (HANDLE_MULTIBYTE)
-      if (mb_cur_max > 1 && rl_byte_oriented == 0 && prompt_multibyte_chars > 0)
+      /* first copy the linebreaks array we computed in expand_prompt */
+      while (local_prompt_newlines[newlines+1] != -1)
 	{
-	  nocorrect = 1;
-	  n0 = num;
-          temp = local_prompt_len;
-          while (num < temp)
-	    {
-	      /* This has to take invisible characters in the prompt into
-		 account. */
-	      z = _rl_col_width  (local_prompt, n0, num, 1) - wadjust;
-	      if (z > _rl_screenwidth)
-		{
-	          num = _rl_find_prev_mbchar (local_prompt, num, MB_FIND_ANY);
-	          break;
-		}
-	      else if (z == _rl_screenwidth)
-		{
-		  /* If we are in the middle or at the end of a multibyte
-		     character, we want to move to the start, then find out
-		     where it ends so we know where to insert the newline.
-		     If this isn't a multibyte character, its the same as num++ */
-		  p = _rl_find_prev_mbchar (local_prompt, num, MB_FIND_ANY);
-		  num = _rl_find_next_mbchar (local_prompt, p, 1, MB_FIND_ANY);
-		  break;
-		}
-	      num++;
-	    }
-          temp = num;
-	}
-      else
-#endif /* !HANDLE_MULTIBYTE */
-	temp = ((newlines + 1) * _rl_screenwidth);
+	  temp = local_prompt_newlines[newlines+1];
+	  inv_lbreaks[++newlines] = temp;
+	}  
 
-      /* Now account for invisible characters in the current line. */
-      /* XXX - this assumes that the invisible characters may be split, but only
-	 between the first and the last lines. */
-      if (nocorrect == 0)
-	temp += wadjust;
-
-      inv_lbreaks[++newlines] = temp;
-#if defined (HANDLE_MULTIBYTE)
-      /* lpos is a physical cursor position, so it needs to take the invisible
-	 characters into account. */
+      /* Now set lpos from the last newline */
       if (mb_cur_max > 1 && rl_byte_oriented == 0 && prompt_multibyte_chars > 0)
-	lpos -= _rl_col_width (local_prompt, n0, num, 1) - wadjust;
+        lpos = _rl_col_width (local_prompt, temp, local_prompt_len, 1) - (wrap_offset - prompt_invis_chars_first_line);
       else
-#endif
-	lpos -= _rl_screenwidth;	/* all physical cursor positions */
+        lpos -= (_rl_screenwidth * newlines);
     }
 
   prompt_last_screen_line = newlines;
@@ -2561,9 +2539,12 @@ rl_save_prompt ()
   saved_visible_length = prompt_visible_length;
   saved_invis_chars_first_line = prompt_invis_chars_first_line;
   saved_physical_chars = prompt_physical_chars;
+  saved_local_prompt_newlines = local_prompt_newlines;
 
   local_prompt = local_prompt_prefix = (char *)0;
   local_prompt_len = 0;
+  local_prompt_newlines = (int *)0;
+
   prompt_last_invisible = prompt_visible_length = prompt_prefix_length = 0;
   prompt_invis_chars_first_line = prompt_physical_chars = 0;
 }
@@ -2573,10 +2554,13 @@ rl_restore_prompt ()
 {
   FREE (local_prompt);
   FREE (local_prompt_prefix);
+  FREE (local_prompt_newlines);
 
   local_prompt = saved_local_prompt;
   local_prompt_prefix = saved_local_prefix;
   local_prompt_len = saved_local_length;
+  local_prompt_newlines = saved_local_prompt_newlines;
+
   prompt_prefix_length = saved_prefix_length;
   prompt_last_invisible = saved_last_invisible;
   prompt_visible_length = saved_visible_length;
