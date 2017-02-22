@@ -1,6 +1,6 @@
 /* terminal.c -- controlling the terminal with termcap. */
 
-/* Copyright (C) 1996-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2017 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -131,6 +131,7 @@ char *_rl_term_IC;
 char *_rl_term_dc;
 char *_rl_term_DC;
 
+/* How to move forward a char, non-destructively */
 char *_rl_term_forward_char;
 
 /* How to go up a line. */
@@ -188,8 +189,7 @@ int _rl_enable_meta = 1;
 
 #if defined (__EMX__)
 static void
-_emx_get_screensize (swp, shp)
-     int *swp, *shp;
+_emx_get_screensize (int *swp, int *shp)
 {
   int sz[2];
 
@@ -204,8 +204,7 @@ _emx_get_screensize (swp, shp)
 
 #if defined (__MINGW32__)
 static void
-_win_get_screensize (swp, shp)
-     int *swp, *shp;
+_win_get_screensize (int *swp, int *shp)
 {
   HANDLE hConOut;
   CONSOLE_SCREEN_BUFFER_INFO scr;
@@ -227,8 +226,7 @@ _win_get_screensize (swp, shp)
    values of $LINES and $COLUMNS.  The tests for TERM_STRING_BUFFER being
    non-null serve to check whether or not we have initialized termcap. */
 void
-_rl_get_screen_size (tty, ignore_env)
-     int tty, ignore_env;
+_rl_get_screen_size (int tty, int ignore_env)
 {
   char *ss;
 #if defined (TIOCGWINSZ)
@@ -318,8 +316,7 @@ _rl_get_screen_size (tty, ignore_env)
 }
 
 void
-_rl_set_screen_size (rows, cols)
-     int rows, cols;
+_rl_set_screen_size (int rows, int cols)
 {
   if (_rl_term_autowrap == -1)
     _rl_init_terminal_io (rl_terminal_name);
@@ -338,15 +335,13 @@ _rl_set_screen_size (rows, cols)
 }
 
 void
-rl_set_screen_size (rows, cols)
-     int rows, cols;
+rl_set_screen_size (int rows, int cols)
 {
   _rl_set_screen_size (rows, cols);
 }
 
 void
-rl_get_screen_size (rows, cols)
-     int *rows, *cols;
+rl_get_screen_size (int *rows, int *cols)
 {
   if (rows)
     *rows = _rl_screenheight;
@@ -355,19 +350,19 @@ rl_get_screen_size (rows, cols)
 }
 
 void
-rl_reset_screen_size ()
+rl_reset_screen_size (void)
 {
   _rl_get_screen_size (fileno (rl_instream), 0);
 }
 
 void
-_rl_sigwinch_resize_terminal ()
+_rl_sigwinch_resize_terminal (void)
 {
   _rl_get_screen_size (fileno (rl_instream), 1);
 }
 	
 void
-rl_resize_terminal ()
+rl_resize_terminal (void)
 {
   _rl_get_screen_size (fileno (rl_instream), 1);
   if (_rl_echoing_p)
@@ -424,8 +419,7 @@ static const struct _tc_string tc_strings[] =
 /* Read the desired terminal capability strings into BP.  The capabilities
    are described in the TC_STRINGS table. */
 static void
-get_term_capabilities (bp)
-     char **bp;
+get_term_capabilities (char **bp)
 {
 #if !defined (__DJGPP__)	/* XXX - doesn't DJGPP have a termcap library? */
   register int i;
@@ -437,8 +431,7 @@ get_term_capabilities (bp)
 }
 
 int
-_rl_init_terminal_io (terminal_name)
-     const char *terminal_name;
+_rl_init_terminal_io (const char *terminal_name)
 {
   const char *term;
   char *buffer;
@@ -584,8 +577,7 @@ _rl_init_terminal_io (terminal_name)
 
 /* Bind the arrow key sequences from the termcap description in MAP. */
 static void
-bind_termcap_arrow_keys (map)
-     Keymap map;
+bind_termcap_arrow_keys (Keymap map)
 {
   Keymap xkeymap;
 
@@ -606,8 +598,7 @@ bind_termcap_arrow_keys (map)
 }
 
 char *
-rl_get_termcap (cap)
-     const char *cap;
+rl_get_termcap (const char *cap)
 {
   register int i;
 
@@ -624,8 +615,7 @@ rl_get_termcap (cap)
 /* Re-initialize the terminal considering that the TERM/TERMCAP variable
    has changed. */
 int
-rl_reset_terminal (terminal_name)
-     const char *terminal_name;
+rl_reset_terminal (const char *terminal_name)
 {
   _rl_screenwidth = _rl_screenheight = 0;
   _rl_init_terminal_io (terminal_name);
@@ -635,15 +625,13 @@ rl_reset_terminal (terminal_name)
 /* A function for the use of tputs () */
 #ifdef _MINIX
 void
-_rl_output_character_function (c)
-     int c;
+_rl_output_character_function (int c)
 {
   putc (c, _rl_out_stream);
 }
 #else /* !_MINIX */
 int
-_rl_output_character_function (c)
-     int c;
+_rl_output_character_function (int c)
 {
   return putc (c, _rl_out_stream);
 }
@@ -651,17 +639,14 @@ _rl_output_character_function (c)
 
 /* Write COUNT characters from STRING to the output stream. */
 void
-_rl_output_some_chars (string, count)
-     const char *string;
-     int count;
+_rl_output_some_chars (const char *string, int count)
 {
   fwrite (string, 1, count, _rl_out_stream);
 }
 
 /* Move the cursor back. */
 int
-_rl_backspace (count)
-     int count;
+_rl_backspace (int count)
 {
   register int i;
 
@@ -678,7 +663,7 @@ _rl_backspace (count)
 
 /* Move to the start of the next line. */
 int
-rl_crlf ()
+rl_crlf (void)
 {
 #if defined (NEW_TTY_DRIVER) || defined (__MINT__)
   if (_rl_term_cr)
@@ -690,7 +675,7 @@ rl_crlf ()
 
 /* Ring the terminal bell. */
 int
-rl_ding ()
+rl_ding (void)
 {
   if (_rl_echoing_p)
     {
@@ -729,7 +714,7 @@ rl_ding ()
 static int enabled_meta = 0;	/* flag indicating we enabled meta mode */
 
 void
-_rl_enable_meta_key ()
+_rl_enable_meta_key (void)
 {
 #if !defined (__DJGPP__)
   if (term_has_meta && _rl_term_mm)
@@ -741,7 +726,7 @@ _rl_enable_meta_key ()
 }
 
 void
-_rl_disable_meta_key ()
+_rl_disable_meta_key (void)
 {
 #if !defined (__DJGPP__)
   if (term_has_meta && _rl_term_mo && enabled_meta)
@@ -753,8 +738,7 @@ _rl_disable_meta_key ()
 }
 
 void
-_rl_control_keypad (on)
-     int on;
+_rl_control_keypad (int on)
 {
 #if !defined (__DJGPP__)
   if (on && _rl_term_ks)
@@ -775,8 +759,7 @@ _rl_control_keypad (on)
    cursor.  Overwrite mode gets a very visible cursor.  Only does
    anything if we have both capabilities. */
 void
-_rl_set_cursor (im, force)
-     int im, force;
+_rl_set_cursor (int im, int force)
 {
 #ifndef __MSDOS__
   if (_rl_term_ve && _rl_term_vs)

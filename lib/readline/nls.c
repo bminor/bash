@@ -1,6 +1,6 @@
 /* nls.c -- skeletal internationalization code. */
 
-/* Copyright (C) 1996-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2017 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -86,8 +86,7 @@ static char *find_codeset PARAMS((char *, size_t *));
 static char *_rl_get_locale_var PARAMS((const char *));
 
 static char *
-_rl_get_locale_var (v)
-     const char *v;
+_rl_get_locale_var (const char *v)
 {
   char *lspec;
 
@@ -101,8 +100,7 @@ _rl_get_locale_var (v)
 }
 
 static int
-utf8locale (lspec)
-     char *lspec;
+utf8locale (char *lspec)
 {
   char *cp;
   size_t len;
@@ -122,7 +120,7 @@ utf8locale (lspec)
 /* Query the right environment variables and call setlocale() to initialize
    the C library locale settings. */
 char *
-_rl_init_locale ()
+_rl_init_locale (void)
 {
   char *ret, *lspec;
 
@@ -148,7 +146,7 @@ _rl_init_locale ()
    to decide the defaults for 8-bit character input and output.  Returns
    1 if we set eight-bit mode. */
 int
-_rl_init_eightbit ()
+_rl_init_eightbit (void)
 {
 /* If we have setlocale(3), just check the current LC_CTYPE category
    value, and go into eight-bit mode if it's not C or POSIX. */
@@ -196,8 +194,7 @@ _rl_init_eightbit ()
 
 #if !defined (HAVE_SETLOCALE)
 static char *
-normalize_codeset (codeset)
-     char *codeset;
+normalize_codeset (char *codeset)
 {
   size_t namelen, i;
   int len, all_digits;
@@ -244,9 +241,7 @@ normalize_codeset (codeset)
 
 /* Isolate codeset portion of locale specification. */
 static char *
-find_codeset (name, lenp)
-     char *name;
-     size_t *lenp;
+find_codeset (char *name, size_t *lenp)
 {
   char *cp, *language, *result;
 

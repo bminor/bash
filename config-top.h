@@ -66,6 +66,10 @@
   "/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:."
 #endif
 
+/* If you want to unconditionally set a value for PATH in every shell, set
+   this. You could use this for a restricted shell, for example. */
+/* #define STATIC_PATH_VALUE "/rbin:/usr/rbin" */
+
 /* The value for PATH when invoking `command -p'.  This is only used when
    the Posix.2 confstr () function, or CS_PATH define are not present. */
 #ifndef STANDARD_UTILS_PATH

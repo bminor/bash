@@ -1238,6 +1238,7 @@ maybe_make_restricted (name)
     temp++;
   if (restricted || (STREQ (temp, RESTRICTED_SHELL_NAME)))
     {
+      stupidly_hack_special_variables ("PATH");		/* clear hash table */
       set_var_read_only ("PATH");
       set_var_read_only ("SHELL");
       set_var_read_only ("ENV");

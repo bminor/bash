@@ -797,6 +797,17 @@ bgp_add (pid, status)
 
   bucket = pshash_getbucket (pid);
   psi = bgp_getindex ();
+
+  /* XXX - what if psi == *bucket? */
+  if (psi == *bucket)
+    {
+#ifdef DEBUG
+      internal_warning ("hashed pid %d (pid %d) collides with bgpids.head, skipping", psi, pid);
+#endif
+      bgpids.storage[psi].pid = NO_PID;		/* make sure */
+      psi = bgp_getindex ();			/* skip to next one */
+    }
+
   ps = &bgpids.storage[psi];
 
   ps->pid = pid;

@@ -13165,3 +13165,61 @@ parse.y
 	  to the values in tflags when calling shell_getc.  Fixes bug reported
 	  by Michael Homer <michael.homer@ecs.vuw.ac.nz>, patch was originally
 	  contributed by Geir Hauge <geir.hauge@gmail.com>
+
+				   2/15
+				   ----
+jobs.c
+	- bgp_add: if hashed pid collides with bgpids.head index, print a
+	  warning and move to the next index.  Attempt to avoid collision
+	  problem reported by Graham Northup <northug@clarkson.edu>
+
+				   2/17
+				   ----
+subst.c
+	- process_substitute: call remove_quoted_escapes on the command string
+	  like command substitution does, since the string will be run through
+	  the parser again.  Fixes bug reported by David Simmons
+	  <bug-bash@tmp.davidsimmons.com>
+
+config-top.h
+	- STATIC_PATH_VALUE: new config variable, undefined by default
+
+variables.c
+	- shell_initialize: if STATIC_PATH_VALUE is defined, use it to set the
+	  PATH variable at shell startup, overriding the environment and any
+	  value for DEFAULT_PATH_VALUE.  Based on a suggestion from
+	  Lonnie Abelbeck <lonnie@abelbeck.com>
+
+				   2/18
+				   ----
+shell.c
+	- maybe_make_restricted: clear the hash table before making the PATH
+	  variable read-only by calling stupidly_hack_special_variables.
+	  Suggestion from Lonnie Abelbeck <lonnie@abelbeck.com>
+
+subst.c
+	- expand_string_for_pat: change expansion of WORD in ${param[%[%]][#[#]]word}
+	  to use this new function, initially identical to
+	  expand_string_for_rhs
+	- getpattern: use expand_string_for_pat to expand the pattern
+
+				   2/19
+				   ----
+subst.c
+	- expand_string_for_rhs: now that this is only use to expand the RHS
+	  of the various non-pattern ${paramOPword} expansions, set
+	  expand_no_split_dollar_star depending on whether or not the entire
+	  brace expansion is going to be subjected to word splitting: if it's
+	  quoted or if IFS is set but null, we will not be splitting so we set
+	  this to 1 and let $* expand to separate fields separated by a space.
+	  This was heavily debated back in October 2014 and resulted in Posix
+	  interp 888. Reported by Martijn Dekker <martijn@inlv.org>
+
+				   2/20
+				   ----
+subst.c
+	- expand_string_for_rhs: now takes `op' (brace expansion operator) as
+	  an additional argument; changed call in parameter_brace_expand_rhs
+	- expand_string_for_rhs: make sure to set expand_no_split_dollar_star
+	  if `op' is `=', since we are supposed to preserve the assignment
+	  statement expansion semantics on the RHS of ${param=word}

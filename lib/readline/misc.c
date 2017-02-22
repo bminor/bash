@@ -1,6 +1,6 @@
 /* misc.c -- miscellaneous bindable readline functions. */
 
-/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -76,7 +76,7 @@ int _rl_history_saved_point = -1;
 /* **************************************************************** */
 
 int
-_rl_arg_overflow ()
+_rl_arg_overflow (void)
 {
   if (rl_numeric_arg > 1000000)
     {
@@ -92,7 +92,7 @@ _rl_arg_overflow ()
 }
 
 void
-_rl_arg_init ()
+_rl_arg_init (void)
 {
   rl_save_prompt ();
   _rl_argcxt = 0;
@@ -100,7 +100,7 @@ _rl_arg_init ()
 }
 
 int
-_rl_arg_getchar ()
+_rl_arg_getchar (void)
 {
   int c;
 
@@ -116,9 +116,7 @@ _rl_arg_getchar ()
    argument should be aborted, 0 if we should not read any more chars, and
    1 if we should continue to read chars. */
 int
-_rl_arg_dispatch (cxt, c)
-     _rl_arg_cxt cxt;
-     int c;
+_rl_arg_dispatch (_rl_arg_cxt cxt, int c)
 {
   int key, r;
 
@@ -193,7 +191,7 @@ _rl_arg_dispatch (cxt, c)
 
 /* Handle C-u style numeric args, as well as M--, and M-digits. */
 static int
-rl_digit_loop ()
+rl_digit_loop (void)
 {
   int c, r;
 
@@ -220,7 +218,7 @@ rl_digit_loop ()
 
 /* Create a default argument. */
 void
-_rl_reset_argument ()
+_rl_reset_argument (void)
 {
   rl_numeric_arg = rl_arg_sign = 1;
   rl_explicit_arg = 0;
@@ -229,8 +227,7 @@ _rl_reset_argument ()
 
 /* Start a numeric argument with initial value KEY */
 int
-rl_digit_argument (ignore, key)
-     int ignore, key;
+rl_digit_argument (int ignore, int key)
 {
   _rl_arg_init ();
   if (RL_ISSTATE (RL_STATE_CALLBACK))
@@ -250,8 +247,7 @@ rl_digit_argument (ignore, key)
    Read a key.  If the key has nothing to do with arguments, then
    dispatch on it.  If the key is the abort character then abort. */
 int
-rl_universal_argument (count, key)
-     int count, key;
+rl_universal_argument (int count, int key)
 {
   _rl_arg_init ();
   rl_numeric_arg *= 4;
@@ -260,8 +256,7 @@ rl_universal_argument (count, key)
 }
 
 int
-_rl_arg_callback (cxt)
-     _rl_arg_cxt cxt;
+_rl_arg_callback (_rl_arg_cxt cxt)
 {
   int c, r;
 
@@ -285,7 +280,7 @@ _rl_arg_callback (cxt)
 
 /* What to do when you abort reading an argument. */
 int
-rl_discard_argument ()
+rl_discard_argument (void)
 {
   rl_ding ();
   rl_clear_message ();
@@ -310,7 +305,7 @@ HIST_ENTRY *_rl_saved_line_for_history = (HIST_ENTRY *)NULL;
 
 /* Set the history pointer back to the last entry in the history. */
 void
-_rl_start_using_history ()
+_rl_start_using_history (void)
 {
   using_history ();
   if (_rl_saved_line_for_history)
@@ -321,8 +316,7 @@ _rl_start_using_history ()
 
 /* Free the contents (and containing structure) of a HIST_ENTRY. */
 void
-_rl_free_history_entry (entry)
-     HIST_ENTRY *entry;
+_rl_free_history_entry (HIST_ENTRY *entry)
 {
   if (entry == 0)
     return;
@@ -335,7 +329,7 @@ _rl_free_history_entry (entry)
 
 /* Perhaps put back the current line if it has changed. */
 int
-rl_maybe_replace_line ()
+rl_maybe_replace_line (void)
 {
   HIST_ENTRY *temp;
 
@@ -353,7 +347,7 @@ rl_maybe_replace_line ()
 
 /* Restore the _rl_saved_line_for_history if there is one. */
 int
-rl_maybe_unsave_line ()
+rl_maybe_unsave_line (void)
 {
   if (_rl_saved_line_for_history)
     {
@@ -372,7 +366,7 @@ rl_maybe_unsave_line ()
 
 /* Save the current line in _rl_saved_line_for_history. */
 int
-rl_maybe_save_line ()
+rl_maybe_save_line (void)
 {
   if (_rl_saved_line_for_history == 0)
     {
@@ -386,7 +380,7 @@ rl_maybe_save_line ()
 }
 
 int
-_rl_free_saved_history_line ()
+_rl_free_saved_history_line (void)
 {
   if (_rl_saved_line_for_history)
     {
@@ -397,7 +391,7 @@ _rl_free_saved_history_line ()
 }
 
 static void
-_rl_history_set_point ()
+_rl_history_set_point (void)
 {
   rl_point = (_rl_history_preserve_point && _rl_history_saved_point != -1)
 		? _rl_history_saved_point
@@ -415,9 +409,7 @@ _rl_history_set_point ()
 }
 
 void
-rl_replace_from_history (entry, flags)
-     HIST_ENTRY *entry;
-     int flags;			/* currently unused */
+rl_replace_from_history (HIST_ENTRY *entry, int flags)
 {
   /* Can't call with `1' because rl_undo_list might point to an undo list
      from a history entry, just like we're setting up here. */
@@ -441,7 +433,7 @@ rl_replace_from_history (entry, flags)
    intended to be called while actively editing, and the current line is
    not assumed to have been added to the history list. */
 void
-_rl_revert_all_lines ()
+_rl_revert_all_lines (void)
 {
   int hpos;
   HIST_ENTRY *entry;
@@ -490,7 +482,7 @@ _rl_revert_all_lines ()
    to an UNDO_LIST * saved as some history entry's data member.  This
    should not be called while editing is active. */
 void
-rl_clear_history ()
+rl_clear_history (void)
 {
   HIST_ENTRY **hlist, *hent;
   register int i;
@@ -524,16 +516,14 @@ rl_clear_history ()
 
 /* Meta-< goes to the start of the history. */
 int
-rl_beginning_of_history (count, key)
-     int count, key;
+rl_beginning_of_history (int count, int key)
 {
   return (rl_get_previous_history (1 + where_history (), key));
 }
 
 /* Meta-> goes to the end of the history.  (The current line). */
 int
-rl_end_of_history (count, key)
-     int count, key;
+rl_end_of_history (int count, int key)
 {
   rl_maybe_replace_line ();
   using_history ();
@@ -543,8 +533,7 @@ rl_end_of_history (count, key)
 
 /* Move down to the next history line. */
 int
-rl_get_next_history (count, key)
-     int count, key;
+rl_get_next_history (int count, int key)
 {
   HIST_ENTRY *temp;
 
@@ -582,8 +571,7 @@ rl_get_next_history (count, key)
 /* Get the previous item out of our interactive history, making it the current
    line.  If there is no previous history, just ding. */
 int
-rl_get_previous_history (count, key)
-     int count, key;
+rl_get_previous_history (int count, int key)
 {
   HIST_ENTRY *old_temp, *temp;
 
@@ -637,8 +625,7 @@ rl_get_previous_history (count, key)
 /* **************************************************************** */
 /* How to toggle back and forth between editing modes. */
 int
-rl_vi_editing_mode (count, key)
-     int count, key;
+rl_vi_editing_mode (int count, int key)
 {
 #if defined (VI_MODE)
   _rl_set_insert_mode (RL_IM_INSERT, 1);	/* vi mode ignores insert mode */
@@ -650,8 +637,7 @@ rl_vi_editing_mode (count, key)
 }
 
 int
-rl_emacs_editing_mode (count, key)
-     int count, key;
+rl_emacs_editing_mode (int count, int key)
 {
   rl_editing_mode = emacs_mode;
   _rl_set_insert_mode (RL_IM_INSERT, 1); /* emacs mode default is insert mode */
@@ -665,8 +651,7 @@ rl_emacs_editing_mode (count, key)
 
 /* Function for the rest of the library to use to set insert/overwrite mode. */
 void
-_rl_set_insert_mode (im, force)
-     int im, force;
+_rl_set_insert_mode (int im, int force)
 {
 #ifdef CURSOR_MODE
   _rl_set_cursor (im, force);
@@ -678,8 +663,7 @@ _rl_set_insert_mode (im, force)
 /* Toggle overwrite mode.  A positive explicit argument selects overwrite
    mode.  A negative or zero explicit argument selects insert mode. */
 int
-rl_overwrite_mode (count, key)
-     int count, key;
+rl_overwrite_mode (int count, int key)
 {
   if (rl_explicit_arg == 0)
     _rl_set_insert_mode (rl_insert_mode ^ 1, 0);

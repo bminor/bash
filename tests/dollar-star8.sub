@@ -1,0 +1,21 @@
+IFS=
+set "abc" "def ghi" "jkl"
+
+set ${1+$*}
+printf '<%s>\n' "$#" "$@"
+
+set "abc" "def ghi" "jkl"
+set $*
+printf '<%s>\n' "$#" "$@"
+
+printf '<%s>\n' $* ;
+printf '<%s>\n' ${q:-$*} 
+printf '<%s>\n' "${q:-$*}"
+
+IFS=:
+printf '<%s>\n' $* ;
+printf '<%s>\n' ${q:-$*} 
+printf '<%s>\n' "${q:-$*}"
+
+unset -v IFS
+printf '<%s>\n' $* $@

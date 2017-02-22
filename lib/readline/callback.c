@@ -1,6 +1,6 @@
 /* callback.c -- functions to use readline as an X `callback' mechanism. */
 
-/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -80,7 +80,7 @@ static int in_handler;		/* terminal_prepped and signals set? */
 
 /* Make sure the terminal is set up, initialize readline, and prompt. */
 static void
-_rl_callback_newline ()
+_rl_callback_newline (void)
 {
   rl_initialize ();
 
@@ -103,9 +103,7 @@ _rl_callback_newline ()
 
 /* Install a readline handler, set up the terminal, and issue the prompt. */
 void
-rl_callback_handler_install (prompt, linefunc)
-     const char *prompt;
-     rl_vcpfunc_t *linefunc;
+rl_callback_handler_install (const char *prompt, rl_vcpfunc_t *linefunc)
 {
   rl_set_prompt (prompt);
   RL_SETSTATE (RL_STATE_CALLBACK);
@@ -126,7 +124,7 @@ rl_callback_handler_install (prompt, linefunc)
 
 /* Read one character, and dispatch to the handler if it ends the line. */
 void
-rl_callback_read_char ()
+rl_callback_read_char (void)
 {
   char *line;
   int eof, jcode;
@@ -299,7 +297,7 @@ rl_callback_read_char ()
 
 /* Remove the handler, and make sure the terminal is in its normal state. */
 void
-rl_callback_handler_remove ()
+rl_callback_handler_remove (void)
 {
   rl_linefunc = NULL;
   RL_UNSETSTATE (RL_STATE_CALLBACK);
@@ -316,8 +314,7 @@ rl_callback_handler_remove ()
 }
 
 _rl_callback_generic_arg *
-_rl_callback_data_alloc (count)
-     int count;
+_rl_callback_data_alloc (int count)
 {
   _rl_callback_generic_arg *arg;
 
@@ -330,15 +327,14 @@ _rl_callback_data_alloc (count)
 }
 
 void
-_rl_callback_data_dispose (arg)
-     _rl_callback_generic_arg *arg;
+_rl_callback_data_dispose (_rl_callback_generic_arg *arg)
 {
   xfree (arg);
 }
 
 /* Make sure that this agrees with cases in rl_callback_read_char */
 void
-rl_callback_sigcleanup ()
+rl_callback_sigcleanup (void)
 {
   if (RL_ISSTATE (RL_STATE_CALLBACK) == 0)
     return;

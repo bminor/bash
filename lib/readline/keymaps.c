@@ -1,6 +1,6 @@
 /* keymaps.c -- Functions and keymaps for the GNU Readline library. */
 
-/* Copyright (C) 1988,1989-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1988,1989-2009,2017 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -54,7 +54,7 @@
 /* Return a new, empty keymap.
    Free it with free() when you are done. */
 Keymap
-rl_make_bare_keymap ()
+rl_make_bare_keymap (void)
 {
   register int i;
   Keymap keymap;
@@ -80,8 +80,7 @@ rl_make_bare_keymap ()
 /* Return a new keymap which is a copy of MAP.  Just copies pointers, does
    not copy text of macros or descend into child keymaps. */
 Keymap
-rl_copy_keymap (map)
-     Keymap map;
+rl_copy_keymap (Keymap map)
 {
   register int i;
   Keymap temp;
@@ -99,7 +98,7 @@ rl_copy_keymap (map)
    the uppercase Meta characters bound to run their lowercase equivalents,
    and the Meta digits bound to produce numeric arguments. */
 Keymap
-rl_make_keymap ()
+rl_make_keymap (void)
 {
   register int i;
   Keymap newmap;
@@ -125,8 +124,7 @@ rl_make_keymap ()
 
 /* Free the storage associated with MAP. */
 void
-rl_discard_keymap (map)
-     Keymap map;
+rl_discard_keymap (Keymap map)
 {
   int i;
 
@@ -154,8 +152,7 @@ rl_discard_keymap (map)
 
 /* Convenience function that discards, then frees, MAP. */
 void
-rl_free_keymap (map)
-     Keymap map;
+rl_free_keymap (Keymap map)
 {
   rl_discard_keymap (map);
   xfree ((char *)map);

@@ -6,7 +6,7 @@
 /*								    */
 /* **************************************************************** */
 
-/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -78,8 +78,7 @@ static int last_isearch_string_len;
 static char * const default_isearch_terminators = "\033\012";
 
 _rl_search_cxt *
-_rl_scxt_alloc (type, flags)
-     int type, flags;
+_rl_scxt_alloc (int type, int flags)
 {
   _rl_search_cxt *cxt;
 
@@ -120,9 +119,7 @@ _rl_scxt_alloc (type, flags)
 }
 
 void
-_rl_scxt_dispose (cxt, flags)
-     _rl_search_cxt *cxt;
-     int flags;
+_rl_scxt_dispose (_rl_search_cxt *cxt, int flags)
 {
   FREE (cxt->search_string);
   FREE (cxt->allocated_line);
@@ -134,8 +131,7 @@ _rl_scxt_dispose (cxt, flags)
 /* Search backwards through the history looking for a string which is typed
    interactively.  Start with the current line. */
 int
-rl_reverse_search_history (sign, key)
-     int sign, key;
+rl_reverse_search_history (int sign, int key)
 {
   return (rl_search_history (-sign, key));
 }
@@ -143,8 +139,7 @@ rl_reverse_search_history (sign, key)
 /* Search forwards through the history looking for a string which is typed
    interactively.  Start with the current line. */
 int
-rl_forward_search_history (sign, key)
-     int sign, key;
+rl_forward_search_history (int sign, int key)
 {
   return (rl_search_history (sign, key));
 }
@@ -155,9 +150,7 @@ rl_forward_search_history (sign, key)
    WHERE is the history list number of the current line.  If it is
    -1, then this line is the starting one. */
 static void
-rl_display_search (search_string, flags, where)
-     char *search_string;
-     int flags, where;
+rl_display_search (char *search_string, int flags, int where)
 {
   char *message;
   int msglen, searchlen;
@@ -206,8 +199,7 @@ rl_display_search (search_string, flags, where)
 }
 
 static _rl_search_cxt *
-_rl_isearch_init (direction)
-     int direction;
+_rl_isearch_init (int direction)
 {
   _rl_search_cxt *cxt;
   register int i;
@@ -267,8 +259,7 @@ _rl_isearch_init (direction)
 }
 
 static void
-_rl_isearch_fini (cxt)
-     _rl_search_cxt *cxt;
+_rl_isearch_fini (_rl_search_cxt *cxt)
 {
   /* First put back the original state. */
   strcpy (rl_line_buffer, cxt->lines[cxt->save_line]);
@@ -306,8 +297,7 @@ _rl_isearch_fini (cxt)
 }
 
 int
-_rl_search_getchar (cxt)
-     _rl_search_cxt *cxt;
+_rl_search_getchar (_rl_search_cxt *cxt)
 {
   int c;
 
@@ -334,9 +324,7 @@ _rl_search_getchar (cxt)
    -1 if the caller should just free the context and return, 0 if we should
    break out of the loop, and 1 if we should continue to read characters. */
 int
-_rl_isearch_dispatch (cxt, c)
-     _rl_search_cxt *cxt;
-     int c;
+_rl_isearch_dispatch (_rl_search_cxt *cxt, int c)
 {
   int n, wstart, wlen, limit, cval;
   rl_command_func_t *f;
@@ -734,9 +722,7 @@ add_character:
 }
 
 int
-_rl_isearch_cleanup (cxt, r)
-     _rl_search_cxt *cxt;
-     int r;
+_rl_isearch_cleanup (_rl_search_cxt *cxt, int r)
 {
   if (r >= 0)
     _rl_isearch_fini (cxt);
@@ -753,8 +739,7 @@ _rl_isearch_cleanup (cxt, r)
    DIRECTION is which direction to search; >= 0 means forward, < 0 means
    backwards. */
 static int
-rl_search_history (direction, invoking_key)
-     int direction, invoking_key;
+rl_search_history (int direction, int invoking_key)
 {
   _rl_search_cxt *cxt;		/* local for now, but saved globally */
   int c, r;
@@ -792,8 +777,7 @@ rl_search_history (direction, invoking_key)
    If _rl_isearch_dispatch finishes searching, this function is responsible
    for turning off RL_STATE_ISEARCH, which it does using _rl_isearch_cleanup. */
 int
-_rl_isearch_callback (cxt)
-     _rl_search_cxt *cxt;
+_rl_isearch_callback (_rl_search_cxt *cxt)
 {
   int c, r;
 

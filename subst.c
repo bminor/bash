@@ -215,8 +215,11 @@ static WORD_DESC expand_wdesc_error, expand_wdesc_fatal;
 static char expand_param_error, expand_param_fatal, expand_param_unset;
 static char extract_string_error, extract_string_fatal;
 
-/* Set by expand_word_unsplit; used to inhibit splitting and re-joining
-   $* on $IFS, primarily when doing assignment statements. */
+/* Set by expand_word_unsplit and several of the expand_string_XXX functions;
+   used to inhibit splitting and re-joining $* on $IFS, primarily when doing
+   assignment statements.  The idea is that if we're in a context where this
+   is set, we're not going to be performing word splitting, so we use the same
+   rules to expand $* as we would if it appeared within double quotes. */
 static int expand_no_split_dollar_star = 0;
 
 /* A WORD_LIST of words to be expanded by expand_word_list_internal,
@@ -232,7 +235,8 @@ static inline char *expand_string_to_string_internal __P((char *, int, EXPFUNC *
 static WORD_LIST *call_expand_word_internal __P((WORD_DESC *, int, int, int *, int *));
 static WORD_LIST *expand_string_internal __P((char *, int));
 static WORD_LIST *expand_string_leave_quoted __P((char *, int));
-static WORD_LIST *expand_string_for_rhs __P((char *, int, int *, int *));
+static WORD_LIST *expand_string_for_rhs __P((char *, int, int, int *, int *));
+static WORD_LIST *expand_string_for_pat __P((char *, int, int *, int *));
 
 static WORD_LIST *list_quote_escapes __P((WORD_LIST *));
 static WORD_LIST *list_dequote_escapes __P((WORD_LIST *));
@@ -3817,7 +3821,40 @@ expand_string_leave_quoted (string, quoted)
 /* This does not perform word splitting or dequote the WORD_LIST
    it returns. */
 static WORD_LIST *
-expand_string_for_rhs (string, quoted, dollar_at_p, expanded_p)
+expand_string_for_rhs (string, quoted, op, dollar_at_p, expanded_p)
+     char *string;
+     int quoted, op;
+     int *dollar_at_p, *expanded_p;
+{
+  WORD_DESC td;
+  WORD_LIST *tresult;
+
+  if (string == 0 || *string == '\0')
+    return (WORD_LIST *)NULL;
+
+  /* We want field splitting to be determined by what is going to be done with
+     the entire ${parameterOPword} expansion, so we don't want to split the RHS
+     we expand here.  However, the expansion of $* is determined by whether we
+     are going to eventually perform word splitting, so we want to set this
+     depending on whether or not are are going to be splitting: if the expansion
+     is quoted, if the OP is `=',  or if IFS is set to the empty string, we
+     are not going to be splitting, so we set expand_no_split_dollar_star to
+     1.  This may need additional changes depending on whether or not this is
+     on the RHS of an assignment statement. */
+  /* The updated treatment of $* is the result of Posix interp 888 */
+  expand_no_split_dollar_star = (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) || op == '=' || ifs_is_null == 0;
+  td.flags = W_NOSPLIT2;		/* no splitting, remove "" and '' */
+  td.word = string;
+  tresult = call_expand_word_internal (&td, quoted, 1, dollar_at_p, expanded_p);
+  expand_no_split_dollar_star = 0;
+
+  return (tresult);
+}
+
+/* This does not perform word splitting or dequote the WORD_LIST
+   it returns and it treats $* as if it were quoted. */
+static WORD_LIST *
+expand_string_for_pat (string, quoted, dollar_at_p, expanded_p)
      char *string;
      int quoted, *dollar_at_p, *expanded_p;
 {
@@ -4907,9 +4944,9 @@ getpattern (value, quoted, expandpat)
     }
 #endif
 
-  /* expand_string_for_rhs () leaves WORD quoted and does not perform
+  /* expand_string_for_pat () leaves WORD quoted and does not perform
      word splitting. */
-  l = *value ? expand_string_for_rhs (value,
+  l = *value ? expand_string_for_pat (value,
 				      (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) ? Q_PATQUOTE : quoted,
 				      (int *)NULL, (int *)NULL)
 	     : (WORD_LIST *)0;
@@ -5982,6 +6019,8 @@ process_substitute (string, open_for_read_in_child)
      parent. */
   expanding_redir = 0;
 
+  remove_quoted_escapes (string);
+
   subshell_level++;
   result = parse_and_execute (string, "process substitution", (SEVAL_NONINT|SEVAL_NOHIST));
   /* leave subshell level intact for any exit trap */
@@ -6807,9 +6846,9 @@ parameter_brace_expand_indir (name, var_is_special, quoted, quoted_dollar_atp, c
    "-", "+", or "=".  QUOTED is true if the entire brace expression occurs
    between double quotes. */
 static WORD_DESC *
-parameter_brace_expand_rhs (name, value, c, quoted, pflags, qdollaratp, hasdollarat)
+parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdollarat)
      char *name, *value;
-     int c, quoted, pflags, *qdollaratp, *hasdollarat;
+     int op, quoted, pflags, *qdollaratp, *hasdollarat;
 {
   WORD_DESC *w;
   WORD_LIST *l;
@@ -6831,7 +6870,7 @@ parameter_brace_expand_rhs (name, value, c, quoted, pflags, qdollaratp, hasdolla
   w = alloc_word_desc ();
   l_hasdollat = 0;
   /* XXX was 0 not quoted */
-  l = *temp ? expand_string_for_rhs (temp, quoted, &l_hasdollat, (int *)NULL)
+  l = *temp ? expand_string_for_rhs (temp, quoted, op, &l_hasdollat, (int *)NULL)
 	    : (WORD_LIST *)0;
   if (hasdollarat)
     *hasdollarat = l_hasdollat || (l && l->next);
@@ -6903,13 +6942,13 @@ parameter_brace_expand_rhs (name, value, c, quoted, pflags, qdollaratp, hasdolla
   else
     temp = (char *)NULL;
 
-  if (c == '-' || c == '+')
+  if (op == '-' || op == '+')
     {
       w->word = temp;
       return w;
     }
 
-  /* c == '=' */
+  /* op == '=' */
   t = temp ? savestring (temp) : savestring ("");
   t1 = dequote_string (t);
   free (t);

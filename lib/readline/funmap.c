@@ -1,6 +1,6 @@
 /* funmap.c -- attach names to functions. */
 
-/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -206,9 +206,7 @@ static const FUNMAP default_funmap[] = {
 };
 
 int
-rl_add_funmap_entry (name, function)
-     const char *name;
-     rl_command_func_t *function;
+rl_add_funmap_entry (const char *name, rl_command_func_t *function)
 {
   if (funmap_entry + 2 >= funmap_size)
     {
@@ -228,7 +226,7 @@ static int funmap_initialized;
 
 /* Make the funmap contain all of the default entries. */
 void
-rl_initialize_funmap ()
+rl_initialize_funmap (void)
 {
   register int i;
 
@@ -246,7 +244,7 @@ rl_initialize_funmap ()
    is sorted.  The array itself is allocated, but not the strings inside.
    You should free () the array when you done, but not the pointers. */
 const char **
-rl_funmap_names ()
+rl_funmap_names (void)
 {
   const char **result;
   int result_size, result_index;

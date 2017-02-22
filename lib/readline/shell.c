@@ -1,7 +1,7 @@
 /* shell.c -- readline utility functions that are normally provided by
 	      bash when readline is linked as part of the shell. */
 
-/* Copyright (C) 1997-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2009,2017 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -92,8 +92,7 @@ extern struct passwd *getpwuid PARAMS((uid_t));
 
 /* Does shell-like quoting using single quotes. */
 char *
-sh_single_quote (string)
-     char *string;
+sh_single_quote (char *string)
 {
   register int c;
   char *result, *r, *s;
@@ -127,8 +126,7 @@ static char putenv_buf1[INT_STRLEN_BOUND (int) + 6 + 1];	/* sizeof("LINES=") == 
 static char putenv_buf2[INT_STRLEN_BOUND (int) + 8 + 1];	/* sizeof("COLUMNS=") == 8 */
 
 void
-sh_set_lines_and_columns (lines, cols)
-     int lines, cols;
+sh_set_lines_and_columns (int lines, int cols)
 {
 #if defined (HAVE_SETENV)
   sprintf (setenv_buf, "%d", lines);
@@ -148,14 +146,13 @@ sh_set_lines_and_columns (lines, cols)
 }
 
 char *
-sh_get_env_value (varname)
-     const char *varname;
+sh_get_env_value (const char *varname)
 {
   return ((char *)getenv (varname));
 }
 
 char *
-sh_get_home_dir ()
+sh_get_home_dir (void)
 {
   static char *home_dir = (char *)NULL;
   struct passwd *entry;
@@ -188,8 +185,7 @@ sh_get_home_dir ()
 #endif
 
 int
-sh_unset_nodelay_mode (fd)
-     int fd;
+sh_unset_nodelay_mode (int fd)
 {
 #if defined (HAVE_FCNTL)
   int flags, bflags;

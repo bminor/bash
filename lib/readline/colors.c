@@ -2,7 +2,7 @@
 
    Modified by Chet Ramey for Readline.
 
-   Copyright (C) 1985, 1988, 1990-1991, 1995-2010, 2012, 2015
+   Copyright (C) 1985, 1988, 1990-1991, 1995-2010, 2012, 2015, 2017
    Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -70,7 +70,8 @@ COLOR_EXT_TYPE *_rl_color_ext_list = 0;
 
 /* Output a color indicator (which may contain nulls).  */
 void
-_rl_put_indicator (const struct bin_str *ind) {
+_rl_put_indicator (const struct bin_str *ind)
+{
   fwrite (ind->string, ind->len, 1, rl_outstream);
 }
 

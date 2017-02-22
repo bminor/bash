@@ -1,6 +1,6 @@
 /* macro.c -- keyboard macros for readline. */
 
-/* Copyright (C) 1994-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2009,2017 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -90,8 +90,7 @@ static int macro_level = 0;
 /* Set up to read subsequent input from STRING.
    STRING is free ()'ed when we are done with it. */
 void
-_rl_with_macro_input (string)
-     char *string;
+_rl_with_macro_input (char *string)
 {
   if (macro_level > MAX_MACRO_LEVEL)
     {
@@ -112,7 +111,7 @@ _rl_with_macro_input (string)
 /* Return the next character available from a macro, or 0 if
    there are no macro characters. */
 int
-_rl_next_macro_key ()
+_rl_next_macro_key (void)
 {
   int c;
 
@@ -138,7 +137,7 @@ _rl_next_macro_key ()
 }
 
 int
-_rl_peek_macro_key ()
+_rl_peek_macro_key (void)
 {
   if (rl_executing_macro == 0)
     return (0);
@@ -150,7 +149,7 @@ _rl_peek_macro_key ()
 }
 
 int
-_rl_prev_macro_key ()
+_rl_prev_macro_key (void)
 {
   if (rl_executing_macro == 0)
     return (0);
@@ -164,7 +163,7 @@ _rl_prev_macro_key ()
 
 /* Save the currently executing macro on a stack of saved macros. */
 void
-_rl_push_executing_macro ()
+_rl_push_executing_macro (void)
 {
   struct saved_macro *saver;
 
@@ -181,7 +180,7 @@ _rl_push_executing_macro ()
 /* Discard the current macro, replacing it with the one
    on the top of the stack of saved macros. */
 void
-_rl_pop_executing_macro ()
+_rl_pop_executing_macro (void)
 {
   struct saved_macro *macro;
 
@@ -206,8 +205,7 @@ _rl_pop_executing_macro ()
 
 /* Add a character to the macro being built. */
 void
-_rl_add_macro_char (c)
-     int c;
+_rl_add_macro_char (int c)
 {
   if (current_macro_index + 1 >= current_macro_size)
     {
@@ -222,7 +220,7 @@ _rl_add_macro_char (c)
 }
 
 void
-_rl_kill_kbd_macro ()
+_rl_kill_kbd_macro (void)
 {
   if (current_macro)
     {
@@ -245,8 +243,7 @@ _rl_kill_kbd_macro ()
    definition to the end of the existing macro, and start by
    re-executing the existing macro. */
 int
-rl_start_kbd_macro (ignore1, ignore2)
-     int ignore1, ignore2;
+rl_start_kbd_macro (int ignore1, int ignore2)
 {
   if (RL_ISSTATE (RL_STATE_MACRODEF))
     {
@@ -270,8 +267,7 @@ rl_start_kbd_macro (ignore1, ignore2)
    A numeric argument says to execute the macro right now,
    that many times, counting the definition as the first time. */
 int
-rl_end_kbd_macro (count, ignore)
-     int count, ignore;
+rl_end_kbd_macro (int count, int ignore)
 {
   if (RL_ISSTATE (RL_STATE_MACRODEF) == 0)
     {
@@ -290,8 +286,7 @@ rl_end_kbd_macro (count, ignore)
 /* Execute the most recently defined keyboard macro.
    COUNT says how many times to execute it. */
 int
-rl_call_last_kbd_macro (count, ignore)
-     int count, ignore;
+rl_call_last_kbd_macro (int count, int ignore)
 {
   if (current_macro == 0)
     _rl_abort_internal ();
@@ -309,8 +304,7 @@ rl_call_last_kbd_macro (count, ignore)
 }
 
 int
-rl_print_last_kbd_macro (count, ignore)
-     int count, ignore;
+rl_print_last_kbd_macro (int count, int ignore)
 {
   char *m;
 
@@ -332,8 +326,7 @@ rl_print_last_kbd_macro (count, ignore)
 }
 
 void
-rl_push_macro_input (macro)
-     char *macro;
+rl_push_macro_input (char *macro)
 {
   _rl_with_macro_input (macro);
 }

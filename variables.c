@@ -451,15 +451,12 @@ initialize_shell_variables (env, privmode)
 
   /* Now make our own defaults in case the vars that we think are
      important are missing. */
+#if defined (STATIC_PATH_VALUE)
+  temp_var = bind_variable ("PATH", STATIC_PATH_VALUE, 0);
+#else
   temp_var = set_if_not ("PATH", DEFAULT_PATH_VALUE);
-#if 0
-  set_auto_export (temp_var);	/* XXX */
 #endif
-
   temp_var = set_if_not ("TERM", "dumb");
-#if 0
-  set_auto_export (temp_var);	/* XXX */
-#endif
 
 #if defined (__QNX__)
   /* set node id -- don't import it from the environment */
