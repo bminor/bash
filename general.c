@@ -57,6 +57,10 @@
 extern int errno;
 #endif /* !errno */
 
+#ifdef __CYGWIN__
+#  include <sys/cygwin.h>
+#endif
+
 static char *bash_special_tilde_expansions __P((char *));
 static int unquoted_tilde_word __P((const char *));
 static void initialize_group_array __P((void));
@@ -724,7 +728,8 @@ make_absolute (string, dot_path)
     {
       char pathbuf[PATH_MAX + 1];
 
-      cygwin_conv_to_full_posix_path (string, pathbuf);
+      /* WAS cygwin_conv_to_full_posix_path (string, pathbuf); */
+      cygwin_conv_path (CCP_WIN_A_TO_POSIX, string, pathbuf, PATH_MAX);
       result = savestring (pathbuf);
     }
 #else

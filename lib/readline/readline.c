@@ -419,7 +419,10 @@ readline_internal_setup ()
 #if defined (VI_MODE)
   if (rl_editing_mode == vi_mode)
     rl_vi_insertion_mode (1, 'i');	/* don't want to reset last */
+  else
 #endif /* VI_MODE */
+    if (_rl_show_mode_in_prompt)
+      _rl_reset_prompt ();
 
   /* If we're not echoing, we still want to at least print a prompt, because
      rl_redisplay will not do it for us.  If the calling application has a

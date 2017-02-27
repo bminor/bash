@@ -795,8 +795,11 @@ bgp_add (pid, status)
   ps_index_t *bucket, psi;
   struct pidstat *ps;
 
-  bucket = pshash_getbucket (pid);
-  psi = bgp_getindex ();
+  /* bucket == existing chain of pids hashing to same value
+     psi = where were going to put this pid/status */
+
+  bucket = pshash_getbucket (pid);	/* index into pidstat_table */
+  psi = bgp_getindex ();		/* bgpids.head, index into storage */
 
   /* XXX - what if psi == *bucket? */
   if (psi == *bucket)
@@ -835,36 +838,44 @@ pshash_delindex (psi)
      ps_index_t psi;
 {
   struct pidstat *ps;
+  ps_index_t *bucket;
 
   ps = &bgpids.storage[psi];
   if (ps->pid == NO_PID)
     return;
 
-  if (ps->bucket_next != NO_PID)
+  if (ps->bucket_next != NO_PIDSTAT)
     bgpids.storage[ps->bucket_next].bucket_prev = ps->bucket_prev;
-  if (ps->bucket_prev != NO_PID)
+  if (ps->bucket_prev != NO_PIDSTAT)
     bgpids.storage[ps->bucket_prev].bucket_next = ps->bucket_next;
   else
-    *(pshash_getbucket (ps->pid)) = ps->bucket_next;
+    {
+      bucket = pshash_getbucket (ps->pid);
+      *bucket = ps->bucket_next;	/* deleting chain head in hash table */
+    }
+
+  /* clear out this cell, just in case */
+  ps->pid = NO_PID;
+  ps->bucket_next = ps->bucket_prev = NO_PIDSTAT;
 }
 
 static int
 bgp_delete (pid)
      pid_t pid;
 {
-  ps_index_t psi;
+  ps_index_t psi, orig_psi;
 
   if (bgpids.storage == 0 || bgpids.nalloc == 0 || bgpids.npid == 0)
     return 0;
 
   /* Search chain using hash to find bucket in pidstat_table */
-  for (psi = *(pshash_getbucket (pid)); psi != NO_PIDSTAT; psi = bgpids.storage[psi].bucket_next)
+  for (orig_psi = psi = *(pshash_getbucket (pid)); psi != NO_PIDSTAT; psi = bgpids.storage[psi].bucket_next)
     {
       if (bgpids.storage[psi].pid == pid)
 	break;
-      if (psi == bgpids.storage[psi].bucket_next)	/* catch reported bug */
+      if (orig_psi == bgpids.storage[psi].bucket_next)	/* catch reported bug */
 	{
-	  internal_warning ("bgp_delete: BUG: psi (%d) == storage[psi].bucket_next", psi);
+	  internal_warning ("bgp_delete: LOOP: psi (%d) == storage[psi].bucket_next", psi);
 	  return 0;
 	}
     }
@@ -905,15 +916,22 @@ static int
 bgp_search (pid)
      pid_t pid;
 {
-  ps_index_t psi;
+  ps_index_t psi, orig_psi;
 
   if (bgpids.storage == 0 || bgpids.nalloc == 0 || bgpids.npid == 0)
     return -1;
 
   /* Search chain using hash to find bucket in pidstat_table */
-  for (psi = *(pshash_getbucket (pid)); psi != NO_PIDSTAT; psi = bgpids.storage[psi].bucket_next)
-    if (bgpids.storage[psi].pid == pid)
-      return (bgpids.storage[psi].status);
+  for (orig_psi = psi = *(pshash_getbucket (pid)); psi != NO_PIDSTAT; psi = bgpids.storage[psi].bucket_next)
+    {
+      if (bgpids.storage[psi].pid == pid)
+	return (bgpids.storage[psi].status);
+      if (orig_psi == bgpids.storage[psi].bucket_next)	/* catch reported bug */
+	{
+	  internal_warning ("bgp_search: LOOP: psi (%d) == storage[psi].bucket_next", psi);
+	  return -1;
+	}
+    }
 
   return -1;
 }

@@ -451,11 +451,7 @@ initialize_shell_variables (env, privmode)
 
   /* Now make our own defaults in case the vars that we think are
      important are missing. */
-#if defined (STATIC_PATH_VALUE)
-  temp_var = bind_variable ("PATH", STATIC_PATH_VALUE, 0);
-#else
   temp_var = set_if_not ("PATH", DEFAULT_PATH_VALUE);
-#endif
   temp_var = set_if_not ("TERM", "dumb");
 
 #if defined (__QNX__)

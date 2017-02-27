@@ -3842,7 +3842,11 @@ expand_string_for_rhs (string, quoted, op, dollar_at_p, expanded_p)
      1.  This may need additional changes depending on whether or not this is
      on the RHS of an assignment statement. */
   /* The updated treatment of $* is the result of Posix interp 888 */
+#if 0
   expand_no_split_dollar_star = (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) || op == '=' || ifs_is_null == 0;
+#else
+  expand_no_split_dollar_star = 1;
+#endif
   td.flags = W_NOSPLIT2;		/* no splitting, remove "" and '' */
   td.word = string;
   tresult = call_expand_word_internal (&td, quoted, 1, dollar_at_p, expanded_p);
@@ -6640,9 +6644,9 @@ parameter_brace_expand_word (name, var_is_special, quoted, pflags, indp)
   else if (valid_array_reference (name, 0))
     {
 expand_arrayref:
+      var = array_variable_part (name, 0, &tt, (int *)0);
       if (pflags & PF_ASSIGNRHS)
-	{
-	  var = array_variable_part (name, 0, &tt, (int *)0);
+	{ /* [ */
 	  if (ALL_ELEMENT_SUB (tt[0]) && tt[1] == ']')
 	    {
 	      /* Only treat as double quoted if array variable */
@@ -6654,7 +6658,9 @@ expand_arrayref:
 	    }
 	  else
 	    temp = array_value (name, quoted, 0, &atype, &ind);
-	}
+	} /* [ */
+      else if (tt[0] == '*' && tt[1] == ']' && expand_no_split_dollar_star && ifs_is_null)
+	temp = array_value (name, Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT, 0, &atype, &ind);
       else
 	temp = array_value (name, quoted, 0, &atype, &ind);
       if (atype == 0 && temp)
@@ -8403,13 +8409,18 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
       qflags = quoted;
       /* If in a context where word splitting will not take place, treat as
 	 if double-quoted.  Has effects with $* and ${array[*]} */
+
       if (pflags & PF_ASSIGNRHS)
 	qflags |= Q_DOUBLE_QUOTES;
-      chk_atstar (name, qflags, quoted_dollar_atp, contains_dollar_at);
       /* We duplicate a little code here */
       t = mbschr (name, '[');
       if (t && ALL_ELEMENT_SUB (t[1]) && t[2] == ']')
-        all_element_arrayref = 1;
+	{
+	  all_element_arrayref = 1;
+	  if (expand_no_split_dollar_star && t[1] == '*')	/* XXX */
+	    qflags |= Q_DOUBLE_QUOTES;
+	}
+      chk_atstar (name, qflags, quoted_dollar_atp, contains_dollar_at);
     }
 #endif
 

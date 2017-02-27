@@ -991,7 +991,6 @@ print_filename (to_print, full_pathname, prefix_bytes)
 	    slen--;
 	  else
 	    new_full_pathname[slen] = '/';
-	  new_full_pathname[slen] = '/';
 	  strcpy (new_full_pathname + slen + 1, to_print);
 
 #if defined (VISIBLE_STATS)

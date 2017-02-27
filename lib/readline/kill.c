@@ -740,7 +740,7 @@ rl_bracketed_paste_begin (count, key)
   return (retval);
 }
 
-/* A special paste command for Windows users.. */
+/* A special paste command for Windows users. */
 #if defined (_WIN32)
 #include <windows.h>
 

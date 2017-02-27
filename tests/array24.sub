@@ -1,0 +1,47 @@
+set -- "abc" "def ghi" "jkl"
+A=("$@")
+
+IFS=':'
+
+echo 'IFS=: ${var-$*}'
+unset var; printf '%s\n' ${var-$*}
+printf '%s\n' ${var-${A[*]}}
+
+echo "----"
+echo 'IFS=: ${var=$*}'
+
+unset  var; printf '%s\n' ${var=$*}
+printf 'var=%s\n' "$var"
+
+unset var; printf '%s\n' ${var=${A[*]}}
+printf 'var=%s\n' "$var"
+
+echo "----"
+echo 'IFS=: ${var+$*}'
+
+printf '%s\n' ${var+$*}
+printf '%s\n' ${var+${A[*]}}
+
+echo "----"
+echo 'IFS= ${var-$*}'
+
+IFS=''
+unset var; printf '%s\n' ${var-$*}
+unset var; printf '%s\n' ${var-${A[*]}}
+
+echo "----"
+echo 'IFS= ${var=$*}'
+
+unset var
+printf '%s\n' ${var=$*}
+printf 'var=%s\n' "$var"
+
+unset var
+printf '%s\n' ${var=${A[*]}}
+printf 'var=%s\n' "$var"
+
+echo "----"
+echo 'IFS= ${var+$*}'
+
+printf '%s\n' ${var+$*}
+printf '%s\n' ${var+${A[*]}}

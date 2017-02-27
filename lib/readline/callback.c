@@ -60,7 +60,7 @@ int rl_persistent_signal_handlers = 0;
 
 /* **************************************************************** */
 /*								    */
-/*			Callback Readline Functions		 */
+/*			Callback Readline Functions		    */
 /*								    */
 /* **************************************************************** */
 

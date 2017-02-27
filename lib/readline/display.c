@@ -307,6 +307,8 @@ prompt_modestr (lenp)
 
 static int *local_prompt_newlines;
 
+#define APPROX_DIV(n, d)	(((n) < (d)) ? 1 : ((n) / (d)) + 1)
+
 static char *
 expand_prompt (pmt, flags, lp, lip, niflp, vlp)
      char *pmt;
@@ -349,7 +351,10 @@ expand_prompt (pmt, flags, lp, lip, niflp, vlp)
   l = strlen (nprompt);			/* XXX */
   r = ret = (char *)xmalloc (l + 1);
 
-  newlines_guess = (l / _rl_screenwidth) + 1;
+  if (_rl_screenwidth == 0)
+    _rl_get_screen_size (0, 0);	/* avoid division by zero */
+
+  newlines_guess = (_rl_screenwidth > 0) ? APPROX_DIV(l,  _rl_screenwidth) : APPROX_DIV(l, 80);
   local_prompt_newlines = (int *) xrealloc (local_prompt_newlines, sizeof (int) * (newlines_guess + 1));
   local_prompt_newlines[newlines = 0] = 0;
   for (rl = 1; rl <= newlines_guess; rl++)
@@ -2629,7 +2634,8 @@ _rl_erase_at_end_of_line (l)
 }
 
 /* Clear to the end of the line.  COUNT is the minimum
-   number of character spaces to clear, */
+   number of character spaces to clear, but we use a terminal escape
+   sequence if available. */
 void
 _rl_clear_to_eol (count)
      int count;
@@ -2652,7 +2658,7 @@ space_to_eol (count)
   register int i;
 
   for (i = 0; i < count; i++)
-   putc (' ', rl_outstream);
+    putc (' ', rl_outstream);
 
   _rl_last_c_pos += count;
 }

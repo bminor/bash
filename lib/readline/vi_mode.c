@@ -594,7 +594,8 @@ rl_vi_bword (count, ignore)
 	 so we will go back to the start of the previous word. */
       if (!whitespace (rl_line_buffer[rl_point]) &&
 	  whitespace (rl_line_buffer[rl_point - 1]))
-	rl_point--;
+	if (--rl_point == 0)
+	  break;
 
       /* If this character and the previous character are `opposite', move
 	 back so we don't get messed up by the rl_point++ down there in

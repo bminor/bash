@@ -952,11 +952,15 @@ bind_comp_words (lwords)
 {
   SHELL_VAR *v;
 
-  v = find_variable ("COMP_WORDS");
+  v = find_variable_noref ("COMP_WORDS");
   if (v == 0)
     v = make_new_array_variable ("COMP_WORDS");
+  if (nameref_p (v))
+    VUNSETATTR (v, att_nameref);
+#if 0
   if (readonly_p (v))
     VUNSETATTR (v, att_readonly);
+#endif
   if (array_p (v) == 0)
     v = convert_var_to_array (v);
   v = assign_array_var_from_word_list (v, lwords, 0);
@@ -1163,13 +1167,13 @@ gen_shell_function_matches (cs, cmd, text, line, ind, lwords, nw, cw, foundp)
   v = find_variable ("COMPREPLY");
   if (v == 0)
     return ((STRINGLIST *)NULL);
-  if (array_p (v) == 0)
+  if (array_p (v) == 0 && assoc_p (v) == 0)
     v = convert_var_to_array (v);
 
   VUNSETATTR (v, att_invisible);
 
   a = array_cell (v);
-  if (found == 0 || (found & PCOMP_RETRYFAIL) || a == 0 || array_empty (a))
+  if (found == 0 || (found & PCOMP_RETRYFAIL) || a == 0 || array_p (v) == 0 || array_empty (a))
     sl = (STRINGLIST *)NULL;
   else
     {

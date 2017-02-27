@@ -13223,3 +13223,89 @@ subst.c
 	- expand_string_for_rhs: make sure to set expand_no_split_dollar_star
 	  if `op' is `=', since we are supposed to preserve the assignment
 	  statement expansion semantics on the RHS of ${param=word}
+
+jobs.c
+	- bgp_delindex: make sure to set ps->pid to NO_PID so we more
+	  effectively remove it from the hash table. It shouldn't matter as
+	  long as nothing in pidstat_table points to it, but 
+	- bgp_delete,bgp_search: generalize previous collision detection to
+	  loop detection: abort search if we are going to go back to the
+	  first index we tried
+
+				   2/21
+				   ----
+lib/readline/vi_mode.c
+	- rl_vi_bword: if we're trying to move backward to non-whitespace
+	  in a line that begins with whitespace, make sure we don't move
+	  point to 0 and test memory locations before the start of the
+	  buffer. Report and fix from Jason Hood <jadoxa@yahoo.com.au>
+
+lib/readline/display.c
+	- expand_prompt: if _rl_screenwith == 0, call rl_reset_screen_size to
+	  initialize it. If it's still 0 after that, guess that the screen
+	  width is 80 and use that to guess how many screen lines the prompt
+	  consumes
+
+lib/readline/readline.c
+	- readline_internal_setup: if in emacs editing mode, and we are
+	  showing the editing mode in the prompt, call _rl_reset_prompt() to
+	  make sure that the updated setting of _rl_show_mode_in_prompt
+	  (presumably set in an inputrc file) is reflected in the redisplay
+	  performed by rl_callback_newline via readline_internal_setup.
+	  Fix from Jason Hood <jadoxa@yahoo.com.au>
+
+				   2/22
+				   ----
+builtins/complete.def
+	- print_one_completion,print_compopts: make sure to display the
+	  `nosort' and `noquote' options if they've been set for a particular
+	  compspec.  Fix from Grisha Levit <grishalevit@gmail.com>
+
+builtins/read.def
+	- read_builtin: if -e is supplied, read needs to free rlbuf before
+	  returning, since it uses discard_unwind_frame at that point. Bug
+	  and fix from ZhangXiao <xiao.zhang@windriver.com>
+
+execute_cmd.c
+	- execute_for_command: when using a nameref as the for loop control
+	  variable, make sure we check for readonly namerefs and make sure
+	  that we force bind_variable to enforce restrictions on nameref
+	  assignments. Fix from Grisha Levit <grishalevit@gmail.com>
+
+				   2/23
+				   ----
+general.c
+	- make_absolute: convert deprecated cygwin_conv_to_full_posix_path
+	  to cygwin_conv_path (CCP_WIN_A_TO_POSIX, ...)
+
+{shell,variables}.c,config-top.h
+	- modify change from 2/17: rename STATIC_PATH_VALUE to RBASH_STATIC_PATH_VALUE;
+	  don't use it in shell_initialize; set PATH to it just before
+	  imposing restricted shell restrictions
+
+				   2/24
+				   ----
+subst.c
+	- expand_string_for_rhs: revert change from 2/19 concerning setting
+	  expand_no_split_dollar_star so we are consistent with the Posix
+	  examples. This anticipates Martijn Dekker initiating an austin
+	  group discussion about this case
+
+				   2/25
+				   ----
+pcomplete.c
+	- gen_shell_function_matches: if COMPREPLY is an associative array,
+	  don't coerce it to an indexed array, which will fail to produce any
+	  matches anyway.  Report from Grisha Levit <grishalevit@gmail.com>
+	- bind_comp_words: if COMP_WORDS exists as a nameref variable, ignore
+	  the nameref attribute. Report from Grisha Levit
+	  <grishalevit@gmail.com>
+
+subst.c
+	- parameter_brace_expand: if expand_no_split_dollar_star is set, make
+	  sure chk_atstar treats ${var[*]} as quoted by passing Q_DOUBLE_QUOTES
+	  as the second argument.  Fixes differing treatment of $* and ${v[*]}
+	  reported by Grisha Levit <grishalevit@gmail.com>, because otherwise
+	  *contains_dollar_at gets set to 1 and the word is inappropriately
+	  split
+

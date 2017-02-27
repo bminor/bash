@@ -1,6 +1,6 @@
 /* execute_cmd.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -2802,8 +2802,10 @@ execute_for_command (for_command)
 	      sh_invalidid (list->word->word);
 	      v = 0;
 	    }
+	  else if (readonly_p (v))
+	    err_readonly (name_cell (v));
 	  else
-	    v = bind_variable_value (v, list->word->word, 0);
+	    v = bind_variable_value (v, list->word->word, ASS_NAMEREF);
 	}
       else
 	v = bind_variable (identifier, list->word->word, 0);
