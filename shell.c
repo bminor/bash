@@ -1239,7 +1239,7 @@ maybe_make_restricted (name)
   if (restricted || (STREQ (temp, RESTRICTED_SHELL_NAME)))
     {
 #if defined (RBASH_STATIC_PATH_VALUE)
-      temp_var = bind_variable ("PATH", RBASH_STATIC_PATH_VALUE, 0);
+      bind_variable ("PATH", RBASH_STATIC_PATH_VALUE, 0);
       stupidly_hack_special_variables ("PATH");		/* clear hash table */
 #endif
       set_var_read_only ("PATH");

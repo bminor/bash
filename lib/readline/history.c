@@ -1,6 +1,6 @@
 /* history.c -- standalone history library */
 
-/* Copyright (C) 1989-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2017 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -97,7 +97,7 @@ int history_base = 1;
 
 /* Return the current HISTORY_STATE of the history. */
 HISTORY_STATE *
-history_get_history_state ()
+history_get_history_state (void)
 {
   HISTORY_STATE *state;
 
@@ -115,8 +115,7 @@ history_get_history_state ()
 
 /* Set the state of the current history array to STATE. */
 void
-history_set_history_state (state)
-     HISTORY_STATE *state;
+history_set_history_state (HISTORY_STATE *state)
 {
   the_history = state->entries;
   history_offset = state->offset;
@@ -129,7 +128,7 @@ history_set_history_state (state)
 /* Begin a session in which the history functions might be used.  This
    initializes interactive variables. */
 void
-using_history ()
+using_history (void)
 {
   history_offset = history_length;
 }
@@ -138,7 +137,7 @@ using_history ()
    This just adds up the lengths of the_history->lines and the associated
    timestamps. */
 int
-history_total_bytes ()
+history_total_bytes (void)
 {
   register int i, result;
 
@@ -151,7 +150,7 @@ history_total_bytes ()
 /* Returns the magic number which says what history element we are
    looking at now.  In this implementation, it returns history_offset. */
 int
-where_history ()
+where_history (void)
 {
   return (history_offset);
 }
@@ -159,8 +158,7 @@ where_history ()
 /* Make the current history item be the one at POS, an absolute index.
    Returns zero if POS is out of range, else non-zero. */
 int
-history_set_pos (pos)
-     int pos;
+history_set_pos (int pos)
 {
   if (pos > history_length || pos < 0 || !the_history)
     return (0);
@@ -172,7 +170,7 @@ history_set_pos (pos)
    is the actual array of data, and could be bashed or made corrupt easily.
    The array is terminated with a NULL pointer. */
 HIST_ENTRY **
-history_list ()
+history_list (void)
 {
   return (the_history);
 }
@@ -180,7 +178,7 @@ history_list ()
 /* Return the history entry at the current position, as determined by
    history_offset.  If there is no entry there, return a NULL pointer. */
 HIST_ENTRY *
-current_history ()
+current_history (void)
 {
   return ((history_offset == history_length) || the_history == 0)
 		? (HIST_ENTRY *)NULL
@@ -191,7 +189,7 @@ current_history ()
    a pointer to that entry.  If there is no previous entry then return
    a NULL pointer. */
 HIST_ENTRY *
-previous_history ()
+previous_history (void)
 {
   return history_offset ? the_history[--history_offset] : (HIST_ENTRY *)NULL;
 }
@@ -200,7 +198,7 @@ previous_history ()
    a pointer to that entry.  If there is no next entry then return a
    NULL pointer. */
 HIST_ENTRY *
-next_history ()
+next_history (void)
 {
   return (history_offset == history_length) ? (HIST_ENTRY *)NULL : the_history[++history_offset];
 }
@@ -208,8 +206,7 @@ next_history ()
 /* Return the history entry which is logically at OFFSET in the history array.
    OFFSET is relative to history_base. */
 HIST_ENTRY *
-history_get (offset)
-     int offset;
+history_get (int offset)
 {
   int local_index;
 
@@ -220,9 +217,7 @@ history_get (offset)
 }
 
 HIST_ENTRY *
-alloc_history_entry (string, ts)
-     char *string;
-     char *ts;
+alloc_history_entry (char *string, char *ts)
 {
   HIST_ENTRY *temp;
 
@@ -236,8 +231,7 @@ alloc_history_entry (string, ts)
 }
 
 time_t
-history_get_time (hist)
-     HIST_ENTRY *hist;
+history_get_time (HIST_ENTRY *hist)
 {
   char *ts;
   time_t t;
@@ -255,7 +249,7 @@ history_get_time (hist)
 }
 
 static char *
-hist_inittime ()
+hist_inittime (void)
 {
   time_t t;
   char ts[64], *ret;
@@ -275,8 +269,7 @@ hist_inittime ()
 /* Place STRING at the end of the history list.  The data field
    is  set to NULL. */
 void
-add_history (string)
-     const char *string;
+add_history (const char *string)
 {
   HIST_ENTRY *temp;
   int new_length;
@@ -335,8 +328,7 @@ add_history (string)
 
 /* Change the time stamp of the most recent history entry to STRING. */
 void
-add_history_time (string)
-     const char *string;
+add_history_time (const char *string)
 {
   HIST_ENTRY *hs;
 
@@ -350,8 +342,7 @@ add_history_time (string)
 /* Free HIST and return the data so the calling application can free it
    if necessary and desired. */
 histdata_t
-free_history_entry (hist)
-     HIST_ENTRY *hist;
+free_history_entry (HIST_ENTRY *hist)
 {
   histdata_t x;
 
@@ -365,8 +356,7 @@ free_history_entry (hist)
 }
 
 HIST_ENTRY *
-copy_history_entry (hist)
-     HIST_ENTRY *hist;
+copy_history_entry (HIST_ENTRY *hist)
 {
   HIST_ENTRY *ret;
   char *ts;
@@ -388,10 +378,7 @@ copy_history_entry (hist)
    the old entry so you can dispose of the data.  In the case of an
    invalid WHICH, a NULL pointer is returned. */
 HIST_ENTRY *
-replace_history_entry (which, line, data)
-     int which;
-     const char *line;
-     histdata_t data;
+replace_history_entry (int which, const char *line, histdata_t data)
 {
   HIST_ENTRY *temp, *old_value;
 
@@ -413,9 +400,7 @@ replace_history_entry (which, line, data)
    end of the current line first.  This can be used to construct multi-line
    history entries while reading lines from the history file. */
 void
-_hs_append_history_line (which, line)
-     int which;
-     const char *line;
+_hs_append_history_line (int which, const char *line)
 {
   HIST_ENTRY *hent;
   size_t newlen, curlen, minlen;
@@ -451,9 +436,7 @@ _hs_append_history_line (which, line)
    WHICH >= 0 means to replace that particular history entry's data, as
    long as it matches OLD. */
 void
-_hs_replace_history_data (which, old, new)
-     int which;
-     histdata_t *old, *new;
+_hs_replace_history_data (int which, histdata_t *old, histdata_t *new)
 {
   HIST_ENTRY *entry;
   register int i, last;
@@ -493,8 +476,7 @@ _hs_replace_history_data (which, old, new)
    element is returned to you so you can free the line, data,
    and containing structure. */
 HIST_ENTRY *
-remove_history (which)
-     int which;
+remove_history (int which)
 {
   HIST_ENTRY *return_value;
   register int i;
@@ -526,8 +508,7 @@ remove_history (which)
 }
 
 HIST_ENTRY **
-remove_history_range (first, last)
-     int first, last;
+remove_history_range (int first, int last)
 {
   HIST_ENTRY **return_value;
   register int i;
@@ -564,8 +545,7 @@ remove_history_range (first, last)
 
 /* Stifle the history list, remembering only MAX number of lines. */
 void
-stifle_history (max)
-     int max;
+stifle_history (int max)
 {
   register int i, j;
 
@@ -593,7 +573,7 @@ stifle_history (max)
    number of history entries.  The value is positive if the history
    was stifled, negative if it wasn't. */
 int
-unstifle_history ()
+unstifle_history (void)
 {
   if (history_stifled)
     {
@@ -605,13 +585,13 @@ unstifle_history ()
 }
 
 int
-history_is_stifled ()
+history_is_stifled (void)
 {
   return (history_stifled);
 }
 
 void
-clear_history ()
+clear_history (void)
 {
   register int i;
 

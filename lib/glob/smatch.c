@@ -144,25 +144,33 @@ static char const *const cclass_name[] =
 
 #define N_CHAR_CLASS (sizeof(cclass_name) / sizeof (cclass_name[0]))
 
-static int
-is_cclass (c, name)
-     int c;
+static enum char_class
+is_valid_cclass (name)
      const char *name;
 {
-  enum char_class char_class = CC_NO_CLASS;
-  int i, result;
+  enum char_class ret;
+  int i;
+
+  ret = CC_NO_CLASS;
 
   for (i = 1; i < N_CHAR_CLASS; i++)
     {
       if (STREQ (name, cclass_name[i]))
 	{
-	  char_class = (enum char_class)i;
+	  ret = (enum char_class)i;
 	  break;
 	}
     }
 
-  if (char_class == 0)
-    return -1;
+  return ret;
+}
+
+static int
+cclass_test (c, char_class)
+     int c;
+     enum char_class char_class;
+{
+  int result;
 
   switch (char_class)
     {
@@ -214,6 +222,22 @@ is_cclass (c, name)
     }
 
   return result;  
+}
+	
+static int
+is_cclass (c, name)
+     int c;
+     const char *name;
+{
+  enum char_class char_class;
+  int result;
+
+  char_class = is_valid_cclass (name);
+  if (char_class == CC_NO_CLASS)
+    return -1;
+
+  result = cclass_test (c, char_class);
+  return (result);
 }
 
 /* Now include `sm_loop.c' for single-byte characters. */

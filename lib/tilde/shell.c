@@ -1,7 +1,7 @@
 /* shell.c -- tilde utility functions that are normally provided by
 	      bash when readline is linked as part of the shell. */
 
-/* Copyright (C) 1998-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1998-2017 Free Software Foundation, Inc.
 
    This file is part of the GNU Tilde Library.
 
@@ -49,8 +49,7 @@ extern struct passwd *getpwuid ();
 #endif /* !HAVE_GETPW_DECLS */
 
 char *
-get_env_value (varname)
-     char *varname;
+get_env_value (char *varname)
 {
   return ((char *)getenv (varname));
 }
@@ -58,7 +57,7 @@ get_env_value (varname)
 /* If we're not using $HOME, assume that the passwd file information won't
    change while this shell instance is running. */
 char *
-get_home_dir ()
+get_home_dir (void)
 {
   static char *home_dir = (char *)NULL;
   struct passwd *entry;

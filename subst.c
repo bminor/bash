@@ -10863,11 +10863,12 @@ expand_word_list_internal (list, eflags)
 		  tint = do_word_assignment (temp_list->word, 0);
 		  this_command_name = savecmd;
 		  /* Variable assignment errors in non-interactive shells
-		     running in Posix.2 mode cause the shell to exit. */
+		     running in Posix.2 mode cause the shell to exit, unless
+		     they are being run by the `command' builtin. */
 		  if (tint == 0)
 		    {
 		      last_command_exit_value = EXECUTION_FAILURE;
-		      if (interactive_shell == 0 && posixly_correct)
+		      if (interactive_shell == 0 && posixly_correct && executing_command_builtin == 0)
 			exp_jump_to_top_level (FORCE_EOF);
 		      else
 			exp_jump_to_top_level (DISCARD);

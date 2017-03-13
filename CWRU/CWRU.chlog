@@ -13309,3 +13309,56 @@ subst.c
 	  *contains_dollar_at gets set to 1 and the word is inappropriately
 	  split
 
+				    3/1
+				    ---
+subst.c
+	- expand_word_list_internal: if a variable assignment fails (e.g., due
+	  to a readonly variable) in a non-interactive posix mode shell, don't
+	  abort the shell if the assignment is being performed by the command
+	  builtin, even if it's something like `command eval v=1'.  Fixes
+	  RedHat bug https://bugzilla.redhat.com/show_bug.cgi?id=1389838
+	  (reported by Denys Vlasenko)
+
+				    3/3
+				    ---
+builtins/shopt.def
+	- set_compatibility_level: make sure that changing the compatibility
+	  level sets or modifies BASH_COMPAT. Fixes bug reported by
+	  Stephane Chazelas <stephane.chazelas@gmail.com>
+
+lib/glob/smatch.c
+	- is_cclass: broke into two functions: is_valid_cclass and cclass_test,
+	  for future expansion. No functionality change
+
+lib/glob/sm_loop.c
+	- BRACKMATCH: when testing a character against a character class name,
+	  use the unfolded (original) character, since we're not performing a
+	  comparison. This is what glibc does.  Fixes bug reported by
+	  Lukáš Ba�inka <lukas.barinka@boxtrap.net>
+
+				    3/4
+				    ---
+doc/{bash.1,bashref.texi}
+	- note that the arguments to -eq and the rest of the arithmetic
+	  operators are evaluated as expressions when using [[.  Report from
+	  Rob la Lau <rob@ohreally.nl>
+
+
+				    3/7
+				    ---
+lib/readline/display.c
+	- update_line: completely rewrote the code that handles line wrapping
+	  in the presence of multibyte/double-width characters; punts toa
+	  dumb update in cases where the number of screen positions doesn't
+	  match
+	- update_line: in one case, where we are deleting characters from the
+	  line, if we are writing a non-space into the last screen character
+	  position, note that we are no longer using a space as a placeholder
+	  for a line wrap where there is a multi-width character that won't
+	  fit on the screen line (wrapped_line[current_line+1] = 0)
+
+				   3/10
+				   ----
+lib/readline/readline.c
+	- bind_arrow_keys_internal: add default key bindings for control-
+	  arrow keys, suggested by Per Bothner <per@bothner.com>

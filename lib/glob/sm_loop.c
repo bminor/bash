@@ -361,8 +361,10 @@ BRACKMATCH (p, test, flags)
   int brcnt, forcecoll;
   INT pc;
   CHAR *savep;
+  U_CHAR orig_test;
 
-  test = FOLD (test);
+  orig_test = test;
+  test = FOLD (orig_test);
 
   savep = p;
 
@@ -427,7 +429,7 @@ BRACKMATCH (p, test, flags)
 		{
 		  bcopy (p + 1, ccname, (close - p - 1) * sizeof (CHAR));
 		  *(ccname + (close - p - 1)) = L('\0');
-		  pc = IS_CCLASS (test, (XCHAR *)ccname);
+		  pc = IS_CCLASS (orig_test, (XCHAR *)ccname);
 		}
 	      if (pc == -1)
 		pc = 0;

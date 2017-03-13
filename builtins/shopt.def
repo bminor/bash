@@ -596,6 +596,7 @@ set_compatibility_level (option_name, mode)
      int mode;
 {
   int ind;
+  char *rhs;
 
   /* If we're setting something, redo some of the work we did above in
      toggle_shopt().  Unset everything and reset the appropriate option
@@ -623,6 +624,11 @@ set_compatibility_level (option_name, mode)
     shell_compatibility_level = 43;
   else
     shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
+
+  /* Make sure the current compatibility level is reflected in BASH_COMPAT */
+  rhs = itos (shell_compatibility_level);
+  bind_variable ("BASH_COMPAT", rhs, 0);
+  free (rhs);
 
   return 0;
 }

@@ -176,8 +176,7 @@ rl_bind_key_in_map (int key, rl_command_func_t *function, Keymap map)
 }
 
 /* Bind key sequence KEYSEQ to DEFAULT_FUNC if KEYSEQ is unbound.  Right
-   now, this is always used to attempt to bind the arrow keys, hence the
-   check for rl_vi_movement_mode. */
+   now, this is always used to attempt to bind the arrow keys. */
 int
 rl_bind_key_if_unbound_in_map (int key, rl_command_func_t *default_func, Keymap kmap)
 {
@@ -199,15 +198,15 @@ rl_bind_key_if_unbound (int key, rl_command_func_t *default_func)
 }
 
 /* Make KEY do nothing in the currently selected keymap.
-   Returns non-zero in case of error. */
+   Returns non-zero in case of error.  This is not the same as self-insert;
+   this makes it a dead key. */
 int
 rl_unbind_key (int key)
 {
   return (rl_bind_key (key, (rl_command_func_t *)NULL));
 }
 
-/* Make KEY do nothing in MAP.
-   Returns non-zero in case of error. */
+/* Make KEY do nothing in MAP. Returns non-zero in case of error. */
 int
 rl_unbind_key_in_map (int key, Keymap map)
 {
@@ -231,6 +230,7 @@ rl_unbind_function_in_map (rl_command_func_t *func, Keymap map)
   return rval;
 }
 
+/* Unbind all keys bound to COMMAND, which is a bindable command name, in MAP */
 int
 rl_unbind_command_in_map (const char *command, Keymap map)
 {

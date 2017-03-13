@@ -1,6 +1,6 @@
 /* histsearch.c -- searching the history list. */
 
-/* Copyright (C) 1989, 1992-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1989, 1992-2009,2017 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -64,9 +64,7 @@ static int history_search_internal PARAMS((const char *, int, int));
    returned. */
 
 static int
-history_search_internal (string, direction, flags)
-     const char *string;
-     int direction, flags;
+history_search_internal (const char *string, int direction, int flags)
 {
   register int i, reverse;
   register char *line;
@@ -198,9 +196,7 @@ history_search_internal (string, direction, flags)
 }
 
 int
-_hs_history_patsearch (string, direction, flags)
-     const char *string;
-     int direction, flags;
+_hs_history_patsearch (const char *string, int direction, int flags)
 {
   char *pat;
   size_t len;
@@ -244,18 +240,14 @@ _hs_history_patsearch (string, direction, flags)
 	
 /* Do a non-anchored search for STRING through the history in DIRECTION. */
 int
-history_search (string, direction)
-     const char *string;
-     int direction;
+history_search (const char *string, int direction)
 {
   return (history_search_internal (string, direction, NON_ANCHORED_SEARCH));
 }
 
 /* Do an anchored search for string through the history in DIRECTION. */
 int
-history_search_prefix (string, direction)
-     const char *string;
-     int direction;
+history_search_prefix (const char *string, int direction)
 {
   return (history_search_internal (string, direction, ANCHORED_SEARCH));
 }
@@ -264,9 +256,7 @@ history_search_prefix (string, direction)
    backwards.  POS is an absolute index into the history list at
    which point to begin searching. */
 int
-history_search_pos (string, dir, pos)
-     const char *string;
-     int dir, pos;
+history_search_pos (const char *string, int dir, int pos)
 {
   int ret, old;
 
