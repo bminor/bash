@@ -68,7 +68,10 @@ extern int execute_command __P((COMMAND *));
 extern int execute_command_internal __P((COMMAND *, int, int, int, struct fd_bitmap *));
 extern int shell_execve __P((char *, char **, char **));
 extern void setup_async_signals __P((void));
-extern void dispose_exec_redirects __P ((void));
+
+extern void undo_partial_redirects __P((void));
+extern void dispose_partial_redirects __P((void));
+extern void dispose_exec_redirects __P((void));
 
 extern int execute_shell_function __P((SHELL_VAR *, WORD_LIST *));
 

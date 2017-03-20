@@ -3465,6 +3465,7 @@ history_completion_generator (hint_text, state)
 
   while (history_completion_array && history_completion_array[local_index])
     {
+      /* XXX - should this use completion-ignore-case? */
       if (strncmp (text, history_completion_array[local_index++], len) == 0)
 	return (savestring (history_completion_array[local_index - 1]));
     }

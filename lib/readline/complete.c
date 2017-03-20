@@ -1422,7 +1422,8 @@ compute_lcd_of_matches (char **match_list, int matches, const char *text)
 	    }
 
 	  /* sort the list to get consistent answers. */
-	  qsort (match_list+1, matches, sizeof(char *), (QSFUNC *)_rl_qsort_string_compare);
+	  if (rl_sort_completion_matches)
+	    qsort (match_list+1, matches, sizeof(char *), (QSFUNC *)_rl_qsort_string_compare);
 
 	  si = strlen (text);
 	  lx = (si <= low) ? si : low;	/* check shorter of text and matches */
@@ -2644,7 +2645,7 @@ rl_filename_completion_function (const char *text, int state)
    hit the end of the match list, we restore the original unmatched text,
    ring the bell, and reset the counter to zero. */
 int
-rl_old_menu_complete (int count, invoking_key)
+rl_old_menu_complete (int count, int invoking_key)
 {
   rl_compentry_func_t *our_func;
   int matching_filenames, found_quote;
@@ -2947,7 +2948,7 @@ rl_menu_complete (int count, int ignore)
 }
 
 int
-rl_backward_menu_complete (int count, key)
+rl_backward_menu_complete (int count, int key)
 {
   /* Positive arguments to backward-menu-complete translate into negative
      arguments for menu-complete, and vice versa. */

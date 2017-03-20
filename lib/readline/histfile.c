@@ -292,6 +292,9 @@ read_history_range (const char *filename, int from, int to)
       goto error_and_exit;
     }
 
+  if (file_size == 0)
+    return 0;	/* don't waste time if we don't have to */
+
 #ifdef HISTORY_USE_MMAP
   /* We map read/write and private so we can change newlines to NULs without
      affecting the underlying object. */
@@ -338,6 +341,7 @@ read_history_range (const char *filename, int from, int to)
 
   /* Start at beginning of file, work to end. */
   bufend = buffer + chars_read;
+  *bufend = '\0';		/* null-terminate buffer for timestamp checks */
   current_line = 0;
 
   /* Heuristic: the history comment character rarely changes, so assume we

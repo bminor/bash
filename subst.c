@@ -1563,6 +1563,20 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
 	  continue;
 	}
 
+#if defined (PROCESS_SUBSTITUTION)
+      /* Technically this should only work at the start of a word */
+      if ((string[i] == '<' || string[i] == '>') && string[i+1] == LPAREN)
+	{
+	  si = i + 2;
+	  t = extract_process_subst (string, (string[i] == '<' ? "<(" : ">)"), &si, flags|SX_NOALLOC);
+
+	  CHECK_STRING_OVERRUN (i, si, slen, c);
+
+	  i = si + 1;
+	  continue;
+	}
+#endif
+
       /* Pass the contents of double-quoted strings through verbatim. */
       if (c == '"')
 	{
@@ -10281,6 +10295,8 @@ exp_jump_to_top_level (v)
 
   /* Cleanup code goes here. */
   expand_no_split_dollar_star = 0;	/* XXX */
+  if (expanding_redir)
+    undo_partial_redirects ();
   expanding_redir = 0;
   assigning_in_environment = 0;
 

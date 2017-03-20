@@ -449,6 +449,16 @@ cleanup_redirects (list)
   dispose_redirects (list);
 }
 
+void
+undo_partial_redirects ()
+{
+  if (redirection_undo_list)
+    {
+      cleanup_redirects (redirection_undo_list);
+      redirection_undo_list = (REDIRECT *)NULL;
+    }
+}
+
 #if 0
 /* Function to unwind_protect the redirections for functions and builtins. */
 static void
@@ -466,6 +476,16 @@ dispose_exec_redirects ()
     {
       dispose_redirects (exec_redirection_undo_list);
       exec_redirection_undo_list = (REDIRECT *)NULL;
+    }
+}
+
+void
+dispose_partial_redirects ()
+{
+  if (redirection_undo_list)
+    {
+      dispose_redirects (redirection_undo_list);
+      redirection_undo_list = (REDIRECT *)NULL;
     }
 }
 
@@ -728,8 +748,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
      redirection.)  */
   if (do_redirections (command->redirects, RX_ACTIVE|RX_UNDOABLE) != 0)
     {
-      cleanup_redirects (redirection_undo_list);
-      redirection_undo_list = (REDIRECT *)NULL;
+      undo_partial_redirects ();
       dispose_exec_redirects ();
 #if defined (PROCESS_SUBSTITUTION)
       if (saved_fifo)
@@ -742,8 +761,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
     {
       /* XXX - why copy here? */
       my_undo_list = (REDIRECT *)copy_redirects (redirection_undo_list);
-      dispose_redirects (redirection_undo_list);
-      redirection_undo_list = (REDIRECT *)NULL;
+      dispose_partial_redirects ();
     }
   else
     my_undo_list = (REDIRECT *)NULL;
@@ -752,8 +770,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
     {
       /* XXX - why copy here? */
       exec_undo_list = (REDIRECT *)copy_redirects (exec_redirection_undo_list);
-      dispose_redirects (exec_redirection_undo_list);
-      exec_redirection_undo_list = (REDIRECT *)NULL;
+      dispose_exec_redirects ();
     }
   else
     exec_undo_list = (REDIRECT *)NULL;
@@ -1034,10 +1051,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
     }
 
   if (my_undo_list)
-    {
-      do_redirections (my_undo_list, RX_ACTIVE);
-      dispose_redirects (my_undo_list);
-    }
+    cleanup_redirects (my_undo_list);
 
   if (exec_undo_list)
     dispose_redirects (exec_undo_list);
@@ -3873,7 +3887,11 @@ execute_null_command (redirects, pipe_in, pipe_out, async)
   REDIRECT *rd;
 
   for (forcefork = 0, rd = redirects; rd; rd = rd->next)
-    forcefork += rd->rflags & REDIR_VARASSIGN;
+    {
+      forcefork += rd->rflags & REDIR_VARASSIGN;
+      /* Safety */
+      forcefork += (rd->redirector.dest == 0 || fd_is_bash_input (rd->redirector.dest)) && (INPUT_REDIRECT (rd->instruction) || TRANSLATE_REDIRECT (rd->instruction) || rd->instruction == r_close_this);
+    }
 
   if (forcefork || pipe_in != NO_PIPE || pipe_out != NO_PIPE || async)
     {
@@ -3889,6 +3907,8 @@ execute_null_command (redirects, pipe_in, pipe_out, async)
 #if defined (COPROCESS_SUPPORT)
 	  coproc_closeall ();
 #endif
+
+	  interactive = 0;			/* XXX */
 
 	  subshell_environment = 0;
 	  if (async)
@@ -5041,8 +5061,7 @@ execute_builtin_or_function (words, builtin, var, redirects,
 
   if (do_redirections (redirects, RX_ACTIVE|RX_UNDOABLE) != 0)
     {
-      cleanup_redirects (redirection_undo_list);
-      redirection_undo_list = (REDIRECT *)NULL;
+      undo_partial_redirects ();
       dispose_exec_redirects ();
 #if defined (PROCESS_SUBSTITUTION)
       free (ofifo_list);
@@ -5109,11 +5128,7 @@ execute_builtin_or_function (words, builtin, var, redirects,
       discard_unwind_frame ("saved-redirects");
     }
 
-  if (redirection_undo_list)
-    {
-      cleanup_redirects (redirection_undo_list);
-      redirection_undo_list = (REDIRECT *)NULL;
-    }
+  undo_partial_redirects ();
 
 #if defined (PROCESS_SUBSTITUTION)
   /* Close any FIFOs created by this builtin or function. */

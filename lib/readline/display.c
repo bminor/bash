@@ -2075,7 +2075,7 @@ dumb_update:
 		  _rl_last_c_pos += _rl_col_width (nfd, 0, bytes_to_insert, 1);
 		  if (current_line == 0 && wrap_offset &&
 			displaying_prompt_first_line &&
-			_rl_last_c_pos > wrap_offset &&
+			_rl_last_c_pos >= wrap_offset &&	/* XXX was > */
 			((nfd - new) <= prompt_last_invisible))
 		    {
 		      _rl_last_c_pos -= wrap_offset;

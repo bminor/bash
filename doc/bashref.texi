@@ -5458,6 +5458,8 @@ sequences that are expanded before @env{PS1} is displayed.
 
 @item PS2
 The secondary prompt string.  The default value is @samp{> }.
+@env{PS2} is expanded in the same way as @env{PS1} before being
+displayed.
 
 @end vtable
 
@@ -6079,10 +6081,11 @@ The value of this variable is used as the prompt for the
 @code{select} command prompts with @samp{#? }
 
 @item PS4
-The value is the prompt printed before the command line is echoed
-when the @option{-x} option is set (@pxref{The Set Builtin}).
-The first character of @env{PS4} is replicated multiple times, as
-necessary, to indicate multiple levels of indirection.
+The value of this parameter is expanded like @var{PS1}
+and the expanded value is the prompt printed before the command line
+is echoed when the @option{-x} option is set (@pxref{The Set Builtin}).
+The first character of the expanded value is replicated multiple times,
+as necessary, to indicate multiple levels of indirection.
 The default is @samp{+ }.
 
 @item PWD
@@ -6571,7 +6574,10 @@ signals @code{SIGTTIN}, @code{SIGTTOU}, and @code{SIGTSTP}.
 Bash expands and displays @env{PS1} before reading the first line
 of a command, and expands and displays @env{PS2} before reading the
 second and subsequent lines of a multi-line command.
-Bash displays @env{PS0} after it reads a command but before executing it.
+Bash expands and displays @env{PS0} after it reads a command but before
+executing it.
+See @ref{Controlling the Prompt}, for a complete list of prompt
+string escape sequences.
 
 @item
 Bash executes the value of the @env{PROMPT_COMMAND} variable as a command
@@ -7233,7 +7239,8 @@ has a non-null value, then the
 value is executed just as if it had been typed on the command line.
 
 In addition, the following table describes the special characters which
-can appear in the prompt variables @env{PS1} to @env{PS4}:
+can appear in the prompt variables @env{PS0}, @env{PS1}, @env{PS2}, and
+@env{PS4}:
 
 @table @code
 @item \a
@@ -8434,7 +8441,7 @@ If Readline is not enabled, this option has no effect.
 
 @item --enable-prompt-string-decoding
 Turn on the interpretation of a number of backslash-escaped characters
-in the @env{$PS1}, @env{$PS2}, @env{$PS3}, and @env{$PS4} prompt
+in the @env{$PS0}, @env{$PS1}, @env{$PS2}, and @env{$PS4} prompt
 strings.  See @ref{Controlling the Prompt}, for a complete list of prompt
 string escape sequences.
 

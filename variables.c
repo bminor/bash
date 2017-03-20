@@ -412,7 +412,10 @@ initialize_shell_variables (env, privmode)
 #endif
 	{
 	  ro = 0;
-	  if (posixly_correct && STREQ (name, "SHELLOPTS"))
+	  /* If we processed a command-line option that caused SHELLOPTS to be
+	     set, it may already be set (and read-only) by the time we process
+	     the shell's environment. */
+	  if (/* posixly_correct &&*/ STREQ (name, "SHELLOPTS"))
 	    {
 	      temp_var = find_variable ("SHELLOPTS");
 	      ro = temp_var && readonly_p (temp_var);
@@ -585,8 +588,9 @@ initialize_shell_variables (env, privmode)
 #endif /* HISTORY */
 
 #if defined (READLINE) && defined (STRICT_POSIX)
-  /* POSIXLY_CORRECT will only be 1 here if the shell was compiled
-     -DSTRICT_POSIX */
+  /* POSIXLY_CORRECT will be 1 here if the shell was compiled
+     -DSTRICT_POSIX or if POSIXLY_CORRECT was supplied in the shell's
+     environment */
   if (interactive_shell && posixly_correct && no_line_editing == 0)
     rl_prefer_env_winsize = 1;
 #endif /* READLINE && STRICT_POSIX */

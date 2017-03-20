@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Sat Mar  4 13:06:51 EST 2017
+.\"	Last Change: Mon Mar 13 12:04:35 EDT 2017
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2017 March 4" "GNU Bash 4.4"
+.TH BASH 1 "2017 March 13" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2436,6 +2436,7 @@ The value of this parameter is expanded as with
 and the value is printed before each command
 .B bash
 displays during an execution trace.  The first character of
+the expanded value of
 .SM
 .B PS4
 is replicated multiple times, as necessary, to indicate multiple
@@ -5120,8 +5121,15 @@ when it is ready to read a command, and the secondary prompt
 when it needs more input to complete a command.
 .B Bash
 displays
+.SM
 .B PS0
 after it reads a command but before executing it.
+.B Bash
+displays
+.SM
+.B PS4
+as described above
+before tracing each command when the \fB\-x\fP option is enabled.
 .B Bash
 allows these prompt strings to be customized by inserting a number of
 backslash-escaped special characters that are decoded as follows:

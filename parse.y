@@ -1,6 +1,6 @@
 /* parse.y - Yacc grammar for bash. */
 
-/* Copyright (C) 1989-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -116,15 +116,7 @@ typedef void *alias_t;
 extern int extended_glob;
 #endif
 
-extern int eof_encountered;
-extern int no_line_editing, running_under_emacs;
-extern int current_command_number;
-extern int sourcelevel, parse_and_execute_level;
-extern pid_t last_command_subst_pid;
-extern char *dist_version;
-extern int patch_level;
 extern int dump_translatable_strings, dump_po_strings;
-extern sh_builtin_func_t *last_shell_builtin, *this_shell_builtin;
 
 #if !defined (errno)
 extern int errno;
@@ -3335,18 +3327,19 @@ tokword:
 #define P_DOLBRACE	0x0040	/* parsing a ${...} construct */
 
 /* Lexical state while parsing a grouping construct or $(...). */
-#define LEX_WASDOL	0x001
-#define LEX_CKCOMMENT	0x002
-#define LEX_INCOMMENT	0x004
-#define LEX_PASSNEXT	0x008
-#define LEX_RESWDOK	0x010
-#define LEX_CKCASE	0x020
-#define LEX_INCASE	0x040
-#define LEX_INHEREDOC	0x080
-#define LEX_HEREDELIM	0x100		/* reading here-doc delimiter */
-#define LEX_STRIPDOC	0x200		/* <<- strip tabs from here doc delim */
-#define LEX_QUOTEDDOC	0x400		/* here doc with quoted delim */
-#define LEX_INWORD	0x800
+#define LEX_WASDOL	0x0001
+#define LEX_CKCOMMENT	0x0002
+#define LEX_INCOMMENT	0x0004
+#define LEX_PASSNEXT	0x0008
+#define LEX_RESWDOK	0x0010
+#define LEX_CKCASE	0x0020
+#define LEX_INCASE	0x0040
+#define LEX_INHEREDOC	0x0080
+#define LEX_HEREDELIM	0x0100		/* reading here-doc delimiter */
+#define LEX_STRIPDOC	0x0200		/* <<- strip tabs from here doc delim */
+#define LEX_QUOTEDDOC	0x0400		/* here doc with quoted delim */
+#define LEX_INWORD	0x0800
+#define LEX_GTLT	0x1000
 
 #define COMSUB_META(ch)		((ch) == ';' || (ch) == '&' || (ch) == '|')
 
@@ -3377,7 +3370,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
      int open, close;
      int *lenp, flags;
 {
-  int count, ch, tflags;
+  int count, ch, prevch, tflags;
   int nestlen, ttranslen, start_lineno;
   char *ret, *nestret, *ttrans;
   int retind, retsize, rflags;
@@ -3399,8 +3392,10 @@ parse_matched_pair (qc, open, close, lenp, flags)
   retind = 0;
 
   start_lineno = line_number;
+  ch = EOF;		/* just in case */
   while (count)
     {
+      prevch = ch;
       ch = shell_getc (qc != '\'' && (tflags & (LEX_PASSNEXT)) == 0);
 
       if (ch == EOF)
@@ -3594,6 +3589,12 @@ parse_matched_pair (qc, open, close, lenp, flags)
 	    }
 	  else if ((flags & (P_ARRAYSUB|P_DOLBRACE)) && (tflags & LEX_WASDOL) && (ch == '(' || ch == '{' || ch == '['))	/* ) } ] */
 	    goto parse_dollar_word;
+#if defined (PROCESS_SUBSTITUTION)
+	  /* XXX - technically this should only be recognized at the start of
+	     a word */
+	  else if ((flags & (P_ARRAYSUB|P_DOLBRACE)) && (tflags & LEX_GTLT) && (ch == '('))	/* ) */
+	    goto parse_dollar_word;
+#endif
 	}
       /* Parse an old-style command substitution within double quotes as a
 	 single word. */
@@ -3625,6 +3626,12 @@ parse_dollar_word:
 
 	  FREE (nestret);
 	}
+#if defined (PROCESS_SUBSTITUTION)
+      if MBTEST((ch == '<' || ch == '>') && (tflags & LEX_GTLT) == 0)
+	tflags |= LEX_GTLT;
+      else
+	tflags &= ~LEX_GTLT;
+#endif
       if MBTEST(ch == '$' && (tflags & LEX_WASDOL) == 0)
 	tflags |= LEX_WASDOL;
       else

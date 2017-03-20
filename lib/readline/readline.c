@@ -1300,6 +1300,10 @@ bind_arrow_keys_internal (Keymap map)
   rl_bind_keyseq_if_unbound ("\033[1;5D", rl_backward_word);
   rl_bind_keyseq_if_unbound ("\033[3;5~", rl_kill_word);
 
+  /* Key bindings for alt-arrow keys */
+  rl_bind_keyseq_if_unbound ("\033[1;3C", rl_forward_word);
+  rl_bind_keyseq_if_unbound ("\033[1;3D", rl_backward_word);
+
 #if defined (__MINGW32__)
   rl_bind_keyseq_if_unbound ("\340H", rl_get_previous_history);
   rl_bind_keyseq_if_unbound ("\340P", rl_get_next_history);

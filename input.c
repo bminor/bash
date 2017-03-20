@@ -525,7 +525,7 @@ bufstream_ungetc(c, bp)
      int c;
      BUFFERED_STREAM *bp;
 {
-  if (c == EOF || bp->b_inputp == 0)
+  if (c == EOF || bp == 0 || bp->b_inputp == 0)
     return (EOF);
 
   bp->b_buffer[--bp->b_inputp] = c;
@@ -555,6 +555,9 @@ int
 buffered_getchar ()
 {
   CHECK_TERMSIG;
+
+  if (bash_input.location.buffered_fd < 0 || buffers[bash_input.location.buffered_fd] == 0)
+    return EOF;
 
 #if !defined (DJGPP)
   return (bufstream_getc (buffers[bash_input.location.buffered_fd]));

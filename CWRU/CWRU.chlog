@@ -13362,3 +13362,90 @@ lib/readline/display.c
 lib/readline/readline.c
 	- bind_arrow_keys_internal: add default key bindings for control-
 	  arrow keys, suggested by Per Bothner <per@bothner.com>
+
+				   3/13
+				   ----
+doc/{bash.1,bashref.texi}
+	- clarify the prompt strings the undergo expansion (PS0, PS1, PS2, and
+	  PS4) before being displayed.  Based on a report from Grisha Levit
+	  <grishalevit@gmail.com>
+
+				   3/14
+				   ----
+input.c
+	- bufstream_ungetc: return EOF if being asked to unget a character to
+	  a NULL buffer
+	- buffered_getchar: check buffered_fd is valid and buffers[buffered_fd]
+	  is non-NULL before trying to dereference. Fixes bug reported by
+	  floyd <floyd@floyd.ch>
+
+execute_cmd.c
+	- execute_null_command: if we fork to execute the command, the subshell
+	  is not interactive
+	- execute_null_command: for safety's sake, if a redirection attached
+	  to a null command affects fd 0 or the fd the shell is reading for
+	  input, and the redirection can potentially change or close that file
+	  descriptor, force a fork so the redirection is done in a subshell
+
+				   3/15
+				   ----
+lib/readline/display.c
+	- update_line: if we have to output some bytes, and we are outputting
+	  the prompt string, make sure we correct _rl_last_c_pos if we are
+	  at the wrap offset -- what if all of the characters in the prompt
+	  are invisible, so the visible length is 0?  Fixes display bug
+	  reported by Grisha Levit <grishalevit@gmail.com>
+
+execute_cmd.c
+	- undo_partial_redirects: new function, performs redirections specified
+	  in redirection_undo_list and disposes of them. Intended to be used
+	  to unwind redirections performed before a redirection error
+	- dispose_partial_redirects: new function, disposes of
+	  redirection_undo_list and nulls the list
+	- execute_command_internal: use undo_partial_redirects
+
+execute_cmd.h
+	- undo_partial_redirects: extern declaration
+	- dispose_partial_redirects: extern declaration
+
+subst.c
+	- exp_jump_to_top_level: if we are throwing an expansion error while
+	  expanding a redirection (expanding_redir != 0), undo any undoable
+	  redirections by calling undo_partial_redirects() so we don't leave
+	  any in place
+
+variables.c
+	- initialize_shell_variables: if SHELLOPTS is in the environment,
+	  unset the readonly attribute on any existing variable with that
+	  name. It may have been created by processing a -o option on the
+	  command line.  Fixes issue reported by Stephane Chazelas
+	  <stephane.chazelas@gmail.com>
+
+				   3/16
+				   ----
+lib/readline/histfile.c
+	- read_history_range: short-circuit and do nothing if the history file
+	  is of 0 size
+	- read_history_range: make sure the buffer is zero-terminated so the
+	  timestamp tests work right for history files of 1 character.  Report
+	  and recommended fix from Denis Martinez <denis.martinez@gmx.com>
+
+lib/readline/complete.c
+	- compute_lcd_of_matches: when trying to compute the common prefix
+	  of a set of matches while performing case-insensitive completion
+	  matching, don't sort the match list unless rl_sort_completion_matches
+	  is non-zero.  Fixes problem reported by Roee Bar <roee@arista.com>
+
+				   3/18
+				   ----
+subst.c
+	- extract_dollar_brace_string: handle process substitution embedded in
+	  a ${...} expansion in the same way as command substitution.  Reported
+	  by D630 <d630@posteo.net>
+
+parse.y
+	- LEX_GTLT: new flag, set by parse_matched_pair when a `<' or '>' is
+	  read
+	- parse_matched_pair: handle an embedded process substitution like an
+	  embedded command substitution if we are parsing an array index or
+	  a dollar-brace expansion.  Reported by D630 <d630@posteo.net>
