@@ -1,6 +1,6 @@
 /* bashline.c -- Bash's interface to the readline library. */
 
-/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -4094,7 +4094,7 @@ bash_execute_unix_command (count, key)
   register int i, r;
   intmax_t mi;
   sh_parser_state_t ps;
-  char *cmd, *value, *l, *l1, *ce;
+  char *cmd, *value, *ce;
   SHELL_VAR *v;
   char ibuf[INT_STRLEN_BOUND(int) + 1];
 
@@ -4128,7 +4128,6 @@ bash_execute_unix_command (count, key)
   v = bind_variable ("READLINE_LINE", rl_line_buffer, 0);
   if (v)
     VSETATTR (v, att_exported);
-  l = v ? value_cell (v) : 0;
   value = inttostr (rl_point, ibuf, sizeof (ibuf));
   v = bind_int_variable ("READLINE_POINT", value, 0);
   if (v)
@@ -4140,9 +4139,8 @@ bash_execute_unix_command (count, key)
   restore_parser_state (&ps);
 
   v = find_variable ("READLINE_LINE");
-  l1 = v ? value_cell (v) : 0;
-  if (l1 != l)
-    maybe_make_readline_line (value_cell (v));
+  maybe_make_readline_line (v ? value_cell (v) : 0);
+
   v = find_variable ("READLINE_POINT");
   if (v && legal_number (value_cell (v), &mi))
     {

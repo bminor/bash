@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2017 February 1<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2017 March 22<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -42,7 +42,7 @@ bash - GNU Bourne-Again SHell
 <H3>COPYRIGHT</H3>
 
 
-Bash is Copyright &#169; 1989-2016 by the Free Software Foundation, Inc.
+Bash is Copyright &#169; 1989-2017 by the Free Software Foundation, Inc.
 <A NAME="lbAE">&nbsp;</A>
 <H3>DESCRIPTION</H3>
 
@@ -68,8 +68,8 @@ can be configured to be POSIX-conformant by default.
 <H3>OPTIONS</H3>
 
 All of the single-character shell options documented in the
-description of the <B>set</B> builtin command can be used as options
-when the shell is invoked.
+description of the <B>set</B> builtin command, including <B>-o</B>,
+can be used as options when the shell is invoked.
 In addition, <B>bash</B>
 interprets the following options when it is invoked:
 <P>
@@ -3095,6 +3095,7 @@ and the value is printed before each command
 <B>bash</B>
 
 displays during an execution trace.  The first character of
+the expanded value of
 <FONT SIZE=-1><B>PS4</B>
 
 </FONT>
@@ -5116,7 +5117,7 @@ A variant of here documents, the format is:
 <P>
 
 The <I>word</I> undergoes
-brace expansion, tilde expansion, parameter and variable expansion,
+tilde expansion, parameter and variable expansion,
 command substitution, arithmetic expansion, and quote removal.
 Pathname expansion and word splitting are not performed.
 The result is supplied as a single string, with a newline appended,
@@ -5420,6 +5421,35 @@ Variables local to the function may be declared with the
 
 builtin command.  Ordinarily, variables and their values
 are shared between the function and its caller.
+If a variable is declared <B>local</B>, the variable's visible scope
+is restricted to that function and its children (including the functions
+it calls).
+Local variables &quot;shadow&quot; variables with the same name declared at
+previous scopes.
+For instance, a local variable declared in a function
+hides a global variable of the same name: references and assignments
+refer to the local variable, leaving the global variable unmodified.
+When the function returns, the global variable is once again visible.
+<P>
+
+The shell uses <I>dynamic scoping</I> to control a variable's visibility
+within functions.
+With dynamic scoping, visible variables and their values
+are a result of the sequence of function calls that caused execution
+to reach the current function.
+The value of a variable that a function sees depends
+on its value within its caller, if any, whether that caller is
+the &quot;global&quot; scope or another shell function.
+This is also the value that a local variable
+declaration &quot;shadows&quot;, and the value that is restored when the function
+returns.
+<P>
+
+For example, if a variable <I>var</I> is declared as local in function
+<I>func1</I>, and <I>func1</I> calls another function <I>func2</I>,
+references to <I>var</I> made from within <I>func2</I> will resolve to the
+local variable <I>var</I> from <I>func1</I>, shadowing any global variable
+named <I>var</I>.
 <P>
 
 The <B>FUNCNEST</B> variable, if set to a numeric value greater
@@ -5823,6 +5853,17 @@ and
 <I>arg2</I>
 
 may be positive or negative integers.
+When used with the <B>[[</B> command,
+<I>Arg1</I>
+
+and
+<I>Arg2</I>
+
+are evaluated as arithmetic expressions  (see
+<FONT SIZE=-1><B>ARITHMETIC EVALUATION</B>
+
+</FONT>
+above).
 
 </DL>
 <A NAME="lbBX">&nbsp;</A>
@@ -6532,9 +6573,18 @@ when it needs more input to complete a command.
 <B>Bash</B>
 
 displays
-<B>PS0</B>
+<FONT SIZE=-1><B>PS0</B>
 
+</FONT>
 after it reads a command but before executing it.
+<B>Bash</B>
+
+displays
+<FONT SIZE=-1><B>PS4</B>
+
+</FONT>
+as described above
+before tracing each command when the <B>-x</B> option is enabled.
 <B>Bash</B>
 
 allows these prompt strings to be customized by inserting a number of
@@ -7641,6 +7691,21 @@ Words are delimited by non-quoted shell metacharacters.
 <DD>
 Move back to the start of the current or previous word.
 Words are delimited by non-quoted shell metacharacters.
+<DT><B>previous-screen-line</B>
+
+<DD>
+Attempt to move point to the same physical screen column on the previous
+physical screen line. This will not have the desired effect if the current
+Readline line does not take up more than one physical line or if point is not  
+greater than the length of the prompt plus the screen width.
+<DT><B>next-screen-line</B>
+
+<DD>
+Attempt to move point to the same physical screen column on the next
+physical screen line. This will not have the desired effect if the current
+Readline line does not take up more than one physical line or if the length
+of the current Readline line is not greater than the length of the prompt
+plus the screen width.
 <DT><B>clear-screen (C-l)</B>
 
 <DD>
@@ -13649,7 +13714,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2017 February 1<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2017 March 22<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13755,6 +13820,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 01 February 2017 09:18:17 EST
+Time: 22 March 2017 16:12:40 EDT
 </BODY>
 </HTML>

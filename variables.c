@@ -2662,8 +2662,11 @@ make_variable_value (var, value, flags)
      then do expression evaluation on it and store the result.  The
      functions in expr.c (evalexp()) and bind_int_variable() are responsible
      for turning off the integer flag if they don't want further
-     evaluation done. */
-  if (integer_p (var))
+     evaluation done.  Callers that find it inconvenient to do this can set
+     the ASS_NOEVAL flag.  For the special case of arithmetic expression
+     evaluation, the caller can set ASS_NOLONGJMP to avoid jumping out to
+     top_level. */
+  if ((flags & ASS_NOEVAL) == 0 && integer_p (var))
     {
       if (flags & ASS_APPEND)
 	{
@@ -2671,15 +2674,25 @@ make_variable_value (var, value, flags)
 	  lval = evalexp (oval, 0, &expok);	/* ksh93 seems to do this */
 	  if (expok == 0)
 	    {
-	      top_level_cleanup ();
-	      jump_to_top_level (DISCARD);
+	      if (flags & ASS_NOLONGJMP)
+		goto make_value;
+	      else
+		{
+		  top_level_cleanup ();
+		  jump_to_top_level (DISCARD);
+		}
 	    }
 	}
       rval = evalexp (value, 0, &expok);
       if (expok == 0)
 	{
-	  top_level_cleanup ();
-	  jump_to_top_level (DISCARD);
+	  if (flags & ASS_NOLONGJMP)
+	    goto make_value;
+	  else
+	    {
+	      top_level_cleanup ();
+	      jump_to_top_level (DISCARD);
+	    }
 	}
       /* This can be fooled if the variable's value changes while evaluating
 	 `rval'.  We can change it if we move the evaluation of lval to here. */
@@ -2688,7 +2701,7 @@ make_variable_value (var, value, flags)
       retval = itos (rval);
     }
 #if defined (CASEMOD_ATTRS)
-  else if (capcase_p (var) || uppercase_p (var) || lowercase_p (var))
+  else if ((flags & ASS_NOEVAL) == 0 && (capcase_p (var) || uppercase_p (var) || lowercase_p (var)))
     {
       if (flags & ASS_APPEND)
 	{
@@ -2717,6 +2730,7 @@ make_variable_value (var, value, flags)
 #endif /* CASEMOD_ATTRS */
   else if (value)
     {
+make_value:
       if (flags & ASS_APPEND)
 	{
 	  oval = get_variable_value (var);
@@ -2789,7 +2803,8 @@ optimized_assignment (entry, value, aflags)
 }
 
 /* Bind a variable NAME to VALUE in the HASH_TABLE TABLE, which may be the
-   temporary environment (but usually is not). */
+   temporary environment (but usually is not).  HFLAGS controls how NAME
+   is looked up in TABLE; AFLAGS controls how VALUE is assigned */
 static SHELL_VAR *
 bind_variable_internal (name, value, table, hflags, aflags)
      const char *name;
@@ -2842,21 +2857,21 @@ bind_variable_internal (name, value, table, hflags, aflags)
 	    }
 	  free (tname);
           /* XXX - should it be aflags? */
-	  entry = assign_array_element (newval, make_variable_value (entry, value, 0), aflags|ASS_NAMEREF);
+	  entry = assign_array_element (newval, make_variable_value (entry, value, aflags), aflags|ASS_NAMEREF);
 	  if (entry == 0)
 	    return entry;
 	}
       else
 #endif
-      {
-      entry = make_new_variable (newval, table);
-      var_setvalue (entry, make_variable_value (entry, value, 0));
-      }
+	{
+	  entry = make_new_variable (newval, table);
+	  var_setvalue (entry, make_variable_value (entry, value, aflags));
+	}
     }
   else if (entry == 0)
     {
       entry = make_new_variable (name, table);
-      var_setvalue (entry, make_variable_value (entry, value, 0)); /* XXX */
+      var_setvalue (entry, make_variable_value (entry, value, aflags)); /* XXX */
     }
   else if (entry->assign_func)	/* array vars have assign functions now */
     {
@@ -4179,7 +4194,7 @@ push_temp_var (data)
 	binding_table = shell_variables->table = hash_create (TEMPENV_HASH_BUCKETS);
     }
 
-  v = bind_variable_internal (var->name, value_cell (var), binding_table, 0, ASS_FORCE);
+  v = bind_variable_internal (var->name, value_cell (var), binding_table, 0, ASS_FORCE|ASS_NOLONGJMP);
 
   /* XXX - should we set the context here?  It shouldn't matter because of how
      assign_in_env works, but might want to check. */

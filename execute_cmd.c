@@ -2874,7 +2874,7 @@ execute_for_command (for_command)
 	{
 	  SHELL_VAR *new_value;
 
-	  new_value = bind_variable (identifier, value_cell(old_value), 0);
+	  new_value = bind_variable (identifier, value_cell (old_value), 0);
 	  new_value->attributes = old_value->attributes;
 	  dispose_variable (old_value);
 	}

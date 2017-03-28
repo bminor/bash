@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 4.4, 1 February 2017).
+the Bash shell (version 4.4, 22 March 2017).
 
-This is Edition 4.4, last updated 1 February 2017,
+This is Edition 4.4, last updated 22 March 2017,
 of The GNU Bash Reference Manual,
 for Bash, Version 4.4.
 
@@ -284,10 +284,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 4.4, 1 February 2017).
+the Bash shell (version 4.4, 22 March 2017).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 4.4, last updated 1 February 2017,
+<p>This is Edition 4.4, last updated 22 March 2017,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 4.4.
 </p>
@@ -1865,8 +1865,56 @@ before the <code>return</code>.
 </p>
 <p>Variables local to the function may be declared with the
 <code>local</code> builtin.  These variables are visible only to
-the function and the commands it invokes.
+the function and the commands it invokes.  This is particularly
+important when a shell function calls other functions.
 </p>
+<p>Local variables &quot;shadow&quot; variables with the same name declared at
+previous scopes.  For instance, a local variable declared in a function
+hides a global variable of the same name: references and assignments
+refer to the local variable, leaving the global variable unmodified.
+When the function returns, the global variable is once again visible.
+</p>
+<p>The shell uses <var>dynamic scoping</var> to control a variable&rsquo;s visibility
+within functions.
+With dynamic scoping, visible variables and their values
+are a result of the sequence of function calls that caused execution
+to reach the current function.
+The value of a variable that a function sees depends
+on its value within its caller, if any, whether that caller is
+the &quot;global&quot; scope or another shell function.
+This is also the value that a local variable
+declaration &quot;shadows&quot;, and the value that is restored when the function
+returns.
+</p>
+<p>For example, if a variable <var>var</var> is declared as local in function
+<var>func1</var>, and <var>func1</var> calls another function <var>func2</var>,
+references to <var>var</var> made from within <var>func2</var> will resolve to the
+local variable <var>var</var> from <var>func1</var>, shadowing any global variable
+named <var>var</var>.
+</p>
+<p>The following script demonstrates this behavior.
+When executed, the script displays
+</p>
+<div class="example">
+<pre class="example">In func2, var = func1 local
+</pre></div>
+
+<div class="example">
+<pre class="example">func1()
+{
+    local var='func1 local'
+    func2
+}
+
+func2()
+{
+    echo &quot;In func2, var = $var&quot;
+}
+
+var=global
+func1
+</pre></div>
+
 <p>Function names and definitions may be listed with the
 <samp>-f</samp> option to the <code>declare</code> (<code>typeset</code>)
 builtin command (see <a href="#Bash-Builtins">Bash Builtins</a>).
@@ -3370,7 +3418,7 @@ natural fashion.
 </pre></div>
 
 <p>The <var>word</var> undergoes
-brace expansion, tilde expansion, parameter and variable expansion,
+tilde expansion, parameter and variable expansion,
 command substitution, arithmetic expansion, and quote removal.
 Pathname expansion and word splitting are not performed.
 The result is supplied as a single string,
@@ -6392,6 +6440,8 @@ sequences that are expanded before <code>PS1</code> is displayed.
 <a name="index-PS2"></a>
 </dt>
 <dd><p>The secondary prompt string.  The default value is &lsquo;<samp>&gt; </samp>&rsquo;.
+<code>PS2</code> is expanded in the same way as <code>PS1</code> before being
+displayed.
 </p>
 </dd>
 </dl>
@@ -7262,10 +7312,11 @@ and before the command is executed.
 <dt><code>PS4</code>
 <a name="index-PS4"></a>
 </dt>
-<dd><p>The value is the prompt printed before the command line is echoed
-when the <samp>-x</samp> option is set (see <a href="#The-Set-Builtin">The Set Builtin</a>).
-The first character of <code>PS4</code> is replicated multiple times, as
-necessary, to indicate multiple levels of indirection.
+<dd><p>The value of this parameter is expanded like <var>PS1</var>
+and the expanded value is the prompt printed before the command line
+is echoed when the <samp>-x</samp> option is set (see <a href="#The-Set-Builtin">The Set Builtin</a>).
+The first character of the expanded value is replicated multiple times,
+as necessary, to indicate multiple levels of indirection.
 The default is &lsquo;<samp>+ </samp>&rsquo;.
 </p>
 </dd>
@@ -7877,7 +7928,10 @@ signals <code>SIGTTIN</code>, <code>SIGTTOU</code>, and <code>SIGTSTP</code>.
 </li><li> Bash expands and displays <code>PS1</code> before reading the first line
 of a command, and expands and displays <code>PS2</code> before reading the
 second and subsequent lines of a multi-line command.
-Bash displays <code>PS0</code> after it reads a command but before executing it.
+Bash expands and displays <code>PS0</code> after it reads a command but before
+executing it.
+See <a href="#Controlling-the-Prompt">Controlling the Prompt</a>, for a complete list of prompt
+string escape sequences.
 
 </li><li> Bash executes the value of the <code>PROMPT_COMMAND</code> variable as a command
 before printing the primary prompt, <code>$PS1</code>
@@ -8130,6 +8184,8 @@ is equal to, not equal to, less than, less than or equal to,
 greater than, or greater than or equal to <var>arg2</var>,
 respectively.  <var>Arg1</var> and <var>arg2</var>
 may be positive or negative integers.
+When used with the <code>[[</code> command, <var>Arg1</var> and <var>Arg2</var>
+are evaluated as arithmetic expressions (see <a href="#Shell-Arithmetic">Shell Arithmetic</a>).
 </p></dd>
 </dl>
 
@@ -8623,7 +8679,8 @@ has a non-null value, then the
 value is executed just as if it had been typed on the command line.
 </p>
 <p>In addition, the following table describes the special characters which
-can appear in the prompt variables <code>PS1</code> to <code>PS4</code>:
+can appear in the prompt variables <code>PS0</code>, <code>PS1</code>, <code>PS2</code>, and
+<code>PS4</code>:
 </p>
 <dl compact="compact">
 <dt><code>\a</code></dt>
@@ -10657,6 +10714,25 @@ Words are delimited by non-quoted shell metacharacters.
 </dt>
 <dd><p>Move back to the start of the current or previous word.
 Words are delimited by non-quoted shell metacharacters.
+</p>
+</dd>
+<dt><code>previous-screen-line ()</code>
+<a name="index-previous_002dscreen_002dline-_0028_0029"></a>
+</dt>
+<dd><p>Attempt to move point to the same physical screen column on the previous
+physical screen line. This will not have the desired effect if the current
+Readline line does not take up more than one physical line or if point is not
+greater than the length of the prompt plus the screen width.
+</p>
+</dd>
+<dt><code>next-screen-line ()</code>
+<a name="index-next_002dscreen_002dline-_0028_0029"></a>
+</dt>
+<dd><p>Attempt to move point to the same physical screen column on the next
+physical screen line. This will not have the desired effect if the current
+Readline line does not take up more than one physical line or if the length
+of the current Readline line is not greater than the length of the prompt
+plus the screen width.
 </p>
 </dd>
 <dt><code>clear-screen (C-l)</code>
@@ -13258,7 +13334,7 @@ If Readline is not enabled, this option has no effect.
 </dd>
 <dt><code>--enable-prompt-string-decoding</code></dt>
 <dd><p>Turn on the interpretation of a number of backslash-escaped characters
-in the <code>$PS1</code>, <code>$PS2</code>, <code>$PS3</code>, and <code>$PS4</code> prompt
+in the <code>$PS0</code>, <code>$PS1</code>, <code>$PS2</code>, and <code>$PS4</code> prompt
 strings.  See <a href="#Controlling-the-Prompt">Controlling the Prompt</a>, for a complete list of prompt
 string escape sequences.
 </p>
@@ -15066,6 +15142,7 @@ Next: <a href="#Concept-Index" accesskey="n" rel="next">Concept Index</a>, Previ
 <tr><td colspan="4"> <hr></td></tr>
 <tr><th><a name="Function-Index_fn_letter-N">N</a></th><td></td><td></td></tr>
 <tr><td></td><td valign="top"><a href="#index-next_002dhistory-_0028C_002dn_0029"><code>next-history (C-n)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-History">Commands For History</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-next_002dscreen_002dline-_0028_0029"><code>next-screen-line ()</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Moving">Commands For Moving</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-non_002dincremental_002dforward_002dsearch_002dhistory-_0028M_002dn_0029"><code>non-incremental-forward-search-history (M-n)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-History">Commands For History</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-non_002dincremental_002dreverse_002dsearch_002dhistory-_0028M_002dp_0029"><code>non-incremental-reverse-search-history (M-p)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-History">Commands For History</a></td></tr>
 <tr><td colspan="4"> <hr></td></tr>
@@ -15082,6 +15159,7 @@ Next: <a href="#Concept-Index" accesskey="n" rel="next">Concept Index</a>, Previ
 <tr><td></td><td valign="top"><a href="#index-possible_002dvariable_002dcompletions-_0028C_002dx-_0024_0029"><code>possible-variable-completions (C-x $)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Completion">Commands For Completion</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-prefix_002dmeta-_0028ESC_0029"><code>prefix-meta (<span class="key">ESC</span>)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Miscellaneous-Commands">Miscellaneous Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-previous_002dhistory-_0028C_002dp_0029"><code>previous-history (C-p)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-History">Commands For History</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-previous_002dscreen_002dline-_0028_0029"><code>previous-screen-line ()</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Moving">Commands For Moving</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-print_002dlast_002dkbd_002dmacro-_0028_0029"><code>print-last-kbd-macro ()</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Keyboard-Macros">Keyboard Macros</a></td></tr>
 <tr><td colspan="4"> <hr></td></tr>
 <tr><th><a name="Function-Index_fn_letter-Q">Q</a></th><td></td><td></td></tr>

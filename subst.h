@@ -1,6 +1,6 @@
 /* subst.h -- Names of externally visible functions in subst.c. */
 
-/* Copyright (C) 1993-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -52,6 +52,8 @@
 #define ASS_FORCE	0x0020	/* force assignment even to readonly variable */
 #define ASS_CHKLOCAL	0x0040	/* check local variable before assignment */
 #define ASS_NOEXPAND	0x0080	/* don't expand associative array subscripts */
+#define ASS_NOEVAL	0x0100	/* don't evaluate value as expression */
+#define ASS_NOLONGJMP	0x0200	/* don't longjmp on fatal assignment error */
 
 /* Flags for the string extraction functions. */
 #define SX_NOALLOC	0x0001	/* just skip; don't return substring */

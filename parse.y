@@ -2684,6 +2684,10 @@ yylex ()
    which allow ESAC to be the next one read. */
 static int esacs_needed_count;
 
+/* When non-zero, we can read IN as an acceptable token, regardless of how
+   many newlines we read. */
+static int expecting_in_token;
+
 static void
 push_heredoc (r)
      REDIRECT *r;
@@ -2934,12 +2938,9 @@ static int
 special_case_tokens (tokstr)
      char *tokstr;
 {
+  /* Posix grammar rule 6 */
   if ((last_read_token == WORD) &&
-#if defined (SELECT_COMMAND)
       ((token_before_that == FOR) || (token_before_that == CASE) || (token_before_that == SELECT)) &&
-#else
-      ((token_before_that == FOR) || (token_before_that == CASE)) &&
-#endif
       (tokstr[0] == 'i' && tokstr[1] == 'n' && tokstr[2] == 0))
     {
       if (token_before_that == CASE)
@@ -2947,6 +2948,23 @@ special_case_tokens (tokstr)
 	  parser_state |= PST_CASEPAT;
 	  esacs_needed_count++;
 	}
+      if (expecting_in_token)
+	expecting_in_token--;
+      return (IN);
+    }
+
+  /* bash-5.0: leaving above code intact for now, but it should eventually be
+     removed in favor of this clause. */
+  /* Posix grammar rule 6 */
+  if (expecting_in_token && (last_read_token == WORD || last_read_token == '\n') &&
+      (tokstr[0] == 'i' && tokstr[1] == 'n' && tokstr[2] == 0))
+    {
+      if (parser_state & PST_CASESTMT)
+	{
+	  parser_state |= PST_CASEPAT;
+	  esacs_needed_count++;
+	}
+      expecting_in_token--;
       return (IN);
     }
 
@@ -5205,6 +5223,7 @@ got_token:
       if (word_top < MAX_CASE_NEST)
 	word_top++;
       word_lineno[word_top] = line_number;
+      expecting_in_token++;
       break;
     }
 

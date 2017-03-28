@@ -4,7 +4,7 @@
 /* ``Have a little faith, there's magic in the night.  You ain't a
      beauty, but, hey, you're alright.'' */
 
-/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -2539,6 +2539,8 @@ ifs_firstchar (lenp)
    expansion [of $*] appears within a double quoted string, it expands
    to a single field with the value of each parameter separated by the
    first character of the IFS variable, or by a <space> if IFS is unset." */
+/* Posix interpretation 888 changes this when IFS is null by specifying
+   that when unquoted, this expands to separate arguments */
 char *
 string_list_dollar_star (list)
      WORD_LIST *list;
@@ -2688,6 +2690,10 @@ string_list_pos_params (pchar, list, quoted)
       word_list_remove_quoted_nulls (tlist);
       ret = string_list (tlist);
     }
+  else if (pchar == '*' && quoted == 0 && ifs_is_null)	/* XXX */
+    {
+      ret = string_list_dollar_at (list, quoted, 0);	/* Posix interp 888 */
+    }
   else if (pchar == '*')
     {
       /* Even when unquoted, string_list_dollar_star does the right thing
@@ -2704,6 +2710,10 @@ string_list_pos_params (pchar, list, quoted)
        the elements of $@ are separated by the first character of $IFS for
        later splitting. */
     ret = string_list_dollar_at (list, quoted, 0);
+  else if (pchar == '@' && quoted == 0 && ifs_is_null)	/* XXX */
+    {
+      ret = string_list_dollar_at (list, quoted, 0);	/* Posix interp 888 */
+    }
   else if (pchar == '@')
     ret = string_list_dollar_star (list);
   else
@@ -3856,11 +3866,9 @@ expand_string_for_rhs (string, quoted, op, dollar_at_p, expanded_p)
      1.  This may need additional changes depending on whether or not this is
      on the RHS of an assignment statement. */
   /* The updated treatment of $* is the result of Posix interp 888 */
-#if 0
-  expand_no_split_dollar_star = (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) || op == '=' || ifs_is_null == 0;
-#else
-  expand_no_split_dollar_star = 1;
-#endif
+  /* This was further clarified on the austin-group list in March, 2017 and
+     in Posix bug 1129 */
+  expand_no_split_dollar_star = (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) || op == '=' || ifs_is_null == 0;	/* XXX - was 1 */
   td.flags = W_NOSPLIT2;		/* no splitting, remove "" and '' */
   td.word = string;
   tresult = call_expand_word_internal (&td, quoted, 1, dollar_at_p, expanded_p);
@@ -5142,7 +5150,11 @@ parameter_brace_remove_pattern (varname, value, ind, patstr, rtype, quoted, flag
 #endif
     case VT_POSPARMS:
       temp1 = parameter_list_remove_pattern (varname[0], pattern, patspec, quoted);
-      if (temp1 && ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) == 0))
+      if (temp1 && quoted == 0 && ifs_is_null)
+	{
+	  /* Posix interp 888 */
+	}
+      else if (temp1 && ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) == 0))
 	{
 	  val = quote_escapes (temp1);
 	  free (temp1);
@@ -5420,7 +5432,11 @@ parameter_brace_transform (varname, value, ind, xform, rtype, quoted, flags)
 #endif
     case VT_POSPARMS:
       temp1 = parameter_list_transform (xc, varname[0], quoted);
-      if (temp1 && ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) == 0))
+      if (temp1 && quoted == 0 && ifs_is_null)
+	{
+		/* Posix interp 888 */
+	}
+      else if (temp1 && ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) == 0))
 	{
 	  val = quote_escapes (temp1);
 	  free (temp1);
@@ -7520,7 +7536,11 @@ parameter_brace_substring (varname, value, ind, substr, quoted, flags)
       break;
     case VT_POSPARMS:
       tt = pos_params (varname, e1, e2, quoted);
-      if ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) == 0)
+      if (tt && quoted == 0 && ifs_is_null)
+	{
+	  temp = tt;	/* Posix interp 888 */
+	}
+      else if ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) == 0)
 	{
 	  temp = tt ? quote_escapes (tt) : (char *)NULL;
 	  FREE (tt);
@@ -7734,7 +7754,6 @@ pos_params_pat_subst (string, pat, rep, mflags)
   qflags = (mflags & MATCH_QUOTED) == MATCH_QUOTED ? Q_DOUBLE_QUOTES : 0;
 
   ret = string_list_pos_params (pchar, save, qflags);
-
   dispose_words (save);
 
   return (ret);
@@ -7872,7 +7891,11 @@ parameter_brace_patsub (varname, value, ind, patsub, quoted, pflags, flags)
       break;
     case VT_POSPARMS:
       temp = pos_params_pat_subst (val, p, rep, mflags);
-      if (temp && (mflags & MATCH_QUOTED) == 0)
+      if (temp && quoted == 0 && ifs_is_null)
+	{
+	  /* Posix interp 888 */
+	}
+      else if (temp && (mflags & MATCH_QUOTED) == 0)
 	{
 	  tt = quote_escapes (temp);
 	  free (temp);
@@ -8021,7 +8044,11 @@ parameter_brace_casemod (varname, value, ind, modspec, patspec, quoted, flags)
 
     case VT_POSPARMS:
       temp = pos_params_modcase (val, pat, modop, mflags);
-      if (temp && (mflags & MATCH_QUOTED)  == 0)
+      if (temp && quoted == 0 && ifs_is_null)
+	{
+	  /* Posix interp 888 */
+	}
+      else if (temp && (mflags & MATCH_QUOTED)  == 0)
 	{
 	  tt = quote_escapes (temp);
 	  free (temp);
@@ -8479,14 +8506,14 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
   if (want_substring)
     {
       temp1 = parameter_brace_substring (name, temp, ind, value, quoted, (tflag & W_ARRAYIND) ? AV_USEIND : 0);
-      FREE (name);
       FREE (value);
       FREE (temp);
 
-      if (temp1 == &expand_param_error)
-	return (&expand_wdesc_error);
-      else if (temp1 == &expand_param_fatal)
-	return (&expand_wdesc_fatal);
+      if (temp1 == &expand_param_error || temp1 == &expand_param_fatal)
+        {
+          FREE (name);
+	  return (temp1 == &expand_param_error ? &expand_wdesc_error : &expand_wdesc_fatal);
+        }
 
       ret = alloc_word_desc ();
       ret->word = temp1;
@@ -8498,19 +8525,24 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
           (quoted_dollar_atp == 0 || *quoted_dollar_atp == 0) &&
 	  QUOTED_NULL (temp1) && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
 	ret->flags |= W_QUOTED|W_HASQUOTEDNULL;
+      /* Special handling for $* when unquoted and $IFS is null. Posix interp 888 */
+      else if (temp1 && (name[0] == '*' && name[1] == 0) && quoted == 0 && ifs_is_null)
+	ret->flags |= W_SPLITSPACE;	/* Posix interp 888 */
+
+      FREE (name);
       return ret;
     }
   else if (want_patsub)
     {
       temp1 = parameter_brace_patsub (name, temp, ind, value, quoted, pflags, (tflag & W_ARRAYIND) ? AV_USEIND : 0);
-      FREE (name);
       FREE (value);
       FREE (temp);
 
-      if (temp1 == &expand_param_error)
-	return (&expand_wdesc_error);
-      else if (temp1 == &expand_param_fatal)
-	return (&expand_wdesc_fatal);
+      if (temp1 == &expand_param_error || temp1 == &expand_param_fatal)
+        {
+          FREE (name);
+	  return (temp1 == &expand_param_error ? &expand_wdesc_error : &expand_wdesc_fatal);
+        }
 
       ret = alloc_word_desc ();
       ret->word = temp1;
@@ -8518,20 +8550,25 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
           (quoted_dollar_atp == 0 || *quoted_dollar_atp == 0) &&
 	  QUOTED_NULL (temp1) && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
 	ret->flags |= W_QUOTED|W_HASQUOTEDNULL;
+      /* Special handling for $* when unquoted and $IFS is null. Posix interp 888 */
+      else if (temp1 && (name[0] == '*' && name[1] == 0) && quoted == 0 && ifs_is_null)
+	ret->flags |= W_SPLITSPACE;	/* Posix interp 888 */
+
+      FREE (name);
       return ret;
     }
 #if defined (CASEMOD_EXPANSIONS)
   else if (want_casemod)
     {
       temp1 = parameter_brace_casemod (name, temp, ind, modspec, value, quoted, (tflag & W_ARRAYIND) ? AV_USEIND : 0);
-      FREE (name);
       FREE (value);
       FREE (temp);
 
-      if (temp1 == &expand_param_error)
-	return (&expand_wdesc_error);
-      else if (temp1 == &expand_param_fatal)
-	return (&expand_wdesc_fatal);
+      if (temp1 == &expand_param_error || temp1 == &expand_param_fatal)
+        {
+          FREE (name);
+	  return (temp1 == &expand_param_error ? &expand_wdesc_error : &expand_wdesc_fatal);
+        }
 
       ret = alloc_word_desc ();
       ret->word = temp1;
@@ -8539,6 +8576,11 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
           (quoted_dollar_atp == 0 || *quoted_dollar_atp == 0) &&
 	  QUOTED_NULL (temp1) && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
 	ret->flags |= W_QUOTED|W_HASQUOTEDNULL;
+      /* Special handling for $* when unquoted and $IFS is null. Posix interp 888 */
+      else if (temp1 && (name[0] == '*' && name[1] == 0) && quoted == 0 && ifs_is_null)
+	ret->flags |= W_SPLITSPACE;	/* Posix interp 888 */
+
+      FREE (name);
       return ret;
     }
 #endif
@@ -8566,10 +8608,11 @@ bad_substitution:
       temp1 = parameter_brace_transform (name, temp, ind, value, c, quoted, (tflag & W_ARRAYIND) ? AV_USEIND : 0);
       free (temp);
       free (value);
-      free (name);
+
       if (temp1 == &expand_param_error || temp1 == &expand_param_fatal)
 	{
-	  last_command_exit_value = EXECUTION_FAILURE;
+	  free (name);
+      	  last_command_exit_value = EXECUTION_FAILURE;
 	  report_error (_("%s: bad substitution"), string ? string : "??");
 	  return (temp1 == &expand_param_error ? &expand_wdesc_error : &expand_wdesc_fatal);
 	}
@@ -8578,6 +8621,11 @@ bad_substitution:
       ret->word = temp1;
       if (temp1 && QUOTED_NULL (temp1) && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
 	ret->flags |= W_QUOTED|W_HASQUOTEDNULL;
+      /* Special handling for $* when unquoted and $IFS is null. Posix interp 888 */
+      else if (temp1 && (name[0] == '*' && name[1] == 0) && quoted == 0 && ifs_is_null)
+	ret->flags |= W_SPLITSPACE;	/* Posix interp 888 */
+
+      free (name);
       return ret;
 
     case '#':	/* ${param#[#]pattern} */
@@ -8590,12 +8638,16 @@ bad_substitution:
       temp1 = parameter_brace_remove_pattern (name, temp, ind, value, c, quoted, (tflag & W_ARRAYIND) ? AV_USEIND : 0);
       free (temp);
       free (value);
-      free (name);
 
       ret = alloc_word_desc ();
       ret->word = temp1;
       if (temp1 && QUOTED_NULL (temp1) && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
 	ret->flags |= W_QUOTED|W_HASQUOTEDNULL;
+      /* Special handling for $* when unquoted and $IFS is null. Posix interp 888 */
+      else if (temp1 && (name[0] == '*' && name[1] == 0) && quoted == 0 && ifs_is_null)
+	ret->flags |= W_SPLITSPACE;	/* Posix interp 888 */
+
+      free (name);
       return ret;
 
     case '-':

@@ -2,9 +2,9 @@ This is bashref.info, produced by makeinfo version 6.3 from
 bashref.texi.
 
 This text is a brief description of the features that are present in the
-Bash shell (version 4.4, 1 February 2017).
+Bash shell (version 4.4, 22 March 2017).
 
-   This is Edition 4.4, last updated 1 February 2017, of 'The GNU Bash
+   This is Edition 4.4, last updated 22 March 2017, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 4.4.
 
    Copyright (C) 1988-2017 Free Software Foundation, Inc.
@@ -27,10 +27,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in the
-Bash shell (version 4.4, 1 February 2017).  The Bash home page is
+Bash shell (version 4.4, 22 March 2017).  The Bash home page is
 <http://www.gnu.org/software/bash/>.
 
-   This is Edition 4.4, last updated 1 February 2017, of 'The GNU Bash
+   This is Edition 4.4, last updated 22 March 2017, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 4.4.
 
    Bash contains features that appear in other popular shells, and some
@@ -1210,7 +1210,47 @@ last command executed before the 'return'.
 
    Variables local to the function may be declared with the 'local'
 builtin.  These variables are visible only to the function and the
-commands it invokes.
+commands it invokes.  This is particularly important when a shell
+function calls other functions.
+
+   Local variables "shadow" variables with the same name declared at
+previous scopes.  For instance, a local variable declared in a function
+hides a global variable of the same name: references and assignments
+refer to the local variable, leaving the global variable unmodified.
+When the function returns, the global variable is once again visible.
+
+   The shell uses DYNAMIC SCOPING to control a variable's visibility
+within functions.  With dynamic scoping, visible variables and their
+values are a result of the sequence of function calls that caused
+execution to reach the current function.  The value of a variable that a
+function sees depends on its value within its caller, if any, whether
+that caller is the "global" scope or another shell function.  This is
+also the value that a local variable declaration "shadows", and the
+value that is restored when the function returns.
+
+   For example, if a variable VAR is declared as local in function
+FUNC1, and FUNC1 calls another function FUNC2, references to VAR made
+from within FUNC2 will resolve to the local variable VAR from FUNC1,
+shadowing any global variable named VAR.
+
+   The following script demonstrates this behavior.  When executed, the
+script displays
+
+     In func2, var = func1 local
+
+     func1()
+     {
+         local var='func1 local'
+         func2
+     }
+
+     func2()
+     {
+         echo "In func2, var = $var"
+     }
+
+     var=global
+     func1
 
    Function names and definitions may be listed with the '-f' option to
 the 'declare' ('typeset') builtin command (*note Bash Builtins::).  The
@@ -2354,12 +2394,11 @@ fashion.
 A variant of here documents, the format is:
      [N]<<< WORD
 
-   The WORD undergoes brace expansion, tilde expansion, parameter and
-variable expansion, command substitution, arithmetic expansion, and
-quote removal.  Pathname expansion and word splitting are not performed.
-The result is supplied as a single string, with a newline appended, to
-the command on its standard input (or file descriptor N if N is
-specified).
+   The WORD undergoes tilde expansion, parameter and variable expansion,
+command substitution, arithmetic expansion, and quote removal.  Pathname
+expansion and word splitting are not performed.  The result is supplied
+as a single string, with a newline appended, to the command on its
+standard input (or file descriptor N if N is specified).
 
 3.6.8 Duplicating File Descriptors
 ----------------------------------
@@ -4687,7 +4726,8 @@ In some cases, Bash assigns a default value to the variable.
      that are expanded before 'PS1' is displayed.
 
 'PS2'
-     The secondary prompt string.  The default value is '> '.
+     The secondary prompt string.  The default value is '> '.  'PS2' is
+     expanded in the same way as 'PS1' before being displayed.
 
 
 File: bashref.info,  Node: Bash Variables,  Prev: Bourne Shell Variables,  Up: Shell Variables
@@ -5254,10 +5294,12 @@ Variables::).
      with '#? '
 
 'PS4'
-     The value is the prompt printed before the command line is echoed
-     when the '-x' option is set (*note The Set Builtin::).  The first
-     character of 'PS4' is replicated multiple times, as necessary, to
-     indicate multiple levels of indirection.  The default is '+ '.
+     The value of this parameter is expanded like PS1 and the expanded
+     value is the prompt printed before the command line is echoed when
+     the '-x' option is set (*note The Set Builtin::).  The first
+     character of the expanded value is replicated multiple times, as
+     necessary, to indicate multiple levels of indirection.  The default
+     is '+ '.
 
 'PWD'
      The current working directory as set by the 'cd' builtin.
@@ -5714,8 +5756,10 @@ several ways.
 
   3. Bash expands and displays 'PS1' before reading the first line of a
      command, and expands and displays 'PS2' before reading the second
-     and subsequent lines of a multi-line command.  Bash displays 'PS0'
-     after it reads a command but before executing it.
+     and subsequent lines of a multi-line command.  Bash expands and
+     displays 'PS0' after it reads a command but before executing it.
+     See *note Controlling the Prompt::, for a complete list of prompt
+     string escape sequences.
 
   4. Bash executes the value of the 'PROMPT_COMMAND' variable as a
      command before printing the primary prompt, '$PS1' (*note Bash
@@ -5920,7 +5964,9 @@ link itself.
      arithmetic binary operators return true if ARG1 is equal to, not
      equal to, less than, less than or equal to, greater than, or
      greater than or equal to ARG2, respectively.  ARG1 and ARG2 may be
-     positive or negative integers.
+     positive or negative integers.  When used with the '[[' command,
+     ARG1 and ARG2 are evaluated as arithmetic expressions (*note Shell
+     Arithmetic::).
 
 
 File: bashref.info,  Node: Shell Arithmetic,  Next: Aliases,  Prev: Bash Conditional Expressions,  Up: Bash Features
@@ -6281,7 +6327,7 @@ non-null value, then the value is executed just as if it had been typed
 on the command line.
 
    In addition, the following table describes the special characters
-which can appear in the prompt variables 'PS1' to 'PS4':
+which can appear in the prompt variables 'PS0', 'PS1', 'PS2', and 'PS4':
 
 '\a'
      A bell character.
@@ -7853,6 +7899,20 @@ File: bashref.info,  Node: Commands For Moving,  Next: Commands For History,  Up
 'shell-backward-word ()'
      Move back to the start of the current or previous word.  Words are
      delimited by non-quoted shell metacharacters.
+
+'previous-screen-line ()'
+     Attempt to move point to the same physical screen column on the
+     previous physical screen line.  This will not have the desired
+     effect if the current Readline line does not take up more than one
+     physical line or if point is not greater than the length of the
+     prompt plus the screen width.
+
+'next-screen-line ()'
+     Attempt to move point to the same physical screen column on the
+     next physical screen line.  This will not have the desired effect
+     if the current Readline line does not take up more than one
+     physical line or if the length of the current Readline line is not
+     greater than the length of the prompt plus the screen width.
 
 'clear-screen (C-l)'
      Clear the screen and redraw the current line, leaving the current
@@ -9737,7 +9797,7 @@ unless the operating system does not provide the necessary support.
 
 '--enable-prompt-string-decoding'
      Turn on the interpretation of a number of backslash-escaped
-     characters in the '$PS1', '$PS2', '$PS3', and '$PS4' prompt
+     characters in the '$PS0', '$PS1', '$PS2', and '$PS4' prompt
      strings.  See *note Controlling the Prompt::, for a complete list
      of prompt string escape sequences.
 
@@ -11019,17 +11079,17 @@ D.3 Parameter and Variable Index
                                                               (line  53)
 * PS3:                                   Bash Variables.      (line 559)
 * PS4:                                   Bash Variables.      (line 564)
-* PWD:                                   Bash Variables.      (line 570)
-* RANDOM:                                Bash Variables.      (line 573)
-* READLINE_LINE:                         Bash Variables.      (line 578)
-* READLINE_POINT:                        Bash Variables.      (line 582)
-* REPLY:                                 Bash Variables.      (line 586)
+* PWD:                                   Bash Variables.      (line 572)
+* RANDOM:                                Bash Variables.      (line 575)
+* READLINE_LINE:                         Bash Variables.      (line 580)
+* READLINE_POINT:                        Bash Variables.      (line 584)
+* REPLY:                                 Bash Variables.      (line 588)
 * revert-all-at-newline:                 Readline Init File Syntax.
                                                               (line 270)
-* SECONDS:                               Bash Variables.      (line 589)
-* SHELL:                                 Bash Variables.      (line 595)
-* SHELLOPTS:                             Bash Variables.      (line 600)
-* SHLVL:                                 Bash Variables.      (line 609)
+* SECONDS:                               Bash Variables.      (line 591)
+* SHELL:                                 Bash Variables.      (line 597)
+* SHELLOPTS:                             Bash Variables.      (line 602)
+* SHLVL:                                 Bash Variables.      (line 611)
 * show-all-if-ambiguous:                 Readline Init File Syntax.
                                                               (line 276)
 * show-all-if-unmodified:                Readline Init File Syntax.
@@ -11040,10 +11100,10 @@ D.3 Parameter and Variable Index
                                                               (line 297)
 * TEXTDOMAIN:                            Locale Translation.  (line  11)
 * TEXTDOMAINDIR:                         Locale Translation.  (line  11)
-* TIMEFORMAT:                            Bash Variables.      (line 614)
-* TMOUT:                                 Bash Variables.      (line 652)
-* TMPDIR:                                Bash Variables.      (line 664)
-* UID:                                   Bash Variables.      (line 668)
+* TIMEFORMAT:                            Bash Variables.      (line 616)
+* TMOUT:                                 Bash Variables.      (line 654)
+* TMPDIR:                                Bash Variables.      (line 666)
+* UID:                                   Bash Variables.      (line 670)
 * vi-cmd-mode-string:                    Readline Init File Syntax.
                                                               (line 310)
 * vi-ins-mode-string:                    Readline Init File Syntax.
@@ -11083,7 +11143,7 @@ D.4 Function Index
                                                               (line  42)
 * character-search-backward (M-C-]):     Miscellaneous Commands.
                                                               (line  47)
-* clear-screen (C-l):                    Commands For Moving. (line  34)
+* clear-screen (C-l):                    Commands For Moving. (line  48)
 * complete (<TAB>):                      Commands For Completion.
                                                               (line   6)
 * complete-command (M-!):                Commands For Completion.
@@ -11179,6 +11239,7 @@ D.4 Function Index
                                                               (line  38)
 * next-history (C-n):                    Commands For History.
                                                               (line  17)
+* next-screen-line ():                   Commands For Moving. (line  41)
 * non-incremental-forward-search-history (M-n): Commands For History.
                                                               (line  41)
 * non-incremental-reverse-search-history (M-p): Commands For History.
@@ -11202,11 +11263,12 @@ D.4 Function Index
                                                               (line  19)
 * previous-history (C-p):                Commands For History.
                                                               (line  13)
+* previous-screen-line ():               Commands For Moving. (line  34)
 * print-last-kbd-macro ():               Keyboard Macros.     (line  17)
 * quoted-insert (C-q or C-v):            Commands For Text.   (line  26)
 * re-read-init-file (C-x C-r):           Miscellaneous Commands.
                                                               (line   6)
-* redraw-current-line ():                Commands For Moving. (line  38)
+* redraw-current-line ():                Commands For Moving. (line  52)
 * reverse-search-history (C-r):          Commands For History.
                                                               (line  27)
 * revert-line (M-r):                     Miscellaneous Commands.
@@ -11410,134 +11472,134 @@ D.5 Concept Index
 
 
 Tag Table:
-Node: Top895
-Node: Introduction2813
-Node: What is Bash?3029
-Node: What is a shell?4143
-Node: Definitions6681
-Node: Basic Shell Features9632
-Node: Shell Syntax10851
-Node: Shell Operation11877
-Node: Quoting13170
-Node: Escape Character14470
-Node: Single Quotes14955
-Node: Double Quotes15303
-Node: ANSI-C Quoting16581
-Node: Locale Translation17834
-Node: Comments18730
-Node: Shell Commands19348
-Node: Simple Commands20220
-Node: Pipelines20851
-Node: Lists23594
-Node: Compound Commands25323
-Node: Looping Constructs26326
-Node: Conditional Constructs28789
-Node: Command Grouping39711
-Node: Coprocesses41190
-Node: GNU Parallel43022
-Node: Shell Functions46995
-Node: Shell Parameters52201
-Node: Positional Parameters56614
-Node: Special Parameters57514
-Node: Shell Expansions60851
-Node: Brace Expansion62945
-Node: Tilde Expansion65779
-Node: Shell Parameter Expansion68127
-Node: Command Substitution82259
-Node: Arithmetic Expansion83614
-Node: Process Substitution84546
-Node: Word Splitting85666
-Node: Filename Expansion87610
-Node: Pattern Matching89984
-Node: Quote Removal93970
-Node: Redirections94265
-Node: Executing Commands103839
-Node: Simple Command Expansion104509
-Node: Command Search and Execution106439
-Node: Command Execution Environment108775
-Node: Environment111759
-Node: Exit Status113418
-Node: Signals115088
-Node: Shell Scripts117055
-Node: Shell Builtin Commands119570
-Node: Bourne Shell Builtins121604
-Node: Bash Builtins142204
-Node: Modifying Shell Behavior170849
-Node: The Set Builtin171194
-Node: The Shopt Builtin181607
-Node: Special Builtins197505
-Node: Shell Variables198484
-Node: Bourne Shell Variables198921
-Node: Bash Variables200952
-Node: Bash Features230660
-Node: Invoking Bash231559
-Node: Bash Startup Files237508
-Node: Interactive Shells242611
-Node: What is an Interactive Shell?243021
-Node: Is this Shell Interactive?243670
-Node: Interactive Shell Behavior244485
-Node: Bash Conditional Expressions247860
-Node: Shell Arithmetic252100
-Node: Aliases254917
-Node: Arrays257465
-Node: The Directory Stack262549
-Node: Directory Stack Builtins263333
-Node: Controlling the Prompt266301
-Node: The Restricted Shell269047
-Node: Bash POSIX Mode270872
-Node: Job Control281223
-Node: Job Control Basics281683
-Node: Job Control Builtins286651
-Node: Job Control Variables291378
-Node: Command Line Editing292534
-Node: Introduction and Notation294205
-Node: Readline Interaction295828
-Node: Readline Bare Essentials297019
-Node: Readline Movement Commands298802
-Node: Readline Killing Commands299762
-Node: Readline Arguments301680
-Node: Searching302724
-Node: Readline Init File304910
-Node: Readline Init File Syntax306057
-Node: Conditional Init Constructs326244
-Node: Sample Init File328769
-Node: Bindable Readline Commands331886
-Node: Commands For Moving333090
-Node: Commands For History334233
-Node: Commands For Text338528
-Node: Commands For Killing341917
-Node: Numeric Arguments344398
-Node: Commands For Completion345537
-Node: Keyboard Macros349728
-Node: Miscellaneous Commands350415
-Node: Readline vi Mode356291
-Node: Programmable Completion357198
-Node: Programmable Completion Builtins364659
-Node: A Programmable Completion Example374545
-Node: Using History Interactively379797
-Node: Bash History Facilities380481
-Node: Bash History Builtins383482
-Node: History Interaction387774
-Node: Event Designators390738
-Node: Word Designators391957
-Node: Modifiers393594
-Node: Installing Bash394996
-Node: Basic Installation396133
-Node: Compilers and Options398824
-Node: Compiling For Multiple Architectures399565
-Node: Installation Names401228
-Node: Specifying the System Type402046
-Node: Sharing Defaults402762
-Node: Operation Controls403435
-Node: Optional Features404393
-Node: Reporting Bugs414919
-Node: Major Differences From The Bourne Shell416113
-Node: GNU Free Documentation License432965
-Node: Indexes458142
-Node: Builtin Index458596
-Node: Reserved Word Index465423
-Node: Variable Index467871
-Node: Function Index483549
-Node: Concept Index496706
+Node: Top891
+Node: Introduction2805
+Node: What is Bash?3021
+Node: What is a shell?4135
+Node: Definitions6673
+Node: Basic Shell Features9624
+Node: Shell Syntax10843
+Node: Shell Operation11869
+Node: Quoting13162
+Node: Escape Character14462
+Node: Single Quotes14947
+Node: Double Quotes15295
+Node: ANSI-C Quoting16573
+Node: Locale Translation17826
+Node: Comments18722
+Node: Shell Commands19340
+Node: Simple Commands20212
+Node: Pipelines20843
+Node: Lists23586
+Node: Compound Commands25315
+Node: Looping Constructs26318
+Node: Conditional Constructs28781
+Node: Command Grouping39703
+Node: Coprocesses41182
+Node: GNU Parallel43014
+Node: Shell Functions46987
+Node: Shell Parameters53696
+Node: Positional Parameters58109
+Node: Special Parameters59009
+Node: Shell Expansions62346
+Node: Brace Expansion64440
+Node: Tilde Expansion67274
+Node: Shell Parameter Expansion69622
+Node: Command Substitution83754
+Node: Arithmetic Expansion85109
+Node: Process Substitution86041
+Node: Word Splitting87161
+Node: Filename Expansion89105
+Node: Pattern Matching91479
+Node: Quote Removal95465
+Node: Redirections95760
+Node: Executing Commands105318
+Node: Simple Command Expansion105988
+Node: Command Search and Execution107918
+Node: Command Execution Environment110254
+Node: Environment113238
+Node: Exit Status114897
+Node: Signals116567
+Node: Shell Scripts118534
+Node: Shell Builtin Commands121049
+Node: Bourne Shell Builtins123083
+Node: Bash Builtins143683
+Node: Modifying Shell Behavior172328
+Node: The Set Builtin172673
+Node: The Shopt Builtin183086
+Node: Special Builtins198984
+Node: Shell Variables199963
+Node: Bourne Shell Variables200400
+Node: Bash Variables202504
+Node: Bash Features232297
+Node: Invoking Bash233196
+Node: Bash Startup Files239145
+Node: Interactive Shells244248
+Node: What is an Interactive Shell?244658
+Node: Is this Shell Interactive?245307
+Node: Interactive Shell Behavior246122
+Node: Bash Conditional Expressions249610
+Node: Shell Arithmetic253976
+Node: Aliases256793
+Node: Arrays259341
+Node: The Directory Stack264425
+Node: Directory Stack Builtins265209
+Node: Controlling the Prompt268177
+Node: The Restricted Shell270939
+Node: Bash POSIX Mode272764
+Node: Job Control283115
+Node: Job Control Basics283575
+Node: Job Control Builtins288543
+Node: Job Control Variables293270
+Node: Command Line Editing294426
+Node: Introduction and Notation296097
+Node: Readline Interaction297720
+Node: Readline Bare Essentials298911
+Node: Readline Movement Commands300694
+Node: Readline Killing Commands301654
+Node: Readline Arguments303572
+Node: Searching304616
+Node: Readline Init File306802
+Node: Readline Init File Syntax307949
+Node: Conditional Init Constructs328136
+Node: Sample Init File330661
+Node: Bindable Readline Commands333778
+Node: Commands For Moving334982
+Node: Commands For History336831
+Node: Commands For Text341126
+Node: Commands For Killing344515
+Node: Numeric Arguments346996
+Node: Commands For Completion348135
+Node: Keyboard Macros352326
+Node: Miscellaneous Commands353013
+Node: Readline vi Mode358889
+Node: Programmable Completion359796
+Node: Programmable Completion Builtins367257
+Node: A Programmable Completion Example377143
+Node: Using History Interactively382395
+Node: Bash History Facilities383079
+Node: Bash History Builtins386080
+Node: History Interaction390372
+Node: Event Designators393336
+Node: Word Designators394555
+Node: Modifiers396192
+Node: Installing Bash397594
+Node: Basic Installation398731
+Node: Compilers and Options401422
+Node: Compiling For Multiple Architectures402163
+Node: Installation Names403826
+Node: Specifying the System Type404644
+Node: Sharing Defaults405360
+Node: Operation Controls406033
+Node: Optional Features406991
+Node: Reporting Bugs417517
+Node: Major Differences From The Bourne Shell418711
+Node: GNU Free Documentation License435563
+Node: Indexes460740
+Node: Builtin Index461194
+Node: Reserved Word Index468021
+Node: Variable Index470469
+Node: Function Index486147
+Node: Concept Index499450
 
 End Tag Table

@@ -9,7 +9,7 @@ SSYYNNOOPPSSIISS
        bbaasshh [options] [command_string | file]
 
 CCOOPPYYRRIIGGHHTT
-       Bash is Copyright (C) 1989-2016 by the Free Software Foundation, Inc.
+       Bash is Copyright (C) 1989-2017 by the Free Software Foundation, Inc.
 
 DDEESSCCRRIIPPTTIIOONN
        BBaasshh  is  an  sshh-compatible  command language interpreter that executes
@@ -22,9 +22,9 @@ DDEESSCCRRIIPPTTIIOONN
 
 OOPPTTIIOONNSS
        All of the single-character shell options documented in the description
-       of the sseett builtin command can be used as options  when  the  shell  is
-       invoked.  In addition, bbaasshh interprets the following options when it is
-       invoked:
+       of the sseett builtin command, including --oo, can be used as  options  when
+       the  shell  is  invoked.   In  addition,  bbaasshh interprets the following
+       options when it is invoked:
 
        --cc        If the --cc option is present, then commands are read from  the
                  first non-option argument _c_o_m_m_a_n_d___s_t_r_i_n_g.  If there are argu-
@@ -1286,9 +1286,9 @@ PPAARRAAMMEETTEERRSS
               command (see SSHHEELLLL GGRRAAMMMMAARR above).
        PPSS44    The value of this parameter is expanded  as  with  PPSS11  and  the
               value  is  printed  before  each command bbaasshh displays during an
-              execution trace.  The first character of PPSS44 is replicated  mul-
-              tiple  times, as necessary, to indicate multiple levels of indi-
-              rection.  The default is ``++ ''.
+              execution trace.  The first character of the expanded  value  of
+              PPSS44 is replicated multiple times, as necessary, to indicate mul-
+              tiple levels of indirection.  The default is ``++ ''.
        SSHHEELLLL  The full pathname to the shell is kept in this environment vari-
               able.   If  it is not set when the shell starts, bbaasshh assigns to
               it the full pathname of the current user's login shell.
@@ -2176,12 +2176,11 @@ RREEDDIIRREECCTTIIOONN
 
               [_n]<<<<<<_w_o_r_d
 
-       The  _w_o_r_d  undergoes  brace  expansion,  tilde expansion, parameter and
-       variable expansion, command  substitution,  arithmetic  expansion,  and
-       quote  removal.   Pathname  expansion  and  word splitting are not per-
-       formed.  The result is supplied as a  single  string,  with  a  newline
-       appended, to the command on its standard input (or file descriptor _n if
-       _n is specified).
+       The  _w_o_r_d  undergoes tilde expansion, parameter and variable expansion,
+       command substitution, arithmetic expansion, and quote  removal.   Path-
+       name  expansion  and  word  splitting are not performed.  The result is
+       supplied as a single string, with a newline appended, to the command on
+       its standard input (or file descriptor _n if _n is specified).
 
    DDuupplliiccaattiinngg FFiillee DDeessccrriippttoorrss
        The redirection operator
@@ -2189,22 +2188,22 @@ RREEDDIIRREECCTTIIOONN
               [_n]<<&&_w_o_r_d
 
        is used to duplicate input file descriptors.  If _w_o_r_d expands to one or
-       more  digits,  the file descriptor denoted by _n is made to be a copy of
-       that file descriptor.  If the digits in _w_o_r_d  do  not  specify  a  file
-       descriptor  open for input, a redirection error occurs.  If _w_o_r_d evalu-
-       ates to --, file descriptor _n is closed.  If _n  is  not  specified,  the
+       more digits, the file descriptor denoted by _n is made to be a  copy  of
+       that  file  descriptor.   If  the  digits in _w_o_r_d do not specify a file
+       descriptor open for input, a redirection error occurs.  If _w_o_r_d  evalu-
+       ates  to  --,  file  descriptor _n is closed.  If _n is not specified, the
        standard input (file descriptor 0) is used.
 
        The operator
 
               [_n]>>&&_w_o_r_d
 
-       is  used  similarly  to duplicate output file descriptors.  If _n is not
-       specified, the standard output (file descriptor 1)  is  used.   If  the
-       digits  in _w_o_r_d do not specify a file descriptor open for output, a re-
-       direction error occurs.  If _w_o_r_d evaluates to --, file descriptor  _n  is
-       closed.   As  a special case, if _n is omitted, and _w_o_r_d does not expand
-       to one or more digits or --, the standard output and standard error  are
+       is used similarly to duplicate output file descriptors.  If  _n  is  not
+       specified,  the  standard  output  (file descriptor 1) is used.  If the
+       digits in _w_o_r_d do not specify a file descriptor open for output, a  re-
+       direction  error  occurs.  If _w_o_r_d evaluates to --, file descriptor _n is
+       closed.  As a special case, if _n is omitted, and _w_o_r_d does  not  expand
+       to  one or more digits or --, the standard output and standard error are
        redirected as described previously.
 
    MMoovviinngg FFiillee DDeessccrriippttoorrss
@@ -2212,7 +2211,7 @@ RREEDDIIRREECCTTIIOONN
 
               [_n]<<&&_d_i_g_i_t--
 
-       moves  the  file descriptor _d_i_g_i_t to file descriptor _n, or the standard
+       moves the file descriptor _d_i_g_i_t to file descriptor _n, or  the  standard
        input (file descriptor 0) if _n is not specified.  _d_i_g_i_t is closed after
        being duplicated to _n.
 
@@ -2220,7 +2219,7 @@ RREEDDIIRREECCTTIIOONN
 
               [_n]>>&&_d_i_g_i_t--
 
-       moves  the  file descriptor _d_i_g_i_t to file descriptor _n, or the standard
+       moves the file descriptor _d_i_g_i_t to file descriptor _n, or  the  standard
        output (file descriptor 1) if _n is not specified.
 
    OOppeenniinngg FFiillee DDeessccrriippttoorrss ffoorr RReeaaddiinngg aanndd WWrriittiinngg
@@ -2228,81 +2227,102 @@ RREEDDIIRREECCTTIIOONN
 
               [_n]<<>>_w_o_r_d
 
-       causes the file whose name is the expansion of _w_o_r_d to  be  opened  for
-       both  reading and writing on file descriptor _n, or on file descriptor 0
+       causes  the  file  whose name is the expansion of _w_o_r_d to be opened for
+       both reading and writing on file descriptor _n, or on file descriptor  0
        if _n is not specified.  If the file does not exist, it is created.
 
 AALLIIAASSEESS
-       _A_l_i_a_s_e_s allow a string to be substituted for a word when it is used  as
-       the  first  word  of  a  simple command.  The shell maintains a list of
-       aliases that may be set and unset with the aalliiaass  and  uunnaalliiaass  builtin
-       commands  (see  SSHHEELLLL  BBUUIILLTTIINN CCOOMMMMAANNDDSS below).  The first word of each
-       simple command, if unquoted, is checked to see if it has an alias.   If
-       so,  that word is replaced by the text of the alias.  The characters //,
-       $$, ``, and == and any of the shell _m_e_t_a_c_h_a_r_a_c_t_e_r_s or  quoting  characters
+       _A_l_i_a_s_e_s  allow a string to be substituted for a word when it is used as
+       the first word of a simple command.  The  shell  maintains  a  list  of
+       aliases  that  may  be set and unset with the aalliiaass and uunnaalliiaass builtin
+       commands (see SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below).  The first  word  of  each
+       simple  command, if unquoted, is checked to see if it has an alias.  If
+       so, that word is replaced by the text of the alias.  The characters  //,
+       $$,  ``,  and == and any of the shell _m_e_t_a_c_h_a_r_a_c_t_e_r_s or quoting characters
        listed above may not appear in an alias name.  The replacement text may
-       contain any valid shell input,  including  shell  metacharacters.   The
-       first  word  of  the replacement text is tested for aliases, but a word
-       that is identical to an alias being expanded is not expanded  a  second
-       time.   This  means  that  one may alias llss to llss --FF, for instance, and
-       bbaasshh does not try to recursively expand the replacement text.   If  the
-       last  character  of  the  alias value is a _b_l_a_n_k, then the next command
+       contain  any  valid  shell  input, including shell metacharacters.  The
+       first word of the replacement text is tested for aliases,  but  a  word
+       that  is  identical to an alias being expanded is not expanded a second
+       time.  This means that one may alias llss to llss  --FF,  for  instance,  and
+       bbaasshh  does  not try to recursively expand the replacement text.  If the
+       last character of the alias value is a _b_l_a_n_k,  then  the  next  command
        word following the alias is also checked for alias expansion.
 
        Aliases are created and listed with the aalliiaass command, and removed with
        the uunnaalliiaass command.
 
-       There  is no mechanism for using arguments in the replacement text.  If
-       arguments are needed, a shell function should be  used  (see  FFUUNNCCTTIIOONNSS
+       There is no mechanism for using arguments in the replacement text.   If
+       arguments  are  needed,  a shell function should be used (see FFUUNNCCTTIIOONNSS
        below).
 
-       Aliases  are not expanded when the shell is not interactive, unless the
-       eexxppaanndd__aalliiaasseess shell option is set using sshhoopptt (see the description  of
+       Aliases are not expanded when the shell is not interactive, unless  the
+       eexxppaanndd__aalliiaasseess  shell option is set using sshhoopptt (see the description of
        sshhoopptt under SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below).
 
-       The  rules  concerning  the  definition and use of aliases are somewhat
-       confusing.  BBaasshh always reads at  least  one  complete  line  of  input
-       before  executing  any  of  the  commands  on  that  line.  Aliases are
-       expanded when a command is read, not when it is  executed.   Therefore,
-       an  alias definition appearing on the same line as another command does
-       not take effect until the next line of input  is  read.   The  commands
+       The rules concerning the definition and use  of  aliases  are  somewhat
+       confusing.   BBaasshh  always  reads  at  least  one complete line of input
+       before executing any  of  the  commands  on  that  line.   Aliases  are
+       expanded  when  a command is read, not when it is executed.  Therefore,
+       an alias definition appearing on the same line as another command  does
+       not  take  effect  until  the next line of input is read.  The commands
        following the alias definition on that line are not affected by the new
-       alias.  This behavior is also an issue  when  functions  are  executed.
-       Aliases  are  expanded when a function definition is read, not when the
-       function is executed, because a function definition is  itself  a  com-
-       mand.   As  a consequence, aliases defined in a function are not avail-
-       able until after that function is executed.  To  be  safe,  always  put
-       alias  definitions on a separate line, and do not use aalliiaass in compound
+       alias.   This  behavior  is  also an issue when functions are executed.
+       Aliases are expanded when a function definition is read, not  when  the
+       function  is  executed,  because a function definition is itself a com-
+       mand.  As a consequence, aliases defined in a function are  not  avail-
+       able  until  after  that  function is executed.  To be safe, always put
+       alias definitions on a separate line, and do not use aalliiaass in  compound
        commands.
 
        For almost every purpose, aliases are superseded by shell functions.
 
 FFUUNNCCTTIIOONNSS
-       A shell function, defined  as  described  above  under  SSHHEELLLL  GGRRAAMMMMAARR,
-       stores  a  series  of commands for later execution.  When the name of a
-       shell function is used as a simple command name, the list  of  commands
+       A  shell  function,  defined  as  described  above under SSHHEELLLL GGRRAAMMMMAARR,
+       stores a series of commands for later execution.  When the  name  of  a
+       shell  function  is used as a simple command name, the list of commands
        associated with that function name is executed.  Functions are executed
-       in the context of the current shell;  no  new  process  is  created  to
-       interpret  them  (contrast  this with the execution of a shell script).
-       When a function is executed, the arguments to the function  become  the
+       in  the  context  of  the  current  shell; no new process is created to
+       interpret them (contrast this with the execution of  a  shell  script).
+       When  a  function is executed, the arguments to the function become the
        positional parameters during its execution.  The special parameter ## is
-       updated to reflect the change.  Special parameter 00 is unchanged.   The
-       first  element of the FFUUNNCCNNAAMMEE variable is set to the name of the func-
+       updated  to reflect the change.  Special parameter 00 is unchanged.  The
+       first element of the FFUUNNCCNNAAMMEE variable is set to the name of the  func-
        tion while the function is executing.
 
-       All other aspects of the  shell  execution  environment  are  identical
-       between  a function and its caller with these exceptions: the DDEEBBUUGG and
-       RREETTUURRNN traps (see the description  of  the  ttrraapp  builtin  under  SSHHEELLLL
-       BBUUIILLTTIINN  CCOOMMMMAANNDDSS below) are not inherited unless the function has been
-       given the ttrraaccee attribute (see the description of the  ddeeccllaarree  builtin
-       below)  or  the --oo ffuunnccttrraaccee shell option has been enabled with the sseett
-       builtin (in which case all  functions  inherit  the  DDEEBBUUGG  and  RREETTUURRNN
-       traps),  and the EERRRR trap is not inherited unless the --oo eerrrrttrraaccee shell
+       All  other  aspects  of  the  shell execution environment are identical
+       between a function and its caller with these exceptions: the DDEEBBUUGG  and
+       RREETTUURRNN  traps  (see  the  description  of  the ttrraapp builtin under SSHHEELLLL
+       BBUUIILLTTIINN CCOOMMMMAANNDDSS below) are not inherited unless the function has  been
+       given  the  ttrraaccee attribute (see the description of the ddeeccllaarree builtin
+       below) or the --oo ffuunnccttrraaccee shell option has been enabled with  the  sseett
+       builtin  (in  which  case  all  functions  inherit the DDEEBBUUGG and RREETTUURRNN
+       traps), and the EERRRR trap is not inherited unless the --oo eerrrrttrraaccee  shell
        option has been enabled.
 
-       Variables local to the function may be declared with the llooccaall  builtin
+       Variables  local to the function may be declared with the llooccaall builtin
        command.  Ordinarily, variables and their values are shared between the
-       function and its caller.
+       function  and  its  caller.  If a variable is declared llooccaall, the vari-
+       able's visible scope is restricted to that function  and  its  children
+       (including the functions it calls).  Local variables "shadow" variables
+       with the same name declared at previous scopes.  For instance, a  local
+       variable  declared  in  a  function hides a global variable of the same
+       name: references and assignments refer to the local  variable,  leaving
+       the  global variable unmodified.  When the function returns, the global
+       variable is once again visible.
+
+       The shell uses _d_y_n_a_m_i_c  _s_c_o_p_i_n_g  to  control  a  variable's  visibility
+       within  functions.   With  dynamic scoping, visible variables and their
+       values are a result of the sequence of function calls that caused  exe-
+       cution  to  reach the current function.  The value of a variable that a
+       function sees depends on its value within its caller, if  any,  whether
+       that  caller  is the "global" scope or another shell function.  This is
+       also the value that a local variable  declaration  "shadows",  and  the
+       value that is restored when the function returns.
+
+       For  example, if a variable _v_a_r is declared as local in function _f_u_n_c_1,
+       and _f_u_n_c_1 calls another function _f_u_n_c_2, references  to  _v_a_r  made  from
+       within _f_u_n_c_2 will resolve to the local variable _v_a_r from _f_u_n_c_1, shadow-
+       ing any global variable named _v_a_r.
 
        The FFUUNNCCNNEESSTT variable, if set  to  a  numeric  value  greater  than  0,
        defines  a  maximum  function nesting level.  Function invocations that
@@ -2499,7 +2519,9 @@ CCOONNDDIITTIIOONNAALL EEXXPPRREESSSSIIOONNSS
               binary operators return true if _a_r_g_1 is equal to, not equal  to,
               less  than, less than or equal to, greater than, or greater than
               or equal to _a_r_g_2, respectively.  _A_r_g_1 and _a_r_g_2 may  be  positive
-              or negative integers.
+              or  negative  integers.  When used with the [[[[ command, _A_r_g_1 and
+              _A_r_g_2 are evaluated as arithmetic  expressions   (see  AARRIITTHHMMEETTIICC
+              EEVVAALLUUAATTIIOONN above).
 
 SSIIMMPPLLEE CCOOMMMMAANNDD EEXXPPAANNSSIIOONN
        When  a  simple  command  is executed, the shell performs the following
@@ -2836,9 +2858,11 @@ PPRROOMMPPTTIINNGG
        When executing interactively, bbaasshh displays the primary prompt PPSS11 when
        it  is  ready  to  read a command, and the secondary prompt PPSS22 when it
        needs more input to complete a command.  BBaasshh  displays  PPSS00  after  it
-       reads  a  command  but  before  executing it.  BBaasshh allows these prompt
-       strings to be customized by inserting  a  number  of  backslash-escaped
-       special characters that are decoded as follows:
+       reads  a  command  but  before  executing  it.   BBaasshh  displays  PPSS44 as
+       described above before tracing each  command  when  the  --xx  option  is
+       enabled.   BBaasshh allows these prompt strings to be customized by insert-
+       ing a number of backslash-escaped special characters that  are  decoded
+       as follows:
               \\aa     an ASCII bell character (07)
               \\dd     the  date  in "Weekday Month Date" format (e.g., "Tue May
                      26")
@@ -3369,6 +3393,18 @@ RREEAADDLLIINNEE
        sshheellll--bbaacckkwwaarrdd--wwoorrdd
               Move  back  to the start of the current or previous word.  Words
               are delimited by non-quoted shell metacharacters.
+       pprreevviioouuss--ssccrreeeenn--lliinnee
+              Attempt to move point to the same physical screen column on  the
+              previous  physical  screen  line. This will not have the desired
+              effect if the current Readline line does not take up  more  than
+              one  physical line or if point is not greater than the length of
+              the prompt plus the screen width.
+       nneexxtt--ssccrreeeenn--lliinnee
+              Attempt to move point to the same physical screen column on  the
+              next physical screen line. This will not have the desired effect
+              if the current Readline line does not  take  up  more  than  one
+              physical  line  or if the length of the current Readline line is
+              not greater than the length of the prompt plus the screen width.
        cclleeaarr--ssccrreeeenn ((CC--ll))
               Clear the screen leaving the current line  at  the  top  of  the
               screen.   With  an  argument,  refresh  the current line without
@@ -5989,4 +6025,4 @@ BBUUGGSS
 
 
 
-GNU Bash 4.4                    2017 February 1                        BASH(1)
+GNU Bash 4.4                     2017 March 22                         BASH(1)

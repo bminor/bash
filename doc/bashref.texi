@@ -1424,7 +1424,64 @@ before the @code{return}.
 
 Variables local to the function may be declared with the
 @code{local} builtin.  These variables are visible only to
-the function and the commands it invokes.
+the function and the commands it invokes.  This is particularly
+important when a shell function calls other functions.
+
+Local variables "shadow" variables with the same name declared at
+previous scopes.  For instance, a local variable declared in a function
+hides a global variable of the same name: references and assignments
+refer to the local variable, leaving the global variable unmodified.
+When the function returns, the global variable is once again visible.
+
+The shell uses @var{dynamic scoping} to control a variable's visibility
+within functions.
+With dynamic scoping, visible variables and their values
+are a result of the sequence of function calls that caused execution
+to reach the current function.
+The value of a variable that a function sees depends
+on its value within its caller, if any, whether that caller is
+the "global" scope or another shell function.
+This is also the value that a local variable
+declaration "shadows", and the value that is restored when the function
+returns.
+
+For example, if a variable @var{var} is declared as local in function
+@var{func1}, and @var{func1} calls another function @var{func2},
+references to @var{var} made from within @var{func2} will resolve to the
+local variable @var{var} from @var{func1}, shadowing any global variable
+named @var{var}.
+
+The following script demonstrates this behavior.
+When executed, the script displays
+
+@example
+In func2, var = func1 local
+@end example
+
+@example
+func1()
+@{
+    local var='func1 local'
+    func2
+@}
+
+func2()
+@{
+    echo "In func2, var = $var"
+@}
+
+var=global
+func1
+@end example
+
+The @code{unset} builtin also acts using the same dynamic scope: if a  
+variable is local to the current scope, @code{unset} will unset it;         
+otherwise the unset will refer to the variable found in any calling scope 
+as described above.
+If a variable at the local scope is unset, it will remain so
+until it is reset in that scope or until the function returns.
+If the unset acts on a variable at a previous scope, any instance of a   
+variable with that name that had been shadowed will become visible.
 
 Function names and definitions may be listed with the
 @option{-f} option to the @code{declare} (@code{typeset})
@@ -7102,6 +7159,7 @@ destroys the array element at index @var{subscript}.
 Negative subscripts to indexed arrays are interpreted as described above.
 Care must be taken to avoid unwanted side effects caused by filename
 expansion.
+Unsetting the last element of an array variable does not unset the variable.
 @code{unset @var{name}}, where @var{name} is an array, removes the
 entire array.  A subscript of @samp{*} or @samp{@@} also removes the
 entire array.

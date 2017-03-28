@@ -13206,7 +13206,7 @@ subst.c
 				   2/19
 				   ----
 subst.c
-	- expand_string_for_rhs: now that this is only use to expand the RHS
+	- expand_string_for_rhs: now that this is only used to expand the RHS
 	  of the various non-pattern ${paramOPword} expansions, set
 	  expand_no_split_dollar_star depending on whether or not the entire
 	  brace expansion is going to be subjected to word splitting: if it's
@@ -13449,3 +13449,63 @@ parse.y
 	- parse_matched_pair: handle an embedded process substitution like an
 	  embedded command substitution if we are parsing an array index or
 	  a dollar-brace expansion.  Reported by D630 <d630@posteo.net>
+
+				   3/21
+				   ----
+subst.h
+	- ASS_NOEVAL, ASS_NOLONGJMP: new values for assignments, used by
+	  make_variable_value
+
+variables.c
+	- make_variable_value: ASS_NOEVAL: if this is set, don't attempt
+	  arithmetic evaluation or case modification, just produce the value
+	  (still honor ASS_APPEND)
+	- make_variable_value: ASS_NOLONGJMP: don't longjmp back to top_level
+	  if arithmetic evaluation fails due to a syntax error
+	- bind_variable_internal: make sure aflags is passed to all calls to
+	  make_variable_value
+	- push_temp_var: add ASS_NOLONGJMP to the flags passed to
+	  bind_variable_internal.  Fixes bug reported by D630 <d630@posteo.net>
+
+bashline.c
+	- bash_execute_unix_command: don't bother to attempt optimization by
+	  checking whether the call to parse_and_execute changes $READLINE_LINE;
+	  it can be defeated by the new code that optimizes appends to string
+	  variables. Bug reported by Grisha Levit <grishalevit@gmail.com>
+
+				   3/22
+				   ----
+subst.c
+	- expand_string_for_rhs: re-apply change from 2/19 based on discussion
+	  on the austin-group mailing list about how unquoted ${var-$*}
+	  expands when IFS is null.  Originally reported by Martijn Dekker
+	  <martijn@inlv.org>
+
+				   3/25
+				   ----
+parse.y
+	- read_token_word: if we read a WORD immediately after a CASE, FOR, or
+	  SELECT, increment `expecting_in_token' to note that we're going to
+	  be reading IN as the next non-newline token
+	- special_case_tokens: if we're expecting an IN (expecting_in_token > 0)
+	  and we have an "in", return IN and decrement expecting_in_token. This
+	  is a better implementation of Posix grammar rule 6 than the previous
+	  code in that function (which is still there for posterity, but should
+	  eventually be removed).  Fixes bug reported by Torka Noda
+	  <kanito.tasoga@gmail.com>
+
+subst.c
+	- string_list_pos_params: if the expansion is not quoted, and IFS is
+	  null, return a string containing the quoted positional parameters
+	  separated by spaces.  Callers know what to do with the string
+	- parameter_brace_substring,parameter_brace_remove_pattern,
+	  parameter_brace_transform,parameter_brace_patsub,parameter_brace_casemod:
+	  for the VT_POSPARMS case, after calling the operator-specific
+	  expansion function, which eventually calls string_list_pos_params,
+	  leave the returned string alone, since it's already quoted properly
+	- parameter_brace_expand: after calling the above functions to perform
+	  expansions, if the expansion is being performed on an unquoted $*
+	  when IFS is null, set the W_SPLITSPACE flag in the return WORD_DESC
+	  so that splitting on spaces is performed on the already-quoted word.
+	  Fixes bug reported by Grisha Levit <grishalevit@gmail.com>
+

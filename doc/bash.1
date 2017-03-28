@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Mar 13 12:04:35 EDT 2017
+.\"	Last Change: Wed Mar 22 15:35:08 EDT 2017
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2017 March 13" "GNU Bash 4.4"
+.TH BASH 1 "2017 March 22" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2673,10 +2673,12 @@ special parameters \fI@\fP and \fI*\fP within double quotes.
 The
 .B unset
 builtin is used to destroy arrays.  \fBunset\fP \fIname\fP[\fIsubscript\fP]
-destroys the array element at index \fIsubscript\fP.
+destroys the array element at index \fIsubscript\fP,
+for both indexed and associative arrays.
 Negative subscripts to indexed arrays are interpreted as described above.
 Care must be taken to avoid unwanted side effects caused by pathname
 expansion.
+Unsetting the last element of an array variable does not unset the variable.
 \fBunset\fP \fIname\fP, where \fIname\fP is an array, or
 \fBunset\fP \fIname\fP[\fIsubscript\fP], where
 \fIsubscript\fP is \fB*\fP or \fB@\fP, removes the entire array.
@@ -4244,6 +4246,42 @@ Variables local to the function may be declared with the
 .B local
 builtin command.  Ordinarily, variables and their values
 are shared between the function and its caller.
+If a variable is declared \fBlocal\fP, the variable's visible scope
+is restricted to that function and its children (including the functions
+it calls).
+Local variables "shadow" variables with the same name declared at
+previous scopes.
+For instance, a local variable declared in a function
+hides a global variable of the same name: references and assignments
+refer to the local variable, leaving the global variable unmodified.
+When the function returns, the global variable is once again visible.
+.PP
+The shell uses \fIdynamic scoping\fP to control a variable's visibility
+within functions.
+With dynamic scoping, visible variables and their values
+are a result of the sequence of function calls that caused execution
+to reach the current function.
+The value of a variable that a function sees depends
+on its value within its caller, if any, whether that caller is
+the "global" scope or another shell function.
+This is also the value that a local variable
+declaration "shadows", and the value that is restored when the function
+returns.
+.PP
+For example, if a variable \fIvar\fP is declared as local in function
+\fIfunc1\fP, and \fIfunc1\fP calls another function \fIfunc2\fP,
+references to \fIvar\fP made from within \fIfunc2\fP will resolve to the
+local variable \fIvar\fP from \fIfunc1\fP, shadowing any global variable
+named \fIvar\fP.
+.PP
+The \fBunset\fP builtin also acts using the same dynamic scope: if a
+variable is local to the current scope, \fBunset\fP will unset it;
+otherwise the unset will refer to the variable found in any calling scope
+as described above.
+If a variable at the local scope is unset, it will remain so
+until it is reset in that scope or until the function returns.
+If the unset acts on a variable at a previous scope, any instance of a
+variable with that name that had been shadowed will become visible.
 .PP
 The \fBFUNCNEST\fP variable, if set to a numeric value greater
 than 0, defines a maximum function nesting level.  Function
