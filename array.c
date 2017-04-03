@@ -63,6 +63,8 @@
 
 static char *array_to_string_internal __P((ARRAY_ELEMENT *, ARRAY_ELEMENT *, char *, int));
 
+static char *spacesep = " ";
+
 #define IS_LASTREF(a)	(a->lastref)
 
 #define LASTREF_START(a, i) \
@@ -489,9 +491,13 @@ int	mflags;
 
 	if (mflags & MATCH_STARSUB) {
 		array_remove_quoted_nulls (a2);
-		sifs = ifs_firstchar((int *)NULL);
+		if ((mflags & MATCH_QUOTED) == 0 && ifs_is_null)
+			sifs = spacesep;
+		else
+			sifs = ifs_firstchar((int *)NULL);
 		t = array_to_string (a2, sifs, 0);
-		free(sifs);
+		if (sifs != spacesep)
+			free(sifs);
 	} else if (mflags & MATCH_QUOTED) {
 		/* ${array[@]} */
 		sifs = ifs_firstchar (&slen);
@@ -540,9 +546,13 @@ int	mflags;
 
 	if (mflags & MATCH_STARSUB) {
 		array_remove_quoted_nulls (a2);
-		sifs = ifs_firstchar((int *)NULL);
+		if ((mflags & MATCH_QUOTED) == 0 && ifs_is_null)
+			sifs = spacesep;
+		else
+			sifs = ifs_firstchar((int *)NULL);
 		t = array_to_string (a2, sifs, 0);
-		free(sifs);
+		if (sifs != spacesep)
+			free(sifs);
 	} else if (mflags & MATCH_QUOTED) {
 		/* ${array[@]} */
 		sifs = ifs_firstchar (&slen);

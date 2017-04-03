@@ -316,6 +316,7 @@ extern WORD_LIST *split_at_delims __P((char *, int, char *, int, int, int *, int
 extern SHELL_VAR *ifs_var;
 extern char *ifs_value;
 extern unsigned char ifs_cmap[];
+extern int ifs_is_set, ifs_is_null;
 
 #if defined (HANDLE_MULTIBYTE)
 extern unsigned char ifs_firstc[];

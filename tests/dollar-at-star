@@ -276,4 +276,13 @@ ${THIS_SH} ./dollar-star7.sub
 # problem through bash-4.4 in some parameter expansion contexts
 ${THIS_SH} ./dollar-star8.sub
 
+# tests for expansions of "$@" when there are no positional parameter or when
+# $1 == '' and the expansion is preceded by something that results in a quoted
+# null string
+${THIS_SH} ./dollar-at7.sub
+
+# tests for expansions of $* when in an assignment context (no splitting) and
+# IFS is null
+${THIS_SH} ./dollar-star9.sub
+
 exit 0

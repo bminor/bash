@@ -590,6 +590,13 @@ the time information.
 .PP
 Each command in a pipeline is executed as a separate process (i.e., in a
 subshell).
+See
+.SM
+\fBCOMMAND EXECUTION ENVIRONMENT\fP
+for a description of a subshell environment.
+If the \fBlastpipe\fP option is enabled using the \fBshopt\fP builtin
+(see the description of \fBshopt\fP below),
+the last element of a pipeline may be run by the shell process.
 .SS Lists
 .PP
 A \fIlist\fP is a sequence of one or more pipelines separated by one
@@ -640,7 +647,7 @@ An AND list has the form
 .I command2
 is executed if, and only if,
 .I command1
-returns an exit status of zero.
+returns an exit status of zero (success).
 .PP
 An OR list has the form
 .RS
@@ -1142,7 +1149,7 @@ question mark
 .TP
 .B \e\fInnn\fP
 the eight-bit character whose value is the octal value \fInnn\fP
-(one to three digits)
+(one to three octal digits)
 .TP
 .B \ex\fIHH\fP
 the eight-bit character whose value is the hexadecimal value \fIHH\fP

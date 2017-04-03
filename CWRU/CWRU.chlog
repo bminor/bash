@@ -13509,3 +13509,76 @@ subst.c
 	  so that splitting on spaces is performed on the already-quoted word.
 	  Fixes bug reported by Grisha Levit <grishalevit@gmail.com>
 
+				   3/28
+				   ----
+subst.c
+	- process_substitute: change so the subshell doesn't inherit the 'v'
+	  option, like command substitution now does (as of bash-4.4).
+	  Suggested by Grisha Levit <grishalevit@gmail.com>
+
+				   3/30
+				   ----
+subst.c
+	- parameter_brace_casemod: now takes a pflags parameter, like
+	  parameter_brace_patsub; changed callers
+	- parameter_brace_transform: now takes a pflags parameter, like
+	  parameter_brace_patsub; changed callers
+	- pos_params_pat_subst,pos_params_modcase: if mflags indicates we're
+	  on the rhs of an assignment statement and not going to perform
+	  word splitting, we're expanding $*, and $IFS is null, make sure
+	  string_list_pos_params treats the expansion as double-quoted, so
+	  the positional parameters will be concatenated.  Fixes bug reported
+	  by Grisha Levit <grishalevit@gmail.com>
+
+				   3/31
+				   ----
+doc/{bash.1,bashref.texi}
+	- add notes to the description of pipelines emphasizing that each
+	  element of a pipeline is executed in a subshell, referring to the
+	  description of a command execution environment, and that the
+	  lastpipe option can modify that behavior. From a discussion with
+	  Jean Delvare <jdelvare@suse.de>
+
+				    4/1
+				    ---
+subst.c
+	- expand_word_internal: set had_quoted_null to note for later if we
+	  expand '', "", or "$x" when x is unset
+	- expand_word_internal: if we expand "$param" (or "${param}") and we
+	  come back with a single word with the W_HAVEQUOTEDNULL flag set,
+	  make sure we set had_quoted_null to remember it for later. In this
+	  case, if we already have seen a quoted null and we expanded $@ in
+	  this (sub)string expansion, we don't want to do any of the special
+	  $@ handling. In particular, we don't want to set *expanded_something,
+	  because that will result in word splitting and quoted null removal.
+	  Fixes bug reported by Grisha Levit <grishalevit@gmail.com>
+	- parameter_brace_patsub: when expanding ${*/pat/sub} in the case
+	  where ifs_is_null != 0 and (pflags & PF_NOSPLIT2) (meaning we aren't
+	  going to be doing word splitting), pass MATCH_ASSIGNRHS so we do
+	  the right thing in this case. Part of a set of cases inspired by
+	  Grisha Levit <grishalevit@gmail.com>
+	- param_expand: case '*': if we are on the rhs of an assignment
+	  (PF_ASSIGNRHS) and ifs is unset, and $1 == " ", we need to make sure
+	  string_list_dollar_at gets called with Q_DOUBLE_QUOTES so it quotes
+	  the positional parameters before joining them into a string with
+	  string_list_internal.  Otherwise, that first space gets removed by
+	  the implicit word splitting that gets performed.  Reported by
+	  Grisha Levit <grishalevit@gmail.com>
+
+array.c
+	- array_patsub,array_modcase: handle ${A[*]} identically to $* when
+	  not quoted and IFS is null (separate with spaces).  Makes things
+	  like ${A[*]/x/y} behave the same as ${*/x/y} when IFS is null
+
+subst.c
+	- parameter_brace_patsub,parameter_brace_casemod: if expanding ${A[*]}
+	  when the match is on the rhs of an assignment statement (PF_ASSIGNRHS)
+	  and ifs is null, make sure the match is performed as if it were
+	  quoted
+	- parameter_brace_substring: now takes a PFLAGS argument
+	- parameter_brace_substring: if expanding $* in a context where we
+	  don't want to do word splitting (expand_no_split_dollar_star &&
+	  PF_NOSPLIT2), make sure we expand $* as if it were quoted
+	- parameter_brace_substring: if expanding an unquoted $* on the rhs of
+	  an assignment statement when IFS is null, make sure we expand the $*
+	  as if it were quoted

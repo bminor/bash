@@ -451,7 +451,7 @@ decoded as follows:
      question mark
 '\NNN'
      the eight-bit character whose value is the octal value NNN (one to
-     three digits)
+     three octal digits)
 '\xHH'
      the eight-bit character whose value is the hexadecimal value HH
      (one or two hex digits)
@@ -633,7 +633,7 @@ executed with left associativity.
      COMMAND1 && COMMAND2
 
 COMMAND2 is executed if, and only if, COMMAND1 returns an exit status of
-zero.
+zero (success).
 
    An OR list has the form
      COMMAND1 || COMMAND2
@@ -656,11 +656,12 @@ File: bashref.info,  Node: Compound Commands,  Next: Coprocesses,  Prev: Lists, 
 * Conditional Constructs::	Shell commands for conditional execution.
 * Command Grouping::		Ways to group commands.
 
-Compound commands are the shell programming constructs.  Each construct
-begins with a reserved word or control operator and is terminated by a
-corresponding reserved word or operator.  Any redirections (*note
-Redirections::) associated with a compound command apply to all commands
-within that compound command unless explicitly overridden.
+Compound commands are the shell programming language constructs.  Each
+construct begins with a reserved word or control operator and is
+terminated by a corresponding reserved word or operator.  Any
+redirections (*note Redirections::) associated with a compound command
+apply to all commands within that compound command unless explicitly
+overridden.
 
    In most cases a list of commands in a compound command's description
 may be separated from the rest of the command by one or more newlines,
@@ -705,14 +706,16 @@ syntax, it may be replaced with one or more newlines.
 
           for NAME [ [in [WORDS ...] ] ; ] do COMMANDS; done
 
-     Expand WORDS, and execute COMMANDS once for each member in the
-     resultant list, with NAME bound to the current member.  If 'in
-     WORDS' is not present, the 'for' command executes the COMMANDS once
-     for each positional parameter that is set, as if 'in "$@"' had been
-     specified (*note Special Parameters::).  The return status is the
-     exit status of the last command that executes.  If there are no
-     items in the expansion of WORDS, no commands are executed, and the
-     return status is zero.
+     Expand WORDS (*note Shell Expansions::), and execute COMMANDS once
+     for each member in the resultant list, with NAME bound to the
+     current member.  If 'in WORDS' is not present, the 'for' command
+     executes the COMMANDS once for each positional parameter that is
+     set, as if 'in "$@"' had been specified (*note Special
+     Parameters::).
+
+     The return status is the exit status of the last command that
+     executes.  If there are no items in the expansion of WORDS, no
+     commands are executed, and the return status is zero.
 
      An alternate form of the 'for' command is also supported:
 
@@ -764,20 +767,21 @@ File: bashref.info,  Node: Conditional Constructs,  Next: Command Grouping,  Pre
           case WORD in [ [(] PATTERN [| PATTERN]...) COMMAND-LIST ;;]... esac
 
      'case' will selectively execute the COMMAND-LIST corresponding to
-     the first PATTERN that matches WORD.  If the 'nocasematch' shell
-     option (see the description of 'shopt' in *note The Shopt
-     Builtin::) is enabled, the match is performed without regard to the
-     case of alphabetic characters.  The '|' is used to separate
-     multiple patterns, and the ')' operator terminates a pattern list.
-     A list of patterns and an associated command-list is known as a
-     CLAUSE.
+     the first PATTERN that matches WORD.  The match is performed
+     according to the rules described below in *note Pattern Matching::.
+     If the 'nocasematch' shell option (see the description of 'shopt'
+     in *note The Shopt Builtin::) is enabled, the match is performed
+     without regard to the case of alphabetic characters.  The '|' is
+     used to separate multiple patterns, and the ')' operator terminates
+     a pattern list.  A list of patterns and an associated command-list
+     is known as a CLAUSE.
 
      Each clause must be terminated with ';;', ';&', or ';;&'.  The WORD
      undergoes tilde expansion, parameter expansion, command
-     substitution, arithmetic expansion, and quote removal before
-     matching is attempted.  Each PATTERN undergoes tilde expansion,
-     parameter expansion, command substitution, and arithmetic
-     expansion.
+     substitution, arithmetic expansion, and quote removal (*note Shell
+     Parameter Expansion::) before matching is attempted.  Each PATTERN
+     undergoes tilde expansion, parameter expansion, command
+     substitution, and arithmetic expansion.
 
      There may be an arbitrary number of 'case' clauses, each terminated
      by a ';;', ';&', or ';;&'.  The first pattern that matches
@@ -904,7 +908,7 @@ File: bashref.info,  Node: Conditional Constructs,  Next: Command Grouping,  Pre
      variable LINE) if there is a sequence of characters in the value
      consisting of any number, including zero, of space characters, zero
      or one instances of 'a', then a 'b':
-          [[ $line =~ [[:space:]]*(a)?b ]]
+          [[ $line =~ [[:space:]]*?(a)b ]]
 
      That means values like 'aab' and ' aaaaaab' will match, as will a
      line containing a 'b' anywhere in its value.
@@ -917,7 +921,7 @@ File: bashref.info,  Node: Conditional Constructs,  Next: Command Grouping,  Pre
      to the shell's quote removal.  Using a shell variable to store the
      pattern decreases these problems.  For example, the following is
      equivalent to the above:
-          pattern='[[:space:]]*(a)?b'
+          pattern='[[:space:]]*?(a)b'
           [[ $line =~ $pattern ]]
 
      If you want to match a character that's special to the regular
@@ -1251,6 +1255,14 @@ script displays
 
      var=global
      func1
+
+   The 'unset' builtin also acts using the same dynamic scope: if a
+variable is local to the current scope, 'unset' will unset it; otherwise
+the unset will refer to the variable found in any calling scope as
+described above.  If a variable at the local scope is unset, it will
+remain so until it is reset in that scope or until the function returns.
+If the unset acts on a variable at a previous scope, any instance of a
+variable with that name that had been shadowed will become visible.
 
    Function names and definitions may be listed with the '-f' option to
 the 'declare' ('typeset') builtin command (*note Bash Builtins::).  The
@@ -6205,8 +6217,10 @@ quotes.
 NAME[SUBSCRIPT]' destroys the array element at index SUBSCRIPT.
 Negative subscripts to indexed arrays are interpreted as described
 above.  Care must be taken to avoid unwanted side effects caused by
-filename expansion.  'unset NAME', where NAME is an array, removes the
-entire array.  A subscript of '*' or '@' also removes the entire array.
+filename expansion.  Unsetting the last element of an array variable
+does not unset the variable.  'unset NAME', where NAME is an array,
+removes the entire array.  A subscript of '*' or '@' also removes the
+entire array.
 
    The 'declare', 'local', and 'readonly' builtins each accept a '-a'
 option to specify an indexed array and a '-A' option to specify an
@@ -10854,9 +10868,9 @@ D.2 Index of Shell Reserved Words
 
 * !:                                     Pipelines.           (line   9)
 * [[:                                    Conditional Constructs.
-                                                              (line 121)
+                                                              (line 122)
 * ]]:                                    Conditional Constructs.
-                                                              (line 121)
+                                                              (line 122)
 * {:                                     Command Grouping.    (line  21)
 * }:                                     Command Grouping.    (line  21)
 * case:                                  Conditional Constructs.
@@ -10878,7 +10892,7 @@ D.2 Index of Shell Reserved Words
 * in:                                    Conditional Constructs.
                                                               (line  28)
 * select:                                Conditional Constructs.
-                                                              (line  79)
+                                                              (line  80)
 * then:                                  Conditional Constructs.
                                                               (line   7)
 * time:                                  Pipelines.           (line   9)
@@ -11485,121 +11499,121 @@ Node: Escape Character14462
 Node: Single Quotes14947
 Node: Double Quotes15295
 Node: ANSI-C Quoting16573
-Node: Locale Translation17826
-Node: Comments18722
-Node: Shell Commands19340
-Node: Simple Commands20212
-Node: Pipelines20843
-Node: Lists23586
-Node: Compound Commands25315
-Node: Looping Constructs26318
-Node: Conditional Constructs28781
-Node: Command Grouping39703
-Node: Coprocesses41182
-Node: GNU Parallel43014
-Node: Shell Functions46987
-Node: Shell Parameters53696
-Node: Positional Parameters58109
-Node: Special Parameters59009
-Node: Shell Expansions62346
-Node: Brace Expansion64440
-Node: Tilde Expansion67274
-Node: Shell Parameter Expansion69622
-Node: Command Substitution83754
-Node: Arithmetic Expansion85109
-Node: Process Substitution86041
-Node: Word Splitting87161
-Node: Filename Expansion89105
-Node: Pattern Matching91479
-Node: Quote Removal95465
-Node: Redirections95760
-Node: Executing Commands105318
-Node: Simple Command Expansion105988
-Node: Command Search and Execution107918
-Node: Command Execution Environment110254
-Node: Environment113238
-Node: Exit Status114897
-Node: Signals116567
-Node: Shell Scripts118534
-Node: Shell Builtin Commands121049
-Node: Bourne Shell Builtins123083
-Node: Bash Builtins143683
-Node: Modifying Shell Behavior172328
-Node: The Set Builtin172673
-Node: The Shopt Builtin183086
-Node: Special Builtins198984
-Node: Shell Variables199963
-Node: Bourne Shell Variables200400
-Node: Bash Variables202504
-Node: Bash Features232297
-Node: Invoking Bash233196
-Node: Bash Startup Files239145
-Node: Interactive Shells244248
-Node: What is an Interactive Shell?244658
-Node: Is this Shell Interactive?245307
-Node: Interactive Shell Behavior246122
-Node: Bash Conditional Expressions249610
-Node: Shell Arithmetic253976
-Node: Aliases256793
-Node: Arrays259341
-Node: The Directory Stack264425
-Node: Directory Stack Builtins265209
-Node: Controlling the Prompt268177
-Node: The Restricted Shell270939
-Node: Bash POSIX Mode272764
-Node: Job Control283115
-Node: Job Control Basics283575
-Node: Job Control Builtins288543
-Node: Job Control Variables293270
-Node: Command Line Editing294426
-Node: Introduction and Notation296097
-Node: Readline Interaction297720
-Node: Readline Bare Essentials298911
-Node: Readline Movement Commands300694
-Node: Readline Killing Commands301654
-Node: Readline Arguments303572
-Node: Searching304616
-Node: Readline Init File306802
-Node: Readline Init File Syntax307949
-Node: Conditional Init Constructs328136
-Node: Sample Init File330661
-Node: Bindable Readline Commands333778
-Node: Commands For Moving334982
-Node: Commands For History336831
-Node: Commands For Text341126
-Node: Commands For Killing344515
-Node: Numeric Arguments346996
-Node: Commands For Completion348135
-Node: Keyboard Macros352326
-Node: Miscellaneous Commands353013
-Node: Readline vi Mode358889
-Node: Programmable Completion359796
-Node: Programmable Completion Builtins367257
-Node: A Programmable Completion Example377143
-Node: Using History Interactively382395
-Node: Bash History Facilities383079
-Node: Bash History Builtins386080
-Node: History Interaction390372
-Node: Event Designators393336
-Node: Word Designators394555
-Node: Modifiers396192
-Node: Installing Bash397594
-Node: Basic Installation398731
-Node: Compilers and Options401422
-Node: Compiling For Multiple Architectures402163
-Node: Installation Names403826
-Node: Specifying the System Type404644
-Node: Sharing Defaults405360
-Node: Operation Controls406033
-Node: Optional Features406991
-Node: Reporting Bugs417517
-Node: Major Differences From The Bourne Shell418711
-Node: GNU Free Documentation License435563
-Node: Indexes460740
-Node: Builtin Index461194
-Node: Reserved Word Index468021
-Node: Variable Index470469
-Node: Function Index486147
-Node: Concept Index499450
+Node: Locale Translation17832
+Node: Comments18728
+Node: Shell Commands19346
+Node: Simple Commands20218
+Node: Pipelines20849
+Node: Lists23592
+Node: Compound Commands25331
+Node: Looping Constructs26343
+Node: Conditional Constructs28838
+Node: Command Grouping39893
+Node: Coprocesses41372
+Node: GNU Parallel43204
+Node: Shell Functions47177
+Node: Shell Parameters54376
+Node: Positional Parameters58789
+Node: Special Parameters59689
+Node: Shell Expansions63026
+Node: Brace Expansion65120
+Node: Tilde Expansion67954
+Node: Shell Parameter Expansion70302
+Node: Command Substitution84434
+Node: Arithmetic Expansion85789
+Node: Process Substitution86721
+Node: Word Splitting87841
+Node: Filename Expansion89785
+Node: Pattern Matching92159
+Node: Quote Removal96145
+Node: Redirections96440
+Node: Executing Commands105998
+Node: Simple Command Expansion106668
+Node: Command Search and Execution108598
+Node: Command Execution Environment110934
+Node: Environment113918
+Node: Exit Status115577
+Node: Signals117247
+Node: Shell Scripts119214
+Node: Shell Builtin Commands121729
+Node: Bourne Shell Builtins123763
+Node: Bash Builtins144363
+Node: Modifying Shell Behavior173008
+Node: The Set Builtin173353
+Node: The Shopt Builtin183766
+Node: Special Builtins199664
+Node: Shell Variables200643
+Node: Bourne Shell Variables201080
+Node: Bash Variables203184
+Node: Bash Features232977
+Node: Invoking Bash233876
+Node: Bash Startup Files239825
+Node: Interactive Shells244928
+Node: What is an Interactive Shell?245338
+Node: Is this Shell Interactive?245987
+Node: Interactive Shell Behavior246802
+Node: Bash Conditional Expressions250290
+Node: Shell Arithmetic254656
+Node: Aliases257473
+Node: Arrays260021
+Node: The Directory Stack265183
+Node: Directory Stack Builtins265967
+Node: Controlling the Prompt268935
+Node: The Restricted Shell271697
+Node: Bash POSIX Mode273522
+Node: Job Control283873
+Node: Job Control Basics284333
+Node: Job Control Builtins289301
+Node: Job Control Variables294028
+Node: Command Line Editing295184
+Node: Introduction and Notation296855
+Node: Readline Interaction298478
+Node: Readline Bare Essentials299669
+Node: Readline Movement Commands301452
+Node: Readline Killing Commands302412
+Node: Readline Arguments304330
+Node: Searching305374
+Node: Readline Init File307560
+Node: Readline Init File Syntax308707
+Node: Conditional Init Constructs328894
+Node: Sample Init File331419
+Node: Bindable Readline Commands334536
+Node: Commands For Moving335740
+Node: Commands For History337589
+Node: Commands For Text341884
+Node: Commands For Killing345273
+Node: Numeric Arguments347754
+Node: Commands For Completion348893
+Node: Keyboard Macros353084
+Node: Miscellaneous Commands353771
+Node: Readline vi Mode359647
+Node: Programmable Completion360554
+Node: Programmable Completion Builtins368015
+Node: A Programmable Completion Example377901
+Node: Using History Interactively383153
+Node: Bash History Facilities383837
+Node: Bash History Builtins386838
+Node: History Interaction391130
+Node: Event Designators394094
+Node: Word Designators395313
+Node: Modifiers396950
+Node: Installing Bash398352
+Node: Basic Installation399489
+Node: Compilers and Options402180
+Node: Compiling For Multiple Architectures402921
+Node: Installation Names404584
+Node: Specifying the System Type405402
+Node: Sharing Defaults406118
+Node: Operation Controls406791
+Node: Optional Features407749
+Node: Reporting Bugs418275
+Node: Major Differences From The Bourne Shell419469
+Node: GNU Free Documentation License436321
+Node: Indexes461498
+Node: Builtin Index461952
+Node: Reserved Word Index468779
+Node: Variable Index471227
+Node: Function Index486905
+Node: Concept Index500208
 
 End Tag Table

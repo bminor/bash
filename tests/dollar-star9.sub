@@ -1,0 +1,16 @@
+set -- 1 2
+
+IFS=
+
+a=$* b=${*}
+c=${*/} d=${*#} e=${*%} f=${*:1}
+printf '<%s>' "$a" "$b" "$c" "$d" "$e" "$f"; echo
+
+unset a b c d e f
+: ${a=$*} ${b=${*}} ${c=${*/}}
+: ${d=${*#}} ${e=${*%}} ${f=${*:1}}
+printf '<%s>' "$a" "$b" "$c" "$d" "$e" "$f" ; echo
+
+unset f g
+f=${*,,} g=${*@Q}
+printf '<%s>' "$f" "$g" ; echo
