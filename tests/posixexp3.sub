@@ -1,0 +1,35 @@
+set -- 1 2
+
+unset var
+recho ${var-$@}
+recho ${var-"$@"}
+recho ${var-$*}
+recho ${var-"$*"}
+
+unset -v a b c d
+recho ${a=$@}
+recho "$a"
+recho ${b="$@"}
+recho "$b"
+recho ${c=$*}
+recho "$c"
+recho ${d="$*"}
+recho "$d"
+
+IFS=
+unset var
+recho ${var-$@}
+recho ${var-"$@"}
+recho ${var-$*}
+recho ${var-"$*"}
+
+unset -v a b c d
+# Posix interp 221
+recho ${a=$@}
+recho "$a"
+recho ${b="$@"}
+recho "$b"
+recho ${c=$*}
+recho "$c"
+recho ${d="$*"}
+recho "$d"

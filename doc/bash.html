@@ -780,6 +780,12 @@ the time information.
 
 Each command in a pipeline is executed as a separate process (i.e., in a
 subshell).
+See
+<FONT SIZE=-1><B>COMMAND EXECUTION ENVIRONMENT</B></FONT>
+for a description of a subshell environment.
+If the <B>lastpipe</B> option is enabled using the <B>shopt</B> builtin
+(see the description of <B>shopt</B> below),
+the last element of a pipeline may be run by the shell process.
 <A NAME="lbAN">&nbsp;</A>
 <H4>Lists</H4>
 
@@ -855,7 +861,7 @@ An AND list has the form
 is executed if, and only if,
 <I>command1</I>
 
-returns an exit status of zero.
+returns an exit status of zero (success).
 <P>
 
 An OR list has the form
@@ -1463,7 +1469,7 @@ question mark
 
 <DD>
 the eight-bit character whose value is the octal value <I>nnn</I>
-(one to three digits)
+(one to three octal digits)
 <DT><B>\x</B><I>HH</I>
 
 <DD>
@@ -3388,10 +3394,12 @@ The
 <B>unset</B>
 
 builtin is used to destroy arrays.  <B>unset</B> <I>name</I>[<I>subscript</I>]
-destroys the array element at index <I>subscript</I>.
+destroys the array element at index <I>subscript</I>,
+for both indexed and associative arrays.
 Negative subscripts to indexed arrays are interpreted as described above.
 Care must be taken to avoid unwanted side effects caused by pathname
 expansion.
+Unsetting the last element of an array variable does not unset the variable.
 <B>unset</B> <I>name</I>, where <I>name</I> is an array, or
 <B>unset</B> <I>name</I>[<I>subscript</I>], where
 <I>subscript</I> is <B>*</B> or <B>@</B>, removes the entire array.
@@ -5450,6 +5458,16 @@ For example, if a variable <I>var</I> is declared as local in function
 references to <I>var</I> made from within <I>func2</I> will resolve to the
 local variable <I>var</I> from <I>func1</I>, shadowing any global variable
 named <I>var</I>.
+<P>
+
+The <B>unset</B> builtin also acts using the same dynamic scope: if a
+variable is local to the current scope, <B>unset</B> will unset it;
+otherwise the unset will refer to the variable found in any calling scope
+as described above.
+If a variable at the local scope is unset, it will remain so
+until it is reset in that scope or until the function returns.
+If the unset acts on a variable at a previous scope, any instance of a
+variable with that name that had been shadowed will become visible.
 <P>
 
 The <B>FUNCNEST</B> variable, if set to a numeric value greater
@@ -13820,6 +13838,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 22 March 2017 16:12:40 EDT
+Time: 03 April 2017 16:34:05 EDT
 </BODY>
 </HTML>

@@ -192,7 +192,7 @@ extern char *expand_arith_string __P((char *, int));
 extern char *dequote_string __P((char *));
 
 /* De-quote CTLESC-escaped CTLESC or CTLNUL characters in STRING. */
-extern char *dequote_escapes __P((char *));
+extern char *dequote_escapes __P((const char *));
 
 /* De-quote quoted characters in each word in LIST. */
 extern WORD_LIST *dequote_list __P((WORD_LIST *));
@@ -216,7 +216,7 @@ extern char *quote_string __P((char *));
 
 /* Quote escape characters (characters special to interals of expansion)
    in a string. */
-extern char *quote_escapes __P((char *));
+extern char *quote_escapes __P((const char *));
 
 /* And remove such quoted special characters. */
 extern char *remove_quoted_escapes __P((char *));

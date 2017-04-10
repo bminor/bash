@@ -33,6 +33,7 @@ extern char *glob_error_return;
 #define QGLOB_CVTNULL	0x01	/* convert QUOTED_NULL strings to '\0' */
 #define QGLOB_FILENAME	0x02	/* do correct quoting for matching filenames */
 #define QGLOB_REGEXP	0x04	/* quote an ERE for regcomp/regexec */
+#define QGLOB_CTLESC	0x08	/* turn CTLESC CTLESC into CTLESC for BREs */
 
 #if defined (EXTENDED_GLOB)
 /* Flags to OR with other flag args to strmatch() to enabled the extended

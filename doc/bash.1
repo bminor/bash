@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed Mar 22 15:35:08 EDT 2017
+.\"	Last Change: Tue Apr  4 14:55:46 EDT 2017
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2017 March 22" "GNU Bash 4.4"
+.TH BASH 1 "2017 April 4" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -8768,6 +8768,8 @@ Options, if supplied, have the following meanings:
 .B \-d
 The first character of \fIdelim\fP is used to terminate each input line,
 rather than newline.
+If \fIdelim\fP is the empty string, \fBread\fP will terminate a line
+when it reads a NUL character.
 .TP
 .B \-n
 Copy at most

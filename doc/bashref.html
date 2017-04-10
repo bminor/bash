@@ -861,7 +861,7 @@ present, are decoded as follows:
 </p></dd>
 <dt><code>\<var>nnn</var></code></dt>
 <dd><p>the eight-bit character whose value is the octal value <var>nnn</var>
-(one to three digits)
+(one to three octal digits)
 </p></dd>
 <dt><code>\x<var>HH</var></code></dt>
 <dd><p>the eight-bit character whose value is the hexadecimal value <var>HH</var>
@@ -1051,8 +1051,13 @@ the time information.
 <p>If the pipeline is not executed asynchronously (see <a href="#Lists">Lists</a>), the
 shell waits for all commands in the pipeline to complete.
 </p>
-<p>Each command in a pipeline is executed in its own subshell
-(see <a href="#Command-Execution-Environment">Command Execution Environment</a>).  The exit
+<p>Each command in a pipeline is executed in its own subshell, which is a
+separate process (see <a href="#Command-Execution-Environment">Command Execution Environment</a>).
+If the <code>lastpipe</code> option is enabled using the <code>shopt</code> builtin
+(see <a href="#The-Shopt-Builtin">The Shopt Builtin</a>),
+the last element of a pipeline may be run by the shell process.
+</p>
+<p>The exit
 status of a pipeline is the exit status of the last command in the
 pipeline, unless the <code>pipefail</code> option is enabled
 (see <a href="#The-Set-Builtin">The Set Builtin</a>).
@@ -1111,7 +1116,7 @@ associativity.
 </pre></div>
 
 <p><var>command2</var> is executed if, and only if, <var>command1</var>
-returns an exit status of zero.
+returns an exit status of zero (success).
 </p>
 <p>An <small>OR</small> list has the form
 </p><div class="example">
@@ -1144,7 +1149,7 @@ Next: <a href="#Coprocesses" accesskey="n" rel="next">Coprocesses</a>, Previous:
 </td></tr>
 </table>
 
-<p>Compound commands are the shell programming constructs.
+<p>Compound commands are the shell programming language constructs.
 Each construct begins with a reserved word or control operator and is
 terminated by a corresponding reserved word or operator.
 Any redirections (see <a href="#Redirections">Redirections</a>) associated with a compound command
@@ -1211,13 +1216,15 @@ in <var>consequent-commands</var>, or zero if none was executed.
 <pre class="example">for <var>name</var> [ [in [<var>words</var> &hellip;] ] ; ] do <var>commands</var>; done
 </pre></div>
 
-<p>Expand <var>words</var>, and execute <var>commands</var> once for each member
+<p>Expand <var>words</var> (see <a href="#Shell-Expansions">Shell Expansions</a>), and execute <var>commands</var>
+once for each member
 in the resultant list, with <var>name</var> bound to the current member.
 If &lsquo;<samp>in <var>words</var></samp>&rsquo; is not present, the <code>for</code> command
 executes the <var>commands</var> once for each positional parameter that is
 set, as if &lsquo;<samp>in &quot;$@&quot;</samp>&rsquo; had been specified
 (see <a href="#Special-Parameters">Special Parameters</a>).
-The return status is the exit status of the last command that executes.
+</p>
+<p>The return status is the exit status of the last command that executes.
 If there are no items in the expansion of <var>words</var>, no commands are
 executed, and the return status is zero.
 </p>
@@ -1295,6 +1302,8 @@ zero if no condition tested true.
 
 <p><code>case</code> will selectively execute the <var>command-list</var> corresponding to
 the first <var>pattern</var> that matches <var>word</var>.
+The match is performed according
+to the rules described below in <a href="#Pattern-Matching">Pattern Matching</a>.
 If the <code>nocasematch</code> shell option
 (see the description of <code>shopt</code> in <a href="#The-Shopt-Builtin">The Shopt Builtin</a>)
 is enabled, the match is performed without regard to the case
@@ -1306,7 +1315,9 @@ as a <var>clause</var>.
 </p>
 <p>Each clause must be terminated with &lsquo;<samp>;;</samp>&rsquo;, &lsquo;<samp>;&amp;</samp>&rsquo;, or &lsquo;<samp>;;&amp;</samp>&rsquo;.
 The <var>word</var> undergoes tilde expansion, parameter expansion, command
-substitution, arithmetic expansion, and quote removal before matching is
+substitution, arithmetic expansion, and quote removal
+(see <a href="#Shell-Parameter-Expansion">Shell Parameter Expansion</a>)
+before matching is
 attempted.  Each <var>pattern</var> undergoes tilde expansion, parameter
 expansion, command substitution, and arithmetic expansion.
 </p>
@@ -1467,7 +1478,7 @@ if there is a sequence of characters in the value consisting of
 any number, including zero, of 
 space characters, zero or one instances of &lsquo;<samp>a</samp>&rsquo;, then a &lsquo;<samp>b</samp>&rsquo;:
 </p><div class="example">
-<pre class="example">[[ $line =~ [[:space:]]*(a)?b ]]
+<pre class="example">[[ $line =~ [[:space:]]*?(a)b ]]
 </pre></div>
 
 <p>That means values like &lsquo;<samp>aab</samp>&rsquo; and &lsquo;<samp>  aaaaaab</samp>&rsquo; will match, as
@@ -1482,7 +1493,7 @@ expressions while paying attention to the shell&rsquo;s quote removal.
 Using a shell variable to store the pattern decreases these problems.
 For example, the following is equivalent to the above:
 </p><div class="example">
-<pre class="example">pattern='[[:space:]]*(a)?b'
+<pre class="example">pattern='[[:space:]]*?(a)b'
 [[ $line =~ $pattern ]]
 </pre></div>
 
@@ -1915,6 +1926,15 @@ var=global
 func1
 </pre></div>
 
+<p>The <code>unset</code> builtin also acts using the same dynamic scope: if a  
+variable is local to the current scope, <code>unset</code> will unset it;         
+otherwise the unset will refer to the variable found in any calling scope 
+as described above.
+If a variable at the local scope is unset, it will remain so
+until it is reset in that scope or until the function returns.
+If the unset acts on a variable at a previous scope, any instance of a   
+variable with that name that had been shadowed will become visible.
+</p>
 <p>Function names and definitions may be listed with the
 <samp>-f</samp> option to the <code>declare</code> (<code>typeset</code>)
 builtin command (see <a href="#Bash-Builtins">Bash Builtins</a>).
@@ -8508,6 +8528,7 @@ destroys the array element at index <var>subscript</var>.
 Negative subscripts to indexed arrays are interpreted as described above.
 Care must be taken to avoid unwanted side effects caused by filename
 expansion.
+Unsetting the last element of an array variable does not unset the variable.
 <code>unset <var>name</var></code>, where <var>name</var> is an array, removes the
 entire array.  A subscript of &lsquo;<samp>*</samp>&rsquo; or &lsquo;<samp>@</samp>&rsquo; also removes the
 entire array.

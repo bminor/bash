@@ -3389,7 +3389,7 @@ execute_case_command (case_command)
   WORD_LIST *wlist, *es;
   PATTERN_LIST *clauses;
   char *word, *pattern;
-  int retval, match, ignore_return, save_line_number;
+  int retval, match, ignore_return, save_line_number, qflags;
 
   save_line_number = line_number;
   line_number = case_command->line;
@@ -3441,7 +3441,15 @@ execute_case_command (case_command)
 	  es = expand_word_leave_quoted (list->word, 0);
 
 	  if (es && es->word && es->word->word && *(es->word->word))
-	    pattern = quote_string_for_globbing (es->word->word, QGLOB_CVTNULL);
+	    {
+	      qflags = QGLOB_CVTNULL;
+	      /* We left CTLESC in place quoting CTLESC after the call to
+		 expand_word_leave_quoted; tell quote_string_for_globbing to
+		 remove those here */
+	      if ((list->word->flags & W_QUOTED) == 0)
+		qflags |= QGLOB_CTLESC;
+	      pattern = quote_string_for_globbing (es->word->word, qflags);
+	    }
 	  else
 	    {
 	      pattern = (char *)xmalloc (1);
@@ -5689,6 +5697,7 @@ execute_intern_function (name, funcdef)
      FUNCTION_DEF *funcdef;
 {
   SHELL_VAR *var;
+  char *t;
 
   if (check_identifier (name, posixly_correct) == 0)
     {
@@ -5698,6 +5707,13 @@ execute_intern_function (name, funcdef)
 	  jump_to_top_level (ERREXIT);
 	}
       return (EXECUTION_FAILURE);
+    }
+
+  if (strchr (name->word, CTLESC))	/* WHY? */
+    {
+      t = dequote_escapes (name->word);
+      free (name->word);
+      name->word = t;
     }
 
   /* Posix interpretation 383 */

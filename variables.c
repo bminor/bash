@@ -4309,7 +4309,7 @@ mk_env_string (name, value, isfunc)
      int isfunc;
 {
   size_t name_len, value_len;
-  char	*p, *q;
+  char	*p, *q, *t;
 
   name_len = strlen (name);
   value_len = STRLEN (value);
@@ -4336,7 +4336,17 @@ mk_env_string (name, value, isfunc)
 
   q[0] = '=';
   if (value && *value)
-    memcpy (q + 1, value, value_len + 1);
+    {
+      if (isfunc)
+	{
+	  t = dequote_escapes (value);
+	  value_len = STRLEN (t);
+	  memcpy (q + 1, t, value_len + 1);
+	  free (t);
+	}
+      else
+	memcpy (q + 1, value, value_len + 1);
+    }
   else
     q[1] = '\0';
 

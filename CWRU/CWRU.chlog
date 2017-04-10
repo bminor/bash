@@ -13582,3 +13582,85 @@ subst.c
 	- parameter_brace_substring: if expanding an unquoted $* on the rhs of
 	  an assignment statement when IFS is null, make sure we expand the $*
 	  as if it were quoted
+
+				    4/4
+				    ---
+doc/{bash.1,bashref.texi}
+	- read: document that a delim argument of '' terminates each line when
+	  a NUL character appears
+
+				    4/5
+				    ---
+subst.c
+	- parameter_brace_expand_word: handle case where unquoted $@ is
+	  expanded in a context where word splitting is not performed (PF_NOSPLIT2)
+	  and IFS is not equal to the standard value
+	- param_expand: handle case where unquoted $@ is expanded in a context
+	  where word splitting is not performed (PF_NOSPLIT2) and IFS is not
+	  equal to the standard value.  Fixes bug with IFS == $1 when expanding
+	  unquoted $@ reported by Grisha Levit <grishalevit@gmail.com>
+
+				    4/7
+				    ---
+subst.c
+	- pos_params_pat_subst: if MATCH_ASSIGNRHS is set, don't expand $*
+	  as quoted unless expand_no_split_dollar_star is also set. Fixes
+	  expansion bug reported on 4/4 by Grisha Levit <grishalevit@gmail.com>
+	- parameter_brace_transform: if we transform unquoted A[@] or A[*]
+	  when IFS is null, don't quote the result of array_transform in the
+	  same way we don't quote the result of parameter_list_transform,
+	  since it will come back quoted.  Fixes bug reported by
+	  Grisha Levit <grishalevit@gmail.com>
+	- list_transform: if we transform unquoted $* or ${a[*]} when IFS is
+	  null and expand_no_split_dollar_star is non-zero, call
+	  string_list_pos_params with Q_DOUBLE_QUOTES to inhibit splitting.
+	  We do this in all cases except @Q, which is inconsistent but more
+	  intuitive.
+	  Fixes bug reported by Grisha Levit <grishalevit@gmail.com>
+
+				    4/8
+				    ---
+builtins/read.def
+	- read_mbchar: if unbuffered == 2, we are running read -N and need to
+	  use zreadn to read the rest of the multibyte char, since the
+	  previous call to zreadn may have buffered characters.  Fixes bug
+	  reported by Stephane Chazelas <stephane.chazelas@gmail.com>
+
+pathexp.h
+	- QGLOB_CTLESC: new flag for quote_string_for_globbing: means to turn
+	  CTLESC CTLESC (quoted CTLESC that's usually removed as part of
+	  word splitting or quote removal) into CTLESC
+
+pathexp.c
+	- quote_string_for_globbing: if QGLOB_CTLESC is present in flags,
+	  turn CTLESC CTLESC into CTLESC, even if the first CTLESC is preceded
+	  by a backslash. Callers can't do this because the remaining CTLESC
+	  will be treated as a quoting character and turned into a backslash
+
+execute_cmd.c
+	- execute_case_command: if the pattern is not quoted, make sure to tell
+	  quote_string_for_globbing to turn CTLESC CTLESC into CTLESC by
+	  passing QGLOB_CTLESC.  Fixes bug reported 4/2 by Martijn Dekker
+	  <martijn@inlv.org>
+
+				    4/9
+				    ---
+subst.c
+	- string_transform: after calling ansiexpand for the `E' transformation,
+	  need to call dequote_escapes because ansiexpand assumes it is being
+	  called by the parser and arranges for ansicstr to quote CTLESC and
+	  CTLNUL with CTLESC.  Reported by Grisha Levit <grishalevit@gmail.com>
+
+variables.c
+	- mk_env_string: when exporting functions, run them through
+	  dequote_escapes because any strings containing CTLESC or CTLNUL are
+	  still quoted with CTLESC.  Reported by Grisha Levit
+	  <grishalevit@gmail.com>
+
+subst.[ch]
+	- quote_escapes,dequote_escapes: now take const char * argument
+
+execute_cmd.c
+	- execute_intern_function: if the function name contains CTLESC, run
+	  it through dequote_escapes just in case it got CTLESC quoting
+	  CTLESC or CTLNUL from the parser

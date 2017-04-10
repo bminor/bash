@@ -57,8 +57,6 @@ code directory by typing 'make clean'.  To also remove the files that
 'configure' created (so you can compile Bash for a different kind of
 computer), type 'make distclean'.
 
-Next: Compiling For Multiple Architectures,  Prev: Basic Installation,  Up: Installing Bash
-
 Compilers and Options
 =====================
 
@@ -75,8 +73,6 @@ On systems that have the 'env' program, you can do it like this:
      env CPPFLAGS=-I/usr/local/include LDFLAGS=-s ./configure
 
 The configuration process uses GCC to build Bash if it is available.
-
-Next: Installation Names,  Prev: Compilers and Options,  Up: Installing Bash
 
 Compiling For Multiple Architectures
 ====================================
@@ -108,8 +104,6 @@ The 'mkclone' script requires Bash, so you must have already built Bash
 for at least one architecture before you can create build directories
 for other architectures.
 
-Next: Specifying the System Type,  Prev: Compiling For Multiple Architectures,  Up: Installing Bash
-
 Installation Names
 ==================
 
@@ -125,8 +119,6 @@ option '--exec-prefix=PATH', 'make install' will use PATH as the prefix
 for installing programs and libraries.  Documentation and other data
 files will still use the regular prefix.
 
-Next: Sharing Defaults,  Prev: Installation Names,  Up: Installing Bash
-
 Specifying the System Type
 ==========================
 
@@ -140,8 +132,6 @@ canonical name with three fields: 'CPU-COMPANY-SYSTEM' (e.g.,
 
 See the file 'support/config.sub' for the possible values of each field.
 
-Next: Operation Controls,  Prev: Specifying the System Type,  Up: Installing Bash
-
 Sharing Defaults
 ================
 
@@ -153,8 +143,6 @@ looks for 'PREFIX/share/config.site' if it exists, then
 'CONFIG_SITE' environment variable to the location of the site script.
 A warning: the Bash 'configure' looks for a site script, but not all
 'configure' scripts do.
-
-Next: Optional Features,  Prev: Sharing Defaults,  Up: Installing Bash
 
 Operation Controls
 ==================
@@ -184,8 +172,6 @@ Operation Controls
 
 'configure' also accepts some other, not widely used, boilerplate
 options.  'configure --help' prints the complete list.
-
-Prev: Operation Controls,  Up: Installing Bash
 
 Optional Features
 =================
@@ -321,6 +307,12 @@ unless the operating system does not provide the necessary support.
 '--enable-debugger'
      Include support for the bash debugger (distributed separately).
 
+'--enable-dev-fd-stat-broken'
+     If calling 'stat' on /dev/fd/N returns different results than
+     calling 'fstat' on file descriptor N, supply this option to enable
+     a workaround.  This has implications for conditional commands that
+     test file attributes.
+
 '--enable-direxpand-default'
      Cause the 'direxpand' shell option (*note The Shopt Builtin::) to
      be enabled by default when the shell starts.  It is normally
@@ -391,7 +383,7 @@ unless the operating system does not provide the necessary support.
 
 '--enable-prompt-string-decoding'
      Turn on the interpretation of a number of backslash-escaped
-     characters in the '$PS1', '$PS2', '$PS3', and '$PS4' prompt
+     characters in the '$PS0', '$PS1', '$PS2', and '$PS4' prompt
      strings.  See *note Controlling the Prompt::, for a complete list
      of prompt string escape sequences.
 

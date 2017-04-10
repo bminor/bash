@@ -1,0 +1,52 @@
+x=$'\\a\\b\\c\\\001\\d\\e\\f'
+y='\a\b\c\\d\e\f'
+z=$'abc\001def'
+
+recho "$x"
+recho "$y"
+recho "$z"
+
+case $'abc\001def' in
+$x) echo ok 1 ;;
+*) echo oops 1;;
+esac
+
+case $z in
+$x) echo ok 2 ;;
+*) echo oops 2;;
+esac
+
+case $'abc\001def' in
+$y) echo ok 3 ;;
+*) echo oops 3;;
+esac
+
+case $z in
+$y) echo ok 4 ;;
+*) echo oops 4;;
+esac
+
+# no backslash before \001
+x=$'\\a\\b\\c\001\\d\\e\\f'
+y='\a\b\c\d\e\f'
+
+case $'abc\001def' in
+$x) echo ok 5 ;;
+*) echo oops 5;;
+esac
+
+case $z in
+$x) echo ok 6 ;;
+*) echo oops 6;;
+esac
+
+case $'abc\001def' in
+$y) echo ok 7 ;;
+*) echo oops 7;;
+esac
+
+case $z in
+$y) echo ok 8 ;;
+*) echo oops 8;;
+esac
+

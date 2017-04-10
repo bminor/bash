@@ -3942,11 +3942,7 @@ expand_word_unsplit (word, quoted)
   WORD_LIST *result;
 
   expand_no_split_dollar_star = 1;
-#if defined (HANDLE_MULTIBYTE)
-  if (ifs_firstc[0] == 0)
-#else
-  if (ifs_firstc == 0)
-#endif
+  if (ifs_is_null)
     word->flags |= W_NOSPLIT;
   word->flags |= W_NOSPLIT2;
   result = call_expand_word_internal (word, quoted, 0, (int *)NULL, (int *)NULL);
@@ -3966,11 +3962,7 @@ expand_word_leave_quoted (word, quoted)
   WORD_LIST *result;
 
   expand_no_split_dollar_star = 1;
-#if defined (HANDLE_MULTIBYTE)
-  if (ifs_firstc[0] == 0)
-#else
-  if (ifs_firstc == 0)
-#endif
+  if (ifs_is_null)
     word->flags |= W_NOSPLIT;
   word->flags |= W_NOSPLIT2;
   result = call_expand_word_internal (word, quoted, 0, (int *)NULL, (int *)NULL);
@@ -4002,11 +3994,11 @@ expand_word_leave_quoted (word, quoted)
    document (effectively double-quoted). */
 char *
 quote_escapes (string)
-     char *string;
+     const char *string;
 {
-  register char *s, *t;
+  const char *s, *send;
+  char *t, *result;
   size_t slen;
-  char *result, *send;
   int quote_spaces, skip_ctlesc, skip_ctlnul;
   DECLARE_MBSTATE; 
 
@@ -4061,16 +4053,16 @@ list_quote_escapes (list)
    Also used by parts of the pattern substitution code. */
 char *
 dequote_escapes (string)
-     char *string;
+     const char *string;
 {
-  register char *s, *t, *s1;
+  const char *s, *send;
+  char *t, *result;
   size_t slen;
-  char *result, *send;
   int quote_spaces;
   DECLARE_MBSTATE;
 
   if (string == 0)
-    return string;
+    return (char *)0;
 
   slen = strlen (string);
   send = string + slen;
@@ -6390,6 +6382,7 @@ parameter_brace_expand_word (name, var_is_special, quoted, pflags, indp)
     {
 expand_arrayref:
       var = array_variable_part (name, 0, &tt, (int *)0);
+      /* These are the cases where word splitting will not be performed */
       if (pflags & PF_ASSIGNRHS)
 	{
 	  if (ALL_ELEMENT_SUB (tt[0]) && tt[1] == RBRACK)
@@ -6404,6 +6397,25 @@ expand_arrayref:
 	  else
 	    temp = array_value (name, quoted, 0, &atype, &ind);
 	}
+      /* Posix interp 888 */
+      else if (pflags & PF_NOSPLIT2)
+	{
+	  /* Special cases, then general case, for each of A[@], A[*], A[n] */
+#if defined (HANDLE_MULTIBYTE)
+          if (tt[0] == '@' && tt[1] == RBRACK && var && quoted == 0 && ifs_is_set && ifs_is_null == 0 && ifs_firstc[0] != ' ')
+#else
+	  if (tt[0] == '@' && tt[1] == RBRACK && var && quoted == 0 && ifs_is_set && ifs_is_null == 0 && ifs_firstc != ' ')
+#endif
+	    temp = array_value (name, Q_DOUBLE_QUOTES, AV_ASSIGNRHS, &atype, &ind);
+	  else if (tt[0] == '@' && tt[1] == RBRACK)
+	    temp = array_value (name, quoted, 0, &atype, &ind);
+	  else if (tt[0] == '*' && tt[1] == RBRACK && expand_no_split_dollar_star && ifs_is_null)
+	    temp = array_value (name, Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT, 0, &atype, &ind);
+	  else if (tt[0] == '*' && tt[1] == RBRACK)
+	    temp = array_value (name, quoted, 0, &atype, &ind);
+	  else
+	    temp = array_value (name, quoted, 0, &atype, &ind);
+	}	  	  
       else if (tt[0] == '*' && tt[1] == RBRACK && expand_no_split_dollar_star && ifs_is_null)
 	temp = array_value (name, Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT, 0, &atype, &ind);
       else
@@ -7235,7 +7247,7 @@ string_transform (xc, v, s)
      SHELL_VAR *v;
      char *s;
 {
-  char *ret, flags[MAX_ATTRIBUTES];
+  char *ret, flags[MAX_ATTRIBUTES], *t;
   int i;
 
   if (((xc == 'A' || xc == 'a') && v == 0) || (xc != 'a' && s == 0))
@@ -7253,7 +7265,9 @@ string_transform (xc, v, s)
 	break;
       /* Transformations that modify the variable's value */
       case 'E':
-	ret = ansiexpand (s, 0, strlen (s), (int *)0);
+	t = ansiexpand (s, 0, strlen (s), (int *)0);
+	ret = dequote_escapes (t);
+	free (t);
 	break;
       case 'P':
 	ret = decode_prompt_string (s);
@@ -7278,6 +7292,7 @@ list_transform (xc, v, list, itype, quoted)
   WORD_LIST *new, *l;
   WORD_DESC *w;
   char *tword;
+  int qflags;
 
   for (new = (WORD_LIST *)NULL, l = list; l; l = l->next)
     {
@@ -7286,9 +7301,15 @@ list_transform (xc, v, list, itype, quoted)
       w->word = tword ? tword : savestring ("");	/* XXX */
       new = make_word_list (w, new);
     }
-
   l = REVERSE_LIST (new, WORD_LIST *);
-  tword = string_list_pos_params (itype, l, quoted);
+
+  qflags = quoted;
+  /* If we are expanding in a context where word splitting will not be
+     performed, treat as quoted.  This changes how $* will be expanded. */
+  if (xc != 'Q' && itype == '*' && expand_no_split_dollar_star && ifs_is_null)
+    qflags |= Q_DOUBLE_QUOTES;		/* Posix interp 888 */
+
+  tword = string_list_pos_params (itype, l, qflags);
   dispose_words (l);
 
   return (tword);
@@ -7412,7 +7433,11 @@ parameter_brace_transform (varname, value, ind, xform, rtype, quoted, pflags, fl
 #if defined (ARRAY_VARS)
     case VT_ARRAYVAR:
       temp1 = array_transform (xc, v, varname, quoted);
-      if (temp1 && ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) == 0))
+      if (temp1 && quoted == 0 && ifs_is_null)
+	{
+		/* Posix interp 888 */
+	}
+      else if (temp1 && ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) == 0))
 	{
 	  val = quote_escapes (temp1);
 	  free (temp1);
@@ -7538,11 +7563,10 @@ parameter_brace_substring (varname, value, ind, substr, quoted, pflags, flags)
       break;
     case VT_POSPARMS:
       qflags = quoted;
-      if (expand_no_split_dollar_star && starsub && (pflags & PF_NOSPLIT2))
-	qflags |= Q_DOUBLE_QUOTES;      /* Posix interp 888 */
-      if (starsub && (pflags & PF_ASSIGNRHS) && quoted == 0 && ifs_is_null)
-	qflags |= Q_DOUBLE_QUOTES;	/* Posix interp 888 */
       tt = pos_params (varname, e1, e2, qflags);
+      /* string_list_dollar_at will quote the list if ifs_is_null != 0 */
+      /* We want to leave this alone in every case where pos_params/
+	 string_list_pos_params quotes the list members */
       if (tt && quoted == 0 && ifs_is_null)
 	{
 	  temp = tt;	/* Posix interp 888 */
@@ -7762,7 +7786,7 @@ pos_params_pat_subst (string, pat, rep, mflags)
 
   /* If we are expanding in a context where word splitting will not be
      performed, treat as quoted.  This changes how $* will be expanded. */
-  if (pchar == '*' && (mflags & MATCH_ASSIGNRHS) && ifs_is_null)
+  if (pchar == '*' && (mflags & MATCH_ASSIGNRHS) && expand_no_split_dollar_star && ifs_is_null)
     qflags |= Q_DOUBLE_QUOTES;		/* Posix interp 888 */
 
   ret = string_list_pos_params (pchar, save, qflags);
@@ -9024,10 +9048,32 @@ param_expand (string, sindex, quoted, expanded_something,
 	 parameters no matter what IFS is set to. */
       /* XXX - what to do when in a context where word splitting is not
 	 performed? Even when IFS is not the default, posix seems to imply
-	 that we behave like unquoted $* ?  Maybe we should use PF_NOSPLIT2
-	 here. */
-      /* XXX - bash-4.4/bash-5.0 passing PFLAGS */
-      temp = string_list_dollar_at (list, (pflags & PF_ASSIGNRHS) ? (quoted|Q_DOUBLE_QUOTES) : quoted, pflags);
+	 that we behave like unquoted $* ?  See below for how we use
+	 PF_NOSPLIT2 here. */
+
+      /* These are the cases where word splitting will not be performed. */
+      if (pflags & PF_ASSIGNRHS)
+	temp = string_list_dollar_at (list, (quoted|Q_DOUBLE_QUOTES), pflags);
+      /* This needs to match what expand_word_internal does with non-quoted $@
+	 does with separating with spaces.  Passing Q_DOUBLE_QUOTES means that
+	 the characters in LIST will be quoted, and PF_ASSIGNRHS ensures that
+	 they will separated by spaces. After doing this, we need the special
+	 handling for PF_NOSPLIT2 in expand_word_internal to remove the CTLESC
+	 quotes. */
+      else if (pflags & PF_NOSPLIT2)
+        {
+#if defined (HANDLE_MULTIBYTE)
+	  if (quoted == 0 && ifs_is_set && ifs_is_null == 0 && ifs_firstc[0] != ' ')
+#else
+	  if (quoted == 0 && ifs_is_set && ifs_is_null == 0 && ifs_firstc != ' ')
+#endif
+	    /* Posix interp 888 */
+	    temp = string_list_dollar_at (list, Q_DOUBLE_QUOTES, pflags);
+	  else
+	    temp = string_list_dollar_at (list, quoted, pflags);
+	}
+      else
+	temp = string_list_dollar_at (list, quoted, pflags);
 
       tflag |= W_DOLLARAT;
       dispose_words (list);
@@ -9988,6 +10034,8 @@ add_twochars:
 	      else
 		{
 #if HANDLE_MULTIBYTE
+		  /* XXX - should make sure that c is actually multibyte,
+		     otherwise we can use the twochars branch */
 		  if (mb_cur_max > 1)
 		    sindex--;
 
@@ -10125,7 +10173,18 @@ finished_with_string:
 	  /* Only split and rejoin if we have to */
 	  if (*ifs_chars && *ifs_chars != ' ')
 	    {
+	      /* list_string dequotes CTLESCs in the string it's passed, so we
+		 need it to get the space separation right if space isn't the
+		 first character in IFS (but is present) and to remove the 
+		 quoting we added back in param_expand(). */
 	      list = list_string (istring, *ifs_chars ? ifs_chars : " ", 1);
+	      /* This isn't exactly right in the case where we're expanding
+		 the RHS of an expansion like ${var-$@} where IFS=: (for
+		 example). The W_NOSPLIT2 means we do the separation with :;
+		 the list_string removes the quotes and breaks the string into
+		 a list, and the string_list rejoins it on spaces. When we
+		 return, we expect to be able to split the results, but the
+		 space separation means the right split doesn't happen. */
 	      tword->word = string_list (list);	
 	    }
 	  else

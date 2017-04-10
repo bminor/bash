@@ -34,7 +34,7 @@
 \entry{commands, lists}{9}{commands, lists}
 \entry{commands, compound}{9}{commands, compound}
 \entry{commands, looping}{10}{commands, looping}
-\entry{commands, conditional}{10}{commands, conditional}
+\entry{commands, conditional}{11}{commands, conditional}
 \entry{commands, grouping}{14}{commands, grouping}
 \entry{coprocess}{15}{coprocess}
 \entry{shell function}{17}{shell function}
@@ -54,7 +54,7 @@
 \entry{command substitution}{30}{command substitution}
 \entry{expansion, arithmetic}{30}{expansion, arithmetic}
 \entry{arithmetic expansion}{30}{arithmetic expansion}
-\entry{process substitution}{30}{process substitution}
+\entry{process substitution}{31}{process substitution}
 \entry{word splitting}{31}{word splitting}
 \entry{expansion, filename}{31}{expansion, filename}
 \entry{expansion, pathname}{31}{expansion, pathname}

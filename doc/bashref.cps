@@ -20,7 +20,7 @@
 \entry {command substitution}{30}
 \entry {command timing}{8}
 \entry {commands, compound}{9}
-\entry {commands, conditional}{10}
+\entry {commands, conditional}{11}
 \entry {commands, grouping}{14}
 \entry {commands, lists}{9}
 \entry {commands, looping}{10}
@@ -99,7 +99,7 @@
 \entry {POSIX Mode}{98}
 \entry {process group}{3}
 \entry {process group ID}{3}
-\entry {process substitution}{30}
+\entry {process substitution}{31}
 \entry {programmable completion}{131}
 \entry {prompting}{96}
 \initial {Q}

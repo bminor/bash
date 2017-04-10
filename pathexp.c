@@ -205,7 +205,7 @@ quote_string_for_globbing (pathname, qflags)
 	}
       /* If we are parsing regexp, turn CTLESC CTLESC into CTLESC. It's not an
 	 ERE special character, so we should just be able to pass it through. */
-      else if ((qflags & QGLOB_REGEXP) && pathname[i] == CTLESC && pathname[i+1] == CTLESC)
+      else if ((qflags & (QGLOB_REGEXP|QGLOB_CTLESC)) && pathname[i] == CTLESC && pathname[i+1] == CTLESC)
 	{
 	  i++;
 	  temp[j++] = pathname[i];
@@ -325,6 +325,10 @@ quote_string_for_globbing (pathname, qflags)
 	  i++;
 	  if (pathname[i] == '\0')
 	    break;
+	  /* If we are turning CTLESC CTLESC into CTLESC, we need to do that
+	     even when the first CTLESC is preceded by a backslash. */
+	  if ((qflags & QGLOB_CTLESC) && pathname[i] == CTLESC && pathname[i+1] == CTLESC)
+	    i++;	/* skip over one of the CTLESCs */
 	}
       else if (pathname[i] == '\\' && (qflags & QGLOB_REGEXP))
         last_was_backslash = 1;
