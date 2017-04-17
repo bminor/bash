@@ -166,7 +166,7 @@ source_builtin (list)
     }
 
   begin_unwind_frame ("source");
-  add_unwind_protect ((Function *)xfree, filename);
+  add_unwind_protect (xfree, filename);
 
   if (list->next)
     {

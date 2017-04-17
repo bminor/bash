@@ -3564,7 +3564,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 		{
 		  /* Translate $'...' here. */
 		  ttrans = ansiexpand (nestret, 0, nestlen - 1, &ttranslen);
-		  xfree (nestret);
+		  free (nestret);
 
 		  /* If we're parsing a double-quoted brace expansion and we are
 		     not in a place where single quotes are treated specially,
@@ -3594,7 +3594,7 @@ parse_matched_pair (qc, open, close, lenp, flags)
 		{
 		  /* Locale expand $"..." here. */
 		  ttrans = localeexpand (nestret, 0, nestlen - 1, start_lineno, &ttranslen);
-		  xfree (nestret);
+		  free (nestret);
 
 		  nestret = sh_mkdoublequoted (ttrans, ttranslen, 0);
 		  free (ttrans);
@@ -4190,7 +4190,7 @@ eof_error:
 	    {
 	      /* Translate $'...' here. */
 	      ttrans = ansiexpand (nestret, 0, nestlen - 1, &ttranslen);
-	      xfree (nestret);
+	      free (nestret);
 
 	      if ((rflags & P_DQUOTE) == 0)
 		{
@@ -4209,7 +4209,7 @@ eof_error:
 	    {
 	      /* Locale expand $"..." here. */
 	      ttrans = localeexpand (nestret, 0, nestlen - 1, start_lineno, &ttranslen);
-	      xfree (nestret);
+	      free (nestret);
 
 	      nestret = sh_mkdoublequoted (ttrans, ttranslen, 0);
 	      free (ttrans);
@@ -5497,6 +5497,31 @@ print_prompt ()
   fflush (stderr);
 }
 
+#if defined (HISTORY)
+  /* The history library increments the history offset as soon as it stores
+     the first line of a potentially multi-line command, so we compensate
+     here by returning one fewer when appropriate. */
+static int
+prompt_history_number (pmt)
+     char *pmt;
+{
+  int ret;
+
+  ret = history_number ();
+  if (ret == 1)
+    return ret;
+
+  if (pmt == ps1_prompt)	/* are we expanding $PS1? */
+    return ret;
+  else if (pmt == ps2_prompt && command_oriented_history == 0)
+    return ret;			/* not command oriented history */
+  else if (pmt == ps2_prompt && command_oriented_history && current_command_first_line_saved)
+    return ret - 1;
+  else
+    return ret - 1;		/* PS0, PS4, ${var@P}, PS2 other cases */
+}
+#endif
+
 /* Return a string which will be printed as a prompt.  The string
    may contain special characters which are decoded as follows:
 
@@ -5534,7 +5559,7 @@ decode_prompt_string (string)
      char *string;
 {
   WORD_LIST *list;
-  char *result, *t;
+  char *result, *t, *orig_string;
   struct dstack save_dstack;
   int last_exit_value, last_comsub_pid;
 #if defined (PROMPT_STRING_DECODE)
@@ -5550,6 +5575,7 @@ decode_prompt_string (string)
   result = (char *)xmalloc (result_size = PROMPT_GROWTH);
   result[result_index = 0] = 0;
   temp = (char *)NULL;
+  orig_string = string;
 
   while (c = *string++)
     {
@@ -5565,7 +5591,7 @@ decode_prompt_string (string)
 #if !defined (HISTORY)
 		temp = savestring ("1");
 #else /* HISTORY */
-		temp = itos (history_number ());
+		temp = itos (prompt_history_number (orig_string));
 #endif /* HISTORY */
 		string--;	/* add_string increments string again. */
 		goto add_string;
@@ -5797,14 +5823,19 @@ decode_prompt_string (string)
 	      goto add_string;
 
 	    case '#':
-	      temp = itos (current_command_number);
+	      n = current_command_number;
+	      /* If we have already incremented current_command_number (PS4,
+		 ${var@P}), compensate */
+	      if (orig_string != ps0_prompt && orig_string != ps1_prompt && orig_string != ps2_prompt)
+		n--;
+	      temp = itos (n);
 	      goto add_string;
 
 	    case '!':
 #if !defined (HISTORY)
 	      temp = savestring ("1");
 #else /* HISTORY */
-	      temp = itos (history_number ());
+	      temp = itos (prompt_history_number (orig_string));
 #endif /* HISTORY */
 	      goto add_string;
 

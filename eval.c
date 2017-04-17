@@ -148,10 +148,6 @@ reader_loop ()
 	  else if (current_command = global_command)
 	    {
 	      global_command = (COMMAND *)NULL;
-	      current_command_number++;
-
-	      executing = 1;
-	      stdin_redir = 0;
 
 	      /* If the shell is interactive, expand and display $PS0 after reading a
 		 command (possibly a list or pipeline) and before executing it. */
@@ -167,6 +163,11 @@ reader_loop ()
 		    }
 		  free (ps0_string);
 		}
+
+	      current_command_number++;
+
+	      executing = 1;
+	      stdin_redir = 0;
 
 	      execute_command (current_command);
 

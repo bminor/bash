@@ -459,7 +459,7 @@ fc_builtin (list)
   /* Turn on the `v' flag while fc_execute_file runs so the commands
      will be echoed as they are read by the parser. */
   begin_unwind_frame ("fc builtin");
-  add_unwind_protect ((Function *)xfree, fn);
+  add_unwind_protect (xfree, fn);
   add_unwind_protect (unlink, fn);
   add_unwind_protect (set_verbose_flag, (char *)NULL);
   echo_input_at_read = 1;

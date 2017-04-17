@@ -232,7 +232,7 @@ mapfile (fd, line_count_goal, origin, nskip, callback_quantum, callback, array_n
 	break;
     }
 
-  xfree (line);
+  free (line);
 
   if (unbuffered_read == 0)
     zsyncfd (fd);

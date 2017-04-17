@@ -541,7 +541,7 @@ read_builtin (list)
 	{
 	  if (rlbuf && rlbuf[rlind] == '\0')
 	    {
-	      xfree (rlbuf);
+	      free (rlbuf);
 	      rlbuf = (char *)0;
 	    }
 	  if (rlbuf == 0)
@@ -736,20 +736,20 @@ assign_vars:
       if (legal_identifier (arrayname) == 0)
 	{
 	  sh_invalidid (arrayname);
-	  xfree (input_string);
+	  free (input_string);
 	  return (EXECUTION_FAILURE);
 	}
 
       var = find_or_make_array_variable (arrayname, 1);
       if (var == 0)
 	{
-	  xfree (input_string);
+	  free (input_string);
 	  return EXECUTION_FAILURE;	/* readonly or noassign */
 	}
       if (assoc_p (var))
 	{
           builtin_error (_("%s: cannot convert associative to indexed array"), arrayname);
-	  xfree (input_string);
+	  free (input_string);
 	  return EXECUTION_FAILURE;	/* existing associative array */
 	}
       else if (invisible_p (var))
@@ -766,7 +766,7 @@ assign_vars:
 	  assign_array_var_from_word_list (var, alist, 0);
 	  dispose_words (alist);
 	}
-      xfree (input_string);
+      free (input_string);
       return (retval);
     }
 #endif /* ARRAY_VARS */ 
@@ -802,7 +802,7 @@ assign_vars:
       else
 	VUNSETATTR (var, att_invisible);
 
-      xfree (input_string);
+      free (input_string);
       return (retval);
     }
 
@@ -825,7 +825,7 @@ assign_vars:
 #endif
 	{
 	  sh_invalidid (varname);
-	  xfree (orig_input_string);
+	  free (orig_input_string);
 	  return (EXECUTION_FAILURE);
 	}
 
@@ -843,7 +843,7 @@ assign_vars:
 	    {
 	      t1 = dequote_string (t);
 	      var = bind_read_variable (varname, t1);
-	      xfree (t1);
+	      free (t1);
 	    }
 	  else
 	    var = bind_read_variable (varname, t ? t : "");
@@ -857,7 +857,7 @@ assign_vars:
       FREE (t);
       if (var == 0)
 	{
-	  xfree (orig_input_string);
+	  free (orig_input_string);
 	  return (EXECUTION_FAILURE);
 	}
 
@@ -873,7 +873,7 @@ assign_vars:
 #endif
     {
       sh_invalidid (list->word->word);
-      xfree (orig_input_string);
+      free (orig_input_string);
       return (EXECUTION_FAILURE);
     }
 
@@ -904,7 +904,7 @@ assign_vars:
     {
       t = dequote_string (input_string);
       var = bind_read_variable (list->word->word, t);
-      xfree (t);
+      free (t);
     }
   else
     var = bind_read_variable (list->word->word, input_string ? input_string : "");
@@ -918,7 +918,7 @@ assign_vars:
     retval = EXECUTION_FAILURE;
 
   FREE (tofree);
-  xfree (orig_input_string);
+  free (orig_input_string);
 
   return (retval);
 }

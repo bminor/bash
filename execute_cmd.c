@@ -4617,7 +4617,7 @@ execute_builtin (builtin, words, flags, subshell)
       if (error_trap)
 	{
 	  set_error_trap (error_trap);
-	  xfree (error_trap);
+	  free (error_trap);
 	}
       discard_unwind_frame ("eval_builtin");
     }

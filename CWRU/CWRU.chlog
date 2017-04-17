@@ -13664,3 +13664,40 @@ execute_cmd.c
 	- execute_intern_function: if the function name contains CTLESC, run
 	  it through dequote_escapes just in case it got CTLESC quoting
 	  CTLESC or CTLNUL from the parser
+
+				   4/11
+				   ----
+eval.c
+	- reader_loop: make sure PS0 is expanded and displayed before
+	  incrementing the command number
+
+parse.y
+	- prompt_history_number:  function to make history number as reported
+	  by \!, or posix mode !!, be the same index that the (possibly multi-
+	  line) command will be stored with. The history library increments
+	  history_offset as soon as a new line is entered, and it's up to the
+	  history code to store the second and subsequent lines of a command
+	  in the same history entry.  If we are expanding PS0 or PS4, or
+	  a ${var@P} expansion, we're already past the history entry no
+	  matter what.  Inspired by patch from Grisha Levit
+	  <grishalevit@gmail.com>
+	- decode_prompt_string: call prompt_history_number
+	- decode_prompt_string: if expanding PS4 or ${var@P}, make the
+	  command number the same as reported by PS0/PS1/PS2
+
+				   4/12
+				   ----
+support/Makefile.in
+	- clean: remove man2html.o as part of this production instead of
+	  waiting until `distclean'. Reported by chrlis <chrlis@sbrella.com>
+
+subst.c
+	- string_list_pos_params: if we are expanding $* in a context where
+	  IFS is null and expand_no_split_dollar_star is set (no word
+	  splitting), use string_list_dollar_star to force the positional
+	  parameters to be joined without first separating them into a list
+	  and attempting to join them later.  Fixes problem with constructs
+	  like ${var=${*:1}}, pointed out by Grisha Levit
+	  <grishalevit@gmail.com>. This undoes change to @Q from 4/7, so
+	  list_transform change reverted
+

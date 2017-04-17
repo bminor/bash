@@ -79,10 +79,9 @@ man2html$(EXEEXT): $(OBJ1)
 	$(CC_FOR_BUILD) $(CCFLAGS_FOR_BUILD) $(OBJ1) -o $@ ${LIBS_FOR_BUILD}
 
 clean:
-	$(RM) man2html$(EXEEXT)
+	$(RM) man2html$(EXEEXT) $(OBJ1)
 
 distclean maintainer-clean mostlyclean: clean
-	$(RM) $(OBJ1)
 	$(RM) bash.pc
 
 man2html.o: man2html.c

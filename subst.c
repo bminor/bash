@@ -2684,7 +2684,7 @@ string_list_pos_params (pchar, list, quoted)
       ret = string_list (tlist);
     }
   else if (pchar == '*' && quoted == 0 && ifs_is_null)	/* XXX */
-    ret = string_list_dollar_at (list, quoted, 0);	/* Posix interp 888 */
+    ret = expand_no_split_dollar_star ? string_list_dollar_star (list) : string_list_dollar_at (list, quoted, 0);	/* Posix interp 888 */
   else if (pchar == '*')
     {
       /* Even when unquoted, string_list_dollar_star does the right thing
@@ -7306,7 +7306,7 @@ list_transform (xc, v, list, itype, quoted)
   qflags = quoted;
   /* If we are expanding in a context where word splitting will not be
      performed, treat as quoted.  This changes how $* will be expanded. */
-  if (xc != 'Q' && itype == '*' && expand_no_split_dollar_star && ifs_is_null)
+  if (itype == '*' && expand_no_split_dollar_star && ifs_is_null)
     qflags |= Q_DOUBLE_QUOTES;		/* Posix interp 888 */
 
   tword = string_list_pos_params (itype, l, qflags);
