@@ -5948,6 +5948,8 @@ command_substitute (string, quoted, flags)
   /* Flags to pass to parse_and_execute() */
   pflags = (interactive && sourcelevel == 0) ? SEVAL_RESETLINE : 0;
 
+  old_pid = last_made_pid;
+
   /* Pipe the output of executing STRING into the current shell. */
   if (pipe (fildes) < 0)
     {
@@ -5955,7 +5957,6 @@ command_substitute (string, quoted, flags)
       goto error_exit;
     }
 
-  old_pid = last_made_pid;
 #if defined (JOB_CONTROL)
   old_pipeline_pgrp = pipeline_pgrp;
   /* Don't reset the pipeline pgrp if we're already a subshell in a pipeline. */

@@ -452,8 +452,6 @@ rl_translate_keyseq (const char *seq, char *array, int *len)
 		  array[l++] = ESC;	/* ESC is meta-prefix */
 		  i += 5;
 		  array[l++] = CTRL (_rl_to_upper (seq[i]));
-		  if (seq[i] == '\0')
-		    i--;
 		}
 	      else if (c == 'M')
 		{
@@ -482,6 +480,8 @@ rl_translate_keyseq (const char *seq, char *array, int *len)
 		  /* Special hack for C-?... */
 		  array[l++] = (seq[i] == '?') ? RUBOUT : CTRL (_rl_to_upper (seq[i]));
 		}
+	      if (seq[i] == '\0')
+		break;
 	      continue;
 	    }	      
 
@@ -1263,6 +1263,12 @@ rl_parse_and_bind (char *string)
   /* Advance to the colon (:) or whitespace which separates the two objects. */
   for (; (c = string[i]) && c != ':' && c != ' ' && c != '\t'; i++ );
 
+  if (i == 0)
+    {
+      _rl_init_file_error ("`%s': invalid key binding: missing key sequence", string);
+      return 1;
+    }
+
   equivalency = (c == ':' && string[i + 1] == '=');
 
   foundsep = c != 0;
@@ -1341,6 +1347,11 @@ remove_trailing:
       i = _rl_skip_to_delim (string, i+1, *funname);
       if (string[i])
 	i++;
+      else
+	{
+	  _rl_init_file_error ("`%s': missing closing quote for macro", funname);
+	  return 1;
+	}
     }
 
   /* Advance to the end of the string.  */

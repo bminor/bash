@@ -1,7 +1,7 @@
 /* strmatch.c -- ksh-like extended pattern matching for the shell and filename
 		globbing. */
 
-/* Copyright (C) 1991-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -254,6 +254,7 @@ is_cclass (c, name)
 #define PATSCAN			glob_patscan
 #define STRCOMPARE		strcompare
 #define EXTMATCH		extmatch
+#define STRUCT			smat_struct
 #define STRCHR(S, C)		strchr((S), (C))
 #define MEMCHR(S, C, N)		memchr((S), (C), (N))
 #define STRCOLL(S1, S2)		strcoll((S1), (S2))
@@ -389,6 +390,7 @@ is_wcclass (wc, name)
 #define PATSCAN			glob_patscan_wc
 #define STRCOMPARE		wscompare
 #define EXTMATCH		extmatch_wc
+#define STRUCT			wcsmat_struct
 #define STRCHR(S, C)		wcschr((S), (C))
 #define MEMCHR(S, C, N)		wmemchr((S), (C), (N))
 #define STRCOLL(S1, S2)		wcscoll((S1), (S2))

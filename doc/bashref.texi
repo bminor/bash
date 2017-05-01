@@ -4360,7 +4360,7 @@ Options, if supplied, have the following meanings:
 @item -d
 The first character of @var{delim} is used to terminate each input line,
 rather than newline.
-If @var{delim} is the empty string, @code{read} will terminate a line
+If @var{delim} is the empty string, @code{mapfile} will terminate a line
 when it reads a NUL character.
 @item -n
 Copy at most @var{count} lines.  If @var{count} is 0, all lines are copied.
@@ -4487,6 +4487,8 @@ Other @var{name} arguments are ignored.
 @item -d @var{delim}
 The first character of @var{delim} is used to terminate the input line,
 rather than newline.
+If @var{delim} is the empty string, @code{read} will terminate a line
+when it reads a NUL character.
 
 @item -e
 Readline (@pxref{Command Line Editing}) is used to obtain the line.
@@ -5135,6 +5137,8 @@ If set, Bash
 attempts to save all lines of a multiple-line
 command in the same history entry.  This allows
 easy re-editing of multi-line commands.
+This option is enabled by default, but only has an effect if command
+history is enabled (@pxref{Bash History Facilities}).
 
 @item compat31
 If set, Bash

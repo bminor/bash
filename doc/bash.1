@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue Apr  4 14:55:46 EDT 2017
+.\"	Last Change: Tue Apr 25 09:44:48 EDT 2017
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2017 April 4" "GNU Bash 4.4"
+.TH BASH 1 "2017 April 25" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -8768,7 +8768,7 @@ Options, if supplied, have the following meanings:
 .B \-d
 The first character of \fIdelim\fP is used to terminate each input line,
 rather than newline.
-If \fIdelim\fP is the empty string, \fBread\fP will terminate a line
+If \fIdelim\fP is the empty string, \fBmapfile\fP will terminate a line
 when it reads a NUL character.
 .TP
 .B \-n
@@ -9029,6 +9029,8 @@ Other \fIname\fP arguments are ignored.
 .B \-d \fIdelim\fP
 The first character of \fIdelim\fP is used to terminate the input line,
 rather than newline.
+If \fIdelim\fP is the empty string, \fBread\fP will terminate a line
+when it reads a NUL character.
 .TP
 .B \-e
 If the standard input
@@ -9691,6 +9693,10 @@ If set,
 attempts to save all lines of a multiple-line
 command in the same history entry.  This allows
 easy re-editing of multi-line commands.
+This option is enabled by default, but only has an effect if command
+history is enabled, as described above under
+.SM
+.BR HISTORY .
 .TP 8
 .B compat31
 If set,

@@ -318,6 +318,9 @@ static WORD_DESC *word_desc_to_read;
 
 static REDIRECTEE source;
 static REDIRECTEE redir;
+
+static FILE *yyoutstream;
+static FILE *yyerrstream;
 %}
 
 %union {
@@ -1310,6 +1313,8 @@ debug_parser (i)
 {
 #if YYDEBUG != 0
   yydebug = i;
+  yyoutstream = stdout;
+  yyerrstream = stderr;
 #endif
 }
 #endif
@@ -2675,7 +2680,7 @@ yylex ()
       if (bash_input.type == st_string)
 	rewind_input_string ();
     }
-  parser_state &= ~PST_EOFTOKEN;
+  parser_state &= ~PST_EOFTOKEN;	/* ??? */
 
   return (current_token);
 }
@@ -4267,7 +4272,7 @@ xparse_dolparen (base, string, indp, flags)
   STRING_SAVER *saved_pushed_strings;
 #endif
 
-  /*yydebug = 1;*/
+/*debug_parser(1);*/
   orig_ind = *indp;
   ostring = string;
 
@@ -4287,7 +4292,13 @@ xparse_dolparen (base, string, indp, flags)
   parser_state |= PST_CMDSUBST|PST_EOFTOKEN;	/* allow instant ')' */ /*(*/
   shell_eof_token = ')';
 
+  /* Should we save and restore the bison/yacc lookahead token (yychar) here?
+     Or only if it's not YYEMPTY? */
+
   nc = parse_string (string, "command substitution", sflags, &ep);
+
+  if (current_token == shell_eof_token)
+    yyclearin;		/* might want to clear lookahead token unconditionally */
 
   shell_eof_token = orig_eof_token;
   restore_parser_state (&ps);

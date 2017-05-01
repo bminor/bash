@@ -293,7 +293,10 @@ read_history_range (const char *filename, int from, int to)
     }
 
   if (file_size == 0)
-    return 0;	/* don't waste time if we don't have to */
+    {
+      free (input);
+      return 0;	/* don't waste time if we don't have to */
+    }
 
 #ifdef HISTORY_USE_MMAP
   /* We map read/write and private so we can change newlines to NULs without

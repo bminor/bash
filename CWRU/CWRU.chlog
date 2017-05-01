@@ -13716,3 +13716,54 @@ bashline.c
 	  NEW_LINE is NULL.  Report from Jaren Stangret <sirjaren@gmail.com>,
 	  fix from Eduardo Bustamante <dualbus@gmail.com>
 
+				   4/24
+				   ----
+parse.y
+	- xparse_dolparen: if the current token (the last thing read_token
+	  returned to yylex) is shell_eof_token, assume that it is the new
+	  bison lookahead token and clear it. Fixes bug reported by
+	  Werner Fink <werner@suse.de>
+
+				   4/25
+				   ----
+doc/{bash.1,bashref.texi}
+	- cmdhist: clarify that this option only has an effect if history is
+	  enabled. Suggested by Matthew Braun <matthew@powerplug.com>
+
+				   4/26
+				   ----
+jobs.c
+	- wait_for: if a non-interactive shell with job control enabled (set -m)
+	  detects that a foreground job died due to SIGINT, act as if the shell
+	  also received the SIGINT. Prompted by an austin-group-l discussion
+	- waitchld: run SIGCHLD trap for each child exited even if job control
+	  is not enabled when in Posix mode. Prompted by an austin-group-l
+	  discussion
+
+				   4/27
+				   ----
+lib/readline/histfile.c
+	- read_history_range: if the history file is empty, free the history
+	  filename before returning. Report and fix from Eduardo Bustamante
+	  <dualbus@gmail.com>
+
+lib/readline/bind.c
+	- rl_parse_and_bind: make sure there is something, even if it's a
+	  quoted empty string, before the `:' in a key binding.  Report from
+	  Eduardo Bustamante <dualbus@gmail.com>
+	- rl_parse_and_bind: if the right side of a key binding starts with a
+	  quote, make sure there's a matching close quote before treating it
+	  as a macro definition
+	- rl_translate_keyseq: if a key sequence ends with \C- or \M- (or
+	  \C-\M-) make sure we break out of the loop if moving to the character
+	  to be translated is a NUL. Old code did this only in the \C-\M-
+	  case. Report from Eduardo Bustamante <dualbus@gmail.com>
+
+				   4/28
+				   ----
+lib/glob/sm_loop.c
+	- GMATCH: implement a clever technique from glibc that avoids
+	  backtracking past a `*' if we've already chosen to use it and need
+	  matches beyond it.  Look at https://research.swtch.com/glob for a
+	  longer explanation. This results in a significant speedup for globs
+	  with multiple instances of `*', especially with more than 4.

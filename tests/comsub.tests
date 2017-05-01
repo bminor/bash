@@ -44,6 +44,12 @@ bar')
 # long-standing parse error in all versions up through bash-4.3
 echo ${foo:-$(echo a{b,c})} >/dev/null
 
+# parsing problem based on recursively calling bison parser through bash-4.4
+for (( INDEX=0; INDEX<$((10-$(expr length $V_NAME))); INDEX++ ))
+do
+	:
+done
+
 ${THIS_SH} ./comsub1.sub
 ${THIS_SH} ./comsub2.sub
 ${THIS_SH} ./comsub3.sub

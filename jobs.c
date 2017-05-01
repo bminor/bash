@@ -2963,8 +2963,21 @@ if (job == NO_JOB)
 		kill (getpid (), SIGINT);
 	    }
 	}
-      else if (interactive_shell == 0 && IS_FOREGROUND (job) && check_window_size)
-	get_new_window_size (0, (int *)0, (int *)0);
+      else if (interactive_shell == 0 && subshell_environment == 0 && IS_FOREGROUND (job))
+	{
+	  s = job_signal_status (job);
+
+	  /* XXX - bash-5.0 */
+	  /* If we are non-interactive, but job control is enabled, and the job
+	     died due to SIGINT, pretend we got the SIGINT */
+	  if (job_control && IS_JOBCONTROL (job) && WIFSIGNALED (s) && WTERMSIG (s) == SIGINT)
+	    {
+	      ADDINTERRUPT;	/* For now */
+	    }
+
+	  if (check_window_size)
+	    get_new_window_size (0, (int *)0, (int *)0);
+	}
 
       /* Moved here from set_job_status_and_cleanup, which is in the SIGCHLD
          signal handler path */
@@ -3669,7 +3682,8 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
     }
 
   /* Call a SIGCHLD trap handler for each child that exits, if one is set. */
-  if (job_control && children_exited &&
+  /* XXX - bash-5.0 adds posixly_correct test */
+  if ((job_control || posixly_correct) && children_exited &&
       (signal_is_trapped (SIGCHLD) || trap_list[SIGCHLD] == (char *)IMPOSSIBLE_TRAP_HANDLER) &&
       trap_list[SIGCHLD] != (char *)IGNORE_SIG)
     {
