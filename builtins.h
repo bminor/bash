@@ -18,6 +18,9 @@
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef BUILTINS_H
+#define BUILTINS_H
+
 #include "config.h"
 
 #if defined (HAVE_UNISTD_H)
@@ -60,3 +63,5 @@ extern int num_shell_builtins;	/* Number of shell builtins. */
 extern struct builtin static_shell_builtins[];
 extern struct builtin *shell_builtins;
 extern struct builtin *current_builtin;
+
+#endif /* BUILTINS_H */

@@ -2565,7 +2565,7 @@ parser_remaining_input ()
 {
   if (shell_input_line == 0)
     return 0;
-  if (shell_input_line_index < 0 || shell_input_line_index >= shell_input_line_len)
+  if ((int)shell_input_line_index < 0 || shell_input_line_index >= shell_input_line_len)
     return "";	/* XXX */
   return (shell_input_line + shell_input_line_index);
 }

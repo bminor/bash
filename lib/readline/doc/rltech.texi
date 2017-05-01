@@ -90,6 +90,12 @@ If @code{readline} encounters an @code{EOF} while reading the line, and the
 line is empty at that point, then @code{(char *)NULL} is returned.
 Otherwise, the line is ended just as if a newline had been typed.
 
+Readline performs some expansion on the @var{prompt} before it is
+displayed on the screen.  See the description of @code{rl_expand_prompt}
+(@pxref{Redisplay}) for additional details, especially if @var{prompt}
+will contain characters that do not consume physical screen space when
+displayed.
+
 If you want the user to be able to get at the line later, (with
 @key{C-p} for example), you must call @code{add_history()} to save the
 line away in a @dfn{history} list of such lines.

@@ -2545,7 +2545,7 @@ static void
 maybe_make_readline_line (new_line)
      char *new_line;
 {
-  if (strcmp (new_line, rl_line_buffer) != 0)
+  if (new_line && strcmp (new_line, rl_line_buffer) != 0)
     {
       rl_point = rl_end;
 

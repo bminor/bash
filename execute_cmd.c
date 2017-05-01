@@ -1090,6 +1090,8 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 #  endif
       set_pipestatus_from_exit (exec_result);
       break;
+    default:
+      break;
     }
 #endif
 
