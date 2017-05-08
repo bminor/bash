@@ -3682,8 +3682,8 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
     }
 
   /* Call a SIGCHLD trap handler for each child that exits, if one is set. */
-  /* XXX - bash-5.0 adds posixly_correct test */
-  if ((job_control || posixly_correct) && children_exited &&
+  /* XXX - bash-5.0 removes test for job_control */
+  if (children_exited &&
       (signal_is_trapped (SIGCHLD) || trap_list[SIGCHLD] == (char *)IMPOSSIBLE_TRAP_HANDLER) &&
       trap_list[SIGCHLD] != (char *)IGNORE_SIG)
     {

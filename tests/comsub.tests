@@ -45,7 +45,7 @@ bar')
 echo ${foo:-$(echo a{b,c})} >/dev/null
 
 # parsing problem based on recursively calling bison parser through bash-4.4
-for (( INDEX=0; INDEX<$((10-$(expr length $V_NAME))); INDEX++ ))
+for (( INDEX=0; INDEX<$((10-$(echo length $V_NAME))); INDEX++ ))
 do
 	:
 done

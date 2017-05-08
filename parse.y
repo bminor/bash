@@ -823,25 +823,25 @@ for_command:	FOR WORD newline_list DO compound_list DONE
 arith_for_command:	FOR ARITH_FOR_EXPRS list_terminator newline_list DO compound_list DONE
 				{
 				  $$ = make_arith_for_command ($2, $6, arith_for_lineno);
-				  /* if ($$ == 0) YYERROR; */
+				  if ($$ == 0) YYERROR;
 				  if (word_top > 0) word_top--;
 				}
 	|		FOR ARITH_FOR_EXPRS list_terminator newline_list '{' compound_list '}'
 				{
 				  $$ = make_arith_for_command ($2, $6, arith_for_lineno);
-				  /* if ($$ == 0) YYERROR; */
+				  if ($$ == 0) YYERROR;
 				  if (word_top > 0) word_top--;
 				}
 	|		FOR ARITH_FOR_EXPRS DO compound_list DONE
 				{
 				  $$ = make_arith_for_command ($2, $4, arith_for_lineno);
-				  /* if ($$ == 0) YYERROR; */
+				  if ($$ == 0) YYERROR;
 				  if (word_top > 0) word_top--;
 				}
 	|		FOR ARITH_FOR_EXPRS '{' compound_list '}'
 				{
 				  $$ = make_arith_for_command ($2, $4, arith_for_lineno);
-				  /* if ($$ == 0) YYERROR; */
+				  if ($$ == 0) YYERROR;
 				  if (word_top > 0) word_top--;
 				}
 	;
@@ -5217,6 +5217,11 @@ got_token:
 /*itrace("read_token_word: returning REDIR_WORD for %s", the_word->word);*/
 	  return (REDIR_WORD);
 	}
+      else
+        /* valid_array_reference can call the parser recursively; need to
+	   make sure that yylval.word doesn't change if we are going to
+	   return WORD or ASSIGNMENT_WORD */
+        yylval.word = the_word;
     }
 
   result = ((the_word->flags & (W_ASSIGNMENT|W_NOSPLIT)) == (W_ASSIGNMENT|W_NOSPLIT))

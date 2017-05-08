@@ -578,7 +578,7 @@ rl_get_previous_history (int count, int key)
   if (count < 0)
     return (rl_get_next_history (-count, key));
 
-  if (count == 0)
+  if (count == 0 || history_list () == 0)
     return 0;
 
   /* either not saved by rl_newline or at end of line, so set appropriately. */
@@ -608,7 +608,10 @@ rl_get_previous_history (int count, int key)
     temp = old_temp;
 
   if (temp == 0)
-    rl_ding ();
+    {
+      rl_maybe_unsave_line ();
+      rl_ding ();
+    }
   else
     {
       rl_replace_from_history (temp, 0);

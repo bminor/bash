@@ -627,7 +627,8 @@ read_builtin (list)
 	  pass_next = 0;
 	  if (c == '\n')
 	    {
-	      i--;		/* back up over the CTLESC */
+	      if (skip_ctlesc == 0 && i > 0)
+		i--;		/* back up over the CTLESC */
 	      if (interactive && input_is_tty && raw == 0)
 		print_ps2 = 1;
 	    }

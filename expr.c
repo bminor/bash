@@ -283,8 +283,13 @@ popexp ()
 {
   EXPR_CONTEXT *context;
 
-  if (expr_depth == 0)
-    evalerror (_("recursion stack underflow"));
+  if (expr_depth <= 0)
+    {
+      /* See the comment at the top of evalexp() for an explanation of why
+	 this is done. */
+      expression = lasttp = 0;
+      evalerror (_("recursion stack underflow"));
+    }
 
   context = expr_stack[--expr_depth];
 
@@ -307,7 +312,8 @@ expr_unwind ()
 
       free (expr_stack[expr_depth]);
     }
-  free (expr_stack[expr_depth]);	/* free the allocated EXPR_CONTEXT */
+  if (expr_depth == 0)
+    free (expr_stack[expr_depth]);	/* free the allocated EXPR_CONTEXT */
 
   noeval = 0;	/* XXX */
 }
@@ -396,6 +402,9 @@ evalexp (expr, flags, validp)
       tokstr = expression = (char *)NULL;
 
       expr_unwind ();
+
+      /* We copy in case we've called evalexp recursively */
+      FASTCOPY (oevalbuf, evalbuf, sizeof (evalbuf));
 
       if (validp)
 	*validp = 0;
@@ -1456,11 +1465,11 @@ evalerror (msg)
   char *name, *t;
 
   name = this_command_name;
-  for (t = expression; whitespace (*t); t++)
+  for (t = expression; t && whitespace (*t); t++)
     ;
   internal_error (_("%s%s%s: %s (error token is \"%s\")"),
-		   name ? name : "", name ? ": " : "", t,
-		   msg, (lasttp && *lasttp) ? lasttp : "");
+		   name ? name : "", name ? ": " : "",
+		   t ? t : "", msg, (lasttp && *lasttp) ? lasttp : "");
   sh_longjmp (evalbuf, 1);
 }
 

@@ -13767,3 +13767,76 @@ lib/glob/sm_loop.c
 	  matches beyond it.  Look at https://research.swtch.com/glob for a
 	  longer explanation. This results in a significant speedup for globs
 	  with multiple instances of `*', especially with more than 4.
+
+				    5/2
+				    ---
+lib/readline/bind.c
+	- rl_translate_keyseq: make sure a trailing backslash in the key
+	  sequence is preserved. Report from Eduardo Bustamante
+	  <dualbus@gmail.com>
+
+				    5/3
+				    ---
+builtins/builtin.def
+	- builtin_builtin: make sure to set  this_shell_builtin to the builtin
+	  command being executed, overwriting `builtin'. Leave
+	  last_shell_builtin alone.  Fixes bug reported by Luiz Angelo Daros
+	  de Luca <luizluca@gmail.com>
+
+jobs.c
+	- waitchld: modify change of 4/26 to run SIGCHLD traps even if job
+	  control is not enabled
+
+lib/readline/misc.c
+	- rl_get_previous_history: if we didn't find a previous history entry
+	  to use, call rl_maybe_unsave_line before returning because we
+	  aren't going to use the saved line, and it has the same undo list
+	  as rl_undo_list.  Fixes fuzzing bug reported by Eduardo Bustamante
+	  <dualbus@gmail.com>
+	- rl_get_{next,previous}_history: if there is no history list, don't
+	  bother doing anything
+
+				    5/4
+				    ---
+expr.c
+	- popexp: if we error out due to stack underflow, make sure to zero out
+	  expression and lasttp; they may contain undefined values we don't
+	  want evalerror to print
+	- expr_unwind: handle expr_depth decrementing below zero
+	- evalexp: restore the old value of evalbuf even if we error and
+	  longjmp; we may have called evalexp recursively
+	- evalerror: make sure expression is non-NULL before trying to print it.
+	  These fix fuzzing bug reported by Eduardo Bustamante
+	  <dualbus@gmail.com>, happens only in cases where we don't longjmp on
+	  a fatal expansion error
+
+				    5/5
+				    ---
+parse.y
+	- read_token_word: when checking for a word that's a target of a
+	  redirection, we can potentially call valid_array_reference, which
+	  can end up calling the parser recursively. If it does that, we
+	  need to make sure that yylval.word doesn't change, so we set it back
+	  to the_word. Fixes another fuzzing bug
+
+parse.y
+	- arith_for_command: make syntax errors in the arithmetic for command
+	  (signaled by make_arith_for_command returning NULL) more like
+	  language syntax errors by calling YYERROR. Avoids complicated
+	  attempts at error recovery and dealing with NULL returns from
+	  command productions. Pointed out by Eduardo Bustamante
+	  <dualbus@gmail.com>
+
+lib/readline/kill.c
+	- _rl_copy_to_kill_ring: make sure the current slot in the kill ring
+	  has something in it, even if the last command was a kill, before
+	  trying to modify it. Another fuzzing bug
+
+				    5/6
+				    ---
+builtins/read.def
+	- read_builtin: if we see a backslash when not in raw mode (not -r),
+	  only back up `i' when we read the next character if we know we added
+	  a CTLESC the last time through the loop (skip_ctlesc == 0),
+	  especially if i == 0. Another fuzzing bug from Eduardo Bustamante
+	  <dualbus@gmail.com>

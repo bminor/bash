@@ -441,7 +441,10 @@ rl_translate_keyseq (const char *seq, char *array, int *len)
 	  c = seq[++i];
 
 	  if (c == 0)
-	    break;
+	    {
+	      array[l++] = '\\';	/* preserve trailing backslash */
+	      break;
+	    }
 
 	  /* Handle \C- and \M- prefixes. */
 	  if ((c == 'C' || c == 'M') && seq[i + 1] == '-')
