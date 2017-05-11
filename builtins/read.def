@@ -381,7 +381,11 @@ read_builtin (list)
     sync_buffered_stream (default_buffered_input);
 #endif
 
+#if 1
   input_is_tty = isatty (fd);
+#else
+  input_is_tty = 1;
+#endif
   if (input_is_tty == 0)
 #ifndef __CYGWIN__
     input_is_pipe = (lseek (fd, 0L, SEEK_CUR) < 0) && (errno == ESPIPE);
@@ -606,7 +610,8 @@ read_builtin (list)
 #endif
 
       CHECK_ALRM;
-      if (i + 4 >= size)	/* XXX was i + 2; use i + 4 for multibyte/read_mbchar */
+      /* XXX -- use i + mb_cur_max (at least 4) for multibyte/read_mbchar */
+      if (i + (mb_cur_max > 4 ? mb_cur_max : 4) >= size)
 	{
 	  char *t;
 	  t = (char *)xrealloc (input_string, size += 128);
@@ -666,14 +671,28 @@ add_char:
       CHECK_ALRM;
 
 #if defined (HANDLE_MULTIBYTE)
-#  if 0
-      if (nchars > 0 && mb_cur_max > 1 && is_basic (c) == 0)
-#  else
+      /* XXX - what if C == 127? Can DEL introduce a multibyte sequence? */
       if (mb_cur_max > 1 && is_basic (c) == 0)
-#  endif
 	{
 	  input_string[i] = '\0';	/* for simplicity and debugging */
-	  i += read_mbchar (fd, input_string, i, c, unbuffered_read);
+	  /* If we got input from readline, grab the next multibyte char from
+	     rlbuf. */
+	  if (edit)
+	    {
+	      size_t clen;
+	      clen = mbrlen (rlbuf + rlind - 1, mb_cur_max, (mbstate_t *)NULL);
+	      /* We only deal with valid multibyte sequences longer than one
+		 byte. If we get anything else, we leave the one character
+		 copied and move on to the next. */
+	      if ((int)clen > 1)
+		{
+		  memcpy (input_string+i, rlbuf+rlind, clen-1);
+		  i += clen - 1;
+		  rlind += clen - 1;
+		}
+	    }
+	  else
+	    i += read_mbchar (fd, input_string, i, c, unbuffered_read);
 	}
 #endif
 
@@ -968,6 +987,7 @@ read_mbchar (fd, string, ind, ch, unbuffered)
       if (ret == (size_t)-2)
 	{
 	  ps = ps_back;
+
 	  /* We don't want to be interrupted during a multibyte char read */
 	  if (unbuffered == 2)
 	    r = zreadn (fd, &c, 1);
@@ -975,7 +995,7 @@ read_mbchar (fd, string, ind, ch, unbuffered)
 	    r = zread (fd, &c, 1);
 	  else
 	    r = zreadc (fd, &c);
-	  if (r < 0)
+	  if (r <= 0)
 	    goto mbchar_return;
 	  mbchar[i++] = c;	
 	  continue;

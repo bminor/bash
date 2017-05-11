@@ -13840,3 +13840,44 @@ builtins/read.def
 	  a CTLESC the last time through the loop (skip_ctlesc == 0),
 	  especially if i == 0. Another fuzzing bug from Eduardo Bustamante
 	  <dualbus@gmail.com>
+
+				    5/8
+				    ---
+builtins/read.def
+	- read_mbchar: handle zreadn/zreadc/zread returning EOF in the middle
+	  of an incomplete multibyte sequence.  Fixes another fuzzing bug
+	- read_builtin: use mb_cur_max instead of constant 4 when deciding
+	  whether the next character can exceed the number of bytes available
+	  in input_string
+
+lib/readline/input.c
+	- MinGW: include <conio.h> before <io.h>. Fix from Eli Zaretskii
+	  <eliz@gnu.org>
+
+builtins/read.def
+	- read_builtin: if we get input from readline, we need to get the
+	  remainder of a multibyte character from rlbuf instead of calling
+	  read_mbchar. Bug reported by Eduardo Bustamante <dualbus@gmail.com>
+
+				    5/9
+				    ---
+parse.y
+	- token_is_assignment: use the allocated buffer approach in all cases,
+	  not just if we're not using bash malloc. This avoids the assignment
+	  to t[i+1] writing beyond the end of the allocated token if
+	  i == token_buffer_size - 1. Another fuzzing bug
+	- xparse_dolparen: if parse_string returns < 0, we clear out the
+	  current shell_input_line before performing a longjmp, since we're
+	  abandoning parsing of this command.  This is consistent with how
+	  the parser resynchronizes after other syntax errors
+	- GRAMMAR: add 'error yacc_EOF' production to handle a syntax error
+	  that's immediately followed by an EOF after resynchronization.
+	  Fixes another fuzzing bug
+
+				   5/10
+				   ----
+lib/readline/text.c
+	- _rl_set_mark_at_pos: don't let the mark be set to a position < 0.
+	  Fixes a fuzzing bug
+	- rl_exchange_point_and_mark: don't do anything if the mark is already
+	  less than 0

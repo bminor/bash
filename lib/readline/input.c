@@ -102,6 +102,7 @@ static int rl_gather_tyi PARAMS((void));
 /* Windows isatty returns true for every character device, including the null
    device, so we need to perform additional checks. */
 #if defined (_WIN32) && !defined (__CYGWIN__)
+#include <conio.h>
 #include <io.h>
 #define WIN32_LEAN_AND_MEAN 1
 #include <windows.h>

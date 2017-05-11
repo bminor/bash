@@ -1699,7 +1699,7 @@ rl_backward_char_search (int count, int key)
 int
 _rl_set_mark_at_pos (int position)
 {
-  if (position > rl_end)
+  if (position < 0 || position > rl_end)
     return 1;
 
   rl_mark = position;
@@ -1720,9 +1720,10 @@ rl_exchange_point_and_mark (int count, int key)
   if (rl_mark > rl_end)
     rl_mark = -1;
 
-  if (rl_mark == -1)
+  if (rl_mark < 0)
     {
       rl_ding ();
+      rl_mark = 0;		/* like _RL_FIX_POINT */
       return 1;
     }
   else

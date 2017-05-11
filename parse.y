@@ -411,6 +411,14 @@ inputunit:	simple_list simple_list_terminator
 			      YYABORT;
 			    }
 			}
+	|	error yacc_EOF
+			{
+			  /* EOF after an error.  Do ignoreeof or not.  Really
+			     only interesting in non-interactive shells */
+			  global_command = (COMMAND *)NULL;
+			  handle_eof_input_unit ();
+			  YYACCEPT;
+			}
 	|	yacc_EOF
 			{
 			  /* Case of EOF seen by itself.  Do ignoreeof or
@@ -4313,9 +4321,13 @@ xparse_dolparen (base, string, indp, flags)
   token_to_read = 0;
 
   /* If parse_string returns < 0, we need to jump to top level with the
-     negative of the return value */
+     negative of the return value. We abandon the rest of this input line
+     first */
   if (nc < 0)
-    jump_to_top_level (-nc);	/* XXX */
+    {
+      clear_shell_input_line ();	/* XXX */
+      jump_to_top_level (-nc);	/* XXX */
+    }
 
   /* Need to find how many characters parse_and_execute consumed, update
      *indp, if flags != 0, copy the portion of the string parsed into RET
@@ -4714,37 +4726,27 @@ parse_cond_command ()
 
 #if defined (ARRAY_VARS)
 /* When this is called, it's guaranteed that we don't care about anything
-   in t beyond i.  We do save and restore the chars, though. */
+   in t beyond i.  We use a buffer with room for the characters we add just
+   in case assignment() ends up doing something like parsing a command
+   substitution that will reallocate atoken.  We don't want to write beyond
+   the end of an allocated buffer. */
 static int
 token_is_assignment (t, i)
      char *t;
      int i;
 {
   int r;
+  char *atoken;
 
-#if !defined (USING_BASH_MALLOC)
-  static char *token = 0;
+  atoken = xmalloc (i + 3);
+  memcpy (atoken, t, i);
+  atoken[i] = '=';
+  atoken[i+1] = '\0';
 
-  token = xrealloc (token, i + 3);
-  memcpy (token, t, i);
-  token[i] = '=';
-  token[i+1] = '\0';
+  r = assignment (atoken, (parser_state & PST_COMPASSIGN) != 0);
 
-  r = assignment (token, (parser_state & PST_COMPASSIGN) != 0);
+  free (atoken);
 
-  if (i + 3 > 4096)	/* keep it from getting too big */
-    {
-      free (token);
-      token = 0;
-    }
-#else
-  unsigned char c, c1;
-
-  c = t[i]; c1 = t[i+1];
-  t[i] = '='; t[i+1] = '\0';
-  r = assignment (t, (parser_state & PST_COMPASSIGN) != 0);
-  t[i] = c; t[i+1] = c1;
-#endif
   /* XXX - check that r == i to avoid returning false positive for
      t containing `=' before t[i]. */
   return (r > 0 && r == i);
