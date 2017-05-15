@@ -466,7 +466,7 @@ expand_prompt (char *pmt, int flags, int *lp, int *lip, int *niflp, int *vlp)
 		{
 #if defined (HANDLE_MULTIBYTE)
 		  if (mb_cur_max > 1 && rl_byte_oriented == 0)
-		    new = _rl_find_prev_mbchar (r, r - ret, MB_FIND_ANY);
+		    new = _rl_find_prev_mbchar (ret, r - ret, MB_FIND_ANY);
 		  else
 #endif
 		    new = r - ret - (physchars - bound);	/* XXX */

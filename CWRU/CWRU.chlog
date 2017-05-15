@@ -13881,3 +13881,27 @@ lib/readline/text.c
 	  Fixes a fuzzing bug
 	- rl_exchange_point_and_mark: don't do anything if the mark is already
 	  less than 0
+
+				   5/12
+				   ----
+lib/readline/rlmbutil.h
+	- wchar_t: make sure this is defined as int if multibyte characters
+	  aren't supported
+
+lib/readline/text.c
+	- _rl_change_case: don't force use of ascii toupper and tolower if
+	  isascii returns true; it's not defined to work on characters outside
+	  the 0..255 (really 0..127) range.  Bug reported by
+	  Eduardo Bustamante <dualbus@gmail.com>
+
+				   5/14
+				   ----
+lib/readline/text.c
+	- rl_change_case: handle case where the old and new characters (after
+	  the case change) are not the same number of bytes. Pointed out in
+	  http://lists.gnu.org/archive/html/bug-bash/2015-01/msg00091.html
+
+lib/readline/display.c
+	- expand_prompt: use `ret' as first parameter to _rl_find_prev_mbchar
+	  since that needs the base of the array. Bug from fuzzing reported by
+	  Eduardo Bustamante <dualbus@gmail.com>

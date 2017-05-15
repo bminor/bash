@@ -200,6 +200,10 @@ _rl_wcwidth (wc)
 
 #define UTF8_SINGLEBYTE(c)	(1)
 
+#if !defined (HAVE_WCHAR_T) && !defined (wchar_t)
+#  define wchar_t int
+#endif
+
 #endif /* !HANDLE_MULTIBYTE */
 
 extern int rl_byte_oriented;

@@ -1327,7 +1327,8 @@ static int
 rl_change_case (int count, int op)
 {
   int start, next, end;
-  int inword, c, nc, nop;
+  int inword, nc, nop;
+  wchar_t c;
 #if defined (HANDLE_MULTIBYTE)
   wchar_t wc, nwc;
   char mb[MB_LEN_MAX+1];
@@ -1377,7 +1378,10 @@ rl_change_case (int count, int op)
 	}
       else
 	nop = op;
-      if (MB_CUR_MAX == 1 || rl_byte_oriented || isascii ((unsigned char)c))
+      /* Can't check isascii here; some languages (e.g, Turkish) have
+	 multibyte upper and lower case equivalents of single-byte ascii
+	 characters */
+      if (MB_CUR_MAX == 1 || rl_byte_oriented)
 	{
 	  nc = (nop == UpCase) ? _rl_to_upper (c) : _rl_to_lower (c);
 	  rl_line_buffer[start] = nc;
@@ -1393,11 +1397,35 @@ rl_change_case (int count, int op)
 	  nwc = (nop == UpCase) ? _rl_to_wupper (wc) : _rl_to_wlower (wc);
 	  if  (nwc != wc)	/*  just skip unchanged characters */
 	    {
+	      char *s, *e;
 	      mlen = wcrtomb (mb, nwc, &mps);
 	      if (mlen > 0)
 		mb[mlen] = '\0';
-	      /* Assume the same width */
-	      strncpy (rl_line_buffer + start, mb, mlen);
+	      /* what to do if m != mlen? adjust below */
+	      /* m == length of old char, mlen == length of new char */
+	      s = rl_line_buffer + start;
+	      e = rl_line_buffer + rl_end;
+	      if (m == mlen)
+		memcpy (s, mb, mlen);
+	      else if (m > mlen)
+		{
+		  memcpy (s, mb, mlen);
+		  memmove (s + mlen, s + m, (e - s) - m);
+		  next -= m - mlen;	/* next char changes */
+		  end -= m - mlen;	/* end of word changes */
+		  rl_end -= m - mlen;	/* end of line changes */
+		  rl_line_buffer[rl_end] = 0;
+		}
+	      else if (m < mlen)
+		{
+		  rl_extend_line_buffer (mlen - m + 1);
+		  memmove (s + mlen, s + m, (e - s) - m);
+		  memcpy (s, mb, mlen);
+		  next += mlen - m;	/* next char changes */
+		  end += mlen - m;	/* end of word changes */
+		  rl_end += mlen - m;	/* end of line changes */
+		  rl_line_buffer[rl_end] = 0;
+		}
 	    }
 	}
 #endif
