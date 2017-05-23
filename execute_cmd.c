@@ -2974,11 +2974,12 @@ execute_arith_for_command (arith_for_command)
      line_number before executing each expression -- for $LINENO
      and the DEBUG trap. */
   line_number = arith_lineno = arith_for_command->line;
-  if (variable_context && interactive_shell)
+  if (variable_context && interactive_shell && sourcelevel == 0)
     {
-      line_number -= function_line_number;
-      if (line_number < 0)
-	line_number = 0;
+      /* line numbers in a function start at 1 */
+      line_number -= function_line_number - 1;
+      if (line_number <= 0)
+	line_number = 1;
     }
 
   /* Evaluate the initialization expression. */
@@ -3632,11 +3633,12 @@ execute_arith_command (arith_command)
   this_command_name = "((";	/* )) */
   line_number_for_err_trap = line_number = arith_command->line;
   /* If we're in a function, update the line number information. */
-  if (variable_context && interactive_shell)
+  if (variable_context && interactive_shell && sourcelevel == 0)
     {
-      line_number -= function_line_number;
-      if (line_number < 0)
-	line_number = 0;
+      /* line numbers in a function start at 1 */
+      line_number -= function_line_number - 1;
+      if (line_number <= 0)
+	line_number = 1;
     }      
 
   command_string_index = 0;
@@ -3833,11 +3835,12 @@ execute_cond_command (cond_command)
   this_command_name = "[[";
   line_number_for_err_trap = line_number = cond_command->line;
   /* If we're in a function, update the line number information. */
-  if (variable_context && interactive_shell)
+  if (variable_context && interactive_shell && sourcelevel == 0)
     {
-      line_number -= function_line_number;
-      if (line_number < 0)
-	line_number = 0;
+      /* line numbers in a function start at 1 */
+      line_number -= function_line_number - 1;
+      if (line_number <= 0)
+	line_number = 1;
     }
   command_string_index = 0;
   print_cond_command (cond_command);
@@ -4087,9 +4090,10 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
   /* If we're in a function, update the line number information. */
   if (variable_context && interactive_shell && sourcelevel == 0)
     {
-      line_number -= function_line_number;
-      if (line_number < 0)
-	line_number = 0;
+      /* line numbers in a function start at 1 */
+      line_number -= function_line_number - 1;
+      if (line_number <= 0)
+	line_number = 1;
     }
 
   /* Remember what this command line looks like at invocation. */

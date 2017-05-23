@@ -501,6 +501,9 @@ expassign ()
 	  lvalue = value;
 	}
 
+      if (tokstr == 0)
+	evalerror (_("syntax error in variable assignment"));
+
       /* XXX - watch out for pointer aliasing issues here */
       lhs = savestring (tokstr);
       /* save ind in case rhs is string var and evaluation overwrites it */

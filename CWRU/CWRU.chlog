@@ -1,4 +1,4 @@
-				 2/14/2011
+'				 2/14/2011
 				 ---------
 [bash-4.2 released]
 
@@ -13905,3 +13905,45 @@ lib/readline/display.c
 	- expand_prompt: use `ret' as first parameter to _rl_find_prev_mbchar
 	  since that needs the base of the array. Bug from fuzzing reported by
 	  Eduardo Bustamante <dualbus@gmail.com>
+
+				   5/15
+				   ----
+execute_cmd.c
+	- execute_simple_command, execute_arith_command, execute_cond_command,
+	  execute_arith_for_command: adjust the line number when executing a
+	  function interactively so that the first command in the function is
+	  line 1, not line 0, as Posix requires.  Reported by Robert Elz
+	  <kre@bmunnari.OZ.AU>
+	- execute_simple_command, execute_arith_command, execute_cond_command,
+	  execute_arith_for_command: ony adjust the line number when executing
+	  a function interactively if we are not sourcing a file
+	  (sourcelevel == 0), so this is consistent everywhere we adjust the
+	  line number
+
+				   5/16
+				   ----
+bashline.c
+	- bash_directory_completion_hook: when calling split_at_delims to see
+	  whether a ${ or $( is closed, use the right value for `start' relative
+	  to the substring beginning at `$'.  Bug from fuzzing reported by
+	  Eduardo Bustamante <dualbus@gmail.com>
+
+expr.c
+	- expassign: if the call to expcond generates a syntax error in a
+	  context when the shell won't longjmp (like when evaluating $PS1),
+	  it will end up NULL and we need to catch it before calling strlen.
+	  Bug from fuzzing reported by Eduardo Bustamante <dualbus@gmail.com>
+
+examples/bash-completion/
+	- new place to include a current or recent version of the
+	  bash-completion package
+
+				   5/19
+				   ----
+lib/readline/display.c
+	- CHECK_INV_LBREAKS: new versions for multibyte and single-byte chars,
+	  so the multibyte version can check and increase the size of
+	  line_state_invisible->wbsize and line_state_invisible->wrapped_line,
+	  callers who call CHECK_INV_LBREAKS must update
+	  wrapped_line[newlines] when in HANDLE_MULTIBYTE mode. Fuzzing bug
+	  reported by Eduardo Bustamante <dualbus@gmail.com>

@@ -764,6 +764,21 @@ rl_redisplay (void)
       wrap_offset = prompt_invis_chars_first_line = 0;
     }
 
+#if defined (HANDLE_MULTIBYTE)
+#define CHECK_INV_LBREAKS() \
+      do { \
+	if (newlines >= (inv_lbsize - 2)) \
+	  { \
+	    inv_lbsize *= 2; \
+	    inv_lbreaks = (int *)xrealloc (inv_lbreaks, inv_lbsize * sizeof (int)); \
+	  } \
+	if (newlines >= (line_state_invisible->wbsize - 2)) \
+	  { \
+	    line_state_invisible->wbsize *= 2; \
+	    line_state_invisible->wrapped_line = (int *)xrealloc (line_state_invisible->wrapped_line, line_state_invisible->wbsize * sizeof(int)); \
+	  } \
+      } while (0)
+#else
 #define CHECK_INV_LBREAKS() \
       do { \
 	if (newlines >= (inv_lbsize - 2)) \
@@ -772,6 +787,7 @@ rl_redisplay (void)
 	    inv_lbreaks = (int *)xrealloc (inv_lbreaks, inv_lbsize * sizeof (int)); \
 	  } \
       } while (0)
+#endif /* !HANDLE_MULTIBYTE */
 
 #if defined (HANDLE_MULTIBYTE)	  
 #define CHECK_LPOS() \
@@ -785,7 +801,7 @@ rl_redisplay (void)
 		inv_lbreaks = (int *)xrealloc (inv_lbreaks, inv_lbsize * sizeof (int)); \
 	      } \
 	    inv_lbreaks[++newlines] = out; \
-	    if (newlines >= (line_state_invisible->wbsize - 1)) \
+	    if (newlines >= (line_state_invisible->wbsize - 2)) \
 	      { \
 		line_state_invisible->wbsize *= 2; \
 		line_state_invisible->wrapped_line = (int *)xrealloc (line_state_invisible->wrapped_line, line_state_invisible->wbsize * sizeof(int)); \
@@ -935,6 +951,9 @@ rl_redisplay (void)
 		  temp = _rl_screenwidth - lpos;
 		  CHECK_INV_LBREAKS ();
 		  inv_lbreaks[++newlines] = out + temp;
+#if defined (HANDLE_MULTIBYTE)
+		  line_state_invisible->wrapped_line[newlines] = _rl_wrapped_multicolumn;
+#endif
 		  lpos = 4 - temp;
 		}
 	      else
@@ -965,6 +984,9 @@ rl_redisplay (void)
 	      temp2 = _rl_screenwidth - lpos;
 	      CHECK_INV_LBREAKS ();
 	      inv_lbreaks[++newlines] = out + temp2;
+#if defined (HANDLE_MULTIBYTE)
+	      line_state_invisible->wrapped_line[newlines] = _rl_wrapped_multicolumn;
+#endif
 	      lpos = temp - temp2;
 	      while (out < newout)
 		line[out++] = ' ';
@@ -982,6 +1004,9 @@ rl_redisplay (void)
 	  line[out++] = '\0';	/* XXX - sentinel */
 	  CHECK_INV_LBREAKS ();
 	  inv_lbreaks[++newlines] = out;
+#if defined (HANDLE_MULTIBYTE)
+	  line_state_invisible->wrapped_line[newlines] = _rl_wrapped_multicolumn;
+#endif
 	  lpos = 0;
 	}
       else if (CTRL_CHAR (c) || c == RUBOUT)
@@ -1056,6 +1081,10 @@ rl_redisplay (void)
   inv_botlin = lb_botlin = _rl_inv_botlin = newlines;
   CHECK_INV_LBREAKS ();
   inv_lbreaks[newlines+1] = out;
+#if defined (HANDLE_MULTIBYTE)
+  /* This should be 0 anyway */
+  line_state_invisible->wrapped_line[newlines+1] = _rl_wrapped_multicolumn;
+#endif
   cursor_linenum = lb_linenum;
 
   /* CPOS_BUFFER_POSITION == position in buffer where cursor should be placed.
