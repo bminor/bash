@@ -273,7 +273,7 @@ extern SHELL_VAR *find_tempenv_variable __P((const char *));
 extern SHELL_VAR *find_variable_no_invisible __P((const char *));
 extern SHELL_VAR *find_variable_for_assignment __P((const char *));
 extern SHELL_VAR *copy_variable __P((SHELL_VAR *));
-extern SHELL_VAR *make_local_variable __P((const char *));
+extern SHELL_VAR *make_local_variable __P((const char *, int));
 extern SHELL_VAR *bind_variable __P((const char *, char *, int));
 extern SHELL_VAR *bind_global_variable __P((const char *, char *, int));
 extern SHELL_VAR *bind_function __P((const char *, COMMAND *));

@@ -311,7 +311,7 @@ declare_internal (list, local_var)
 
       if (local_var && variable_context && STREQ (name, "-"))
 	{
-	  var = make_local_variable ("-");
+	  var = make_local_variable ("-", 0);
 	  FREE (value_cell (var));		/* just in case */
 	  value = get_current_options ();
 	  var_setvalue (var, value);
@@ -433,18 +433,18 @@ restart_new_var_name:
 	      if (refvar && refvar->context != variable_context)
 		{
 		  refvar = 0;
-		  var = make_local_variable (name);
+		  var = make_local_variable (name, 0);
 		}
 	      else if (refvar && refvar->context == variable_context)
 		var = refvar;
 	      /* Maybe we just want to create a new local variable */
 	      else if (var == 0 || var->context != variable_context)
-		var = make_local_variable (name);
+		var = make_local_variable (name, 0);
 	      /* otherwise we have a var at the right context */
 	    }
 	  else
 	    /* XXX - check name for validity here with valid_nameref_value */
-	    var = make_local_variable (name);	/* sets att_invisible for new vars */
+	    var = make_local_variable (name, 0);	/* sets att_invisible for new vars */
 	  if (var == 0)
 	    {
 	      any_failed++;

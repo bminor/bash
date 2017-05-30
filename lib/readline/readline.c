@@ -1067,7 +1067,7 @@ _rl_subseq_result (int r, Keymap map, int key, int got_subseq)
       _rl_dispatching_keymap = map;
       return -2;
     }
-  else if (r && got_subseq)
+  else if (r < 0 && got_subseq)		/* XXX */
     {
       /* OK, back up the chain. */
       if (RL_ISSTATE (RL_STATE_MACROINPUT))

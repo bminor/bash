@@ -283,6 +283,16 @@ read_history_range (const char *filename, int from, int to)
   if ((file < 0) || (fstat (file, &finfo) == -1))
     goto error_and_exit;
 
+  if (S_ISREG (finfo.st_mode) == 0)
+    {
+#ifdef EFTYPE
+      errno = EFTYPE;
+#else
+      errno = EINVAL;
+#endif
+      goto error_and_exit;
+    }
+
   file_size = (size_t)finfo.st_size;
 
   /* check for overflow on very large files */

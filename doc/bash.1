@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue Apr 25 09:44:48 EDT 2017
+.\"	Last Change: Thu May 25 15:58:43 EDT 2017
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2017 April 25" "GNU Bash 4.4"
+.TH BASH 1 "2017 May 25" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -9973,6 +9973,11 @@ If set, and the
 .B cmdhist
 option is enabled, multi-line commands are saved to the history with
 embedded newlines rather than using semicolon separators where possible.
+.TP 8
+.B localvar_inherit
+If set, local variables inherit the value and attributes of a variable of
+the same name that exists at a previous scope before any new value is
+assigned.  The nameref attribute is not inherited.
 .TP 8
 .B login_shell
 The shell sets this option if it is started as a login shell (see

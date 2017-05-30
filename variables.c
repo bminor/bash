@@ -120,6 +120,10 @@ HASH_TABLE *shell_function_defs = (HASH_TABLE *)NULL;
    executing functions we are. */
 int variable_context = 0;
 
+/* If non-zero, local variables inherit values and attributes from a variable
+   with the same name at a previous scope. */
+int localvar_inherit = 1;
+
 /* The set of shell assignments which are made only in the environment
    for a single command. */
 HASH_TABLE *temporary_env = (HASH_TABLE *)NULL;
@@ -2421,13 +2425,14 @@ set_if_not (name, value)
 
 /* Create a local variable referenced by NAME. */
 SHELL_VAR *
-make_local_variable (name)
+make_local_variable (name, flags)
      const char *name;
+     int flags;
 {
   SHELL_VAR *new_var, *old_var, *old_ref;
   VAR_CONTEXT *vc;
   int was_tmpvar;
-  char *tmp_value;
+  char *old_value;
 
   /* We don't want to follow the nameref chain when making local variables; we
      just want to create them. */
@@ -2463,8 +2468,10 @@ make_local_variable (name)
       VUNSETATTR (old_var, att_invisible);	/* XXX */
       return (old_var);
     }
-  if (was_tmpvar)
-    tmp_value = value_cell (old_var);
+
+  /* If we want to change to "inherit the old variable's value" semantics,
+     here is where to save the old value. */
+  old_value = was_tmpvar ? value_cell (old_var) : (char *)NULL;
 
   for (vc = shell_variables; vc; vc = vc->down)
     if (vc_isfuncenv (vc) && vc->scope == variable_context)
@@ -2510,10 +2517,36 @@ make_local_variable (name)
 	 things like `x=4 local x'. XXX - see above for temporary env
 	 variables with the same context level as variable_context */
       /* XXX - we should only do this if the variable is not an array. */
+      /* If we want to change the local variable semantics to "inherit
+	 the old variable's value" here is where to set it.  And we would
+	 need to use copy_variable (currently unused) to do it for all
+	 possible variable values. */
       if (was_tmpvar)
-	var_setvalue (new_var, savestring (tmp_value));
+	var_setvalue (new_var, savestring (old_value));
+      else if (localvar_inherit)
+	{
+	  /* This may not make sense for nameref variables that are shadowing
+	     variables with the same name, but we don't know that yet. */
+	  if (assoc_p (old_var))
+	    var_setassoc (new_var, assoc_copy (assoc_cell (old_var)));
+	  else if (array_p (old_var))
+	    var_setarray (new_var, array_copy (array_cell (old_var)));
+	  else if (value_cell (old_var))
+	    var_setvalue (new_var, savestring (value_cell (old_var)));
+	  else
+	    var_setvalue (new_var, (char *)NULL);
+	}
 
-      new_var->attributes = exported_p (old_var) ? att_exported : 0;
+      if (localvar_inherit)
+	{
+	  /* It doesn't make sense to inherit the nameref attribute */
+	  new_var->attributes = old_var->attributes & ~att_nameref;
+	  new_var->dynamic_value = old_var->dynamic_value;
+	  new_var->assign_func = old_var->assign_func;
+	}
+      else
+	/* We inherit the export attribute, but no others. */
+	new_var->attributes = exported_p (old_var) ? att_exported : 0;
     }
 
   vc->flags |= VC_HASLOCAL;
@@ -2524,7 +2557,9 @@ make_local_variable (name)
   if (ifsname (name))
     setifs (new_var);
 
-  if (was_tmpvar == 0 && no_invisible_vars == 0)
+  /* value_cell will be 0 if localvar_inherit == 0 or there was no old variable
+     with the same name or the old variable was invisible */
+  if (was_tmpvar == 0 && no_invisible_vars == 0 && value_cell (new_var) == 0)
     VSETATTR (new_var, att_invisible);	/* XXX */
   return (new_var);
 }
@@ -2601,7 +2636,7 @@ make_local_array_variable (name, assoc_ok)
   SHELL_VAR *var;
   ARRAY *array;
 
-  var = make_local_variable (name);
+  var = make_local_variable (name, 0);	/* XXX for now */
   if (var == 0 || array_p (var) || (assoc_ok && assoc_p (var)))
     return var;
 
@@ -2635,7 +2670,7 @@ make_local_assoc_variable (name)
   SHELL_VAR *var;
   HASH_TABLE *hash;
 
-  var = make_local_variable (name);
+  var = make_local_variable (name, 0);	/* XXX for now */
   if (var == 0 || assoc_p (var))
     return var;
 

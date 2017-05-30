@@ -267,6 +267,9 @@ _rl_nsearch_abort (_rl_search_cxt *cxt)
 static int
 _rl_nsearch_dispatch (_rl_search_cxt *cxt, int c)
 {
+  if (c < 0)
+    c = CTRL ('C');  
+
   switch (c)
     {
     case CTRL('W'):
@@ -374,6 +377,12 @@ noninc_search (int dir, int pchar)
     {
       c = _rl_search_getchar (cxt);
 
+      if (c < 0)
+	{
+	  _rl_nsearch_abort (cxt);
+	  return 1;
+	}
+	  
       if (c == 0)
 	break;
 
@@ -455,6 +464,12 @@ _rl_nsearch_callback (_rl_search_cxt *cxt)
   int c, r;
 
   c = _rl_search_getchar (cxt);
+  if (c <= 0)
+    {
+      if (c < 0)
+        _rl_nsearch_abort (cxt);
+      return 1;
+    }
   r = _rl_nsearch_dispatch (cxt, c);
   if (r != 0)
     return 1;

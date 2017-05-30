@@ -13947,3 +13947,40 @@ lib/readline/display.c
 	  callers who call CHECK_INV_LBREAKS must update
 	  wrapped_line[newlines] when in HANDLE_MULTIBYTE mode. Fuzzing bug
 	  reported by Eduardo Bustamante <dualbus@gmail.com>
+
+				   5/24
+				   ----
+lib/readline/search.c
+	- _rl_nsearch_callback,noninc_search: handle _rl_search_getchar
+	  returning -1 (EOF or read error) by aborting the search.
+	  Fuzzing bug reported by Eduardo Bustamante <dualbus@gmail.com>
+
+				   5/25
+				   ----
+variables.c
+	- localvar_inherit: new variable, controlled by shopt localvar_inherit
+	  option
+	- make_local_variable: if localvar_inherit is set, the new local
+	  variable inherits a previous scope's variable's value, attributes
+	  (except nameref), and dynamic variable information. If a local
+	  variable inherits a value, the local is not invisible
+
+builtins/shopt.def
+	- localvar_inherit: new option
+
+doc/{bash.1,bashref.texi}
+	- localvar_inherit: document new shopt option
+
+				   5/29
+				   ----
+lib/readline/readline.c
+	- _rl_subseq_result: only return -1 and back up the chain if we are
+	  dealing with a result (r) that's already < 0 and we are at the end
+	  of a multi-key sequence. Otherwise, a failing readline command (e.g.,
+	  delete-char at the end of a line) could cause this code to be
+	  executed.  Report from Nuzhna Pomoshch <nuzhna_pomoshch@yahoo.com>
+
+lib/readline/histfile.c
+	- read_history_range: if the file isn't a regular file, return an
+	  error. Bug report from Eduardo Bustamante <dualbus@gmail.com>,
+	  relaying from IRC
