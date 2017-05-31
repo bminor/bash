@@ -122,7 +122,7 @@ int variable_context = 0;
 
 /* If non-zero, local variables inherit values and attributes from a variable
    with the same name at a previous scope. */
-int localvar_inherit = 1;
+int localvar_inherit = 0;
 
 /* The set of shell assignments which are made only in the environment
    for a single command. */
@@ -854,8 +854,13 @@ set_pwd ()
       current_dir = sh_canonpath (temp_string, PATH_CHECKDOTDOT|PATH_CHECKEXISTS);
       if (current_dir == 0)
 	current_dir = get_working_directory ("shell_init");
-      else 
+      else
 	set_working_directory (current_dir);
+      if (posixly_correct && current_dir)
+	{
+	  temp_var = bind_variable ("PWD", current_dir, 0);
+	  set_auto_export (temp_var);
+	}  
       free (current_dir);
     }
   else if (home_string && interactive_shell && login_shell &&

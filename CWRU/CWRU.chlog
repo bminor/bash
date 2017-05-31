@@ -13984,3 +13984,19 @@ lib/readline/histfile.c
 	- read_history_range: if the file isn't a regular file, return an
 	  error. Bug report from Eduardo Bustamante <dualbus@gmail.com>,
 	  relaying from IRC
+
+				   5/30
+				   ----
+variables.c
+	- set_pwd: if in Posix mode, and PWD appears in initial environment as
+	  an absolute pathname to the current directory, set PWD to the result
+	  of canonicalizing the environment value, or to the physical path if
+	  canonicalization fails. From a suggestion by Eduardo Bustamante
+	  <dualbus@gmail.com>
+
+				   5/31
+				   ----
+builtins/read.def
+	- read_builtin: if -n or -N option is supplied with a 0 argument,
+	  don't attempt to read any characters; bail out right away. Reported
+	  by Eduardo Bustamante <dualbus@gmail.com>, relaying from IRC

@@ -176,7 +176,7 @@ read_builtin (list)
      WORD_LIST *list;
 {
   register char *varname;
-  int size, nr, pass_next, saw_escape, eof, opt, retval, code, print_ps2;
+  int size, nr, pass_next, saw_escape, eof, opt, retval, code, print_ps2, nflag;
   volatile int i;
   int input_is_tty, input_is_pipe, unbuffered_read, skip_ctlesc, skip_ctlnul;
   int raw, edit, nchars, silent, have_timeout, ignore_delim, fd, lastsig, t_errno;
@@ -239,7 +239,7 @@ read_builtin (list)
   tmsec = tmusec = 0;		/* no timeout */
   nr = nchars = input_is_tty = input_is_pipe = unbuffered_read = have_timeout = 0;
   delim = '\n';		/* read until newline */
-  ignore_delim = 0;
+  ignore_delim = nflag = 0;
 
   reset_internal_getopt ();
   while ((opt = internal_getopt (list, "ersa:d:i:n:p:t:u:N:")) != -1)
@@ -288,6 +288,7 @@ read_builtin (list)
 	  ignore_delim = 1;
 	  delim = -1;
 	case 'n':
+	  nflag = 1;
 	  code = legal_number (list_optarg, &intval);
 	  if (code == 0 || intval < 0 || intval != (int)intval)
 	    {
@@ -360,6 +361,10 @@ read_builtin (list)
 
   input_string = (char *)xmalloc (size = 112);	/* XXX was 128 */
   input_string[0] = '\0';
+
+  /* More input and options validation */
+  if (nflag == 1 && nchars == 0)
+    goto assign_vars;		/* bail early if asked to read 0 chars */
 
   /* $TMOUT, if set, is the default timeout for read. */
   if (have_timeout == 0 && (e = get_string_value ("TMOUT")))
