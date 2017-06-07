@@ -14000,3 +14000,23 @@ builtins/read.def
 	- read_builtin: if -n or -N option is supplied with a 0 argument,
 	  don't attempt to read any characters; bail out right away. Reported
 	  by Eduardo Bustamante <dualbus@gmail.com>, relaying from IRC
+
+				    6/3
+				    ---
+config.h.in
+	- HAVE_STRUCT_STAT_ST_ATIM_TV_NSEC: add define, used by stat-time.h
+	  to construct a timespec from struct stat. Report and fix from
+	  Siteshwar Vashisht <svashisht@redhat.com>
+
+variables.h
+	- att_regenerate: new internal variable attribute: if set, regenerate
+	  dynamic variable's value when it's exported and we are creating the
+	  export environment
+
+variables.c
+	- init_dynamic_variables: LINENO, EPOCHSECONDS, EPOCHREALTIME: set
+	  internal regenerate attribute for these dynamic variables
+	- make_env_array_from_var_list: if a dynamic variable has the
+	  regenerate attribute set, call the dynamic value function to generate
+	  an updated value before placing it in the environment.  From a report
+	  about exporting LINENO from by Robert Elz <kre@bmunnari.OZ.AU>

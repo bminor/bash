@@ -1825,13 +1825,15 @@ initialize_dynamic_variables ()
   INIT_DYNAMIC_VAR ("RANDOM", (char *)NULL, get_random, assign_random);
   VSETATTR (v, att_integer);
   INIT_DYNAMIC_VAR ("LINENO", (char *)NULL, get_lineno, assign_lineno);
-  VSETATTR (v, att_integer);
+  VSETATTR (v, att_integer|att_regenerate);
 
   INIT_DYNAMIC_VAR ("BASHPID", (char *)NULL, get_bashpid, null_assign);
   VSETATTR (v, att_integer);
 
   INIT_DYNAMIC_VAR ("EPOCHSECONDS", (char *)NULL, get_epochseconds, null_assign);
+  VSETATTR (v, att_regenerate);
   INIT_DYNAMIC_VAR ("EPOCHREALTIME", (char *)NULL, get_epochrealtime, null_assign);
+  VSETATTR (v, att_regenerate);
 
 #if defined (HISTORY)
   INIT_DYNAMIC_VAR ("HISTCMD", (char *)NULL, get_histcmd, (sh_var_assign_func_t *)NULL);
@@ -4449,6 +4451,14 @@ make_env_array_from_var_list (vars)
       /* We don't use the exportstr stuff on Cygwin at all. */
       INVALIDATE_EXPORTSTR (var);
 #endif
+
+      /* If the value is generated dynamically, generate it here. */
+      if (regen_p (var) && var->dynamic_value)
+	{
+	  var = (*(var->dynamic_value)) (var);
+	  INVALIDATE_EXPORTSTR (var);
+	}
+
       if (var->exportstr)
 	value = var->exportstr;
       else if (function_p (var))

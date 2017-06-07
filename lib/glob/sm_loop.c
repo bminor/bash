@@ -384,7 +384,7 @@ BRACKMATCH (p, test, flags)
 {
   register CHAR cstart, cend, c;
   register int not;    /* Nonzero if the sense of the character class is inverted.  */
-  int brcnt, forcecoll;
+  int brcnt, brchr, forcecoll;
   INT pc;
   CHAR *savep;
   U_CHAR orig_test;
@@ -460,7 +460,7 @@ BRACKMATCH (p, test, flags)
 	      if (pc == -1)
 		pc = 0;
 	      else
-		p = close + 2;
+		p = close + 2;		/* move past the closing `]' */
 
 	      free (ccname);
 	    }
@@ -577,16 +577,26 @@ matched:
   /* Skip the rest of the [...] that already matched.  */
   c = *--p;
   brcnt = 1;
+  brchr = 0;
   while (brcnt > 0)
     {
+      int oc;
+
       /* A `[' without a matching `]' is just another character to match. */
       if (c == L('\0'))
 	return ((test == L('[')) ? savep : (CHAR *)0);
 
+      oc = c;
       c = *p++;
       if (c == L('[') && (*p == L('=') || *p == L(':') || *p == L('.')))
-	brcnt++;
-      else if (c == L(']'))
+	{
+	  brcnt++;
+	  brchr = *p;
+	}
+      /* we only want to check brchr if we set it above */
+      else if (c == L(']') && brcnt > 1 && brchr != 0 && oc == brchr)
+	brcnt--;
+      else if (c == L(']') && brcnt == 1)
 	brcnt--;
       else if (!(flags & FNM_NOESCAPE) && c == L('\\'))
 	{

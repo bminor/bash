@@ -125,6 +125,7 @@ typedef struct _vlist {
 #define att_imported	0x0008000	/* came from environment */
 #define att_special	0x0010000	/* requires special handling */
 #define att_nofree	0x0020000	/* do not free value on unset */
+#define att_regenerate	0x0040000	/* regenerate when exported */
 
 #define	attmask_int	0x00ff000
 
@@ -153,6 +154,7 @@ typedef struct _vlist {
 #define imported_p(var)		((((var)->attributes) & (att_imported)))
 #define specialvar_p(var)	((((var)->attributes) & (att_special)))
 #define nofree_p(var)		((((var)->attributes) & (att_nofree)))
+#define regen_p(var)		((((var)->attributes) & (att_regenerate)))
 
 #define tempvar_p(var)		((((var)->attributes) & (att_tempvar)))
 
