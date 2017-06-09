@@ -74,17 +74,19 @@ type fx
 fx
 
 # errors 
+{
 ${THIS_SH} -c 'for (( i=0; "i < 3" ))
 do
 	echo $i
-done'
-echo $?
+done' ; echo $? ;  } 2>&1 | sed 's|^.*/||'
+#echo $?
 
+{
 ${THIS_SH} -c 'for (( i=0; i < 3; i++; 7 ))
 do
 	echo $i
-done'
-echo $?
+done' ; echo $?; } 2>&1 | sed 's|^.*/||'
+#echo $?
 
 # one-liners added in post-bash-2.04
 for     ((i=0; i < 20; i++)) do : ; done

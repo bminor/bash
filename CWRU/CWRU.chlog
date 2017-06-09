@@ -14020,3 +14020,17 @@ variables.c
 	  regenerate attribute set, call the dynamic value function to generate
 	  an updated value before placing it in the environment.  From a report
 	  about exporting LINENO from by Robert Elz <kre@bmunnari.OZ.AU>
+
+				    6/4
+				    ---
+lib/glob/sm_loop.c
+	- BRACKMATCH: at the matched: label, make sure we get the bracket
+	  character we're looking for (char class, collating symbol. etc.)
+	  before we decrement the count of braces we're looking for. Eventually
+	  we could do something about badly-formed bracket expressions
+
+				    6/7
+				    ---
+lib/readline/histlib.h
+	- strchr: only declare if  __STDC__ is not defined, since we already
+	  include <string.h>.  Report from Chi-Hsuan Yen <yan12125@gmail.com>
