@@ -2826,9 +2826,12 @@ itrace("wait_for: blocking wait for %d returns %d child = %p", (int)pid, r, chil
       CHECK_WAIT_INTR;
 
       if (pid == ANY_PID)
-        /* XXX - could set child but we don't have a handle on what waitchld
-	   reaps.  Leave termination_state alone. */
-	goto wait_for_return;
+	{
+	  /* XXX - could set child but we don't have a handle on what waitchld
+	    reaps.  Leave termination_state alone. */
+	  restore_sigint_handler ();
+	  goto wait_for_return;
+	}
     }
   while (PRUNNING (child) || (job != NO_JOB && RUNNING (job)));
 

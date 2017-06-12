@@ -14047,3 +14047,10 @@ lib/readline/mbutil.c
 	- _rl_get_char_len: use MB_CUR_MAX in the call to mbrlen; there's no
 	  need to look at the rest of the string when we're just interested in
 	  the length of a single character
+
+				   6/12
+				   ----
+jobs.c
+	- wait_for: when waiting for the next child to exit (ANY_PID), make
+	  sure to restore the old SIGINT handler before returning.  Fixes
+	  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=864649
