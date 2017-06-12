@@ -220,7 +220,7 @@ _rl_get_char_len (char *src, mbstate_t *ps)
 {
   size_t tmp;
 
-  tmp = mbrlen((const char *)src, (size_t)strlen (src), ps);
+  tmp = mbrlen((const char *)src, MB_CUR_MAX, ps);
   if (tmp == (size_t)(-2))
     {
       /* shorted to compose multibyte char */

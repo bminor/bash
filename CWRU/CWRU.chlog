@@ -14034,3 +14034,16 @@ lib/glob/sm_loop.c
 lib/readline/histlib.h
 	- strchr: only declare if  __STDC__ is not defined, since we already
 	  include <string.h>.  Report from Chi-Hsuan Yen <yan12125@gmail.com>
+
+				    6/9
+				    ---
+lib/readline/display.c
+	- update_line: when wrapping lines with multibyte chars at the end of
+	  the new line being wrapped, make sure we copy the NULL byte in old
+	  when moving the contents of old around. Fuzzing bug reported by
+	  Eduardo Bustamante <dualbus@gmail.com>
+
+lib/readline/mbutil.c
+	- _rl_get_char_len: use MB_CUR_MAX in the call to mbrlen; there's no
+	  need to look at the rest of the string when we're just interested in
+	  the length of a single character

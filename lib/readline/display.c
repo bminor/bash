@@ -266,6 +266,8 @@ static int *local_prompt_newlines;
    lines and the current line is so marked. */
 static int modmark;
 
+static int line_totbytes;
+
 /* Variables to save and restore prompt and display information. */
 
 /* These are getting numerous enough that it's time to create a struct. */
@@ -1072,6 +1074,7 @@ rl_redisplay (void)
 #endif
     }
   line[out] = '\0';
+  line_totbytes = out;
   if (cpos_buffer_position < 0)
     {
       cpos_buffer_position = out;
@@ -1480,6 +1483,8 @@ update_line (char *old, char *new, int current_line, int omax, int nmax, int inv
 	 the screen and dealing with changes to what's visible by modifying
 	 OLD to match it.  Complicated by the presence of multi-width
 	 characters at the end of the line or beginning of the new one. */
+      /* old is always somewhere in visible_line; new is always somewhere in
+         invisible_line.  These should always be null-terminated. */
 #if defined (HANDLE_MULTIBYTE)
       if (mb_cur_max > 1 && rl_byte_oriented == 0)
 	{
@@ -1593,8 +1598,9 @@ update_line (char *old, char *new, int current_line, int omax, int nmax, int inv
 		{
 		  /* We have written as many bytes from new as we need to
 		     consume the first character of old. Fix up `old' so it
-		     reflects the new screen contents */
-		  memmove (old+newbytes, old+oldbytes, strlen (old+oldbytes));
+		     reflects the new screen contents.  We use +1 in the
+		     memmove call to copy the trailing NUL. */
+		  memmove (old+newbytes, old+oldbytes, strlen (old+oldbytes) + 1);
 		  memcpy (old, new, newbytes);
 		  j = newbytes - oldbytes;
 		      
@@ -1627,7 +1633,6 @@ update_line (char *old, char *new, int current_line, int omax, int nmax, int inv
 	}
     }
 
-      
   /* Find first difference. */
 #if defined (HANDLE_MULTIBYTE)
   if (mb_cur_max > 1 && rl_byte_oriented == 0)
