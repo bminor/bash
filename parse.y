@@ -4284,6 +4284,16 @@ xparse_dolparen (base, string, indp, flags)
   orig_ind = *indp;
   ostring = string;
 
+  if (*string == 0)
+    {
+      if (flags & SX_NOALLOC) 
+	return (char *)NULL;
+
+      ret = xmalloc (1);
+      ret[0] = '\0';
+      return ret;
+    }
+
 /*itrace("xparse_dolparen: size = %d shell_input_line = `%s'", shell_input_line_size, shell_input_line);*/
   sflags = SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOFREE;
   if (flags & SX_NOLONGJMP)
@@ -4350,6 +4360,8 @@ xparse_dolparen (base, string, indp, flags)
 #if DEBUG
   if (base[*indp] != ')')
     itrace("xparse_dolparen:%d: base[%d] != RPAREN (%d), base = `%s'", line_number, *indp, base[*indp], base);
+  if (*indp < orig_ind)
+    itrace("xparse_dolparen:%d: *indp (%d) < orig_ind (%d), orig_string = `%s'", line_number, *indp, orig_ind, ostring);
 #endif
 
   if (flags & SX_NOALLOC) 
@@ -6614,6 +6626,8 @@ set_line_mbstate ()
       shell_input_line_property = (char *)xrealloc (shell_input_line_property, shell_input_line_propsize);
     }
 
+  /* XXX - use whether or not we are in a UTF-8 locale to avoid calls to
+     mbrlen */
   memset (&prevs, '\0', sizeof (mbstate_t));
   for (i = previ = 0; i < len; i++)
     {
@@ -6628,6 +6642,9 @@ set_line_mbstate ()
 	  break;
 	}
 
+      /* I'd love to take more advantage of UTF-8's properties in a UTF-8
+         locale, but mbrlen changes the mbstate_t on every call even when
+         presented with single-byte characters. */
       mbclen = mbrlen (shell_input_line + previ, i - previ + 1, &mbs);
       if (mbclen == 1 || mbclen == (size_t)-1)
 	{

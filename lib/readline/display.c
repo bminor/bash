@@ -467,6 +467,7 @@ expand_prompt (char *pmt, int flags, int *lp, int *lip, int *niflp, int *vlp)
 	      if (physchars > bound)		/* should rarely happen */
 		{
 #if defined (HANDLE_MULTIBYTE)
+		  *r = '\0';	/* need null-termination for strlen */
 		  if (mb_cur_max > 1 && rl_byte_oriented == 0)
 		    new = _rl_find_prev_mbchar (ret, r - ret, MB_FIND_ANY);
 		  else
@@ -1518,6 +1519,8 @@ update_line (char *old, char *new, int current_line, int omax, int nmax, int inv
 	    oldwidth = 0;
 	  else
 	    oldwidth = WCWIDTH (wc);
+	  if (oldwidth < 0)
+	    oldwidth = 1;
 
 	  /* 2. how many screen positions does the first char in new consume? */
 	  memset (&ps, 0, sizeof (mbstate_t));
@@ -1532,12 +1535,16 @@ update_line (char *old, char *new, int current_line, int omax, int nmax, int inv
 	    newwidth = 0;
 	  else
 	    newwidth = WCWIDTH (wc);
+	  if (newwidth < 0)
+	    newwidth = 1;
 
 	  /* 3. if the new width is less than the old width, we need to keep
 	     going in new until we have consumed at least that many screen
 	     positions, and figure out how many bytes that will take */
 	  while (newbytes < nmax && newwidth < oldwidth)
 	    {
+	      int t;
+
 	      ret = mbrtowc (&wc, new+newbytes, mb_cur_max, &ps);
 	      if (MB_INVALIDCH (ret))
 		{
@@ -1548,7 +1555,8 @@ update_line (char *old, char *new, int current_line, int omax, int nmax, int inv
 	        break;
 	      else
 		{
-		  newwidth += WCWIDTH (wc);
+		  t = WCWIDTH (wc);
+		  newwidth += (t >= 0) ? t : 1;
 		  newbytes += ret;
 		}
 	    }
@@ -1557,6 +1565,8 @@ update_line (char *old, char *new, int current_line, int omax, int nmax, int inv
 	     figure out how many bytes that will take.  This is an optimization */
 	  while (oldbytes < omax && oldwidth < newwidth)
 	    {
+	      int t;
+
 	      ret = mbrtowc (&wc, old+oldbytes, mb_cur_max, &ps);
 	      if (MB_INVALIDCH (ret))
 		{
@@ -1567,7 +1577,8 @@ update_line (char *old, char *new, int current_line, int omax, int nmax, int inv
 	        break;
 	      else
 		{
-		  oldwidth += WCWIDTH (wc);
+		  t = WCWIDTH (wc);
+		  oldwidth += (t >= 0) ? t : 1;
 		  oldbytes += ret;
 		}
 	    }

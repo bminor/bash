@@ -92,6 +92,11 @@ _rl_find_next_mbchar_internal (char *string, int seed, int count, int find_non_z
     return seed;
 
   point = seed + _rl_adjust_point (string, seed, &ps);
+  /* if _rl_adjust_point returns -1, the character or string is invalid.
+     treat as a byte. */
+  if (point == seed - 1)	/* invalid */
+    return seed + 1;
+    
   /* if this is true, means that seed was not pointing to a byte indicating
      the beginning of a multibyte character.  Correct the point and consume
      one char. */
@@ -265,7 +270,7 @@ _rl_compare_chars (char *buf1, int pos1, mbstate_t *ps1, char *buf2, int pos2, m
 /* adjust pointed byte and find mbstate of the point of string.
    adjusted point will be point <= adjusted_point, and returns
    differences of the byte(adjusted_point - point).
-   if point is invalied (point < 0 || more than string length),
+   if point is invalid (point < 0 || more than string length),
    it returns -1 */
 int
 _rl_adjust_point (char *string, int point, mbstate_t *ps)
@@ -336,6 +341,8 @@ _rl_char_value (char *buf, int ind)
   l = strlen (buf);
   if (ind >= l - 1)
     return ((wchar_t) buf[ind]);
+  if (l < ind)			/* Sanity check */
+    l = strlen (buf+ind);
   memset (&ps, 0, sizeof (mbstate_t));
   tmp = mbrtowc (&wc, buf + ind, l - ind, &ps);
   if (MB_INVALIDCH (tmp) || MB_NULLWCH (tmp))  

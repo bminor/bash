@@ -14054,3 +14054,51 @@ jobs.c
 	- wait_for: when waiting for the next child to exit (ANY_PID), make
 	  sure to restore the old SIGINT handler before returning.  Fixes
 	  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=864649
+
+				   6/14
+				   ----
+lib/readline/display.c
+	- expand_prompt: make sure `ret' is NULL-terminated before calling
+	  _rl_prev_mbchar_internal, since that calls strlen, which requires
+	  the passed string to be NULL-terminated. Another fuzzing bug.
+
+				   6/15
+				   ----
+lib/readline/isearch.c
+	- _rl_isearch_fini: use rl_replace_line instead of strcpy so rl_end
+	  gets set right
+	- _rl_isearch_fini: after restoring rl_point, call _rl_fix_point so
+	  we don't set rl_point > rl_end. Fixes a fuzzing bug
+
+lib/readline/mbutil.c
+	- _rl_find_next_mbchar_internal: if _rl_adjust_point returns < 0,
+	  just punt, treat the value as a byte, and advance point by 1
+
+lib/readline/util.c
+	- rl_tilde_expand: rearrange code in the whitespace loop so that
+	  `start' gets tested first and we don't try to dereference
+	  rl_line_buffer[-1]. Another fuzzing bug from dualbus@gmail.com
+
+bashline.c
+	- bash_dequote_filename: make sure that pointers that are used as
+	  indices into sh_syntaxtab are cast to unsigned char first, to
+	  avoid problems with signed chars > 128. Fixes a fuzzing bug.
+
+lib/readline/kill.c
+	- _rl_copy_to_kill_ring: when reallocating the kill ring, make sure to
+	  allocate one more than the max number of kills so the loop that
+	  copies the kill ring entries down runs right (and to mirror the
+	  initial allocation). Fixes a fuzzing bug.
+
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: make sure that cxt->sline_index never goes < 0
+	  even when searching a line in reverse. Fixes a fuzzing bug
+
+				   6/16
+				   ----
+parse.y
+	- xparse_dolparen: short-circuit immediately if passed a empty string
+
+lib/readline/display.c
+	- update_line: when wrapping multibyte characters, make sure we deal
+	  with WCWIDTH returning -1. Fixes a fuzzing bug

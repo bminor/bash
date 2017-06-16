@@ -3886,7 +3886,7 @@ bash_dequote_filename (text, quote_char)
 	    *r++ = *p;
 	  /* Backslashes are preserved within double quotes unless the
 	     character is one that is defined to be escaped */
-	  else if (quoted == '"' && ((sh_syntaxtab[p[1]] & CBSDQUOTE) == 0))
+	  else if (quoted == '"' && ((sh_syntaxtab[(unsigned char)p[1]] & CBSDQUOTE) == 0))
 	    *r++ = *p;
 
 	  *r++ = *++p;

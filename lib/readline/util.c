@@ -193,7 +193,7 @@ rl_tilde_expand (int ignore, int key)
     }
   else if (start >= 0 && rl_line_buffer[start] != '~')
     {
-      for (; !whitespace (rl_line_buffer[start]) && start >= 0; start--)
+      for (; start >= 0 && !whitespace (rl_line_buffer[start]); start--)
         ;
       start++;
     }

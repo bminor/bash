@@ -119,7 +119,7 @@ _rl_copy_to_kill_ring (char *text, int append)
 	  else
 	    {
 	      slot = rl_kill_ring_length += 1;
-	      rl_kill_ring = (char **)xrealloc (rl_kill_ring, slot * sizeof (char *));
+	      rl_kill_ring = (char **)xrealloc (rl_kill_ring, (slot + 1) * sizeof (char *));
 	    }
 	  rl_kill_ring[--slot] = (char *)NULL;
 	}

@@ -262,7 +262,7 @@ static void
 _rl_isearch_fini (_rl_search_cxt *cxt)
 {
   /* First put back the original state. */
-  strcpy (rl_line_buffer, cxt->lines[cxt->save_line]);
+  rl_replace_line (cxt->lines[cxt->save_line], 0);
 
   rl_restore_prompt ();
 
@@ -292,6 +292,7 @@ _rl_isearch_fini (_rl_search_cxt *cxt)
   rl_point = cxt->sline_index;
   /* Don't worry about where to put the mark here; rl_get_previous_history
      and rl_get_next_history take care of it. */
+  _rl_fix_point (0);
 
   rl_clear_message ();
 }
@@ -515,7 +516,7 @@ add_character:
 	    }
 	  return (1);
 	}
-      else if (cxt->sflags & SF_REVERSE)
+      else if (cxt->sflags & SF_REVERSE && cxt->sline_index > 0)
 	cxt->sline_index--;
       else if (cxt->sline_index != cxt->sline_len)
 	cxt->sline_index++;
@@ -664,6 +665,11 @@ add_character:
 	    }
 	  else
 	    cxt->sline_index += cxt->direction;
+	  if (cxt->sline_index < 0)
+	    {
+	      cxt->sline_index = 0;
+	      break;
+	    }
 	}
       if (cxt->sflags & SF_FOUND)
 	break;

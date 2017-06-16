@@ -3009,7 +3009,7 @@ wait_for_return:
    state */
 int
 wait_for_job (job, flags)
-     int job;
+     int job, flags;
 {
   pid_t pid;
   int r, state;
@@ -3054,6 +3054,7 @@ wait_for_job (job, flags)
    is responsible for translating -1 into the right return value. */
 int
 wait_for_any_job (flags)
+     int flags;
 {
   pid_t pid;
   int i, r, waited_for;
