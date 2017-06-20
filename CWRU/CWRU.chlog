@@ -14102,3 +14102,70 @@ parse.y
 lib/readline/display.c
 	- update_line: when wrapping multibyte characters, make sure we deal
 	  with WCWIDTH returning -1. Fixes a fuzzing bug
+
+				   6/17
+				   ----
+execute_cmd.c
+	- execute_coproc: make sure `invert' is set before trying to use it
+	  when returning failure on invalid coproc name.  Report and fix from
+	  Eduardo Bustamante <dualbus@gmail.com>
+	- execute_command_internal: make sure execute_coproc sets
+	  last_command_exit_value if it returns failure, so an invalid name
+	  can set $? = 1.  Report and fix from Eduardo Bustamante
+	  <dualbus@gmail.com>
+
+lib/readline/display.c
+	- update_line: make sure all references to `wrapped_line' are wrapped
+	  with #ifdef HANDLE_MULTIBYTE.  Report and fix from Eduardo Bustamante
+	  <dualbus@gmail.com>
+
+lib/readline/vi_mode.c
+	- _rl_vi_change_char: don't use rl_point++ when you mean to move
+	  forward a character; use _rl_vi_append_forward to account for
+	  multibyte characters and take vi end of line handling into account
+	- _rl_vi_last_replacement: now an array of chars whether we are
+	  using multibyte chars or not. If we're not, the character we read
+	  to use as the replacement is saved as the first element of the array
+	- rl_vi_change_char,_rl_vi_callback_change_char: changes to deal with
+	  _rl_vi_last_replacement being an array.  Fixes bug reported by
+	  Eduardo Bustamante <dualbus@gmail.com>
+
+lib/readline/mbutil.c
+	- _rl_get_char_len: look at at most MB_CUR_MAX characters, but maybe
+	  fewer if the length of the string is less
+
+builtins/bind.def
+	- unbind_keyseq: new function for the -r option; checks whether the
+	  key sequence is actually bound before trying to bind it to NULL.
+	  Partial fix for https://savannah.gnu.org/support/?109329
+
+parse.y
+	- augment `error yacc_EOF' production to call YYABORT in non-interactive
+	  shells or calls to parse_and_execute (eval, command substitution,
+	  etc.) Fixes bug reported by Martijn Dekker <martijn@inlv.org>
+
+				   6/19
+				   ----
+bashline.c
+	- edit_and_execute_command: don't add rl_line_buffer to the history
+	  list if it's empty; consistent with how other code treats an empty
+	  line
+
+execute_cmd.c
+	- execute_builtin: make sure to preserve the temporary env across the
+	  execution of the `read' builtin or `fc' builtin if HISTORY is
+	  defined, in case `read -e' calls edit-and-execute-command.  Should
+	  have no side effects. Reported by Eduardo Bustamante
+	  <dualbus@gmail.com>
+
+general.c
+	- line_isblank: new function: returns true if passed string is composed
+	  entirely of blanks
+
+general.h
+	- line_isblank: new extern declaration
+
+parse.y
+	- history_delimiting_chars: return "" for a blank line, since there's
+	  nothing to delimit with `;'
+

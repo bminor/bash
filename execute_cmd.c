@@ -598,7 +598,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
 #if defined (COPROCESS_SUPPORT)
   if (command->type == cm_coproc)
-    return (execute_coproc (command, pipe_in, pipe_out, fds_to_close));
+    return (last_command_exit_value = execute_coproc (command, pipe_in, pipe_out, fds_to_close));
 #endif
 
   user_subshell = command->type == cm_subshell || ((command->flags & CMD_WANT_SUBSHELL) != 0);
@@ -2298,6 +2298,8 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
   coproc_init (&sh_coproc);
 #endif
 
+  invert = (command->flags & CMD_INVERT_RETURN) != 0;
+
   /* XXX - expand coproc name without splitting -- bash-5.0 */
   /* could make this dependent on a shopt option */
   name = expand_string_unsplit_to_string (command->value.Coproc->name, 0);
@@ -2313,7 +2315,6 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
       command->value.Coproc->name = name;
     }
 
-  invert = (command->flags & CMD_INVERT_RETURN) != 0;
   command_string_index = 0;
   tcmd = make_command_string (command);
 
@@ -4554,6 +4555,10 @@ execute_builtin (builtin, words, flags, subshell)
      `mapfile' is a special case because it uses evalstring (same as
      eval or source) to run its callbacks. */
   isbltinenv = (builtin == source_builtin || builtin == eval_builtin || builtin == unset_builtin || builtin == mapfile_builtin);
+#if defined (HISTORY) && defined (READLINE)
+  if (builtin == fc_builtin || builtin == read_builtin)
+    isbltinenv = 1;
+#endif
 
   if (isbltinenv)
     {

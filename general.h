@@ -292,6 +292,7 @@ extern int check_identifier __P((WORD_DESC *, int));
 extern int valid_nameref_value __P((const char *, int));
 extern int check_selfref __P((const char *, char *, int));
 extern int legal_alias_name __P((const char *, int));
+extern int line_isblank __P((const char *));
 extern int assignment __P((const char *, int));
 
 extern int sh_unset_nodelay_mode __P((int));

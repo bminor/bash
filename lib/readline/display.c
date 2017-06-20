@@ -2128,6 +2128,7 @@ dumb_update:
 		    }
 
 #if 1
+#ifdef HANDLE_MULTIBYTE
 		  /* If we write a non-space into the last screen column,
 		     remove the note that we added a space to compensate for
 		     a multibyte double-width character that didn't fit, since
@@ -2137,6 +2138,7 @@ dumb_update:
 			line_state_invisible->wrapped_line[current_line+1] &&
 			nfd[bytes_to_insert-1] != ' ')
 		    line_state_invisible->wrapped_line[current_line+1] = 0;
+#endif
 #endif
 		}
 	      else

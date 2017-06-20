@@ -416,8 +416,16 @@ inputunit:	simple_list simple_list_terminator
 			  /* EOF after an error.  Do ignoreeof or not.  Really
 			     only interesting in non-interactive shells */
 			  global_command = (COMMAND *)NULL;
+			  last_command_exit_value = 1;
 			  handle_eof_input_unit ();
-			  YYACCEPT;
+			  if (interactive && parse_and_execute_level == 0)
+			    {
+			      YYACCEPT;
+			    }
+			  else
+			    {
+			      YYABORT;
+			    }
 			}
 	|	yacc_EOF
 			{
@@ -5456,6 +5464,9 @@ history_delimiting_chars (line)
       if (token_before_that == no_semi_successors[i])
 	return (" ");
     }
+
+  if (line_isblank (line))
+    return ("");
 
   return ("; ");
 }

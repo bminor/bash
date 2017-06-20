@@ -655,7 +655,7 @@ _rl_read_mbchar (char *mbchar, int size)
 int
 _rl_read_mbstring (int first, char *mb, int mlen)
 {
-  int i, c;
+  int i, c, n;
   mbstate_t ps;
 
   c = first;
@@ -664,7 +664,8 @@ _rl_read_mbstring (int first, char *mb, int mlen)
     {
       mb[i] = (char)c;
       memset (&ps, 0, sizeof (mbstate_t));
-      if (_rl_get_char_len (mb, &ps) == -2)
+      n = _rl_get_char_len (mb, &ps);
+      if (n == -2)
 	{
 	  /* Read more for multibyte character */
 	  RL_SETSTATE (RL_STATE_MOREINPUT);

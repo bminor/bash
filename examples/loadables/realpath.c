@@ -88,13 +88,16 @@ WORD_LIST	*list;
 			break;
 		default:
 			builtin_usage();
+			return (EX_USAGE);
 		}
 	}
 
 	list = loptend;
 
-	if (list == 0)
+	if (list == 0) {
 		builtin_usage();
+		return (EX_USAGE);
+	}
 
 	for (es = EXECUTION_SUCCESS; list; list = list->next) {
 		p = list->word->word;

@@ -223,9 +223,13 @@ _rl_find_prev_mbchar_internal (char *string, int seed, int find_non_zero)
 int
 _rl_get_char_len (char *src, mbstate_t *ps)
 {
-  size_t tmp;
+  size_t tmp, l;
+  int mb_cur_max;
 
-  tmp = mbrlen((const char *)src, MB_CUR_MAX, ps);
+  /* Look at no more than MB_CUR_MAX characters */
+  l = (size_t)strlen (src);
+  mb_cur_max = MB_CUR_MAX;
+  tmp = mbrlen((const char *)src, (l < mb_cur_max) ? l : mb_cur_max, ps);
   if (tmp == (size_t)(-2))
     {
       /* shorted to compose multibyte char */

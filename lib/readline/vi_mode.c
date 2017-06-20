@@ -101,7 +101,7 @@ static int _rl_vi_last_search_mblen;
 #else
 static int _rl_vi_last_search_char;
 #endif
-static int _rl_vi_last_replacement;
+static char _rl_vi_last_replacement[MB_LEN_MAX+1];	/* reserve for trailing NULL */
 
 static int _rl_vi_last_key_before_insert;
 
@@ -646,11 +646,7 @@ _rl_vi_append_forward (int key)
       else
 	{
 	  point = rl_point;
-#if 0
-	  rl_forward_char (1, key);
-#else
 	  rl_point = _rl_forward_char_internal (1);
-#endif
 	  if (point == rl_point)
 	    rl_point = rl_end;
 	}
@@ -1889,7 +1885,7 @@ _rl_vi_change_char (int count, int c, char *mb)
       p = rl_point;
       rl_vi_delete (1, c);
       if (rl_point < p)		/* Did we retreat at EOL? */
-	rl_point++;
+	_rl_vi_append_forward (c);
 #if defined (HANDLE_MULTIBYTE)
       if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
 	rl_insert_text (mb);
@@ -1931,9 +1927,15 @@ static int
 _rl_vi_callback_change_char (_rl_callback_generic_arg *data)
 {
   int c;
-  char mb[MB_LEN_MAX];
+  char mb[MB_LEN_MAX+1];
 
-  _rl_vi_last_replacement = c = _rl_vi_callback_getchar (mb, MB_LEN_MAX);
+  c = _rl_vi_callback_getchar (mb, MB_LEN_MAX);
+#if defined (HANDLE_MULTIBYTE)
+  strncpy (_rl_vi_last_replacement, mb, MB_LEN_MAX);
+#else
+  _rl_vi_last_replacement[0] = c;
+#endif
+  _rl_vi_last_replacement[MB_LEN_MAX] = '\0';	/* XXX */
 
   if (c < 0)
     return -1;
@@ -1949,13 +1951,13 @@ int
 rl_vi_change_char (int count, int key)
 {
   int c;
-  char mb[MB_LEN_MAX];
+  char mb[MB_LEN_MAX+1];
 
   if (_rl_vi_redoing)
     {
-      c = _rl_vi_last_replacement;
-      mb[0] = c;
-      mb[1] = '\0';
+      strncpy (mb, _rl_vi_last_replacement, MB_LEN_MAX);
+      c = (unsigned char)_rl_vi_last_replacement[0];	/* XXX */
+      mb[MB_LEN_MAX] = '\0';
     }
 #if defined (READLINE_CALLBACKS)
   else if (RL_ISSTATE (RL_STATE_CALLBACK))
@@ -1966,7 +1968,15 @@ rl_vi_change_char (int count, int key)
     }
 #endif
   else
-    _rl_vi_last_replacement = c = _rl_vi_callback_getchar (mb, MB_LEN_MAX);
+    {
+      c = _rl_vi_callback_getchar (mb, MB_LEN_MAX);
+#ifdef HANDLE_MULTIBYTE
+      strncpy (_rl_vi_last_replacement, mb, MB_LEN_MAX);
+#else
+      _rl_vi_last_replacement[0] = c;
+#endif
+      _rl_vi_last_replacement[MB_LEN_MAX] = '\0';	/* just in case */      
+    }
 
   if (c < 0)
     return -1;

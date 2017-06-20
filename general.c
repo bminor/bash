@@ -402,6 +402,20 @@ assignment (string, flags)
   return (0);
 }
 
+int
+line_isblank (line)
+     const char *line;
+{
+  register int i;
+
+  if (line == 0)
+    return 0;		/* XXX */
+  for (i = 0; line[i]; i++)
+    if (isblank ((unsigned char)line[i]) == 0)
+      break;
+  return (line[i] == '\0');  
+}
+
 /* **************************************************************** */
 /*								    */
 /*	     Functions to manage files and file descriptors	    */
