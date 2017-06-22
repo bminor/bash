@@ -84,6 +84,7 @@ tee_builtin (list)
 	case 'i':
 	  nointr = 1;
 	  break;
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);

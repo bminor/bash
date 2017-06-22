@@ -402,6 +402,7 @@ evalexp (expr, flags, validp)
       tokstr = expression = (char *)NULL;
 
       expr_unwind ();
+      expr_depth = 0;	/* XXX - make sure */
 
       /* We copy in case we've called evalexp recursively */
       FASTCOPY (oevalbuf, evalbuf, sizeof (evalbuf));
@@ -1117,6 +1118,7 @@ expr_streval (tok, e, lvalue)
   SHELL_VAR *v;
   char *value;
   intmax_t tval;
+  int initial_depth;
 #if defined (ARRAY_VARS)
   arrayind_t ind;
   int tflag, aflag;
@@ -1127,6 +1129,8 @@ expr_streval (tok, e, lvalue)
      going through the rest of the evaluator. */
   if (noeval)
     return (0);
+
+  initial_depth = expr_depth;
 
 #if defined (ARRAY_VARS)
   tflag = assoc_expand_once && already_expanded;	/* for a start */
@@ -1180,6 +1184,13 @@ expr_streval (tok, e, lvalue)
 #else
   value = get_variable_value (v);
 #endif
+
+  if (expr_depth < initial_depth)
+    {
+      if (no_longjmp_on_fatal_error && interactive_shell)
+	sh_longjmp (evalbuf, 1);
+      return (0);
+    }
 
   tval = (value && *value) ? subexpr (value) : 0;
 

@@ -2782,7 +2782,8 @@ itrace("wait_for: blocking wait for %d returns %d child = %p", (int)pid, r, chil
 	  if (r == -1 && errno == ECHILD && this_shell_builtin == wait_builtin)
 	    {
 	      termination_state = -1;
-	      /* XXX - restore sigint handler here? */
+	      /* XXX - restore sigint handler here */
+	      restore_sigint_handler ();
 	      goto wait_for_return;
 	    }
 

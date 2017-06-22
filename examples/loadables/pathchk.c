@@ -112,6 +112,7 @@ pathchk_builtin (list)
 	case 'p':
 	  pflag = 1;
 	  break;
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);

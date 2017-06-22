@@ -95,6 +95,7 @@ uname_builtin (list)
 	case 'v':
 	  uname_flags |= FLAG_VERSION;
 	  break;
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);

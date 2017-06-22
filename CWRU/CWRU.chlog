@@ -14169,3 +14169,27 @@ parse.y
 	- history_delimiting_chars: return "" for a blank line, since there's
 	  nothing to delimit with `;'
 
+				   6/21
+				   ----
+jobs.c
+	- wait_for: make sure to call restore_sigint_handler before returning
+	  if we return out of the loop due to no children. Report from
+	  Eduardo Bustamante <dualbus@gmail.com>
+
+subst.c
+	- expand_word_internal: if split_on_spaces is set, and the word is
+	  unquoted, and IFS is null, split the results of the previous steps
+	  on $' \t\n' instead of just ' '. This relies on the previous steps
+	  quoting the portions of the word that should not be split.  Fixes
+	  bug reported by Kevin Brodsky <corax26@gmail.com>
+
+expr.c
+	- evalexp: after running expr_unwind, make sure we reset expr_depth
+	  to 0 for the next call
+	- expr_streval: if after a call to get_array_value (which can call
+	  the expression evaluator recursively) we discover that expr_depth
+	  is less than it was before we called it, we assume there has been
+	  some kind of error and an expr_unwind, so we treat it as an
+	  error and either longjmp back to the expression top level or return
+	  0 immediately. Fixes bug reported by Eduardo Bustamante
+	  <dualbus@gmail.com>

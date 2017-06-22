@@ -86,6 +86,7 @@ WORD_LIST	*list;
 		case 'v':
 			vflag = 1;
 			break;
+		CASE_HELPOPT;
 		default:
 			builtin_usage();
 			return (EX_USAGE);

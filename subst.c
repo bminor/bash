@@ -8984,6 +8984,8 @@ param_expand (string, sindex, quoted, expanded_something,
 	  else
 	    {
 	      temp = string_list_dollar_at (list, quoted, 0);
+	      /* Set W_SPLITSPACE to make sure the individual positional
+		 parameters are split into separate arguments */
 	      if (quoted == 0 && (ifs_is_set == 0 || ifs_is_null))
 		tflag |= W_SPLITSPACE;
 	      /* If we're not quoted but we still don't want word splitting, make
@@ -10158,7 +10160,16 @@ finished_with_string:
 	 or we expanded "$@" with IFS null and we need to split the positional
 	 parameters into separate words. */
       if (split_on_spaces)
-	list = list_string (istring, " ", 1);	/* XXX quoted == 1? */
+	{
+	  /* If IFS is not set, and the word is not quoted, we want to split
+	     the individual words on $' \t\n'. We rely on previous steps to
+	     quote the portions of the word that should not be split */
+	  if (ifs_is_set == 0)
+	    list = list_string (istring, " \t\n", 1);	/* XXX quoted == 1? */
+	  else
+	    list = list_string (istring, " ", 1);	/* XXX quoted == 1? */
+	}
+
       /* If we have $@ (has_dollar_at != 0) and we are in a context where we
 	 don't want to split the result (W_NOSPLIT2), and we are not quoted,
 	 we have already separated the arguments with the first character of

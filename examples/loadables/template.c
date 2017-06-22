@@ -31,6 +31,7 @@ template_builtin (list)
     {
       switch (opt)
 	{
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);

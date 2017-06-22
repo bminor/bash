@@ -76,6 +76,7 @@ ln_builtin (list)
 	case 'n':
 	  flags |= LN_NOFOLLOW;
 	  break;
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);
