@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu May 25 15:58:43 EDT 2017
+.\"	Last Change: Fri Jun 23 12:42:34 EDT 2017
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2017 May 25" "GNU Bash 4.4"
+.TH BASH 1 "2017 June 23" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2744,10 +2744,11 @@ original word are removed unless they have been quoted themselves
 (\fIquote removal\fP).
 .PP
 Only brace expansion, word splitting, and pathname expansion
-can change the number of words of the expansion; other expansions
+can increase the number of words of the expansion; other expansions
 expand a single word to a single word.
 The only exceptions to this are the expansions of
-"\fB$@\fP" and "\fB${\fP\fIname\fP\fB[@]}\fP"
+"\fB$@\fP" and "\fB${\fP\fIname\fP\fB[@]}\fP",
+and, in most cases, \fB$*\fP and \fB${\fP\fIname\fP\fB[*]}\fP
 as explained above (see
 .SM
 .BR PARAMETERS ).
@@ -9679,8 +9680,8 @@ above).  The shell always
 postpones exiting if any jobs are stopped.
 .TP 8
 .B checkwinsize
-If set, \fBbash\fP checks the window size after each command
-and, if necessary, updates the values of
+If set, \fBbash\fP checks the window size after each external (non-builtin)
+command and, if necessary, updates the values of
 .SM
 .B LINES
 and

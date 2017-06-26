@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 4.4, 22 March 2017).
+the Bash shell (version 4.4, 23 June 2017).
 
-This is Edition 4.4, last updated 22 March 2017,
+This is Edition 4.4, last updated 23 June 2017,
 of The GNU Bash Reference Manual,
 for Bash, Version 4.4.
 
@@ -284,10 +284,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 4.4, 22 March 2017).
+the Bash shell (version 4.4, 23 June 2017).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 4.4, last updated 22 March 2017,
+<p>This is Edition 4.4, last updated 23 June 2017,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 4.4.
 </p>
@@ -1755,7 +1755,7 @@ Adding the <samp>-k</samp> option
 <p>Finally, Parallel can be used to run a sequence of shell commands in parallel,
 similar to &lsquo;<samp>cat file | bash</samp>&rsquo;.
 It is not uncommon to take a list of filenames, create a series of shell
-commands to operate on them, and feed that list of commnds to a shell.
+commands to operate on them, and feed that list of commands to a shell.
 Parallel can speed this up.  Assuming that <samp>file</samp> contains a list of
 shell commands, one per line,
 </p>
@@ -2276,10 +2276,11 @@ original word are removed unless they have been quoted themselves
 (<var>quote removal</var>).
 </p>
 <p>Only brace expansion, word splitting, and filename expansion
-can change the number of words of the expansion; other expansions
+can increase the number of words of the expansion; other expansions
 expand a single word to a single word.
 The only exceptions to this are the expansions of
-<code>&quot;$@&quot;</code> (see <a href="#Special-Parameters">Special Parameters</a>) and <code>&quot;${<var>name</var>[@]}&quot;</code>
+<code>&quot;$@&quot;</code> and <code>$*</code> (see <a href="#Special-Parameters">Special Parameters</a>), and
+<code>&quot;${<var>name</var>[@]}&quot;</code> and <code>${<var>name</var>[*]}</code>
 (see <a href="#Arrays">Arrays</a>).
 </p>
 <p>After all expansions, <code>quote removal</code> (see <a href="#Quote-Removal">Quote Removal</a>)
@@ -5084,6 +5085,8 @@ Options, if supplied, have the following meanings:
 <dt><code>-d</code></dt>
 <dd><p>The first character of <var>delim</var> is used to terminate each input line,
 rather than newline.
+If <var>delim</var> is the empty string, <code>mapfile</code> will terminate a line
+when it reads a NUL character.
 </p></dd>
 <dt><code>-n</code></dt>
 <dd><p>Copy at most <var>count</var> lines.  If <var>count</var> is 0, all lines are copied.
@@ -5222,12 +5225,14 @@ Other <var>name</var> arguments are ignored.
 <dt><code>-d <var>delim</var></code></dt>
 <dd><p>The first character of <var>delim</var> is used to terminate the input line,
 rather than newline.
+If <var>delim</var> is the empty string, <code>read</code> will terminate a line
+when it reads a NUL character.
 </p>
 </dd>
 <dt><code>-e</code></dt>
 <dd><p>Readline (see <a href="#Command-Line-Editing">Command Line Editing</a>) is used to obtain the line.
 Readline uses the current (or default, if line editing was not previously
-active) editing settings.
+active) editing settings, but uses Readline&rsquo;s default filename completion.
 </p>
 </dd>
 <dt><code>-i <var>text</var></code></dt>
@@ -5976,8 +5981,8 @@ The shell always postpones exiting if any jobs are stopped.
 </p>
 </dd>
 <dt><code>checkwinsize</code></dt>
-<dd><p>If set, Bash checks the window size after each command
- and, if necessary, updates the values of    
+<dd><p>If set, Bash checks the window size after each external (non-builtin)
+command and, if necessary, updates the values of    
 <code>LINES</code> and <code>COLUMNS</code>.
 </p>
 </dd>
@@ -5986,6 +5991,8 @@ The shell always postpones exiting if any jobs are stopped.
 attempts to save all lines of a multiple-line
 command in the same history entry.  This allows
 easy re-editing of multi-line commands.
+This option is enabled by default, but only has an effect if command
+history is enabled (see <a href="#Bash-History-Facilities">Bash History Facilities</a>).
 </p>
 </dd>
 <dt><code>compat31</code></dt>
@@ -6228,6 +6235,12 @@ a pipeline not executed in the background in the current shell environment.
 <dd><p>If enabled, and the <code>cmdhist</code>
 option is enabled, multi-line commands are saved to the history with
 embedded newlines rather than using semicolon separators where possible.
+</p>
+</dd>
+<dt><code>localvar_inherit</code></dt>
+<dd><p>If set, local variables inherit the value and attributes of a variable of
+the same name that exists at a previous scope before any new value is
+assigned.  The <var>nameref</var> attribute is not inherited.
 </p>
 </dd>
 <dt><code>login_shell</code></dt>
@@ -12173,7 +12186,7 @@ a shell function and bind it to a particular command using <code>complete -F</co
 </p>
 <p>The following function provides completions for the <code>cd</code> builtin.
 It is a reasonably good example of what shell functions must do when
-used for completion.  This function uses the word passsed as <code>$2</code>
+used for completion.  This function uses the word passed as <code>$2</code>
 to determine the directory name to complete.  You can also use the
 <code>COMP_WORDS</code> array variable; the current word is indexed by the
 <code>COMP_CWORD</code> variable.

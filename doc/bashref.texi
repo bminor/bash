@@ -1776,10 +1776,11 @@ original word are removed unless they have been quoted themselves
 (@var{quote removal}).
 
 Only brace expansion, word splitting, and filename expansion
-can change the number of words of the expansion; other expansions
+can increase the number of words of the expansion; other expansions
 expand a single word to a single word.
 The only exceptions to this are the expansions of
-@code{"$@@"} (@pxref{Special Parameters}) and @code{"$@{@var{name}[@@]@}"}
+@code{"$@@"} and @code{$*} (@pxref{Special Parameters}), and
+@code{"$@{@var{name}[@@]@}"} and @code{$@{@var{name}[*]@}}
 (@pxref{Arrays}).
 
 After all expansions, @code{quote removal} (@pxref{Quote Removal})
@@ -5128,8 +5129,8 @@ intervening command (@pxref{Job Control}).
 The shell always postpones exiting if any jobs are stopped.
 
 @item checkwinsize
-If set, Bash checks the window size after each command
- and, if necessary, updates the values of    
+If set, Bash checks the window size after each external (non-builtin)
+command and, if necessary, updates the values of    
 @env{LINES} and @env{COLUMNS}.
 
 @item cmdhist

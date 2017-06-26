@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2017 March 22<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2017 June 23<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -3482,10 +3482,11 @@ original word are removed unless they have been quoted themselves
 <P>
 
 Only brace expansion, word splitting, and pathname expansion
-can change the number of words of the expansion; other expansions
+can increase the number of words of the expansion; other expansions
 expand a single word to a single word.
 The only exceptions to this are the expansions of
-&quot;<B>$@</B>&quot; and &quot;<B>${</B><I>name</I><B>[@]}</B>&quot;
+&quot;<B>$@</B>&quot; and &quot;<B>${</B><I>name</I><B>[@]}</B>&quot;,
+and, in most cases, <B>$*</B> and <B>${</B><I>name</I><B>[*]}</B>
 as explained above (see
 <FONT SIZE=-1><B>PARAMETERS</B>).
 
@@ -8728,7 +8729,7 @@ If <B>HISTFILESIZE</B> is unset, or set to null, a non-numeric value,
 or a numeric value less than zero, the history file is not truncated.
 When the history file is read,
 lines beginning with the history comment character followed immediately
-by a digit are interpreted as timestamps for the preceding history line.
+by a digit are interpreted as timestamps for the following history line.
 These timestamps are optionally displayed depending on the value of the
 <FONT SIZE=-1><B>HISTTIMEFORMAT</B>
 
@@ -10535,7 +10536,7 @@ echoed and executed.
 <P>
 In the second form, <I>command</I> is re-executed after each instance
 of <I>pat</I> is replaced by <I>rep</I>.
-<I>Command</I> is intepreted the same as <I>first</I> above.
+<I>Command</I> is interpreted the same as <I>first</I> above.
 A useful alias to use with this is
 
 <TT>r='fc -s'</TT>,
@@ -11125,6 +11126,8 @@ Options, if supplied, have the following meanings:
 <DD>
 The first character of <I>delim</I> is used to terminate each input line,
 rather than newline.
+If <I>delim</I> is the empty string, <B>mapfile</B> will terminate a line
+when it reads a NUL character.
 <DT><B>-n</B>
 
 <DD>
@@ -11440,6 +11443,8 @@ Other <I>name</I> arguments are ignored.
 <DD>
 The first character of <I>delim</I> is used to terminate the input line,
 rather than newline.
+If <I>delim</I> is the empty string, <B>read</B> will terminate a line
+when it reads a NUL character.
 <DT><B>-e</B>
 
 <DD>
@@ -11453,7 +11458,7 @@ is coming from a terminal,
 </FONT>
 above) is used to obtain the line.
 Readline uses the current (or default, if line editing was not previously
-active) editing settings.
+active) editing settings, but uses Readline's default filename completion.
 <DT><B>-i </B><I>text</I>
 
 <DD>
@@ -12273,8 +12278,8 @@ postpones exiting if any jobs are stopped.
 <DT><B>checkwinsize</B>
 
 <DD>
-If set, <B>bash</B> checks the window size after each command
-and, if necessary, updates the values of
+If set, <B>bash</B> checks the window size after each external (non-builtin)
+command and, if necessary, updates the values of
 <FONT SIZE=-1><B>LINES</B>
 
 </FONT>
@@ -12291,6 +12296,11 @@ If set,
 attempts to save all lines of a multiple-line
 command in the same history entry.  This allows
 easy re-editing of multi-line commands.
+This option is enabled by default, but only has an effect if command
+history is enabled, as described above under
+<FONT SIZE=-1><B>HISTORY</B>.
+
+</FONT>
 <DT><B>compat31</B>
 
 <DD>
@@ -12641,6 +12651,12 @@ If set, and the
 
 option is enabled, multi-line commands are saved to the history with
 embedded newlines rather than using semicolon separators where possible.
+<DT><B>localvar_inherit</B>
+
+<DD>
+If set, local variables inherit the value and attributes of a variable of
+the same name that exists at a previous scope before any new value is
+assigned.  The nameref attribute is not inherited.
 <DT><B>login_shell</B>
 
 <DD>
@@ -13437,7 +13453,7 @@ If the <B>-n</B> option is supplied, <B>wait</B> waits for any job to
 terminate and returns its exit status.
 If the <B>-f</B> option is supplied, and job control is enabled,
 <B>wait</B> forces <I>id</I> to terminate before returning its status,
-intead of returning when it changes status.
+instead of returning when it changes status.
 If
 <I>id</I>
 
@@ -13732,7 +13748,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2017 March 22<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2017 June 23<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13838,6 +13854,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 03 April 2017 16:34:05 EDT
+Time: 26 June 2017 09:16:53 EDT
 </BODY>
 </HTML>
