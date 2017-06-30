@@ -1346,3 +1346,26 @@ conf_standard_path ()
 #  endif /* !CS_PATH */
 #endif /* !_CS_PATH || !HAVE_CONFSTR */
 }
+
+int
+default_columns ()
+{
+  char *v;
+  int c;
+
+  c = -1;
+  v = get_string_value ("COLUMNS");
+  if (v && *v)
+    {
+      c = atoi (v);
+      if (c > 0)
+	return c;
+    }
+
+  if (check_window_size)
+    get_new_window_size (0, (int *)0, &c);
+
+  return (c > 0 ? c : 80);
+}
+
+  

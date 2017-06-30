@@ -335,5 +335,6 @@ extern char **get_group_list __P((int *));
 extern int *get_group_array __P((int *));
 
 extern char *conf_standard_path __P((void));
+extern int default_columns __P((void));
 
 #endif	/* _GENERAL_H_ */

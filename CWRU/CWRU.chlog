@@ -14199,3 +14199,28 @@ expr.c
 doc/{bash.1,bashref.texi}
 	- add text noting that $* and ${array[*]} (unquoted) can also expand
 	  to multiple words
+
+				   6/29
+				   ----
+general.[ch]
+	- default_columns: new function, returns the value of COLUMNS, or
+	  refreshes it if check_window_size is set and COLUMNS is unset. By
+	  default, it returns 80
+
+execute_cmd.c
+	- select_query: use default_columns() instead of fetching value of
+	  COLUMNS directly
+
+builtins/help.def
+	- show_builtin_command_help: use default_columns() instead of fetching
+	  value of COLUMNS directly
+
+				   6/30
+				   ----
+builtins/read.def
+	- read_builtin: call QUIT during the read loop, just in case we get a
+	  signal we should act on that didn't cause read to be interrupted.
+	  Fixes https://bugzilla.redhat.com/show_bug.cgi?id=1466737
+	- read_builtin: if -n or -N is supplied with a 0 argument, try a zero-
+	  length read to detect errors and return failure if that read returns
+	  a value < 0. Suggested by dualbus@gmail.com

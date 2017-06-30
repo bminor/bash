@@ -530,10 +530,7 @@ Use `man -k' or `info' to find out more about commands not in this list.\n\
 A star (*) next to a name means that the command is disabled.\n\
 \n"));
 
-  t = get_string_value ("COLUMNS");
-  width = (t && *t) ? atoi (t) : 80;
-  if (width <= 0)
-    width = 80;
+  width = default_columns ();
 
   width /= 2;
   if (width > sizeof (blurb))

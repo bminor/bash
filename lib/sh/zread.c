@@ -1,6 +1,6 @@
 /* zread - read data from file descriptor into buffer with retries */
 
-/* Copyright (C) 1999-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 

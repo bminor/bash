@@ -3185,12 +3185,7 @@ select_query (list, list_len, prompt, print_menu)
   WORD_LIST *l;
   char *repl_string, *t;
 
-#if 0
-  t = get_string_value ("LINES");
-  LINES = (t && *t) ? atoi (t) : 24;
-#endif
-  t = get_string_value ("COLUMNS");
-  COLS =  (t && *t) ? atoi (t) : 80;
+  COLS = default_columns ();
 
 #if 0
   t = get_string_value ("TABSIZE");

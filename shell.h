@@ -119,6 +119,7 @@ extern char **subshell_envp;
 extern int hup_on_exit;
 extern int check_jobs_at_exit;
 extern int autocd;
+extern int check_window_size;
 
 /* from version.c */
 extern int build_version, patch_level;

@@ -1,7 +1,7 @@
 This file is read.def, from which is created read.c.
 It implements the builtin "read" in Bash.
 
-Copyright (C) 1987-2015 Free Software Foundation, Inc.
+Copyright (C) 1987-2017 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -364,7 +364,11 @@ read_builtin (list)
 
   /* More input and options validation */
   if (nflag == 1 && nchars == 0)
-    goto assign_vars;		/* bail early if asked to read 0 chars */
+    {
+      retval = read (fd, &c, 0);
+      retval = (retval >= 0) ? EXECUTION_SUCCESS : EXECUTION_FAILURE;
+      goto assign_vars;		/* bail early if asked to read 0 chars */
+    }
 
   /* $TMOUT, if set, is the default timeout for read. */
   if (have_timeout == 0 && (e = get_string_value ("TMOUT")))
@@ -609,7 +613,7 @@ read_builtin (list)
 	}
 
       CHECK_ALRM;
-
+      QUIT;		/* in case we didn't call check_signals() */
 #if defined (READLINE)
 	}
 #endif
