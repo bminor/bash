@@ -909,9 +909,9 @@ operate_and_get_next (count, c)
   rl_newline (1, c);
 
   /* Find the current line, and find the next line to use. */
-  where = where_history ();
+  where = rl_explicit_arg ? count : where_history ();
 
-  if (HISTORY_FULL () || (where >= history_length - 1))
+  if (HISTORY_FULL () || (where >= history_length - 1) || rl_explicit_arg)
     saved_history_line_to_use = where;
   else
     saved_history_line_to_use = where + 1;

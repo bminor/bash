@@ -723,7 +723,10 @@ void
 maybe_add_history (line)
      char *line;
 {
+  int is_comment;
+
   hist_last_line_added = 0;
+  is_comment = shell_comment (line);
 
   /* Don't use the value of history_control to affect the second
      and subsequent lines of a multi-line command (old code did
@@ -731,14 +734,15 @@ maybe_add_history (line)
   if (current_command_line_count > 1)
     {
       if (current_command_first_line_saved &&
-	  ((parser_state & PST_HEREDOC) || literal_history || dstack.delimiter_depth != 0 || shell_comment (line) != 1))
+	  ((parser_state & PST_HEREDOC) || literal_history || dstack.delimiter_depth != 0 || is_comment != 1))
 	bash_add_history (line);
+      current_command_line_comment = is_comment ? current_command_line_count : -2;
       return;
     }
 
   /* This is the first line of a (possible multi-line) command.  Note whether
      or not we should save the first line and remember it. */
-  current_command_line_comment = shell_comment (line) ? current_command_line_count : -2;
+  current_command_line_comment = is_comment ? current_command_line_count : -2;
   current_command_first_line_saved = check_add_history (line, 0);
 }
 

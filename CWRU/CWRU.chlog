@@ -14224,3 +14224,24 @@ builtins/read.def
 	- read_builtin: if -n or -N is supplied with a 0 argument, try a zero-
 	  length read to detect errors and return failure if that read returns
 	  a value < 0. Suggested by dualbus@gmail.com
+
+				    7/4
+				    ---
+bashhist.c
+	- maybe_add_history: keep track of whether the current line is a shell
+	  comment, even if we're not adding it because it's in a multi-line
+	  command, so we use appropriate delimiters between it and any
+	  subsequent lines. Fixes bug reported by Grisha Levit
+	  <grishalevit@gmail.com> back on 2/28/2017
+
+bashline.c
+	- operate_and_get_next: if given an explicit argument, use that to
+	  choose which line in the history to use.
+
+lib/readline/doc/rluser.texi,doc/bash.1
+	- operate-and-get-next: document new effect of explicit numeric arg
+
+lib/readline/complete.c
+	- fnprint: make sure print_len is initialized before using it on
+	  systems without multibyte character support.  Report and fix from
+	  Juan Manuel Guerrero <juan.guerrero@gmx.de>

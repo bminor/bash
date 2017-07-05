@@ -804,6 +804,8 @@ fnprint (const char *to_print, int prefix_bytes, const char *real_pathname)
   print_len = strlen (to_print);
   end = to_print + print_len + 1;
   memset (&ps, 0, sizeof (mbstate_t));
+#else
+  print_len = strlen (to_print);
 #endif
 
   printed_len = common_prefix_len = 0;
