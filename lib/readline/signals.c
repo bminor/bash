@@ -249,9 +249,11 @@ _rl_handle_signal (int sig)
       rl_cleanup_after_signal ();
 
 #if defined (HAVE_POSIX_SIGNALS)
+#  if defined (SIGTSTP)
       /* Unblock SIGTTOU blocked above */
       if (sig == SIGTTIN || sig == SIGTSTP)
 	sigprocmask (SIG_UNBLOCK, &set, (sigset_t *)NULL);
+#  endif
 
       sigemptyset (&set);
       sigprocmask (SIG_BLOCK, (sigset_t *)NULL, &set);

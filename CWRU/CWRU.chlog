@@ -1,4 +1,4 @@
-'				 2/14/2011
+				 2/14/2011
 				 ---------
 [bash-4.2 released]
 
@@ -14245,3 +14245,34 @@ lib/readline/complete.c
 	- fnprint: make sure print_len is initialized before using it on
 	  systems without multibyte character support.  Report and fix from
 	  Juan Manuel Guerrero <juan.guerrero@gmx.de>
+
+				    7/6
+				    ---
+builtins/printf.def
+	- PRETURN,printf_builtin: check variable returned by bind_printf_variable,
+	  return failure if that indicates we can't perform an assignment
+	  because the variable is marked readonly or noassign. Fixes bug
+	  reported by Arnaud Gaillard <arnaud.mgaillard@gmail.com>
+
+				    7/7
+				    ---
+lib/readline/text.c
+	- rl_quoted_insert: new feature: a negative argument means to insert
+	  the next -COUNT characters using quoted-insert. Original feature
+	  from Jason Hood <jadoxa@yahoo.com.au>. Still needs work on
+	  redisplay
+	- _rl_insert_next_callback: implement support for negative arguments
+	  similar to rl_quoted_insert: we just insert one at a time and keep
+	  increasing the count until it hits 0
+
+lib/readline/misc.c
+	- _rl_arg_callback: if the return value from _rl_arg_dispatch indicates
+	  we should keep reading a numeric argument, update the message with
+	  the new arg value
+
+				    7/8
+				    ---
+lib/readline/signals.c
+	- _rl_handle_signal: make sure all uses of any of the job control
+	  signals are protected by a check for SIGTSTP being defined.  Report
+	  from Juan Manuel Guerrero <juan.guerrero@gmx.de>

@@ -578,7 +578,7 @@ main (argc, argv, env)
    */
   if (interactive_shell)
     {
-      char *term, *emacs, *inside_emacs;;
+      char *term, *emacs, *inside_emacs;
       int emacs_term, in_emacs;
 
       term = get_string_value ("TERM");

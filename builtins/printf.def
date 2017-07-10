@@ -1,7 +1,7 @@
 This file is printf.def, from which is created printf.c.
 It implements the builtin "printf" in Bash.
 
-Copyright (C) 1997-2016 Free Software Foundation, Inc.
+Copyright (C) 1997-2017 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -148,8 +148,11 @@ extern int errno;
       QUIT; \
       if (vflag) \
 	{ \
-	  bind_printf_variable  (vname, vbuf, 0); \
+	  SHELL_VAR *v; \
+	  v = bind_printf_variable  (vname, vbuf, 0); \
 	  stupidly_hack_special_variables (vname); \
+	  if (v == 0 || readonly_p (v) || noassign_p (v)) \
+	    return (EXECUTION_FAILURE); \
 	} \
       if (conv_bufsize > 4096 ) \
 	{ \
@@ -293,9 +296,10 @@ printf_builtin (list)
   /* Allow printf -v var "" to act like var="" */
   if (vflag && list->word->word && list->word->word[0] == '\0')
     {
-      bind_printf_variable (vname, "", 0);
+      SHELL_VAR *v;
+      v = bind_printf_variable (vname, "", 0);
       stupidly_hack_special_variables (vname);
-      return (EXECUTION_SUCCESS);
+      return ((v == 0 || readonly_p (v) || noassign_p (v)) ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
     }
 
   if (list->word->word == 0 || list->word->word[0] == '\0')

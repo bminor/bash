@@ -426,7 +426,7 @@ mkseq (start, end, incr, type, width)
   result = strvec_mcreate (nelem + 1);
   if (result == 0)
     {
-      internal_error (_("brace expansion: failed to allocate memory for %d elements"), nelem);
+      internal_error (_("brace expansion: failed to allocate memory for %u elements"), (unsigned int)nelem);
       return ((char **)NULL);
     }
 

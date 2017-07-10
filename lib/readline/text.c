@@ -980,14 +980,29 @@ _rl_insert_next (int count)
 static int
 _rl_insert_next_callback (_rl_callback_generic_arg *data)
 {
-  int count;
+  int count, r;
 
   count = data->count;
+  r = 0;
+
+  if (count < 0)
+    {
+      data->count++;
+      r = _rl_insert_next (1);
+      _rl_want_redisplay = 1;
+      /* If we should keep going, leave the callback function installed */
+      if (data->count < 0 && r == 0)
+	return r;
+      count = 0;	/* data->count == 0 || r != 0; force break below */
+    }
 
   /* Deregister function, let rl_callback_read_char deallocate data */
   _rl_callback_func = 0;
   _rl_want_redisplay = 1;
- 
+
+  if (count == 0)
+    return r;
+
   return _rl_insert_next (count);
 }
 #endif
@@ -1009,7 +1024,18 @@ rl_quoted_insert (int count, int key)
       return (0);
     }
 #endif
-      
+
+  /* A negative count means to quote the next -COUNT characters. */
+  if (count < 0)
+    {
+      int r;
+
+      do
+	r = _rl_insert_next (1);
+      while (r == 0 && ++count < 0);
+      return r;
+    }
+
   return _rl_insert_next (count);
 }
 

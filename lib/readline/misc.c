@@ -275,6 +275,8 @@ _rl_arg_callback (_rl_arg_cxt cxt)
     }
 
   r = _rl_arg_dispatch (cxt, c);
+  if (r > 0)
+    rl_message ("(arg: %d) ", rl_arg_sign * rl_numeric_arg);
   return (r != 1);
 }
 
