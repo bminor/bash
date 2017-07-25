@@ -115,7 +115,7 @@ extern int errno;
 struct ttsave
 {
   int fd;
-  TTYSTRUCT *attrs;
+  TTYSTRUCT attrs;
 };
 
 #if defined (READLINE)
@@ -494,7 +494,7 @@ read_builtin (list)
 	  /* ttsave() */
 	  termsave.fd = fd;
 	  ttgetattr (fd, &ttattrs);
-	  termsave.attrs = &ttattrs;
+	  termsave.attrs = ttattrs;
 
 	  ttset = ttattrs;	  
 	  i = silent ? ttfd_cbreak (fd, &ttset) : ttfd_onechar (fd, &ttset);
@@ -511,7 +511,7 @@ read_builtin (list)
       /* ttsave (); */
       termsave.fd = fd;
       ttgetattr (fd, &ttattrs);
-      termsave.attrs = &ttattrs;
+      termsave.attrs = ttattrs;
 
       ttset = ttattrs;
       i = ttfd_noecho (fd, &ttset);			/* ttnoecho (); */
@@ -1027,7 +1027,7 @@ static void
 ttyrestore (ttp)
      struct ttsave *ttp;
 {
-  ttsetattr (ttp->fd, ttp->attrs);
+  ttsetattr (ttp->fd, &(ttp->attrs));
   tty_modified = 0;
 }
 

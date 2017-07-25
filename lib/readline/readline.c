@@ -530,7 +530,7 @@ readline_internal_charloop (void)
 #endif
 {
   static int lastc, eof_found;
-  int c, code, lk;
+  int c, code, lk, r;
 
   lastc = EOF;
 
@@ -626,7 +626,7 @@ readline_internal_charloop (void)
 	}
 
       lastc = c;
-      _rl_dispatch ((unsigned char)c, _rl_keymap);
+      r = _rl_dispatch ((unsigned char)c, _rl_keymap);
       RL_CHECK_SIGNALS ();
 
       /* If there was no change in _rl_last_command_was_kill, then no kill

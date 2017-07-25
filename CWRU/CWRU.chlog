@@ -14276,3 +14276,18 @@ lib/readline/signals.c
 	- _rl_handle_signal: make sure all uses of any of the job control
 	  signals are protected by a check for SIGTSTP being defined.  Report
 	  from Juan Manuel Guerrero <juan.guerrero@gmx.de>
+
+				   7/11
+				   ----
+lib/readline/vi_mode.c
+	- rl_vi_replace: when making the new keymap for vi replacement mode,
+	  make sure that ANYOTHERKEY is set correctly, otherwise some input
+	  will cause _rl_dispatch to return -2 to the top level.  Fixes fuzzing
+	  bug reported by Ben Wong <benjamin.a.wong@gmail.com>
+
+				   7/19
+				   ----
+builtins/read.def
+	- struct ttsave: make the attrs member a struct, not a pointer, to force
+	  a structure copy that will survive a longjmp to another context.
+	  Leaving it as a pointer to a local struct is not portable

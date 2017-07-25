@@ -2074,6 +2074,9 @@ rl_vi_replace (int count, int key)
 	  vi_insertion_keymap[CTRL ('H')].function == rl_rubout)
 	vi_replace_map[CTRL ('H')].function = rl_vi_overstrike_delete;
 
+      /* Make sure this is the value we need. */
+      vi_replace_map[ANYOTHERKEY].type = ISFUNC;
+      vi_replace_map[ANYOTHERKEY].function = (rl_command_func_t *)NULL;
     }
 
   rl_vi_start_inserting (key, 1, rl_arg_sign);
