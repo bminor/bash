@@ -15,7 +15,7 @@ any later version published by the Free Software Foundation; with no
 Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 A copy of the license is included in the section entitled
 "GNU Free Documentation License". -->
-<!-- Created by GNU Texinfo 6.3, http://www.gnu.org/software/texinfo/ -->
+<!-- Created by GNU Texinfo 6.4, http://www.gnu.org/software/texinfo/ -->
 <head>
 <title>Bash Reference Manual</title>
 
@@ -3975,7 +3975,7 @@ facilities (see <a href="#Programmable-Completion-Builtins">Programmable Complet
 <p>Unless otherwise noted, each builtin command documented as accepting
 options preceded by &lsquo;<samp>-</samp>&rsquo; accepts &lsquo;<samp>--</samp>&rsquo;
 to signify the end of the options.
-The <code>:</code>, <code>true</code>, <code>false</code>, and <code>test</code>
+The <code>:</code>, <code>true</code>, <code>false</code>, and <code>test</code>/<code>[</code>
 builtins do not accept options and do not treat &lsquo;<samp>--</samp>&rsquo; specially.
 The <code>exit</code>, <code>logout</code>, <code>return</code>,
 <code>break</code>, <code>continue</code>, <code>let</code>,
@@ -4142,6 +4142,7 @@ cannot be executed for some reason, a non-interactive shell exits,
 unless the <code>execfail</code> shell option
 is enabled.  In that case, it returns failure.
 An interactive shell returns failure if the file cannot be executed.
+A subshell exits unconditionally if <code>exec</code> fails.
 If no <var>command</var> is specified, redirections may be used to affect
 the current shell environment.  If there are no redirection errors, the
 return status is zero; otherwise the return status is non-zero.
@@ -7682,7 +7683,8 @@ of a login shell.
 <dd><p>If this option is present, or if no arguments remain after option
 processing, then commands are read from the standard input.
 This option allows the positional parameters to be set
-when invoking an interactive shell.
+when invoking an interactive shell or when reading input
+through a pipe.
 </p>
 </dd>
 <dt><code>-D</code></dt>
@@ -11652,8 +11654,9 @@ word expansions (see <a href="#Shell-Expansions">Shell Expansions</a>).
 <a name="index-operate_002dand_002dget_002dnext-_0028C_002do_0029"></a>
 </dt>
 <dd><p>Accept the current line for execution and fetch the next line
-relative to the current line from the history for editing.  Any
-argument is ignored.
+relative to the current line from the history for editing.
+A numeric argument, if supplied, specifies the history entry to use instead
+of the current line.
 </p>
 </dd>
 <dt><code>edit-and-execute-command (C-x C-e)</code>
@@ -13876,7 +13879,7 @@ Everyone is permitted to copy and distribute verbatim copies
 of this license document, but changing it is not allowed.
 </pre></div>
 
-<ol>
+<ol start="0">
 <li> PREAMBLE
 
 <p>The purpose of this License is to make a manual, textbook, or other
@@ -14052,7 +14055,7 @@ Version filling the role of the Document, thus licensing distribution
 and modification of the Modified Version to whoever possesses a copy
 of it.  In addition, you must do these things in the Modified Version:
 </p>
-<ol>
+<ol type="A" start="1">
 <li> Use in the Title Page (and on the covers, if any) a title distinct
 from that of the Document, and from those of previous versions
 (which should, if there were any, be listed in the History section

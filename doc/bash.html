@@ -139,7 +139,8 @@ If the
 option is present, or if no arguments remain after option
 processing, then commands are read from the standard input.
 This option allows the positional parameters to be set
-when invoking an interactive shell.
+when invoking an interactive shell or when reading input
+through a pipe.
 <DT><B>-D</B>
 
 <DD>
@@ -7896,8 +7897,9 @@ A synonym for <B>yank-last-arg</B>.
 
 <DD>
 Accept the current line for execution and fetch the next line
-relative to the current line from the history for editing.  Any
-argument is ignored.
+relative to the current line from the history for editing.
+A numeric argument, if supplied, specifies the history entry to use instead
+of the current line.
 <DT><B>edit-and-execute-command (C-x C-e)</B>
 
 <DD>
@@ -9222,7 +9224,7 @@ accepts
 <B>--</B>
 
 to signify the end of the options.
-The <B>:</B>, <B>true</B>, <B>false</B>, and <B>test</B> builtins
+The <B>:</B>, <B>true</B>, <B>false</B>, and <B>test</B>/<B>[</B> builtins
 do not accept options and do not treat <B>--</B> specially.
 The <B>exit</B>, <B>logout</B>, <B>return</B>,
 <B>break</B>, <B>continue</B>, <B>let</B>,
@@ -10396,6 +10398,7 @@ unless the
 shell option
 is enabled.  In that case, it returns failure.
 An interactive shell returns failure if the file cannot be executed.
+A subshell exits unconditionally if <B>exec</B> fails.
 If
 <I>command</I>
 
@@ -13854,6 +13857,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 26 June 2017 09:16:53 EDT
+Time: 23 August 2017 16:02:54 EDT
 </BODY>
 </HTML>
