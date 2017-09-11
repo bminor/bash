@@ -14291,3 +14291,13 @@ builtins/read.def
 	- struct ttsave: make the attrs member a struct, not a pointer, to force
 	  a structure copy that will survive a longjmp to another context.
 	  Leaving it as a pointer to a local struct is not portable
+
+				   9/10
+				   ----
+execute_cmd.c
+	- execute_builtin: make sure that we set up the unwind-protect for
+	  pop_scope (temporary_env is non-zero) so that the temporary env
+	  is propagated to the current environment only for special builtins
+	  (source/eval/unset) not run by the command builtin
+	  (flags & CMD_COMMAND_BUILTIN == 0).  Fixes bug reported by
+	  Martijn Dekker <martijn@inlv.org>

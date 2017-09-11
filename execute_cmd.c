@@ -603,6 +603,16 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
   user_subshell = command->type == cm_subshell || ((command->flags & CMD_WANT_SUBSHELL) != 0);
 
+#if defined (TIME_BEFORE_SUBSHELL)
+  if ((command->flags & CMD_TIME_PIPELINE) && user_subshell && asynchronous == 0)
+    {
+      command->flags |= CMD_FORCE_SUBSHELL;
+      exec_result = time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close);
+      currently_executing_command = (COMMAND *)NULL;
+      return (exec_result);
+    }
+#endif
+
   if (command->type == cm_subshell ||
       (command->flags & (CMD_WANT_SUBSHELL|CMD_FORCE_SUBSHELL)) ||
       (shell_control_structure (command->type) &&
@@ -4510,10 +4520,11 @@ execute_builtin (builtin, words, flags, subshell)
      int flags, subshell;
 {
   int result, eval_unwind, ignexit_flag, old_e_flag;
-  int isbltinenv;
+  int isbltinenv, should_keep;
   char *error_trap;
 
   error_trap = 0;
+  should_keep = 0;
 
   /* The eval builtin calls parse_and_execute, which does not know about
      the setting of flags, and always calls the execution functions with
@@ -4549,10 +4560,17 @@ execute_builtin (builtin, words, flags, subshell)
      problem only with the `unset', `source' and `eval' builtins.
      `mapfile' is a special case because it uses evalstring (same as
      eval or source) to run its callbacks. */
+  /* SHOULD_KEEP is for the pop_scope call below; it only matters when
+     posixly_correct is set, but we should propagate the temporary environment
+     to the enclosing environment only for special builtins. */
   isbltinenv = (builtin == source_builtin || builtin == eval_builtin || builtin == unset_builtin || builtin == mapfile_builtin);
+  should_keep = isbltinenv && builtin != mapfile_builtin;
 #if defined (HISTORY) && defined (READLINE)
   if (builtin == fc_builtin || builtin == read_builtin)
-    isbltinenv = 1;
+    {
+      isbltinenv = 1;
+      should_keep = 0;
+    }
 #endif
 
   if (isbltinenv)
@@ -4563,8 +4581,10 @@ execute_builtin (builtin, words, flags, subshell)
       if (temporary_env)
 	{
 	  push_scope (VC_BLTNENV, temporary_env);
+	  if (flags & CMD_COMMAND_BUILTIN)
+	    should_keep = 0;
 	  if (subshell == 0)
-	    add_unwind_protect (pop_scope, (flags & CMD_COMMAND_BUILTIN) ? 0 : "1");
+	    add_unwind_protect (pop_scope, should_keep ? "1" : 0);
           temporary_env = (HASH_TABLE *)NULL;	  
 	}
     }
