@@ -14301,3 +14301,11 @@ execute_cmd.c
 	  (source/eval/unset) not run by the command builtin
 	  (flags & CMD_COMMAND_BUILTIN == 0).  Fixes bug reported by
 	  Martijn Dekker <martijn@inlv.org>
+
+				   9/17
+				   ----
+builtins/printf.def
+	- asciicode: don't use mblen to check whether or not a character is a
+	  valid multibyte character; use mbtowc right away and then inspect
+	  the return value.  Fixes bug reported by Stephane Chazelas
+	  <stephane.chazelas@gmail.com>

@@ -1245,18 +1245,17 @@ asciicode ()
   register intmax_t ch;
 #if defined (HANDLE_MULTIBYTE)
   wchar_t wc;
-  size_t mblength, slen;
+  size_t slen;
+  int mblength;
 #endif
   DECLARE_MBSTATE;
 
 #if defined (HANDLE_MULTIBYTE)
   slen = strlen (garglist->word->word+1);
-  mblength = MBLEN (garglist->word->word+1, slen);
-  if (mblength > 1)
-    {
-      mblength = mbtowc (&wc, garglist->word->word+1, slen);
-      ch = wc;		/* XXX */
-    }
+  wc = 0;
+  mblength = mbtowc (&wc, garglist->word->word+1, slen);
+  if (mblength > 0)
+    ch = wc;		/* XXX */
   else
 #endif
     ch = (unsigned char)garglist->word->word[1];
