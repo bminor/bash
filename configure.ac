@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.4, version 4.088])dnl
+AC_REVISION([for Bash 4.4, version 4.089])dnl
 
 define(bashvers, 4.4)
 define(relstatus, maint)
@@ -817,7 +817,7 @@ AC_CHECK_DECLS([strtold], [
     AC_CACHE_VAL(bash_cv_strtold_broken,
 	[AC_TRY_COMPILE(
 	    [#include <stdlib.h>],
-	    [int main() { long double r; char *foo, bar; r = strtold(foo, &bar);}],
+	    [long double r; char *foo, bar; r = strtold(foo, &bar);],
 	    bash_cv_strtold_broken=no, bash_cv_strtold_broken=yes,
 	    [AC_MSG_WARN(cannot check for broken strtold if cross-compiling, defaulting to no)])
 	]

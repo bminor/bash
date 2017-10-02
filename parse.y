@@ -2996,7 +2996,11 @@ special_case_tokens (tokstr)
       (token_before_that == FOR) &&
 #endif
       (tokstr[0] == 'd' && tokstr[1] == 'o' && tokstr[2] == '\0'))
-    return (DO);
+    {
+      if (expecting_in_token)
+	expecting_in_token--;
+      return (DO);
+    }
 
   /* Ditto for ESAC in the CASE case.
      Specifically, this handles "case word in esac", which is a legal

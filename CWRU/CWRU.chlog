@@ -14309,3 +14309,22 @@ builtins/printf.def
 	  valid multibyte character; use mbtowc right away and then inspect
 	  the return value.  Fixes bug reported by Stephane Chazelas
 	  <stephane.chazelas@gmail.com>
+
+				   9/27
+				   ----
+{jobs,subst}.h
+	- move declaration of last_command_subst_pid to subst.h, since it's
+	  declared in subst.c and doesn't depend on job control. Reported by
+	  Martijn Dekker <martijn@inlv.org>
+
+builtins/read.def,variables.c
+	- fixed a couple of problems (READLINE, ARRAY_VARS) that prevented
+	  the minimal config from building
+
+				   10/1
+				   ----
+parse.y
+	- special_case_tokens: if we are returning DO in a case where the last
+	  two tokens read are `FOR' and `WORD' make sure we decrement
+	  expecting_in_token.  Fixes bug reported by Martijn Dekker
+	  <martijn@inlv.org>

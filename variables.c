@@ -2534,11 +2534,15 @@ make_local_variable (name, flags)
 	{
 	  /* This may not make sense for nameref variables that are shadowing
 	     variables with the same name, but we don't know that yet. */
+#if defined (ARRAY_VARS)
 	  if (assoc_p (old_var))
 	    var_setassoc (new_var, assoc_copy (assoc_cell (old_var)));
 	  else if (array_p (old_var))
 	    var_setarray (new_var, array_copy (array_cell (old_var)));
 	  else if (value_cell (old_var))
+#else
+	  if (value_cell (old_var))
+#endif
 	    var_setvalue (new_var, savestring (value_cell (old_var)));
 	  else
 	    var_setvalue (new_var, (char *)NULL);

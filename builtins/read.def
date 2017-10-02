@@ -686,6 +686,7 @@ add_char:
 	  input_string[i] = '\0';	/* for simplicity and debugging */
 	  /* If we got input from readline, grab the next multibyte char from
 	     rlbuf. */
+#  if defined (READLINE)
 	  if (edit)
 	    {
 	      size_t clen;
@@ -701,6 +702,7 @@ add_char:
 		}
 	    }
 	  else
+#  endif
 	    i += read_mbchar (fd, input_string, i, c, unbuffered_read);
 	}
 #endif
