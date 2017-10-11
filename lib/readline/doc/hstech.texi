@@ -234,10 +234,12 @@ pointer.
 @end deftypefun
 
 @deftypefun {HIST_ENTRY *} history_get (int offset)
-Return the history entry at position @var{offset}, starting from
-@code{history_base} (@pxref{History Variables}).
-If there is no entry there, or if @var{offset}
-is greater than the history length, return a @code{NULL} pointer.
+Return the history entry at position @var{offset}.
+The range of valid
+values of @var{offset} starts at @code{history_base} and ends at
+@var{history_length} - 1 (@pxref{History Variables}).
+If there is no entry there, or if @var{offset} is outside the valid
+range, return a @code{NULL} pointer.
 @end deftypefun
 
 @deftypefun time_t history_get_time (HIST_ENTRY *entry)

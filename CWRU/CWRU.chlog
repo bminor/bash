@@ -14328,3 +14328,48 @@ parse.y
 	  two tokens read are `FOR' and `WORD' make sure we decrement
 	  expecting_in_token.  Fixes bug reported by Martijn Dekker
 	  <martijn@inlv.org>
+
+				   10/4
+				   ----
+subst.c
+	- expand_string_for_rhs: now takes an additional PFLAGS argument from
+	  its caller (one so far); passes that through to call_expand_word_internal
+	  as W_ASSIGNRHS. Fixes bug reported by Martijn Dekker
+	  <martijn@inlv.org>
+	- expand_string_for_rhs: expanding b in ${a[:]=b} is now done as if
+	  b were the rhs of an assignment statement. This means that splitting
+	  isn't done, but tilde expansion is performed as if the statement
+	  were `a=b'. Fixes splitting bug with $* reported by Martijn Dekker
+	  <martijn@inlv.org>
+
+command.h
+	- W_NOASSNTILDE: new word flag, means to not perform tilde expansion
+	  following a `:' even if the word has the W_ASSIGNRHS flag enabled
+
+subst.c
+	- expand_word_internal: if we see a `:' with the W_NOASSNTILDE flag
+	  set, just add the character and inhibit any subsequent tilde
+	  expansion. Currently not set anywhere, but it could be set in
+	  expand_string_for_rhs to satisfy its peculiar semantics
+
+				   10/6
+				   ----
+lib/sh/casemod.c
+	- sh_modcase: convert even single-byte wide characters to wide upper
+	  or lowercase equivalents to accommodate locales where single-byte
+	  characters have multibyte upper and lower case conversions. Bug
+	  reported by Stephane Chazelas <stephane.chazelas@gmail.com>
+
+				   10/7
+				   ----
+doc/{bash.1,bashref.texi}
+	- slight changes to the description of command_not_found_handle to
+	  clarify that it's executed in a separate execution environment,
+	  just like if the command was found. Reported by Martijn Dekker
+	  <martijn@inlv.org>
+
+				   10/8
+				   ----
+lib/readline/doc/{history.3,hstech.texi}
+	- history_get: clarify the range of valid values for the OFFSET
+	  argument. From a report by Kevin Ryde <user42_kevin@yahoo.com.au>

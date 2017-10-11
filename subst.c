@@ -236,7 +236,7 @@ static inline char *expand_string_to_string_internal __P((char *, int, EXPFUNC *
 static WORD_LIST *call_expand_word_internal __P((WORD_DESC *, int, int, int *, int *));
 static WORD_LIST *expand_string_internal __P((char *, int));
 static WORD_LIST *expand_string_leave_quoted __P((char *, int));
-static WORD_LIST *expand_string_for_rhs __P((char *, int, int, int *, int *));
+static WORD_LIST *expand_string_for_rhs __P((char *, int, int, int, int *, int *));
 static WORD_LIST *expand_string_for_pat __P((char *, int, int *, int *));
 
 static WORD_LIST *list_quote_escapes __P((WORD_LIST *));
@@ -446,6 +446,11 @@ dump_word_flags (flags)
     {
       f &= ~W_ASSIGNRHS;
       fprintf (stderr, "W_ASSIGNRHS%s", f ? "|" : "");
+    }
+  if (f & W_NOASSNTILDE)
+    {
+      f &= ~W_NOASSNTILDE;
+      fprintf (stderr, "W_NOASSNTILDE%s", f ? "|" : "");
     }
   if (f & W_NOCOMSUB)
     {
@@ -3833,13 +3838,14 @@ expand_string_leave_quoted (string, quoted)
 /* This does not perform word splitting or dequote the WORD_LIST
    it returns. */
 static WORD_LIST *
-expand_string_for_rhs (string, quoted, op, dollar_at_p, expanded_p)
+expand_string_for_rhs (string, quoted, op, pflags, dollar_at_p, expanded_p)
      char *string;
-     int quoted, op;
+     int quoted, op, pflags;
      int *dollar_at_p, *expanded_p;
 {
   WORD_DESC td;
   WORD_LIST *tresult;
+  int old_nosplit;
 
   if (string == 0 || *string == '\0')
     return (WORD_LIST *)NULL;
@@ -3849,20 +3855,23 @@ expand_string_for_rhs (string, quoted, op, dollar_at_p, expanded_p)
      we expand here.  However, the expansion of $* is determined by whether we
      are going to eventually perform word splitting, so we want to set this
      depending on whether or not are are going to be splitting: if the expansion
-     is quoted, if the OP is `=',  or if IFS is set to the empty string, we
+     is quoted, if the OP is `=', or if IFS is set to the empty string, we
      are not going to be splitting, so we set expand_no_split_dollar_star to
-     1.  This may need additional changes depending on whether or not this is
-     on the RHS of an assignment statement. */
+     We pass through PF_ASSIGNRHS as W_ASSIGNRHS if this is on the RHS of an
+     assignment statement. */
   /* The updated treatment of $* is the result of Posix interp 888 */
   /* This was further clarified on the austin-group list in March, 2017 and
      in Posix bug 1129 */
+  old_nosplit = expand_no_split_dollar_star;
   expand_no_split_dollar_star = (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) || op == '=' || ifs_is_null == 0;	/* XXX - was 1 */
-  /* You'd think Posix specifies W_ASSIGNRHS, but it results in tilde expansion
-     after `=' and `:' the rhs of ${param=word} */
   td.flags = W_NOSPLIT2;		/* no splitting, remove "" and '' */
+  if (pflags & PF_ASSIGNRHS)		/* pass through */
+    td.flags |= W_ASSIGNRHS;
+  if (op == '=')
+    td.flags |= W_ASSIGNRHS;		/* expand b in ${a=b} like assignment */
   td.word = string;
   tresult = call_expand_word_internal (&td, quoted, 1, dollar_at_p, expanded_p);
-  expand_no_split_dollar_star = 0;
+  expand_no_split_dollar_star = old_nosplit;
 
   return (tresult);
 }
@@ -6633,7 +6642,7 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
 
   w = alloc_word_desc ();
   l_hasdollat = 0;
-  l = *temp ? expand_string_for_rhs (temp, quoted, op, &l_hasdollat, (int *)NULL)
+  l = *temp ? expand_string_for_rhs (temp, quoted, op, pflags, &l_hasdollat, (int *)NULL)
 	    : (WORD_LIST *)0;
   if (hasdollarat)
     *hasdollarat = l_hasdollat || (l && l->next);
@@ -9573,7 +9582,7 @@ add_string:
 	    goto add_character;
 
 	case ':':
-	  if (word->flags & W_NOTILDE)
+	  if (word->flags & (W_NOTILDE|W_NOASSNTILDE))
 	    {
 	      if (isexp == 0 && (word->flags & (W_NOSPLIT|W_NOSPLIT2)) == 0 && isifs (c))
 		goto add_ifs_character;

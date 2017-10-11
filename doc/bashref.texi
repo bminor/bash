@@ -3003,9 +3003,10 @@ A full search of the directories in @env{$PATH}
 is performed only if the command is not found in the hash table.
 If the search is unsuccessful, the shell searches for a defined shell
 function named @code{command_not_found_handle}.
-If that function exists, it is invoked with the original command and
+If that function exists, it is invoked in a separate execution environment
+with the original command and
 the original command's arguments as its arguments, and the function's
-exit status becomes the exit status of the shell.
+exit status becomes the exit status of that subshell.
 If that function is not defined, the shell prints an error
 message and returns an exit status of 127.
 

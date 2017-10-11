@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Jun 23 12:42:34 EDT 2017
+.\"	Last Change: Sat Oct  7 17:30:18 EDT 2017
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2017 June 23" "GNU Bash 4.4"
+.TH BASH 1 "2017 October 7" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -4694,9 +4694,10 @@ A full search of the directories in
 is performed only if the command is not found in the hash table.
 If the search is unsuccessful, the shell searches for a defined shell
 function named \fBcommand_not_found_handle\fP.
-If that function exists, it is invoked with the original command and
+If that function exists, it is invoked in a separate execution environment
+with the original command and
 the original command's arguments as its arguments, and the function's
-exit status becomes the exit status of the shell.
+exit status becomes the exit status of that subshell.
 If that function is not defined, the shell prints an error
 message and returns an exit status of 127.
 .PP

@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Sun May 24 18:01:17 EDT 2015
+.\"	Last Change: Sun Oct  8 11:43:43 EDT 2017
 .\"
-.TH HISTORY 3 "2015 May 24" "GNU History 6.3"
+.TH HISTORY 3 "2017 October 8" "GNU History 6.3"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -40,8 +40,8 @@
 .SH NAME
 history \- GNU History Library
 .SH COPYRIGHT
-.if t The GNU History Library is Copyright \(co 1989-2014 by the Free Software Foundation, Inc.
-.if n The GNU History Library is Copyright (C) 1989-2014 by the Free Software Foundation, Inc.
+.if t The GNU History Library is Copyright \(co 1989-2017 by the Free Software Foundation, Inc.
+.if n The GNU History Library is Copyright (C) 1989-2017 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 Many programs read input from the user a line at a time.  The GNU
 History library is able to keep track of those lines, associate arbitrary
@@ -411,10 +411,11 @@ Return the history entry at the current position, as determined by
 pointer.
 
 .Fn1 "HIST_ENTRY *" history_get "int offset"
-Return the history entry at position \fIoffset\fP, starting from
-\fBhistory_base\fP.
-If there is no entry there, or if \fIoffset\fP
-is greater than the history length, return a \fBNULL\fP pointer.
+Return the history entry at position \fIoffset\fP.
+The range of valid values of \fIoffset\fP starts at \fBhistory_base\fP
+and ends at \fBhistory_length\fP \- 1.
+If there is no entry there, or if \fIoffset\fP is outside the valid
+range, return a \fBNULL\fP pointer.
 
 .Fn1 "time_t" history_get_time "HIST_ENTRY *"
 Return the time stamp associated with the history entry passed as the argument.

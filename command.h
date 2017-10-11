@@ -102,6 +102,7 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define W_NOBRACE	0x4000000	/* Don't perform brace expansion */
 #define W_COMPLETE	0x8000000	/* word is being expanded for completion */
 #define W_CHKLOCAL	0x10000000	/* check for local vars on assignment */
+#define W_NOASSNTILDE	0x20000000	/* don't do tilde expansion like an assignment statement */
 
 /* Flags for the `pflags' argument to param_expand() and various
    parameter_brace_expand_xxx functions; also used for string_list_dollar_at */
