@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 4.4, 23 June 2017).
+the Bash shell (version 4.4, 7 October 2017).
 
-This is Edition 4.4, last updated 23 June 2017,
+This is Edition 4.4, last updated 7 October 2017,
 of The GNU Bash Reference Manual,
 for Bash, Version 4.4.
 
@@ -284,10 +284,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 4.4, 23 June 2017).
+the Bash shell (version 4.4, 7 October 2017).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 4.4, last updated 23 June 2017,
+<p>This is Edition 4.4, last updated 7 October 2017,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 4.4.
 </p>
@@ -3615,9 +3615,10 @@ A full search of the directories in <code>$PATH</code>
 is performed only if the command is not found in the hash table.
 If the search is unsuccessful, the shell searches for a defined shell
 function named <code>command_not_found_handle</code>.
-If that function exists, it is invoked with the original command and
+If that function exists, it is invoked in a separate execution environment
+with the original command and
 the original command&rsquo;s arguments as its arguments, and the function&rsquo;s
-exit status becomes the exit status of the shell.
+exit status becomes the exit status of that subshell.
 If that function is not defined, the shell prints an error
 message and returns an exit status of 127.
 

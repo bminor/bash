@@ -229,9 +229,9 @@ singlebyte:
       else
 	{
 	  m = mbrtowc (&wc, string + start, end - start, &state);
-	  /* Have to go through case conversion even for single-byte chars, to
-	     accommodate single-byte characters where the corresponding upper
-	     or lower case equivalent is multibyte. */
+	  /* Have to go through wide case conversion even for single-byte
+	     chars, to accommodate single-byte characters where the
+	     corresponding upper or lower case equivalent is multibyte. */
 	  if (MB_INVALIDCH (m))
 	    {
 	      wc = (unsigned char)string[start];
