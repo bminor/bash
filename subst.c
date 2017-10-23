@@ -3868,7 +3868,11 @@ expand_string_for_rhs (string, quoted, op, pflags, dollar_at_p, expanded_p)
   if (pflags & PF_ASSIGNRHS)		/* pass through */
     td.flags |= W_ASSIGNRHS;
   if (op == '=')
+#if 0
     td.flags |= W_ASSIGNRHS;		/* expand b in ${a=b} like assignment */
+#else
+    td.flags |= W_ASSIGNRHS|W_NOASSNTILDE;		/* expand b in ${a=b} like assignment */
+#endif
   td.word = string;
   tresult = call_expand_word_internal (&td, quoted, 1, dollar_at_p, expanded_p);
   expand_no_split_dollar_star = old_nosplit;

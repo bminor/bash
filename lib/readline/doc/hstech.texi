@@ -166,6 +166,9 @@ parameters managing the list itself.
 @deftypefun void add_history (const char *string)
 Place @var{string} at the end of the history list.  The associated data
 field (if any) is set to @code{NULL}.
+If the maximum number of history entries has been set using
+@code{stifle_history()}, and the new number of history entries would exceed
+that maximum, the oldest history entry is removed.
 @end deftypefun
 
 @deftypefun void add_history_time (const char *string)
@@ -198,6 +201,7 @@ Clear the history list by deleting all the entries.
 
 @deftypefun void stifle_history (int max)
 Stifle the history list, remembering only the last @var{max} entries.
+The history list will contain only @var{max} entries at a time.
 @end deftypefun
 
 @deftypefun int unstifle_history (void)

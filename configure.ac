@@ -248,7 +248,7 @@ AC_ARG_ENABLE(static-link, AC_HELP_STRING([--enable-static-link], [link bash sta
 
 dnl So-called `precious' variables
 AC_ARG_VAR([CC_FOR_BUILD], [C compiler used when compiling binaries used only at build time])
-AC_ARG_VAR([CFLAGS_FOR_BUILD], [Compliation options (CFLAGS) used when compiling binaries used only at build time])
+AC_ARG_VAR([CFLAGS_FOR_BUILD], [Compilation options (CFLAGS) used when compiling binaries used only at build time])
 AC_ARG_VAR([LDFLAGS_FOR_BUILD], [Linker options (LDFLAGS) used when compiling binaries used only at build time])
 AC_ARG_VAR([CPPFLAGS_FOR_BUILD], [C preprocessor options (CPPFLAGS) used when compiling binaries used only at build time])
 

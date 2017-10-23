@@ -1,6 +1,6 @@
 /* shell.c -- GNU's idea of the POSIX shell specification. */
 
-/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -291,6 +291,7 @@ int want_pending_command;	/* -c flag supplied */
 
 /* This variable is not static so it can be bound to $BASH_EXECUTION_STRING */
 char *command_execution_string;	/* argument to -c option */
+char *shell_script_filename; 	/* shell script */
 
 int malloc_trace_at_exit = 0;
 
@@ -427,7 +428,7 @@ main (argc, argv, env)
   arg_index = 1;
   if (arg_index > argc)
     arg_index = argc;
-  command_execution_string = (char *)NULL;
+  command_execution_string = shell_script_filename = (char *)NULL;
   want_pending_command = locally_skip_execution = read_from_stdin = 0;
   default_input = stdin;
 #if defined (BUFFERED_INPUT)
@@ -667,6 +668,22 @@ main (argc, argv, env)
   restricted = 0;
 #endif
 
+  /* Set positional parameters before running startup files. top_level_arg_index
+     holds the index of the current argument before setting the positional
+     parameters, so any changes performed in the startup files won't affect
+     later option processing. */
+  if (wordexp_only)
+    ;			/* nothing yet */
+  else if (command_execution_string)
+    arg_index = bind_args (argv, arg_index, argc, 0);	/* $0 ... $n */
+  else if (arg_index != argc && read_from_stdin == 0)
+    {
+      shell_script_filename = argv[arg_index++];
+      arg_index = bind_args (argv, arg_index, argc, 1);	/* $1 ... $n */
+    }
+  else
+    arg_index = bind_args (argv, arg_index, argc, 1);	/* $1 ... $n */
+
   /* The startup files are run with `set -e' temporarily disabled. */
   if (locally_skip_execution == 0 && running_setuid == 0)
     {
@@ -697,7 +714,7 @@ main (argc, argv, env)
   if (wordexp_only)
     {
       startup_state = 3;
-      last_command_exit_value = run_wordexp (argv[arg_index]);
+      last_command_exit_value = run_wordexp (argv[top_level_arg_index]);
       exit_shell (last_command_exit_value);
     }
 #endif
@@ -707,7 +724,6 @@ main (argc, argv, env)
 
   if (command_execution_string)
     {
-      arg_index = bind_args (argv, arg_index, argc, 0);
       startup_state = 2;
 
       if (debugging_mode)
@@ -725,11 +741,8 @@ main (argc, argv, env)
 
   /* Get possible input filename and set up default_buffered_input or
      default_input as appropriate. */
-  if (arg_index != argc && read_from_stdin == 0)
-    {
-      open_shell_script (argv[arg_index]);
-      arg_index++;
-    }
+  if (shell_script_filename)
+    open_shell_script (shell_script_filename);
   else if (interactive == 0)
     {
       /* In this mode, bash is reading a script from stdin, which is a
@@ -741,15 +754,12 @@ main (argc, argv, env)
 #endif /* !BUFFERED_INPUT */
       read_from_stdin = 1;
     }
-  else if (arg_index == argc)
+  else if (top_level_arg_index == argc)		/* arg index before startup files */
     /* "If there are no operands and the -c option is not specified, the -s
        option shall be assumed." */
     read_from_stdin = 1;
 
   set_bash_input ();
-
-  /* Bind remaining args to $1 ... $n */
-  arg_index = bind_args (argv, arg_index, argc, 1);
 
   if (debugging_mode && locally_skip_execution == 0 && running_setuid == 0 && (reading_shell_script || interactive_shell == 0))
     start_debugger ();

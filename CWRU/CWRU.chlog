@@ -14373,3 +14373,14 @@ doc/{bash.1,bashref.texi}
 lib/readline/doc/{history.3,hstech.texi}
 	- history_get: clarify the range of valid values for the OFFSET
 	  argument. From a report by Kevin Ryde <user42_kevin@yahoo.com.au>
+
+				   10/21
+				   -----
+subst.c
+	- expand_string_for_rhs: set W_NOASSNTILDE if the operator is `='
+	  for backwards compatibility with bash-4.4
+
+shell.c
+	- main: set positional parameters before running the startup files,
+	  so the startup files can inspect $@.  Often-requested feature,
+	  most recently from Stephane Chazelas <stephane.chazelas@gmail.com>

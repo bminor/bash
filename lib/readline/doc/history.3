@@ -356,6 +356,9 @@ parameters managing the list itself.
 .Fn1 void add_history "const char *string"
 Place \fIstring\fP at the end of the history list.  The associated data
 field (if any) is set to \fBNULL\fP.
+If the maximum number of history entries has been set using
+\fBstifle_history()\fP, and the new number of history entries would exceed
+that maximum, the oldest history entry is removed.
 
 .Fn1 void add_history_time "const char *string"
 Change the time stamp associated with the most recent history entry to
@@ -382,6 +385,7 @@ Clear the history list by deleting all the entries.
 
 .Fn1 void stifle_history "int max"
 Stifle the history list, remembering only the last \fImax\fP entries.
+The history list will contain only \fImax\fP entries at a time.
 
 .Fn1 int unstifle_history "void"
 Stop stifling the history.  This returns the previously-set
