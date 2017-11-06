@@ -50,6 +50,12 @@ do
 	:
 done
 
+# problem with four-character words followed by a metachar through bash-4.4
+comsub_foo_1()
+{
+  echo $(while true; do case $HOME in /*) echo abs ;; esac; done)
+}
+
 ${THIS_SH} ./comsub1.sub
 ${THIS_SH} ./comsub2.sub
 ${THIS_SH} ./comsub3.sub

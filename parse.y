@@ -4079,11 +4079,13 @@ eof_error:
 		  tflags |= LEX_RESWDOK;
 		  lex_rwlen = 0;
 		}
-	       else
+	       else if (shellmeta (ch) == 0)
 		{
 		  tflags &= ~LEX_RESWDOK;
 /*itrace("parse_comsub:%d: found `%.4s', lex_reswdok -> 0", line_number, ret+retind-4);*/
 		}
+	      else	/* can't be in a reserved word any more */
+	        lex_rwlen = 0;
 	    }
 	  else if MBTEST((tflags & LEX_CKCOMMENT) && ch == '#' && (lex_rwlen == 0 || ((tflags & LEX_INWORD) && lex_wlen == 0)))
 	    ;	/* don't modify LEX_RESWDOK if we're starting a comment */

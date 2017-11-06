@@ -14399,3 +14399,37 @@ parse.y
 	  buffer when checking for the here doc delimiter.  Report from
 	  Jakub Wilk <jwilk@jwilk.net>, the result of a fuzzing test. Pointer
 	  to place for the fix from Eduardo Bustamante <dualbus@gmail.com>
+
+				   10/30
+				   -----
+builtins/pushd.def
+	- get_directory_stack: make sure the current directory (element 0 of
+	  the stack) is passed to polite_directory_format under the same
+	  conditions as the rest of the stack entries (flags & 1). Otherwise
+	  something like `cd ${DIRSTACK[0]}' will fail. Fixes bug reported
+	  by Steve Jones <sjml@slohj.org>
+
+builtins/declare.def
+	- declare_internal: when checking for a `[' to see whether or not this
+	  is an array variable declaration (declare -a foo[12]), make sure
+	  we don't do the check if we're just dealing with shell functions.
+	  Bug and pointer to fix from PJ Eby <pje@telecommunity.com>
+
+				   11/1
+				   ----
+parse.y
+	- parse_comsub: if we read a four-character word followed by a break
+	  character, and that word is not one of the reserved words, set
+	  lex_rwlen to 0 since we are no longer in a reserved word. It only
+	  hurts if another break character immediately follows, so that test
+	  succeeds again. Turn off the RESWDOK flag only if it's not a shell
+	  metacharacter, too. Fixes bug reported by Kjetil Torgrim Homme
+	  <kjetilho@scribus.ms.redpill-linpro.com>
+
+				   11/3
+				   ----
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: if we are searching in reverse order, let
+	  sline_index go to -1 to avoid searching the same line twice. It
+	  gets reset right after that, so there's no danger of indexing into
+	  the history line with a negative index.

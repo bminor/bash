@@ -516,7 +516,7 @@ add_character:
 	    }
 	  return (1);
 	}
-      else if (cxt->sflags & SF_REVERSE && cxt->sline_index > 0)
+      else if ((cxt->sflags & SF_REVERSE) && cxt->sline_index >= 0)
 	cxt->sline_index--;
       else if (cxt->sline_index != cxt->sline_len)
 	cxt->sline_index++;
@@ -665,6 +665,7 @@ add_character:
 	    }
 	  else
 	    cxt->sline_index += cxt->direction;
+
 	  if (cxt->sline_index < 0)
 	    {
 	      cxt->sline_index = 0;
@@ -697,7 +698,12 @@ add_character:
 	     (cxt->search_string_index > cxt->sline_len));
 
       if (cxt->sflags & SF_FAILED)
-	break;
+	{
+	  /* XXX - reset sline_index if < 0 */
+	  if (cxt->sline_index < 0)
+	    cxt->sline_index = 0;
+	  break;
+	}
 
       /* Now set up the line for searching... */
       cxt->sline_index = (cxt->sflags & SF_REVERSE) ? cxt->sline_len - cxt->search_string_index : 0;

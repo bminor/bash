@@ -678,7 +678,7 @@ get_directory_stack (flags)
     d = ".";
   else
     {
-      t = polite_directory_format (d);
+      t = (flags&1) ? polite_directory_format (d) : d;
       /* polite_directory_format sometimes returns its argument unchanged.
 	 If it does not, we can free d right away.  If it does, we need to
 	 mark d to be deleted later. */

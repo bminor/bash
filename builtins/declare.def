@@ -373,7 +373,7 @@ restart_new_var_name:
       compound_array_assign = simple_array_assign = 0;
       array_subscript_assignment = 0;
       subscript_start = (char *)NULL;
-      if (t = strchr (name, '['))	/* ] */
+      if ((t = strchr (name, '[')) && (flags_on & att_function) == 0)	/* ] */
 	{
 	  /* If offset != 0 we have already validated any array reference
 	     because assignment() calls skipsubscript() */
