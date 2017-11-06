@@ -26,6 +26,7 @@
 #include "rlconf.h"	/* for VISIBLE_STATS */
 #include "rlstdc.h"
 #include "posixjmp.h"	/* defines procenv_t */
+#include "rlmbutil.h"	/* for HANDLE_MULTIBYTE */
 
 /*************************************************************************
  *									 *

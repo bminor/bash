@@ -1505,10 +1505,6 @@ Functions may be exported so that subshells
 automatically have them defined with the
 @option{-f} option to the @code{export} builtin
 (@pxref{Bourne Shell Builtins}).
-Note that shell functions and variables with the same name may result
-in multiple identically-named entries in the environment passed to the
-shell's children.
-Care should be taken in cases where this may cause a problem.
 
 Functions may be recursive.
 The @code{FUNCNEST} variable may be used to limit the depth of the
@@ -7183,12 +7179,15 @@ The @code{unset} builtin is used to destroy arrays.
 @code{unset @var{name}[@var{subscript}]}
 destroys the array element at index @var{subscript}.
 Negative subscripts to indexed arrays are interpreted as described above.
-Care must be taken to avoid unwanted side effects caused by filename
-expansion.
 Unsetting the last element of an array variable does not unset the variable.
 @code{unset @var{name}}, where @var{name} is an array, removes the
 entire array.  A subscript of @samp{*} or @samp{@@} also removes the
 entire array.
+
+When using a variable name with a subscript as an argument to a command,
+such as with @code{unset}, without using the word expansion syntax
+described above, the argument is subject to the shell's filename expansion.
+If filename expansion is not desired, the argument should be quoted.
 
 The @code{declare}, @code{local}, and @code{readonly}
 builtins each accept a @option{-a} option to specify an indexed

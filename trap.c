@@ -1054,7 +1054,7 @@ _run_trap_internal (sig, tag)
 int
 run_debug_trap ()
 {
-  int trap_exit_value;
+  int trap_exit_value, old_verbose;
   pid_t save_pgrp;
   int save_pipe[2];
 
@@ -1072,7 +1072,14 @@ run_debug_trap ()
       stop_making_children ();
 #endif
 
+      old_verbose = echo_input_at_read;
+#if 0	/* not yet */
+      echo_input_at_read = 0;
+#endif
+
       trap_exit_value = _run_trap_internal (DEBUG_TRAP, "debug trap");
+
+      echo_input_at_read = old_verbose;
 
 #if defined (JOB_CONTROL)
       pipeline_pgrp = save_pgrp;

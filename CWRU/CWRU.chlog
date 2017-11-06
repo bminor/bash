@@ -14384,3 +14384,18 @@ shell.c
 	- main: set positional parameters before running the startup files,
 	  so the startup files can inspect $@.  Often-requested feature,
 	  most recently from Stephane Chazelas <stephane.chazelas@gmail.com>
+
+				   10/27
+				   -----
+doc/{bash.1,bashref.texi}
+	- Arrays: add some clarifying language to make it clear that array
+	  references that don't use the ${a[s]} syntax are subject to
+	  globbing when passed as arguments to commands such as unset, and
+	  should be quoted for safety. Change prompted by a report from
+	  Eli Barzilay <eli@barzilay.org>
+
+parse.y
+	- parse_comsub: make sure we don't run off the end of the `ret'
+	  buffer when checking for the here doc delimiter.  Report from
+	  Jakub Wilk <jwilk@jwilk.net>, the result of a fuzzing test. Pointer
+	  to place for the fix from Eduardo Bustamante <dualbus@gmail.com>

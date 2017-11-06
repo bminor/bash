@@ -3838,7 +3838,7 @@ eof_error:
 	      tind = lex_firstind;
 	      while ((tflags & LEX_STRIPDOC) && ret[tind] == '\t')
 		tind++;
-	      if (STREQN (ret + tind, heredelim, hdlen))
+	      if (retind-tind == hdlen && STREQN (ret + tind, heredelim, hdlen))
 		{
 		  tflags &= ~(LEX_STRIPDOC|LEX_INHEREDOC|LEX_QUOTEDDOC);
 /*itrace("parse_comsub:%d: found here doc end `%s'", line_number, ret + tind);*/
