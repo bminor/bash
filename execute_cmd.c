@@ -1356,8 +1356,10 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   command->flags &= ~(CMD_TIME_PIPELINE|CMD_TIME_POSIX);
   code = setjmp_nosigs (top_level);
   if (code == NOT_JUMPED)
-    rv = execute_command_internal (command, asynchronous, pipe_in, pipe_out, fds_to_close);
-  command->flags = old_flags;
+    {
+      rv = execute_command_internal (command, asynchronous, pipe_in, pipe_out, fds_to_close);
+      command->flags = old_flags;
+    }
   COPY_PROCENV (save_top_level, top_level);
 
   rs = us = ss = 0;

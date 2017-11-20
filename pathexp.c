@@ -420,11 +420,13 @@ shell_glob_filename (pathname)
 #else /* !USE_POSIX_GLOB_LIBRARY */
 
   char *temp, **results;
+  int gflags;
 
   noglob_dot_filenames = glob_dot_filenames == 0;
 
   temp = quote_string_for_globbing (pathname, QGLOB_FILENAME);
-  results = glob_filename (temp, glob_star ? GX_GLOBSTAR : 0);
+  gflags = glob_star ? GX_GLOBSTAR : 0;
+  results = glob_filename (temp, gflags);
   free (temp);
 
   if (results && ((GLOB_FAILED (results)) == 0))

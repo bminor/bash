@@ -14433,3 +14433,28 @@ lib/readline/isearch.c
 	  sline_index go to -1 to avoid searching the same line twice. It
 	  gets reset right after that, so there's no danger of indexing into
 	  the history line with a negative index.
+
+				   11/7
+				   ----
+execute_cmd.c
+	- time_command: only restore command->flags if CODE indicates we didn't
+	  perform a longjmp back to top_level. If we did, `command' has already
+	  been freed. Fixes bug reported on savannah by 
+	  ukuvbu oibws <xyzdr4gon333@googlemail.com>
+	  https://savannah.gnu.org/support/?109403
+
+				   11/10
+				   -----
+lib/sh/unicode.c
+	- u32cconv: make sure to initialize localconv to -1 (error) in case
+	  we switch from a utf-8 locale to something else and call
+	  iconv_close. Report from Egmont Koblinger <egmont@gmail.com>; fix
+	  from Eduardo Bustamante <dualbus@gmail.com>
+
+				   11/16
+				   -----
+subst.c
+	- parse_comsub: istring_index should be a size_t to avoid integer
+	  overflow when allocating large pieces of memory. Report and fix
+	  from Siteshwar Vashisht <svashisht@redhat.com>, originally based on
+	  http://lists.gnu.org/archive/html/bug-bash/2017-11/msg00047.html

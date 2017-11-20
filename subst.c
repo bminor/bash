@@ -5803,7 +5803,8 @@ read_comsub (fd, quoted, flags, rflag)
      int *rflag;
 {
   char *istring, buf[128], *bufp, *s;
-  int istring_index, istring_size, c, tflag, skip_ctlesc, skip_ctlnul;
+  int istring_index, c, tflag, skip_ctlesc, skip_ctlnul;
+  size_t istring_size;
   ssize_t bufn;
   int nullbyte;
 

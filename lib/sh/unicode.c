@@ -272,6 +272,7 @@ u32cconv (c, s)
   if (u32init == 0)
     {
       utf8locale = locale_utf8locale;
+      localconv = (iconv_t)-1;
       if (utf8locale == 0)
 	{
 #if HAVE_LOCALE_CHARSET
