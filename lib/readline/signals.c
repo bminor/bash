@@ -595,6 +595,12 @@ rl_pending_signal (void)
 {
   return (_rl_caught_signal);
 }
+
+void
+rl_check_signals (void)
+{
+  RL_CHECK_SIGNALS ();
+}
 #endif  /* HANDLE_SIGNALS */
 
 /* **************************************************************** */

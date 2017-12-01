@@ -37,8 +37,16 @@
 #include <unistd.h>
 #endif
 
+#include <errno.h>
+#if !defined (errno)
+extern int errno;
+#endif /* !errno */
+
 #if defined (HAVE_SELECT)
 #  include "posixselect.h"
+#  include "quit.h"
+#  include "trap.h"
+#  include "stat-time.h"
 #endif
 
 /* A version of `alarm' using setitimer if it's available. */
@@ -84,17 +92,46 @@ falarm (secs, usecs)
 /* A version of sleep using fractional seconds and select.  I'd like to use
    `usleep', but it's already taken */
 
-#if defined (HAVE_TIMEVAL) && defined (HAVE_SELECT)
+#if defined (HAVE_TIMEVAL) && (defined (HAVE_SELECT) || defined (HAVE_PSELECT))
 int
 fsleep(sec, usec)
      unsigned int sec, usec;
 {
+  int e, r;
+#if defined (HAVE_PSELECT)
+  sigset_t blocked_sigs;
+  struct timespec ts;
+#else
   struct timeval tv;
+#endif
 
+#if defined (HAVE_PSELECT)
+  sigemptyset (&blocked_sigs);
+#  if defined (SIGCHLD)
+  sigaddset (&blocked_sigs, SIGCHLD);
+#  endif
+  ts.tv_sec = sec;
+  ts.tv_nsec = usec * 1000;
+#else
   tv.tv_sec = sec;
   tv.tv_usec = usec;
+#endif /* !HAVE_PSELECT */
 
-  return select(0, (fd_set *)0, (fd_set *)0, (fd_set *)0, &tv);
+  do
+    {
+#if defined (HAVE_PSELECT)
+      r = pselect(0, (fd_set *)0, (fd_set *)0, (fd_set *)0, &ts, &blocked_sigs);
+#else
+      r = select(0, (fd_set *)0, (fd_set *)0, (fd_set *)0, &tv);
+#endif
+      e = errno;
+      if (r < 0 && errno == EINTR)
+	QUIT;		/* just signals, no traps */
+      errno = e;
+    }
+  while (r < 0 && errno == EINTR);
+
+  return r;
 }
 #else /* !HAVE_TIMEVAL || !HAVE_SELECT */
 int

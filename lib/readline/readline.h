@@ -346,6 +346,7 @@ extern int rl_parse_and_bind PARAMS((char *));
 
 /* Functions for manipulating keymaps. */
 extern Keymap rl_make_bare_keymap PARAMS((void));
+extern int rl_empty_keymap PARAMS((Keymap));
 extern Keymap rl_copy_keymap PARAMS((Keymap));
 extern Keymap rl_make_keymap PARAMS((void));
 extern void rl_discard_keymap PARAMS((Keymap));
@@ -447,6 +448,7 @@ extern void rl_reset_after_signal PARAMS((void));
 extern void rl_free_line_state PARAMS((void));
 
 extern int rl_pending_signal PARAMS((void));
+extern void rl_check_signals PARAMS((void));
 
 extern void rl_echo_signal_char PARAMS((int)); 
 

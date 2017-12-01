@@ -77,6 +77,21 @@ rl_make_bare_keymap (void)
   return (keymap);
 }
 
+/* A convenience function that returns 1 if there are no keys bound to
+   functions in KEYMAP */
+int
+rl_empty_keymap (Keymap keymap)
+{
+  int i;
+
+  for (i = 0; i < ANYOTHERKEY; i++)
+    {
+      if (keymap[i].type != ISFUNC || keymap[i].function)
+	return 0;
+    }
+  return 1;
+}
+
 /* Return a new keymap which is a copy of MAP.  Just copies pointers, does
    not copy text of macros or descend into child keymaps. */
 Keymap

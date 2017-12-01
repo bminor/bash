@@ -13348,7 +13348,7 @@ doc/{bash.1,bashref.texi}
 				    ---
 lib/readline/display.c
 	- update_line: completely rewrote the code that handles line wrapping
-	  in the presence of multibyte/double-width characters; punts toa
+	  in the presence of multibyte/double-width characters; punts to a
 	  dumb update in cases where the number of screen positions doesn't
 	  match
 	- update_line: in one case, where we are deleting characters from the
@@ -14458,3 +14458,76 @@ subst.c
 	  overflow when allocating large pieces of memory. Report and fix
 	  from Siteshwar Vashisht <svashisht@redhat.com>, originally based on
 	  http://lists.gnu.org/archive/html/bug-bash/2017-11/msg00047.html
+
+				   11/24
+				   -----
+lib/readline/bind.c
+	- rl_empty_keymap: new public function, returns non-zero if there are
+	  no keys bound in the keymap passed as an argument
+
+lib/readline/readline.h
+	- rl_empty_keymap: new public extern declaration
+
+lib/readline/doc/rltech.texi
+	- rl_empty_keymap: document new function
+
+lib/readline/bind.c
+	- rl_generic_bind: keep track of the previous keymap and previous
+	  index in a multi-key key sequence so we can remove an empty terminal
+	  keymap and remove a previous override to ANYOTHERKEY. Right now,
+	  this only works for one previous keymap level. Inspired by a report
+	  from Clark Wang <dearvoid@gmail.com>
+
+				   11/25
+				   -----
+lib/readline/display.c
+	- _rl_update_final: make sure that computing the length of the visible
+	  bottom line (botline_length) takes any invisible characters in the
+	  prompt into account (woff). This value is used as part of the check
+	  whether or not we want to remove the line-wrapping indicator on
+	  terminals like xterm
+	- _rl_update_final: when removing the line-wrapping indicator on xterm,
+	  make sure we take invisible characters in the prompt (woff) into
+	  account when computing the character in the rightmost physical
+	  screen position. Fixes cosmetic line-wrapping issue reported by
+	  Egmont Koblinger <egmont@gmail.com>
+
+				   11/27
+				   -----
+lib/sh/ufuncs.c
+	- fsleep: if using select to implement sleep, use restart after
+	  a signal interrupts the select and handle pending signals. If
+	  pselect is available, use that instead and block SIGCHLD while
+	  pselect is executing.
+	  Fixes report from Thiruvadi Rajaraman <trajaraman@mvista.com>
+
+				   11/28
+				   -----
+lib/readline/signals.c
+	- rl_check_signals: new public function: a wrapper for RL_CHECK_SIGNALS
+	  that can be used by applications that install a wrapper for
+	  rl_getc (rl_getc_function) so they can respond to signals that
+	  arrive while waiting for input in the same way as rl_getc. The app
+	  can use rl_pending_signal() to get the most recently-received
+	  signal. From a discussion about Gnuplot initiated by
+	  Rin Okuyama <rokuyama@rk.phys.keio.ac.jp>
+
+lib/readline/readline.h
+	- rl_check_signals: new extern declaration
+
+lib/readline/doc/rltech.texi
+	- rl_check_signals: document new public function
+
+variables.c
+	- set_pwd: test for and force an inherited OLDPWD to be a directory
+	  if OLDPWD_CHECK_DIRECTORY is defined in config-top.h (it is by
+	  default). Issue raised by Mikulas Patocka <mikulas@twibright.com>
+
+config-top.h
+	- OLDPWD_CHECK_DIRECTORY: new define, defined to 1 by default
+
+				   11/29
+				   -----
+Makefile.in
+	- pathexp.o: add dependencies on libintl.h.  Reported by
+	  Ross Burton <ross@burtonini.com>

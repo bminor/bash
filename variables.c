@@ -886,7 +886,11 @@ set_pwd ()
      don't find OLDPWD in the environment, or it doesn't name a directory,
      make a dummy invisible variable for OLDPWD, and mark it as exported. */
   temp_var = find_variable ("OLDPWD");
+#if defined (OLDPWD_CHECK_DIRECTORY)
   if (temp_var == 0 || value_cell (temp_var) == 0 || file_isdir (value_cell (temp_var)) == 0)
+#else
+  if (temp_var == 0 || value_cell (temp_var) == 0)
+#endif
     {
       temp_var = bind_variable ("OLDPWD", (char *)NULL, 0);
       VSETATTR (temp_var, (att_exported | att_invisible));

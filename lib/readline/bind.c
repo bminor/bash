@@ -325,9 +325,10 @@ int
 rl_generic_bind (int type, const char *keyseq, char *data, Keymap map)
 {
   char *keys;
-  int keys_len;
+  int keys_len, prevkey;
   register int i;
   KEYMAP_ENTRY k;
+  Keymap prevmap;  
 
   k.function = 0;
 
@@ -350,11 +351,16 @@ rl_generic_bind (int type, const char *keyseq, char *data, Keymap map)
       return -1;
     }
 
+  prevmap = map;
+  prevkey = keys[0];
+
   /* Bind keys, making new keymaps as necessary. */
   for (i = 0; i < keys_len; i++)
     {
       unsigned char uc = keys[i];
       int ic;
+
+      prevkey = ic;
 
       ic = uc;
       if (ic < 0 || ic >= KEYMAP_SIZE)
@@ -367,7 +373,10 @@ rl_generic_bind (int type, const char *keyseq, char *data, Keymap map)
 	{
 	  ic = UNMETA (ic);
 	  if (map[ESC].type == ISKMAP)
-	    map = FUNCTION_TO_KEYMAP (map, ESC);
+	    {
+	      prevmap = map;
+	      map = FUNCTION_TO_KEYMAP (map, ESC);
+	    }
 	}
 
       if ((i + 1) < keys_len)
@@ -386,6 +395,7 @@ rl_generic_bind (int type, const char *keyseq, char *data, Keymap map)
 	      map[ic].type = ISKMAP;
 	      map[ic].function = KEYMAP_TO_FUNCTION (rl_make_bare_keymap());
 	    }
+	  prevmap = map;
 	  map = FUNCTION_TO_KEYMAP (map, ic);
 	  /* The dispatch code will return this function if no matching
 	     key sequence is found in the keymap.  This (with a little
@@ -405,6 +415,7 @@ rl_generic_bind (int type, const char *keyseq, char *data, Keymap map)
 	    xfree ((char *)map[ic].function);
 	  else if (map[ic].type == ISKMAP)
 	    {
+	      prevmap = map;
 	      map = FUNCTION_TO_KEYMAP (map, ic);
 	      ic = ANYOTHERKEY;
 	      /* If we're trying to override a keymap with a null function
@@ -421,7 +432,28 @@ rl_generic_bind (int type, const char *keyseq, char *data, Keymap map)
 	}
 
       rl_binding_keymap = map;
+
     }
+
+  /* If we unbound a key (type == ISFUNC, data == 0), and the prev keymap
+     points to the keymap where we unbound the key (sanity check), and the
+     current binding keymap is empty (rl_empty_keymap() returns non-zero),
+     and the binding keymap has ANYOTHERKEY set with type == ISFUNC
+     (overridden function), delete the now-empty keymap, take the previously-
+     overridden function and remove the override. */
+  /* Right now, this only works one level back. */
+  if (type == ISFUNC && data == 0 &&
+      prevmap[prevkey].type == ISKMAP &&
+      (FUNCTION_TO_KEYMAP(prevmap, prevkey) == rl_binding_keymap) &&
+      rl_binding_keymap[ANYOTHERKEY].type == ISFUNC &&
+      rl_empty_keymap (rl_binding_keymap))
+    {
+      prevmap[prevkey].type = rl_binding_keymap[ANYOTHERKEY].type;
+      prevmap[prevkey].function = rl_binding_keymap[ANYOTHERKEY].function;
+      rl_discard_keymap (rl_binding_keymap);
+      rl_binding_keymap = prevmap;
+    }
+
   xfree (keys);
   return 0;
 }
