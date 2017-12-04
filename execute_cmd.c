@@ -183,6 +183,7 @@ static char *getinterp __P((char *, int, int *));
 static void initialize_subshell __P((void));
 static int execute_in_subshell __P((COMMAND *, int, int, int, struct fd_bitmap *));
 #if defined (COPROCESS_SUPPORT)
+static void coproc_setstatus __P((struct coproc *, int));
 static int execute_coproc __P((COMMAND *, int, int, struct fd_bitmap *));
 #endif
 
@@ -1847,7 +1848,10 @@ cpl_closeall ()
   struct cpelement *cpe;
 
   for (cpe = coproc_list.head; cpe; cpe = cpe->next)
-    coproc_close (cpe->coproc);
+    {
+      coproc_close (cpe->coproc);
+      coproc_setstatus (cpe->coproc, 0);	/* fake zero status */
+    }
 }
 
 static void
@@ -2048,6 +2052,7 @@ coproc_closeall ()
   cpl_closeall ();
 #else
   coproc_close (&sh_coproc);	/* XXX - will require changes for multiple coprocs */
+  coproc_setstatus (&sh_coproc, 0);	/* fake zero status */
 #endif
 }
 
@@ -2142,6 +2147,21 @@ coproc_fdrestore (cp)
   cp->c_wfd = cp->c_wsave;
 }
 
+static void
+coproc_setstatus (cp, status)
+     struct coproc *cp;
+     int status;
+{
+  cp->c_lock = 4;
+  cp->c_status = status;
+  cp->c_flags |= COPROC_DEAD;
+  cp->c_flags &= ~COPROC_RUNNING;
+  /* Don't dispose the coproc or unset the COPROC_XXX variables because
+     this is executed in a signal handler context.  Wait until coproc_reap
+     takes care of it. */
+  cp->c_lock = 0;
+}
+
 void
 coproc_pidchk (pid, status)
      pid_t pid;
@@ -2160,16 +2180,7 @@ coproc_pidchk (pid, status)
   cp = getcoprocbypid (pid);
 #endif
   if (cp)
-    {
-      cp->c_lock = 4;
-      cp->c_status = status;
-      cp->c_flags |= COPROC_DEAD;
-      cp->c_flags &= ~COPROC_RUNNING;
-      /* Don't dispose the coproc or unset the COPROC_XXX variables because
-	 this is executed in a signal handler context.  Wait until coproc_reap
-	 takes care of it. */
-      cp->c_lock = 0;
-    }
+    coproc_setstatus (cp, status);
 }
 
 pid_t

@@ -98,21 +98,23 @@ fsleep(sec, usec)
      unsigned int sec, usec;
 {
   int e, r;
+  sigset_t blocked_sigs, prevmask;
 #if defined (HAVE_PSELECT)
-  sigset_t blocked_sigs;
   struct timespec ts;
 #else
   struct timeval tv;
 #endif
 
-#if defined (HAVE_PSELECT)
   sigemptyset (&blocked_sigs);
 #  if defined (SIGCHLD)
   sigaddset (&blocked_sigs, SIGCHLD);
 #  endif
+
+#if defined (HAVE_PSELECT)
   ts.tv_sec = sec;
   ts.tv_nsec = usec * 1000;
 #else
+  sigemptyset (&prevmask);
   tv.tv_sec = sec;
   tv.tv_usec = usec;
 #endif /* !HAVE_PSELECT */
@@ -122,7 +124,9 @@ fsleep(sec, usec)
 #if defined (HAVE_PSELECT)
       r = pselect(0, (fd_set *)0, (fd_set *)0, (fd_set *)0, &ts, &blocked_sigs);
 #else
+      sigprocmask (SIG_SETMASK, &blocked_sigs, &prevmask);
       r = select(0, (fd_set *)0, (fd_set *)0, (fd_set *)0, &tv);
+      sigprocmask (SIG_SETMASK, &prevmask, NULL);
 #endif
       e = errno;
       if (r < 0 && errno == EINTR)

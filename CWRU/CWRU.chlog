@@ -14531,3 +14531,21 @@ config-top.h
 Makefile.in
 	- pathexp.o: add dependencies on libintl.h.  Reported by
 	  Ross Burton <ross@burtonini.com>
+
+				   12/1
+				   ----
+lib/sh/ufuncs.c
+	- fsleep: add blocking and releasing SIGCHLD using sigprocmask
+	  around call to select(2) even if pselect(2) is not available
+
+				   12/3
+				   ----
+execute_cmd.c
+	- coproc_setstatus: new utility function, take a pointer to a coproc
+	  and a status and mark the coproc as dead and having been reaped
+	  with that status. Used by child processes who want to invalidate
+	  the coproc's pid
+	- coproc_closeall,cpl_closeall: call coproc_setstatus (to invalidate
+	  pid) after closing a coproc (invalidating FDs).  Fixes issue with
+	  spurious warning reported by Tobias Hoffmann
+	  <lfile-list@thax.hardliners.org>
