@@ -3536,6 +3536,7 @@ waitchld (wpid, block)
   WAIT status;
   PROCESS *child;
   pid_t pid;
+  int ind;
 
   int call_set_current, last_stopped_job, job, children_exited, waitpid_flags;
   static int wcontinued = WCONTINUED;	/* run-time fix for glibc problem */
@@ -3641,6 +3642,13 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
 #if defined (COPROCESS_SUPPORT)
       coproc_pidchk (pid, WSTATUS(status));
 #endif
+
+#if defined (PROCESS_SUBSTITUTION)
+      if ((ind = find_procsub_child (pid)) >= 0)
+	set_procsub_status (ind, pid, WSTATUS (status));
+	/* XXX - save in bgpids list? */
+#endif
+      
 
       /* It is not an error to have a child terminate that we did
 	 not have a record of.  This child could have been part of

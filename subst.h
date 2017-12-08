@@ -265,6 +265,7 @@ extern WORD_LIST *expand_words_shellexp __P((WORD_LIST *));
 extern WORD_DESC *command_substitute __P((char *, int, int));
 extern char *pat_subst __P((char *, char *, char *, int));
 
+#if defined (PROCESS_SUBSTITUTION)
 extern int fifos_pending __P((void));
 extern int num_fifos __P((void));
 extern void unlink_fifo_list __P((void));
@@ -275,6 +276,10 @@ extern void unlink_new_fifos __P((char *, int));
 extern void close_new_fifos __P((char *, int));
 
 extern void clear_fifo_list __P((void));
+
+extern int find_procsub_child __P((pid_t));
+extern void set_procsub_status __P((int, pid_t, int));
+#endif
 
 extern WORD_LIST *list_string_with_quotes __P((char *));
 

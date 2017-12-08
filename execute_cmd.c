@@ -1848,10 +1848,7 @@ cpl_closeall ()
   struct cpelement *cpe;
 
   for (cpe = coproc_list.head; cpe; cpe = cpe->next)
-    {
-      coproc_close (cpe->coproc);
-      coproc_setstatus (cpe->coproc, 0);	/* fake zero status */
-    }
+    coproc_close (cpe->coproc);
 }
 
 static void
@@ -2052,7 +2049,6 @@ coproc_closeall ()
   cpl_closeall ();
 #else
   coproc_close (&sh_coproc);	/* XXX - will require changes for multiple coprocs */
-  coproc_setstatus (&sh_coproc, 0);	/* fake zero status */
 #endif
 }
 

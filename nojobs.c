@@ -269,6 +269,12 @@ set_pid_status (pid, status)
   coproc_pidchk (pid, status);
 #endif
 
+#if defined (PROCESS_SUBSTITUTION)
+  if ((ind = find_procsub_child (pid)) >= 0)
+    set_procsub_status (ind, pid, WSTATUS (status));
+    /* XXX - also saving in list below */
+#endif
+
   slot = find_index_by_pid (pid);
   if (slot == NO_PID)
     return;

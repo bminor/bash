@@ -5366,6 +5366,43 @@ close_new_fifos (list, lsize)
 }
 
 int
+find_procsub_child (pid)
+     pid_t pid;
+{
+  int i;
+
+  for (i = 0; i < nfifo; i++)
+    if ((fifo_list[i].proc == pid)
+      return i;
+  return -1;
+}
+
+void
+set_procsub_status (ind, pid, status)
+     int ind;
+     pid_t pid;
+     int status;
+{
+  if (ind >= 0 && ind < nfifo)
+    fifo_list[ind].proc = -2;		/* sentinel */
+}
+
+/* If we've marked the process for this procsub as dead, close the
+   associated file descriptor and delete the FIFO. */
+void
+reap_procsubs ()
+{
+  int i;
+
+  for (i = 0; i < nfifo; i++)
+    if (fifo_list[i].proc == -2)	/* reaped */
+      {
+	fifo_list[i].proc = -1;
+	unlink_fifo (ind);
+      }
+}
+
+int
 fifos_pending ()
 {
   return nfifo;
@@ -5502,7 +5539,7 @@ unlink_fifo_list ()
   if (nfds == 0)
     return;
 
-  for (i = 0; nfds && i < totfds; i++)
+  for (i = totfds-1; nfds && i >= 0; i--)
     unlink_fifo (i);
 
   nfds = 0;
@@ -5532,6 +5569,44 @@ close_new_fifos (list, lsize)
 
   for (i = lsize; i < totfds; i++)
     unlink_fifo (i);  
+}
+
+int
+find_procsub_child (pid)
+     pid_t pid;
+{
+  int i;
+
+  if (nfds == 0)
+    return -1;
+
+  for (i = 0; i < totfds; i++)
+    if (dev_fd_list[i] == pid)
+      return i;
+
+  return -1;
+}
+
+void
+set_procsub_status (ind, pid, status)
+     int ind;
+     pid_t pid;
+     int status;
+{
+  if (ind >= 0 && ind < totfds)
+    dev_fd_list[ind] = -2;		/* sentinel */
+}
+
+/* If we've marked the process for this procsub as dead, close the
+   associated file descriptor. */
+void
+reap_procsubs ()
+{
+  int i;
+
+  for (i = 0; nfds > 0 && i < totfds; i++)
+    if (dev_fd_list[i] == -2)
+      unlink_fifo (i);
 }
 
 #if defined (NOTDEF)
@@ -5687,7 +5762,9 @@ process_substitute (string, open_for_read_in_child)
       last_procsub_child = restore_pipeline (0);
 #endif
 
-#if !defined (HAVE_DEV_FD)
+#if defined (HAVE_DEV_FD)
+      dev_fd_list[parent_pipe_fd] = pid;
+#else
       fifo_list[nfifo-1].proc = pid;
 #endif
 
