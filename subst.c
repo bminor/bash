@@ -5251,6 +5251,8 @@ parameter_brace_remove_pattern (varname, value, ind, patstr, rtype, quoted, flag
    list.  NFIFO is a count of the number of FIFOs in the list. */
 #define FIFO_INCR 20
 
+/* PROC value of -1 means the process has been reaped and the FIFO needs to
+   be removed. PROC value of 0 means the slot is unused. */
 struct temp_fifo {
   char *file;
   pid_t proc;
@@ -5278,11 +5280,19 @@ static void
 add_fifo_list (pathname)
      char *pathname;
 {
+  int osize, i;
+
   if (nfifo >= fifo_list_size - 1)
     {
+      osize = fifo_list_size;
       fifo_list_size += FIFO_INCR;
       fifo_list = (struct temp_fifo *)xrealloc (fifo_list,
 				fifo_list_size * sizeof (struct temp_fifo));
+      for (i = osize; i < fifo_list_size; i++)
+	{
+	  fifo_list[i].file = (char *)NULL;
+	  fifo_list[i].proc = 0;	/* unused */
+	}
     }
 
   fifo_list[nfifo].file = savestring (pathname);
@@ -5293,12 +5303,12 @@ void
 unlink_fifo (i)
      int i;
 {
-  if ((fifo_list[i].proc == -1) || (kill(fifo_list[i].proc, 0) == -1))
+  if ((fifo_list[i].proc == (pid_t)-1) || (fifo_list[i].proc > 0 && (kill(fifo_list[i].proc, 0) == -1)))
     {
       unlink (fifo_list[i].file);
       free (fifo_list[i].file);
       fifo_list[i].file = (char *)NULL;
-      fifo_list[i].proc = -1;
+      fifo_list[i].proc = 0;
     }
 }
 
@@ -5312,12 +5322,12 @@ unlink_fifo_list ()
 
   for (i = saved = 0; i < nfifo; i++)
     {
-      if ((fifo_list[i].proc == -1) || (kill(fifo_list[i].proc, 0) == -1))
+      if ((fifo_list[i].proc == (pid_t)-1) || (fifo_list[i].proc > 0 && (kill(fifo_list[i].proc, 0) == -1)))
 	{
 	  unlink (fifo_list[i].file);
 	  free (fifo_list[i].file);
 	  fifo_list[i].file = (char *)NULL;
-	  fifo_list[i].proc = -1;
+	  fifo_list[i].proc = 0;
 	}
       else
 	saved++;
@@ -5384,7 +5394,7 @@ set_procsub_status (ind, pid, status)
      int status;
 {
   if (ind >= 0 && ind < nfifo)
-    fifo_list[ind].proc = -2;		/* sentinel */
+    fifo_list[ind].proc = (pid_t)-1;		/* sentinel */
 }
 
 /* If we've marked the process for this procsub as dead, close the
@@ -5395,11 +5405,23 @@ reap_procsubs ()
   int i;
 
   for (i = 0; i < nfifo; i++)
-    if (fifo_list[i].proc == -2)	/* reaped */
-      {
-	fifo_list[i].proc = -1;
-	unlink_fifo (ind);
-      }
+    if (fifo_list[i].proc == (pid_t)-1)	/* reaped */
+      unlink_fifo (i);
+}
+
+void
+wait_procsubs ()
+{
+  int i;
+
+  for (i = 0; i < nfifo; i++)
+    {
+      if (fifo_list[i].proc != (pid_t)-1 && fifo_list[i].proc > 0)
+	{
+	  r = wait_for (fifo_list[i].proc);
+	  fifo_list[i].proc = (pid_t)-1;
+	}
+    }
 }
 
 int
@@ -5436,7 +5458,10 @@ make_named_pipe ()
    has open to children.  NFDS is a count of the number of bits currently
    set in DEV_FD_LIST.  TOTFDS is a count of the highest possible number
    of open files. */
-static char *dev_fd_list = (char *)NULL;
+/* dev_fd_list[I] value of -1 means the process has been reaped and file
+   descriptor I needs to be closed. Value of 0 means the slot is unused. */
+
+static pid_t *dev_fd_list = (pid_t *)NULL;
 static int nfds;
 static int totfds;	/* The highest possible number of open files. */
 
@@ -5480,8 +5505,8 @@ copy_fifo_list (sizep)
 
   if (sizep)
     *sizep = totfds;
-  ret = (char *)xmalloc (totfds);
-  return (memcpy (ret, dev_fd_list, totfds));
+  ret = (char *)xmalloc (totfds * sizeof (pid_t));
+  return (memcpy (ret, dev_fd_list, totfds * sizeof (pid_t)));
 }
 
 static void
@@ -5499,11 +5524,12 @@ add_fifo_list (fd)
       if (fd >= totfds)
 	totfds = fd + 2;
 
-      dev_fd_list = (char *)xrealloc (dev_fd_list, totfds);
-      memset (dev_fd_list + ofds, '\0', totfds - ofds);
+      dev_fd_list = (char *)xrealloc (dev_fd_list, totfds * sizeof (dev_fd_list[0]));
+      /* XXX - might need a loop for this */
+      memset (dev_fd_list + ofds, '\0', (totfds - ofds) * sizeof (pid_t));
     }
 
-  dev_fd_list[fd] = 1;
+  dev_fd_list[fd] = 1;		/* marker; updated later */
   nfds++;
 }
 
@@ -5594,7 +5620,7 @@ set_procsub_status (ind, pid, status)
      int status;
 {
   if (ind >= 0 && ind < totfds)
-    dev_fd_list[ind] = -2;		/* sentinel */
+    dev_fd_list[ind] = (pid_t)-1;		/* sentinel */
 }
 
 /* If we've marked the process for this procsub as dead, close the
@@ -5605,8 +5631,23 @@ reap_procsubs ()
   int i;
 
   for (i = 0; nfds > 0 && i < totfds; i++)
-    if (dev_fd_list[i] == -2)
+    if (dev_fd_list[i] == (pid_t)-1)
       unlink_fifo (i);
+}
+
+void
+wait_procsubs ()
+{
+  int i, r;
+
+  for (i = 0; nfds > 0 && i < totfds; i++)
+    {
+      if (dev_fd_list[i] != (pid_t)-1 && dev_fd_list[i] > 0)
+	{
+	  r = wait_for (dev_fd_list[i]);
+	  dev_fd_list[i] = (pid_t)-1;
+	}
+    }
 }
 
 #if defined (NOTDEF)

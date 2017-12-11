@@ -748,7 +748,7 @@ bgp_resize ()
   else
     nsize = bgpids.nalloc;
 
-  while (nsize < js.c_childmax)
+  while (nsize < (ps_index_t)js.c_childmax)
     nsize *= 2;
 
   if (bgpids.nalloc < js.c_childmax)
@@ -2442,7 +2442,10 @@ wait_for_background_pids ()
 	    itrace("wait_for_background_pids: job %d non-null after js.j_lastj (%d)", i, js.j_lastj);
 #endif
 	  if (jobs[i] && STOPPED (i))
-	    any_stopped = 1;
+	    {
+	      builtin_warning ("job %d[%d] stopped", i+1, find_last_pid (i, 0));
+	      any_stopped = 1;
+	    }
 
 	  if (jobs[i] && RUNNING (i) && IS_FOREGROUND (i) == 0)
 	    break;
@@ -2470,8 +2473,12 @@ wait_for_background_pids ()
 #if defined (PROCESS_SUBSTITUTION)
   if (last_procsub_child && last_procsub_child->pid != NO_PID)
     r = wait_for (last_procsub_child->pid);
+  wait_procsubs ();
+  reap_procsubs ();
 #if 1
   /* We don't want to wait indefinitely if we have stopped children. */
+  /* XXX - should add a loop that goes through the list of process
+     substitutions and waits for each proc in turn before this code. */
   if (any_stopped == 0)
     {
       /* Check whether or not we have any unreaped children. */
@@ -3644,11 +3651,12 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
 #endif
 
 #if defined (PROCESS_SUBSTITUTION)
+      /* Only manipulate the list of process substitutions while SIGCHLD
+	 is blocked. */
       if ((ind = find_procsub_child (pid)) >= 0)
 	set_procsub_status (ind, pid, WSTATUS (status));
 	/* XXX - save in bgpids list? */
 #endif
-      
 
       /* It is not an error to have a child terminate that we did
 	 not have a record of.  This child could have been part of

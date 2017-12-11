@@ -524,7 +524,8 @@ set to either @samp{emacs} or @samp{vi}.
 
 @item emacs-mode-string
 @vindex emacs-mode-string
-This string is displayed immediately before the last line of the primary
+If the @var{show-mode-in-prompt} variable is enabled,
+this string is displayed immediately before the last line of the primary
 prompt when emacs editing mode is active.  The value is expanded like a
 key binding, so the standard set of meta- and control prefixes and
 backslash escape sequences is available.
@@ -714,9 +715,9 @@ The default value is @samp{off}.
 
 @item show-mode-in-prompt
 @vindex show-mode-in-prompt
-If set to @samp{on}, add a character to the beginning of the prompt
+If set to @samp{on}, add a string to the beginning of the prompt
 indicating the editing mode: emacs, vi command, or vi insertion.
-The mode strings are user-settable.
+The mode strings are user-settable (e.g., @var{emacs-mode-string}).
 The default value is @samp{off}.
 
 @item skip-completed-text
@@ -735,7 +736,8 @@ The default value is @samp{off}.
 
 @item vi-cmd-mode-string
 @vindex vi-cmd-mode-string
-This string is displayed immediately before the last line of the primary
+If the @var{show-mode-in-prompt} variable is enabled,
+this string is displayed immediately before the last line of the primary
 prompt when vi editing mode is active and in command mode.
 The value is expanded like a
 key binding, so the standard set of meta- and control prefixes and
@@ -747,7 +749,8 @@ The default is @samp{(cmd)}.
 
 @item vi-ins-mode-string
 @vindex vi-ins-mode-string
-This string is displayed immediately before the last line of the primary
+If the @var{show-mode-in-prompt} variable is enabled,
+this string is displayed immediately before the last line of the primary
 prompt when vi editing mode is active and in insertion mode.
 The value is expanded like a
 key binding, so the standard set of meta- and control prefixes and

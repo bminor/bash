@@ -5691,7 +5691,8 @@ or
 .BR vi .
 .TP
 .B emacs\-mode\-string (@)
-This string is displayed immediately before the last line of the primary
+If the \fIshow\-mode\-in\-prompt\fP variable is enabled,
+this string is displayed immediately before the last line of the primary
 prompt when emacs editing mode is active.  The value is expanded like a
 key binding, so the standard set of meta- and control prefixes and
 backslash escape sequences is available.
@@ -5845,9 +5846,9 @@ a common prefix) cause the matches to be listed immediately instead
 of ringing the bell.
 .TP
 .B show\-mode\-in\-prompt (Off)
-If set to \fBOn\fP, add a character to the beginning of the prompt
-indicating the editing mode: emacs (@), vi command (:) or vi
-insertion (+).
+If set to \fBOn\fP, add a string to the beginning of the prompt
+indicating the editing mode: emacs, vi command, or vi insertion.
+The mode strings are user-settable (e.g., \fIemacs\-mode\-string\fP).
 .TP
 .B skip\-completed\-text (Off)
 If set to \fBOn\fP, this alters the default completion behavior when
@@ -5858,7 +5859,8 @@ after point in the word being completed, so portions of the word
 following the cursor are not duplicated.
 .TP
 .B vi\-cmd\-mode\-string ((cmd))
-This string is displayed immediately before the last line of the primary
+If the \fIshow\-mode\-in\-prompt\fP variable is enabled,
+this string is displayed immediately before the last line of the primary
 prompt when vi editing mode is active and in command mode.
 The value is expanded like a
 key binding, so the standard set of meta- and control prefixes and
@@ -5868,7 +5870,8 @@ non-printing characters, which can be used to embed a terminal control
 sequence into the mode string.
 .TP
 .B vi\-ins\-mode\-string ((ins))
-This string is displayed immediately before the last line of the primary
+If the \fIshow\-mode\-in\-prompt\fP variable is enabled,
+this string is displayed immediately before the last line of the primary
 prompt when vi editing mode is active and in insertion mode.
 The value is expanded like a
 key binding, so the standard set of meta- and control prefixes and

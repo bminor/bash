@@ -399,7 +399,7 @@ execute_command (command)
 #if defined (PROCESS_SUBSTITUTION)
   /* don't unlink fifos if we're in a shell function; wait until the function
      returns. */
-  if (variable_context == 0)
+  if (variable_context == 0 && executing_list == 0)
     unlink_fifo_list ();
 #endif /* PROCESS_SUBSTITUTION */
 
@@ -749,6 +749,8 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
     {
       ofifo = num_fifos ();
       ofifo_list = copy_fifo_list ((int *)&osize);
+      begin_unwind_frame ("internal_fifos");
+      add_unwind_protect (xfree, ofifo_list);
       saved_fifo = 1;
     }
   else
@@ -1077,6 +1079,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       if (nfifo > ofifo)
 	close_new_fifos ((char *)ofifo_list, osize);
       free ((void *)ofifo_list);
+      discard_unwind_frame ("internal_fifos");
     }
 #endif
 
@@ -2312,7 +2315,7 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
 
   /* XXX -- can be removed after changes to handle multiple coprocs */
 #if !MULTIPLE_COPROCS
-  if (sh_coproc.c_pid != NO_PID)
+  if (sh_coproc.c_pid != NO_PID && (sh_coproc.c_rfd >= 0 || sh_coproc.c_wfd >= 0))
     internal_warning (_("execute_coproc: coproc [%d:%s] still exists"), sh_coproc.c_pid, sh_coproc.c_name);
   coproc_init (&sh_coproc);
 #endif
@@ -4213,11 +4216,13 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	    result = last_command_exit_value;
 	  close_pipes (pipe_in, pipe_out);
 #if defined (PROCESS_SUBSTITUTION) && defined (HAVE_DEV_FD)
+#if 0
 	  /* Close /dev/fd file descriptors in the parent after forking the
 	     last child in a (possibly one-element) pipeline.  Defer this
 	     until any running shell function completes. */
 	  if (pipe_out == NO_PIPE && variable_context == 0)	/* XXX */
 	    unlink_fifo_list ();		/* XXX */
+#endif
 #endif
 	  command_line = (char *)NULL;      /* don't free this. */
 	  bind_lastarg ((char *)NULL);
@@ -5097,9 +5102,14 @@ execute_builtin_or_function (words, builtin, var, redirects,
   char *ofifo_list;
 #endif
 
-#if defined (PROCESS_SUBSTITUTION)  
+#if defined (PROCESS_SUBSTITUTION)
+  begin_unwind_frame ("saved_fifos");
+  /* If we return, we longjmp and don't get a chance to restore the old
+     fifo list, so we add an unwind protect to free it */
   ofifo = num_fifos ();
   ofifo_list = copy_fifo_list (&osize);
+  if (ofifo_list)
+    add_unwind_protect (xfree, ofifo_list);
 #endif
 
   if (do_redirections (redirects, RX_ACTIVE|RX_UNDOABLE) != 0)
@@ -5178,7 +5188,9 @@ execute_builtin_or_function (words, builtin, var, redirects,
   nfifo = num_fifos ();
   if (nfifo > ofifo)
     close_new_fifos (ofifo_list, osize);
-  free (ofifo_list);
+  if (ofifo_list)
+    free (ofifo_list);
+  discard_unwind_frame ("saved_fifos");
 #endif
 
   return (result);
@@ -5384,8 +5396,10 @@ parent_return:
       /* Make sure that the pipes are closed in the parent. */
       close_pipes (pipe_in, pipe_out);
 #if defined (PROCESS_SUBSTITUTION) && defined (HAVE_DEV_FD)
+#if 0
       if (variable_context == 0)
         unlink_fifo_list ();
+#endif
 #endif
       FREE (command);
       return (result);

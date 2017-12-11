@@ -13227,7 +13227,7 @@ subst.c
 jobs.c
 	- bgp_delindex: make sure to set ps->pid to NO_PID so we more
 	  effectively remove it from the hash table. It shouldn't matter as
-	  long as nothing in pidstat_table points to it, but 
+	  long as nothing in pidstat_table points to it, but better to be safe
 	- bgp_delete,bgp_search: generalize previous collision detection to
 	  loop detection: abort search if we are going to go back to the
 	  first index we tried
@@ -14545,3 +14545,108 @@ execute_cmd.c
 	  and a status and mark the coproc as dead and having been reaped
 	  with that status. Used by child processes who want to invalidate
 	  the coproc's pid
+
+				   12/5
+				   ----
+subst.c
+	- process_substitute: instead of just having a flag to denote that a
+	  file descriptor is connected to a process substitution, store the
+	  pid of the child process (still needs work)
+	- find_procsub_child,set_procsub_status,reap_procsubs: utility
+	  functions to allow the job control code to detect that a process
+	  substitution child has died and deallocate the file descriptors
+	  or pathname
+
+subst.h
+	- find_procsub_child,set_procsub_status,reap_procsubs: extern
+	  declarations
+
+nojobs.c
+	- set_pid_status: if we are reaping a process substitution, call
+	  set_procsub_status to record the fact
+
+jobs.c
+	- waitchld: if we are reaping a process substitution, call
+	  set_procsub_status to record the fact. Doesn't really do anything
+	  yet
+
+				   12/6
+				   ----
+execute_cmd.c
+	- execute_command: don't call unlink_fifo_list if we're in the
+	  middle of executing a list of commands (executing_list != 0).
+	  Partial fix for bug reported by Stephane Chazelas
+	  <stephane.chazelas@gmail.com>
+	- execute_simple_command: don't close process substitution file
+	  descriptors in the parent after forking children in a pipeline;
+	  defer until pipeline completes, since parent may have inherited
+	  fds from a calling scope (e.g., via `.'). EXPERIMENTAL
+	- execute_disk_command: don't close process substitution file
+	  descriptors in the parent after forking the child. EXPERIMENTAL
+
+				   12/7
+				   ----
+doc/bash.1,lib/readline/doc/{readline.3,rluser.texi}
+	- show-mode-in-prompt: clarify that this must be enabled before the
+	  vi and emacs mode strings are prefixed to the prompt.  Report from
+	  Rob Foehl <rwf@loonybin.net>
+
+				   12/8
+				   ----
+execute_cmd.c
+	- execute_coproc: don't warn about an existing coproc if the write and
+	  read file descriptors are unusable (-1), as they will be after a
+	  call to coproc_closeall in a subshell. Fixes spurious warning
+	  reported by Tobias Hoffmann <lfile-list@thax.hardliners.org>
+
+jobs.c
+	- bgp_resize: avoid overflow when calculating the new size if the
+	  child process limit is something ridiculously large. Report and
+	  fix from Natanael Copa <ncopa@alpinelinux.org>
+
+execute_cmd.c
+	- execute_builtin_or_function: if we return via the return builtin, we
+	  don't get a chance to free the saved fifo list, so add an unwind-
+	  protect to make sure it happens. Part of fix for leak reported by
+	  Oyvind Hvidsten <oyvind.hvidsten@dhampir.no>
+	- execute_command_internal: if we unwind via the return builtin (e.g.,
+	  we execute a function which then returns via the return builtin to
+	  a previous function), we don't free the saved fifo list, so add an
+	  unwind-protect to make sure the free happens. Rest of fix for leak
+	  reported by Oyvind Hvidsten <oyvind.hvidsten@dhampir.no>
+
+subst.c
+	- add_fifo_list: for the FIFO case (no /dev/fd), make sure we
+	  initialize the new members of the fifo list after xrealloc
+
+				   12/9
+				   ----
+subst.c
+	- dev_fd_list: now a list of type `pid_t' so we can store process
+	  associated with the pipe fd into the right element; change all
+	  necessary functions (copy_fifo_list, add_fifo_list)
+	- process_substitute: store pid of child process into the right
+	  index in dev_fd_list after opening the pipe. Process ID of -1 means
+	  process has been reaped and fd needs to be closed (or FIFO needs to
+	  be unlinked); value of 0 means slot is unused
+
+jobs.c
+	- wait_for_background_pids: call reap_procsubs to make sure we clean
+	  up all reaped process substitutions before trying to wait for
+	  everything (still needs work)
+
+tests/{run-procsub,procsub.{tests,right}}
+	- new file, tests of process substitution that have failed in the past
+
+				   12/10
+				   -----
+jobs.c
+	- wait_for_background_pids: warn if one of the jobs is stopped
+
+subst.c
+	- wait_procsubs: new function, call wait_for for every "live" process
+	  substitution
+
+jobs.c
+	- wait_for_background_pids: call wait_procsubs to reap any living
+	  process subsitutions

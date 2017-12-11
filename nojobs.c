@@ -271,8 +271,11 @@ set_pid_status (pid, status)
 
 #if defined (PROCESS_SUBSTITUTION)
   if ((ind = find_procsub_child (pid)) >= 0)
+{
+itrace("waitchld: calling set_procsub_status (%d, %d)", ind, pid);
     set_procsub_status (ind, pid, WSTATUS (status));
     /* XXX - also saving in list below */
+}
 #endif
 
   slot = find_index_by_pid (pid);
