@@ -87,6 +87,9 @@ static int glean_key_from_name PARAMS((char *));
 static int find_boolean_var PARAMS((const char *));
 static int find_string_var PARAMS((const char *));
 
+static const char *boolean_varname PARAMS((int));
+static const char *string_varname PARAMS((int));
+
 static char *_rl_get_string_variable_value PARAMS((const char *));
 static int substring_member_of_array PARAMS((const char *, const char * const *));
 
@@ -103,6 +106,7 @@ static int _rl_prefer_visible_bell = 1;
 #define OP_LE	6
 
 #define OPSTART(c)	((c) == '=' || (c) == '!' || (c) == '<' || (c) == '>')
+#define CMPSTART(c)	((c) == '=' || (c) == '!')
 
 /* **************************************************************** */
 /*								    */
@@ -1100,7 +1104,9 @@ static int if_stack_size;
 static int
 parser_if (char *args)
 {
-  int i, llen;
+  int i, llen, boolvar, strvar;
+
+  boolvar = strvar = -1;
 
   /* Push parser state. */
   if (if_stack_depth + 1 >= if_stack_size)
@@ -1246,6 +1252,53 @@ parser_if (char *args)
      value stored in rl_readline_name. */
   else if (_rl_stricmp (args, rl_readline_name) == 0)
     _rl_parsing_conditionalized_out = 0;
+  else if ((boolvar = find_boolean_var (args)) >= 0 || (strvar = find_string_var (args)) >= 0)
+    {
+      int op, previ;
+      size_t vlen;
+      const char *vname;
+      char *valuearg, *vval, prevc;
+
+      _rl_parsing_conditionalized_out = 1;
+      vname = (boolvar >= 0) ? boolean_varname (boolvar) : string_varname (strvar);
+      vlen = strlen (vname);
+      if (i > 0 && i <= llen && args[i-1] == '\0')
+        args[i-1] = ' ';
+      args[llen] = '\0';		/* just in case */
+      for (i = vlen; whitespace (args[i]); i++)
+	;
+      if (CMPSTART(args[i]) == 0)
+	{
+	  _rl_init_file_error ("equality comparison operator expected, found `%s'", args[i] ? args + i : "end-of-line");
+	  return 0;
+	}
+      previ = i;
+      op = parse_comparison_op (args, &i);
+      if (op != OP_EQ && op != OP_NE)
+	{
+	  _rl_init_file_error ("equality comparison operator expected, found `%s'", args+previ);
+	  return 0;
+	}
+      for ( ; args[i] && whitespace (args[i]); i++)
+	;
+      if (args[i] == 0)
+	{
+	  _rl_init_file_error ("argument expected, found `%s'", args+i);
+	  return 0;
+	}
+      previ = i;
+      valuearg = args + i;
+      for ( ; args[i] && whitespace (args[i]) == 0; i++)
+	;
+      prevc = args[i];
+      args[i] = '\0';		/* null-terminate valuearg */
+      vval = rl_variable_value (vname);
+      if (op == OP_EQ)
+        _rl_parsing_conditionalized_out = _rl_stricmp (vval, valuearg) != 0;
+      else if (op == OP_NE)
+        _rl_parsing_conditionalized_out = _rl_stricmp (vval, valuearg) == 0;
+      args[i] = prevc;
+    }
   else
     _rl_parsing_conditionalized_out = 1;
   return 0;
@@ -1722,6 +1775,12 @@ find_boolean_var (const char *name)
   return -1;
 }
 
+static const char *
+boolean_varname (int i)
+{
+  return ((i >= 0) ? boolean_varlist[i].name : (char *)NULL);
+}  
+
 /* Hooks for handling special boolean variables, where a
    function needs to be called or another variable needs
    to be changed when they're changed. */
@@ -1804,6 +1863,12 @@ find_string_var (const char *name)
       return i;
   return -1;
 }
+
+static const char *
+string_varname (int i)
+{
+  return ((i >= 0) ? string_varlist[i].name : (char *)NULL);
+}  
 
 /* A boolean value that can appear in a `set variable' command is true if
    the value is null or empty, `on' (case-insensitive), or "1".  Any other

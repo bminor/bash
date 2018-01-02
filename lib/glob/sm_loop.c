@@ -862,6 +862,16 @@ fprintf(stderr, "extmatch: flags = %d\n", flags);
 	      if (pnext == prest)
 		break;
 	    }
+
+#if 0	/* NOTYET */
+	  /* Report from Eric Cook <llua@gmx.com> 12/29/2017 */
+	  /* If nothing matched, but the string starts with a period and we
+	     need to match periods explicitly, don't return this as a match,
+	     even for negation. */
+	  if (m1 == 0 && *s == '.' && (flags & FNM_PERIOD))
+	    return (FNM_NOMATCH);
+#endif
+
 	  /* if srest > s, we are not at start of string */
 	  xflags = (srest > s) ? (flags & ~FNM_PERIOD) : flags;
 	  if (m1 == 0 && GMATCH (srest, se, prest, pe, NULL, xflags) == 0)

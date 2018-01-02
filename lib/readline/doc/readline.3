@@ -6,9 +6,9 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Dec 14 11:44:43 EST 2017
+.\"	Last Change: Thu Dec 28 14:49:51 EST 2017
 .\"
-.TH READLINE 3 "2017 December 14" "GNU Readline 7.0"
+.TH READLINE 3 "2017 December 28" "GNU Readline 7.0"
 .\"
 .\" File Name macro.  This used to be `.PN', for Path Name,
 .\" but Sun doesn't seem to like that very much.
@@ -643,8 +643,9 @@ The
 .B $if
 construct allows bindings to be made based on the
 editing mode, the terminal being used, or the application using
-readline.  The text of the test extends to the end of the line;
-no characters are required to isolate it.
+readline.  The text of the test, after any comparison operator,
+extends to the end of the line;
+unless otherwise noted, no characters are required to isolate it.
 .RS
 .IP \fBmode\fP
 The \fBmode=\fP form of the \fB$if\fP directive is used to test
@@ -684,6 +685,8 @@ The version number supplied on the right side of the operator consists
 of a major version number, an optional decimal point, and an optional
 minor version (e.g., \fB7.1\fP). If the minor version is omitted, it
 is assumed to be \fB0\fP.
+The operator may be separated from the string \fBversion\fP
+and from the version number argument by whitespace.
 .IP \fBapplication\fP
 The \fBapplication\fP construct is used to include
 application-specific settings.  Each program using the readline
@@ -701,6 +704,15 @@ key sequence that quotes the current or previous word in \fBbash\fP:
 \fB$endif\fP
 .fi
 .RE
+.IP \fIvariable\fP
+The \fIvariable\fP construct provides simple equality tests for readline
+variables and values.
+The permitted comparison operators are \fI=\fP, \fI==\fP, and \fI!=\fP.
+The variable name must be separated from the comparison operator by
+whitespace; the operator may be separated from the value on the right hand
+side by whitespace.
+Both string and boolean variables may be tested. Boolean variables must be
+tested against the values \fIon\fP and \fIoff\fP.
 .RE
 .IP \fB$endif\fP
 This command, as seen in the previous example, terminates an

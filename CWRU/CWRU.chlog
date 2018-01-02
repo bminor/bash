@@ -14722,3 +14722,21 @@ builtins/hash.def
 array.c,arrayfunc.c,...
 	- many changes to clean up unused variables and functions. From a
 	  report from Siteshwar Vashisht <svashisht@redhat.com>
+
+				   12/28
+				   -----
+lib/readline/terminal.c
+	- _rl_term_clrscroll: save the `E3' termcap capability, which clears
+	  the scrollback buffer where supported. Unused right now
+
+lib/readline/rlprivate.h
+	- _rl_term_clrscroll: extern declaration
+
+lib/readline/bind.c
+	- parser_if: added simple variable comparison capability. Allowable
+	  operators are `=', `==', and `!='; boolean variables must be
+	  compared to either `on' or `off'; variable names must be separated
+	  from the operator by whitespace
+
+doc/bash.1,lib/readline/doc/{rluser.texi,readline.3}
+	- document new `if variable comparison value' construct

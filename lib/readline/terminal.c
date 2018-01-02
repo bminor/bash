@@ -112,6 +112,7 @@ char PC, *BC, *UP;
 /* Some strings to control terminal actions.  These are output by tputs (). */
 char *_rl_term_clreol;
 char *_rl_term_clrpag;
+char *_rl_term_clrscroll;
 char *_rl_term_cr;
 char *_rl_term_backspace;
 char *_rl_term_goto;
@@ -385,6 +386,7 @@ static const struct _tc_string tc_strings[] =
 {
   { "@7", &_rl_term_at7 },
   { "DC", &_rl_term_DC },
+  { "E3", &_rl_term_clrscroll },
   { "IC", &_rl_term_IC },
   { "ce", &_rl_term_clreol },
   { "cl", &_rl_term_clrpag },
@@ -438,7 +440,7 @@ _rl_init_terminal_io (const char *terminal_name)
   int tty, tgetent_ret;
 
   term = terminal_name ? terminal_name : sh_get_env_value ("TERM");
-  _rl_term_clrpag = _rl_term_cr = _rl_term_clreol = (char *)NULL;
+  _rl_term_clrpag = _rl_term_cr = _rl_term_clreol = _rl_term_clrscroll = (char *)NULL;
   tty = rl_instream ? fileno (rl_instream) : 0;
 
   if (term == 0)
@@ -451,7 +453,7 @@ _rl_init_terminal_io (const char *terminal_name)
   _rl_term_mm = _rl_term_mo = (char *)NULL;
   _rl_terminal_can_insert = term_has_meta = _rl_term_autowrap = 0;
   _rl_term_cr = "\r";
-  _rl_term_clreol = _rl_term_clrpag = _rl_term_backspace = (char *)NULL;
+  _rl_term_backspace = (char *)NULL;
   _rl_term_goto = _rl_term_pc = _rl_term_ip = (char *)NULL;
   _rl_term_ks = _rl_term_ke =_rl_term_vs = _rl_term_ve = (char *)NULL;
   _rl_term_kh = _rl_term_kH = _rl_term_at7 = _rl_term_kI = (char *)NULL;

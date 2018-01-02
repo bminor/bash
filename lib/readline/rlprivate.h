@@ -538,6 +538,7 @@ extern int _rl_enable_keypad;
 extern int _rl_enable_meta;
 extern char *_rl_term_clreol;
 extern char *_rl_term_clrpag;
+extern char *_rl_term_clrscroll;
 extern char *_rl_term_im;
 extern char *_rl_term_ic;
 extern char *_rl_term_ei;
