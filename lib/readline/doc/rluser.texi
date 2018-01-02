@@ -938,6 +938,24 @@ the portion of the terminal name before the first @samp{-}.  This
 allows @code{sun} to match both @code{sun} and @code{sun-cmd},
 for instance.
 
+@item version
+The @code{version} test may be used to perform comparisons against
+specific Readline versions.
+The @code{version} expands to the current Readline version.
+The set of comparison operators includes
+@samp{=} (and @samp{==}), @samp{!=}, @samp{<=}, @samp{>=}, @samp{<},
+and @samp{>}.
+The version number supplied on the right side of the operator consists
+of a major version number, an optional decimal point, and an optional
+minor version (e.g., @samp{7.1}). If the minor version is omitted, it
+is assumed to be @samp{0}.
+The following example sets a variable if the Readline version being used
+is 7.0 or newer:
+@example
+$if version >= 7.0
+set show-mode-in-prompt on
+$endif
+@end example
 @item application
 The @var{application} construct is used to include
 application-specific settings.  Each program using the Readline

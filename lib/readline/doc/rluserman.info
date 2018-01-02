@@ -1,12 +1,12 @@
-This is rluserman.info, produced by makeinfo version 5.2 from
+This is rluserman.info, produced by makeinfo version 6.4 from
 rluserman.texi.
 
 This manual describes the end user interface of the GNU Readline Library
-(version 6.4, 28 May 2015), a library which aids in the consistency of
-user interface across discrete programs which provide a command line
+(version 7.0, 7 December 2017), a library which aids in the consistency
+of user interface across discrete programs which provide a command line
 interface.
 
-   Copyright (C) 1988-2014 Free Software Foundation, Inc.
+   Copyright (C) 1988-2016 Free Software Foundation, Inc.
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -435,12 +435,19 @@ Variable Settings
           If set to 'on', Readline will convert characters with the
           eighth bit set to an ASCII key sequence by stripping the
           eighth bit and prefixing an <ESC> character, converting them
-          to a meta-prefixed key sequence.  The default value is 'on'.
+          to a meta-prefixed key sequence.  The default value is 'on',
+          but will be set to 'off' if the locale is one that contains
+          eight-bit characters.
 
      'disable-completion'
           If set to 'On', Readline will inhibit word completion.
           Completion characters will be inserted into the line as if
           they had been mapped to 'self-insert'.  The default is 'off'.
+
+     'echo-control-characters'
+          When set to 'on', on operating systems that indicate they
+          support it, readline echoes a character corresponding to a
+          signal generated from the keyboard.  The default is 'on'.
 
      'editing-mode'
           The 'editing-mode' variable controls which default set of key
@@ -449,19 +456,14 @@ Variable Settings
           This variable can be set to either 'emacs' or 'vi'.
 
      'emacs-mode-string'
-          This string is displayed immediately before the last line of
-          the primary prompt when emacs editing mode is active.  The
-          value is expanded like a key binding, so the standard set of
-          meta- and control prefixes and backslash escape sequences is
-          available.  Use the '\1' and '\2' escapes to begin and end
-          sequences of non-printing characters, which can be used to
-          embed a terminal control sequence into the mode string.  The
-          default is '@'.
-
-     'echo-control-characters'
-          When set to 'on', on operating systems that indicate they
-          support it, readline echoes a character corresponding to a
-          signal generated from the keyboard.  The default is 'on'.
+          If the SHOW-MODE-IN-PROMPT variable is enabled, this string is
+          displayed immediately before the last line of the primary
+          prompt when emacs editing mode is active.  The value is
+          expanded like a key binding, so the standard set of meta- and
+          control prefixes and backslash escape sequences is available.
+          Use the '\1' and '\2' escapes to begin and end sequences of
+          non-printing characters, which can be used to embed a terminal
+          control sequence into the mode string.  The default is '@'.
 
      'enable-bracketed-paste'
           When set to 'On', Readline will configure the terminal in a
@@ -497,7 +499,9 @@ Variable Settings
           list.  If set to zero, any existing history entries are
           deleted and no new entries are saved.  If set to a value less
           than zero, the number of history entries is not limited.  By
-          default, the number of history entries is not limited.
+          default, the number of history entries is not limited.  If an
+          attempt is made to set HISTORY-SIZE to a non-numeric value,
+          the maximum number of history entries will be set to 500.
 
      'horizontal-scroll-mode'
           This variable can be set to either 'on' or 'off'.  Setting it
@@ -510,8 +514,9 @@ Variable Settings
           If set to 'on', Readline will enable eight-bit input (it will
           not clear the eighth bit in the characters it reads),
           regardless of what the terminal claims it can support.  The
-          default value is 'off'.  The name 'meta-flag' is a synonym for
-          this variable.
+          default value is 'off', but Readline will set it to 'on' if
+          the locale contains eight-bit characters.  The name
+          'meta-flag' is a synonym for this variable.
 
      'isearch-terminators'
           The string of characters that should terminate an incremental
@@ -525,9 +530,10 @@ Variable Settings
           commands.  Acceptable 'keymap' names are 'emacs',
           'emacs-standard', 'emacs-meta', 'emacs-ctlx', 'vi', 'vi-move',
           'vi-command', and 'vi-insert'.  'vi' is equivalent to
-          'vi-command'; 'emacs' is equivalent to 'emacs-standard'.  The
-          default value is 'emacs'.  The value of the 'editing-mode'
-          variable also affects the default keymap.
+          'vi-command' ('vi-move' is also a synonym); 'emacs' is
+          equivalent to 'emacs-standard'.  The default value is 'emacs'.
+          The value of the 'editing-mode' variable also affects the
+          default keymap.
 
      'keyseq-timeout'
           Specifies the duration Readline will wait for a character when
@@ -574,7 +580,8 @@ Variable Settings
      'output-meta'
           If set to 'on', Readline will display characters with the
           eighth bit set directly rather than as a meta-prefixed escape
-          sequence.  The default is 'off'.
+          sequence.  The default is 'off', but Readline will set it to
+          'on' if the locale contains eight-bit characters.
 
      'page-completions'
           If set to 'on', Readline uses an internal 'more'-like pager to
@@ -608,10 +615,10 @@ Variable Settings
           default value is 'off'.
 
      'show-mode-in-prompt'
-          If set to 'on', add a character to the beginning of the prompt
+          If set to 'on', add a string to the beginning of the prompt
           indicating the editing mode: emacs, vi command, or vi
-          insertion.  The mode strings are user-settable.  The default
-          value is 'off'.
+          insertion.  The mode strings are user-settable (e.g.,
+          EMACS-MODE-STRING).  The default value is 'off'.
 
      'skip-completed-text'
           If set to 'on', this alters the default completion behavior
@@ -627,24 +634,26 @@ Variable Settings
           'off'.
 
      'vi-cmd-mode-string'
-          This string is displayed immediately before the last line of
-          the primary prompt when vi editing mode is active and in
-          command mode.  The value is expanded like a key binding, so
-          the standard set of meta- and control prefixes and backslash
-          escape sequences is available.  Use the '\1' and '\2' escapes
-          to begin and end sequences of non-printing characters, which
-          can be used to embed a terminal control sequence into the mode
-          string.  The default is '(cmd)'.
+          If the SHOW-MODE-IN-PROMPT variable is enabled, this string is
+          displayed immediately before the last line of the primary
+          prompt when vi editing mode is active and in command mode.
+          The value is expanded like a key binding, so the standard set
+          of meta- and control prefixes and backslash escape sequences
+          is available.  Use the '\1' and '\2' escapes to begin and end
+          sequences of non-printing characters, which can be used to
+          embed a terminal control sequence into the mode string.  The
+          default is '(cmd)'.
 
      'vi-ins-mode-string'
-          This string is displayed immediately before the last line of
-          the primary prompt when vi editing mode is active and in
-          insertion mode.  The value is expanded like a key binding, so
-          the standard set of meta- and control prefixes and backslash
-          escape sequences is available.  Use the '\1' and '\2' escapes
-          to begin and end sequences of non-printing characters, which
-          can be used to embed a terminal control sequence into the mode
-          string.  The default is '(ins)'.
+          If the SHOW-MODE-IN-PROMPT variable is enabled, this string is
+          displayed immediately before the last line of the primary
+          prompt when vi editing mode is active and in insertion mode.
+          The value is expanded like a key binding, so the standard set
+          of meta- and control prefixes and backslash escape sequences
+          is available.  Use the '\1' and '\2' escapes to begin and end
+          sequences of non-printing characters, which can be used to
+          embed a terminal control sequence into the mode string.  The
+          default is '(ins)'.
 
      'visible-stats'
           If set to 'on', a character denoting a file's type is appended
@@ -784,6 +793,16 @@ four parser directives used.
           '=' is tested against both the full name of the terminal and
           the portion of the terminal name before the first '-'.  This
           allows 'sun' to match both 'sun' and 'sun-cmd', for instance.
+
+     'version'
+          The 'version' test may be used to perform comparisons against
+          specific Readline versions.  The 'version' expands to the
+          current Readline version.  The set of comparison operators
+          includes '=' (and '=='), '!=', '<=', '>=', '<', and '>'.  The
+          version number supplied on the right side of the operator
+          consists of a major version number, an optional decimal point,
+          and an optional minor version (e.g., '7.1').  If the minor
+          version is omitted, it is assumed to be '0'.
 
      'application'
           The APPLICATION construct is used to include
@@ -973,6 +992,20 @@ File: rluserman.info,  Node: Commands For Moving,  Next: Commands For History,  
      Move back to the start of the current or previous word.  Words are
      composed of letters and digits.
 
+'previous-screen-line ()'
+     Attempt to move point to the same physical screen column on the
+     previous physical screen line.  This will not have the desired
+     effect if the current Readline line does not take up more than one
+     physical line or if point is not greater than the length of the
+     prompt plus the screen width.
+
+'next-screen-line ()'
+     Attempt to move point to the same physical screen column on the
+     next physical screen line.  This will not have the desired effect
+     if the current Readline line does not take up more than one
+     physical line or if the length of the current Readline line is not
+     greater than the length of the prompt plus the screen width.
+
 'clear-screen (C-l)'
      Clear the screen and redraw the current line, leaving the current
      line at the top of the screen.
@@ -1038,13 +1071,13 @@ File: rluserman.info,  Node: Commands For History,  Next: Commands For Text,  Pr
      string must match at the beginning of a history line.  This is a
      non-incremental search.  By default, this command is unbound.
 
-'history-substr-search-forward ()'
+'history-substring-search-forward ()'
      Search forward through the history for the string of characters
      between the start of the current line and the point.  The search
      string may match anywhere in a history line.  This is a
      non-incremental search.  By default, this command is unbound.
 
-'history-substr-search-backward ()'
+'history-substring-search-backward ()'
      Search backward through the history for the string of characters
      between the start of the current line and the point.  The search
      string may match anywhere in a history line.  This is a
@@ -1322,9 +1355,10 @@ File: rluserman.info,  Node: Miscellaneous Commands,  Prev: Keyboard Macros,  Up
      Abort the current editing command and ring the terminal's bell
      (subject to the setting of 'bell-style').
 
-'do-uppercase-version (M-a, M-b, M-X, ...)'
-     If the metafied character X is lowercase, run the command that is
-     bound to the corresponding uppercase character.
+'do-lowercase-version (M-A, M-B, M-X, ...)'
+     If the metafied character X is upper case, run the command that is
+     bound to the corresponding metafied lower case character.  The
+     behavior is undefined if X is already lower case.
 
 'prefix-meta (<ESC>)'
      Metafy the next character typed.  This is for keyboards without a
@@ -1909,29 +1943,29 @@ their use in free software.
 
 
 Tag Table:
-Node: Top903
-Node: Command Line Editing1425
-Node: Introduction and Notation2079
-Node: Readline Interaction3704
-Node: Readline Bare Essentials4897
-Node: Readline Movement Commands6682
-Node: Readline Killing Commands7644
-Node: Readline Arguments9564
-Node: Searching10610
-Node: Readline Init File12764
-Node: Readline Init File Syntax13919
-Node: Conditional Init Constructs33365
-Node: Sample Init File35892
-Node: Bindable Readline Commands39011
-Node: Commands For Moving40067
-Node: Commands For History40929
-Node: Commands For Text45189
-Node: Commands For Killing48633
-Node: Numeric Arguments50801
-Node: Commands For Completion51942
-Node: Keyboard Macros53912
-Node: Miscellaneous Commands54601
-Node: Readline vi Mode58453
-Node: GNU Free Documentation License59367
+Node: Top907
+Node: Command Line Editing1429
+Node: Introduction and Notation2083
+Node: Readline Interaction3708
+Node: Readline Bare Essentials4901
+Node: Readline Movement Commands6686
+Node: Readline Killing Commands7648
+Node: Readline Arguments9568
+Node: Searching10614
+Node: Readline Init File12768
+Node: Readline Init File Syntax13923
+Node: Conditional Init Constructs34015
+Node: Sample Init File37104
+Node: Bindable Readline Commands40223
+Node: Commands For Moving41279
+Node: Commands For History42847
+Node: Commands For Text47113
+Node: Commands For Killing50557
+Node: Numeric Arguments52725
+Node: Commands For Completion53866
+Node: Keyboard Macros55836
+Node: Miscellaneous Commands56525
+Node: Readline vi Mode60448
+Node: GNU Free Documentation License61362
 
 End Tag Table

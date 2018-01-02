@@ -106,7 +106,7 @@ extern char *string_list_internal __P((WORD_LIST *, char *));
 extern char *string_list __P((WORD_LIST *));
 
 /* Turn $* into a single string, obeying POSIX rules. */
-extern char *string_list_dollar_star __P((WORD_LIST *));
+extern char *string_list_dollar_star __P((WORD_LIST *, int, int));
 
 /* Expand $@ into a single string, obeying POSIX rules. */
 extern char *string_list_dollar_at __P((WORD_LIST *, int, int));

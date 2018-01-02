@@ -1107,7 +1107,7 @@ array_value_internal (s, quoted, flags, rtype, indp)
 	 retval if rtype == 0, so this is not a memory leak */
       if (t[0] == '*' && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
 	{
-	  temp = string_list_dollar_star (l);
+	  temp = string_list_dollar_star (l, quoted, (flags & AV_ASSIGNRHS) ? PF_ASSIGNRHS : 0);
 	  retval = quote_string (temp);
 	  free (temp);
 	}
@@ -1228,7 +1228,7 @@ array_keys (s, quoted)
 
   if (t[0] == '*' && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
     {
-      temp = string_list_dollar_star (l);
+      temp = string_list_dollar_star (l, quoted, 0);
       retval = quote_string (temp);
       free (temp);
     }

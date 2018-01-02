@@ -1,5 +1,5 @@
 \initial {A}
-\entry {application-specific completion functions}{47}
+\entry {application-specific completion functions}{49}
 \initial {C}
 \entry {command editing}{1}
 \initial {E}
@@ -13,7 +13,7 @@
 \initial {N}
 \entry {notation, readline}{1}
 \initial {R}
-\entry {readline, function}{23}
+\entry {readline, function}{24}
 \initial {V}
 \entry {variables, readline}{4}
 \initial {Y}

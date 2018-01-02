@@ -104,6 +104,8 @@ extern ARRAY *array_from_string __P((char *, char *));
 #define element_forw(ae)	((ae)->next)
 #define element_back(ae)	((ae)->prev)
 
+#define set_element_value(ae, val)	((ae)->value = (val))
+
 /* Convenience */
 #define array_push(a,v)	\
   do { array_rshift ((a), 1, (v)); } while (0)

@@ -14650,3 +14650,33 @@ subst.c
 jobs.c
 	- wait_for_background_pids: call wait_procsubs to reap any living
 	  process subsitutions
+
+				   12/13
+				   -----
+lib/readline/bind.c
+	- parser_if: add support for testing the readline version, using the
+	  full set of arithmetic comparison operators (and supporting both
+	  = and ==), using version numbers of the form major[.[minor]]
+
+				   12/14
+				   -----
+subst.[ch]
+	- string_list_dollar_star: now takes QUOTED and PFLAGS arguments like
+	  string_list_dollar_at, changed all callers. Not used yet.
+
+				   12/16
+				   -----
+subst.c
+	- param_expand: broke out cases of expanding unquoted (quoted == 0)
+	  $* on the rhs of an assignment statement (pflags & PF_ASSIGNRHS)
+	  with various values of IFS (unset, null, set to non-null value) to
+	  capture the expansion subtleties. From a report back on 11/24 by
+	  Martijn Dekker <martijn@inlv.org>
+
+				   12/17
+				   -----
+array.h
+	- set_element_value: new define, sets array element AE to VALUE
+
+variables.c
+	- set_pipestatus_array: use set_element_value where appropriate

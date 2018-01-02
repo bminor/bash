@@ -2540,8 +2540,9 @@ ifs_firstchar (lenp)
 /* Posix interpretation 888 changes this when IFS is null by specifying
    that when unquoted, this expands to separate arguments */
 char *
-string_list_dollar_star (list)
+string_list_dollar_star (list, quoted, flags)
      WORD_LIST *list;
+     int quoted, flags;
 {
   char *ret;
 #if defined (HANDLE_MULTIBYTE)
@@ -2680,7 +2681,7 @@ string_list_pos_params (pchar, list, quoted)
     {
       tlist = quote_list (list);
       word_list_remove_quoted_nulls (tlist);
-      ret = string_list_dollar_star (tlist);
+      ret = string_list_dollar_star (tlist, 0, 0);
     }
   else if (pchar == '*' && (quoted & Q_HERE_DOCUMENT))
     {
@@ -2689,13 +2690,13 @@ string_list_pos_params (pchar, list, quoted)
       ret = string_list (tlist);
     }
   else if (pchar == '*' && quoted == 0 && ifs_is_null)	/* XXX */
-    ret = expand_no_split_dollar_star ? string_list_dollar_star (list) : string_list_dollar_at (list, quoted, 0);	/* Posix interp 888 */
+    ret = expand_no_split_dollar_star ? string_list_dollar_star (list, quoted, 0) : string_list_dollar_at (list, quoted, 0);	/* Posix interp 888 */
   else if (pchar == '*')
     {
       /* Even when unquoted, string_list_dollar_star does the right thing
 	 making sure that the first character of $IFS is used as the
 	 separator. */
-      ret = string_list_dollar_star (list);
+      ret = string_list_dollar_star (list, quoted, 0);
     }
   else if (pchar == '@' && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
     /* We use string_list_dollar_at, but only if the string is quoted, since
@@ -2709,7 +2710,7 @@ string_list_pos_params (pchar, list, quoted)
   else if (pchar == '@' && quoted == 0 && ifs_is_null)	/* XXX */
     ret = string_list_dollar_at (list, quoted, 0);	/* Posix interp 888 */
   else if (pchar == '@')
-    ret = string_list_dollar_star (list);
+    ret = string_list_dollar_star (list, quoted, 0);
   else
     ret = string_list ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) ? quote_list (list) : list);
 
@@ -3345,7 +3346,7 @@ string_rest_of_args (dollar_star)
   char *string;
 
   list = list_rest_of_args ();
-  string = dollar_star ? string_list_dollar_star (list) : string_list (list);
+  string = dollar_star ? string_list_dollar_star (list, 0, 0) : string_list (list);
   dispose_words (list);
   return (string);
 }
@@ -6796,7 +6797,7 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
 	  w->flags |= W_SPLITSPACE;
 	}
       else
-	temp = (l_hasdollat || l->next) ? string_list_dollar_star (l) : string_list (l);
+	temp = (l_hasdollat || l->next) ? string_list_dollar_star (l, quoted, 0) : string_list (l);
 
       /* If we have a quoted null result (QUOTED_NULL(temp)) and the word is
 	 a quoted null (l->next == 0 && QUOTED_NULL(l->word->word)), the
@@ -8533,7 +8534,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
       x = all_variables_matching_prefix (temp1);
       xlist = strvec_to_word_list (x, 0, 0);
       if (string[sindex - 2] == '*')
-	temp = string_list_dollar_star (xlist);
+	temp = string_list_dollar_star (xlist, quoted, 0);
       else
 	{
 	  temp = string_list_dollar_at (xlist, quoted, 0);
@@ -9083,7 +9084,7 @@ param_expand (string, sindex, quoted, expanded_something,
 	     quote the whole string, including the separators.  If IFS
 	     is unset, the parameters are separated by ' '; if $IFS is
 	     null, the parameters are concatenated. */
-	  temp = (quoted & (Q_DOUBLE_QUOTES|Q_PATQUOTE)) ? string_list_dollar_star (list) : string_list (list);
+	  temp = (quoted & (Q_DOUBLE_QUOTES|Q_PATQUOTE)) ? string_list_dollar_star (list, quoted, 0) : string_list (list);
 	  if (temp)
 	    {
 	      temp1 = (quoted & Q_DOUBLE_QUOTES) ? quote_string (temp) : temp;
@@ -9101,18 +9102,34 @@ param_expand (string, sindex, quoted, expanded_something,
 	     an assignment statement.  In that case, we don't separate the
 	     arguments at all.  Otherwise, if the $* is not quoted it is
 	     identical to $@ */
-#  if defined (HANDLE_MULTIBYTE)
-	  if (expand_no_split_dollar_star && ifs_firstc[0] == 0)
-#  else
-	  if (expand_no_split_dollar_star && ifs_firstc == 0)
-#  endif
-	    temp = string_list_dollar_star (list);
-	  else if (expand_no_split_dollar_star && quoted == 0 && (ifs_is_set == 0 || ifs_is_null) && (pflags & PF_ASSIGNRHS))
+	  if (expand_no_split_dollar_star && quoted == 0 && ifs_is_set == 0 && (pflags & PF_ASSIGNRHS))
 	    {
-	      /* Posix interp 888 */
+	      /* Posix interp 888: RHS of assignment, IFS unset */
 	      temp = string_list_dollar_at (list, Q_DOUBLE_QUOTES, pflags);
 	      tflag |= W_SPLITSPACE;
 	    }
+	  else if (expand_no_split_dollar_star && quoted == 0 && ifs_is_null && (pflags & PF_ASSIGNRHS))
+	    {
+	      /* Posix interp 888: RHS of assignment, IFS set to '' */
+	      temp1 = string_list_dollar_star (list, quoted, pflags);
+	      temp = quote_escapes (temp1);
+	      free (temp1);
+	    }
+	  else if (expand_no_split_dollar_star && quoted == 0 && ifs_is_set && ifs_is_null == 0 && (pflags & PF_ASSIGNRHS))
+	    {
+	      /* Posix interp 888: RHS of assignment, IFS set to non-null value */
+	      temp1 = string_list_dollar_star (list, quoted, pflags);
+	      temp = quote_string (temp1);
+	      free (temp1);
+	    }
+	  /* XXX - should we check ifs_is_set here as well? */
+#  if defined (HANDLE_MULTIBYTE)
+	  else if (expand_no_split_dollar_star && ifs_firstc[0] == 0)
+#  else
+	  else if (expand_no_split_dollar_star && ifs_firstc == 0)
+#  endif
+	    /* Posix interp 888: not RHS, no splitting, IFS set to '' */
+	    temp = string_list_dollar_star (list, quoted, 0);
 	  else
 	    {
 	      temp = string_list_dollar_at (list, quoted, 0);
@@ -10526,7 +10543,7 @@ setifs (v)
 #if defined (HANDLE_MULTIBYTE)
   if (ifs_value == 0)
     {
-      ifs_firstc[0] = '\0';
+      ifs_firstc[0] = '\0';	/* XXX - ? */
       ifs_firstc_len = 1;
     }
   else

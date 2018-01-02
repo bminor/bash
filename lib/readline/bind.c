@@ -95,6 +95,15 @@ static int currently_reading_init_file;
 /* used only in this file */
 static int _rl_prefer_visible_bell = 1;
 
+#define OP_EQ	1
+#define OP_NE	2
+#define OP_GT	3
+#define OP_GE	4
+#define OP_LT	5
+#define OP_LE	6
+
+#define OPSTART(c)	((c) == '=' || (c) == '!' || (c) == '<' || (c) == '>')
+
 /* **************************************************************** */
 /*								    */
 /*			Binding keys				    */
@@ -1005,6 +1014,62 @@ _rl_init_file_error (va_alist)
 
 /* **************************************************************** */
 /*								    */
+/*			Parser Helper Functions       		    */
+/*								    */
+/* **************************************************************** */
+
+static int
+parse_comparison_op (s, indp)
+     const char *s;
+     int *indp;
+{
+  int i, peekc, op;
+
+  if (OPSTART (s[*indp]) == 0)
+    return -1;
+  i = *indp;
+  peekc = s[i] ? s[i+1] : 0;
+  op = -1;
+
+  if (s[i] == '=')
+    {
+      op = OP_EQ;
+      if (peekc == '=')
+        i++;
+      i++;
+    }
+  else if (s[i] == '!' && peekc == '=')
+    {
+      op = OP_NE;
+      i += 2;
+    }
+  else if (s[i] == '<' && peekc == '=')
+    {
+      op = OP_LE;
+      i += 2;
+    }
+  else if (s[i] == '>' && peekc == '=')
+    {
+      op = OP_GE;
+      i += 2;
+    }
+  else if (s[i] == '<')
+    {
+      op = OP_LT;
+      i += 1;
+    }
+  else if (s[i] == '>')
+    {
+      op = OP_GT;
+      i += 1;
+    }
+
+  *indp = i;
+  return op;        
+}
+
+/* **************************************************************** */
+/*								    */
 /*			Parser Directives       		    */
 /*								    */
 /* **************************************************************** */
@@ -1035,7 +1100,7 @@ static int if_stack_size;
 static int
 parser_if (char *args)
 {
-  register int i;
+  int i, llen;
 
   /* Push parser state. */
   if (if_stack_depth + 1 >= if_stack_size)
@@ -1051,6 +1116,8 @@ parser_if (char *args)
      for finding the matching endif.  In that case, return right now. */
   if (_rl_parsing_conditionalized_out)
     return 0;
+
+  llen = strlen (args);
 
   /* Isolate first argument. */
   for (i = 0; args[i] && !whitespace (args[i]); i++);
@@ -1094,6 +1161,87 @@ parser_if (char *args)
       _rl_parsing_conditionalized_out = mode != rl_editing_mode;
     }
 #endif /* VI_MODE */
+  else if (_rl_strnicmp (args, "version", 7) == 0)
+    {
+      int rlversion, versionarg, op, previ, major, minor;
+
+      _rl_parsing_conditionalized_out = 1;
+      rlversion = RL_VERSION_MAJOR*10 + RL_VERSION_MINOR;
+      /* if "version" is separated from the operator by whitespace, or the
+         operand is separated from the operator by whitespace, restore it.
+         We're more liberal with allowed whitespace for this variable. */
+      if (i > 0 && i <= llen && args[i-1] == '\0')
+        args[i-1] = ' ';
+      args[llen] = '\0';		/* just in case */
+      for (i = 7; whitespace (args[i]); i++)
+	;
+      if (OPSTART(args[i]) == 0)
+	{
+	  _rl_init_file_error ("comparison operator expected, found `%s'", args[i] ? args + i : "end-of-line");
+	  return 0;
+	}
+      previ = i;
+      op = parse_comparison_op (args, &i);
+      if (op <= 0)
+	{
+	  _rl_init_file_error ("comparison operator expected, found `%s'", args+previ);
+	  return 0;
+	}
+      for ( ; args[i] && whitespace (args[i]); i++)
+	;
+      if (args[i] == 0 || _rl_digit_p (args[i]) == 0)
+	{
+	  _rl_init_file_error ("numeric argument expected, found `%s'", args+i);
+	  return 0;
+	}
+      major = minor = 0;
+      previ = i;
+      for ( ; args[i] && _rl_digit_p (args[i]); i++)
+	major = major*10 + _rl_digit_value (args[i]);
+      if (args[i] == '.')
+	{
+	  if (args[i + 1] && _rl_digit_p (args [i + 1]) == 0)
+	    {
+	      _rl_init_file_error ("numeric argument expected, found `%s'", args+previ);
+	      return 0;
+	    }
+	  for (++i; args[i] && _rl_digit_p (args[i]); i++)
+	    minor = minor*10 + _rl_digit_value (args[i]);
+	}
+      /* optional - check for trailing garbage on the line, allow whitespace
+	 and a trailing comment */
+      previ = i;
+      for ( ; args[i] && whitespace (args[i]); i++)
+	;
+      if (args[i] && args[i] != '#')
+	{
+	  _rl_init_file_error ("trailing garbage on line: `%s'", args+previ);
+	  return 0;
+	}
+      versionarg = major*10 + minor;
+
+      switch (op)
+	{
+	case OP_EQ:
+	  _rl_parsing_conditionalized_out = rlversion == versionarg;
+	  break;
+	case OP_NE:
+	  _rl_parsing_conditionalized_out = rlversion != versionarg;
+	  break;
+	case OP_GT:
+	  _rl_parsing_conditionalized_out = rlversion > versionarg;
+	  break;
+	case OP_GE:
+	  _rl_parsing_conditionalized_out = rlversion >= versionarg;
+	  break;
+	case OP_LT:
+	  _rl_parsing_conditionalized_out = rlversion < versionarg;
+	  break;
+	case OP_LE:
+	  _rl_parsing_conditionalized_out = rlversion <= versionarg;
+	  break;
+	}
+    }
   /* Check to see if the first word in ARGS is the same as the
      value stored in rl_readline_name. */
   else if (_rl_stricmp (args, rl_readline_name) == 0)

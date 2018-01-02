@@ -5714,7 +5714,7 @@ set_pipestatus_array (ps, nproc)
     {
       ae = element_forw (a->head);
       free (element_value (ae));
-      ae->value = itos (ps[0]);
+      set_element_value (ae, itos (ps[0]));
     }
   else if (array_num_elements (a) <= nproc)
     {
@@ -5724,7 +5724,7 @@ set_pipestatus_array (ps, nproc)
 	{
 	  ae = element_forw (ae);
 	  free (element_value (ae));
-	  ae->value = itos (ps[i]);
+	  set_element_value (ae, itos (ps[i]));
 	}
       /* add any more */
       for ( ; i < nproc; i++)

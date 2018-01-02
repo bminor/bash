@@ -1,10 +1,10 @@
-This is readline.info, produced by makeinfo version 5.2 from rlman.texi.
+This is readline.info, produced by makeinfo version 6.4 from rlman.texi.
 
-This manual describes the GNU Readline Library (version 6.4, 28 May
-2015), a library which aids in the consistency of user interface across
+This manual describes the GNU Readline Library (version 7.0, 7 December
+2017), a library which aids in the consistency of user interface across
 discrete programs which provide a command line interface.
 
-   Copyright (C) 1988-2014 Free Software Foundation, Inc.
+   Copyright (C) 1988-2016 Free Software Foundation, Inc.
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -437,12 +437,19 @@ Variable Settings
           If set to 'on', Readline will convert characters with the
           eighth bit set to an ASCII key sequence by stripping the
           eighth bit and prefixing an <ESC> character, converting them
-          to a meta-prefixed key sequence.  The default value is 'on'.
+          to a meta-prefixed key sequence.  The default value is 'on',
+          but will be set to 'off' if the locale is one that contains
+          eight-bit characters.
 
      'disable-completion'
           If set to 'On', Readline will inhibit word completion.
           Completion characters will be inserted into the line as if
           they had been mapped to 'self-insert'.  The default is 'off'.
+
+     'echo-control-characters'
+          When set to 'on', on operating systems that indicate they
+          support it, readline echoes a character corresponding to a
+          signal generated from the keyboard.  The default is 'on'.
 
      'editing-mode'
           The 'editing-mode' variable controls which default set of key
@@ -451,19 +458,14 @@ Variable Settings
           This variable can be set to either 'emacs' or 'vi'.
 
      'emacs-mode-string'
-          This string is displayed immediately before the last line of
-          the primary prompt when emacs editing mode is active.  The
-          value is expanded like a key binding, so the standard set of
-          meta- and control prefixes and backslash escape sequences is
-          available.  Use the '\1' and '\2' escapes to begin and end
-          sequences of non-printing characters, which can be used to
-          embed a terminal control sequence into the mode string.  The
-          default is '@'.
-
-     'echo-control-characters'
-          When set to 'on', on operating systems that indicate they
-          support it, readline echoes a character corresponding to a
-          signal generated from the keyboard.  The default is 'on'.
+          If the SHOW-MODE-IN-PROMPT variable is enabled, this string is
+          displayed immediately before the last line of the primary
+          prompt when emacs editing mode is active.  The value is
+          expanded like a key binding, so the standard set of meta- and
+          control prefixes and backslash escape sequences is available.
+          Use the '\1' and '\2' escapes to begin and end sequences of
+          non-printing characters, which can be used to embed a terminal
+          control sequence into the mode string.  The default is '@'.
 
      'enable-bracketed-paste'
           When set to 'On', Readline will configure the terminal in a
@@ -499,7 +501,9 @@ Variable Settings
           list.  If set to zero, any existing history entries are
           deleted and no new entries are saved.  If set to a value less
           than zero, the number of history entries is not limited.  By
-          default, the number of history entries is not limited.
+          default, the number of history entries is not limited.  If an
+          attempt is made to set HISTORY-SIZE to a non-numeric value,
+          the maximum number of history entries will be set to 500.
 
      'horizontal-scroll-mode'
           This variable can be set to either 'on' or 'off'.  Setting it
@@ -512,8 +516,9 @@ Variable Settings
           If set to 'on', Readline will enable eight-bit input (it will
           not clear the eighth bit in the characters it reads),
           regardless of what the terminal claims it can support.  The
-          default value is 'off'.  The name 'meta-flag' is a synonym for
-          this variable.
+          default value is 'off', but Readline will set it to 'on' if
+          the locale contains eight-bit characters.  The name
+          'meta-flag' is a synonym for this variable.
 
      'isearch-terminators'
           The string of characters that should terminate an incremental
@@ -527,9 +532,10 @@ Variable Settings
           commands.  Acceptable 'keymap' names are 'emacs',
           'emacs-standard', 'emacs-meta', 'emacs-ctlx', 'vi', 'vi-move',
           'vi-command', and 'vi-insert'.  'vi' is equivalent to
-          'vi-command'; 'emacs' is equivalent to 'emacs-standard'.  The
-          default value is 'emacs'.  The value of the 'editing-mode'
-          variable also affects the default keymap.
+          'vi-command' ('vi-move' is also a synonym); 'emacs' is
+          equivalent to 'emacs-standard'.  The default value is 'emacs'.
+          The value of the 'editing-mode' variable also affects the
+          default keymap.
 
      'keyseq-timeout'
           Specifies the duration Readline will wait for a character when
@@ -576,7 +582,8 @@ Variable Settings
      'output-meta'
           If set to 'on', Readline will display characters with the
           eighth bit set directly rather than as a meta-prefixed escape
-          sequence.  The default is 'off'.
+          sequence.  The default is 'off', but Readline will set it to
+          'on' if the locale contains eight-bit characters.
 
      'page-completions'
           If set to 'on', Readline uses an internal 'more'-like pager to
@@ -610,10 +617,10 @@ Variable Settings
           default value is 'off'.
 
      'show-mode-in-prompt'
-          If set to 'on', add a character to the beginning of the prompt
+          If set to 'on', add a string to the beginning of the prompt
           indicating the editing mode: emacs, vi command, or vi
-          insertion.  The mode strings are user-settable.  The default
-          value is 'off'.
+          insertion.  The mode strings are user-settable (e.g.,
+          EMACS-MODE-STRING).  The default value is 'off'.
 
      'skip-completed-text'
           If set to 'on', this alters the default completion behavior
@@ -629,24 +636,26 @@ Variable Settings
           'off'.
 
      'vi-cmd-mode-string'
-          This string is displayed immediately before the last line of
-          the primary prompt when vi editing mode is active and in
-          command mode.  The value is expanded like a key binding, so
-          the standard set of meta- and control prefixes and backslash
-          escape sequences is available.  Use the '\1' and '\2' escapes
-          to begin and end sequences of non-printing characters, which
-          can be used to embed a terminal control sequence into the mode
-          string.  The default is '(cmd)'.
+          If the SHOW-MODE-IN-PROMPT variable is enabled, this string is
+          displayed immediately before the last line of the primary
+          prompt when vi editing mode is active and in command mode.
+          The value is expanded like a key binding, so the standard set
+          of meta- and control prefixes and backslash escape sequences
+          is available.  Use the '\1' and '\2' escapes to begin and end
+          sequences of non-printing characters, which can be used to
+          embed a terminal control sequence into the mode string.  The
+          default is '(cmd)'.
 
      'vi-ins-mode-string'
-          This string is displayed immediately before the last line of
-          the primary prompt when vi editing mode is active and in
-          insertion mode.  The value is expanded like a key binding, so
-          the standard set of meta- and control prefixes and backslash
-          escape sequences is available.  Use the '\1' and '\2' escapes
-          to begin and end sequences of non-printing characters, which
-          can be used to embed a terminal control sequence into the mode
-          string.  The default is '(ins)'.
+          If the SHOW-MODE-IN-PROMPT variable is enabled, this string is
+          displayed immediately before the last line of the primary
+          prompt when vi editing mode is active and in insertion mode.
+          The value is expanded like a key binding, so the standard set
+          of meta- and control prefixes and backslash escape sequences
+          is available.  Use the '\1' and '\2' escapes to begin and end
+          sequences of non-printing characters, which can be used to
+          embed a terminal control sequence into the mode string.  The
+          default is '(ins)'.
 
      'visible-stats'
           If set to 'on', a character denoting a file's type is appended
@@ -786,6 +795,16 @@ four parser directives used.
           '=' is tested against both the full name of the terminal and
           the portion of the terminal name before the first '-'.  This
           allows 'sun' to match both 'sun' and 'sun-cmd', for instance.
+
+     'version'
+          The 'version' test may be used to perform comparisons against
+          specific Readline versions.  The 'version' expands to the
+          current Readline version.  The set of comparison operators
+          includes '=' (and '=='), '!=', '<=', '>=', '<', and '>'.  The
+          version number supplied on the right side of the operator
+          consists of a major version number, an optional decimal point,
+          and an optional minor version (e.g., '7.1').  If the minor
+          version is omitted, it is assumed to be '0'.
 
      'application'
           The APPLICATION construct is used to include
@@ -975,6 +994,20 @@ File: readline.info,  Node: Commands For Moving,  Next: Commands For History,  U
      Move back to the start of the current or previous word.  Words are
      composed of letters and digits.
 
+'previous-screen-line ()'
+     Attempt to move point to the same physical screen column on the
+     previous physical screen line.  This will not have the desired
+     effect if the current Readline line does not take up more than one
+     physical line or if point is not greater than the length of the
+     prompt plus the screen width.
+
+'next-screen-line ()'
+     Attempt to move point to the same physical screen column on the
+     next physical screen line.  This will not have the desired effect
+     if the current Readline line does not take up more than one
+     physical line or if the length of the current Readline line is not
+     greater than the length of the prompt plus the screen width.
+
 'clear-screen (C-l)'
      Clear the screen and redraw the current line, leaving the current
      line at the top of the screen.
@@ -1040,13 +1073,13 @@ File: readline.info,  Node: Commands For History,  Next: Commands For Text,  Pre
      string must match at the beginning of a history line.  This is a
      non-incremental search.  By default, this command is unbound.
 
-'history-substr-search-forward ()'
+'history-substring-search-forward ()'
      Search forward through the history for the string of characters
      between the start of the current line and the point.  The search
      string may match anywhere in a history line.  This is a
      non-incremental search.  By default, this command is unbound.
 
-'history-substr-search-backward ()'
+'history-substring-search-backward ()'
      Search backward through the history for the string of characters
      between the start of the current line and the point.  The search
      string may match anywhere in a history line.  This is a
@@ -1324,9 +1357,10 @@ File: readline.info,  Node: Miscellaneous Commands,  Prev: Keyboard Macros,  Up:
      Abort the current editing command and ring the terminal's bell
      (subject to the setting of 'bell-style').
 
-'do-uppercase-version (M-a, M-b, M-X, ...)'
-     If the metafied character X is lowercase, run the command that is
-     bound to the corresponding uppercase character.
+'do-lowercase-version (M-A, M-B, M-X, ...)'
+     If the metafied character X is upper case, run the command that is
+     bound to the corresponding metafied lower case character.  The
+     behavior is undefined if X is already lower case.
 
 'prefix-meta (<ESC>)'
      Metafy the next character typed.  This is for keyboards without a
@@ -1430,7 +1464,7 @@ and subsequent lines with 'j', and so forth.
 aiding in the consistency of user interface across discrete programs
 that need to provide a command line interface.
 
-   Copyright (C) 1988-2014 Free Software Foundation, Inc.
+   Copyright (C) 1988-2016 Free Software Foundation, Inc.
 
    Permission is granted to make and distribute verbatim copies of this
 manual provided the copyright notice and this permission notice pare
@@ -1499,6 +1533,11 @@ the final newline removed, so only the text remains.
    If 'readline' encounters an 'EOF' while reading the line, and the
 line is empty at that point, then '(char *)NULL' is returned.
 Otherwise, the line is ended just as if a newline had been typed.
+
+   Readline performs some expansion on the PROMPT before it is displayed
+on the screen.  See the description of 'rl_expand_prompt' (*note
+Redisplay::) for additional details, especially if PROMPT will contain
+characters that do not consume physical screen space when displayed.
 
    If you want the user to be able to get at the line later, (with <C-p>
 for example), you must call 'add_history()' to save the line away in a
@@ -2057,6 +2096,10 @@ which keymap to use.
      Free all storage associated with KEYMAP.  This calls
      'rl_discard_keymap' to free subordindate keymaps and macros.
 
+ -- Function: int rl_empty_keymap (Keymap keymap)
+     Return non-zero if there are no keys bound to functions in KEYMAP;
+     zero if there are any keys bound.
+
    Readline has several internal keymaps.  These functions allow you to
 change which keymap is active.
 
@@ -2316,6 +2359,10 @@ File: readline.info,  Node: Redisplay,  Next: Modifying Text,  Prev: Allowing Un
      Readline to know the prompt string length for redisplay.  It should
      be used after setting RL_ALREADY_PROMPTED.
 
+ -- Function: int rl_clear_visible_line (void)
+     Clear the screen lines corresponding to the current line's
+     contents.
+
  -- Function: int rl_reset_line_state (void)
      Reset the display state to a clean state and redisplay the current
      line starting on a new line.
@@ -2470,6 +2517,13 @@ File: readline.info,  Node: Terminal Management,  Next: Utility Functions,  Prev
      Reset the bindings manipulated by 'rl_tty_set_default_bindings' so
      that the terminal editing characters are bound to 'rl_insert'.  The
      bindings are performed in KMAP.
+
+ -- Function: int rl_tty_set_echoing (int value)
+     Set Readline's idea of whether or not it is echoing output to its
+     output stream (RL_OUTSTREAM).  If VALUE is 0, Readline does not
+     display output to RL_OUTSTREAM; any other value enables output.
+     The initial value is set when Readline initializes the terminal
+     settings.  This function returns the previous value.
 
  -- Function: int rl_reset_terminal (const char *terminal_name)
      Reinitialize Readline's idea of the terminal settings using
@@ -2742,11 +2796,15 @@ understands the EOF character or "exit" to exit the program.
 
      /* Standard include files. stdio.h is required. */
      #include <stdlib.h>
+     #include <string.h>
      #include <unistd.h>
+     #include <locale.h>
 
      /* Used for select(2) */
      #include <sys/types.h>
      #include <sys/select.h>
+
+     #include <signal.h>
 
      #include <stdio.h>
 
@@ -2755,9 +2813,19 @@ understands the EOF character or "exit" to exit the program.
      #include <readline/history.h>
 
      static void cb_linehandler (char *);
+     static void sighandler (int);
 
      int running;
+     int sigwinch_received;
      const char *prompt = "rltest$ ";
+
+     /* Handle SIGWINCH and window size changes when readline is not active and
+        reading a character. */
+     static void
+     sighandler (int sig)
+     {
+       sigwinch_received = 1;
+     }
 
      /* Callback function called for each line when accept-line executed, EOF
         seen, or EOF character read.  This sets a flag and returns; it could
@@ -2793,6 +2861,13 @@ understands the EOF character or "exit" to exit the program.
        fd_set fds;
        int r;
 
+       /* Set the default locale values according to environment variables. */
+       setlocale (LC_ALL, "");
+
+       /* Handle window size changes when readline is not active and reading
+          characters. */
+       signal (SIGWINCH, sighandler);
+
        /* Install the line handler. */
        rl_callback_handler_install (prompt, cb_linehandler);
 
@@ -2807,12 +2882,19 @@ understands the EOF character or "exit" to exit the program.
            FD_SET (fileno (rl_instream), &fds);
 
            r = select (FD_SETSIZE, &fds, NULL, NULL, NULL);
-           if (r < 0)
+           if (r < 0 && errno != EINTR)
              {
                perror ("rltest: select");
                rl_callback_handler_remove ();
                break;
              }
+           if (sigwinch_received)
+     	{
+     	  rl_resize_terminal ();
+     	  sigwinch_received = 0;
+     	}
+           if (r < 0)
+     	continue;
 
            if (FD_ISSET (fileno (rl_instream), &fds))
              rl_callback_read_char ();
@@ -2870,6 +2952,21 @@ interface should be prepared to clean up Readline's state if they wish
 to handle the signal before the line handler completes and restores the
 terminal state.
 
+   If an application using the callback interface wishes to have
+Readline install its signal handlers at the time the application calls
+'rl_callback_handler_install' and remove them only when a complete line
+of input has been read, it should set the
+'rl_persistent_signal_handlers' variable to a non-zero value.  This
+allows an application to defer all of the handling of the signals
+Readline catches to Readline.  Applications should use this variable
+with care; it can result in Readline catching signals and not acting on
+them (or allowing the application to react to them) until the
+application calls 'rl_callback_read_char'.  This can result in an
+application becoming less responsive to keyboard signals like SIGINT. If
+an application does not want or need to perform any signal handling, or
+does not need to do any processing between calls to
+'rl_callback_read_char', setting this variable may be desirable.
+
    Readline provides two variables that allow application writers to
 control whether or not it will catch certain signals and act on them
 when they are received.  It is important that applications change the
@@ -2889,6 +2986,14 @@ signal handler, so Readline's internal signal state is not corrupted.
 
      The default value of 'rl_catch_sigwinch' is 1.
 
+ -- Variable: int rl_persistent_signal_handlers
+     If an application using the callback interface wishes Readline's
+     signal handlers to be installed and active during the set of calls
+     to 'rl_callback_read_char' that constitutes an entire single line,
+     it should set this variable to a non-zero value.
+
+     The default value of 'rl_persistent_signal_handlers' is 0.
+
  -- Variable: int rl_change_environment
      If this variable is set to a non-zero value, and Readline is
      handling 'SIGWINCH', Readline will modify the LINES and COLUMNS
@@ -2900,6 +3005,11 @@ signal handler, so Readline's internal signal state is not corrupted.
 or to handle signals other than those Readline catches ('SIGHUP', for
 example), Readline provides convenience functions to do the necessary
 terminal and internal state cleanup upon receipt of a signal.
+
+ -- Function: int rl_pending_signal (void)
+     Return the signal number of the most recent signal Readline
+     received but has not yet handled, or 0 if there is no pending
+     signal.
 
  -- Function: void rl_cleanup_after_signal (void)
      This function will reset the state of the terminal to what it was
@@ -2919,6 +3029,19 @@ terminal and internal state cleanup upon receipt of a signal.
      This will reinitialize the terminal and reinstall any Readline
      signal handlers, depending on the values of 'rl_catch_signals' and
      'rl_catch_sigwinch'.
+
+   If an application wants to force Readline to handle any signals that
+have arrived while it has been executing, 'rl_check_signals()' will call
+Readline's internal signal handler if there are any pending signals.
+This is primarily intended for those applications that use a custom
+'rl_getc_function' (*note Readline Variables::) and wish to handle
+signals received while waiting for input.
+
+ -- Function: void rl_check_signals (void)
+     If there are any pending signals, call Readline's internal signal
+     handling functions to process them.  'rl_pending_signal()' can be
+     used independently to determine whether or not there are any
+     pending signals.
 
    If an application does not wish Readline to catch 'SIGWINCH', it may
 call 'rl_resize_terminal()' or 'rl_set_screen_size()' to force Readline
@@ -4426,10 +4549,10 @@ Function and Variable Index
 * call-last-kbd-macro (C-x e):           Keyboard Macros.     (line  13)
 * capitalize-word (M-c):                 Commands For Text.   (line  64)
 * character-search (C-]):                Miscellaneous Commands.
-                                                              (line  41)
+                                                              (line  42)
 * character-search-backward (M-C-]):     Miscellaneous Commands.
-                                                              (line  46)
-* clear-screen (C-l):                    Commands For Moving. (line  26)
+                                                              (line  47)
+* clear-screen (C-l):                    Commands For Moving. (line  40)
 * colored-completion-prefix:             Readline Init File Syntax.
                                                               (line  52)
 * colored-stats:                         Readline Init File Syntax.
@@ -4461,69 +4584,68 @@ Function and Variable Index
                                                               (line  39)
 * delete-horizontal-space ():            Commands For Killing.
                                                               (line  37)
-* digit-argument ('M-0', 'M-1', ... 'M--'): Numeric Arguments.
-                                                              (line   6)
+* digit-argument (M-0, M-1, ... M--):    Numeric Arguments.   (line   6)
 * disable-completion:                    Readline Init File Syntax.
-                                                              (line 111)
-* do-uppercase-version (M-a, M-b, M-X, ...): Miscellaneous Commands.
+                                                              (line 113)
+* do-lowercase-version (M-A, M-B, M-X, ...): Miscellaneous Commands.
                                                               (line  14)
 * downcase-word (M-l):                   Commands For Text.   (line  60)
 * dump-functions ():                     Miscellaneous Commands.
-                                                              (line  69)
+                                                              (line  70)
 * dump-macros ():                        Miscellaneous Commands.
-                                                              (line  81)
+                                                              (line  82)
 * dump-variables ():                     Miscellaneous Commands.
-                                                              (line  75)
+                                                              (line  76)
 * echo-control-characters:               Readline Init File Syntax.
-                                                              (line 132)
+                                                              (line 118)
 * editing-mode:                          Readline Init File Syntax.
-                                                              (line 116)
+                                                              (line 123)
 * emacs-editing-mode (C-e):              Miscellaneous Commands.
-                                                              (line  87)
+                                                              (line  88)
 * emacs-mode-string:                     Readline Init File Syntax.
-                                                              (line 122)
+                                                              (line 129)
 * enable-bracketed-paste:                Readline Init File Syntax.
-                                                              (line 137)
+                                                              (line 139)
 * enable-keypad:                         Readline Init File Syntax.
-                                                              (line 145)
+                                                              (line 147)
 * end-kbd-macro (C-x )):                 Keyboard Macros.     (line   9)
 * end-of-file (usually C-d):             Commands For Text.   (line   6)
 * end-of-history (M->):                  Commands For History.
                                                               (line  22)
 * end-of-line (C-e):                     Commands For Moving. (line   9)
 * exchange-point-and-mark (C-x C-x):     Miscellaneous Commands.
-                                                              (line  36)
+                                                              (line  37)
 * expand-tilde:                          Readline Init File Syntax.
-                                                              (line 156)
+                                                              (line 158)
 * forward-backward-delete-char ():       Commands For Text.   (line  21)
 * forward-char (C-f):                    Commands For Moving. (line  12)
 * forward-search-history (C-s):          Commands For History.
                                                               (line  30)
 * forward-word (M-f):                    Commands For Moving. (line  18)
 * history-preserve-point:                Readline Init File Syntax.
-                                                              (line 160)
+                                                              (line 162)
 * history-search-backward ():            Commands For History.
                                                               (line  52)
 * history-search-forward ():             Commands For History.
                                                               (line  46)
 * history-size:                          Readline Init File Syntax.
-                                                              (line 166)
-* history-substr-search-backward ():     Commands For History.
+                                                              (line 168)
+* history-substring-search-backward ():  Commands For History.
                                                               (line  64)
-* history-substr-search-forward ():      Commands For History.
+* history-substring-search-forward ():   Commands For History.
                                                               (line  58)
 * horizontal-scroll-mode:                Readline Init File Syntax.
-                                                              (line 173)
+                                                              (line 177)
 * input-meta:                            Readline Init File Syntax.
-                                                              (line 180)
+                                                              (line 184)
 * insert-comment (M-#):                  Miscellaneous Commands.
-                                                              (line  60)
+                                                              (line  61)
 * insert-completions (M-*):              Commands For Completion.
                                                               (line  18)
 * isearch-terminators:                   Readline Init File Syntax.
-                                                              (line 187)
+                                                              (line 192)
 * keymap:                                Readline Init File Syntax.
-                                                              (line 194)
+                                                              (line 199)
 * kill-line (C-k):                       Commands For Killing.
                                                               (line   6)
 * kill-region ():                        Commands For Killing.
@@ -4533,48 +4655,50 @@ Function and Variable Index
 * kill-word (M-d):                       Commands For Killing.
                                                               (line  19)
 * mark-modified-lines:                   Readline Init File Syntax.
-                                                              (line 223)
+                                                              (line 229)
 * mark-symlinked-directories:            Readline Init File Syntax.
-                                                              (line 228)
+                                                              (line 234)
 * match-hidden-files:                    Readline Init File Syntax.
-                                                              (line 233)
+                                                              (line 239)
 * menu-complete ():                      Commands For Completion.
                                                               (line  22)
 * menu-complete-backward ():             Commands For Completion.
                                                               (line  34)
 * menu-complete-display-prefix:          Readline Init File Syntax.
-                                                              (line 240)
+                                                              (line 246)
 * meta-flag:                             Readline Init File Syntax.
-                                                              (line 180)
+                                                              (line 184)
 * next-history (C-n):                    Commands For History.
                                                               (line  16)
+* next-screen-line ():                   Commands For Moving. (line  33)
 * non-incremental-forward-search-history (M-n): Commands For History.
                                                               (line  40)
 * non-incremental-reverse-search-history (M-p): Commands For History.
                                                               (line  34)
 * output-meta:                           Readline Init File Syntax.
-                                                              (line 245)
+                                                              (line 251)
 * overwrite-mode ():                     Commands For Text.   (line  68)
 * page-completions:                      Readline Init File Syntax.
-                                                              (line 250)
+                                                              (line 257)
 * possible-completions (M-?):            Commands For Completion.
                                                               (line  11)
 * prefix-meta (<ESC>):                   Miscellaneous Commands.
-                                                              (line  18)
+                                                              (line  19)
 * previous-history (C-p):                Commands For History.
                                                               (line  12)
+* previous-screen-line ():               Commands For Moving. (line  26)
 * print-last-kbd-macro ():               Keyboard Macros.     (line  17)
 * quoted-insert (C-q or C-v):            Commands For Text.   (line  26)
 * re-read-init-file (C-x C-r):           Miscellaneous Commands.
                                                               (line   6)
 * readline:                              Basic Behavior.      (line  12)
-* redraw-current-line ():                Commands For Moving. (line  30)
+* redraw-current-line ():                Commands For Moving. (line  44)
 * reverse-search-history (C-r):          Commands For History.
                                                               (line  26)
 * revert-all-at-newline:                 Readline Init File Syntax.
-                                                              (line 260)
+                                                              (line 267)
 * revert-line (M-r):                     Miscellaneous Commands.
-                                                              (line  25)
+                                                              (line  26)
 * rl_add_defun:                          Function Naming.     (line  18)
 * rl_add_funmap_entry:                   Associating Function Names and Bindings.
                                                               (line  45)
@@ -4604,21 +4728,24 @@ Function and Variable Index
 * rl_callback_read_char:                 Alternate Interface. (line  22)
 * rl_callback_sigcleanup:                Alternate Interface. (line  35)
 * rl_catch_signals:                      Readline Signal Handling.
-                                                              (line  54)
+                                                              (line  69)
 * rl_catch_sigwinch:                     Readline Signal Handling.
-                                                              (line  61)
+                                                              (line  76)
 * rl_change_environment:                 Readline Signal Handling.
-                                                              (line  67)
+                                                              (line  90)
 * rl_char_is_quoted_p:                   Completion Variables.
                                                               (line  45)
+* rl_check_signals:                      Readline Signal Handling.
+                                                              (line 133)
 * rl_cleanup_after_signal:               Readline Signal Handling.
-                                                              (line  79)
+                                                              (line 107)
 * rl_clear_history:                      Miscellaneous Functions.
                                                               (line  49)
-* rl_clear_message:                      Redisplay.           (line  47)
+* rl_clear_message:                      Redisplay.           (line  51)
 * rl_clear_pending_input:                Character Input.     (line  29)
 * rl_clear_signals:                      Readline Signal Handling.
-                                                              (line 138)
+                                                              (line 179)
+* rl_clear_visible_line:                 Redisplay.           (line  25)
 * rl_complete:                           How Completing Works.
                                                               (line  46)
 * rl_complete <1>:                       Completion Functions.
@@ -4661,7 +4788,7 @@ Function and Variable Index
                                                               (line 151)
 * rl_copy_keymap:                        Keymaps.             (line  16)
 * rl_copy_text:                          Modifying Text.      (line  14)
-* rl_crlf:                               Redisplay.           (line  29)
+* rl_crlf:                               Redisplay.           (line  33)
 * rl_delete_text:                        Modifying Text.      (line  10)
 * rl_deprep_terminal:                    Terminal Management. (line  12)
 * rl_deprep_term_function:               Readline Variables.  (line 174)
@@ -4677,8 +4804,9 @@ Function and Variable Index
 * rl_done:                               Readline Variables.  (line  27)
 * rl_do_undo:                            Allowing Undoing.    (line  47)
 * rl_echo_signal_char:                   Readline Signal Handling.
-                                                              (line 102)
+                                                              (line 143)
 * rl_editing_mode:                       Readline Variables.  (line 281)
+* rl_empty_keymap:                       Keymaps.             (line  33)
 * rl_end:                                Readline Variables.  (line  18)
 * rl_end_undo_group:                     Allowing Undoing.    (line  34)
 * rl_erase_empty_line:                   Readline Variables.  (line  46)
@@ -4688,7 +4816,7 @@ Function and Variable Index
 * rl_executing_keymap:                   Readline Variables.  (line 180)
 * rl_executing_keyseq:                   Readline Variables.  (line 195)
 * rl_executing_macro:                    Readline Variables.  (line 188)
-* rl_expand_prompt:                      Redisplay.           (line  62)
+* rl_expand_prompt:                      Redisplay.           (line  66)
 * rl_explicit_arg:                       Readline Variables.  (line 272)
 * rl_extend_line_buffer:                 Utility Functions.   (line  26)
 * rl_filename_completion_desired:        Completion Variables.
@@ -4711,7 +4839,7 @@ Function and Variable Index
 * rl_free:                               Utility Functions.   (line  17)
 * rl_free_keymap:                        Keymaps.             (line  29)
 * rl_free_line_state:                    Readline Signal Handling.
-                                                              (line  85)
+                                                              (line 113)
 * rl_free_undo_list:                     Allowing Undoing.    (line  44)
 * rl_function_dumper:                    Associating Function Names and Bindings.
                                                               (line  29)
@@ -4722,11 +4850,11 @@ Function and Variable Index
 * rl_generic_bind:                       Binding Keys.        (line  87)
 * rl_getc:                               Character Input.     (line  14)
 * rl_getc_function:                      Readline Variables.  (line 128)
-* rl_get_keymap:                         Keymaps.             (line  36)
-* rl_get_keymap_by_name:                 Keymaps.             (line  42)
-* rl_get_keymap_name:                    Keymaps.             (line  47)
+* rl_get_keymap:                         Keymaps.             (line  40)
+* rl_get_keymap_by_name:                 Keymaps.             (line  46)
+* rl_get_keymap_name:                    Keymaps.             (line  51)
 * rl_get_screen_size:                    Readline Signal Handling.
-                                                              (line 121)
+                                                              (line 162)
 * rl_get_termcap:                        Miscellaneous Functions.
                                                               (line  41)
 * rl_gnu_readline_p:                     Readline Variables.  (line  82)
@@ -4760,7 +4888,7 @@ Function and Variable Index
 * rl_make_bare_keymap:                   Keymaps.             (line  11)
 * rl_make_keymap:                        Keymaps.             (line  19)
 * rl_mark:                               Readline Variables.  (line  23)
-* rl_message:                            Redisplay.           (line  38)
+* rl_message:                            Redisplay.           (line  42)
 * rl_modifying:                          Allowing Undoing.    (line  56)
 * rl_named_function:                     Associating Function Names and Bindings.
                                                               (line  10)
@@ -4771,6 +4899,10 @@ Function and Variable Index
 * rl_outstream:                          Readline Variables.  (line 100)
 * rl_parse_and_bind:                     Binding Keys.        (line  95)
 * rl_pending_input:                      Readline Variables.  (line  36)
+* rl_pending_signal:                     Readline Signal Handling.
+                                                              (line 102)
+* rl_persistent_signal_handlers:         Readline Signal Handling.
+                                                              (line  82)
 * rl_point:                              Readline Variables.  (line  14)
 * rl_possible_completions:               Completion Functions.
                                                               (line  27)
@@ -4789,28 +4921,28 @@ Function and Variable Index
 * rl_redisplay_function:                 Readline Variables.  (line 161)
 * rl_replace_line:                       Utility Functions.   (line  21)
 * rl_reset_after_signal:                 Readline Signal Handling.
-                                                              (line  93)
-* rl_reset_line_state:                   Redisplay.           (line  25)
+                                                              (line 121)
+* rl_reset_line_state:                   Redisplay.           (line  29)
 * rl_reset_screen_size:                  Readline Signal Handling.
-                                                              (line 125)
-* rl_reset_terminal:                     Terminal Management. (line  27)
+                                                              (line 166)
+* rl_reset_terminal:                     Terminal Management. (line  34)
 * rl_resize_terminal:                    Readline Signal Handling.
-                                                              (line 108)
-* rl_restore_prompt:                     Redisplay.           (line  56)
+                                                              (line 149)
+* rl_restore_prompt:                     Redisplay.           (line  60)
 * rl_restore_state:                      Utility Functions.   (line  11)
-* rl_save_prompt:                        Redisplay.           (line  52)
+* rl_save_prompt:                        Redisplay.           (line  56)
 * rl_save_state:                         Utility Functions.   (line   6)
 * rl_set_key:                            Binding Keys.        (line  71)
 * rl_set_keyboard_input_timeout:         Character Input.     (line  34)
-* rl_set_keymap:                         Keymaps.             (line  39)
+* rl_set_keymap:                         Keymaps.             (line  43)
 * rl_set_paren_blink_timeout:            Miscellaneous Functions.
                                                               (line  36)
-* rl_set_prompt:                         Redisplay.           (line  76)
+* rl_set_prompt:                         Redisplay.           (line  80)
 * rl_set_screen_size:                    Readline Signal Handling.
-                                                              (line 112)
+                                                              (line 153)
 * rl_set_signals:                        Readline Signal Handling.
-                                                              (line 132)
-* rl_show_char:                          Redisplay.           (line  32)
+                                                              (line 173)
+* rl_show_char:                          Redisplay.           (line  36)
 * rl_signal_event_hook:                  Readline Variables.  (line 136)
 * rl_sort_completion_matches:            Completion Variables.
                                                               (line 260)
@@ -4820,6 +4952,7 @@ Function and Variable Index
 * rl_stuff_char:                         Character Input.     (line  18)
 * rl_terminal_name:                      Readline Variables.  (line  86)
 * rl_tty_set_default_bindings:           Terminal Management. (line  17)
+* rl_tty_set_echoing:                    Terminal Management. (line  27)
 * rl_tty_unset_default_bindings:         Terminal Management. (line  22)
 * rl_unbind_command_in_map:              Binding Keys.        (line  53)
 * rl_unbind_function_in_map:             Binding Keys.        (line  49)
@@ -4835,25 +4968,25 @@ Function and Variable Index
                                                               (line  25)
 * self-insert (a, b, A, 1, !, ...):      Commands For Text.   (line  33)
 * set-mark (C-@):                        Miscellaneous Commands.
-                                                              (line  32)
+                                                              (line  33)
 * show-all-if-ambiguous:                 Readline Init File Syntax.
-                                                              (line 266)
+                                                              (line 273)
 * show-all-if-unmodified:                Readline Init File Syntax.
-                                                              (line 272)
+                                                              (line 279)
 * show-mode-in-prompt:                   Readline Init File Syntax.
-                                                              (line 281)
+                                                              (line 288)
 * skip-completed-text:                   Readline Init File Syntax.
-                                                              (line 287)
+                                                              (line 294)
 * skip-csi-sequence ():                  Miscellaneous Commands.
-                                                              (line  51)
+                                                              (line  52)
 * start-kbd-macro (C-x ():               Keyboard Macros.     (line   6)
 * tab-insert (M-<TAB>):                  Commands For Text.   (line  30)
 * tilde-expand (M-~):                    Miscellaneous Commands.
-                                                              (line  29)
+                                                              (line  30)
 * transpose-chars (C-t):                 Commands For Text.   (line  45)
 * transpose-words (M-t):                 Commands For Text.   (line  51)
 * undo (C-_ or C-x C-u):                 Miscellaneous Commands.
-                                                              (line  22)
+                                                              (line  23)
 * universal-argument ():                 Numeric Arguments.   (line  10)
 * unix-filename-rubout ():               Commands For Killing.
                                                               (line  32)
@@ -4863,13 +4996,13 @@ Function and Variable Index
                                                               (line  28)
 * upcase-word (M-u):                     Commands For Text.   (line  56)
 * vi-cmd-mode-string:                    Readline Init File Syntax.
-                                                              (line 300)
+                                                              (line 307)
 * vi-editing-mode (M-C-j):               Miscellaneous Commands.
-                                                              (line  91)
+                                                              (line  92)
 * vi-ins-mode-string:                    Readline Init File Syntax.
-                                                              (line 310)
+                                                              (line 318)
 * visible-stats:                         Readline Init File Syntax.
-                                                              (line 320)
+                                                              (line 329)
 * yank (C-y):                            Commands For Killing.
                                                               (line  59)
 * yank-last-arg (M-. or M-_):            Commands For History.
@@ -4882,58 +5015,58 @@ Function and Variable Index
 
 
 Tag Table:
-Node: Top860
-Node: Command Line Editing1585
-Node: Introduction and Notation2237
-Node: Readline Interaction3861
-Node: Readline Bare Essentials5053
-Node: Readline Movement Commands6837
-Node: Readline Killing Commands7798
-Node: Readline Arguments9717
-Node: Searching10762
-Node: Readline Init File12915
-Node: Readline Init File Syntax14069
-Node: Conditional Init Constructs33514
-Node: Sample Init File36040
-Node: Bindable Readline Commands39158
-Node: Commands For Moving40213
-Node: Commands For History41074
-Node: Commands For Text45333
-Node: Commands For Killing48776
-Node: Numeric Arguments50943
-Node: Commands For Completion52083
-Node: Keyboard Macros54052
-Node: Miscellaneous Commands54740
-Node: Readline vi Mode58591
-Node: Programming with GNU Readline60408
-Node: Basic Behavior61394
-Node: Custom Functions64798
-Node: Readline Typedefs66281
-Node: Function Writing67915
-Node: Readline Variables69229
-Node: Readline Convenience Functions81901
-Node: Function Naming82973
-Node: Keymaps84235
-Node: Binding Keys86228
-Node: Associating Function Names and Bindings90776
-Node: Allowing Undoing93061
-Node: Redisplay95611
-Node: Modifying Text99508
-Node: Character Input100755
-Node: Terminal Management102653
-Node: Utility Functions104090
-Node: Miscellaneous Functions107418
-Node: Alternate Interface110007
-Node: A Readline Example112749
-Node: Alternate Interface Example114688
-Node: Readline Signal Handling117461
-Node: Custom Completers124357
-Node: How Completing Works125077
-Node: Completion Functions128384
-Node: Completion Variables131958
-Node: A Short Completion Example147602
-Node: GNU Free Documentation License160381
-Node: Concept Index185555
-Node: Function and Variable Index187076
+Node: Top864
+Node: Command Line Editing1589
+Node: Introduction and Notation2241
+Node: Readline Interaction3865
+Node: Readline Bare Essentials5057
+Node: Readline Movement Commands6841
+Node: Readline Killing Commands7802
+Node: Readline Arguments9721
+Node: Searching10766
+Node: Readline Init File12919
+Node: Readline Init File Syntax14073
+Node: Conditional Init Constructs34164
+Node: Sample Init File37252
+Node: Bindable Readline Commands40370
+Node: Commands For Moving41425
+Node: Commands For History42992
+Node: Commands For Text47257
+Node: Commands For Killing50700
+Node: Numeric Arguments52867
+Node: Commands For Completion54007
+Node: Keyboard Macros55976
+Node: Miscellaneous Commands56664
+Node: Readline vi Mode60586
+Node: Programming with GNU Readline62403
+Node: Basic Behavior63389
+Node: Custom Functions67072
+Node: Readline Typedefs68555
+Node: Function Writing70189
+Node: Readline Variables71503
+Node: Readline Convenience Functions84175
+Node: Function Naming85247
+Node: Keymaps86509
+Node: Binding Keys88664
+Node: Associating Function Names and Bindings93212
+Node: Allowing Undoing95497
+Node: Redisplay98047
+Node: Modifying Text102071
+Node: Character Input103318
+Node: Terminal Management105216
+Node: Utility Functions107039
+Node: Miscellaneous Functions110367
+Node: Alternate Interface112956
+Node: A Readline Example115698
+Node: Alternate Interface Example117637
+Node: Readline Signal Handling121169
+Node: Custom Completers130218
+Node: How Completing Works130938
+Node: Completion Functions134245
+Node: Completion Variables137819
+Node: A Short Completion Example153463
+Node: GNU Free Documentation License166242
+Node: Concept Index191416
+Node: Function and Variable Index192937
 
 End Tag Table
