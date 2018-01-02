@@ -1,0 +1,57 @@
+var=$'\01\02\03\177'
+
+bar=${unset:-$var}
+recho "$bar"
+unset -v bar
+bar=${unset:-"$var"}
+recho "$bar"
+
+foo=${parameter:=$var}
+
+recho "$foo"
+recho "$parameter"
+
+unset -v foo parameter
+
+foo=${parameter:="$var"}
+
+recho "$foo"
+recho "$parameter"
+
+unset -v foo parameter
+
+foo="${parameter:=$var}"
+
+recho "$foo"
+recho "$parameter"
+
+unset -v foo parameter
+
+recho ${parameter:=a\ b}
+unset -v parameter
+
+recho ${parameter:="a b"}
+unset -v parameter
+
+v='a b'
+
+recho ${parameter:=$v}
+unset -v parameter
+
+recho ${parameter:="$v"}
+unset -v parameter
+
+# unsetting IFS here
+
+set "  abc  " " def  ghi " "jkl "
+unset -v IFS var
+var=${var-$*}/${var-$*}
+printf '[%s]\n' "$var"
+
+unset -v var
+: ${var=$*}
+printf '[%s]\n' "$var"
+
+unset -v var
+: ${var:=$*/$*/${var-$*}}
+printf '[%s]\n' "$var"

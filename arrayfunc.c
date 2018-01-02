@@ -262,9 +262,6 @@ bind_assoc_variable (entry, name, key, value, flags)
      char *value;
      int flags;
 {
-  SHELL_VAR *dentry;
-  char *newval;
-
   if ((readonly_p (entry) && (flags&ASS_FORCE) == 0) || noassign_p (entry))
     {
       if (readonly_p (entry))
@@ -285,7 +282,7 @@ assign_array_element (name, value, flags)
 {
   char *sub, *vname;
   int sublen;
-  SHELL_VAR *entry, *nv;
+  SHELL_VAR *entry;
 
   vname = array_variable_name (name, (flags & ASS_NOEXPAND) != 0, &sub, &sublen);
 
@@ -458,7 +455,6 @@ expand_compound_array_assignment (var, value, flags)
      int flags;
 {
   WORD_LIST *list, *nlist;
-  WORD_LIST *hd, *tl, *t, *n;
   char *val;
   int ni;
 

@@ -561,7 +561,6 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
   int exec_result, user_subshell, invert, ignore_return, was_error_trap;
   REDIRECT *my_undo_list, *exec_undo_list;
   char *tcmd;
-  volatile int last_pid;
   volatile int save_line_number;
 #if defined (PROCESS_SUBSTITUTION)
   volatile int ofifo, nfifo, osize, saved_fifo;
@@ -812,7 +811,6 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 #if defined (RECYCLES_PIDS)
 	last_made_pid = NO_PID;
 #endif
-	last_pid = last_made_pid;
 	was_error_trap = signal_is_trapped (ERROR_TRAP) && signal_is_ignored (ERROR_TRAP) == 0;
 
 	if (ignore_return && command->value.Simple)
@@ -4533,7 +4531,7 @@ execute_builtin (builtin, words, flags, subshell)
      WORD_LIST *words;
      int flags, subshell;
 {
-  int result, eval_unwind, ignexit_flag, old_e_flag;
+  int result, eval_unwind, ignexit_flag;
   int isbltinenv, should_keep;
   char *error_trap;
 
@@ -4669,8 +4667,6 @@ static void
 maybe_restore_getopt_state (gs)
      sh_getopt_state_t *gs;
 {
-  SHELL_VAR *v;
-
   /* If we have a local copy of OPTIND and it's at the right (current)
      context, then we restore getopt's internal state.  If not, we just
      let it go.  We know there is a local OPTIND if gs->gs_flags & 1.

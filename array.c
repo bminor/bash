@@ -384,7 +384,6 @@ array_remove_quoted_nulls(array)
 ARRAY	*array;
 {
 	ARRAY_ELEMENT	*a;
-	char	*t;
 
 	if (array == 0 || array_head(array) == 0 || array_empty(array))
 		return (ARRAY *)NULL;

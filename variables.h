@@ -220,6 +220,9 @@ typedef struct _vlist {
 
 #define ifsname(s)	((s)[0] == 'I' && (s)[1] == 'F' && (s)[2] == 'S' && (s)[3] == '\0')
 
+/* Flag values for make_local_variable */
+#define MKLOC_INHERIT		0x01
+
 /* Special value for nameref with invalid value for creation or assignment */
 extern SHELL_VAR nameref_invalid_value;
 #define INVALID_NAMEREF_VALUE	(void *)&nameref_invalid_value

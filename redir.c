@@ -154,7 +154,6 @@ redirection_error (temp, error)
 #endif
   else if (expandable_redirection_filename (temp))
     {
-expandable_filename:
       oflags = temp->redirectee.filename->flags;
       if (posixly_correct && interactive_shell == 0)
 	temp->redirectee.filename->flags |= W_NOGLOB;

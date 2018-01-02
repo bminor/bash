@@ -1049,7 +1049,7 @@ bash_forward_shellword (count, key)
      int count, key;
 {
   size_t slen;
-  int sindex, c, p;
+  int c, p;
   DECLARE_MBSTATE;
 
   if (count < 0)
@@ -1158,7 +1158,7 @@ bash_backward_shellword (count, key)
      int count, key;
 {
   size_t slen;
-  int sindex, c, p;
+  int c, p;
   DECLARE_MBSTATE;
 
   if (count < 0)
@@ -1416,7 +1416,7 @@ attempt_shell_completion (text, start, end)
      const char *text;
      int start, end;
 {
-  int in_command_position, ti, saveti, qc, dflags;
+  int in_command_position, ti, qc, dflags;
   char **matches, *command_separator_chars;
 #if defined (PROGRAMMABLE_COMPLETION)
   int have_progcomps, was_assignment;
@@ -1438,7 +1438,7 @@ attempt_shell_completion (text, start, end)
      appears after a character that separates commands.  It cannot be a
      command word if we aren't at the top-level prompt. */
   ti = start - 1;
-  saveti = qc = -1;
+  qc = -1;
 
   while ((ti > -1) && (whitespace (rl_line_buffer[ti])))
     ti--;
@@ -1449,7 +1449,7 @@ attempt_shell_completion (text, start, end)
   if (ti >= 0 && (rl_line_buffer[ti] == '"' || rl_line_buffer[ti] == '\''))
     {
       qc = rl_line_buffer[ti];
-      saveti = ti--;
+      ti--;
       while (ti > -1 && (whitespace (rl_line_buffer[ti])))
 	ti--;
     }
@@ -1799,7 +1799,7 @@ command_word_completion_function (hint_text, state)
   static char *dequoted_hint = (char *)NULL;
   static char *directory_part = (char *)NULL;
   static char **glob_matches = (char **)NULL;
-  static int path_index, hint_len, dequoted_len, istate, igncase;
+  static int path_index, hint_len, istate, igncase;
   static int mapping_over, local_index, searching_path, hint_is_dir;
   static int old_glob_ignore_case, globpat;
   static SHELL_VAR **varlist = (SHELL_VAR **)NULL;
@@ -1877,7 +1877,7 @@ command_word_completion_function (hint_text, state)
 	      free (hint);
 	      hint = dequoted_hint;
 	    }
-	  dequoted_len = hint_len = strlen (hint);
+	  hint_len = strlen (hint);
 
 	  if (filename_hint)
 	    free (filename_hint);
@@ -1905,13 +1905,10 @@ command_word_completion_function (hint_text, state)
 	}
 
       dequoted_hint = hint = savestring (hint_text);
-      dequoted_len = hint_len = strlen (hint);
+      hint_len = strlen (hint);
 
       if (rl_completion_found_quote && rl_completion_quote_character == 0)
-	{
-	  dequoted_hint = bash_dequote_filename (hint, 0);
-	  dequoted_len = strlen (dequoted_hint);
-	}
+	dequoted_hint = bash_dequote_filename (hint, 0);
       
       path = get_string_value ("PATH");
       path_index = dot_in_path = 0;
@@ -2300,7 +2297,6 @@ variable_completion_function (text, state)
   static char **varlist = (char **)NULL;
   static int varlist_index;
   static char *varname = (char *)NULL;
-  static int namelen;
   static int first_char, first_char_loc;
 
   if (!state)
@@ -2319,7 +2315,6 @@ variable_completion_function (text, state)
 
       varname = savestring (text + first_char_loc);
 
-      namelen = strlen (varname);
       if (varlist)
 	strvec_dispose (varlist);
 
@@ -2407,7 +2402,7 @@ bash_servicename_completion_function (text, state)
 #else
   static char *sname = (char *)NULL;
   static struct servent *srvent;
-  static int snamelen, firstc;
+  static int snamelen;
   char *value;
   char **alist, *aentry;
   int afound;
@@ -2415,7 +2410,6 @@ bash_servicename_completion_function (text, state)
   if (state == 0)
     {
       FREE (sname);
-      firstc = *text;
 
       sname = savestring (text);
       snamelen = strlen (sname);
@@ -3145,7 +3139,6 @@ bash_filename_stat_hook (dirname)
   int should_expand_dirname, return_value;
   int global_nounset;
   WORD_LIST *wl;
-  struct stat sb;
 
   local_dirname = *dirname;
   should_expand_dirname = return_value = 0;
@@ -3223,10 +3216,8 @@ bash_directory_completion_hook (dirname)
      char **dirname;
 {
   char *local_dirname, *new_dirname, *t;
-  int return_value, should_expand_dirname, nextch, closer, changed;
-  size_t local_dirlen;
+  int return_value, should_expand_dirname, nextch, closer;
   WORD_LIST *wl;
-  struct stat sb;
 
   return_value = should_expand_dirname = nextch = closer = 0;
   local_dirname = *dirname;
@@ -4090,9 +4081,6 @@ bash_execute_unix_command (count, key)
      int count;	/* ignored */
      int key;
 {
-  Keymap ckmap;		/* current keymap */
-  Keymap xkmap;		/* unix command executing keymap */
-  rl_command_func_t *func;
   int type;
   register int i, r;
   intmax_t mi;

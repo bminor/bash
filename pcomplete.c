@@ -726,7 +726,6 @@ pcomp_filename_completion_function (text, state)
      int state;
 {
   static char *dfn;	/* dequoted filename */
-  int qc;
   int iscompgen, iscompleting;
 
   if (state == 0)
@@ -1616,7 +1615,7 @@ programmable_completions (cmd, word, start, end, foundp)
      const char *word;
      int start, end, *foundp;
 {
-  COMPSPEC *cs, *lastcs;
+  COMPSPEC *lastcs;
   STRINGLIST *ret;
   char **rmatches, *t;
   int found, retry, count;

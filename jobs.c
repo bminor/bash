@@ -768,8 +768,6 @@ bgp_resize ()
 static ps_index_t
 bgp_getindex ()
 {
-  ps_index_t psi;
-
   if (bgpids.nalloc < js.c_childmax || bgpids.head >= bgpids.nalloc)
     bgp_resize ();
 
@@ -3065,7 +3063,7 @@ wait_for_any_job (flags)
      int flags;
 {
   pid_t pid;
-  int i, r, waited_for;
+  int i, r;
   sigset_t set, oset;
 
   if (jobs_list_frozen)
@@ -3092,7 +3090,7 @@ return_job:
 
   /* At this point, we have no dead jobs in the jobs table.  Wait until we
      get one, even if it takes multiple pids exiting. */
-  for (waited_for = 0;;)
+  for (;;)
     {
       /* Make sure there is a background job to wait for */
       BLOCK_CHILD (set, oset);

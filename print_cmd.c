@@ -1004,8 +1004,6 @@ static void
 print_deferred_heredocs (cstring)
      const char *cstring;
 {
-  REDIRECT *hdtail;	
-
   /* We now print the heredoc headers in print_redirection_list */
   if (cstring && cstring[0] && (cstring[0] != ';' || cstring[1]))
     cprintf ("%s", cstring); 

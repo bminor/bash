@@ -1696,10 +1696,25 @@ assign_hashcmd (self, value, ind, key)
      char *key;
 {
 #if defined (RESTRICTED_SHELL)
-  if (restricted && strchr (value, '/'))
+  char *full_path;
+
+  if (restricted)
     {
-      sh_restricted (value);
-      return (SHELL_VAR *)NULL;
+      if (strchr (value, '/'))
+	{
+	  sh_restricted (value);
+	  return (SHELL_VAR *)NULL;
+	}
+      /* If we are changing the hash table in a restricted shell, make sure the
+	 target pathname can be found using a $PATH search. */
+      full_path = find_user_command (value);
+      if (full_path == 0 || *full_path == 0 || executable_file (full_path) == 0)
+	{
+	  sh_notfound (value);
+	  free (full_path);
+	  return ((SHELL_VAR *)NULL);
+	}
+      free (full_path);
     }
 #endif
   phash_insert (key, value, 0, 0);
@@ -1974,7 +1989,7 @@ find_variable_nameref (v)
      SHELL_VAR *v;
 {
   int level, flags;
-  char *newname, *t;
+  char *newname;
   SHELL_VAR *orig, *oldv;
 
   level = 0;
@@ -2072,7 +2087,6 @@ find_nameref_at_context (v, vc)
      VAR_CONTEXT *vc;
 {
   SHELL_VAR *nv, *nv2;
-  VAR_CONTEXT *nvc;
   char *newname;
   int level;
 
@@ -2534,7 +2548,7 @@ make_local_variable (name, flags)
 	 possible variable values. */
       if (was_tmpvar)
 	var_setvalue (new_var, savestring (old_value));
-      else if (localvar_inherit)
+      else if (localvar_inherit || (flags & MKLOC_INHERIT))
 	{
 	  /* This may not make sense for nameref variables that are shadowing
 	     variables with the same name, but we don't know that yet. */
@@ -2552,7 +2566,7 @@ make_local_variable (name, flags)
 	    var_setvalue (new_var, (char *)NULL);
 	}
 
-      if (localvar_inherit)
+      if (localvar_inherit || (flags & MKLOC_INHERIT))
 	{
 	  /* It doesn't make sense to inherit the nameref attribute */
 	  new_var->attributes = old_var->attributes & ~att_nameref;
@@ -3020,7 +3034,6 @@ bind_variable (name, value, flags)
 {
   SHELL_VAR *v, *nv;
   VAR_CONTEXT *vc, *nvc;
-  int level;
 
   if (shell_variables == 0)
     create_variable_tables ();
@@ -3098,10 +3111,6 @@ bind_global_variable (name, value, flags)
      char *value;
      int flags;
 {
-  SHELL_VAR *v, *nv;
-  VAR_CONTEXT *vc, *nvc;
-  int level;
-
   if (shell_variables == 0)
     create_variable_tables ();
 
@@ -5749,16 +5758,15 @@ ARRAY *
 save_pipestatus_array ()
 {
   SHELL_VAR *v;
-  ARRAY *a, *a2;
+  ARRAY *a;
 
   v = find_variable ("PIPESTATUS");
   if (v == 0 || array_p (v) == 0 || array_cell (v) == 0)
     return ((ARRAY *)NULL);
     
-  a = array_cell (v);
-  a2 = array_copy (array_cell (v));
+  a = array_copy (array_cell (v));
 
-  return a2;
+  return a;
 }
 
 void

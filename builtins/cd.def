@@ -545,7 +545,7 @@ change_to_directory (newdir, nolinks, xattr)
      int nolinks, xattr;
 {
   char *t, *tdir, *ndir;
-  int err, canon_failed, r, ndlen, dlen;
+  int err, canon_failed, r, ndlen;
 
   tdir = (char *)NULL;
 
@@ -564,7 +564,6 @@ change_to_directory (newdir, nolinks, xattr)
 		 : sh_canonpath (t, PATH_CHECKDOTDOT|PATH_CHECKEXISTS);
 
   ndlen = strlen (newdir);
-  dlen = strlen (t);
 
   /* Use the canonicalized version of NEWDIR, or, if canonicalization
      failed, use the non-canonical form. */

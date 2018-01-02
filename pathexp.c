@@ -183,7 +183,7 @@ quote_string_for_globbing (pathname, qflags)
 {
   char *temp;
   register int i, j;
-  int brack, cclass, collsym, equiv, c, last_was_backslash;
+  int cclass, collsym, equiv, c, last_was_backslash;
   int savei, savej;
 
   temp = (char *)xmalloc (2 * strlen (pathname) + 1);
@@ -194,7 +194,7 @@ quote_string_for_globbing (pathname, qflags)
       return temp;
     }
 
-  brack = cclass = collsym = equiv = last_was_backslash = 0;
+  cclass = collsym = equiv = last_was_backslash = 0;
   for (i = j = 0; pathname[i]; i++)
     {
       /* Fix for CTLESC at the end of the string? */
@@ -225,7 +225,6 @@ quote_string_for_globbing (pathname, qflags)
 	}
       else if ((qflags & QGLOB_REGEXP) && (i == 0 || pathname[i-1] != CTLESC) && pathname[i] == '[')	/*]*/
 	{
-	  brack = 1;
 	  temp[j++] = pathname[i++];	/* open bracket */
 	  savej = j;
 	  savei = i;

@@ -934,8 +934,8 @@ _run_trap_internal (sig, tag)
      char *tag;
 {
   char *trap_command, *old_trap;
-  int trap_exit_value, *token_state;
-  volatile int save_return_catch_flag, function_code, top_level_code, old_int;
+  int trap_exit_value;
+  volatile int save_return_catch_flag, function_code, old_int;
   int flags;
   procenv_t save_return_catch;
   WORD_LIST *save_subst_varlist;

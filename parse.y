@@ -4289,7 +4289,7 @@ xparse_dolparen (base, string, indp, flags)
   sh_parser_state_t ps;
   sh_input_line_state_t ls;
   int orig_ind, nc, sflags, orig_eof_token;
-  char *ret, *s, *ep, *ostring;
+  char *ret, *ep, *ostring;
 #if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
   STRING_SAVER *saved_pushed_strings;
 #endif
@@ -6459,8 +6459,6 @@ sh_parser_state_t *
 save_parser_state (ps)
      sh_parser_state_t *ps;
 {
-  int i;
-
   if (ps == 0)
     ps = (sh_parser_state_t *)xmalloc (sizeof (sh_parser_state_t));
   if (ps == 0)
@@ -6496,15 +6494,10 @@ save_parser_state (ps)
   ps->need_here_doc = need_here_doc;
   ps->here_doc_first_line = here_doc_first_line;
 
-#if 0
-  for (i = 0; i < HEREDOC_MAX; i++)
-    ps->redir_stack[i] = redir_stack[i];
-#else
   if (need_here_doc == 0)
     ps->redir_stack[0] = 0;
   else
     memcpy (ps->redir_stack, redir_stack, sizeof (redir_stack[0]) * HEREDOC_MAX);
-#endif
 
   ps->token = token;
   ps->token_buffer_size = token_buffer_size;

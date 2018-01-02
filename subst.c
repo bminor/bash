@@ -1139,7 +1139,6 @@ string_extract_verbatim (string, slen, sindex, charlist, flags)
 {
   register int i;
 #if defined (HANDLE_MULTIBYTE)
-  size_t clen;
   wchar_t *wcharlist;
 #endif
   int c;
@@ -1155,7 +1154,6 @@ string_extract_verbatim (string, slen, sindex, charlist, flags)
 
   i = *sindex;
 #if defined (HANDLE_MULTIBYTE)
-  clen = strlen (charlist);
   wcharlist = 0;
 #endif
   while (c = string[i])
@@ -2019,10 +2017,9 @@ skip_to_histexp (string, start, delims, flags)
      char *delims;
      int flags;
 {
-  int i, pass_next, backq, dquote, si, c, oldjmp;
+  int i, pass_next, backq, dquote, c, oldjmp;
   int histexp_comsub, histexp_backq, old_dquote;
   size_t slen;
-  char *temp, open[3];
   DECLARE_MBSTATE;
 
   slen = strlen (string + start) + start;
@@ -4104,6 +4101,7 @@ dequote_escapes (string)
   return result;
 }
 
+#if defined (INCLUDE_UNUSED)
 static WORD_LIST *
 list_dequote_escapes (list)
      WORD_LIST *list;
@@ -4119,6 +4117,7 @@ list_dequote_escapes (list)
     }
   return list;
 }
+#endif
 
 /* Return a new string with the quoted representation of character C.
    This turns "" into QUOTED_NULL, so the W_HASQUOTEDNULL flag needs to be
@@ -4301,7 +4300,7 @@ remove_quoted_ifs (string)
      char *string;
 {
   register size_t slen;
-  register int i, j, prev_i;
+  register int i, j;
   char *ret, *send;
   DECLARE_MBSTATE;
 
@@ -4659,7 +4658,6 @@ match_upattern (string, pat, mtype, sp, ep)
   size_t len;
   register char *p, *p1, *npat;
   char *end;
-  int n1;
 
   /* If the pattern doesn't match anywhere in the string, go ahead and
      short-circuit right away.  A minor optimization, saves a bunch of
@@ -4960,7 +4958,6 @@ match_pattern (string, pat, mtype, sp, ep)
   size_t n;
   wchar_t *wstring, *wpat;
   char **indices;
-  size_t slen, plen, mslen, mplen;
 #endif
 
   if (string == 0 || pat == 0 || *pat == 0)
@@ -5525,7 +5522,7 @@ add_fifo_list (fd)
       if (fd >= totfds)
 	totfds = fd + 2;
 
-      dev_fd_list = (char *)xrealloc (dev_fd_list, totfds * sizeof (dev_fd_list[0]));
+      dev_fd_list = (pid_t *)xrealloc (dev_fd_list, totfds * sizeof (dev_fd_list[0]));
       /* XXX - might need a loop for this */
       memset (dev_fd_list + ofds, '\0', (totfds - ofds) * sizeof (pid_t));
     }
@@ -5921,7 +5918,7 @@ read_comsub (fd, quoted, flags, rflag)
      int fd, quoted, flags;
      int *rflag;
 {
-  char *istring, buf[128], *bufp, *s;
+  char *istring, buf[128], *bufp;
   int istring_index, c, tflag, skip_ctlesc, skip_ctlnul;
   size_t istring_size;
   ssize_t bufn;
@@ -6632,6 +6629,7 @@ parameter_brace_find_indir (name, var_is_special, quoted, find_nameref)
   char *temp, *t;
   WORD_DESC *w;
   SHELL_VAR *v;
+  int pflags, oldex;
 
   if (find_nameref && var_is_special == 0 && (v = find_variable_last_nameref (name, 0)) &&
       nameref_p (v) && (t = nameref_cell (v)) && *t)
@@ -6640,12 +6638,23 @@ parameter_brace_find_indir (name, var_is_special, quoted, find_nameref)
   /* If var_is_special == 0, and name is not an array reference, this does
      more expansion than necessary.  It should really look up the variable's
      value and not try to expand it. */
-  w = parameter_brace_expand_word (name, var_is_special, quoted, PF_IGNUNBOUND, 0);
+  pflags = PF_IGNUNBOUND;
+  /* Note that we're not going to be doing word splitting here */
+  if (var_is_special)
+    {
+      pflags |= PF_ASSIGNRHS;	/* suppresses word splitting */
+      oldex = expand_no_split_dollar_star;
+      expand_no_split_dollar_star = 1;
+    }
+  w = parameter_brace_expand_word (name, var_is_special, quoted, pflags, 0);
+  if (var_is_special)
+    expand_no_split_dollar_star = oldex;
+
   t = w->word;
   /* Have to dequote here if necessary */
   if (t)
     {
-      temp = (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))
+      temp = ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) || var_is_special)
 		? dequote_string (t)
 		: dequote_escapes (t);
       free (t);
@@ -6664,7 +6673,7 @@ parameter_brace_expand_indir (name, var_is_special, quoted, quoted_dollar_atp, c
      int var_is_special, quoted;
      int *quoted_dollar_atp, *contains_dollar_at;
 {
-  char *temp, *t;
+  char *t;
   WORD_DESC *w;
   SHELL_VAR *v;
 
@@ -6845,9 +6854,8 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
     }
 
   /* op == '=' */
-  t = temp ? savestring (temp) : savestring ("");
-  t1 = dequote_string (t);
-  free (t);
+  t1 = temp ? dequote_string (temp) : savestring ("");
+  free (temp);
 
   /* bash-4.4/5.0 */
   vname = name;
@@ -6884,9 +6892,13 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
     free (vname);
 
   /* From Posix group discussion Feb-March 2010.  Issue 7 0000221 */
-  free (temp);
 
-  w->word = t1;
+  /* If we are double-quoted or if we are not going to be performing word
+     splitting, we want to quote the value we return appropriately, like
+     the other expansions this function handles. */
+  w->word = (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) ? quote_string (t1) : quote_escapes (t1);
+  free (t1);
+
   return w;
 }
 
@@ -7199,7 +7211,6 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
 {
   int vtype, want_indir;
   char *temp, *vname;
-  WORD_DESC *wd;
   SHELL_VAR *v;
   arrayind_t lind;
 
@@ -7741,7 +7752,7 @@ parameter_brace_substring (varname, value, ind, substr, quoted, pflags, flags)
 /*								*/
 /****************************************************************/
 
-#if 0	/* Unused */
+#ifdef INCLUDE_UNUSED
 static int
 shouldexp_replacement (s)
      char *s;
@@ -10293,7 +10304,6 @@ finished_with_string:
   else
     {
       char *ifs_chars;
-      char *tstring;
 
       ifs_chars = (quoted_dollar_at || has_dollar_at) ? ifs_value : (char *)NULL;
 
@@ -11010,7 +11020,6 @@ shell_expand_word_list (tlist, eflags)
 {
   WORD_LIST *expanded, *orig_list, *new_list, *next, *temp_list, *wcmd;
   int expanded_something, has_dollar_at;
-  char *temp_string;
 
   /* We do tilde expansion all the time.  This is what 1003.2 says. */
   new_list = (WORD_LIST *)NULL;
@@ -11020,8 +11029,6 @@ shell_expand_word_list (tlist, eflags)
 
   for (orig_list = tlist; tlist; tlist = next)
     {
-      temp_string = tlist->word->word;
-
       next = tlist->next;
 
 #if defined (ARRAY_VARS)
@@ -11034,7 +11041,8 @@ shell_expand_word_list (tlist, eflags)
       if ((tlist->word->flags & (W_COMPASSIGN|W_ASSIGNARG)) == (W_COMPASSIGN|W_ASSIGNARG))
 	{
 	  int t;
-	  char opts[16], opti;
+	  char opts[16];
+	  int opti;
 
 	  opti = 0;
 	  if (tlist->word->flags & (W_ASSIGNASSOC|W_ASSNGLOBAL|W_ASSIGNARRAY))

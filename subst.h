@@ -279,6 +279,9 @@ extern void clear_fifo_list __P((void));
 
 extern int find_procsub_child __P((pid_t));
 extern void set_procsub_status __P((int, pid_t, int));
+
+extern void wait_procsubs __P((void));
+extern void reap_procsubs __P((void));
 #endif
 
 extern WORD_LIST *list_string_with_quotes __P((char *));

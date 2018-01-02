@@ -86,7 +86,7 @@ _evalfile (filename, flags)
   size_t file_size;
   sh_vmsg_func_t *errfunc;
 #if defined (ARRAY_VARS)
-  SHELL_VAR *funcname_v, *nfv, *bash_source_v, *bash_lineno_v;
+  SHELL_VAR *funcname_v, *bash_source_v, *bash_lineno_v;
   ARRAY *funcname_a, *bash_source_a, *bash_lineno_a;
   struct func_array_state *fa;
 #  if defined (DEBUGGER)

@@ -1830,9 +1830,6 @@ and any characters special to other expansions are preserved
 in the result.  It is strictly textual.  Bash
 does not apply any syntactic interpretation to the context of the
 expansion or the text between the braces.
-To avoid conflicts with parameter expansion, the string @samp{$@{}
-is not considered eligible for brace expansion,
-and inhibits brace expansion until the closing @samp{@}}..
 
 A correctly-formed brace expansion must contain unquoted opening
 and closing braces, and at least one unquoted comma or a valid
@@ -1842,7 +1839,8 @@ Any incorrectly formed brace expansion is left unchanged.
 A @{ or @samp{,} may be quoted with a backslash to prevent its
 being considered part of a brace expression.
 To avoid conflicts with parameter expansion, the string @samp{$@{}
-is not considered eligible for brace expansion.
+is not considered eligible for brace expansion,
+and inhibits brace expansion until the closing @samp{@}}..
 
 This construct is typically used as shorthand when the common
 prefix of the strings to be generated is longer than in the
@@ -1959,6 +1957,8 @@ Bash uses the value of the variable formed from the rest of
 expanded and that value is used in the rest of the substitution, rather
 than the value of @var{parameter} itself.
 This is known as @code{indirect expansion}.
+The value is subject to tilde expansion,
+parameter expansion, command substitution, and arithmetic expansion.
 If @var{parameter} is a nameref, this expands to the name of the
 variable referenced by @var{parameter} instead of performing the
 complete indirect expansion.

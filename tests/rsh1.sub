@@ -1,0 +1,16 @@
+cd ${TMPDIR:-/tmp}
+cp /bin/sh .
+
+PATH=/rbin:/usr/local/rbin
+hash -p /bin/rm rm
+
+set -r
+
+BASH_CMDS[x]=/bin/sh
+
+BASH_CMDS[a]="sh"
+a -c 'echo hello'
+
+rm -f sh a
+
+exit 0

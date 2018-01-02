@@ -60,8 +60,6 @@ $END
 extern size_t confstr __P((int, char *, size_t));
 #endif
 
-static void restore_path __P((char *));
-
 /* Run the commands mentioned in LIST without paying attention to shell
    functions. */
 int
@@ -69,7 +67,6 @@ command_builtin (list)
      WORD_LIST *list;
 {
   int result, verbose, use_standard_path, opt;
-  char *old_path, *standard_path;
   COMMAND *command;
 
   verbose = use_standard_path = 0;
@@ -141,21 +138,4 @@ command_builtin (list)
   run_unwind_frame ("command_builtin");
 
   return (result);
-}
-
-/* Restore the value of the $PATH variable after replacing it when
-   executing `command -p'. */
-static void
-restore_path (var)
-     char *var;
-{
-  if (var)
-    {
-      bind_variable ("PATH", var, 0);
-      free (var);
-    }
-  else
-    unbind_variable ("PATH");
-
-  stupidly_hack_special_variables ("PATH");
 }

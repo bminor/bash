@@ -14680,3 +14680,45 @@ array.h
 
 variables.c
 	- set_pipestatus_array: use set_element_value where appropriate
+
+				   12/18
+				   -----
+subst.c
+	- parameter_brace_find_indir: when expanding the indirect parameter
+	  to find the eventual variable name, we don't perform word splitting.
+	  Make sure this does the right thing for * and @.  Fixes bug
+	  reported by isabella parakiss <izaberina@gmail.com>
+
+				   12/19
+				   -----
+doc/{bash.1,bashref.texi}
+	- indirect expansion: make sure to note that the value of the indirect
+	  variable does not undergo word splitting as one of its expansions,
+	  as in fix from 12/18
+
+				   12/22
+				   -----
+subst.c
+	- parameter_brace_expand_rhs: make sure the value this function returns
+	  when OP is `=' is quoted appropriately, as the callers expect. More
+	  changes from Posix interp 221. Fixes report from Martijn Dekker
+	  <martijn@inlv.org>
+
+variables.c
+	- assign_hashcmd: if running in a restricted shell, make sure the
+	  target of the hash assignment can be found via a $PATH search, to
+	  prevent users assigning commands to the hash table they would not
+	  ordinarily have access to. Fixes issue raised by Drew Parker
+	  <andrew.s.parker2@gmail.com>
+
+builtins/hash.def
+	- hash_builtin: if running in a restricted shell, make sure the
+	  pathname target of `hash -p' can be found via a $PATH search, to
+	  prevent users assigning commands to the hash table they would not
+	  ordinarily have access to.
+
+				   12/27
+				   -----
+array.c,arrayfunc.c,...
+	- many changes to clean up unused variables and functions. From a
+	  report from Siteshwar Vashisht <svashisht@redhat.com>
