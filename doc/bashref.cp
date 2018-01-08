@@ -54,7 +54,7 @@
 \entry{command substitution}{30}{command substitution}
 \entry{expansion, arithmetic}{30}{expansion, arithmetic}
 \entry{arithmetic expansion}{30}{arithmetic expansion}
-\entry{process substitution}{31}{process substitution}
+\entry{process substitution}{30}{process substitution}
 \entry{word splitting}{31}{word splitting}
 \entry{expansion, filename}{31}{expansion, filename}
 \entry{expansion, pathname}{31}{expansion, pathname}

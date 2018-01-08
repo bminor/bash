@@ -14740,3 +14740,63 @@ lib/readline/bind.c
 
 doc/bash.1,lib/readline/doc/{rluser.texi,readline.3}
 	- document new `if variable comparison value' construct
+
+				 1/2/2018
+				 --------
+lib/glob/sm_loop.c
+	- EXTMATCH: when matching against !(patlist), if a filename beginning
+	  with a `.' does not match any of the patterns in patlist, don't
+	  return it as a match if leading dots need to be matched explicitly
+	  (flags & FNM_PERIOD). Report from Eric Cook <llua@gmx.com>
+
+				    1/3
+				    ---
+variables.[ch]
+	- bind_function_def: takes an additional flags argument. If FLAGS&1,
+	  overwrite any existing function_def hash table entry; if FLAGS==0,
+	  leave any existing function_def alone.
+
+make_cmd.c
+	- make_function_def: call bind_function_def with flags == 0
+
+execute_cmd.c
+	- execute_intern_function: call bind_function_def with flags == 1 so
+	  we have function_def information that's correct for where the
+	  function is defined, not just where it's last parsed. Fixes report
+	  from Bruno Vasselle <bruno.vasselle@laposte.net>; final piece of
+	  fix from 12/15/2011
+
+				    1/4
+				    ---
+subst.c
+	- param_expand: deal with string_list_dollar_star returning NULL.
+	  Fixes bug reported by Martijn Dekker <martijn@inlv.org>
+
+builtins/history.def
+	- history_builtin: enabled code that performs range deletion
+
+				    1/5
+				    ---
+subst.c
+	- do_assignment_internal: if performing a compound assignment, make
+	  sure to pass ASS_CHKLOCAL flag to do_compound_assignment if the
+	  assignment word has the W_CHKLOCAL flag set
+	- do_compound_assignment: honor ASS_CHKLOCAL flag and check for an
+	  existing local variable before creating or modifying a global
+	  variable
+
+builtins/declare.def
+	- declare_internal: new (undocumented so far) option: -G. Means to
+	  act on global variables (create, modify) if no local variable is
+	  found with the specified name
+	- declare_find_variable: new declare-specific wrapper functon for
+	  declare builtin; obeys -g and -G options in one place
+	- declare_internal: if no variable is found after following any nameref
+	  chain, look up the variable using declare_find_variable to honor the
+	  -G option. XXX - so far, this is the only place that function is used
+
+subst.c
+	- shell_expand_word_list: before calling make_internal_declare, add
+	  'G' to the options list if W_CHKLOCAL is set in the word's flags.
+	  This makes builtins like `readonly' that modify local variables in
+	  a function behave the same for scalar and array variables

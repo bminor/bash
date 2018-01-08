@@ -1,6 +1,6 @@
-This is readline.info, produced by makeinfo version 6.4 from rlman.texi.
+This is readline.info, produced by makeinfo version 6.5 from rlman.texi.
 
-This manual describes the GNU Readline Library (version 7.0, 7 December
+This manual describes the GNU Readline Library (version 7.0, 28 December
 2017), a library which aids in the consistency of user interface across
 discrete programs which provide a command line interface.
 
@@ -778,8 +778,9 @@ four parser directives used.
 '$if'
      The '$if' construct allows bindings to be made based on the editing
      mode, the terminal being used, or the application using Readline.
-     The text of the test extends to the end of the line; no characters
-     are required to isolate it.
+     The text of the test, after any comparison operator, extends to the
+     end of the line; unless otherwise noted, no characters are required
+     to isolate it.
 
      'mode'
           The 'mode=' form of the '$if' directive is used to test
@@ -804,7 +805,13 @@ four parser directives used.
           version number supplied on the right side of the operator
           consists of a major version number, an optional decimal point,
           and an optional minor version (e.g., '7.1').  If the minor
-          version is omitted, it is assumed to be '0'.
+          version is omitted, it is assumed to be '0'.  The operator may
+          be separated from the string 'version' and from the version
+          number argument by whitespace.  The following example sets a
+          variable if the Readline version being used is 7.0 or newer:
+               $if version >= 7.0
+               set show-mode-in-prompt on
+               $endif
 
      'application'
           The APPLICATION construct is used to include
@@ -817,6 +824,20 @@ four parser directives used.
                $if Bash
                # Quote the current or previous word
                "\C-xq": "\eb\"\ef\""
+               $endif
+
+     'variable'
+          The VARIABLE construct provides simple equality tests for
+          Readline variables and values.  The permitted comparison
+          operators are '=', '==', and '!='.  The variable name must be
+          separated from the comparison operator by whitespace; the
+          operator may be separated from the value on the right hand
+          side by whitespace.  Both string and boolean variables may be
+          tested.  Boolean variables must be tested against the values
+          ON and OFF.  The following example is equivalent to the
+          'mode=emacs' test described above:
+               $if editing-mode == emacs
+               set show-mode-in-prompt on
                $endif
 
 '$endif'
@@ -5015,58 +5036,58 @@ Function and Variable Index
 
 
 Tag Table:
-Node: Top864
-Node: Command Line Editing1589
-Node: Introduction and Notation2241
-Node: Readline Interaction3865
-Node: Readline Bare Essentials5057
-Node: Readline Movement Commands6841
-Node: Readline Killing Commands7802
-Node: Readline Arguments9721
-Node: Searching10766
-Node: Readline Init File12919
-Node: Readline Init File Syntax14073
-Node: Conditional Init Constructs34164
-Node: Sample Init File37252
-Node: Bindable Readline Commands40370
-Node: Commands For Moving41425
-Node: Commands For History42992
-Node: Commands For Text47257
-Node: Commands For Killing50700
-Node: Numeric Arguments52867
-Node: Commands For Completion54007
-Node: Keyboard Macros55976
-Node: Miscellaneous Commands56664
-Node: Readline vi Mode60586
-Node: Programming with GNU Readline62403
-Node: Basic Behavior63389
-Node: Custom Functions67072
-Node: Readline Typedefs68555
-Node: Function Writing70189
-Node: Readline Variables71503
-Node: Readline Convenience Functions84175
-Node: Function Naming85247
-Node: Keymaps86509
-Node: Binding Keys88664
-Node: Associating Function Names and Bindings93212
-Node: Allowing Undoing95497
-Node: Redisplay98047
-Node: Modifying Text102071
-Node: Character Input103318
-Node: Terminal Management105216
-Node: Utility Functions107039
-Node: Miscellaneous Functions110367
-Node: Alternate Interface112956
-Node: A Readline Example115698
-Node: Alternate Interface Example117637
-Node: Readline Signal Handling121169
-Node: Custom Completers130218
-Node: How Completing Works130938
-Node: Completion Functions134245
-Node: Completion Variables137819
-Node: A Short Completion Example153463
-Node: GNU Free Documentation License166242
-Node: Concept Index191416
-Node: Function and Variable Index192937
+Node: Top865
+Node: Command Line Editing1590
+Node: Introduction and Notation2242
+Node: Readline Interaction3866
+Node: Readline Bare Essentials5058
+Node: Readline Movement Commands6842
+Node: Readline Killing Commands7803
+Node: Readline Arguments9722
+Node: Searching10767
+Node: Readline Init File12920
+Node: Readline Init File Syntax14074
+Node: Conditional Init Constructs34165
+Node: Sample Init File38362
+Node: Bindable Readline Commands41480
+Node: Commands For Moving42535
+Node: Commands For History44102
+Node: Commands For Text48367
+Node: Commands For Killing51810
+Node: Numeric Arguments53977
+Node: Commands For Completion55117
+Node: Keyboard Macros57086
+Node: Miscellaneous Commands57774
+Node: Readline vi Mode61696
+Node: Programming with GNU Readline63513
+Node: Basic Behavior64499
+Node: Custom Functions68182
+Node: Readline Typedefs69665
+Node: Function Writing71299
+Node: Readline Variables72613
+Node: Readline Convenience Functions85285
+Node: Function Naming86357
+Node: Keymaps87619
+Node: Binding Keys89774
+Node: Associating Function Names and Bindings94322
+Node: Allowing Undoing96607
+Node: Redisplay99157
+Node: Modifying Text103181
+Node: Character Input104428
+Node: Terminal Management106326
+Node: Utility Functions108149
+Node: Miscellaneous Functions111477
+Node: Alternate Interface114066
+Node: A Readline Example116808
+Node: Alternate Interface Example118747
+Node: Readline Signal Handling122279
+Node: Custom Completers131328
+Node: How Completing Works132048
+Node: Completion Functions135355
+Node: Completion Variables138929
+Node: A Short Completion Example154573
+Node: GNU Free Documentation License167352
+Node: Concept Index192526
+Node: Function and Variable Index194047
 
 End Tag Table

@@ -1,7 +1,7 @@
 This file is history.def, from which is created history.c.
 It implements the builtin "history" in Bash.
 
-Copyright (C) 1987-2016 Free Software Foundation, Inc.
+Copyright (C) 1987-2018 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -177,13 +177,13 @@ history_builtin (list)
       return (sh_chkwrite (EXECUTION_SUCCESS));
     }
 #endif
-#if defined (BASH_50)	/* bash 5.0 */
-  else if ((flags & DFLAG) && (range = strchr (delete_arg[0] == '-' ? delete_arg + 1 : delete_arg, '-')))
+  else if ((flags & DFLAG) && (range = strchr ((delete_arg[0] == '-') ? delete_arg + 1 : delete_arg, '-')))
     {
       intmax_t delete_start, delete_end;
       *range++ = '\0';
       if (legal_number (delete_arg, &delete_start) == 0 || legal_number (range, &delete_end) == 0)
 	{
+	  range[-1] = '-';
 	  sh_erange (delete_arg, _("history position"));
 	  return (EXECUTION_FAILURE);
 	}
@@ -193,6 +193,7 @@ history_builtin (list)
           delete_start += history_length;
 	  if (delete_start < history_base)
 	    {
+start_error:
 	      sh_erange (delete_arg, _("history position"));
 	      return (EXECUTION_FAILURE);
 	    }
@@ -200,23 +201,27 @@ history_builtin (list)
       /* numbers as displayed by display_history are offset by history_base */
       else if (delete_start > 0)
 	delete_start -= history_base;
+      if (delete_start < 0 || delete_start >= history_length)
+	goto start_error;
       if (range[0] == '-' && delete_end < 0)
         {
           delete_end += history_length;
 	  if (delete_end < history_base)
 	    {
-	      sh_erange (delete_arg, _("history position"));
+range_error:
+	      sh_erange (range, _("history position"));
 	      return (EXECUTION_FAILURE);
 	    }
         }
       else if (delete_end > 0)
 	delete_end -= history_base;
+      if (delete_end < 0 || delete_end >= history_length)
+	goto range_error;
       result = bash_delete_history_range (delete_start, delete_end);
       if (where_history () > history_length)
 	history_set_pos (history_length);
       return (result ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
     }
-#endif /* BASH_50 */
   else if (flags & DFLAG)
     {
       if (legal_number (delete_arg, &delete_offset) == 0)

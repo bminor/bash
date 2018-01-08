@@ -4,7 +4,7 @@
 /* ``Have a little faith, there's magic in the night.  You ain't a
      beauty, but, hey, you're alright.'' */
 
-/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2018 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -3056,12 +3056,13 @@ do_compound_assignment (name, value, flags)
      int flags;
 {
   SHELL_VAR *v;
-  int mklocal, mkassoc, mkglobal;
+  int mklocal, mkassoc, mkglobal, chklocal;
   WORD_LIST *list;
 
   mklocal = flags & ASS_MKLOCAL;
   mkassoc = flags & ASS_MKASSOC;
   mkglobal = flags & ASS_MKGLOBAL;
+  chklocal = flags & ASS_CHKLOCAL;
 
   if (mklocal && variable_context)
     {
@@ -3082,10 +3083,15 @@ do_compound_assignment (name, value, flags)
       if (list)
 	dispose_words (list);
     }
-  /* In a function but forcing assignment in global context */
+  /* In a function but forcing assignment in global context. CHKLOCAL means to
+     check for an existing local variable first. */
   else if (mkglobal && variable_context)
     {
-      v = find_global_variable (name);
+      v = chklocal ? find_variable (name) : 0;
+      if (v && (local_p (v) == 0 || v->context != variable_context))
+	v = 0;
+      if (v == 0)
+        v = find_global_variable (name);
       if (v && ((readonly_p (v) && (flags & ASS_FORCE) == 0) || noassign_p (v)))
 	{
 	  if (readonly_p (v))
@@ -3208,6 +3214,8 @@ do_assignment_internal (word, expand)
     }
   else if (assign_list)
     {
+      if ((word->flags & W_ASSIGNARG) && (word->flags & W_CHKLOCAL))
+	aflags |= ASS_CHKLOCAL;
       if ((word->flags & W_ASSIGNARG) && (word->flags & W_ASSNGLOBAL) == 0)
 	aflags |= ASS_MKLOCAL;
       if ((word->flags & W_ASSIGNARG) && (word->flags & W_ASSNGLOBAL))
@@ -9123,15 +9131,15 @@ param_expand (string, sindex, quoted, expanded_something,
 	    {
 	      /* Posix interp 888: RHS of assignment, IFS set to '' */
 	      temp1 = string_list_dollar_star (list, quoted, pflags);
-	      temp = quote_escapes (temp1);
-	      free (temp1);
+	      temp = temp1 ? quote_escapes (temp1) : temp1;
+	      FREE (temp1);
 	    }
 	  else if (expand_no_split_dollar_star && quoted == 0 && ifs_is_set && ifs_is_null == 0 && (pflags & PF_ASSIGNRHS))
 	    {
 	      /* Posix interp 888: RHS of assignment, IFS set to non-null value */
 	      temp1 = string_list_dollar_star (list, quoted, pflags);
-	      temp = quote_string (temp1);
-	      free (temp1);
+	      temp = temp1 ? quote_string (temp1) : temp1;
+	      FREE (temp1);
 	    }
 	  /* XXX - should we check ifs_is_set here as well? */
 #  if defined (HANDLE_MULTIBYTE)
@@ -11045,7 +11053,7 @@ shell_expand_word_list (tlist, eflags)
 	  int opti;
 
 	  opti = 0;
-	  if (tlist->word->flags & (W_ASSIGNASSOC|W_ASSNGLOBAL|W_ASSIGNARRAY))
+	  if (tlist->word->flags & (W_ASSIGNASSOC|W_ASSNGLOBAL|W_CHKLOCAL|W_ASSIGNARRAY))
 	    opts[opti++] = '-';
 
 	  if ((tlist->word->flags & (W_ASSIGNASSOC|W_ASSNGLOBAL)) == (W_ASSIGNASSOC|W_ASSNGLOBAL))
@@ -11064,6 +11072,9 @@ shell_expand_word_list (tlist, eflags)
 	    opts[opti++] = 'a';
 	  else if (tlist->word->flags & W_ASSNGLOBAL)
 	    opts[opti++] = 'g';
+
+	  if (tlist->word->flags & W_CHKLOCAL)
+	    opts[opti++] = 'G';
 
 	  /* If we have special handling note the integer attribute and others
 	     that transform the value upon assignment.  What we do is take all

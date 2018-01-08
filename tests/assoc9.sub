@@ -100,3 +100,11 @@ echo $((1+a[\$x]))
 echo "1+${a[$x]}"
 
 declare -p a
+
+shopt -s assoc_expand_once
+declare -A myarray
+
+declare myarray["foo[bar"]=bleh
+myarray["foo"]=bleh
+
+declare -p myarray

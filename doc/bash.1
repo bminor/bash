@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Dec 28 14:50:35 EST 2017
+.\"	Last Change: Thu Jan  4 15:29:06 EST 2018
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2017 December 28" "GNU Bash 4.4"
+.TH BASH 1 "2018 January 4" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -50,8 +50,8 @@ bash \- GNU Bourne-Again SHell
 [options]
 [command_string | file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989-2017 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989-2017 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-2018 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-2018 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
 is an \fBsh\fR-compatible command language interpreter that
@@ -8552,6 +8552,8 @@ The return status is 0 unless no command matches
 .TP
 \fBhistory \-d\fP \fIoffset\fP
 .TP
+\fBhistory \-d\fP \fIstart\fP\-\fIend\fP
+.TP
 \fBhistory\fP \fB\-anrw\fP [\fIfilename\fP]
 .TP
 \fBhistory\fP \fB\-p\fP \fIarg\fP [\fIarg ...\fP]
@@ -8592,6 +8594,11 @@ If \fIoffset\fP is negative, it is interpreted as relative to one greater
 than the last history position, so negative indices count back from the
 end of the history, and an index of \-1 refers to the current
 \fBhistory -d\fP command.
+.TP
+\fB\-d\fP \fIstart\fP\-\fIend\fP
+Delete the history entries between positions \fIstart\fP and \fIend\fP,
+inclusive.  Positive and negative values for \fIstart\fP and \fIend\fP
+are interpreted as described above.
 .TP
 .B \-a
 Append the ``new'' history lines to the history file.

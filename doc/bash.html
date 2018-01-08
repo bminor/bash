@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2017 October 7<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2017 December 28<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -3398,12 +3398,16 @@ builtin is used to destroy arrays.  <B>unset</B> <I>name</I>[<I>subscript</I>]
 destroys the array element at index <I>subscript</I>,
 for both indexed and associative arrays.
 Negative subscripts to indexed arrays are interpreted as described above.
-Care must be taken to avoid unwanted side effects caused by pathname
-expansion.
 Unsetting the last element of an array variable does not unset the variable.
 <B>unset</B> <I>name</I>, where <I>name</I> is an array, or
 <B>unset</B> <I>name</I>[<I>subscript</I>], where
 <I>subscript</I> is <B>*</B> or <B>@</B>, removes the entire array.
+<P>
+
+When using a variable name with a subscript as an argument to a command,
+such as with <B>unset</B>, without using the word expansion syntax
+described above, the argument is subject to pathname expansion.
+If pathname expansion is not desired, the argument should be quoted.
 <P>
 
 The
@@ -3735,6 +3739,8 @@ it introduces a level of variable indirection.
 expanded and that value is used in the rest of the substitution, rather
 than the value of <I>parameter</I> itself.
 This is known as <I>indirect expansion</I>.
+The value is subject to tilde expansion,
+parameter expansion, command substitution, and arithmetic expansion.
 If <I>parameter</I> is a nameref, this expands to the name of the
 variable referenced by <I>parameter</I> instead of performing the
 complete indirect expansion.
@@ -4131,7 +4137,7 @@ is an array variable subscripted with
 or
 <B>*</B>,
 
-the case modification operation is applied to each member of the
+the operation is applied to each member of the
 array in turn, and the expansion is the resultant list.
 <P>
 The result of the expansion is subject to word splitting and pathname
@@ -5528,10 +5534,6 @@ the
 <B>unset</B>
 
 builtin.
-Note that shell functions and variables with the same name may result
-in multiple identically-named entries in the environment passed to the
-shell's children.
-Care should be taken in cases where this may cause a problem.
 <P>
 
 Functions may be recursive.
@@ -7295,7 +7297,8 @@ or
 <DT><B>emacs-mode-string (@)</B>
 
 <DD>
-This string is displayed immediately before the last line of the primary
+If the <I>show-mode-in-prompt</I> variable is enabled,
+this string is displayed immediately before the last line of the primary
 prompt when emacs editing mode is active.  The value is expanded like a
 key binding, so the standard set of meta- and control prefixes and
 backslash escape sequences is available.
@@ -7478,9 +7481,9 @@ of ringing the bell.
 <DT><B>show-mode-in-prompt (Off)</B>
 
 <DD>
-If set to <B>On</B>, add a character to the beginning of the prompt
-indicating the editing mode: emacs (@), vi command (:) or vi
-insertion (+).
+If set to <B>On</B>, add a string to the beginning of the prompt
+indicating the editing mode: emacs, vi command, or vi insertion.
+The mode strings are user-settable (e.g., <I>emacs-mode-string</I>).
 <DT><B>skip-completed-text (Off)</B>
 
 <DD>
@@ -7493,7 +7496,8 @@ following the cursor are not duplicated.
 <DT><B>vi-cmd-mode-string ((cmd))</B>
 
 <DD>
-This string is displayed immediately before the last line of the primary
+If the <I>show-mode-in-prompt</I> variable is enabled,
+this string is displayed immediately before the last line of the primary
 prompt when vi editing mode is active and in command mode.
 The value is expanded like a
 key binding, so the standard set of meta- and control prefixes and
@@ -7504,7 +7508,8 @@ sequence into the mode string.
 <DT><B>vi-ins-mode-string ((ins))</B>
 
 <DD>
-This string is displayed immediately before the last line of the primary
+If the <I>show-mode-in-prompt</I> variable is enabled,
+this string is displayed immediately before the last line of the primary
 prompt when vi editing mode is active and in insertion mode.
 The value is expanded like a
 key binding, so the standard set of meta- and control prefixes and
@@ -7536,8 +7541,9 @@ The
 
 construct allows bindings to be made based on the
 editing mode, the terminal being used, or the application using
-readline.  The text of the test extends to the end of the line;
-no characters are required to isolate it.
+readline.  The text of the test, after any comparison operator,
+<BR>&nbsp;extends&nbsp;to&nbsp;the&nbsp;end&nbsp;of&nbsp;the&nbsp;line;
+unless otherwise noted, no characters are required to isolate it.
 <DL COMPACT><DT><DD>
 <DL COMPACT>
 <DT><B>mode</B><DD>
@@ -7564,6 +7570,33 @@ and
 <I>sun-cmd</I>,
 
 for instance.
+<DT><B>version</B><DD>
+The <B>version</B> test may be used to perform comparisons against
+specific readline versions.
+The <B>version</B> expands to the current readline version.
+The set of comparison operators includes
+<B>=</B>,
+
+(and
+<B>==</B>),
+
+<B>!=</B>,
+
+<B>&lt;=</B>,
+
+<B>&gt;=</B>,
+
+<B>&lt;</B>,
+
+and
+<B>&gt;</B>.
+
+The version number supplied on the right side of the operator consists
+of a major version number, an optional decimal point, and an optional
+minor version (e.g., <B>7.1</B>). If the minor version is omitted, it
+is assumed to be <B>0</B>.
+The operator may be separated from the string <B>version</B>   
+and from the version number argument by whitespace.
 <DT><B>application</B><DD>
 The <B>application</B> construct is used to include
 application-specific settings.  Each program using the readline
@@ -7583,6 +7616,15 @@ key sequence that quotes the current or previous word in <B>bash</B>:
 
 </DL>
 
+<DT><I>variable</I><DD>
+The <I>variable</I> construct provides simple equality tests for readline
+variables and values.
+The permitted comparison operators are <I>=</I>, <I>==</I>, and <I>!=</I>.
+The variable name must be separated from the comparison operator by
+whitespace; the operator may be separated from the value on the right hand
+side by whitespace.
+Both string and boolean variables may be tested. Boolean variables must be
+tested against the values <I>on</I> and <I>off</I>.
 </DL></DL>
 
 <DT><B>$endif</B><DD>
@@ -11610,7 +11652,7 @@ is omitted, the return status is that of the last command
 executed in the function body.
 If <B>return</B> is executed by a trap handler, the last command used to
 determine the status is the last command executed before the trap handler.
-if <B>return</B> is executed during a <B>DEBUG</B> trap, the last command
+If <B>return</B> is executed during a <B>DEBUG</B> trap, the last command
 used to determine the status is the last command executed by the trap
 handler before <B>return</B> was invoked.
 If
@@ -12171,7 +12213,8 @@ With no options, or with the
 <B>-p</B>
 
 option, a list of all settable options is displayed, with
-an indication of whether or not each is set.
+an indication of whether or not each is set;
+if <I>optnames</I> are supplied, the output is restricted to those options.
 The <B>-p</B> option causes output to be displayed in a form that
 may be reused as input.
 Other options have the following meanings:
@@ -13754,7 +13797,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2017 October 7<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2017 December 28<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13860,6 +13903,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 09 October 2017 15:38:40 EDT
+Time: 02 January 2018 10:55:16 EST
 </BODY>
 </HTML>

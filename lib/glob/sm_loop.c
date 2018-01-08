@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2018 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -863,14 +863,11 @@ fprintf(stderr, "extmatch: flags = %d\n", flags);
 		break;
 	    }
 
-#if 0	/* NOTYET */
-	  /* Report from Eric Cook <llua@gmx.com> 12/29/2017 */
 	  /* If nothing matched, but the string starts with a period and we
 	     need to match periods explicitly, don't return this as a match,
-	     even for negation. */
+	     even for negation. Might need to do this only if srest == s. */
 	  if (m1 == 0 && *s == '.' && (flags & FNM_PERIOD))
 	    return (FNM_NOMATCH);
-#endif
 
 	  /* if srest > s, we are not at start of string */
 	  xflags = (srest > s) ? (flags & ~FNM_PERIOD) : flags;

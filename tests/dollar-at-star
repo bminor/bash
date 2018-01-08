@@ -6,6 +6,23 @@ recho "$*"
 recho $@
 recho $*
 
+foo=$*
+foo=$@
+
+foo="$*"
+foo="$@"
+
+unset -v bar
+
+foo=${bar:-$*}
+foo=${bar:-$@}
+
+foo=${bar:-"$*"}
+foo=${bar:-"$@"}
+
+foo=${!*}
+foo=${!@}
+
 set a b
 
 recho "$*"

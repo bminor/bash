@@ -1,7 +1,7 @@
 @ignore
 This file documents the user interface to the GNU History library.
 
-Copyright (C) 1988--2016 Free Software Foundation, Inc.
+Copyright (C) 1988--2018 Free Software Foundation, Inc.
 Authored by Brian Fox and Chet Ramey.
 
 Permission is granted to make and distribute verbatim copies of this manual
@@ -176,6 +176,7 @@ and typing @samp{r} re-executes the last command (@pxref{Aliases}).
 history [@var{n}]
 history -c
 history -d @var{offset}
+history -d @var{start}-@var{end}
 history [-anrw] [@var{filename}]
 history -ps @var{arg}
 @end example
@@ -204,6 +205,11 @@ If @var{offset} is negative, it is interpreted as relative to one greater
 than the last history position, so negative indices count back from the
 end of the history, and an index of @samp{-1} refers to the current
 @code{history -d} command.
+
+@item -d @var{start}-@var{end}
+Delete the history entries between positions @var{start} and @var{end},
+inclusive.  Positive and negative values for @var{start} and @var{end}
+are interpreted as described above.
 
 @item -a
 Append the new history lines to the history file.

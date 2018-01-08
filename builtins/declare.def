@@ -88,6 +88,7 @@ $END
 #include "builtext.h"
 #include "bashgetopt.h"
 
+static SHELL_VAR *declare_find_variable __P((const char *, int, int));
 static int declare_internal __P((register WORD_LIST *, int));
 
 /* Declare or change variable attributes. */
@@ -134,10 +135,30 @@ local_builtin (list)
 }
 
 #if defined (ARRAY_VARS)
-#  define DECLARE_OPTS	"+acfgilnprtuxAF"
+#  define DECLARE_OPTS	"+acfgilnprtuxAFG"
 #else
-#  define DECLARE_OPTS	"+cfgilnprtuxF"
+#  define DECLARE_OPTS	"+cfgilnprtuxFG"
 #endif
+
+static SHELL_VAR *
+declare_find_variable (name, mkglobal, chklocal)
+     const char *name;
+     int mkglobal, chklocal;
+{
+  SHELL_VAR *var;
+
+  if (mkglobal == 0)
+    return (find_variable (name));
+  else if (chklocal)
+    {
+      var = find_variable (name);
+      if (var && local_p (var) && var->context == variable_context)
+	return var;
+      return (find_global_variable (name));
+    }
+  else
+    return (find_global_variable (name));
+}
 
 /* The workhorse function. */
 static int
@@ -146,12 +167,14 @@ declare_internal (list, local_var)
      int local_var;
 {
   int flags_on, flags_off, *flags;
-  int any_failed, assign_error, pflag, nodefs, opt, mkglobal, onref, offref;
+  int any_failed, assign_error, pflag, nodefs, opt, onref, offref;
+  int mkglobal, chklocal;
   char *t, *subscript_start;
   SHELL_VAR *var, *refvar, *v;
   FUNCTION_DEF *shell_fn;
 
-  flags_on = flags_off = any_failed = assign_error = pflag = nodefs = mkglobal = 0;
+  flags_on = flags_off = any_failed = assign_error = pflag = nodefs = 0;
+  mkglobal = chklocal = 0;
   refvar = (SHELL_VAR *)NULL;
   reset_internal_getopt ();
   while ((opt = internal_getopt (list, DECLARE_OPTS)) != -1)
@@ -189,6 +212,10 @@ declare_internal (list, local_var)
 	case 'f':
 	  *flags |= att_function;
 	  break;
+	case 'G':
+	  if (flags == &flags_on)
+	    chklocal = 1;
+	  /*FALLTHROUGH*/
 	case 'g':
 	  if (flags == &flags_on)
 	    mkglobal = 1;
@@ -538,14 +565,9 @@ restart_new_var_name:
 #endif
 	  if (var == 0 && (flags_on & att_nameref))
 	    {
-#if 0
-	      /* See if we are trying to modify an existing nameref variable */
-	      var = mkglobal ? find_global_variable_last_nameref (name, 1) : find_variable_last_nameref (name, 1);
-#else
 	      /* See if we are trying to modify an existing nameref variable,
 		 but don't follow the nameref chain. */
 	      var = mkglobal ? find_global_variable_noref (name) : find_variable_noref (name);
-#endif
 	      if (var && nameref_p (var) == 0)
 		var = 0;
 	    }
@@ -571,6 +593,7 @@ restart_new_var_name:
 		  NEXT_VARIABLE ();
 		}
 	      if (refvar)
+		/* XXX - use declare_find_variable here? */
 		var = mkglobal ? find_global_variable (nameref_cell (refvar)) : find_variable (nameref_cell (refvar));
 	    }
 #if defined (ARRAY_VARS)
@@ -602,6 +625,7 @@ restart_new_var_name:
 	      if (refvar && nameref_p (refvar) == 0)
 		refvar = 0;
 	      if (refvar)
+		/* XXX - use declare_find_variable here? */
 		var = mkglobal ? find_global_variable (nameref_cell (refvar)) : find_variable (nameref_cell (refvar));
 	      if (refvar && var == 0)
 		{
@@ -652,7 +676,7 @@ restart_new_var_name:
 		}
 	    }
 	  if (var == 0)
-	    var = mkglobal ? find_global_variable (name) : find_variable (name);
+	    var = declare_find_variable (name, mkglobal, chklocal);
 
 #if defined (ARRAY_VARS)
 	  var_exists = var != 0;

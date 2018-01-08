@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 4.4, 7 October 2017).
+the Bash shell (version 4.4, 19 December 2017).
 
-This is Edition 4.4, last updated 7 October 2017,
+This is Edition 4.4, last updated 19 December 2017,
 of The GNU Bash Reference Manual,
 for Bash, Version 4.4.
 
@@ -15,8 +15,9 @@ any later version published by the Free Software Foundation; with no
 Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 A copy of the license is included in the section entitled
 "GNU Free Documentation License". -->
-<!-- Created by GNU Texinfo 6.4, http://www.gnu.org/software/texinfo/ -->
+<!-- Created by GNU Texinfo 6.5, http://www.gnu.org/software/texinfo/ -->
 <head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Bash Reference Manual</title>
 
 <meta name="description" content="Bash Reference Manual">
@@ -24,7 +25,6 @@ A copy of the license is included in the section entitled
 <meta name="resource-type" content="document">
 <meta name="distribution" content="global">
 <meta name="Generator" content="makeinfo">
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link href="#Top" rel="start" title="Top">
 <link href="#Indexes" rel="index" title="Indexes">
 <link href="#SEC_Contents" rel="contents" title="Table of Contents">
@@ -284,10 +284,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 4.4, 7 October 2017).
+the Bash shell (version 4.4, 19 December 2017).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 4.4, last updated 7 October 2017,
+<p>This is Edition 4.4, last updated 19 December 2017,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 4.4.
 </p>
@@ -1946,10 +1946,6 @@ Functions may be exported so that subshells
 automatically have them defined with the
 <samp>-f</samp> option to the <code>export</code> builtin
 (see <a href="#Bourne-Shell-Builtins">Bourne Shell Builtins</a>).
-Note that shell functions and variables with the same name may result
-in multiple identically-named entries in the environment passed to the
-shell&rsquo;s children.
-Care should be taken in cases where this may cause a problem.
 </p>
 <p>Functions may be recursive.
 The <code>FUNCNEST</code> variable may be used to limit the depth of the
@@ -2340,9 +2336,6 @@ and any characters special to other expansions are preserved
 in the result.  It is strictly textual.  Bash
 does not apply any syntactic interpretation to the context of the
 expansion or the text between the braces.
-To avoid conflicts with parameter expansion, the string &lsquo;<samp>${</samp>&rsquo;
-is not considered eligible for brace expansion,
-and inhibits brace expansion until the closing &lsquo;<samp>}</samp>&rsquo;..
 </p>
 <p>A correctly-formed brace expansion must contain unquoted opening
 and closing braces, and at least one unquoted comma or a valid
@@ -2352,7 +2345,8 @@ Any incorrectly formed brace expansion is left unchanged.
 <p>A { or &lsquo;<samp>,</samp>&rsquo; may be quoted with a backslash to prevent its
 being considered part of a brace expression.
 To avoid conflicts with parameter expansion, the string &lsquo;<samp>${</samp>&rsquo;
-is not considered eligible for brace expansion.
+is not considered eligible for brace expansion,
+and inhibits brace expansion until the closing &lsquo;<samp>}</samp>&rsquo;..
 </p>
 <p>This construct is typically used as shorthand when the common
 prefix of the strings to be generated is longer than in the
@@ -2489,6 +2483,8 @@ Bash uses the value of the variable formed from the rest of
 expanded and that value is used in the rest of the substitution, rather
 than the value of <var>parameter</var> itself.
 This is known as <code>indirect expansion</code>.
+The value is subject to tilde expansion,
+parameter expansion, command substitution, and arithmetic expansion.
 If <var>parameter</var> is a nameref, this expands to the name of the
 variable referenced by <var>parameter</var> instead of performing the
 complete indirect expansion.
@@ -4321,7 +4317,7 @@ If <var>n</var> is not supplied, the return value is the exit status of the
 last command executed in the function.
 If <code>return</code> is executed by a trap handler, the last command used to
 determine the status is the last command executed before the trap handler.
-if <code>return</code> is executed during a <code>DEBUG</code> trap, the last command
+If <code>return</code> is executed during a <code>DEBUG</code> trap, the last command
 used to determine the status is the last command executed by the trap
 handler before <code>return</code> was invoked.
 <code>return</code> may also be used to terminate execution of a script
@@ -5903,7 +5899,8 @@ The settings can be either those listed below, or, if the
 <samp>-o</samp> option is used, those available with the <samp>-o</samp>
 option to the <code>set</code> builtin command (see <a href="#The-Set-Builtin">The Set Builtin</a>).
 With no options, or with the <samp>-p</samp> option, a list of all settable
-options is displayed, with an indication of whether or not each is set.
+options is displayed, with an indication of whether or not each is set;
+if <var>optnames</var> are supplied, the output is restricted to those options.
 The <samp>-p</samp> option causes output to be displayed in a form that
 may be reused as input.
 Other options have the following meanings:
@@ -8542,12 +8539,15 @@ special parameters &lsquo;<samp>@</samp>&rsquo; and &lsquo;<samp>*</samp>&rsquo;
 <code>unset <var>name</var>[<var>subscript</var>]</code>
 destroys the array element at index <var>subscript</var>.
 Negative subscripts to indexed arrays are interpreted as described above.
-Care must be taken to avoid unwanted side effects caused by filename
-expansion.
 Unsetting the last element of an array variable does not unset the variable.
 <code>unset <var>name</var></code>, where <var>name</var> is an array, removes the
 entire array.  A subscript of &lsquo;<samp>*</samp>&rsquo; or &lsquo;<samp>@</samp>&rsquo; also removes the
 entire array.
+</p>
+<p>When using a variable name with a subscript as an argument to a command,
+such as with <code>unset</code>, without using the word expansion syntax
+described above, the argument is subject to the shell&rsquo;s filename expansion.
+If filename expansion is not desired, the argument should be quoted.
 </p>
 <p>The <code>declare</code>, <code>local</code>, and <code>readonly</code>
 builtins each accept a <samp>-a</samp> option to specify an indexed
@@ -10035,7 +10035,8 @@ set to either &lsquo;<samp>emacs</samp>&rsquo; or &lsquo;<samp>vi</samp>&rsquo;.
 </dd>
 <dt><code>emacs-mode-string</code></dt>
 <dd><a name="index-emacs_002dmode_002dstring"></a>
-<p>This string is displayed immediately before the last line of the primary
+<p>If the <var>show-mode-in-prompt</var> variable is enabled,
+this string is displayed immediately before the last line of the primary
 prompt when emacs editing mode is active.  The value is expanded like a
 key binding, so the standard set of meta- and control prefixes and
 backslash escape sequences is available.
@@ -10248,9 +10249,9 @@ The default value is &lsquo;<samp>off</samp>&rsquo;.
 </dd>
 <dt><code>show-mode-in-prompt</code></dt>
 <dd><a name="index-show_002dmode_002din_002dprompt"></a>
-<p>If set to &lsquo;<samp>on</samp>&rsquo;, add a character to the beginning of the prompt
+<p>If set to &lsquo;<samp>on</samp>&rsquo;, add a string to the beginning of the prompt
 indicating the editing mode: emacs, vi command, or vi insertion.
-The mode strings are user-settable.
+The mode strings are user-settable (e.g., <var>emacs-mode-string</var>).
 The default value is &lsquo;<samp>off</samp>&rsquo;.
 </p>
 </dd>
@@ -10271,7 +10272,8 @@ The default value is &lsquo;<samp>off</samp>&rsquo;.
 </dd>
 <dt><code>vi-cmd-mode-string</code></dt>
 <dd><a name="index-vi_002dcmd_002dmode_002dstring"></a>
-<p>This string is displayed immediately before the last line of the primary
+<p>If the <var>show-mode-in-prompt</var> variable is enabled,
+this string is displayed immediately before the last line of the primary
 prompt when vi editing mode is active and in command mode.
 The value is expanded like a
 key binding, so the standard set of meta- and control prefixes and
@@ -10284,7 +10286,8 @@ The default is &lsquo;<samp>(cmd)</samp>&rsquo;.
 </dd>
 <dt><code>vi-ins-mode-string</code></dt>
 <dd><a name="index-vi_002dins_002dmode_002dstring"></a>
-<p>This string is displayed immediately before the last line of the primary
+<p>If the <var>show-mode-in-prompt</var> variable is enabled,
+this string is displayed immediately before the last line of the primary
 prompt when vi editing mode is active and in insertion mode.
 The value is expanded like a
 key binding, so the standard set of meta- and control prefixes and
@@ -10477,8 +10480,9 @@ of tests.  There are four parser directives used.
 <dt><code>$if</code></dt>
 <dd><p>The <code>$if</code> construct allows bindings to be made based on the
 editing mode, the terminal being used, or the application using
-Readline.  The text of the test extends to the end of the line;
-no characters are required to isolate it.
+Readline.  The text of the test, after any comparison operator,
+extends to the end of the line;
+unless otherwise noted, no characters are required to isolate it.
 </p>
 <dl compact="compact">
 <dt><code>mode</code></dt>
@@ -10500,6 +10504,28 @@ allows <code>sun</code> to match both <code>sun</code> and <code>sun-cmd</code>,
 for instance.
 </p>
 </dd>
+<dt><code>version</code></dt>
+<dd><p>The <code>version</code> test may be used to perform comparisons against
+specific Readline versions.
+The <code>version</code> expands to the current Readline version.
+The set of comparison operators includes
+&lsquo;<samp>=</samp>&rsquo; (and &lsquo;<samp>==</samp>&rsquo;), &lsquo;<samp>!=</samp>&rsquo;, &lsquo;<samp>&lt;=</samp>&rsquo;, &lsquo;<samp>&gt;=</samp>&rsquo;, &lsquo;<samp>&lt;</samp>&rsquo;,
+and &lsquo;<samp>&gt;</samp>&rsquo;.
+The version number supplied on the right side of the operator consists
+of a major version number, an optional decimal point, and an optional
+minor version (e.g., &lsquo;<samp>7.1</samp>&rsquo;). If the minor version is omitted, it
+is assumed to be &lsquo;<samp>0</samp>&rsquo;.
+The operator may be separated from the string <code>version</code> and
+from the version number argument by whitespace.
+The following example sets a variable if the Readline version being used
+is 7.0 or newer:
+</p><div class="example">
+<pre class="example">$if version &gt;= 7.0
+set show-mode-in-prompt on
+$endif
+</pre></div>
+
+</dd>
 <dt><code>application</code></dt>
 <dd><p>The <var>application</var> construct is used to include
 application-specific settings.  Each program using the Readline
@@ -10512,6 +10538,24 @@ key sequence that quotes the current or previous word in Bash:
 <pre class="example">$if Bash
 # Quote the current or previous word
 &quot;\C-xq&quot;: &quot;\eb\&quot;\ef\&quot;&quot;
+$endif
+</pre></div>
+
+</dd>
+<dt><code>variable</code></dt>
+<dd><p>The <var>variable</var> construct provides simple equality tests for Readline
+variables and values.
+The permitted comparison operators are &lsquo;<samp>=</samp>&rsquo;, &lsquo;<samp>==</samp>&rsquo;, and &lsquo;<samp>!=</samp>&rsquo;.
+The variable name must be separated from the comparison operator by
+whitespace; the operator may be separated from the value on the right hand
+side by whitespace.
+Both string and boolean variables may be tested. Boolean variables must be
+tested against the values <var>on</var> and <var>off</var>.
+The following example is equivalent to the <code>mode=emacs</code> test described
+above:
+</p><div class="example">
+<pre class="example">$if editing-mode == emacs
+set show-mode-in-prompt on
 $endif
 </pre></div>
 </dd>

@@ -1,8 +1,8 @@
-This is rluserman.info, produced by makeinfo version 6.4 from
+This is rluserman.info, produced by makeinfo version 6.5 from
 rluserman.texi.
 
 This manual describes the end user interface of the GNU Readline Library
-(version 7.0, 7 December 2017), a library which aids in the consistency
+(version 7.0, 28 December 2017), a library which aids in the consistency
 of user interface across discrete programs which provide a command line
 interface.
 
@@ -776,8 +776,9 @@ four parser directives used.
 '$if'
      The '$if' construct allows bindings to be made based on the editing
      mode, the terminal being used, or the application using Readline.
-     The text of the test extends to the end of the line; no characters
-     are required to isolate it.
+     The text of the test, after any comparison operator, extends to the
+     end of the line; unless otherwise noted, no characters are required
+     to isolate it.
 
      'mode'
           The 'mode=' form of the '$if' directive is used to test
@@ -802,7 +803,13 @@ four parser directives used.
           version number supplied on the right side of the operator
           consists of a major version number, an optional decimal point,
           and an optional minor version (e.g., '7.1').  If the minor
-          version is omitted, it is assumed to be '0'.
+          version is omitted, it is assumed to be '0'.  The operator may
+          be separated from the string 'version' and from the version
+          number argument by whitespace.  The following example sets a
+          variable if the Readline version being used is 7.0 or newer:
+               $if version >= 7.0
+               set show-mode-in-prompt on
+               $endif
 
      'application'
           The APPLICATION construct is used to include
@@ -815,6 +822,20 @@ four parser directives used.
                $if Bash
                # Quote the current or previous word
                "\C-xq": "\eb\"\ef\""
+               $endif
+
+     'variable'
+          The VARIABLE construct provides simple equality tests for
+          Readline variables and values.  The permitted comparison
+          operators are '=', '==', and '!='.  The variable name must be
+          separated from the comparison operator by whitespace; the
+          operator may be separated from the value on the right hand
+          side by whitespace.  Both string and boolean variables may be
+          tested.  Boolean variables must be tested against the values
+          ON and OFF.  The following example is equivalent to the
+          'mode=emacs' test described above:
+               $if editing-mode == emacs
+               set show-mode-in-prompt on
                $endif
 
 '$endif'
@@ -1943,29 +1964,29 @@ their use in free software.
 
 
 Tag Table:
-Node: Top907
-Node: Command Line Editing1429
-Node: Introduction and Notation2083
-Node: Readline Interaction3708
-Node: Readline Bare Essentials4901
-Node: Readline Movement Commands6686
-Node: Readline Killing Commands7648
-Node: Readline Arguments9568
-Node: Searching10614
-Node: Readline Init File12768
-Node: Readline Init File Syntax13923
-Node: Conditional Init Constructs34015
-Node: Sample Init File37104
-Node: Bindable Readline Commands40223
-Node: Commands For Moving41279
-Node: Commands For History42847
-Node: Commands For Text47113
-Node: Commands For Killing50557
-Node: Numeric Arguments52725
-Node: Commands For Completion53866
-Node: Keyboard Macros55836
-Node: Miscellaneous Commands56525
-Node: Readline vi Mode60448
-Node: GNU Free Documentation License61362
+Node: Top908
+Node: Command Line Editing1430
+Node: Introduction and Notation2084
+Node: Readline Interaction3709
+Node: Readline Bare Essentials4902
+Node: Readline Movement Commands6687
+Node: Readline Killing Commands7649
+Node: Readline Arguments9569
+Node: Searching10615
+Node: Readline Init File12769
+Node: Readline Init File Syntax13924
+Node: Conditional Init Constructs34016
+Node: Sample Init File38214
+Node: Bindable Readline Commands41333
+Node: Commands For Moving42389
+Node: Commands For History43957
+Node: Commands For Text48223
+Node: Commands For Killing51667
+Node: Numeric Arguments53835
+Node: Commands For Completion54976
+Node: Keyboard Macros56946
+Node: Miscellaneous Commands57635
+Node: Readline vi Mode61558
+Node: GNU Free Documentation License62472
 
 End Tag Table

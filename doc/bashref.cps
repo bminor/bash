@@ -99,7 +99,7 @@
 \entry {POSIX Mode}{98}
 \entry {process group}{3}
 \entry {process group ID}{3}
-\entry {process substitution}{31}
+\entry {process substitution}{30}
 \entry {programmable completion}{131}
 \entry {prompting}{96}
 \initial {Q}

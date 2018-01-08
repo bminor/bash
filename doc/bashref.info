@@ -1,10 +1,10 @@
-This is bashref.info, produced by makeinfo version 6.4 from
+This is bashref.info, produced by makeinfo version 6.5 from
 bashref.texi.
 
 This text is a brief description of the features that are present in the
-Bash shell (version 4.4, 7 October 2017).
+Bash shell (version 4.4, 19 December 2017).
 
-   This is Edition 4.4, last updated 7 October 2017, of 'The GNU Bash
+   This is Edition 4.4, last updated 19 December 2017, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 4.4.
 
    Copyright (C) 1988-2017 Free Software Foundation, Inc.
@@ -27,10 +27,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in the
-Bash shell (version 4.4, 7 October 2017).  The Bash home page is
+Bash shell (version 4.4, 19 December 2017).  The Bash home page is
 <http://www.gnu.org/software/bash/>.
 
-   This is Edition 4.4, last updated 7 October 2017, of 'The GNU Bash
+   This is Edition 4.4, last updated 19 December 2017, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 4.4.
 
    Bash contains features that appear in other popular shells, and some
@@ -1274,10 +1274,7 @@ the 'declare' ('typeset') builtin command (*note Bash Builtins::).  The
 (and optionally the source file and line number, if the 'extdebug' shell
 option is enabled).  Functions may be exported so that subshells
 automatically have them defined with the '-f' option to the 'export'
-builtin (*note Bourne Shell Builtins::).  Note that shell functions and
-variables with the same name may result in multiple identically-named
-entries in the environment passed to the shell's children.  Care should
-be taken in cases where this may cause a problem.
+builtin (*note Bourne Shell Builtins::).
 
    Functions may be recursive.  The 'FUNCNEST' variable may be used to
 limit the depth of the function call stack and restrict the number of
@@ -1548,10 +1545,7 @@ each term.  The default increment is 1 or -1 as appropriate.
    Brace expansion is performed before any other expansions, and any
 characters special to other expansions are preserved in the result.  It
 is strictly textual.  Bash does not apply any syntactic interpretation
-to the context of the expansion or the text between the braces.  To
-avoid conflicts with parameter expansion, the string '${' is not
-considered eligible for brace expansion, and inhibits brace expansion
-until the closing '}'..
+to the context of the expansion or the text between the braces.
 
    A correctly-formed brace expansion must contain unquoted opening and
 closing braces, and at least one unquoted comma or a valid sequence
@@ -1560,7 +1554,7 @@ expression.  Any incorrectly formed brace expansion is left unchanged.
    A { or ',' may be quoted with a backslash to prevent its being
 considered part of a brace expression.  To avoid conflicts with
 parameter expansion, the string '${' is not considered eligible for
-brace expansion.
+brace expansion, and inhibits brace expansion until the closing '}'..
 
    This construct is typically used as shorthand when the common prefix
 of the strings to be generated is longer than in the above example:
@@ -1660,12 +1654,14 @@ PARAMETER is not a NAMEREF, it introduces a level of variable
 indirection.  Bash uses the value of the variable formed from the rest
 of PARAMETER as the name of the variable; this variable is then expanded
 and that value is used in the rest of the substitution, rather than the
-value of PARAMETER itself.  This is known as 'indirect expansion'.  If
-PARAMETER is a nameref, this expands to the name of the variable
-referenced by PARAMETER instead of performing the complete indirect
-expansion.  The exceptions to this are the expansions of ${!PREFIX*} and
-${!NAME[@]} described below.  The exclamation point must immediately
-follow the left brace in order to introduce indirection.
+value of PARAMETER itself.  This is known as 'indirect expansion'.  The
+value is subject to tilde expansion, parameter expansion, command
+substitution, and arithmetic expansion.  If PARAMETER is a nameref, this
+expands to the name of the variable referenced by PARAMETER instead of
+performing the complete indirect expansion.  The exceptions to this are
+the expansions of ${!PREFIX*} and ${!NAME[@]} described below.  The
+exclamation point must immediately follow the left brace in order to
+introduce indirection.
 
    In each of the cases below, WORD is subject to tilde expansion,
 parameter expansion, command substitution, and arithmetic expansion.
@@ -3098,7 +3094,7 @@ standard.
      status of the last command executed in the function.  If 'return'
      is executed by a trap handler, the last command used to determine
      the status is the last command executed before the trap handler.
-     if 'return' is executed during a 'DEBUG' trap, the last command
+     If 'return' is executed during a 'DEBUG' trap, the last command
      used to determine the status is the last command executed by the
      trap handler before 'return' was invoked.  'return' may also be
      used to terminate execution of a script being executed with the '.'
@@ -4305,9 +4301,10 @@ This builtin allows you to change additional shell optional behavior.
      option is used, those available with the '-o' option to the 'set'
      builtin command (*note The Set Builtin::).  With no options, or
      with the '-p' option, a list of all settable options is displayed,
-     with an indication of whether or not each is set.  The '-p' option
-     causes output to be displayed in a form that may be reused as
-     input.  Other options have the following meanings:
+     with an indication of whether or not each is set; if OPTNAMES are
+     supplied, the output is restricted to those options.  The '-p'
+     option causes output to be displayed in a form that may be reused
+     as input.  Other options have the following meanings:
 
      '-s'
           Enable (set) each OPTNAME.
@@ -6233,11 +6230,15 @@ quotes.
    The 'unset' builtin is used to destroy arrays.  'unset
 NAME[SUBSCRIPT]' destroys the array element at index SUBSCRIPT.
 Negative subscripts to indexed arrays are interpreted as described
-above.  Care must be taken to avoid unwanted side effects caused by
-filename expansion.  Unsetting the last element of an array variable
-does not unset the variable.  'unset NAME', where NAME is an array,
-removes the entire array.  A subscript of '*' or '@' also removes the
-entire array.
+above.  Unsetting the last element of an array variable does not unset
+the variable.  'unset NAME', where NAME is an array, removes the entire
+array.  A subscript of '*' or '@' also removes the entire array.
+
+   When using a variable name with a subscript as an argument to a
+command, such as with 'unset', without using the word expansion syntax
+described above, the argument is subject to the shell's filename
+expansion.  If filename expansion is not desired, the argument should be
+quoted.
 
    The 'declare', 'local', and 'readonly' builtins each accept a '-a'
 option to specify an indexed array and a '-A' option to specify an
@@ -7393,14 +7394,14 @@ Variable Settings
           This variable can be set to either 'emacs' or 'vi'.
 
      'emacs-mode-string'
-          This string is displayed immediately before the last line of
-          the primary prompt when emacs editing mode is active.  The
-          value is expanded like a key binding, so the standard set of
-          meta- and control prefixes and backslash escape sequences is
-          available.  Use the '\1' and '\2' escapes to begin and end
-          sequences of non-printing characters, which can be used to
-          embed a terminal control sequence into the mode string.  The
-          default is '@'.
+          If the SHOW-MODE-IN-PROMPT variable is enabled, this string is
+          displayed immediately before the last line of the primary
+          prompt when emacs editing mode is active.  The value is
+          expanded like a key binding, so the standard set of meta- and
+          control prefixes and backslash escape sequences is available.
+          Use the '\1' and '\2' escapes to begin and end sequences of
+          non-printing characters, which can be used to embed a terminal
+          control sequence into the mode string.  The default is '@'.
 
      'enable-bracketed-paste'
           When set to 'On', Readline will configure the terminal in a
@@ -7552,10 +7553,10 @@ Variable Settings
           default value is 'off'.
 
      'show-mode-in-prompt'
-          If set to 'on', add a character to the beginning of the prompt
+          If set to 'on', add a string to the beginning of the prompt
           indicating the editing mode: emacs, vi command, or vi
-          insertion.  The mode strings are user-settable.  The default
-          value is 'off'.
+          insertion.  The mode strings are user-settable (e.g.,
+          EMACS-MODE-STRING).  The default value is 'off'.
 
      'skip-completed-text'
           If set to 'on', this alters the default completion behavior
@@ -7571,24 +7572,26 @@ Variable Settings
           'off'.
 
      'vi-cmd-mode-string'
-          This string is displayed immediately before the last line of
-          the primary prompt when vi editing mode is active and in
-          command mode.  The value is expanded like a key binding, so
-          the standard set of meta- and control prefixes and backslash
-          escape sequences is available.  Use the '\1' and '\2' escapes
-          to begin and end sequences of non-printing characters, which
-          can be used to embed a terminal control sequence into the mode
-          string.  The default is '(cmd)'.
+          If the SHOW-MODE-IN-PROMPT variable is enabled, this string is
+          displayed immediately before the last line of the primary
+          prompt when vi editing mode is active and in command mode.
+          The value is expanded like a key binding, so the standard set
+          of meta- and control prefixes and backslash escape sequences
+          is available.  Use the '\1' and '\2' escapes to begin and end
+          sequences of non-printing characters, which can be used to
+          embed a terminal control sequence into the mode string.  The
+          default is '(cmd)'.
 
      'vi-ins-mode-string'
-          This string is displayed immediately before the last line of
-          the primary prompt when vi editing mode is active and in
-          insertion mode.  The value is expanded like a key binding, so
-          the standard set of meta- and control prefixes and backslash
-          escape sequences is available.  Use the '\1' and '\2' escapes
-          to begin and end sequences of non-printing characters, which
-          can be used to embed a terminal control sequence into the mode
-          string.  The default is '(ins)'.
+          If the SHOW-MODE-IN-PROMPT variable is enabled, this string is
+          displayed immediately before the last line of the primary
+          prompt when vi editing mode is active and in insertion mode.
+          The value is expanded like a key binding, so the standard set
+          of meta- and control prefixes and backslash escape sequences
+          is available.  Use the '\1' and '\2' escapes to begin and end
+          sequences of non-printing characters, which can be used to
+          embed a terminal control sequence into the mode string.  The
+          default is '(ins)'.
 
      'visible-stats'
           If set to 'on', a character denoting a file's type is appended
@@ -7715,8 +7718,9 @@ four parser directives used.
 '$if'
      The '$if' construct allows bindings to be made based on the editing
      mode, the terminal being used, or the application using Readline.
-     The text of the test extends to the end of the line; no characters
-     are required to isolate it.
+     The text of the test, after any comparison operator, extends to the
+     end of the line; unless otherwise noted, no characters are required
+     to isolate it.
 
      'mode'
           The 'mode=' form of the '$if' directive is used to test
@@ -7733,6 +7737,22 @@ four parser directives used.
           the portion of the terminal name before the first '-'.  This
           allows 'sun' to match both 'sun' and 'sun-cmd', for instance.
 
+     'version'
+          The 'version' test may be used to perform comparisons against
+          specific Readline versions.  The 'version' expands to the
+          current Readline version.  The set of comparison operators
+          includes '=' (and '=='), '!=', '<=', '>=', '<', and '>'.  The
+          version number supplied on the right side of the operator
+          consists of a major version number, an optional decimal point,
+          and an optional minor version (e.g., '7.1').  If the minor
+          version is omitted, it is assumed to be '0'.  The operator may
+          be separated from the string 'version' and from the version
+          number argument by whitespace.  The following example sets a
+          variable if the Readline version being used is 7.0 or newer:
+               $if version >= 7.0
+               set show-mode-in-prompt on
+               $endif
+
      'application'
           The APPLICATION construct is used to include
           application-specific settings.  Each program using the
@@ -7744,6 +7764,20 @@ four parser directives used.
                $if Bash
                # Quote the current or previous word
                "\C-xq": "\eb\"\ef\""
+               $endif
+
+     'variable'
+          The VARIABLE construct provides simple equality tests for
+          Readline variables and values.  The permitted comparison
+          operators are '=', '==', and '!='.  The variable name must be
+          separated from the comparison operator by whitespace; the
+          operator may be separated from the value on the right hand
+          side by whitespace.  Both string and boolean variables may be
+          tested.  Boolean variables must be tested against the values
+          ON and OFF.  The following example is equivalent to the
+          'mode=emacs' test described above:
+               $if editing-mode == emacs
+               set show-mode-in-prompt on
                $endif
 
 '$endif'
@@ -11139,9 +11173,9 @@ D.3 Parameter and Variable Index
 * vi-cmd-mode-string:                    Readline Init File Syntax.
                                                               (line 310)
 * vi-ins-mode-string:                    Readline Init File Syntax.
-                                                              (line 320)
+                                                              (line 321)
 * visible-stats:                         Readline Init File Syntax.
-                                                              (line 330)
+                                                              (line 332)
 
 
 File: bashref.info,  Node: Function Index,  Next: Concept Index,  Prev: Variable Index,  Up: Indexes
@@ -11504,134 +11538,134 @@ D.5 Concept Index
 
 
 Tag Table:
-Node: Top893
-Node: Introduction2809
-Node: What is Bash?3025
-Node: What is a shell?4139
-Node: Definitions6677
-Node: Basic Shell Features9628
-Node: Shell Syntax10847
-Node: Shell Operation11873
-Node: Quoting13166
-Node: Escape Character14466
-Node: Single Quotes14951
-Node: Double Quotes15299
-Node: ANSI-C Quoting16577
-Node: Locale Translation17836
-Node: Comments18732
-Node: Shell Commands19350
-Node: Simple Commands20222
-Node: Pipelines20853
-Node: Lists23785
-Node: Compound Commands25524
-Node: Looping Constructs26536
-Node: Conditional Constructs29031
-Node: Command Grouping40086
-Node: Coprocesses41565
-Node: GNU Parallel43397
-Node: Shell Functions47371
-Node: Shell Parameters54570
-Node: Positional Parameters58983
-Node: Special Parameters59883
-Node: Shell Expansions63220
-Node: Brace Expansion65343
-Node: Tilde Expansion68177
-Node: Shell Parameter Expansion70525
-Node: Command Substitution84702
-Node: Arithmetic Expansion86057
-Node: Process Substitution86989
-Node: Word Splitting88109
-Node: Filename Expansion90053
-Node: Pattern Matching92427
-Node: Quote Removal96413
-Node: Redirections96708
-Node: Executing Commands106266
-Node: Simple Command Expansion106936
-Node: Command Search and Execution108866
-Node: Command Execution Environment111242
-Node: Environment114226
-Node: Exit Status115885
-Node: Signals117555
-Node: Shell Scripts119522
-Node: Shell Builtin Commands122037
-Node: Bourne Shell Builtins124075
-Node: Bash Builtins144730
-Node: Modifying Shell Behavior173639
-Node: The Set Builtin173984
-Node: The Shopt Builtin184397
-Node: Special Builtins200732
-Node: Shell Variables201711
-Node: Bourne Shell Variables202148
-Node: Bash Variables204252
-Node: Bash Features234045
-Node: Invoking Bash234944
-Node: Bash Startup Files240930
-Node: Interactive Shells246033
-Node: What is an Interactive Shell?246443
-Node: Is this Shell Interactive?247092
-Node: Interactive Shell Behavior247907
-Node: Bash Conditional Expressions251395
-Node: Shell Arithmetic255761
-Node: Aliases258578
-Node: Arrays261126
-Node: The Directory Stack266288
-Node: Directory Stack Builtins267072
-Node: Controlling the Prompt270040
-Node: The Restricted Shell272802
-Node: Bash POSIX Mode274627
-Node: Job Control284978
-Node: Job Control Basics285438
-Node: Job Control Builtins290406
-Node: Job Control Variables295133
-Node: Command Line Editing296289
-Node: Introduction and Notation297960
-Node: Readline Interaction299583
-Node: Readline Bare Essentials300774
-Node: Readline Movement Commands302557
-Node: Readline Killing Commands303517
-Node: Readline Arguments305435
-Node: Searching306479
-Node: Readline Init File308665
-Node: Readline Init File Syntax309812
-Node: Conditional Init Constructs329999
-Node: Sample Init File332524
-Node: Bindable Readline Commands335641
-Node: Commands For Moving336845
-Node: Commands For History338694
-Node: Commands For Text342989
-Node: Commands For Killing346378
-Node: Numeric Arguments348859
-Node: Commands For Completion349998
-Node: Keyboard Macros354189
-Node: Miscellaneous Commands354876
-Node: Readline vi Mode360829
-Node: Programmable Completion361736
-Node: Programmable Completion Builtins369197
-Node: A Programmable Completion Example379083
-Node: Using History Interactively384334
-Node: Bash History Facilities385018
-Node: Bash History Builtins388019
-Node: History Interaction392311
-Node: Event Designators395373
-Node: Word Designators396592
-Node: Modifiers398229
-Node: Installing Bash399631
-Node: Basic Installation400768
-Node: Compilers and Options403459
-Node: Compiling For Multiple Architectures404200
-Node: Installation Names405863
-Node: Specifying the System Type406681
-Node: Sharing Defaults407397
-Node: Operation Controls408070
-Node: Optional Features409028
-Node: Reporting Bugs419554
-Node: Major Differences From The Bourne Shell420748
-Node: GNU Free Documentation License437600
-Node: Indexes462777
-Node: Builtin Index463231
-Node: Reserved Word Index470058
-Node: Variable Index472506
-Node: Function Index488184
-Node: Concept Index501487
+Node: Top897
+Node: Introduction2817
+Node: What is Bash?3033
+Node: What is a shell?4147
+Node: Definitions6685
+Node: Basic Shell Features9636
+Node: Shell Syntax10855
+Node: Shell Operation11881
+Node: Quoting13174
+Node: Escape Character14474
+Node: Single Quotes14959
+Node: Double Quotes15307
+Node: ANSI-C Quoting16585
+Node: Locale Translation17844
+Node: Comments18740
+Node: Shell Commands19358
+Node: Simple Commands20230
+Node: Pipelines20861
+Node: Lists23793
+Node: Compound Commands25532
+Node: Looping Constructs26544
+Node: Conditional Constructs29039
+Node: Command Grouping40094
+Node: Coprocesses41573
+Node: GNU Parallel43405
+Node: Shell Functions47379
+Node: Shell Parameters54355
+Node: Positional Parameters58768
+Node: Special Parameters59668
+Node: Shell Expansions63005
+Node: Brace Expansion65128
+Node: Tilde Expansion67852
+Node: Shell Parameter Expansion70200
+Node: Command Substitution84488
+Node: Arithmetic Expansion85843
+Node: Process Substitution86775
+Node: Word Splitting87895
+Node: Filename Expansion89839
+Node: Pattern Matching92213
+Node: Quote Removal96199
+Node: Redirections96494
+Node: Executing Commands106052
+Node: Simple Command Expansion106722
+Node: Command Search and Execution108652
+Node: Command Execution Environment111028
+Node: Environment114012
+Node: Exit Status115671
+Node: Signals117341
+Node: Shell Scripts119308
+Node: Shell Builtin Commands121823
+Node: Bourne Shell Builtins123861
+Node: Bash Builtins144516
+Node: Modifying Shell Behavior173425
+Node: The Set Builtin173770
+Node: The Shopt Builtin184183
+Node: Special Builtins200592
+Node: Shell Variables201571
+Node: Bourne Shell Variables202008
+Node: Bash Variables204112
+Node: Bash Features233905
+Node: Invoking Bash234804
+Node: Bash Startup Files240790
+Node: Interactive Shells245893
+Node: What is an Interactive Shell?246303
+Node: Is this Shell Interactive?246952
+Node: Interactive Shell Behavior247767
+Node: Bash Conditional Expressions251255
+Node: Shell Arithmetic255621
+Node: Aliases258438
+Node: Arrays260986
+Node: The Directory Stack266352
+Node: Directory Stack Builtins267136
+Node: Controlling the Prompt270104
+Node: The Restricted Shell272866
+Node: Bash POSIX Mode274691
+Node: Job Control285042
+Node: Job Control Basics285502
+Node: Job Control Builtins290470
+Node: Job Control Variables295197
+Node: Command Line Editing296353
+Node: Introduction and Notation298024
+Node: Readline Interaction299647
+Node: Readline Bare Essentials300838
+Node: Readline Movement Commands302621
+Node: Readline Killing Commands303581
+Node: Readline Arguments305499
+Node: Searching306543
+Node: Readline Init File308729
+Node: Readline Init File Syntax309876
+Node: Conditional Init Constructs330247
+Node: Sample Init File334443
+Node: Bindable Readline Commands337560
+Node: Commands For Moving338764
+Node: Commands For History340613
+Node: Commands For Text344908
+Node: Commands For Killing348297
+Node: Numeric Arguments350778
+Node: Commands For Completion351917
+Node: Keyboard Macros356108
+Node: Miscellaneous Commands356795
+Node: Readline vi Mode362748
+Node: Programmable Completion363655
+Node: Programmable Completion Builtins371116
+Node: A Programmable Completion Example381002
+Node: Using History Interactively386253
+Node: Bash History Facilities386937
+Node: Bash History Builtins389938
+Node: History Interaction394230
+Node: Event Designators397292
+Node: Word Designators398511
+Node: Modifiers400148
+Node: Installing Bash401550
+Node: Basic Installation402687
+Node: Compilers and Options405378
+Node: Compiling For Multiple Architectures406119
+Node: Installation Names407782
+Node: Specifying the System Type408600
+Node: Sharing Defaults409316
+Node: Operation Controls409989
+Node: Optional Features410947
+Node: Reporting Bugs421473
+Node: Major Differences From The Bourne Shell422667
+Node: GNU Free Documentation License439519
+Node: Indexes464696
+Node: Builtin Index465150
+Node: Reserved Word Index471977
+Node: Variable Index474425
+Node: Function Index490103
+Node: Concept Index503406
 
 End Tag Table

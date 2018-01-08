@@ -221,5 +221,9 @@ ${THIS_SH} ./varenv7.sub
 # redirections
 ${THIS_SH} ./varenv8.sub
 
+# make sure that builtins like readonly and export modify local array variables
+# if executed in shell functions, like they modify local scalar variables
+${THIS_SH} ./varenv9.sub
+
 # make sure variable scoping is done right
 tt() { typeset a=b;echo a=$a; };a=z;echo a=$a;tt;echo a=$a

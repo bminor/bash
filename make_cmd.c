@@ -1,7 +1,7 @@
 /* make_cmd.c -- Functions for making instances of the various
    parser constructs. */
 
-/* Copyright (C) 1989-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -793,7 +793,7 @@ make_function_def (name, command, lineno, lstart)
     temp->source_file = shell_initialized ? "main" : "environment";
 
 #if defined (DEBUGGER)
-  bind_function_def (name->word, temp);
+  bind_function_def (name->word, temp, 0);
 #endif
 
   temp->source_file = temp->source_file ? savestring (temp->source_file) : 0;

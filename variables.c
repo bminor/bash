@@ -1,6 +1,6 @@
 /* variables.c -- Functions for hacking shell variables. */
 
-/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2018 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -3302,22 +3302,27 @@ bind_function (name, value)
 
 #if defined (DEBUGGER)
 /* Bind a function definition, which includes source file and line number
-   information in addition to the command, into the FUNCTION_DEF hash table.*/
+   information in addition to the command, into the FUNCTION_DEF hash table.
+   If (FLAGS & 1), overwrite any existing definition. If FLAGS == 0, leave
+   any existing definition alone. */
 void
-bind_function_def (name, value)
+bind_function_def (name, value, flags)
      const char *name;
      FUNCTION_DEF *value;
+     int flags;
 {
   FUNCTION_DEF *entry;
   BUCKET_CONTENTS *elt;
   COMMAND *cmd;
 
   entry = find_function_def (name);
-  if (entry)
+  if (entry && (flags & 1))
     {
       dispose_function_def_contents (entry);
       entry = copy_function_def_contents (value, entry);
     }
+  else if (entry)
+    return;
   else
     {
       cmd = value->command;

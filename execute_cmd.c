@@ -1,6 +1,6 @@
 /* execute_cmd.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2018 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -5778,7 +5778,7 @@ execute_intern_function (name, funcdef)
     }
 
 #if defined (DEBUGGER)
-  bind_function_def (name->word, funcdef);
+  bind_function_def (name->word, funcdef, 1);
 #endif
 
   bind_function (name->word, funcdef->command);

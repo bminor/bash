@@ -1,6 +1,6 @@
 /* variables.h -- data structures for shell variables. */
 
-/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2018 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -283,7 +283,7 @@ extern SHELL_VAR *bind_variable __P((const char *, char *, int));
 extern SHELL_VAR *bind_global_variable __P((const char *, char *, int));
 extern SHELL_VAR *bind_function __P((const char *, COMMAND *));
 
-extern void bind_function_def __P((const char *, FUNCTION_DEF *));
+extern void bind_function_def __P((const char *, FUNCTION_DEF *, int));
 
 extern SHELL_VAR **map_over __P((sh_var_map_func_t *, VAR_CONTEXT *));
 SHELL_VAR **map_over_funcs __P((sh_var_map_func_t *));
