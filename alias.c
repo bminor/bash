@@ -158,6 +158,10 @@ free_alias_data (data)
   register alias_t *a;
 
   a = (alias_t *)data;
+
+  if (a->flags & AL_BEINGEXPANDED)
+    clear_string_list_expander (a);	/* call back to the parser */
+
   free (a->value);
   free (a->name);
   free (data);

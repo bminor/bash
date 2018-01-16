@@ -14800,3 +14800,51 @@ subst.c
 	  'G' to the options list if W_CHKLOCAL is set in the word's flags.
 	  This makes builtins like `readonly' that modify local variables in
 	  a function behave the same for scalar and array variables
+
+				   1/11
+				   ----
+parse.y
+	- shell_getc: move code that decides whether to append a space to an
+	  alias expansion here from mk_alexpansion, so we can inhibit adding
+	  a space if we're currently parsing a single or double quoted string
+
+				   1/12
+				   ----
+
+parse.y
+	- clear_string_list_expander: take a pointer to an alias that's about
+	  to be freed and make sure there aren't any pointers to it in the
+	  list of pushed strings. If there are, zero it out in the pushed
+	  string list to avoid referencing freed memory in pop_string()
+
+alias.c
+	- free_alias_data: if an alias being freed is currently being expanded,
+	  call clear_string_list_expander to remove references to it from the
+	  list of pushed strings
+
+				   1/14
+				   ----
+pcomplib.c
+	- progcomp_search: add code to look up an alias for the CMD argument
+	  and return the completions for the first word of that alias if one
+	  is found. Just a start at completing aliases, a much-requested
+	  feature
+
+pcomplete.h
+	- COPT_LASTUSER: last flag value used by user-settable completion
+	  options
+	- PCOMP_RETRYFAIL, PCOMP_NOTFOUND: new #defines, possible return values
+	  from programmable_completions in FOUNDP argument. Moved RETRYFAIL
+	  define here from pcomplete.c to avoid collisions with user-settable
+	  option values (COPT_*)
+
+				   1/15
+				   ----
+pcomplete.c
+	- programmable_completions: if we don't find any completions for a
+	  command, and RETRY is 0, see if the command is a defined alias,
+	  expand it, and try to expand the first word of the value as a
+	  command, and find any programmable completions for it. Here right
+	  now, could be moved to attempt_shell_completion later if we need
+	  to do more analysis of the expanded line. We'll see how it works
+	  in practice.

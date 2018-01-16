@@ -95,6 +95,8 @@ typedef void *alias_t;
 #define RE_READ_TOKEN	-99
 #define NO_EXPANSION	-100
 
+#define END_ALIAS	-2
+
 #ifdef DEBUG
 #  define YYDEBUG 1
 #else
@@ -1967,6 +1969,23 @@ parser_restore_alias ()
 #endif
 }
 
+#if defined (ALIAS)
+/* Before freeing AP, make sure that there aren't any cases of pointer
+   aliasing that could cause us to reference freed memory later on. */
+void
+clear_string_list_expander (ap)
+     alias_t *ap;
+{
+  register STRING_SAVER *t;
+
+  for (t = pushed_string_list; t; t = t->next)
+    {
+      if (t->expander && t->expander == ap)
+	t->expander = 0;
+    }
+}
+#endif
+
 void
 clear_shell_input_line ()
 {
@@ -2500,6 +2519,30 @@ next_alias_char:
      parsing an alias, we have just saved one (push_string, when called by
      the parse_dparen code) In this case, just go on as well.  The PSH_SOURCE
      case is handled below. */
+
+  /* If we're at the end of an alias expansion add a space to make sure that
+     the alias remains marked as being in use while we expand its last word.
+     This makes sure that pop_string doesn't mark the alias as not in use
+     before the string resulting from the alias expansion is tokenized and
+     checked for alias expansion, preventing recursion.  At this point, the
+     last character in shell_input_line is the last character of the alias
+     expansion.  We test that last character to determine whether or not to
+     return the space that will delimit the token and postpone the pop_string.
+     This set of conditions duplicates what used to be in mk_alexpansion ()
+     below, with the addition that we don't add a space if we're currently
+     reading a quoted string. */
+#ifndef OLD_ALIAS_HACK
+  if (uc == 0 && pushed_string_list && pushed_string_list->flags != PSH_SOURCE &&
+      shell_input_line_index > 0 &&
+      shell_input_line[shell_input_line_index-1] != ' ' &&
+      shell_input_line[shell_input_line_index-1] != '\n' &&
+      shellmeta (shell_input_line[shell_input_line_index-1]) == 0 &&
+      (current_delimiter (dstack) != '\'' && current_delimiter (dstack) != '"'))
+    {
+      return ' ';	/* END_ALIAS */
+    }
+#endif
+
 pop_alias:
   if (uc == 0 && pushed_string_list && pushed_string_list->flags != PSH_SOURCE)
     {
@@ -2518,10 +2561,9 @@ pop_alias:
 	/* What do we do here if we're expanding an alias whose definition
 	   includes an escaped newline?  If that's the last character in the
 	   alias expansion, we just pop the pushed string list (recall that
-	   we inhibit the appending of a space in mk_alexpansion() if newline
-	   is the last character).  If it's not the last character, we need
-	   to consume the quoted newline and move to the next character in
-	   the expansion. */
+	   we inhibit the appending of a space if newline is the last
+	   character).  If it's not the last character, we need to consume the
+	   quoted newline and move to the next character in the expansion. */
 #if defined (ALIAS)
 	if (expanding_alias () && shell_input_line[shell_input_line_index+1] == '\0')
 	  {
@@ -2829,13 +2871,15 @@ mk_alexpansion (s)
   l = strlen (s);
   r = xmalloc (l + 2);
   strcpy (r, s);
+#ifdef OLD_ALIAS_HACK
   /* If the last character in the alias is a newline, don't add a trailing
      space to the expansion.  Works with shell_getc above. */
   /* Need to do something about the case where the alias expansion contains
      an unmatched quoted string, since appending this space affects the
      subsequent output. */
-  if (r[l - 1] != ' ' && r[l - 1] != '\n' && shellmeta(r[l - 1]) == 0)
+  if (l > 0 && r[l - 1] != ' ' && r[l - 1] != '\n' && shellmeta(r[l - 1]) == 0)
     r[l++] = ' ';
+#endif
   r[l] = '\0';
   return r;
 }
@@ -2856,12 +2900,14 @@ alias_expand_token (tokstr)
       if (ap && (ap->flags & AL_BEINGEXPANDED))
 	return (NO_EXPANSION);
 
+#ifdef OLD_ALIAS_HACK
       /* mk_alexpansion puts an extra space on the end of the alias expansion,
 	 so the lookahead by the parser works right (the alias needs to remain
 	 `in use' while parsing its last word to avoid alias recursion for
 	 something like "alias echo=echo").  If this gets changed, make sure
 	 the code in shell_getc that deals with reaching the end of an
 	 expanded alias is changed with it. */
+#endif
       expanded = ap ? mk_alexpansion (ap->value) : (char *)NULL;
 
       if (expanded)

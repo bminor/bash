@@ -681,6 +681,8 @@ compgen_builtin (list)
   COMPSPEC *cs;
   STRINGLIST *sl;
   char *word, **matches;
+  char *old_line;
+  int old_ind;
 
   if (list == 0)
     return (EXECUTION_SUCCESS);
@@ -721,7 +723,15 @@ compgen_builtin (list)
   cs->filterpat = STRDUP (Xarg);
 
   rval = EXECUTION_FAILURE;
+
+  /* probably don't have to save these, just being safe */
+  old_line = pcomp_line;
+  old_ind = pcomp_ind;
+  pcomp_line = (char *)NULL;
+  pcomp_ind = 0;
   sl = gen_compspec_completions (cs, "compgen", word, 0, 0, 0);
+  pcomp_line = old_line;
+  pcomp_ind = old_ind;
 
   /* If the compspec wants the bash default completions, temporarily
      turn off programmable completion and call the bash completion code. */

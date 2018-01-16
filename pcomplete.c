@@ -1,6 +1,6 @@
 /* pcomplete.c - functions to generate lists of matches for programmable completion. */
 
-/* Copyright (C) 1999-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2018 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -70,8 +70,6 @@
 #include <readline/rlconf.h>
 #include <readline/readline.h>
 #include <readline/history.h>
-
-#define PCOMP_RETRYFAIL	256
 
 #ifdef STRDUP
 #  undef STRDUP
@@ -153,6 +151,10 @@ static int progcomp_debug = 0;
 
 int prog_completion_enabled = 1;
 
+#ifdef ALIAS
+int progcomp_alias = 0;	/* unavailable to user code for now */
+#endif
+
 /* These are used to manage the arrays of strings for possible completions. */
 ITEMLIST it_aliases = { 0, it_init_aliases, (STRINGLIST *)0 };
 ITEMLIST it_arrayvars  = { LIST_DYNAMIC, it_init_arrayvars, (STRINGLIST *)0 };
@@ -182,6 +184,9 @@ ITEMLIST it_variables = { LIST_DYNAMIC, it_init_variables, (STRINGLIST *)0 };
 COMPSPEC *pcomp_curcs;
 const char *pcomp_curcmd;
 const char *pcomp_curtxt;
+
+char *pcomp_line;
+int pcomp_ind;
 
 #ifdef DEBUG
 /* Debugging code */
@@ -1380,14 +1385,14 @@ gen_compspec_completions (cs, cmd, word, start, end, foundp)
       /* If we have a command or function to execute, we need to first break
 	 the command line into individual words, find the number of words,
 	 and find the word in the list containing the word to be completed. */
-      line = substring (rl_line_buffer, start, end);
+      line = substring (pcomp_line, start, end);
       llen = end - start;
 
 #ifdef DEBUG
       debug_printf ("command_line_to_word_list (%s, %d, %d, %p, %p)",
-		line, llen, rl_point - start, &nw, &cw);
+		line, llen, pcomp_ind - start, &nw, &cw);
 #endif
-      lwords = command_line_to_word_list (line, llen, rl_point - start, &nw, &cw);
+      lwords = command_line_to_word_list (line, llen, pcomp_ind - start, &nw, &cw);
       /* If we skipped a NULL word at the beginning of the line, add it back */
       if (lwords && lwords->word && cmd[0] == 0 && lwords->word->word[0] != 0)
 	{
@@ -1414,7 +1419,7 @@ gen_compspec_completions (cs, cmd, word, start, end, foundp)
   if (cs->funcname)
     {
       foundf = 0;
-      tmatches = gen_shell_function_matches (cs, cmd, word, line, rl_point - start, lwords, nw, cw, &foundf);
+      tmatches = gen_shell_function_matches (cs, cmd, word, line, pcomp_ind - start, lwords, nw, cw, &foundf);
       if (foundf != 0)
 	found = foundf;
       if (tmatches)
@@ -1434,7 +1439,7 @@ gen_compspec_completions (cs, cmd, word, start, end, foundp)
 
   if (cs->command)
     {
-      tmatches = gen_command_matches (cs, cmd, word, line, rl_point - start, lwords, nw, cw);
+      tmatches = gen_command_matches (cs, cmd, word, line, pcomp_ind - start, lwords, nw, cw);
       if (tmatches)
 	{
 #ifdef DEBUG
@@ -1608,7 +1613,8 @@ gen_progcomp_completions (ocmd, cmd, word, start, end, foundp, retryp, lastcs)
 
 /* The driver function for the programmable completion code.  Returns a list
    of matches for WORD, which is an argument to command CMD.  START and END
-   bound the command currently being completed in rl_line_buffer. */
+   bound the command currently being completed in pcomp_line (usually
+   rl_line_buffer). */
 char **
 programmable_completions (cmd, word, start, end, foundp)
      const char *cmd;
@@ -1619,9 +1625,20 @@ programmable_completions (cmd, word, start, end, foundp)
   STRINGLIST *ret;
   char **rmatches, *t;
   int found, retry, count;
+  char *ocmd;
+  int oend;
+#if defined (ALIAS)
+  alias_t *al;
+#endif
 
   lastcs = 0;
   found = count = 0;
+
+  pcomp_line = rl_line_buffer;
+  pcomp_ind = rl_point;
+
+  ocmd = (char *)cmd;
+  oend = end;
 
   do
     {
@@ -1629,16 +1646,74 @@ programmable_completions (cmd, word, start, end, foundp)
 
       /* We look at the basename of CMD if the full command does not have
 	 an associated COMPSPEC. */
-      ret = gen_progcomp_completions (cmd, cmd, word, start, end, &found, &retry, &lastcs);
+      ret = gen_progcomp_completions (ocmd, ocmd, word, start, oend, &found, &retry, &lastcs);
       if (found == 0)
 	{
-	  t = strrchr (cmd, '/');
+	  t = strrchr (ocmd, '/');
 	  if (t && *(++t))
-	    ret = gen_progcomp_completions (t, cmd, word, start, end, &found, &retry, &lastcs);
+	    ret = gen_progcomp_completions (t, ocmd, word, start, oend, &found, &retry, &lastcs);
 	}
 
       if (found == 0)
-	ret = gen_progcomp_completions (DEFAULTCMD, cmd, word, start, end, &found, &retry, &lastcs);
+	ret = gen_progcomp_completions (DEFAULTCMD, ocmd, word, start, oend, &found, &retry, &lastcs);
+
+#if defined (ALIAS)
+      /* Look up any alias for CMD, try to gen completions for it */
+      /* Look up the alias, find the value, build a new line replacing CMD
+	 with that value, offsetting PCOMP_IND and END appropriately, reset
+	 PCOMP_LINE to the new line and OCMD with the new command name, then
+	 call gen_progcomp_completions again. We could use alias_expand for
+	 this, but it does more (and less) than we need right now. */
+      if (found == 0 && retry == 0 && progcomp_alias && (al = find_alias (ocmd)))
+	{
+	  char *ncmd, *nline, *ntxt;
+	  int ind, lendiff;
+	  size_t nlen, olen, llen;
+
+	  /* We found an alias for OCMD. Take the value and build a new line */
+	  ntxt = al->value;
+	  nlen = strlen (ntxt);
+	  if (nlen == 0)
+	    break;
+	  olen = strlen (ocmd);
+	  lendiff = nlen - olen;	/* can be negative */
+	  llen = strlen (pcomp_line);
+
+	  nline = (char *)xmalloc (llen + lendiff + 1);
+	  if (start > 0)
+	    strncpy (nline, pcomp_line, start);
+	  strncpy (nline + start, ntxt, nlen);
+	  strcpy (nline + start + nlen, pcomp_line + start + olen);
+
+	  /* Find the first word of the alias value and use that as OCMD. We
+	     don't check the alias value to see whether it begins with a valid
+	     command name, so this can be fooled. */
+	  ind = skip_to_delim (ntxt, 0, "()<>;&| \t\n", SD_NOJMP|SD_COMPLETE); /*)*/
+	  if (ind > 0)
+	    ncmd = substring (ntxt, 0, ind);
+	  else
+	    {
+	      free (nline);
+	      break;		/* will free pcomp_line and ocmd later */
+	    }
+
+	  /* Adjust PCOMP_IND and OEND appropriately */
+	  pcomp_ind += lendiff;
+	  oend += lendiff;
+
+	  /* Set up values with new line. WORD stays the same. */
+	  if (ocmd != cmd)
+	    free (ocmd);
+	  if (pcomp_line != rl_line_buffer)
+	    free (pcomp_line);
+
+	  ocmd = ncmd;
+	  pcomp_line = nline;
+
+	  /* And go back and start over. */
+	  retry = 1;
+	}
+#endif /* ALIAS */
 
       count++;
 
@@ -1649,6 +1724,11 @@ programmable_completions (cmd, word, start, end, foundp)
 	}
     }
   while (retry);
+
+  if (pcomp_line != rl_line_buffer)
+    free (pcomp_line);
+  if (ocmd != cmd)
+    free (ocmd);
 
   if (ret)
     {
@@ -1663,6 +1743,10 @@ programmable_completions (cmd, word, start, end, foundp)
 
   if (lastcs)	/* XXX - should be while? */
     compspec_dispose (lastcs);
+
+  /* XXX restore pcomp_line and pcomp_ind? */
+  pcomp_line = rl_line_buffer;
+  pcomp_ind = rl_point;
 
   return (rmatches);
 }
