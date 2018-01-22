@@ -1245,6 +1245,7 @@ pipeline_command: pipeline
 			    token_to_read = '\n';
 			  else if ($2 == ';')
 			    token_to_read = ';';
+			  parser_state &= ~PST_REDIRLIST;	/* make_simple_command sets this */
 			}
 	|	BANG list_terminator
 			{
@@ -1265,6 +1266,7 @@ pipeline_command: pipeline
 			    token_to_read = '\n';
 			  if ($2 == ';')
 			    token_to_read = ';';
+			  parser_state &= ~PST_REDIRLIST;	/* make_simple_command sets this */
 			}
 	;
 

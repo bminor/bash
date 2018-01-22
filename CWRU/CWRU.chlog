@@ -14847,4 +14847,22 @@ pcomplete.c
 	  command, and find any programmable completions for it. Here right
 	  now, could be moved to attempt_shell_completion later if we need
 	  to do more analysis of the expanded line. We'll see how it works
-	  in practice.
+	  in practice. (Disabled for now.)
+
+				   1/16
+				   ----
+parse.y
+	- grammar: when timing the null command, make sure to turn off the
+	  flags in parser_state (PST_REDIRLIST) that make_simple_command sets
+	  when given a NULL second argument, since it assumes that it's going
+	  to turn those off when it gets the next word of the simple command
+	  (which it never gets in this case).  Fixes bug reported by
+	  Anti Räis <antirais@gmail.com>
+
+				   1/19
+				   ----
+lib/readline/rltty.c
+	- prepare_terminal_settings (termios/termio): if there is a function
+	  bound to the VDISCARD character in the current keymap, set VDISCARD
+	  to _POSIX_VDISABLE while readline is active. From a report from
+	  Rhialto <rhialto@falu.nl>

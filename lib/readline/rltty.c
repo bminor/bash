@@ -503,6 +503,9 @@ set_tty_settings (int tty, TIOTYPE *tiop)
 static void
 prepare_terminal_settings (int meta_flag, TIOTYPE oldtio, TIOTYPE *tiop)
 {
+  int sc;
+  Keymap kmap;
+
   _rl_echoing_p = (oldtio.c_lflag & ECHO);
 #if defined (ECHOCTL)
   _rl_echoctl = (oldtio.c_lflag & ECHOCTL);
@@ -558,6 +561,20 @@ prepare_terminal_settings (int meta_flag, TIOTYPE oldtio, TIOTYPE *tiop)
 #if defined (VDSUSP)
   tiop->c_cc[VDSUSP] = _POSIX_VDISABLE;
 #endif
+
+  /* Conditionally disable some other tty special characters if there is a
+     key binding for them in the current keymap.  Readline ordinarily doesn't
+     bind these characters, but an application or user might. */
+#if defined (VI_MODE)
+      kmap = (rl_editing_mode == vi_mode) ? vi_insertion_keymap : _rl_keymap;
+#else
+      kmap = _rl_keymap;
+#endif
+#if defined (VDISCARD)
+  sc = tiop->c_cc[VDISCARD];
+  if (sc != _POSIX_VDISABLE && kmap[(unsigned char)sc].type == ISFUNC)
+    tiop->c_cc[VDISCARD] = _POSIX_VDISABLE;
+#endif /* VDISCARD */
 
 #endif /* TERMIOS_TTY_DRIVER && _POSIX_VDISABLE */
 }
