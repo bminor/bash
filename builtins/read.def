@@ -610,7 +610,7 @@ read_builtin (list)
 	}
 
       CHECK_ALRM;
-
+      QUIT;		/* in case we didn't call check_signals() */
 #if defined (READLINE)
 	}
 #endif
