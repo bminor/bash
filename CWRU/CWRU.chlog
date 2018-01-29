@@ -14866,3 +14866,39 @@ lib/readline/rltty.c
 	  bound to the VDISCARD character in the current keymap, set VDISCARD
 	  to _POSIX_VDISABLE while readline is active. From a report from
 	  Rhialto <rhialto@falu.nl>
+
+				   1/22
+				   ----
+builtins/history.def
+	- histtime: check whether or not localtime() returns NULL, and make
+	  sure we only call strftime() with a valid struct tm. This can happen
+	  when the timestamps in the history file overflow a time_t. Fixes bug
+	  reported by Luke Dashjr <luke@dashjr.org>
+
+bashline.c
+	- edit_and_execute_command: if we're in vi editing mode, make sure
+	  we end up in insert mode after executing the commands from the
+	  edited file. This seems to be what other shells do. Report from
+	  Stan Marsh <gazelle@xmission.com>
+
+				   1/26
+				   ----
+bashline.c
+	- command_word_completion_function: match alias and shell function
+	  names case-insensitively if the readline completion-ignore-case
+	  variable is set. Inspired by report from <odnehel@gmail.com>
+
+lib/readline/display.c
+	- update_line: when performing a dumb update after wrapping the line
+	  (usually due to printing the prompt), make sure we adjust
+	  _rl_last_c_pos if there are invisible characters in prompt lines
+	  other than the first (we assume those invisible characters are in
+	  the last line, which is nearly always the case). We adjust by the
+	  total number of invisible chars less the number of invisible chars
+	  in the first prompt line. From a report in
+	  https://bugs.launchpad.net/ubuntu/+source/bash/+bug/1745273
+
+execute_cmd.c
+	- execute_command_internal: if redirections attached to a compound
+	  command fail, make sure we discard the `internal_fifos' unwind-
+	  protect frame after freeing the copied fifo_list and before returning

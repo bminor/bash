@@ -321,10 +321,12 @@ histtime (hlist, histtimefmt)
 {
   static char timestr[128];
   time_t t;
+  struct tm *tm;
 
   t = history_get_time (hlist);
-  if (t)
-    strftime (timestr, sizeof (timestr), histtimefmt, localtime (&t));
+  tm = t ? localtime (&t) : 0;
+  if (t && tm)
+    strftime (timestr, sizeof (timestr), histtimefmt, tm);
   else if (hlist->timestamp && hlist->timestamp[0])
     snprintf (timestr, sizeof (timestr), _("%s: invalid timestamp"),
 	(hlist->timestamp[0] == '#') ? hlist->timestamp + 1: hlist->timestamp);

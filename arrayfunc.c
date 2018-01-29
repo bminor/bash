@@ -902,16 +902,23 @@ valid_array_reference (name, flags)
       *t = '[';
       if (r == 0)
 	return 0;
-      /* Check for a properly-terminated non-blank subscript. */
+      /* Check for a properly-terminated non-null subscript. */
       len = skipsubscript (t, 0, flags);
       if (t[len] != ']' || len == 1)
 	return 0;
       if (t[len+1] != '\0')
 	return 0;
+#if 1
+      /* Could check and allow subscripts consisting only of whitespace for
+	 existing associative arrays. */
       for (r = 1; r < len; r++)
 	if (whitespace (t[r]) == 0)
 	  return 1;
       return 0;
+#else
+      /* This allows blank subscripts */
+      return 1;
+#endif
     }
   return 0;
 }

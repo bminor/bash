@@ -992,6 +992,11 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
   rl_done = 0;
   rl_readline_state = rrs;
 
+#if defined (VI_MODE)
+  if (editing_mode == VI_EDITING_MODE)
+    rl_vi_insertion_mode (1, c);
+#endif
+
   rl_forced_update_display ();
 
   return r;
@@ -1942,7 +1947,9 @@ command_word_completion_function (hint_text, state)
 
 	  alias = alias_list[local_index++]->name;
 
-	  if (STREQN (alias, hint, hint_len))
+	  if (igncase == 0 && (STREQN (alias, hint, hint_len)))
+	    return (savestring (alias));
+	  else if (igncase && strncasecmp (alias, hint, hint_len) == 0)
 	    return (savestring (alias));
 	}
 #endif /* ALIAS */
@@ -1971,7 +1978,10 @@ command_word_completion_function (hint_text, state)
 
 	  varname = varlist[local_index++]->name;
 
-	  if (STREQN (varname, hint, hint_len))
+	  /* Honor completion-ignore-case for shell function names. */
+	  if (igncase == 0 && (STREQN (varname, hint, hint_len)))
+	    return (savestring (varname));
+	  else if (igncase && strncasecmp (varname, hint, hint_len) == 0)
 	    return (savestring (varname));
 	}
       local_index = 0;

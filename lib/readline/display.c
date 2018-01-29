@@ -1168,11 +1168,12 @@ rl_redisplay (void)
 		 wrap_offset. */
 	      if (linenum == 0 && (mb_cur_max > 1 && rl_byte_oriented == 0) && OLD_CPOS_IN_PROMPT())
 		_rl_last_c_pos -= prompt_invis_chars_first_line;	/* XXX - was wrap_offset */
-	      else if (linenum == prompt_last_screen_line && prompt_physical_chars > _rl_screenwidth &&
+	      else if (linenum == prompt_last_screen_line &&
+			prompt_physical_chars > _rl_screenwidth &&
 			(mb_cur_max > 1 && rl_byte_oriented == 0) &&
 			cpos_adjusted == 0 &&
 			_rl_last_c_pos != o_cpos &&
-			_rl_last_c_pos > (prompt_last_invisible - _rl_screenwidth - prompt_invis_chars_first_line))
+			_rl_last_c_pos > (prompt_last_invisible - _rl_screenwidth - prompt_invis_chars_first_line))	/* XXX - rethink this last one */
 		/* This assumes that all the invisible characters are split
 		   between the first and last lines of the prompt, if the 
 		   prompt consumes more than two lines. It's usually right */
@@ -1896,7 +1897,23 @@ dumb_update:
 	    {
 	      _rl_output_some_chars (nfd, temp);
 	      if (mb_cur_max > 1 && rl_byte_oriented == 0)
-		_rl_last_c_pos += _rl_col_width (new, nd, ne - new, 1);
+		{
+		  _rl_last_c_pos += _rl_col_width (new, nd, ne - new, 1);
+		  /* Need to adjust here based on wrap_offset. Guess that if
+		     this is the line containing the last line of the prompt
+		     we need to adjust by
+		     	wrap_offset-prompt_invis_chars_first_line
+		     on the assumption that this is the number of invisible
+		     characters in the last line of the prompt. */
+		  if (wrap_offset > prompt_invis_chars_first_line &&
+		      current_line == prompt_last_screen_line &&
+		      prompt_physical_chars > _rl_screenwidth &&
+		      _rl_horizontal_scroll_mode == 0)
+		    {
+		      _rl_last_c_pos -= wrap_offset - prompt_invis_chars_first_line;
+		      cpos_adjusted = 1;
+		    }
+		}
 	      else
 		_rl_last_c_pos += temp;
 	    }
@@ -1987,7 +2004,7 @@ dumb_update:
 	     cpos_adjusted to let the caller know. */
 	  if (current_line == 0 && displaying_prompt_first_line && wrap_offset && ((nfd - new) <= prompt_last_invisible))
 	    {
-	      _rl_last_c_pos -= wrap_offset;
+	      _rl_last_c_pos -= wrap_offset;	/* XXX - prompt_invis_chars_first_line? */
 	      cpos_adjusted = 1;
 	    }
 	  return;
@@ -2040,7 +2057,7 @@ dumb_update:
 		 and set cpos_adjusted to let the caller know. */
 	      if ((mb_cur_max > 1 && rl_byte_oriented == 0) && current_line == 0 && displaying_prompt_first_line && wrap_offset && ((nfd - new) <= prompt_last_invisible))
 		{
-		  _rl_last_c_pos -= wrap_offset;
+		  _rl_last_c_pos -= wrap_offset;	/* XXX - prompt_invis_chars_first_line? */
 		  cpos_adjusted = 1;
 		}
 	      return;
@@ -2053,7 +2070,7 @@ dumb_update:
 		 and set cpos_adjusted to let the caller know. */
 	      if ((mb_cur_max > 1 && rl_byte_oriented == 0) && current_line == 0 && displaying_prompt_first_line && wrap_offset && ((nfd - new) <= prompt_last_invisible))
 		{
-		  _rl_last_c_pos -= wrap_offset;
+		  _rl_last_c_pos -= wrap_offset;	/* XXX - prompt_invis_chars_first_line? */
 		  cpos_adjusted = 1;
 		}
 	    }
@@ -2123,7 +2140,7 @@ dumb_update:
 			_rl_last_c_pos >= wrap_offset &&	/* XXX was > */
 			((nfd - new) <= prompt_last_invisible))
 		    {
-		      _rl_last_c_pos -= wrap_offset;
+		      _rl_last_c_pos -= wrap_offset;	/* XXX - prompt_invis_chars_first_line? */
 		      cpos_adjusted = 1;
 		    }
 
@@ -2171,7 +2188,7 @@ dumb_update:
 			_rl_last_c_pos > wrap_offset &&
 			((nfd - new) <= prompt_last_invisible))
 		    {
-		      _rl_last_c_pos -= wrap_offset;
+		      _rl_last_c_pos -= wrap_offset;	/* XXX - prompt_invis_chars_first_line? */
 		      cpos_adjusted = 1;
 		    }
 		}

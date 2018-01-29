@@ -764,7 +764,10 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       dispose_exec_redirects ();
 #if defined (PROCESS_SUBSTITUTION)
       if (saved_fifo)
-	free ((void *)ofifo_list);
+	{
+	  free ((void *)ofifo_list);
+          discard_unwind_frame ("internal_fifos");
+	}
 #endif
       return (last_command_exit_value = EXECUTION_FAILURE);
     }

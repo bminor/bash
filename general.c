@@ -380,6 +380,8 @@ assignment (string, flags)
       if (c == '[')
 	{
 	  newi = skipsubscript (string, indx, (flags & 2) ? 1 : 0);
+	  /* XXX - why not check for blank subscripts here, if we do in
+	     valid_array_reference? */
 	  if (string[newi++] != ']')
 	    return (0);
 	  if (string[newi] == '+' && string[newi+1] == '=')
