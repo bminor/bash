@@ -469,6 +469,8 @@ here_document_to_fd (redirectee, ri)
       return (fd);
     }
 
+  SET_CLOSE_ON_EXEC (fd);
+
   errno = r = 0;		/* XXX */
   /* write_here_document returns 0 on success, errno on failure. */
   if (redirectee->word)
