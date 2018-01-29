@@ -5906,6 +5906,8 @@ process_substitute (string, open_for_read_in_child)
      parent. */
   expanding_redir = 0;
 
+  remove_quoted_escapes (string);
+
   subshell_level++;
   result = parse_and_execute (string, "process substitution", (SEVAL_NONINT|SEVAL_NOHIST));
   subshell_level--;
