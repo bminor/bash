@@ -25,6 +25,6 @@
    regexp `^#define[ 	]*PATCHLEVEL', since that's what support/mkversion.sh
    looks for to find the patch level (for the sccs version string). */
 
-#define PATCHLEVEL 15
+#define PATCHLEVEL 16
 
 #endif /* _PATCHLEVEL_H_ */
