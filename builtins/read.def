@@ -690,6 +690,11 @@ add_char:
   input_string[i] = '\0';
   CHECK_ALRM;
 
+#if defined (READLINE)
+  if (edit)
+    free (rlbuf);
+#endif
+
   if (retval < 0)
     {
       t_errno = errno;
