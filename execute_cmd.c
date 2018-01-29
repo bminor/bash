@@ -726,6 +726,8 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
     {
       ofifo = num_fifos ();
       ofifo_list = copy_fifo_list ((int *)&osize);
+      begin_unwind_frame ("internal_fifos");
+      add_unwind_protect (xfree, ofifo_list);
       saved_fifo = 1;
     }
   else
@@ -741,7 +743,10 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       dispose_exec_redirects ();
 #if defined (PROCESS_SUBSTITUTION)
       if (saved_fifo)
-	free ((void *)ofifo_list);
+        {
+	  free ((void *)ofifo_list);
+	  discard_unwind_frame ("internal_fifos");
+        }
 #endif
       return (last_command_exit_value = EXECUTION_FAILURE);
     }
@@ -1060,6 +1065,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       if (nfifo > ofifo)
 	close_new_fifos ((char *)ofifo_list, osize);
       free ((void *)ofifo_list);
+      discard_unwind_frame ("internal_fifos");
     }
 #endif
 
@@ -4977,9 +4983,14 @@ execute_builtin_or_function (words, builtin, var, redirects,
   char *ofifo_list;
 #endif
 
-#if defined (PROCESS_SUBSTITUTION)  
+#if defined (PROCESS_SUBSTITUTION)
+  begin_unwind_frame ("saved_fifos");
+  /* If we return, we longjmp and don't get a chance to restore the old
+     fifo list, so we add an unwind protect to free it */
   ofifo = num_fifos ();
   ofifo_list = copy_fifo_list (&osize);
+  if (ofifo_list)
+    add_unwind_protect (xfree, ofifo_list);
 #endif
 
   if (do_redirections (redirects, RX_ACTIVE|RX_UNDOABLE) != 0)
@@ -5063,7 +5074,9 @@ execute_builtin_or_function (words, builtin, var, redirects,
   nfifo = num_fifos ();
   if (nfifo > ofifo)
     close_new_fifos (ofifo_list, osize);
-  free (ofifo_list);
+  if (ofifo_list)
+    free (ofifo_list);
+  discard_unwind_frame ("saved_fifos");
 #endif
 
   return (result);
