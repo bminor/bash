@@ -44,8 +44,8 @@
    once, when performing variable expansion. */
 int assoc_expand_once = 0;
 
-/* Ditto for indexed array subscripts */
-int array_expand_once = 1;
+/* Ditto for indexed array subscripts -- currently unused */
+int array_expand_once = 0;
 
 static SHELL_VAR *bind_array_var_internal __P((SHELL_VAR *, arrayind_t, char *, char *, int));
 static SHELL_VAR *assign_array_element_internal __P((SHELL_VAR *, char *, char *, char *, int, char *, int));

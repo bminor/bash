@@ -3605,7 +3605,7 @@ The @option{-d} option causes the shell to forget the remembered location
 of each @var{name}.
 If the @option{-t} option is supplied, the full pathname to which each
 @var{name} corresponds is printed.  If multiple @var{name} arguments are
-supplied with @option{-t} the @var{name} is printed before the hashed
+supplied with @option{-t}, the @var{name} is printed before the hashed
 full pathname.
 The @option{-l} option causes output to be displayed in a format
 that may be reused as input.
@@ -5096,6 +5096,11 @@ option.
 
 The list of @code{shopt} options is:
 @table @code
+
+@item assoc_expand_once
+If set, the shell suppresses multiple evaluation of associative array
+subscripts during arithmetic expression evaluation and while executing
+builtins that can perform variable assignments.
 
 @item autocd
 If set, a command name that is the name of a directory is executed as if

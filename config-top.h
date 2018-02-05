@@ -53,7 +53,7 @@
 /* Define DONT_REPORT_SIGTERM if you don't want to see `Terminates' message
    when a job exits due to SIGTERM, since that's the default signal sent
    by the kill builtin. */
-/* #define DONT_REPORT_SIGTERM */
+#define DONT_REPORT_SIGTERM
 
 /* Define DONT_REPORT_BROKEN_PIPE_WRITE_ERRORS if you don't want builtins
    like `echo' and `printf' to report errors when output does not succeed

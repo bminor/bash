@@ -14902,3 +14902,28 @@ execute_cmd.c
 	- execute_command_internal: if redirections attached to a compound
 	  command fail, make sure we discard the `internal_fifos' unwind-
 	  protect frame after freeing the copied fifo_list and before returning
+
+				   1/30
+				   ----
+lib/readline/rlprivate.h
+	- BRACK_PASTE_FINI: add \r to the end of the string to avoid problems
+	  with the tty driver thinking the cursor was in the wrong position.
+	  Fixes issue reported by Egmont Koblinger <egmont@gmail.com>
+
+				   1/31
+				   ----
+lib/sh/zread.c
+	- zread,zreadintr: call check_signals() before calling read() to
+	  minimize the race window between signal delivery, signal handling,
+	  and a blocking read(2). Partial fix for FIFO read issue reported by
+	  Oyvind Hvidsten <oyvind.hvidsten@dhampir.no>
+
+doc/{bash.1,bashref.texi}
+	- shopt: document `assoc_expand_once' shell option
+
+				    2/1
+				    ---
+config-top.h
+	- DONT_REPORT_SIGPIPE: define, so non-interactive shells will no
+	  longer print termination messages for child processes killed by
+	  SIGTERM

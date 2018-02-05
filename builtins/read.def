@@ -585,6 +585,7 @@ read_builtin (list)
 	}
 
       reading = 1;
+      CHECK_ALRM;
       if (unbuffered_read == 2)
 	retval = posixly_correct ? zreadintr (fd, &c, 1) : zreadn (fd, &c, nchars - nr);
       else if (unbuffered_read)

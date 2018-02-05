@@ -307,7 +307,7 @@ extern int _rl_search_getchar PARAMS((_rl_search_cxt *));
 #define BRACK_PASTE_SLEN	6
 
 #define BRACK_PASTE_INIT	"\033[?2004h"
-#define BRACK_PASTE_FINI	"\033[?2004l"
+#define BRACK_PASTE_FINI	"\033[?2004l\r"
 
 /* macro.c */
 extern void _rl_with_macro_input PARAMS((char *));

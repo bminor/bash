@@ -1168,15 +1168,16 @@ rl_redisplay (void)
 		 wrap_offset. */
 	      if (linenum == 0 && (mb_cur_max > 1 && rl_byte_oriented == 0) && OLD_CPOS_IN_PROMPT())
 		_rl_last_c_pos -= prompt_invis_chars_first_line;	/* XXX - was wrap_offset */
-	      else if (linenum == prompt_last_screen_line &&
+	      else if (cpos_adjusted == 0 &&
+			linenum == prompt_last_screen_line &&
 			prompt_physical_chars > _rl_screenwidth &&
 			(mb_cur_max > 1 && rl_byte_oriented == 0) &&
-			cpos_adjusted == 0 &&
 			_rl_last_c_pos != o_cpos &&
 			_rl_last_c_pos > (prompt_last_invisible - _rl_screenwidth - prompt_invis_chars_first_line))	/* XXX - rethink this last one */
 		/* This assumes that all the invisible characters are split
 		   between the first and last lines of the prompt, if the 
 		   prompt consumes more than two lines. It's usually right */
+		/* XXX - not sure this is ever executed */
 		_rl_last_c_pos -= (wrap_offset-prompt_invis_chars_first_line);
 
 	      /* If this is the line with the prompt, we might need to

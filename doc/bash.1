@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Jan 25 10:51:45 EST 2018
+.\"	Last Change: Wed Jan 31 11:23:23 EST 2018
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2018 January 25" "GNU Bash 4.4"
+.TH BASH 1 "2018 January 31" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -9690,6 +9690,11 @@ The list of \fBshopt\fP options is:
 .if t .sp .5v
 .if n .sp 1v
 .PD 0
+.TP 8
+.B assoc_expand_once
+If set, the shell suppresses multiple evaluation of associative array
+subscripts during arithmetic expression evaluation and while executing
+builtins that can perform variable assignments.
 .TP 8
 .B autocd
 If set, a command name that is the name of a directory is executed as if
