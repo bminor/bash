@@ -771,7 +771,9 @@ rl_redisplay ()
 	 appear in the first and last lines of the prompt */
       wadjust = (newlines == 0)
 		  ? prompt_invis_chars_first_line
-		  : ((newlines == prompt_lines_estimate) ? wrap_offset : prompt_invis_chars_first_line);
+		  : ((newlines == prompt_lines_estimate)
+		  	? (wrap_offset - prompt_invis_chars_first_line)
+		  	: 0);
 
       /* fix from Darin Johnson <darin@acuson.com> for prompt string with
          invisible characters that is longer than the screen width.  The
