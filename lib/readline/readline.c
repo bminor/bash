@@ -242,7 +242,7 @@ int rl_erase_empty_line = 0;
 
 /* Non-zero means to read only this many characters rather than up to a
    character bound to accept-line. */
-int rl_num_chars_to_read;
+int rl_num_chars_to_read = 0;
 
 /* Line buffer and maintenance. */
 char *rl_line_buffer = (char *)NULL;

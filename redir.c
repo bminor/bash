@@ -578,6 +578,10 @@ redir_special_open (spec, filename, flags, mode, ri)
 #if defined (NETWORK_REDIRECTIONS)
     case RF_DEVTCP:
     case RF_DEVUDP:
+#if defined (RESTRICTED_SHELL)
+      if (restricted)
+	return (RESTRICTED_REDIRECT);
+#endif
 #if defined (HAVE_NETWORK)
       fd = netopen (filename);
 #else
@@ -850,7 +854,7 @@ do_redirection_internal (redirect, flags)
       fd = redir_open (redirectee_word, redirect->flags, 0666, ri);
       free (redirectee_word);
 
-      if (fd == NOCLOBBER_REDIRECT)
+      if (fd == NOCLOBBER_REDIRECT || fd == RESTRICTED_REDIRECT)
 	return (fd);
 
       if (fd < 0)

@@ -14927,3 +14927,31 @@ config-top.h
 	- DONT_REPORT_SIGPIPE: define, so non-interactive shells will no
 	  longer print termination messages for child processes killed by
 	  SIGTERM
+
+				    2/6
+				    ---
+lib/readline/text.c
+	- rl_insert: don't attempt to optimize typeahead if we are only reading
+	  a fixed number of characters (rl_num_chars_to_read > 0)
+
+redir.c
+	- redir_special_open: if the shell is restricted, return a
+	  RESTRICTED_REDIRECT error for attempts to open /dev/tcp and /dev/udp
+	  sockets.  Inspired by report from Blake Burkhart <bburky@bburky.com>
+	- do_redirection_internal: if redir_open returns RESTRICTED_REDIRECT,
+	  return that right away (instead of errno) so we can print a better
+	  error message
+
+				   2/11
+				   ----
+jobs.c
+	- bgp_resize: fix problems with (pid_t) overflow when calculating new
+	  size for table when js.c_childmax is near the limit of a pid_t
+	  (e.g., 2**31 - 1 on a 32-bit system, or 2**63-1 on a system with
+	  32-bit pid_t). Fixes hang reported by Natanael Copa
+	  <ncopa@alpinelinux.org> based on his patch from 12/8.
+	- bgp_resize: cap max table size for bgpids at MAX_CHILD_MAX (32768)
+
+include/typemax.h
+	- TYPE_MINIMUM, TYPE_MAXIMUM: updated definitions from coreutils-8.29,
+	  silences some compiler warnings

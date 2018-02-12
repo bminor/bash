@@ -73,6 +73,8 @@
 #include "execute_cmd.h"
 #include "flags.h"
 
+#include "typemax.h"
+
 #include "builtins/builtext.h"
 #include "builtins/common.h"
 
@@ -93,7 +95,7 @@ extern int killpg __P((pid_t, int));
 #endif
 
 #if !MAX_CHILD_MAX
-#  define MAX_CHILD_MAX 8192
+#  define MAX_CHILD_MAX 32768
 #endif
 
 #if !defined (DEBUG)
@@ -734,7 +736,7 @@ stop_pipeline (async, deferred)
 static void
 bgp_resize ()
 {
-  ps_index_t nsize;
+  ps_index_t nsize, nsize_cur, nsize_max;
   ps_index_t psi;
 
   if (bgpids.nalloc == 0)
@@ -748,10 +750,19 @@ bgp_resize ()
   else
     nsize = bgpids.nalloc;
 
-  while (nsize < (ps_index_t)js.c_childmax)
-    nsize *= 2;
+  nsize_max = TYPE_MAXIMUM (ps_index_t);
+  nsize_cur = (ps_index_t)js.c_childmax;
+  if (nsize_cur < 0)				/* overflow */
+    nsize_cur = MAX_CHILD_MAX;
 
-  if (bgpids.nalloc < js.c_childmax)
+  while (nsize > 0 && nsize < nsize_cur)	/* > 0 should catch overflow */
+    nsize <<= 1;
+  if (nsize > nsize_max || nsize <= 0)		/* overflow? */
+    nsize = nsize_max;
+  if (nsize > MAX_CHILD_MAX)
+    nsize = nsize_max = MAX_CHILD_MAX;		/* hard cap */
+
+  if (bgpids.nalloc < nsize_cur && bgpids.nalloc < nsize_max)
     {
       bgpids.storage = (struct pidstat *)xrealloc (bgpids.storage, nsize * sizeof (struct pidstat));
 
@@ -768,7 +779,7 @@ bgp_resize ()
 static ps_index_t
 bgp_getindex ()
 {
-  if (bgpids.nalloc < js.c_childmax || bgpids.head >= bgpids.nalloc)
+  if (bgpids.nalloc < (ps_index_t)js.c_childmax || bgpids.head >= bgpids.nalloc)
     bgp_resize ();
 
   pshash_delindex (bgpids.head);		/* XXX - clear before reusing */

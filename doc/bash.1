@@ -2133,7 +2133,7 @@ A value of
 .I ignoreboth
 is shorthand for \fIignorespace\fP and \fIignoredups\fP.
 A value of
-.IR erasedups
+.I erasedups
 causes all previous lines matching the current line to be removed from
 the history list before that line is saved.
 Any value not in the above list is ignored.
@@ -2794,7 +2794,7 @@ lexicographically between \fIx\fP and \fIy\fP, inclusive,
 using the default C locale.
 Note that both \fIx\fP and \fIy\fP must be of the same type.
 When the increment is supplied, it is used as the difference between
-each term.  The default increment is 1 or -1 as appropriate.
+each term.  The default increment is 1 or \-1 as appropriate.
 .PP
 Brace expansion is performed before any other expansions,
 and any characters special to other expansions are preserved
@@ -3042,7 +3042,7 @@ one space to avoid being confused with the \fB:-\fP expansion.
 If \fIparameter\fP is \fB@\fP, the result is \fIlength\fP positional
 parameters beginning at \fIoffset\fP.
 A negative \fIoffset\fP is taken relative to one greater than the greatest
-positional parameter, so an offset of -1 evaluates to the last positional
+positional parameter, so an offset of \-1 evaluates to the last positional
 parameter.
 It is an expansion error if \fIlength\fP evaluates to a number less than
 zero.
@@ -3439,7 +3439,7 @@ are ignored at the beginning and end of the
 word, as long as the whitespace character is in the
 value of
 .SM
-.BR IFS
+.B IFS
 (an
 .SM
 .B IFS
@@ -4423,7 +4423,7 @@ A shell variable that is null or unset evaluates to 0 when referenced
 by name without using the parameter expansion syntax.
 The value of a variable is evaluated as an arithmetic expression
 when it is referenced, or when a variable which has been given the
-\fIinteger\fP attribute using \fBdeclare -i\fP is assigned a value.
+\fIinteger\fP attribute using \fBdeclare \-i\fP is assigned a value.
 A null value evaluates to 0.
 A shell variable need not have its \fIinteger\fP attribute
 turned on to be used in an expression.
@@ -5633,13 +5633,13 @@ in emacs mode and to
 .B #
 in vi command mode.
 .TP
-.B completion\-display\-width (-1)
+.B completion\-display\-width (\-1)
 The number of screen columns used to display possible matches
 when performing completion.
 The value is ignored if it is less than 0 or greater than the terminal
 screen width.
 A value of 0 will cause matches to be displayed one per line.
-The default value is -1.
+The default value is \-1.
 .TP
 .B completion\-ignore\-case (Off)
 If set to \fBOn\fP, readline performs filename matching and completion
@@ -6805,7 +6805,7 @@ of the setting of the \fBmark-symlinked\-directories\fP readline variable.
 .PP
 There is some support for dynamically modifying completions.  This is
 most useful when used in combination with a default completion specified
-with \fBcomplete -D\fP.
+with \fBcomplete \-D\fP.
 It's possible for shell functions executed as completion
 handlers to indicate that completion should be retried by returning an
 exit status of 124.  If a shell function returns 124, and changes
@@ -6962,7 +6962,7 @@ for information on setting and unsetting shell options.
 .PP
 The shell supports a history expansion feature that
 is similar to the history expansion in
-.BR csh.
+.BR csh .
 This section describes what syntax features are available.  This
 feature is enabled by default for interactive shells, and can be
 disabled using the
@@ -8289,7 +8289,7 @@ with that string) or as a number (an index into the history list,
 where a negative number is used as an offset from the current
 command number).  If
 .I last
-is not specified it is set to
+is not specified, it is set to
 the current command for listing (so that
 .if n ``fc \-l \-10''
 .if t \f(CWfc \-l \-10\fP
@@ -8298,7 +8298,7 @@ prints the last 10 commands) and to
 otherwise.
 If
 .I first
-is not specified it is set to the previous
+is not specified, it is set to the previous
 command for editing and \-16 for listing.
 .sp 1
 The
@@ -8802,7 +8802,7 @@ Exit a login shell.
 Read lines from the standard input into the indexed array variable
 .IR array ,
 or from file descriptor
-.IR fd
+.I fd
 if the
 .B \-u
 option is supplied.
@@ -8951,9 +8951,9 @@ causes \fBprintf\fP to output the date-time string resulting from using
 \fIdatefmt\fP as a format string for \fIstrftime\fP(3).
 The corresponding \fIargument\fP is an integer representing the number of
 seconds since the epoch.
-Two special argument values may be used: -1 represents the current
-time, and -2 represents the time the shell was invoked.
-If no argument is specified, conversion behaves as if -1 had been given.
+Two special argument values may be used: \-1 represents the current
+time, and \-2 represents the time the shell was invoked.
+If no argument is specified, conversion behaves as if \-1 had been given.
 This is an exception to the usual \fBprintf\fP behavior.
 .PD
 .PP

@@ -915,6 +915,7 @@ rl_insert (int count, int c)
   x = 0;
   n = (unsigned short)-2;
   while (_rl_optimize_typeahead &&
+	 rl_num_chars_to_read == 0 &&
 	 (RL_ISSTATE (RL_STATE_INPUTPENDING|RL_STATE_MACROINPUT) == 0) &&
 	 _rl_pushed_input_available () == 0 &&
 	 _rl_input_queued (0) &&

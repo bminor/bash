@@ -261,6 +261,15 @@ send_pwd_to_eterm ()
   free (f);
 }
 
+static void
+execute_prompt_command ()
+{
+  char *command_to_execute;
+
+  command_to_execute = get_string_value ("PROMPT_COMMAND");
+  if (command_to_execute)
+    execute_variable_command (command_to_execute, "PROMPT_COMMAND");
+}
 /* Call the YACC-generated parser and return the status of the parse.
    Input is read from the current input stream (bash_input).  yyparse
    leaves the parsed command in the global variable GLOBAL_COMMAND.
@@ -269,7 +278,6 @@ int
 parse_command ()
 {
   int r;
-  char *command_to_execute;
 
   need_here_doc = 0;
   run_pending_traps ();
@@ -282,9 +290,7 @@ parse_command ()
      actually printed. */
   if (interactive && bash_input.type != st_string && parser_expanding_alias() == 0)
     {
-      command_to_execute = get_string_value ("PROMPT_COMMAND");
-      if (command_to_execute)
-	execute_variable_command (command_to_execute, "PROMPT_COMMAND");
+      execute_prompt_command ();
 
       if (running_under_emacs == 2)
 	send_pwd_to_eterm ();	/* Yuck */
