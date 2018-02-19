@@ -2335,10 +2335,10 @@ split_at_delims (string, slen, delims, sentinel, flags, nwp, cwp)
 	  /* If we're using IFS splitting, the non-whitespace delimiter char
 	     and any additional IFS whitespace delimits a field. */
 	  if (ifs_split)
-	    while (member (string[te], d) && spctabnl (string[te]))
+	    while (member (string[te], d) && spctabnl (string[te]) && ((flags&SD_NOQUOTEDELIM) == 0 || (string[te] != '\'' && string[te] != '"')))
 	      te++;
 	  else
-	    while (member (string[te], d2))
+	    while (member (string[te], d2) && ((flags&SD_NOQUOTEDELIM) == 0 || (string[te] != '\'' && string[te] != '"')))
 	      te++;
 	}
 
@@ -2371,7 +2371,8 @@ split_at_delims (string, slen, delims, sentinel, flags, nwp, cwp)
 	break;
 
       i = te;
-      while (member (string[i], d) && (ifs_split || spctabnl(string[i])))
+      /* XXX - honor SD_NOQUOTEDELIM here */
+      while (member (string[i], d) && (ifs_split || spctabnl(string[i])) && ((flags&SD_NOQUOTEDELIM) == 0 || (string[te] != '\'' && string[te] != '"')))
 	i++;
 
       if (string[i])

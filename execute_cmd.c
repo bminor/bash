@@ -4848,6 +4848,11 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   /* The temporary environment for a function is supposed to apply to
      all commands executed within the function body. */
 
+  /* Initialize BASH_ARGC and BASH_ARGV before we blow away the positional
+     parameters */
+  if (debugging_mode || shell_compatibility_level <= 44)
+    init_bash_argv ();
+
   remember_args (words->next, 1);
 
   /* Update BASH_ARGV and BASH_ARGC */

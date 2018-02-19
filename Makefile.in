@@ -1,6 +1,6 @@
-# Makefile for bash-4.4, version 4.22
+# Makefile for bash-5.0, version 4.23
 #
-# Copyright (C) 1996-2015 Free Software Foundation, Inc.
+# Copyright (C) 1996-2018 Free Software Foundation, Inc.
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -914,7 +914,7 @@ maintainer-clean:	basic-clean
 	$(RM) $(CREATED_SUPPORT) Makefile pathnames.h
 
 maybe-clean:
-	-if test "X$(topdir)" != "X$(BUILD_DIR)" ; then \
+	-if test X"`cd $(topdir) && pwd -P`" != X"`cd $(BUILD_DIR) && pwd -P`" ; then \
 		$(RM) parser-built y.tab.c y.tab.h ; \
 	fi
 

@@ -14955,3 +14955,66 @@ jobs.c
 include/typemax.h
 	- TYPE_MINIMUM, TYPE_MAXIMUM: updated definitions from coreutils-8.29,
 	  silences some compiler warnings
+
+				   2/14
+				   ----
+Makefile.in
+	- maybe-clean: use cd and pwd -P to test whether or not two directory
+	  names identical, since topdir = '.' and BUILD_DIR = full pathname
+	  when you use something like `bash ./configure'. Problem reported by
+	  Michael Felt <aixtools@gmail.com>
+
+subst.c
+	- split_at_delims: if SD_NOQUOTEDELIM is in the flags argument, don't
+	  treat `'' and `"' as candidates for possible sequences of delimiters,
+	  even if they're part of the delimiter set (the delims argument).
+	  Fixes problem with completing lines like `foo --bar='quux baz' xx'
+	  reported by Nick Patavalis <npat@efault.net>
+
+				   2/15
+				   ----
+copy_cmd.c
+	- copy_word_list: build the list in the right order, avoiding having
+	  to reverse it at the end. Helps with long argument lists
+
+shell.c
+	- bind_args: build the argument list in the right order, avoiding
+	  having to reverse it at the end.
+	- bind_args: only call push_args to save argc and argv as BASH_ARGC
+	  and BASH_ARGV if debugging mode is enabled (debugging_mode != 0).
+	  Inspired by report from Ambrose Feinstein <ambrose@google.com>
+	- bind_args: note that we've saved BASH_ARGC and BASH_ARGV by setting
+	  bash_argv_initialized
+	- shell_reinitialize: reset bash_argv_initialized back to 0 so
+	  BASH_ARGV and BASH_ARGC will be recreated if we're in debugging mode
+
+variables.c
+	- save_bash_argv: new function, initializes BASH_ARGV and BASH_ARGC
+	  from the saved positional parameters
+	- init_bash_argv: initialize BASH_ARGV and BASH_ARGC if
+	  bash_argv_initialized == 0
+
+builtins/shopt.def
+	- shopt_set_debug_mode: if we're turning on debug mode, initialize
+	  BASH_ARGC and BASH_ARGV if bash_argv_initialized == 0
+
+				   2/16
+				   ----
+execute_cmd.c
+	- execute_function: make sure BASH_ARGV and BASH_ARGC are initialized
+	  before calling push_args (and before calling remember_args)
+
+builtins/source.def
+	- source_builtin: make sure BASH_ARGV and BASH_ARGC are initialized
+	  before calling push_args (and before calling remember_args)
+
+builtins/evalfile.c
+	- _evalfile: if the shell compatibility level is 44 or lower, make
+	  sure BASH_ARGV and BASH_ARGC are initialized before calling
+	  array_push
+
+builtins/shopt.def
+	- compat44: new shell option. This will be the last compatXX option
+
+doc/{bash.1,bashref.texi}
+	- compat44: document new shell option

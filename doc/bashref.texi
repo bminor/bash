@@ -5198,6 +5198,11 @@ and does not reset the
 loop state when a shell function is executed (this allows @code{break} or
 @code{continue} in a shell function to affect loops in the caller's context).
 
+@item compat44
+If set, Bash
+saves the positional parameters to BASH_ARGV and BASH_ARGC before they are
+used, regardless of whether or not extended debugging mode is enabled.
+
 @item complete_fullquote
 If set, Bash
 quotes all shell metacharacters in filenames and directory names when
@@ -5604,6 +5609,8 @@ The shell sets @code{BASH_ARGC} only when in extended debugging mode
 (see @ref{The Shopt Builtin}
 for a description of the @code{extdebug} option to the @code{shopt}
 builtin).
+Setting @code{extdebug} after the shell has started to execute a script
+may result in inconsistent values.
 
 @item BASH_ARGV
 An array variable containing all of the parameters in the current bash
@@ -5615,6 +5622,8 @@ The shell sets @code{BASH_ARGV} only when in extended debugging mode
 (see @ref{The Shopt Builtin}
 for a description of the @code{extdebug} option to the @code{shopt}
 builtin).
+Setting @code{extdebug} after the shell has started to execute a script
+may result in inconsistent values.
 
 @item BASH_ARGV0
 When referenced, this variable expands to the name of the shell or shell

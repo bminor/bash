@@ -5088,6 +5088,28 @@ dispose_saved_dollar_vars ()
   dollar_arg_stack[dollar_arg_stack_index] = (WORD_LIST *)NULL;
 }
 
+/* Initialize BASH_ARGV and BASH_ARGC after turning on extdebug after the
+   shell is initialized */
+void
+init_bash_argv ()
+{
+  if (bash_argv_initialized == 0)
+    {
+      save_bash_argv ();
+      bash_argv_initialized = 1;
+    }
+}
+
+void
+save_bash_argv ()
+{
+  WORD_LIST *list;
+
+  list = list_rest_of_args ();
+  push_args (list);
+  dispose_words (list);
+}
+
 /* Manipulate the special BASH_ARGV and BASH_ARGC variables. */
 
 void

@@ -339,6 +339,8 @@ extern void push_dollar_vars __P((void));
 extern void pop_dollar_vars __P((void));
 extern void dispose_saved_dollar_vars __P((void));
 
+extern void init_bash_argv __P((void));
+extern void save_bash_argv __P((void));
 extern void push_args __P((WORD_LIST *));
 extern void pop_args __P((void));
 

@@ -1498,7 +1498,9 @@ only when in extended debugging mode (see the description of the
 .B extdebug
 option to the
 .B shopt
-builtin below)
+builtin below).
+Setting \fBextdebug\fP after the shell has started to execute a script
+may result in inconsistent values.
 .TP
 .B BASH_ARGV
 An array variable containing all of the parameters in the current \fBbash\fP
@@ -1516,7 +1518,9 @@ only when in extended debugging mode
 .B extdebug
 option to the
 .B shopt
-builtin below)
+builtin below).
+Setting \fBextdebug\fP after the shell has started to execute a script
+may result in inconsistent values.
 .TP
 .B BASH_ARGV0
 When referenced, this variable expands to the name of the shell or shell
@@ -9812,6 +9816,12 @@ to make them fatal errors that cause the shell to exit),
 and does not reset the
 loop state when a shell function is executed (this allows \fBbreak\fP or
 \fBcontinue\fP in a shell function to affect loops in the caller's context).
+.TP 8
+.B compat44
+If set,
+.B bash
+saves the positional parameters to BASH_ARGV and BASH_ARGC before they are
+used, regardless of whether or not extended debugging mode is enabled.
 .TP 8
 .B complete_fullquote
 If set,

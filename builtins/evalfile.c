@@ -254,7 +254,9 @@ file_error_and_exit:
      arguments */
   if ((flags & FEVAL_NOPUSHARGS) == 0)
     {
-      array_push (bash_argv_a, (char *)filename);
+      if (shell_compatibility_level <= 44)
+	init_bash_argv ();
+      array_push (bash_argv_a, (char *)filename);	/* XXX - unconditionally? */
       tt[0] = '1'; tt[1] = '\0';
       array_push (bash_argc_a, tt);
       if (flags & FEVAL_UNWINDPROT)

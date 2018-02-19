@@ -30,8 +30,8 @@ read LINE <&${REFLECT[0]}
 echo $LINE
 
 { sleep 1; kill $REFLECT_PID; } &
-wait $REFLECT_PID >$TMPOUT 2>&1 || echo "coproc.tests: REFLECT: status $?"
-grep 'Terminated.*coproc.*REFLECT' < $TMPOUT >/dev/null 2>&1 || {
+wait $REFLECT_PID >$TMPOUT 2>&1 || { status=$? ; echo "coproc.tests: REFLECT: status $status" ; }
+[[ $status < 128 || $status == 143 ]] || {
 	echo "coproc.tests: wait for REFLECT failed" >&2
 }
 rm -f $TMPOUT

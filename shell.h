@@ -99,6 +99,7 @@ extern int interactive, interactive_shell;
 extern int startup_state;
 extern int reading_shell_script;
 extern int shell_initialized;
+extern int bash_argv_initialized;
 extern int subshell_environment;
 extern int current_command_number;
 extern int indirection_level;
