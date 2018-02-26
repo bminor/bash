@@ -15018,3 +15018,32 @@ builtins/shopt.def
 
 doc/{bash.1,bashref.texi}
 	- compat44: document new shell option
+
+				   2/21
+				   ----
+builtins/common.h
+	- ISOPTION: check s[1] before s[2] to avoid out of bound reads. Fixes
+	  bug reported by jeremy@feusi.co
+
+input.h
+	- B_SHAREDBUF: new flag for buffered input fds, indicates that this
+	  fd shares its b_buffer with another fd
+
+input.c
+	- duplicate_buffered_stream: when duplicating *from* the buffer
+	  corresponding to bash input, make sure the new buffer has B_SHAREDBUF
+	  in the flags, because copy_buffered_stream copies pointers
+	- duplicate_buffered_stream: if the buffer being copied to has the
+	  B_SHAREDBUF flag set, make sure the b_buffer doesn't get freed.
+	  Fixes use-after-free bug reported by jeremy@feusi.co
+	- save_bash_input,close_buffered_stream: make sure a buffer with
+	  B_SHAREDBUF set has its b_buffer set to NULL before calling
+	  free_buffered_stream
+
+				   2/24
+				   ----
+subst.c
+	- parameter_brace_expand_error: add parameter saying whether or not
+	  we are checking whether value is null, so we can have different
+	  error messages for ${x:?} and ${x?}. Report and fix from
+	  don fong <dfong@dfong.com>

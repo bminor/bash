@@ -1,6 +1,6 @@
 /* input.c -- functions to perform buffered input with synchronization. */
 
-/* Copyright (C) 1992-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2018 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -272,6 +272,8 @@ save_bash_input (fd, new_fd)
       /* What's this?  A stray buffer without an associated open file
 	 descriptor?  Free up the buffer and report the error. */
       internal_error (_("save_bash_input: buffer already exists for new fd %d"), nfd);
+      if (buffers[nfd]->b_flag & B_SHAREDBUF)
+	buffers[nfd]->b_buffer = (char *)NULL;
       free_buffered_stream (buffers[nfd]);
     }
 
@@ -351,6 +353,12 @@ duplicate_buffered_stream (fd1, fd2)
       /* If the two objects share the same b_buffer, don't free it. */
       if (buffers[fd1] && buffers[fd1]->b_buffer && buffers[fd1]->b_buffer == buffers[fd2]->b_buffer)
 	buffers[fd2] = (BUFFERED_STREAM *)NULL;
+      /* If this buffer is shared with another fd, don't free the buffer */
+      else if (buffers[fd2]->b_flag & B_SHAREDBUF)
+	{
+	  buffers[fd2]->b_buffer = (char *)NULL;
+	  free_buffered_stream (buffers[fd2]);
+	}
       else
 	free_buffered_stream (buffers[fd2]);
     }
@@ -364,6 +372,9 @@ duplicate_buffered_stream (fd1, fd2)
 	fd_to_buffered_stream (fd2);
       buffers[fd2]->b_flag |= B_WASBASHINPUT;
     }
+
+  if (fd_is_bash_input (fd1) || (buffers[fd1] && (buffers[fd1]->b_flag & B_SHAREDBUF)))
+    buffers[fd2]->b_flag |= B_SHAREDBUF;
 
   return (fd2);
 }
@@ -436,6 +447,8 @@ close_buffered_stream (bp)
   if (!bp)
     return (0);
   fd = bp->b_fd;
+  if (bp->b_flag & B_SHAREDBUF)
+    bp->b_buffer = (char *)NULL;
   free_buffered_stream (bp);
   return (close (fd));
 }

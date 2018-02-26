@@ -317,7 +317,7 @@ static WORD_DESC *parameter_brace_expand_word __P((char *, int, int, int, arrayi
 static char *parameter_brace_find_indir __P((char *, int, int, int));
 static WORD_DESC *parameter_brace_expand_indir __P((char *, int, int, int *, int *));
 static WORD_DESC *parameter_brace_expand_rhs __P((char *, char *, int, int, int, int *, int *));
-static void parameter_brace_expand_error __P((char *, char *));
+static void parameter_brace_expand_error __P((char *, char *, int));
 
 static int valid_length_expression __P((char *));
 static intmax_t parameter_brace_expand_length __P((char *));
@@ -6916,8 +6916,9 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
    used as the error message to print, otherwise a standard message is
    printed. */
 static void
-parameter_brace_expand_error (name, value)
+parameter_brace_expand_error (name, value, check_null)
      char *name, *value;
+     int check_null;
 {
   WORD_LIST *l;
   char *temp;
@@ -6931,6 +6932,8 @@ parameter_brace_expand_error (name, value)
       FREE (temp);
       dispose_words (l);
     }
+  else if (check_null == 0)
+    report_error (_("%s: parameter not set"), name);
   else
     report_error (_("%s: parameter null or not set"), name);
 
@@ -8923,7 +8926,7 @@ bad_substitution:
 	    }
 	  else if (c == '?')
 	    {
-	      parameter_brace_expand_error (name, value);
+	      parameter_brace_expand_error (name, value, check_nullness);
 	      return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
 	    }
 	  else if (c != '+')

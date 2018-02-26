@@ -23,7 +23,7 @@
 
 #include "stdc.h"
 
-#define ISOPTION(s, c)	(s[0] == '-' && !s[2] && s[1] == c)
+#define ISOPTION(s, c)	(s[0] == '-' && s[1] == c && !s[2])
 #define ISHELP(s)	(STREQ ((s), "--help"))
 
 #define CHECK_HELPOPT(l) \
