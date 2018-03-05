@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2017 December 28<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2018 March 2<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -42,7 +42,7 @@ bash - GNU Bourne-Again SHell
 <H3>COPYRIGHT</H3>
 
 
-Bash is Copyright &#169; 1989-2017 by the Free Software Foundation, Inc.
+Bash is Copyright &#169; 1989-2018 by the Free Software Foundation, Inc.
 <A NAME="lbAE">&nbsp;</A>
 <H3>DESCRIPTION</H3>
 
@@ -878,7 +878,7 @@ An OR list has the form
 
 <I>command2</I>
 
-is executed if and only if
+is executed if, and only if,
 <I>command1</I>
 
 returns a non-zero exit status.
@@ -1224,7 +1224,8 @@ command (see
 below).
 The file descriptors can be utilized as arguments to shell commands
 and redirections using standard word expansions.
-The file descriptors are not available in subshells.
+Other than those created to execute command and process substitutions,
+the file descriptors are not available in subshells.
 The process ID of the shell spawned to execute the coprocess is
 available as the value of the variable <I>NAME</I>_PID.
 The <B>wait</B>
@@ -1920,7 +1921,9 @@ only when in extended debugging mode (see the description of the
 option to the
 <B>shopt</B>
 
-builtin below)
+builtin below).
+Setting <B>extdebug</B> after the shell has started to execute a script
+may result in inconsistent values.
 <DT><B>BASH_ARGV</B>
 
 <DD>
@@ -1943,7 +1946,9 @@ only when in extended debugging mode
 option to the
 <B>shopt</B>
 
-builtin below)
+builtin below).
+Setting <B>extdebug</B> after the shell has started to execute a script
+may result in inconsistent values.
 <DT><B>BASH_ARGV0</B>
 
 <DD>
@@ -5472,8 +5477,10 @@ The <B>unset</B> builtin also acts using the same dynamic scope: if a
 variable is local to the current scope, <B>unset</B> will unset it;
 otherwise the unset will refer to the variable found in any calling scope
 as described above.
-If a variable at the local scope is unset, it will remain so
+If a variable at the current local scope is unset, it will remain so
 until it is reset in that scope or until the function returns.
+Once the function returns, any instance of the variable at a previous
+scope will become visible.
 If the unset acts on a variable at a previous scope, any instance of a
 variable with that name that had been shadowed will become visible.
 <P>
@@ -8884,7 +8891,7 @@ for information on setting and unsetting shell options.
 
 The shell supports a history expansion feature that
 is similar to the history expansion in
-<B>csh.</B>
+<B>csh</B>.
 
 This section describes what syntax features are available.  This
 feature is enabled by default for interactive shells, and can be
@@ -10527,7 +10534,7 @@ where a negative number is used as an offset from the current
 command number).  If
 <I>last</I>
 
-is not specified it is set to
+is not specified, it is set to
 the current command for listing (so that
 
 <TT>fc -l -10</TT>
@@ -10538,7 +10545,7 @@ otherwise.
 If
 <I>first</I>
 
-is not specified it is set to the previous
+is not specified, it is set to the previous
 command for editing and -16 for listing.
 <P>
 The
@@ -10856,6 +10863,7 @@ The return status is 0 unless no command matches
 
 <DT><B>history</B> <B>-c</B><DD>
 <DT><B>history -d</B> <I>offset</I><DD>
+<DT><B>history -d</B> <I>start</I>-<I>end</I><DD>
 <DT><B>history</B> <B>-anrw</B> [<I>filename</I>]<DD>
 <DT><B>history</B> <B>-p</B> <I>arg</I> [<I>arg ...</I>]<DD>
 <DT><B>history</B> <B>-s</B> <I>arg</I> [<I>arg ...</I>]<DD>
@@ -10900,6 +10908,10 @@ If <I>offset</I> is negative, it is interpreted as relative to one greater
 than the last history position, so negative indices count back from the
 end of the history, and an index of -1 refers to the current
 <B>history -d</B> command.
+<DT><B>-d</B> <I>start</I>-<I>end</I><DD>
+Delete the history entries between positions <I>start</I> and <I>end</I>,
+inclusive.  Positive and negative values for <I>start</I> and <I>end</I>
+are interpreted as described above.
 <DT><B>-a</B>
 
 <DD>
@@ -12279,6 +12291,12 @@ The list of <B>shopt</B> options is:
 
 
 <DL COMPACT>
+<DT><B>assoc_expand_once</B>
+
+<DD>
+If set, the shell suppresses multiple evaluation of associative array
+subscripts during arithmetic expression evaluation and while executing
+builtins that can perform variable assignments.
 <DT><B>autocd</B>
 
 <DD>
@@ -12424,6 +12442,14 @@ to make them fatal errors that cause the shell to exit),
 and does not reset the
 loop state when a shell function is executed (this allows <B>break</B> or
 <B>continue</B> in a shell function to affect loops in the caller's context).
+<DT><B>compat44</B>
+
+<DD>
+If set,
+<B>bash</B>
+
+saves the positional parameters to BASH_ARGV and BASH_ARGC before they are
+used, regardless of whether or not extended debugging mode is enabled.
 <DT><B>complete_fullquote</B>
 
 <DD>
@@ -13797,7 +13823,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2017 December 28<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2018 March 2<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13903,6 +13929,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 02 January 2018 10:55:16 EST
+Time: 02 March 2018 16:08:40 EST
 </BODY>
 </HTML>

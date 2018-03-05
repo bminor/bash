@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed Jan 31 11:23:23 EST 2018
+.\"	Last Change: Fri Mar  2 16:07:55 EST 2018
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2018 January 31" "GNU Bash 4.4"
+.TH BASH 1 "2018 March 2" "GNU Bash 4.4"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -658,7 +658,7 @@ An OR list has the form
 .RE
 .PP
 .I command2
-is executed if and only if
+is executed if, and only if,
 .I command1
 returns a non-zero exit status.
 The return status of
@@ -4297,8 +4297,10 @@ The \fBunset\fP builtin also acts using the same dynamic scope: if a
 variable is local to the current scope, \fBunset\fP will unset it;
 otherwise the unset will refer to the variable found in any calling scope
 as described above.
-If a variable at the local scope is unset, it will remain so
+If a variable at the current local scope is unset, it will remain so
 until it is reset in that scope or until the function returns.
+Once the function returns, any instance of the variable at a previous
+scope will become visible.
 If the unset acts on a variable at a previous scope, any instance of a
 variable with that name that had been shadowed will become visible.
 .PP

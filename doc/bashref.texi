@@ -1490,8 +1490,10 @@ The @code{unset} builtin also acts using the same dynamic scope: if a
 variable is local to the current scope, @code{unset} will unset it;         
 otherwise the unset will refer to the variable found in any calling scope 
 as described above.
-If a variable at the local scope is unset, it will remain so
+If a variable at the current local scope is unset, it will remain so
 until it is reset in that scope or until the function returns.
+Once the function returns, any instance of the variable at a previous
+scope will become visible.
 If the unset acts on a variable at a previous scope, any instance of a   
 variable with that name that had been shadowed will become visible.
 
@@ -3748,7 +3750,7 @@ expressions using a set of rules based on the number of arguments.
 The expression is false.
 
 @item 1 argument
-The expression is true if and only if the argument is not null.
+The expression is true if, and only if, the argument is not null.
 
 @item 2 arguments
 If the first argument is @samp{!}, the expression is true if and
@@ -8158,7 +8160,7 @@ To find out more about the options and arguments that the
 @code{configure} script understands, type 
 
 @example
-bash-2.04$ ./configure --help
+bash-4.2$ ./configure --help
 @end example
 
 @noindent
@@ -8176,6 +8178,9 @@ cd /usr/local/build/bash-4.4
 bash /usr/local/src/bash-4.4/configure
 make
 @end example
+
+See @ref{Compiling For Multiple Architectures} for more information
+about building in a directory separate from the source.
 
 If you need to do unusual things to compile Bash, please
 try to figure out how @code{configure} could check whether or not
@@ -8226,7 +8231,9 @@ own directory.  To do this, you must use a version of @code{make} that
 supports the @code{VPATH} variable, such as GNU @code{make}.
 @code{cd} to the
 directory where you want the object files and executables to go and run
-the @code{configure} script from the source directory.  You may need to
+the @code{configure} script from the source directory
+(@pxref{Basic Installation}).
+You may need to
 supply the @option{--srcdir=PATH} argument to tell @code{configure} where the
 source files are.  @code{configure} automatically checks for the
 source code in the directory that @code{configure} is in and in `..'.
