@@ -119,6 +119,15 @@ declare -ar i4=([0]="a" [1]="b" [2]="c")
 declare -ar j4=([0]="1" [1]="2" [2]="3")
 ./varenv9.sub: line 66: unset: i4: cannot unset: readonly variable
 ./varenv9.sub: line 66: unset: j4: cannot unset: readonly variable
+main: unset
+inner: res unset
+outer: res: X Y
+main: after first call: X
+inner: X
+outer: res: X Y
+main: after second call: X
+func: null or unset
+after func: x = outside
 a=z
 a=b
 a=z

@@ -124,6 +124,11 @@ int variable_context = 0;
    with the same name at a previous scope. */
 int localvar_inherit = 0;
 
+/* If non-zero, calling `unset' on local variables in previous scopes marks
+   them as invisible so lookups find them unset. This is the same behavior
+   as local variables in the current local scope. */
+int localvar_unset = 0;
+
 /* The set of shell assignments which are made only in the environment
    for a single command. */
 HASH_TABLE *temporary_env = (HASH_TABLE *)NULL;
@@ -3706,7 +3711,8 @@ makunbound (name, vc)
      must be done so that if the variable is subsequently assigned a new
      value inside the function, the `local' attribute is still present.
      We also need to add it back into the correct hash table. */
-  if (old_var && local_p (old_var) && variable_context == old_var->context)
+  if (old_var && local_p (old_var) &&
+	(old_var->context == variable_context || (localvar_unset && old_var->context < variable_context)))
     {
       if (nofree_p (old_var))
 	var_setvalue (old_var, (char *)NULL);

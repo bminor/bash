@@ -148,16 +148,19 @@ SYSTEM_FLAGS = -DPROGRAM='"$(Program)"' -DCONF_HOSTTYPE='"$(Machine)"' -DCONF_OS
 BASE_CCFLAGS = $(SYSTEM_FLAGS) $(LOCAL_DEFS) \
 	  $(DEFS) $(LOCAL_CFLAGS) $(INCLUDES)
 
-CCFLAGS = $(ASAN_CFLAGS) $(BASE_CCFLAGS) ${PROFILE_FLAGS} $(CPPFLAGS) $(CFLAGS)
+CCFLAGS = $(ADDON_CFLAGS) $(BASE_CCFLAGS) ${PROFILE_FLAGS} $(CPPFLAGS) $(CFLAGS)
 
 CCFLAGS_FOR_BUILD = $(BASE_CCFLAGS) $(CPPFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD)
 
 BASE_LDFLAGS = @LDFLAGS@ $(LOCAL_LDFLAGS) $(CFLAGS)
-LDFLAGS = ${ASAN_LDFLAGS} ${BASE_LDFLAGS} ${PROFILE_FLAGS} ${STATIC_LD}
+LDFLAGS = ${ADDON_LDFLAGS} ${BASE_LDFLAGS} ${PROFILE_FLAGS} ${STATIC_LD}
 LDFLAGS_FOR_BUILD = @LDFLAGS_FOR_BUILD@ $(LOCAL_LDFLAGS) $(CFLAGS_FOR_BUILD)
 
 ASAN_XCFLAGS = -fsanitize=address -fno-omit-frame-pointer
 ASAN_XLDFLAGS = -fsanitize=address
+
+GCOV_XCFLAGS = -fprofile-arcs -ftest-coverage
+GCOV_XLDFLAGS = -fprofile-arcs -ftest-coverage
 
 INCLUDES = -I. @RL_INCLUDE@ -I$(srcdir) -I$(BASHINCDIR) -I$(LIBSRC) $(INTL_INC)
 
@@ -602,7 +605,12 @@ lint:
 	${MAKE} ${MFLAGS} CFLAGS='${GCC_LINT_FLAGS}' .made
 
 asan:
-	${MAKE} ${MFLAGS} ASAN_CFLAGS='${ASAN_XCFLAGS}' ASAN_LDFLAGS='${ASAN_XLDFLAGS}' .made
+	${MAKE} ${MFLAGS} ADDON_CFLAGS='${ASAN_XCFLAGS}' ADDON_LDFLAGS='${ASAN_XLDFLAGS}' .made
+
+# cheating
+gcov:
+	${MAKE} ${MFLAGS} ADDON_CFLAGS='${GCOV_XCFLAGS}' ADDON_LDFLAGS='${GCOV_XLDFLAGS}' .made
+
 
 # have to make this separate because making tests depend on $(PROGRAM)
 asan-tests: asan  $(TESTS_SUPPORT)
@@ -610,6 +618,10 @@ asan-tests: asan  $(TESTS_SUPPORT)
 	@cp $(TESTS_SUPPORT) tests
 	@( cd $(srcdir)/tests && \
 		PATH=$(BUILD_DIR)/tests:$$PATH THIS_SH=$(THIS_SH) $(SHELL) ${TESTSCRIPT} )
+
+profiling-tests:	${PROGRAM}
+	@test "X$$PROFILE_FLAGS" == "X" && { echo "profiling-tests: must be built with profiling enabled" >&2; exit 1; }
+	@${MAKE} ${MFLAGS} tests TESTSCRIPT=run-gprof
 
 version.h:  $(SOURCES) config.h Makefile patchlevel.h
 	$(SHELL) $(SUPPORT_SRC)mkversion.sh -b -S ${topdir} -s $(RELSTATUS) -d $(Version) -o newversion.h \

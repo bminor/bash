@@ -417,3 +417,19 @@ declare -a var=([123]="")
 declare -n ref="var[123]"
 ./nameref18.sub: line 54: declare: var[123]: not found
 declare -a var=([123]="X")
+declare -n foo="bar"
+declare -- foo="bar"
+./nameref19.sub: line 9: declare: bar: not found
+declare -n foo="bar"
+declare -- foo="bar"
+declare -i bar="11"
+declare -inx foo6
+declare -ix foo6
+declare -n foo="bar"
+declare -- bar="Hello World!"
+declare -- foo="bar"
+declare -- bar="Hello World!"
+declare -n foo="bar"
+declare -- bar
+declare -- foo="bar"
+declare -- bar

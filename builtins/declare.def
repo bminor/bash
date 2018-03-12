@@ -573,8 +573,9 @@ restart_new_var_name:
 	    }
 	  /* However, if we're turning off the nameref attribute on an existing
 	     nameref variable, we first follow the nameref chain to the end,
-	     modify the value of the variable this nameref variable references,
-	     *CHANGING ITS VALUE AS A SIDE EFFECT* then turn off the nameref
+	     modify the value of the variable this nameref variable references
+	     if there is an assignment statement argument,
+	     *CHANGING ITS VALUE AS A SIDE EFFECT*, then turn off the nameref
 	     flag *LEAVING THE NAMEREF VARIABLE'S VALUE UNCHANGED* */
 	  else if (var == 0 && (flags_off & att_nameref))
 	    {
@@ -592,6 +593,16 @@ restart_new_var_name:
 		  any_failed++;
 		  NEXT_VARIABLE ();
 		}
+
+	      /* If all we're doing is turning off the nameref attribute, don't
+		 bother with VAR at all, whether it exists or not. Just turn it
+		 off and go on. */
+	      if (refvar && flags_on == 0 && offset == 0 && (flags_off & ~att_nameref) == 0)
+		{
+		  VUNSETATTR (refvar, att_nameref);
+		  NEXT_VARIABLE ();
+		}
+
 	      if (refvar)
 		/* XXX - use declare_find_variable here? */
 		var = mkglobal ? find_global_variable (nameref_cell (refvar)) : find_variable (nameref_cell (refvar));
@@ -671,6 +682,12 @@ restart_new_var_name:
 		      value = name + namelen;
 		    }
 		  free (oldname);
+
+		  /* OK, let's turn off the nameref attribute.
+		     Now everything else applies to VAR. */
+		  if (flags_off & att_nameref)
+		    VUNSETATTR (refvar, att_nameref);
+
 		  goto restart_new_var_name;
 		  /* NOTREACHED */
 		}

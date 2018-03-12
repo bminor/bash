@@ -1,0 +1,47 @@
+#!/bin/bash
+#
+# various tests of unset when applied to variables at different local scopes
+
+# function unsetting variable at previous local scope, uncovering global
+
+inner()
+{
+    unset res
+    echo ${FUNCNAME}: ${res-res unset}
+    if [[ $1 == "set" ]]; then
+        res[0]="X"
+        res[1]="Y"
+    fi
+}
+
+outer()
+{
+    local res=
+    inner "$1"
+    echo ${FUNCNAME}: "res: ${res[@]}"
+}
+
+echo main: ${res-unset}
+outer set
+echo main: after first call: ${res-unset}
+outer dontset 
+echo main: after second call: ${res-unset}
+
+unset -f outer inner
+unset res
+
+# local scope, unset variable at the same scope as local declaration
+func()
+{
+	typeset x=4
+
+	unset x
+	echo ${FUNCNAME}: ${x:-null or unset}
+}
+
+x=outside
+func
+echo after func: x = $x
+
+unset -f func
+unset x

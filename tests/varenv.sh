@@ -225,5 +225,8 @@ ${THIS_SH} ./varenv8.sub
 # if executed in shell functions, like they modify local scalar variables
 ${THIS_SH} ./varenv9.sub
 
+# more tests of unset and local variables with dynamic scoping
+${THIS_SH} ./varenv10.sub
+
 # make sure variable scoping is done right
 tt() { typeset a=b;echo a=$a; };a=z;echo a=$a;tt;echo a=$a

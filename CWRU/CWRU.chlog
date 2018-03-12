@@ -15047,3 +15047,25 @@ subst.c
 	  we are checking whether value is null, so we can have different
 	  error messages for ${x:?} and ${x?}. Report and fix from
 	  don fong <dfong@dfong.com>
+
+				    3/5
+				    ---
+lib/readline/bind.c
+	- _rl_read_file: instead of calling stat/open on the passed filename,
+	  use open/fstat to avoid one possible filename translation and close
+	  a small (benign) race condition. Report and fix from Roy Ivy
+	  <roy.ivy.iii@gmail.com>
+
+				   3/11
+				   ----
+variables.c
+	- makunbound: if new variable localvar_unset is non-zero, mark local
+	  vars in previous scopes as invisible and unset so they will show
+	  up as unset until that previous scope returns (similar to how	local
+	  variables in the current local scope are handled). localvar_unset
+	  is currently set to 0 with no way for a script to change its value.
+	  Eventually there will be an option to modify it.  From a bug-bash
+	  discussion started by Nikolai Kondrashov <spbnick@gmail.com> back
+	  on 2/11/2018
+
+
