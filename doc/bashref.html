@@ -1,11 +1,11 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 4.4, 2 March 2018).
+the Bash shell (version 5.0, 15 March 2018).
 
-This is Edition 4.4, last updated 2 March 2018,
+This is Edition 5.0, last updated 15 March 2018,
 of The GNU Bash Reference Manual,
-for Bash, Version 4.4.
+for Bash, Version 5.0.
 
 Copyright (C) 1988-2018 Free Software Foundation, Inc.
 
@@ -284,12 +284,12 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 4.4, 2 March 2018).
+the Bash shell (version 5.0, 15 March 2018).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 4.4, last updated 2 March 2018,
+<p>This is Edition 5.0, last updated 15 March 2018,
 of <cite>The GNU Bash Reference Manual</cite>,
-for <code>Bash</code>, Version 4.4.
+for <code>Bash</code>, Version 5.0.
 </p>
 <p>Bash contains features that appear in other popular shells, and some
 features that only appear in Bash.  Some of the shells that Bash has
@@ -2716,8 +2716,8 @@ array, and an index of -1 references the last element.
 <dt><code>${<var>parameter</var>#<var>word</var>}</code></dt>
 <dt><code>${<var>parameter</var>##<var>word</var>}</code></dt>
 <dd><p>The <var>word</var>
-is expanded to produce a pattern just as in filename
-expansion (see <a href="#Filename-Expansion">Filename Expansion</a>).  If the pattern matches
+is expanded to produce a pattern and matched according to the rules
+described below (see <a href="#Pattern-Matching">Pattern Matching</a>).  If the pattern matches
 the beginning of the expanded value of <var>parameter</var>,
 then the result of the expansion is the expanded value of <var>parameter</var>
 with the shortest matching pattern (the &lsquo;<samp>#</samp>&rsquo; case) or the
@@ -2733,8 +2733,9 @@ array in turn, and the expansion is the resultant list.
 </dd>
 <dt><code>${<var>parameter</var>%<var>word</var>}</code></dt>
 <dt><code>${<var>parameter</var>%%<var>word</var>}</code></dt>
-<dd><p>The <var>word</var> is expanded to produce a pattern just as in
-filename expansion.
+<dd><p>The <var>word</var>
+is expanded to produce a pattern and matched according to the rules
+described below (see <a href="#Pattern-Matching">Pattern Matching</a>).  If the pattern matches
 If the pattern matches a trailing portion of the expanded value of
 <var>parameter</var>, then the result of the expansion is the value of
 <var>parameter</var> with the shortest matching pattern (the &lsquo;<samp>%</samp>&rsquo; case)
@@ -2754,6 +2755,8 @@ array in turn, and the expansion is the resultant list.
 filename expansion.
 <var>Parameter</var> is expanded and the longest match of <var>pattern</var>
 against its value is replaced with <var>string</var>.
+The match is performed according to the rules described below
+(see <a href="#Pattern-Matching">Pattern Matching</a>).
 If <var>pattern</var> begins with &lsquo;<samp>/</samp>&rsquo;, all matches of <var>pattern</var> are
 replaced with <var>string</var>.  Normally only the first match is replaced.
 If <var>pattern</var> begins with &lsquo;<samp>#</samp>&rsquo;, it must match at the beginning
@@ -3045,9 +3048,12 @@ at the start of a filename or immediately following a slash
 must be matched explicitly, unless the shell option <code>dotglob</code> is set.
 The filenames &lsquo;<samp>.</samp>&rsquo; and &lsquo;<samp>..</samp>&rsquo; must always be matched explicitly,
 even if <code>dotglob</code> is set.
-When matching a filename, the slash character must always be
-matched explicitly.
 In other cases, the &lsquo;<samp>.</samp>&rsquo; character is not treated specially.
+</p>
+<p>When matching a filename, the slash character must always be
+matched explicitly by a slash in the pattern, but in other matching
+contexts it can be matched by a special pattern character as described
+below (see <a href="#Pattern-Matching">Pattern Matching</a>).
 </p>
 <p>See the description of <code>shopt</code> in <a href="#The-Shopt-Builtin">The Shopt Builtin</a>,
 for a description of the <code>nocaseglob</code>, <code>nullglob</code>,

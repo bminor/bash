@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2018 March 2<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2018 March 15<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -1117,11 +1117,11 @@ or zero if no commands were executed.
 <DT><B>case</B> <I>word</I> <B>in</B> [ [(] <I>pattern</I> [ <B>|</B> <I>pattern</I> ] 
 <DD>
 A <B>case</B> command first expands <I>word</I>, and tries to match
-it against each <I>pattern</I> in turn, using the same matching rules
-as for pathname expansion (see
-<B>Pathname Expansion</B>
+it against each <I>pattern</I> in turn, using the matching rules
+described under
+<B>Pattern Matching</B>
 
-below).
+below.
 The <I>word</I> is expanded using tilde
 expansion, parameter and variable expansion, arithmetic expansion,
 command substitution, process substitution and quote removal.
@@ -3931,7 +3931,14 @@ The
 <I>word</I>
 
 is expanded to produce a pattern just as in pathname
-expansion.  If the pattern matches the beginning of
+expansion, and matched against the expanded value of
+<I>parameter</I>
+
+using the rules described under
+<B>Pattern Matching</B>
+
+below.
+If the pattern matches the beginning of
 the value of
 <I>parameter</I>,
 
@@ -3968,7 +3975,13 @@ array in turn, and the expansion is the resultant list.
 
 <B>Remove matching suffix pattern</B>.
 The <I>word</I> is expanded to produce a pattern just as in
-pathname expansion.
+pathname expansion, and matched against the expanded value of
+<I>parameter</I>
+
+using the rules described under
+<B>Pattern Matching</B>
+
+below.
 If the pattern matches a trailing portion of the expanded value of
 <I>parameter</I>,
 
@@ -4002,9 +4015,13 @@ array in turn, and the expansion is the resultant list.
 <DT>${<I>parameter</I><B>/</B><I>pattern</I><B>/</B><I>string</I>}<DD>
 <B>Pattern substitution</B>.
 The <I>pattern</I> is expanded to produce a pattern just as in
-pathname expansion.
+pathname expansion,
 <I>Parameter</I> is expanded and the longest match of <I>pattern</I>
 against its value is replaced with <I>string</I>.
+The match is performed using the rules described under
+<B>Pattern Matching</B>
+
+below.
 If <I>pattern</I> begins with <B>/</B>, all matches of <I>pattern</I> are
 replaced with <I>string</I>.  Normally only the first match is replaced.
 If <I>pattern</I> begins with <B>#</B>, it must match at the beginning
@@ -4447,12 +4464,17 @@ must always be matched explicitly, even if
 <B>dotglob</B>
 
 is set.
-When matching a pathname, the slash character must always be
-matched explicitly.
 In other cases, the
 <B>``.''</B>
 
 character is not treated specially.
+When matching a pathname, the slash character must always be
+matched explicitly by a slash in the pattern, but in other matching
+contexts it can be matched by a special pattern character as described
+below under
+<FONT SIZE=-1><B>Pattern Matching</B>.
+
+</FONT>
 See the description of
 <B>shopt</B>
 
@@ -13823,7 +13845,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 4.4<TH ALIGN=CENTER width=33%>2018 March 2<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2018 March 15<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13929,6 +13951,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 02 March 2018 16:08:40 EST
+Time: 15 March 2018 14:13:43 EDT
 </BODY>
 </HTML>

@@ -120,8 +120,9 @@ after readonly assignment
 ./errors4.sub: line 7: var: readonly variable
 ./errors5.sub: line 6: array: unbound variable
 ./errors5.sub: line 7: array: unbound variable
-./errors5.sub: line 10: 7: unbound variable
+./errors5.sub: line 8: array[7]: unbound variable
 ./errors5.sub: line 11: 7: unbound variable
+./errors5.sub: line 12: 7: unbound variable
 after 1: 1
 after 2: 1
 after 3: 1
@@ -136,6 +137,13 @@ array after 2: 1
 ./errors6.sub: line 27: -3: invalid variable name
 after indir: 1
 ./errors6.sub: line 30: -3: invalid variable name
+
+unset
+./errors6.sub: line 37: var: invalid indirect expansion
+./errors6.sub: line 38: var: invalid indirect expansion
+./errors6.sub: line 41: invalid-ident: invalid variable name
+./errors6.sub: line 42: invalid-ident: invalid variable name
+./errors6.sub: line 43: invalid-ident: invalid variable name
 ./errors6.sub: uvar: parameter not set
 ./errors6.sub: uvar: parameter null or not set
 
@@ -145,4 +153,28 @@ after indir: 1
 ./errors6.sub: line 27: -3: invalid variable name
 after indir: 1
 ./errors6.sub: line 30: -3: invalid variable name
-./errors.tests: line 278: `!!': not a valid identifier
+
+unset
+./errors6.sub: line 37: var: invalid indirect expansion
+./errors6.sub: line 38: var: invalid indirect expansion
+./errors6.sub: line 41: invalid-ident: invalid variable name
+./errors6.sub: line 42: invalid-ident: invalid variable name
+./errors6.sub: line 43: invalid-ident: invalid variable name
+./errors7.sub: line 8: x: readonly variable
+./errors7.sub: line 8: notthere: command not found
+after no such command: 127
+./errors7.sub: line 10: x: readonly variable
+echo builtin
+after non-special builtin: 0
+./errors7.sub: line 12: x: readonly variable
+after special builtin: 0
+./errors7.sub: line 14: x: readonly variable
+./errors7.sub: line 8: x: readonly variable
+./errors7.sub: line 8: notthere: command not found
+after no such command: 127
+./errors7.sub: line 10: x: readonly variable
+echo builtin
+after non-special builtin: 0
+./errors7.sub: line 12: x: readonly variable
+./errors7.sub: line 14: x: readonly variable
+./errors.tests: line 281: `!!': not a valid identifier

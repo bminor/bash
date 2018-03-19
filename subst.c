@@ -595,6 +595,7 @@ quoted_strlen (s)
 }
 #endif
 
+#ifdef INCLUDE_UNUSED
 /* Find the first occurrence of character C in string S, obeying shell
    quoting rules.  If (FLAGS & ST_BACKSL) is non-zero, backslash-escaped
    characters are skipped.  If (FLAGS & ST_CTLESC) is non-zero, characters
@@ -622,7 +623,6 @@ quoted_strchr (s, c, flags)
   return ((char *)NULL);
 }
 
-#if defined (INCLUDE_UNUSED)
 /* Return 1 if CHARACTER appears in an unquoted portion of
    STRING.  Return 0 otherwise.  CHARACTER must be a single-byte character. */
 static int
@@ -4607,6 +4607,9 @@ remove_pattern (param, pattern, op)
       size_t n;
       wchar_t *wparam, *wpattern;
       mbstate_t ps;
+
+      /* XXX - could optimize here by checking param and pattern for multibyte
+	 chars with mbsmbchar and calling remove_upattern. */
 
       n = xdupmbstowcs (&wpattern, NULL, pattern);
       if (n == (size_t)-1)
@@ -11315,10 +11318,15 @@ expand_word_list_internal (list, eflags)
 	      if (assign_func == do_word_assignment)
 		{
 		  last_command_exit_value = EXECUTION_FAILURE;
-		  if (interactive_shell == 0 && posixly_correct && is_special_builtin)
+		  if (interactive_shell == 0 && posixly_correct)
 		    exp_jump_to_top_level (FORCE_EOF);
 		  else
 		    exp_jump_to_top_level (DISCARD);
+		}
+	      else if (interactive_shell == 0 && is_special_builtin)
+		{
+		  last_command_exit_value = EXECUTION_FAILURE;
+		  exp_jump_to_top_level (FORCE_EOF);
 		}
 	      else
 		tempenv_assign_error++;

@@ -2189,8 +2189,8 @@ array, and an index of -1 references the last element.
 @item $@{@var{parameter}#@var{word}@}
 @itemx $@{@var{parameter}##@var{word}@}
 The @var{word}
-is expanded to produce a pattern just as in filename
-expansion (@pxref{Filename Expansion}).  If the pattern matches
+is expanded to produce a pattern and matched according to the rules
+described below (@pxref{Pattern Matching}).  If the pattern matches
 the beginning of the expanded value of @var{parameter},
 then the result of the expansion is the expanded value of @var{parameter}
 with the shortest matching pattern (the @samp{#} case) or the
@@ -2205,8 +2205,9 @@ array in turn, and the expansion is the resultant list.
 
 @item $@{@var{parameter}%@var{word}@}
 @itemx $@{@var{parameter}%%@var{word}@}
-The @var{word} is expanded to produce a pattern just as in
-filename expansion.
+The @var{word}
+is expanded to produce a pattern and matched according to the rules
+described below (@pxref{Pattern Matching}).  If the pattern matches
 If the pattern matches a trailing portion of the expanded value of
 @var{parameter}, then the result of the expansion is the value of
 @var{parameter} with the shortest matching pattern (the @samp{%} case)
@@ -2225,6 +2226,8 @@ The @var{pattern} is expanded to produce a pattern just as in
 filename expansion.
 @var{Parameter} is expanded and the longest match of @var{pattern}
 against its value is replaced with @var{string}.
+The match is performed according to the rules described below
+(@pxref{Pattern Matching}).
 If @var{pattern} begins with @samp{/}, all matches of @var{pattern} are
 replaced with @var{string}.  Normally only the first match is replaced.
 If @var{pattern} begins with @samp{#}, it must match at the beginning
@@ -2481,9 +2484,12 @@ at the start of a filename or immediately following a slash
 must be matched explicitly, unless the shell option @code{dotglob} is set.
 The filenames @samp{.} and @samp{..} must always be matched explicitly,
 even if @code{dotglob} is set.
-When matching a filename, the slash character must always be
-matched explicitly.
 In other cases, the @samp{.} character is not treated specially.
+
+When matching a filename, the slash character must always be
+matched explicitly by a slash in the pattern, but in other matching
+contexts it can be matched by a special pattern character as described
+below (@pxref{Pattern Matching}).
 
 See the description of @code{shopt} in @ref{The Shopt Builtin},
 for a description of the @code{nocaseglob}, @code{nullglob},

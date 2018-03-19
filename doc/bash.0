@@ -457,24 +457,24 @@ SSHHEELLLL GGRRAAMMMMAARR
 
        ccaassee _w_o_r_d iinn [ [(] _p_a_t_t_e_r_n [ || _p_a_t_t_e_r_n ] ... ) _l_i_s_t ;; ] ... eessaacc
               A ccaassee command first expands _w_o_r_d, and tries to match it against
-              each _p_a_t_t_e_r_n in turn, using the same matching rules as for path-
-              name expansion (see PPaatthhnnaammee  EExxppaannssiioonn  below).   The  _w_o_r_d  is
-              expanded  using  tilde  expansion, parameter and variable expan-
-              sion, arithmetic expansion, command substitution,  process  sub-
-              stitution  and quote removal.  Each _p_a_t_t_e_r_n examined is expanded
-              using tilde expansion, parameter and variable expansion,  arith-
-              metic expansion, command substitution, and process substitution.
-              If the nnooccaasseemmaattcchh shell option is enabled, the  match  is  per-
-              formed  without  regard  to  the  case of alphabetic characters.
-              When a match is found, the corresponding _l_i_s_t is  executed.   If
-              the  ;;;;  operator  is  used, no subsequent matches are attempted
-              after the first pattern match.  Using ;;&& in place of  ;;;;  causes
-              execution to continue with the _l_i_s_t associated with the next set
-              of patterns.  Using ;;;;&& in place of ;;;; causes the shell to  test
-              the  next pattern list in the statement, if any, and execute any
-              associated _l_i_s_t on a successful match.  The exit status is  zero
-              if  no pattern matches.  Otherwise, it is the exit status of the
-              last command executed in _l_i_s_t.
+              each  _p_a_t_t_e_r_n  in turn, using the matching rules described under
+              PPaatttteerrnn MMaattcchhiinngg below.  The _w_o_r_d is expanded using tilde expan-
+              sion,  parameter  and  variable expansion, arithmetic expansion,
+              command substitution, process substitution  and  quote  removal.
+              Each _p_a_t_t_e_r_n examined is expanded using tilde expansion, parame-
+              ter and variable expansion, arithmetic expansion,  command  sub-
+              stitution,  and  process substitution.  If the nnooccaasseemmaattcchh shell
+              option is enabled, the match is performed without regard to  the
+              case  of alphabetic characters.  When a match is found, the cor-
+              responding _l_i_s_t is executed.  If the ;;;;  operator  is  used,  no
+              subsequent  matches are attempted after the first pattern match.
+              Using ;;&& in place of ;;;; causes execution to  continue  with  the
+              _l_i_s_t  associated  with  the  next set of patterns.  Using ;;;;&& in
+              place of ;;;; causes the shell to test the next  pattern  list  in
+              the statement, if any, and execute any associated _l_i_s_t on a suc-
+              cessful match.  The exit status is zero if no  pattern  matches.
+              Otherwise, it is the exit status of the last command executed in
+              _l_i_s_t.
 
        iiff _l_i_s_t; tthheenn _l_i_s_t; [ eelliiff _l_i_s_t; tthheenn _l_i_s_t; ] ... [ eellssee _l_i_s_t; ] ffii
               The iiff _l_i_s_t is executed.  If its exit status is zero,  the  tthheenn
@@ -1710,100 +1710,105 @@ EEXXPPAANNSSIIOONN
        ${_p_a_r_a_m_e_t_e_r##_w_o_r_d}
        ${_p_a_r_a_m_e_t_e_r####_w_o_r_d}
               RReemmoovvee mmaattcchhiinngg pprreeffiixx ppaatttteerrnn.  The _w_o_r_d is expanded to produce
-              a pattern just as in pathname expansion.  If the pattern matches
-              the beginning of the value of _p_a_r_a_m_e_t_e_r, then the result of  the
+              a pattern just as in pathname expansion, and matched against the
+              expanded value of _p_a_r_a_m_e_t_e_r using the rules described under PPaatt--
+              tteerrnn  MMaattcchhiinngg  below.   If the pattern matches the beginning of
+              the value of _p_a_r_a_m_e_t_e_r, then the result of the expansion is  the
+              expanded  value  of _p_a_r_a_m_e_t_e_r with the shortest matching pattern
+              (the ``##'' case) or the longest  matching  pattern  (the  ``####''
+              case)  deleted.   If  _p_a_r_a_m_e_t_e_r  is  @@ or **, the pattern removal
+              operation is applied to each positional parameter in  turn,  and
+              the  expansion  is the resultant list.  If _p_a_r_a_m_e_t_e_r is an array
+              variable subscripted with @@ or **, the pattern removal  operation
+              is  applied  to each member of the array in turn, and the expan-
+              sion is the resultant list.
+
+       ${_p_a_r_a_m_e_t_e_r%%_w_o_r_d}
+       ${_p_a_r_a_m_e_t_e_r%%%%_w_o_r_d}
+              RReemmoovvee mmaattcchhiinngg ssuuffffiixx ppaatttteerrnn.  The _w_o_r_d is expanded to produce
+              a pattern just as in pathname expansion, and matched against the
+              expanded value of _p_a_r_a_m_e_t_e_r using the rules described under PPaatt--
+              tteerrnn  MMaattcchhiinngg below.  If the pattern matches a trailing portion
+              of the expanded value of  _p_a_r_a_m_e_t_e_r,  then  the  result  of  the
               expansion  is  the expanded value of _p_a_r_a_m_e_t_e_r with the shortest
-              matching pattern (the ``##'' case) or the longest  matching  pat-
-              tern  (the  ``####''  case)  deleted.  If _p_a_r_a_m_e_t_e_r is @@ or **, the
+              matching pattern (the ``%%'' case) or the longest  matching  pat-
+              tern  (the  ``%%%%''  case)  deleted.  If _p_a_r_a_m_e_t_e_r is @@ or **, the
               pattern removal operation is applied to each positional  parame-
               ter in turn, and the expansion is the resultant list.  If _p_a_r_a_m_-
               _e_t_e_r is an array variable subscripted with @@ or **,  the  pattern
               removal  operation  is  applied  to  each member of the array in
               turn, and the expansion is the resultant list.
 
-       ${_p_a_r_a_m_e_t_e_r%%_w_o_r_d}
-       ${_p_a_r_a_m_e_t_e_r%%%%_w_o_r_d}
-              RReemmoovvee mmaattcchhiinngg ssuuffffiixx ppaatttteerrnn.  The _w_o_r_d is expanded to produce
-              a pattern just as in pathname expansion.  If the pattern matches
-              a trailing portion of the expanded value of _p_a_r_a_m_e_t_e_r, then  the
-              result  of the expansion is the expanded value of _p_a_r_a_m_e_t_e_r with
-              the shortest matching pattern (the ``%%'' case)  or  the  longest
-              matching  pattern  (the ``%%%%'' case) deleted.  If _p_a_r_a_m_e_t_e_r is @@
-              or **, the pattern removal operation is  applied  to  each  posi-
-              tional  parameter  in  turn,  and the expansion is the resultant
-              list.  If _p_a_r_a_m_e_t_e_r is an array variable subscripted with  @@  or
-              **,  the  pattern  removal operation is applied to each member of
-              the array in turn, and the expansion is the resultant list.
-
        ${_p_a_r_a_m_e_t_e_r//_p_a_t_t_e_r_n//_s_t_r_i_n_g}
               PPaatttteerrnn ssuubbssttiittuuttiioonn.  The _p_a_t_t_e_r_n is expanded to produce a pat-
-              tern  just  as in pathname expansion.  _P_a_r_a_m_e_t_e_r is expanded and
+              tern  just  as  in pathname expansion, _P_a_r_a_m_e_t_e_r is expanded and
               the longest match of _p_a_t_t_e_r_n against its value is replaced  with
-              _s_t_r_i_n_g.   If  _p_a_t_t_e_r_n  begins with //, all matches of _p_a_t_t_e_r_n are
-              replaced  with  _s_t_r_i_n_g.   Normally  only  the  first  match   is
-              replaced.  If _p_a_t_t_e_r_n begins with ##, it must match at the begin-
-              ning of the expanded value of _p_a_r_a_m_e_t_e_r.  If _p_a_t_t_e_r_n begins with
-              %%,  it must match at the end of the expanded value of _p_a_r_a_m_e_t_e_r.
-              If _s_t_r_i_n_g is null, matches of _p_a_t_t_e_r_n are deleted and the // fol-
-              lowing  _p_a_t_t_e_r_n may be omitted.  If the nnooccaasseemmaattcchh shell option
-              is enabled, the match is performed without regard to the case of
-              alphabetic characters.  If _p_a_r_a_m_e_t_e_r is @@ or **, the substitution
-              operation is applied to each positional parameter in  turn,  and
-              the  expansion  is the resultant list.  If _p_a_r_a_m_e_t_e_r is an array
-              variable subscripted with @@ or **, the substitution operation  is
-              applied  to  each member of the array in turn, and the expansion
-              is the resultant list.
+              _s_t_r_i_n_g.   The match is performed using the rules described under
+              PPaatttteerrnn MMaattcchhiinngg below.  If _p_a_t_t_e_r_n begins with //,  all  matches
+              of  _p_a_t_t_e_r_n  are  replaced with _s_t_r_i_n_g.  Normally only the first
+              match is replaced.  If _p_a_t_t_e_r_n begins with ##, it must  match  at
+              the  beginning  of  the expanded value of _p_a_r_a_m_e_t_e_r.  If _p_a_t_t_e_r_n
+              begins with %%, it must match at the end of the expanded value of
+              _p_a_r_a_m_e_t_e_r.   If  _s_t_r_i_n_g  is null, matches of _p_a_t_t_e_r_n are deleted
+              and the // following _p_a_t_t_e_r_n may be omitted.  If the  nnooccaasseemmaattcchh
+              shell  option  is enabled, the match is performed without regard
+              to the case of alphabetic characters.  If _p_a_r_a_m_e_t_e_r is @@  or  **,
+              the substitution operation is applied to each positional parame-
+              ter in turn, and the expansion is the resultant list.  If _p_a_r_a_m_-
+              _e_t_e_r is an array variable subscripted with @@ or **, the substitu-
+              tion operation is applied to each member of the array  in  turn,
+              and the expansion is the resultant list.
 
        ${_p_a_r_a_m_e_t_e_r^^_p_a_t_t_e_r_n}
        ${_p_a_r_a_m_e_t_e_r^^^^_p_a_t_t_e_r_n}
        ${_p_a_r_a_m_e_t_e_r,,_p_a_t_t_e_r_n}
        ${_p_a_r_a_m_e_t_e_r,,,,_p_a_t_t_e_r_n}
-              CCaassee mmooddiiffiiccaattiioonn.  This expansion modifies the case  of  alpha-
-              betic  characters in _p_a_r_a_m_e_t_e_r.  The _p_a_t_t_e_r_n is expanded to pro-
+              CCaassee  mmooddiiffiiccaattiioonn.   This expansion modifies the case of alpha-
+              betic characters in _p_a_r_a_m_e_t_e_r.  The _p_a_t_t_e_r_n is expanded to  pro-
               duce a pattern just as in pathname expansion.  Each character in
-              the  expanded value of _p_a_r_a_m_e_t_e_r is tested against _p_a_t_t_e_r_n, and,
-              if it matches the pattern, its case is converted.   The  pattern
-              should  not  attempt  to  match  more than one character.  The ^^
-              operator converts lowercase letters matching _p_a_t_t_e_r_n  to  upper-
+              the expanded value of _p_a_r_a_m_e_t_e_r is tested against _p_a_t_t_e_r_n,  and,
+              if  it  matches the pattern, its case is converted.  The pattern
+              should not attempt to match more  than  one  character.   The  ^^
+              operator  converts  lowercase letters matching _p_a_t_t_e_r_n to upper-
               case; the ,, operator converts matching uppercase letters to low-
               ercase.  The ^^^^ and ,,,, expansions convert each matched character
-              in  the expanded value; the ^^ and ,, expansions match and convert
-              only the first character in the expanded value.  If  _p_a_t_t_e_r_n  is
-              omitted,  it is treated like a ??, which matches every character.
-              If _p_a_r_a_m_e_t_e_r is @@ or  **,  the  case  modification  operation  is
-              applied  to each positional parameter in turn, and the expansion
-              is the resultant list.  If _p_a_r_a_m_e_t_e_r is an array  variable  sub-
+              in the expanded value; the ^^ and ,, expansions match and  convert
+              only  the  first character in the expanded value.  If _p_a_t_t_e_r_n is
+              omitted, it is treated like a ??, which matches every  character.
+              If  _p_a_r_a_m_e_t_e_r  is  @@  or  **,  the case modification operation is
+              applied to each positional parameter in turn, and the  expansion
+              is  the  resultant list.  If _p_a_r_a_m_e_t_e_r is an array variable sub-
               scripted with @@ or **, the case modification operation is applied
-              to each member of the array in turn, and the  expansion  is  the
+              to  each  member  of the array in turn, and the expansion is the
               resultant list.
 
        ${_p_a_r_a_m_e_t_e_r@@_o_p_e_r_a_t_o_r}
               PPaarraammeetteerr ttrraannssffoorrmmaattiioonn.  The expansion is either a transforma-
-              tion of the value of _p_a_r_a_m_e_t_e_r or  information  about  _p_a_r_a_m_e_t_e_r
-              itself,  depending on the value of _o_p_e_r_a_t_o_r.  Each _o_p_e_r_a_t_o_r is a
+              tion  of  the  value of _p_a_r_a_m_e_t_e_r or information about _p_a_r_a_m_e_t_e_r
+              itself, depending on the value of _o_p_e_r_a_t_o_r.  Each _o_p_e_r_a_t_o_r is  a
               single letter:
 
-              QQ      The expansion is a string that is the value of  _p_a_r_a_m_e_t_e_r
+              QQ      The  expansion is a string that is the value of _p_a_r_a_m_e_t_e_r
                      quoted in a format that can be reused as input.
-              EE      The  expansion is a string that is the value of _p_a_r_a_m_e_t_e_r
-                     with backslash escape  sequences  expanded  as  with  the
+              EE      The expansion is a string that is the value of  _p_a_r_a_m_e_t_e_r
+                     with  backslash  escape  sequences  expanded  as with the
                      $$''......'' quoting mechanism.
               PP      The expansion is a string that is the result of expanding
                      the value of _p_a_r_a_m_e_t_e_r as if it were a prompt string (see
                      PPRROOMMPPTTIINNGG below).
-              AA      The  expansion  is  a string in the form of an assignment
-                     statement or ddeeccllaarree command  that,  if  evaluated,  will
+              AA      The expansion is a string in the form  of  an  assignment
+                     statement  or  ddeeccllaarree  command  that, if evaluated, will
                      recreate _p_a_r_a_m_e_t_e_r with its attributes and value.
-              aa      The  expansion is a string consisting of flag values rep-
+              aa      The expansion is a string consisting of flag values  rep-
                      resenting _p_a_r_a_m_e_t_e_r's attributes.
 
-              If _p_a_r_a_m_e_t_e_r is @@ or **, the operation is applied to  each  posi-
-              tional  parameter  in  turn,  and the expansion is the resultant
-              list.  If _p_a_r_a_m_e_t_e_r is an array variable subscripted with  @@  or
+              If  _p_a_r_a_m_e_t_e_r  is @@ or **, the operation is applied to each posi-
+              tional parameter in turn, and the  expansion  is  the  resultant
+              list.   If  _p_a_r_a_m_e_t_e_r is an array variable subscripted with @@ or
               **, the operation is applied to each member of the array in turn,
               and the expansion is the resultant list.
 
-              The result of the expansion is subject  to  word  splitting  and
+              The  result  of  the  expansion is subject to word splitting and
               pathname expansion as described below.
 
    CCoommmmaanndd SSuubbssttiittuuttiioonn
@@ -1817,106 +1822,109 @@ EEXXPPAANNSSIIOONN
        BBaasshh performs the expansion by executing _c_o_m_m_a_n_d in a subshell environ-
        ment and replacing the command substitution with the standard output of
        the command, with any trailing newlines deleted.  Embedded newlines are
-       not  deleted,  but they may be removed during word splitting.  The com-
-       mand substitution $$((ccaatt _f_i_l_e)) can be replaced  by  the  equivalent  but
+       not deleted, but they may be removed during word splitting.   The  com-
+       mand  substitution  $$((ccaatt  _f_i_l_e))  can be replaced by the equivalent but
        faster $$((<< _f_i_l_e)).
 
-       When  the  old-style  backquote form of substitution is used, backslash
-       retains its literal meaning except when followed by $$, ``,  or  \\.   The
+       When the old-style backquote form of substitution  is  used,  backslash
+       retains  its  literal  meaning except when followed by $$, ``, or \\.  The
        first backquote not preceded by a backslash terminates the command sub-
-       stitution.  When using the $(_c_o_m_m_a_n_d) form, all characters between  the
+       stitution.   When using the $(_c_o_m_m_a_n_d) form, all characters between the
        parentheses make up the command; none are treated specially.
 
        Command substitutions may be nested.  To nest when using the backquoted
        form, escape the inner backquotes with backslashes.
 
-       If the substitution appears within double quotes,  word  splitting  and
+       If  the  substitution  appears within double quotes, word splitting and
        pathname expansion are not performed on the results.
 
    AArriitthhmmeettiicc EExxppaannssiioonn
-       Arithmetic  expansion allows the evaluation of an arithmetic expression
-       and the substitution of the result.  The format for  arithmetic  expan-
+       Arithmetic expansion allows the evaluation of an arithmetic  expression
+       and  the  substitution of the result.  The format for arithmetic expan-
        sion is:
 
               $$((((_e_x_p_r_e_s_s_i_o_n))))
 
-       The  _e_x_p_r_e_s_s_i_o_n  is  treated  as if it were within double quotes, but a
-       double quote inside the parentheses  is  not  treated  specially.   All
+       The _e_x_p_r_e_s_s_i_o_n is treated as if it were within  double  quotes,  but  a
+       double  quote  inside  the  parentheses  is not treated specially.  All
        tokens in the expression undergo parameter and variable expansion, com-
-       mand substitution, and quote removal.  The result  is  treated  as  the
-       arithmetic  expression  to  be evaluated.  Arithmetic expansions may be
+       mand  substitution,  and  quote  removal.  The result is treated as the
+       arithmetic expression to be evaluated.  Arithmetic  expansions  may  be
        nested.
 
-       The evaluation is performed according to the rules listed  below  under
+       The  evaluation  is performed according to the rules listed below under
        AARRIITTHHMMEETTIICC EEVVAALLUUAATTIIOONN.  If _e_x_p_r_e_s_s_i_o_n is invalid, bbaasshh prints a message
        indicating failure and no substitution occurs.
 
    PPrroocceessss SSuubbssttiittuuttiioonn
-       _P_r_o_c_e_s_s _s_u_b_s_t_i_t_u_t_i_o_n allows a process's input or output to be  referred
-       to  using  a  filename.   It takes the form of <<((_l_i_s_t)) or >>((_l_i_s_t)).  The
-       process _l_i_s_t is run asynchronously, and its input or output appears  as
+       _P_r_o_c_e_s_s  _s_u_b_s_t_i_t_u_t_i_o_n allows a process's input or output to be referred
+       to using a filename.  It takes the form of  <<((_l_i_s_t))  or  >>((_l_i_s_t)).   The
+       process  _l_i_s_t is run asynchronously, and its input or output appears as
        a filename.  This filename is passed as an argument to the current com-
-       mand as the result of the expansion.  If  the  >>((_l_i_s_t))  form  is  used,
-       writing  to  the file will provide input for _l_i_s_t.  If the <<((_l_i_s_t)) form
-       is used, the file passed as an argument should be read  to  obtain  the
+       mand  as  the  result  of  the expansion.  If the >>((_l_i_s_t)) form is used,
+       writing to the file will provide input for _l_i_s_t.  If the  <<((_l_i_s_t))  form
+       is  used,  the  file passed as an argument should be read to obtain the
        output of _l_i_s_t.  Process substitution is supported on systems that sup-
        port named pipes (_F_I_F_O_s) or the //ddeevv//ffdd method of naming open files.
 
-       When available, process substitution is performed  simultaneously  with
-       parameter  and variable expansion, command substitution, and arithmetic
+       When  available,  process substitution is performed simultaneously with
+       parameter and variable expansion, command substitution, and  arithmetic
        expansion.
 
    WWoorrdd SSpplliittttiinngg
-       The shell scans the results of parameter expansion,  command  substitu-
-       tion,  and arithmetic expansion that did not occur within double quotes
+       The  shell  scans the results of parameter expansion, command substitu-
+       tion, and arithmetic expansion that did not occur within double  quotes
        for _w_o_r_d _s_p_l_i_t_t_i_n_g.
 
-       The shell treats each character of IIFFSS as a delimiter, and  splits  the
-       results  of  the  other expansions into words using these characters as
-       field  terminators.   If  IIFFSS  is  unset,  or  its  value  is   exactly
-       <<ssppaaccee>><<ttaabb>><<nneewwlliinnee>>,  the  default, then sequences of <<ssppaaccee>>, <<ttaabb>>,
-       and <<nneewwlliinnee>> at the beginning and end of the results of  the  previous
-       expansions  are  ignored, and any sequence of IIFFSS characters not at the
-       beginning or end serves to delimit words.  If IIFFSS  has  a  value  other
-       than  the  default,  then sequences of the whitespace characters ssppaaccee,
-       ttaabb, and nneewwlliinnee are ignored at the beginning and end of the  word,  as
-       long  as the whitespace character is in the value of IIFFSS (an IIFFSS white-
-       space character).  Any character in IIFFSS that  is  not  IIFFSS  whitespace,
+       The  shell  treats each character of IIFFSS as a delimiter, and splits the
+       results of the other expansions into words using  these  characters  as
+       field   terminators.   If  IIFFSS  is  unset,  or  its  value  is  exactly
+       <<ssppaaccee>><<ttaabb>><<nneewwlliinnee>>, the default, then sequences of  <<ssppaaccee>>,  <<ttaabb>>,
+       and  <<nneewwlliinnee>>  at the beginning and end of the results of the previous
+       expansions are ignored, and any sequence of IIFFSS characters not  at  the
+       beginning  or  end  serves  to delimit words.  If IIFFSS has a value other
+       than the default, then sequences of the  whitespace  characters  ssppaaccee,
+       ttaabb,  and  nneewwlliinnee are ignored at the beginning and end of the word, as
+       long as the whitespace character is in the value of IIFFSS (an IIFFSS  white-
+       space  character).   Any  character  in IIFFSS that is not IIFFSS whitespace,
        along with any adjacent IIFFSS whitespace characters, delimits a field.  A
-       sequence of IIFFSS whitespace characters is also treated as  a  delimiter.
+       sequence  of  IIFFSS whitespace characters is also treated as a delimiter.
        If the value of IIFFSS is null, no word splitting occurs.
 
-       Explicit  null arguments ("""" or '''') are retained and passed to commands
+       Explicit null arguments ("""" or '''') are retained and passed to  commands
        as empty strings.  Unquoted implicit null arguments, resulting from the
        expansion of parameters that have no values, are removed.  If a parame-
-       ter with no value is expanded within double  quotes,  a  null  argument
-       results  and  is  retained  and passed to a command as an empty string.
-       When a quoted null argument appears as part of a word  whose  expansion
-       is  non-null,  the  null  argument  is removed.  That is, the word -d''
+       ter  with  no  value  is expanded within double quotes, a null argument
+       results and is retained and passed to a command  as  an  empty  string.
+       When  a  quoted null argument appears as part of a word whose expansion
+       is non-null, the null argument is removed.   That  is,  the  word  -d''
        becomes -d after word splitting and null argument removal.
 
        Note that if no expansion occurs, no splitting is performed.
 
    PPaatthhnnaammee EExxppaannssiioonn
-       After word splitting, unless the --ff option has  been  set,  bbaasshh  scans
-       each  word  for the characters **, ??, and [[.  If one of these characters
-       appears, then the word is regarded as a _p_a_t_t_e_r_n, and replaced  with  an
-       alphabetically  sorted list of filenames matching the pattern (see PPaatt--
-       tteerrnn MMaattcchhiinngg below).  If no matching  filenames  are  found,  and  the
-       shell  option  nnuullllgglloobb is not enabled, the word is left unchanged.  If
-       the nnuullllgglloobb option is set, and no  matches  are  found,  the  word  is
-       removed.   If  the  ffaaiillgglloobb  shell  option  is set, and no matches are
+       After  word  splitting,  unless  the --ff option has been set, bbaasshh scans
+       each word for the characters **, ??, and [[.  If one of  these  characters
+       appears,  then  the word is regarded as a _p_a_t_t_e_r_n, and replaced with an
+       alphabetically sorted list of filenames matching the pattern (see  PPaatt--
+       tteerrnn  MMaattcchhiinngg  below).   If  no  matching filenames are found, and the
+       shell option nnuullllgglloobb is not enabled, the word is left  unchanged.   If
+       the  nnuullllgglloobb  option  is  set,  and  no matches are found, the word is
+       removed.  If the ffaaiillgglloobb shell option  is  set,  and  no  matches  are
        found, an error message is printed and the command is not executed.  If
-       the  shell option nnooccaasseegglloobb is enabled, the match is performed without
-       regard to the case of alphabetic characters.  When a  pattern  is  used
-       for  pathname expansion, the character ````..''''  at the start of a name or
-       immediately following a slash must be matched  explicitly,  unless  the
-       shell  option  ddoottgglloobb  is  set.  The filenames ````..''''  and ````....''''  must
-       always be matched explicitly, even if ddoottgglloobb is set.  When matching  a
-       pathname,  the  slash  character must always be matched explicitly.  In
-       other cases, the ````..''''  character is not treated  specially.   See  the
-       description  of sshhoopptt below under SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS for a descrip-
-       tion of the nnooccaasseegglloobb, nnuullllgglloobb, ffaaiillgglloobb, and ddoottgglloobb shell options.
+       the shell option nnooccaasseegglloobb is enabled, the match is performed  without
+       regard  to  the  case of alphabetic characters.  When a pattern is used
+       for pathname expansion, the character ````..''''  at the start of a name  or
+       immediately  following  a  slash must be matched explicitly, unless the
+       shell option ddoottgglloobb is set.  The filenames  ````..''''   and  ````....''''   must
+       always  be matched explicitly, even if ddoottgglloobb is set.  In other cases,
+       the ````..''''  character is not treated specially.  When matching  a  path-
+       name,  the slash character must always be matched explicitly by a slash
+       in the pattern, but in other matching contexts it can be matched  by  a
+       special  pattern  character  as described below under PPaatttteerrnn MMaattcchhiinngg.
+       See the description of sshhoopptt below under SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS  for  a
+       description  of  the  nnooccaasseegglloobb, nnuullllgglloobb, ffaaiillgglloobb, and ddoottgglloobb shell
+       options.
 
        The GGLLOOBBIIGGNNOORREE shell variable may be used to restrict the set  of  file
        names  matching  a  _p_a_t_t_e_r_n.   If GGLLOOBBIIGGNNOORREE is set, each matching file
@@ -6106,4 +6114,4 @@ BBUUGGSS
 
 
 
-GNU Bash 4.4                     2018 March 2                          BASH(1)
+GNU Bash 5.0                     2018 March 15                         BASH(1)

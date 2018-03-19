@@ -340,7 +340,7 @@ recho "${foo:-$@}"
 expect '<ab> <cd> <ef> <gh>'
 recho "${foo:-"$@"}"
 
-shift $#
+shift ${#}
 expect nothing
 recho $xxx"$@"
 expect nothing
@@ -498,7 +498,7 @@ recho ${*%?}
 recho ${@#?}
 recho ${*#?}
 
-shift $#
+shift ${#}
 set -u
 ( recho $9 ; echo after 1)
 ( recho ${9} ; echo after 2)
@@ -596,6 +596,9 @@ ${THIS_SH} ./new-exp9.sub
 
 # new parameter transformation `@' expansion operator
 ${THIS_SH} ./new-exp10.sub
+
+# parameter substring replacement and removal operators with multibyte chars
+${THIS_SH} ./new-exp11.sub
 
 # problems with stray CTLNUL in bash-4.0-alpha
 unset a

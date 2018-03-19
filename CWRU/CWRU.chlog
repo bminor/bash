@@ -15068,4 +15068,23 @@ variables.c
 	  discussion started by Nikolai Kondrashov <spbnick@gmail.com> back
 	  on 2/11/2018
 
+				   3/13
+				   ----
+subst.c
+	- expand_word_list_internal: short-circuit and exit right away if a
+	  variable assignment preceding a special builtin fails in posix mode
+	- expand_word_list_internal: if a variable assignment precedes an
+	  empty command name (after expansion), fix to exit right away when
+	  the shell is in posix mode
 
+				   3/15
+				   ----
+doc/{bash.1,bashref.texi}
+	- Add text to Pathname Expansion clarifying that a slash must be
+	  matched by a slash in the pattern when matching pathnames, but
+	  not in other matching contexts. Suggested by <stormy1777@yahoo.com>
+
+builtins/common.c
+	- read_octal: allow octal numbers greater than 777 to accommodate
+	  modes and umasks that include sticky/setuid/setgid bits. Report
+	  and fix from Martijn Dekker <martijn@inlv.org>

@@ -128,6 +128,13 @@ outer: res: X Y
 main: after second call: X
 func: null or unset
 after func: x = outside
+./varenv11.sub: line 4: local: qux: readonly variable
+./varenv11.sub: line 5: qux: readonly variable
+declare -A foo=([one]="one" [zero]="zero" )
+declare -a bar=([0]="zero" [1]="one")
+declare -A foo=([one]="one" [zero]="zero" )
+declare -a bar=([0]="zero" [1]="one")
+./varenv11.sub: line 29: a: readonly variable
 a=z
 a=b
 a=z

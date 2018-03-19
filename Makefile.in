@@ -1,4 +1,4 @@
-# Makefile for bash-5.0, version 4.23
+# Makefile for bash-5.0, version 4.25
 #
 # Copyright (C) 1996-2018 Free Software Foundation, Inc.
 
@@ -609,7 +609,7 @@ asan:
 
 # cheating
 gcov:
-	${MAKE} ${MFLAGS} ADDON_CFLAGS='${GCOV_XCFLAGS}' ADDON_LDFLAGS='${GCOV_XLDFLAGS}' .made
+	${MAKE} ${MFLAGS} CFLAGS=-g ADDON_CFLAGS='${GCOV_XCFLAGS}' ADDON_LDFLAGS='${GCOV_XLDFLAGS}' .made
 
 
 # have to make this separate because making tests depend on $(PROGRAM)

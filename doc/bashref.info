@@ -2,10 +2,10 @@ This is bashref.info, produced by makeinfo version 6.5 from
 bashref.texi.
 
 This text is a brief description of the features that are present in the
-Bash shell (version 4.4, 2 March 2018).
+Bash shell (version 5.0, 15 March 2018).
 
-   This is Edition 4.4, last updated 2 March 2018, of 'The GNU Bash
-Reference Manual', for 'Bash', Version 4.4.
+   This is Edition 5.0, last updated 15 March 2018, of 'The GNU Bash
+Reference Manual', for 'Bash', Version 5.0.
 
    Copyright (C) 1988-2018 Free Software Foundation, Inc.
 
@@ -27,11 +27,11 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in the
-Bash shell (version 4.4, 2 March 2018).  The Bash home page is
+Bash shell (version 5.0, 15 March 2018).  The Bash home page is
 <http://www.gnu.org/software/bash/>.
 
-   This is Edition 4.4, last updated 2 March 2018, of 'The GNU Bash
-Reference Manual', for 'Bash', Version 4.4.
+   This is Edition 5.0, last updated 15 March 2018, of 'The GNU Bash
+Reference Manual', for 'Bash', Version 5.0.
 
    Bash contains features that appear in other popular shells, and some
 features that only appear in Bash.  Some of the shells that Bash has
@@ -1859,22 +1859,23 @@ omitted, the operator tests only for existence.
 
 '${PARAMETER#WORD}'
 '${PARAMETER##WORD}'
-     The WORD is expanded to produce a pattern just as in filename
-     expansion (*note Filename Expansion::).  If the pattern matches the
-     beginning of the expanded value of PARAMETER, then the result of
-     the expansion is the expanded value of PARAMETER with the shortest
-     matching pattern (the '#' case) or the longest matching pattern
-     (the '##' case) deleted.  If PARAMETER is '@' or '*', the pattern
-     removal operation is applied to each positional parameter in turn,
-     and the expansion is the resultant list.  If PARAMETER is an array
-     variable subscripted with '@' or '*', the pattern removal operation
-     is applied to each member of the array in turn, and the expansion
-     is the resultant list.
+     The WORD is expanded to produce a pattern and matched according to
+     the rules described below (*note Pattern Matching::).  If the
+     pattern matches the beginning of the expanded value of PARAMETER,
+     then the result of the expansion is the expanded value of PARAMETER
+     with the shortest matching pattern (the '#' case) or the longest
+     matching pattern (the '##' case) deleted.  If PARAMETER is '@' or
+     '*', the pattern removal operation is applied to each positional
+     parameter in turn, and the expansion is the resultant list.  If
+     PARAMETER is an array variable subscripted with '@' or '*', the
+     pattern removal operation is applied to each member of the array in
+     turn, and the expansion is the resultant list.
 
 '${PARAMETER%WORD}'
 '${PARAMETER%%WORD}'
-     The WORD is expanded to produce a pattern just as in filename
-     expansion.  If the pattern matches a trailing portion of the
+     The WORD is expanded to produce a pattern and matched according to
+     the rules described below (*note Pattern Matching::).  If the
+     pattern matches If the pattern matches a trailing portion of the
      expanded value of PARAMETER, then the result of the expansion is
      the value of PARAMETER with the shortest matching pattern (the '%'
      case) or the longest matching pattern (the '%%' case) deleted.  If
@@ -1888,21 +1889,23 @@ omitted, the operator tests only for existence.
 
      The PATTERN is expanded to produce a pattern just as in filename
      expansion.  PARAMETER is expanded and the longest match of PATTERN
-     against its value is replaced with STRING.  If PATTERN begins with
-     '/', all matches of PATTERN are replaced with STRING.  Normally
-     only the first match is replaced.  If PATTERN begins with '#', it
-     must match at the beginning of the expanded value of PARAMETER.  If
-     PATTERN begins with '%', it must match at the end of the expanded
-     value of PARAMETER.  If STRING is null, matches of PATTERN are
-     deleted and the '/' following PATTERN may be omitted.  If the
-     'nocasematch' shell option (see the description of 'shopt' in *note
-     The Shopt Builtin::) is enabled, the match is performed without
-     regard to the case of alphabetic characters.  If PARAMETER is '@'
-     or '*', the substitution operation is applied to each positional
-     parameter in turn, and the expansion is the resultant list.  If
-     PARAMETER is an array variable subscripted with '@' or '*', the
-     substitution operation is applied to each member of the array in
-     turn, and the expansion is the resultant list.
+     against its value is replaced with STRING.  The match is performed
+     according to the rules described below (*note Pattern Matching::).
+     If PATTERN begins with '/', all matches of PATTERN are replaced
+     with STRING.  Normally only the first match is replaced.  If
+     PATTERN begins with '#', it must match at the beginning of the
+     expanded value of PARAMETER.  If PATTERN begins with '%', it must
+     match at the end of the expanded value of PARAMETER.  If STRING is
+     null, matches of PATTERN are deleted and the '/' following PATTERN
+     may be omitted.  If the 'nocasematch' shell option (see the
+     description of 'shopt' in *note The Shopt Builtin::) is enabled,
+     the match is performed without regard to the case of alphabetic
+     characters.  If PARAMETER is '@' or '*', the substitution operation
+     is applied to each positional parameter in turn, and the expansion
+     is the resultant list.  If PARAMETER is an array variable
+     subscripted with '@' or '*', the substitution operation is applied
+     to each member of the array in turn, and the expansion is the
+     resultant list.
 
 '${PARAMETER^PATTERN}'
 '${PARAMETER^^PATTERN}'
@@ -2104,8 +2107,12 @@ performed without regard to the case of alphabetic characters.
 the start of a filename or immediately following a slash must be matched
 explicitly, unless the shell option 'dotglob' is set.  The filenames '.'
 and '..' must always be matched explicitly, even if 'dotglob' is set.
-When matching a filename, the slash character must always be matched
-explicitly.  In other cases, the '.' character is not treated specially.
+In other cases, the '.' character is not treated specially.
+
+   When matching a filename, the slash character must always be matched
+explicitly by a slash in the pattern, but in other matching contexts it
+can be matched by a special pattern character as described below (*note
+Pattern Matching::).
 
    See the description of 'shopt' in *note The Shopt Builtin::, for a
 description of the 'nocaseglob', 'nullglob', 'failglob', and 'dotglob'
@@ -11575,134 +11582,134 @@ D.5 Concept Index
 
 
 Tag Table:
-Node: Top889
-Node: Introduction2801
-Node: What is Bash?3017
-Node: What is a shell?4131
-Node: Definitions6669
-Node: Basic Shell Features9620
-Node: Shell Syntax10839
-Node: Shell Operation11865
-Node: Quoting13158
-Node: Escape Character14458
-Node: Single Quotes14943
-Node: Double Quotes15291
-Node: ANSI-C Quoting16569
-Node: Locale Translation17828
-Node: Comments18724
-Node: Shell Commands19342
-Node: Simple Commands20214
-Node: Pipelines20845
-Node: Lists23777
-Node: Compound Commands25516
-Node: Looping Constructs26528
-Node: Conditional Constructs29023
-Node: Command Grouping40078
-Node: Coprocesses41557
-Node: GNU Parallel43460
-Node: Shell Functions47434
-Node: Shell Parameters54517
-Node: Positional Parameters58930
-Node: Special Parameters59830
-Node: Shell Expansions63167
-Node: Brace Expansion65290
-Node: Tilde Expansion68014
-Node: Shell Parameter Expansion70362
-Node: Command Substitution84650
-Node: Arithmetic Expansion86005
-Node: Process Substitution86937
-Node: Word Splitting88057
-Node: Filename Expansion90001
-Node: Pattern Matching92375
-Node: Quote Removal96361
-Node: Redirections96656
-Node: Executing Commands106214
-Node: Simple Command Expansion106884
-Node: Command Search and Execution108814
-Node: Command Execution Environment111190
-Node: Environment114174
-Node: Exit Status115833
-Node: Signals117503
-Node: Shell Scripts119470
-Node: Shell Builtin Commands121985
-Node: Bourne Shell Builtins124023
-Node: Bash Builtins144681
-Node: Modifying Shell Behavior173589
-Node: The Set Builtin173934
-Node: The Shopt Builtin184347
-Node: Special Builtins201217
-Node: Shell Variables202196
-Node: Bourne Shell Variables202633
-Node: Bash Variables204737
-Node: Bash Features234751
-Node: Invoking Bash235650
-Node: Bash Startup Files241636
-Node: Interactive Shells246739
-Node: What is an Interactive Shell?247149
-Node: Is this Shell Interactive?247798
-Node: Interactive Shell Behavior248613
-Node: Bash Conditional Expressions252101
-Node: Shell Arithmetic256467
-Node: Aliases259284
-Node: Arrays261832
-Node: The Directory Stack267198
-Node: Directory Stack Builtins267982
-Node: Controlling the Prompt270950
-Node: The Restricted Shell273712
-Node: Bash POSIX Mode275537
-Node: Job Control285888
-Node: Job Control Basics286348
-Node: Job Control Builtins291316
-Node: Job Control Variables296043
-Node: Command Line Editing297199
-Node: Introduction and Notation298870
-Node: Readline Interaction300493
-Node: Readline Bare Essentials301684
-Node: Readline Movement Commands303467
-Node: Readline Killing Commands304427
-Node: Readline Arguments306345
-Node: Searching307389
-Node: Readline Init File309575
-Node: Readline Init File Syntax310722
-Node: Conditional Init Constructs331093
-Node: Sample Init File335289
-Node: Bindable Readline Commands338406
-Node: Commands For Moving339610
-Node: Commands For History341459
-Node: Commands For Text345754
-Node: Commands For Killing349143
-Node: Numeric Arguments351624
-Node: Commands For Completion352763
-Node: Keyboard Macros356954
-Node: Miscellaneous Commands357641
-Node: Readline vi Mode363594
-Node: Programmable Completion364501
-Node: Programmable Completion Builtins371962
-Node: A Programmable Completion Example381848
-Node: Using History Interactively387099
-Node: Bash History Facilities387783
-Node: Bash History Builtins390788
-Node: History Interaction395319
-Node: Event Designators398386
-Node: Word Designators399605
-Node: Modifiers401242
-Node: Installing Bash402644
-Node: Basic Installation403781
-Node: Compilers and Options407039
-Node: Compiling For Multiple Architectures407780
-Node: Installation Names409473
-Node: Specifying the System Type410291
-Node: Sharing Defaults411007
-Node: Operation Controls411680
-Node: Optional Features412638
-Node: Reporting Bugs423164
-Node: Major Differences From The Bourne Shell424358
-Node: GNU Free Documentation License441210
-Node: Indexes466387
-Node: Builtin Index466841
-Node: Reserved Word Index473668
-Node: Variable Index476116
-Node: Function Index491794
-Node: Concept Index505097
+Node: Top891
+Node: Introduction2805
+Node: What is Bash?3021
+Node: What is a shell?4135
+Node: Definitions6673
+Node: Basic Shell Features9624
+Node: Shell Syntax10843
+Node: Shell Operation11869
+Node: Quoting13162
+Node: Escape Character14462
+Node: Single Quotes14947
+Node: Double Quotes15295
+Node: ANSI-C Quoting16573
+Node: Locale Translation17832
+Node: Comments18728
+Node: Shell Commands19346
+Node: Simple Commands20218
+Node: Pipelines20849
+Node: Lists23781
+Node: Compound Commands25520
+Node: Looping Constructs26532
+Node: Conditional Constructs29027
+Node: Command Grouping40082
+Node: Coprocesses41561
+Node: GNU Parallel43464
+Node: Shell Functions47438
+Node: Shell Parameters54521
+Node: Positional Parameters58934
+Node: Special Parameters59834
+Node: Shell Expansions63171
+Node: Brace Expansion65294
+Node: Tilde Expansion68018
+Node: Shell Parameter Expansion70366
+Node: Command Substitution84849
+Node: Arithmetic Expansion86204
+Node: Process Substitution87136
+Node: Word Splitting88256
+Node: Filename Expansion90200
+Node: Pattern Matching92730
+Node: Quote Removal96716
+Node: Redirections97011
+Node: Executing Commands106569
+Node: Simple Command Expansion107239
+Node: Command Search and Execution109169
+Node: Command Execution Environment111545
+Node: Environment114529
+Node: Exit Status116188
+Node: Signals117858
+Node: Shell Scripts119825
+Node: Shell Builtin Commands122340
+Node: Bourne Shell Builtins124378
+Node: Bash Builtins145036
+Node: Modifying Shell Behavior173944
+Node: The Set Builtin174289
+Node: The Shopt Builtin184702
+Node: Special Builtins201572
+Node: Shell Variables202551
+Node: Bourne Shell Variables202988
+Node: Bash Variables205092
+Node: Bash Features235106
+Node: Invoking Bash236005
+Node: Bash Startup Files241991
+Node: Interactive Shells247094
+Node: What is an Interactive Shell?247504
+Node: Is this Shell Interactive?248153
+Node: Interactive Shell Behavior248968
+Node: Bash Conditional Expressions252456
+Node: Shell Arithmetic256822
+Node: Aliases259639
+Node: Arrays262187
+Node: The Directory Stack267553
+Node: Directory Stack Builtins268337
+Node: Controlling the Prompt271305
+Node: The Restricted Shell274067
+Node: Bash POSIX Mode275892
+Node: Job Control286243
+Node: Job Control Basics286703
+Node: Job Control Builtins291671
+Node: Job Control Variables296398
+Node: Command Line Editing297554
+Node: Introduction and Notation299225
+Node: Readline Interaction300848
+Node: Readline Bare Essentials302039
+Node: Readline Movement Commands303822
+Node: Readline Killing Commands304782
+Node: Readline Arguments306700
+Node: Searching307744
+Node: Readline Init File309930
+Node: Readline Init File Syntax311077
+Node: Conditional Init Constructs331448
+Node: Sample Init File335644
+Node: Bindable Readline Commands338761
+Node: Commands For Moving339965
+Node: Commands For History341814
+Node: Commands For Text346109
+Node: Commands For Killing349498
+Node: Numeric Arguments351979
+Node: Commands For Completion353118
+Node: Keyboard Macros357309
+Node: Miscellaneous Commands357996
+Node: Readline vi Mode363949
+Node: Programmable Completion364856
+Node: Programmable Completion Builtins372317
+Node: A Programmable Completion Example382203
+Node: Using History Interactively387454
+Node: Bash History Facilities388138
+Node: Bash History Builtins391143
+Node: History Interaction395674
+Node: Event Designators398741
+Node: Word Designators399960
+Node: Modifiers401597
+Node: Installing Bash402999
+Node: Basic Installation404136
+Node: Compilers and Options407394
+Node: Compiling For Multiple Architectures408135
+Node: Installation Names409828
+Node: Specifying the System Type410646
+Node: Sharing Defaults411362
+Node: Operation Controls412035
+Node: Optional Features412993
+Node: Reporting Bugs423519
+Node: Major Differences From The Bourne Shell424713
+Node: GNU Free Documentation License441565
+Node: Indexes466742
+Node: Builtin Index467196
+Node: Reserved Word Index474023
+Node: Variable Index476471
+Node: Function Index492149
+Node: Concept Index505452
 
 End Tag Table

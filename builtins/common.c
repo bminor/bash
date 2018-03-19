@@ -537,7 +537,7 @@ read_octal (string)
     {
       digits++;
       result = (result * 8) + (*string++ - '0');
-      if (result > 0777)
+      if (result > 07777)
 	return -1;
     }
 

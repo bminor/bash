@@ -21,6 +21,9 @@ unset a
 a=abcde
 declare -a a
 echo ${a[0]}
+if [ "$a" != "${a[0]}" ]; then
+	echo 'array.tests: $a and $a[0] array mismatch'
+fi
 
 unset a
 a=abcde
