@@ -848,6 +848,12 @@ not @code{NULL}, the type of the object is returned in the @code{int} variable
 it points to (one of @code{ISFUNC}, @code{ISKMAP}, or @code{ISMACR}).
 @end deftypefun
 
+@deftypefun {rl_command_func_t *} rl_function_of_keyseq_len (const char *keyseq, size_t len Keymap map, int *type)
+Return the function invoked by @var{keyseq} of length @var{len}
+in keymap @var{map}. Equivalent to @code{rl_function_of_keyseq} with the
+addition of the @var{len} parameter.
+@end deftypefun
+
 @deftypefun {char **} rl_invoking_keyseqs (rl_command_func_t *function)
 Return an array of strings representing the key sequences used to
 invoke @var{function} in the current keymap.

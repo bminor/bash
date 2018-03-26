@@ -15088,3 +15088,52 @@ builtins/common.c
 	- read_octal: allow octal numbers greater than 777 to accommodate
 	  modes and umasks that include sticky/setuid/setgid bits. Report
 	  and fix from Martijn Dekker <martijn@inlv.org>
+
+				   3/19
+				   ----
+lib/readline/bind.c
+	- rl_generic_bind: make sure we only assign to prevkey in the loop
+	  if the key sequence index is > 0, so ic is valid. Fixes bug
+	  reported by Koichi Murase <myoga.murase@gmail.com>
+
+builtins/read.def
+	- read_builtin: be slightly less aggressive checking for timeouts and
+	  SIGALRM: if we successfully read a character, don't check for a
+	  timeout until we store or process it. Fixes timing problem
+	  reported by Rob Foehl <rwf@loonybin.net>
+
+				   3/22
+				   ----
+sig.c
+	- termsig_handler: add a call to exit(1) after the kill, just in case
+	  there are circumstances where the SIG_DFL signal handler is
+	  ignored.  Report from Andrei Vagin <avagin@gmail.com>
+
+				   3/25
+				   ----
+lib/readline/bind.c
+	- _rl_function_of_keyseq_internal: new internal function thta takes a
+	  length parameter to accommodate NUL in the key sequence. Patch from
+	  Koichi Murase <myoga.murase@gmail.com>
+	- rl_function_of_keyseq_len: new application-callable function that
+	  takes a length parameter; otherwise equivalent to rl_function_of_keyseq.
+
+lib/readline/readline.h
+	- rl_function_of_keyseq_len: add extern declration for new function
+
+lib/readline/doc/rltech.texi
+	- rl_function_of_keyseq_len: document new function interface
+
+bashline.c
+	- bash_execute_unix_command: use rl_function_of_keyseq_len to handle
+	  key sequences with embedded NULs (\C-@). Fix from Koichi Murase
+	  <myoga.murase@gmail.com>
+
+lib/readline/bind.c
+	- rl_bind_key_if_unbound,rl_bind_key_if_unbound_in_map: run the KEY
+	  argument through rl_untranslate_keyseq to produce a symbolic sequence
+	  that can encode \C-@.
+	- rl_bind_keyseq_if_unbound_in_map: translate the key sequence in order
+	  to accommodate symbolic key sequences; should be a no-op for `raw'
+	  key sequences such as the arrow key seqeunces from terminfo. Change
+	  from Koichi Murase <myoga.murase@gmail.com>

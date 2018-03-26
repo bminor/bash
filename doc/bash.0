@@ -4503,9 +4503,11 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               --WW _w_o_r_d_l_i_s_t
                       The _w_o_r_d_l_i_s_t is split using the characters  in  the  IIFFSS
                       special  variable as delimiters, and each resultant word
-                      is expanded.  The possible completions are  the  members
-                      of  the  resultant  list which match the word being com-
-                      pleted.
+                      is expanded.  Shell quoting is honored within  _w_o_r_d_l_i_s_t,
+                      in order to provide a mechanism for the words to contain
+                      shell metacharacters or characters in the value of  IIFFSS.
+                      The  possible  completions are the members of the resul-
+                      tant list which match the word being completed.
               --XX _f_i_l_t_e_r_p_a_t
                       _f_i_l_t_e_r_p_a_t is a pattern as used for  pathname  expansion.
                       It is applied to the list of possible completions gener-

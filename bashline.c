@@ -4102,7 +4102,7 @@ bash_execute_unix_command (count, key)
   /* First, we need to find the right command to execute.  This is tricky,
      because we might have already indirected into another keymap, so we
      have to walk cmd_xmap using the entire key sequence. */
-  cmd = (char *)rl_function_of_keyseq (rl_executing_keyseq, cmd_xmap, &type);
+  cmd = (char *)rl_function_of_keyseq_len (rl_executing_keyseq, rl_key_sequence_length, cmd_xmap, &type);
     
   if (cmd == 0 || type != ISMACR)
     {

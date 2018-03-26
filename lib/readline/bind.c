@@ -80,6 +80,8 @@ static void _rl_init_file_error (const char *, ...)  __attribute__((__format__ (
 static void _rl_init_file_error ();
 #endif
 
+static rl_command_func_t *_rl_function_of_keyseq_internal PARAMS((const char *, size_t, Keymap, int *));
+
 static char *_rl_read_file PARAMS((char *, size_t *));
 static int _rl_read_init_file PARAMS((const char *, int));
 static int glean_key_from_name PARAMS((char *));
@@ -193,20 +195,18 @@ rl_bind_key_in_map (int key, rl_command_func_t *function, Keymap map)
 int
 rl_bind_key_if_unbound_in_map (int key, rl_command_func_t *default_func, Keymap kmap)
 {
-  char keyseq[2];
+  char *keyseq;
 
-  keyseq[0] = (unsigned char)key;
-  keyseq[1] = '\0';
+  keyseq = rl_untranslate_keyseq ((unsigned char)key);
   return (rl_bind_keyseq_if_unbound_in_map (keyseq, default_func, kmap));
 }
 
 int
 rl_bind_key_if_unbound (int key, rl_command_func_t *default_func)
 {
-  char keyseq[2];
+  char *keyseq;
 
-  keyseq[0] = (unsigned char)key;
-  keyseq[1] = '\0';
+  keyseq = rl_untranslate_keyseq ((unsigned char)key);
   return (rl_bind_keyseq_if_unbound_in_map (keyseq, default_func, _rl_keymap));
 }
 
@@ -287,10 +287,21 @@ int
 rl_bind_keyseq_if_unbound_in_map (const char *keyseq, rl_command_func_t *default_func, Keymap kmap)
 {
   rl_command_func_t *func;
+  char *keys;
+  int keys_len;
 
   if (keyseq)
     {
-      func = rl_function_of_keyseq (keyseq, kmap, (int *)NULL);
+      /* Handle key sequences that require translations and `raw' ones that
+	 don't. This might be a problem with backslashes. */
+      keys = (char *)xmalloc (1 + (2 * strlen (keyseq)));
+      if (rl_translate_keyseq (keyseq, keys, &keys_len))
+	{
+	  xfree (keys);
+	  return -1;
+	}
+      func = rl_function_of_keyseq_len (keys, keys_len, kmap, (int *)NULL);
+      xfree (keys);
 #if defined (VI_MODE)
       if (!func || func == rl_do_lowercase_version || func == rl_vi_movement_mode)
 #else
@@ -373,7 +384,8 @@ rl_generic_bind (int type, const char *keyseq, char *data, Keymap map)
       unsigned char uc = keys[i];
       int ic;
 
-      prevkey = ic;
+      if (i > 0)
+	prevkey = ic;
 
       ic = uc;
       if (ic < 0 || ic >= KEYMAP_SIZE)
@@ -760,15 +772,15 @@ rl_named_function (const char *string)
    used.  TYPE, if non-NULL, is a pointer to an int which will receive the
    type of the object pointed to.  One of ISFUNC (function), ISKMAP (keymap),
    or ISMACR (macro). */
-rl_command_func_t *
-rl_function_of_keyseq (const char *keyseq, Keymap map, int *type)
+static rl_command_func_t *
+_rl_function_of_keyseq_internal (const char *keyseq, size_t len, Keymap map, int *type)
 {
   register int i;
 
   if (map == 0)
     map = _rl_keymap;
 
-  for (i = 0; keyseq && keyseq[i]; i++)
+  for (i = 0; keyseq && i < len; i++)
     {
       unsigned char ic = keyseq[i];
 
@@ -818,6 +830,18 @@ rl_function_of_keyseq (const char *keyseq, Keymap map, int *type)
 	}
     }
   return ((rl_command_func_t *) NULL);
+}
+
+rl_command_func_t *
+rl_function_of_keyseq (const char *keyseq, Keymap map, int *type)
+{
+  return _rl_function_of_keyseq_internal (keyseq, strlen (keyseq), map, type);
+}
+
+rl_command_func_t *
+rl_function_of_keyseq_len (const char *keyseq, size_t len, Keymap map, int *type)
+{
+  return _rl_function_of_keyseq_internal (keyseq, len, map, type);
 }
 
 /* The last key bindings file read. */

@@ -3036,7 +3036,15 @@ special_case_tokens (tokstr)
       expecting_in_token--;
       return (IN);
     }
+  /* Posix grammar rule 6, third word in FOR: for i; do command-list; done */
+  else if (expecting_in_token && (last_read_token == '\n' || last_read_token == ';') &&
+    (tokstr[0] == 'd' && tokstr[1] == 'o' && tokstr[2] == '\0'))
+    {
+      expecting_in_token--;
+      return (DO);
+    }
 
+  /* for i do; command-list; done */
   if (last_read_token == WORD &&
 #if defined (SELECT_COMMAND)
       (token_before_that == FOR || token_before_that == SELECT) &&

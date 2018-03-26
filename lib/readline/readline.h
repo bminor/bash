@@ -332,6 +332,7 @@ extern char *rl_untranslate_keyseq PARAMS((int));
 
 extern rl_command_func_t *rl_named_function PARAMS((const char *));
 extern rl_command_func_t *rl_function_of_keyseq PARAMS((const char *, Keymap, int *));
+extern rl_command_func_t *rl_function_of_keyseq_len PARAMS((const char *, size_t, Keymap, int *));
 
 extern void rl_list_funmap_names PARAMS((void));
 extern char **rl_invoking_keyseqs_in_map PARAMS((rl_command_func_t *, Keymap));

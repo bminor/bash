@@ -585,6 +585,8 @@ termsig_handler (sig)
   run_exit_trap ();	/* XXX - run exit trap possibly in signal context? */
   set_signal_handler (sig, SIG_DFL);
   kill (getpid (), sig);
+
+  exit (1);		/* just in case the kill fails? */
 }
 
 /* What we really do when SIGINT occurs. */

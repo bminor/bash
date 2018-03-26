@@ -613,13 +613,14 @@ read_builtin (list)
 	  break;
 	}
 
-      CHECK_ALRM;
       QUIT;		/* in case we didn't call check_signals() */
 #if defined (READLINE)
 	}
 #endif
 
-      CHECK_ALRM;
+      if (retval <= 0)			/* XXX shouldn't happen */
+	CHECK_ALRM;
+
       /* XXX -- use i + mb_cur_max (at least 4) for multibyte/read_mbchar */
       if (i + (mb_cur_max > 4 ? mb_cur_max : 4) >= size)
 	{
