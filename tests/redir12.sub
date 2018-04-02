@@ -1,5 +1,5 @@
-# make sure we can wait for the last process substitution, since it sets $!
-cat <(exit 123) >/dev/null
-
-wait "$!"
-echo $?
+umask 0777
+cat <<'  HERE'
+look ma, no permissions
+HERE
+cat <<<"it's a miracle"
