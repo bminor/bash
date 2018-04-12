@@ -35,6 +35,15 @@ struct func_array_state
   };
 #endif
 
+/* Placeholder for later expansion to include more execution state */
+/* XXX - watch out for pid_t */
+struct execstate
+  {
+    pid_t pid;
+    int subshell_env;
+  };
+	
+
 /* Variables delared in execute_cmd.c, used by many other files */
 extern int return_catch_flag;
 extern int return_catch_value;

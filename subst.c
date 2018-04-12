@@ -5713,7 +5713,7 @@ process_substitute (string, open_for_read_in_child)
      int open_for_read_in_child;
 {
   char *pathname;
-  int fd, result;
+  int fd, result, rc, function_value;
   pid_t old_pid, pid;
 #if defined (HAVE_DEV_FD)
   int parent_pipe_fd, child_pipe_fd;
@@ -5903,18 +5903,41 @@ process_substitute (string, open_for_read_in_child)
 
   remove_quoted_escapes (string);
 
-  subshell_level++;
-  result = parse_and_execute (string, "process substitution", (SEVAL_NONINT|SEVAL_NOHIST));
-  /* leave subshell level intact for any exit trap */
+  /* Give process substitution a place to jump back to on failure,
+     so we don't go back up to main (). */
+  result = setjmp_nosigs (top_level);
+
+  /* If we're running a process substitution inside a shell function,
+     trap `return' so we don't return from the function in the subshell
+     and go off to never-never land. */
+  if (result == 0 && return_catch_flag)
+    function_value = setjmp_nosigs (return_catch);
+  else
+    function_value = 0;
+
+  if (result == ERREXIT)
+    rc = last_command_exit_value;
+  else if (result == EXITPROG)
+    rc = last_command_exit_value;
+  else if (result)
+    rc = EXECUTION_FAILURE;
+  else if (function_value)
+    rc = return_catch_value;
+  else
+    {
+      subshell_level++;
+      rc = parse_and_execute (string, "process substitution", (SEVAL_NONINT|SEVAL_NOHIST));
+      /* leave subshell level intact for any exit trap */
+    }
 
 #if !defined (HAVE_DEV_FD)
   /* Make sure we close the named pipe in the child before we exit. */
   close (open_for_read_in_child ? 0 : 1);
 #endif /* !HAVE_DEV_FD */
 
-  last_command_exit_value = result;
-  result = run_exit_trap ();
-  exit (result);
+  last_command_exit_value = rc;
+  rc = run_exit_trap ();
+  exit (rc);
   /*NOTREACHED*/
 }
 #endif /* PROCESS_SUBSTITUTION */

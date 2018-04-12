@@ -15137,3 +15137,63 @@ lib/readline/bind.c
 	  to accommodate symbolic key sequences; should be a no-op for `raw'
 	  key sequences such as the arrow key seqeunces from terminfo. Change
 	  from Koichi Murase <myoga.murase@gmail.com>
+
+				    4/2
+				    ---
+jobs.c
+	- wait_for: when setting the SIGINT signal handler to wait_sigint_handler
+	  make sure we're not setting old_sigint_handler recursively, as we
+	  can when running an external command in a trap we took after a
+	  command exited due to SIGINT. We don't want to overwrite
+	  old_sigint_handler here. Fixes bug reported by Dr. Werner Fink
+	  <werner@suse.de>
+
+execute_cmd.c
+	- execute_disk_command: when there is a command_not_found_hook, make
+	  sure the subshell turns off job control before running it, in case
+	  it runs processes. We don't want it to manipulate process groups.
+	  Fixes bug reported by �и�иллов �има <dk.1997-fast@yandex.ru>
+	- execute_command_internal: make sure the command run by the `command'
+	  builtin doesn't cause the ERR trap to be executed; wait for the
+	  status to be returned by the command builtin. Fixes bug reported by
+	  Martijn Dekker <martijn@inlv.org>
+
+				    4/4
+				    ---
+subst.c
+	- process_substitute: handle longjmp back to top_level and function
+	  returns (return_catch) in the child process, like command
+	  substitution, so we don't longjmp back to some arbitrary spot from
+	  the `exit' or `return' builtins, or on an expansion error, like
+	  the command timing code. Fixes bug reported by Basin Ilya
+	  <basinilya@gmail.com>
+
+				    4/6
+				    ---
+parse.y
+	- read_token_word: when reading a matched pair of backquotes as part
+	  of a word, treat it as quoted so the characters are read as a single
+	  word, but do not let the presence of the backquote mark the word as
+	  quoted. Fixes here-document delimiter bug reported by Denys Vlasenko
+	  <dvlasenk@redhat.com>
+
+				    4/7
+				    ---
+execute_cmd.c
+	- execute_case_command: call quote_string_for_globbing with the
+	  QGLOB_CTLESC flag for both quoted and unquoted words, so it will
+	  remove CTLESC/CTLESC in all cases while converting other quoted
+	  characters to use a preceding backslash. Bug reported by
+	  Martijn Dekker <martijn@inlv.org>
+
+				    4/9
+				    ---
+smatch.c
+	- posix_cclass_only: helper function that checks whether a pattern has
+	  only posix single-byte character classes ([:alpha:], etc.) or has
+	  none at all
+	- xstrmatch: if running in a multibyte locale, make sure to short-
+	  circuit to the single-byte matching code only if there are no
+	  unrecognized character class names, since the wide character ctype
+	  functions allow locales to define their own character class names
+	  (e.g., "hyphen"). Fixes issue reported by yangyajing <yyj_cqu@163.com>

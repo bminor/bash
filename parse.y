@@ -4946,7 +4946,8 @@ read_token_word (character)
 	  strcpy (token + token_index, ttok);
 	  token_index += ttoklen;
 	  all_digit_token = 0;
-	  quoted = 1;
+	  if (character != '`')
+	    quoted = 1;
 	  dollar_present |= (character == '"' && strchr (ttok, '$') != 0);
 	  FREE (ttok);
 	  goto next_character;

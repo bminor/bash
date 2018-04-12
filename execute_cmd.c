@@ -873,8 +873,13 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       }
 
       /* 2009/02/13 -- pipeline failure is processed elsewhere.  This handles
-	 only the failure of a simple command. */
-      if (was_error_trap && ignore_return == 0 && invert == 0 && pipe_in == NO_PIPE && pipe_out == NO_PIPE && exec_result != EXECUTION_SUCCESS)
+	 only the failure of a simple command. We don't want to run the error
+	 trap if the command run by the `command' builtin fails; we want to
+	 defer that until the command builtin itself returns failure. */
+      if (was_error_trap && ignore_return == 0 && invert == 0 &&
+	    pipe_in == NO_PIPE && pipe_out == NO_PIPE &&
+	    (command->value.Simple->flags & CMD_COMMAND_BUILTIN) == 0 &&
+	    exec_result != EXECUTION_SUCCESS)
 	{
 	  last_command_exit_value = exec_result;
 	  line_number = line_number_for_err_trap;
@@ -1421,6 +1426,7 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       else
 	time_format = BASH_TIMEFORMAT;
     }
+
   if (time_format && *time_format)
     print_formatted_time (stderr, time_format, rs, rsf, us, usf, ss, ssf, cpu);
 
@@ -3464,12 +3470,15 @@ execute_case_command (case_command)
 
 	  if (es && es->word && es->word->word && *(es->word->word))
 	    {
+	      /* Convert quoted null strings into empty strings. */
 	      qflags = QGLOB_CVTNULL;
+
 	      /* We left CTLESC in place quoting CTLESC after the call to
 		 expand_word_leave_quoted; tell quote_string_for_globbing to
-		 remove those here */
-	      if ((list->word->flags & W_QUOTED) == 0)
-		qflags |= QGLOB_CTLESC;
+		 remove those here. This works for both unquoted portions of
+		 the word (which call quote_escapes) and quoted portions
+		 (which call quote_string). */
+	      qflags |= QGLOB_CTLESC;
 	      pattern = quote_string_for_globbing (es->word->word, qflags);
 	    }
 	  else
@@ -5375,9 +5384,13 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 	      exit (EX_NOTFOUND);	/* Posix.2 says the exit status is 127 */
 	    }
 
+	  /* We don't want to manage process groups for processes we start
+	     from here, so we turn off job control and don't attempt to
+	     manipulate the terminal's process group. */
+	  without_job_control ();
+
 #if defined (JOB_CONTROL)
-	  /* May need to reinitialize more of the job control state here. */
-	  kill_current_pipeline ();
+	  set_sigchld_handler ();
 #endif
 
 	  wl = make_word_list (make_word (NOTFOUND_HOOK), words);
