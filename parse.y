@@ -2041,7 +2041,8 @@ read_a_line (remove_quoted_newline)
 	  c = '\n';
 	}
 
-      /* `+2' in case the final character in the buffer is a newline. */
+      /* `+2' in case the final character in the buffer is a newline or we
+	 have to handle CTLESC or CTLNUL. */
       RESIZE_MALLOCED_BUFFER (line_buffer, indx, 2, buffer_size, 128);
 
       /* IF REMOVE_QUOTED_NEWLINES is non-zero, we are reading a
@@ -2072,7 +2073,14 @@ read_a_line (remove_quoted_newline)
 	    }
 	}
       else
-	line_buffer[indx++] = c;
+	{
+	  /* remove_quoted_newline is non-zero if the here-document delimiter
+	     is unquoted. In this case, we will be expanding the lines and
+	     need to make sure CTLESC and CTLNUL in the input are quoted. */
+	  if (remove_quoted_newline && (c == CTLESC || c == CTLNUL))
+	    line_buffer[indx++] = CTLESC;
+	  line_buffer[indx++] = c;
+	}
 
       if (c == '\n')
 	{

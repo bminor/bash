@@ -1,5 +1,5 @@
 dnl
-dnl Configure script for bash-4.4
+dnl Configure script for bash-5.0
 dnl
 dnl report bugs to chet@po.cwru.edu
 dnl
@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.0, version 4.090])dnl
+AC_REVISION([for Bash 5.0, version 4.091])dnl
 
 define(bashvers, 5.0)
 define(relstatus, alpha)
@@ -82,7 +82,7 @@ sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
 *-rhapsody*)	opt_bash_malloc=no ;;	# Apple Rhapsody (MacOS X)
 *-darwin*)	opt_bash_malloc=no ;;	# Apple Darwin (MacOS X)
 *-dgux*)	opt_bash_malloc=no ;;	# DG/UX machines
-*-qnx*)		opt_bash_malloc=no ;;	# QNX 4.2, QNX 6.x
+*-qnx*)		opt_bash_malloc=no ;;	# QNX 4.2, QNX [67].x
 *-machten4)	opt_bash_malloc=no ;;	# MachTen 4.x
 *-bsdi2.1|*-bsdi3.?)	opt_bash_malloc=no ; : ${CC:=shlicc2} ;; # for loadable builtins
 *-beos*)	opt_bash_malloc=no ;;	# they say it's suitable
@@ -444,6 +444,9 @@ if test "x$cross_compiling" = "xyes"; then
 	;;
     i[[3456]]86-*-beos*)
 	cross_cache=${srcdir}/cross-build/x86-beos.cache
+	;;
+    *-qnx*)
+	cross_cache=${srcdir}/cross-build/qnx.cache
 	;;
     *)	echo "configure: cross-compiling for $host is not supported" >&2
 	;;
@@ -1108,7 +1111,7 @@ linux*)		LOCAL_LDFLAGS=-rdynamic		 # allow dynamic loading
 		1.*|2.[[0123]]*)	: ;;
 		*)	AC_DEFINE(PGRP_PIPE) ;;
 		esac ;;
-*qnx6*)		LOCAL_CFLAGS="-Dqnx -Dqnx6" LOCAL_LIBS="-lncurses" ;;
+*qnx[[67]]*)	LOCAL_LIBS="-lncurses" ;;
 *qnx*)		LOCAL_CFLAGS="-Dqnx -F -3s" LOCAL_LDFLAGS="-3s" LOCAL_LIBS="-lunix -lncurses" ;;
 powerux*)	LOCAL_LIBS="-lgen" ;;
 cygwin*)	LOCAL_CFLAGS=-DRECYCLES_PIDS ;;

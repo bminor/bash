@@ -15197,3 +15197,59 @@ smatch.c
 	  unrecognized character class names, since the wide character ctype
 	  functions allow locales to define their own character class names
 	  (e.g., "hyphen"). Fixes issue reported by yangyajing <yyj_cqu@163.com>
+
+				   4/10
+				   ----
+configure.ac,cross-build/qnx.cache
+	- qnx: add a configure cache file for cross-building, treat qnx 7 like
+	  qnx 6 in terms of cpp options. Fix from Brian Carnes
+	  <bcarnes@google.com>
+
+aclocal.m4
+	- BASH_CHECK_DEV_STDIN: experimental change to test for /dev/stdin
+	  independently of /dev/fd or /proc/self/fd. Suggested for QNX by
+	  Brian Carnes <bcarnes@google.com>
+
+
+				   4/11
+				   ----
+lib/glob/glob.c
+	- glob_testdir: return -2 if DIR is a symlink, to differentiate it from
+	  any other kind of non-directory file
+	- glob_vector: if we have GX_ALLDIRS (globstar), we want to skip over
+	  symlinks to directories, since we will pick up the real directory
+	  later. Fixes incompatibility reported by Murukesh Mohanan
+	  <murukesh.mohanan@gmail.com>
+
+bashline.c
+	- bash_execute_unix_command: changes to make READLINE_POINT apply to
+	  characters instead of bytes when in a multibyte locale. Report and
+	  fix from Koichi Murase <myoga.murase@gmail.com>
+
+				   4/12
+				   ----
+builtins/evalstring.c
+	- parse_and_execute_cleanup: now takes an argument which is the value
+	  of running_trap at some point before parse_and_execute was called;
+	  changed callers in sig.c, builtins/evalfile.c
+
+builtins/common.h
+	- parse_and_execute_cleanup: changed prototype
+
+				   4/13
+				   ----
+builtins/evalstring.c
+	- parse_and_execute_cleanup: if the argument holding the previous state
+	  of running_trap is the same value as the current running_trap state,
+	  don't call run_trap_cleanup: assume that there is a caller who will
+	  take care of the cleanup after this returns. Fixes recursive trap
+	  call on "eval return" reported by Martijn Dekker <martijn@inlv.org>
+
+parse.y
+	- read_a_line: if remove_quoted_newline is non-zero, indicating the
+	  here-document delimiter is unquoted, we will be running the contents
+	  of the here-document through word expansion and need to quote CTLESC
+	  and CTLNUL in the input. Fixes bug with ^A in here document reported
+	  by Jorge Alberto Baca Garcia <bacagarcia@me.com>
+
+

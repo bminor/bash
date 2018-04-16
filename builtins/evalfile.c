@@ -278,7 +278,7 @@ file_error_and_exit:
      force parse_and_execute () to clean up. */
   if (return_val)
     {
-      parse_and_execute_cleanup ();
+      parse_and_execute_cleanup (-1);
       result = return_catch_value;
     }
   else

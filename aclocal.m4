@@ -1581,9 +1581,7 @@ fi
 AC_DEFUN(BASH_CHECK_DEV_STDIN,
 [AC_MSG_CHECKING(whether /dev/stdin stdout stderr are available)
 AC_CACHE_VAL(bash_cv_dev_stdin,
-[if test -d /dev/fd && (exec test -r /dev/stdin < /dev/null) ; then
-   bash_cv_dev_stdin=present
- elif test -d /proc/self/fd && (exec test -r /dev/stdin < /dev/null) ; then
+[if (exec test -r /dev/stdin < /dev/null) ; then
    bash_cv_dev_stdin=present
  else
    bash_cv_dev_stdin=absent

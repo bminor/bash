@@ -136,11 +136,17 @@ optimize_subshell_command (command)
      
 /* How to force parse_and_execute () to clean up after itself. */
 void
-parse_and_execute_cleanup ()
+parse_and_execute_cleanup (old_running_trap)
+     int old_running_trap;
 {
-  if (running_trap)
+  if (running_trap > 0)
     {
-      run_trap_cleanup (running_trap - 1);
+      /* We assume if we have a different value for running_trap than when
+	 we started (the only caller that cares is evalstring()), the
+	 original caller will perform the cleanup, and we should not step
+	 on them. */
+      if (running_trap != old_running_trap)
+	run_trap_cleanup (running_trap - 1);
       unfreeze_jobs_list ();
     }
 
@@ -653,6 +659,10 @@ evalstring (string, from_file, flags)
      int flags;
 {
   volatile int r, rflag, rcatch;
+  volatile int was_trap;
+
+  /* Are we running a trap when we execute this function? */
+  was_trap = running_trap;
 
   rcatch = 0;
   rflag = return_catch_flag;
@@ -672,7 +682,9 @@ evalstring (string, from_file, flags)
 
   if (rcatch)
     {
-      parse_and_execute_cleanup ();
+      /* We care about whether or not we are running the same trap we were
+	 when we entered this function. */
+      parse_and_execute_cleanup (was_trap);
       r = return_catch_value;
     }
   else

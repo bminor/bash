@@ -66,6 +66,7 @@
 #include <readline/rlconf.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <readline/rlmbutil.h>
 
 #include <glob/glob.h>
 
@@ -4095,7 +4096,7 @@ bash_execute_unix_command (count, key)
   register int i, r;
   intmax_t mi;
   sh_parser_state_t ps;
-  char *cmd, *value, *ce;
+  char *cmd, *value, *ce, old_ch;
   SHELL_VAR *v;
   char ibuf[INT_STRLEN_BOUND(int) + 1];
 
@@ -4129,7 +4130,17 @@ bash_execute_unix_command (count, key)
   v = bind_variable ("READLINE_LINE", rl_line_buffer, 0);
   if (v)
     VSETATTR (v, att_exported);
-  value = inttostr (rl_point, ibuf, sizeof (ibuf));
+  i = rl_point;
+#if defined (HANDLE_MULTIBYTE)
+  if (MB_CUR_MAX > 1)
+    {
+      old_ch = rl_line_buffer[rl_point];
+      rl_line_buffer[rl_point] = '\0';
+      i = MB_STRLEN (rl_line_buffer);
+      rl_line_buffer[rl_point] = old_ch;
+    }
+#endif
+  value = inttostr (i, ibuf, sizeof (ibuf));
   v = bind_int_variable ("READLINE_POINT", value, 0);
   if (v)
     VSETATTR (v, att_exported);
@@ -4146,6 +4157,10 @@ bash_execute_unix_command (count, key)
   if (v && legal_number (value_cell (v), &mi))
     {
       i = mi;
+#if defined (HANDLE_MULTIBYTE)
+      if (i > 0 && MB_CUR_MAX > 1)
+	i = _rl_find_next_mbchar (rl_line_buffer, 0, i, 0);
+#endif
       if (i != rl_point)
 	{
 	  rl_point = i;

@@ -4814,11 +4814,7 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
 
   /* Shell functions inherit the RETURN trap if function tracing is on
      globally or on individually for this function. */
-#if 0
-  if (return_trap && ((trace_p (var) == 0) && function_trace_mode == 0))
-#else
   if (return_trap && (signal_in_progress (DEBUG_TRAP) || ((trace_p (var) == 0) && function_trace_mode == 0)))
-#endif
     {
       if (subshell == 0)
 	{

@@ -371,7 +371,7 @@ top_level_cleanup ()
 {
   /* Clean up string parser environment. */
   while (parse_and_execute_level)
-    parse_and_execute_cleanup ();
+    parse_and_execute_cleanup (-1);
 
 #if defined (PROCESS_SUBSTITUTION)
   unlink_fifo_list ();
@@ -409,7 +409,7 @@ throw_to_top_level ()
 
   /* Clean up string parser environment. */
   while (parse_and_execute_level)
-    parse_and_execute_cleanup ();
+    parse_and_execute_cleanup (-1);
 
   if (running_trap > 0)
     run_trap_cleanup (running_trap - 1);

@@ -477,7 +477,7 @@ dequote_pathname (pathname)
 #  endif /* AFS */
 #endif /* !HAVE_LSTAT */
 
-/* Return 0 if DIR is a directory, -1 otherwise. */
+/* Return 0 if DIR is a directory, -2 if DIR is a symlink,  -1 otherwise. */
 static int
 glob_testdir (dir, flags)
      char *dir;
@@ -494,6 +494,11 @@ glob_testdir (dir, flags)
 #endif
   if (r < 0)
     return (-1);
+
+#if defined (S_ISLNK)
+  if (S_ISLNK (finfo.st_mode))
+    return (-2);
+#endif
 
   if (S_ISDIR (finfo.st_mode) == 0)
     return (-1);
@@ -800,6 +805,15 @@ glob_vector (pat, dir, flags)
 		    }
 		}
 
+	      /* When FLAGS includes GX_ALLDIRS, we want to skip a symlink
+	         to a directory, since we will pick the directory up later. */
+	      if (isdir == -2 && glob_testdir (subdir, 0) == 0)
+		{
+		  free (subdir);
+		  continue;
+		}
+
+	      /* XXX - should we even add this if it's not a directory? */
 	      nextlink = (struct globval *) malloc (sizeof (struct globval));
 	      if (firstmalloc == 0)
 		firstmalloc = nextlink;
