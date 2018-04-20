@@ -1,7 +1,5 @@
 #!/bin/sh -
 #
-#	BSDI $Id: mkdep.gcc.sh,v 2.1 1995/02/03 12:54:13 polk Exp $
-#
 # Copyright (c) 1991, 1993
 #	The Regents of the University of California.  All rights reserved.
 #
@@ -13,10 +11,6 @@
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in the
 #    documentation and/or other materials provided with the distribution.
-# 3. All advertising materials mentioning features or use of this software
-#    must display the following acknowledgement:
-#	This product includes software developed by the University of
-#	California, Berkeley and its contributors.
 # 4. Neither the name of the University nor the names of its contributors
 #    may be used to endorse or promote products derived from this software
 #    without specific prior written permission.
@@ -33,59 +27,72 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-#	@(#)mkdep.gcc.sh	8.1 (Berkeley) 6/6/93
+# $FreeBSD: stable/11/usr.bin/mkdep/mkdep.sh 216370 2010-12-11 08:32:16Z joel $
+#
+#	@(#)mkdep.sh	8.1 (Berkeley) 6/6/93
 #
 
-PATH=/bin:/usr/bin:/usr/gnu/bin:/usr/local/bin:/usr/local/bin/gnu
+PATH=/bin:/usr/bin:/usr/ucb:/usr/old/bin
 export PATH
 
-cpp=${CPP:-gcc}
-#trad="-notraditional"
-
-D=depends			# default dependency file is depends
+D=.depend			# default dependency file is .depend
 append=0
-pflag=
 
-usage()
-{
-	echo 'usage: mkdep [-t] [-p] [-f depend_file] [-c compiler] [cc_flags] file ...' >&2
-}
+while :
+	do case "$1" in
+		# -a appends to the depend file
+		-a)
+			append=1
+			shift ;;
 
-while getopts "2af:c:pt" opt; do
-	case "$opt" in
-	# -2 => gcc2 -- this option is temporary, hence not documented
-	2)	cpp=${CPP:-gcc2} ; trad= ;;
-	# -a appends to the depend file
-	a)	append=1;;
-	# -c specifies the compiler to use
-	c)	CPP=$OPTARG ;;
-	# -f allows you to select a makefile name
-	f)	D=$OPTARG ;;
-	# the -p flag produces "program: program.c" style dependencies
-	# so .o's don't get produced
-	p)	pflag=p ;;
-	# -t means use -traditional with gnu cpp
-	t)	trad="-traditional" ;;
-	\?)	usage ; exit 2;;
+		# -f allows you to select a makefile name
+		-f)
+			D=$2
+			shift; shift ;;
+
+		# the -p flag produces "program: program.c" style dependencies
+		# so .o's don't get produced
+		-p)
+			SED='s;\.o ; ;'
+			shift ;;
+		*)
+			break ;;
 	esac
 done
 
-shift $(( $OPTIND - 1 ))
-
 if [ $# = 0 ] ; then
-	usage
+	echo 'usage: mkdep [-p] [-f depend_file] [cc_flags] file ...'
 	exit 1
 fi
 
 TMP=/tmp/mkdep$$
 
-trap 'rm -f $TMP ; exit 1' 1 2 3 13 15
+trap 'rm -f $TMP ; trap 2 ; kill -2 $$' 1 2 3 13 15
 
-if [ x$pflag = x ]; then
-	$cpp $trad -M $* | sed -e 's; \./; ;g' > $TMP
-else
-	$cpp $trad -M $* | sed -e 's;\.o *:;:;' -e 's; \./; ;g' > $TMP
-fi
+cc -M $* |
+sed "
+	s; \./; ;g
+	/\.c:$/d
+	$SED" |
+awk '{
+	if ($1 != prev) {
+		if (rec != "")
+			print rec;
+		rec = $0;
+		prev = $1;
+	}
+	else {
+		if (length(rec $2) > 78) {
+			print rec;
+			rec = $0;
+		}
+		else
+			rec = rec " " $2
+	}
+}
+END {
+	print rec
+}' > $TMP
 
 if [ $? != 0 ]; then
 	echo 'mkdep: compile failed.'

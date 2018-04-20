@@ -744,6 +744,10 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
     stdin_redir = stdin_redirects (command->redirects);
 
 #if defined (PROCESS_SUBSTITUTION)
+#  if !defined (HAVE_DEV_FD)
+  reap_procsubs ();
+#  endif
+
   if (variable_context != 0)
     {
       ofifo = num_fifos ();
@@ -3473,9 +3477,9 @@ execute_case_command (case_command)
 	      /* Convert quoted null strings into empty strings. */
 	      qflags = QGLOB_CVTNULL;
 
-	      /* We left CTLESC in place quoting CTLESC after the call to
-		 expand_word_leave_quoted; tell quote_string_for_globbing to
-		 remove those here. This works for both unquoted portions of
+	      /* We left CTLESC in place quoting CTLESC and CTLNUL after the
+	      	 call to expand_word_leave_quoted; tell quote_string_for_globbing
+	      	 to remove those here. This works for both unquoted portions of
 		 the word (which call quote_escapes) and quoted portions
 		 (which call quote_string). */
 	      qflags |= QGLOB_CTLESC;

@@ -15252,4 +15252,20 @@ parse.y
 	  and CTLNUL in the input. Fixes bug with ^A in here document reported
 	  by Jorge Alberto Baca Garcia <bacagarcia@me.com>
 
+				   4/18
+				   ----
+pathexp.c
+	- quote_string_for_globbing: make sure the QGLOB_CTLESC code handles
+	  both CTLESC CTLESC and CTLESC CTLNUL in the same way. Fixes bug
+	  reported by Martijn Dekker <martijn@inlv.org>
+
+				   4/19
+				   ----
+execute_cmd.c
+	- execute_command_internal: before executing any command in the current
+	  shell, and before copying any existing FIFO list, call
+	  reap_procsubs to unlink or close any process substitution pipes
+	  associated with processes that have exited. Fixes hang in test suite
+	  when trying to open a FIFO with no process having it open for
+	  reading
 

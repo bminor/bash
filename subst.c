@@ -5392,7 +5392,7 @@ find_procsub_child (pid)
   int i;
 
   for (i = 0; i < nfifo; i++)
-    if ((fifo_list[i].proc == pid)
+    if (fifo_list[i].proc == pid)
       return i;
   return -1;
 }
@@ -5422,7 +5422,7 @@ reap_procsubs ()
 void
 wait_procsubs ()
 {
-  int i;
+  int i, r;
 
   for (i = 0; i < nfifo; i++)
     {

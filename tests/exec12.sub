@@ -1,5 +1,6 @@
 : ${TMPDIR:=/var/tmp}
 TMPFILE=$TMPDIR/exitcode
+trap 'rm -f $TMPFILE' 0
 
 rm -f $TMPFILE
 set -e

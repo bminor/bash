@@ -24,7 +24,7 @@ testmatch() {
 	echo
 }
 
-for c in $'\1' $'\2'; do
+for c in $'\1' $'\2' $'\177'; do
 	echo -n "--- testing: "
 	echo "$c" | od -t a | awk 'NR==1 { print $2 } '
 	testmatch "${c}" "\\${c}"
