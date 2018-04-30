@@ -96,8 +96,13 @@ unquoted_glob_pattern_p (string)
 	    return (1);
 	  continue;
 
-	case CTLESC:
+	/* A pattern can't end with a backslash, but a backslash in the pattern
+	   can be removed by the matching engine, so we have to run it through
+	   globbing. */
 	case '\\':
+	  return (*string != 0);
+	 	  
+	case CTLESC:
 	  if (*string++ == '\0')
 	    return (0);
 	}
@@ -172,10 +177,11 @@ glob_char_p (s)
    is performed, (flags & QGLOB_CVTNULL) should be 0; if called when quote
    removal has not been done (for example, before attempting to match a
    pattern while executing a case statement), flags should include
-   QGLOB_CVTNULL.  If flags includes QGLOB_FILENAME, appropriate quoting
-   to match a filename should be performed.  QGLOB_REGEXP means we're
-   quoting for a Posix ERE (for [[ string =~ pat ]]) and that requires
-   some special handling. */
+   QGLOB_CVTNULL.  If flags includes QGLOB_CTLESC, we need to remove CTLESC
+   quoting CTLESC or CTLNUL (as if dequote_string were called).  If flags
+   includes QGLOB_FILENAME, appropriate quoting to match a filename should be
+   performed.  QGLOB_REGEXP means we're quoting for a Posix ERE (for
+   [[ string =~ pat ]]) and that requires some special handling. */
 char *
 quote_string_for_globbing (pathname, qflags)
      const char *pathname;

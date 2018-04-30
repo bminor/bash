@@ -35,3 +35,6 @@ for c in $'\1' $'\2' $'\177'; do
 	testmatch "x${c}" "\\x\\${c}"
 	testmatch "x${c}" "x\\${c}"
 done
+
+match() { case $1 in ( $2 ) ;; ( * ) return 1 ;; esac; } 
+match $'? *x\1y\177z' $'??\\*\\x\\\1\\y\\\177\\z' || echo bad 6

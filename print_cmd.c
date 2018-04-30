@@ -1475,7 +1475,7 @@ cprintf (control, va_alist)
 #endif
 {
   register const char *s;
-  char char_arg[2], *argp, intbuf[INT_STRLEN_BOUND (int) + 1];
+  char char_arg[2], *argp, intbuf[INT_STRLEN_BOUND (unsigned int) + 1];
   int digit_arg, arg_len, c;
   va_list args;
 
@@ -1520,7 +1520,7 @@ cprintf (control, va_alist)
 	      digit_arg = va_arg (args, int);
 	      if (digit_arg < 0)
 		{
-		  sprintf (intbuf, "%u", (unsigned)-1);
+		  sprintf (intbuf, "%u", (unsigned int)-1);
 		  argp = intbuf;
 		}
 	      else

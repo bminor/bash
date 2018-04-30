@@ -92,15 +92,27 @@ extern char *strcpy __P((char *, const char *));
 /* Nonzero if the integer type T is signed.  */
 #define TYPE_SIGNED(t) (! ((t) 0 < (t) -1))
 
+/* The width in bits of the integer type or expression T.
+   Padding bits are not supported; this is checked at compile-time below.  */
+#define TYPE_WIDTH(t) (sizeof (t) * CHAR_BIT)
+
+/* Bound on length of the string representing an unsigned integer
+   value representable in B bits.  log10 (2.0) < 146/485.  The
+      smallest value of B where this bound is not tight is 2621.  */
+#define INT_BITS_STRLEN_BOUND(b) (((b) * 146 + 484) / 485)
+
 /* Bound on length of the string representing an integer value of type T.
    Subtract one for the sign bit if T is signed;
    302 / 1000 is log10 (2) rounded up;
    add one for integer division truncation;
    add one more for a minus sign if t is signed.  */
 #define INT_STRLEN_BOUND(t) \
-  ((sizeof (t) * CHAR_BIT - TYPE_SIGNED (t)) * 302 / 1000 \
+  ((TYPE_WIDTH (t) - TYPE_SIGNED (t)) * 302 / 1000 \
    + 1 + TYPE_SIGNED (t))
 
+/* Bound on buffer size needed to represent an integer type or expression T,
+   including the terminating null.  */
+#define INT_BUFSIZE_BOUND(t) (INT_STRLEN_BOUND (t) + 1)
 
 /* Define exactly what a legal shell identifier consists of. */
 #define legal_variable_starter(c) (ISALPHA(c) || (c == '_'))

@@ -458,7 +458,18 @@ BRACKMATCH (p, test, flags)
 		  pc = IS_CCLASS (orig_test, (XCHAR *)ccname);
 		}
 	      if (pc == -1)
-		pc = 0;
+		{
+		  /* CCNAME is not a valid character class in the current
+		     locale. In addition to noting no match (pc = 0), we have
+		     a choice about what to do with the invalid charclass.
+		     Posix leaves the behavior unspecified, but we're going
+		     to skip over the charclass and keep going instead of
+		     testing ORIG_TEST against each character in the class
+		     string. If we don't want to do that, take out the update
+		     of P. */
+		  pc = 0;
+		  p = close + 2;
+		}
 	      else
 		p = close + 2;		/* move past the closing `]' */
 

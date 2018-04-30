@@ -776,6 +776,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       return (last_command_exit_value = EXECUTION_FAILURE);
     }
 
+#if 0
   if (redirection_undo_list)
     {
       /* XXX - why copy here? */
@@ -784,7 +785,12 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
     }
   else
     my_undo_list = (REDIRECT *)NULL;
+#else
+  my_undo_list = redirection_undo_list;
+  redirection_undo_list = (REDIRECT *)NULL;
+#endif
 
+#if 0
   if (exec_redirection_undo_list)
     {
       /* XXX - why copy here? */
@@ -793,6 +799,10 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
     }
   else
     exec_undo_list = (REDIRECT *)NULL;
+#else
+  exec_undo_list = exec_redirection_undo_list;
+  exec_redirection_undo_list = (REDIRECT *)NULL;
+#endif
 
   if (my_undo_list || exec_undo_list)
     begin_unwind_frame ("loop_redirections");

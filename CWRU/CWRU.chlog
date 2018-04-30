@@ -14019,7 +14019,7 @@ variables.c
 	- make_env_array_from_var_list: if a dynamic variable has the
 	  regenerate attribute set, call the dynamic value function to generate
 	  an updated value before placing it in the environment.  From a report
-	  about exporting LINENO from by Robert Elz <kre@bmunnari.OZ.AU>
+	  about exporting LINENO from Robert Elz <kre@bmunnari.OZ.AU>
 
 				    6/4
 				    ---
@@ -15269,3 +15269,52 @@ execute_cmd.c
 	  when trying to open a FIFO with no process having it open for
 	  reading
 
+				   4/26
+				   ----
+parse.y
+	- read_token_word: if returning REDIR_WORD for a {id}>foo construct,
+	  for example, make sure to assign the_word to yylval.word before
+	  returning, in case a recursive call to the parser overwrites it
+	  (e.g., when evaluating array indexes). From a message to
+	  austin-group-l from Stephane Chazelas <stephane.chazelas@gmail.com>
+
+lib/glob/sm_loop.c
+	- BRACKMATCH: if we have an invalid character class in an otherwise
+	  well-formed bracket expression, don't try to match each character
+	  of the (invalid) class individually; just skip over the class and
+	  move on.  From a message on the austin-group list from
+	  Stephane Chazelas <stephane.chazelas@gmail.com>
+
+				   4/27
+				   ----
+variables.c
+	- push_exported_var,push_func_var,push_temp_var: make sure to set the
+	  context correctly in the variable we bind in the previous (non-temp)
+	  scope. Report from Martijn Dekker <martijn@inlv.org>
+
+pathexp.c
+	- unquoted_glob_pattern_p: a pattern that contains a backslash can
+	  have it removed by the matching engine (since backslash is special
+	  in pattern matching), so if the pattern contains a backslash, and
+	  does not end in a backslash, we need to return true. Fixes bug
+	  reported by Robert Elz <kre@bmunnari.OZ.AU>
+
+lib/glob/gm_loop.c
+	- INTERNAL_GLOB_PATTERN_P: same change to return TRUE for a backslash
+	  that doesn't end the pattern
+
+lib/sh/timeval.c
+	- print_timeval: use locale_decpoint() instead of fixed `.' to print
+	  decimal point. Bug report in austin-group email from Joerg Schilling
+	  <Joerg.Schilling@fokus.fraunhofer.de>
+
+lib/sh/clock.c
+	- print_clock_t: use locale_depoint() in the same way as print_timeval
+
+				   4/29
+				   ----
+subst.c
+	- expand_cond_node: if special != 0, make sure to add QGLOB_CTLESC
+	  to the flags passed to quote_string_for_globbing. Same issue as the
+	  one with `case' fixed on 4/7, report from Martijn Dekker
+	  <martijn@inlv.org>

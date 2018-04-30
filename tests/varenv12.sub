@@ -1,0 +1,4 @@
+set -o posix
+fn() { foo=abc : ; typeset +x foo; printenv|grep ^foo=; }
+
+fn

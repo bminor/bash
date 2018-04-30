@@ -32,7 +32,13 @@
 #include <stdio.h>
 #include <stdc.h>
 
-extern long get_clk_tck __P((void));
+#include <bashintl.h>
+
+#ifndef locale_decpoint
+extern int locale_decpoint PARAMS((void));
+#endif
+
+extern long get_clk_tck PARAMS((void));
 
 void
 clock_t_to_secs (t, sp, sfp)
@@ -76,6 +82,6 @@ print_clock_t (fp, t)
   minutes = timestamp / 60;
   seconds = timestamp % 60;
 
-  fprintf (fp, "%ldm%d.%03ds",  minutes, seconds, seconds_fraction);
+  fprintf (fp, "%ldm%d%c%03ds",  minutes, seconds, locale_decpoint(), seconds_fraction);
 }
 #endif /* HAVE_TIMES */

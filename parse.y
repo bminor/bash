@@ -5295,6 +5295,7 @@ got_token:
 
   yylval.word = the_word;
 
+  /* should we check that quoted == 0 as well? */
   if (token[0] == '{' && token[token_index-1] == '}' &&
       (character == '<' || character == '>'))
     {
@@ -5307,7 +5308,8 @@ got_token:
 #endif
 	{
 	  strcpy (the_word->word, token+1);
-/*itrace("read_token_word: returning REDIR_WORD for %s", the_word->word);*/
+/* itrace("read_token_word: returning REDIR_WORD for %s", the_word->word); */
+	  yylval.word = the_word;	/* accommodate recursive call */
 	  return (REDIR_WORD);
 	}
       else

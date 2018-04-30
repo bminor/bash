@@ -4268,6 +4268,9 @@ push_temp_var (data)
 
   /* XXX - should we set the context here?  It shouldn't matter because of how
      assign_in_env works, but might want to check. */
+  if (v)
+    v->context = shell_variables->scope;
+
   if (binding_table == global_variables->table)		/* XXX */
     var->attributes &= ~(att_tempvar|att_propagate);
   else
@@ -4861,20 +4864,27 @@ push_func_var (data)
      PTR_T data;
 {
   SHELL_VAR *var, *v;
+  int posix_func_behavior;
 
   var = (SHELL_VAR *)data;
+  /* As of IEEE Std 1003.1-2017, assignment statements preceding shell
+     functions no longer behave like assignment statements preceding
+     special builtins, and do not persist in the current shell environment. */
+  posix_func_behavior = posixly_correct;	/* placeholder for later */
 
   if (local_p (var) && STREQ (var->name, "-"))
     set_current_options (value_cell (var));
-  else if (tempvar_p (var) && (posixly_correct || (var->attributes & att_propagate)))
+  else if (tempvar_p (var) && (posix_func_behavior || (var->attributes & att_propagate)))
     {
       /* Make sure we have a hash table to store the variable in while it is
 	 being propagated down to the global variables table.  Create one if
 	 we have to */
       if ((vc_isfuncenv (shell_variables) || vc_istempenv (shell_variables)) && shell_variables->table == 0)
 	shell_variables->table = hash_create (VARIABLES_HASH_BUCKETS);
-      /* XXX - should we set v->context here? */
       v = bind_variable_internal (var->name, value_cell (var), shell_variables->table, 0, 0);
+      /* XXX - should we set v->context here? */
+      if (v)
+	v->context = shell_variables->scope;
 #if defined (ARRAY_VARS)
       if (v && (array_p (var) || assoc_p (var)))
 	{
@@ -4979,7 +4989,10 @@ push_exported_var (data)
       if (shell_variables == global_variables)
 	var->attributes &= ~att_propagate;
       if (v)
-	v->attributes |= var->attributes;
+	{
+	  v->attributes |= var->attributes;
+	  v->context = shell_variables->scope;
+	}
     }
   else
     stupidly_hack_special_variables (var->name);	/* XXX */
