@@ -15318,3 +15318,43 @@ subst.c
 	  to the flags passed to quote_string_for_globbing. Same issue as the
 	  one with `case' fixed on 4/7, report from Martijn Dekker
 	  <martijn@inlv.org>
+
+				   4/30
+				   ----
+redir.c
+	- do_redirection_internal: r_close_this: if the file descriptor is
+	  already closed before the shell is asked to close it, make sure to
+	  add an undo list redirect to make sure it stays closed. Report from
+	  Martijn Dekker <martijn@inlv.org>
+
+				    5/2
+				    ---
+variables.c
+	- push_posix_temp_var: new function, takes the SHELL_VAR * passed as
+	  an argument and uses the name and value to create a global variable
+	- merge_temporary_env: if posixly_correct is set, call
+	  push_posix_temp_var to create global variables, otherwise call
+	  push_temp_var to preserve the old behavior. Right now, it's only
+	  called when in posix mode, but that might change. This undoes the
+	  change from 4/27 when in posix mode
+
+				    5/3
+				    ---
+sig.c
+	- struct that holds the terminating signal information has a new
+	  field: whether that signal is expected to cause a core dump
+	- termsig_handler: if the call to kill(2) doesn't kill the process,
+	  we have a problem. If our pid is not 1, we just exit with status
+	  128+sig (fake the sig exit status). If the pid is 1, we assume
+	  we're in a Linux pid namespace and aren't allowed to send a signal
+	  to ourselves. If we need to generate a core dump, we try to get
+	  the kernel to SIGSEGV us by dereferencing location 0. If not, we
+	  just exit with 128+sig. From a report and patch from Andrei Vagin
+	  <avagin@virtuozzo.com>
+
+				    5/4
+				    ---
+bashline.c
+	- bash_execute_unix_command: make sure that parse_and_execute is called
+	  with newly-allocated memory to avoid prematurely freeing the
+	  command. Report and fix from Koichi Murase <myoga.murase@gmail.com>

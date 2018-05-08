@@ -157,6 +157,7 @@ typedef struct _vlist {
 #define regen_p(var)		((((var)->attributes) & (att_regenerate)))
 
 #define tempvar_p(var)		((((var)->attributes) & (att_tempvar)))
+#define propagate_p(var)	((((var)->attributes) & (att_propagate)))
 
 /* Variable names: lvalues */
 #define name_cell(var)		((var)->name)

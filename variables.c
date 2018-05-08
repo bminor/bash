@@ -280,6 +280,7 @@ static SHELL_VAR *find_variable_nameref_context __P((SHELL_VAR *, VAR_CONTEXT *,
 static SHELL_VAR *find_variable_last_nameref_context __P((SHELL_VAR *, VAR_CONTEXT *, VAR_CONTEXT **));
 
 static SHELL_VAR *bind_tempenv_variable __P((const char *, char *));
+static void push_posix_temp_var __P((PTR_T));
 static void push_temp_var __P((PTR_T));
 static void propagate_temp_var __P((PTR_T));
 static void dispose_temporary_env __P((sh_free_func_t *));     
@@ -4243,8 +4244,46 @@ find_tempenv_variable (name)
 char **tempvar_list;
 int tvlist_ind;
 
+/* Take a variable from an assignment statement preceding a posix special
+   builtin (including `return') and create a global variable from it. This
+   is called from merge_temporary_env, which is only called when in posix
+   mode. */
+static void
+push_posix_temp_var (data)
+     PTR_T data;
+{
+  SHELL_VAR *var, *v;
+  HASH_TABLE *binding_table;
+
+  var = (SHELL_VAR *)data;
+
+  binding_table = global_variables->table;
+  if (binding_table == 0)
+    binding_table = global_variables->table = hash_create (VARIABLES_HASH_BUCKETS);
+
+  v = bind_variable_internal (var->name, value_cell (var), binding_table, 0, ASS_FORCE|ASS_NOLONGJMP);
+
+  /* global variables are no longer temporary and don't need propagating. */
+  var->attributes &= ~(att_tempvar|att_propagate);
+  if (v)
+    v->attributes |= var->attributes;
+
+  if (find_special_var (var->name) >= 0)
+    tempvar_list[tvlist_ind++] = savestring (var->name);
+
+  dispose_variable (var);
+}
+
 /* Push the variable described by (SHELL_VAR *)DATA down to the next
-   variable context from the temporary environment. */
+   variable context from the temporary environment. This can be called
+   from one context:
+      1. propagate_temp_var: which is called to propagate variables in
+	 assignments like `var=value declare -x var' to the surrounding
+	 scope.
+
+  In this case, the variable should have the att_propagate flag set and
+  we can create variables in the current scope.
+*/
 static void
 push_temp_var (data)
      PTR_T data;
@@ -4267,7 +4306,7 @@ push_temp_var (data)
   v = bind_variable_internal (var->name, value_cell (var), binding_table, 0, ASS_FORCE|ASS_NOLONGJMP);
 
   /* XXX - should we set the context here?  It shouldn't matter because of how
-     assign_in_env works, but might want to check. */
+     assign_in_env works, but we do it anyway. */
   if (v)
     v->context = shell_variables->scope;
 
@@ -4288,6 +4327,10 @@ push_temp_var (data)
   dispose_variable (var);
 }
 
+/* Take a variable described by DATA and push it to the surrounding scope if
+   the PROPAGATE attribute is set. That gets set by push_temp_var if we are
+   taking a variable like `var=value declare -x var' and propagating it to
+   the enclosing scope. */
 static void
 propagate_temp_var (data)
      PTR_T data;
@@ -4351,12 +4394,15 @@ dispose_used_env_vars ()
 }
 
 /* Take all of the shell variables in the temporary environment HASH_TABLE
-   and make shell variables from them at the current variable context. */
+   and make shell variables from them at the current variable context.
+   Right now, this is only called in Posix mode to implement the historical
+   accident of creating global variables from assignment statements preceding
+   special builtins, but we check in case this acquires another caller later. */
 void
 merge_temporary_env ()
 {
   if (temporary_env)
-    dispose_temporary_env (push_temp_var);
+    dispose_temporary_env (posixly_correct ? push_posix_temp_var : push_temp_var);
 }
 
 void
@@ -4859,6 +4905,16 @@ push_var_context (name, flags, tempvars)
   return (shell_variables = vc);
 }
 
+/* This can be called from one of two code paths:
+	1. pop_scope, which implements the posix rules for propagating variable
+	   assignments preceding special builtins to the surrounding scope.
+	2. pop_var_context, which is called from pop_context and implements the
+	   posix rules for propagating variable assignments preceding function
+	   calls to the surrounding scope.
+
+  It takes variables out of a temporary environment hash table. We take the
+  variable in data
+*/
 static void
 push_func_var (data)
      PTR_T data;
@@ -4978,11 +5034,7 @@ push_exported_var (data)
      propagated, bind it in the previous scope before disposing it. */
   /* XXX - This isn't exactly right, because all tempenv variables have the
     export attribute set. */
-#if 0
-  if (exported_p (var) || (var->attributes & att_propagate))
-#else
   if (tempvar_p (var) && exported_p (var) && (var->attributes & att_propagate))
-#endif
     {
       var->attributes &= ~att_tempvar;		/* XXX */
       v = bind_variable_internal (var->name, value_cell (var), shell_variables->table, 0, 0);
@@ -5000,11 +5052,17 @@ push_exported_var (data)
   dispose_variable (var);
 }
 
+/* This is called to propagate variables in the temporary environment of a
+   special builtin (if IS_SPECIAL != 0) or exported variables that are the
+   result of a builtin like `source' or `command' that can operate on the
+   variables in its temporary environment. In the first case, we call
+   push_func_var, which does the right thing (for now) */
 void
 pop_scope (is_special)
      int is_special;
 {
   VAR_CONTEXT *vcxt, *ret;
+  int is_bltinenv;
 
   vcxt = shell_variables;
   if (vc_istempscope (vcxt) == 0)
@@ -5012,6 +5070,7 @@ pop_scope (is_special)
       internal_error (_("pop_scope: head of shell_variables not a temporary environment scope"));
       return;
     }
+  is_bltinenv = vc_isbltnenv (vcxt);	/* XXX - for later */
 
   ret = vcxt->down;
   if (ret)

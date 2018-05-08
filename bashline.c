@@ -4147,7 +4147,7 @@ bash_execute_unix_command (count, key)
   array_needs_making = 1;
 
   save_parser_state (&ps);
-  r = parse_and_execute (cmd, "bash_execute_unix_command", SEVAL_NOHIST|SEVAL_NOFREE);
+  r = parse_and_execute (savestring (cmd), "bash_execute_unix_command", SEVAL_NOHIST|SEVAL_NOFREE);
   restore_parser_state (&ps);
 
   v = find_variable ("READLINE_LINE");

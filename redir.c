@@ -1142,9 +1142,12 @@ do_redirection_internal (redirect, flags)
 
 	  r = 0;
 	  /* XXX - only if REDIR_VARASSIGN not set? */
-	  if ((flags & RX_UNDOABLE) && (fcntl (redirector, F_GETFD, 0) != -1))
+	  if (flags & RX_UNDOABLE)
 	    {
-	      r = add_undo_redirect (redirector, ri, -1);
+	      if (fcntl (redirector, F_GETFD, 0) != -1)
+		r = add_undo_redirect (redirector, ri, -1);
+	      else
+		r = add_undo_close_redirect (redirector);
 	      REDIRECTION_ERROR (r, errno, redirector);
 	    }
 

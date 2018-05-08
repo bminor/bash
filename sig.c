@@ -1,6 +1,6 @@
 /* sig.c - interface for shell signal handlers and signal initialization. */
 
-/* Copyright (C) 1994-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2018 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -113,6 +113,7 @@ struct termsig {
      int signum;
      SigHandler *orig_handler;
      int orig_flags;
+     int core_dump;
 };
 
 #define NULL_HANDLER (SigHandler *)SIG_DFL
@@ -130,15 +131,15 @@ static struct termsig terminating_signals[] = {
 #endif
 
 #ifdef SIGILL
-{  SIGILL, NULL_HANDLER, 0 },
+{  SIGILL, NULL_HANDLER, 0, 1},
 #endif
 
 #ifdef SIGTRAP
-{  SIGTRAP, NULL_HANDLER, 0 },
+{  SIGTRAP, NULL_HANDLER, 0, 1 },
 #endif
 
 #ifdef SIGIOT
-{  SIGIOT, NULL_HANDLER, 0 },
+{  SIGIOT, NULL_HANDLER, 0, 1 },
 #endif
 
 #ifdef SIGDANGER
@@ -150,19 +151,19 @@ static struct termsig terminating_signals[] = {
 #endif
 
 #ifdef SIGFPE
-{  SIGFPE, NULL_HANDLER, 0 },
+{  SIGFPE, NULL_HANDLER, 0, 1 },
 #endif
 
 #ifdef SIGBUS
-{  SIGBUS, NULL_HANDLER, 0 },
+{  SIGBUS, NULL_HANDLER, 0, 1 },
 #endif
 
 #ifdef SIGSEGV
-{  SIGSEGV, NULL_HANDLER, 0 },
+{  SIGSEGV, NULL_HANDLER, 0, 1 },
 #endif
 
 #ifdef SIGSYS
-{  SIGSYS, NULL_HANDLER, 0 },
+{  SIGSYS, NULL_HANDLER, 0, 1 },
 #endif
 
 #ifdef SIGPIPE
@@ -177,12 +178,14 @@ static struct termsig terminating_signals[] = {
 {  SIGTERM, NULL_HANDLER, 0 },
 #endif
 
+/* These don't generate core dumps on anything but Linux, but we're doing
+   this just for Linux anyway. */
 #ifdef SIGXCPU
-{  SIGXCPU, NULL_HANDLER, 0 },
+{  SIGXCPU, NULL_HANDLER, 0, 1 },
 #endif
 
 #ifdef SIGXFSZ
-{  SIGXFSZ, NULL_HANDLER, 0 },
+{  SIGXFSZ, NULL_HANDLER, 0, 1 },
 #endif
 
 #ifdef SIGVTALRM
@@ -213,6 +216,7 @@ static struct termsig terminating_signals[] = {
 #define XSIG(x) (terminating_signals[x].signum)
 #define XHANDLER(x) (terminating_signals[x].orig_handler)
 #define XSAFLAGS(x) (terminating_signals[x].orig_flags)
+#define XCOREDUMP(x) (terminating_signals[x].core_dump)
 
 static int termsigs_initialized = 0;
 
@@ -360,7 +364,6 @@ reset_terminating_signals ()
 
   termsigs_initialized = 0;
 }
-#undef XSIG
 #undef XHANDLER
 
 /* Run some of the cleanups that should be performed when we run
@@ -542,6 +545,8 @@ termsig_handler (sig)
      int sig;
 {
   static int handling_termsig = 0;
+  int i, core;
+  sigset_t mask;
 
   /* Simple semaphore to keep this function from being executed multiple
      times.  Since we no longer are running as a signal handler, we don't
@@ -583,11 +588,39 @@ termsig_handler (sig)
   executing_list = comsub_ignore_return = return_catch_flag = wait_intr_flag = 0;
 
   run_exit_trap ();	/* XXX - run exit trap possibly in signal context? */
+
+  /* We don't change the set of blocked signals. If a user starts the shell
+     with a terminating signal blocked, we won't get here (and if by some
+     magic chance we do, we'll exit below). */
   set_signal_handler (sig, SIG_DFL);
+
   kill (getpid (), sig);
 
-  exit (1);		/* just in case the kill fails? */
+  if (dollar_dollar_pid != 1)
+    exit (128+sig);		/* just in case the kill fails? */
+
+  /* We are PID 1, and the kill above failed to kill the process. We assume
+     this means that we are running as an init process in a pid namespace
+     on Linux. In this case, we can't send ourselves a fatal signal, so we
+     determine whether or not we should have generated a core dump with the
+     kill call and attempt to trick the kernel into generating one if
+     necessary. */
+  sigprocmask (SIG_SETMASK, (sigset_t *)NULL, &mask);
+  for (i = core = 0; i < TERMSIGS_LENGTH; i++)
+    {
+      set_signal_handler (XSIG (i), SIG_DFL);
+      sigdelset (&mask, XSIG (i));
+      if (sig == XSIG (i))
+	core = XCOREDUMP (i);
+    }
+  sigprocmask (SIG_SETMASK, &mask, (sigset_t *)NULL);
+
+  if (core)
+    *((volatile unsigned long *) NULL) = 0xdead0000 + sig;	/* SIGSEGV */
+
+  exit (128+sig);
 }
+#undef XSIG
 
 /* What we really do when SIGINT occurs. */
 sighandler
