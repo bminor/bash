@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Mar 15 11:30:03 EDT 2018
+.\"	Last Change: Sat May 19 21:48:08 EDT 2018
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2018 March 15" "GNU Bash 5.0"
+.TH BASH 1 "2018 May 19" "GNU Bash 5.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1357,7 +1357,14 @@ If
 is null, the parameters are joined without intervening separators.
 .TP
 .B @
-Expands to the positional parameters, starting from one.  When the
+Expands to the positional parameters, starting from one.
+In contexts where word splitting is performed, this expands each
+positional parameter to a separate word; if not within double
+quotes, these words are subject to word splitting.
+In contexts where word splitting is not performed,
+this expands to a single word
+with each positional parameter separated by a space.
+When the
 expansion occurs within double quotes, each parameter expands to a
 separate word.  That is, "\fB$@\fP" is equivalent to
 "\fB$1\fP" "\fB$2\fP" ...

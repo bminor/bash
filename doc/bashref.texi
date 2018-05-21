@@ -1663,8 +1663,16 @@ separators.
 
 @item @@
 @vindex $@@
-($@@) Expands to the positional parameters, starting from one.  When the
-expansion occurs within double quotes, each parameter expands to a
+($@@) Expands to the positional parameters, starting from one.
+In contexts where word splitting is performed, this expands each
+positional parameter to a separate word; if not within double
+quotes, these words are subject to word splitting.
+In contexts where word splitting is not performed,
+this expands to a single word
+with each positional parameter separated by a space.
+When the
+expansion occurs within double quotes, and word splitting is performed,
+each parameter expands to a
 separate word.  That is, @code{"$@@"} is equivalent to
 @code{"$1" "$2" @dots{}}.
 If the double-quoted expansion occurs within a word, the expansion of
@@ -7421,7 +7429,7 @@ shell session.
 After the string is decoded, it is expanded via
 parameter expansion, command substitution, arithmetic
 expansion, and quote removal, subject to the value of the
-@code{promptvars} shell option (@pxref{Bash Builtins}).
+@code{promptvars} shell option (@pxref{The Shopt Builtin}).
 
 @node The Restricted Shell
 @section The Restricted Shell
