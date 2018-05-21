@@ -231,7 +231,7 @@ ${THIS_SH} ./varenv10.sub
 # tests of compound assignments in function scope
 ${THIS_SH} ./varenv11.sub
 
-# temporary environment variable propagation in posix mode
+# temporary environment variable propagation and scoping in posix mode
 ${THIS_SH} ./varenv12.sub
 
 # make sure variable scoping is done right

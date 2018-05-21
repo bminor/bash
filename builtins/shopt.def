@@ -121,6 +121,10 @@ extern int assoc_expand_once;
 extern int array_expand_once;
 #endif
 
+#if defined (SYSLOG_HISTORY) && defined (SYSLOG_SHOPT)
+extern int syslog_history;
+#endif
+
 static void shopt_error __P((char *));
 
 static int set_shellopts_after_change __P((char *, int));
@@ -235,6 +239,9 @@ static struct {
 #endif
   { "shift_verbose", &print_shift_error, (shopt_set_func_t *)NULL },
   { "sourcepath", &source_uses_path, (shopt_set_func_t *)NULL },
+#if defined (SYSLOG_HISTORY) && defined (SYSLOG_SHOPT)
+  { "syslog_history", &syslog_history, (shopt_set_func_t *)NULL },
+#endif
   { "xpg_echo", &xpg_echo, (shopt_set_func_t *)NULL },
   { (char *)0, (int *)0, (shopt_set_func_t *)NULL }
 };
@@ -355,6 +362,14 @@ reset_shopt_options ()
   literal_history = 0;
   force_append_history = 0;
   command_oriented_history = 1;
+#endif
+
+#if defined (SYSLOG_HISTORY)
+#  if defined (SYSLOG_SHOPT)
+  syslog_history = SYSLOG_SHOPT;
+#  else
+  syslog_history = 1;
+#  endif /* SYSLOG_SHOPT */
 #endif
 
 #if defined (READLINE)

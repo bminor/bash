@@ -267,6 +267,82 @@ iiii. Fixed a problem with splitting double-quoted words for programmable
       completion when the double quote immediately follows another word
       delimiter.
 
+jjjj. Fixed a bug resulting in a use-after-free if two file descriptors share
+      the same input buffer.
+
+kkkk. The error message resulting from ${x:?} and ${x?} now differs depending
+      on whether the variable is null or unset.
+
+llll. In Posix mode, the shell exits if a variable assignment fails and precedes
+      an empty simple command (after expansion).
+
+mmmm. Fixed a timing problem with SIGALRM that could cause the read builtin to
+      drop characters.
+
+nnnn. Added code to deal with kill(2) failing to send the shell a fatal signal
+      due to Linux pid namespace peculiarities.
+
+oooo. Fixed a bug that made \C-@ (NUL) unusable in key sequences used for
+      `bind -x' commands.
+
+pppp. Fixed a bug that could cause SIGINT recursion when running an external
+      command in a trap the shell takes after a command exits due to SIGINT.
+
+qqqq. Make sure the shell turns off job control before running the command-
+      not-found handle, so the command doesn't try to manipulate process
+      groups.
+
+rrrr. Fixed a problem with timing process substitutions that caused the shell
+      to print timing information for the calling command.
+
+ssss. Fixed a bug that caused backquotes in a here-document delimiter to mark
+      the delimiter as quoted (inhibiting expansion of the here-document
+      contents).
+
+tttt. Fixed several problems with 0x01 and 0x177 in case pattern lists and
+      conditional command pattern matches.
+
+uuuu. Fixed a bug that could cause the pattern matching engine to not recognize
+      locale-specific character classes.
+
+vvvv. The auto-configuration now tests for /dev/stdin and /dev/fd independently.
+
+wwww. The `globstar' code now skips over symbolic links to directories,
+      preventing them from being scanned twice.
+
+xxxx. When running `bind -x' commands, bash now sets READLINE_POINT based on
+      the number of characters in the readline line buffer, not the number of
+      bytes.
+
+yyyy. Fixed a problem that could cause recursive trap evaluation of the RETURN
+      trap when using `eval return'.
+
+zzzz. Fixed a bug with expanding 0x01 in an unquoted here-document.
+
+aaaaa. The process substitution code now closes and unlinks FIFOs when the
+       process on the other side exits, in order to prevent SIGPIPE or
+       waiting until a FIFO opened for read has a writer.
+
+bbbbb. Fixed a bug with recursive calls to the parser overwriting the token in
+       an {id}>foo construct.
+
+ccccc. After a Posix discussion, the pattern matching engine just skips over
+       invalid character classes in bracket expressions, instead of matching
+       them like individual characters in the expression.
+
+ddddd. Fixed a posix-mode problem with variable scoping when creating variables
+       from assignment statements preceding special builtins.
+
+eeeee. Fixed a bug that could cause patterns containing backslashes to not be
+       run through the pattern matching engine.
+
+fffff. Fixed a bug that could cause redirections to compound commands to not
+       be `undone' if the file descriptor in the redirection was closed when
+       the redirection was initially processed.
+
+ggggg. Fixed a bug that could cause buffer corruption when using `bind -x' in
+       a command execute as a result of a key binding installed by `bind -x'.
+
 2.  Changes to Readline
 
 a. Added a guard to prevent nested macros from causing an infinite expansion
@@ -283,7 +359,7 @@ d. Added support for keyboard timeouts when an ESC character is the last
 
 e. There are several performance improvements when in a UTF-8 locale.
 
-f. Readline does a better job of preserving the original set of blocked =
+f. Readline does a better job of preserving the original set of blocked
    signals when using pselect() to wait for input.
 
 g. Fixed a bug that caused multibyte characters in macros to be mishandled.
@@ -330,6 +406,9 @@ u. If there is a key bound to the tty's VDISCARD special character, readline
 
 v. Fixed a problem with exiting bracketed paste mode on terminals that assume
    the bracketed paste mode character sequence contains visible characters.
+
+w. Fixed a bug that could cause a key binding command to refer to an
+   uninitialized variable.
 
 3.  New Features in Bash
 
@@ -405,6 +484,14 @@ w. There is a new `assoc_expand_once' shell option that attempts to expand
 x. The shell only sets up BASH_ARGV and BASH_ARGC at startup if extended
    debugging mode is active. The old behavior of unconditionally setting them
    is available as part of the shell compatibility options.
+
+y. The `umask' builtin now allows modes and masks greater than octal 777.
+
+z. The `times' builtin now honors the current locale when printing a decimal
+   point.
+
+aa. There is a new (disabled by default, undocumented) shell option to enable
+    and disable sending history to syslog at runtime.
 
 4.  New Features in Readline
 

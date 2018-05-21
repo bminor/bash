@@ -1522,6 +1522,11 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   /* Subshells are neither login nor interactive. */
   login_shell = interactive = 0;
 
+  /* And we're no longer in a loop. See Posix interp 842 (we are not in the
+     "same execution environment"). */
+  if (shell_compatibility_level > 43)
+    loop_level = 0;
+
   if (user_subshell)
     {
       subshell_environment = SUBSHELL_PAREN;	/* XXX */
@@ -1671,6 +1676,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   if (invert)
     return_code = (return_code == EXECUTION_SUCCESS) ? EXECUTION_FAILURE
 						     : EXECUTION_SUCCESS;
+
 
   /* If we were explicitly placed in a subshell with (), we need
      to do the `shell cleanup' things, such as running traps[0]. */
@@ -4768,6 +4774,12 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   if (subshell == 0)
     {
       begin_unwind_frame ("function_calling");
+      /* If the shell is in posix mode, this will push the variables in
+	 the temporary environment to the "current shell environment" (the
+	 global scope), and dispose the temporary env before setting it to
+	 NULL later. This behavior has disappeared from the latest edition
+	 of the standard, so I will eventually remove it from variables.c:
+	 push_var_context. */
       push_context (var->name, subshell, temporary_env);
       /* This has to be before the pop_context(), because the unwinding of
 	 local variables may cause the restore of a local declaration of

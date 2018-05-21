@@ -244,7 +244,7 @@ installdirs:
 
 install-dev:	installdirs
 	@$(INSTALL_DATA) Makefile.inc $(DESTDIR)$(loadablesdir)/Makefile.inc
-	@$(INSTALL_DATA) loadables.h $(DESTDIR)$(loadablesdir)/loadables.h
+	@$(INSTALL_DATA) $(srcdir)/loadables.h $(DESTDIR)$(loadablesdir)/loadables.h
 	@( cd $(BUILD_DIR) && ${MAKE} ${MFLAGS} DESTDIR="$(DESTDIR)" install-headers)
 
 install-supported:	all installdirs install-dev

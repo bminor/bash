@@ -124,6 +124,13 @@
 #  define OPENLOG_OPTS LOG_PID
 #endif
 
+/* Define if you want syslogging history to be controllable at runtime via a
+   shell option; if defined, the value is the default for the syslog_history
+   shopt option */
+#if defined (SYSLOG_HISTORY)
+/* #define SYSLOG_SHOPT 1 */
+#endif
+
 /* Define if you want to include code in shell.c to support wordexp(3) */
 /* #define WORDEXP_OPTION */
 

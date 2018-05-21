@@ -435,6 +435,7 @@ parse_and_execute (string, from_file, flags)
 	      else
 		last_result = execute_command_internal
 				(command, 0, NO_PIPE, NO_PIPE, bitmap);
+
 	      dispose_command (command);
 	      dispose_fd_bitmap (bitmap);
 	      discard_unwind_frame ("pe_dispose");

@@ -15358,3 +15358,41 @@ bashline.c
 	- bash_execute_unix_command: make sure that parse_and_execute is called
 	  with newly-allocated memory to avoid prematurely freeing the
 	  command. Report and fix from Koichi Murase <myoga.murase@gmail.com>
+
+				    5/7
+				    ---
+builtins/shopt.def
+	- syslog_history: a shell option to control whether history is logged
+	  to syslog; can be modified at runtime. Original patch from
+	  Siteshwar Vashisht <svashisht@redhat.com>
+
+config-top.h
+	- SYSLOG_SHOPT: new configurable option, determines whether there is a
+	  shell option to control syslogging history lines at runtime and sets
+	  the default value of the option
+
+bashline.c
+	- syslog_history: new variable to control whether history lines are
+	  sent to syslog; default value is the value of SYSLOG_SHOPT (or 1
+	  if that's not defined)
+	- bash_add_history: send history lines to syslog if syslog_history is
+	  non-zero
+
+				   5/10
+				   ----
+
+variables.c
+	- push_var_context: if we are in Posix mode and manipulating the
+	  temporary environment (temporary_env), implement behavior specified
+	  in Posix interp 1009 and make sure that temporary assignments
+	  preceding function calls modify the current environment *before*
+	  the function is executed.
+
+[bash-5.0-alpha frozen]
+
+				   5/12
+				   ----
+execute_cmd.c
+	- execute_in_subshell: subshells should set loop_level == 0, since
+	  they are no longer "enclosed" by the loop, according to posix.
+	  Report from Aeron.E. Wang <aeron.e.wang@gmail.com>

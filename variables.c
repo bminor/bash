@@ -4889,11 +4889,22 @@ push_var_context (name, flags, tempvars)
      HASH_TABLE *tempvars;
 {
   VAR_CONTEXT *vc;
+  int posix_func_behavior;
+
+  /* As of IEEE Std 1003.1-2017, assignment statements preceding shell
+     functions no longer behave like assignment statements preceding
+     special builtins, and do not persist in the current shell environment.
+     This is austin group interp #654, though nobody implements it yet. */
+  posix_func_behavior = posixly_correct;	/* placeholder for later */
 
   vc = new_var_context (name, flags);
-  vc->table = tempvars;
-  if (tempvars)
+  /* Posix interp 1009, temporary assignments preceding function calls modify
+     the current environment *before* the command is executed. */
+  if (posix_func_behavior && tempvars == temporary_env)
+    merge_temporary_env ();
+  else if (tempvars)
     {
+      vc->table = tempvars;
       /* Have to do this because the temp environment was created before
 	 variable_context was incremented. */
       flatten (tempvars, set_context, (VARLIST *)NULL, 0);

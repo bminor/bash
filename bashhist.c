@@ -780,6 +780,12 @@ check_add_history (line, force)
 #define OPENLOG_OPTS 0
 #endif
 
+#if defined (SYSLOG_SHOPT)
+int syslog_history = SYSLOG_SHOPT;
+#else
+int syslog_history = 1;
+#endif
+
 void
 bash_syslog_history (line)
      const char *line;
@@ -883,7 +889,8 @@ bash_add_history (line)
     really_add_history (line);
 
 #if defined (SYSLOG_HISTORY)
-  bash_syslog_history (line);
+  if (syslog_history)
+    bash_syslog_history (line);
 #endif
 
   using_history ();

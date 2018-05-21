@@ -7,7 +7,7 @@ teststring=$(printf '\1\2\3\177')
 n=0
 
 trim_od() {
-	od -a | sed -n '1 { s/^0*[[:blank:]]*//; s/[[:blank:]]*$//; p; }'
+	od -t a | sed -n '1 { s/^0*[[:blank:]]*//; s/[[:blank:]]*$//; p; }'
 }
 
 doTest() {
