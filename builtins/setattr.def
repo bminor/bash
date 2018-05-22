@@ -34,13 +34,11 @@ $PRODUCES setattr.c
 #include "../bashintl.h"
 
 #include "../shell.h"
+#include "../execute_cmd.h"
 #include "../flags.h"
 #include "common.h"
 #include "bashgetopt.h"
 
-extern int posixly_correct;
-extern int array_needs_making;
-extern char *this_command_name;
 extern sh_builtin_func_t *this_shell_builtin;
 
 #ifdef ARRAY_VARS
@@ -539,7 +537,7 @@ set_var_attribute (name, attribute, undo)
      int attribute, undo;
 {
   SHELL_VAR *var, *tv, *v, *refvar;
-  char *tvalue, *refname;
+  char *tvalue;
 
   if (undo)
     var = find_variable (name);

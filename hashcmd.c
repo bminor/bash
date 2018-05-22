@@ -31,10 +31,9 @@
 #include "bashansi.h"
 
 #include "shell.h"
+#include "flags.h"
 #include "findcmd.h"
 #include "hashcmd.h"
-
-extern int hashing_enabled;
 
 HASH_TABLE *hashed_filenames = (HASH_TABLE *)NULL;
 

@@ -230,8 +230,6 @@ ansic_quote (str, flags, rlen)
   *r++ = '$';
   *r++ = '\'';
 
-  s = str;
-
   for (s = str; c = *s; s++)
     {
       b = l = 1;		/* 1 == add backslash; 0 == no backslash */
@@ -305,10 +303,8 @@ ansic_wshouldquote (string)
 {
   const wchar_t *wcs;
   wchar_t wcc;
-
   wchar_t *wcstr = NULL;
   size_t slen;
-
 
   slen = mbstowcs (wcstr, string, 0);
 

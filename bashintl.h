@@ -47,4 +47,8 @@
 #  define setlocale(cat, loc)
 #endif
 
+#if !defined (HAVE_LOCALE_H) || !defined (HAVE_LOCALECONV)
+#  define locale_decpoint()	'.'
+#endif
+
 #endif /* !_BASHINTL_H_ */

@@ -103,7 +103,7 @@ INC = -I. -I.. -I$(topdir) -I$(topdir)/lib -I$(topdir)/builtins -I${srcdir} \
 ALLPROG = print truefalse sleep finfo logname basename dirname \
 	  tty pathchk tee head mkdir rmdir printenv id whoami \
 	  uname sync push ln unlink realpath strftime mypid setpgid
-OTHERPROG = necho hello cat pushd
+OTHERPROG = necho hello cat pushd stat rm fdflags
 
 all:	$(SHOBJ_STATUS)
 
@@ -141,6 +141,12 @@ finfo:	finfo.o
 
 cat:	cat.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ cat.o $(SHOBJ_LIBS)
+
+rm:	rm.o
+	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ rm.o $(SHOBJ_LIBS)
+
+fdflags:	fdflags.o
+	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ fdflags.o $(SHOBJ_LIBS)
 
 logname:	logname.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ logname.o $(SHOBJ_LIBS)
@@ -202,9 +208,11 @@ strftime:	strftime.o
 mypid:	mypid.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ mypid.o $(SHOBJ_LIBS)
 
-
 setpgid:	setpgid.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ setpgid.o $(SHOBJ_LIBS)
+
+stat:	stat.o
+	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ stat.o $(SHOBJ_LIBS)
 
 # pushd is a special case.  We use the same source that the builtin version
 # uses, with special compilation options.
@@ -236,6 +244,7 @@ installdirs:
 
 install-dev:	installdirs
 	@$(INSTALL_DATA) Makefile.inc $(DESTDIR)$(loadablesdir)/Makefile.inc
+	@$(INSTALL_DATA) $(srcdir)/loadables.h $(DESTDIR)$(loadablesdir)/loadables.h
 	@( cd $(BUILD_DIR) && ${MAKE} ${MFLAGS} DESTDIR="$(DESTDIR)" install-headers)
 
 install-supported:	all installdirs install-dev
@@ -246,7 +255,7 @@ install-supported:	all installdirs install-dev
 	done
 
 uninstall-dev:
-	-$(RM) $(DESTDIR)$(loadablesdir)/Makefile.inc
+	-$(RM) $(DESTDIR)$(loadablesdir)/Makefile.inc $(DESTDIR)$(loadablesdir)/loadables.h
 	-( cd $(BUILD_DIR) && ${MAKE} ${MFLAGS} DESTDIR="$(DESTDIR)" uninstall-headers)
 
 uninstall-supported:	uninstall-dev
@@ -283,3 +292,4 @@ mkdir.o: mkdir.c
 realpath.o: realpath.c
 strftime.o: strftime.c
 setpgid.o: setpgid.c
+stat.o: stat.c

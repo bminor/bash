@@ -35,6 +35,7 @@ $PRODUCES set.c
 #include "../bashintl.h"
 
 #include "../shell.h"
+#include "../parser.h"
 #include "../flags.h"
 #include "common.h"
 #include "bashgetopt.h"
@@ -48,14 +49,6 @@ $PRODUCES set.c
 #if defined (HISTORY)
 #  include "../bashhist.h"
 #endif
-
-extern int posixly_correct, ignoreeof, eof_encountered_limit;
-#if defined (HISTORY)
-extern int dont_save_function_defs;
-#endif
-#if defined (READLINE)
-extern int no_line_editing;
-#endif /* READLINE */
 
 $BUILTIN set
 $FUNCTION set_builtin
@@ -859,7 +852,7 @@ unset_builtin (list)
 
 #if defined (ARRAY_VARS)
       unset_array = 0;
-      if (!unset_function && nameref == 0 && valid_array_reference (name, 0))
+      if (!unset_function && nameref == 0 && valid_array_reference (name, assoc_expand_once))	/* XXX valid array reference second arg was 0 */
 	{
 	  t = strchr (name, '[');
 	  *t++ = '\0';
@@ -916,7 +909,7 @@ unset_builtin (list)
       if (var && unset_array)
 	{
 	  /* Let unbind_array_element decide what to do with non-array vars */
-	  tem = unbind_array_element (var, t);
+	  tem = unbind_array_element (var, t, assoc_expand_once);	/* XXX new third arg */
 	  if (tem == -2 && array_p (var) == 0 && assoc_p (var) == 0)
 	    {
 	      builtin_error (_("%s: not an array variable"), var->name);
@@ -938,8 +931,8 @@ unset_builtin (list)
 	      if (valid_array_reference (nameref_cell (var), 0))
 		{
 		  tname = savestring (nameref_cell (var));
-		  if (var = array_variable_part (tname, &t, 0))
-		    tem = unbind_array_element (var, t);
+		  if (var = array_variable_part (tname, 0, &t, (int *)0))
+		    tem = unbind_array_element (var, t, assoc_expand_once);	/* XXX new third arg */
 		  free (tname);
 		}
 	      else

@@ -1,0 +1,26 @@
+set -- ' A ' ' B '
+IFS=
+
+printf '<%s>' ${*} ${*##}
+echo
+printf '<%s>' ${*} ${*/}
+echo
+printf '<%s>' ${*} ${*,,}
+echo
+printf '<%s>' ${*} ${*:1:2}
+echo
+printf '<%s>' ${*} ${*@Q}
+echo
+
+echo -----
+
+printf '<%s>' ${@} ${@##}
+echo
+printf '<%s>' ${@} ${@/}
+echo
+printf '<%s>' ${@} ${@,,}
+echo
+printf '<%s>' ${@} ${@:1:2}
+echo
+printf '<%s>' ${@} ${@@Q}
+echo

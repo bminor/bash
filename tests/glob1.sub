@@ -1,7 +1,10 @@
 # bash-2.01.1 failed this test
-FN=/tmp/bash-glob.$$
+: ${TMPDIR:=/var/tmp}
+
+FN=$TMPDIR/bash-glob.$$
 mkdir $FN
 cd $FN
+
 mkdir foo
 mkdir foobar
 touch foo/bar
@@ -10,5 +13,5 @@ chmod 311 foo foobar
 echo f*/bar
 
 chmod 777 foo foobar
-cd /
+cd $OLDPWD
 rm -rf $FN

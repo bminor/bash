@@ -152,7 +152,7 @@ b1()
 b2()
 {	
 	recho $*
-	recho $#
+	recho ${#}
 }
 
 expect '<1>'
@@ -414,7 +414,7 @@ recho ${#}
 expect '<5>'
 recho ${#?:-xyz}
 
-shift $#
+shift ${#}
 
 expect '<0>'
 recho ${#:-foo}

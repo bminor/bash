@@ -122,6 +122,7 @@ print_builtin (list)
 	case 'f':
 	  pfmt = list_optarg;
 	  break;
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);

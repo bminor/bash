@@ -2,9 +2,9 @@ Compatibility with previous versions
 ====================================
 
 This document details the incompatibilities between this version of bash,
-bash-4.4, and the previous widely-available versions, bash-3.x (which is
-still the `standard' version for Mac OS X), 4.1/4.2 (which are still
-standard on a few Linux distributions), and bash-4.3, the current
+bash-5.0, and the previous widely-available versions, bash-3.x (which is
+still the `standard' version for Mac OS X), 4.2/4.3 (which are still
+standard on a few Linux distributions), and bash-4.4, the current
 widely-available version.  These were discovered by users of bash-2.x
 through 4.x, so this list is not comprehensive.  Some of these
 incompatibilities occur between the current version and versions 2.0 and
@@ -391,6 +391,11 @@ above.
     argument to `declare' or a similar builtin expands to a word that looks
     like a compound array assignment (e.g. declare w=$x where x='(foo)').
 
+60. Bash-5.0 only sets up BASH_ARGV and BASH_ARGC at startup if extended
+    debugging mode is active. The old behavior of unconditionally setting
+    BASH_ARGC and BASH_ARGV is available at compatibility levels less than
+    or equal to 44.
+
 Shell Compatibility Level
 =========================
 
@@ -450,6 +455,11 @@ compat43 set
 	  not reset, so `break' or `continue' in a shell function will break or
 	  continue loops in the calling context.  Bash-4.4 and later reset the
 	  loop state to prevent this.
+
+compat44 set
+	- the shell sets up the values used by BASH_ARGV and BASH_ARGC so
+	  they can expand to the shell's positional parameters even if extended
+	  debug mode is not enabled
 
 -------------------------------------------------------------------------------
 

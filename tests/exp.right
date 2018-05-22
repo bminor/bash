@@ -210,11 +210,13 @@ argv[1] = <correct>
 argv[2] = <a>
 argv[1] = <correct>
 argv[2] = <a>
+./exp7.sub: line 5: INFORM: dequote_string: string with bare CTLESC
 argv[1] = <^A>
 argv[1] = <3>
 argv[2] = <^C>
 argv[3] = <^C>
 argv[4] = <^C>
+./exp7.sub: line 10: INFORM: dequote_string: string with bare CTLESC
 argv[1] = <^A>
 argv[1] = <x^Ay^?z>
 argv[1] = <x^Ay^?z>
@@ -291,7 +293,9 @@ var=abc:def ghi:jkl
 abcdef ghijkl
 abcdef ghijkl
 abcdef ghijkl
-abcdef ghijkl
+abc
+def ghi
+jkl
 abcdef ghijkl
 abcdef ghijkl
 abcdef ghijkl
@@ -332,3 +336,68 @@ jkl
 []
 [foo]
 []
+< A >< B >< A >< B >
+< A >< B >< A >< B >
+< A >< B >< a >< b >
+< A >< B >< A >< B >
+< A >< B ><' A '><' B '>
+-----
+< A >< B >< A >< B >
+< A >< B >< A >< B >
+< A >< B >< a >< b >
+< A >< B >< A >< B >
+< A >< B ><' A '><' B '>
+argv[1] = <1>
+argv[2] = <2>
+argv[1] = <1>
+argv[2] = <2>
+argv[1] = <1>
+argv[2] = <2>
+argv[1] = <1 2>
+argv[1] = <a b>
+argv[1] = <a>
+argv[2] = <b>
+argv[1] = <a b>
+argv[1] = <1>
+argv[2] = <2>
+argv[1] = <1>
+argv[2] = <2>
+argv[1] = <1>
+argv[2] = <2>
+argv[1] = <12>
+argv[1] = <12>
+argv[1] = <1>
+argv[2] = <2>
+argv[1] = <1>
+argv[2] = <2>
+argv[1] = < >
+argv[1] = < >
+argv[1] = < >
+argv[1] = < >
+argv[1] = < >
+argv[1] = <12>
+argv[1] = <12>
+argv[1] = <12>
+argv[1] = <12>
+ok 1
+ok 2
+ok 3
+ok 4
+ok 5
+ok 6
+ok 7
+ok 8
+ok 9
+argv[1] = <file.o>
+argv[1] = <posix>
+argv[1] = </src/cmd>
+argv[1] = <three>
+argv[1] = </one/two/three>
+abcdefg
+abcdefg
+abcdefg
+abcdefg
+cdefg
+abcdefg
+abcde
+abcdefg

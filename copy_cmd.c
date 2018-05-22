@@ -69,12 +69,20 @@ WORD_LIST *
 copy_word_list (list)
      WORD_LIST *list;
 {
-  WORD_LIST *new_list;
+  WORD_LIST *new_list, *tl;
 
-  for (new_list = (WORD_LIST *)NULL; list; list = list->next)
-    new_list = make_word_list (copy_word (list->word), new_list);
+  for (new_list = tl = (WORD_LIST *)NULL; list; list = list->next)
+    {
+      if (new_list == 0)
+	new_list = tl = make_word_list (copy_word (list->word), new_list);
+      else
+	{
+	  tl->next = make_word_list (copy_word (list->word), (WORD_LIST *)NULL);
+	  tl = tl->next;
+	}
+    }
 
-  return (REVERSE_LIST (new_list, WORD_LIST *));
+  return (new_list);
 }
 
 static PATTERN_LIST *
@@ -221,6 +229,7 @@ copy_subshell_command (com)
   new_subshell = (SUBSHELL_COM *)xmalloc (sizeof (SUBSHELL_COM));
   new_subshell->command = copy_command (com->command);
   new_subshell->flags = com->flags;
+  new_subshell->line = com->line;
   return (new_subshell);
 }
 

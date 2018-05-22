@@ -1,6 +1,6 @@
 /* kill.c -- kill ring management. */
 
-/* Copyright (C) 1994-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2017 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -78,8 +78,7 @@ static int rl_yank_nth_arg_internal PARAMS((int, int, int));
 /* How to say that you only want to save a certain amount
    of kill material. */
 int
-rl_set_retained_kills (num)
-     int num;
+rl_set_retained_kills (int num)
 {
   return 0;
 }
@@ -89,9 +88,7 @@ rl_set_retained_kills (num)
    non-zero, and the last command was a kill, the text is appended to the
    current kill ring slot, otherwise prepended. */
 static int
-_rl_copy_to_kill_ring (text, append)
-     char *text;
-     int append;
+_rl_copy_to_kill_ring (char *text, int append)
 {
   char *old, *new;
   int slot;
@@ -122,7 +119,7 @@ _rl_copy_to_kill_ring (text, append)
 	  else
 	    {
 	      slot = rl_kill_ring_length += 1;
-	      rl_kill_ring = (char **)xrealloc (rl_kill_ring, slot * sizeof (char *));
+	      rl_kill_ring = (char **)xrealloc (rl_kill_ring, (slot + 1) * sizeof (char *));
 	    }
 	  rl_kill_ring[--slot] = (char *)NULL;
 	}
@@ -131,7 +128,7 @@ _rl_copy_to_kill_ring (text, append)
     slot = rl_kill_ring_length - 1;
 
   /* If the last command was a kill, prepend or append. */
-  if (_rl_last_command_was_kill && rl_editing_mode != vi_mode)
+  if (_rl_last_command_was_kill && rl_kill_ring[slot] && rl_editing_mode != vi_mode)
     {
       old = rl_kill_ring[slot];
       new = (char *)xmalloc (1 + strlen (old) + strlen (text));
@@ -163,8 +160,7 @@ _rl_copy_to_kill_ring (text, append)
    last command was not a kill command, then a new slot is made for
    this kill. */
 int
-rl_kill_text (from, to)
-     int from, to;
+rl_kill_text (int from, int to)
 {
   char *text;
 
@@ -198,8 +194,7 @@ rl_kill_text (from, to)
 
 /* Delete the word at point, saving the text in the kill ring. */
 int
-rl_kill_word (count, key)
-     int count, key;
+rl_kill_word (int count, int key)
 {
   int orig_point;
 
@@ -222,17 +217,16 @@ rl_kill_word (count, key)
 
 /* Rubout the word before point, placing it on the kill ring. */
 int
-rl_backward_kill_word (count, ignore)
-     int count, ignore;
+rl_backward_kill_word (int count, int key)
 {
   int orig_point;
 
   if (count < 0)
-    return (rl_kill_word (-count, ignore));
+    return (rl_kill_word (-count, key));
   else
     {
       orig_point = rl_point;
-      rl_backward_word (count, ignore);
+      rl_backward_word (count, key);
 
       if (rl_point != orig_point)
 	rl_kill_text (orig_point, rl_point);
@@ -246,17 +240,16 @@ rl_backward_kill_word (count, ignore)
 /* Kill from here to the end of the line.  If DIRECTION is negative, kill
    back to the line start instead. */
 int
-rl_kill_line (direction, ignore)
-     int direction, ignore;
+rl_kill_line (int direction, int key)
 {
   int orig_point;
 
   if (direction < 0)
-    return (rl_backward_kill_line (1, ignore));
+    return (rl_backward_kill_line (1, key));
   else
     {
       orig_point = rl_point;
-      rl_end_of_line (1, ignore);
+      rl_end_of_line (1, key);
       if (orig_point != rl_point)
 	rl_kill_text (orig_point, rl_point);
       rl_point = orig_point;
@@ -269,13 +262,12 @@ rl_kill_line (direction, ignore)
 /* Kill backwards to the start of the line.  If DIRECTION is negative, kill
    forwards to the line end instead. */
 int
-rl_backward_kill_line (direction, ignore)
-     int direction, ignore;
+rl_backward_kill_line (int direction, int key)
 {
   int orig_point;
 
   if (direction < 0)
-    return (rl_kill_line (1, ignore));
+    return (rl_kill_line (1, key));
   else
     {
       if (rl_point == 0)
@@ -283,7 +275,7 @@ rl_backward_kill_line (direction, ignore)
       else
 	{
 	  orig_point = rl_point;
-	  rl_beg_of_line (1, ignore);
+	  rl_beg_of_line (1, key);
 	  if (rl_point != orig_point)
 	    rl_kill_text (orig_point, rl_point);
 	  if (rl_editing_mode == emacs_mode)
@@ -295,8 +287,7 @@ rl_backward_kill_line (direction, ignore)
 
 /* Kill the whole line, no matter where point is. */
 int
-rl_kill_full_line (count, ignore)
-     int count, ignore;
+rl_kill_full_line (int count, int key)
 {
   rl_begin_undo_group ();
   rl_point = 0;
@@ -313,8 +304,7 @@ rl_kill_full_line (count, ignore)
 /* This does what C-w does in Unix.  We can't prevent people from
    using behaviour that they expect. */
 int
-rl_unix_word_rubout (count, key)
-     int count, key;
+rl_unix_word_rubout (int count, int key)
 {
   int orig_point;
 
@@ -346,8 +336,7 @@ rl_unix_word_rubout (count, key)
 /* This deletes one filename component in a Unix pathname.  That is, it
    deletes backward to directory separator (`/') or whitespace.  */
 int
-rl_unix_filename_rubout (count, key)
-     int count, key;
+rl_unix_filename_rubout (int count, int key)
 {
   int orig_point, c;
 
@@ -390,8 +379,7 @@ rl_unix_filename_rubout (count, key)
    into the line at all, and if you aren't, then you know what you are
    doing. */
 int
-rl_unix_line_discard (count, key)
-     int count, key;
+rl_unix_line_discard (int count, int key)
 {
   if (rl_point == 0)
     rl_ding ();
@@ -408,8 +396,7 @@ rl_unix_line_discard (count, key)
 /* Copy the text in the `region' to the kill ring.  If DELETE is non-zero,
    delete the text from the line as well. */
 static int
-region_kill_internal (delete)
-     int delete;
+region_kill_internal (int delete)
 {
   char *text;
 
@@ -427,16 +414,14 @@ region_kill_internal (delete)
 
 /* Copy the text in the region to the kill ring. */
 int
-rl_copy_region_to_kill (count, ignore)
-     int count, ignore;
+rl_copy_region_to_kill (int count, int key)
 {
   return (region_kill_internal (0));
 }
 
 /* Kill the text between the point and mark. */
 int
-rl_kill_region (count, ignore)
-     int count, ignore;
+rl_kill_region (int count, int key)
 {
   int r, npoint;
 
@@ -450,8 +435,7 @@ rl_kill_region (count, ignore)
 /* Copy COUNT words to the kill ring.  DIR says which direction we look
    to find the words. */
 static int
-_rl_copy_word_as_kill (count, dir)
-     int count, dir;
+_rl_copy_word_as_kill (int count, int dir)
 {
   int om, op, r;
 
@@ -479,8 +463,7 @@ _rl_copy_word_as_kill (count, dir)
 }
 
 int
-rl_copy_forward_word (count, key)
-     int count, key;
+rl_copy_forward_word (int count, int key)
 {
   if (count < 0)
     return (rl_copy_backward_word (-count, key));
@@ -489,8 +472,7 @@ rl_copy_forward_word (count, key)
 }
 
 int
-rl_copy_backward_word (count, key)
-     int count, key;
+rl_copy_backward_word (int count, int key)
 {
   if (count < 0)
     return (rl_copy_forward_word (-count, key));
@@ -500,8 +482,7 @@ rl_copy_backward_word (count, key)
   
 /* Yank back the last killed text.  This ignores arguments. */
 int
-rl_yank (count, ignore)
-     int count, ignore;
+rl_yank (int count, int key)
 {
   if (rl_kill_ring == 0)
     {
@@ -519,8 +500,7 @@ rl_yank (count, ignore)
    delete that text from the line, rotate the index down, and
    yank back some other text. */
 int
-rl_yank_pop (count, key)
-     int count, key;
+rl_yank_pop (int count, int key)
 {
   int l, n;
 
@@ -552,8 +532,7 @@ rl_yank_pop (count, key)
 
 #if defined (VI_MODE)
 int
-rl_vi_yank_pop (count, key)
-     int count, key;
+rl_vi_yank_pop (int count, int key)
 {
   int l, n;
 
@@ -587,8 +566,7 @@ rl_vi_yank_pop (count, key)
 /* Yank the COUNTh argument from the previous history line, skipping
    HISTORY_SKIP lines before looking for the `previous line'. */
 static int
-rl_yank_nth_arg_internal (count, ignore, history_skip)
-     int count, ignore, history_skip;
+rl_yank_nth_arg_internal (int count, int key, int history_skip)
 {
   register HIST_ENTRY *entry;
   char *arg;
@@ -629,7 +607,7 @@ rl_yank_nth_arg_internal (count, ignore, history_skip)
      inserts it right *after* rl_point. */
   if (rl_editing_mode == vi_mode)
     {
-      rl_vi_append_mode (1, ignore);
+      rl_vi_append_mode (1, key);
       rl_insert_text (" ");
     }
 #endif /* VI_MODE */
@@ -643,18 +621,16 @@ rl_yank_nth_arg_internal (count, ignore, history_skip)
 
 /* Yank the COUNTth argument from the previous history line. */
 int
-rl_yank_nth_arg (count, ignore)
-     int count, ignore;
+rl_yank_nth_arg (int count, int key)
 {
-  return (rl_yank_nth_arg_internal (count, ignore, 0));
+  return (rl_yank_nth_arg_internal (count, key, 0));
 }
 
 /* Yank the last argument from the previous history line.  This `knows'
    how rl_yank_nth_arg treats a count of `$'.  With an argument, this
    behaves the same as rl_yank_nth_arg. */
 int
-rl_yank_last_arg (count, key)
-     int count, key;
+rl_yank_last_arg (int count, int key)
 {
   static int history_skip = 0;
   static int explicit_arg_p = 0;
@@ -695,8 +671,7 @@ rl_yank_last_arg (count, key)
    closing sequence and insert the pasted text as a single unit without
    interpretation. */
 int
-rl_bracketed_paste_begin (count, key)
-     int count, key;
+rl_bracketed_paste_begin (int count, int key)
 {
   int retval, c;
   size_t len, cap;
@@ -740,13 +715,12 @@ rl_bracketed_paste_begin (count, key)
   return (retval);
 }
 
-/* A special paste command for Windows users.. */
+/* A special paste command for Windows users. */
 #if defined (_WIN32)
 #include <windows.h>
 
 int
-rl_paste_from_clipboard (count, key)
-     int count, key;
+rl_paste_from_clipboard (int count, int key)
 {
   char *data, *ptr;
   int len;

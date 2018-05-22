@@ -81,7 +81,7 @@
 #else
 #  include <strings.h>
 #endif
-
+#include <errno.h>
 #include <stdio.h>
 
 /* Define getpagesize () if the system does not.  */
@@ -99,6 +99,12 @@
 #ifdef MALLOC_WATCH
 #  include "watch.h"
 #endif
+
+#ifdef powerof2
+#  undef powerof2
+#endif
+/* Could also use (((x) & -(x)) == (x)) */
+#define powerof2(x)	((((x) - 1) & (x)) == 0)
 
 /* System-specific omissions. */
 #ifdef HPUX
@@ -239,6 +245,10 @@ static const unsigned long binsizes[NBUCKETS] = {
 
 /* binsizes[x] == (1 << ((x) + 3)) */
 #define binsize(x)	binsizes[(x)]
+
+#if !defined (errno)
+extern int errno;
+#endif
 
 /* Declarations for internal functions */
 static PTR_T internal_malloc __P((size_t, const char *, int, int));
@@ -1033,11 +1043,15 @@ internal_realloc (mem, n, file, line, flags)
   _mstats.bytesreq += (n < tocopy) ? 0 : n - tocopy;
 #endif
 
+  /* If we're reallocating to the same size as previously, return now */
+  if (n == p->mh_nbytes)
+    return mem;
+
   /* See if desired size rounds to same power of 2 as actual size. */
   nbytes = ALLOCATED_BYTES(n);
 
   /* If ok, use the same block, just marking its size as changed.  */
-  if (RIGHT_BUCKET(nbytes, nunits))
+  if (RIGHT_BUCKET(nbytes, nunits) || RIGHT_BUCKET(nbytes, nunits-1))
     {
 #if 0
       m = (char *)mem + p->mh_nbytes;
@@ -1119,6 +1133,57 @@ internal_memalign (alignment, size, file, line, flags)
   p->mh_alloc = ISMEMALIGN;
 
   return aligned;
+}
+
+int
+posix_memalign (memptr, alignment, size)
+     void **memptr;
+     size_t alignment, size;
+{
+  void *mem;
+
+  /* Perform posix-mandated error checking here */
+  if ((alignment % sizeof (void *) != 0) || alignment == 0)
+    return EINVAL;
+  else if (powerof2 (alignment) == 0)
+    return EINVAL;
+
+  mem = internal_memalign (alignment, size, (char *)0, 0, 0);
+  if (mem != 0)
+    {
+      *memptr = mem;
+      return 0;
+    }
+  return ENOMEM;
+}
+
+size_t
+malloc_usable_size (mem)
+     void *mem;
+{
+  register union mhead *p;
+  register char *ap;
+  register int maxbytes;
+
+
+  if ((ap = (char *)mem) == 0)
+    return 0;
+
+  /* Find the true start of the memory block to discover which bin */
+  p = (union mhead *) ap - 1;
+  if (p->mh_alloc == ISMEMALIGN)
+    {
+      ap -= p->mh_nbytes;
+      p = (union mhead *) ap - 1;
+    }
+
+  /* XXX - should we return 0 if ISFREE? */
+  maxbytes = binsize(p->mh_index);
+
+  /* So the usable size is the maximum number of bytes in the bin less the
+     malloc overhead */
+  maxbytes -= MOVERHEAD + MSLOP;
+  return (maxbytes);
 }
 
 #if !defined (NO_VALLOC)

@@ -35,14 +35,23 @@
 #  define TYPE_SIGNED(t)	(! ((t) 0 < (t) -1))
 #endif
 
+#ifndef TYPE_SIGNED_MAGNITUDE
+#  define TYPE_SIGNED_MAGNITUDE(t) ((t) ~ (t) 0 < (t) -1)
+#endif
+
+#ifndef TYPE_WIDTH
+#  define TYPE_WIDTH(t) (sizeof (t) * CHAR_BIT)
+#endif
+
 #ifndef TYPE_MINIMUM
-#  define TYPE_MINIMUM(t) ((t) (TYPE_SIGNED (t) \
-				? ~ (t) 0 << (sizeof (t) * CHAR_BIT - 1) \
-				: (t) 0))
+#  define TYPE_MINIMUM(t) ((t) ~ TYPE_MAXIMUM (t))
 #endif
 
 #ifndef TYPE_MAXIMUM
-#  define TYPE_MAXIMUM(t) ((t) (~ (t) 0 - TYPE_MINIMUM (t)))
+#  define TYPE_MAXIMUM(t)  \
+  ((t) (! TYPE_SIGNED (t) \
+        ? (t) -1 \
+        : ((((t) 1 << (TYPE_WIDTH (t) - 2)) - 1) * 2 + 1)))
 #endif
 
 #ifdef HAVE_LONG_LONG

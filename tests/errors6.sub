@@ -15,6 +15,29 @@ echo array after 1: $?'  2>/dev/null
 ${THIS_SH} -c 'typeset -A v ; v["0"]=one ; echo ${v[   ]}
 echo array after 2: $?'  2>/dev/null
 
+${THIS_SH} -c 'echo ${uvar?}' ./errors6.sub
+${THIS_SH} -c 'echo ${uvar:?}' ./errors6.sub
+export uvar=
+${THIS_SH} -c 'echo ${uvar?}' ./errors6.sub
+${THIS_SH} -c 'echo ${uvar:?}' ./errors6.sub
+unset uvar
+
+echo "${-3:-${-3}}"
 echo ${-3}
 x=-3; echo ${!x}
 echo after indir: $?
+
+function ivar() { echo -n "${!1:-${1}}"; }
+ivar -3
+
+foo=bar
+echo ${!foo}
+echo ${!foo:-unset}
+
+echo ${!var:-unset}
+echo ${!var+unset}
+
+foo=invalid-ident
+echo ${!foo}
+echo ${!foo:-unset}
+echo ${!foo+unset}

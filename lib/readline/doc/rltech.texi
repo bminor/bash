@@ -90,6 +90,12 @@ If @code{readline} encounters an @code{EOF} while reading the line, and the
 line is empty at that point, then @code{(char *)NULL} is returned.
 Otherwise, the line is ended just as if a newline had been typed.
 
+Readline performs some expansion on the @var{prompt} before it is
+displayed on the screen.  See the description of @code{rl_expand_prompt}
+(@pxref{Redisplay}) for additional details, especially if @var{prompt}
+will contain characters that do not consume physical screen space when
+displayed.
+
 If you want the user to be able to get at the line later, (with
 @key{C-p} for example), you must call @code{add_history()} to save the
 line away in a @dfn{history} list of such lines.
@@ -688,6 +694,11 @@ Free all storage associated with @var{keymap}.  This calls
 @code{rl_discard_keymap} to free subordindate keymaps and macros.
 @end deftypefun
 
+@deftypefun int rl_empty_keymap (Keymap keymap)
+Return non-zero if there are no keys bound to functions in @var{keymap};
+zero if there are any keys bound.
+@end deftypefun
+
 Readline has several internal keymaps.  These functions allow you to
 change which keymap is active.
 
@@ -835,6 +846,12 @@ Return the function invoked by @var{keyseq} in keymap @var{map}.
 If @var{map} is @code{NULL}, the current keymap is used.  If @var{type} is
 not @code{NULL}, the type of the object is returned in the @code{int} variable
 it points to (one of @code{ISFUNC}, @code{ISKMAP}, or @code{ISMACR}).
+@end deftypefun
+
+@deftypefun {rl_command_func_t *} rl_function_of_keyseq_len (const char *keyseq, size_t len Keymap map, int *type)
+Return the function invoked by @var{keyseq} of length @var{len}
+in keymap @var{map}. Equivalent to @code{rl_function_of_keyseq} with the
+addition of the @var{len} parameter.
 @end deftypefun
 
 @deftypefun {char **} rl_invoking_keyseqs (rl_command_func_t *function)
@@ -1677,6 +1694,19 @@ current input line.
 This will reinitialize the terminal and reinstall any Readline signal
 handlers, depending on the values of @code{rl_catch_signals} and
 @code{rl_catch_sigwinch}.
+@end deftypefun
+
+If an application wants to force Readline to handle any signals that
+have arrived while it has been executing, @code{rl_check_signals()}
+will call Readline's internal signal handler if there are any pending
+signals.  This is primarily intended for those applications that use
+a custom @code{rl_getc_function} (@pxref{Readline Variables}) and wish
+to handle signals received while waiting for input.
+
+@deftypefun void rl_check_signals (void)
+If there are any pending signals, call Readline's internal signal handling
+functions to process them. @code{rl_pending_signal()} can be used independently
+to determine whether or not there are any pending signals.
 @end deftypefun
 
 If an application does not wish Readline to catch @code{SIGWINCH}, it may

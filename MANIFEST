@@ -11,6 +11,7 @@ cross-build	d
 doc	d
 examples	d
 #examples/obashdb	d
+examples/bash-completion	d
 examples/complete	d
 examples/functions d
 examples/scripts d
@@ -209,6 +210,7 @@ builtins/bashgetopt.h	f
 cross-build/cygwin32.cache	f
 cross-build/x86-beos.cache	f
 cross-build/opennt.cache	f
+cross-build/qnx.cache	f
 include/ansi_stdlib.h	f
 include/chartypes.h	f
 include/filecntl.h	f
@@ -239,6 +241,7 @@ lib/glob/glob.c		f
 lib/glob/glob.h		f
 lib/glob/glob_loop.c	f
 lib/glob/gmisc.c	f
+lib/glob/gm_loop.c	f
 lib/glob/xmbsrtowcs.c	f
 lib/glob/collsyms.h	f
 lib/glob/doc/Makefile	f
@@ -534,6 +537,8 @@ po/nb.gmo		f
 po/nl.po		f
 po/pl.gmo		f
 po/pl.po		f
+po/pt.gmo		f
+po/pt.po		f
 po/pt_BR.gmo		f
 po/pt_BR.po		f
 po/ro.gmo		f
@@ -631,6 +636,7 @@ support/mkversion.sh	f	755
 support/mksignames.c	f
 support/signames.c	f
 support/bashbug.sh	f
+support/bashbug.sh.in	f
 support/man2html.c	f
 support/recho.c		f
 support/zecho.c		f
@@ -649,6 +655,8 @@ examples/INDEX.html	f
 #examples/obashdb/README	f
 #examples/obashdb/bashdb		f
 #examples/obashdb/bashdb.el	f
+examples/bash-completion/README	f
+examples/bash-completion/bash-completion-2.5.tar.xz	f
 examples/complete/bash_completion	f
 examples/complete/cdfunc	f
 examples/complete/complete-examples	f
@@ -672,6 +680,7 @@ examples/loadables/strftime.c	f
 examples/loadables/truefalse.c	f
 #examples/loadables/getconf.h	f
 #examples/loadables/getconf.c	f
+examples/loadables/fdflags.c	f
 examples/loadables/finfo.c	f
 examples/loadables/cat.c	f
 #examples/loadables/cut.c	f
@@ -681,6 +690,7 @@ examples/loadables/dirname.c	f
 examples/loadables/tty.c	f
 examples/loadables/pathchk.c	f
 examples/loadables/tee.c	f
+examples/loadables/rm.c		f
 examples/loadables/rmdir.c	f
 examples/loadables/head.c	f
 examples/loadables/printenv.c	f
@@ -693,6 +703,7 @@ examples/loadables/mkdir.c	f
 examples/loadables/ln.c		f
 examples/loadables/mypid.c	f
 examples/loadables/unlink.c	f
+examples/loadables/stat.c	f
 examples/loadables/perl/Makefile.in	f
 examples/loadables/perl/README	f
 examples/loadables/perl/bperl.c	f
@@ -701,9 +712,12 @@ examples/loadables/perl/iperl.c	f
 #examples/loadables/xtitle.c	f
 examples/functions/array-stuff	f
 examples/functions/array-to-string	f
+examples/functions/arrayops.bash	f
 examples/functions/autoload	f
 examples/functions/autoload.v2	f
 examples/functions/autoload.v3	f
+examples/functions/autoload.v4	f
+examples/functions/autoload.v4.t	f
 examples/functions/basename	f
 #examples/functions/basename2	f
 #examples/functions/coproc.bash	f
@@ -808,6 +822,8 @@ tests/test-glue-functions	f
 tests/alias.tests	f
 tests/alias1.sub	f
 tests/alias2.sub	f
+tests/alias3.sub	f
+tests/alias4.sub	f
 tests/alias.right	f
 tests/appendop.tests	f
 tests/appendop1.sub	f
@@ -824,6 +840,7 @@ tests/arith4.sub	f
 tests/arith5.sub	f
 tests/arith6.sub	f
 tests/arith7.sub	f
+tests/arith8.sub	f
 tests/array.tests	f
 tests/array.right	f
 tests/array1.sub	f
@@ -847,6 +864,10 @@ tests/array18.sub	f
 tests/array19.sub	f
 tests/array20.sub	f
 tests/array21.sub	f
+tests/array22.sub	f
+tests/array23.sub	f
+tests/array24.sub	f
+tests/array25.sub	f
 tests/array-at-star	f
 tests/array2.right	f
 tests/assoc.tests	f
@@ -859,6 +880,7 @@ tests/assoc5.sub	f
 tests/assoc6.sub	f
 tests/assoc7.sub	f
 tests/assoc8.sub	f
+tests/assoc9.sub	f
 tests/attr.tests	f
 tests/attr.right	f
 tests/attr1.sub		f
@@ -883,6 +905,8 @@ tests/source7.sub	f
 tests/case.tests	f
 tests/case.right	f
 tests/case1.sub		f
+tests/case2.sub		f
+tests/case3.sub		f
 tests/casemod.tests	f
 tests/casemod.right	f
 tests/comsub.tests	f
@@ -890,6 +914,7 @@ tests/comsub.right	f
 tests/comsub1.sub	f
 tests/comsub2.sub	f
 tests/comsub3.sub	f
+tests/comsub4.sub	f
 tests/comsub-eof.tests	f
 tests/comsub-eof0.sub	f
 tests/comsub-eof1.sub	f
@@ -910,6 +935,7 @@ tests/cond-regexp2.sub	f
 tests/cond-regexp3.sub	f
 tests/coproc.tests	f
 tests/coproc.right	f
+tests/coproc1.sub	f
 tests/cprint.tests	f
 tests/cprint.right	f
 tests/dbg-support.right	f
@@ -933,6 +959,7 @@ tests/dollar-at3.sub	f
 tests/dollar-at4.sub	f
 tests/dollar-at5.sub	f
 tests/dollar-at6.sub	f
+tests/dollar-at7.sub	f
 tests/dollar-star1.sub	f
 tests/dollar-star2.sub	f
 tests/dollar-star3.sub	f
@@ -940,11 +967,15 @@ tests/dollar-star4.sub	f
 tests/dollar-star5.sub	f
 tests/dollar-star6.sub	f
 tests/dollar-star7.sub	f
+tests/dollar-star8.sub	f
+tests/dollar-star9.sub	f
 tests/dollar.right	f
 tests/dstack.tests	f
 tests/dstack.right	f
 tests/dstack2.tests	f
 tests/dstack2.right	f
+tests/dynvar.tests	f
+tests/dynvar.right	f
 tests/errors.tests	f
 tests/errors.right	f
 tests/errors1.sub	f
@@ -953,6 +984,7 @@ tests/errors3.sub	f
 tests/errors4.sub	f
 tests/errors5.sub	f
 tests/errors6.sub	f
+tests/errors7.sub	f
 tests/execscript	f
 tests/exec.right	f
 tests/exec1.sub		f	755
@@ -979,6 +1011,9 @@ tests/exp6.sub		f
 tests/exp7.sub		f
 tests/exp8.sub		f
 tests/exp9.sub		f
+tests/exp10.sub		f
+tests/exp11.sub		f
+tests/exp12.sub		f
 tests/exportfunc.tests	f
 tests/exportfunc.right	f
 tests/exportfunc1.sub	f
@@ -995,6 +1030,7 @@ tests/extglob3.sub	f
 tests/extglob3.tests	f
 tests/extglob3.right	f
 tests/extglob4.sub	f
+tests/extglob5.sub	f
 tests/func.tests	f
 tests/func.right	f
 tests/func1.sub		f
@@ -1015,6 +1051,8 @@ tests/getopts9.sub	f
 tests/getopts10.sub	f
 tests/glob.tests	f
 tests/glob1.sub		f
+tests/glob2.sub		f
+tests/glob3.sub		f
 tests/glob.right	f
 tests/globstar.tests	f
 tests/globstar.right	f
@@ -1025,6 +1063,7 @@ tests/heredoc.right	f
 tests/heredoc1.sub	f
 tests/heredoc2.sub	f
 tests/heredoc3.sub	f
+tests/heredoc4.sub	f
 tests/herestr.tests	f
 tests/herestr.right	f
 tests/herestr1.sub	f
@@ -1039,8 +1078,10 @@ tests/history.right	f
 tests/history.list	f	444
 tests/history1.sub	f
 tests/history2.sub	f
+tests/history3.sub	f
 tests/ifs.tests		f
 tests/ifs.right		f
+tests/ifs1.sub		f
 tests/ifs-posix.tests	f
 tests/ifs-posix.right	f
 tests/input-line.sh	f
@@ -1062,6 +1103,7 @@ tests/jobs2.sub		f
 tests/jobs3.sub		f
 tests/jobs4.sub		f
 tests/jobs5.sub		f
+tests/jobs6.sub		f
 tests/jobs.right	f
 tests/lastpipe.right	f
 tests/lastpipe.tests	f
@@ -1093,6 +1135,7 @@ tests/nameref15.sub	f
 tests/nameref16.sub	f
 tests/nameref17.sub	f
 tests/nameref18.sub	f
+tests/nameref19.sub	f
 tests/nameref.right	f
 tests/new-exp.tests	f
 tests/new-exp1.sub	f
@@ -1105,6 +1148,7 @@ tests/new-exp7.sub	f
 tests/new-exp8.sub	f
 tests/new-exp9.sub	f
 tests/new-exp10.sub	f
+tests/new-exp11.sub	f
 tests/new-exp.right	f
 tests/nquote.tests	f
 tests/nquote.right	f
@@ -1126,10 +1170,15 @@ tests/parser.right	f
 tests/parser1.sub	f
 tests/posix2.tests	f
 tests/posix2.right	f
+tests/posix2syntax.sub	f
 tests/posixexp.tests	f
 tests/posixexp.right	f
 tests/posixexp1.sub	f
 tests/posixexp2.sub	f
+tests/posixexp3.sub	f
+tests/posixexp4.sub	f
+tests/posixexp5.sub	f
+tests/posixexp6.sub	f
 tests/posixexp2.tests	f
 tests/posixexp2.right	f
 tests/posixpat.tests	f
@@ -1144,6 +1193,9 @@ tests/printf1.sub	f
 tests/printf2.sub	f
 tests/printf3.sub	f
 tests/printf4.sub	f
+tests/procsub.tests	f
+tests/procsub.right	f
+tests/procsub1.sub	f
 tests/quote.tests	f
 tests/quote.right	f
 tests/quote1.sub	f
@@ -1171,12 +1223,13 @@ tests/redir8.sub	f
 tests/redir9.sub	f
 tests/redir10.sub	f
 tests/redir11.sub	f
-tests/redir12.sub	f
 tests/rhs-exp.tests	f
 tests/rhs-exp.right	f
 tests/rhs-exp1.sub	f
 tests/rsh.tests		f
 tests/rsh.right		f
+tests/rsh1.sub		f
+tests/rsh2.sub		f
 tests/run-all		f
 tests/run-minimal	f
 tests/run-alias		f
@@ -1201,6 +1254,7 @@ tests/run-dbg-support	f
 tests/run-dbg-support2	f
 tests/run-dirstack	f
 tests/run-dollars	f
+tests/run-dynvar	f
 tests/run-errors	f
 tests/run-execscript	f
 tests/run-exp-tests	f
@@ -1242,6 +1296,7 @@ tests/run-posixpat	f
 tests/run-posixpipe	f
 tests/run-precedence	f
 tests/run-printf	f
+tests/run-procsub	f
 tests/run-quote		f
 tests/run-read		f
 tests/run-redir		f
@@ -1272,6 +1327,7 @@ tests/shopt.right	f
 tests/strip.tests	f
 tests/strip.right	f
 tests/test.tests	f
+tests/test1.sub		f
 tests/test.right	f
 tests/tilde.tests	f
 tests/tilde.right	f
@@ -1285,6 +1341,7 @@ tests/trap2a.sub	f	755
 tests/trap3.sub		f
 tests/trap4.sub		f
 tests/trap5.sub		f
+tests/trap6.sub		f
 tests/type.tests	f
 tests/type.right	f
 tests/type1.sub		f
@@ -1304,6 +1361,10 @@ tests/varenv5.sub	f
 tests/varenv6.sub	f
 tests/varenv7.sub	f
 tests/varenv8.sub	f
+tests/varenv9.sub	f
+tests/varenv10.sub	f
+tests/varenv11.sub	f
+tests/varenv12.sub	f
 tests/version		f
 tests/version.mini	f
 tests/vredir.tests	f

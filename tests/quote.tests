@@ -109,4 +109,15 @@ recho `echo "(\\")"`
 # ultimate workaround
 recho `echo "(\")"`
 
+# various strings ending in backslashes
+
+echo 'string \'
+echo "string \\"
+
+echo string\ \\
+
+echo ${foo:-'string \'}
+echo "${foo:-string \\}"
+echo ${foo:-string \\\}}
+
 ${THIS_SH} ./quote1.sub

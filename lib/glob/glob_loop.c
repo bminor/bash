@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2005 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -16,16 +16,16 @@
    along with Bash.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-static int INTERNAL_GLOB_PATTERN_P __P((const CHAR *));
+static int INTERNAL_GLOB_PATTERN_P __P((const GCHAR *));
 
 /* Return nonzero if PATTERN has any special globbing chars in it.
    Compiled twice, once each for single-byte and multibyte characters. */
 static int
 INTERNAL_GLOB_PATTERN_P (pattern)
-     const CHAR *pattern;
+     const GCHAR *pattern;
 {
-  register const CHAR *p;
-  register CHAR c;
+  register const GCHAR *p;
+  register GCHAR c;
   int bopen;
 
   p = pattern;
@@ -54,8 +54,11 @@ INTERNAL_GLOB_PATTERN_P (pattern)
 	continue;
 
       case L('\\'):
-	if (*p++ == L('\0'))
-	  return 0;
+	/* Don't let the pattern end in a backslash (GMATCH returns no match
+	   if the pattern ends in a backslash anyway), but otherwise return 1,
+	   since the matching engine uses backslash as an escape character
+	   and it can be removed. */
+	return (*p != L('\0'));
       }
 
   return 0;
@@ -65,3 +68,4 @@ INTERNAL_GLOB_PATTERN_P (pattern)
 #undef L
 #undef INT
 #undef CHAR
+#undef GCHAR

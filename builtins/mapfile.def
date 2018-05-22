@@ -59,7 +59,7 @@ $END
 
 $BUILTIN readarray
 $FUNCTION mapfile_builtin
-$SHORT_DOC readarray [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c quantum] [array]
+$SHORT_DOC readarray [-d delim] [-n count] [-O origin] [-s count] [-t] [-u fd] [-C callback] [-c quantum] [array]
 Read lines from a file into an array variable.
 
 A synonym for `mapfile'.
@@ -232,7 +232,7 @@ mapfile (fd, line_count_goal, origin, nskip, callback_quantum, callback, array_n
 	break;
     }
 
-  xfree (line);
+  free (line);
 
   if (unbuffered_read == 0)
     zsyncfd (fd);
@@ -244,12 +244,11 @@ int
 mapfile_builtin (list)
      WORD_LIST *list;
 {
-  int opt, code, fd, clear_array, flags;
+  int opt, code, fd, flags;
   intmax_t intval;
   long lines, origin, nskip, callback_quantum;
   char *array_name, *callback;
 
-  clear_array = 1;
   fd = 0;
   lines = origin = nskip = 0;
   flags = MAPF_CLEARARRAY;

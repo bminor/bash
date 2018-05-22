@@ -26,6 +26,7 @@
 #include "rlconf.h"	/* for VISIBLE_STATS */
 #include "rlstdc.h"
 #include "posixjmp.h"	/* defines procenv_t */
+#include "rlmbutil.h"	/* for HANDLE_MULTIBYTE */
 
 /*************************************************************************
  *									 *
@@ -64,6 +65,7 @@
 #define SF_FOUND		0x02
 #define SF_FAILED		0x04
 #define SF_CHGKMAP		0x08
+#define SF_PATTERN		0x10		/* unused so far */
 
 typedef struct  __rl_search_context
 {
@@ -305,10 +307,11 @@ extern int _rl_search_getchar PARAMS((_rl_search_cxt *));
 #define BRACK_PASTE_SLEN	6
 
 #define BRACK_PASTE_INIT	"\033[?2004h"
-#define BRACK_PASTE_FINI	"\033[?2004l"
+#define BRACK_PASTE_FINI	"\033[?2004l\r"
 
 /* macro.c */
 extern void _rl_with_macro_input PARAMS((char *));
+extern int _rl_peek_macro_key PARAMS((void));
 extern int _rl_next_macro_key PARAMS((void));
 extern int _rl_prev_macro_key PARAMS((void));
 extern void _rl_push_executing_macro PARAMS((void));
@@ -330,6 +333,7 @@ extern void _rl_set_insert_mode PARAMS((int, int));
 extern void _rl_revert_all_lines PARAMS((void));
 
 /* nls.c */
+extern char *_rl_init_locale PARAMS((void));
 extern int _rl_init_eightbit PARAMS((void));
 
 /* parens.c */
@@ -534,6 +538,7 @@ extern int _rl_enable_keypad;
 extern int _rl_enable_meta;
 extern char *_rl_term_clreol;
 extern char *_rl_term_clrpag;
+extern char *_rl_term_clrscroll;
 extern char *_rl_term_im;
 extern char *_rl_term_ic;
 extern char *_rl_term_ei;

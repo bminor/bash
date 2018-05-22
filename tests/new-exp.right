@@ -169,11 +169,11 @@ lines.
 This-string-has-multiple-lines.
 this is a test of proc subst
 this is test 2
-./new-exp2.sub: line 31: /tmp/bashtmp.x*: No such file or directory
-./new-exp2.sub: line 35: /tmp/redir-notthere: No such file or directory
+a
+./new-exp2.sub: line 42: /tmp/redir-notthere: No such file or directory
 1
 
-./new-exp2.sub: line 42: 1111111111111111111111: command not found
+./new-exp2.sub: line 49: 1111111111111111111111: command not found
 
 argv[1] = <6>
 ./new-exp.tests: line 285: ${#:}: bad substitution
@@ -624,7 +624,7 @@ c Sub = 0 2 4 8
 <'ab cd'> 
 <'4'> <'ab cd'> 
 <> 
-argv[1] = <host(2)[4.4]$ >
+argv[1] = <host(2)[5.0]$ >
 < 	
 >
 <' \t\n'>
@@ -643,6 +643,26 @@ ir
 a b c d e
 5
 a5b
+abcxxxdef
+abcÃ¥def
+ḅć
+Ã¥
+prependḅć
+Ã¥append
+prependÃ¥
+ḅćappend
+Ã¥
+ḅć
+ḅć
+ḅć
+Ã¥
+Ã¥
+Ã¥
+ḅć
+Ã¥
+Ã¥
+ḅć
+ḅć
 argv[1] = </>
 argv[1] = </>
-./new-exp.tests: line 608: ABXD: parameter unset
+./new-exp.tests: line 611: ABXD: parameter unset

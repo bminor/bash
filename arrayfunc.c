@@ -30,6 +30,7 @@
 #include "bashintl.h"
 
 #include "shell.h"
+#include "execute_cmd.h"
 #include "pathexp.h"
 
 #include "shmbutil.h"
@@ -39,9 +40,12 @@
 
 #include "builtins/common.h"
 
-extern char *this_command_name;
-extern int last_command_exit_value;
-extern int array_needs_making;
+/* This variable means to not expand associative array subscripts more than
+   once, when performing variable expansion. */
+int assoc_expand_once = 0;
+
+/* Ditto for indexed array subscripts -- currently unused */
+int array_expand_once = 0;
 
 static SHELL_VAR *bind_array_var_internal __P((SHELL_VAR *, arrayind_t, char *, char *, int));
 static SHELL_VAR *assign_array_element_internal __P((SHELL_VAR *, char *, char *, char *, int, char *, int));
@@ -258,9 +262,6 @@ bind_assoc_variable (entry, name, key, value, flags)
      char *value;
      int flags;
 {
-  SHELL_VAR *dentry;
-  char *newval;
-
   if ((readonly_p (entry) && (flags&ASS_FORCE) == 0) || noassign_p (entry))
     {
       if (readonly_p (entry))
@@ -272,7 +273,8 @@ bind_assoc_variable (entry, name, key, value, flags)
 }
 
 /* Parse NAME, a lhs of an assignment statement of the form v[s], and
-   assign VALUE to that array element by calling bind_array_variable(). */
+   assign VALUE to that array element by calling bind_array_variable().
+   Flags are ASS_ assignment flags */
 SHELL_VAR *
 assign_array_element (name, value, flags)
      char *name, *value;
@@ -280,9 +282,9 @@ assign_array_element (name, value, flags)
 {
   char *sub, *vname;
   int sublen;
-  SHELL_VAR *entry, *nv;
+  SHELL_VAR *entry;
 
-  vname = array_variable_name (name, &sub, &sublen);
+  vname = array_variable_name (name, (flags & ASS_NOEXPAND) != 0, &sub, &sublen);
 
   if (vname == 0)
     return ((SHELL_VAR *)NULL);
@@ -317,7 +319,10 @@ assign_array_element_internal (entry, name, vname, sub, sublen, value, flags)
   if (entry && assoc_p (entry))
     {
       sub[sublen-1] = '\0';
-      akey = expand_assignment_string_to_string (sub, 0);	/* [ */
+      if ((flags & ASS_NOEXPAND) == 0)
+	akey = expand_assignment_string_to_string (sub, 0);	/* [ */
+      else
+	akey = savestring (sub);
       sub[sublen-1] = ']';
       if (akey == 0 || *akey == 0)
 	{
@@ -329,7 +334,7 @@ assign_array_element_internal (entry, name, vname, sub, sublen, value, flags)
     }
   else
     {
-      ind = array_expand_index (entry, sub, sublen);
+      ind = array_expand_index (entry, sub, sublen, 0);
       /* negative subscripts to indexed arrays count back from end */
       if (entry && ind < 0)
 	ind = (array_p (entry) ? array_max_index (array_cell (entry)) : 0) + 1 + ind;
@@ -450,7 +455,6 @@ expand_compound_array_assignment (var, value, flags)
      int flags;
 {
   WORD_LIST *list, *nlist;
-  WORD_LIST *hd, *tl, *t, *n;
   char *val;
   int ni;
 
@@ -583,7 +587,7 @@ assign_compound_array_list (var, nlist, flags)
 
 	  if (array_p (var))
 	    {
-	      ind = array_expand_index (var, w + 1, len);
+	      ind = array_expand_index (var, w + 1, len, 0);
 	      /* negative subscripts to indexed arrays count back from end */
 	      if (ind < 0)
 		ind = array_max_index (array_cell (var)) + 1 + ind;
@@ -759,17 +763,19 @@ quote_array_assignment_chars (list)
 /* This function is called with SUB pointing to just after the beginning
    `[' of an array subscript and removes the array element to which SUB
    expands from array VAR.  A subscript of `*' or `@' unsets the array. */
+/* If FLAGS&1 we don't expand the subscript; we just use it as-is. */
 int
-unbind_array_element (var, sub)
+unbind_array_element (var, sub, flags)
      SHELL_VAR *var;
      char *sub;
+     int flags;
 {
   int len;
   arrayind_t ind;
   char *akey;
   ARRAY_ELEMENT *ae;
 
-  len = skipsubscript (sub, 0, (var && assoc_p(var)));
+  len = skipsubscript (sub, 0, (flags&1) || (var && assoc_p(var)));
   if (sub[len] != ']' || len == 0)
     {
       builtin_error ("%s[%s: %s", var->name, sub, _(bash_badsub_errmsg));
@@ -790,7 +796,7 @@ unbind_array_element (var, sub)
 
   if (assoc_p (var))
     {
-      akey = expand_assignment_string_to_string (sub, 0);     /* [ */
+      akey = (flags & 1) ? sub : expand_assignment_string_to_string (sub, 0);
       if (akey == 0 || *akey == 0)
 	{
 	  builtin_error ("[%s]: %s", sub, _(bash_badsub_errmsg));
@@ -798,11 +804,12 @@ unbind_array_element (var, sub)
 	  return -1;
 	}
       assoc_remove (assoc_cell (var), akey);
-      free (akey);
+      if (akey != sub)
+	free (akey);
     }
   else if (array_p (var))
     {
-      ind = array_expand_index (var, sub, len+1);
+      ind = array_expand_index (var, sub, len+1, 0);
       /* negative subscripts to indexed arrays count back from end */
       if (ind < 0)
 	ind = array_max_index (array_cell (var)) + 1 + ind;
@@ -818,7 +825,7 @@ unbind_array_element (var, sub)
   else	/* array_p (var) == 0 && assoc_p (var) == 0 */
     {
       akey = this_command_name;
-      ind = array_expand_index (var, sub, len+1);
+      ind = array_expand_index (var, sub, len+1, 0);
       this_command_name = akey;
       if (ind == 0)
 	{
@@ -895,26 +902,34 @@ valid_array_reference (name, flags)
       *t = '[';
       if (r == 0)
 	return 0;
-      /* Check for a properly-terminated non-blank subscript. */
-      len = skipsubscript (t, 0, 0);
+      /* Check for a properly-terminated non-null subscript. */
+      len = skipsubscript (t, 0, flags);
       if (t[len] != ']' || len == 1)
 	return 0;
       if (t[len+1] != '\0')
 	return 0;
+#if 1
+      /* Could check and allow subscripts consisting only of whitespace for
+	 existing associative arrays. */
       for (r = 1; r < len; r++)
 	if (whitespace (t[r]) == 0)
 	  return 1;
       return 0;
+#else
+      /* This allows blank subscripts */
+      return 1;
+#endif
     }
   return 0;
 }
 
 /* Expand the array index beginning at S and extending LEN characters. */
 arrayind_t
-array_expand_index (var, s, len)
+array_expand_index (var, s, len, flags)
      SHELL_VAR *var;
      char *s;
      int len;
+     int flags;
 {
   char *exp, *t, *savecmd;
   int expok;
@@ -923,12 +938,19 @@ array_expand_index (var, s, len)
   exp = (char *)xmalloc (len);
   strncpy (exp, s, len - 1);
   exp[len - 1] = '\0';
+#if 0	/* XXX - not yet -- maybe bash-5.0 */
+  if ((flags & AV_NOEXPAND) == 0)
+    t = expand_arith_string (exp, Q_DOUBLE_QUOTES|Q_ARITH|Q_ARRAYSUB);	/* XXX - Q_ARRAYSUB for future use */
+  else
+    t = exp;
+#endif
   t = expand_arith_string (exp, Q_DOUBLE_QUOTES|Q_ARITH|Q_ARRAYSUB);	/* XXX - Q_ARRAYSUB for future use */
   savecmd = this_command_name;
   this_command_name = (char *)NULL;
-  val = evalexp (t, &expok);
+  val = evalexp (t, 0, &expok);
   this_command_name = savecmd;
-  free (t);
+  if (t != exp)
+    free (t);
   free (exp);
   if (expok == 0)
     {
@@ -947,8 +969,9 @@ array_expand_index (var, s, len)
    in *SUBP. If LENP is non-null, the length of the subscript is returned
    in *LENP.  This returns newly-allocated memory. */
 char *
-array_variable_name (s, subp, lenp)
+array_variable_name (s, flags, subp, lenp)
      const char *s;
+     int flags;
      char **subp;
      int *lenp;
 {
@@ -965,7 +988,7 @@ array_variable_name (s, subp, lenp)
       return ((char *)NULL);
     }
   ind = t - s;
-  ni = skipsubscript (s, ind, 0);
+  ni = skipsubscript (s, ind, flags);	/* XXX - was 0 not flags */
   if (ni <= ind + 1 || s[ni] != ']')
     {
       err_badarraysub (s);
@@ -992,15 +1015,16 @@ array_variable_name (s, subp, lenp)
    non-null, return a pointer to the start of the subscript in *SUBP.
    If LENP is non-null, the length of the subscript is returned in *LENP. */
 SHELL_VAR *
-array_variable_part (s, subp, lenp)
+array_variable_part (s, flags, subp, lenp)
      const char *s;
+     int flags;
      char **subp;
      int *lenp;
 {
   char *t;
   SHELL_VAR *var;
 
-  t = array_variable_name (s, subp, lenp);
+  t = array_variable_name (s, flags, subp, lenp);
   if (t == 0)
     return ((SHELL_VAR *)NULL);
   var = find_variable (t);		/* XXX - handle namerefs here? */
@@ -1042,7 +1066,7 @@ array_value_internal (s, quoted, flags, rtype, indp)
   WORD_LIST *l;
   SHELL_VAR *var;
 
-  var = array_variable_part (s, &t, &len);
+  var = array_variable_part (s, (flags&AV_NOEXPAND) ? 1 : 0, &t, &len);	/* XXX */
 
   /* Expand the index, even if the variable doesn't exist, in case side
      effects are needed, like ${w[i++]} where w is unset. */
@@ -1082,15 +1106,17 @@ array_value_internal (s, quoted, flags, rtype, indp)
 	    return ((char *) NULL);
 	}
 
+      /* Caller of array_value takes care of inspecting rtype and duplicating
+	 retval if rtype == 0, so this is not a memory leak */
       if (t[0] == '*' && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
 	{
-	  temp = string_list_dollar_star (l);
-	  retval = quote_string (temp);		/* XXX - leak here */
+	  temp = string_list_dollar_star (l, quoted, (flags & AV_ASSIGNRHS) ? PF_ASSIGNRHS : 0);
+	  retval = quote_string (temp);
 	  free (temp);
 	}
       else	/* ${name[@]} or unquoted ${name[*]} */
         /* XXX - bash-4.4/bash-5.0 test AV_ASSIGNRHS and pass PF_ASSIGNRHS */
-	retval = string_list_dollar_at (l, quoted, (flags & AV_ASSIGNRHS) ? PF_ASSIGNRHS : 0);	/* XXX - leak here */
+	retval = string_list_dollar_at (l, quoted, (flags & AV_ASSIGNRHS) ? PF_ASSIGNRHS : 0);
 
       dispose_words (l);
     }
@@ -1102,7 +1128,7 @@ array_value_internal (s, quoted, flags, rtype, indp)
 	{
 	  if ((flags & AV_USEIND) == 0 || indp == 0)
 	    {
-	      ind = array_expand_index (var, t, len);
+	      ind = array_expand_index (var, t, len, flags);
 	      if (ind < 0)
 		{
 		  /* negative subscripts to indexed arrays count back from end */
@@ -1120,7 +1146,10 @@ array_value_internal (s, quoted, flags, rtype, indp)
       else if (assoc_p (var))
 	{
 	  t[len - 1] = '\0';
-	  akey = expand_assignment_string_to_string (t, 0);	/* [ */
+	  if ((flags & AV_NOEXPAND) == 0)
+	    akey = expand_assignment_string_to_string (t, 0);	/* [ */
+	  else
+	    akey = savestring (t);
 	  t[len - 1] = ']';
 	  if (akey == 0 || *akey == 0)
 	    {
@@ -1182,7 +1211,7 @@ array_keys (s, quoted)
   WORD_LIST *l;
   SHELL_VAR *var;
 
-  var = array_variable_part (s, &t, &len);
+  var = array_variable_part (s, 0, &t, &len);
 
   /* [ */
   if (var == 0 || ALL_ELEMENT_SUB (t[0]) == 0 || t[1] != ']')
@@ -1202,7 +1231,7 @@ array_keys (s, quoted)
 
   if (t[0] == '*' && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
     {
-      temp = string_list_dollar_star (l);
+      temp = string_list_dollar_star (l, quoted, 0);
       retval = quote_string (temp);
       free (temp);
     }

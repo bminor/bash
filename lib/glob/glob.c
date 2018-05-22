@@ -1,6 +1,6 @@
 /* glob.c -- file-name wildcard pattern matching for Bash.
 
-   Copyright (C) 1985-2009 Free Software Foundation, Inc.
+   Copyright (C) 1985-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne-Again SHell.
    
@@ -123,10 +123,14 @@ static char **glob_dir_to_array __P((char *, char **, int));
 extern char *glob_patscan __P((char *, char *, int));
 extern wchar_t *glob_patscan_wc __P((wchar_t *, wchar_t *, int));
 
+/* And this from gmisc.c/gm_loop.c */
+extern int wextglob_pattern_p __P((wchar_t *));
+
 extern char *glob_dirscan __P((char *, int));
 
 /* Compile `glob_loop.c' for single-byte characters. */
-#define CHAR	unsigned char
+#define GCHAR	unsigned char
+#define CHAR	char
 #define INT	int
 #define L(CS)	CS
 #define INTERNAL_GLOB_PATTERN_P internal_glob_pattern_p
@@ -135,6 +139,7 @@ extern char *glob_dirscan __P((char *, int));
 /* Compile `glob_loop.c' again for multibyte characters. */
 #if HANDLE_MULTIBYTE
 
+#define GCHAR	wchar_t
 #define CHAR	wchar_t
 #define INT	wint_t
 #define L(CS)	L##CS
@@ -182,9 +187,10 @@ extglob_skipname (pat, dname, flags)
      int flags;
 {
   char *pp, *pe, *t, *se;
-  int n, r, negate;
+  int n, r, negate, wild;
 
   negate = *pat == '!';
+  wild = *pat == '*' || *pat == '?';
   pp = pat + 2;
   se = pp + strlen (pp) - 1;		/* end of string */
   pe = glob_patscan (pp, se, 0);	/* end of extglob pattern (( */
@@ -203,14 +209,19 @@ extglob_skipname (pat, dname, flags)
       r = skipname (pp, dname, flags);	/*(*/
 #endif
       *pe = ')';
+      if (wild && pe[1])	/* if we can match zero instances, check further */
+        return (skipname (pe+1, dname, flags));
       return r;
     }
 
   /* check every subpattern */
   while (t = glob_patscan (pp, pe, '|'))
     {
-      n = t[-1];
-      t[-1] = '\0';
+      n = t[-1];	/* ( */
+      if (extglob_pattern_p (pp) && n == ')')
+	t[-1] = n;	/* no-op for now */
+      else
+	t[-1] = '\0';
 #if defined (HANDLE_MULTIBYTE)
       r = mbskipname (pp, dname, flags);
 #else
@@ -222,12 +233,14 @@ extglob_skipname (pat, dname, flags)
       pp = t;
     }	/*(*/
 
-  /* glob_patscan might find end of pattern */
+  /* glob_patscan might find end of string */
   if (pp == se)
     return r;
 
   /* but if it doesn't then we didn't match a leading dot */
-  return 0;
+  if (wild && *pe)	/* if we can match zero instances, check further */
+    return (skipname (pe, dname, flags));
+  return 1;
 }
 #endif
 
@@ -263,22 +276,23 @@ skipname (pat, dname, flags)
 #if HANDLE_MULTIBYTE
 
 static int
-wchkname (pat_wc, dn_wc)
-     wchar_t *pat_wc, *dn_wc;
+wskipname (pat, dname, flags)
+     wchar_t *pat, *dname;
+     int flags;
 {
   /* If a leading dot need not be explicitly matched, and the
      pattern doesn't start with a `.', don't match `.' or `..' */
-  if (noglob_dot_filenames == 0 && pat_wc[0] != L'.' &&
-	(pat_wc[0] != L'\\' || pat_wc[1] != L'.') &&
-	(dn_wc[0] == L'.' &&
-	  (dn_wc[1] == L'\0' || (dn_wc[1] == L'.' && dn_wc[2] == L'\0'))))
+  if (noglob_dot_filenames == 0 && pat[0] != L'.' &&
+	(pat[0] != L'\\' || pat[1] != L'.') &&
+	(dname[0] == L'.' &&
+	  (dname[1] == L'\0' || (dname[1] == L'.' && dname[2] == L'\0'))))
     return 1;
 
   /* If a leading dot must be explicitly matched, check to see if the
      pattern and dirname both have one. */
- else if (noglob_dot_filenames && dn_wc[0] == L'.' &&
-	pat_wc[0] != L'.' &&
-	   (pat_wc[0] != L'\\' || pat_wc[1] != L'.'))
+ else if (noglob_dot_filenames && dname[0] == L'.' &&
+	pat[0] != L'.' &&
+	   (pat[0] != L'\\' || pat[1] != L'.'))
     return 1;
 
   return 0;
@@ -291,9 +305,10 @@ wextglob_skipname (pat, dname, flags)
 {
 #if EXTENDED_GLOB
   wchar_t *pp, *pe, *t, n, *se;
-  int r, negate;
+  int r, negate, wild;
 
   negate = *pat == L'!';
+  wild = *pat == L'*' || *pat == L'?';
   pp = pat + 2;
   se = pp + wcslen (pp) - 1;	/*(*/
   pe = glob_patscan_wc (pp, se, 0);
@@ -301,17 +316,22 @@ wextglob_skipname (pat, dname, flags)
   if (pe == se && *pe == ')' && (t = wcschr (pp, L'|')) == 0)
     {
       *pe = L'\0';
-      r = wchkname (pp, dname); /*(*/
+      r = wskipname (pp, dname, flags); /*(*/
       *pe = L')';
+      if (wild && pe[1] != L'\0')
+        return (wskipname (pe+1, dname, flags));
       return r;
     }
 
   /* check every subpattern */
   while (t = glob_patscan_wc (pp, pe, '|'))
     {
-      n = t[-1];
-      t[-1] = L'\0';
-      r = wchkname (pp, dname);
+      n = t[-1];	/* ( */
+      if (wextglob_pattern_p (pp) && n == L')')
+	t[-1] = n;	/* no-op for now */
+      else
+	t[-1] = L'\0';
+      r = wskipname (pp, dname, flags);
       t[-1] = n;
       if (r == 0)
 	return 0;
@@ -322,9 +342,11 @@ wextglob_skipname (pat, dname, flags)
     return r;
 
   /* but if it doesn't then we didn't match a leading dot */
-  return 0;
+  if (wild && *pe != L'\0')
+    return (wskipname (pe, dname, flags));
+  return 1;
 #else
-  return (wchkname (pat, dname));
+  return (wskipname (pat, dname, flags));
 #endif
 }
 
@@ -355,7 +377,7 @@ mbskipname (pat, dname, flags)
 
   ret = 0;
   if (pat_n != (size_t)-1 && dn_n !=(size_t)-1)
-    ret = ext ? wextglob_skipname (pat_wc, dn_wc, flags) : wchkname (pat_wc, dn_wc);
+    ret = ext ? wextglob_skipname (pat_wc, dn_wc, flags) : wskipname (pat_wc, dn_wc, flags);
   else
     ret = skipname (pat, dname, flags);
 
@@ -455,7 +477,7 @@ dequote_pathname (pathname)
 #  endif /* AFS */
 #endif /* !HAVE_LSTAT */
 
-/* Return 0 if DIR is a directory, -1 otherwise. */
+/* Return 0 if DIR is a directory, -2 if DIR is a symlink,  -1 otherwise. */
 static int
 glob_testdir (dir, flags)
      char *dir;
@@ -472,6 +494,11 @@ glob_testdir (dir, flags)
 #endif
   if (r < 0)
     return (-1);
+
+#if defined (S_ISLNK)
+  if (S_ISLNK (finfo.st_mode))
+    return (-2);
+#endif
 
   if (S_ISDIR (finfo.st_mode) == 0)
     return (-1);
@@ -778,6 +805,15 @@ glob_vector (pat, dir, flags)
 		    }
 		}
 
+	      /* When FLAGS includes GX_ALLDIRS, we want to skip a symlink
+	         to a directory, since we will pick the directory up later. */
+	      if (isdir == -2 && glob_testdir (subdir, 0) == 0)
+		{
+		  free (subdir);
+		  continue;
+		}
+
+	      /* XXX - should we even add this if it's not a directory? */
 	      nextlink = (struct globval *) malloc (sizeof (struct globval));
 	      if (firstmalloc == 0)
 		firstmalloc = nextlink;
@@ -1018,7 +1054,7 @@ glob_filename (pathname, flags)
      char *pathname;
      int flags;
 {
-  char **result;
+  char **result, **new_result;
   unsigned int result_size;
   char *directory_name, *filename, *dname, *fn;
   unsigned int directory_len;
@@ -1248,16 +1284,16 @@ glob_filename (pathname, flags)
 	      while (array[l] != NULL)
 		++l;
 
-	      result =
-		(char **)realloc (result, (result_size + l) * sizeof (char *));
+	      new_result = (char **)realloc (result, (result_size + l) * sizeof (char *));
 
-	      if (result == NULL)
+	      if (new_result == NULL)
 		{
 		  for (l = 0; array[l]; ++l)
 		    free (array[l]);
 		  free ((char *)array);
 		  goto memory_error;
 		}
+	      result = new_result;
 
 	      for (l = 0; array[l] != NULL; ++l)
 		result[result_size++ - 1] = array[l];

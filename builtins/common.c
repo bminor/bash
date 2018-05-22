@@ -1,6 +1,6 @@
 /* common.c - utility functions for all builtins */
 
-/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -49,6 +49,7 @@
 #include "../shell.h"
 #include "maxpath.h"
 #include "../flags.h"
+#include "../parser.h"
 #include "../jobs.h"
 #include "../builtins.h"
 #include "../input.h"
@@ -67,13 +68,6 @@
 extern int errno;   
 #endif /* !errno */
 
-extern int indirection_level, subshell_environment;
-extern int line_number;
-extern int last_command_exit_value;
-extern int trap_saved_exit_value;
-extern int running_trap;
-extern int posixly_correct;
-extern char *this_command_name, *shell_name;
 extern const char * const bash_getcwd_errstr;
 
 /* Used by some builtins and the mainline code. */
@@ -543,7 +537,7 @@ read_octal (string)
     {
       digits++;
       result = (result * 8) + (*string++ - '0');
-      if (result > 0777)
+      if (result > 07777)
 	return -1;
     }
 
@@ -782,13 +776,9 @@ display_signal_list (list, forcecols)
 	      list = list->next;
 	      continue;
 	    }
-#if defined (JOB_CONTROL)
 	  /* POSIX.2 says that `kill -l signum' prints the signal name without
 	     the `SIG' prefix. */
-	  printf ("%s\n", (this_shell_builtin == kill_builtin) ? name + 3 : name);
-#else
-	  printf ("%s\n", name);
-#endif
+	  printf ("%s\n", (this_shell_builtin == kill_builtin && signum > 0) ? name + 3 : name);
 	}
       else
 	{

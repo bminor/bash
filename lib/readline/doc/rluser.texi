@@ -524,7 +524,8 @@ set to either @samp{emacs} or @samp{vi}.
 
 @item emacs-mode-string
 @vindex emacs-mode-string
-This string is displayed immediately before the last line of the primary
+If the @var{show-mode-in-prompt} variable is enabled,
+this string is displayed immediately before the last line of the primary
 prompt when emacs editing mode is active.  The value is expanded like a
 key binding, so the standard set of meta- and control prefixes and
 backslash escape sequences is available.
@@ -714,9 +715,9 @@ The default value is @samp{off}.
 
 @item show-mode-in-prompt
 @vindex show-mode-in-prompt
-If set to @samp{on}, add a character to the beginning of the prompt
+If set to @samp{on}, add a string to the beginning of the prompt
 indicating the editing mode: emacs, vi command, or vi insertion.
-The mode strings are user-settable.
+The mode strings are user-settable (e.g., @var{emacs-mode-string}).
 The default value is @samp{off}.
 
 @item skip-completed-text
@@ -735,7 +736,8 @@ The default value is @samp{off}.
 
 @item vi-cmd-mode-string
 @vindex vi-cmd-mode-string
-This string is displayed immediately before the last line of the primary
+If the @var{show-mode-in-prompt} variable is enabled,
+this string is displayed immediately before the last line of the primary
 prompt when vi editing mode is active and in command mode.
 The value is expanded like a
 key binding, so the standard set of meta- and control prefixes and
@@ -747,7 +749,8 @@ The default is @samp{(cmd)}.
 
 @item vi-ins-mode-string
 @vindex vi-ins-mode-string
-This string is displayed immediately before the last line of the primary
+If the @var{show-mode-in-prompt} variable is enabled,
+this string is displayed immediately before the last line of the primary
 prompt when vi editing mode is active and in insertion mode.
 The value is expanded like a
 key binding, so the standard set of meta- and control prefixes and
@@ -914,8 +917,9 @@ of tests.  There are four parser directives used.
 @item $if
 The @code{$if} construct allows bindings to be made based on the
 editing mode, the terminal being used, or the application using
-Readline.  The text of the test extends to the end of the line;
-no characters are required to isolate it.
+Readline.  The text of the test, after any comparison operator,
+extends to the end of the line;
+unless otherwise noted, no characters are required to isolate it.
 
 @table @code
 @item mode
@@ -935,6 +939,27 @@ the portion of the terminal name before the first @samp{-}.  This
 allows @code{sun} to match both @code{sun} and @code{sun-cmd},
 for instance.
 
+@item version
+The @code{version} test may be used to perform comparisons against
+specific Readline versions.
+The @code{version} expands to the current Readline version.
+The set of comparison operators includes
+@samp{=} (and @samp{==}), @samp{!=}, @samp{<=}, @samp{>=}, @samp{<},
+and @samp{>}.
+The version number supplied on the right side of the operator consists
+of a major version number, an optional decimal point, and an optional
+minor version (e.g., @samp{7.1}). If the minor version is omitted, it
+is assumed to be @samp{0}.
+The operator may be separated from the string @code{version} and
+from the version number argument by whitespace.
+The following example sets a variable if the Readline version being used
+is 7.0 or newer:
+@example
+$if version >= 7.0
+set show-mode-in-prompt on
+$endif
+@end example
+
 @item application
 The @var{application} construct is used to include
 application-specific settings.  Each program using the Readline
@@ -947,6 +972,23 @@ key sequence that quotes the current or previous word in Bash:
 $if Bash
 # Quote the current or previous word
 "\C-xq": "\eb\"\ef\""
+$endif
+@end example
+
+@item variable
+The @var{variable} construct provides simple equality tests for Readline
+variables and values.
+The permitted comparison operators are @samp{=}, @samp{==}, and @samp{!=}.
+The variable name must be separated from the comparison operator by
+whitespace; the operator may be separated from the value on the right hand
+side by whitespace.
+Both string and boolean variables may be tested. Boolean variables must be
+tested against the values @var{on} and @var{off}.
+The following example is equivalent to the @code{mode=emacs} test described
+above:
+@example
+$if editing-mode == emacs
+set show-mode-in-prompt on
 $endif
 @end example
 @end table
@@ -1138,6 +1180,19 @@ Move back to the start of the current or previous word.
 Words are delimited by non-quoted shell metacharacters.
 @end ifset
 
+@item previous-screen-line ()
+Attempt to move point to the same physical screen column on the previous
+physical screen line. This will not have the desired effect if the current
+Readline line does not take up more than one physical line or if point is not
+greater than the length of the prompt plus the screen width.
+
+@item next-screen-line ()
+Attempt to move point to the same physical screen column on the next
+physical screen line. This will not have the desired effect if the current
+Readline line does not take up more than one physical line or if the length
+of the current Readline line is not greater than the length of the prompt
+plus the screen width.
+
 @item clear-screen (C-l)
 Clear the screen and redraw the current line,
 leaving the current line at the top of the screen.
@@ -1216,14 +1271,14 @@ The search string must match at the beginning of a history line.
 This is a non-incremental search.
 By default, this command is unbound.
 
-@item history-substr-search-forward ()
+@item history-substring-search-forward ()
 Search forward through the history for the string of characters
 between the start of the current line and the point.
 The search string may match anywhere in a history line.
 This is a non-incremental search.
 By default, this command is unbound.
 
-@item history-substr-search-backward ()
+@item history-substring-search-backward ()
 Search backward through the history for the string of characters
 between the start of the current line and the point.
 The search string may match anywhere in a history line.
@@ -1590,9 +1645,10 @@ Abort the current editing command and
 ring the terminal's bell (subject to the setting of
 @code{bell-style}).
 
-@item do-uppercase-version (M-a, M-b, M-@var{x}, @dots{})
-If the metafied character @var{x} is lowercase, run the command
-that is bound to the corresponding uppercase character.
+@item do-lowercase-version (M-A, M-B, M-@var{x}, @dots{})
+If the metafied character @var{x} is upper case, run the command
+that is bound to the corresponding metafied lower case character.
+The behavior is undefined if @var{x} is already lower case.
 
 @item prefix-meta (@key{ESC})
 Metafy the next character typed.  This is for keyboards
@@ -1718,10 +1774,11 @@ A synonym for @code{yank-last-arg}.
 
 @item operate-and-get-next (C-o)
 Accept the current line for execution and fetch the next line
-relative to the current line from the history for editing.  Any
-argument is ignored.
+relative to the current line from the history for editing.
+A numeric argument, if supplied, specifies the history entry to use instead
+of the current line.
 
-@item edit-and-execute-command (C-xC-e)
+@item edit-and-execute-command (C-x C-e)
 Invoke an editor on the current command line, and execute the result as shell
 commands.
 Bash attempts to invoke
@@ -1816,7 +1873,9 @@ Next, the string specified as the argument to the @option{-W} option
 is considered.
 The string is first split using the characters in the @env{IFS}
 special variable as delimiters.
-Shell quoting is honored.
+Shell quoting is honored within the string, in order to provide a
+mechanism for the words to contain shell metacharacters or characters
+in the value of @env{IFS}.
 Each word is then expanded using
 brace expansion, tilde expansion, parameter and variable expansion,
 command substitution, and arithmetic expansion,
@@ -2200,7 +2259,7 @@ a shell function and bind it to a particular command using @code{complete -F}.
 
 The following function provides completions for the @code{cd} builtin.
 It is a reasonably good example of what shell functions must do when
-used for completion.  This function uses the word passsed as @code{$2}
+used for completion.  This function uses the word passed as @code{$2}
 to determine the directory name to complete.  You can also use the
 @code{COMP_WORDS} array variable; the current word is indexed by the
 @code{COMP_CWORD} variable.

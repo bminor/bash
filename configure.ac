@@ -1,5 +1,5 @@
 dnl
-dnl Configure script for bash-4.4
+dnl Configure script for bash-5.0
 dnl
 dnl report bugs to chet@po.cwru.edu
 dnl
@@ -21,10 +21,10 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 4.4, version 4.082])dnl
+AC_REVISION([for Bash 5.0, version 4.091])dnl
 
-define(bashvers, 4.4)
-define(relstatus, release)
+define(bashvers, 5.0)
+define(relstatus, alpha)
 
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
 
@@ -82,7 +82,7 @@ sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
 *-rhapsody*)	opt_bash_malloc=no ;;	# Apple Rhapsody (MacOS X)
 *-darwin*)	opt_bash_malloc=no ;;	# Apple Darwin (MacOS X)
 *-dgux*)	opt_bash_malloc=no ;;	# DG/UX machines
-*-qnx*)		opt_bash_malloc=no ;;	# QNX 4.2, QNX 6.x
+*-qnx*)		opt_bash_malloc=no ;;	# QNX 4.2, QNX [67].x
 *-machten4)	opt_bash_malloc=no ;;	# MachTen 4.x
 *-bsdi2.1|*-bsdi3.?)	opt_bash_malloc=no ; : ${CC:=shlicc2} ;; # for loadable builtins
 *-beos*)	opt_bash_malloc=no ;;	# they say it's suitable
@@ -179,6 +179,7 @@ opt_extglob_default=no
 opt_dircomplete_expand_default=no
 opt_globascii_default=no
 opt_function_import=yes
+opt_dev_fd_stat_broken=no
 
 dnl options that affect how bash is compiled and linked
 opt_static_link=no
@@ -214,6 +215,7 @@ AC_ARG_ENABLE(cond-command, AC_HELP_STRING([--enable-cond-command], [enable the 
 AC_ARG_ENABLE(cond-regexp, AC_HELP_STRING([--enable-cond-regexp], [enable extended regular expression matching in conditional commands]), opt_cond_regexp=$enableval)
 AC_ARG_ENABLE(coprocesses, AC_HELP_STRING([--enable-coprocesses], [enable coprocess support and the coproc reserved word]), opt_coproc=$enableval)
 AC_ARG_ENABLE(debugger, AC_HELP_STRING([--enable-debugger], [enable support for bash debugger]), opt_debugger=$enableval)
+AC_ARG_ENABLE(dev-fd-stat-broken, AC_HELP_STRING([--enable-dev-fd-stat-broken], [enable this option if stat on /dev/fd/N and fstat on file descriptor N don't return the same results]), opt_dev_fd_stat_broken=$enableval)
 AC_ARG_ENABLE(direxpand-default, AC_HELP_STRING([--enable-direxpand-default], [enable the direxpand shell option by default]), opt_dircomplete_expand_default=$enableval)
 AC_ARG_ENABLE(directory-stack, AC_HELP_STRING([--enable-directory-stack], [enable builtins pushd/popd/dirs]), opt_dirstack=$enableval)
 AC_ARG_ENABLE(disabled-builtins, AC_HELP_STRING([--enable-disabled-builtins], [allow disabled builtins to still be invoked]), opt_disabled_builtins=$enableval)
@@ -246,7 +248,7 @@ AC_ARG_ENABLE(static-link, AC_HELP_STRING([--enable-static-link], [link bash sta
 
 dnl So-called `precious' variables
 AC_ARG_VAR([CC_FOR_BUILD], [C compiler used when compiling binaries used only at build time])
-AC_ARG_VAR([CFLAGS_FOR_BUILD], [Compliation options (CFLAGS) used when compiling binaries used only at build time])
+AC_ARG_VAR([CFLAGS_FOR_BUILD], [Compilation options (CFLAGS) used when compiling binaries used only at build time])
 AC_ARG_VAR([LDFLAGS_FOR_BUILD], [Linker options (LDFLAGS) used when compiling binaries used only at build time])
 AC_ARG_VAR([CPPFLAGS_FOR_BUILD], [C preprocessor options (CPPFLAGS) used when compiling binaries used only at build time])
 
@@ -347,6 +349,9 @@ fi
 if test $opt_function_import = yes; then
 AC_DEFINE(FUNCTION_IMPORT)
 fi
+if test $opt_dev_fd_stat_broken = yes; then
+AC_DEFINE(DEV_FD_STAT_BROKEN)
+fi
 
 if test $opt_memscramble = yes; then
 AC_DEFINE(MEMSCRAMBLE)
@@ -440,6 +445,9 @@ if test "x$cross_compiling" = "xyes"; then
     i[[3456]]86-*-beos*)
 	cross_cache=${srcdir}/cross-build/x86-beos.cache
 	;;
+    *-qnx*)
+	cross_cache=${srcdir}/cross-build/qnx.cache
+	;;
     *)	echo "configure: cross-compiling for $host is not supported" >&2
 	;;
     esac
@@ -472,7 +480,7 @@ dnl these must come after the test for cc/gcc
 if test "$opt_profiling" = "yes"; then
 	PROFILE_FLAGS=-pg
 	case "$host_os" in
-	solaris2*)	;;
+	solaris2*|linux*)	;;
 	*)		opt_static_link=yes ;;
 	esac
 	DEBUG= MALLOC_DEBUG=
@@ -488,7 +496,7 @@ if test "$opt_static_link" = yes; then
 	if test -n "$GCC" || test "$ac_cv_prog_gcc" = "yes"; then
 		STATIC_LD="-static" 
 		case "$host_os" in
-		solaris2*)	;;
+		solaris2*|linux*)	;;
 		*)		LDFLAGS="$LDFLAGS -static" ;;	# XXX experimental
 		esac
 	fi
@@ -500,7 +508,11 @@ fi
 if test "X$cross_compiling" = "Xno"; then
 	CC_FOR_BUILD=${CC_FOR_BUILD-'$(CC)'}
 	CPPFLAGS_FOR_BUILD=${CPPFLAGS_FOR_BUILD-"$CPPFLAGS"}	# XXX - should it be '$(CPPFLAGS)'
-	LDFLAGS_FOR_BUILD=${LDFLAGS_FOR_BUILD-'$(LDFLAGS)'}
+	if test X"$opt_profiling" = Xyes; then
+		LDFLAGS_FOR_BUILD=${LDFLAGS_FOR_BUILD-'$(BASE_LDFLAGS)'}
+	else
+		LDFLAGS_FOR_BUILD=${LDFLAGS_FOR_BUILD-'$(LDFLAGS)'}
+	fi
 	# CFLAGS set above to default value if not passed in environment
 	CFLAGS_FOR_BUILD=${CFLAGS-'$(CFLAGS)'}
 	LIBS_FOR_BUILD=${LIBS_FOR_BUILD-'$(LIBS)'}
@@ -538,7 +550,7 @@ then
 	RL_LIB_READLINE_VERSION
 
 	case "$ac_cv_rl_version" in
-	5*|6*|7*|8*|9*)	;;
+	7*|8*|9*)	;;
 	*)	opt_with_installed_readline=no 
 		AC_MSG_WARN([installed readline library is too old to be linked with bash])
 		AC_MSG_WARN([using private bash version])
@@ -770,7 +782,7 @@ AC_CHECK_FUNC(mkfifo,AC_DEFINE(HAVE_MKFIFO),AC_DEFINE(MKFIFO_MISSING))
 dnl checks for system calls
 AC_CHECK_FUNCS(dup2 eaccess fcntl getdtablesize getgroups gethostname \
 		getpagesize getpeername getrlimit getrusage gettimeofday \
-		kill killpg lstat pselect readlink sbrk select setdtablesize \
+		kill killpg lstat pselect readlink select setdtablesize \
 		setitimer tcgetpgrp uname ulimit waitpid)
 AC_REPLACE_FUNCS(rename)
 
@@ -808,7 +820,7 @@ AC_CHECK_DECLS([strtold], [
     AC_CACHE_VAL(bash_cv_strtold_broken,
 	[AC_TRY_COMPILE(
 	    [#include <stdlib.h>],
-	    [int main() { long double r; char *foo, bar; r = strtold(foo, &bar);}],
+	    [long double r; char *foo, bar; r = strtold(foo, &bar);],
 	    bash_cv_strtold_broken=no, bash_cv_strtold_broken=yes,
 	    [AC_MSG_WARN(cannot check for broken strtold if cross-compiling, defaulting to no)])
 	]
@@ -980,6 +992,9 @@ BASH_STRUCT_WEXITSTATUS_OFFSET
 BASH_CHECK_TYPE_STRUCT_TIMESPEC
 BASH_STAT_TIME
 
+dnl checks for system calls
+BASH_FUNC_SBRK
+
 dnl presence and behavior of C library functions
 BASH_FUNC_STRSIGNAL
 BASH_FUNC_OPENDIR_CHECK
@@ -1093,9 +1108,10 @@ solaris2*)	LOCAL_CFLAGS=-DSOLARIS ;;
 lynxos*)	LOCAL_CFLAGS=-DRECYCLES_PIDS ;;
 linux*)		LOCAL_LDFLAGS=-rdynamic		 # allow dynamic loading
 		case "`uname -r`" in
-		2.[[456789]]*|[[34]]*)	AC_DEFINE(PGRP_PIPE) ;;
+		1.*|2.[[0123]]*)	: ;;
+		*)	AC_DEFINE(PGRP_PIPE) ;;
 		esac ;;
-*qnx6*)		LOCAL_CFLAGS="-Dqnx -Dqnx6" LOCAL_LIBS="-lncurses" ;;
+*qnx[[67]]*)	LOCAL_LIBS="-lncurses" ;;
 *qnx*)		LOCAL_CFLAGS="-Dqnx -F -3s" LOCAL_LDFLAGS="-3s" LOCAL_LIBS="-lunix -lncurses" ;;
 powerux*)	LOCAL_LIBS="-lgen" ;;
 cygwin*)	LOCAL_CFLAGS=-DRECYCLES_PIDS ;;
@@ -1151,6 +1167,9 @@ then
 	AC_SUBST(SHOBJ_LIBS)
 	AC_SUBST(SHOBJ_STATUS)
 	AC_MSG_RESULT($SHOBJ_STATUS)
+else
+	SHOBJ_STATUS=unsupported
+	AC_SUBST(SHOBJ_STATUS)
 fi
 
 # try to create a directory tree if the source is elsewhere
@@ -1227,7 +1246,7 @@ AC_OUTPUT([Makefile builtins/Makefile lib/readline/Makefile lib/glob/Makefile \
 	  lib/tilde/Makefile doc/Makefile support/Makefile po/Makefile.in \
 	  examples/loadables/Makefile examples/loadables/Makefile.inc \
 	  examples/loadables/perl/Makefile \
-	  support/bash.pc],
+	  support/bash.pc support/bashbug.sh],
 [
 # Makefile uses this timestamp file to record whether config.h is up to date.
 echo timestamp > stamp-h

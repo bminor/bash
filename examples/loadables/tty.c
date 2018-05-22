@@ -46,6 +46,7 @@ tty_builtin (list)
 	case 's':
 	  sflag = 1;
 	  break;
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);

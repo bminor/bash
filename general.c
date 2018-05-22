@@ -39,8 +39,13 @@
 #include "bashintl.h"
 
 #include "shell.h"
+#include "parser.h"
+#include "flags.h"
+#include "findcmd.h"
 #include "test.h"
 #include "trap.h"
+
+#include "builtins/common.h"
 
 #if defined (HAVE_MBSTR_H) && defined (HAVE_MBSCHR)
 #  include <mbstr.h>		/* mbschr */
@@ -52,13 +57,9 @@
 extern int errno;
 #endif /* !errno */
 
-extern int expand_aliases;
-extern int interactive_comments;
-extern int check_hashed_filenames;
-extern int source_uses_path;
-extern int source_searches_cwd;
-extern int posixly_correct;
-extern int inherit_errexit;
+#ifdef __CYGWIN__
+#  include <sys/cygwin.h>
+#endif
 
 static char *bash_special_tilde_expansions __P((char *));
 static int unquoted_tilde_word __P((const char *));
@@ -265,7 +266,7 @@ check_selfref (name, value, flags)
 #if defined (ARRAY_VARS)
   if (valid_array_reference (value, 0))
     {
-      t = array_variable_name (value, (char **)NULL, (int *)NULL);
+      t = array_variable_name (value, 0, (char **)NULL, (int *)NULL);
       if (t && STREQ (name, t))
 	{
 	  free (t);
@@ -349,7 +350,8 @@ legal_alias_name (string, flags)
 }
 
 /* Returns non-zero if STRING is an assignment statement.  The returned value
-   is the index of the `=' sign. */
+   is the index of the `=' sign.  If FLAGS&1 we are expecting a compound assignment
+   and don't want an array subscript before the `='. */
 int
 assignment (string, flags)
      const char *string;
@@ -361,7 +363,7 @@ assignment (string, flags)
   c = string[indx = 0];
 
 #if defined (ARRAY_VARS)
-  if ((legal_variable_starter (c) == 0) && (flags == 0 || c != '[')) /* ] */
+  if ((legal_variable_starter (c) == 0) && ((flags&1) == 0 || c != '[')) /* ] */
 #else
   if (legal_variable_starter (c) == 0)
 #endif
@@ -377,7 +379,9 @@ assignment (string, flags)
 #if defined (ARRAY_VARS)
       if (c == '[')
 	{
-	  newi = skipsubscript (string, indx, 0);
+	  newi = skipsubscript (string, indx, (flags & 2) ? 1 : 0);
+	  /* XXX - why not check for blank subscripts here, if we do in
+	     valid_array_reference? */
 	  if (string[newi++] != ']')
 	    return (0);
 	  if (string[newi] == '+' && string[newi+1] == '=')
@@ -398,6 +402,20 @@ assignment (string, flags)
       indx++;
     }
   return (0);
+}
+
+int
+line_isblank (line)
+     const char *line;
+{
+  register int i;
+
+  if (line == 0)
+    return 0;		/* XXX */
+  for (i = 0; line[i]; i++)
+    if (isblank ((unsigned char)line[i]) == 0)
+      break;
+  return (line[i] == '\0');  
 }
 
 /* **************************************************************** */
@@ -445,6 +463,14 @@ sh_unset_nodelay_mode (fd)
     }
 
   return 0;
+}
+
+/* Just a wrapper for the define in include/filecntl.h */
+int
+sh_setclexec (fd)
+     int fd;
+{
+  return (SET_CLOSE_ON_EXEC (fd));
 }
 
 /* Return 1 if file descriptor FD is valid; 0 otherwise. */
@@ -718,7 +744,8 @@ make_absolute (string, dot_path)
     {
       char pathbuf[PATH_MAX + 1];
 
-      cygwin_conv_to_full_posix_path (string, pathbuf);
+      /* WAS cygwin_conv_to_full_posix_path (string, pathbuf); */
+      cygwin_conv_path (CCP_WIN_A_TO_POSIX, string, pathbuf, PATH_MAX);
       result = savestring (pathbuf);
     }
 #else
@@ -1321,3 +1348,26 @@ conf_standard_path ()
 #  endif /* !CS_PATH */
 #endif /* !_CS_PATH || !HAVE_CONFSTR */
 }
+
+int
+default_columns ()
+{
+  char *v;
+  int c;
+
+  c = -1;
+  v = get_string_value ("COLUMNS");
+  if (v && *v)
+    {
+      c = atoi (v);
+      if (c > 0)
+	return c;
+    }
+
+  if (check_window_size)
+    get_new_window_size (0, (int *)0, &c);
+
+  return (c > 0 ? c : 80);
+}
+
+  

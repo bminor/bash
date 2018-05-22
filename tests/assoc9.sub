@@ -1,0 +1,110 @@
+typeset -A a=( [\\]= [\"]= [\)]= ) b
+for x in "${!a[@]}"; do b[$x]=; done
+b+=([\`]= [\]]=)
+typeset -p b
+for x in "${!a[@]}"; do
+  unset -v 'b[$x]'
+done
+typeset -p b
+
+unset -v a b
+
+loaddict()
+{
+    dict['"']=1
+    dict['`']=2
+    dict["'"]=3
+    dict['\']=4
+    declare -p dict
+}
+
+del()
+{
+	unset -v dict["$1"];
+}
+
+declare -A dict
+loaddict
+for k in "${!dict[@]}"; do del "$k"; done 
+declare -p dict
+
+unset 'dict[@]'
+
+shopt -s assoc_expand_once
+declare -A dict
+loaddict
+for k in "${!dict[@]}"; do del "$k"; done 
+declare -p dict
+
+unset a b dict
+
+typeset -A a
+b="80's"
+
+((++a[$b]))
+
+((++a["$b"]))
+[[ $((++a[$b])) ]]
+[[ $((++a["$b"])) ]]
+echo ${a["$b"]}
+echo ${a[$b]}
+
+let "++a[$b]"
+
+echo 'a[$b]=' "${a[$b]}"
+
+unset a b
+
+declare -A a
+b="80's"
+
+: ${a[$b]:='Depeche Mode'}
+
+declare -p a
+
+unset a b
+shopt -u assoc_expand_once
+
+typeset -A a
+b="80's"
+
+read a[$b] <<<"Depeche Mode"
+typeset -p a
+
+shopt -s assoc_expand_once
+read a[$b] <<<"Depeche Mode"
+typeset -p a
+
+unset a
+shopt -u assoc_expand_once
+
+typeset -A a
+
+printf -v a[$b] "%s" "Depeche Mode"
+typeset -p a
+
+shopt -s assoc_expand_once
+
+printf -v a[$b] "%s" "Depeche Mode"
+typeset -p a
+
+unset a
+
+declare -A a
+x='$(date >&2)'
+a[$x]=5
+
+shopt -s assoc_expand_once
+echo $((1+a[$x]))
+echo $((1+a[\$x]))
+echo "1+${a[$x]}"
+
+declare -p a
+
+shopt -s assoc_expand_once
+declare -A myarray
+
+declare myarray["foo[bar"]=bleh
+myarray["foo"]=bleh
+
+declare -p myarray

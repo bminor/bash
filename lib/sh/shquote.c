@@ -228,7 +228,8 @@ sh_un_double_quote (string)
    going through the shell parser, which will protect the internal
    quoting characters.  TABLE, if set, points to a map of the ascii code
    set with char needing to be backslash-quoted if table[char]==1.  FLAGS,
-   if 1, causes tildes to be quoted as well. */
+   if 1, causes tildes to be quoted as well.  If FLAGS&2, backslash-quote
+   other shell blank characters. */
    
 char *
 sh_backslash_quote (string, table, flags)
@@ -272,6 +273,8 @@ sh_backslash_quote (string, table, flags)
       else if ((flags&1) && c == '~' && (s == string || s[-1] == ':' || s[-1] == '='))
         /* Tildes are special at the start of a word or after a `:' or `='
 	   (technically unquoted, but it doesn't make a difference in practice) */
+	*r++ = '\\';
+      else if ((flags&2) && shellblank((unsigned char)c))
 	*r++ = '\\';
       *r++ = c;
     }

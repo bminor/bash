@@ -1,6 +1,6 @@
 /* subst.h -- Names of externally visible functions in subst.c. */
 
-/* Copyright (C) 1993-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -50,6 +50,10 @@
 #define ASS_MKGLOBAL	0x0008	/* force global assignment */
 #define ASS_NAMEREF	0x0010	/* assigning to nameref variable */
 #define ASS_FORCE	0x0020	/* force assignment even to readonly variable */
+#define ASS_CHKLOCAL	0x0040	/* check local variable before assignment */
+#define ASS_NOEXPAND	0x0080	/* don't expand associative array subscripts */
+#define ASS_NOEVAL	0x0100	/* don't evaluate value as expression */
+#define ASS_NOLONGJMP	0x0200	/* don't longjmp on fatal assignment error */
 
 /* Flags for the string extraction functions. */
 #define SX_NOALLOC	0x0001	/* just skip; don't return substring */
@@ -102,7 +106,7 @@ extern char *string_list_internal __P((WORD_LIST *, char *));
 extern char *string_list __P((WORD_LIST *));
 
 /* Turn $* into a single string, obeying POSIX rules. */
-extern char *string_list_dollar_star __P((WORD_LIST *));
+extern char *string_list_dollar_star __P((WORD_LIST *, int, int));
 
 /* Expand $@ into a single string, obeying POSIX rules. */
 extern char *string_list_dollar_at __P((WORD_LIST *, int, int));
@@ -188,7 +192,7 @@ extern char *expand_arith_string __P((char *, int));
 extern char *dequote_string __P((char *));
 
 /* De-quote CTLESC-escaped CTLESC or CTLNUL characters in STRING. */
-extern char *dequote_escapes __P((char *));
+extern char *dequote_escapes __P((const char *));
 
 /* De-quote quoted characters in each word in LIST. */
 extern WORD_LIST *dequote_list __P((WORD_LIST *));
@@ -212,7 +216,7 @@ extern char *quote_string __P((char *));
 
 /* Quote escape characters (characters special to interals of expansion)
    in a string. */
-extern char *quote_escapes __P((char *));
+extern char *quote_escapes __P((const char *));
 
 /* And remove such quoted special characters. */
 extern char *remove_quoted_escapes __P((char *));
@@ -258,9 +262,10 @@ extern WORD_LIST *expand_words_no_vars __P((WORD_LIST *));
    command substitution, arithmetic expansion, and word splitting. */
 extern WORD_LIST *expand_words_shellexp __P((WORD_LIST *));
 
-extern WORD_DESC *command_substitute __P((char *, int));
+extern WORD_DESC *command_substitute __P((char *, int, int));
 extern char *pat_subst __P((char *, char *, char *, int));
 
+#if defined (PROCESS_SUBSTITUTION)
 extern int fifos_pending __P((void));
 extern int num_fifos __P((void));
 extern void unlink_fifo_list __P((void));
@@ -271,6 +276,13 @@ extern void unlink_new_fifos __P((char *, int));
 extern void close_new_fifos __P((char *, int));
 
 extern void clear_fifo_list __P((void));
+
+extern int find_procsub_child __P((pid_t));
+extern void set_procsub_status __P((int, pid_t, int));
+
+extern void wait_procsubs __P((void));
+extern void reap_procsubs __P((void));
+#endif
 
 extern WORD_LIST *list_string_with_quotes __P((char *));
 
@@ -312,6 +324,7 @@ extern WORD_LIST *split_at_delims __P((char *, int, char *, int, int, int *, int
 extern SHELL_VAR *ifs_var;
 extern char *ifs_value;
 extern unsigned char ifs_cmap[];
+extern int ifs_is_set, ifs_is_null;
 
 #if defined (HANDLE_MULTIBYTE)
 extern unsigned char ifs_firstc[];
@@ -319,6 +332,12 @@ extern size_t ifs_firstc_len;
 #else
 extern unsigned char ifs_firstc;
 #endif
+
+extern int assigning_in_environment;
+extern int expanding_redir;
+extern int inherit_errexit;
+
+extern pid_t last_command_subst_pid;
 
 /* Evaluates to 1 if C is a character in $IFS. */
 #define isifs(c)	(ifs_cmap[(unsigned char)(c)] != 0)

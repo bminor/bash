@@ -61,7 +61,9 @@ extern int errno;
 
 extern int asprintf __P((char **, const char *, ...)) __attribute__((__format__ (printf, 2, 3)));
 
+#if defined (NOTDEF)
 extern int last_command_exit_value;
+#endif
 
 /* Basic idea:
 
@@ -383,7 +385,7 @@ mkseq (start, end, incr, type, width)
      int type, width;
 {
   intmax_t n, prevn;
-  int i, j, nelem;
+  int i, nelem;
   char **result, *t;
 
   if (incr == 0)
@@ -424,7 +426,7 @@ mkseq (start, end, incr, type, width)
   result = strvec_mcreate (nelem + 1);
   if (result == 0)
     {
-      internal_error (_("brace expansion: failed to allocate memory for %d elements"), nelem);
+      internal_error (_("brace expansion: failed to allocate memory for %u elements"), (unsigned int)nelem);
       return ((char **)NULL);
     }
 
@@ -494,7 +496,7 @@ expand_seqterm (text, tlen)
      size_t tlen;
 {
   char *t, *lhs, *rhs;
-  int i, lhs_t, rhs_t, lhs_l, rhs_l, width;
+  int lhs_t, rhs_t, lhs_l, rhs_l, width;
   intmax_t lhs_v, rhs_v, incr;
   intmax_t tl, tr;
   char **result, *ep, *oep;
@@ -741,20 +743,6 @@ comsub:
 
   *indx = i;
   return (c);
-}
-
-/* Return 1 if ARR has any non-empty-string members.  Used to short-circuit
-   in array_concat() below. */
-static int
-degenerate_array (arr)
-     char **arr;
-{
-  register int i;
-
-  for (i = 0; arr[i]; i++)
-    if (arr[i][0] != '\0')
-      return 0;
-  return 1;
 }
 
 /* Return a new array of strings which is the result of appending each

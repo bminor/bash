@@ -65,11 +65,11 @@ foo is a function
 foo () 
 { 
     echo;
-    cat  <<END
+    cat <<END
 bar
 END
 
-    cat  <<EOF
+    cat <<EOF
 qux
 EOF
 
@@ -86,7 +86,7 @@ foo ()
     rm -f a b c;
     for f in a b c;
     do
-        cat  >> ${f} <<-EOF
+        cat <<-EOF >> ${f}
 file
 EOF
 
@@ -99,7 +99,7 @@ c:file
 bb is a function
 bb () 
 { 
-    ( cat  <<EOF
+    ( cat <<EOF
 foo
 bar
 EOF
@@ -110,13 +110,13 @@ mkcoprocs is a function
 mkcoprocs () 
 { 
     coproc a { 
-        cat  <<EOF1
+        cat <<EOF1
 producer 1
 EOF1
 
     }
     coproc b { 
-        cat  <<EOF2
+        cat <<EOF2
 producer 2
 EOF2
 
@@ -126,7 +126,7 @@ EOF2
 mkcoprocs is a function
 mkcoprocs () 
 { 
-    coproc COPROC ( b cat  <<EOF
+    coproc COPROC ( b cat <<EOF
 heredoc
 body
 EOF

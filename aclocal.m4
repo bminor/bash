@@ -1,4 +1,4 @@
-dnl
+nl
 dnl Bash specific tests
 dnl
 dnl Some derived from PDKSH 5.1.3 autoconf tests
@@ -1357,7 +1357,7 @@ AC_DEFUN(BASH_SYS_JOB_CONTROL_MISSING,
 [AC_REQUIRE([BASH_SYS_SIGNAL_VINTAGE])
 AC_MSG_CHECKING(for presence of necessary job control definitions)
 AC_CACHE_VAL(bash_cv_job_control_missing,
-[AC_TRY_RUN([
+[AC_TRY_COMPILE([
 #include <sys/types.h>
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
@@ -1367,42 +1367,38 @@ AC_CACHE_VAL(bash_cv_job_control_missing,
 #endif
 #include <signal.h>
 
-/* Add more tests in here as appropriate. */
-main()
-{
+/* add more tests in here as appropriate */
+
 /* signal type */
 #if !defined (HAVE_POSIX_SIGNALS) && !defined (HAVE_BSD_SIGNALS)
-exit(1);
+#error
 #endif
 
 /* signals and tty control. */
 #if !defined (SIGTSTP) || !defined (SIGSTOP) || !defined (SIGCONT)
-exit (1);
+#error
 #endif
 
 /* process control */
 #if !defined (WNOHANG) || !defined (WUNTRACED) 
-exit(1);
+#error
 #endif
 
 /* Posix systems have tcgetpgrp and waitpid. */
 #if defined (_POSIX_VERSION) && !defined (HAVE_TCGETPGRP)
-exit(1);
+#error
 #endif
 
 #if defined (_POSIX_VERSION) && !defined (HAVE_WAITPID)
-exit(1);
+#error
 #endif
 
 /* Other systems have TIOCSPGRP/TIOCGPRGP and wait3. */
 #if !defined (_POSIX_VERSION) && !defined (HAVE_WAIT3)
-exit(1);
+#error
 #endif
 
-exit(0);
-}], bash_cv_job_control_missing=present, bash_cv_job_control_missing=missing,
-    [AC_MSG_WARN(cannot check job control if cross-compiling -- defaulting to missing)
-     bash_cv_job_control_missing=missing]
+], , bash_cv_job_control_missing=present, bash_cv_job_control_missing=missing
 )])
 AC_MSG_RESULT($bash_cv_job_control_missing)
 if test $bash_cv_job_control_missing = missing; then
@@ -1585,9 +1581,7 @@ fi
 AC_DEFUN(BASH_CHECK_DEV_STDIN,
 [AC_MSG_CHECKING(whether /dev/stdin stdout stderr are available)
 AC_CACHE_VAL(bash_cv_dev_stdin,
-[if test -d /dev/fd && (exec test -r /dev/stdin < /dev/null) ; then
-   bash_cv_dev_stdin=present
- elif test -d /proc/self/fd && (exec test -r /dev/stdin < /dev/null) ; then
+[if (exec test -r /dev/stdin < /dev/null) ; then
    bash_cv_dev_stdin=present
  else
    bash_cv_dev_stdin=absent
@@ -1798,6 +1792,8 @@ if test "$am_cv_func_iconv" = yes; then
 	LIBS="$OLDLIBS"
 fi
 
+AC_CHECK_SIZEOF(wchar_t, 4)
+
 ])
 
 dnl need: prefix exec_prefix libdir includedir CC TERMCAP_LIB
@@ -1856,7 +1852,7 @@ main()
 ],
 ac_cv_rl_version=`cat conftest.rlv`,
 ac_cv_rl_version='0.0',
-ac_cv_rl_version='6.3')])
+ac_cv_rl_version='7.0')])
 
 CFLAGS="$_save_CFLAGS"
 LDFLAGS="$_save_LDFLAGS"
@@ -4194,4 +4190,35 @@ if test "$bash_cv_wexitstatus_offset" -gt 32 ; then
 fi
 AC_MSG_RESULT($bash_cv_wexitstatus_offset)
 AC_DEFINE_UNQUOTED([WEXITSTATUS_OFFSET], [$bash_cv_wexitstatus_offset], [Offset of exit status in wait status word])
+])
+
+AC_DEFUN([BASH_FUNC_SBRK],
+[
+  AC_CHECK_FUNCS_ONCE([sbrk])
+  if test X$ac_cv_func_sbrk = Xyes; then
+    AC_CACHE_CHECK([for working sbrk], [bash_cv_func_sbrk],
+      [AC_TRY_RUN([
+#include <stdlib.h>
+#include <unistd.h>
+
+int
+main(int c, char **v)
+{
+	void *x;
+
+	x = sbrk (4096);
+	exit ((x == (void *)-1) ? 1 : 0);
+}
+], bash_cv_func_sbrk=yes, bash_cv_func_snprintf=sbrk,
+   [AC_MSG_WARN([cannot check working sbrk if cross-compiling])
+    bash_cv_func_sbrk=yes]
+)])
+    if test $bash_cv_func_sbrk = no; then
+      ac_cv_func_sbrk=no
+    fi
+  fi
+  if test $ac_cv_func_sbrk = no; then
+    AC_DEFINE(HAVE_SBRK, 0,
+      [Define if you have a working sbrk function.])
+  fi
 ])

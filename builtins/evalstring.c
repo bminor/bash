@@ -1,6 +1,6 @@
 /* evalstring.c - evaluate a string as one or more shell commands. */
 
-/* Copyright (C) 1996-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -39,6 +39,7 @@
 #include "../jobs.h"
 #include "../builtins.h"
 #include "../flags.h"
+#include "../parser.h"
 #include "../input.h"
 #include "../execute_cmd.h"
 #include "../redir.h"
@@ -59,19 +60,6 @@ extern int errno;
 #endif
 
 #define IS_BUILTIN(s)	(builtin_address_internal(s, 0) != (struct builtin *)NULL)
-
-extern int indirection_level, subshell_environment;
-extern int line_number, line_number_for_err_trap;
-extern int current_token, shell_eof_token;
-extern int last_command_exit_value;
-extern int running_trap;
-extern int loop_level;
-extern int executing_list;
-extern int comsub_ignore_return;
-extern int posixly_correct;
-extern int return_catch_flag, return_catch_value;
-extern sh_builtin_func_t *this_shell_builtin;
-extern char *the_printed_command_except_trap;
 
 int parse_and_execute_level = 0;
 
@@ -124,14 +112,41 @@ optimize_fork (command)
       command->value.Connection->second->value.Simple->flags |= CMD_NO_FORK;
     }
 }
+
+void
+optimize_subshell_command (command)
+     COMMAND *command;
+{
+  if (running_trap == 0 &&
+      command->type == cm_simple &&
+      signal_is_trapped (EXIT_TRAP) == 0 &&
+      signal_is_trapped (ERROR_TRAP) == 0 &&
+      any_signals_trapped () < 0 &&
+      command->redirects == 0 && command->value.Simple->redirects == 0 &&
+      ((command->flags & CMD_TIME_PIPELINE) == 0) &&
+      ((command->flags & CMD_INVERT_RETURN) == 0))
+    {
+      command->flags |= CMD_NO_FORK;
+      command->value.Simple->flags |= CMD_NO_FORK;
+    }
+  else if (command->type == cm_connection &&
+	   (command->value.Connection->connector == AND_AND || command->value.Connection->connector == OR_OR))
+    optimize_subshell_command (command->value.Connection->second);
+}
      
 /* How to force parse_and_execute () to clean up after itself. */
 void
-parse_and_execute_cleanup ()
+parse_and_execute_cleanup (old_running_trap)
+     int old_running_trap;
 {
-  if (running_trap)
+  if (running_trap > 0)
     {
-      run_trap_cleanup (running_trap - 1);
+      /* We assume if we have a different value for running_trap than when
+	 we started (the only caller that cares is evalstring()), the
+	 original caller will perform the cleanup, and we should not step
+	 on them. */
+      if (running_trap != old_running_trap)
+	run_trap_cleanup (running_trap - 1);
       unfreeze_jobs_list ();
     }
 
@@ -644,6 +659,10 @@ evalstring (string, from_file, flags)
      int flags;
 {
   volatile int r, rflag, rcatch;
+  volatile int was_trap;
+
+  /* Are we running a trap when we execute this function? */
+  was_trap = running_trap;
 
   rcatch = 0;
   rflag = return_catch_flag;
@@ -663,7 +682,9 @@ evalstring (string, from_file, flags)
 
   if (rcatch)
     {
-      parse_and_execute_cleanup ();
+      /* We care about whether or not we are running the same trap we were
+	 when we entered this function. */
+      parse_and_execute_cleanup (was_trap);
       r = return_catch_value;
     }
   else

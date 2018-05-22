@@ -1,7 +1,7 @@
 /* readline.c -- a general facility for reading lines of input
    with emacs style editing and completion. */
 
-/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -242,7 +242,7 @@ int rl_erase_empty_line = 0;
 
 /* Non-zero means to read only this many characters rather than up to a
    character bound to accept-line. */
-int rl_num_chars_to_read;
+int rl_num_chars_to_read = 0;
 
 /* Line buffer and maintenance. */
 char *rl_line_buffer = (char *)NULL;
@@ -325,8 +325,7 @@ int _rl_meta_flag = 0;	/* Forward declaration */
 /* Set up the prompt and expand it.  Called from readline() and
    rl_callback_handler_install (). */
 int
-rl_set_prompt (prompt)
-     const char *prompt;
+rl_set_prompt (const char *prompt)
 {
   FREE (rl_prompt);
   rl_prompt = prompt ? savestring (prompt) : (char *)NULL;
@@ -339,8 +338,7 @@ rl_set_prompt (prompt)
 /* Read a line of input.  Prompt with PROMPT.  An empty PROMPT means
    none.  A return value of NULL means that EOF was encountered. */
 char *
-readline (prompt)
-     const char *prompt;
+readline (const char *prompt)
 {
   char *value;
 #if 0
@@ -401,7 +399,7 @@ readline (prompt)
 #endif
 
 STATIC_CALLBACK void
-readline_internal_setup ()
+readline_internal_setup (void)
 {
   char *nprompt;
 
@@ -419,7 +417,10 @@ readline_internal_setup ()
 #if defined (VI_MODE)
   if (rl_editing_mode == vi_mode)
     rl_vi_insertion_mode (1, 'i');	/* don't want to reset last */
+  else
 #endif /* VI_MODE */
+    if (_rl_show_mode_in_prompt)
+      _rl_reset_prompt ();
 
   /* If we're not echoing, we still want to at least print a prompt, because
      rl_redisplay will not do it for us.  If the calling application has a
@@ -450,8 +451,7 @@ readline_internal_setup ()
 }
 
 STATIC_CALLBACK char *
-readline_internal_teardown (eof)
-     int eof;
+readline_internal_teardown (int eof)
 {
   char *temp;
   HIST_ENTRY *entry;
@@ -493,7 +493,7 @@ readline_internal_teardown (eof)
 }
 
 void
-_rl_internal_char_cleanup ()
+_rl_internal_char_cleanup (void)
 {
 #if defined (VI_MODE)
   /* In vi mode, when you exit insert mode, the cursor moves back
@@ -524,13 +524,13 @@ _rl_internal_char_cleanup ()
 
 STATIC_CALLBACK int
 #if defined (READLINE_CALLBACKS)
-readline_internal_char ()
+readline_internal_char (void)
 #else
-readline_internal_charloop ()
+readline_internal_charloop (void)
 #endif
 {
   static int lastc, eof_found;
-  int c, code, lk;
+  int c, code, lk, r;
 
   lastc = EOF;
 
@@ -626,7 +626,7 @@ readline_internal_charloop ()
 	}
 
       lastc = c;
-      _rl_dispatch ((unsigned char)c, _rl_keymap);
+      r = _rl_dispatch ((unsigned char)c, _rl_keymap);
       RL_CHECK_SIGNALS ();
 
       /* If there was no change in _rl_last_command_was_kill, then no kill
@@ -648,7 +648,7 @@ readline_internal_charloop ()
 
 #if defined (READLINE_CALLBACKS)
 static int
-readline_internal_charloop ()
+readline_internal_charloop (void)
 {
   int eof = 1;
 
@@ -662,7 +662,7 @@ readline_internal_charloop ()
    the global rl_outstream.
    If rl_prompt is non-null, then that is our prompt. */
 static char *
-readline_internal ()
+readline_internal (void)
 {
   int eof;
 
@@ -672,7 +672,7 @@ readline_internal ()
 }
 
 void
-_rl_init_line_state ()
+_rl_init_line_state (void)
 {
   rl_point = rl_end = rl_mark = 0;
   the_line = rl_line_buffer;
@@ -680,14 +680,14 @@ _rl_init_line_state ()
 }
 
 void
-_rl_set_the_line ()
+_rl_set_the_line (void)
 {
   the_line = rl_line_buffer;
 }
 
 #if defined (READLINE_CALLBACKS)
 _rl_keyseq_cxt *
-_rl_keyseq_cxt_alloc ()
+_rl_keyseq_cxt_alloc (void)
 {
   _rl_keyseq_cxt *cxt;
 
@@ -703,14 +703,13 @@ _rl_keyseq_cxt_alloc ()
 }
 
 void
-_rl_keyseq_cxt_dispose (cxt)
-    _rl_keyseq_cxt *cxt;
+_rl_keyseq_cxt_dispose (_rl_keyseq_cxt *cxt)
 {
   xfree (cxt);
 }
 
 void
-_rl_keyseq_chain_dispose ()
+_rl_keyseq_chain_dispose (void)
 {
   _rl_keyseq_cxt *cxt;
 
@@ -724,8 +723,7 @@ _rl_keyseq_chain_dispose ()
 #endif
 
 static int
-_rl_subseq_getchar (key)
-     int key;
+_rl_subseq_getchar (int key)
 {
   int k;
 
@@ -742,8 +740,7 @@ _rl_subseq_getchar (key)
 
 #if defined (READLINE_CALLBACKS)
 int
-_rl_dispatch_callback (cxt)
-     _rl_keyseq_cxt *cxt;
+_rl_dispatch_callback (_rl_keyseq_cxt *cxt)
 {
   int nkey, r;
 
@@ -794,19 +791,14 @@ _rl_dispatch_callback (cxt)
    If the associated command is really a keymap, then read
    another key, and dispatch into that map. */
 int
-_rl_dispatch (key, map)
-     register int key;
-     Keymap map;
+_rl_dispatch (register int key, Keymap map)
 {
   _rl_dispatching_keymap = map;
   return _rl_dispatch_subseq (key, map, 0);
 }
 
 int
-_rl_dispatch_subseq (key, map, got_subseq)
-     register int key;
-     Keymap map;
-     int got_subseq;
+_rl_dispatch_subseq (register int key, Keymap map, int got_subseq)
 {
   int r, newkey;
   char *macro;
@@ -920,6 +912,15 @@ _rl_dispatch_subseq (key, map, got_subseq)
               _rl_pushed_input_available () == 0 &&
 	      _rl_input_queued ((_rl_keyseq_timeout > 0) ? _rl_keyseq_timeout*1000 : 0) == 0)
 	    return (_rl_dispatch (ANYOTHERKEY, FUNCTION_TO_KEYMAP (map, key)));
+	  /* This is a very specific test.  It can possibly be generalized in
+	     the future, but for now it handles a specific case of ESC being
+	     the last character in a keyboard macro. */
+	  if (rl_editing_mode == vi_mode && key == ESC && map == vi_insertion_keymap &&
+	      (RL_ISSTATE (RL_STATE_INPUTPENDING) == 0) &&
+	      (RL_ISSTATE (RL_STATE_MACROINPUT) && _rl_peek_macro_key () == 0) &&
+	      _rl_pushed_input_available () == 0 &&
+	      _rl_input_queued ((_rl_keyseq_timeout > 0) ? _rl_keyseq_timeout*1000 : 0) == 0)
+	    return (_rl_dispatch (ANYOTHERKEY, FUNCTION_TO_KEYMAP (map, key)));	      
 #endif
 
 	  RESIZE_KEYSEQ_BUFFER ();
@@ -1014,10 +1015,7 @@ _rl_dispatch_subseq (key, map, got_subseq)
 }
 
 static int
-_rl_subseq_result (r, map, key, got_subseq)
-     int r;
-     Keymap map;
-     int key, got_subseq;
+_rl_subseq_result (int r, Keymap map, int key, int got_subseq)
 {
   Keymap m;
   int type, nt;
@@ -1069,7 +1067,7 @@ _rl_subseq_result (r, map, key, got_subseq)
       _rl_dispatching_keymap = map;
       return -2;
     }
-  else if (r && got_subseq)
+  else if (r < 0 && got_subseq)		/* XXX */
     {
       /* OK, back up the chain. */
       if (RL_ISSTATE (RL_STATE_MACROINPUT))
@@ -1091,11 +1089,11 @@ _rl_subseq_result (r, map, key, got_subseq)
 
 /* Initialize readline (and terminal if not already). */
 int
-rl_initialize ()
+rl_initialize (void)
 {
   /* If we have never been called before, initialize the
      terminal and data structures. */
-  if (!rl_initialized)
+  if (rl_initialized == 0)
     {
       RL_SETSTATE(RL_STATE_INITIALIZING);
       readline_initialize_everything ();
@@ -1103,6 +1101,8 @@ rl_initialize ()
       rl_initialized++;
       RL_SETSTATE(RL_STATE_INITIALIZED);
     }
+  else
+    (void)_rl_init_locale ();	/* check current locale */
 
   /* Initialize the current line information. */
   _rl_init_line_state ();
@@ -1137,7 +1137,7 @@ rl_initialize ()
 #if 0
 #if defined (__EMX__)
 static void
-_emx_build_environ ()
+_emx_build_environ (void)
 {
   TIB *tibp;
   PIB *pibp;
@@ -1162,7 +1162,7 @@ _emx_build_environ ()
 
 /* Initialize the entire state of the world. */
 static void
-readline_initialize_everything ()
+readline_initialize_everything (void)
 {
 #if 0
 #if defined (__EMX__)
@@ -1247,7 +1247,7 @@ readline_initialize_everything ()
    input editing characters, then bind them to their readline
    equivalents, iff the characters are not bound to keymaps. */
 static void
-readline_default_bindings ()
+readline_default_bindings (void)
 {
   if (_rl_bind_stty_chars)
     rl_tty_set_default_bindings (_rl_keymap);
@@ -1256,7 +1256,7 @@ readline_default_bindings ()
 /* Reset the default bindings for the terminal special characters we're
    interested in back to rl_insert and read the new ones. */
 static void
-reset_default_bindings ()
+reset_default_bindings (void)
 {
   if (_rl_bind_stty_chars)
     {
@@ -1267,8 +1267,7 @@ reset_default_bindings ()
 
 /* Bind some common arrow key sequences in MAP. */
 static void
-bind_arrow_keys_internal (map)
-     Keymap map;
+bind_arrow_keys_internal (Keymap map)
 {
   Keymap xkeymap;
 
@@ -1295,6 +1294,15 @@ bind_arrow_keys_internal (map)
   rl_bind_keyseq_if_unbound ("\033OD", rl_backward_char);
   rl_bind_keyseq_if_unbound ("\033OH", rl_beg_of_line);
   rl_bind_keyseq_if_unbound ("\033OF", rl_end_of_line);
+
+  /* Key bindings for control-arrow keys */
+  rl_bind_keyseq_if_unbound ("\033[1;5C", rl_forward_word);
+  rl_bind_keyseq_if_unbound ("\033[1;5D", rl_backward_word);
+  rl_bind_keyseq_if_unbound ("\033[3;5~", rl_kill_word);
+
+  /* Key bindings for alt-arrow keys */
+  rl_bind_keyseq_if_unbound ("\033[1;3C", rl_forward_word);
+  rl_bind_keyseq_if_unbound ("\033[1;3D", rl_backward_word);
 
 #if defined (__MINGW32__)
   rl_bind_keyseq_if_unbound ("\340H", rl_get_previous_history);
@@ -1324,7 +1332,7 @@ bind_arrow_keys_internal (map)
    the inputrc file a chance to bind them and create `real' keymaps
    for the arrow key prefix. */
 static void
-bind_arrow_keys ()
+bind_arrow_keys (void)
 {
   bind_arrow_keys_internal (emacs_standard_keymap);
 
@@ -1339,7 +1347,7 @@ bind_arrow_keys ()
 }
 
 static void
-bind_bracketed_paste_prefix ()
+bind_bracketed_paste_prefix (void)
 {
   Keymap xkeymap;
 
@@ -1361,8 +1369,7 @@ bind_bracketed_paste_prefix ()
 /* **************************************************************** */
 
 int
-rl_save_state (sp)
-     struct readline_state *sp;
+rl_save_state (struct readline_state *sp)
 {
   if (sp == 0)
     return -1;
@@ -1402,8 +1409,7 @@ rl_save_state (sp)
 }
 
 int
-rl_restore_state (sp)
-     struct readline_state *sp;
+rl_restore_state (struct readline_state *sp)
 {
   if (sp == 0)
     return -1;

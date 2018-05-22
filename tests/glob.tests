@@ -9,10 +9,12 @@ expect()
 
 # First, a test that bash-2.01.1 fails
 ${THIS_SH} ./glob1.sub
+${THIS_SH} ./glob2.sub
+${THIS_SH} ./glob3.sub
 
 MYDIR=$PWD	# save where we are
 
-TESTDIR=/tmp/glob-test
+TESTDIR=$TMPDIR/glob-test-$$
 mkdir $TESTDIR
 builtin cd $TESTDIR || { echo $0: cannot cd to $TESTDIR >&2 ; exit 1; }
 rm -rf *

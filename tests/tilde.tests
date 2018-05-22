@@ -1,3 +1,4 @@
+wdir=$PWD
 # this is needed because posix mode restricts tilde expansion to assignment
 # statements preceding a command, instead of the default of expanding all
 # assignment statements on the line (e.g., after `export').  Without this,
@@ -69,3 +70,6 @@ esac
 
 USER=root		# should exist just about everywhere
 echo ~$USER
+
+cd "$wdir"
+exit 0

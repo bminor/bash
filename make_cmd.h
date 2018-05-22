@@ -23,6 +23,8 @@
 
 #include "stdc.h"
 
+extern int here_doc_first_line;
+
 extern void cmd_init __P((void));
 
 extern WORD_DESC *alloc_word_desc __P((void));

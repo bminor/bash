@@ -1,4 +1,4 @@
-trap 'rm /tmp/newhistory' 0
+trap 'rm $TMPDIR/newhistory' 0
 
 # bad options
 history -x
@@ -20,6 +20,7 @@ HISTFILE=history.list
 HISTCONTROL=ignoreboth
 HISTIGNORE='&:history*:fc*'
 HISTSIZE=32
+export HISTIGNORE
 
 shopt -s cmdhist
 set -o history
@@ -39,7 +40,7 @@ history -p '!!'
 
 fc -nl
 
-HISTFILE=/tmp/newhistory
+HISTFILE=$TMPDIR/newhistory
 history -a
 echo displaying \$HISTFILE after history -a
 cat $HISTFILE
@@ -112,3 +113,4 @@ ${THIS_SH} ./history1.sub
 rm -f $TMPDIR/foohist-*
 
 ${THIS_SH} ./history2.sub
+${THIS_SH} ./history3.sub

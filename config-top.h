@@ -53,7 +53,7 @@
 /* Define DONT_REPORT_SIGTERM if you don't want to see `Terminates' message
    when a job exits due to SIGTERM, since that's the default signal sent
    by the kill builtin. */
-/* #define DONT_REPORT_SIGTERM */
+#define DONT_REPORT_SIGTERM
 
 /* Define DONT_REPORT_BROKEN_PIPE_WRITE_ERRORS if you don't want builtins
    like `echo' and `printf' to report errors when output does not succeed
@@ -65,6 +65,10 @@
 #define DEFAULT_PATH_VALUE \
   "/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:."
 #endif
+
+/* If you want to unconditionally set a value for PATH in every restricted
+   shell, set this. */
+/* #define RBASH_STATIC_PATH_VALUE "/rbin:/usr/rbin" */
 
 /* The value for PATH when invoking `command -p'.  This is only used when
    the Posix.2 confstr () function, or CS_PATH define are not present. */
@@ -120,10 +124,18 @@
 #  define OPENLOG_OPTS LOG_PID
 #endif
 
+/* Define if you want syslogging history to be controllable at runtime via a
+   shell option; if defined, the value is the default for the syslog_history
+   shopt option */
+#if defined (SYSLOG_HISTORY)
+/* #define SYSLOG_SHOPT 1 */
+#endif
+
 /* Define if you want to include code in shell.c to support wordexp(3) */
 /* #define WORDEXP_OPTION */
 
-/* Define as 1 if you want to enable code that implements multiple coprocs */
+/* Define as 1 if you want to enable code that implements multiple coprocs
+   executing simultaneously */
 #ifndef MULTIPLE_COPROCS
 #  define MULTIPLE_COPROCS 0
 #endif
@@ -160,3 +172,7 @@
 /* Define to use libc mktemp/mkstemp instead of replacements in lib/sh/tmpfile.c */
 #define USE_MKTEMP
 #define USE_MKSTEMP
+
+/* Define to force the value of OLDPWD inherited from the environment to be a
+   directory */
+#define OLDPWD_CHECK_DIRECTORY 1

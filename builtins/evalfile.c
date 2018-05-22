@@ -1,6 +1,6 @@
 /* evalfile.c - read and evaluate commands from a file or file descriptor */
 
-/* Copyright (C) 1996-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -36,6 +36,7 @@
 #include "../bashintl.h"
 
 #include "../shell.h"
+#include "../parser.h"
 #include "../jobs.h"
 #include "../builtins.h"
 #include "../flags.h"
@@ -68,13 +69,6 @@ extern int errno;
 #define FEVAL_REGFILE		0x080
 #define FEVAL_NOPUSHARGS	0x100
 
-extern int posixly_correct;
-extern int indirection_level, subshell_environment;
-extern int return_catch_flag, return_catch_value;
-extern int last_command_exit_value;
-extern int executing_command_builtin;
-extern int current_token;		/* parse.y */
-
 /* How many `levels' of sourced files we have. */
 int sourcelevel = 0;
 
@@ -92,7 +86,7 @@ _evalfile (filename, flags)
   size_t file_size;
   sh_vmsg_func_t *errfunc;
 #if defined (ARRAY_VARS)
-  SHELL_VAR *funcname_v, *nfv, *bash_source_v, *bash_lineno_v;
+  SHELL_VAR *funcname_v, *bash_source_v, *bash_lineno_v;
   ARRAY *funcname_a, *bash_source_a, *bash_lineno_a;
   struct func_array_state *fa;
 #  if defined (DEBUGGER)
@@ -260,7 +254,9 @@ file_error_and_exit:
      arguments */
   if ((flags & FEVAL_NOPUSHARGS) == 0)
     {
-      array_push (bash_argv_a, (char *)filename);
+      if (shell_compatibility_level <= 44)
+	init_bash_argv ();
+      array_push (bash_argv_a, (char *)filename);	/* XXX - unconditionally? */
       tt[0] = '1'; tt[1] = '\0';
       array_push (bash_argc_a, tt);
       if (flags & FEVAL_UNWINDPROT)
@@ -282,7 +278,7 @@ file_error_and_exit:
      force parse_and_execute () to clean up. */
   if (return_val)
     {
-      parse_and_execute_cleanup ();
+      parse_and_execute_cleanup (-1);
       result = return_catch_value;
     }
   else

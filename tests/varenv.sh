@@ -221,5 +221,18 @@ ${THIS_SH} ./varenv7.sub
 # redirections
 ${THIS_SH} ./varenv8.sub
 
+# make sure that builtins like readonly and export modify local array variables
+# if executed in shell functions, like they modify local scalar variables
+${THIS_SH} ./varenv9.sub
+
+# more tests of unset and local variables with dynamic scoping
+${THIS_SH} ./varenv10.sub
+
+# tests of compound assignments in function scope
+${THIS_SH} ./varenv11.sub
+
+# temporary environment variable propagation and scoping in posix mode
+${THIS_SH} ./varenv12.sub
+
 # make sure variable scoping is done right
 tt() { typeset a=b;echo a=$a; };a=z;echo a=$a;tt;echo a=$a

@@ -1,0 +1,46 @@
+set -- ''
+
+recho 1 ''"$@"
+recho 2 """$@"
+
+recho 3 "$@""$@"
+recho 4 "$x""$@"
+
+set --
+
+echo -----
+recho 1 ''"$@"
+recho 2 """$@"
+
+recho 3 "$@""$@"
+recho 4 "$x""$@"
+
+set -- X
+
+echo ------
+recho 1 ''"${@/*}"
+recho 2 """${@/*}"
+
+recho 3 "$x""${@/*}"
+
+recho 4 ''"${@#X}"
+recho 5 """${@#X}"
+
+recho 6 "$x""${@#X}"
+
+set --
+
+echo -----
+recho 1 ''"${@/*}"
+recho 2 """${@/*}"
+
+recho 3 "$x""${@/*}"
+
+recho 4 ''"${@#X}"
+recho 5 """${@#X}"
+
+recho 6 "$x""${@#X}"
+
+echo -----
+recho 1 "$novar${*}$(echo)"
+recho 2 ''"$novar${@}$(echo)"

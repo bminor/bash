@@ -1,7 +1,7 @@
 /* strmatch.c -- ksh-like extended pattern matching for the shell and filename
 		globbing. */
 
-/* Copyright (C) 1991-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -144,25 +144,33 @@ static char const *const cclass_name[] =
 
 #define N_CHAR_CLASS (sizeof(cclass_name) / sizeof (cclass_name[0]))
 
-static int
-is_cclass (c, name)
-     int c;
+static enum char_class
+is_valid_cclass (name)
      const char *name;
 {
-  enum char_class char_class = CC_NO_CLASS;
-  int i, result;
+  enum char_class ret;
+  int i;
+
+  ret = CC_NO_CLASS;
 
   for (i = 1; i < N_CHAR_CLASS; i++)
     {
       if (STREQ (name, cclass_name[i]))
 	{
-	  char_class = (enum char_class)i;
+	  ret = (enum char_class)i;
 	  break;
 	}
     }
 
-  if (char_class == 0)
-    return -1;
+  return ret;
+}
+
+static int
+cclass_test (c, char_class)
+     int c;
+     enum char_class char_class;
+{
+  int result;
 
   switch (char_class)
     {
@@ -215,6 +223,22 @@ is_cclass (c, name)
 
   return result;  
 }
+	
+static int
+is_cclass (c, name)
+     int c;
+     const char *name;
+{
+  enum char_class char_class;
+  int result;
+
+  char_class = is_valid_cclass (name);
+  if (char_class == CC_NO_CLASS)
+    return -1;
+
+  result = cclass_test (c, char_class);
+  return (result);
+}
 
 /* Now include `sm_loop.c' for single-byte characters. */
 /* The result of FOLD is an `unsigned char' */
@@ -230,6 +254,7 @@ is_cclass (c, name)
 #define PATSCAN			glob_patscan
 #define STRCOMPARE		strcompare
 #define EXTMATCH		extmatch
+#define STRUCT			smat_struct
 #define STRCHR(S, C)		strchr((S), (C))
 #define MEMCHR(S, C, N)		memchr((S), (C), (N))
 #define STRCOLL(S1, S2)		strcoll((S1), (S2))
@@ -355,6 +380,50 @@ is_wcclass (wc, name)
     return (iswctype (wc, desc));
 }
 
+/* Return 1 if there are no char class [:class:] expressions (degenerate case)
+   or only posix-specified (C locale supported) char class expressions in
+   PATTERN.  These are the ones where it's safe to punt to the single-byte
+   code, since wide character support allows locale-defined char classes.
+   This only uses single-byte code, but is only needed to support multibyte
+   locales. */
+static int
+posix_cclass_only (pattern)
+     char *pattern;
+{
+  char *p, *p1;
+  char cc[16];		/* sufficient for all valid posix char class names */
+  enum char_class valid;
+
+  p = pattern;
+  while (p = strchr (p, '['))
+    {
+      if (p[1] != ':')
+	{
+	  p++;
+	  continue;
+        }
+      p += 2;		/* skip past "[:" */
+      /* Find end of char class expression */
+      for (p1 = p; *p1;  p1++)
+	if (*p1 == ':' && p1[1] == ']')
+	  break;
+      if (*p1 == 0)	/* no char class expression found */
+	break;
+      /* Find char class name and validate it against posix char classes */
+      if ((p1 - p) >= sizeof (cc))
+	return 0;
+      bcopy (p, cc, p1 - p);
+      cc[p1 - p] = '\0';
+      valid = is_valid_cclass (cc);
+      if (valid == CC_NO_CLASS)
+	return 0;		/* found unrecognized char class name */
+
+      p = p1 + 2;		/* found posix char class name */
+    }
+    
+  return 1;			/* no char class names or only posix */
+}      
+
 /* Now include `sm_loop.c' for multibyte characters. */
 #define FOLD(c) ((flags & FNM_CASEFOLD) && iswupper (c) ? towlower (c) : (c))
 #define FCT			internal_wstrmatch
@@ -365,6 +434,7 @@ is_wcclass (wc, name)
 #define PATSCAN			glob_patscan_wc
 #define STRCOMPARE		wscompare
 #define EXTMATCH		extmatch_wc
+#define STRUCT			wcsmat_struct
 #define STRCHR(S, C)		wcschr((S), (C))
 #define MEMCHR(S, C, N)		wmemchr((S), (C), (N))
 #define STRCOLL(S1, S2)		wcscoll((S1), (S2))
@@ -390,10 +460,10 @@ xstrmatch (pattern, string, flags)
   wchar_t *wpattern, *wstring;
   size_t plen, slen, mplen, mslen;
 
-  if (mbsmbchar (string) == 0 && mbsmbchar (pattern) == 0)
+  if (MB_CUR_MAX == 1)
     return (internal_strmatch ((unsigned char *)pattern, (unsigned char *)string, flags));
 
-  if (MB_CUR_MAX == 1)
+  if (mbsmbchar (string) == 0 && mbsmbchar (pattern) == 0 && posix_cclass_only (pattern) )
     return (internal_strmatch ((unsigned char *)pattern, (unsigned char *)string, flags));
 
   n = xdupmbstowcs (&wpattern, NULL, pattern);

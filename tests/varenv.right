@@ -91,6 +91,62 @@ global:2
 after: --global--
 after: ----
 x = :1:2
+in o1 (readonly modifying local scalars):
+declare -r i1="a b c"
+declare -r j1="1 2 3"
+after o1:
+./varenv9.sub: line 15: declare: i1: not found
+./varenv9.sub: line 15: declare: j1: not found
+in o2 (readonly setting global scalars):
+declare -r i2="a b c"
+declare -r j2="1 2 3"
+after o2:
+declare -r i2="a b c"
+declare -r j2="1 2 3"
+./varenv9.sub: line 33: unset: i2: cannot unset: readonly variable
+./varenv9.sub: line 33: unset: j2: cannot unset: readonly variable
+in o3 (readonly modifying locals, converting to arrays):
+declare -ar i3=([0]="a" [1]="b" [2]="c")
+declare -ar j3=([0]="1" [1]="2" [2]="3")
+after o3:
+./varenv9.sub: line 48: declare: i3: not found
+./varenv9.sub: line 48: declare: j3: not found
+in o4 (readonly setting global array variables):
+declare -ar i4=([0]="a" [1]="b" [2]="c")
+declare -ar j4=([0]="1" [1]="2" [2]="3")
+after o4:
+declare -ar i4=([0]="a" [1]="b" [2]="c")
+declare -ar j4=([0]="1" [1]="2" [2]="3")
+./varenv9.sub: line 66: unset: i4: cannot unset: readonly variable
+./varenv9.sub: line 66: unset: j4: cannot unset: readonly variable
+main: unset
+inner: res unset
+outer: res: X Y
+main: after first call: X
+inner: X
+outer: res: X Y
+main: after second call: X
+func: null or unset
+after func: x = outside
+./varenv11.sub: line 4: local: qux: readonly variable
+./varenv11.sub: line 5: qux: readonly variable
+declare -A foo=([one]="one" [zero]="zero" )
+declare -a bar=([0]="zero" [1]="one")
+declare -A foo=([one]="one" [zero]="zero" )
+declare -a bar=([0]="zero" [1]="one")
+./varenv11.sub: line 29: a: readonly variable
+foo=abc
+func1: var =
+
+func1: var =
+
+inside: declare -- foo
+outside:
+declare -x foo="abc"
+inside: declare -x var="value"
+outside: declare -- var="one"
+inside: declare -- var="local"
+outside: declare -x var="global"
 a=z
 a=b
 a=z

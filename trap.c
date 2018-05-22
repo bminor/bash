@@ -38,7 +38,9 @@
 #include "trap.h"
 
 #include "shell.h"
+#include "execute_cmd.h"
 #include "flags.h"
+#include "parser.h"
 #include "input.h"	/* for save_token_state, restore_token_state */
 #include "jobs.h"
 #include "signames.h"
@@ -85,20 +87,10 @@ static void reset_or_restore_signal_handlers (sh_resetsig_func_t *);
 static void trap_if_untrapped (int, char *);
 
 /* Variables used here but defined in other files. */
-extern int last_command_exit_value;
-extern int line_number;
-
-extern int sigalrm_seen;
 extern procenv_t alrmbuf;
 
 extern volatile int from_return_trap;
 
-extern char *this_command_name;
-extern sh_builtin_func_t *this_shell_builtin;
-extern procenv_t wait_intr_buf;
-extern int wait_intr_flag;
-extern int return_catch_flag, return_catch_value;
-extern int subshell_level;
 extern WORD_LIST *subst_assign_varlist;
 
 /* The list of things to do originally, before we started trapping. */
@@ -494,6 +486,8 @@ first_pending_trap ()
   return -1;
 }
 
+/* Return > 0 if any of the "real" signals (not fake signals like EXIT) are
+   trapped. */
 int
 any_signals_trapped ()
 {
@@ -940,8 +934,8 @@ _run_trap_internal (sig, tag)
      char *tag;
 {
   char *trap_command, *old_trap;
-  int trap_exit_value, *token_state;
-  volatile int save_return_catch_flag, function_code, top_level_code, old_int;
+  int trap_exit_value;
+  volatile int save_return_catch_flag, function_code, old_int;
   int flags;
   procenv_t save_return_catch;
   WORD_LIST *save_subst_varlist;
@@ -1060,7 +1054,7 @@ _run_trap_internal (sig, tag)
 int
 run_debug_trap ()
 {
-  int trap_exit_value;
+  int trap_exit_value, old_verbose;
   pid_t save_pgrp;
   int save_pipe[2];
 
@@ -1078,7 +1072,14 @@ run_debug_trap ()
       stop_making_children ();
 #endif
 
+      old_verbose = echo_input_at_read;
+#if 0	/* not yet */
+      echo_input_at_read = 0;
+#endif
+
       trap_exit_value = _run_trap_internal (DEBUG_TRAP, "debug trap");
+
+      echo_input_at_read = old_verbose;
 
 #if defined (JOB_CONTROL)
       pipeline_pgrp = save_pgrp;
@@ -1087,8 +1088,9 @@ run_debug_trap ()
       close_pgrp_pipe ();
       restore_pgrp_pipe (save_pipe);
 #  endif
-      if (pipeline_pgrp > 0)
+      if (pipeline_pgrp > 0 && ((subshell_environment & (SUBSHELL_ASYNC|SUBSHELL_PIPE)) == 0))
 	give_terminal_to (pipeline_pgrp, 1);
+
       notify_and_cleanup ();
 #endif
       

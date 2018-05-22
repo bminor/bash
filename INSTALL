@@ -38,9 +38,23 @@ don't want to keep, you may remove or edit it.
 To find out more about the options and arguments that the 'configure'
 script understands, type
 
-     bash-2.04$ ./configure --help
+     bash-4.2$ ./configure --help
 
 at the Bash prompt in your Bash source directory.
+
+If you want to build Bash in a directory separate from the source
+directory - to build for multiple architectures, for example - just use
+the full path to the configure script.  The following commands will
+build bash in a directory under '/usr/local/build' from the source code
+in '/usr/local/src/bash-4.4':
+
+     mkdir /usr/local/build/bash-4.4
+     cd /usr/local/build/bash-4.4
+     bash /usr/local/src/bash-4.4/configure
+     make
+
+See *note Compiling For Multiple Architectures:: for more information
+about building in a directory separate from the source.
 
 If you need to do unusual things to compile Bash, please try to figure
 out how 'configure' could check whether or not to do them, and mail
@@ -56,8 +70,6 @@ You can remove the program binaries and object files from the source
 code directory by typing 'make clean'.  To also remove the files that
 'configure' created (so you can compile Bash for a different kind of
 computer), type 'make distclean'.
-
-Next: Compiling For Multiple Architectures,  Prev: Basic Installation,  Up: Installing Bash
 
 Compilers and Options
 =====================
@@ -76,8 +88,6 @@ On systems that have the 'env' program, you can do it like this:
 
 The configuration process uses GCC to build Bash if it is available.
 
-Next: Installation Names,  Prev: Compilers and Options,  Up: Installing Bash
-
 Compiling For Multiple Architectures
 ====================================
 
@@ -86,10 +96,10 @@ time, by placing the object files for each architecture in their own
 directory.  To do this, you must use a version of 'make' that supports
 the 'VPATH' variable, such as GNU 'make'.  'cd' to the directory where
 you want the object files and executables to go and run the 'configure'
-script from the source directory.  You may need to supply the
-'--srcdir=PATH' argument to tell 'configure' where the source files are.
-'configure' automatically checks for the source code in the directory
-that 'configure' is in and in '..'.
+script from the source directory (*note Basic Installation::).  You may
+need to supply the '--srcdir=PATH' argument to tell 'configure' where
+the source files are.  'configure' automatically checks for the source
+code in the directory that 'configure' is in and in '..'.
 
 If you have to use a 'make' that does not supports the 'VPATH' variable,
 you can compile Bash for one architecture at a time in the source code
@@ -108,8 +118,6 @@ The 'mkclone' script requires Bash, so you must have already built Bash
 for at least one architecture before you can create build directories
 for other architectures.
 
-Next: Specifying the System Type,  Prev: Compiling For Multiple Architectures,  Up: Installing Bash
-
 Installation Names
 ==================
 
@@ -125,8 +133,6 @@ option '--exec-prefix=PATH', 'make install' will use PATH as the prefix
 for installing programs and libraries.  Documentation and other data
 files will still use the regular prefix.
 
-Next: Sharing Defaults,  Prev: Installation Names,  Up: Installing Bash
-
 Specifying the System Type
 ==========================
 
@@ -140,8 +146,6 @@ canonical name with three fields: 'CPU-COMPANY-SYSTEM' (e.g.,
 
 See the file 'support/config.sub' for the possible values of each field.
 
-Next: Operation Controls,  Prev: Specifying the System Type,  Up: Installing Bash
-
 Sharing Defaults
 ================
 
@@ -153,8 +157,6 @@ looks for 'PREFIX/share/config.site' if it exists, then
 'CONFIG_SITE' environment variable to the location of the site script.
 A warning: the Bash 'configure' looks for a site script, but not all
 'configure' scripts do.
-
-Next: Optional Features,  Prev: Sharing Defaults,  Up: Installing Bash
 
 Operation Controls
 ==================
@@ -184,8 +186,6 @@ Operation Controls
 
 'configure' also accepts some other, not widely used, boilerplate
 options.  'configure --help' prints the complete list.
-
-Prev: Operation Controls,  Up: Installing Bash
 
 Optional Features
 =================
@@ -321,6 +321,12 @@ unless the operating system does not provide the necessary support.
 '--enable-debugger'
      Include support for the bash debugger (distributed separately).
 
+'--enable-dev-fd-stat-broken'
+     If calling 'stat' on /dev/fd/N returns different results than
+     calling 'fstat' on file descriptor N, supply this option to enable
+     a workaround.  This has implications for conditional commands that
+     test file attributes.
+
 '--enable-direxpand-default'
      Cause the 'direxpand' shell option (*note The Shopt Builtin::) to
      be enabled by default when the shell starts.  It is normally
@@ -391,7 +397,7 @@ unless the operating system does not provide the necessary support.
 
 '--enable-prompt-string-decoding'
      Turn on the interpretation of a number of backslash-escaped
-     characters in the '$PS1', '$PS2', '$PS3', and '$PS4' prompt
+     characters in the '$PS0', '$PS1', '$PS2', and '$PS4' prompt
      strings.  See *note Controlling the Prompt::, for a complete list
      of prompt string escape sequences.
 

@@ -56,6 +56,7 @@ int	fd;
 	return 0;
 }
 
+int
 cat_main (argc, argv)
 int	argc;
 char	**argv;
@@ -88,6 +89,7 @@ char	**argv;
 	return (r);
 }
 
+int
 cat_builtin(list)
 WORD_LIST *list;
 {

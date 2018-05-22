@@ -8,7 +8,7 @@ echo $BASH_VERSION
     2  /bin/sh -c 'echo this is $0'
     3  ls
     4  echo $BASH_VERSION
-    5  HISTFILE=/tmp/newhistory
+    5  HISTFILE=$TMPDIR/newhistory
     6  echo line 2 for history
 echo line 2 for history
 echo line 2 for history
@@ -19,7 +19,7 @@ line 2 for history
     2  /bin/sh -c 'echo this is $0'
     3  ls
     4  echo $BASH_VERSION
-    5  HISTFILE=/tmp/newhistory
+    5  HISTFILE=$TMPDIR/newhistory
     6  echo line 2 for history
     7  set -H
     8  echo line 2 for history
@@ -181,6 +181,15 @@ echo g
 g
 eval echo "echo g"
 echo g
+h
+echo \!\! `echo echo h`
+!! echo h
+i
+echo echo i `echo echo i`
+echo i echo i
+j
+echo `echo j` echo j
+j echo j
 a
 cat < <(echo echo a)
 echo a

@@ -1,6 +1,6 @@
 /* funmap.c -- attach names to functions. */
 
-/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -110,6 +110,7 @@ static const FUNMAP default_funmap[] = {
   { "menu-complete", rl_menu_complete },
   { "menu-complete-backward", rl_backward_menu_complete },
   { "next-history", rl_get_next_history },
+  { "next-screen-line", rl_next_screen_line },
   { "non-incremental-forward-search-history", rl_noninc_forward_search },
   { "non-incremental-reverse-search-history", rl_noninc_reverse_search },
   { "non-incremental-forward-search-history-again", rl_noninc_forward_search_again },
@@ -121,6 +122,7 @@ static const FUNMAP default_funmap[] = {
 #endif
   { "possible-completions", rl_possible_completions },
   { "previous-history", rl_get_previous_history },
+  { "previous-screen-line", rl_previous_screen_line },
   { "print-last-kbd-macro", rl_print_last_kbd_macro },
   { "quoted-insert", rl_quoted_insert },
   { "re-read-init-file", rl_re_read_init_file },
@@ -204,9 +206,7 @@ static const FUNMAP default_funmap[] = {
 };
 
 int
-rl_add_funmap_entry (name, function)
-     const char *name;
-     rl_command_func_t *function;
+rl_add_funmap_entry (const char *name, rl_command_func_t *function)
 {
   if (funmap_entry + 2 >= funmap_size)
     {
@@ -226,7 +226,7 @@ static int funmap_initialized;
 
 /* Make the funmap contain all of the default entries. */
 void
-rl_initialize_funmap ()
+rl_initialize_funmap (void)
 {
   register int i;
 
@@ -244,7 +244,7 @@ rl_initialize_funmap ()
    is sorted.  The array itself is allocated, but not the strings inside.
    You should free () the array when you done, but not the pointers. */
 const char **
-rl_funmap_names ()
+rl_funmap_names (void)
 {
   const char **result;
   int result_size, result_index;

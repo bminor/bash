@@ -515,6 +515,8 @@ print_one_completion (cmd, cs)
   PRINTCOMPOPT (COPT_DEFAULT, "default");
   PRINTCOMPOPT (COPT_DIRNAMES, "dirnames");
   PRINTCOMPOPT (COPT_FILENAMES, "filenames");
+  PRINTCOMPOPT (COPT_NOQUOTE, "noquote");
+  PRINTCOMPOPT (COPT_NOSORT, "nosort");
   PRINTCOMPOPT (COPT_NOSPACE, "nospace");
   PRINTCOMPOPT (COPT_PLUSDIRS, "plusdirs");
 
@@ -589,6 +591,8 @@ print_compopts (cmd, cs, full)
       XPRINTCOMPOPT (COPT_DEFAULT, "default");
       XPRINTCOMPOPT (COPT_DIRNAMES, "dirnames");
       XPRINTCOMPOPT (COPT_FILENAMES, "filenames");
+      XPRINTCOMPOPT (COPT_NOQUOTE, "noquote");
+      XPRINTCOMPOPT (COPT_NOSORT, "nosort");
       XPRINTCOMPOPT (COPT_NOSPACE, "nospace");
       XPRINTCOMPOPT (COPT_PLUSDIRS, "plusdirs");
     }
@@ -598,6 +602,8 @@ print_compopts (cmd, cs, full)
       PRINTCOMPOPT (COPT_DEFAULT, "default");
       PRINTCOMPOPT (COPT_DIRNAMES, "dirnames");
       PRINTCOMPOPT (COPT_FILENAMES, "filenames");
+      PRINTCOMPOPT (COPT_NOQUOTE, "noquote");
+      PRINTCOMPOPT (COPT_NOSORT, "nosort");
       PRINTCOMPOPT (COPT_NOSPACE, "nospace");
       PRINTCOMPOPT (COPT_PLUSDIRS, "plusdirs");
     }
@@ -675,6 +681,8 @@ compgen_builtin (list)
   COMPSPEC *cs;
   STRINGLIST *sl;
   char *word, **matches;
+  char *old_line;
+  int old_ind;
 
   if (list == 0)
     return (EXECUTION_SUCCESS);
@@ -715,7 +723,15 @@ compgen_builtin (list)
   cs->filterpat = STRDUP (Xarg);
 
   rval = EXECUTION_FAILURE;
+
+  /* probably don't have to save these, just being safe */
+  old_line = pcomp_line;
+  old_ind = pcomp_ind;
+  pcomp_line = (char *)NULL;
+  pcomp_ind = 0;
   sl = gen_compspec_completions (cs, "compgen", word, 0, 0, 0);
+  pcomp_line = old_line;
+  pcomp_ind = old_ind;
 
   /* If the compspec wants the bash default completions, temporarily
      turn off programmable completion and call the bash completion code. */

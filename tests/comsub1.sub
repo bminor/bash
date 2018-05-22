@@ -52,3 +52,9 @@ echo $( # we just took and pasted in some
 # command substitution
 echo xyz
 )
+
+# problem with parse_comsub through bash-4.4
+case $(echo $$'x\nx') in
+x*)	echo bad 7;;
+*)	echo ok 7;;
+esac

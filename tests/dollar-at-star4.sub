@@ -33,10 +33,12 @@ unset a
 unset IFS
 set a b "c d"
 printf '<%s>' $* ; echo
+printf '<%s>' ${q-$*} ; echo
 
 IFS=
 set a b "c d"
 printf '<%s>' $* ; echo
+printf '<%s>' ${q-$*} ; echo
 
 IFS=:
 set a b

@@ -27,7 +27,9 @@
 #include "stdc.h"
 
 /* Functions from expr.c. */
-extern intmax_t evalexp __P((char *, int *));
+#define EXP_EXPANDED	0x01
+
+extern intmax_t evalexp __P((char *, int, int *));
 
 /* Functions from print_cmd.c. */
 #define FUNC_MULTILINE	0x01
@@ -92,6 +94,7 @@ extern void get_current_user_info __P((void));
 
 /* Functions from eval.c. */
 extern int reader_loop __P((void));
+extern int pretty_print_loop __P((void));
 extern int parse_command __P((void));
 extern int read_command __P((void));
 
@@ -137,6 +140,9 @@ extern char *get_locale_var __P((char *));
 extern char *localetrans __P((char *, int, int *));
 extern char *mk_msgstr __P((char *, int *));
 extern char *localeexpand __P((char *, int, int, int, int *));
+#ifndef locale_decpoint
+extern int locale_decpoint __P((void));
+#endif
 
 /* Declarations for functions defined in list.c. */
 extern void list_walk __P((GENERIC_LIST *, sh_glist_func_t *));

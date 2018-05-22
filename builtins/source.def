@@ -69,6 +69,7 @@ $END
 #include "../bashintl.h"
 
 #include "../shell.h"
+#include "../execute_cmd.h"
 #include "../flags.h"
 #include "../findcmd.h"
 #include "common.h"
@@ -78,10 +79,6 @@ $END
 #if !defined (errno)
 extern int errno;
 #endif /* !errno */
-
-extern int posixly_correct;
-extern int last_command_exit_value;
-extern int executing_command_builtin;
 
 static void maybe_pop_dollar_vars __P((void));
 
@@ -169,12 +166,14 @@ source_builtin (list)
     }
 
   begin_unwind_frame ("source");
-  add_unwind_protect ((Function *)xfree, filename);
+  add_unwind_protect (xfree, filename);
 
   if (list->next)
     {
       push_dollar_vars ();
       add_unwind_protect ((Function *)maybe_pop_dollar_vars, (char *)NULL);
+      if (debugging_mode || shell_compatibility_level <= 44)
+	init_bash_argv ();	/* Initialize BASH_ARGV and BASH_ARGC */
       remember_args (list->next, 1);
       if (debugging_mode)
 	push_args (list->next);	/* Update BASH_ARGV and BASH_ARGC */

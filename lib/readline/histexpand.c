@@ -1,6 +1,6 @@
 /* histexpand.c -- history expansion. */
 
-/* Copyright (C) 1989-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2017 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -132,10 +132,7 @@ static char *search_match;
    So you might call this function like:
    line = get_history_event ("!echo:p", &index, 0);  */
 char *
-get_history_event (string, caller_index, delimiting_quote)
-     const char *string;
-     int *caller_index;
-     int delimiting_quote;
+get_history_event (const char *string, int *caller_index, int delimiting_quote)
 {
   register int i;
   register char c;
@@ -316,9 +313,7 @@ get_history_event (string, caller_index, delimiting_quote)
    to the closing single quote.  FLAGS currently used to allow backslash
    to escape a single quote (e.g., for bash $'...'). */
 static void
-hist_string_extract_single_quoted (string, sindex, flags)
-     char *string;
-     int *sindex, flags;
+hist_string_extract_single_quoted (char *string, int *sindex, int flags)
 {
   register int i;
 
@@ -332,8 +327,7 @@ hist_string_extract_single_quoted (string, sindex, flags)
 }
 
 static char *
-quote_breaks (s)
-     char *s;
+quote_breaks (char *s)
 {
   register char *p, *r;
   char *ret;
@@ -374,9 +368,7 @@ quote_breaks (s)
 }
 
 static char *
-hist_error(s, start, current, errtype)
-      char *s;
-      int start, current, errtype;
+hist_error(char *s, int start, int current, int errtype)
 {
   char *temp;
   const char *emsg;
@@ -433,9 +425,7 @@ hist_error(s, start, current, errtype)
    subst_rhs is allowed to be set to the empty string. */
 
 static char *
-get_subst_pattern (str, iptr, delimiter, is_rhs, lenptr)
-     char *str;
-     int *iptr, delimiter, is_rhs, *lenptr;
+get_subst_pattern (char *str, int *iptr, int delimiter, int is_rhs, int *lenptr)
 {
   register int si, i, j, k;
   char *s;
@@ -490,7 +480,7 @@ get_subst_pattern (str, iptr, delimiter, is_rhs, lenptr)
 }
 
 static void
-postproc_subst_rhs ()
+postproc_subst_rhs (void)
 {
   char *new;
   int i, j, new_size;
@@ -526,12 +516,9 @@ postproc_subst_rhs ()
    if the `p' modifier was supplied and the caller should just print
    the returned string.  Returns the new index into string in
    *END_INDEX_PTR, and the expanded specifier in *RET_STRING. */
+/* need current line for !# */
 static int
-history_expand_internal (string, start, qc, end_index_ptr, ret_string, current_line)
-     char *string;
-     int start, qc, *end_index_ptr;
-     char **ret_string;
-     char *current_line;	/* for !# */
+history_expand_internal (char *string, int start, int qc, int *end_index_ptr, char **ret_string, char *current_line)
 {
   int i, n, starting_index;
   int substitute_globally, subst_bywords, want_quotes, print_only;
@@ -908,9 +895,7 @@ history_expand_internal (string, start, qc, end_index_ptr, ret_string, current_l
 	while (0)
 
 int
-history_expand (hstring, output)
-     char *hstring;
-     char **output;
+history_expand (char *hstring, char **output)
 {
   register int j;
   int i, r, l, passc, cc, modified, eindex, only_printing, dquote, squote, flag;
@@ -1249,9 +1234,7 @@ history_expand (hstring, output)
    CALLER_INDEX is the offset in SPEC to start looking; it is updated
    to point to just after the last character parsed. */
 static char *
-get_history_word_specifier (spec, from, caller_index)
-     char *spec, *from;
-     int *caller_index;
+get_history_word_specifier (char *spec, char *from, int *caller_index)
 {
   register int i = *caller_index;
   int first, last;
@@ -1357,9 +1340,7 @@ get_history_word_specifier (spec, from, caller_index)
    tokens, so that FIRST = -1 means the next to last token on the line).
    If LAST is `$' the last arg from STRING is used. */
 char *
-history_arg_extract (first, last, string)
-     int first, last;
-     const char *string;
+history_arg_extract (int first, int last, const char *string)
 {
   register int i, len;
   char *result;
@@ -1418,9 +1399,7 @@ history_arg_extract (first, last, string)
 }
 
 static int
-history_tokenize_word (string, ind)
-     const char *string;
-     int ind;
+history_tokenize_word (const char *string, int ind)
 {
   register int i, j;
   int delimiter, nestdelim, delimopen;
@@ -1570,9 +1549,7 @@ get_word:
 }
 
 static char *
-history_substring (string, start, end)
-     const char *string;
-     int start, end;
+history_substring (const char *string, int start, int end)
 {
   register int len;
   register char *result;
@@ -1589,9 +1566,7 @@ history_substring (string, start, end)
    WIND.  The position in the returned array of strings is returned in
    *INDP. */
 static char **
-history_tokenize_internal (string, wind, indp)
-     const char *string;
-     int wind, *indp;
+history_tokenize_internal (const char *string, int wind, int *indp)
 {
   char **result;
   register int i, start, result_index, size;
@@ -1644,17 +1619,14 @@ history_tokenize_internal (string, wind, indp)
 /* Return an array of tokens, much as the shell might.  The tokens are
    parsed out of STRING. */
 char **
-history_tokenize (string)
-     const char *string;
+history_tokenize (const char *string)
 {
   return (history_tokenize_internal (string, -1, (int *)NULL));
 }
 
 /* Free members of WORDS from START to an empty string */
 static void
-freewords (words, start)
-     char **words;
-     int start;
+freewords (char **words, int start)
 {
   register int i;
 
@@ -1666,9 +1638,7 @@ freewords (words, start)
    in the history line LINE.  Used to save the word matched by the
    last history !?string? search. */
 static char *
-history_find_word (line, ind)
-     char *line;
-     int ind;
+history_find_word (char *line, int ind)
 {
   char **words, *s;
   int i, wind;

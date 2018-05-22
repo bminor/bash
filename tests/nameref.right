@@ -48,7 +48,7 @@ argv[1] = <unset>
 expect <bar>
 argv[1] = <bar>
 expect <unset>
-argv[1] = <unset>
+./nameref3.sub: line 16: foo: invalid indirect expansion
 ./nameref3.sub: line 21: unset: bar: cannot unset: readonly variable
 expect <two>
 two
@@ -226,6 +226,13 @@ declare -r RO="x"
 ./nameref11.sub: line 39: declare: RO_PID: not found
 ./nameref11.sub: line 41: RO2: readonly variable
 declare -r RO2="a"
+2
+./nameref11.sub: line 52: typeset: `2': invalid variable name for name reference
+2
+./nameref11.sub: line 57: typeset: `2': invalid variable name for name reference
+2
+./nameref11.sub: line 62: foo[2]: invalid indirect expansion
+./nameref11.sub: line 63: bar: invalid indirect expansion
 ./nameref12.sub: line 6: declare: `/': invalid variable name for name reference
 ./nameref12.sub: line 9: declare: `%': invalid variable name for name reference
 ./nameref12.sub: line 13: `^': not a valid identifier
@@ -306,30 +313,38 @@ declare -a b=([0]="0")
 ./nameref15.sub: line 19: warning: ref: circular name reference
 ./nameref15.sub: line 20: warning: ref: circular name reference
 ./nameref15.sub: line 21: warning: ref: circular name reference
-inside
+inside X
 outside X
-./nameref15.sub: line 29: typeset: ref: nameref variable self references not allowed
-./nameref15.sub: line 31: ref: nameref variable self references not allowed
+before: 7
+./nameref15.sub: line 32: typeset: warning: xxx: circular name reference
+./nameref15.sub: line 32: warning: xxx: circular name reference
+./nameref15.sub: line 33: warning: xxx: circular name reference
+declare -n xxx="xxx"
+./nameref15.sub: line 35: warning: xxx: circular name reference
+xxx_func: inside: xxx = foo
+after: foo
+./nameref15.sub: line 46: typeset: ref: nameref variable self references not allowed
+./nameref15.sub: line 48: ref: nameref variable self references not allowed
 declare -n ref="re"
 declare -n ref="re"
 declare -- re="4"
 4
 declare -n foo="var[@]"
 declare -n ref="var[@]"
-./nameref15.sub: line 48: var[@]: bad array subscript
+./nameref15.sub: line 65: var[@]: bad array subscript
 declare -n bar="var[@]"
-./nameref15.sub: line 53: var[@]: bad array subscript
+./nameref15.sub: line 70: var[@]: bad array subscript
 declare -n a="b"
 declare -n b="a[1]"
-./nameref15.sub: line 61: warning: a: removing nameref attribute
+./nameref15.sub: line 78: warning: a: removing nameref attribute
 declare -a a=([1]="foo")
 declare -n b="a[1]"
-./nameref15.sub: line 66: warning: a: removing nameref attribute
+./nameref15.sub: line 83: warning: a: removing nameref attribute
 declare -a a=([1]="foo")
 declare -n b="a[1]"
 declare -n n="v"
 declare -a v=([1]="1")
-./nameref15.sub: line 82: typeset: n: not found
+./nameref15.sub: line 99: typeset: n: not found
 declare -a v=([0]="0" [1]="1")
 declare -n n="v[1]"
 declare -a v=([0]="0")
@@ -409,3 +424,19 @@ declare -a var=([123]="")
 declare -n ref="var[123]"
 ./nameref18.sub: line 54: declare: var[123]: not found
 declare -a var=([123]="X")
+declare -n foo="bar"
+declare -- foo="bar"
+./nameref19.sub: line 9: declare: bar: not found
+declare -n foo="bar"
+declare -- foo="bar"
+declare -i bar="11"
+declare -inx foo6
+declare -ix foo6
+declare -n foo="bar"
+declare -- bar="Hello World!"
+declare -- foo="bar"
+declare -- bar="Hello World!"
+declare -n foo="bar"
+declare -- bar
+declare -- foo="bar"
+declare -- bar

@@ -1,7 +1,7 @@
 This file is builtin.def, from which is created builtin.c.
 It implements the builtin "builtin" in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2017 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -31,7 +31,7 @@ as a shell function, but need to execute the builtin within the function.
 
 Exit Status:
 Returns the exit status of SHELL-BUILTIN, or false if SHELL-BUILTIN is
-not a shell builtin..
+not a shell builtin.
 $END
 #include <config.h>
 
@@ -43,10 +43,9 @@ $END
 #endif
 
 #include "../shell.h"
+#include "../execute_cmd.h"
 #include "common.h"
 #include "bashgetopt.h"
-
-extern char *this_command_name;
 
 /* Run the command mentioned in list directly, without going through the
    normal alias/function/builtin/filename lookup process. */
@@ -71,7 +70,7 @@ builtin_builtin (list)
   function = find_shell_builtin (command);
 #endif /* !DISABLED_BUILTINS */
 
-  if (!function)
+  if (function == 0)
     {
       sh_notbuiltin (command);
       return (EXECUTION_FAILURE);
@@ -79,6 +78,7 @@ builtin_builtin (list)
   else
     {
       this_command_name = command;
+      this_shell_builtin = function;	/* overwrite "builtin" as this builtin */
       list = list->next;
       return ((*function) (list));
     }

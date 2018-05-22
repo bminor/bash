@@ -32,28 +32,37 @@ the canonical example.  There is no real `builtin writers' programming
 guide'.  The file template.c provides a template to use for creating
 new loadable builtins.
 
+The file "Makefile.inc" is created using the same values that configure
+writes into Makefile.in, and is installed in the same directory as the
+rest of the example builtins. It's intended to be a start at something
+that can be modified or included to help you build your own loadables
+without having to search for the right CFLAGS and LDFLAGS.
+
 basename.c	Return non-directory portion of pathname.
 cat.c		cat(1) replacement with no options - the way cat was intended.
 dirname.c	Return directory portion of pathname.
+fdflags.c	Change the flag associated with one of bash's open file desriptors.
 finfo.c		Print file info.
 head.c		Copy first part of files.
 hello.c		Obligatory "Hello World" / sample loadable.
 id.c		POSIX.2 user identity.
 ln.c		Make links.
-loadables.h	Start at a file loadable builtins can include for shell definitions
+loadables.h	File loadable builtins can include for shell definitions.
 logname.c	Print login name of current user.
 Makefile.in	Simple makefile for the sample loadable builtins.
 mkdir.c		Make directories.
-mypid.c		Add $MYPID variable, demonstrate use of unload hook function
+mypid.c		Add $MYPID variable, demonstrate use of unload hook functio.n
 necho.c		echo without options or argument interpretation.
 pathchk.c	Check pathnames for validity and portability.
 print.c		Loadable ksh-93 style print builtin.
 printenv.c	Minimal builtin clone of BSD printenv(1).
 push.c		Anyone remember TOPS-20?
-README		README
 realpath.c	Canonicalize pathnames, resolving symlinks.
+rm.c		Remove files and directories.
 rmdir.c		Remove directory.
+setpgid.c	Set a process's pgrp; example of how to wrap a system call.
 sleep.c		sleep for fractions of a second.
+stat.c		populate an associative array with information about a file
 strftime.c	Loadable builtin interface to strftime(3).
 sync.c		Sync the disks by forcing pending filesystem writes to complete.
 tee.c		Duplicate standard input.
