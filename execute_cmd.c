@@ -1524,7 +1524,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 
   /* And we're no longer in a loop. See Posix interp 842 (we are not in the
      "same execution environment"). */
-  if (shell_compatibility_level > 43)
+  if (shell_compatibility_level > 44)
     loop_level = 0;
 
   if (user_subshell)

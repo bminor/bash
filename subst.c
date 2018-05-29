@@ -1178,7 +1178,10 @@ string_extract_verbatim (string, slen, sindex, charlist, flags)
 	}
 
 #if defined (HANDLE_MULTIBYTE)
-      mblength = MBLEN (string + i, slen - i);
+      if (locale_utf8locale && slen > i && UTF8_SINGLEBYTE (string[i]))
+	mblength = (string[i] != 0) ? 1 : 0;
+      else
+	mblength = MBLEN (string + i, slen - i);
       if (mblength > 1)
 	{
 	  wchar_t wc;
@@ -10596,9 +10599,14 @@ setifs (v)
     }
   else
     {
-      size_t ifs_len;
-      ifs_len = strnlen (ifs_value, MB_CUR_MAX);
-      ifs_firstc_len = MBLEN (ifs_value, ifs_len);
+      if (locale_utf8locale && UTF8_SINGLEBYTE (*ifs_value))
+	ifs_firstc_len = (*ifs_value != 0) ? 1 : 0;
+      else
+	{
+	  size_t ifs_len;
+	  ifs_len = strnlen (ifs_value, MB_CUR_MAX);
+	  ifs_firstc_len = MBLEN (ifs_value, ifs_len);
+	}
       if (ifs_firstc_len == 1 || ifs_firstc_len == 0 || MB_INVALIDCH (ifs_firstc_len))
 	{
 	  ifs_firstc[0] = ifs_value[0];

@@ -1055,7 +1055,7 @@ _rl_subseq_result (int r, Keymap map, int key, int got_subseq)
 	/* We probably shadowed a keymap, so keep going. */
 	r = _rl_dispatch (ANYOTHERKEY, m);
     }
-  else if (r && map[ANYOTHERKEY].function)
+  else if (r < 0 && map[ANYOTHERKEY].function)
     {
       /* We didn't match (r is probably -1), so return something to
 	 tell the caller that it should try ANYOTHERKEY for an

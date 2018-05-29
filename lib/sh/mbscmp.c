@@ -1,6 +1,6 @@
 /* mbscmp - multibyte string comparison. */
 
-/* Copyright (C) 1995-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1995-2018 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -25,6 +25,10 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
+
+extern int locale_utf8locale;
+
+extern int utf8_mbscmp (const char *, const char *);
 
 /* Compare MBS1 and MBS2.  */
 int

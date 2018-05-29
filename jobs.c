@@ -863,7 +863,7 @@ pshash_delindex (psi)
       *bucket = ps->bucket_next;	/* deleting chain head in hash table */
     }
 
-  /* clear out this cell, just in case */
+  /* clear out this cell, in case it gets reused. */
   ps->pid = NO_PID;
   ps->bucket_next = ps->bucket_prev = NO_PIDSTAT;
 }

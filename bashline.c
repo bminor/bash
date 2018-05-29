@@ -1564,7 +1564,7 @@ attempt_shell_completion (text, start, end)
       else if (start == end && start == s1 && e != 0 && e1 > end)	/* beginning of command name, leading whitespace */
 	foundcs = 0;
       else if (e == 0 && e == s && text[0] == '\0' && have_progcomps)	/* beginning of empty line */
-        prog_complete_matches = programmable_completions ("_EmptycmD_", text, s, e, &foundcs);
+        prog_complete_matches = programmable_completions (EMPTYCMD, text, s, e, &foundcs);
       else if (start == end && text[0] == '\0' && s1 > start && whitespace (rl_line_buffer[start]))
         foundcs = 0;		/* whitespace before command name */
       else if (e > s && was_assignment == 0 && e1 == end && rl_line_buffer[e] == 0 && whitespace (rl_line_buffer[e-1]) == 0)

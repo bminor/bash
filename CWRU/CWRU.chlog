@@ -15396,3 +15396,74 @@ execute_cmd.c
 	- execute_in_subshell: subshells should set loop_level == 0, since
 	  they are no longer "enclosed" by the loop, according to posix.
 	  Report from Aeron.E. Wang <aeron.e.wang@gmail.com>
+
+				   5/24
+				   ----
+Makefile.in
+	- pkgconfigdir: don't fail installing bash.pc if this directory doesn't
+	  exist or isn't writable -- there's no error in failing to install
+	  something nothing will use
+	- install-headers-dirs: creat $(pkgconfigdir) if it doesn't exist
+
+lib/sh/shmbchar.c
+	- utf8_mblen: replace with version from gnulib
+	- utf8_mbstrlen: reimplement using utf8_mblen so it handles invalid
+	  multibyte sequences in the same way as mbstrlen
+
+lib/readline/mbutil.c
+	- _rl_utf8_mblen: utf-8 specific version of mblen from gnulib
+
+include/shmbutil.h
+	- ADVANCE_CHAR,COPY_CHAR_P: do better job detecting end of string in
+	  UTF-8 locales (should not be called with an empty string, but to
+	  be safe)
+
+				   5/25
+				   ----
+lib/sh/utf8.c
+	- new file, utf-8-specific functions collected from other files
+
+externs.h
+	- extern declarations moved around for utf8.c
+
+include/shmbutil.h
+	- SADD_MBCHAR, SADD_MBQCHAR_BODY, ADVANCE_CHAR_P: if the locale is a
+	  UTF-8 locale, don't bother with a call to mbrlen if the current
+	  character cannot start a multibyte character
+
+variables.c
+	- push_var_context: only merge the temporary environment in posix mode
+	  if we are executing a shell function (flags & VC_FUNCENV). Report
+	  from Martijn Dekker <martijn@inlv.org>
+
+lib/readline/mbutil.c
+	- _rl_get_char_len: don't call mbrlen if we are in a UTF-8 locale and
+	  the character cannot start a multibyte sequence
+
+builtins/read.def
+	- read_builtin: if mb_cur_max > 1, call read_mbchar only if we're not
+	  in a utf-8 locale or, if we are, the character we just read indicates
+	  the start of a multibyte sequence
+
+subst.c
+	- string_extract_verbatim: don't call MBRLEN if we're in a utf-8
+	  locale and the current character can't start a multibyte sequence
+	- setifs: don't call MBRLEN if we're in a utf-8 locale and the first
+	  character of $IFS can't start a multibyte sequence
+
+lib/readline/kill.c
+	- rl_bracketed_paste_begin: make sure we return 0 here if rl_insert_text
+	  returns the right number of characters inserted to be consistent
+	  with other functions. Returns 1 otherwise. Report and fix from
+	  Gabe Krabbe <gabe@rtfs.de> back in March, 2018
+
+lib/readline/readline.c
+	- rl_subseq_result: make sure r is < 0 before checking map[ANYOTHERKEY]
+	  to see if we shadowed a key that should now be tried
+
+				   5/27
+				   ----
+variables.c
+	- assign_aliasvar: perform same validity check on subscript assignment
+	  as alias builtin performs on name argument. Bug report from
+	  Mike Jonkmans <bashbug@jonkmans.nl>

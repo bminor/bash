@@ -677,7 +677,7 @@ rl_bracketed_paste_begin (int count, int key)
   size_t len, cap;
   char *buf;
 
-  retval = 1;
+  retval = 0;
   len = 0;
   buf = xmalloc (cap = 64);
 
@@ -708,7 +708,7 @@ rl_bracketed_paste_begin (int count, int key)
       if (len == cap)
 	buf = xrealloc (buf, cap + 1);
       buf[len] = '\0';
-      retval = rl_insert_text (buf);
+      retval = rl_insert_text (buf) == len ? 0 : 1;
     }
 
   xfree (buf);

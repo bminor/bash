@@ -1777,6 +1777,11 @@ assign_aliasvar (self, value, ind, key)
      arrayind_t ind;
      char *key;
 {
+  if (legal_alias_name (key, 0) == 0)
+    {
+       report_error (_("`%s': invalid alias name"), key);
+       return (self);
+    }
   add_alias (key, value);
   return (build_aliasvar (self));
 }
@@ -4900,7 +4905,7 @@ push_var_context (name, flags, tempvars)
   vc = new_var_context (name, flags);
   /* Posix interp 1009, temporary assignments preceding function calls modify
      the current environment *before* the command is executed. */
-  if (posix_func_behavior && tempvars == temporary_env)
+  if (posix_func_behavior && (flags & VC_FUNCENV) && tempvars == temporary_env)
     merge_temporary_env ();
   else if (tempvars)
     {

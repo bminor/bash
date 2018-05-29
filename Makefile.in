@@ -1,4 +1,4 @@
-# Makefile for bash-5.0, version 4.25
+# Makefile for bash-5.0, version 4.27
 #
 # Copyright (C) 1996-2018 Free Software Foundation, Inc.
 
@@ -41,6 +41,7 @@ infodir = @infodir@
 includedir = @includedir@
 datadir = @datadir@
 localedir = @localedir@
+pkgconfigdir = ${libdir}/pkgconfig
 
 loadablesdir = @loadablesdir@
 headersdir = @headersdir@
@@ -230,7 +231,7 @@ SHLIB_SOURCE =	${SH_LIBSRC}/clktck.c ${SH_LIBSRC}/getcwd.c \
 		${SH_LIBSRC}/input_avail.c ${SH_LIBSRC}/mbscasecmp.c \
 		${SH_LIBSRC}/fnxform.c ${SH_LIBSRC}/unicode.c \
 		${SH_LIBSRC}/wcswidth.c ${SH_LIBSRC}/wcsnwidth.c \
-		${SH_LIBSRC}/shmbchar.c
+		${SH_LIBSRC}/shmbchar.c ${SH_LIBSRC}/utf8.c
 
 SHLIB_LIB = -lsh
 SHLIB_LIBNAME = libsh.a
@@ -834,7 +835,7 @@ install-headers-dirs:
 	@${SHELL} $(SUPPORT_SRC)mkinstalldirs $(DESTDIR)$(headersdir)
 	@${SHELL} $(SUPPORT_SRC)mkinstalldirs $(DESTDIR)$(headersdir)/builtins
 	@${SHELL} $(SUPPORT_SRC)mkinstalldirs $(DESTDIR)$(headersdir)/include
-	@${SHELL} $(SUPPORT_SRC)mkinstalldirs $(DESTDIR)$(libdir)/pkgconfig
+	@${SHELL} $(SUPPORT_SRC)mkinstalldirs $(DESTDIR)$(pkgconfigdir)
 
 install-headers: install-headers-dirs
 	@for hf in $(INSTALLED_HEADERS) ; do \
@@ -849,14 +850,14 @@ install-headers: install-headers-dirs
 	@for hf in $(CREATED_HEADERS) ; do \
 		${INSTALL_DATA} $(BUILD_DIR)/"$$hf" $(DESTDIR)$(headersdir)/$$hf; \
 	done
-	$(INSTALL_DATA) $(SDIR)/bash.pc $(DESTDIR)$(libdir)/pkgconfig/bash.pc
+	-$(INSTALL_DATA) $(SDIR)/bash.pc $(DESTDIR)$(pkgconfigdir)/bash.pc
 
 uninstall-headers:
 	-( cd $(DESTDIR)$(headersdir) && $(RM) $(INSTALLED_HEADERS) )
 	-( cd $(DESTDIR)$(headersdir)/include && $(RM) $(INSTALLED_INCFILES) )
 	-( cd $(DESTDIR)$(headersdir)/builtins && $(RM) $(INSTALLED_BUILTINS_HEADERS) )
 	-( cd $(DESTDIR)$(headersdir) && $(RM) $(CREATED_HEADERS) )
-	-( $(RM) $(DESTDIR)$(libdir)/pkgconfig/bash.pc )
+	-( $(RM) $(DESTDIR)$(pkgconfigdir)/bash.pc )
 
 uninstall:	.made
 	$(RM) $(DESTDIR)$(bindir)/$(Program) $(DESTDIR)$(bindir)/bashbug

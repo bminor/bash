@@ -2079,7 +2079,7 @@ line editing.
 Similar to
 .SM
 .BR BASH_ENV ;
-used when the shell is invoked in POSIX mode.
+used when the shell is invoked in \fIposix mode\fP.
 .TP
 .B EXECIGNORE
 A colon-separated list of shell patterns (see \fBPattern Matching\fP)
@@ -4828,7 +4828,7 @@ subshell environment.  Changes made to the subshell environment
 cannot affect the shell's execution environment.
 .PP
 Subshells spawned to execute command substitutions inherit the value of
-the \fB\-e\fP option from the parent shell.  When not in \fIposix\fP mode,
+the \fB\-e\fP option from the parent shell.  When not in \fIposix mode\fP,
 \fBbash\fP clears the \fB\-e\fP option in such subshells.
 .PP
 If a command is followed by a \fB&\fP and job control is not active, the
@@ -9278,7 +9278,7 @@ Without options, the name and value of each shell variable are displayed
 in a format that can be reused as input
 for setting or resetting the currently-set variables.
 Read-only variables cannot be reset.
-In \fIposix\fP mode, only shell variables are listed.
+In \fIposix mode\fP, only shell variables are listed.
 The output is sorted according to the current locale.
 When options are specified, they set or unset shell attributes.
 Any arguments remaining after option processing are treated
@@ -9824,7 +9824,7 @@ interrupt; previous versions continue with the next command in the list.
 .B compat41
 If set,
 .BR bash ,
-when in \fIposix\fP mode, treats a single quote in a double-quoted
+when in \fIposix mode\fP, treats a single quote in a double-quoted
 parameter expansion as a special character.  The single quotes must match
 (an even number) and the characters between the single quotes are considered
 quoted.  This is the behavior of posix mode through version 4.1.
@@ -10596,7 +10596,7 @@ which is in units of 512-byte blocks;
 and
 .BR \-u ,
 which are unscaled values;
-and, when in Posix mode,
+and, when in posix mode,
 .B \-c
 and
 .BR \-f ,

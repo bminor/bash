@@ -705,6 +705,7 @@ add_char:
 	    }
 	  else
 #  endif
+	  if (locale_utf8locale == 0 || ((c & 0x80) != 0))
 	    i += read_mbchar (fd, input_string, i, c, unbuffered_read);
 	}
 #endif

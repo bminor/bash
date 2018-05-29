@@ -1,4 +1,4 @@
-/* Copyright (C) 2001, 2006, 2009, 2010, 2012, 2015 Free Software Foundation, Inc.
+/* Copyright (C) 2001, 2006, 2009, 2010, 2012, 2015-2018 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -45,102 +45,9 @@ const unsigned int is_basic_table [UCHAR_MAX / 32 + 1] =
 
 extern int locale_utf8locale;
 
-/* We can optimize this if we know the locale is UTF-8, but needs to handle
-   malformed byte sequences. */
-static inline size_t
-utf8_mbstrlen(s)
-     const char *s;
-{
-  size_t num = 0;
-  register unsigned char c;
+extern char *utf8_mbsmbchar (const char *);
+extern int utf8_mblen (const char *, size_t);
 
-  while ((c = *s++))
-    /* bytes 0xc0 through 0xff are first byte of multi-byte sequence */
-    if ((c & 0xc0) != 0x80)	/* skip continuation bytes */
-      ++num;
-  return (num);
-}
-
-/* Adapted from GNU libutf8 */
-static inline int
-utf8_mblen (s, n)
-     const char *s;
-     int n;
-{
-  unsigned char c;
-
-  if (s == 0)
-    return 0;
-  else if (n == 0)
-    return -1;
-
-  c = (unsigned char) *s;
-  if (c < 0x80)
-    return (c != 0);
-  else if (c < 0xc0)
-    goto return_error;
-  else
-    {
-      const char *start = s;
-      size_t count;
-      int check_unsafe;
-
-      if (c < 0xe0)
-        {
-          count = 1;
-          if (c < 0xc2)
-	    goto return_error;
-	  check_unsafe = 0;
-        }
-      else if (c < 0xf0)
-	{
-	  count = 2;
-	  check_unsafe = (c == 0xe0);
-	}
-#if SIZEOF_WCHAR_T == 4
-      else if (c < 0xf8)
-	{
-	  count = 3;
-	  check_unsafe = (c == 0xe0);
-	}
-      else if (c < 0xfc)
-	{
-	  count = 4;
-	  check_unsafe = (c == 0xf8);
-	}
-      else if (c < 0xfe)
-	{
-	  count = 5;
-	  check_unsafe = (c == 0xfc);
-	}
-#endif
-      else
-	goto return_error;
-      if (n <= count)
-	return -1;
-      s++;
-      c = (unsigned char) *s++ ^ 0x80;
-      if (c >= 0x40)
-	goto return_error;
-      if (--count > 0)
-	{
-	  if (check_unsafe && ((c >> (6 - count)) == 0))
-	    goto return_error;
-	  do
-	    {
-	      c = (unsigned char) *s++ ^ 0x80;
-	      if (c >= 0x40)
-		goto return_error;
-	    }
-	  while (--count > 0);
-	}
-      return s - start;
-    }
-return_error:
-  errno = EILSEQ;
-  return -1;
-}
-  
 /* Count the number of characters in S, counting multi-byte characters as a
    single character. */
 size_t
@@ -168,18 +75,6 @@ mbstrlen (s)
       nc++;
     }
   return nc;
-}
-
-static inline char *
-utf8_mbsmbchar (str)
-     const char *str;
-{
-  register char *s;
-
-  for (s = (char *)str; *s; s++)
-    if ((*s & 0xc0) == 0x80)
-      return s;
-  return (0);
 }
 
 /* Return pointer to first multibyte char in S, or NULL if none. */
@@ -217,22 +112,6 @@ mbsmbchar (s)
 	return t;
     }
   return 0;
-}
-
-static inline int
-utf_mbsnlen(src, srclen, maxlen)
-     const char *src;
-     size_t srclen;
-     int maxlen;
-{
-  register int sind, count;
-
-  for (sind = count = 0; src[sind] && sind <= maxlen; sind++)
-    {
-      if ((src[sind] & 0xc0) != 0x80)
-	count++;
-    }
-  return (count);
 }
 
 int

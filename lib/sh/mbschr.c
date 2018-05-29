@@ -32,13 +32,7 @@ extern int locale_utf8locale;
 
 #undef mbschr
 
-static inline char *
-utf8_mbschr (s, c)
-     const char *s;
-     int c;
-{
-  return strchr (s, c);		/* for now */
-}
+extern char *utf8_mbschr (const char *, int);	/* XXX */
 
 /* In some locales, the non-first byte of some multibyte characters have
    the same value as some ascii character.  Faced with these strings, a

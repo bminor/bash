@@ -43,7 +43,7 @@
 extern int errno;
 #endif
 
-int locale_utf8locale;	/* set but unused for now */
+int locale_utf8locale;
 int locale_mb_cur_max;	/* value of MB_CUR_MAX for current locale (LC_CTYPE) */
 int locale_shiftstates;
 

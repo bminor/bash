@@ -396,6 +396,10 @@ above.
     BASH_ARGC and BASH_ARGV is available at compatibility levels less than
     or equal to 44.
 
+61. Bash-5.0 doesn't allow a `break' or `continue' in a subshell to attempt
+    to break or continue loop execution inherited from the calling context.
+
+
 Shell Compatibility Level
 =========================
 
@@ -451,15 +455,18 @@ compat43 set
 	  (declare -a foo='(1 2)')
 	- word expansion errors are considered non-fatal errors that cause the
 	  current command to fail, even in Posix mode
-	- when executing a shell function, the loop state (while/until/etc.) is
-	  not reset, so `break' or `continue' in a shell function will break or
-	  continue loops in the calling context.  Bash-4.4 and later reset the
-	  loop state to prevent this.
+	- when executing a shell function, the loop state (while/until/etc.)
+	  is not reset, so `break' or `continue' in that function will break
+	  or continue loops in the calling context. Bash-4.4 and later reset
+	  the loop state to prevent this.
 
 compat44 set
 	- the shell sets up the values used by BASH_ARGV and BASH_ARGC so
 	  they can expand to the shell's positional parameters even if extended
 	  debug mode is not enabled
+	- a subshell inherits loops from its parent contenxt, so `break'
+	  or `continue' will cause the subshell to exit
+
 
 -------------------------------------------------------------------------------
 
