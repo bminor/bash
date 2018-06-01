@@ -1057,7 +1057,7 @@ _rl_subseq_result (r, map, key, got_subseq)
 	/* We probably shadowed a keymap, so keep going. */
 	r = _rl_dispatch (ANYOTHERKEY, m);
     }
-  else if (r && map[ANYOTHERKEY].function)
+  else if (r < 0 && map[ANYOTHERKEY].function)
     {
       /* We didn't match (r is probably -1), so return something to
 	 tell the caller that it should try ANYOTHERKEY for an
@@ -1069,7 +1069,7 @@ _rl_subseq_result (r, map, key, got_subseq)
       _rl_dispatching_keymap = map;
       return -2;
     }
-  else if (r && got_subseq)
+  else if (r < 0 && got_subseq)		/* XXX */
     {
       /* OK, back up the chain. */
       if (RL_ISSTATE (RL_STATE_MACROINPUT))
