@@ -2689,7 +2689,17 @@ wait_for (pid)
   wait_sigint_received = child_caught_sigint = 0;
   if (job_control == 0 || (subshell_environment&SUBSHELL_COMSUB))
     {
-      old_sigint_handler = set_signal_handler (SIGINT, wait_sigint_handler);
+      SigHandler *temp_sigint_handler;
+
+      temp_sigint_handler = set_signal_handler (SIGINT, wait_sigint_handler);
+      if (temp_sigint_handler == wait_sigint_handler)
+        {
+#if defined (DEBUG)
+	  internal_warning ("wait_for: recursively setting old_sigint_handler to wait_sigint_handler: running_trap = %d", running_trap);
+#endif
+        }
+      else
+	old_sigint_handler = temp_sigint_handler;
       waiting_for_child = 0;
       if (old_sigint_handler == SIG_IGN)
 	set_signal_handler (SIGINT, old_sigint_handler);
