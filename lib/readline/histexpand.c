@@ -1429,11 +1429,11 @@ history_tokenize_word (const char *string, int ind)
 	}
     }
 
-  if (member (string[i], "<>;&|$"))
+  if (member (string[i], "<>;&|"))
     {
       int peek = string[i + 1];
 
-      if (peek == string[i] && peek != '$')
+      if (peek == string[i])
 	{
 	  if (peek == '<' && string[i + 2] == '-')
 	    i++;
@@ -1456,9 +1456,8 @@ history_tokenize_word (const char *string, int ind)
 	  i += 2;
 	  return i;
 	}
-      /* XXX - separated out for later -- bash-4.2 */
-      else if ((peek == '(' && (string[i] == '>' || string[i] == '<')) || /* ) */
-	       (peek == '(' && string[i] == '$')) /*)*/
+      /* XXX - process substitution -- separated out for later -- bash-4.2 */
+      else if (peek == '(' && (string[i] == '>' || string[i] == '<')) /*)*/
 	{
 	  i += 2;
 	  delimopen = '(';
@@ -1466,34 +1465,9 @@ history_tokenize_word (const char *string, int ind)
 	  nestdelim = 1;
 	  goto get_word;
 	}
-#if 0
-      else if (peek == '\'' && string[i] == '$')
-        {
-	  i += 2;	/* XXX */
-	  return i;
-        }
-#endif
 
-      if (string[i] != '$')
-	{
-	  i++;
-	  return i;
-	}
-    }
-
-  /* same code also used for $(...)/<(...)/>(...) above */
-  if (member (string[i], "!@?+*"))
-    {
-      int peek = string[i + 1];
-
-      if (peek == '(')		/*)*/
-	{
-	  /* Shell extended globbing patterns */
-	  i += 2;
-	  delimopen = '(';
-	  delimiter = ')';	/* XXX - not perfect */
-	  nestdelim = 1;
-	}
+      i++;
+      return i;
     }
 
 get_word:
@@ -1538,6 +1512,16 @@ get_word:
 	  continue;
 	}
 
+      /* Command and process substitution; shell extended globbing patterns */
+      if (nestdelim == 0 && delimiter == 0 && member (string[i], "<>$!@?+*") && string[i+1] == '(') /*)*/
+	{
+	  i += 2;
+	  delimopen = '(';
+	  delimiter = ')';
+	  nestdelim = 1;
+	  continue;
+	}
+      
       if (delimiter == 0 && (member (string[i], history_word_delimiters)))
 	break;
 

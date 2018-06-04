@@ -399,6 +399,11 @@ above.
 61. Bash-5.0 doesn't allow a `break' or `continue' in a subshell to attempt
     to break or continue loop execution inherited from the calling context.
 
+62. Bash-5.0 doesn't allow variable assignments preceding builtins like
+    export and readonly to modify variables with the same name in preceding
+    contexts (including the global context) unless the shell is in posix
+    mode, since export and readonly are special builtins.
+
 
 Shell Compatibility Level
 =========================
@@ -466,6 +471,10 @@ compat44 set
 	  debug mode is not enabled
 	- a subshell inherits loops from its parent contenxt, so `break'
 	  or `continue' will cause the subshell to exit
+	- variable assignments preceding builtins like export and readonly
+	  that set attributes continue to affect variables with the same
+	  name in the calling environment even if the shell is not in posix
+	  mode
 
 
 -------------------------------------------------------------------------------

@@ -60,6 +60,10 @@
 extern int rl_done, rl_dispatching;	/* should really include readline.h */
 #endif
 
+#ifndef HISTSIZE_DEFAULT
+#  define HISTSIZE_DEFAULT "500"
+#endif
+
 #if !defined (errno)
 extern int errno;
 #endif
@@ -305,7 +309,7 @@ load_history ()
      Note that the history file is automatically truncated to the
      size of HISTSIZE if the user does not explicitly set the size
      differently. */
-  set_if_not ("HISTSIZE", "500");
+  set_if_not ("HISTSIZE", HISTSIZE_DEFAULT);
   sv_histsize ("HISTSIZE");
 
   set_if_not ("HISTFILESIZE", get_string_value ("HISTSIZE"));

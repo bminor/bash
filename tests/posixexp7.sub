@@ -1,0 +1,13 @@
+# test the effect of quotes on the WORD in the posix pattern removal operators
+# a here document does not behave the same as double quotes
+x=notOK
+cat <<EOF
+5: ${x#$'not'}
+EOF
+
+echo "${x#'not'}"
+echo "${x#$'not'}"
+
+cat <<EOF
+5: $'not\ttoo\nbad'
+EOF

@@ -876,7 +876,9 @@ zero if no condition tested true.
 The syntax of the @code{case} command is:
 
 @example
-case @var{word} in [ [(] @var{pattern} [| @var{pattern}]@dots{}) @var{command-list} ;;]@dots{} esac
+case @var{word} in
+    [ [(] @var{pattern} [| @var{pattern}]@dots{}) @var{command-list} ;;]@dots{}
+esac
 @end example
 
 @code{case} will selectively execute the @var{command-list} corresponding to
@@ -1283,7 +1285,8 @@ from a file (in this case, filenames listed one per line):
 @noindent
 with a more compact syntax reminiscent of lambdas:
 @example
-cat list | parallel "do-something1 @{@} config-@{@} ; do-something2 < @{@}" | process-output
+cat list | parallel "do-something1 @{@} config-@{@} ; do-something2 < @{@}" |
+           process-output
 @end example
 
 Parallel provides a built-in mechanism to remove filename extensions, which
@@ -1306,13 +1309,21 @@ parallel "zcat @{@} | bzip2 >@{.@}.bz2 && rm @{@}" ::: *.gz
 If a command generates output, you may want to preserve the input order in
 the output.  For instance, the following command
 @example
-@{ echo foss.org.my ; echo debian.org; echo freenetproject.org; @} | parallel traceroute
+@{
+    echo foss.org.my ;
+    echo debian.org ;
+    echo freenetproject.org ;
+@} | parallel traceroute
 @end example
 @noindent
 will display as output the traceroute invocation that finishes first.
 Adding the @option{-k} option 
 @example
-@{ echo foss.org.my ; echo debian.org; echo freenetproject.org; @} | parallel -k traceroute
+@{
+    echo foss.org.my ;
+    echo debian.org ;
+    echo freenetproject.org ;
+@} | parallel -k traceroute
 @end example
 @noindent
 will ensure that the output of @code{traceroute foss.org.my} is displayed first.
@@ -4361,8 +4372,8 @@ parent.
 @item mapfile
 @btindex mapfile
 @example
-mapfile [-d @var{delim}] [-n @var{count}] [-O @var{origin}] [-s @var{count}] [-t] [-u @var{fd}]
-    [-C @var{callback}] [-c @var{quantum}] [@var{array}]
+mapfile [-d @var{delim}] [-n @var{count}] [-O @var{origin}] [-s @var{count}]
+    [-t] [-u @var{fd}] [-C @var{callback}] [-c @var{quantum}] [@var{array}]
 @end example
 
 Read lines from the standard input into the indexed array variable @var{array},
@@ -4569,8 +4580,8 @@ Read input from file descriptor @var{fd}.
 @item readarray
 @btindex readarray
 @example
-readarray [-d @var{delim}] [-n @var{count}] [-O @var{origin}] [-s @var{count}] [-t] [-u @var{fd}]
-    [-C @var{callback}] [-c @var{quantum}] [@var{array}]
+readarray [-d @var{delim}] [-n @var{count}] [-O @var{origin}] [-s @var{count}]
+    [-t] [-u @var{fd}] [-C @var{callback}] [-c @var{quantum}] [@var{array}]
 @end example
 
 Read lines from the standard input into the indexed array variable @var{array},
@@ -6338,9 +6349,12 @@ This chapter describes features unique to Bash.
 @section Invoking Bash
 
 @example
-bash [long-opt] [-ir] [-abefhkmnptuvxdBCDHP] [-o @var{option}] [-O @var{shopt_option}] [@var{argument} @dots{}]
-bash [long-opt] [-abefhkmnptuvxdBCDHP] [-o @var{option}] [-O @var{shopt_option}] -c @var{string} [@var{argument} @dots{}]
-bash [long-opt] -s [-abefhkmnptuvxdBCDHP] [-o @var{option}] [-O @var{shopt_option}] [@var{argument} @dots{}]
+bash [long-opt] [-ir] [-abefhkmnptuvxdBCDHP] [-o @var{option}]
+    [-O @var{shopt_option}] [@var{argument} @dots{}]
+bash [long-opt] [-abefhkmnptuvxdBCDHP] [-o @var{option}]
+    [-O @var{shopt_option}] -c @var{string} [@var{argument} @dots{}]
+bash [long-opt] -s [-abefhkmnptuvxdBCDHP] [-o @var{option}]
+    [-O @var{shopt_option}] [@var{argument} @dots{}]
 @end example
 
 All of the single-character options used with the @code{set} builtin

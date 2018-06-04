@@ -560,18 +560,23 @@ set_var_attribute (name, attribute, undo)
 	  var->attributes |= tv->attributes & ~att_tempvar;
 	  /* This avoids an error message when propagating a read-only var
 	     later on. */
-	  if (var->context == 0 && (attribute & att_readonly))
+	  if (posixly_correct || shell_compatibility_level <= 44)
 	    {
-	      /* Don't bother to set the `propagate to the global variables
-		 table' flag if we've just bound the variable in that table */
-	      v = find_global_variable (tv->name);
-	      if (v != var)
+	      if (var->context == 0 && (attribute & att_readonly))
+		{
+		  /* Don't bother to set the `propagate to the global variables
+		     table' flag if we've just bound the variable in that
+		     table */
+		  v = find_global_variable (tv->name);
+		  if (v != var)
+		    VSETATTR (tv, att_propagate);
+		}
+	      else
 		VSETATTR (tv, att_propagate);
+	      if (var->context != 0)
+		VSETATTR (var, att_propagate);
 	    }
-	  else
-	    VSETATTR (tv, att_propagate);
-	  if (var->context != 0)
-	    VSETATTR (var, att_propagate);
+
 	  SETVARATTR (tv, attribute, undo);	/* XXX */
 
 	  stupidly_hack_special_variables (tv->name);

@@ -15467,3 +15467,26 @@ variables.c
 	- assign_aliasvar: perform same validity check on subscript assignment
 	  as alias builtin performs on name argument. Bug report from
 	  Mike Jonkmans <bashbug@jonkmans.nl>
+
+				   5/29
+				   ----
+builtins/setattr.def
+	- set_var_attribute: we should not propagate a variable assignment
+	  preceding a builtin back to the calling environment unless the
+	  shell is in posix mode. Since previous versions of the shell do
+	  this, setting the shell compatibility level to 44 or less will
+	  continue the propagation behavior
+
+				    6/1
+				    ---
+lib/readline/histexpand.c
+	- history_tokenize_word: as part of teaching history tokenization more
+	  and more about shell syntax, allow command and process subsitution
+	  and extended globbing patterns to appear within a word being
+	  tokenized and not just at the beginning. Fixes bug reported back in
+	  2/2017 by ecki@tofex.de
+
+bashhist.c
+	- load_history: use HISTSIZE_DEFAULT (still defaults to "500") to set
+	  the initial value of $HISTSIZE. HISTSIZE_DEFAULT can be overridden
+	  in config-top.h

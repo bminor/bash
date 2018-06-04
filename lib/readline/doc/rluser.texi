@@ -475,6 +475,7 @@ The default value is @samp{off}.
 If set to @samp{on}, and @var{completion-ignore-case} is enabled, Readline
 treats hyphens (@samp{-}) and underscores (@samp{_}) as equivalent when
 performing case-insensitive filename matching and completion.
+The default value is @samp{off}.
 
 @item completion-prefix-display-length
 @vindex completion-prefix-display-length
@@ -802,7 +803,7 @@ Meta-Rubout: backward-kill-word
 Control-o: "> output"
 @end example
 
-In the above example, @kbd{C-u} is bound to the function
+In the example above, @kbd{C-u} is bound to the function
 @code{universal-argument},
 @kbd{M-DEL} is bound to the function @code{backward-kill-word}, and
 @kbd{C-o} is bound to run the macro
@@ -2289,7 +2290,7 @@ _comp_cd()
     local cur _skipdot _cdpath
     local i j k
 
-    # Tilde expansion, with side effect of expanding tilde to full pathname
+    # Tilde expansion, which also expands tilde to full pathname
     case "$2" in
     \~*)    eval cur="$2" ;;
     *)      cur=$2 ;;

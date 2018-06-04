@@ -1,7 +1,7 @@
 \initial {A}
 \entry {alias expansion}{92}
 \entry {arithmetic evaluation}{91}
-\entry {arithmetic expansion}{30}
+\entry {arithmetic expansion}{31}
 \entry {arithmetic, shell}{91}
 \entry {arrays}{93}
 \initial {B}
@@ -9,12 +9,12 @@
 \entry {Bash configuration}{145}
 \entry {Bash installation}{145}
 \entry {Bourne shell}{5}
-\entry {brace expansion}{22}
+\entry {brace expansion}{23}
 \entry {builtin}{3}
 \initial {C}
 \entry {command editing}{107}
 \entry {command execution}{38}
-\entry {command expansion}{37}
+\entry {command expansion}{38}
 \entry {command history}{140}
 \entry {command search}{38}
 \entry {command substitution}{30}
@@ -36,24 +36,24 @@
 \entry {directory stack}{95}
 \initial {E}
 \entry {editing command lines}{107}
-\entry {environment}{39}
+\entry {environment}{40}
 \entry {evaluation, arithmetic}{91}
 \entry {event designators}{143}
-\entry {execution environment}{38}
+\entry {execution environment}{39}
 \entry {exit status}{3, 40}
 \entry {expansion}{22}
-\entry {expansion, arithmetic}{30}
-\entry {expansion, brace}{22}
-\entry {expansion, filename}{31}
+\entry {expansion, arithmetic}{31}
+\entry {expansion, brace}{23}
+\entry {expansion, filename}{32}
 \entry {expansion, parameter}{24}
-\entry {expansion, pathname}{31}
+\entry {expansion, pathname}{32}
 \entry {expansion, tilde}{23}
 \entry {expressions, arithmetic}{91}
 \entry {expressions, conditional}{89}
 \initial {F}
 \entry {field}{3}
 \entry {filename}{3}
-\entry {filename expansion}{31}
+\entry {filename expansion}{32}
 \entry {foreground}{102}
 \entry {functions, shell}{17}
 \initial {H}
@@ -90,16 +90,16 @@
 \initial {P}
 \entry {parameter expansion}{24}
 \entry {parameters}{19}
-\entry {parameters, positional}{20}
+\entry {parameters, positional}{21}
 \entry {parameters, special}{21}
-\entry {pathname expansion}{31}
+\entry {pathname expansion}{32}
 \entry {pattern matching}{32}
 \entry {pipeline}{8}
 \entry {POSIX}{3}
 \entry {POSIX Mode}{98}
 \entry {process group}{3}
 \entry {process group ID}{3}
-\entry {process substitution}{30}
+\entry {process substitution}{31}
 \entry {programmable completion}{131}
 \entry {prompting}{96}
 \initial {Q}
@@ -107,7 +107,7 @@
 \entry {quoting, ANSI}{6}
 \initial {R}
 \entry {Readline, how to use}{105}
-\entry {redirection}{33}
+\entry {redirection}{34}
 \entry {reserved word}{3}
 \entry {restricted shell}{97}
 \entry {return status}{4}
@@ -118,7 +118,7 @@
 \entry {shell variable}{19}
 \entry {shell, interactive}{87}
 \entry {signal}{4}
-\entry {signal handling}{40}
+\entry {signal handling}{41}
 \entry {special builtin}{4, 71}
 \entry {startup files}{86}
 \entry {suspending jobs}{102}

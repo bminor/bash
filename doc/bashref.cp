@@ -42,34 +42,34 @@
 \entry{parameters}{19}{parameters}
 \entry{variable, shell}{19}{variable, shell}
 \entry{shell variable}{19}{shell variable}
-\entry{parameters, positional}{20}{parameters, positional}
+\entry{parameters, positional}{21}{parameters, positional}
 \entry{parameters, special}{21}{parameters, special}
 \entry{expansion}{22}{expansion}
-\entry{brace expansion}{22}{brace expansion}
-\entry{expansion, brace}{22}{expansion, brace}
+\entry{brace expansion}{23}{brace expansion}
+\entry{expansion, brace}{23}{expansion, brace}
 \entry{tilde expansion}{23}{tilde expansion}
 \entry{expansion, tilde}{23}{expansion, tilde}
 \entry{parameter expansion}{24}{parameter expansion}
 \entry{expansion, parameter}{24}{expansion, parameter}
 \entry{command substitution}{30}{command substitution}
-\entry{expansion, arithmetic}{30}{expansion, arithmetic}
-\entry{arithmetic expansion}{30}{arithmetic expansion}
-\entry{process substitution}{30}{process substitution}
+\entry{expansion, arithmetic}{31}{expansion, arithmetic}
+\entry{arithmetic expansion}{31}{arithmetic expansion}
+\entry{process substitution}{31}{process substitution}
 \entry{word splitting}{31}{word splitting}
-\entry{expansion, filename}{31}{expansion, filename}
-\entry{expansion, pathname}{31}{expansion, pathname}
-\entry{filename expansion}{31}{filename expansion}
-\entry{pathname expansion}{31}{pathname expansion}
+\entry{expansion, filename}{32}{expansion, filename}
+\entry{expansion, pathname}{32}{expansion, pathname}
+\entry{filename expansion}{32}{filename expansion}
+\entry{pathname expansion}{32}{pathname expansion}
 \entry{pattern matching}{32}{pattern matching}
 \entry{matching, pattern}{32}{matching, pattern}
-\entry{redirection}{33}{redirection}
-\entry{command expansion}{37}{command expansion}
+\entry{redirection}{34}{redirection}
+\entry{command expansion}{38}{command expansion}
 \entry{command execution}{38}{command execution}
 \entry{command search}{38}{command search}
-\entry{execution environment}{38}{execution environment}
-\entry{environment}{39}{environment}
+\entry{execution environment}{39}{execution environment}
+\entry{environment}{40}{environment}
 \entry{exit status}{40}{exit status}
-\entry{signal handling}{40}{signal handling}
+\entry{signal handling}{41}{signal handling}
 \entry{shell script}{41}{shell script}
 \entry{special builtin}{71}{special builtin}
 \entry{login shell}{86}{login shell}

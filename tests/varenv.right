@@ -145,8 +145,13 @@ outside:
 declare -x foo="abc"
 inside: declare -x var="value"
 outside: declare -- var="one"
+inside: declare -x var="value"
+outside: declare -x var="value"
 inside: declare -- var="local"
 outside: declare -x var="global"
+foo=<unset> environment foo=
+foo=foo environment foo=foo
+foo=foo environment foo=foo
 a=z
 a=b
 a=z
