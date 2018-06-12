@@ -2,9 +2,9 @@ This is bashref.info, produced by makeinfo version 6.5 from
 bashref.texi.
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.0, 15 March 2018).
+Bash shell (version 5.0, 8 June 2018).
 
-   This is Edition 5.0, last updated 15 March 2018, of 'The GNU Bash
+   This is Edition 5.0, last updated 8 June 2018, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.0.
 
    Copyright (C) 1988-2018 Free Software Foundation, Inc.
@@ -27,10 +27,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.0, 15 March 2018).  The Bash home page is
+Bash shell (version 5.0, 8 June 2018).  The Bash home page is
 <http://www.gnu.org/software/bash/>.
 
-   This is Edition 5.0, last updated 15 March 2018, of 'The GNU Bash
+   This is Edition 5.0, last updated 8 June 2018, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.0.
 
    Bash contains features that appear in other popular shells, and some
@@ -768,7 +768,9 @@ File: bashref.info,  Node: Conditional Constructs,  Next: Command Grouping,  Pre
 'case'
      The syntax of the 'case' command is:
 
-          case WORD in [ [(] PATTERN [| PATTERN]...) COMMAND-LIST ;;]... esac
+          case WORD in
+              [ [(] PATTERN [| PATTERN]...) COMMAND-LIST ;;]...
+          esac
 
      'case' will selectively execute the COMMAND-LIST corresponding to
      the first PATTERN that matches WORD.  The match is performed
@@ -883,8 +885,8 @@ File: bashref.info,  Node: Conditional Constructs,  Next: Command Grouping,  Pre
      'shopt' in *note The Shopt Builtin::) is enabled, the match is
      performed without regard to the case of alphabetic characters.  The
      return value is 0 if the string matches ('==') or does not match
-     ('!=')the pattern, and 1 otherwise.  Any part of the pattern may be
-     quoted to force the quoted portion to be matched as a string.
+     ('!=') the pattern, and 1 otherwise.  Any part of the pattern may
+     be quoted to force the quoted portion to be matched as a string.
 
      An additional binary operator, '=~', is available, with the same
      precedence as '==' and '!='.  When it is used, the string to the
@@ -1103,7 +1105,8 @@ read from a file (in this case, filenames listed one per line):
      	done < file | process-output
 
 with a more compact syntax reminiscent of lambdas:
-     cat list | parallel "do-something1 {} config-{} ; do-something2 < {}" | process-output
+     cat list | parallel "do-something1 {} config-{} ; do-something2 < {}" |
+                process-output
 
    Parallel provides a built-in mechanism to remove filename extensions,
 which lends itself to batch file transformations or renaming:
@@ -1118,10 +1121,18 @@ take arguments from the command line; the above can also be written as
 
    If a command generates output, you may want to preserve the input
 order in the output.  For instance, the following command
-     { echo foss.org.my ; echo debian.org; echo freenetproject.org; } | parallel traceroute
+     {
+         echo foss.org.my ;
+         echo debian.org ;
+         echo freenetproject.org ;
+     } | parallel traceroute
 will display as output the traceroute invocation that finishes first.
 Adding the '-k' option
-     { echo foss.org.my ; echo debian.org; echo freenetproject.org; } | parallel -k traceroute
+     {
+         echo foss.org.my ;
+         echo debian.org ;
+         echo freenetproject.org ;
+     } | parallel -k traceroute
 will ensure that the output of 'traceroute foss.org.my' is displayed
 first.
 
@@ -1406,15 +1417,21 @@ only be referenced; assignment to them is not allowed.
      is null, the parameters are joined without intervening separators.
 
 '@'
-     ($@) Expands to the positional parameters, starting from one.  When
-     the expansion occurs within double quotes, each parameter expands
-     to a separate word.  That is, '"$@"' is equivalent to '"$1" "$2"
-     ...'.  If the double-quoted expansion occurs within a word, the
-     expansion of the first parameter is joined with the beginning part
-     of the original word, and the expansion of the last parameter is
-     joined with the last part of the original word.  When there are no
-     positional parameters, '"$@"' and '$@' expand to nothing (i.e.,
-     they are removed).
+     ($@) Expands to the positional parameters, starting from one.  In
+     contexts where word splitting is performed, this expands each
+     positional parameter to a separate word; if not within double
+     quotes, these words are subject to word splitting.  In contexts
+     where word splitting is not performed, this expands to a single
+     word with each positional parameter separated by a space.  When the
+     expansion occurs within double quotes, and word splitting is
+     performed, each parameter expands to a separate word.  That is,
+     '"$@"' is equivalent to '"$1" "$2" ...'.  If the double-quoted
+     expansion occurs within a word, the expansion of the first
+     parameter is joined with the beginning part of the original word,
+     and the expansion of the last parameter is joined with the last
+     part of the original word.  When there are no positional
+     parameters, '"$@"' and '$@' expand to nothing (i.e., they are
+     removed).
 
 '#'
      ($#) Expands to the number of positional parameters in decimal.
@@ -3662,8 +3679,8 @@ standard.
      Exit a login shell, returning a status of N to the shell's parent.
 
 'mapfile'
-          mapfile [-d DELIM] [-n COUNT] [-O ORIGIN] [-s COUNT] [-t] [-u FD]
-              [-C CALLBACK] [-c QUANTUM] [ARRAY]
+          mapfile [-d DELIM] [-n COUNT] [-O ORIGIN] [-s COUNT]
+              [-t] [-u FD] [-C CALLBACK] [-c QUANTUM] [ARRAY]
 
      Read lines from the standard input into the indexed array variable
      ARRAY, or from file descriptor FD if the '-u' option is supplied.
@@ -3846,8 +3863,8 @@ standard.
           Read input from file descriptor FD.
 
 'readarray'
-          readarray [-d DELIM] [-n COUNT] [-O ORIGIN] [-s COUNT] [-t] [-u FD]
-              [-C CALLBACK] [-c QUANTUM] [ARRAY]
+          readarray [-d DELIM] [-n COUNT] [-O ORIGIN] [-s COUNT]
+              [-t] [-u FD] [-C CALLBACK] [-c QUANTUM] [ARRAY]
 
      Read lines from the standard input into the indexed array variable
      ARRAY, or from file descriptor FD if the '-u' option is supplied.
@@ -5228,7 +5245,7 @@ Variables::).
      as the sole input.  If set, the value denotes the number of
      consecutive 'EOF' characters that can be read as the first
      character on an input line before the shell will exit.  If the
-     variable exists but does not have a numeric value (or has no value)
+     variable exists but does not have a numeric value, or has no value,
      then the default is 10.  If the variable does not exist, then 'EOF'
      signifies the end of input to the shell.  This is only in effect
      for interactive shells.
@@ -5484,9 +5501,12 @@ File: bashref.info,  Node: Invoking Bash,  Next: Bash Startup Files,  Up: Bash F
 6.1 Invoking Bash
 =================
 
-     bash [long-opt] [-ir] [-abefhkmnptuvxdBCDHP] [-o OPTION] [-O SHOPT_OPTION] [ARGUMENT ...]
-     bash [long-opt] [-abefhkmnptuvxdBCDHP] [-o OPTION] [-O SHOPT_OPTION] -c STRING [ARGUMENT ...]
-     bash [long-opt] -s [-abefhkmnptuvxdBCDHP] [-o OPTION] [-O SHOPT_OPTION] [ARGUMENT ...]
+     bash [long-opt] [-ir] [-abefhkmnptuvxdBCDHP] [-o OPTION]
+         [-O SHOPT_OPTION] [ARGUMENT ...]
+     bash [long-opt] [-abefhkmnptuvxdBCDHP] [-o OPTION]
+         [-O SHOPT_OPTION] -c STRING [ARGUMENT ...]
+     bash [long-opt] -s [-abefhkmnptuvxdBCDHP] [-o OPTION]
+         [-O SHOPT_OPTION] [ARGUMENT ...]
 
    All of the single-character options used with the 'set' builtin
 (*note The Set Builtin::) can be used as options when the shell is
@@ -5832,8 +5852,8 @@ several ways.
   9. In the absence of any traps, Bash ignores 'SIGTERM' (*note
      Signals::).
 
-  10. In the absence of any traps, 'SIGINT' is caught and handled
-     ((*note Signals::).  'SIGINT' will interrupt some shell builtins.
+  10. In the absence of any traps, 'SIGINT' is caught and handled (*note
+     Signals::).  'SIGINT' will interrupt some shell builtins.
 
   11. An interactive login shell sends a 'SIGHUP' to all jobs on exit if
      the 'huponexit' shell option has been enabled (*note Signals::).
@@ -6453,7 +6473,8 @@ of commands executed during the current shell session.
 
    After the string is decoded, it is expanded via parameter expansion,
 command substitution, arithmetic expansion, and quote removal, subject
-to the value of the 'promptvars' shell option (*note Bash Builtins::).
+to the value of the 'promptvars' shell option (*note The Shopt
+Builtin::).
 
 
 File: bashref.info,  Node: The Restricted Shell,  Next: Bash POSIX Mode,  Prev: Controlling the Prompt,  Up: Bash Features
@@ -7374,7 +7395,7 @@ Variable Settings
           If set to 'on', and COMPLETION-IGNORE-CASE is enabled,
           Readline treats hyphens ('-') and underscores ('_') as
           equivalent when performing case-insensitive filename matching
-          and completion.
+          and completion.  The default value is 'off'.
 
      'completion-prefix-display-length'
           The length in characters of the common prefix of a list of
@@ -7650,7 +7671,7 @@ Key Bindings
                Meta-Rubout: backward-kill-word
                Control-o: "> output"
 
-          In the above example, 'C-u' is bound to the function
+          In the example above, 'C-u' is bound to the function
           'universal-argument', 'M-DEL' is bound to the function
           'backward-kill-word', and 'C-o' is bound to run the macro
           expressed on the right hand side (that is, to insert the text
@@ -8141,7 +8162,7 @@ File: bashref.info,  Node: Commands For Text,  Next: Commands For Killing,  Prev
      assigned by default.  It allows Readline to insert the pasted text
      as a single unit without treating each character as if it had been
      read from the keyboard.  The characters are inserted as if each one
-     was bound to 'self-insert') instead of executing any editing
+     was bound to 'self-insert' instead of executing any editing
      commands.
 
 'transpose-chars (C-t)'
@@ -8737,10 +8758,10 @@ happening.
      no matches were generated.
 
 'complete'
-          complete [-abcdefgjksuv] [-o COMP-OPTION] [-DE] [-A ACTION] [-G GLOBPAT] [-W WORDLIST]
-          [-F FUNCTION] [-C COMMAND] [-X FILTERPAT]
+          complete [-abcdefgjksuv] [-o COMP-OPTION] [-DEI] [-A ACTION] [-G GLOBPAT]
+          [-W WORDLIST] [-F FUNCTION] [-C COMMAND] [-X FILTERPAT]
           [-P PREFIX] [-S SUFFIX] NAME [NAME ...]
-          complete -pr [-DE] [NAME ...]
+          complete -pr [-DEI] [NAME ...]
 
      Specify how arguments to each NAME should be completed.  If the
      '-p' option is supplied, or if no options are supplied, existing
@@ -8753,10 +8774,16 @@ happening.
      completion has previously been defined.  The '-E' option indicates
      that the remaining options and actions should apply to "empty"
      command completion; that is, completion attempted on a blank line.
+     The '-I' option indicates that the remaining options and actions
+     should apply to completion on the inital non-assignment word on the
+     line, or after a command delimiter such as ';' or '|', which is
+     usually command name completion.  If multiple options are supplied,
+     the '-D' option takes precedence over '-E', and both take
+     precedence over '-I'.
 
      The process of applying these completion specifications when word
      completion is attempted is described above (*note Programmable
-     Completion::).  The '-D' option takes precedence over '-E'.
+     Completion::).
 
      Other options, if specified, have the following meanings.  The
      arguments to the '-G', '-W', and '-X' options (and, if necessary,
@@ -8783,7 +8810,7 @@ happening.
           'filenames'
                Tell Readline that the compspec generates filenames, so
                it can perform any filename-specific processing (like
-               adding a slash to directory names quoting special
+               adding a slash to directory names, quoting special
                characters, or suppressing trailing spaces).  This option
                is intended to be used with shell functions specified
                with '-F'.
@@ -8936,7 +8963,7 @@ happening.
      completion specification.
 
 'compopt'
-          compopt [-o OPTION] [-DE] [+o OPTION] [NAME]
+          compopt [-o OPTION] [-DEI] [+o OPTION] [NAME]
      Modify completion options for each NAME according to the OPTIONs,
      or for the currently-executing completion if no NAMEs are supplied.
      If no OPTIONs are given, display the completion options for each
@@ -8947,9 +8974,13 @@ happening.
      command for which no completion has previously been defined.  The
      '-E' option indicates that the remaining options should apply to
      "empty" command completion; that is, completion attempted on a
-     blank line.
+     blank line.  The '-I' option indicates that the remaining options
+     should apply to completion on the inital non-assignment word on the
+     line, or after a command delimiter such as ';' or '|', which is
+     usually command name completion.
 
-     The '-D' option takes precedence over '-E'.
+     If multiple options are supplied, the '-D' option takes precedence
+     over '-E', and both take precedence over '-I'
 
      The return value is true unless an invalid option is supplied, an
      attempt is made to modify the options for a NAME for which no
@@ -8993,7 +9024,7 @@ retrieves the completions from there when the function returns.
          local cur _skipdot _cdpath
          local i j k
 
-         # Tilde expansion, with side effect of expanding tilde to full pathname
+         # Tilde expansion, which also expands tilde to full pathname
          case "$2" in
          \~*)    eval cur="$2" ;;
          *)      cur=$2 ;;
@@ -9760,8 +9791,8 @@ and linked, rather than changing run-time features.
 
 '--enable-largefile'
      Enable support for large files
-     (http://www.sas.com/standards/large_file/x_open.20Mar96.html) if
-     the operating system requires special compiler options to build
+     (http://www.unix.org/version2/whatsnew/lfs20mar.html) if the
+     operating system requires special compiler options to build
      programs which can access large files.  This is enabled by default,
      if the operating system provides large file support.
 
@@ -10881,7 +10912,7 @@ D.1 Index of Shell Builtin Commands
 * complete:                              Programmable Completion Builtins.
                                                               (line  30)
 * compopt:                               Programmable Completion Builtins.
-                                                              (line 229)
+                                                              (line 235)
 * continue:                              Bourne Shell Builtins.
                                                               (line  85)
 * declare:                               Bash Builtins.       (line 148)
@@ -10966,9 +10997,9 @@ D.2 Index of Shell Reserved Words
 
 * !:                                     Pipelines.           (line   9)
 * [[:                                    Conditional Constructs.
-                                                              (line 122)
+                                                              (line 124)
 * ]]:                                    Conditional Constructs.
-                                                              (line 122)
+                                                              (line 124)
 * {:                                     Command Grouping.    (line  21)
 * }:                                     Command Grouping.    (line  21)
 * case:                                  Conditional Constructs.
@@ -10990,7 +11021,7 @@ D.2 Index of Shell Reserved Words
 * in:                                    Conditional Constructs.
                                                               (line  28)
 * select:                                Conditional Constructs.
-                                                              (line  80)
+                                                              (line  82)
 * then:                                  Conditional Constructs.
                                                               (line   7)
 * time:                                  Pipelines.           (line   9)
@@ -11006,24 +11037,24 @@ D.3 Parameter and Variable Index
  [index ]
 * Menu:
 
-* !:                                     Special Parameters.  (line  50)
-* #:                                     Special Parameters.  (line  33)
-* $:                                     Special Parameters.  (line  45)
-* $!:                                    Special Parameters.  (line  51)
-* $#:                                    Special Parameters.  (line  34)
-* $$:                                    Special Parameters.  (line  46)
+* !:                                     Special Parameters.  (line  56)
+* #:                                     Special Parameters.  (line  39)
+* $:                                     Special Parameters.  (line  51)
+* $!:                                    Special Parameters.  (line  57)
+* $#:                                    Special Parameters.  (line  40)
+* $$:                                    Special Parameters.  (line  52)
 * $*:                                    Special Parameters.  (line  10)
-* $-:                                    Special Parameters.  (line  41)
-* $0:                                    Special Parameters.  (line  56)
-* $?:                                    Special Parameters.  (line  37)
+* $-:                                    Special Parameters.  (line  47)
+* $0:                                    Special Parameters.  (line  62)
+* $?:                                    Special Parameters.  (line  43)
 * $@:                                    Special Parameters.  (line  23)
-* $_:                                    Special Parameters.  (line  65)
+* $_:                                    Special Parameters.  (line  71)
 * *:                                     Special Parameters.  (line   9)
-* -:                                     Special Parameters.  (line  40)
-* 0:                                     Special Parameters.  (line  55)
-* ?:                                     Special Parameters.  (line  36)
+* -:                                     Special Parameters.  (line  46)
+* 0:                                     Special Parameters.  (line  61)
+* ?:                                     Special Parameters.  (line  42)
 * @:                                     Special Parameters.  (line  22)
-* _:                                     Special Parameters.  (line  64)
+* _:                                     Special Parameters.  (line  70)
 * auto_resume:                           Job Control Variables.
                                                               (line   6)
 * BASH:                                  Bash Variables.      (line  13)
@@ -11512,7 +11543,7 @@ D.5 Concept Index
 * installation:                          Basic Installation.  (line   6)
 * interaction, readline:                 Readline Interaction.
                                                               (line   6)
-* interactive shell:                     Invoking Bash.       (line 128)
+* interactive shell:                     Invoking Bash.       (line 131)
 * interactive shell <1>:                 Interactive Shells.  (line   6)
 * internationalization:                  Locale Translation.  (line   6)
 * job:                                   Definitions.         (line  38)
@@ -11523,7 +11554,7 @@ D.5 Concept Index
 * killing text:                          Readline Killing Commands.
                                                               (line   6)
 * localization:                          Locale Translation.  (line   6)
-* login shell:                           Invoking Bash.       (line 125)
+* login shell:                           Invoking Bash.       (line 128)
 * matching, pattern:                     Pattern Matching.    (line   6)
 * metacharacter:                         Definitions.         (line  46)
 * name:                                  Definitions.         (line  51)
@@ -11584,134 +11615,134 @@ D.5 Concept Index
 
 
 Tag Table:
-Node: Top891
-Node: Introduction2805
-Node: What is Bash?3021
-Node: What is a shell?4135
-Node: Definitions6673
-Node: Basic Shell Features9624
-Node: Shell Syntax10843
-Node: Shell Operation11869
-Node: Quoting13162
-Node: Escape Character14462
-Node: Single Quotes14947
-Node: Double Quotes15295
-Node: ANSI-C Quoting16573
-Node: Locale Translation17832
-Node: Comments18728
-Node: Shell Commands19346
-Node: Simple Commands20218
-Node: Pipelines20849
-Node: Lists23781
-Node: Compound Commands25520
-Node: Looping Constructs26532
-Node: Conditional Constructs29027
-Node: Command Grouping40082
-Node: Coprocesses41561
-Node: GNU Parallel43464
-Node: Shell Functions47438
-Node: Shell Parameters54521
-Node: Positional Parameters58934
-Node: Special Parameters59834
-Node: Shell Expansions63171
-Node: Brace Expansion65294
-Node: Tilde Expansion68018
-Node: Shell Parameter Expansion70366
-Node: Command Substitution84849
-Node: Arithmetic Expansion86204
-Node: Process Substitution87136
-Node: Word Splitting88256
-Node: Filename Expansion90200
-Node: Pattern Matching92730
-Node: Quote Removal96716
-Node: Redirections97011
-Node: Executing Commands106569
-Node: Simple Command Expansion107239
-Node: Command Search and Execution109169
-Node: Command Execution Environment111545
-Node: Environment114529
-Node: Exit Status116188
-Node: Signals117858
-Node: Shell Scripts119825
-Node: Shell Builtin Commands122340
-Node: Bourne Shell Builtins124378
-Node: Bash Builtins145036
-Node: Modifying Shell Behavior173944
-Node: The Set Builtin174289
-Node: The Shopt Builtin184702
-Node: Special Builtins201572
-Node: Shell Variables202551
-Node: Bourne Shell Variables202988
-Node: Bash Variables205092
-Node: Bash Features235106
-Node: Invoking Bash236005
-Node: Bash Startup Files241991
-Node: Interactive Shells247094
-Node: What is an Interactive Shell?247504
-Node: Is this Shell Interactive?248153
-Node: Interactive Shell Behavior248968
-Node: Bash Conditional Expressions252456
-Node: Shell Arithmetic256822
-Node: Aliases259639
-Node: Arrays262187
-Node: The Directory Stack267553
-Node: Directory Stack Builtins268337
-Node: Controlling the Prompt271305
-Node: The Restricted Shell274067
-Node: Bash POSIX Mode275892
-Node: Job Control286243
-Node: Job Control Basics286703
-Node: Job Control Builtins291671
-Node: Job Control Variables296398
-Node: Command Line Editing297554
-Node: Introduction and Notation299225
-Node: Readline Interaction300848
-Node: Readline Bare Essentials302039
-Node: Readline Movement Commands303822
-Node: Readline Killing Commands304782
-Node: Readline Arguments306700
-Node: Searching307744
-Node: Readline Init File309930
-Node: Readline Init File Syntax311077
-Node: Conditional Init Constructs331448
-Node: Sample Init File335644
-Node: Bindable Readline Commands338761
-Node: Commands For Moving339965
-Node: Commands For History341814
-Node: Commands For Text346109
-Node: Commands For Killing349498
-Node: Numeric Arguments351979
-Node: Commands For Completion353118
-Node: Keyboard Macros357309
-Node: Miscellaneous Commands357996
-Node: Readline vi Mode363949
-Node: Programmable Completion364856
-Node: Programmable Completion Builtins372450
-Node: A Programmable Completion Example382336
-Node: Using History Interactively387587
-Node: Bash History Facilities388271
-Node: Bash History Builtins391276
-Node: History Interaction395807
-Node: Event Designators398874
-Node: Word Designators400093
-Node: Modifiers401730
-Node: Installing Bash403132
-Node: Basic Installation404269
-Node: Compilers and Options407527
-Node: Compiling For Multiple Architectures408268
-Node: Installation Names409961
-Node: Specifying the System Type410779
-Node: Sharing Defaults411495
-Node: Operation Controls412168
-Node: Optional Features413126
-Node: Reporting Bugs423652
-Node: Major Differences From The Bourne Shell424846
-Node: GNU Free Documentation License441698
-Node: Indexes466875
-Node: Builtin Index467329
-Node: Reserved Word Index474156
-Node: Variable Index476604
-Node: Function Index492282
-Node: Concept Index505585
+Node: Top887
+Node: Introduction2797
+Node: What is Bash?3013
+Node: What is a shell?4127
+Node: Definitions6665
+Node: Basic Shell Features9616
+Node: Shell Syntax10835
+Node: Shell Operation11861
+Node: Quoting13154
+Node: Escape Character14454
+Node: Single Quotes14939
+Node: Double Quotes15287
+Node: ANSI-C Quoting16565
+Node: Locale Translation17824
+Node: Comments18720
+Node: Shell Commands19338
+Node: Simple Commands20210
+Node: Pipelines20841
+Node: Lists23773
+Node: Compound Commands25512
+Node: Looping Constructs26524
+Node: Conditional Constructs29019
+Node: Command Grouping40099
+Node: Coprocesses41578
+Node: GNU Parallel43481
+Node: Shell Functions47539
+Node: Shell Parameters54622
+Node: Positional Parameters59035
+Node: Special Parameters59935
+Node: Shell Expansions63649
+Node: Brace Expansion65772
+Node: Tilde Expansion68496
+Node: Shell Parameter Expansion70844
+Node: Command Substitution85327
+Node: Arithmetic Expansion86682
+Node: Process Substitution87614
+Node: Word Splitting88734
+Node: Filename Expansion90678
+Node: Pattern Matching93208
+Node: Quote Removal97194
+Node: Redirections97489
+Node: Executing Commands107047
+Node: Simple Command Expansion107717
+Node: Command Search and Execution109647
+Node: Command Execution Environment112023
+Node: Environment115007
+Node: Exit Status116666
+Node: Signals118336
+Node: Shell Scripts120303
+Node: Shell Builtin Commands122818
+Node: Bourne Shell Builtins124856
+Node: Bash Builtins145514
+Node: Modifying Shell Behavior174422
+Node: The Set Builtin174767
+Node: The Shopt Builtin185180
+Node: Special Builtins202050
+Node: Shell Variables203029
+Node: Bourne Shell Variables203466
+Node: Bash Variables205570
+Node: Bash Features235584
+Node: Invoking Bash236483
+Node: Bash Startup Files242496
+Node: Interactive Shells247599
+Node: What is an Interactive Shell?248009
+Node: Is this Shell Interactive?248658
+Node: Interactive Shell Behavior249473
+Node: Bash Conditional Expressions252960
+Node: Shell Arithmetic257326
+Node: Aliases260143
+Node: Arrays262691
+Node: The Directory Stack268057
+Node: Directory Stack Builtins268841
+Node: Controlling the Prompt271809
+Node: The Restricted Shell274575
+Node: Bash POSIX Mode276400
+Node: Job Control286751
+Node: Job Control Basics287211
+Node: Job Control Builtins292179
+Node: Job Control Variables296906
+Node: Command Line Editing298062
+Node: Introduction and Notation299733
+Node: Readline Interaction301356
+Node: Readline Bare Essentials302547
+Node: Readline Movement Commands304330
+Node: Readline Killing Commands305290
+Node: Readline Arguments307208
+Node: Searching308252
+Node: Readline Init File310438
+Node: Readline Init File Syntax311585
+Node: Conditional Init Constructs331985
+Node: Sample Init File336181
+Node: Bindable Readline Commands339298
+Node: Commands For Moving340502
+Node: Commands For History342351
+Node: Commands For Text346646
+Node: Commands For Killing350034
+Node: Numeric Arguments352515
+Node: Commands For Completion353654
+Node: Keyboard Macros357845
+Node: Miscellaneous Commands358532
+Node: Readline vi Mode364485
+Node: Programmable Completion365392
+Node: Programmable Completion Builtins372986
+Node: A Programmable Completion Example383514
+Node: Using History Interactively388754
+Node: Bash History Facilities389438
+Node: Bash History Builtins392443
+Node: History Interaction396974
+Node: Event Designators400041
+Node: Word Designators401260
+Node: Modifiers402897
+Node: Installing Bash404299
+Node: Basic Installation405436
+Node: Compilers and Options408694
+Node: Compiling For Multiple Architectures409435
+Node: Installation Names411128
+Node: Specifying the System Type411946
+Node: Sharing Defaults412662
+Node: Operation Controls413335
+Node: Optional Features414293
+Node: Reporting Bugs424811
+Node: Major Differences From The Bourne Shell426005
+Node: GNU Free Documentation License442857
+Node: Indexes468034
+Node: Builtin Index468488
+Node: Reserved Word Index475315
+Node: Variable Index477763
+Node: Function Index493441
+Node: Concept Index506744
 
 End Tag Table

@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2018 March 15<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2018 June 8<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -1738,7 +1738,14 @@ is null, the parameters are joined without intervening separators.
 <DT><B>@</B>
 
 <DD>
-Expands to the positional parameters, starting from one.  When the
+Expands to the positional parameters, starting from one.
+In contexts where word splitting is performed, this expands each
+positional parameter to a separate word; if not within double
+quotes, these words are subject to word splitting.
+In contexts where word splitting is not performed,
+this expands to a single word
+with each positional parameter separated by a space.
+When the
 expansion occurs within double quotes, each parameter expands to a
 separate word.  That is, &quot;<B>$@</B>&quot; is equivalent to
 &quot;<B>$1</B>&quot; &quot;<B>$2</B>&quot; ...
@@ -2634,7 +2641,7 @@ Similar to
 <FONT SIZE=-1><B>BASH_ENV</B>;
 
 </FONT>
-used when the shell is invoked in POSIX mode.
+used when the shell is invoked in <I>posix mode</I>.
 <DT><B>EXECIGNORE</B>
 
 <DD>
@@ -6125,7 +6132,7 @@ cannot affect the shell's execution environment.
 <P>
 
 Subshells spawned to execute command substitutions inherit the value of
-the <B>-e</B> option from the parent shell.  When not in <I>posix</I> mode,
+the <B>-e</B> option from the parent shell.  When not in <I>posix mode</I>,
 <B>bash</B> clears the <B>-e</B> option in such subshells.
 <P>
 
@@ -9745,12 +9752,12 @@ will be displayed.
 <P>
 The return value is true unless an invalid option is supplied, or no
 matches were generated.
-<DT><B>complete</B> [<B>-abcdefgjksuv</B>] [<B>-o</B> <I>comp-option</I>] [<B>-DE</B>] [<B>-A</B> <I>action</I>] [<B>-G</B> <I>globpat</I>] [<B>-W</B> <I>wordlist</I>] [<B>-F</B> <I>function</I>] [<B>-C</B> <I>command</I>]<DD>
+<DT><B>complete</B> [<B>-abcdefgjksuv</B>] [<B>-o</B> <I>comp-option</I>] [<B>-DEI</B>] [<B>-A</B> <I>action</I>] [<B>-G</B> <I>globpat</I>] [<B>-W</B> <I>wordlist</I>] [<B>-F</B> <I>function</I>] [<B>-C</B> <I>command</I>]<DD>
 <BR>
 
 [<B>-X</B> <I>filterpat</I>] [<B>-P</B> <I>prefix</I>] [<B>-S</B> <I>suffix</I>] <I>name</I> [<I>name ...</I>]
 
-<DT><B>complete</B> <B>-pr</B> [<B>-DE</B>] [<I>name</I> ...]<DD>
+<DT><B>complete</B> <B>-pr</B> [<B>-DEI</B>] [<I>name</I> ...]<DD>
 
 Specify how arguments to each <I>name</I> should be completed.
 If the <B>-p</B> option is supplied, or if no options are supplied,
@@ -9765,6 +9772,12 @@ on a command for which no completion has previously been defined.
 The <B>-E</B> option indicates that the remaining options and actions should
 apply to ``empty'' command completion; that is, completion attempted on a
 blank line.
+The <B>-I</B> option indicates that the remaining options and actions should
+apply to completion on the inital non-assignment word on the line, or after
+a command delimiter such as <B>;</B> or <B>|</B>, which is usually command
+name completion.
+If multiple options are supplied, the <B>-D</B> option takes precedence
+over <B>-E</B>, and both take precedence of <B>-I</B>.
 <P>
 The process of applying these completion specifications when word completion
 is attempted is described above under <B>Programmable Completion</B>.
@@ -9995,7 +10008,7 @@ a <I>name</I> for which no specification exists, or
 an error occurs adding a completion specification.
 </DL>
 
-<DT><B>compopt</B> [<B>-o</B> <I>option</I>] [<B>-DE</B>] [<B>+o</B> <I>option</I>] [<I>name</I>]<DD>
+<DT><B>compopt</B> [<B>-o</B> <I>option</I>] [<B>-DEI</B>] [<B>+o</B> <I>option</I>] [<I>name</I>]<DD>
 Modify completion options for each <I>name</I> according to the
 <I>option</I>s, or for the
 currently-executing completion if no <I>name</I>s are supplied.
@@ -10009,6 +10022,10 @@ on a command for which no completion has previously been defined.
 The <B>-E</B> option indicates that the remaining options should
 apply to ``empty'' command completion; that is, completion attempted on a
 blank line.
+The <B>-I</B> option indicates that the remaining options should
+apply to completion on the inital non-assignment word on the line,
+or after a command delimiter such as <B>;</B> or <B>|</B>, which is usually
+command name completion.
 <P>
 The return value is true unless an invalid option is supplied, an attempt
 is made to modify the options for a <I>name</I> for which no completion
@@ -11727,7 +11744,7 @@ Without options, the name and value of each shell variable are displayed
 in a format that can be reused as input
 for setting or resetting the currently-set variables.
 Read-only variables cannot be reset.
-In <I>posix</I> mode, only shell variables are listed.
+In <I>posix mode</I>, only shell variables are listed.
 The output is sorted according to the current locale.
 When options are specified, they set or unset shell attributes.
 Any arguments remaining after option processing are treated
@@ -12444,7 +12461,7 @@ interrupt; previous versions continue with the next command in the list.
 If set,
 <B>bash</B>,
 
-when in <I>posix</I> mode, treats a single quote in a double-quoted
+when in <I>posix mode</I>, treats a single quote in a double-quoted
 parameter expansion as a special character.  The single quotes must match
 (an even number) and the characters between the single quotes are considered
 quoted.  This is the behavior of posix mode through version 4.1.
@@ -13426,7 +13443,7 @@ and
 <B>-u</B>,
 
 which are unscaled values;
-and, when in Posix mode,
+and, when in posix mode,
 <B>-c</B>
 
 and
@@ -13852,7 +13869,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2018 March 15<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2018 June 8<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13958,6 +13975,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 19 March 2018 09:43:32 EDT
+Time: 08 June 2018 16:16:11 EDT
 </BODY>
 </HTML>

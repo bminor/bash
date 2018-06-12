@@ -1,6 +1,6 @@
 /* braces.c -- code for doing word expansion in curly braces. */
 
-/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2018 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -778,7 +778,9 @@ array_concat (arr1, arr2)
   len1 = strvec_len (arr1);
   len2 = strvec_len (arr2);
 
-  result = (char **)xmalloc ((1 + (len1 * len2)) * sizeof (char *));
+  result = (char **)malloc ((1 + (len1 * len2)) * sizeof (char *));
+  if (result == 0)
+    return (result);
 
   len = 0;
   for (i = 0; i < len1; i++)

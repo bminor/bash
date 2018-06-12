@@ -1426,6 +1426,7 @@ attempt_shell_completion (text, start, end)
   char **matches, *command_separator_chars;
 #if defined (PROGRAMMABLE_COMPLETION)
   int have_progcomps, was_assignment;
+  COMPSPEC *iw_compspec;
 #endif
 
   command_separator_chars = COMMAND_SEPARATORS;
@@ -1510,7 +1511,9 @@ attempt_shell_completion (text, start, end)
 #if defined (PROGRAMMABLE_COMPLETION)
   /* Attempt programmable completion. */
   have_progcomps = prog_completion_enabled && (progcomp_size () > 0);
-  if (matches == 0 && (in_command_position == 0 || text[0] == '\0') &&
+  iw_compspec = progcomp_search (INITIALWORD);
+  if (matches == 0 &&
+      (in_command_position == 0 || text[0] == '\0' || (in_command_position && iw_compspec)) &&
       current_prompt_string == ps1_prompt)
     {
       int s, e, s1, e1, os, foundcs;
@@ -1599,6 +1602,12 @@ attempt_shell_completion (text, start, end)
         }
       else
 	foundcs = 0;
+
+      /* If we have defined a compspec for the initial (command) word, call
+	 it and process the results like any other programmable completion. */
+      if (in_command_position && foundcs == 0 && iw_compspec)
+	prog_complete_matches = programmable_completions (INITIALWORD, text, s, e, &foundcs);
+
       FREE (n);
       /* XXX - if we found a COMPSPEC for the command, just return whatever
 	 the programmable completion code returns, and disable the default

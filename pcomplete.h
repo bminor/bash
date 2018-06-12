@@ -107,6 +107,7 @@ typedef struct _list_of_items {
 
 #define EMPTYCMD	"_EmptycmD_"
 #define DEFAULTCMD	"_DefaultCmD_"
+#define INITIALWORD	"_InitialWorD_"
 
 extern HASH_TABLE *prog_completes;
 

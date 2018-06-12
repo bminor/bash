@@ -1,6 +1,6 @@
 /* histfile.c - functions to manipulate the history file. */
 
-/* Copyright (C) 1989-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -396,7 +396,7 @@ read_history_range (const char *filename, int from, int to)
 	  {
 	    if (HIST_TIMESTAMP_START(line_start) == 0)
 	      {
-	      	if (last_ts == NULL && history_multiline_entries)
+	      	if (last_ts == NULL && history_length > 0 && history_multiline_entries)
 		  _hs_append_history_line (history_length - 1, line_start);
 		else
 		  add_history (line_start);

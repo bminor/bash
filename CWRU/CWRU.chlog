@@ -15490,3 +15490,39 @@ bashhist.c
 	- load_history: use HISTSIZE_DEFAULT (still defaults to "500") to set
 	  the initial value of $HISTSIZE. HISTSIZE_DEFAULT can be overridden
 	  in config-top.h
+
+				    6/4
+				    ---
+configure.ac
+	- make sure we link against an external readline library that's at
+	  least version 8
+
+				    6/8
+				    ---
+pcomplete.h
+	- INITIALWORD: internal compspec name for programmable completion on
+	  the initial (usually the command) word
+
+bashline.c
+	- attempt_shell_completion: if we are in a command position and the
+	  user has defined a compspec for INITIALWORD, use programmable
+	  completion to complete command words. Original patch from
+	  Luca Boccassi <bluca@debian.org>
+
+lib/readline/doc/rluser.texi,builtins/complete.def,doc/bash.1
+	- make it clearer that -D takes precedence over -E when supplied as
+	  options to `complete', not when they are applied during completion
+
+builtins/complete.def
+	- complete_builtin,compgen_builtin: add support for -I option
+	- print_one_completion,print_compopts: display -I when appropriate
+
+lib/readline/doc/rluser.texi,doc/bash.1
+	- complete,compgen: document new -I option and its effect
+
+				   6/10
+				   ----
+lib/readline/histfile.c
+	- read_history_range: don't apply the heuristic and try to append a
+	  history line to an existing history entry if we don't have any
+	  history entries. Bug and fix from Edward Huff <ejhuff@gmail.com>

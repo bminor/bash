@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Sat May 19 21:48:08 EDT 2018
+.\"	Last Change: Fri Jun  8 16:15:23 EDT 2018
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2018 May 19" "GNU Bash 5.0"
+.TH BASH 1 "2018 June 8" "GNU Bash 5.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -7647,12 +7647,12 @@ will be displayed.
 The return value is true unless an invalid option is supplied, or no
 matches were generated.
 .TP
-\fBcomplete\fP [\fB\-abcdefgjksuv\fP] [\fB\-o\fP \fIcomp-option\fP] [\fB\-DE\fP] [\fB\-A\fP \fIaction\fP] [\fB\-G\fP \fIglobpat\fP] [\fB\-W\fP \fIwordlist\fP] [\fB\-F\fP \fIfunction\fP] [\fB\-C\fP \fIcommand\fP]
+\fBcomplete\fP [\fB\-abcdefgjksuv\fP] [\fB\-o\fP \fIcomp-option\fP] [\fB\-DEI\fP] [\fB\-A\fP \fIaction\fP] [\fB\-G\fP \fIglobpat\fP] [\fB\-W\fP \fIwordlist\fP] [\fB\-F\fP \fIfunction\fP] [\fB\-C\fP \fIcommand\fP]
 .br
 [\fB\-X\fP \fIfilterpat\fP] [\fB\-P\fP \fIprefix\fP] [\fB\-S\fP \fIsuffix\fP] \fIname\fP [\fIname ...\fP]
 .PD 0
 .TP
-\fBcomplete\fP \fB\-pr\fP [\fB\-DE\fP] [\fIname\fP ...]
+\fBcomplete\fP \fB\-pr\fP [\fB\-DEI\fP] [\fIname\fP ...]
 .PD
 Specify how arguments to each \fIname\fP should be completed.
 If the \fB\-p\fP option is supplied, or if no options are supplied,
@@ -7667,6 +7667,12 @@ on a command for which no completion has previously been defined.
 The \fB\-E\fP option indicates that the remaining options and actions should
 apply to ``empty'' command completion; that is, completion attempted on a
 blank line.
+The \fB\-I\fP option indicates that the remaining options and actions should
+apply to completion on the inital non-assignment word on the line, or after
+a command delimiter such as \fB;\fP or \fB|\fP, which is usually command
+name completion.
+If multiple options are supplied, the \fB\-D\fP option takes precedence
+over \fB\-E\fP, and both take precedence of \fB\-I\fP.
 .sp 1
 The process of applying these completion specifications when word completion
 is attempted is described above under \fBProgrammable Completion\fP.
@@ -7862,7 +7868,7 @@ a \fIname\fP for which no specification exists, or
 an error occurs adding a completion specification.
 .RE
 .TP
-\fBcompopt\fP [\fB\-o\fP \fIoption\fP] [\fB\-DE\fP] [\fB+o\fP \fIoption\fP] [\fIname\fP]
+\fBcompopt\fP [\fB\-o\fP \fIoption\fP] [\fB\-DEI\fP] [\fB+o\fP \fIoption\fP] [\fIname\fP]
 Modify completion options for each \fIname\fP according to the
 \fIoption\fPs, or for the
 currently-executing completion if no \fIname\fPs are supplied.
@@ -7876,6 +7882,10 @@ on a command for which no completion has previously been defined.
 The \fB\-E\fP option indicates that the remaining options should
 apply to ``empty'' command completion; that is, completion attempted on a
 blank line.
+The \fB\-I\fP option indicates that the remaining options should
+apply to completion on the inital non-assignment word on the line,
+or after a command delimiter such as \fB;\fP or \fB|\fP, which is usually
+command name completion.
 .sp 1
 The return value is true unless an invalid option is supplied, an attempt
 is made to modify the options for a \fIname\fP for which no completion
