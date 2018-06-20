@@ -850,7 +850,7 @@ AC_CHECK_HEADERS([argz.h errno.h fcntl.h malloc.h stdio_ext.h])
 dnl AC_FUNC_MALLOC
 AC_FUNC_MMAP
 AC_CHECK_FUNCS([__argz_count __argz_next __argz_stringify dcgettext mempcpy \
-		munmap stpcpy strcspn])
+		munmap mremap stpcpy strcspn])
 
 INTL_DEP= INTL_INC= LIBINTL_H=
 if test "x$USE_INCLUDED_LIBINTL" = "xyes"; then

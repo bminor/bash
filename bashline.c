@@ -1592,8 +1592,8 @@ attempt_shell_completion (text, start, end)
 	}
       else if (s >= e && n[0] == '\0' && text[0] == '\0' && start > 0)
         {
-          foundcs = 0;	/* empty command name following assignments */
-          in_command_position = was_assignment;
+          foundcs = 0;	/* empty command name following optional assignments */
+          in_command_position += was_assignment;
         }
       else if (s == start && e == end && STREQ (n, text) && start > 0)
         {
@@ -1605,7 +1605,7 @@ attempt_shell_completion (text, start, end)
 
       /* If we have defined a compspec for the initial (command) word, call
 	 it and process the results like any other programmable completion. */
-      if (in_command_position && foundcs == 0 && iw_compspec)
+      if (in_command_position && have_progcomps && foundcs == 0 && iw_compspec)
 	prog_complete_matches = programmable_completions (INITIALWORD, text, s, e, &foundcs);
 
       FREE (n);

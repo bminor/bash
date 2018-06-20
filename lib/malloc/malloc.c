@@ -111,6 +111,7 @@
 #  define NO_VALLOC
 #endif
 
+/* SIZEOF_LONG * 4 - 2, usable bins from 1..NBUCKETS-1 */
 #define NBUCKETS	30
 
 #define ISALLOC ((char) 0xf7)	/* magic byte that implies allocation */
@@ -194,6 +195,8 @@ typedef union _malloc_guard {
 
 #define LESSCORE_MIN	10
 #define LESSCORE_FRC	13
+
+#define MMAP_THRESHOLD	15	/* must be greater than SPLIT_MAX, COMBINE_MAX */
 
 #define STARTBUCK	1
 
@@ -1053,12 +1056,9 @@ internal_realloc (mem, n, file, line, flags)
   /* If ok, use the same block, just marking its size as changed.  */
   if (RIGHT_BUCKET(nbytes, nunits) || RIGHT_BUCKET(nbytes, nunits-1))
     {
-#if 0
-      m = (char *)mem + p->mh_nbytes;
-#else
       /* Compensate for increment above. */
       m -= 4;
-#endif
+
       *m++ = 0;  *m++ = 0;  *m++ = 0;  *m++ = 0;
       m = (char *)mem + (p->mh_nbytes = n);
 
@@ -1120,11 +1120,7 @@ internal_memalign (alignment, size, file, line, flags)
   if (((long) ptr & (alignment - 1)) == 0)
     return ptr;
   /* Otherwise, get address of byte in the block that has that alignment.  */
-#if 0
-  aligned = (char *) (((long) ptr + alignment - 1) & -alignment);
-#else
   aligned = (char *) (((long) ptr + alignment - 1) & (~alignment + 1));
-#endif
 
   /* Store a suitable indication of how to free the block,
      so that free can find the true beginning of it.  */

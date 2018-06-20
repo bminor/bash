@@ -15526,3 +15526,13 @@ lib/readline/histfile.c
 	- read_history_range: don't apply the heuristic and try to append a
 	  history line to an existing history entry if we don't have any
 	  history entries. Bug and fix from Edward Huff <ejhuff@gmail.com>
+
+				   6/12
+				   ----
+bashline.c
+	- attempt_shell_completion: don't all the programmable completion for
+	  INITIALWORD if programmable completion is disabled
+	- attempt_shell_completion: make sure in_command_position remains set
+	  for an empty command word on an otherwise blank line, making the
+	  presence of assignment statements optional.  Report from
+	  Luca Boccassi <bluca@debian.org>
