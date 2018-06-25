@@ -229,7 +229,9 @@ static SHELL_VAR *get_dirstack __P((SHELL_VAR *));
 
 #if defined (ARRAY_VARS)
 static SHELL_VAR *get_groupset __P((SHELL_VAR *));
-
+#  if defined (DEBUGGER)
+static SHELL_VAR *get_bashargcv __P((SHELL_VAR *));
+#  endif
 static SHELL_VAR *build_hashcmd __P((SHELL_VAR *));
 static SHELL_VAR *get_hashcmd __P((SHELL_VAR *));
 static SHELL_VAR *assign_hashcmd __P((SHELL_VAR *,  char *, arrayind_t, char *));
@@ -1652,6 +1654,27 @@ get_groupset (self)
   return (self);
 }
 
+#  if defined (DEBUGGER)
+static SHELL_VAR *
+get_bashargcv (self)
+     SHELL_VAR *self;
+{
+  static int self_semaphore = 0;
+
+  /* Backwards compatibility: if we refer to BASH_ARGV or BASH_ARGC at the
+     top level without enabling debug mode, and we don't have an instance
+     of the variable set, initialize the arg arrays.
+     This will already have been done if debugging_mode != 0. */
+  if (self_semaphore == 0 && variable_context == 0 && debugging_mode == 0)	/* don't do it for shell functions */
+    {
+      self_semaphore = 1;
+      init_bash_argv ();
+      self_semaphore = 0;
+    }
+  return self;
+}
+#  endif
+
 static SHELL_VAR *
 build_hashcmd (self)
      SHELL_VAR *self;
@@ -1882,8 +1905,8 @@ initialize_dynamic_variables ()
   v = init_dynamic_array_var ("GROUPS", get_groupset, null_array_assign, att_noassign);
 
 #  if defined (DEBUGGER)
-  v = init_dynamic_array_var ("BASH_ARGC", get_self, null_array_assign, att_noassign|att_nounset);
-  v = init_dynamic_array_var ("BASH_ARGV", get_self, null_array_assign, att_noassign|att_nounset);
+  v = init_dynamic_array_var ("BASH_ARGC", get_bashargcv, null_array_assign, att_noassign|att_nounset);
+  v = init_dynamic_array_var ("BASH_ARGV", get_bashargcv, null_array_assign, att_noassign|att_nounset);
 #  endif /* DEBUGGER */
   v = init_dynamic_array_var ("BASH_SOURCE", get_self, null_array_assign, att_noassign|att_nounset);
   v = init_dynamic_array_var ("BASH_LINENO", get_self, null_array_assign, att_noassign|att_nounset);

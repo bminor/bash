@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.0, version 4.091])dnl
+AC_REVISION([for Bash 5.0, version 4.092])dnl
 
 define(bashvers, 5.0)
 define(relstatus, alpha)
@@ -714,7 +714,7 @@ AC_CHECK_HEADERS(unistd.h stdlib.h stdarg.h varargs.h limits.h string.h \
 		 stdbool.h stddef.h stdint.h netdb.h pwd.h grp.h strings.h \
 		 regex.h syslog.h ulimit.h)
 AC_CHECK_HEADERS(sys/pte.h sys/stream.h sys/select.h sys/file.h sys/ioctl.h \
-		 sys/param.h sys/socket.h sys/stat.h \
+		 sys/mman.h sys/param.h sys/socket.h sys/stat.h \
 		 sys/time.h sys/times.h sys/types.h sys/wait.h)
 AC_CHECK_HEADERS(netinet/in.h arpa/inet.h)
 

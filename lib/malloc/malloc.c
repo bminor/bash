@@ -84,6 +84,10 @@
 #include <errno.h>
 #include <stdio.h>
 
+#if defined (HAVE_MMAP)
+#include <sys/mman.h>
+#endif
+
 /* Define getpagesize () if the system does not.  */
 #ifndef HAVE_GETPAGESIZE
 #  include "getpagesize.h"
@@ -196,9 +200,24 @@ typedef union _malloc_guard {
 #define LESSCORE_MIN	10
 #define LESSCORE_FRC	13
 
-#define MMAP_THRESHOLD	15	/* must be greater than SPLIT_MAX, COMBINE_MAX */
-
 #define STARTBUCK	1
+
+/* Should we use mmap for large allocations? */
+#if defined (HAVE_MMAP)
+#  if !defined (MAP_ANON) && defined (MAP_ANONYMOUS)
+#    define MAP_ANON MAP_ANONYMOUS
+#  endif
+#endif
+
+#if defined (HAVE_MMAP) && defined (MAP_ANON)
+#  define USE_MMAP
+#endif
+
+#if defined (USE_MMAP)
+#  define MMAP_THRESHOLD	14	/* must be >= SPLIT_MAX, COMBINE_MAX */
+#else
+#  define MMAP_THRESHOLD	(8 * SIZEOF_LONG)
+#endif
 
 /* Flags for the internal functions. */
 #define MALLOC_WRAPPER	0x01	/* wrapper function */
@@ -290,6 +309,9 @@ struct _malstats _mstats;
 int malloc_flags = 0;	/* future use */
 int malloc_trace = 0;	/* trace allocations and frees to stderr */
 int malloc_register = 0;	/* future use */
+
+/* Use a variable in case we want to dynamically adapt it in the future */
+int malloc_mmap_threshold = MMAP_THRESHOLD;
 
 #ifdef MALLOC_TRACE
 char _malloc_trace_buckets[NBUCKETS];
@@ -597,7 +619,7 @@ morecore (nu)
 
   /* Try to split a larger block here, if we're within the range of sizes
      to split. */
-  if (nu >= SPLIT_MIN)
+  if (nu >= SPLIT_MIN && nu <= malloc_mmap_threshold)
     {
       bsplit (nu);
       if (nextf[nu] != 0)
@@ -606,7 +628,7 @@ morecore (nu)
 
   /* Try to coalesce two adjacent blocks from the free list on nextf[nu - 1],
      if we can, and we're within the range of the block coalescing limits. */
-  if (nu >= COMBINE_MIN && nu < COMBINE_MAX && busy[nu - 1] == 0 && nextf[nu - 1])
+  if (nu >= COMBINE_MIN && nu < COMBINE_MAX && nu <= malloc_mmap_threshold && busy[nu - 1] == 0 && nextf[nu - 1])
     {
       bcoalesce (nu);
       if (nextf[nu] != 0)
@@ -634,6 +656,25 @@ morecore (nu)
 	sbrk_amt = siz + pagesz - sbrk_amt;
       nblks = 1;
     }
+
+#if defined (USE_MMAP)
+  if (nu > malloc_mmap_threshold)
+    {
+      mp = (union mhead *)mmap (0, sbrk_amt, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+      if ((void *)mp == MAP_FAILED)
+	goto morecore_done;
+      nextf[nu] = mp;
+      mp->mh_alloc = ISFREE;
+      mp->mh_index = nu;
+      CHAIN (mp) = 0;
+#ifdef MALLOC_STATS
+      _mstats.nmmap++;
+      _mstats.tmmap += sbrk_amt;
+#endif
+      goto morecore_done;
+    }
+#endif
+	
 
 #ifdef MALLOC_STATS
   _mstats.nsbrk++;
@@ -918,6 +959,17 @@ internal_free (mem, file, line, flags)
   if (mg.i != p->mh_nbytes)
     xbotch (mem, ERR_ASSERT_FAILED, _("free: start and end chunk sizes differ"), file, line);
 
+#if defined (USE_MMAP)
+  if (nunits > malloc_mmap_threshold)
+    {
+      munmap (p, binsize (nunits));
+#if defined (MALLOC_STATS)
+      _mstats.nlesscore[nunits]++;
+#endif
+      goto free_return;
+    }
+#endif
+
 #if GLIBC21
   if (nunits >= LESSCORE_MIN && ((char *)p + binsize(nunits) == sbrk (0)))
 #else
@@ -1075,6 +1127,8 @@ internal_realloc (mem, n, file, line, flags)
 #ifdef MALLOC_STATS
   _mstats.nrcopy++;
 #endif
+
+  /* If we are using mmap and have mremap, we could use it here. */
 
   if ((m = internal_malloc (n, file, line, MALLOC_INTERNAL|MALLOC_NOTRACE|MALLOC_NOREG)) == 0)
     return 0;
