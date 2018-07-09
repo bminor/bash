@@ -3424,7 +3424,7 @@ lib/readline/bind.c
 	  takes a length parameter; otherwise equivalent to rl_function_of_keyseq.
 
 lib/readline/readline.h
-	- rl_function_of_keyseq_len: add extern declration for new function
+	- rl_function_of_keyseq_len: add extern declaration for new function
 
 lib/readline/doc/rltech.texi
 	- rl_function_of_keyseq_len: document new function interface
@@ -3873,3 +3873,54 @@ variables.c
 	  function) without enabling debugging mode and not having initialized
 	  the variable previously (using a simple semaphore), create the
 	  variables
+
+				   6/25
+				   ----
+configure.ac
+	- opt_bash_malloc: bash malloc no longer disabled for systems that
+	  require eight-bit alignment; the bash malloc has had this for a
+	  long time
+
+				    7/4
+				    ---
+bashline.c
+	- pre_process_line: if command-oriented history is enabled, and the
+	  line being expanded is the second or later in a multi-line command,
+	  and we know the command is being saved as the current history entry,
+	  decrease history_length before calling history_expand so references
+	  like !! refer to the previous history entry as usual
+
+lib/readline/histexpand.c
+	- history_quoting_state: new variable, can be set by calling
+	  application before calling history_expand to note that the string
+	  being expanded is part of a quoted string. Can be set to a single
+	  quote, a double quote, or 0 (no quoting)
+	- history_expand: look at history_quoting_state and honor the
+	  single-quote setting by not expanding any initial portion of the
+	  line before the closing single quote. This allows history expansions
+	  to be performed on a line containing a closing single quote if they
+	  appear after the single quote
+
+lib/readline/history.h
+	- history_quoting_state: extern declaration
+
+bashhist.c
+	- bash_history_inhibit_expansion: if history_quoting_state indicates
+	  that this string is single-quoted, skip over the single-quoted
+	  portion and determine whether or not the portion after the
+	  quoted string needs to be inhibited from history expansion
+
+parse.y
+	- shell_getc: set history_quoting_state based on the contents of the
+	  current delimiter before calling pre_process_line
+
+				    7/6
+				    ---
+lib/readline/doc/hsuser.texi
+	- describe the default behavior of backslash and single and double
+	  quotes
+
+lib/readline/doc/hstech.texi
+	- history_quoting_state: describe effect of setting this variable
+	- history_quotes_inihibit_expansion: expand the description to include
+	  the default quoting behavior that setting this variable enables

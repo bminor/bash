@@ -213,7 +213,7 @@ bash_history_inhibit_expansion (string, i)
      char *string;
      int i;
 {
-  int t;
+  int t, si;
   char hx[2];
 
   hx[0] = history_expansion_char;
@@ -236,9 +236,20 @@ bash_history_inhibit_expansion (string, i)
     return (1);
 #endif
 
+  si = 0;
+  /* If we're supposed to be in single-quoted string, skip over the
+     single-quoted part and then look at what's left. */
+  if (history_quoting_state == '\'')
+    {
+      si = skip_to_delim (string, 0, "'", SD_NOJMP|SD_HISTEXP);
+      if (string[si] == 0 || si >= i)
+	return (1);
+      si++;
+    }
+
   /* Make sure the history expansion should not be skipped by quoting or
      command/process substitution. */
-  else if ((t = skip_to_histexp (string, 0, hx, SD_NOJMP|SD_HISTEXP)) > 0)
+  if ((t = skip_to_histexp (string, si, hx, SD_NOJMP|SD_HISTEXP)) > 0)
     {
       /* Skip instances of history expansion appearing on the line before
 	 this one. */
@@ -549,7 +560,15 @@ pre_process_line (line, print_changes, addit)
      add that line to the history if ADDIT is non-zero. */
   if (!history_expansion_inhibited && history_expansion && history_expansion_p (line))
     {
+      /* If we are expanding the second or later line of a multi-line
+	 command, decrease history_length so references to history expansions
+	 in these lines refer to the previous history entry and not the
+	 current command. */
+      if (history_length > 0 && command_oriented_history && current_command_first_line_saved && current_command_line_count > 1)
+        history_length--;
       expanded = history_expand (line, &history_value);
+      if (history_length >= 0 && command_oriented_history && current_command_first_line_saved && current_command_line_count > 1)
+        history_length++;
 
       if (expanded)
 	{

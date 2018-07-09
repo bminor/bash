@@ -2414,20 +2414,21 @@ shell_getc (remove_quoted_newline)
 	{
 	  char *expansions;
 #  if defined (BANG_HISTORY)
-	  int old_hist;
-
 	  /* If the current delimiter is a single quote, we should not be
 	     performing history expansion, even if we're on a different
 	     line from the original single quote. */
-	  old_hist = history_expansion_inhibited;
 	  if (current_delimiter (dstack) == '\'')
-	    history_expansion_inhibited = 1;
+	    history_quoting_state = '\'';
+	  else if (current_delimiter (dstack) == '"')
+	    history_quoting_state = '"';
+	  else
+	    history_quoting_state = 0;
 #  endif
 	  /* Calling with a third argument of 1 allows remember_on_history to
 	     determine whether or not the line is saved to the history list */
 	  expansions = pre_process_line (shell_input_line, 1, 1);
 #  if defined (BANG_HISTORY)
-	  history_expansion_inhibited = old_hist;
+	  history_quoting_state = 0;
 #  endif
 	  if (expansions != shell_input_line)
 	    {

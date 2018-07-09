@@ -110,6 +110,13 @@ extern char *strcpy __P((char *, const char *));
   ((TYPE_WIDTH (t) - TYPE_SIGNED (t)) * 302 / 1000 \
    + 1 + TYPE_SIGNED (t))
 
+/* Updated version adapted from gnulib/intprops.h, not used right now.
+   Changes the approximation of log10(2) from 302/1000 to 146/485. */
+#if 0
+#define INT_STRLEN_BOUND(t) \
+  (INT_BITS_STRLEN_BOUND (TYPE_WIDTH (t) - TYPE_SIGNED (t)) + TYPE_SIGNED(t))
+#endif
+
 /* Bound on buffer size needed to represent an integer type or expression T,
    including the terminating null.  */
 #define INT_BUFSIZE_BOUND(t) (INT_STRLEN_BOUND (t) + 1)

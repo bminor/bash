@@ -1,6 +1,6 @@
 /* histexpand.c -- history expansion. */
 
-/* Copyright (C) 1989-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -106,6 +106,8 @@ char *history_word_delimiters = HISTORY_WORD_DELIMITERS;
 /* If set, this points to a function that is called to verify that a
    particular history expansion should be performed. */
 rl_linebuf_func_t *history_inhibit_expansion_function;
+
+int history_quoting_state = 0;
 
 /* **************************************************************** */
 /*								    */
@@ -961,7 +963,22 @@ history_expand (char *hstring, char **output)
 
       /* `!' followed by one of the characters in history_no_expand_chars
 	 is NOT an expansion. */
-      for (i = dquote = squote = 0; string[i]; i++)
+      dquote = history_quoting_state == '"';
+      squote = history_quoting_state == '\'';
+
+      /* If the calling application tells us we are already reading a
+	 single-quoted string, consume the rest of the string right now
+	 and then go on. */
+      i = 0;
+      if (squote && history_quotes_inhibit_expansion)
+	{
+	  hist_string_extract_single_quoted (string, &i, 0);
+	  squote = 0;
+	  if (string[i])
+	    i++;
+	}
+
+      for ( ; string[i]; i++)
 	{
 #if defined (HANDLE_MULTIBYTE)
 	  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
@@ -1049,7 +1066,29 @@ history_expand (char *hstring, char **output)
     }
 
   /* Extract and perform the substitution. */
-  for (passc = dquote = squote = i = j = 0; i < l; i++)
+  dquote = history_quoting_state == '"';
+  squote = history_quoting_state == '\'';
+
+  /* If the calling application tells us we are already reading a
+     single-quoted string, consume the rest of the string right now
+     and then go on. */
+  i = j = 0;
+  if (squote && history_quotes_inhibit_expansion)
+    {
+      int c;
+
+      hist_string_extract_single_quoted (string, &i, 0);
+      squote = 0;
+      for (c = 0; c < i; c++)
+	ADD_CHAR (string[c]);      
+      if (string[i])
+	{
+	  ADD_CHAR (string[i]);
+	  i++;
+	}
+    }
+
+  for (passc = 0; i < l; i++)
     {
       int qc, tchar = string[i];
 

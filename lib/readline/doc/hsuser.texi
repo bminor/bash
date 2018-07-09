@@ -262,8 +262,8 @@ fix errors in previous commands quickly.
 @ifset BashFeatures
 History expansion is performed immediately after a complete line
 is read, before the shell breaks it into words, and is performed
-on each line individually without taking quoting on previous lines into
-account.
+on each line individually.  Bash attempts to inform the history
+expansion functions about quoting still in effect from previous lines.
 @end ifset
 
 History expansion takes place in two parts.  The first is to determine
@@ -277,9 +277,19 @@ that Bash does, so that several words
 surrounded by quotes are considered one word.
 History expansions are introduced by the appearance of the
 history expansion character, which is @samp{!} by default.
+
+History expansion implements shell-like quoting conventions:
+a backslash can be used to remove the special handling for the next character;
+single quotes enclose verbatim sequences of characters, and can be used to
+inhibit history expansion;
+and characters enclosed within double quotes may be subject to history
+expansion, since backslash can escape the history expansion character,
+but single quotes may not, since they are not treated specially within
+double quotes.
+
 @ifset BashFeatures
-Only @samp{\} and @samp{'} may be used to escape the history expansion
-character, but the history expansion character is
+When using the shell, only @samp{\} and @samp{'} may be used to escape the
+history expansion character, but the history expansion character is
 also treated as quoted if it immediately precedes the closing double quote
 in a double-quoted string. 
 @end ifset
