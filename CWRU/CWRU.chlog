@@ -3924,3 +3924,63 @@ lib/readline/doc/hstech.texi
 	- history_quoting_state: describe effect of setting this variable
 	- history_quotes_inihibit_expansion: expand the description to include
 	  the default quoting behavior that setting this variable enables
+
+				    7/9
+				    ---
+support/man2html.c
+	- unescape: use memmove instead of strcpy to handle overlapping strings
+	  Report and fix from Bernhard M. Wiedemann <bwiedemann@suse.de>
+
+lib/sh/getenv.c
+	- getenv: check that environ is non-NULL before looking through it.
+	  Report and fix from Keeley Hoek <keeley@hoek.io>
+
+				   7/12
+				   ----
+braces.c
+	- mkseq: use better integer overflow handling for systems with 32-bit
+	  ints and 64-bit intmax_ts. Bug reported by Simon Wörner
+	  <mail@simon-woerner.de> as the result of fuzzing
+
+builtins/declare.def
+	- declare_internal: make sure bind_variable returns non-NULL when
+	  setting attributes for a variable named as an argument to declare
+	  that also appears in the temporary environment (and is a nameref).
+	  Bug reported by Simon Wörner <mail@simon-woerner.de as the
+	  result of fuzzing
+
+variables.c
+	- bind_variable_internal: if we're assigning through a nameref, don't
+	  create a variable with an invalid name under any circumstances
+
+builtins/common.c
+	- get_job_spec: make sure to return NO_JOB if atoi() returns < 0 due
+	  to integer overflow.
+	  Bug reported by Simon Wörner <mail@simon-woerner.de as the
+	  result of fuzzing
+
+				   7/13
+				   ----
+execute_cmd.c
+	- execute_in_subshell: don't call set_sigint_handler if the subshell
+	  is asynchronous, since it undoes the signal handler installed by
+	  setup_async_signals. Fixes bug reported by Daniel Mills
+	  <danielmills1@gmail.com>
+
+parse.y,externs.h
+	- reset_readahead_token: new convenience function for the rest of
+	  the shell, resets token_to_read if it's a newline (as it will be
+	  after reset_parser is called)
+
+eval.c
+	- reader_loop: if we're just going to execute one command, make sure
+	  the read-ahead token isn't set to something that will result in a
+	  NULL command (by calling reset_readahead_token), since the code
+	  will take that as the one command and set EOF_Reached
+
+				   7/15
+				   ----
+doc/{bash.1,bashref.texi}
+	- indirect expansion: clarify that the expansion works on parameters,
+	  not just variables (NAMEs). Suggested by konsolebox
+	  <konsolebox@gmail.com>

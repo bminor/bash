@@ -939,9 +939,12 @@ restart_new_var_name:
 		{
 		  tvalue = var_isset (var) ? savestring (value_cell (var)) : savestring ("");
 	          tv = bind_variable (var->name, tvalue, 0);
-	          tv->attributes |= var->attributes & ~att_tempvar;
-	          if (tv->context > 0)
-		    VSETATTR (tv, att_propagate);
+		  if (tv)
+		    {
+		      tv->attributes |= var->attributes & ~att_tempvar;
+		      if (tv->context > 0)
+			VSETATTR (tv, att_propagate);
+		    }
 	          free (tvalue);
 		}
 	      VSETATTR (var, att_propagate);

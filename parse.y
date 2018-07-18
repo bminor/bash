@@ -3168,6 +3168,13 @@ reset_parser ()
   token_to_read = '\n';
 }
 
+void
+reset_readahead_token ()
+{
+  if (token_to_read == '\n')
+    token_to_read = 0;
+}
+
 /* Read the next token.  Command can be READ (normal operation) or
    RESET (to normalize state). */
 static int

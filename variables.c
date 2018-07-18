@@ -2939,7 +2939,12 @@ bind_variable_internal (name, value, table, hflags, aflags)
     }
   else if (entry && nameref_p (entry))
     {
-      newval = nameref_cell (entry);
+      newval = nameref_cell (entry);	/* XXX - newval can't be NULL here */
+      if (valid_nameref_value (newval, 0) == 0)
+	{
+	  sh_invalidid (newval);
+	  return ((SHELL_VAR *)NULL);
+	}
 #if defined (ARRAY_VARS)
       /* declare -n foo=x[2] ; foo=bar */
       if (valid_array_reference (newval, 0))

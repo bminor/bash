@@ -109,6 +109,7 @@ extern int return_EOF __P((void));
 extern void push_token __P((int));
 extern char *xparse_dolparen __P((char *, char *, int *, int));
 extern void reset_parser __P((void));
+extern void reset_readahead_token __P((void));
 extern WORD_LIST *parse_string_to_word_list __P((char *, int, const char *));
 
 extern int parser_in_command_position __P((void));

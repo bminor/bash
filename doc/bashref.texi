@@ -1030,7 +1030,8 @@ to be matched as a string.
 An additional binary operator, @samp{=~}, is available, with the same
 precedence as @samp{==} and @samp{!=}.
 When it is used, the string to the right of the operator is considered
-an extended regular expression and matched accordingly (as in @i{regex}3)).
+a @sc{POSIX} extended regular expression and matched accordingly
+(as in @i{regex}3)).
 The return value is 0 if the string matches
 the pattern, and 1 otherwise.
 If the regular expression is syntactically incorrect, the conditional
@@ -1973,11 +1974,11 @@ interpreted as part of its name.
 
 If the first character of @var{parameter} is an exclamation point (!),
 and @var{parameter} is not a @var{nameref},
-it introduces a level of variable indirection.
-Bash uses the value of the variable formed from the rest of
-@var{parameter} as the name of the variable; this variable is then
-expanded and that value is used in the rest of the substitution, rather
-than the value of @var{parameter} itself.
+it introduces a level of indirection.
+Bash uses the value formed by expanding the rest of
+@var{parameter} as the new @var{parameter}; this is then
+expanded and that value is used in the rest of the expansion, rather
+than the expansion of the original @var{parameter}.
 This is known as @code{indirect expansion}.
 The value is subject to tilde expansion,
 parameter expansion, command substitution, and arithmetic expansion.

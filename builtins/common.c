@@ -678,7 +678,7 @@ get_job_spec (list)
   if (DIGIT (*word) && all_digits (word))
     {
       job = atoi (word);
-      return (job > js.j_jobslots ? NO_JOB : job - 1);
+      return ((job < 0 || job > js.j_jobslots) ? NO_JOB : job - 1);
     }
 
   jflags = 0;

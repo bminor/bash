@@ -739,7 +739,7 @@ to be matched as a string.
 An additional binary operator, \fB=~\fP, is available, with the same
 precedence as \fB==\fP and \fB!=\fP.
 When it is used, the string to the right of the operator is considered
-an extended regular expression and matched accordingly (as in \fIregex\fP(3)).
+a POSIX extended regular expression and matched accordingly (as in \fIregex\fP(3)).
 The return value is 0 if the string matches
 the pattern, and 1 otherwise.
 If the regular expression is syntactically incorrect, the conditional
@@ -2954,16 +2954,16 @@ The \fIparameter\fP is a shell parameter as described above
 .PP
 If the first character of \fIparameter\fP is an exclamation point (\fB!\fP),
 and \fIparameter\fP is not a \fInameref\fP,
-it introduces a level of variable indirection.
-\fBBash\fP uses the value of the variable formed from the rest of
-\fIparameter\fP as the name of the variable; this variable is then
-expanded and that value is used in the rest of the substitution, rather
-than the value of \fIparameter\fP itself.
+it introduces a level of indirection.
+\fBBash\fP uses the value formed by expanding the rest of
+\fIparameter\fP as the new \fIparameter\fP; this is then
+expanded and that value is used in the rest of the expansion, rather
+than the expansion of the original \fIparameter\fP.
 This is known as \fIindirect expansion\fP.
 The value is subject to tilde expansion,
 parameter expansion, command substitution, and arithmetic expansion.
 If \fIparameter\fP is a nameref, this expands to the name of the
-variable referenced by \fIparameter\fP instead of performing the
+parameter referenced by \fIparameter\fP instead of performing the
 complete indirect expansion.
 The exceptions to this are the expansions of ${\fB!\fP\fIprefix\fP\fB*\fP} and
 ${\fB!\fP\fIname\fP[\fI@\fP]} described below.

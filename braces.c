@@ -420,9 +420,9 @@ mkseq (start, end, incr, type, width)
   /* Instead of a simple nelem = prevn + 1, something like:
   	nelem = (prevn / imaxabs(incr)) + 1;
      would work */
-  nelem = (prevn / sh_imaxabs(incr)) + 1;
-  if (nelem > INT_MAX - 2)		/* Don't overflow int */
+  if ((prevn / sh_imaxabs (incr)) > INT_MAX - 3)	/* check int overflow */
     return ((char **)NULL);
+  nelem = (prevn / sh_imaxabs(incr)) + 1;
   result = strvec_mcreate (nelem + 1);
   if (result == 0)
     {

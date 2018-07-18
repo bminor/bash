@@ -1561,12 +1561,12 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       setup_async_signals ();
       asynchronous = 0;
     }
+  else
+    set_sigint_handler ();
 
 #if defined (JOB_CONTROL)
   set_sigchld_handler ();
 #endif /* JOB_CONTROL */
-
-  set_sigint_handler ();
 
   /* Delete all traces that there were any jobs running.  This is
      only for subshells. */
