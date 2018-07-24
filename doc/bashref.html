@@ -1452,7 +1452,8 @@ to be matched as a string.
 <p>An additional binary operator, &lsquo;<samp>=~</samp>&rsquo;, is available, with the same
 precedence as &lsquo;<samp>==</samp>&rsquo; and &lsquo;<samp>!=</samp>&rsquo;.
 When it is used, the string to the right of the operator is considered
-an extended regular expression and matched accordingly (as in <i>regex</i>3)).
+a <small>POSIX</small> extended regular expression and matched accordingly
+(as in <i>regex</i>3)).
 The return value is 0 if the string matches
 the pattern, and 1 otherwise.
 If the regular expression is syntactically incorrect, the conditional
@@ -2499,11 +2500,11 @@ interpreted as part of its name.
 </p>
 <p>If the first character of <var>parameter</var> is an exclamation point (!),
 and <var>parameter</var> is not a <var>nameref</var>,
-it introduces a level of variable indirection.
-Bash uses the value of the variable formed from the rest of
-<var>parameter</var> as the name of the variable; this variable is then
-expanded and that value is used in the rest of the substitution, rather
-than the value of <var>parameter</var> itself.
+it introduces a level of indirection.
+Bash uses the value formed by expanding the rest of
+<var>parameter</var> as the new <var>parameter</var>; this is then
+expanded and that value is used in the rest of the expansion, rather
+than the expansion of the original <var>parameter</var>.
 This is known as <code>indirect expansion</code>.
 The value is subject to tilde expansion,
 parameter expansion, command substitution, and arithmetic expansion.
@@ -6593,7 +6594,8 @@ The shell sets <code>BASH_ARGC</code> only when in extended debugging mode
 (see <a href="#The-Shopt-Builtin">The Shopt Builtin</a>
 for a description of the <code>extdebug</code> option to the <code>shopt</code>
 builtin).
-Setting <code>extdebug</code> after the shell has started to execute a script
+Setting <code>extdebug</code> after the shell has started to execute a script,
+or referencing this variable when <code>extdebug</code> is not set,
 may result in inconsistent values.
 </p>
 </dd>
@@ -6609,7 +6611,8 @@ The shell sets <code>BASH_ARGV</code> only when in extended debugging mode
 (see <a href="#The-Shopt-Builtin">The Shopt Builtin</a>
 for a description of the <code>extdebug</code> option to the <code>shopt</code>
 builtin).
-Setting <code>extdebug</code> after the shell has started to execute a script
+Setting <code>extdebug</code> after the shell has started to execute a script,
+or referencing this variable when <code>extdebug</code> is not set,
 may result in inconsistent values.
 </p>
 </dd>
@@ -12659,8 +12662,8 @@ fix errors in previous commands quickly.
 </p>
 <p>History expansion is performed immediately after a complete line
 is read, before the shell breaks it into words, and is performed
-on each line individually without taking quoting on previous lines into
-account.
+on each line individually.  Bash attempts to inform the history
+expansion functions about quoting still in effect from previous lines.
 </p>
 <p>History expansion takes place in two parts.  The first is to determine
 which line from the history list should be used during substitution.
@@ -12673,8 +12676,18 @@ that Bash does, so that several words
 surrounded by quotes are considered one word.
 History expansions are introduced by the appearance of the
 history expansion character, which is &lsquo;<samp>!</samp>&rsquo; by default.
-Only &lsquo;<samp>\</samp>&rsquo; and &lsquo;<samp>'</samp>&rsquo; may be used to escape the history expansion
-character, but the history expansion character is
+</p>
+<p>History expansion implements shell-like quoting conventions:
+a backslash can be used to remove the special handling for the next character;
+single quotes enclose verbatim sequences of characters, and can be used to
+inhibit history expansion;
+and characters enclosed within double quotes may be subject to history
+expansion, since backslash can escape the history expansion character,
+but single quotes may not, since they are not treated specially within
+double quotes.
+</p>
+<p>When using the shell, only &lsquo;<samp>\</samp>&rsquo; and &lsquo;<samp>'</samp>&rsquo; may be used to escape the
+history expansion character, but the history expansion character is
 also treated as quoted if it immediately precedes the closing double quote
 in a double-quoted string. 
 </p>

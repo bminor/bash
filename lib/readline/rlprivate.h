@@ -511,6 +511,7 @@ extern FILE *_rl_in_stream;
 extern FILE *_rl_out_stream;
 extern int _rl_last_command_was_kill;
 extern int _rl_eof_char;
+extern int _rl_eof_found;
 extern procenv_t _rl_top_level;
 extern _rl_keyseq_cxt *_rl_kscxt;
 extern int _rl_keyseq_timeout;

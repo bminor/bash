@@ -112,7 +112,7 @@
 \entry{history expansion}{142}{history expansion}
 \entry{event designators}{143}{event designators}
 \entry{history events}{143}{history events}
-\entry{installation}{145}{installation}
-\entry{configuration}{145}{configuration}
-\entry{Bash installation}{145}{Bash installation}
-\entry{Bash configuration}{145}{Bash configuration}
+\entry{installation}{146}{installation}
+\entry{configuration}{146}{configuration}
+\entry{Bash installation}{146}{Bash installation}
+\entry{Bash configuration}{146}{Bash configuration}

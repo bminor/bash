@@ -3984,3 +3984,113 @@ doc/{bash.1,bashref.texi}
 	- indirect expansion: clarify that the expansion works on parameters,
 	  not just variables (NAMEs). Suggested by konsolebox
 	  <konsolebox@gmail.com>
+
+				   7/16
+				   ----
+doc/{bash.1,bashref.texi}
+	- INSIDE_EMACS: document its effect on line editing
+
+				   7/17
+				   ----
+lib/readline/{readline.c,rlprivate.h}
+	- _rl_eof_found: new variable, private to the readline library, that
+	  indicates whether the current call to readline() will return NULL
+	  because we read EOF
+
+lib/readline/rltty.c
+	- rl_deprep_terminal: if bracketed paste mode is active, the last
+	  character of the string to disable it is \r (to avoid confusing
+	  the terminal driver about where the cursor is). In this case,
+	  output a newline before returning so subsequent text (like the
+	  `exit' bash prints) doesn't overwrite the prompt. Bug from
+	  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=903936
+
+variables.c
+	- make_local_assoc_variable: add second argument like corresponding
+	  local array function, to allow this function to return an existing
+	  local array variable to the caller for the caller to handle
+
+variables.h
+	- make_local_assoc_variable: change function prototype to add second
+	  arg
+
+{subst.c,variables.c}
+	- make_local_assoc_variable: change callers
+
+builtins/declare.def
+	- declare_internal: call make_local_assoc_variable with a non-zero
+	  second arg to have it return an existing local array variable to be
+	  flagged as an error. Fixes bug reported by Grisha Levit
+	  <grishalevit@gmail.com>
+	- declare_internal: call make_local_array_variable with unconditional
+	  second argument of 1 for the same reason as above
+
+				   7/18
+				   ----
+variables.c
+	- bind_invalid_envvar: new function, takes invalid names from the
+	  initial environment (names that are not valid shell identifiers) and
+	  stores them in a separate hash table (invalid_env)
+	- maybe_make_export_env: make sure to add names from invalid_env to
+	  the export env
+	- assign_in_env: for now, prevent variable names that aren't shell
+	  identifiers from being added to the temporary environment. Addresses
+	  issue raised by Grisha Levit <grishalevit@gmail.com>
+
+test.c
+	- unary_test: rearrange code slightly to avoid a wasted variable lookup
+	  if the argument to -v is a subscripted array reference
+
+				   7/19
+				   ----
+variables.c
+	- nameref_transform_name: if a name doesn't resolve to a shell variable,
+	  this function will check whether it resolves to a nameref that
+	  points to a variable that hasn't been created yet
+
+variables.h
+	- nameref_transform_name: extern declaration
+
+subst.c
+	- do_compound_assignment: make sure that we follow any nameref chain
+	  if the name passed resolves to a nameref that points to a variable
+	  that doesn't exist. Fixes issue raised by Grisha Levit
+	  <grishalevit@gmail.com>
+
+builtins/declare.def
+	- declare_internal: before calling any variant of make_local_variable,
+	  make sure to perform any transformation of the name indicated by an
+	  existing nameref. Fixes issue raised by Grisha Levit
+	  <grishalevit@gmail.com>
+
+				   7/20
+				   ----
+builtins/declare.def
+	- declare_internal: if we are creating a global variable with -g, even
+	  if we're not giving it a value, check for namerefs at the global
+	  scope to avoid confusion with namerefs at the local (function) scope.
+
+subst.c
+	- expand_word_internal: if a double-quoted string expands to nothing,
+	  make sure we note that for later by setting had_quoted_null, just
+	  as we do for single-quoted empty strings
+
+subst.[ch]
+	- W_SAWQUOTEDNULL: new flag (replaces W_HASCTLESC, which is unused),
+	  means that we saw a possibly-discarded quoted null while expanding
+	  this word
+
+subst.c
+	- expand_word_internal: if expansion results in a non-empty word but
+	  we saw a quoted null during expansion (had_quoted_null == 1), set
+	  W_SAWQUOTED_NULL in the returned word
+	- expand_word_internal: if a recursive call to param_expand comes back
+	  with W_SAWQUOTEDNULL set in the resulting word, set had_quoted_null
+	  to note it
+	- parameter_brace_expand_rhs: if a recursive call to expand_word_internal
+	  returns a non-quoted-null string (after an optional call to
+	  string_list) make sure we pass the W_SAWQUOTEDNULL flag back to the
+	  caller
+	- word_list_split: if a word expands to nothing after expansion and
+	  splitting, but we saw a quoted null during the expansion
+	  (W_SAWQUOTEDNULL), return an empty word

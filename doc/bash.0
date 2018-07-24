@@ -382,24 +382,24 @@ SSHHEELLLL GGRRAAMMMMAARR
 
               An  additional  binary operator, ==~~, is available, with the same
               precedence as ==== and !!==.  When it is used,  the  string  to  the
-              right  of the operator is considered an extended regular expres-
-              sion and matched accordingly (as in _r_e_g_e_x(3)).  The return value
-              is 0 if the string matches the pattern, and 1 otherwise.  If the
-              regular expression is syntactically incorrect,  the  conditional
-              expression's return value is 2.  If the nnooccaasseemmaattcchh shell option
-              is enabled, the match is performed without regard to the case of
-              alphabetic characters.  Any part of the pattern may be quoted to
-              force the quoted portion to be matched  as  a  string.   Bracket
-              expressions  in  regular  expressions must be treated carefully,
-              since normal quoting  characters  lose  their  meanings  between
-              brackets.  If the pattern is stored in a shell variable, quoting
-              the variable expansion forces the entire pattern to  be  matched
-              as a string.  Substrings matched by parenthesized subexpressions
-              within the regular expression are saved in  the  array  variable
-              BBAASSHH__RREEMMAATTCCHH.   The  element of BBAASSHH__RREEMMAATTCCHH with index 0 is the
-              portion of the string matching the  entire  regular  expression.
-              The  element  of BBAASSHH__RREEMMAATTCCHH with index _n is the portion of the
-              string matching the _nth parenthesized subexpression.
+              right  of  the  operator  is considered a POSIX extended regular
+              expression and matched accordingly (as in _r_e_g_e_x(3)).  The return
+              value  is  0 if the string matches the pattern, and 1 otherwise.
+              If the regular expression is syntactically incorrect, the condi-
+              tional expression's return value is 2.  If the nnooccaasseemmaattcchh shell
+              option is enabled, the match is performed without regard to  the
+              case  of  alphabetic characters.  Any part of the pattern may be
+              quoted to force the quoted portion to be matched  as  a  string.
+              Bracket expressions in regular expressions must be treated care-
+              fully, since  normal  quoting  characters  lose  their  meanings
+              between brackets.  If the pattern is stored in a shell variable,
+              quoting the variable expansion forces the entire pattern  to  be
+              matched as a string.  Substrings matched by parenthesized subex-
+              pressions within the regular expression are saved in  the  array
+              variable BBAASSHH__RREEMMAATTCCHH.  The element of BBAASSHH__RREEMMAATTCCHH with index 0
+              is the portion of the string matching the entire regular expres-
+              sion.   The  element of BBAASSHH__RREEMMAATTCCHH with index _n is the portion
+              of the string matching the _nth parenthesized subexpression.
 
               Expressions may  be  combined  using  the  following  operators,
               listed in decreasing order of precedence:
@@ -812,18 +812,20 @@ PPAARRAAMMEETTEERRSS
               is pushed onto BBAASSHH__AARRGGCC.  The shell sets BBAASSHH__AARRGGCC only when in
               extended  debugging  mode  (see  the description of the eexxttddeebbuugg
               option to the sshhoopptt builtin below).  Setting eexxttddeebbuugg after  the
-              shell has started to execute a script may result in inconsistent
-              values.
+              shell has started to execute a script, or referencing this vari-
+              able when eexxttddeebbuugg is not set, may result in  inconsistent  val-
+              ues.
        BBAASSHH__AARRGGVV
-              An array variable containing all of the parameters in  the  cur-
+              An  array  variable containing all of the parameters in the cur-
               rent bbaasshh execution call stack.  The final parameter of the last
-              subroutine call is at the top of the stack; the first  parameter
+              subroutine  call is at the top of the stack; the first parameter
               of the initial call is at the bottom.  When a subroutine is exe-
-              cuted, the parameters supplied are pushed onto  BBAASSHH__AARRGGVV.   The
-              shell  sets  BBAASSHH__AARRGGVV only when in extended debugging mode (see
-              the description of the eexxttddeebbuugg  option  to  the  sshhoopptt  builtin
+              cuted,  the  parameters supplied are pushed onto BBAASSHH__AARRGGVV.  The
+              shell sets BBAASSHH__AARRGGVV only when in extended debugging  mode  (see
+              the  description  of  the  eexxttddeebbuugg  option to the sshhoopptt builtin
               below).  Setting eexxttddeebbuugg after the shell has started to execute
-              a script may result in inconsistent values.
+              a script, or referencing this variable when eexxttddeebbuugg is not set,
+              may result in inconsistent values.
        BBAASSHH__AARRGGVV00
               When referenced, this variable expands to the name of the  shell
               or shell script (identical to $$00; see the description of special
@@ -1603,18 +1605,18 @@ EEXXPPAANNSSIIOONN
               (AArrrraayyss).
 
        If the first character of _p_a_r_a_m_e_t_e_r is an exclamation  point  (!!),  and
-       _p_a_r_a_m_e_t_e_r  is not a _n_a_m_e_r_e_f, it introduces a level of variable indirec-
-       tion.  BBaasshh uses the value of the variable  formed  from  the  rest  of
-       _p_a_r_a_m_e_t_e_r  as  the name of the variable; this variable is then expanded
-       and that value is used in the rest of the substitution, rather than the
-       value  of  _p_a_r_a_m_e_t_e_r itself.  This is known as _i_n_d_i_r_e_c_t _e_x_p_a_n_s_i_o_n.  The
-       value is subject to tilde expansion, parameter expansion, command  sub-
-       stitution,  and  arithmetic expansion.  If _p_a_r_a_m_e_t_e_r is a nameref, this
-       expands to the name of the variable referenced by _p_a_r_a_m_e_t_e_r instead  of
-       performing the complete indirect expansion.  The exceptions to this are
-       the expansions of ${!!_p_r_e_f_i_x**} and  ${!!_n_a_m_e[_@]}  described  below.   The
-       exclamation  point  must  immediately follow the left brace in order to
-       introduce indirection.
+       _p_a_r_a_m_e_t_e_r is not a _n_a_m_e_r_e_f, it introduces a level of indirection.  BBaasshh
+       uses the value formed by expanding the rest of  _p_a_r_a_m_e_t_e_r  as  the  new
+       _p_a_r_a_m_e_t_e_r;  this is then expanded and that value is used in the rest of
+       the expansion, rather than the expansion  of  the  original  _p_a_r_a_m_e_t_e_r.
+       This  is  known  as  _i_n_d_i_r_e_c_t _e_x_p_a_n_s_i_o_n.  The value is subject to tilde
+       expansion, parameter expansion, command  substitution,  and  arithmetic
+       expansion.   If _p_a_r_a_m_e_t_e_r is a nameref, this expands to the name of the
+       parameter referenced by _p_a_r_a_m_e_t_e_r instead of  performing  the  complete
+       indirect  expansion.   The  exceptions  to  this  are the expansions of
+       ${!!_p_r_e_f_i_x**} and ${!!_n_a_m_e[_@]} described  below.   The  exclamation  point
+       must  immediately  follow the left brace in order to introduce indirec-
+       tion.
 
        In each of the cases below, _w_o_r_d is subject to tilde expansion, parame-
        ter expansion, command substitution, and arithmetic expansion.

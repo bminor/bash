@@ -152,6 +152,14 @@ outside: declare -x var="global"
 foo=<unset> environment foo=
 foo=foo environment foo=foo
 foo=foo environment foo=foo
+./varenv13.sub: line 3: `var[0]': not a valid identifier
+./varenv13.sub: line 3: `var[@]': not a valid identifier
+./varenv13.sub: line 1: declare: var: not found
+./varenv13.sub: line 12: var[@]: bad array subscript
+declare -A var=([0]="X" )
+help
+./varenv13.sub: line 21: `var[0]': not a valid identifier
+1
 a=z
 a=b
 a=z

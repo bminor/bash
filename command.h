@@ -94,7 +94,7 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define W_HASQUOTEDNULL	0x040000	/* word contains a quoted null character */
 #define W_DQUOTE	0x080000	/* word should be treated as if double-quoted */
 #define W_NOPROCSUB	0x100000	/* don't perform process substitution */
-#define W_HASCTLESC	0x200000	/* word contains literal CTLESC characters */
+#define W_SAWQUOTEDNULL	0x200000	/* word contained a quoted null that was removed */
 #define W_ASSIGNASSOC	0x400000	/* word looks like associative array assignment */
 #define W_ASSIGNARRAY	0x800000	/* word looks like a compound indexed array assignment */
 #define W_ARRAYIND	0x1000000	/* word is an array index being expanded */

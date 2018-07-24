@@ -278,6 +278,7 @@ extern SHELL_VAR *find_shell_variable __P((const char *));
 extern SHELL_VAR *find_tempenv_variable __P((const char *));
 extern SHELL_VAR *find_variable_no_invisible __P((const char *));
 extern SHELL_VAR *find_variable_for_assignment __P((const char *));
+extern char *nameref_transform_name __P((char *, int));
 extern SHELL_VAR *copy_variable __P((SHELL_VAR *));
 extern SHELL_VAR *make_local_variable __P((const char *, int));
 extern SHELL_VAR *bind_variable __P((const char *, char *, int));
@@ -380,7 +381,7 @@ extern SHELL_VAR *make_new_array_variable __P((char *));
 extern SHELL_VAR *make_local_array_variable __P((char *, int));
 
 extern SHELL_VAR *make_new_assoc_variable __P((char *));
-extern SHELL_VAR *make_local_assoc_variable __P((char *));
+extern SHELL_VAR *make_local_assoc_variable __P((char *, int));
 
 extern void set_pipestatus_array __P((int *, int));
 extern ARRAY *save_pipestatus_array __P((void));

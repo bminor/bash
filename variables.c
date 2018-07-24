@@ -110,6 +110,8 @@ VAR_CONTEXT *shell_variables = (VAR_CONTEXT *)NULL;
    the environment. */
 HASH_TABLE *shell_functions = (HASH_TABLE *)NULL;
 
+HASH_TABLE *invalid_env = (HASH_TABLE *)NULL;
+
 #if defined (DEBUGGER)
 /* The table of shell function definitions that the user defined or that
    came from the environment. */
@@ -246,6 +248,8 @@ static SHELL_VAR *get_funcname __P((SHELL_VAR *));
 static SHELL_VAR *init_funcname_var __P((void));
 
 static void initialize_dynamic_variables __P((void));
+
+static SHELL_VAR *bind_invalid_envvar __P((const char *, char *, int));
 
 static SHELL_VAR *hash_lookup __P((const char *, HASH_TABLE *));
 static SHELL_VAR *new_shell_variable __P((const char *));
@@ -393,7 +397,7 @@ initialize_shell_variables (env, privmode)
 	    }
 	  else
 	    {
-	      if (temp_var = bind_variable (name, string, 0))
+	      if (temp_var = bind_invalid_envvar (name, string, 0))
 		{
 		  VSETATTR (temp_var, (att_exported | att_imported | att_invisible));
 		  array_needs_making = 1;
@@ -434,17 +438,24 @@ initialize_shell_variables (env, privmode)
 	      if (temp_var)
 		VUNSETATTR (temp_var, att_readonly);
 	    }
-	  temp_var = bind_variable (name, string, 0);
-	  if (temp_var)
+	  if (legal_identifier (name))
 	    {
-	      if (legal_identifier (name))
-		VSETATTR (temp_var, (att_exported | att_imported));
-	      else
-		VSETATTR (temp_var, (att_exported | att_imported | att_invisible));
-	      if (ro)
-		VSETATTR (temp_var, att_readonly);
-	      array_needs_making = 1;
+	      temp_var = bind_variable (name, string, 0);
+	      if (temp_var)
+		{
+		  VSETATTR (temp_var, (att_exported | att_imported));
+		  if (ro)
+		    VSETATTR (temp_var, att_readonly);
+		}
 	    }
+	  else
+	    {
+	      temp_var = bind_invalid_envvar (name, string, 0);
+	      if (temp_var)
+		VSETATTR (temp_var, (att_exported | att_imported | att_invisible));
+	    }
+	  if (temp_var)
+	    array_needs_making = 1;
 	}
 
       name[char_index] = '=';
@@ -2254,6 +2265,30 @@ find_variable_nameref_for_assignment (name, flags)
   return (var);
 }
 
+/* If find_variable (name) returns NULL, check that it's not a nameref
+   referencing a variable that doesn't exist. If it is, return the new
+   name. If not, return the original name. Kind of like the previous
+   function, but dealing strictly with names. This takes assignment flags
+   so it can deal with the various assignment modes used by `declare'. */
+char *
+nameref_transform_name (name, flags)
+     char *name;
+     int flags;
+{
+  SHELL_VAR *v;
+  char *newname;
+
+  v = 0;
+  if (flags & ASS_MKLOCAL)
+    v = find_variable_last_nameref (name, 1);
+  else if (flags & ASS_MKGLOBAL)
+    v = (flags & ASS_CHKLOCAL) ? find_variable_last_nameref (name, 1)
+			       : find_global_variable_last_nameref (name, 1);
+  if (v && nameref_p (v) && valid_nameref_value (nameref_cell (v), 1))
+    return nameref_cell (v);
+  return name;
+}
+
 /* Find a variable, forcing a search of the temporary environment first */
 SHELL_VAR *
 find_variable_tempenv (name)
@@ -2700,6 +2735,9 @@ make_local_array_variable (name, assoc_ok)
   ARRAY *array;
 
   var = make_local_variable (name, 0);	/* XXX for now */
+  /* If ASSOC_OK is non-zero, assume that we are ok with letting an assoc
+     variable return to the caller without converting it. The caller will
+     either flag an error or do the conversion itself. */
   if (var == 0 || array_p (var) || (assoc_ok && assoc_p (var)))
     return var;
 
@@ -2727,14 +2765,18 @@ make_new_assoc_variable (name)
 }
 
 SHELL_VAR *
-make_local_assoc_variable (name)
+make_local_assoc_variable (name, array_ok)
      char *name;
+     int array_ok;
 {
   SHELL_VAR *var;
   HASH_TABLE *hash;
 
   var = make_local_variable (name, 0);	/* XXX for now */
-  if (var == 0 || assoc_p (var))
+  /* If ARRAY_OK is non-zero, assume that we are ok with letting an array
+     variable return to the caller without converting it. The caller will
+     either flag an error or do the conversion itself. */
+  if (var == 0 || assoc_p (var) || (array_ok && array_p (var)))
     return var;
 
   dispose_variable_value (var);
@@ -3157,6 +3199,17 @@ bind_global_variable (name, value, flags)
   return (bind_variable_internal (name, value, global_variables->table, 0, flags));
 }
 
+static SHELL_VAR *
+bind_invalid_envvar (name, value, flags)
+     const char *name;
+     char *value;
+     int flags;
+{
+  if (invalid_env == 0)
+    invalid_env = hash_create (64);	/* XXX */
+  return (bind_variable_internal (name, value, invalid_env, HASH_NOSRCH, flags));
+}
+
 /* Make VAR, a simple shell variable, have value VALUE.  Once assigned a
    value, variables are no longer invisible.  This is a duplicate of part
    of the internals of bind_variable.  If the variable is exported, or
@@ -3407,6 +3460,12 @@ assign_in_env (word, flags)
 	  aflags |= ASS_APPEND;
 	}
 
+      if (legal_identifier (name) == 0)
+	{
+	  sh_invalidid (name);
+	  return (0);
+	}
+  
       var = find_variable (name);
       if (var == 0)
 	{
@@ -4774,7 +4833,7 @@ maybe_make_export_env ()
 {
   register char **temp_array;
   int new_size;
-  VAR_CONTEXT *tcxt;
+  VAR_CONTEXT *tcxt, *icxt;
 
   if (array_needs_making)
     {
@@ -4786,7 +4845,7 @@ maybe_make_export_env ()
 	 variables are not (yet) exported, this will always be big enough
 	 for the exported variables and functions. */
       new_size = n_shell_variables () + HASH_ENTRIES (shell_functions) + 1 +
-		 HASH_ENTRIES (temporary_env);
+		 HASH_ENTRIES (temporary_env) + HASH_ENTRIES (invalid_env);
       if (new_size > export_env_size)
 	{
 	  export_env_size = new_size;
@@ -4807,10 +4866,22 @@ maybe_make_export_env ()
 	}
       else
 	tcxt = shell_variables;
+
+      if (invalid_env)
+	{
+	  icxt = new_var_context ((char *)NULL, 0);
+	  icxt->table = invalid_env;
+	  icxt->down = tcxt;
+	}
+      else
+	icxt = tcxt;
       
-      temp_array = make_var_export_array (tcxt);
+      temp_array = make_var_export_array (icxt);
       if (temp_array)
 	add_temp_array_to_env (temp_array, 0, 0);
+
+      if (icxt != tcxt)
+	free (icxt);
 
       if (tcxt != shell_variables)
 	free (tcxt);
@@ -4928,7 +4999,7 @@ push_var_context (name, flags, tempvars)
      functions no longer behave like assignment statements preceding
      special builtins, and do not persist in the current shell environment.
      This is austin group interp #654, though nobody implements it yet. */
-  posix_func_behavior = posixly_correct;	/* placeholder for later */
+  posix_func_behavior = posixly_correct;
 
   vc = new_var_context (name, flags);
   /* Posix interp 1009, temporary assignments preceding function calls modify
@@ -4957,24 +5028,25 @@ push_var_context (name, flags, tempvars)
 	   calls to the surrounding scope.
 
   It takes variables out of a temporary environment hash table. We take the
-  variable in data
+  variable in data.
 */
 static void
 push_func_var (data)
      PTR_T data;
 {
   SHELL_VAR *var, *v;
-  int posix_func_behavior;
+  int posix_var_behavior;
 
   var = (SHELL_VAR *)data;
   /* As of IEEE Std 1003.1-2017, assignment statements preceding shell
      functions no longer behave like assignment statements preceding
-     special builtins, and do not persist in the current shell environment. */
-  posix_func_behavior = posixly_correct;	/* placeholder for later */
+     special builtins, and do not persist in the current shell environment.
+     This is austin group interp #654, though nobody implements it yet. */
+  posix_var_behavior = posixly_correct && (shell_compatibility_level < 50 || vc_isfuncenv (shell_variables) == 0);
 
   if (local_p (var) && STREQ (var->name, "-"))
     set_current_options (value_cell (var));
-  else if (tempvar_p (var) && (posix_func_behavior || (var->attributes & att_propagate)))
+  else if (tempvar_p (var) && (posix_var_behavior || (var->attributes & att_propagate)))
     {
       /* Make sure we have a hash table to store the variable in while it is
 	 being propagated down to the global variables table.  Create one if

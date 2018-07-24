@@ -440,3 +440,24 @@ declare -n foo="bar"
 declare -- bar
 declare -- foo="bar"
 declare -- bar
+declare -a v=([0]="Y")
+r: <Y>
+v: <Y>
+declare -n ref="var"
+declare -a var=([0]="X")
+declare -n ref="var"
+declare -a var=([0]="X")
+declare -n ref="var"
+./nameref20.sub: line 23: declare: var: not found
+outside:
+declare -a foo=([0]="X")
+declare -n ref="var"
+declare -a var=([0]="X")
+outside:
+./nameref20.sub: line 38: declare: ref: not found
+./nameref20.sub: line 38: declare: var: not found
+declare -n ref="var"
+declare -- var="X"
+outside:
+./nameref20.sub: line 45: declare: ref: not found
+./nameref20.sub: line 45: declare: var: not found

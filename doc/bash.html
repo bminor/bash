@@ -965,7 +965,7 @@ to be matched as a string.
 An additional binary operator, <B>=~</B>, is available, with the same
 precedence as <B>==</B> and <B>!=</B>.
 When it is used, the string to the right of the operator is considered
-an extended regular expression and matched accordingly (as in <I>regex</I>(3)).
+a POSIX extended regular expression and matched accordingly (as in <I>regex</I>(3)).
 The return value is 0 if the string matches
 the pattern, and 1 otherwise.
 If the regular expression is syntactically incorrect, the conditional
@@ -1929,7 +1929,8 @@ option to the
 <B>shopt</B>
 
 builtin below).
-Setting <B>extdebug</B> after the shell has started to execute a script
+Setting <B>extdebug</B> after the shell has started to execute a script,
+or referencing this variable when <B>extdebug</B> is not set,
 may result in inconsistent values.
 <DT><B>BASH_ARGV</B>
 
@@ -1954,7 +1955,8 @@ option to the
 <B>shopt</B>
 
 builtin below).
-Setting <B>extdebug</B> after the shell has started to execute a script
+Setting <B>extdebug</B> after the shell has started to execute a script,
+or referencing this variable when <B>extdebug</B> is not set,
 may result in inconsistent values.
 <DT><B>BASH_ARGV0</B>
 
@@ -3745,16 +3747,16 @@ The <I>parameter</I> is a shell parameter as described above
 
 If the first character of <I>parameter</I> is an exclamation point (<B>!</B>),
 and <I>parameter</I> is not a <I>nameref</I>,
-it introduces a level of variable indirection.
-<B>Bash</B> uses the value of the variable formed from the rest of
-<I>parameter</I> as the name of the variable; this variable is then
-expanded and that value is used in the rest of the substitution, rather
-than the value of <I>parameter</I> itself.
+it introduces a level of indirection.
+<B>Bash</B> uses the value formed by expanding the rest of
+<I>parameter</I> as the new <I>parameter</I>; this is then
+expanded and that value is used in the rest of the expansion, rather
+than the expansion of the original <I>parameter</I>.
 This is known as <I>indirect expansion</I>.
 The value is subject to tilde expansion,
 parameter expansion, command substitution, and arithmetic expansion.
 If <I>parameter</I> is a nameref, this expands to the name of the
-variable referenced by <I>parameter</I> instead of performing the
+parameter referenced by <I>parameter</I> instead of performing the
 complete indirect expansion.
 The exceptions to this are the expansions of ${<B>!</B><I>prefix</I><B>*</B>} and
 ${<B>!</B><I>name</I>[<I>@</I>]} described below.
@@ -13975,6 +13977,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 12 June 2018 15:50:58 EDT
+Time: 16 July 2018 10:36:49 EDT
 </BODY>
 </HTML>

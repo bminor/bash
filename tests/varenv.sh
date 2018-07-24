@@ -234,5 +234,8 @@ ${THIS_SH} ./varenv11.sub
 # temporary environment variable propagation and scoping in posix mode
 ${THIS_SH} ./varenv12.sub
 
+# temporary environment and invalid shell indentifier names
+${THIS_SH} ./varenv13.sub
+
 # make sure variable scoping is done right
 tt() { typeset a=b;echo a=$a; };a=z;echo a=$a;tt;echo a=$a

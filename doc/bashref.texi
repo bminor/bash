@@ -6095,6 +6095,11 @@ input to the shell.  This is only in effect for interactive shells.
 The name of the Readline initialization file, overriding the default
 of @file{~/.inputrc}.
 
+@item INSIDE_EMACS
+If Bash finds this variable in the environment when the shell
+starts, it assumes that the shell is running in an Emacs shell buffer
+and may disable line editing depending on the value of @env{TERM}.
+
 @item LANG  
 Used to determine the locale category for any category not specifically
 selected with a variable starting with @code{LC_}.

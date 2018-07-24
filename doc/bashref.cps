@@ -6,8 +6,8 @@
 \entry {arrays}{93}
 \initial {B}
 \entry {background}{102}
-\entry {Bash configuration}{145}
-\entry {Bash installation}{145}
+\entry {Bash configuration}{146}
+\entry {Bash installation}{146}
 \entry {Bourne shell}{5}
 \entry {brace expansion}{23}
 \entry {builtin}{3}
@@ -29,7 +29,7 @@
 \entry {commands, simple}{8}
 \entry {comments, shell}{7}
 \entry {completion builtins}{133}
-\entry {configuration}{145}
+\entry {configuration}{146}
 \entry {control operator}{3}
 \entry {coprocess}{15}
 \initial {D}
@@ -65,7 +65,7 @@
 \initial {I}
 \entry {identifier}{3}
 \entry {initialization file, readline}{109}
-\entry {installation}{145}
+\entry {installation}{146}
 \entry {interaction, readline}{106}
 \entry {interactive shell}{86, 87}
 \entry {internationalization}{7}
