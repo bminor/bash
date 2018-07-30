@@ -4068,9 +4068,13 @@ fix_assignment_words (words)
 	/* If we have an assignment builtin that does not create local variables,
 	   make sure we create global variables even if we internally call
 	   `declare'.  The CHKLOCAL flag means to set attributes or values on
-	   an existing local variable */
+	   an existing local variable, if there is one. */
 	if (b && ((b->flags & (ASSIGNMENT_BUILTIN|LOCALVAR_BUILTIN)) == ASSIGNMENT_BUILTIN))
 	  w->word->flags |= W_ASSNGLOBAL|W_CHKLOCAL;
+#if 0
+	else if (b && (b->flags & ASSIGNMENT_BUILTIN) && (b->flags & LOCALVAR_BUILTIN))
+	  w->word->flags |= W_CHKLOCAL;
+#endif
       }
 #if defined (ARRAY_VARS)
     /* Note that we saw an associative array option to a builtin that takes

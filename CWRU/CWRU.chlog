@@ -4094,3 +4094,18 @@ subst.c
 	- word_list_split: if a word expands to nothing after expansion and
 	  splitting, but we saw a quoted null during the expansion
 	  (W_SAWQUOTEDNULL), return an empty word
+
+				   7/25
+				   ----
+
+subst.c
+	- do_compound_assignment: if creating a local variable, make sure to
+	  set `newname' to the name of the variable returned from find_variable,
+	  since that follows namerefs. Fixes issue raised by Grisha Levit
+	  <grishalevit@gmail.com>
+
+				   7/29
+				   ----
+subst.c
+	- get_var_and_type: if VALUE is NULL, check before calling dequote_string.
+	  Report and fix from Grisha Levit <grishalevit@gmail.com>

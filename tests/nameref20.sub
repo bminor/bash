@@ -45,3 +45,12 @@ echo outside:
 declare -p ref var
 
 unset -f f
+
+unset -n ref; unset var
+
+f()
+{
+	declare var=X; declare -n ref=var; declare ref=(Y)
+	declare -p ref var
+}
+f

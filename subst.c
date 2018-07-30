@@ -3071,8 +3071,8 @@ do_compound_assignment (name, value, flags)
 
   if (mklocal && variable_context)
     {
-      v = find_variable (name);
-      newname = (v == 0) ? nameref_transform_name (name, flags) : name;
+      v = find_variable (name);		/* follows namerefs */
+      newname = (v == 0) ? nameref_transform_name (name, flags) : v->name;
       if (v && ((readonly_p (v) && (flags & ASS_FORCE) == 0) || noassign_p (v)))
 	{
 	  if (readonly_p (v))
@@ -7320,9 +7320,9 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
 	  vtype = VT_VARIABLE;
 	  *varp = v;
 	  if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))
-	    *valp = dequote_string (value);
+	    *valp = value ? dequote_string (value) : savestring ("");
 	  else
-	    *valp = dequote_escapes (value);
+	    *valp = value ? dequote_escapes (value) : (char *)NULL;
 	}
       else
 	{

@@ -251,6 +251,9 @@ extern WORD_LIST *rest_of_args;
 extern pid_t dollar_dollar_pid;
 
 extern void initialize_shell_variables __P((char **, int));
+
+extern int validate_inherited_value __P((SHELL_VAR *, int));
+
 extern SHELL_VAR *set_if_not __P((char *, char *));
 
 extern void sh_set_lines_and_columns __P((int, int));

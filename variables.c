@@ -251,6 +251,8 @@ static void initialize_dynamic_variables __P((void));
 
 static SHELL_VAR *bind_invalid_envvar __P((const char *, char *, int));
 
+static int var_sametype __P((SHELL_VAR *, SHELL_VAR *));
+
 static SHELL_VAR *hash_lookup __P((const char *, HASH_TABLE *));
 static SHELL_VAR *new_shell_variable __P((const char *));
 static SHELL_VAR *make_new_variable __P((const char *, HASH_TABLE *));
@@ -2501,6 +2503,42 @@ sh_get_env_value (v)
 /*								    */
 /* **************************************************************** */
 
+static int
+var_sametype (v1, v2)
+     SHELL_VAR *v1;
+     SHELL_VAR *v2;
+{
+  if (v1 == 0 || v2 == 0)
+    return 0;
+#if defined (ARRAY_VARS)
+  else if (assoc_p (v1) && assoc_p (v2))
+    return 1;
+  else if (array_p (v1) && array_p (v2))
+    return 1;
+  else if (array_p (v1) || array_p (v2))
+    return 0;
+  else if (assoc_p (v1) || assoc_p (v2))
+    return 0;
+#endif
+  else
+    return 1;
+}
+
+int
+validate_inherited_value (var, type)
+     SHELL_VAR *var;
+     int type;
+{
+#if defined (ARRAY_VARS)
+  if (type == att_array && assoc_p (var))
+    return 0;
+  else if (type == att_assoc && array_p (var))
+    return 0;
+  else
+#endif
+  return 1;	/* should we run convert_var_to_array here or let the caller? */
+}
+
 /* Set NAME to VALUE if NAME has no value. */
 SHELL_VAR *
 set_if_not (name, value)
@@ -2741,6 +2779,9 @@ make_local_array_variable (name, assoc_ok)
   if (var == 0 || array_p (var) || (assoc_ok && assoc_p (var)))
     return var;
 
+  /* Validate any value we inherited from a variable instance at a previous
+     scope and disard anything that's invalid. */
+
   array = array_create ();
 
   dispose_variable_value (var);
@@ -2778,6 +2819,9 @@ make_local_assoc_variable (name, array_ok)
      either flag an error or do the conversion itself. */
   if (var == 0 || assoc_p (var) || (array_ok && array_p (var)))
     return var;
+
+  /* Validate any value we inherited from a variable instance at a previous
+     scope and disard anything that's invalid. */
 
   dispose_variable_value (var);
   hash = assoc_create (0);
@@ -5042,7 +5086,7 @@ push_func_var (data)
      functions no longer behave like assignment statements preceding
      special builtins, and do not persist in the current shell environment.
      This is austin group interp #654, though nobody implements it yet. */
-  posix_var_behavior = posixly_correct && (shell_compatibility_level < 50 || vc_isfuncenv (shell_variables) == 0);
+  posix_var_behavior = posixly_correct;  
 
   if (local_p (var) && STREQ (var->name, "-"))
     set_current_options (value_cell (var));
