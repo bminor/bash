@@ -95,3 +95,12 @@ recho d2 "${1:2:2}"
 
 recho @1 ${@:1:2}
 recho @2 "${@:1:2}"
+
+declare -A assoc
+assoc=( [0]=$e [1]=$e )
+
+recho aa1 ${assoc:0:4}
+recho aa2 "${assoc:0:4}"
+
+recho aa3 ${assoc[@]:0:2}
+recho aa4 "${assoc[@]:0:2}"

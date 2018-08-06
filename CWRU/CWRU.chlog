@@ -4109,3 +4109,47 @@ subst.c
 subst.c
 	- get_var_and_type: if VALUE is NULL, check before calling dequote_string.
 	  Report and fix from Grisha Levit <grishalevit@gmail.com>
+
+				   7/30
+				   ----
+variables.c
+	- make_local_{array,assoc}_variable: make sure we're not trying to
+	  inherit a value from an incompatible array type. Fixes issue raised
+	  by Grisha Levit <grishalevit@gmail.com>
+	- nameref_transform_name: if we're trying to resolve a nameref that
+	  will be used to create a local variable, make sure the nameref is
+	  at the same variable scope. Report from Grisha Levit
+	  <grishalevit@gmail.com>
+
+				    8/2
+				    ---
+array.c
+	- array_subrange: change to use string_list_pos_params after creating a
+	  WORD_LIST from the array slice, like assoc_subrange does
+
+subst.c
+	- parameter_brace_substring: since assoc_subrange and array_subrange
+	  both call string_list_pos_params now, treat the results the same as
+	  the VT_POSPARAMS case (pos_params also calls string_list_pos_params).
+	  Fixes behavior difference between ${a[@]:sub} and ${@:sub} reported
+	  by Ilkka Virta <itvirta@iki.fi>
+
+				    8/3
+				    ---
+array.c
+	- array_patsub: rewrite to work in terms of a WORD_LIST * and call
+	  string_list_pos_params on the result to be consistent with the
+	  expansions of ${@/pat/rep} and ${*/pat/rep}
+
+assoc.c
+	- assoc_patsub: rewrite to work in terms of a WORD_LIST * and call
+	  string_list_pos_params on the result to be consistent with the
+	  expansions of ${@/pat/rep} and ${*/pat/rep}
+
+subst.c
+	- parameter_brace_patsub: change how return value of {array,assoc}_patsub
+	  is treated to make it identical to pos_params_pat_subst, since they
+	  all call string_list_pos_params now
+	- expand_string_for_pat: make sure we preserve the value of
+	  expand_no_split_dollar_star instead of just unconditionally setting
+	  it back to 0 in case it was 1 before this function was called

@@ -305,54 +305,29 @@ assoc_patsub (h, pat, rep, mflags)
      char *pat, *rep;
      int mflags;
 {
-  BUCKET_CONTENTS *tlist;
-  int i, slen;
-  HASH_TABLE *h2;
-  char	*t, *sifs, *ifs;
+  char	*t;
+  int pchar, qflags;
+  WORD_LIST *wl, *save;
 
   if (h == 0 || assoc_empty (h))
     return ((char *)NULL);
 
-  h2 = assoc_copy (h);
-  for (i = 0; i < h2->nbuckets; i++)
-    for (tlist = hash_items (i, h2); tlist; tlist = tlist->next)
-      {
-	t = pat_subst ((char *)tlist->data, pat, rep, mflags);
-	FREE (tlist->data);
-	tlist->data = t;
-      }
+  wl = assoc_to_word_list (h);
+  if (wl == 0)
+    return (char *)NULL;
 
-  if (mflags & MATCH_QUOTED)
-    assoc_quote (h2);
-  else
-    assoc_quote_escapes (h2);
-
-  if (mflags & MATCH_STARSUB)
+  for (save = wl; wl; wl = wl->next)
     {
-      assoc_remove_quoted_nulls (h2);
-      sifs = ifs_firstchar ((int *)NULL);
-      t = assoc_to_string (h2, sifs, 0);
-      free (sifs);
+      t = pat_subst (wl->word->word, pat, rep, mflags);
+      FREE (wl->word->word);
+      wl->word->word = t;
     }
-  else if (mflags & MATCH_QUOTED)
-    {
-      /* ${array[@]} */
-      sifs = ifs_firstchar (&slen);
-      ifs = getifs ();
-      if (ifs == 0 || *ifs == 0)
-	{
-	  if (slen < 2)
-	    sifs = xrealloc (sifs, 2);
-	  sifs[0] = ' ';
-	  sifs[1] = '\0';
-	}
-      t = assoc_to_string (h2, sifs, 0);
-      free(sifs);
-    }
-  else
-    t = assoc_to_string (h2, " ", 0);
 
-  assoc_dispose (h2);
+  pchar = (mflags & MATCH_STARSUB) == MATCH_STARSUB ? '*' : '@';
+  qflags = (mflags & MATCH_QUOTED) == MATCH_QUOTED ? Q_DOUBLE_QUOTES : 0;
+
+  t = string_list_pos_params (pchar, save, qflags);
+  dispose_words (save);
 
   return t;
 }

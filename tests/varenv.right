@@ -160,6 +160,23 @@ declare -A var=([0]="X" )
 help
 ./varenv13.sub: line 21: `var[0]': not a valid identifier
 1
+./varenv14.sub: line 6: warning: var: cannot inherit value from incompatible type
+declare -a var=([0]="X")
+./varenv14.sub: line 9: warning: var: cannot inherit value from incompatible type
+declare -a var=([0]="Y")
+./varenv14.sub: line 10: warning: var: cannot inherit value from incompatible type
+declare -a var=([0]="Y")
+./varenv14.sub: line 11: warning: var: cannot inherit value from incompatible type
+declare -a var=()
+./varenv14.sub: line 12: warning: var: cannot inherit value from incompatible type
+declare -a var=()
+./varenv14.sub: line 18: f: var: cannot convert indexed to associative array
+declare -a a=([0]="X")
+declare -a s=([0]="X")
+declare -a a=([0]="X" [1]="Y")
+declare -a s=([0]="X" [1]="Y")
+declare -a a=([0]="XY")
+declare -a s=([0]="XY")
 a=z
 a=b
 a=z

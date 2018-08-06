@@ -3903,15 +3903,17 @@ expand_string_for_pat (string, quoted, dollar_at_p, expanded_p)
 {
   WORD_DESC td;
   WORD_LIST *tresult;
+  int oexp;
 
   if (string == 0 || *string == '\0')
     return (WORD_LIST *)NULL;
 
+  oexp = expand_no_split_dollar_star;
   expand_no_split_dollar_star = 1;
   td.flags = W_NOSPLIT2;		/* no splitting, remove "" and '' */
   td.word = string;
   tresult = call_expand_word_internal (&td, quoted, 1, dollar_at_p, expanded_p);
-  expand_no_split_dollar_star = 0;
+  expand_no_split_dollar_star = oexp;
 
   return (tresult);
 }
@@ -7706,7 +7708,7 @@ parameter_brace_substring (varname, value, ind, substr, quoted, pflags, flags)
      int quoted, pflags, flags;
 {
   intmax_t e1, e2;
-  int vtype, r, starsub, qflags;
+  int vtype, r, starsub;
   char *temp, *val, *tt, *oname;
   SHELL_VAR *v;
 
@@ -7755,9 +7757,23 @@ parameter_brace_substring (varname, value, ind, substr, quoted, pflags, flags)
       FREE (tt);
       break;
     case VT_POSPARMS:
-      qflags = quoted;
-      tt = pos_params (varname, e1, e2, qflags);
-      /* string_list_dollar_at will quote the list if ifs_is_null != 0 */
+    case VT_ARRAYVAR:
+      if (vtype == VT_POSPARMS)
+	tt = pos_params (varname, e1, e2, quoted);
+#if defined (ARRAY_VARS)
+        /* assoc_subrange and array_subrange both call string_list_pos_params,
+	   so we can treat this case just like VT_POSPARAMS. */
+      else if (assoc_p (v))
+	/* we convert to list and take first e2 elements starting at e1th
+	   element -- officially undefined for now */	
+	tt = assoc_subrange (assoc_cell (v), e1, e2, starsub, quoted);
+      else
+	/* We want E2 to be the number of elements desired (arrays can be
+	   sparse, so verify_substring_values just returns the numbers
+	   specified and we rely on array_subrange to understand how to
+	   deal with them). */
+	tt = array_subrange (array_cell (v), e1, e2, starsub, quoted);
+#endif
       /* We want to leave this alone in every case where pos_params/
 	 string_list_pos_params quotes the list members */
       if (tt && quoted == 0 && ifs_is_null)
@@ -7772,21 +7788,7 @@ parameter_brace_substring (varname, value, ind, substr, quoted, pflags, flags)
       else
 	temp = tt;
       break;
-#if defined (ARRAY_VARS)
-    case VT_ARRAYVAR:
-      if (assoc_p (v))
-	/* we convert to list and take first e2 elements starting at e1th
-	   element -- officially undefined for now */	
-	temp = assoc_subrange (assoc_cell (v), e1, e2, starsub, quoted);
-      else
-      /* We want E2 to be the number of elements desired (arrays can be sparse,
-	 so verify_substring_values just returns the numbers specified and we
-	 rely on array_subrange to understand how to deal with them). */
-	temp = array_subrange (array_cell (v), e1, e2, starsub, quoted);
-      /* array_subrange now calls array_quote_escapes as appropriate, so the
-	 caller no longer needs to. */
-      break;
-#endif
+
     default:
       temp = (char *)NULL;
     }
@@ -7978,7 +7980,7 @@ pos_params_pat_subst (string, pat, rep, mflags)
   qflags = (mflags & MATCH_QUOTED) == MATCH_QUOTED ? Q_DOUBLE_QUOTES : 0;
 
   /* If we are expanding in a context where word splitting will not be
-     performed, treat as quoted.  This changes how $* will be expanded. */
+     performed, treat as quoted. This changes how $* will be expanded. */
   if (pchar == '*' && (mflags & MATCH_ASSIGNRHS) && expand_no_split_dollar_star && ifs_is_null)
     qflags |= Q_DOUBLE_QUOTES;		/* Posix interp 888 */
 
@@ -8145,11 +8147,22 @@ parameter_brace_patsub (varname, value, ind, patsub, quoted, pflags, flags)
       if ((mflags & MATCH_STARSUB) && (mflags & MATCH_ASSIGNRHS) && ifs_is_null)
 	mflags |= MATCH_QUOTED;		/* Posix interp 888 */
 
-      temp = assoc_p (v) ? assoc_patsub (assoc_cell (v), p, rep, mflags)
-			 : array_patsub (array_cell (v), p, rep, mflags);
-      /* Don't call quote_escapes anymore; array_patsub calls
-	 array_quote_escapes as appropriate before adding the
-	 space separators; ditto for assoc_patsub. */
+      /* these eventually call string_list_pos_params */
+      if (assoc_p (v))
+	temp = assoc_patsub (assoc_cell (v), p, rep, mflags);
+      else
+	temp = array_patsub (array_cell (v), p, rep, mflags);
+
+      if (temp && quoted == 0 && ifs_is_null)
+	{
+	  /* Posix interp 888 */
+	}
+      else if (temp && (mflags & MATCH_QUOTED) == 0)
+	{
+	  tt = quote_escapes (temp);
+	  free (temp);
+	  temp = tt;
+	}
       break;
 #endif
     }

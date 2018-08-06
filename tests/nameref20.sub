@@ -54,3 +54,16 @@ f()
 	declare -p ref var
 }
 f
+
+unset -f f
+
+declare -n ref=var
+f() { local ref=Y; declare -p ref var; local; }
+
+var=X
+f
+
+unset -v var
+f
+
+unset -n ref

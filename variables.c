@@ -2282,7 +2282,13 @@ nameref_transform_name (name, flags)
 
   v = 0;
   if (flags & ASS_MKLOCAL)
-    v = find_variable_last_nameref (name, 1);
+    {
+      v = find_variable_last_nameref (name, 1);
+      /* If we're making local variables, only follow namerefs that point to
+	 non-existant variables at the same variable context. */
+      if (v && v->context != variable_context)
+	v = 0;
+    }
   else if (flags & ASS_MKGLOBAL)
     v = (flags & ASS_CHKLOCAL) ? find_variable_last_nameref (name, 1)
 			       : find_global_variable_last_nameref (name, 1);
@@ -2781,11 +2787,23 @@ make_local_array_variable (name, assoc_ok)
 
   /* Validate any value we inherited from a variable instance at a previous
      scope and disard anything that's invalid. */
+  if (localvar_inherit && assoc_p (var))
+    {
+      internal_warning ("%s: cannot inherit value from incompatible type", name);
+      VUNSETATTR (var, att_assoc);
+      dispose_variable_value (var);
+      array = array_create ();
+      var_setarray (var, array);
+    }
+  else if (localvar_inherit)
+    var = convert_var_to_array (var);		/* XXX */
+  else
+    {
+      dispose_variable_value (var);
+      array = array_create ();
+      var_setarray (var, array);
+    }
 
-  array = array_create ();
-
-  dispose_variable_value (var);
-  var_setarray (var, array);
   VSETATTR (var, att_array);
   return var;
 }
@@ -2822,11 +2840,23 @@ make_local_assoc_variable (name, array_ok)
 
   /* Validate any value we inherited from a variable instance at a previous
      scope and disard anything that's invalid. */
+  if (localvar_inherit && array_p (var))
+    {
+      internal_warning ("%s: cannot inherit value from incompatible type", name);
+      VUNSETATTR (var, att_array);
+      dispose_variable_value (var);
+      hash = assoc_create (0);
+      var_setassoc (var, hash);
+    }
+  else if (localvar_inherit)
+    var = convert_var_to_assoc (var);		/* XXX */
+  else
+    {
+      dispose_variable_value (var);
+      hash = assoc_create (0);
+      var_setassoc (var, hash);
+    }
 
-  dispose_variable_value (var);
-  hash = assoc_create (0);
-
-  var_setassoc (var, hash);
   VSETATTR (var, att_assoc);
   return var;
 }
