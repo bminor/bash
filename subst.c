@@ -7829,7 +7829,7 @@ pat_subst (string, pat, rep, mflags)
   int rptr, mtype, rxpand, mlen;
   size_t rsize, l, replen, rslen;
 
-  if (string  == 0)
+  if (string == 0)
     return (savestring (""));
 
   mtype = mflags & MATCH_TYPEMASK;
@@ -8309,7 +8309,7 @@ parameter_brace_casemod (varname, value, ind, modspec, patspec, quoted, pflags, 
 	{
 	  /* Posix interp 888 */
 	}
-      else if (temp && (mflags & MATCH_QUOTED)  == 0)
+      else if (temp && (mflags & MATCH_QUOTED) == 0)
 	{
 	  tt = quote_escapes (temp);
 	  free (temp);
@@ -8327,9 +8327,18 @@ parameter_brace_casemod (varname, value, ind, modspec, patspec, quoted, pflags, 
 
       temp = assoc_p (v) ? assoc_modcase (assoc_cell (v), pat, modop, mflags)
 			 : array_modcase (array_cell (v), pat, modop, mflags);
-      /* Don't call quote_escapes; array_modcase calls array_quote_escapes
-	 as appropriate before adding the space separators; ditto for
-	 assoc_modcase. */
+
+      if (temp && quoted == 0 && ifs_is_null)
+	{
+	  /* Posix interp 888 */
+	}
+      else if (temp && (mflags & MATCH_QUOTED) == 0)
+	{
+	  tt = quote_escapes (temp);
+	  free (temp);
+	  temp = tt;
+	}
+
       break;
 #endif
     }

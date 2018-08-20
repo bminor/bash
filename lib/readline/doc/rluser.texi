@@ -2033,18 +2033,21 @@ reused as input.
 The @option{-r} option removes a completion specification for
 each @var{name}, or, if no @var{name}s are supplied, all
 completion specifications.
-The @option{-D} option indicates that the remaining options and actions should
+The @option{-D} option indicates that other supplied options and actions should
 apply to the ``default'' command completion; that is, completion attempted
 on a command for which no completion has previously been defined.
-The @option{-E} option indicates that the remaining options and actions should
+The @option{-E} option indicates that other supplied options and actions should
 apply to ``empty'' command completion; that is, completion attempted on a 
 blank line.
-The @option{-I} option indicates that the remaining options and actions should
+The @option{-I} option indicates that other supplied options and actions should
 apply to completion on the inital non-assignment word on the line, or after a
 command delimiter such as @samp{;} or @samp{|}, which is usually command
 name completion.
 If multiple options are supplied, the @option{-D} option takes precedence
 over @option{-E}, and both take precedence over @option{-I}.
+If any of @option{-D}, @option{-E}, or @option{-I} are supplied, any other
+@var{name} arguments are ignored; these completions only apply to the case
+specified by the option.
 
 The process of applying these completion specifications when word completion
 is attempted is described above (@pxref{Programmable Completion}).
@@ -2241,13 +2244,13 @@ If no @var{option}s are given, display the completion options for each
 @var{name} or the current completion.
 The possible values of @var{option} are those valid for the @code{complete}
 builtin described above.
-The @option{-D} option indicates that the remaining options should
+The @option{-D} option indicates that other supplied options should
 apply to the ``default'' command completion; that is, completion attempted
 on a command for which no completion has previously been defined.
-The @option{-E} option indicates that the remaining options should
+The @option{-E} option indicates that other supplied options should
 apply to ``empty'' command completion; that is, completion attempted on a 
 blank line.
-The @option{-I} option indicates that the remaining options should
+The @option{-I} option indicates that other supplied options should
 apply to completion on the inital non-assignment word on the line, or after a
 command delimiter such as @samp{;} or @samp{|}, which is usually command
 name completion.

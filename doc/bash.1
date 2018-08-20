@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Jun  8 16:15:23 EDT 2018
+.\"	Last Change: Tue Aug  7 12:01:07 EDT 2018
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2018 June 8" "GNU Bash 5.0"
+.TH BASH 1 "2018 August 7" "GNU Bash 5.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2928,6 +2928,14 @@ and
 .SM
 .BR CDPATH ,
 and the shell assigns the expanded value.
+.PP
+Bash also performs tilde expansion on words satisfying the conditions of
+variable assignments (as described above under
+.SM
+.BR PARAMETERS )
+when they appear as arguments to simple commands.
+Bash does not do this, except for the \fIdeclaration\fP commands listed
+above, when in \fIposix mode\fP.
 .SS Parameter Expansion
 .PP
 The `\fB$\fP' character introduces parameter expansion,
@@ -7668,18 +7676,21 @@ them to be reused as input.
 The \fB\-r\fP option removes a completion specification for
 each \fIname\fP, or, if no \fIname\fPs are supplied, all
 completion specifications.
-The \fB\-D\fP option indicates that the remaining options and actions should
+The \fB\-D\fP option indicates that other supplied options and actions should
 apply to the ``default'' command completion; that is, completion attempted
 on a command for which no completion has previously been defined.
-The \fB\-E\fP option indicates that the remaining options and actions should
+The \fB\-E\fP option indicates that other supplied options and actions should
 apply to ``empty'' command completion; that is, completion attempted on a
 blank line.
-The \fB\-I\fP option indicates that the remaining options and actions should
+The \fB\-I\fP option indicates that other supplied options and actions should
 apply to completion on the inital non-assignment word on the line, or after
 a command delimiter such as \fB;\fP or \fB|\fP, which is usually command
 name completion.
 If multiple options are supplied, the \fB\-D\fP option takes precedence
-over \fB\-E\fP, and both take precedence of \fB\-I\fP.
+over \fB\-E\fP, and both take precedence over \fB\-I\fP.
+If any of \fB\-D\fP, \fB\-E\fP, or \fB\-I\fP are supplied, any other
+\fIname\fP arguments are ignored; these completions only apply to the case
+specified by the option.
 .sp 1
 The process of applying these completion specifications when word completion
 is attempted is described above under \fBProgrammable Completion\fP.
@@ -7883,13 +7894,13 @@ If no \fIoption\fPs are given, display the completion options for each
 \fIname\fP or the current completion.
 The possible values of \fIoption\fP are those valid for the \fBcomplete\fP
 builtin described above.
-The \fB\-D\fP option indicates that the remaining options should
+The \fB\-D\fP option indicates that other supplied options should
 apply to the ``default'' command completion; that is, completion attempted
 on a command for which no completion has previously been defined.
-The \fB\-E\fP option indicates that the remaining options should
+The \fB\-E\fP option indicates that other supplied options should
 apply to ``empty'' command completion; that is, completion attempted on a
 blank line.
-The \fB\-I\fP option indicates that the remaining options should
+The \fB\-I\fP option indicates that other supplied options should
 apply to completion on the inital non-assignment word on the line,
 or after a command delimiter such as \fB;\fP or \fB|\fP, which is usually
 command name completion.

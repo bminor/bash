@@ -481,53 +481,32 @@ char	*pat;
 int	modop;
 int	mflags;
 {
-	ARRAY		*a2;
-	ARRAY_ELEMENT	*e;
-	char	*t, *sifs, *ifs;
-	int	slen;
+	char	*t;
+	int	pchar, qflags;
+	WORD_LIST	*wl, *save;
 
 	if (a == 0 || array_head(a) == 0 || array_empty(a))
 		return ((char *)NULL);
 
-	a2 = array_copy(a);
-	for (e = element_forw(a2->head); e != a2->head; e = element_forw(e)) {
-		t = sh_modcase(element_value(e), pat, modop);
-		FREE(element_value(e));
-		e->value = t;
+	wl = array_to_word_list(a);
+	if (wl == 0)
+		return ((char *)NULL);
+
+	for (save = wl; wl; wl = wl->next) {
+		t = sh_modcase(wl->word->word, pat, modop);
+		FREE(wl->word->word);
+		wl->word->word = t;
 	}
 
-	if (mflags & MATCH_QUOTED)
-		array_quote(a2);
-	else
-		array_quote_escapes(a2);
+	pchar = (mflags & MATCH_STARSUB) == MATCH_STARSUB ? '*' : '@';
+	qflags = (mflags & MATCH_QUOTED) == MATCH_QUOTED ? Q_DOUBLE_QUOTES : 0;
 
-	if (mflags & MATCH_STARSUB) {
-		array_remove_quoted_nulls (a2);
-		if ((mflags & MATCH_QUOTED) == 0 && ifs_is_null)
-			sifs = spacesep;
-		else
-			sifs = ifs_firstchar((int *)NULL);
-		t = array_to_string (a2, sifs, 0);
-		if (sifs != spacesep)
-			free(sifs);
-	} else if (mflags & MATCH_QUOTED) {
-		/* ${array[@]} */
-		sifs = ifs_firstchar (&slen);
-		ifs = getifs ();
-		if (ifs == 0 || *ifs == 0) {
-			if (slen < 2)
-				sifs = xrealloc (sifs, 2);
-			sifs[0] = ' ';
-			sifs[1] = '\0';
-		}
-		t = array_to_string (a2, sifs, 0);
-		free(sifs);
-	} else
-		t = array_to_string (a2, " ", 0);
-	array_dispose (a2);
+	t = string_list_pos_params (pchar, save, qflags);
+	dispose_words(save);
 
 	return t;
 }
+
 /*
  * Allocate and return a new array element with index INDEX and value
  * VALUE.

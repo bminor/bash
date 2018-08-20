@@ -444,7 +444,20 @@ restart_new_var_name:
 
 	  /* check name for validity here? */
 	  var = find_variable (name);
-	  newname = (var == 0) ? nameref_transform_name (name, ASS_MKLOCAL) : name;
+	  if (var == 0)
+	    newname = nameref_transform_name (name, ASS_MKLOCAL);
+	  else if ((flags_on & att_nameref) == 0 && (flags_off & att_nameref) == 0)
+	    {
+	      /* Ok, we're following namerefs here, so let's make sure that if
+		 we followed one, it was at the same context (see below for
+		 more details). */
+	      refvar = find_variable_last_nameref (name, 1);
+	      newname = (refvar && refvar->context != variable_context) ? name : var->name;
+	      refvar = (SHELL_VAR *)NULL;
+	    }
+	  else
+	    newname = name;	/* dealing with nameref attribute */
+
 #if defined (ARRAY_VARS)
 	  /* Pass 1 as second argument to make_local_{assoc,array}_variable
 	     return an existing {array,assoc} variable to be flagged as an

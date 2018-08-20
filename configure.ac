@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.0, version 4.094])dnl
+AC_REVISION([for Bash 5.0, version 4.095])dnl
 
 define(bashvers, 5.0)
 define(relstatus, alpha)
@@ -182,7 +182,7 @@ opt_casemod_attrs=yes
 opt_casemod_expansions=yes
 opt_extglob_default=no
 opt_dircomplete_expand_default=no
-opt_globascii_default=no
+opt_globascii_default=yes
 opt_function_import=yes
 opt_dev_fd_stat_broken=no
 
@@ -205,7 +205,7 @@ if test $opt_minimal_config = yes; then
 	opt_net_redirs=no opt_progcomp=no opt_separate_help=no
 	opt_multibyte=yes opt_cond_regexp=no opt_coproc=no
 	opt_casemod_attrs=no opt_casemod_expansions=no opt_extglob_default=no
-	opt_globascii_default=no
+	opt_globascii_default=yes
 fi
 
 AC_ARG_ENABLE(alias, AC_HELP_STRING([--enable-alias], [enable shell aliases]), opt_alias=$enableval)

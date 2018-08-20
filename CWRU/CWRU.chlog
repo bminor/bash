@@ -4153,3 +4153,36 @@ subst.c
 	- expand_string_for_pat: make sure we preserve the value of
 	  expand_no_split_dollar_star instead of just unconditionally setting
 	  it back to 0 in case it was 1 before this function was called
+
+				    8/6
+				    ---
+array.c
+	- array_modcase: rewrite to work in terms of a WORD_LIST * and call
+	  string_list_pos_params on the result to be consistent with the
+	  expansions of ${@,,} and ${*,,}
+
+assoc.c
+	- assoc_modcase: rewrite to work in terms of a WORD_LIST * and call
+	  string_list_pos_params on the result to be consistent with the
+	  expansions of ${@,,} and ${*,,}
+
+subst.c
+	- parameter_brace_casemod: change how return value of {array,assoc}_modcase
+	  is treated to make it identical to pos_params_modcase, since they
+	  all call string_list_pos_params now
+
+				    8/8
+				    ---
+builtins/declare.def
+	- declare_internal: if we are making local variables, and not dealing
+	  with the nameref attribute, make sure that any nameref variable we
+	  followed when resolving the name given was at the same variable
+	  context. If not, we just want to make or use a local variable with
+	  the name passed; if so, we want to use the nameref value as the
+	  variable name. Report from Grisha Levit <grishalevit@gmail.com>
+
+				    8/9
+				    ---
+configure.ac
+	- globasciiranges: RRI now on by default, must be turned off explicitly
+	  at configure time or runtime with `shopt -u globasciiranges'
