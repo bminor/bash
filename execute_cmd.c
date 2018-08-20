@@ -2448,7 +2448,7 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
      struct fd_bitmap *fds_to_close;
 {
   int prev, fildes[2], new_bitmap_size, dummyfd, ignore_return, exec_result;
-  int lstdin, lastpipe_flag, lastpipe_jid;
+  int lstdin, lastpipe_flag, lastpipe_jid, old_frozen;
   COMMAND *cmd;
   struct fd_bitmap *fd_bitmap;
   pid_t lastpid;
@@ -2563,7 +2563,7 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	  prev = NO_PIPE;
 	  add_unwind_protect (restore_stdin, lstdin);
 	  lastpipe_flag = 1;
-	  freeze_jobs_list ();
+	  old_frozen = freeze_jobs_list ();
 	  lastpipe_jid = stop_pipeline (0, (COMMAND *)NULL);	/* XXX */
 	  add_unwind_protect (lastpipe_cleanup, lastpipe_jid);
 	}
@@ -2611,9 +2611,9 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       else if (pipefail_opt)
 	exec_result = exec_result | lstdin;	/* XXX */
       /* otherwise we use exec_result */
-        
 #endif
-      unfreeze_jobs_list ();
+
+      set_jobs_list_frozen (old_frozen);
     }
 
   discard_unwind_frame ("lastpipe-exec");

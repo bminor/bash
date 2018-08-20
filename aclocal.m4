@@ -1307,7 +1307,7 @@ AC_CACHE_VAL(bash_cv_must_reinstall_sighandlers,
 
 typedef RETSIGTYPE sigfunc();
 
-int nsigint;
+volatile int nsigint;
 
 #ifdef HAVE_POSIX_SIGNALS
 sigfunc *

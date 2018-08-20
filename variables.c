@@ -5290,9 +5290,63 @@ pop_scope (is_special)
 /*								    */
 /* **************************************************************** */
 
-static WORD_LIST **dollar_arg_stack = (WORD_LIST **)NULL;
+struct saved_dollar_vars {
+  char **first_ten;
+  WORD_LIST *rest;
+};
+
+static struct saved_dollar_vars *dollar_arg_stack = (struct saved_dollar_vars *)NULL;
 static int dollar_arg_stack_slots;
 static int dollar_arg_stack_index;
+
+/* Functions to manipulate dollar_vars array. Need to keep these in sync with
+   whatever remember_args() does. */
+static char **
+save_dollar_vars ()
+{
+  char **ret;
+  int i;
+
+  ret = strvec_create (10);
+  for (i = 1; i < 10; i++)
+    {
+      ret[i] = dollar_vars[i];
+      dollar_vars[i] = (char *)NULL;
+    }
+  return ret;
+}
+
+static void
+restore_dollar_vars (args)
+     char **args;
+{
+  int i;
+
+  for (i = 1; i < 10; i++)
+    dollar_vars[i] = args[i];
+}
+
+static void
+free_dollar_vars ()
+{
+  int i;
+
+  for (i = 1; i < 10; i++)
+    {
+      FREE (dollar_vars[i]);
+      dollar_vars[i] = (char *)NULL;
+    }
+}
+
+static void
+free_saved_dollar_vars (args)
+     char **args;
+{
+  int i;
+
+  for (i = 1; i < 10; i++)
+    FREE (args[i]);
+}
 
 /* XXX - should always be followed by remember_args () */
 void
@@ -5325,35 +5379,53 @@ push_dollar_vars ()
 {
   if (dollar_arg_stack_index + 2 > dollar_arg_stack_slots)
     {
-      dollar_arg_stack = (WORD_LIST **)
+      dollar_arg_stack = (struct saved_dollar_vars *)
 	xrealloc (dollar_arg_stack, (dollar_arg_stack_slots += 10)
-		  * sizeof (WORD_LIST *));
+		  * sizeof (struct saved_dollar_vars));
     }
-  dollar_arg_stack[dollar_arg_stack_index++] = list_rest_of_args ();
-  dollar_arg_stack[dollar_arg_stack_index] = (WORD_LIST *)NULL;
+  
+  dollar_arg_stack[dollar_arg_stack_index].first_ten = save_dollar_vars ();
+  dollar_arg_stack[dollar_arg_stack_index++].rest = rest_of_args;
+  rest_of_args = (WORD_LIST *)NULL;
+  
+  dollar_arg_stack[dollar_arg_stack_index].first_ten = (char **)NULL;
+  dollar_arg_stack[dollar_arg_stack_index].rest = (WORD_LIST *)NULL;  
 }
 
 /* Restore the positional parameters from our stack. */
 void
 pop_dollar_vars ()
 {
-  if (!dollar_arg_stack || dollar_arg_stack_index == 0)
+  if (dollar_arg_stack == 0 || dollar_arg_stack_index == 0)
     return;
 
-  remember_args (dollar_arg_stack[--dollar_arg_stack_index], 1);
-  dispose_words (dollar_arg_stack[dollar_arg_stack_index]);
-  dollar_arg_stack[dollar_arg_stack_index] = (WORD_LIST *)NULL;
+  /* Do what remember_args (xxx, 1) would have done. */
+  free_dollar_vars ();
+  dispose_words (rest_of_args);
+  
+  rest_of_args = dollar_arg_stack[--dollar_arg_stack_index].rest;
+  restore_dollar_vars (dollar_arg_stack[dollar_arg_stack_index].first_ten);
+  free (dollar_arg_stack[dollar_arg_stack_index].first_ten);
+
+  dollar_arg_stack[dollar_arg_stack_index].first_ten = (char **)NULL;
+  dollar_arg_stack[dollar_arg_stack_index].rest = (WORD_LIST *)NULL;
+  
   set_dollar_vars_unchanged ();
+  invalidate_cached_quoted_dollar_at ();
 }
 
 void
 dispose_saved_dollar_vars ()
 {
-  if (!dollar_arg_stack || dollar_arg_stack_index == 0)
+  if (dollar_arg_stack == 0 || dollar_arg_stack_index == 0)
     return;
 
-  dispose_words (dollar_arg_stack[dollar_arg_stack_index]);
-  dollar_arg_stack[dollar_arg_stack_index] = (WORD_LIST *)NULL;
+  dispose_words (dollar_arg_stack[--dollar_arg_stack_index].rest);    
+  free_saved_dollar_vars (dollar_arg_stack[dollar_arg_stack_index].first_ten);	
+  free (dollar_arg_stack[dollar_arg_stack_index].first_ten);
+
+  dollar_arg_stack[dollar_arg_stack_index].first_ten = (char **)NULL;  
+  dollar_arg_stack[dollar_arg_stack_index].rest = (WORD_LIST *)NULL;
 }
 
 /* Initialize BASH_ARGV and BASH_ARGC after turning on extdebug after the

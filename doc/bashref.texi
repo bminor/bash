@@ -6189,7 +6189,9 @@ as if the command
 @code{set -o posix}
 @end example
 @noindent
-had been executed.  
+had been executed.
+When the shell enters @sc{posix} mode, it sets this variable if it was
+not already set.
 
 @item PPID
 The process @sc{id} of the shell's parent process.  This variable
@@ -7528,6 +7530,9 @@ startup files.
 The following list is what's changed when `@sc{posix} mode' is in effect:
 
 @enumerate
+@item
+Bash ensures that the @env{POSIXLY_CORRECT} variable is set.
+
 @item
 When a command in the hash table no longer exists, Bash will re-search
 @env{$PATH} to find the new location.  This is also available with

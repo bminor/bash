@@ -4771,6 +4771,13 @@ unfreeze_jobs_list ()
   jobs_list_frozen = 0;
 }
 
+void
+set_jobs_list_frozen (s)
+     int s;
+{
+  jobs_list_frozen = s;
+}
+
 /* Allow or disallow job control to take place.  Returns the old value
    of job_control. */
 int

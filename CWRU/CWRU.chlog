@@ -3229,7 +3229,7 @@ doc/{bash.1,bashref.texi}
 				    2/1
 				    ---
 config-top.h
-	- DONT_REPORT_SIGPIPE: define, so non-interactive shells will no
+	- DONT_REPORT_SIGTERM: define, so non-interactive shells will no
 	  longer print termination messages for child processes killed by
 	  SIGTERM
 
@@ -4186,3 +4186,54 @@ builtins/declare.def
 configure.ac
 	- globasciiranges: RRI now on by default, must be turned off explicitly
 	  at configure time or runtime with `shopt -u globasciiranges'
+
+				   8/14
+				   ----
+variables.c
+	- dispose_saved_dollar_vars: decrement stack pointer before looking
+	  for saved positional parameters to dispose; stack pointer always
+	  points to the first unused slot
+
+				   8/15
+				   ----
+variables.c
+	- dollar_arg_stack: now a stack of struct saved_dollar_vars, which has
+	  an array for the first ten (dollar_vars) and a WORD_LIST * for the
+	  remaining (rest_of_args). Fixes performance issue with function calls
+	  and large numbers of positional parameters raised by
+	  Bize Ma <binaryzebra@gmail.com>
+	- {save,restore,free,free_saved}_dollar_vars: new functions to manage
+	  dollar_vars and dollar_arg_stack members. Need to keep these in sync
+	  with whatever remember_args does
+	- push_dollar_vars: use save_dollar_vars, which just copies pointers,
+	  and directly assign rest_of_args, without copying the words, to the
+	  dollar_arg_stack entry. Have to clear dollar_vars and rest_of_args
+	  with the assumption that callers will call remember_args(args, 1)
+	  immediately following
+	- pop_dollar_vars: free current positional parameters and restore old
+	  ones from pointers saved in dollar_arg_stack, making sure to
+	  invalidate any cached value for "$@"
+	- dispose_saved_dollar_vars: free saved pointers from current index
+	  into dollar_arg_stack
+
+doc/{bash.1,bashref.texi}
+	- POSIXLY_CORRECT: make sure to note that bash makes sure this variable
+	  is set when posix mode is enabled
+
+				   8/17
+				   ----
+{jobs,nojobs}.c
+	- set_jobs_list_frozen: set jobs_list_frozen to a particular value.
+	  Intended to save and restore the value around code sections instead
+	  of unconditionally unfreezing it.
+
+jobs.h
+	- set_jobs_list_frozen: extern declaration
+
+execute_cmd.c
+	- execute_pipeline: if lastpipe is enabled, save and restore the
+	  value of jobs_list_frozen using freeze_jobs_list/set_jobs_list_frozen
+	  to avoid problems with race conditions and nested pipelines
+	  causing jobs to be removed from the jobs table. Fixes savannah issue
+	  https://savannah.gnu.org/support/index.php?109541 reported by
+	  Björn Kautler <vampire0>
