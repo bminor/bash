@@ -2438,7 +2438,7 @@ static void
 lastpipe_cleanup (s)
      int s;
 {
-  unfreeze_jobs_list ();
+  set_jobs_list_frozen (s);
 }
 
 static int
@@ -2565,7 +2565,7 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	  lastpipe_flag = 1;
 	  old_frozen = freeze_jobs_list ();
 	  lastpipe_jid = stop_pipeline (0, (COMMAND *)NULL);	/* XXX */
-	  add_unwind_protect (lastpipe_cleanup, lastpipe_jid);
+	  add_unwind_protect (lastpipe_cleanup, old_frozen);
 	}
       if (cmd)
 	cmd->flags |= CMD_LASTPIPE;

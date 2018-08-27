@@ -4237,3 +4237,11 @@ execute_cmd.c
 	  causing jobs to be removed from the jobs table. Fixes savannah issue
 	  https://savannah.gnu.org/support/index.php?109541 reported by
 	  Björn Kautler <vampire0>
+
+				   8/24
+				   ----
+execute_cmd.c
+	- lastpipe_cleanup: call set_jobs_list_frozen instead of
+	  unfreeze_jobs_list
+	- execute_pipeline: set up lastpipe_cleanup with old value of
+	  jobs_list_frozen
