@@ -297,7 +297,7 @@ _rl_forward_char_internal (int count)
 #endif
 
     if (rl_end < 0)
-	rl_end = 0;
+      rl_end = 0;
 #else
   point = rl_point + count;
   if (point > rl_end)
