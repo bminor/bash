@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2018 June 8<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2018 August 7<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -2896,6 +2896,12 @@ startup file, overriding the default of
 
 </FONT>
 below).
+<DT><B>INSIDE_EMACS</B>
+
+<DD>
+If this variable appears in the environment when the shell starts,
+<B>bash</B> assumes that it is running inside an Emacs shell buffer
+and may disable line editing, depending on the value of <B>TERM</B>.
 <DT><B>LANG</B>
 
 <DD>
@@ -3052,6 +3058,8 @@ running, <B>bash</B> enables <I>posix mode</I>, as if the command
 <TT>set -o posix</TT>
 
 had been executed.
+When the shell enters <I>posix mode</I>, it sets this variable if it was
+not already set.
 <DT><B>PROMPT_COMMAND</B>
 
 <DD>
@@ -3707,6 +3715,16 @@ and
 
 </FONT>
 and the shell assigns the expanded value.
+<P>
+
+Bash also performs tilde expansion on words satisfying the conditions of
+variable assignments (as described above under
+<FONT SIZE=-1><B>PARAMETERS</B>)
+
+</FONT>
+when they appear as arguments to simple commands.
+Bash does not do this, except for the <I>declaration</I> commands listed
+above, when in <I>posix mode</I>.
 <A NAME="lbBB">&nbsp;</A>
 <H4>Parameter Expansion</H4>
 
@@ -9768,18 +9786,21 @@ them to be reused as input.
 The <B>-r</B> option removes a completion specification for
 each <I>name</I>, or, if no <I>name</I>s are supplied, all
 completion specifications.
-The <B>-D</B> option indicates that the remaining options and actions should
+The <B>-D</B> option indicates that other supplied options and actions should
 apply to the ``default'' command completion; that is, completion attempted
 on a command for which no completion has previously been defined.
-The <B>-E</B> option indicates that the remaining options and actions should
+The <B>-E</B> option indicates that other supplied options and actions should
 apply to ``empty'' command completion; that is, completion attempted on a
 blank line.
-The <B>-I</B> option indicates that the remaining options and actions should
+The <B>-I</B> option indicates that other supplied options and actions should
 apply to completion on the inital non-assignment word on the line, or after
 a command delimiter such as <B>;</B> or <B>|</B>, which is usually command
 name completion.
 If multiple options are supplied, the <B>-D</B> option takes precedence
-over <B>-E</B>, and both take precedence of <B>-I</B>.
+over <B>-E</B>, and both take precedence over <B>-I</B>.
+If any of <B>-D</B>, <B>-E</B>, or <B>-I</B> are supplied, any other
+<I>name</I> arguments are ignored; these completions only apply to the case
+specified by the option.
 <P>
 The process of applying these completion specifications when word completion
 is attempted is described above under <B>Programmable Completion</B>.
@@ -10018,13 +10039,13 @@ If no <I>option</I>s are given, display the completion options for each
 <I>name</I> or the current completion.
 The possible values of <I>option</I> are those valid for the <B>complete</B>
 builtin described above.
-The <B>-D</B> option indicates that the remaining options should
+The <B>-D</B> option indicates that other supplied options should
 apply to the ``default'' command completion; that is, completion attempted
 on a command for which no completion has previously been defined.
-The <B>-E</B> option indicates that the remaining options should
+The <B>-E</B> option indicates that other supplied options should
 apply to ``empty'' command completion; that is, completion attempted on a
 blank line.
-The <B>-I</B> option indicates that the remaining options should
+The <B>-I</B> option indicates that other supplied options should
 apply to completion on the inital non-assignment word on the line,
 or after a command delimiter such as <B>;</B> or <B>|</B>, which is usually
 command name completion.
@@ -13871,7 +13892,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2018 June 8<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2018 August 7<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13977,6 +13998,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 16 July 2018 10:36:49 EDT
+Time: 07 September 2018 16:15:28 EDT
 </BODY>
 </HTML>

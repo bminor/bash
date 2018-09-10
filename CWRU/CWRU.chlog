@@ -4252,3 +4252,54 @@ builtins/printf.def
 	- getuintmax,getfloatmax: on a conversion error, return as much of the
 	  value as we were able to convert instead of 0. Fixes bug reported
 	  by Robert Elz <kre@bmunnari.OZ.AU>
+
+				    9/4
+				    ---
+lib/readline/text.c,lib/readline/rlprivate.h
+	- _rl_backward_char_internal: new function, guts of rl_backward_char
+	  and rl_backward_byte, not currently used there
+
+lib/readline/vi_mode.c
+	- _rl_vi_advance_point: new function, move point forward by one
+	  character, handling multibyte locales and characters and the end
+	  of line semantics
+	- _rl_vi_backup_point: new function, move point backward by one
+	  character, handling multibyte locales and characters
+	- rl_vi_eword,rl_vi_eWord: use rl_vi_advance_point instead of a simple
+	  increment to handle multibyte characters.  Fixes bug reported by
+	  Enrico Maria De Angelis <enricomaria.dean6elis@gmail.com>
+
+				    9/5
+				    ---
+lib/readline/vi_mode.c
+	- rl_vi_fword,rl_vi_fWord: use rl_vi_advance_point instead of a simple
+	  increment to handle multibyte characters
+	- rl_vi_bword,rl_vi_bWord: use rl_vi_backup_point instead of a simple
+	  decrement (and _rl_vi_advance_point where necessary) to handle
+	  multibyte characters
+	- rl_vi_complete,_rl_vi_change_mbchar_case,_rl_vi_domove_motion_cleanup:
+	  use _rl_vi_advance_point instead of simple rl_point increment
+	- vi_delete_dispatch,vi_change_dispatch,vi_yank_dispatch: use
+	  INCREMENT_POS instead of a simple increment to rl_mark to handle
+	  multibyte characters
+	- rl_vi_column: use _rl_forward_char_internal, starting with
+	  rl_point == 0, to handle multibyte characters (Posix says `character
+	  position', not index)
+
+				    9/7
+				    ---
+configure.ac
+	- changed release status to `beta'
+
+				    9/9
+				    ---
+lib/readline/display.c
+	- _rl_update_final: if the bottom line has zero characters and we are
+	  on that line at column 0, don't bother with an additional \r\n.
+	  Fixes redisplay nit reported by Per Bothner <per@bothner.com>
+
+
+configure.ac
+	- openbsd needs DEV_FD_STAT_BROKEN defined
+
+[bash-5.0-beta frozen]

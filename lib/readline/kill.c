@@ -322,7 +322,7 @@ rl_unix_word_rubout (int count, int key)
 	    rl_point--;
 
 	  while (rl_point && (whitespace (rl_line_buffer[rl_point - 1]) == 0))
-	    rl_point--;
+	    rl_point--;		/* XXX - multibyte? */
 	}
 
       rl_kill_text (orig_point, rl_point);
@@ -359,7 +359,7 @@ rl_unix_filename_rubout (int count, int key)
 
 	  while (rl_point && (whitespace (c) == 0) && c != '/')
 	    {
-	      rl_point--;
+	      rl_point--;	/* XXX - multibyte? */
 	      c = rl_line_buffer[rl_point - 1];
 	    }
 	}

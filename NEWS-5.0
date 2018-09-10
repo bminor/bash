@@ -85,6 +85,31 @@ z. The `times' builtin now honors the current locale when printing a decimal
 aa. There is a new (disabled by default, undocumented) shell option to enable
     and disable sending history to syslog at runtime.
 
+bb. Bash no longer allows variable assignments preceding a special builtin that
+    changes variable attributes to propagate back to the calling environment
+    unless the compatibility level is 44 or lower.
+
+cc. You can set the default value for $HISTSIZE at build time in config-top.h.
+
+dd. The `complete' builtin now accepts a -I option that applies the completion
+    to the initial word on the line.
+
+ee.  The internal bash malloc now uses mmap (if available) to satisfy requests
+    greater than 128K bytes, so free can use mfree to return the pages to the
+    kernel.
+
+ff. The shell doesn't automatically set BASH_ARGC and BASH_ARGV at startup
+    unless it's in debugging mode, as the documentation has always said, but
+    will dynamically create them if a script references them at the top level
+    without having enabled debugging mode.
+
+gg. The localvar_inherit option will not attempt to inherit a value from a
+    variable of an incompatible type (indexed vs. associative arrays, for
+    example).
+
+hh. The `globasciiranges' option is now enabled by default; it can be set to
+    off by default at configuration time.
+
 2.  New Features in Readline
 
 a. Non-incremental vi-mode search (`N', `n') can search for a shell pattern, as
@@ -111,3 +136,11 @@ g. There is a simple variable comparison facility available for use within an
    variables may be compared to a value; boolean variables must be compared to
    either `on' or `off'; variable names are separated from the operator by
    whitespace.
+
+h. The history expansion library now understands command and process
+   substitution and extended globbing and allows them to appear anywhere in a
+   word.
+
+i. The history library has a new variable that allows applications to set the
+   initial quoting state, so quoting state can be inherited from a previous
+   line.

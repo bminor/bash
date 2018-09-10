@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.0, 8 June 2018).
+the Bash shell (version 5.0, 7 August 2018).
 
-This is Edition 5.0, last updated 8 June 2018,
+This is Edition 5.0, last updated 7 August 2018,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.0.
 
@@ -284,10 +284,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.0, 8 June 2018).
+the Bash shell (version 5.0, 7 August 2018).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.0, last updated 8 June 2018,
+<p>This is Edition 5.0, last updated 7 August 2018,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.0.
 </p>
@@ -2466,6 +2466,12 @@ and the shell assigns the expanded value.
 </p></dd>
 </dl>
 
+<p>Bash also performs tilde expansion on words satisfying the conditions of
+variable assignments (see <a href="#Shell-Parameters">Shell Parameters</a>)
+when they appear as arguments to simple commands.
+Bash does not do this, except for the <var>declaration</var> commands listed
+above, when in <small>POSIX</small> mode.
+</p>
 <hr>
 <a name="Shell-Parameter-Expansion"></a>
 <div class="header">
@@ -7214,6 +7220,14 @@ input to the shell.  This is only in effect for interactive shells.
 of <samp>~/.inputrc</samp>.
 </p>
 </dd>
+<dt><code>INSIDE_EMACS</code>
+<a name="index-INSIDE_005fEMACS"></a>
+</dt>
+<dd><p>If Bash finds this variable in the environment when the shell
+starts, it assumes that the shell is running in an Emacs shell buffer
+and may disable line editing depending on the value of <code>TERM</code>.
+</p>
+</dd>
 <dt><code>LANG</code>
 <a name="index-LANG"></a>
 </dt>
@@ -7346,7 +7360,9 @@ as if the command
 </p><div class="example">
 <pre class="example"><code>set -o posix</code>
 </pre></div>
-<p>had been executed.  
+<p>had been executed.
+When the shell enters <small>POSIX</small> mode, it sets this variable if it was
+not already set.
 </p>
 </dd>
 <dt><code>PPID</code>
@@ -8938,7 +8954,9 @@ startup files.
 <p>The following list is what&rsquo;s changed when &lsquo;<small>POSIX</small> mode&rsquo; is in effect:
 </p>
 <ol>
-<li> When a command in the hash table no longer exists, Bash will re-search
+<li> Bash ensures that the <code>POSIXLY_CORRECT</code> variable is set.
+
+</li><li> When a command in the hash table no longer exists, Bash will re-search
 <code>$PATH</code> to find the new location.  This is also available with
 &lsquo;<samp>shopt -s checkhash</samp>&rsquo;.
 
@@ -12012,18 +12030,21 @@ reused as input.
 The <samp>-r</samp> option removes a completion specification for
 each <var>name</var>, or, if no <var>name</var>s are supplied, all
 completion specifications.
-The <samp>-D</samp> option indicates that the remaining options and actions should
+The <samp>-D</samp> option indicates that other supplied options and actions should
 apply to the &ldquo;default&rdquo; command completion; that is, completion attempted
 on a command for which no completion has previously been defined.
-The <samp>-E</samp> option indicates that the remaining options and actions should
+The <samp>-E</samp> option indicates that other supplied options and actions should
 apply to &ldquo;empty&rdquo; command completion; that is, completion attempted on a 
 blank line.
-The <samp>-I</samp> option indicates that the remaining options and actions should
+The <samp>-I</samp> option indicates that other supplied options and actions should
 apply to completion on the inital non-assignment word on the line, or after a
 command delimiter such as &lsquo;<samp>;</samp>&rsquo; or &lsquo;<samp>|</samp>&rsquo;, which is usually command
 name completion.
 If multiple options are supplied, the <samp>-D</samp> option takes precedence
 over <samp>-E</samp>, and both take precedence over <samp>-I</samp>.
+If any of <samp>-D</samp>, <samp>-E</samp>, or <samp>-I</samp> are supplied, any other
+<var>name</var> arguments are ignored; these completions only apply to the case
+specified by the option.
 </p>
 <p>The process of applying these completion specifications when word completion
 is attempted is described above (see <a href="#Programmable-Completion">Programmable Completion</a>).
@@ -12261,13 +12282,13 @@ If no <var>option</var>s are given, display the completion options for each
 <var>name</var> or the current completion.
 The possible values of <var>option</var> are those valid for the <code>complete</code>
 builtin described above.
-The <samp>-D</samp> option indicates that the remaining options should
+The <samp>-D</samp> option indicates that other supplied options should
 apply to the &ldquo;default&rdquo; command completion; that is, completion attempted
 on a command for which no completion has previously been defined.
-The <samp>-E</samp> option indicates that the remaining options should
+The <samp>-E</samp> option indicates that other supplied options should
 apply to &ldquo;empty&rdquo; command completion; that is, completion attempted on a 
 blank line.
-The <samp>-I</samp> option indicates that the remaining options should
+The <samp>-I</samp> option indicates that other supplied options should
 apply to completion on the inital non-assignment word on the line, or after a
 command delimiter such as &lsquo;<samp>;</samp>&rsquo; or &lsquo;<samp>|</samp>&rsquo;, which is usually command
 name completion.
@@ -15037,6 +15058,7 @@ Next: <a href="#Function-Index" accesskey="n" rel="next">Function Index</a>, Pre
 <tr><td></td><td valign="top"><a href="#index-IGNOREEOF"><code>IGNOREEOF</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-input_002dmeta"><code>input-meta</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Readline-Init-File-Syntax">Readline Init File Syntax</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-INPUTRC"><code>INPUTRC</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-INSIDE_005fEMACS"><code>INSIDE_EMACS</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-isearch_002dterminators"><code>isearch-terminators</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Readline-Init-File-Syntax">Readline Init File Syntax</a></td></tr>
 <tr><td colspan="4"> <hr></td></tr>
 <tr><th><a name="Variable-Index_vr_letter-K">K</a></th><td></td><td></td></tr>

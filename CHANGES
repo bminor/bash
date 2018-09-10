@@ -1,3 +1,124 @@
+This document details the changes between this version, bash-5.0-beta, and
+the previous version, bash-5.0-alpha.
+
+1.  Changes to Bash
+
+a. Fixed a bug that allowed subshells to "inherit" enclosing loops -- this
+   is where POSIX says the subshell is not "enclosed" by the loop.
+
+b. Added more UTF-8-specific versions of multibyte functions, and optimized
+   existing functions if the current locale uses UTF-8 encoding.
+
+c. In POSIX mode, assignments preceding regular builtins should not persist
+   when the builtin completes.
+
+d. Added additional checks to special array assignment (e.g., BASH_ALIASES)
+   so it can't be used to bypass validity checks performed in other places.
+
+e. The `!!' history expansion now refers to the previous history entry as
+   expected, even if used on the second or subsequent line of a multi-line
+   history entry.
+
+f. Fixed a bug that could cause the shell to dereference a NULL pointer if
+   the environment (`environ') is set to NULL.
+
+g. Bash uses slightly better integer overflow handling for brace sequence
+   expansion on systems where ints are 32 bits and intmax_t is 64 bits.
+
+h. Fixed a bug setting attributes for a variable named as an argument to
+   `declare' that also appears as a nameref in the temporary environment.
+
+i. Fixed several bugs that could cause assignments to namerefs to create
+   variables with invalid names.
+
+j. Fixed a bug that could result in the SIGINT handler being set incorrectly
+   in asynchronous subshells.
+
+k. Fixed a bug that could cause `bash -t' to not execute the specified command.
+
+l. Fixed several bugs that caused the shell to operate on the wrong variable
+   when using namerefs with the same name as a global variable in shell
+   functions.
+
+m. Internal changes to how the shell handles variables with invalid names in
+   the initial environment and to prevent variables with invalid names from
+   being added to the environment instead of passing them on to children.
+
+n. Changes to make sure that an expansion that results in a quoted null string
+   is reflected in the expansion, even if the word expands to nothing.
+
+o. Changes to make sure that $* and ${array[*]} (and $@/${array[@]}) expand
+   the same way after the recent changes for POSIX interpretation 888.
+
+p. Saving and restoring the positional parameters at function entry and exit
+   is considerably more efficient; noticeably so when there are large numbers
+   of positional parameters.
+
+q. Fixed a bug that caused `lastpipe' and `pipefail' to return an incorrect
+   status for the pipeline if there was more than one external command in a
+   loop body appearing in the last pipeline element.
+
+r. Fixed a bug that caused value conversion errors with the printf builtin's
+   %u and %f conversion specifications and invalid constants.
+
+2.  Changes to Readline
+
+a. Added more UTF-8-specific versions of multibyte functions, and optimized
+   existing functions if the current locale uses UTF-8 encoding.
+
+b. Fixed a problem with bracketed-paste inserting more than one character and
+   interacting with other readline functions.
+
+c. Fixed a bug that caused the history library to attempt to append a history
+   line to a non-existent history entry.
+
+d. If using bracketed paste mode, output a newline after the \r that is the
+   last character of the mode disable string to avoid overwriting output.
+
+e. Fixes to the vi-mode `b', `B', `w', `W', `e', and `E' commands to better
+   handle multibyte characters.
+
+f. Fixed a redisplay problem that caused an extra newline to be generated on
+   accept-line when the line is exactly the screenwidth.
+
+3.  New Features in Bash
+
+a. Bash no longer allows variable assignments preceding a special builtin that
+   changes variable attributes to propagate back to the calling environment
+   unless the compatibility level is 44 or lower.
+
+b. You can set the default value for $HISTSIZE at build time in config-top.h.
+
+c. The `complete' builtin now accepts a -I option that applies the completion
+   to the initial word on the line.
+
+d. The internal bash malloc now uses mmap (if available) to satisfy requests
+   greater than 128K bytes, so free can use mfree to return the pages to the
+   kernel.
+
+e. The shell doesn't automatically set BASH_ARGC and BASH_ARGV at startup
+   unless it's in debugging mode, as the documentation has always said, but
+   will dynamically create them if a script references them at the top level
+   without having enabled debugging mode.
+
+f. The localvar_inherit option will not attempt to inherit a value from a
+   variable of an incompatible type (indexed vs. associative arrays, for
+   example).
+
+g. The `globasciiranges' option is now enabled by default; it can be set to
+   off by default at configuration time.
+
+4.  New Features in Readline
+
+a. The history expansion library now understands command and process
+   substitution and extended globbing and allows them to appear anywhere in a
+   word.
+
+b. The history library has a new variable that allows applications to set the
+   initial quoting state, so quoting state can be inherited from a previous
+   line.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-5.0-alpha, and
 the previous version, bash-4.4-release.
 

@@ -2987,7 +2987,8 @@ _rl_update_final (void)
       putc (last_line[_rl_screenwidth - 1 + woff], rl_outstream);
     }
   _rl_vis_botlin = 0;
-  rl_crlf ();
+  if (botline_length > 0 || _rl_last_c_pos > 0)
+    rl_crlf ();
   fflush (rl_outstream);
   rl_display_fixed++;
 }

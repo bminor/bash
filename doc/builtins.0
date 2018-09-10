@@ -219,18 +219,20 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               completion specifications are printed in a way that allows  them
               to be reused as input.  The --rr option removes a completion spec-
               ification for each _n_a_m_e, or, if no _n_a_m_es are supplied, all  com-
-              pletion  specifications.   The  --DD  option  indicates  that  the
-              remaining options and actions should apply  to  the  ``default''
-              command  completion;  that is, completion attempted on a command
-              for which no completion has previously  been  defined.   The  --EE
-              option  indicates  that the remaining options and actions should
-              apply to  ``empty''  command  completion;  that  is,  completion
-              attempted  on  a  blank  line.  The --II option indicates that the
-              remaining options and actions should apply to completion on  the
-              inital  non-assignment  word  on  the  line,  or after a command
-              delimiter such as ;; or ||, which is usually command name  comple-
-              tion.   If  multiple  options  are supplied, the --DD option takes
-              precedence over --EE, and both take precedence of --II.
+              pletion specifications.  The --DD option indicates that other sup-
+              plied options and actions should apply to the  ``default''  com-
+              mand  completion; that is, completion attempted on a command for
+              which no completion has previously been defined.  The --EE  option
+              indicates  that  other supplied options and actions should apply
+              to ``empty'' command completion; that is,  completion  attempted
+              on  a  blank  line.  The --II option indicates that other supplied
+              options and actions should apply to  completion  on  the  inital
+              non-assignment  word  on  the line, or after a command delimiter
+              such as ;; or ||, which is usually command  name  completion.   If
+              multiple  options  are  supplied, the --DD option takes precedence
+              over --EE, and both take precedence over --II.  If any of --DD, --EE, or
+              --II  are  supplied,  any  other _n_a_m_e arguments are ignored; these
+              completions only apply to the case specified by the option.
 
               The process of applying  these  completion  specifications  when
               word  completion  is attempted is described above under PPrrooggrraamm--
@@ -364,13 +366,13 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               are  supplied.   If no _o_p_t_i_o_ns are given, display the completion
               options for each _n_a_m_e or the current completion.   The  possible
               values  of  _o_p_t_i_o_n  are  those  valid  for  the ccoommpplleettee builtin
-              described above.  The --DD option  indicates  that  the  remaining
+              described above.  The --DD option indicates  that  other  supplied
               options should apply to the ``default'' command completion; that
               is, completion attempted on a command for  which  no  completion
-              has  previously  been defined.  The --EE option indicates that the
-              remaining options should apply to ``empty'' command  completion;
+              has previously been defined.  The --EE option indicates that other
+              supplied options should apply to ``empty''  command  completion;
               that  is,  completion  attempted on a blank line.  The --II option
-              indicates that the remaining options should apply to  completion
+              indicates that other supplied options should apply to completion
               on  the  inital non-assignment word on the line, or after a com-
               mand delimiter such as ;; or ||, which  is  usually  command  name
               completion.
