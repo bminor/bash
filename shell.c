@@ -363,7 +363,7 @@ main (argc, argv, env)
 #endif /* !NO_MAIN_ENV_ARG */
 {
   register int i;
-  int code, old_errexit_flag;
+  int code, old_errexit_flag, old_onecmd;
 #if defined (RESTRICTED_SHELL)
   int saverst;
 #endif
@@ -1012,7 +1012,7 @@ sh_exit (s)
      int s;
 {
 #if defined (MALLOC_DEBUG) && defined (USING_BASH_MALLOC)
-  if (malloc_trace_at_exit)
+  if (malloc_trace_at_exit && (subshell_environment & (SUBSHELL_COMSUB|SUBSHELL_PROCSUB)) == 0)
     trace_malloc_stats (get_name_for_error (), (char *)NULL);
   /* mlocation_write_table (); */
 #endif

@@ -1,0 +1,17 @@
+f() { declare -a a; declare -A a; echo -n "$FUNCNAME: " ; declare -p a; }
+f
+
+f() { declare -A a; declare -a a; echo -n "$FUNCNAME: " ; declare -p a; }
+f
+
+echo 
+
+f() { declare -a a; echo -n "$FUNCNAME: " ; declare -p a; }
+a=7
+f
+echo -n 'main: '; declare -p a
+
+f() { declare -A a; echo -n "$FUNCNAME: " ; declare -p a; }
+a=42
+f
+echo -n 'main: '; declare -p a

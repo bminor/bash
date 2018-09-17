@@ -1198,8 +1198,10 @@ getuintmax ()
   if (*ep)
     {
       sh_invalidnum (garglist->word->word);
+#if 0
       /* Same POSIX.2 conversion error requirements as getintmax(). */
       ret = 0;
+#endif
       conversion_error = 1;
     }
   else if (errno == ERANGE)
@@ -1227,8 +1229,10 @@ getfloatmax ()
   if (*ep)
     {
       sh_invalidnum (garglist->word->word);
+#if 0
       /* Same thing about POSIX.2 conversion error requirements. */
       ret = 0;
+#endif
       conversion_error = 1;
     }
   else if (errno == ERANGE)

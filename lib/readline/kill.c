@@ -322,7 +322,7 @@ rl_unix_word_rubout (int count, int key)
 	    rl_point--;
 
 	  while (rl_point && (whitespace (rl_line_buffer[rl_point - 1]) == 0))
-	    rl_point--;
+	    rl_point--;		/* XXX - multibyte? */
 	}
 
       rl_kill_text (orig_point, rl_point);
@@ -359,7 +359,7 @@ rl_unix_filename_rubout (int count, int key)
 
 	  while (rl_point && (whitespace (c) == 0) && c != '/')
 	    {
-	      rl_point--;
+	      rl_point--;	/* XXX - multibyte? */
 	      c = rl_line_buffer[rl_point - 1];
 	    }
 	}
@@ -677,7 +677,7 @@ rl_bracketed_paste_begin (int count, int key)
   size_t len, cap;
   char *buf;
 
-  retval = 1;
+  retval = 0;
   len = 0;
   buf = xmalloc (cap = 64);
 
@@ -708,7 +708,7 @@ rl_bracketed_paste_begin (int count, int key)
       if (len == cap)
 	buf = xrealloc (buf, cap + 1);
       buf[len] = '\0';
-      retval = rl_insert_text (buf);
+      retval = rl_insert_text (buf) == len ? 0 : 1;
     }
 
   xfree (buf);

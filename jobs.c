@@ -863,7 +863,7 @@ pshash_delindex (psi)
       *bucket = ps->bucket_next;	/* deleting chain head in hash table */
     }
 
-  /* clear out this cell, just in case */
+  /* clear out this cell, in case it gets reused. */
   ps->pid = NO_PID;
   ps->bucket_next = ps->bucket_prev = NO_PIDSTAT;
 }
@@ -4769,6 +4769,13 @@ void
 unfreeze_jobs_list ()
 {
   jobs_list_frozen = 0;
+}
+
+void
+set_jobs_list_frozen (s)
+     int s;
+{
+  jobs_list_frozen = s;
 }
 
 /* Allow or disallow job control to take place.  Returns the old value

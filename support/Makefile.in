@@ -4,11 +4,12 @@
 # documentation support: man2html
 # testing support: printenv recho zecho xcase
 #
-# bashbug lives here but is created by the top-level makefile
+# bashbug.sh lives here (created by configure), but bashbug is created by
+# the top-level makefile
 #
 # Currently only man2html is built
 #
-# Copyright (C) 1998-2009 Free Software Foundation, Inc.     
+# Copyright (C) 1998-2018 Free Software Foundation, Inc.
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -82,6 +83,6 @@ clean:
 	$(RM) man2html$(EXEEXT) $(OBJ1)
 
 distclean maintainer-clean mostlyclean: clean
-	$(RM) bash.pc
+	$(RM) bash.pc bashbug.sh
 
 man2html.o: man2html.c

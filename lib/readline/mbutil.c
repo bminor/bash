@@ -75,6 +75,57 @@ int _rl_utf8locale = 0;
 
 #if defined(HANDLE_MULTIBYTE)
 
+/* **************************************************************** */
+/*								    */
+/*		UTF-8 specific Character Utility Functions	    */
+/*								    */
+/* **************************************************************** */
+
+/* Return the length in bytes of the possibly-multibyte character beginning
+   at S. Encoding is UTF-8. */
+static int
+_rl_utf8_mblen (const char *s, size_t n)
+{
+  unsigned char c, c1;
+
+  if (s == 0)
+    return (0);	/* no shift states */
+  if (n <= 0)
+    return (-1);
+
+  c = (unsigned char)*s;
+  if (c < 0x80)
+    return (c != 0);
+  if (c >= 0xc2)
+    {
+      c1 = (unsigned char)s[1];
+      if (c < 0xe0)
+	{
+	  if (n >= 2 && (s[1] ^ 0x80) < 0x40)
+	    return 2;
+	}
+      else if (c < 0xf0)
+	{
+	  if (n >= 3
+		&& (s[1] ^ 0x80) < 0x40 && (s[2] ^ 0x80) < 0x40
+		&& (c >= 0xe1 || c1 >= 0xa0)
+		&& (c != 0xed || c1 < 0xa0))
+	    return 3;
+	}
+      else if (c < 0xf8)
+	{
+	  if (n >= 4
+		&& (s[1] ^ 0x80) < 0x40 && (s[2] ^ 0x80) < 0x40
+	 	&& (s[3] ^ 0x80) < 0x40
+		&& (c >= 0xf1 || c1 >= 0x90)
+		&& (c < 0xf4 || (c == 0xf4 && c1 < 0x90)))
+	    return 4;
+	}
+    }
+  /* invalid or incomplete multibyte character */
+  return -1;
+}
+
 static int
 _rl_find_next_mbchar_internal (char *string, int seed, int count, int find_non_zero)
 {
@@ -228,11 +279,16 @@ _rl_get_char_len (char *src, mbstate_t *ps)
 
   /* Look at no more than MB_CUR_MAX characters */
   l = (size_t)strlen (src);
-  mb_cur_max = MB_CUR_MAX;
-  tmp = mbrlen((const char *)src, (l < mb_cur_max) ? l : mb_cur_max, ps);
+  if (_rl_utf8locale && l > 0 && UTF8_SINGLEBYTE(*src))
+    tmp = (*src != 0) ? 1 : 0;
+  else
+    {
+      mb_cur_max = MB_CUR_MAX;
+      tmp = mbrlen((const char *)src, (l < mb_cur_max) ? l : mb_cur_max, ps);
+    }
   if (tmp == (size_t)(-2))
     {
-      /* shorted to compose multibyte char */
+      /* too short to compose multibyte char */
       if (ps)
 	memset (ps, 0, sizeof(mbstate_t));
       return -2;

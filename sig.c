@@ -268,7 +268,6 @@ initialize_terminating_signals ()
 	sigaction (XSIG (i), &oact, (struct sigaction *)NULL);
 #endif /* SIGPROF && !_MINIX */
     }
-
 #else /* !HAVE_POSIX_SIGNALS */
 
   for (i = 0; i < TERMSIGS_LENGTH; i++)

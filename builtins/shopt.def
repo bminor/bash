@@ -110,6 +110,7 @@ extern int enable_hostname_completion __P((int));
 
 #if defined (PROGRAMMABLE_COMPLETION)
 extern int prog_completion_enabled;
+extern int progcomp_alias;
 #endif
 
 #if defined (DEBUGGER)
@@ -219,7 +220,7 @@ static struct {
   { "lithist", &literal_history, (shopt_set_func_t *)NULL },
 #endif
   { "localvar_inherit", &localvar_inherit, (shopt_set_func_t *)NULL },
-#if 0
+#if 0 /* bash-5.0-beta */
   { "localvar_unset", &localvar_unset, (shopt_set_func_t *)NULL },
 #endif
   { "login_shell", &shopt_login_shell, set_login_shell },
@@ -232,6 +233,9 @@ static struct {
   { "nullglob",	&allow_null_glob_expansion, (shopt_set_func_t *)NULL },
 #if defined (PROGRAMMABLE_COMPLETION)
   { "progcomp", &prog_completion_enabled, (shopt_set_func_t *)NULL },
+#  if 0	/* bash-5.0-beta */
+  { "progcomp_alias", &progcomp_alias, (shopt_set_func_t *)NULL },
+#  endif
 #endif
   { "promptvars", &promptvars, (shopt_set_func_t *)NULL },
 #if defined (RESTRICTED_SHELL)

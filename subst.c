@@ -387,10 +387,10 @@ dump_word_flags (flags)
       f &= ~W_ASSIGNARRAY;
       fprintf (stderr, "W_ASSIGNARRAY%s", f ? "|" : "");
     }
-  if (f & W_HASCTLESC)
+  if (f & W_SAWQUOTEDNULL)
     {
-      f &= ~W_HASCTLESC;
-      fprintf (stderr, "W_HASCTLESC%s", f ? "|" : "");
+      f &= ~W_SAWQUOTEDNULL;
+      fprintf (stderr, "W_SAWQUOTEDNULL%s", f ? "|" : "");
     }
   if (f & W_NOPROCSUB)
     {
@@ -1178,7 +1178,10 @@ string_extract_verbatim (string, slen, sindex, charlist, flags)
 	}
 
 #if defined (HANDLE_MULTIBYTE)
-      mblength = MBLEN (string + i, slen - i);
+      if (locale_utf8locale && slen > i && UTF8_SINGLEBYTE (string[i]))
+	mblength = (string[i] != 0) ? 1 : 0;
+      else
+	mblength = MBLEN (string + i, slen - i);
       if (mblength > 1)
 	{
 	  wchar_t wc;
@@ -3059,6 +3062,7 @@ do_compound_assignment (name, value, flags)
   SHELL_VAR *v;
   int mklocal, mkassoc, mkglobal, chklocal;
   WORD_LIST *list;
+  char *newname;	/* used for local nameref references */
 
   mklocal = flags & ASS_MKLOCAL;
   mkassoc = flags & ASS_MKASSOC;
@@ -3067,7 +3071,8 @@ do_compound_assignment (name, value, flags)
 
   if (mklocal && variable_context)
     {
-      v = find_variable (name);
+      v = find_variable (name);		/* follows namerefs */
+      newname = (v == 0) ? nameref_transform_name (name, flags) : v->name;
       if (v && ((readonly_p (v) && (flags & ASS_FORCE) == 0) || noassign_p (v)))
 	{
 	  if (readonly_p (v))
@@ -3076,9 +3081,9 @@ do_compound_assignment (name, value, flags)
 	}
       list = expand_compound_array_assignment (v, value, flags);
       if (mkassoc)
-	v = make_local_assoc_variable (name);
+	v = make_local_assoc_variable (newname, 0);
       else if (v == 0 || (array_p (v) == 0 && assoc_p (v) == 0) || v->context != variable_context)
-        v = make_local_array_variable (name, 0);
+        v = make_local_array_variable (newname, 0);
       if (v)
 	assign_compound_array_list (v, list, flags);
       if (list)
@@ -3099,13 +3104,15 @@ do_compound_assignment (name, value, flags)
 	    err_readonly (name);
 	  return (v);	/* XXX */
 	}
+      /* sanity check */
+      newname = (v == 0) ? nameref_transform_name (name, flags) : name;
       list = expand_compound_array_assignment (v, value, flags);
       if (v == 0 && mkassoc)
-	v = make_new_assoc_variable (name);
+	v = make_new_assoc_variable (newname);
       else if (v && mkassoc && assoc_p (v) == 0)
 	v = convert_var_to_assoc (v);
       else if (v == 0)
-	v = make_new_array_variable (name);
+	v = make_new_array_variable (newname);
       else if (v && mkassoc == 0 && array_p (v) == 0)
 	v = convert_var_to_array (v);
       if (v)
@@ -3896,15 +3903,17 @@ expand_string_for_pat (string, quoted, dollar_at_p, expanded_p)
 {
   WORD_DESC td;
   WORD_LIST *tresult;
+  int oexp;
 
   if (string == 0 || *string == '\0')
     return (WORD_LIST *)NULL;
 
+  oexp = expand_no_split_dollar_star;
   expand_no_split_dollar_star = 1;
   td.flags = W_NOSPLIT2;		/* no splitting, remove "" and '' */
   td.word = string;
   tresult = call_expand_word_internal (&td, quoted, 1, dollar_at_p, expanded_p);
-  expand_no_split_dollar_star = 0;
+  expand_no_split_dollar_star = oexp;
 
   return (tresult);
 }
@@ -6006,10 +6015,7 @@ read_comsub (fd, quoted, flags, rflag)
 	 from the rest of the word expansions (word splitting and globbing.)
 	 This is essentially quote_escapes inline. */
       else if (skip_ctlesc == 0 && c == CTLESC)
-	{
-	  tflag |= W_HASCTLESC;
-	  istring[istring_index++] = CTLESC;
-	}
+	istring[istring_index++] = CTLESC;
       else if ((skip_ctlnul == 0 && c == CTLNUL) || (c == ' ' && (ifs_value && *ifs_value == 0)))
 	istring[istring_index++] = CTLESC;
 
@@ -6840,8 +6846,14 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
 	  temp = string_list_internal (l, " ");
 	  w->flags |= W_SPLITSPACE;
 	}
+      else if (l_hasdollat || l->next)
+	temp = string_list_dollar_star (l, quoted, 0);
       else
-	temp = (l_hasdollat || l->next) ? string_list_dollar_star (l, quoted, 0) : string_list (l);
+	{
+	  temp = string_list (l);
+	  if (temp && (QUOTED_NULL (temp) == 0) && (l->word->flags & W_SAWQUOTEDNULL))
+	    w->flags |= W_SAWQUOTEDNULL;	/* XXX */
+	}
 
       /* If we have a quoted null result (QUOTED_NULL(temp)) and the word is
 	 a quoted null (l->next == 0 && QUOTED_NULL(l->word->word)), the
@@ -7310,9 +7322,9 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
 	  vtype = VT_VARIABLE;
 	  *varp = v;
 	  if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))
-	    *valp = dequote_string (value);
+	    *valp = value ? dequote_string (value) : savestring ("");
 	  else
-	    *valp = dequote_escapes (value);
+	    *valp = value ? dequote_escapes (value) : (char *)NULL;
 	}
       else
 	{
@@ -7696,7 +7708,7 @@ parameter_brace_substring (varname, value, ind, substr, quoted, pflags, flags)
      int quoted, pflags, flags;
 {
   intmax_t e1, e2;
-  int vtype, r, starsub, qflags;
+  int vtype, r, starsub;
   char *temp, *val, *tt, *oname;
   SHELL_VAR *v;
 
@@ -7745,9 +7757,23 @@ parameter_brace_substring (varname, value, ind, substr, quoted, pflags, flags)
       FREE (tt);
       break;
     case VT_POSPARMS:
-      qflags = quoted;
-      tt = pos_params (varname, e1, e2, qflags);
-      /* string_list_dollar_at will quote the list if ifs_is_null != 0 */
+    case VT_ARRAYVAR:
+      if (vtype == VT_POSPARMS)
+	tt = pos_params (varname, e1, e2, quoted);
+#if defined (ARRAY_VARS)
+        /* assoc_subrange and array_subrange both call string_list_pos_params,
+	   so we can treat this case just like VT_POSPARAMS. */
+      else if (assoc_p (v))
+	/* we convert to list and take first e2 elements starting at e1th
+	   element -- officially undefined for now */	
+	tt = assoc_subrange (assoc_cell (v), e1, e2, starsub, quoted);
+      else
+	/* We want E2 to be the number of elements desired (arrays can be
+	   sparse, so verify_substring_values just returns the numbers
+	   specified and we rely on array_subrange to understand how to
+	   deal with them). */
+	tt = array_subrange (array_cell (v), e1, e2, starsub, quoted);
+#endif
       /* We want to leave this alone in every case where pos_params/
 	 string_list_pos_params quotes the list members */
       if (tt && quoted == 0 && ifs_is_null)
@@ -7762,21 +7788,7 @@ parameter_brace_substring (varname, value, ind, substr, quoted, pflags, flags)
       else
 	temp = tt;
       break;
-#if defined (ARRAY_VARS)
-    case VT_ARRAYVAR:
-      if (assoc_p (v))
-	/* we convert to list and take first e2 elements starting at e1th
-	   element -- officially undefined for now */	
-	temp = assoc_subrange (assoc_cell (v), e1, e2, starsub, quoted);
-      else
-      /* We want E2 to be the number of elements desired (arrays can be sparse,
-	 so verify_substring_values just returns the numbers specified and we
-	 rely on array_subrange to understand how to deal with them). */
-	temp = array_subrange (array_cell (v), e1, e2, starsub, quoted);
-      /* array_subrange now calls array_quote_escapes as appropriate, so the
-	 caller no longer needs to. */
-      break;
-#endif
+
     default:
       temp = (char *)NULL;
     }
@@ -7817,7 +7829,7 @@ pat_subst (string, pat, rep, mflags)
   int rptr, mtype, rxpand, mlen;
   size_t rsize, l, replen, rslen;
 
-  if (string  == 0)
+  if (string == 0)
     return (savestring (""));
 
   mtype = mflags & MATCH_TYPEMASK;
@@ -7968,7 +7980,7 @@ pos_params_pat_subst (string, pat, rep, mflags)
   qflags = (mflags & MATCH_QUOTED) == MATCH_QUOTED ? Q_DOUBLE_QUOTES : 0;
 
   /* If we are expanding in a context where word splitting will not be
-     performed, treat as quoted.  This changes how $* will be expanded. */
+     performed, treat as quoted. This changes how $* will be expanded. */
   if (pchar == '*' && (mflags & MATCH_ASSIGNRHS) && expand_no_split_dollar_star && ifs_is_null)
     qflags |= Q_DOUBLE_QUOTES;		/* Posix interp 888 */
 
@@ -8135,11 +8147,22 @@ parameter_brace_patsub (varname, value, ind, patsub, quoted, pflags, flags)
       if ((mflags & MATCH_STARSUB) && (mflags & MATCH_ASSIGNRHS) && ifs_is_null)
 	mflags |= MATCH_QUOTED;		/* Posix interp 888 */
 
-      temp = assoc_p (v) ? assoc_patsub (assoc_cell (v), p, rep, mflags)
-			 : array_patsub (array_cell (v), p, rep, mflags);
-      /* Don't call quote_escapes anymore; array_patsub calls
-	 array_quote_escapes as appropriate before adding the
-	 space separators; ditto for assoc_patsub. */
+      /* these eventually call string_list_pos_params */
+      if (assoc_p (v))
+	temp = assoc_patsub (assoc_cell (v), p, rep, mflags);
+      else
+	temp = array_patsub (array_cell (v), p, rep, mflags);
+
+      if (temp && quoted == 0 && ifs_is_null)
+	{
+	  /* Posix interp 888 */
+	}
+      else if (temp && (mflags & MATCH_QUOTED) == 0)
+	{
+	  tt = quote_escapes (temp);
+	  free (temp);
+	  temp = tt;
+	}
       break;
 #endif
     }
@@ -8286,7 +8309,7 @@ parameter_brace_casemod (varname, value, ind, modspec, patspec, quoted, pflags, 
 	{
 	  /* Posix interp 888 */
 	}
-      else if (temp && (mflags & MATCH_QUOTED)  == 0)
+      else if (temp && (mflags & MATCH_QUOTED) == 0)
 	{
 	  tt = quote_escapes (temp);
 	  free (temp);
@@ -8304,9 +8327,18 @@ parameter_brace_casemod (varname, value, ind, modspec, patspec, quoted, pflags, 
 
       temp = assoc_p (v) ? assoc_modcase (assoc_cell (v), pat, modop, mflags)
 			 : array_modcase (array_cell (v), pat, modop, mflags);
-      /* Don't call quote_escapes; array_modcase calls array_quote_escapes
-	 as appropriate before adding the space separators; ditto for
-	 assoc_modcase. */
+
+      if (temp && quoted == 0 && ifs_is_null)
+	{
+	  /* Posix interp 888 */
+	}
+      else if (temp && (mflags & MATCH_QUOTED) == 0)
+	{
+	  tt = quote_escapes (temp);
+	  free (temp);
+	  temp = tt;
+	}
+
       break;
 #endif
     }
@@ -9870,6 +9902,8 @@ add_string:
 
 	  if (tword && (tword->flags & W_HASQUOTEDNULL))
 	    had_quoted_null = 1;		/* note for later */
+	  if (tword && (tword->flags & W_SAWQUOTEDNULL))
+	    had_quoted_null = 1;		/* XXX */
 
 	  temp = tword ? tword->word : (char *)NULL;
 	  dispose_word_desc (tword);
@@ -10146,6 +10180,9 @@ add_twochars:
 	  else
 	    temp = (char *)NULL;
 
+	  if (temp == 0 && quoted_state == PARTIALLY_QUOTED)
+	    had_quoted_null = 1;	/* note for later */
+
 	  /* We do not want to add quoted nulls to strings that are only
 	     partially quoted; we can throw them away.  The exception to
 	     this is when we are going to be performing word splitting,
@@ -10416,6 +10453,8 @@ finished_with_string:
 	    tword->word = istring;
 	  if (had_quoted_null && QUOTED_NULL (istring))
 	    tword->flags |= W_HASQUOTEDNULL;	/* XXX */
+	  else if (had_quoted_null)
+	    tword->flags |= W_SAWQUOTEDNULL;	/* XXX */
 	  if (tword->word != istring)
 	    free (istring);
 	  istring = 0;			/* avoid later free() */
@@ -10596,9 +10635,14 @@ setifs (v)
     }
   else
     {
-      size_t ifs_len;
-      ifs_len = strnlen (ifs_value, MB_CUR_MAX);
-      ifs_firstc_len = MBLEN (ifs_value, ifs_len);
+      if (locale_utf8locale && UTF8_SINGLEBYTE (*ifs_value))
+	ifs_firstc_len = (*ifs_value != 0) ? 1 : 0;
+      else
+	{
+	  size_t ifs_len;
+	  ifs_len = strnlen (ifs_value, MB_CUR_MAX);
+	  ifs_firstc_len = MBLEN (ifs_value, ifs_len);
+	}
       if (ifs_firstc_len == 1 || ifs_firstc_len == 0 || MB_INVALIDCH (ifs_firstc_len))
 	{
 	  ifs_firstc[0] = ifs_value[0];
@@ -10649,10 +10693,24 @@ word_list_split (list)
      WORD_LIST *list;
 {
   WORD_LIST *result, *t, *tresult, *e;
+  WORD_DESC *w;
 
   for (t = list, result = (WORD_LIST *)NULL; t; t = t->next)
     {
       tresult = word_split (t->word, ifs_value);
+      /* POSIX 2.6: "If the complete expansion appropriate for a word results
+	 in an empty field, that empty field shall be deleted from the list
+	 of fields that form the completely expanded command, unless the
+	 original word contained single-quote or double-quote characters."
+	 This is where we handle these words that contain quoted null strings
+	 and other characters that expand to nothing after word splitting. */
+      if (tresult == 0 && t->word && (t->word->flags & W_SAWQUOTEDNULL))	/* XXX */
+	{
+	  w = alloc_word_desc ();
+	  w->word = (char *)xmalloc (1);
+	  w->word[0] = '\0';
+	  tresult = make_word_list (w, (WORD_LIST *)NULL);
+	}
       if (result == 0)
         result = e = tresult;
       else

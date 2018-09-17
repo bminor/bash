@@ -1,0 +1,28 @@
+set -o history
+set -o histexpand
+
+# command and process substitutions should be tokenized as a single word
+echo /$(echo tmp)/Step1
+echo !:*
+echo /<(echo tmp)/Step1 >/dev/null
+echo !:*
+
+# same tests at the beginning of a word
+echo $(echo /tmp)/Step1
+echo !:*
+echo <(echo /tmp)/Step1 >/dev/null
+echo !:*
+
+# so should shell extended glob patterns
+shopt -s extglob
+
+echo /+(one|two|three)/Step1
+echo !:*
+echo /*(tmp|dev|usr)/Step1
+echo !:*
+
+# same tests at the beginning of a word
+echo +(/one|/two|/three)/Step1
+echo !:*
+echo *(/tmp|/dev|/usr)/Step1
+echo !:*

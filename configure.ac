@@ -5,7 +5,7 @@ dnl report bugs to chet@po.cwru.edu
 dnl
 dnl Process this file with autoconf to produce a configure script.
 
-# Copyright (C) 1987-2016 Free Software Foundation, Inc.
+# Copyright (C) 1987-2018 Free Software Foundation, Inc.
 
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -21,10 +21,10 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.0, version 4.091])dnl
+AC_REVISION([for Bash 5.0, version 5.002])dnl
 
 define(bashvers, 5.0)
-define(relstatus, alpha)
+define(relstatus, beta)
 
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
 
@@ -63,33 +63,38 @@ dnl some systems should be configured without the bash malloc by default
 dnl and some need a special compiler or loader
 dnl look in the NOTES file for more
 case "${host_cpu}-${host_os}" in
+# mostly obsolete platforms
 alpha*-*)	opt_bash_malloc=no ;;	# alpha running osf/1 or linux
 *[[Cc]]ray*-*)	opt_bash_malloc=no ;;	# Crays
 *-osf1*)	opt_bash_malloc=no ;;	# other osf/1 machines
+*-dgux*)	opt_bash_malloc=no ;;	# DG/UX machines
 sparc-svr4*)	opt_bash_malloc=no ;;	# sparc SVR4, SVR4.2
-sparc-netbsd*)	opt_bash_malloc=no ;;	# needs 8-byte alignment
-mips-irix6*)	opt_bash_malloc=no ;;	# needs 8-byte alignment
 m68k-sysv)	opt_bash_malloc=no ;;	# fixes file descriptor leak in closedir
+*-bsdi2.1|*-bsdi3.?)	opt_bash_malloc=no ; : ${CC:=shlicc2} ;; # for loadable builtins
+*-opennt*|*-interix*)	opt_bash_malloc=no ;;	# Interix, now owned by Microsoft
+*-beos*)	opt_bash_malloc=no ;;	# they say it's suitable
+# These need additional investigation
 sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
-#*-freebsd*-gnu)	opt_bash_malloc=no ;;	# there's some undetermined problem here
-#*-freebsd*)	opt_bash_malloc=no ;;	# they claim it's better; I disagree
-*-openbsd*)	opt_bash_malloc=no ;;	# they claim it needs eight-bit alignment
-*-mirbsd*)	opt_bash_malloc=no ;;	# they claim it needs eight-bit alignment
 *-aix*)		opt_bash_malloc=no ;;	# AIX machines
+*-cygwin*)	opt_bash_malloc=no ;;	# Cygnus's CYGWIN environment
+# Mach-derived systems have a ton of extra malloc functions and lack sbrk(2)
 *-nextstep*)	opt_bash_malloc=no ;;	# NeXT machines running NeXTstep
 *-openstep*)	opt_bash_malloc=no ;;	# i386/Sparc/HP machines running Openstep
 *-macos*)	opt_bash_malloc=no ;;	# Apple MacOS X
 *-rhapsody*)	opt_bash_malloc=no ;;	# Apple Rhapsody (MacOS X)
 *-darwin*)	opt_bash_malloc=no ;;	# Apple Darwin (MacOS X)
-*-dgux*)	opt_bash_malloc=no ;;	# DG/UX machines
-*-qnx*)		opt_bash_malloc=no ;;	# QNX 4.2, QNX [67].x
 *-machten4)	opt_bash_malloc=no ;;	# MachTen 4.x
-*-bsdi2.1|*-bsdi3.?)	opt_bash_malloc=no ; : ${CC:=shlicc2} ;; # for loadable builtins
-*-beos*)	opt_bash_malloc=no ;;	# they say it's suitable
-*-cygwin*)	opt_bash_malloc=no ;;	# Cygnus's CYGWIN environment
-*-opennt*|*-interix*)	opt_bash_malloc=no ;;	# Interix, now owned by Microsoft
+# Niche or non-mainstream-shell-user systems
+*-qnx*)		opt_bash_malloc=no ;;	# QNX 4.2, QNX [67].x
 *-nsk*)		opt_bash_malloc=no ;;	# HP NonStop
 *-haiku*)	opt_bash_malloc=no ;;	# Haiku OS
+# Deprecated -- bash malloc is suitable
+#sparc-netbsd*)	opt_bash_malloc=no ;;	# needs 8-byte alignment
+#mips-irix6*)	opt_bash_malloc=no ;;	# needs 8-byte alignment
+#*-freebsd*-gnu)	opt_bash_malloc=no ;;	# there's some undetermined problem here
+#*-freebsd*)	opt_bash_malloc=no ;;	# they claim it's better; I disagree
+#*-openbsd*)	opt_bash_malloc=no ;;	# they claim it needs eight-bit alignment
+#*-mirbsd*)	opt_bash_malloc=no ;;	# they claim it needs eight-bit alignment
 esac
 
 # memory scrambling on free()
@@ -177,7 +182,7 @@ opt_casemod_attrs=yes
 opt_casemod_expansions=yes
 opt_extglob_default=no
 opt_dircomplete_expand_default=no
-opt_globascii_default=no
+opt_globascii_default=yes
 opt_function_import=yes
 opt_dev_fd_stat_broken=no
 
@@ -200,7 +205,7 @@ if test $opt_minimal_config = yes; then
 	opt_net_redirs=no opt_progcomp=no opt_separate_help=no
 	opt_multibyte=yes opt_cond_regexp=no opt_coproc=no
 	opt_casemod_attrs=no opt_casemod_expansions=no opt_extglob_default=no
-	opt_globascii_default=no
+	opt_globascii_default=yes
 fi
 
 AC_ARG_ENABLE(alias, AC_HELP_STRING([--enable-alias], [enable shell aliases]), opt_alias=$enableval)
@@ -550,7 +555,7 @@ then
 	RL_LIB_READLINE_VERSION
 
 	case "$ac_cv_rl_version" in
-	7*|8*|9*)	;;
+	8*|9*)	;;
 	*)	opt_with_installed_readline=no 
 		AC_MSG_WARN([installed readline library is too old to be linked with bash])
 		AC_MSG_WARN([using private bash version])
@@ -714,7 +719,7 @@ AC_CHECK_HEADERS(unistd.h stdlib.h stdarg.h varargs.h limits.h string.h \
 		 stdbool.h stddef.h stdint.h netdb.h pwd.h grp.h strings.h \
 		 regex.h syslog.h ulimit.h)
 AC_CHECK_HEADERS(sys/pte.h sys/stream.h sys/select.h sys/file.h sys/ioctl.h \
-		 sys/param.h sys/socket.h sys/stat.h \
+		 sys/mman.h sys/param.h sys/socket.h sys/stat.h \
 		 sys/time.h sys/times.h sys/types.h sys/wait.h)
 AC_CHECK_HEADERS(netinet/in.h arpa/inet.h)
 
@@ -850,7 +855,7 @@ AC_CHECK_HEADERS([argz.h errno.h fcntl.h malloc.h stdio_ext.h])
 dnl AC_FUNC_MALLOC
 AC_FUNC_MMAP
 AC_CHECK_FUNCS([__argz_count __argz_next __argz_stringify dcgettext mempcpy \
-		munmap stpcpy strcspn])
+		munmap mremap stpcpy strcspn])
 
 INTL_DEP= INTL_INC= LIBINTL_H=
 if test "x$USE_INCLUDED_LIBINTL" = "xyes"; then
@@ -1111,6 +1116,7 @@ linux*)		LOCAL_LDFLAGS=-rdynamic		 # allow dynamic loading
 		1.*|2.[[0123]]*)	: ;;
 		*)	AC_DEFINE(PGRP_PIPE) ;;
 		esac ;;
+openbsd*)	LOCAL_CFLAGS="-DDEV_FD_STAT_BROKEN" ;;
 *qnx[[67]]*)	LOCAL_LIBS="-lncurses" ;;
 *qnx*)		LOCAL_CFLAGS="-Dqnx -F -3s" LOCAL_LDFLAGS="-3s" LOCAL_LIBS="-lunix -lncurses" ;;
 powerux*)	LOCAL_LIBS="-lgen" ;;

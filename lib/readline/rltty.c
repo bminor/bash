@@ -691,7 +691,11 @@ rl_deprep_terminal (void)
   tty = rl_instream ? fileno (rl_instream) : fileno (stdin);
 
   if (terminal_prepped & TPX_BRACKPASTE)
-    fprintf (rl_outstream, BRACK_PASTE_FINI);
+    {
+      fprintf (rl_outstream, BRACK_PASTE_FINI);
+      if (_rl_eof_found)
+ 	fprintf (rl_outstream, "\n");
+    }
 
   if (_rl_enable_keypad)
     _rl_control_keypad (0);

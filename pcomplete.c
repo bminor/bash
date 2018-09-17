@@ -151,7 +151,7 @@ static int progcomp_debug = 0;
 
 int prog_completion_enabled = 1;
 
-#ifdef ALIAS
+#ifdef ALIAS	/* bash-5.0-beta */
 int progcomp_alias = 0;	/* unavailable to user code for now */
 #endif
 
@@ -1688,7 +1688,7 @@ programmable_completions (cmd, word, start, end, foundp)
 	  /* Find the first word of the alias value and use that as OCMD. We
 	     don't check the alias value to see whether it begins with a valid
 	     command name, so this can be fooled. */
-	  ind = skip_to_delim (ntxt, 0, "()<>;&| \t\n", SD_NOJMP|SD_COMPLETE); /*)*/
+	  ind = skip_to_delim (ntxt, 0, "()<>;&| \t\n", SD_NOJMP|SD_COMPLETE);
 	  if (ind > 0)
 	    ncmd = substring (ntxt, 0, ind);
 	  else

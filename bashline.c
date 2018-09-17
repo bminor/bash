@@ -1426,6 +1426,7 @@ attempt_shell_completion (text, start, end)
   char **matches, *command_separator_chars;
 #if defined (PROGRAMMABLE_COMPLETION)
   int have_progcomps, was_assignment;
+  COMPSPEC *iw_compspec;
 #endif
 
   command_separator_chars = COMMAND_SEPARATORS;
@@ -1510,7 +1511,9 @@ attempt_shell_completion (text, start, end)
 #if defined (PROGRAMMABLE_COMPLETION)
   /* Attempt programmable completion. */
   have_progcomps = prog_completion_enabled && (progcomp_size () > 0);
-  if (matches == 0 && (in_command_position == 0 || text[0] == '\0') &&
+  iw_compspec = progcomp_search (INITIALWORD);
+  if (matches == 0 &&
+      (in_command_position == 0 || text[0] == '\0' || (in_command_position && iw_compspec)) &&
       current_prompt_string == ps1_prompt)
     {
       int s, e, s1, e1, os, foundcs;
@@ -1564,7 +1567,7 @@ attempt_shell_completion (text, start, end)
       else if (start == end && start == s1 && e != 0 && e1 > end)	/* beginning of command name, leading whitespace */
 	foundcs = 0;
       else if (e == 0 && e == s && text[0] == '\0' && have_progcomps)	/* beginning of empty line */
-        prog_complete_matches = programmable_completions ("_EmptycmD_", text, s, e, &foundcs);
+        prog_complete_matches = programmable_completions (EMPTYCMD, text, s, e, &foundcs);
       else if (start == end && text[0] == '\0' && s1 > start && whitespace (rl_line_buffer[start]))
         foundcs = 0;		/* whitespace before command name */
       else if (e > s && was_assignment == 0 && e1 == end && rl_line_buffer[e] == 0 && whitespace (rl_line_buffer[e-1]) == 0)
@@ -1589,8 +1592,8 @@ attempt_shell_completion (text, start, end)
 	}
       else if (s >= e && n[0] == '\0' && text[0] == '\0' && start > 0)
         {
-          foundcs = 0;	/* empty command name following assignments */
-          in_command_position = was_assignment;
+          foundcs = 0;	/* empty command name following optional assignments */
+          in_command_position += was_assignment;
         }
       else if (s == start && e == end && STREQ (n, text) && start > 0)
         {
@@ -1599,6 +1602,12 @@ attempt_shell_completion (text, start, end)
         }
       else
 	foundcs = 0;
+
+      /* If we have defined a compspec for the initial (command) word, call
+	 it and process the results like any other programmable completion. */
+      if (in_command_position && have_progcomps && foundcs == 0 && iw_compspec)
+	prog_complete_matches = programmable_completions (INITIALWORD, text, s, e, &foundcs);
+
       FREE (n);
       /* XXX - if we found a COMPSPEC for the command, just return whatever
 	 the programmable completion code returns, and disable the default

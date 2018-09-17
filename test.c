@@ -622,9 +622,8 @@ unary_test (op, arg)
       return (minus_o_option_value (arg) == 1);
 
     case 'v':
-      v = find_variable (arg);
 #if defined (ARRAY_VARS)
-      if (v == 0 && valid_array_reference (arg, 0))
+      if (valid_array_reference (arg, 0))
 	{
 	  char *t;
 	  int rtype, ret;
@@ -634,7 +633,8 @@ unary_test (op, arg)
 	    free (t);
 	  return ret;
 	}
-     else if (v && invisible_p (v) == 0 && array_p (v))
+      v = find_variable (arg);
+      if (v && invisible_p (v) == 0 && array_p (v))
 	{
 	  char *t;
 	  /* [[ -v foo ]] == [[ -v foo[0] ]] */
@@ -647,6 +647,8 @@ unary_test (op, arg)
 	  t = assoc_reference (assoc_cell (v), "0");
 	  return (t ? TRUE : FALSE);
 	}
+#else
+      v = find_variable (arg);
 #endif
       return (v && invisible_p (v) == 0 && var_isset (v) ? TRUE : FALSE);
 

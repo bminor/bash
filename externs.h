@@ -109,6 +109,7 @@ extern int return_EOF __P((void));
 extern void push_token __P((int));
 extern char *xparse_dolparen __P((char *, char *, int *, int));
 extern void reset_parser __P((void));
+extern void reset_readahead_token __P((void));
 extern WORD_LIST *parse_string_to_word_list __P((char *, int, const char *));
 
 extern int parser_in_command_position __P((void));
@@ -484,6 +485,14 @@ extern unsigned int fsleep __P((unsigned int, unsigned int));
 /* declarations for functions defined in lib/sh/unicode.c */
 extern int u32cconv __P((unsigned long, char *));
 extern void u32reset __P((void));
+
+/* declarations for functions defined in lib/sh/utf8.c */
+extern char *utf8_mbschr __P((const char *, int));
+extern int utf8_mbscmp __P((const char *, const char *));
+extern char *utf8_mbsmbchar __P((const char *));
+extern int utf8_mbsnlen __P((const char *, size_t, int));
+extern int utf8_mblen __P((const char *, size_t));
+extern size_t utf8_mbstrlen __P((const char *));
 
 /* declarations for functions defined in lib/sh/wcsnwidth.c */
 #if defined (HANDLE_MULTIBYTE)

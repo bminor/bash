@@ -214,6 +214,9 @@ int _rl_eof_char = CTRL ('D');
 /* Non-zero makes this the next keystroke to read. */
 int rl_pending_input = 0;
 
+/* If non-zero when readline_internal returns, it means we found EOF */
+int _rl_eof_found = 0;
+
 /* Pointer to a useful terminal name. */
 const char *rl_terminal_name = (const char *)NULL;
 
@@ -222,7 +225,7 @@ int _rl_horizontal_scroll_mode = 0;
 
 /* Non-zero means to display an asterisk at the starts of history lines
    which have been modified. */
-int _rl_mark_modified_lines = 0;  
+int _rl_mark_modified_lines = 0;
 
 /* The style of `bell' notification preferred.  This can be set to NO_BELL,
    AUDIBLE_BELL, or VISIBLE_BELL. */
@@ -664,11 +667,9 @@ readline_internal_charloop (void)
 static char *
 readline_internal (void)
 {
-  int eof;
-
   readline_internal_setup ();
-  eof = readline_internal_charloop ();
-  return (readline_internal_teardown (eof));
+  _rl_eof_found = readline_internal_charloop ();
+  return (readline_internal_teardown (_rl_eof_found));
 }
 
 void
@@ -1055,7 +1056,7 @@ _rl_subseq_result (int r, Keymap map, int key, int got_subseq)
 	/* We probably shadowed a keymap, so keep going. */
 	r = _rl_dispatch (ANYOTHERKEY, m);
     }
-  else if (r && map[ANYOTHERKEY].function)
+  else if (r < 0 && map[ANYOTHERKEY].function)
     {
       /* We didn't match (r is probably -1), so return something to
 	 tell the caller that it should try ANYOTHERKEY for an

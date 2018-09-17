@@ -69,6 +69,9 @@ reader_loop ()
 
   our_indirection_level = ++indirection_level;
 
+  if (just_one_command)
+    reset_readahead_token ();
+
   while (EOF_Reached == 0)
     {
       int code;

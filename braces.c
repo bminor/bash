@@ -1,6 +1,6 @@
 /* braces.c -- code for doing word expansion in curly braces. */
 
-/* Copyright (C) 1987-2012 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2018 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -420,9 +420,9 @@ mkseq (start, end, incr, type, width)
   /* Instead of a simple nelem = prevn + 1, something like:
   	nelem = (prevn / imaxabs(incr)) + 1;
      would work */
-  nelem = (prevn / sh_imaxabs(incr)) + 1;
-  if (nelem > INT_MAX - 2)		/* Don't overflow int */
+  if ((prevn / sh_imaxabs (incr)) > INT_MAX - 3)	/* check int overflow */
     return ((char **)NULL);
+  nelem = (prevn / sh_imaxabs(incr)) + 1;
   result = strvec_mcreate (nelem + 1);
   if (result == 0)
     {
@@ -778,7 +778,9 @@ array_concat (arr1, arr2)
   len1 = strvec_len (arr1);
   len2 = strvec_len (arr2);
 
-  result = (char **)xmalloc ((1 + (len1 * len2)) * sizeof (char *));
+  result = (char **)malloc ((1 + (len1 * len2)) * sizeof (char *));
+  if (result == 0)
+    return (result);
 
   len = 0;
   for (i = 0; i < len1; i++)

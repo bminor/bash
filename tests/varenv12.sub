@@ -47,6 +47,28 @@ echo -n 'outside: ' ; declare -p var
 unset -v var
 unset -f func
 
+# this will probably change behavior; export shouldn't behave like this when
+# not in posix mode and the sequencing is probably wrong in posix mode. since
+# export is a special builtin, the variable assignment should modify the
+# global variable, leaving the local variable unchanged. all shells, including
+# bash, modify the local variable; bash is the only one that propagates the
+# value out to the calling environment. bash does that only when in posix
+# mode.
+
+func()
+{
+	local var=inside
+	var=value export var
+	echo -n 'inside: ' ; declare -p var
+}
+
+var=outside
+func
+echo -n 'outside: ' ; declare -p var
+
+unset -v var
+unset -f func
+
 func()
 {
 	local var=local
@@ -60,3 +82,19 @@ echo -n 'outside: ' ; declare -p var
 
 unset -v var
 unset -f func
+
+# test whether or not temporary environment assignments are exported
+# in posix mode
+showfoo()
+{
+	printf %s "foo=${foo-<unset>}"
+	echo -n ' environment foo='
+	printenv foo || echo 
+}
+unset foo
+showfoo
+foo=foo showfoo
+showfoo
+
+unset -v foo
+unset -f showfoo

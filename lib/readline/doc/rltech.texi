@@ -846,12 +846,16 @@ Return the function invoked by @var{keyseq} in keymap @var{map}.
 If @var{map} is @code{NULL}, the current keymap is used.  If @var{type} is
 not @code{NULL}, the type of the object is returned in the @code{int} variable
 it points to (one of @code{ISFUNC}, @code{ISKMAP}, or @code{ISMACR}).
+It takes a "translated" key sequence and should not be used if the key sequence
+can include NUL.
 @end deftypefun
 
-@deftypefun {rl_command_func_t *} rl_function_of_keyseq_len (const char *keyseq, size_t len Keymap map, int *type)
+@deftypefun {rl_command_func_t *} rl_function_of_keyseq_len (const char *keyseq, size_t len, Keymap map, int *type)
 Return the function invoked by @var{keyseq} of length @var{len}
 in keymap @var{map}. Equivalent to @code{rl_function_of_keyseq} with the
 addition of the @var{len} parameter.
+It takes a "translated" key sequence and should be used if the key sequence
+can include NUL.
 @end deftypefun
 
 @deftypefun {char **} rl_invoking_keyseqs (rl_command_func_t *function)

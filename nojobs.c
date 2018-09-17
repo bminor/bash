@@ -1037,6 +1037,12 @@ unfreeze_jobs_list ()
 {
 }
 
+void
+set_jobs_list_frozen (s)
+     int s;
+{
+}
+
 int
 count_all_jobs ()
 {

@@ -1,7 +1,7 @@
 /* vi_mode.c -- A vi emulation mode for Bash.
    Derived from code written by Jeff Sparkes (jsparkes@bnr.ca).  */
 
-/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2018 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -63,6 +63,19 @@
 #define member(c, s) ((c) ? (char *)strchr ((s), (c)) != (char *)NULL : 0)
 #endif
 
+/* Increment START to the next character in RL_LINE_BUFFER, handling multibyte chars */
+#if defined (HANDLE_MULTIBYTE)
+#define INCREMENT_POS(start) \
+  do { \
+	if (MB_CUR_MAX == 1 || rl_byte_oriented) \
+	  start++; \
+	else \
+	  start = _rl_find_next_mbchar (rl_line_buffer, start, 1, MB_FIND_ANY); \
+  } while (0)
+#else /* !HANDLE_MULTIBYTE */
+#define INCREMENT_POS(start)    (start)++
+#endif /* !HANDLE_MULTIBYTE */
+
 /* This is global so other parts of the code can check whether the last
    command was a text modification command. */
 int _rl_vi_last_command = 'i';	/* default `.' puts you in insert mode */
@@ -118,13 +131,16 @@ static void _rl_vi_save_insert PARAMS((UNDO_LIST *));
 
 static void vi_save_insert_buffer PARAMS ((int, int));
 
-static void _rl_vi_backup PARAMS((void));
+static inline void _rl_vi_backup PARAMS((void));
 
 static int _rl_vi_arg_dispatch PARAMS((int));
 static int rl_digit_loop1 PARAMS((void));
 
 static int _rl_vi_set_mark PARAMS((void));
 static int _rl_vi_goto_mark PARAMS((void));
+
+static inline int _rl_vi_advance_point PARAMS((void));
+static inline int _rl_vi_backup_point PARAMS((void));
 
 static void _rl_vi_append_forward PARAMS((int));
 
@@ -383,7 +399,7 @@ rl_vi_complete (int ignore, int key)
     {
       if (!whitespace (rl_line_buffer[rl_point + 1]))
 	rl_vi_end_word (1, 'E');
-      rl_point++;
+      _rl_vi_advance_point ();
     }
 
   if (key == '*')
@@ -451,6 +467,69 @@ rl_vi_next_word (int count, int key)
   return (0);
 }
 
+static inline int
+_rl_vi_advance_point (void)
+{
+  int point;
+
+  point = rl_point;
+  if (rl_point < rl_end)
+#if defined (HANDLE_MULTIBYTE)
+    {
+      if (MB_CUR_MAX == 1 || rl_byte_oriented)
+	rl_point++;
+      else
+	{
+	  point = rl_point;
+	  rl_point = _rl_forward_char_internal (1);
+	  if (point == rl_point || rl_point > rl_end)
+	    rl_point = rl_end;
+	}
+    }
+#else
+    rl_point++;
+#endif
+
+  return point;
+}
+
+/* Move the cursor back one character. */
+static inline void
+_rl_vi_backup (void)
+{
+  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+    rl_point = _rl_find_prev_mbchar (rl_line_buffer, rl_point, MB_FIND_NONZERO);
+  else
+    rl_point--;
+}
+
+/* Move the point back one character, returning the starting value and not
+   doing anything at the beginning of the line */
+static inline int
+_rl_vi_backup_point (void)
+{
+  int point;
+
+  point = rl_point;
+  if (rl_point > 0)
+#if defined (HANDLE_MULTIBYTE)
+    {
+      if (MB_CUR_MAX == 1 || rl_byte_oriented)
+	rl_point--;
+      else
+	{
+	  point = rl_point;
+	  rl_point = _rl_backward_char_internal (1);
+	  if (rl_point < 0)
+	    rl_point = 0;		/* XXX - not really necessary */
+	}
+    }
+#else
+    rl_point--;
+#endif
+  return point;
+}
+
 /* Move to the end of the ?next? word. */
 int
 rl_vi_end_word (int count, int key)
@@ -476,11 +555,11 @@ rl_vi_fWord (int count, int ignore)
     {
       /* Skip until whitespace. */
       while (!whitespace (rl_line_buffer[rl_point]) && rl_point < rl_end)
-	rl_point++;
+	_rl_vi_advance_point ();
 
       /* Now skip whitespace. */
       while (whitespace (rl_line_buffer[rl_point]) && rl_point < rl_end)
-	rl_point++;
+	_rl_vi_advance_point ();
     }
   return (0);
 }
@@ -497,12 +576,18 @@ rl_vi_bWord (int count, int ignore)
 	rl_point--;
 
       while (rl_point > 0 && whitespace (rl_line_buffer[rl_point]))
-	rl_point--;
+	_rl_vi_backup_point ();
 
       if (rl_point > 0)
 	{
-	  while (--rl_point >= 0 && !whitespace (rl_line_buffer[rl_point]));
-	  rl_point++;
+	  do
+	    _rl_vi_backup_point ();
+	  while (rl_point > 0 && !whitespace (rl_line_buffer[rl_point]));
+	  if (rl_point > 0)	/* hit whitespace */
+	    rl_point++;		
+
+	  if (rl_point < 0)
+	    rl_point = 0;
 	}
     }
   return (0);
@@ -511,28 +596,32 @@ rl_vi_bWord (int count, int ignore)
 int
 rl_vi_eWord (int count, int ignore)
 {
+  int opoint;
+
   while (count-- && rl_point < (rl_end - 1))
     {
-      if (!whitespace (rl_line_buffer[rl_point]))
-	rl_point++;
+      if (whitespace (rl_line_buffer[rl_point]) == 0)
+	_rl_vi_advance_point ();
 
       /* Move to the next non-whitespace character (to the start of the
 	 next word). */
       while (rl_point < rl_end && whitespace (rl_line_buffer[rl_point]))
-	rl_point++;
+	_rl_vi_advance_point ();
 
       if (rl_point && rl_point < rl_end)
 	{
+	  opoint = rl_point;
+
 	  /* Skip whitespace. */
 	  while (rl_point < rl_end && whitespace (rl_line_buffer[rl_point]))
-	    rl_point++;
+	    opoint = _rl_vi_advance_point ();	/* XXX - why? */
 
 	  /* Skip until whitespace. */
 	  while (rl_point < rl_end && !whitespace (rl_line_buffer[rl_point]))
-	    rl_point++;
+	    opoint = _rl_vi_advance_point ();
 
 	  /* Move back to the last character of the word. */
-	  rl_point--;
+	  rl_point = opoint;
 	}
     }
   return (0);
@@ -541,24 +630,28 @@ rl_vi_eWord (int count, int ignore)
 int
 rl_vi_fword (int count, int ignore)
 {
+  int opoint;
+
   while (count-- && rl_point < (rl_end - 1))
     {
       /* Move to white space (really non-identifer). */
       if (_rl_isident (rl_line_buffer[rl_point]))
 	{
 	  while (_rl_isident (rl_line_buffer[rl_point]) && rl_point < rl_end)
-	    rl_point++;
+	    _rl_vi_advance_point ();
 	}
       else /* if (!whitespace (rl_line_buffer[rl_point])) */
 	{
 	  while (!_rl_isident (rl_line_buffer[rl_point]) &&
 		 !whitespace (rl_line_buffer[rl_point]) && rl_point < rl_end)
-	    rl_point++;
+	    _rl_vi_advance_point ();
 	}
+
+      opoint = rl_point;
 
       /* Move past whitespace. */
       while (whitespace (rl_line_buffer[rl_point]) && rl_point < rl_end)
-	rl_point++;
+	opoint = _rl_vi_advance_point ();
     }
   return (0);
 }
@@ -566,9 +659,11 @@ rl_vi_fword (int count, int ignore)
 int
 rl_vi_bword (int count, int ignore)
 {
+  int opoint;
+
   while (count-- && rl_point > 0)
     {
-      int last_is_ident;
+      int prev_is_ident, cur_is_ident;
 
       /* If we are at the start of a word, move back to whitespace
 	 so we will go back to the start of the previous word. */
@@ -581,22 +676,35 @@ rl_vi_bword (int count, int ignore)
 	 back so we don't get messed up by the rl_point++ down there in
 	 the while loop.  Without this code, words like `l;' screw up the
 	 function. */
-      last_is_ident = _rl_isident (rl_line_buffer[rl_point - 1]);
-      if ((_rl_isident (rl_line_buffer[rl_point]) && !last_is_ident) ||
-	  (!_rl_isident (rl_line_buffer[rl_point]) && last_is_ident))
-	rl_point--;
+      cur_is_ident = _rl_isident (rl_line_buffer[rl_point]);
+      opoint = _rl_vi_backup_point ();
+      prev_is_ident = _rl_isident (rl_line_buffer[rl_point]);
+      if ((cur_is_ident && !prev_is_ident) || (!cur_is_ident && prev_is_ident))
+	;	/* leave point alone, we backed it up one character */
+      else
+	rl_point = opoint;
 
       while (rl_point > 0 && whitespace (rl_line_buffer[rl_point]))
-	rl_point--;
+	_rl_vi_backup_point ();
 
       if (rl_point > 0)
 	{
+	  opoint = rl_point;
 	  if (_rl_isident (rl_line_buffer[rl_point]))
-	    while (--rl_point >= 0 && _rl_isident (rl_line_buffer[rl_point]));
+	    do
+	      opoint = _rl_vi_backup_point ();
+	    while (rl_point > 0 && _rl_isident (rl_line_buffer[rl_point]));
 	  else
-	    while (--rl_point >= 0 && !_rl_isident (rl_line_buffer[rl_point]) &&
+	    do
+	      opoint = _rl_vi_backup_point ();
+	    while (rl_point > 0 && !_rl_isident (rl_line_buffer[rl_point]) &&
 		   !whitespace (rl_line_buffer[rl_point]));
-	  rl_point++;
+
+	  if (rl_point > 0)
+	    rl_point = opoint;
+
+	  if (rl_point < 0)
+	    rl_point = 0;
 	}
     }
   return (0);
@@ -605,23 +713,34 @@ rl_vi_bword (int count, int ignore)
 int
 rl_vi_eword (int count, int ignore)
 {
-  while (count-- && rl_point < rl_end - 1)
+  int opoint;
+
+  while (count-- && rl_point < (rl_end - 1))
     {
-      if (!whitespace (rl_line_buffer[rl_point]))
-	rl_point++;
+      if (whitespace (rl_line_buffer[rl_point]) == 0)
+	_rl_vi_advance_point ();
 
       while (rl_point < rl_end && whitespace (rl_line_buffer[rl_point]))
-	rl_point++;
+	_rl_vi_advance_point ();
 
+      opoint = rl_point;
       if (rl_point < rl_end)
 	{
 	  if (_rl_isident (rl_line_buffer[rl_point]))
-	    while (++rl_point < rl_end && _rl_isident (rl_line_buffer[rl_point]));
+	    do
+	      {
+		opoint = _rl_vi_advance_point ();
+	      }
+	    while (rl_point < rl_end && _rl_isident (rl_line_buffer[rl_point]));
 	  else
-	    while (++rl_point < rl_end && !_rl_isident (rl_line_buffer[rl_point])
+	    do
+	      {
+		opoint = _rl_vi_advance_point ();
+	      }
+	    while (rl_point < rl_end && !_rl_isident (rl_line_buffer[rl_point])
 		   && !whitespace (rl_line_buffer[rl_point]));
 	}
-      rl_point--;
+      rl_point = opoint;
     }
   return (0);
 }
@@ -637,20 +756,7 @@ rl_vi_insert_beg (int count, int key)
 static void
 _rl_vi_append_forward (int key)
 {
-  int point;
-
-  if (rl_point < rl_end)
-    {
-      if (MB_CUR_MAX == 1 || rl_byte_oriented)
-	rl_point++;
-      else
-	{
-	  point = rl_point;
-	  rl_point = _rl_forward_char_internal (1);
-	  if (point == rl_point)
-	    rl_point = rl_end;
-	}
-    }
+  _rl_vi_advance_point ();
 }
 
 int
@@ -859,7 +965,7 @@ _rl_vi_change_mbchar_case (int count)
 	  rl_begin_undo_group ();
 	  rl_vi_delete (1, 0);
 	  if (rl_point < p)	/* Did we retreat at EOL? */
-	    rl_point++;	/* XXX - should we advance more than 1 for mbchar? */
+	    _rl_vi_advance_point ();
 	  rl_insert_text (mb);
 	  rl_end_undo_group ();
 	  rl_vi_check ();
@@ -931,27 +1037,12 @@ rl_vi_put (int count, int key)
   return (0);
 }
 
-/* Move the cursor back one character. */
-static void
-_rl_vi_backup (void)
-{
-  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
-    rl_point = _rl_find_prev_mbchar (rl_line_buffer, rl_point, MB_FIND_NONZERO);
-  else
-    rl_point--;
-}
-
 /* Move the cursor back one character if you're at the end of the line */
 int
 rl_vi_check (void)
 {
   if (rl_point && rl_point == rl_end)
-    {
-      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
-	rl_point = _rl_find_prev_mbchar (rl_line_buffer, rl_point, MB_FIND_NONZERO);
-      else
-	rl_point--;
-    }
+    _rl_vi_backup ();
   return (0);
 }
 
@@ -962,7 +1053,10 @@ rl_vi_column (int count, int key)
   if (count > rl_end)
     rl_end_of_line (1, key);
   else
-    rl_point = count - 1;
+    {
+      rl_point = 0;
+      rl_point = _rl_forward_char_internal (count - 1);
+    }
   return (0);
 }
 
@@ -1113,7 +1207,7 @@ _rl_vi_domove_motion_cleanup (int c, _rl_vimotion_cxt *m)
      non-whitespace character, move back one (presumably to whitespace). */
   if ((_rl_to_upper (c) == 'W') && rl_point < rl_end && rl_point > rl_mark &&
       !whitespace (rl_line_buffer[rl_point]))
-    rl_point--;
+    rl_point--;		/* XXX */
 
   /* If cw or cW, back up to the end of a word, so the behaviour of ce
      or cE is the actual result.  Brute-force, no subtlety. */
@@ -1126,14 +1220,14 @@ _rl_vi_domove_motion_cleanup (int c, _rl_vimotion_cxt *m)
       /* Posix.2 says that if cw or cW moves the cursor towards the end of
 	 the line, the character under the cursor should be deleted. */
       if (rl_point == rl_mark)
-	rl_point++;
+	_rl_vi_advance_point ();
       else
 	{
 	  /* Move past the end of the word so that the kill doesn't
 	     remove the last letter of the previous word.  Only do this
 	     if we are not at the end of the line. */
 	  if (rl_point >= 0 && rl_point < (rl_end - 1) && !whitespace (rl_line_buffer[rl_point]))
-	    rl_point++;
+	    _rl_vi_advance_point ();
 	}
     }
 
@@ -1271,7 +1365,7 @@ vi_delete_dispatch (_rl_vimotion_cxt *m)
      mark. */
   if (((strchr (" l|h^0bBFT`", m->motion) == 0) && (rl_point >= m->start)) &&
       (rl_mark < rl_end))
-    rl_mark++;
+    INCREMENT_POS (rl_mark);
 
   rl_kill_text (rl_point, rl_mark);
   return (0);
@@ -1334,7 +1428,7 @@ vi_change_dispatch (_rl_vimotion_cxt *m)
      and already leave the mark at the correct location. */
   if (((strchr (" l|hwW^0bBFT`", m->motion) == 0) && (rl_point >= m->start)) &&
       (rl_mark < rl_end))
-    rl_mark++;
+    INCREMENT_POS (rl_mark);
 
   /* The cursor never moves with c[wW]. */
   if ((_rl_to_upper (m->motion) == 'W') && rl_point < m->start)
@@ -1421,7 +1515,7 @@ vi_yank_dispatch (_rl_vimotion_cxt *m)
      mark. */
   if (((strchr (" l|h^0%bBFT`", m->motion) == 0) && (rl_point >= m->start)) &&
       (rl_mark < rl_end))
-    rl_mark++;
+    INCREMENT_POS (rl_mark);
 
   rl_begin_undo_group ();
   rl_kill_text (rl_point, rl_mark);
@@ -1611,8 +1705,8 @@ rl_vi_unix_word_rubout (int count, int key)
 	    while (rl_point && vi_unix_word_boundary (rl_line_buffer[rl_point - 1]))
 	      rl_point--;
 	  else if (rl_point > 0 && vi_unix_word_boundary (rl_line_buffer[rl_point]) == 0)
-	    while (rl_point && (vi_unix_word_boundary (rl_line_buffer[rl_point - 1]) == 0))
-	      rl_point--;
+	    while (rl_point > 0 && (vi_unix_word_boundary (rl_line_buffer[rl_point - 1]) == 0))
+	      _rl_vi_backup_point ();
 	}
 
       rl_kill_text (orig_point, rl_point);
@@ -2100,7 +2194,7 @@ rl_vi_possible_completions (void)
     {
       while (rl_point < rl_end && rl_line_buffer[rl_point] != ' ' &&
 	     rl_line_buffer[rl_point] != ';')
-	rl_point++;
+	_rl_vi_advance_point ();
     }
   else if (rl_line_buffer[rl_point - 1] == ';')
     {

@@ -110,6 +110,8 @@ VAR_CONTEXT *shell_variables = (VAR_CONTEXT *)NULL;
    the environment. */
 HASH_TABLE *shell_functions = (HASH_TABLE *)NULL;
 
+HASH_TABLE *invalid_env = (HASH_TABLE *)NULL;
+
 #if defined (DEBUGGER)
 /* The table of shell function definitions that the user defined or that
    came from the environment. */
@@ -229,7 +231,9 @@ static SHELL_VAR *get_dirstack __P((SHELL_VAR *));
 
 #if defined (ARRAY_VARS)
 static SHELL_VAR *get_groupset __P((SHELL_VAR *));
-
+#  if defined (DEBUGGER)
+static SHELL_VAR *get_bashargcv __P((SHELL_VAR *));
+#  endif
 static SHELL_VAR *build_hashcmd __P((SHELL_VAR *));
 static SHELL_VAR *get_hashcmd __P((SHELL_VAR *));
 static SHELL_VAR *assign_hashcmd __P((SHELL_VAR *,  char *, arrayind_t, char *));
@@ -244,6 +248,10 @@ static SHELL_VAR *get_funcname __P((SHELL_VAR *));
 static SHELL_VAR *init_funcname_var __P((void));
 
 static void initialize_dynamic_variables __P((void));
+
+static SHELL_VAR *bind_invalid_envvar __P((const char *, char *, int));
+
+static int var_sametype __P((SHELL_VAR *, SHELL_VAR *));
 
 static SHELL_VAR *hash_lookup __P((const char *, HASH_TABLE *));
 static SHELL_VAR *new_shell_variable __P((const char *));
@@ -391,7 +399,7 @@ initialize_shell_variables (env, privmode)
 	    }
 	  else
 	    {
-	      if (temp_var = bind_variable (name, string, 0))
+	      if (temp_var = bind_invalid_envvar (name, string, 0))
 		{
 		  VSETATTR (temp_var, (att_exported | att_imported | att_invisible));
 		  array_needs_making = 1;
@@ -432,17 +440,24 @@ initialize_shell_variables (env, privmode)
 	      if (temp_var)
 		VUNSETATTR (temp_var, att_readonly);
 	    }
-	  temp_var = bind_variable (name, string, 0);
-	  if (temp_var)
+	  if (legal_identifier (name))
 	    {
-	      if (legal_identifier (name))
-		VSETATTR (temp_var, (att_exported | att_imported));
-	      else
-		VSETATTR (temp_var, (att_exported | att_imported | att_invisible));
-	      if (ro)
-		VSETATTR (temp_var, att_readonly);
-	      array_needs_making = 1;
+	      temp_var = bind_variable (name, string, 0);
+	      if (temp_var)
+		{
+		  VSETATTR (temp_var, (att_exported | att_imported));
+		  if (ro)
+		    VSETATTR (temp_var, att_readonly);
+		}
 	    }
+	  else
+	    {
+	      temp_var = bind_invalid_envvar (name, string, 0);
+	      if (temp_var)
+		VSETATTR (temp_var, (att_exported | att_imported | att_invisible));
+	    }
+	  if (temp_var)
+	    array_needs_making = 1;
 	}
 
       name[char_index] = '=';
@@ -1652,6 +1667,27 @@ get_groupset (self)
   return (self);
 }
 
+#  if defined (DEBUGGER)
+static SHELL_VAR *
+get_bashargcv (self)
+     SHELL_VAR *self;
+{
+  static int self_semaphore = 0;
+
+  /* Backwards compatibility: if we refer to BASH_ARGV or BASH_ARGC at the
+     top level without enabling debug mode, and we don't have an instance
+     of the variable set, initialize the arg arrays.
+     This will already have been done if debugging_mode != 0. */
+  if (self_semaphore == 0 && variable_context == 0 && debugging_mode == 0)	/* don't do it for shell functions */
+    {
+      self_semaphore = 1;
+      init_bash_argv ();
+      self_semaphore = 0;
+    }
+  return self;
+}
+#  endif
+
 static SHELL_VAR *
 build_hashcmd (self)
      SHELL_VAR *self;
@@ -1777,6 +1813,11 @@ assign_aliasvar (self, value, ind, key)
      arrayind_t ind;
      char *key;
 {
+  if (legal_alias_name (key, 0) == 0)
+    {
+       report_error (_("`%s': invalid alias name"), key);
+       return (self);
+    }
   add_alias (key, value);
   return (build_aliasvar (self));
 }
@@ -1877,8 +1918,8 @@ initialize_dynamic_variables ()
   v = init_dynamic_array_var ("GROUPS", get_groupset, null_array_assign, att_noassign);
 
 #  if defined (DEBUGGER)
-  v = init_dynamic_array_var ("BASH_ARGC", get_self, null_array_assign, att_noassign|att_nounset);
-  v = init_dynamic_array_var ("BASH_ARGV", get_self, null_array_assign, att_noassign|att_nounset);
+  v = init_dynamic_array_var ("BASH_ARGC", get_bashargcv, null_array_assign, att_noassign|att_nounset);
+  v = init_dynamic_array_var ("BASH_ARGV", get_bashargcv, null_array_assign, att_noassign|att_nounset);
 #  endif /* DEBUGGER */
   v = init_dynamic_array_var ("BASH_SOURCE", get_self, null_array_assign, att_noassign|att_nounset);
   v = init_dynamic_array_var ("BASH_LINENO", get_self, null_array_assign, att_noassign|att_nounset);
@@ -2226,6 +2267,36 @@ find_variable_nameref_for_assignment (name, flags)
   return (var);
 }
 
+/* If find_variable (name) returns NULL, check that it's not a nameref
+   referencing a variable that doesn't exist. If it is, return the new
+   name. If not, return the original name. Kind of like the previous
+   function, but dealing strictly with names. This takes assignment flags
+   so it can deal with the various assignment modes used by `declare'. */
+char *
+nameref_transform_name (name, flags)
+     char *name;
+     int flags;
+{
+  SHELL_VAR *v;
+  char *newname;
+
+  v = 0;
+  if (flags & ASS_MKLOCAL)
+    {
+      v = find_variable_last_nameref (name, 1);
+      /* If we're making local variables, only follow namerefs that point to
+	 non-existant variables at the same variable context. */
+      if (v && v->context != variable_context)
+	v = 0;
+    }
+  else if (flags & ASS_MKGLOBAL)
+    v = (flags & ASS_CHKLOCAL) ? find_variable_last_nameref (name, 1)
+			       : find_global_variable_last_nameref (name, 1);
+  if (v && nameref_p (v) && valid_nameref_value (nameref_cell (v), 1))
+    return nameref_cell (v);
+  return name;
+}
+
 /* Find a variable, forcing a search of the temporary environment first */
 SHELL_VAR *
 find_variable_tempenv (name)
@@ -2437,6 +2508,42 @@ sh_get_env_value (v)
 /*		  Creating and setting variables		    */
 /*								    */
 /* **************************************************************** */
+
+static int
+var_sametype (v1, v2)
+     SHELL_VAR *v1;
+     SHELL_VAR *v2;
+{
+  if (v1 == 0 || v2 == 0)
+    return 0;
+#if defined (ARRAY_VARS)
+  else if (assoc_p (v1) && assoc_p (v2))
+    return 1;
+  else if (array_p (v1) && array_p (v2))
+    return 1;
+  else if (array_p (v1) || array_p (v2))
+    return 0;
+  else if (assoc_p (v1) || assoc_p (v2))
+    return 0;
+#endif
+  else
+    return 1;
+}
+
+int
+validate_inherited_value (var, type)
+     SHELL_VAR *var;
+     int type;
+{
+#if defined (ARRAY_VARS)
+  if (type == att_array && assoc_p (var))
+    return 0;
+  else if (type == att_assoc && array_p (var))
+    return 0;
+  else
+#endif
+  return 1;	/* should we run convert_var_to_array here or let the caller? */
+}
 
 /* Set NAME to VALUE if NAME has no value. */
 SHELL_VAR *
@@ -2672,13 +2779,31 @@ make_local_array_variable (name, assoc_ok)
   ARRAY *array;
 
   var = make_local_variable (name, 0);	/* XXX for now */
+  /* If ASSOC_OK is non-zero, assume that we are ok with letting an assoc
+     variable return to the caller without converting it. The caller will
+     either flag an error or do the conversion itself. */
   if (var == 0 || array_p (var) || (assoc_ok && assoc_p (var)))
     return var;
 
-  array = array_create ();
+  /* Validate any value we inherited from a variable instance at a previous
+     scope and disard anything that's invalid. */
+  if (localvar_inherit && assoc_p (var))
+    {
+      internal_warning ("%s: cannot inherit value from incompatible type", name);
+      VUNSETATTR (var, att_assoc);
+      dispose_variable_value (var);
+      array = array_create ();
+      var_setarray (var, array);
+    }
+  else if (localvar_inherit)
+    var = convert_var_to_array (var);		/* XXX */
+  else
+    {
+      dispose_variable_value (var);
+      array = array_create ();
+      var_setarray (var, array);
+    }
 
-  dispose_variable_value (var);
-  var_setarray (var, array);
   VSETATTR (var, att_array);
   return var;
 }
@@ -2699,20 +2824,39 @@ make_new_assoc_variable (name)
 }
 
 SHELL_VAR *
-make_local_assoc_variable (name)
+make_local_assoc_variable (name, array_ok)
      char *name;
+     int array_ok;
 {
   SHELL_VAR *var;
   HASH_TABLE *hash;
 
   var = make_local_variable (name, 0);	/* XXX for now */
-  if (var == 0 || assoc_p (var))
+  /* If ARRAY_OK is non-zero, assume that we are ok with letting an array
+     variable return to the caller without converting it. The caller will
+     either flag an error or do the conversion itself. */
+  if (var == 0 || assoc_p (var) || (array_ok && array_p (var)))
     return var;
 
-  dispose_variable_value (var);
-  hash = assoc_create (0);
+  /* Validate any value we inherited from a variable instance at a previous
+     scope and disard anything that's invalid. */
+  if (localvar_inherit && array_p (var))
+    {
+      internal_warning ("%s: cannot inherit value from incompatible type", name);
+      VUNSETATTR (var, att_array);
+      dispose_variable_value (var);
+      hash = assoc_create (0);
+      var_setassoc (var, hash);
+    }
+  else if (localvar_inherit)
+    var = convert_var_to_assoc (var);		/* XXX */
+  else
+    {
+      dispose_variable_value (var);
+      hash = assoc_create (0);
+      var_setassoc (var, hash);
+    }
 
-  var_setassoc (var, hash);
   VSETATTR (var, att_assoc);
   return var;
 }
@@ -2911,7 +3055,12 @@ bind_variable_internal (name, value, table, hflags, aflags)
     }
   else if (entry && nameref_p (entry))
     {
-      newval = nameref_cell (entry);
+      newval = nameref_cell (entry);	/* XXX - newval can't be NULL here */
+      if (valid_nameref_value (newval, 0) == 0)
+	{
+	  sh_invalidid (newval);
+	  return ((SHELL_VAR *)NULL);
+	}
 #if defined (ARRAY_VARS)
       /* declare -n foo=x[2] ; foo=bar */
       if (valid_array_reference (newval, 0))
@@ -3122,6 +3271,17 @@ bind_global_variable (name, value, flags)
 
   /* bind_variable_internal will handle nameref resolution in this case */
   return (bind_variable_internal (name, value, global_variables->table, 0, flags));
+}
+
+static SHELL_VAR *
+bind_invalid_envvar (name, value, flags)
+     const char *name;
+     char *value;
+     int flags;
+{
+  if (invalid_env == 0)
+    invalid_env = hash_create (64);	/* XXX */
+  return (bind_variable_internal (name, value, invalid_env, HASH_NOSRCH, flags));
 }
 
 /* Make VAR, a simple shell variable, have value VALUE.  Once assigned a
@@ -3374,6 +3534,12 @@ assign_in_env (word, flags)
 	  aflags |= ASS_APPEND;
 	}
 
+      if (legal_identifier (name) == 0)
+	{
+	  sh_invalidid (name);
+	  return (0);
+	}
+  
       var = find_variable (name);
       if (var == 0)
 	{
@@ -4741,7 +4907,7 @@ maybe_make_export_env ()
 {
   register char **temp_array;
   int new_size;
-  VAR_CONTEXT *tcxt;
+  VAR_CONTEXT *tcxt, *icxt;
 
   if (array_needs_making)
     {
@@ -4753,7 +4919,7 @@ maybe_make_export_env ()
 	 variables are not (yet) exported, this will always be big enough
 	 for the exported variables and functions. */
       new_size = n_shell_variables () + HASH_ENTRIES (shell_functions) + 1 +
-		 HASH_ENTRIES (temporary_env);
+		 HASH_ENTRIES (temporary_env) + HASH_ENTRIES (invalid_env);
       if (new_size > export_env_size)
 	{
 	  export_env_size = new_size;
@@ -4774,10 +4940,22 @@ maybe_make_export_env ()
 	}
       else
 	tcxt = shell_variables;
+
+      if (invalid_env)
+	{
+	  icxt = new_var_context ((char *)NULL, 0);
+	  icxt->table = invalid_env;
+	  icxt->down = tcxt;
+	}
+      else
+	icxt = tcxt;
       
-      temp_array = make_var_export_array (tcxt);
+      temp_array = make_var_export_array (icxt);
       if (temp_array)
 	add_temp_array_to_env (temp_array, 0, 0);
+
+      if (icxt != tcxt)
+	free (icxt);
 
       if (tcxt != shell_variables)
 	free (tcxt);
@@ -4893,13 +5071,14 @@ push_var_context (name, flags, tempvars)
 
   /* As of IEEE Std 1003.1-2017, assignment statements preceding shell
      functions no longer behave like assignment statements preceding
-     special builtins, and do not persist in the current shell environment. */
-  posix_func_behavior = posixly_correct;	/* placeholder for later */
+     special builtins, and do not persist in the current shell environment.
+     This is austin group interp #654, though nobody implements it yet. */
+  posix_func_behavior = posixly_correct;
 
   vc = new_var_context (name, flags);
   /* Posix interp 1009, temporary assignments preceding function calls modify
      the current environment *before* the command is executed. */
-  if (posix_func_behavior && tempvars == temporary_env)
+  if (posix_func_behavior && (flags & VC_FUNCENV) && tempvars == temporary_env)
     merge_temporary_env ();
   else if (tempvars)
     {
@@ -4923,24 +5102,25 @@ push_var_context (name, flags, tempvars)
 	   calls to the surrounding scope.
 
   It takes variables out of a temporary environment hash table. We take the
-  variable in data
+  variable in data.
 */
 static void
 push_func_var (data)
      PTR_T data;
 {
   SHELL_VAR *var, *v;
-  int posix_func_behavior;
+  int posix_var_behavior;
 
   var = (SHELL_VAR *)data;
   /* As of IEEE Std 1003.1-2017, assignment statements preceding shell
      functions no longer behave like assignment statements preceding
-     special builtins, and do not persist in the current shell environment. */
-  posix_func_behavior = posixly_correct;	/* placeholder for later */
+     special builtins, and do not persist in the current shell environment.
+     This is austin group interp #654, though nobody implements it yet. */
+  posix_var_behavior = posixly_correct;  
 
   if (local_p (var) && STREQ (var->name, "-"))
     set_current_options (value_cell (var));
-  else if (tempvar_p (var) && (posix_func_behavior || (var->attributes & att_propagate)))
+  else if (tempvar_p (var) && (posix_var_behavior || (var->attributes & att_propagate)))
     {
       /* Make sure we have a hash table to store the variable in while it is
 	 being propagated down to the global variables table.  Create one if
@@ -5110,9 +5290,63 @@ pop_scope (is_special)
 /*								    */
 /* **************************************************************** */
 
-static WORD_LIST **dollar_arg_stack = (WORD_LIST **)NULL;
+struct saved_dollar_vars {
+  char **first_ten;
+  WORD_LIST *rest;
+};
+
+static struct saved_dollar_vars *dollar_arg_stack = (struct saved_dollar_vars *)NULL;
 static int dollar_arg_stack_slots;
 static int dollar_arg_stack_index;
+
+/* Functions to manipulate dollar_vars array. Need to keep these in sync with
+   whatever remember_args() does. */
+static char **
+save_dollar_vars ()
+{
+  char **ret;
+  int i;
+
+  ret = strvec_create (10);
+  for (i = 1; i < 10; i++)
+    {
+      ret[i] = dollar_vars[i];
+      dollar_vars[i] = (char *)NULL;
+    }
+  return ret;
+}
+
+static void
+restore_dollar_vars (args)
+     char **args;
+{
+  int i;
+
+  for (i = 1; i < 10; i++)
+    dollar_vars[i] = args[i];
+}
+
+static void
+free_dollar_vars ()
+{
+  int i;
+
+  for (i = 1; i < 10; i++)
+    {
+      FREE (dollar_vars[i]);
+      dollar_vars[i] = (char *)NULL;
+    }
+}
+
+static void
+free_saved_dollar_vars (args)
+     char **args;
+{
+  int i;
+
+  for (i = 1; i < 10; i++)
+    FREE (args[i]);
+}
 
 /* XXX - should always be followed by remember_args () */
 void
@@ -5145,35 +5379,53 @@ push_dollar_vars ()
 {
   if (dollar_arg_stack_index + 2 > dollar_arg_stack_slots)
     {
-      dollar_arg_stack = (WORD_LIST **)
+      dollar_arg_stack = (struct saved_dollar_vars *)
 	xrealloc (dollar_arg_stack, (dollar_arg_stack_slots += 10)
-		  * sizeof (WORD_LIST *));
+		  * sizeof (struct saved_dollar_vars));
     }
-  dollar_arg_stack[dollar_arg_stack_index++] = list_rest_of_args ();
-  dollar_arg_stack[dollar_arg_stack_index] = (WORD_LIST *)NULL;
+  
+  dollar_arg_stack[dollar_arg_stack_index].first_ten = save_dollar_vars ();
+  dollar_arg_stack[dollar_arg_stack_index++].rest = rest_of_args;
+  rest_of_args = (WORD_LIST *)NULL;
+  
+  dollar_arg_stack[dollar_arg_stack_index].first_ten = (char **)NULL;
+  dollar_arg_stack[dollar_arg_stack_index].rest = (WORD_LIST *)NULL;  
 }
 
 /* Restore the positional parameters from our stack. */
 void
 pop_dollar_vars ()
 {
-  if (!dollar_arg_stack || dollar_arg_stack_index == 0)
+  if (dollar_arg_stack == 0 || dollar_arg_stack_index == 0)
     return;
 
-  remember_args (dollar_arg_stack[--dollar_arg_stack_index], 1);
-  dispose_words (dollar_arg_stack[dollar_arg_stack_index]);
-  dollar_arg_stack[dollar_arg_stack_index] = (WORD_LIST *)NULL;
+  /* Do what remember_args (xxx, 1) would have done. */
+  free_dollar_vars ();
+  dispose_words (rest_of_args);
+  
+  rest_of_args = dollar_arg_stack[--dollar_arg_stack_index].rest;
+  restore_dollar_vars (dollar_arg_stack[dollar_arg_stack_index].first_ten);
+  free (dollar_arg_stack[dollar_arg_stack_index].first_ten);
+
+  dollar_arg_stack[dollar_arg_stack_index].first_ten = (char **)NULL;
+  dollar_arg_stack[dollar_arg_stack_index].rest = (WORD_LIST *)NULL;
+  
   set_dollar_vars_unchanged ();
+  invalidate_cached_quoted_dollar_at ();
 }
 
 void
 dispose_saved_dollar_vars ()
 {
-  if (!dollar_arg_stack || dollar_arg_stack_index == 0)
+  if (dollar_arg_stack == 0 || dollar_arg_stack_index == 0)
     return;
 
-  dispose_words (dollar_arg_stack[dollar_arg_stack_index]);
-  dollar_arg_stack[dollar_arg_stack_index] = (WORD_LIST *)NULL;
+  dispose_words (dollar_arg_stack[--dollar_arg_stack_index].rest);    
+  free_saved_dollar_vars (dollar_arg_stack[dollar_arg_stack_index].first_ten);	
+  free (dollar_arg_stack[dollar_arg_stack_index].first_ten);
+
+  dollar_arg_stack[dollar_arg_stack_index].first_ten = (char **)NULL;  
+  dollar_arg_stack[dollar_arg_stack_index].rest = (WORD_LIST *)NULL;
 }
 
 /* Initialize BASH_ARGV and BASH_ARGC after turning on extdebug after the

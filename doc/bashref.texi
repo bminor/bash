@@ -876,7 +876,9 @@ zero if no condition tested true.
 The syntax of the @code{case} command is:
 
 @example
-case @var{word} in [ [(] @var{pattern} [| @var{pattern}]@dots{}) @var{command-list} ;;]@dots{} esac
+case @var{word} in
+    [ [(] @var{pattern} [| @var{pattern}]@dots{}) @var{command-list} ;;]@dots{}
+esac
 @end example
 
 @code{case} will selectively execute the @var{command-list} corresponding to
@@ -1028,7 +1030,8 @@ to be matched as a string.
 An additional binary operator, @samp{=~}, is available, with the same
 precedence as @samp{==} and @samp{!=}.
 When it is used, the string to the right of the operator is considered
-an extended regular expression and matched accordingly (as in @i{regex}3)).
+a @sc{POSIX} extended regular expression and matched accordingly
+(as in @i{regex}3)).
 The return value is 0 if the string matches
 the pattern, and 1 otherwise.
 If the regular expression is syntactically incorrect, the conditional
@@ -1283,7 +1286,8 @@ from a file (in this case, filenames listed one per line):
 @noindent
 with a more compact syntax reminiscent of lambdas:
 @example
-cat list | parallel "do-something1 @{@} config-@{@} ; do-something2 < @{@}" | process-output
+cat list | parallel "do-something1 @{@} config-@{@} ; do-something2 < @{@}" |
+           process-output
 @end example
 
 Parallel provides a built-in mechanism to remove filename extensions, which
@@ -1306,13 +1310,21 @@ parallel "zcat @{@} | bzip2 >@{.@}.bz2 && rm @{@}" ::: *.gz
 If a command generates output, you may want to preserve the input order in
 the output.  For instance, the following command
 @example
-@{ echo foss.org.my ; echo debian.org; echo freenetproject.org; @} | parallel traceroute
+@{
+    echo foss.org.my ;
+    echo debian.org ;
+    echo freenetproject.org ;
+@} | parallel traceroute
 @end example
 @noindent
 will display as output the traceroute invocation that finishes first.
 Adding the @option{-k} option 
 @example
-@{ echo foss.org.my ; echo debian.org; echo freenetproject.org; @} | parallel -k traceroute
+@{
+    echo foss.org.my ;
+    echo debian.org ;
+    echo freenetproject.org ;
+@} | parallel -k traceroute
 @end example
 @noindent
 will ensure that the output of @code{traceroute foss.org.my} is displayed first.
@@ -1663,8 +1675,16 @@ separators.
 
 @item @@
 @vindex $@@
-($@@) Expands to the positional parameters, starting from one.  When the
-expansion occurs within double quotes, each parameter expands to a
+($@@) Expands to the positional parameters, starting from one.
+In contexts where word splitting is performed, this expands each
+positional parameter to a separate word; if not within double
+quotes, these words are subject to word splitting.
+In contexts where word splitting is not performed,
+this expands to a single word
+with each positional parameter separated by a space.
+When the
+expansion occurs within double quotes, and word splitting is performed,
+each parameter expands to a
 separate word.  That is, @code{"$@@"} is equivalent to
 @code{"$1" "$2" @dots{}}.
 If the double-quoted expansion occurs within a word, the expansion of
@@ -1926,6 +1946,12 @@ The string that would be displayed by @samp{dirs +@var{N}}
 The string that would be displayed by @samp{dirs -@var{N}}
 @end table
 
+Bash also performs tilde expansion on words satisfying the conditions of
+variable assignments (@pxref{Shell Parameters})
+when they appear as arguments to simple commands.
+Bash does not do this, except for the @var{declaration} commands listed
+above, when in @sc{posix} mode.
+
 @node Shell Parameter Expansion
 @subsection Shell Parameter Expansion
 @cindex parameter expansion
@@ -1954,11 +1980,11 @@ interpreted as part of its name.
 
 If the first character of @var{parameter} is an exclamation point (!),
 and @var{parameter} is not a @var{nameref},
-it introduces a level of variable indirection.
-Bash uses the value of the variable formed from the rest of
-@var{parameter} as the name of the variable; this variable is then
-expanded and that value is used in the rest of the substitution, rather
-than the value of @var{parameter} itself.
+it introduces a level of indirection.
+Bash uses the value formed by expanding the rest of
+@var{parameter} as the new @var{parameter}; this is then
+expanded and that value is used in the rest of the expansion, rather
+than the expansion of the original @var{parameter}.
 This is known as @code{indirect expansion}.
 The value is subject to tilde expansion,
 parameter expansion, command substitution, and arithmetic expansion.
@@ -4353,8 +4379,8 @@ parent.
 @item mapfile
 @btindex mapfile
 @example
-mapfile [-d @var{delim}] [-n @var{count}] [-O @var{origin}] [-s @var{count}] [-t] [-u @var{fd}]
-    [-C @var{callback}] [-c @var{quantum}] [@var{array}]
+mapfile [-d @var{delim}] [-n @var{count}] [-O @var{origin}] [-s @var{count}]
+    [-t] [-u @var{fd}] [-C @var{callback}] [-c @var{quantum}] [@var{array}]
 @end example
 
 Read lines from the standard input into the indexed array variable @var{array},
@@ -4561,8 +4587,8 @@ Read input from file descriptor @var{fd}.
 @item readarray
 @btindex readarray
 @example
-readarray [-d @var{delim}] [-n @var{count}] [-O @var{origin}] [-s @var{count}] [-t] [-u @var{fd}]
-    [-C @var{callback}] [-c @var{quantum}] [@var{array}]
+readarray [-d @var{delim}] [-n @var{count}] [-O @var{origin}] [-s @var{count}]
+    [-t] [-u @var{fd}] [-C @var{callback}] [-c @var{quantum}] [@var{array}]
 @end example
 
 Read lines from the standard input into the indexed array variable @var{array},
@@ -5617,7 +5643,8 @@ The shell sets @code{BASH_ARGC} only when in extended debugging mode
 (see @ref{The Shopt Builtin}
 for a description of the @code{extdebug} option to the @code{shopt}
 builtin).
-Setting @code{extdebug} after the shell has started to execute a script
+Setting @code{extdebug} after the shell has started to execute a script,
+or referencing this variable when @code{extdebug} is not set,
 may result in inconsistent values.
 
 @item BASH_ARGV
@@ -5630,7 +5657,8 @@ The shell sets @code{BASH_ARGV} only when in extended debugging mode
 (see @ref{The Shopt Builtin}
 for a description of the @code{extdebug} option to the @code{shopt}
 builtin).
-Setting @code{extdebug} after the shell has started to execute a script
+Setting @code{extdebug} after the shell has started to execute a script,
+or referencing this variable when @code{extdebug} is not set,
 may result in inconsistent values.
 
 @item BASH_ARGV0
@@ -6073,6 +6101,11 @@ input to the shell.  This is only in effect for interactive shells.
 The name of the Readline initialization file, overriding the default
 of @file{~/.inputrc}.
 
+@item INSIDE_EMACS
+If Bash finds this variable in the environment when the shell
+starts, it assumes that the shell is running in an Emacs shell buffer
+and may disable line editing depending on the value of @env{TERM}.
+
 @item LANG  
 Used to determine the locale category for any category not specifically
 selected with a variable starting with @code{LC_}.
@@ -6156,7 +6189,9 @@ as if the command
 @code{set -o posix}
 @end example
 @noindent
-had been executed.  
+had been executed.
+When the shell enters @sc{posix} mode, it sets this variable if it was
+not already set.
 
 @item PPID
 The process @sc{id} of the shell's parent process.  This variable
@@ -6330,9 +6365,12 @@ This chapter describes features unique to Bash.
 @section Invoking Bash
 
 @example
-bash [long-opt] [-ir] [-abefhkmnptuvxdBCDHP] [-o @var{option}] [-O @var{shopt_option}] [@var{argument} @dots{}]
-bash [long-opt] [-abefhkmnptuvxdBCDHP] [-o @var{option}] [-O @var{shopt_option}] -c @var{string} [@var{argument} @dots{}]
-bash [long-opt] -s [-abefhkmnptuvxdBCDHP] [-o @var{option}] [-O @var{shopt_option}] [@var{argument} @dots{}]
+bash [long-opt] [-ir] [-abefhkmnptuvxdBCDHP] [-o @var{option}]
+    [-O @var{shopt_option}] [@var{argument} @dots{}]
+bash [long-opt] [-abefhkmnptuvxdBCDHP] [-o @var{option}]
+    [-O @var{shopt_option}] -c @var{string} [@var{argument} @dots{}]
+bash [long-opt] -s [-abefhkmnptuvxdBCDHP] [-o @var{option}]
+    [-O @var{shopt_option}] [@var{argument} @dots{}]
 @end example
 
 All of the single-character options used with the @code{set} builtin
@@ -7421,7 +7459,7 @@ shell session.
 After the string is decoded, it is expanded via
 parameter expansion, command substitution, arithmetic
 expansion, and quote removal, subject to the value of the
-@code{promptvars} shell option (@pxref{Bash Builtins}).
+@code{promptvars} shell option (@pxref{The Shopt Builtin}).
 
 @node The Restricted Shell
 @section The Restricted Shell
@@ -7492,6 +7530,9 @@ startup files.
 The following list is what's changed when `@sc{posix} mode' is in effect:
 
 @enumerate
+@item
+Bash ensures that the @env{POSIXLY_CORRECT} variable is set.
+
 @item
 When a command in the hash table no longer exists, Bash will re-search
 @env{$PATH} to find the new location.  This is also available with

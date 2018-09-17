@@ -1992,7 +1992,7 @@ unescape (char *c)
 	while (i < l && c[i]) {
 		if (c[i] == '\a') {
 			if (c[i+1])
-				strcpy(c + i, c + i + 1);	/* should be memmove */
+				memmove (c + i, c + i + 1, l - i);
 			else {
 				c[i] = '\0';
 				break;

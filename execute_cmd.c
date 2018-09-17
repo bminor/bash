@@ -1522,6 +1522,11 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   /* Subshells are neither login nor interactive. */
   login_shell = interactive = 0;
 
+  /* And we're no longer in a loop. See Posix interp 842 (we are not in the
+     "same execution environment"). */
+  if (shell_compatibility_level > 44)
+    loop_level = 0;
+
   if (user_subshell)
     {
       subshell_environment = SUBSHELL_PAREN;	/* XXX */
@@ -1556,12 +1561,12 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       setup_async_signals ();
       asynchronous = 0;
     }
+  else
+    set_sigint_handler ();
 
 #if defined (JOB_CONTROL)
   set_sigchld_handler ();
 #endif /* JOB_CONTROL */
-
-  set_sigint_handler ();
 
   /* Delete all traces that there were any jobs running.  This is
      only for subshells. */
@@ -1671,6 +1676,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   if (invert)
     return_code = (return_code == EXECUTION_SUCCESS) ? EXECUTION_FAILURE
 						     : EXECUTION_SUCCESS;
+
 
   /* If we were explicitly placed in a subshell with (), we need
      to do the `shell cleanup' things, such as running traps[0]. */
@@ -2432,7 +2438,7 @@ static void
 lastpipe_cleanup (s)
      int s;
 {
-  unfreeze_jobs_list ();
+  set_jobs_list_frozen (s);
 }
 
 static int
@@ -2442,7 +2448,7 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
      struct fd_bitmap *fds_to_close;
 {
   int prev, fildes[2], new_bitmap_size, dummyfd, ignore_return, exec_result;
-  int lstdin, lastpipe_flag, lastpipe_jid;
+  int lstdin, lastpipe_flag, lastpipe_jid, old_frozen;
   COMMAND *cmd;
   struct fd_bitmap *fd_bitmap;
   pid_t lastpid;
@@ -2557,9 +2563,9 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	  prev = NO_PIPE;
 	  add_unwind_protect (restore_stdin, lstdin);
 	  lastpipe_flag = 1;
-	  freeze_jobs_list ();
+	  old_frozen = freeze_jobs_list ();
 	  lastpipe_jid = stop_pipeline (0, (COMMAND *)NULL);	/* XXX */
-	  add_unwind_protect (lastpipe_cleanup, lastpipe_jid);
+	  add_unwind_protect (lastpipe_cleanup, old_frozen);
 	}
       if (cmd)
 	cmd->flags |= CMD_LASTPIPE;
@@ -2605,9 +2611,9 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       else if (pipefail_opt)
 	exec_result = exec_result | lstdin;	/* XXX */
       /* otherwise we use exec_result */
-        
 #endif
-      unfreeze_jobs_list ();
+
+      set_jobs_list_frozen (old_frozen);
     }
 
   discard_unwind_frame ("lastpipe-exec");
@@ -4062,9 +4068,13 @@ fix_assignment_words (words)
 	/* If we have an assignment builtin that does not create local variables,
 	   make sure we create global variables even if we internally call
 	   `declare'.  The CHKLOCAL flag means to set attributes or values on
-	   an existing local variable */
+	   an existing local variable, if there is one. */
 	if (b && ((b->flags & (ASSIGNMENT_BUILTIN|LOCALVAR_BUILTIN)) == ASSIGNMENT_BUILTIN))
 	  w->word->flags |= W_ASSNGLOBAL|W_CHKLOCAL;
+#if 0
+	else if (b && (b->flags & ASSIGNMENT_BUILTIN) && (b->flags & LOCALVAR_BUILTIN))
+	  w->word->flags |= W_CHKLOCAL;
+#endif
       }
 #if defined (ARRAY_VARS)
     /* Note that we saw an associative array option to a builtin that takes

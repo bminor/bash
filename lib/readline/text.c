@@ -297,13 +297,40 @@ _rl_forward_char_internal (int count)
 #endif
 
     if (rl_end < 0)
-	rl_end = 0;
+      rl_end = 0;
 #else
   point = rl_point + count;
-  if (point > rl_end)
-    point = rl_end;
 #endif
 
+  if (point > rl_end)
+    point = rl_end;
+  return (point);
+}
+
+int
+_rl_backward_char_internal (int count)
+{
+  int point;
+
+  point = rl_point;
+#if defined (HANDLE_MULTIBYTE)
+  if (count > 0)
+    {
+      while (count > 0 && point > 0)
+	{
+	  point = _rl_find_prev_mbchar (rl_line_buffer, point, MB_FIND_NONZERO);
+	  count--;
+	}
+      if (count > 0)
+        return 0;	/* XXX - rl_ding() here? */
+    }
+#else
+  if (count > 0)
+    point -= count;
+#endif
+
+  if (point < 0)
+    point = 0;
   return (point);
 }
 

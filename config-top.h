@@ -176,3 +176,7 @@
 /* Define to force the value of OLDPWD inherited from the environment to be a
    directory */
 #define OLDPWD_CHECK_DIRECTORY 1
+
+/* Define to set the initial size of the history list ($HISTSIZE). This must
+   be a string. */
+/*#define HISTSIZE_DEFAULT "500"*/

@@ -199,6 +199,8 @@ bind_array_var_internal (entry, ind, key, value, flags)
   FREE (newval);
 
   VUNSETATTR (entry, att_invisible);	/* no longer invisible */
+
+  /* check mark_modified_variables if we ever want to export array vars */
   return (entry);
 }
 
