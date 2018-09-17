@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.0, version 5.002])dnl
+AC_REVISION([for Bash 5.0, version 5.003])dnl
 
 define(bashvers, 5.0)
 define(relstatus, beta)
@@ -1116,7 +1116,7 @@ linux*)		LOCAL_LDFLAGS=-rdynamic		 # allow dynamic loading
 		1.*|2.[[0123]]*)	: ;;
 		*)	AC_DEFINE(PGRP_PIPE) ;;
 		esac ;;
-openbsd*)	LOCAL_CFLAGS="-DDEV_FD_STAT_BROKEN" ;;
+netbsd*|openbsd*)	LOCAL_CFLAGS="-DDEV_FD_STAT_BROKEN" ;;
 *qnx[[67]]*)	LOCAL_LIBS="-lncurses" ;;
 *qnx*)		LOCAL_CFLAGS="-Dqnx -F -3s" LOCAL_LDFLAGS="-3s" LOCAL_LIBS="-lunix -lncurses" ;;
 powerux*)	LOCAL_LIBS="-lgen" ;;

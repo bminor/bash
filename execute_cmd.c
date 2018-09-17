@@ -748,7 +748,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
   reap_procsubs ();
 #  endif
 
-  if (variable_context != 0)
+  if (variable_context != 0)	/* XXX - also if sourcelevel != 0? */
     {
       ofifo = num_fifos ();
       ofifo_list = copy_fifo_list ((int *)&osize);

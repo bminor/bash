@@ -4303,3 +4303,49 @@ configure.ac
 	- openbsd needs DEV_FD_STAT_BROKEN defined
 
 [bash-5.0-beta frozen]
+
+				   9/11
+				   ----
+builtins/exec.def
+	- exec_builtin: make sure to sync the buffered stream where bash is
+	  reading input (especially if it's fd 0) so a command exec'd by the
+	  script can read the rest of stdin after the exec
+
+				   9/15
+				   ----
+lib/readline/histexpand.c
+	- history_tokenize_internal: if the event contains embedded newlines
+	  (e.g., bash with command-oriented history and lithist), use them as
+	  word delimiters, equivalent to space and tab, so they don't end up
+	  as separate words. Fixes issue pointed out by Viktor Dukhovni
+	  <ietf-dane@dukhovni.org>
+	- history_tokenize_word: don't break if we get a newline (though we
+	  shouldn't get one due to the loop in history_tokenize_internal
+	- history_expand_internal: use newline as a whitespace character when
+	  expanding by words, as we do with history_tokenize_internal
+
+jobs.h
+	- J_PIPEFAIL: new flag for `flags' element of job struct
+
+jobs.c
+	- stop_pipeline: if pipefail_opt set, newjob gets J_PIPEFAIL in its
+	  flags word
+	- raw_job_exit_status: use J_PIPEFAIL (setting of pipefail when job
+	  created) instead of current setting of pipefail status to determine
+	  how to compute exit status of pipeline. Tentative implementation of
+	  Posix proposal
+
+expr.c
+	- exp0: don't call expr_bind_variable with a NULL string.  Fixes
+	  fuzzing bug reported by Eduardo Bustamante <dualbus@gmail.com>
+	- expr_bind_variable: don't try to do anything with a NULL or empty
+	  LHS
+
+				   9/16
+				   ----
+lib/readline/undo.c
+	- rl_do_undo: before we release the undo list entry we've just
+	  processed, make sure we avoid any pointer aliasing issues caused
+	  by having the entry being removed as part of the undo list in
+	  _rl_saved_line_for_history. Fixes fuzzing bug reported by
+	  Eduardo Bustamante <dualbus@gmail.com>

@@ -103,6 +103,7 @@ typedef enum { JNONE = -1, JRUNNING = 1, JSTOPPED = 2, JDEAD = 4, JMIXED = 8 } J
 #define J_NOHUP      0x08 /* Don't send SIGHUP to job if shell gets SIGHUP. */
 #define J_STATSAVED  0x10 /* A process in this job had had status saved via $! */
 #define J_ASYNC	     0x20 /* Job was started asynchronously */
+#define J_PIPEFAIL   0x40 /* pipefail set when job was started */
 
 #define IS_FOREGROUND(j)	((jobs[j]->flags & J_FOREGROUND) != 0)
 #define IS_NOTIFIED(j)		((jobs[j]->flags & J_NOTIFIED) != 0)

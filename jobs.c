@@ -630,6 +630,8 @@ stop_pipeline (async, deferred)
       pipeline_pgrp = 0;
 
       newjob->flags = 0;
+      if (pipefail_opt)
+	newjob->flags |= J_PIPEFAIL;
 
       /* Flag to see if in another pgrp. */
       if (job_control)
@@ -688,7 +690,7 @@ stop_pipeline (async, deferred)
 	{
 	  newjob->flags |= J_FOREGROUND;
 	  /*
-	   *		!!!!! NOTE !!!!!  (chet@ins.cwru.edu)
+	   *		!!!!! NOTE !!!!!  (chet@po.cwru.edu)
 	   *
 	   * The currently-accepted job control wisdom says to set the
 	   * terminal's process group n+1 times in an n-step pipeline:
@@ -2639,7 +2641,11 @@ raw_job_exit_status (job)
   int fail;
   WAIT ret;
 
+#if 0
   if (pipefail_opt)
+#else
+  if (jobs[job]->flags & J_PIPEFAIL)
+#endif
     {
       fail = 0;
       p = jobs[job]->pipe;

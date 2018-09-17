@@ -68,6 +68,7 @@ $END
 #endif
 #include "common.h"
 #include "bashgetopt.h"
+#include "input.h"
 
 /* Not all systems declare ERRNO in errno.h... and some systems #define it! */
 #if !defined (errno)
@@ -220,6 +221,11 @@ exec_builtin (list)
   if (interactive || job_control)
     default_tty_job_signals ();		/* undo initialize_job_signals */
 #endif /* JOB_CONTROL */
+
+#if defined (BUFFERED_INPUT)
+  if (default_buffered_input >= 0)
+    sync_buffered_stream (default_buffered_input);
+#endif
 
   exit_value = shell_execve (command, args, env);
 

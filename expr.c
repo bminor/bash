@@ -325,6 +325,9 @@ expr_bind_variable (lhs, rhs)
   SHELL_VAR *v;
   int aflags;
 
+  if (lhs == 0 || *lhs == 0)
+    return;		/* XXX */
+
 #if defined (ARRAY_VARS)
   aflags = (assoc_expand_once && already_expanded) ? ASS_NOEXPAND : 0;
 #else
@@ -1012,7 +1015,8 @@ exp0 ()
 	    expr_bind_array_element (curlval.tokstr, curlval.ind, vincdec);
 	  else
 #endif
-	    expr_bind_variable (tokstr, vincdec);
+	    if (tokstr)
+	      expr_bind_variable (tokstr, vincdec);
 	}
       free (vincdec);
       val = v2;

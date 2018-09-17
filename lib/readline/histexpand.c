@@ -55,6 +55,8 @@
 
 #define slashify_in_quotes "\\`\"$"
 
+#define fielddelim(c)	(whitespace(c) || (c) == '\n')
+
 typedef int _hist_search_func_t PARAMS((const char *, int));
 
 static char error_pointer;
@@ -769,7 +771,7 @@ history_expand_internal (char *string, int start, int qc, int *end_index_ptr, ch
 		   the last time. */
 		if (subst_bywords && si > we)
 		  {
-		    for (; temp[si] && whitespace (temp[si]); si++)
+		    for (; temp[si] && fielddelim (temp[si]); si++)
 		      ;
 		    ws = si;
 		    we = history_tokenize_word (temp, si);
@@ -1446,7 +1448,7 @@ history_tokenize_word (const char *string, int ind)
   i = ind;
   delimiter = nestdelim = 0;
 
-  if (member (string[i], "()\n"))
+  if (member (string[i], "()\n"))	/* XXX - included \n, but why? been here forever */
     {
       i++;
       return i;
@@ -1604,7 +1606,7 @@ history_tokenize_internal (const char *string, int wind, int *indp)
   for (i = result_index = size = 0, result = (char **)NULL; string[i]; )
     {
       /* Skip leading whitespace. */
-      for (; string[i] && whitespace (string[i]); i++)
+      for (; string[i] && fielddelim (string[i]); i++)
 	;
       if (string[i] == 0 || string[i] == history_comment_char)
 	return (result);
