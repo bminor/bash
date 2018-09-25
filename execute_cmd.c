@@ -2252,7 +2252,10 @@ coproc_setvars (cp)
     {
       v = find_variable_nameref_for_create (cp->c_name, 1);
       if (v == INVALID_NAMEREF_VALUE)
-	return;
+	{
+	  free (namevar);
+	  return;
+	}
       if (v && nameref_p (v))
 	{
 	  free (cp->c_name);
@@ -2265,6 +2268,7 @@ coproc_setvars (cp)
     {
       if (readonly_p (v))
 	err_readonly (cp->c_name);
+      free (namevar);
       return;
     }
   if (v == 0)

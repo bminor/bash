@@ -4349,3 +4349,97 @@ lib/readline/undo.c
 	  by having the entry being removed as part of the undo list in
 	  _rl_saved_line_for_history. Fixes fuzzing bug reported by
 	  Eduardo Bustamante <dualbus@gmail.com>
+
+				   9/17
+				   ----
+[bash-5.0-beta released]
+
+				   9/18
+				   ----
+lib/readline/bind.c
+	- name_and_keymap: new struct for keymap names and maps
+	- builtin_keymap_names: static array of builtin keymap names and
+	  maps; preparing for allowing applications to set the names of
+	  keymaps they create; keymap_names is initially a pointer to
+	  this array
+	- _rl_get_keymap_by_name,_rl_get_keymap_by_map: new functions for
+	  searching the keymap_names array and returning an index
+	- rl_get_keymap_by_name, rl_get_keymap_name: rewritten in terms of
+	  new functions above
+	- rl_set_keymap_name (char *name, Keymap map): new function, set
+	  name of MAP to NAME. NAME must not be builtin; MAP must not be one
+	  of the builtin keymaps. Request and initial implementation from
+	  Tom Tromey <tom@tromey.com>
+
+lib/readline/readline.h
+	- rl_set_keymap_name: new extern declaration for new public function
+
+lib/readline/doc/rltech.texi
+	- rl_set_keymap_name: add documentation
+
+lib/readline/doc/rluser.texi
+	- add text to `set keymap' description to note that applications
+	  can add keymap names that can be used there
+
+				   9/20
+				   ----
+parse.y
+	- shell_getc: don't execute the alias hack (returning a space at the
+	  end of the string) if we are parsing a command substitution that
+	  starts with a double paren (subshell inside a comsub), in which
+	  case the flags are PSH_DPAREN. Fixes fuzzing bug reported by
+	  Eduardo Bustamante <dualbus@gmail.com>
+
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: default case: make sure we check multibyte
+	  char length when deciding whether to enlarge the search string
+	  buffer, instead of using the old assumption. Fixes fuzzing bug
+	  reported by Eduardo Bustamante <dualbus@gmail.com>
+
+builtins/fc.def,execute_cmd.c
+	- fixed some missing free()s uncovered by coverity. Report from
+	  Siteshwar Vashisht <svashisht@redhat.com>
+
+lib/glob/glob.c
+	- glob_vector: make sure name_vector is initialized to NULL
+
+lib/sh/{pathcanon,pathphys}.c
+	- {pathcanon,pathphys}: use memmove instead of strcpy on a possibly-
+	  overlapping region of memory
+
+subst.c
+	- parameter_list_transform: make sure to dispose the word list in all
+	  cases before returning
+	- parameter_brace_expand_rhs: make sure t1 is freed before returning
+	  due to an invalid name resulting from an indirect expansion
+
+support/man2html.c
+	- fixed a couple of memory leaks
+
+				   9/21
+				   ----
+subst.c
+	- process_substitute: if we are part of a job control process chain
+	  (pipeline_pgrp != shell_pgrp), have the child shell forked to run
+	  the process substitution set pipeline_pgrp to its own PID,
+	  effectively becoming a process group leader without changing
+	  its own process group. Fixes stray SIGHUP issue reported by
+	  Jeremy Townshend <jeremy.townshend@gmail.com>
+ 
+				   9/23
+				   ----
+arrayfunc.c
+	- assign_array_element: if we are assigning to an existing associative
+	  array, and assoc_expand_once is set, allow `*' and `@' as subscripts.
+	  Partial fix for report from Grisha Levit <grishalevit@gmail.com>
+
+variables.c
+	- bind_int_variable: if valid_array_reference (lhs) is not true,
+	  make sure that the lhs is a valid identifier before assigning the
+	  value
+
+arrayfunc.c
+	- valid_array_reference: allow blank subscripts. They are treated as
+ 	  `normal' keys for associative arrays and evaluate to 0 for indexed
+	  arrays. More of fix for report from Grisha Levit
+	  <grishalevit@gmail.com>

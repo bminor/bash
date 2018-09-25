@@ -3373,6 +3373,11 @@ bind_int_variable (lhs, rhs, flags)
       isarr = 1;
       v = array_variable_part (lhs, (flags & ASS_NOEXPAND) != 0, (char **)0, (int *)0);
     }
+  else if (legal_identifier (lhs) == 0)
+    {
+      sh_invalidid (lhs);
+      return ((SHELL_VAR *)NULL);      
+    }
   else
 #endif
     v = find_variable (lhs);

@@ -357,6 +357,9 @@ extern Keymap rl_get_keymap_by_name PARAMS((const char *));
 extern char *rl_get_keymap_name PARAMS((Keymap));
 extern void rl_set_keymap PARAMS((Keymap));
 extern Keymap rl_get_keymap PARAMS((void));
+
+extern int rl_set_keymap_name PARAMS((const char *, Keymap));
+
 /* Undocumented; used internally only. */
 extern void rl_set_keymap_from_edit_mode PARAMS((void));
 extern char *rl_get_keymap_name_from_edit_mode PARAMS((void));

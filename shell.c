@@ -1989,7 +1989,11 @@ show_shell_usage (fp, extra)
 
   for (i = 0, set_opts = 0; shell_builtins[i].name; i++)
     if (STREQ (shell_builtins[i].name, "set"))
-      set_opts = savestring (shell_builtins[i].short_doc);
+      {
+	set_opts = savestring (shell_builtins[i].short_doc);
+	break;
+      }
+
   if (set_opts)
     {
       s = strchr (set_opts, '[');

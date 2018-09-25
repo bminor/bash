@@ -5844,7 +5844,24 @@ process_substitute (string, open_for_read_in_child)
   set_sigint_handler ();
 
 #if defined (JOB_CONTROL)
+  /* make sure we don't have any job control */
   set_job_control (0);
+
+  /* The idea is that we want all the jobs we start from an async process
+     substitution to be in the same process group, but not the same pgrp
+     as our parent shell, since we don't want to affect our parent shell's
+     jobs if we get a SIGHUP and end up calling hangup_all_jobs, for example.
+     If pipeline_pgrp != shell_pgrp, we assume that there is a job control
+     shell somewhere in our parent process chain (since make_child initializes
+     pipeline_pgrp to shell_pgrp if job_control == 0). What we do in this
+     case is to set pipeline_pgrp to our PID, so all jobs started by this
+     process have that same pgrp and we are basically the process group leader.
+     This should not have negative effects on child processes surviving
+     after we exit, since we wait for the children we create, but that is
+     something to watch for. */
+
+  if (pipeline_pgrp != shell_pgrp)
+    pipeline_pgrp = getpid ();
 #endif /* JOB_CONTROL */
 
 #if !defined (HAVE_DEV_FD)
@@ -6914,6 +6931,7 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
 	{
 	  report_error (_("%s: invalid indirect expansion"), name);
 	  free (vname);
+	  free (t1);
 	  dispose_word (w);
 	  return &expand_wdesc_error;
 	}
@@ -6921,6 +6939,7 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
 	{
 	  report_error (_("%s: invalid variable name"), vname);
 	  free (vname);
+	  free (t1);
 	  dispose_word (w);
 	  return &expand_wdesc_error;
 	}
@@ -7523,8 +7542,9 @@ parameter_list_transform (xc, itype, quoted)
   if (list == 0)
     return ((char *)NULL);
   if (xc == 'A')
-    return (pos_params_assignment (list, itype, quoted));
-  ret = list_transform (xc, (SHELL_VAR *)0, list, itype, quoted);
+    ret = pos_params_assignment (list, itype, quoted);
+  else
+    ret = list_transform (xc, (SHELL_VAR *)0, list, itype, quoted);
   dispose_words (list);
   return (ret);
 }

@@ -720,6 +720,21 @@ Return the name matching @var{keymap}.  @var{name} is one which would
 be supplied in a @code{set keymap} inputrc line (@pxref{Readline Init File}).
 @end deftypefun
 
+@deftypefun void rl_set_keymap (const char *name, Keymap keymap)
+Set the name of @var{keymap}.  This name will then be "registered" and
+available for use in a @code{set keymap} inputrc directive
+@pxref{Readline Init File}).
+The @var{name} may not be one of Readline's builtin names;
+you may not add a different name for one of Readline's builtin keymaps.
+Readline will make a copy of @var{name}.
+You may replace the name associated with a given keymap by calling this
+function two or more times with the same @var{keymap} argument.
+You can associate a registered name with a new keymap by calling this
+function two or more times with the same @var{name} argument.
+There is no way to remove a named keymap once the name has been
+registered.
+@end deftypefun
+
 @node Binding Keys
 @subsection Binding Keys
 

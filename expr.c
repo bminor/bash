@@ -26,8 +26,8 @@
  order of decreasing precedence.
 
 	"id++", "id--"		[post-increment and post-decrement]
-	"++id", "--id"		[pre-increment and pre-decrement]
 	"-", "+"		[(unary operators)]
+	"++id", "--id"		[pre-increment and pre-decrement]
 	"!", "~"
 	"**"			[(exponentiation)]
 	"*", "/", "%"
@@ -1438,7 +1438,8 @@ readtok ()
 	    /* Could force parsing as preinc or predec and throw an error */
 #if 0
 	    {
-	      /* bash-5.0 */
+	      /* Posix says unary plus and minus have higher priority than
+		 preinc and predec. */
 	      /* This catches something like --4++ */
 	      if (c == '-')
 		evalerror ("--: assignment requires lvalue");

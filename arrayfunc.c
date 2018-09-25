@@ -283,7 +283,7 @@ assign_array_element (name, value, flags)
      int flags;
 {
   char *sub, *vname;
-  int sublen;
+  int sublen, isassoc;
   SHELL_VAR *entry;
 
   vname = array_variable_name (name, (flags & ASS_NOEXPAND) != 0, &sub, &sublen);
@@ -291,14 +291,16 @@ assign_array_element (name, value, flags)
   if (vname == 0)
     return ((SHELL_VAR *)NULL);
 
-  if ((ALL_ELEMENT_SUB (sub[0]) && sub[1] == ']') || (sublen <= 1))
+  entry = find_variable (vname);
+  isassoc = entry && assoc_p (entry);
+
+  if (((isassoc == 0 || (flags & ASS_NOEXPAND) == 0) && (ALL_ELEMENT_SUB (sub[0]) && sub[1] == ']')) || (sublen <= 1))
     {
       free (vname);
       err_badarraysub (name);
       return ((SHELL_VAR *)NULL);
     }
 
-  entry = find_variable (vname);
   entry = assign_array_element_internal (entry, name, vname, sub, sublen, value, flags);
 
   free (vname);
@@ -910,7 +912,7 @@ valid_array_reference (name, flags)
 	return 0;
       if (t[len+1] != '\0')
 	return 0;
-#if 1
+#if 0
       /* Could check and allow subscripts consisting only of whitespace for
 	 existing associative arrays. */
       for (r = 1; r < len; r++)
