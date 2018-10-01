@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue Aug  7 12:01:07 EDT 2018
+.\"	Last Change: Sat Sep 29 13:38:24 EDT 2018
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2018 August 7" "GNU Bash 5.0"
+.TH BASH 1 "2018 September 29" "GNU Bash 5.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -4409,11 +4409,11 @@ The levels are listed in order of decreasing precedence.
 .B \fIid\fP++ \fIid\fP\-\-
 variable post-increment and post-decrement
 .TP
-.B ++\fIid\fP \-\-\fIid\fP
-variable pre-increment and pre-decrement
-.TP
 .B \- +
 unary minus and plus
+.TP
+.B ++\fIid\fP \-\-\fIid\fP
+variable pre-increment and pre-decrement
 .TP
 .B ! ~
 logical and bitwise negation
@@ -9806,6 +9806,7 @@ command and, if necessary, updates the values of
 and
 .SM
 .BR COLUMNS .
+This option is enabled by default.
 .TP 8
 .B cmdhist
 If set,
@@ -10104,6 +10105,12 @@ embedded newlines rather than using semicolon separators where possible.
 If set, local variables inherit the value and attributes of a variable of
 the same name that exists at a previous scope before any new value is
 assigned.  The nameref attribute is not inherited.
+.TP 8
+.B localvar_unset
+If set, calling \fBunset\fP on local variables in previous function scopes
+marks them so subsequent lookups find them unset until that function
+returns. This is identical to the behavior of unsetting local variables
+at the current function scope.
 .TP 8
 .B login_shell
 The shell sets this option if it is started as a login shell (see

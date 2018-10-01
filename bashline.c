@@ -2988,7 +2988,7 @@ restore_tilde (val, directory_part)
      char *val, *directory_part;
 {
   int l, vl, dl2, xl;
-  char *dh2, *expdir, *ret;
+  char *dh2, *expdir, *ret, *v;
 
   vl = strlen (val);
 
@@ -3000,6 +3000,22 @@ restore_tilde (val, directory_part)
 
   expdir = bash_tilde_expand (directory_part, 0);
   xl = strlen (expdir);
+  if (*directory_part == '~' && STREQ (directory_part, expdir))
+    {
+      /* tilde expansion failed, so what should we return? we use what the
+	 user typed. */
+      v = mbschr (val, '/');
+      vl = STRLEN (v);
+      ret = (char *)xmalloc (xl + vl + 2);
+      strcpy (ret, directory_part);
+      if (v && *v)
+	strcpy (ret + xl, v);
+
+      free (dh2);
+      free (expdir);
+
+      return ret;
+    }
   free (expdir);
 
   /*
@@ -3010,6 +3026,11 @@ restore_tilde (val, directory_part)
      l = length of remainder after tilde-prefix
   */
   l = (vl - xl) + 1;
+  if (l <= 0)
+    {
+      free (dh2);
+      return (savestring (val));		/* XXX - just punt */
+    }
 
   ret = (char *)xmalloc (dl2 + 2 + l);
   strcpy (ret, dh2);

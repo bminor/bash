@@ -741,3 +741,18 @@ argv[2] = <b>
 argv[1] = <a>
 argv[2] = <b>
 argv[1] = <a+b>
+7
+./array27.sub: line 11: a[]]=7 : syntax error: invalid arithmetic operator (error token is "]=7 ")
+declare -A A=([$'\t']="2" [" "]="2" )
+./array27.sub: line 23: ((: A[]]=2 : syntax error: invalid arithmetic operator (error token is "]=2 ")
+declare -A A=([$'\t']="2" [" "]="2" ["*"]="2" ["@"]="2" )
+./array27.sub: line 32: A[]]: bad array subscript
+declare -A A=([$'\t']="X" [" "]="X" ["*"]="X" ["@"]="X" )
+./array27.sub: line 40: A[]]: bad array subscript
+declare -A A=([$'\t']="X" [" "]="X" ["*"]="X" ["@"]="X" )
+./array27.sub: line 48: declare: `A[]]=X': not a valid identifier
+declare -A A=(["*"]="X" ["@"]="X" )
+./array27.sub: line 56: declare: `A[]]=X': not a valid identifier
+./array27.sub: line 56: A[*]: bad array subscript
+./array27.sub: line 56: A[@]: bad array subscript
+declare -A A

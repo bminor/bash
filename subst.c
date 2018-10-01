@@ -1816,6 +1816,9 @@ skip_matched_pair (string, start, open, close, flags)
 }
 
 #if defined (ARRAY_VARS)
+/* Flags has 1 as a reserved value, since skip_matched_pair uses it for
+   skipping over quoted strings and taking the first instance of the
+   closing character. */
 int
 skipsubscript (string, start, flags)
      const char *string;

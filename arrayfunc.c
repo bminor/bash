@@ -890,31 +890,38 @@ print_assoc_assignment (var, quoted)
 /***********************************************************************/
 
 /* Return 1 if NAME is a properly-formed array reference v[sub]. */
+
+/* We need to reserve 1 for FLAGS, which we pass to skipsubscript. */
 int
 valid_array_reference (name, flags)
      const char *name;
      int flags;
 {
   char *t;
-  int r, len;
+  int r, len, isassoc;
+  SHELL_VAR *entry;
 
   t = mbschr (name, '[');	/* ] */
   if (t)
     {
       *t = '\0';
       r = legal_identifier (name);
+      isassoc = (entry = find_variable (name)) && assoc_p (entry);      
       *t = '[';
       if (r == 0)
 	return 0;
-      /* Check for a properly-terminated non-null subscript. */
-      len = skipsubscript (t, 0, flags);
-      if (t[len] != ']' || len == 1)
+
+      if (isassoc && ((flags & (VA_NOEXPAND|VA_ONEWORD)) == (VA_NOEXPAND|VA_ONEWORD)))
+	len = strlen (t) - 1;
+      else
+	/* Check for a properly-terminated non-null subscript. */
+	len = skipsubscript (t, 0, flags&VA_NOEXPAND);	/* VA_NOEXPAND must be 1 */
+      if (t[len] != ']' || len == 1 || t[len+1] != '\0')
 	return 0;
-      if (t[len+1] != '\0')
-	return 0;
+
 #if 0
       /* Could check and allow subscripts consisting only of whitespace for
-	 existing associative arrays. */
+	 existing associative arrays, using isassoc */
       for (r = 1; r < len; r++)
 	if (whitespace (t[r]) == 0)
 	  return 1;

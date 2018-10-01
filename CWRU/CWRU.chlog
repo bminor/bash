@@ -4443,3 +4443,52 @@ arrayfunc.c
  	  `normal' keys for associative arrays and evaluate to 0 for indexed
 	  arrays. More of fix for report from Grisha Levit
 	  <grishalevit@gmail.com>
+
+				   9/24
+				   ----
+bashline.c
+	- restore_tilde: if the expanded length (xl) is longer than vl
+	  we end up requesting a negative amount of memory (an extremely
+	  large unsigned number). Just punt and return val in this case.
+	  Fuzzing bug reported by Eduardo Bustamante <dualbus@gmail.com>
+	- restore_tilde: make sure we return what the user typed if tilde
+	  expansion fails
+
+				   9/29
+				   ----
+builtins/shopt.def
+	- uncomment `localvar_unset' option definition
+
+doc/{bash.1,bashref.texi}
+	- document `localvar_unset' shell option
+
+arrayfunc.c
+	- valid_array_reference: if we are parsing a subscript for an existing
+	  associative array, the `assoc_expand_once' option is set, and the
+	  VA_ONEWORD flag is set in FLAGS (meaning there should be nothing
+	  following the closing `]'), don't call skipsubscript to find the
+	  closing `]', use one that is at the end of the word. Part of fix for
+	  issue reported by Grisha Levit <grishalevit@gmail.com>
+
+builtins/{printf,set}.def
+	- pass VA_ONEWORD as part of flags value everywhere valid_array_reference
+	  is used
+
+config-top.h
+	- CHECKWINSIZE_DEFAULT: now 1, so check_window_size is on by default
+	- HISTEXPAND_DEFAULT: new define, allows builder to enable or disable
+	  history expansion by default at build time
+
+doc/{bash.1,bashref.texi}
+	- checkwinsize: document new default value
+
+bashhist.h
+	- HISTEXPAND_DEFAULT: don't define if it's already defined. Strict
+	  POSIX mode continues to default to off
+
+				   9/30
+				   ----
+lib/readline/input.c
+	- win32_isatty: win32-specific changes from GDB. Patch submitted by
+	  Tom Tromey <tom@tromey.com>, originally from Eli Zaretskii
+	  <eliz@gnu.org>

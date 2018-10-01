@@ -2873,14 +2873,14 @@ space_to_eol (int count)
 void
 _rl_clear_screen (void)
 {
-#ifndef __DJGPP__
+#if defined (__DJGPP__)
+  ScreenClear ();
+  ScreenSetCursor (0, 0);
+#else
   if (_rl_term_clrpag)
     tputs (_rl_term_clrpag, 1, _rl_output_character_function);
   else
     rl_crlf ();
-#else
-  ScreenClear ();
-  ScreenSetCursor (0, 0);
 #endif /* __DJGPP__ */
 }
 

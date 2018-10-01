@@ -1,7 +1,7 @@
 This file is shopt.def, from which is created shopt.c.
 It implements the Bash `shopt' builtin.
 
-Copyright (C) 1994-2016 Free Software Foundation, Inc.
+Copyright (C) 1994-2018 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -220,9 +220,7 @@ static struct {
   { "lithist", &literal_history, (shopt_set_func_t *)NULL },
 #endif
   { "localvar_inherit", &localvar_inherit, (shopt_set_func_t *)NULL },
-#if 0 /* bash-5.0-beta */
   { "localvar_unset", &localvar_unset, (shopt_set_func_t *)NULL },
-#endif
   { "login_shell", &shopt_login_shell, set_login_shell },
   { "mailwarn", &mail_warning, (shopt_set_func_t *)NULL },
 #if defined (READLINE)

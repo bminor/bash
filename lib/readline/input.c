@@ -102,15 +102,29 @@ static int rl_gather_tyi PARAMS((void));
 /* Windows isatty returns true for every character device, including the null
    device, so we need to perform additional checks. */
 #if defined (_WIN32) && !defined (__CYGWIN__)
-#include <conio.h>
 #include <io.h>
+#include <conio.h>
 #define WIN32_LEAN_AND_MEAN 1
 #include <windows.h>
 
 int
 win32_isatty (int fd)
 {
-  return (_isatty (fd) ? ((((long) (HANDLE) _get_osfhandle (fd)) & 3) == 3) : 0);
+  if (_isatty(fd))
+    {
+      HANDLE h;
+      DWORD ignored;
+
+      if ((h = (HANDLE) _get_osfhandle (fd)) == INVALID_HANDLE_VALUE)
+	{
+	  errno = EBADF;
+	  return 0;
+	}
+      if (GetConsoleMode (h, &ignored) != 0)
+	return 1;
+    }
+  errno = ENOTTY;
+  return 0;
 }
 
 #define isatty(x)	win32_isatty(x)

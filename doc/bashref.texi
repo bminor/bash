@@ -5171,6 +5171,7 @@ The shell always postpones exiting if any jobs are stopped.
 If set, Bash checks the window size after each external (non-builtin)
 command and, if necessary, updates the values of    
 @env{LINES} and @env{COLUMNS}.
+This option is enabled by default.
 
 @item cmdhist
 If set, Bash
@@ -5408,6 +5409,12 @@ embedded newlines rather than using semicolon separators where possible.
 If set, local variables inherit the value and attributes of a variable of
 the same name that exists at a previous scope before any new value is
 assigned.  The @var{nameref} attribute is not inherited.
+
+@item localvar_unset
+If set, calling @code{unset} on local variables in previous function scopes
+marks them so subsequent lookups find them unset until that function
+returns. This is identical to the behavior of unsetting local variables
+at the current function scope.
 
 @item login_shell
 The shell sets this option if it is started as a login shell

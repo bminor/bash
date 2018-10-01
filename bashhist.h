@@ -31,9 +31,12 @@
 #define HC_IGNBOTH	(HC_IGNSPACE|HC_IGNDUPS)
 
 #if defined (STRICT_POSIX)
+#  undef HISTEXPAND_DEFAULT
 #  define HISTEXPAND_DEFAULT	0
 #else
-#  define HISTEXPAND_DEFAULT	1
+#  if !defined (HISTEXPAND_DEFAULT)
+#    define HISTEXPAND_DEFAULT	1
+#  endif /* !HISTEXPAND_DEFAULT */
 #endif
 
 extern int remember_on_history;
