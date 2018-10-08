@@ -1603,7 +1603,6 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
 	}
 
 #if defined (ARRAY_VARS)
-      /* XXX - bash-5.0 */
       if (c == LBRACK && dolbrace_state == DOLBRACE_PARAM)
 	{
 	  si = skipsubscript (string, i, 0);
@@ -2625,7 +2624,8 @@ string_list_dollar_at (list, quoted, flags)
 #  if !defined (__GNUC__)
   sep = (char *)xmalloc (MB_CUR_MAX + 1);
 #  endif /* !__GNUC__ */
-  /* XXX - bash-4.4/bash-5.0 testing PF_ASSIGNRHS */
+  /* XXX - testing PF_ASSIGNRHS to make sure positional parameters are
+     separated with a space even when word splitting will not occur. */
   if (flags & PF_ASSIGNRHS)
     {
       sep[0] = ' ';
@@ -2650,7 +2650,8 @@ string_list_dollar_at (list, quoted, flags)
       sep[1] = '\0';
     }
 #else	/* !HANDLE_MULTIBYTE */
-  /* XXX - bash-4.4/bash-5.0 test PF_ASSIGNRHS */
+  /* XXX - PF_ASSIGNRHS means no word splitting, so we want positional
+     parameters separated by a space. */
   sep[0] = ((flags & PF_ASSIGNRHS) || ifs == 0 || *ifs == 0) ? ' ' : *ifs;
   sep[1] = '\0';
 #endif	/* !HANDLE_MULTIBYTE */
@@ -6581,7 +6582,6 @@ expand_arrayref:
 	    {
 	      /* Only treat as double quoted if array variable */
 	      if (var && (array_p (var) || assoc_p (var)))
-	        /* XXX - bash-4.4/bash-5.0 pass AV_ASSIGNRHS */
 		temp = array_value (name, quoted|Q_DOUBLE_QUOTES, AV_ASSIGNRHS, &atype, &ind);
 	      else		
 		temp = array_value (name, quoted, 0, &atype, &ind);
@@ -7228,7 +7228,7 @@ verify_substring_values (v, value, substr, vtype, e1p, e2p)
 #if 1
       if ((vtype == VT_ARRAYVAR || vtype == VT_POSPARMS) && *e2p < 0)
 #else
-      /* XXX - bash-5.0 */
+      /* XXX - TAG: bash-5.1 */
       if (vtype == VT_ARRAYVAR && *e2p < 0)
 #endif
 	{
@@ -7630,6 +7630,11 @@ parameter_brace_transform (varname, value, ind, xform, rtype, quoted, pflags, fl
       this_command_name = oname;
       return &expand_param_error;
     }
+
+  /* If we are asked to display the attributes of an unset variable, V will
+     be NULL after the call to get_var_and_type. Double-check here. */
+  if (xc == 'a' && vtype == VT_VARIABLE && varname && v == 0)
+    v = find_variable (varname);
 
   temp1 = (char *)NULL;		/* shut up gcc */
   switch (vtype & ~VT_STARSUB)
@@ -9753,8 +9758,7 @@ add_string:
 	case '<':
 	case '>':
 	  {
-	    /* bash-4.4/bash-5.0
-	       XXX - technically this should only be expanded at the start
+	       /* XXX - technically this should only be expanded at the start
 	       of a word */
 	    if (string[++sindex] != LPAREN || (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (word->flags & (W_DQUOTE|W_NOPROCSUB)) || posixly_correct)
 	      {
@@ -9813,7 +9817,6 @@ add_string:
 	    word->flags |= W_ITILDE;
 #endif
 
-	  /* XXX - bash-4.4/bash-5.0 */
 	  if (word->flags & W_ASSIGNARG)
 	    word->flags |= W_ASSIGNRHS;		/* affects $@ */
 
@@ -10070,9 +10073,8 @@ add_twochars:
 	      tword = alloc_word_desc ();
 	      tword->word = temp;
 
-	      /* XXX - bash-4.4/bash-5.0 */
 	      if (word->flags & W_ASSIGNARG)
-		tword->flags |= word->flags & (W_ASSIGNARG|W_ASSIGNRHS);	/* affects $@ */
+		tword->flags |= word->flags & (W_ASSIGNARG|W_ASSIGNRHS); /* affects $@ */
 	      if (word->flags & W_COMPLETE)
 		tword->flags |= W_COMPLETE;	/* for command substitutions */
 	      if (word->flags & W_NOCOMSUB)

@@ -282,7 +282,7 @@ int line_number_for_err_trap;
 int funcnest = 0;
 int funcnest_max = 0;
 
-int evalnest = 0;		/* bash-4.4/bash-5.0 */
+int evalnest = 0;
 int evalnest_max = EVALNEST_MAX;
 
 int sourcenest = 0;
@@ -1605,7 +1605,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
     async_redirect_stdin ();
 
 #if 0
-  /* bash-5.0 */
+  /* XXX - TAG: bash-5.1 */
   if (user_subshell && command->type == cm_subshell)
     optimize_subshell_command (command->value.Subshell->command);
 #endif
@@ -2353,10 +2353,9 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
 
   invert = (command->flags & CMD_INVERT_RETURN) != 0;
 
-  /* XXX - expand coproc name without splitting -- bash-5.0 */
-  /* could make this dependent on a shopt option */
+  /* expand name without splitting - could make this dependent on a shopt option */
   name = expand_string_unsplit_to_string (command->value.Coproc->name, 0);
-  /* Optional check -- bash-5.0. */
+  /* Optional check -- could be relaxed */
   if (legal_identifier (name) == 0)
     {
       internal_error (_("`%s': not a valid identifier"), name);
@@ -2399,7 +2398,6 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
   close (rpipe[1]);
   close (wpipe[0]);
 
-  /* XXX - run Coproc->name through word expansion above -- bash-5.0 */
   cp = coproc_alloc (command->value.Coproc->name, coproc_pid);
   cp->c_rfd = rpipe[0];
   cp->c_wfd = wpipe[1];

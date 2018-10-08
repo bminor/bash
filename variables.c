@@ -303,7 +303,10 @@ static int n_shell_variables __P((void));
 static int set_context __P((SHELL_VAR *));
 
 static void push_func_var __P((PTR_T));
+static void push_builtin_var __P((PTR_T));
 static void push_exported_var __P((PTR_T));
+
+static inline void push_posix_tempvar_internal __P((SHELL_VAR *, int));
 
 static inline int find_special_var __P((const char *));
 
@@ -2059,7 +2062,7 @@ find_variable_nameref (v)
 	{
 	  internal_warning (_("%s: circular name reference"), orig->name);
 #if 1
-	  /* XXX - provisional change - bash-5.0 - circular refs go to
+	  /* XXX - provisional change - circular refs go to
 	     global scope for resolution, without namerefs. */
 	  if (variable_context && v->context)
 	    return (find_global_variable_noref (v->name));
@@ -4543,9 +4546,6 @@ dispose_temporary_env (pushf)
 
   array_needs_making = 1;
 
-#if 0
-  sv_ifs ("IFS");		/* XXX here for now -- check setifs in assign_in_env */  
-#endif
   for (i = 0; i < tvlist_ind; i++)
     stupidly_hack_special_variables (tempvar_list[i]);
 
@@ -5078,7 +5078,11 @@ push_var_context (name, flags, tempvars)
      functions no longer behave like assignment statements preceding
      special builtins, and do not persist in the current shell environment.
      This is austin group interp #654, though nobody implements it yet. */
+#if 0	/* XXX - TAG: bash-5.1 */
+  posix_func_behavior = 0;
+#else
   posix_func_behavior = posixly_correct;
+#endif
 
   vc = new_var_context (name, flags);
   /* Posix interp 1009, temporary assignments preceding function calls modify
@@ -5101,27 +5105,33 @@ push_var_context (name, flags, tempvars)
 
 /* This can be called from one of two code paths:
 	1. pop_scope, which implements the posix rules for propagating variable
-	   assignments preceding special builtins to the surrounding scope.
+	   assignments preceding special builtins to the surrounding scope
+	   (push_builtin_var);
 	2. pop_var_context, which is called from pop_context and implements the
 	   posix rules for propagating variable assignments preceding function
-	   calls to the surrounding scope.
+	   calls to the surrounding scope (push_func_var).
 
   It takes variables out of a temporary environment hash table. We take the
   variable in data.
 */
-static void
-push_func_var (data)
-     PTR_T data;
+
+static inline void
+push_posix_tempvar_internal (var, isbltin)
+     SHELL_VAR *var;
+     int isbltin;
 {
-  SHELL_VAR *var, *v;
+  SHELL_VAR *v;
   int posix_var_behavior;
 
-  var = (SHELL_VAR *)data;
   /* As of IEEE Std 1003.1-2017, assignment statements preceding shell
      functions no longer behave like assignment statements preceding
      special builtins, and do not persist in the current shell environment.
      This is austin group interp #654, though nobody implements it yet. */
-  posix_var_behavior = posixly_correct;  
+#if 0	/* XXX - TAG: bash-5.1 */
+  posix_var_behavior = posixly_correct && isbltin;
+#else
+  posix_var_behavior = posixly_correct;
+#endif
 
   if (local_p (var) && STREQ (var->name, "-"))
     set_current_options (value_cell (var));
@@ -5157,6 +5167,26 @@ push_func_var (data)
     stupidly_hack_special_variables (var->name);	/* XXX */
 
   dispose_variable (var);
+}
+
+static void
+push_func_var (data)
+     PTR_T data;
+{
+  SHELL_VAR *var;
+
+  var = (SHELL_VAR *)data;
+  push_posix_tempvar_internal (var, 0);
+}
+
+static void
+push_builtin_var (data)
+     PTR_T data;
+{
+  SHELL_VAR *var;
+
+  var = (SHELL_VAR *)data;
+  push_posix_tempvar_internal (var, 1);
 }
 
 /* Pop the top context off of VCXT and dispose of it, returning the rest of
@@ -5251,7 +5281,7 @@ push_exported_var (data)
    special builtin (if IS_SPECIAL != 0) or exported variables that are the
    result of a builtin like `source' or `command' that can operate on the
    variables in its temporary environment. In the first case, we call
-   push_func_var, which does the right thing (for now) */
+   push_builtin_var, which does the right thing. */
 void
 pop_scope (is_special)
      int is_special;
@@ -5279,7 +5309,7 @@ pop_scope (is_special)
   if (vcxt->table)
     {
       if (is_special)
-	hash_flush (vcxt->table, push_func_var);
+	hash_flush (vcxt->table, push_builtin_var);
       else
 	hash_flush (vcxt->table, push_exported_var);
       hash_dispose (vcxt->table);

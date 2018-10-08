@@ -902,11 +902,13 @@ valid_array_reference (name, flags)
   SHELL_VAR *entry;
 
   t = mbschr (name, '[');	/* ] */
+  isassoc = 0;
   if (t)
     {
       *t = '\0';
       r = legal_identifier (name);
-      isassoc = (entry = find_variable (name)) && assoc_p (entry);      
+      if (flags & VA_NOEXPAND)	/* Don't waste a lookup if we don't need one */
+	isassoc = (entry = find_variable (name)) && assoc_p (entry);      
       *t = '[';
       if (r == 0)
 	return 0;
@@ -949,7 +951,7 @@ array_expand_index (var, s, len, flags)
   exp = (char *)xmalloc (len);
   strncpy (exp, s, len - 1);
   exp[len - 1] = '\0';
-#if 0	/* XXX - not yet -- maybe bash-5.0 */
+#if 0	/* XXX - not yet -- maybe bash-5.1 */
   if ((flags & AV_NOEXPAND) == 0)
     t = expand_arith_string (exp, Q_DOUBLE_QUOTES|Q_ARITH|Q_ARRAYSUB);	/* XXX - Q_ARRAYSUB for future use */
   else
@@ -1126,7 +1128,6 @@ array_value_internal (s, quoted, flags, rtype, indp)
 	  free (temp);
 	}
       else	/* ${name[@]} or unquoted ${name[*]} */
-        /* XXX - bash-4.4/bash-5.0 test AV_ASSIGNRHS and pass PF_ASSIGNRHS */
 	retval = string_list_dollar_at (l, quoted, (flags & AV_ASSIGNRHS) ? PF_ASSIGNRHS : 0);
 
       dispose_words (l);

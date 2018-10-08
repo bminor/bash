@@ -328,6 +328,9 @@ int
 _rl_isearch_dispatch (_rl_search_cxt *cxt, int c)
 {
   int n, wstart, wlen, limit, cval, incr;
+  char *paste;
+  size_t pastelen;
+  int j;
   rl_command_func_t *f;
 
   f = (rl_command_func_t *)NULL;
@@ -398,6 +401,8 @@ add_character:
 	cxt->lastc = -5;
       else if (c == CTRL ('Y') || f == rl_yank)	/* XXX */
 	cxt->lastc = -6;
+      else if (f == rl_bracketed_paste_begin)
+	cxt->lastc = -7;
     }
 
   /* If we changed the keymap earlier while translating a key sequence into
@@ -618,6 +623,23 @@ add_character:
       for (n = wstart; n < rl_end; n++)
 	cxt->search_string[cxt->search_string_index++] = rl_line_buffer[n];
       cxt->search_string[cxt->search_string_index] = '\0';
+      break;
+
+    case -7:	/* bracketed paste */
+      paste = _rl_bracketed_text (&pastelen);
+      if (paste == 0 || *paste == 0)
+	{
+	  free (paste);
+	  break;
+	}
+      if (cxt->search_string_index + pastelen + 1 >= cxt->search_string_size)
+	{
+	  cxt->search_string_size += pastelen + 2;
+	  cxt->search_string = (char *)xrealloc (cxt->search_string, cxt->search_string_size);
+	}
+      strcpy (cxt->search_string + cxt->search_string_index, paste);
+      cxt->search_string_index += pastelen;
+      free (paste);
       break;
 
     /* Add character to search string and continue search. */

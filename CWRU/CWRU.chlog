@@ -4492,3 +4492,61 @@ lib/readline/input.c
 	- win32_isatty: win32-specific changes from GDB. Patch submitted by
 	  Tom Tromey <tom@tromey.com>, originally from Eli Zaretskii
 	  <eliz@gnu.org>
+
+				   10/1
+				   ----
+lib/readline/vi_mode.c
+	- rl_vi_start_inserting: start an undo group so we can grab the text
+	  inserted here as a single unit, avoiding any insert coalescing
+	  performed by rl_insert_text. Report and fix from Richard Todd
+	  <richard.w.todd@outlook.com>
+
+				   10/3
+				   ----
+subst.c
+	- parameter_brace_transform: if we're asked to display the attributes
+	  of an unset variable, check that the variable exists even if
+	  get_var_and_type returns NULL (it checks invisible_p). Requested by
+	  Michal Pesa <pesathem@gmail.com>
+
+lib/readline/kill.c
+	- _rl_bracketed_text: new function, collects the text pasted in
+	  bracketed paste mode and consumes the bracketed paste end marker;
+	  returns the pasted text and its length
+	- rl_bracketed_paste_begin: call _rl_bracketed_text to collect the
+	  text
+
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: set cxt->lastc to -7 if the input resolves to
+	  rl_bracketed_paste_begin
+	- _rl_isearch_dispatch: if cxt->lastc == -7, call _rl_bracketed_text
+	  to collect the pasted text and add it to the accumulating search
+	  string. Only works if ESC is not one of the isearch terminators.
+	  Fixes issue reported in Debian bug report 891780,
+	  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=891780
+
+				   10/5
+				   ----
+variables.c
+	- push_posix_tempvar_internal: new function, body of push_func_var
+	  with additional argument saying whether it's being called from a
+	  function or (special) builtin code path
+	- push_builtin_var: new function, calls push_posix_tempvar_internal
+	  with second argument indicating builtin code path
+	- push_func_var: now a stub that calls push_posix_tempvar_internal
+	  with second argument indicating function code path
+	- pop_scope: if called from a special builtin, call push_builtin_var
+	  instead of push_func_var to do the right variable propagation
+
+builtins/shopt.def
+	- progcomp_alias: uncomment, make available to users
+
+doc/{bash.1,bashref.texi},lib/readline/doc/rluser.texi
+	- progcomp_alias: document shopt option, describe its use in
+	  the section on programmable completion
+
+trap.c
+	- decode_signal: handle SIGRTMIN+n at runtime, with the `SIG' prefix
+	  or without, case-insensitively if requested, and return SIGRTMIN+n.
+	  These values could be different than what was available at compile
+	  time. Report and patch from Rasmus Villemoes <rv@rasumsvillemoes.dk>

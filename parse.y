@@ -3033,7 +3033,7 @@ special_case_tokens (tokstr)
       return (IN);
     }
 
-  /* bash-5.0: leaving above code intact for now, but it should eventually be
+  /* XXX - leaving above code intact for now, but it should eventually be
      removed in favor of this clause. */
   /* Posix grammar rule 6 */
   if (expecting_in_token && (last_read_token == WORD || last_read_token == '\n') &&

@@ -1851,6 +1851,9 @@ If no compspec is found for the full pathname, an attempt is made to
 find a compspec for the portion following the final slash.
 If those searches do not result in a compspec, any compspec defined with
 the @option{-D} option to @code{complete} is used as the default.
+If there is no default compspec, Bash attempts alias expansion
+on the command word as a final resort, and attempts to find a compspec
+for the command word from any successful expansion 
 
 Once a compspec has been found, it is used to generate the list of
 matching words.

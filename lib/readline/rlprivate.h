@@ -309,6 +309,8 @@ extern int _rl_search_getchar PARAMS((_rl_search_cxt *));
 #define BRACK_PASTE_INIT	"\033[?2004h"
 #define BRACK_PASTE_FINI	"\033[?2004l\r"
 
+extern char *_rl_bracketed_text PARAMS((size_t *));
+
 /* macro.c */
 extern void _rl_with_macro_input PARAMS((char *));
 extern int _rl_peek_macro_key PARAMS((void));

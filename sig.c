@@ -761,7 +761,6 @@ set_signal_handler (sig, handler)
   if (sig == SIGCHLD)
     act.sa_flags |= SA_RESTART;		/* XXX */
 #endif
-  /* XXX - bash-5.0 */
   /* Let's see if we can keep SIGWINCH from interrupting interruptible system
      calls, like open(2)/read(2)/write(2) */
 #if defined (SIGWINCH)

@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Sat Sep 29 13:38:24 EDT 2018
+.\"	Last Change: Fri Oct  5 14:53:12 EDT 2018
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2018 September 29" "GNU Bash 5.0"
+.TH BASH 1 "2018 October 5" "GNU Bash 5.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -6710,6 +6710,9 @@ If no compspec is found for the full pathname, an attempt is made to
 find a compspec for the portion following the final slash.
 If those searches do not result in a compspec, any compspec defined with
 the \fB\-D\fP option to \fBcomplete\fP is used as the default.
+If there is no default compspec, \fBbash\fP attempts alias expansion
+on the command word as a final resort, and attempts to find a compspec
+for the command word from any successful expansion.
 .PP
 Once a compspec has been found, it is used to generate the list of
 matching words.
@@ -10164,6 +10167,12 @@ to expand to a null string, rather than themselves.
 If set, the programmable completion facilities (see
 \fBProgrammable Completion\fP above) are enabled.
 This option is enabled by default.
+.TP 8
+.B progcomp_alias
+If set, and programmable completion is enabled, \fBbash\fP treats a command
+name that doesn't have any completions as a possible alias and attempts
+alias expansion. If it has an alias, \fBbash\fP attempts programmable
+completion using the command word resulting from the expanded alias.
 .TP 8
 .B promptvars
 If set, prompt strings undergo

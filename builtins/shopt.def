@@ -231,7 +231,7 @@ static struct {
   { "nullglob",	&allow_null_glob_expansion, (shopt_set_func_t *)NULL },
 #if defined (PROGRAMMABLE_COMPLETION)
   { "progcomp", &prog_completion_enabled, (shopt_set_func_t *)NULL },
-#  if 0	/* bash-5.0-beta */
+#  if defined (ALIAS)
   { "progcomp_alias", &progcomp_alias, (shopt_set_func_t *)NULL },
 #  endif
 #endif
