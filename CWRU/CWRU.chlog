@@ -4550,3 +4550,23 @@ trap.c
 	  or without, case-insensitively if requested, and return SIGRTMIN+n.
 	  These values could be different than what was available at compile
 	  time. Report and patch from Rasmus Villemoes <rv@rasumsvillemoes.dk>
+
+				   10/8
+				   ----
+execute_cmd.c
+	- execute_command_internal: only set line_number from command->value.Subshell
+	  if the type == cm_subshell; otherwise defer and set later
+
+				   10/10
+				   -----
+examples/loadables/seq.c
+	- seq: new loadable builtin, derived originally from coreutils:seq.c
+	  but with very little of that code remaining
+
+				   10/12
+				   -----
+trap.c
+	- run_pending_traps,_run_trap_internal: honor evalnest_max and
+	  increment/decrement evalnest accordingly, since trap actions
+	  are processed as if run by `eval'. Feature suggsted by Mike
+	  Gerwitz <mtg@gnu.org>

@@ -624,7 +624,9 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
       /* Fork a subshell, turn off the subshell bit, turn off job
 	 control and call execute_command () on the command again. */
-      line_number_for_err_trap = line_number = command->value.Subshell->line;	/* XXX - save value? */
+      if (command->type == cm_subshell)
+	line_number_for_err_trap = line_number = command->value.Subshell->line;	/* XXX - save value? */
+	/* Otherwise we defer setting line_number */
       tcmd = make_command_string (command);
       paren_pid = make_child (p = savestring (tcmd), asynchronous);
 

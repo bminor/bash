@@ -17,14 +17,14 @@ f
 typeset -f f
 
 # make sure it was closed
-read -u 5 foo
+read -u 5 foo 2>&1 | grep -q 'invalid file descriptor' 
 echo after read
 
 exec 5<&0
 
 exec <&-
 
-read abcde
+read abcde 2>&1 | grep -q 'read error'
 
 exec 0<&9-
 read line
