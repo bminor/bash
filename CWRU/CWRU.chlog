@@ -4570,3 +4570,20 @@ trap.c
 	  increment/decrement evalnest accordingly, since trap actions
 	  are processed as if run by `eval'. Feature suggsted by Mike
 	  Gerwitz <mtg@gnu.org>
+
+				   10/16
+				   -----
+expr.c
+	- expr_skipsubscript: new function, calls skipsubscript with flags
+	  similar to arrayfunc.c:valid_array_subscript if assoc_expand_once
+	  is set and it looks like we've already expanded the subscript of
+	  an associative array. Reported back on 8/27 by Grisha Levit
+	  <grishalevit@gmail.com>
+	- readtok: call expr_skipsubscript instead of skipsubscript
+
+arrayfunc.c
+	- valid_array_reference: call skipsubscript with a third arg computed
+	  from the VA_NOEXPAND flag only if we're expanding an associative
+	  array subscript -- we already figure out whether or not we are
+
+[bumped release status to beta2]

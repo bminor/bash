@@ -315,7 +315,7 @@ run_pending_traps ()
 #endif
       /* could check for running the trap handler for the same signal here
 	 (running_trap == sig+1) */
-      if (evalnest_max && evalnest > evalnest_max)
+      if (evalnest_max > 0 && evalnest > evalnest_max)
 	{
 	  internal_error (_("trap handler: maximum trap handler level exceeded (%d)"), evalnest_max);
 	  evalnest = 0;

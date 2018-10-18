@@ -340,6 +340,27 @@ expr_bind_variable (lhs, rhs)
 }
 
 #if defined (ARRAY_VARS)
+/* This is similar to the logic in arrayfunc.c:valid_array_subscript when
+   you pass VA_NOEXPAND. */
+static char *
+expr_skipsubscript (vp, cp)
+     char *vp, *cp;
+{
+  int flags, isassoc;
+  SHELL_VAR *entry;
+
+  isassoc = 0;
+  entry = 0;
+  if (assoc_expand_once & already_expanded)
+    {
+      *cp = '\0';
+      isassoc = legal_identifier (vp) && (entry = find_variable (vp)) && assoc_p (entry);
+      *cp = '[';	/* ] */
+    }
+  flags = (isassoc && assoc_expand_once && already_expanded) ? VA_NOEXPAND : 0;
+  return (skipsubscript (cp, 0, flags));
+}
+
 /* Rewrite tok, which is of the form vname[expression], to vname[ind], where
    IND is the already-calculated value of expression. */
 static void
@@ -1316,7 +1337,7 @@ readtok ()
 #if defined (ARRAY_VARS)
       if (c == '[')
 	{
-	  e = skipsubscript (cp, 0, 1);		/* XXX - arg 3 was 0 */
+	  e = expr_skipsubscript (tp, cp);		/* XXX - was skipsubscript */
 	  if (cp[e] == ']')
 	    {
 	      cp += e + 1;

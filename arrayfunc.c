@@ -779,7 +779,7 @@ unbind_array_element (var, sub, flags)
   char *akey;
   ARRAY_ELEMENT *ae;
 
-  len = skipsubscript (sub, 0, (flags&1) || (var && assoc_p(var)));
+  len = skipsubscript (sub, 0, (flags&1) || (var && assoc_p(var)));	/* XXX */
   if (sub[len] != ']' || len == 0)
     {
       builtin_error ("%s[%s: %s", var->name, sub, _(bash_badsub_errmsg));
@@ -915,9 +915,12 @@ valid_array_reference (name, flags)
 
       if (isassoc && ((flags & (VA_NOEXPAND|VA_ONEWORD)) == (VA_NOEXPAND|VA_ONEWORD)))
 	len = strlen (t) - 1;
+      else if (isassoc)
+	len = skipsubscript (t, 0, flags&VA_NOEXPAND);	/* VA_NOEXPAND must be 1 */
       else
 	/* Check for a properly-terminated non-null subscript. */
-	len = skipsubscript (t, 0, flags&VA_NOEXPAND);	/* VA_NOEXPAND must be 1 */
+	len = skipsubscript (t, 0, 0);		/* arithmetic expression */
+
       if (t[len] != ']' || len == 1 || t[len+1] != '\0')
 	return 0;
 
