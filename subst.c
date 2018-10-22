@@ -4276,6 +4276,21 @@ quote_list (list)
   return list;
 }
 
+WORD_DESC *
+dequote_word (word)
+     WORD_DESC *word;
+{
+  register char *s;
+
+  s = dequote_string (word->word);
+  if (QUOTED_NULL (word->word))
+    word->flags &= ~W_HASQUOTEDNULL;
+  free (word->word);
+  word->word = s;
+
+  return word;
+}
+
 /* De-quote quoted characters in each word in LIST. */
 WORD_LIST *
 dequote_list (list)
@@ -6821,6 +6836,7 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
   WORD_LIST *l;
   char *t, *t1, *temp, *vname;
   int l_hasdollat, sindex;
+  SHELL_VAR *v;
 
 /*itrace("parameter_brace_expand_rhs: %s:%s pflags = %d", name, value, pflags);*/
   /* If the entire expression is between double quotes, we want to treat
@@ -6950,10 +6966,26 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
     
 #if defined (ARRAY_VARS)
   if (valid_array_reference (vname, 0))
-    assign_array_element (vname, t1, 0);
+    v = assign_array_element (vname, t1, 0);
   else
 #endif /* ARRAY_VARS */
-  bind_variable (vname, t1, 0);
+  v = bind_variable (vname, t1, 0);
+
+  if (v == 0 || readonly_p (v) || noassign_p (v))	/* expansion error  */
+    {
+      if ((v == 0 || readonly_p (v)) && interactive_shell == 0 && posixly_correct)
+	{
+	  last_command_exit_value = EXECUTION_FAILURE;
+	  exp_jump_to_top_level (FORCE_EOF);
+	}
+      else
+	{
+	  if (vname != name)
+	    free (vname);
+	  last_command_exit_value = EX_BADUSAGE;
+	  exp_jump_to_top_level (DISCARD);
+	}
+    }
 
   stupidly_hack_special_variables (vname);
 
@@ -9244,7 +9276,11 @@ param_expand (string, sindex, quoted, expanded_something,
 	      temp = string_list_dollar_at (list, quoted, 0);
 	      /* Set W_SPLITSPACE to make sure the individual positional
 		 parameters are split into separate arguments */
+#if 0
 	      if (quoted == 0 && (ifs_is_set == 0 || ifs_is_null))
+#else	/* change with bash-5.0 */
+	      if (quoted == 0 && ifs_is_null)
+#endif
 		tflag |= W_SPLITSPACE;
 	      /* If we're not quoted but we still don't want word splitting, make
 		 we quote the IFS characters to protect them from splitting (e.g.,

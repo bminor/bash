@@ -4587,3 +4587,31 @@ arrayfunc.c
 	  array subscript -- we already figure out whether or not we are
 
 [bumped release status to beta2]
+
+				   10/20
+				   -----
+builtins/setattr.def
+	- set_or_show_attributes: after isolating NAME, make sure to restore
+	  the "[+]=" in case we need the word later. Issue pointed out by
+	  Grisha Levit <grishalevit@gmail.com>
+
+				   10/21
+				   -----
+lib/readline/search.c
+	- noninc_search_from_pos: if we are supposed to be searching for a
+	  pattern (vi mode), make sure to pass S to _hs_history_patsearch,
+	  since that has any leading `^' stripped
+
+lib/readline/histsearch.c
+	- _hs_history_patsearch: if the search isn't anchored, put a `*' at
+	  the beginning to force fnmatch to match anywhere in the line (could
+	  look at this later to make a change to history_search_internal that
+	  would avoid the need to add the leading `*')
+
+subst.c
+	- parameter_brace_expand_rhs: treat a failure to assign a variable with
+	  a ${param:=value} expansion as an expansion error, and, in a non-
+	  interactive posix-mode shell, exit the shell
+	- param_expand: don't set W_SPLITSPACE for $* unless IFS is NULL;
+	  consistent with other uses of W_SPLITSPACE
+

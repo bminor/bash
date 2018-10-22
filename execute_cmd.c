@@ -3473,9 +3473,31 @@ execute_case_command (case_command)
     }
 #endif
 
+#if 0	/* TAG: bash-5.1 */
+  /* Use the same expansions (POSIX leaves them unspecified) as the patterns
+     but dequote the resulting string, since the quotes are handled specially
+     below. */
+  if (posixly_correct)
+    {
+      wlist = expand_word_leave_quoted (case_command->word, 0);
+      if (wlist)
+	{
+	  char *t;
+	  t = string_list (wlist);
+	  word = dequote_string (t);
+	  free (t);
+	}
+      else
+        word = savestring ("");
+      dispose_words (wlist);
+    }
+  else
+#endif
+    {
   wlist = expand_word_unsplit (case_command->word, 0);
   word = wlist ? string_list (wlist) : savestring ("");
   dispose_words (wlist);
+    }
 
   retval = EXECUTION_SUCCESS;
   ignore_return = case_command->flags & CMD_IGNORE_RETURN;

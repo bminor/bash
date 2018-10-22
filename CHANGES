@@ -1,6 +1,66 @@
 This document details the changes between this version, bash-5.0-beta, and
 the previous version, bash-5.0-alpha.
 
+1. Changes to Bash
+
+a. Fixed a bug that could cause a seg fault while parsing a subshell command
+   inside a command substitution.
+
+b. Fixed several small memory leaks uncovered by coverity.
+
+c. Fixed a problem with command substitution inside an interactive shell that
+   could cause the parent to receive a SIGHUP.
+
+d. Fixed a problem with using `*' and `@' as subscripts when assigning values
+   to an associative array with assoc_expand_once enabled.
+
+e. Fixed a bug that could cause a huge memory allocation when completing a
+   word beginning with an invalid tilde expansion.
+
+f. Cleaned up some incompatiblities with bash-4.4 when expanding indexed array
+   subscripts used in arithmetic expansions when assoc_expand_once is enabled.
+
+g. The ${parameter@a} expansion will display attributes even if `parameter' is
+   unset.
+
+2. Changes to Readline
+
+a. Fixed a bug with adding multibyte characters to an incremental search string.
+
+b. Fixed a bug with redoing text insertions in vi mode.
+
+c. Fixed a bug with pasting text into an incremental search string if bracketed
+   paste mode is enabled. ESC cannot be one of the incremental search
+   terminator characters for this to work.
+
+3. New Features in Bash
+
+a. Associative and indexed arrays now allow subscripts consisting solely of
+   whitespace.
+
+b. `checkwinsize' is now enabled by default.
+
+c. The `localvar_unset' shopt option is now visible and documented.
+
+d. The `progcomp_alias' shopt option is now visible and documented.
+
+e. The signal name processing code now understands `SIGRTMIN+n' all the way
+   up to SIGRTMAX.
+
+f. There is a new `seq' loadable builtin.
+
+g. Trap execution now honors the (internal) max invocations of `eval', since
+   traps are supposed to be executed as if using `eval'.
+
+4. New Features in Readline
+
+a. Readline now allows application-defined keymap names; there is a new public
+   function, rl_set_keymap_name(), to do that.
+
+------------------------------------------------------------------------------
+This document details the changes between this version, bash-5.0-beta, and
+the previous version, bash-5.0-alpha.
+
 1.  Changes to Bash
 
 a. Fixed a bug that allowed subshells to "inherit" enclosing loops -- this

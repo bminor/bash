@@ -135,7 +135,7 @@ noninc_search_from_pos (char *string, int pos, int dir, int flags, int *ncp)
 	  sflags |= ANCHORED_SEARCH;
 	  s++;
 	}
-      ret = _hs_history_patsearch (string, dir, sflags);
+      ret = _hs_history_patsearch (s, dir, sflags);
     }
   else if (*string == '^')
     ret = history_search_prefix (string + 1, dir);

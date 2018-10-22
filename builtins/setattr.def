@@ -277,6 +277,12 @@ set_or_show_attributes (list, attribute, nodefs)
 	    }
 
 	  set_var_attribute (name, attribute, undo);
+	  if (assign)		/* restore word */
+	    {
+	      name[assign] = '=';
+	      if (aflags & ASS_APPEND)
+		name[assign-1] = '+';
+	    }
 	  list = list->next;
 	}
     }
