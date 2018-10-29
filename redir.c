@@ -465,6 +465,7 @@ here_document_to_fd (redirectee, ri)
       return (fd);
     }
 
+  fchmod (fd, S_IRUSR | S_IWUSR);
   SET_CLOSE_ON_EXEC (fd);
 
   errno = r = 0;		/* XXX */
@@ -508,6 +509,8 @@ here_document_to_fd (redirectee, ri)
     }
 
   free (filename);
+
+  fchmod (fd2, S_IRUSR);
   return (fd2);
 }
 

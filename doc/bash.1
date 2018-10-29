@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Oct  5 14:53:12 EDT 2018
+.\"	Last Change: Mon Oct 22 09:55:27 EDT 2018
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2018 October 5" "GNU Bash 5.0"
+.TH BASH 1 "2018 October 22" "GNU Bash 5.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1427,8 +1427,8 @@ as given by argument zero.
 At shell startup, set to the absolute pathname used to invoke the
 shell or shell script being executed as passed in the environment
 or argument list.
-Subsequently, expands to the last argument to the previous command,
-after expansion.
+Subsequently, expands to the last argument to the previous simple
+command executed in the foreground, after expansion.
 Also set to the full pathname used to invoke each command executed
 and placed in the environment exported to that command.
 When checking mail, this parameter holds the name of the mail file
@@ -4494,6 +4494,10 @@ rules above.
 Conditional expressions are used by the \fB[[\fP compound command and
 the \fBtest\fP and \fB[\fP builtin commands to test file attributes
 and perform string and arithmetic comparisons.
+The \fBtest\fP abd \fB[\fP commands determine their behavior based on
+the number of arguments; see the descriptions of those commands for any
+other command-specific actions.
+.PP
 Expressions are formed from the following unary or binary primaries.
 \fBBash\fP handles several filenames specially when they are used in
 expressions.

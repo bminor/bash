@@ -4615,3 +4615,28 @@ subst.c
 	- param_expand: don't set W_SPLITSPACE for $* unless IFS is NULL;
 	  consistent with other uses of W_SPLITSPACE
 
+				   10/22
+				   -----
+doc/{bash.1,bashref.texi}
+	- tweak description of bash conditional expressions to note that the
+	  test and [ commands determine their behavior based on the number of
+	  arguments. Suggested by Ilkka Virta <itvirta@iki.fi>
+
+				   10/24
+				   -----
+execute_cmd.c
+	- execute_simple_command: don't set $_ to NULL when executing a
+	  command that forks; just leave it unchanged. Tweaked the documentation
+	  slightly as a result. Inspired by report from Ricky Tigg
+	  <ricky.tigg@gmail.com>
+
+				   10/28
+				   -----
+redir.c
+	- here_document_to_fd: make sure the temp files used to store here
+	  documents are readable (and writable, where necessary) by the user.
+	  This can happen in the unlikely case that someone decides to shoot
+	  himself in the foot by setting the umask to 400. Issue originally
+	  raised back in March by Stephane Chazelas
+	  <stephane.chazelas@gmail.com>; fix inspired by Martijn Dekker
+	  <martijn@inlv.org>

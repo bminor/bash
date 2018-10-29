@@ -1738,8 +1738,8 @@ to the filename used to invoke Bash, as given by argument zero.
 At shell startup, set to the absolute pathname used to invoke the
 shell or shell script being executed as passed in the environment
 or argument list.
-Subsequently, expands to the last argument to the previous command,
-after expansion.   
+Subsequently, expands to the last argument to the previous simple
+command executed in the foreground, after expansion. 
 Also set to the full pathname used to invoke each command executed
 and placed in the environment exported to that command.
 When checking mail, this parameter holds the name of the mail file.
@@ -3795,18 +3795,25 @@ false.
 
 @item 3 arguments
 The following conditions are applied in the order listed.
+
+@enumerate
+@item
 If the second argument is one of the binary conditional
 operators (@pxref{Bash Conditional Expressions}), the
 result of the expression is the result of the binary test using the
 first and third arguments as operands.
 The @samp{-a} and @samp{-o} operators are considered binary operators
 when there are three arguments.
+@item
 If the first argument is @samp{!}, the value is the negation of
 the two-argument test using the second and third arguments.
+@item
 If the first argument is exactly @samp{(} and the third argument is
 exactly @samp{)}, the result is the one-argument test of the second
 argument.
+@item
 Otherwise, the expression is false.
+@end enumerate
 
 @item 4 arguments
 If the first argument is @samp{!}, the result is the negation of
@@ -6821,9 +6828,13 @@ printing @env{$PS1} (@pxref{Bash Variables}).
 @cindex expressions, conditional
 
 Conditional expressions are used by the @code{[[} compound command
-and the @code{test} and @code{[} builtin commands.
+and the @code{test} and @code{[} builtin commands. The @code{test}
+and @code{[} commands determine their behavior based on the number
+of arguments; see the descriptions of those commands for any other
+command-specific actions.
 
-Expressions may be unary or binary.
+Expressions may be unary or binary,
+and are formed from the following primaries.
 Unary expressions are often used to examine the status of a file.
 There are string operators and numeric comparison operators as well.
 Bash handles several filenames specially when they are used in
