@@ -595,6 +595,7 @@ bind_termcap_arrow_keys (Keymap map)
   rl_bind_keyseq_if_unbound (_rl_term_at7, rl_end_of_line);	/* End */
 
   rl_bind_keyseq_if_unbound (_rl_term_kD, rl_delete);
+  rl_bind_keyseq_if_unbound (_rl_term_kI, rl_overwrite_mode);	/* Insert */
 
   _rl_keymap = xkeymap;
 }
