@@ -348,7 +348,7 @@ run_pending_traps ()
 	      /* We don't modify evalnest here, since run_interrupt_trap() calls
 		 _run_trap_internal, which does. */
 	      run_interrupt_trap (0);
-	      CLRINTERRUPT;
+	      CLRINTERRUPT;	/* interrupts don't stack */
 	    }
 #if defined (JOB_CONTROL) && defined (SIGCHLD)
 	  else if (sig == SIGCHLD &&
@@ -1064,6 +1064,8 @@ _run_trap_internal (sig, tag)
 #endif
 	    free (old_trap);
 	  sigmodes[sig] &= ~SIG_CHANGED;
+
+	  CHECK_TERMSIG;	/* some pathological conditions lead here */
 	}
 
       if (save_return_catch_flag)

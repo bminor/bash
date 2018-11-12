@@ -1,0 +1,25 @@
+shopt -s -o posix
+two="t w  o"
+ten="t   e
+n"
+set 1 "$two" 3 4 5 6 7 8 9 "$ten"
+
+unset IFS
+expvar="$*"
+case $* in
+"$expvar") ;;
+*) echo "failed 1" ;;
+esac
+
+case $* in
+$expvar) ;;
+*) echo "failed 2" ;;
+esac
+
+alias foo='oneword'
+foo_word='foo'
+case "$foo_word"
+in
+        foo) ;;
+	*) echo failed 3;;
+esac

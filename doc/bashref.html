@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.0, 7 August 2018).
+the Bash shell (version 5.0, 9 November 2018).
 
-This is Edition 5.0, last updated 7 August 2018,
+This is Edition 5.0, last updated 9 November 2018,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.0.
 
@@ -284,10 +284,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.0, 7 August 2018).
+the Bash shell (version 5.0, 9 November 2018).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.0, last updated 7 August 2018,
+<p>This is Edition 5.0, last updated 9 November 2018,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.0.
 </p>
@@ -2222,8 +2222,8 @@ to the filename used to invoke Bash, as given by argument zero.
 At shell startup, set to the absolute pathname used to invoke the
 shell or shell script being executed as passed in the environment
 or argument list.
-Subsequently, expands to the last argument to the previous command,
-after expansion.   
+Subsequently, expands to the last argument to the previous simple
+command executed in the foreground, after expansion. 
 Also set to the full pathname used to invoke each command executed
 and placed in the environment exported to that command.
 When checking mail, this parameter holds the name of the mail file.
@@ -4455,19 +4455,22 @@ false.
 </dd>
 <dt>3 arguments</dt>
 <dd><p>The following conditions are applied in the order listed.
-If the second argument is one of the binary conditional
+</p>
+<ol>
+<li> If the second argument is one of the binary conditional
 operators (see <a href="#Bash-Conditional-Expressions">Bash Conditional Expressions</a>), the
 result of the expression is the result of the binary test using the
 first and third arguments as operands.
 The &lsquo;<samp>-a</samp>&rsquo; and &lsquo;<samp>-o</samp>&rsquo; operators are considered binary operators
 when there are three arguments.
-If the first argument is &lsquo;<samp>!</samp>&rsquo;, the value is the negation of
+</li><li> If the first argument is &lsquo;<samp>!</samp>&rsquo;, the value is the negation of
 the two-argument test using the second and third arguments.
-If the first argument is exactly &lsquo;<samp>(</samp>&rsquo; and the third argument is
+</li><li> If the first argument is exactly &lsquo;<samp>(</samp>&rsquo; and the third argument is
 exactly &lsquo;<samp>)</samp>&rsquo;, the result is the one-argument test of the second
 argument.
-Otherwise, the expression is false.
-</p>
+</li><li> Otherwise, the expression is false.
+</li></ol>
+
 </dd>
 <dt>4 arguments</dt>
 <dd><p>If the first argument is &lsquo;<samp>!</samp>&rsquo;, the result is the negation of
@@ -6024,6 +6027,7 @@ The shell always postpones exiting if any jobs are stopped.
 <dd><p>If set, Bash checks the window size after each external (non-builtin)
 command and, if necessary, updates the values of    
 <code>LINES</code> and <code>COLUMNS</code>.
+This option is enabled by default.
 </p>
 </dd>
 <dt><code>cmdhist</code></dt>
@@ -6289,6 +6293,13 @@ the same name that exists at a previous scope before any new value is
 assigned.  The <var>nameref</var> attribute is not inherited.
 </p>
 </dd>
+<dt><code>localvar_unset</code></dt>
+<dd><p>If set, calling <code>unset</code> on local variables in previous function scopes
+marks them so subsequent lookups find them unset until that function
+returns. This is identical to the behavior of unsetting local variables
+at the current function scope.
+</p>
+</dd>
 <dt><code>login_shell</code></dt>
 <dd><p>The shell sets this option if it is started as a login shell
 (see <a href="#Invoking-Bash">Invoking Bash</a>).
@@ -6329,6 +6340,13 @@ files to expand to a null string, rather than themselves.
 <dd><p>If set, the programmable completion facilities
 (see <a href="#Programmable-Completion">Programmable Completion</a>) are enabled.
 This option is enabled by default.
+</p>
+</dd>
+<dt><code>progcomp_alias</code></dt>
+<dd><p>If set, and programmable completion is enabled, Bash treats a command
+name that doesn&rsquo;t have any completions as a possible alias and attempts
+alias expansion. If it has an alias, Bash attempts programmable
+completion using the command word resulting from the expanded alias.
 </p>
 </dd>
 <dt><code>promptvars</code></dt>
@@ -8108,9 +8126,13 @@ Next: <a href="#Shell-Arithmetic" accesskey="n" rel="next">Shell Arithmetic</a>,
 <a name="index-expressions_002c-conditional"></a>
 
 <p>Conditional expressions are used by the <code>[[</code> compound command
-and the <code>test</code> and <code>[</code> builtin commands.
+and the <code>test</code> and <code>[</code> builtin commands. The <code>test</code>
+and <code>[</code> commands determine their behavior based on the number
+of arguments; see the descriptions of those commands for any other
+command-specific actions.
 </p>
-<p>Expressions may be unary or binary.
+<p>Expressions may be unary or binary,
+and are formed from the following primaries.
 Unary expressions are often used to examine the status of a file.
 There are string operators and numeric comparison operators as well.
 Bash handles several filenames specially when they are used in
@@ -9113,6 +9135,11 @@ the <samp>-e</samp> option from the parent shell.
 When the <code>inherit_errexit</code> option is not enabled,
 Bash clears the <samp>-e</samp> option in such subshells.
 
+</li><li> Enabling <small>POSIX</small> mode has the effect of setting the
+<code>shift_verbose</code> option, so numeric arguments to <code>shift</code>
+that exceed the number of positional parameters will result in an
+error message.
+
 </li><li> When the <code>alias</code> builtin displays alias definitions, it does not
 display them with a leading &lsquo;<samp>alias </samp>&rsquo; unless the <samp>-p</samp> option
 is supplied.
@@ -9128,6 +9155,12 @@ even if the result contains nonprinting characters.
 constructed from <code>$PWD</code> and the directory name supplied as an argument
 does not refer to an existing directory, <code>cd</code> will fail instead of
 falling back to <var>physical</var> mode.
+
+</li><li> When the <code>cd</code> builtin cannot change a directory because the
+length of the pathname 
+constructed from <code>$PWD</code> and the directory name supplied as an argument
+exceeds <var>PATH_MAX</var> when all symbolic links are expanded, <code>cd</code> will
+fail instead of attempting to use only the supplied directory name.
 
 </li><li> The <code>pwd</code> builtin verifies that the value it prints is the same as the
 current directory, even if it is not asked to check the file system with the
@@ -10195,7 +10228,7 @@ If this variable has not been given a value, the characters <tt class="key">ESC<
 <dt><code>keymap</code></dt>
 <dd><a name="index-keymap"></a>
 <p>Sets Readline&rsquo;s idea of the current keymap for key binding commands.
-Acceptable <code>keymap</code> names are
+Built-in <code>keymap</code> names are
 <code>emacs</code>,
 <code>emacs-standard</code>,
 <code>emacs-meta</code>,
@@ -10206,6 +10239,7 @@ Acceptable <code>keymap</code> names are
 <code>vi-insert</code>.
 <code>vi</code> is equivalent to <code>vi-command</code> (<code>vi-move</code> is also a
 synonym); <code>emacs</code> is equivalent to <code>emacs-standard</code>.
+Applications may add additional names.
 The default value is <code>emacs</code>.
 The value of the <code>editing-mode</code> variable also affects the
 default keymap.
@@ -11840,6 +11874,9 @@ If no compspec is found for the full pathname, an attempt is made to
 find a compspec for the portion following the final slash.
 If those searches do not result in a compspec, any compspec defined with
 the <samp>-D</samp> option to <code>complete</code> is used as the default.
+If there is no default compspec, Bash attempts alias expansion
+on the command word as a final resort, and attempts to find a compspec
+for the command word from any successful expansion 
 </p>
 <p>Once a compspec has been found, it is used to generate the list of
 matching words.

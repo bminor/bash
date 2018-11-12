@@ -1107,6 +1107,8 @@ array_value_internal (s, quoted, flags, rtype, indp)
 	}
       else if (var == 0 || value_cell (var) == 0)	/* XXX - check for invisible_p(var) ? */
 	return ((char *)NULL);
+      else if (invisible_p (var))
+	return ((char *)NULL);
       else if (array_p (var) == 0 && assoc_p (var) == 0)
 	l = add_string_to_list (value_cell (var), (WORD_LIST *)NULL);
       else if (assoc_p (var))
@@ -1174,6 +1176,11 @@ array_value_internal (s, quoted, flags, rtype, indp)
 	}
      
       if (var == 0 || value_cell (var) == 0)	/* XXX - check invisible_p(var) ? */
+	{
+          FREE (akey);
+	  return ((char *)NULL);
+	}
+      else if (invisible_p (var))
 	{
           FREE (akey);
 	  return ((char *)NULL);

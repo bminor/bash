@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2018 August 7<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2018 October 22<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -1825,8 +1825,8 @@ as given by argument zero.
 At shell startup, set to the absolute pathname used to invoke the
 shell or shell script being executed as passed in the environment
 or argument list.
-Subsequently, expands to the last argument to the previous command,
-after expansion.
+Subsequently, expands to the last argument to the previous simple
+command executed in the foreground, after expansion.
 Also set to the full pathname used to invoke each command executed
 and placed in the environment exported to that command.
 When checking mail, this parameter holds the name of the mail file
@@ -5617,14 +5617,14 @@ The levels are listed in order of decreasing precedence.
 
 <DD>
 variable post-increment and post-decrement
-<DT><B>++</B><I>id</I> --<I>id</I>
-
-<DD>
-variable pre-increment and pre-decrement
 <DT><B>- +</B>
 
 <DD>
 unary minus and plus
+<DT><B>++</B><I>id</I> --<I>id</I>
+
+<DD>
+variable pre-increment and pre-decrement
 <DT><B>! ~</B>
 
 <DD>
@@ -5726,6 +5726,11 @@ rules above.
 Conditional expressions are used by the <B>[[</B> compound command and
 the <B>test</B> and <B>[</B> builtin commands to test file attributes
 and perform string and arithmetic comparisons.
+The <B>test</B> abd <B>[</B> commands determine their behavior based on
+the number of arguments; see the descriptions of those commands for any
+other command-specific actions.
+<P>
+
 Expressions are formed from the following unary or binary primaries.
 <B>Bash</B> handles several filenames specially when they are used in
 expressions.
@@ -8569,6 +8574,9 @@ If no compspec is found for the full pathname, an attempt is made to
 find a compspec for the portion following the final slash.
 If those searches do not result in a compspec, any compspec defined with
 the <B>-D</B> option to <B>complete</B> is used as the default.
+If there is no default compspec, <B>bash</B> attempts alias expansion
+on the command word as a final resort, and attempts to find a compspec
+for the command word from any successful expansion.
 <P>
 
 Once a compspec has been found, it is used to generate the list of
@@ -12423,6 +12431,7 @@ and
 <FONT SIZE=-1><B>COLUMNS</B>.
 
 </FONT>
+This option is enabled by default.
 <DT><B>cmdhist</B>
 
 <DD>
@@ -12801,6 +12810,13 @@ embedded newlines rather than using semicolon separators where possible.
 If set, local variables inherit the value and attributes of a variable of
 the same name that exists at a previous scope before any new value is
 assigned.  The nameref attribute is not inherited.
+<DT><B>localvar_unset</B>
+
+<DD>
+If set, calling <B>unset</B> on local variables in previous function scopes
+marks them so subsequent lookups find them unset until that function
+returns. This is identical to the behavior of unsetting local variables
+at the current function scope.
 <DT><B>login_shell</B>
 
 <DD>
@@ -12870,6 +12886,13 @@ to expand to a null string, rather than themselves.
 If set, the programmable completion facilities (see
 <B>Programmable Completion</B> above) are enabled.
 This option is enabled by default.
+<DT><B>progcomp_alias</B>
+
+<DD>
+If set, and programmable completion is enabled, <B>bash</B> treats a command
+name that doesn't have any completions as a possible alias and attempts
+alias expansion. If it has an alias, <B>bash</B> attempts programmable
+completion using the command word resulting from the expanded alias.
 <DT><B>promptvars</B>
 
 <DD>
@@ -13892,7 +13915,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2018 August 7<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2018 October 22<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -13998,6 +14021,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 07 September 2018 16:15:28 EDT
+Time: 09 November 2018 14:50:32 EST
 </BODY>
 </HTML>

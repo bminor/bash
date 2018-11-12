@@ -3473,31 +3473,21 @@ execute_case_command (case_command)
     }
 #endif
 
-#if 0	/* TAG: bash-5.1 */
-  /* Use the same expansions (POSIX leaves them unspecified) as the patterns
-     but dequote the resulting string, since the quotes are handled specially
-     below. */
-  if (posixly_correct)
+  /* Use the same expansions (the ones POSIX specifies) as the patterns;
+     dequote the resulting string (as POSIX specifies) since the quotes in
+     patterns are handled specially below. We have to do it in this order
+     because we're not supposed to perform word splitting. */
+  wlist = expand_word_leave_quoted (case_command->word, 0);
+  if (wlist)
     {
-      wlist = expand_word_leave_quoted (case_command->word, 0);
-      if (wlist)
-	{
-	  char *t;
-	  t = string_list (wlist);
-	  word = dequote_string (t);
-	  free (t);
-	}
-      else
-        word = savestring ("");
-      dispose_words (wlist);
+      char *t;
+      t = string_list (wlist);
+      word = dequote_string (t);
+      free (t);
     }
   else
-#endif
-    {
-  wlist = expand_word_unsplit (case_command->word, 0);
-  word = wlist ? string_list (wlist) : savestring ("");
+    word = savestring ("");
   dispose_words (wlist);
-    }
 
   retval = EXECUTION_SUCCESS;
   ignore_return = case_command->flags & CMD_IGNORE_RETURN;
@@ -4693,8 +4683,10 @@ execute_builtin (builtin, words, flags, subshell)
   /* `return' does a longjmp() back to a saved environment in execute_function.
      If a variable assignment list preceded the command, and the shell is
      running in POSIX mode, we need to merge that into the shell_variables
-     table, since `return' is a POSIX special builtin. */
-  if (posixly_correct && subshell == 0 && builtin == return_builtin && temporary_env)
+     table, since `return' is a POSIX special builtin. We don't do this if
+     it's being run by the `command' builtin, since that's supposed to inhibit
+     the special builtin properties. */
+  if (posixly_correct && subshell == 0 && builtin == return_builtin && (flags & CMD_COMMAND_BUILTIN) == 0 && temporary_env)
     {
       begin_unwind_frame ("return_temp_env");
       add_unwind_protect (merge_temporary_env, (char *)NULL);

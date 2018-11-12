@@ -7757,6 +7757,12 @@ When the @code{inherit_errexit} option is not enabled,
 Bash clears the @option{-e} option in such subshells.
 
 @item
+Enabling @sc{posix} mode has the effect of setting the
+@code{shift_verbose} option, so numeric arguments to @code{shift}
+that exceed the number of positional parameters will result in an
+error message.
+
+@item
 When the @code{alias} builtin displays alias definitions, it does not
 display them with a leading @samp{alias } unless the @option{-p} option
 is supplied.
@@ -7775,6 +7781,13 @@ When the @code{cd} builtin is invoked in @var{logical} mode, and the pathname
 constructed from @code{$PWD} and the directory name supplied as an argument
 does not refer to an existing directory, @code{cd} will fail instead of
 falling back to @var{physical} mode.
+
+@item
+When the @code{cd} builtin cannot change a directory because the
+length of the pathname 
+constructed from @code{$PWD} and the directory name supplied as an argument
+exceeds @var{PATH_MAX} when all symbolic links are expanded, @code{cd} will
+fail instead of attempting to use only the supplied directory name.
 
 @item
 The @code{pwd} builtin verifies that the value it prints is the same as the

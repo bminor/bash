@@ -4654,3 +4654,79 @@ braces.c
 	- mkseq: make sure to terminate result array before passing it to
 	  strvec_dispose on an interrupt. Report and fix from Corbin Souffrant
 	  <corbin.souffrant@gmail.com>
+
+				   11/6
+				   ----
+trap.c
+	- _run_trap_internal: if the signal shows up as SIG_CHANGED after
+	  running the trap handler, check for terminating signals and run any
+	  terminating signal handler indicates. Fixes issue reported by
+	  Owen Stephens <owen@owenstephens.co.uk>
+
+				   11/7
+				   ----
+execute_cmd.c
+	- execute_builtin: don't merge the temporary environment when the
+	  `return' builtin is being executed if it's being executed by the
+	  `command' builtin, since that's supposed to inhibit the special
+	  builtin properties. Part of POSIX conformance problems reported
+	  by Martin Rehak <martin.rehak@oracle.com>
+
+builtins/cd.def
+	- bindpwd: if canonicalization fails when -P is specified (e.g. if the
+	  directory name length exceeds PATH_MAX), reset dirname ($PWD value) =
+	  to the_current_working_directory (Posix cd description, step 10.)
+	  Part of POSIX conformance problems reported by Martin Rehak
+	  <martin.rehak@oracle.com>
+
+builtins/kill.def
+	- kill_builtin: support -sSIG and -nSIG without requiring them to be
+	  separate arguments. POSIX says a "conforming implementation" should
+	  accept them.
+	  Part of POSIX conformance problems reported by Martin Rehak
+	  <martin.rehak@oracle.com>
+
+				   11/8
+				   ----
+arrayfunc.c
+	- array_value_internal: return NULL for invisible array variables.
+	  Fixes issue with FUNCNAME sometimes returning invalid value reported
+	  by Great Big Dot <greatbigdot@gmail.com>
+
+builtins/cd.def
+	- change_to_directory: if we are in posix mode, and the chdir to the
+	  absolute pathname ($PWD/dirname) fails, return an error without
+	  trying to use just `dirname' (posix cd step 10).
+	  Part of POSIX conformance problems reported by Martin Rehak
+	  <martin.rehak@oracle.com>
+
+execute_cmd.c
+	- execute_case_command: use expand_word_leave_quoted to expand the
+	  word, then dequote the resulting string. This performs the
+	  expansions in the order posix specifies.
+	  Part of POSIX conformance problems reported by Martin Rehak
+	  <martin.rehak@oracle.com>
+
+subst.c
+	- expand_word_unsplit: rewrite in terms of expand_word_leave_quoted
+	- ifs_whitespace: new macro, Posix ifs whitespace (ISSPACE; member
+	  of current locale's space char class)
+	- ifs_whitesep: new macro, whitespace that is a member of $IFS; used
+	  by list_string and get_word_from_string
+	- list_string: use ifs_whitesep instead of spctabnl in case $IFS
+	  contains whitespace characters that are not space, tab, or newline
+	- get_word_from_string: use ifs_whitesep instead of spctabnl in case
+	  $IFS contains whitespace characters that are not space, tab, or
+	  newline.
+	  Part of POSIX conformance problems reported by Martin Rehak
+	  <martin.rehak@oracle.com>
+
+				   11/9
+				   ----
+general.c
+	- posix_initialize: enable the shift_verbose option when turning on
+	  posix mode, and disable it when posix mode is disabled. From a
+	  report by Eric Blake <eblake@redhat.com>
+
+doc/bashref.texi
+	- posix mode: note the effect of posix mode on shift_verbose

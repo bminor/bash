@@ -2754,6 +2754,13 @@ string_list_pos_params (pchar, list, quoted)
 					      : (c) == (separators)[0]) \
 			   : 0)
 
+/* member of the space character class in the current locale */
+#define ifs_whitespace(c)	ISSPACE(c)
+
+/* "adjacent IFS white space" */
+#define ifs_whitesep(c)	((sh_style_split || separators == 0) ? spctabnl (c) \
+							     : ifs_whitespace (c))
+
 WORD_LIST *
 list_string (string, separators, quoted)
      register char *string, *separators;
@@ -2781,10 +2788,12 @@ list_string (string, separators, quoted)
   slen = 0;
   /* Remove sequences of whitespace at the beginning of STRING, as
      long as those characters appear in IFS.  Do not do this if
-     STRING is quoted or if there are no separator characters. */
+     STRING is quoted or if there are no separator characters. We use the
+     Posix definition of whitespace as a member of the space character
+     class in the current locale. */
   if (!quoted || !separators || !*separators)
     {
-      for (s = string; *s && spctabnl (*s) && issep (*s); s++);
+      for (s = string; *s && issep (*s) && ifs_whitespace (*s); s++);
 
       if (!*s)
 	return ((WORD_LIST *)NULL);
@@ -2795,7 +2804,7 @@ list_string (string, separators, quoted)
   /* OK, now STRING points to a word that does not begin with white space.
      The splitting algorithm is:
 	extract a word, stopping at a separator
-	skip sequences of spc, tab, or nl as long as they are separators
+	skip sequences of whitespace characters as long as they are separators
      This obeys the field splitting rules in Posix.2. */
   slen = STRLEN (string);
   for (result = (WORD_LIST *)NULL, sindex = 0; string[sindex]; )
@@ -2830,7 +2839,7 @@ list_string (string, separators, quoted)
 
       /* If we're not doing sequences of separators in the traditional
 	 Bourne shell style, then add a quoted null argument. */
-      else if (!sh_style_split && !spctabnl (string[sindex]))
+      else if (!sh_style_split && !ifs_whitespace (string[sindex]))
 	{
 	  t = alloc_word_desc ();
 	  t->word = make_quoted_char ('\0');
@@ -2841,7 +2850,7 @@ list_string (string, separators, quoted)
       free (current_word);
 
       /* Note whether or not the separator is IFS whitespace, used later. */
-      whitesep = string[sindex] && spctabnl (string[sindex]);
+      whitesep = string[sindex] && ifs_whitesep (string[sindex]);
 
       /* Move past the current separator character. */
       if (string[sindex])
@@ -2850,21 +2859,21 @@ list_string (string, separators, quoted)
 	  ADVANCE_CHAR (string, slen, sindex);
 	}
 
-      /* Now skip sequences of space, tab, or newline characters if they are
+      /* Now skip sequences of whitespace characters if they are
 	 in the list of separators. */
-      while (string[sindex] && spctabnl (string[sindex]) && issep (string[sindex]))
+      while (string[sindex] && ifs_whitesep (string[sindex]) && issep (string[sindex]))
 	sindex++;
 
       /* If the first separator was IFS whitespace and the current character
 	 is a non-whitespace IFS character, it should be part of the current
 	 field delimiter, not a separate delimiter that would result in an
 	 empty field.  Look at POSIX.2, 3.6.5, (3)(b). */
-      if (string[sindex] && whitesep && issep (string[sindex]) && !spctabnl (string[sindex]))
+      if (string[sindex] && whitesep && issep (string[sindex]) && !ifs_whitesep (string[sindex]))
 	{
 	  sindex++;
 	  /* An IFS character that is not IFS white space, along with any
 	     adjacent IFS white space, shall delimit a field. (SUSv3) */
-	  while (string[sindex] && spctabnl (string[sindex]) && isifs (string[sindex]))
+	  while (string[sindex] && ifs_whitesep (string[sindex]) && isifs (string[sindex]))
 	    sindex++;
 	}
     }
@@ -2880,6 +2889,7 @@ list_string (string, separators, quoted)
    XXX - this function is very similar to list_string; they should be
 	 combined - XXX */
 
+/* character is in $IFS */
 #define islocalsep(c)	(local_cmap[(unsigned char)(c)] != 0)
 
 char *
@@ -2914,17 +2924,17 @@ get_word_from_string (stringp, separators, endptr)
      long as those characters appear in SEPARATORS.  This happens if
      SEPARATORS == $' \t\n' or if IFS is unset. */
   if (sh_style_split || separators == 0)
-    {
-      for (; *s && spctabnl (*s) && islocalsep (*s); s++);
+    for (; *s && spctabnl (*s) && islocalsep (*s); s++);
+  else
+    for (; *s && ifs_whitespace (*s) && islocalsep (*s); s++);
 
-      /* If the string is nothing but whitespace, update it and return. */
-      if (!*s)
-	{
-	  *stringp = s;
-	  if (endptr)
-	    *endptr = s;
-	  return ((char *)NULL);
-	}
+  /* If the string is nothing but whitespace, update it and return. */
+  if (!*s)
+    {
+      *stringp = s;
+      if (endptr)
+	*endptr = s;
+      return ((char *)NULL);
     }
 
   /* OK, S points to a word that does not begin with white space.
@@ -2944,7 +2954,7 @@ get_word_from_string (stringp, separators, endptr)
     *endptr = s + sindex;
 
   /* Note whether or not the separator is IFS whitespace, used later. */
-  whitesep = s[sindex] && spctabnl (s[sindex]);
+  whitesep = s[sindex] && ifs_whitesep (s[sindex]);
 
   /* Move past the current separator character. */
   if (s[sindex])
@@ -2962,12 +2972,12 @@ get_word_from_string (stringp, separators, endptr)
      a non-whitespace IFS character, it should be part of the current field
      delimiter, not a separate delimiter that would result in an empty field.
      Look at POSIX.2, 3.6.5, (3)(b). */
-  if (s[sindex] && whitesep && islocalsep (s[sindex]) && !spctabnl (s[sindex]))
+  if (s[sindex] && whitesep && islocalsep (s[sindex]) && !ifs_whitesep (s[sindex]))
     {
       sindex++;
       /* An IFS character that is not IFS white space, along with any adjacent
 	 IFS white space, shall delimit a field. */
-      while (s[sindex] && spctabnl (s[sindex]) && islocalsep(s[sindex]))
+      while (s[sindex] && ifs_whitesep (s[sindex]) && islocalsep(s[sindex]))
 	sindex++;
     }
 
@@ -3974,13 +3984,7 @@ expand_word_unsplit (word, quoted)
 {
   WORD_LIST *result;
 
-  expand_no_split_dollar_star = 1;
-  if (ifs_is_null)
-    word->flags |= W_NOSPLIT;
-  word->flags |= W_NOSPLIT2;
-  result = call_expand_word_internal (word, quoted, 0, (int *)NULL, (int *)NULL);
-  expand_no_split_dollar_star = 0;
-
+  result = expand_word_leave_quoted (word, quoted);
   return (result ? dequote_list (result) : result);
 }
 

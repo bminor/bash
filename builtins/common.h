@@ -230,6 +230,9 @@ extern int loop_level;
 /* variables from read.def */
 extern int sigalrm_seen;
 
+/* variables from shift.def */
+extern int print_shift_error;
+
 /* variables from source.def */
 extern int source_searches_cwd;
 extern int source_uses_path;
