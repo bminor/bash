@@ -110,6 +110,30 @@ gg. The localvar_inherit option will not attempt to inherit a value from a
 hh. The `globasciiranges' option is now enabled by default; it can be set to
     off by default at configuration time.
 
+ii. Associative and indexed arrays now allow subscripts consisting solely of
+    whitespace.
+
+jj. `checkwinsize' is now enabled by default.
+
+kk. The `localvar_unset' shopt option is now visible and documented.
+
+ll. The `progcomp_alias' shopt option is now visible and documented.
+
+mm. The signal name processing code now understands `SIGRTMIN+n' all the way
+    up to SIGRTMAX.
+
+nn. There is a new `seq' loadable builtin.
+
+oo. Trap execution now honors the (internal) max invocations of `eval', since
+    traps are supposed to be executed as if using `eval'.
+
+pp. The $_ variable doesn't change when the shell executes a command that forks.
+
+qq. The `kill' builtin now supports -sSIGNAME and -nSIGNUM, even though
+    conforming applications aren't supposed to use them.
+
+rr. POSIX mode now enables the `shift_verbose' option.
+
 2.  New Features in Readline
 
 a. Non-incremental vi-mode search (`N', `n') can search for a shell pattern, as
@@ -144,3 +168,9 @@ h. The history expansion library now understands command and process
 i. The history library has a new variable that allows applications to set the
    initial quoting state, so quoting state can be inherited from a previous
    line.
+
+j. Readline now allows application-defined keymap names; there is a new public
+   function, rl_set_keymap_name(), to do that.
+
+k. The "Insert" keypad key, if available, now puts readline into overwrite
+   mode.

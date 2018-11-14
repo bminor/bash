@@ -7,6 +7,7 @@ unset a
 
 echo a2
 a[1]=; recho "${a[@]:-y}"
+a[1]=; recho "${a[*]:-z}"
 unset a
 
 echo a3
@@ -32,3 +33,14 @@ shift $#
 echo p3
 set '' x
 recho ${@:+y}
+
+# problems with * and null expansions dating back to bash's earliest days
+A=(''); set -- ''
+
+echo "<${A[*]:-X}>" "<${*:-X}>" "<${A:-X}>" "<${A[0]:-X}>" 
+
+IFS=
+A=('' ''); set -- '' ''
+B=''
+
+echo "<${A[*]:-X}>" "<${*:-X}>" "<${B:-X}>" "<${B[*]:-X}>"

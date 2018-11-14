@@ -131,7 +131,6 @@ extern int errno;
    the embedded `break'. The dangling else accommodates a trailing semicolon;
    we could also put in a do ; while (0) */
 
-   
 #define CHECK_STRING_OVERRUN(oind, ind, len, ch) \
   if (ind >= len) \
     { \
@@ -8765,6 +8764,12 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
   else
     tdesc = parameter_brace_expand_word (name, var_is_special, quoted, PF_IGNUNBOUND|(pflags&(PF_NOSPLIT2|PF_ASSIGNRHS)), &ind);
 
+  if (tdesc == &expand_wdesc_error || tdesc == &expand_wdesc_fatal)
+    {
+      tflag = 0;
+      tdesc = 0;
+    }
+
   if (tdesc)
     {
       temp = tdesc->word;
@@ -8810,6 +8815,14 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
   /* XXX - this may not need to be restricted to special variables */
   if (check_nullness)
     var_is_null |= var_is_set && var_is_special && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && QUOTED_NULL (temp);
+#if defined (ARRAY_VARS)
+  if (check_nullness)
+    var_is_null |= var_is_set && 
+		   (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) &&
+		   QUOTED_NULL (temp) &&
+		   valid_array_reference (name, 0) &&
+		   chk_atstar (name, 0, (int *)0, (int *)0);
+#endif
 
   /* Get the rest of the stuff inside the braces. */
   if (c && c != RBRACE)
@@ -9131,6 +9144,7 @@ param_expand (string, sindex, quoted, expanded_something,
     case '8':
     case '9':
       temp1 = dollar_vars[TODIGIT (c)];
+      /* This doesn't get called when (pflags&PF_IGNUNBOUND) != 0 */
       if (unbound_vars_is_error && temp1 == (char *)NULL)
 	{
 	  uerror[0] = '$';
@@ -9179,7 +9193,7 @@ param_expand (string, sindex, quoted, expanded_something,
 	  if (expanded_something)
 	    *expanded_something = 0;
 	  temp = (char *)NULL;
-	  if (unbound_vars_is_error)
+	  if (unbound_vars_is_error && (pflags & PF_IGNUNBOUND) == 0)
 	    {
 	      uerror[0] = '$';
 	      uerror[1] = c;

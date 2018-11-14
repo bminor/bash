@@ -1,5 +1,5 @@
-This document details the changes between this version, bash-5.0-beta, and
-the previous version, bash-5.0-alpha.
+This document details the changes between this version, bash-5.0-beta2, and
+the previous version, bash-5.0-beta.
 
 1. Changes to Bash
 
@@ -23,6 +23,44 @@ f. Cleaned up some incompatiblities with bash-4.4 when expanding indexed array
 g. The ${parameter@a} expansion will display attributes even if `parameter' is
    unset.
 
+h. Fixed a bug that caused the output of `set' to cut off some variables before
+   printing the value.
+
+i. Treat a failure to assign a variable when using the ${x:=value} expansion
+   as an expansion error, so non-interactive posix-mode shells exit
+
+j. Fixed a problem when expanding $* in a context where word splitting is not
+   performed when IFS is NULL.
+
+k. Temp files used to store here documents are forced readable, no matter what
+   the user's umask says.
+
+l. Fixed a problem where an interrupted brace expansion could cause the shell
+   to attempt to free an invalid memory location.
+
+m. Make sure to check for any terminating signals after running a trap
+   handler; don't wait until the next time we process traps.
+
+n. Fixed a bug that caused "return" to act like a special builtin with respect
+   to variable assignments even when preceded by "command".
+
+o. POSIX-mode shells now return failure if the cd builtin fails due to the
+   absolute directory name being longer than PATH_MAX, instead of trying
+   again with a relative pathname.
+
+p. Fixed a problem with FUNCNAME occasionally being visible when not executing
+   a shell function.
+
+q. Fixed a problem with the expansions performed on the WORD in the case
+   command.
+
+r. Fixed a slight POSIX compatibility when removing "IFS whitespace" during
+   word splitting and the read builtin.
+
+s. Fixed a problem with expanding an array with subscript `*' when all the
+   elements expand to the empty string, and making sure the expansion honors
+   the `:' specifier.
+
 2. Changes to Readline
 
 a. Fixed a bug with adding multibyte characters to an incremental search string.
@@ -32,6 +70,9 @@ b. Fixed a bug with redoing text insertions in vi mode.
 c. Fixed a bug with pasting text into an incremental search string if bracketed
    paste mode is enabled. ESC cannot be one of the incremental search
    terminator characters for this to work.
+
+d. Fixed a bug with anchored search patterns when performing searches in vi
+   mode.
 
 3. New Features in Bash
 
@@ -52,10 +93,20 @@ f. There is a new `seq' loadable builtin.
 g. Trap execution now honors the (internal) max invocations of `eval', since
    traps are supposed to be executed as if using `eval'.
 
+h. The $_ variable doesn't change when the shell executes a command that forks.
+
+i. The `kill' builtin now supports -sSIGNAME and -nSIGNUM, even though
+   conforming applications aren't supposed to use them.
+
+j. POSIX mode now enables the `shift_verbose' option.
+
 4. New Features in Readline
 
 a. Readline now allows application-defined keymap names; there is a new public
    function, rl_set_keymap_name(), to do that.
+
+b. The "Insert" keypad key, if available, now puts readline into overwrite
+   mode.
 
 ------------------------------------------------------------------------------
 This document details the changes between this version, bash-5.0-beta, and

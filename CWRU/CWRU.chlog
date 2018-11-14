@@ -4730,3 +4730,18 @@ general.c
 
 doc/bashref.texi
 	- posix mode: note the effect of posix mode on shift_verbose
+
+				   11/12
+				   -----
+subst.c
+	- parameter_brace_expand: if parameter_brace_expand_word returns an
+	  error, make sure to set TEMP = 0 (to note that the variable is unset).
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+	- param_expand: if expanding $! when set -u is enabled, honor the
+	  PF_IGNUNBOUND flag and just return NULL, relying on the caller to
+	  take care of understanding that the variable is unset
+	  From a report by Grisha Levit <grishalevit@gmail.com>	
+	- parameter_brace_expand: if we are checking nullness, and we have a
+	  valid array expansion, a quoted null string resulting from the array
+	  expansion of a * or @ subscript satisfies the nullness check.
+	  From a report by Grisha Levit <grishalevit@gmail.com>
