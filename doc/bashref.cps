@@ -109,7 +109,7 @@
 \entry {Readline, how to use}{106}
 \entry {redirection}{34}
 \entry {reserved word}{3}
-\entry {restricted shell}{98}
+\entry {restricted shell}{99}
 \entry {return status}{4}
 \initial {S}
 \entry {shell arithmetic}{92}

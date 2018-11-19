@@ -1581,7 +1581,9 @@ attempt_shell_completion (text, start, end)
 	{
 	  prog_complete_matches = programmable_completions (n, text, s, e, &foundcs);
 	  /* command completion if programmable completion fails */
-	  in_command_position = s == start && STREQ (n, text);	/* XXX */
+	  /* If we have a completion for the initial word, we can prefer that */
+	  in_command_position = s == start && (iw_compspec || STREQ (n, text));	/* XXX */
+	  foundcs = foundcs && (iw_compspec == 0);
 	}
       /* empty command name following command separator */
       else if (s >= e && n[0] == '\0' && text[0] == '\0' && start > 0 &&

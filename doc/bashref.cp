@@ -87,7 +87,7 @@
 \entry{arrays}{94}{arrays}
 \entry{directory stack}{96}{directory stack}
 \entry{prompting}{97}{prompting}
-\entry{restricted shell}{98}{restricted shell}
+\entry{restricted shell}{99}{restricted shell}
 \entry{POSIX Mode}{99}{POSIX Mode}
 \entry{job control}{103}{job control}
 \entry{foreground}{103}{foreground}

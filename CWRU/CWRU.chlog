@@ -4745,3 +4745,18 @@ subst.c
 	  valid array expansion, a quoted null string resulting from the array
 	  expansion of a * or @ subscript satisfies the nullness check.
 	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+				   11/14
+				   -----
+aclocal.m4
+	- BASH_CHECK_LIB_TERMCAP: add last-ditch check for libncursesw, since
+	  it's apparently the only curses library on some distributions.
+	  Report from John Frankish <john.frankish@outlook.com>
+
+				   11/16
+				   -----
+bashline.c
+	- attempt_shell_completion: allow an initial word completion to
+	  complete a partial first word (point appears in the middle of
+	  the word) before resorting to command completion. Report and fix
+	  from Luca Boccassi <bluca@debian.org>

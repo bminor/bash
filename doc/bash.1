@@ -4232,9 +4232,10 @@ below).
 The rules concerning the definition and use of aliases are
 somewhat confusing.
 .B Bash
-always reads at least one complete line
-of input before executing any
-of the commands on that line.  Aliases are expanded when a
+always reads at least one complete line of input,
+and all lines that make up a compound command,
+before executing any of the commands on that line or the compound command.
+Aliases are expanded when a
 command is read, not when it is executed.  Therefore, an
 alias definition appearing on the same line as another
 command does not take effect until the next line of input is read.

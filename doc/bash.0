@@ -2303,19 +2303,19 @@ AALLIIAASSEESS
        sshhoopptt under SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below).
 
        The  rules  concerning  the  definition and use of aliases are somewhat
-       confusing.  BBaasshh always reads at  least  one  complete  line  of  input
-       before  executing  any  of  the  commands  on  that  line.  Aliases are
-       expanded when a command is read, not when it is  executed.   Therefore,
-       an  alias definition appearing on the same line as another command does
-       not take effect until the next line of input  is  read.   The  commands
-       following the alias definition on that line are not affected by the new
-       alias.  This behavior is also an issue  when  functions  are  executed.
-       Aliases  are  expanded when a function definition is read, not when the
-       function is executed, because a function definition is  itself  a  com-
-       mand.   As  a consequence, aliases defined in a function are not avail-
-       able until after that function is executed.  To  be  safe,  always  put
-       alias  definitions on a separate line, and do not use aalliiaass in compound
-       commands.
+       confusing.  BBaasshh always reads at least one complete line of input,  and
+       all  lines that make up a compound command, before executing any of the
+       commands on that line or the compound command.   Aliases  are  expanded
+       when  a  command is read, not when it is executed.  Therefore, an alias
+       definition appearing on the same line as another command does not  take
+       effect  until  the  next line of input is read.  The commands following
+       the alias definition on that line are not affected by  the  new  alias.
+       This  behavior  is  also an issue when functions are executed.  Aliases
+       are expanded when a function definition is read, not when the  function
+       is  executed,  because a function definition is itself a command.  As a
+       consequence, aliases defined in a  function  are  not  available  until
+       after  that function is executed.  To be safe, always put alias defini-
+       tions on a separate line, and do not use aalliiaass in compound commands.
 
        For almost every purpose, aliases are superseded by shell functions.
 
