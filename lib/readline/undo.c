@@ -51,6 +51,8 @@
 
 extern void _hs_replace_history_data PARAMS((int, histdata_t *, histdata_t *));
 
+extern HIST_ENTRY *_rl_saved_line_for_history;
+
 /* Non-zero tells rl_delete_text and rl_insert_text to not add to
    the undo list. */
 int _rl_doing_an_undo = 0;
@@ -166,7 +168,7 @@ _rl_copy_undo_list (UNDO_LIST *head)
 int
 rl_do_undo (void)
 {
-  UNDO_LIST *release;
+  UNDO_LIST *release, *search;
   int waiting_for_begin, start, end;
   HIST_ENTRY *cur, *temp;
 
@@ -223,6 +225,7 @@ rl_do_undo (void)
 
       release = rl_undo_list;
       rl_undo_list = rl_undo_list->next;
+      release->next = 0;	/* XXX */
 
       /* If we are editing a history entry, make sure the change is replicated
 	 in the history entry's line */
@@ -235,7 +238,29 @@ rl_do_undo (void)
 	  xfree (temp);
 	}
 
+      /* Make sure there aren't any history entries with that undo list */
       _hs_replace_history_data (-1, (histdata_t *)release, (histdata_t *)rl_undo_list);
+
+      /* And make sure this list isn't anywhere in the saved line for history */
+      if (_rl_saved_line_for_history && _rl_saved_line_for_history->data)
+	{
+	  /* Brute force; no finesse here */
+	  search = (UNDO_LIST *)_rl_saved_line_for_history->data;
+	  if (search == release)
+	    _rl_saved_line_for_history->data = rl_undo_list;
+	  else
+	    {
+	      while (search->next)
+		{
+		  if (search->next == release)
+		    {
+		      search->next = rl_undo_list;
+		      break;
+		    }
+		  search = search->next;
+		}
+	    }
+	}
 
       xfree (release);
     }

@@ -617,6 +617,8 @@ glob_vector (pat, dir, flags)
   firstmalloc = 0;
   nalloca = 0;
 
+  name_vector = NULL;
+
 /*itrace("glob_vector: pat = `%s' dir = `%s' flags = 0x%x", pat, dir, flags);*/
   /* If PAT is empty, skip the loop, but return one (empty) filename. */
   if (pat == 0 || *pat == '\0')

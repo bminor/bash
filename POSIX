@@ -169,56 +169,66 @@ The following list is what's changed when 'POSIX mode' is in effect:
      shell.  When the 'inherit_errexit' option is not enabled, Bash
      clears the '-e' option in such subshells.
 
-  44. When the 'alias' builtin displays alias definitions, it does not
+  44. Enabling POSIX mode has the effect of setting the 'shift_verbose'
+     option, so numeric arguments to 'shift' that exceed the number of
+     positional parameters will result in an error message.
+
+  45. When the 'alias' builtin displays alias definitions, it does not
      display them with a leading 'alias ' unless the '-p' option is
      supplied.
 
-  45. When the 'set' builtin is invoked without options, it does not
+  46. When the 'set' builtin is invoked without options, it does not
      display shell function names and definitions.
 
-  46. When the 'set' builtin is invoked without options, it displays
+  47. When the 'set' builtin is invoked without options, it displays
      variable values without quotes, unless they contain shell
      metacharacters, even if the result contains nonprinting characters.
 
-  47. When the 'cd' builtin is invoked in LOGICAL mode, and the pathname
+  48. When the 'cd' builtin is invoked in LOGICAL mode, and the pathname
      constructed from '$PWD' and the directory name supplied as an
      argument does not refer to an existing directory, 'cd' will fail
      instead of falling back to PHYSICAL mode.
 
-  48. The 'pwd' builtin verifies that the value it prints is the same as
+  49. When the 'cd' builtin cannot change a directory because the length
+     of the pathname constructed from '$PWD' and the directory name
+     supplied as an argument exceeds PATH_MAX when all symbolic links
+     are expanded, 'cd' will fail instead of attempting to use only the
+     supplied directory name.
+
+  50. The 'pwd' builtin verifies that the value it prints is the same as
      the current directory, even if it is not asked to check the file
      system with the '-P' option.
 
-  49. When listing the history, the 'fc' builtin does not include an
+  51. When listing the history, the 'fc' builtin does not include an
      indication of whether or not a history entry has been modified.
 
-  50. The default editor used by 'fc' is 'ed'.
+  52. The default editor used by 'fc' is 'ed'.
 
-  51. The 'type' and 'command' builtins will not report a non-executable
+  53. The 'type' and 'command' builtins will not report a non-executable
      file as having been found, though the shell will attempt to execute
      such a file if it is the only so-named file found in '$PATH'.
 
-  52. The 'vi' editing mode will invoke the 'vi' editor directly when
+  54. The 'vi' editing mode will invoke the 'vi' editor directly when
      the 'v' command is run, instead of checking '$VISUAL' and
      '$EDITOR'.
 
-  53. When the 'xpg_echo' option is enabled, Bash does not attempt to
+  55. When the 'xpg_echo' option is enabled, Bash does not attempt to
      interpret any arguments to 'echo' as options.  Each argument is
      displayed, after escape characters are converted.
 
-  54. The 'ulimit' builtin uses a block size of 512 bytes for the '-c'
+  56. The 'ulimit' builtin uses a block size of 512 bytes for the '-c'
      and '-f' options.
 
-  55. The arrival of 'SIGCHLD' when a trap is set on 'SIGCHLD' does not
+  57. The arrival of 'SIGCHLD' when a trap is set on 'SIGCHLD' does not
      interrupt the 'wait' builtin and cause it to return immediately.
      The trap command is run once for each child that exits.
 
-  56. The 'read' builtin may be interrupted by a signal for which a trap
+  58. The 'read' builtin may be interrupted by a signal for which a trap
      has been set.  If Bash receives a trapped signal while executing
      'read', the trap handler executes and 'read' returns an exit status
      greater than 128.
 
-  57. Bash removes an exited background process's status from the list
+  59. Bash removes an exited background process's status from the list
      of such statuses after the 'wait' builtin is used to obtain it.
 
 There is other POSIX behavior that Bash does not implement by default

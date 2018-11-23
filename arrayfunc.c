@@ -283,7 +283,7 @@ assign_array_element (name, value, flags)
      int flags;
 {
   char *sub, *vname;
-  int sublen;
+  int sublen, isassoc;
   SHELL_VAR *entry;
 
   vname = array_variable_name (name, (flags & ASS_NOEXPAND) != 0, &sub, &sublen);
@@ -291,14 +291,16 @@ assign_array_element (name, value, flags)
   if (vname == 0)
     return ((SHELL_VAR *)NULL);
 
-  if ((ALL_ELEMENT_SUB (sub[0]) && sub[1] == ']') || (sublen <= 1))
+  entry = find_variable (vname);
+  isassoc = entry && assoc_p (entry);
+
+  if (((isassoc == 0 || (flags & ASS_NOEXPAND) == 0) && (ALL_ELEMENT_SUB (sub[0]) && sub[1] == ']')) || (sublen <= 1))
     {
       free (vname);
       err_badarraysub (name);
       return ((SHELL_VAR *)NULL);
     }
 
-  entry = find_variable (vname);
   entry = assign_array_element_internal (entry, name, vname, sub, sublen, value, flags);
 
   free (vname);
@@ -777,7 +779,7 @@ unbind_array_element (var, sub, flags)
   char *akey;
   ARRAY_ELEMENT *ae;
 
-  len = skipsubscript (sub, 0, (flags&1) || (var && assoc_p(var)));
+  len = skipsubscript (sub, 0, (flags&1) || (var && assoc_p(var)));	/* XXX */
   if (sub[len] != ']' || len == 0)
     {
       builtin_error ("%s[%s: %s", var->name, sub, _(bash_badsub_errmsg));
@@ -888,31 +890,43 @@ print_assoc_assignment (var, quoted)
 /***********************************************************************/
 
 /* Return 1 if NAME is a properly-formed array reference v[sub]. */
+
+/* We need to reserve 1 for FLAGS, which we pass to skipsubscript. */
 int
 valid_array_reference (name, flags)
      const char *name;
      int flags;
 {
   char *t;
-  int r, len;
+  int r, len, isassoc;
+  SHELL_VAR *entry;
 
   t = mbschr (name, '[');	/* ] */
+  isassoc = 0;
   if (t)
     {
       *t = '\0';
       r = legal_identifier (name);
+      if (flags & VA_NOEXPAND)	/* Don't waste a lookup if we don't need one */
+	isassoc = (entry = find_variable (name)) && assoc_p (entry);      
       *t = '[';
       if (r == 0)
 	return 0;
-      /* Check for a properly-terminated non-null subscript. */
-      len = skipsubscript (t, 0, flags);
-      if (t[len] != ']' || len == 1)
+
+      if (isassoc && ((flags & (VA_NOEXPAND|VA_ONEWORD)) == (VA_NOEXPAND|VA_ONEWORD)))
+	len = strlen (t) - 1;
+      else if (isassoc)
+	len = skipsubscript (t, 0, flags&VA_NOEXPAND);	/* VA_NOEXPAND must be 1 */
+      else
+	/* Check for a properly-terminated non-null subscript. */
+	len = skipsubscript (t, 0, 0);		/* arithmetic expression */
+
+      if (t[len] != ']' || len == 1 || t[len+1] != '\0')
 	return 0;
-      if (t[len+1] != '\0')
-	return 0;
-#if 1
+
+#if 0
       /* Could check and allow subscripts consisting only of whitespace for
-	 existing associative arrays. */
+	 existing associative arrays, using isassoc */
       for (r = 1; r < len; r++)
 	if (whitespace (t[r]) == 0)
 	  return 1;
@@ -940,7 +954,7 @@ array_expand_index (var, s, len, flags)
   exp = (char *)xmalloc (len);
   strncpy (exp, s, len - 1);
   exp[len - 1] = '\0';
-#if 0	/* XXX - not yet -- maybe bash-5.0 */
+#if 0	/* XXX - not yet -- maybe bash-5.1 */
   if ((flags & AV_NOEXPAND) == 0)
     t = expand_arith_string (exp, Q_DOUBLE_QUOTES|Q_ARITH|Q_ARRAYSUB);	/* XXX - Q_ARRAYSUB for future use */
   else
@@ -1093,6 +1107,8 @@ array_value_internal (s, quoted, flags, rtype, indp)
 	}
       else if (var == 0 || value_cell (var) == 0)	/* XXX - check for invisible_p(var) ? */
 	return ((char *)NULL);
+      else if (invisible_p (var))
+	return ((char *)NULL);
       else if (array_p (var) == 0 && assoc_p (var) == 0)
 	l = add_string_to_list (value_cell (var), (WORD_LIST *)NULL);
       else if (assoc_p (var))
@@ -1117,7 +1133,6 @@ array_value_internal (s, quoted, flags, rtype, indp)
 	  free (temp);
 	}
       else	/* ${name[@]} or unquoted ${name[*]} */
-        /* XXX - bash-4.4/bash-5.0 test AV_ASSIGNRHS and pass PF_ASSIGNRHS */
 	retval = string_list_dollar_at (l, quoted, (flags & AV_ASSIGNRHS) ? PF_ASSIGNRHS : 0);
 
       dispose_words (l);
@@ -1161,6 +1176,11 @@ array_value_internal (s, quoted, flags, rtype, indp)
 	}
      
       if (var == 0 || value_cell (var) == 0)	/* XXX - check invisible_p(var) ? */
+	{
+          FREE (akey);
+	  return ((char *)NULL);
+	}
+      else if (invisible_p (var))
 	{
           FREE (akey);
 	  return ((char *)NULL);

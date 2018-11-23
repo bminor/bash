@@ -100,10 +100,10 @@ INC = -I. -I.. -I$(topdir) -I$(topdir)/lib -I$(topdir)/builtins -I${srcdir} \
 	$(SHOBJ_CC) $(SHOBJ_CFLAGS) $(CCFLAGS) $(INC) -c -o $@ $<
 
 
-ALLPROG = print truefalse sleep finfo logname basename dirname \
+ALLPROG = print truefalse sleep finfo logname basename dirname fdflags \
 	  tty pathchk tee head mkdir rmdir printenv id whoami \
-	  uname sync push ln unlink realpath strftime mypid setpgid
-OTHERPROG = necho hello cat pushd stat rm fdflags
+	  uname sync push ln unlink realpath strftime mypid setpgid seq
+OTHERPROG = necho hello cat pushd stat rm
 
 all:	$(SHOBJ_STATUS)
 
@@ -147,6 +147,9 @@ rm:	rm.o
 
 fdflags:	fdflags.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ fdflags.o $(SHOBJ_LIBS)
+
+seq:	seq.o
+	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ seq.o $(SHOBJ_LIBS)
 
 logname:	logname.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ logname.o $(SHOBJ_LIBS)
@@ -293,3 +296,5 @@ realpath.o: realpath.c
 strftime.o: strftime.c
 setpgid.o: setpgid.c
 stat.o: stat.c
+fdflags.o: fdflags.c
+seq.o: seq.c

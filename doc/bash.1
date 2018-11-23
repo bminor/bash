@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue Aug  7 12:01:07 EDT 2018
+.\"	Last Change: Mon Oct 22 09:55:27 EDT 2018
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2018 August 7" "GNU Bash 5.0"
+.TH BASH 1 "2018 October 22" "GNU Bash 5.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1427,8 +1427,8 @@ as given by argument zero.
 At shell startup, set to the absolute pathname used to invoke the
 shell or shell script being executed as passed in the environment
 or argument list.
-Subsequently, expands to the last argument to the previous command,
-after expansion.
+Subsequently, expands to the last argument to the previous simple
+command executed in the foreground, after expansion.
 Also set to the full pathname used to invoke each command executed
 and placed in the environment exported to that command.
 When checking mail, this parameter holds the name of the mail file
@@ -4232,9 +4232,10 @@ below).
 The rules concerning the definition and use of aliases are
 somewhat confusing.
 .B Bash
-always reads at least one complete line
-of input before executing any
-of the commands on that line.  Aliases are expanded when a
+always reads at least one complete line of input,
+and all lines that make up a compound command,
+before executing any of the commands on that line or the compound command.
+Aliases are expanded when a
 command is read, not when it is executed.  Therefore, an
 alias definition appearing on the same line as another
 command does not take effect until the next line of input is read.
@@ -4409,11 +4410,11 @@ The levels are listed in order of decreasing precedence.
 .B \fIid\fP++ \fIid\fP\-\-
 variable post-increment and post-decrement
 .TP
-.B ++\fIid\fP \-\-\fIid\fP
-variable pre-increment and pre-decrement
-.TP
 .B \- +
 unary minus and plus
+.TP
+.B ++\fIid\fP \-\-\fIid\fP
+variable pre-increment and pre-decrement
 .TP
 .B ! ~
 logical and bitwise negation
@@ -4494,6 +4495,10 @@ rules above.
 Conditional expressions are used by the \fB[[\fP compound command and
 the \fBtest\fP and \fB[\fP builtin commands to test file attributes
 and perform string and arithmetic comparisons.
+The \fBtest\fP abd \fB[\fP commands determine their behavior based on
+the number of arguments; see the descriptions of those commands for any
+other command-specific actions.
+.PP
 Expressions are formed from the following unary or binary primaries.
 \fBBash\fP handles several filenames specially when they are used in
 expressions.
@@ -6710,6 +6715,9 @@ If no compspec is found for the full pathname, an attempt is made to
 find a compspec for the portion following the final slash.
 If those searches do not result in a compspec, any compspec defined with
 the \fB\-D\fP option to \fBcomplete\fP is used as the default.
+If there is no default compspec, \fBbash\fP attempts alias expansion
+on the command word as a final resort, and attempts to find a compspec
+for the command word from any successful expansion.
 .PP
 Once a compspec has been found, it is used to generate the list of
 matching words.
@@ -9187,7 +9195,7 @@ is displayed only if input is coming from a terminal.
 .B \-r
 Backslash does not act as an escape character.
 The backslash is considered to be part of the line.
-In particular, a backslash-newline pair may not be used as a line
+In particular, a backslash-newline pair may not then be used as a line
 continuation.
 .TP
 .B \-s
@@ -9806,6 +9814,7 @@ command and, if necessary, updates the values of
 and
 .SM
 .BR COLUMNS .
+This option is enabled by default.
 .TP 8
 .B cmdhist
 If set,
@@ -10105,6 +10114,12 @@ If set, local variables inherit the value and attributes of a variable of
 the same name that exists at a previous scope before any new value is
 assigned.  The nameref attribute is not inherited.
 .TP 8
+.B localvar_unset
+If set, calling \fBunset\fP on local variables in previous function scopes
+marks them so subsequent lookups find them unset until that function
+returns. This is identical to the behavior of unsetting local variables
+at the current function scope.
+.TP 8
 .B login_shell
 The shell sets this option if it is started as a login shell (see
 .SM
@@ -10157,6 +10172,12 @@ to expand to a null string, rather than themselves.
 If set, the programmable completion facilities (see
 \fBProgrammable Completion\fP above) are enabled.
 This option is enabled by default.
+.TP 8
+.B progcomp_alias
+If set, and programmable completion is enabled, \fBbash\fP treats a command
+name that doesn't have any completions as a possible alias and attempts
+alias expansion. If it has an alias, \fBbash\fP attempts programmable
+completion using the command word resulting from the expanded alias.
 .TP 8
 .B promptvars
 If set, prompt strings undergo

@@ -179,7 +179,8 @@ read_builtin (list)
   int size, nr, pass_next, saw_escape, eof, opt, retval, code, print_ps2, nflag;
   volatile int i;
   int input_is_tty, input_is_pipe, unbuffered_read, skip_ctlesc, skip_ctlnul;
-  int raw, edit, nchars, silent, have_timeout, ignore_delim, fd, lastsig, t_errno;
+  int raw, edit, nchars, silent, have_timeout, ignore_delim, fd;
+  int lastsig, t_errno;
   int mb_cur_max;
   unsigned int tmsec, tmusec;
   long ival, uval;
@@ -192,6 +193,7 @@ read_builtin (list)
   TTYSTRUCT ttattrs, ttset;
 #if defined (ARRAY_VARS)
   WORD_LIST *alist;
+  int vflags;
 #endif
 #if defined (READLINE)
   char *rlbuf, *itext;
@@ -336,7 +338,8 @@ read_builtin (list)
   /* Convenience: check early whether or not the first of possibly several
      variable names is a valid identifier, and bail early if so. */
 #if defined (ARRAY_VARS)
-  if (list && legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, assoc_expand_once) == 0)
+  vflags = assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0;
+  if (list && legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, vflags) == 0)
 #else
   if (list && legal_identifier (list->word->word) == 0)
 #endif
@@ -853,7 +856,7 @@ assign_vars:
     {
       varname = list->word->word;
 #if defined (ARRAY_VARS)
-      if (legal_identifier (varname) == 0 && valid_array_reference (varname, assoc_expand_once) == 0)
+      if (legal_identifier (varname) == 0 && valid_array_reference (varname, vflags) == 0)
 #else
       if (legal_identifier (varname) == 0)
 #endif
@@ -901,7 +904,7 @@ assign_vars:
 
   /* Now assign the rest of the line to the last variable argument. */
 #if defined (ARRAY_VARS)
-  if (legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, assoc_expand_once) == 0)
+  if (legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, vflags) == 0)
 #else
   if (legal_identifier (list->word->word) == 0)
 #endif
@@ -964,7 +967,7 @@ bind_read_variable (name, value)
   SHELL_VAR *v;
 
 #if defined (ARRAY_VARS)
-  if (valid_array_reference (name, assoc_expand_once) == 0)
+  if (valid_array_reference (name, assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0) == 0)
     v = bind_variable (name, value, 0);
   else
     v = assign_array_element (name, value, assoc_expand_once ? ASS_NOEXPAND : 0);

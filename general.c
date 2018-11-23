@@ -79,6 +79,7 @@ posix_initialize (on)
       interactive_comments = source_uses_path = expand_aliases = 1;
       inherit_errexit = 1;
       source_searches_cwd = 0;
+      print_shift_error = 1;
     }
 
   /* Things that should be turned on when posix mode is disabled. */
@@ -86,6 +87,7 @@ posix_initialize (on)
     {
       source_searches_cwd = 1;
       expand_aliases = interactive_shell;
+      print_shift_error = 0;
     }
 }
 

@@ -2544,6 +2544,7 @@ next_alias_char:
      reading a quoted string. */
 #ifndef OLD_ALIAS_HACK
   if (uc == 0 && pushed_string_list && pushed_string_list->flags != PSH_SOURCE &&
+      pushed_string_list->flags != PSH_DPAREN &&
       shell_input_line_index > 0 &&
       shell_input_line[shell_input_line_index-1] != ' ' &&
       shell_input_line[shell_input_line_index-1] != '\n' &&
@@ -2555,6 +2556,7 @@ next_alias_char:
 #endif
 
 pop_alias:
+  /* This case works for PSH_DPAREN as well */
   if (uc == 0 && pushed_string_list && pushed_string_list->flags != PSH_SOURCE)
     {
       pop_string ();
@@ -3031,7 +3033,7 @@ special_case_tokens (tokstr)
       return (IN);
     }
 
-  /* bash-5.0: leaving above code intact for now, but it should eventually be
+  /* XXX - leaving above code intact for now, but it should eventually be
      removed in favor of this clause. */
   /* Posix grammar rule 6 */
   if (expecting_in_token && (last_read_token == WORD || last_read_token == '\n') &&

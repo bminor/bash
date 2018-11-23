@@ -282,7 +282,7 @@ int line_number_for_err_trap;
 int funcnest = 0;
 int funcnest_max = 0;
 
-int evalnest = 0;		/* bash-4.4/bash-5.0 */
+int evalnest = 0;
 int evalnest_max = EVALNEST_MAX;
 
 int sourcenest = 0;
@@ -624,7 +624,9 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
       /* Fork a subshell, turn off the subshell bit, turn off job
 	 control and call execute_command () on the command again. */
-      line_number_for_err_trap = line_number = command->value.Subshell->line;	/* XXX - save value? */
+      if (command->type == cm_subshell)
+	line_number_for_err_trap = line_number = command->value.Subshell->line;	/* XXX - save value? */
+	/* Otherwise we defer setting line_number */
       tcmd = make_command_string (command);
       paren_pid = make_child (p = savestring (tcmd), asynchronous);
 
@@ -748,7 +750,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
   reap_procsubs ();
 #  endif
 
-  if (variable_context != 0)
+  if (variable_context != 0)	/* XXX - also if sourcelevel != 0? */
     {
       ofifo = num_fifos ();
       ofifo_list = copy_fifo_list ((int *)&osize);
@@ -1605,7 +1607,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
     async_redirect_stdin ();
 
 #if 0
-  /* bash-5.0 */
+  /* XXX - TAG: bash-5.1 */
   if (user_subshell && command->type == cm_subshell)
     optimize_subshell_command (command->value.Subshell->command);
 #endif
@@ -2252,7 +2254,10 @@ coproc_setvars (cp)
     {
       v = find_variable_nameref_for_create (cp->c_name, 1);
       if (v == INVALID_NAMEREF_VALUE)
-	return;
+	{
+	  free (namevar);
+	  return;
+	}
       if (v && nameref_p (v))
 	{
 	  free (cp->c_name);
@@ -2265,6 +2270,7 @@ coproc_setvars (cp)
     {
       if (readonly_p (v))
 	err_readonly (cp->c_name);
+      free (namevar);
       return;
     }
   if (v == 0)
@@ -2349,10 +2355,9 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
 
   invert = (command->flags & CMD_INVERT_RETURN) != 0;
 
-  /* XXX - expand coproc name without splitting -- bash-5.0 */
-  /* could make this dependent on a shopt option */
+  /* expand name without splitting - could make this dependent on a shopt option */
   name = expand_string_unsplit_to_string (command->value.Coproc->name, 0);
-  /* Optional check -- bash-5.0. */
+  /* Optional check -- could be relaxed */
   if (legal_identifier (name) == 0)
     {
       internal_error (_("`%s': not a valid identifier"), name);
@@ -2395,7 +2400,6 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
   close (rpipe[1]);
   close (wpipe[0]);
 
-  /* XXX - run Coproc->name through word expansion above -- bash-5.0 */
   cp = coproc_alloc (command->value.Coproc->name, coproc_pid);
   cp->c_rfd = rpipe[0];
   cp->c_wfd = wpipe[1];
@@ -3469,8 +3473,20 @@ execute_case_command (case_command)
     }
 #endif
 
-  wlist = expand_word_unsplit (case_command->word, 0);
-  word = wlist ? string_list (wlist) : savestring ("");
+  /* Use the same expansions (the ones POSIX specifies) as the patterns;
+     dequote the resulting string (as POSIX specifies) since the quotes in
+     patterns are handled specially below. We have to do it in this order
+     because we're not supposed to perform word splitting. */
+  wlist = expand_word_leave_quoted (case_command->word, 0);
+  if (wlist)
+    {
+      char *t;
+      t = string_list (wlist);
+      word = dequote_string (t);
+      free (t);
+    }
+  else
+    word = savestring ("");
   dispose_words (wlist);
 
   retval = EXECUTION_SUCCESS;
@@ -4259,7 +4275,9 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 #endif
 #endif
 	  command_line = (char *)NULL;      /* don't free this. */
+#if 0
 	  bind_lastarg ((char *)NULL);
+#endif
 	  return (result);
 	}
     }
@@ -4665,8 +4683,10 @@ execute_builtin (builtin, words, flags, subshell)
   /* `return' does a longjmp() back to a saved environment in execute_function.
      If a variable assignment list preceded the command, and the shell is
      running in POSIX mode, we need to merge that into the shell_variables
-     table, since `return' is a POSIX special builtin. */
-  if (posixly_correct && subshell == 0 && builtin == return_builtin && temporary_env)
+     table, since `return' is a POSIX special builtin. We don't do this if
+     it's being run by the `command' builtin, since that's supposed to inhibit
+     the special builtin properties. */
+  if (posixly_correct && subshell == 0 && builtin == return_builtin && (flags & CMD_COMMAND_BUILTIN) == 0 && temporary_env)
     {
       begin_unwind_frame ("return_temp_env");
       add_unwind_protect (merge_temporary_env, (char *)NULL);

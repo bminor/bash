@@ -198,6 +198,7 @@ void
 rl_vi_start_inserting (int key, int repeat, int sign)
 {
   _rl_vi_set_last (key, repeat, sign);
+  rl_begin_undo_group ();		/* ensure inserts aren't concatenated */
   rl_vi_insertion_mode (1, key);
 }
 

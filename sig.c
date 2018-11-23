@@ -574,6 +574,7 @@ termsig_handler (sig)
 #if defined (JOB_CONTROL)
   if (sig == SIGHUP && (interactive || (subshell_environment & (SUBSHELL_COMSUB|SUBSHELL_PROCSUB))))
     hangup_all_jobs ();
+
   if ((subshell_environment & (SUBSHELL_COMSUB|SUBSHELL_PROCSUB)) == 0)
     end_job_control ();
 #endif /* JOB_CONTROL */
@@ -597,6 +598,8 @@ termsig_handler (sig)
 
   if (dollar_dollar_pid != 1)
     exit (128+sig);		/* just in case the kill fails? */
+
+  /* We get here only under extraordinary circumstances. */
 
   /* We are PID 1, and the kill above failed to kill the process. We assume
      this means that we are running as an init process in a pid namespace
@@ -758,7 +761,6 @@ set_signal_handler (sig, handler)
   if (sig == SIGCHLD)
     act.sa_flags |= SA_RESTART;		/* XXX */
 #endif
-  /* XXX - bash-5.0 */
   /* Let's see if we can keep SIGWINCH from interrupting interruptible system
      calls, like open(2)/read(2)/write(2) */
 #if defined (SIGWINCH)

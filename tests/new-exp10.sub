@@ -84,3 +84,17 @@ set -- a b c d e
 echo ${@}
 echo ${#@}
 echo a${#@}b
+
+# new feature in bash-5.0: display attributes of even unset variables
+unset -v foo
+
+declare -i foo
+echo ${foo@a}
+
+declare -p foo
+
+unset foo
+declare -A foo
+echo ${foo@a}
+
+declare -p foo

@@ -40,6 +40,10 @@ extern int array_expand_once;
 #define AV_ASSIGNRHS	0x010	/* no splitting, special case ${a[@]} */
 #define AV_NOEXPAND	0x020	/* don't run assoc subscripts through word expansion */
 
+/* Flags for valid_array_reference. Value 1 is reserved for skipsubscript() */
+#define VA_NOEXPAND	0x001
+#define VA_ONEWORD	0x002
+
 extern SHELL_VAR *convert_var_to_array __P((SHELL_VAR *));
 extern SHELL_VAR *convert_var_to_assoc __P((SHELL_VAR *));
 
@@ -82,6 +86,8 @@ extern SHELL_VAR *array_variable_part __P((const char *, int, char **, int *));
 #define AV_QUOTED	0
 #define AV_USEIND	0
 #define AV_ASSIGNRHS	0
+
+#define VA_ONEWORD	0
 
 #endif
 

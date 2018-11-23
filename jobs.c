@@ -630,6 +630,8 @@ stop_pipeline (async, deferred)
       pipeline_pgrp = 0;
 
       newjob->flags = 0;
+      if (pipefail_opt)
+	newjob->flags |= J_PIPEFAIL;
 
       /* Flag to see if in another pgrp. */
       if (job_control)
@@ -688,7 +690,7 @@ stop_pipeline (async, deferred)
 	{
 	  newjob->flags |= J_FOREGROUND;
 	  /*
-	   *		!!!!! NOTE !!!!!  (chet@ins.cwru.edu)
+	   *		!!!!! NOTE !!!!!  (chet@po.cwru.edu)
 	   *
 	   * The currently-accepted job control wisdom says to set the
 	   * terminal's process group n+1 times in an n-step pipeline:
@@ -2639,7 +2641,11 @@ raw_job_exit_status (job)
   int fail;
   WAIT ret;
 
+#if 0
   if (pipefail_opt)
+#else
+  if (jobs[job]->flags & J_PIPEFAIL)
+#endif
     {
       fail = 0;
       p = jobs[job]->pipe;
@@ -2997,7 +3003,6 @@ if (job == NO_JOB)
 	{
 	  s = job_signal_status (job);
 
-	  /* XXX - bash-5.0 */
 	  /* If we are non-interactive, but job control is enabled, and the job
 	     died due to SIGINT, pretend we got the SIGINT */
 	  if (job_control && IS_JOBCONTROL (job) && WIFSIGNALED (s) && WTERMSIG (s) == SIGINT)
@@ -3722,7 +3727,6 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
     }
 
   /* Call a SIGCHLD trap handler for each child that exits, if one is set. */
-  /* XXX - bash-5.0 removes test for job_control */
   if (children_exited &&
       (signal_is_trapped (SIGCHLD) || trap_list[SIGCHLD] == (char *)IMPOSSIBLE_TRAP_HANDLER) &&
       trap_list[SIGCHLD] != (char *)IGNORE_SIG)

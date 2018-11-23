@@ -49,7 +49,7 @@ declare -a f=([0]="" [1]="bdef" [2]="hello world" [3]="test" [4]="ninth element"
 ./array.tests: line 103: a: readonly variable
 ./array.tests: line 105: b[]: bad array subscript
 ./array.tests: line 106: b[*]: bad array subscript
-./array.tests: line 107: ${b[   ]}: bad substitution
+this
 ./array.tests: line 109: c[-2]: bad array subscript
 ./array.tests: line 110: c: bad array subscript
 
@@ -506,7 +506,8 @@ a1
 argv[1] = <>
 argv[2] = <>
 a2
-argv[1] = <>
+argv[1] = <y>
+argv[1] = <z>
 a3
 argv[1] = <>
 argv[2] = <x>
@@ -520,6 +521,8 @@ argv[1] = <>
 argv[2] = <x>
 p3
 argv[1] = <y>
+<X> <X> <X> <X>
+<X> <X> <X> <X>
 ./array23.sub: line 9: $( echo >&2 foo ) : syntax error: operand expected (error token is "$( echo >&2 foo ) ")
 ./array23.sub: line 10: $( echo >&2 foo ) : syntax error: operand expected (error token is "$( echo >&2 foo ) ")
 foo
@@ -530,6 +533,9 @@ foo
 6
 ./array23.sub: line 21: $( echo >&2 foo ): syntax error: operand expected (error token is "$( echo >&2 foo )")
 ./array23.sub: line 22: $( echo >&2 foo ): syntax error: operand expected (error token is "$( echo >&2 foo )")
+0
+0
+0
 IFS=: ${var-$*}
 abc
 def ghi
@@ -579,9 +585,9 @@ def ghi
 jkl
 1. indexed:
 reference:
-./array25.sub: line 10: ${a[ ]}: bad substitution
+1. 0
 ./array25.sub: line 11: ' ': syntax error: operand expected (error token is "' '")
-./array25.sub: line 12: ${a[ ]}: bad substitution
+3. 0
 4. 0
 5. 0
 6. 0
@@ -591,19 +597,19 @@ assignment:
 3.declare -a a=([0]="12" [1]="1")
 4.declare -a a=([0]="13" [1]="1")
 arithmetic:
-1.declare -a a=([0]="0" [1]="1")
-2.declare -a a=([0]="0" [1]="1")
-3.declare -a a=([0]="0" [1]="1")
-4.declare -a a=([0]="0" [1]="1")
-5.declare -a a=([0]="0" [1]="1")
+1.declare -a a=([0]="10" [1]="1")
+2.declare -a a=([0]="11" [1]="1")
+3.declare -a a=([0]="12" [1]="1")
+4.declare -a a=([0]="13" [1]="1")
+5.declare -a a=([0]="10" [1]="1")
 6.declare -a a=([0]="11" [1]="1")
-7.declare -a a=([0]="0" [1]="1")
+7.declare -a a=([0]="12" [1]="1")
 8.declare -a a=([0]="13" [1]="1")
 2. associative:
 reference:
-./array25.sub: line 47: ${a[ ]}: bad substitution
+1.
 2.
-./array25.sub: line 49: ${a[ ]}: bad substitution
+3. 
 4.
 5.
 6. 
@@ -613,14 +619,14 @@ assignment:
 3.declare -A a=([" "]="12" [0]="0" [1]="1" )
 4.declare -A a=([" "]="13" [0]="0" [1]="1" )
 arithmetic:
-1.declare -A a=([" "]="13" [0]="0" [1]="1" )
-2.declare -A a=([" "]="13" [0]="0" [1]="1" )
-3.declare -A a=([" "]="13" [0]="0" [1]="1" )
+1.declare -A a=([" "]="10" [0]="0" [1]="1" )
+2.declare -A a=([" "]="11" [0]="0" [1]="1" )
+3.declare -A a=([" "]="12" [0]="0" [1]="1" )
 4.declare -A a=([" "]="13" [0]="0" [1]="1" )
-5.declare -A a=([" "]="13" [0]="0" [1]="1" )
-6.declare -A a=([" "]="13" [0]="0" [1]="1" ["\" \""]="11" )
-7.declare -A a=([" "]="13" [0]="0" [1]="1" ["\" \""]="11" )
-8.declare -A a=([" "]="13" [0]="0" [1]="1" ["\" \""]="13" )
+5.declare -A a=([" "]="10" [0]="0" [1]="1" )
+6.declare -A a=([" "]="10" [0]="0" [1]="1" ["\" \""]="11" )
+7.declare -A a=([" "]="12" [0]="0" [1]="1" ["\" \""]="11" )
+8.declare -A a=([" "]="12" [0]="0" [1]="1" ["\" \""]="13" )
 argv[1] = <aa>
 argv[2] = <bb>
 argv[1] = <aa>
@@ -741,3 +747,18 @@ argv[2] = <b>
 argv[1] = <a>
 argv[2] = <b>
 argv[1] = <a+b>
+7
+./array27.sub: line 11: a[]]=7 : syntax error: invalid arithmetic operator (error token is "]=7 ")
+declare -A A=([$'\t']="2" [" "]="2" )
+./array27.sub: line 23: ((: A[]]=2 : syntax error: invalid arithmetic operator (error token is "]=2 ")
+declare -A A=([$'\t']="2" [" "]="2" ["*"]="2" ["@"]="2" )
+./array27.sub: line 32: A[]]: bad array subscript
+declare -A A=([$'\t']="X" [" "]="X" ["*"]="X" ["@"]="X" )
+./array27.sub: line 40: A[]]: bad array subscript
+declare -A A=([$'\t']="X" [" "]="X" ["*"]="X" ["@"]="X" )
+./array27.sub: line 48: declare: `A[]]=X': not a valid identifier
+declare -A A=(["*"]="X" ["@"]="X" )
+./array27.sub: line 56: declare: `A[]]=X': not a valid identifier
+./array27.sub: line 56: A[*]: bad array subscript
+./array27.sub: line 56: A[@]: bad array subscript
+declare -A A

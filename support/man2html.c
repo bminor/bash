@@ -522,6 +522,7 @@ read_man_page(char *filename)
 			man_buf[buf_size] = '\n';
 			man_buf[buf_size + 1] = man_buf[buf_size + 2] = '\0';
 		} else {
+			free(man_buf);
 			man_buf = NULL;
 		}
 		fclose(man_stream);
@@ -2562,7 +2563,6 @@ scan_request(char *c)
 					h = name;
 				if (stat(h, &stbuf) != -1)
 					l = stbuf.st_size;
-				buf = stralloc(l + 4);
 #if NOCGI
 				if (!out_length) {
 					char   *t, *s;

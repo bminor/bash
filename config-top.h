@@ -142,7 +142,7 @@
 
 /* Define to 0 if you want the checkwinsize option off by default, 1 if you
    want it on. */
-#define CHECKWINSIZE_DEFAULT	0
+#define CHECKWINSIZE_DEFAULT	1
 
 /* Define to 1 if you want to optimize for sequential array assignment when
    using indexed arrays, 0 if you want bash-4.2 behavior, which favors
@@ -161,7 +161,8 @@
    no longer exists.  This behavior is the default in Posix mode. */
 #define CHECKHASH_DEFAULT 0
 
-/* Define to the maximum level of recursion you want for the eval builtin.
+/* Define to the maximum level of recursion you want for the eval builtin
+   and trap handlers (since traps are run as if run by eval).
    0 means the limit is not active. */
 #define EVALNEST_MAX 0
 
@@ -180,3 +181,8 @@
 /* Define to set the initial size of the history list ($HISTSIZE). This must
    be a string. */
 /*#define HISTSIZE_DEFAULT "500"*/
+
+/* Define to 0 if you want history expansion to be disabled by default in
+   interactive shells; define to 1 for the historical behavior of enabling
+   when the shell is interactive. */
+#define HISTEXPAND_DEFAULT	1

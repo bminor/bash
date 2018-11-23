@@ -1738,8 +1738,8 @@ to the filename used to invoke Bash, as given by argument zero.
 At shell startup, set to the absolute pathname used to invoke the
 shell or shell script being executed as passed in the environment
 or argument list.
-Subsequently, expands to the last argument to the previous command,
-after expansion.   
+Subsequently, expands to the last argument to the previous simple
+command executed in the foreground, after expansion. 
 Also set to the full pathname used to invoke each command executed
 and placed in the environment exported to that command.
 When checking mail, this parameter holds the name of the mail file.
@@ -3795,18 +3795,25 @@ false.
 
 @item 3 arguments
 The following conditions are applied in the order listed.
+
+@enumerate
+@item
 If the second argument is one of the binary conditional
 operators (@pxref{Bash Conditional Expressions}), the
 result of the expression is the result of the binary test using the
 first and third arguments as operands.
 The @samp{-a} and @samp{-o} operators are considered binary operators
 when there are three arguments.
+@item
 If the first argument is @samp{!}, the value is the negation of
 the two-argument test using the second and third arguments.
+@item
 If the first argument is exactly @samp{(} and the third argument is
 exactly @samp{)}, the result is the one-argument test of the second
 argument.
+@item
 Otherwise, the expression is false.
+@end enumerate
 
 @item 4 arguments
 If the first argument is @samp{!}, the result is the negation of
@@ -4557,7 +4564,7 @@ The prompt is displayed only if input is coming from a terminal.
 @item -r
 If this option is given, backslash does not act as an escape character.
 The backslash is considered to be part of the line.
-In particular, a backslash-newline pair may not be used as a line
+In particular, a backslash-newline pair may not then be used as a line
 continuation.
 
 @item -s
@@ -5171,6 +5178,7 @@ The shell always postpones exiting if any jobs are stopped.
 If set, Bash checks the window size after each external (non-builtin)
 command and, if necessary, updates the values of    
 @env{LINES} and @env{COLUMNS}.
+This option is enabled by default.
 
 @item cmdhist
 If set, Bash
@@ -5409,6 +5417,12 @@ If set, local variables inherit the value and attributes of a variable of
 the same name that exists at a previous scope before any new value is
 assigned.  The @var{nameref} attribute is not inherited.
 
+@item localvar_unset
+If set, calling @code{unset} on local variables in previous function scopes
+marks them so subsequent lookups find them unset until that function
+returns. This is identical to the behavior of unsetting local variables
+at the current function scope.
+
 @item login_shell
 The shell sets this option if it is started as a login shell
 (@pxref{Invoking Bash}).
@@ -5443,6 +5457,12 @@ files to expand to a null string, rather than themselves.
 If set, the programmable completion facilities
 (@pxref{Programmable Completion}) are enabled.
 This option is enabled by default.
+
+@item progcomp_alias
+If set, and programmable completion is enabled, Bash treats a command
+name that doesn't have any completions as a possible alias and attempts
+alias expansion. If it has an alias, Bash attempts programmable
+completion using the command word resulting from the expanded alias.
 
 @item promptvars
 If set, prompt strings undergo
@@ -6808,9 +6828,13 @@ printing @env{$PS1} (@pxref{Bash Variables}).
 @cindex expressions, conditional
 
 Conditional expressions are used by the @code{[[} compound command
-and the @code{test} and @code{[} builtin commands.
+and the @code{test} and @code{[} builtin commands. The @code{test}
+and @code{[} commands determine their behavior based on the number
+of arguments; see the descriptions of those commands for any other
+command-specific actions.
 
-Expressions may be unary or binary.
+Expressions may be unary or binary,
+and are formed from the following primaries.
 Unary expressions are often used to examine the status of a file.
 There are string operators and numeric comparison operators as well.
 Bash handles several filenames specially when they are used in
@@ -7101,10 +7125,11 @@ unless the @code{expand_aliases} shell option is set using
 @code{shopt} (@pxref{The Shopt Builtin}).
 
 The rules concerning the definition and use of aliases are
-somewhat confusing.  Bash
-always reads at least one complete line
-of input before executing any
-of the commands on that line.  Aliases are expanded when a
+somewhat confusing. Bash
+always reads at least one complete line of input,
+and all lines that make up a compound command,
+before executing any of the commands on that line or the compound command.
+Aliases are expanded when a
 command is read, not when it is executed.  Therefore, an
 alias definition appearing on the same line as another
 command does not take effect until the next line of input is read.
@@ -7733,6 +7758,12 @@ When the @code{inherit_errexit} option is not enabled,
 Bash clears the @option{-e} option in such subshells.
 
 @item
+Enabling @sc{posix} mode has the effect of setting the
+@code{shift_verbose} option, so numeric arguments to @code{shift}
+that exceed the number of positional parameters will result in an
+error message.
+
+@item
 When the @code{alias} builtin displays alias definitions, it does not
 display them with a leading @samp{alias } unless the @option{-p} option
 is supplied.
@@ -7751,6 +7782,13 @@ When the @code{cd} builtin is invoked in @var{logical} mode, and the pathname
 constructed from @code{$PWD} and the directory name supplied as an argument
 does not refer to an existing directory, @code{cd} will fail instead of
 falling back to @var{physical} mode.
+
+@item
+When the @code{cd} builtin cannot change a directory because the
+length of the pathname 
+constructed from @code{$PWD} and the directory name supplied as an argument
+exceeds @var{PATH_MAX} when all symbolic links are expanded, @code{cd} will
+fail instead of attempting to use only the supplied directory name.
 
 @item
 The @code{pwd} builtin verifies that the value it prints is the same as the

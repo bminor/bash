@@ -194,6 +194,8 @@ extern char *dequote_string __P((char *));
 /* De-quote CTLESC-escaped CTLESC or CTLNUL characters in STRING. */
 extern char *dequote_escapes __P((const char *));
 
+extern WORD_DESC *dequote_word __P((WORD_DESC *));
+
 /* De-quote quoted characters in each word in LIST. */
 extern WORD_LIST *dequote_list __P((WORD_LIST *));
 

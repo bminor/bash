@@ -20,3 +20,9 @@ typeset -a a
 echo $((1+a[$index]))
 echo $((1+a[\$index]))
 echo "1+${a[$index]}"
+
+# intermediate problems discovered while bash-5.0 was in testing
+a=0
+echo $(( a[a[0]] ))
+echo ${a[a[a[0]]]}
+echo $(( a[a[a[0]]] ))

@@ -670,16 +670,16 @@ rl_yank_last_arg (int count, int key)
    `bracketed paste' sequence, read the rest of the pasted input until the
    closing sequence and insert the pasted text as a single unit without
    interpretation. */
-int
-rl_bracketed_paste_begin (int count, int key)
+char *
+_rl_bracketed_text (size_t *lenp)
 {
-  int retval, c;
+  int c;
   size_t len, cap;
   char *buf;
 
-  retval = 0;
   len = 0;
   buf = xmalloc (cap = 64);
+  buf[0] = '\0';
 
   RL_SETSTATE (RL_STATE_MOREINPUT);
   while ((c = rl_read_key ()) >= 0)
@@ -708,8 +708,22 @@ rl_bracketed_paste_begin (int count, int key)
       if (len == cap)
 	buf = xrealloc (buf, cap + 1);
       buf[len] = '\0';
-      retval = rl_insert_text (buf) == len ? 0 : 1;
     }
+
+  if (lenp)
+    *lenp = len;
+  return (buf);
+}
+
+int
+rl_bracketed_paste_begin (int count, int key)
+{
+  int retval, c;
+  size_t len, cap;
+  char *buf;
+
+  buf = _rl_bracketed_text (&len);
+  retval = rl_insert_text (buf) == len ? 0 : 1;
 
   xfree (buf);
   return (retval);

@@ -4303,3 +4303,462 @@ configure.ac
 	- openbsd needs DEV_FD_STAT_BROKEN defined
 
 [bash-5.0-beta frozen]
+
+				   9/11
+				   ----
+builtins/exec.def
+	- exec_builtin: make sure to sync the buffered stream where bash is
+	  reading input (especially if it's fd 0) so a command exec'd by the
+	  script can read the rest of stdin after the exec
+
+				   9/15
+				   ----
+lib/readline/histexpand.c
+	- history_tokenize_internal: if the event contains embedded newlines
+	  (e.g., bash with command-oriented history and lithist), use them as
+	  word delimiters, equivalent to space and tab, so they don't end up
+	  as separate words. Fixes issue pointed out by Viktor Dukhovni
+	  <ietf-dane@dukhovni.org>
+	- history_tokenize_word: don't break if we get a newline (though we
+	  shouldn't get one due to the loop in history_tokenize_internal
+	- history_expand_internal: use newline as a whitespace character when
+	  expanding by words, as we do with history_tokenize_internal
+
+jobs.h
+	- J_PIPEFAIL: new flag for `flags' element of job struct
+
+jobs.c
+	- stop_pipeline: if pipefail_opt set, newjob gets J_PIPEFAIL in its
+	  flags word
+	- raw_job_exit_status: use J_PIPEFAIL (setting of pipefail when job
+	  created) instead of current setting of pipefail status to determine
+	  how to compute exit status of pipeline. Tentative implementation of
+	  Posix proposal
+
+expr.c
+	- exp0: don't call expr_bind_variable with a NULL string.  Fixes
+	  fuzzing bug reported by Eduardo Bustamante <dualbus@gmail.com>
+	- expr_bind_variable: don't try to do anything with a NULL or empty
+	  LHS
+
+				   9/16
+				   ----
+lib/readline/undo.c
+	- rl_do_undo: before we release the undo list entry we've just
+	  processed, make sure we avoid any pointer aliasing issues caused
+	  by having the entry being removed as part of the undo list in
+	  _rl_saved_line_for_history. Fixes fuzzing bug reported by
+	  Eduardo Bustamante <dualbus@gmail.com>
+
+				   9/17
+				   ----
+[bash-5.0-beta released]
+
+				   9/18
+				   ----
+lib/readline/bind.c
+	- name_and_keymap: new struct for keymap names and maps
+	- builtin_keymap_names: static array of builtin keymap names and
+	  maps; preparing for allowing applications to set the names of
+	  keymaps they create; keymap_names is initially a pointer to
+	  this array
+	- _rl_get_keymap_by_name,_rl_get_keymap_by_map: new functions for
+	  searching the keymap_names array and returning an index
+	- rl_get_keymap_by_name, rl_get_keymap_name: rewritten in terms of
+	  new functions above
+	- rl_set_keymap_name (char *name, Keymap map): new function, set
+	  name of MAP to NAME. NAME must not be builtin; MAP must not be one
+	  of the builtin keymaps. Request and initial implementation from
+	  Tom Tromey <tom@tromey.com>
+
+lib/readline/readline.h
+	- rl_set_keymap_name: new extern declaration for new public function
+
+lib/readline/doc/rltech.texi
+	- rl_set_keymap_name: add documentation
+
+lib/readline/doc/rluser.texi
+	- add text to `set keymap' description to note that applications
+	  can add keymap names that can be used there
+
+				   9/20
+				   ----
+parse.y
+	- shell_getc: don't execute the alias hack (returning a space at the
+	  end of the string) if we are parsing a command substitution that
+	  starts with a double paren (subshell inside a comsub), in which
+	  case the flags are PSH_DPAREN. Fixes fuzzing bug reported by
+	  Eduardo Bustamante <dualbus@gmail.com>
+
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: default case: make sure we check multibyte
+	  char length when deciding whether to enlarge the search string
+	  buffer, instead of using the old assumption. Fixes fuzzing bug
+	  reported by Eduardo Bustamante <dualbus@gmail.com>
+
+builtins/fc.def,execute_cmd.c
+	- fixed some missing free()s uncovered by coverity. Report from
+	  Siteshwar Vashisht <svashisht@redhat.com>
+
+lib/glob/glob.c
+	- glob_vector: make sure name_vector is initialized to NULL
+
+lib/sh/{pathcanon,pathphys}.c
+	- {pathcanon,pathphys}: use memmove instead of strcpy on a possibly-
+	  overlapping region of memory
+
+subst.c
+	- parameter_list_transform: make sure to dispose the word list in all
+	  cases before returning
+	- parameter_brace_expand_rhs: make sure t1 is freed before returning
+	  due to an invalid name resulting from an indirect expansion
+
+support/man2html.c
+	- fixed a couple of memory leaks
+
+				   9/21
+				   ----
+subst.c
+	- process_substitute: if we are part of a job control process chain
+	  (pipeline_pgrp != shell_pgrp), have the child shell forked to run
+	  the process substitution set pipeline_pgrp to its own PID,
+	  effectively becoming a process group leader without changing
+	  its own process group. Fixes stray SIGHUP issue reported by
+	  Jeremy Townshend <jeremy.townshend@gmail.com>
+ 
+				   9/23
+				   ----
+arrayfunc.c
+	- assign_array_element: if we are assigning to an existing associative
+	  array, and assoc_expand_once is set, allow `*' and `@' as subscripts.
+	  Partial fix for report from Grisha Levit <grishalevit@gmail.com>
+
+variables.c
+	- bind_int_variable: if valid_array_reference (lhs) is not true,
+	  make sure that the lhs is a valid identifier before assigning the
+	  value
+
+arrayfunc.c
+	- valid_array_reference: allow blank subscripts. They are treated as
+ 	  `normal' keys for associative arrays and evaluate to 0 for indexed
+	  arrays. More of fix for report from Grisha Levit
+	  <grishalevit@gmail.com>
+
+				   9/24
+				   ----
+bashline.c
+	- restore_tilde: if the expanded length (xl) is longer than vl
+	  we end up requesting a negative amount of memory (an extremely
+	  large unsigned number). Just punt and return val in this case.
+	  Fuzzing bug reported by Eduardo Bustamante <dualbus@gmail.com>
+	- restore_tilde: make sure we return what the user typed if tilde
+	  expansion fails
+
+				   9/29
+				   ----
+builtins/shopt.def
+	- uncomment `localvar_unset' option definition
+
+doc/{bash.1,bashref.texi}
+	- document `localvar_unset' shell option
+
+arrayfunc.c
+	- valid_array_reference: if we are parsing a subscript for an existing
+	  associative array, the `assoc_expand_once' option is set, and the
+	  VA_ONEWORD flag is set in FLAGS (meaning there should be nothing
+	  following the closing `]'), don't call skipsubscript to find the
+	  closing `]', use one that is at the end of the word. Part of fix for
+	  issue reported by Grisha Levit <grishalevit@gmail.com>
+
+builtins/{printf,set}.def
+	- pass VA_ONEWORD as part of flags value everywhere valid_array_reference
+	  is used
+
+config-top.h
+	- CHECKWINSIZE_DEFAULT: now 1, so check_window_size is on by default
+	- HISTEXPAND_DEFAULT: new define, allows builder to enable or disable
+	  history expansion by default at build time
+
+doc/{bash.1,bashref.texi}
+	- checkwinsize: document new default value
+
+bashhist.h
+	- HISTEXPAND_DEFAULT: don't define if it's already defined. Strict
+	  POSIX mode continues to default to off
+
+				   9/30
+				   ----
+lib/readline/input.c
+	- win32_isatty: win32-specific changes from GDB. Patch submitted by
+	  Tom Tromey <tom@tromey.com>, originally from Eli Zaretskii
+	  <eliz@gnu.org>
+
+				   10/1
+				   ----
+lib/readline/vi_mode.c
+	- rl_vi_start_inserting: start an undo group so we can grab the text
+	  inserted here as a single unit, avoiding any insert coalescing
+	  performed by rl_insert_text. Report and fix from Richard Todd
+	  <richard.w.todd@outlook.com>
+
+				   10/3
+				   ----
+subst.c
+	- parameter_brace_transform: if we're asked to display the attributes
+	  of an unset variable, check that the variable exists even if
+	  get_var_and_type returns NULL (it checks invisible_p). Requested by
+	  Michal Pesa <pesathem@gmail.com>
+
+lib/readline/kill.c
+	- _rl_bracketed_text: new function, collects the text pasted in
+	  bracketed paste mode and consumes the bracketed paste end marker;
+	  returns the pasted text and its length
+	- rl_bracketed_paste_begin: call _rl_bracketed_text to collect the
+	  text
+
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: set cxt->lastc to -7 if the input resolves to
+	  rl_bracketed_paste_begin
+	- _rl_isearch_dispatch: if cxt->lastc == -7, call _rl_bracketed_text
+	  to collect the pasted text and add it to the accumulating search
+	  string. Only works if ESC is not one of the isearch terminators.
+	  Fixes issue reported in Debian bug report 891780,
+	  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=891780
+
+				   10/5
+				   ----
+variables.c
+	- push_posix_tempvar_internal: new function, body of push_func_var
+	  with additional argument saying whether it's being called from a
+	  function or (special) builtin code path
+	- push_builtin_var: new function, calls push_posix_tempvar_internal
+	  with second argument indicating builtin code path
+	- push_func_var: now a stub that calls push_posix_tempvar_internal
+	  with second argument indicating function code path
+	- pop_scope: if called from a special builtin, call push_builtin_var
+	  instead of push_func_var to do the right variable propagation
+
+builtins/shopt.def
+	- progcomp_alias: uncomment, make available to users
+
+doc/{bash.1,bashref.texi},lib/readline/doc/rluser.texi
+	- progcomp_alias: document shopt option, describe its use in
+	  the section on programmable completion
+
+trap.c
+	- decode_signal: handle SIGRTMIN+n at runtime, with the `SIG' prefix
+	  or without, case-insensitively if requested, and return SIGRTMIN+n.
+	  These values could be different than what was available at compile
+	  time. Report and patch from Rasmus Villemoes <rv@rasumsvillemoes.dk>
+
+				   10/8
+				   ----
+execute_cmd.c
+	- execute_command_internal: only set line_number from command->value.Subshell
+	  if the type == cm_subshell; otherwise defer and set later
+
+				   10/10
+				   -----
+examples/loadables/seq.c
+	- seq: new loadable builtin, derived originally from coreutils:seq.c
+	  but with very little of that code remaining
+
+				   10/12
+				   -----
+trap.c
+	- run_pending_traps,_run_trap_internal: honor evalnest_max and
+	  increment/decrement evalnest accordingly, since trap actions
+	  are processed as if run by `eval'. Feature suggsted by Mike
+	  Gerwitz <mtg@gnu.org>
+
+				   10/16
+				   -----
+expr.c
+	- expr_skipsubscript: new function, calls skipsubscript with flags
+	  similar to arrayfunc.c:valid_array_subscript if assoc_expand_once
+	  is set and it looks like we've already expanded the subscript of
+	  an associative array. Reported back on 8/27 by Grisha Levit
+	  <grishalevit@gmail.com>
+	- readtok: call expr_skipsubscript instead of skipsubscript
+
+arrayfunc.c
+	- valid_array_reference: call skipsubscript with a third arg computed
+	  from the VA_NOEXPAND flag only if we're expanding an associative
+	  array subscript -- we already figure out whether or not we are
+
+[bumped release status to beta2]
+
+				   10/20
+				   -----
+builtins/setattr.def
+	- set_or_show_attributes: after isolating NAME, make sure to restore
+	  the "[+]=" in case we need the word later. Issue pointed out by
+	  Grisha Levit <grishalevit@gmail.com>
+
+				   10/21
+				   -----
+lib/readline/search.c
+	- noninc_search_from_pos: if we are supposed to be searching for a
+	  pattern (vi mode), make sure to pass S to _hs_history_patsearch,
+	  since that has any leading `^' stripped
+
+lib/readline/histsearch.c
+	- _hs_history_patsearch: if the search isn't anchored, put a `*' at
+	  the beginning to force fnmatch to match anywhere in the line (could
+	  look at this later to make a change to history_search_internal that
+	  would avoid the need to add the leading `*')
+
+subst.c
+	- parameter_brace_expand_rhs: treat a failure to assign a variable with
+	  a ${param:=value} expansion as an expansion error, and, in a non-
+	  interactive posix-mode shell, exit the shell
+	- param_expand: don't set W_SPLITSPACE for $* unless IFS is NULL;
+	  consistent with other uses of W_SPLITSPACE
+
+				   10/22
+				   -----
+doc/{bash.1,bashref.texi}
+	- tweak description of bash conditional expressions to note that the
+	  test and [ commands determine their behavior based on the number of
+	  arguments. Suggested by Ilkka Virta <itvirta@iki.fi>
+
+				   10/24
+				   -----
+execute_cmd.c
+	- execute_simple_command: don't set $_ to NULL when executing a
+	  command that forks; just leave it unchanged. Tweaked the documentation
+	  slightly as a result. Inspired by report from Ricky Tigg
+	  <ricky.tigg@gmail.com>
+
+				   10/28
+				   -----
+redir.c
+	- here_document_to_fd: make sure the temp files used to store here
+	  documents are readable (and writable, where necessary) by the user.
+	  This can happen in the unlikely case that someone decides to shoot
+	  himself in the foot by setting the umask to 400. Issue originally
+	  raised back in March by Stephane Chazelas
+	  <stephane.chazelas@gmail.com>; fix inspired by Martijn Dekker
+	  <martijn@inlv.org>
+
+				   10/29
+				   -----
+lib/readline/terminal.c
+	- bind_termcap_arrow_keys: bind the "kI" capability (what the Insert
+	  keypad key outputs) to overwrite mode. Patch from Xose Vazquez Perez
+	  <xose.vazquez@gmail.com>
+
+				   10/30
+				   -----
+braces.c
+	- mkseq: make sure to terminate result array before passing it to
+	  strvec_dispose on an interrupt. Report and fix from Corbin Souffrant
+	  <corbin.souffrant@gmail.com>
+
+				   11/6
+				   ----
+trap.c
+	- _run_trap_internal: if the signal shows up as SIG_CHANGED after
+	  running the trap handler, check for terminating signals and run any
+	  terminating signal handler indicates. Fixes issue reported by
+	  Owen Stephens <owen@owenstephens.co.uk>
+
+				   11/7
+				   ----
+execute_cmd.c
+	- execute_builtin: don't merge the temporary environment when the
+	  `return' builtin is being executed if it's being executed by the
+	  `command' builtin, since that's supposed to inhibit the special
+	  builtin properties. Part of POSIX conformance problems reported
+	  by Martin Rehak <martin.rehak@oracle.com>
+
+builtins/cd.def
+	- bindpwd: if canonicalization fails when -P is specified (e.g. if the
+	  directory name length exceeds PATH_MAX), reset dirname ($PWD value) =
+	  to the_current_working_directory (Posix cd description, step 10.)
+	  Part of POSIX conformance problems reported by Martin Rehak
+	  <martin.rehak@oracle.com>
+
+builtins/kill.def
+	- kill_builtin: support -sSIG and -nSIG without requiring them to be
+	  separate arguments. POSIX says a "conforming implementation" should
+	  accept them.
+	  Part of POSIX conformance problems reported by Martin Rehak
+	  <martin.rehak@oracle.com>
+
+				   11/8
+				   ----
+arrayfunc.c
+	- array_value_internal: return NULL for invisible array variables.
+	  Fixes issue with FUNCNAME sometimes returning invalid value reported
+	  by Great Big Dot <greatbigdot@gmail.com>
+
+builtins/cd.def
+	- change_to_directory: if we are in posix mode, and the chdir to the
+	  absolute pathname ($PWD/dirname) fails, return an error without
+	  trying to use just `dirname' (posix cd step 10).
+	  Part of POSIX conformance problems reported by Martin Rehak
+	  <martin.rehak@oracle.com>
+
+execute_cmd.c
+	- execute_case_command: use expand_word_leave_quoted to expand the
+	  word, then dequote the resulting string. This performs the
+	  expansions in the order posix specifies.
+	  Part of POSIX conformance problems reported by Martin Rehak
+	  <martin.rehak@oracle.com>
+
+subst.c
+	- expand_word_unsplit: rewrite in terms of expand_word_leave_quoted
+	- ifs_whitespace: new macro, Posix ifs whitespace (ISSPACE; member
+	  of current locale's space char class)
+	- ifs_whitesep: new macro, whitespace that is a member of $IFS; used
+	  by list_string and get_word_from_string
+	- list_string: use ifs_whitesep instead of spctabnl in case $IFS
+	  contains whitespace characters that are not space, tab, or newline
+	- get_word_from_string: use ifs_whitesep instead of spctabnl in case
+	  $IFS contains whitespace characters that are not space, tab, or
+	  newline.
+	  Part of POSIX conformance problems reported by Martin Rehak
+	  <martin.rehak@oracle.com>
+
+				   11/9
+				   ----
+general.c
+	- posix_initialize: enable the shift_verbose option when turning on
+	  posix mode, and disable it when posix mode is disabled. From a
+	  report by Eric Blake <eblake@redhat.com>
+
+doc/bashref.texi
+	- posix mode: note the effect of posix mode on shift_verbose
+
+				   11/12
+				   -----
+subst.c
+	- parameter_brace_expand: if parameter_brace_expand_word returns an
+	  error, make sure to set TEMP = 0 (to note that the variable is unset).
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+	- param_expand: if expanding $! when set -u is enabled, honor the
+	  PF_IGNUNBOUND flag and just return NULL, relying on the caller to
+	  take care of understanding that the variable is unset
+	  From a report by Grisha Levit <grishalevit@gmail.com>	
+	- parameter_brace_expand: if we are checking nullness, and we have a
+	  valid array expansion, a quoted null string resulting from the array
+	  expansion of a * or @ subscript satisfies the nullness check.
+	  From a report by Grisha Levit <grishalevit@gmail.com>
+
+				   11/14
+				   -----
+aclocal.m4
+	- BASH_CHECK_LIB_TERMCAP: add last-ditch check for libncursesw, since
+	  it's apparently the only curses library on some distributions.
+	  Report from John Frankish <john.frankish@outlook.com>
+
+				   11/16
+				   -----
+bashline.c
+	- attempt_shell_completion: allow an initial word completion to
+	  complete a partial first word (point appears in the middle of
+	  the word) before resorting to command completion. Report and fix
+	  from Luca Boccassi <bluca@debian.org>
+
+[bash-5.0-beta2 frozen]

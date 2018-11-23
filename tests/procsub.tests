@@ -68,6 +68,12 @@ unset -f bug
 count_lines()
 {
     wc -l < $1
+
+#    case "$1" in
+#    *sh-np*)	[ -e "$1" ] || { echo 0; echo 0; echo 0; echo 0; return; } ;;
+#    *) ;;
+#    esac
+
     wc -l < $1
     wc -l < $1
     true | wc -l < $1
@@ -80,12 +86,12 @@ unset -f count_lines
 
 echo extern
 FN=$TMPDIR/bashtest-$$
-cat >$FN <<EOF
-wc -l < \$1
-wc -l < \$1
-wc -l < \$1
-true | wc -l < \$1
-wc -l < \$1
+cat >$FN << \EOF
+wc -l < $1
+wc -l < $1
+wc -l < $1
+true | wc -l < $1
+wc -l < $1
 EOF
 
 ${THIS_SH} -c "source $FN <(date)" | _cut_leading_spaces

@@ -199,7 +199,7 @@ int
 _hs_history_patsearch (const char *string, int direction, int flags)
 {
   char *pat;
-  size_t len;
+  size_t len, start;
   int ret, unescaped_backslash;
 
 #if defined (HAVE_FNMATCH)
@@ -216,12 +216,26 @@ _hs_history_patsearch (const char *string, int direction, int flags)
     }
   if (unescaped_backslash)
     return -1;
-  pat = (char *)xmalloc (len + 2);
+  pat = (char *)xmalloc (len + 3);
+  /* If the search string is not anchored, we'll be calling fnmatch (assuming
+     we have it). Prefix a `*' to the front of the search string so we search
+     anywhere in the line. */
+  if ((flags & ANCHORED_SEARCH) == 0 && string[0] != '*')
+    {
+      pat[0] = '*';
+      start = 1;
+      len++;
+    }
+  else
+    {
+      start = 0;
+    }
+
   /* Attempt to reduce the number of searches by tacking a `*' onto the end
      of a pattern that doesn't have one.  Assume a pattern that ends in a
      backslash contains an even number of trailing backslashes; we check
      above */
-  strcpy (pat, string);
+  strcpy (pat + start, string);
   if (pat[len - 1] != '*')
     {
       pat[len] = '*';		/* XXX */

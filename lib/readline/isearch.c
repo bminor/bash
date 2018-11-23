@@ -327,7 +327,10 @@ _rl_search_getchar (_rl_search_cxt *cxt)
 int
 _rl_isearch_dispatch (_rl_search_cxt *cxt, int c)
 {
-  int n, wstart, wlen, limit, cval;
+  int n, wstart, wlen, limit, cval, incr;
+  char *paste;
+  size_t pastelen;
+  int j;
   rl_command_func_t *f;
 
   f = (rl_command_func_t *)NULL;
@@ -398,6 +401,8 @@ add_character:
 	cxt->lastc = -5;
       else if (c == CTRL ('Y') || f == rl_yank)	/* XXX */
 	cxt->lastc = -6;
+      else if (f == rl_bracketed_paste_begin)
+	cxt->lastc = -7;
     }
 
   /* If we changed the keymap earlier while translating a key sequence into
@@ -620,22 +625,44 @@ add_character:
       cxt->search_string[cxt->search_string_index] = '\0';
       break;
 
+    case -7:	/* bracketed paste */
+      paste = _rl_bracketed_text (&pastelen);
+      if (paste == 0 || *paste == 0)
+	{
+	  free (paste);
+	  break;
+	}
+      if (cxt->search_string_index + pastelen + 1 >= cxt->search_string_size)
+	{
+	  cxt->search_string_size += pastelen + 2;
+	  cxt->search_string = (char *)xrealloc (cxt->search_string, cxt->search_string_size);
+	}
+      strcpy (cxt->search_string + cxt->search_string_index, paste);
+      cxt->search_string_index += pastelen;
+      free (paste);
+      break;
+
     /* Add character to search string and continue search. */
     default:
-      if (cxt->search_string_index + 2 >= cxt->search_string_size)
+#if defined (HANDLE_MULTIBYTE)
+      wlen = (cxt->mb[0] == 0 || cxt->mb[1] == 0) ? 1 : RL_STRLEN (cxt->mb);
+#else
+      wlen = 1;
+#endif
+      if (cxt->search_string_index + wlen + 1 >= cxt->search_string_size)
 	{
-	  cxt->search_string_size += 128;
+	  cxt->search_string_size += 128;	/* 128 much greater than MB_CUR_MAX */
 	  cxt->search_string = (char *)xrealloc (cxt->search_string, cxt->search_string_size);
 	}
 #if defined (HANDLE_MULTIBYTE)
       if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
 	{
-	  int j, l;
+	  int j;
 
 	  if (cxt->mb[0] == 0 || cxt->mb[1] == 0)
 	    cxt->search_string[cxt->search_string_index++] = cxt->mb[0];
 	  else
-	    for (j = 0, l = RL_STRLEN (cxt->mb); j < l; )
+	    for (j = 0; j < wlen; )
 	      cxt->search_string[cxt->search_string_index++] = cxt->mb[j++];
 	}
       else

@@ -95,6 +95,9 @@ static const char *string_varname PARAMS((int));
 static char *_rl_get_string_variable_value PARAMS((const char *));
 static int substring_member_of_array PARAMS((const char *, const char * const *));
 
+static int _rl_get_keymap_by_name PARAMS((const char *));
+static int _rl_get_keymap_by_map PARAMS((Keymap));
+
 static int currently_reading_init_file;
 
 /* used only in this file */
@@ -2255,10 +2258,12 @@ glean_key_from_name (char *name)
 }
 
 /* Auxiliary functions to manage keymaps. */
-static const struct {
-  const char * const name;
+struct name_and_keymap {
+  char *name;
   Keymap map;
-} keymap_names[] = {
+};
+
+static struct name_and_keymap builtin_keymap_names[] = {
   { "emacs", emacs_standard_keymap },
   { "emacs-standard", emacs_standard_keymap },
   { "emacs-meta", emacs_meta_keymap },
@@ -2272,27 +2277,101 @@ static const struct {
   { (char *)0x0, (Keymap)0x0 }
 };
 
-Keymap
-rl_get_keymap_by_name (const char *name)
+/* -1 for NULL entry */
+#define NUM_BUILTIN_KEYMAPS (sizeof (builtin_keymap_names) / sizeof (builtin_keymap_names[0]) - 1)
+
+static struct name_and_keymap *keymap_names = builtin_keymap_names;
+
+static int
+_rl_get_keymap_by_name (const char *name)
 {
   register int i;
 
   for (i = 0; keymap_names[i].name; i++)
     if (_rl_stricmp (name, keymap_names[i].name) == 0)
-      return (keymap_names[i].map);
-  return ((Keymap) NULL);
+      return (i);
+  return -1;
+}
+
+Keymap
+rl_get_keymap_by_name (const char *name)
+{
+  int i;
+
+  i = _rl_get_keymap_by_name (name);
+  return ((i >= 0) ? keymap_names[i].map : (Keymap) NULL);
+}
+
+static int
+_rl_get_keymap_by_map (Keymap map)
+{
+  register int i;
+
+  for (i = 0; keymap_names[i].name; i++)
+    if (map == keymap_names[i].map)
+      return (i);
+  return -1;
 }
 
 char *
 rl_get_keymap_name (Keymap map)
 {
-  register int i;
-  for (i = 0; keymap_names[i].name; i++)
-    if (map == keymap_names[i].map)
-      return ((char *)keymap_names[i].name);
-  return ((char *)NULL);
+  int i;
+
+  i = _rl_get_keymap_by_map (map);
+  return ((i >= 0) ? keymap_names[i].name : (char *)NULL);
 }
-  
+
+int
+rl_set_keymap_name (const char *name, Keymap map)
+{
+  int i, ni, mi;
+
+  /* First check whether or not we're trying to rename a builtin keymap */
+  mi = _rl_get_keymap_by_map (map);
+  if (mi >= 0 && mi < NUM_BUILTIN_KEYMAPS)
+    return -1;
+
+  /* Then reject attempts to set one of the builtin names to a new map */
+  ni = _rl_get_keymap_by_name (name);
+  if (ni >= 0 && ni < NUM_BUILTIN_KEYMAPS)
+    return -1;
+
+  /* Renaming a keymap we already added */
+  if (mi >= 0)	/* XXX - could be >= NUM_BUILTIN_KEYMAPS */
+    {
+      xfree (keymap_names[mi].name);
+      keymap_names[mi].name = savestring (name);
+      return mi;
+    }
+
+  /* Associating new keymap with existing name */
+  if (ni >= 0)
+    {
+      keymap_names[ni].map = map;
+      return ni;
+    }
+
+  for (i = 0; keymap_names[i].name; i++)
+    ;
+
+  if (keymap_names == builtin_keymap_names)
+    {
+      keymap_names = xmalloc ((i + 2) * sizeof (struct name_and_keymap));
+      memcpy (keymap_names, builtin_keymap_names, i * sizeof (struct name_and_keymap));
+    }
+  else
+    keymap_names = xrealloc (keymap_names, (i + 2) * sizeof (struct name_and_keymap));
+
+  keymap_names[i].name = savestring (name);
+  keymap_names[i].map = map;
+
+  keymap_names[i+1].name = NULL;
+  keymap_names[i+1].map = NULL;
+
+  return i;
+}
+
 void
 rl_set_keymap (Keymap map)
 {

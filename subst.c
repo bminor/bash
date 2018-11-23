@@ -131,7 +131,6 @@ extern int errno;
    the embedded `break'. The dangling else accommodates a trailing semicolon;
    we could also put in a do ; while (0) */
 
-   
 #define CHECK_STRING_OVERRUN(oind, ind, len, ch) \
   if (ind >= len) \
     { \
@@ -1603,7 +1602,6 @@ extract_dollar_brace_string (string, sindex, quoted, flags)
 	}
 
 #if defined (ARRAY_VARS)
-      /* XXX - bash-5.0 */
       if (c == LBRACK && dolbrace_state == DOLBRACE_PARAM)
 	{
 	  si = skipsubscript (string, i, 0);
@@ -1816,6 +1814,9 @@ skip_matched_pair (string, start, open, close, flags)
 }
 
 #if defined (ARRAY_VARS)
+/* Flags has 1 as a reserved value, since skip_matched_pair uses it for
+   skipping over quoted strings and taking the first instance of the
+   closing character. */
 int
 skipsubscript (string, start, flags)
      const char *string;
@@ -2622,7 +2623,8 @@ string_list_dollar_at (list, quoted, flags)
 #  if !defined (__GNUC__)
   sep = (char *)xmalloc (MB_CUR_MAX + 1);
 #  endif /* !__GNUC__ */
-  /* XXX - bash-4.4/bash-5.0 testing PF_ASSIGNRHS */
+  /* XXX - testing PF_ASSIGNRHS to make sure positional parameters are
+     separated with a space even when word splitting will not occur. */
   if (flags & PF_ASSIGNRHS)
     {
       sep[0] = ' ';
@@ -2647,7 +2649,8 @@ string_list_dollar_at (list, quoted, flags)
       sep[1] = '\0';
     }
 #else	/* !HANDLE_MULTIBYTE */
-  /* XXX - bash-4.4/bash-5.0 test PF_ASSIGNRHS */
+  /* XXX - PF_ASSIGNRHS means no word splitting, so we want positional
+     parameters separated by a space. */
   sep[0] = ((flags & PF_ASSIGNRHS) || ifs == 0 || *ifs == 0) ? ' ' : *ifs;
   sep[1] = '\0';
 #endif	/* !HANDLE_MULTIBYTE */
@@ -2750,6 +2753,13 @@ string_list_pos_params (pchar, list, quoted)
 					      : (c) == (separators)[0]) \
 			   : 0)
 
+/* member of the space character class in the current locale */
+#define ifs_whitespace(c)	ISSPACE(c)
+
+/* "adjacent IFS white space" */
+#define ifs_whitesep(c)	((sh_style_split || separators == 0) ? spctabnl (c) \
+							     : ifs_whitespace (c))
+
 WORD_LIST *
 list_string (string, separators, quoted)
      register char *string, *separators;
@@ -2777,10 +2787,12 @@ list_string (string, separators, quoted)
   slen = 0;
   /* Remove sequences of whitespace at the beginning of STRING, as
      long as those characters appear in IFS.  Do not do this if
-     STRING is quoted or if there are no separator characters. */
+     STRING is quoted or if there are no separator characters. We use the
+     Posix definition of whitespace as a member of the space character
+     class in the current locale. */
   if (!quoted || !separators || !*separators)
     {
-      for (s = string; *s && spctabnl (*s) && issep (*s); s++);
+      for (s = string; *s && issep (*s) && ifs_whitespace (*s); s++);
 
       if (!*s)
 	return ((WORD_LIST *)NULL);
@@ -2791,7 +2803,7 @@ list_string (string, separators, quoted)
   /* OK, now STRING points to a word that does not begin with white space.
      The splitting algorithm is:
 	extract a word, stopping at a separator
-	skip sequences of spc, tab, or nl as long as they are separators
+	skip sequences of whitespace characters as long as they are separators
      This obeys the field splitting rules in Posix.2. */
   slen = STRLEN (string);
   for (result = (WORD_LIST *)NULL, sindex = 0; string[sindex]; )
@@ -2826,7 +2838,7 @@ list_string (string, separators, quoted)
 
       /* If we're not doing sequences of separators in the traditional
 	 Bourne shell style, then add a quoted null argument. */
-      else if (!sh_style_split && !spctabnl (string[sindex]))
+      else if (!sh_style_split && !ifs_whitespace (string[sindex]))
 	{
 	  t = alloc_word_desc ();
 	  t->word = make_quoted_char ('\0');
@@ -2837,7 +2849,7 @@ list_string (string, separators, quoted)
       free (current_word);
 
       /* Note whether or not the separator is IFS whitespace, used later. */
-      whitesep = string[sindex] && spctabnl (string[sindex]);
+      whitesep = string[sindex] && ifs_whitesep (string[sindex]);
 
       /* Move past the current separator character. */
       if (string[sindex])
@@ -2846,21 +2858,21 @@ list_string (string, separators, quoted)
 	  ADVANCE_CHAR (string, slen, sindex);
 	}
 
-      /* Now skip sequences of space, tab, or newline characters if they are
+      /* Now skip sequences of whitespace characters if they are
 	 in the list of separators. */
-      while (string[sindex] && spctabnl (string[sindex]) && issep (string[sindex]))
+      while (string[sindex] && ifs_whitesep (string[sindex]) && issep (string[sindex]))
 	sindex++;
 
       /* If the first separator was IFS whitespace and the current character
 	 is a non-whitespace IFS character, it should be part of the current
 	 field delimiter, not a separate delimiter that would result in an
 	 empty field.  Look at POSIX.2, 3.6.5, (3)(b). */
-      if (string[sindex] && whitesep && issep (string[sindex]) && !spctabnl (string[sindex]))
+      if (string[sindex] && whitesep && issep (string[sindex]) && !ifs_whitesep (string[sindex]))
 	{
 	  sindex++;
 	  /* An IFS character that is not IFS white space, along with any
 	     adjacent IFS white space, shall delimit a field. (SUSv3) */
-	  while (string[sindex] && spctabnl (string[sindex]) && isifs (string[sindex]))
+	  while (string[sindex] && ifs_whitesep (string[sindex]) && isifs (string[sindex]))
 	    sindex++;
 	}
     }
@@ -2876,6 +2888,7 @@ list_string (string, separators, quoted)
    XXX - this function is very similar to list_string; they should be
 	 combined - XXX */
 
+/* character is in $IFS */
 #define islocalsep(c)	(local_cmap[(unsigned char)(c)] != 0)
 
 char *
@@ -2910,17 +2923,17 @@ get_word_from_string (stringp, separators, endptr)
      long as those characters appear in SEPARATORS.  This happens if
      SEPARATORS == $' \t\n' or if IFS is unset. */
   if (sh_style_split || separators == 0)
-    {
-      for (; *s && spctabnl (*s) && islocalsep (*s); s++);
+    for (; *s && spctabnl (*s) && islocalsep (*s); s++);
+  else
+    for (; *s && ifs_whitespace (*s) && islocalsep (*s); s++);
 
-      /* If the string is nothing but whitespace, update it and return. */
-      if (!*s)
-	{
-	  *stringp = s;
-	  if (endptr)
-	    *endptr = s;
-	  return ((char *)NULL);
-	}
+  /* If the string is nothing but whitespace, update it and return. */
+  if (!*s)
+    {
+      *stringp = s;
+      if (endptr)
+	*endptr = s;
+      return ((char *)NULL);
     }
 
   /* OK, S points to a word that does not begin with white space.
@@ -2940,7 +2953,7 @@ get_word_from_string (stringp, separators, endptr)
     *endptr = s + sindex;
 
   /* Note whether or not the separator is IFS whitespace, used later. */
-  whitesep = s[sindex] && spctabnl (s[sindex]);
+  whitesep = s[sindex] && ifs_whitesep (s[sindex]);
 
   /* Move past the current separator character. */
   if (s[sindex])
@@ -2958,12 +2971,12 @@ get_word_from_string (stringp, separators, endptr)
      a non-whitespace IFS character, it should be part of the current field
      delimiter, not a separate delimiter that would result in an empty field.
      Look at POSIX.2, 3.6.5, (3)(b). */
-  if (s[sindex] && whitesep && islocalsep (s[sindex]) && !spctabnl (s[sindex]))
+  if (s[sindex] && whitesep && islocalsep (s[sindex]) && !ifs_whitesep (s[sindex]))
     {
       sindex++;
       /* An IFS character that is not IFS white space, along with any adjacent
 	 IFS white space, shall delimit a field. */
-      while (s[sindex] && spctabnl (s[sindex]) && islocalsep(s[sindex]))
+      while (s[sindex] && ifs_whitesep (s[sindex]) && islocalsep(s[sindex]))
 	sindex++;
     }
 
@@ -3970,13 +3983,7 @@ expand_word_unsplit (word, quoted)
 {
   WORD_LIST *result;
 
-  expand_no_split_dollar_star = 1;
-  if (ifs_is_null)
-    word->flags |= W_NOSPLIT;
-  word->flags |= W_NOSPLIT2;
-  result = call_expand_word_internal (word, quoted, 0, (int *)NULL, (int *)NULL);
-  expand_no_split_dollar_star = 0;
-
+  result = expand_word_leave_quoted (word, quoted);
   return (result ? dequote_list (result) : result);
 }
 
@@ -4270,6 +4277,21 @@ quote_list (list)
       free (t);
     }
   return list;
+}
+
+WORD_DESC *
+dequote_word (word)
+     WORD_DESC *word;
+{
+  register char *s;
+
+  s = dequote_string (word->word);
+  if (QUOTED_NULL (word->word))
+    word->flags &= ~W_HASQUOTEDNULL;
+  free (word->word);
+  word->word = s;
+
+  return word;
 }
 
 /* De-quote quoted characters in each word in LIST. */
@@ -5844,7 +5866,24 @@ process_substitute (string, open_for_read_in_child)
   set_sigint_handler ();
 
 #if defined (JOB_CONTROL)
+  /* make sure we don't have any job control */
   set_job_control (0);
+
+  /* The idea is that we want all the jobs we start from an async process
+     substitution to be in the same process group, but not the same pgrp
+     as our parent shell, since we don't want to affect our parent shell's
+     jobs if we get a SIGHUP and end up calling hangup_all_jobs, for example.
+     If pipeline_pgrp != shell_pgrp, we assume that there is a job control
+     shell somewhere in our parent process chain (since make_child initializes
+     pipeline_pgrp to shell_pgrp if job_control == 0). What we do in this
+     case is to set pipeline_pgrp to our PID, so all jobs started by this
+     process have that same pgrp and we are basically the process group leader.
+     This should not have negative effects on child processes surviving
+     after we exit, since we wait for the children we create, but that is
+     something to watch for. */
+
+  if (pipeline_pgrp != shell_pgrp)
+    pipeline_pgrp = getpid ();
 #endif /* JOB_CONTROL */
 
 #if !defined (HAVE_DEV_FD)
@@ -6561,7 +6600,6 @@ expand_arrayref:
 	    {
 	      /* Only treat as double quoted if array variable */
 	      if (var && (array_p (var) || assoc_p (var)))
-	        /* XXX - bash-4.4/bash-5.0 pass AV_ASSIGNRHS */
 		temp = array_value (name, quoted|Q_DOUBLE_QUOTES, AV_ASSIGNRHS, &atype, &ind);
 	      else		
 		temp = array_value (name, quoted, 0, &atype, &ind);
@@ -6801,6 +6839,7 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
   WORD_LIST *l;
   char *t, *t1, *temp, *vname;
   int l_hasdollat, sindex;
+  SHELL_VAR *v;
 
 /*itrace("parameter_brace_expand_rhs: %s:%s pflags = %d", name, value, pflags);*/
   /* If the entire expression is between double quotes, we want to treat
@@ -6914,6 +6953,7 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
 	{
 	  report_error (_("%s: invalid indirect expansion"), name);
 	  free (vname);
+	  free (t1);
 	  dispose_word (w);
 	  return &expand_wdesc_error;
 	}
@@ -6921,6 +6961,7 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
 	{
 	  report_error (_("%s: invalid variable name"), vname);
 	  free (vname);
+	  free (t1);
 	  dispose_word (w);
 	  return &expand_wdesc_error;
 	}
@@ -6928,10 +6969,26 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
     
 #if defined (ARRAY_VARS)
   if (valid_array_reference (vname, 0))
-    assign_array_element (vname, t1, 0);
+    v = assign_array_element (vname, t1, 0);
   else
 #endif /* ARRAY_VARS */
-  bind_variable (vname, t1, 0);
+  v = bind_variable (vname, t1, 0);
+
+  if (v == 0 || readonly_p (v) || noassign_p (v))	/* expansion error  */
+    {
+      if ((v == 0 || readonly_p (v)) && interactive_shell == 0 && posixly_correct)
+	{
+	  last_command_exit_value = EXECUTION_FAILURE;
+	  exp_jump_to_top_level (FORCE_EOF);
+	}
+      else
+	{
+	  if (vname != name)
+	    free (vname);
+	  last_command_exit_value = EX_BADUSAGE;
+	  exp_jump_to_top_level (DISCARD);
+	}
+    }
 
   stupidly_hack_special_variables (vname);
 
@@ -7206,7 +7263,7 @@ verify_substring_values (v, value, substr, vtype, e1p, e2p)
 #if 1
       if ((vtype == VT_ARRAYVAR || vtype == VT_POSPARMS) && *e2p < 0)
 #else
-      /* XXX - bash-5.0 */
+      /* XXX - TAG: bash-5.1 */
       if (vtype == VT_ARRAYVAR && *e2p < 0)
 #endif
 	{
@@ -7523,8 +7580,9 @@ parameter_list_transform (xc, itype, quoted)
   if (list == 0)
     return ((char *)NULL);
   if (xc == 'A')
-    return (pos_params_assignment (list, itype, quoted));
-  ret = list_transform (xc, (SHELL_VAR *)0, list, itype, quoted);
+    ret = pos_params_assignment (list, itype, quoted);
+  else
+    ret = list_transform (xc, (SHELL_VAR *)0, list, itype, quoted);
   dispose_words (list);
   return (ret);
 }
@@ -7607,6 +7665,11 @@ parameter_brace_transform (varname, value, ind, xform, rtype, quoted, pflags, fl
       this_command_name = oname;
       return &expand_param_error;
     }
+
+  /* If we are asked to display the attributes of an unset variable, V will
+     be NULL after the call to get_var_and_type. Double-check here. */
+  if (xc == 'a' && vtype == VT_VARIABLE && varname && v == 0)
+    v = find_variable (varname);
 
   temp1 = (char *)NULL;		/* shut up gcc */
   switch (vtype & ~VT_STARSUB)
@@ -8701,6 +8764,12 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
   else
     tdesc = parameter_brace_expand_word (name, var_is_special, quoted, PF_IGNUNBOUND|(pflags&(PF_NOSPLIT2|PF_ASSIGNRHS)), &ind);
 
+  if (tdesc == &expand_wdesc_error || tdesc == &expand_wdesc_fatal)
+    {
+      tflag = 0;
+      tdesc = 0;
+    }
+
   if (tdesc)
     {
       temp = tdesc->word;
@@ -8746,6 +8815,14 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
   /* XXX - this may not need to be restricted to special variables */
   if (check_nullness)
     var_is_null |= var_is_set && var_is_special && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && QUOTED_NULL (temp);
+#if defined (ARRAY_VARS)
+  if (check_nullness)
+    var_is_null |= var_is_set && 
+		   (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) &&
+		   QUOTED_NULL (temp) &&
+		   valid_array_reference (name, 0) &&
+		   chk_atstar (name, 0, (int *)0, (int *)0);
+#endif
 
   /* Get the rest of the stuff inside the braces. */
   if (c && c != RBRACE)
@@ -9067,6 +9144,7 @@ param_expand (string, sindex, quoted, expanded_something,
     case '8':
     case '9':
       temp1 = dollar_vars[TODIGIT (c)];
+      /* This doesn't get called when (pflags&PF_IGNUNBOUND) != 0 */
       if (unbound_vars_is_error && temp1 == (char *)NULL)
 	{
 	  uerror[0] = '$';
@@ -9115,7 +9193,7 @@ param_expand (string, sindex, quoted, expanded_something,
 	  if (expanded_something)
 	    *expanded_something = 0;
 	  temp = (char *)NULL;
-	  if (unbound_vars_is_error)
+	  if (unbound_vars_is_error && (pflags & PF_IGNUNBOUND) == 0)
 	    {
 	      uerror[0] = '$';
 	      uerror[1] = c;
@@ -9216,7 +9294,11 @@ param_expand (string, sindex, quoted, expanded_something,
 	      temp = string_list_dollar_at (list, quoted, 0);
 	      /* Set W_SPLITSPACE to make sure the individual positional
 		 parameters are split into separate arguments */
+#if 0
 	      if (quoted == 0 && (ifs_is_set == 0 || ifs_is_null))
+#else	/* change with bash-5.0 */
+	      if (quoted == 0 && ifs_is_null)
+#endif
 		tflag |= W_SPLITSPACE;
 	      /* If we're not quoted but we still don't want word splitting, make
 		 we quote the IFS characters to protect them from splitting (e.g.,
@@ -9730,8 +9812,7 @@ add_string:
 	case '<':
 	case '>':
 	  {
-	    /* bash-4.4/bash-5.0
-	       XXX - technically this should only be expanded at the start
+	       /* XXX - technically this should only be expanded at the start
 	       of a word */
 	    if (string[++sindex] != LPAREN || (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (word->flags & (W_DQUOTE|W_NOPROCSUB)) || posixly_correct)
 	      {
@@ -9790,7 +9871,6 @@ add_string:
 	    word->flags |= W_ITILDE;
 #endif
 
-	  /* XXX - bash-4.4/bash-5.0 */
 	  if (word->flags & W_ASSIGNARG)
 	    word->flags |= W_ASSIGNRHS;		/* affects $@ */
 
@@ -10047,9 +10127,8 @@ add_twochars:
 	      tword = alloc_word_desc ();
 	      tword->word = temp;
 
-	      /* XXX - bash-4.4/bash-5.0 */
 	      if (word->flags & W_ASSIGNARG)
-		tword->flags |= word->flags & (W_ASSIGNARG|W_ASSIGNRHS);	/* affects $@ */
+		tword->flags |= word->flags & (W_ASSIGNARG|W_ASSIGNRHS); /* affects $@ */
 	      if (word->flags & W_COMPLETE)
 		tword->flags |= W_COMPLETE;	/* for command substitutions */
 	      if (word->flags & W_NOCOMSUB)

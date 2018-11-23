@@ -151,7 +151,7 @@ static int progcomp_debug = 0;
 
 int prog_completion_enabled = 1;
 
-#ifdef ALIAS	/* bash-5.0-beta */
+#ifdef ALIAS
 int progcomp_alias = 0;	/* unavailable to user code for now */
 #endif
 

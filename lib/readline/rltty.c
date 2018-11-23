@@ -396,7 +396,6 @@ save_tty_chars (TIOTYPE *tiop)
 /* Currently this is only used on AIX */
 static void
 rltty_warning (char *msg)
-     char *msg;
 {
   _rl_errmsg ("warning: %s", msg);
 }

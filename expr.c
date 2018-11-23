@@ -26,8 +26,8 @@
  order of decreasing precedence.
 
 	"id++", "id--"		[post-increment and post-decrement]
-	"++id", "--id"		[pre-increment and pre-decrement]
 	"-", "+"		[(unary operators)]
+	"++id", "--id"		[pre-increment and pre-decrement]
 	"!", "~"
 	"**"			[(exponentiation)]
 	"*", "/", "%"
@@ -325,6 +325,9 @@ expr_bind_variable (lhs, rhs)
   SHELL_VAR *v;
   int aflags;
 
+  if (lhs == 0 || *lhs == 0)
+    return;		/* XXX */
+
 #if defined (ARRAY_VARS)
   aflags = (assoc_expand_once && already_expanded) ? ASS_NOEXPAND : 0;
 #else
@@ -337,6 +340,27 @@ expr_bind_variable (lhs, rhs)
 }
 
 #if defined (ARRAY_VARS)
+/* This is similar to the logic in arrayfunc.c:valid_array_subscript when
+   you pass VA_NOEXPAND. */
+static char *
+expr_skipsubscript (vp, cp)
+     char *vp, *cp;
+{
+  int flags, isassoc;
+  SHELL_VAR *entry;
+
+  isassoc = 0;
+  entry = 0;
+  if (assoc_expand_once & already_expanded)
+    {
+      *cp = '\0';
+      isassoc = legal_identifier (vp) && (entry = find_variable (vp)) && assoc_p (entry);
+      *cp = '[';	/* ] */
+    }
+  flags = (isassoc && assoc_expand_once && already_expanded) ? VA_NOEXPAND : 0;
+  return (skipsubscript (cp, 0, flags));
+}
+
 /* Rewrite tok, which is of the form vname[expression], to vname[ind], where
    IND is the already-calculated value of expression. */
 static void
@@ -1012,7 +1036,8 @@ exp0 ()
 	    expr_bind_array_element (curlval.tokstr, curlval.ind, vincdec);
 	  else
 #endif
-	    expr_bind_variable (tokstr, vincdec);
+	    if (tokstr)
+	      expr_bind_variable (tokstr, vincdec);
 	}
       free (vincdec);
       val = v2;
@@ -1312,7 +1337,7 @@ readtok ()
 #if defined (ARRAY_VARS)
       if (c == '[')
 	{
-	  e = skipsubscript (cp, 0, 1);		/* XXX - arg 3 was 0 */
+	  e = expr_skipsubscript (tp, cp);		/* XXX - was skipsubscript */
 	  if (cp[e] == ']')
 	    {
 	      cp += e + 1;
@@ -1434,7 +1459,8 @@ readtok ()
 	    /* Could force parsing as preinc or predec and throw an error */
 #if 0
 	    {
-	      /* bash-5.0 */
+	      /* Posix says unary plus and minus have higher priority than
+		 preinc and predec. */
 	      /* This catches something like --4++ */
 	      if (c == '-')
 		evalerror ("--: assignment requires lvalue");

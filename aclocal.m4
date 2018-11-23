@@ -962,7 +962,8 @@ AC_CACHE_VAL(bash_cv_termcap_lib,
     [AC_CHECK_LIB(tinfo, tgetent, bash_cv_termcap_lib=libtinfo,
         [AC_CHECK_LIB(curses, tgetent, bash_cv_termcap_lib=libcurses,
 	    [AC_CHECK_LIB(ncurses, tgetent, bash_cv_termcap_lib=libncurses,
-	        bash_cv_termcap_lib=gnutermcap)])])])])])
+                [AC_CHECK_LIB(ncursesw, tgetent, bash_cv_termcap_lib=libncursesw,
+	            bash_cv_termcap_lib=gnutermcap)])])])])])])
 if test "X$_bash_needmsg" = "Xyes"; then
 AC_MSG_CHECKING(which library has the termcap functions)
 fi
@@ -1852,7 +1853,7 @@ main()
 ],
 ac_cv_rl_version=`cat conftest.rlv`,
 ac_cv_rl_version='0.0',
-ac_cv_rl_version='7.0')])
+ac_cv_rl_version='8.0')])
 
 CFLAGS="$_save_CFLAGS"
 LDFLAGS="$_save_LDFLAGS"

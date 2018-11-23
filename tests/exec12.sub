@@ -4,7 +4,8 @@ trap 'rm -f $TMPFILE' 0
 
 rm -f $TMPFILE
 set -e
-exit_handler() { echo "exit code: $?" ; touch $TMPFILE; }
+# we normalize the exit code to accommodate false returning 255 on Solaris
+exit_handler() { echo "exit code: $(( $? != 0 ))" ; touch $TMPFILE; }
 false() { ! :; }
 notfound() { nosuchcommand ; }
 syntaxerror() { !:; }

@@ -438,6 +438,7 @@ mkseq (start, end, incr, type, width)
 #if defined (SHELL)
       if (ISINTERRUPT)
         {
+          result[i] = (char *)NULL;
           strvec_dispose (result);
           result = (char **)NULL;
         }

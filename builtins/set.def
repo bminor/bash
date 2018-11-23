@@ -800,7 +800,7 @@ unset_builtin (list)
   WORD_LIST *list;
 {
   int unset_function, unset_variable, unset_array, opt, nameref, any_failed;
-  int global_unset_func, global_unset_var;
+  int global_unset_func, global_unset_var, vflags;
   char *name, *tname;
 
   unset_function = unset_variable = unset_array = nameref = any_failed = 0;
@@ -837,6 +837,10 @@ unset_builtin (list)
   else if (unset_function && nameref)
     nameref = 0;
 
+#if defined (ARRAY_VARS)
+  vflags = assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0;
+#endif
+
   while (list)
     {
       SHELL_VAR *var;
@@ -852,7 +856,8 @@ unset_builtin (list)
 
 #if defined (ARRAY_VARS)
       unset_array = 0;
-      if (!unset_function && nameref == 0 && valid_array_reference (name, assoc_expand_once))	/* XXX valid array reference second arg was 0 */
+      /* XXX valid array reference second arg was 0 */
+      if (!unset_function && nameref == 0 && valid_array_reference (name, vflags))
 	{
 	  t = strchr (name, '[');
 	  *t++ = '\0';
@@ -909,7 +914,7 @@ unset_builtin (list)
       if (var && unset_array)
 	{
 	  /* Let unbind_array_element decide what to do with non-array vars */
-	  tem = unbind_array_element (var, t, assoc_expand_once);	/* XXX new third arg */
+	  tem = unbind_array_element (var, t, vflags);	/* XXX new third arg */
 	  if (tem == -2 && array_p (var) == 0 && assoc_p (var) == 0)
 	    {
 	      builtin_error (_("%s: not an array variable"), var->name);
@@ -932,7 +937,7 @@ unset_builtin (list)
 		{
 		  tname = savestring (nameref_cell (var));
 		  if (var = array_variable_part (tname, 0, &t, (int *)0))
-		    tem = unbind_array_element (var, t, assoc_expand_once);	/* XXX new third arg */
+		    tem = unbind_array_element (var, t, vflags);	/* XXX new third arg */
 		  free (tname);
 		}
 	      else

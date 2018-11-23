@@ -1581,7 +1581,9 @@ attempt_shell_completion (text, start, end)
 	{
 	  prog_complete_matches = programmable_completions (n, text, s, e, &foundcs);
 	  /* command completion if programmable completion fails */
-	  in_command_position = s == start && STREQ (n, text);	/* XXX */
+	  /* If we have a completion for the initial word, we can prefer that */
+	  in_command_position = s == start && (iw_compspec || STREQ (n, text));	/* XXX */
+	  foundcs = foundcs && (iw_compspec == 0);
 	}
       /* empty command name following command separator */
       else if (s >= e && n[0] == '\0' && text[0] == '\0' && start > 0 &&
@@ -2988,7 +2990,7 @@ restore_tilde (val, directory_part)
      char *val, *directory_part;
 {
   int l, vl, dl2, xl;
-  char *dh2, *expdir, *ret;
+  char *dh2, *expdir, *ret, *v;
 
   vl = strlen (val);
 
@@ -3000,6 +3002,22 @@ restore_tilde (val, directory_part)
 
   expdir = bash_tilde_expand (directory_part, 0);
   xl = strlen (expdir);
+  if (*directory_part == '~' && STREQ (directory_part, expdir))
+    {
+      /* tilde expansion failed, so what should we return? we use what the
+	 user typed. */
+      v = mbschr (val, '/');
+      vl = STRLEN (v);
+      ret = (char *)xmalloc (xl + vl + 2);
+      strcpy (ret, directory_part);
+      if (v && *v)
+	strcpy (ret + xl, v);
+
+      free (dh2);
+      free (expdir);
+
+      return ret;
+    }
   free (expdir);
 
   /*
@@ -3010,6 +3028,11 @@ restore_tilde (val, directory_part)
      l = length of remainder after tilde-prefix
   */
   l = (vl - xl) + 1;
+  if (l <= 0)
+    {
+      free (dh2);
+      return (savestring (val));		/* XXX - just punt */
+    }
 
   ret = (char *)xmalloc (dl2 + 2 + l);
   strcpy (ret, dh2);
