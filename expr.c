@@ -342,7 +342,7 @@ expr_bind_variable (lhs, rhs)
 #if defined (ARRAY_VARS)
 /* This is similar to the logic in arrayfunc.c:valid_array_subscript when
    you pass VA_NOEXPAND. */
-static char *
+static int
 expr_skipsubscript (vp, cp)
      char *vp, *cp;
 {

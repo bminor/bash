@@ -1,3 +1,7 @@
+if (( $UID == 0 )); then
+	echo "new-exp.tests: the test suite should not be run as root" >&2
+fi
+
 # must do this because posix mode causes process substitution to be disabled
 # and flagged as a syntax error, which causes the shell to exit
 set +o posix

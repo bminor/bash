@@ -161,7 +161,7 @@ long_double_format (char const *fmt)
         strcpy (ldfmt + length_modifier_offset + 1,
                 fmt + length_modifier_offset + has_L);
 #else
-        strcpy (ldfmt + length_modifier_offset, fmt + length_modifier_offset)
+        strcpy (ldfmt + length_modifier_offset, fmt + length_modifier_offset);
 #endif
         return ldfmt;
       }

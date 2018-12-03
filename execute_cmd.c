@@ -1553,6 +1553,15 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
      trap strings if we run trap to change a signal disposition. */
   reset_signal_handlers ();
   subshell_environment |= SUBSHELL_RESETTRAP;
+#if 0	/* TAG:bash-5.1 */
+  /* We are in a subshell, so forget that we are running a trap handler or
+     that the signal handler has changed (we haven't changed it!) */
+  if (running_trap > 0)
+    {
+      run_trap_cleanup (running_trap - 1);
+      running_trap = 0;
+    }
+#endif
 
   /* Make sure restore_original_signals doesn't undo the work done by
      make_child to ensure that asynchronous children are immune to SIGINT

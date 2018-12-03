@@ -4760,3 +4760,44 @@ bashline.c
 	  complete a partial first word (point appears in the middle of
 	  the word) before resorting to command completion. Report and fix
 	  from Luca Boccassi <bluca@debian.org>
+
+[bash-5.0-beta2 frozen]
+
+				   11/27
+				   -----
+bashline.c
+	- attempt_shell_completion: better fix for problems with fix from
+	  11/16. Report and fix from Tom Ryder <tom@sanctum.geek.nz>
+
+expr.c
+	- expr_skipsubscript: fix return type. Report and fix from
+	  Andreas Schwab <schwab@linux-m68k.org>
+
+				   11/29
+				   -----
+subst.c
+	- quote_escapes_internal: refactored quote_escapes into a function
+	  that takes an additional flag saying whether or not we are going
+	  to split the result. If we are not, and CTLESC is in IFS, we quote
+	  the CTLESC (ditto for CTLNUL) to prevent it being removed when the
+	  string is dequoted.
+	- quote_escapes: call quote_escapes_internal with FLAGS == 0
+	- quote_rhs: new function, calls quote_escapes with FLAGS == PF_NOSPLIT2
+	  so that a CTLESC will be quoted if CTLESC is in $IFS
+	- parameter_brace_expand_word: call quote_rhs on the value of a variable
+	  if PFLAGS includes PF_ASSIGNRHS, indicating that we will not be
+	  splitting the word, but we will be dequoting it. Fixes bug reported
+	  by Martijn Dekker <martijn@inlv.org>
+	- param_expand: same change as for parameter_brace_expand_word
+
+execute_cmd.c
+	- execute_in_subshell: if we are running a trap (running_trap > 0),
+	  turn off the SIG_INPROGRESS and SIG_CHANGED flags for that signal
+	  by calling run_trap_cleanup and reset running_trap to 0 (watch the
+	  second part!)
+
+				   11/30
+				   -----
+lib/readline/doc/rltech.texi
+	- rl_set_keymap_name: correct typo in the name; some updates to the
+	  description that clarify usage. Report from <hirooih@gmail.com>

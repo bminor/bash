@@ -30,6 +30,12 @@
 #include "shmbutil.h"
 #include "xmalloc.h"
 
+#include <errno.h>
+
+#if !defined (errno)
+extern int errno;
+#endif
+
 /* First, compile `sm_loop.c' for single-byte characters. */
 #define CHAR	unsigned char
 #define U_CHAR	unsigned char
@@ -82,7 +88,7 @@ rangecmp (c1, c2, forcecoll)
 
   if ((ret = strcoll (s1, s2)) != 0)
     return ret;
-  return (c1 - c2);
+  return (c1 - c2);		/* impose total ordering */
 }
 #else /* !HAVE_STRCOLL */
 #  define rangecmp(c1, c2, f)	((int)(c1) - (int)(c2))
@@ -289,6 +295,7 @@ rangecmp_wc (c1, c2, forcecoll)
 {
   static wchar_t s1[2] = { L' ', L'\0' };
   static wchar_t s2[2] = { L' ', L'\0' };
+  int r, oerrno;
 
   if (c1 == c2)
     return 0;
@@ -299,14 +306,22 @@ rangecmp_wc (c1, c2, forcecoll)
   s1[0] = c1;
   s2[0] = c2;
 
+#if 0	/* TAG: bash-5.1 */
+  /* We impose a total ordering here by returning c1-c2 if wcscoll returns 0,
+     as we do above in the single-byte case. */
+  if ((r = wcscoll (s1, s2)) != 0)
+    return r;
+  return ((int)(c1 - c2));		/* impose total ordering */
+#else
   return (wcscoll (s1, s2));
+#endif
 }
 
 static int
 collequiv_wc (c, equiv)
      wint_t c, equiv;
 {
-  return (c == equiv);
+  return (rangecmp_wc (c, equiv, 1) == 0);
 }
 
 /* Helper function for collating symbol. */

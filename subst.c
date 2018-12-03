@@ -238,6 +238,8 @@ static WORD_LIST *expand_string_leave_quoted __P((char *, int));
 static WORD_LIST *expand_string_for_rhs __P((char *, int, int, int, int *, int *));
 static WORD_LIST *expand_string_for_pat __P((char *, int, int *, int *));
 
+static char *quote_escapes_internal __P((const char *, int));
+
 static WORD_LIST *list_quote_escapes __P((WORD_LIST *));
 static WORD_LIST *list_dequote_escapes __P((WORD_LIST *));
 
@@ -4027,24 +4029,32 @@ expand_word_leave_quoted (word, quoted)
    code exists in dequote_escapes.  Even if we don't end up splitting on
    spaces, quoting spaces is not a problem.  This should never be called on
    a string that is quoted with single or double quotes or part of a here
-   document (effectively double-quoted). */
-char *
-quote_escapes (string)
+   document (effectively double-quoted).
+   FLAGS says whether or not we are going to split the result. If we are not,
+   and there is a CTLESC or CTLNUL in IFS, we need to quote CTLESC and CTLNUL,
+   respectively, to prevent them from being removed as part of dequoting. */
+static char *
+quote_escapes_internal (string, flags)
      const char *string;
+     int flags;
 {
   const char *s, *send;
   char *t, *result;
   size_t slen;
-  int quote_spaces, skip_ctlesc, skip_ctlnul;
+  int quote_spaces, skip_ctlesc, skip_ctlnul, nosplit;
   DECLARE_MBSTATE; 
 
   slen = strlen (string);
   send = string + slen;
 
   quote_spaces = (ifs_value && *ifs_value == 0);
+  nosplit = (flags & PF_NOSPLIT2);
 
   for (skip_ctlesc = skip_ctlnul = 0, s = ifs_value; s && *s; s++)
-    skip_ctlesc |= *s == CTLESC, skip_ctlnul |= *s == CTLNUL;
+    {
+      skip_ctlesc |= (nosplit == 0 && *s == CTLESC);
+      skip_ctlnul |= (nosplit == 0 && *s == CTLNUL);
+    }
 
   t = result = (char *)xmalloc ((slen * 2) + 1);
   s = string;
@@ -4058,6 +4068,20 @@ quote_escapes (string)
   *t = '\0';
 
   return (result);
+}
+
+char *
+quote_escapes (string)
+     const char *string;
+{
+  return (quote_escapes_internal (string, 0));
+}
+
+char *
+quote_rhs (string)
+     const char *string;
+{
+  return (quote_escapes_internal (string, PF_NOSPLIT2));
 }
 
 static WORD_LIST *
@@ -6661,7 +6685,8 @@ expand_arrayref:
 	  if (temp)
 	    temp = (*temp && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
 		      ? quote_string (temp)
-		      : quote_escapes (temp);
+		      : ((pflags & PF_ASSIGNRHS) ? quote_rhs (temp)
+						 : quote_escapes (temp));
 	}
       else
 	temp = (char *)NULL;
@@ -9567,7 +9592,8 @@ comsub:
 
 	      temp = (*temp && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
 			? quote_string (temp)
-			: quote_escapes (temp);
+			: ((pflags & PF_ASSIGNRHS) ? quote_rhs (temp)
+						   : quote_escapes (temp));
 	    }
 
 	  free (temp1);
