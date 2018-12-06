@@ -1616,7 +1616,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
     async_redirect_stdin ();
 
 #if 0
-  /* XXX - TAG: bash-5.1 */
+  /* XXX - TAG:bash-5.1 */
   if (user_subshell && command->type == cm_subshell)
     optimize_subshell_command (command->value.Subshell->command);
 #endif
@@ -2985,7 +2985,7 @@ eval_arith_for_expr (l, okp)
 
       command_string_index = 0;
       print_arith_command (new);
-      if (signal_in_progress (DEBUG_TRAP) == 0)
+      if (signal_in_progress (DEBUG_TRAP) == 0 && running_trap == 0)
 	{
 	  FREE (the_printed_command_except_trap);
 	  the_printed_command_except_trap = savestring (the_printed_command);
@@ -3717,7 +3717,7 @@ execute_arith_command (arith_command)
   command_string_index = 0;
   print_arith_command (arith_command->exp);
 
-  if (signal_in_progress (DEBUG_TRAP) == 0)
+  if (signal_in_progress (DEBUG_TRAP) == 0 && running_trap == 0)
     {
       FREE (the_printed_command_except_trap);
       the_printed_command_except_trap = savestring (the_printed_command);
@@ -3918,7 +3918,7 @@ execute_cond_command (cond_command)
   command_string_index = 0;
   print_cond_command (cond_command);
 
-  if (signal_in_progress (DEBUG_TRAP) == 0)
+  if (signal_in_progress (DEBUG_TRAP) == 0 && running_trap == 0)
     {
       FREE (the_printed_command_except_trap);
       the_printed_command_except_trap = savestring (the_printed_command);

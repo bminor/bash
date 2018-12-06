@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.0, version 5.003])dnl
+AC_REVISION([for Bash 5.0, version 5.004])dnl
 
 define(bashvers, 5.0)
 define(relstatus, beta2)
@@ -1029,6 +1029,8 @@ AC_DEFINE(HAVE_STD_UNSETENV)
 fi
 
 BASH_FUNC_PRINTF_A_FORMAT
+
+BASH_FUNC_FNMATCH_EQUIV_FALLBACK
 
 dnl presence and behavior of OS functions
 BASH_SYS_REINSTALL_SIGHANDLERS

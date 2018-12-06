@@ -4801,3 +4801,32 @@ execute_cmd.c
 lib/readline/doc/rltech.texi
 	- rl_set_keymap_name: correct typo in the name; some updates to the
 	  description that clarify usage. Report from <hirooih@gmail.com>
+
+				   12/4
+				   ----
+aclocal.m4
+	- BASH_FUNC_FNMATCH_EQUIV_FALLBACK: a test of whether fnmatch(3)
+	  understands bracket equivalence classes ([=c=]) for characters
+	  that collate with equal weights but are not identical
+
+configure.ac,config.h.in
+	- call BASH_FUNC_FNMATCH_EQUIV_FALLBACK and define
+	  FNMATCH_EQUIV_FALLBACK to 1 if it can be used for equivalence
+	  classes
+
+				   12/5
+				   ----
+execute_cmd.c
+	- eval_arith_for_expr,execute_arith_command,execute_cond_command: make
+	  sure running_trap == 0 before we reset the_printed_command_except_trap
+	  Report from Peng Yu <pengyu.ut@gmail.com>
+
+lib/glob/smatch.c
+	- _fnmatch_fallback_wc: new function, takes two wide characters c1 and
+	  c2, converts them to a pattern ([[=c2=]]) and a string (c1) for
+	  fnmatch to determine whether or not they are members of the same
+	  equivalence class
+	- collequiv_wc: call _fnmatch_fallback_wc if rangecmp_wc returns
+	  non-zero if FNMATCH_EQUIV_FALLBACK is defined, so we know that
+	  fnmatch understands equivalence classes. Another Posix test suite
+	  issue from Martin Rehak <martin.rehak@oracle.com>
