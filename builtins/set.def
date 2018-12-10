@@ -1,7 +1,7 @@
 This file is set.def, from which is created set.c.
 It implements the "set" and "unset" builtins in Bash.
 
-Copyright (C) 1987-2015 Free Software Foundation, Inc.
+Copyright (C) 1987-2018 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -154,6 +154,8 @@ $END
 typedef int setopt_set_func_t __P((int, char *));
 typedef int setopt_get_func_t __P((char *));
 
+static int find_minus_o_option __P((char *));
+
 static void print_minus_o_option __P((char *, int, int));
 static void print_all_shell_variables __P((void));
 
@@ -242,6 +244,18 @@ const struct {
   ((o_options[i].set_func) ? (*o_options[i].set_func) (onoff, name) \
 			   : (*o_options[i].variable = (onoff == FLAG_ON)))
 
+static int
+find_minus_o_option (name)
+     char *name;
+{
+  register int i;
+
+  for (i = 0; o_options[i].name; i++)
+    if (STREQ (name, o_options[i].name))
+      return i;
+  return -1;
+}
+
 int
 minus_o_option_value (name)
      char *name;
@@ -249,21 +263,17 @@ minus_o_option_value (name)
   register int	i;
   int *on_or_off;
 
-  for (i = 0; o_options[i].name; i++)
-    {
-      if (STREQ (name, o_options[i].name))
-	{
-	  if (o_options[i].letter)
-	    {
-	      on_or_off = find_flag (o_options[i].letter);
-	      return ((on_or_off == FLAG_UNKNOWN) ? -1 : *on_or_off);
-	    }
-	  else
-	    return (GET_BINARY_O_OPTION_VALUE (i, name));
-	}
-    }
+  i = find_minus_o_option (name);
+  if (i < 0)
+    return (-1);
 
-  return (-1);
+  if (o_options[i].letter)
+    {
+      on_or_off = find_flag (o_options[i].letter);
+      return ((on_or_off == FLAG_UNKNOWN) ? -1 : *on_or_off);
+    }
+  else
+    return (GET_BINARY_O_OPTION_VALUE (i, name));
 }
 
 #define MINUS_O_FORMAT "%-15s\t%s\n"
@@ -323,9 +333,12 @@ char *
 get_current_options ()
 {
   char *temp;
-  int i;
+  int i, posixopts;
 
-  temp = (char *)xmalloc (1 + N_O_OPTIONS);
+  posixopts = num_posix_options ();	/* shopts modified by posix mode */
+  /* Make the buffer big enough to hold the set -o options and the shopt
+     options modified by posix mode. */
+  temp = (char *)xmalloc (1 + N_O_OPTIONS + posixopts);
   for (i = 0; o_options[i].name; i++)
     {
       if (o_options[i].letter)
@@ -333,7 +346,11 @@ get_current_options ()
       else
 	temp[i] = GET_BINARY_O_OPTION_VALUE (i, o_options[i].name);
     }
-  temp[i] = '\0';
+
+  /* Add the shell options that are modified by posix mode to the end of the
+     bitmap. They will be handled in set_current_options() */
+  get_posix_options (temp+i);
+  temp[i+posixopts] = '\0';
   return (temp);
 }
 
@@ -345,6 +362,7 @@ set_current_options (bitmap)
 
   if (bitmap == 0)
     return;
+
   for (i = 0; o_options[i].name; i++)
     {
       if (o_options[i].letter)
@@ -352,6 +370,9 @@ set_current_options (bitmap)
       else
 	SET_BINARY_O_OPTION_VALUE (i, bitmap[i] ? FLAG_ON : FLAG_OFF, o_options[i].name);
     }
+
+  /* Now reset the variables changed by posix mode */
+  set_posix_options (bitmap+i);
 }
 
 static int
@@ -451,32 +472,29 @@ set_minus_o_option (on_or_off, option_name)
 {
   register int i;
 
-  for (i = 0; o_options[i].name; i++)
+  i = find_minus_o_option (option_name);
+  if (i < 0)
     {
-      if (STREQ (option_name, o_options[i].name))
-	{
-	  if (o_options[i].letter == 0)
-	    {
-	      previous_option_value = GET_BINARY_O_OPTION_VALUE (i, o_options[i].name);
-	      SET_BINARY_O_OPTION_VALUE (i, on_or_off, option_name);
-	      return (EXECUTION_SUCCESS);
-	    }
-	  else
-	    {
-	      if ((previous_option_value = change_flag (o_options[i].letter, on_or_off)) == FLAG_ERROR)
-		{
-		  sh_invalidoptname (option_name);
-		  return (EXECUTION_FAILURE);
-		}
-	      else
-		return (EXECUTION_SUCCESS);
-	    }
-
-	}
+      sh_invalidoptname (option_name);
+      return (EX_USAGE);
     }
 
-  sh_invalidoptname (option_name);
-  return (EX_USAGE);
+  if (o_options[i].letter == 0)
+    {
+      previous_option_value = GET_BINARY_O_OPTION_VALUE (i, o_options[i].name);
+      SET_BINARY_O_OPTION_VALUE (i, on_or_off, option_name);
+      return (EXECUTION_SUCCESS);
+    }
+  else
+    {
+      if ((previous_option_value = change_flag (o_options[i].letter, on_or_off)) == FLAG_ERROR)
+	{
+	  sh_invalidoptname (option_name);
+	  return (EXECUTION_FAILURE);
+	}
+      else
+	return (EXECUTION_SUCCESS);
+    }
 }
 
 static void

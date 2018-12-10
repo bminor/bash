@@ -343,7 +343,7 @@ extern char *dirspell __P((char *));
 
 /* declarations for functions defined in lib/sh/strcasecmp.c */
 #if !defined (HAVE_STRCASECMP)
-extern int strncasecmp __P((const char *, const char *, int));
+extern int strncasecmp __P((const char *, const char *, size_t));
 extern int strcasecmp __P((const char *, const char *));
 #endif /* HAVE_STRCASECMP */
 

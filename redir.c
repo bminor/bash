@@ -778,6 +778,8 @@ do_redirection_internal (redirect, flags)
 	    case r_move_output_word:
 	      new_redirect = make_redirection (sd, r_move_output, rd, 0);
 	      break;
+	    default:
+	      break;	/* shut up gcc */
 	    }
 	}
       else if (ri == r_duplicating_output_word && (redirect->rflags & REDIR_VARASSIGN) == 0 && redirector == 1)
@@ -1175,6 +1177,8 @@ do_redirection_internal (redirect, flags)
 
     case r_duplicating_input_word:
     case r_duplicating_output_word:
+    case r_move_input_word:
+    case r_move_output_word:
       break;
     }
   return (0);
@@ -1334,6 +1338,10 @@ stdin_redirection (ri, redirector)
     case r_append_err_and_out:
     case r_output_force:
     case r_duplicating_output_word:
+    case r_move_input:
+    case r_move_output:
+    case r_move_input_word:
+    case r_move_output_word:
       return (0);
     }
   return (0);

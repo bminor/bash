@@ -300,6 +300,8 @@ static int bgp_delete __P((pid_t));
 static void bgp_clear __P((void));
 static int bgp_search __P((pid_t));
 
+static struct pipeline_saver *alloc_pipeline_saver __P((void));
+
 static ps_index_t bgp_getindex __P((void));
 static void bgp_resize __P((void));	/* XXX */
 
@@ -453,7 +455,7 @@ discard_last_procsub_child ()
     discard_pipeline (disposer);
 }
 
-struct pipeline_saver *
+static struct pipeline_saver *
 alloc_pipeline_saver ()
 {
   struct pipeline_saver *ret;

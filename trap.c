@@ -1091,7 +1091,9 @@ run_debug_trap ()
 {
   int trap_exit_value, old_verbose;
   pid_t save_pgrp;
+#if defined (PGRP_PIPE)
   int save_pipe[2];
+#endif
 
   /* XXX - question:  should the DEBUG trap inherit the RETURN trap? */
   trap_exit_value = 0;

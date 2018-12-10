@@ -363,7 +363,7 @@ main (argc, argv, env)
 #endif /* !NO_MAIN_ENV_ARG */
 {
   register int i;
-  int code, old_errexit_flag, old_onecmd;
+  int code, old_errexit_flag;
 #if defined (RESTRICTED_SHELL)
   int saverst;
 #endif

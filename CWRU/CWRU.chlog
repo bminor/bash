@@ -4830,3 +4830,41 @@ lib/glob/smatch.c
 	  non-zero if FNMATCH_EQUIV_FALLBACK is defined, so we know that
 	  fnmatch understands equivalence classes. Another Posix test suite
 	  issue from Martin Rehak <martin.rehak@oracle.com>
+
+				   12/6
+				   ----
+redir.c
+	- add missing cases to switch statements to shut up gcc
+
+				   12/7
+				   ----
+builtins/set.def
+	- find_minus_o_option: new helper function, returns index into
+	  o_options given option name
+	- minus_o_option_value,set_minus_o_option: use find_minus_o_option
+
+general.c
+	- new table of variables (currently all shopt options) that are
+	  modified by going into and out of posix mode; num_posix_options()
+	  returns the number of variables
+	- get_posix_options: fill in a bitmap passed as an argument (or return
+	  a new one) of values of posix-mode-modified variables in the table
+	- set_posix_options: set values of posix-mode-modified variables from
+	  the table using the passed bitmap for values
+
+builtins/set.def
+	- get_current_options: make the bitmap large enough to hold the options
+	  in the set table and the table of posix-mode-modified variables; call
+	  get_posix_options to fill in those values after the values from the
+	  o_options table
+	- set_current_options: call set_posix_options to reset the values of
+	  the posix-mode-modified variables at the end of the bitmap, after
+	  the o_options values. Fixes issue reported by PJ Eby
+	  <pje@telecommunity.com>
+
+				   12/9
+				   ----
+parse.y
+	- select_command: add two additional productions to support select
+	  commands without a word_list following the `in'. Fixes omission
+	  reported by Martijn Dekker <martijn@inlv.org>
