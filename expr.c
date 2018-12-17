@@ -214,7 +214,7 @@ static intmax_t exp5 __P((void));
 static intmax_t exp4 __P((void));
 static intmax_t expshift __P((void));
 static intmax_t exp3 __P((void));
-static intmax_t exp2 __P((void));
+static intmax_t expmuldiv __P((void));
 static intmax_t	exppower __P((void));
 static intmax_t exp1 __P((void));
 static intmax_t exp0 __P((void));
@@ -858,14 +858,14 @@ exp3 ()
 {
   register intmax_t val1, val2;
 
-  val1 = exp2 ();
+  val1 = expmuldiv ();
 
   while ((curtok == PLUS) || (curtok == MINUS))
     {
       int op = curtok;
 
       readtok ();
-      val2 = exp2 ();
+      val2 = expmuldiv ();
 
       if (op == PLUS)
 	val1 += val2;
@@ -877,7 +877,7 @@ exp3 ()
 }
 
 static intmax_t
-exp2 ()
+expmuldiv ()
 {
   register intmax_t val1, val2;
 #if defined (HAVE_IMAXDIV)

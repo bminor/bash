@@ -289,6 +289,10 @@ is_cclass (c, name)
 extern char *mbsmbchar __P((const char *));
 
 #if FNMATCH_EQUIV_FALLBACK
+/* We don't include <fnmatch.h> in order to avoid namespace collisions; the
+   internal strmatch still uses the FNM_ constants. */
+extern int fnmatch (const char *, const char *, int);
+
 /* Construct a string w1 = "c1" and a pattern w2 = "[[=c2=]]" and pass them
    to fnmatch to see if wide characters c1 and c2 collate as members of the
    same equivalence class. We can't really do this portably any other way */

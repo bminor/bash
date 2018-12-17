@@ -418,7 +418,8 @@ inputunit:	simple_list simple_list_terminator
 			  /* EOF after an error.  Do ignoreeof or not.  Really
 			     only interesting in non-interactive shells */
 			  global_command = (COMMAND *)NULL;
-			  last_command_exit_value = 1;
+			  if (last_command_exit_value == 0)
+			    last_command_exit_value = EX_BADUSAGE;	/* force error return */
 			  handle_eof_input_unit ();
 			  if (interactive && parse_and_execute_level == 0)
 			    {
