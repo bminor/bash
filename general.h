@@ -297,6 +297,10 @@ extern void xfree __P((void *));
 /* Declarations for functions defined in general.c */
 extern void posix_initialize __P((int));
 
+extern int num_posix_options __P((void));
+extern char *get_posix_options __P((char *));
+extern void set_posix_options __P((const char *));
+
 #if defined (RLIMTYPE)
 extern RLIMTYPE string_to_rlimtype __P((char *));
 extern void print_rlimtype __P((RLIMTYPE, int));

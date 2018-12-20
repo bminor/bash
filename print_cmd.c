@@ -38,6 +38,8 @@
 #include "bashansi.h"
 #include "bashintl.h"
 
+#define NEED_XTRACE_SET_DECL
+
 #include "shell.h"
 #include "flags.h"
 #include <y.tab.h>	/* use <...> so we pick it up from the build directory */

@@ -300,6 +300,8 @@ static int bgp_delete __P((pid_t));
 static void bgp_clear __P((void));
 static int bgp_search __P((pid_t));
 
+static struct pipeline_saver *alloc_pipeline_saver __P((void));
+
 static ps_index_t bgp_getindex __P((void));
 static void bgp_resize __P((void));	/* XXX */
 
@@ -453,7 +455,7 @@ discard_last_procsub_child ()
     discard_pipeline (disposer);
 }
 
-struct pipeline_saver *
+static struct pipeline_saver *
 alloc_pipeline_saver ()
 {
   struct pipeline_saver *ret;
@@ -4073,20 +4075,20 @@ notify_of_job_status ()
 		((DEADJOB (job) && IS_FOREGROUND (job) == 0) || STOPPED (job)))
 	    continue;
 	  
-#if 0
-	  /* If job control is disabled, don't print the status messages.
-	     Mark dead jobs as notified so that they get cleaned up.  If
-	     startup_state == 2, we were started to run `-c command', so
-	     don't print anything. */
-	  if ((job_control == 0 && interactive_shell) || startup_state == 2)
-#else
 	  /* If job control is disabled, don't print the status messages.
 	     Mark dead jobs as notified so that they get cleaned up.  If
 	     startup_state == 2 and subshell_environment has the
 	     SUBSHELL_COMSUB bit turned on, we were started to run a command
-	     substitution, so don't print anything. */
+	     substitution, so don't print anything.
+	     Otherwise, if the shell is not interactive, POSIX says that `jobs'
+	     is the only way to notify of job status. */
+#if 1
 	  if ((job_control == 0 && interactive_shell) ||
 	      (startup_state == 2 && (subshell_environment & SUBSHELL_COMSUB)))
+#else	/* TAG:bash-5.1 */
+	  if ((job_control == 0 && interactive_shell) ||
+	      (startup_state == 2 && (subshell_environment & SUBSHELL_COMSUB)) ||
+	      (startup_state == 2 && posixly_correct && (subshell_environment & SUBSHELL_COMSUB) == 0))
 #endif
 	    {
 	      /* POSIX.2 compatibility:  if the shell is not interactive,

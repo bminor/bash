@@ -696,7 +696,8 @@ to delimit commands, equivalent to a semicolon.
 
 If a command is terminated by the control operator @samp{&},
 the shell executes the command asynchronously in a subshell.
-This is known as executing the command in the @var{background}.
+This is known as executing the command in the @var{background},
+and these are referred to as @var{asynchronous} commands.
 The shell does not wait for the command to finish, and the return
 status is 0 (true).
 When job control is not active (@pxref{Job Control}),
@@ -4207,8 +4208,8 @@ the environment.
 @end table
 
 Using @samp{+} instead of @samp{-} turns off the attribute instead,
-with the exceptions that @samp{+a}
-may not be used to destroy an array variable and @samp{+r} will not
+with the exceptions that @samp{+a} and @samp{+A}
+may not be used to destroy array variables and @samp{+r} will not
 remove the readonly attribute.
 When used in a function, @code{declare} makes each @var{name} local,
 as with the @code{local} command, unless the @option{-g} option is used.

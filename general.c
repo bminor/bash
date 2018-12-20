@@ -68,7 +68,33 @@ static void initialize_group_array __P((void));
 /* A standard error message to use when getcwd() returns NULL. */
 const char * const bash_getcwd_errstr = N_("getcwd: cannot access parent directories");
 
-/* Do whatever is necessary to initialize `Posix mode'. */
+/* Do whatever is necessary to initialize `Posix mode'.  This currently
+   modifies the following variables which are controlled via shopt:
+      interactive_comments
+      source_uses_path
+      expand_aliases
+      inherit_errexit
+      print_shift_error
+
+   and the following variables which cannot be user-modified:
+
+      source_searches_cwd
+
+  If we add to the first list, we need to change the table and functions
+  below */
+
+static struct {
+  int *posix_mode_var;
+} posix_vars[] = 
+{
+  &interactive_comments,
+  &source_uses_path,
+  &expand_aliases,
+  &inherit_errexit,
+  &print_shift_error,
+  0
+};
+
 void
 posix_initialize (on)
      int on;
@@ -80,6 +106,7 @@ posix_initialize (on)
       inherit_errexit = 1;
       source_searches_cwd = 0;
       print_shift_error = 1;
+
     }
 
   /* Things that should be turned on when posix mode is disabled. */
@@ -89,6 +116,35 @@ posix_initialize (on)
       expand_aliases = interactive_shell;
       print_shift_error = 0;
     }
+}
+
+int
+num_posix_options ()
+{
+  return ((sizeof (posix_vars) / sizeof (posix_vars[0])) - 1);
+}
+
+char *
+get_posix_options (bitmap)
+     char *bitmap;
+{
+  register int i;
+
+  if (bitmap == 0)
+    bitmap = (char *)xmalloc (num_posix_options ());	/* no trailing NULL */
+  for (i = 0; posix_vars[i].posix_mode_var; i++)
+    bitmap[i] = *(posix_vars[i].posix_mode_var);
+  return bitmap;
+}
+
+void
+set_posix_options (bitmap)
+     const char *bitmap;
+{
+  register int i;
+
+  for (i = 0; posix_vars[i].posix_mode_var; i++)
+    *(posix_vars[i].posix_mode_var) = bitmap[i];
 }
 
 /* **************************************************************** */

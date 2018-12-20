@@ -336,9 +336,9 @@ int	flags;
 	} else if (flags & OPT_DEV)
 		printf("%d\n", st->st_dev);
 	else if (flags & OPT_INO)
-		printf("%d\n", st->st_ino);
+		printf("%lu\n", (unsigned long)st->st_ino);
 	else if (flags & OPT_FID)
-		printf("%d:%ld\n", st->st_dev, st->st_ino);
+		printf("%d:%lu\n", st->st_dev, (unsigned long)st->st_ino);
 	else if (flags & OPT_NLINK)
 		printf("%d\n", st->st_nlink);
 	else if (flags & OPT_LNKNAM) {

@@ -418,7 +418,8 @@ inputunit:	simple_list simple_list_terminator
 			  /* EOF after an error.  Do ignoreeof or not.  Really
 			     only interesting in non-interactive shells */
 			  global_command = (COMMAND *)NULL;
-			  last_command_exit_value = 1;
+			  if (last_command_exit_value == 0)
+			    last_command_exit_value = EX_BADUSAGE;	/* force error return */
 			  handle_eof_input_unit ();
 			  if (interactive && parse_and_execute_level == 0)
 			    {
@@ -892,6 +893,16 @@ select_command:	SELECT WORD newline_list DO list DONE
 	|	SELECT WORD newline_list IN word_list list_terminator newline_list '{' list '}'
 			{
 			  $$ = make_select_command ($2, REVERSE_LIST ($5, WORD_LIST *), $9, word_lineno[word_top]);
+			  if (word_top > 0) word_top--;
+			}
+	|	SELECT WORD newline_list IN list_terminator newline_list DO compound_list DONE
+			{
+			  $$ = make_select_command ($2, (WORD_LIST *)NULL, $8, word_lineno[word_top]);
+			  if (word_top > 0) word_top--;
+			}
+	|	SELECT WORD newline_list IN list_terminator newline_list '{' compound_list '}'
+			{
+			  $$ = make_select_command ($2, (WORD_LIST *)NULL, $8, word_lineno[word_top]);
 			  if (word_top > 0) word_top--;
 			}
 	;
@@ -3020,7 +3031,11 @@ special_case_tokens (tokstr)
 {
   /* Posix grammar rule 6 */
   if ((last_read_token == WORD) &&
+#if defined (SELECT_COMMAND)
       ((token_before_that == FOR) || (token_before_that == CASE) || (token_before_that == SELECT)) &&
+#else
+      ((token_before_that == FOR) || (token_before_that == CASE)) &&
+#endif
       (tokstr[0] == 'i' && tokstr[1] == 'n' && tokstr[2] == 0))
     {
       if (token_before_that == CASE)

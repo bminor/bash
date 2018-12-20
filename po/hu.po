@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash 4.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-11-16 15:54-0500\n"
+"POT-Creation-Date: 2018-12-19 15:52-0500\n"
 "PO-Revision-Date: 2017-04-27 21:42+0200\n"
 "Last-Translator: Balázs Úr <urbalazs@gmail.com>\n"
 "Language-Team: Hungarian <translation-team-hu@lists.sourceforge.net>\n"
@@ -25,8 +25,8 @@ msgstr ""
 msgid "bad array subscript"
 msgstr "Hibás tömbindex"
 
-#: arrayfunc.c:377 builtins/declare.def:638 variables.c:2233 variables.c:2259
-#: variables.c:3075
+#: arrayfunc.c:377 builtins/declare.def:638 variables.c:2254 variables.c:2280
+#: variables.c:3108
 #, c-format
 msgid "%s: removing nameref attribute"
 msgstr "%s: névhivatkozás attribútum eltávolítása"
@@ -56,22 +56,22 @@ msgstr "%s: %s: asszociatív tömbhöz való értékadásnál meg kell adni az i
 msgid "%s: cannot create: %s"
 msgstr "%s: nem hozható létre: %s"
 
-#: bashline.c:4143
+#: bashline.c:4144
 msgid "bash_execute_unix_command: cannot find keymap for command"
 msgstr ""
 "bash_execute_unix_command: nem található billentyűkiosztás a parancshoz"
 
-#: bashline.c:4253
+#: bashline.c:4254
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr "%s: az első nem szóközkarakter nem „\"”"
 
-#: bashline.c:4282
+#: bashline.c:4283
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr "nincs záró „%c” a következőben: %s"
 
-#: bashline.c:4316
+#: bashline.c:4317
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: hiányzó kettőspont-elválasztó"
@@ -93,7 +93,7 @@ msgid "brace expansion: failed to allocate memory for `%s'"
 msgstr ""
 "szögleteszárójel-kiegészítés: nem sikerült a memóriafoglalás „%s” számára"
 
-#: builtins/alias.def:131 variables.c:1821
+#: builtins/alias.def:131 variables.c:1842
 #, c-format
 msgid "`%s': invalid alias name"
 msgstr "„%s”: érvénytelen alias-név"
@@ -207,7 +207,7 @@ msgstr "%s: érvénytelen kapcsoló"
 msgid "%s: invalid option name"
 msgstr "%s: érvénytelen kapcsolónév"
 
-#: builtins/common.c:230 execute_cmd.c:2363 general.c:296 general.c:301
+#: builtins/common.c:230 execute_cmd.c:2372 general.c:352 general.c:357
 #, c-format
 msgid "`%s': not a valid identifier"
 msgstr "„%s”: érvénytelen azonosító"
@@ -342,13 +342,13 @@ msgstr "csak függvényben használható"
 msgid "%s: reference variable cannot be an array"
 msgstr "%s: a referenciaváltozó nem lehet tömb"
 
-#: builtins/declare.def:380 variables.c:3325
+#: builtins/declare.def:380 variables.c:3363
 #, c-format
 msgid "%s: nameref variable self references not allowed"
 msgstr "%s: a névhivatkozás változó önhivatkozása nem engedélyezett"
 
-#: builtins/declare.def:385 variables.c:2063 variables.c:3236 variables.c:3248
-#: variables.c:3322
+#: builtins/declare.def:385 variables.c:2084 variables.c:3272 variables.c:3285
+#: variables.c:3360
 #, c-format
 msgid "%s: circular name reference"
 msgstr "%s: körkörös névhivatkozás"
@@ -362,7 +362,7 @@ msgstr "„%s”: érvénytelen változónév a névhivatkozáshoz"
 msgid "cannot use `-f' to make functions"
 msgstr "nem használható a „-f” függvény létrehozására"
 
-#: builtins/declare.def:532 execute_cmd.c:5843
+#: builtins/declare.def:532 execute_cmd.c:5852
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: csak olvasható függvény"
@@ -411,7 +411,7 @@ msgstr "%s: nem dinamikusan van betöltve"
 msgid "%s: cannot delete: %s"
 msgstr "%s: nem törölhető: %s"
 
-#: builtins/evalfile.c:138 builtins/hash.def:184 execute_cmd.c:5675
+#: builtins/evalfile.c:138 builtins/hash.def:184 execute_cmd.c:5684
 #, c-format
 msgid "%s: is a directory"
 msgstr "%s egy könyvtár"
@@ -812,21 +812,21 @@ msgstr ""
 "csak függvényből vagy source-olt parancsfájlból lehet „return”-nel "
 "visszatérni"
 
-#: builtins/set.def:834
+#: builtins/set.def:852
 msgid "cannot simultaneously unset a function and a variable"
 msgstr "nem lehet egyszerre függvényt és változót megszüntetni"
 
-#: builtins/set.def:886
+#: builtins/set.def:904
 #, c-format
 msgid "%s: cannot unset"
 msgstr "%s: nem szüntethető meg"
 
-#: builtins/set.def:907 variables.c:3772
+#: builtins/set.def:925 variables.c:3813
 #, c-format
 msgid "%s: cannot unset: readonly %s"
 msgstr "%s: nem szüntethető meg: csak olvasható %s"
 
-#: builtins/set.def:920
+#: builtins/set.def:938
 #, c-format
 msgid "%s: not an array variable"
 msgstr "%s: nem egy tömbváltozó"
@@ -1001,61 +1001,61 @@ msgstr "szabványos bemenet /dev/null-ra állítása sikertelen: %s"
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "IDŐFORMÁTUM: „%c”: érvénytelen formátumkarakter"
 
-#: execute_cmd.c:2352
+#: execute_cmd.c:2361
 #, c-format
 msgid "execute_coproc: coproc [%d:%s] still exists"
 msgstr "execute_coproc: a coproc [%d:%s] még mindig létezik"
 
-#: execute_cmd.c:2476
+#: execute_cmd.c:2485
 msgid "pipe error"
 msgstr "hibás csővezeték"
 
-#: execute_cmd.c:4662
+#: execute_cmd.c:4671
 #, c-format
 msgid "eval: maximum eval nesting level exceeded (%d)"
 msgstr "eval: a maximális eval beágyazási szint túllépve (%d)"
 
-#: execute_cmd.c:4674
+#: execute_cmd.c:4683
 #, c-format
 msgid "%s: maximum source nesting level exceeded (%d)"
 msgstr "%s: a maximális source beágyazási szint túllépve (%d)"
 
-#: execute_cmd.c:4782
+#: execute_cmd.c:4791
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
 msgstr "%s: a maximális függvénybeágyazási szint túllépve (%d)"
 
-#: execute_cmd.c:5331
+#: execute_cmd.c:5340
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: korlátozott: nem adható meg „/” a parancsok nevében"
 
-#: execute_cmd.c:5429
+#: execute_cmd.c:5438
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: parancs nem található"
 
-#: execute_cmd.c:5673
+#: execute_cmd.c:5682
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: execute_cmd.c:5711
+#: execute_cmd.c:5720
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: rossz parancsértelmező"
 
-#: execute_cmd.c:5748
+#: execute_cmd.c:5757
 #, c-format
 msgid "%s: cannot execute binary file: %s"
 msgstr "%s: a bináris nem hajtható végre: %s"
 
-#: execute_cmd.c:5834
+#: execute_cmd.c:5843
 #, c-format
 msgid "`%s': is a special builtin"
 msgstr "„%s”: egy speciális beépített parancs"
 
-#: execute_cmd.c:5886
+#: execute_cmd.c:5895
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "nem lehet duplikálni a(z) %d. fájlleírót a(z) %d. helyre"
@@ -1135,7 +1135,7 @@ msgstr "%s: hibás kifejezés\n"
 msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: nem érhetőek el a szülőkönyvtárak"
 
-#: input.c:99 subst.c:5906
+#: input.c:99 subst.c:5930
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "nem lehet újraindítani a nodelay módot a(z) %d. fájlleíróhoz"
@@ -1151,153 +1151,153 @@ msgstr ""
 msgid "save_bash_input: buffer already exists for new fd %d"
 msgstr "save_bash_input: már van puffer a(z) %d. fájlleíróhoz"
 
-#: jobs.c:527
+#: jobs.c:529
 msgid "start_pipeline: pgrp pipe"
 msgstr "start_pipeline: pgrp csővezeték"
 
-#: jobs.c:1082
+#: jobs.c:1084
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr "a(z) %d számú forkolt pid a(z) %d számú munkában jelent meg"
 
-#: jobs.c:1201
+#: jobs.c:1203
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "%d. számú megállított munka törlése a %ld számú folyamatcsoporttal"
 
-#: jobs.c:1305
+#: jobs.c:1307
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
 msgstr "add_process: %5ld. folyamat (%s) a the_pipeline-ban"
 
-#: jobs.c:1308
+#: jobs.c:1310
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr "add_process: %5ld. folyamat (%s) még élőként van jelölve"
 
-#: jobs.c:1637
+#: jobs.c:1639
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "describe_pid: %ld: nincs ilyen pid"
 
-#: jobs.c:1652
+#: jobs.c:1654
 #, c-format
 msgid "Signal %d"
 msgstr "%d. szignál"
 
-#: jobs.c:1666 jobs.c:1692
+#: jobs.c:1668 jobs.c:1694
 msgid "Done"
 msgstr "Kész"
 
-#: jobs.c:1671 siglist.c:123
+#: jobs.c:1673 siglist.c:123
 msgid "Stopped"
 msgstr "Megállítva"
 
-#: jobs.c:1675
+#: jobs.c:1677
 #, c-format
 msgid "Stopped(%s)"
 msgstr "Megállítva(%s)"
 
-#: jobs.c:1679
+#: jobs.c:1681
 msgid "Running"
 msgstr "Fut"
 
-#: jobs.c:1696
+#: jobs.c:1698
 #, c-format
 msgid "Done(%d)"
 msgstr "Kész(%d)"
 
-#: jobs.c:1698
+#: jobs.c:1700
 #, c-format
 msgid "Exit %d"
 msgstr "Kilépett(%d)"
 
-#: jobs.c:1701
+#: jobs.c:1703
 msgid "Unknown status"
 msgstr "Ismeretlen állapot"
 
-#: jobs.c:1788
+#: jobs.c:1790
 #, c-format
 msgid "(core dumped) "
 msgstr "(core készült) "
 
-#: jobs.c:1807
+#: jobs.c:1809
 #, c-format
 msgid "  (wd: %s)"
 msgstr " (mk: %s)"
 
-#: jobs.c:2035
+#: jobs.c:2037
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr "gyermek setpgid (innen: %ld ide: %ld)"
 
-#: jobs.c:2397 nojobs.c:657
+#: jobs.c:2399 nojobs.c:657
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: %ld. számú folyamat nem gyermeke ennek a parancsértelmezőnek"
 
-#: jobs.c:2693
+#: jobs.c:2695
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for: Nincs bejegyzés %ld. számú folyamatról"
 
-#: jobs.c:3053
+#: jobs.c:3055
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: %d. számú munka le lett állítva"
 
-#: jobs.c:3360
+#: jobs.c:3362
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: a munka be lett fejezve"
 
-#: jobs.c:3369
+#: jobs.c:3371
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: %d. számú munka már a háttérben van"
 
-#: jobs.c:3595
+#: jobs.c:3597
 msgid "waitchld: turning on WNOHANG to avoid indefinite block"
 msgstr "waitchld: WNOHANG bekapcsolása a korlátlan blokk elkerülésére"
 
-#: jobs.c:4118
+#: jobs.c:4120
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s: %d. sor: "
 
-#: jobs.c:4132 nojobs.c:900
+#: jobs.c:4134 nojobs.c:900
 #, c-format
 msgid " (core dumped)"
 msgstr " (core készült)"
 
-#: jobs.c:4144 jobs.c:4157
+#: jobs.c:4146 jobs.c:4159
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(mk most: %s)\n"
 
-#: jobs.c:4189
+#: jobs.c:4191
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: getpgrp sikertelen"
 
-#: jobs.c:4245
+#: jobs.c:4247
 #, fuzzy
 msgid "initialize_job_control: no job control in background"
 msgstr "initialize_job_control: line discipline"
 
-#: jobs.c:4261
+#: jobs.c:4263
 msgid "initialize_job_control: line discipline"
 msgstr "initialize_job_control: line discipline"
 
-#: jobs.c:4271
+#: jobs.c:4273
 msgid "initialize_job_control: setpgid"
 msgstr "initialize_job_control: setpgid"
 
-#: jobs.c:4292 jobs.c:4301
+#: jobs.c:4294 jobs.c:4303
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "nem állítható be a terminál folyamatcsoportja (%d)"
 
-#: jobs.c:4306
+#: jobs.c:4308
 msgid "no job control in this shell"
 msgstr "nincsen munkakezelés ebben a parancsértelmezőben"
 
@@ -1450,7 +1450,7 @@ msgstr "a(z) %d. sorban kezdett heredocot EOF zárja („%s” helyett)"
 msgid "make_redirection: redirection instruction `%d' out of range"
 msgstr "make_redirection: %d. átirányító utasítás kívül esik a tartományon"
 
-#: parse.y:2369
+#: parse.y:2380
 #, c-format
 msgid ""
 "shell_getc: shell_input_line_size (%zu) exceeds SIZE_MAX (%lu): line "
@@ -1459,103 +1459,103 @@ msgstr ""
 "shell_getc: a shell_input_line_size (%zu) meghaladja a MÉRET_MAXIMUM értékét "
 "(%lu): a sor csonkolva"
 
-#: parse.y:2775
+#: parse.y:2786
 msgid "maximum here-document count exceeded"
 msgstr "a maximális here-document szám túllépve"
 
-#: parse.y:3521 parse.y:3891
+#: parse.y:3536 parse.y:3906
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "váratlan EOF „%c” helyett"
 
-#: parse.y:4591
+#: parse.y:4606
 msgid "unexpected EOF while looking for `]]'"
 msgstr "váratlan EOF „]]” helyett"
 
-#: parse.y:4596
+#: parse.y:4611
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr "szintaktikai hiba a feltételben: váratlan token: „%s”"
 
-#: parse.y:4600
+#: parse.y:4615
 msgid "syntax error in conditional expression"
 msgstr "szintaktikai hiba a feltételben"
 
-#: parse.y:4678
+#: parse.y:4693
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr "váratlan token (%s) „)” helyett"
 
-#: parse.y:4682
+#: parse.y:4697
 msgid "expected `)'"
 msgstr "„)” szükséges"
 
-#: parse.y:4710
+#: parse.y:4725
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr "váratlan argumentum (%s) feltételes egyoperandusú operátorhoz"
 
-#: parse.y:4714
+#: parse.y:4729
 msgid "unexpected argument to conditional unary operator"
 msgstr "váratlan argumentum feltételes egyoperandusú operátorhoz"
 
-#: parse.y:4760
+#: parse.y:4775
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr "váratlan token (%s), feltételes kétoperandusú operátor szükséges"
 
-#: parse.y:4764
+#: parse.y:4779
 msgid "conditional binary operator expected"
 msgstr "feltételes kétoperandusú operátor szükséges"
 
-#: parse.y:4786
+#: parse.y:4801
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr "váratlan argumentum (%s) feltételes kétoperandusú operátorhoz"
 
-#: parse.y:4790
+#: parse.y:4805
 msgid "unexpected argument to conditional binary operator"
 msgstr "váratlan argumentum feltételes kétoperandusú operátorhoz"
 
-#: parse.y:4801
+#: parse.y:4816
 #, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr "váratlan token (%c) feltételes parancsban"
 
-#: parse.y:4804
+#: parse.y:4819
 #, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr "váratlan token (%s) feltételes parancsban"
 
-#: parse.y:4808
+#: parse.y:4823
 #, c-format
 msgid "unexpected token %d in conditional command"
 msgstr "váratlan token (%d) feltételes parancsban"
 
-#: parse.y:6230
+#: parse.y:6245
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "szintaktikai hiba „%s” váratlan token közelében"
 
-#: parse.y:6248
+#: parse.y:6263
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "szintaktikai hiba „%s” közelében"
 
-#: parse.y:6258
+#: parse.y:6273
 msgid "syntax error: unexpected end of file"
 msgstr "szintaktikai hiba: váratlan fájlvége"
 
-#: parse.y:6258
+#: parse.y:6273
 msgid "syntax error"
 msgstr "szintaktikai hiba"
 
-#: parse.y:6320
+#: parse.y:6335
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "„%s” használatával lehet elhagyni a parancsértelmezőt.\n"
 
-#: parse.y:6482
+#: parse.y:6497
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "váratlan EOF „)” helyett"
 
@@ -1574,26 +1574,26 @@ msgstr "programmable_completion: %s: lehetséges újrapróbálási hurok"
 msgid "progcomp_insert: %s: NULL COMPSPEC"
 msgstr "progcomp_insert: %s: NULL COMPSPEC"
 
-#: print_cmd.c:300
+#: print_cmd.c:302
 #, c-format
 msgid "print_command: bad connector `%d'"
 msgstr "print_command: hibás csatlakozó (%d)"
 
-#: print_cmd.c:373
+#: print_cmd.c:375
 #, c-format
 msgid "xtrace_set: %d: invalid file descriptor"
 msgstr "xtrace_set: %d: érvénytelen fájlleíró"
 
-#: print_cmd.c:378
+#: print_cmd.c:380
 msgid "xtrace_set: NULL file pointer"
 msgstr "xtrace_set: NULL fájlmutató"
 
-#: print_cmd.c:382
+#: print_cmd.c:384
 #, c-format
 msgid "xtrace fd (%d) != fileno xtrace fp (%d)"
 msgstr "xtrace fd (%d) != fileno xtrace fp (%d)"
 
-#: print_cmd.c:1538
+#: print_cmd.c:1540
 #, c-format
 msgid "cprintf: `%c': invalid format character"
 msgstr "cprintf: „%c”: érvénytelen formátumkarakter"
@@ -1631,7 +1631,7 @@ msgstr "%s: nem lehet változóhoz fájlleírót rendelni"
 msgid "/dev/(tcp|udp)/host/port not supported without networking"
 msgstr "/dev/(tcp|udp)/host/port nincs támogatva hálózat nélkül"
 
-#: redir.c:873 redir.c:988 redir.c:1049 redir.c:1217
+#: redir.c:875 redir.c:990 redir.c:1051 redir.c:1221
 msgid "redirection error: cannot duplicate fd"
 msgstr "átirányítási hiba: nem lehet duplikálni a fájlleírót"
 
@@ -1909,96 +1909,96 @@ msgstr "Ismeretlen szignál #"
 msgid "Unknown Signal #%d"
 msgstr "%d. számú ismeretlen szignál"
 
-#: subst.c:1452 subst.c:1642
+#: subst.c:1454 subst.c:1644
 #, c-format
 msgid "bad substitution: no closing `%s' in %s"
 msgstr "hibás helyettesítés: nincs záró „%s” a következőben: %s"
 
-#: subst.c:3229
+#: subst.c:3231
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr "%s: lista nem adható tömbelemnek értékül"
 
-#: subst.c:5765 subst.c:5781
+#: subst.c:5789 subst.c:5805
 msgid "cannot make pipe for process substitution"
 msgstr "nem hozható létre a csővezeték a folyamatbehelyettesítéshez"
 
-#: subst.c:5827
+#: subst.c:5851
 msgid "cannot make child for process substitution"
 msgstr "nem hozható létre a gyermek a folyamatbehelyettesítéshez"
 
-#: subst.c:5896
+#: subst.c:5920
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "nem nyitható meg olvasásra a(z) %s csővezeték"
 
-#: subst.c:5898
+#: subst.c:5922
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "nem nyitható meg írásra a(z) %s csővezeték"
 
-#: subst.c:5921
+#: subst.c:5945
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "nem duplikálható a(z) %s csővezeték %d. fájlleíróként"
 
-#: subst.c:6038
+#: subst.c:6062
 msgid "command substitution: ignored null byte in input"
 msgstr "parancshelyettesítés: figyelmen kívül hagyott null bájt a bemeneten"
 
-#: subst.c:6166
+#: subst.c:6190
 msgid "cannot make pipe for command substitution"
 msgstr "nem hozható létre csővezeték a parancsbehelyettesítéshez"
 
-#: subst.c:6209
+#: subst.c:6233
 msgid "cannot make child for command substitution"
 msgstr "nem hozható létre gyermek a parancsbehelyettesítéshez"
 
-#: subst.c:6235
+#: subst.c:6259
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr "command_substitute: nem duplikálható a csővezeték 1. fájlleíróként"
 
-#: subst.c:6685 subst.c:9597
+#: subst.c:6710 subst.c:9623
 #, c-format
 msgid "%s: invalid variable name for name reference"
 msgstr "%s: érvénytelen változóérték a névhivatkozáshoz"
 
-#: subst.c:6781 subst.c:6799 subst.c:6954
+#: subst.c:6806 subst.c:6824 subst.c:6979
 #, c-format
 msgid "%s: invalid indirect expansion"
 msgstr "%s: az indirekt kiegészítés érvénytelen"
 
-#: subst.c:6815 subst.c:6962
+#: subst.c:6840 subst.c:6987
 #, c-format
 msgid "%s: invalid variable name"
 msgstr "%s: érvénytelen változónév"
 
-#: subst.c:7031
+#: subst.c:7056
 #, fuzzy, c-format
 msgid "%s: parameter not set"
 msgstr "%s: a paraméter null vagy nincs beállítva"
 
-#: subst.c:7033
+#: subst.c:7058
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: a paraméter null vagy nincs beállítva"
 
-#: subst.c:7270 subst.c:7285
+#: subst.c:7295 subst.c:7310
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: részkarakterlánc-kifejezés < 0"
 
-#: subst.c:8948 subst.c:8969
+#: subst.c:8973 subst.c:8994
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: rossz helyettesítés"
 
-#: subst.c:9057
+#: subst.c:9082
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: nem lehet így értéket adni"
 
-#: subst.c:9460
+#: subst.c:9485
 msgid ""
 "future versions of the shell will force evaluation as an arithmetic "
 "substitution"
@@ -2006,12 +2006,12 @@ msgstr ""
 "a parancsértelmező későbbi verziói kötelezővé teszik majd az aritmetikai "
 "kiértékelést"
 
-#: subst.c:10017
+#: subst.c:10043
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "hibás helyettesítés: nincs záró „`” a következőben: %s"
 
-#: subst.c:11044
+#: subst.c:11070
 #, c-format
 msgid "no match: %s"
 msgstr "nincs találat: %s"
@@ -2074,72 +2074,72 @@ msgstr ""
 msgid "trap_handler: bad signal %d"
 msgstr "trap_handler: rossz szignál: %d"
 
-#: variables.c:411
+#: variables.c:412
 #, c-format
 msgid "error importing function definition for `%s'"
 msgstr "hiba a függvénydefiníció betöltésekor: „%s”"
 
-#: variables.c:820
+#: variables.c:821
 #, c-format
 msgid "shell level (%d) too high, resetting to 1"
 msgstr "a parancsértelmező szintje (%d) túl magas, visszaállítás 1-re"
 
-#: variables.c:2623
+#: variables.c:2655
 msgid "make_local_variable: no function context at current scope"
 msgstr "make_local_variable: nincs függvénykörnyezet az aktuális látókörben"
 
-#: variables.c:2642
+#: variables.c:2674
 #, c-format
 msgid "%s: variable may not be assigned value"
 msgstr "%s: nem lehet a változóhoz értéket rendelni"
 
-#: variables.c:3415
+#: variables.c:3453
 #, c-format
 msgid "%s: assigning integer to name reference"
 msgstr "%s: egész szám hozzárendelése a névhivatkozáshoz"
 
-#: variables.c:4324
+#: variables.c:4365
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: nincs függvénykörnyezet az aktuális látókörben"
 
-#: variables.c:4657
+#: variables.c:4698
 #, c-format
 msgid "%s has null exportstr"
 msgstr "%s exportstr-je null"
 
-#: variables.c:4662 variables.c:4671
+#: variables.c:4703 variables.c:4712
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "érvénytelen karakter (%d) %s exportstr-jében"
 
-#: variables.c:4677
+#: variables.c:4718
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "nincs „=” %s exportstr-jében"
 
-#: variables.c:5202
+#: variables.c:5243
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr "pop_var_context: shell_variables feje nem egy függvénykörnyezet"
 
-#: variables.c:5215
+#: variables.c:5256
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: nincs global_variables környezet"
 
-#: variables.c:5295
+#: variables.c:5336
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr "pop_scope: shell_variables feje nem egy átmeneti környezeti látókör"
 
-#: variables.c:6231
+#: variables.c:6272
 #, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: %s: nem nyitható meg FILE-ként"
 
-#: variables.c:6236
+#: variables.c:6277
 #, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%s: %s: érvénytelen érték a trace fájlleíróhoz"
 
-#: variables.c:6281
+#: variables.c:6322
 #, c-format
 msgid "%s: %s: compatibility value out of range"
 msgstr "%s: %s: a kompatibilitási érték kívül esik a tartományon"
@@ -3053,6 +3053,7 @@ msgstr ""
 "    hiba történik, vagy nem függvényben lett hívva."
 
 #: builtins.c:555
+#, fuzzy
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -3081,6 +3082,12 @@ msgid ""
 "    \t\t0 to 3 octal digits\n"
 "      \\xHH\tthe eight-bit character whose value is HH (hexadecimal).  HH\n"
 "    \t\tcan be one or two hex digits\n"
+"      \\uHHHH\tthe Unicode character whose value is the hexadecimal value "
+"HHHH.\n"
+"    \t\tHHHH can be one to four hex digits.\n"
+"      \\UHHHHHHHH the Unicode character whose value is the hexadecimal "
+"value\n"
+"    \t\tHHHHHHHH. HHHHHHHH can be one to eight hex digits.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns success unless a write error occurs."
@@ -3114,7 +3121,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, kivéve írási hiba esetén."
 
-#: builtins.c:591
+#: builtins.c:595
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -3136,7 +3143,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, kivéve írási hiba esetén."
 
-#: builtins.c:606
+#: builtins.c:610
 msgid ""
 "Enable and disable shell builtins.\n"
 "    \n"
@@ -3188,7 +3195,7 @@ msgstr ""
 "    Sikerrel tér vissza, kivéve ha a NÉV nem egy beépített parancs, vagy\n"
 "    hiba történt."
 
-#: builtins.c:634
+#: builtins.c:638
 msgid ""
 "Execute arguments as a shell command.\n"
 "    \n"
@@ -3207,7 +3214,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    A parancs kilépési kódjával tér vissza, vagy sikerrel, ha üres a parancs."
 
-#: builtins.c:646
+#: builtins.c:650
 msgid ""
 "Parse option arguments.\n"
 "    \n"
@@ -3285,7 +3292,7 @@ msgstr ""
 "    Sikerrel tér vissza, ha kapcsolót talált, sikertelenül, ha elfogytak a\n"
 "    kapcsolók, vagy hiba történt."
 
-#: builtins.c:688
+#: builtins.c:692
 msgid ""
 "Replace the shell with the given command.\n"
 "    \n"
@@ -3327,7 +3334,7 @@ msgstr ""
 "    Sikerrel tér vissza, kivéve, ha a PARANCS nem található vagy sikertelen\n"
 "    az átirányítás."
 
-#: builtins.c:709
+#: builtins.c:713
 msgid ""
 "Exit the shell.\n"
 "    \n"
@@ -3340,7 +3347,7 @@ msgstr ""
 "utolsó\n"
 "    parancs kilépési kódjával lép ki."
 
-#: builtins.c:718
+#: builtins.c:722
 msgid ""
 "Exit a login shell.\n"
 "    \n"
@@ -3353,7 +3360,7 @@ msgstr ""
 "    Kilép a bejelentkező parancsértelmezőből az N kilépési kóddal. Hibával\n"
 "    tér vissza, ha nem bejelentkező parancsértelmezőből hívják."
 
-#: builtins.c:728
+#: builtins.c:732
 msgid ""
 "Display or execute commands from the history list.\n"
 "    \n"
@@ -3411,7 +3418,7 @@ msgstr ""
 "eltérőt\n"
 "    hiba esetén."
 
-#: builtins.c:758
+#: builtins.c:762
 msgid ""
 "Move job to the foreground.\n"
 "    \n"
@@ -3433,7 +3440,7 @@ msgstr ""
 "    Az előtérbe hozott parancs állapota (annak kilépésekor), vagy nem nulla\n"
 "    hiba esetén."
 
-#: builtins.c:773
+#: builtins.c:777
 msgid ""
 "Move jobs to the background.\n"
 "    \n"
@@ -3457,7 +3464,7 @@ msgstr ""
 "    Sikerrel tér vissza, kivéve ha a munkakezelés le van tiltva, vagy\n"
 "    hiba történt."
 
-#: builtins.c:787
+#: builtins.c:791
 msgid ""
 "Remember or display program locations.\n"
 "    \n"
@@ -3500,7 +3507,7 @@ msgstr ""
 "    Sikerrel tér vissza, kivéve, ha a NÉV nem található vagy érvénytelen\n"
 "    kapcsolót kap."
 
-#: builtins.c:812
+#: builtins.c:816
 #, fuzzy
 msgid ""
 "Display information about builtin commands.\n"
@@ -3540,7 +3547,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, kivéve ha nincs találat vagy hibás kapcsolót kap."
 
-#: builtins.c:836
+#: builtins.c:840
 #, fuzzy
 msgid ""
 "Display or manipulate the history list.\n"
@@ -3609,7 +3616,7 @@ msgstr ""
 "    Sikerrel tér vissza, kivéve ha érvénytelen kapcsolót kap, vagy hiba\n"
 "    történik."
 
-#: builtins.c:873
+#: builtins.c:877
 msgid ""
 "Display status of jobs.\n"
 "    \n"
@@ -3654,7 +3661,7 @@ msgstr ""
 "    Sikerrel tér vissza, ha nem kap érvénytelen kapcsolót, és nem történik\n"
 "    hiba. -x használata esetén a PARANCS kilépési kódjával tér vissza."
 
-#: builtins.c:900
+#: builtins.c:904
 msgid ""
 "Remove jobs from current shell.\n"
 "    \n"
@@ -3686,7 +3693,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, ha nem kap érvénytelen kapcsolót vagy MUNKASZÁMOT"
 
-#: builtins.c:919
+#: builtins.c:923
 msgid ""
 "Send a signal to a job.\n"
 "    \n"
@@ -3731,7 +3738,7 @@ msgstr ""
 "történik\n"
 "    hiba."
 
-#: builtins.c:943
+#: builtins.c:947
 msgid ""
 "Evaluate arithmetic expressions.\n"
 "    \n"
@@ -3814,7 +3821,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Ha az utolsó argumentum 0, a let 1-gyel tér vissza, különben 0-val."
 
-#: builtins.c:988
+#: builtins.c:992
 #, fuzzy
 msgid ""
 "Read a line from the standard input and split it into fields.\n"
@@ -3904,7 +3911,7 @@ msgstr ""
 "    A kilépési kód nulla, kivéve ha EOF-ot ér a beolvasás, időtúllépéskor\n"
 "    (ekkor > 128) vagy érvénytelen fájlleíró megadásakor a -u kapcsolónak."
 
-#: builtins.c:1035
+#: builtins.c:1039
 msgid ""
 "Return from a shell function.\n"
 "    \n"
@@ -3926,7 +3933,7 @@ msgstr ""
 "    N-nel tér vissza, kivéve ha nem függvényből vagy parancsfájlból akar\n"
 "    visszatérni – ekkor sikertelenséget jelez."
 
-#: builtins.c:1048
+#: builtins.c:1052
 msgid ""
 "Set or unset values of shell options and positional parameters.\n"
 "    \n"
@@ -4096,7 +4103,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, kivéve ha érvénytelen kapcsolót kap."
 
-#: builtins.c:1133
+#: builtins.c:1137
 msgid ""
 "Unset values and attributes of shell variables and functions.\n"
 "    \n"
@@ -4138,7 +4145,7 @@ msgstr ""
 "    Sikerrel tér vissza, kivéve ha hibás kapcsolót kap, vagy egy NÉV csak\n"
 "    olvasható."
 
-#: builtins.c:1155
+#: builtins.c:1159
 msgid ""
 "Set export attribute for shell variables.\n"
 "    \n"
@@ -4172,7 +4179,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, kivéve ha érvénytelen kapcsolót vagy NEVET kap."
 
-#: builtins.c:1174
+#: builtins.c:1178
 msgid ""
 "Mark shell variables as unchangeable.\n"
 "    \n"
@@ -4210,7 +4217,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, kivéve ha érvénytelen kapcsolót vagy NEVET kap."
 
-#: builtins.c:1196
+#: builtins.c:1200
 msgid ""
 "Shift positional parameters.\n"
 "    \n"
@@ -4228,7 +4235,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, kivéve ha N negatív vagy nagyobb mint $#."
 
-#: builtins.c:1208 builtins.c:1223
+#: builtins.c:1212 builtins.c:1227
 msgid ""
 "Execute commands from a file in the current shell.\n"
 "    \n"
@@ -4253,7 +4260,7 @@ msgstr ""
 "sikertelenül,\n"
 "    ha a FÁJLNÉV nem olvasható."
 
-#: builtins.c:1239
+#: builtins.c:1243
 msgid ""
 "Suspend shell execution.\n"
 "    \n"
@@ -4279,7 +4286,7 @@ msgstr ""
 "    Sikerrel tér vissza, kivéve ha a munkakezelés nem támogatott vagy hiba\n"
 "    történt."
 
-#: builtins.c:1255
+#: builtins.c:1259
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -4440,7 +4447,7 @@ msgstr ""
 "vagy\n"
 "    érvénytelen argumentumokat kap."
 
-#: builtins.c:1337
+#: builtins.c:1341
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -4452,7 +4459,7 @@ msgstr ""
 "    Ez a „test” beépített parancs szinonimája, de annyiban eltér tőle,\n"
 "    hogy az utolsó argumentuma „]” kell legyen – a nyitó „]”-lel összhangban."
 
-#: builtins.c:1346
+#: builtins.c:1350
 msgid ""
 "Display process times.\n"
 "    \n"
@@ -4471,7 +4478,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Mindig sikeres."
 
-#: builtins.c:1358
+#: builtins.c:1362
 msgid ""
 "Trap signals and other events.\n"
 "    \n"
@@ -4554,7 +4561,7 @@ msgstr ""
 "    Sikerrel tér vissza, kivéve ha a SZIGNÁL érvénytelen, vagy érvénytelen\n"
 "    kapcsolót kap."
 
-#: builtins.c:1394
+#: builtins.c:1398
 msgid ""
 "Display information about command type.\n"
 "    \n"
@@ -4606,7 +4613,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Sikerrel lép ki, ha minden NÉV megtalálható, sikertelenül, ha nem."
 
-#: builtins.c:1425
+#: builtins.c:1429
 msgid ""
 "Modify shell resource limits.\n"
 "    \n"
@@ -4701,7 +4708,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, kivéve érvénytelen kapcsoló vagy hiba esetében."
 
-#: builtins.c:1475
+#: builtins.c:1479
 msgid ""
 "Display or set file mode mask.\n"
 "    \n"
@@ -4737,7 +4744,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Sikerrel lép ki, kivéve ha a MÓD vagy egy kapcsoló érvénytelen."
 
-#: builtins.c:1495
+#: builtins.c:1499
 #, fuzzy
 msgid ""
 "Wait for job completion and return exit status.\n"
@@ -4775,7 +4782,7 @@ msgstr ""
 "    ID kilépési kódjával tér vissza; érvénytelen ID vagy kapcsoló esetén\n"
 "    sikertelenül."
 
-#: builtins.c:1519
+#: builtins.c:1523
 msgid ""
 "Wait for process completion and return exit status.\n"
 "    \n"
@@ -4800,7 +4807,7 @@ msgstr ""
 "kapcsoló\n"
 "    esetén sikertelenül."
 
-#: builtins.c:1534
+#: builtins.c:1538
 msgid ""
 "Execute commands for each member in a list.\n"
 "    \n"
@@ -4822,7 +4829,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Az utolsó parancs kilépési kódját adja vissza."
 
-#: builtins.c:1548
+#: builtins.c:1552
 msgid ""
 "Arithmetic for loop.\n"
 "    \n"
@@ -4853,7 +4860,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Az utolsó parancs kilépési kódját adja."
 
-#: builtins.c:1566
+#: builtins.c:1570
 msgid ""
 "Select words from a list and execute commands.\n"
 "    \n"
@@ -4889,7 +4896,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Az utolsó parancs kilépési kódját adja vissza."
 
-#: builtins.c:1587
+#: builtins.c:1591
 msgid ""
 "Report time consumed by pipeline's execution.\n"
 "    \n"
@@ -4919,7 +4926,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    A kilépési kód a CSŐVEZETÉK kilépési kódja lesz."
 
-#: builtins.c:1604
+#: builtins.c:1608
 msgid ""
 "Execute commands based on pattern matching.\n"
 "    \n"
@@ -4939,7 +4946,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Az utolsó parancs kilépési kódját adja vissza."
 
-#: builtins.c:1616
+#: builtins.c:1620
 msgid ""
 "Execute commands based on conditional.\n"
 "    \n"
@@ -4972,7 +4979,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Az utoljára végrehajtott parancs kilépési kódja."
 
-#: builtins.c:1633
+#: builtins.c:1637
 msgid ""
 "Execute commands as long as a test succeeds.\n"
 "    \n"
@@ -4991,7 +4998,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Az utolsónak végrehajtott parancs kilépési kódja."
 
-#: builtins.c:1645
+#: builtins.c:1649
 msgid ""
 "Execute commands as long as a test does not succeed.\n"
 "    \n"
@@ -5010,7 +5017,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Az utolsónak végrehajtott parancs kilépési kódja."
 
-#: builtins.c:1657
+#: builtins.c:1661
 msgid ""
 "Create a coprocess named NAME.\n"
 "    \n"
@@ -5032,7 +5039,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    A coproc parancs 0-s kilépési kóddal tér vissza."
 
-#: builtins.c:1671
+#: builtins.c:1675
 msgid ""
 "Define shell function.\n"
 "    \n"
@@ -5056,7 +5063,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, kivéve ha a NÉV csak olvasható."
 
-#: builtins.c:1685
+#: builtins.c:1689
 msgid ""
 "Group commands as a unit.\n"
 "    \n"
@@ -5074,7 +5081,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Az utolsó parancs kilépési kódját adja vissza."
 
-#: builtins.c:1697
+#: builtins.c:1701
 msgid ""
 "Resume job in foreground.\n"
 "    \n"
@@ -5098,7 +5105,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    A visszaállított parancs kilépési kódjával lép ki."
 
-#: builtins.c:1712
+#: builtins.c:1716
 msgid ""
 "Evaluate arithmetic expression.\n"
 "    \n"
@@ -5116,7 +5123,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    1-gyel tér vissza, ha KIFEJEZÉS értéke 0, különben 0-val."
 
-#: builtins.c:1724
+#: builtins.c:1728
 msgid ""
 "Execute conditional command.\n"
 "    \n"
@@ -5165,7 +5172,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    0 vagy 1 a KIFEJEZÉSTŐL függően."
 
-#: builtins.c:1750
+#: builtins.c:1754
 msgid ""
 "Common shell variable names and usage.\n"
 "    \n"
@@ -5266,7 +5273,7 @@ msgstr ""
 "    HISTIGNORE\tKettőspontokkal elválasztott mintalista, amely mintákra\n"
 "    \t\tilleszkedő parancsok nem kerülnek az előzmények közé\n"
 
-#: builtins.c:1807
+#: builtins.c:1811
 msgid ""
 "Add directories to stack.\n"
 "    \n"
@@ -5324,7 +5331,7 @@ msgstr ""
 "    Sikerrel tér vissza, kivéve érvénytelen argumentum vagy könyvtárváltás\n"
 "    során történő hiba esetén."
 
-#: builtins.c:1841
+#: builtins.c:1845
 msgid ""
 "Remove directories from stack.\n"
 "    \n"
@@ -5373,7 +5380,7 @@ msgstr ""
 "    Sikerrel tér vissza, kivéve érvénytelen argumentum vagy könyvtárváltás\n"
 "    során történő hiba esetén."
 
-#: builtins.c:1871
+#: builtins.c:1875
 msgid ""
 "Display directory stack.\n"
 "    \n"
@@ -5423,7 +5430,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, kivéve érvénytelen argumentum vagy hiba esetén."
 
-#: builtins.c:1902
+#: builtins.c:1906
 #, fuzzy
 msgid ""
 "Set and unset shell options.\n"
@@ -5460,7 +5467,7 @@ msgstr ""
 "    Sikerrel tér vissza, ha az OPTNÉV engedélyezve van; sikertelenül, ha\n"
 "    hibás kapcsolókat kap vagy az OPTNÉV tiltva van."
 
-#: builtins.c:1923
+#: builtins.c:1927
 msgid ""
 "Formats and prints ARGUMENTS under control of the FORMAT.\n"
 "    \n"
@@ -5530,7 +5537,7 @@ msgstr ""
 "    Sikerrel tér vissza, kivéve ha hibás kapcsolókat kap, vagy az írás/\n"
 "    értékadás hibával járt."
 
-#: builtins.c:1957
+#: builtins.c:1961
 #, fuzzy
 msgid ""
 "Specify how arguments are to be completed by Readline.\n"
@@ -5549,7 +5556,7 @@ msgid ""
 "    \t\twithout any specific completion defined\n"
 "      -E\tapply the completions and actions to \"empty\" commands --\n"
 "    \t\tcompletion attempted on a blank line\n"
-"      -I\tapply the completions and actions to the intial (usually the\n"
+"      -I\tapply the completions and actions to the initial (usually the\n"
 "    \t\tcommand) word\n"
 "    \n"
 "    When completion is attempted, the actions are applied in the order the\n"
@@ -5584,7 +5591,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Sikerrel tér vissza, kivéve érvénytelen kapcsoló és hiba esetén."
 
-#: builtins.c:1987
+#: builtins.c:1991
 msgid ""
 "Display possible completions depending on the options.\n"
 "    \n"
@@ -5606,7 +5613,7 @@ msgstr ""
 "    Kilépési kód:\n"
 "    Sikerrel lép ki, kivéve érvénytelen kapcsoló vagy hiba esetén."
 
-#: builtins.c:2002
+#: builtins.c:2006
 #, fuzzy
 msgid ""
 "Modify or display completion options.\n"
@@ -5665,7 +5672,7 @@ msgstr ""
 "nincs\n"
 "    még megadva."
 
-#: builtins.c:2033
+#: builtins.c:2037
 msgid ""
 "Read lines from the standard input into an indexed array variable.\n"
 "    \n"
@@ -5737,7 +5744,7 @@ msgstr ""
 "    Sikerrel tér vissza, kivéve érvénytelen kapcsoló vagy csak olvasható,\n"
 "    vagy nem indexelt TÖMB megadása esetén."
 
-#: builtins.c:2069
+#: builtins.c:2073
 msgid ""
 "Read lines from a file into an array variable.\n"
 "    \n"

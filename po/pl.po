@@ -1,15 +1,15 @@
 # Polish translation of bash
-# Copyright (C) 2007, 2010, 2011, 2013, 2014, 2015, 2016 Free Software Foundation, Inc.
+# Copyright (C) 2007, 2010, 2011, 2013, 2014, 2015, 2016, 2018 Free Software Foundation, Inc.
 # This file is distributed under the same license as the bash package.
 # Andrzej M. Krzysztofowicz <ankry@mif.pg.gda.pl> 2006,2007.
-# Jakub Bogusz <qboosh@pld-linux.org> 2010-2016.
+# Jakub Bogusz <qboosh@pld-linux.org> 2010-2018.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: bash 4.4\n"
+"Project-Id-Version: bash 5.0-beta2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-11-16 15:54-0500\n"
-"PO-Revision-Date: 2016-09-16 21:30+0200\n"
+"POT-Creation-Date: 2018-12-19 15:52-0500\n"
+"PO-Revision-Date: 2018-11-28 17:15+0100\n"
 "Last-Translator: Jakub Bogusz <qboosh@pld-linux.org>\n"
 "Language-Team: Polish <translation-team-pl@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -24,8 +24,8 @@ msgstr ""
 msgid "bad array subscript"
 msgstr "nieprawidłowy indeks tablicy"
 
-#: arrayfunc.c:377 builtins/declare.def:638 variables.c:2233 variables.c:2259
-#: variables.c:3075
+#: arrayfunc.c:377 builtins/declare.def:638 variables.c:2254 variables.c:2280
+#: variables.c:3108
 #, c-format
 msgid "%s: removing nameref attribute"
 msgstr "%s: usuwanie atrybutu nameref"
@@ -56,22 +56,22 @@ msgid "%s: cannot create: %s"
 msgstr "%s: nie można utworzyć: %s"
 
 # ???
-#: bashline.c:4143
+#: bashline.c:4144
 msgid "bash_execute_unix_command: cannot find keymap for command"
 msgstr ""
 "bash_execute_unix_command: nie można znaleźć mapy klawiszy dla polecenia"
 
-#: bashline.c:4253
+#: bashline.c:4254
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr "%s: pierwszym drukowalnym znakiem nie jest `\"'"
 
-#: bashline.c:4282
+#: bashline.c:4283
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr "brak zamykającego `%c' w %s"
 
-#: bashline.c:4316
+#: bashline.c:4317
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: brak separującego dwukropka"
@@ -82,18 +82,18 @@ msgid "brace expansion: cannot allocate memory for %s"
 msgstr "rozwijanie nawiasów: nie można przydzielić pamięci dla %s"
 
 #: braces.c:429
-#, fuzzy, c-format
+#, c-format
 msgid "brace expansion: failed to allocate memory for %u elements"
 msgstr ""
 "rozwijanie nawiasów: nie udało się przydzielić pamięci dla elementów w "
-"liczbie %d"
+"liczbie %u"
 
 #: braces.c:474
 #, c-format
 msgid "brace expansion: failed to allocate memory for `%s'"
 msgstr "rozwijanie nawiasów: nie udało się przydzielić pamięci dla `%s'"
 
-#: builtins/alias.def:131 variables.c:1821
+#: builtins/alias.def:131 variables.c:1842
 #, c-format
 msgid "`%s': invalid alias name"
 msgstr "`%s': błędna nazwa aliasu"
@@ -208,7 +208,7 @@ msgstr "%s: nieprawidłowa opcja"
 msgid "%s: invalid option name"
 msgstr "%s: nieprawidłowa nazwa opcji"
 
-#: builtins/common.c:230 execute_cmd.c:2363 general.c:296 general.c:301
+#: builtins/common.c:230 execute_cmd.c:2372 general.c:352 general.c:357
 #, c-format
 msgid "`%s': not a valid identifier"
 msgstr "`%s': nieprawidłowy identyfikator"
@@ -343,13 +343,13 @@ msgstr "można używać tylko w funkcji"
 msgid "%s: reference variable cannot be an array"
 msgstr "%s: zmienna referencyjna nie może być tablicą"
 
-#: builtins/declare.def:380 variables.c:3325
+#: builtins/declare.def:380 variables.c:3363
 #, c-format
 msgid "%s: nameref variable self references not allowed"
 msgstr "%s: zmienna referencyjna nie może wskazywać na siebie"
 
-#: builtins/declare.def:385 variables.c:2063 variables.c:3236 variables.c:3248
-#: variables.c:3322
+#: builtins/declare.def:385 variables.c:2084 variables.c:3272 variables.c:3285
+#: variables.c:3360
 #, c-format
 msgid "%s: circular name reference"
 msgstr "%s: cykliczne odwołanie do nazwy"
@@ -363,7 +363,7 @@ msgstr "`%s': błędna nazwa zmiennej przy odwołaniu do nazwy"
 msgid "cannot use `-f' to make functions"
 msgstr "nie można używać `-f' do tworzenia funkcji"
 
-#: builtins/declare.def:532 execute_cmd.c:5843
+#: builtins/declare.def:532 execute_cmd.c:5852
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: funkcja tylko do odczytu"
@@ -412,7 +412,7 @@ msgstr "%s: nie jest ładowany dynamicznie"
 msgid "%s: cannot delete: %s"
 msgstr "%s: nie można usunąć: %s"
 
-#: builtins/evalfile.c:138 builtins/hash.def:184 execute_cmd.c:5675
+#: builtins/evalfile.c:138 builtins/hash.def:184 execute_cmd.c:5684
 #, c-format
 msgid "%s: is a directory"
 msgstr "%s: jest katalogiem"
@@ -818,21 +818,21 @@ msgstr "błąd odczytu: %d: %s"
 msgid "can only `return' from a function or sourced script"
 msgstr "wyjście przez `return' możliwe tylko z funkcji lub skryptu"
 
-#: builtins/set.def:834
+#: builtins/set.def:852
 msgid "cannot simultaneously unset a function and a variable"
 msgstr "nie można jednocześnie anulować definicji funkcji i zmiennej"
 
-#: builtins/set.def:886
+#: builtins/set.def:904
 #, c-format
 msgid "%s: cannot unset"
 msgstr "%s: nie można anulować definicji"
 
-#: builtins/set.def:907 variables.c:3772
+#: builtins/set.def:925 variables.c:3813
 #, c-format
 msgid "%s: cannot unset: readonly %s"
 msgstr "%s: nie można anulować definicji: %s jest tylko do odczytu"
 
-#: builtins/set.def:920
+#: builtins/set.def:938
 #, c-format
 msgid "%s: not an array variable"
 msgstr "%s: nie jest zmienną tablicową"
@@ -1006,61 +1006,61 @@ msgstr "nie można przekierować standardowego wejścia z /dev/null: %s"
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "TIMEFORMAT: `%c': nieprawidłowy znak formatujący"
 
-#: execute_cmd.c:2352
+#: execute_cmd.c:2361
 #, c-format
 msgid "execute_coproc: coproc [%d:%s] still exists"
 msgstr "execute_coproc: koproces [%d:%s] nadal istnieje"
 
-#: execute_cmd.c:2476
+#: execute_cmd.c:2485
 msgid "pipe error"
 msgstr "błąd potoku"
 
-#: execute_cmd.c:4662
+#: execute_cmd.c:4671
 #, c-format
 msgid "eval: maximum eval nesting level exceeded (%d)"
 msgstr "eval: przekroczono maksymalny poziom zagnieżdżenia polecenia eval (%d)"
 
-#: execute_cmd.c:4674
+#: execute_cmd.c:4683
 #, c-format
 msgid "%s: maximum source nesting level exceeded (%d)"
 msgstr "%s: przekroczono maksymalny poziom zagnieżdżenia polecenia source (%d)"
 
-#: execute_cmd.c:4782
+#: execute_cmd.c:4791
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
 msgstr "%s: przekroczono maksymalny poziom zagnieżdżenia funkcji (%d)"
 
-#: execute_cmd.c:5331
+#: execute_cmd.c:5340
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: ograniczony: nie można podawać `/' w nazwach poleceń"
 
-#: execute_cmd.c:5429
+#: execute_cmd.c:5438
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: nie znaleziono polecenia"
 
-#: execute_cmd.c:5673
+#: execute_cmd.c:5682
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: execute_cmd.c:5711
+#: execute_cmd.c:5720
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: zły interpreter"
 
-#: execute_cmd.c:5748
+#: execute_cmd.c:5757
 #, c-format
 msgid "%s: cannot execute binary file: %s"
 msgstr "%s: nie można uruchomić pliku binarnego: %s"
 
-#: execute_cmd.c:5834
+#: execute_cmd.c:5843
 #, c-format
 msgid "`%s': is a special builtin"
 msgstr "`%s' jest specjalnym poleceniem wewnętrznym"
 
-#: execute_cmd.c:5886
+#: execute_cmd.c:5895
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "nie można skopiować deskryptora pliku %d do %d"
@@ -1082,9 +1082,8 @@ msgid "attempted assignment to non-variable"
 msgstr "próba przypisania do nie-zmiennej"
 
 #: expr.c:530
-#, fuzzy
 msgid "syntax error in variable assignment"
-msgstr "błąd składniowy w wyrażeniu"
+msgstr "błąd składniowy w przypisaniu zmiennej"
 
 #: expr.c:544 expr.c:910
 msgid "division by 0"
@@ -1142,7 +1141,7 @@ msgstr "%s: błąd w wyrażeniu\n"
 msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: niemożliwy dostęp do katalogów nadrzędnych"
 
-#: input.c:99 subst.c:5906
+#: input.c:99 subst.c:5930
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "nie można wyłączyć trybu nieblokującego dla deskryptora %d"
@@ -1157,155 +1156,154 @@ msgstr "nie można przydzielić nowego deskryptora pliku dla wejścia basha z %d
 msgid "save_bash_input: buffer already exists for new fd %d"
 msgstr "save_bash_input: bufor dla nowego deskryptora %d już istnieje"
 
-#: jobs.c:527
+#: jobs.c:529
 msgid "start_pipeline: pgrp pipe"
 msgstr "start_pipeline: pgrp pipe"
 
 # ???
-#: jobs.c:1082
+#: jobs.c:1084
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr "proces o PID %d występuje w działającym zadaniu %d"
 
-#: jobs.c:1201
+#: jobs.c:1203
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "usuwanie zatrzymanego zadania %d z grupą procesów %ld"
 
-#: jobs.c:1305
+#: jobs.c:1307
 #, c-format
 msgid "add_process: process %5ld (%s) in the_pipeline"
 msgstr "add_process: proces %5ld (%s) w potoku"
 
-#: jobs.c:1308
+#: jobs.c:1310
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr "add_process: pid %5ld (%s) oznaczony jako nadal żywy"
 
-#: jobs.c:1637
+#: jobs.c:1639
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "describe_pid: %ld: brak takiego PID-u"
 
-#: jobs.c:1652
+#: jobs.c:1654
 #, c-format
 msgid "Signal %d"
 msgstr "Sygnał %d"
 
-#: jobs.c:1666 jobs.c:1692
+#: jobs.c:1668 jobs.c:1694
 msgid "Done"
 msgstr "Zakończono"
 
-#: jobs.c:1671 siglist.c:123
+#: jobs.c:1673 siglist.c:123
 msgid "Stopped"
 msgstr "Zatrzymano"
 
-#: jobs.c:1675
+#: jobs.c:1677
 #, c-format
 msgid "Stopped(%s)"
 msgstr "Zatrzymano(%s)"
 
-#: jobs.c:1679
+#: jobs.c:1681
 msgid "Running"
 msgstr "Działa"
 
-#: jobs.c:1696
+#: jobs.c:1698
 #, c-format
 msgid "Done(%d)"
 msgstr "Zakończono(%d)"
 
-#: jobs.c:1698
+#: jobs.c:1700
 #, c-format
 msgid "Exit %d"
 msgstr "Kod wyjścia %d"
 
-#: jobs.c:1701
+#: jobs.c:1703
 msgid "Unknown status"
 msgstr "Stan nieznany"
 
-#: jobs.c:1788
+#: jobs.c:1790
 #, c-format
 msgid "(core dumped) "
 msgstr "(zrzut pamięci) "
 
-#: jobs.c:1807
+#: jobs.c:1809
 #, c-format
 msgid "  (wd: %s)"
 msgstr "  (katalog: %s)"
 
-#: jobs.c:2035
+#: jobs.c:2037
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr "setpgid potomka (%ld na %ld)"
 
-#: jobs.c:2397 nojobs.c:657
+#: jobs.c:2399 nojobs.c:657
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: PID %ld nie jest potomkiem tej powłoki"
 
-#: jobs.c:2693
+#: jobs.c:2695
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for: Brak rekordu dla procesu %ld"
 
-#: jobs.c:3053
+#: jobs.c:3055
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: zadanie %d jest zatrzymane"
 
-#: jobs.c:3360
+#: jobs.c:3362
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: zadanie zostało przerwane"
 
-#: jobs.c:3369
+#: jobs.c:3371
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: zadanie %d już pracuje w tle"
 
-#: jobs.c:3595
+#: jobs.c:3597
 msgid "waitchld: turning on WNOHANG to avoid indefinite block"
 msgstr ""
 "waitchld: wyłączanie WNOHANG w celu uniknięcia nieskończonego oczekiwania"
 
-#: jobs.c:4118
+#: jobs.c:4120
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s: linia %d: "
 
-#: jobs.c:4132 nojobs.c:900
+#: jobs.c:4134 nojobs.c:900
 #, c-format
 msgid " (core dumped)"
 msgstr " (zrzut pamięci)"
 
-#: jobs.c:4144 jobs.c:4157
+#: jobs.c:4146 jobs.c:4159
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(katalog: %s)\n"
 
-#: jobs.c:4189
+#: jobs.c:4191
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: getpgrp nie powiodło się"
 
-#: jobs.c:4245
-#, fuzzy
+#: jobs.c:4247
 msgid "initialize_job_control: no job control in background"
-msgstr "initialize_job_control: dyscyplina linii"
+msgstr "initialize_job_control: brak kontroli zadań w tle"
 
-#: jobs.c:4261
+#: jobs.c:4263
 msgid "initialize_job_control: line discipline"
 msgstr "initialize_job_control: dyscyplina linii"
 
-#: jobs.c:4271
+#: jobs.c:4273
 msgid "initialize_job_control: setpgid"
 msgstr "initialize_job_control: setpgid"
 
-#: jobs.c:4292 jobs.c:4301
+#: jobs.c:4294 jobs.c:4303
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "nie można ustawić grupy procesów terminala (%d)"
 
-#: jobs.c:4306
+#: jobs.c:4308
 msgid "no job control in this shell"
 msgstr "w tej powłoce nie ma kontroli zadań"
 
@@ -1460,7 +1458,7 @@ msgstr ""
 msgid "make_redirection: redirection instruction `%d' out of range"
 msgstr "make_redirection: instrukcja przekierowania `%d' poza zakresem"
 
-#: parse.y:2369
+#: parse.y:2380
 #, c-format
 msgid ""
 "shell_getc: shell_input_line_size (%zu) exceeds SIZE_MAX (%lu): line "
@@ -1469,103 +1467,103 @@ msgstr ""
 "shell_getc: shell_input_line_size (%zu) przekracza SIZE_MAX (%lu): linia "
 "skrócona"
 
-#: parse.y:2775
+#: parse.y:2786
 msgid "maximum here-document count exceeded"
 msgstr "przekroczono maksymalną liczbę dokumentów w miejscu"
 
-#: parse.y:3521 parse.y:3891
+#: parse.y:3536 parse.y:3906
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "nieoczekiwany EOF podczas poszukiwania pasującego `%c'"
 
-#: parse.y:4591
+#: parse.y:4606
 msgid "unexpected EOF while looking for `]]'"
 msgstr "nieoczekiwany EOF podczas poszukiwania `]]'"
 
-#: parse.y:4596
+#: parse.y:4611
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr "błąd składni w wyrażeniu warunkowym: nieoczekiwany znacznik `%s'"
 
-#: parse.y:4600
+#: parse.y:4615
 msgid "syntax error in conditional expression"
 msgstr "błąd składni w wyrażeniu warunkowym"
 
-#: parse.y:4678
+#: parse.y:4693
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr "nieoczekiwany znacznik `%s', oczekiwano `)'"
 
-#: parse.y:4682
+#: parse.y:4697
 msgid "expected `)'"
 msgstr "oczekiwano `)'"
 
-#: parse.y:4710
+#: parse.y:4725
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr "nieoczekiwany argument `%s' jednoargumentowego operatora warunkowego"
 
-#: parse.y:4714
+#: parse.y:4729
 msgid "unexpected argument to conditional unary operator"
 msgstr "nieoczekiwany argument jednoargumentowego operatora warunkowego"
 
-#: parse.y:4760
+#: parse.y:4775
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr "nieoczekiwany argument `%s', oczekiwano dwuarg. operatora warunkowego"
 
-#: parse.y:4764
+#: parse.y:4779
 msgid "conditional binary operator expected"
 msgstr "oczekiwano dwuargumentowego operatora warunkowego"
 
-#: parse.y:4786
+#: parse.y:4801
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr "nieoczekiwany argument `%s' dwuargumentowego operatora warunkowego"
 
-#: parse.y:4790
+#: parse.y:4805
 msgid "unexpected argument to conditional binary operator"
 msgstr "nieoczekiwany argument dwuargumentowego operatora warunkowego"
 
-#: parse.y:4801
+#: parse.y:4816
 #, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr "nieoczekiwany znacznik `%c' w poleceniu warunkowym"
 
-#: parse.y:4804
+#: parse.y:4819
 #, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr "nieoczekiwany znacznik `%s' w poleceniu warunkowym"
 
-#: parse.y:4808
+#: parse.y:4823
 #, c-format
 msgid "unexpected token %d in conditional command"
 msgstr "nieoczekiwany znacznik %d w poleceniu warunkowym"
 
-#: parse.y:6230
+#: parse.y:6245
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "błąd składni przy nieoczekiwanym znaczniku `%s'"
 
-#: parse.y:6248
+#: parse.y:6263
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "błąd składni przy `%s'"
 
-#: parse.y:6258
+#: parse.y:6273
 msgid "syntax error: unexpected end of file"
 msgstr "błąd składni: nieoczekiwany koniec pliku"
 
-#: parse.y:6258
+#: parse.y:6273
 msgid "syntax error"
 msgstr "błąd składni"
 
-#: parse.y:6320
+#: parse.y:6335
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "Użyj \"%s\", aby opuścić tę powłokę.\n"
 
-#: parse.y:6482
+#: parse.y:6497
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "nieoczekiwany EOF podczas poszukiwania pasującego `)'"
 
@@ -1584,26 +1582,26 @@ msgstr "programmable_completion: %s: możliwe zapętlenie wznowień"
 msgid "progcomp_insert: %s: NULL COMPSPEC"
 msgstr "progcomp_insert: %s: NULL COMPSPEC"
 
-#: print_cmd.c:300
+#: print_cmd.c:302
 #, c-format
 msgid "print_command: bad connector `%d'"
 msgstr "print_command: zły łącznik `%d'"
 
-#: print_cmd.c:373
+#: print_cmd.c:375
 #, c-format
 msgid "xtrace_set: %d: invalid file descriptor"
 msgstr "xtrace_set: %d: nieprawidłowy deskryptor pliku"
 
-#: print_cmd.c:378
+#: print_cmd.c:380
 msgid "xtrace_set: NULL file pointer"
 msgstr "xtrace_set: pusty wskaźnik pliku"
 
-#: print_cmd.c:382
+#: print_cmd.c:384
 #, c-format
 msgid "xtrace fd (%d) != fileno xtrace fp (%d)"
 msgstr "xtrace fd (%d) != fileno xtrace fp (%d)"
 
-#: print_cmd.c:1538
+#: print_cmd.c:1540
 #, c-format
 msgid "cprintf: `%c': invalid format character"
 msgstr "cprintf: `%c': nieprawidłowy znak formatujący"
@@ -1641,7 +1639,7 @@ msgstr "%s: nie można przypisać deskryptora pliku do zmiennej"
 msgid "/dev/(tcp|udp)/host/port not supported without networking"
 msgstr "/dev/(tcp|udp)/host/port nie są wspierane bez sieci"
 
-#: redir.c:873 redir.c:988 redir.c:1049 redir.c:1217
+#: redir.c:875 redir.c:990 redir.c:1051 redir.c:1221
 msgid "redirection error: cannot duplicate fd"
 msgstr "błąd przekierowania: nie można powielić deskryptora pliku"
 
@@ -1655,7 +1653,7 @@ msgstr "/tmp musi być prawidłową nazwą katalogu"
 
 #: shell.c:798
 msgid "pretty-printing mode ignored in interactive shells"
-msgstr ""
+msgstr "tryb ładnego wypisywania jest ignorowany w powłokach interaktywnych"
 
 #: shell.c:940
 #, c-format
@@ -1921,96 +1919,96 @@ msgstr "Nieznany sygnał #"
 msgid "Unknown Signal #%d"
 msgstr "Nieznany sygnał #%d"
 
-#: subst.c:1452 subst.c:1642
+#: subst.c:1454 subst.c:1644
 #, c-format
 msgid "bad substitution: no closing `%s' in %s"
 msgstr "złe podstawienie: brak zamykającego `%s' w %s"
 
-#: subst.c:3229
+#: subst.c:3231
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr "%s: nie można przypisać listy do elementu tablicy"
 
-#: subst.c:5765 subst.c:5781
+#: subst.c:5789 subst.c:5805
 msgid "cannot make pipe for process substitution"
 msgstr "nie można utworzyć potoku dla podstawienia procesu"
 
-#: subst.c:5827
+#: subst.c:5851
 msgid "cannot make child for process substitution"
 msgstr "nie można utworzyć procesu potomnego dla podstawienia procesu"
 
-#: subst.c:5896
+#: subst.c:5920
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "nie można otworzyć nazwanego potoku %s do odczytu"
 
-#: subst.c:5898
+#: subst.c:5922
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "nie można otworzyć nazwanego potoku %s do zapisu"
 
-#: subst.c:5921
+#: subst.c:5945
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "nie można powielić nazwanego potoku %s jako deskryptor %d"
 
-#: subst.c:6038
+#: subst.c:6062
 msgid "command substitution: ignored null byte in input"
 msgstr "podstawienie polecenia: zignorowano zerowy bajt na wejściu"
 
-#: subst.c:6166
+#: subst.c:6190
 msgid "cannot make pipe for command substitution"
 msgstr "nie można utworzyć potoku dla podstawienia polecenia"
 
-#: subst.c:6209
+#: subst.c:6233
 msgid "cannot make child for command substitution"
 msgstr "nie można utworzyć procesu potomnego dla podstawienia polecenia"
 
-#: subst.c:6235
+#: subst.c:6259
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr "command_substitute: nie można powielić potoku jako deskryptora 1"
 
-#: subst.c:6685 subst.c:9597
+#: subst.c:6710 subst.c:9623
 #, c-format
 msgid "%s: invalid variable name for name reference"
 msgstr "%s: nieprawidłowa nazwa zmiennej przy odwołaniu do nazwy"
 
-#: subst.c:6781 subst.c:6799 subst.c:6954
+#: subst.c:6806 subst.c:6824 subst.c:6979
 #, c-format
 msgid "%s: invalid indirect expansion"
 msgstr "%s: błędne rozwinięcie niebezpośrednie"
 
-#: subst.c:6815 subst.c:6962
+#: subst.c:6840 subst.c:6987
 #, c-format
 msgid "%s: invalid variable name"
 msgstr "`%s': błędna nazwa zmiennej"
 
-#: subst.c:7031
-#, fuzzy, c-format
+#: subst.c:7056
+#, c-format
 msgid "%s: parameter not set"
-msgstr "%s: parametr pusty lub nieustawiony"
+msgstr "%s: parametr nieustawiony"
 
-#: subst.c:7033
+#: subst.c:7058
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: parametr pusty lub nieustawiony"
 
-#: subst.c:7270 subst.c:7285
+#: subst.c:7295 subst.c:7310
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: wyrażenie dla podłańcucha < 0"
 
-#: subst.c:8948 subst.c:8969
+#: subst.c:8973 subst.c:8994
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: złe podstawienie"
 
-#: subst.c:9057
+#: subst.c:9082
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: nie można przypisywać w ten sposób"
 
-#: subst.c:9460
+#: subst.c:9485
 msgid ""
 "future versions of the shell will force evaluation as an arithmetic "
 "substitution"
@@ -2018,12 +2016,12 @@ msgstr ""
 "przyszłe wersje powłoki będą wymuszać obliczenie jako podstawienie "
 "arytmetyczne"
 
-#: subst.c:10017
+#: subst.c:10043
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "złe podstawienie: brak zamykającego \"`\" w %s"
 
-#: subst.c:11044
+#: subst.c:11070
 #, c-format
 msgid "no match: %s"
 msgstr "brak pasującego: %s"
@@ -2065,9 +2063,9 @@ msgid "invalid signal number"
 msgstr "nieprawidłowy numer sygnału"
 
 #: trap.c:320
-#, fuzzy, c-format
+#, c-format
 msgid "trap handler: maximum trap handler level exceeded (%d)"
-msgstr "eval: przekroczono maksymalny poziom zagnieżdżenia polecenia eval (%d)"
+msgstr "obsługa pułapki: przekroczono maksymalny poziom obsługi pułapek (%d)"
 
 #: trap.c:408
 #, c-format
@@ -2087,81 +2085,80 @@ msgstr ""
 msgid "trap_handler: bad signal %d"
 msgstr "trap_handler: zły sygnał %d"
 
-#: variables.c:411
+#: variables.c:412
 #, c-format
 msgid "error importing function definition for `%s'"
 msgstr "błąd importu definicji funkcji dla `%s'"
 
-#: variables.c:820
+#: variables.c:821
 #, c-format
 msgid "shell level (%d) too high, resetting to 1"
 msgstr "poziom powłoki (%d) jest za duży, ustawiono na 1"
 
-#: variables.c:2623
+#: variables.c:2655
 msgid "make_local_variable: no function context at current scope"
 msgstr "make_local_variable: brak kontekstu funkcji w bieżącym zakresie"
 
-#: variables.c:2642
+#: variables.c:2674
 #, c-format
 msgid "%s: variable may not be assigned value"
 msgstr "%s: nie można przypisać wartości do zmiennej"
 
-#: variables.c:3415
+#: variables.c:3453
 #, c-format
 msgid "%s: assigning integer to name reference"
 msgstr "%s: przypisanie wartości całkowitej przy odwołaniu do nazwy"
 
-#: variables.c:4324
+#: variables.c:4365
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: brak kontekstu funkcji w bieżącym zakresie"
 
-#: variables.c:4657
+#: variables.c:4698
 #, c-format
 msgid "%s has null exportstr"
 msgstr "%s ma pusty exportstr"
 
-#: variables.c:4662 variables.c:4671
+#: variables.c:4703 variables.c:4712
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "nieprawidłowy znak %d w exportstr dla %s"
 
-#: variables.c:4677
+#: variables.c:4718
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "brak `=' w exportstr dla %s"
 
-#: variables.c:5202
+#: variables.c:5243
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr "pop_var_context: nagłówek shell_variables poza kontekstem funkcji"
 
-#: variables.c:5215
+#: variables.c:5256
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: brak kontekstu global_variables"
 
-#: variables.c:5295
+#: variables.c:5336
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr ""
 "pop_scope: nagłówek shell_variables poza zakresem tymczasowego środowiska"
 
-#: variables.c:6231
+#: variables.c:6272
 #, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: %s: nie można otworzyć jako PLIK"
 
-#: variables.c:6236
+#: variables.c:6277
 #, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%s: %s: nieprawidłowa wartość dla deskryptora pliku do śledzenia"
 
-#: variables.c:6281
+#: variables.c:6322
 #, c-format
 msgid "%s: %s: compatibility value out of range"
 msgstr "%s: %s: wartość zgodności poza zakresem"
 
 #: version.c:46 version2.c:46
-#, fuzzy
 msgid "Copyright (C) 2018 Free Software Foundation, Inc."
-msgstr "Copyright (C) 2016 Free Software Foundation, Inc."
+msgstr "Copyright (C) 2018 Free Software Foundation, Inc."
 
 #: version.c:47 version2.c:47
 msgid ""
@@ -2413,9 +2410,8 @@ msgid "umask [-p] [-S] [mode]"
 msgstr "umask [-p] [-S] [uprawnienia]"
 
 #: builtins.c:177
-#, fuzzy
 msgid "wait [-fn] [id ...]"
-msgstr "wait [-n] [id ...]"
+msgstr "wait [-fn] [id ...]"
 
 #: builtins.c:181
 msgid "wait [pid ...]"
@@ -2506,14 +2502,13 @@ msgid "printf [-v var] format [arguments]"
 msgstr "printf [-v var] format [argumenty]"
 
 #: builtins.c:231
-#, fuzzy
 msgid ""
 "complete [-abcdefgjksuv] [-pr] [-DEI] [-o option] [-A action] [-G globpat] [-"
 "W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S "
 "suffix] [name ...]"
 msgstr ""
-"complete [-abcdefgjksuv] [-pr] [-DE] [-o opcja] [-A akcja] [-G wzorzec-glob] "
-"[-W lista-słów] [-F funkcja] [-C polecenie] [-X wzorzec-filtra] [-P "
+"complete [-abcdefgjksuv] [-pr] [-DEI] [-o opcja] [-A akcja] [-G wzorzec-"
+"glob] [-W lista-słów]  [-F funkcja] [-C polecenie] [-X wzorzec-filtra] [-P "
 "przedrostek] [-S przyrostek] [nazwa ...]"
 
 #: builtins.c:235
@@ -2526,9 +2521,8 @@ msgstr ""
 "przyrostek] [słowo]"
 
 #: builtins.c:239
-#, fuzzy
 msgid "compopt [-o|+o option] [-DEI] [name ...]"
-msgstr "compopt [-o|+o opcja] [-DE] [nazwa ...]"
+msgstr "compopt [-o|+o opcja] [-DEI] [nazwa ...]"
 
 #: builtins.c:242
 msgid ""
@@ -2539,13 +2533,12 @@ msgstr ""
 "C wywołanie] [-c co-ile] [tablica]"
 
 #: builtins.c:244
-#, fuzzy
 msgid ""
 "readarray [-d delim] [-n count] [-O origin] [-s count] [-t] [-u fd] [-C "
 "callback] [-c quantum] [array]"
 msgstr ""
-"readarray [-n liczba] [-O początek] [-s liczba] [-t] [-u fd] [-C wywołanie] "
-"[-c co-ile] [tablica]"
+"readarray [-d ogranicznik] [-n liczba] [-O początek] [-s liczba] [-t] [-u "
+"fd] [-C wywołanie] [-c krok] [tablica]"
 
 #: builtins.c:256
 msgid ""
@@ -2730,7 +2723,6 @@ msgstr ""
 "    Instrukcja zwraca 0, chyba że N jest mniejsze niż 1."
 
 #: builtins.c:354
-#, fuzzy
 msgid ""
 "Execute shell builtins.\n"
 "    \n"
@@ -2969,7 +2961,6 @@ msgstr ""
 "    znalezione."
 
 #: builtins.c:490
-#, fuzzy
 msgid ""
 "Set variable values and attributes.\n"
 "    \n"
@@ -3025,12 +3016,13 @@ msgstr ""
 "      -a\tczyni NAZWĘ tablicą indeksowaną (jeśli są one obsługiwane)\n"
 "      -A\tczyni NAZWĘ tablicą asocjacyjną (jeśli są one obsługiwane)\n"
 "      -i\tnadaje NAZWIE atrybut `integer' (zmiennej całkowitej)\n"
-"      -l\tprzekształca NAZWĘ na małe litery przy przypisaniu\n"
+"      -l\tprzekształca wartość każdej NAZWY na małe litery przy przypisaniu\n"
 "      -n\tczyni NAZWĘ odwołaniem do zmiennej o nazwie wskazanej przez "
 "wartość\n"
 "      -r\tczyni NAZWĘ tylko do odczytu\n"
 "      -t\tnadaje NAZWIE atrybut `trace'\n"
-"      -u\tprzekształca NAZWĘ na wielkie litery przy przypisaniu\n"
+"      -u\tprzekształca wartość każdej NAZWY na wielkie litery przy "
+"przypisaniu\n"
 "      -x\teksportuje NAZWĘ\n"
 "    \n"
 "    Użycie `+' zamiast `-' wyłącza podany atrybut.\n"
@@ -3081,6 +3073,7 @@ msgstr ""
 "    przypisaniu zmiennej lub powłoka nie wykonuje żadnej funkcji."
 
 #: builtins.c:555
+#, fuzzy
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -3109,6 +3102,12 @@ msgid ""
 "    \t\t0 to 3 octal digits\n"
 "      \\xHH\tthe eight-bit character whose value is HH (hexadecimal).  HH\n"
 "    \t\tcan be one or two hex digits\n"
+"      \\uHHHH\tthe Unicode character whose value is the hexadecimal value "
+"HHHH.\n"
+"    \t\tHHHH can be one to four hex digits.\n"
+"      \\UHHHHHHHH the Unicode character whose value is the hexadecimal "
+"value\n"
+"    \t\tHHHHHHHH. HHHHHHHH can be one to eight hex digits.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns success unless a write error occurs."
@@ -3146,7 +3145,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracana jest prawda, chyba że wystąpi błąd zapisu."
 
-#: builtins.c:591
+#: builtins.c:595
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -3168,7 +3167,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracana jest prawda, chyba że wystąpi błąd zapisu."
 
-#: builtins.c:606
+#: builtins.c:610
 msgid ""
 "Enable and disable shell builtins.\n"
 "    \n"
@@ -3222,7 +3221,7 @@ msgstr ""
 "    Zwracana jest prawda, chyba że NAZWA nie jest poleceniem wbudowanym lub\n"
 "    wystąpi błąd."
 
-#: builtins.c:634
+#: builtins.c:638
 msgid ""
 "Execute arguments as a shell command.\n"
 "    \n"
@@ -3242,7 +3241,7 @@ msgstr ""
 "    Zwracany jest stan wyjściowy polecenia lub prawdę, jeśli polecenie jest\n"
 "    puste."
 
-#: builtins.c:646
+#: builtins.c:650
 msgid ""
 "Parse option arguments.\n"
 "    \n"
@@ -3328,7 +3327,7 @@ msgstr ""
 "koniec\n"
 "    opcji lub błąd."
 
-#: builtins.c:688
+#: builtins.c:692
 msgid ""
 "Replace the shell with the given command.\n"
 "    \n"
@@ -3369,7 +3368,7 @@ msgstr ""
 "wystąpi\n"
 "    błąd przekierowania."
 
-#: builtins.c:709
+#: builtins.c:713
 msgid ""
 "Exit the shell.\n"
 "    \n"
@@ -3381,7 +3380,7 @@ msgstr ""
 "    Opuszczenie powłoki z kodem zakończenia N. Jeśli N pominięto, kodem\n"
 "    zakończenia będzie kod zakończenia ostatniego wykonanego polecenia."
 
-#: builtins.c:718
+#: builtins.c:722
 msgid ""
 "Exit a login shell.\n"
 "    \n"
@@ -3394,7 +3393,7 @@ msgstr ""
 "    Opuszczenie powłoki logowania z kodem zakończenia N. Zwraca błąd, jeśli\n"
 "    powłoka nie jest powłoką logowania."
 
-#: builtins.c:728
+#: builtins.c:732
 msgid ""
 "Display or execute commands from the history list.\n"
 "    \n"
@@ -3453,7 +3452,7 @@ msgstr ""
 "    Zwracana jest prawda lub stan wykonanego polecenia; wartość niezerowa\n"
 "    w przypadku błędu."
 
-#: builtins.c:758
+#: builtins.c:762
 msgid ""
 "Move job to the foreground.\n"
 "    \n"
@@ -3474,7 +3473,7 @@ msgstr ""
 "    Stan zadania umieszczonego na pierwszym planie lub fałsz, jeśli wystąpi\n"
 "    błąd."
 
-#: builtins.c:773
+#: builtins.c:777
 msgid ""
 "Move jobs to the background.\n"
 "    \n"
@@ -3497,7 +3496,7 @@ msgstr ""
 "    Zwracana jest prawda, chyba że sterowanie zadaniami nie jest włączone\n"
 "    lub wystąpi błąd."
 
-#: builtins.c:787
+#: builtins.c:791
 msgid ""
 "Remember or display program locations.\n"
 "    \n"
@@ -3541,8 +3540,7 @@ msgstr ""
 "    Zwracana jest prawda, chyba że nie znaleziono NAZWY lub podano błędną\n"
 "    opcję."
 
-#: builtins.c:812
-#, fuzzy
+#: builtins.c:816
 msgid ""
 "Display information about builtin commands.\n"
 "    \n"
@@ -3583,8 +3581,7 @@ msgstr ""
 "    Zwracana jest prawda, chyba że WZORCA nie znaleziono lub podano błędną\n"
 "    opcję."
 
-#: builtins.c:836
-#, fuzzy
+#: builtins.c:840
 msgid ""
 "Display or manipulate the history list.\n"
 "    \n"
@@ -3626,7 +3623,9 @@ msgstr ""
 "    \n"
 "    Opcje:\n"
 "      -c\twyczyszczenie listy historii poprzez usunięcie wszystkich wpisów\n"
-"      -d offset\tusunięcie wpisu historii o podanym OFFSECIE\n"
+"      -d offset\tusunięcie wpisu historii o podanym OFFSECIE. Ujemne "
+"offsety\n"
+"    \t\tliczą się wstecz od końca listy historii\n"
 "    \n"
 "      -a\tdołączenie linii historii z tej sesji do pliku historii\n"
 "      -n\todczyt wszystkich jeszcze nie przeczytanych linii z pliku\n"
@@ -3654,7 +3653,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracana jest prawda, chyba że podano błędną opcję lub wystąpi błąd."
 
-#: builtins.c:873
+#: builtins.c:877
 msgid ""
 "Display status of jobs.\n"
 "    \n"
@@ -3699,7 +3698,7 @@ msgstr ""
 "    Zwracana jest prawda, chyba że podano błędną opcję lub wystąpi błąd.\n"
 "    Jeśli użyto -x, zwracany jest stan wyjściowy POLECENIA."
 
-#: builtins.c:900
+#: builtins.c:904
 msgid ""
 "Remove jobs from current shell.\n"
 "    \n"
@@ -3729,7 +3728,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracana jest prawda, chyba że podano błędną opcję lub ZADANIE."
 
-#: builtins.c:919
+#: builtins.c:923
 msgid ""
 "Send a signal to a job.\n"
 "    \n"
@@ -3775,7 +3774,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracany jest sukces, chyba że podano błędną opcję lub wystąpi błąd."
 
-#: builtins.c:943
+#: builtins.c:947
 msgid ""
 "Evaluate arithmetic expressions.\n"
 "    \n"
@@ -3864,8 +3863,7 @@ msgstr ""
 "    Jeśli wartością ostatniego argumentu jest 0, let zwraca 1;\n"
 "    w pozostałych przypadkach zwracane jest 0."
 
-#: builtins.c:988
-#, fuzzy
+#: builtins.c:992
 msgid ""
 "Read a line from the standard input and split it into fields.\n"
 "    \n"
@@ -3935,7 +3933,7 @@ msgstr ""
 "      -d ogr\tkontynuacja do odczytu pierwszego znaku OGR zamiast znaku "
 "nowej\n"
 "    \t\tlinii\n"
-"      -e\tużycie Readline'a do odczytania wiersza w powłoce interaktywnej\n"
+"      -e\tużycie Readline'a do odczytania wiersza\n"
 "      -o tekst\tużycie TEKSTU jako początkowego tekstu dla Readline'a\n"
 "      -n liczba\tpowrót po odczycie LICZBY znaków zamiast oczekiwania na\n"
 "    \t\tznak nowej linii; ogranicznik jest honorowany, jeśli odczytano "
@@ -3965,7 +3963,7 @@ msgstr ""
 "    błąd przypisania zmiennej albo podano nieprawidłowy deskryptor dla\n"
 "    argumentu -u."
 
-#: builtins.c:1035
+#: builtins.c:1039
 msgid ""
 "Return from a shell function.\n"
 "    \n"
@@ -3986,7 +3984,7 @@ msgstr ""
 "    Zwracane jest N lub niepowodzenie, jeśli powłoka nie wykonuje żadnej\n"
 "    funkcji ani skryptu."
 
-#: builtins.c:1048
+#: builtins.c:1052
 msgid ""
 "Set or unset values of shell options and positional parameters.\n"
 "    \n"
@@ -4163,7 +4161,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracana jest prawda, chyba że podano nieprawidłową opcję."
 
-#: builtins.c:1133
+#: builtins.c:1137
 msgid ""
 "Unset values and attributes of shell variables and functions.\n"
 "    \n"
@@ -4205,7 +4203,7 @@ msgstr ""
 "do\n"
 "    odczytu."
 
-#: builtins.c:1155
+#: builtins.c:1159
 msgid ""
 "Set export attribute for shell variables.\n"
 "    \n"
@@ -4240,7 +4238,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracana jest prawda, chyba że podano nieprawidłową opcję lub NAZWĘ."
 
-#: builtins.c:1174
+#: builtins.c:1178
 msgid ""
 "Mark shell variables as unchangeable.\n"
 "    \n"
@@ -4280,7 +4278,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracana jest prawda, chyba że podano nieprawidłową opcję lub NAZWĘ."
 
-#: builtins.c:1196
+#: builtins.c:1200
 msgid ""
 "Shift positional parameters.\n"
 "    \n"
@@ -4298,7 +4296,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracana jest prawda, chyba że N jest ujemne lub większe niż $#."
 
-#: builtins.c:1208 builtins.c:1223
+#: builtins.c:1212 builtins.c:1227
 msgid ""
 "Execute commands from a file in the current shell.\n"
 "    \n"
@@ -4323,7 +4321,7 @@ msgstr ""
 "jeśli\n"
 "    PLIKU nie udało się odczytać."
 
-#: builtins.c:1239
+#: builtins.c:1243
 msgid ""
 "Suspend shell execution.\n"
 "    \n"
@@ -4351,7 +4349,7 @@ msgstr ""
 "wystąpi\n"
 "    błąd."
 
-#: builtins.c:1255
+#: builtins.c:1259
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -4524,7 +4522,7 @@ msgstr ""
 "    Zwracana jest prawda, jeśli wartością WYRAŻENIA jest prawda; fałsz, gdy\n"
 "    wartością WYRAŻENIA jest fałsz lub podano błędny argument."
 
-#: builtins.c:1337
+#: builtins.c:1341
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -4536,7 +4534,7 @@ msgstr ""
 "    Jest to synonim dla wbudowanego polecenia \"test\", ale wymagający, by\n"
 "    ostatnim argumentem był `]' pasujący do początkowego `['."
 
-#: builtins.c:1346
+#: builtins.c:1350
 msgid ""
 "Display process times.\n"
 "    \n"
@@ -4556,7 +4554,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zawsze prawda."
 
-#: builtins.c:1358
+#: builtins.c:1362
 msgid ""
 "Trap signals and other events.\n"
 "    \n"
@@ -4641,7 +4639,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracana jest prawda, chyba że podano błędny SYGNAŁ lub błędną opcję."
 
-#: builtins.c:1394
+#: builtins.c:1398
 msgid ""
 "Display information about command type.\n"
 "    \n"
@@ -4699,7 +4697,7 @@ msgstr ""
 "jeśli\n"
 "    którakolwiek nie zostanie znaleziona."
 
-#: builtins.c:1425
+#: builtins.c:1429
 msgid ""
 "Modify shell resource limits.\n"
 "    \n"
@@ -4798,7 +4796,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracana jest prawda, chyba że podano błędną opcję lub wystąpi błąd."
 
-#: builtins.c:1475
+#: builtins.c:1479
 msgid ""
 "Display or set file mode mask.\n"
 "    \n"
@@ -4833,8 +4831,7 @@ msgstr ""
 "    Zwracana jest prawda, chyba że podano błędne uprawnienia lub błędną "
 "opcję."
 
-#: builtins.c:1495
-#, fuzzy
+#: builtins.c:1499
 msgid ""
 "Wait for job completion and return exit status.\n"
 "    \n"
@@ -4869,11 +4866,14 @@ msgstr ""
 "    Jeśli podano opcję -n, oczekiwanie na zakończenie następnego zadania\n"
 "    i zwrócenie jego kodu zakończenia.\n"
 "    \n"
+"    Jeśli podano opcję -f, a kontrola zadań jest włączona, oczekiwanie na\n"
+"    zakończenie podanego ID zamiast czekania na zmianę jego stanu.\n"
+"    \n"
 "    Stan wyjściowy:\n"
 "    Zwracany jest stan zakończenia ID; niepowodzenie, jeśli ID jest\n"
 "    nieprawidłowe lub podano błędną opcję."
 
-#: builtins.c:1519
+#: builtins.c:1523
 msgid ""
 "Wait for process completion and return exit status.\n"
 "    \n"
@@ -4902,7 +4902,7 @@ msgstr ""
 "podano\n"
 "    nieprawidłową opcję."
 
-#: builtins.c:1534
+#: builtins.c:1538
 msgid ""
 "Execute commands for each member in a list.\n"
 "    \n"
@@ -4925,7 +4925,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracany jest status zakończenia ostatniego wykonanego polecenia."
 
-#: builtins.c:1548
+#: builtins.c:1552
 msgid ""
 "Arithmetic for loop.\n"
 "    \n"
@@ -4955,7 +4955,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracany jest status zakończenia ostatniego wykonanego polecenia."
 
-#: builtins.c:1566
+#: builtins.c:1570
 msgid ""
 "Select words from a list and execute commands.\n"
 "    \n"
@@ -4992,7 +4992,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracany jest status zakończenia ostatniego wykonanego polecenia."
 
-#: builtins.c:1587
+#: builtins.c:1591
 msgid ""
 "Report time consumed by pipeline's execution.\n"
 "    \n"
@@ -5022,7 +5022,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Polecenie zwraca status zakończenia POTOKU poleceń."
 
-#: builtins.c:1604
+#: builtins.c:1608
 msgid ""
 "Execute commands based on pattern matching.\n"
 "    \n"
@@ -5040,7 +5040,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracany jest status zakończenia ostatniego wykonanego polecenia."
 
-#: builtins.c:1616
+#: builtins.c:1620
 msgid ""
 "Execute commands based on conditional.\n"
 "    \n"
@@ -5076,7 +5076,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracany jest status zakończenia ostatniego wykonanego polecenia."
 
-#: builtins.c:1633
+#: builtins.c:1637
 msgid ""
 "Execute commands as long as a test succeeds.\n"
 "    \n"
@@ -5094,7 +5094,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracany jest status zakończenia ostatniego wykonanego polecenia."
 
-#: builtins.c:1645
+#: builtins.c:1649
 msgid ""
 "Execute commands as long as a test does not succeed.\n"
 "    \n"
@@ -5112,7 +5112,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracany jest status zakończenia ostatniego wykonanego polecenia."
 
-#: builtins.c:1657
+#: builtins.c:1661
 msgid ""
 "Create a coprocess named NAME.\n"
 "    \n"
@@ -5134,7 +5134,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Polecenie coproc zwraca status wyjścia 0."
 
-#: builtins.c:1671
+#: builtins.c:1675
 msgid ""
 "Define shell function.\n"
 "    \n"
@@ -5159,7 +5159,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracany jest sukces, chyba że NAZWA jest tylko do odczytu."
 
-#: builtins.c:1685
+#: builtins.c:1689
 msgid ""
 "Group commands as a unit.\n"
 "    \n"
@@ -5177,7 +5177,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracany jest status zakończenia ostatniego wykonanego polecenia."
 
-#: builtins.c:1697
+#: builtins.c:1701
 msgid ""
 "Resume job in foreground.\n"
 "    \n"
@@ -5203,7 +5203,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracany jest stan wznowionego zadania."
 
-#: builtins.c:1712
+#: builtins.c:1716
 msgid ""
 "Evaluate arithmetic expression.\n"
 "    \n"
@@ -5223,7 +5223,7 @@ msgstr ""
 "    Zwracane jest 1, jeśli wartością WYRAŻENIA jest 0; 0 w przeciwnym "
 "wypadku."
 
-#: builtins.c:1724
+#: builtins.c:1728
 msgid ""
 "Execute conditional command.\n"
 "    \n"
@@ -5278,7 +5278,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    0 lub 1 w zależności od wartości WYRAŻENIA."
 
-#: builtins.c:1750
+#: builtins.c:1754
 msgid ""
 "Common shell variable names and usage.\n"
 "    \n"
@@ -5386,7 +5386,7 @@ msgstr ""
 "    \t\tdecydowaniu, które polecenia powinny być zapisywane na liście\n"
 "    \t\thistorii.\n"
 
-#: builtins.c:1807
+#: builtins.c:1811
 msgid ""
 "Add directories to stack.\n"
 "    \n"
@@ -5444,7 +5444,7 @@ msgstr ""
 "katalogu\n"
 "    się nie powiedzie."
 
-#: builtins.c:1841
+#: builtins.c:1845
 msgid ""
 "Remove directories from stack.\n"
 "    \n"
@@ -5496,7 +5496,7 @@ msgstr ""
 "katalogu\n"
 "    się nie powiedzie."
 
-#: builtins.c:1871
+#: builtins.c:1875
 msgid ""
 "Display directory stack.\n"
 "    \n"
@@ -5550,8 +5550,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracana jest prawda, chyba że podano błędną opcję lub wystąpi błąd."
 
-#: builtins.c:1902
-#, fuzzy
+#: builtins.c:1906
 msgid ""
 "Set and unset shell options.\n"
 "    \n"
@@ -5574,7 +5573,9 @@ msgstr ""
 "    \n"
 "    Zmiana ustawienia każdej z NAZWY-OPCJI. Bez argumentów będących "
 "opcjami,\n"
-"    wypisywane są wszystkie opcje powłoki z zaznaczeniem włączonych.\n"
+"    wypisywane są wszystkie podane NAZWY-OPCJI, lub wszystkie opcje "
+"powłoki,\n"
+"    jeśli nie podano NAZW-OPCJI, wraz z zaznaczeniem włączonych.\n"
 "    \n"
 "    Opcje:\n"
 "      -o\tograniczenie NAZW-OPCJI do używanych z `set -o'\n"
@@ -5588,7 +5589,7 @@ msgstr ""
 "jeśli\n"
 "    podano błędną opcję lub NAZWA-OPCJI jest wyłączona."
 
-#: builtins.c:1923
+#: builtins.c:1927
 msgid ""
 "Formats and prints ARGUMENTS under control of the FORMAT.\n"
 "    \n"
@@ -5660,7 +5661,8 @@ msgstr ""
 "    Zwracana jest prawda, chyba że podano błędną opcję lub zapis albo\n"
 "    przypisanie zakończy się niepowodzeniem."
 
-#: builtins.c:1957
+# FIXME: s/intial/initial/
+#: builtins.c:1961
 #, fuzzy
 msgid ""
 "Specify how arguments are to be completed by Readline.\n"
@@ -5679,7 +5681,7 @@ msgid ""
 "    \t\twithout any specific completion defined\n"
 "      -E\tapply the completions and actions to \"empty\" commands --\n"
 "    \t\tcompletion attempted on a blank line\n"
-"      -I\tapply the completions and actions to the intial (usually the\n"
+"      -I\tapply the completions and actions to the initial (usually the\n"
 "    \t\tcommand) word\n"
 "    \n"
 "    When completion is attempted, the actions are applied in the order the\n"
@@ -5706,14 +5708,17 @@ msgstr ""
 "    \t\tokreślonych żadnych konkretnych reguł dopełniania\n"
 "      -E\tstosowanie dopełniania i akcji dla \"pustych\" poleceń -\n"
 "    \t\tpróby dopełnienia w pustej linii\n"
+"      -I\tstosowanie dopełniania i akcji do początkowego słowa (zwykle\n"
+"    \t\tpolecenia)\n"
 "    \n"
 "    Przy próbie dopełnienia akcje są wykonywane w kolejności takiej, jak\n"
-"    wielkie litery wymienione powyżej. Opcja -D ma priorytet nad -E.\n"
+"    wielkie litery wymienione powyżej. Jeśli podano wiele opcji, opcja -D\n"
+"    ma priorytet nad -E, a obie mają priorytet nad -I.\n"
 "    \n"
 "    Stan wyjściowy:\n"
 "    Zwracana jest prawda, chyba że podano błędną opcję lub wystąpi błąd."
 
-#: builtins.c:1987
+#: builtins.c:1991
 msgid ""
 "Display possible completions depending on the options.\n"
 "    \n"
@@ -5734,8 +5739,7 @@ msgstr ""
 "    Stan wyjściowy:\n"
 "    Zwracana jest prawda, chyba że podano błędną opcję lub wystąpi błąd."
 
-#: builtins.c:2002
-#, fuzzy
+#: builtins.c:2006
 msgid ""
 "Modify or display completion options.\n"
 "    \n"
@@ -5777,6 +5781,7 @@ msgstr ""
 "    \t-o opcja\tUstawienie podanej OPCJI dopełniania dla każdej NAZWY\n"
 "    \t-D\t\tZmiana opcji dla \"domyślnego\" dopełniania polecenia\n"
 "    \t-E\t\tZmiana opcji dla dopełniania \"pustego\" polecenia\n"
+"    \t-I\t\tZmiana opcji dla dopełniania dla początkowego słowa\n"
 "    \n"
 "    Użycie `+o' zamiast `-o' wyłącza podaną opcję.\n"
 "    \n"
@@ -5794,7 +5799,7 @@ msgstr ""
 "    Zwracana jest prawda, chyba że podano błędną opcję lub NAZWA nie ma\n"
 "    zdefiniowanej specyfikacji dopełniania."
 
-#: builtins.c:2033
+#: builtins.c:2037
 msgid ""
 "Read lines from the standard input into an indexed array variable.\n"
 "    \n"
@@ -5870,7 +5875,7 @@ msgstr ""
 "tylko\n"
 "    do odczytu, lub nie jest tablicą indeksowaną."
 
-#: builtins.c:2069
+#: builtins.c:2073
 msgid ""
 "Read lines from a file into an array variable.\n"
 "    \n"

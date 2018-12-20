@@ -169,6 +169,7 @@ SHELL_VAR nameref_invalid_value;
 static SHELL_VAR nameref_maxloop_value;
 
 static HASH_TABLE *last_table_searched;	/* hash_lookup sets this */
+static VAR_CONTEXT *last_context_searched;
 
 /* Some forward declarations. */
 static void create_variable_tables __P((void));
@@ -1311,34 +1312,48 @@ init_seconds_var ()
 }
      
 /* The random number seed.  You can change this by setting RANDOM. */
-static unsigned long rseed = 1;
+static u_bits32_t rseed = 1;
 static int last_random_value;
 static int seeded_subshell = 0;
 
-/* A linear congruential random number generator based on the example
-   one in the ANSI C standard.  This one isn't very good, but a more
-   complicated one is overkill. */
+#define BASH_RANDOM_16	1
+
+#if BASH_RANDOM_16
+#  define BASH_RAND_MAX	32767		/* 0x7fff - 16 bits */
+#else
+#  define BASH_RAND_MAX	0x7fffffff	/* 32 bits */
+#endif
 
 /* Returns a pseudo-random number between 0 and 32767. */
 static int
 brand ()
 {
-  /* From "Random number generators: good ones are hard to find",
+  /* Minimal Standard generator from
+     "Random number generators: good ones are hard to find",
      Park and Miller, Communications of the ACM, vol. 31, no. 10,
-     October 1988, p. 1195. filtered through FreeBSD */
-  long h, l;
+     October 1988, p. 1195. filtered through FreeBSD.
+
+     x(n+1) = 16807 * x(n) mod (2**31 - 1).
+
+     We split up the calculations to avoid overflow.
+
+     h = rseed / q; l = x - h * q; t = a * l - h * r
+     m = 2147483647, a = 16807, q = 127773, r = 2836
+
+     There are lots of other combinations of constants to use; look at
+     https://www.gnu.org/software/gsl/manual/html_node/Other-random-number-generators.html#Other-random-number-generators */
+
+  bits32_t h, l, t;
 
   /* Can't seed with 0. */
   if (rseed == 0)
     rseed = 123459876;
   h = rseed / 127773;
-  l = rseed % 127773;
-  rseed = 16807 * l - 2836 * h;
-#if 0
-  if (rseed < 0)
-    rseed += 0x7fffffff;
-#endif
-  return ((unsigned int)(rseed & 32767));	/* was % 32768 */
+  l = rseed - (127773 * h);
+  t = 16807 * l - 2836 * h;
+  rseed = (t < 0) ? t + 0x7fffffff : t;
+
+  return ((unsigned int)(rseed & BASH_RAND_MAX));	/* was % BASH_RAND_MAX+1 */
 }
 
 /* Set the random number generator seed to SEED. */
@@ -1354,9 +1369,15 @@ static void
 seedrand ()
 {
   struct timeval tv;
+  SHELL_VAR *v;
 
   gettimeofday (&tv, NULL);
+#if 0
+  v = find_variable ("BASH_VERSION");
+  sbrand (tv.tv_sec ^ tv.tv_usec ^ getpid () ^ ((u_bits32_t)&v & 0x7fffffff));
+#else
   sbrand (tv.tv_sec ^ tv.tv_usec ^ getpid ());
+#endif
 }
 
 static SHELL_VAR *
@@ -2607,6 +2628,17 @@ make_local_variable (name, flags)
   if (was_tmpvar && old_var->context == variable_context && last_table_searched != temporary_env)
     {
       VUNSETATTR (old_var, att_invisible);	/* XXX */
+#if 0	/* TAG:bash-5.1 */
+      /* We still want to flag this variable as local, though, and set things
+         up so that it gets treated as a local variable. */
+      new_var = old_var;
+      /* Since we found the variable in a temporary environment, this will
+	 succeed. */
+      for (vc = shell_variables; vc; vc = vc->down)
+	if (vc_isfuncenv (vc) && vc->scope == variable_context)
+	  break;
+      goto set_local_var_flags;
+#endif
       return (old_var);
     }
 
@@ -2694,6 +2726,7 @@ make_local_variable (name, flags)
 	new_var->attributes = exported_p (old_var) ? att_exported : 0;
     }
 
+set_local_var_flags:
   vc->flags |= VC_HASLOCAL;
 
   new_var->context = variable_context;
@@ -3213,6 +3246,9 @@ bind_variable (name, value, flags)
 	  nvc = vc;
 	  if (v && nameref_p (v))
 	    {
+	      /* This starts at the context where we found the nameref. If we
+		 want to start the name resolution over again at the original
+		 context, this is where we need to change it */
 	      nv = find_variable_nameref_context (v, vc, &nvc);
 	      if (nv == 0)
 		{
@@ -3234,8 +3270,9 @@ bind_variable (name, value, flags)
 		  else if (nv == &nameref_maxloop_value)
 		    {
 		      internal_warning (_("%s: circular name reference"), v->name);
-#if 0
-		      return (bind_variable_value (v, value, flags|ASS_NAMEREF));
+#if 1
+		      /* TAG:bash-5.1 */
+		      return (bind_global_variable (v->name, value, flags));
 #else
 		      v = 0;	/* backwards compat */
 #endif
@@ -3246,8 +3283,9 @@ bind_variable (name, value, flags)
 	      else if (nv == &nameref_maxloop_value)
 		{
 		  internal_warning (_("%s: circular name reference"), v->name);
-#if 0
-		  return (bind_variable_value (v, value, flags|ASS_NAMEREF));
+#if 1
+		  /* TAG:bash-5.1 */
+		  return (bind_global_variable (v->name, value, flags));
 #else
 		  v = 0;	/* backwards compat */
 #endif
@@ -3557,7 +3595,10 @@ assign_in_env (word, flags)
 	     but the variable does not already exist, assign to the nameref
 	     target and add the target to the temporary environment.  This is
 	     what ksh93 does */
-	  if (var && nameref_p (var) && valid_nameref_value (nameref_cell (var), 1))
+	  /* We use 2 in the call to valid_nameref_value because we don't want
+	     to allow array references here at all (newname will be used to
+	     create a variable directly below) */
+	  if (var && nameref_p (var) && valid_nameref_value (nameref_cell (var), 2))
 	    {
 	      newname = nameref_cell (var);
 	      var = 0;		/* don't use it for append */

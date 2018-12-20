@@ -384,7 +384,7 @@ BRACKMATCH (p, test, flags)
 {
   register CHAR cstart, cend, c;
   register int not;    /* Nonzero if the sense of the character class is inverted.  */
-  int brcnt, brchr, forcecoll;
+  int brcnt, brchr, forcecoll, isrange;
   INT pc;
   CHAR *savep;
   U_CHAR orig_test;
@@ -519,6 +519,7 @@ BRACKMATCH (p, test, flags)
 	}
 
       cstart = cend = FOLD (cstart);
+      isrange = 0;
 
       /* POSIX.2 2.8.3.1.2 says: `An expression containing a `[' that
 	 is not preceded by a backslash and is not part of a bracket
@@ -573,10 +574,18 @@ BRACKMATCH (p, test, flags)
 	      c = FOLD (c);
 	      continue;
 	    }
+	  isrange = 1;
 	}
 
+#if 0		/* TAG: bash-5.1 */
+      if (isrange == 0 && test == cstart)
+        goto matched;
+      if (isrange && RANGECMP (test, cstart, forcecoll) >= 0 && RANGECMP (test, cend, forcecoll) <= 0)
+	goto matched;
+#else
       if (RANGECMP (test, cstart, forcecoll) >= 0 && RANGECMP (test, cend, forcecoll) <= 0)
 	goto matched;
+#endif
 
       if (c == L(']'))
 	break;

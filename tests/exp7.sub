@@ -9,3 +9,15 @@ recho $# "$1" "$2" "$3"
 
 x=$c
 recho "$x"
+
+unset c c2 x
+
+c=$'Y\1Y';
+
+v=X${c}X;
+recho X${c}X
+recho "$v"
+
+v=X$c
+recho X$c
+recho "$v"

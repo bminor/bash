@@ -1091,7 +1091,9 @@ run_debug_trap ()
 {
   int trap_exit_value, old_verbose;
   pid_t save_pgrp;
+#if defined (PGRP_PIPE)
   int save_pipe[2];
+#endif
 
   /* XXX - question:  should the DEBUG trap inherit the RETURN trap? */
   trap_exit_value = 0;
@@ -1213,7 +1215,7 @@ free_trap_string (sig)
      int sig;
 {
   change_signal (sig, (char *)DEFAULT_SIG);
-  sigmodes[sig] &= ~SIG_TRAPPED;
+  sigmodes[sig] &= ~SIG_TRAPPED;		/* XXX - SIG_INPROGRESS? */
 }
 
 /* Reset the handler for SIG to the original value but leave the trap string
@@ -1223,7 +1225,7 @@ reset_signal (sig)
      int sig;
 {
   set_signal_handler (sig, original_signals[sig]);
-  sigmodes[sig] &= ~SIG_TRAPPED;
+  sigmodes[sig] &= ~SIG_TRAPPED;		/* XXX - SIG_INPROGRESS? */
 }
 
 /* Set the handler signal SIG to the original and free any trap
@@ -1246,7 +1248,7 @@ reset_or_restore_signal_handlers (reset)
   /* Take care of the exit trap first */
   if (sigmodes[EXIT_TRAP] & SIG_TRAPPED)
     {
-      sigmodes[EXIT_TRAP] &= ~SIG_TRAPPED;
+      sigmodes[EXIT_TRAP] &= ~SIG_TRAPPED;	/* XXX - SIG_INPROGRESS? */
       if (reset != reset_signal)
 	{
 	  free_trap_command (EXIT_TRAP);

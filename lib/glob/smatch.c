@@ -30,6 +30,12 @@
 #include "shmbutil.h"
 #include "xmalloc.h"
 
+#include <errno.h>
+
+#if !defined (errno)
+extern int errno;
+#endif
+
 /* First, compile `sm_loop.c' for single-byte characters. */
 #define CHAR	unsigned char
 #define U_CHAR	unsigned char
@@ -82,7 +88,7 @@ rangecmp (c1, c2, forcecoll)
 
   if ((ret = strcoll (s1, s2)) != 0)
     return ret;
-  return (c1 - c2);
+  return (c1 - c2);		/* impose total ordering */
 }
 #else /* !HAVE_STRCOLL */
 #  define rangecmp(c1, c2, f)	((int)(c1) - (int)(c2))
@@ -282,6 +288,41 @@ is_cclass (c, name)
 
 extern char *mbsmbchar __P((const char *));
 
+#if FNMATCH_EQUIV_FALLBACK
+/* We don't include <fnmatch.h> in order to avoid namespace collisions; the
+   internal strmatch still uses the FNM_ constants. */
+extern int fnmatch (const char *, const char *, int);
+
+/* Construct a string w1 = "c1" and a pattern w2 = "[[=c2=]]" and pass them
+   to fnmatch to see if wide characters c1 and c2 collate as members of the
+   same equivalence class. We can't really do this portably any other way */
+static int
+_fnmatch_fallback_wc (c1, c2)
+     wchar_t c1, c2;			/* string char, patchar */
+{
+  char w1[MB_LEN_MAX+1];		/* string */
+  char w2[MB_LEN_MAX+8];		/* constructed pattern */
+  int l1, l2;
+
+  l1 = wctomb (w1, c1);
+  if (l1 == -1)
+    return (2);
+  w1[l1] = '\0';
+
+  /* reconstruct the pattern */
+  w2[0] = w2[1] = '[';
+  w2[2] = '=';
+  l2 = wctomb (w2+3, c2);
+  if (l2 == -1)
+    return (2);
+  w2[l2+3] = '=';
+  w2[l2+4] = w2[l2+5] = ']';
+  w2[l2+6] = '\0';
+
+  return (fnmatch ((const char *)w2, (const char *)w1, 0));
+}
+#endif
+
 static int
 rangecmp_wc (c1, c2, forcecoll)
      wint_t c1, c2;
@@ -289,6 +330,7 @@ rangecmp_wc (c1, c2, forcecoll)
 {
   static wchar_t s1[2] = { L' ', L'\0' };
   static wchar_t s2[2] = { L' ', L'\0' };
+  int r, oerrno;
 
   if (c1 == c2)
     return 0;
@@ -299,14 +341,38 @@ rangecmp_wc (c1, c2, forcecoll)
   s1[0] = c1;
   s2[0] = c2;
 
+#if 0	/* TAG:bash-5.1 */
+  /* We impose a total ordering here by returning c1-c2 if wcscoll returns 0,
+     as we do above in the single-byte case.  If we do this, we can no longer
+     use this code in collequiv_wc */
+  if ((r = wcscoll (s1, s2)) != 0)
+    return r;
+  return ((int)(c1 - c2));		/* impose total ordering */
+#else
   return (wcscoll (s1, s2));
+#endif
 }
 
+/* Returns non-zero on success */
 static int
 collequiv_wc (c, equiv)
      wint_t c, equiv;
 {
-  return (c == equiv);
+  wchar_t s, p;
+
+  if (rangecmp_wc (c, equiv, 1) == 0)
+    return 1;
+#if FNMATCH_EQUIV_FALLBACK
+/* We check explicitly for success (fnmatch returns 0) to avoid problems if
+   our local definition of FNM_NOMATCH (strmatch.h) doesn't match the
+   system's (fnmatch.h). We don't care about error return values here. */
+
+  s = c;
+  p = equiv;
+  return (_fnmatch_fallback_wc (s, p) == 0);
+#else
+  return 0;
+#endif
 }
 
 /* Helper function for collating symbol. */

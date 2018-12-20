@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Oct 22 09:55:27 EDT 2018
+.\"	Last Change: Fri Dec  7 09:48:47 EST 2018
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2018 October 22" "GNU Bash 5.0"
+.TH BASH 1 "2018 December 7" "GNU Bash 5.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -629,8 +629,11 @@ of a semicolon to delimit commands.
 If a command is terminated by the control operator
 .BR & ,
 the shell executes the command in the \fIbackground\fP
-in a subshell.  The shell does not wait for the command to
-finish, and the return status is 0.  Commands separated by a
+in a subshell.
+The shell does not wait for the command to
+finish, and the return status is 0.
+These are referred to as \fIasynchronous\fP commands.
+Commands separated by a
 .B ;
 are executed sequentially; the shell waits for each
 command to terminate in turn.  The return status is the
@@ -8036,8 +8039,8 @@ Mark \fIname\fPs for export to subsequent commands via the environment.
 .PP
 Using `+' instead of `\-'
 turns off the attribute instead,
-with the exceptions that \fB+a\fP
-may not be used to destroy an array variable and \fB+r\fP will not
+with the exceptions that \fB+a\fP and \fB+A\fP
+may not be used to destroy array variables and \fB+r\fP will not
 remove the readonly attribute.
 When used in a function,
 .B declare
