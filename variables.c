@@ -1312,34 +1312,48 @@ init_seconds_var ()
 }
      
 /* The random number seed.  You can change this by setting RANDOM. */
-static unsigned long rseed = 1;
+static u_bits32_t rseed = 1;
 static int last_random_value;
 static int seeded_subshell = 0;
 
-/* A linear congruential random number generator based on the example
-   one in the ANSI C standard.  This one isn't very good, but a more
-   complicated one is overkill. */
+#define BASH_RANDOM_16	1
+
+#if BASH_RANDOM_16
+#  define BASH_RAND_MAX	32767		/* 0x7fff - 16 bits */
+#else
+#  define BASH_RAND_MAX	0x7fffffff	/* 32 bits */
+#endif
 
 /* Returns a pseudo-random number between 0 and 32767. */
 static int
 brand ()
 {
-  /* From "Random number generators: good ones are hard to find",
+  /* Minimal Standard generator from
+     "Random number generators: good ones are hard to find",
      Park and Miller, Communications of the ACM, vol. 31, no. 10,
-     October 1988, p. 1195. filtered through FreeBSD */
-  long h, l;
+     October 1988, p. 1195. filtered through FreeBSD.
+
+     x(n+1) = 16807 * x(n) mod (2**31 - 1).
+
+     We split up the calculations to avoid overflow.
+
+     h = rseed / q; l = x - h * q; t = a * l - h * r
+     m = 2147483647, a = 16807, q = 127773, r = 2836
+
+     There are lots of other combinations of constants to use; look at
+     https://www.gnu.org/software/gsl/manual/html_node/Other-random-number-generators.html#Other-random-number-generators */
+
+  bits32_t h, l, t;
 
   /* Can't seed with 0. */
   if (rseed == 0)
     rseed = 123459876;
   h = rseed / 127773;
-  l = rseed % 127773;
-  rseed = 16807 * l - 2836 * h;
-#if 0
-  if (rseed < 0)
-    rseed += 0x7fffffff;
-#endif
-  return ((unsigned int)(rseed & 32767));	/* was % 32768 */
+  l = rseed - (127773 * h);
+  t = 16807 * l - 2836 * h;
+  rseed = (t < 0) ? t + 0x7fffffff : t;
+
+  return ((unsigned int)(rseed & BASH_RAND_MAX));	/* was % BASH_RAND_MAX+1 */
 }
 
 /* Set the random number generator seed to SEED. */
@@ -1355,9 +1369,15 @@ static void
 seedrand ()
 {
   struct timeval tv;
+  SHELL_VAR *v;
 
   gettimeofday (&tv, NULL);
+#if 0
+  v = find_variable ("BASH_VERSION");
+  sbrand (tv.tv_sec ^ tv.tv_usec ^ getpid () ^ ((u_bits32_t)&v & 0x7fffffff));
+#else
   sbrand (tv.tv_sec ^ tv.tv_usec ^ getpid ());
+#endif
 }
 
 static SHELL_VAR *

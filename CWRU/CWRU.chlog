@@ -4794,7 +4794,7 @@ execute_cmd.c
 	- execute_in_subshell: if we are running a trap (running_trap > 0),
 	  turn off the SIG_INPROGRESS and SIG_CHANGED flags for that signal
 	  by calling run_trap_cleanup and reset running_trap to 0 (watch the
-	  second part!)
+	  second part!). Tagged for bash-5.1.
 
 				   11/30
 				   -----
@@ -4892,3 +4892,36 @@ expr.c
 lib/sh/smatch.c
 	- fnmatch: add extern declaration if FNMATCH_EQUIV_FALLBACK is being
 	  used
+
+hashlib.c
+	- hash_string: add FNV offset as initial value for hash instead of
+	  starting at 0, changes hash for associative arrays and requires a
+	  bunch of changes to the "right" test suite files
+
+variables.c
+	- rseed: make it explicitly 32 bits; that's all we're interested in
+	  anyway
+
+				   12/18
+				   -----
+
+variables.c
+	- brand: add some comments, make the constants explicitly 32 bits;
+	  use signed 32-bit values for the intermediate calculations. The
+	  algorithm is still minstd
+
+[bash-5.0-rc1 frozen]
+
+				   12/21
+				   -----
+doc/bash.1
+	- }1: remove macro definition; it's outlived its bugfix purpose.
+	  Report from Derek Schrock <dereks@lifeofadishwasher.com>
+
+				   12/22
+				   -----
+subst.c
+	- expand_arith_string: set W_NOTILDE in the flags so we don't perform
+	  tilde expansion at all, even for the previously-special-case array
+	  subscript expansion. Report from Bize Ma <binaryzebra@gmail.com>
+	- expand_word_internal: take out Q_ARRAYSUB check for tilde expansion

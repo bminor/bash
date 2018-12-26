@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.0, version 5.004])dnl
+AC_REVISION([for Bash 5.0, version 5.005])dnl
 
 define(bashvers, 5.0)
 define(relstatus, rc1)
@@ -1157,10 +1157,10 @@ esac
 if test "$GCC" = yes # && test -n "$DEBUG"
 then
 	CFLAGS="$CFLAGS -Wno-parentheses -Wno-format-security"
-	if test -n "$DEBUG"
-	then
-		CFLAGS="$CFLAGS -Werror"
-	fi
+#	if test -n "$DEBUG"
+#	then
+#		CFLAGS="$CFLAGS -Werror"
+#	fi
 fi
 
 #

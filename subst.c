@@ -3564,7 +3564,7 @@ expand_arith_string (string, quoted)
     {
       /* This is expanded version of expand_string_internal as it's called by
 	 expand_string_leave_quoted  */
-      td.flags = W_NOPROCSUB;	/* don't want process substitution */
+      td.flags = W_NOPROCSUB|W_NOTILDE;	/* don't want process substitution or tilde expansion */
       td.word = savestring (string);
       list = call_expand_word_internal (&td, quoted, 0, (int *)NULL, (int *)NULL);
       /* This takes care of the calls from expand_string_leave_quoted and
@@ -9929,15 +9929,12 @@ add_string:
 	case '~':
 	  /* If the word isn't supposed to be tilde expanded, or we're not
 	     at the start of a word or after an unquoted : or = in an
-	     assignment statement, we don't do tilde expansion.  If we don't want
-	     tilde expansion when expanding words to be passed to the arithmetic
-	     evaluator, remove the check for Q_ARITH.  Right now, the code
-	     suppresses tilde expansion when expanding in a pure arithmetic
-	     context, but allows it when expanding an array subscript.  This is
-	     for backwards compatibility, but I figure nobody's relying on it */
+	     assignment statement, we don't do tilde expansion.  We don't
+	     do tilde expansion if quoted or in an arithmetic context. */
+
 	  if ((word->flags & (W_NOTILDE|W_DQUOTE)) ||
 	      (sindex > 0 && ((word->flags & W_ITILDE) == 0)) ||
-	      ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) && ((quoted & Q_ARRAYSUB) == 0)))
+	      (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)))
 	    {
 	      word->flags &= ~W_ITILDE;
 	      if (isexp == 0 && (word->flags & (W_NOSPLIT|W_NOSPLIT2)) == 0 && isifs (c) && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) == 0)

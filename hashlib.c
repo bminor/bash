@@ -125,6 +125,20 @@ hash_copy (table, cpdata)
   return new_table;
 }
 
+/* This is the best 32-bit string hash function I found. It's one of the
+   Fowler-Noll-Vo family (FNV-1).
+
+   The magic is in the interesting relationship between the special prime
+   16777619 (2^24 + 403) and 2^32 and 2^8. */
+
+#define FNV_OFFSET 2166136261
+#define FNV_PRIME 16777619
+
+/* If you want to use 64 bits, use
+FNV_OFFSET	14695981039346656037
+FNV_PRIMT	1099511628211
+*/
+
 /* The `khash' check below requires that strings that compare equally with
    strcmp hash to the same value. */
 unsigned int
@@ -133,14 +147,9 @@ hash_string (s)
 {
   register unsigned int i;
 
-  /* This is the best string hash function I found.
-
-     The magic is in the interesting relationship between the special prime
-     16777619 (2^24 + 403) and 2^32 and 2^8. */
- 
-  for (i = 0; *s; s++)
+  for (i = FNV_OFFSET; *s; s++)
     {
-      i *= 16777619;
+      i *= FNV_PRIME;
       i ^= *s;
     }
 
