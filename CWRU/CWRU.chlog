@@ -3604,7 +3604,7 @@ pathexp.c
 	  does not end in a backslash, we need to return true. Fixes bug
 	  reported by Robert Elz <kre@bmunnari.OZ.AU>
 
-lib/glob/gm_loop.c
+lib/glob/glob_loop.c
 	- INTERNAL_GLOB_PATTERN_P: same change to return TRUE for a backslash
 	  that doesn't end the pattern
 
@@ -4925,3 +4925,41 @@ subst.c
 	  tilde expansion at all, even for the previously-special-case array
 	  subscript expansion. Report from Bize Ma <binaryzebra@gmail.com>
 	- expand_word_internal: take out Q_ARRAYSUB check for tilde expansion
+
+				   12/26
+				   -----
+builtins/evalstring.c
+	- parse_and_execute: if the eval builtin gets a parser error while
+	  parsing a  string in posix mode, don't exit the shell if the eval
+	  was run by the command builtin. report from Martijn Dekker
+	  <martijn@inlv.org>
+
+examples/loadables/{basename,dirname}.c
+	- dirname_builtin: skip over any `--' ending the options.  Report from
+	  Peng Yu <pengyu.ut@gmail.com>
+
+				   12/27
+				   -----
+examples/loadables/mkdir.c
+	- make_path: add argument noting whether or not the user specified -m;
+	  only attempt the chmod on an existing directory if the user did so
+	- make_path: when creating intermediate directories, perform the
+	  mkdir (path, 0) and chmod separately as the posix text recommends
+
+				   12/28
+				   -----
+parser.h
+	- PST_COMMENT: new state, set when the shell is reading characters
+	  until newline as part of comment processing
+
+parse.y
+	- shell_getc: don't return a space at the end of a token if the parser
+	  is consuming a comment. Fixes bug reported by Harald van Dijk
+	  <harald@gigawatt.nl>
+
+				   12/31
+				   -----
+lib/glob/glob_loop.c
+	- INTERNAL_GLOB_PATTERN_P: revert change from 4/27 that makes this
+	  function return non-zero for a backslash in the string. Based on a
+	  report from Tom Ryder <tom@sanctum.geek.nz>

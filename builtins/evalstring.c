@@ -448,11 +448,11 @@ parse_and_execute (string, from_file, flags)
 	}
       else
 	{
-	  last_result = EXECUTION_FAILURE;
+	  last_result = EX_BADUSAGE;	/* was EXECUTION_FAILURE */
 
 	  if (interactive_shell == 0 && this_shell_builtin &&
 	      (this_shell_builtin == source_builtin || this_shell_builtin == eval_builtin) &&
-	      last_command_exit_value == EX_BADSYNTAX && posixly_correct)
+	      last_command_exit_value == EX_BADSYNTAX && posixly_correct && executing_command_builtin == 0)
 	    {
 	      should_jump_to_top_level = 1;
 	      code = ERREXIT;

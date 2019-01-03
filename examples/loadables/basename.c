@@ -46,6 +46,7 @@ basename_builtin (list)
 
   if (no_options (list))
     return (EX_USAGE);
+  list = loptend;
 
   string = list->word->word;
   suffix = (char *)NULL;

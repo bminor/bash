@@ -54,11 +54,17 @@ INTERNAL_GLOB_PATTERN_P (pattern)
 	continue;
 
       case L('\\'):
+#if 0
 	/* Don't let the pattern end in a backslash (GMATCH returns no match
 	   if the pattern ends in a backslash anyway), but otherwise return 1,
 	   since the matching engine uses backslash as an escape character
 	   and it can be removed. */
 	return (*p != L('\0'));
+#else
+	/* The pattern may not end with a backslash. */
+	if (*p++ == L('\0'))
+	  return 0;
+#endif
       }
 
   return 0;

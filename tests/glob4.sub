@@ -1,0 +1,13 @@
+trap "rm 'a?' aa" EXIT
+touch 'a?' aa
+
+set -- a \?; IFS=\\; var=$*;
+recho "$var"
+unset IFS; printf "%s\n" ${var}
+
+var='a\?'
+recho "$var"
+printf "%s\n" ${var}
+
+var='a\a'
+printf "%s\n" ${var}
