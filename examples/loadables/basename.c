@@ -30,6 +30,7 @@
 #include "builtins.h"
 #include "shell.h"
 #include "common.h"
+#include "bashgetopt.h"
 
 int
 basename_builtin (list)
@@ -46,6 +47,7 @@ basename_builtin (list)
 
   if (no_options (list))
     return (EX_USAGE);
+  list = loptend;
 
   string = list->word->word;
   suffix = (char *)NULL;

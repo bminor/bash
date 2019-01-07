@@ -69,7 +69,7 @@ getenv (name)
       if (var && exported_p (var))
 	return (value_cell (var));
     }
-  else
+  else if (environ)
     {
       register int i, len;
 

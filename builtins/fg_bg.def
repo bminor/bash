@@ -46,13 +46,12 @@ $END
 #include "../bashintl.h"
 
 #include "../shell.h"
+#include "../execute_cmd.h"
 #include "../jobs.h"
 #include "common.h"
 #include "bashgetopt.h"
 
 #if defined (JOB_CONTROL)
-extern char *this_command_name;
-
 static int fg_bg __P((WORD_LIST *, int));
 
 /* How to bring a job into the foreground. */

@@ -70,8 +70,6 @@ $END
 extern int errno;
 #endif /* !errno */
 
-extern int posixly_correct;
-
 static void kill_error __P((pid_t, int));
 
 #if !defined (CONTINUE_AFTER_KILL_ERROR)
@@ -120,6 +118,7 @@ kill_builtin (list)
 	  if (list)
 	    {
 	      sigspec = list->word->word;
+use_sigspec:
 	      if (sigspec[0] == '0' && sigspec[1] == '\0')
 		sig = 0;
 	      else
@@ -132,6 +131,16 @@ kill_builtin (list)
 	      sh_needarg (word);
 	      return (EXECUTION_FAILURE);
 	    }
+	}
+      else if (word[0] == '-' && word[1] == 's' && ISALPHA (word[2]))
+	{
+	  sigspec = word + 2;
+	  goto use_sigspec;
+	}
+      else if (word[0] == '-' && word[1] == 'n' && ISDIGIT (word[2]))
+	{
+	  sigspec = word + 2;
+	  goto use_sigspec;
 	}
       else if (ISOPTION (word, '-'))
 	{

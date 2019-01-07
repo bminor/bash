@@ -1,6 +1,6 @@
 /* undo.c - manage list of changes to lines, offering opportunity to undo them */
 
-/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -51,6 +51,8 @@
 
 extern void _hs_replace_history_data PARAMS((int, histdata_t *, histdata_t *));
 
+extern HIST_ENTRY *_rl_saved_line_for_history;
+
 /* Non-zero tells rl_delete_text and rl_insert_text to not add to
    the undo list. */
 int _rl_doing_an_undo = 0;
@@ -68,10 +70,7 @@ UNDO_LIST *rl_undo_list = (UNDO_LIST *)NULL;
 /* **************************************************************** */
 
 static UNDO_LIST *
-alloc_undo_entry (what, start, end, text)
-     enum undo_code what;
-     int start, end;
-     char *text;
+alloc_undo_entry (enum undo_code what, int start, int end, char *text)
 {
   UNDO_LIST *temp;
 
@@ -88,10 +87,7 @@ alloc_undo_entry (what, start, end, text)
 /* Remember how to undo something.  Concatenate some undos if that
    seems right. */
 void
-rl_add_undo (what, start, end, text)
-     enum undo_code what;
-     int start, end;
-     char *text;
+rl_add_undo (enum undo_code what, int start, int end, char *text)
 {
   UNDO_LIST *temp;
 
@@ -102,8 +98,7 @@ rl_add_undo (what, start, end, text)
 
 /* Free an UNDO_LIST */
 void
-_rl_free_undo_list (ul)
-     UNDO_LIST *ul;
+_rl_free_undo_list (UNDO_LIST *ul)
 {
   UNDO_LIST *release;
 
@@ -121,7 +116,7 @@ _rl_free_undo_list (ul)
 
 /* Free the existing undo list. */
 void
-rl_free_undo_list ()
+rl_free_undo_list (void)
 {
   UNDO_LIST *release, *orig_list;
 
@@ -132,8 +127,7 @@ rl_free_undo_list ()
 }
 
 UNDO_LIST *
-_rl_copy_undo_entry (entry)
-     UNDO_LIST *entry;
+_rl_copy_undo_entry (UNDO_LIST *entry)
 {
   UNDO_LIST *new;
 
@@ -143,8 +137,7 @@ _rl_copy_undo_entry (entry)
 }
 
 UNDO_LIST *
-_rl_copy_undo_list (head)
-     UNDO_LIST *head;
+_rl_copy_undo_list (UNDO_LIST *head)
 {
   UNDO_LIST *list, *new, *roving, *c;
 
@@ -173,9 +166,9 @@ _rl_copy_undo_list (head)
 /* Undo the next thing in the list.  Return 0 if there
    is nothing to undo, or non-zero if there was. */
 int
-rl_do_undo ()
+rl_do_undo (void)
 {
-  UNDO_LIST *release;
+  UNDO_LIST *release, *search;
   int waiting_for_begin, start, end;
   HIST_ENTRY *cur, *temp;
 
@@ -232,6 +225,7 @@ rl_do_undo ()
 
       release = rl_undo_list;
       rl_undo_list = rl_undo_list->next;
+      release->next = 0;	/* XXX */
 
       /* If we are editing a history entry, make sure the change is replicated
 	 in the history entry's line */
@@ -244,7 +238,29 @@ rl_do_undo ()
 	  xfree (temp);
 	}
 
+      /* Make sure there aren't any history entries with that undo list */
       _hs_replace_history_data (-1, (histdata_t *)release, (histdata_t *)rl_undo_list);
+
+      /* And make sure this list isn't anywhere in the saved line for history */
+      if (_rl_saved_line_for_history && _rl_saved_line_for_history->data)
+	{
+	  /* Brute force; no finesse here */
+	  search = (UNDO_LIST *)_rl_saved_line_for_history->data;
+	  if (search == release)
+	    _rl_saved_line_for_history->data = rl_undo_list;
+	  else
+	    {
+	      while (search->next)
+		{
+		  if (search->next == release)
+		    {
+		      search->next = rl_undo_list;
+		      break;
+		    }
+		  search = search->next;
+		}
+	    }
+	}
 
       xfree (release);
     }
@@ -255,8 +271,7 @@ rl_do_undo ()
 #undef TRANS
 
 int
-_rl_fix_last_undo_of_type (type, start, end)
-     int type, start, end;
+_rl_fix_last_undo_of_type (int type, int start, int end)
 {
   UNDO_LIST *rl;
 
@@ -274,7 +289,7 @@ _rl_fix_last_undo_of_type (type, start, end)
 
 /* Begin a group.  Subsequent undos are undone as an atomic operation. */
 int
-rl_begin_undo_group ()
+rl_begin_undo_group (void)
 {
   rl_add_undo (UNDO_BEGIN, 0, 0, 0);
   _rl_undo_group_level++;
@@ -283,7 +298,7 @@ rl_begin_undo_group ()
 
 /* End an undo group started with rl_begin_undo_group (). */
 int
-rl_end_undo_group ()
+rl_end_undo_group (void)
 {
   rl_add_undo (UNDO_END, 0, 0, 0);
   _rl_undo_group_level--;
@@ -292,8 +307,7 @@ rl_end_undo_group ()
 
 /* Save an undo entry for the text from START to END. */
 int
-rl_modifying (start, end)
-     int start, end;
+rl_modifying (int start, int end)
 {
   if (start > end)
     {
@@ -313,8 +327,7 @@ rl_modifying (start, end)
 
 /* Revert the current line to its previous state. */
 int
-rl_revert_line (count, key)
-     int count, key;
+rl_revert_line (int count, int key)
 {
   if (rl_undo_list == 0)
     rl_ding ();
@@ -333,8 +346,7 @@ rl_revert_line (count, key)
 
 /* Do some undoing of things that were done. */
 int
-rl_undo_command (count, key)
-     int count, key;
+rl_undo_command (int count, int key)
 {
   if (count < 0)
     return 0;	/* Nothing to do. */

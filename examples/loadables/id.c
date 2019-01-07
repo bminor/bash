@@ -91,6 +91,7 @@ id_builtin (list)
 	case 'n': id_flags |= ID_USENAME; break;
 	case 'r': id_flags |= ID_USEREAL; break;
 	case 'u': id_flags |= ID_USERONLY; break;
+	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
 	  return (EX_USAGE);

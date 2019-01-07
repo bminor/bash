@@ -1,6 +1,6 @@
 /* histfile.c - functions to manipulate the history file. */
 
-/* Copyright (C) 1989-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -143,8 +143,7 @@ static int histfile_restore PARAMS((const char *, const char *));
    filename.  This only matters when you don't specify the
    filename to read_history (), or write_history (). */
 static char *
-history_filename (filename)
-     const char *filename;
+history_filename (const char *filename)
 {
   char *return_val;
   const char *home;
@@ -179,8 +178,7 @@ history_filename (filename)
 }
 
 static char *
-history_backupfile (filename)
-     const char *filename;
+history_backupfile (const char *filename)
 {
   const char *fn;
   char *ret, linkbuf[PATH_MAX+1];
@@ -208,8 +206,7 @@ history_backupfile (filename)
 }
   
 static char *
-history_tempfile (filename)
-     const char *filename;
+history_tempfile (const char *filename)
 {
   const char *fn;
   char *ret, linkbuf[PATH_MAX+1];
@@ -251,8 +248,7 @@ history_tempfile (filename)
    If FILENAME is NULL, then read from ~/.history.  Returns 0 if
    successful, or errno if not. */
 int
-read_history (filename)
-     const char *filename;
+read_history (const char *filename)
 {
   return (read_history_range (filename, 0, -1));
 }
@@ -263,9 +259,7 @@ read_history (filename)
    until the end of the file.  If FILENAME is NULL, then read from
    ~/.history.  Returns 0 if successful, or errno if not. */
 int
-read_history_range (filename, from, to)
-     const char *filename;
-     int from, to;
+read_history_range (const char *filename, int from, int to)
 {
   register char *line_start, *line_end, *p;
   char *input, *buffer, *bufend, *last_ts;
@@ -289,6 +283,16 @@ read_history_range (filename, from, to)
   if ((file < 0) || (fstat (file, &finfo) == -1))
     goto error_and_exit;
 
+  if (S_ISREG (finfo.st_mode) == 0)
+    {
+#ifdef EFTYPE
+      errno = EFTYPE;
+#else
+      errno = EINVAL;
+#endif
+      goto error_and_exit;
+    }
+
   file_size = (size_t)finfo.st_size;
 
   /* check for overflow on very large files */
@@ -296,6 +300,12 @@ read_history_range (filename, from, to)
     {
       errno = overflow_errno;
       goto error_and_exit;
+    }
+
+  if (file_size == 0)
+    {
+      free (input);
+      return 0;	/* don't waste time if we don't have to */
     }
 
 #ifdef HISTORY_USE_MMAP
@@ -344,6 +354,7 @@ read_history_range (filename, from, to)
 
   /* Start at beginning of file, work to end. */
   bufend = buffer + chars_read;
+  *bufend = '\0';		/* null-terminate buffer for timestamp checks */
   current_line = 0;
 
   /* Heuristic: the history comment character rarely changes, so assume we
@@ -385,7 +396,7 @@ read_history_range (filename, from, to)
 	  {
 	    if (HIST_TIMESTAMP_START(line_start) == 0)
 	      {
-	      	if (last_ts == NULL && history_multiline_entries)
+	      	if (last_ts == NULL && history_length > 0 && history_multiline_entries)
 		  _hs_append_history_line (history_length - 1, line_start);
 		else
 		  add_history (line_start);
@@ -427,9 +438,7 @@ read_history_range (filename, from, to)
 /* Save FILENAME to BACK, handling case where FILENAME is a symlink
    (e.g., ~/.bash_history -> .histfiles/.bash_history.$HOSTNAME) */
 static int
-histfile_backup (filename, back)
-     const char *filename;
-     const char *back;
+histfile_backup (const char *filename, const char *back)
 {
 #if defined (HAVE_READLINK)
   char linkbuf[PATH_MAX+1];
@@ -448,9 +457,7 @@ histfile_backup (filename, back)
 /* Restore ORIG from BACKUP handling case where ORIG is a symlink
    (e.g., ~/.bash_history -> .histfiles/.bash_history.$HOSTNAME) */
 static int
-histfile_restore (backup, orig)
-     const char *backup;
-     const char *orig;
+histfile_restore (const char *backup, const char *orig)
 {
 #if defined (HAVE_READLINK)
   char linkbuf[PATH_MAX+1];
@@ -470,9 +477,7 @@ histfile_restore (backup, orig)
    If FNAME is NULL, then use ~/.history.  Writes a new file and renames
    it to the original name.  Returns 0 on success, errno on failure. */
 int
-history_truncate_file (fname, lines)
-     const char *fname;
-     int lines;
+history_truncate_file (const char *fname, int lines)
 {
   char *buffer, *filename, *tempname, *bp, *bp1;		/* bp1 == bp+1 */
   int file, chars_read, rv, orig_lines, exists, r;
@@ -606,12 +611,14 @@ history_truncate_file (fname, lines)
       history_lines_written_to_file = 0;
     }
 
+#if defined (HAVE_CHOWN)
   /* Make sure the new filename is owned by the same user as the old.  If one
      user is running this, it's a no-op.  If the shell is running after sudo
      with a shared history file, we don't want to leave the history file
      owned by root. */
   if (rv == 0 && exists)
     r = chown (filename, finfo.st_uid, finfo.st_gid);
+#endif
 
   xfree (filename);
   FREE (tempname);
@@ -623,9 +630,7 @@ history_truncate_file (fname, lines)
    from the history list to FILENAME.  OVERWRITE is non-zero if you
    wish to replace FILENAME with the entries. */
 static int
-history_do_write (filename, nelements, overwrite)
-     const char *filename;
-     int nelements, overwrite;
+history_do_write (const char *filename, int nelements, int overwrite)
 {
   register int i;
   char *output, *tempname, *histname;
@@ -753,12 +758,14 @@ mmap_error:
       history_lines_written_to_file = 0;
     }
 
+#if defined (HAVE_CHOWN)
   /* Make sure the new filename is owned by the same user as the old.  If one
      user is running this, it's a no-op.  If the shell is running after sudo
      with a shared history file, we don't want to leave the history file
      owned by root. */
   if (rv == 0 && exists)
     mode = chown (histname, finfo.st_uid, finfo.st_gid);
+#endif
 
   FREE (histname);
   FREE (tempname);
@@ -769,9 +776,7 @@ mmap_error:
 /* Append NELEMENT entries to FILENAME.  The entries appended are from
    the end of the list minus NELEMENTs up to the end of the list. */
 int
-append_history (nelements, filename)
-     int nelements;
-     const char *filename;
+append_history (int nelements, const char *filename)
 {
   return (history_do_write (filename, nelements, HISTORY_APPEND));
 }
@@ -780,8 +785,7 @@ append_history (nelements, filename)
    then write the history list to ~/.history.  Values returned
    are as in read_history ().*/
 int
-write_history (filename)
-     const char *filename;
+write_history (const char *filename)
 {
   return (history_do_write (filename, history_length, HISTORY_OVERWRITE));
 }

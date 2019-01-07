@@ -25,6 +25,13 @@
 #include <sys/types.h>
 #include <posixtime.h>
 
+#include <bashintl.h>
+#include <stdc.h>
+
+#ifndef locale_decpoint
+extern int locale_decpoint PARAMS((void));
+#endif
+
 #include <stdio.h>
 
 struct timeval *
@@ -140,6 +147,6 @@ print_timeval (fp, tvp)
   minutes = timestamp / 60;
   seconds = timestamp % 60;
 
-  fprintf (fp, "%ldm%d.%03ds",  minutes, seconds, seconds_fraction);
+  fprintf (fp, "%ldm%d%c%03ds",  minutes, seconds, locale_decpoint (), seconds_fraction);
 }
 #endif /* HAVE_TIMEVAL */

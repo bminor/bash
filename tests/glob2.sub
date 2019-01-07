@@ -1,0 +1,44 @@
+. ./test-glue-functions
+
+var='ab\'
+
+case $var in
+ab\\)	echo ok 1;;
+*)	echo bad 1;;
+esac
+
+case $var in
+$var)	echo ok 2;;
+*)	echo bad 2;;
+esac
+
+case $var in
+'ab\')	echo ok 3;;
+*)	echo bad 3;;
+esac
+
+[[ $var = $var ]] && echo ok 4
+[[ $var = $'ab\134' ]] && echo ok 5
+
+LC_ALL=zh_HK.big5hkscs
+
+read a b c <<< $'\u3b1 b c\n'
+echo $b
+unset a b c
+
+export alpha=$'\u3b1'
+
+printf -v v 'A%sB' "$alpha" 
+recho "$v"
+IFS=$alpha read a b c <<<"$v"
+recho "$a"
+recho "$b"
+unset a b v
+
+recho "a${alpha}b"
+printf "%s" "a${alpha}b" | LC_ALL=C od -b | _intl_normalize_spaces
+
+a=$'\u3b1'
+[[ $a = $a ]] && echo ok 6
+
+LC_ALL=zh_HK.big5hkscs ${THIS_SH} -c $'[[ \u3b1 = \u3b1 ]]' && echo ok 7

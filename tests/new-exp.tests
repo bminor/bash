@@ -1,3 +1,7 @@
+if (( $UID == 0 )); then
+	echo "new-exp.tests: the test suite should not be run as root" >&2
+fi
+
 # must do this because posix mode causes process substitution to be disabled
 # and flagged as a syntax error, which causes the shell to exit
 set +o posix
@@ -340,7 +344,7 @@ recho "${foo:-$@}"
 expect '<ab> <cd> <ef> <gh>'
 recho "${foo:-"$@"}"
 
-shift $#
+shift ${#}
 expect nothing
 recho $xxx"$@"
 expect nothing
@@ -498,7 +502,7 @@ recho ${*%?}
 recho ${@#?}
 recho ${*#?}
 
-shift $#
+shift ${#}
 set -u
 ( recho $9 ; echo after 1)
 ( recho ${9} ; echo after 2)
@@ -596,6 +600,9 @@ ${THIS_SH} ./new-exp9.sub
 
 # new parameter transformation `@' expansion operator
 ${THIS_SH} ./new-exp10.sub
+
+# parameter substring replacement and removal operators with multibyte chars
+${THIS_SH} ./new-exp11.sub
 
 # problems with stray CTLNUL in bash-4.0-alpha
 unset a

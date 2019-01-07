@@ -46,6 +46,8 @@
 #define FNM_CASEFOLD	(1 << 4) /* Compare without regard to case. */
 #define FNM_EXTMATCH	(1 << 5) /* Use ksh-like extended matching. */
 
+#define FNM_FIRSTCHAR	(1 << 6) /* Match only the first character */
+
 /* Value returned by `strmatch' if STRING does not match PATTERN.  */
 #undef FNM_NOMATCH
 

@@ -308,6 +308,9 @@ shopt -s nullglob extglob
 echo "x$(printf "%b" @(hugo))x"
 printf -v var "%b" @(hugo); echo "x${var}x"
 
+# make sure that missing arguments are always handled like the empty string
+printf "<%3s><%3b>\n"
+
 # tests variable assignment with -v
 ${THIS_SH} ./printf1.sub
 
@@ -316,4 +319,3 @@ ${THIS_SH} ./printf2.sub
 ${THIS_SH} ./printf3.sub
 
 ${THIS_SH} ./printf4.sub
-

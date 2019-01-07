@@ -1,6 +1,6 @@
 /* findcmd.c -- Functions to search for commands by name. */
 
-/* Copyright (C) 1997-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -38,6 +38,7 @@
 
 #include "memalloc.h"
 #include "shell.h"
+#include "execute_cmd.h"
 #include "flags.h"
 #include "hashlib.h"
 #include "pathexp.h"
@@ -49,9 +50,6 @@
 #if !defined (errno)
 extern int errno;
 #endif
-
-extern int posixly_correct;
-extern int last_command_exit_value;
 
 /* Static functions defined and used in this file. */
 static char *_find_user_command_internal __P((const char *, int));
@@ -339,7 +337,7 @@ search_for_command (pathname, flags)
      const char *pathname;
      int flags;
 {
-  char *hashed_file, *command, *pathlist;
+  char *hashed_file, *command, *path_list;
   int temp_path, st;
   SHELL_VAR *path;
 
@@ -380,13 +378,13 @@ search_for_command (pathname, flags)
   else
     {
       if (flags & CMDSRCH_STDPATH)
-	pathlist = conf_standard_path ();
+	path_list = conf_standard_path ();
       else if (temp_path || path)
-	pathlist = value_cell (path);
+	path_list = value_cell (path);
       else
-	pathlist = 0;
+	path_list = 0;
 
-      command = find_user_command_in_path (pathname, pathlist, FS_EXEC_PREFERRED|FS_NODIRS);
+      command = find_user_command_in_path (pathname, path_list, FS_EXEC_PREFERRED|FS_NODIRS);
 
       if (command && hashing_enabled && temp_path == 0 && (flags & CMDSRCH_HASH))
 	{
@@ -404,7 +402,7 @@ search_for_command (pathname, flags)
 	}
 
       if (flags & CMDSRCH_STDPATH)
-	free (pathlist);
+	free (path_list);
     }
 
   return (command);

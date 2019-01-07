@@ -142,9 +142,11 @@ extern char *fmtullong __P((unsigned long long int, int, char *, size_t, int));
    302 / 1000 is log10 (2) rounded up;
    add one for integer division truncation;
    add one more for a minus sign if t is signed.  */
+#ifndef INT_STRLEN_BOUND
 #define INT_STRLEN_BOUND(t) \
   ((sizeof (t) * CHAR_BIT - TYPE_SIGNED (t)) * 302 / 1000 \
      + 1 + TYPE_SIGNED (t))
+#endif
 
 /* conversion flags */
 #define PF_ALTFORM	0x00001		/* # */

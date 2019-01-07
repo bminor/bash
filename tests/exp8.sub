@@ -10,11 +10,11 @@ declare -p var | sed -n l
 
 recho ${var@Q}
 recho ${var@P}
-echo ${var@A}
+echo -E ${var@A}
 
 unset array
 array=( [$'x\001y\177z']=foo )	# should be error
-echo ${array[@]@A}
+echo -E ${array[@]@A}
 
 unset array
 declare -a array=([0]=$'x\001y\177z')
@@ -23,9 +23,9 @@ declare -p array
 unset array
 array=( "$var" )
 recho ${array[@]}
-echo ${array[@]@A}
+echo -E ${array[@]@A}
 
 unset array
 declare -A array
 array=( [$'x\001y\177z']=$'a\242b\002c' )
-echo ${array[@]@A}
+echo -E ${array[@]@A}

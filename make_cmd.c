@@ -1,7 +1,7 @@
 /* make_cmd.c -- Functions for making instances of the various
    parser constructs. */
 
-/* Copyright (C) 1989-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -34,29 +34,17 @@
 
 #include "bashintl.h"
 
+#include "shell.h"
+#include "execute_cmd.h"
 #include "parser.h"
-#include "syntax.h"
-#include "command.h"
-#include "general.h"
-#include "error.h"
 #include "flags.h"
-#include "make_cmd.h"
-#include "dispose_cmd.h"
-#include "variables.h"
-#include "subst.h"
 #include "input.h"
-#include "ocache.h"
-#include "externs.h"
 
 #if defined (JOB_CONTROL)
 #include "jobs.h"
 #endif
 
 #include "shmbutil.h"
-
-extern int line_number, current_command_line_count, parser_state;
-extern int last_command_exit_value;
-extern int shell_initialized;
 
 int here_doc_first_line = 0;
 
@@ -805,7 +793,7 @@ make_function_def (name, command, lineno, lstart)
     temp->source_file = shell_initialized ? "main" : "environment";
 
 #if defined (DEBUGGER)
-  bind_function_def (name->word, temp);
+  bind_function_def (name->word, temp, 0);
 #endif
 
   temp->source_file = temp->source_file ? savestring (temp->source_file) : 0;
@@ -822,6 +810,7 @@ make_subshell_command (command)
   temp = (SUBSHELL_COM *)xmalloc (sizeof (SUBSHELL_COM));
   temp->command = command;
   temp->flags = CMD_WANT_SUBSHELL;
+  temp->line = line_number;
   return (make_command (cm_subshell, (SIMPLE_COM *)temp));
 }
 

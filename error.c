@@ -44,6 +44,7 @@ extern int errno;
 #include "bashintl.h"
 
 #include "shell.h"
+#include "execute_cmd.h"
 #include "flags.h"
 #include "input.h"
 
@@ -53,8 +54,6 @@ extern int errno;
 
 extern int executing_line_number __P((void));
 
-extern int last_command_exit_value;
-extern char *shell_name;
 #if defined (JOB_CONTROL)
 extern pid_t shell_pgrp;
 extern int give_terminal_to __P((pid_t, int));

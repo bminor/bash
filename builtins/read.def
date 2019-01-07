@@ -1,7 +1,7 @@
 This file is read.def, from which is created read.c.
 It implements the builtin "read" in Bash.
 
-Copyright (C) 1987-2015 Free Software Foundation, Inc.
+Copyright (C) 1987-2017 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -39,7 +39,7 @@ Options:
 		variable ARRAY, starting at zero
   -d delim	continue until the first character of DELIM is read, rather
 		than newline
-  -e	use Readline to obtain the line in an interactive shell
+  -e	use Readline to obtain the line
   -i text	use TEXT as the initial text for Readline
   -n nchars	return after reading NCHARS characters rather than waiting
 		for a newline, but honor a delimiter if fewer than
@@ -93,6 +93,7 @@ $END
 #include "../shell.h"
 #include "common.h"
 #include "bashgetopt.h"
+#include "trap.h"
 
 #include <shtty.h>
 
@@ -111,15 +112,10 @@ $END
 extern int errno;
 #endif
 
-extern void run_pending_traps __P((void));
-
-extern int posixly_correct;
-extern int trapped_signal_received;
-
 struct ttsave
 {
   int fd;
-  TTYSTRUCT *attrs;
+  TTYSTRUCT attrs;
 };
 
 #if defined (READLINE)
@@ -152,9 +148,8 @@ static struct ttsave termsave;
    avoids problems with the semi-tricky stuff we do with the xfree of
    input_string at the top of the unwind-protect list (see below). */
 
-/* Set a flag that CHECK_ALRM can check.  This relies on zread calling
-   trap.c:check_signals_and_traps(), which knows about sigalrm_seen and
-   alrmbuf. */
+/* Set a flag that CHECK_ALRM can check.  This relies on zread or read_builtin
+   calling trap.c:check_signals(), which knows about sigalrm_seen and alrmbuf. */
 static sighandler
 sigalrm (s)
      int s;
@@ -181,10 +176,12 @@ read_builtin (list)
      WORD_LIST *list;
 {
   register char *varname;
-  int size, nr, pass_next, saw_escape, eof, opt, retval, code, print_ps2;
+  int size, nr, pass_next, saw_escape, eof, opt, retval, code, print_ps2, nflag;
   volatile int i;
   int input_is_tty, input_is_pipe, unbuffered_read, skip_ctlesc, skip_ctlnul;
-  int raw, edit, nchars, silent, have_timeout, ignore_delim, fd, lastsig, t_errno;
+  int raw, edit, nchars, silent, have_timeout, ignore_delim, fd;
+  int lastsig, t_errno;
+  int mb_cur_max;
   unsigned int tmsec, tmusec;
   long ival, uval;
   intmax_t intval;
@@ -196,6 +193,7 @@ read_builtin (list)
   TTYSTRUCT ttattrs, ttset;
 #if defined (ARRAY_VARS)
   WORD_LIST *alist;
+  int vflags;
 #endif
 #if defined (READLINE)
   char *rlbuf, *itext;
@@ -239,10 +237,11 @@ read_builtin (list)
   rlind = 0;
 #endif
 
+  mb_cur_max = MB_CUR_MAX;
   tmsec = tmusec = 0;		/* no timeout */
   nr = nchars = input_is_tty = input_is_pipe = unbuffered_read = have_timeout = 0;
   delim = '\n';		/* read until newline */
-  ignore_delim = 0;
+  ignore_delim = nflag = 0;
 
   reset_internal_getopt ();
   while ((opt = internal_getopt (list, "ersa:d:i:n:p:t:u:N:")) != -1)
@@ -291,6 +290,7 @@ read_builtin (list)
 	  ignore_delim = 1;
 	  delim = -1;
 	case 'n':
+	  nflag = 1;
 	  code = legal_number (list_optarg, &intval);
 	  if (code == 0 || intval < 0 || intval != (int)intval)
 	    {
@@ -338,7 +338,8 @@ read_builtin (list)
   /* Convenience: check early whether or not the first of possibly several
      variable names is a valid identifier, and bail early if so. */
 #if defined (ARRAY_VARS)
-  if (list && legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, 0) == 0)
+  vflags = assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0;
+  if (list && legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, vflags) == 0)
 #else
   if (list && legal_identifier (list->word->word) == 0)
 #endif
@@ -364,6 +365,14 @@ read_builtin (list)
   input_string = (char *)xmalloc (size = 112);	/* XXX was 128 */
   input_string[0] = '\0';
 
+  /* More input and options validation */
+  if (nflag == 1 && nchars == 0)
+    {
+      retval = read (fd, &c, 0);
+      retval = (retval >= 0) ? EXECUTION_SUCCESS : EXECUTION_FAILURE;
+      goto assign_vars;		/* bail early if asked to read 0 chars */
+    }
+
   /* $TMOUT, if set, is the default timeout for read. */
   if (have_timeout == 0 && (e = get_string_value ("TMOUT")))
     {
@@ -384,7 +393,11 @@ read_builtin (list)
     sync_buffered_stream (default_buffered_input);
 #endif
 
+#if 1
   input_is_tty = isatty (fd);
+#else
+  input_is_tty = 1;
+#endif
   if (input_is_tty == 0)
 #ifndef __CYGWIN__
     input_is_pipe = (lseek (fd, 0L, SEEK_CUR) < 0) && (errno == ESPIPE);
@@ -484,7 +497,7 @@ read_builtin (list)
 	  /* ttsave() */
 	  termsave.fd = fd;
 	  ttgetattr (fd, &ttattrs);
-	  termsave.attrs = &ttattrs;
+	  termsave.attrs = ttattrs;
 
 	  ttset = ttattrs;	  
 	  i = silent ? ttfd_cbreak (fd, &ttset) : ttfd_onechar (fd, &ttset);
@@ -501,7 +514,7 @@ read_builtin (list)
       /* ttsave (); */
       termsave.fd = fd;
       ttgetattr (fd, &ttattrs);
-      termsave.attrs = &ttattrs;
+      termsave.attrs = ttattrs;
 
       ttset = ttattrs;
       i = ttfd_noecho (fd, &ttset);			/* ttnoecho (); */
@@ -544,7 +557,7 @@ read_builtin (list)
 	{
 	  if (rlbuf && rlbuf[rlind] == '\0')
 	    {
-	      xfree (rlbuf);
+	      free (rlbuf);
 	      rlbuf = (char *)0;
 	    }
 	  if (rlbuf == 0)
@@ -574,11 +587,8 @@ read_builtin (list)
 	  print_ps2 = 0;
 	}
 
-#if 0
-      if (posixly_correct == 0)
-	interrupt_immediately++;
-#endif
       reading = 1;
+      CHECK_ALRM;
       if (unbuffered_read == 2)
 	retval = posixly_correct ? zreadintr (fd, &c, 1) : zreadn (fd, &c, nchars - nr);
       else if (unbuffered_read)
@@ -586,15 +596,12 @@ read_builtin (list)
       else
 	retval = posixly_correct ? zreadcintr (fd, &c) : zreadc (fd, &c);
       reading = 0;
-#if 0
-      if (posixly_correct == 0)
-	interrupt_immediately--;
-#endif
 
       if (retval <= 0)
 	{
 	  if (retval < 0 && errno == EINTR)
 	    {
+	      check_signals ();		/* in case we didn't call zread via zreadc */
 	      lastsig = LASTSIG();
 	      if (lastsig == 0)
 		lastsig = trapped_signal_received;
@@ -609,14 +616,16 @@ read_builtin (list)
 	  break;
 	}
 
-      CHECK_ALRM;
       QUIT;		/* in case we didn't call check_signals() */
 #if defined (READLINE)
 	}
 #endif
 
-      CHECK_ALRM;
-      if (i + 4 >= size)	/* XXX was i + 2; use i + 4 for multibyte/read_mbchar */
+      if (retval <= 0)			/* XXX shouldn't happen */
+	CHECK_ALRM;
+
+      /* XXX -- use i + mb_cur_max (at least 4) for multibyte/read_mbchar */
+      if (i + (mb_cur_max > 4 ? mb_cur_max : 4) >= size)
 	{
 	  char *t;
 	  t = (char *)xrealloc (input_string, size += 128);
@@ -637,7 +646,8 @@ read_builtin (list)
 	  pass_next = 0;
 	  if (c == '\n')
 	    {
-	      i--;		/* back up over the CTLESC */
+	      if (skip_ctlesc == 0 && i > 0)
+		i--;		/* back up over the CTLESC */
 	      if (interactive && input_is_tty && raw == 0)
 		print_ps2 = 1;
 	    }
@@ -675,10 +685,31 @@ add_char:
       CHECK_ALRM;
 
 #if defined (HANDLE_MULTIBYTE)
-      if (nchars > 0 && MB_CUR_MAX > 1 && is_basic (c) == 0)
+      /* XXX - what if C == 127? Can DEL introduce a multibyte sequence? */
+      if (mb_cur_max > 1 && is_basic (c) == 0)
 	{
 	  input_string[i] = '\0';	/* for simplicity and debugging */
-	  i += read_mbchar (fd, input_string, i, c, unbuffered_read);
+	  /* If we got input from readline, grab the next multibyte char from
+	     rlbuf. */
+#  if defined (READLINE)
+	  if (edit)
+	    {
+	      size_t clen;
+	      clen = mbrlen (rlbuf + rlind - 1, mb_cur_max, (mbstate_t *)NULL);
+	      /* We only deal with valid multibyte sequences longer than one
+		 byte. If we get anything else, we leave the one character
+		 copied and move on to the next. */
+	      if ((int)clen > 1)
+		{
+		  memcpy (input_string+i, rlbuf+rlind, clen-1);
+		  i += clen - 1;
+		  rlind += clen - 1;
+		}
+	    }
+	  else
+#  endif
+	  if (locale_utf8locale == 0 || ((c & 0x80) != 0))
+	    i += read_mbchar (fd, input_string, i, c, unbuffered_read);
 	}
 #endif
 
@@ -742,20 +773,20 @@ assign_vars:
       if (legal_identifier (arrayname) == 0)
 	{
 	  sh_invalidid (arrayname);
-	  xfree (input_string);
+	  free (input_string);
 	  return (EXECUTION_FAILURE);
 	}
 
       var = find_or_make_array_variable (arrayname, 1);
       if (var == 0)
 	{
-	  xfree (input_string);
+	  free (input_string);
 	  return EXECUTION_FAILURE;	/* readonly or noassign */
 	}
       if (assoc_p (var))
 	{
           builtin_error (_("%s: cannot convert associative to indexed array"), arrayname);
-	  xfree (input_string);
+	  free (input_string);
 	  return EXECUTION_FAILURE;	/* existing associative array */
 	}
       else if (invisible_p (var))
@@ -772,7 +803,7 @@ assign_vars:
 	  assign_array_var_from_word_list (var, alist, 0);
 	  dispose_words (alist);
 	}
-      xfree (input_string);
+      free (input_string);
       return (retval);
     }
 #endif /* ARRAY_VARS */ 
@@ -808,7 +839,7 @@ assign_vars:
       else
 	VUNSETATTR (var, att_invisible);
 
-      xfree (input_string);
+      free (input_string);
       return (retval);
     }
 
@@ -825,13 +856,13 @@ assign_vars:
     {
       varname = list->word->word;
 #if defined (ARRAY_VARS)
-      if (legal_identifier (varname) == 0 && valid_array_reference (varname, 0) == 0)
+      if (legal_identifier (varname) == 0 && valid_array_reference (varname, vflags) == 0)
 #else
       if (legal_identifier (varname) == 0)
 #endif
 	{
 	  sh_invalidid (varname);
-	  xfree (orig_input_string);
+	  free (orig_input_string);
 	  return (EXECUTION_FAILURE);
 	}
 
@@ -849,7 +880,7 @@ assign_vars:
 	    {
 	      t1 = dequote_string (t);
 	      var = bind_read_variable (varname, t1);
-	      xfree (t1);
+	      free (t1);
 	    }
 	  else
 	    var = bind_read_variable (varname, t ? t : "");
@@ -863,7 +894,7 @@ assign_vars:
       FREE (t);
       if (var == 0)
 	{
-	  xfree (orig_input_string);
+	  free (orig_input_string);
 	  return (EXECUTION_FAILURE);
 	}
 
@@ -873,13 +904,13 @@ assign_vars:
 
   /* Now assign the rest of the line to the last variable argument. */
 #if defined (ARRAY_VARS)
-  if (legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, 0) == 0)
+  if (legal_identifier (list->word->word) == 0 && valid_array_reference (list->word->word, vflags) == 0)
 #else
   if (legal_identifier (list->word->word) == 0)
 #endif
     {
       sh_invalidid (list->word->word);
-      xfree (orig_input_string);
+      free (orig_input_string);
       return (EXECUTION_FAILURE);
     }
 
@@ -910,7 +941,7 @@ assign_vars:
     {
       t = dequote_string (input_string);
       var = bind_read_variable (list->word->word, t);
-      xfree (t);
+      free (t);
     }
   else
     var = bind_read_variable (list->word->word, input_string ? input_string : "");
@@ -924,7 +955,7 @@ assign_vars:
     retval = EXECUTION_FAILURE;
 
   FREE (tofree);
-  xfree (orig_input_string);
+  free (orig_input_string);
 
   return (retval);
 }
@@ -936,10 +967,10 @@ bind_read_variable (name, value)
   SHELL_VAR *v;
 
 #if defined (ARRAY_VARS)
-  if (valid_array_reference (name, 0) == 0)
+  if (valid_array_reference (name, assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0) == 0)
     v = bind_variable (name, value, 0);
   else
-    v = assign_array_element (name, value, 0);
+    v = assign_array_element (name, value, assoc_expand_once ? ASS_NOEXPAND : 0);
 #else /* !ARRAY_VARS */
   v = bind_variable (name, value, 0);
 #endif /* !ARRAY_VARS */
@@ -973,12 +1004,15 @@ read_mbchar (fd, string, ind, ch, unbuffered)
       if (ret == (size_t)-2)
 	{
 	  ps = ps_back;
+
 	  /* We don't want to be interrupted during a multibyte char read */
-	  if (unbuffered)
+	  if (unbuffered == 2)
+	    r = zreadn (fd, &c, 1);
+	  else if (unbuffered)
 	    r = zread (fd, &c, 1);
 	  else
 	    r = zreadc (fd, &c);
-	  if (r < 0)
+	  if (r <= 0)
 	    goto mbchar_return;
 	  mbchar[i++] = c;	
 	  continue;
@@ -1001,7 +1035,7 @@ static void
 ttyrestore (ttp)
      struct ttsave *ttp;
 {
-  ttsetattr (ttp->fd, ttp->attrs);
+  ttsetattr (ttp->fd, &(ttp->attrs));
   tty_modified = 0;
 }
 

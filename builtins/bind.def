@@ -88,8 +88,7 @@ extern int errno;
 
 static int query_bindings __P((char *));
 static int unbind_command __P((char *));
-
-extern int no_line_editing;
+static int unbind_keyseq __P((char *));
 
 #define BIND_RETURN(x)  do { return_code = x; goto bind_exit; } while (0)
 
@@ -265,11 +264,8 @@ bind_builtin (list)
 
   if ((flags & RFLAG) && remove_seq)
     {
-      if (rl_bind_keyseq (remove_seq, (rl_command_func_t *)NULL) != 0)
-	{
-	  builtin_error (_("`%s': cannot unbind"), remove_seq);
-	  BIND_RETURN (EXECUTION_FAILURE);
-	}
+      opt = unbind_keyseq (remove_seq);
+      BIND_RETURN (opt);
     }
 
   if (flags & XFLAG)
@@ -341,5 +337,39 @@ unbind_command (name)
 
   rl_unbind_function_in_map (function, rl_get_keymap ());
   return EXECUTION_SUCCESS;
+}
+
+static int
+unbind_keyseq (seq)
+     char *seq;
+{
+  char *kseq;
+  int kslen;
+
+  kseq = (char *)xmalloc ((2 * strlen (seq)) + 1);
+  if (rl_translate_keyseq (seq, kseq, &kslen))
+    {
+      free (kseq);
+      builtin_error (_("`%s': cannot unbind"), seq);
+      return EXECUTION_FAILURE;
+    }
+  if (rl_function_of_keyseq (kseq, (Keymap)0, (int *)0) == 0)
+    {
+      free (kseq);
+      return (EXECUTION_SUCCESS);
+    }
+
+  /* I wish this didn't have to translate the key sequence again, but readline
+     doesn't have a binding function that takes a translated key sequence as
+     an argument. */
+  if (rl_bind_keyseq (seq, (rl_command_func_t *)NULL) != 0)
+    {
+      free (kseq);
+      builtin_error (_("`%s': cannot unbind"), seq);
+      return (EXECUTION_FAILURE);
+    }
+
+  free (kseq);
+  return (EXECUTION_SUCCESS);
 }
 #endif /* READLINE */

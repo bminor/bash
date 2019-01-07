@@ -23,7 +23,7 @@
 
 #include "stdc.h"
 
-#define ISOPTION(s, c)	(s[0] == '-' && !s[2] && s[1] == c)
+#define ISOPTION(s, c)	(s[0] == '-' && s[1] == c && !s[2])
 #define ISHELP(s)	(STREQ ((s), "--help"))
 
 #define CHECK_HELPOPT(l) \
@@ -200,15 +200,44 @@ extern WORD_LIST *get_directory_stack __P((int));
 /* Functions from evalstring.c */
 extern int parse_and_execute __P((char *, const char *, int));
 extern int evalstring __P((char *, const char *, int));
-extern void parse_and_execute_cleanup __P((void));
+extern void parse_and_execute_cleanup __P((int));
 extern int parse_string __P((char *, const char *, int, char **));
 extern int should_suppress_fork __P((COMMAND *));
 extern void optimize_fork __P((COMMAND *));
+extern void optimize_subshell_command __P((COMMAND *));
 
 /* Functions from evalfile.c */
 extern int maybe_execute_file __P((const char *, int));
 extern int force_execute_file __P((const char *, int));
 extern int source_file __P((const char *, int));
 extern int fc_execute_file __P((const char *));
+
+/* variables from common.c */
+extern sh_builtin_func_t *this_shell_builtin;
+extern sh_builtin_func_t *last_shell_builtin;
+
+/* variables from evalfile.c */
+extern int sourcelevel;
+
+/* variables from evalstring.c */
+extern int parse_and_execute_level;
+
+/* variables from break.def/continue.def */
+extern int breaking;
+extern int continuing;
+extern int loop_level;
+
+/* variables from read.def */
+extern int sigalrm_seen;
+
+/* variables from shift.def */
+extern int print_shift_error;
+
+/* variables from source.def */
+extern int source_searches_cwd;
+extern int source_uses_path;
+
+/* variables from wait.def */
+extern int wait_intr_flag;
 
 #endif /* !__COMMON_H */

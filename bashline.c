@@ -1,6 +1,6 @@
 /* bashline.c -- Bash's interface to the readline library. */
 
-/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -46,6 +46,7 @@
 
 #include "shell.h"
 #include "input.h"
+#include "parser.h"
 #include "builtins.h"
 #include "bashhist.h"
 #include "bashline.h"
@@ -65,6 +66,7 @@
 #include <readline/rlconf.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <readline/rlmbutil.h>
 
 #include <glob/glob.h>
 
@@ -200,19 +202,8 @@ static char *prog_complete_return __P((const char *, int));
 static char **prog_complete_matches;
 #endif
 
-/* Variables used here but defined in other files. */
-#if defined (BANG_HISTORY)
-extern int hist_verify;
-#endif
-
-extern int current_command_line_count, saved_command_line_count;
-extern int last_command_exit_value;
-extern int array_needs_making;
-extern int posixly_correct, no_symbolic_links;
-extern int sigalrm_seen;
-extern char *current_prompt_string, *ps1_prompt;
+extern int no_symbolic_links;
 extern STRING_INT_ALIST word_token_alist[];
-extern sh_builtin_func_t *last_shell_builtin, *this_shell_builtin;
 
 /* SPECIFIC_COMPLETION_FUNCTIONS specifies that we have individual
    completion functions which indicate what type of completion should be
@@ -919,9 +910,9 @@ operate_and_get_next (count, c)
   rl_newline (1, c);
 
   /* Find the current line, and find the next line to use. */
-  where = where_history ();
+  where = rl_explicit_arg ? count : where_history ();
 
-  if (HISTORY_FULL () || (where >= history_length - 1))
+  if (HISTORY_FULL () || (where >= history_length - 1) || rl_explicit_arg)
     saved_history_line_to_use = where;
   else
     saved_history_line_to_use = where + 1;
@@ -969,8 +960,11 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
       /* This breaks down when using command-oriented history and are not
 	 finished with the command, so we should not ignore the last command */
       using_history ();
-      current_command_line_count++;	/* for rl_newline above */
-      bash_add_history (rl_line_buffer);
+      if (rl_line_buffer[0])
+	{
+	  current_command_line_count++;	/* for rl_newline above */
+	  bash_add_history (rl_line_buffer);
+	}
       current_command_line_count = 0;	/* for dummy history entry */
       bash_add_history ("");
       history_lines_this_session++;
@@ -998,6 +992,11 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
   rl_point = rl_end = 0;
   rl_done = 0;
   rl_readline_state = rrs;
+
+#if defined (VI_MODE)
+  if (editing_mode == VI_EDITING_MODE)
+    rl_vi_insertion_mode (1, c);
+#endif
 
   rl_forced_update_display ();
 
@@ -1056,7 +1055,7 @@ bash_forward_shellword (count, key)
      int count, key;
 {
   size_t slen;
-  int sindex, c, p;
+  int c, p;
   DECLARE_MBSTATE;
 
   if (count < 0)
@@ -1165,15 +1164,18 @@ bash_backward_shellword (count, key)
      int count, key;
 {
   size_t slen;
-  int sindex, c, p;
+  int c, p;
   DECLARE_MBSTATE;
-  
+
   if (count < 0)
     return (bash_forward_shellword (-count, key));
 
   p = rl_point;
   slen = rl_end;
-  
+
+  if (p == rl_end && p > 0)
+    p--;  
+
   while (count)
     {
       if (p == 0)
@@ -1186,9 +1188,9 @@ bash_backward_shellword (count, key)
       while (p > 0)
 	{
 	  c = rl_line_buffer[p];
-	  if (WORDDELIM (c) && char_is_quoted (rl_line_buffer, p) == 0)
-	    BACKUP_CHAR (rl_line_buffer, slen, p);
-	  break;
+	  if (WORDDELIM (c) == 0 || char_is_quoted (rl_line_buffer, p))
+	    break;
+	  BACKUP_CHAR (rl_line_buffer, slen, p);
 	}
 
       if (p == 0)
@@ -1420,10 +1422,11 @@ attempt_shell_completion (text, start, end)
      const char *text;
      int start, end;
 {
-  int in_command_position, ti, saveti, qc, dflags;
+  int in_command_position, ti, qc, dflags;
   char **matches, *command_separator_chars;
 #if defined (PROGRAMMABLE_COMPLETION)
   int have_progcomps, was_assignment;
+  COMPSPEC *iw_compspec;
 #endif
 
   command_separator_chars = COMMAND_SEPARATORS;
@@ -1442,7 +1445,7 @@ attempt_shell_completion (text, start, end)
      appears after a character that separates commands.  It cannot be a
      command word if we aren't at the top-level prompt. */
   ti = start - 1;
-  saveti = qc = -1;
+  qc = -1;
 
   while ((ti > -1) && (whitespace (rl_line_buffer[ti])))
     ti--;
@@ -1453,7 +1456,7 @@ attempt_shell_completion (text, start, end)
   if (ti >= 0 && (rl_line_buffer[ti] == '"' || rl_line_buffer[ti] == '\''))
     {
       qc = rl_line_buffer[ti];
-      saveti = ti--;
+      ti--;
       while (ti > -1 && (whitespace (rl_line_buffer[ti])))
 	ti--;
     }
@@ -1508,7 +1511,9 @@ attempt_shell_completion (text, start, end)
 #if defined (PROGRAMMABLE_COMPLETION)
   /* Attempt programmable completion. */
   have_progcomps = prog_completion_enabled && (progcomp_size () > 0);
-  if (matches == 0 && (in_command_position == 0 || text[0] == '\0') &&
+  iw_compspec = progcomp_search (INITIALWORD);
+  if (matches == 0 &&
+      (in_command_position == 0 || text[0] == '\0' || (in_command_position && iw_compspec)) &&
       current_prompt_string == ps1_prompt)
     {
       int s, e, s1, e1, os, foundcs;
@@ -1562,7 +1567,7 @@ attempt_shell_completion (text, start, end)
       else if (start == end && start == s1 && e != 0 && e1 > end)	/* beginning of command name, leading whitespace */
 	foundcs = 0;
       else if (e == 0 && e == s && text[0] == '\0' && have_progcomps)	/* beginning of empty line */
-        prog_complete_matches = programmable_completions ("_EmptycmD_", text, s, e, &foundcs);
+        prog_complete_matches = programmable_completions (EMPTYCMD, text, s, e, &foundcs);
       else if (start == end && text[0] == '\0' && s1 > start && whitespace (rl_line_buffer[start]))
         foundcs = 0;		/* whitespace before command name */
       else if (e > s && was_assignment == 0 && e1 == end && rl_line_buffer[e] == 0 && whitespace (rl_line_buffer[e-1]) == 0)
@@ -1576,7 +1581,10 @@ attempt_shell_completion (text, start, end)
 	{
 	  prog_complete_matches = programmable_completions (n, text, s, e, &foundcs);
 	  /* command completion if programmable completion fails */
-	  in_command_position = s == start && STREQ (n, text);	/* XXX */
+	  /* If we have a completion for the initial word, we can prefer that */
+	  in_command_position = s == start && (iw_compspec || STREQ (n, text));	/* XXX */
+	  if (iw_compspec && in_command_position)
+	    foundcs = 0;
 	}
       /* empty command name following command separator */
       else if (s >= e && n[0] == '\0' && text[0] == '\0' && start > 0 &&
@@ -1587,8 +1595,8 @@ attempt_shell_completion (text, start, end)
 	}
       else if (s >= e && n[0] == '\0' && text[0] == '\0' && start > 0)
         {
-          foundcs = 0;	/* empty command name following assignments */
-          in_command_position = was_assignment;
+          foundcs = 0;	/* empty command name following optional assignments */
+          in_command_position += was_assignment;
         }
       else if (s == start && e == end && STREQ (n, text) && start > 0)
         {
@@ -1597,6 +1605,12 @@ attempt_shell_completion (text, start, end)
         }
       else
 	foundcs = 0;
+
+      /* If we have defined a compspec for the initial (command) word, call
+	 it and process the results like any other programmable completion. */
+      if (in_command_position && have_progcomps && foundcs == 0 && iw_compspec)
+	prog_complete_matches = programmable_completions (INITIALWORD, text, s, e, &foundcs);
+
       FREE (n);
       /* XXX - if we found a COMPSPEC for the command, just return whatever
 	 the programmable completion code returns, and disable the default
@@ -1639,7 +1653,7 @@ bash_default_completion (text, start, end, qc, compflags)
   matches = (char **)NULL;
 
   /* New posix-style command substitution or variable name? */
-  if (!matches && *text == '$')
+  if (*text == '$')
     {
       if (qc != '\'' && text[1] == '(') /* ) */
 	matches = rl_completion_matches (text, command_subst_completion_function);
@@ -1803,7 +1817,7 @@ command_word_completion_function (hint_text, state)
   static char *dequoted_hint = (char *)NULL;
   static char *directory_part = (char *)NULL;
   static char **glob_matches = (char **)NULL;
-  static int path_index, hint_len, dequoted_len, istate, igncase;
+  static int path_index, hint_len, istate, igncase;
   static int mapping_over, local_index, searching_path, hint_is_dir;
   static int old_glob_ignore_case, globpat;
   static SHELL_VAR **varlist = (SHELL_VAR **)NULL;
@@ -1881,7 +1895,7 @@ command_word_completion_function (hint_text, state)
 	      free (hint);
 	      hint = dequoted_hint;
 	    }
-	  dequoted_len = hint_len = strlen (hint);
+	  hint_len = strlen (hint);
 
 	  if (filename_hint)
 	    free (filename_hint);
@@ -1909,13 +1923,10 @@ command_word_completion_function (hint_text, state)
 	}
 
       dequoted_hint = hint = savestring (hint_text);
-      dequoted_len = hint_len = strlen (hint);
+      hint_len = strlen (hint);
 
       if (rl_completion_found_quote && rl_completion_quote_character == 0)
-	{
-	  dequoted_hint = bash_dequote_filename (hint, 0);
-	  dequoted_len = strlen (dequoted_hint);
-	}
+	dequoted_hint = bash_dequote_filename (hint, 0);
       
       path = get_string_value ("PATH");
       path_index = dot_in_path = 0;
@@ -1949,7 +1960,9 @@ command_word_completion_function (hint_text, state)
 
 	  alias = alias_list[local_index++]->name;
 
-	  if (STREQN (alias, hint, hint_len))
+	  if (igncase == 0 && (STREQN (alias, hint, hint_len)))
+	    return (savestring (alias));
+	  else if (igncase && strncasecmp (alias, hint, hint_len) == 0)
 	    return (savestring (alias));
 	}
 #endif /* ALIAS */
@@ -1978,7 +1991,10 @@ command_word_completion_function (hint_text, state)
 
 	  varname = varlist[local_index++]->name;
 
-	  if (STREQN (varname, hint, hint_len))
+	  /* Honor completion-ignore-case for shell function names. */
+	  if (igncase == 0 && (STREQN (varname, hint, hint_len)))
+	    return (savestring (varname));
+	  else if (igncase && strncasecmp (varname, hint, hint_len) == 0)
 	    return (savestring (varname));
 	}
       local_index = 0;
@@ -2304,7 +2320,6 @@ variable_completion_function (text, state)
   static char **varlist = (char **)NULL;
   static int varlist_index;
   static char *varname = (char *)NULL;
-  static int namelen;
   static int first_char, first_char_loc;
 
   if (!state)
@@ -2323,7 +2338,6 @@ variable_completion_function (text, state)
 
       varname = savestring (text + first_char_loc);
 
-      namelen = strlen (varname);
       if (varlist)
 	strvec_dispose (varlist);
 
@@ -2411,7 +2425,7 @@ bash_servicename_completion_function (text, state)
 #else
   static char *sname = (char *)NULL;
   static struct servent *srvent;
-  static int snamelen, firstc;
+  static int snamelen;
   char *value;
   char **alist, *aentry;
   int afound;
@@ -2419,7 +2433,6 @@ bash_servicename_completion_function (text, state)
   if (state == 0)
     {
       FREE (sname);
-      firstc = *text;
 
       sname = savestring (text);
       snamelen = strlen (sname);
@@ -2552,7 +2565,7 @@ static void
 maybe_make_readline_line (new_line)
      char *new_line;
 {
-  if (strcmp (new_line, rl_line_buffer) != 0)
+  if (new_line && strcmp (new_line, rl_line_buffer) != 0)
     {
       rl_point = rl_end;
 
@@ -2704,6 +2717,7 @@ shell_expand_line (count, ignore)
 {
   char *new_line;
   WORD_LIST *expanded_string;
+  WORD_DESC *w;
 
   new_line = 0;
 #if defined (BANG_HISTORY)
@@ -2733,9 +2747,19 @@ shell_expand_line (count, ignore)
 
       /* If there is variable expansion to perform, do that as a separate
 	 operation to be undone. */
+
+#if 1
+      w = alloc_word_desc ();
+      w->word = savestring (rl_line_buffer);
+      w->flags = rl_explicit_arg ? (W_NOPROCSUB|W_NOCOMSUB) : 0;
+      expanded_string = expand_word (w, rl_explicit_arg ? Q_HERE_DOCUMENT : 0);
+      dispose_word (w);
+#else
       new_line = savestring (rl_line_buffer);
       expanded_string = expand_string (new_line, 0);
       FREE (new_line);
+#endif
+
       if (expanded_string == 0)
 	{
 	  new_line = (char *)xmalloc (1);
@@ -2967,7 +2991,7 @@ restore_tilde (val, directory_part)
      char *val, *directory_part;
 {
   int l, vl, dl2, xl;
-  char *dh2, *expdir, *ret;
+  char *dh2, *expdir, *ret, *v;
 
   vl = strlen (val);
 
@@ -2979,6 +3003,22 @@ restore_tilde (val, directory_part)
 
   expdir = bash_tilde_expand (directory_part, 0);
   xl = strlen (expdir);
+  if (*directory_part == '~' && STREQ (directory_part, expdir))
+    {
+      /* tilde expansion failed, so what should we return? we use what the
+	 user typed. */
+      v = mbschr (val, '/');
+      vl = STRLEN (v);
+      ret = (char *)xmalloc (xl + vl + 2);
+      strcpy (ret, directory_part);
+      if (v && *v)
+	strcpy (ret + xl, v);
+
+      free (dh2);
+      free (expdir);
+
+      return ret;
+    }
   free (expdir);
 
   /*
@@ -2989,6 +3029,11 @@ restore_tilde (val, directory_part)
      l = length of remainder after tilde-prefix
   */
   l = (vl - xl) + 1;
+  if (l <= 0)
+    {
+      free (dh2);
+      return (savestring (val));		/* XXX - just punt */
+    }
 
   ret = (char *)xmalloc (dl2 + 2 + l);
   strcpy (ret, dh2);
@@ -3138,7 +3183,6 @@ bash_filename_stat_hook (dirname)
   int should_expand_dirname, return_value;
   int global_nounset;
   WORD_LIST *wl;
-  struct stat sb;
 
   local_dirname = *dirname;
   should_expand_dirname = return_value = 0;
@@ -3216,10 +3260,8 @@ bash_directory_completion_hook (dirname)
      char **dirname;
 {
   char *local_dirname, *new_dirname, *t;
-  int return_value, should_expand_dirname, nextch, closer, changed;
-  size_t local_dirlen;
+  int return_value, should_expand_dirname, nextch, closer;
   WORD_LIST *wl;
-  struct stat sb;
 
   return_value = should_expand_dirname = nextch = closer = 0;
   local_dirname = *dirname;
@@ -3236,6 +3278,17 @@ bash_directory_completion_hook (dirname)
 	closer = '}';
       else
 	nextch = 0;
+
+      if (closer)
+	{
+	  int p;
+	  char delims[2];
+
+	  delims[0] = closer; delims[1] = 0;
+	  p = skip_to_delim (t, 1, delims, SD_NOJMP|SD_COMPLETE);
+	  if (t[p] != closer)
+	    should_expand_dirname = 0;
+	}
     }
   else if (local_dirname[0] == '~')
     should_expand_dirname = '~';
@@ -3450,6 +3503,7 @@ history_completion_generator (hint_text, state)
 
   while (history_completion_array && history_completion_array[local_index])
     {
+      /* XXX - should this use completion-ignore-case? */
       if (strncmp (text, history_completion_array[local_index++], len) == 0)
 	return (savestring (history_completion_array[local_index - 1]));
     }
@@ -3870,7 +3924,7 @@ bash_dequote_filename (text, quote_char)
 	    *r++ = *p;
 	  /* Backslashes are preserved within double quotes unless the
 	     character is one that is defined to be escaped */
-	  else if (quoted == '"' && ((sh_syntaxtab[p[1]] & CBSDQUOTE) == 0))
+	  else if (quoted == '"' && ((sh_syntaxtab[(unsigned char)p[1]] & CBSDQUOTE) == 0))
 	    *r++ = *p;
 
 	  *r++ = *++p;
@@ -4071,21 +4125,18 @@ bash_execute_unix_command (count, key)
      int count;	/* ignored */
      int key;
 {
-  Keymap ckmap;		/* current keymap */
-  Keymap xkmap;		/* unix command executing keymap */
-  rl_command_func_t *func;
   int type;
   register int i, r;
   intmax_t mi;
   sh_parser_state_t ps;
-  char *cmd, *value, *l, *l1, *ce;
+  char *cmd, *value, *ce, old_ch;
   SHELL_VAR *v;
   char ibuf[INT_STRLEN_BOUND(int) + 1];
 
   /* First, we need to find the right command to execute.  This is tricky,
      because we might have already indirected into another keymap, so we
      have to walk cmd_xmap using the entire key sequence. */
-  cmd = (char *)rl_function_of_keyseq (rl_executing_keyseq, cmd_xmap, &type);
+  cmd = (char *)rl_function_of_keyseq_len (rl_executing_keyseq, rl_key_sequence_length, cmd_xmap, &type);
     
   if (cmd == 0 || type != ISMACR)
     {
@@ -4112,25 +4163,37 @@ bash_execute_unix_command (count, key)
   v = bind_variable ("READLINE_LINE", rl_line_buffer, 0);
   if (v)
     VSETATTR (v, att_exported);
-  l = v ? value_cell (v) : 0;
-  value = inttostr (rl_point, ibuf, sizeof (ibuf));
-  v = bind_int_variable ("READLINE_POINT", value);
+  i = rl_point;
+#if defined (HANDLE_MULTIBYTE)
+  if (MB_CUR_MAX > 1)
+    {
+      old_ch = rl_line_buffer[rl_point];
+      rl_line_buffer[rl_point] = '\0';
+      i = MB_STRLEN (rl_line_buffer);
+      rl_line_buffer[rl_point] = old_ch;
+    }
+#endif
+  value = inttostr (i, ibuf, sizeof (ibuf));
+  v = bind_int_variable ("READLINE_POINT", value, 0);
   if (v)
     VSETATTR (v, att_exported);
   array_needs_making = 1;
 
   save_parser_state (&ps);
-  r = parse_and_execute (cmd, "bash_execute_unix_command", SEVAL_NOHIST|SEVAL_NOFREE);
+  r = parse_and_execute (savestring (cmd), "bash_execute_unix_command", SEVAL_NOHIST|SEVAL_NOFREE);
   restore_parser_state (&ps);
 
   v = find_variable ("READLINE_LINE");
-  l1 = v ? value_cell (v) : 0;
-  if (l1 != l)
-    maybe_make_readline_line (value_cell (v));
+  maybe_make_readline_line (v ? value_cell (v) : 0);
+
   v = find_variable ("READLINE_POINT");
   if (v && legal_number (value_cell (v), &mi))
     {
       i = mi;
+#if defined (HANDLE_MULTIBYTE)
+      if (i > 0 && MB_CUR_MAX > 1)
+	i = _rl_find_next_mbchar (rl_line_buffer, 0, i, 0);
+#endif
       if (i != rl_point)
 	{
 	  rl_point = i;

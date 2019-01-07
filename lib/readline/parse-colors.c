@@ -2,8 +2,8 @@
 
    Modified by Chet Ramey for Readline.
 
-   Copyright (C) 1985, 1988, 1990-1991, 1995-2010, 2012 Free Software Foundation,
-   Inc.
+   Copyright (C) 1985, 1988, 1990-1991, 1995-2010, 2012, 2017
+   Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -297,7 +297,7 @@ get_funky_string (char **dest, const char **src, bool equals_end, size_t *output
 }
 #endif /* COLOR_SUPPORT */
 
-void _rl_parse_colors()
+void _rl_parse_colors(void)
 {
 #if defined (COLOR_SUPPORT)
   const char *p;		/* Pointer to character being parsed */

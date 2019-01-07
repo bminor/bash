@@ -27,7 +27,9 @@
 #include "stdc.h"
 
 /* Functions from expr.c. */
-extern intmax_t evalexp __P((char *, int *));
+#define EXP_EXPANDED	0x01
+
+extern intmax_t evalexp __P((char *, int, int *));
 
 /* Functions from print_cmd.c. */
 #define FUNC_MULTILINE	0x01
@@ -92,6 +94,7 @@ extern void get_current_user_info __P((void));
 
 /* Functions from eval.c. */
 extern int reader_loop __P((void));
+extern int pretty_print_loop __P((void));
 extern int parse_command __P((void));
 extern int read_command __P((void));
 
@@ -106,6 +109,7 @@ extern int return_EOF __P((void));
 extern void push_token __P((int));
 extern char *xparse_dolparen __P((char *, char *, int *, int));
 extern void reset_parser __P((void));
+extern void reset_readahead_token __P((void));
 extern WORD_LIST *parse_string_to_word_list __P((char *, int, const char *));
 
 extern int parser_in_command_position __P((void));
@@ -137,6 +141,9 @@ extern char *get_locale_var __P((char *));
 extern char *localetrans __P((char *, int, int *));
 extern char *mk_msgstr __P((char *, int *));
 extern char *localeexpand __P((char *, int, int, int, int *));
+#ifndef locale_decpoint
+extern int locale_decpoint __P((void));
+#endif
 
 /* Declarations for functions defined in list.c. */
 extern void list_walk __P((GENERIC_LIST *, sh_glist_func_t *));
@@ -336,7 +343,7 @@ extern char *dirspell __P((char *));
 
 /* declarations for functions defined in lib/sh/strcasecmp.c */
 #if !defined (HAVE_STRCASECMP)
-extern int strncasecmp __P((const char *, const char *, int));
+extern int strncasecmp __P((const char *, const char *, size_t));
 extern int strcasecmp __P((const char *, const char *));
 #endif /* HAVE_STRCASECMP */
 
@@ -478,6 +485,14 @@ extern unsigned int fsleep __P((unsigned int, unsigned int));
 /* declarations for functions defined in lib/sh/unicode.c */
 extern int u32cconv __P((unsigned long, char *));
 extern void u32reset __P((void));
+
+/* declarations for functions defined in lib/sh/utf8.c */
+extern char *utf8_mbschr __P((const char *, int));
+extern int utf8_mbscmp __P((const char *, const char *));
+extern char *utf8_mbsmbchar __P((const char *));
+extern int utf8_mbsnlen __P((const char *, size_t, int));
+extern int utf8_mblen __P((const char *, size_t));
+extern size_t utf8_mbstrlen __P((const char *));
 
 /* declarations for functions defined in lib/sh/wcsnwidth.c */
 #if defined (HANDLE_MULTIBYTE)

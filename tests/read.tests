@@ -25,43 +25,43 @@ echo $'\177' | ( read ; recho "$REPLY" )
 # the input stream
 echo $'ab\\\ncd' | ( read ; recho "$REPLY" )
 
-echo "A B " > /tmp/IN
+echo "A B " > $TMPDIR/IN
 unset x y z
-read x y z < /tmp/IN
+read x y z < $TMPDIR/IN
 echo 1: "x[$x] y[$y] z[$z]"
 echo 1a: ${z-z not set}
-read x < /tmp/IN
+read x < $TMPDIR/IN
 echo 2: "x[$x]"
-rm /tmp/IN
+rm $TMPDIR/IN
 
 # this is where the bash `read' behavior with respect to $REPLY differs
 # from ksh93
-echo "A B " > /tmp/IN
+echo "A B " > $TMPDIR/IN
 
-read < /tmp/IN
+read < $TMPDIR/IN
 echo "[$REPLY]"
 
-rm /tmp/IN
+rm $TMPDIR/IN
 
-echo " A B " > /tmp/IN
+echo " A B " > $TMPDIR/IN
 
-read < /tmp/IN
+read < $TMPDIR/IN
 echo "[$REPLY]"
 
-rm /tmp/IN
+rm $TMPDIR/IN
 
 # make sure that read with more variables than words sets the extra
 # variables to the empty string
 
 bvar=bvar
 cvar=cvar
-echo aa > /tmp/IN
-read avar bvar cvar < /tmp/IN
+echo aa > $TMPDIR/IN
+read avar bvar cvar < $TMPDIR/IN
 echo =="$avar"==
 echo =="$bvar"==
 echo =="$cvar"==
 
-rm /tmp/IN
+rm $TMPDIR/IN
 
 # test behavior of read with various settings of IFS
 

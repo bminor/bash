@@ -39,3 +39,25 @@ unset -n ref ; unset ref
 declare -r RO RO_PID; coproc RO { :; }; declare -p RO_PID; wait; declare -p RO RO_PID
 
 declare -r RO2=a; declare -n ref_PID=RO2; coproc ref { :; }; wait; declare -p RO2
+
+unset x y
+set -- one two three
+
+y=2
+typeset -n x=y
+echo ${x}
+
+unset -n x
+
+typeset -n y
+echo $y
+
+unset -n y
+
+typeset -n y
+y=2
+echo ${y}
+
+declare -n foo=bar
+echo ${!foo[2]}
+echo ${!bar}

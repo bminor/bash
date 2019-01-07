@@ -1,6 +1,6 @@
 /* zread - read data from file descriptor into buffer with retries */
 
-/* Copyright (C) 1999-2002 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -53,6 +53,7 @@ zread (fd, buf, len)
 {
   ssize_t r;
 
+  check_signals ();	/* check for signals before a blocking read */
   while ((r = read (fd, buf, len)) < 0 && errno == EINTR)
     /* XXX - bash-5.0 */
     /* We check executing_builtin and run traps here for backwards compatibility */
@@ -103,6 +104,7 @@ zreadintr (fd, buf, len)
      char *buf;
      size_t len;
 {
+  check_signals ();
   return (read (fd, buf, len));
 }
 

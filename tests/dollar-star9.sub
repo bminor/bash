@@ -1,0 +1,46 @@
+set -- 1 2
+
+IFS=
+
+a=$* b=${*}
+c=${*/} d=${*#} e=${*%} f=${*:1}
+printf '<%s>' "$a" "$b" "$c" "$d" "$e" "$f"; echo
+
+unset a b c d e f
+: ${a=$*} ${b=${*}} ${c=${*/}}
+: ${d=${*#}} ${e=${*%}} ${f=${*:1}}
+printf '<%s>' "$a" "$b" "$c" "$d" "$e" "$f" ; echo
+
+unset f g
+f=${*,,} g=${*@Q}
+printf '<%s>' "$f" "$g" ; echo
+
+unset -v a b c d e f g
+unset var
+
+# resetting IFS here
+
+IFS=$' \t\n'
+
+printf '%s\n' "${*:1}"
+var=${*:1}; printf '%s\n' "$var"
+var="${*:1}"; printf '%s\n' "$var"
+
+unset var
+recho ${var-${*}}
+recho ${var-${*:1}}
+recho "${var-${*:1}}"
+recho ${var-"${*:1}"}
+
+unset var
+recho ${var=${*}}
+printf 'var=%s\n' "$var"
+unset var
+recho ${var=${*:1}}
+printf 'var=%s\n' "$var"
+
+a=${*:1}
+recho "$a"
+
+: ${b=${*:1}}
+recho "$b"

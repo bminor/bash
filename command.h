@@ -94,13 +94,15 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define W_HASQUOTEDNULL	0x040000	/* word contains a quoted null character */
 #define W_DQUOTE	0x080000	/* word should be treated as if double-quoted */
 #define W_NOPROCSUB	0x100000	/* don't perform process substitution */
-#define W_HASCTLESC	0x200000	/* word contains literal CTLESC characters */
+#define W_SAWQUOTEDNULL	0x200000	/* word contained a quoted null that was removed */
 #define W_ASSIGNASSOC	0x400000	/* word looks like associative array assignment */
 #define W_ASSIGNARRAY	0x800000	/* word looks like a compound indexed array assignment */
 #define W_ARRAYIND	0x1000000	/* word is an array index being expanded */
 #define W_ASSNGLOBAL	0x2000000	/* word is a global assignment to declare (declare/typeset -g) */
 #define W_NOBRACE	0x4000000	/* Don't perform brace expansion */
 #define W_COMPLETE	0x8000000	/* word is being expanded for completion */
+#define W_CHKLOCAL	0x10000000	/* check for local vars on assignment */
+#define W_NOASSNTILDE	0x20000000	/* don't do tilde expansion like an assignment statement */
 
 /* Flags for the `pflags' argument to param_expand() and various
    parameter_brace_expand_xxx functions; also used for string_list_dollar_at */
@@ -352,6 +354,7 @@ typedef struct group_com {
 
 typedef struct subshell_com {
   int flags;
+  int line;
   COMMAND *command;
 } SUBSHELL_COM;
 

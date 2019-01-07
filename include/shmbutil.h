@@ -37,6 +37,7 @@ extern size_t mbstrlen __P((const char *));
 extern char *xstrchr __P((const char *, int));
 
 extern int locale_mb_cur_max;	/* XXX */
+extern int locale_utf8locale;	/* XXX */
 
 #ifndef MB_INVALIDCH
 #define MB_INVALIDCH(x)		((x) == (size_t)-1 || (x) == (size_t)-2)
@@ -48,6 +49,10 @@ extern int locale_mb_cur_max;	/* XXX */
 
 #define MBLEN(s, n)	((MB_CUR_MAX > 1) ? mblen ((s), (n)) : 1)
 #define MBRLEN(s, n, p)	((MB_CUR_MAX > 1) ? mbrlen ((s), (n), (p)) : 1)
+
+#define UTF8_SINGLEBYTE(c)	(((c) & 0x80) == 0)
+#define UTF8_MBFIRSTCHAR(c)	(((c) & 0xc0) == 0xc0)
+#define UTF8_MBCHAR(c)		(((c) & 0xc0) == 0x80)
 
 #else /* !HANDLE_MULTIBYTE */
 
@@ -73,6 +78,9 @@ extern int locale_mb_cur_max;	/* XXX */
 #ifndef wchar_t
 #  define wchar_t	int
 #endif
+
+#define UTF8_SINGLEBYTE(c)	(1)
+#define UTF8_MBFIRSTCHAR(c)	(0)
 
 #endif /* !HANDLE_MULTIBYTE */
 
@@ -109,6 +117,8 @@ extern int locale_mb_cur_max;	/* XXX */
 	    _f = is_basic ((_str)[_i]); \
 	    if (_f) \
 	      mblength = 1; \
+	    else if (locale_utf8locale && (((_str)[_i] & 0x80) == 0)) \
+	      mblength = (_str)[_i] != 0; \
 	    else \
 	      { \
 	        state_bak = state; \
@@ -149,6 +159,8 @@ extern int locale_mb_cur_max;	/* XXX */
 	    _f = is_basic (*(_str)); \
 	    if (_f) \
 	      mblength = 1; \
+	    else if (locale_utf8locale && ((*(_str) & 0x80) == 0)) \
+	      mblength = *(_str) != 0; \
 	    else \
 	      { \
 		state_bak = state; \
@@ -267,6 +279,8 @@ extern int locale_mb_cur_max;	/* XXX */
 	    _k = is_basic (*(_src)); \
 	    if (_k) \
 	      mblength = 1; \
+	    else if (locale_utf8locale && ((*(_src) & 0x80) == 0)) \
+	      mblength = *(_src) != 0; \
 	    else \
 	      { \
 		state_bak = state; \
@@ -440,6 +454,8 @@ extern int locale_mb_cur_max;	/* XXX */
 	    i = is_basic (*((_src) + (_si))); \
 	    if (i) \
 	      mblength = 1; \
+	    else if (locale_utf8locale && (((_src)[_si] & 0x80) == 0)) \
+	      mblength = (_src)[_si] != 0; \
 	    else \
 	      { \
 		state_bak = state; \
@@ -478,6 +494,8 @@ extern int locale_mb_cur_max;	/* XXX */
 	    i = is_basic (*((_src) + (_si))); \
 	    if (i) \
 	      mblength = 1; \
+	    else if (locale_utf8locale && (((_src)[_si] & 0x80) == 0)) \
+	      mblength = (_src)[_si] != 0; \
 	    else \
 	      { \
 		state_bak = state; \

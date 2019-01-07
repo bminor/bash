@@ -1,0 +1,36 @@
+: ${TMPDIR:=/tmp}
+
+set -o history
+HISTFILE=$TMPDIR/history-$$
+
+history -c
+
+echo a
+echo b
+echo c
+echo d
+echo e
+
+history ; echo 
+
+history -d 2-4
+
+history
+
+echo f
+echo g
+echo h
+echo i
+history -d 6--1
+history ; echo
+
+history -d 16-40
+history -d 1-200
+history -d -20-50
+history -d 1--50
+history -d 5-0xaf
+
+history ; echo
+
+unset HISTFILE
+exit 0

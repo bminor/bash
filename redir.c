@@ -1,6 +1,6 @@
 /* redir.c -- Functions to perform input and output redirection. */
 
-/* Copyright (C) 1997-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -62,9 +62,6 @@ extern int errno;
 
 int expanding_redir;
 
-extern int posixly_correct;
-extern int last_command_exit_value;
-extern int executing_builtin;
 extern REDIRECT *redirection_undo_list;
 extern REDIRECT *exec_redirection_undo_list;
 
@@ -157,7 +154,6 @@ redirection_error (temp, error)
 #endif
   else if (expandable_redirection_filename (temp))
     {
-expandable_filename:
       oflags = temp->redirectee.filename->flags;
       if (posixly_correct && interactive_shell == 0)
 	temp->redirectee.filename->flags |= W_NOGLOB;
@@ -469,6 +465,7 @@ here_document_to_fd (redirectee, ri)
       return (fd);
     }
 
+  fchmod (fd, S_IRUSR | S_IWUSR);
   SET_CLOSE_ON_EXEC (fd);
 
   errno = r = 0;		/* XXX */
@@ -512,6 +509,8 @@ here_document_to_fd (redirectee, ri)
     }
 
   free (filename);
+
+  fchmod (fd2, S_IRUSR);
   return (fd2);
 }
 
@@ -582,6 +581,10 @@ redir_special_open (spec, filename, flags, mode, ri)
 #if defined (NETWORK_REDIRECTIONS)
     case RF_DEVTCP:
     case RF_DEVUDP:
+#if defined (RESTRICTED_SHELL)
+      if (restricted)
+	return (RESTRICTED_REDIRECT);
+#endif
 #if defined (HAVE_NETWORK)
       fd = netopen (filename);
 #else
@@ -775,6 +778,8 @@ do_redirection_internal (redirect, flags)
 	    case r_move_output_word:
 	      new_redirect = make_redirection (sd, r_move_output, rd, 0);
 	      break;
+	    default:
+	      break;	/* shut up gcc */
 	    }
 	}
       else if (ri == r_duplicating_output_word && (redirect->rflags & REDIR_VARASSIGN) == 0 && redirector == 1)
@@ -854,7 +859,7 @@ do_redirection_internal (redirect, flags)
       fd = redir_open (redirectee_word, redirect->flags, 0666, ri);
       free (redirectee_word);
 
-      if (fd == NOCLOBBER_REDIRECT)
+      if (fd == NOCLOBBER_REDIRECT || fd == RESTRICTED_REDIRECT)
 	return (fd);
 
       if (fd < 0)
@@ -1142,9 +1147,12 @@ do_redirection_internal (redirect, flags)
 
 	  r = 0;
 	  /* XXX - only if REDIR_VARASSIGN not set? */
-	  if ((flags & RX_UNDOABLE) && (fcntl (redirector, F_GETFD, 0) != -1))
+	  if (flags & RX_UNDOABLE)
 	    {
-	      r = add_undo_redirect (redirector, ri, -1);
+	      if (fcntl (redirector, F_GETFD, 0) != -1)
+		r = add_undo_redirect (redirector, ri, -1);
+	      else
+		r = add_undo_close_redirect (redirector);
 	      REDIRECTION_ERROR (r, errno, redirector);
 	    }
 
@@ -1169,6 +1177,8 @@ do_redirection_internal (redirect, flags)
 
     case r_duplicating_input_word:
     case r_duplicating_output_word:
+    case r_move_input_word:
+    case r_move_output_word:
       break;
     }
   return (0);
@@ -1328,6 +1338,10 @@ stdin_redirection (ri, redirector)
     case r_append_err_and_out:
     case r_output_force:
     case r_duplicating_output_word:
+    case r_move_input:
+    case r_move_output:
+    case r_move_input_word:
+    case r_move_output_word:
       return (0);
     }
   return (0);
@@ -1384,7 +1398,7 @@ redir_varvalue (redir)
 #if defined (ARRAY_VARS)
   if (vr = valid_array_reference (w, 0))
     {
-      v = array_variable_part (w, &sub, &len);
+      v = array_variable_part (w, 0, &sub, &len);
     }
   else
 #endif
@@ -1398,7 +1412,7 @@ redir_varvalue (redir)
 	    {
 	      w = nameref_cell (v);
 	      if (vr = valid_array_reference (w, 0))
-		v = array_variable_part (w, &sub, &len);
+		v = array_variable_part (w, 0, &sub, &len);
 	      else
 	        v = find_variable (w);
 	    }

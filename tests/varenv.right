@@ -91,6 +91,122 @@ global:2
 after: --global--
 after: ----
 x = :1:2
+in o1 (readonly modifying local scalars):
+declare -r i1="a b c"
+declare -r j1="1 2 3"
+after o1:
+./varenv9.sub: line 15: declare: i1: not found
+./varenv9.sub: line 15: declare: j1: not found
+in o2 (readonly setting global scalars):
+declare -r i2="a b c"
+declare -r j2="1 2 3"
+after o2:
+declare -r i2="a b c"
+declare -r j2="1 2 3"
+./varenv9.sub: line 33: unset: i2: cannot unset: readonly variable
+./varenv9.sub: line 33: unset: j2: cannot unset: readonly variable
+in o3 (readonly modifying locals, converting to arrays):
+declare -ar i3=([0]="a" [1]="b" [2]="c")
+declare -ar j3=([0]="1" [1]="2" [2]="3")
+after o3:
+./varenv9.sub: line 48: declare: i3: not found
+./varenv9.sub: line 48: declare: j3: not found
+in o4 (readonly setting global array variables):
+declare -ar i4=([0]="a" [1]="b" [2]="c")
+declare -ar j4=([0]="1" [1]="2" [2]="3")
+after o4:
+declare -ar i4=([0]="a" [1]="b" [2]="c")
+declare -ar j4=([0]="1" [1]="2" [2]="3")
+./varenv9.sub: line 66: unset: i4: cannot unset: readonly variable
+./varenv9.sub: line 66: unset: j4: cannot unset: readonly variable
+main: unset
+inner: res unset
+outer: res: X Y
+main: after first call: X
+inner: X
+outer: res: X Y
+main: after second call: X
+func: null or unset
+after func: x = outside
+./varenv11.sub: line 4: local: qux: readonly variable
+./varenv11.sub: line 5: qux: readonly variable
+declare -A foo=([zero]="zero" [one]="one" )
+declare -a bar=([0]="zero" [1]="one")
+declare -A foo=([zero]="zero" [one]="one" )
+declare -a bar=([0]="zero" [1]="one")
+./varenv11.sub: line 29: a: readonly variable
+foo=abc
+func1: var =
+
+func1: var =
+
+inside: declare -- foo
+outside:
+declare -x foo="abc"
+inside: declare -x var="value"
+outside: declare -- var="one"
+inside: declare -x var="value"
+outside: declare -x var="value"
+inside: declare -- var="local"
+outside: declare -x var="global"
+foo=<unset> environment foo=
+foo=foo environment foo=foo
+foo=foo environment foo=foo
+./varenv13.sub: line 3: `var[0]': not a valid identifier
+./varenv13.sub: line 3: `var[@]': not a valid identifier
+./varenv13.sub: line 1: declare: var: not found
+./varenv13.sub: line 12: var[@]: bad array subscript
+declare -A var=([0]="X" )
+help
+./varenv13.sub: line 21: `var[0]': not a valid identifier
+1
+./varenv14.sub: line 6: warning: var: cannot inherit value from incompatible type
+declare -a var=([0]="X")
+./varenv14.sub: line 9: warning: var: cannot inherit value from incompatible type
+declare -a var=([0]="Y")
+./varenv14.sub: line 10: warning: var: cannot inherit value from incompatible type
+declare -a var=([0]="Y")
+./varenv14.sub: line 11: warning: var: cannot inherit value from incompatible type
+declare -a var=()
+./varenv14.sub: line 12: warning: var: cannot inherit value from incompatible type
+declare -a var=()
+./varenv14.sub: line 18: f: var: cannot convert indexed to associative array
+declare -a a=([0]="X")
+declare -a s=([0]="X")
+declare -a a=([0]="X" [1]="Y")
+declare -a s=([0]="X" [1]="Y")
+declare -a a=([0]="XY")
+declare -a s=([0]="XY")
+f: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50
+f1: after: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+done: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100
+f3:1
+f3:2
+f3:3
+f3:4
+f3:5
+f3:6
+f3:7
+f3:8
+f3:9
+f3:10
+f3:11
+f3:12
+f3:13
+f3:14
+f3:15
+f3:16
+f3:17
+f3:18
+f3:19
+f3:20
+before source: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+varenv15.in: before set: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+varenv15.in: after set: a b c d e f g h i j k l m n o p q r s t u v w x y z
+after source 1: a b c d e f g h i j k l m n o p q r s t u v w x y z
+varenv15.in: before set: one two three four five six seven eight nine ten
+varenv15.in: after set: a b c d e f g h i j k l m n o p q r s t u v w x y z
+after source 2: a b c d e f g h i j k l m n o p q r s t u v w x y z
 a=z
 a=b
 a=z

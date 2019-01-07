@@ -37,7 +37,7 @@ Options:
 		PATTERN
 
 Arguments:
-  PATTERN	Pattern specifiying a help topic
+  PATTERN	Pattern specifying a help topic
 
 Exit Status:
 Returns success unless PATTERN is not found or an invalid option is given.
@@ -64,6 +64,7 @@ $END
 
 #include "../shell.h"
 #include "../builtins.h"
+#include "../execute_cmd.h"
 #include "../pathexp.h"
 #include "common.h"
 #include "bashgetopt.h"
@@ -77,9 +78,6 @@ extern int errno;
 
 extern const char * const bash_copyright;
 extern const char * const bash_license;
-
-extern char *this_command_name;
-extern struct builtin *current_builtin;
 
 static void show_builtin_command_help __P((void));
 static int open_helpfile __P((char *));
@@ -132,7 +130,7 @@ help_builtin (list)
 
   if (glob_pattern_p (list->word->word))
     {
-      printf (ngettext ("Shell commands matching keyword `", "Shell commands matching keywords `", (list->next ? 2 : 1)));
+      printf ("%s", ngettext ("Shell commands matching keyword `", "Shell commands matching keywords `", (list->next ? 2 : 1)));
       print_word_list (list, ", ");
       printf ("'\n\n");
     }
@@ -260,7 +258,7 @@ show_desc (name, i)
      char *name;
      int i;
 {
-  register int j;
+  register int j, r;
   char **doc, *line;
   int fd, usefile;
 
@@ -272,8 +270,9 @@ show_desc (name, i)
       fd = open_helpfile (doc[0]);
       if (fd < 0)
 	return;
-      zmapfd (fd, &line, doc[0]);
+      r = zmapfd (fd, &line, doc[0]);
       close (fd);
+      /* XXX - handle errors if zmapfd returns < 0 */
     }
   else
     line = doc ? doc[0] : (char *)NULL;
@@ -421,7 +420,6 @@ wdispcolumn (i, buf, bufsize, width, height)
   char *helpdoc;
   wchar_t *wcstr;
   size_t slen, n;
-  int wclen;
 
   /* first column */
   helpdoc = _(shell_builtins[i].short_doc);
@@ -531,10 +529,7 @@ Use `man -k' or `info' to find out more about commands not in this list.\n\
 A star (*) next to a name means that the command is disabled.\n\
 \n"));
 
-  t = get_string_value ("COLUMNS");
-  width = (t && *t) ? atoi (t) : 80;
-  if (width <= 0)
-    width = 80;
+  width = default_columns ();
 
   width /= 2;
   if (width > sizeof (blurb))

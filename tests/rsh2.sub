@@ -1,0 +1,17 @@
+cd ${TMPDIR:-/tmp}
+cp /bin/sh .
+ln sh a
+
+PATH=/rbin:/usr/local/rbin
+hash -p /bin/rm rm
+
+set -r
+
+hash -p /bin/sh sh
+
+hash -p sh a
+a -c 'echo hello'
+
+rm -f sh a
+
+exit 0

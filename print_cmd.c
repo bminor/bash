@@ -1,6 +1,6 @@
 /* print_command -- A way to make readable commands from a command tree. */
 
-/* Copyright (C) 1989-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -38,6 +38,8 @@
 #include "bashansi.h"
 #include "bashintl.h"
 
+#define NEED_XTRACE_SET_DECL
+
 #include "shell.h"
 #include "flags.h"
 #include <y.tab.h>	/* use <...> so we pick it up from the build directory */
@@ -50,9 +52,6 @@
 #if !HAVE_DECL_PRINTF
 extern int printf __P((const char *, ...));	/* Yuck.  Double yuck. */
 #endif
-
-extern int indirection_level;
-extern int posixly_correct;
 
 static int indentation;
 static int indentation_amount = 4;
@@ -83,6 +82,7 @@ static void print_redirection __P((REDIRECT *));
 static void print_heredoc_header __P((REDIRECT *));
 static void print_heredoc_body __P((REDIRECT *));
 static void print_heredocs __P((REDIRECT *));
+static void print_heredoc_bodies __P((REDIRECT *));
 static void print_deferred_heredocs __P((const char *));
 
 static void print_for_command __P((FOR_COM *));
@@ -515,11 +515,10 @@ xtrace_print_assignment (name, value, assign_list, xflags)
   fflush (xtrace_fp);
 }
 
-/* A function to print the words of a simple command when set -x is on.  Also
-   used to print the word list in a for or select command header; in that case,
-   we suppress quoting the words because they haven't been expanded yet.
-   XTFLAGS&1 means to print $PS4; XTFLAGS&2 means to suppress quoting the
-   words in LIST. */
+/* A function to print the words of a simple command when set -x is on.  Also used to
+   print the word list in a for or select command header; in that case, we suppress
+   quoting the words because they haven't been expanded yet.  XTFLAGS&1 means to
+   print $PS4; XTFLAGS&2 means to suppress quoting the words in LIST. */
 void
 xtrace_print_word_list (list, xtflags)
      WORD_LIST *list;
@@ -981,34 +980,38 @@ print_heredocs (heredocs)
   was_heredoc = 1;
 }
 
-/* Print heredocs that are attached to the command before the connector
-   represented by CSTRING.  The parsing semantics require us to print the
-   here-doc delimiters, then the connector (CSTRING), then the here-doc
-   bodies.  We don't print the connector if it's a `;', but we use it to
-   note not to print an extra space after the last heredoc body and
-   newline. */
 static void
-print_deferred_heredocs (cstring)
-     const char *cstring;
+print_heredoc_bodies (heredocs)
+     REDIRECT *heredocs;
 {
-  REDIRECT *hdtail;	
+  REDIRECT *hdtail;
 
-  for (hdtail = deferred_heredocs; hdtail; hdtail = hdtail->next)
-    {
-      cprintf (" ");
-      print_heredoc_header (hdtail);
-    }
-  if (cstring && cstring[0] && (cstring[0] != ';' || cstring[1]))
-    cprintf ("%s", cstring); 
-  if (deferred_heredocs)
-    cprintf ("\n");
-  for (hdtail = deferred_heredocs; hdtail; hdtail = hdtail->next)
+  cprintf ("\n"); 
+  for (hdtail = heredocs; hdtail; hdtail = hdtail->next)
     {
       print_heredoc_body (hdtail);
       cprintf ("\n");
     }
+  was_heredoc = 1;
+}
+
+/* Print heredocs that are attached to the command before the connector
+   represented by CSTRING.  The parsing semantics require us to print the
+   here-doc delimiters, then the connector (CSTRING), then the here-doc
+   bodies.  We print the here-doc delimiters in print_redirection_list
+   and print the connector and the bodies here. We don't print the connector
+   if it's a `;', but we use it to note not to print an extra space after the
+   last heredoc body and newline. */
+static void
+print_deferred_heredocs (cstring)
+     const char *cstring;
+{
+  /* We now print the heredoc headers in print_redirection_list */
+  if (cstring && cstring[0] && (cstring[0] != ';' || cstring[1]))
+    cprintf ("%s", cstring); 
   if (deferred_heredocs)
     {
+      print_heredoc_bodies (deferred_heredocs);
       if (cstring && cstring[0] && (cstring[0] != ';' || cstring[1]))
 	cprintf (" ");	/* make sure there's at least one space */
       dispose_redirects (deferred_heredocs);
@@ -1030,12 +1033,15 @@ print_redirection_list (redirects)
   was_heredoc = 0;
   while (redirects)
     {
-      /* Defer printing the here documents until we've printed the
-	 rest of the redirections. */
+      /* Defer printing the here document bodiess until we've printed the rest of the
+         redirections, but print the headers in the order they're given.  */
       if (redirects->instruction == r_reading_until || redirects->instruction == r_deblank_reading_until)
 	{
 	  newredir = copy_redirect (redirects);
 	  newredir->next = (REDIRECT *)NULL;
+
+	  print_heredoc_header (newredir);
+
 	  if (heredocs)
 	    {
 	      hdtail->next = newredir;
@@ -1062,12 +1068,13 @@ print_redirection_list (redirects)
     }
 
   /* Now that we've printed all the other redirections (on one line),
-     print the here documents. */
+     print the here documents.  If we're printing a connection, we wait until
+     we print the connector symbol, then we print the here document bodies */
   if (heredocs && printing_connection)
     deferred_heredocs = heredocs;
   else if (heredocs)
     {
-      print_heredocs (heredocs);
+      print_heredoc_bodies (heredocs);
       dispose_redirects (heredocs);
     }
 }
@@ -1410,8 +1417,7 @@ named_function_string (name, command, flags)
 	  }
 #else
       if (result[2] == '\n')	/* XXX -- experimental */
-	memmove (result + 2, result + 3, strlen (result) - 2);
-	
+	memmove (result + 2, result + 3, strlen (result) - 2);	
 #endif
     }
 
@@ -1471,7 +1477,7 @@ cprintf (control, va_alist)
 #endif
 {
   register const char *s;
-  char char_arg[2], *argp, intbuf[INT_STRLEN_BOUND (int) + 1];
+  char char_arg[2], *argp, intbuf[INT_STRLEN_BOUND (unsigned int) + 1];
   int digit_arg, arg_len, c;
   va_list args;
 
@@ -1516,7 +1522,7 @@ cprintf (control, va_alist)
 	      digit_arg = va_arg (args, int);
 	      if (digit_arg < 0)
 		{
-		  sprintf (intbuf, "%u", (unsigned)-1);
+		  sprintf (intbuf, "%u", (unsigned int)-1);
 		  argp = intbuf;
 		}
 	      else

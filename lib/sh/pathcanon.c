@@ -227,7 +227,7 @@ sh_canonpath (path, flags)
       if (result[2] == '\0')	/* short-circuit for bare `//' */
 	result[1] = '\0';
       else
-	strcpy (result, result + 1);
+	memmove (result, result + 1, strlen (result + 1) + 1);
     }
 
   return (result);

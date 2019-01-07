@@ -36,6 +36,16 @@
 #  endif
 #endif
 
+/* New definition to use, moving away from __P since it's part of a reserved
+   namespace */
+#if !defined (PARAMS)
+#  if defined (__STDC__) || defined (__GNUC__) || defined (__cplusplus) || defined (PROTOTYPES)
+#    define PARAMS(protos) protos
+#  else 
+#    define PARAMS(protos) ()
+#  endif
+#endif
+
 /* Fortify, at least, has trouble with this definition */
 #if defined (HAVE_STRINGIZE)
 #  define CPP_STRING(x) #x

@@ -28,8 +28,11 @@
 #include "shmbutil.h"
 
 extern int locale_mb_cur_max;
+extern int locale_utf8locale;
 
 #undef mbschr
+
+extern char *utf8_mbschr (const char *, int);	/* XXX */
 
 /* In some locales, the non-first byte of some multibyte characters have
    the same value as some ascii character.  Faced with these strings, a
@@ -48,6 +51,9 @@ mbschr (s, c)
   char *pos;
   mbstate_t state;
   size_t strlength, mblength;
+
+  if (locale_utf8locale && c < 0x80)
+    return (utf8_mbschr (s, c));		/* XXX */
 
   /* The locale encodings with said weird property are BIG5, BIG5-HKSCS,
      GBK, GB18030, SHIFT_JIS, and JOHAB.  They exhibit the problem only

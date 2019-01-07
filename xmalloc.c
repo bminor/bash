@@ -51,9 +51,11 @@
 extern char *sbrk();
 #endif
 
+#if defined (HAVE_SBRK) && defined (USING_BASH_MALLOC)
 static PTR_T lbreak;
 static int brkfound;
 static size_t allocated;
+#endif
 
 /* **************************************************************** */
 /*								    */

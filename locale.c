@@ -1,6 +1,6 @@
 /* locale.c - Miscellaneous internationalization functions. */
 
-/* Copyright (C) 1996-2009,2012 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2009,2012,2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -43,8 +43,9 @@
 extern int errno;
 #endif
 
-int locale_utf8locale;	/* unused for now */
+int locale_utf8locale;
 int locale_mb_cur_max;	/* value of MB_CUR_MAX for current locale (LC_CTYPE) */
+int locale_shiftstates;
 
 extern int dump_translatable_strings, dump_po_strings;
 
@@ -84,6 +85,8 @@ set_default_locale ()
   textdomain (PACKAGE);
 
   locale_mb_cur_max = MB_CUR_MAX;
+  locale_utf8locale = locale_isutf8 (default_locale);
+  locale_shiftstates = mblen ((char *)NULL, 0);
 }
 
 /* Set default values for LC_CTYPE, LC_COLLATE, LC_MESSAGES, LC_NUMERIC and
@@ -103,6 +106,8 @@ set_default_locale_vars ()
       setlocale (LC_CTYPE, lc_all);
       locale_setblanks ();
       locale_mb_cur_max = MB_CUR_MAX;
+      locale_utf8locale = locale_isutf8 (lc_all);
+      locale_shiftstates = mblen ((char *)NULL, 0);
       u32reset ();
     }
 #  endif
@@ -203,6 +208,10 @@ set_locale_var (var, value)
 	}
       locale_setblanks ();
       locale_mb_cur_max = MB_CUR_MAX;
+      /* if LC_ALL == "", reset_locale_vars has already called this */
+      if (*lc_all && x)
+	locale_utf8locale = locale_isutf8 (lc_all);
+      locale_shiftstates = mblen ((char *)NULL, 0);
       u32reset ();
       return r;
 #else
@@ -219,6 +228,10 @@ set_locale_var (var, value)
 	  x = setlocale (LC_CTYPE, get_locale_var ("LC_CTYPE"));
 	  locale_setblanks ();
 	  locale_mb_cur_max = MB_CUR_MAX;
+	  /* if setlocale() returns NULL, the locale is not changed */
+	  if (x)
+	    locale_utf8locale = locale_isutf8 (x);
+	  locale_shiftstates = mblen ((char *)NULL, 0);
 	  u32reset ();
 	}
 #  endif
@@ -327,15 +340,16 @@ get_locale_var (var)
 static int
 reset_locale_vars ()
 {
-  char *t;
+  char *t, *x;
 #if defined (HAVE_SETLOCALE)
   if (lang == 0 || *lang == '\0')
     maybe_make_export_env ();		/* trust that this will change environment for setlocale */
   if (setlocale (LC_ALL, lang ? lang : "") == 0)
     return 0;
 
+  x = 0;
 #  if defined (LC_CTYPE)
-  t = setlocale (LC_CTYPE, get_locale_var ("LC_CTYPE"));
+  x = setlocale (LC_CTYPE, get_locale_var ("LC_CTYPE"));
 #  endif
 #  if defined (LC_COLLATE)
   t = setlocale (LC_COLLATE, get_locale_var ("LC_COLLATE"));
@@ -352,8 +366,10 @@ reset_locale_vars ()
 
   locale_setblanks ();  
   locale_mb_cur_max = MB_CUR_MAX;
+  if (x)
+    locale_utf8locale = locale_isutf8 (x);
+  locale_shiftstates = mblen ((char *)NULL, 0);
   u32reset ();
-
 #endif
   return 1;
 }
@@ -547,17 +563,55 @@ locale_setblanks ()
     }
 }
 
+/* Parse a locale specification
+     language[_territory][.codeset][@modifier][+special][,[sponsor][_revision]]
+   and return TRUE if the codeset is UTF-8 or utf8 */
 static int
 locale_isutf8 (lspec)
      char *lspec;
 {
-  char *cp;
+  char *cp, *encoding;
 
 #if HAVE_LANGINFO_CODESET
   cp = nl_langinfo (CODESET);
   return (STREQ (cp, "UTF-8") || STREQ (cp, "utf8"));
+#elif HAVE_LOCALE_CHARSET
+  cp = locale_charset ();
+  return (STREQ (cp, "UTF-8") || STREQ (cp, "utf8"));
 #else
   /* Take a shot */
-  return (strstr (lspec, "UTF-8") || strstr (lspec, "utf8"));
+  for (cp = lspec; *cp && *cp != '@' && *cp != '+' && *cp != ','; cp++)
+    {
+      if (*cp == '.')
+	{
+	  for (encoding = ++cp; *cp && *cp != '@' && *cp != '+' && *cp != ','; cp++)
+	    ;
+	  /* The encoding (codeset) is the substring between encoding and cp */
+	  if ((cp - encoding == 5 && STREQN (encoding, "UTF-8", 5)) ||
+	      (cp - encoding == 4 && STREQN (encoding, "utf8", 4)))
+	    return 1;
+	  else
+	    return 0;
+	}
+    }
+  return 0;
 #endif
 }
+
+#if defined (HAVE_LOCALECONV)
+int
+locale_decpoint ()
+{
+  struct lconv *lv;
+
+  lv = localeconv ();
+  return (lv && lv->decimal_point && lv->decimal_point[0]) ? lv->decimal_point[0] : '.';
+}
+#else
+#  undef locale_decpoint
+int
+locale_decpoint ()
+{
+  return '.';
+}
+#endif

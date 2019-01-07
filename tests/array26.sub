@@ -1,0 +1,118 @@
+# these should produce the same results
+a=(aa bb)
+set -- aa bb
+
+IFS=+
+
+recho ${a[@]} 
+recho ${a[@]:0} 
+
+recho $@
+recho ${@:1} 
+
+A=${a[*]} B=${a[*]:0}
+recho $* ${*:1}
+recho ${a[*]} ${a[*]:0}
+recho "$A" "$B"
+recho $A $B
+
+unset A B
+
+recho ${@/a/x} 
+recho ${a[@]/a/x} 
+recho "${@/a/x}"
+recho "${a[@]/a/x}"
+
+recho ${*/a/x} 
+recho ${a[*]/a/x} 
+recho "${*/a/x}"
+recho "${a[*]/a/x}"
+
+A=${*/a/x}
+B=${a[*]/a/x}
+
+recho "$A" "$B"
+
+unset A B
+declare -A A
+A[0]=aa
+A[1]=bb
+
+recho ${A[@]/a/x}
+recho "${A[@]/a/x}"
+recho ${A[*]/a/x}
+recho "${A[*]/a/x}"
+
+unset A
+IFS=
+
+recho ${@/a/x}
+recho ${a[@]/a/x}
+recho "${@/a/x}"
+recho "${a[@]/a/x}"
+
+recho ${*/a/x}
+recho ${a[*]/a/x}
+recho "${*/a/x}"
+recho "${a[*]/a/x}"
+
+A=${*/a/x}
+B=${a[*]/a/x}
+
+recho "$A" "$B"
+
+unset A B
+declare -A A
+A[0]=aa
+A[1]=bb
+
+recho ${A[@]/a/x}  
+recho "${A[@]/a/x}" 
+recho ${A[*]/a/x}   
+recho "${A[*]/a/x}"
+
+unset A
+
+IFS=+
+
+recho ${a[@]}
+recho ${a[@],,} 
+recho "${a[@]}"
+recho "${a[@],,}"
+
+A=${a[*]} B=${a[*],,}
+recho $* ${*,,}
+recho ${a[*]} ${a[*],,}
+recho "${a[*]}" "${a[*],,}"
+recho "$A" "$B"
+recho $A $B
+
+unset A B
+declare -A A
+A[0]=aa
+A[1]=bb
+
+recho ${A[@],,}
+recho "${A[@],,}"
+recho ${A[*],,}
+recho "${A[*],,}"
+
+unset A
+
+recho ${a[@]#?}
+recho ${@#?}
+
+A=${a[*]#?} B=${a[*]#?}
+recho ${*#?} ${a[*]#?}
+recho "$A" "$B"
+recho $A $B
+
+unset A B
+declare -A A
+A[0]=aa
+A[1]=bb
+
+recho ${A[@]#?}  
+recho "${A[@]#?}"   
+recho ${A[*]#?}  
+recho "${A[*]#?}" 

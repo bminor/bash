@@ -20,13 +20,15 @@ case 9 in
 [![:alpha:]])	echo ok 4;;
 esac
 
-# invalid character class expressions are just characters to be matched
 case a in
 [:al:])		echo ok 5;;
 esac
 
+# invalid character class expressions are no longer just characters to be
+# matched
 case a in
-[[:al:])	echo ok 6;;
+[[:al:])	echo bad 6;;
+*)		echo ok 6;;
 esac
 
 case '!' in
@@ -230,4 +232,3 @@ case a in
 [[=b=])		echo oops;;	# an incomplete equiv class is just a string
 *)		echo ok 3;;
 esac
-

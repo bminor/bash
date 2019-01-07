@@ -1,6 +1,4 @@
-This is the Bash FAQ, version 4.14, for Bash version 4.4.
-
-[THIS FAQ IS NO LONGER MAINTAINED]
+This is the Bash FAQ, version 4.15, for Bash version 5.0.
 
 This document contains a set of frequently-asked questions concerning
 Bash, the GNU Bourne-Again Shell.  Bash is a freely-available command
@@ -962,7 +960,7 @@ o `complete' and `compgen' now take a `-o value' option, which controls some
                     directory names and suppress trailing spaces
 o A new loadable builtin, realpath, which canonicalizes and expands symlinks
   in pathname arguments.
-o When `set' is called without options, it prints function defintions in a
+o When `set' is called without options, it prints function definitions in a
   way that allows them to be reused as input.  This affects `declare' and 
   `declare -p' as well.  This only happens when the shell is not in POSIX
    mode, since POSIX.2 forbids this behavior.
@@ -2171,17 +2169,11 @@ You may also need
 
 Finally, you need to tell readline that you will be inputting and
 displaying eight-bit characters.  You use readline variables to do
-this.  convert-meta says what to do if you read a character with its
-eighth bit set.  input-meta says whether to permit characters with the
-eighth bit at all.  output-meta determines how to display characters
-with the eighth bit set: if on, they are output directly; if it is off,
-such characters are displayed as a meta-prefixed escape sequence.
-
-These variables can be set in your .inputrc or using the bash
+this.  These variables can be set in your .inputrc or using the bash
 `bind' builtin.  Here's an example using `bind':
 
 	bash$ bind 'set convert-meta off'
-	bash$ bind 'set input-meta on'
+	bash$ bind 'set meta-flag on'
 	bash$ bind 'set output-meta on'
 
 The `set' commands between the single quotes may also be placed
@@ -2287,7 +2279,7 @@ The \w expansion gives the full pathname of the current directory, with
 a tilde (`~') substituted for the current value of $HOME.  The \W
 expansion gives the basename of the current directory.  To put the full
 pathname of the current directory into the path without any tilde
-subsitution, use $PWD.  Here are some examples:
+substitution, use $PWD.  Here are some examples:
 
 	PS1='\w$ '	# current directory with tilde
 	PS1='\W$ '	# basename of current directory
@@ -2404,7 +2396,7 @@ a bash programmer's guide with a chapter on creating loadable builtins
 a better loadable interface to perl with access to the shell builtins and
 	variables (contributions gratefully accepted)
 ksh93-like `xx.yy' variables (including some of the .sh.* variables) and
-	associated disipline functions
+	associated discipline functions
 Some of the new ksh93 pattern matching operators, like backreferencing
 
 H5) When will the next release appear?

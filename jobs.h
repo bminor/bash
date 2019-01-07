@@ -1,6 +1,6 @@
 /* jobs.h -- structures and definitions used by the jobs.c file. */
 
-/* Copyright (C) 1993-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -37,6 +37,10 @@
 
 /* I looked it up.  For pretty_print_job ().  The real answer is 24. */
 #define LONGEST_SIGNAL_DESC 24
+
+/* Defines for the wait_for functions and for the wait builtin to use */
+#define JWAIT_PERROR		0x01
+#define JWAIT_FORCE		0x02 
 
 /* The max time to sleep while retrying fork() on EAGAIN failure */
 #define FORKSLEEP_MAX	16
@@ -99,6 +103,7 @@ typedef enum { JNONE = -1, JRUNNING = 1, JSTOPPED = 2, JDEAD = 4, JMIXED = 8 } J
 #define J_NOHUP      0x08 /* Don't send SIGHUP to job if shell gets SIGHUP. */
 #define J_STATSAVED  0x10 /* A process in this job had had status saved via $! */
 #define J_ASYNC	     0x20 /* Job was started asynchronously */
+#define J_PIPEFAIL   0x40 /* pipefail set when job was started */
 
 #define IS_FOREGROUND(j)	((jobs[j]->flags & J_FOREGROUND) != 0)
 #define IS_NOTIFIED(j)		((jobs[j]->flags & J_NOTIFIED) != 0)
@@ -185,6 +190,11 @@ extern pid_t original_pgrp, shell_pgrp, pipeline_pgrp;
 extern volatile pid_t last_made_pid, last_asynchronous_pid;
 extern int asynchronous_notification;
 
+extern int already_making_children;
+extern int running_in_background;
+
+extern PROCESS *last_procsub_child;
+
 extern JOB **jobs;
 
 extern void making_children __P((void));
@@ -234,8 +244,8 @@ extern int job_exit_signal __P((int));
 extern int wait_for_single_pid __P((pid_t, int));
 extern void wait_for_background_pids __P((void));
 extern int wait_for __P((pid_t));
-extern int wait_for_job __P((int));
-extern int wait_for_any_job __P((void));
+extern int wait_for_job __P((int, int));
+extern int wait_for_any_job __P((int));
 
 extern void wait_sigint_cleanup __P((void));
 
@@ -251,6 +261,7 @@ extern void run_sigchld_trap __P((int));
 
 extern int freeze_jobs_list __P((void));
 extern void unfreeze_jobs_list __P((void));
+extern void set_jobs_list_frozen __P((int));
 extern int set_job_control __P((int));
 extern void without_job_control __P((void));
 extern void end_job_control __P((void));

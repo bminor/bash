@@ -1,0 +1,38 @@
+# force single-byte versions of these functions
+
+export LANG=C
+
+# remove shortest trailing match
+x=file.c
+recho ${x%.c}.o
+
+# remove longest trailing match
+x=posix/src/std
+recho ${x%%/*}
+
+# remove shortest leading pattern
+x=$HOME/src/cmd
+recho ${x#$HOME}
+
+# remove longest leading pattern
+x=/one/two/three
+recho ${x##*/}
+
+# and no match thrown in for good measure
+recho ${x#nomatch}
+
+foo=abcdefg
+
+# fail
+echo ${foo%ab}
+echo ${foo%def}
+
+echo ${foo#fg}
+echo ${foo#def}
+
+# succeed
+echo ${foo#ab}
+echo ${foo#def}
+
+echo ${foo%fg}
+echo ${foo%def}

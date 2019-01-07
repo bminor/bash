@@ -1,0 +1,21 @@
+# some systems, like old SunOS, have stat on /dev/fd/N and fstat(N, ...)
+# return different results
+: ${TMPDIR:=/tmp}
+
+trap 'rm -f ${TMPDIR}/pipe' 0 1 2 3 6 15
+
+exec 6>&-
+echo "t -p /dev/fd/6"
+test -p /dev/fd/6
+echo $?
+
+rm -f ${TMPDIR}/pipe 2>/dev/null
+mkfifo ${TMPDIR}/pipe
+cat < ${TMPDIR}/pipe &
+exec 6>&-
+exec 6>${TMPDIR}/pipe
+echo "t -p /dev/fd/6"
+test -p /dev/fd/6
+echo $?
+exec 2>/dev/null	# disable process termination message
+kill $! 2>/dev/null 

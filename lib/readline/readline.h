@@ -39,8 +39,8 @@ extern "C" {
 #endif
 
 /* Hex-encoded Readline version number. */
-#define RL_READLINE_VERSION	0x0700		/* Readline 7.0 */
-#define RL_VERSION_MAJOR	7
+#define RL_READLINE_VERSION	0x0800		/* Readline 8.0 */
+#define RL_VERSION_MAJOR	8
 #define RL_VERSION_MINOR	0
 
 /* Readline data structures. */
@@ -97,6 +97,9 @@ extern int rl_refresh_line PARAMS((int, int));
 extern int rl_clear_screen PARAMS((int, int));
 extern int rl_skip_csi_sequence PARAMS((int, int));
 extern int rl_arrow_keys PARAMS((int, int));
+
+extern int rl_previous_screen_line PARAMS((int, int));
+extern int rl_next_screen_line PARAMS((int, int));
 
 /* Bindable commands for inserting and deleting text. */
 extern int rl_insert PARAMS((int, int));
@@ -329,6 +332,7 @@ extern char *rl_untranslate_keyseq PARAMS((int));
 
 extern rl_command_func_t *rl_named_function PARAMS((const char *));
 extern rl_command_func_t *rl_function_of_keyseq PARAMS((const char *, Keymap, int *));
+extern rl_command_func_t *rl_function_of_keyseq_len PARAMS((const char *, size_t, Keymap, int *));
 
 extern void rl_list_funmap_names PARAMS((void));
 extern char **rl_invoking_keyseqs_in_map PARAMS((rl_command_func_t *, Keymap));
@@ -343,6 +347,7 @@ extern int rl_parse_and_bind PARAMS((char *));
 
 /* Functions for manipulating keymaps. */
 extern Keymap rl_make_bare_keymap PARAMS((void));
+extern int rl_empty_keymap PARAMS((Keymap));
 extern Keymap rl_copy_keymap PARAMS((Keymap));
 extern Keymap rl_make_keymap PARAMS((void));
 extern void rl_discard_keymap PARAMS((Keymap));
@@ -352,6 +357,9 @@ extern Keymap rl_get_keymap_by_name PARAMS((const char *));
 extern char *rl_get_keymap_name PARAMS((Keymap));
 extern void rl_set_keymap PARAMS((Keymap));
 extern Keymap rl_get_keymap PARAMS((void));
+
+extern int rl_set_keymap_name PARAMS((const char *, Keymap));
+
 /* Undocumented; used internally only. */
 extern void rl_set_keymap_from_edit_mode PARAMS((void));
 extern char *rl_get_keymap_name_from_edit_mode PARAMS((void));
@@ -413,6 +421,7 @@ extern void rl_deprep_terminal PARAMS((void));
 extern void rl_tty_set_default_bindings PARAMS((Keymap));
 extern void rl_tty_unset_default_bindings PARAMS((Keymap));
 
+extern int rl_tty_set_echoing PARAMS((int));
 extern int rl_reset_terminal PARAMS((const char *));
 extern void rl_resize_terminal PARAMS((void));
 extern void rl_set_screen_size PARAMS((int, int));
@@ -443,6 +452,7 @@ extern void rl_reset_after_signal PARAMS((void));
 extern void rl_free_line_state PARAMS((void));
 
 extern int rl_pending_signal PARAMS((void));
+extern void rl_check_signals PARAMS((void));
 
 extern void rl_echo_signal_char PARAMS((int)); 
 

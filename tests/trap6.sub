@@ -1,0 +1,15 @@
+set -o functrace
+fn() { return; }
+
+trap "echo fn ; fn" RETURN
+
+fn
+echo after 1
+
+unset -f fn
+
+fn() { eval return; }
+fn
+echo after 2
+
+unset -f fn

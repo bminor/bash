@@ -1,0 +1,40 @@
+#!/bin/sh
+
+testmatch() {
+	case $1 in
+	( $2 ) printf ok1 ;;
+	( * ) printf fail1 ;;
+	esac
+	case $1,$2 in
+	( $2,"$2" ) printf ok2 ;;
+	( * ) printf fail2 ;;
+	esac
+	case $1, in
+	( $2, ) printf ok3 ;;
+	( * ) printf fail3 ;;
+	esac
+	case ,$2 in
+	( ,"$2" ) printf ok4 ;;
+	( * ) printf fail4 ;;
+	esac
+	case "$1,$2" in
+	( $2,"$2" ) printf ok5 ;;
+	( * ) printf fail5 ;;
+	esac
+	echo
+}
+
+for c in $'\1' $'\2' $'\177'; do
+	echo -n "--- testing: "
+	echo "$c" | od -t a | awk 'NR==1 { print $2 } '
+	testmatch "${c}" "\\${c}"
+	testmatch "${c}x" "\\${c}\\x"  # bash-git fails case 2 and 5 for $'\1'
+	testmatch "${c}x" "${c}\\x"
+	testmatch "${c}x" "${c}x"
+	testmatch "${c}x" "\\${c}x"
+	testmatch "x${c}" "\\x\\${c}"
+	testmatch "x${c}" "x\\${c}"
+done
+
+match() { case $1 in ( $2 ) ;; ( * ) return 1 ;; esac; } 
+match $'? *x\1y\177z' $'??\\*\\x\\\1\\y\\\177\\z' || echo bad 6

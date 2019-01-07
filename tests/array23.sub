@@ -1,0 +1,28 @@
+# this captures how bash and ksh93 expand indexed array subscripts in
+# various contexts. if changes are ever made, or an option added to do
+# this differently, the diffs will show up here
+
+typeset -a array
+
+index='$( echo >&2 foo )' # Literal shell code should never be evaluated unless an 'eval' is involved.
+
+echo ${array[ $index ]} # [] expands $index, results in a literal that [] does not re-evaluate.
+echo $(( $index )) # (( )) expands $index, results in a literal that (( )) does not re-evaluate.
+echo $(( array[ $index ] )) # (( )) expands $index, results in a literal that  [] DOES re-evaluate.
+
+(( array[ $index ] ))
+
+typeset -a a
+
+: $(( a[$index]=5 ))
+
+#shopt -s assoc_expand_once
+echo $((1+a[$index]))
+echo $((1+a[\$index]))
+echo "1+${a[$index]}"
+
+# intermediate problems discovered while bash-5.0 was in testing
+a=0
+echo $(( a[a[0]] ))
+echo ${a[a[a[0]]]}
+echo $(( a[a[a[0]]] ))

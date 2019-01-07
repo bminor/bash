@@ -35,6 +35,7 @@
 #include "bashintl.h"
 
 #include "shell.h"
+#include "parser.h"
 #include "flags.h"
 #include "trap.h"
 
@@ -46,16 +47,6 @@
 #if defined (HISTORY)
 #  include "bashhist.h"
 #endif
-
-extern int EOF_reached;
-extern int indirection_level;
-extern int posixly_correct;
-extern int subshell_environment, running_under_emacs;
-extern int last_command_exit_value, stdin_redir;
-extern int need_here_doc;
-extern int current_command_number, current_command_line_count, line_number;
-extern int expand_aliases;
-extern char *ps0_prompt;
 
 #if defined (HAVE_POSIX_SIGNALS)
 extern sigset_t top_level_mask;
@@ -78,6 +69,9 @@ reader_loop ()
 
   our_indirection_level = ++indirection_level;
 
+  if (just_one_command)
+    reset_readahead_token ();
+
   while (EOF_Reached == 0)
     {
       int code;
@@ -90,7 +84,7 @@ reader_loop ()
 
       /* XXX - why do we set this every time through the loop?  And why do
 	 it if SIGINT is trapped in an interactive shell? */
-      if (interactive_shell && signal_is_ignored (SIGINT) == 0)
+      if (interactive_shell && signal_is_ignored (SIGINT) == 0 && signal_is_trapped (SIGINT) == 0)
 	set_signal_handler (SIGINT, sigint_sighandler);
 
       if (code != NOT_JUMPED)
@@ -157,10 +151,6 @@ reader_loop ()
 	  else if (current_command = global_command)
 	    {
 	      global_command = (COMMAND *)NULL;
-	      current_command_number++;
-
-	      executing = 1;
-	      stdin_redir = 0;
 
 	      /* If the shell is interactive, expand and display $PS0 after reading a
 		 command (possibly a list or pipeline) and before executing it. */
@@ -176,6 +166,11 @@ reader_loop ()
 		    }
 		  free (ps0_string);
 		}
+
+	      current_command_number++;
+
+	      executing = 1;
+	      stdin_redir = 0;
 
 	      execute_command (current_command);
 
@@ -200,6 +195,47 @@ reader_loop ()
     }
   indirection_level--;
   return (last_command_exit_value);
+}
+
+/* Pretty print shell scripts */
+int
+pretty_print_loop ()
+{
+  COMMAND *current_command;
+  char *command_to_print;
+  int code;
+  int global_posix_mode, last_was_newline;
+
+  global_posix_mode = posixly_correct;
+  last_was_newline = 0;
+  while (EOF_Reached == 0)
+    {
+      code = setjmp_nosigs (top_level);
+      if (code)
+        return (EXECUTION_FAILURE);
+      if (read_command() == 0)
+	{
+	  current_command = global_command;
+	  global_command = 0;
+	  posixly_correct = 1;			/* print posix-conformant */
+	  if (current_command && (command_to_print = make_command_string (current_command)))
+	    {
+	      printf ("%s\n", command_to_print);	/* for now */
+	      last_was_newline = 0;
+	    }
+	  else if (last_was_newline == 0)
+	    {
+	       printf ("\n");
+	       last_was_newline = 1;
+	    }
+	  posixly_correct = global_posix_mode;
+	  dispose_command (current_command);
+	}
+      else
+	return (EXECUTION_FAILURE);
+    }
+    
+  return (EXECUTION_SUCCESS);
 }
 
 static sighandler
@@ -228,6 +264,15 @@ send_pwd_to_eterm ()
   free (f);
 }
 
+static void
+execute_prompt_command ()
+{
+  char *command_to_execute;
+
+  command_to_execute = get_string_value ("PROMPT_COMMAND");
+  if (command_to_execute)
+    execute_variable_command (command_to_execute, "PROMPT_COMMAND");
+}
 /* Call the YACC-generated parser and return the status of the parse.
    Input is read from the current input stream (bash_input).  yyparse
    leaves the parsed command in the global variable GLOBAL_COMMAND.
@@ -236,7 +281,6 @@ int
 parse_command ()
 {
   int r;
-  char *command_to_execute;
 
   need_here_doc = 0;
   run_pending_traps ();
@@ -249,9 +293,7 @@ parse_command ()
      actually printed. */
   if (interactive && bash_input.type != st_string && parser_expanding_alias() == 0)
     {
-      command_to_execute = get_string_value ("PROMPT_COMMAND");
-      if (command_to_execute)
-	execute_variable_command (command_to_execute, "PROMPT_COMMAND");
+      execute_prompt_command ();
 
       if (running_under_emacs == 2)
 	send_pwd_to_eterm ();	/* Yuck */

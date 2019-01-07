@@ -67,8 +67,8 @@ LOCAL_DEFS = @LOCAL_DEFS@
 
 INCLUDES = -I. -I../.. -I$(topdir) -I$(topdir)/lib -I$(BASHINCDIR) -I$(srcdir) $(INTL_INC)
 
-CCFLAGS = ${PROFILE_FLAGS} ${INCLUDES} $(DEFS) $(LOCAL_DEFS) $(LOCAL_CFLAGS) \
-	  $(CFLAGS) $(CPPFLAGS) 
+CCFLAGS = ${ADDON_CFLAGS} ${PROFILE_FLAGS} ${INCLUDES} $(DEFS) $(LOCAL_DEFS) \
+	  $(LOCAL_CFLAGS) $(CFLAGS) $(CPPFLAGS) 
 
 GCC_LINT_FLAGS = -Wall -Wshadow -Wpointer-arith -Wcast-qual \
 		 -Wcast-align -Wstrict-prototypes -Wconversion \
@@ -92,7 +92,8 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   mktime.c strftime.c mbschr.c zcatfd.c zmapfd.c winsize.c eaccess.c \
 	   wcsdup.c fpurge.c zgetline.c mbscmp.c uconvert.c ufuncs.c \
 	   casemod.c dprintf.c input_avail.c mbscasecmp.c fnxform.c \
-	   strchrnul.c unicode.c wcswidth.c wcsnwidth.c shmbchar.c strdup.c
+	   strchrnul.c unicode.c wcswidth.c wcsnwidth.c shmbchar.c strdup.c \
+	   utf8.c
 
 # The header files for this library.
 HSOURCES = 
@@ -107,7 +108,7 @@ OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o strnlen.o \
 	  fmtullong.o fmtumax.o zcatfd.o zmapfd.o winsize.o wcsdup.o \
 	  fpurge.o zgetline.o mbscmp.o uconvert.o ufuncs.o casemod.o \
 	  input_avail.o mbscasecmp.o fnxform.o unicode.o shmbchar.o \
-	  wcsnwidth.o ${LIBOBJS}
+	  utf8.o wcsnwidth.o ${LIBOBJS}
 
 SUPPORT = Makefile
 
@@ -200,6 +201,7 @@ tmpfile.o: tmpfile.c
 uconvert.o: uconvert.c
 ufuncs.o: ufuncs.c
 unicode.o: unicode.c
+utf8.o: utf8.c
 vprint.o: vprint.c
 wcsdup.o: wcsdup.c
 wcsnwidth.o: wcsnwidth.c
@@ -277,6 +279,7 @@ tmpfile.o: ${BUILD_DIR}/config.h
 uconvert.o: ${BUILD_DIR}/config.h
 ufuncs.o: ${BUILD_DIR}/config.h
 unicode.o: ${BUILD_DIR}/config.h
+utf8.o: ${BUILD_DIR}/config.h
 vprint.o: ${BUILD_DIR}/config.h
 wcsdup.o: ${BUILD_DIR}/config.h
 wcsnwidth.o: ${BUILD_DIR}/config.h
@@ -611,6 +614,10 @@ shmbchar.o: ${BASHINCDIR}/shmbutil.h
 unicode.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
 unicode.o: ${BASHINCDIR}/stdc.h
 unicode.o: ${topdir}/xmalloc.h
+
+utf8.o: ${topdir}/bashansi.h
+utf8.o: ${BASHINCDIR}/ansi_stdlib.h
+utf8.o: ${BASHINCDIR}/shmbutil.h ${BASHINCDIR}/shmbchar.h
 
 winsize.o: ${BASHINCDIR}/stdc.h
 winsize.o: ${topdir}/xmalloc.h

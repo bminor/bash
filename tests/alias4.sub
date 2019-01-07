@@ -1,0 +1,70 @@
+shopt -s expand_aliases
+
+# from an austin-group report
+alias foo="echo 'Error:"
+foo bar'
+
+# from some FreeBSD sh tests
+
+v=1
+alias a='unalias -a
+v=2'
+eval a
+[ "$v" = 2 ] && echo ok 1
+v=1
+alias a='unalias a
+v=2'
+eval a
+[ "$v" = 2 ] && echo ok 2
+
+# make sure command doesn't ever reset anything even if it's made a keyword
+unalias -a
+alias command=command
+alias true='echo bad'
+eval 'command true'
+
+unalias -a
+alias alias0=command
+alias true='echo bad'
+eval 'alias0 true'
+
+# make sure null aliases are ok
+unalias -a
+alias nullalias=''
+alias foo='echo '
+foo nullalias text
+unalias foo
+
+# aliases shouldn't be expanded in quoted strings even when the previous word
+# is an alias whose expansion ends in a space
+alias foo="echo 'whoops: "
+foo nullalias'
+
+unalias -a
+
+# recursive alias definitions
+alias echo=echo
+eval echo foo
+
+alias echo='echo a'
+
+echo
+echo b
+eval echo b
+echo $(eval echo b)
+
+unalias -a
+
+# alias expansion when in a command position after redirections
+alias e=echo
+eval '</dev/null e ok 3'
+eval 'a=true e ok 4'
+
+alias comment=#
+comment
+
+alias long_comment='# for x in '
+long_comment text after
+
+# comment
+comment foo bar

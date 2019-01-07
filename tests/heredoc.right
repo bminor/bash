@@ -20,7 +20,7 @@ jkl mno
 fff is a function
 fff () 
 { 
-    ed /tmp/foo  > /dev/null <<ENDOFINPUT
+    ed ${TMPDIR}/foo <<ENDOFINPUT > /dev/null
 /^name/d
 w
 q
@@ -31,7 +31,7 @@ ENDOFINPUT
 fff is a function
 fff () 
 { 
-    ed /tmp/foo > /dev/null  <<ENDOFINPUT
+    ed ${TMPDIR}/foo <<ENDOFINPUT > /dev/null
 /^name/d
 w
 q
@@ -43,11 +43,11 @@ foo is a function
 foo () 
 { 
     echo;
-    cat  <<END
+    cat <<END
 bar
 END
 
-    cat  <<EOF
+    cat <<EOF
 qux
 EOF
 
@@ -59,13 +59,13 @@ qux
 bar
 qux
 abc def geh
-./heredoc3.sub: line 9: warning: here-document at line 7 delimited by end-of-file (wanted `EOF')
+./heredoc3.sub: line 10: warning: here-document at line 8 delimited by end-of-file (wanted `EOF')
 = here is the text =
-./heredoc3.sub: line 15: warning: here-document at line 13 delimited by end-of-file (wanted `EOF')
+./heredoc3.sub: line 16: warning: here-document at line 14 delimited by end-of-file (wanted `EOF')
 this paren ) is not a problem
-./heredoc3.sub: line 21: warning: here-document at line 19 delimited by end-of-file (wanted `EOF')
+./heredoc3.sub: line 22: warning: here-document at line 20 delimited by end-of-file (wanted `EOF')
 these balanced parens ( ) are not a problem
-./heredoc3.sub: line 27: warning: here-document at line 25 delimited by end-of-file (wanted `EOF')
+./heredoc3.sub: line 28: warning: here-document at line 26 delimited by end-of-file (wanted `EOF')
 quoted balanced parens \( ) are not a problem either
 more text in a subshell
 some more text in a different subshell
@@ -82,8 +82,16 @@ end helloEND
 hello
 \END
 end hello<NL>\END
-./heredoc3.sub: line 78: warning: here-document at line 76 delimited by end-of-file (wanted `EOF')
-./heredoc3.sub: line 79: syntax error: unexpected end of file
+./heredoc3.sub: line 85: warning: here-document at line 83 delimited by end-of-file (wanted `EOF')
+./heredoc3.sub: line 86: syntax error: unexpected end of file
+heredoc1
+EOF
+Ok:0
+argv[1] = <onetwo>
+argv[2] = <threefour>
+argv[1] = <two>
+argv[2] = <threefi>
+argv[3] = <ve>
 comsub here-string
 ./heredoc.tests: line 105: warning: here-document at line 103 delimited by end-of-file (wanted `EOF')
 hi

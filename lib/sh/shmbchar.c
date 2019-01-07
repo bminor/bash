@@ -1,4 +1,4 @@
-/* Copyright (C) 2001, 2006, 2009, 2010, 2012, 2015 Free Software Foundation, Inc.
+/* Copyright (C) 2001, 2006, 2009, 2010, 2012, 2015-2018 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -20,8 +20,14 @@
 #include <stdlib.h>
 #include <limits.h>
 
+#include <errno.h>
+
 #include <shmbutil.h>
 #include <shmbchar.h>
+
+#ifndef errno
+extern int errno;
+#endif
 
 #if IS_BASIC_ASCII
 
@@ -37,6 +43,13 @@ const unsigned int is_basic_table [UCHAR_MAX / 32 + 1] =
 
 #endif /* IS_BASIC_ASCII */
 
+extern int locale_utf8locale;
+
+extern char *utf8_mbsmbchar (const char *);
+extern int utf8_mblen (const char *, size_t);
+
+/* Count the number of characters in S, counting multi-byte characters as a
+   single character. */
 size_t
 mbstrlen (s)
      const char *s;
@@ -65,6 +78,8 @@ mbstrlen (s)
 }
 
 /* Return pointer to first multibyte char in S, or NULL if none. */
+/* XXX - if we know that the locale is UTF-8, we can just check whether or
+   not any byte has the eighth bit turned on */
 char *
 mbsmbchar (s)
      const char *s;
@@ -74,13 +89,19 @@ mbsmbchar (s)
   mbstate_t mbs = { 0 };
   int mb_cur_max;
 
+  if (locale_utf8locale)
+    return (utf8_mbsmbchar (s));	/* XXX */
+
   mb_cur_max = MB_CUR_MAX;
   for (t = (char *)s; *t; t++)
     {
       if (is_basic (*t))
 	continue;
 
-      clen = mbrlen (t, mb_cur_max, &mbs);
+      if (locale_utf8locale)		/* not used if above code active */
+	clen = utf8_mblen (t, mb_cur_max);
+      else
+	clen = mbrlen (t, mb_cur_max, &mbs);
 
       if (clen == 0)
         return 0;

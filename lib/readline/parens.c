@@ -1,6 +1,6 @@
 /* parens.c -- implementation of matching parentheses feature. */
 
-/* Copyright (C) 1987, 1989, 1992-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1987, 1989, 1992-2015, 2017 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -64,8 +64,7 @@ static int _paren_blink_usec = 500000;
 /* Change emacs_standard_keymap to have bindings for paren matching when
    ON_OR_OFF is 1, change them back to self_insert when ON_OR_OFF == 0. */
 void
-_rl_enable_paren_matching (on_or_off)
-     int on_or_off;
+_rl_enable_paren_matching (int on_or_off)
 {
   if (on_or_off)
     {
@@ -98,8 +97,7 @@ _rl_enable_paren_matching (on_or_off)
 }
 
 int
-rl_set_paren_blink_timeout (u)
-     int u;
+rl_set_paren_blink_timeout (int u)
 {
   int o;
 
@@ -110,8 +108,7 @@ rl_set_paren_blink_timeout (u)
 }
 
 int
-rl_insert_close (count, invoking_key)
-     int count, invoking_key;
+rl_insert_close (int count, int invoking_key)
 {
   if (rl_explicit_arg || !rl_blink_matching_paren)
     _rl_insert_char (count, invoking_key);
@@ -148,9 +145,7 @@ rl_insert_close (count, invoking_key)
 }
 
 static int
-find_matching_open (string, from, closer)
-     char *string;
-     int from, closer;
+find_matching_open (char *string, int from, int closer)
 {
   register int i;
   int opener, level, delimiter;

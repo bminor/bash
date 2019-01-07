@@ -32,7 +32,7 @@ int
 strncasecmp (string1, string2, count)
      const char *string1;
      const char *string2;
-     int count;
+     size_t count;
 {
   register const char *s1;
   register const char *s2;

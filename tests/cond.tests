@@ -180,6 +180,9 @@ echo ${BASH_REMATCH[@]}
 if [[ "123abc" == *?(a)bc ]]; then echo ok 42; else echo bad 42; fi
 if [[ "123abc" == *?(a)bc ]]; then echo ok 43; else echo bad 43; fi
 
+match() { [[ $1 == $2 ]]; }
+match $'? *x\1y\177z' $'??\\*\\x\\\1\\y\\\177\\z' || echo bad 44
+
 foo=""
 [[ bar == *"${foo,,}"* ]] && echo ok 1
 [[ bar == *${foo,,}* ]] && echo ok 2

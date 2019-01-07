@@ -1,0 +1,42 @@
+x=x
+e=
+
+recho ${x:+""}
+recho ${x:+ ""}
+recho ${x:+"" }
+recho ${x:+"$e"}
+recho ${x:+ "$e"}
+recho ${x:+"$e""$e"""}
+recho ${x:+"$e""$e"""}
+recho ${x:+"$e" "$e"""}
+recho ${x:+"$e""$e" ""}
+recho ${x:+ "$e""$e"""}
+
+echo =====
+recho ${x:+''}
+recho ${x:+ ''}
+recho ${x:+'' }
+recho ${x:+'' ''}
+
+recho ${x:+$e''}
+recho ${x:+''$e}
+
+recho ${x:+''$e $e''}
+
+echo =====
+recho ${x:+"$(:)"}
+recho ${x:+ "$(:)"}
+recho ${x:+"$(:)""$(:)"""}
+recho ${x:+"$(:)""$(:)"""}
+recho ${x:+"$(:)" "$(:)"""}
+recho ${x:+"$(:)""$(:)" ""}
+recho ${x:+ "$(:)""$(:)"""}
+
+echo =====
+recho ${x:+"`:`"}
+recho ${x:+ "`:`"}
+recho ${x:+"`:`""`:`"""}
+recho ${x:+"`:`""`:`"""}
+recho ${x:+"`:`" "`:`"""}
+recho ${x:+"`:`""`:`" ""}
+recho ${x:+ "`:`""`:`"""}

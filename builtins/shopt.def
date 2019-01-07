@@ -1,7 +1,7 @@
 This file is shopt.def, from which is created shopt.c.
 It implements the Bash `shopt' builtin.
 
-Copyright (C) 1994-2016 Free Software Foundation, Inc.
+Copyright (C) 1994-2018 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -26,8 +26,8 @@ $SHORT_DOC shopt [-pqsu] [-o] [optname ...]
 Set and unset shell options.
 
 Change the setting of each shell option OPTNAME.  Without any option
-arguments, list all shell options with an indication of whether or not each
-is set. 
+arguments, list each supplied OPTNAME, or all shell options if no
+OPTNAMEs are given, with an indication of whether or not each is set.
 
 Options:
   -o	restrict OPTNAMEs to those defined for use with `set -o'
@@ -91,6 +91,8 @@ extern int glob_star;
 extern int glob_asciirange;
 extern int lastpipe_opt;
 extern int inherit_errexit;
+extern int localvar_inherit;
+extern int localvar_unset;
 
 #if defined (EXTENDED_GLOB)
 extern int extended_glob;
@@ -108,20 +110,25 @@ extern int enable_hostname_completion __P((int));
 
 #if defined (PROGRAMMABLE_COMPLETION)
 extern int prog_completion_enabled;
-#endif
-
-#if defined (RESTRICTED_SHELL)
-extern char *shell_name;
+extern int progcomp_alias;
 #endif
 
 #if defined (DEBUGGER)
 extern int debugging_mode;
 #endif
 
+#if defined (ARRAY_VARS)
+extern int assoc_expand_once;
+extern int array_expand_once;
+#endif
+
+#if defined (SYSLOG_HISTORY) && defined (SYSLOG_SHOPT)
+extern int syslog_history;
+#endif
+
 static void shopt_error __P((char *));
 
 static int set_shellopts_after_change __P((char *, int));
-static int shopt_enable_hostname_completion __P((char *, int));
 static int set_compatibility_level __P((char *, int));
 
 #if defined (RESTRICTED_SHELL)
@@ -129,6 +136,7 @@ static int set_restricted_shell __P((char *, int));
 #endif
 
 #if defined (READLINE)
+static int shopt_enable_hostname_completion __P((char *, int));
 static int shopt_set_complete_direxpand __P((char *, int));
 #endif
 
@@ -141,6 +149,7 @@ static int shopt_compat40;
 static int shopt_compat41;
 static int shopt_compat42;
 static int shopt_compat43;
+static int shopt_compat44;
 
 typedef int shopt_set_func_t __P((char *, int));
 
@@ -153,6 +162,9 @@ static struct {
   shopt_set_func_t *set_func;
 } shopt_vars[] = {
   { "autocd", &autocd, (shopt_set_func_t *)NULL },
+#if defined (ARRAY_VARS)
+  { "assoc_expand_once", &assoc_expand_once, (shopt_set_func_t *)NULL },
+#endif
   { "cdable_vars", &cdable_vars, (shopt_set_func_t *)NULL },
   { "cdspell", &cdspelling, (shopt_set_func_t *)NULL },
   { "checkhash", &check_hashed_filenames, (shopt_set_func_t *)NULL },
@@ -169,6 +181,7 @@ static struct {
   { "compat41", &shopt_compat41, set_compatibility_level },
   { "compat42", &shopt_compat42, set_compatibility_level },
   { "compat43", &shopt_compat43, set_compatibility_level },
+  { "compat44", &shopt_compat44, set_compatibility_level },
 #if defined (READLINE)
   { "complete_fullquote", &complete_fullquote, (shopt_set_func_t *)NULL},
   { "direxpand", &dircomplete_expand, shopt_set_complete_direxpand },
@@ -206,6 +219,8 @@ static struct {
 #if defined (HISTORY)
   { "lithist", &literal_history, (shopt_set_func_t *)NULL },
 #endif
+  { "localvar_inherit", &localvar_inherit, (shopt_set_func_t *)NULL },
+  { "localvar_unset", &localvar_unset, (shopt_set_func_t *)NULL },
   { "login_shell", &shopt_login_shell, set_login_shell },
   { "mailwarn", &mail_warning, (shopt_set_func_t *)NULL },
 #if defined (READLINE)
@@ -216,6 +231,9 @@ static struct {
   { "nullglob",	&allow_null_glob_expansion, (shopt_set_func_t *)NULL },
 #if defined (PROGRAMMABLE_COMPLETION)
   { "progcomp", &prog_completion_enabled, (shopt_set_func_t *)NULL },
+#  if defined (ALIAS)
+  { "progcomp_alias", &progcomp_alias, (shopt_set_func_t *)NULL },
+#  endif
 #endif
   { "promptvars", &promptvars, (shopt_set_func_t *)NULL },
 #if defined (RESTRICTED_SHELL)
@@ -223,6 +241,9 @@ static struct {
 #endif
   { "shift_verbose", &print_shift_error, (shopt_set_func_t *)NULL },
   { "sourcepath", &source_uses_path, (shopt_set_func_t *)NULL },
+#if defined (SYSLOG_HISTORY) && defined (SYSLOG_SHOPT)
+  { "syslog_history", &syslog_history, (shopt_set_func_t *)NULL },
+#endif
   { "xpg_echo", &xpg_echo, (shopt_set_func_t *)NULL },
   { (char *)0, (int *)0, (shopt_set_func_t *)NULL }
 };
@@ -343,6 +364,14 @@ reset_shopt_options ()
   literal_history = 0;
   force_append_history = 0;
   command_oriented_history = 1;
+#endif
+
+#if defined (SYSLOG_HISTORY)
+#  if defined (SYSLOG_SHOPT)
+  syslog_history = SYSLOG_SHOPT;
+#  else
+  syslog_history = 1;
+#  endif /* SYSLOG_SHOPT */
 #endif
 
 #if defined (READLINE)
@@ -572,10 +601,13 @@ shopt_set_debug_mode (option_name, mode)
 #if defined (DEBUGGER)
   error_trace_mode = function_trace_mode = debugging_mode;
   set_shellopts ();
+  if (debugging_mode)
+    init_bash_argv ();
 #endif
   return (0);
 }
 
+#if defined (READLINE)
 static int
 shopt_enable_hostname_completion (option_name, mode)
      char *option_name;
@@ -583,6 +615,7 @@ shopt_enable_hostname_completion (option_name, mode)
 {
   return (enable_hostname_completion (mode));
 }
+#endif
 
 static int
 set_compatibility_level (option_name, mode)
@@ -590,6 +623,7 @@ set_compatibility_level (option_name, mode)
      int mode;
 {
   int ind;
+  char *rhs;
 
   /* If we're setting something, redo some of the work we did above in
      toggle_shopt().  Unset everything and reset the appropriate option
@@ -598,6 +632,7 @@ set_compatibility_level (option_name, mode)
     {
       shopt_compat31 = shopt_compat32 = 0;
       shopt_compat40 = shopt_compat41 = shopt_compat42 = shopt_compat43 = 0;
+      shopt_compat44 = 0;
       ind = find_shopt (option_name);
       *shopt_vars[ind].value = mode;
     }
@@ -615,8 +650,15 @@ set_compatibility_level (option_name, mode)
     shell_compatibility_level = 42;
   else if (shopt_compat43)
     shell_compatibility_level = 43;
+  else if (shopt_compat44)
+    shell_compatibility_level = 44;
   else
     shell_compatibility_level = DEFAULT_COMPAT_LEVEL;
+
+  /* Make sure the current compatibility level is reflected in BASH_COMPAT */
+  rhs = itos (shell_compatibility_level);
+  bind_variable ("BASH_COMPAT", rhs, 0);
+  free (rhs);
 
   return 0;
 }
@@ -628,10 +670,13 @@ set_compatibility_opts ()
 {
   shopt_compat31 = shopt_compat32 = 0;
   shopt_compat40 = shopt_compat41 = shopt_compat42 = shopt_compat43 = 0;
+  shopt_compat44 = 0;
   switch (shell_compatibility_level)
     {
       case DEFAULT_COMPAT_LEVEL:
 	break;
+      case 44:
+	shopt_compat44 = 1; break;
       case 43:
 	shopt_compat43 = 1; break;
       case 42:

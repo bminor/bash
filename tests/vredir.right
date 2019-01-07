@@ -11,9 +11,6 @@ bar ()
 ./vredir.tests: line 6: v: readonly variable
 ./vredir.tests: line 6: v: cannot assign fd to variable
 42
-./vredir.tests: line 25: $v: Bad file descriptor
-./vredir.tests: line 26: $v: Bad file descriptor
-./vredir.tests: line 27: $v: Bad file descriptor
 bar is a function
 bar () 
 { 
@@ -27,7 +24,7 @@ line 3
 bar is a function
 bar () 
 { 
-    exec  {v}<<EOF
+    exec {v}<<EOF
 line 1
 line 2
 line 3

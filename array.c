@@ -9,7 +9,7 @@
  * chet@ins.cwru.edu
  */
 
-/* Copyright (C) 1997-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -52,40 +52,30 @@
 		ae->prev = new; \
 		new->next = ae; \
 	} while(0)
+	
+#define ADD_AFTER(ae, new) \
+	do { \
+		ae->next->prev = new; \
+		new->next = ae->next; \
+		new->prev = ae; \
+		ae->next = new; \
+	} while (0)
 
 static char *array_to_string_internal __P((ARRAY_ELEMENT *, ARRAY_ELEMENT *, char *, int));
 
-/* lastref should be moved into the array structure so each array can be
-   optimized separately */
+static char *spacesep = " ";
 
-static ARRAY *lastarray = 0;
-static ARRAY_ELEMENT *lastref = 0;
-
-#define IS_LASTREF(a)	(lastarray && (a) == lastarray)
+#define IS_LASTREF(a)	(a->lastref)
 
 #define LASTREF_START(a, i) \
-	(IS_LASTREF(a) && i >= element_index(lastref)) ? lastref \
-						       : element_forw(a->head)
+	(IS_LASTREF(a) && i >= element_index(a->lastref)) ? a->lastref \
+						          : element_forw(a->head)
 
-#define INVALIDATE_LASTREF(a) \
-do { \
-	if ((a) == lastarray) { \
-		lastarray = 0; \
-		lastref = 0; \
-	} \
-} while (0)
+#define LASTREF(a)	(a->lastref ? a->lastref : element_forw(a->head))
 
-#define SET_LASTREF(a, e) \
-do { \
-	lastarray = (a); \
-	lastref = (e); \
-} while (0)
-
-#define UNSET_LASTREF() \
-do { \
-	lastarray = 0; \
-	lastref = 0; \
-} while (0)
+#define INVALIDATE_LASTREF(a)	a->lastref = 0
+#define SET_LASTREF(a, e)	a->lastref = (e)
+#define UNSET_LASTREF(a)	a->lastref = 0;
 
 ARRAY *
 array_create()
@@ -93,10 +83,11 @@ array_create()
 	ARRAY	*r;
 	ARRAY_ELEMENT	*head;
 
-	r =(ARRAY *)xmalloc(sizeof(ARRAY));
+	r = (ARRAY *)xmalloc(sizeof(ARRAY));
 	r->type = array_indexed;
 	r->max_index = -1;
 	r->num_elements = 0;
+	r->lastref = (ARRAY_ELEMENT *)0;
 	head = array_create_element(-1, (char *)NULL);	/* dummy head */
 	head->prev = head->next = head;
 	r->head = head;
@@ -149,6 +140,8 @@ ARRAY	*a;
 	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae)) {
 		new = array_create_element(element_index(ae), element_value(ae));
 		ADD_BEFORE(a1->head, new);
+		if (ae == LASTREF(a))
+			SET_LASTREF(a1, new);
 	}
 	return(a1);
 }
@@ -391,7 +384,6 @@ array_remove_quoted_nulls(array)
 ARRAY	*array;
 {
 	ARRAY_ELEMENT	*a;
-	char	*t;
 
 	if (array == 0 || array_head(array) == 0 || array_empty(array))
 		return (ARRAY *)NULL;
@@ -414,8 +406,8 @@ int	starsub, quoted;
 	ARRAY		*a2;
 	ARRAY_ELEMENT	*h, *p;
 	arrayind_t	i;
-	char		*ifs, *sifs, *t;
-	int		slen;
+	char		*t;
+	WORD_LIST	*wl;
 
 	p = a ? array_head (a) : 0;
 	if (p == 0 || array_empty (a) || start > array_max_index(a))
@@ -440,32 +432,12 @@ int	starsub, quoted;
 
 	a2 = array_slice(a, h, p);
 
-	if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))
-		array_quote(a2);
-	else
-		array_quote_escapes(a2);
-
-	if (starsub && (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))) {
-		/* ${array[*]} */
-		array_remove_quoted_nulls (a2);
-		sifs = ifs_firstchar ((int *)NULL);
-		t = array_to_string (a2, sifs, 0);
-		free (sifs);
-	} else if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) {
-		/* ${array[@]} */
-		sifs = ifs_firstchar (&slen);
-		ifs = getifs ();
-		if (ifs == 0 || *ifs == 0) {
-			if (slen < 2)
-				sifs = xrealloc(sifs, 2);
-			sifs[0] = ' ';
-			sifs[1] = '\0';
-		}
-		t = array_to_string (a2, sifs, 0);
-		free (sifs);
-	} else
-		t = array_to_string (a2, " ", 0);
+	wl = array_to_word_list(a2);
 	array_dispose(a2);
+	if (wl == 0)
+		return (char *)NULL;
+	t = string_list_pos_params(starsub ? '*' : '@', wl, quoted);
+	dispose_words(wl);
 
 	return t;
 }
@@ -476,46 +448,28 @@ ARRAY	*a;
 char	*pat, *rep;
 int	mflags;
 {
-	ARRAY		*a2;
-	ARRAY_ELEMENT	*e;
-	char	*t, *sifs, *ifs;
-	int	slen;
+	char	*t;
+	int	pchar, qflags;
+	WORD_LIST	*wl, *save;
 
 	if (a == 0 || array_head(a) == 0 || array_empty(a))
 		return ((char *)NULL);
 
-	a2 = array_copy(a);
-	for (e = element_forw(a2->head); e != a2->head; e = element_forw(e)) {
-		t = pat_subst(element_value(e), pat, rep, mflags);
-		FREE(element_value(e));
-		e->value = t;
+	wl = array_to_word_list(a);
+	if (wl == 0)
+		return (char *)NULL;
+
+	for (save = wl; wl; wl = wl->next) {
+		t = pat_subst (wl->word->word, pat, rep, mflags);
+		FREE (wl->word->word);
+		wl->word->word = t;
 	}
 
-	if (mflags & MATCH_QUOTED)
-		array_quote(a2);
-	else
-		array_quote_escapes(a2);
+	pchar = (mflags & MATCH_STARSUB) == MATCH_STARSUB ? '*' : '@';
+	qflags = (mflags & MATCH_QUOTED) == MATCH_QUOTED ? Q_DOUBLE_QUOTES : 0;
 
-	if (mflags & MATCH_STARSUB) {
-		array_remove_quoted_nulls (a2);
-		sifs = ifs_firstchar((int *)NULL);
-		t = array_to_string (a2, sifs, 0);
-		free(sifs);
-	} else if (mflags & MATCH_QUOTED) {
-		/* ${array[@]} */
-		sifs = ifs_firstchar (&slen);
-		ifs = getifs ();
-		if (ifs == 0 || *ifs == 0) {
-			if (slen < 2)
-				sifs = xrealloc (sifs, 2);
-			sifs[0] = ' ';
-			sifs[1] = '\0';
-		}
-		t = array_to_string (a2, sifs, 0);
-		free(sifs);
-	} else
-		t = array_to_string (a2, " ", 0);
-	array_dispose (a2);
+	t = string_list_pos_params (pchar, save, qflags);
+	dispose_words(save);
 
 	return t;
 }
@@ -527,49 +481,32 @@ char	*pat;
 int	modop;
 int	mflags;
 {
-	ARRAY		*a2;
-	ARRAY_ELEMENT	*e;
-	char	*t, *sifs, *ifs;
-	int	slen;
+	char	*t;
+	int	pchar, qflags;
+	WORD_LIST	*wl, *save;
 
 	if (a == 0 || array_head(a) == 0 || array_empty(a))
 		return ((char *)NULL);
 
-	a2 = array_copy(a);
-	for (e = element_forw(a2->head); e != a2->head; e = element_forw(e)) {
-		t = sh_modcase(element_value(e), pat, modop);
-		FREE(element_value(e));
-		e->value = t;
+	wl = array_to_word_list(a);
+	if (wl == 0)
+		return ((char *)NULL);
+
+	for (save = wl; wl; wl = wl->next) {
+		t = sh_modcase(wl->word->word, pat, modop);
+		FREE(wl->word->word);
+		wl->word->word = t;
 	}
 
-	if (mflags & MATCH_QUOTED)
-		array_quote(a2);
-	else
-		array_quote_escapes(a2);
+	pchar = (mflags & MATCH_STARSUB) == MATCH_STARSUB ? '*' : '@';
+	qflags = (mflags & MATCH_QUOTED) == MATCH_QUOTED ? Q_DOUBLE_QUOTES : 0;
 
-	if (mflags & MATCH_STARSUB) {
-		array_remove_quoted_nulls (a2);
-		sifs = ifs_firstchar((int *)NULL);
-		t = array_to_string (a2, sifs, 0);
-		free(sifs);
-	} else if (mflags & MATCH_QUOTED) {
-		/* ${array[@]} */
-		sifs = ifs_firstchar (&slen);
-		ifs = getifs ();
-		if (ifs == 0 || *ifs == 0) {
-			if (slen < 2)
-				sifs = xrealloc (sifs, 2);
-			sifs[0] = ' ';
-			sifs[1] = '\0';
-		}
-		t = array_to_string (a2, sifs, 0);
-		free(sifs);
-	} else
-		t = array_to_string (a2, " ", 0);
-	array_dispose (a2);
+	t = string_list_pos_params (pchar, save, qflags);
+	dispose_words(save);
 
 	return t;
 }
+
 /*
  * Allocate and return a new array element with index INDEX and value
  * VALUE.
@@ -618,6 +555,8 @@ arrayind_t	i;
 char	*v;
 {
 	register ARRAY_ELEMENT *new, *ae, *start;
+	arrayind_t startind;
+	int direction;
 
 	if (a == 0)
 		return(-1);
@@ -633,6 +572,12 @@ char	*v;
 		a->num_elements++;
 		SET_LASTREF(a, new);
 		return(0);
+	} else if (i < array_first_index(a)) {
+		/* Hook at the beginning */
+		ADD_AFTER(a->head, new);
+		a->num_elements++;
+		SET_LASTREF(a, new);
+		return(0);
 	}
 #if OPTIMIZE_SEQUENTIAL_ARRAY_ASSIGNMENT
 	/*
@@ -640,26 +585,48 @@ char	*v;
 	 * handle optimizes the case of sequential or almost-sequential
 	 * assignments that are not at the end of the array.
 	 */
-	start = LASTREF_START(a, i);
+	start = LASTREF(a);
+	/* Use same strategy as array_reference to avoid paying large penalty
+	   for semi-random assignment pattern. */
+	startind = element_index(start);
+	if (i < startind/2) {
+		start = element_forw(a->head);
+		startind = element_index(start);
+		direction = 1;
+	} else if (i >= startind) {
+		direction = 1;
+	} else {
+		direction = -1;
+	}
 #else
 	start = element_forw(ae->head);
+	startind = element_index(start);
+	direction = 1;
 #endif
-	for (ae = start; ae != a->head; ae = element_forw(ae)) {
+	for (ae = start; ae != a->head; ) {
 		if (element_index(ae) == i) {
 			/*
 			 * Replacing an existing element.
 			 */
-			array_dispose_element(new);
 			free(element_value(ae));
-			ae->value = v ? savestring(v) : (char *)NULL;
+			/* Just swap in the new value */
+			ae->value = new->value;
+			new->value = 0;
+			array_dispose_element(new);
 			SET_LASTREF(a, ae);
 			return(0);
-		} else if (element_index(ae) > i) {
+		} else if (direction == 1 && element_index(ae) > i) {
 			ADD_BEFORE(ae, new);
 			a->num_elements++;
 			SET_LASTREF(a, new);
 			return(0);
+		} else if (direction == -1 && element_index(ae) < i) {
+			ADD_AFTER(ae, new);
+			a->num_elements++;
+			SET_LASTREF(a, new);
+			return(0);
 		}
+		ae = direction == 1 ? element_forw(ae) : element_back(ae);
 	}
 	array_dispose_element(new);
 	INVALIDATE_LASTREF(a);
@@ -676,11 +643,27 @@ ARRAY	*a;
 arrayind_t	i;
 {
 	register ARRAY_ELEMENT *ae, *start;
+	arrayind_t startind;
+	int direction;
 
 	if (a == 0 || array_empty(a))
 		return((ARRAY_ELEMENT *) NULL);
-	start = LASTREF_START(a, i);
-	for (ae = start; ae != a->head; ae = element_forw(ae))
+	if (i > array_max_index(a) || i < array_first_index(a))
+		return((ARRAY_ELEMENT *)NULL);	/* Keep roving pointer into array to optimize sequential access */
+	start = LASTREF(a);
+	/* Use same strategy as array_reference to avoid paying large penalty
+	   for semi-random assignment pattern. */
+	startind = element_index(start);
+	if (i < startind/2) {
+		start = element_forw(a->head);
+		startind = element_index(start);
+		direction = 1;
+	} else if (i >= startind) {
+		direction = 1;
+	} else {
+		direction = -1;
+	}
+	for (ae = start; ae != a->head; ) {
 		if (element_index(ae) == i) {
 			ae->next->prev = ae->prev;
 			ae->prev->next = ae->next;
@@ -699,6 +682,12 @@ arrayind_t	i;
 #endif
 			return(ae);
 		}
+		ae = (direction == 1) ? element_forw(ae) : element_back(ae);
+		if (direction == 1 && element_index(ae) > i)
+			break;
+		else if (direction == -1 && element_index(ae) < i)
+			break;
+	}
 	return((ARRAY_ELEMENT *) NULL);
 }
 
@@ -711,18 +700,48 @@ ARRAY	*a;
 arrayind_t	i;
 {
 	register ARRAY_ELEMENT *ae, *start;
+	arrayind_t startind;
+	int direction;
 
 	if (a == 0 || array_empty(a))
 		return((char *) NULL);
-	if (i > array_max_index(a))
+	if (i > array_max_index(a) || i < array_first_index(a))
 		return((char *)NULL);	/* Keep roving pointer into array to optimize sequential access */
-	start = LASTREF_START(a, i);
-	for (ae = start; ae != a->head; ae = element_forw(ae))
+	start = LASTREF(a);	/* lastref pointer */
+	startind = element_index(start);
+	if (i < startind/2) {	/* XXX - guess */
+		start = element_forw(a->head);
+		startind = element_index(start);
+		direction = 1;
+	} else if (i >= startind) {
+		direction = 1;
+	} else {
+		direction = -1;
+	}
+	for (ae = start; ae != a->head; ) {
 		if (element_index(ae) == i) {
 			SET_LASTREF(a, ae);
 			return(element_value(ae));
 		}
-	UNSET_LASTREF();		/* XXX SET_LASTREF(a, start) ? */
+		ae = (direction == 1) ? element_forw(ae) : element_back(ae);
+		/* Take advantage of index ordering to short-circuit */
+		/* If we don't find it, set the lastref pointer to the element
+		   that's `closest', assuming that the unsuccessful reference
+		   will quickly be followed by an assignment.  No worse than
+		   not changing it from the previous value or resetting it. */
+		if (direction == 1 && element_index(ae) > i) {
+			start = ae;	/* use for SET_LASTREF below */
+			break;
+		} else if (direction == -1 && element_index(ae) < i) {
+			start = ae;	/* use for SET_LASTREF below */
+			break;
+		}
+	}
+#if 0
+	UNSET_LASTREF(a);
+#else
+	SET_LASTREF(a, start);
+#endif
 	return((char *) NULL);
 }
 

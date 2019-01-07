@@ -2,6 +2,7 @@
 shopt: usage: shopt [-pqsu] [-o] [optname ...]
 --
 shopt -u autocd
+shopt -u assoc_expand_once
 shopt -u cdable_vars
 shopt -s cdspell
 shopt -u checkhash
@@ -14,6 +15,7 @@ shopt -u compat40
 shopt -u compat41
 shopt -u compat42
 shopt -u compat43
+shopt -u compat44
 shopt -s complete_fullquote
 shopt -u direxpand
 shopt -u dirspell
@@ -25,7 +27,7 @@ shopt -u extglob
 shopt -s extquote
 shopt -u failglob
 shopt -s force_fignore
-shopt -u globasciiranges
+shopt -s globasciiranges
 shopt -u globstar
 shopt -u gnu_errfmt
 shopt -u histappend
@@ -37,6 +39,8 @@ shopt -u inherit_errexit
 shopt -s interactive_comments
 shopt -u lastpipe
 shopt -u lithist
+shopt -u localvar_inherit
+shopt -u localvar_unset
 shopt -u login_shell
 shopt -u mailwarn
 shopt -u no_empty_cmd_completion
@@ -44,6 +48,7 @@ shopt -u nocaseglob
 shopt -u nocasematch
 shopt -u nullglob
 shopt -s progcomp
+shopt -u progcomp_alias
 shopt -s promptvars
 shopt -u restricted_shell
 shopt -u shift_verbose
@@ -60,6 +65,7 @@ shopt -s complete_fullquote
 shopt -s expand_aliases
 shopt -s extquote
 shopt -s force_fignore
+shopt -s globasciiranges
 shopt -s hostcomplete
 shopt -s interactive_comments
 shopt -s progcomp
@@ -67,6 +73,7 @@ shopt -s promptvars
 shopt -s sourcepath
 --
 shopt -u autocd
+shopt -u assoc_expand_once
 shopt -u cdable_vars
 shopt -u checkhash
 shopt -u checkjobs
@@ -77,6 +84,7 @@ shopt -u compat40
 shopt -u compat41
 shopt -u compat42
 shopt -u compat43
+shopt -u compat44
 shopt -u direxpand
 shopt -u dirspell
 shopt -u dotglob
@@ -84,7 +92,6 @@ shopt -u execfail
 shopt -u extdebug
 shopt -u extglob
 shopt -u failglob
-shopt -u globasciiranges
 shopt -u globstar
 shopt -u gnu_errfmt
 shopt -u histappend
@@ -94,17 +101,21 @@ shopt -u huponexit
 shopt -u inherit_errexit
 shopt -u lastpipe
 shopt -u lithist
+shopt -u localvar_inherit
+shopt -u localvar_unset
 shopt -u login_shell
 shopt -u mailwarn
 shopt -u no_empty_cmd_completion
 shopt -u nocaseglob
 shopt -u nocasematch
 shopt -u nullglob
+shopt -u progcomp_alias
 shopt -u restricted_shell
 shopt -u shift_verbose
 shopt -u xpg_echo
 --
 autocd         	off
+assoc_expand_once	off
 cdable_vars    	off
 checkhash      	off
 checkjobs      	off
@@ -115,6 +126,7 @@ compat40       	off
 compat41       	off
 compat42       	off
 compat43       	off
+compat44       	off
 direxpand      	off
 dirspell       	off
 dotglob        	off
@@ -122,7 +134,6 @@ execfail       	off
 extdebug       	off
 extglob        	off
 failglob       	off
-globasciiranges	off
 globstar       	off
 gnu_errfmt     	off
 histappend     	off
@@ -132,12 +143,15 @@ huponexit      	off
 inherit_errexit	off
 lastpipe       	off
 lithist        	off
+localvar_inherit	off
+localvar_unset 	off
 login_shell    	off
 mailwarn       	off
 no_empty_cmd_completion	off
 nocaseglob     	off
 nocasematch    	off
 nullglob       	off
+progcomp_alias 	off
 restricted_shell	off
 shift_verbose  	off
 xpg_echo       	off

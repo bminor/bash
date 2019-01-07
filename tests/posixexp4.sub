@@ -1,0 +1,31 @@
+set -- ' abc' 'def ghi' 'jkl '
+
+echo normal IFS
+recho $@
+: ${var=$@}
+recho $var
+unset -v var
+recho ${var-$@}
+
+echo null IFS
+IFS=
+recho $@
+: ${var=$@}
+recho $var
+unset -v var
+recho ${var-$@}
+
+echo non-standard IFS
+IFS=:
+recho $@
+: ${var=$@}
+recho $var
+unset -v var
+recho ${var-$@}	# this is inconsistent
+
+echo unset IFS
+recho $@
+: ${var=$@}
+recho $var
+unset -v var
+recho ${var-$@}

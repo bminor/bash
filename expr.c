@@ -26,8 +26,8 @@
  order of decreasing precedence.
 
 	"id++", "id--"		[post-increment and post-decrement]
-	"++id", "--id"		[pre-increment and pre-decrement]
 	"-", "+"		[(unary operators)]
+	"++id", "--id"		[pre-increment and pre-decrement]
 	"!", "~"
 	"**"			[(exponentiation)]
 	"*", "/", "%"
@@ -82,6 +82,10 @@
 #include "bashintl.h"
 
 #include "shell.h"
+#include "arrayfunc.h"
+#include "execute_cmd.h"
+#include "flags.h"
+#include "subst.h"
 #include "typemax.h"		/* INTMAX_MAX, INTMAX_MIN */
 
 /* Because of the $((...)) construct, expressions may include newlines.
@@ -171,6 +175,9 @@ static intmax_t	tokval;		/* current token value */
 static int	noeval;		/* set to 1 if no assignment to be done */
 static procenv_t evalbuf;
 
+/* set to 1 if the expression has already been run through word expansion */
+static int	already_expanded;
+
 static struct lvalue curlval = {0, 0, 0, -1};
 static struct lvalue lastlval = {0, 0, 0, -1};
 
@@ -207,7 +214,7 @@ static intmax_t exp5 __P((void));
 static intmax_t exp4 __P((void));
 static intmax_t expshift __P((void));
 static intmax_t exp3 __P((void));
-static intmax_t exp2 __P((void));
+static intmax_t expmuldiv __P((void));
 static intmax_t	exppower __P((void));
 static intmax_t exp1 __P((void));
 static intmax_t exp0 __P((void));
@@ -216,9 +223,6 @@ static intmax_t exp0 __P((void));
 static EXPR_CONTEXT **expr_stack;
 static int expr_depth;		   /* Location in the stack. */
 static int expr_stack_size;	   /* Number of slots already allocated. */
-
-extern char *this_command_name;
-extern int unbound_vars_is_error, last_command_exit_value;
 
 #if defined (ARRAY_VARS)
 extern const char * const bash_badsub_errmsg;
@@ -279,8 +283,13 @@ popexp ()
 {
   EXPR_CONTEXT *context;
 
-  if (expr_depth == 0)
-    evalerror (_("recursion stack underflow"));
+  if (expr_depth <= 0)
+    {
+      /* See the comment at the top of evalexp() for an explanation of why
+	 this is done. */
+      expression = lasttp = 0;
+      evalerror (_("recursion stack underflow"));
+    }
 
   context = expr_stack[--expr_depth];
 
@@ -303,7 +312,8 @@ expr_unwind ()
 
       free (expr_stack[expr_depth]);
     }
-  free (expr_stack[expr_depth]);	/* free the allocated EXPR_CONTEXT */
+  if (expr_depth == 0)
+    free (expr_stack[expr_depth]);	/* free the allocated EXPR_CONTEXT */
 
   noeval = 0;	/* XXX */
 }
@@ -313,14 +323,44 @@ expr_bind_variable (lhs, rhs)
      char *lhs, *rhs;
 {
   SHELL_VAR *v;
+  int aflags;
 
-  v = bind_int_variable (lhs, rhs);
+  if (lhs == 0 || *lhs == 0)
+    return;		/* XXX */
+
+#if defined (ARRAY_VARS)
+  aflags = (assoc_expand_once && already_expanded) ? ASS_NOEXPAND : 0;
+#else
+  aflags = 0;
+#endif
+  v = bind_int_variable (lhs, rhs, aflags);
   if (v && (readonly_p (v) || noassign_p (v)))
     sh_longjmp (evalbuf, 1);	/* variable assignment error */
   stupidly_hack_special_variables (lhs);
 }
 
 #if defined (ARRAY_VARS)
+/* This is similar to the logic in arrayfunc.c:valid_array_subscript when
+   you pass VA_NOEXPAND. */
+static int
+expr_skipsubscript (vp, cp)
+     char *vp, *cp;
+{
+  int flags, isassoc;
+  SHELL_VAR *entry;
+
+  isassoc = 0;
+  entry = 0;
+  if (assoc_expand_once & already_expanded)
+    {
+      *cp = '\0';
+      isassoc = legal_identifier (vp) && (entry = find_variable (vp)) && assoc_p (entry);
+      *cp = '[';	/* ] */
+    }
+  flags = (isassoc && assoc_expand_once && already_expanded) ? VA_NOEXPAND : 0;
+  return (skipsubscript (cp, 0, flags));
+}
+
 /* Rewrite tok, which is of the form vname[expression], to vname[ind], where
    IND is the already-calculated value of expression. */
 static void
@@ -334,7 +374,7 @@ expr_bind_array_element (tok, ind, rhs)
   char ibuf[INT_STRLEN_BOUND (arrayind_t) + 1], *istr;
 
   istr = fmtumax (ind, 10, ibuf, sizeof (ibuf), 0);
-  vname = array_variable_name (tok, (char **)NULL, (int *)NULL);
+  vname = array_variable_name (tok, 0, (char **)NULL, (int *)NULL);
 
   llen = strlen (vname) + sizeof (ibuf) + 3;
   lhs = xmalloc (llen);
@@ -362,8 +402,9 @@ expr_bind_array_element (tok, ind, rhs)
    safe to let the loop terminate when expr_depth == 0, without freeing up
    any of the expr_depth[0] stuff. */
 intmax_t
-evalexp (expr, validp)
+evalexp (expr, flags, validp)
      char *expr;
+     int flags;
      int *validp;
 {
   intmax_t val;
@@ -372,6 +413,7 @@ evalexp (expr, validp)
 
   val = 0;
   noeval = 0;
+  already_expanded = (flags&EXP_EXPANDED);
 
   FASTCOPY (evalbuf, oevalbuf, sizeof (evalbuf));
 
@@ -384,6 +426,10 @@ evalexp (expr, validp)
       tokstr = expression = (char *)NULL;
 
       expr_unwind ();
+      expr_depth = 0;	/* XXX - make sure */
+
+      /* We copy in case we've called evalexp recursively */
+      FASTCOPY (oevalbuf, evalbuf, sizeof (evalbuf));
 
       if (validp)
 	*validp = 0;
@@ -479,6 +525,9 @@ expassign ()
 	  op = assigntok;		/* a OP= b */
 	  lvalue = value;
 	}
+
+      if (tokstr == 0)
+	evalerror (_("syntax error in variable assignment"));
 
       /* XXX - watch out for pointer aliasing issues here */
       lhs = savestring (tokstr);
@@ -809,14 +858,14 @@ exp3 ()
 {
   register intmax_t val1, val2;
 
-  val1 = exp2 ();
+  val1 = expmuldiv ();
 
   while ((curtok == PLUS) || (curtok == MINUS))
     {
       int op = curtok;
 
       readtok ();
-      val2 = exp2 ();
+      val2 = expmuldiv ();
 
       if (op == PLUS)
 	val1 += val2;
@@ -828,7 +877,7 @@ exp3 ()
 }
 
 static intmax_t
-exp2 ()
+expmuldiv ()
 {
   register intmax_t val1, val2;
 #if defined (HAVE_IMAXDIV)
@@ -987,7 +1036,8 @@ exp0 ()
 	    expr_bind_array_element (curlval.tokstr, curlval.ind, vincdec);
 	  else
 #endif
-	    expr_bind_variable (tokstr, vincdec);
+	    if (tokstr)
+	      expr_bind_variable (tokstr, vincdec);
 	}
       free (vincdec);
       val = v2;
@@ -1093,19 +1143,28 @@ expr_streval (tok, e, lvalue)
   SHELL_VAR *v;
   char *value;
   intmax_t tval;
+  int initial_depth;
 #if defined (ARRAY_VARS)
   arrayind_t ind;
+  int tflag, aflag;
 #endif
 
-/*itrace("expr_streval: %s: noeval = %d", tok, noeval);*/
+/*itrace("expr_streval: %s: noeval = %d expanded=%d", tok, noeval, already_expanded);*/
   /* If we are suppressing evaluation, just short-circuit here instead of
      going through the rest of the evaluator. */
   if (noeval)
     return (0);
 
+  initial_depth = expr_depth;
+
+#if defined (ARRAY_VARS)
+  tflag = assoc_expand_once && already_expanded;	/* for a start */
+#endif
+
   /* [[[[[ */
 #if defined (ARRAY_VARS)
-  v = (e == ']') ? array_variable_part (tok, (char **)0, (int *)0) : find_variable (tok);
+  aflag = (tflag) ? AV_NOEXPAND : 0;
+  v = (e == ']') ? array_variable_part (tok, tflag, (char **)0, (int *)0) : find_variable (tok);
 #else
   v = find_variable (tok);
 #endif
@@ -1113,7 +1172,7 @@ expr_streval (tok, e, lvalue)
   if ((v == 0 || invisible_p (v)) && unbound_vars_is_error)
     {
 #if defined (ARRAY_VARS)
-      value = (e == ']') ? array_variable_name (tok, (char **)0, (int *)0) : tok;
+      value = (e == ']') ? array_variable_name (tok, tflag, (char **)0, (int *)0) : tok;
 #else
       value = tok;
 #endif
@@ -1141,14 +1200,22 @@ expr_streval (tok, e, lvalue)
 
 #if defined (ARRAY_VARS)
   ind = -1;
-  /* Second argument of 0 to get_array_value means that we don't allow
-     references like array[@].  In this case, get_array_value is just
-     like get_variable_value in that it does not return newly-allocated
-     memory or quote the results. */
-  value = (e == ']') ? get_array_value (tok, 0, (int *)NULL, &ind) : get_variable_value (v);
+  /* If the second argument to get_array_value doesn't include AV_ALLOWALL,
+     we don't allow references like array[@].  In this case, get_array_value
+     is just like get_variable_value in that it does not return newly-allocated
+     memory or quote the results.  AFLAG is set above and is either AV_NOEXPAND
+     or 0. */
+  value = (e == ']') ? get_array_value (tok, aflag, (int *)NULL, &ind) : get_variable_value (v);
 #else
   value = get_variable_value (v);
 #endif
+
+  if (expr_depth < initial_depth)
+    {
+      if (no_longjmp_on_fatal_error && interactive_shell)
+	sh_longjmp (evalbuf, 1);
+      return (0);
+    }
 
   tval = (value && *value) ? subexpr (value) : 0;
 
@@ -1270,7 +1337,7 @@ readtok ()
 #if defined (ARRAY_VARS)
       if (c == '[')
 	{
-	  e = skipsubscript (cp, 0, 0);
+	  e = expr_skipsubscript (tp, cp);		/* XXX - was skipsubscript */
 	  if (cp[e] == ']')
 	    {
 	      cp += e + 1;
@@ -1371,6 +1438,14 @@ readtok ()
 	c = POWER;
       else if ((c == '-' || c == '+') && c1 == c && curtok == STR)
 	c = (c == '-') ? POSTDEC : POSTINC;
+      else if ((c == '-' || c == '+') && c1 == c && curtok == NUM && (lasttok == PREINC || lasttok == PREDEC))
+	{
+	  /* This catches something like --FOO++ */
+	  if (c == '-')
+	    evalerror ("--: assignment requires lvalue");
+	  else
+	    evalerror ("++: assignment requires lvalue");
+	}
       else if ((c == '-' || c == '+') && c1 == c)
 	{
 	  /* Quickly scan forward to see if this is followed by optional
@@ -1381,7 +1456,20 @@ readtok ()
 	  if (legal_variable_starter ((unsigned char)*xp))
 	    c = (c == '-') ? PREDEC : PREINC;
 	  else
+	    /* Could force parsing as preinc or predec and throw an error */
+#if 0
+	    {
+	      /* Posix says unary plus and minus have higher priority than
+		 preinc and predec. */
+	      /* This catches something like --4++ */
+	      if (c == '-')
+		evalerror ("--: assignment requires lvalue");
+	      else
+		evalerror ("++: assignment requires lvalue");
+	    }
+#else
 	    cp--;	/* not preinc or predec, so unget the character */
+#endif
 	}
       else if (c1 == EQ && member (c, "*/%+-&^|"))
 	{
@@ -1417,11 +1505,11 @@ evalerror (msg)
   char *name, *t;
 
   name = this_command_name;
-  for (t = expression; whitespace (*t); t++)
+  for (t = expression; t && whitespace (*t); t++)
     ;
   internal_error (_("%s%s%s: %s (error token is \"%s\")"),
-		   name ? name : "", name ? ": " : "", t,
-		   msg, (lasttp && *lasttp) ? lasttp : "");
+		   name ? name : "", name ? ": " : "",
+		   t ? t : "", msg, (lasttp && *lasttp) ? lasttp : "");
   sh_longjmp (evalbuf, 1);
 }
 
@@ -1544,7 +1632,7 @@ main (argc, argv)
 
   for (i = 1; i < argc; i++)
     {
-      v = evalexp (argv[i], &expok);
+      v = evalexp (argv[i], 0, &expok);
       if (expok == 0)
 	fprintf (stderr, _("%s: expression error\n"), argv[i]);
       else

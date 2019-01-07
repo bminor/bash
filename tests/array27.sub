@@ -1,0 +1,59 @@
+# tests for `problem' keys when using associative arrays and assoc_expand_once
+# deal with problems for now; this is a placeholder for if and when I fix them
+
+typeset -A a
+shopt -s assoc_expand_once
+
+k='['
+echo $(( a[$k]=7 ))
+
+k=']'
+echo $(( a[$k]=7 ))
+
+unset a
+
+declare -A A
+
+for k in $'\t' ' '; do
+   (( A[$k]=2 ))
+done
+declare -p A
+
+for k in ']' '*' '@'; do
+   (( A[$k]=2 ))
+done
+
+declare -p A
+
+unset A
+declare -A A
+
+for k in $'\t' ' ' ']' '*' '@'; do
+   read "A[$k]" <<< X
+done
+declare -p A
+
+unset A
+declare -A A
+
+for k in $'\t' ' ' ']' '*' '@'; do
+	printf -v "A[$k]" "%s" X
+done
+declare -p A
+
+unset A
+declare -A A
+
+for k in ']' '*' '@'; do
+   declare A[$k]=X
+done
+declare -p A
+
+unset A
+declare -A A
+
+for k in ']' '*' '@'; do
+   declare "A[$k]=X"
+done
+declare -p A
+

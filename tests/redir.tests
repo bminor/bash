@@ -57,6 +57,9 @@ echo to c 1>&6
 cat $TMPDIR/bash-c
 echo "Point 5"
 
+# clean up before running scripts
+exec 4>&- 5>&- 6<&-
+
 rm -f $TMPDIR/bash-a $TMPDIR/bash-b $TMPDIR/bash-c
 
 #
@@ -191,4 +194,3 @@ ${THIS_SH} ./redir9.sub
 ${THIS_SH} ./redir10.sub
 
 ${THIS_SH} ./redir11.sub
-${THIS_SH} ./redir12.sub

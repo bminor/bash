@@ -34,13 +34,11 @@ $PRODUCES setattr.c
 #include "../bashintl.h"
 
 #include "../shell.h"
+#include "../execute_cmd.h"
 #include "../flags.h"
 #include "common.h"
 #include "bashgetopt.h"
 
-extern int posixly_correct;
-extern int array_needs_making;
-extern char *this_command_name;
 extern sh_builtin_func_t *this_shell_builtin;
 
 #ifdef ARRAY_VARS
@@ -279,6 +277,12 @@ set_or_show_attributes (list, attribute, nodefs)
 	    }
 
 	  set_var_attribute (name, attribute, undo);
+	  if (assign)		/* restore word */
+	    {
+	      name[assign] = '=';
+	      if (aflags & ASS_APPEND)
+		name[assign-1] = '+';
+	    }
 	  list = list->next;
 	}
     }
@@ -506,7 +510,7 @@ show_name_attributes (name, nodefs)
   var = find_variable_noref (name);
 #endif
 
-  if (var /* && invisible_p (var) == 0 */)	/* XXX bash-4.4/bash-5.0 */
+  if (var /* && invisible_p (var) == 0 */)
     {
       show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
       return (0);
@@ -539,7 +543,7 @@ set_var_attribute (name, attribute, undo)
      int attribute, undo;
 {
   SHELL_VAR *var, *tv, *v, *refvar;
-  char *tvalue, *refname;
+  char *tvalue;
 
   if (undo)
     var = find_variable (name);
@@ -562,18 +566,23 @@ set_var_attribute (name, attribute, undo)
 	  var->attributes |= tv->attributes & ~att_tempvar;
 	  /* This avoids an error message when propagating a read-only var
 	     later on. */
-	  if (var->context == 0 && (attribute & att_readonly))
+	  if (posixly_correct || shell_compatibility_level <= 44)
 	    {
-	      /* Don't bother to set the `propagate to the global variables
-		 table' flag if we've just bound the variable in that table */
-	      v = find_global_variable (tv->name);
-	      if (v != var)
+	      if (var->context == 0 && (attribute & att_readonly))
+		{
+		  /* Don't bother to set the `propagate to the global variables
+		     table' flag if we've just bound the variable in that
+		     table */
+		  v = find_global_variable (tv->name);
+		  if (v != var)
+		    VSETATTR (tv, att_propagate);
+		}
+	      else
 		VSETATTR (tv, att_propagate);
+	      if (var->context != 0)
+		VSETATTR (var, att_propagate);
 	    }
-	  else
-	    VSETATTR (tv, att_propagate);
-	  if (var->context != 0)
-	    VSETATTR (var, att_propagate);
+
 	  SETVARATTR (tv, attribute, undo);	/* XXX */
 
 	  stupidly_hack_special_variables (tv->name);

@@ -52,7 +52,7 @@ BASHINCDIR = ${topdir}/include
 
 INCLUDES = -I. -I../.. -I$(topdir) -I${BASHINCDIR} -I$(topdir)/lib
 
-CCFLAGS = $(PROFILE_FLAGS) $(DEFS) $(LOCAL_DEFS) $(CPPFLAGS) \
+CCFLAGS = ${ASAN_CFLAGS} $(PROFILE_FLAGS) $(DEFS) $(LOCAL_DEFS) $(CPPFLAGS) \
 	  ${INCLUDES} $(LOCAL_CFLAGS) $(CFLAGS)
 
 .c.o:

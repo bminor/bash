@@ -1,7 +1,7 @@
 @ignore
 This file documents the user interface to the GNU History library.
 
-Copyright (C) 1988--2016 Free Software Foundation, Inc.
+Copyright (C) 1988--2018 Free Software Foundation, Inc.
 Authored by Brian Fox and Chet Ramey.
 
 Permission is granted to make and distribute verbatim copies of this manual
@@ -124,7 +124,7 @@ The @code{lithist}
 shell option causes the shell to save the command with embedded newlines
 instead of semicolons.
 The @code{shopt} builtin is used to set these options.
-@xref{Bash Builtins}, for a description of @code{shopt}.
+@xref{The Shopt Builtin}, for a description of @code{shopt}.
 
 @node Bash History Builtins
 @section Bash History Builtins
@@ -149,8 +149,8 @@ Both @var{first} and
 @var{last} may be specified as a string (to locate the most recent
 command beginning with that string) or as a number (an index into the
 history list, where a negative number is used as an offset from the
-current command number).  If @var{last} is not specified it is set to
-@var{first}.  If @var{first} is not specified it is set to the previous
+current command number).  If @var{last} is not specified, it is set to
+@var{first}.  If @var{first} is not specified, it is set to the previous
 command for editing and @minus{}16 for listing.  If the @option{-l} flag is
 given, the commands are listed on standard output.  The @option{-n} flag
 suppresses the command numbers when listing.  The @option{-r} flag
@@ -176,6 +176,7 @@ and typing @samp{r} re-executes the last command (@pxref{Aliases}).
 history [@var{n}]
 history -c
 history -d @var{offset}
+history -d @var{start}-@var{end}
 history [-anrw] [@var{filename}]
 history -ps @var{arg}
 @end example
@@ -198,8 +199,17 @@ with the other options to replace the history list completely.
 
 @item -d @var{offset}
 Delete the history entry at position @var{offset}.
-@var{offset} should be specified as it appears when the history is
-displayed.
+If @var{offset} is positive, it should be specified as it appears when
+the history is displayed.
+If @var{offset} is negative, it is interpreted as relative to one greater
+than the last history position, so negative indices count back from the
+end of the history, and an index of @samp{-1} refers to the current
+@code{history -d} command.
+
+@item -d @var{start}-@var{end}
+Delete the history entries between positions @var{start} and @var{end},
+inclusive.  Positive and negative values for @var{start} and @var{end}
+are interpreted as described above.
 
 @item -a
 Append the new history lines to the history file.
@@ -251,7 +261,9 @@ fix errors in previous commands quickly.
 
 @ifset BashFeatures
 History expansion is performed immediately after a complete line
-is read, before the shell breaks it into words.
+is read, before the shell breaks it into words, and is performed
+on each line individually.  Bash attempts to inform the history
+expansion functions about quoting still in effect from previous lines.
 @end ifset
 
 History expansion takes place in two parts.  The first is to determine
@@ -265,16 +277,26 @@ that Bash does, so that several words
 surrounded by quotes are considered one word.
 History expansions are introduced by the appearance of the
 history expansion character, which is @samp{!} by default.
+
+History expansion implements shell-like quoting conventions:
+a backslash can be used to remove the special handling for the next character;
+single quotes enclose verbatim sequences of characters, and can be used to
+inhibit history expansion;
+and characters enclosed within double quotes may be subject to history
+expansion, since backslash can escape the history expansion character,
+but single quotes may not, since they are not treated specially within
+double quotes.
+
 @ifset BashFeatures
-Only @samp{\} and @samp{'} may be used to escape the history expansion
-character, but the history expansion character is
+When using the shell, only @samp{\} and @samp{'} may be used to escape the
+history expansion character, but the history expansion character is
 also treated as quoted if it immediately precedes the closing double quote
 in a double-quoted string. 
 @end ifset
 
 @ifset BashFeatures
 Several shell options settable with the @code{shopt}
-builtin (@pxref{Bash Builtins}) may be used to tailor
+builtin (@pxref{The Shopt Builtin}) may be used to tailor
 the behavior of history expansion.  If the
 @code{histverify} shell option is enabled, and Readline
 is being used, history substitutions are not immediately passed to

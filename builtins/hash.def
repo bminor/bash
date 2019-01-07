@@ -61,15 +61,14 @@ $END
 
 #include "../shell.h"
 #include "../builtins.h"
+#include "../execute_cmd.h"
 #include "../flags.h"
 #include "../findcmd.h"
 #include "../hashcmd.h"
 #include "common.h"
 #include "bashgetopt.h"
 
-extern int posixly_correct;
 extern int dot_found_in_search;
-extern char *this_command_name;
 
 static int add_hashed_command __P((char *, int));
 static int print_hash_info __P((BUCKET_CONTENTS *));
@@ -149,10 +148,23 @@ hash_builtin (list)
     return (list_hashed_filename_targets (list, list_portably));
       
 #if defined (RESTRICTED_SHELL)
-  if (restricted && pathname && strchr (pathname, '/'))
+  if (restricted && pathname)
     {
-      sh_restricted (pathname);
-      return (EXECUTION_FAILURE);
+      if (strchr (pathname, '/'))
+	{
+          sh_restricted (pathname);
+          return (EXECUTION_FAILURE);
+	}
+      /* If we are changing the hash table in a restricted shell, make sure the
+	 target pathname can be found using a $PATH search. */
+      w = find_user_command (pathname);
+      if (w == 0 || *w == 0 || executable_file (w) == 0)
+	{
+	  sh_notfound (pathname);
+	  free (w);
+	  return (EXECUTION_FAILURE);
+	}
+      free (w);
     }
 #endif
 

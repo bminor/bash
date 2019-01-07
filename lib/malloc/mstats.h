@@ -25,6 +25,7 @@
 
 #ifdef MALLOC_STATS
 
+/* This needs to change if the definition in malloc.c changes */
 #ifndef NBUCKETS
 #  define NBUCKETS 30
 #endif
@@ -77,6 +78,8 @@ struct _malstats {
   int nsplit[NBUCKETS];
   int tbcoalesce;
   int ncoalesce[NBUCKETS];
+  int nmmap;
+  bits32_t tmmap;
 };
 
 /* Return statistics describing allocation of blocks of size BLOCKSIZE.
@@ -98,6 +101,7 @@ struct bucket_stats {
   int nlesscore;
   int nsplit;
   int ncoalesce;
+  int nmmap;		/* currently unused */
 };
 
 extern struct bucket_stats malloc_bucket_stats __P((int));

@@ -48,13 +48,6 @@
 #include "builtins.h"
 #include "common.h"
 
-#define RETURN(x) \
-	do { \
-		if (sp) *sp = sec; \
-		if (usp) *usp = usec; \
-		return (x); \
-	} while (0)
-
 int
 sleep_builtin (list)
 WORD_LIST	*list;

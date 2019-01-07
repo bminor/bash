@@ -91,7 +91,9 @@ sh_stat (path, finfo)
     }
   if (path[0] == '/' && path[1] == 'd' && strncmp (path, "/dev/fd/", 8) == 0)
     {
-#if !defined (HAVE_DEV_FD)
+      /* If stating /dev/fd/n doesn't produce the same results as fstat of
+	 FD N, then define DEV_FD_STAT_BROKEN */
+#if !defined (HAVE_DEV_FD) || defined (DEV_FD_STAT_BROKEN)
       intmax_t fd;
       int r;
 

@@ -36,13 +36,13 @@ echo line for history
 	 echo line for history
 displaying $HISTFILE after history -a
 echo line for history
-HISTFILE=/tmp/newhistory
+HISTFILE=$TMPDIR/newhistory
     1  for i in one two three; do echo $i; done
     2  /bin/sh -c 'echo this is $0'
     3  ls
     4  echo $BASH_VERSION
     5  echo line for history
-    6  HISTFILE=/tmp/newhistory
+    6  HISTFILE=$TMPDIR/newhistory
     7  echo displaying \$HISTFILE after history -a
     8  cat $HISTFILE
 for i in one two three; do echo $i; done
@@ -50,7 +50,7 @@ for i in one two three; do echo $i; done
 ls
 echo $BASH_VERSION
 echo line for history
-HISTFILE=/tmp/newhistory
+HISTFILE=$TMPDIR/newhistory
 echo displaying \$HISTFILE after history -a
 cat $HISTFILE
     1  for i in one two three; do echo $i; done
@@ -58,7 +58,7 @@ cat $HISTFILE
     3  ls
     4  echo $BASH_VERSION
     5  echo line for history
-    6  HISTFILE=/tmp/newhistory
+    6  HISTFILE=$TMPDIR/newhistory
     7  echo displaying \$HISTFILE after history -a
     8  cat $HISTFILE
     9  echo line 2 for history
@@ -69,7 +69,7 @@ echo line 2 for history
     3  ls
     4  echo $BASH_VERSION
     5  echo line for history
-    6  HISTFILE=/tmp/newhistory
+    6  HISTFILE=$TMPDIR/newhistory
     7  echo displaying \$HISTFILE after history -a
     8  cat $HISTFILE
     9  echo line 2 for history
@@ -80,7 +80,7 @@ echo line 2 for history
 line 2 for history
 4	 echo $BASH_VERSION
 5	 echo line for history
-6	 HISTFILE=/tmp/newhistory
+6	 HISTFILE=$TMPDIR/newhistory
 7	 echo displaying \$HISTFILE after history -a
 8	 cat $HISTFILE
 9	 echo line 2 for history
@@ -94,10 +94,10 @@ line 2 for history
 17	 unset HISTFILE
 4	 echo $BASH_VERSION
 5	 echo line for history
-6	 HISTFILE=/tmp/newhistory
+6	 HISTFILE=$TMPDIR/newhistory
 7	 echo displaying \$HISTFILE after history -a
 8	 cat $HISTFILE
-./history.tests: line 75: fc: history specification out of range
+./history.tests: line 76: fc: history specification out of range
    14  set -H
    15  echo line 2 for history
    16  unset HISTSIZE
@@ -107,7 +107,7 @@ echo xx xb xc
 xx xb xc
 echo 44 48 4c
 44 48 4c
-./history.tests: line 90: fc: no command found
+./history.tests: line 91: fc: no command found
 aa
 bb
 cc
@@ -140,7 +140,41 @@ three
 one
 two
 three
-4.4
+5.0
 echo ${BASH_VERSION%\.*}
-4.4
+5.0
 	 echo ${BASH_VERSION%\.*}
+a
+b
+c
+d
+e
+    1  echo a
+    2  echo b
+    3  echo c
+    4  echo d
+    5  echo e
+
+    1  echo a
+    2  echo e
+f
+g
+h
+i
+    1  echo a
+    2  echo e
+    3  echo f
+    4  echo g
+    5  echo h
+
+./history3.sub: line 27: history: 16: history position out of range
+./history3.sub: line 28: history: 200: history position out of range
+./history3.sub: line 29: history: -20: history position out of range
+./history3.sub: line 30: history: -50: history position out of range
+./history3.sub: line 31: history: 5-0xaf: history position out of range
+    1  echo a
+    2  echo e
+    3  echo f
+    4  echo g
+    5  echo h
+

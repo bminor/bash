@@ -1,6 +1,6 @@
 LC_ALL=C
 LANG=C
-trap 'rm /tmp/newhistory' 0
+trap 'rm $TMPDIR/newhistory' 0
 
 file=bax
 histchars='!^#'	# make sure history comment char is set correctly
@@ -25,7 +25,7 @@ history -p '!!:z'
 
 history
 
-HISTFILE=/tmp/newhistory
+HISTFILE=$TMPDIR/newhistory
 history -a
 
 history -w
@@ -140,3 +140,5 @@ ${THIS_SH} ./histexp1.sub
 ${THIS_SH} ./histexp2.sub
 ${THIS_SH} ./histexp3.sub
 ${THIS_SH} ./histexp4.sub
+${THIS_SH} ./histexp5.sub
+${THIS_SH} ./histexp6.sub

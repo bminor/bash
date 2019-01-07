@@ -1,7 +1,7 @@
 /* trap.c -- Not the trap command, but useful functions for manipulating
    those objects.  The trap command is in builtins/trap.def. */
 
-/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2018 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -38,7 +38,9 @@
 #include "trap.h"
 
 #include "shell.h"
+#include "execute_cmd.h"
 #include "flags.h"
+#include "parser.h"
 #include "input.h"	/* for save_token_state, restore_token_state */
 #include "jobs.h"
 #include "signames.h"
@@ -85,20 +87,10 @@ static void reset_or_restore_signal_handlers (sh_resetsig_func_t *);
 static void trap_if_untrapped (int, char *);
 
 /* Variables used here but defined in other files. */
-extern int last_command_exit_value;
-extern int line_number;
-
-extern int sigalrm_seen;
 extern procenv_t alrmbuf;
 
 extern volatile int from_return_trap;
 
-extern char *this_command_name;
-extern sh_builtin_func_t *this_shell_builtin;
-extern procenv_t wait_intr_buf;
-extern int wait_intr_flag;
-extern int return_catch_flag, return_catch_value;
-extern int subshell_level;
 extern WORD_LIST *subst_assign_varlist;
 
 /* The list of things to do originally, before we started trapping. */
@@ -242,6 +234,23 @@ decode_signal (string, flags)
   if (legal_number (string, &sig))
     return ((sig >= 0 && sig < NSIG) ? (int)sig : NO_SIG);
 
+#if defined (SIGRTMIN) && defined (SIGRTMAX)
+  if (STREQN (string, "SIGRTMIN+", 9) || ((flags & DSIG_NOCASE) && strncasecmp (string, "SIGRTMIN+", 9) == 0))
+    {
+      if (legal_number (string+9, &sig) && sig >= 0 && sig <= SIGRTMAX - SIGRTMIN)
+	return (SIGRTMIN + sig);
+      else
+	return NO_SIG;
+    }
+  else if (STREQN (string, "RTMIN+", 6) || ((flags & DSIG_NOCASE) && strncasecmp (string, "RTMIN+", 6) == 0))
+    {
+      if (legal_number (string+6, &sig) && sig >= 0 && sig <= SIGRTMAX - SIGRTMIN)
+	return (SIGRTMIN + sig);
+      else
+	return NO_SIG;
+    }
+#endif /* SIGRTMIN && SIGRTMAX */
+
   /* A leading `SIG' may be omitted. */
   for (sig = 0; sig < BASH_NSIG; sig++)
     {
@@ -303,9 +312,15 @@ run_pending_traps ()
 #if defined (SIGWINCH)
       if (running_trap == SIGWINCH+1 && pending_traps[SIGWINCH])
 	return;			/* no recursive SIGWINCH trap invocations */
-#else
-      ;
 #endif
+      /* could check for running the trap handler for the same signal here
+	 (running_trap == sig+1) */
+      if (evalnest_max > 0 && evalnest > evalnest_max)
+	{
+	  internal_error (_("trap handler: maximum trap handler level exceeded (%d)"), evalnest_max);
+	  evalnest = 0;
+	  jump_to_top_level (DISCARD);
+	}
     }
 
   catch_flag = trapped_signal_received = 0;
@@ -330,8 +345,10 @@ run_pending_traps ()
 	  if (sig == SIGINT)
 	    {
 	      pending_traps[sig] = 0;	/* XXX */
+	      /* We don't modify evalnest here, since run_interrupt_trap() calls
+		 _run_trap_internal, which does. */
 	      run_interrupt_trap (0);
-	      CLRINTERRUPT;
+	      CLRINTERRUPT;	/* interrupts don't stack */
 	    }
 #if defined (JOB_CONTROL) && defined (SIGCHLD)
 	  else if (sig == SIGCHLD &&
@@ -339,10 +356,14 @@ run_pending_traps ()
 		   (sigmodes[SIGCHLD] & SIG_INPROGRESS) == 0)
 	    {
 	      sigmodes[SIGCHLD] |= SIG_INPROGRESS;
+	      /* We modify evalnest here even though run_sigchld_trap can run
+		 the trap action more than once */
+	      evalnest++;
 	      x = pending_traps[sig];
 	      pending_traps[sig] = 0;
 	      run_sigchld_trap (x);	/* use as counter */
 	      running_trap = 0;
+	      evalnest--;
 	      sigmodes[SIGCHLD] &= ~SIG_INPROGRESS;
 	      /* continue here rather than reset pending_traps[SIGCHLD] below in
 		 case there are recursive calls to run_pending_traps and children
@@ -406,7 +427,9 @@ run_pending_traps ()
 #endif
 	      /* XXX - set pending_traps[sig] = 0 here? */
 	      pending_traps[sig] = 0;
+	      evalnest++;
 	      evalstring (savestring (trap_list[sig]), "trap", SEVAL_NONINT|SEVAL_NOHIST|SEVAL_RESETLINE);
+	      evalnest--;
 #if defined (JOB_CONTROL)
 	      restore_pipeline (1);
 #endif
@@ -479,7 +502,7 @@ trap_handler (sig)
 
       errno = oerrno;
     }
-
+  
   SIGRETURN (0);
 }
 
@@ -494,6 +517,8 @@ first_pending_trap ()
   return -1;
 }
 
+/* Return > 0 if any of the "real" signals (not fake signals like EXIT) are
+   trapped. */
 int
 any_signals_trapped ()
 {
@@ -940,8 +965,8 @@ _run_trap_internal (sig, tag)
      char *tag;
 {
   char *trap_command, *old_trap;
-  int trap_exit_value, *token_state;
-  volatile int save_return_catch_flag, function_code, top_level_code, old_int;
+  int trap_exit_value;
+  volatile int save_return_catch_flag, function_code, old_int;
   int flags;
   procenv_t save_return_catch;
   WORD_LIST *save_subst_varlist;
@@ -1001,6 +1026,7 @@ _run_trap_internal (sig, tag)
       flags = SEVAL_NONINT|SEVAL_NOHIST;
       if (sig != DEBUG_TRAP && sig != RETURN_TRAP && sig != ERROR_TRAP)
 	flags |= SEVAL_RESETLINE;
+      evalnest++;
       if (function_code == 0)
         {
 	  parse_and_execute (trap_command, tag, flags);
@@ -1008,6 +1034,7 @@ _run_trap_internal (sig, tag)
         }
       else
         trap_exit_value = return_catch_value;
+      evalnest--;
 
 #if defined (JOB_CONTROL)
       if (sig != DEBUG_TRAP)	/* run_debug_trap does this */
@@ -1037,6 +1064,8 @@ _run_trap_internal (sig, tag)
 #endif
 	    free (old_trap);
 	  sigmodes[sig] &= ~SIG_CHANGED;
+
+	  CHECK_TERMSIG;	/* some pathological conditions lead here */
 	}
 
       if (save_return_catch_flag)
@@ -1060,9 +1089,11 @@ _run_trap_internal (sig, tag)
 int
 run_debug_trap ()
 {
-  int trap_exit_value;
+  int trap_exit_value, old_verbose;
   pid_t save_pgrp;
+#if defined (PGRP_PIPE)
   int save_pipe[2];
+#endif
 
   /* XXX - question:  should the DEBUG trap inherit the RETURN trap? */
   trap_exit_value = 0;
@@ -1078,7 +1109,14 @@ run_debug_trap ()
       stop_making_children ();
 #endif
 
+      old_verbose = echo_input_at_read;
+#if 0	/* not yet */
+      echo_input_at_read = 0;
+#endif
+
       trap_exit_value = _run_trap_internal (DEBUG_TRAP, "debug trap");
+
+      echo_input_at_read = old_verbose;
 
 #if defined (JOB_CONTROL)
       pipeline_pgrp = save_pgrp;
@@ -1087,8 +1125,9 @@ run_debug_trap ()
       close_pgrp_pipe ();
       restore_pgrp_pipe (save_pipe);
 #  endif
-      if (pipeline_pgrp > 0)
+      if (pipeline_pgrp > 0 && ((subshell_environment & (SUBSHELL_ASYNC|SUBSHELL_PIPE)) == 0))
 	give_terminal_to (pipeline_pgrp, 1);
+
       notify_and_cleanup ();
 #endif
       
@@ -1176,7 +1215,7 @@ free_trap_string (sig)
      int sig;
 {
   change_signal (sig, (char *)DEFAULT_SIG);
-  sigmodes[sig] &= ~SIG_TRAPPED;
+  sigmodes[sig] &= ~SIG_TRAPPED;		/* XXX - SIG_INPROGRESS? */
 }
 
 /* Reset the handler for SIG to the original value but leave the trap string
@@ -1186,7 +1225,7 @@ reset_signal (sig)
      int sig;
 {
   set_signal_handler (sig, original_signals[sig]);
-  sigmodes[sig] &= ~SIG_TRAPPED;
+  sigmodes[sig] &= ~SIG_TRAPPED;		/* XXX - SIG_INPROGRESS? */
 }
 
 /* Set the handler signal SIG to the original and free any trap
@@ -1209,7 +1248,7 @@ reset_or_restore_signal_handlers (reset)
   /* Take care of the exit trap first */
   if (sigmodes[EXIT_TRAP] & SIG_TRAPPED)
     {
-      sigmodes[EXIT_TRAP] &= ~SIG_TRAPPED;
+      sigmodes[EXIT_TRAP] &= ~SIG_TRAPPED;	/* XXX - SIG_INPROGRESS? */
       if (reset != reset_signal)
 	{
 	  free_trap_command (EXIT_TRAP);

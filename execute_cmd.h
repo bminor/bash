@@ -1,6 +1,6 @@
 /* execute_cmd.h - functions from execute_cmd.c. */
 
-/* Copyright (C) 1993-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2017 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -35,6 +35,40 @@ struct func_array_state
   };
 #endif
 
+/* Placeholder for later expansion to include more execution state */
+/* XXX - watch out for pid_t */
+struct execstate
+  {
+    pid_t pid;
+    int subshell_env;
+  };
+	
+
+/* Variables delared in execute_cmd.c, used by many other files */
+extern int return_catch_flag;
+extern int return_catch_value;
+extern volatile int last_command_exit_value;
+extern int last_command_exit_signal;
+extern int builtin_ignoring_errexit;
+extern int executing_builtin;
+extern int executing_list;
+extern int comsub_ignore_return;
+extern int subshell_level;
+extern int match_ignore_case;
+extern int executing_command_builtin;
+extern int funcnest, funcnest_max;
+extern int evalnest, evalnest_max;
+extern int sourcenest, sourcenest_max;
+extern int stdin_redir;
+extern int line_number_for_err_trap;
+
+extern char *the_printed_command_except_trap;
+
+extern char *this_command_name;
+extern SHELL_VAR *this_shell_function;
+
+/* Functions delared in execute_cmd.c, used by many other files */
+
 extern struct fd_bitmap *new_fd_bitmap __P((int));
 extern void dispose_fd_bitmap __P((struct fd_bitmap *));
 extern void close_fd_bitmap __P((struct fd_bitmap *));
@@ -43,7 +77,10 @@ extern int execute_command __P((COMMAND *));
 extern int execute_command_internal __P((COMMAND *, int, int, int, struct fd_bitmap *));
 extern int shell_execve __P((char *, char **, char **));
 extern void setup_async_signals __P((void));
-extern void dispose_exec_redirects __P ((void));
+
+extern void undo_partial_redirects __P((void));
+extern void dispose_partial_redirects __P((void));
+extern void dispose_exec_redirects __P((void));
 
 extern int execute_shell_function __P((SHELL_VAR *, WORD_LIST *));
 
@@ -57,6 +94,7 @@ extern void coproc_flush __P((void));
 extern void coproc_close __P((struct coproc *));
 extern void coproc_closeall __P((void));
 extern void coproc_reap __P((void));
+extern pid_t coproc_active __P((void));
 
 extern void coproc_rclose __P((struct coproc *, int));
 extern void coproc_wclose __P((struct coproc *, int));

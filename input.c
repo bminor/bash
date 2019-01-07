@@ -1,6 +1,6 @@
 /* input.c -- functions to perform buffered input with synchronization. */
 
-/* Copyright (C) 1992-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2018 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -36,12 +36,9 @@
 #include "bashansi.h"
 #include "bashintl.h"
 
-#include "command.h"
-#include "general.h"
+#include "shell.h"
 #include "input.h"
-#include "error.h"
 #include "externs.h"
-#include "quit.h"
 #include "trap.h"
 
 #if !defined (errno)
@@ -152,8 +149,6 @@ ungetc_with_restart (c, stream)
 #  undef min
 #endif
 #define min(a, b)	((a) > (b) ? (b) : (a))
-
-extern int interactive_shell;
 
 int bash_input_fd_changed;
 
@@ -277,6 +272,8 @@ save_bash_input (fd, new_fd)
       /* What's this?  A stray buffer without an associated open file
 	 descriptor?  Free up the buffer and report the error. */
       internal_error (_("save_bash_input: buffer already exists for new fd %d"), nfd);
+      if (buffers[nfd]->b_flag & B_SHAREDBUF)
+	buffers[nfd]->b_buffer = (char *)NULL;
       free_buffered_stream (buffers[nfd]);
     }
 
@@ -356,6 +353,12 @@ duplicate_buffered_stream (fd1, fd2)
       /* If the two objects share the same b_buffer, don't free it. */
       if (buffers[fd1] && buffers[fd1]->b_buffer && buffers[fd1]->b_buffer == buffers[fd2]->b_buffer)
 	buffers[fd2] = (BUFFERED_STREAM *)NULL;
+      /* If this buffer is shared with another fd, don't free the buffer */
+      else if (buffers[fd2]->b_flag & B_SHAREDBUF)
+	{
+	  buffers[fd2]->b_buffer = (char *)NULL;
+	  free_buffered_stream (buffers[fd2]);
+	}
       else
 	free_buffered_stream (buffers[fd2]);
     }
@@ -369,6 +372,9 @@ duplicate_buffered_stream (fd1, fd2)
 	fd_to_buffered_stream (fd2);
       buffers[fd2]->b_flag |= B_WASBASHINPUT;
     }
+
+  if (fd_is_bash_input (fd1) || (buffers[fd1] && (buffers[fd1]->b_flag & B_SHAREDBUF)))
+    buffers[fd2]->b_flag |= B_SHAREDBUF;
 
   return (fd2);
 }
@@ -441,6 +447,8 @@ close_buffered_stream (bp)
   if (!bp)
     return (0);
   fd = bp->b_fd;
+  if (bp->b_flag & B_SHAREDBUF)
+    bp->b_buffer = (char *)NULL;
   free_buffered_stream (bp);
   return (close (fd));
 }
@@ -504,7 +512,7 @@ b_fill_buffer (bp)
     nr = zread (bp->b_fd, bp->b_buffer, bp->b_size);
   if (nr <= 0)
     {
-      bp->b_used = 0;
+      bp->b_used = bp->b_inputp = 0;
       bp->b_buffer[0] = 0;
       if (nr == 0)
 	bp->b_flag |= B_EOF;
@@ -530,7 +538,7 @@ bufstream_ungetc(c, bp)
      int c;
      BUFFERED_STREAM *bp;
 {
-  if (c == EOF || bp->b_inputp == 0)
+  if (c == EOF || bp == 0 || bp->b_inputp == 0)
     return (EOF);
 
   bp->b_buffer[--bp->b_inputp] = c;
@@ -560,6 +568,9 @@ int
 buffered_getchar ()
 {
   CHECK_TERMSIG;
+
+  if (bash_input.location.buffered_fd < 0 || buffers[bash_input.location.buffered_fd] == 0)
+    return EOF;
 
 #if !defined (DJGPP)
   return (bufstream_getc (buffers[bash_input.location.buffered_fd]));

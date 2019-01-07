@@ -242,6 +242,9 @@
 /* The number of bytes in a `long long', if we have one. */
 #undef SIZEOF_LONG_LONG
 
+/* The number of bytes in a `wchar_t', if supported */
+#undef SIZEOF_WCHAR_T
+
 /* System paths */
 
 #define DEFAULT_MAIL_DIRECTORY "/usr/spool/mail"
@@ -449,6 +452,7 @@
 #undef SYS_TIME_H_DEFINES_STRUCT_TIMESPEC
 #undef PTHREAD_H_DEFINES_STRUCT_TIMESPEC
 
+#undef HAVE_STRUCT_STAT_ST_ATIM_TV_NSEC
 #undef TYPEOF_STRUCT_STAT_ST_ATIM_IS_STRUCT_TIMESPEC
 #undef HAVE_STRUCT_STAT_ST_ATIMESPEC_TV_NSEC
 #undef HAVE_STRUCT_STAT_ST_ATIMENSEC
@@ -604,6 +608,12 @@
 
 /* Define if you have the fcntl function.  */
 #undef HAVE_FCNTL
+
+/* Define if you have the fnmatch function.  */
+#undef HAVE_FNMATCH
+
+/* Can fnmatch be used as a fallback to match [=equiv=] with collation weights? */
+#undef FNMATCH_EQUIV_FALLBACK
 
 /* Define if you have the fpurge/__fpurge function.  */
 #undef HAVE_FPURGE
@@ -1021,6 +1031,9 @@
 /* Define if you have the <sys/ioctl.h> header file.  */
 #undef HAVE_SYS_IOCTL_H
 
+/* Define if you have the <sys/mman.h> header file.  */
+#undef HAVE_SYS_MMAN_H
+
 /* Define if you have the <sys/ndir.h> header file.  */
 #undef HAVE_SYS_NDIR_H
 
@@ -1126,6 +1139,8 @@
 
 #undef GETCWD_BROKEN
 
+#undef DEV_FD_STAT_BROKEN
+
 /* Additional defines for configuring lib/intl, maintained by autoscan/autoheader */
 
 /* Define if you have the <argz.h> header file. */
@@ -1157,6 +1172,9 @@
 
 /* Define if you have a working `mmap' system call. */
 #undef HAVE_MMAP
+
+/* Define if you have the `mremap' function. */
+#undef HAVE_MREMAP
 
 /* Define if you have the `munmap' function. */
 #undef HAVE_MUNMAP

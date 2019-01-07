@@ -1,6 +1,6 @@
 /* variables.h -- data structures for shell variables. */
 
-/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2018 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -125,6 +125,7 @@ typedef struct _vlist {
 #define att_imported	0x0008000	/* came from environment */
 #define att_special	0x0010000	/* requires special handling */
 #define att_nofree	0x0020000	/* do not free value on unset */
+#define att_regenerate	0x0040000	/* regenerate when exported */
 
 #define	attmask_int	0x00ff000
 
@@ -153,8 +154,10 @@ typedef struct _vlist {
 #define imported_p(var)		((((var)->attributes) & (att_imported)))
 #define specialvar_p(var)	((((var)->attributes) & (att_special)))
 #define nofree_p(var)		((((var)->attributes) & (att_nofree)))
+#define regen_p(var)		((((var)->attributes) & (att_regenerate)))
 
 #define tempvar_p(var)		((((var)->attributes) & (att_tempvar)))
+#define propagate_p(var)	((((var)->attributes) & (att_propagate)))
 
 /* Variable names: lvalues */
 #define name_cell(var)		((var)->name)
@@ -218,6 +221,9 @@ typedef struct _vlist {
 
 #define ifsname(s)	((s)[0] == 'I' && (s)[1] == 'F' && (s)[2] == 'S' && (s)[3] == '\0')
 
+/* Flag values for make_local_variable */
+#define MKLOC_INHERIT		0x01
+
 /* Special value for nameref with invalid value for creation or assignment */
 extern SHELL_VAR nameref_invalid_value;
 #define INVALID_NAMEREF_VALUE	(void *)&nameref_invalid_value
@@ -236,7 +242,18 @@ extern int variable_context;
 extern char *dollar_vars[];
 extern char **export_env;
 
+extern int tempenv_assign_error;
+extern int array_needs_making;
+extern int shell_level;
+
+/* XXX */
+extern WORD_LIST *rest_of_args;
+extern pid_t dollar_dollar_pid;
+
 extern void initialize_shell_variables __P((char **, int));
+
+extern int validate_inherited_value __P((SHELL_VAR *, int));
+
 extern SHELL_VAR *set_if_not __P((char *, char *));
 
 extern void sh_set_lines_and_columns __P((int, int));
@@ -264,13 +281,14 @@ extern SHELL_VAR *find_shell_variable __P((const char *));
 extern SHELL_VAR *find_tempenv_variable __P((const char *));
 extern SHELL_VAR *find_variable_no_invisible __P((const char *));
 extern SHELL_VAR *find_variable_for_assignment __P((const char *));
+extern char *nameref_transform_name __P((char *, int));
 extern SHELL_VAR *copy_variable __P((SHELL_VAR *));
-extern SHELL_VAR *make_local_variable __P((const char *));
+extern SHELL_VAR *make_local_variable __P((const char *, int));
 extern SHELL_VAR *bind_variable __P((const char *, char *, int));
 extern SHELL_VAR *bind_global_variable __P((const char *, char *, int));
 extern SHELL_VAR *bind_function __P((const char *, COMMAND *));
 
-extern void bind_function_def __P((const char *, FUNCTION_DEF *));
+extern void bind_function_def __P((const char *, FUNCTION_DEF *, int));
 
 extern SHELL_VAR **map_over __P((sh_var_map_func_t *, VAR_CONTEXT *));
 SHELL_VAR **map_over_funcs __P((sh_var_map_func_t *));
@@ -296,7 +314,7 @@ extern char *sh_get_env_value __P((const char *));
 extern char *make_variable_value __P((SHELL_VAR *, char *, int));
 
 extern SHELL_VAR *bind_variable_value __P((SHELL_VAR *, char *, int));
-extern SHELL_VAR *bind_int_variable __P((char *, char *));
+extern SHELL_VAR *bind_int_variable __P((char *, char *, int));
 extern SHELL_VAR *bind_var_to_int __P((char *, intmax_t));
 
 extern int assign_in_env __P((WORD_DESC *, int));
@@ -326,6 +344,8 @@ extern void push_dollar_vars __P((void));
 extern void pop_dollar_vars __P((void));
 extern void dispose_saved_dollar_vars __P((void));
 
+extern void init_bash_argv __P((void));
+extern void save_bash_argv __P((void));
 extern void push_args __P((WORD_LIST *));
 extern void pop_args __P((void));
 
@@ -364,7 +384,7 @@ extern SHELL_VAR *make_new_array_variable __P((char *));
 extern SHELL_VAR *make_local_array_variable __P((char *, int));
 
 extern SHELL_VAR *make_new_assoc_variable __P((char *));
-extern SHELL_VAR *make_local_assoc_variable __P((char *));
+extern SHELL_VAR *make_local_assoc_variable __P((char *, int));
 
 extern void set_pipestatus_array __P((int *, int));
 extern ARRAY *save_pipestatus_array __P((void));

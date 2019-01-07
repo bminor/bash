@@ -172,6 +172,10 @@ _rl_wcwidth (wc)
 #  define IS_COMBINING_CHAR(x)	(WCWIDTH(x) == 0)
 #endif
 
+#define UTF8_SINGLEBYTE(c)	(((c) & 0x80) == 0)
+#define UTF8_MBFIRSTCHAR(c)	(((c) & 0xc0) == 0xc0)
+#define UTF8_MBCHAR(c)		(((c) & 0xc0) == 0x80)
+
 #else /* !HANDLE_MULTIBYTE */
 
 #undef MB_LEN_MAX
@@ -195,6 +199,12 @@ _rl_wcwidth (wc)
 
 #define MB_INVALIDCH(x)		(0)
 #define MB_NULLWCH(x)		(0)
+
+#define UTF8_SINGLEBYTE(c)	(1)
+
+#if !defined (HAVE_WCHAR_T) && !defined (wchar_t)
+#  define wchar_t int
+#endif
 
 #endif /* !HANDLE_MULTIBYTE */
 

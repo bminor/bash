@@ -1,0 +1,18 @@
+# globignore extglob patterns containing colons -- problem until bash-4.2
+
+: ${TMPDIR:=/tmp}
+TESTDIR=$TMPDIR/bash-globignore-$$
+[ -d "$TESTDIR" ] || mkdir "$TESTDIR"
+
+cd "$TESTDIR" || exit 2
+
+shopt -s extglob
+GLOBIGNORE='+([^[:alnum:]]):@([-.,:; _]):[![:alnum:]]'
+
+touch ';' '++'
+echo *
+
+rm ';' '++'
+
+cd $OLDPWD
+rmdir $TESTDIR

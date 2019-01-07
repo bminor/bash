@@ -67,4 +67,7 @@ extern char *alias_expand_word __P((char *));
 /* Return a new line, with any aliases expanded. */
 extern char *alias_expand __P((char *));
 
+/* Helper definition for the parser */
+extern void clear_string_list_expander __P((alias_t *));
+
 #endif /* _ALIAS_H_ */

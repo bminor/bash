@@ -77,6 +77,12 @@ typedef struct compspec {
 #define COPT_PLUSDIRS	(1<<7)
 #define COPT_NOSORT	(1<<8)
 
+#define COPT_LASTUSER	COPT_NOSORT
+
+#define PCOMP_RETRYFAIL (COPT_LASTUSER << 1)
+#define PCOMP_NOTFOUND	(COPT_LASTUSER << 2)
+
+
 /* List of items is used by the code that implements the programmable
    completions. */
 typedef struct _list_of_items {
@@ -101,9 +107,15 @@ typedef struct _list_of_items {
 
 #define EMPTYCMD	"_EmptycmD_"
 #define DEFAULTCMD	"_DefaultCmD_"
+#define INITIALWORD	"_InitialWorD_"
 
 extern HASH_TABLE *prog_completes;
+
+extern char *pcomp_line;
+extern int pcomp_ind;
+
 extern int prog_completion_enabled;
+extern int progcomp_alias;
 
 /* Not all of these are used yet. */
 extern ITEMLIST it_aliases;

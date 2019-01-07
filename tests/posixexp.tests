@@ -72,6 +72,12 @@ ${THIS_SH} ./posixexp1.sub || echo "bash posixexp1.sub: test $? failed"
 THIS_SH=$TMPDIR/sh ${THIS_SH} ./posixexp2.sub || echo "sh posixexp2.sub: test $? failed"
 rm -f $TMPDIR/sh
 
+${THIS_SH} ./posixexp3.sub
+${THIS_SH} ./posixexp4.sub
+${THIS_SH} ./posixexp5.sub
+${THIS_SH} ./posixexp6.sub
+${THIS_SH} ./posixexp7.sub
+
 # this will be an error
 foo=bar
 echo "${foo:-"a}"
