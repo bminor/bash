@@ -419,10 +419,7 @@ inputunit:	simple_list simple_list_terminator
 			     only interesting in non-interactive shells */
 			  global_command = (COMMAND *)NULL;
 			  if (last_command_exit_value == 0)
-{
-itrace("parser: forcing EX_BADUSAGE; executing_command_builtin = %d", executing_command_builtin);
 			    last_command_exit_value = EX_BADUSAGE;	/* force error return */
-}
 			  handle_eof_input_unit ();
 			  if (interactive && parse_and_execute_level == 0)
 			    {

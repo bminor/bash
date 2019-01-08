@@ -392,6 +392,7 @@ hash_pstats (table, name)
 HASH_TABLE *table, *ntable;
 
 int interrupt_immediately = 0;
+int running_trap = 0;
 
 int
 signal_is_trapped (s)
@@ -417,6 +418,7 @@ internal_warning (const char *format, ...)
 {
 }
 
+int
 main ()
 {
   char string[256];

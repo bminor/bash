@@ -30,6 +30,7 @@
 #include "builtins.h"
 #include "shell.h"
 #include "common.h"
+#include "bashgetopt.h"
 
 int
 basename_builtin (list)

@@ -4963,3 +4963,33 @@ lib/glob/glob_loop.c
 	- INTERNAL_GLOB_PATTERN_P: revert change from 4/27 that makes this
 	  function return non-zero for a backslash in the string. Based on a
 	  report from Tom Ryder <tom@sanctum.geek.nz>
+
+[bash-5.0 frozen]
+
+[bash-5.0 released]
+
+				 1/6/2019
+				 --------
+execute_cmd.c
+	- execute_simple_command: catch all non-zero special builtin errors
+	  (e.g. return not in a function) and make sure a non-interactive
+	  posix-mode shell exits. Old code expected builtins to signal
+	  internal fatal errors with code > 256. Fixes bug reported by
+	  Robert Hailey <bash@osndok.com>
+
+examples/loadables/basename.c
+	- make sure to include bashgetopt.h. Reported by Angel 
+	  <angel@16bits.net>
+
+lib/malloc/malloc.c
+	- stdlib.h: include if botch isn't defined to provide a declaration
+	  for abort()
+
+hashlib.c,Makefile.in
+	- fixes to make hash library testing work for others from
+	  Eduardo Bustamante <dualbus@gmail.com>
+
+lib/readline/unicode.c
+	- u32toutf16: correct the second argument to be wchar_t *, and treat
+	  it as such, even though it doesn't make a difference in practice.
+	  Report and fix from Eduardo Bustamante <dualbus@gmail.com>

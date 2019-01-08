@@ -84,6 +84,10 @@
 #include <errno.h>
 #include <stdio.h>
 
+#if !defined (botch)
+#include <stdlib.h>
+#endif
+
 #if defined (HAVE_MMAP)
 #include <sys/mman.h>
 #endif
