@@ -3565,6 +3565,10 @@ expand_arith_string (string, quoted)
       /* This is expanded version of expand_string_internal as it's called by
 	 expand_string_leave_quoted  */
       td.flags = W_NOPROCSUB|W_NOTILDE;	/* don't want process substitution or tilde expansion */
+#if 0	/* TAG:bash-5.1 */
+      if (quoted & Q_ARRAYSUB)
+	td.flags |= W_NOCOMSUB;
+#endif
       td.word = savestring (string);
       list = call_expand_word_internal (&td, quoted, 0, (int *)NULL, (int *)NULL);
       /* This takes care of the calls from expand_string_leave_quoted and

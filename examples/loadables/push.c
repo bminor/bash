@@ -35,7 +35,7 @@
 extern int errno;
 #endif
 
-extern int dollar_dollar_pid;
+extern pid_t dollar_dollar_pid;
 extern int last_command_exit_value;
 
 int

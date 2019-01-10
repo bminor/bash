@@ -11,3 +11,9 @@ printf "%s\n" ${var}
 
 var='a\a'
 printf "%s\n" ${var}
+
+# shell's idea of a glob pattern and libglob's idea of a glob pattern have to
+# be identical
+PRE='\/'
+printf '<%s>\n' 'define'${PRE}'\
+/'

@@ -533,7 +533,12 @@ restart_new_var_name:
 		      any_failed++;
 		      NEXT_VARIABLE ();
 		    }
-
+		  else if (flags_on & (att_array|att_assoc))
+		    {
+		      sh_invalidopt ((flags_on & att_array) ? "-a" : "-A");
+		      any_failed++;
+		      NEXT_VARIABLE ();
+		    }
 		  /* declare -[Ff] name [name...] */
 		  if (flags_on == att_function && flags_off == 0)
 		    {
@@ -558,6 +563,7 @@ restart_new_var_name:
 		  else		/* declare -[fF] -[rx] name [name...] */
 		    {
 		      VSETATTR (var, flags_on);
+		      flags_off &= ~att_function;	/* makes no sense */
 		      VUNSETATTR (var, flags_off);
 		    }
 		}

@@ -344,10 +344,10 @@ arithcomp (s, t, op, flags)
 
   if (flags & TEST_ARITHEXP)
     {
-      l = evalexp (s, 0, &expok);
+      l = evalexp (s, EXP_EXPANDED, &expok);
       if (expok == 0)
 	return (FALSE);		/* should probably longjmp here */
-      r = evalexp (t, 0, &expok);
+      r = evalexp (t, EXP_EXPANDED, &expok);
       if (expok == 0)
 	return (FALSE);		/* ditto */
     }

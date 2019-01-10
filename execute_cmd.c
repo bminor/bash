@@ -4504,8 +4504,6 @@ run_builtin:
 		  if (builtin_is_special)
 		    special_builtin_failed = 1;	/* XXX - take command builtin into account? */
 		}
-	      else
-		special_builtin_failed = builtin_is_special && result != EXECUTION_SUCCESS;
 
 	      /* In POSIX mode, if there are assignment statements preceding
 		 a special builtin, they persist after the builtin

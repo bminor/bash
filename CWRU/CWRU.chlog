@@ -4970,12 +4970,6 @@ lib/glob/glob_loop.c
 
 				 1/6/2019
 				 --------
-execute_cmd.c
-	- execute_simple_command: catch all non-zero special builtin errors
-	  (e.g. return not in a function) and make sure a non-interactive
-	  posix-mode shell exits. Old code expected builtins to signal
-	  internal fatal errors with code > 256. Fixes bug reported by
-	  Robert Hailey <bash@osndok.com>
 
 examples/loadables/basename.c
 	- make sure to include bashgetopt.h. Reported by Angel 
@@ -4993,3 +4987,42 @@ lib/readline/unicode.c
 	- u32toutf16: correct the second argument to be wchar_t *, and treat
 	  it as such, even though it doesn't make a difference in practice.
 	  Report and fix from Eduardo Bustamante <dualbus@gmail.com>
+
+				    1/8
+				    ---
+
+builtins/return.def
+	- return_builtin: return EX_USAGE if we're not executing a shell
+	  function or sourcing a script, so a posix-mode shell exits. Fixes
+	  bug reported by Robert Hailey <bash@osndok.com>
+
+builtins/declare.def
+	- declare_internal: don't let `declare -f +f' turn off the function
+	  attribute. Fix from Grisha Levit <grishalevit@gmail.com>
+	- declare_internal: reject attempts to add the -A or -a attributes
+	  to functions. Report from Grisha Levit <grishalevit@gmail.com>
+
+				    1/9
+				    ---
+bashline.c
+	- completion_glob_pattern: new function, returns true if the passed
+	  string contains a glob pattern that should be process by the glob
+	  completion code. Completion glob patterns don't pay attention to
+	  backslashes unless they're the last character in the string. This
+	  is a different, more self-contained, fix for the problem reported
+	  by Tom Ryder <tom@sanctum.geek.nz>
+
+lib/glob/glob_loop.c
+	- INTERNAL_GLOB_PATTERN_P: restore change from 4/27 and make this
+	  function return non-zero if it encounters a backslash in the string.
+	  It needs to match pathexp.c:unquoted_glob_pattern_p(). Adds fix
+	  back for issue reported by axel@freakout.de
+
+test.c
+	- arithcomp: when calling evalexp, make sure to call it with the
+	  EXP_EXPANDED flag, since all arguments here have been evaluated
+	  already
+
+arrayfunc.c
+	- array_expand_index: call evalexp with EXP_EXPANDED flag, since we
+	  have run the string through expand_arith_string already
