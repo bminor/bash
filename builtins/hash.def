@@ -123,9 +123,9 @@ hash_builtin (list)
   list = loptend;
 
   /* hash -t requires at least one argument. */
-  if (list == 0 && list_targets)
+  if (list == 0 && (delete || list_targets))
     {
-      sh_needarg ("-t");
+      sh_needarg (delete ? "-d" : "-t");
       return (EXECUTION_FAILURE);
     }
 

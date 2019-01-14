@@ -5026,3 +5026,38 @@ test.c
 arrayfunc.c
 	- array_expand_index: call evalexp with EXP_EXPANDED flag, since we
 	  have run the string through expand_arith_string already
+
+				   1/11
+				   ----
+parser.h
+	- PST_ENDALIAS: new state, means we just consumed the last character
+	  of an alias expansion and returned the fake space
+
+parse.y
+	- shell_getc: add PST_ENDALIAS to parser_state before returning the
+	  fake space that marks the end of the alias, making sure to do it
+	  only once. With that set, fall through to the pop_string(), making
+	  sure to unset PST_ENDALIAS. Fixes alias bug reported by
+	  Ante Peric <synthmeat@gmail.com>
+
+				   1/12
+				   ----
+lib/glob/glob.c
+	- {extglob,wextglob}_skipname: make sure we check the rest of the
+	  pattern if the extglob pattern is null, and therefore won't match
+	  anything. If that is followed by a `.', quoted or unquoted, we can
+	  match a leading `.' in the pathname. This code is currently not
+	  active.
+
+builtins/hash.def
+	- hash_builtin: if -d is supplied without an argument, print an error
+	  message and return failure, just like -t without an argument. Fixes
+	  inconsistency reported by Dan Jacobson <jidanni@jidanni.org>
+
+				   1/13
+				   ----
+parse.y
+	- shell_getc: use shellblank when testing the last character of an
+	  alias to determine whether or not to add a trailing space instead
+	  of testing against a space only. These are the non-shell-metacharacters
+	  that can delimit words. Used together with PST_ENDALIAS

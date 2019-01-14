@@ -4775,7 +4775,6 @@ make_env_array_from_var_list (vars)
 	     using the cached exportstr... */
 	  list[list_index] = USE_EXPORTSTR ? savestring (value)
 					   : mk_env_string (var->name, value, function_p (var));
-
 	  if (USE_EXPORTSTR == 0)
 	    SAVE_EXPORTSTR (var, list[list_index]);
 

@@ -187,7 +187,7 @@ extglob_skipname (pat, dname, flags)
      int flags;
 {
   char *pp, *pe, *t, *se;
-  int n, r, negate, wild;
+  int n, r, negate, wild, nullpat;
 
   negate = *pat == '!';
   wild = *pat == '*' || *pat == '?';
@@ -213,6 +213,11 @@ extglob_skipname (pat, dname, flags)
         return (skipname (pe+1, dname, flags));
       return r;
     }
+
+  /* Is the extglob pattern between the parens the null pattern?  The null
+     pattern can match nothing, so should we check any remaining portion of
+     the pattern? */
+  nullpat = pe >= (pat + 2) && pe[-2] == '(' && pe[-1] == ')';
 
   /* check every subpattern */
   while (t = glob_patscan (pp, pe, '|'))
@@ -305,7 +310,7 @@ wextglob_skipname (pat, dname, flags)
 {
 #if EXTENDED_GLOB
   wchar_t *pp, *pe, *t, n, *se;
-  int r, negate, wild;
+  int r, negate, wild, nullpat;
 
   negate = *pat == L'!';
   wild = *pat == L'*' || *pat == L'?';
@@ -322,6 +327,11 @@ wextglob_skipname (pat, dname, flags)
         return (wskipname (pe+1, dname, flags));
       return r;
     }
+
+  /* Is the extglob pattern between the parens the null pattern?  The null
+     pattern can match nothing, so should we check any remaining portion of
+     the pattern? */
+  nullpat = pe >= (pat + 2) && pe[-2] == L'(' && pe[-1] == L')';
 
   /* check every subpattern */
   while (t = glob_patscan_wc (pp, pe, '|'))
