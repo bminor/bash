@@ -4873,12 +4873,14 @@ next_alias_char:
   if (uc == 0 && pushed_string_list && pushed_string_list->flags != PSH_SOURCE &&
       pushed_string_list->flags != PSH_DPAREN &&
       (parser_state & PST_COMMENT) == 0 &&
+      (parser_state & PST_ENDALIAS) == 0 &&	/* only once */
       shell_input_line_index > 0 &&
-      shell_input_line[shell_input_line_index-1] != ' ' &&
+      shellblank (shell_input_line[shell_input_line_index-1]) == 0 &&
       shell_input_line[shell_input_line_index-1] != '\n' &&
       shellmeta (shell_input_line[shell_input_line_index-1]) == 0 &&
       (current_delimiter (dstack) != '\'' && current_delimiter (dstack) != '"'))
     {
+      parser_state |= PST_ENDALIAS;
       return ' ';	/* END_ALIAS */
     }
 #endif
@@ -4887,6 +4889,7 @@ pop_alias:
   /* This case works for PSH_DPAREN as well */
   if (uc == 0 && pushed_string_list && pushed_string_list->flags != PSH_SOURCE)
     {
+      parser_state &= ~PST_ENDALIAS;
       pop_string ();
       uc = shell_input_line[shell_input_line_index];
       if (uc)
