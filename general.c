@@ -338,21 +338,21 @@ check_selfref (name, value, flags)
 }
 
 /* Make sure that WORD is a valid shell identifier, i.e.
-   does not contain a dollar sign, nor is quoted in any way.  Nor
-   does it consist of all digits.  If CHECK_WORD is non-zero,
+   does not contain a dollar sign, nor is quoted in any way.
+   If CHECK_WORD is non-zero,
    the word is checked to ensure that it consists of only letters,
-   digits, and underscores. */
+   digits, and underscores, and does not consist of all digits. */
 int
 check_identifier (word, check_word)
      WORD_DESC *word;
      int check_word;
 {
-  if ((word->flags & (W_HASDOLLAR|W_QUOTED)) || all_digits (word->word))
+  if (word->flags & (W_HASDOLLAR|W_QUOTED))	/* XXX - HASDOLLAR? */
     {
       internal_error (_("`%s': not a valid identifier"), word->word);
       return (0);
     }
-  else if (check_word && legal_identifier (word->word) == 0)
+  else if (check_word && (all_digits (word->word) || legal_identifier (word->word) == 0))
     {
       internal_error (_("`%s': not a valid identifier"), word->word);
       return (0);

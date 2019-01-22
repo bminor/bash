@@ -5061,3 +5061,20 @@ parse.y
 	  alias to determine whether or not to add a trailing space instead
 	  of testing against a space only. These are the non-shell-metacharacters
 	  that can delimit words. Used together with PST_ENDALIAS
+
+				   1/17
+				   ----
+parse.y
+	- shell_getc: keep track of whether the last character read from
+	  shell_input_line is an unquoted backslash and don't add a space to
+	  the end of an alias if the alias value ends in an unquoted backslash.
+	  From an austin-group mailing list discussion message from
+	  Harald van Dijk <ag@gigawatt.nl>
+
+				   1/20
+				   ----
+general.c
+	- check_identifier: make sure CHECK_WORD is non-zero before we check
+	  whether or not the word consists of all digits. This allows function
+	  names to consist solely of digits when not in posix mode. From a
+	  report by Andrey Butirsky <butirsky@gmail.com>

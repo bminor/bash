@@ -2260,6 +2260,8 @@ static struct dstack temp_dstack = { (char *)NULL, 0, 0 };
    shell_ungetc when we're at the start of a line. */
 static int eol_ungetc_lookahead = 0;
 
+static int unquoted_backslash = 0;
+
 static int
 shell_getc (remove_quoted_newline)
      int remove_quoted_newline;
@@ -2525,10 +2527,16 @@ shell_getc (remove_quoted_newline)
     }
 
 next_alias_char:
+if (shell_input_line_index == 0)
+  unquoted_backslash = 0;
+
   uc = shell_input_line[shell_input_line_index];
 
   if (uc)
+{
+unquoted_backslash = unquoted_backslash == 0 && uc == '\\';
     shell_input_line_index++;
+}
 
 #if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
   /* If UC is NULL, we have reached the end of the current input string.  If
@@ -2561,6 +2569,7 @@ next_alias_char:
       shell_input_line_index > 0 &&
       shellblank (shell_input_line[shell_input_line_index-1]) == 0 &&
       shell_input_line[shell_input_line_index-1] != '\n' &&
+      unquoted_backslash == 0 &&
       shellmeta (shell_input_line[shell_input_line_index-1]) == 0 &&
       (current_delimiter (dstack) != '\'' && current_delimiter (dstack) != '"'))
     {

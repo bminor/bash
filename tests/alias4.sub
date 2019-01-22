@@ -75,3 +75,13 @@ alias foo="\
 	"
 
 foo
+
+alias foo=$'echo bad \t'
+foo
+
+# this should probably just echo a blank line to stdout
+alias foo='echo 0'
+foo>&2
+
+alias a='printf "<%s>\n" \'
+a|cat

@@ -231,7 +231,7 @@ static int bash_possible_variable_completions __P((int, int));
 static int bash_complete_command __P((int, int));
 static int bash_possible_command_completions __P((int, int));
 
-static int completion_glob_pattern __P((const char *));
+static int completion_glob_pattern __P((char *));
 static char *glob_complete_word __P((const char *, int));
 static int bash_glob_completion_internal __P((int));
 static int bash_glob_complete_word __P((int, int));
@@ -1742,7 +1742,7 @@ bash_default_completion (text, start, end, qc, compflags)
 
   /* This could be a globbing pattern, so try to expand it using pathname
      expansion. */
-  if (!matches && completion_glob_pattern (text))
+  if (!matches && completion_glob_pattern ((char *)text))
     {
       matches = rl_completion_matches (text, glob_complete_word);
       /* A glob expression that matches more than one filename is problematic.
@@ -1851,7 +1851,7 @@ command_word_completion_function (hint_text, state)
 	  glob_matches = (char **)NULL;
 	}
 
-      globpat = completion_glob_pattern (hint_text);
+      globpat = completion_glob_pattern ((char *)hint_text);
 
       /* If this is an absolute program name, do not check it against
 	 aliases, reserved words, functions or builtins.  We must check
@@ -3716,7 +3716,7 @@ bash_complete_command_internal (what_to_do)
 
 static int
 completion_glob_pattern (string)
-     const char *string;
+     char *string;
 {
   register int c;
   char *send;
