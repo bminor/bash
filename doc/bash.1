@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Dec  7 09:48:47 EST 2018
+.\"	Last Change: Sun Jan 27 17:41:59 EST 2019
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2018 December 7" "GNU Bash 5.0"
+.TH BASH 1 "2019 January 27" "GNU Bash 5.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -893,7 +893,8 @@ Using \fB;&\fP in place of \fB;;\fP causes execution to continue with
 the \fIlist\fP associated with the next set of patterns.
 Using \fB;;&\fP in place of \fB;;\fP causes the shell to test the next
 pattern list in the statement, if any, and execute any associated \fIlist\fP
-on a successful match.
+on a successful match,
+continuing the case statement execution as if the pattern list had not matched.
 The exit status is zero if no
 pattern matches.  Otherwise, it is the exit status of the
 last command executed in \fIlist\fP.

@@ -497,7 +497,10 @@ initialize_readline ()
   if (func == rl_vi_editing_mode)
     rl_unbind_key_in_map (CTRL('M'), emacs_meta_keymap);
 #if defined (VI_MODE)
-  rl_unbind_key_in_map (CTRL('E'), vi_movement_keymap);
+  kseq[0] = CTRL('E');
+  func = rl_function_of_keyseq (kseq, vi_movement_keymap, (int *)NULL);
+  if (func == rl_emacs_editing_mode)
+    rl_unbind_key_in_map (CTRL('E'), vi_movement_keymap);
 #endif
 
 #if defined (BRACE_COMPLETION)

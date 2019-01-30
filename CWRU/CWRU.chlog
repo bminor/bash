@@ -5078,3 +5078,47 @@ general.c
 	  whether or not the word consists of all digits. This allows function
 	  names to consist solely of digits when not in posix mode. From a
 	  report by Andrey Butirsky <butirsky@gmail.com>
+
+				   1/22
+				   ----
+bashline.c
+	- initialize_readline: only unbind ^E in vi_movement_keymap if it's
+	  still bound to the default rl_emacs_editing_mode. Fixes bug
+	  reported by Greg Bell <gbell_spamless@yahoo.com>
+
+				   1/23
+				   ----
+builtins/shopt.def
+	- we need the extern declaration for syslog_history if SYSLOG_HISTORY
+	  is defined, since it's used even if SYSLOG_SHOPT is not defined
+
+				   1/25
+				   ----
+command.h
+	- CMD_TRY_OPTIMIZING: new command flag, means this (simple) command is
+	  a candidate for fork optimization (suppression)
+
+builtins/evalstring.c
+	- can_optimize_connection: new function, takes an AND_OR list (&& or
+	  ||) from parse_and_execute, makes sure it's the last in a possibly
+	  multi-command list, and returns non-zero if it's a simple command,
+	  indicating that it's a candidate for fork optimization.
+	- parse_and_execute: if we have a cm_connection command, call
+	  can_optimize_connection to determine if it's a suitable candidate
+	  and set CMD_TRY_OPTIMIZING if that returns non-zero
+	- optimize_fork: don't bother unless the rhs of the && or || command
+	  has the CMD_TRY_OPTIMIZING flag set. These fix the bug reported by
+	  Brad Spencer <bspencer@blackberry.com>
+
+execute_cmd.c
+	- execute_connection: case AND_AND and OR_OR: call optimize_fork on
+	  the right side of the command before executing `second'. This will
+	  safely restore the fork optimization we removed from
+	  parse_and_execute()
+
+builtins/complete.def
+	- build_actions: make sure the function name argument to -F is a
+	  valid shell function name: it doesn't contain any invalid posix-
+	  mode characters and doesn't contain any shell break characters that
+	  would need to be quoted when defining a function. Fixes issue
+	  reported by Great Big Dot <greatbigdot@gmail.com>

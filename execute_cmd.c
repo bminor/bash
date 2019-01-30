@@ -2767,6 +2767,8 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	  ((command->value.Connection->connector == OR_OR) &&
 	   (exec_result != EXECUTION_SUCCESS)))
 	{
+	  optimize_fork (command);
+
 	  second = command->value.Connection->second;
 	  if (ignore_return && second)
 	    second->flags |= CMD_IGNORE_RETURN;

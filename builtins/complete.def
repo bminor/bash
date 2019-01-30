@@ -193,6 +193,7 @@ build_actions (list, flagp, actp, optp)
 {
   int opt, ind, opt_given;
   unsigned long acts, copts;
+  WORD_DESC w;
 
   acts = copts = (unsigned long)0L;
   opt_given = 0;
@@ -323,7 +324,13 @@ build_actions (list, flagp, actp, optp)
 	      return (EX_USAGE);
 	    }
 	case 'F':
-	  Farg = list_optarg;
+	  w.word = Farg = list_optarg;
+	  w.flags = 0;
+	  if (check_identifier (&w, posixly_correct) == 0 || strcspn (Farg, shell_break_chars))
+	    {
+	      sh_invalidid (Farg);
+	      return (EX_USAGE);
+	    }
 	  break;
 	case 'G':
 	  Garg = list_optarg;

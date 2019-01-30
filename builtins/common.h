@@ -203,6 +203,7 @@ extern int evalstring __P((char *, const char *, int));
 extern void parse_and_execute_cleanup __P((int));
 extern int parse_string __P((char *, const char *, int, char **));
 extern int should_suppress_fork __P((COMMAND *));
+extern int can_optimize_connection __P((COMMAND *));
 extern void optimize_fork __P((COMMAND *));
 extern void optimize_subshell_command __P((COMMAND *));
 
