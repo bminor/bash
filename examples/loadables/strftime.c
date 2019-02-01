@@ -86,7 +86,7 @@ strftime_builtin (list)
   /* Now try to figure out how big the buffer should really be.  strftime(3)
      will return the number of bytes placed in the buffer unless it's greater
      than MAXSIZE, in which case it returns 0. */
-  for (n = 1; n < 4; n++)
+  for (n = 1; n <= 8; n++)
     {
       tbuf = xrealloc (tbuf, tbsize * n);
       tsize = strftime (tbuf, tbsize * n, format, t);
@@ -94,7 +94,8 @@ strftime_builtin (list)
         break;
     }
 
-  printf ("%s\n", tbuf);
+  if (tsize)
+    printf ("%s\n", tbuf);
   free (tbuf);
 
   return (EXECUTION_SUCCESS);

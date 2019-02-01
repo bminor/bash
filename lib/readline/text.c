@@ -1452,7 +1452,18 @@ rl_change_case (int count, int op)
 	  if  (nwc != wc)	/*  just skip unchanged characters */
 	    {
 	      char *s, *e;
-	      mlen = wcrtomb (mb, nwc, &mps);
+	      mbstate_t ts;
+
+	      memset (&ts, 0, sizeof (mbstate_t));
+	      mlen = wcrtomb (mb, nwc, &ts);
+	      if (mlen < 0)
+		{
+		  nwc = wc;
+		  memset (&ts, 0, sizeof (mbstate_t));
+		  mlen = wcrtomb (mb, nwc, &ts);
+		  if (mlen < 0)		/* should not happen */
+		    strncpy (mb, rl_line_buffer + start, mlen = m);
+		}
 	      if (mlen > 0)
 		mb[mlen] = '\0';
 	      /* what to do if m != mlen? adjust below */

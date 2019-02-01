@@ -159,7 +159,7 @@ glob_pattern_p (pattern)
   wchar_t *wpattern;
   int r;
 
-  if (MB_CUR_MAX == 1)
+  if (MB_CUR_MAX == 1 || mbsmbchar (pattern) == 0)
     return (internal_glob_pattern_p ((unsigned char *)pattern));
 
   /* Convert strings to wide chars, and call the multibyte version. */
@@ -173,7 +173,7 @@ glob_pattern_p (pattern)
 
   return r;
 #else
-  return (internal_glob_pattern_p (pattern));
+  return (internal_glob_pattern_p ((unsigned char *)pattern));
 #endif
 }
 
@@ -430,6 +430,12 @@ wdequote_pathname (pathname)
   wchar_t *wpathname;
   int i, j;
   wchar_t *orig_wpathname;
+
+  if (mbsmbchar (pathname) == 0)
+    {
+      udequote_pathname (pathname);
+      return;
+    }
 
   len = strlen (pathname);
   /* Convert the strings into wide characters.  */
@@ -1071,7 +1077,7 @@ glob_filename (pathname, flags)
   char *directory_name, *filename, *dname, *fn;
   unsigned int directory_len;
   int free_dirname;			/* flag */
-  int dflags;
+  int dflags, hasglob;
 
   result = (char **) malloc (sizeof (char *));
   result_size = 1;
@@ -1120,9 +1126,12 @@ glob_filename (pathname, flags)
       free_dirname = 1;
     }
 
+  hasglob = 0;
   /* If directory_name contains globbing characters, then we
-     have to expand the previous levels.  Just recurse. */
-  if (directory_len > 0 && glob_pattern_p (directory_name))
+     have to expand the previous levels.  Just recurse.
+     If glob_pattern_p returns != [0,1] we have a pattern that has backslash
+     quotes but no unquoted glob pattern characters. We dequote it below. */
+  if (directory_len > 0 && (hasglob = glob_pattern_p (directory_name)) == 1)
     {
       char **directories, *d, *p;
       register unsigned int i;
@@ -1341,6 +1350,11 @@ only_filename:
 	  if (free_dirname)
 	    free (directory_name);
 	  return (NULL);
+	}
+      if (directory_len > 0 && hasglob == 2)		/* need to dequote */
+	{
+	  dequote_pathname (directory_name);
+	  directory_len = strlen (directory_name);
 	}
       /* Handle GX_MARKDIRS here. */
       result[0] = (char *) malloc (directory_len + 1);

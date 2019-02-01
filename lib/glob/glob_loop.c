@@ -26,10 +26,10 @@ INTERNAL_GLOB_PATTERN_P (pattern)
 {
   register const GCHAR *p;
   register GCHAR c;
-  int bopen;
+  int bopen, bsquote;
 
   p = pattern;
-  bopen = 0;
+  bopen = bsquote = 0;
 
   while ((c = *p++) != L('\0'))
     switch (c)
@@ -55,13 +55,22 @@ INTERNAL_GLOB_PATTERN_P (pattern)
 
       case L('\\'):
 	/* Don't let the pattern end in a backslash (GMATCH returns no match
-	   if the pattern ends in a backslash anyway), but otherwise return 1,
-	   since the matching engine uses backslash as an escape character
-	   and it can be removed. */
-	return (*p != L('\0'));
+	   if the pattern ends in a backslash anyway), but otherwise note that 
+	   we have seen this, since the matching engine uses backslash as an
+	   escape character and it can be removed. We return 2 later if we
+	   have seen only backslash-escaped characters, so interested callers
+	   know they can shortcut and just dequote the pathname. */
+	if (*p != L('\0'))
+	  {
+	    p++;
+	    bsquote = 1;
+	  }
+	else if (*p == L('\0'))
+	  return 0;
+	continue;
       }
 
-  return 0;
+  return bsquote ? 2 : 0;
 }
 
 #undef INTERNAL_GLOB_PATTERN_P

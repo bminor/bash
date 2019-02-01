@@ -1,0 +1,16 @@
+mkdir -m700 /tmp/a /tmp/a/b
+touch /tmp/a/b/c
+
+echo /tmp/a/b/* "/tmp/a/"b/* "/tmp/a/b"/*
+
+chmod -r /tmp/a            
+echo /tmp/a/b/* "/tmp/a/"b/* "/tmp/a/b"/*
+echo "/tmp/a/b"/*
+
+bs=\\
+echo /tmp${bs}/a/b/*
+echo /tmp${bs}/a/b/c
+echo /tm[p]${bs}/a/b/c
+
+chmod +r /tmp/a
+rm -rf /tmp/a

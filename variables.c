@@ -3270,12 +3270,7 @@ bind_variable (name, value, flags)
 		  else if (nv == &nameref_maxloop_value)
 		    {
 		      internal_warning (_("%s: circular name reference"), v->name);
-#if 1
-		      /* TAG:bash-5.1 */
 		      return (bind_global_variable (v->name, value, flags));
-#else
-		      v = 0;	/* backwards compat */
-#endif
 		    }
 		  else
 		    v = nv;
@@ -3283,12 +3278,7 @@ bind_variable (name, value, flags)
 	      else if (nv == &nameref_maxloop_value)
 		{
 		  internal_warning (_("%s: circular name reference"), v->name);
-#if 1
-		  /* TAG:bash-5.1 */
 		  return (bind_global_variable (v->name, value, flags));
-#else
-		  v = 0;	/* backwards compat */
-#endif
 		}
 	      else
 	        v = nv;
@@ -4472,16 +4462,37 @@ push_posix_temp_var (data)
 
   var = (SHELL_VAR *)data;
 
+#if 0 /* TAG:bash-5.1 */
+  /* Just like do_assignment_internal(). This makes assignments preceding
+     special builtins act like standalone assignment statements when in
+     posix mode. */
+  v = bind_variable (var->name, value_cell (var), ASS_FORCE|ASS_NOLONGJMP);
+
+  /* If this modifies an existing local variable, v->context will be non-zero.
+     If it comes back with v->context == 0, we bound at the global context.
+     Set binding_table appropriately. It doesn't matter whether it's correct
+     if the variable is local, only that it's not global_variables->table */
+  binding_table = v->context ? shell_variables->table : global_variables->table;
+#else
   binding_table = global_variables->table;
   if (binding_table == 0)
     binding_table = global_variables->table = hash_create (VARIABLES_HASH_BUCKETS);
 
   v = bind_variable_internal (var->name, value_cell (var), binding_table, 0, ASS_FORCE|ASS_NOLONGJMP);
+#endif
 
   /* global variables are no longer temporary and don't need propagating. */
-  var->attributes &= ~(att_tempvar|att_propagate);
+  if (binding_table == global_variables->table)
+    var->attributes &= ~(att_tempvar|att_propagate);
+
   if (v)
-    v->attributes |= var->attributes;
+    {
+      v->attributes |= var->attributes;
+      v->attributes &= ~att_tempvar;	/* not a temp var now */
+#if 1	/* TAG:bash-5.1 code doesn't need this, disable for bash-5.1 */
+      v->context = (binding_table == global_variables->table) ? 0 : shell_variables->scope;
+#endif
+    }
 
   if (find_special_var (var->name) >= 0)
     tempvar_list[tvlist_ind++] = savestring (var->name);
@@ -4575,13 +4586,16 @@ dispose_temporary_env (pushf)
      sh_free_func_t *pushf;
 {
   int i;
+  HASH_TABLE *disposer;
 
   tempvar_list = strvec_create (HASH_ENTRIES (temporary_env) + 1);
   tempvar_list[tvlist_ind = 0] = 0;
-    
-  hash_flush (temporary_env, pushf);
-  hash_dispose (temporary_env);
+
+  disposer = temporary_env;
   temporary_env = (HASH_TABLE *)NULL;
+
+  hash_flush (disposer, pushf);
+  hash_dispose (disposer);
 
   tempvar_list[tvlist_ind] = 0;
 

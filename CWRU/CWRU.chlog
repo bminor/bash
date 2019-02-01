@@ -5122,3 +5122,71 @@ builtins/complete.def
 	  mode characters and doesn't contain any shell break characters that
 	  would need to be quoted when defining a function. Fixes issue
 	  reported by Great Big Dot <greatbigdot@gmail.com>
+
+				   1/28
+				   ----
+variables.c
+	- dispose_temporary_env: make sure to save temporary_env to a temp
+	  pointer and set temporary_env to NULL before trying to dispose it,
+	  so no flush function ever tries to add a temporary variable back
+	  into the table (e.g., bind_variable())
+
+				   1/29
+				   ----
+builtins/evalstring.c
+	- can_optimize_connection,optimize_fork: add the last command in lists
+	  separated by `;' to the list of candidates for fork optimization
+
+				   1/30
+				   ----
+examples/loadables/strftime.c
+	- strftime_builtin: try to extend the buffer longer than tbsize*3,
+	  which is a minimum of 24 characters, in case some of the formats
+	  (e.g., %c) expand to something longer than that. Fixes bug
+	  reported by Stan Marsh <gazelle@xmission.com>
+
+				   1/31
+				   ----
+lib/readline/undo.c
+	- rl_do_undo: before inserting text while undoing UNDO_DELETE, or
+	  performing a deletion while undoing UNDO_INSERT, make sure that
+	  rl_point is valid by calling _rl_fix_point. Fuzzing bug and fix
+	  from Eduardo Bustamante <dualbus@gmail.com>
+
+lib/readline/search.c
+	- _rl_nsearch_abort: validate new values for rl_point and rl_mark by
+	  calling _rl_fix_point(). Fuzzing bug and fix from
+	  Eduardo Bustamante <dualbus@gmail.com>
+
+subst.c
+	- string_extract_double_quoted: if we parse a syntactically-incorrect
+	  $( expression while extracting a double-quoted string, si will
+	  appear to go `backward'. Just skip over the rest of the string and
+	  continue. Fuzzing bug from Eduardo Bustamante <dualbus@gmail.com>
+
+lib/readline/text.c
+	- rl_change_case: if towupper or towlower returns a valid wide char
+	  that can't be converted back to a valid multibyte character, use
+	  the original character and go on. Fuzzing bug from
+	  Eduardo Bustamante <dualbus@gmail.com>
+
+lib/glob/glob.c
+	- wdequote_pathname: if there are no multibyte characters in pathname,
+	  just call udequote_pathname and don't bother converting it to wide
+	  characters
+	- glob_pattern_p: if there are no multibyte characters in the pattern,
+	  just call internal_glob_pattern_p right away
+
+lib/glob/glob_loop.c
+	- INTERNAL_GLOB_PATTERN_P: return 2 if we see only backslash-quoted
+	  characters without any other unquoted glob pattern characters, so
+	  interested callers can shortcut and just dequote the pathname
+
+pathexp.c
+	- unquoted_glob_pattern_p: return 2 if we see only backslash-quoted
+	  characters without any other unquoted glob pattern characters,
+	  consistent with the glob library
+	- unquoted_glob_pattern_p: don't count a backslash quoting a slash as
+	  a backslash that will trigger a call to shell_glob_filename, since
+	  backslashes at the end of patterns (pathname components) will always
+	  fail to match. XXX - this is provisional

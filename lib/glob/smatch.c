@@ -529,7 +529,7 @@ xstrmatch (pattern, string, flags)
   if (MB_CUR_MAX == 1)
     return (internal_strmatch ((unsigned char *)pattern, (unsigned char *)string, flags));
 
-  if (mbsmbchar (string) == 0 && mbsmbchar (pattern) == 0 && posix_cclass_only (pattern) )
+  if (mbsmbchar (string) == 0 && mbsmbchar (pattern) == 0 && posix_cclass_only (pattern))
     return (internal_strmatch ((unsigned char *)pattern, (unsigned char *)string, flags));
 
   n = xdupmbstowcs (&wpattern, NULL, pattern);

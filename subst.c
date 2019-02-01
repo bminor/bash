@@ -964,7 +964,9 @@ add_one_character:
 	    temp[j] = ret[t];
 	  temp[j] = string[si];
 
-	  if (string[si])
+	  if (si < i + 2)	/* we went back? */
+	    i += 2;
+	  else if (string[si])
 	    {
 	      j++;
 	      i = si + 1;
