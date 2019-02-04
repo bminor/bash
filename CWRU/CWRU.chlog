@@ -5190,3 +5190,18 @@ pathexp.c
 	  a backslash that will trigger a call to shell_glob_filename, since
 	  backslashes at the end of patterns (pathname components) will always
 	  fail to match. XXX - this is provisional
+
+lib/glob/glob.c
+	- glob_filename: if we have a directory name that has no unquoted
+	  special glob chars, but has backslashes, just dequote it and return
+	  it without going through the rest of the glob expansions. Partial
+	  fix for issue with unreadable directories reported by
+	  Andrew Church <achurch+bash@achurch.org>
+
+				    2/2
+				    ---
+lib/readline/readline.c
+	- readline_internal_teardown: if revert-all-at-newline is set, make
+	  sure that the history position is at the end of the history before
+	  calling _rl_revert_all_lines(). Fixes bug reported by
+	  johnlinp@gmail.com and frederik@ofb.net

@@ -458,6 +458,7 @@ readline_internal_teardown (int eof)
 {
   char *temp;
   HIST_ENTRY *entry;
+  int pos;
 
   RL_CHECK_SIGNALS ();
 
@@ -477,7 +478,12 @@ readline_internal_teardown (int eof)
     }
 
   if (_rl_revert_all_at_newline)
-    _rl_revert_all_lines ();
+    {
+      pos = where_history ();
+      using_history ();
+      _rl_revert_all_lines ();
+      history_set_pos (pos);
+    }
 
   /* At any rate, it is highly likely that this line has an undo list.  Get
      rid of it now. */

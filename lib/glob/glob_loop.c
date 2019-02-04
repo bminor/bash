@@ -64,10 +64,10 @@ INTERNAL_GLOB_PATTERN_P (pattern)
 	  {
 	    p++;
 	    bsquote = 1;
+	    continue;
 	  }
-	else if (*p == L('\0'))
+	else 	/* (*p == L('\0')) */
 	  return 0;
-	continue;
       }
 
   return bsquote ? 2 : 0;
