@@ -633,6 +633,17 @@ unary_test (op, arg)
 	    free (t);
 	  return ret;
 	}
+#if 0	/* TAG:bash-5.1 */
+      else if (legal_number (arg, &r))		/* -v n == is $n set? */
+	{
+	  char *t;
+	  int ret;
+	  t = get_dollar_var_value (r);
+	  ret = t ? TRUE : FALSE;
+	  free (t);
+	  return ret;
+	}
+#endif
       v = find_variable (arg);
       if (v && invisible_p (v) == 0 && array_p (v))
 	{

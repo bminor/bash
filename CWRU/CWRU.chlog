@@ -5205,3 +5205,28 @@ lib/readline/readline.c
 	  sure that the history position is at the end of the history before
 	  calling _rl_revert_all_lines(). Fixes bug reported by
 	  johnlinp@gmail.com and frederik@ofb.net
+
+				    2/4
+				    ---
+builtins/complete.def
+	- complete_builtin: fix check for argument to -F to use strpbrk
+	  instead of incomplete use of strcspn. Fix from Grisha Levit
+	  <grishalevit@gmail.com>
+
+				    2/5
+				    ---
+lib/readline/readline.c
+	- rl_parse_and_bind: change parsing of boolean variable values to
+	  look for and consume an optional whitespace-delimited word. This
+	  allows trailing spaces and everything that follows to work. Idea
+	  from Bize Ma <binaryzebra@gmail.com>
+	- rl_parse_and_bind: print error message about unknown variable names
+	  instead of calling rl_variable_bind to do it
+	- rl_variable_bind: report error if setting string variable returns
+	  non-zero
+
+				    2/6
+				    ---
+lib/readline/histfile.c
+	- read_history_range: close FILE before returning if the history file
+	  size is 0

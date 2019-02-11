@@ -1,6 +1,6 @@
 /* bind.c -- key binding and startup file support for the readline library. */
 
-/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2019 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -1569,15 +1569,11 @@ rl_parse_and_bind (char *string)
       /* Strip trailing whitespace from values of boolean variables. */
       if (find_boolean_var (var) >= 0)
 	{
-	  /* remove trailing whitespace */
-remove_trailing:
-	  e = value + strlen (value) - 1;
-	  while (e >= value && whitespace (*e))
-	    e--;
-	  e++;		/* skip back to whitespace or EOS */
-	  
-	  if (*e && e >= value)
-	    *e = '\0';
+	  /* just read a whitespace-delimited word or empty string */
+	  for (e = value; *e && whitespace (*e) == 0; e++)
+	    ;
+	  if (e > value)
+	    *e = '\0';		/* cut off everything trailing */
 	}
       else if ((i = find_string_var (var)) >= 0)
 	{
@@ -1589,9 +1585,24 @@ remove_trailing:
 	      value++;	/* skip past the quote */
 	    }
 	  else
-	    goto remove_trailing;
+	    {
+	      /* remove trailing whitespace */
+	      e = value + strlen (value) - 1;
+	      while (e >= value && whitespace (*e))
+		e--;
+	      e++;		/* skip back to whitespace or EOS */
+	  
+	      if (*e && e >= value)
+		*e = '\0';
+	    }
 	}
-	
+      else
+	{
+	  /* avoid calling rl_variable_bind just to find this out */
+	  _rl_init_file_error ("%s: unknown variable name", var);
+	  return 1;
+	}
+
       rl_variable_bind (var, value);
       return 0;
     }
@@ -1903,7 +1914,7 @@ string_varname (int i)
 }  
 
 /* A boolean value that can appear in a `set variable' command is true if
-   the value is null or empty, `on' (case-insensitive), or "1".  Any other
+   the value is null or empty, `on' (case-insensitive), or "1".  All other
    values result in 0 (false). */
 static int
 bool_to_int (const char *value)
@@ -1928,7 +1939,7 @@ rl_variable_value (const char *name)
     return (_rl_get_string_variable_value (string_varlist[i].name));
 
   /* Unknown variable names return NULL. */
-  return 0;
+  return (char *)NULL;
 }
 
 int
@@ -1959,6 +1970,8 @@ rl_variable_bind (const char *name, const char *value)
     }
 
   v = (*string_varlist[i].set_func) (value);
+  if (v != 0)
+    _rl_init_file_error ("%s: could not set value to `%s'", name, value);
   return v;
 }
 
