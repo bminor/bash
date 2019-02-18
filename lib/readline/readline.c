@@ -1,7 +1,7 @@
 /* readline.c -- a general facility for reading lines of input
    with emacs style editing and completion. */
 
-/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2019 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -458,7 +458,6 @@ readline_internal_teardown (int eof)
 {
   char *temp;
   HIST_ENTRY *entry;
-  int pos;
 
   RL_CHECK_SIGNALS ();
 
@@ -478,12 +477,7 @@ readline_internal_teardown (int eof)
     }
 
   if (_rl_revert_all_at_newline)
-    {
-      pos = where_history ();
-      using_history ();
-      _rl_revert_all_lines ();
-      history_set_pos (pos);
-    }
+    _rl_revert_all_lines ();
 
   /* At any rate, it is highly likely that this line has an undo list.  Get
      rid of it now. */

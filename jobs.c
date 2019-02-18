@@ -4839,12 +4839,10 @@ void
 end_job_control ()
 {
   if (job_control)
-    {
-      terminate_stopped_jobs ();
+    terminate_stopped_jobs ();
 
-      if (original_pgrp >= 0)
-	give_terminal_to (original_pgrp, 1);
-    }
+  if (original_pgrp >= 0 && terminal_pgrp != original_pgrp)
+    give_terminal_to (original_pgrp, 1);
 
   if (original_pgrp >= 0)
     setpgid (0, original_pgrp);

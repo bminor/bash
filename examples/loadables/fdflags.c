@@ -3,7 +3,7 @@
 /* See Makefile for compilation details. */
 
 /*
-   Copyright (C) 2017 Free Software Foundation, Inc.
+   Copyright (C) 2017,2018,2019 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -113,8 +113,10 @@ getflags(int fd, int p)
       return -1;
     }
 
+#ifdef O_CLOEXEC
   if (c)
     f |= O_CLOEXEC;
+#endif
 
   return f & getallflags();
 }
@@ -199,16 +201,20 @@ setone(int fd, char *v, int verbose)
   parseflags(v, &pos, &neg);
 
   cloexec = -1;
+#ifdef O_CLOEXEC
   if ((pos & O_CLOEXEC) && (f & O_CLOEXEC) == 0)
     cloexec = FD_CLOEXEC;
   if ((neg & O_CLOEXEC) && (f & O_CLOEXEC))
     cloexec = 0;
+#endif
   if (cloexec != -1 && fcntl(fd, F_SETFD, cloexec) == -1)
     builtin_error("can't set status for fd %d: %s", fd, strerror(errno));
 
+#ifdef O_CLOEXEC
   pos &= ~O_CLOEXEC;
   neg &= ~O_CLOEXEC;
   f &= ~O_CLOEXEC;
+#endif
 
   n = f;
   n |= pos;

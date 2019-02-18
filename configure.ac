@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.0, version 5.005])dnl
+AC_REVISION([for Bash 5.0, version 5.007])dnl
 
 define(bashvers, 5.0)
 define(relstatus, maint)
@@ -684,6 +684,43 @@ AC_SUBST(SIZE)
 
 m4_include([m4/stat-time.m4])
 m4_include([m4/timespec.m4])
+
+dnl include files for gettext
+
+m4_include([m4/codeset.m4])
+m4_include([m4/extern-inline.m4])
+m4_include([m4/fcntl-o.m4])
+m4_include([m4/gettext.m4])
+m4_include([m4/glibc2.m4])
+m4_include([m4/glibc21.m4])
+m4_include([m4/host-cpu-c-abi.m4])
+m4_include([m4/iconv.m4])
+m4_include([m4/intdiv0.m4])
+m4_include([m4/intl.m4])
+m4_include([m4/intlmacosx.m4])
+m4_include([m4/intl-thread-locale.m4])
+m4_include([m4/intmax.m4])
+m4_include([m4/inttypes-pri.m4])
+m4_include([m4/inttypes.m4])
+m4_include([m4/inttypes_h.m4])
+m4_include([m4/lcmessage.m4])
+m4_include([m4/lib-ld.m4])
+m4_include([m4/lib-link.m4])
+m4_include([m4/lib-prefix.m4])
+m4_include([m4/lock.m4])
+m4_include([m4/nls.m4])
+m4_include([m4/po.m4])
+m4_include([m4/printf-posix.m4])
+m4_include([m4/progtest.m4])
+m4_include([m4/size_max.m4])
+m4_include([m4/stdint_h.m4])
+m4_include([m4/threadlib.m4])
+m4_include([m4/uintmax_t.m4])
+m4_include([m4/ulonglong.m4])
+m4_include([m4/visibility.m4])
+m4_include([m4/wchar_t.m4])
+m4_include([m4/wint_t.m4])
+m4_include([m4/xsize.m4])
 
 dnl Turn on any extensions available in the GNU C library.
 AC_DEFINE(_GNU_SOURCE, 1)

@@ -1,0 +1,28 @@
+#!/bin/bash
+#
+# make sure indirect expansion for arrays uses the closest-scope instance
+# of the resulting variable name
+
+array_1=("PASS")
+array_2=("1 foo" "2 foo")
+
+unsafe_fn ()
+{
+    local array_1=('HELLO')
+    local a=("${!1}") b=("${!2}")
+    printf '%s;' "${a[@]}" "${b[@]}"
+    printf '\n'
+}
+
+safe_fn ()
+{
+    local a=("${!1}") b=("${!2}")
+    local array_1=('FAIL')
+    printf '%s;' "${a[@]}" "${b[@]}"
+    printf '\n'
+}
+
+unsafe_fn 'array_1[@]' 'array_2[@]'
+safe_fn 'array_1[@]' 'array_2[@]'
+
+echo after: ${array_1[@]}

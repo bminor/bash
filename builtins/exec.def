@@ -101,7 +101,7 @@ exec_builtin (list)
      WORD_LIST *list;
 {
   int exit_value = EXECUTION_FAILURE;
-  int cleanenv, login, opt;
+  int cleanenv, login, opt, orig_job_control;
   char *argv0, *command, **args, **env, *newname, *com2;
 
   cleanenv = login = 0;
@@ -218,6 +218,7 @@ exec_builtin (list)
   restore_original_signals ();
 
 #if defined (JOB_CONTROL)
+  orig_job_control = job_control;	/* XXX - was also interactive_shell */
   if (subshell_environment == 0)
     end_job_control ();
   if (interactive || job_control)
@@ -264,7 +265,7 @@ failed_exec:
   initialize_signals (1);
 
 #if defined (JOB_CONTROL)
-  if (interactive_shell || job_control)
+  if (orig_job_control)
     restart_job_control ();
 #endif /* JOB_CONTROL */
 

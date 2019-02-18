@@ -3417,7 +3417,7 @@ sig.c
 				   3/25
 				   ----
 lib/readline/bind.c
-	- _rl_function_of_keyseq_internal: new internal function thta takes a
+	- _rl_function_of_keyseq_internal: new internal function that takes a
 	  length parameter to accommodate NUL in the key sequence. Patch from
 	  Koichi Murase <myoga.murase@gmail.com>
 	- rl_function_of_keyseq_len: new application-callable function that
@@ -5230,3 +5230,90 @@ lib/readline/readline.c
 lib/readline/histfile.c
 	- read_history_range: close FILE before returning if the history file
 	  size is 0
+
+				   2/11
+				   ----
+bashline.c
+	- edit_and_execute_command: add the current line buffer to the history
+	  list even if it's empty and rely on other code in bash_add_history
+	  to take care to not add multiple semicolons with multiple blank
+	  lines and command_oriented_history. Live with the blank lines as
+	  history entries for now. Fixes problem reported by
+	  Johannes Hielscher <jhielscher@posteo.de>
+
+lib/readline/misc.c
+	- _rl_revert_all_lines: renamed to _rl_revert_previous_lines, since
+	  that is basically what it does
+	- _rl_revert_all_lines: now just makes sure the history offset is at
+	  the end of the history and calls _rl_revert_previous_lines. Inspired
+	  by a suggestion from johnlinp@gmail.com
+
+lib/readline/readline.c
+	- readline_internal_teardown: revert change of 2/2, moved that code
+	  into the (new) _rl_revert_all_lines
+
+lib/readline/rlprivate.h
+	- _rl_revert_previous_lines: new extern declaration
+
+builtins/bind.def
+	- bind_builtin: make sure the unwind-protect gets run when the --help
+	  option is used, so use `case GETOPT_HELP:' instead of `CASE_HELPOPT;'.
+	  Report and fix from Koichi Murase <myoga.murase@gmail.com>
+
+				   2/12
+				   ----
+lib/readline/util.c
+	- _rl_abort_internal: don't just turn off the MACRODEF state, call
+	  _rl_kill_kbd_macro to delete any traces of an in-progress macro
+	  definition before turning it off. Fixes fuzzing bug.
+
+				   2/13
+				   ----
+examples/loadables/Makefile.in
+	- CCFLAGS: add $(CPPFLAGS) to value, based on a report from
+	  Christian Weisgerber <naddy@mips.inka.de>
+
+				   2/15
+				   ----
+bashline.c
+	- posix_readline_initialize: keep track of the vi insertion keymap
+	  binding for TAB, since we change it in this function. Save the
+	  old binding before we change it when turning posix mode on, and
+	  restore that old binding when turning posix mode off, as long as
+	  the current binding is still rl_insert. Suggested by a report from
+	  Koichi Murase <myoga.murase@gmail.com>
+
+				   2/17
+				   ----
+builtins/exec.def
+	- exec_builtin: save value of job_control; use it to restore the value
+	  of job_control if an exec fails in an interactive shell instead of
+	  enabling it by default in an interactive shell. Report from
+	  Grisha Levit <grishalevit@gmail.com>
+
+lib/readline/bind.c
+	- _rl_function_of_keyseq_internal: make sure to use checks against LEN
+	  instead of a NULL character in KEYSEQ to determine the length of the
+	  key sequence.
+	  Report and fix from Koichi Murase <myoga.murase@gmail.com>
+	- rl_bind_key: make sure the KEY argument is not larger than the
+	  largest unsigned character.
+	  Report and fix from Koichi Murase <myoga.murase@gmail.com>
+	- rl_translate_keyseq: make sure that M-x correctly adds "\ex" to the
+	  key sequence array when convert-meta is set.
+	  Report and fix from Koichi Murase <myoga.murase@gmail.com>
+	- rl_translate_keyseq: now unconditionally converts meta characters to
+	  ESC-prefixed key sequences when processing \0nnn \Xnnn and \[char]
+	  escape sequences that resolve to meta characters and for `normal'
+	  characters that have the meta bit set
+	  Report and fix from Koichi Murase <myoga.murase@gmail.com>
+
+jobs.c
+	- end_job_control: if the terminal pgrp (terminal_pgrp) is not the same
+	  as the original pgrp (original_pgrp), set the terminal's pgrp to the
+	  original pgrp so when we reset the shell's pgrp to original_pgrp,
+	  we'll continue to be able to read from the terminal if the shell is
+	  interactive. Fixes bug with turning off job control before starting
+	  an interactive shell reported by Grisha Levit
+	  <grishalevit@gmail.com>
+

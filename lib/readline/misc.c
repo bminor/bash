@@ -1,6 +1,6 @@
 /* misc.c -- miscellaneous bindable readline functions. */
 
-/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2019 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -435,7 +435,7 @@ rl_replace_from_history (HIST_ENTRY *entry, int flags)
    intended to be called while actively editing, and the current line is
    not assumed to have been added to the history list. */
 void
-_rl_revert_all_lines (void)
+_rl_revert_previous_lines (void)
 {
   int hpos;
   HIST_ENTRY *entry;
@@ -478,6 +478,19 @@ _rl_revert_all_lines (void)
   /* and clean up */
   xfree (lbuf);
 }  
+
+/* Revert all lines in the history by making sure we are at the end of the
+   history before calling _rl_revert_previous_lines() */
+void
+_rl_revert_all_lines (void)
+{
+  int pos;
+
+  pos = where_history ();
+  using_history ();
+  _rl_revert_previous_lines ();
+  history_set_pos (pos);
+}
 
 /* Free the history list, including private readline data and take care
    of pointer aliases to history data.  Resets rl_undo_list if it points

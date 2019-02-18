@@ -310,16 +310,29 @@ static int completion_quoting_style = COMPLETE_BSQUOTE;
 /* Flag values for the final argument to bash_default_completion */
 #define DEFCOMP_CMDPOS		1
 
+static rl_command_func_t *vi_tab_binding = rl_complete;
+
 /* Change the readline VI-mode keymaps into or out of Posix.2 compliance.
    Called when the shell is put into or out of `posix' mode. */
 void
 posix_readline_initialize (on_or_off)
      int on_or_off;
 {
+  static char kseq[2] = { CTRL ('I'), 0 };		/* TAB */
+
   if (on_or_off)
     rl_variable_bind ("comment-begin", "#");
 #if defined (VI_MODE)
-  rl_bind_key_in_map (CTRL ('I'), on_or_off ? rl_insert : rl_complete, vi_insertion_keymap);
+  if (on_or_off)
+    {
+      vi_tab_binding = rl_function_of_keyseq (kseq, vi_insertion_keymap, (int *)NULL);
+      rl_bind_key_in_map (CTRL ('I'), rl_insert, vi_insertion_keymap);
+    }
+  else
+    {
+      if (rl_function_of_keyseq (kseq, vi_insertion_keymap, (int *)NULL) == rl_insert)
+        rl_bind_key_in_map (CTRL ('I'), vi_tab_binding, vi_insertion_keymap);
+    }
 #endif
 }
 
@@ -964,11 +977,8 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
       /* This breaks down when using command-oriented history and are not
 	 finished with the command, so we should not ignore the last command */
       using_history ();
-      if (rl_line_buffer[0])
-	{
-	  current_command_line_count++;	/* for rl_newline above */
-	  bash_add_history (rl_line_buffer);
-	}
+      current_command_line_count++;	/* for rl_newline above */
+      bash_add_history (rl_line_buffer);
       current_command_line_count = 0;	/* for dummy history entry */
       bash_add_history ("");
       history_lines_this_session++;

@@ -238,7 +238,7 @@ print_fltseq (fmt, first, last, incr)
   floatmax_t next;
   const char *s;
 
-  n = 0;		/* interation counter */
+  n = 0;		/* iteration counter */
   s = "";
   for (next = first; incr >= 0 ? (next <= last) : (next >= last); next = first + n * incr)
     {
