@@ -4844,8 +4844,8 @@ end_job_control ()
   if (original_pgrp >= 0 && terminal_pgrp != original_pgrp)
     give_terminal_to (original_pgrp, 1);
 
-  if (original_pgrp >= 0)
-    setpgid (0, original_pgrp);
+  if (original_pgrp >= 0 && setpgid (0, original_pgrp) == 0)
+    shell_pgrp = original_pgrp;
 }
 
 /* Restart job control by closing shell tty and reinitializing.  This is

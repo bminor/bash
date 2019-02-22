@@ -87,7 +87,7 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define W_ASSIGNRHS	0x000800	/* Word is rhs of an assignment statement */
 #define W_NOTILDE	0x001000	/* Don't perform tilde expansion on this word */
 #define W_ITILDE	0x002000	/* Internal flag for word expansion */
-#define W_NOEXPAND	0x004000	/* Don't expand at all -- do quote removal */
+#define W_EXPANDRHS	0x004000	/* Expanding word in ${paramOPword} */
 #define W_COMPASSIGN	0x008000	/* Compound assignment */
 #define W_ASSNBLTIN	0x010000	/* word is a builtin command that takes assignments */
 #define W_ASSIGNARG	0x020000	/* word is assignment argument to command */
@@ -111,6 +111,7 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 #define PF_NOSPLIT2	0x04	/* same as W_NOSPLIT2 */
 #define PF_ASSIGNRHS	0x08	/* same as W_ASSIGNRHS */
 #define PF_COMPLETE	0x10	/* same as W_COMPLETE, sets SX_COMPLETE */
+#define PF_EXPANDRHS	0x20	/* same as W_EXPANDRHS */
 
 /* Possible values for subshell_environment */
 #define SUBSHELL_ASYNC	0x01	/* subshell caused by `command &' */

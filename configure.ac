@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.0, version 5.007])dnl
+AC_REVISION([for Bash 5.0, version 5.008])dnl
 
 define(bashvers, 5.0)
 define(relstatus, maint)
@@ -712,6 +712,7 @@ m4_include([m4/nls.m4])
 m4_include([m4/po.m4])
 m4_include([m4/printf-posix.m4])
 m4_include([m4/progtest.m4])
+m4_include([m4/pthread_rwlock_rdlock.m4])
 m4_include([m4/size_max.m4])
 m4_include([m4/stdint_h.m4])
 m4_include([m4/threadlib.m4])

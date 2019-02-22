@@ -149,6 +149,7 @@ bindpwd (no_symlinks)
 #undef tcwd
 
   /* If canonicalization fails, reset dirname to the_current_working_directory */
+  canon_failed = 0;
   if (dirname == 0)
     {
       canon_failed = 1;

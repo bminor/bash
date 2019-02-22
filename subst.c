@@ -428,10 +428,10 @@ dump_word_flags (flags)
       f &= ~W_COMPASSIGN;
       fprintf (stderr, "W_COMPASSIGN%s", f ? "|" : "");
     }
-  if (f & W_NOEXPAND)
+  if (f & W_EXPANDRHS)
     {
-      f &= ~W_NOEXPAND;
-      fprintf (stderr, "W_NOEXPAND%s", f ? "|" : "");
+      f &= ~W_EXPANDRHS;
+      fprintf (stderr, "W_EXPANDRHS%s", f ? "|" : "");
     }
   if (f & W_ITILDE)
     {
@@ -3899,7 +3899,8 @@ expand_string_for_rhs (string, quoted, op, pflags, dollar_at_p, expanded_p)
      in Posix bug 1129 */
   old_nosplit = expand_no_split_dollar_star;
   expand_no_split_dollar_star = (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) || op == '=' || ifs_is_null == 0;	/* XXX - was 1 */
-  td.flags = W_NOSPLIT2;		/* no splitting, remove "" and '' */
+  td.flags = W_EXPANDRHS;		/* expanding RHS of ${paramOPword */
+  td.flags |= W_NOSPLIT2;		/* no splitting, remove "" and '' */
   if (pflags & PF_ASSIGNRHS)		/* pass through */
     td.flags |= W_ASSIGNRHS;
   if (op == '=')
@@ -10296,6 +10297,13 @@ add_twochars:
 	     this is when we are going to be performing word splitting,
 	     since we have to preserve a null argument if the next character
 	     will cause word splitting. */
+	  if (temp == 0 && quoted_state == PARTIALLY_QUOTED && quoted == 0 && (word->flags & W_NOSPLIT) == 0 && (word->flags & W_EXPANDRHS))
+	    {
+	      c = CTLNUL;
+	      sindex--;
+	      had_quoted_null = 1;
+	      goto add_character;
+	    }
 	  if (temp == 0 && quoted_state == PARTIALLY_QUOTED && (word->flags & (W_NOSPLIT|W_NOSPLIT2)))
 	    continue;
 
@@ -10347,7 +10355,14 @@ add_twochars:
 	  /* We do not want to add quoted nulls to strings that are only
 	     partially quoted; such nulls are discarded.  See above for the
 	     exception, which is when the string is going to be split.
-	     Posix interp 888 */
+	     Posix interp 888/1129 */
+	  if (temp == 0 && quoted_state == PARTIALLY_QUOTED && quoted == 0 && (word->flags & W_NOSPLIT) == 0 && (word->flags & W_EXPANDRHS))
+	    {
+	      c = CTLNUL;
+	      sindex--;
+	      goto add_character;
+	    }
+
 	  if (temp == 0 && (quoted_state == PARTIALLY_QUOTED) && (word->flags & (W_NOSPLIT|W_NOSPLIT2)))
 	    continue;
 
@@ -10478,8 +10493,6 @@ finished_with_string:
 	tword->flags |= W_NOGLOB;	/* XXX */
       if (word->flags & W_NOBRACE)
 	tword->flags |= W_NOBRACE;	/* XXX */
-      if (word->flags & W_NOEXPAND)
-	tword->flags |= W_NOEXPAND;	/* XXX */
       if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
 	tword->flags |= W_QUOTED;
       list = make_word_list (tword, (WORD_LIST *)NULL);
@@ -10577,8 +10590,6 @@ set_word_flags:
 	    tword->flags |= W_NOGLOB;
 	  if (word->flags & W_NOBRACE)
 	    tword->flags |= W_NOBRACE;
-	  if (word->flags & W_NOEXPAND)
-	    tword->flags |= W_NOEXPAND;
 	  list = make_word_list (tword, (WORD_LIST *)NULL);
 	}
     }

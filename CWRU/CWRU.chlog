@@ -5317,3 +5317,44 @@ jobs.c
 	  an interactive shell reported by Grisha Levit
 	  <grishalevit@gmail.com>
 
+				   2/19
+				   ----
+
+jobs.c
+	- end_job_control: if the setpgid(0, ...) succeeds, reset the value of
+	  shell_pgrp. Fixes pgrp mismatch after failed exec in an interactive
+	  login shell reported by Grisha Levit <grishalevit@gmail.com>
+
+				   2/20
+				   ----
+bashhist.c
+	- pre_process_line: save history_length before calling history_expand,
+	  and after possibly decrementing history_length, just restore the old
+	  value instead of incrementing it.  Fixes bug reported by
+	  Michael Albinus <michael.albinus@gmx.de>
+	- bash_add_history: don't bother calling really_add_history if the
+	  history is stifled and the max number of entries is 0
+
+aclocal.m4,configure.ac,m4/*.m4
+	- replace the old set of gettext m4 macros with the latest m4 files
+	  from the gnulib and gettext distributions
+
+				   2/21
+				   ----
+builtins/cd.def
+	- bindpwd: initialize canon_failed to 0 to prevent `cd -e' from always
+	  failing
+
+command.h
+	- W_EXPANDRHS: new flag, set when expanding WORD in ${paramOPword}
+
+subst.c
+	- expand_string_for_rhs: set W_EXPANDRHS in word to be expanded
+
+subst.c
+	- expand_word_internal: when encountering a single or double quoted
+	  string that expands to nothing, add a CTLNUL if the W_EXPANDRHS
+	  flag is set and the word isn't quoted, indicating that the word
+	  will eventually be split and we need to preserve the null to
+	  produce an empty word. From a discussion on bug-bash started by
+	  sunnycemetery@gmail.com
