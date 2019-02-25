@@ -436,11 +436,11 @@ int
 maybe_append_history (filename)
      char *filename;
 {
-  int fd, result;
+  int fd, result, histlen;
   struct stat buf;
 
   result = EXECUTION_SUCCESS;
-  if (history_lines_this_session > 0 && (history_lines_this_session <= where_history ()))
+  if (history_lines_this_session > 0)
     {
       /* If the filename was supplied, then create it if necessary. */
       if (stat (filename, &buf) == -1 && errno == ENOENT)
@@ -453,6 +453,10 @@ maybe_append_history (filename)
 	    }
 	  close (fd);
 	}
+      /* cap the number of lines we write at the length of the history list */
+      histlen = where_history ();
+      if (histlen > 0 && history_lines_this_session > histlen)
+	history_lines_this_session = histlen;	/* reset below anyway */
       result = append_history (history_lines_this_session, filename);
       /* Pretend we already read these lines from the file because we just
 	 added them */

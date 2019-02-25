@@ -3765,7 +3765,7 @@ completion_glob_pattern (string)
 	  continue;
 
 	case '\\':
-	  if (*string == 0)
+	  if (*string++ == 0)
 	    return (0);	 	  
 	}
 

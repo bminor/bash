@@ -5358,3 +5358,26 @@ subst.c
 	  will eventually be split and we need to preserve the null to
 	  produce an empty word. From a discussion on bug-bash started by
 	  sunnycemetery@gmail.com
+
+				   2/22
+				   ----
+bashline.c
+	- completion_glob_pattern: make sure to skip over a character quoted
+	  by a backslash. Fixes bug reported by John Van Sickle
+	  <john.vansickle@gmail.com>
+
+				   2/23
+				   ----
+lib/readline/complete.c
+	- last_completion_failed: keep track of whether the last completion
+	  attempt generated any matches
+	- rl_complete: if the last readline command was completion, but the
+	  completion attempt didn't generate any matches, don't regenerate
+	  and display the match list. Treat it as a new completion attempt.
+	  Suggested by Richard Stallman <rms@gnu.org>
+
+bashhist.c
+	- maybe_append_history: try to handle the case where the number of
+	  history entries in the current shell session is greater than the
+	  number of entries in the history list. Based on a report from
+	  <airat_vi@mail.ru>

@@ -406,6 +406,7 @@ int rl_sort_completion_matches = 1;
 
 /* Local variable states what happened during the last completion attempt. */
 static int completion_changed_buffer;
+static int last_completion_failed = 0;
 
 /* The result of the query to the user about displaying completion matches */
 static int completion_y_or_n;
@@ -428,7 +429,7 @@ rl_complete (int ignore, int invoking_key)
 
   if (rl_inhibit_completion)
     return (_rl_insert_char (ignore, invoking_key));
-  else if (rl_last_func == rl_complete && !completion_changed_buffer)
+  else if (rl_last_func == rl_complete && completion_changed_buffer == 0 && last_completion_failed == 0)
     return (rl_complete_internal ('?'));
   else if (_rl_complete_show_all)
     return (rl_complete_internal ('!'));
@@ -477,7 +478,7 @@ rl_completion_mode (rl_command_func_t *cfunc)
 /*				    */
 /************************************/
 
-/* Reset readline state on a signal or other event. */
+/* Reset public readline state on a signal or other event. */
 void
 _rl_reset_completion_state (void)
 {
@@ -2023,6 +2024,7 @@ rl_complete_internal (int what_to_do)
       rl_ding ();
       FREE (saved_line_buffer);
       completion_changed_buffer = 0;
+      last_completion_failed = 1;
       RL_UNSETSTATE(RL_STATE_COMPLETING);
       _rl_reset_completion_state ();
       return (0);
@@ -2038,10 +2040,14 @@ rl_complete_internal (int what_to_do)
       rl_ding ();
       FREE (saved_line_buffer);
       completion_changed_buffer = 0;
+      last_completion_failed = 1;
       RL_UNSETSTATE(RL_STATE_COMPLETING);
       _rl_reset_completion_state ();
       return (0);
     }
+
+  if (matches && matches[0] && *matches[0])
+    last_completion_failed = 0;
 
   switch (what_to_do)
     {

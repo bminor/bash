@@ -1,0 +1,18 @@
+# new tests
+x=4
+sp=' '
+
+# word
+recho ${x}${sp}''
+
+# unquoted
+recho ${x+ab "$y"}
+recho ${x+ab ''}
+recho ${x+ab "$( : )"}
+recho ${x+ab "${yy}"}
+
+# quoted
+recho "${x+ab ''}"
+recho "${x+ab ""}"
+recho "${x+ab '${yy}'}"
+recho "${x+ab "${yy}"}"
