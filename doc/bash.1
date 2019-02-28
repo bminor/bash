@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Sun Jan 27 17:41:59 EST 2019
+.\"	Last Change: Tue Feb 26 09:46:20 EST 2019
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2019 January 27" "GNU Bash 5.0"
+.TH BASH 1 "2019 February 26" "GNU Bash 5.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -4499,7 +4499,7 @@ rules above.
 Conditional expressions are used by the \fB[[\fP compound command and
 the \fBtest\fP and \fB[\fP builtin commands to test file attributes
 and perform string and arithmetic comparisons.
-The \fBtest\fP abd \fB[\fP commands determine their behavior based on
+The \fBtest\fP and \fB[\fP commands determine their behavior based on
 the number of arguments; see the descriptions of those commands for any
 other command-specific actions.
 .PP
@@ -9961,7 +9961,9 @@ If set, aliases are expanded as described above under
 This option is enabled by default for interactive shells.
 .TP 8
 .B extdebug
-If set at shell invocation, arrange to execute the debugger profile
+If set at shell invocation,
+or in a shell startup file,
+arrange to execute the debugger profile
 before the shell starts, identical to the \fB\-\-debugger\fP option.
 If set after invocation, behavior intended for use by debuggers is enabled:
 .RS

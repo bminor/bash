@@ -364,6 +364,13 @@ fc_builtin (list)
 	 in parse_and_execute(). */
       if (histbeg == histend && histend == last_hist && hlist[last_hist] == 0)
 	last_hist = histbeg = --histend;
+
+      if (hlist[last_hist] == 0)
+	last_hist--;
+      if (histend >= last_hist)
+	histend = last_hist;
+      else if (histbeg >= last_hist)
+	histbeg = last_hist;
     }
 
   /* We print error messages for line specifications out of range. */

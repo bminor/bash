@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.0, 7 December 2018).
+the Bash shell (version 5.0, 26 February 2019).
 
-This is Edition 5.0, last updated 7 December 2018,
+This is Edition 5.0, last updated 26 February 2019,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.0.
 
@@ -284,10 +284,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.0, 7 December 2018).
+the Bash shell (version 5.0, 26 February 2019).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.0, last updated 7 December 2018,
+<p>This is Edition 5.0, last updated 26 February 2019,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.0.
 </p>
@@ -1353,7 +1353,8 @@ Using &lsquo;<samp>;&amp;</samp>&rsquo;  in place of &lsquo;<samp>;;</samp>&rsqu
 the <var>command-list</var> associated with the next clause, if any.
 Using &lsquo;<samp>;;&amp;</samp>&rsquo; in place of &lsquo;<samp>;;</samp>&rsquo; causes the shell to test the patterns
 in the next clause, if any, and execute any associated <var>command-list</var>
-on a successful match.
+on a successful match,
+continuing the case statement execution as if the pattern list had not matched.
 </p>
 <p>The return status is zero if no <var>pattern</var> is matched.  Otherwise, the
 return status is the exit status of the <var>command-list</var> executed.
@@ -2370,7 +2371,7 @@ Any incorrectly formed brace expansion is left unchanged.
 being considered part of a brace expression.
 To avoid conflicts with parameter expansion, the string &lsquo;<samp>${</samp>&rsquo;
 is not considered eligible for brace expansion,
-and inhibits brace expansion until the closing &lsquo;<samp>}</samp>&rsquo;..
+and inhibits brace expansion until the closing &lsquo;<samp>}</samp>&rsquo;.
 </p>
 <p>This construct is typically used as shorthand when the common
 prefix of the strings to be generated is longer than in the
@@ -2762,7 +2763,7 @@ array in turn, and the expansion is the resultant list.
 <dt><code>${<var>parameter</var>%%<var>word</var>}</code></dt>
 <dd><p>The <var>word</var>
 is expanded to produce a pattern and matched according to the rules
-described below (see <a href="#Pattern-Matching">Pattern Matching</a>).  If the pattern matches
+described below (see <a href="#Pattern-Matching">Pattern Matching</a>).
 If the pattern matches a trailing portion of the expanded value of
 <var>parameter</var>, then the result of the expansion is the value of
 <var>parameter</var> with the shortest matching pattern (the &lsquo;<samp>%</samp>&rsquo; case)
@@ -6158,7 +6159,9 @@ This option is enabled by default for interactive shells.
 </p>
 </dd>
 <dt><code>extdebug</code></dt>
-<dd><p>If set at shell invocation, arrange to execute the debugger profile
+<dd><p>If set at shell invocation,
+or in a shell startup file,
+arrange to execute the debugger profile
 before the shell starts, identical to the <samp>--debugger</samp> option.
 If set after invocation, behavior intended for use by debuggers is enabled:
 </p>
@@ -8550,7 +8553,7 @@ To explicitly declare an array, use
 </p>
 <p>Associative arrays are created using
 </p><div class="example">
-<pre class="example">declare -A <var>name</var>.
+<pre class="example">declare -A <var>name</var>
 </pre></div>
 
 <p>Attributes may be
@@ -12077,7 +12080,7 @@ The <samp>-E</samp> option indicates that other supplied options and actions sho
 apply to &ldquo;empty&rdquo; command completion; that is, completion attempted on a 
 blank line.
 The <samp>-I</samp> option indicates that other supplied options and actions should
-apply to completion on the inital non-assignment word on the line, or after a
+apply to completion on the initial non-assignment word on the line, or after a
 command delimiter such as &lsquo;<samp>;</samp>&rsquo; or &lsquo;<samp>|</samp>&rsquo;, which is usually command
 name completion.
 If multiple options are supplied, the <samp>-D</samp> option takes precedence
@@ -12329,7 +12332,7 @@ The <samp>-E</samp> option indicates that other supplied options should
 apply to &ldquo;empty&rdquo; command completion; that is, completion attempted on a 
 blank line.
 The <samp>-I</samp> option indicates that other supplied options should
-apply to completion on the inital non-assignment word on the line, or after a
+apply to completion on the initial non-assignment word on the line, or after a
 command delimiter such as &lsquo;<samp>;</samp>&rsquo; or &lsquo;<samp>|</samp>&rsquo;, which is usually command
 name completion.
 </p>

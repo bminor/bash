@@ -2214,7 +2214,7 @@ unsigned char string[4] = { '\xc3', '\xa4', '\0' };
 int
 main (int c, char **v)
 {
-  setlocale (LC_ALL, "de_DE.UTF-8");
+  setlocale (LC_ALL, "en_US.UTF-8");
   if (fnmatch (pattern, (const char *)string, 0) != FNM_NOMATCH)
     exit (0);
   exit (1);

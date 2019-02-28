@@ -35,27 +35,27 @@
 \entry{commands, compound}{9}{commands, compound}
 \entry{commands, looping}{10}{commands, looping}
 \entry{commands, conditional}{11}{commands, conditional}
-\entry{commands, grouping}{14}{commands, grouping}
+\entry{commands, grouping}{15}{commands, grouping}
 \entry{coprocess}{15}{coprocess}
 \entry{shell function}{17}{shell function}
 \entry{functions, shell}{17}{functions, shell}
-\entry{parameters}{19}{parameters}
-\entry{variable, shell}{19}{variable, shell}
-\entry{shell variable}{19}{shell variable}
+\entry{parameters}{20}{parameters}
+\entry{variable, shell}{20}{variable, shell}
+\entry{shell variable}{20}{shell variable}
 \entry{parameters, positional}{21}{parameters, positional}
 \entry{parameters, special}{21}{parameters, special}
 \entry{expansion}{22}{expansion}
 \entry{brace expansion}{23}{brace expansion}
 \entry{expansion, brace}{23}{expansion, brace}
-\entry{tilde expansion}{23}{tilde expansion}
-\entry{expansion, tilde}{23}{expansion, tilde}
+\entry{tilde expansion}{24}{tilde expansion}
+\entry{expansion, tilde}{24}{expansion, tilde}
 \entry{parameter expansion}{24}{parameter expansion}
 \entry{expansion, parameter}{24}{expansion, parameter}
-\entry{command substitution}{30}{command substitution}
+\entry{command substitution}{31}{command substitution}
 \entry{expansion, arithmetic}{31}{expansion, arithmetic}
 \entry{arithmetic expansion}{31}{arithmetic expansion}
 \entry{process substitution}{31}{process substitution}
-\entry{word splitting}{31}{word splitting}
+\entry{word splitting}{32}{word splitting}
 \entry{expansion, filename}{32}{expansion, filename}
 \entry{expansion, pathname}{32}{expansion, pathname}
 \entry{filename expansion}{32}{filename expansion}
@@ -64,13 +64,13 @@
 \entry{matching, pattern}{33}{matching, pattern}
 \entry{redirection}{34}{redirection}
 \entry{command expansion}{38}{command expansion}
-\entry{command execution}{38}{command execution}
-\entry{command search}{38}{command search}
+\entry{command execution}{39}{command execution}
+\entry{command search}{39}{command search}
 \entry{execution environment}{39}{execution environment}
 \entry{environment}{40}{environment}
-\entry{exit status}{40}{exit status}
+\entry{exit status}{41}{exit status}
 \entry{signal handling}{41}{signal handling}
-\entry{shell script}{41}{shell script}
+\entry{shell script}{42}{shell script}
 \entry{special builtin}{71}{special builtin}
 \entry{login shell}{87}{login shell}
 \entry{interactive shell}{87}{interactive shell}

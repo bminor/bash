@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2018 December 7<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2019 February 26<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -1155,7 +1155,8 @@ Using <B>;&amp;</B> in place of <B>;;</B> causes execution to continue with
 the <I>list</I> associated with the next set of patterns.
 Using <B>;;&amp;</B> in place of <B>;;</B> causes the shell to test the next
 pattern list in the statement, if any, and execute any associated <I>list</I>
-on a successful match.
+on a successful match,
+continuing the case statement execution as if the pattern list had not matched.
 The exit status is zero if no
 pattern matches.  Otherwise, it is the exit status of the
 last command executed in <I>list</I>.
@@ -5742,7 +5743,7 @@ rules above.
 Conditional expressions are used by the <B>[[</B> compound command and
 the <B>test</B> and <B>[</B> builtin commands to test file attributes
 and perform string and arithmetic comparisons.
-The <B>test</B> abd <B>[</B> commands determine their behavior based on
+The <B>test</B> and <B>[</B> commands determine their behavior based on
 the number of arguments; see the descriptions of those commands for any
 other command-specific actions.
 <P>
@@ -9817,7 +9818,7 @@ The <B>-E</B> option indicates that other supplied options and actions should
 apply to ``empty'' command completion; that is, completion attempted on a
 blank line.
 The <B>-I</B> option indicates that other supplied options and actions should
-apply to completion on the inital non-assignment word on the line, or after
+apply to completion on the initial non-assignment word on the line, or after
 a command delimiter such as <B>;</B> or <B>|</B>, which is usually command
 name completion.
 If multiple options are supplied, the <B>-D</B> option takes precedence
@@ -10070,7 +10071,7 @@ The <B>-E</B> option indicates that other supplied options should
 apply to ``empty'' command completion; that is, completion attempted on a
 blank line.
 The <B>-I</B> option indicates that other supplied options should
-apply to completion on the inital non-assignment word on the line,
+apply to completion on the initial non-assignment word on the line,
 or after a command delimiter such as <B>;</B> or <B>|</B>, which is usually
 command name completion.
 <P>
@@ -12628,7 +12629,9 @@ This option is enabled by default for interactive shells.
 <DT><B>extdebug</B>
 
 <DD>
-If set at shell invocation, arrange to execute the debugger profile
+If set at shell invocation,
+or in a shell startup file,
+arrange to execute the debugger profile
 before the shell starts, identical to the <B>--debugger</B> option.
 If set after invocation, behavior intended for use by debuggers is enabled:
 <DL COMPACT><DT><DD>
@@ -13932,7 +13935,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2018 December 7<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2019 February 26<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -14038,6 +14041,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 02 January 2019 09:14:47 EST
+Time: 26 February 2019 09:57:16 EST
 </BODY>
 </HTML>

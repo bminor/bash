@@ -5381,3 +5381,42 @@ bashhist.c
 	  history entries in the current shell session is greater than the
 	  number of entries in the history list. Based on a report from
 	  <airat_vi@mail.ru>
+
+				   2/25
+				   ----
+aclocal.m4
+	- BASH_FUNC_FNMATCH_EQUIV_FALLBACK: use en_US.UTF-8 instead of
+	  de_DE.UTF-8; it's more likely to be installed
+
+				   2/26
+				   ----
+doc/{bash.1,bashref.texi}
+	- extdebug: make sure to note that setting this option in a startup
+	  file causes an attempt to start the debugger. Noted by Linda
+	  Walsh <bash@tlinx.org>
+
+builtins/fc.def
+	- fc_builtin: if we are not listing, and delete the last history entry,
+	  make sure that histbeg or histend, whichever is greater, is clamped
+	  at the value of last_hist to avoid dereferencing the just-removed
+	  history index. Fixes bug reported by Chris King-Parra
+	  <chris@kingparra.work>
+
+				   2/27
+				   ----
+shell.c
+	- init_interactive: assignment to histexp_flag should be protected by
+	  #ifdef BANG_HISTORY. https://savannah.gnu.org/patch/?9759
+
+subst.c
+	- list_string: if we have a non-null string, but quoted null character
+	  removal leaves an empty string, set W_SAWQUOTEDNULL in the returned
+	  word flags so the caller can deal with it
+	- parameter_brace_expand_rhs: deal with word with null or empty word
+	  and W_SAWQUOTEDNULL in the flags coming back from expand_string_for_rhs
+	  by turning it into a quoted null word and modifying the flags. Part
+	  of fix for bug report from Grisha Levit <grishalevit@gmail.com>
+	- expand_word_internal: if a double-quoted string comes back with a
+	  quoted null as the expansion of "$@", note that we saw it, but still
+	  add a quoted null into the result string instead of short-circuiting.
+	  Part of fix for bug report from Grisha Levit <grishalevit@gmail.com>

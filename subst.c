@@ -2838,6 +2838,10 @@ list_string (string, separators, quoted)
 	  result->word->flags &= ~W_HASQUOTEDNULL;	/* just to be sure */
 	  if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))
 	    result->word->flags |= W_QUOTED;
+	  /* If removing quoted null characters leaves an empty word, note
+	     that we saw this for the caller to act on. */
+	  if (current_word == 0 || current_word[0] == '\0')
+	    result->word->flags |= W_SAWQUOTEDNULL;
 	}
 
       /* If we're not doing sequences of separators in the traditional
@@ -3892,6 +3896,7 @@ expand_string_for_rhs (string, quoted, op, pflags, dollar_at_p, expanded_p)
      depending on whether or not are are going to be splitting: if the expansion
      is quoted, if the OP is `=', or if IFS is set to the empty string, we
      are not going to be splitting, so we set expand_no_split_dollar_star to
+     note this to callees.
      We pass through PF_ASSIGNRHS as W_ASSIGNRHS if this is on the RHS of an
      assignment statement. */
   /* The updated treatment of $* is the result of Posix interp 888 */
@@ -6868,7 +6873,7 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
      int op, quoted, pflags, *qdollaratp, *hasdollarat;
 {
   WORD_DESC *w;
-  WORD_LIST *l;
+  WORD_LIST *l, *tl;
   char *t, *t1, *temp, *vname;
   int l_hasdollat, sindex;
   SHELL_VAR *v;
@@ -6893,6 +6898,23 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
     *hasdollarat = l_hasdollat || (l && l->next);
   if (temp != value)
     free (temp);
+
+  /* list_string takes multiple CTLNULs and turns them into an empty word
+     with W_SAWQUOTEDNULL set. Turn it back into a single CTLNUL for the
+     rest of this function and the caller. */
+  for (tl = l; tl; tl = tl->next)
+    {
+      if (tl->word && (tl->word->word == 0 || tl->word->word[0] == 0) &&
+	    (tl->word->flags | W_SAWQUOTEDNULL))
+	{
+	  t = make_quoted_char ('\0');
+	  FREE (tl->word->word);
+	  tl->word->word = t;
+	  tl->word->flags |= W_QUOTED|W_HASQUOTEDNULL;
+	  tl->word->flags &= ~W_SAWQUOTEDNULL;
+	}
+    }
+
   if (l)
     {
       /* If l->next is not null, we know that TEMP contained "$@", since that
@@ -10204,13 +10226,8 @@ add_twochars:
 		 disable the special handling that "$@" gets. */
 	      if (list && list->word && list->next == 0 && (list->word->flags & W_HASQUOTEDNULL))
 		{
-		  /* If we already saw a quoted null, we don't need to add
-		     another one */
 		  if (had_quoted_null && temp_has_dollar_at)
-		    {
-		      quoted_dollar_at++;
-		      break;
-		    }
+		    quoted_dollar_at++;
 		  had_quoted_null = 1;		/* XXX */
 		}
 
@@ -10572,7 +10589,7 @@ finished_with_string:
 	    tword->word = remove_quoted_ifs (istring);
 	  else
 	    tword->word = istring;
-	  if (had_quoted_null && QUOTED_NULL (istring))
+	  if (had_quoted_null && QUOTED_NULL (istring))	/* should check for more than one */
 	    tword->flags |= W_HASQUOTEDNULL;	/* XXX */
 	  else if (had_quoted_null)
 	    tword->flags |= W_SAWQUOTEDNULL;	/* XXX */

@@ -13,15 +13,15 @@
 \entry {builtin}{3}
 \initial {C}
 \entry {command editing}{108}
-\entry {command execution}{38}
+\entry {command execution}{39}
 \entry {command expansion}{38}
 \entry {command history}{141}
-\entry {command search}{38}
-\entry {command substitution}{30}
+\entry {command search}{39}
+\entry {command substitution}{31}
 \entry {command timing}{8}
 \entry {commands, compound}{9}
 \entry {commands, conditional}{11}
-\entry {commands, grouping}{14}
+\entry {commands, grouping}{15}
 \entry {commands, lists}{9}
 \entry {commands, looping}{10}
 \entry {commands, pipelines}{8}
@@ -40,14 +40,14 @@
 \entry {evaluation, arithmetic}{92}
 \entry {event designators}{144}
 \entry {execution environment}{39}
-\entry {exit status}{3, 40}
+\entry {exit status}{3, 41}
 \entry {expansion}{22}
 \entry {expansion, arithmetic}{31}
 \entry {expansion, brace}{23}
 \entry {expansion, filename}{32}
 \entry {expansion, parameter}{24}
 \entry {expansion, pathname}{32}
-\entry {expansion, tilde}{23}
+\entry {expansion, tilde}{24}
 \entry {expressions, arithmetic}{92}
 \entry {expressions, conditional}{90}
 \initial {F}
@@ -89,7 +89,7 @@
 \entry {operator, shell}{3}
 \initial {P}
 \entry {parameter expansion}{24}
-\entry {parameters}{19}
+\entry {parameters}{20}
 \entry {parameters, positional}{21}
 \entry {parameters, special}{21}
 \entry {pathname expansion}{32}
@@ -114,8 +114,8 @@
 \initial {S}
 \entry {shell arithmetic}{92}
 \entry {shell function}{17}
-\entry {shell script}{41}
-\entry {shell variable}{19}
+\entry {shell script}{42}
+\entry {shell variable}{20}
 \entry {shell, interactive}{88}
 \entry {signal}{4}
 \entry {signal handling}{41}
@@ -123,14 +123,14 @@
 \entry {startup files}{87}
 \entry {suspending jobs}{103}
 \initial {T}
-\entry {tilde expansion}{23}
+\entry {tilde expansion}{24}
 \entry {token}{4}
 \entry {translation, native languages}{7}
 \initial {V}
-\entry {variable, shell}{19}
+\entry {variable, shell}{20}
 \entry {variables, readline}{111}
 \initial {W}
 \entry {word}{4}
-\entry {word splitting}{31}
+\entry {word splitting}{32}
 \initial {Y}
 \entry {yanking text}{109}
