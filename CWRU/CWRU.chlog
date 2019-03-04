@@ -5420,3 +5420,14 @@ subst.c
 	  quoted null as the expansion of "$@", note that we saw it, but still
 	  add a quoted null into the result string instead of short-circuiting.
 	  Part of fix for bug report from Grisha Levit <grishalevit@gmail.com>
+
+				    3/1
+				    ---
+examples/loadables/fdflags.c
+	- O_CLOEXEC: instead of not using it, synthesize a definition for it
+	  from unused bits in the file status word. It's only used as a
+	  placeholder anyway. Fix from code by Robert Elz <kre@bmunnari.oz.au>
+
+execute_cmd.c
+	- execute_connection: call optimize_fork on the rhs of a `;' connection
+	  to attempt to optimize the last simple command in a list

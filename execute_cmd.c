@@ -2699,6 +2699,7 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       QUIT;
       execute_command (command->value.Connection->first);
       QUIT;
+      optimize_fork (command);			/* XXX */
       exec_result = execute_command_internal (command->value.Connection->second,
 				      asynchronous, pipe_in, pipe_out,
 				      fds_to_close);
@@ -4506,7 +4507,6 @@ run_builtin:
 		  if (builtin_is_special)
 		    special_builtin_failed = 1;	/* XXX - take command builtin into account? */
 		}
-
 	      /* In POSIX mode, if there are assignment statements preceding
 		 a special builtin, they persist after the builtin
 		 completes. */

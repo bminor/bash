@@ -74,3 +74,15 @@ set -- '' ''
 n ${x+"$@" "$@"}
 n "$@" "$@"
 n "$@""$@"
+
+# new tests
+unset -v x
+v=$'\177'
+
+recho ''$'\177'''
+recho $'\177'''
+recho ''$'\177'
+
+recho ''$v''
+recho ''$v
+recho $v''
