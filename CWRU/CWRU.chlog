@@ -5431,3 +5431,31 @@ examples/loadables/fdflags.c
 execute_cmd.c
 	- execute_connection: call optimize_fork on the rhs of a `;' connection
 	  to attempt to optimize the last simple command in a list
+
+				    3/4
+				    ---
+subst.c
+	- parameter_brace_expand: add `@' to the list of operators that cause
+	  unbound parameter errors. Fixes oversight bug reported by
+	  Martin Schulte <gnu@schrader-schulte.de>
+
+				    3/5
+				    ---
+subst.c
+	- expand_word_internal: update to fix from 2/21 and 2/27 to accommodate
+	  contexts when word splitting will not take place (W_ASSIGNRHS). Fix
+	  from Grisha Levit <grishalevit@gmail.com>
+	- param_expand: if IFS is unset, and we are expanding $* in a context
+	  where we're not going to be performing word splitting, just treat it
+	  as if IFS=" " and don't set W_SPLITSPACE. Report and hint at fix
+	  from Grisha Levit <grishalevit@gmail.com>
+	- param_expand: if IFS is not null, and we are expanding $* in a
+	  context where we're not going to be performing word splitting, and
+	  we quote a null string (resulting in a quoted null), make sure we
+	  set W_SAWQUOTEDNULL to note this for the caller
+	- parameter_brace_expand_rhs: make sure to remove any W_SAWQUOTEDNULL
+	  flag for a the word on the rhs of the `=' operator if the original
+	  string is null or the original string is not null and the returned
+	  string (after dequoting) is not null. For instance ${v= ''} should
+	  not have the SAWQUOTEDNULL flag set because it is " " after
+	  expansion and dequoting, even though we saw a quoted null there

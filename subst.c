@@ -4,7 +4,7 @@
 /* ``Have a little faith, there's magic in the night.  You ain't a
      beauty, but, hey, you're alright.'' */
 
-/* Copyright (C) 1987-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2019 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -7055,6 +7055,11 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
      splitting, we want to quote the value we return appropriately, like
      the other expansions this function handles. */
   w->word = (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) ? quote_string (t1) : quote_escapes (t1);
+  /* If we have something that's non-null, that's not a quoted null string,
+     and we're not going to be performing word splitting (we know we're not
+     because the operator is `='), we can forget we saw a quoted null. */
+  if (w->word && w->word[0] && QUOTED_NULL (w->word) == 0)
+    w->flags &= ~W_SAWQUOTEDNULL;
   free (t1);
 
   return w;
@@ -8896,7 +8901,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 
   /* All the cases where an expansion can possibly generate an unbound
      variable error. */
-  if (want_substring || want_patsub || want_casemod || c == '#' || c == '%' || c == RBRACE)
+  if (want_substring || want_patsub || want_casemod || c == '@' || c == '#' || c == '%' || c == RBRACE)
     {
       if (var_is_set == 0 && unbound_vars_is_error && ((name[0] != '@' && name[0] != '*') || name[1]) && all_element_arrayref == 0)
 	{
@@ -9317,9 +9322,14 @@ param_expand (string, sindex, quoted, expanded_something,
 	     identical to $@ */
 	  if (expand_no_split_dollar_star && quoted == 0 && ifs_is_set == 0 && (pflags & PF_ASSIGNRHS))
 	    {
-	      /* Posix interp 888: RHS of assignment, IFS unset */
-	      temp = string_list_dollar_at (list, Q_DOUBLE_QUOTES, pflags);
-	      tflag |= W_SPLITSPACE;
+	      /* Posix interp 888: RHS of assignment, IFS unset: no splitting,
+		 separate with space */
+	      temp1 = string_list_dollar_star (list, quoted, pflags);
+	      temp = temp1 ? quote_string (temp1) : temp1;
+	      /* XXX - tentative - note that we saw a quoted null here */
+	      if (temp1 && *temp1 == 0 && QUOTED_NULL (temp))
+		tflag |= W_SAWQUOTEDNULL;
+	      FREE (temp1);
 	    }
 	  else if (expand_no_split_dollar_star && quoted == 0 && ifs_is_null && (pflags & PF_ASSIGNRHS))
 	    {
@@ -9333,6 +9343,10 @@ param_expand (string, sindex, quoted, expanded_something,
 	      /* Posix interp 888: RHS of assignment, IFS set to non-null value */
 	      temp1 = string_list_dollar_star (list, quoted, pflags);
 	      temp = temp1 ? quote_string (temp1) : temp1;
+
+	      /* XXX - tentative - note that we saw a quoted null here */
+	      if (temp1 && *temp1 == 0 && QUOTED_NULL (temp))
+		tflag |= W_SAWQUOTEDNULL;
 	      FREE (temp1);
 	    }
 	  /* XXX - should we check ifs_is_set here as well? */
@@ -10314,7 +10328,7 @@ add_twochars:
 	     this is when we are going to be performing word splitting,
 	     since we have to preserve a null argument if the next character
 	     will cause word splitting. */
-	  if (temp == 0 && quoted_state == PARTIALLY_QUOTED && quoted == 0 && (word->flags & W_NOSPLIT) == 0 && (word->flags & W_EXPANDRHS))
+	  if (temp == 0 && quoted_state == PARTIALLY_QUOTED && quoted == 0 && (word->flags & (W_NOSPLIT|W_EXPANDRHS|W_ASSIGNRHS)) == W_EXPANDRHS)
 	    {
 	      c = CTLNUL;
 	      sindex--;
@@ -10373,7 +10387,7 @@ add_twochars:
 	     partially quoted; such nulls are discarded.  See above for the
 	     exception, which is when the string is going to be split.
 	     Posix interp 888/1129 */
-	  if (temp == 0 && quoted_state == PARTIALLY_QUOTED && quoted == 0 && (word->flags & W_NOSPLIT) == 0 && (word->flags & W_EXPANDRHS))
+	  if (temp == 0 && quoted_state == PARTIALLY_QUOTED && quoted == 0 && (word->flags & (W_NOSPLIT|W_EXPANDRHS|W_ASSIGNRHS)) == W_EXPANDRHS)
 	    {
 	      c = CTLNUL;
 	      sindex--;

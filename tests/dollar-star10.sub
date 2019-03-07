@@ -1,0 +1,79 @@
+oIFS=$IFS
+
+set -- ''
+
+unset v
+recho ${v= ''}
+recho $v
+unset v
+recho ${v=''}
+recho $v
+unset v
+recho ${v= $*}
+recho $v
+unset v
+recho ${v=$*}
+recho $v
+unset v
+recho ${v='' }
+recho $v
+unset v
+recho ${v= '' }
+recho $v
+unset v
+recho ${v=$* }
+recho $v
+unset v
+recho ${v= $* }
+recho $v
+
+unset IFS
+
+unset v
+recho ${v= ''}
+recho $v
+unset v
+recho ${v=''}
+recho $v
+unset v
+recho ${v= $*}
+recho $v
+unset v
+recho ${v=$*}
+recho $v
+unset v
+recho ${v='' }
+recho $v
+unset v
+recho ${v= '' }
+recho $v
+unset v
+recho ${v=$* }
+recho $v
+unset v
+recho ${v= $* }
+recho $v
+
+unset -v v
+IFS=$oIFS
+
+# This shouldn't output anything
+set -- '' ''
+
+unset -v v
+recho ${v=$*}
+unset -v v
+recho ${v= $*}
+unset -v v
+recho ${v=$* }
+unset -v v
+recho ${v= $* }
+
+unset -v v IFS
+recho ${v=$*}
+unset -v v
+recho ${v= $*}
+unset -v v
+recho ${v= $* }
+unset -v v
+recho ${v= $*}
