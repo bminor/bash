@@ -5459,3 +5459,51 @@ subst.c
 	  string (after dequoting) is not null. For instance ${v= ''} should
 	  not have the SAWQUOTEDNULL flag set because it is " " after
 	  expansion and dequoting, even though we saw a quoted null there
+
+				    3/6
+				    ---
+lib/sh/eaccess.c
+	- sh_eaccess: AIX needs the same kind of additional checks as FreeBSD
+	  and Solaris when running as root and checking whether or not a file
+	  is executable. Report and fix from REIX, Tony <tony.reix@atos.net>
+
+				    3/7
+				    ---
+lib/glob/glob.h
+	- GX_RECURSE: new flag, indicates internal call to glob_filename
+
+lib/glob/glob.c
+	- glob_filename: add GX_RECURSE to recursive call to glob_filename
+	- glob_filename: dequote a directory name (in the absence of a
+	  filename) only if this is not a recursive call to glob_filename
+	  ((flags & GX_RECURSE) == 0). Fixes bug reported by Dr. Werner Fink
+	  <werner@suse.de>
+
+				    3/8
+				    ---
+parse.y
+	- handle_eof_input_unit: before calling exit_builtin, set
+	  last_shell_builtin and this_shell_builtin appropriately, since the
+	  exit builtin uses them to determine whether or not to exit
+	  immediately. Fixes bug reported by Tom Levy <tomlevy93@gmail.com>
+
+lib/sh/shquote.c
+	- sh_double_quote,sh_mkdoublequoted,sh_backslash_quote_for_double_quotes:
+	  make sure to handle multibyte characters that may contain characters
+	  that need to be quoted in double quotes; adding a spurious double
+	  quote may turn them into different characters or uncover characters
+	  that are special in double quotes. Fixes bug reported by
+	  Stephane Chazelas <stephane.chazelas@gmail.com>
+	- sh_backslash_quote: don't call COPY_CHAR_P if we're in a UTF-8
+	  locale and the current character doesn't have its eighth bit set;
+	  only check mb_cur_max and is_basic if we're not in a UTF-8 character
+	  set
+
+				    3/9
+				    ---
+subst.c
+	- read_comsub: if it looks like we're starting a multibyte character,
+	  read a whole multibyte character from buf and add it all at once,
+	  so we don't quote each byte in a multibyte character sequence. Fixes
+	  bug uncovered by shquote changes from 3/8
+

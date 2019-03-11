@@ -1194,7 +1194,7 @@ glob_filename (pathname, flags)
       if (d[directory_len - 1] == '/')
 	d[directory_len - 1] = '\0';
 
-      directories = glob_filename (d, dflags);
+      directories = glob_filename (d, dflags|GX_RECURSE);
 
       if (free_dirname)
 	{
@@ -1351,11 +1351,20 @@ only_filename:
 	    free (directory_name);
 	  return (NULL);
 	}
-      if (directory_len > 0 && hasglob == 2)		/* need to dequote */
+      /* If we have a directory name with quoted characters, and we are
+	 being called recursively to glob the directory portion of a pathname,
+	 we need to dequote the directory name before returning it so the
+	 caller can read the directory */
+      if (directory_len > 0 && hasglob == 2 && (flags & GX_RECURSE) != 0)
 	{
 	  dequote_pathname (directory_name);
 	  directory_len = strlen (directory_name);
 	}
+
+      /* We could check whether or not the dequoted directory_name is a
+	 directory and return it here, returning the original directory_name
+	 if not, but we don't do that yet. I'm not sure it matters. */
+
       /* Handle GX_MARKDIRS here. */
       result[0] = (char *) malloc (directory_len + 1);
       if (result[0] == NULL)

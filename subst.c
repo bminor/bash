@@ -6037,11 +6037,18 @@ read_comsub (fd, quoted, flags, rflag)
      int fd, quoted, flags;
      int *rflag;
 {
-  char *istring, buf[128], *bufp;
+  char *istring, buf[512], *bufp;
   int istring_index, c, tflag, skip_ctlesc, skip_ctlnul;
+  int mb_cur_max;
   size_t istring_size;
   ssize_t bufn;
   int nullbyte;
+#if defined (HANDLE_MULTIBYTE)
+  mbstate_t ps;
+  wchar_t wc;
+  size_t mblen;
+  int i;
+#endif
 
   istring = (char *)NULL;
   istring_index = istring_size = bufn = tflag = 0;
@@ -6049,6 +6056,7 @@ read_comsub (fd, quoted, flags, rflag)
   skip_ctlesc = ifs_cmap[CTLESC];
   skip_ctlnul = ifs_cmap[CTLNUL];
 
+  mb_cur_max = MB_CUR_MAX;
   nullbyte = 0;
 
   /* Read the output of the command through the pipe.  This may need to be
@@ -6079,7 +6087,7 @@ read_comsub (fd, quoted, flags, rflag)
 	}
 
       /* Add the character to ISTRING, possibly after resizing it. */
-      RESIZE_MALLOCED_BUFFER (istring, istring_index, 2, istring_size, DEFAULT_ARRAY_SIZE);
+      RESIZE_MALLOCED_BUFFER (istring, istring_index, mb_cur_max+1, istring_size, DEFAULT_ARRAY_SIZE);
 
       /* This is essentially quote_string inline */
       if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) /* || c == CTLESC || c == CTLNUL */)
@@ -6093,6 +6101,27 @@ read_comsub (fd, quoted, flags, rflag)
 	istring[istring_index++] = CTLESC;
       else if ((skip_ctlnul == 0 && c == CTLNUL) || (c == ' ' && (ifs_value && *ifs_value == 0)))
 	istring[istring_index++] = CTLESC;
+
+#if defined (HANDLE_MULTIBYTE)
+      if ((locale_utf8locale && (c & 0x80)) ||
+	  (locale_utf8locale == 0 && mb_cur_max > 1 && (unsigned char)c > 127))
+	{
+	  /* read a multibyte character from buf */
+	  /* punt on the hard case for now */
+	  memset (&ps, '\0', sizeof (mbstate_t));
+	  mblen = mbrtowc (&wc, bufp-1, bufn+1, &ps);
+	  if (MB_INVALIDCH (mblen) || mblen == 0 || mblen == 1)
+	    istring[istring_index++] = c;
+	  else
+	    {
+	      istring[istring_index++] = c;
+	      for (i = 0; i < mblen-1; i++)
+		istring[istring_index++] = *bufp++;
+	      bufn -= mblen - 1;
+	    }
+	  continue;
+	}
+#endif
 
       istring[istring_index++] = c;
 
@@ -10250,9 +10279,7 @@ add_twochars:
 		 a special case; it's the only case where a quoted string
 		 can expand into more than one word.  It's going to come back
 		 from the above call to expand_word_internal as a list with
-		 a single word, in which all characters are quoted and
-		 separated by blanks.  What we want to do is to turn it back
-		 into a list for the next piece of code. */
+		 multiple words. */
 	      if (list)
 		dequote_list (list);
 

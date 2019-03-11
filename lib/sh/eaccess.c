@@ -213,10 +213,10 @@ sh_eaccess (path, mode)
 #  else		/* HAVE_EACCESS */	/* FreeBSD */
   ret = eaccess (path, mode);	/* XXX -- not always correct for X_OK */
 #  endif	/* HAVE_EACCESS */
-#  if defined (__FreeBSD__) || defined (SOLARIS)
+#  if defined (__FreeBSD__) || defined (SOLARIS) || defined (_AIX)
   if (ret == 0 && current_user.euid == 0 && mode == X_OK)
     return (sh_stataccess (path, mode));
-#  endif	/* __FreeBSD__ || SOLARIS */
+#  endif	/* __FreeBSD__ || SOLARIS || _AIX */
   return ret;
 #elif defined (EFF_ONLY_OK)		/* SVR4(?), SVR4.2 */
   return access (path, mode|EFF_ONLY_OK);

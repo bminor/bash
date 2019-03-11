@@ -6361,6 +6361,9 @@ handle_eof_input_unit ()
 
       /* In this case EOF should exit the shell.  Do it now. */
       reset_parser ();
+
+      last_shell_builtin = this_shell_builtin;
+      this_shell_builtin = exit_builtin;
       exit_builtin ((WORD_LIST *)NULL);
     }
   else

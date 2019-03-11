@@ -1,16 +1,54 @@
-mkdir -m700 /tmp/a /tmp/a/b
-touch /tmp/a/b/c
+ORIGD=$PWD
+: ${TMPDIR:=/var/tmp}
 
-echo /tmp/a/b/* "/tmp/a/"b/* "/tmp/a/b"/*
+SD=$TMPDIR/scratch-$$
+[ -d $SD ] || mkdir $SD
+cd $SD
+mkdir tmp
 
-chmod -r /tmp/a            
-echo /tmp/a/b/* "/tmp/a/"b/* "/tmp/a/b"/*
-echo "/tmp/a/b"/*
+D=./tmp/a
+D1='./t\mp/a'
+
+mkdir -m700 ./tmp/a ./tmp/a/b
+touch ./tmp/a/b/c
+
+echo ./tmp/a/b/* "./tmp/a/"b/* "./tmp/a/b"/*
+
+chmod -r ./tmp/a            
+echo ./tmp/a/b/* "./tmp/a/"b/* "./tmp/a/b"/*
+echo "./tmp/a/b"/*
 
 bs=\\
-echo /tmp${bs}/a/b/*
-echo /tmp${bs}/a/b/c
-echo /tm[p]${bs}/a/b/c
+echo ./tmp${bs}/a/b/*
+echo ./tmp${bs}/a/b/c
+echo ./tm[p]${bs}/a/b/c
+echo ./t${bs}mp/a/b/*
 
-chmod +r /tmp/a
-rm -rf /tmp/a
+recho "./tmp/a"/*
+recho "$D"/*
+recho "$D"/b/*
+
+recho $D/*
+recho $D/b/*
+recho $D1/*
+recho $D1/b/*
+recho $D/
+recho $D/b/
+recho $D1/
+recho $D1/b/
+
+recho ./t\mp/a/*
+recho ./t\mp/a/b/*
+
+recho ./tmp/a*
+recho ./tmp/a/b*
+recho ./t\mp/a*
+recho ./t\mp/a/b*
+
+recho ./t\mp/
+
+chmod +r ./tmp/a
+rm -rf ./tmp/a
+
+cd $ORIGD
+rm -rf $SD
