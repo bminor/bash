@@ -27,7 +27,7 @@
 
 typedef intmax_t	arrayind_t;
 
-enum atype {array_indexed, array_assoc};
+enum atype {array_indexed, array_assoc};	/* only array_indexed used */
 
 typedef struct array {
 	enum atype	type;
@@ -64,7 +64,7 @@ extern ARRAY	*array_dequote __P((ARRAY *));
 extern ARRAY	*array_dequote_escapes __P((ARRAY *));
 extern ARRAY	*array_remove_quoted_nulls __P((ARRAY *));
 
-extern char	*array_subrange __P((ARRAY *, arrayind_t, arrayind_t, int, int));
+extern char	*array_subrange __P((ARRAY *, arrayind_t, arrayind_t, int, int, int));
 extern char	*array_patsub __P((ARRAY *, char *, char *, int));
 extern char	*array_modcase __P((ARRAY *, char *, int, int));
 

@@ -398,10 +398,10 @@ ARRAY	*array;
  * Since arrays are sparse, unset array elements are not counted.
  */
 char *
-array_subrange (a, start, nelem, starsub, quoted)
+array_subrange (a, start, nelem, starsub, quoted, pflags)
 ARRAY	*a;
 arrayind_t	start, nelem;
-int	starsub, quoted;
+int	starsub, quoted, pflags;
 {
 	ARRAY		*a2;
 	ARRAY_ELEMENT	*h, *p;
@@ -436,7 +436,7 @@ int	starsub, quoted;
 	array_dispose(a2);
 	if (wl == 0)
 		return (char *)NULL;
-	t = string_list_pos_params(starsub ? '*' : '@', wl, quoted);
+	t = string_list_pos_params(starsub ? '*' : '@', wl, quoted, pflags);	/* XXX */
 	dispose_words(wl);
 
 	return t;
@@ -449,7 +449,7 @@ char	*pat, *rep;
 int	mflags;
 {
 	char	*t;
-	int	pchar, qflags;
+	int	pchar, qflags, pflags;
 	WORD_LIST	*wl, *save;
 
 	if (a == 0 || array_head(a) == 0 || array_empty(a))
@@ -467,8 +467,9 @@ int	mflags;
 
 	pchar = (mflags & MATCH_STARSUB) == MATCH_STARSUB ? '*' : '@';
 	qflags = (mflags & MATCH_QUOTED) == MATCH_QUOTED ? Q_DOUBLE_QUOTES : 0;
+	pflags = (mflags & MATCH_ASSIGNRHS) ? PF_ASSIGNRHS : 0;
 
-	t = string_list_pos_params (pchar, save, qflags);
+	t = string_list_pos_params (pchar, save, qflags, pflags);
 	dispose_words(save);
 
 	return t;
@@ -482,7 +483,7 @@ int	modop;
 int	mflags;
 {
 	char	*t;
-	int	pchar, qflags;
+	int	pchar, qflags, pflags;
 	WORD_LIST	*wl, *save;
 
 	if (a == 0 || array_head(a) == 0 || array_empty(a))
@@ -500,8 +501,9 @@ int	mflags;
 
 	pchar = (mflags & MATCH_STARSUB) == MATCH_STARSUB ? '*' : '@';
 	qflags = (mflags & MATCH_QUOTED) == MATCH_QUOTED ? Q_DOUBLE_QUOTES : 0;
+	pflags = (mflags & MATCH_ASSIGNRHS) ? PF_ASSIGNRHS : 0;
 
-	t = string_list_pos_params (pchar, save, qflags);
+	t = string_list_pos_params (pchar, save, qflags, pflags);
 	dispose_words(save);
 
 	return t;

@@ -43,7 +43,7 @@ extern void assoc_remove __P((HASH_TABLE *, char *));
 
 extern char *assoc_reference __P((HASH_TABLE *, char *));
 
-extern char *assoc_subrange __P((HASH_TABLE *, arrayind_t, arrayind_t, int, int));
+extern char *assoc_subrange __P((HASH_TABLE *, arrayind_t, arrayind_t, int, int, int));
 extern char *assoc_patsub __P((HASH_TABLE *, char *, char *, int));
 extern char *assoc_modcase __P((HASH_TABLE *, char *, int, int));
 

@@ -264,7 +264,7 @@ static char *extract_delimited_string __P((char *, int *, char *, char *, char *
 static char *extract_dollar_brace_string __P((char *, int *, int, int));
 static int skip_matched_pair __P((const char *, int, int, int, int));
 
-static char *pos_params __P((char *, int, int, int));
+static char *pos_params __P((char *, int, int, int, int));
 
 static unsigned char *mb_getcharlens __P((char *, int));
 
@@ -311,12 +311,12 @@ static arrayind_t array_length_reference __P((char *));
 #endif
 
 static int valid_brace_expansion_word __P((char *, int));
-static int chk_atstar __P((char *, int, int *, int *));
+static int chk_atstar __P((char *, int, int, int *, int *));
 static int chk_arithsub __P((const char *, int));
 
 static WORD_DESC *parameter_brace_expand_word __P((char *, int, int, int, arrayind_t *));
 static char *parameter_brace_find_indir __P((char *, int, int, int));
-static WORD_DESC *parameter_brace_expand_indir __P((char *, int, int, int *, int *));
+static WORD_DESC *parameter_brace_expand_indir __P((char *, int, int, int, int *, int *));
 static WORD_DESC *parameter_brace_expand_rhs __P((char *, char *, int, int, int, int *, int *));
 static void parameter_brace_expand_error __P((char *, char *, int));
 
@@ -2676,11 +2676,13 @@ string_list_dollar_at (list, quoted, flags)
    the various subtleties of using the first character of $IFS as the
    separator.  Calls string_list_dollar_at, string_list_dollar_star, and
    string_list as appropriate. */
+/* This needs to fully understand the additional contexts where word
+   splitting does not occur (W_ASSIGNRHS, etc.) */
 char *
-string_list_pos_params (pchar, list, quoted)
+string_list_pos_params (pchar, list, quoted, pflags)
      int pchar;
      WORD_LIST *list;
-     int quoted;
+     int quoted, pflags;
 {
   char *ret;
   WORD_LIST *tlist;
@@ -2698,6 +2700,8 @@ string_list_pos_params (pchar, list, quoted)
       ret = string_list (tlist);
     }
   else if (pchar == '*' && quoted == 0 && ifs_is_null)	/* XXX */
+    ret = expand_no_split_dollar_star ? string_list_dollar_star (list, quoted, 0) : string_list_dollar_at (list, quoted, 0);	/* Posix interp 888 */
+  else if (pchar == '*' && quoted == 0 && (pflags & PF_ASSIGNRHS))	/* XXX */
     ret = expand_no_split_dollar_star ? string_list_dollar_star (list, quoted, 0) : string_list_dollar_at (list, quoted, 0);	/* Posix interp 888 */
   else if (pchar == '*')
     {
@@ -2717,6 +2721,8 @@ string_list_pos_params (pchar, list, quoted)
     ret = string_list_dollar_at (list, quoted, 0);
   else if (pchar == '@' && quoted == 0 && ifs_is_null)	/* XXX */
     ret = string_list_dollar_at (list, quoted, 0);	/* Posix interp 888 */
+  else if (pchar == '@' && quoted == 0 && (pflags & PF_ASSIGNRHS))
+    ret = string_list_dollar_at (list, quoted, pflags);	/* Posix interp 888 */
   else if (pchar == '@')
     ret = string_list_dollar_star (list, quoted, 0);
   else
@@ -3391,9 +3397,9 @@ string_rest_of_args (dollar_star)
    Q_HERE_DOCUMENT or Q_DOUBLE_QUOTES, this returns a quoted list, otherwise
    no quoting chars are added. */
 static char *
-pos_params (string, start, end, quoted)
+pos_params (string, start, end, quoted, pflags)
      char *string;
-     int start, end, quoted;
+     int start, end, quoted, pflags;
 {
   WORD_LIST *save, *params, *h, *t;
   char *ret;
@@ -3427,7 +3433,7 @@ pos_params (string, start, end, quoted)
     }
   t->next = (WORD_LIST *)NULL;
 
-  ret = string_list_pos_params (string[0], h, quoted);
+  ret = string_list_pos_params (string[0], h, quoted, pflags);
 
   if (t != params)
     t->next = params;
@@ -3755,7 +3761,7 @@ expand_string_unsplit (string, quoted)
     {
       if (value->word)
 	{
-	  remove_quoted_nulls (value->word->word);
+	  remove_quoted_nulls (value->word->word);	/* XXX */
 	  value->word->flags &= ~W_HASQUOTEDNULL;
 	}
       dequote_list (value);
@@ -3797,7 +3803,7 @@ expand_string_assignment (string, quoted)
     {
       if (value->word)
 	{
-	  remove_quoted_nulls (value->word->word);
+	  remove_quoted_nulls (value->word->word);	/* XXX */
 	  value->word->flags &= ~W_HASQUOTEDNULL;
 	}
       dequote_list (value);
@@ -3839,7 +3845,7 @@ expand_prompt_string (string, quoted, wflags)
     {
       if (value->word)
 	{
-	  remove_quoted_nulls (value->word->word);
+	  remove_quoted_nulls (value->word->word);	/* XXX */
 	  value->word->flags &= ~W_HASQUOTEDNULL;
 	}
       dequote_list (value);
@@ -3904,7 +3910,7 @@ expand_string_for_rhs (string, quoted, op, pflags, dollar_at_p, expanded_p)
      in Posix bug 1129 */
   old_nosplit = expand_no_split_dollar_star;
   expand_no_split_dollar_star = (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) || op == '=' || ifs_is_null == 0;	/* XXX - was 1 */
-  td.flags = W_EXPANDRHS;		/* expanding RHS of ${paramOPword */
+  td.flags = W_EXPANDRHS;		/* expanding RHS of ${paramOPword} */
   td.flags |= W_NOSPLIT2;		/* no splitting, remove "" and '' */
   if (pflags & PF_ASSIGNRHS)		/* pass through */
     td.flags |= W_ASSIGNRHS;
@@ -5166,7 +5172,7 @@ list_remove_pattern (list, pattern, patspec, itype, quoted)
     }
 
   l = REVERSE_LIST (new, WORD_LIST *);
-  tword = string_list_pos_params (itype, l, quoted);
+  tword = string_list_pos_params (itype, l, quoted, 0);
   dispose_words (l);
 
   return (tword);
@@ -6547,9 +6553,9 @@ valid_brace_expansion_word (name, var_is_special)
 }
 
 static int
-chk_atstar (name, quoted, quoted_dollar_atp, contains_dollar_at)
+chk_atstar (name, quoted, pflags, quoted_dollar_atp, contains_dollar_at)
      char *name;
-     int quoted;
+     int quoted, pflags;
      int *quoted_dollar_atp, *contains_dollar_at;
 {
   char *temp1;
@@ -6574,7 +6580,9 @@ chk_atstar (name, quoted, quoted_dollar_atp, contains_dollar_at)
     }
   else if (name[0] == '*' && name[1] == '\0' && quoted == 0)
     {
-      if (contains_dollar_at)
+      /* Need more checks here that parallel what string_list_pos_params and
+	 param_expand do. Check expand_no_split_dollar_star and ??? */
+      if (contains_dollar_at && expand_no_split_dollar_star == 0)
 	*contains_dollar_at = 1;
       return 1;
     }
@@ -6813,9 +6821,9 @@ parameter_brace_find_indir (name, var_is_special, quoted, find_nameref)
 /* Expand an indirect reference to a variable: ${!NAME} expands to the
    value of the variable whose name is the value of NAME. */
 static WORD_DESC *
-parameter_brace_expand_indir (name, var_is_special, quoted, quoted_dollar_atp, contains_dollar_at)
+parameter_brace_expand_indir (name, var_is_special, quoted, pflags, quoted_dollar_atp, contains_dollar_at)
      char *name;
-     int var_is_special, quoted;
+     int var_is_special, quoted, pflags;
      int *quoted_dollar_atp, *contains_dollar_at;
 {
   char *t;
@@ -6853,7 +6861,7 @@ parameter_brace_expand_indir (name, var_is_special, quoted, quoted_dollar_atp, c
       
   t = parameter_brace_find_indir (name, var_is_special, quoted, 0);
 
-  chk_atstar (t, quoted, quoted_dollar_atp, contains_dollar_at);
+  chk_atstar (t, quoted, pflags, quoted_dollar_atp, contains_dollar_at);
 
 #if defined (ARRAY_VARS)
   /* Array references to unset variables are also an error */
@@ -6886,7 +6894,7 @@ parameter_brace_expand_indir (name, var_is_special, quoted, quoted_dollar_atp, c
       return (w);
     }
 	
-  w = parameter_brace_expand_word (t, SPECIAL_VAR(t, 0), quoted, 0, 0);
+  w = parameter_brace_expand_word (t, SPECIAL_VAR(t, 0), quoted, pflags, 0);
   free (t);
 
   return w;
@@ -7649,7 +7657,7 @@ list_transform (xc, v, list, itype, quoted)
   if (itype == '*' && expand_no_split_dollar_star && ifs_is_null)
     qflags |= Q_DOUBLE_QUOTES;		/* Posix interp 888 */
 
-  tword = string_list_pos_params (itype, l, qflags);
+  tword = string_list_pos_params (itype, l, qflags, 0);
   dispose_words (l);
 
   return (tword);
@@ -7910,24 +7918,28 @@ parameter_brace_substring (varname, value, ind, substr, quoted, pflags, flags)
     case VT_POSPARMS:
     case VT_ARRAYVAR:
       if (vtype == VT_POSPARMS)
-	tt = pos_params (varname, e1, e2, quoted);
+	tt = pos_params (varname, e1, e2, quoted, pflags);
 #if defined (ARRAY_VARS)
         /* assoc_subrange and array_subrange both call string_list_pos_params,
 	   so we can treat this case just like VT_POSPARAMS. */
       else if (assoc_p (v))
 	/* we convert to list and take first e2 elements starting at e1th
 	   element -- officially undefined for now */	
-	tt = assoc_subrange (assoc_cell (v), e1, e2, starsub, quoted);
+	tt = assoc_subrange (assoc_cell (v), e1, e2, starsub, quoted, pflags);
       else
 	/* We want E2 to be the number of elements desired (arrays can be
 	   sparse, so verify_substring_values just returns the numbers
 	   specified and we rely on array_subrange to understand how to
 	   deal with them). */
-	tt = array_subrange (array_cell (v), e1, e2, starsub, quoted);
+	tt = array_subrange (array_cell (v), e1, e2, starsub, quoted, pflags);
 #endif
       /* We want to leave this alone in every case where pos_params/
 	 string_list_pos_params quotes the list members */
       if (tt && quoted == 0 && ifs_is_null)
+	{
+	  temp = tt;	/* Posix interp 888 */
+	}
+      else if (tt && quoted == 0 && (pflags & PF_ASSIGNRHS))
 	{
 	  temp = tt;	/* Posix interp 888 */
 	}
@@ -8112,7 +8124,7 @@ pos_params_pat_subst (string, pat, rep, mflags)
   WORD_LIST *save, *params;
   WORD_DESC *w;
   char *ret;
-  int pchar, qflags;
+  int pchar, qflags, pflags;
 
   save = params = list_rest_of_args ();
   if (save == 0)
@@ -8129,13 +8141,14 @@ pos_params_pat_subst (string, pat, rep, mflags)
 
   pchar = (mflags & MATCH_STARSUB) == MATCH_STARSUB ? '*' : '@';
   qflags = (mflags & MATCH_QUOTED) == MATCH_QUOTED ? Q_DOUBLE_QUOTES : 0;
+  pflags = (mflags & MATCH_ASSIGNRHS) == MATCH_ASSIGNRHS ? PF_ASSIGNRHS : 0;
 
   /* If we are expanding in a context where word splitting will not be
      performed, treat as quoted. This changes how $* will be expanded. */
   if (pchar == '*' && (mflags & MATCH_ASSIGNRHS) && expand_no_split_dollar_star && ifs_is_null)
     qflags |= Q_DOUBLE_QUOTES;		/* Posix interp 888 */
 
-  ret = string_list_pos_params (pchar, save, qflags);
+  ret = string_list_pos_params (pchar, save, qflags, pflags);
   dispose_words (save);
 
   return (ret);
@@ -8283,6 +8296,10 @@ parameter_brace_patsub (varname, value, ind, patsub, quoted, pflags, flags)
 	{
 	  /* Posix interp 888 */
 	}
+      else if (temp && quoted == 0 && (pflags & PF_ASSIGNRHS))
+	{
+	  /* Posix interp 888 */
+	}
       else if (temp && (mflags & MATCH_QUOTED) == 0)
 	{
 	  tt = quote_escapes (temp);
@@ -8344,7 +8361,7 @@ pos_params_modcase (string, pat, modop, mflags)
   WORD_LIST *save, *params;
   WORD_DESC *w;
   char *ret;
-  int pchar, qflags;
+  int pchar, qflags, pflags;
 
   save = params = list_rest_of_args ();
   if (save == 0)
@@ -8361,13 +8378,14 @@ pos_params_modcase (string, pat, modop, mflags)
 
   pchar = (mflags & MATCH_STARSUB) == MATCH_STARSUB ? '*' : '@';
   qflags = (mflags & MATCH_QUOTED) == MATCH_QUOTED ? Q_DOUBLE_QUOTES : 0;
+  pflags = (mflags & MATCH_ASSIGNRHS) == MATCH_ASSIGNRHS ? PF_ASSIGNRHS : 0;
 
   /* If we are expanding in a context where word splitting will not be
      performed, treat as quoted.  This changes how $* will be expanded. */
   if (pchar == '*' && (mflags & MATCH_ASSIGNRHS) && ifs_is_null)
     qflags |= Q_DOUBLE_QUOTES;		/* Posix interp 888 */
 
-  ret = string_list_pos_params (pchar, save, qflags);
+  ret = string_list_pos_params (pchar, save, qflags, pflags);
   dispose_words (save);
 
   return (ret);
@@ -8802,7 +8820,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
       FREE (x);
       if (ALL_ELEMENT_SUB (x1[0]) && x1[1] == RBRACK)
 	{
-	  temp = array_keys (temp1, quoted);	/* handles assoc vars too */
+	  temp = array_keys (temp1, quoted, pflags);	/* handles assoc vars too */
 	  if (x1[0] == '@')
 	    {
 	      if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) && quoted_dollar_atp)
@@ -8837,7 +8855,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 
   if (want_indir)
     {
-      tdesc = parameter_brace_expand_indir (name + 1, var_is_special, quoted, quoted_dollar_atp, contains_dollar_at);
+      tdesc = parameter_brace_expand_indir (name + 1, var_is_special, quoted, pflags, quoted_dollar_atp, contains_dollar_at);
       if (tdesc == &expand_wdesc_error || tdesc == &expand_wdesc_fatal)
 	{
 	  temp = (char *)NULL;
@@ -8894,7 +8912,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 	  if (expand_no_split_dollar_star && t[1] == '*')	/* XXX */
 	    qflags |= Q_DOUBLE_QUOTES;
 	}
-      chk_atstar (name, qflags, quoted_dollar_atp, contains_dollar_at);
+      chk_atstar (name, qflags, pflags, quoted_dollar_atp, contains_dollar_at);
     }
 #endif
 
@@ -8909,7 +8927,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 		   (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) &&
 		   QUOTED_NULL (temp) &&
 		   valid_array_reference (name, 0) &&
-		   chk_atstar (name, 0, (int *)0, (int *)0);
+		   chk_atstar (name, 0, 0, (int *)0, (int *)0);
 #endif
 
   /* Get the rest of the stuff inside the braces. */
@@ -8962,10 +8980,13 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 	 "$@" to take a different code path. In fact, we make sure at the end
 	 of expand_word_internal that we're only looking at these flags if
 	 quoted_dollar_at == 0. */
-      if (temp1 && 
+      if (temp1 &&
           (quoted_dollar_atp == 0 || *quoted_dollar_atp == 0) &&
 	  QUOTED_NULL (temp1) && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
 	ret->flags |= W_QUOTED|W_HASQUOTEDNULL;
+      else if (temp1 && (name[0] == '*' && name[1] == 0) && quoted == 0 &&
+		(pflags & PF_ASSIGNRHS))
+	ret->flags |= W_SPLITSPACE;	/* Posix interp 888 */	
       /* Special handling for $* when unquoted and $IFS is null. Posix interp 888 */
       else if (temp1 && (name[0] == '*' && name[1] == 0) && quoted == 0 && ifs_is_null)
 	ret->flags |= W_SPLITSPACE;	/* Posix interp 888 */
@@ -9205,9 +9226,9 @@ param_expand (string, sindex, quoted, expanded_something,
   unsigned char c;
   intmax_t number;
   SHELL_VAR *var;
-  WORD_LIST *list;
+  WORD_LIST *list, *l;
   WORD_DESC *tdesc, *ret;
-  int tflag;
+  int tflag, nullarg;
 
 /*itrace("param_expand: `%s' pflags = %d", string+*sindex, pflags);*/
   zindex = *sindex;
@@ -9442,6 +9463,12 @@ param_expand (string, sindex, quoted, expanded_something,
 	}
 #endif
 
+      for (nullarg = 0, l = list; l; l = l->next)
+	{
+	  if (l->word && (l->word->word == 0 || l->word->word[0] == 0))
+	    nullarg = 1;
+	}
+
       /* We want to flag the fact that we saw this.  We can't turn
 	 off quoting entirely, because other characters in the
 	 string might need it (consider "\"$@\""), but we need some
@@ -9460,12 +9487,18 @@ param_expand (string, sindex, quoted, expanded_something,
 	 parameters no matter what IFS is set to. */
       /* XXX - what to do when in a context where word splitting is not
 	 performed? Even when IFS is not the default, posix seems to imply
-	 that we behave like unquoted $* ?  See below for how we use
-	 PF_NOSPLIT2 here. */
+	 that we have to expand $@ to all the positional parameters and
+	 separate them with spaces, which are preserved because word splitting
+	 doesn't take place.  See below for how we use PF_NOSPLIT2 here. */
 
       /* These are the cases where word splitting will not be performed. */
       if (pflags & PF_ASSIGNRHS)
-	temp = string_list_dollar_at (list, (quoted|Q_DOUBLE_QUOTES), pflags);
+	{
+	  temp = string_list_dollar_at (list, (quoted|Q_DOUBLE_QUOTES), pflags);
+	  if (nullarg)
+	    tflag |= W_HASQUOTEDNULL;	/* we know quoting produces quoted nulls */
+	}
+
       /* This needs to match what expand_word_internal does with non-quoted $@
 	 does with separating with spaces.  Passing Q_DOUBLE_QUOTES means that
 	 the characters in LIST will be quoted, and PF_ASSIGNRHS ensures that
@@ -10059,6 +10092,7 @@ add_string:
 	    pflags |= PF_ASSIGNRHS;
 	  if (word->flags & W_COMPLETE)
 	    pflags |= PF_COMPLETE;
+
 	  tword = param_expand (string, &sindex, quoted, expanded_something,
 			       &temp_has_dollar_at, &quoted_dollar_at,
 			       &had_quoted_null, pflags);
@@ -10230,6 +10264,9 @@ add_twochars:
 		tword->flags |= W_NOCOMSUB;
 	      if (word->flags & W_NOPROCSUB)
 		tword->flags |= W_NOPROCSUB;
+
+if (word->flags & W_ASSIGNRHS)
+  tword->flags |= W_ASSIGNRHS;
 
 	      temp = (char *)NULL;
 
@@ -10436,13 +10473,30 @@ add_twochars:
 
 	  /* break; */
 
+	case ' ':
+	  /* If we are in a context where the word is not going to be split, but
+	     we need to account for $@ and $* producing one word for each
+	     positional parameter, add quoted spaces so the spaces in the
+	     expansion of "$@", if any, behave correctly. We still may need to
+	     split if we are expanding the rhs of a word expansion. */
+	  if (ifs_is_null || split_on_spaces || ((word->flags & (W_NOSPLIT|W_NOSPLIT2|W_ASSIGNRHS)) && (word->flags & W_EXPANDRHS) == 0))
+	    {
+	      if (string[sindex])
+		sindex++;
+	      twochars[0] = CTLESC;
+	      twochars[1] = c;
+	      goto add_twochars;
+	    }
+	  /* FALLTHROUGH */
+	  
 	default:
 	  /* This is the fix for " $@ " */
-	add_ifs_character:
+add_ifs_character:
 	  if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (isexp == 0 && isifs (c) && (word->flags & (W_NOSPLIT|W_NOSPLIT2)) == 0))
 	    {
 	      if ((quoted&(Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) == 0)
 		has_quoted_ifs++;
+add_quoted_character:
 	      if (string[sindex])	/* from old goto dollar_add_string */
 		sindex++;
 	      if (c == 0)
@@ -10474,7 +10528,7 @@ add_twochars:
 
 	  SADD_MBCHAR (temp, string, sindex, string_size);
 
-	add_character:
+add_character:
 	  RESIZE_MALLOCED_BUFFER (istring, istring_index, 1, istring_size,
 				  DEFAULT_ARRAY_SIZE);
 	  istring[istring_index++] = c;
@@ -10554,6 +10608,17 @@ finished_with_string:
       if (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES))
 	tword->flags |= W_QUOTED;
       list = make_word_list (tword, (WORD_LIST *)NULL);
+    }
+  else if (word->flags & W_ASSIGNRHS)
+    {
+      list = list_string (istring, "", quoted);
+      tword = list->word;
+      if (had_quoted_null && QUOTED_NULL (istring))
+	tword->flags |= W_HASQUOTEDNULL;
+      free (list);
+      free (istring);
+      istring = 0;			/* avoid later free() */
+      goto set_word_flags;
     }
   else
     {

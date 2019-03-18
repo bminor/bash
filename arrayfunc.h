@@ -75,7 +75,7 @@ extern int valid_array_reference __P((const char *, int));
 extern char *array_value __P((const char *, int, int, int *, arrayind_t *));
 extern char *get_array_value __P((const char *, int, int *, arrayind_t *));
 
-extern char *array_keys __P((char *, int));
+extern char *array_keys __P((char *, int, int));
 
 extern char *array_variable_name __P((const char *, int, char **, int *));
 extern SHELL_VAR *array_variable_part __P((const char *, int, char **, int *));

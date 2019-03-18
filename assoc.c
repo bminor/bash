@@ -258,10 +258,10 @@ assoc_remove_quoted_nulls (h)
  * the STARTth element and spanning NELEM members.  Null elements are counted.
  */
 char *
-assoc_subrange (hash, start, nelem, starsub, quoted)
-HASH_TABLE *hash;
-arrayind_t start, nelem;
-int starsub, quoted;
+assoc_subrange (hash, start, nelem, starsub, quoted, pflags)
+     HASH_TABLE *hash;
+     arrayind_t start, nelem;
+     int starsub, quoted, pflags;
 {
   WORD_LIST *l, *save, *h, *t;
   int i, j;
@@ -289,7 +289,7 @@ int starsub, quoted;
 
   t->next = (WORD_LIST *)NULL;
 
-  ret = string_list_pos_params (starsub ? '*' : '@', h, quoted);
+  ret = string_list_pos_params (starsub ? '*' : '@', h, quoted, pflags);
 
   if (t != l)
     t->next = l;
@@ -306,7 +306,7 @@ assoc_patsub (h, pat, rep, mflags)
      int mflags;
 {
   char	*t;
-  int pchar, qflags;
+  int pchar, qflags, pflags;
   WORD_LIST *wl, *save;
 
   if (h == 0 || assoc_empty (h))
@@ -325,8 +325,9 @@ assoc_patsub (h, pat, rep, mflags)
 
   pchar = (mflags & MATCH_STARSUB) == MATCH_STARSUB ? '*' : '@';
   qflags = (mflags & MATCH_QUOTED) == MATCH_QUOTED ? Q_DOUBLE_QUOTES : 0;
+  pflags = (mflags & MATCH_ASSIGNRHS) == MATCH_ASSIGNRHS ? PF_ASSIGNRHS : 0;
 
-  t = string_list_pos_params (pchar, save, qflags);
+  t = string_list_pos_params (pchar, save, qflags, pflags);
   dispose_words (save);
 
   return t;
@@ -340,7 +341,7 @@ assoc_modcase (h, pat, modop, mflags)
      int mflags;
 {
   char	*t;
-  int pchar, qflags;
+  int pchar, qflags, pflags;
   WORD_LIST *wl, *save;
 
   if (h == 0 || assoc_empty (h))
@@ -359,8 +360,9 @@ assoc_modcase (h, pat, modop, mflags)
 
   pchar = (mflags & MATCH_STARSUB) == MATCH_STARSUB ? '*' : '@';
   qflags = (mflags & MATCH_QUOTED) == MATCH_QUOTED ? Q_DOUBLE_QUOTES : 0;
+  pflags = (mflags & MATCH_ASSIGNRHS) == MATCH_ASSIGNRHS ? PF_ASSIGNRHS : 0;
 
-  t = string_list_pos_params (pchar, save, qflags);
+  t = string_list_pos_params (pchar, save, qflags, pflags);
   dispose_words (save);
 
   return t;

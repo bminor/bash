@@ -1224,9 +1224,9 @@ get_array_value (s, flags, rtype, indp)
 }
 
 char *
-array_keys (s, quoted)
+array_keys (s, quoted, pflags)
      char *s;
-     int quoted;
+     int quoted, pflags;
 {
   int len;
   char *retval, *t, *temp;
@@ -1251,6 +1251,9 @@ array_keys (s, quoted)
   if (l == (WORD_LIST *)NULL)
     return ((char *) NULL);
 
+#if 1
+  retval = string_list_pos_params (t[0], l, quoted, pflags);
+#else
   if (t[0] == '*' && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
     {
       temp = string_list_dollar_star (l, quoted, 0);
@@ -1259,6 +1262,7 @@ array_keys (s, quoted)
     }
   else	/* ${!name[@]} or unquoted ${!name[*]} */
     retval = string_list_dollar_at (l, quoted, 0);
+#endif
 
   dispose_words (l);
   return retval;

@@ -115,7 +115,7 @@ extern char *string_list_dollar_at __P((WORD_LIST *, int, int));
    the various subtleties of using the first character of $IFS as the
    separator.  Calls string_list_dollar_at, string_list_dollar_star, and
    string_list as appropriate. */
-extern char *string_list_pos_params __P((int, WORD_LIST *, int));
+extern char *string_list_pos_params __P((int, WORD_LIST *, int, int));
 
 /* Perform quoted null character removal on each element of LIST.
    This modifies LIST. */

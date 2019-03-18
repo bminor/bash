@@ -5507,3 +5507,85 @@ subst.c
 	  so we don't quote each byte in a multibyte character sequence. Fixes
 	  bug uncovered by shquote changes from 3/8
 
+				   3/11
+				   ----
+subst.c
+	- expand_word_internal: if we are in a context where word splitting
+	  will not occur, but one where we need to make sure we eventually
+	  expand "$@" to multiple words, add a space as quoted so we can still
+	  split on the space separator in $@. Fixes bug reported by
+	  Grisha Levit <grishalevit@gmail.com>
+
+				   3/13
+				   ----
+subst.c
+	- parameter_brace_substring, parameter_brace_patsub: treat the case
+	  where pflags includes PF_ASSIGNRHS the same as if IFS is null, since
+	  word splitting will not take place
+
+{subst,array,assoc}.c,subst.h
+	- string_list_pos_params: add a fourth argument: pflags; change all
+	  callers to initially pass 0 as fourth arg
+
+				   3/14
+				   ----
+subst.c
+	- expand_word_internal: split words with W_ASSIGNRHS flag set specially.
+	  These and subsequent changes fix expansion bugs reported by
+	  Grisha Levit <grishalevit@gmail.com>
+
+subst.c
+	- string_list_pos_params: if we are expanding `@', make sure we honor
+	  PFLAGS including PF_ASSIGNRHS and use string_list_dollar_at to make
+	  sure the positional parameters are separated by spaces
+	- string_list_pos_params: if we are expanding `*', make sure we honor
+	  PFLAGS including PF_ASSIGNRHS and separate the positional parameters
+	  with the first character of $IFS
+	- pos_params_pat_subst,pos_params_modcase: calculate appropriate value
+	  for PFLAGS depending on match flags value, and pass right value to
+	  string_list_pos_params (affects @, * expansion)
+	- pos_params: now takes PFLAGS as argument to pass to string_list_pos_params;
+	  changed caller
+
+array.c
+	- array_pat_subst,array_modcase: calculate appropriate value for
+	  PFLAGS depending on match flags value, and pass right value to
+	  string_list_pos_params (affects @, * subscript expansion)
+
+array.[ch]
+	- array_subrange: now takes additional PFLAGS argument to pass to
+	  string_list_pos_params
+
+assoc.c
+	- assoc_pat_subst,assoc_modcase: calculate appropriate value for
+	  PFLAGS depending on match flags value, and pass right value to
+	  string_list_pos_params (affects @, * subscript expansion)
+	  STILL NEED TO DO SUBRANGE
+
+subst.c
+	- parameter_brace_substring: add PFLAGS argument to array_subrange
+
+arrayfunc.c
+	- array_keys: use string_list_pos_params instead of calling
+	  string_list_dollar_{star,at} directly.
+
+arrayfunc.[ch]
+	- array_keys: now takes a PFLAGS argument, passes to string_list_pos_params
+
+subst.c
+	- parameter_brace_expand: add PFLAGS argument to call to array_keys
+
+subst.c
+	- parameter_brace_expand_indir: now takes a PFLAGS argument and uses it
+	  in the call to parameter_brace_expand_word
+	- parameter_brace_expand: add PFLAGS argument to call to
+	  parameter_brace_expand_indir
+
+				   3/15
+				   ----
+subst.c
+	- chk_atstar: now takes a PFLAGS parameter, changed callers. Will
+	  eventually affect whether or not we saw $@
+	- chk_atstar: if we see "$*" don't note that we saw $@ unless
+	  expand_no_split_dollar_star is unset. This is what param_expand
+	  does
