@@ -1061,7 +1061,7 @@ glob_filename (pathname, flags)
   char *directory_name, *filename, *dname, *fn;
   unsigned int directory_len;
   int free_dirname;			/* flag */
-  int dflags;
+  int dflags, hasglob;
 
   result = (char **) malloc (sizeof (char *));
   result_size = 1;
@@ -1110,9 +1110,12 @@ glob_filename (pathname, flags)
       free_dirname = 1;
     }
 
+  hasglob = 0;
   /* If directory_name contains globbing characters, then we
-     have to expand the previous levels.  Just recurse. */
-  if (directory_len > 0 && glob_pattern_p (directory_name))
+     have to expand the previous levels.  Just recurse.
+     If glob_pattern_p returns != [0,1] we have a pattern that has backslash
+     quotes but no unquoted glob pattern characters. We dequote it below. */
+  if (directory_len > 0 && (hasglob = glob_pattern_p (directory_name)) == 1)
     {
       char **directories, *d, *p;
       register unsigned int i;
@@ -1175,7 +1178,7 @@ glob_filename (pathname, flags)
       if (d[directory_len - 1] == '/')
 	d[directory_len - 1] = '\0';
 
-      directories = glob_filename (d, dflags);
+      directories = glob_filename (d, dflags|GX_RECURSE);
 
       if (free_dirname)
 	{
@@ -1332,6 +1335,20 @@ only_filename:
 	    free (directory_name);
 	  return (NULL);
 	}
+      /* If we have a directory name with quoted characters, and we are
+	 being called recursively to glob the directory portion of a pathname,
+	 we need to dequote the directory name before returning it so the
+	 caller can read the directory */
+      if (directory_len > 0 && hasglob == 2 && (flags & GX_RECURSE) != 0)
+	{
+	  dequote_pathname (directory_name);
+	  directory_len = strlen (directory_name);
+	}
+
+      /* We could check whether or not the dequoted directory_name is a
+	 directory and return it here, returning the original directory_name
+	 if not, but we don't do that yet. I'm not sure it matters. */
+
       /* Handle GX_MARKDIRS here. */
       result[0] = (char *) malloc (directory_len + 1);
       if (result[0] == NULL)
