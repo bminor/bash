@@ -5589,3 +5589,40 @@ subst.c
 	- chk_atstar: if we see "$*" don't note that we saw $@ unless
 	  expand_no_split_dollar_star is unset. This is what param_expand
 	  does
+
+				   3/18
+				   ----
+lib/readline/misc.c
+	- rl_get_previous_history: if we are trying to go back from the
+	  beginning of the history, or if we are trying to go back before the
+	  beginning of the history, call _rl_free_saved_history_line to just
+	  get rid of the history line we saved instead of using
+	  rl_maybe_unsave_line, which modifies the current line buffer.
+	  Fixes bug reported by lessbug <lessbug@qq.com>
+
+				   3/20
+				   ----
+execute_cmd.c
+	- execute_command_internal: save and restore line_number around
+	  user_subshell setting it to the line number saved in the command.
+	  Fixes bug reported in https://bugzilla.novell.com/show_bug.cgi?id=1128936
+
+				   3/21
+				   ----
+lib/sh/strtrans.c
+	- ansicstr: handle multibyte characters that are not preceded by a
+	  backslash so we skip over potential escapes in characters whose
+	  multibyte representation contains a backslash. Fixes issue reported by
+	  Stephane Chazelas <stephane.chazelas@gmail.com>
+
+subst.c
+	- reap_some_procsubs: reap_procsubs, but parameterized to take the
+	  max index to check -- general function for future use
+	- reap_procsubs: now just calls reap_some_procsubs with the right arg
+
+execute_cmd.c
+	- execute_command_internal: if we are using /dev/fd for process
+	  substitution, reap the procsubs at the end of this function (FIFOs
+	  do it at the beginning -- look at this more closely). Only do it
+	  for loops to avoid fd exhaustion. Fixes bug reported by
+	  sunnycemetery@gmail.com

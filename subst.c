@@ -5321,6 +5321,8 @@ parameter_brace_remove_pattern (varname, value, ind, patstr, rtype, quoted, flag
 
 #if defined (PROCESS_SUBSTITUTION)
 
+static void reap_some_procsubs __P((int));
+
 /*****************************************************************/
 /*								 */
 /*		    Hacking Process Substitution		 */
@@ -5482,14 +5484,21 @@ set_procsub_status (ind, pid, status)
 
 /* If we've marked the process for this procsub as dead, close the
    associated file descriptor and delete the FIFO. */
-void
-reap_procsubs ()
+static void
+reap_some_procsubs (max)
+     int max;
 {
   int i;
 
-  for (i = 0; i < nfifo; i++)
+  for (i = 0; i < max; i++)
     if (fifo_list[i].proc == (pid_t)-1)	/* reaped */
       unlink_fifo (i);
+}
+
+void
+reap_procsubs ()
+{
+  reap_some_procsubs (nfifo);
 }
 
 void
@@ -5708,14 +5717,21 @@ set_procsub_status (ind, pid, status)
 
 /* If we've marked the process for this procsub as dead, close the
    associated file descriptor. */
-void
-reap_procsubs ()
+static void
+reap_some_procsubs (max)
+     int max;
 {
   int i;
 
-  for (i = 0; nfds > 0 && i < totfds; i++)
+  for (i = 0; nfds > 0 && i < max; i++)
     if (dev_fd_list[i] == (pid_t)-1)
       unlink_fifo (i);
+}
+
+void
+reap_procsubs ()
+{
+  reap_some_procsubs (totfds);
 }
 
 void

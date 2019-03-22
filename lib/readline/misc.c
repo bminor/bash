@@ -624,7 +624,7 @@ rl_get_previous_history (int count, int key)
 
   if (temp == 0)
     {
-      rl_maybe_unsave_line ();
+      _rl_free_saved_history_line ();
       rl_ding ();
     }
   else

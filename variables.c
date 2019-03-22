@@ -4465,7 +4465,8 @@ push_posix_temp_var (data)
 #if 0 /* TAG:bash-5.1 */
   /* Just like do_assignment_internal(). This makes assignments preceding
      special builtins act like standalone assignment statements when in
-     posix mode. */
+     posix mode, satisfying the posix requirement that this affect the
+     "current execution environment." */
   v = bind_variable (var->name, value_cell (var), ASS_FORCE|ASS_NOLONGJMP);
 
   /* If this modifies an existing local variable, v->context will be non-zero.
@@ -5148,6 +5149,7 @@ push_var_context (name, flags, tempvars)
       vc->table = tempvars;
       /* Have to do this because the temp environment was created before
 	 variable_context was incremented. */
+      /* XXX - only need to do it if flags&VC_FUNCENV */
       flatten (tempvars, set_context, (VARLIST *)NULL, 0);
       vc->flags |= VC_HASTMPVAR;
     }

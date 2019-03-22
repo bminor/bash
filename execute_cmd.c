@@ -624,6 +624,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
       /* Fork a subshell, turn off the subshell bit, turn off job
 	 control and call execute_command () on the command again. */
+      save_line_number = line_number;
       if (command->type == cm_subshell)
 	line_number_for_err_trap = line_number = command->value.Subshell->line;	/* XXX - save value? */
 	/* Otherwise we defer setting line_number */
@@ -676,6 +677,8 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	    return (EXECUTION_SUCCESS);
 
 	  stop_pipeline (asynchronous, (COMMAND *)NULL);
+
+	  line_number = save_line_number;
 
 	  if (asynchronous == 0)
 	    {
@@ -1103,6 +1106,21 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       free ((void *)ofifo_list);
       discard_unwind_frame ("internal_fifos");
     }
+# if defined (HAVE_DEV_FD)
+  /* Reap process substitutions at the end of loops */
+  switch (command->type)
+    {
+    case cm_while:
+    case cm_until:
+    case cm_for:
+#    if defined (ARITH_FOR_COMMAND)
+    case cm_arith_for:
+#    endif
+      reap_procsubs ();
+    default:
+      break;
+    }
+#  endif /* HAVE_DEV_FD */
 #endif
 
   /* Invert the return value if we have to */
