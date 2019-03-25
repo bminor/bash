@@ -7988,7 +7988,7 @@ Bash does not print another warning, and any stopped jobs are terminated.
 
 When the shell is waiting for a job or process using the @code{wait}
 builtin, and job control is enabled, @code{wait} will return when the
-job changes state. The @option{-f} option will force @code{wait} to wait
+job changes state. The @option{-f} option causes @code{wait} to wait
 until the job or process terminates before returning.
 
 @node Job Control Builtins
@@ -8098,9 +8098,10 @@ If no arguments are given, all currently active child processes are
 waited for, and the return status is zero.
 If the @option{-n} option is supplied, @code{wait} waits for any job to
 terminate and returns its exit status.
-If the @option{-f} option is supplied, and job control is enabled,
-@code{wait} forces each @var{pid} or @var{jobspec} to terminate before
-returning its status, intead of returning when it changes status.
+Supplying the @option{-f} option, when job control is enabled,
+forces @code{wait} to wait for each @var{pid} or @var{jobspec} to
+terminate before returning its status, intead of returning when it changes
+status.
 If neither @var{jobspec} nor @var{pid} specifies an active child process
 of the shell, the return status is 127.
 

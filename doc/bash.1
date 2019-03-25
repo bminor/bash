@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue Feb 26 09:46:20 EST 2019
+.\"	Last Change: Sun Mar 24 14:05:55 EDT 2019
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2019 February 26" "GNU Bash 5.0"
+.TH BASH 1 "2019 March 24" "GNU Bash 5.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -5212,7 +5212,7 @@ jobs are terminated.
 .PP
 When the shell is waiting for a job or process using the \fBwait\fP
 builtin, and job control is enabled, \fBwait\fP will return when the
-job changes state. The \fB\-f\fP option will force \fBwait\fP to wait
+job changes state. The \fB\-f\fP option causes \fBwait\fP to wait
 until the job or process terminates before returning.
 .SH PROMPTING
 When executing interactively,
@@ -10761,9 +10761,9 @@ is not given, all currently active child processes
 are waited for, and the return status is zero.
 If the \fB\-n\fP option is supplied, \fBwait\fP waits for any job to
 terminate and returns its exit status.
-If the \fB\-f\fP option is supplied, and job control is enabled,
-\fBwait\fP forces \fIid\fP to terminate before returning its status,
-instead of returning when it changes status.
+Supplying the \fB\-f\fP option, when job control is enabled,
+forces \fBwait\fP to wait for \fIid\fP to terminate before returning
+its status, instead of returning when it changes status.
 If
 .I id
 specifies a non-existent process or job, the return status is

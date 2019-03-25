@@ -526,7 +526,6 @@ extern int _rl_executing_keyseq_size;
 extern _rl_search_cxt *_rl_nscxt;
 
 /* signals.c */
-extern int _rl_interrupt_immediately;
 extern int volatile _rl_caught_signal;
 
 extern _rl_sigcleanup_func_t *_rl_sigcleanup;

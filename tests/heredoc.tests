@@ -1,5 +1,33 @@
-# check order and content of multiple here docs
+# basics
+cat <<EOF
+a
+b
+c
+EOF
+read x <<EOF
+a
+b
+c
+EOF
+echo "$x"
+read x y <<\EOF
+$PS4
+EOF
+echo "$x"
 
+# empty here-documents
+read x <<EOF
+EOF
+echo "$x"
+read x <<\EOF
+EOF
+echo "$x"
+read x <<EOF
+$empty
+EOF
+echo "$x"
+
+# check order and content of multiple here docs
 cat << EOF1 << EOF2 
 hi
 EOF1

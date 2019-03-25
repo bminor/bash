@@ -742,6 +742,9 @@ ${DEFDIR}/bashgetopt.o:	$(BUILTIN_SRCDIR)/bashgetopt.c
 ${DEFDIR}/builtext.h: $(BUILTIN_DEFS)
 	@(cd $(DEFDIR) && $(MAKE) $(MFLAGS) builtext.h ) || exit 1
 
+${DEFDIR}/pipesize.h:
+	@(cd $(DEFDIR) && $(MAKE) $(MFLAGS) pipesize.h ) || exit 1
+
 $(SDIR)/man2html$(EXEEXT):	${SUPPORT_SRC}/man2html.c
 	@(cd $(SDIR) && $(MAKE) $(MFLAGS) all ) || exit 1
 
@@ -1111,6 +1114,7 @@ redir.o: ${BASHINCDIR}/memalloc.h shell.h syntax.h bashjmp.h ${BASHINCDIR}/posix
 redir.o: general.h xmalloc.h variables.h arrayfunc.h conftypes.h array.h hashlib.h quit.h ${BASHINCDIR}/maxpath.h unwind_prot.h
 redir.o: dispose_cmd.h make_cmd.h subst.h sig.h pathnames.h externs.h 
 redir.o: flags.h execute_cmd.h redir.h input.h
+redir.o: ${DEFDIR}/pipesize.h
 shell.o: config.h bashtypes.h ${BASHINCDIR}/posixstat.h bashansi.h ${BASHINCDIR}/ansi_stdlib.h ${BASHINCDIR}/filecntl.h
 shell.o: shell.h syntax.h config.h bashjmp.h ${BASHINCDIR}/posixjmp.h command.h ${BASHINCDIR}/stdc.h error.h
 shell.o: general.h xmalloc.h bashtypes.h variables.h arrayfunc.h conftypes.h array.h hashlib.h

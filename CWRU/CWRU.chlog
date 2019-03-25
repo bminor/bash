@@ -5626,3 +5626,35 @@ execute_cmd.c
 	  do it at the beginning -- look at this more closely). Only do it
 	  for loops to avoid fd exhaustion. Fixes bug reported by
 	  sunnycemetery@gmail.com
+
+				   3/22
+				   ----
+lib/readline/{rlprivate.h,signals.c}
+	- _rl_interrupt_immediately: removed as no longer used
+
+redir.c
+	- heredoc_expand: new function, called for both here-documents and
+	  here-strings, takes care of expanding the document and returns a
+	  string
+	- write_here_document: use heredoc_expand, call write(2) once on the
+	  entire document; structure is now very similar to write_here_string
+
+				   3/23
+				   ----
+redir.c
+	- here_document_to_fd: expand the here document/here string first,
+	  using heredoc_expand, then decide what to do; remove calls to
+	  write_here_document/write_here_string in favor of calling
+	  heredoc_write directly
+	- here_document_to_fd: if the expanded document is of zero length,
+	  just open /dev/null right away and return it -- idea from yash
+	- here_document_to_fd: if the length of the expanded document is
+	  between 1 and PIPESIZE (pipe capacity, computed by builtins/psize.aux
+	  and stored in builtins/pipesize.h), try to use a pipe: write
+	  the document to the write end and return the read end. Prompted by a
+	  report from Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+
+builtins/enable.def
+	- dyn_load_builtin: add warning if dynamic builtin with a load function
+	  is loaded more than once, before running the load function a second
+	  time. From a suggestion by Stan Marsh <gazelle@xmission.com>

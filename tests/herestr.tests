@@ -1,3 +1,23 @@
+# basics
+read x <<<"alpha"
+echo "$x"
+read x <<<beta
+echo "$x"
+X=4
+read x <<<$X
+echo "$x"
+read x <<<"$X"
+echo "$x"
+unset X
+
+# empty here-strings
+read x <<<""
+echo "$x"
+read x <<<"$empty"
+echo "$x"
+read x <<<$empty
+echo "$x"
+
 a=hot
 b=damn
 f1()

@@ -362,6 +362,8 @@ dyn_load_builtin (list, flags, filename)
       strcpy (struct_name, name);
       strcpy (struct_name + size, STRUCT_SUFFIX);
 
+      old_builtin = builtin_address_internal (name, 1);
+
       b = (struct builtin *)dlsym (handle, struct_name);
       if (b == 0)
 	{
@@ -381,6 +383,9 @@ dyn_load_builtin (list, flags, filename)
       loadfunc = (sh_load_func_t *)dlsym (handle, funcname);
       if (loadfunc)
 	{
+	  /* Add warning if running an init function more than once */
+	  if (old_builtin && (old_builtin->flags & STATIC_BUILTIN) == 0)
+	    builtin_warning (_("%s: dynamic builtin already loaded"), name);
 	  r = (*loadfunc) (name);
 	  if (r == 0)
 	    {
@@ -396,7 +401,7 @@ dyn_load_builtin (list, flags, filename)
 	b->flags |= SPECIAL_BUILTIN;
       b->handle = handle;
 
-      if (old_builtin = builtin_address_internal (name, 1))
+      if (old_builtin)
 	{
 	  replaced++;
 	  FASTCOPY ((char *)b, (char *)old_builtin, sizeof (struct builtin));
