@@ -102,6 +102,9 @@ wait_builtin (list)
 {
   int status, code, opt, nflag, wflags;
   volatile int old_interrupt_immediately;
+#if defined (JOB_CONTROL)
+  struct procstat pstat;
+#endif
 
   USE_VAR(list);
 
@@ -157,7 +160,7 @@ wait_builtin (list)
 #if defined (JOB_CONTROL)
   if (nflag)
     {
-      status = wait_for_any_job (wflags);
+      status = wait_for_any_job (wflags, &pstat);
       if (status < 0)
 	status = 127;
       WAIT_RETURN (status);

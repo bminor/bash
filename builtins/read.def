@@ -966,14 +966,7 @@ bind_read_variable (name, value)
 {
   SHELL_VAR *v;
 
-#if defined (ARRAY_VARS)
-  if (valid_array_reference (name, assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0) == 0)
-    v = bind_variable (name, value, 0);
-  else
-    v = assign_array_element (name, value, assoc_expand_once ? ASS_NOEXPAND : 0);
-#else /* !ARRAY_VARS */
-  v = bind_variable (name, value, 0);
-#endif /* !ARRAY_VARS */
+  v = builtin_bind_variable (name, value, 0);
   return (v == 0 ? v
 		 : ((readonly_p (v) || noassign_p (v)) ? (SHELL_VAR *)NULL : v));
 }

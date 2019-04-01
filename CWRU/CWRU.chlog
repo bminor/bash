@@ -5658,3 +5658,49 @@ builtins/enable.def
 	- dyn_load_builtin: add warning if dynamic builtin with a load function
 	  is loaded more than once, before running the load function a second
 	  time. From a suggestion by Stan Marsh <gazelle@xmission.com>
+
+				   3/25
+				   ----
+jobs.[ch]
+	- wait_for_any_job: takes a new argument, a struct procstat * that
+	  gets the PID of the exited job's process leader (the one that
+	  contributes the status) and the same status we return from the
+	  function
+
+builtins/wait.def
+	- wait_builtin: pass a struct procstat * to wait_for_any_job to get
+	  the pid of the job's process leader (and the same status the
+	  function returns). We don't do anything with it yet
+
+				   3/28
+				   ----
+variable.c
+	- seedrand: add a couple more variables to the random seed
+
+lib/sh/tmpfile.c
+	- sh_mktmpdir: new function, makes a temporary directory using
+	  mkdtemp if it's available, and generates a filename using
+	  sh_mktmpname (which uses mktemp, if available) and makes a
+	  directory with it if not
+
+config-{top,bot}.h
+	- set up to use mkdtemp if available
+
+externs.h
+	- sh_mktmpdir: extern declaration
+	- MT_TEMPFILE: new flag for the tempfile functions; means to use the
+	  value in the NAMEROOT argument as a template for the mktemp/mkstemp/
+	  mkdtemp functions. Not used in mainline shell code
+
+examples/loadables/mktemp.c
+	- mktemp: new loadable builtin, with BSD options and basic semantics
+
+				   3/29
+				   ----
+builtins/common.c,builtins/printf.def
+	- builtin_bind_variable: moved bind_printf_variable to common.c from
+	  printf.def, renamed to builtin_bind_variable, made global for other
+	  builtins to use
+
+builtins/read.def
+	- bind_read_variable: now uses builtin_bind_variable

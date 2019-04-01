@@ -1,4 +1,4 @@
-# Makefile for bash-5.0, version 4.27
+# Makefile for bash-5.0, version 4.28
 #
 # Copyright (C) 1996-2018 Free Software Foundation, Inc.
 
@@ -618,7 +618,7 @@ asan-tests: asan  $(TESTS_SUPPORT)
 	@-test -d tests || mkdir tests
 	@cp $(TESTS_SUPPORT) tests
 	@( cd $(srcdir)/tests && \
-		PATH=$(BUILD_DIR)/tests:$$PATH THIS_SH=$(THIS_SH) $(SHELL) ${TESTSCRIPT} )
+		BUILD_DIR=$(BUILD_DIR) PATH=$(BUILD_DIR)/tests:$$PATH THIS_SH=$(THIS_SH) $(SHELL) ${TESTSCRIPT} )
 
 profiling-tests:	${PROGRAM}
 	@test "X$$PROFILE_FLAGS" == "X" && { echo "profiling-tests: must be built with profiling enabled" >&2; exit 1; }
@@ -950,7 +950,7 @@ test tests check:	force $(Program) $(TESTS_SUPPORT)
 	@-test -d tests || mkdir tests
 	@cp $(TESTS_SUPPORT) tests
 	@( cd $(srcdir)/tests && \
-		PATH=$(BUILD_DIR)/tests:$$PATH THIS_SH=$(THIS_SH) $(SHELL) ${TESTSCRIPT} )
+		BUILD_DIR=$(BUILD_DIR) PATH=$(BUILD_DIR)/tests:$$PATH THIS_SH=$(THIS_SH) $(SHELL) ${TESTSCRIPT} )
 
 symlinks:
 	$(SHELL) $(SUPPORT_SRC)fixlinks -s $(srcdir)

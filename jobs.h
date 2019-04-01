@@ -169,6 +169,12 @@ struct bgpids {
 
 #define NO_PIDSTAT (ps_index_t)-1
 
+/* standalone process status struct, without bgpids indexes */
+struct procstat {
+  pid_t pid;
+  bits16_t status;
+};
+
 #define NO_JOB  -1	/* An impossible job array index. */
 #define DUP_JOB -2	/* A possible return value for get_job_spec (). */
 #define BAD_JOBSPEC -3	/* Bad syntax for job spec. */
@@ -245,7 +251,7 @@ extern int wait_for_single_pid __P((pid_t, int));
 extern void wait_for_background_pids __P((void));
 extern int wait_for __P((pid_t));
 extern int wait_for_job __P((int, int));
-extern int wait_for_any_job __P((int));
+extern int wait_for_any_job __P((int, struct procstat *));
 
 extern void wait_sigint_cleanup __P((void));
 

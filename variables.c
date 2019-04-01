@@ -1376,7 +1376,7 @@ seedrand ()
   v = find_variable ("BASH_VERSION");
   sbrand (tv.tv_sec ^ tv.tv_usec ^ getpid () ^ ((u_bits32_t)&v & 0x7fffffff));
 #else
-  sbrand (tv.tv_sec ^ tv.tv_usec ^ getpid ());
+  sbrand (tv.tv_sec ^ tv.tv_usec ^ getpid () ^ getppid () ^ current_user.uid ^ current_user.gid);
 #endif
 }
 

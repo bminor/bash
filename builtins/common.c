@@ -908,3 +908,32 @@ builtin_help ()
   printf ("%s: %s\n", this_command_name, _("help not available in this version"));
 }
 #endif
+
+/* **************************************************************** */
+/*								    */
+/*	    Variable assignments during builtin commands	    */
+/*								    */
+/* **************************************************************** */
+
+SHELL_VAR *
+builtin_bind_variable (name, value, flags)
+     char *name;
+     char *value;
+     int flags;
+{
+  SHELL_VAR *v;
+
+#if defined (ARRAY_VARS)
+  if (valid_array_reference (name, assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0) == 0)
+    v = bind_variable (name, value, flags);
+  else
+    v = assign_array_element (name, value, flags | (assoc_expand_once ? ASS_NOEXPAND : 0));
+#else /* !ARRAY_VARS */
+  v = bind_variable (name, value, flags);
+#endif /* !ARRAY_VARS */
+
+  if (v && readonly_p (v) == 0 && noassign_p (v) == 0)
+    VUNSETATTR (v, att_invisible);
+
+  return v;
+}

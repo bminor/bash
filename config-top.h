@@ -173,6 +173,7 @@
 /* Define to use libc mktemp/mkstemp instead of replacements in lib/sh/tmpfile.c */
 #define USE_MKTEMP
 #define USE_MKSTEMP
+#define USE_MKDTEMP
 
 /* Define to force the value of OLDPWD inherited from the environment to be a
    directory */

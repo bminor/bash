@@ -3085,10 +3085,12 @@ wait_for_job (job, flags)
 /* Wait for any background job started by this shell to finish.  Very
    similar to wait_for_background_pids().  Returns the exit status of
    the next exiting job, -1 if there are no background jobs.  The caller
-   is responsible for translating -1 into the right return value. */
+   is responsible for translating -1 into the right return value. RPID,
+   if non-null, gets the pid of the job's process leader. */
 int
-wait_for_any_job (flags)
+wait_for_any_job (flags, ps)
      int flags;
+     struct procstat *ps;
 {
   pid_t pid;
   int i, r;
@@ -3105,6 +3107,12 @@ wait_for_any_job (flags)
 	{
 return_job:
 	  r = job_exit_status (i);
+	  pid = find_last_pid (i, 0);
+	  if (ps)
+	    {
+	      ps->pid = pid;
+	      ps->status = r;
+	    }
 	  notify_of_job_status ();		/* XXX */
 	  delete_job (i, 0);
 #if defined (COPROCESS_SUPPORT)

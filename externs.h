@@ -470,10 +470,12 @@ extern void print_timeval ();
 #define MT_USETMPDIR		0x0001
 #define MT_READWRITE		0x0002
 #define MT_USERANDOM		0x0004
+#define MT_TEMPLATE		0x0008
 
 extern char *sh_mktmpname __P((char *, int));
 extern int sh_mktmpfd __P((char *, int, char **));
 /* extern FILE *sh_mktmpfp __P((char *, int, char **)); */
+extern char *sh_mktmpdir __P((char *, int));
 
 /* declarations for functions defined in lib/sh/uconvert.c */
 extern int uconvert __P((char *, long *, long *));

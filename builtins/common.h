@@ -217,6 +217,8 @@ extern int fc_execute_file __P((const char *));
 extern sh_builtin_func_t *this_shell_builtin;
 extern sh_builtin_func_t *last_shell_builtin;
 
+extern SHELL_VAR *builtin_bind_variable __P((char *, char *, int));
+
 /* variables from evalfile.c */
 extern int sourcelevel;
 

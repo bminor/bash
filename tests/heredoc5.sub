@@ -1,0 +1,28 @@
+# test here documents for sizes > 65536 (max pipe capacity I've seen),
+# 4096 < size < 65536 (for smaller pipe capacities)
+# 512 < size < 4096 (PIPE_BUF)
+#
+# There are tests in other scripts for here documents shorter than 512 bytes
+#
+# This should return the same results regardless of the pipe capacity
+
+: ${TMPDIR:=/tmp}
+FILENAME=${TMPDIR}/catfile-$$
+
+catfile()
+{
+	cat <<- EOF > $FILENAME
+		$(cat $1)
+EOF
+	cmp $FILENAME $1
+	rm -f $FILENAME
+}
+
+
+if [ -f $BUILD_DIR/y.tab.c ]; then
+	catfile $BUILD_DIR/y.tab.c
+else
+	catfile ../y.tab.c
+fi
+catfile ${BUILD_DIR}/config.h
+catfile ${BUILD_DIR}/version.h
