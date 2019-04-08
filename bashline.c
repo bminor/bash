@@ -3766,7 +3766,7 @@ completion_glob_pattern (string)
 
 	case '\\':
 	  if (*string++ == 0)
-	    return (0);	 	  
+	    return (0);
 	}
 
       /* Advance one fewer byte than an entire multibyte character to

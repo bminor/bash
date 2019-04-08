@@ -5704,3 +5704,10 @@ builtins/common.c,builtins/printf.def
 
 builtins/read.def
 	- bind_read_variable: now uses builtin_bind_variable
+
+				    4/4
+				    ---
+lib/readline/histfile.c
+	- history_rename: wrapper function for rename(2) to deal with the Win32
+	  refusal to rename over an existing file; changed callers. Bug and fix
+	  from <john.david.donoghue@gmail.com>

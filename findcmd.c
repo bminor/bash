@@ -397,6 +397,16 @@ search_for_command (pathname, flags)
 	      if (st & FS_EXECABLE)
 	        phash_insert ((char *)pathname, command, dot_found_in_search, 1);
 	    }
+#if 0	/* TAG:bash-5.1 */
+	  /* If we're in posix mode, don't add files without the execute bit
+	     to the hash table. */
+	  else if (posixly_correct)
+	    {
+	      st = file_status (command);
+	      if (st & FS_EXECABLE)
+	        phash_insert ((char *)pathname, command, dot_found_in_search, 1);
+	    }
+#endif
 	  else
 	    phash_insert ((char *)pathname, command, dot_found_in_search, 1);
 	}

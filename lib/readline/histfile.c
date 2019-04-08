@@ -1,6 +1,6 @@
 /* histfile.c - functions to manipulate the history file. */
 
-/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2019 Free Software Foundation, Inc.
 
    This file contains the GNU History Library (History), a set of
    routines for managing the text of previously typed lines.
@@ -79,6 +79,11 @@
 
 #endif /* HISTORY_USE_MMAP */
 
+#if defined(_WIN32)
+#  define WIN32_LEAN_AND_MEAN
+#  include <windows.h>
+#endif
+
 /* If we're compiling for __EMX__ (OS/2) or __CYGWIN__ (cygwin32 environment
    on win 95/98/nt), we want to open files with O_BINARY mode so that there
    is no \n -> \r\n conversion performed.  On other systems, we don't want to
@@ -138,6 +143,7 @@ static char *history_backupfile PARAMS((const char *));
 static char *history_tempfile PARAMS((const char *));
 static int histfile_backup PARAMS((const char *, const char *));
 static int histfile_restore PARAMS((const char *, const char *));
+static int history_rename PARAMS((const char *, const char *));
 
 /* Return the string that should be used in the place of this
    filename.  This only matters when you don't specify the
@@ -436,6 +442,18 @@ read_history_range (const char *filename, int from, int to)
   return (0);
 }
 
+/* We need a special version for WIN32 because Windows rename() refuses to
+   overwrite an existing file. */
+static int
+history_rename (const char *old, const char *new)
+{
+#if defined (_WIN32)
+  return (MoveFileEx (old, new, MOVEFILE_REPLACE_EXISTING) == 0 ? -1 : 0);
+#else
+  return (rename (old, new));
+#endif
+}
+
 /* Save FILENAME to BACK, handling case where FILENAME is a symlink
    (e.g., ~/.bash_history -> .histfiles/.bash_history.$HOSTNAME) */
 static int
@@ -449,10 +467,10 @@ histfile_backup (const char *filename, const char *back)
   if ((n = readlink (filename, linkbuf, sizeof (linkbuf) - 1)) > 0)
     {
       linkbuf[n] = '\0';
-      return (rename (linkbuf, back));
+      return (history_rename (linkbuf, back));
     }
 #endif
-  return (rename (filename, back));
+  return (history_rename (filename, back));
 }
 
 /* Restore ORIG from BACKUP handling case where ORIG is a symlink
@@ -468,10 +486,10 @@ histfile_restore (const char *backup, const char *orig)
   if ((n = readlink (orig, linkbuf, sizeof (linkbuf) - 1)) > 0)
     {
       linkbuf[n] = '\0';
-      return (rename (backup, linkbuf));
+      return (history_rename (backup, linkbuf));
     }
 #endif
-  return (rename (backup, orig));
+  return (history_rename (backup, orig));
 }
 
 /* Truncate the history file FNAME, leaving only LINES trailing lines.
