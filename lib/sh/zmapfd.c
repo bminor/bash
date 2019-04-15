@@ -48,12 +48,12 @@ zmapfd (fd, ostr, fn)
 {
   ssize_t nr;
   int rval;
-  char lbuf[128];
+  char lbuf[512];
   char *result;
   int rsize, rind;
 
   rval = 0;
-  result = (char *)xmalloc (rsize = 64);
+  result = (char *)xmalloc (rsize = 512);
   rind = 0;
 
   while (1)
@@ -72,7 +72,7 @@ zmapfd (fd, ostr, fn)
 	  return -1;
 	}
 
-      RESIZE_MALLOCED_BUFFER (result, rind, nr, rsize, 128);
+      RESIZE_MALLOCED_BUFFER (result, rind, nr, rsize, 512);
       memcpy (result+rind, lbuf, nr);
       rind += nr;
     }

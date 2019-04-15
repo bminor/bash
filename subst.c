@@ -3641,7 +3641,9 @@ remove_backslashes (string)
    this case, we quote the string specially for the globbing code.  If
    SPECIAL is 2, this is an rhs argument for the =~ operator, and should
    be quoted appropriately for regcomp/regexec.  The caller is responsible
-   for removing the backslashes if the unquoted word is needed later. */   
+   for removing the backslashes if the unquoted word is needed later. In
+   any case, since we don't perform word splitting, we need to do quoted
+   null character removal. */
 char *
 cond_expand_word (w, special)
      WORD_DESC *w;
@@ -3662,6 +3664,8 @@ cond_expand_word (w, special)
     {
       if (special == 0)			/* LHS */
 	{
+	  if (l->word)
+	    word_list_remove_quoted_nulls (l);
 	  dequote_list (l);
 	  r = string_list (l);
 	}
@@ -6414,16 +6418,23 @@ command_substitute (string, quoted, flags)
     }
   else
     {
+      int dummyfd;
+
 #if defined (JOB_CONTROL) && defined (PGRP_PIPE)
       close_pgrp_pipe ();
 #endif /* JOB_CONTROL && PGRP_PIPE */
 
       close (fildes[1]);
 
+      begin_unwind_frame ("read-comsub");
+      dummyfd = fildes[0];
+      add_unwind_protect (close, dummyfd);
+
       tflag = 0;
       istring = read_comsub (fildes[0], quoted, flags, &tflag);
 
       close (fildes[0]);
+      discard_unwind_frame ("read-comsub");
 
       current_command_subst_pid = pid;
       last_command_exit_value = wait_for (pid);

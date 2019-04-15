@@ -5711,3 +5711,78 @@ lib/readline/histfile.c
 	- history_rename: wrapper function for rename(2) to deal with the Win32
 	  refusal to rename over an existing file; changed callers. Bug and fix
 	  from <john.david.donoghue@gmail.com>
+
+				    4/8
+				    ---
+builtins/trap.def
+	- display_traps,showtrap: take an additional int argument, that, if
+	  non-zero, means to print a trap command for a signal whose disposition
+	  is SIG_DFL
+	- trap_builtin: if the -p option is given, and posix mode is enabled,
+	  pass the `show every signal' flag to display_traps so SIG_DFL signals
+	  are displayed as `trap -- - <signal>'. From an austin-group
+	  interpretation (1212) initiated by Robert Elz <kre@bmunnari.oz.au>.
+	  Tagged for bash-5.1
+
+				    4/9
+				    ---
+jobs.c
+	- list_one_job: printing one job counts as notifying the user about
+	  it, so add a call to cleanup_dead_jobs like in the other job display
+	  functions. Fixes https://savannah.gnu.org/support/?109667 reported
+	  by "Brian K. White"
+
+				   4/10
+				   ----
+redir.c
+	- HEREDOC_PIPESIZE: define to PIPESIZE if not defined, allow it to be
+	  specified at build time; used in here_document_to_fd to determine
+	  whether or not a pipe is used
+	- HEREDOC_PIPEMAX: allow build-time definition of the max heredoc size
+	  that will be written to a pipe
+	- here_document_to_fd: if F_GETPIPE_SZ is defined (Linux), ensure that
+	  the document is shorter than the possibly-dynamic max pipe size,
+	  and fall back to the tempfile implementation if it is not
+	- HEREDOC_PARANOID: if this is defined to a non-zero value,
+	  here_document_to_fd ensures that both file descriptors opened on
+	  the temporary file refer to the same file
+
+lib/sh/zmapfd.c
+	- zmapfd: increased the default allocation sizes
+
+lib/sh/zcatfd.c
+	- zcatfd: increased the default allocation sizes
+
+input.c
+	- localbuf: increased the default buffer size for reads
+
+				   4/11
+				   ----
+subst.c
+	- cond_expand_word: like expand_word_unsplit, we need to peform
+	  quoted null character removal on both the LHS and RHS of the
+	  operator, since we are not performing word splitting. Fixes bug
+	  reported by Matt Whitlock in https://savannah.gnu.org/support/?109671
+
+				   4/12
+				   ----
+jobs.c
+	- wait_for_background_pids: don't bother with the loop that waits for
+	  and reaps all children of the shell in the case that it's inherited
+	  some children it doesn't care about. Report from Daniel Kahn Gillmor
+	  <dkg@fifthhorseman.net>
+
+				   4/14
+				   ----
+subst.c
+	- command_substitute: add an unwind-protect to make sure the read end
+	  of the pipe gets closed in the parent on a SIGINT that interrupts
+	  the zread. Fixes fast SIGINT fd leak reported by Tycho Kirchner
+	  <tychokirchner@mail.de>
+
+bashhist.c
+	- history_number: if enable_history_list is set (`set -o history' has
+	  been executed), return the current history number even if we're
+	  not currently saving commands in the history list
+	  (remember_on_history == 0). Prompted by report from Paul Wise
+	  <pabs3@bonedaddy.net>

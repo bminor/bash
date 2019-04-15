@@ -62,7 +62,7 @@ extern void termsig_handler __P((int));
 /* Functions to handle reading input on systems that don't restart read(2)
    if a signal is received. */
 
-static char localbuf[128];
+static char localbuf[1024];
 static int local_index = 0, local_bufused = 0;
 
 /* Posix and USG systems do not guarantee to restart read () if it is

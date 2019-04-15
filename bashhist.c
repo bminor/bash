@@ -1,6 +1,6 @@
 /* bashhist.c -- bash interface to the GNU history library. */
 
-/* Copyright (C) 1993-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2019 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -943,7 +943,7 @@ int
 history_number ()
 {
   using_history ();
-  return (remember_on_history ? history_base + where_history () : 1);
+  return ((remember_on_history || enable_history_list) ? history_base + where_history () : 1);
 }
 
 static int

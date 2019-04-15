@@ -69,6 +69,16 @@ extern int errno;
 #  endif
 #endif
 
+#ifndef HEREDOC_PIPESIZE
+#  define HEREDOC_PIPESIZE PIPESIZE
+#endif
+
+#if defined (HEREDOC_PIPEMAX)
+#  if HEREDOC_PIPESIZE > HEREDOC_PIPEMAX
+#    define HEREDOC_PIPESIZE HEREDOC_PIPEMAX
+#  endif
+#endif
+
 #define SHELL_FD_BASE	10
 
 int expanding_redir;
@@ -418,6 +428,9 @@ here_document_to_fd (redirectee, ri)
   int r, fd, fd2, herepipe[2];
   char *document;
   size_t document_len;
+#if HEREDOC_PARANOID
+  struct stat st1, st2;
+#endif
 
   /* Expand the here-document/here-string first and then decide what to do. */
   document = heredoc_expand (redirectee, ri, &document_len);
@@ -433,11 +446,11 @@ here_document_to_fd (redirectee, ri)
       return fd;
     }
 
-#if defined (PIPESIZE)
+#if defined (HEREDOC_PIPESIZE)
   /* Try to use a pipe internal to this process if the document is shorter
      than the system's pipe capacity (computed at build time). We want to
      write the entire document without write blocking. */
-  if (document_len <= PIPESIZE)
+  if (document_len <= HEREDOC_PIPESIZE)
     {
       if (pipe (herepipe) < 0)
 	{
@@ -447,6 +460,12 @@ here_document_to_fd (redirectee, ri)
 	  errno = r;
 	  return (-1);
 	}
+
+#if defined (F_GETPIPE_SZ)
+      if (fcntl (herepipe[1], F_GETPIPE_SZ, 0) < document_len)
+	goto use_tempfile;
+#endif
+
       r = heredoc_write (herepipe[1], document, document_len);
       if (document != redirectee->word)
 	free (document);
@@ -460,6 +479,8 @@ here_document_to_fd (redirectee, ri)
       return (herepipe[0]);
     }
 #endif
+
+use_tempfile:
 
   fd = sh_mktmpfd ("sh-thd", MT_USERANDOM|MT_USETMPDIR, &filename);
 
@@ -505,6 +526,22 @@ here_document_to_fd (redirectee, ri)
       errno = r;
       return -1;
     }
+
+#if HEREDOC_PARANOID
+  /* We can use same_file here to check whether or not fd and fd2 refer to
+     the same file, but we don't do that unless HEREDOC_PARANOID is defined. */
+  if (fstat (fd, &st1) < 0 || S_ISREG (st1.st_mode) == 0 ||
+      fstat (fd2, &st2) < 0 || S_ISREG (st2.st_mode) == 0 ||
+      same_file (filename, filename, &st1, &st2) == 0)
+    {
+      unlink (filename);
+      free (filename);
+      close (fd);
+      close (fd2);
+      errno = EEXIST;
+      return -1;
+    }
+#endif
 
   close (fd);
   if (unlink (filename) < 0)

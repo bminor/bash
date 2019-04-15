@@ -46,7 +46,7 @@ zcatfd (fd, ofd, fn)
 {
   ssize_t nr;
   int rval;
-  char lbuf[128];
+  char lbuf[1024];
 
   rval = 0;
   while (1)

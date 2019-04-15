@@ -823,6 +823,7 @@ glob_vector (pat, dir, flags)
 		    }
 		}
 
+#if 0
 	      /* When FLAGS includes GX_ALLDIRS, we want to skip a symlink
 	         to a directory, since we will pick the directory up later. */
 	      if (isdir == -2 && glob_testdir (subdir, 0) == 0)
@@ -830,6 +831,7 @@ glob_vector (pat, dir, flags)
 		  free (subdir);
 		  continue;
 		}
+#endif
 
 	      /* XXX - should we even add this if it's not a directory? */
 	      nextlink = (struct globval *) malloc (sizeof (struct globval));
