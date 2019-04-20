@@ -100,12 +100,22 @@ should_suppress_fork (command)
 	  ((command->flags & CMD_INVERT_RETURN) == 0));
 }
 
+int
+can_optimize_connection (command)
+     COMMAND *command;
+{
+  return (*bash_input.location.string == '\0' &&
+	  (command->value.Connection->connector == AND_AND || command->value.Connection->connector == OR_OR || command->value.Connection->connector == ';') &&
+	  command->value.Connection->second->type == cm_simple);
+}
+
 void
 optimize_fork (command)
      COMMAND *command;
 {
   if (command->type == cm_connection &&
-      (command->value.Connection->connector == AND_AND || command->value.Connection->connector == OR_OR) &&
+      (command->value.Connection->connector == AND_AND || command->value.Connection->connector == OR_OR || command->value.Connection->connector == ';') &&
+      (command->value.Connection->second->flags & CMD_TRY_OPTIMIZING) &&
       should_suppress_fork (command->value.Connection->second))
     {
       command->value.Connection->second->flags |= CMD_NO_FORK;
@@ -412,8 +422,18 @@ parse_and_execute (string, from_file, flags)
 		  command->flags |= CMD_NO_FORK;
 		  command->value.Simple->flags |= CMD_NO_FORK;
 		}
-	      else if (command->type == cm_connection)
-		optimize_fork (command);
+
+	      /* Can't optimize forks out here execept for simple commands.
+		 This knows that the parser sets up commands as left-side heavy
+		 (&& and || are left-associative) and after the single parse,
+		 if we are at the end of the command string, the last in a
+		 series of connection commands is
+		 command->value.Connection->second. */
+	      else if (command->type == cm_connection && can_optimize_connection (command))
+		{
+		  command->value.Connection->second->flags |= CMD_TRY_OPTIMIZING;
+		  command->value.Connection->second->value.Simple->flags |= CMD_TRY_OPTIMIZING;
+		}
 #endif /* ONESHOT */
 
 	      /* See if this is a candidate for $( <file ). */
