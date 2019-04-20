@@ -2488,10 +2488,8 @@ wait_for_background_pids ()
     r = wait_for (last_procsub_child->pid);
   wait_procsubs ();
   reap_procsubs ();
-#if 1
+#if 0
   /* We don't want to wait indefinitely if we have stopped children. */
-  /* XXX - should add a loop that goes through the list of process
-     substitutions and waits for each proc in turn before this code. */
   if (any_stopped == 0)
     {
       /* Check whether or not we have any unreaped children. */
