@@ -350,6 +350,11 @@ file is taken from the value of the environment variable @env{INPUTRC}.  If
 that variable is unset, the default is @file{~/.inputrc}.  If that
 file does not exist or cannot be read, the ultimate default is
 @file{/etc/inputrc}.
+@ifset BashFeatures
+The @w{@code{bind}} builtin command can also be used to set Readline
+keybindings and variables.
+@xref{Bash Builtins}.
+@end ifset
 
 When a program which uses the Readline library starts up, the
 init file is read, and the key bindings are set.
@@ -2380,7 +2385,7 @@ Many more examples -- an extensive collection of completions for most of
 the common GNU, Unix, and Linux commands -- are available as part of the
 bash_completion project.  This is installed by default on many GNU/Linux
 distributions.  Originally written by Ian Macdonald, the project now lives
-at @url{https://salsa.debian.org/debian/bash-completion}.  There are ports for
+at @url{https://github.com/scop/bash-completion/}.  There are ports for
 other systems such as Solaris and Mac OS X.
 
 An older version of the bash_completion package is distributed with bash

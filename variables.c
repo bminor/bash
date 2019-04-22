@@ -363,6 +363,11 @@ initialize_shell_variables (env, privmode)
       /* Now, name = env variable name, string = env variable value, and
 	 char_index == strlen (name) */
 
+if (STREQ (name, "BASHOPTS"))
+  itrace("initialize_shell_variables: processing BASHOPTS");
+if (STREQ (name, "BASH_COMPAT"))
+  itrace("initialize_shell_variables: processing BASH_COMPAT");
+
       temp_var = (SHELL_VAR *)NULL;
 
 #if defined (FUNCTION_IMPORT)

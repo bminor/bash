@@ -5090,7 +5090,9 @@ bashline.c
 				   ----
 builtins/shopt.def
 	- we need the extern declaration for syslog_history if SYSLOG_HISTORY
-	  is defined, since it's used even if SYSLOG_SHOPT is not defined
+	  is defined, since it's used even if SYSLOG_SHOPT is not defined.
+	  From a Gentoo Linux bug report, eventually reported to bug-bash by
+	  Tomas Mozes <hydrapolic@gmail.com>
 
 				   1/25
 				   ----
@@ -5786,3 +5788,10 @@ bashhist.c
 	  not currently saving commands in the history list
 	  (remember_on_history == 0). Prompted by report from Paul Wise
 	  <pabs3@bonedaddy.net>
+
+				   4/20
+				   ----
+doc/bash.1,lib/readline/doc/rluser.texi
+	- make it clear that the `bind' builtin can be used to set readline
+	  keybindings and variables. Suggestion from Dan Jacobson
+	  <jidanni@jidanni.org>
