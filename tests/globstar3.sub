@@ -1,0 +1,24 @@
+olddir=$PWD
+: ${TMPDIR:=/var/tmp}
+
+SCRATCH=${TMPDIR}/scratch-$$
+rm -rf $SCRATCH
+mkdir $SCRATCH || exit 1
+
+cd $SCRATCH
+
+mkdir a b
+touch a/aa a/ab
+touch b/bb b/bc
+
+ln -s a c
+
+shopt -s globstar
+
+echo **
+echo **/
+
+echo **/*b
+
+cd "$olddir"
+rm -rf $SCRATCH

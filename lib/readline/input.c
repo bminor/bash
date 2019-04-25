@@ -596,6 +596,10 @@ handle_error:
       else if (_rl_caught_signal == SIGINT)
 #endif
         RL_CHECK_SIGNALS ();
+#if defined (SIGTSTP)
+      else if (_rl_caught_signal == SIGTSTP)
+	RL_CHECK_SIGNALS ();
+#endif
       /* non-keyboard-generated signals of interest */
 #if defined (SIGWINCH)
       else if (_rl_caught_signal == SIGWINCH)

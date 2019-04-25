@@ -6,8 +6,8 @@
 \entry {arrays}{94}
 \initial {B}
 \entry {background}{103}
-\entry {Bash configuration}{147}
-\entry {Bash installation}{147}
+\entry {Bash configuration}{148}
+\entry {Bash installation}{148}
 \entry {Bourne shell}{5}
 \entry {brace expansion}{23}
 \entry {builtin}{3}
@@ -15,7 +15,7 @@
 \entry {command editing}{108}
 \entry {command execution}{39}
 \entry {command expansion}{38}
-\entry {command history}{141}
+\entry {command history}{142}
 \entry {command search}{39}
 \entry {command substitution}{31}
 \entry {command timing}{8}
@@ -28,8 +28,8 @@
 \entry {commands, shell}{8}
 \entry {commands, simple}{8}
 \entry {comments, shell}{7}
-\entry {completion builtins}{134}
-\entry {configuration}{147}
+\entry {completion builtins}{135}
+\entry {configuration}{148}
 \entry {control operator}{3}
 \entry {coprocess}{15}
 \initial {D}
@@ -38,7 +38,7 @@
 \entry {editing command lines}{108}
 \entry {environment}{40}
 \entry {evaluation, arithmetic}{92}
-\entry {event designators}{144}
+\entry {event designators}{145}
 \entry {execution environment}{39}
 \entry {exit status}{3, 41}
 \entry {expansion}{22}
@@ -57,15 +57,15 @@
 \entry {foreground}{103}
 \entry {functions, shell}{17}
 \initial {H}
-\entry {history builtins}{141}
-\entry {history events}{144}
-\entry {history expansion}{143}
-\entry {history list}{141}
-\entry {History, how to use}{140}
+\entry {history builtins}{142}
+\entry {history events}{145}
+\entry {history expansion}{144}
+\entry {history list}{142}
+\entry {History, how to use}{141}
 \initial {I}
 \entry {identifier}{3}
 \entry {initialization file, readline}{110}
-\entry {installation}{147}
+\entry {installation}{148}
 \entry {interaction, readline}{107}
 \entry {interactive shell}{87, 88}
 \entry {internationalization}{7}
@@ -100,7 +100,7 @@
 \entry {process group}{3}
 \entry {process group ID}{3}
 \entry {process substitution}{31}
-\entry {programmable completion}{132}
+\entry {programmable completion}{133}
 \entry {prompting}{97}
 \initial {Q}
 \entry {quoting}{6}

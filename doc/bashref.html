@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.0, 26 February 2019).
+the Bash shell (version 5.0, 20 April 2019).
 
-This is Edition 5.0, last updated 26 February 2019,
+This is Edition 5.0, last updated 20 April 2019,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.0.
 
@@ -284,10 +284,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.0, 26 February 2019).
+the Bash shell (version 5.0, 20 April 2019).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.0, last updated 26 February 2019,
+<p>This is Edition 5.0, last updated 20 April 2019,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.0.
 </p>
@@ -8913,6 +8913,9 @@ shell session.
 parameter expansion, command substitution, arithmetic
 expansion, and quote removal, subject to the value of the
 <code>promptvars</code> shell option (see <a href="#The-Shopt-Builtin">The Shopt Builtin</a>).
+This can have unwanted side effects if escaped portions of the string
+appear within command substitution or contain characters special to
+word expansion.
 </p>
 <hr>
 <a name="The-Restricted-Shell"></a>
@@ -9359,7 +9362,7 @@ Bash does not print another warning, and any stopped jobs are terminated.
 </p>
 <p>When the shell is waiting for a job or process using the <code>wait</code>
 builtin, and job control is enabled, <code>wait</code> will return when the
-job changes state. The <samp>-f</samp> option will force <code>wait</code> to wait
+job changes state. The <samp>-f</samp> option causes <code>wait</code> to wait
 until the job or process terminates before returning.
 </p>
 <hr>
@@ -9481,11 +9484,12 @@ last command waited for.
 If a job spec is given, all processes in the job are waited for.
 If no arguments are given, all currently active child processes are
 waited for, and the return status is zero.
-If the <samp>-n</samp> option is supplied, <code>wait</code> waits for any job to
-terminate and returns its exit status.
-If the <samp>-f</samp> option is supplied, and job control is enabled,
-<code>wait</code> forces each <var>pid</var> or <var>jobspec</var> to terminate before
-returning its status, intead of returning when it changes status.
+If the <samp>-n</samp> option is supplied, <code>wait</code> waits for a single job
+to terminate and returns its exit status.
+Supplying the <samp>-f</samp> option, when job control is enabled,
+forces <code>wait</code> to wait for each <var>pid</var> or <var>jobspec</var> to
+terminate before returning its status, intead of returning when it changes
+status.
 If neither <var>jobspec</var> nor <var>pid</var> specifies an active child process
 of the shell, the return status is 127.
 </p>
@@ -9946,6 +9950,9 @@ file is taken from the value of the shell variable <code>INPUTRC</code>.  If
 that variable is unset, the default is <samp>~/.inputrc</samp>.  If that
 file does not exist or cannot be read, the ultimate default is
 <samp>/etc/inputrc</samp>.
+The <code>bind</code><!-- /@w --> builtin command can also be used to set Readline
+keybindings and variables.
+See <a href="#Bash-Builtins">Bash Builtins</a>.
 </p>
 <p>When a program which uses the Readline library starts up, the
 init file is read, and the key bindings are set.
@@ -12453,7 +12460,7 @@ character to the directory name, in case we want to append to it.
 The <samp>-o bashdefault</samp> option brings in the rest of the &quot;Bash default&quot;
 completions &ndash; possible completion that Bash adds to the default Readline
 set.  These include things like command name completion, variable completion
-for words beginning with &lsquo;<samp>{</samp>&rsquo;, completions containing pathname
+for words beginning with &lsquo;<samp>$</samp>&rsquo; or &lsquo;<samp>${</samp>&rsquo;, completions containing pathname
 expansion patterns (see <a href="#Filename-Expansion">Filename Expansion</a>), and so on.
 </p>
 <p>Once installed using <code>complete</code>, <code>_comp_cd</code> will be called every
@@ -12463,7 +12470,7 @@ time we attempt word completion for a <code>cd</code> command.
 the common GNU, Unix, and Linux commands &ndash; are available as part of the
 bash_completion project.  This is installed by default on many GNU/Linux
 distributions.  Originally written by Ian Macdonald, the project now lives
-at <a href="http://bash-completion.alioth.debian.org/">http://bash-completion.alioth.debian.org/</a>.  There are ports for
+at <a href="https://github.com/scop/bash-completion/">https://github.com/scop/bash-completion/</a>.  There are ports for
 other systems such as Solaris and Mac OS X.
 </p>
 <p>An older version of the bash_completion package is distributed with bash

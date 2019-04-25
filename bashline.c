@@ -108,6 +108,7 @@ static int operate_and_get_next __P((int, int));
 
 static int bash_ignore_filenames __P((char **));
 static int bash_ignore_everything __P((char **));
+static int bash_progcomp_ignore_filenames __P((char **));
 
 #if defined (BANG_HISTORY)
 static char *history_expand_line_internal __P((char *));
@@ -169,6 +170,7 @@ static char **hostnames_matching __P((char *));
 static void _ignore_completion_names __P((char **, sh_ignore_func_t *));
 static int name_is_acceptable __P((const char *));
 static int test_for_directory __P((const char *));
+static int test_for_canon_directory __P((const char *));
 static int return_zero __P((const char *));
 
 static char *bash_dequote_filename __P((char *, int));
@@ -2973,12 +2975,35 @@ test_for_directory (name)
   return (r);
 }
 
+static int
+test_for_canon_directory (name)
+     const char *name;
+{
+  char *fn;
+  int r;
+
+  fn = (*name == '~') ? bash_tilde_expand (name, 0) : savestring (name);
+  bash_filename_stat_hook (&fn);
+  r = file_isdir (fn);
+  free (fn);
+
+  return (r);
+}
+
 /* Remove files from NAMES, leaving directories. */
 static int
 bash_ignore_filenames (names)
      char **names;
 {
   _ignore_completion_names (names, test_for_directory);
+  return 0;
+}
+
+static int
+bash_progcomp_ignore_filenames (names)
+     char **names;
+{
+  _ignore_completion_names (names, test_for_canon_directory);
   return 0;
 }
 
@@ -4437,7 +4462,7 @@ bash_directory_completion_matches (text)
   /* We don't bother recomputing the lcd of the matches, because it will just
      get thrown away by the programmable completion code and recomputed
      later. */
-  (void)bash_ignore_filenames (m1);
+  (void)bash_progcomp_ignore_filenames (m1);
   return m1;
 }
 

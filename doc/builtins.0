@@ -1836,13 +1836,13 @@ BBAASSHH BBUUIILLTTIINN CCOOMMMMAANNDDSS
               a job spec is given, all processes in that  job's  pipeline  are
               waited for.  If _i_d is not given, all currently active child pro-
               cesses are waited for, and the return status is zero.  If the --nn
-              option  is  supplied,  wwaaiitt  waits  for any job to terminate and
-              returns its exit status.  If the --ff option is supplied, and  job
-              control is enabled, wwaaiitt forces _i_d to terminate before returning
-              its status, instead of returning when it changes status.  If  _i_d
-              specifies  a  non-existent  process or job, the return status is
-              127.  Otherwise, the return status is the  exit  status  of  the
-              last process or job waited for.
+              option is supplied, wwaaiitt waits for a single job to terminate and
+              returns its exit status.  Supplying the --ff option, when job con-
+              trol  is enabled, forces wwaaiitt to wait for _i_d to terminate before
+              returning its status, instead of returning when it changes  sta-
+              tus.   If _i_d specifies a non-existent process or job, the return
+              status is 127.  Otherwise, the return status is the exit  status
+              of the last process or job waited for.
 
 SSEEEE AALLSSOO
        bash(1), sh(1)

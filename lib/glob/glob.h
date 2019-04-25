@@ -31,6 +31,7 @@
 #define GX_ADDCURDIR	0x200	/* internal -- add passed directory name */
 #define GX_GLOBSTAR	0x400	/* turn on special handling of ** */
 #define GX_RECURSE	0x800	/* internal -- glob_filename called recursively */
+#define GX_SYMLINK	0x1000	/* internal -- symlink to a directory */
 
 extern int glob_pattern_p __P((const char *));
 extern char **glob_vector __P((char *, char *, int));

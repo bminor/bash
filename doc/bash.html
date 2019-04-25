@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2019 February 26<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2019 April 20<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -6654,7 +6654,7 @@ jobs are terminated.
 
 When the shell is waiting for a job or process using the <B>wait</B>
 builtin, and job control is enabled, <B>wait</B> will return when the
-job changes state. The <B>-f</B> option will force <B>wait</B> to wait
+job changes state. The <B>-f</B> option causes <B>wait</B> to wait
 until the job or process terminates before returning.
 <A NAME="lbCE">&nbsp;</A>
 <H3>PROMPTING</H3>
@@ -6852,6 +6852,9 @@ command under
 
 </FONT>
 below).
+This can have unwanted side effects if escaped portions of the string
+appear within command substitution or contain characters special to
+word expansion.
 <A NAME="lbCF">&nbsp;</A>
 <H3>READLINE</H3>
 
@@ -7236,6 +7239,11 @@ file with a statement of the form
 <B>set</B> <I>variable-name</I> <I>value</I>
 </DL>
 
+or using the <B>bind</B> builtin command (see
+<FONT SIZE=-1><B>SHELL BUILTIN COMMANDS</B>
+
+</FONT>
+below).
 <P>
 
 Except where noted, readline variables can take the values
@@ -13636,11 +13644,11 @@ in that job's pipeline are waited for.  If
 
 is not given, all currently active child processes
 are waited for, and the return status is zero.
-If the <B>-n</B> option is supplied, <B>wait</B> waits for any job to
-terminate and returns its exit status.
-If the <B>-f</B> option is supplied, and job control is enabled,
-<B>wait</B> forces <I>id</I> to terminate before returning its status,
-instead of returning when it changes status.
+If the <B>-n</B> option is supplied, <B>wait</B> waits for a single job
+to terminate and returns its exit status.
+Supplying the <B>-f</B> option, when job control is enabled,
+forces <B>wait</B> to wait for <I>id</I> to terminate before returning
+its status, instead of returning when it changes status.
 If
 <I>id</I>
 
@@ -13935,7 +13943,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2019 February 26<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2019 April 20<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -14041,6 +14049,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 26 February 2019 09:57:16 EST
+Time: 22 April 2019 09:26:51 EDT
 </BODY>
 </HTML>

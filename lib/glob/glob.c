@@ -823,16 +823,6 @@ glob_vector (pat, dir, flags)
 		    }
 		}
 
-#if 0
-	      /* When FLAGS includes GX_ALLDIRS, we want to skip a symlink
-	         to a directory, since we will pick the directory up later. */
-	      if (isdir == -2 && glob_testdir (subdir, 0) == 0)
-		{
-		  free (subdir);
-		  continue;
-		}
-#endif
-
 	      /* XXX - should we even add this if it's not a directory? */
 	      nextlink = (struct globval *) malloc (sizeof (struct globval));
 	      if (firstmalloc == 0)
@@ -1042,17 +1032,22 @@ glob_dir_to_array (dir, array, flags)
       strcpy (result[i], dir);
       if (add_slash)
 	result[i][l] = '/';
-      strcpy (result[i] + l + add_slash, array[i]);
-      if (flags & GX_MARKDIRS)
+      if (array[i][0])
 	{
-	  if ((stat (result[i], &sb) == 0) && S_ISDIR (sb.st_mode))
+	  strcpy (result[i] + l + add_slash, array[i]);
+	  if (flags & GX_MARKDIRS)
 	    {
-	      size_t rlen;
-	      rlen = strlen (result[i]);
-	      result[i][rlen] = '/';
-	      result[i][rlen+1] = '\0';
+	      if ((stat (result[i], &sb) == 0) && S_ISDIR (sb.st_mode))
+		{
+		  size_t rlen;
+		  rlen = strlen (result[i]);
+		  result[i][rlen] = '/';
+		  result[i][rlen+1] = '\0';
+		}
 	    }
 	}
+      else
+        result[i][l+add_slash] = '\0';
     }
   result[i] = NULL;
 
@@ -1246,6 +1241,7 @@ glob_filename (pathname, flags)
 	     files ending in `h' with a `/' appended. */
 	  dname = directories[i];
 	  dflags = flags & ~(GX_MARKDIRS|GX_ALLDIRS|GX_ADDCURDIR);
+	  /* last_starstar? */
 	  if ((flags & GX_GLOBSTAR) && filename[0] == '*' && filename[1] == '*' && filename[2] == '\0')
 	    dflags |= GX_ALLDIRS|GX_ADDCURDIR;
 	  if (dname[0] == '\0' && filename[0])
@@ -1253,7 +1249,44 @@ glob_filename (pathname, flags)
 	      dflags |= GX_NULLDIR;
 	      dname = ".";	/* treat null directory name and non-null filename as current directory */
 	    }
-	  temp_results = glob_vector (filename, dname, dflags);
+
+	  /* Special handling for symlinks to directories with globstar on */
+	  if (all_starstar && (dflags & GX_NULLDIR) == 0)
+	    {
+	      int dlen;
+
+	      /* If we have a directory name that is not null (GX_NULLDIR above)
+		 and is a symlink to a directory, we return the symlink if
+		 we're not `descending' into it (filename[0] == 0) and return
+		 glob_error_return (which causes the code below to skip the
+		 name) otherwise. I should fold this into a test that does both
+		 checks instead of calling stat twice. */
+	      if (glob_testdir (dname, flags|GX_ALLDIRS) == -2 && glob_testdir (dname, 0) == 0)
+		{
+		  if (filename[0] != 0)
+		    temp_results = (char **)&glob_error_return;		/* skip */
+		  else
+		    {
+		      /* Construct array to pass to glob_dir_to_array */
+		      temp_results = (char **)malloc (2 * sizeof (char *));
+		      if (temp_results == NULL)
+			goto memory_error;
+		      temp_results[0] = (char *)malloc (1);
+		      if (temp_results[0] == 0)
+			{
+			  free (temp_results);
+			  goto memory_error;
+			}
+		      **temp_results = '\0';
+		      temp_results[1] = NULL;
+		      dflags |= GX_SYMLINK;	/* mostly for debugging */
+		    }
+		}
+	      else
+		temp_results = glob_vector (filename, dname, dflags);
+	    }
+	  else
+	    temp_results = glob_vector (filename, dname, dflags);
 
 	  /* Handle error cases. */
 	  if (temp_results == NULL)
@@ -1301,6 +1334,8 @@ glob_filename (pathname, flags)
 	          else
 		    array = temp_results;
 		}
+	      else if (dflags & GX_SYMLINK)
+		array = glob_dir_to_array (directories[i], temp_results, flags);
 	      else
 		array = glob_dir_to_array (directories[i], temp_results, flags);
 	      l = 0;

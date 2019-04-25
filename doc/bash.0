@@ -2908,8 +2908,8 @@ JJOOBB CCOONNTTRROOLL
 
        When the shell is waiting for a job or process using the wwaaiitt  builtin,
        and  job  control  is  enabled,  wwaaiitt  will return when the job changes
-       state. The --ff option will force wwaaiitt to wait until the job  or  process
-       terminates before returning.
+       state. The --ff option causes wwaaiitt to wait until the job or process  ter-
+       minates before returning.
 
 PPRROOMMPPTTIINNGG
        When executing interactively, bbaasshh displays the primary prompt PPSS11 when
@@ -2967,7 +2967,9 @@ PPRROOMMPPTTIINNGG
        is  decoded,  it is expanded via parameter expansion, command substitu-
        tion, arithmetic expansion, and quote removal, subject to the value  of
        the  pprroommppttvvaarrss  shell option (see the description of the sshhoopptt command
-       under SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below).
+       under SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS  below).   This  can  have  unwanted  side
+       effects if escaped portions of the string appear within command substi-
+       tution or contain characters special to word expansion.
 
 RREEAADDLLIINNEE
        This is the library that handles reading input when using  an  interac-
@@ -3103,6 +3105,7 @@ RREEAADDLLIINNEE
        form
 
               sseett _v_a_r_i_a_b_l_e_-_n_a_m_e _v_a_l_u_e
+       or using the bbiinndd builtin command (see SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below).
 
        Except  where  noted,  readline variables can take the values OOnn or OOffff
        (without regard to case).  Unrecognized  variable  names  are  ignored.
@@ -6032,13 +6035,13 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               a job spec is given, all processes in that  job's  pipeline  are
               waited for.  If _i_d is not given, all currently active child pro-
               cesses are waited for, and the return status is zero.  If the --nn
-              option  is  supplied,  wwaaiitt  waits  for any job to terminate and
-              returns its exit status.  If the --ff option is supplied, and  job
-              control is enabled, wwaaiitt forces _i_d to terminate before returning
-              its status, instead of returning when it changes status.  If  _i_d
-              specifies  a  non-existent  process or job, the return status is
-              127.  Otherwise, the return status is the  exit  status  of  the
-              last process or job waited for.
+              option is supplied, wwaaiitt waits for a single job to terminate and
+              returns its exit status.  Supplying the --ff option, when job con-
+              trol  is enabled, forces wwaaiitt to wait for _i_d to terminate before
+              returning its status, instead of returning when it changes  sta-
+              tus.   If _i_d specifies a non-existent process or job, the return
+              status is 127.  Otherwise, the return status is the exit  status
+              of the last process or job waited for.
 
 RREESSTTRRIICCTTEEDD SSHHEELLLL
        If bbaasshh is started with the name rrbbaasshh, or the --rr option is supplied at
@@ -6170,4 +6173,4 @@ BBUUGGSS
 
 
 
-GNU Bash 5.0                   2019 February 26                        BASH(1)
+GNU Bash 5.0                     2019 April 20                         BASH(1)

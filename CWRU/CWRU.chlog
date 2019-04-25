@@ -5795,3 +5795,51 @@ doc/bash.1,lib/readline/doc/rluser.texi
 	- make it clear that the `bind' builtin can be used to set readline
 	  keybindings and variables. Suggestion from Dan Jacobson
 	  <jidanni@jidanni.org>
+
+				   4/22
+				   ----
+lib/glob/glob.h
+	- GX_SYMLINK: new internal flag denoting we are processing a symlink to
+	  a directory. If GX_GLOBSTAR is active, we should not `descend' into
+	  that directory
+
+lib/glob/glob.c
+	- glob_filename: if the directory portion of the pattern is `**'
+	  (all_starstar), we have globbed all of the directories corresponding
+	  to that pattern, and we encounter a name that is a symlink to a
+	  directory, don't descend into it: if the filename portion is null,
+	  return that name only; if the filename portion is non-null, skip over
+	  it because we will pick it up when we process the `real' directory.
+	  This is a better fix for the issue originally reported by
+	  Murukesh Mohanan <murukesh.mohanan@gmail.com> back in 4/2018 and
+	  addresses the issue raised by Eli Schwartz <eschwartz@archlinux.org>
+	- glob_dir_to_array: slight optimization: if array[i] is the empty
+	  string, don't bother to strcpy it or check the result for a directory
+	  for GX_MARKDIRS support
+
+				   4/23
+				   ----
+bashline.c
+	- test_for_canon_directory: test a pathname for a directory, but
+	  expand and canonicalize it first using bash_filename_stat_hook()
+	  before calling stat(2)
+	- bash_progcomp_ignore_filenames: strip non-directories out of a match
+	  list, but use the function above that canonicalizes the pathname to
+	  expand the name before testing
+	- bash_directory_completion_matches: use bash_progcomp_ignore_filenames
+	  to strip out non-directories so we get consistent results between
+	  programmable completion and tab completion. Fixes bug reported by
+	  Ville Skyttä <ville.skytta@iki.fi>
+
+builtins/read.def
+	- read_builtin: allow read -e and read -u N to be used together, by
+	  calling fdopen(fd) if fd != 0. Save and restore rl_instream. Fixes
+	  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=927768
+
+				   4/24
+				   ----
+lib/readline/input.c
+	- rl_getc: if readline catches SIGTSTP, the calling application must
+	  not have had it ignored. Run the signal handler and set the signal
+	  hook in case the application wants to handle it. Report from
+	  Robert Elz <kre@bmunnari.oz.au>

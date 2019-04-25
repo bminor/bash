@@ -1,7 +1,7 @@
 This file is read.def, from which is created read.c.
 It implements the builtin "read" in Bash.
 
-Copyright (C) 1987-2017 Free Software Foundation, Inc.
+Copyright (C) 1987-2019 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -198,6 +198,7 @@ read_builtin (list)
 #if defined (READLINE)
   char *rlbuf, *itext;
   int rlind;
+  FILE *save_instream;
 #endif
 
   USE_VAR(size);
@@ -527,6 +528,19 @@ read_builtin (list)
 	initialize_terminating_signals ();
     }
 
+#if defined (READLINE)
+  save_instream = 0;
+  if (edit && fd != 0)
+    {
+      if (bash_readline_initialized == 0)
+	initialize_readline ();
+
+      unwind_protect_var (rl_instream);
+      save_instream = rl_instream;
+      rl_instream = fdopen (fd, "r");	
+    }
+#endif
+
   /* This *must* be the top unwind-protect on the stack, so the manipulation
      of the unwind-protect stack after the realloc() works right. */
   add_unwind_protect (xfree, input_string);
@@ -758,6 +772,11 @@ add_char:
 
   if (unbuffered_read == 0)
     zsyncfd (fd);
+
+#if defined (READLINE)
+  if (save_instream)
+    rl_instream = save_instream;	/* can't portably free it */
+#endif
 
   discard_unwind_frame ("read_builtin");
 
