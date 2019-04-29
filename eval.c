@@ -293,7 +293,10 @@ parse_command ()
      actually printed. */
   if (interactive && bash_input.type != st_string && parser_expanding_alias() == 0)
     {
-      execute_prompt_command ();
+#if defined (READLINE)
+      if (no_line_editing || (bash_input.type == st_stdin && parser_will_prompt ()))
+#endif
+        execute_prompt_command ();
 
       if (running_under_emacs == 2)
 	send_pwd_to_eterm ();	/* Yuck */

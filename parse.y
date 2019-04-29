@@ -1479,7 +1479,6 @@ yy_readline_get ()
       old_sigint = IMPOSSIBLE_TRAP_HANDLER;
       if (signal_is_ignored (SIGINT) == 0)
 	{
-	  /* interrupt_immediately++; */
 	  old_sigint = (SigHandler *)set_signal_handler (SIGINT, sigint_sighandler);
 	}
 
@@ -1490,7 +1489,6 @@ yy_readline_get ()
       CHECK_TERMSIG;
       if (signal_is_ignored (SIGINT) == 0)
 	{
-	  /* interrupt_immediately--; */
 	  if (old_sigint != IMPOSSIBLE_TRAP_HANDLER)
 	    set_signal_handler (SIGINT, old_sigint);
 	}
@@ -1546,6 +1544,16 @@ with_input_from_stdin ()
     }
 }
 
+/* Will we be collecting another input line and printing a prompt? This uses
+   different conditions than SHOULD_PROMPT(), since readline allows a user to
+   embed a newline in the middle of the line it collects, which the parser
+   will interpret as a line break and command delimiter. */
+int
+parser_will_prompt ()
+{
+  return (current_readline_line == 0 || current_readline_line[current_readline_line_index] == 0);
+}
+  
 #else  /* !READLINE */
 
 void

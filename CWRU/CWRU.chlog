@@ -5843,3 +5843,25 @@ lib/readline/input.c
 	  not have had it ignored. Run the signal handler and set the signal
 	  hook in case the application wants to handle it. Report from
 	  Robert Elz <kre@bmunnari.oz.au>
+
+				   4/26
+				   ----
+parse.y
+	- parser_will_prompt: check and return true if we have consumed the
+	  entire readline line buffer and will have to go back to readline for
+	  more input, printing a prompt as a consequence
+
+eval.c
+	- parse_command: if parser_will_prompt() returns 0, indicating that we
+	  still have unconsumed input in the readline line buffer, don't
+	  execute PROMPT_COMMAND. TENTATIVE fix prompted by report from
+	  Matteo Landi <matteo@matteolandi.net>
+
+builtins/read.def
+	- set_eol_delim: save the old values before changing the bindings for
+	  RETURN and the delimiter character, in case the delimiter is RETURN.
+	  Fixes bug report from Stephane Chazelas <stephane.chazelas@gmail.com>
+	- read_builtin: if the delimiter is '\0' and we are using readline,
+	  don't terminate the buffer and go back to read another character;
+	  allow the NULL to pass through and terminate the read.
+	  Fixes bug report from Stephane Chazelas <stephane.chazelas@gmail.com>

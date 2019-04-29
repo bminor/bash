@@ -569,7 +569,8 @@ read_builtin (list)
 #if defined (READLINE)
       if (edit)
 	{
-	  if (rlbuf && rlbuf[rlind] == '\0')
+	  /* If we have a null delimiter, don't treat NULL as ending the line */
+	  if (rlbuf && rlbuf[rlind] == '\0' && delim != '\0')
 	    {
 	      free (rlbuf);
 	      rlbuf = (char *)0;
@@ -1148,15 +1149,17 @@ set_eol_delim (c)
     initialize_readline ();
   cmap = rl_get_keymap ();
 
-  /* Change newline to self-insert */
+  /* Save the old delimiter char binding */
   old_newline_ctype = cmap[RETURN].type;
   old_newline_func =  cmap[RETURN].function;
+  old_delim_ctype = cmap[c].type;
+  old_delim_func = cmap[c].function;
+
+  /* Change newline to self-insert */
   cmap[RETURN].type = ISFUNC;
   cmap[RETURN].function = rl_insert;
 
   /* Bind the delimiter character to accept-line. */
-  old_delim_ctype = cmap[c].type;
-  old_delim_func = cmap[c].function;
   cmap[c].type = ISFUNC;
   cmap[c].function = rl_newline;
 

@@ -112,6 +112,7 @@ extern void reset_parser __P((void));
 extern void reset_readahead_token __P((void));
 extern WORD_LIST *parse_string_to_word_list __P((char *, int, const char *));
 
+extern int parser_will_prompt __P((void));
 extern int parser_in_command_position __P((void));
 
 extern void free_pushed_string_input __P((void));
