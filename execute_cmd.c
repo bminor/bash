@@ -3263,7 +3263,7 @@ select_query (list, list_len, prompt, print_menu)
      char *prompt;
      int print_menu;
 {
-  int max_elem_len, indices_len, len;
+  int max_elem_len, indices_len, len, r, oe;
   intmax_t reply;
   WORD_LIST *l;
   char *repl_string, *t;
@@ -3297,7 +3297,11 @@ select_query (list, list_len, prompt, print_menu)
       fflush (stderr);
       QUIT;
 
-      if (read_builtin ((WORD_LIST *)NULL) != EXECUTION_SUCCESS)
+      oe = executing_builtin;
+      executing_builtin = 1;
+      r = read_builtin ((WORD_LIST *)NULL);
+      executing_builtin = oe;
+      if (r != EXECUTION_SUCCESS)
 	{
 	  putchar ('\n');
 	  return ((char *)NULL);

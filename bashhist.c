@@ -359,10 +359,11 @@ bash_delete_histent (i)
 
   discard = remove_history (i);
   if (discard)
-    free_history_entry (discard);
-  history_lines_this_session--;
-
-  return 1;
+    {
+      free_history_entry (discard);
+      history_lines_this_session--;
+    }
+  return discard != 0;
 }
 
 int

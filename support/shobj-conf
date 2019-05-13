@@ -402,18 +402,15 @@ hpux11*)
 	SHLIB_STATUS=unsupported
 
 	# If you are using the HP ANSI C compiler, you can uncomment and use
-	# this code (I have not tested it)
-#	SHOBJ_STATUS=supported
-#	SHLIB_STATUS=supported
-#
+	# this code from michael.osipov@siemens.com (I have not tested it)
 #	SHOBJ_CFLAGS='+z'
-#	SHOBJ_LD='ld'
-#	SHOBJ_LDFLAGS='-b +s +h $@'
+#	SHOBJ_LD='$(CC)'
+#	SHOBJ_LDFLAGS='-b -Wl,+s -Wl,+h,$@'
 #
-#	SHLIB_XLDFLAGS='+b $(libdir)'
-#	SHLIB_LIBSUFF='sl'
+#	SHLIB_XLDFLAGS='-Wl,+b,$(libdir)'
+#	SHLIB_LIBSUFF='so'
 #	SHLIB_LIBVERSION='$(SHLIB_LIBSUFF).$(SHLIB_MAJOR)'	
-
+#	SHLIB_LIBS='$(TERMCAP_LIB)'
 	;;
 
 sysv4*-*gcc*)

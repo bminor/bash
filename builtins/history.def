@@ -243,7 +243,7 @@ range_error:
 	    }
 	  opt = ind + history_base;	/* compensate for opt - history_base below */
 	}
-      else if ((delete_offset < history_base) || (delete_offset > (history_base + history_length)))
+      else if ((delete_offset < history_base) || (delete_offset >= (history_base + history_length)))
 	{
 	  sh_erange (delete_arg, _("history position"));
 	  return (EXECUTION_FAILURE);

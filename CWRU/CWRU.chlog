@@ -5865,3 +5865,41 @@ builtins/read.def
 	  don't terminate the buffer and go back to read another character;
 	  allow the NULL to pass through and terminate the read.
 	  Fixes bug report from Stephane Chazelas <stephane.chazelas@gmail.com>
+
+				    5/9
+				    ---
+bashhist.c
+	- bash_delete_histent: decrement history_lines_this_session only if
+	  remove_history returns a non-null history entry, and return failure
+	  if it does return a null entry
+
+builtins/history.def
+	- history_builtin: when checking the argument to -d, display an error
+	  if the argument is >= history_base + history_length, since that's
+	  what history_get and remove_history check. Fixes issue reported by
+	  <jr@saturn.site>
+
+support/shobj-conf
+	- hpux11: change stanza to create shared libraries on later versions of
+	  HPUX 11. Contributed by Michael Osipov <michael.osipov@siemens.com>
+
+lib/readline/terminal.c
+	- _rl_init_terminal_io: assume TGETENT_BROKEN defined means that tgetent
+	  returns 0 on success, as on HPUX 11. Bug reported by Michael Osipov
+	  <michael.osipov@siemens.com>
+
+configure.ac
+	- hpux: add -DTGETENT_BROKEN to LOCAL_CFLAGS. Still need to do this
+	  in the readline configure.ac
+
+execute_cmd.c
+	- select_builtin: set executing_builtin around the call to read_builtin
+	  so we can run traps if the read call is interrupted. From a report
+	  from Andreas Kusalananda Kähäri <andreas.kahari@abc.se>
+
+				   5/12
+				   ----
+doc/bashref.texi
+	- The Restricted Shell: add some language detailing the weaknesses of
+	  the restricted shell mode in isolation, inspired by a discussion on
+	  the zsh mailing list

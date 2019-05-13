@@ -483,7 +483,11 @@ _rl_init_terminal_io (const char *terminal_name)
       tgetent_ret = tgetent (term_buffer, term);
     }
 
+#ifdef TGETENT_BROKEN
+  if (tgetent_ret < 0)
+#else
   if (tgetent_ret <= 0)
+#endif
     {
       FREE (term_string_buffer);
       FREE (term_buffer);
