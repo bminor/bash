@@ -91,6 +91,7 @@ should_suppress_fork (command)
   return (startup_state == 2 && parse_and_execute_level == 1 &&
 	  running_trap == 0 &&
 	  *bash_input.location.string == '\0' &&
+	  parser_expanding_alias () == 0 &&
 	  command->type == cm_simple &&
 	  signal_is_trapped (EXIT_TRAP) == 0 &&
 	  signal_is_trapped (ERROR_TRAP) == 0 &&
@@ -105,6 +106,7 @@ can_optimize_connection (command)
      COMMAND *command;
 {
   return (*bash_input.location.string == '\0' &&
+	  parser_expanding_alias () == 0 &&
 	  (command->value.Connection->connector == AND_AND || command->value.Connection->connector == OR_OR || command->value.Connection->connector == ';') &&
 	  command->value.Connection->second->type == cm_simple);
 }
@@ -290,7 +292,7 @@ parse_and_execute (string, from_file, flags)
 
   with_input_from_string (string, from_file);
   clear_shell_input_line ();
-  while (*(bash_input.location.string))
+  while (*(bash_input.location.string) || parser_expanding_alias ())
     {
       command = (COMMAND *)NULL;
 
@@ -545,7 +547,7 @@ parse_string (string, from_file, flags, endp)
   ostring = string;
 
   with_input_from_string (string, from_file);
-  while (*(bash_input.location.string))
+  while (*(bash_input.location.string))		/* XXX - parser_expanding_alias () ? */
     {
       command = (COMMAND *)NULL;
 

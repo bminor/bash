@@ -1,0 +1,15 @@
+# -c commands ending with multi-line aliases; post-bash-5.0
+
+: ${THIS_SH:=./bash}
+
+${THIS_SH} -c "shopt -s expand_aliases &>/dev/null;
+alias myalias='/bin/echo foo
+echo bar
+echo baz'
+myalias"
+
+${THIS_SH} -c "shopt -s expand_aliases &>/dev/null;
+alias myalias='echo foo
+echo bar
+echo baz'
+myalias"

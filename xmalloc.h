@@ -53,6 +53,14 @@ extern void sh_xfree __P((void *, const char *, int));
 #undef free
 #endif
 #define free(x)		sh_xfree((x), __FILE__, __LINE__)
+
+extern PTR_T sh_malloc __P((size_t, const char *, int));
+
+#ifdef malloc
+#undef malloc
+#endif
+#define malloc(x)	sh_malloc((x), __FILE__, __LINE__)
+
 #endif	/* USING_BASH_MALLOC */
 
 #endif	/* _XMALLOC_H_ */

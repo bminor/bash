@@ -43,6 +43,7 @@
 #endif
 #include "bashansi.h"
 #include "bashintl.h"
+#include "filecntl.h"
 
 #define NEED_XTRACE_SET_DECL
 
@@ -199,11 +200,23 @@ static SHELL_VAR *assign_seconds __P((SHELL_VAR *, char *, arrayind_t, char *));
 static SHELL_VAR *get_seconds __P((SHELL_VAR *));
 static SHELL_VAR *init_seconds_var __P((void));
 
+static u_bits32_t intrand32 __P((u_bits32_t));
+static u_bits32_t genseed __P((void));
+
 static int brand __P((void));
 static void sbrand __P((unsigned long));		/* set bash random number generator. */
 static void seedrand __P((void));			/* seed generator randomly */
+
+static u_bits32_t brand32 __P((void));
+static void sbrand32 __P((u_bits32_t));
+static void seedrand32 __P((void));
+static void perturb_rand32 __P((void));
+static u_bits32_t get_urandom32 __P((void));
+
 static SHELL_VAR *assign_random __P((SHELL_VAR *, char *, arrayind_t, char *));
 static SHELL_VAR *get_random __P((SHELL_VAR *));
+
+static SHELL_VAR *get_urandom __P((SHELL_VAR *));
 
 static SHELL_VAR *assign_lineno __P((SHELL_VAR *, char *, arrayind_t, char *));
 static SHELL_VAR *get_lineno __P((SHELL_VAR *));
@@ -598,8 +611,9 @@ if (STREQ (name, "BASH_COMPAT"))
     }
 #endif /* HISTORY */
 
-  /* Seed the random number generator. */
+  /* Seed the random number generators. */
   seedrand ();
+  seedrand32 ();
 
   /* Handle some "special" variables that we may have inherited from a
      parent shell. */
@@ -1321,17 +1335,10 @@ static u_bits32_t rseed = 1;
 static int last_random_value;
 static int seeded_subshell = 0;
 
-#define BASH_RANDOM_16	1
-
-#if BASH_RANDOM_16
-#  define BASH_RAND_MAX	32767		/* 0x7fff - 16 bits */
-#else
-#  define BASH_RAND_MAX	0x7fffffff	/* 32 bits */
-#endif
-
-/* Returns a pseudo-random number between 0 and 32767. */
-static int
-brand ()
+/* Returns a 32-bit pseudo-random number. */
+static u_bits32_t
+intrand32 (last)
+     u_bits32_t last;
 {
   /* Minimal Standard generator from
      "Random number generators: good ones are hard to find",
@@ -1342,23 +1349,48 @@ brand ()
 
      We split up the calculations to avoid overflow.
 
-     h = rseed / q; l = x - h * q; t = a * l - h * r
+     h = last / q; l = x - h * q; t = a * l - h * r
      m = 2147483647, a = 16807, q = 127773, r = 2836
 
      There are lots of other combinations of constants to use; look at
      https://www.gnu.org/software/gsl/manual/html_node/Other-random-number-generators.html#Other-random-number-generators */
 
   bits32_t h, l, t;
+  u_bits32_t ret;
 
   /* Can't seed with 0. */
-  if (rseed == 0)
-    rseed = 123459876;
-  h = rseed / 127773;
-  l = rseed - (127773 * h);
+  ret = (last == 0) ? 123459876 : last;
+  h = ret / 127773;
+  l = ret - (127773 * h);
   t = 16807 * l - 2836 * h;
-  rseed = (t < 0) ? t + 0x7fffffff : t;
+  ret = (t < 0) ? t + 0x7fffffff : t;
 
-  return ((unsigned int)(rseed & BASH_RAND_MAX));	/* was % BASH_RAND_MAX+1 */
+  return (ret);
+}
+
+static u_bits32_t
+genseed ()
+{
+  struct timeval tv;
+  u_bits32_t iv;
+
+  gettimeofday (&tv, NULL);
+  iv = (u_bits32_t)seedrand;		/* let the compiler truncate */
+  iv = tv.tv_sec ^ tv.tv_usec ^ getpid () ^ getppid () ^ current_user.uid ^ iv;
+  return (iv);
+}
+
+#define BASH_RAND_MAX	32767		/* 0x7fff - 16 bits */
+
+/* Returns a pseudo-random number between 0 and 32767. */
+static int
+brand ()
+{
+  unsigned int ret;
+
+  rseed = intrand32 (rseed);
+  ret = (rseed >> 16) ^ (rseed & 65535);
+  return (ret & BASH_RAND_MAX);
 }
 
 /* Set the random number generator seed to SEED. */
@@ -1373,16 +1405,88 @@ sbrand (seed)
 static void
 seedrand ()
 {
-  struct timeval tv;
-  SHELL_VAR *v;
+  u_bits32_t iv;
 
-  gettimeofday (&tv, NULL);
-#if 0
-  v = find_variable ("BASH_VERSION");
-  sbrand (tv.tv_sec ^ tv.tv_usec ^ getpid () ^ ((u_bits32_t)&v & 0x7fffffff));
+  iv = genseed ();
+  sbrand (iv);
+}
+
+static u_bits32_t rseed32 = 1073741823;
+static int last_rand32;
+
+static int urandfd = -1;
+
+#define BASH_RAND32_MAX	0x7fffffff	/* 32 bits */
+
+/* Returns a 32-bit pseudo-random number between 0 and 4294967295. */
+static u_bits32_t
+brand32 ()
+{
+  u_bits32_t ret;
+
+  rseed32 = intrand32 (rseed32);
+  return (rseed32 & BASH_RAND32_MAX);
+}
+
+static void
+sbrand32 (seed)
+     u_bits32_t seed;
+{
+  rseed32 = seed;
+  last_rand32 = seed;
+}
+
+static void
+seedrand32 ()
+{
+  u_bits32_t iv;
+
+  iv = genseed ();
+  sbrand32 (iv);
+}
+
+static void
+perturb_rand32 ()
+{
+  rseed32 ^= genseed ();
+}
+
+/* Force another attempt to open /dev/urandom on the next call to get_urandom32 */
+void
+urandom_close ()
+{
+  if (urandfd >= 0)
+    close (urandfd);
+  urandfd = -1;
+}
+
+static u_bits32_t
+get_urandom32 ()
+{
+  u_bits32_t ret;
+  int n;
+  static int urand_unavail = 0;
+
+  if (urandfd == -1 && urand_unavail == 0)
+    {
+      urandfd = open ("/dev/urandom", O_RDONLY, 0);
+      if (urandfd >= 0)
+	SET_CLOSE_ON_EXEC (urandfd);
+      else
+	urand_unavail = 1;
+    }
+  if (urandfd >= 0 && (n = read (urandfd, (char *)&ret, sizeof (ret))) == sizeof (ret))
+    return (last_rand32 = ret);
+#if defined (HAVE_ARC4RANDOM)
+  ret = arc4random ();
 #else
-  sbrand (tv.tv_sec ^ tv.tv_usec ^ getpid () ^ getppid () ^ current_user.uid ^ current_user.gid);
+  if (subshell_environment)
+    perturb_rand32 ();
+  do
+    ret = brand32 ();
+  while (ret == last_rand32);
 #endif
+  return (last_rand32 = ret);
 }
 
 static SHELL_VAR *
@@ -1414,7 +1518,8 @@ get_random_number ()
   do
     rv = brand ();
   while (rv == last_random_value);
-  return rv;
+
+  return (last_random_value = rv);
 }
 
 static SHELL_VAR *
@@ -1425,7 +1530,23 @@ get_random (var)
   char *p;
 
   rv = get_random_number ();
-  last_random_value = rv;
+  p = itos (rv);
+
+  FREE (value_cell (var));
+
+  VSETATTR (var, att_integer);
+  var_setvalue (var, p);
+  return (var);
+}
+
+static SHELL_VAR *
+get_urandom (var)
+     SHELL_VAR *var;
+{
+  u_bits32_t rv;
+  char *p;
+
+  rv = get_urandom32 ();
   p = itos (rv);
 
   FREE (value_cell (var));
@@ -1919,6 +2040,8 @@ initialize_dynamic_variables ()
 
   INIT_DYNAMIC_VAR ("RANDOM", (char *)NULL, get_random, assign_random);
   VSETATTR (v, att_integer);
+  INIT_DYNAMIC_VAR ("URANDOM", (char *)NULL, get_urandom, (sh_var_assign_func_t *)NULL);
+  VSETATTR (v, att_integer);  
   INIT_DYNAMIC_VAR ("LINENO", (char *)NULL, get_lineno, assign_lineno);
   VSETATTR (v, att_integer|att_regenerate);
 

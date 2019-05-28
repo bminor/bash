@@ -1,29 +1,31 @@
+# this depends on the sequence of random numbers from the internal LCRNG
 RANDOM=42
 (( dice[RANDOM%6+1 + RANDOM%6+1]++ ))
-echo ${dice[5]}
+echo ${dice[6]}
 
 (( ++dice[RANDOM%6+1 + RANDOM%6+1] ))
-echo ${dice[6]}
+echo ${dice[7]}
 
 v=4
 DIND=20
 
 (( dice[DIND%6 + 1]=v ))
 echo ${dice[3]}
+(( dice[DIND/v]+=2 ))
 
 RANDOM=42
 
 (( dice[RANDOM%6+1 + RANDOM%6+1]+=v ))
-echo ${dice[5]}
-
-(( dice[RANDOM%6+1 + RANDOM%6+1]-=v ))
 echo ${dice[6]}
 
+(( dice[RANDOM%6+1 + RANDOM%6+1]-=v ))
+echo ${dice[7]}
+
 (( dice[RANDOM%6+1 + RANDOM%6+1]+=2 ))
-echo ${dice[11]}
+echo ${dice[8]}
 
 (( dice[RANDOM%6+1 + RANDOM%6+1]*=2 ))
-echo ${dice[11]}
+echo ${dice[5]}
 
 unset dice1 dice2
 RANDOM=42

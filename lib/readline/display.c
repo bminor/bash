@@ -603,6 +603,9 @@ init_line_structures (int minsize)
 {
   register int n;
 
+  if (line_size <= _rl_screenwidth)	/* XXX - for gdb */
+    line_size = _rl_screenwidth + 1;
+
   if (invisible_line == 0)	/* initialize it */
     {
       if (line_size < minsize)

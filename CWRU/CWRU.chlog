@@ -64,7 +64,7 @@ parse.y
 
 				   9/23
 				   ----
-execute_command.c
+execute_cmd.c
 	- execute_in_subshell: call without_job_control for both job control
 	  and non-job-control builds to avoid waiting for last_made_pid
 	  inherited from parent shell.  Related to fix from 8/4 to
@@ -5889,8 +5889,7 @@ lib/readline/terminal.c
 	  <michael.osipov@siemens.com>
 
 configure.ac
-	- hpux: add -DTGETENT_BROKEN to LOCAL_CFLAGS. Still need to do this
-	  in the readline configure.ac
+	- hpux: add -DTGETENT_BROKEN to LOCAL_CFLAGS
 
 execute_cmd.c
 	- select_builtin: set executing_builtin around the call to read_builtin
@@ -5903,3 +5902,75 @@ doc/bashref.texi
 	- The Restricted Shell: add some language detailing the weaknesses of
 	  the restricted shell mode in isolation, inspired by a discussion on
 	  the zsh mailing list
+
+				   5/15
+				   ----
+xmalloc.h
+	- malloc: define to sh_malloc to get file and line information from
+	  malloc (not xmalloc) calls. From a suggestion by achurch@achurch.org
+	  (Andrew Church)
+
+builtins/evalstring.c
+	- parse_and_execute: make sure the parser is not expanding an alias
+	  before terminating the loop that processes characters in the string.
+	  Fixes problem with -c commands that end with an alias reported by
+	  Yu Kou <ckyoog@gmail.com>
+	- should_suppress_fork: make sure that we don't try to optimize out a
+	  fork if the parser is still expanding an alias
+
+				   5/16
+				   ----
+lib/readline/misc.c
+	- rl_get_previous_history: if previous_history() returns NULL, only
+	  free the saved history if we were the ones who saved it; leave any
+	  existing saved history entry alone. Fixes problem with ^N not working
+	  at the end of the history if we previously moved back to the start
+	  of history
+
+lib/readline/histfile.c
+	- read_history_range: when reading until FROM lines with a history
+	  file that has timestamps, make sure to skip to the end of the command
+	  line corresponding to the FROMth line instead of leaving line_start
+	  pointing to it, and keep track of the start of the last timestamp in
+	  last_ts for use by the loop below. Fix for history -n bug reported
+	  by HIROSE Masaaki <hirose31@gmail.com>
+
+lib/readline/display.c
+	- init_line_structures: if, for some reason, _rl_screenwidth ends up
+	  bigger than the line_size default of 1024 (e.g., gdb's setting the
+	  terminal width to 0), make sure line_size is at least _rl_screenwidth.
+	  From a report by Tom de Vries <tdevries@suse.de>
+
+				   5/17
+				   ----
+variables.c
+	- brand: split the code into a function that generates a 32-bit value
+	  given the last value in the sequence (intrand32) and a function that
+	  returns a 16-bit random number (brand)
+	- seedrand: small change in hopes of adding slightly more entropy
+	- brand: modify the 16-bit version to XOR the top 16 bits of the 32-bit
+	  seed with the bottom 16 bits and return the lower 15 bits of that
+	  result as before. Based on an analysis by Andrew Church
+	  <achurch+bash@achurch.org>
+
+				   5/18
+				   ----
+variables.c
+	- genseed: break code that generates the 32-bit seed for the RNG into
+	  a separate function; call from seedrand
+	- {brand32,sbrand32,seedrand32}: new 32-bit versions of the random
+	  number generator functions that use the entire 32-bit internal value.
+	  Prep for systems that don't have /dev/urandom or arc4random()
+	- perturb_rand32: shake up the 32-bit LCRNG in subshells
+
+				   5/19
+				   ----
+variables.c
+	- get_urandom32: get a 32-bit random number by using the first one of
+	  these that succeeds: reading from /dev/urandom (if available),
+	  calling arc4random (if available), and using the internal 32-bit
+	  RNG (always available)
+	- URANDOM: expand to a 32-bit random number. This is not a LCRNG, so
+	  the numbers shouldn't have any relationship to previous returned
+	  values. Assignments are accepted but have no effect on the sequence.
+	  Not documented yet
