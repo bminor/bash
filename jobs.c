@@ -243,6 +243,7 @@ static sighandler sigstop_sighandler __P((int));
 
 static int waitchld __P((pid_t, int));
 
+static PROCESS *find_pid_in_pipeline __P((pid_t, PROCESS *, int));
 static PROCESS *find_pipeline __P((pid_t, int, int *));
 static PROCESS *find_process __P((pid_t, int, int *));
 
@@ -1492,6 +1493,27 @@ kill_current_pipeline ()
   start_pipeline ();
 }
 
+static PROCESS *
+find_pid_in_pipeline (pid, pipeline, alive_only)
+     pid_t pid;
+     PROCESS *pipeline;
+     int alive_only;
+{
+  PROCESS *p;
+
+  p = pipeline;
+  do
+    {
+      /* Return it if we found it.  Don't ever return a recycled pid. */
+      if (p->pid == pid && ((alive_only == 0 && PRECYCLED(p) == 0) || PALIVE(p)))
+	return (p);
+
+      p = p->next;
+    }
+  while (p != pipeline);
+  return ((PROCESS *)NULL);
+}
+
 /* Return the pipeline that PID belongs to.  Note that the pipeline
    doesn't have to belong to a job.  Must be called with SIGCHLD blocked.
    If JOBP is non-null, return the index of the job containing PID.  */
@@ -1503,37 +1525,23 @@ find_pipeline (pid, alive_only, jobp)
 {
   int job;
   PROCESS *p;
+  struct pipeline_saver *save;
 
   /* See if this process is in the pipeline that we are building. */
+  p = (PROCESS *)NULL;
   if (jobp)
     *jobp = NO_JOB;
-  if (the_pipeline)
-    {
-      p = the_pipeline;
-      do
-	{
-	  /* Return it if we found it.  Don't ever return a recycled pid. */
-	  if (p->pid == pid && ((alive_only == 0 && PRECYCLED(p) == 0) || PALIVE(p)))
-	    return (p);
+  if (the_pipeline && (p = find_pid_in_pipeline (pid, the_pipeline, alive_only)))
+    return (p);
 
-	  p = p->next;
-	}
-      while (p != the_pipeline);
-    }
+  /* Is this process in a saved pipeline? */
+  for (save = saved_pipeline; save; save = save->next)
+    if (save->pipeline && (p = find_pid_in_pipeline (pid, save->pipeline, alive_only)))
+      return (p);
+  
   /* Now look in the last process substitution pipeline, since that sets $! */
-  if (last_procsub_child)
-    {
-      p = last_procsub_child;
-      do
-	{
-	  /* Return it if we found it.  Don't ever return a recycled pid. */
-	  if (p->pid == pid && ((alive_only == 0 && PRECYCLED(p) == 0) || PALIVE(p)))
-	    return (p);
-
-	  p = p->next;
-	}
-      while (p != last_procsub_child);
-    }
+  if (last_procsub_child && (p = find_pid_in_pipeline (pid, last_procsub_child, alive_only)))
+    return (p);
 
   job = find_job (pid, alive_only, &p);
   if (jobp)

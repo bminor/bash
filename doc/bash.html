@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2019 April 20<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2019 May 20<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -2419,13 +2419,14 @@ command.
 <DT><B>RANDOM</B>
 
 <DD>
-Each time this parameter is referenced, a random integer between
-0 and 32767 is
-generated.  The sequence of random numbers may be initialized by assigning
+Each time this parameter is referenced, it expands to a random integer
+between 0 and 32767.
+Assigning
 a value to
-<FONT SIZE=-1><B>RANDOM</B>.
+<FONT SIZE=-1><B>RANDOM</B>
 
 </FONT>
+initializes (seeds) the sequence of random numbers.
 If
 <FONT SIZE=-1><B>RANDOM</B>
 
@@ -2520,6 +2521,21 @@ Incremented by one each time an instance of
 <B>bash</B>
 
 is started.
+<DT><B>SRANDOM</B>
+
+<DD>
+This variable expands to a 32-bit pseudo-random number each time it is
+referenced. The random number generator is not linear on systems that
+support <TT>/dev/urandom</TT> or <I>arc4random</I>, so each returned number
+has no relationship to the numbers preceding it.
+The random number generator cannot be seeded, so assignments to this
+variable have no effect.
+If
+<FONT SIZE=-1><B>SRANDOM</B>
+
+</FONT>
+is unset, it loses its special properties,
+even if it is subsequently reset.
 <DT><B>UID</B>
 
 <DD>
@@ -3149,7 +3165,7 @@ levels of indirection.  The default is ``<B>+ </B>''.
 <DT><B>SHELL</B>
 
 <DD>
-The full pathname to the shell is kept in this environment variable.
+This variable expands to the full pathname to the shell.
 If it is not set when the shell starts,
 <B>bash</B>
 
@@ -13943,7 +13959,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2019 April 20<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2019 May 20<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -14049,6 +14065,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 22 April 2019 09:26:51 EDT
+Time: 20 May 2019 14:36:28 EDT
 </BODY>
 </HTML>

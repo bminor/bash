@@ -1015,11 +1015,11 @@ PPAARRAAMMEETTEERRSS
        PPPPIIDD   The process ID of the shell's parent.  This  variable  is  read-
               only.
        PPWWDD    The current working directory as set by the ccdd command.
-       RRAANNDDOOMM Each time this parameter is referenced, a random integer between
-              0 and 32767 is generated.  The sequence of random numbers may be
-              initialized by assigning a value to RRAANNDDOOMM.  If RRAANNDDOOMM is unset,
-              it loses its special properties,  even  if  it  is  subsequently
-              reset.
+       RRAANNDDOOMM Each  time  this parameter is referenced, it expands to a random
+              integer between 0 and 32767.  Assigning a value to  RRAANNDDOOMM  ini-
+              tializes  (seeds)  the sequence of random numbers.  If RRAANNDDOOMM is
+              unset, it loses its special properties, even  if  it  is  subse-
+              quently reset.
        RREEAADDLLIINNEE__LLIINNEE
               The contents of the rreeaaddlliinnee line buffer, for use with "bind -x"
               (see SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS below).
@@ -1044,6 +1044,14 @@ PPAARRAAMMEETTEERRSS
               shell option in the list will  be  enabled  before  reading  any
               startup files.  This variable is read-only.
        SSHHLLVVLL  Incremented by one each time an instance of bbaasshh is started.
+       SSRRAANNDDOOMM
+              This variable expands to a 32-bit pseudo-random number each time
+              it is referenced. The random number generator is not  linear  on
+              systems   that  support  /dev/urandom  or  _a_r_c_4_r_a_n_d_o_m,  so  each
+              returned number has no relationship to the numbers preceding it.
+              The  random number generator cannot be seeded, so assignments to
+              this variable have no effect.  If SSRRAANNDDOOMM is unset, it loses its
+              special properties, even if it is subsequently reset.
        UUIIDD    Expands to the user ID of the current user, initialized at shell
               startup.  This variable is readonly.
 
@@ -1312,9 +1320,9 @@ PPAARRAAMMEETTEERRSS
               execution  trace.   The first character of the expanded value of
               PPSS44 is replicated multiple times, as necessary, to indicate mul-
               tiple levels of indirection.  The default is ``++ ''.
-       SSHHEELLLL  The full pathname to the shell is kept in this environment vari-
-              able.  If it is not set when the shell starts, bbaasshh  assigns  to
-              it the full pathname of the current user's login shell.
+       SSHHEELLLL  This  variable expands to the full pathname to the shell.  If it
+              is not set when the shell starts, bbaasshh assigns to  it  the  full
+              pathname of the current user's login shell.
        TTIIMMEEFFOORRMMAATT
               The  value of this parameter is used as a format string specify-
               ing how the timing information for pipelines prefixed  with  the
@@ -6173,4 +6181,4 @@ BBUUGGSS
 
 
 
-GNU Bash 5.0                     2019 April 20                         BASH(1)
+GNU Bash 5.0                      2019 May 20                          BASH(1)

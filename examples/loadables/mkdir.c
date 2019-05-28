@@ -93,7 +93,7 @@ mkdir_builtin (list)
 	  return (EXECUTION_FAILURE);
 	}
     }
-  else if (mode)
+  else 				/* symbolic mode */
     {
       /* initial bits are a=rwx; the mode argument modifies them */
       omode = parse_symbolic_mode (mode, S_IRWXU | S_IRWXG | S_IRWXO);

@@ -6254,8 +6254,8 @@ The default is @samp{+ }.
 The current working directory as set by the @code{cd} builtin.
 
 @item RANDOM
-Each time this parameter is referenced, a random integer
-between 0 and 32767 is generated.  Assigning a value to this
+Each time this parameter is referenced, it expands to a random integer
+between 0 and 32767. Assigning a value to this
 variable seeds the random number generator.
 
 @item READLINE_LINE
@@ -6277,7 +6277,7 @@ becomes the value assigned plus the number of seconds
 since the assignment.
 
 @item SHELL
-The full pathname to the shell is kept in this environment variable.
+This environment variable expands to the full pathname to the shell.
 If it is not set when the shell starts,
 Bash assigns to it the full pathname of the current user's login shell.
 
@@ -6294,6 +6294,16 @@ reading any startup files.  This variable is readonly.
 @item SHLVL
 Incremented by one each time a new instance of Bash is started.  This is
 intended to be a count of how deeply your Bash shells are nested.
+
+@item SRANDOM
+This variable expands to a 32-bit pseudo-random number each time it is
+referenced. The random number generator is not linear on systems that
+support @file{/dev/urandom} or @code{arc4random}, so each returned number
+has no relationship to the numbers preceding it.
+The random number generator cannot be seeded, so assignments to this
+variable have no effect.
+If @env{SRANDOM} is unset, it loses its special properties,
+even if it is subsequently reset.
 
 @item TIMEFORMAT
 The value of this parameter is used as a format string specifying
@@ -7555,7 +7565,7 @@ allow shell escapes are particularly vulnerable), leaving the user
 in a non-writable directory other than his home directory after login,
 not allowing the restricted shell to execute shell scripts, and cleaning
 the environment of variables that cause some commands to modify their
-behavior (e.g., @env{VISUAL} or @{PAGER}).
+behavior (e.g., @env{VISUAL} or @env{PAGER}).
 
 Modern systems provide more secure ways to implement a restricted environment,
 such as @code{jails}, @code{zones}, or @code{containers}.

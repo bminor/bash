@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.0, 20 April 2019).
+the Bash shell (version 5.0, 20 May 2019).
 
-This is Edition 5.0, last updated 20 April 2019,
+This is Edition 5.0, last updated 20 May 2019,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.0.
 
@@ -284,10 +284,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.0, 20 April 2019).
+the Bash shell (version 5.0, 20 May 2019).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.0, last updated 20 April 2019,
+<p>This is Edition 5.0, last updated 20 May 2019,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.0.
 </p>
@@ -7447,8 +7447,8 @@ The default is &lsquo;<samp>+ </samp>&rsquo;.
 <dt><code>RANDOM</code>
 <a name="index-RANDOM"></a>
 </dt>
-<dd><p>Each time this parameter is referenced, a random integer
-between 0 and 32767 is generated.  Assigning a value to this
+<dd><p>Each time this parameter is referenced, it expands to a random integer
+between 0 and 32767. Assigning a value to this
 variable seeds the random number generator.
 </p>
 </dd>
@@ -7485,7 +7485,7 @@ since the assignment.
 <dt><code>SHELL</code>
 <a name="index-SHELL"></a>
 </dt>
-<dd><p>The full pathname to the shell is kept in this environment variable.
+<dd><p>This environment variable expands to the full pathname to the shell.
 If it is not set when the shell starts,
 Bash assigns to it the full pathname of the current user&rsquo;s login shell.
 </p>
@@ -7508,6 +7508,19 @@ reading any startup files.  This variable is readonly.
 </dt>
 <dd><p>Incremented by one each time a new instance of Bash is started.  This is
 intended to be a count of how deeply your Bash shells are nested.
+</p>
+</dd>
+<dt><code>SRANDOM</code>
+<a name="index-SRANDOM"></a>
+</dt>
+<dd><p>This variable expands to a 32-bit pseudo-random number each time it is
+referenced. The random number generator is not linear on systems that
+support <samp>/dev/urandom</samp> or <code>arc4random</code>, so each returned number
+has no relationship to the numbers preceding it.
+The random number generator cannot be seeded, so assignments to this
+variable have no effect.
+If <code>SRANDOM</code> is unset, it loses its special properties,
+even if it is subsequently reset.
 </p>
 </dd>
 <dt><code>TIMEFORMAT</code>
@@ -8964,6 +8977,19 @@ option to the <code>hash</code> builtin command.
 (see <a href="#Shell-Scripts">Shell Scripts</a>), <code>rbash</code> turns off any restrictions in
 the shell spawned to execute the script.
 </p>
+<p>The restricted shell mode is only one component of a useful restricted
+environment. It should be accompanied by setting <code>PATH</code> to a value
+that allows execution of only a few verified commands (commands that
+allow shell escapes are particularly vulnerable), leaving the user
+in a non-writable directory other than his home directory after login,
+not allowing the restricted shell to execute shell scripts, and cleaning
+the environment of variables that cause some commands to modify their
+behavior (e.g., <code>VISUAL</code> or <code>PAGER</code>).
+</p>
+<p>Modern systems provide more secure ways to implement a restricted environment,
+such as <code>jails</code>, <code>zones</code>, or <code>containers</code>.
+</p>
+
 <hr>
 <a name="Bash-POSIX-Mode"></a>
 <div class="header">
@@ -15177,6 +15203,7 @@ Next: <a href="#Function-Index" accesskey="n" rel="next">Function Index</a>, Pre
 <tr><td></td><td valign="top"><a href="#index-show_002dall_002dif_002dunmodified"><code>show-all-if-unmodified</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Readline-Init-File-Syntax">Readline Init File Syntax</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show_002dmode_002din_002dprompt"><code>show-mode-in-prompt</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Readline-Init-File-Syntax">Readline Init File Syntax</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-skip_002dcompleted_002dtext"><code>skip-completed-text</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Readline-Init-File-Syntax">Readline Init File Syntax</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-SRANDOM"><code>SRANDOM</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td colspan="4"> <hr></td></tr>
 <tr><th><a name="Variable-Index_vr_letter-T">T</a></th><td></td><td></td></tr>
 <tr><td></td><td valign="top"><a href="#index-TEXTDOMAIN"><code>TEXTDOMAIN</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Locale-Translation">Locale Translation</a></td></tr>

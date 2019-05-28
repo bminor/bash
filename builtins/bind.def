@@ -353,7 +353,7 @@ unbind_keyseq (seq)
       builtin_error (_("`%s': cannot unbind"), seq);
       return EXECUTION_FAILURE;
     }
-  if (rl_function_of_keyseq (kseq, (Keymap)0, (int *)0) == 0)
+  if (rl_function_of_keyseq_len (kseq, kslen, (Keymap)0, (int *)0) == 0)
     {
       free (kseq);
       return (EXECUTION_SUCCESS);

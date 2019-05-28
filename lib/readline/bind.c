@@ -361,7 +361,7 @@ int
 rl_generic_bind (int type, const char *keyseq, char *data, Keymap map)
 {
   char *keys;
-  int keys_len, prevkey;
+  int keys_len, prevkey, ic;
   register int i;
   KEYMAP_ENTRY k;
   Keymap prevmap;  
@@ -394,7 +394,6 @@ rl_generic_bind (int type, const char *keyseq, char *data, Keymap map)
   for (i = 0; i < keys_len; i++)
     {
       unsigned char uc = keys[i];
-      int ic;
 
       if (i > 0)
 	prevkey = ic;

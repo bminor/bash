@@ -5970,7 +5970,43 @@ variables.c
 	  these that succeeds: reading from /dev/urandom (if available),
 	  calling arc4random (if available), and using the internal 32-bit
 	  RNG (always available)
-	- URANDOM: expand to a 32-bit random number. This is not a LCRNG, so
+	- SRANDOM: expand to a 32-bit random number. This is not a LCRNG, so
 	  the numbers shouldn't have any relationship to previous returned
 	  values. Assignments are accepted but have no effect on the sequence.
 	  Not documented yet
+
+				   5/20
+				   ----
+doc/{bash.1,bashref.texi}
+	- SRANDOM: document new special variable
+
+				   5/22
+				   ----
+jobs.c
+	- find_pid_in_pipeline: abstract some code from find_pipeline to look
+	  for a PID in a specific pipline passed as an argument
+	- find_pipeline: if we have some saved pipeline(s), look there to find
+	  the PID instead of returning failure. This process could have been
+	  started from a DEBUG trap that saved the_pipeline. Fixes Linux bug
+	  reported by Hengyang Zhao <hzhao877502@gmail.com>
+
+builtins/bind.def
+	- unbind_keyseq: use rl_function_of_keyseq_len so you can unbind ^@
+	  (which translates to 0). Fixes bug reported by
+	  Dennis Williamson <dennistwilliamson@gmail.com>
+
+				   5/23
+				   ----
+lib/readline/display.c
+	- rl_redisplay: make sure that the line structures can hold up to
+	  _rl_screenwidth characters, to support applications like gdb that
+	  set the screen width to huge values. Report and fix from
+	  Tom de Vries <tdevries@suse.de>
+
+				   5/24
+				   ----
+lib/readline/bind.c
+	- rl_generic_bind: move `ic' from block scope to function scope to
+	  avoid problems with compilers that destroy and recreate it every
+	  time through the loop. Report and fix from Adam Richter
+	  <adamrichter4@gmail.com>

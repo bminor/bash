@@ -376,11 +376,6 @@ initialize_shell_variables (env, privmode)
       /* Now, name = env variable name, string = env variable value, and
 	 char_index == strlen (name) */
 
-if (STREQ (name, "BASHOPTS"))
-  itrace("initialize_shell_variables: processing BASHOPTS");
-if (STREQ (name, "BASH_COMPAT"))
-  itrace("initialize_shell_variables: processing BASH_COMPAT");
-
       temp_var = (SHELL_VAR *)NULL;
 
 #if defined (FUNCTION_IMPORT)
@@ -2040,7 +2035,7 @@ initialize_dynamic_variables ()
 
   INIT_DYNAMIC_VAR ("RANDOM", (char *)NULL, get_random, assign_random);
   VSETATTR (v, att_integer);
-  INIT_DYNAMIC_VAR ("URANDOM", (char *)NULL, get_urandom, (sh_var_assign_func_t *)NULL);
+  INIT_DYNAMIC_VAR ("SRANDOM", (char *)NULL, get_urandom, (sh_var_assign_func_t *)NULL);
   VSETATTR (v, att_integer);  
   INIT_DYNAMIC_VAR ("LINENO", (char *)NULL, get_lineno, assign_lineno);
   VSETATTR (v, att_integer|att_regenerate);
