@@ -86,6 +86,19 @@
 #  define VI_EDITING_MODE	 0
 #endif
 
+/* Copied from rldefs.h, since that's not a public readline header file. */
+#ifndef FUNCTION_TO_KEYMAP
+
+#if defined (CRAY)
+#  define FUNCTION_TO_KEYMAP(map, key)	(Keymap)((int)map[key].function)
+#  define KEYMAP_TO_FUNCTION(data)	(rl_command_func_t *)((int)(data))
+#else
+#  define FUNCTION_TO_KEYMAP(map, key)	(Keymap)(map[key].function)
+#  define KEYMAP_TO_FUNCTION(data)	(rl_command_func_t *)(data)
+#endif
+
+#endif
+
 #define RL_BOOLEAN_VARIABLE_VALUE(s)	((s)[0] == 'o' && (s)[1] == 'n' && (s)[2] == '\0')
 
 #if defined (BRACE_COMPLETION)
@@ -183,6 +196,10 @@ static void putx __P((int));
 #else
 static int putx __P((int));
 #endif
+
+static Keymap get_cmd_xmap_from_edit_mode __P((void));
+static Keymap get_cmd_xmap_from_keymap __P((Keymap));
+
 static int bash_execute_unix_command __P((int, int));
 static void init_unix_command_map __P((void));
 static int isolate_sequence __P((char *, int, int, int *));
@@ -4196,8 +4213,14 @@ bash_quote_filename (s, rtype, qcp)
   return ret;
 }
 
-/* Support for binding readline key sequences to Unix commands. */
-static Keymap cmd_xmap;
+/* Support for binding readline key sequences to Unix commands. Each editing
+   mode has a separate Unix command keymap. */
+
+static Keymap emacs_std_cmd_xmap;
+#if defined (VI_MODE)
+static Keymap vi_insert_cmd_xmap;
+static Keymap vi_movement_cmd_xmap;
+#endif
 
 #ifdef _MINIX
 static void
@@ -4226,10 +4249,12 @@ bash_execute_unix_command (count, key)
   char *cmd, *value, *ce, old_ch;
   SHELL_VAR *v;
   char ibuf[INT_STRLEN_BOUND(int) + 1];
+  Keymap cmd_xmap;
 
   /* First, we need to find the right command to execute.  This is tricky,
      because we might have already indirected into another keymap, so we
      have to walk cmd_xmap using the entire key sequence. */
+  cmd_xmap = get_cmd_xmap_from_keymap (rl_get_keymap ());
   cmd = (char *)rl_function_of_keyseq_len (rl_executing_keyseq, rl_key_sequence_length, cmd_xmap, &type);
     
   if (cmd == 0 || type != ISMACR)
@@ -4317,9 +4342,10 @@ bash_execute_unix_command (count, key)
 int
 print_unix_command_map ()
 {
-  Keymap save;
+  Keymap save, cmd_xmap;
 
   save = rl_get_keymap ();
+  cmd_xmap = get_cmd_xmap_from_keymap (save);
   rl_set_keymap (cmd_xmap);
   rl_macro_dumper (1);
   rl_set_keymap (save);
@@ -4329,7 +4355,59 @@ print_unix_command_map ()
 static void
 init_unix_command_map ()
 {
-  cmd_xmap = rl_make_bare_keymap ();
+  emacs_std_cmd_xmap = rl_make_bare_keymap ();
+
+  emacs_std_cmd_xmap[CTRL('X')].type = ISKMAP;
+  emacs_std_cmd_xmap[CTRL('X')].function = KEYMAP_TO_FUNCTION (rl_make_bare_keymap ());
+  emacs_std_cmd_xmap[ESC].type = ISKMAP;
+  emacs_std_cmd_xmap[ESC].function = KEYMAP_TO_FUNCTION (rl_make_bare_keymap ());
+
+#if defined (VI_MODE)  
+  vi_insert_cmd_xmap = rl_make_bare_keymap ();
+  vi_movement_cmd_xmap = rl_make_bare_keymap ();
+#endif
+}
+
+static Keymap
+get_cmd_xmap_from_edit_mode ()
+{
+  if (emacs_std_cmd_xmap == 0)
+    init_unix_command_map ();
+
+  switch (rl_editing_mode)
+    {
+    case EMACS_EDITING_MODE:
+      return emacs_std_cmd_xmap;
+#if defined (VI_MODE)
+    case VI_EDITING_MODE:
+      return (get_cmd_xmap_from_keymap (rl_get_keymap ()));
+#endif
+    default:
+      return (Keymap)NULL;
+    }
+}
+
+static Keymap
+get_cmd_xmap_from_keymap (kmap)
+     Keymap kmap;
+{
+  if (emacs_std_cmd_xmap == 0)
+    init_unix_command_map ();
+
+  if (kmap == emacs_standard_keymap)
+    return emacs_std_cmd_xmap;
+  else if (kmap == emacs_meta_keymap)
+    return (FUNCTION_TO_KEYMAP (emacs_std_cmd_xmap, ESC));
+  else if (kmap == emacs_ctlx_keymap)
+    return (FUNCTION_TO_KEYMAP (emacs_std_cmd_xmap, CTRL('X')));
+#if defined (VI_MODE)
+  else if (kmap == vi_insertion_keymap)
+    return vi_insert_cmd_xmap;
+  else if (kmap == vi_movement_keymap)
+    return vi_movement_cmd_xmap;
+#endif
+  else
+    return (Keymap)NULL;
 }
 
 static int
@@ -4385,12 +4463,9 @@ int
 bind_keyseq_to_unix_command (line)
      char *line;
 {
-  Keymap kmap;
+  Keymap kmap, cmd_xmap;
   char *kseq, *value;
   int i, kstart;
-
-  if (cmd_xmap == 0)
-    init_unix_command_map ();
 
   kmap = rl_get_keymap ();
 
@@ -4424,6 +4499,7 @@ bind_keyseq_to_unix_command (line)
   value = substring (line, kstart, i);
 
   /* Save the command to execute and the key sequence in the CMD_XMAP */
+  cmd_xmap = get_cmd_xmap_from_keymap (kmap);
   rl_generic_bind (ISMACR, kseq, value, cmd_xmap);
 
   /* and bind the key sequence in the current keymap to a function that

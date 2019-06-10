@@ -3723,7 +3723,7 @@ execute_arith_command (arith_command)
   int expok, save_line_number, retval;
   intmax_t expresult;
   WORD_LIST *new;
-  char *exp;
+  char *exp, *t;
 
   expresult = 0;
 
@@ -3762,27 +3762,37 @@ execute_arith_command (arith_command)
     }
 #endif
 
-  new = expand_words_no_vars (arith_command->exp);
+  t = (char *)NULL;
+  new = arith_command->exp;
+  if (new->next)
+    exp = t = string_list (new);	/* just in case */
+  else
+    exp = new->word->word;
+
+  exp = expand_arith_string (exp, Q_DOUBLE_QUOTES|Q_ARITH);
 
   /* If we're tracing, make a new word list with `((' at the front and `))'
-     at the back and print it. */
+     at the back and print it. Change xtrace_print_arith_cmd to take a string
+     when I change eval_arith_for_expr to use expand_arith_string(). */
   if (echo_command_at_execute)
-    xtrace_print_arith_cmd (new);
-
-  if (new)
     {
-      exp = new->next ? string_list (new) : new->word->word;
+      new = make_word_list (make_word (exp ? exp : ""), (WORD_LIST *)NULL);
+      xtrace_print_arith_cmd (new);
+      dispose_words (new);
+    }
+
+  if (exp)
+    {
       expresult = evalexp (exp, EXP_EXPANDED, &expok);
       line_number = save_line_number;
-      if (exp != new->word->word)
-	free (exp);
-      dispose_words (new);
+      free (exp);
     }
   else
     {
       expresult = 0;
       expok = 1;
     }
+  FREE (t);
 
   if (expok == 0)
     return (EXECUTION_FAILURE);

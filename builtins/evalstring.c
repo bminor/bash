@@ -138,6 +138,7 @@ optimize_subshell_command (command)
       ((command->flags & CMD_TIME_PIPELINE) == 0) &&
       ((command->flags & CMD_INVERT_RETURN) == 0))
     {
+itrace("optimize_subshell_command: setting CMD_NO_FOR for simple command");
       command->flags |= CMD_NO_FORK;
       command->value.Simple->flags |= CMD_NO_FORK;
     }

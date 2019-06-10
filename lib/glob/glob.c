@@ -51,6 +51,7 @@
 #include <signal.h>
 
 #include "shell.h"
+#include "general.h"
 
 #include "glob.h"
 #include "strmatch.h"
@@ -98,6 +99,11 @@ int noglob_dot_filenames = 1;
 /* Global variable which controls whether or not filename globbing
    is done without regard to case. */
 int glob_ignore_case = 0;
+
+/* Global variable controlling whether globbing ever returns . or ..
+   regardless of the pattern. If set to 1, no glob pattern will ever
+   match `.' or `..'. Disabled by default. */
+int glob_always_skip_dot_and_dotdot = 0;
 
 /* Global variable to return to signify an error in globbing. */
 char *glob_error_return;
@@ -262,12 +268,14 @@ skipname (pat, dname, flags)
     return (extglob_skipname (pat, dname, flags));
 #endif
 
+  if (glob_always_skip_dot_and_dotdot && DOT_OR_DOTDOT (dname))
+    return 1;
+
   /* If a leading dot need not be explicitly matched, and the pattern
      doesn't start with a `.', don't match `.' or `..' */
   if (noglob_dot_filenames == 0 && pat[0] != '.' &&
 	(pat[0] != '\\' || pat[1] != '.') &&
-	(dname[0] == '.' &&
-	  (dname[1] == '\0' || (dname[1] == '.' && dname[2] == '\0'))))
+	DOT_OR_DOTDOT (dname))
     return 1;
 
   /* If a dot must be explicitly matched, check to see if they do. */
@@ -285,12 +293,14 @@ wskipname (pat, dname, flags)
      wchar_t *pat, *dname;
      int flags;
 {
+  if (glob_always_skip_dot_and_dotdot && WDOT_OR_DOTDOT (dname))
+    return 1;
+
   /* If a leading dot need not be explicitly matched, and the
      pattern doesn't start with a `.', don't match `.' or `..' */
   if (noglob_dot_filenames == 0 && pat[0] != L'.' &&
 	(pat[0] != L'\\' || pat[1] != L'.') &&
-	(dname[0] == L'.' &&
-	  (dname[1] == L'\0' || (dname[1] == L'.' && dname[2] == L'\0'))))
+	WDOT_OR_DOTDOT (dname))
     return 1;
 
   /* If a leading dot must be explicitly matched, check to see if the

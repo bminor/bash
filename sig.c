@@ -1,6 +1,6 @@
 /* sig.c - interface for shell signal handlers and signal initialization. */
 
-/* Copyright (C) 1994-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2019 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -581,6 +581,9 @@ termsig_handler (sig)
 
 #if defined (PROCESS_SUBSTITUTION)
   unlink_fifo_list ();
+#  if defined (JOB_CONTROL)
+  discard_last_procsub_child ();
+#  endif
 #endif /* PROCESS_SUBSTITUTION */
 
   /* Reset execution context */
