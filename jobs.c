@@ -3,7 +3,7 @@
 /* This file works with both POSIX and BSD systems.  It implements job
    control. */
 
-/* Copyright (C) 1989-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2019 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -2442,7 +2442,8 @@ wait_for_single_pid (pid, flags)
 
 /* Wait for all of the background processes started by this shell to finish. */
 void
-wait_for_background_pids ()
+wait_for_background_pids (ps)
+     struct procstat *ps;
 {
   register int i, r;
   int any_stopped, check_async;
@@ -2484,6 +2485,11 @@ wait_for_background_pids ()
       QUIT;
       errno = 0;		/* XXX */
       r = wait_for_single_pid (pid, JWAIT_PERROR);
+      if (ps)
+	{
+	  ps->pid = pid;
+	  ps->status = (r < 0) ? 127 : r;
+	}
       if (r == -1 && errno == ECHILD)
 	{
 	  /* If we're mistaken about job state, compensate. */
@@ -3049,8 +3055,9 @@ wait_for_return:
    includes JWAIT_FORCE, we wait for the job to terminate, no just change
    state */
 int
-wait_for_job (job, flags)
+wait_for_job (job, flags, ps)
      int job, flags;
+     struct procstat *ps;
 {
   pid_t pid;
   int r, state;
@@ -3086,6 +3093,11 @@ wait_for_job (job, flags)
     jobs[job]->flags |= J_NOTIFIED;
   UNBLOCK_CHILD (oset);
 
+  if (ps)
+    {
+      ps->pid = pid;
+      ps->status = (r < 0) ? 127 : r;
+    }
   return r;
 }
 

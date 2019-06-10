@@ -1,7 +1,7 @@
 This file is wait.def, from which is created wait.c.
 It implements the builtin "wait" in Bash.
 
-Copyright (C) 1987-2017 Free Software Foundation, Inc.
+Copyright (C) 1987-2019 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -102,9 +102,7 @@ wait_builtin (list)
 {
   int status, code, opt, nflag, wflags;
   volatile int old_interrupt_immediately;
-#if defined (JOB_CONTROL)
   struct procstat pstat;
-#endif
 
   USE_VAR(list);
 
@@ -171,7 +169,7 @@ wait_builtin (list)
      currently active background processes. */
   if (list == 0)
     {
-      wait_for_background_pids ();
+      wait_for_background_pids (&pstat);
       WAIT_RETURN (EXECUTION_SUCCESS);
     }
 
@@ -189,10 +187,14 @@ wait_builtin (list)
 	    {
 	      pid = (pid_t)pid_value;
 	      status = wait_for_single_pid (pid, wflags|JWAIT_PERROR);
+	      pstat.pid = pid;
+	      pstat.status = status;
 	    }
 	  else
 	    {
 	      sh_badpid (w);
+	      pstat.pid = NO_PID;
+	      pstat.status = 127;
 	      WAIT_RETURN (EXECUTION_FAILURE);
 	    }
 	}
@@ -212,18 +214,22 @@ wait_builtin (list)
 		sh_badjob (list->word->word);
 	      UNBLOCK_CHILD (oset);
 	      status = 127;	/* As per Posix.2, section 4.70.2 */
+	      pstat.pid = NO_PID;
+	      pstat.status = status;
 	      list = list->next;
 	      continue;
 	    }
 
 	  /* Job spec used.  Wait for the last pid in the pipeline. */
 	  UNBLOCK_CHILD (oset);
-	  status = wait_for_job (job, wflags);
+	  status = wait_for_job (job, wflags, &pstat);
 	}
 #endif /* JOB_CONTROL */
       else
 	{
 	  sh_badpid (w);
+	  pstat.pid = NO_PID;
+	  pstat.status = 127;
 	  status = EXECUTION_FAILURE;
 	}
       list = list->next;

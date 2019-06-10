@@ -145,8 +145,12 @@ rm_builtin (list)
 
   if (list == 0)
     {
-      builtin_usage ();
-      return (EXECUTION_FAILURE);
+      if (force == 0)
+	{
+          builtin_usage ();
+          return (EXECUTION_FAILURE);
+	}
+      return (EXECUTION_SUCCESS);      
     }
 
   for (l = list; l; l = l->next)

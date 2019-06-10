@@ -6010,3 +6010,22 @@ lib/readline/bind.c
 	  avoid problems with compilers that destroy and recreate it every
 	  time through the loop. Report and fix from Adam Richter
 	  <adamrichter4@gmail.com>
+
+				   5/30
+				   ----
+jobs.c
+	- wait_for_job: now takes an additional struct procstat * argument,
+	  and returns the pid and status of the job's `controlling process'
+	  to the caller
+
+{jobs,nojobs}.c
+	- wait_for_background_pids: take a struct proctstat * argument and fill
+	  it in with pid and status of the last process to terminate
+
+jobs.h
+	- wait_for_job, wait_for_background_pids: add additional argument to
+	  declaration
+
+builtins/wait.def
+	- wait_builtin: set pstat.{pid,status} each time through the pid-or-job
+	  loop and for wait without arguments

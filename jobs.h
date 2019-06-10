@@ -248,9 +248,9 @@ extern int job_exit_status __P((int));
 extern int job_exit_signal __P((int));
 
 extern int wait_for_single_pid __P((pid_t, int));
-extern void wait_for_background_pids __P((void));
+extern void wait_for_background_pids __P((struct procstat *));
 extern int wait_for __P((pid_t));
-extern int wait_for_job __P((int, int));
+extern int wait_for_job __P((int, int, struct procstat *));
 extern int wait_for_any_job __P((int, struct procstat *));
 
 extern void wait_sigint_cleanup __P((void));

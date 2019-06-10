@@ -698,7 +698,8 @@ wait_for_single_pid (pid, flags)
 /* Wait for all of the shell's children to exit.  Called by the `wait'
    builtin. */
 void
-wait_for_background_pids ()
+wait_for_background_pids (ps)
+     struct procstat *ps;
 {
   pid_t got_pid;
   WAIT status;
@@ -712,7 +713,14 @@ wait_for_background_pids ()
 
   /* Wait for ECHILD */
   while ((got_pid = WAITPID (-1, &status, 0)) != -1)
-    set_pid_status (got_pid, status);
+    {
+      set_pid_status (got_pid, status);
+      if (ps)
+	{
+	  ps->pid = got_pid;
+	  ps->status = process_exit_status (status);
+	}
+    }
 
   if (errno != EINTR && errno != ECHILD)
     {
