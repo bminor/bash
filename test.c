@@ -633,7 +633,7 @@ unary_test (op, arg)
 	    free (t);
 	  return ret;
 	}
-#if 0	/* TAG:bash-5.1 */
+#if 0	/* TAG:bash-5.1 from Martijn Dekker */
       else if (legal_number (arg, &r))		/* -v n == is $n set? */
 	{
 	  char *t;

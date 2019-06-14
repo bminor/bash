@@ -6061,3 +6061,46 @@ execute_cmd.c
 	  conversion from a WORD_LIST into a string. This makes it more
 	  consistent with other arithmetic expansions. Inspired by a
 	  discussion begun by Nils Emmerich <nemmerich@ernw.de>
+
+				   6/10
+				   ----
+jobs.c
+	- waitchld: since process substitutions are asynchronous, save the
+	  status of one that exits (that we still know about) in the bgpids
+	  list
+
+				   6/12
+				   ----
+jobs.c
+	- wait_for_background_pids: wait for the last procsub only if it's the
+ 	  same as last_asynchronous_pid
+
+bashline.c
+	- bash_backward_shellword: changes to behave better when at the
+	  beginning of the last character on the line and to leave point at
+	  the beginning of the shellword, like backward-word. Fixes from
+	  Andrew Gaylard <a.gaylard@gmail.com>
+
+				   6/13
+				   ----
+bashline.c
+	- __P: Replaced with PARAMS. First of many
+	- bash_transpose_shellwords: transpose-words, but using `shellword'
+	  word boundaries like shell-forward-word and shell-backward-word.
+	  Contributed by Andrew Gaylard <a.gaylard@gmail.com>
+	- "shell-transpose-words": new name binding for bash_transpose_shellwords
+	- bash_readline_initialize: add default bindings for shell-forward-word,
+	  shell-backward-word, shell-transpose-words, and shell-kill-word.
+	  Suggested by Andrew Gaylard <a.gaylard@gmail.com>
+
+lib/readline/doc/rluser.texi
+	- shell-transpose-words: document
+	- {shell-forward-word,shell-backward-word,shell-kill-word,shell-transpose-words}:
+	  document new default bindings bash now adds
+
+variables.c
+	- set_argv0: function to assign argv0 if it's found in the initial
+	  shell environment. Suggested by Cuong Manh Le
+	  <coung.manhle.vn@gmail.com>
+	- initialize_shell_variables: call set_argv0() as part of shell
+	  initialization

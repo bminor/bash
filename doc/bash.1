@@ -10263,7 +10263,8 @@ Return a status of 0 (true) or 1 (false) depending on
 the evaluation of the conditional expression
 .IR expr .
 Each operator and operand must be a separate argument.
-Expressions are composed of the primaries described above under
+.if \n(zZ=0 Expressions are composed of the primaries described above under
+.if \n(zZ=1 Expressions are composed of the primaries described in the \fBbash\fP manual page under
 .SM
 .BR "CONDITIONAL EXPRESSIONS" .
 \fBtest\fP does not accept any options, nor does it accept and ignore
@@ -10775,8 +10776,11 @@ may be a process
 ID or a job specification; if a job spec is given, all processes
 in that job's pipeline are waited for.  If
 .I id
-is not given, all currently active child processes
-are waited for, and the return status is zero.
+is not given,
+\fBwait\fP waits for all running background jobs and
+the last-executed process substitution, if its process id is the same as
+\fB$!\fP,
+and the return status is zero.
 If the \fB\-n\fP option is supplied, \fBwait\fP waits for a single job
 to terminate and returns its exit status.
 Supplying the \fB\-f\fP option, when job control is enabled,

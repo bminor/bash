@@ -13658,8 +13658,11 @@ ID or a job specification; if a job spec is given, all processes
 in that job's pipeline are waited for.  If
 <I>id</I>
 
-is not given, all currently active child processes
-are waited for, and the return status is zero.
+is not given,
+<B>wait</B> waits for all running background jobs and
+the last-executed process substitution, if its process id is the same as
+<B>$!</B>,
+and the return status is zero.
 If the <B>-n</B> option is supplied, <B>wait</B> waits for a single job
 to terminate and returns its exit status.
 Supplying the <B>-f</B> option, when job control is enabled,
@@ -14065,6 +14068,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 20 May 2019 14:36:28 EDT
+Time: 12 June 2019 15:27:00 EDT
 </BODY>
 </HTML>

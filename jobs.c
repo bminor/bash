@@ -2499,22 +2499,10 @@ wait_for_background_pids (ps)
     }
 
 #if defined (PROCESS_SUBSTITUTION)
-  if (last_procsub_child && last_procsub_child->pid != NO_PID)
+  if (last_procsub_child && last_procsub_child->pid != NO_PID && last_procsub_child->pid == last_asynchronous_pid)
     r = wait_for (last_procsub_child->pid);
   wait_procsubs ();
   reap_procsubs ();
-#if 0
-  /* We don't want to wait indefinitely if we have stopped children. */
-  if (any_stopped == 0)
-    {
-      /* Check whether or not we have any unreaped children. */
-      while ((r = wait_for (ANY_PID)) >= 0)
-	{
-	  QUIT;
-	  CHECK_WAIT_INTR;
-	}
-    }
-#endif
 #endif
       
   /* POSIX.2 says the shell can discard the statuses of all completed jobs if
@@ -3707,8 +3695,10 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
       /* Only manipulate the list of process substitutions while SIGCHLD
 	 is blocked. */
       if ((ind = find_procsub_child (pid)) >= 0)
-	set_procsub_status (ind, pid, WSTATUS (status));
-	/* XXX - save in bgpids list? */
+	{
+	  set_procsub_status (ind, pid, WSTATUS (status));
+	  bgp_add (pid, WSTATUS (status));
+	}
 #endif
 
       /* It is not an error to have a child terminate that we did

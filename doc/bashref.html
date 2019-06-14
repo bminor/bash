@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.0, 20 May 2019).
+the Bash shell (version 5.0, 12 June 2019).
 
-This is Edition 5.0, last updated 20 May 2019,
+This is Edition 5.0, last updated 12 June 2019,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.0.
 
@@ -284,10 +284,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.0, 20 May 2019).
+the Bash shell (version 5.0, 12 June 2019).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.0, last updated 20 May 2019,
+<p>This is Edition 5.0, last updated 12 June 2019,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.0.
 </p>
@@ -9508,8 +9508,11 @@ or non-zero if an error occurs or an invalid option is encountered.
 or job specification <var>jobspec</var> exits and return the exit status of the
 last command waited for.
 If a job spec is given, all processes in the job are waited for.
-If no arguments are given, all currently active child processes are
-waited for, and the return status is zero.
+If no arguments are given,
+<code>wait</code> waits for all running background jobs and
+the last-executed process substitution, if its process id is the same as
+<var>$!</var>,
+and the return status is zero.
 If the <samp>-n</samp> option is supplied, <code>wait</code> waits for a single job
 to terminate and returns its exit status.
 Supplying the <samp>-f</samp> option, when job control is enabled,

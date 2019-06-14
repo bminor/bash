@@ -6041,21 +6041,22 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               Wait for each specified child process and return its termination
               status.   Each _i_d may be a process ID or a job specification; if
               a job spec is given, all processes in that  job's  pipeline  are
-              waited for.  If _i_d is not given, all currently active child pro-
-              cesses are waited for, and the return status is zero.  If the --nn
-              option is supplied, wwaaiitt waits for a single job to terminate and
-              returns its exit status.  Supplying the --ff option, when job con-
-              trol  is enabled, forces wwaaiitt to wait for _i_d to terminate before
-              returning its status, instead of returning when it changes  sta-
-              tus.   If _i_d specifies a non-existent process or job, the return
-              status is 127.  Otherwise, the return status is the exit  status
-              of the last process or job waited for.
+              waited  for.   If  _i_d  is  not given, wwaaiitt waits for all running
+              background jobs and the last-executed process  substitution,  if
+              its process id is the same as $$!!, and the return status is zero.
+              If the --nn option is supplied, wwaaiitt waits for  a  single  job  to
+              terminate and returns its exit status.  Supplying the --ff option,
+              when job control is enabled, forces wwaaiitt to wait for _i_d to  ter-
+              minate before returning its status, instead of returning when it
+              changes status.  If _i_d specifies a non-existent process or  job,
+              the  return  status is 127.  Otherwise, the return status is the
+              exit status of the last process or job waited for.
 
 RREESSTTRRIICCTTEEDD SSHHEELLLL
        If bbaasshh is started with the name rrbbaasshh, or the --rr option is supplied at
-       invocation, the shell becomes restricted.  A restricted shell  is  used
-       to  set  up an environment more controlled than the standard shell.  It
-       behaves identically to bbaasshh with the exception that the  following  are
+       invocation,  the  shell becomes restricted.  A restricted shell is used
+       to set up an environment more controlled than the standard  shell.   It
+       behaves  identically  to bbaasshh with the exception that the following are
        disallowed or not performed:
 
        +o      changing directories with ccdd
@@ -6064,16 +6065,16 @@ RREESSTTRRIICCTTEEDD SSHHEELLLL
 
        +o      specifying command names containing //
 
-       +o      specifying  a  filename  containing  a // as an argument to the ..
+       +o      specifying a filename containing a // as an  argument  to  the  ..
               builtin command
 
-       +o      specifying a filename containing a slash as an argument  to  the
+       +o      specifying  a  filename containing a slash as an argument to the
               --pp option to the hhaasshh builtin command
 
-       +o      importing  function  definitions  from  the shell environment at
+       +o      importing function definitions from  the  shell  environment  at
               startup
 
-       +o      parsing the value of SSHHEELLLLOOPPTTSS from  the  shell  environment  at
+       +o      parsing  the  value  of  SSHHEELLLLOOPPTTSS from the shell environment at
               startup
 
        +o      redirecting output using the >, >|, <>, >&, &>, and >> redirect-
@@ -6082,10 +6083,10 @@ RREESSTTRRIICCTTEEDD SSHHEELLLL
        +o      using the eexxeecc builtin command to replace the shell with another
               command
 
-       +o      adding  or  deleting builtin commands with the --ff and --dd options
+       +o      adding or deleting builtin commands with the --ff and  --dd  options
               to the eennaabbllee builtin command
 
-       +o      using the  eennaabbllee  builtin  command  to  enable  disabled  shell
+       +o      using  the  eennaabbllee  builtin  command  to  enable  disabled shell
               builtins
 
        +o      specifying the --pp option to the ccoommmmaanndd builtin command
@@ -6095,14 +6096,14 @@ RREESSTTRRIICCTTEEDD SSHHEELLLL
        These restrictions are enforced after any startup files are read.
 
        When a command that is found to be a shell script is executed (see CCOOMM--
-       MMAANNDD EEXXEECCUUTTIIOONN above), rrbbaasshh turns off any restrictions  in  the  shell
+       MMAANNDD  EEXXEECCUUTTIIOONN  above),  rrbbaasshh turns off any restrictions in the shell
        spawned to execute the script.
 
 SSEEEE AALLSSOO
        _B_a_s_h _R_e_f_e_r_e_n_c_e _M_a_n_u_a_l, Brian Fox and Chet Ramey
        _T_h_e _G_n_u _R_e_a_d_l_i_n_e _L_i_b_r_a_r_y, Brian Fox and Chet Ramey
        _T_h_e _G_n_u _H_i_s_t_o_r_y _L_i_b_r_a_r_y, Brian Fox and Chet Ramey
-       _P_o_r_t_a_b_l_e  _O_p_e_r_a_t_i_n_g  _S_y_s_t_e_m  _I_n_t_e_r_f_a_c_e _(_P_O_S_I_X_) _P_a_r_t _2_: _S_h_e_l_l _a_n_d _U_t_i_l_i_-
+       _P_o_r_t_a_b_l_e _O_p_e_r_a_t_i_n_g _S_y_s_t_e_m _I_n_t_e_r_f_a_c_e _(_P_O_S_I_X_) _P_a_r_t _2_:  _S_h_e_l_l  _a_n_d  _U_t_i_l_i_-
        _t_i_e_s, IEEE --
               http://pubs.opengroup.org/onlinepubs/9699919799/
        http://tiswww.case.edu/~chet/bash/POSIX -- a description of posix mode
@@ -6120,7 +6121,7 @@ FFIILLEESS
        _~_/_._b_a_s_h_r_c
               The individual per-interactive-shell startup file
        _~_/_._b_a_s_h___l_o_g_o_u_t
-              The individual login shell cleanup file, executed when  a  login
+              The  individual  login shell cleanup file, executed when a login
               shell exits
        _~_/_._i_n_p_u_t_r_c
               Individual _r_e_a_d_l_i_n_e initialization file
@@ -6134,14 +6135,14 @@ AAUUTTHHOORRSS
 
 BBUUGG RREEPPOORRTTSS
        If you find a bug in bbaasshh,, you should report it.  But first, you should
-       make sure that it really is a bug, and that it appears  in  the  latest
-       version   of  bbaasshh.   The  latest  version  is  always  available  from
+       make  sure  that  it really is a bug, and that it appears in the latest
+       version  of  bbaasshh.   The  latest  version  is  always  available   from
        _f_t_p_:_/_/_f_t_p_._g_n_u_._o_r_g_/_p_u_b_/_g_n_u_/_b_a_s_h_/.
 
-       Once you have determined that a bug actually exists,  use  the  _b_a_s_h_b_u_g
-       command  to submit a bug report.  If you have a fix, you are encouraged
-       to mail that as well!  Suggestions and `philosophical' bug reports  may
-       be  mailed  to  _b_u_g_-_b_a_s_h_@_g_n_u_._o_r_g  or  posted  to  the  Usenet newsgroup
+       Once  you  have  determined that a bug actually exists, use the _b_a_s_h_b_u_g
+       command to submit a bug report.  If you have a fix, you are  encouraged
+       to  mail that as well!  Suggestions and `philosophical' bug reports may
+       be mailed  to  _b_u_g_-_b_a_s_h_@_g_n_u_._o_r_g  or  posted  to  the  Usenet  newsgroup
        ggnnuu..bbaasshh..bbuugg.
 
        ALL bug reports should include:
@@ -6152,7 +6153,7 @@ BBUUGG RREEPPOORRTTSS
        A description of the bug behaviour
        A short script or `recipe' which exercises the bug
 
-       _b_a_s_h_b_u_g inserts the first three items automatically into  the  template
+       _b_a_s_h_b_u_g  inserts  the first three items automatically into the template
        it provides for filing a bug report.
 
        Comments and bug reports concerning this manual page should be directed
@@ -6169,10 +6170,10 @@ BBUUGGSS
        Shell builtin commands and functions are not stoppable/restartable.
 
        Compound commands and command sequences of the form `a ; b ; c' are not
-       handled gracefully  when  process  suspension  is  attempted.   When  a
-       process  is stopped, the shell immediately executes the next command in
-       the sequence.  It suffices to place the sequence  of  commands  between
-       parentheses  to  force  it  into  a subshell, which may be stopped as a
+       handled  gracefully  when  process  suspension  is  attempted.   When a
+       process is stopped, the shell immediately executes the next command  in
+       the  sequence.   It  suffices to place the sequence of commands between
+       parentheses to force it into a subshell, which  may  be  stopped  as  a
        unit.
 
        Array variables may not (yet) be exported.

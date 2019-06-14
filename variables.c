@@ -1,6 +1,6 @@
 /* variables.c -- Functions for hacking shell variables. */
 
-/* Copyright (C) 1987-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2019 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -228,6 +228,10 @@ static SHELL_VAR *get_epochseconds __P((SHELL_VAR *));
 static SHELL_VAR *get_epochrealtime __P((SHELL_VAR *));
 
 static SHELL_VAR *get_bashpid __P((SHELL_VAR *));
+
+static SHELL_VAR *get_bash_argv0 __P((SHELL_VAR *));
+static SHELL_VAR *assign_bash_argv0 __P((SHELL_VAR *, char *, arrayind_t, char *));
+static void set_argv0 __P((void));
 
 #if defined (HISTORY)
 static SHELL_VAR *get_histcmd __P((SHELL_VAR *));
@@ -553,6 +557,8 @@ initialize_shell_variables (env, privmode)
   initialize_shell_level ();
 
   set_ppid ();
+
+  set_argv0 ();
 
   /* Initialize the `getopts' stuff. */
   temp_var = bind_variable ("OPTIND", "1", 0);
@@ -1694,6 +1700,16 @@ assign_bash_argv0 (var, value, unused, key)
   
   shell_name = static_shell_name;
   return var;
+}
+
+static void
+set_argv0 ()
+{
+  SHELL_VAR *v;
+
+  v = find_variable ("BASH_ARGV0");
+  if (v && imported_p (v))
+    assign_bash_argv0 (v, value_cell (v), 0, 0);
 }
   
 static SHELL_VAR *

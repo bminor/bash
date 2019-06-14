@@ -8117,8 +8117,11 @@ Wait until the child process specified by each process @sc{id} @var{pid}
 or job specification @var{jobspec} exits and return the exit status of the
 last command waited for.
 If a job spec is given, all processes in the job are waited for.
-If no arguments are given, all currently active child processes are
-waited for, and the return status is zero.
+If no arguments are given,
+@code{wait} waits for all running background jobs and
+the last-executed process substitution, if its process id is the same as
+@var{$!},
+and the return status is zero.
 If the @option{-n} option is supplied, @code{wait} waits for a single job
 to terminate and returns its exit status.
 Supplying the @option{-f} option, when job control is enabled,

@@ -544,6 +544,7 @@ rl_translate_keyseq (const char *seq, char *array, int *len)
 		{
 		  i++;		/* seq[i] == '-' */
 		  /* XXX - obey convert-meta setting, convert to key seq  */
+		  /* XXX - doesn't yet handle \M-\C-n if convert-meta is on */
 		  if (_rl_convert_meta_chars_to_ascii)
 		    {
 		      array[l++] = ESC;	/* ESC is meta-prefix */
