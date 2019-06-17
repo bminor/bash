@@ -6104,3 +6104,29 @@ variables.c
 	  <coung.manhle.vn@gmail.com>
 	- initialize_shell_variables: call set_argv0() as part of shell
 	  initialization
+
+				   6/14
+				   ----
+execute_cmd.c
+	- execute_for_command: make sure to call stupidly_hack_special_variables
+	  on the index variable each time bind_variable is called on it. If
+	  someone does something nonsensical like `for OPTIND in ...' we want
+	  the side effects to happen. Reported by Stephane Chazelas
+	  <stephane.chazelas@gmail.com>
+	- execute_select_command: do the same thing for the selection variable
+	  after calling bind_variable
+
+				   6/15
+				   ----
+builtins/set.def
+	- unset_builtin: if neither -f nor -v is supplied, and a NAME cannot
+	  be a shell variable because it's not a shell identifier, try to
+	  unset a shell function whether we're in posix mode or not. Suggested
+	  back in 1/2019 by PePa65 <solusos@passchier.net> and Robert Elz	
+	  <kre@bmunnari.oz.au>
+
+execute_cmd.c
+	- execute_simple_command: if this is being executed by the command
+	  builtin (flags&CMD_COMMAND_BUILTIN), don't bother to print the
+	  command words if set -x is enabled. From a report by Martijn Dekker
+	  <martijn@inlv.org> back in 4/2018

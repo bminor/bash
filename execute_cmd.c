@@ -2929,6 +2929,8 @@ execute_for_command (for_command)
 
       if (ifsname (identifier))
 	setifs (v);
+      else
+	stupidly_hack_special_variables (identifier);
 
       retval = execute_command (for_command->action);
       REAP ();
@@ -3427,6 +3429,8 @@ execute_select_command (select_command)
 	      return (EXECUTION_FAILURE);
 	    }
 	}
+
+      stupidly_hack_special_variables (identifier);
 
       retval = execute_command (select_command->action);
 
@@ -4368,7 +4372,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 
   begin_unwind_frame ("simple-command");
 
-  if (echo_command_at_execute)
+  if (echo_command_at_execute && (simple_command->flags & CMD_COMMAND_BUILTIN) == 0)
     xtrace_print_word_list (words, 1);
 
   builtin = (sh_builtin_func_t *)NULL;

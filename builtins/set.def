@@ -818,7 +818,7 @@ unset_builtin (list)
   WORD_LIST *list;
 {
   int unset_function, unset_variable, unset_array, opt, nameref, any_failed;
-  int global_unset_func, global_unset_var, vflags;
+  int global_unset_func, global_unset_var, vflags, valid_id;
   char *name, *tname;
 
   unset_function = unset_variable = unset_array = nameref = any_failed = 0;
@@ -884,17 +884,28 @@ unset_builtin (list)
 #endif
       /* Get error checking out of the way first.  The low-level functions
 	 just perform the unset, relying on the caller to verify. */
+      valid_id = legal_identifier (name);
+
+      /* Whether or not we are in posix mode, if neither -f nor -v appears,
+	 skip over trying to unset variables with invalid names and just
+	 treat them as potential shell function names. */
+      if (global_unset_func == 0 && global_unset_var == 0 && valid_id == 0)
+	{
+	  unset_variable = unset_array = 0;
+	  unset_function = 1;
+	}
 
       /* Bash allows functions with names which are not valid identifiers
 	 to be created when not in posix mode, so check only when in posix
 	 mode when unsetting a function. */
-      if (((unset_function && posixly_correct) || !unset_function) && legal_identifier (name) == 0)
+      if (unset_function == 0 && valid_id == 0)
 	{
 	  sh_invalidid (name);
 	  NEXT_VARIABLE ();
 	}
 
-      /* Only search for functions here if -f supplied. */
+      /* Search for functions here if -f supplied or if NAME cannot be a
+	 variable name. */
       var = unset_function ? find_function (name)
 			   : (nameref ? find_variable_last_nameref (name, 0) : find_variable (name));
 

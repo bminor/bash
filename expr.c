@@ -1524,6 +1524,8 @@ evalerror (msg)
    from [0-9][a-z][A-Z]_@ (a = 10, z = 35, A = 36, Z = 61, @ = 62, _ = 63 --
    you get the picture). */
 
+#define VALID_NUMCHAR(c)	(ISALNUM(c) || ((c) == '_') || ((c) == '@'))
+
 static intmax_t
 strlong (num)
      char *num;
@@ -1570,8 +1572,15 @@ strlong (num)
 	  base = val;
 	  val = 0;
 	  foundbase++;
+
+#if 0	/* TAG:bash-5.1 */
+	  /* Make sure a base# is followed by a character that can compose a
+	     valid integer constant. Jeremy Townshend <jeremy.townshend@gmail.com> */
+	  if (VALID_NUMCHAR (*s) == 0)
+	    evalerror (_("invalid integer constant"));
+#endif
 	}
-      else if (ISALNUM(c) || (c == '_') || (c == '@'))
+      else if (VALID_NUMCHAR (c))
 	{
 	  if (DIGIT(c))
 	    c = TODIGIT(c);
