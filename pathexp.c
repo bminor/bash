@@ -58,6 +58,9 @@ int extended_glob = EXTGLOB_DEFAULT;
 /* Control enabling special handling of `**' */
 int glob_star = 0;
 
+/* Do we handle backslashes in patterns the way Posix specifies? */
+int posix_glob_backslash = 1;
+
 /* Return nonzero if STRING has any unquoted special globbing chars in it.  */
 int
 unquoted_glob_pattern_p (string)
@@ -125,7 +128,7 @@ unquoted_glob_pattern_p (string)
 #endif
     }
 
-  return (bsquote ? 2 : 0);
+  return ((bsquote && posix_glob_backslash) ? 2 : 0);
 }
 
 /* Return 1 if C is a character that is `special' in a POSIX ERE and needs to
@@ -433,11 +436,12 @@ shell_glob_filename (pathname)
 #else /* !USE_POSIX_GLOB_LIBRARY */
 
   char *temp, **results;
-  int gflags;
+  int gflags, quoted_pattern;
 
   noglob_dot_filenames = glob_dot_filenames == 0;
 
   temp = quote_string_for_globbing (pathname, QGLOB_FILENAME);
+  quoted_pattern = STREQ (pathname, temp) == 0;
   gflags = glob_star ? GX_GLOBSTAR : 0;
   results = glob_filename (temp, gflags);
   free (temp);

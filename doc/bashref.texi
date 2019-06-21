@@ -7083,6 +7083,8 @@ A null value evaluates to 0.
 A shell variable need not have its @var{integer} attribute turned on
 to be used in an expression.
 
+Integer constants follow the C language definition, without suffixes or
+character constants.
 Constants with a leading 0 are interpreted as octal numbers.
 A leading @samp{0x} or @samp{0X} denotes hexadecimal.  Otherwise,
 numbers take the form [@var{base}@code{#}]@var{n}, where the optional @var{base}
@@ -7090,6 +7092,7 @@ is a decimal number between 2 and 64 representing the arithmetic
 base, and @var{n} is a number in that base.
 If @var{base}@code{#} is omitted, then base 10 is used.
 When specifying @var{n},
+if a non-digit is required,
 the digits greater than 9 are represented by the lowercase letters,
 the uppercase letters, @samp{@@}, and @samp{_}, in that order.
 If @var{base} is less than or equal to 36, lowercase and uppercase

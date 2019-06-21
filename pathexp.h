@@ -51,6 +51,7 @@ extern int glob_dot_filenames;
 extern int extended_glob;
 extern int glob_star;
 extern int match_ignore_case;	/* doesn't really belong here */
+extern int posix_glob_backslash;
 
 extern int unquoted_glob_pattern_p __P((char *));
 

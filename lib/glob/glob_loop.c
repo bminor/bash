@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2019 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -70,7 +70,7 @@ INTERNAL_GLOB_PATTERN_P (pattern)
 	  return 0;
       }
 
-  return bsquote ? 2 : 0;
+  return ((bsquote && posix_glob_backslash) ? 2 : 0);
 }
 
 #undef INTERNAL_GLOB_PATTERN_P

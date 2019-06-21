@@ -1,6 +1,6 @@
 /* glob.c -- file-name wildcard pattern matching for Bash.
 
-   Copyright (C) 1985-2017 Free Software Foundation, Inc.
+   Copyright (C) 1985-2019 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne-Again SHell.
    
@@ -91,6 +91,7 @@ extern int signal_is_pending __P((int));
 extern void run_pending_traps __P((void));
 
 extern int extended_glob;
+extern int posix_glob_backslash;
 
 /* Global variable which controls whether or not * matches .*.
    Non-zero means don't match .*.  */
@@ -1410,7 +1411,25 @@ only_filename:
 
       /* We could check whether or not the dequoted directory_name is a
 	 directory and return it here, returning the original directory_name
-	 if not, but we don't do that yet. I'm not sure it matters. */
+	 if not, but we don't do that. We do return the dequoted directory
+	 name if we're not being called recursively and the dequoted name
+	 corresponds to an actual directory. For better backwards compatibility,
+	 we can return &glob_error_return unconditionally in this case. */
+
+      if (directory_len > 0 && hasglob == 2 && (flags & GX_RECURSE) == 0)
+	{
+#if 1
+	  dequote_pathname (directory_name);
+	  if (glob_testdir (directory_name, 0) < 0)
+	    {
+	      if (free_dirname)
+		free (directory_name);
+	      return ((char **)&glob_error_return);
+	    }
+#else
+	  return ((char **)&glob_error_return);
+#endif
+	}
 
       /* Handle GX_MARKDIRS here. */
       result[0] = (char *) malloc (directory_len + 1);

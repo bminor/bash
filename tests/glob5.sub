@@ -50,5 +50,14 @@ recho ./t\mp/
 chmod +r ./tmp/a
 rm -rf ./tmp/a
 
+a='$foo'
+b='$bar'
+a=$(echo "$a" | sed 's/\$/\\$/g')
+
+recho $a "$a"
+recho 'mixed'$a/
+
+unset a b
+
 cd $ORIGD
 rm -rf $SD

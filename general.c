@@ -1,6 +1,6 @@
 /* general.c -- Stuff that is used by all files. */
 
-/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2019 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -44,6 +44,7 @@
 #include "findcmd.h"
 #include "test.h"
 #include "trap.h"
+#include "pathexp.h"
 
 #include "builtins/common.h"
 
@@ -75,6 +76,7 @@ const char * const bash_getcwd_errstr = N_("getcwd: cannot access parent directo
       expand_aliases
       inherit_errexit
       print_shift_error
+      posixglob
 
    and the following variables which cannot be user-modified:
 
@@ -91,6 +93,7 @@ static struct {
   &source_uses_path,
   &expand_aliases,
   &inherit_errexit,
+  &posix_glob_backslash,
   &print_shift_error,
   0
 };
@@ -106,7 +109,7 @@ posix_initialize (on)
       inherit_errexit = 1;
       source_searches_cwd = 0;
       print_shift_error = 1;
-
+      posix_glob_backslash = 1;
     }
 
   /* Things that should be turned on when posix mode is disabled. */

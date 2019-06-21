@@ -6130,3 +6130,33 @@ execute_cmd.c
 	  builtin (flags&CMD_COMMAND_BUILTIN), don't bother to print the
 	  command words if set -x is enabled. From a report by Martijn Dekker
 	  <martijn@inlv.org> back in 4/2018
+
+				   6/19
+				   ----
+lib/glob/glob.c
+	- glob_filename: if we are not being called recursively, and there is
+	  only a directory name, dequote the passed pathname and see if it
+	  names an existing directory. If it does, return it; otherwise return
+	  failure ((char **)&glob_error_return). This is what makes backslash
+	  escaped-characters in pathnames in shell variables work the same as
+	  the same value passed directly. From an anonymous comment on
+	  https://savannah.gnu.org/support/?109629 and a discussion on the
+	  austin-group list.
+
+				   6/20
+				   ----
+pathexp.c,lib/glob/glob.c
+	- posix_glob_backslash: variable to control whether or not pathname
+	  expansion handles backslashes in the pattern the way Posix says it
+	  should. Enabled by default
+
+pathexp.h
+	- posix_glob_backslash: new extern declaration
+
+builtins/shopt.def
+	- posixglob: new option, reflects the value of posix_glob_backslash
+
+general.c
+	- posix_vars: add posix_glob_backslash to the table
+	- posix_initialize: set posix_glob_backslash to 1 when turning on
+	  posix mode

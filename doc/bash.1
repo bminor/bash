@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon May 20 10:45:39 EDT 2019
+.\"	Last Change: Wed Jun 19 11:22:28 EDT 2019
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2019 May 20" "GNU Bash 5.0"
+.TH BASH 1 "2019 June 19" "GNU Bash 5.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -4493,6 +4493,8 @@ A null value evaluates to 0.
 A shell variable need not have its \fIinteger\fP attribute
 turned on to be used in an expression.
 .PP
+Integer constants follow the C language definition, without suffixes or
+character constants.
 Constants with a leading 0 are interpreted as octal numbers.
 A leading 0x or 0X denotes hexadecimal.
 Otherwise, numbers take the form [\fIbase#\fP]n, where the optional \fIbase\fP
@@ -4500,6 +4502,7 @@ is a decimal number between 2 and 64 representing the arithmetic
 base, and \fIn\fP is a number in that base.
 If \fIbase#\fP is omitted, then base 10 is used.
 When specifying \fIn\fP,
+if a non-digit is required,
 the digits greater than 9 are represented by the lowercase letters,
 the uppercase letters, @, and _, in that order.
 If \fIbase\fP is less than or equal to 36, lowercase and uppercase
