@@ -71,48 +71,48 @@
 \entry{exit status}{41}{exit status}
 \entry{signal handling}{41}{signal handling}
 \entry{shell script}{42}{shell script}
-\entry{special builtin}{71}{special builtin}
-\entry{login shell}{87}{login shell}
-\entry{interactive shell}{87}{interactive shell}
-\entry{startup files}{87}{startup files}
+\entry{special builtin}{72}{special builtin}
+\entry{login shell}{88}{login shell}
 \entry{interactive shell}{88}{interactive shell}
-\entry{shell, interactive}{88}{shell, interactive}
-\entry{expressions, conditional}{90}{expressions, conditional}
-\entry{arithmetic, shell}{92}{arithmetic, shell}
-\entry{shell arithmetic}{92}{shell arithmetic}
-\entry{expressions, arithmetic}{92}{expressions, arithmetic}
-\entry{evaluation, arithmetic}{92}{evaluation, arithmetic}
-\entry{arithmetic evaluation}{92}{arithmetic evaluation}
-\entry{alias expansion}{93}{alias expansion}
-\entry{arrays}{94}{arrays}
-\entry{directory stack}{96}{directory stack}
-\entry{prompting}{97}{prompting}
-\entry{restricted shell}{99}{restricted shell}
-\entry{POSIX Mode}{99}{POSIX Mode}
-\entry{job control}{104}{job control}
-\entry{foreground}{104}{foreground}
-\entry{background}{104}{background}
-\entry{suspending jobs}{104}{suspending jobs}
-\entry{Readline, how to use}{107}{Readline, how to use}
-\entry{interaction, readline}{108}{interaction, readline}
-\entry{notation, readline}{109}{notation, readline}
-\entry{command editing}{109}{command editing}
-\entry{editing command lines}{109}{editing command lines}
-\entry{killing text}{110}{killing text}
-\entry{yanking text}{110}{yanking text}
-\entry{kill ring}{110}{kill ring}
-\entry{initialization file, readline}{111}{initialization file, readline}
-\entry{variables, readline}{112}{variables, readline}
-\entry{programmable completion}{134}{programmable completion}
-\entry{completion builtins}{136}{completion builtins}
-\entry{History, how to use}{142}{History, how to use}
-\entry{command history}{143}{command history}
-\entry{history list}{143}{history list}
-\entry{history builtins}{143}{history builtins}
-\entry{history expansion}{145}{history expansion}
-\entry{event designators}{146}{event designators}
-\entry{history events}{146}{history events}
-\entry{installation}{149}{installation}
-\entry{configuration}{149}{configuration}
-\entry{Bash installation}{149}{Bash installation}
-\entry{Bash configuration}{149}{Bash configuration}
+\entry{startup files}{88}{startup files}
+\entry{interactive shell}{89}{interactive shell}
+\entry{shell, interactive}{89}{shell, interactive}
+\entry{expressions, conditional}{91}{expressions, conditional}
+\entry{arithmetic, shell}{93}{arithmetic, shell}
+\entry{shell arithmetic}{93}{shell arithmetic}
+\entry{expressions, arithmetic}{93}{expressions, arithmetic}
+\entry{evaluation, arithmetic}{93}{evaluation, arithmetic}
+\entry{arithmetic evaluation}{93}{arithmetic evaluation}
+\entry{alias expansion}{94}{alias expansion}
+\entry{arrays}{95}{arrays}
+\entry{directory stack}{97}{directory stack}
+\entry{prompting}{98}{prompting}
+\entry{restricted shell}{100}{restricted shell}
+\entry{POSIX Mode}{100}{POSIX Mode}
+\entry{job control}{105}{job control}
+\entry{foreground}{105}{foreground}
+\entry{background}{105}{background}
+\entry{suspending jobs}{105}{suspending jobs}
+\entry{Readline, how to use}{108}{Readline, how to use}
+\entry{interaction, readline}{109}{interaction, readline}
+\entry{notation, readline}{110}{notation, readline}
+\entry{command editing}{110}{command editing}
+\entry{editing command lines}{110}{editing command lines}
+\entry{killing text}{111}{killing text}
+\entry{yanking text}{111}{yanking text}
+\entry{kill ring}{111}{kill ring}
+\entry{initialization file, readline}{112}{initialization file, readline}
+\entry{variables, readline}{113}{variables, readline}
+\entry{programmable completion}{135}{programmable completion}
+\entry{completion builtins}{137}{completion builtins}
+\entry{History, how to use}{143}{History, how to use}
+\entry{command history}{144}{command history}
+\entry{history list}{144}{history list}
+\entry{history builtins}{144}{history builtins}
+\entry{history expansion}{146}{history expansion}
+\entry{event designators}{147}{event designators}
+\entry{history events}{147}{history events}
+\entry{installation}{150}{installation}
+\entry{configuration}{150}{configuration}
+\entry{Bash installation}{150}{Bash installation}
+\entry{Bash configuration}{150}{Bash configuration}

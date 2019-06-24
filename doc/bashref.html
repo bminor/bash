@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.0, 12 June 2019).
+the Bash shell (version 5.0, 21 June 2019).
 
-This is Edition 5.0, last updated 12 June 2019,
+This is Edition 5.0, last updated 21 June 2019,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.0.
 
@@ -284,10 +284,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.0, 12 June 2019).
+the Bash shell (version 5.0, 21 June 2019).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.0, last updated 12 June 2019,
+<p>This is Edition 5.0, last updated 21 June 2019,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.0.
 </p>
@@ -3056,7 +3056,10 @@ Next: <a href="#Quote-Removal" accesskey="n" rel="next">Quote Removal</a>, Previ
 
 <p>After word splitting, unless the <samp>-f</samp> option has been set
 (see <a href="#The-Set-Builtin">The Set Builtin</a>), Bash scans each word for the characters
-&lsquo;<samp>*</samp>&rsquo;, &lsquo;<samp>?</samp>&rsquo;, and &lsquo;<samp>[</samp>&rsquo;.
+&lsquo;<samp>*</samp>&rsquo;, &lsquo;<samp>?</samp>&rsquo;, &lsquo;<samp>[</samp>&rsquo;,
+and, under certain circumstances (e.g., when it appears in the expansion of
+an unquoted shell variable),
+&lsquo;<samp>\\</samp>&rsquo;.
 If one of these characters appears, then the word is
 regarded as a <var>pattern</var>,
 and replaced with an alphabetically sorted list of
@@ -6341,6 +6344,14 @@ or when filtering possible completions as part of programmable completion.
 files to expand to a null string, rather than themselves.
 </p>
 </dd>
+<dt><code>posixglob</code></dt>
+<dd><p>If set, Bash
+makes words containing unquoted backslashes after expansion eligible for  
+filename expansion, even if they don&rsquo;t contain any other unquoted pattern
+characters. This option is enabled by default and is enabled when <small>POSIX</small>
+mode is enabled.
+</p>
+</dd>
 <dt><code>progcomp</code></dt>
 <dd><p>If set, the programmable completion facilities
 (see <a href="#Programmable-Completion">Programmable Completion</a>) are enabled.
@@ -8441,13 +8452,16 @@ A null value evaluates to 0.
 A shell variable need not have its <var>integer</var> attribute turned on
 to be used in an expression.
 </p>
-<p>Constants with a leading 0 are interpreted as octal numbers.
+<p>Integer constants follow the C language definition, without suffixes or
+character constants.
+Constants with a leading 0 are interpreted as octal numbers.
 A leading &lsquo;<samp>0x</samp>&rsquo; or &lsquo;<samp>0X</samp>&rsquo; denotes hexadecimal.  Otherwise,
 numbers take the form [<var>base</var><code>#</code>]<var>n</var>, where the optional <var>base</var>
 is a decimal number between 2 and 64 representing the arithmetic
 base, and <var>n</var> is a number in that base.
 If <var>base</var><code>#</code> is omitted, then base 10 is used.
 When specifying <var>n</var>,
+if a non-digit is required,
 the digits greater than 9 are represented by the lowercase letters,
 the uppercase letters, &lsquo;<samp>@</samp>&rsquo;, and &lsquo;<samp>_</samp>&rsquo;, in that order.
 If <var>base</var> is less than or equal to 36, lowercase and uppercase
@@ -9174,6 +9188,10 @@ Bash clears the <samp>-e</samp> option in such subshells.
 <code>shift_verbose</code> option, so numeric arguments to <code>shift</code>
 that exceed the number of positional parameters will result in an
 error message.
+
+</li><li> Enabling <small>POSIX</small> mode has the effect of setting the <code>posixglob</code>
+option, which affects how unquoted backslashes are treated during
+filename expansion (see <a href="#Filename-Expansion">Filename Expansion</a>).
 
 </li><li> When the <code>alias</code> builtin displays alias definitions, it does not
 display them with a leading &lsquo;<samp>alias </samp>&rsquo; unless the <samp>-p</samp> option
@@ -10928,15 +10946,15 @@ Words are composed of letters and digits.
 Words are composed of letters and digits.
 </p>
 </dd>
-<dt><code>shell-forward-word ()</code>
-<a name="index-shell_002dforward_002dword-_0028_0029"></a>
+<dt><code>shell-forward-word (M-C-f)</code>
+<a name="index-shell_002dforward_002dword-_0028M_002dC_002df_0029"></a>
 </dt>
 <dd><p>Move forward to the end of the next word.
 Words are delimited by non-quoted shell metacharacters.
 </p>
 </dd>
-<dt><code>shell-backward-word ()</code>
-<a name="index-shell_002dbackward_002dword-_0028_0029"></a>
+<dt><code>shell-backward-word (M-C-b)</code>
+<a name="index-shell_002dbackward_002dword-_0028M_002dC_002db_0029"></a>
 </dt>
 <dd><p>Move back to the start of the current or previous word.
 Words are delimited by non-quoted shell metacharacters.
@@ -11302,8 +11320,8 @@ Word boundaries are the same as <code>forward-word</code>.
 Word boundaries are the same as <code>backward-word</code>.
 </p>
 </dd>
-<dt><code>shell-kill-word ()</code>
-<a name="index-shell_002dkill_002dword-_0028_0029"></a>
+<dt><code>shell-kill-word (M-C-d)</code>
+<a name="index-shell_002dkill_002dword-_0028M_002dC_002dd_0029"></a>
 </dt>
 <dd><p>Kill from point to the end of the current word, or if between
 words, to the end of the next word.
@@ -11315,6 +11333,17 @@ Word boundaries are the same as <code>shell-forward-word</code>.
 </dt>
 <dd><p>Kill the word behind point.
 Word boundaries are the same as <code>shell-backward-word</code>.
+</p>
+</dd>
+<dt><code>shell-transpose-words (M-C-t)</code>
+<a name="index-shell_002dtranspose_002dwords-_0028M_002dC_002dt_0029"></a>
+</dt>
+<dd><p>Drag the word before point past the word after point,
+moving point past that word as well.
+If the insertion point is at the end of the line, this transposes
+the last two words on the line.
+Word boundaries are the same as <code>shell-forward-word</code> and
+<code>shell-backward-word</code>.
 </p>
 </dd>
 <dt><code>unix-word-rubout (C-w)</code>
@@ -15459,10 +15488,11 @@ Next: <a href="#Concept-Index" accesskey="n" rel="next">Concept Index</a>, Previ
 <tr><td></td><td valign="top"><a href="#index-self_002dinsert-_0028a_002c-b_002c-A_002c-1_002c-_0021_002c-_2026_0029"><code>self-insert (a, b, A, 1, !, &hellip;)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Text">Commands For Text</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-set_002dmark-_0028C_002d_0040_0029"><code>set-mark (C-@)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Miscellaneous-Commands">Miscellaneous Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-shell_002dbackward_002dkill_002dword-_0028_0029"><code>shell-backward-kill-word ()</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Killing">Commands For Killing</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-shell_002dbackward_002dword-_0028_0029"><code>shell-backward-word ()</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Moving">Commands For Moving</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-shell_002dbackward_002dword-_0028M_002dC_002db_0029"><code>shell-backward-word (M-C-b)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Moving">Commands For Moving</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-shell_002dexpand_002dline-_0028M_002dC_002de_0029"><code>shell-expand-line (M-C-e)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Miscellaneous-Commands">Miscellaneous Commands</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-shell_002dforward_002dword-_0028_0029"><code>shell-forward-word ()</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Moving">Commands For Moving</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-shell_002dkill_002dword-_0028_0029"><code>shell-kill-word ()</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Killing">Commands For Killing</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-shell_002dforward_002dword-_0028M_002dC_002df_0029"><code>shell-forward-word (M-C-f)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Moving">Commands For Moving</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-shell_002dkill_002dword-_0028M_002dC_002dd_0029"><code>shell-kill-word (M-C-d)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Killing">Commands For Killing</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-shell_002dtranspose_002dwords-_0028M_002dC_002dt_0029"><code>shell-transpose-words (M-C-t)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Killing">Commands For Killing</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-skip_002dcsi_002dsequence-_0028_0029"><code>skip-csi-sequence ()</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Miscellaneous-Commands">Miscellaneous Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-start_002dkbd_002dmacro-_0028C_002dx-_0028_0029"><code>start-kbd-macro (C-x ()</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Keyboard-Macros">Keyboard Macros</a></td></tr>
 <tr><td colspan="4"> <hr></td></tr>

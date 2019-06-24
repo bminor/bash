@@ -2,9 +2,9 @@ This is bash.info, produced by makeinfo version 6.5 from
 bashref.texi.
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.0, 12 June 2019).
+Bash shell (version 5.0, 21 June 2019).
 
-   This is Edition 5.0, last updated 12 June 2019, of 'The GNU Bash
+   This is Edition 5.0, last updated 21 June 2019, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.0.
 
    Copyright (C) 1988-2018 Free Software Foundation, Inc.
@@ -27,10 +27,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.0, 12 June 2019).  The Bash home page is
+Bash shell (version 5.0, 21 June 2019).  The Bash home page is
 <http://www.gnu.org/software/bash/>.
 
-   This is Edition 5.0, last updated 12 June 2019, of 'The GNU Bash
+   This is Edition 5.0, last updated 21 June 2019, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.0.
 
    Bash contains features that appear in other popular shells, and some
@@ -2116,16 +2116,18 @@ File: bash.info,  Node: Filename Expansion,  Next: Quote Removal,  Prev: Word Sp
 * Pattern Matching::	How the shell matches patterns.
 
 After word splitting, unless the '-f' option has been set (*note The Set
-Builtin::), Bash scans each word for the characters '*', '?', and '['.
-If one of these characters appears, then the word is regarded as a
-PATTERN, and replaced with an alphabetically sorted list of filenames
-matching the pattern (*note Pattern Matching::).  If no matching
-filenames are found, and the shell option 'nullglob' is disabled, the
-word is left unchanged.  If the 'nullglob' option is set, and no matches
-are found, the word is removed.  If the 'failglob' shell option is set,
-and no matches are found, an error message is printed and the command is
-not executed.  If the shell option 'nocaseglob' is enabled, the match is
-performed without regard to the case of alphabetic characters.
+Builtin::), Bash scans each word for the characters '*', '?', '[', and,
+under certain circumstances (e.g., when it appears in the expansion of
+an unquoted shell variable), '\\'.  If one of these characters appears,
+then the word is regarded as a PATTERN, and replaced with an
+alphabetically sorted list of filenames matching the pattern (*note
+Pattern Matching::).  If no matching filenames are found, and the shell
+option 'nullglob' is disabled, the word is left unchanged.  If the
+'nullglob' option is set, and no matches are found, the word is removed.
+If the 'failglob' shell option is set, and no matches are found, an
+error message is printed and the command is not executed.  If the shell
+option 'nocaseglob' is enabled, the match is performed without regard to
+the case of alphabetic characters.
 
    When a pattern is used for filename expansion, the character '.' at
 the start of a filename or immediately following a slash must be matched
@@ -4676,6 +4678,12 @@ This builtin allows you to change additional shell optional behavior.
           If set, Bash allows filename patterns which match no files to
           expand to a null string, rather than themselves.
 
+     'posixglob'
+          If set, Bash makes words containing unquoted backslashes after
+          expansion eligible for filename expansion, even if they don't
+          contain any other unquoted pattern characters.  This option is
+          enabled by default and is enabled when POSIX mode is enabled.
+
      'progcomp'
           If set, the programmable completion facilities (*note
           Programmable Completion::) are enabled.  This option is
@@ -6168,15 +6176,17 @@ given the INTEGER attribute using 'declare -i' is assigned a value.  A
 null value evaluates to 0.  A shell variable need not have its INTEGER
 attribute turned on to be used in an expression.
 
-   Constants with a leading 0 are interpreted as octal numbers.  A
-leading '0x' or '0X' denotes hexadecimal.  Otherwise, numbers take the
-form [BASE'#']N, where the optional BASE is a decimal number between 2
-and 64 representing the arithmetic base, and N is a number in that base.
-If BASE'#' is omitted, then base 10 is used.  When specifying N, the
-digits greater than 9 are represented by the lowercase letters, the
-uppercase letters, '@', and '_', in that order.  If BASE is less than or
-equal to 36, lowercase and uppercase letters may be used interchangeably
-to represent numbers between 10 and 35.
+   Integer constants follow the C language definition, without suffixes
+or character constants.  Constants with a leading 0 are interpreted as
+octal numbers.  A leading '0x' or '0X' denotes hexadecimal.  Otherwise,
+numbers take the form [BASE'#']N, where the optional BASE is a decimal
+number between 2 and 64 representing the arithmetic base, and N is a
+number in that base.  If BASE'#' is omitted, then base 10 is used.  When
+specifying N, if a non-digit is required, the digits greater than 9 are
+represented by the lowercase letters, the uppercase letters, '@', and
+'_', in that order.  If BASE is less than or equal to 36, lowercase and
+uppercase letters may be used interchangeably to represent numbers
+between 10 and 35.
 
    Operators are evaluated in order of precedence.  Sub-expressions in
 parentheses are evaluated first and may override the precedence rules
@@ -6757,62 +6767,66 @@ startup files.
      option, so numeric arguments to 'shift' that exceed the number of
      positional parameters will result in an error message.
 
-  45. When the 'alias' builtin displays alias definitions, it does not
+  45. Enabling POSIX mode has the effect of setting the 'posixglob'
+     option, which affects how unquoted backslashes are treated during
+     filename expansion (*note Filename Expansion::).
+
+  46. When the 'alias' builtin displays alias definitions, it does not
      display them with a leading 'alias ' unless the '-p' option is
      supplied.
 
-  46. When the 'set' builtin is invoked without options, it does not
+  47. When the 'set' builtin is invoked without options, it does not
      display shell function names and definitions.
 
-  47. When the 'set' builtin is invoked without options, it displays
+  48. When the 'set' builtin is invoked without options, it displays
      variable values without quotes, unless they contain shell
      metacharacters, even if the result contains nonprinting characters.
 
-  48. When the 'cd' builtin is invoked in LOGICAL mode, and the pathname
+  49. When the 'cd' builtin is invoked in LOGICAL mode, and the pathname
      constructed from '$PWD' and the directory name supplied as an
      argument does not refer to an existing directory, 'cd' will fail
      instead of falling back to PHYSICAL mode.
 
-  49. When the 'cd' builtin cannot change a directory because the length
+  50. When the 'cd' builtin cannot change a directory because the length
      of the pathname constructed from '$PWD' and the directory name
      supplied as an argument exceeds PATH_MAX when all symbolic links
      are expanded, 'cd' will fail instead of attempting to use only the
      supplied directory name.
 
-  50. The 'pwd' builtin verifies that the value it prints is the same as
+  51. The 'pwd' builtin verifies that the value it prints is the same as
      the current directory, even if it is not asked to check the file
      system with the '-P' option.
 
-  51. When listing the history, the 'fc' builtin does not include an
+  52. When listing the history, the 'fc' builtin does not include an
      indication of whether or not a history entry has been modified.
 
-  52. The default editor used by 'fc' is 'ed'.
+  53. The default editor used by 'fc' is 'ed'.
 
-  53. The 'type' and 'command' builtins will not report a non-executable
+  54. The 'type' and 'command' builtins will not report a non-executable
      file as having been found, though the shell will attempt to execute
      such a file if it is the only so-named file found in '$PATH'.
 
-  54. The 'vi' editing mode will invoke the 'vi' editor directly when
+  55. The 'vi' editing mode will invoke the 'vi' editor directly when
      the 'v' command is run, instead of checking '$VISUAL' and
      '$EDITOR'.
 
-  55. When the 'xpg_echo' option is enabled, Bash does not attempt to
+  56. When the 'xpg_echo' option is enabled, Bash does not attempt to
      interpret any arguments to 'echo' as options.  Each argument is
      displayed, after escape characters are converted.
 
-  56. The 'ulimit' builtin uses a block size of 512 bytes for the '-c'
+  57. The 'ulimit' builtin uses a block size of 512 bytes for the '-c'
      and '-f' options.
 
-  57. The arrival of 'SIGCHLD' when a trap is set on 'SIGCHLD' does not
+  58. The arrival of 'SIGCHLD' when a trap is set on 'SIGCHLD' does not
      interrupt the 'wait' builtin and cause it to return immediately.
      The trap command is run once for each child that exits.
 
-  58. The 'read' builtin may be interrupted by a signal for which a trap
+  59. The 'read' builtin may be interrupted by a signal for which a trap
      has been set.  If Bash receives a trapped signal while executing
      'read', the trap handler executes and 'read' returns an exit status
      greater than 128.
 
-  59. Bash removes an exited background process's status from the list
+  60. Bash removes an exited background process's status from the list
      of such statuses after the 'wait' builtin is used to obtain it.
 
    There is other POSIX behavior that Bash does not implement by default
@@ -8080,11 +8094,11 @@ File: bash.info,  Node: Commands For Moving,  Next: Commands For History,  Up: B
      Move back to the start of the current or previous word.  Words are
      composed of letters and digits.
 
-'shell-forward-word ()'
+'shell-forward-word (M-C-f)'
      Move forward to the end of the next word.  Words are delimited by
      non-quoted shell metacharacters.
 
-'shell-backward-word ()'
+'shell-backward-word (M-C-b)'
      Move back to the start of the current or previous word.  Words are
      delimited by non-quoted shell metacharacters.
 
@@ -8308,13 +8322,20 @@ File: bash.info,  Node: Commands For Killing,  Next: Numeric Arguments,  Prev: C
      Kill the word behind point.  Word boundaries are the same as
      'backward-word'.
 
-'shell-kill-word ()'
+'shell-kill-word (M-C-d)'
      Kill from point to the end of the current word, or if between
      words, to the end of the next word.  Word boundaries are the same
      as 'shell-forward-word'.
 
 'shell-backward-kill-word ()'
      Kill the word behind point.  Word boundaries are the same as
+     'shell-backward-word'.
+
+'shell-transpose-words (M-C-t)'
+     Drag the word before point past the word after point, moving point
+     past that word as well.  If the insertion point is at the end of
+     the line, this transposes the last two words on the line.  Word
+     boundaries are the same as 'shell-forward-word' and
      'shell-backward-word'.
 
 'unix-word-rubout (C-w)'
@@ -11398,18 +11419,18 @@ D.4 Function Index
 * complete-variable (M-$):               Commands For Completion.
                                                               (line  64)
 * copy-backward-word ():                 Commands For Killing.
-                                                              (line  58)
+                                                              (line  65)
 * copy-forward-word ():                  Commands For Killing.
-                                                              (line  63)
+                                                              (line  70)
 * copy-region-as-kill ():                Commands For Killing.
-                                                              (line  54)
+                                                              (line  61)
 * dabbrev-expand ():                     Commands For Completion.
                                                               (line  95)
 * delete-char (C-d):                     Commands For Text.   (line  12)
 * delete-char-or-list ():                Commands For Completion.
                                                               (line  43)
 * delete-horizontal-space ():            Commands For Killing.
-                                                              (line  46)
+                                                              (line  53)
 * digit-argument (M-0, M-1, ... M--):    Numeric Arguments.   (line   6)
 * display-shell-version (C-x C-v):       Miscellaneous Commands.
                                                               (line 110)
@@ -11465,7 +11486,7 @@ D.4 Function Index
 * kill-line (C-k):                       Commands For Killing.
                                                               (line   6)
 * kill-region ():                        Commands For Killing.
-                                                              (line  50)
+                                                              (line  57)
 * kill-whole-line ():                    Commands For Killing.
                                                               (line  15)
 * kill-word (M-d):                       Commands For Killing.
@@ -11517,12 +11538,14 @@ D.4 Function Index
                                                               (line  33)
 * shell-backward-kill-word ():           Commands For Killing.
                                                               (line  33)
-* shell-backward-word ():                Commands For Moving. (line  30)
+* shell-backward-word (M-C-b):           Commands For Moving. (line  30)
 * shell-expand-line (M-C-e):             Miscellaneous Commands.
                                                               (line 113)
-* shell-forward-word ():                 Commands For Moving. (line  26)
-* shell-kill-word ():                    Commands For Killing.
+* shell-forward-word (M-C-f):            Commands For Moving. (line  26)
+* shell-kill-word (M-C-d):               Commands For Killing.
                                                               (line  28)
+* shell-transpose-words (M-C-t):         Commands For Killing.
+                                                              (line  37)
 * skip-csi-sequence ():                  Miscellaneous Commands.
                                                               (line  52)
 * start-kbd-macro (C-x ():               Keyboard Macros.     (line   6)
@@ -11534,20 +11557,20 @@ D.4 Function Index
                                                               (line  23)
 * universal-argument ():                 Numeric Arguments.   (line  10)
 * unix-filename-rubout ():               Commands For Killing.
-                                                              (line  41)
+                                                              (line  48)
 * unix-line-discard (C-u):               Commands For Killing.
                                                               (line  12)
 * unix-word-rubout (C-w):                Commands For Killing.
-                                                              (line  37)
+                                                              (line  44)
 * upcase-word (M-u):                     Commands For Text.   (line  53)
 * yank (C-y):                            Commands For Killing.
-                                                              (line  68)
+                                                              (line  75)
 * yank-last-arg (M-. or M-_):            Commands For History.
                                                               (line  80)
 * yank-nth-arg (M-C-y):                  Commands For History.
                                                               (line  71)
 * yank-pop (M-y):                        Commands For Killing.
-                                                              (line  71)
+                                                              (line  78)
 
 
 File: bash.info,  Node: Concept Index,  Prev: Function Index,  Up: Indexes
@@ -11749,96 +11772,96 @@ Node: Arithmetic Expansion87084
 Node: Process Substitution88016
 Node: Word Splitting89136
 Node: Filename Expansion91080
-Node: Pattern Matching93610
-Node: Quote Removal97596
-Node: Redirections97891
-Node: Executing Commands107449
-Node: Simple Command Expansion108119
-Node: Command Search and Execution110049
-Node: Command Execution Environment112425
-Node: Environment115409
-Node: Exit Status117068
-Node: Signals118738
-Node: Shell Scripts120705
-Node: Shell Builtin Commands123220
-Node: Bourne Shell Builtins125258
-Node: Bash Builtins146008
-Node: Modifying Shell Behavior174933
-Node: The Set Builtin175278
-Node: The Shopt Builtin185691
-Node: Special Builtins203361
-Node: Shell Variables204340
-Node: Bourne Shell Variables204777
-Node: Bash Variables206881
-Node: Bash Features237828
-Node: Invoking Bash238727
-Node: Bash Startup Files244740
-Node: Interactive Shells249843
-Node: What is an Interactive Shell?250253
-Node: Is this Shell Interactive?250902
-Node: Interactive Shell Behavior251717
-Node: Bash Conditional Expressions255204
-Node: Shell Arithmetic259781
-Node: Aliases262598
-Node: Arrays265218
-Node: The Directory Stack270583
-Node: Directory Stack Builtins271367
-Node: Controlling the Prompt274335
-Node: The Restricted Shell277256
-Node: Bash POSIX Mode279738
-Node: Job Control290671
-Node: Job Control Basics291131
-Node: Job Control Builtins296095
-Node: Job Control Variables300913
-Node: Command Line Editing302069
-Node: Introduction and Notation303740
-Node: Readline Interaction305363
-Node: Readline Bare Essentials306554
-Node: Readline Movement Commands308337
-Node: Readline Killing Commands309297
-Node: Readline Arguments311215
-Node: Searching312259
-Node: Readline Init File314445
-Node: Readline Init File Syntax315704
-Node: Conditional Init Constructs336143
-Node: Sample Init File340339
-Node: Bindable Readline Commands343456
-Node: Commands For Moving344660
-Node: Commands For History346509
-Node: Commands For Text350804
-Node: Commands For Killing354192
-Node: Numeric Arguments356673
-Node: Commands For Completion357812
-Node: Keyboard Macros362003
-Node: Miscellaneous Commands362690
-Node: Readline vi Mode368643
-Node: Programmable Completion369550
-Node: Programmable Completion Builtins377330
-Node: A Programmable Completion Example388025
-Node: Using History Interactively393272
-Node: Bash History Facilities393956
-Node: Bash History Builtins396961
-Node: History Interaction401492
-Node: Event Designators405112
-Node: Word Designators406331
-Node: Modifiers407968
-Node: Installing Bash409370
-Node: Basic Installation410507
-Node: Compilers and Options413765
-Node: Compiling For Multiple Architectures414506
-Node: Installation Names416199
-Node: Specifying the System Type417017
-Node: Sharing Defaults417733
-Node: Operation Controls418406
-Node: Optional Features419364
-Node: Reporting Bugs429882
-Node: Major Differences From The Bourne Shell431076
-Node: GNU Free Documentation License447928
-Node: Indexes473105
-Node: Builtin Index473559
-Node: Reserved Word Index480386
-Node: Variable Index482834
-Node: Function Index498658
-Node: Concept Index511961
+Node: Pattern Matching93717
+Node: Quote Removal97703
+Node: Redirections97998
+Node: Executing Commands107556
+Node: Simple Command Expansion108226
+Node: Command Search and Execution110156
+Node: Command Execution Environment112532
+Node: Environment115516
+Node: Exit Status117175
+Node: Signals118845
+Node: Shell Scripts120812
+Node: Shell Builtin Commands123327
+Node: Bourne Shell Builtins125365
+Node: Bash Builtins146115
+Node: Modifying Shell Behavior175040
+Node: The Set Builtin175385
+Node: The Shopt Builtin185798
+Node: Special Builtins203776
+Node: Shell Variables204755
+Node: Bourne Shell Variables205192
+Node: Bash Variables207296
+Node: Bash Features238243
+Node: Invoking Bash239142
+Node: Bash Startup Files245155
+Node: Interactive Shells250258
+Node: What is an Interactive Shell?250668
+Node: Is this Shell Interactive?251317
+Node: Interactive Shell Behavior252132
+Node: Bash Conditional Expressions255619
+Node: Shell Arithmetic260196
+Node: Aliases263136
+Node: Arrays265756
+Node: The Directory Stack271121
+Node: Directory Stack Builtins271905
+Node: Controlling the Prompt274873
+Node: The Restricted Shell277794
+Node: Bash POSIX Mode280276
+Node: Job Control291403
+Node: Job Control Basics291863
+Node: Job Control Builtins296827
+Node: Job Control Variables301645
+Node: Command Line Editing302801
+Node: Introduction and Notation304472
+Node: Readline Interaction306095
+Node: Readline Bare Essentials307286
+Node: Readline Movement Commands309069
+Node: Readline Killing Commands310029
+Node: Readline Arguments311947
+Node: Searching312991
+Node: Readline Init File315177
+Node: Readline Init File Syntax316436
+Node: Conditional Init Constructs336875
+Node: Sample Init File341071
+Node: Bindable Readline Commands344188
+Node: Commands For Moving345392
+Node: Commands For History347251
+Node: Commands For Text351546
+Node: Commands For Killing354934
+Node: Numeric Arguments357749
+Node: Commands For Completion358888
+Node: Keyboard Macros363079
+Node: Miscellaneous Commands363766
+Node: Readline vi Mode369719
+Node: Programmable Completion370626
+Node: Programmable Completion Builtins378406
+Node: A Programmable Completion Example389101
+Node: Using History Interactively394348
+Node: Bash History Facilities395032
+Node: Bash History Builtins398037
+Node: History Interaction402568
+Node: Event Designators406188
+Node: Word Designators407407
+Node: Modifiers409044
+Node: Installing Bash410446
+Node: Basic Installation411583
+Node: Compilers and Options414841
+Node: Compiling For Multiple Architectures415582
+Node: Installation Names417275
+Node: Specifying the System Type418093
+Node: Sharing Defaults418809
+Node: Operation Controls419482
+Node: Optional Features420440
+Node: Reporting Bugs430958
+Node: Major Differences From The Bourne Shell432152
+Node: GNU Free Documentation License449004
+Node: Indexes474181
+Node: Builtin Index474635
+Node: Reserved Word Index481462
+Node: Variable Index483910
+Node: Function Index499734
+Node: Concept Index513173
 
 End Tag Table

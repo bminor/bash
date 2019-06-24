@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2019 May 20<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2019 June 21<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -4470,8 +4470,12 @@ scans each word for the characters
 
 <B>?</B>,
 
-and
-<B>[</B>.
+<B>[</B>,
+
+and, under certain circumstances (e.g., when it appears in the expansion of
+an unquoted shell variable, depending on the setting of the <B>posixglob</B>
+shell option),
+<B>\</B>.
 
 If one of these characters appears, then the word is
 regarded as a
@@ -5736,6 +5740,8 @@ A shell variable need not have its <I>integer</I> attribute
 turned on to be used in an expression.
 <P>
 
+Integer constants follow the C language definition, without suffixes or
+character constants.
 Constants with a leading 0 are interpreted as octal numbers.
 A leading 0x or 0X denotes hexadecimal.
 Otherwise, numbers take the form [<I>base#</I>]n, where the optional <I>base</I>
@@ -5743,6 +5749,7 @@ is a decimal number between 2 and 64 representing the arithmetic
 base, and <I>n</I> is a number in that base.
 If <I>base#</I> is omitted, then base 10 is used.
 When specifying <I>n</I>,
+if a non-digit is required,
 the digits greater than 9 are represented by the lowercase letters,
 the uppercase letters, @, and _, in that order.
 If <I>base</I> is less than or equal to 36, lowercase and uppercase
@@ -12924,6 +12931,16 @@ files (see
 
 above)
 to expand to a null string, rather than themselves.
+<DT><B>posixglob</B>
+
+<DD>
+If set,
+<B>bash</B>
+
+makes words containing unquoted backslashes after expansion eligible for
+pathname expansion, even if they don't contain any other unquoted pattern
+characters. This option is enabled by default, and is enabled when
+<I>posix mode</I> is enabled.
 <DT><B>progcomp</B>
 
 <DD>
@@ -13006,6 +13023,7 @@ the evaluation of the conditional expression
 
 Each operator and operand must be a separate argument.
 Expressions are composed of the primaries described above under
+
 <FONT SIZE=-1><B>CONDITIONAL EXPRESSIONS</B>.
 
 </FONT>
@@ -13962,7 +13980,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2019 May 20<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2019 June 21<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -14068,6 +14086,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 12 June 2019 15:27:00 EDT
+Time: 21 June 2019 10:27:46 EDT
 </BODY>
 </HTML>

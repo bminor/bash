@@ -43,7 +43,7 @@ export PATH
 
 #Securely create a temporary directory for the temporary files
 TEMPDIR=$TMPDIR/bbug.$$
-(umask 077 && mkdir $TEMPDIR) || {
+(umask 077 && mkdir "$TEMPDIR") || {
 	echo "$0: could not create temporary directory" >&2
 	exit 1
 }

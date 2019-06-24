@@ -2492,7 +2492,10 @@ is performed.
 
 After word splitting, unless the @option{-f} option has been set
 (@pxref{The Set Builtin}), Bash scans each word for the characters
-@samp{*}, @samp{?}, and @samp{[}.
+@samp{*}, @samp{?}, @samp{[},
+and, under certain circumstances (e.g., when it appears in the expansion of
+an unquoted shell variable),
+@samp{\\}.
 If one of these characters appears, then the word is
 regarded as a @var{pattern},
 and replaced with an alphabetically sorted list of
@@ -5458,6 +5461,13 @@ or when filtering possible completions as part of programmable completion.
 If set, Bash allows filename patterns which match no
 files to expand to a null string, rather than themselves.
 
+@item posixglob
+If set, Bash
+makes words containing unquoted backslashes after expansion eligible for  
+filename expansion, even if they don't contain any other unquoted pattern
+characters. This option is enabled by default and is enabled when @sc{posix}
+mode is enabled.
+
 @item progcomp
 If set, the programmable completion facilities
 (@pxref{Programmable Completion}) are enabled.
@@ -7796,6 +7806,11 @@ Enabling @sc{posix} mode has the effect of setting the
 @code{shift_verbose} option, so numeric arguments to @code{shift}
 that exceed the number of positional parameters will result in an
 error message.
+
+@item
+Enabling @sc{posix} mode has the effect of setting the @code{posixglob}
+option, which affects how unquoted backslashes are treated during
+filename expansion (@pxref{Filename Expansion}).
 
 @item
 When the @code{alias} builtin displays alias definitions, it does not

@@ -1932,27 +1932,29 @@ EEXXPPAANNSSIIOONN
 
    PPaatthhnnaammee EExxppaannssiioonn
        After  word  splitting,  unless  the --ff option has been set, bbaasshh scans
-       each word for the characters **, ??, and [[.  If one of  these  characters
-       appears,  then  the word is regarded as a _p_a_t_t_e_r_n, and replaced with an
-       alphabetically sorted list of filenames matching the pattern (see  PPaatt--
-       tteerrnn  MMaattcchhiinngg  below).   If  no  matching filenames are found, and the
-       shell option nnuullllgglloobb is not enabled, the word is left  unchanged.   If
-       the  nnuullllgglloobb  option  is  set,  and  no matches are found, the word is
-       removed.  If the ffaaiillgglloobb shell option  is  set,  and  no  matches  are
-       found, an error message is printed and the command is not executed.  If
-       the shell option nnooccaasseegglloobb is enabled, the match is performed  without
-       regard  to  the  case of alphabetic characters.  When a pattern is used
-       for pathname expansion, the character ````..''''  at the start of a name  or
-       immediately  following  a  slash must be matched explicitly, unless the
-       shell option ddoottgglloobb is set.  The filenames  ````..''''   and  ````....''''   must
-       always  be matched explicitly, even if ddoottgglloobb is set.  In other cases,
-       the ````..''''  character is not treated specially.  When matching  a  path-
-       name,  the slash character must always be matched explicitly by a slash
-       in the pattern, but in other matching contexts it can be matched  by  a
-       special  pattern  character  as described below under PPaatttteerrnn MMaattcchhiinngg.
-       See the description of sshhoopptt below under SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS  for  a
-       description  of  the  nnooccaasseegglloobb, nnuullllgglloobb, ffaaiillgglloobb, and ddoottgglloobb shell
-       options.
+       each word for the characters **, ??, [[, and, under certain  circumstances
+       (e.g.,  when it appears in the expansion of an unquoted shell variable,
+       depending on the setting of the ppoossiixxgglloobb shell option), \\.  If one  of
+       these  characters  appears, then the word is regarded as a _p_a_t_t_e_r_n, and
+       replaced with an alphabetically sorted list of filenames  matching  the
+       pattern  (see  PPaatttteerrnn  MMaattcchhiinngg  below).  If no matching filenames are
+       found, and the shell option nnuullllgglloobb is not enabled, the word  is  left
+       unchanged.   If  the  nnuullllgglloobb option is set, and no matches are found,
+       the word is removed.  If the ffaaiillgglloobb  shell  option  is  set,  and  no
+       matches  are  found, an error message is printed and the command is not
+       executed.  If the shell option nnooccaasseegglloobb is enabled, the match is per-
+       formed  without  regard  to  the case of alphabetic characters.  When a
+       pattern is used for pathname expansion, the  character  ````..''''   at  the
+       start  of  a  name  or  immediately  following  a slash must be matched
+       explicitly, unless the shell option  ddoottgglloobb  is  set.   The  filenames
+       ````..''''   and  ````....''''  must always be matched explicitly, even if ddoottgglloobb
+       is set.  In other cases, the ````..''''  character is not treated specially.
+       When  matching  a  pathname, the slash character must always be matched
+       explicitly by a slash in the pattern, but in other matching contexts it
+       can  be matched by a special pattern character as described below under
+       PPaatttteerrnn MMaattcchhiinngg.  See the  description  of  sshhoopptt  below  under  SSHHEELLLL
+       BBUUIILLTTIINN  CCOOMMMMAANNDDSS  for a description of the nnooccaasseegglloobb, nnuullllgglloobb, ffaaiill--
+       gglloobb, and ddoottgglloobb shell options.
 
        The GGLLOOBBIIGGNNOORREE shell variable may be used to restrict the set  of  file
        names  matching  a  _p_a_t_t_e_r_n.   If GGLLOOBBIIGGNNOORREE is set, each matching file
@@ -2457,15 +2459,17 @@ AARRIITTHHMMEETTIICC EEVVAALLUUAATTIIOONN
        to 0.  A shell variable need not have its _i_n_t_e_g_e_r attribute  turned  on
        to be used in an expression.
 
-       Constants with a leading 0 are interpreted as octal numbers.  A leading
-       0x or  0X  denotes  hexadecimal.   Otherwise,  numbers  take  the  form
-       [_b_a_s_e_#]n,  where the optional _b_a_s_e is a decimal number between 2 and 64
-       representing the arithmetic base, and _n is a number in that  base.   If
-       _b_a_s_e_#  is omitted, then base 10 is used.  When specifying _n, the digits
-       greater than 9 are represented by the lowercase letters, the  uppercase
-       letters, @, and _, in that order.  If _b_a_s_e is less than or equal to 36,
-       lowercase and uppercase letters may be used interchangeably  to  repre-
-       sent numbers between 10 and 35.
+       Integer constants follow the C language definition, without suffixes or
+       character constants.  Constants with a leading  0  are  interpreted  as
+       octal  numbers.   A  leading  0x or 0X denotes hexadecimal.  Otherwise,
+       numbers take the form [_b_a_s_e_#]n, where the optional _b_a_s_e  is  a  decimal
+       number  between  2  and 64 representing the arithmetic base, and _n is a
+       number in that base.  If _b_a_s_e_# is omitted, then base 10 is used.   When
+       specifying _n, if a non-digit is required, the digits greater than 9 are
+       represented by the lowercase letters, the uppercase letters, @, and  _,
+       in  that  order.   If  _b_a_s_e  is less than or equal to 36, lowercase and
+       uppercase letters may be  used  interchangeably  to  represent  numbers
+       between 10 and 35.
 
        Operators  are  evaluated  in  order of precedence.  Sub-expressions in
        parentheses are evaluated first and may override the  precedence  rules
@@ -5776,6 +5780,12 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
                       If set, bbaasshh allows patterns which match no  files  (see
                       PPaatthhnnaammee  EExxppaannssiioonn  above)  to expand to a null string,
                       rather than themselves.
+              ppoossiixxgglloobb
+                      If set, bbaasshh makes words containing unquoted backslashes
+                      after expansion eligible for pathname expansion, even if
+                      they don't contain any other  unquoted  pattern  charac-
+                      ters.  This option is enabled by default, and is enabled
+                      when _p_o_s_i_x _m_o_d_e is enabled.
               pprrooggccoommpp
                       If set, the programmable completion facilities (see PPrroo--
                       ggrraammmmaabbllee CCoommpplleettiioonn above) are enabled.  This option is
@@ -6182,4 +6192,4 @@ BBUUGGSS
 
 
 
-GNU Bash 5.0                      2019 May 20                          BASH(1)
+GNU Bash 5.0                     2019 June 21                          BASH(1)
