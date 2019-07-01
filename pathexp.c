@@ -61,7 +61,10 @@ int glob_star = 0;
 /* Do we handle backslashes in patterns the way Posix specifies? */
 int posix_glob_backslash = 1;
 
-/* Return nonzero if STRING has any unquoted special globbing chars in it.  */
+/* Return nonzero if STRING has any unquoted special globbing chars in it.
+   This is supposed to be called when pathname expansion is performed, so
+   it implements the rules in Posix 2.13.3, specifically that an unquoted
+   slash cannot appear in a bracket expression. */
 int
 unquoted_glob_pattern_p (string)
      register char *string;
@@ -88,9 +91,13 @@ unquoted_glob_pattern_p (string)
 	  continue;
 
 	case ']':
-	  if (open)
+	  if (open)		/* XXX - if --open == 0? */
 	    return (1);
 	  continue;
+
+	case '/':
+	  if (open)
+	    open = 0;
 
 	case '+':
 	case '@':
@@ -107,6 +114,11 @@ unquoted_glob_pattern_p (string)
 	    {
 	      bsquote = 1;
 	      string++;
+	      continue;
+	    }
+	  else if (open && *string == '/')
+	    {
+	      string++;		/* quoted slashes in bracket expressions are ok */
 	      continue;
 	    }
 	  else if (*string == 0)

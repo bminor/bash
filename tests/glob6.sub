@@ -1,0 +1,54 @@
+# tests of the backslash-in-glob-patterns discussion on the austin-group ML
+
+: ${TMPDIR:=/var/tmp}
+
+ORIG=$PWD
+GLOBDIR=$TMPDIR/bash-glob-$$
+mkdir $GLOBDIR && cd $GLOBDIR
+
+# does the pattern matcher allow backslashes as escape characters and remove
+# them as part of matching?
+touch abcdefg
+pat='ab\cd*'
+printf '<%s>\n' $pat
+pat='\.'
+printf '<%s>\n' $pat
+rm abcdefg
+
+# how about when escaping pattern characters?
+touch '*abc.c'
+a='\**.c'
+printf '%s\n' $a
+rm -f '*abc.c'
+
+# how about when making the distinction between readable and searchable path
+# components?
+mkdir -m a=x searchable
+mkdir -m a=r readable
+
+p='searchable/\.'
+printf "%s\n" $p
+
+p='searchable/\./.'
+printf "%s\n" $p
+
+p='readable/\.'
+printf "%s\n" $p
+
+p='readable/\./.'
+printf "%s\n" $p
+
+printf "%s\n" 'searchable/\.'
+printf "%s\n" 'readable/\.'
+
+echo */.
+
+p='*/\.'
+echo $p
+
+echo */'.'
+
+rmdir searchable readable
+
+cd $ORIG
+rmdir $GLOBDIR

@@ -6167,3 +6167,37 @@ doc/{bash.1,bashref.texi}
 	- pathname expansion: note that under some circumstances the shell
 	  will invoke the matching engine for words with unquoted backslashes
 	- posixglob: document the new shell option and its effects
+
+				   6/27
+				   ----
+{config.h.in,configure.ac}
+	- setresuid,setresgid: check and set HAVE_{DECL,}_SETRES[UG]ID as
+	  appropriate
+
+shell.c
+	- disable_priv_mode: if we have setres[ug]id, use them over
+	  set[ug]id, which only set the save user-id and group-id if the
+	  process is running as root. From Ian Eldred Pudney
+	  in https://savannah.gnu.org/patch/?9822
+
+				   6/28
+				   ----
+lib/glob/glob.c
+	- glob_vector: don't bother trying to read the directory if the filename
+	  pattern doesn't have any globbing characters except backslash; just
+	  dequote the pattern and try to lstat(2) it as if there were no
+	  globbing characters at all. From an austingroup-bugs discussion
+	  message from Stephane Chazelas <stephane.chazelas@gmail.com>
+
+bashline.c
+	- completion_glob_pattern: just call glob_pattern_p and make sure it
+	  returns 1 (non-backslash globbing characters)
+
+builtins/help.def
+	- help_builtin: don't try pattern matching the help topic argument
+	  unless glob_pattern_p returns 1
+
+pathexp.c
+	- unquoted_glob_pattern_p: when in a bracket expression (open > 0),
+	  don't allow an unquoted slash as part of the bracket expression.
+	  Report from Stephane Chazelas <stephane.chazelas@gmail.com>

@@ -634,6 +634,7 @@ glob_vector (pat, dir, flags)
   register unsigned int i;
   int mflags;		/* Flags passed to strmatch (). */
   int pflags;		/* flags passed to sh_makepath () */
+  int hasglob;		/* return value from glob_pattern_p */
   int nalloca;
   struct globval *firstmalloc, *tmplink;
   char *convfn;
@@ -675,10 +676,12 @@ glob_vector (pat, dir, flags)
   patlen = (pat && *pat) ? strlen (pat) : 0;
 
   /* If the filename pattern (PAT) does not contain any globbing characters,
+     or contains a pattern with only backslash escapes (hasglob == 2),
      we can dispense with reading the directory, and just see if there is
      a filename `DIR/PAT'.  If there is, and we can access it, just make the
      vector to return and bail immediately. */
-  if (skip == 0 && glob_pattern_p (pat) == 0)
+  hasglob = 0;
+  if (skip == 0 && (hasglob = glob_pattern_p (pat)) == 0 || hasglob == 2)
     {
       int dirlen;
       struct stat finfo;

@@ -128,7 +128,7 @@ help_builtin (list)
 
   /* We should consider making `help bash' do something. */
 
-  if (glob_pattern_p (list->word->word))
+  if (glob_pattern_p (list->word->word) == 1)
     {
       printf ("%s", ngettext ("Shell commands matching keyword `", "Shell commands matching keywords `", (list->next ? 2 : 1)));
       print_word_list (list, ", ");
