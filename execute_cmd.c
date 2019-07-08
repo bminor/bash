@@ -781,33 +781,11 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       return (last_command_exit_value = EXECUTION_FAILURE);
     }
 
-#if 0
-  if (redirection_undo_list)
-    {
-      /* XXX - why copy here? */
-      my_undo_list = (REDIRECT *)copy_redirects (redirection_undo_list);
-      dispose_partial_redirects ();
-    }
-  else
-    my_undo_list = (REDIRECT *)NULL;
-#else
   my_undo_list = redirection_undo_list;
   redirection_undo_list = (REDIRECT *)NULL;
-#endif
 
-#if 0
-  if (exec_redirection_undo_list)
-    {
-      /* XXX - why copy here? */
-      exec_undo_list = (REDIRECT *)copy_redirects (exec_redirection_undo_list);
-      dispose_exec_redirects ();
-    }
-  else
-    exec_undo_list = (REDIRECT *)NULL;
-#else
   exec_undo_list = exec_redirection_undo_list;
   exec_redirection_undo_list = (REDIRECT *)NULL;
-#endif
 
   if (my_undo_list || exec_undo_list)
     begin_unwind_frame ("loop_redirections");
@@ -1113,6 +1091,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
     case cm_while:
     case cm_until:
     case cm_for:
+    case cm_group:
 #    if defined (ARITH_FOR_COMMAND)
     case cm_arith_for:
 #    endif
@@ -2715,7 +2694,14 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	}
       executing_list++;
       QUIT;
+#if 1
       execute_command (command->value.Connection->first);
+#else
+      execute_command_internal (command->value.Connection->first,
+				  asynchronous, pipe_in, pipe_out,
+				  fds_to_close);
+#endif
+
       QUIT;
       optimize_fork (command);			/* XXX */
       exec_result = execute_command_internal (command->value.Connection->second,
@@ -2779,7 +2765,11 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       if (command->value.Connection->first)
 	command->value.Connection->first->flags |= CMD_IGNORE_RETURN;
 
+#if 1
       exec_result = execute_command (command->value.Connection->first);
+#else
+      exec_result = execute_command_internal (command->value.Connection->first, 0, NO_PIPE, NO_PIPE, fds_to_close);
+#endif
       QUIT;
       if (((command->value.Connection->connector == AND_AND) &&
 	   (exec_result == EXECUTION_SUCCESS)) ||

@@ -1312,7 +1312,7 @@ print_function_def (func)
   make_command_string_internal (cmdcopy->type == cm_group
 					? cmdcopy->value.Group->command
 					: cmdcopy);
-  /* XXX - PRINT_DEFERRED_HEREDOCS (""); ? */
+  PRINT_DEFERRED_HEREDOCS ("");
 
   remove_unwind_protect ();
   indentation -= indentation_amount;
@@ -1388,7 +1388,7 @@ named_function_string (name, command, flags)
   make_command_string_internal (cmdcopy->type == cm_group
 					? cmdcopy->value.Group->command
 					: cmdcopy);
-  /* XXX - PRINT_DEFERRED_HEREDOCS (""); ? */
+  PRINT_DEFERRED_HEREDOCS ("");
 
   indentation = old_indent;
   indentation_amount = old_amount;

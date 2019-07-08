@@ -5515,6 +5515,7 @@ wait_procsubs ()
       if (fifo_list[i].proc != (pid_t)-1 && fifo_list[i].proc > 0)
 	{
 	  r = wait_for (fifo_list[i].proc);
+	  /* add to bgpids list? have to make interface public */
 	  fifo_list[i].proc = (pid_t)-1;
 	}
     }
@@ -5748,6 +5749,7 @@ wait_procsubs ()
       if (dev_fd_list[i] != (pid_t)-1 && dev_fd_list[i] > 0)
 	{
 	  r = wait_for (dev_fd_list[i]);
+	  /* add to bgpids list? have to make interface public */
 	  dev_fd_list[i] = (pid_t)-1;
 	}
     }

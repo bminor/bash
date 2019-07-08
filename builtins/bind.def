@@ -287,6 +287,9 @@ bind_builtin (list)
 
   run_unwind_frame ("bind_builtin");
 
+  if (return_code < 0)
+    return_code = EXECUTION_FAILURE;
+
   return (sh_chkwrite (return_code));
 }
 

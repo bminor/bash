@@ -6201,3 +6201,30 @@ pathexp.c
 	- unquoted_glob_pattern_p: when in a bracket expression (open > 0),
 	  don't allow an unquoted slash as part of the bracket expression.
 	  Report from Stephane Chazelas <stephane.chazelas@gmail.com>
+
+				    7/1
+				    ---
+print_cmd.c
+	- print_function_def,named_function_string: make sure to call
+	  PRINT_DEFERRED_HEREDOCS to finish printing any here documents and
+	  delimiters before printing the function closing brace. Fixes bug
+	  reported by Denis McKeon <dmckeon@swcp.com>
+
+execute_cmd.c
+	- execute_command_internal: call reap_procsubs at the end of executing
+	  a group command on systems that have /dev/fd. Fixes bug reported by
+	  kfm@plushkava.net
+
+				    7/3
+				    ---
+jobs.c
+	- waitchld: this is in the potential SIGCHLD path, so don't call
+	  bgp_add, which can potentially call malloc. The glibc malloc doesn't
+	  handle that well. Report from howaboutsynergy@protonmail.com
+
+				    7/5
+				    ---
+builtins/bind.def
+	- bind_builtin: make sure return_code is >= 0 before returning it.
+	  Fixes bug with bind -x and invalid key sequences reported by
+	  bashbug@jonkmans.nl

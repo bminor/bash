@@ -3695,10 +3695,7 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
       /* Only manipulate the list of process substitutions while SIGCHLD
 	 is blocked. */
       if ((ind = find_procsub_child (pid)) >= 0)
-	{
-	  set_procsub_status (ind, pid, WSTATUS (status));
-	  bgp_add (pid, WSTATUS (status));
-	}
+	set_procsub_status (ind, pid, WSTATUS (status));
 #endif
 
       /* It is not an error to have a child terminate that we did
