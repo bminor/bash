@@ -1433,8 +1433,7 @@ static void
 sbrand32 (seed)
      u_bits32_t seed;
 {
-  rseed32 = seed;
-  last_rand32 = seed;
+  last_rand32 = rseed32 = seed;
 }
 
 static void
@@ -6188,8 +6187,19 @@ void
 sv_tz (name)
      char *name;
 {
-  if (chkexport (name))
-    tzset ();
+  SHELL_VAR *v;
+
+  v = find_variable (name);
+  if (v && exported_p (v))
+    array_needs_making = 1;
+  else if (v == 0)
+    array_needs_making = 1;
+
+  if (array_needs_making)
+    {
+      maybe_make_export_env ();  
+      tzset ();
+    }
 }
 #endif
 

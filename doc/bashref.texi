@@ -3946,6 +3946,8 @@ If no options are supplied, each @var{name} refers to a variable; if
 there is no variable by that name, any function with that name is
 unset.
 Readonly variables and functions may not be unset.
+Some shell variables lose their special behavior if they are unset; such
+behavior is noted in the description of the individual variables.
 The return status is zero unless a @var{name} is readonly.
 @end table
 
@@ -5653,7 +5655,7 @@ Expands to the process ID of the current Bash process.
 This differs from @code{$$} under certain circumstances, such as subshells
 that do not require Bash to be re-initialized.
 Assignments to @env{BASHPID} have no effect.
-If @code{BASHPID}
+If @env{BASHPID}
 is unset, it loses its special properties, even if it is
 subsequently reset.
 
@@ -5664,7 +5666,7 @@ list of aliases as maintained by the @code{alias} builtin.
 Elements added to this array appear in the alias list; however,
 unsetting array elements currently does not cause aliases to be removed
 from the alias list.
-If @code{BASH_ALIASES}
+If @env{BASH_ALIASES}
 is unset, it loses its special properties, even if it is
 subsequently reset.
 
@@ -5703,7 +5705,7 @@ script (identical to @code{$0}; @xref{Special Parameters},
 for the description of special parameter 0).
 Assignment to @code{BASH_ARGV0}
 causes the value assigned to also be assigned to @code{$0}.
-If @code{BASH_ARGV0}
+If @env{BASH_ARGV0}
 is unset, it loses its special properties, even if it is
 subsequently reset.
 
@@ -5714,7 +5716,7 @@ hash table of commands as maintained by the @code{hash} builtin
 Elements added to this array appear in the hash table; however,
 unsetting array elements currently does not cause command names to be removed
 from the hash table.
-If @code{BASH_CMDS}
+If @env{BASH_CMDS}
 is unset, it loses its special properties, even if it is
 subsequently reset.
 
@@ -5722,6 +5724,9 @@ subsequently reset.
 The command currently being executed or about to be executed, unless the
 shell is executing a command as the result of a trap,
 in which case it is the command executing at the time of the trap.
+If @env{BASH_COMMAND}
+is unset, it loses its special properties, even if it is
+subsequently reset.
 
 @item BASH_COMPAT
 The value is used to set the shell's compatibility level.
@@ -5782,6 +5787,9 @@ The shell function @code{$@{FUNCNAME[$i]@}} is defined in the file
 Incremented by one within each subshell or subshell environment when
 the shell begins executing in that environment.
 The initial value is 0.
+If @env{BASH_SUBSHELL}
+is unset, it loses its special properties, even if it is
+subsequently reset.
 
 @item BASH_VERSINFO
 A readonly array variable (@pxref{Arrays})
@@ -5881,7 +5889,8 @@ completion function.
 @item COMP_WORDBREAKS
 The set of characters that the Readline library treats as word
 separators when performing word completion.
-If @code{COMP_WORDBREAKS} is unset, it loses its special properties,
+If @env{COMP_WORDBREAKS}
+is unset, it loses its special properties,
 even if it is subsequently reset.
 
 @item COMP_WORDS
@@ -5910,7 +5919,8 @@ Assigning to members of this array variable may be used to modify
 directories already in the stack, but the @code{pushd} and @code{popd}
 builtins must be used to add and remove directories.
 Assignment to this variable will not change the current directory.
-If @env{DIRSTACK} is unset, it loses its special properties, even if
+If @env{DIRSTACK}
+is unset, it loses its special properties, even if
 it is subsequently reset.
 
 @item EMACS
@@ -5928,7 +5938,8 @@ since the Unix Epoch as a floating point value with micro-second granularity
 (see the documentation for the C library function @var{time} for the
 definition of Epoch).
 Assignments to @env{EPOCHREALTIME} are ignored.
-If @env{EPOCHREALTIME} is unset, it loses its special properties, even if
+If @env{EPOCHREALTIME}
+is unset, it loses its special properties, even if
 it is subsequently reset.
 
 @item EPOCHSECONDS
@@ -5936,7 +5947,8 @@ Each time this parameter is referenced, it expands to the number of seconds
 since the Unix Epoch (see the documentation for the C library function
 @var{time} for the definition of Epoch).
 Assignments to @env{EPOCHSECONDS} are ignored.
-If @env{EPOCHSECONDS} is unset, it loses its special properties, even if
+If @env{EPOCHSECONDS}
+is unset, it loses its special properties, even if
 it is subsequently reset.
 
 @item EUID
@@ -5979,7 +5991,8 @@ The bottom-most element (the one with the highest index)
 is @code{"main"}.
 This variable exists only when a shell function is executing.
 Assignments to @env{FUNCNAME} have no effect.
-If @env{FUNCNAME} is unset, it loses its special properties, even if
+If @env{FUNCNAME}
+is unset, it loses its special properties, even if
 it is subsequently reset.
 
 This variable can be used with @code{BASH_LINENO} and @code{BASH_SOURCE}.
@@ -6008,7 +6021,8 @@ option.
 An array variable containing the list of groups of which the current    
 user is a member.
 Assignments to @env{GROUPS} have no effect.
-If @env{GROUPS} is unset, it loses its special properties, even if it is
+If @env{GROUPS}
+is unset, it loses its special properties, even if it is
 subsequently reset.
 
 @item histchars
@@ -6027,7 +6041,9 @@ parser to treat the rest of the line as a comment.
 
 @item HISTCMD
 The history number, or index in the history list, of the current
-command.  If @env{HISTCMD} is unset, it loses its special properties,
+command.
+If @env{HISTCMD}
+is unset, it loses its special properties,
 even if it is subsequently reset.
 
 @item HISTCONTROL
@@ -6175,6 +6191,9 @@ formatting.
 
 @item LINENO
 The line number in the script or shell function currently executing.
+If @env{LINENO}
+is unset, it loses its special properties, even if it is
+subsequently reset.
 
 @item LINES
 Used by the @code{select} command to determine the column length
@@ -6268,6 +6287,9 @@ The current working directory as set by the @code{cd} builtin.
 Each time this parameter is referenced, it expands to a random integer
 between 0 and 32767. Assigning a value to this
 variable seeds the random number generator.
+If @env{RANDOM}
+is unset, it loses its special properties, even if it is
+subsequently reset.
 
 @item READLINE_LINE
 The contents of the Readline line buffer, for use
@@ -6286,6 +6308,9 @@ shell was started.  Assignment to this variable resets
 the count to the value assigned, and the expanded value
 becomes the value assigned plus the number of seconds
 since the assignment.
+If @env{SECONDS}
+is unset, it loses its special properties,
+even if it is subsequently reset.
 
 @item SHELL
 This environment variable expands to the full pathname to the shell.
@@ -6313,7 +6338,8 @@ support @file{/dev/urandom} or @code{arc4random}, so each returned number
 has no relationship to the numbers preceding it.
 The random number generator cannot be seeded, so assignments to this
 variable have no effect.
-If @env{SRANDOM} is unset, it loses its special properties,
+If @env{SRANDOM}
+is unset, it loses its special properties,
 even if it is subsequently reset.
 
 @item TIMEFORMAT

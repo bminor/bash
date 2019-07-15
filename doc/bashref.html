@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.0, 21 June 2019).
+the Bash shell (version 5.0, 8 July 2019).
 
-This is Edition 5.0, last updated 21 June 2019,
+This is Edition 5.0, last updated 8 July 2019,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.0.
 
@@ -284,10 +284,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.0, 21 June 2019).
+the Bash shell (version 5.0, 8 July 2019).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.0, last updated 21 June 2019,
+<p>This is Edition 5.0, last updated 8 July 2019,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.0.
 </p>
@@ -3581,7 +3581,8 @@ Next: <a href="#Command-Search-and-Execution" accesskey="n" rel="next">Command S
 <a name="index-command-expansion"></a>
 
 <p>When a simple command is executed, the shell performs the following
-expansions, assignments, and redirections, from left to right.
+expansions, assignments, and redirections, from left to right, in
+the following order.
 </p>
 <ol>
 <li> The words that the parser has marked as variable assignments (those
@@ -4608,6 +4609,8 @@ If no options are supplied, each <var>name</var> refers to a variable; if
 there is no variable by that name, any function with that name is
 unset.
 Readonly variables and functions may not be unset.
+Some shell variables lose their special behavior if they are unset; such
+behavior is noted in the description of the individual variables.
 The return status is zero unless a <var>name</var> is readonly.
 </p></dd>
 </dl>
@@ -6689,6 +6692,9 @@ subsequently reset.
 <dd><p>The command currently being executed or about to be executed, unless the
 shell is executing a command as the result of a trap,
 in which case it is the command executing at the time of the trap.
+If <code>BASH_COMMAND</code>
+is unset, it loses its special properties, even if it is
+subsequently reset.
 </p>
 </dd>
 <dt><code>BASH_COMPAT</code>
@@ -6773,6 +6779,9 @@ The shell function <code>${FUNCNAME[$i]}</code> is defined in the file
 <dd><p>Incremented by one within each subshell or subshell environment when
 the shell begins executing in that environment.
 The initial value is 0.
+If <code>BASH_SUBSHELL</code>
+is unset, it loses its special properties, even if it is
+subsequently reset.
 </p>
 </dd>
 <dt><code>BASH_VERSINFO</code>
@@ -6910,7 +6919,8 @@ completion function.
 </dt>
 <dd><p>The set of characters that the Readline library treats as word
 separators when performing word completion.
-If <code>COMP_WORDBREAKS</code> is unset, it loses its special properties,
+If <code>COMP_WORDBREAKS</code>
+is unset, it loses its special properties,
 even if it is subsequently reset.
 </p>
 </dd>
@@ -6951,7 +6961,8 @@ Assigning to members of this array variable may be used to modify
 directories already in the stack, but the <code>pushd</code> and <code>popd</code>
 builtins must be used to add and remove directories.
 Assignment to this variable will not change the current directory.
-If <code>DIRSTACK</code> is unset, it loses its special properties, even if
+If <code>DIRSTACK</code>
+is unset, it loses its special properties, even if
 it is subsequently reset.
 </p>
 </dd>
@@ -6978,7 +6989,8 @@ since the Unix Epoch as a floating point value with micro-second granularity
 (see the documentation for the C library function <var>time</var> for the
 definition of Epoch).
 Assignments to <code>EPOCHREALTIME</code> are ignored.
-If <code>EPOCHREALTIME</code> is unset, it loses its special properties, even if
+If <code>EPOCHREALTIME</code>
+is unset, it loses its special properties, even if
 it is subsequently reset.
 </p>
 </dd>
@@ -6989,7 +7001,8 @@ it is subsequently reset.
 since the Unix Epoch (see the documentation for the C library function
 <var>time</var> for the definition of Epoch).
 Assignments to <code>EPOCHSECONDS</code> are ignored.
-If <code>EPOCHSECONDS</code> is unset, it loses its special properties, even if
+If <code>EPOCHSECONDS</code>
+is unset, it loses its special properties, even if
 it is subsequently reset.
 </p>
 </dd>
@@ -7047,7 +7060,8 @@ The bottom-most element (the one with the highest index)
 is <code>&quot;main&quot;</code>.
 This variable exists only when a shell function is executing.
 Assignments to <code>FUNCNAME</code> have no effect.
-If <code>FUNCNAME</code> is unset, it loses its special properties, even if
+If <code>FUNCNAME</code>
+is unset, it loses its special properties, even if
 it is subsequently reset.
 </p>
 <p>This variable can be used with <code>BASH_LINENO</code> and <code>BASH_SOURCE</code>.
@@ -7085,7 +7099,8 @@ option.
 <dd><p>An array variable containing the list of groups of which the current    
 user is a member.
 Assignments to <code>GROUPS</code> have no effect.
-If <code>GROUPS</code> is unset, it loses its special properties, even if it is
+If <code>GROUPS</code>
+is unset, it loses its special properties, even if it is
 subsequently reset.
 </p>
 </dd>
@@ -7110,7 +7125,9 @@ parser to treat the rest of the line as a comment.
 <a name="index-HISTCMD"></a>
 </dt>
 <dd><p>The history number, or index in the history list, of the current
-command.  If <code>HISTCMD</code> is unset, it loses its special properties,
+command.
+If <code>HISTCMD</code>
+is unset, it loses its special properties,
 even if it is subsequently reset.
 </p>
 </dd>
@@ -7318,6 +7335,9 @@ formatting.
 <a name="index-LINENO"></a>
 </dt>
 <dd><p>The line number in the script or shell function currently executing.
+If <code>LINENO</code>
+is unset, it loses its special properties, even if it is
+subsequently reset.
 </p>
 </dd>
 <dt><code>LINES</code>
@@ -7461,6 +7481,9 @@ The default is &lsquo;<samp>+ </samp>&rsquo;.
 <dd><p>Each time this parameter is referenced, it expands to a random integer
 between 0 and 32767. Assigning a value to this
 variable seeds the random number generator.
+If <code>RANDOM</code>
+is unset, it loses its special properties, even if it is
+subsequently reset.
 </p>
 </dd>
 <dt><code>READLINE_LINE</code>
@@ -7491,6 +7514,9 @@ shell was started.  Assignment to this variable resets
 the count to the value assigned, and the expanded value
 becomes the value assigned plus the number of seconds
 since the assignment.
+If <code>SECONDS</code>
+is unset, it loses its special properties,
+even if it is subsequently reset.
 </p>
 </dd>
 <dt><code>SHELL</code>
@@ -7530,7 +7556,8 @@ support <samp>/dev/urandom</samp> or <code>arc4random</code>, so each returned n
 has no relationship to the numbers preceding it.
 The random number generator cannot be seeded, so assignments to this
 variable have no effect.
-If <code>SRANDOM</code> is unset, it loses its special properties,
+If <code>SRANDOM</code>
+is unset, it loses its special properties,
 even if it is subsequently reset.
 </p>
 </dd>

@@ -518,6 +518,7 @@ unary_test (op, arg)
 {
   intmax_t r;
   struct stat stat_buf;
+  struct timespec mtime, atime;
   SHELL_VAR *v;
      
   switch (op[1])
@@ -544,8 +545,11 @@ unary_test (op, arg)
 	      (gid_t) current_user.egid == (gid_t) stat_buf.st_gid);
 
     case 'N':
-      return (sh_stat (arg, &stat_buf) == 0 &&
-	      stat_buf.st_atime <= stat_buf.st_mtime);
+      if (sh_stat (arg, &stat_buf) < 0)
+	return (FALSE);
+      atime = get_stat_atime (&stat_buf);
+      mtime = get_stat_mtime (&stat_buf);
+      return (timespec_cmp (mtime, atime) > 0);
 
     case 'f':			/* File is a file? */
       if (sh_stat (arg, &stat_buf) < 0)

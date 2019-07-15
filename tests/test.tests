@@ -166,7 +166,7 @@ echo 't -S /tmp/test.socket'
 t -S /tmp/test.socket	# false
 rm -f /tmp/test.socket
 
-touch /tmp/test.newer
+touch /tmp/test.newer ; sleep 1; echo "hello" > /tmp/test.newer
 echo 't -N /tmp/test.newer'
 t -N /tmp/test.newer
 rm -f /tmp/test.newer

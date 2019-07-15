@@ -2530,21 +2530,36 @@ shell_getc (remove_quoted_newline)
 	    shell_input_line[shell_input_line_len] = '\n';
 	  shell_input_line[shell_input_line_len + 1] = '\0';
 
-	  set_line_mbstate ();
+#if 0
+	  set_line_mbstate ();		/* XXX - this is wasteful */
+#else
+#  if defined (HANDLE_MULTIBYTE)
+	  /* This is kind of an abstraction violation, but there's no need to
+	     go through the entire shell_input_line again with a call to
+	     set_line_mbstate(). */
+	  if (shell_input_line_len + 2 > shell_input_line_propsize)
+	    {
+	      shell_input_line_propsize = shell_input_line_len + 2;
+	      shell_input_line_property = (char *)xrealloc (shell_input_line_property,
+							    shell_input_line_propsize);
+	    }
+	  shell_input_line_property[shell_input_line_len] = 1;
+#  endif
+#endif
 	}
     }
 
 next_alias_char:
-if (shell_input_line_index == 0)
-  unquoted_backslash = 0;
+  if (shell_input_line_index == 0)
+    unquoted_backslash = 0;
 
   uc = shell_input_line[shell_input_line_index];
 
   if (uc)
-{
-unquoted_backslash = unquoted_backslash == 0 && uc == '\\';
-    shell_input_line_index++;
-}
+    {
+      unquoted_backslash = unquoted_backslash == 0 && uc == '\\';
+      shell_input_line_index++;
+    }
 
 #if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
   /* If UC is NULL, we have reached the end of the current input string.  If
@@ -6698,9 +6713,19 @@ save_input_line_state (ls)
   ls->input_line_len = shell_input_line_len;
   ls->input_line_index = shell_input_line_index;
 
+#if defined (HANDLE_MULTIBYTE)
+  ls->input_property = shell_input_line_property;
+  ls->input_propsize = shell_input_line_propsize;
+#endif
+
   /* force reallocation */
   shell_input_line = 0;
   shell_input_line_size = shell_input_line_len = shell_input_line_index = 0;
+
+#if defined (HANDLE_MULTIBYTE)
+  shell_input_line_property = 0;
+  shell_input_line_propsize = 0;
+#endif
 
   return ls;
 }
@@ -6715,7 +6740,15 @@ restore_input_line_state (ls)
   shell_input_line_len = ls->input_line_len;
   shell_input_line_index = ls->input_line_index;
 
+#if defined (HANDLE_MULTIBYTE)
+  FREE (shell_input_line_property);
+  shell_input_line_property = ls->input_property;
+  shell_input_line_propsize = ls->input_propsize;
+#endif
+
+#if 0
   set_line_mbstate ();
+#endif
 }
 
 /************************************************
@@ -6736,10 +6769,11 @@ set_line_mbstate ()
   size_t i, previ, len;
   mbstate_t mbs, prevs;
   size_t mbclen;
+  int ilen;
 
   if (shell_input_line == NULL)
     return;
-  len = strlen (shell_input_line);	/* XXX - shell_input_line_len ? */
+  len = STRLEN (shell_input_line);	/* XXX - shell_input_line_len ? */
   if (len == 0)
     return;
   if (shell_input_line_propsize >= MAX_PROPSIZE && len < MAX_PROPSIZE>>1)
@@ -6754,12 +6788,21 @@ set_line_mbstate ()
       shell_input_line_property = (char *)xrealloc (shell_input_line_property, shell_input_line_propsize);
     }
 
+  if (locale_mb_cur_max == 1)
+    {
+      memset (shell_input_line_property, 1, len);
+      return;
+    }
+
   /* XXX - use whether or not we are in a UTF-8 locale to avoid calls to
      mbrlen */
-  memset (&prevs, '\0', sizeof (mbstate_t));
+  if (locale_utf8locale == 0)
+    memset (&prevs, '\0', sizeof (mbstate_t));
+
   for (i = previ = 0; i < len; i++)
     {
-      mbs = prevs;
+      if (locale_utf8locale == 0)
+	mbs = prevs;
 
       c = shell_input_line[i];
       if (c == EOF)
@@ -6770,10 +6813,20 @@ set_line_mbstate ()
 	  break;
 	}
 
-      /* I'd love to take more advantage of UTF-8's properties in a UTF-8
-         locale, but mbrlen changes the mbstate_t on every call even when
-         presented with single-byte characters. */
-      mbclen = mbrlen (shell_input_line + previ, i - previ + 1, &mbs);
+      if (locale_utf8locale)
+	{
+	  if ((unsigned char)shell_input_line[previ] < 128)
+	    mbclen = 1;
+	  else
+	    {
+	      ilen = utf8_mblen (shell_input_line + previ, i - previ + 1);
+	      mbclen = (ilen == -1) ? (size_t)-1
+				    : ((ilen == -2) ? (size_t)-2 : (size_t)ilen);
+	    }
+	}
+      else
+	mbclen = mbrlen (shell_input_line + previ, i - previ + 1, &mbs);
+
       if (mbclen == 1 || mbclen == (size_t)-1)
 	{
 	  mbclen = 1;
@@ -6785,11 +6838,11 @@ set_line_mbstate ()
 	{
 	  mbclen = 0;
 	  previ = i + 1;
-	  prevs = mbs;
+	  if (locale_utf8locale == 0)
+	    prevs = mbs;
 	}
       else
 	{
-	  /* XXX - what to do if mbrlen returns 0? (null wide character) */
 	  size_t j;
 	  for (j = i; j < len; j++)
 	    shell_input_line_property[j] = 1;

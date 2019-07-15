@@ -97,19 +97,28 @@ utf8_mblen (s, n)
       c1 = (unsigned char)s[1];
       if (c < 0xe0)
 	{
+	  if (n == 1)
+	    return -2;
+
 	  if (n >= 2 && (s[1] ^ 0x80) < 0x40)
 	    return 2;
 	}
       else if (c < 0xf0)
 	{
+	  if (n <= 2)
+	    return -2;
+	  
 	  if (n >= 3
 		&& (s[1] ^ 0x80) < 0x40 && (s[2] ^ 0x80) < 0x40
 		&& (c >= 0xe1 || c1 >= 0xa0)
 		&& (c != 0xed || c1 < 0xa0))
 	    return 3;
 	}
-      else if (c < 0xf8)
+      else if (c <= 0xf4)
 	{
+	  if (n <= 3)
+	    return -2;
+
 	  if (n >= 4
 		&& (s[1] ^ 0x80) < 0x40 && (s[2] ^ 0x80) < 0x40
 	 	&& (s[3] ^ 0x80) < 0x40

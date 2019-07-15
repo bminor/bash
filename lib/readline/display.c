@@ -576,11 +576,6 @@ rl_expand_prompt (char *prompt)
     {
       /* The prompt spans multiple lines. */
       t = ++p;
-      local_prompt = expand_prompt (p, PMT_MULTILINE,
-				       &prompt_visible_length,
-				       &prompt_last_invisible,
-				       &prompt_invis_chars_first_line,
-				       &prompt_physical_chars);
       c = *t; *t = '\0';
       /* The portion of the prompt string up to and including the
 	 final newline is now null-terminated. */
@@ -590,6 +585,12 @@ rl_expand_prompt (char *prompt)
 						   (int *)NULL,
 						   (int *)NULL);
       *t = c;
+
+      local_prompt = expand_prompt (p, PMT_MULTILINE,
+				       &prompt_visible_length,
+				       &prompt_last_invisible,
+				       &prompt_invis_chars_first_line,
+				       &prompt_physical_chars);
       local_prompt_len = local_prompt ? strlen (local_prompt) : 0;
       return (prompt_prefix_length);
     }

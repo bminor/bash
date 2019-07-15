@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2019 June 21<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2019 July 8<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -2010,6 +2010,11 @@ subsequently reset.
 The command currently being executed or about to be executed, unless the
 shell is executing a command as the result of a trap,
 in which case it is the command executing at the time of the trap.
+If
+<B>BASH_COMMAND</B>
+
+is unset, it loses its special properties, even if it is
+subsequently reset.
 <DT><B>BASH_EXECUTION_STRING</B>
 
 <DD>
@@ -2070,6 +2075,11 @@ The shell function
 Incremented by one within each subshell or subshell environment when
 the shell begins executing in that environment.
 The initial value is 0.
+If
+<B>BASH_SUBSHELL</B>
+
+is unset, it loses its special properties, even if it is
+subsequently reset.
 <DT><B>BASH_VERSINFO</B>
 
 <DD>
@@ -5993,7 +6003,8 @@ above).
 <H3>SIMPLE COMMAND EXPANSION</H3>
 
 When a simple command is executed, the shell performs the following
-expansions, assignments, and redirections, from left to right.
+expansions, assignments, and redirections, from left to right, in
+the following order.
 <DL COMPACT>
 <DT>1.<DD>
 The words that the parser has marked as variable assignments (those
@@ -13636,19 +13647,34 @@ unset.
 Each unset variable or function is removed from the environment
 passed to subsequent commands.
 If any of
+<FONT SIZE=-1><B>BASH_ALIASES</B>,
+
+</FONT>
+<FONT SIZE=-1><B>BASH_ARGV0</B>,
+
+</FONT>
+<FONT SIZE=-1><B>BASH_CMDS</B>,
+
+</FONT>
+<FONT SIZE=-1><B>BASH_COMMAND</B>,
+
+</FONT>
+<FONT SIZE=-1><B>BASH_SUBSHELL</B>,
+
+</FONT>
+<FONT SIZE=-1><B>BASHPID</B>,
+
+</FONT>
 <FONT SIZE=-1><B>COMP_WORDBREAKS</B>,
 
 </FONT>
-<FONT SIZE=-1><B>RANDOM</B>,
+<FONT SIZE=-1><B>DIRSTACK</B>,
 
 </FONT>
-<FONT SIZE=-1><B>SECONDS</B>,
+<FONT SIZE=-1><B>EPOCHREALTIME</B>,
 
 </FONT>
-<FONT SIZE=-1><B>LINENO</B>,
-
-</FONT>
-<FONT SIZE=-1><B>HISTCMD</B>,
+<FONT SIZE=-1><B>EPOCHSECONDS</B>,
 
 </FONT>
 <FONT SIZE=-1><B>FUNCNAME</B>,
@@ -13657,8 +13683,20 @@ If any of
 <FONT SIZE=-1><B>GROUPS</B>,
 
 </FONT>
+<FONT SIZE=-1><B>HISTCMD</B>,
+
+</FONT>
+<FONT SIZE=-1><B>LINENO</B>,
+
+</FONT>
+<FONT SIZE=-1><B>RANDOM</B>,
+
+</FONT>
+<FONT SIZE=-1><B>SECONDS</B>,
+
+</FONT>
 or
-<FONT SIZE=-1><B>DIRSTACK</B>
+<FONT SIZE=-1><B>SRANDOM</B>
 
 </FONT>
 are unset, they lose their special properties, even if they are
@@ -13980,7 +14018,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2019 June 21<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2019 July 8<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -14086,6 +14124,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 21 June 2019 10:27:46 EDT
+Time: 08 July 2019 15:16:27 EDT
 </BODY>
 </HTML>

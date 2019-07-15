@@ -6228,3 +6228,55 @@ builtins/bind.def
 	- bind_builtin: make sure return_code is >= 0 before returning it.
 	  Fixes bug with bind -x and invalid key sequences reported by
 	  bashbug@jonkmans.nl
+
+				    7/8
+				    ---
+doc/{bash.1,bashref.texi}
+	- unset: fixed up list of special variables that lose their special
+	  properties if they are unset. Report and fix from Edward Huff
+	  <ejhuff@gmail.com>
+
+				    7/9
+				    ---
+test.c
+	- unary_test: update the `-N' test to use timespecs and nanosecond
+	  granularity if available, and use mtime > atime instead of the
+	  old mtime >= atime. Fixes bug reported by kfm@plushkava.net
+
+lib/sh/strtod.c
+	- strtod: make sure to use locale_decpoint() to determine the radix
+	  character
+
+				   7/11
+				   ----
+lib/sh/utf8.c
+	- utf8_mblen: return -2 if the UTF-8 sequence is incomplete
+	- utf8_mblen: 4-byte UTF-8 characters start with a byte < 0xf4
+
+				   7/12
+				   ----
+parse.y,shell.h
+	- sh_input_line_state_t: if HANDLE_MULTIBYTE is defined, add members
+	  for saving shell_input_line_property and its associated size; let
+	  save_line_state and restore_line_state manage it. This means
+	  restore_line_state no longer calls set_line_mbstate. From a report
+	  from astian <astian@e-nautia.com>
+
+parse.y
+	- set_line_mbstate: if the current locale is not multibyte, just set
+	  everything in the property array to 1
+	- set_line_mbstate: use locale_utf8locale to optimize away calls to
+	  mbrlen; just use utf8_mblen
+
+				   7/14
+				   ----
+variables.c
+	- sv_tz: remake the export env if TZ is being unset. Fixes bug
+	  reported by Travis Everett <travis.a.everett@gmail.com>
+
+lib/readline/display.c
+	- rl_expand_prompt: if the prompt contains embedded newlines, compute
+	  local_prompt_prefix before local_prompt because each call sets
+	  local_prompt_newlines, and we want the values computed in the call
+	  that uses local_prompt to be the ones that we use. Fixes prompt
+	  wrapping bug reported by Tianon Gravi <admwiggin@gmail.com>

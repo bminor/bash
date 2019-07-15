@@ -49,6 +49,10 @@ extern int errno;
 #  define HUGE_VAL HUGE
 #endif
 
+#ifndef locale_decpoint
+extern int locale_decpoint PARAMS((void));
+#endif
+
 /* Convert NPTR to a double.  If ENDPTR is not NULL, a pointer to the
    character after the last one used in the number is put in *ENDPTR.  */
 double
@@ -62,6 +66,7 @@ strtod (nptr, endptr)
   /* The number so far.  */
   double num;
 
+  int radixchar;
   int got_dot;			/* Found a decimal point.  */
   int got_digit;		/* Seen any digits.  */
 
@@ -85,6 +90,7 @@ strtod (nptr, endptr)
   if (*s == '-' || *s == '+')
     ++s;
 
+  radixchar = locale_decpoint ();
   num = 0.0;
   got_dot = 0;
   got_digit = 0;
@@ -113,7 +119,7 @@ strtod (nptr, endptr)
 	  if (got_dot)
 	    --exponent;
 	}
-      else if (!got_dot && *s == '.')
+      else if (!got_dot && *s == radixchar)
 	/* Record that we have found the decimal point.  */
 	got_dot = 1;
       else

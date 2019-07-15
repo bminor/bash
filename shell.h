@@ -213,6 +213,10 @@ typedef struct _sh_input_line_state_t {
   size_t input_line_index;
   size_t input_line_size;
   size_t input_line_len;
+#if defined (HANDLE_MULTIBYTE)
+  char *input_property;
+  size_t input_propsize;
+#endif
 } sh_input_line_state_t;
 
 /* Let's try declaring these here. */

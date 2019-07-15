@@ -4811,7 +4811,12 @@ set_job_control (arg)
 
   if (terminal_pgrp == NO_PID)
     terminal_pgrp = tcgetpgrp (shell_tty);
-  
+
+  /* If we're turning on job control we're going to want to know the shell's
+     process group. */
+  if (job_control != old && job_control)
+    shell_pgrp = getpgid (0);  
+
   running_in_background = (terminal_pgrp != shell_pgrp);
 
 #if 0
