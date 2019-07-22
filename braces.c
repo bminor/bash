@@ -61,10 +61,6 @@ extern int errno;
 
 extern int asprintf __P((char **, const char *, ...)) __attribute__((__format__ (printf, 2, 3)));
 
-#if defined (NOTDEF)
-extern int last_command_exit_value;
-#endif
-
 /* Basic idea:
 
    Segregate the text into 3 sections: preamble (stuff before an open brace),
@@ -190,7 +186,7 @@ brace_expand (text)
 	  if (text[j] == brace_arg_separator)
 	    {	/* { */
 	      strvec_dispose (result);
-	      last_command_exit_value = 1;
+	      set_exit_status (EXECUTION_FAILURE);
 	      report_error ("no closing `%c' in %s", '}', text);
 	      throw_to_top_level ();
 	    }

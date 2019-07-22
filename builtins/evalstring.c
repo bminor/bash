@@ -339,6 +339,7 @@ parse_and_execute (string, from_file, flags)
 	      if (command)
 		run_unwind_frame ("pe_dispose");
 	      last_result = last_command_exit_value = EXECUTION_FAILURE; /* XXX */
+	      set_pipestatus_from_exit (last_command_exit_value);
 	      if (subshell_environment)
 		{
 		  should_jump_to_top_level = 1;
@@ -389,6 +390,7 @@ parse_and_execute (string, from_file, flags)
 		      internal_warning (_("%s: ignoring function definition attempt"), from_file);
 		      should_jump_to_top_level = 0;
 		      last_result = last_command_exit_value = EX_BADUSAGE;
+		      set_pipestatus_from_exit (last_command_exit_value);
 		      reset_parser ();
 		      break;
 		    }

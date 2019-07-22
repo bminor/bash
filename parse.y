@@ -6266,6 +6266,7 @@ report_syntax_error (message)
       if (interactive && EOF_Reached)
 	EOF_Reached = 0;
       last_command_exit_value = parse_and_execute_level ? EX_BADSYNTAX : EX_BADUSAGE;
+      set_pipestatus_from_exit (last_command_exit_value);
       return;
     }
 
@@ -6287,6 +6288,7 @@ report_syntax_error (message)
 	print_offending_line ();
 
       last_command_exit_value = parse_and_execute_level ? EX_BADSYNTAX : EX_BADUSAGE;
+      set_pipestatus_from_exit (last_command_exit_value);
       return;
     }
 
@@ -6318,6 +6320,7 @@ report_syntax_error (message)
     }
 
   last_command_exit_value = parse_and_execute_level ? EX_BADSYNTAX : EX_BADUSAGE;
+  set_pipestatus_from_exit (last_command_exit_value);
 }
 
 /* ??? Needed function. ??? We have to be able to discard the constructs
@@ -6490,7 +6493,7 @@ parse_string_to_word_list (s, flags, whom)
 
   if (wl == &parse_string_error)
     {
-      last_command_exit_value = EXECUTION_FAILURE;
+      set_exit_status (EXECUTION_FAILURE);
       if (interactive_shell == 0 && posixly_correct)
 	jump_to_top_level (FORCE_EOF);
       else
@@ -6554,7 +6557,7 @@ parse_compound_assignment (retlenp)
 
   if (wl == &parse_string_error)
     {
-      last_command_exit_value = EXECUTION_FAILURE;
+      set_exit_status (EXECUTION_FAILURE);
       last_read_token = '\n';	/* XXX */
       if (interactive_shell == 0 && posixly_correct)
 	jump_to_top_level (FORCE_EOF);
@@ -6815,7 +6818,7 @@ set_line_mbstate ()
 
       if (locale_utf8locale)
 	{
-	  if ((unsigned char)shell_input_line[previ] < 128)
+	  if ((unsigned char)shell_input_line[previ] < 128)	/* i != previ */
 	    mbclen = 1;
 	  else
 	    {

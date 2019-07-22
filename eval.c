@@ -108,7 +108,7 @@ reader_loop ()
 		 leave existing non-zero values (e.g., > 128 on signal)
 		 alone. */
 	      if (last_command_exit_value == 0)
-		last_command_exit_value = EXECUTION_FAILURE;
+		set_exit_status (EXECUTION_FAILURE);
 	      if (subshell_environment)
 		{
 		  current_command = (COMMAND *)NULL;
@@ -144,7 +144,7 @@ reader_loop ()
 	{
 	  if (interactive_shell == 0 && read_but_dont_execute)
 	    {
-	      last_command_exit_value = EXECUTION_SUCCESS;
+	      set_exit_status (EXECUTION_SUCCESS);
 	      dispose_command (global_command);
 	      global_command = (COMMAND *)NULL;
 	    }

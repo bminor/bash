@@ -6251,7 +6251,8 @@ lib/sh/strtod.c
 				   ----
 lib/sh/utf8.c
 	- utf8_mblen: return -2 if the UTF-8 sequence is incomplete
-	- utf8_mblen: 4-byte UTF-8 characters start with a byte < 0xf4
+	- utf8_mblen: 4-byte UTF-8 characters start with a byte <= 0xf4; limit
+	  to 4-byte UTF-8 (since 5- and 6-byte code points were removed in 2003)
 
 				   7/12
 				   ----
@@ -6280,3 +6281,97 @@ lib/readline/display.c
 	  local_prompt_newlines, and we want the values computed in the call
 	  that uses local_prompt to be the ones that we use. Fixes prompt
 	  wrapping bug reported by Tianon Gravi <admwiggin@gmail.com>
+
+				   7/16
+				   ----
+Makefile.in
+	- added a number of dependencies from Vemake Vemake
+	  <vemakereporter@gmail.com> as reported in
+	  http://savannah.gnu.org/patch/download.php?file_id=47219
+
+				   7/19
+				   ----
+lib/sh/utf8.c
+	- utf8_mblen: changes to handle invalid multibyte sequences better,
+	  even when N means that the sequence would be too short anyway
+
+arrayfunc.c
+	- bind_assoc_var_internal: new convenience function to assign a
+	  key-value pair to an associative array. It gets the SHELL_VAR * AND
+	  a HASH_TABLE *, which may or may not correspond to the assoc_cell
+	  of the variable, and performs the insertion into the hash table.
+	  Callers take care of passing the right values.
+	- bind_assoc_variable: call bind_assoc_var_internal to do the real
+	  work
+	- assign_compound_array_list: change to assign associative array
+	  key-value pairs into a new hash table (NHASH), so we can still use
+	  the old value for expansion. We do this in place of clearing out
+	  the contents of the associative array before performing the expansion
+	  and assignments. After doing all the assignments into NHASH, we swap
+	  NHASH into the variable as its value and dispose of the old value.
+	  Fixes inconsistency reported by Darren 'Tadgy' Austin
+	  <darren@afterdark.org.uk>
+
+				   7/20
+				   ----
+aclocal.m4
+	- include bashansi.h in a bunch of AC_TRY_RUN recipies to avoid
+	  exit() being flagged as an implicit declaration. Report and fix
+	  from Chris Yungmann <yungmann.chris@gmail.com>
+
+shell.c
+	- set_exit_status: set last_command_exit_value to the argument and make
+	  sure to set PIPESTATUS from that exit value
+
+shell.h
+	- set_exit_status: extern declaration
+
+parse.y
+	- report_syntax_error: make sure to set PIPESTATUS if we set
+	  last_command_exit_value on a syntax error
+	- parse_string_to_word_list,parse_compound_assignment: set PIPESTATUS
+	  when we set last_command_exit_value
+
+sig.c
+	- throw_to_top_level,sigint_sighandler: set PIPESTATUS when we set
+	  last_command_exit_value
+
+variables.c
+	- sv_locale: call set_exit_status to set PIPESTATUS and last_command_exit_value
+
+arrayfunc.c
+	- find_or_make_array_variable,array_expand_index,assign_compound_array_list:
+	  call set_exit_status to set PIPESTATUS and last_command_exit_value
+
+builtins/evalstring.c
+	- parse_and_execute: set PIPESTATUS when we set last_command_exit_value
+
+braces.c
+	- brace_expand: call set_exit_status to set PIPESTATUS and last_command_exit_value
+
+eval.c
+	- reader_loop: call set_exit_status to set PIPESTATUS and last_command_exit_value
+
+make_cmd.c
+	- set PIPESTATUS when setting $? due to syntax errors or constructs
+	  not being available
+
+expr.c
+	- expr_streval: set PIPESTATUS when setting $? due to syntax errors
+
+subst.c
+	- extract_delimited_string,extract_dollar_brace_string,do_assignment_internal,
+	  call_expand_word_internal,array_length_reference,param_expand,
+	  parameter_brace_expand_word,parameter_brace_expand_rhs,
+	  parameter_brace_expand_error,parameter_brace_expand,err_unboundvar:
+	  set PIPESTATUS when setting last_command_exit_value on error
+	  conditions
+
+redir.c
+	- REDIRECTION_ERROR: set PIPESTATUS when setting last_command_exit_value
+	  on error conditions
+
+subst.c
+	- match_upattern,match_wpattern: if the match length is greater than the
+	  string length, short-circuit and return failure.  Fixes bug
+	  reported by Eduardo Bustamante <dualbus@gmail.com>

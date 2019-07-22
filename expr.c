@@ -1177,7 +1177,7 @@ expr_streval (tok, e, lvalue)
       value = tok;
 #endif
 
-      last_command_exit_value = EXECUTION_FAILURE;
+      set_exit_status (EXECUTION_FAILURE);
       err_unboundvar (value);
 
 #if defined (ARRAY_VARS)

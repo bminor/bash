@@ -394,6 +394,7 @@ throw_to_top_level ()
     {
       if (last_command_exit_value < 128)
 	last_command_exit_value = 128 + SIGINT;
+      set_pipestatus_from_exit (last_command_exit_value);
       print_newline = 1;
       DELINTERRUPT;
     }
@@ -404,6 +405,7 @@ throw_to_top_level ()
   last_command_exit_signal = (last_command_exit_value > 128) ?
 				(last_command_exit_value - 128) : 0;
   last_command_exit_value |= 128;
+  set_pipestatus_from_exit (last_command_exit_value);
 
   /* Run any traps set on SIGINT, mostly for interactive shells */
   if (signal_is_trapped (SIGINT))
@@ -647,6 +649,7 @@ sigint_sighandler (sig)
   if (wait_intr_flag)
     {
       last_command_exit_value = 128 + sig;
+      set_pipestatus_from_exit (last_command_exit_value);
       wait_signal_received = sig;
       SIGRETURN (0);
     }
@@ -655,6 +658,7 @@ sigint_sighandler (sig)
     {
       interrupt_immediately = 0;
       last_command_exit_value = 128 + sig;
+      set_pipestatus_from_exit (last_command_exit_value);
       throw_to_top_level ();
     }
 #if defined (READLINE)

@@ -1994,7 +1994,7 @@ make_child (command, async_p)
       if (the_pipeline)
 	kill_current_pipeline ();
 
-      last_command_exit_value = EX_NOEXEC;
+      set_exit_status (EX_NOEXEC);
       throw_to_top_level ();	/* Reset signals, etc. */
     }
 
@@ -2552,6 +2552,7 @@ wait_sigint_handler (sig)
       (this_shell_builtin && this_shell_builtin == wait_builtin))
     {
       last_command_exit_value = 128+SIGINT;
+      set_pipestatus_from_exit (last_command_exit_value);
       restore_sigint_handler ();
       /* If we got a SIGINT while in `wait', and SIGINT is trapped, do
 	 what POSIX.2 says (see builtins/wait.def for more info). */
@@ -2586,6 +2587,7 @@ wait_sigint_handler (sig)
   else
     {
       last_command_exit_value = 128+SIGINT;
+      set_pipestatus_from_exit (last_command_exit_value);
       restore_sigint_handler ();
       kill (getpid (), SIGINT);
     }

@@ -201,7 +201,7 @@ report_error (format, va_alist)
   if (exit_immediately_on_error)
     {
       if (last_command_exit_value == 0)
-	last_command_exit_value = 1;
+	last_command_exit_value = EXECUTION_FAILURE;
       exit_shell (last_command_exit_value);
     }
 }

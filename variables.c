@@ -425,7 +425,7 @@ initialize_shell_variables (env, privmode)
 		  VSETATTR (temp_var, (att_exported | att_imported | att_invisible));
 		  array_needs_making = 1;
 		}
-	      last_command_exit_value = 1;
+	      last_command_exit_value = EXECUTION_FAILURE;
 	      report_error (_("error importing function definition for `%s'"), tname);
 	    }
 
@@ -6292,7 +6292,7 @@ sv_locale (name)
 
 #if 1
   if (r == 0 && posixly_correct)
-    last_command_exit_value = 1;
+    set_exit_status (EXECUTION_FAILURE);
 #endif
 }
 

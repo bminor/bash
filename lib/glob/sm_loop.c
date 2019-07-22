@@ -612,6 +612,8 @@ matched:
 	{
 	  brcnt++;
 	  brchr = *p;
+	  /* If brchr == ':' we need to check that the rest of the characters
+	     form a valid character class name. */
 	}
       /* we only want to check brchr if we set it above */
       else if (c == L(']') && brcnt > 1 && brchr != 0 && oc == brchr)

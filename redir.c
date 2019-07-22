@@ -120,7 +120,7 @@ do { \
     { \
       if (fd >= 0) \
 	close (fd); \
-      last_command_exit_value = EXECUTION_FAILURE;\
+      set_exit_status (EXECUTION_FAILURE);\
       return ((e) == 0 ? EINVAL : (e));\
     } \
 } while (0)

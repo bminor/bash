@@ -3270,7 +3270,7 @@ do_assignment_internal (word, expand)
     retval = 0;		/* assignment failure */
   else if (noassign_p (entry))
     {
-      last_command_exit_value = EXECUTION_FAILURE;
+      set_exit_status (EXECUTION_FAILURE);
       retval = 1;	/* error status, but not assignment failure */
     }
   else
@@ -4803,6 +4803,8 @@ match_upattern (string, pat, mtype, sp, ep)
   end = string + len;
 
   mlen = umatchlen (pat, len);
+  if (mlen > len)
+    return (0);
 
   switch (mtype)
     {
@@ -4958,6 +4960,8 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
     return (0);
 
   mlen = wmatchlen (wpat, wstrlen);
+  if (mlen > wstrlen)
+    return (0);
 
 /* itrace("wmatchlen (%ls) -> %d", wpat, mlen); */
   switch (mtype)
@@ -6501,7 +6505,7 @@ array_length_reference (s)
     {
       c = *--t;
       *t = '\0';
-      last_command_exit_value = EXECUTION_FAILURE;
+      set_exit_status (EXECUTION_FAILURE);
       err_unboundvar (s);
       *t = c;
       return (-1);
@@ -6784,7 +6788,7 @@ expand_arrayref:
       /* y=2 ; typeset -n x=y; echo ${x} is not the same as echo ${2} in ksh */
       if (temp && *temp && legal_identifier (temp) == 0)
         {
-	  last_command_exit_value = EXECUTION_FAILURE;
+	  set_exit_status (EXECUTION_FAILURE);
 	  report_error (_("%s: invalid variable name for name reference"), temp);
 	  temp = &expand_param_error;
         }
@@ -7143,7 +7147,7 @@ parameter_brace_expand_error (name, value, check_null)
   WORD_LIST *l;
   char *temp;
 
-  last_command_exit_value = EXECUTION_FAILURE;	/* ensure it's non-zero */
+  set_exit_status (EXECUTION_FAILURE);	/* ensure it's non-zero */
   if (value && *value)
     {
       l = expand_string (value, 0);
@@ -8769,7 +8773,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
       number = parameter_brace_expand_length (name);
       if (number == INTMAX_MIN && unbound_vars_is_error)
 	{
-	  last_command_exit_value = EXECUTION_FAILURE;
+	  set_exit_status (EXECUTION_FAILURE);
 	  err_unboundvar (name+1);
 	  free (name);
 	  return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
@@ -8981,7 +8985,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
     {
       if (var_is_set == 0 && unbound_vars_is_error && ((name[0] != '@' && name[0] != '*') || name[1]) && all_element_arrayref == 0)
 	{
-	  last_command_exit_value = EXECUTION_FAILURE;
+	  set_exit_status (EXECUTION_FAILURE);
 	  err_unboundvar (name);
 	  FREE (value);
 	  FREE (temp);
@@ -9082,7 +9086,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
     default:
     case '\0':
 bad_substitution:
-      last_command_exit_value = EXECUTION_FAILURE;
+      set_exit_status (EXECUTION_FAILURE);
       report_error (_("%s: bad substitution"), string ? string : "??");
       FREE (value);
       FREE (temp);
@@ -9103,7 +9107,7 @@ bad_substitution:
       if (temp1 == &expand_param_error || temp1 == &expand_param_fatal)
 	{
 	  free (name);
-      	  last_command_exit_value = EXECUTION_FAILURE;
+	  set_exit_status (EXECUTION_FAILURE);
 	  report_error (_("%s: bad substitution"), string ? string : "??");
 	  return (temp1 == &expand_param_error ? &expand_wdesc_error : &expand_wdesc_fatal);
 	}
@@ -9191,7 +9195,7 @@ bad_substitution:
 	  temp = (char *)NULL;
 	  if (c == '=' && var_is_special)
 	    {
-	      last_command_exit_value = EXECUTION_FAILURE;
+	      set_exit_status (EXECUTION_FAILURE);
 	      report_error (_("$%s: cannot assign in this way"), name);
 	      free (name);
 	      free (value);
@@ -9288,7 +9292,7 @@ param_expand (string, sindex, quoted, expanded_something,
 	  uerror[0] = '$';
 	  uerror[1] = c;
 	  uerror[2] = '\0';
-	  last_command_exit_value = EXECUTION_FAILURE;
+	  set_exit_status (EXECUTION_FAILURE);
 	  err_unboundvar (uerror);
 	  return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
 	}
@@ -9336,7 +9340,7 @@ param_expand (string, sindex, quoted, expanded_something,
 	      uerror[0] = '$';
 	      uerror[1] = c;
 	      uerror[2] = '\0';
-	      last_command_exit_value = EXECUTION_FAILURE;
+	      set_exit_status (EXECUTION_FAILURE);
 	      err_unboundvar (uerror);
 	      return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
 	    }
@@ -9363,7 +9367,7 @@ param_expand (string, sindex, quoted, expanded_something,
 	  uerror[0] = '$';
 	  uerror[1] = '*';
 	  uerror[2] = '\0';
-	  last_command_exit_value = EXECUTION_FAILURE;
+	  set_exit_status (EXECUTION_FAILURE);
 	  err_unboundvar (uerror);
 	  return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
 	}
@@ -9486,7 +9490,7 @@ param_expand (string, sindex, quoted, expanded_something,
 	  uerror[0] = '$';
 	  uerror[1] = '@';
 	  uerror[2] = '\0';
-	  last_command_exit_value = EXECUTION_FAILURE;
+	  set_exit_status (EXECUTION_FAILURE);
 	  err_unboundvar (uerror);
 	  return (interactive_shell ? &expand_wdesc_error : &expand_wdesc_fatal);
 	}
@@ -9637,7 +9641,7 @@ arithsub:
 	    {
 	      if (interactive_shell == 0 && posixly_correct)
 		{
-		  last_command_exit_value = EXECUTION_FAILURE;
+		  set_exit_status (EXECUTION_FAILURE);
 		  return (&expand_wdesc_fatal);
 		}
 	      else
@@ -9753,7 +9757,7 @@ comsub:
 	  /* y=2 ; typeset -n x=y; echo $x is not the same as echo $2 in ksh */
 	  if (temp && *temp && legal_identifier (temp) == 0)
 	    {
-	      last_command_exit_value = EXECUTION_FAILURE;
+	      set_exit_status (EXECUTION_FAILURE);
 	      report_error (_("%s: invalid variable name for name reference"), temp);
 	      return (&expand_wdesc_error);	/* XXX */
 	    }
@@ -9766,7 +9770,7 @@ comsub:
 unbound_variable:
       if (unbound_vars_is_error)
 	{
-	  last_command_exit_value = EXECUTION_FAILURE;
+	  set_exit_status (EXECUTION_FAILURE);
 	  err_unboundvar (temp1);
 	}
       else
@@ -9776,7 +9780,7 @@ unbound_variable:
 	}
 
       free (temp1);
-      last_command_exit_value = EXECUTION_FAILURE;
+      set_exit_status (EXECUTION_FAILURE);
       return ((unbound_vars_is_error && interactive_shell == 0)
 		? &expand_wdesc_fatal
 		: &expand_wdesc_error);
@@ -10171,7 +10175,7 @@ add_string:
 		    sindex = t_index;
 		    goto add_character;
 		  }
-		last_command_exit_value = EXECUTION_FAILURE;
+		set_exit_status (EXECUTION_FAILURE);
 		report_error (_("bad substitution: no closing \"`\" in %s") , string+t_index);
 		free (string);
 		free (istring);

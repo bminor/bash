@@ -1038,6 +1038,13 @@ subshell_exit (s)
   sh_exit (s);
 }
 
+void
+set_exit_status (s)
+     int s;
+{
+  set_pipestatus_from_exit (last_command_exit_value = s);
+}
+
 /* Source the bash startup files.  If POSIXLY_CORRECT is non-zero, we obey
    the Posix.2 startup file rules:  $ENV is expanded, and if the file it
    names exists, that file is sourced.  The Posix.2 rules are in effect

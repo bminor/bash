@@ -177,7 +177,41 @@ make_array_variable_value (entry, ind, key, value, flags)
 
   return newval;
 }
-  
+
+/* Assign HASH[KEY]=VALUE according to FLAGS. ENTRY is an associative array
+   variable; HASH is the hash table to assign into. HASH may or may not be
+   the hash table associated with ENTRY; if it's not, the caller takes care
+   of it.
+   XXX - make sure that any dynamic associative array variables recreate the
+   hash table on each assignment. BASH_CMDS and BASH_ALIASES already do this */
+static SHELL_VAR *
+bind_assoc_var_internal (entry, hash, key, value, flags)
+     SHELL_VAR *entry;
+     HASH_TABLE *hash;
+     char *key;
+     char *value;
+     int flags;
+{
+  char *newval;
+
+  /* Use the existing array contents to expand the value */
+  newval = make_array_variable_value (entry, 0, key, value, flags);
+
+  if (entry->assign_func)
+    (*entry->assign_func) (entry, newval, 0, key);
+  else
+    assoc_insert (hash, key, newval);
+
+  FREE (newval);
+
+  VUNSETATTR (entry, att_invisible);	/* no longer invisible */
+
+  /* check mark_modified_variables if we ever want to export array vars */
+  return (entry);
+}
+
+/* Perform ENTRY[IND]=VALUE or ENTRY[KEY]=VALUE. This is not called for every
+   assignment to an associative array; see assign_compound_array_list below. */
 static SHELL_VAR *
 bind_array_var_internal (entry, ind, key, value, flags)
      SHELL_VAR *entry;
@@ -271,7 +305,7 @@ bind_assoc_variable (entry, name, key, value, flags)
       return (entry);
     }
 
-  return (bind_array_var_internal (entry, 0, key, value, flags));
+  return (bind_assoc_var_internal (entry, assoc_cell (entry), key, value, flags));
 }
 
 /* Parse NAME, a lhs of an assignment statement of the form v[s], and
@@ -398,7 +432,7 @@ find_or_make_array_variable (name, flags)
     }
   else if ((flags & 2) && array_p (var))
     {
-      last_command_exit_value = 1;
+      set_exit_status (EXECUTION_FAILURE);
       report_error (_("%s: cannot convert indexed to associative array"), name);
       return ((SHELL_VAR *)NULL);
     }
@@ -481,6 +515,9 @@ expand_compound_array_assignment (var, value, flags)
      (ksh93 seems to do this). */
   list = parse_string_to_word_list (val, 1, "array assign");
 
+  /* Note that we defer expansion of the assignment statements for associative
+     arrays here, so we don't have to scan the subscript and find the ending
+     bracket twice. See the caller below. */
   if (var && assoc_p (var))
     {
       if (val != value)
@@ -507,7 +544,12 @@ expand_compound_array_assignment (var, value, flags)
   return nlist;
 }
 
-/* Callers ensure that VAR is not NULL */
+/* Callers ensure that VAR is not NULL. Associative array assignments have not
+   been expanded when this is called, so we don't have to scan through the
+   expanded subscript to find the ending bracket; indexed array assignments
+   have been expanded.
+   If this is an associative array, we perform the assignments into NHASH and
+   set NHASH to be the value of VAR after processing the assignments in NLIST */
 void
 assign_compound_array_list (var, nlist, flags)
      SHELL_VAR *var;
@@ -515,7 +557,7 @@ assign_compound_array_list (var, nlist, flags)
      int flags;
 {
   ARRAY *a;
-  HASH_TABLE *h;
+  HASH_TABLE *h, *nhash;
   WORD_LIST *list;
   char *w, *val, *nval, *savecmd;
   int len, iflags, free_val;
@@ -523,7 +565,7 @@ assign_compound_array_list (var, nlist, flags)
   char *akey;
 
   a = (var && array_p (var)) ? array_cell (var) : (ARRAY *)0;
-  h = (var && assoc_p (var)) ? assoc_cell (var) : (HASH_TABLE *)0;
+  nhash = h = (var && assoc_p (var)) ? assoc_cell (var) : (HASH_TABLE *)0;
 
   akey = (char *)0;
   ind = 0;
@@ -535,7 +577,7 @@ assign_compound_array_list (var, nlist, flags)
       if (a && array_p (var))
 	array_flush (a);
       else if (h && assoc_p (var))
-	assoc_flush (h);
+	nhash = assoc_create (h->nbuckets);
     }
 
   last_ind = (a && (flags & ASS_APPEND)) ? array_max_index (a) + 1 : 0;
@@ -581,7 +623,7 @@ assign_compound_array_list (var, nlist, flags)
 
 	  if (ALL_ELEMENT_SUB (w[1]) && len == 2)
 	    {
-	      last_command_exit_value = 1;
+	      set_exit_status (EXECUTION_FAILURE);
 	      if (assoc_p (var))
 		report_error (_("%s: invalid associative array key"), w);
 	      else
@@ -629,7 +671,7 @@ assign_compound_array_list (var, nlist, flags)
 	}
       else if (assoc_p (var))
 	{
-	  last_command_exit_value = 1;
+	  set_exit_status (EXECUTION_FAILURE);
 	  report_error (_("%s: %s: must use subscript when assigning associative array"), var->name, w);
 	  continue;
 	}
@@ -655,12 +697,22 @@ assign_compound_array_list (var, nlist, flags)
       savecmd = this_command_name;
       if (integer_p (var))
 	this_command_name = (char *)NULL;	/* no command name for errors */
-      bind_array_var_internal (var, ind, akey, val, iflags);
+      if (assoc_p (var))
+	bind_assoc_var_internal (var, nhash, akey, val, iflags);
+      else
+	bind_array_var_internal (var, ind, akey, val, iflags);
       last_ind++;
       this_command_name = savecmd;
 
       if (free_val)
 	free (val);
+    }
+
+  if (assoc_p (var) && nhash && nhash != h)
+    {
+      h = assoc_cell (var);
+      var_setassoc (var, nhash);
+      assoc_dispose (h);
     }
 }
 
@@ -970,7 +1022,7 @@ array_expand_index (var, s, len, flags)
   free (exp);
   if (expok == 0)
     {
-      last_command_exit_value = EXECUTION_FAILURE;
+      set_exit_status (EXECUTION_FAILURE);
 
       if (no_longjmp_on_fatal_error)
 	return 0;
@@ -1251,18 +1303,7 @@ array_keys (s, quoted, pflags)
   if (l == (WORD_LIST *)NULL)
     return ((char *) NULL);
 
-#if 1
   retval = string_list_pos_params (t[0], l, quoted, pflags);
-#else
-  if (t[0] == '*' && (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)))
-    {
-      temp = string_list_dollar_star (l, quoted, 0);
-      retval = quote_string (temp);
-      free (temp);
-    }
-  else	/* ${!name[@]} or unquoted ${!name[*]} */
-    retval = string_list_dollar_at (l, quoted, 0);
-#endif
 
   dispose_words (l);
   return retval;
