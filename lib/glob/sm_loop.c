@@ -384,9 +384,10 @@ BRACKMATCH (p, test, flags)
 {
   register CHAR cstart, cend, c;
   register int not;    /* Nonzero if the sense of the character class is inverted.  */
-  int brcnt, brchr, forcecoll, isrange;
+  int brcnt, forcecoll, isrange;
   INT pc;
   CHAR *savep;
+  CHAR *brchrp;
   U_CHAR orig_test;
 
   orig_test = test;
@@ -597,7 +598,7 @@ matched:
   /* Skip the rest of the [...] that already matched.  */
   c = *--p;
   brcnt = 1;
-  brchr = 0;
+  brchrp = 0;
   while (brcnt > 0)
     {
       int oc;
@@ -611,15 +612,26 @@ matched:
       if (c == L('[') && (*p == L('=') || *p == L(':') || *p == L('.')))
 	{
 	  brcnt++;
-	  brchr = *p;
-	  /* If brchr == ':' we need to check that the rest of the characters
-	     form a valid character class name. */
+	  brchrp = p++;		/* skip over the char after the left bracket */
+	  if ((c = *p) == L('\0'))
+	    return ((test == L('[')) ? savep : (CHAR *)0);
+	  /* If *brchrp == ':' we should check that the rest of the characters
+	     form a valid character class name. We don't do that yet, but we
+	     keep BRCHRP in case we want to. */
 	}
-      /* we only want to check brchr if we set it above */
-      else if (c == L(']') && brcnt > 1 && brchr != 0 && oc == brchr)
-	brcnt--;
-      else if (c == L(']') && brcnt == 1)
-	brcnt--;
+      /* We only want to check brchrp if we set it above. */
+      else if (c == L(']') && brcnt > 1 && brchrp != 0 && oc == *brchrp)
+	{
+	  brcnt--;
+	  brchrp = 0;		/* just in case */
+	}
+      /* Left bracket loses its special meaning inside a bracket expression.
+         It is only valid when followed by a `.', `=', or `:', which we check
+         for above. Technically the right bracket can appear in a collating
+         symbol, so we check for that here. Otherwise, it terminates the
+         bracket expression. */
+      else if (c == L(']') && (brchrp == 0 || *brchrp != L('.')) && brcnt >= 1)
+	brcnt = 0;
       else if (!(flags & FNM_NOESCAPE) && c == L('\\'))
 	{
 	  if (*p == '\0')

@@ -213,6 +213,15 @@ declare -p assoc
 readonly -A assoc
 declare -p assoc
 
+declare -A hash
+
+hash=(["key"]="value1")
+declare -p hash
+hash=(["key"]="${hash["key"]} value2")
+declare -p hash
+
+unset hash
+
 ${THIS_SH} ./assoc8.sub
 
 # new shopt option to prevent multiple expansion of assoc array subscripts

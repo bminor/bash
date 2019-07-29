@@ -4803,7 +4803,7 @@ match_upattern (string, pat, mtype, sp, ep)
   end = string + len;
 
   mlen = umatchlen (pat, len);
-  if (mlen > len)
+  if (mlen > (int)len)
     return (0);
 
   switch (mtype)
@@ -4960,7 +4960,7 @@ match_wpattern (wstring, indices, wstrlen, wpat, mtype, sp, ep)
     return (0);
 
   mlen = wmatchlen (wpat, wstrlen);
-  if (mlen > wstrlen)
+  if (mlen > (int)wstrlen)
     return (0);
 
 /* itrace("wmatchlen (%ls) -> %d", wpat, mlen); */

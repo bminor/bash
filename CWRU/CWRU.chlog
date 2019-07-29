@@ -6375,3 +6375,18 @@ subst.c
 	- match_upattern,match_wpattern: if the match length is greater than the
 	  string length, short-circuit and return failure.  Fixes bug
 	  reported by Eduardo Bustamante <dualbus@gmail.com>
+
+				   7/22
+				   ----
+lib/glob/sm_loop.c
+	- BRACKMATCH: if we think we've matched, tighten up the rules for
+	  the closing right bracket in the bracket expression to be correct
+	  in the presence of invalid character classes, collating symbols,
+	  and equivalence classes. If they're invalid, they shouldn't require
+	  additional right brackets to close them
+
+				   7/25
+				   ----
+builtins/colon.def
+	- add the right includes so colon_builtin and false_builtin can take
+	  a WORD_LIST * argument like the prototype says they do

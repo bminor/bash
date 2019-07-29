@@ -613,6 +613,9 @@ a=/a
 recho "/${a%/*}"
 recho "/${a///a/}"
 
+# caused core dumps because of bad bracket expression parsing in bash-5.0
+eval : $'${x/#[0\xef\xbf\xbd\\Z[:]]}'
+
 # this must be last!
 expect $0: 'ABXD: parameter unset'
 recho ${ABXD:?"parameter unset"}
