@@ -635,9 +635,7 @@ _rl_read_mbchar (char *mbchar, int size)
   mb_len = 0;  
   while (mb_len < size)
     {
-      RL_SETSTATE(RL_STATE_MOREINPUT);
-      c = rl_read_key ();
-      RL_UNSETSTATE(RL_STATE_MOREINPUT);
+      c = (mb_len == 0) ? _rl_bracketed_read_key () : rl_read_key ();
 
       if (c < 0)
 	break;

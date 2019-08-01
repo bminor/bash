@@ -1,7 +1,7 @@
 /* vi_mode.c -- A vi emulation mode for Bash.
    Derived from code written by Jeff Sparkes (jsparkes@bnr.ca).  */
 
-/* Copyright (C) 1987-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2019 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -1316,13 +1316,7 @@ rl_domove_read_callback (_rl_vimotion_cxt *m)
 static int
 rl_vi_domove_getchar (_rl_vimotion_cxt *m)
 {
-  int c;
-
-  RL_SETSTATE(RL_STATE_MOREINPUT);
-  c = rl_read_key ();
-  RL_UNSETSTATE(RL_STATE_MOREINPUT);
-
-  return c;
+  return (_rl_bracketed_read_key ());
 }
 
 #if defined (READLINE_CALLBACKS)
@@ -2000,21 +1994,7 @@ _rl_vi_change_char (int count, int c, char *mb)
 static int
 _rl_vi_callback_getchar (char *mb, int mlen)
 {
-  int c;
-
-  RL_SETSTATE(RL_STATE_MOREINPUT);
-  c = rl_read_key ();
-  RL_UNSETSTATE(RL_STATE_MOREINPUT);
-
-  if (c < 0)
-    return -1;
-
-#if defined (HANDLE_MULTIBYTE)
-  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
-    c = _rl_read_mbstring (c, mb, mlen);
-#endif
-
-  return c;
+  return (_rl_bracketed_read_mbstring (mb, mlen));
 }
 
 #if defined (READLINE_CALLBACKS)
@@ -2137,6 +2117,34 @@ rl_vi_overstrike_delete (int count, int key)
   return (0);
 }
 
+/* Read bracketed paste mode pasted text and insert it in overwrite mode */
+static int
+rl_vi_overstrike_bracketed_paste (int count, int key)
+{
+  int r;
+  char *pbuf;
+  size_t pblen;
+
+  pbuf = _rl_bracketed_text (&pblen);
+  if (pblen == 0)
+    {
+      xfree (pbuf);
+      return 0;
+    }
+  r = pblen;
+  while (--r >= 0)
+    _rl_unget_char ((unsigned char)pbuf[r]);
+  xfree (pbuf);
+
+  while (_rl_pushed_input_available ())
+    {
+      key = rl_read_key ();
+      r = rl_vi_overstrike (1, key);
+    }
+
+  return r;
+}
+
 int
 rl_vi_replace (int count, int key)
 {
@@ -2178,6 +2186,9 @@ rl_vi_replace (int count, int key)
 
   _rl_vi_last_key_before_insert = key;
   _rl_keymap = vi_replace_map;
+
+  if (_rl_enable_bracketed_paste)
+    rl_bind_keyseq_if_unbound (BRACK_PASTE_PREF, rl_vi_overstrike_bracketed_paste);
 
   return (0);
 }

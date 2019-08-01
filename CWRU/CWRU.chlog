@@ -6390,3 +6390,61 @@ lib/glob/sm_loop.c
 builtins/colon.def
 	- add the right includes so colon_builtin and false_builtin can take
 	  a WORD_LIST * argument like the prototype says they do
+
+				   7/29
+				   ----
+lib/readline/kill.c
+	- _rl_read_bracketed_paste_prefix: read the character prefix that
+	  indicates a pasted string in bracketed paste mode. If we don't
+	  read a valid bracketed paste prefix, push the other characters
+	  back onto the input stack with _rl_unget_char
+	- _rl_bracketed_read_key: handle reading pasted input when bracketed
+	  paste mode is enabled, including reading multibyte characters; push
+	  anything beyond a single byte back onto the input stack where it
+	  can be read by _rl_read_mbstring or subsequent input
+	- _rl_bracketed_read_mbstring: handle reading pasted input in bracketed
+	  paste mode, using _rl_bracketed_read_key to get the pasted text,
+	  then call _rl_read_mbstring to get the rest of any multibyte char
+
+
+lib/readline/vi_mode.c
+	- _rl_vi_callback_getchar: call _rl_bracketed_read_mbstring to handle
+	  bracketed paste mode input. Fixes issue with vi-change-char reported
+	  by <vampyrebat@gmail.com>
+	- rl_vi_domove_getchar: just call _rl_bracketed_read_key and return
+	  the result -- we're not interested in multibyte-character input here
+	  yet
+	- rl_vi_replace: bind BRACK_PASTE_PREF key sequence if bracketed paste
+	  mode has been enabled
+	- _rl_overstrike_bracketed_paste: key binding function for the bracketed
+	  paste prefix key sequence in overwrite mode; reads the pasted text
+	  and uses rl_vi_overstrike to add each character in overwrite mode.
+	  Fixes issue reported by <vampyrebat@gmail.com>
+
+				   7/31
+				   ----
+lib/readline/input.c
+	- _rl_read_mbchar: the first time through the loop (mb_len == 0), call
+	  _rl_bracketed_read_key to process any bracketed paste characters
+
+lib/readline/text.c
+	- _rl_char_search: use _rl_bracketed_read_key in the non-multibyte
+	  character case
+
+lib/readline/misc.c
+	- _rl_arg_dispatch: use _rl_bracketed_read_key in place of rl_read_key
+
+subst.c
+	- list_string: if string_extract_verbatim returns something, just make
+	  a WORD_DESC * and add current_word directly to it, noting that we
+	  don't want to free current_word (free_word = 0)
+	- string_extract_verbatim: if the separator string is the empty
+	  string, don't bother with the loop -- just savestring the string,
+	  update *sindex, and return the copy
+	- read_comsub: make the string we use to save the output from the pipe
+	  512 bytes instead of 128 (same size as the buffer used to read from
+	  the pipe); fewer calls to xrealloc in the worst case
+	- parameter_brace_expand_length: optimize the common case (non-dynamic
+	  scalar variable without `set -u' in effect) and just call MB_STRLEN
+	  on the variable value in that case. From a report from
+	  Alkis Georgopoulos <alkisg@gmail.com>

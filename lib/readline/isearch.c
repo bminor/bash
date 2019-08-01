@@ -297,6 +297,7 @@ _rl_isearch_fini (_rl_search_cxt *cxt)
   rl_clear_message ();
 }
 
+/* XXX - we could use _rl_bracketed_read_mbstring () here. */
 int
 _rl_search_getchar (_rl_search_cxt *cxt)
 {

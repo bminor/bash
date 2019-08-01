@@ -138,9 +138,7 @@ _rl_arg_dispatch (_rl_arg_cxt cxt, int c)
         }
       else
 	{
-	  RL_SETSTATE(RL_STATE_MOREINPUT);
-	  key = rl_read_key ();
-	  RL_UNSETSTATE(RL_STATE_MOREINPUT);
+	  key = _rl_bracketed_read_key ();
 	  rl_restore_prompt ();
 	  rl_clear_message ();
 	  RL_UNSETSTATE(RL_STATE_NUMERICARG);

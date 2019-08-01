@@ -1155,6 +1155,18 @@ string_extract_verbatim (string, slen, sindex, charlist, flags)
       return temp;
     }
 
+  /* This can never be called with charlist == NULL. If *charlist == NULL,
+     we can skip the loop and just return a copy of the string, updating
+     *sindex */
+  if (*charlist == 0)
+    {
+      temp = string + *sindex;
+      c = (*sindex == 0) ? slen : STRLEN (temp);
+      temp = savestring (temp);
+      *sindex += c;
+      return temp;
+    }
+
   i = *sindex;
 #if defined (HANDLE_MULTIBYTE)
   wcharlist = 0;
@@ -2352,7 +2364,7 @@ split_at_delims (string, slen, delims, sentinel, flags, nwp, cwp)
 
       token = substring (string, ts, te);
 
-      ret = add_string_to_list (token, ret);
+      ret = add_string_to_list (token, ret);	/* XXX */
       free (token);
       nw++;
 
@@ -2778,7 +2790,7 @@ list_string (string, separators, quoted)
   WORD_LIST *result;
   WORD_DESC *t;
   char *current_word, *s;
-  int sindex, sh_style_split, whitesep, xflags;
+  int sindex, sh_style_split, whitesep, xflags, free_word;
   size_t slen;
 
   if (!string || !*string)
@@ -2800,7 +2812,14 @@ list_string (string, separators, quoted)
      STRING is quoted or if there are no separator characters. We use the
      Posix definition of whitespace as a member of the space character
      class in the current locale. */
+#if 0
   if (!quoted || !separators || !*separators)
+#else
+  /* issep() requires that separators be non-null, and always returns 0 if
+     separator is the empty string, so don't bother if we get an empty string
+     for separators. We already returned NULL above if STRING is empty. */
+  if (!quoted && separators && *separators)
+#endif
     {
       for (s = string; *s && issep (*s) && ifs_whitespace (*s); s++);
 
@@ -2824,6 +2843,8 @@ list_string (string, separators, quoted)
       if (current_word == 0)
 	break;
 
+      free_word = 1;	/* If non-zero, we free current_word */
+
       /* If we have a quoted empty string, add a quoted null argument.  We
 	 want to preserve the quoted null character iff this is a quoted
 	 empty string; otherwise the quoted null characters are removed
@@ -2840,7 +2861,15 @@ list_string (string, separators, quoted)
 	  /* If we have something, then add it regardless.  However,
 	     perform quoted null character removal on the current word. */
 	  remove_quoted_nulls (current_word);
-	  result = add_string_to_list (current_word, result);
+
+	  /* We don't want to set the word flags based on the string contents
+	     here -- that's mostly for the parser -- so we just allocate a
+	     WORD_DESC *, assign current_word (noting that we don't want to
+	     free it), and skip all of make_word. */
+	  t = alloc_word_desc ();
+	  t->word = current_word;
+	  result = make_word_list (t, result);
+	  free_word = 0;
 	  result->word->flags &= ~W_HASQUOTEDNULL;	/* just to be sure */
 	  if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))
 	    result->word->flags |= W_QUOTED;
@@ -2860,7 +2889,8 @@ list_string (string, separators, quoted)
 	  result = make_word_list (t, result);
 	}
 
-      free (current_word);
+      if (free_word)
+	free (current_word);
 
       /* Note whether or not the separator is IFS whitespace, used later. */
       whitesep = string[sindex] && ifs_whitesep (string[sindex]);
@@ -6119,7 +6149,7 @@ read_comsub (fd, quoted, flags, rflag)
 	}
 
       /* Add the character to ISTRING, possibly after resizing it. */
-      RESIZE_MALLOCED_BUFFER (istring, istring_index, mb_cur_max+1, istring_size, DEFAULT_ARRAY_SIZE);
+      RESIZE_MALLOCED_BUFFER (istring, istring_index, mb_cur_max+1, istring_size, 512);
 
       /* This is essentially quote_string inline */
       if ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) /* || c == CTLESC || c == CTLNUL */)
@@ -7191,9 +7221,9 @@ parameter_brace_expand_length (name)
   char *t, *newname;
   intmax_t number, arg_index;
   WORD_LIST *list;
-#if defined (ARRAY_VARS)
   SHELL_VAR *var;
-#endif
+
+  var = (SHELL_VAR *)NULL;
 
   if (name[1] == '\0')			/* ${#} */
     number = number_of_args ();
@@ -7254,6 +7284,15 @@ parameter_brace_expand_length (name)
 	  number = MB_STRLEN (t);
 	}
 #endif
+      /* Fast path for the common case of taking the length of a non-dynamic
+	 scalar variable value. */
+      else if ((var || (var = find_variable (name + 1))) &&
+      		invisible_p (var) == 0 &&
+		array_p (var) == 0 && assoc_p (var) == 0 &&
+		var->dynamic_value == 0)
+	number = value_cell (var) ? MB_STRLEN (value_cell (var)) : 0;
+      else if (var == 0 && unbound_vars_is_error == 0)
+	number = 0;
       else				/* ${#PS1} */
 	{
 	  newname = savestring (name);
