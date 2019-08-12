@@ -10337,8 +10337,8 @@ add_twochars:
 	      if (word->flags & W_NOPROCSUB)
 		tword->flags |= W_NOPROCSUB;
 
-if (word->flags & W_ASSIGNRHS)
-  tword->flags |= W_ASSIGNRHS;
+	      if (word->flags & W_ASSIGNRHS)
+		tword->flags |= W_ASSIGNRHS;
 
 	      temp = (char *)NULL;
 
@@ -11216,6 +11216,7 @@ glob_expand_word_list (tlist, eflags)
   register int glob_index;
   WORD_LIST *glob_list, *output_list, *disposables, *next;
   WORD_DESC *tword;
+  int x;
 
   output_list = disposables = (WORD_LIST *)NULL;
   glob_array = (char **)NULL;
@@ -11237,7 +11238,7 @@ glob_expand_word_list (tlist, eflags)
       /* If the word isn't an assignment and contains an unquoted
 	 pattern matching character, then glob it. */
       if ((tlist->word->flags & W_NOGLOB) == 0 &&
-	  unquoted_glob_pattern_p (tlist->word->word))
+	  (x = unquoted_glob_pattern_p (tlist->word->word)))
 	{
 	  glob_array = shell_glob_filename (tlist->word->word);
 
