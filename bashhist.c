@@ -560,15 +560,18 @@ pre_process_line (line, print_changes, addit)
      add that line to the history if ADDIT is non-zero. */
   if (!history_expansion_inhibited && history_expansion && history_expansion_p (line))
     {
+      int old_len;
+
       /* If we are expanding the second or later line of a multi-line
 	 command, decrease history_length so references to history expansions
 	 in these lines refer to the previous history entry and not the
 	 current command. */
+      old_len = history_length;
       if (history_length > 0 && command_oriented_history && current_command_first_line_saved && current_command_line_count > 1)
         history_length--;
       expanded = history_expand (line, &history_value);
       if (history_length >= 0 && command_oriented_history && current_command_first_line_saved && current_command_line_count > 1)
-        history_length++;
+        history_length = old_len;
 
       if (expanded)
 	{
