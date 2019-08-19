@@ -6448,3 +6448,15 @@ subst.c
 	  scalar variable without `set -u' in effect) and just call MB_STRLEN
 	  on the variable value in that case. From a report from
 	  Alkis Georgopoulos <alkisg@gmail.com>
+
+				   8/13
+				   ----
+execute_cmd.c
+	- execute_subshell_builtin_or_function: call subshell_exit() instead of
+	  sh_exit() or exit() so the exit trap gets run. Fixes issue reported
+	  in https://savannah.gnu.org/support/?109840
+	- replace __P with PARAMS
+
+lib/readline/colors.c
+	- _rl_print_color_indicator: eliminate one use of S_ISLNK.
+	  Report and fix from Christian Biesinger <cbiesinger@google.com>

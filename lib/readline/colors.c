@@ -175,7 +175,7 @@ _rl_print_color_indicator (const char *f)
 
   if (linkok == -1 && _rl_color_indicator[C_MISSING].string != NULL)
     colored_filetype = C_MISSING;
-  else if (linkok == 0 && S_ISLNK(mode) && _rl_color_indicator[C_ORPHAN].string != NULL)
+  else if (linkok == 0 && _rl_color_indicator[C_ORPHAN].string != NULL)
     colored_filetype = C_ORPHAN;	/* dangling symlink */
   else if(stat_ok != 0)
     {

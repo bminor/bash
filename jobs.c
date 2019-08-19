@@ -1225,7 +1225,9 @@ delete_job (job_index, dflags)
   js.c_injobs -= ndel;
   if (temp->state == JDEAD)
     {
-      js.c_reaped -= ndel;
+      /* XXX - save_pipeline and restore_pipeline (e.g., for DEBUG trap) can
+	 mess with this total. */
+      js.c_reaped -= ndel;	/* assumes proc hadn't been reaped earlier */
       js.j_ndead--;
       if (js.c_reaped < 0)
 	{
