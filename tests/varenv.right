@@ -146,12 +146,19 @@ declare -x foo="abc"
 inside: declare -x var="value"
 outside: declare -- var="one"
 inside: declare -x var="value"
-outside: declare -x var="value"
-inside: declare -- var="local"
-outside: declare -x var="global"
-foo=<unset> environment foo=
-foo=foo environment foo=foo
-foo=foo environment foo=foo
+outside: declare -- var="outside"
+inside: declare -x var="inside"
+outside: declare -- var="outside"
+outside 1.0: var=one
+outside 1.1: var=one
+inside func: var=two
+outside 2.0: var=two
+inside func: var=two
+outside 2.1: var=two
+inside func1: var=value
+outside 3.0: var=value
+inside func2: var=global
+outside 4.0: var=outside
 ./varenv13.sub: line 3: `var[0]': not a valid identifier
 ./varenv13.sub: line 3: `var[@]': not a valid identifier
 ./varenv13.sub: line 1: declare: var: not found
@@ -207,6 +214,22 @@ after source 1: a b c d e f g h i j k l m n o p q r s t u v w x y z
 varenv15.in: before set: one two three four five six seven eight nine ten
 varenv15.in: after set: a b c d e f g h i j k l m n o p q r s t u v w x y z
 after source 2: a b c d e f g h i j k l m n o p q r s t u v w x y z
+foo=showfoo environment foo=showfoo
+foo=showfoo environment foo=showfoo
+foo=showfoo environment foo=showfoo
+outside: foo=<unset>
+
+posix mode
+foo=showfoo environment foo=showfoo
+outside 1.0: foo=<unset>
+foo=showfoo environment foo=showfoo
+foo=showfoo environment foo=showfoo
+outside 1.1: foo=foo
+foo=<unset> environment foo=
+outside 2.0: foo=<unset>
+foo=foo environment foo=foo
+foo=foo environment foo=foo
+outside 2.1: foo=foo
 a=z
 a=b
 a=z

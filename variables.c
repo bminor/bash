@@ -324,6 +324,7 @@ static void push_func_var __P((PTR_T));
 static void push_builtin_var __P((PTR_T));
 static void push_exported_var __P((PTR_T));
 
+/* This needs to be looked at again. */
 static inline void push_posix_tempvar_internal __P((SHELL_VAR *, int));
 
 static inline int find_special_var __P((const char *));
@@ -4600,7 +4601,6 @@ push_posix_temp_var (data)
 
   var = (SHELL_VAR *)data;
 
-#if 0 /* TAG:bash-5.1 */
   /* Just like do_assignment_internal(). This makes assignments preceding
      special builtins act like standalone assignment statements when in
      posix mode, satisfying the posix requirement that this affect the
@@ -4612,13 +4612,6 @@ push_posix_temp_var (data)
      Set binding_table appropriately. It doesn't matter whether it's correct
      if the variable is local, only that it's not global_variables->table */
   binding_table = v->context ? shell_variables->table : global_variables->table;
-#else
-  binding_table = global_variables->table;
-  if (binding_table == 0)
-    binding_table = global_variables->table = hash_create (VARIABLES_HASH_BUCKETS);
-
-  v = bind_variable_internal (var->name, value_cell (var), binding_table, 0, ASS_FORCE|ASS_NOLONGJMP);
-#endif
 
   /* global variables are no longer temporary and don't need propagating. */
   if (binding_table == global_variables->table)
@@ -4628,9 +4621,6 @@ push_posix_temp_var (data)
     {
       v->attributes |= var->attributes;
       v->attributes &= ~att_tempvar;	/* not a temp var now */
-#if 1	/* TAG:bash-5.1 code doesn't need this, disable for bash-5.1 */
-      v->context = (binding_table == global_variables->table) ? 0 : shell_variables->scope;
-#endif
     }
 
   if (find_special_var (var->name) >= 0)
@@ -4768,6 +4758,15 @@ merge_temporary_env ()
 {
   if (temporary_env)
     dispose_temporary_env (posixly_correct ? push_posix_temp_var : push_temp_var);
+}
+
+/* Temporary function to use if we want to separate function and special
+   builtin behavior. */
+void
+merge_function_temporary_env ()
+{
+  if (temporary_env)
+    dispose_temporary_env (push_temp_var);
 }
 
 void

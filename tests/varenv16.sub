@@ -1,0 +1,38 @@
+# test whether or not temporary environment assignments are exported
+# in posix mode. works now, posix says it will not work in the future
+
+show2()
+{
+        printf %s "foo=${foo-<unset>}"
+        echo -n ' environment foo='
+        printenv foo || echo
+}
+
+showfoo()
+{
+	local foo
+
+	foo=showfoo show2
+}
+
+unset foo
+showfoo
+foo=foo showfoo
+showfoo
+echo outside: "foo=${foo-<unset>}"
+
+echo ; echo 'posix mode'
+set -o posix
+unset foo
+showfoo
+echo outside 1.0: "foo=${foo-<unset>}"
+foo=foo showfoo
+showfoo
+echo outside 1.1: "foo=${foo-<unset>}"
+
+unset foo
+show2
+echo outside 2.0: "foo=${foo-<unset>}"
+foo=foo show2
+show2
+echo outside 2.1: "foo=${foo-<unset>}"

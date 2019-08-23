@@ -6460,3 +6460,18 @@ execute_cmd.c
 lib/readline/colors.c
 	- _rl_print_color_indicator: eliminate one use of S_ISLNK.
 	  Report and fix from Christian Biesinger <cbiesinger@google.com>
+
+				   8/22
+				   ----
+variables.c
+	- push_posix_temp_var: change to use bind_variable and modify variables
+	  at the current local scope or create and modify variables at the
+	  global scope, as if a standalone assignment statement had been
+	  executed. This restores some bash-4.4 backwards compatibility with
+	  respect to posix-mode assignment statements preceding special
+	  builtins and shell functions. The bash-5.0 behavior, while perhaps
+	  defensible, caused too many compatibility problems. Originally
+	  prompted by several discussions with Martijn Dekker; the current
+	  incarnation and tests based on a report to Debian BTS from
+	  Thorsten Glaser <tg@mirbsd.de>
+
