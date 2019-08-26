@@ -4607,6 +4607,8 @@ push_posix_temp_var (data)
      "current execution environment." */
   v = bind_variable (var->name, value_cell (var), ASS_FORCE|ASS_NOLONGJMP);
 
+  /* XXX - do we need to worry about array variables here? */
+
   /* If this modifies an existing local variable, v->context will be non-zero.
      If it comes back with v->context == 0, we bound at the global context.
      Set binding_table appropriately. It doesn't matter whether it's correct
@@ -4669,7 +4671,7 @@ push_temp_var (data)
     var->attributes &= ~(att_tempvar|att_propagate);
   else
     {
-      var->attributes |= att_propagate;
+      var->attributes |= att_propagate;			/* XXX - propagate more than once? */
       if  (binding_table == shell_variables->table)
 	shell_variables->flags |= VC_HASTMPVAR;
     }
@@ -5299,10 +5301,10 @@ push_var_context (name, flags, tempvars)
 /* This can be called from one of two code paths:
 	1. pop_scope, which implements the posix rules for propagating variable
 	   assignments preceding special builtins to the surrounding scope
-	   (push_builtin_var);
+	   (push_builtin_var -- isbltin == 1);
 	2. pop_var_context, which is called from pop_context and implements the
 	   posix rules for propagating variable assignments preceding function
-	   calls to the surrounding scope (push_func_var).
+	   calls to the surrounding scope (push_func_var -- isbltin == 0)
 
   It takes variables out of a temporary environment hash table. We take the
   variable in data.
@@ -5326,9 +5328,32 @@ push_posix_tempvar_internal (var, isbltin)
   posix_var_behavior = posixly_correct;
 #endif
 
+  v = 0;
+
   if (local_p (var) && STREQ (var->name, "-"))
     set_current_options (value_cell (var));
+#if 0	/* TAG: bash-5.1 */
+  /* This takes variable assignments preceding special builtins that can execute
+     multiple commands (source, eval, etc.) and performs the equivalent of
+     an assignment statement to modify the closest enclosing variable (the
+     posix "current execution environment"). This makes the behavior the same
+     as push_posix_temp_var; but the circumstances of calling are slightly
+     different. */
+  else if (tempvar_p (var) && posix_var_behavior)
+    {
+      /* similar to push_posix_temp_var */
+      v = bind_variable (var->name, value_cell (var), ASS_FORCE|ASS_NOLONGJMP);
+      if (v)
+	{
+	  v->attributes |= var->attributes;
+	  if (v->context == 0)
+	    v->attributes &= ~(att_tempvar|att_propagate);
+	}
+    }
+  else if (tempvar_p (var) && propagate_p (var))
+#else
   else if (tempvar_p (var) && (posix_var_behavior || (var->attributes & att_propagate)))
+#endif
     {
       /* Make sure we have a hash table to store the variable in while it is
 	 being propagated down to the global variables table.  Create one if
@@ -5339,16 +5364,6 @@ push_posix_tempvar_internal (var, isbltin)
       /* XXX - should we set v->context here? */
       if (v)
 	v->context = shell_variables->scope;
-#if defined (ARRAY_VARS)
-      if (v && (array_p (var) || assoc_p (var)))
-	{
-	  FREE (value_cell (v));
-	  if (array_p (var))
-	    var_setarray (v, array_copy (array_cell (var)));
-	  else
-	    var_setassoc (v, assoc_copy (assoc_cell (var)));
-	}
-#endif	  
       if (shell_variables == global_variables)
 	var->attributes &= ~(att_tempvar|att_propagate);
       else
@@ -5358,6 +5373,17 @@ push_posix_tempvar_internal (var, isbltin)
     }
   else
     stupidly_hack_special_variables (var->name);	/* XXX */
+
+#if defined (ARRAY_VARS)
+  if (v && (array_p (var) || assoc_p (var)))
+    {
+      FREE (value_cell (v));
+      if (array_p (var))
+	var_setarray (v, array_copy (array_cell (var)));
+      else
+	var_setassoc (v, assoc_copy (assoc_cell (var)));
+    }
+#endif	  
 
   dispose_variable (var);
 }

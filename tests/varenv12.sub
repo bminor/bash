@@ -131,3 +131,28 @@ func2()
 var=outside
 func2
 echo -n 'outside 4.0: ' ; echo "var=${var-<unset>}"
+
+unset -v var
+unset -f fecho foo bar
+
+fecho() {
+    echo $var
+}
+
+foo() {
+    local var="foo: bye bye"
+    var="foo: hello world" fecho
+}
+
+bar() {
+    var="bar: hello world" fecho
+}
+
+var=global
+var=outside foo
+echo after foo: var=$var
+var=global
+var=outside bar
+echo after bar: var=$var
+
+unset -v var
