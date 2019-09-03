@@ -1,9 +1,9 @@
 abc
-./redir.tests: line 15: /tmp/redir-test: cannot overwrite existing file
+./redir.tests: line 28: /tmp/redir-test: cannot overwrite existing file
 abc
 def
 def
-./redir.tests: line 31: $z: ambiguous redirect
+./redir.tests: line 44: $z: ambiguous redirect
 Point 1
 Point 2
 to a
@@ -24,8 +24,8 @@ read line3 "cd"
 read line4 "daemon"
 from stdin: aa
 to stdout
-./redir4.sub: line 32: $fd: ambiguous redirect
-./redir4.sub: line 33: $fd: ambiguous redirect
+./redir4.sub: line 45: $fd: ambiguous redirect
+./redir4.sub: line 46: $fd: ambiguous redirect
 err-and-out:
 to stdout
 to stderr
@@ -44,7 +44,20 @@ kl
 ab
 cd
 cd
-./redir.tests: line 157: redir1.*: No such file or directory
+./redir.tests: line 170: redir1.*: No such file or directory
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 # tests of ksh93-like dup-and-close redirection operators
 exec 9<$0
 
@@ -85,7 +98,7 @@ f ()
     done
 }
 after read
-# tests of ksh93-like dup-and-close redirection operators
+# This program is free software: you can redistribute it and/or modify
 /
 /
 /
@@ -141,7 +154,7 @@ foo
 1
 7
 after: 42
-./redir11.sub: line 40: $(ss= declare -i ss): ambiguous redirect
+./redir11.sub: line 53: $(ss= declare -i ss): ambiguous redirect
 after: 42
 a+=3
 foo

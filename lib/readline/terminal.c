@@ -177,6 +177,19 @@ static char *_rl_term_kI;
 static char *_rl_term_vs;	/* very visible */
 static char *_rl_term_ve;	/* normal */
 
+/* It's not clear how HPUX is so broken here. */
+#ifdef TGETENT_BROKEN
+#  define TGETENT_SUCCESS 0
+#else
+#  define TGETENT_SUCCESS 1
+#endif
+#ifdef TGETFLAG_BROKEN
+#  define TGETFLAG_SUCCESS 0
+#else
+#  define TGETFLAG_SUCCESS 1
+#endif
+#define TGETFLAG(cap)	(tgetflag (cap) == TGETFLAG_SUCCESS)
+
 static void bind_termcap_arrow_keys PARAMS((Keymap));
 
 /* Variables that hold the screen dimensions, used by the display code. */
@@ -483,11 +496,7 @@ _rl_init_terminal_io (const char *terminal_name)
       tgetent_ret = tgetent (term_buffer, term);
     }
 
-#ifdef TGETENT_BROKEN
-  if (tgetent_ret < 0)
-#else
-  if (tgetent_ret <= 0)
-#endif
+  if (tgetent_ret != TGETENT_SUCCESS)
     {
       FREE (term_string_buffer);
       FREE (term_buffer);
@@ -548,7 +557,7 @@ _rl_init_terminal_io (const char *terminal_name)
   if (!_rl_term_cr)
     _rl_term_cr = "\r";
 
-  _rl_term_autowrap = tgetflag ("am") && tgetflag ("xn");
+  _rl_term_autowrap = TGETFLAG ("am") && TGETFLAG ("xn");
 
   /* Allow calling application to set default height and width, using
      rl_set_screen_size */
@@ -563,7 +572,7 @@ _rl_init_terminal_io (const char *terminal_name)
 
   /* Check to see if this terminal has a meta key and clear the capability
      variables if there is none. */
-  term_has_meta = tgetflag ("km") != 0;
+  term_has_meta = TGETFLAG ("km");
   if (term_has_meta == 0)
     _rl_term_mm = _rl_term_mo = (char *)NULL;
 #endif /* !__MSDOS__ */

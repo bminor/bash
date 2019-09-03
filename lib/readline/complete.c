@@ -429,7 +429,11 @@ rl_complete (int ignore, int invoking_key)
 
   if (rl_inhibit_completion)
     return (_rl_insert_char (ignore, invoking_key));
+#if 0
   else if (rl_last_func == rl_complete && completion_changed_buffer == 0 && last_completion_failed == 0)
+#else
+  else if (rl_last_func == rl_complete && completion_changed_buffer == 0)
+#endif
     return (rl_complete_internal ('?'));
   else if (_rl_complete_show_all)
     return (rl_complete_internal ('!'));
@@ -1987,9 +1991,11 @@ rl_complete_internal (int what_to_do)
   int start, end, delimiter, found_quote, i, nontrivial_lcd;
   char *text, *saved_line_buffer;
   char quote_char;
-  int tlen, mlen;
+  int tlen, mlen, saved_last_completion_failed;
 
   RL_SETSTATE(RL_STATE_COMPLETING);
+
+  saved_last_completion_failed = last_completion_failed;
 
   set_completion_defaults (what_to_do);
 
@@ -2104,6 +2110,15 @@ rl_complete_internal (int what_to_do)
       break;
 
     case '?':
+      /* Let's try to insert a single match here if the last completion failed
+	 but this attempt returned a single match. */
+      if (saved_last_completion_failed && matches[0] && *matches[0] && matches[1] == 0)
+	{
+	  insert_match (matches[0], start, matches[1] ? MULT_MATCH : SINGLE_MATCH, &quote_char);
+	  append_to_match (matches[0], delimiter, quote_char, nontrivial_lcd);
+	  break;
+	}
+      
       if (rl_completion_display_matches_hook == 0)
 	{
 	  _rl_sigcleanup = _rl_complete_sigcleanup;

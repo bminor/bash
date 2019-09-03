@@ -6475,3 +6475,51 @@ variables.c
 	  incarnation and tests based on a report to Debian BTS from
 	  Thorsten Glaser <tg@mirbsd.de>
 
+				   8/26
+				   ----
+shell.c,bashhist.c
+	- __P -> PARAMS
+
+shell.c
+	- set_option_defaults,reset_option_defaults: before calling
+	  list_minus_o_options at invocation, call set_option_defaults to
+	  set the options that are initialized to -1 to either 1 or 0, as
+	  appropriate; then call reset_option_defaults to set them back to -1
+	  after list_minus_o_options returns
+	- init_interactive: if enable_history_list == -1, set it to 1, then
+	  set remember_on_history to enable_history_list. Fixes bug reported
+	  by Alex Kerzner <alex.j.kerzner@gmail.com>
+	- init_noninteractive: if enable_history_list == -1, set it to 0, let
+	  bash_history_reinit take care of setting remember_on_history
+	- init_interactive_script: if enable_history_list == -1, set it to 1,
+	  then set remember_on_history to enable_history_list
+
+bashhist.c
+	- enable_history_list: initialize to -1 to note when it gets changed
+	  by -o history or +o history at invocation
+
+				   8/28
+				   ----
+lib/readline/terminal.c
+	- TGETENT_SUCCESS, TGETFLAG_SUCCESS: defines to represent successful
+	  returns from tgetent and tgetflag, since HPUX manages to get them
+	  wrong. New patch from Osipov, Michael <michael.osipov@siemens.com>
+	- TGETFLAG: new define, make sure tgetflag returns TGETENT_SUCCESS
+	- _rl_init_terminal_io: use TGETENT_SUCCESS and TGETFLAG
+
+configure.ac
+	- hpux: make sure to define TGETFLAG_BROKEN
+
+				   8/30
+				   ----
+tests
+	- add copyright notices to all scripts longer than 15 lines at the
+	  request of the FSF
+
+				    9/1
+				    ---
+lib/readline/complete.c
+	- _rl_complete_internal: move logic that checks whether the last
+	  completion attempt failed and the current attempt returned a single
+	  match and insert the single completion here. A better implementation
+	  of Richard Stallman's suggestion of 2/23.

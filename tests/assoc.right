@@ -7,17 +7,17 @@ declare -A fluff=([foo]="one" [bar]="two" )
 declare -A fluff=([foo]="one" [bar]="two" )
 declare -A fluff=([bar]="two" )
 declare -A fluff=([bar]="newval" [qux]="assigned" )
-./assoc.tests: line 26: chaff: four: must use subscript when assigning associative array
+./assoc.tests: line 39: chaff: four: must use subscript when assigning associative array
 declare -A BASH_ALIASES=()
 declare -A BASH_CMDS=()
 declare -Ai chaff=([zero]="5" [one]="10" )
-declare -Ar waste=([lineno]="28" [source]="./assoc.tests" [version]="4.0-devel" [pid]="42134" )
+declare -Ar waste=([lineno]="41" [source]="./assoc.tests" [version]="4.0-devel" [pid]="42134" )
 declare -A wheat=([two]="b" [three]="c" [zero]="0" [one]="a" )
 declare -A chaff=(["hello world"]="flip" [zero]="5" [one]="10" )
-./assoc.tests: line 38: waste: readonly variable
-./assoc.tests: line 39: unset: waste: cannot unset: readonly variable
-./assoc.tests: line 40: chaff[*]: bad array subscript
-./assoc.tests: line 41: [*]=12: invalid associative array key
+./assoc.tests: line 51: waste: readonly variable
+./assoc.tests: line 52: unset: waste: cannot unset: readonly variable
+./assoc.tests: line 53: chaff[*]: bad array subscript
+./assoc.tests: line 54: [*]=12: invalid associative array key
 declare -A chaff=(["hello world"]="flip" [one]="a" )
 flip
 argv[1] = <multiple>
@@ -32,9 +32,9 @@ argv[2] = <words>
 argv[3] = <flip>
 argv[4] = <a>
 argv[1] = <multiple words flip a>
-./assoc.tests: line 58: declare: chaff: cannot destroy array variables in this way
-./assoc.tests: line 60: chaff[*]: bad array subscript
-./assoc.tests: line 61: [*]=12: invalid associative array key
+./assoc.tests: line 71: declare: chaff: cannot destroy array variables in this way
+./assoc.tests: line 73: chaff[*]: bad array subscript
+./assoc.tests: line 74: [*]=12: invalid associative array key
 declare -A wheat=(["foo bar"]="qux qix" [six]="6" )
 argv[1] = <qux>
 argv[2] = <qix>
@@ -137,7 +137,7 @@ argv[4] = <FOOQ>
 abc
 def
 def
-./assoc5.sub: line 13: declare: `myarray[foo[bar]=bleh': not a valid identifier
+./assoc5.sub: line 26: declare: `myarray[foo[bar]=bleh': not a valid identifier
 bleh def abc
 myarray=([foo]="bleh" ["]"]="def" ["a]=test1;#a"]="123" ["a]a"]="abc" )
 
@@ -200,10 +200,10 @@ declare -A hash=([key]="value1 value2" )
 declare -A b=([")"]="" ["\""]="" ["]"]="" ["\\"]="" ["\`"]="" )
 declare -A b=(["]"]="" ["\`"]="" )
 declare -A dict=(["'"]="3" ["\""]="1" ["\\"]="4" ["\`"]="2" )
-./assoc9.sub: line 23: unset: `dict[']': not a valid identifier
-./assoc9.sub: line 23: unset: `dict["]': not a valid identifier
-./assoc9.sub: line 23: unset: `dict[\]': not a valid identifier
-./assoc9.sub: line 23: unset: `dict[`]': not a valid identifier
+./assoc9.sub: line 36: unset: `dict[']': not a valid identifier
+./assoc9.sub: line 36: unset: `dict["]': not a valid identifier
+./assoc9.sub: line 36: unset: `dict[\]': not a valid identifier
+./assoc9.sub: line 36: unset: `dict[`]': not a valid identifier
 declare -A dict=(["'"]="3" ["\""]="1" ["\\"]="4" ["\`"]="2" )
 declare -A dict=(["'"]="3" ["\""]="1" ["\\"]="4" ["\`"]="2" )
 declare -A dict=()
@@ -211,10 +211,10 @@ declare -A dict=()
 4
 a[$b]= 5
 declare -A a=(["80's"]="Depeche Mode" )
-./assoc9.sub: line 71: read: `a[80's]': not a valid identifier
+./assoc9.sub: line 84: read: `a[80's]': not a valid identifier
 declare -A a
 declare -A a=(["80's"]="Depeche Mode" )
-./assoc9.sub: line 83: printf: `a[80's]': not a valid identifier
+./assoc9.sub: line 96: printf: `a[80's]': not a valid identifier
 declare -A a
 declare -A a=(["80's"]="Depeche Mode" )
 6
@@ -222,9 +222,9 @@ declare -A a=(["80's"]="Depeche Mode" )
 1+5
 declare -A a=(["\$(date >&2)"]="5" )
 declare -A myarray=([foo]="bleh" ["foo[bar"]="bleh" )
-./assoc10.sub: line 1: declare: a: cannot convert indexed to associative array
+./assoc10.sub: line 14: declare: a: cannot convert indexed to associative array
 f: declare -a a
-./assoc10.sub: line 4: declare: a: cannot convert associative to indexed array
+./assoc10.sub: line 17: declare: a: cannot convert associative to indexed array
 f: declare -A a
 
 f: declare -a a

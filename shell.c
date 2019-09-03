@@ -1,6 +1,6 @@
 /* shell.c -- GNU's idea of the POSIX shell specification. */
 
-/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2019 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -303,35 +303,38 @@ static FILE *default_input;
 static STRING_INT_ALIST *shopt_alist;
 static int shopt_ind = 0, shopt_len = 0;
 
-static int parse_long_options __P((char **, int, int));
-static int parse_shell_options __P((char **, int, int));
-static int bind_args __P((char **, int, int, int));
+static int parse_long_options PARAMS((char **, int, int));
+static int parse_shell_options PARAMS((char **, int, int));
+static int bind_args PARAMS((char **, int, int, int));
 
-static void start_debugger __P((void));
+static void start_debugger PARAMS((void));
 
-static void add_shopt_to_alist __P((char *, int));
-static void run_shopt_alist __P((void));
+static void add_shopt_to_alist PARAMS((char *, int));
+static void run_shopt_alist PARAMS((void));
 
-static void execute_env_file __P((char *));
-static void run_startup_files __P((void));
-static int open_shell_script __P((char *));
-static void set_bash_input __P((void));
-static int run_one_command __P((char *));
+static void execute_env_file PARAMS((char *));
+static void run_startup_files PARAMS((void));
+static int open_shell_script PARAMS((char *));
+static void set_bash_input PARAMS((void));
+static int run_one_command PARAMS((char *));
 #if defined (WORDEXP_OPTION)
-static int run_wordexp __P((char *));
+static int run_wordexp PARAMS((char *));
 #endif
 
-static int uidget __P((void));
+static int uidget PARAMS((void));
 
-static void init_interactive __P((void));
-static void init_noninteractive __P((void));
-static void init_interactive_script __P((void));
+static void set_option_defaults PARAMS((void));
+static void reset_option_defaults PARAMS((void));
 
-static void set_shell_name __P((char *));
-static void shell_initialize __P((void));
-static void shell_reinitialize __P((void));
+static void init_interactive PARAMS((void));
+static void init_noninteractive PARAMS((void));
+static void init_interactive_script PARAMS((void));
 
-static void show_shell_usage __P((FILE *, int));
+static void set_shell_name PARAMS((char *));
+static void shell_initialize PARAMS((void));
+static void shell_reinitialize PARAMS((void));
+
+static void show_shell_usage PARAMS((FILE *, int));
 
 #ifdef __CYGWIN__
 static void
@@ -907,7 +910,9 @@ parse_shell_options (argv, arg_start, arg_end)
 	      o_option = argv[next_arg];
 	      if (o_option == 0)
 		{
+		  set_option_defaults ();
 		  list_minus_o_opts (-1, (on_or_off == '-') ? 0 : 1);
+		  reset_option_defaults ();
 		  break;
 		}
 	      if (set_minus_o_option (on_or_off, o_option) != EXECUTION_SUCCESS)
@@ -1778,13 +1783,36 @@ set_shell_name (argv0)
     shell_name = PROGRAM;
 }
 
+/* Some options are initialized to -1 so we have a way to determine whether
+   they were set on the command line. This is an issue when listing the option
+   values at invocation (`bash -o'), so we set the defaults here and reset
+   them after the call to list_minus_o_options (). */
+/* XXX - could also do this for histexp_flag, jobs_m_flag */
+static void
+set_option_defaults ()
+{
+#if defined (HISTORY)
+  enable_history_list = 0;
+#endif
+}
+
+static void
+reset_option_defaults ()
+{
+#if defined (HISTORY)
+  enable_history_list = -1;
+#endif
+}
+
 static void
 init_interactive ()
 {
   expand_aliases = interactive_shell = startup_state = 1;
   interactive = 1;
 #if defined (HISTORY)
-  remember_on_history = enable_history_list = 1;	/* XXX */
+  if (enable_history_list == -1)
+    enable_history_list = 1;				/* set default  */
+  remember_on_history = enable_history_list;
 #  if defined (BANG_HISTORY)
   histexp_flag = history_expansion;			/* XXX */
 #  endif
@@ -1795,6 +1823,8 @@ static void
 init_noninteractive ()
 {
 #if defined (HISTORY)
+  if (enable_history_list == -1)			/* set default */
+    enable_history_list = 0;
   bash_history_reinit (0);
 #endif /* HISTORY */
   interactive_shell = startup_state = interactive = 0;
@@ -1810,10 +1840,14 @@ init_noninteractive ()
 static void
 init_interactive_script ()
 {
+#if defined (HISTORY)
+  if (enable_history_list == -1)
+    enable_history_list = 1;
+#endif
   init_noninteractive ();
   expand_aliases = interactive_shell = startup_state = 1;
 #if defined (HISTORY)
-  remember_on_history = enable_history_list = 1;	/* XXX */
+  remember_on_history = enable_history_list;	/* XXX */
 #endif
 }
 

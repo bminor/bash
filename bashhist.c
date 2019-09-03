@@ -68,10 +68,10 @@ extern int rl_done, rl_dispatching;	/* should really include readline.h */
 extern int errno;
 #endif
 
-static int histignore_item_func __P((struct ign *));
-static int check_history_control __P((char *));
-static void hc_erasedups __P((char *));
-static void really_add_history __P((char *));
+static int histignore_item_func PARAMS((struct ign *));
+static int check_history_control PARAMS((char *));
+static void hc_erasedups PARAMS((char *));
+static void really_add_history PARAMS((char *));
 
 static struct ignorevar histignore =
 {
@@ -89,7 +89,7 @@ static struct ignorevar histignore =
    list.  This is different than the user-controlled behaviour; this
    becomes zero when we read lines from a file, for example. */
 int remember_on_history = 0;
-int enable_history_list = 0;	/* value for `set -o history' */
+int enable_history_list = -1;	/* value for `set -o history' */
 
 /* The number of lines that Bash has added to this history session.  The
    difference between the number of the top element in the history list
@@ -193,17 +193,17 @@ int hist_verify;
 int dont_save_function_defs;
 
 #if defined (BANG_HISTORY)
-static int bash_history_inhibit_expansion __P((char *, int));
+static int bash_history_inhibit_expansion PARAMS((char *, int));
 #endif
 #if defined (READLINE)
-static void re_edit __P((char *));
+static void re_edit PARAMS((char *));
 #endif
-static int history_expansion_p __P((char *));
-static int shell_comment __P((char *));
-static int should_expand __P((char *));
-static HIST_ENTRY *last_history_entry __P((void));
-static char *expand_histignore_pattern __P((char *));
-static int history_should_ignore __P((char *));
+static int history_expansion_p PARAMS((char *));
+static int shell_comment PARAMS((char *));
+static int should_expand PARAMS((char *));
+static HIST_ENTRY *last_history_entry PARAMS((void));
+static char *expand_histignore_pattern PARAMS((char *));
+static int history_should_ignore PARAMS((char *));
 
 #if defined (BANG_HISTORY)
 /* Is the history expansion starting at string[i] one that should not
