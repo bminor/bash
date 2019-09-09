@@ -440,8 +440,6 @@ parse_and_execute (string, from_file, flags)
 		}
 #endif /* ONESHOT */
 
-itrace("evalstring: command->type == %d but string = `%s'", command->type, bash_input.location.string);
-
 	      /* See if this is a candidate for $( <file ). */
 	      if (startup_state == 2 &&
 		  (subshell_environment & SUBSHELL_COMSUB) &&

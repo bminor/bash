@@ -6523,3 +6523,10 @@ lib/readline/complete.c
 	  completion attempt failed and the current attempt returned a single
 	  match and insert the single completion here. A better implementation
 	  of Richard Stallman's suggestion of 2/23.
+
+				    9/3
+				    ---
+bashline.c
+	- edit_and_execute_command: reset the readahead token after calling
+	  restore_parser_state, in case some call to reset_parser set
+	  token_to_read. Fixes bug reported by null <avalonvales@protonmail.com>

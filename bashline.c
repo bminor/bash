@@ -1022,6 +1022,10 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
   save_parser_state (&ps);
   r = parse_and_execute (command, (editing_mode == VI_EDITING_MODE) ? "v" : "C-xC-e", SEVAL_NOHIST);
   restore_parser_state (&ps);
+
+  /* if some kind of reset_parser was called, undo it. */
+  reset_readahead_token ();
+
   if (rl_prep_term_function)
     (*rl_prep_term_function) (metaflag);
 
