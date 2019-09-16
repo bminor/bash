@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.0, version 5.011])dnl
+AC_REVISION([for Bash 5.0, version 5.014])dnl
 
 define(bashvers, 5.0)
 define(relstatus, maint)
@@ -850,9 +850,12 @@ AC_CHECK_DECLS([confstr])
 AC_CHECK_DECLS([printf])
 AC_CHECK_DECLS([sbrk])
 AC_CHECK_DECLS([setregid])
-AC_CHECK_DECLS[(setresuid, setresgid])
+dnl AC_CHECK_DECLS[(setresuid])
+dnl AC_CHECK_DECLS[(setresgid])
 AC_CHECK_DECLS([strcpy])
 AC_CHECK_DECLS([strsignal])
+
+AC_CHECK_FUNCS(setresuid setresgid)
 
 dnl Extra test to detect the horribly broken HP/UX 11.00 strtold(3)
 AC_CHECK_DECLS([strtold], [

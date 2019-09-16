@@ -139,6 +139,7 @@ typedef int (*_bashfunc)(const char *, ...);
 typedef int (*_bashfunc)();
 #endif
 #include <stdlib.h>
+int
 main()
 {
 _bashfunc pf;
@@ -200,6 +201,7 @@ AC_CACHE_VAL(bash_cv_under_sys_siglist,
 #ifndef UNDER_SYS_SIGLIST_DECLARED
 extern char *_sys_siglist[];
 #endif
+int
 main()
 {
 char *msg = (char *)_sys_siglist[2];
@@ -228,6 +230,7 @@ AC_CACHE_VAL(bash_cv_sys_siglist,
 #if !HAVE_DECL_SYS_SIGLIST
 extern char *sys_siglist[];
 #endif
+int
 main()
 {
 char *msg = sys_siglist[2];
@@ -281,6 +284,7 @@ AC_CACHE_VAL(bash_cv_dup2_broken,
 #include <sys/types.h>
 #include <fcntl.h>
 #include <stdlib.h>
+int
 main()
 {
   int fd1, fd2, fl;
@@ -308,7 +312,8 @@ AC_DEFUN(BASH_FUNC_STRSIGNAL,
 [AC_MSG_CHECKING([for the existence of strsignal])
 AC_CACHE_VAL(bash_cv_have_strsignal,
 [AC_TRY_LINK([#include <sys/types.h>
-#include <signal.h>],
+#include <signal.h>
+#include <string.h>],
 [char *s = (char *)strsignal(2);],
  bash_cv_have_strsignal=yes, bash_cv_have_strsignal=no)])
 AC_MSG_RESULT($bash_cv_have_strsignal)
@@ -329,6 +334,9 @@ AC_CACHE_VAL(bash_cv_opendir_not_robust,
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
 #if defined(HAVE_DIRENT_H)
 # include <dirent.h>
 #else
@@ -344,6 +352,7 @@ AC_CACHE_VAL(bash_cv_opendir_not_robust,
 # endif
 #endif /* HAVE_DIRENT_H */
 #include <stdlib.h>
+int
 main()
 {
 DIR *dir;
@@ -524,6 +533,7 @@ AC_TRY_RUN([
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <stdlib.h>
+int
 main()
 {
 #ifdef HAVE_QUAD_T
@@ -609,6 +619,7 @@ getenv (name)
 {
 return "42";
 }
+int
 main()
 {
 char *s;
@@ -695,6 +706,11 @@ AC_DEFUN(BASH_FUNC_ULIMIT_MAXFDS,
 [AC_MSG_CHECKING(whether ulimit can substitute for getdtablesize)
 AC_CACHE_VAL(bash_cv_ulimit_maxfds,
 [AC_TRY_RUN([
+#include <stdlib.h>
+#ifdef HAVE_ULIMIT_H
+#include <ulimit.h>
+#endif
+int
 main()
 {
 long maxfds = ulimit(4, 0L);
@@ -718,7 +734,9 @@ AC_CACHE_VAL(bash_cv_getcwd_malloc,
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <stdlib.h>
 
+int
 main()
 {
 	char	*xpwd;
@@ -768,12 +786,13 @@ AC_CACHE_VAL(bash_cv_fnm_extmatch,
 [AC_TRY_RUN([
 #include <fnmatch.h>
 
+int
 main()
 {
 #ifdef FNM_EXTMATCH
-  exit (0);
+  return (0);
 #else
-  exit (1);
+  return (1);
 #endif
 }
 ], bash_cv_fnm_extmatch=yes, bash_cv_fnm_extmatch=no,
@@ -799,6 +818,7 @@ AC_CACHE_VAL(bash_cv_func_sigsetjmp,
 #include <setjmp.h>
 #include <stdlib.h>
 
+int
 main()
 {
 #if !defined (_POSIX_VERSION) || !defined (HAVE_POSIX_SIGNALS)
@@ -847,7 +867,10 @@ AC_CACHE_VAL(bash_cv_func_strcoll_broken,
 #if defined (HAVE_LOCALE_H)
 #include <locale.h>
 #endif
+#include <string.h>
+#include <stdlib.h>
 
+int
 main(c, v)
 int     c;
 char    *v[];
@@ -947,6 +970,7 @@ AC_CACHE_VAL(bash_cv_struct_stat_st_blocks,
 #include <sys/stat.h>
 ],
 [
+int
 main()
 {
 static struct stat a;
@@ -1254,7 +1278,11 @@ AC_CACHE_VAL(bash_cv_pgrp_pipe,
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>
 #endif
+#ifdef HAVE_SYS_WAIT_H
+#  include <sys/wait.h>
+#endif
 #include <stdlib.h>
+int
 main()
 {
 # ifdef GETPGRP_VOID
@@ -1350,6 +1378,7 @@ int s;
   nsigint++;
 }
 
+int
 main()
 {
 	nsigint = 0;
@@ -1433,9 +1462,11 @@ AC_CACHE_VAL(bash_cv_sys_named_pipes,
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <stdio.h>
 #include <stdlib.h>
 
 /* Add more tests in here as appropriate. */
+int
 main()
 {
 int fd, err;
@@ -1673,6 +1704,7 @@ AC_CACHE_VAL(bash_cv_unusable_rtsigs,
 #  define NSIG 64
 #endif
 
+int
 main ()
 {
   int n_sigs = 2 * NSIG;
@@ -1787,6 +1819,7 @@ bash_cv_wcwidth_broken,
 #include <locale.h>
 #include <wchar.h>
 
+int
 main(c, v)
 int     c;
 char    **v;
@@ -1855,6 +1888,7 @@ AC_CACHE_VAL(ac_cv_rl_version,
 
 extern int rl_gnu_readline_p;
 
+int
 main()
 {
 	FILE *fp;
@@ -1944,7 +1978,9 @@ AC_CACHE_VAL(bash_cv_func_ctype_nonascii,
 #endif
 #include <stdio.h>
 #include <ctype.h>
+#include <stdlib.h>
 
+int
 main(c, v)
 int	c;
 char	*v[];
@@ -1987,10 +2023,12 @@ AC_CACHE_VAL(bash_cv_wcontinued_broken,
 #include <sys/wait.h>
 #include <unistd.h>
 #include <errno.h>
+#include <stdlib.h>
 
 #ifndef errno
 extern int errno;
 #endif
+int
 main()
 {
 	int	x;
@@ -2058,6 +2096,7 @@ AC_DEFUN([BASH_FUNC_SNPRINTF],
 #include <stdio.h>
 #include <stdlib.h>
 
+int
 main()
 {
   int n;
@@ -2114,6 +2153,7 @@ foo(format, va_alist)
   return n;
 }
 
+int
 main()
 {
   int n;
@@ -2143,6 +2183,7 @@ AC_CACHE_VAL(bash_cv_wexitstatus_offset,
 
 #include <sys/wait.h>
 
+int
 main(c, v)
      int c;
      char **v;

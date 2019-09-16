@@ -753,7 +753,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
   reap_procsubs ();
 #  endif
 
-  if (variable_context != 0)	/* XXX - also if sourcelevel != 0? */
+  if (variable_context != 0 || executing_list)	/* XXX - also if sourcelevel != 0? */
     {
       ofifo = num_fifos ();
       ofifo_list = copy_fifo_list ((int *)&osize);
@@ -2694,6 +2694,7 @@ execute_connection (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	}
       executing_list++;
       QUIT;
+
 #if 1
       execute_command (command->value.Connection->first);
 #else

@@ -38,13 +38,13 @@ static void
 sigfpe_handler (int sig)
 {
   /* Exit with code 0 if SIGFPE, with code 1 if any other signal.  */
-  _exit (sig != SIGFPE);
+  exit (sig != SIGFPE);
 }
 
 int x = 1;
 int y = 0;
 int z;
-int nan;
+int xnan;
 
 int main ()
 {
@@ -59,7 +59,7 @@ int main ()
 #endif
 
   z = x / y;
-  nan = y / y;
+  xnan = y / y;
   exit (2);
 }
 ]])],

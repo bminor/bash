@@ -243,6 +243,9 @@ AC_DEFUN([gt_INTL_SUBDIR_CORE],
     stpcpy strcasecmp strdup strtoul tsearch argz_count argz_stringify \
     argz_next __fsetlocking])
 
+  dnl ADDED FOR BASH
+  AC_CHECK_FUNCS([localeconv])
+
   dnl Use the *_unlocked functions only if they are declared.
   dnl (because some of them were defined without being declared in Solaris
   dnl 2.5.1 but were removed in Solaris 2.6, whereas we want binaries built

@@ -6530,3 +6530,33 @@ bashline.c
 	- edit_and_execute_command: reset the readahead token after calling
 	  restore_parser_state, in case some call to reset_parser set
 	  token_to_read. Fixes bug reported by null <avalonvales@protonmail.com>
+
+				    9/9
+				    ---
+execute_cmd.c
+	- execute_command_internal: if we're executing a command list
+	  (executing_list != 0), save the old fifo list and close any new
+	  FIFOs that the command opens. Fixes bug reported by
+	  Kamil Cukrowski <kamilcukrowski@gmail.com>
+
+				   9/10
+				   ----
+aclocal.m4,m4/intdiv0.m4
+	- make sure `exit' is used consistently with <stdlib.h> included
+	- make sure `main' isn't declared to implicitly return int
+	- include <ulimit.h> before using ulimit
+	- include <string.h> before testing string functions
+	- fixes from Florian Weimer <fweimer@redhat.com>
+
+configure.ac
+	- setresuid,setresgid: use AC_CHECK_FUNCS instead of AC_CHECK_DECL,
+	  which always fails
+
+shell.c
+	- disable_priv_mode: use HAVE_SETRESUID and HAVE_SETRESGID instead of
+	  the HAVE_DECL variants, which always fail configure tests
+
+m4/intl.m4
+	- gt_INTL_SUBDIR_CORE: add back check for localeconv, removed in
+	  newer gettext releases
+

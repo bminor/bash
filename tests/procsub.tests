@@ -17,8 +17,9 @@
 eval cat <(echo test1)
 eval "echo foo;cat" <(echo test2)
 
-unset f
-f=<(echo test3); cat "$f"
+# this doesn't work, and it never should have
+#unset f
+#f=<(echo test3); cat "$f"
 
 unset f
 eval f=<(echo test4) "; cat \$f"

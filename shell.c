@@ -1305,7 +1305,7 @@ disable_priv_mode ()
 {
   int e;
 
-#if HAVE_DECL_SETRESUID
+#if HAVE_SETRESUID
   if (setresuid (current_user.uid, current_user.uid, current_user.uid) < 0)
 #else
   if (setuid (current_user.uid) < 0)
@@ -1318,7 +1318,7 @@ disable_priv_mode ()
 	exit (e);
 #endif
     }
-#if HAVE_DECL_SETRESGID
+#if HAVE_SETRESGID
   if (setresgid (current_user.gid, current_user.gid, current_user.gid) < 0)
 #else
   if (setgid (current_user.gid) < 0)
