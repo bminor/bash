@@ -5539,6 +5539,8 @@ reap_procsubs ()
   reap_some_procsubs (nfifo);
 }
 
+#if 0
+/* UNUSED */
 void
 wait_procsubs ()
 {
@@ -5549,11 +5551,12 @@ wait_procsubs ()
       if (fifo_list[i].proc != (pid_t)-1 && fifo_list[i].proc > 0)
 	{
 	  r = wait_for (fifo_list[i].proc);
-	  /* add to bgpids list? have to make interface public */
+	  save_proc_status (fifo_list[i].proc, r);
 	  fifo_list[i].proc = (pid_t)-1;
 	}
     }
 }
+#endif
 
 int
 fifos_pending ()
@@ -5773,6 +5776,8 @@ reap_procsubs ()
   reap_some_procsubs (totfds);
 }
 
+#if 0
+/* UNUSED */
 void
 wait_procsubs ()
 {
@@ -5783,11 +5788,12 @@ wait_procsubs ()
       if (dev_fd_list[i] != (pid_t)-1 && dev_fd_list[i] > 0)
 	{
 	  r = wait_for (dev_fd_list[i]);
-	  /* add to bgpids list? have to make interface public */
+	  save_proc_status (dev_fd_list[i], r);
 	  dev_fd_list[i] = (pid_t)-1;
 	}
     }
 }
+#endif
 
 #if defined (NOTDEF)
 print_dev_fd_list ()
@@ -5937,9 +5943,11 @@ process_substitute (string, open_for_read_in_child)
   if (pid > 0)
     {
 #if defined (JOB_CONTROL)
-      if (last_procsub_child)
-	discard_last_procsub_child ();
       last_procsub_child = restore_pipeline (0);
+      /* We assume that last_procsub_child->next == last_procsub_child because
+	 of how jobs.c:add_process() works. */
+      last_procsub_child->next = 0;
+      procsub_add (last_procsub_child);
 #endif
 
 #if defined (HAVE_DEV_FD)
@@ -5966,6 +5974,9 @@ process_substitute (string, open_for_read_in_child)
 #if defined (JOB_CONTROL)
   /* make sure we don't have any job control */
   set_job_control (0);
+
+  /* Clear out any existing list of process substitutions */
+  procsub_clear ();
 
   /* The idea is that we want all the jobs we start from an async process
      substitution to be in the same process group, but not the same pgrp

@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Jul  8 15:14:50 EDT 2019
+.\"	Last Change: Fri Sep 20 15:30:19 EDT 2019
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2019 July 8" "GNU Bash 5.0"
+.TH BASH 1 "2019 September 20" "GNU Bash 5.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -742,7 +742,9 @@ to be matched as a string.
 An additional binary operator, \fB=~\fP, is available, with the same
 precedence as \fB==\fP and \fB!=\fP.
 When it is used, the string to the right of the operator is considered
-a POSIX extended regular expression and matched accordingly (as in \fIregex\fP(3)).
+a POSIX extended regular expression and matched accordingly
+(using the POSIX \fIregcomp\fP and \fIregexec\fP interfaces
+usually described in \fIregex\fP(3)).
 The return value is 0 if the string matches
 the pattern, and 1 otherwise.
 If the regular expression is syntactically incorrect, the conditional
@@ -8494,7 +8496,7 @@ does not specify a valid job or
 .I jobspec
 specifies a job that was started without job control.
 .TP
-\fBgetopts\fP \fIoptstring\fP \fIname\fP [\fIargs\fP]
+\fBgetopts\fP \fIoptstring\fP \fIname\fP [\fIarg ...\fP]
 .B getopts
 is used by shell procedures to parse positional parameters.
 .I optstring
@@ -8540,8 +8542,9 @@ and \fIname\fP is set to ?.
 .sp 1
 .B getopts
 normally parses the positional parameters, but if more arguments are
-given in
-.IR args ,
+supplied as
+.I arg
+values,
 .B getopts
 parses those instead.
 .sp 1

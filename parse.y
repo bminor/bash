@@ -4435,7 +4435,7 @@ xparse_dolparen (base, string, indp, flags)
       return ret;
     }
 
-/*itrace("xparse_dolparen: size = %d shell_input_line = `%s'", shell_input_line_size, shell_input_line);*/
+/*itrace("xparse_dolparen: size = %d shell_input_line = `%s' string=`%s'", shell_input_line_size, shell_input_line, string);*/
   sflags = SEVAL_NONINT|SEVAL_NOHIST|SEVAL_NOFREE;
   if (flags & SX_NOLONGJMP)
     sflags |= SEVAL_NOLONGJMP;
@@ -4459,11 +4459,13 @@ xparse_dolparen (base, string, indp, flags)
   if (current_token == shell_eof_token)
     yyclearin;		/* might want to clear lookahead token unconditionally */
 
+  reset_parser ();
+  /* reset_parser() clears shell_input_line and associated variables, including
+     parser_state, so we want to reset things, then restore what we need. */
+  restore_input_line_state (&ls);
+
   shell_eof_token = orig_eof_token;
   restore_parser_state (&ps);
-  reset_parser ();
-  /* reset_parser clears shell_input_line and associated variables */
-  restore_input_line_state (&ls);
 
 #if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
   pushed_string_list = saved_pushed_strings;

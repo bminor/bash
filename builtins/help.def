@@ -1,7 +1,7 @@
 This file is help.def, from which is created help.c.
 It implements the builtin "help" in Bash.
 
-Copyright (C) 1987-2015 Free Software Foundation, Inc.
+Copyright (C) 1987-2019 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -132,7 +132,7 @@ help_builtin (list)
     {
       printf ("%s", ngettext ("Shell commands matching keyword `", "Shell commands matching keywords `", (list->next ? 2 : 1)));
       print_word_list (list, ", ");
-      printf ("'\n\n");
+      printf ("%s", _("'\n\n"));
     }
 
   for (match_found = 0, pattern = ""; list; list = list->next)

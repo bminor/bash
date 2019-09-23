@@ -6560,3 +6560,77 @@ m4/intl.m4
 	- gt_INTL_SUBDIR_CORE: add back check for localeconv, removed in
 	  newer gettext releases
 
+				   9/16
+				   ----
+builtins/help.def
+	- help_builtin: make the closing quote printed after the argument list
+	  for a glob pattern argument a translatable string to ease translation
+	  for certain languages. Report from Roland Illig <roland.illig@gmx.de>
+
+builtins/{reserved,complete,exec,getopts}.def
+	- minor typographical fixes from Roland Illig <roland.illig@gmx.de>
+
+siglist.c
+	- include general.h for INT_STRLEN_BOUND
+	- initialize_siglist: use the same string for the strlen and xmalloc
+	  for the message about an unknown signal number; use INT_STRLEN_BOUND
+	  instead of a fixed 10 for the number
+
+builtins/getopts.def,doc/{bash.1,bashref.texi}
+	- getopts: minor changes to the description of the effect of supplying
+	  additional arguments. Report from Roland Illig <roland.illig@gmx.de>
+
+				   9/17
+				   ----
+jobs.[ch]
+	- save_proc_status: external interface to bgp_add, takes care of
+	  blocking and unblocking SIGCHLD
+	- __P -> PARAMS
+
+				   9/18
+				   ----
+jobs.[ch]
+	- procsub_{free,add,search,delete,waitpid,waitall,clear,prune}: new
+	  functions to keep track of the list of active process substitutions
+	  and their statuses. Implementation is currently a singly-linked list
+	  of PROCESS *, so functions that expect a PROCESS * to manipulate
+	  continue to work. Inspired by report from leo.dalecki@ntymail.com
+	- find_pipeline,cleanup_dead_jobs,wait_for_background_pids: call new
+	  procsub_* functions to manage procsub list; don't call the functions
+	  in subst.c any more
+
+subst.c
+	- process_substitute: call procsub_add with the PROCESS * returned
+	  from make_child; let the functions in jobs.c manage the list.
+	  waitchld continues to set the pid field in the fifo list as a hint
+	  that a particular fd or FIFO is no longer used and can be reaped
+	- process_substitute: let the child process clear out any existing
+	  procsub pid list
+	- wait_procsubs: no longer compiled in
+
+sig.c
+	- termsig_handler: replace discard_last_procsub_child with call to
+	  procsub_clear
+
+lib/readline/display.c
+	- init_line_structures: fix a problem which results in references to
+	  uninitialized memory when gdb sets the number of columns to 32767
+	  (their `unlimited'). Modification of change from 5/23. Report and
+	  fix from Andrew Burgess <andrew.burgess@embecosm.com>
+
+				   9/19
+				   ----
+parse.y
+	- xparse_dolparen: after calling parse_string to consume input, make
+	  sure to reset the parser (reset_parser()) before restoring the EOF
+	  token and the parser_state variable. Fixes issue with nested traps
+	  running command substitutions in command lines with command
+	  substitutions reported by Travis Everett <travis.a.everett@gmail.com>
+
+				   9/20
+				   ----
+doc/{bashref.texi,bash.1}
+	- fixed a typo in the example for the =~ operator: the ? should follow
+	  the (a), not precede it. Report from hk <hkadeveloper@gmail.com>
+	- some changes to the text describing regular expression matching for
+	  the =~ operator

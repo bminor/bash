@@ -584,7 +584,7 @@ termsig_handler (sig)
 #if defined (PROCESS_SUBSTITUTION)
   unlink_fifo_list ();
 #  if defined (JOB_CONTROL)
-  discard_last_procsub_child ();
+  procsub_clear ();
 #  endif
 #endif /* PROCESS_SUBSTITUTION */
 

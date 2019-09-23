@@ -4304,15 +4304,6 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	  if (pipe_out != NO_PIPE)
 	    result = last_command_exit_value;
 	  close_pipes (pipe_in, pipe_out);
-#if defined (PROCESS_SUBSTITUTION) && defined (HAVE_DEV_FD)
-#if 0
-	  /* Close /dev/fd file descriptors in the parent after forking the
-	     last child in a (possibly one-element) pipeline.  Defer this
-	     until any running shell function completes. */
-	  if (pipe_out == NO_PIPE && variable_context == 0)	/* XXX */
-	    unlink_fifo_list ();		/* XXX */
-#endif
-#endif
 	  command_line = (char *)NULL;      /* don't free this. */
 #if 0
 	  bind_lastarg ((char *)NULL);

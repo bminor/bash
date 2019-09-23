@@ -1033,7 +1033,8 @@ An additional binary operator, @samp{=~}, is available, with the same
 precedence as @samp{==} and @samp{!=}.
 When it is used, the string to the right of the operator is considered
 a @sc{POSIX} extended regular expression and matched accordingly
-(as in @i{regex}3)).
+(using the @sc{POSIX} @code{regcomp} and @code{regexec} interfaces
+usually described in @i{regex}(3)).
 The return value is 0 if the string matches
 the pattern, and 1 otherwise.
 If the regular expression is syntactically incorrect, the conditional
@@ -1057,11 +1058,12 @@ string matching the @var{n}th parenthesized subexpression.
 
 For example, the following will match a line
 (stored in the shell variable @var{line})
-if there is a sequence of characters in the value consisting of
+if there is a sequence of characters anywhere in the value consisting of
 any number, including zero, of 
-space characters, zero or one instances of @samp{a}, then a @samp{b}:
+characters in the @code{space} character class,
+zero or one instances of @samp{a}, then a @samp{b}:
 @example
-[[ $line =~ [[:space:]]*?(a)b ]]
+[[ $line =~ [[:space:]]*(a)?b ]]
 @end example
 
 @noindent
@@ -1077,7 +1079,7 @@ expressions while paying attention to the shell's quote removal.
 Using a shell variable to store the pattern decreases these problems.
 For example, the following is equivalent to the above:
 @example
-pattern='[[:space:]]*?(a)b'
+pattern='[[:space:]]*(a)?b'
 [[ $line =~ $pattern ]]
 @end example
 
@@ -3574,7 +3576,7 @@ with a name that is not a shell function.
 @item getopts
 @btindex getopts
 @example
-getopts @var{optstring} @var{name} [@var{args}]
+getopts @var{optstring} @var{name} [@var{arg} @dots{}]
 @end example
 
 @code{getopts} is used by shell scripts to parse positional parameters.
@@ -3603,7 +3605,7 @@ and @var{name} is set to @samp{?}.
 
 @code{getopts}
 normally parses the positional parameters, but if more arguments are
-given in @var{args}, @code{getopts} parses those instead.
+supplied as @var{arg} values, @code{getopts} parses those instead.
 
 @code{getopts} can report errors in two ways.  If the first character of
 @var{optstring} is a colon, @var{silent}
