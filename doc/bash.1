@@ -759,16 +759,25 @@ Bracket expressions in regular expressions must be treated carefully,
 since normal quoting characters lose their meanings between brackets.
 If the pattern is stored in a shell variable, quoting the variable
 expansion forces the entire pattern to be matched as a string.
-Substrings matched by parenthesized subexpressions within the regular
-expression are saved in the array variable
+.if t .sp 0.5
+.if n .sp 1
+The pattern will match if it matches any part of the string.
+Anchor the pattern using the \fB^\fP and \fB$\fP regular expression
+operators to force it to match the entire string.
+The array variable
 .SM
-.BR BASH_REMATCH .
+.B BASH_REMATCH
+records which parts of the string matched the pattern.
 The element of
 .SM
 .B BASH_REMATCH
-with index 0 is the portion of the string
-matching the entire regular expression.
-The element of
+with index 0 contains the portion of
+the string matching the entire regular expression.
+Substrings matched by parenthesized subexpressions within the regular
+expression are saved in the remaining
+.SM
+.B BASH_REMATCH
+indices. The element of
 .SM
 .B BASH_REMATCH
 with index \fIn\fP is the portion of the

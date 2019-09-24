@@ -1049,10 +1049,16 @@ Bracket expressions in regular expressions must be treated carefully,
 since normal quoting characters lose their meanings between brackets.
 If the pattern is stored in a shell variable, quoting the variable
 expansion forces the entire pattern to be matched as a string.
+
+The pattern will match if it matches any part of the string.
+Anchor the pattern using the @samp{^} and @samp{$} regular expression
+operators to force it to match the entire string.
+The array variable @code{BASH_REMATCH} records which parts of the string
+matched the pattern.
+The element of @code{BASH_REMATCH} with index 0 contains the portion of
+the string matching the entire regular expression.
 Substrings matched by parenthesized subexpressions within the regular
-expression are saved in the array variable @code{BASH_REMATCH}.
-The element of @code{BASH_REMATCH} with index 0 is the portion of the string
-matching the entire regular expression.
+expression are saved in the remaining @code{BASH_REMATCH} indices.
 The element of @code{BASH_REMATCH} with index @var{n} is the portion of the
 string matching the @var{n}th parenthesized subexpression.
 
