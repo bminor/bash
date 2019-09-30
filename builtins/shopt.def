@@ -1,7 +1,7 @@
 This file is shopt.def, from which is created shopt.c.
 It implements the Bash `shopt' builtin.
 
-Copyright (C) 1994-2018 Free Software Foundation, Inc.
+Copyright (C) 1994-2019 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -93,7 +93,6 @@ extern int lastpipe_opt;
 extern int inherit_errexit;
 extern int localvar_inherit;
 extern int localvar_unset;
-extern int posix_glob_backslash;
 
 #if defined (EXTENDED_GLOB)
 extern int extended_glob;
@@ -230,7 +229,6 @@ static struct {
   { "nocaseglob", &glob_ignore_case, (shopt_set_func_t *)NULL },
   { "nocasematch", &match_ignore_case, (shopt_set_func_t *)NULL },
   { "nullglob",	&allow_null_glob_expansion, (shopt_set_func_t *)NULL },
-  { "posixglob", &posix_glob_backslash, (shopt_set_func_t *)NULL },
 #if defined (PROGRAMMABLE_COMPLETION)
   { "progcomp", &prog_completion_enabled, (shopt_set_func_t *)NULL },
 #  if defined (ALIAS)

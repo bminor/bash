@@ -93,7 +93,6 @@ static struct {
   &source_uses_path,
   &expand_aliases,
   &inherit_errexit,
-  &posix_glob_backslash,
   &print_shift_error,
   0
 };
@@ -109,7 +108,6 @@ posix_initialize (on)
       inherit_errexit = 1;
       source_searches_cwd = 0;
       print_shift_error = 1;
-      posix_glob_backslash = 1;
     }
 
   /* Things that should be turned on when posix mode is disabled. */

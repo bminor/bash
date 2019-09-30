@@ -91,7 +91,7 @@ extern int killpg PARAMS((pid_t, int));
 #endif
 
 #if !DEFAULT_CHILD_MAX
-#  define DEFAULT_CHILD_MAX 32
+#  define DEFAULT_CHILD_MAX 4096
 #endif
 
 #if !MAX_CHILD_MAX
@@ -4527,15 +4527,7 @@ just_bail:
   if (interactive)
     get_tty_state ();
 
-  if (js.c_childmax < 0)
-    js.c_childmax = getmaxchild ();
-  if (js.c_childmax < 0)
-    js.c_childmax = DEFAULT_CHILD_MAX;
-
-#if 0
-  if (js.c_childmax > MAX_CHILD_MAX)
-    js.c_childmax = MAX_CHILD_MAX;
-#endif
+  set_maxchild (0);
 
   return job_control;
 }
@@ -4909,14 +4901,7 @@ mark_dead_jobs_as_notified (force)
 #endif
 
   if (js.c_childmax < 0)
-    js.c_childmax = getmaxchild ();
-  if (js.c_childmax < 0)
-    js.c_childmax = DEFAULT_CHILD_MAX;
-
-#if 0
-  if (js.c_childmax > MAX_CHILD_MAX)
-    js.c_childmax = MAX_CHILD_MAX;
-#endif
+    set_maxchild (0);
 
   /* Don't do anything if the number of dead processes is less than CHILD_MAX
      and we're not forcing a cleanup. */
@@ -5069,14 +5054,23 @@ restart_job_control ()
   initialize_job_control (0);
 }
 
+/* Set the maximum number of background children we keep track of to NCHILD.
+   If the caller passes NCHILD as 0 or -1, this ends up setting it to
+   LMAXCHILD, which is initialized the first time through. */
 void
 set_maxchild (nchild)
      int nchild;
 {
   static int lmaxchild = -1;
 
+  /* Initialize once. */
   if (lmaxchild < 0)
-    lmaxchild = getmaxchild ();
+    {
+      errno = 0;
+      lmaxchild = getmaxchild ();
+      if (lmaxchild < 0 && errno == 0)
+        lmaxchild = MAX_CHILD_MAX;		/* assume unlimited */
+    }
   if (lmaxchild < 0)
     lmaxchild = DEFAULT_CHILD_MAX;
 

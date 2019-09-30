@@ -6634,3 +6634,25 @@ doc/{bashref.texi,bash.1}
 	  the (a), not precede it. Report from hk <hkadeveloper@gmail.com>
 	- some changes to the text describing regular expression matching for
 	  the =~ operator
+
+				   9/25
+				   ----
+general.c,builtins/shopt.def
+	- posix_glob_backslash: remove references to this variable and the
+	  `posixglob' shell option
+
+doc/{bash.1,bashref.texi}
+	- remove references to the `posixglob' shell option
+
+				   9/26
+				   ----
+{jobs,nojobs}.c
+	- DEFAULT_MAX_CHILD: bump this up to 4096
+	- set_maxchild: set lmaxchild to MAX_CHILD_MAX if getmaxchild returns
+	  -1 without changing errno (assume that sysconf returns -1 meaning
+	  unlimited)
+	- initialize_job_control: call set_maxchild instead of inline code
+	- mark_dead_jobs_as_notified: call set_maxchild to set js.c_childmax
+	  if it hasn't been set yet
+
+	  

@@ -1262,16 +1262,18 @@ use find's @option{-print0} option and parallel's @option{-0} option.
 You can use Parallel to move files from the current directory when the
 number of files is too large to process with one @code{mv} invocation:
 @example
-ls | parallel mv @{@} destdir
+printf '%s\n' * | parallel mv @{@} destdir
 @end example
 
 As you can see, the @{@} is replaced with each line read from standard input.
 While using @code{ls} will work in most instances, it is not sufficient to
-deal with all filenames.
+deal with all filenames. @code{printf} is a shell builtin, and therefore is
+not subject to the kernel's limit on the number of arguments to a program,
+so you can use @samp{*} (but see below about the @code{dotglob} shell option).
 If you need to accommodate special characters in filenames, you can use
 
 @example
-find . -depth 1 \! -name '.*' -print0 | parallel -0 mv @{@} destdir
+printf '%s\0' * | parallel -0 mv @{@} destdir
 @end example
 
 @noindent
@@ -1281,8 +1283,11 @@ This will run as many @code{mv} commands as there are files in the current
 directory.
 You can emulate a parallel @code{xargs} by adding the @option{-X} option:
 @example
-find . -depth 1 \! -name '.*' -print0 | parallel -0 -X mv @{@} destdir
+printf '%s\0' * | parallel -0 -X mv @{@} destdir
 @end example
+
+(You may have to modify the pattern if you have the @code{dotglob} option
+enabled.)
 
 GNU Parallel can replace certain common idioms that operate on lines read
 from a file (in this case, filenames listed one per line):
@@ -2500,11 +2505,8 @@ is performed.
 
 After word splitting, unless the @option{-f} option has been set
 (@pxref{The Set Builtin}), Bash scans each word for the characters
-@samp{*}, @samp{?}, @samp{[},
-and, under certain circumstances (e.g., when it appears in the expansion of
-an unquoted shell variable),
-@samp{\\}.
-If one of these characters appears, then the word is
+@samp{*}, @samp{?}, and @samp{[}.
+If one of these characters appears, and is not quoted, then the word is
 regarded as a @var{pattern},
 and replaced with an alphabetically sorted list of
 filenames matching the pattern (@pxref{Pattern Matching}).
@@ -3336,22 +3338,31 @@ are retained by the child.
 Most versions of Unix make this a part of the operating system's command
 execution mechanism.  If the first line of a script begins with
 the two characters @samp{#!}, the remainder of the line specifies
-an interpreter for the program.
+an interpreter for the program and, depending on the operating system, one
+or more optional arguments for that interpreter.
 Thus, you can specify Bash, @code{awk}, Perl, or some other
 interpreter and write the rest of the script file in that language.
 
 The arguments to the interpreter
-consist of a single optional argument following the interpreter
+consist of one or more optional arguments following the interpreter
 name on the first line of the script file, followed by the name of
-the script file, followed by the rest of the arguments.  Bash
-will perform this action on operating systems that do not handle it
-themselves.  Note that some older versions of Unix limit the interpreter
-name and argument to a maximum of 32 characters.
+the script file, followed by the rest of the arguments supplied to the
+script.
+The details of how the interpreter line is split into an interpreter name
+and a set of arguments vary across systems.
+Bash will perform this action on operating systems that do not handle it
+themselves.
+Note that some older versions of Unix limit the interpreter
+name and a single argument to a maximum of 32 characters, so it's not
+portable to assume that using more than one argument will work.
 
 Bash scripts often begin with @code{#! /bin/bash} (assuming that
 Bash has been installed in @file{/bin}), since this ensures that
 Bash will be used to interpret the script, even if it is executed
-under another shell.
+under another shell. It's a common idiom to use @code{env} to find
+@code{bash} even if it's been installed in another directory:
+@code{#!/usr/bin/env bash} will find the first occurrence of @code{bash}
+in @env{$PATH}.
 
 @node Shell Builtin Commands
 @chapter Shell Builtin Commands
@@ -5471,13 +5482,6 @@ or when filtering possible completions as part of programmable completion.
 @item nullglob
 If set, Bash allows filename patterns which match no
 files to expand to a null string, rather than themselves.
-
-@item posixglob
-If set, Bash
-makes words containing unquoted backslashes after expansion eligible for  
-filename expansion, even if they don't contain any other unquoted pattern
-characters. This option is enabled by default and is enabled when @sc{posix}
-mode is enabled.
 
 @item progcomp
 If set, the programmable completion facilities
@@ -7841,11 +7845,6 @@ Enabling @sc{posix} mode has the effect of setting the
 @code{shift_verbose} option, so numeric arguments to @code{shift}
 that exceed the number of positional parameters will result in an
 error message.
-
-@item
-Enabling @sc{posix} mode has the effect of setting the @code{posixglob}
-option, which affects how unquoted backslashes are treated during
-filename expansion (@pxref{Filename Expansion}).
 
 @item
 When the @code{alias} builtin displays alias definitions, it does not

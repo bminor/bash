@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Sep 20 15:30:19 EDT 2019
+.\"	Last Change: Wed Sep 25 16:28:22 EDT 2019
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2019 September 20" "GNU Bash 5.0"
+.TH BASH 1 "2019 September 25" "GNU Bash 5.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -3565,12 +3565,9 @@ option has been set,
 scans each word for the characters
 .BR * ,
 .BR ? ,
-.BR [ ,
-and, under certain circumstances (e.g., when it appears in the expansion of
-an unquoted shell variable, depending on the setting of the \fBposixglob\fP
-shell option),
-.BR \e .
-If one of these characters appears, then the word is
+and
+.BR [ .
+If one of these characters appears, and is not quoted, then the word is
 regarded as a
 .IR pattern ,
 and replaced with an alphabetically sorted list of
@@ -10222,14 +10219,6 @@ files (see
 .B Pathname Expansion
 above)
 to expand to a null string, rather than themselves.
-.TP 8
-.B posixglob
-If set,
-.B bash
-makes words containing unquoted backslashes after expansion eligible for
-pathname expansion, even if they don't contain any other unquoted pattern
-characters. This option is enabled by default, and is enabled when
-\fIposix mode\fP is enabled.
 .TP 8
 .B progcomp
 If set, the programmable completion facilities (see

@@ -3,7 +3,7 @@
 /* This file works under BSD, System V, minix, and Posix systems.  It does
    not implement job control. */
 
-/* Copyright (C) 1987-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2019 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -51,7 +51,7 @@
 #include "builtins/builtext.h"	/* for wait_builtin */
 #include "builtins/common.h"
 
-#define DEFAULT_CHILD_MAX 32
+#define DEFAULT_CHILD_MAX 4096
 
 #if defined (_POSIX_VERSION) || !defined (HAVE_KILLPG)
 #  define killpg(pg, sig)		kill(-(pg),(sig))

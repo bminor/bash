@@ -11249,7 +11249,7 @@ glob_expand_word_list (tlist, eflags)
       /* If the word isn't an assignment and contains an unquoted
 	 pattern matching character, then glob it. */
       if ((tlist->word->flags & W_NOGLOB) == 0 &&
-	  (x = unquoted_glob_pattern_p (tlist->word->word)))
+	  unquoted_glob_pattern_p (tlist->word->word))
 	{
 	  glob_array = shell_glob_filename (tlist->word->word);
 
