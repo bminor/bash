@@ -91,7 +91,6 @@ extern int signal_is_pending __P((int));
 extern void run_pending_traps __P((void));
 
 extern int extended_glob;
-extern int posix_glob_backslash;
 
 /* Global variable which controls whether or not * matches .*.
    Non-zero means don't match .*.  */
@@ -475,6 +474,12 @@ wdequote_pathname (pathname)
   /* Convert the wide character string into unibyte character set. */
   memset (&ps, '\0', sizeof(mbstate_t));
   n = wcsrtombs(pathname, (const wchar_t **)&wpathname, len, &ps);
+  if (n == (size_t)-1 || *wpathname != 0)	/* what? now you tell me? */
+    {
+      wpathname = orig_wpathname;
+      memset (&ps, '\0', sizeof(mbstate_t));
+      n = xwcsrtombs (pathname, (const wchar_t **)&wpathname, len, &ps);
+    }
   pathname[len] = '\0';
 
   /* Can't just free wpathname here; wcsrtombs changes it in many cases. */
@@ -1421,7 +1426,6 @@ only_filename:
 
       if (directory_len > 0 && hasglob == 2 && (flags & GX_RECURSE) == 0)
 	{
-#if 1
 	  dequote_pathname (directory_name);
 	  if (glob_testdir (directory_name, 0) < 0)
 	    {
@@ -1429,9 +1433,6 @@ only_filename:
 		free (directory_name);
 	      return ((char **)&glob_error_return);
 	    }
-#else
-	  return ((char **)&glob_error_return);
-#endif
 	}
 
       /* Handle GX_MARKDIRS here. */

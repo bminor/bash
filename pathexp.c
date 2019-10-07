@@ -1,6 +1,6 @@
 /* pathexp.c -- The shell interface to the globbing library. */
 
-/* Copyright (C) 1995-2014 Free Software Foundation, Inc.
+/* Copyright (C) 1995-2019 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -58,9 +58,6 @@ int extended_glob = EXTGLOB_DEFAULT;
 /* Control enabling special handling of `**' */
 int glob_star = 0;
 
-/* Do we handle backslashes in patterns the way Posix specifies? */
-int posix_glob_backslash = 1;
-
 /* Return nonzero if STRING has any unquoted special globbing chars in it.
    This is supposed to be called when pathname expansion is performed, so
    it implements the rules in Posix 2.13.3, specifically that an unquoted
@@ -107,8 +104,8 @@ unquoted_glob_pattern_p (string)
 	  continue;
 
 	/* A pattern can't end with a backslash, but a backslash in the pattern
-	   can be removed by the matching engine, so we have to run it through
-	   globbing. */
+	   can be special to the matching engine, so we note it in case we
+	   need it later. */
 	case '\\':
 	  if (*string != '\0' && *string != '/')
 	    {
@@ -140,7 +137,11 @@ unquoted_glob_pattern_p (string)
 #endif
     }
 
-  return ((bsquote && posix_glob_backslash) ? 2 : 0);
+#if 0
+  return (bsquote ? 2 : 0);
+#else
+  return (0);
+#endif
 }
 
 /* Return 1 if C is a character that is `special' in a POSIX ERE and needs to
@@ -343,7 +344,7 @@ quote_string_for_globbing (pathname, qflags)
       else if (pathname[i] == '\\' && (qflags & QGLOB_REGEXP) == 0)
 	{
 	  /* XXX - if not quoting regexp, use backslash as quote char. Should
-	     we just pass it through without treating it as special? That is
+	     We just pass it through without treating it as special? That is
 	     what ksh93 seems to do. */
 
 	  /* If we want to pass through backslash unaltered, comment out these
@@ -396,8 +397,9 @@ quote_globbing_chars (string)
 
 /* Call the glob library to do globbing on PATHNAME. */
 char **
-shell_glob_filename (pathname)
+shell_glob_filename (pathname, qflags)
      const char *pathname;
+     int qflags;
 {
 #if defined (USE_POSIX_GLOB_LIBRARY)
   register int i;
@@ -405,7 +407,7 @@ shell_glob_filename (pathname)
   glob_t filenames;
   int glob_flags;
 
-  temp = quote_string_for_globbing (pathname, QGLOB_FILENAME);
+  temp = quote_string_for_globbing (pathname, QGLOB_FILENAME|qflags);
 
   filenames.gl_offs = 0;
 
@@ -452,8 +454,7 @@ shell_glob_filename (pathname)
 
   noglob_dot_filenames = glob_dot_filenames == 0;
 
-  temp = quote_string_for_globbing (pathname, QGLOB_FILENAME);
-  quoted_pattern = STREQ (pathname, temp) == 0;
+  temp = quote_string_for_globbing (pathname, QGLOB_FILENAME|qflags);
   gflags = glob_star ? GX_GLOBSTAR : 0;
   results = glob_filename (temp, gflags);
   free (temp);

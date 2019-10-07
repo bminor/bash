@@ -246,6 +246,7 @@ typedef int sh_builtin_func_t __P((WORD_LIST *)); /* sh_wlist_func_t */
 #endif /* SH_FUNCTION_TYPEDEF */
 
 #define NOW	((time_t) time ((time_t *) 0))
+#define GETTIME(tv)	gettimeofday(&(tv), NULL)
 
 /* Some defines for calling file status functions. */
 #define FS_EXISTS	  0x1

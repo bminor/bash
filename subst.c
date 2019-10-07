@@ -11251,7 +11251,7 @@ glob_expand_word_list (tlist, eflags)
       if ((tlist->word->flags & W_NOGLOB) == 0 &&
 	  unquoted_glob_pattern_p (tlist->word->word))
 	{
-	  glob_array = shell_glob_filename (tlist->word->word);
+	  glob_array = shell_glob_filename (tlist->word->word, QGLOB_CTLESC);	/* XXX */
 
 	  /* Handle error cases.
 	     I don't think we should report errors like "No such file

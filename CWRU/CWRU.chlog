@@ -6655,4 +6655,74 @@ doc/{bash.1,bashref.texi}
 	- mark_dead_jobs_as_notified: call set_maxchild to set js.c_childmax
 	  if it hasn't been set yet
 
-	  
+				   9/30
+				   ----
+lib/glob/xmbsrtowcs.c
+	- xwcsrtombs: implementation of wcsrtombs from gnulib, modified to
+	  treat invalid wide characters (or wide characters that can't be
+	  converted to multibyte character sequences) as bytes. Should be
+	  used only in unusual circumstances where wcsrtombs fails.
+
+lib/glob/glob.c
+	- wdequote_pathname: if wcsrtombs fails to convert the dequoted wide
+	  character pathname back to a sequence of multibyte characters, call
+	  xwcsrtombs to try to treat the invalid wide characters as bytes --
+	  the call to xdupmbstowcs treats bytes that don't convert to wide
+	  characters as just bytes, which kind of causes this problem in the
+	  first place. Inspired by report from Geoff Kuenning <geoff@cs.hmc.edu>
+
+lib/readline/complete.c
+	- compute_lcd_of_matches: use the case-folding code (which performs
+          character-by-character checking and compares invalid multibyte
+          sequences as bytes) instead of the old case-sensitive code (which
+	  used _rl_compare_chars), converting characters to lowercase as
+	  needed. Fixes bug with invalid sequences in common filename prefixes
+	  reported by Grisha Levit <grishalevit@gmail.com>
+
+				   10/1
+				   ----
+builtins/shopt.def
+	- reset_shopt_options: add in resets for some missing shopt options.
+	  Report and fix from Grisha Levit <grishalevit@gmail.com>
+
+execute_cmd.c
+	- execute_command_internal: make sure a failed attempt to define a
+	  shell function causes the shell to exit if -e is enabled. Report
+	  from Andreas Kusalananda Kähäri <andreas.kahari@abc.se>
+	- execute_command_internal: combine cm_function_def, cm_arith, and
+	  cm_cond cases into one switch case, since the code is virtually
+	  identical across all three
+
+				   10/3
+				   ----
+pathexp.[ch],lib/glob/glob.c,lib/glob/glob_loop.c
+	- remove all references to posix_glob_backslash in preparation for
+	  implementing austin group interpretation #1234
+
+pathexp.c
+	- unquoted_glob_pattern_p: revert to bash-4.4 behavior of returning 1
+	  only if there is an unquoted `*', `?', or bracket expression, as
+	  per austin group interpretation #1234
+
+lib/glob/glob_loop.c
+	- INTERNAL_GLOB_PATTERN_P: revert to bash-4.4 behavior of returning 1
+	  only if there is an unquoted `*', `?', or bracket expression, as
+	  per austin group interpretation #1234
+
+				   10/4
+				   ----
+variables.c
+	- assign_seconds,get_seconds: use the tv_sec value returned from
+	  gettimeofday() instead of time() to get a better approximation of
+	  the number of seconds since the epoch for future calculations.
+	  From a report by Stephane Chazelas <stephane.chazelas@gmail.com>
+
+pathexp.[ch],{bashline,subst}.c
+	- shell_glob_filename: now takes an additional flags argument to pass
+	  to quote_string_for_globbing
+
+				   10/6
+				   ----
+subst.c
+	- glob_expand_word_list: call shell_glob_filename with QGLOB_CTLESC
+	  because quote removal hasn't been performed yet

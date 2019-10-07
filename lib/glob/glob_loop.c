@@ -70,7 +70,11 @@ INTERNAL_GLOB_PATTERN_P (pattern)
 	  return 0;
       }
 
-  return ((bsquote && posix_glob_backslash) ? 2 : 0);
+#if 0
+  return bsquote ? 2 : 0;
+#else
+  return (0);
+#endif
 }
 
 #undef INTERNAL_GLOB_PATTERN_P

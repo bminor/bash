@@ -2834,11 +2834,7 @@ raw_job_exit_status (job)
   int fail;
   WAIT ret;
 
-#if 0
-  if (pipefail_opt)
-#else
   if (jobs[job]->flags & J_PIPEFAIL)
-#endif
     {
       fail = 0;
       p = jobs[job]->pipe;

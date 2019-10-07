@@ -347,6 +347,7 @@ reset_shopt_options ()
   inherit_errexit = 0;
   interactive_comments = 1;
   lastpipe_opt = 0;
+  localvar_inherit = localvar_unset = 0;
   mail_warning = 0;
   glob_ignore_case = match_ignore_case = 0;
   print_shift_error = 0;
@@ -358,6 +359,10 @@ reset_shopt_options ()
 
 #if defined (EXTENDED_GLOB)
   extended_glob = EXTGLOB_DEFAULT;
+#endif
+
+#if defined (ARRAY_VARS)
+  assoc_expand_once = 0;
 #endif
 
 #if defined (HISTORY)
@@ -390,6 +395,9 @@ reset_shopt_options ()
 
 #if defined (PROGRAMMABLE_COMPLETION)
   prog_completion_enabled = 1;
+#  if defined (ALIAS)
+  progcomp_alias = 0;
+#  endif
 #endif
 
 #if defined (DEFAULT_ECHO_TO_XPG) || defined (STRICT_POSIX)

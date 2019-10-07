@@ -1002,40 +1002,35 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
 #if defined (DPAREN_ARITHMETIC)
     case cm_arith:
-      was_error_trap = signal_is_trapped (ERROR_TRAP) && signal_is_ignored (ERROR_TRAP) == 0;
-      if (ignore_return)
-	command->value.Arith->flags |= CMD_IGNORE_RETURN;
-      line_number_for_err_trap = save_line_number = line_number;
-      exec_result = execute_arith_command (command->value.Arith);
-      line_number = save_line_number;
-
-      if (was_error_trap && ignore_return == 0 && invert == 0 && exec_result != EXECUTION_SUCCESS)
-	{
-	  last_command_exit_value = exec_result;
-	  save_line_number = line_number;
-	  line_number = line_number_for_err_trap;
-	  run_error_trap ();
-	  line_number = save_line_number;
-	}
-
-      if (ignore_return == 0 && invert == 0 && exit_immediately_on_error && exec_result != EXECUTION_SUCCESS)
-	{
-	  last_command_exit_value = exec_result;
-	  run_pending_traps ();
-	  jump_to_top_level (ERREXIT);
-	}
-
-      break;
 #endif
-
 #if defined (COND_COMMAND)
     case cm_cond:
+#endif
+    case cm_function_def:
       was_error_trap = signal_is_trapped (ERROR_TRAP) && signal_is_ignored (ERROR_TRAP) == 0;
-      if (ignore_return)
+#if defined (DPAREN_ARITHMETIC)
+      if (ignore_return && command->type == cm_arith)
+	command->value.Arith->flags |= CMD_IGNORE_RETURN;
+#endif
+#if defined (COND_COMMAND)
+      if (ignore_return && command->type == cm_cond)
 	command->value.Cond->flags |= CMD_IGNORE_RETURN;
+#endif
 
       line_number_for_err_trap = save_line_number = line_number;
-      exec_result = execute_cond_command (command->value.Cond);
+#if defined (DPAREN_ARITHMETIC)
+      if (command->type == cm_arith)
+	exec_result = execute_arith_command (command->value.Arith);
+      else
+#endif
+#if defined (COND_COMMAND)
+      if (command->type == cm_cond)
+	exec_result = execute_cond_command (command->value.Cond);
+      else
+#endif
+      if (command->type == cm_function_def)
+	exec_result = execute_intern_function (command->value.Function_def->name,
+					       command->value.Function_def);
       line_number = save_line_number;
 
       if (was_error_trap && ignore_return == 0 && invert == 0 && exec_result != EXECUTION_SUCCESS)
@@ -1054,12 +1049,6 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	  jump_to_top_level (ERREXIT);
 	}
 
-      break;
-#endif
-    
-    case cm_function_def:
-      exec_result = execute_intern_function (command->value.Function_def->name,
-					     command->value.Function_def);
       break;
 
     default:

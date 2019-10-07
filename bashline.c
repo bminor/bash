@@ -2140,7 +2140,7 @@ globword:
       if (state == 0)
 	{
 	  glob_ignore_case = igncase;
-	  glob_matches = shell_glob_filename (hint);
+	  glob_matches = shell_glob_filename (hint, 0);
 	  glob_ignore_case = old_glob_ignore_case;
 
 	  if (GLOB_FAILED (glob_matches) || glob_matches == 0)
@@ -3891,7 +3891,7 @@ glob_complete_word (text, state)
       if (ttext != text)
 	free (ttext);
 
-      matches = shell_glob_filename (globtext);
+      matches = shell_glob_filename (globtext, 0);
       if (GLOB_FAILED (matches))
 	matches = (char **)NULL;
       ind = 0;

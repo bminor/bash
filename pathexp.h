@@ -51,7 +51,6 @@ extern int glob_dot_filenames;
 extern int extended_glob;
 extern int glob_star;
 extern int match_ignore_case;	/* doesn't really belong here */
-extern int posix_glob_backslash;
 
 extern int unquoted_glob_pattern_p __P((char *));
 
@@ -70,8 +69,10 @@ extern char *quote_string_for_globbing __P((const char *, int));
 extern int glob_char_p __P((const char *));
 extern char *quote_globbing_chars __P((const char *));
 
-/* Call the glob library to do globbing on PATHNAME. */
-extern char **shell_glob_filename __P((const char *));
+/* Call the glob library to do globbing on PATHNAME. FLAGS is additional
+   flags to pass to QUOTE_STRING_FOR_GLOBBING, mostly having to do with
+   whether or not we've already performed quote removal. */
+extern char **shell_glob_filename __P((const char *, int));
 
 /* Filename completion ignore.  Used to implement the "fignore" facility of
    tcsh, GLOBIGNORE (like ksh-93 FIGNORE), and EXECIGNORE.

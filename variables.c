@@ -1294,9 +1294,11 @@ assign_seconds (self, value, unused, key)
      arrayind_t unused;
      char *key;
 {
+  struct timeval tv;
   if (legal_number (value, &seconds_value_assigned) == 0)
     seconds_value_assigned = 0;
-  shell_start_time = NOW;
+  gettimeofday (&tv, NULL);
+  shell_start_time = tv.tv_sec;
   return (self);
 }
 
@@ -1306,8 +1308,10 @@ get_seconds (var)
 {
   time_t time_since_start;
   char *p;
+  struct timeval tv;
 
-  time_since_start = NOW - shell_start_time;
+  gettimeofday(&tv, NULL);
+  time_since_start = tv.tv_sec - shell_start_time;
   p = itos(seconds_value_assigned + time_since_start);
 
   FREE (value_cell (var));
