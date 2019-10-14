@@ -126,8 +126,6 @@ static void cleanup_redirects PARAMS((REDIRECT *));
 static int restore_signal_mask PARAMS((sigset_t *));
 #endif
 
-static void async_redirect_stdin PARAMS((void));
-
 static int builtin_status PARAMS((int));
 
 static int execute_for_command PARAMS((FOR_COM *));
@@ -521,7 +519,7 @@ open_files ()
 }
 #endif
 
-static void
+void
 async_redirect_stdin ()
 {
   int fd;

@@ -64,7 +64,7 @@ sh_regmatch (string, pattern, flags)
 #endif
 
   rflags = REG_EXTENDED;
-  if (glob_ignore_case || match_ignore_case)
+  if (match_ignore_case)
     rflags |= REG_ICASE;
 #if !defined (ARRAY_VARS)
   rflags |= REG_NOSUB;

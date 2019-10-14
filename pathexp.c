@@ -243,6 +243,7 @@ quote_string_for_globbing (pathname, qflags)
 	}
       else if (pathname[i] == CTLESC)
 	{
+convert_to_backslash:
 	  if ((qflags & QGLOB_FILENAME) && pathname[i+1] == '/')
 	    continue;
 	  /* What to do if preceding char is backslash? */
@@ -358,6 +359,16 @@ quote_string_for_globbing (pathname, qflags)
 	     even when the first CTLESC is preceded by a backslash. */
 	  if ((qflags & QGLOB_CTLESC) && pathname[i] == CTLESC && (pathname[i+1] == CTLESC || pathname[i+1] == CTLNUL))
 	    i++;	/* skip over the CTLESC */
+	  else if ((qflags & QGLOB_CTLESC) && pathname[i] == CTLESC)
+	    /* A little more general: if there is an unquoted backslash in the
+	       pattern and we are handling quoted characters in the pattern,
+	       convert the CTLESC to backslash and add the next character on
+	       the theory that the backslash will quote the next character
+	       but it would be inconsistent not to replace the CTLESC with
+	       another backslash here. We can't tell at this point whether the
+	       CTLESC comes from a backslash or other form of quoting in the
+	       original pattern. */
+	    goto convert_to_backslash;
 	}
       else if (pathname[i] == '\\' && (qflags & QGLOB_REGEXP))
         last_was_backslash = 1;

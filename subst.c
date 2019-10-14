@@ -5898,12 +5898,15 @@ process_substitute (string, open_for_read_in_child)
   pid = make_child ((char *)NULL, 1);
   if (pid == 0)
     {
+interactive = 0;
       reset_terminating_signals ();	/* XXX */
       free_pushed_string_input ();
       /* Cancel traps, in trap.c. */
       restore_original_signals ();	/* XXX - what about special builtins? bash-4.2 */
       QUIT;	/* catch any interrupts we got post-fork */
       setup_async_signals ();
+      if (open_for_read_in_child == 0)
+	async_redirect_stdin ();
       subshell_environment |= SUBSHELL_COMSUB|SUBSHELL_PROCSUB;
 
       /* We don't inherit the verbose option for command substitutions now, so

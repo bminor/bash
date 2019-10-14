@@ -260,6 +260,7 @@ is_cclass (c, name)
 #define PATSCAN			glob_patscan
 #define STRCOMPARE		strcompare
 #define EXTMATCH		extmatch
+#define DEQUOTE_PATHNAME	udequote_pathname
 #define STRUCT			smat_struct
 #define STRCHR(S, C)		strchr((S), (C))
 #define MEMCHR(S, C, N)		memchr((S), (C), (N))
@@ -500,6 +501,7 @@ posix_cclass_only (pattern)
 #define PATSCAN			glob_patscan_wc
 #define STRCOMPARE		wscompare
 #define EXTMATCH		extmatch_wc
+#define DEQUOTE_PATHNAME	wcdequote_pathname
 #define STRUCT			wcsmat_struct
 #define STRCHR(S, C)		wcschr((S), (C))
 #define MEMCHR(S, C, N)		wmemchr((S), (C), (N))

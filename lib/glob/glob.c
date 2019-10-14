@@ -115,8 +115,9 @@ static int skipname __P((char *, char *, int));
 #if HANDLE_MULTIBYTE
 static int mbskipname __P((char *, char *, int));
 #endif
+void udequote_pathname __P((char *));
 #if HANDLE_MULTIBYTE
-static void udequote_pathname __P((char *));
+void wcdequote_pathname __P((wchar_t *));
 static void wdequote_pathname __P((char *));
 #else
 #  define dequote_pathname udequote_pathname
@@ -409,7 +410,7 @@ mbskipname (pat, dname, flags)
 #endif /* HANDLE_MULTIBYTE */
 
 /* Remove backslashes quoting characters in PATHNAME by modifying PATHNAME. */
-static void
+void
 udequote_pathname (pathname)
      char *pathname;
 {
@@ -431,6 +432,26 @@ udequote_pathname (pathname)
 
 #if HANDLE_MULTIBYTE
 /* Remove backslashes quoting characters in PATHNAME by modifying PATHNAME. */
+void
+wcdequote_pathname (wpathname)
+     wchar_t *wpathname;
+{
+  int i, j;
+
+  for (i = j = 0; wpathname && wpathname[i]; )
+    {
+      if (wpathname[i] == L'\\')
+	i++;
+
+      wpathname[j++] = wpathname[i++];
+
+      if (wpathname[i - 1] == L'\0')
+	break;
+    }
+  if (wpathname)
+    wpathname[j] = L'\0';
+}
+
 static void
 wdequote_pathname (pathname)
      char *pathname;
@@ -458,18 +479,7 @@ wdequote_pathname (pathname)
     }
   orig_wpathname = wpathname;
 
-  for (i = j = 0; wpathname && wpathname[i]; )
-    {
-      if (wpathname[i] == L'\\')
-	i++;
-
-      wpathname[j++] = wpathname[i++];
-
-      if (wpathname[i - 1] == L'\0')
-	break;
-    }
-  if (wpathname)
-    wpathname[j] = L'\0';
+  wcdequote_pathname (wpathname);
 
   /* Convert the wide character string into unibyte character set. */
   memset (&ps, '\0', sizeof(mbstate_t));
@@ -686,7 +696,7 @@ glob_vector (pat, dir, flags)
      a filename `DIR/PAT'.  If there is, and we can access it, just make the
      vector to return and bail immediately. */
   hasglob = 0;
-  if (skip == 0 && (hasglob = glob_pattern_p (pat)) == 0 || hasglob == 2)
+  if (skip == 0 && ((hasglob = glob_pattern_p (pat)) == 0 || hasglob == 2))
     {
       int dirlen;
       struct stat finfo;

@@ -12,7 +12,13 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 : ${TMPDIR:=/var/tmp}
-cd $TMPDIR
+
+TESTDIR=${TMPDIR}/glob-test-$$
+mkdir ${TESTDIR}
+cd $TESTDIR ||  {
+        echo "$TESTDIR: cannot cd" >&2
+        exit 1
+}
 
 matchfunc()
 {
@@ -38,9 +44,20 @@ matchfunc()
 	*)		echo bad 2;;
 	esac
 
+	case x in
+	[[:aeioux:])	echo bad 2.1 ;;
+	*)		echo ok 2.1 ;;
+	esac
+
 	case [x in
 	[[:alpha:])	echo bad 3;;
 	*)		echo ok 3;;
+	esac
+
+	# unclosed bracket char class expression just matches against ":alpha"
+	case a in
+	[[:alpha])	echo ok 4;;
+	*)		echo bad 4;;
 	esac
 }
 
@@ -57,6 +74,12 @@ matchfunc()
 {
 	echo == LANG=$LANG ==
 
+	touch p
+	# quoted character classes work as if they were unquoted now
+	echo [[:alpha:]]
+	echo [[:"alpha":]]
+	rm -f p
+
 	case a] in
 	[[:aleph:]])	echo bad 1;;
 	*)		echo ok 1;;
@@ -72,9 +95,10 @@ matchfunc()
 	*)		echo ok 3;;
 	esac
 
-	case a in
-	[[:"alpha":]])	echo bad 4;;
-	*)		echo ok 4;;
+	# Posix says quoted character class names work now
+	case x in
+	[[:"alpha":]])	echo ok 4;;
+	*)		echo bad 4;;
 	esac
 
 	case a in
@@ -134,3 +158,6 @@ matchfunc
 
 export LANG=en_US.UTF-8
 matchfunc
+
+cd $OLDPWD
+rm -rf $TESTDIR

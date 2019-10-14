@@ -6726,3 +6726,59 @@ pathexp.[ch],{bashline,subst}.c
 subst.c
 	- glob_expand_word_list: call shell_glob_filename with QGLOB_CTLESC
 	  because quote removal hasn't been performed yet
+
+				   10/7
+				   ----
+pathexp.c
+	- quote_string_for_globbing: if we have an unquoted backslash followed
+	  by a CTLESC-quoted character (not CTLESC-CTLESC), just perform the
+	  usual CTLESC-to-backslash conversion instead of skipping over it.
+	  Fixes issue raised in austin-group discussion about globbing by
+	  Geoff Clare <gwc@opengroup.org> (austin-group issue 1234), though
+	  it's still inherently ambiguous
+
+				   10/8
+				   ----
+include/shmbutil.h
+	- xwcsrtombs: extern declaration, to match other functions in that file
+
+lib/glob/glob.c
+	- wcdequote_pathname: new function, actual backslash quote removal code
+	  from wdequote_pathname; wdequote_pathname calls it
+
+lib/glob/glob.c
+	- {udequote,wcdequote}_pathname: now public void functions
+
+lib/glob/smatch.c
+	- DEQUOTE_PATHNAME: defined appropriately to udequote_pathname or
+	  wcdequote_pathname
+
+lib/glob/sm_loop.c
+	- DEQUOTE_PATHNAME: appropriate extern declaration
+	- BRACKMATCH: call DEQUOTE_PATHNAME to dequote a character class name
+	  in a bracket expression. This is the result of a discussion on the
+	  austin-group mailing list, from Geoff Clare <gwc@opengroup.org> and
+	  Robert Elz <kre@bmunnari.oz.au>
+
+				   10/10
+				   -----
+execute_cmd.[ch]
+	- async_redirect_stdin: now a global function
+
+subst.c
+	- process_substitute: call async_redirect_stdin in the child to keep
+	  it from having stdin connected to the terminal, since it's not a
+	  job control process
+
+				   10/11
+				   -----
+subst.c
+	- process_substitute: in the child process, set interactive = 0, since
+	  an asynchronous process substitution process is not interactive.
+	  Seems to fix issue reported by Grisha Levit <grishalevit@gmail.com>
+
+lib/sh/shmatch.c
+	- sh_regmatch: implement a suggestion from Grisha Levit
+	  <grishalevit@gmail.com> and don't allow nocaseglob to enable case-
+	  insensitive regexp matching. It hasn't been documented that way
+	  in years

@@ -29,6 +29,8 @@ static CHAR *PARSE_COLLSYM __P((CHAR *, INT *));
 static CHAR *BRACKMATCH __P((CHAR *, U_CHAR, int));
 static int EXTMATCH __P((INT, CHAR *, CHAR *, CHAR *, CHAR *, int));
 
+extern void DEQUOTE_PATHNAME __P((CHAR *));
+
 /*static*/ CHAR *PATSCAN __P((CHAR *, CHAR *, INT));
 
 int
@@ -456,6 +458,9 @@ BRACKMATCH (p, test, flags)
 		{
 		  bcopy (p + 1, ccname, (close - p - 1) * sizeof (CHAR));
 		  *(ccname + (close - p - 1)) = L('\0');
+		  /* As a result of a POSIX discussion, char class names are
+		     allowed to be quoted (?) */
+		  DEQUOTE_PATHNAME (ccname);
 		  pc = IS_CCLASS (orig_test, (XCHAR *)ccname);
 		}
 	      if (pc == -1)
@@ -929,6 +934,7 @@ fprintf(stderr, "extmatch: flags = %d\n", flags);
 #undef PATSCAN
 #undef STRCOMPARE
 #undef EXTMATCH
+#undef DEQUOTE_PATHNAME
 #undef STRUCT
 #undef BRACKMATCH
 #undef STRCHR
