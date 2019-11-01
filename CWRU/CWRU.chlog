@@ -6782,3 +6782,24 @@ lib/sh/shmatch.c
 	  <grishalevit@gmail.com> and don't allow nocaseglob to enable case-
 	  insensitive regexp matching. It hasn't been documented that way
 	  in years
+
+				   10/30
+				   -----
+bashhist.c
+	- bash_add_history: fix a couple of problems with adding extra blank
+	  lines to history entries containing here-documents. Fixes bug
+	  reported by Oguz <oguzismailuysal@gmail.com>
+
+lib/sh/shmatch.c
+	- BASH_REMATCH: no longer set to readonly. From a suggestion from
+	  Rocky Bernstein <rocky@gnu.org>
+
+doc/{bash.1,bashref.texi}
+	- BASH_REMATCH: document that it's no longer set to readonly
+
+subst.c
+	- getpattern: since expand_string_for_pat leaves the pattern quoted,
+	  we need to remove quoted nulls before running the string through
+	  string_list (and then quote_string_for_globbing, since QGLOB_CVTNULL
+	  only handles pat[0] == CTLNUL). Fixes bug reported by Oguz
+	  <oguzismailuysal@gmail.com>

@@ -107,7 +107,9 @@ sh_regmatch (string, pattern, flags)
 	}
     }
 
+#if 0
   VSETATTR (rematch, att_readonly);
+#endif
 
   free (subexp_str);
   free (matches);

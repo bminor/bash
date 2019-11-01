@@ -850,13 +850,15 @@ void
 bash_add_history (line)
      char *line;
 {
-  int add_it, offset, curlen;
+  int add_it, offset, curlen, is_comment;
   HIST_ENTRY *current, *old;
   char *chars_to_add, *new_line;
 
   add_it = 1;
   if (command_oriented_history && current_command_line_count > 1)
     {
+      is_comment = shell_comment (line);
+
       /* The second and subsequent lines of a here document have the trailing
 	 newline preserved.  We don't want to add extra newlines here, but we
 	 do want to add one after the first line (which is the command that
@@ -864,7 +866,11 @@ bash_add_history (line)
 	 does the right thing to take care of this for us.  We don't want to
 	 add extra newlines if the user chooses to enable literal_history,
 	 so we have to duplicate some of what that function does here. */
-      if ((parser_state & PST_HEREDOC) && literal_history && current_command_line_count > 2 && line[strlen (line) - 1] == '\n')
+      /* If we're in a here document and past the first line,
+		(current_command_line_count > 2)
+	 don't add a newline here. This will also take care of the literal_history
+	 case if the other conditions are met. */
+      if ((parser_state & PST_HEREDOC) && current_command_line_count > 2 && line[strlen (line) - 1] == '\n')
 	chars_to_add = "";
       else if (current_command_line_count == current_command_line_comment+1)
 	chars_to_add = "\n";
@@ -876,7 +882,7 @@ bash_add_history (line)
       using_history ();
       current = previous_history ();
 
-      current_command_line_comment = shell_comment (line) ? current_command_line_count : -2;
+      current_command_line_comment = is_comment ? current_command_line_count : -2;
 
       if (current)
 	{
