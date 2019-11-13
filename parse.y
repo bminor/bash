@@ -4415,7 +4415,7 @@ xparse_dolparen (base, string, indp, flags)
 {
   sh_parser_state_t ps;
   sh_input_line_state_t ls;
-  int orig_ind, nc, sflags, orig_eof_token;
+  int orig_ind, nc, sflags, orig_eof_token, start_lineno;
   char *ret, *ep, *ostring;
 #if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
   STRING_SAVER *saved_pushed_strings;
@@ -4424,6 +4424,7 @@ xparse_dolparen (base, string, indp, flags)
 /*debug_parser(1);*/
   orig_ind = *indp;
   ostring = string;
+  start_lineno = line_number;
 
   if (*string == 0)
     {
@@ -4493,19 +4494,27 @@ xparse_dolparen (base, string, indp, flags)
       if (ep[-1] != '\n')
 	itrace("xparse_dolparen:%d: ep[-1] != RPAREN (%d), ep = `%s'", line_number, ep[-1], ep);
 #endif
+
       while (ep > ostring && ep[-1] == '\n') ep--;
     }
 
   nc = ep - ostring;
   *indp = ep - base - 1;
 
-  /*(*/
+  /*((*/
 #if DEBUG
   if (base[*indp] != ')')
     itrace("xparse_dolparen:%d: base[%d] != RPAREN (%d), base = `%s'", line_number, *indp, base[*indp], base);
   if (*indp < orig_ind)
     itrace("xparse_dolparen:%d: *indp (%d) < orig_ind (%d), orig_string = `%s'", line_number, *indp, orig_ind, ostring);
 #endif
+
+  if (base[*indp] != ')')
+    {
+      /*(*/
+      parser_error (start_lineno, _("unexpected EOF while looking for matching `%c'"), ')');
+      jump_to_top_level (DISCARD);
+    }
 
   if (flags & SX_NOALLOC) 
     return (char *)NULL;

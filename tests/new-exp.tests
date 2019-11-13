@@ -626,6 +626,12 @@ a=/a
 recho "/${a%/*}"
 recho "/${a///a/}"
 
+patfunc()
+{
+	echo ${1##*"${1##*}"}
+}
+patfunc foo
+
 # caused core dumps because of bad bracket expression parsing in bash-5.0
 eval : $'${x/#[0\xef\xbf\xbd\\Z[:]]}'
 

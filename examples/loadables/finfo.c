@@ -28,6 +28,12 @@
 #endif
 
 #include <sys/types.h>
+#ifdef MAJOR_IN_MKDEV
+#  include <sys/mkdev.h>
+#endif
+#ifdef MAJOR_IN_SYSMACROS
+#  include <sys/sysmacros.h>
+#endif
 #include "posixstat.h"
 #include <stdio.h>
 #include <pwd.h>

@@ -367,7 +367,7 @@ heredoc_expand (redirectee, ri, lenp)
   /* Now that we've changed the variable search order to ignore the temp
      environment, see if we need to change the cached IFS values. */
   sv_ifs ("IFS");
-  document = (ri == r_reading_string) ? expand_string_unsplit_to_string (redirectee->word, 0)
+  document = (ri == r_reading_string) ? expand_assignment_string_to_string (redirectee->word, 0)
   				      : expand_string_to_string (redirectee->word, Q_HERE_DOCUMENT);
   expanding_redir = 0;
   /* Now we need to change the variable search order back to include the temp

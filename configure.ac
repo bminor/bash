@@ -743,6 +743,7 @@ AM_GNU_GETTEXT([no-libtool], [need-ngettext], [lib/intl])
 dnl header files
 AC_HEADER_DIRENT
 AC_HEADER_TIME
+AC_HEADER_MAJOR
 
 BASH_HEADER_INTTYPES
 

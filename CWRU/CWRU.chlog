@@ -6803,3 +6803,37 @@ subst.c
 	  string_list (and then quote_string_for_globbing, since QGLOB_CVTNULL
 	  only handles pat[0] == CTLNUL). Fixes bug reported by Oguz
 	  <oguzismailuysal@gmail.com>
+
+				   11/4
+				   ----
+configure.ac,config.h.in
+	- AC_HEADER_MAJOR: look for `major' and `minor' in various header files
+	  and define MAJOR_IN_MAKEDEV or MAJOR_IN_SYSMACROS as appropriate.
+	  From a patch from Eli Schwartz <eschwartz@archlinux.org>
+
+examples/loadables/finfo.c
+	- include <sys/mkdev.h> and <sys/sysmacros.h> as appropriate for
+	  definitions of major/minor
+
+				   11/6
+				   ----
+redir.c
+	- heredoc_expand: if we are expanding the WORD in a here-string, use
+	  expand_assignment_string_to_string so the expansions are consistent
+	  in contexts where word splitting is not performed. From a bug report
+	  by Robin A. Meade <robin.a.meade@gmail.com>
+
+				   11/7
+				   ----
+parse.y
+	- xparse_dolparen: if the command substitution is incomplete or doesn't
+	  end in `)', print an error message instead of allowing EOS to
+	  terminate the comsub. From a bug report from
+	  Oguz <oguzismailuysal@gmail.com>
+
+				   11/11
+				   -----
+lib/sh/unicode.c
+	- u32toutf8: fix a typo that assigned the wrong value to the first
+	  byte of a six-byte UTF-8 character. Report and fix from
+	  István Pásztor <pasztorpisti@gmail.com>

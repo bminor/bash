@@ -1,6 +1,6 @@
 /* unicode.c - functions to convert unicode characters */
 
-/* Copyright (C) 2010-2016 Free Software Foundation, Inc.
+/* Copyright (C) 2010-2019 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -196,7 +196,7 @@ u32toutf8 (wc, s)
     }
   else if (wc < 0x080000000)
     {
-      s[0] = (wc >> 30) | 0xf8;
+      s[0] = (wc >> 30) | 0xfc;
       s[1] = ((wc >> 24) & 0x3f) | 0x80;
       s[2] = ((wc >> 18) & 0x3f) | 0x80;
       s[3] = ((wc >> 12) & 0x3f) | 0x80;

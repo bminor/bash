@@ -611,7 +611,7 @@ itrace("parse_string: longjmp executed: code = %d", code);
 	  break;
     }
 
- out:
+out:
 
   global_command = oglobal;
   nc = bash_input.location.string - ostring;
