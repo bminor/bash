@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed Oct 30 16:58:09 EDT 2019
+.\"	Last Change: Fri Nov 15 09:39:07 EST 2019
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2019 October 30" "GNU Bash 5.0"
+.TH BASH 1 "2019 November 15" "GNU Bash 5.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -7192,6 +7192,8 @@ history list containing
 The trailing \fB?\fP may be omitted if
 .I string
 is followed immediately by a newline.
+If \fIstring\fP is missing, the string from the most recent search is used;
+it is an error if there is no previous search string.
 .TP
 .B \d\s+2^\s-2\u\fIstring1\fP\d\s+2^\s-2\u\fIstring2\fP\d\s+2^\s-2\u
 Quick substitution.  Repeat the previous command, replacing
@@ -7199,7 +7201,7 @@ Quick substitution.  Repeat the previous command, replacing
 with
 .IR string2 .
 Equivalent to
-``!!:s/\fIstring1\fP/\fIstring2\fP/''
+``!!:s\d\s+2^\s-2\u\fIstring1\fP\d\s+2^\s-2\u\fIstring2\fP\d\s+2^\s-2\u''
 (see \fBModifiers\fP below).
 .TP
 .B !#
@@ -7239,7 +7241,8 @@ The last word.  This is usually the last argument, but will expand to the
 zeroth word if there is only one word in the line.
 .TP
 .B %
-The word matched by the most recent `?\fIstring\fR?' search.
+The first word matched by the most recent `?\fIstring\fR?' search,
+if the search string begins with a character that is part of a word.
 .TP
 .I x\fB\-\fPy
 A range of words; `\-\fIy\fR' abbreviates `0\-\fIy\fR'.
@@ -7256,6 +7259,7 @@ Abbreviates \fIx\-$\fP.
 .TP
 .B x\-
 Abbreviates \fIx\-$\fP like \fBx*\fP, but omits the last word.
+If \fBx\fP is missing, it defaults to 0.
 .PD
 .PP
 If a word designator is supplied without an event specification, the
@@ -7293,15 +7297,19 @@ Quote the substituted words as with
 but break into words at
 .B blanks
 and newlines.
+The \fBq\fP and \fBx\fP modifiers are mutually exclusive; the last one
+supplied is used.
 .TP
 .B s/\fIold\fP/\fInew\fP/
 Substitute
 .I new
 for the first occurrence of
 .I old
-in the event line.  Any delimiter can be used in place of /.  The
-final delimiter is optional if it is the last character of the
-event line.  The delimiter may be quoted in
+in the event line.
+Any character may be used as the delimiter in place of /.
+The final delimiter is optional if it is the last character of the
+event line.
+The delimiter may be quoted in
 .I old
 and
 .I new
@@ -7309,7 +7317,8 @@ with a single backslash.  If & appears in
 .IR new ,
 it is replaced by
 .IR old .
-A single backslash will quote the &.  If
+A single backslash will quote the &.
+If
 .I old
 is null, it is set to the last
 .I old
@@ -7333,7 +7342,8 @@ if it is the last character of the event line.
 An \fBa\fP may be used as a synonym for \fBg\fP.
 .TP
 .B G
-Apply the following `\fBs\fP' modifier once to each word in the event line.
+Apply the following `\fBs\fP' or `\fB&\fP' modifier once to each word
+in the event line.
 .PD
 .SH "SHELL BUILTIN COMMANDS"
 .\" start of bash_builtins

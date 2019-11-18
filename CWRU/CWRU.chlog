@@ -6837,3 +6837,30 @@ lib/sh/unicode.c
 	- u32toutf8: fix a typo that assigned the wrong value to the first
 	  byte of a six-byte UTF-8 character. Report and fix from
 	  István Pásztor <pasztorpisti@gmail.com>
+
+				   11/15
+				   -----
+doc/bash.1,lib/readline/doc/{history.3,hsuser.texi}
+	- quick substitution: make it clear that ^s1^s2^ is equivalent to
+	  !!:s^s1^s2^, since that's the internal transformation we perform.
+	  Reported by Jim Monte <jim.monte01@gmail.com>
+	- note that the `q' and `x' modifiers are mutually exclusive; last
+	  one wins. Reported by Jim Monte <jim.monte01@gmail.com>
+	- note that the `G' modifier can work with `&' as well as `s'.
+	  Reported by Jim Monte <jim.monte01@gmail.com>
+	- note that a word designator of `-' is equivalent to `0-'.
+	  Reported by Jim Monte <jim.monte01@gmail.com>
+
+lib/readline/histexpand.c
+	- history_expand_internal: make multiple :p modifiers work to suppress
+	  execution. Reported by Jim Monte <jim.monte01@gmail.com>
+	- get_history_word_specifier: fix so a `^' word designator works as
+	  the second part of a range.
+	  Reported by Jim Monte <jim.monte01@gmail.com>
+	- hist_error: make sure we don't blindly copy a null character into
+	  the error string (e.g., if there is a missing word designator
+	  following `:'). Reported by Jim Monte <jim.monte01@gmail.com>
+	- get_history_event: if the history event specifier (!) is followed
+	  immediately by a `-' and a non-digit (e.g. !-a), make sure the - is
+	  treated as part of a search string instead of making it an offset of
+	  0. Reported by Jim Monte <jim.monte01@gmail.com>
