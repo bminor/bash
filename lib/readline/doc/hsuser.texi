@@ -456,6 +456,7 @@ previous command is used as the event.
 
 After the optional word designator, you can add a sequence of one or more
 of the following modifiers, each preceded by a @samp{:}.
+These modify, or edit, the word or words selected from the history event.
 
 @table @code
 
@@ -497,8 +498,9 @@ the @samp{&}.
 If @var{old} is null, it is set to the last @var{old}
 substituted, or, if no previous history substitutions took place,
 the last @var{string}
-in a !?@var{string}@code[?]}
+in a !?@var{string}@code{[?]}
 search.
+If @var{new} is is null, each matching @var{old} is deleted.
 The final delimiter is optional if it is the last
 character on the input line.
 

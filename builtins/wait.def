@@ -22,7 +22,7 @@ $BUILTIN wait
 $FUNCTION wait_builtin
 $DEPENDS_ON JOB_CONTROL
 $PRODUCES wait.c
-$SHORT_DOC wait [-fn] [id ...]
+$SHORT_DOC wait [-fn] [-p var] [id ...]
 Wait for job completion and return exit status.
 
 Waits for each process identified by an ID, which may be a process ID or a
@@ -33,6 +33,11 @@ in that job's pipeline.
 
 If the -n option is supplied, waits for the next job to terminate and
 returns its exit status.
+
+If the -p option is supplied, the process or job identifier of the job
+for which the exit status is returned is assigned to the variable VAR
+named by the option argument. The variable will be unset initially, before
+any assignment. This is useful only when the -n option is supplied.
 
 If the -f option is supplied, and job control is enabled, waits for the
 specified ID to terminate, instead of waiting for it to change status.
@@ -89,7 +94,6 @@ int wait_intr_flag;
 #define WAIT_RETURN(s) \
   do \
     { \
-      interrupt_immediately = old_interrupt_immediately;\
       wait_signal_received = 0; \
       wait_intr_flag = 0; \
       return (s);\
@@ -101,14 +105,17 @@ wait_builtin (list)
      WORD_LIST *list;
 {
   int status, code, opt, nflag, wflags;
-  volatile int old_interrupt_immediately;
+  char *vname;
+  SHELL_VAR *pidvar;
   struct procstat pstat;
 
   USE_VAR(list);
 
   nflag = wflags = 0;
+  vname = NULL;
+  pidvar = (SHELL_VAR *)NULL;
   reset_internal_getopt ();
-  while ((opt = internal_getopt (list, "nf")) != -1)
+  while ((opt = internal_getopt (list, "fnp:")) != -1)
     {
       switch (opt)
 	{
@@ -119,6 +126,9 @@ wait_builtin (list)
 	case 'f':
 	  wflags |= JWAIT_FORCE;
 	  break;
+	case 'p':
+	  vname = list_optarg;
+	  break;	
 #endif
 	CASE_HELPOPT;
 	default:
@@ -128,10 +138,17 @@ wait_builtin (list)
     }
   list = loptend;
 
-  old_interrupt_immediately = interrupt_immediately;
-#if 0
-  interrupt_immediately++;
-#endif
+  /* Sanity-check variable name if -p supplied. */
+  if (vname)
+    {
+      if (legal_identifier (vname) == 0)
+	{
+	  sh_invalidid (vname);
+	  WAIT_RETURN (EXECUTION_FAILURE);
+	}
+      if (builtin_unbind_variable (vname) == -2)
+	WAIT_RETURN (EXECUTION_FAILURE);
+    }
 
   /* POSIX.2 says:  When the shell is waiting (by means of the wait utility)
      for asynchronous commands to complete, the reception of a signal for
@@ -161,6 +178,8 @@ wait_builtin (list)
       status = wait_for_any_job (wflags, &pstat);
       if (status < 0)
 	status = 127;
+      if (vname && status >= 0)
+	bind_var_to_int (vname, pstat.pid);
       WAIT_RETURN (status);
     }
 #endif
@@ -170,6 +189,8 @@ wait_builtin (list)
   if (list == 0)
     {
       wait_for_background_pids (&pstat);
+      if (vname)
+	bind_var_to_int (vname, pstat.pid);
       WAIT_RETURN (EXECUTION_SUCCESS);
     }
 

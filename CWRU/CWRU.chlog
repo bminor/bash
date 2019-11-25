@@ -6850,6 +6850,8 @@ doc/bash.1,lib/readline/doc/{history.3,hsuser.texi}
 	  Reported by Jim Monte <jim.monte01@gmail.com>
 	- note that a word designator of `-' is equivalent to `0-'.
 	  Reported by Jim Monte <jim.monte01@gmail.com>
+	- note that a missing `new' in a substitution modifier causes
+	  instances of `old' to be deleted
 
 lib/readline/histexpand.c
 	- history_expand_internal: make multiple :p modifiers work to suppress
@@ -6864,3 +6866,43 @@ lib/readline/histexpand.c
 	  immediately by a `-' and a non-digit (e.g. !-a), make sure the - is
 	  treated as part of a search string instead of making it an offset of
 	  0. Reported by Jim Monte <jim.monte01@gmail.com>
+
+				   11/19
+				   -----
+lib/readline/{colors,complete,histfile,input}.c,support/shobj-conf
+	- fixes to make readline compile on the latest HPE Nonstop (Tandem)
+	  releases. From Randall S. Becker <rsbecker@nexbridge.com>
+
+subst.c
+	- pat_subst: if we have a null match, make sure we advance by one
+	  character, not one byte. Bug reported by Chris Carlen
+	  <crobc@sbcglobal.net>
+
+				   11/22
+				   -----
+jobs.[ch],nojobs.c,builtins/jobs.def
+	- get_job_by_pid: now takes a PROCESS ** third argument; if non-null,
+	  it gets a pointer to the PROCESS struct corresponding to the PID
+	  argument. A convenience, not used by any caller yet
+
+builtins/wait.def
+	- interrupt_immediately: remove any uses, no longer used anywheren
+
+variables.c
+	- check_unbind_variable: return -2 if the variable name is readonly
+	  (change) or non-unsettable (new) to differentiate the return value
+	  from -1 from makunboud (which means variable not found)
+
+builtins/common.[ch]
+	- builtin_unbind_variable: identical to check_unbind_variable but calls
+	  builtin_error; for use by builtin commands
+
+buitins/wait.def
+	- wait_builtin: now has -p VARNAME option, which takes the pid
+	  returned by `wait -n' or wait without arguments and assigns it to
+	  VARNAME, unsetting VARNAME first. Requested by Robert Elz
+	  <kre@bmunnari.oz.au> after a similar feature in netbsd sh (not
+	  completely compatible yet)
+
+doc/{bash.1,bashref.texi}
+	- wait: document new -p option

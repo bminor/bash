@@ -8076,9 +8076,10 @@ pat_subst (string, pat, rep, mflags)
      char *string, *pat, *rep;
      int mflags;
 {
-  char *ret, *s, *e, *str, *rstr, *mstr;
+  char *ret, *s, *e, *str, *rstr, *mstr, *send;
   int rptr, mtype, rxpand, mlen;
   size_t rsize, l, replen, rslen;
+  DECLARE_MBSTATE;
 
   if (string == 0)
     return (savestring (""));
@@ -8132,6 +8133,7 @@ pat_subst (string, pat, rep, mflags)
 
   ret = (char *)xmalloc (rsize = 64);
   ret[0] = '\0';
+  send = string + strlen (string);
 
   for (replen = STRLEN (rep), rptr = 0, str = string; *str;)
     {
@@ -8185,9 +8187,20 @@ pat_subst (string, pat, rep, mflags)
 	{
 	  /* On a zero-length match, make sure we copy one character, since
 	     we increment one character to avoid infinite recursion. */
-	  RESIZE_MALLOCED_BUFFER (ret, rptr, 1, rsize, 64);
+	  char *p, *origp, *origs;
+	  size_t clen;
+
+	  RESIZE_MALLOCED_BUFFER (ret, rptr, locale_mb_cur_max, rsize, 64);
+#if defined (HANDLE_MULTIBYTE)
+	  p = origp = ret + rptr;
+	  origs = str;
+	  COPY_CHAR_P (p, str, send);
+	  rptr += p - origp;
+	  e += str - origs;
+#else
 	  ret[rptr++] = *str++;
 	  e++;		/* avoid infinite recursion on zero-length match */
+#endif
 	}
     }
 

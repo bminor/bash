@@ -41,6 +41,7 @@
 /* Defines for the wait_for functions and for the wait builtin to use */
 #define JWAIT_PERROR		0x01
 #define JWAIT_FORCE		0x02 
+#define JWAIT_NOWAIT		0x04	/* don't waitpid(), just return status if already exited */
 
 /* The max time to sleep while retrying fork() on EAGAIN failure */
 #define FORKSLEEP_MAX	16
@@ -101,7 +102,7 @@ typedef enum { JNONE = -1, JRUNNING = 1, JSTOPPED = 2, JDEAD = 4, JMIXED = 8 } J
 #define J_NOTIFIED   0x02 /* Non-zero if already notified about job state.   */
 #define J_JOBCONTROL 0x04 /* Non-zero if this job started under job control. */
 #define J_NOHUP      0x08 /* Don't send SIGHUP to job if shell gets SIGHUP. */
-#define J_STATSAVED  0x10 /* A process in this job had had status saved via $! */
+#define J_STATSAVED  0x10 /* A process in this job had status saved via $! */
 #define J_ASYNC	     0x20 /* Job was started asynchronously */
 #define J_PIPEFAIL   0x40 /* pipefail set when job was started */
 
@@ -245,10 +246,10 @@ extern void hangup_all_jobs PARAMS((void));
 extern void kill_current_pipeline PARAMS((void));
 
 #if defined (__STDC__) && defined (pid_t)
-extern int get_job_by_pid PARAMS((int, int));
+extern int get_job_by_pid PARAMS((int, int, PROCESS **));
 extern void describe_pid PARAMS((int));
 #else
-extern int get_job_by_pid PARAMS((pid_t, int));
+extern int get_job_by_pid PARAMS((pid_t, int, PROCESS **));
 extern void describe_pid PARAMS((pid_t));
 #endif
 

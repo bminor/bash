@@ -22,6 +22,8 @@
 #define READLINE_LIBRARY
 
 #if defined (__TANDEM)
+#  define _XOPEN_SOURCE_EXTENDED 1
+#  define _TANDEM_SOURCE 1
 #  include <floss.h>
 #endif
 

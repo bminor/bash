@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2019 July 8<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2019 November 22<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -980,7 +980,9 @@ to be matched as a string.
 An additional binary operator, <B>=~</B>, is available, with the same
 precedence as <B>==</B> and <B>!=</B>.
 When it is used, the string to the right of the operator is considered
-a POSIX extended regular expression and matched accordingly (as in <I>regex</I>(3)).
+a POSIX extended regular expression and matched accordingly
+(using the POSIX <I>regcomp</I> and <I>regexec</I> interfaces
+usually described in <I>regex</I>(3)).
 The return value is 0 if the string matches
 the pattern, and 1 otherwise.
 If the regular expression is syntactically incorrect, the conditional
@@ -996,18 +998,29 @@ Bracket expressions in regular expressions must be treated carefully,
 since normal quoting characters lose their meanings between brackets.
 If the pattern is stored in a shell variable, quoting the variable
 expansion forces the entire pattern to be matched as a string.
-Substrings matched by parenthesized subexpressions within the regular
-expression are saved in the array variable
-<FONT SIZE=-1><B>BASH_REMATCH</B>.
+<P>
+
+
+The pattern will match if it matches any part of the string.
+Anchor the pattern using the <B>^</B> and <B>$</B> regular expression
+operators to force it to match the entire string.
+The array variable
+<FONT SIZE=-1><B>BASH_REMATCH</B>
 
 </FONT>
+records which parts of the string matched the pattern.
 The element of
 <FONT SIZE=-1><B>BASH_REMATCH</B>
 
 </FONT>
-with index 0 is the portion of the string
-matching the entire regular expression.
-The element of
+with index 0 contains the portion of
+the string matching the entire regular expression.
+Substrings matched by parenthesized subexpressions within the regular
+expression are saved in the remaining
+<FONT SIZE=-1><B>BASH_REMATCH</B>
+
+</FONT>
+indices. The element of
 <FONT SIZE=-1><B>BASH_REMATCH</B>
 
 </FONT>
@@ -2055,7 +2068,6 @@ The element with index 0 is the portion of the string
 matching the entire regular expression.
 The element with index <I>n</I> is the portion of the
 string matching the <I>n</I>th parenthesized subexpression.
-This variable is read-only.
 <DT><B>BASH_SOURCE</B>
 
 <DD>
@@ -4480,14 +4492,10 @@ scans each word for the characters
 
 <B>?</B>,
 
-<B>[</B>,
+and
+<B>[</B>.
 
-and, under certain circumstances (e.g., when it appears in the expansion of
-an unquoted shell variable, depending on the setting of the <B>posixglob</B>
-shell option),
-<B>\</B>.
-
-If one of these characters appears, then the word is
+If one of these characters appears, and is not quoted, then the word is
 regarded as a
 <I>pattern</I>,
 
@@ -9176,6 +9184,8 @@ The trailing <B>?</B> may be omitted if
 <I>string</I>
 
 is followed immediately by a newline.
+If <I>string</I> is missing, the string from the most recent search is used;
+it is an error if there is no previous search string.
 <DT><B></B><FONT SIZE=+2><B>^</B></FONT><B></B><I>string1</I><FONT SIZE=+2>^</FONT><I>string2</I><FONT SIZE=+2>^</FONT>
 
 <DD>
@@ -9186,7 +9196,7 @@ with
 <I>string2</I>.
 
 Equivalent to
-``!!:s/<I>string1</I>/<I>string2</I>/''
+``!!:s<FONT SIZE=+2>^</FONT><I>string1</I><FONT SIZE=+2>^</FONT><I>string2</I><FONT SIZE=+2>^</FONT>''
 (see <B>Modifiers</B> below).
 <DT><B>!#</B>
 
@@ -9244,7 +9254,8 @@ zeroth word if there is only one word in the line.
 <DT><B>%</B>
 
 <DD>
-The word matched by the most recent `?<I>string</I>?' search.
+The first word matched by the most recent `?<I>string</I>?' search,
+if the search string begins with a character that is part of a word.
 <DT><I>x</I><B>-</B>y
 
 <DD>
@@ -9266,6 +9277,7 @@ Abbreviates <I>x-$</I>.
 
 <DD>
 Abbreviates <I>x-$</I> like <B>x*</B>, but omits the last word.
+If <B>x</B> is missing, it defaults to 0.
 
 </DL>
 <P>
@@ -9279,6 +9291,7 @@ previous command is used as the event.
 
 After the optional word designator, there may appear a sequence of
 one or more of the following modifiers, each preceded by a `:'.
+These modify, or edit, the word or words selected from the history event.
 <P>
 
 
@@ -9320,6 +9333,8 @@ but break into words at
 <B>blanks</B>
 
 and newlines.
+The <B>q</B> and <B>x</B> modifiers are mutually exclusive; the last one
+supplied is used.
 <DT><B>s/</B><I>old</I>/<I>new</I>/
 
 <DD>
@@ -9329,9 +9344,11 @@ Substitute
 for the first occurrence of
 <I>old</I>
 
-in the event line.  Any delimiter can be used in place of /.  The
-final delimiter is optional if it is the last character of the
-event line.  The delimiter may be quoted in
+in the event line.
+Any character may be used as the delimiter in place of /.
+The final delimiter is optional if it is the last character of the
+event line.
+The delimiter may be quoted in
 <I>old</I>
 
 and
@@ -9343,7 +9360,8 @@ with a single backslash.  If &amp; appears in
 it is replaced by
 <I>old</I>.
 
-A single backslash will quote the &amp;.  If
+A single backslash will quote the &amp;.
+If
 <I>old</I>
 
 is null, it is set to the last
@@ -9357,6 +9375,13 @@ in a
 <B>!?</B><I>string</I><B>[?]</B>
 
 search.
+If
+<I>new</I>
+
+is null, each matching
+<I>old</I>
+
+is deleted.
 <DT><B>&amp;</B>
 
 <DD>
@@ -9374,7 +9399,8 @@ An <B>a</B> may be used as a synonym for <B>g</B>.
 <DT><B>G</B>
 
 <DD>
-Apply the following `<B>s</B>' modifier once to each word in the event line.
+Apply the following `<B>s</B>' or `<B>&amp;</B>' modifier once to each word
+in the event line.
 
 </DL>
 <A NAME="lbDB">&nbsp;</A>
@@ -9839,10 +9865,10 @@ will be displayed.
 <P>
 The return value is true unless an invalid option is supplied, or no
 matches were generated.
-<DT><B>complete</B> [<B>-abcdefgjksuv</B>] [<B>-o</B> <I>comp-option</I>] [<B>-DEI</B>] [<B>-A</B> <I>action</I>] [<B>-G</B> <I>globpat</I>] [<B>-W</B> <I>wordlist</I>] [<B>-F</B> <I>function</I>] [<B>-C</B> <I>command</I>]<DD>
+<DT><B>complete</B> [<B>-abcdefgjksuv</B>] [<B>-o</B> <I>comp-option</I>] [<B>-DEI</B>] [<B>-A</B> <I>action</I>] [<B>-G</B> <I>globpat</I>] [<B>-W</B> <I>wordlist</I>]<DD>
 <BR>
 
-[<B>-X</B> <I>filterpat</I>] [<B>-P</B> <I>prefix</I>] [<B>-S</B> <I>suffix</I>] <I>name</I> [<I>name ...</I>]
+[<B>-F</B> <I>function</I>] [<B>-C</B> <I>command</I>] [<B>-X</B> <I>filterpat</I>] [<B>-P</B> <I>prefix</I>] [<B>-S</B> <I>suffix</I>] <I>name</I> [<I>name ...</I>]
 
 <DT><B>complete</B> <B>-pr</B> [<B>-DEI</B>] [<I>name</I> ...]<DD>
 
@@ -10781,7 +10807,7 @@ does not specify a valid job or
 <I>jobspec</I>
 
 specifies a job that was started without job control.
-<DT><B>getopts</B> <I>optstring</I> <I>name</I> [<I>args</I>]<DD>
+<DT><B>getopts</B> <I>optstring</I> <I>name</I> [<I>arg ...</I>]<DD>
 <B>getopts</B>
 
 is used by shell procedures to parse positional parameters.
@@ -10840,9 +10866,10 @@ and <I>name</I> is set to ?.
 <B>getopts</B>
 
 normally parses the positional parameters, but if more arguments are
-given in
-<I>args</I>,
+supplied as
+<I>arg</I>
 
+values,
 <B>getopts</B>
 
 parses those instead.
@@ -12942,16 +12969,6 @@ files (see
 
 above)
 to expand to a null string, rather than themselves.
-<DT><B>posixglob</B>
-
-<DD>
-If set,
-<B>bash</B>
-
-makes words containing unquoted backslashes after expansion eligible for
-pathname expansion, even if they don't contain any other unquoted pattern
-characters. This option is enabled by default, and is enabled when
-<I>posix mode</I> is enabled.
 <DT><B>progcomp</B>
 
 <DD>
@@ -13704,7 +13721,7 @@ subsequently reset.  The exit status is true unless a
 <I>name</I>
 
 is readonly.
-<DT><B>wait</B> [<B>-fn</B>] [<I>id ...</I>]<DD>
+<DT><B>wait</B> [<B>-fn</B>] [-p <I>varname</I>] [<I>id ...</I>]<DD>
 Wait for each specified child process and return its termination status.
 Each
 <I>id</I>
@@ -13721,6 +13738,11 @@ the last-executed process substitution, if its process id is the same as
 and the return status is zero.
 If the <B>-n</B> option is supplied, <B>wait</B> waits for a single job
 to terminate and returns its exit status.
+If the <B>-p</B> option is supplied, the process or job identifier of the job
+for which the exit status is returned is assigned to the variable
+<I>varname</I> named by the option argument.
+The variable will be unset initially, before any assignment.
+This is useful only when the <B>-n</B> option is supplied.
 Supplying the <B>-f</B> option, when job control is enabled,
 forces <B>wait</B> to wait for <I>id</I> to terminate before returning
 its status, instead of returning when it changes status.
@@ -14018,7 +14040,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2019 July 8<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2019 November 22<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -14124,6 +14146,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 08 July 2019 15:16:27 EDT
+Time: 22 November 2019 15:53:56 EST
 </BODY>
 </HTML>

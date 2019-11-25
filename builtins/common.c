@@ -937,3 +937,25 @@ builtin_bind_variable (name, value, flags)
 
   return v;
 }
+
+/* Like check_unbind_variable, but for use by builtins (only matters for
+   error messages). */
+int
+builtin_unbind_variable (vname)
+     const char *vname;
+{
+  SHELL_VAR *v;
+
+  v = find_variable (vname);
+  if (v && readonly_p (v))
+    {
+      builtin_error (_("%s: cannot unset: readonly %s"), vname, "variable");
+      return -2;
+    }
+  else if (v && non_unsettable_p (v))
+    {
+      builtin_error (_("%s: cannot unset"), vname);
+      return -2;
+    }
+  return (unbind_variable (vname));
+}

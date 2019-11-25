@@ -3944,7 +3944,12 @@ check_unbind_variable (name)
   if (v && readonly_p (v))
     {
       internal_error (_("%s: cannot unset: readonly %s"), name, "variable");
-      return -1;
+      return -2;
+    }
+  else if (v && non_unsettable_p (v))
+    {
+      internal_error (_("%s: cannot unset"), name);
+      return -2;
     }
   return (unbind_variable (name));
 }

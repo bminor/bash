@@ -1802,9 +1802,10 @@ find_job (pid, alive_only, procp)
 /* Find a job given a PID.  If BLOCK is non-zero, block SIGCHLD as
    required by find_job. */
 int
-get_job_by_pid (pid, block)
+get_job_by_pid (pid, block, procp)
      pid_t pid;
      int block;
+     PROCESS **procp;
 {
   int job;
   sigset_t set, oset;
@@ -1812,7 +1813,7 @@ get_job_by_pid (pid, block)
   if (block)
     BLOCK_CHILD (set, oset);
 
-  job = find_job (pid, 0, NULL);
+  job = find_job (pid, 0, procp);
 
   if (block)
     UNBLOCK_CHILD (oset);

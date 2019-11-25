@@ -1016,9 +1016,10 @@ without_job_control ()
 }
 
 int
-get_job_by_pid (pid, block)
+get_job_by_pid (pid, block, ignore)
      pid_t pid;
      int block;
+     PROCESS **ignore;
 {
   int i;
 

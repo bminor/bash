@@ -8161,7 +8161,7 @@ or non-zero if an error occurs or an invalid option is encountered.
 @item wait
 @btindex wait
 @example
-wait [-fn] [@var{jobspec} or @var{pid} @dots{}]
+wait [-fn] [-p @var{varname}] [@var{jobspec} or @var{pid} @dots{}]
 @end example
 
 Wait until the child process specified by each process @sc{id} @var{pid}
@@ -8175,6 +8175,11 @@ the last-executed process substitution, if its process id is the same as
 and the return status is zero.
 If the @option{-n} option is supplied, @code{wait} waits for a single job
 to terminate and returns its exit status.
+If the @option{-p} option is supplied, the process or job identifier of the job
+for which the exit status is returned is assigned to the variable
+@var{varname} named by the option argument.
+The variable will be unset initially, before any assignment.
+This is useful only when the @option{-n} option is supplied.
 Supplying the @option{-f} option, when job control is enabled,
 forces @code{wait} to wait for each @var{pid} or @var{jobspec} to
 terminate before returning its status, intead of returning when it changes

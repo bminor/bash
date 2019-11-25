@@ -218,6 +218,7 @@ extern sh_builtin_func_t *this_shell_builtin;
 extern sh_builtin_func_t *last_shell_builtin;
 
 extern SHELL_VAR *builtin_bind_variable __P((char *, char *, int));
+extern int builtin_unbind_variable __P((const char *));
 
 /* variables from evalfile.c */
 extern int sourcelevel;
