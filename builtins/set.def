@@ -395,6 +395,11 @@ set_posix_mode (on_or_off, option_name)
      int on_or_off;
      char *option_name;
 {
+  /* short-circuit on no-op */
+  if ((on_or_off == FLAG_ON && posixly_correct) ||
+      (on_or_off == FLAG_OFF && posixly_correct == 0))
+    return 0;
+
   posixly_correct = on_or_off == FLAG_ON;
   if (posixly_correct == 0)
     unbind_variable_noref ("POSIXLY_CORRECT");

@@ -185,11 +185,13 @@ rl_display_search (char *search_string, int flags, int where)
   strcpy (message + msglen, "i-search)`");
   msglen += 10;
 
-  if (search_string)
+  if (search_string && *search_string)
     {
       strcpy (message + msglen, search_string);
       msglen += searchlen;
     }
+  else
+    _rl_optimize_redisplay ();
 
   strcpy (message + msglen, "': ");
 

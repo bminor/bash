@@ -49,8 +49,8 @@
 \entry{expansion, brace}{23}{expansion, brace}
 \entry{tilde expansion}{24}{tilde expansion}
 \entry{expansion, tilde}{24}{expansion, tilde}
-\entry{parameter expansion}{25}{parameter expansion}
-\entry{expansion, parameter}{25}{expansion, parameter}
+\entry{parameter expansion}{24}{parameter expansion}
+\entry{expansion, parameter}{24}{expansion, parameter}
 \entry{command substitution}{31}{command substitution}
 \entry{expansion, arithmetic}{31}{expansion, arithmetic}
 \entry{arithmetic expansion}{31}{arithmetic expansion}

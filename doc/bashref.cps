@@ -45,7 +45,7 @@
 \entry{expansion, arithmetic}{31}
 \entry{expansion, brace}{23}
 \entry{expansion, filename}{32}
-\entry{expansion, parameter}{25}
+\entry{expansion, parameter}{24}
 \entry{expansion, pathname}{32}
 \entry{expansion, tilde}{24}
 \entry{expressions, arithmetic}{93}
@@ -88,7 +88,7 @@
 \initial {O}
 \entry{operator, shell}{3}
 \initial {P}
-\entry{parameter expansion}{25}
+\entry{parameter expansion}{24}
 \entry{parameters}{20}
 \entry{parameters, positional}{21}
 \entry{parameters, special}{21}

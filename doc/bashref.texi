@@ -1375,16 +1375,16 @@ shell context; no new process is created to interpret them.
 Functions are declared using this syntax:
 @rwindex function
 @example
-@var{name} () @var{compound-command} [ @var{redirections} ]
+@var{fname} () @var{compound-command} [ @var{redirections} ]
 @end example
 
 or
 
 @example
-function @var{name} [()] @var{compound-command} [ @var{redirections} ]
+function @var{fname} [()] @var{compound-command} [ @var{redirections} ]
 @end example
 
-This defines a shell function named @var{name}.  The reserved
+This defines a shell function named @var{fname}.  The reserved
 word @code{function} is optional.
 If the @code{function} reserved
 word is supplied, the parentheses are optional.
@@ -1394,14 +1394,16 @@ That command is usually a @var{list} enclosed between @{ and @}, but
 may be any compound command listed above,
 with one exception: If the @code{function} reserved word is used, but the
 parentheses are not supplied, the braces are required.                   
-@var{compound-command} is executed whenever @var{name} is specified as the
+@var{compound-command} is executed whenever @var{fname} is specified as the
 name of a command.
 When the shell is in @sc{posix} mode (@pxref{Bash POSIX Mode}),
-@var{name} may not be the same as one of the special builtins
+@var{fname} must be a valid shell @var{name} and
+may not be the same as one of the special builtins
 (@pxref{Special Builtins}).
+In default mode, a function name can be any unquoted shell word that does
+not contain @samp{$}.
 Any redirections (@pxref{Redirections}) associated with the shell function
 are performed when the function is executed.
-
 A function definition may be deleted using the @option{-f} option to the
 @code{unset} builtin (@pxref{Bourne Shell Builtins}).
 
@@ -1746,18 +1748,6 @@ If Bash is started with the @option{-c} option (@pxref{Invoking Bash}),
 then @code{$0} is set to the first argument after the string to be
 executed, if one is present.  Otherwise, it is set
 to the filename used to invoke Bash, as given by argument zero.
-
-@item _
-@vindex $_
-($_, an underscore.)
-At shell startup, set to the absolute pathname used to invoke the
-shell or shell script being executed as passed in the environment
-or argument list.
-Subsequently, expands to the last argument to the previous simple
-command executed in the foreground, after expansion. 
-Also set to the full pathname used to invoke each command executed
-and placed in the environment exported to that command.
-When checking mail, this parameter holds the name of the mail file.
 @end vtable
 
 @node Shell Expansions
@@ -5648,6 +5638,18 @@ variables for controlling the job control facilities
 (@pxref{Job Control Variables}).
 
 @vtable @code
+
+@item _
+@vindex $_
+($_, an underscore.)
+At shell startup, set to the absolute pathname used to invoke the
+shell or shell script being executed as passed in the environment
+or argument list.
+Subsequently, expands to the last argument to the previous simple
+command executed in the foreground, after expansion. 
+Also set to the full pathname used to invoke each command executed
+and placed in the environment exported to that command.
+When checking mail, this parameter holds the name of the mail file.
 
 @item BASH
 The full pathname used to execute the current instance of Bash.

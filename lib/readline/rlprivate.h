@@ -276,6 +276,7 @@ extern void _rl_erase_at_end_of_line PARAMS((int));
 extern void _rl_clear_to_eol PARAMS((int));
 extern void _rl_clear_screen PARAMS((void));
 extern void _rl_update_final PARAMS((void));
+extern void _rl_optimize_redisplay PARAMS((void));
 extern void _rl_redisplay_after_sigwinch PARAMS((void));
 extern void _rl_clean_up_for_exit PARAMS((void));
 extern void _rl_erase_entire_line PARAMS((void));

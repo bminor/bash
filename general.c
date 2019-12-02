@@ -97,6 +97,8 @@ static struct {
   0
 };
 
+static char *saved_posix_vars;
+
 void
 posix_initialize (on)
      int on;
@@ -136,6 +138,13 @@ get_posix_options (bitmap)
   for (i = 0; posix_vars[i].posix_mode_var; i++)
     bitmap[i] = *(posix_vars[i].posix_mode_var);
   return bitmap;
+}
+
+#undef save_posix_options
+void
+save_posix_options ()
+{
+  saved_posix_vars = get_posix_options (saved_posix_vars);
 }
 
 void

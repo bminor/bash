@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2019 November 22<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2019 November 26<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -54,7 +54,7 @@ bash - GNU Bourne-Again SHell
 <H3>COPYRIGHT</H3>
 
 
-Bash is Copyright &#169; 1989-2018 by the Free Software Foundation, Inc.
+Bash is Copyright &#169; 1989-2019 by the Free Software Foundation, Inc.
 <A NAME="lbAE">&nbsp;</A>
 <H3>DESCRIPTION</H3>
 
@@ -1273,11 +1273,11 @@ A shell function is an object that is called like a simple command and
 executes a compound command with a new set of positional parameters.
 Shell functions are declared as follows:
 <DL COMPACT>
-<DT><I>name</I> () <I>compound-command</I> [<I>redirection</I>]<DD>
+<DT><I>fname</I> () <I>compound-command</I> [<I>redirection</I>]<DD>
 
-<DT><B>function</B> <I>name</I> [()] <I>compound-command</I> [<I>redirection</I>]<DD>
+<DT><B>function</B> <I>fname</I> [()] <I>compound-command</I> [<I>redirection</I>]<DD>
 
-This defines a function named <I>name</I>.
+This defines a function named <I>fname</I>.
 The reserved word <B>function</B> is optional.
 If the <B>function</B> reserved word is supplied, the parentheses are optional.
 The <I>body</I> of the function is the compound command
@@ -1288,10 +1288,13 @@ That command is usually a <I>list</I> of commands between { and }, but
 may be any command listed under <B>Compound Commands</B> above,
 with one exception: If the <B>function</B> reserved word is used, but the
 parentheses are not supplied, the braces are required.
-<I>compound-command</I> is executed whenever <I>name</I> is specified as the
+<I>compound-command</I> is executed whenever <I>fname</I> is specified as the
 name of a simple command.
-When in <I>posix mode</I>, <I>name</I> may not be the name of one of the
+When in <I>posix mode</I>, <I>fname</I> must be a valid shell <I>name</I>
+and may not be the name of one of the
 POSIX <I>special builtins</I>.
+In default mode, a function name can be any unquoted shell word that does
+not contain <B>$</B>.
 Any redirections (see
 <FONT SIZE=-1><B>REDIRECTION</B>
 
@@ -1848,18 +1851,6 @@ to the filename used to invoke
 <B>bash</B>,
 
 as given by argument zero.
-<DT><B>_</B>
-
-<DD>
-At shell startup, set to the absolute pathname used to invoke the
-shell or shell script being executed as passed in the environment
-or argument list.
-Subsequently, expands to the last argument to the previous simple
-command executed in the foreground, after expansion.
-Also set to the full pathname used to invoke each command executed
-and placed in the environment exported to that command.
-When checking mail, this parameter holds the name of the mail file
-currently being checked.
 
 </DL>
 <A NAME="lbAW">&nbsp;</A>
@@ -1872,6 +1863,18 @@ The following variables are set by the shell:
 
 
 <DL COMPACT>
+<DT><B>_</B>
+
+<DD>
+At shell startup, set to the absolute pathname used to invoke the
+shell or shell script being executed as passed in the environment
+or argument list.
+Subsequently, expands to the last argument to the previous simple
+command executed in the foreground, after expansion.
+Also set to the full pathname used to invoke each command executed
+and placed in the environment exported to that command.
+When checking mail, this parameter holds the name of the mail file
+currently being checked.
 <DT><B>BASH</B>
 
 <DD>
@@ -7482,6 +7485,7 @@ the maximum number of history entries will be set to 500.
 When set to <B>On</B>, makes readline use a single line for display,
 scrolling the input horizontally on a single screen line when it
 becomes longer than the screen width rather than wrapping to a new line.
+This setting is automatically enabled for terminals of height 1.
 <DT><B>input-meta (Off)</B>
 
 <DD>
@@ -12583,7 +12587,7 @@ If set,
 when in <I>posix mode</I>, treats a single quote in a double-quoted
 parameter expansion as a special character.  The single quotes must match
 (an even number) and the characters between the single quotes are considered
-quoted.  This is the behavior of posix mode through version 4.1.
+quoted.  This is the behavior of &lt;posix mode through version 4.1.
 The default bash behavior remains as in previous versions.
 <DT><B>compat42</B>
 
@@ -14040,7 +14044,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2019 November 22<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2019 November 26<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -14146,6 +14150,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 22 November 2019 15:53:56 EST
+Time: 26 November 2019 11:18:28 EST
 </BODY>
 </HTML>

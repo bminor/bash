@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Nov 22 15:26:59 EST 2019
+.\"	Last Change: Tue Nov 26 11:15:17 EST 2019
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2019 November 22" "GNU Bash 5.0"
+.TH BASH 1 "2019 November 26" "GNU Bash 5.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -50,8 +50,8 @@ bash \- GNU Bourne-Again SHell
 [options]
 [command_string | file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989-2018 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989-2018 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-2019 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-2019 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
 is an \fBsh\fR-compatible command language interpreter that
@@ -994,12 +994,12 @@ A shell function is an object that is called like a simple command and
 executes a compound command with a new set of positional parameters.
 Shell functions are declared as follows:
 .TP
-\fIname\fP () \fIcompound\-command\fP [\fIredirection\fP]
+\fIfname\fP () \fIcompound\-command\fP [\fIredirection\fP]
 .PD 0
 .TP
-\fBfunction\fP \fIname\fP [()] \fIcompound\-command\fP [\fIredirection\fP]
+\fBfunction\fP \fIfname\fP [()] \fIcompound\-command\fP [\fIredirection\fP]
 .PD
-This defines a function named \fIname\fP.
+This defines a function named \fIfname\fP.
 The reserved word \fBfunction\fP is optional.
 If the \fBfunction\fP reserved word is supplied, the parentheses are optional.
 The \fIbody\fP of the function is the compound command
@@ -1009,10 +1009,13 @@ That command is usually a \fIlist\fP of commands between { and }, but
 may be any command listed under \fBCompound Commands\fP above,
 with one exception: If the \fBfunction\fP reserved word is used, but the
 parentheses are not supplied, the braces are required.
-\fIcompound\-command\fP is executed whenever \fIname\fP is specified as the
+\fIcompound\-command\fP is executed whenever \fIfname\fP is specified as the
 name of a simple command.
-When in \fIposix mode\fP, \fIname\fP may not be the name of one of the
+When in \fIposix mode\fP, \fIfname\fP must be a valid shell \fIname\fP
+and may not be the name of one of the
 POSIX \fIspecial builtins\fP.
+In default mode, a function name can be any unquoted shell word that does
+not contain \fB$\fP.
 Any redirections (see
 .SM
 .B REDIRECTION
@@ -1437,6 +1440,12 @@ executed, if one is present.  Otherwise, it is set
 to the filename used to invoke
 .BR bash ,
 as given by argument zero.
+.PD
+.SS Shell Variables
+.PP
+The following variables are set by the shell:
+.PP
+.PD 0
 .TP
 .B _
 At shell startup, set to the absolute pathname used to invoke the
@@ -1448,12 +1457,6 @@ Also set to the full pathname used to invoke each command executed
 and placed in the environment exported to that command.
 When checking mail, this parameter holds the name of the mail file
 currently being checked.
-.PD
-.SS Shell Variables
-.PP
-The following variables are set by the shell:
-.PP
-.PD 0
 .TP
 .B BASH
 Expands to the full filename used to invoke this instance of
@@ -5842,6 +5845,7 @@ the maximum number of history entries will be set to 500.
 When set to \fBOn\fP, makes readline use a single line for display,
 scrolling the input horizontally on a single screen line when it
 becomes longer than the screen width rather than wrapping to a new line.
+This setting is automatically enabled for terminals of height 1.
 .TP
 .B input\-meta (Off)
 If set to \fBOn\fP, readline will enable eight-bit input (that is,
@@ -9931,7 +9935,7 @@ If set,
 when in \fIposix mode\fP, treats a single quote in a double-quoted
 parameter expansion as a special character.  The single quotes must match
 (an even number) and the characters between the single quotes are considered
-quoted.  This is the behavior of posix mode through version 4.1.
+quoted.  This is the behavior of <posix mode through version 4.1.
 The default bash behavior remains as in previous versions.
 .TP 8
 .B compat42

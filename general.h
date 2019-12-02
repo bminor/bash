@@ -307,6 +307,9 @@ extern int num_posix_options __P((void));
 extern char *get_posix_options __P((char *));
 extern void set_posix_options __P((const char *));
 
+extern void save_posix_options __P((void));
+#define save_posix_options()  saved_posix_vars = get_posix_options (saved_posix_vars)
+
 #if defined (RLIMTYPE)
 extern RLIMTYPE string_to_rlimtype __P((char *));
 extern void print_rlimtype __P((RLIMTYPE, int));

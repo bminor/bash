@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.0, 22 November 2019).
+the Bash shell (version 5.0, 26 November 2019).
 
-This is Edition 5.0, last updated 22 November 2019,
+This is Edition 5.0, last updated 26 November 2019,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.0.
 
@@ -273,10 +273,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.0, 22 November 2019).
+the Bash shell (version 5.0, 26 November 2019).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.0, last updated 22 November 2019,
+<p>This is Edition 5.0, last updated 26 November 2019,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.0.
 </p>
@@ -1755,16 +1755,16 @@ shell context; no new process is created to interpret them.
 <p>Functions are declared using this syntax:
 <span id="index-function"></span>
 </p><div class="example">
-<pre class="example"><var>name</var> () <var>compound-command</var> [ <var>redirections</var> ]
+<pre class="example"><var>fname</var> () <var>compound-command</var> [ <var>redirections</var> ]
 </pre></div>
 
 <p>or
 </p>
 <div class="example">
-<pre class="example">function <var>name</var> [()] <var>compound-command</var> [ <var>redirections</var> ]
+<pre class="example">function <var>fname</var> [()] <var>compound-command</var> [ <var>redirections</var> ]
 </pre></div>
 
-<p>This defines a shell function named <var>name</var>.  The reserved
+<p>This defines a shell function named <var>fname</var>.  The reserved
 word <code>function</code> is optional.
 If the <code>function</code> reserved
 word is supplied, the parentheses are optional.
@@ -1774,15 +1774,17 @@ That command is usually a <var>list</var> enclosed between { and }, but
 may be any compound command listed above,
 with one exception: If the <code>function</code> reserved word is used, but the
 parentheses are not supplied, the braces are required.                   
-<var>compound-command</var> is executed whenever <var>name</var> is specified as the
+<var>compound-command</var> is executed whenever <var>fname</var> is specified as the
 name of a command.
 When the shell is in <small>POSIX</small> mode (see <a href="#Bash-POSIX-Mode">Bash POSIX Mode</a>),
-<var>name</var> may not be the same as one of the special builtins
+<var>fname</var> must be a valid shell <var>name</var> and
+may not be the same as one of the special builtins
 (see <a href="#Special-Builtins">Special Builtins</a>).
+In default mode, a function name can be any unquoted shell word that does
+not contain &lsquo;<samp>$</samp>&rsquo;.
 Any redirections (see <a href="#Redirections">Redirections</a>) associated with the shell function
 are performed when the function is executed.
-</p>
-<p>A function definition may be deleted using the <samp>-f</samp> option to the
+A function definition may be deleted using the <samp>-f</samp> option to the
 <code>unset</code> builtin (see <a href="#Bourne-Shell-Builtins">Bourne Shell Builtins</a>).
 </p>
 <p>The exit status of a function definition is zero unless a syntax error
@@ -2160,21 +2162,6 @@ If Bash is started with the <samp>-c</samp> option (see <a href="#Invoking-Bash"
 then <code>$0</code> is set to the first argument after the string to be
 executed, if one is present.  Otherwise, it is set
 to the filename used to invoke Bash, as given by argument zero.
-</p>
-</dd>
-<dt><code>_</code>
-<span id="index-_005f"></span>
-</dt>
-<dd><span id="index-_0024_005f"></span>
-<p>($_, an underscore.)
-At shell startup, set to the absolute pathname used to invoke the
-shell or shell script being executed as passed in the environment
-or argument list.
-Subsequently, expands to the last argument to the previous simple
-command executed in the foreground, after expansion. 
-Also set to the full pathname used to invoke each command executed
-and placed in the environment exported to that command.
-When checking mail, this parameter holds the name of the mail file.
 </p></dd>
 </dl>
 
@@ -6453,6 +6440,21 @@ variables for controlling the job control facilities
 (see <a href="#Job-Control-Variables">Job Control Variables</a>).
 </p>
 <dl compact="compact">
+<dt><code>_</code>
+<span id="index-_005f"></span>
+</dt>
+<dd><span id="index-_0024_005f"></span>
+<p>($_, an underscore.)
+At shell startup, set to the absolute pathname used to invoke the
+shell or shell script being executed as passed in the environment
+or argument list.
+Subsequently, expands to the last argument to the previous simple
+command executed in the foreground, after expansion. 
+Also set to the full pathname used to invoke each command executed
+and placed in the environment exported to that command.
+When checking mail, this parameter holds the name of the mail file.
+</p>
+</dd>
 <dt><code>BASH</code>
 <span id="index-BASH"></span>
 </dt>
@@ -10096,8 +10098,9 @@ the maximum number of history entries will be set to 500.
 <p>This variable can be set to either &lsquo;<samp>on</samp>&rsquo; or &lsquo;<samp>off</samp>&rsquo;.  Setting it
 to &lsquo;<samp>on</samp>&rsquo; means that the text of the lines being edited will scroll
 horizontally on a single screen line when they are longer than the width
-of the screen, instead of wrapping onto a new screen line.  By default,
-this variable is set to &lsquo;<samp>off</samp>&rsquo;.
+of the screen, instead of wrapping onto a new screen line.
+This variable is automatically set to &lsquo;<samp>on</samp>&rsquo; for terminals of height 1.
+By default, this variable is set to &lsquo;<samp>off</samp>&rsquo;.
 </p>
 </dd>
 <dt><code>input-meta</code></dt>
@@ -14817,7 +14820,7 @@ Next: <a href="#Function-Index" accesskey="n" rel="next">Function Index</a>, Pre
 <tr><td></td><td valign="top"><a href="#index-_00240"><code>$0</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Special-Parameters">Special Parameters</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-_0024_003f"><code>$?</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Special-Parameters">Special Parameters</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-_0024_0040"><code>$@</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Special-Parameters">Special Parameters</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-_0024_005f"><code>$_</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Special-Parameters">Special Parameters</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-_0024_005f"><code>$_</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td colspan="4"> <hr></td></tr>
 <tr><th id="Variable-Index_vr_symbol-4">*</th><td></td><td></td></tr>
 <tr><td></td><td valign="top"><a href="#index-_002a"><code>*</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Special-Parameters">Special Parameters</a></td></tr>
@@ -14835,7 +14838,7 @@ Next: <a href="#Function-Index" accesskey="n" rel="next">Function Index</a>, Pre
 <tr><td></td><td valign="top"><a href="#index-_0040"><code>@</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Special-Parameters">Special Parameters</a></td></tr>
 <tr><td colspan="4"> <hr></td></tr>
 <tr><th id="Variable-Index_vr_symbol-9">_</th><td></td><td></td></tr>
-<tr><td></td><td valign="top"><a href="#index-_005f"><code>_</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Special-Parameters">Special Parameters</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-_005f"><code>_</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td colspan="4"> <hr></td></tr>
 <tr><th id="Variable-Index_vr_letter-A">A</th><td></td><td></td></tr>
 <tr><td></td><td valign="top"><a href="#index-auto_005fresume"><code>auto_resume</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Job-Control-Variables">Job Control Variables</a></td></tr>

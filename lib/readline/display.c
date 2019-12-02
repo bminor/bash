@@ -1,6 +1,6 @@
 /* display.c -- readline redisplay facility. */
 
-/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2019 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library    
    for reading lines of text with interactive input and history editing.
@@ -192,6 +192,8 @@ int _rl_last_v_pos = 0;
   on screen minus 1. */
 int _rl_vis_botlin = 0;
 
+static int _rl_quick_redisplay = 0;
+
 /* This is a hint update_line gives to rl_redisplay that it has adjusted the
    value of _rl_last_c_pos *and* taken the presence of any invisible chars in
    the prompt into account.  rl_redisplay notes this and does not do the
@@ -222,6 +224,10 @@ static int forced_display;
 
 /* Default and initial buffer size.  Can grow. */
 static int line_size = DEFAULT_LINE_BUFFER_SIZE;
+
+/* Set to a non-zero value if horizontal scrolling has been enabled
+   automatically because the terminal was resized to height 1. */
+static int horizontal_scrolling_autoset = 0;	/* explicit initialization */
 
 /* Variables to keep track of the expanded prompt string, which may
    include invisible characters. */
@@ -653,7 +659,21 @@ init_line_structures (int minsize)
 
   line_structures_initialized = 1;
 }
-  
+
+/* Do whatever tests are necessary and tell update_line that it can do a
+   quick, dumb redisplay on the assumption that there are so many
+   differences between the old and new lines that it would be a waste to
+   compute all the differences.
+   Right now, it just sets _rl_quick_redisplay if the current visible line
+   is a single line (so we don't have to move vertically or mess with line
+   wrapping). */
+void
+_rl_optimize_redisplay (void)
+{
+  if (_rl_vis_botlin == 0)
+    _rl_quick_redisplay = 1;
+}  
+
 /* Basic redisplay algorithm.  See comments inline. */
 void
 rl_redisplay (void)
@@ -690,7 +710,18 @@ rl_redisplay (void)
     }
   else if (line_size <= _rl_screenwidth)
     init_line_structures (_rl_screenwidth + 1);
-    
+
+  /* Enable horizontal scrolling automatically for terminals of height 1
+     where wrapping lines doesn't work. Disable it as soon as the terminal
+     height is increased again if it was automatically enabled. */
+  if (_rl_screenheight <= 1)
+    {
+      if (_rl_horizontal_scroll_mode == 0)
+	 horizontal_scrolling_autoset = 1;
+      _rl_horizontal_scroll_mode = 1;
+    }
+  else if (horizontal_scrolling_autoset)
+    _rl_horizontal_scroll_mode = 0;
 
   /* Draw the line into the buffer. */
   cpos_buffer_position = -1;
@@ -1210,18 +1241,34 @@ rl_redisplay (void)
 		    _rl_clear_to_eol (nleft);
 		}
 #if 0
-	      /* This segment is intended to handle the case where the prompt
-		 has invisible characters on the second line and the new line
+	      /* This segment is intended to handle the case where the old
+		 visible prompt has invisible characters and the new line
 		 to be displayed needs to clear the rest of the old characters
-		 out (e.g., when printing the i-search prompt).  In general,
-		 the case of the new line being shorter than the old.
-		 Incomplete */
-	      else if (linenum == prompt_last_screen_line &&
-		       prompt_physical_chars > _rl_screenwidth &&
-		       wrap_offset != prompt_invis_chars_first_line &&
+		 out (e.g., when printing the i-search prompt): in general,
+		 the case of the new line being shorter than the old.  We need
+		 to be at the end of the new line and the old line needs to be
+		 longer than the current cursor position. It's not perfect,
+		 since it uses the byte length of the first line, but this will
+		 at worst result in some extra clear-to-end-of-lines. We can't
+		 use the prompt length variables because they may not
+		 correspond to the visible line (see printing the i-search
+		 prompt above). The tests for differing numbers of invisible
+		 characters may not matter and can probably be removed. */
+	      else if (linenum == 0 &&
+		       linenum == prompt_last_screen_line &&
 		       _rl_last_c_pos == out &&
+		       _rl_last_c_pos < visible_first_line_len &&
+		       visible_wrap_offset &&
+		       visible_wrap_offset != wrap_offset)
+		{
+		  if (mb_cur_max > 1 && rl_byte_oriented == 0)
+		    nleft = _rl_screenwidth - _rl_last_c_pos;
+		  else
+		    nleft = _rl_screenwidth + wrap_offset - _rl_last_c_pos;
+		  if (nleft)
+		    _rl_clear_to_eol (nleft);
+		}
 #endif
-
 
 	      /* Since the new first line is now visible, save its length. */
 	      if (linenum == 0)
@@ -1445,6 +1492,8 @@ rl_redisplay (void)
       visible_wrap_offset = 0;
     else
       visible_wrap_offset = wrap_offset;
+
+    _rl_quick_redisplay = 0;
   }
 
   RL_UNSETSTATE (RL_STATE_REDISPLAYING);
@@ -1655,6 +1704,19 @@ update_line (char *old, char *new, int current_line, int omax, int nmax, int inv
 	  if (old[0] && new[0])
 	    old[0] = new[0];
 	}
+    }
+
+  if (_rl_quick_redisplay)
+    {
+      nfd = new;
+      ofd = old;
+      for (od = 0, oe = ofd; od < omax && *oe; oe++, od++);
+      for (nd = 0, ne = nfd; nd < nmax && *ne; ne++, nd++);
+      od = nd = 0;
+      _rl_move_cursor_relative (0, old);
+
+      cpos_adjusted = 1;
+      goto dumb_update;
     }
 
   /* Find first difference. */
@@ -1963,6 +2025,14 @@ dumb_update:
   else
     col_lendiff = lendiff;
 
+  /* col_lendiff uses _rl_col_width(), which doesn't know about whether or not
+     the multibyte characters it counts are invisible, so the count is short by
+     the number of bytes in the invisible multibyte characters - the number of
+     multibyte characters. We don't have a good way to solve this without
+     moving to something like a bitmap that indicates which characters are
+     visible and which are invisible. We fix it up (imperfectly) in the
+     caller. */
+     
   /* If we are changing the number of invisible characters in a line, and
      the spot of first difference is before the end of the invisible chars,
      lendiff needs to be adjusted. */

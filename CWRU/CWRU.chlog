@@ -6906,3 +6906,45 @@ buitins/wait.def
 
 doc/{bash.1,bashref.texi}
 	- wait: document new -p option
+
+				   11/25
+				   -----
+lib/readline/display.c
+	- rl_redisplay: auto-set horizontal scrolling if the terminal has
+	  only one line; disable it if we auto-set it if the terminal grows
+	  to more than one line. Fix from Sören Tempel
+	  <soeren@soeren-tempel.net>
+
+lib/readline/doc/{readline.3,rluser.texi},doc/bash.1
+	- horizontal-scroll-mode: document auto-setting behavior
+
+builtins/set.def
+	- set_posix_mode: make setting posix mode when it's already set, or
+	  unsetting it when it's not set, a no-op. Inspired by a report
+	  from Ulrich Mueller <ulm@gentoo.org>
+
+				   11/26
+				   -----
+doc/{bash.1,bashref.texi}
+	- functions: clarify that when in default mode, function names are not
+	  limited to shell identifiers.
+	  Suggested by Reuti <reuti@staff.uni-marburg.de>
+
+				   11/27
+				   -----
+lib/readline/display.c
+	- _rl_optimize_redisplay: tell the redisplay routines to not worry
+	  about calculating differences between the lines and just draw the
+	  new one. Right now, it just sets the _rl_quick_redisplay flag
+	- rl_redisplay: if _rl_quick_redisplay is set, just draw NEW onto
+	  the screen at column 0 with a dumb update and clear the rest of
+	  the line. Intended to be used when the caller knows the new line is
+	  sufficiently different from the old one (e.g., when drawing the
+	  i-search prompt for the first time) that it doesn't pay off to do
+	  the calculations. As a side effect, fixes the bug reported by
+	  �лек�ей Шилин <rootlexx@mail.ru>
+
+lib/readline/isearch.c
+	- rl_display_search: if there isn't a search string, assume this is
+	  the first time this is called and call _rl_optimize_redisplay to
+	  give the redisplay code a hint
