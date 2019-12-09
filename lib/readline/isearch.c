@@ -296,6 +296,7 @@ _rl_isearch_fini (_rl_search_cxt *cxt)
      and rl_get_next_history take care of it. */
   _rl_fix_point (0);
 
+/*  _rl_optimize_redisplay (); */
   rl_clear_message ();
 }
 

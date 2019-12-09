@@ -6948,3 +6948,52 @@ lib/readline/isearch.c
 	- rl_display_search: if there isn't a search string, assume this is
 	  the first time this is called and call _rl_optimize_redisplay to
 	  give the redisplay code a hint
+
+				   12/2
+				   ----
+builtins/wait.def
+	- wait_builtin: allow argument to -p to be a  valid array subscript
+
+				   12/3
+				   ----
+lib/readline/isearch.c
+	- _rl_isearch_fini: add call to _rl_optimize_redisplay because we are
+	  switching the prompt back again and it's safer to redraw everything
+	  (even though part of the line is the same) to deal with differences
+	  in the prompt strings. Fixes additional problem reported by
+	  �лек�ей Шилин <rootlexx@mail.ru>
+
+lib/readline/display.c
+	- update_line: quick redisplay no longer sets cpos_adjusted before
+	  the dumb update
+	- update_line: adjust _rl_last_c_pos in the case of a dumb update if we
+	  are redrawing the prompt that includes invisible characters, since
+	  _rl_col_width does not. We adjust by the count of invisible chars in
+	  the first line of the prompt
+	- update_line: make sure to clear the rest of the line if it looks like
+	  the number of visible characters on the new line is less than the
+	  number of visible characters on the current line; the old calculation
+	  does that just for the number of bytes (which is also useful)
+
+				   12/4
+				   ----
+lib/readline/display.c
+	- rl_redisplay: if we are changing from one line to multiple lines,
+	  don't try quick redisplay
+	- update_line: changes to quick redisplay to take advantage of knowing
+	  the physical length of the prompt to avoid having to compute column
+	  widths of the prompt string again; moved code to call clear screen
+	  to the quick update section; no longer performs `goto dumb_update'
+	- update_line: try to take advantage of prompt_physical_chars when we
+	  know we have written the prompt string (several places) to set
+	  _rl_last_c_pos and calculate column widths
+	- update_line: if the spot where the old and new lines are the same is
+	  before the end of the prompt string, adjust NLS and OLS so we write
+	  the entire prompt string (as long as it's all on one line) and can
+	  take advantage of already knowing prompt_physical_chars so we don't
+	  have to compute column widths
+	- update_line: when copying chars from first diff to last match, adjust
+	  _rl_last_c_pos by prompt_invis_chars_first_line, not wrap offset,
+	  since we are on the first line, and only do this if we inserted more
+	  bytes than wrap_offset (old code checked _rl_last_c_pos, which is
+	  wrong in the presence of multibyte characters)

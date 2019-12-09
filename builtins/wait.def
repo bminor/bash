@@ -141,7 +141,14 @@ wait_builtin (list)
   /* Sanity-check variable name if -p supplied. */
   if (vname)
     {
+#if defined (ARRAY_VARS)
+      int arrayflags;
+
+      arrayflags = assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0;
+      if (legal_identifier (vname) == 0 && valid_array_reference (vname, arrayflags) == 0)
+#else
       if (legal_identifier (vname) == 0)
+#endif
 	{
 	  sh_invalidid (vname);
 	  WAIT_RETURN (EXECUTION_FAILURE);
