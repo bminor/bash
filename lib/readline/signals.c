@@ -220,7 +220,7 @@ _rl_handle_signal (int sig)
 	 sane without stopping on SIGTTOU if we have been placed into the
 	 background.  Even trying to get the current terminal pgrp with
 	 tcgetpgrp() will generate SIGTTOU, so we don't bother.  Don't bother
-	 doing this if we've been stopped on SIGTTOU; it's aready too late. */
+	 doing this if we've been stopped on SIGTTOU; it's already too late. */
       sigemptyset (&set);
       sigaddset (&set, SIGTTOU);
       sigprocmask (SIG_BLOCK, &set, (sigset_t *)NULL);

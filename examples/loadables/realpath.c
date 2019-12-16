@@ -130,7 +130,7 @@ char *realpath_doc[] = {
 	"Display the canonicalized version of each PATHNAME argument, resolving",
 	"symbolic links.  The -c option checks whether or not each resolved name",
 	"exists.  The -s option produces no output; the exit status determines the",
-	"valididty of each PATHNAME.  The -v option produces verbose output.  The",
+	"validity of each PATHNAME.  The -v option produces verbose output.  The",
 	"exit status is 0 if each PATHNAME was resolved; non-zero otherwise.",
 	(char *)NULL
 };

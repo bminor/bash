@@ -102,7 +102,7 @@ int write_helpfiles __P((struct builtin *));
 
 /* For each file mentioned on the command line, process it and
    write the information to STRUCTFILE and EXTERNFILE, while
-   creating the production file if neccessary. */
+   creating the production file if necessary. */
 int
 main (argc, argv)
      int argc;

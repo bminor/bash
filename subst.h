@@ -111,7 +111,7 @@ extern char *string_list_dollar_star __P((WORD_LIST *, int, int));
 /* Expand $@ into a single string, obeying POSIX rules. */
 extern char *string_list_dollar_at __P((WORD_LIST *, int, int));
 
-/* Turn the positional paramters into a string, understanding quoting and
+/* Turn the positional parameters into a string, understanding quoting and
    the various subtleties of using the first character of $IFS as the
    separator.  Calls string_list_dollar_at, string_list_dollar_star, and
    string_list as appropriate. */
@@ -216,7 +216,7 @@ extern char *get_dollar_var_value __P((intmax_t));
 /* Quote a string to protect it from word splitting. */
 extern char *quote_string __P((char *));
 
-/* Quote escape characters (characters special to interals of expansion)
+/* Quote escape characters (characters special to internals of expansion)
    in a string. */
 extern char *quote_escapes __P((const char *));
 

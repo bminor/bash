@@ -1168,7 +1168,7 @@ print_var_function (var)
    unused otherwise.
 
    dynamic_value is called from find_variable_internal to return a `new'
-   value for the specified dynamic varible.  If this function is NULL,
+   value for the specified dynamic variable.  If this function is NULL,
    the variable is treated as a `normal' shell variable.  If it is not,
    however, then this function is called like this:
 	tempvar = (*(var->dynamic_value)) (var);
@@ -2452,7 +2452,7 @@ nameref_transform_name (name, flags)
     {
       v = find_variable_last_nameref (name, 1);
       /* If we're making local variables, only follow namerefs that point to
-	 non-existant variables at the same variable context. */
+	 non-existent variables at the same variable context. */
       if (v && v->context != variable_context)
 	v = 0;
     }
@@ -2965,7 +2965,7 @@ make_local_array_variable (name, assoc_ok)
     return var;
 
   /* Validate any value we inherited from a variable instance at a previous
-     scope and disard anything that's invalid. */
+     scope and discard anything that's invalid. */
   if (localvar_inherit && assoc_p (var))
     {
       internal_warning ("%s: cannot inherit value from incompatible type", name);
@@ -3018,7 +3018,7 @@ make_local_assoc_variable (name, array_ok)
     return var;
 
   /* Validate any value we inherited from a variable instance at a previous
-     scope and disard anything that's invalid. */
+     scope and discard anything that's invalid. */
   if (localvar_inherit && array_p (var))
     {
       internal_warning ("%s: cannot inherit value from incompatible type", name);
@@ -5012,7 +5012,7 @@ do \
     export_env[export_env_index] = (char *)NULL; \
   } while (0)
 
-/* Add ASSIGN to EXPORT_ENV, or supercede a previous assignment in the
+/* Add ASSIGN to EXPORT_ENV, or supersede a previous assignment in the
    array with the same left-hand side.  Return the new EXPORT_ENV. */
 char **
 add_or_supercede_exported_var (assign, do_alloc)

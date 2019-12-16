@@ -383,7 +383,7 @@ OPTIONS
 
                'theCharCount=\$(wc -c \$theFuncFile)'
 
-           for each funcion and
+           for each function and
 
                 if \$theCharCount < \$AUTOLOAD_SHIM_OVERHEAD
 
@@ -416,7 +416,7 @@ NOTES
           backticks or $(), or in a script that is not being sourced into the
           current environment. If you have not previously called the function
           in question at your command line or in a script that was sourced into
-          the current envirnoment, then the various subshells are going to
+          the current environment, then the various subshells are going to
           encounter the shim and replace with the real code before executing.
 
           Remember, however, that environment modifications that occur in a
@@ -490,9 +490,9 @@ NOTES
           matter how hard you try, your autoloaded functions will be
           unavailable to you, even if you run 'autoload -x -f'. The typical
           condition for this is starting up not a subshell, but a brand new
-          DIFFERENT shell. And the typical example of this is git extentions.
+          DIFFERENT shell. And the typical example of this is git extensions.
 
-          At the time of this writing, git extentions work by taking a command
+          At the time of this writing, git extensions work by taking a command
           'git foo' and looking for a file 'git-foo' on the path. 'git' then
           executes 'git-foo' in a new shell - it executes your command in
           /bin/sh. That's not a subshell of your process. It will not get your

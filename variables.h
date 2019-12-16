@@ -162,7 +162,7 @@ typedef struct _vlist {
 /* Variable names: lvalues */
 #define name_cell(var)		((var)->name)
 
-/* Acessing variable values: rvalues */
+/* Accessing variable values: rvalues */
 #define value_cell(var)		((var)->value)
 #define function_cell(var)	(COMMAND *)((var)->value)
 #define array_cell(var)		(ARRAY *)((var)->value)

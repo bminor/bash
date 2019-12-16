@@ -277,7 +277,28 @@ bind_builtin (list)
   /* Process the rest of the arguments as binding specifications. */
   while (list)
     {
+      int olen, nlen, d, i;
+      char **obindings, **nbindings;
+
+      obindings = rl_invoking_keyseqs (bash_execute_unix_command);
+      olen = obindings ? strvec_len (obindings) : 0;
+
       rl_parse_and_bind (list->word->word);
+
+      nbindings = rl_invoking_keyseqs (bash_execute_unix_command);
+      nlen = nbindings ? strvec_len (nbindings) : 0;
+
+      if (nlen < olen)	/* fewer bind -x bindings */
+	for (d = olen - nlen, i = 0; i < olen && d > 0; i++)
+	  if (nlen == 0 || strvec_search (nbindings, obindings[i]) >= 0)
+	    {
+	      unbind_unix_command (obindings[i]);
+	      d--;
+	    }
+
+      strvec_dispose (obindings);
+      strvec_dispose (nbindings);
+
       list = list->next;
     }
 
@@ -348,6 +369,7 @@ unbind_keyseq (seq)
 {
   char *kseq;
   int kslen;
+  rl_command_func_t *f;
 
   kseq = (char *)xmalloc ((2 * strlen (seq)) + 1);
   if (rl_translate_keyseq (seq, kseq, &kslen))
@@ -356,7 +378,7 @@ unbind_keyseq (seq)
       builtin_error (_("`%s': cannot unbind"), seq);
       return EXECUTION_FAILURE;
     }
-  if (rl_function_of_keyseq_len (kseq, kslen, (Keymap)0, (int *)0) == 0)
+  if ((f = rl_function_of_keyseq_len (kseq, kslen, (Keymap)0, (int *)0)) == 0)
     {
       free (kseq);
       return (EXECUTION_SUCCESS);
@@ -371,6 +393,9 @@ unbind_keyseq (seq)
       builtin_error (_("`%s': cannot unbind"), seq);
       return (EXECUTION_FAILURE);
     }
+
+  if (f == bash_execute_unix_command)
+    unbind_unix_command (seq);
 
   free (kseq);
   return (EXECUTION_SUCCESS);

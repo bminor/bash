@@ -642,7 +642,7 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 			sprintf(tbuf+1, "%02ld%02ld", off/60, off%60);
 			break;
 
-		case 'Z':	/* time zone name or abbrevation */
+		case 'Z':	/* time zone name or abbreviation */
 #ifdef HAVE_TZNAME
 			i = (daylight && timeptr->tm_isdst > 0); /* 0 or 1 */
 			strcpy(tbuf, tzname[i]);
@@ -939,7 +939,7 @@ static char *array[] =
 	"(%%H)                          hour (24-hour clock, 00..23)  %H",
 	"(%%I)                          hour (12-hour clock, 01..12)  %I",
 	"(%%M)                                       minute (00..59)  %M",
-	"(%%N)                                      Emporer/Era Name  %N",
+	"(%%N)                                      Emperor/Era Name  %N",
 	"(%%O)                           Locale extensions (ignored)  %O",
 	"(%%R)                                 time, 24-hour (%%H:%%M)  %R",
 	"(%%S)                                       second (00..60)  %S",
@@ -960,7 +960,7 @@ static char *array[] =
 	"(%%k)               hour, 24-hour clock, blank pad ( 0..23)  %k",
 	"(%%l)               hour, 12-hour clock, blank pad ( 0..12)  %l",
 	"(%%m)                                        month (01..12)  %m",
-	"(%%o)                                      Emporer/Era Year  %o",
+	"(%%o)                                      Emperor/Era Year  %o",
 	"(%%p)              locale's AM or PM based on 12-hour clock  %p",
 	"(%%r)                   time, 12-hour (same as %%I:%%M:%%S %%p)  %r",
 	"(%%u) ISO 8601: Weekday as decimal number [1 (Monday) - 7]   %u",

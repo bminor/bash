@@ -2042,7 +2042,7 @@ remove any quote characters from the directory name, because its result will
 be passed directly to @code{opendir()}.
 
 The directory rewrite hook returns an integer that should be non-zero if
-the function modfies its directory argument.
+the function modifies its directory argument.
 The function should not modify the directory argument if it returns 0.
 @end deftypevar
 
@@ -2054,7 +2054,7 @@ is passed to @code{stat()} to determine the file's type and characteristics.
 This function does not need to remove quote characters from the filename.
 
 The stat hook returns an integer that should be non-zero if
-the function modfies its directory argument.
+the function modifies its directory argument.
 The function should not modify the directory argument if it returns 0.
 @end deftypevar
 
@@ -2648,7 +2648,7 @@ com_help (arg)
 
   if (!printed)
     @{
-      printf ("No commands match `%s'.  Possibilties are:\n", arg);
+      printf ("No commands match `%s'.  Possibilities are:\n", arg);
 
       for (i = 0; commands[i].name; i++)
         @{

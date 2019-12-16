@@ -1520,7 +1520,7 @@ evalerror (msg)
 
    Base may be >=2 and <=64.  If base is <= 36, the numbers are drawn
    from [0-9][a-zA-Z], and lowercase and uppercase letters may be used
-   interchangably.  If base is > 36 and <= 64, the numbers are drawn
+   interchangeably.  If base is > 36 and <= 64, the numbers are drawn
    from [0-9][a-z][A-Z]_@ (a = 10, z = 35, A = 36, Z = 61, @ = 62, _ = 63 --
    you get the picture). */
 

@@ -89,7 +89,7 @@ char history_expansion_char = '!';
 char history_subst_char = '^';
 
 /* During tokenization, if this character is seen as the first character
-   of a word, then it, and all subsequent characters upto a newline are
+   of a word, then it, and all subsequent characters up to a newline are
    ignored.  For a Bourne shell, this should be '#'.  Bash special cases
    the interactive comment character to not be a comment delimiter. */
 char history_comment_char = '\0';

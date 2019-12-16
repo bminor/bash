@@ -391,7 +391,12 @@ add_character:
   /* Translate the keys we do something with to opcodes. */
   if (c >= 0 && cxt->keymap[c].type == ISFUNC)
     {
-      f = cxt->keymap[c].function;
+      /* If we have a multibyte character, see if it's bound to something that
+	 affects the search. */
+      if (cxt->mb[1])
+	f = rl_function_of_keyseq (cxt->mb, cxt->keymap, (int *)NULL);
+      else
+	f = cxt->keymap[c].function;
 
       if (f == rl_reverse_search_history)
 	cxt->lastc = (cxt->sflags & SF_REVERSE) ? -1 : -2;

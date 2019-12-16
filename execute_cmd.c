@@ -538,7 +538,7 @@ async_redirect_stdin ()
 
 /* Execute the command passed in COMMAND, perhaps doing it asynchronously.
    COMMAND is exactly what read_command () places into GLOBAL_COMMAND.
-   ASYNCHROUNOUS, if non-zero, says to do this command in the background.
+   ASYNCHRONOUS, if non-zero, says to do this command in the background.
    PIPE_IN and PIPE_OUT are file descriptors saying where input comes
    from and where it goes.  They can have the value of NO_PIPE, which means
    I/O is stdin/stdout.

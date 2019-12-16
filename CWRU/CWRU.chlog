@@ -7003,3 +7003,40 @@ lib/readline/display.c
 lib/readline/display.c
 	- ADJUST_CPOS: define macro and use it in places where _rl_last_c_pos
 	  is changed
+
+				   12/12
+				   -----
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: check for multibyte characters mapped to one
+	  of the editing functions we treat specially to modify the search
+	  string
+
+				   12/13
+				   -----
+support/shobj-conf
+	- FreeBSD and Dragonfly are ELF-only and can use the same code as
+	  Linux, so add those to the linux stanza and remove the old FreeBSD
+	  version-specific sections. Report and fix from Baptiste Daroussin
+	  <bapt@FreeBSD.org>
+
+bashline.[ch]
+	- bash_execute_unix_command: no longer static, available for other
+	  parts of the shell to use
+
+bashline.c
+	- unbind_unix_command: take a key sequence as an argument, and unbind
+	  it in the appropriate unix command keymap
+
+builtins/bind.def
+	- unbind_keyseq: if we are unbinding a key sequence bound to
+	  bash_execute_unix_command, which means it was added by `bind -x',
+	  call unbind_unix_command() to remove it from the appropriate unix
+	  command keymap. Fixes issue originally raised by
+	  Koichi Murase <myoga.murase@gmail.com> and recently by
+	  Šimon Let <simon.a.let@gmail.com>
+	- bind_builtin: check the number of bindings to bash_execute_unix_command
+	  before and after a call to rl_parse_and_bind and if there are fewer
+	  after binding, we know that the bind has re-bound one of the key
+	  sequences that was bound to execute a shell command. We unbind any
+	  key sequences from the list before the call to rl_parse_and_bind that
+	  don't appear in the list after the call using unbind_unix_command

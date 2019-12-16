@@ -90,7 +90,7 @@ _path_isdir (path)
 
 /* Canonicalize PATH, and return a new path.  The new path differs from PATH
    in that:
-	Multple `/'s are collapsed to a single `/'.
+	Multiple `/'s are collapsed to a single `/'.
 	Leading `./'s and trailing `/.'s are removed.
 	Trailing `/'s are removed.
 	Non-leading `../'s and trailing `..'s are handled by removing

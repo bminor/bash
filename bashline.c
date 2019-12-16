@@ -201,7 +201,6 @@ static int putx PARAMS((int));
 static Keymap get_cmd_xmap_from_edit_mode PARAMS((void));
 static Keymap get_cmd_xmap_from_keymap PARAMS((Keymap));
 
-static int bash_execute_unix_command PARAMS((int, int));
 static void init_unix_command_map PARAMS((void));
 static int isolate_sequence PARAMS((char *, int, int, int *));
 
@@ -297,7 +296,7 @@ int dircomplete_expand_relpath = 0;
 
 /* When non-zero, perform `normal' shell quoting on completed filenames
    even when the completed name contains a directory name with a shell
-   variable referene, so dollar signs in a filename get quoted appropriately.
+   variable reference, so dollar signs in a filename get quoted appropriately.
    Set to zero to remove dollar sign (and braces or parens as needed) from
    the set of characters that will be quoted. */
 int complete_fullquote = 1;
@@ -4266,7 +4265,7 @@ putx(c)
 #endif
 }
   
-static int
+int
 bash_execute_unix_command (count, key)
      int count;	/* ignored */
      int key;
@@ -4537,6 +4536,21 @@ bind_keyseq_to_unix_command (line)
 
   free (kseq);  
   return 0;
+}
+
+int
+unbind_unix_command (kseq)
+     char *kseq;
+{
+  Keymap cmd_xmap;
+
+  cmd_xmap = get_cmd_xmap_from_keymap (rl_get_keymap ());
+  if (rl_bind_keyseq_in_map (kseq, (rl_command_func_t *)NULL, cmd_xmap) != 0)
+    {
+      builtin_error (_("`%s': cannot unbind in command keymap"), kseq);
+      return 0;
+    }
+  return 1;
 }
 
 /* Used by the programmable completion code.  Complete TEXT as a filename,

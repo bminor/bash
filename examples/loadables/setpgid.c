@@ -105,7 +105,7 @@ const char *setpgid_doc[] = {
 	"invoke the setpgid(2) system call",
 	"",
 	"Arguments:",
-	"   pid : numeric process identifer, >= 0",
+	"   pid : numeric process identifier, >= 0",
 	"   pgrpid: numeric process group identifier, >=0",
 	"See the setpgid(2) manual page.",
 	(const char *)NULL

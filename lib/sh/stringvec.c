@@ -122,7 +122,6 @@ strvec_remove (array, name)
   return 0;
 }
 
-#ifdef INCLUDE_UNUSED
 /* Find NAME in ARRAY.  Return the index of NAME, or -1 if not present.
    ARRAY should be NULL terminated. */
 int
@@ -137,7 +136,6 @@ strvec_search (array, name)
 
   return (-1);
 }
-#endif
 
 /* Allocate and return a new copy of ARRAY and its contents. */
 char **
