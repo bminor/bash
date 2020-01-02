@@ -788,7 +788,7 @@ _rl_untranslate_macro_value (char *seq, int use_escapes)
 
 /* Return a pointer to the function that STRING represents.
    If STRING doesn't have a matching function, then a NULL pointer
-   is returned. */
+   is returned. The string match is case-insensitive. */
 rl_command_func_t *
 rl_named_function (const char *string)
 {

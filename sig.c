@@ -416,7 +416,10 @@ throw_to_top_level ()
     parse_and_execute_cleanup (-1);
 
   if (running_trap > 0)
-    run_trap_cleanup (running_trap - 1);
+    {
+      run_trap_cleanup (running_trap - 1);
+      running_trap = 0;
+    }
 
 #if defined (JOB_CONTROL)
   give_terminal_to (shell_pgrp, 0);

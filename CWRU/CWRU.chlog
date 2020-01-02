@@ -7040,3 +7040,50 @@ builtins/bind.def
 	  sequences that was bound to execute a shell command. We unbind any
 	  key sequences from the list before the call to rl_parse_and_bind that
 	  don't appear in the list after the call using unbind_unix_command
+
+				   12/19
+				   -----
+include/posixstat.h
+	- added some definitions for MinGW. Report and patch from
+	  Eli Zaretskii <eliz@gnu.org>
+
+				   12/20
+				   -----
+lib/readline/display.c
+	- update_line: when wrapping lines containing multibyte characters at
+	  the wrap point, and the number of screen positions consumed by the
+	  first character on the new line isn't the same as the old line,
+	  make sure we set OE before the `goto dumb_update;' since clearing
+	  the rest of the line may use it. Tentative fix for bug reported by
+	  Kirill Chibisov <wchibisovkirill@gmail.com>
+
+lib/readline/signals.c
+	- _rl_signal_handler: set RL_STATE_SIGHANDLER around SIGWINCH code,
+	  like _rl_handle_signal does
+
+				   12/26
+				   -----
+lib/sh/stringvec.c
+	- strvec_posixcmp: new function that conforms to posix requirement for
+	  sorting globs: perform a bytewise comparison if the two strings
+	  collate equally. Posix interp 963 and 1070
+	- strvec_sort: take a new flags argument, if non-zero use the posix
+	  string comparison function
+
+pathexp.c
+	- shell_glob_filename: call strvec_sort with the flag value to be
+	  posix conformant
+
+lib/sh/stringlist.c
+	- strvec_sort: change callers
+
+				   12/29
+				   -----
+sig.c
+	- throw_to_top_level: set running_trap to 0 after calling run_trap_cleanup.
+	  This avoids spurious (in non-release versions) warnings from
+	  run_pending_traps the next time a trap handler for that signal
+	  runs. Bug report from Martijn Dekker <martijn@inlv.org>
+
+
+	  

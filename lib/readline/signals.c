@@ -144,6 +144,8 @@ _rl_signal_handler (int sig)
 #if defined (SIGWINCH)
   if (sig == SIGWINCH)
     {
+      RL_SETSTATE(RL_STATE_SIGHANDLER);
+
       rl_resize_terminal ();
       /* XXX - experimental for now */
       /* Call a signal hook because though we called the original signal handler
@@ -151,6 +153,8 @@ _rl_signal_handler (int sig)
 	 ourselves. */
       if (rl_signal_event_hook)
 	(*rl_signal_event_hook) ();
+
+      RL_UNSETSTATE(RL_STATE_SIGHANDLER);
     }
   else
 #endif

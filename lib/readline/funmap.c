@@ -157,7 +157,7 @@ static const FUNMAP default_funmap[] = {
   { "vi-backward-bigword", rl_vi_bWord },
   { "vi-backward-word", rl_vi_bword },
   { "vi-bWord", rl_vi_bWord },
-  { "vi-bword", rl_vi_bword },
+  { "vi-bword", rl_vi_bword },	/* BEWARE: name matching is case insensitive */
   { "vi-change-case", rl_vi_change_case },
   { "vi-change-char", rl_vi_change_char },
   { "vi-change-to", rl_vi_change_to },
@@ -171,13 +171,13 @@ static const FUNMAP default_funmap[] = {
   { "vi-end-bigword", rl_vi_eWord },
   { "vi-end-word", rl_vi_end_word },
   { "vi-eof-maybe", rl_vi_eof_maybe },
-  { "vi-eword", rl_vi_eword },
+  { "vi-eword", rl_vi_eword },	/* BEWARE: name matching is case insensitive */
   { "vi-fWord", rl_vi_fWord },
   { "vi-fetch-history", rl_vi_fetch_history },
   { "vi-first-print", rl_vi_first_print },
   { "vi-forward-bigword", rl_vi_fWord },
   { "vi-forward-word", rl_vi_fword },
-  { "vi-fword", rl_vi_fword },
+  { "vi-fword", rl_vi_fword },	/* BEWARE: name matching is case insensitive */
   { "vi-goto-mark", rl_vi_goto_mark },
   { "vi-insert-beg", rl_vi_insert_beg },
   { "vi-insertion-mode", rl_vi_insert_mode },

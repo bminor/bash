@@ -1666,6 +1666,7 @@ update_line (char *old, char *new, int current_line, int omax, int nmax, int inv
 		 and do a dumb update. */
 	      if (newwidth != oldwidth)
 		{
+		  oe = old + omax;
 		  ne = new + nmax;
 		  nd = newbytes;
 		  nfd = new + nd;

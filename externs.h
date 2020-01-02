@@ -405,8 +405,9 @@ extern int strvec_remove __P((char **, char *));
 extern int strvec_len __P((char **));
 extern int strvec_search __P((char **, char *));
 extern char **strvec_copy __P((char **));
+extern int strvec_posixcmp __P((char **, char **));
 extern int strvec_strcmp __P((char **, char **));
-extern void strvec_sort __P((char **));
+extern void strvec_sort __P((char **, int));
 
 extern char **strvec_from_word_list __P((WORD_LIST *, int, int, int *));
 extern WORD_LIST *strvec_to_word_list __P((char **, int, int));

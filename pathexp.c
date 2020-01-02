@@ -448,7 +448,7 @@ shell_glob_filename (pathname, qflags)
       if (should_ignore_glob_matches ())
 	ignore_glob_matches (results);
       if (results && results[0])
-	strvec_sort (results);
+	strvec_sort (results, 1);		/* posix sort */
       else
 	{
 	  FREE (results);
@@ -475,7 +475,7 @@ shell_glob_filename (pathname, qflags)
       if (should_ignore_glob_matches ())
 	ignore_glob_matches (results);
       if (results && results[0])
-	strvec_sort (results);
+	strvec_sort (results, 1);		/* posix sort */
       else
 	{
 	  FREE (results);
