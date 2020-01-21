@@ -4491,7 +4491,7 @@ the <var>nameref</var> attribute, <var>name</var> will be unset rather than the
 variable it references.
 <samp>-n</samp> has no effect if the <samp>-f</samp> option is supplied.
 If no options are supplied, each <var>name</var> refers to a variable; if
-there is no variable by that name, any function with that name is
+there is no variable by that name, a function with that name, if any, is
 unset.
 Readonly variables and functions may not be unset.
 Some shell variables lose their special behavior if they are unset; such
@@ -5215,7 +5215,7 @@ from regular files.
 If <code>read</code> times out, <code>read</code> saves any partial input read into
 the specified variable <var>name</var>.
 If <var>timeout</var> is 0, <code>read</code> returns immediately, without trying to
-read and data.  The exit status is 0 if input is available on
+read any data.  The exit status is 0 if input is available on
 the specified file descriptor, non-zero otherwise.
 The exit status is greater than 128 if the timeout is exceeded.
 </p>
@@ -12479,7 +12479,7 @@ When editing is complete, the edited commands are echoed and executed.
 </p>
 <p>In the second form, <var>command</var> is re-executed after each instance
 of <var>pat</var> in the selected command is replaced by <var>rep</var>.
-<var>command</var> is intepreted the same as <var>first</var> above.
+<var>command</var> is interpreted the same as <var>first</var> above.
 </p>
 <p>A useful alias to use with the <code>fc</code> command is <code>r='fc -s'</code>, so
 that typing &lsquo;<samp>r cc</samp>&rsquo; runs the last command beginning with <code>cc</code>

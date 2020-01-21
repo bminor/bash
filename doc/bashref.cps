@@ -119,7 +119,7 @@
 \entry{shell, interactive}{89}
 \entry{signal}{4}
 \entry{signal handling}{41}
-\entry{special builtin}{4, 72}
+\entry{special builtin}{4, 73}
 \entry{startup files}{88}
 \entry{suspending jobs}{105}
 \initial {T}

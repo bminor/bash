@@ -71,7 +71,7 @@
 \entry{exit status}{41}{exit status}
 \entry{signal handling}{41}{signal handling}
 \entry{shell script}{42}{shell script}
-\entry{special builtin}{72}{special builtin}
+\entry{special builtin}{73}{special builtin}
 \entry{login shell}{88}{login shell}
 \entry{interactive shell}{88}{interactive shell}
 \entry{startup files}{88}{startup files}
