@@ -639,14 +639,7 @@ unary_test (op, arg)
 	}
 #if 0	/* TAG:bash-5.1 from Martijn Dekker */
       else if (legal_number (arg, &r))		/* -v n == is $n set? */
-	{
-	  char *t;
-	  int ret;
-	  t = get_dollar_var_value (r);
-	  ret = t ? TRUE : FALSE;
-	  free (t);
-	  return ret;
-	}
+	return ((r >= 0 && r <= number_of_args()) ? TRUE : FALSE);
 #endif
       v = find_variable (arg);
       if (v && invisible_p (v) == 0 && array_p (v))

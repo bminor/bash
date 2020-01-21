@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: bash 5.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-12-19 15:52-0500\n"
-"PO-Revision-Date: 2019-12-06 23:37+0800\n"
+"PO-Revision-Date: 2020-01-19 00:50+0800\n"
 "Last-Translator: pan93412 <pan93412@gmail.com>\n"
 "Language-Team: Chinese (traditional) <zh-l10n@lists.linux.org.tw>\n"
 "Language: zh_TW\n"
@@ -118,7 +118,7 @@ msgstr "「%s」：不明函數名稱"
 #: builtins/bind.def:312
 #, c-format
 msgid "%s is not bound to any keys.\n"
-msgstr "%s 未與任何鍵繫結。\n"
+msgstr "%s 未與任何按鍵綁定。\n"
 
 #: builtins/bind.def:316
 #, c-format
@@ -128,7 +128,7 @@ msgstr "%s 可以被呼叫，藉由"
 #: builtins/bind.def:353 builtins/bind.def:368
 #, c-format
 msgid "`%s': cannot unbind"
-msgstr "「%s」: 無法解除繫結"
+msgstr "「%s」: 無法解除綁定"
 
 #: builtins/break.def:77 builtins/break.def:119
 msgid "loop count"
@@ -975,7 +975,7 @@ msgstr "錯誤的跳轉"
 #: error.c:503
 #, c-format
 msgid "%s: unbound variable"
-msgstr "%s: 未繫結的變數"
+msgstr "%s: 未綁定的變數"
 
 #: eval.c:245
 #, c-format
@@ -1147,7 +1147,7 @@ msgstr "start_pipeline: 行程群組管道"
 #: jobs.c:1084
 #, c-format
 msgid "forked pid %d appears in running job %d"
-msgstr "產生的行程識別號 %d 顯示為執行中的工作 %d"
+msgstr "產生的行程識別碼 %d 顯示為執行中的工作 %d"
 
 #: jobs.c:1203
 #, c-format
@@ -1162,12 +1162,12 @@ msgstr "add_process: 行程 %5ld(%s) 進入 the_pipeline"
 #: jobs.c:1310
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
-msgstr "add_process: 行程識別號 %5ld(%s) 標註為仍活著"
+msgstr "add_process: 行程識別碼 %5ld(%s) 標註為仍活著"
 
 #: jobs.c:1639
 #, c-format
 msgid "describe_pid: %ld: no such pid"
-msgstr "describe_pid: %ld: 無此行程識別號"
+msgstr "describe_pid: %ld: 無此行程識別碼"
 
 #: jobs.c:1654
 #, c-format
@@ -1223,7 +1223,7 @@ msgstr "子行程 setpgid (%ld 到 %ld)"
 #: jobs.c:2399 nojobs.c:657
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
-msgstr "wait: 行程識別號 %ld 不是目前 shell 的子行程"
+msgstr "wait: 行程識別碼 %ld 不是目前 shell 的子行程"
 
 #: jobs.c:2695
 #, c-format
@@ -2169,7 +2169,7 @@ msgstr "unalias [-a] 名稱 [名稱 …]"
 
 #: builtins.c:53
 msgid "bind [-lpsvPSVX] [-m keymap] [-f filename] [-q name] [-u name] [-r keyseq] [-x keyseq:shell-command] [keyseq:readline-function or readline-command]"
-msgstr "bind [-lpvsPSVX] [-m 按鍵映射] [-f 檔名] [-q 名稱] [-u 名稱] [-r 鍵序列] [-x 鍵序列:shell- 指令] [鍵序列:readline- 函數 或 readline- 指令]"
+msgstr "bind [-lpvsPSVX] [-m 按鍵映射] [-f 檔名] [-q 名稱] [-u 名稱] [-r 按鍵序列] [-x 按鍵序列:shell-指令] [按鍵序列:readline-函數 或 readline-指令]"
 
 #: builtins.c:56
 msgid "break [n]"
@@ -2277,7 +2277,7 @@ msgstr "disown [-h] [-ar] [jobspec ... | pid ...]"
 
 #: builtins.c:134
 msgid "kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]"
-msgstr "kill [-s 訊號規格 | -n 訊號編號 | - 訊號規格] 行程識別號 | 工作規格 … 或 kill -l [訊號規格]"
+msgstr "kill [-s 訊號規格 | -n 訊號編號 | -訊號規格] 行程識別碼 | 工作規格 … 或 kill -l [訊號規格]"
 
 #: builtins.c:136
 msgid "let arg [arg ...]"
@@ -2353,7 +2353,7 @@ msgstr "wait [-fn] [編號 …]"
 
 #: builtins.c:181
 msgid "wait [pid ...]"
-msgstr "wait [行程識別號 …]"
+msgstr "wait [行程識別碼 …]"
 
 #: builtins.c:184
 msgid "for NAME [in WORDS ... ] ; do COMMANDS; done"
@@ -2541,9 +2541,9 @@ msgid ""
 "    Exit Status:\n"
 "    bind returns 0 unless an unrecognized option is given or an error occurs."
 msgstr ""
-"設定 Readline 鍵繫結和變數。\n"
+"設定 Readline 按鍵綁定和變數。\n"
 "    \n"
-"    繫結一個鍵序列到一個 Readline 函數或者巨集，或者設定一個\n"
+"    綁定一個按鍵序列到一個 Readline 函數或者巨集，或者設定一個\n"
 "    Readline 變數。非選項參數的語法和 ~/.inputrc 檔案中的等\n"
 "    同，但是必須做為一個參數被傳遞，\n"
 "    例如，bind '\"\\C-x\\C-r\": re-read-init-file'。\n"
@@ -2553,21 +2553,21 @@ msgstr ""
 "                     可被接受的按鍵映射名字有 emacs、emacs-standard、emacs-meta、\n"
 "                     emacs-ctlx、vi、vi-move、vi-command、和 vi-insert。\n"
 "      -l             列出函數名稱。\n"
-"      -P             列出函數名稱和繫結。\n"
-"      -p             以可以重新用作輸入的格式列出函數名稱和繫結。\n"
-"      -S             列出可以啟動巨集的鍵序列以及它們的值\n"
+"      -P             列出函數名稱和綁定。\n"
+"      -p             以可以重新用作輸入的格式列出函數名稱和綁定。\n"
+"      -S             列出可以啟動巨集的按鍵序列以及它們的值\n"
 "      -s             以可以重新用作輸入的格式列出可以啟動巨集的鍵以及它們的值。\n"
 "      -V             列出變數名稱和它們的值\n"
 "      -v             以可以重新用作輸入的格式列出變數的名稱和它們的值\n"
 "      -q  函數名      查詢指定的函數可以由哪些鍵啟動。\n"
-"      -u  函數名      反繫結所有繫結至指定函數的鍵。\n"
-"      -r  鍵序列      取消指定鍵序列的繫結。\n"
-"      -f  檔名      從指定檔案中讀取鍵繫結。\n"
-"      -x  鍵序列:shell 指令\t當指定的鍵序列被輸入時，執行指定的 shell 指令。\n"
-"      -X             以可被重用的形式列出用 -x 繫結的鍵序列和指令。\n"
+"      -u  函數名      反綁定所有綁定至指定函數的鍵。\n"
+"      -r  按鍵序列    取消指定按鍵序列的綁定。\n"
+"      -f  檔名      從指定檔案中讀取按鍵綁定。\n"
+"      -x  按鍵序列:shell 指令\t當指定的按鍵序列被輸入時，執行指定的 shell 指令。\n"
+"      -X             以可被重用的形式列出用 -x 綁定的按鍵序列和指令。\n"
 "    \n"
 "    退出狀態：\n"
-"    除非使用了無法辨認的選項或者錯誤發生，否則回傳 0。"
+"    除非使用了無法識別的選項或者錯誤發生，否則回傳 0。"
 
 #: builtins.c:330
 msgid ""
@@ -3472,14 +3472,14 @@ msgstr ""
 "    不帶選項時，所有活動工作的狀態都會顯示。\n"
 "    \n"
 "    選項：\n"
-"      -l\t在正常資訊基礎上列出行程識別號\n"
+"      -l\t在正常資訊基礎上列出行程識別碼\n"
 "      -n\t僅列出上次通告之後變更了狀態的行程\n"
-"      -p\t僅列出行程識別號\n"
+"      -p\t僅列出行程識別碼\n"
 "      -r\t限制僅輸出執行中的工作\n"
 "      -s\t限制僅輸出停止的工作\n"
 "    \n"
 "    如果使用了 -x 選項，<參數> 中的所有工作規格會被取代為該工作\n"
-"    的行程群組首領的行程識別號，然後執行 COMMAND 指令。\n"
+"    的行程群組首領的行程識別碼，然後執行 COMMAND 指令。\n"
 "    \n"
 "    退出狀態：\n"
 "    回傳成功，除非使用了無效的選項或者有錯誤發生。\n"
@@ -3539,7 +3539,7 @@ msgid ""
 msgstr ""
 "向一個工作傳送一個訊號。\n"
 "    \n"
-"    向以 PID 行程識別號或者 JOBSPEC 工作規格指定的行程傳送一個以\n"
+"    向以 PID 行程識別碼或者 JOBSPEC 工作規格指定的行程傳送一個以\n"
 "    SIGSPEC 訊號規格或 SIGNUM 訊號編號命名的訊號。如果沒有指定\n"
 "    SIGSPEC 或 SIGNUM，那麼假定傳送 SIGTERM 訊號。\n"
 "    \n"
@@ -3549,7 +3549,7 @@ msgstr ""
 "      -l\t列出訊號名稱；如果參數後跟「-l」則被假設為訊號編號，\n"
 "    \t而相應的訊號名稱會被列出\n"
 "    \n"
-"    Kill 成為 shell 內建物件有兩個理由：它允許使用工作編號而不是行程識別號，\n"
+"    Kill 成為 shell 內建物件有兩個理由：它允許使用工作編號而不是行程識別碼，\n"
 "    並且在可以建立的行程數上限達到時允許行程被砍除。\n"
 "    \n"
 "    退出狀態：\n"
@@ -4525,10 +4525,10 @@ msgstr ""
 "等待行程完成並且回傳退出狀態。\n"
 "    \n"
 "    等待指定行程並通報它的終止狀態。如果沒有提供 PID，則目前所有的活躍\n"
-"    子行程都會被等待，並且回傳碼為零。PID 必須為行程識別號。\n"
+"    子行程都會被等待，並且回傳碼為零。PID 必須為行程識別碼。\n"
 "    \n"
 "    退出狀態：\n"
-"    回傳行程 ID 的狀態；如果 PID 是無效的行程識別號或者指定了無效的選項則失敗。"
+"    回傳行程 ID 的狀態；如果 PID 是無效的行程識別碼或者指定了無效的選項則失敗。"
 
 #: builtins.c:1538
 msgid ""
@@ -5179,16 +5179,16 @@ msgid ""
 "    Returns success unless an invalid option is given or a write or assignment\n"
 "    error occurs."
 msgstr ""
-"在 FORMAT 的控制下格式化並印出 <參數>。\n"
+"在 <格式> 的控制下格式化並印出 <參數>。\n"
 "    \n"
 "    選項：\n"
 "      -v var\t將輸出指派給 shell 變數 VAR 而不顯示在標準輸出上\n"
 "    \n"
-"    FORMAT 是包含三種物件的字串：簡單地被複製到標準輸出的普通字元；\n"
+"    <格式> 是包含三種物件的字串：簡單地被複製到標準輸出的普通字元；\n"
 "    被變換之後複製到標準輸入的逸出字元；以及每個都會影響到下個參數的印出格式化規格。\n"
 "    \n"
 "    在 printf(1) 中描述的標準控制規格之外，printf 解析：\n"
-"、    \n"
+"    \n"
 "      %b\t擴充套件對應參數中的反斜線逸出序列\n"
 "      %q\t以可做為 shell 輸入的格式引用參數\n"
 "      %(fmt)T\t以 FMT 為提供 strftime(3) 的格式輸出日期與時間字串    \n"

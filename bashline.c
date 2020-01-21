@@ -1,6 +1,6 @@
 /* bashline.c -- Bash's interface to the readline library. */
 
-/* Copyright (C) 1987-2019 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1432,13 +1432,35 @@ find_cmd_start (start)
 	 rl_line_buffer[s])
     {
       /* Handle >| token crudely; treat as > not | */
-      if (rl_line_buffer[s] == '|' && rl_line_buffer[s-1] == '>')
+      if (s > 0 && rl_line_buffer[s] == '|' && rl_line_buffer[s-1] == '>')
 	{
 	  ns = skip_to_delim (rl_line_buffer, s+1, COMMAND_SEPARATORS, SD_NOJMP|SD_COMPLETE/*|SD_NOSKIPCMD*/);
 	  if (ns > start || rl_line_buffer[ns] == 0)
 	    return os;
 	  os = ns+1;
 	  continue;
+	}
+      /* The only reserved word in COMMAND_SEPARATORS is `{', so handle that
+	 specially, making sure it's in a spot acceptable for reserved words */
+      if (s >= os && rl_line_buffer[s] == '{')
+	{
+	  int pc, nc;	/* index of previous non-whitespace, next char */
+	  for (pc = (s > os) ? s - 1 : os; pc > os && whitespace(rl_line_buffer[pc]); pc--)
+	    ;
+	  nc = rl_line_buffer[s+1];
+	  /* must be preceded by a command separator or be the first non-
+	     whitespace character since the last command separator, and
+	     followed by a shell break character (not another `{') to be a reserved word. */
+	  if ((pc > os && (rl_line_buffer[s-1] == '{' || strchr (COMMAND_SEPARATORS, rl_line_buffer[pc]) == 0)) ||
+	      (shellbreak(nc) == 0))	/* }} */
+	    {
+	      /* Not a reserved word, look for another delim */
+	      ns = skip_to_delim (rl_line_buffer, s+1, COMMAND_SEPARATORS, SD_NOJMP|SD_COMPLETE/*|SD_NOSKIPCMD*/);
+	      if (ns > start || rl_line_buffer[ns] == 0)
+		return os;
+	      os = ns+1;
+	      continue;
+	    }
 	}
       os = s+1;
     }
@@ -4284,7 +4306,10 @@ bash_execute_unix_command (count, key)
      have to walk cmd_xmap using the entire key sequence. */
   cmd_xmap = get_cmd_xmap_from_keymap (rl_get_keymap ());
   cmd = (char *)rl_function_of_keyseq_len (rl_executing_keyseq, rl_key_sequence_length, cmd_xmap, &type);
-    
+
+  if (type == ISKMAP && (type = ((Keymap) cmd)[ANYOTHERKEY].type) == ISMACR)
+    cmd = (char*)((Keymap) cmd)[ANYOTHERKEY].function;
+
   if (cmd == 0 || type != ISMACR)
     {
       rl_crlf ();

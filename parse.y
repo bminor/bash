@@ -1,6 +1,6 @@
 /* parse.y - Yacc grammar for bash. */
 
-/* Copyright (C) 1989-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -3462,7 +3462,7 @@ itrace("shell_getc: bash_input.location.string = `%s'", bash_input.location.stri
 #if defined (PROCESS_SUBSTITUTION)
       /* Check for the constructs which introduce process substitution.
 	 Shells running in `posix mode' don't do process substitution. */
-      if MBTEST(posixly_correct || ((character != '>' && character != '<') || peek_char != '(')) /*)*/
+      if MBTEST((character != '>' && character != '<') || peek_char != '(') /*)*/
 #endif /* PROCESS_SUBSTITUTION */
 	return (character);
     }

@@ -1162,6 +1162,7 @@ rl_domove_motion_callback (_rl_vimotion_cxt *m)
   /* Append a blank character temporarily so that the motion routines
      work right at the end of the line.  Original value of rl_end is saved
      as m->end. */
+  rl_extend_line_buffer (rl_end + 1);
   rl_line_buffer[rl_end++] = ' ';
   rl_line_buffer[rl_end] = '\0';
 
@@ -1193,8 +1194,7 @@ _rl_vi_domove_motion_cleanup (int c, _rl_vimotion_cxt *m)
   /* Remove the blank that we added in rl_domove_motion_callback. */
   rl_end = m->end;
   rl_line_buffer[rl_end] = '\0';
-  if (rl_point > rl_end)
-    rl_point = rl_end;
+  _rl_fix_point (0);
 
   /* No change in position means the command failed. */
   if (rl_mark == rl_point)
@@ -1517,6 +1517,8 @@ vi_yank_dispatch (_rl_vimotion_cxt *m)
   rl_end_undo_group ();
   rl_do_undo ();
   rl_point = m->start;
+
+  _rl_fix_point (1);
 
   return (0);
 }

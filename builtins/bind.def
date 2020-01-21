@@ -1,7 +1,7 @@
 This file is bind.def, from which is created bind.c.
 It implements the builtin "bind" in Bash.
 
-Copyright (C) 1987-2015 Free Software Foundation, Inc.
+Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -368,7 +368,7 @@ unbind_keyseq (seq)
      char *seq;
 {
   char *kseq;
-  int kslen;
+  int kslen, type;
   rl_command_func_t *f;
 
   kseq = (char *)xmalloc ((2 * strlen (seq)) + 1);
@@ -378,11 +378,13 @@ unbind_keyseq (seq)
       builtin_error (_("`%s': cannot unbind"), seq);
       return EXECUTION_FAILURE;
     }
-  if ((f = rl_function_of_keyseq_len (kseq, kslen, (Keymap)0, (int *)0)) == 0)
+  if ((f = rl_function_of_keyseq_len (kseq, kslen, (Keymap)0, &type)) == 0)
     {
       free (kseq);
       return (EXECUTION_SUCCESS);
     }
+  if (type == ISKMAP)
+    f = ((Keymap) f)[ANYOTHERKEY].function;
 
   /* I wish this didn't have to translate the key sequence again, but readline
      doesn't have a binding function that takes a translated key sequence as

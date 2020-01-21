@@ -6734,120 +6734,118 @@ startup files.
      read with the '.' or 'source' builtins, or in a string processed by
      the 'eval' builtin.
 
-  30. Process substitution is not available.
-
-  31. While variable indirection is available, it may not be applied to
+  30. While variable indirection is available, it may not be applied to
      the '#' and '?' special parameters.
 
-  32. When expanding the '*' special parameter in a pattern context
+  31. When expanding the '*' special parameter in a pattern context
      where the expansion is double-quoted does not treat the '$*' as if
      it were double-quoted.
 
-  33. Assignment statements preceding POSIX special builtins persist in
+  32. Assignment statements preceding POSIX special builtins persist in
      the shell environment after the builtin completes.
 
-  34. Assignment statements preceding shell function calls persist in
+  33. Assignment statements preceding shell function calls persist in
      the shell environment after the function returns, as if a POSIX
      special builtin command had been executed.
 
-  35. The 'command' builtin does not prevent builtins that take
+  34. The 'command' builtin does not prevent builtins that take
      assignment statements as arguments from expanding them as
      assignment statements; when not in POSIX mode, assignment builtins
      lose their assignment statement expansion properties when preceded
      by 'command'.
 
-  36. The 'bg' builtin uses the required format to describe each job
+  35. The 'bg' builtin uses the required format to describe each job
      placed in the background, which does not include an indication of
      whether the job is the current or previous job.
 
-  37. The output of 'kill -l' prints all the signal names on a single
+  36. The output of 'kill -l' prints all the signal names on a single
      line, separated by spaces, without the 'SIG' prefix.
 
-  38. The 'kill' builtin does not accept signal names with a 'SIG'
+  37. The 'kill' builtin does not accept signal names with a 'SIG'
      prefix.
 
-  39. The 'export' and 'readonly' builtin commands display their output
+  38. The 'export' and 'readonly' builtin commands display their output
      in the format required by POSIX.
 
-  40. The 'trap' builtin displays signal names without the leading
+  39. The 'trap' builtin displays signal names without the leading
      'SIG'.
 
-  41. The 'trap' builtin doesn't check the first argument for a possible
+  40. The 'trap' builtin doesn't check the first argument for a possible
      signal specification and revert the signal handling to the original
      disposition if it is, unless that argument consists solely of
      digits and is a valid signal number.  If users want to reset the
      handler for a given signal to the original disposition, they should
      use '-' as the first argument.
 
-  42. The '.' and 'source' builtins do not search the current directory
+  41. The '.' and 'source' builtins do not search the current directory
      for the filename argument if it is not found by searching 'PATH'.
 
-  43. Enabling POSIX mode has the effect of setting the
+  42. Enabling POSIX mode has the effect of setting the
      'inherit_errexit' option, so subshells spawned to execute command
      substitutions inherit the value of the '-e' option from the parent
      shell.  When the 'inherit_errexit' option is not enabled, Bash
      clears the '-e' option in such subshells.
 
-  44. Enabling POSIX mode has the effect of setting the 'shift_verbose'
+  43. Enabling POSIX mode has the effect of setting the 'shift_verbose'
      option, so numeric arguments to 'shift' that exceed the number of
      positional parameters will result in an error message.
 
-  45. When the 'alias' builtin displays alias definitions, it does not
+  44. When the 'alias' builtin displays alias definitions, it does not
      display them with a leading 'alias ' unless the '-p' option is
      supplied.
 
-  46. When the 'set' builtin is invoked without options, it does not
+  45. When the 'set' builtin is invoked without options, it does not
      display shell function names and definitions.
 
-  47. When the 'set' builtin is invoked without options, it displays
+  46. When the 'set' builtin is invoked without options, it displays
      variable values without quotes, unless they contain shell
      metacharacters, even if the result contains nonprinting characters.
 
-  48. When the 'cd' builtin is invoked in LOGICAL mode, and the pathname
+  47. When the 'cd' builtin is invoked in LOGICAL mode, and the pathname
      constructed from '$PWD' and the directory name supplied as an
      argument does not refer to an existing directory, 'cd' will fail
      instead of falling back to PHYSICAL mode.
 
-  49. When the 'cd' builtin cannot change a directory because the length
+  48. When the 'cd' builtin cannot change a directory because the length
      of the pathname constructed from '$PWD' and the directory name
      supplied as an argument exceeds PATH_MAX when all symbolic links
      are expanded, 'cd' will fail instead of attempting to use only the
      supplied directory name.
 
-  50. The 'pwd' builtin verifies that the value it prints is the same as
+  49. The 'pwd' builtin verifies that the value it prints is the same as
      the current directory, even if it is not asked to check the file
      system with the '-P' option.
 
-  51. When listing the history, the 'fc' builtin does not include an
+  50. When listing the history, the 'fc' builtin does not include an
      indication of whether or not a history entry has been modified.
 
-  52. The default editor used by 'fc' is 'ed'.
+  51. The default editor used by 'fc' is 'ed'.
 
-  53. The 'type' and 'command' builtins will not report a non-executable
+  52. The 'type' and 'command' builtins will not report a non-executable
      file as having been found, though the shell will attempt to execute
      such a file if it is the only so-named file found in '$PATH'.
 
-  54. The 'vi' editing mode will invoke the 'vi' editor directly when
+  53. The 'vi' editing mode will invoke the 'vi' editor directly when
      the 'v' command is run, instead of checking '$VISUAL' and
      '$EDITOR'.
 
-  55. When the 'xpg_echo' option is enabled, Bash does not attempt to
+  54. When the 'xpg_echo' option is enabled, Bash does not attempt to
      interpret any arguments to 'echo' as options.  Each argument is
      displayed, after escape characters are converted.
 
-  56. The 'ulimit' builtin uses a block size of 512 bytes for the '-c'
+  55. The 'ulimit' builtin uses a block size of 512 bytes for the '-c'
      and '-f' options.
 
-  57. The arrival of 'SIGCHLD' when a trap is set on 'SIGCHLD' does not
+  56. The arrival of 'SIGCHLD' when a trap is set on 'SIGCHLD' does not
      interrupt the 'wait' builtin and cause it to return immediately.
      The trap command is run once for each child that exits.
 
-  58. The 'read' builtin may be interrupted by a signal for which a trap
+  57. The 'read' builtin may be interrupted by a signal for which a trap
      has been set.  If Bash receives a trapped signal while executing
      'read', the trap handler executes and 'read' returns an exit status
      greater than 128.
 
-  59. Bash removes an exited background process's status from the list
+  58. Bash removes an exited background process's status from the list
      of such statuses after the 'wait' builtin is used to obtain it.
 
    There is other POSIX behavior that Bash does not implement by default
@@ -11846,60 +11844,60 @@ Node: Directory Stack Builtins273455
 Node: Controlling the Prompt276423
 Node: The Restricted Shell279344
 Node: Bash POSIX Mode281826
-Node: Job Control292759
-Node: Job Control Basics293219
-Node: Job Control Builtins298183
-Node: Job Control Variables303329
-Node: Command Line Editing304485
-Node: Introduction and Notation306156
-Node: Readline Interaction307779
-Node: Readline Bare Essentials308970
-Node: Readline Movement Commands310753
-Node: Readline Killing Commands311713
-Node: Readline Arguments313631
-Node: Searching314675
-Node: Readline Init File316861
-Node: Readline Init File Syntax318120
-Node: Conditional Init Constructs338650
-Node: Sample Init File342846
-Node: Bindable Readline Commands345963
-Node: Commands For Moving347167
-Node: Commands For History349026
-Node: Commands For Text353321
-Node: Commands For Killing356709
-Node: Numeric Arguments359524
-Node: Commands For Completion360663
-Node: Keyboard Macros364854
-Node: Miscellaneous Commands365541
-Node: Readline vi Mode371494
-Node: Programmable Completion372401
-Node: Programmable Completion Builtins380181
-Node: A Programmable Completion Example390876
-Node: Using History Interactively396123
-Node: Bash History Facilities396807
-Node: Bash History Builtins399812
-Node: History Interaction404344
-Node: Event Designators407964
-Node: Word Designators409318
-Node: Modifiers411078
-Node: Installing Bash412889
-Node: Basic Installation414026
-Node: Compilers and Options417284
-Node: Compiling For Multiple Architectures418025
-Node: Installation Names419718
-Node: Specifying the System Type420536
-Node: Sharing Defaults421252
-Node: Operation Controls421925
-Node: Optional Features422883
-Node: Reporting Bugs433401
-Node: Major Differences From The Bourne Shell434595
-Node: GNU Free Documentation License451447
-Node: Indexes476624
-Node: Builtin Index477078
-Node: Reserved Word Index483905
-Node: Variable Index486353
-Node: Function Index502177
-Node: Concept Index515616
+Node: Job Control292713
+Node: Job Control Basics293173
+Node: Job Control Builtins298137
+Node: Job Control Variables303283
+Node: Command Line Editing304439
+Node: Introduction and Notation306110
+Node: Readline Interaction307733
+Node: Readline Bare Essentials308924
+Node: Readline Movement Commands310707
+Node: Readline Killing Commands311667
+Node: Readline Arguments313585
+Node: Searching314629
+Node: Readline Init File316815
+Node: Readline Init File Syntax318074
+Node: Conditional Init Constructs338604
+Node: Sample Init File342800
+Node: Bindable Readline Commands345917
+Node: Commands For Moving347121
+Node: Commands For History348980
+Node: Commands For Text353275
+Node: Commands For Killing356663
+Node: Numeric Arguments359478
+Node: Commands For Completion360617
+Node: Keyboard Macros364808
+Node: Miscellaneous Commands365495
+Node: Readline vi Mode371448
+Node: Programmable Completion372355
+Node: Programmable Completion Builtins380135
+Node: A Programmable Completion Example390830
+Node: Using History Interactively396077
+Node: Bash History Facilities396761
+Node: Bash History Builtins399766
+Node: History Interaction404298
+Node: Event Designators407918
+Node: Word Designators409272
+Node: Modifiers411032
+Node: Installing Bash412843
+Node: Basic Installation413980
+Node: Compilers and Options417238
+Node: Compiling For Multiple Architectures417979
+Node: Installation Names419672
+Node: Specifying the System Type420490
+Node: Sharing Defaults421206
+Node: Operation Controls421879
+Node: Optional Features422837
+Node: Reporting Bugs433355
+Node: Major Differences From The Bourne Shell434549
+Node: GNU Free Documentation License451401
+Node: Indexes476578
+Node: Builtin Index477032
+Node: Reserved Word Index483859
+Node: Variable Index486307
+Node: Function Index502131
+Node: Concept Index515570
 
 End Tag Table
 

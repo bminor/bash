@@ -1,6 +1,6 @@
 /* bind.c -- key binding and startup file support for the readline library. */
 
-/* Copyright (C) 1987-2019 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -166,10 +166,12 @@ rl_bind_key (int key, rl_command_func_t *function)
 
   /* If it's bound to a function or macro, just overwrite.  Otherwise we have
      to treat it as a key sequence so rl_generic_bind handles shadow keymaps
-     for us.  If we are binding '\' make sure to escape it so it makes it
-     through the call to rl_translate_keyseq. */
+     for us.  If we are binding '\' or \C-@ (NUL) make sure to escape it so
+     it makes it through the call to rl_translate_keyseq. */
   if (_rl_keymap[key].type != ISKMAP)
     {
+      if (_rl_keymap[key].type == ISMACR)
+	xfree ((char *)_rl_keymap[key].function);
       _rl_keymap[key].type = ISFUNC;
       _rl_keymap[key].function = function;
     }
@@ -178,8 +180,17 @@ rl_bind_key (int key, rl_command_func_t *function)
       l = 0;
 bind_keyseq:
       if (key == '\\')
-	keyseq[l++] = '\\';
-      keyseq[l++] = key;
+	{
+	  keyseq[l++] = '\\';
+	  keyseq[l++] = '\\';
+	}
+      else if (key == '\0')	  
+	{
+	  keyseq[l++] = '\\';
+	  keyseq[l++] = '0';
+	}
+      else
+	keyseq[l++] = key;
       keyseq[l] = '\0';
       rl_bind_keyseq (keyseq, function);
     }
@@ -451,9 +462,7 @@ rl_generic_bind (int type, const char *keyseq, char *data, Keymap map)
 	}
       else
 	{
-	  if (map[ic].type == ISMACR)
-	    xfree ((char *)map[ic].function);
-	  else if (map[ic].type == ISKMAP)
+	  if (map[ic].type == ISKMAP)
 	    {
 	      prevmap = map;
 	      map = FUNCTION_TO_KEYMAP (map, ic);
@@ -466,6 +475,8 @@ rl_generic_bind (int type, const char *keyseq, char *data, Keymap map)
 	      if (type == ISFUNC && data == 0)
 		data = (char *)_rl_null_function;
 	    }
+	  if (map[ic].type == ISMACR)
+	    xfree ((char *)map[ic].function);
 
 	  map[ic].function = KEYMAP_TO_FUNCTION (data);
 	  map[ic].type = type;

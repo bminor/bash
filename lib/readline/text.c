@@ -479,6 +479,8 @@ rl_forward_word (int count, int key)
 
   while (count)
     {
+      if (rl_point > rl_end)
+	rl_point = rl_end;
       if (rl_point == rl_end)
 	return 0;
 
@@ -498,6 +500,8 @@ rl_forward_word (int count, int key)
 	    }
 	}
 
+      if (rl_point > rl_end)
+	rl_point = rl_end;
       if (rl_point == rl_end)
 	return 0;
 

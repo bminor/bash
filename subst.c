@@ -10046,7 +10046,7 @@ add_string:
 	  {
 	       /* XXX - technically this should only be expanded at the start
 	       of a word */
-	    if (string[++sindex] != LPAREN || (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (word->flags & (W_DQUOTE|W_NOPROCSUB)) || posixly_correct)
+	    if (string[++sindex] != LPAREN || (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) || (word->flags & (W_DQUOTE|W_NOPROCSUB)))
 	      {
 		sindex--;	/* add_character: label increments sindex */
 		goto add_character;

@@ -97,7 +97,7 @@ static struct {
   0
 };
 
-static char *saved_posix_vars;
+static char *saved_posix_vars = 0;
 
 void
 posix_initialize (on)
@@ -113,7 +113,13 @@ posix_initialize (on)
     }
 
   /* Things that should be turned on when posix mode is disabled. */
-  if (on == 0)
+  else if (saved_posix_vars)		/* on == 0, restore saved settings */
+    {
+      set_posix_options (saved_posix_vars);
+      free (saved_posix_vars);
+      saved_posix_vars = 0;
+    }
+  else	/* on == 0, restore a default set of settings */
     {
       source_searches_cwd = 1;
       expand_aliases = interactive_shell;

@@ -115,120 +115,118 @@ The following list is what's changed when 'POSIX mode' is in effect:
      read with the '.' or 'source' builtins, or in a string processed by
      the 'eval' builtin.
 
-  30. Process substitution is not available.
-
-  31. While variable indirection is available, it may not be applied to
+  30. While variable indirection is available, it may not be applied to
      the '#' and '?' special parameters.
 
-  32. When expanding the '*' special parameter in a pattern context
+  31. When expanding the '*' special parameter in a pattern context
      where the expansion is double-quoted does not treat the '$*' as if
      it were double-quoted.
 
-  33. Assignment statements preceding POSIX special builtins persist in
+  32. Assignment statements preceding POSIX special builtins persist in
      the shell environment after the builtin completes.
 
-  34. Assignment statements preceding shell function calls persist in
+  33. Assignment statements preceding shell function calls persist in
      the shell environment after the function returns, as if a POSIX
      special builtin command had been executed.
 
-  35. The 'command' builtin does not prevent builtins that take
+  34. The 'command' builtin does not prevent builtins that take
      assignment statements as arguments from expanding them as
      assignment statements; when not in POSIX mode, assignment builtins
      lose their assignment statement expansion properties when preceded
      by 'command'.
 
-  36. The 'bg' builtin uses the required format to describe each job
+  35. The 'bg' builtin uses the required format to describe each job
      placed in the background, which does not include an indication of
      whether the job is the current or previous job.
 
-  37. The output of 'kill -l' prints all the signal names on a single
+  36. The output of 'kill -l' prints all the signal names on a single
      line, separated by spaces, without the 'SIG' prefix.
 
-  38. The 'kill' builtin does not accept signal names with a 'SIG'
+  37. The 'kill' builtin does not accept signal names with a 'SIG'
      prefix.
 
-  39. The 'export' and 'readonly' builtin commands display their output
+  38. The 'export' and 'readonly' builtin commands display their output
      in the format required by POSIX.
 
-  40. The 'trap' builtin displays signal names without the leading
+  39. The 'trap' builtin displays signal names without the leading
      'SIG'.
 
-  41. The 'trap' builtin doesn't check the first argument for a possible
+  40. The 'trap' builtin doesn't check the first argument for a possible
      signal specification and revert the signal handling to the original
      disposition if it is, unless that argument consists solely of
      digits and is a valid signal number.  If users want to reset the
      handler for a given signal to the original disposition, they should
      use '-' as the first argument.
 
-  42. The '.' and 'source' builtins do not search the current directory
+  41. The '.' and 'source' builtins do not search the current directory
      for the filename argument if it is not found by searching 'PATH'.
 
-  43. Enabling POSIX mode has the effect of setting the
+  42. Enabling POSIX mode has the effect of setting the
      'inherit_errexit' option, so subshells spawned to execute command
      substitutions inherit the value of the '-e' option from the parent
      shell.  When the 'inherit_errexit' option is not enabled, Bash
      clears the '-e' option in such subshells.
 
-  44. Enabling POSIX mode has the effect of setting the 'shift_verbose'
+  43. Enabling POSIX mode has the effect of setting the 'shift_verbose'
      option, so numeric arguments to 'shift' that exceed the number of
      positional parameters will result in an error message.
 
-  45. When the 'alias' builtin displays alias definitions, it does not
+  44. When the 'alias' builtin displays alias definitions, it does not
      display them with a leading 'alias ' unless the '-p' option is
      supplied.
 
-  46. When the 'set' builtin is invoked without options, it does not
+  45. When the 'set' builtin is invoked without options, it does not
      display shell function names and definitions.
 
-  47. When the 'set' builtin is invoked without options, it displays
+  46. When the 'set' builtin is invoked without options, it displays
      variable values without quotes, unless they contain shell
      metacharacters, even if the result contains nonprinting characters.
 
-  48. When the 'cd' builtin is invoked in LOGICAL mode, and the pathname
+  47. When the 'cd' builtin is invoked in LOGICAL mode, and the pathname
      constructed from '$PWD' and the directory name supplied as an
      argument does not refer to an existing directory, 'cd' will fail
      instead of falling back to PHYSICAL mode.
 
-  49. When the 'cd' builtin cannot change a directory because the length
+  48. When the 'cd' builtin cannot change a directory because the length
      of the pathname constructed from '$PWD' and the directory name
      supplied as an argument exceeds PATH_MAX when all symbolic links
      are expanded, 'cd' will fail instead of attempting to use only the
      supplied directory name.
 
-  50. The 'pwd' builtin verifies that the value it prints is the same as
+  49. The 'pwd' builtin verifies that the value it prints is the same as
      the current directory, even if it is not asked to check the file
      system with the '-P' option.
 
-  51. When listing the history, the 'fc' builtin does not include an
+  50. When listing the history, the 'fc' builtin does not include an
      indication of whether or not a history entry has been modified.
 
-  52. The default editor used by 'fc' is 'ed'.
+  51. The default editor used by 'fc' is 'ed'.
 
-  53. The 'type' and 'command' builtins will not report a non-executable
+  52. The 'type' and 'command' builtins will not report a non-executable
      file as having been found, though the shell will attempt to execute
      such a file if it is the only so-named file found in '$PATH'.
 
-  54. The 'vi' editing mode will invoke the 'vi' editor directly when
+  53. The 'vi' editing mode will invoke the 'vi' editor directly when
      the 'v' command is run, instead of checking '$VISUAL' and
      '$EDITOR'.
 
-  55. When the 'xpg_echo' option is enabled, Bash does not attempt to
+  54. When the 'xpg_echo' option is enabled, Bash does not attempt to
      interpret any arguments to 'echo' as options.  Each argument is
      displayed, after escape characters are converted.
 
-  56. The 'ulimit' builtin uses a block size of 512 bytes for the '-c'
+  55. The 'ulimit' builtin uses a block size of 512 bytes for the '-c'
      and '-f' options.
 
-  57. The arrival of 'SIGCHLD' when a trap is set on 'SIGCHLD' does not
+  56. The arrival of 'SIGCHLD' when a trap is set on 'SIGCHLD' does not
      interrupt the 'wait' builtin and cause it to return immediately.
      The trap command is run once for each child that exits.
 
-  58. The 'read' builtin may be interrupted by a signal for which a trap
+  57. The 'read' builtin may be interrupted by a signal for which a trap
      has been set.  If Bash receives a trapped signal while executing
      'read', the trap handler executes and 'read' returns an exit status
      greater than 128.
 
-  59. Bash removes an exited background process's status from the list
+  58. Bash removes an exited background process's status from the list
      of such statuses after the 'wait' builtin is used to obtain it.
 
 There is other POSIX behavior that Bash does not implement by default

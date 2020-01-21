@@ -1,7 +1,7 @@
 /* readline.c -- a general facility for reading lines of input
    with emacs style editing and completion. */
 
-/* Copyright (C) 1987-2019 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -870,6 +870,8 @@ _rl_dispatch_subseq (register int key, Keymap map, int got_subseq)
 	    _rl_prev_macro_key ();
 	  else
 	    _rl_unget_char  (key);
+	  if (rl_key_sequence_length > 0)
+	    rl_executing_keyseq[--rl_key_sequence_length] = '\0';
 	  return -2;
 	}
       else if (got_subseq)
@@ -882,6 +884,8 @@ _rl_dispatch_subseq (register int key, Keymap map, int got_subseq)
 	    _rl_prev_macro_key ();
 	  else
 	    _rl_unget_char (key);
+	  if (rl_key_sequence_length > 0)
+	    rl_executing_keyseq[--rl_key_sequence_length] = '\0';
 	  return -1;
 	}
       else
@@ -974,7 +978,11 @@ _rl_dispatch_subseq (register int key, Keymap map, int got_subseq)
 	  	_rl_pushed_input_available () == 0 &&
 		_rl_dispatching_keymap[ANYOTHERKEY].function &&
 		_rl_input_queued (_rl_keyseq_timeout*1000) == 0)
-	    return (_rl_subseq_result (-2, map, key, got_subseq));
+	    {
+	      if (rl_key_sequence_length > 0)
+		rl_executing_keyseq[--rl_key_sequence_length] = '\0';
+	      return (_rl_subseq_result (-2, map, key, got_subseq));
+	    }
 
 	  newkey = _rl_subseq_getchar (key);
 	  if (newkey < 0)
@@ -1065,6 +1073,8 @@ _rl_subseq_result (int r, Keymap map, int key, int got_subseq)
 	_rl_prev_macro_key ();
       else
 	_rl_unget_char (key);
+      if (rl_key_sequence_length > 0)
+	rl_executing_keyseq[--rl_key_sequence_length] = '\0';
       _rl_dispatching_keymap = map;
       return -2;
     }
@@ -1075,6 +1085,8 @@ _rl_subseq_result (int r, Keymap map, int key, int got_subseq)
 	_rl_prev_macro_key ();
       else
 	_rl_unget_char (key);
+      if (rl_key_sequence_length > 0)
+	rl_executing_keyseq[--rl_key_sequence_length] = '\0';
       _rl_dispatching_keymap = map;
       return -1;
     }

@@ -7085,5 +7085,89 @@ sig.c
 	  run_pending_traps the next time a trap handler for that signal
 	  runs. Bug report from Martijn Dekker <martijn@inlv.org>
 
+				 1/14/2020
+				 ---------
+bashline.c
+	- find_cmd_start: don't treat the open brace in brace expansion as a
+	  command start character; only treat open brace specially if it can
+	  be a reserved word. Fixes bug reported back in October, 2019 in
+	  https://savannah.gnu.org/support/index.php?110063
 
-	  
+				   1/15
+				   ----
+lib/readline/readline.c
+	- _rl_dispatch_subseq,_rl_subseq_result: if we push back a character
+	  with _rl_unget_char or otherwise go back up the chain without a
+	  sequence match, make sure we back up in rl_executing_keyseq.
+	  Report and fix from Koichi Murase <myoga.murase@gmail.com>
+
+builtins/bind.def
+	- unbind_keyseq: if we unbind something that ends up pointing to a
+	  shadow keymap, restore the ANYOTHERKEY binding that we used when
+	  binding it.
+	  Report and fix from Koichi Murase <myoga.murase@gmail.com>
+
+bashline.c
+	- bash_execute_unix_command: if we walked cmd_xmap for rl_executing_keyseq
+	  and ended up pointing to a keymap (type == ISKMAP) we want the
+	  binding for ANYOTHERKEY instead.
+	  Report and fix from Koichi Murase <myoga.murase@gmail.com>
+
+lib/readline/bind.c
+	- rl_bind_key: if we're trying to bind a key sequence containing '\0'
+	  using the old-style binding syntax (C-SPC), make sure we quote the
+	  NULL so it will make it through rl_translate_keyseq().
+	  Report and fix from Koichi Murase <myoga.murase@gmail.com>
+	- rl_bind_key: if we're overwriting a binding for a macro, make sure to
+	  free the old macro value.
+	  Report and fix from Koichi Murase <myoga.murase@gmail.com>
+	- rl_generic_bind: if we're overwriting a macro saved to ANYOTHERKEY in
+	  a shadow keymap created by rl_generic_bind, make sure to free the
+	  macro data.
+	  Report and fix from Koichi Murase <myoga.murase@gmail.com>
+
+trap.c
+	- run_pending_traps: save and restore the value of running_trap around
+	  cycle through pending signals so recursive trap handler calls don't
+	  set running_trap to 0
+	- _run_trap_internal: allow some signals the shell treats specially
+	  (e.g., SIGINT) to run recursive handlers
+	- _run_trap_internal: don't turn off SIG_INPROGRESS flag if it was on
+	  for this signal when _run_trap_internal was called
+	- _run_trap_internal: save and restore the value of running_trap around
+	  running the trap handler, except for SIGCHLD. Fixes bug reported by
+	  Martijn Dekker <martijn@inlv.org>
+
+				   1/16
+				   ----
+general.c
+	- posix_initialize: if turning posix mode off, restore settings from
+	  any saved set, if one exists, instead of setting a default environment
+
+				   1/17
+				   ----
+parse.y,subst.c
+	- process_substitution: now available in POSIX mode. Most recently
+	  requested by Martijn Dekker <martijn@inlv.org>; requested several
+	  times in the past
+
+doc/bashref.texi
+	- posix mode: remove restriction that posix mode is not available
+
+lib/readline/vi_mode.c
+	- rl_domove_motion_callback: make sure to extend rl_line_buffer so it
+	  can hold the dummy blank character we're appending. From a fuzzing
+	  report by Tillmann Osswald <tosswald@ernw.de>
+	- vi_yank_dispatch: after we do an undo, make sure to fix point to be
+	  less than the (new) rl_end
+
+lib/readline/text.c
+	- rl_forward_word: make sure that MB_NEXTCHAR doesn't go past rl_end on
+	  invalid multibyte sequences
+
+				   1/18
+				   ----
+test.c
+	- for the `-v' operator, use a clever trick from Martijn Dekker and
+	  just test whether N is between 0 and $#.
+
