@@ -3789,7 +3789,13 @@ assign_in_env (word, flags)
   array_needs_making = 1;
 
   if (flags)
-    stupidly_hack_special_variables (newname);
+    {
+#if 0 /* TAG:bash-5.1 from Martijn Dekker */
+      if (STREQ (newname, "POSIXLY_CORRECT") || STREQ (newname, "POSIX_PEDANDTIC"))
+	save_posix_options ();		/* XXX one level of saving right now */
+#endif
+      stupidly_hack_special_variables (newname);
+    }
 
   if (echo_command_at_execute)
     /* The Korn shell prints the `+ ' in front of assignment statements,

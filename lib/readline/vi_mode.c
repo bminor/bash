@@ -1,7 +1,7 @@
 /* vi_mode.c -- A vi emulation mode for Bash.
    Derived from code written by Jeff Sparkes (jsparkes@bnr.ca).  */
 
-/* Copyright (C) 1987-2019 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -836,6 +836,12 @@ _rl_vi_save_replace (void)
   end = rl_point;
   start = end - vi_replace_count + 1;
   len = vi_replace_count + 1;
+
+  if (start < 0)
+    {
+      len = end + 1;
+      start = 0;
+    }
 
   vi_save_insert_buffer (start, len);  
 }
@@ -2104,7 +2110,7 @@ rl_vi_overstrike_delete (int count, int key)
       s = rl_point;
 
       if (rl_do_undo ())
-	vi_replace_count--;
+	vi_replace_count--;		/* XXX */
 
       if (rl_point == s)
 	rl_backward_char (1, key);
@@ -2117,6 +2123,39 @@ rl_vi_overstrike_delete (int count, int key)
       _rl_vi_doing_insert = 0;
     }
   return (0);
+}
+
+static int
+rl_vi_overstrike_kill_line (int count, int key)
+{
+  int r, end;
+
+  end = rl_end;
+  r = rl_unix_line_discard (count, key);
+  vi_replace_count -= end - rl_end;
+  return r;
+}
+
+static int
+rl_vi_overstrike_kill_word (int count, int key)
+{
+  int r, end;
+
+  end = rl_end;
+  r = rl_vi_unix_word_rubout (count, key);
+  vi_replace_count -= end - rl_end;
+  return r;
+}
+
+static int
+rl_vi_overstrike_yank (int count, int key)
+{
+  int r, end;
+
+  end = rl_end;
+  r = rl_yank (count, key);
+  vi_replace_count += rl_end - end;
+  return r;
 }
 
 /* Read bracketed paste mode pasted text and insert it in overwrite mode */
@@ -2178,6 +2217,21 @@ rl_vi_replace (int count, int key)
       if (vi_insertion_keymap[CTRL ('H')].type == ISFUNC &&
 	  vi_insertion_keymap[CTRL ('H')].function == rl_rubout)
 	vi_replace_map[CTRL ('H')].function = rl_vi_overstrike_delete;
+
+      /* Same for ^U and unix-line-discard. */
+      if (vi_insertion_keymap[CTRL ('U')].type == ISFUNC &&
+	  vi_insertion_keymap[CTRL ('U')].function == rl_unix_line_discard)
+	vi_replace_map[CTRL ('U')].function = rl_vi_overstrike_kill_line;
+
+      /* And for ^W and unix-word-rubout. */
+      if (vi_insertion_keymap[CTRL ('W')].type == ISFUNC &&
+	  vi_insertion_keymap[CTRL ('W')].function == rl_vi_unix_word_rubout)
+	vi_replace_map[CTRL ('W')].function = rl_vi_overstrike_kill_word;
+
+      /* And finally for ^Y and yank. */
+      if (vi_insertion_keymap[CTRL ('Y')].type == ISFUNC &&
+	  vi_insertion_keymap[CTRL ('Y')].function == rl_yank)
+	vi_replace_map[CTRL ('Y')].function = rl_vi_overstrike_yank;
 
       /* Make sure this is the value we need. */
       vi_replace_map[ANYOTHERKEY].type = ISFUNC;
@@ -2281,6 +2335,7 @@ _rl_vi_goto_mark (void)
   if (ch == '`')
     {
       rl_point = rl_mark;
+      _rl_fix_point (1);
       return 0;
     }
   else if (ch < 0 || ch < 'a' || ch > 'z')	/* make test against 0 explicit */
@@ -2296,6 +2351,7 @@ _rl_vi_goto_mark (void)
       return 1;
     }
   rl_point = vi_mark_chars[ch];
+  _rl_fix_point (1);
   return 0;
 }
 

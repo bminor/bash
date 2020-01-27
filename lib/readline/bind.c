@@ -509,17 +509,6 @@ rl_generic_bind (int type, const char *keyseq, char *data, Keymap map)
   return 0;
 }
 
-#define ADD_NORMAL_CHAR(c) \
-  do { \
-    if (META_CHAR (c) && _rl_convert_meta_chars_to_ascii) \
-      { \
-	array[l++] = ESC; \
-	array[l++] = UNMETA (c); \
-      } \
-    else \
-      array[l++] = (c); \
-  } while (0)
-      
 /* Translate the ASCII representation of SEQ, stuffing the values into ARRAY,
    an array of characters.  LEN gets the final length of ARRAY.  Return
    non-zero if there was an error parsing SEQ. */
@@ -527,64 +516,37 @@ int
 rl_translate_keyseq (const char *seq, char *array, int *len)
 {
   register int i, l, temp;
+  int has_control, has_meta;
   unsigned char c;
 
-  for (i = l = 0; c = seq[i]; i++)
+  has_control = 0;
+  has_meta = 0;
+
+  /* When there are incomplete prefixes \C- or \M- (has_control || has_meta)
+     without base character at the end of SEQ, they are processed as the
+     prefixes for '\0'.
+  */
+  for (i = l = 0; (c = seq[i]) || has_control || has_meta; i++)
     {
-      if (c == '\\')
+      /* Only backslashes followed by a non-null character are handled
+	 specially.  Trailing backslash (backslash followed by '\0') is
+	 processed as a normal character.
+      */
+      if (c == '\\' && seq[i + 1] != '\0')
 	{
 	  c = seq[++i];
 
-	  if (c == 0)
-	    {
-	      array[l++] = '\\';	/* preserve trailing backslash */
-	      break;
-	    }
-
 	  /* Handle \C- and \M- prefixes. */
-	  if ((c == 'C' || c == 'M') && seq[i + 1] == '-')
+	  if (c == 'C' && seq[i + 1] == '-')
 	    {
-	      /* Handle special case of backwards define. */
-	      if (strncmp (&seq[i], "C-\\M-", 5) == 0)
-		{
-		  array[l++] = ESC;	/* ESC is meta-prefix */
-		  i += 5;
-		  array[l++] = CTRL (_rl_to_upper (seq[i]));
-		}
-	      else if (c == 'M')
-		{
-		  i++;		/* seq[i] == '-' */
-		  /* XXX - obey convert-meta setting, convert to key seq  */
-		  /* XXX - doesn't yet handle \M-\C-n if convert-meta is on */
-		  if (_rl_convert_meta_chars_to_ascii)
-		    {
-		      array[l++] = ESC;	/* ESC is meta-prefix */
-		      i++;
-		      array[l++] = UNMETA (seq[i]);	/* UNMETA just in case */
-		    }
-		  else if (seq[i+1] == '\\' && seq[i+2] == 'C' && seq[i+3] == '-')
-		    {
-		      i += 4;
-		      temp = (seq[i] == '?') ? RUBOUT : CTRL (_rl_to_upper (seq[i]));
-		      array[l++] = META (temp);
-		    }
-		  else
-		    {
-		      /* This doesn't yet handle things like \M-\a, which may
-			 or may not have any reasonable meaning.  You're
-			 probably better off using straight octal or hex. */
-		      i++;
-		      array[l++] = META (seq[i]);
-		    }
-		}
-	      else if (c == 'C')
-		{
-		  i += 2;
-		  /* Special hack for C-?... */
-		  array[l++] = (seq[i] == '?') ? RUBOUT : CTRL (_rl_to_upper (seq[i]));
-		}
-	      if (seq[i] == '\0')
-		break;
+	      i++;
+	      has_control = 1;
+	      continue;
+	    }
+	  else if (c == 'M' && seq[i + 1] == '-')
+	    {
+	      i++;
+	      has_meta = 1;
 	      continue;
 	    }	      
 
@@ -595,34 +557,34 @@ rl_translate_keyseq (const char *seq, char *array, int *len)
 	  switch (c)
 	    {
 	    case 'a':
-	      array[l++] = '\007';
+	      c = '\007';
 	      break;
 	    case 'b':
-	      array[l++] = '\b';
+	      c = '\b';
 	      break;
 	    case 'd':
-	      array[l++] = RUBOUT;	/* readline-specific */
+	      c = RUBOUT;	/* readline-specific */
 	      break;
 	    case 'e':
-	      array[l++] = ESC;
+	      c = ESC;
 	      break;
 	    case 'f':
-	      array[l++] = '\f';
+	      c = '\f';
 	      break;
 	    case 'n':
-	      array[l++] = NEWLINE;
+	      c = NEWLINE;
 	      break;
 	    case 'r':
-	      array[l++] = RETURN;
+	      c = RETURN;
 	      break;
 	    case 't':
-	      array[l++] = TAB;
+	      c = TAB;
 	      break;
 	    case 'v':
-	      array[l++] = 0x0B;
+	      c = 0x0B;
 	      break;
 	    case '\\':
-	      array[l++] = '\\';
+	      c = '\\';
 	      break;
 	    case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7':
@@ -631,7 +593,6 @@ rl_translate_keyseq (const char *seq, char *array, int *len)
 	        c = (c * 8) + OCTVALUE (seq[i]);
 	      i--;	/* auto-increment in for loop */
 	      c &= largest_char;
-	      ADD_NORMAL_CHAR (c);
 	      break;
 	    case 'x':
 	      i++;
@@ -641,17 +602,39 @@ rl_translate_keyseq (const char *seq, char *array, int *len)
 	        c = 'x';
 	      i--;	/* auto-increment in for loop */
 	      c &= largest_char;
-	      ADD_NORMAL_CHAR (c);
 	      break;
 	    default:	/* backslashes before non-special chars just add the char */
 	      c &= largest_char;
-	      ADD_NORMAL_CHAR (c);
 	      break;	/* the backslash is stripped */
 	    }
-	  continue;
 	}
 
-      ADD_NORMAL_CHAR (c);
+      /* Process \C- and \M- flags */
+      if (has_control)
+	{
+	  /* Special treatment for C-? */
+	  c = (c == '?') ? RUBOUT : CTRL (_rl_to_upper (c));
+	  has_control = 0;
+	}
+      if (has_meta)
+	{
+	  c = META (c);
+	  has_meta = 0;
+	}
+
+      /* If convert-meta is turned on, convert a meta char to a key sequence  */
+      if (META_CHAR (c) && _rl_convert_meta_chars_to_ascii)
+	{
+	  array[l++] = ESC;	/* ESC is meta-prefix */
+	  array[l++] = UNMETA (c);
+	}
+      else
+	array[l++] = (c);
+
+      /* Null characters may be processed for incomplete prefixes at the end of
+	 sequence */
+      if (seq[i] == '\0')
+	break;
     }
 
   *len = l;
@@ -2637,20 +2620,22 @@ rl_invoking_keyseqs_in_map (rl_command_func_t *function, Keymap map)
 		    else
 		      sprintf (keyname, "\\e");
 		  }
-		else if (CTRL_CHAR (key))
-		  sprintf (keyname, "\\C-%c", _rl_to_lower (UNCTRL (key)));
-		else if (key == RUBOUT)
-		  sprintf (keyname, "\\C-?");
-		else if (key == '\\' || key == '"')
-		  {
-		    keyname[0] = '\\';
-		    keyname[1] = (char) key;
-		    keyname[2] = '\0';
-		  }
 		else
 		  {
-		    keyname[0] = (char) key;
-		    keyname[1] = '\0';
+		    int c = key, l = 0;
+		    if (CTRL_CHAR (c) || c == RUBOUT)
+		      {
+			keyname[l++] = '\\';
+			keyname[l++] = 'C';
+			keyname[l++] = '-';
+			c = (c == RUBOUT) ? '?' : _rl_to_lower (UNCTRL (c));
+		      }
+
+		    if (c == '\\' || c == '"')
+		      keyname[l++] = '\\';
+
+		    keyname[l++] = (char) c;
+		    keyname[l++] = '\0';
 		  }
 		
 		strcat (keyname, seqs[i]);

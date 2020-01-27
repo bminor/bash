@@ -387,6 +387,7 @@ extern void _rl_set_cursor PARAMS((int, int));
 
 /* text.c */
 extern void _rl_fix_point PARAMS((int));
+extern void _rl_fix_mark PARAMS((void));
 extern int _rl_replace_text PARAMS((const char *, int, int));
 extern int _rl_forward_char_internal PARAMS((int));
 extern int _rl_backward_char_internal PARAMS((int));

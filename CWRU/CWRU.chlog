@@ -7171,3 +7171,66 @@ test.c
 	- for the `-v' operator, use a clever trick from Martijn Dekker and
 	  just test whether N is between 0 and $#.
 
+				   1/21
+				   ----
+lib/readline/text.c
+	- rl_change_case: fix argument to rl_extend_line_buffer; make sure to
+	  reset s and e after call in case rl_line_buffer was reallocated
+
+lib/readline/vi_mode.c
+	- _rl_vi_save_replace: if start ends up being less than zero, make
+	  sure we don't read before the start of rl_line_buffer
+	- rl_vi_overstrike_kill_line,rl_vi_overstrike_kill_word: replacement
+	  functions for ^U and ^W in vi overstrike mode, to keep right value
+	  for vi_replace_count.
+	- rl_vi_overstrike_yank: similar for ^Y and rl_yank
+
+				   1/22
+				   ----
+lib/readline/display.c
+	- update_line: if we're trying to wrap lines on an autowrap terminal,
+	  punt and do a dumb update if the number of bytes in the first char
+	  on the new line is greater than the number of bytes in the first char
+	  of the old line. There's no guarantee we'll be able to extend the
+	  old line buffer enough to accommodate the new bytes
+	- update_line: try to avoid some operations when wrapping lines if the
+	  number of bytes in the first characters of the old and new lines is
+	  the same
+	- update_line: when updating vis_lbreaks after fixing up the lines when
+	  wrapping, make sure we don't exceed an index of _rl_vis_botlin when
+	  updating the line break offsets
+
+lib/readline/text.c
+	- rl_delete_text: if deleting text leaves the mark past rl_end, adjust
+	  it to rl_end
+
+lib/readline/vi_mode.c
+	- _rl_vi_goto_mark: make sure to call _rl_fix_point after setting
+	  rl_point to rl_mark
+
+				   1/23
+				   ----
+lib/readline/kill.c
+	- rl_kill_region,region_kill_internal: call _rl_fix_point
+
+lib/readline/text.c,lib/readline/rlprivate.h
+	- _rl_fix_mark: new function to clamp rl_mark between 0 and rl_end
+
+				   1/24
+				   ----
+lib/readline/bind.c
+	- rl_translate_keyseq: rework how key sequences are translated with
+	  the intent of normalizing backslash treatment. Since the current
+	  behavior of, e.g., \C-\\, is inconsistent, this change chooses to
+	  effectively treat and display \\ as \\ instead of \C-\. This is not
+	  completely backwards compatible, but it seems like the most reasonable
+	  choice. This allows things like \M-\a but is not compatible with
+	  pre-bash-4.4 (readline 7.0) handling of \C-\, which is now treated
+	  like \C-\0. If that proves to be a problem, we can add code to
+	  understand \C-\ as equivalent to \C-\\. Since attempting to bind
+	  "\C-\" has generated an error for a long time, it doesn't seem like
+	  it will be too much of a problem.
+	  Fixes from Koichi Murase <myoga.murase@gmail.com>
+	- rl_invoking_keyseqs_in_map: make sure to consistently output
+	  backslash as `\\' instead of producing `\C-\'
+	  Fixes from Koichi Murase <myoga.murase@gmail.com>

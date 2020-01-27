@@ -220,7 +220,7 @@ static floatmax_t getfloatmax __P((void));
 
 static intmax_t asciicode __P((void));
 
-static WORD_LIST *garglist;
+static WORD_LIST *garglist, *orig_arglist;
 static int retval;
 static int conversion_error;
 
@@ -311,7 +311,7 @@ printf_builtin (list)
   format = list->word->word;
   tw = 0;
 
-  garglist = list->next;
+  garglist = orig_arglist = list->next;
 
   /* If the format string is empty after preprocessing, return immediately. */
   if (format == 0 || *format == 0)

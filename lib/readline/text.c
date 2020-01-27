@@ -154,6 +154,7 @@ rl_delete_text (int from, int to)
 
   rl_end -= diff;
   rl_line_buffer[rl_end] = '\0';
+  _rl_fix_mark ();
   return (diff);
 }
 
@@ -175,6 +176,12 @@ _rl_fix_point (int fix_mark_too)
   _RL_FIX_POINT (rl_point);
   if (fix_mark_too)
     _RL_FIX_POINT (rl_mark);
+}
+
+void
+_rl_fix_mark (void)
+{
+  _RL_FIX_POINT (rl_mark);
 }
 #undef _RL_FIX_POINT
 
@@ -1487,7 +1494,9 @@ rl_change_case (int count, int op)
 		}
 	      else if (m < mlen)
 		{
-		  rl_extend_line_buffer (mlen - m + 1);
+		  rl_extend_line_buffer (rl_end + mlen + (e - s) - m + 2);
+		  s = rl_line_buffer + start;	/* have to redo this */
+		  e = rl_line_buffer + rl_end;
 		  memmove (s + mlen, s + m, (e - s) - m);
 		  memcpy (s, mb, mlen);
 		  next += mlen - m;	/* next char changes */
