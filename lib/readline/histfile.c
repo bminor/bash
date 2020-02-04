@@ -640,6 +640,7 @@ history_truncate_file (const char *fname, int lines)
 
   if (rv != 0)
     {
+      rv = errno;
       if (tempname)
 	unlink (tempname);
       history_lines_written_to_file = 0;
@@ -787,6 +788,7 @@ mmap_error:
 
   if (rv != 0)
     {
+      rv = errno;
       if (tempname)
 	unlink (tempname);
       history_lines_written_to_file = 0;

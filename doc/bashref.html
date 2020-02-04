@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.0, 26 November 2019).
+the Bash shell (version 5.0, 29 January 2020).
 
-This is Edition 5.0, last updated 26 November 2019,
+This is Edition 5.0, last updated 29 January 2020,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.0.
 
@@ -273,10 +273,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.0, 26 November 2019).
+the Bash shell (version 5.0, 29 January 2020).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.0, last updated 26 November 2019,
+<p>This is Edition 5.0, last updated 29 January 2020,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.0.
 </p>
@@ -4619,11 +4619,12 @@ initialization file.
 entered.
 When <var>shell-command</var> is executed, the shell sets the
 <code>READLINE_LINE</code> variable to the contents of the Readline line
-buffer and the <code>READLINE_POINT</code> variable to the current location
-of the insertion point.
-If the executed command changes the value of <code>READLINE_LINE</code> or
-<code>READLINE_POINT</code>, those new values will be reflected in the
-editing state.
+buffer and the <code>READLINE_POINT</code> and <code>READLINE_MARK</code> variables
+to the current location of the insertion point and the saved insertion
+point (the <var>mark</var>), respectively.
+If the executed command changes the value of any of <code>READLINE_LINE</code>,
+<code>READLINE_POINT</code>, or <code>READLINE_MARK</code>, those new values will be
+reflected in the editing state.
 </p>
 </dd>
 <dt><code>-X</code></dt>
@@ -7366,6 +7367,16 @@ subsequently reset.
 </dt>
 <dd><p>The contents of the Readline line buffer, for use
 with &lsquo;<samp>bind -x</samp>&rsquo; (see <a href="#Bash-Builtins">Bash Builtins</a>).
+</p>
+</dd>
+<dt><code>READLINE_MARK</code>
+<span id="index-READLINE_005fMARK"></span>
+</dt>
+<dd><p>The position of the <var>mark</var> (saved insertion point) in the
+Readline line buffer, for use
+with &lsquo;<samp>bind -x</samp>&rsquo; (see <a href="#Bash-Builtins">Bash Builtins</a>).
+The characters between the insertion point and the mark are often
+called the <var>region</var>.
 </p>
 </dd>
 <dt><code>READLINE_POINT</code>
@@ -14995,6 +15006,7 @@ Next: <a href="#Function-Index" accesskey="n" rel="next">Function Index</a>, Pre
 <tr><th id="Variable-Index_vr_letter-R">R</th><td></td><td></td></tr>
 <tr><td></td><td valign="top"><a href="#index-RANDOM"><code>RANDOM</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-READLINE_005fLINE"><code>READLINE_LINE</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-READLINE_005fMARK"><code>READLINE_MARK</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-READLINE_005fPOINT"><code>READLINE_POINT</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-REPLY"><code>REPLY</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-revert_002dall_002dat_002dnewline"><code>revert-all-at-newline</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Readline-Init-File-Syntax">Readline Init File Syntax</a></td></tr>

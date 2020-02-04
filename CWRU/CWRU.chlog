@@ -7234,3 +7234,30 @@ lib/readline/bind.c
 	- rl_invoking_keyseqs_in_map: make sure to consistently output
 	  backslash as `\\' instead of producing `\C-\'
 	  Fixes from Koichi Murase <myoga.murase@gmail.com>
+
+				   1/29
+				   ----
+bashline.c
+	- readline_get_char_offset: translate a readline buffer offset
+	  (rl_point, rl_mark, rl_end) into a number of (possibly multibyte)
+	  characters
+	- readline_set_char_offset: translate a number of (possibly multibyte)
+	  characters into a buffer offset in rl_line_buffer. Uses a private
+	  readline function to do it, which is bad
+	- bash_execute_unix_command: use readline_{get,set}_char_offset to
+	  translate the rl_point to a character offset
+	- bash_execute_unix_command: bind READLINE_MARK variable, exposing
+	  the value of rl_mark to `bind -x' functions
+
+				   1/31
+				   ----
+examples/loadables/accept.c
+	- accept: new loadable builtin that will accept a TCP connection on a
+	  specified port. Inspired by Stan Marsh <gazelle@xmission.com>
+
+				    2/1
+				    ---
+lib/readline/histfile.c
+	- history_do_write,history_truncate_file: translate the return value rv
+	  to errno when histfile_restore returns -1 (e.g., if rename() fails).
+	  Report and fix from A <auroralanes@protonmail.ch>

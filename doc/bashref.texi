@@ -4063,11 +4063,12 @@ Cause @var{shell-command} to be executed whenever @var{keyseq} is
 entered.
 When @var{shell-command} is executed, the shell sets the
 @code{READLINE_LINE} variable to the contents of the Readline line
-buffer and the @code{READLINE_POINT} variable to the current location
-of the insertion point.
-If the executed command changes the value of @code{READLINE_LINE} or
-@code{READLINE_POINT}, those new values will be reflected in the
-editing state.
+buffer and the @code{READLINE_POINT} and @code{READLINE_MARK} variables
+to the current location of the insertion point and the saved insertion
+point (the @var{mark}), respectively.
+If the executed command changes the value of any of @code{READLINE_LINE},
+@code{READLINE_POINT}, or @code{READLINE_MARK}, those new values will be
+reflected in the editing state.
 
 @item -X
 List all key sequences bound to shell commands and the associated commands
@@ -6307,6 +6308,13 @@ subsequently reset.
 @item READLINE_LINE
 The contents of the Readline line buffer, for use
 with @samp{bind -x} (@pxref{Bash Builtins}).
+
+@item READLINE_MARK
+The position of the @var{mark} (saved insertion point) in the
+Readline line buffer, for use
+with @samp{bind -x} (@pxref{Bash Builtins}).
+The characters between the insertion point and the mark are often
+called the @var{region}.
 
 @item READLINE_POINT
 The position of the insertion point in the Readline line buffer, for use

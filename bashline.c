@@ -197,6 +197,8 @@ static void putx PARAMS((int));
 #else
 static int putx PARAMS((int));
 #endif
+static int readline_get_char_offset PARAMS((int));
+static void readline_set_char_offset PARAMS((int, int *));
 
 static Keymap get_cmd_xmap_from_edit_mode PARAMS((void));
 static Keymap get_cmd_xmap_from_keymap PARAMS((Keymap));
@@ -4286,7 +4288,49 @@ putx(c)
   return x;
 #endif
 }
-  
+
+static int
+readline_get_char_offset (ind)
+     int ind;
+{
+  int r, old_ch;
+
+  r = ind;
+#if defined (HANDLE_MULTIBYTE)
+  if (locale_mb_cur_max > 1)
+    {
+      old_ch = rl_line_buffer[ind];
+      rl_line_buffer[ind] = '\0';
+      r = MB_STRLEN (rl_line_buffer);
+      rl_line_buffer[ind] = old_ch;
+    }
+#endif
+  return r;
+}
+
+static void
+readline_set_char_offset (ind, varp)
+     int ind;
+     int *varp;
+{
+  int i;
+
+  i = ind;
+
+#if defined (HANDLE_MULTIBYTE)
+  if (i > 0 && locale_mb_cur_max > 1)
+    i = _rl_find_next_mbchar (rl_line_buffer, 0, i, 0);		/* XXX */
+#endif
+  if (i != *varp)
+    {
+      if (i > rl_end)
+	i = rl_end;
+      else if (i < 0)
+	i = 0;
+      *varp = i;
+    }
+}
+
 int
 bash_execute_unix_command (count, key)
      int count;	/* ignored */
@@ -4321,12 +4365,7 @@ bash_execute_unix_command (count, key)
   ce = rl_get_termcap ("ce");
   if (ce)	/* clear current line */
     {
-#if 0
-      fprintf (rl_outstream, "\r");
-      tputs (ce, 1, putx);
-#else
       rl_clear_visible_line ();
-#endif
       fflush (rl_outstream);
     }
   else
@@ -4335,18 +4374,16 @@ bash_execute_unix_command (count, key)
   v = bind_variable ("READLINE_LINE", rl_line_buffer, 0);
   if (v)
     VSETATTR (v, att_exported);
-  i = rl_point;
-#if defined (HANDLE_MULTIBYTE)
-  if (MB_CUR_MAX > 1)
-    {
-      old_ch = rl_line_buffer[rl_point];
-      rl_line_buffer[rl_point] = '\0';
-      i = MB_STRLEN (rl_line_buffer);
-      rl_line_buffer[rl_point] = old_ch;
-    }
-#endif
+
+  i = readline_get_char_offset (rl_point);
   value = inttostr (i, ibuf, sizeof (ibuf));
   v = bind_int_variable ("READLINE_POINT", value, 0);
+  if (v)
+    VSETATTR (v, att_exported);
+
+  i = readline_get_char_offset (rl_mark);
+  value = inttostr (i, ibuf, sizeof (ibuf));
+  v = bind_int_variable ("READLINE_MARK", value, 0);
   if (v)
     VSETATTR (v, att_exported);
   array_needs_making = 1;
@@ -4360,24 +4397,15 @@ bash_execute_unix_command (count, key)
 
   v = find_variable ("READLINE_POINT");
   if (v && legal_number (value_cell (v), &mi))
-    {
-      i = mi;
-#if defined (HANDLE_MULTIBYTE)
-      if (i > 0 && MB_CUR_MAX > 1)
-	i = _rl_find_next_mbchar (rl_line_buffer, 0, i, 0);
-#endif
-      if (i != rl_point)
-	{
-	  rl_point = i;
-	  if (rl_point > rl_end)
-	    rl_point = rl_end;
-	  else if (rl_point < 0)
-	    rl_point = 0;
-	}
-    }      
+    readline_set_char_offset (mi, &rl_point);
+
+  v = find_variable ("READLINE_MARK");
+  if (v && legal_number (value_cell (v), &mi))
+    readline_set_char_offset (mi, &rl_mark);
 
   check_unbind_variable ("READLINE_LINE");
   check_unbind_variable ("READLINE_POINT");
+  check_unbind_variable ("READLINE_MARK");
   array_needs_making = 1;
 
   /* and restore the readline buffer and display after command execution. */

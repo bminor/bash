@@ -103,7 +103,7 @@ INC = -I. -I.. -I$(topdir) -I$(topdir)/lib -I$(topdir)/builtins -I${srcdir} \
 ALLPROG = print truefalse sleep finfo logname basename dirname fdflags \
 	  tty pathchk tee head mkdir rmdir mktemp printenv id whoami \
 	  uname sync push ln unlink realpath strftime mypid setpgid seq rm
-OTHERPROG = necho hello cat pushd stat
+OTHERPROG = necho hello cat pushd stat accept
 
 all:	$(SHOBJ_STATUS)
 
@@ -132,6 +132,9 @@ hello:	hello.o
 
 truefalse: truefalse.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ truefalse.o $(SHOBJ_LIBS)
+
+accept:	accept.o
+	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ accept.o $(SHOBJ_LIBS)
 
 sleep:	sleep.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ sleep.o $(SHOBJ_LIBS)
@@ -275,6 +278,7 @@ uninstall:	uninstall-$(SHOBJ_STATUS)
 
 print.o: print.c
 truefalse.o: truefalse.c
+accept.o: accept.c
 sleep.o: sleep.c
 finfo.o: finfo.c
 logname.o: logname.c

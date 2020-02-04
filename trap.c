@@ -954,6 +954,7 @@ void
 run_trap_cleanup (sig)
      int sig;
 {
+  /* XXX - should we clean up trap_list[sig] == IMPOSSIBLE_TRAP_HANDLER? */
   sigmodes[sig] &= ~(SIG_INPROGRESS|SIG_CHANGED);
 }
 

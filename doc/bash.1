@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue Nov 26 11:15:17 EST 2019
+.\"	Last Change: Wed Jan 29 14:00:16 EST 2020
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2019 November 26" "GNU Bash 5.0"
+.TH BASH 1 "2020 January 29" "GNU Bash 5.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -50,8 +50,8 @@ bash \- GNU Bourne-Again SHell
 [options]
 [command_string | file]
 .SH COPYRIGHT
-.if n Bash is Copyright (C) 1989-2019 by the Free Software Foundation, Inc.
-.if t Bash is Copyright \(co 1989-2019 by the Free Software Foundation, Inc.
+.if n Bash is Copyright (C) 1989-2020 by the Free Software Foundation, Inc.
+.if t Bash is Copyright \(co 1989-2020 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 .B Bash
 is an \fBsh\fR-compatible command language interpreter that
@@ -1937,6 +1937,19 @@ line buffer, for use with
 .SM
 .B "SHELL BUILTIN COMMANDS"
 below).
+.TP
+.B READLINE_MARK
+The position of the mark (saved insertion point) in the
+.B readline
+line buffer, for use with
+.if t \f(CWbind -x\fP
+.if n "bind -x"
+(see
+.SM
+.B "SHELL BUILTIN COMMANDS"
+below).
+The characters between the insertion point and the mark are often
+called the \fIregion\fP.
 .TP
 .B READLINE_POINT
 The position of the insertion point in the
@@ -7548,13 +7561,19 @@ When \fIshell\-command\fP is executed, the shell sets the
 variable to the contents of the \fBreadline\fP line buffer and the
 .SM
 .B READLINE_POINT
-variable to the current location of the insertion point.
-If the executed command changes the value of
+and
 .SM
-.B READLINE_LINE
-or
+.B READLINE_MARK
+variables to the current location of the insertion point and the saved
+insertion point (the mark), respectively.
+If the executed command changes the value of any of
+.SM
+.BR READLINE_LINE ,
 .SM
 .BR READLINE_POINT ,
+or
+.SM
+.BR READLINE_MARK ,
 those new values will be reflected in the editing state.
 .TP
 .B \-X

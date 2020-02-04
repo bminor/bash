@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2019 November 26<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>BASH(1)<TH ALIGN=CENTER width=33%>2020 January 29<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <BR><A HREF="#index">Index</A>
@@ -54,7 +54,7 @@ bash - GNU Bourne-Again SHell
 <H3>COPYRIGHT</H3>
 
 
-Bash is Copyright &#169; 1989-2019 by the Free Software Foundation, Inc.
+Bash is Copyright &#169; 1989-2020 by the Free Software Foundation, Inc.
 <A NAME="lbAE">&nbsp;</A>
 <H3>DESCRIPTION</H3>
 
@@ -2472,6 +2472,22 @@ line buffer, for use with
 
 </FONT>
 below).
+<DT><B>READLINE_MARK</B>
+
+<DD>
+The position of the mark (saved insertion point) in the
+<B>readline</B>
+
+line buffer, for use with
+<TT>bind -x</TT>
+
+(see
+<FONT SIZE=-1><B>SHELL BUILTIN COMMANDS</B>
+
+</FONT>
+below).
+The characters between the insertion point and the mark are often
+called the <I>region</I>.
 <DT><B>READLINE_POINT</B>
 
 <DD>
@@ -9635,13 +9651,21 @@ variable to the contents of the <B>readline</B> line buffer and the
 <FONT SIZE=-1><B>READLINE_POINT</B>
 
 </FONT>
-variable to the current location of the insertion point.
-If the executed command changes the value of
-<FONT SIZE=-1><B>READLINE_LINE</B>
+and
+<FONT SIZE=-1><B>READLINE_MARK</B>
+
+</FONT>
+variables to the current location of the insertion point and the saved
+insertion point (the mark), respectively.
+If the executed command changes the value of any of
+<FONT SIZE=-1><B>READLINE_LINE</B>,
+
+</FONT>
+<FONT SIZE=-1><B>READLINE_POINT</B>,
 
 </FONT>
 or
-<FONT SIZE=-1><B>READLINE_POINT</B>,
+<FONT SIZE=-1><B>READLINE_MARK</B>,
 
 </FONT>
 those new values will be reflected in the editing state.
@@ -14044,7 +14068,7 @@ There may be only one active coprocess at a time.
 <HR>
 <TABLE WIDTH=100%>
 <TR>
-<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2019 November 26<TH ALIGN=RIGHT width=33%>BASH(1)
+<TH ALIGN=LEFT width=33%>GNU Bash 5.0<TH ALIGN=CENTER width=33%>2020 January 29<TH ALIGN=RIGHT width=33%>BASH(1)
 </TR>
 </TABLE>
 <HR>
@@ -14150,6 +14174,6 @@ There may be only one active coprocess at a time.
 </DL>
 <HR>
 This document was created by man2html from bash.1.<BR>
-Time: 06 January 2020 08:53:48 EST
+Time: 29 January 2020 14:04:26 EST
 </BODY>
 </HTML>
