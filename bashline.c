@@ -961,11 +961,8 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
       /* This breaks down when using command-oriented history and are not
 	 finished with the command, so we should not ignore the last command */
       using_history ();
-      if (rl_line_buffer[0])
-	{
-	  current_command_line_count++;	/* for rl_newline above */
-	  bash_add_history (rl_line_buffer);
-	}
+      current_command_line_count++;	/* for rl_newline above */
+      bash_add_history (rl_line_buffer);
       current_command_line_count = 0;	/* for dummy history entry */
       bash_add_history ("");
       history_lines_this_session++;
