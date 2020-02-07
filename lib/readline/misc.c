@@ -576,6 +576,7 @@ int
 rl_get_previous_history (int count, int key)
 {
   HIST_ENTRY *old_temp, *temp;
+  int had_saved_line;
 
   if (count < 0)
     return (rl_get_next_history (-count, key));
@@ -588,6 +589,7 @@ rl_get_previous_history (int count, int key)
     _rl_history_saved_point = (rl_point == rl_end) ? -1 : rl_point;
 
   /* If we don't have a line saved, then save this one. */
+  had_saved_line = _rl_saved_line_for_history != 0;
   rl_maybe_save_line ();
 
   /* If the current line has changed, save the changes. */
@@ -611,7 +613,8 @@ rl_get_previous_history (int count, int key)
 
   if (temp == 0)
     {
-      rl_maybe_unsave_line ();
+      if (had_saved_line == 0)
+        _rl_free_saved_history_line ();
       rl_ding ();
     }
   else
