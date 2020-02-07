@@ -1103,6 +1103,22 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
       free ((void *)ofifo_list);
       discard_unwind_frame ("internal_fifos");
     }
+# if defined (HAVE_DEV_FD)
+  /* Reap process substitutions at the end of loops */
+  switch (command->type)
+    {
+    case cm_while:
+    case cm_until:
+    case cm_for:
+    case cm_group:
+#    if defined (ARITH_FOR_COMMAND)
+    case cm_arith_for:
+#    endif
+      reap_procsubs ();
+    default:
+      break;
+    }
+#  endif /* HAVE_DEV_FD */
 #endif
 
   /* Invert the return value if we have to */
