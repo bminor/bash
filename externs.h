@@ -481,7 +481,7 @@ extern int sh_mktmpfd __P((char *, int, char **));
 extern char *sh_mktmpdir __P((char *, int));
 
 /* declarations for functions defined in lib/sh/uconvert.c */
-extern int uconvert __P((char *, long *, long *));
+extern int uconvert __P((char *, long *, long *, char **));
 
 /* declarations for functions defined in lib/sh/ufuncs.c */
 extern unsigned int falarm __P((unsigned int, unsigned int));

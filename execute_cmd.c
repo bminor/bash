@@ -2563,6 +2563,9 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	  old_frozen = freeze_jobs_list ();
 	  lastpipe_jid = stop_pipeline (0, (COMMAND *)NULL);	/* XXX */
 	  add_unwind_protect (lastpipe_cleanup, old_frozen);
+#if defined (JOB_CONTROL)
+	  UNBLOCK_CHILD (oset);		/* XXX */
+#endif
 	}
       if (cmd)
 	cmd->flags |= CMD_LASTPIPE;

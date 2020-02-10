@@ -274,7 +274,7 @@ read_builtin (list)
 	  break;
 #endif
 	case 't':
-	  code = uconvert (list_optarg, &ival, &uval);
+	  code = uconvert (list_optarg, &ival, &uval, (char **)NULL);
 	  if (code == 0 || ival < 0 || uval < 0)
 	    {
 	      builtin_error (_("%s: invalid timeout specification"), list_optarg);
@@ -377,7 +377,7 @@ read_builtin (list)
   /* $TMOUT, if set, is the default timeout for read. */
   if (have_timeout == 0 && (e = get_string_value ("TMOUT")))
     {
-      code = uconvert (e, &ival, &uval);
+      code = uconvert (e, &ival, &uval, (char **)NULL);
       if (code == 0 || ival < 0 || uval < 0)
 	tmsec = tmusec = 0;
       else

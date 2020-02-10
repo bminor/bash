@@ -165,7 +165,6 @@ extern int killpg PARAMS((pid_t, int));
 typedef int sh_job_map_func_t PARAMS((JOB *, int, int, int));
 
 /* Variables used here but defined in other files. */
-extern sigset_t top_level_mask;
 extern WORD_LIST *subst_assign_varlist;
 
 extern SigHandler **original_signals;
@@ -2210,8 +2209,8 @@ make_child (command, async_p)
       CLRINTERRUPT;	/* XXX - children have their own interrupt state */
 
       /* Restore top-level signal mask. */
-      sigprocmask (SIG_SETMASK, &top_level_mask, (sigset_t *)NULL);
-
+      restore_sigmask ();
+  
       if (job_control)
 	{
 	  /* All processes in this pipeline belong in the same

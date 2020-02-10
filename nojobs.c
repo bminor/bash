@@ -74,10 +74,6 @@
 extern int errno;
 #endif /* !errno */
 
-#if defined (HAVE_POSIX_SIGNALS)
-extern sigset_t top_level_mask;
-#endif
-
 extern void set_original_signal __P((int, SigHandler *));
 
 volatile pid_t last_made_pid = NO_PID;
@@ -557,10 +553,8 @@ make_child (command, async_p)
 
       CLRINTERRUPT;	/* XXX - children have their own interrupt state */
 
-#if defined (HAVE_POSIX_SIGNALS)
       /* Restore top-level signal mask. */
-      sigprocmask (SIG_SETMASK, &top_level_mask, (sigset_t *)NULL);
-#endif
+      restore_sigmask ();
 
 #if 0
       /* Ignore INT and QUIT in asynchronous children. */

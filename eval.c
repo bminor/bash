@@ -48,10 +48,6 @@
 #  include "bashhist.h"
 #endif
 
-#if defined (HAVE_POSIX_SIGNALS)
-extern sigset_t top_level_mask;
-#endif
-
 static void send_pwd_to_eterm __P((void));
 static sighandler alrm_catcher __P((int));
 
@@ -121,9 +117,8 @@ reader_loop ()
 		  dispose_command (current_command);
 		  current_command = (COMMAND *)NULL;
 		}
-#if defined (HAVE_POSIX_SIGNALS)
-	      sigprocmask (SIG_SETMASK, &top_level_mask, (sigset_t *)NULL);
-#endif
+
+	      restore_sigmask ();
 	      break;
 
 	    default:

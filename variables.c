@@ -2771,7 +2771,6 @@ make_local_variable (name, flags)
   if (was_tmpvar && old_var->context == variable_context && last_table_searched != temporary_env)
     {
       VUNSETATTR (old_var, att_invisible);	/* XXX */
-#if 0	/* TAG:bash-5.1 */
       /* We still want to flag this variable as local, though, and set things
          up so that it gets treated as a local variable. */
       new_var = old_var;
@@ -2781,7 +2780,7 @@ make_local_variable (name, flags)
 	if (vc_isfuncenv (vc) && vc->scope == variable_context)
 	  break;
       goto set_local_var_flags;
-#endif
+
       return (old_var);
     }
 

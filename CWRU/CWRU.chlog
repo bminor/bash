@@ -6891,7 +6891,7 @@ builtins/wait.def
 variables.c
 	- check_unbind_variable: return -2 if the variable name is readonly
 	  (change) or non-unsettable (new) to differentiate the return value
-	  from -1 from makunboud (which means variable not found)
+	  from -1 from makunbound (which means variable not found)
 
 builtins/common.[ch]
 	- builtin_unbind_variable: identical to check_unbind_variable but calls
@@ -7249,6 +7249,9 @@ bashline.c
 	- bash_execute_unix_command: bind READLINE_MARK variable, exposing
 	  the value of rl_mark to `bind -x' functions
 
+doc/{bash.1,bashref.texi}
+	- READLINE_MARK: document new variable set by the shell
+
 				   1/31
 				   ----
 examples/loadables/accept.c
@@ -7261,3 +7264,53 @@ lib/readline/histfile.c
 	- history_do_write,history_truncate_file: translate the return value rv
 	  to errno when histfile_restore returns -1 (e.g., if rename() fails).
 	  Report and fix from A <auroralanes@protonmail.ch>
+
+				    2/3
+				    ---
+lib/sh/ufuncs.c
+	- fsleep: if pselect/select is interrupted by a signal, return -1 and
+	  let the caller deal with it
+
+lib/sh/timeval.c
+	- multimeval: new function, multiply a timeval by a constant integer
+	- divtimeval: new function, divide a timeval by a constant integer
+
+lib/sh/uconvert.c
+	- uconvert: new additional argument: EP. If non-null, it gets the
+	  address of the first non-digit that ends conversion (like strtod);
+	  we try to do as much of the conversion as possible if EP is set so
+	  the caller can clean up
+
+				    2/4
+				    ---
+examples/loadables/mkfifo.c
+	- mkfifo: new loadable builtin
+
+				    2/6
+				    ---
+variables.c
+	- make_local_variable: make sure local variables that have the same
+	  names as variables found in the temporary environment are marked as
+	  local. From Grisha Levit <grishalevit@gmail.com> back in 12/2018
+
+				    2/7
+				    ---
+sig.[ch]
+	- restore_sigmask: function to restore top-level signal mask using
+	  sigprocmask
+
+{sig,eval,jobs,nojobs}.c
+	- replace calls to sigprocmask with restore_sigmask(); remove extern
+	  declarations of top_level_mask
+
+sig.c
+	- initialize_shell_signals: if SIGCHLD is blocked at shell startup,
+	  not only remove it from top_level_mask but make sure it's unblocked
+
+execute_cmd.c
+	- execute_pipeline: if lastpipe is enabled and we're executing the
+	  rightmost pipeline element in the current shell, make sure to unblock
+	  SIGCHLD before calling execute_command, in case `return' or `exec'
+	  is run and that call doesn't return. From a report by
+	  Harald van Dijk <harald@gigawatt.nl> following up to a report
+	  by Martijn Dekker <martijn@inlv.org>

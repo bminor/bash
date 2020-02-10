@@ -130,7 +130,7 @@ fsleep(sec, usec)
 #endif
       e = errno;
       if (r < 0 && errno == EINTR)
-	QUIT;		/* just signals, no traps */
+	return -1;		/* caller will handle */
       errno = e;
     }
   while (r < 0 && errno == EINTR);

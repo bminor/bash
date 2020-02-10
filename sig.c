@@ -309,7 +309,11 @@ initialize_shell_signals ()
   sigemptyset (&top_level_mask);
   sigprocmask (SIG_BLOCK, (sigset_t *)NULL, &top_level_mask);
 #  if defined (SIGCHLD)
-  sigdelset (&top_level_mask, SIGCHLD);
+  if (sigismember (&top_level_mask, SIGCHLD))
+    {
+      sigdelset (&top_level_mask, SIGCHLD);
+      sigprocmask (SIG_SETMASK, &top_level_mask, (sigset_t *)NULL);
+    }
 #  endif
 #endif /* JOB_CONTROL || HAVE_POSIX_SIGNALS */
 
@@ -425,11 +429,9 @@ throw_to_top_level ()
   give_terminal_to (shell_pgrp, 0);
 #endif /* JOB_CONTROL */
 
-#if defined (JOB_CONTROL) || defined (HAVE_POSIX_SIGNALS)
   /* This needs to stay because jobs.c:make_child() uses it without resetting
      the signal mask. */
-  sigprocmask (SIG_SETMASK, &top_level_mask, (sigset_t *)NULL);
-#endif
+  restore_sigmask ();  
 
   reset_parser ();
 
@@ -467,6 +469,14 @@ jump_to_top_level (value)
      int value;
 {
   sh_longjmp (top_level, value);
+}
+
+void
+restore_sigmask ()
+{
+#if defined (JOB_CONTROL) || defined (HAVE_POSIX_SIGNALS)
+  sigprocmask (SIG_SETMASK, &top_level_mask, (sigset_t *)NULL);
+#endif
 }
 
 sighandler
