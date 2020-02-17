@@ -1,6 +1,6 @@
 /* common.c - utility functions for all builtins */
 
-/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -373,13 +373,16 @@ make_builtin_argv (list, ip)
 
 /* Remember LIST in $1 ... $9, and REST_OF_ARGS.  If DESTRUCTIVE is
    non-zero, then discard whatever the existing arguments are, else
-   only discard the ones that are to be replaced. */
+   only discard the ones that are to be replaced.  Set POSPARAM_COUNT
+   to the number of args assigned (length of LIST). */
 void
 remember_args (list, destructive)
      WORD_LIST *list;
      int destructive;
 {
   register int i;
+
+  posparam_count = 0;
 
   for (i = 1; i < 10; i++)
     {
@@ -391,7 +394,7 @@ remember_args (list, destructive)
 
       if (list)
 	{
-	  dollar_vars[i] = savestring (list->word->word);
+	  dollar_vars[posparam_count = i] = savestring (list->word->word);
 	  list = list->next;
 	}
     }
@@ -403,12 +406,65 @@ remember_args (list, destructive)
     {
       dispose_words (rest_of_args);
       rest_of_args = copy_word_list (list);
+      posparam_count += list_length (list);
     }
 
   if (destructive)
     set_dollar_vars_changed ();
 
   invalidate_cached_quoted_dollar_at ();
+}
+
+void
+shift_args (times)
+     int times;
+{
+  WORD_LIST *temp;
+  int count;
+
+  if (times <= 0)		/* caller should check */
+    return;
+
+  while (times-- > 0)
+    {
+      if (dollar_vars[1])
+	free (dollar_vars[1]);
+
+      for (count = 1; count < 9; count++)
+	dollar_vars[count] = dollar_vars[count + 1];
+
+      if (rest_of_args)
+	{
+	  temp = rest_of_args;
+	  dollar_vars[9] = savestring (temp->word->word);
+	  rest_of_args = rest_of_args->next;
+	  temp->next = (WORD_LIST *)NULL;
+	  dispose_words (temp);
+	}
+      else
+	dollar_vars[9] = (char *)NULL;
+
+      posparam_count--;
+    }
+}
+
+int
+number_of_args ()
+{
+#ifdef DEBUG
+  register WORD_LIST *list;
+  int n;
+
+  for (n = 0; n < 9 && dollar_vars[n+1]; n++)
+    ;
+  for (list = rest_of_args; list; list = list->next)
+    n++;
+
+if (n != posparam_count)
+  itrace("number_of_args: n (%d) != posparam_count (%d)", n, posparam_count);
+#endif
+
+  return posparam_count;
 }
 
 static int changed_dollar_vars;

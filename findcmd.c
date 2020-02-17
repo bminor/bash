@@ -1,6 +1,6 @@
 /* findcmd.c -- Functions to search for commands by name. */
 
-/* Copyright (C) 1997-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -397,7 +397,6 @@ search_for_command (pathname, flags)
 	      if (st & FS_EXECABLE)
 	        phash_insert ((char *)pathname, command, dot_found_in_search, 1);
 	    }
-#if 0	/* TAG:bash-5.1 */
 	  /* If we're in posix mode, don't add files without the execute bit
 	     to the hash table. */
 	  else if (posixly_correct)
@@ -406,7 +405,6 @@ search_for_command (pathname, flags)
 	      if (st & FS_EXECABLE)
 	        phash_insert ((char *)pathname, command, dot_found_in_search, 1);
 	    }
-#endif
 	  else
 	    phash_insert ((char *)pathname, command, dot_found_in_search, 1);
 	}

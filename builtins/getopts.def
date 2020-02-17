@@ -86,9 +86,9 @@ $END
 #define G_INVALID_OPT	-2
 #define G_ARG_MISSING	-3
 
-static int getopts_unbind_variable __P((char *));
-static int getopts_bind_variable __P((char *, char *));
-static int dogetopts __P((int, char **));
+static int getopts_unbind_variable PARAMS((char *));
+static int getopts_bind_variable PARAMS((char *, char *));
+static int dogetopts PARAMS((int, char **));
 
 /* getopts_reset is magic code for when OPTIND is reset.  N is the
    value that has just been assigned to OPTIND. */
@@ -212,10 +212,7 @@ dogetopts (argc, argv)
       register WORD_LIST *words;
       char **v;
 
-      for (i = 0; i < 10 && dollar_vars[i]; i++)
-	;
-      for (words = rest_of_args; words; words = words->next, i++)
-	;
+      i = number_of_args () + 1;	/* +1 for $0 */
       v = strvec_create (i + 1);
       for (i = 0; i < 10 && dollar_vars[i]; i++)
 	v[i] = dollar_vars[i];

@@ -1576,6 +1576,10 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   coproc_closeall ();
 #endif
 
+#if defined (PROCESS_SUBSTITUTION)
+  clear_fifo_list ();		/* XXX- we haven't created any FIFOs */
+#endif
+
   /* If this is a user subshell, set a flag if stdin was redirected.
      This is used later to decide whether to redirect fd 0 to
      /dev/null for async commands in the subshell.  This adds more
@@ -5426,6 +5430,10 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 
       subshell_environment |= SUBSHELL_FORK;	/* XXX - was just = */
 
+#if defined (PROCESS_SUBSTITUTION) && !defined (HAVE_DEV_FD)
+      clear_fifo_list ();	/* XXX - we haven't created any FIFOs */
+#endif
+
       if (redirects && (do_redirections (redirects, RX_ACTIVE) != 0))
 	{
 #if defined (PROCESS_SUBSTITUTION)
@@ -5815,7 +5823,7 @@ shell_execve (command, args, env)
 
   unbind_args ();	/* remove the positional parameters */
 
-#if defined (PROCESS_SUBSTITUTION)
+#if defined (PROCESS_SUBSTITUTION) && defined (HAVE_DEV_FD)
   clear_fifo_list ();	/* pipe fds are what they are now */
 #endif
 

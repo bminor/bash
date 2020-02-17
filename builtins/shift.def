@@ -1,7 +1,7 @@
 This file is shift.def, from which is created shift.c.
 It implements the builtin "shift" in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -58,8 +58,7 @@ shift_builtin (list)
      WORD_LIST *list;
 {
   intmax_t times;
-  register int count;
-  WORD_LIST *temp;
+  int itimes, nargs;
 
   CHECK_HELPOPT (list);
 
@@ -73,32 +72,17 @@ shift_builtin (list)
       sh_erange (list ? list->word->word : NULL, _("shift count"));
       return (EXECUTION_FAILURE);
     }
-  else if (times > number_of_args ())
+  nargs = number_of_args ();
+  if (times > nargs)
     {
       if (print_shift_error)
 	sh_erange (list ? list->word->word : NULL, _("shift count"));
       return (EXECUTION_FAILURE);
     }
-
-  while (times-- > 0)
-    {
-      if (dollar_vars[1])
-	free (dollar_vars[1]);
-
-      for (count = 1; count < 9; count++)
-	dollar_vars[count] = dollar_vars[count + 1];
-
-      if (rest_of_args)
-	{
-	  temp = rest_of_args;
-	  dollar_vars[9] = savestring (temp->word->word);
-	  rest_of_args = rest_of_args->next;
-	  temp->next = (WORD_LIST *)NULL;
-	  dispose_words (temp);
-	}
-      else
-	dollar_vars[9] = (char *)NULL;
-    }
+  else if (times == nargs)
+    clear_dollar_vars ();
+  else
+    shift_args (itimes = times);
 
   invalidate_cached_quoted_dollar_at ();
 

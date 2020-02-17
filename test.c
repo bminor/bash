@@ -2,7 +2,7 @@
 
 /* Modified to run with the GNU shell Apr 25, 1988 by bfox. */
 
-/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -103,31 +103,31 @@ static int test_error_return;
 #define test_exit(val) \
 	do { test_error_return = val; sh_longjmp (test_exit_buf, 1); } while (0)
 
-extern int sh_stat __P((const char *, struct stat *));
+extern int sh_stat PARAMS((const char *, struct stat *));
 
 static int pos;		/* The offset of the current argument in ARGV. */
 static int argc;	/* The number of arguments present in ARGV. */
 static char **argv;	/* The argument list. */
 static int noeval;
 
-static void test_syntax_error __P((char *, char *)) __attribute__((__noreturn__));
-static void beyond __P((void)) __attribute__((__noreturn__));
-static void integer_expected_error __P((char *)) __attribute__((__noreturn__));
+static void test_syntax_error PARAMS((char *, char *)) __attribute__((__noreturn__));
+static void beyond PARAMS((void)) __attribute__((__noreturn__));
+static void integer_expected_error PARAMS((char *)) __attribute__((__noreturn__));
 
-static int unary_operator __P((void));
-static int binary_operator __P((void));
-static int two_arguments __P((void));
-static int three_arguments __P((void));
-static int posixtest __P((void));
+static int unary_operator PARAMS((void));
+static int binary_operator PARAMS((void));
+static int two_arguments PARAMS((void));
+static int three_arguments PARAMS((void));
+static int posixtest PARAMS((void));
 
-static int expr __P((void));
-static int term __P((void));
-static int and __P((void));
-static int or __P((void));
+static int expr PARAMS((void));
+static int term PARAMS((void));
+static int and PARAMS((void));
+static int or PARAMS((void));
 
-static int filecomp __P((char *, char *, int));
-static int arithcomp __P((char *, char *, int, int));
-static int patcomp __P((char *, char *, int));
+static int filecomp PARAMS((char *, char *, int));
+static int arithcomp PARAMS((char *, char *, int, int));
+static int patcomp PARAMS((char *, char *, int));
 
 static void
 test_syntax_error (format, arg)
@@ -637,10 +637,8 @@ unary_test (op, arg)
 	    free (t);
 	  return ret;
 	}
-#if 0	/* TAG:bash-5.1 from Martijn Dekker */
       else if (legal_number (arg, &r))		/* -v n == is $n set? */
 	return ((r >= 0 && r <= number_of_args()) ? TRUE : FALSE);
-#endif
       v = find_variable (arg);
       if (v && invisible_p (v) == 0 && array_p (v))
 	{

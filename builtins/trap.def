@@ -133,11 +133,7 @@ trap_builtin (list)
     {
       initialize_terminating_signals ();
       get_all_original_signals ();
-#if 0	/* TAG:bash-5.1 */
       return (sh_chkwrite (display_traps (list, display && posixly_correct)));
-#else
-      return (sh_chkwrite (display_traps (list, 0)));
-#endif
     }
   else
     {

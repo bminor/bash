@@ -7314,3 +7314,73 @@ execute_cmd.c
 	  is run and that call doesn't return. From a report by
 	  Harald van Dijk <harald@gigawatt.nl> following up to a report
 	  by Martijn Dekker <martijn@inlv.org>
+
+				   2/10
+				   ----
+builtins/trap.def
+	- trap_builtin: in posix mode, when trap is run with -p, show
+	  the disposition of all signals, even those that are still in the
+	  default state, including signals that were ignored when the shell
+	  starts up and haven't been reset. Don't do it in default mode.
+	  From an austin-group discussion back in April, 2019 (interp 1211)
+
+findcmd.c
+	- search_for_command: don't add commands without the execute bit set
+	  to the command hash table. From https://savannah.gnu.org/patch/?9789
+	  contributed by michaeljs1990
+
+				   2/11
+				   ----
+expr.c
+	- strlong: require `base#' to be followed by an integer constant;
+	  otherwise throw an error. From a report from Jeremy Townshend
+	  <jeremy.townshend@gmail.com> back in June, 2019
+
+test.c
+	- unary_test: allow -v N to test whether or not positional parameter
+	  N is set. Most recently suggested by Peng Yu <pengyu.ut@gmail.com>
+	  and Martijn Dekker <martijn@inlv.org>	  
+
+builtins/getopts.def
+	- dogetopts: use number_of_args() to compute the number of positional
+	  parameters
+
+{findcmd,variables,subst,trap,sig}.h,builtins/common.h
+	- __P --> PARAMS
+
+builtins/shift.def,builtins/common.c
+	- shift_builtin: moved code that modifies dollar_vars and rest_of_args
+	  to common.c:shift_args(int times), part of move to localize changes
+	  to positional parameters
+
+builtins/common.c,variables.c
+	- posparam_count: keep a running count of the number of posititional
+	  parameters when dollar_vars and rest_of_args are set
+
+				   2/12
+				   ----
+subst.c
+	- number_of_args: just return posparam_count
+
+builtins/shift.def
+	- shift_builtin: if asked to clear the positional parameters with
+	  something like `shift $#', just call clear_dollar_vars instead of
+	  iterating through them, unsetting them one by one
+
+subst.[ch],builtins/common.[ch]
+	- number_of_args: moved to builtins/common.c
+
+				   2/14
+				   ----
+subst.c
+	- clear_fifo_list: when using named pipes, clear out the FIFO list
+	  without unlinking anything and set NFIFO to 0
+
+execute_cmd.c
+	- execute_disk_command: in the child, clear out the FIFO list, since
+	  we haven't created any FIFOs yet
+	- execute_in_subshell: clear out the FIFO list, since we haven't
+	  created any FIFOs yet
+
+parse.y
+	- special_case_tokens: allow `time -- command'

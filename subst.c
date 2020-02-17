@@ -143,7 +143,7 @@ extern int errno;
 /* An expansion function that takes a string and a quoted flag and returns
    a WORD_LIST *.  Used as the type of the third argument to
    expand_string_if_necessary(). */
-typedef WORD_LIST *EXPFUNC __P((char *, int));
+typedef WORD_LIST *EXPFUNC PARAMS((char *, int));
 
 /* Process ID of the last command executed within command substitution. */
 pid_t last_command_subst_pid = NO_PID;
@@ -195,7 +195,7 @@ extern PROCESS *last_procsub_child;
 #endif
 
 #if !defined (HAVE_WCSDUP) && defined (HANDLE_MULTIBYTE)
-extern wchar_t *wcsdup __P((const wchar_t *));
+extern wchar_t *wcsdup PARAMS((const wchar_t *));
 #endif
 
 #if 0
@@ -226,137 +226,137 @@ static int expand_no_split_dollar_star = 0;
    without any leading variable assignments. */
 static WORD_LIST *garglist = (WORD_LIST *)NULL;
 
-static char *quoted_substring __P((char *, int, int));
-static int quoted_strlen __P((char *));
-static char *quoted_strchr __P((char *, int, int));
+static char *quoted_substring PARAMS((char *, int, int));
+static int quoted_strlen PARAMS((char *));
+static char *quoted_strchr PARAMS((char *, int, int));
 
-static char *expand_string_if_necessary __P((char *, int, EXPFUNC *));
-static inline char *expand_string_to_string_internal __P((char *, int, EXPFUNC *));
-static WORD_LIST *call_expand_word_internal __P((WORD_DESC *, int, int, int *, int *));
-static WORD_LIST *expand_string_internal __P((char *, int));
-static WORD_LIST *expand_string_leave_quoted __P((char *, int));
-static WORD_LIST *expand_string_for_rhs __P((char *, int, int, int, int *, int *));
-static WORD_LIST *expand_string_for_pat __P((char *, int, int *, int *));
+static char *expand_string_if_necessary PARAMS((char *, int, EXPFUNC *));
+static inline char *expand_string_to_string_internal PARAMS((char *, int, EXPFUNC *));
+static WORD_LIST *call_expand_word_internal PARAMS((WORD_DESC *, int, int, int *, int *));
+static WORD_LIST *expand_string_internal PARAMS((char *, int));
+static WORD_LIST *expand_string_leave_quoted PARAMS((char *, int));
+static WORD_LIST *expand_string_for_rhs PARAMS((char *, int, int, int, int *, int *));
+static WORD_LIST *expand_string_for_pat PARAMS((char *, int, int *, int *));
 
-static char *quote_escapes_internal __P((const char *, int));
+static char *quote_escapes_internal PARAMS((const char *, int));
 
-static WORD_LIST *list_quote_escapes __P((WORD_LIST *));
-static WORD_LIST *list_dequote_escapes __P((WORD_LIST *));
+static WORD_LIST *list_quote_escapes PARAMS((WORD_LIST *));
+static WORD_LIST *list_dequote_escapes PARAMS((WORD_LIST *));
 
-static char *make_quoted_char __P((int));
-static WORD_LIST *quote_list __P((WORD_LIST *));
+static char *make_quoted_char PARAMS((int));
+static WORD_LIST *quote_list PARAMS((WORD_LIST *));
 
-static int unquoted_substring __P((char *, char *));
-static int unquoted_member __P((int, char *));
+static int unquoted_substring PARAMS((char *, char *));
+static int unquoted_member PARAMS((int, char *));
 
 #if defined (ARRAY_VARS)
-static SHELL_VAR *do_compound_assignment __P((char *, char *, int));
+static SHELL_VAR *do_compound_assignment PARAMS((char *, char *, int));
 #endif
-static int do_assignment_internal __P((const WORD_DESC *, int));
+static int do_assignment_internal PARAMS((const WORD_DESC *, int));
 
-static char *string_extract_verbatim __P((char *, size_t, int *, char *, int));
-static char *string_extract __P((char *, int *, char *, int));
-static char *string_extract_double_quoted __P((char *, int *, int));
-static inline char *string_extract_single_quoted __P((char *, int *));
-static inline int skip_single_quoted __P((const char *, size_t, int, int));
-static int skip_double_quoted __P((char *, size_t, int, int));
-static char *extract_delimited_string __P((char *, int *, char *, char *, char *, int));
-static char *extract_dollar_brace_string __P((char *, int *, int, int));
-static int skip_matched_pair __P((const char *, int, int, int, int));
+static char *string_extract_verbatim PARAMS((char *, size_t, int *, char *, int));
+static char *string_extract PARAMS((char *, int *, char *, int));
+static char *string_extract_double_quoted PARAMS((char *, int *, int));
+static inline char *string_extract_single_quoted PARAMS((char *, int *));
+static inline int skip_single_quoted PARAMS((const char *, size_t, int, int));
+static int skip_double_quoted PARAMS((char *, size_t, int, int));
+static char *extract_delimited_string PARAMS((char *, int *, char *, char *, char *, int));
+static char *extract_dollar_brace_string PARAMS((char *, int *, int, int));
+static int skip_matched_pair PARAMS((const char *, int, int, int, int));
 
-static char *pos_params __P((char *, int, int, int, int));
+static char *pos_params PARAMS((char *, int, int, int, int));
 
-static unsigned char *mb_getcharlens __P((char *, int));
+static unsigned char *mb_getcharlens PARAMS((char *, int));
 
-static char *remove_upattern __P((char *, char *, int));
+static char *remove_upattern PARAMS((char *, char *, int));
 #if defined (HANDLE_MULTIBYTE) 
-static wchar_t *remove_wpattern __P((wchar_t *, size_t, wchar_t *, int));
+static wchar_t *remove_wpattern PARAMS((wchar_t *, size_t, wchar_t *, int));
 #endif
-static char *remove_pattern __P((char *, char *, int));
+static char *remove_pattern PARAMS((char *, char *, int));
 
-static int match_upattern __P((char *, char *, int, char **, char **));
+static int match_upattern PARAMS((char *, char *, int, char **, char **));
 #if defined (HANDLE_MULTIBYTE)
-static int match_wpattern __P((wchar_t *, char **, size_t, wchar_t *, int, char **, char **));
+static int match_wpattern PARAMS((wchar_t *, char **, size_t, wchar_t *, int, char **, char **));
 #endif
-static int match_pattern __P((char *, char *, int, char **, char **));
-static int getpatspec __P((int, char *));
-static char *getpattern __P((char *, int, int));
-static char *variable_remove_pattern __P((char *, char *, int, int));
-static char *list_remove_pattern __P((WORD_LIST *, char *, int, int, int));
-static char *parameter_list_remove_pattern __P((int, char *, int, int));
+static int match_pattern PARAMS((char *, char *, int, char **, char **));
+static int getpatspec PARAMS((int, char *));
+static char *getpattern PARAMS((char *, int, int));
+static char *variable_remove_pattern PARAMS((char *, char *, int, int));
+static char *list_remove_pattern PARAMS((WORD_LIST *, char *, int, int, int));
+static char *parameter_list_remove_pattern PARAMS((int, char *, int, int));
 #ifdef ARRAY_VARS
-static char *array_remove_pattern __P((SHELL_VAR *, char *, int, char *, int));
+static char *array_remove_pattern PARAMS((SHELL_VAR *, char *, int, char *, int));
 #endif
-static char *parameter_brace_remove_pattern __P((char *, char *, int, char *, int, int, int));
+static char *parameter_brace_remove_pattern PARAMS((char *, char *, int, char *, int, int, int));
 
-static char *string_var_assignment __P((SHELL_VAR *, char *));
+static char *string_var_assignment PARAMS((SHELL_VAR *, char *));
 #if defined (ARRAY_VARS)
-static char *array_var_assignment __P((SHELL_VAR *, int, int));
+static char *array_var_assignment PARAMS((SHELL_VAR *, int, int));
 #endif
-static char *pos_params_assignment __P((WORD_LIST *, int, int));
-static char *string_transform __P((int, SHELL_VAR *, char *));
-static char *list_transform __P((int, SHELL_VAR *, WORD_LIST *, int, int));
-static char *parameter_list_transform __P((int, int, int));
+static char *pos_params_assignment PARAMS((WORD_LIST *, int, int));
+static char *string_transform PARAMS((int, SHELL_VAR *, char *));
+static char *list_transform PARAMS((int, SHELL_VAR *, WORD_LIST *, int, int));
+static char *parameter_list_transform PARAMS((int, int, int));
 #if defined ARRAY_VARS
-static char *array_transform __P((int, SHELL_VAR *, char *, int));
+static char *array_transform PARAMS((int, SHELL_VAR *, char *, int));
 #endif
-static char *parameter_brace_transform __P((char *, char *, int, char *, int, int, int, int));
+static char *parameter_brace_transform PARAMS((char *, char *, int, char *, int, int, int, int));
 
-static char *process_substitute __P((char *, int));
+static char *process_substitute PARAMS((char *, int));
 
-static char *read_comsub __P((int, int, int, int *));
+static char *read_comsub PARAMS((int, int, int, int *));
 
 #ifdef ARRAY_VARS
-static arrayind_t array_length_reference __P((char *));
+static arrayind_t array_length_reference PARAMS((char *));
 #endif
 
-static int valid_brace_expansion_word __P((char *, int));
-static int chk_atstar __P((char *, int, int, int *, int *));
-static int chk_arithsub __P((const char *, int));
+static int valid_brace_expansion_word PARAMS((char *, int));
+static int chk_atstar PARAMS((char *, int, int, int *, int *));
+static int chk_arithsub PARAMS((const char *, int));
 
-static WORD_DESC *parameter_brace_expand_word __P((char *, int, int, int, arrayind_t *));
-static char *parameter_brace_find_indir __P((char *, int, int, int));
-static WORD_DESC *parameter_brace_expand_indir __P((char *, int, int, int, int *, int *));
-static WORD_DESC *parameter_brace_expand_rhs __P((char *, char *, int, int, int, int *, int *));
-static void parameter_brace_expand_error __P((char *, char *, int));
+static WORD_DESC *parameter_brace_expand_word PARAMS((char *, int, int, int, arrayind_t *));
+static char *parameter_brace_find_indir PARAMS((char *, int, int, int));
+static WORD_DESC *parameter_brace_expand_indir PARAMS((char *, int, int, int, int *, int *));
+static WORD_DESC *parameter_brace_expand_rhs PARAMS((char *, char *, int, int, int, int *, int *));
+static void parameter_brace_expand_error PARAMS((char *, char *, int));
 
-static int valid_length_expression __P((char *));
-static intmax_t parameter_brace_expand_length __P((char *));
+static int valid_length_expression PARAMS((char *));
+static intmax_t parameter_brace_expand_length PARAMS((char *));
 
-static char *skiparith __P((char *, int));
-static int verify_substring_values __P((SHELL_VAR *, char *, char *, int, intmax_t *, intmax_t *));
-static int get_var_and_type __P((char *, char *, arrayind_t, int, int, SHELL_VAR **, char **));
-static char *mb_substring __P((char *, int, int));
-static char *parameter_brace_substring __P((char *, char *, int, char *, int, int, int));
+static char *skiparith PARAMS((char *, int));
+static int verify_substring_values PARAMS((SHELL_VAR *, char *, char *, int, intmax_t *, intmax_t *));
+static int get_var_and_type PARAMS((char *, char *, arrayind_t, int, int, SHELL_VAR **, char **));
+static char *mb_substring PARAMS((char *, int, int));
+static char *parameter_brace_substring PARAMS((char *, char *, int, char *, int, int, int));
 
-static int shouldexp_replacement __P((char *));
+static int shouldexp_replacement PARAMS((char *));
 
-static char *pos_params_pat_subst __P((char *, char *, char *, int));
+static char *pos_params_pat_subst PARAMS((char *, char *, char *, int));
 
-static char *parameter_brace_patsub __P((char *, char *, int, char *, int, int, int));
+static char *parameter_brace_patsub PARAMS((char *, char *, int, char *, int, int, int));
 
-static char *pos_params_casemod __P((char *, char *, int, int));
-static char *parameter_brace_casemod __P((char *, char *, int, int, char *, int, int, int));
+static char *pos_params_casemod PARAMS((char *, char *, int, int));
+static char *parameter_brace_casemod PARAMS((char *, char *, int, int, char *, int, int, int));
 
-static WORD_DESC *parameter_brace_expand __P((char *, int *, int, int, int *, int *));
-static WORD_DESC *param_expand __P((char *, int *, int, int *, int *, int *, int *, int));
+static WORD_DESC *parameter_brace_expand PARAMS((char *, int *, int, int, int *, int *));
+static WORD_DESC *param_expand PARAMS((char *, int *, int, int *, int *, int *, int *, int));
 
-static WORD_LIST *expand_word_internal __P((WORD_DESC *, int, int, int *, int *));
+static WORD_LIST *expand_word_internal PARAMS((WORD_DESC *, int, int, int *, int *));
 
-static WORD_LIST *word_list_split __P((WORD_LIST *));
+static WORD_LIST *word_list_split PARAMS((WORD_LIST *));
 
-static void exp_jump_to_top_level __P((int));
+static void exp_jump_to_top_level PARAMS((int));
 
-static WORD_LIST *separate_out_assignments __P((WORD_LIST *));
-static WORD_LIST *glob_expand_word_list __P((WORD_LIST *, int));
+static WORD_LIST *separate_out_assignments PARAMS((WORD_LIST *));
+static WORD_LIST *glob_expand_word_list PARAMS((WORD_LIST *, int));
 #ifdef BRACE_EXPANSION
-static WORD_LIST *brace_expand_word_list __P((WORD_LIST *, int));
+static WORD_LIST *brace_expand_word_list PARAMS((WORD_LIST *, int));
 #endif
 #if defined (ARRAY_VARS)
-static int make_internal_declare __P((char *, char *, char *));
+static int make_internal_declare PARAMS((char *, char *, char *));
 #endif
-static WORD_LIST *shell_expand_word_list __P((WORD_LIST *, int));
-static WORD_LIST *expand_word_list_internal __P((WORD_LIST *, int));
+static WORD_LIST *shell_expand_word_list PARAMS((WORD_LIST *, int));
+static WORD_LIST *expand_word_list_internal PARAMS((WORD_LIST *, int));
 
 /* **************************************************************** */
 /*								    */
@@ -3372,19 +3372,6 @@ list_rest_of_args ()
   return (REVERSE_LIST (list, WORD_LIST *));
 }
 
-int
-number_of_args ()
-{
-  register WORD_LIST *list;
-  int n;
-
-  for (n = 0; n < 9 && dollar_vars[n+1]; n++)
-    ;
-  for (list = rest_of_args; list; list = list->next)
-    n++;
-  return n;
-}
-
 /* Return the value of a positional parameter.  This handles values > 10. */
 char *
 get_dollar_var_value (ind)
@@ -5361,7 +5348,7 @@ parameter_brace_remove_pattern (varname, value, ind, patstr, rtype, quoted, flag
 
 #if defined (PROCESS_SUBSTITUTION)
 
-static void reap_some_procsubs __P((int));
+static void reap_some_procsubs PARAMS((int));
 
 /*****************************************************************/
 /*								 */
@@ -5390,6 +5377,16 @@ static int fifo_list_size;
 void
 clear_fifo_list ()
 {
+  int i;
+
+  for (i = 0; i < fifo_list_size; i++)
+    {
+      if (fifo_list[i].file)
+	free (fifo_list[i].file);
+      fifo_list[i].file = NULL;
+      fifo_list[i].proc = 0;
+    }
+  nfifo = 0;
 }
 
 char *

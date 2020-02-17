@@ -144,6 +144,7 @@ int tempenv_assign_error;
    "$*", "$1", and all the cruft is kept. */
 char *dollar_vars[10];
 WORD_LIST *rest_of_args = (WORD_LIST *)NULL;
+int posparam_count = 0;
 
 /* The value of $$. */
 pid_t dollar_dollar_pid;
@@ -173,161 +174,161 @@ static HASH_TABLE *last_table_searched;	/* hash_lookup sets this */
 static VAR_CONTEXT *last_context_searched;
 
 /* Some forward declarations. */
-static void create_variable_tables __P((void));
+static void create_variable_tables PARAMS((void));
 
-static void set_machine_vars __P((void));
-static void set_home_var __P((void));
-static void set_shell_var __P((void));
-static char *get_bash_name __P((void));
-static void initialize_shell_level __P((void));
-static void uidset __P((void));
+static void set_machine_vars PARAMS((void));
+static void set_home_var PARAMS((void));
+static void set_shell_var PARAMS((void));
+static char *get_bash_name PARAMS((void));
+static void initialize_shell_level PARAMS((void));
+static void uidset PARAMS((void));
 #if defined (ARRAY_VARS)
-static void make_vers_array __P((void));
+static void make_vers_array PARAMS((void));
 #endif
 
-static SHELL_VAR *null_assign __P((SHELL_VAR *, char *, arrayind_t, char *));
+static SHELL_VAR *null_assign PARAMS((SHELL_VAR *, char *, arrayind_t, char *));
 #if defined (ARRAY_VARS)
-static SHELL_VAR *null_array_assign __P((SHELL_VAR *, char *, arrayind_t, char *));
+static SHELL_VAR *null_array_assign PARAMS((SHELL_VAR *, char *, arrayind_t, char *));
 #endif
-static SHELL_VAR *get_self __P((SHELL_VAR *));
+static SHELL_VAR *get_self PARAMS((SHELL_VAR *));
 
 #if defined (ARRAY_VARS)
-static SHELL_VAR *init_dynamic_array_var __P((char *, sh_var_value_func_t *, sh_var_assign_func_t *, int));
-static SHELL_VAR *init_dynamic_assoc_var __P((char *, sh_var_value_func_t *, sh_var_assign_func_t *, int));
+static SHELL_VAR *init_dynamic_array_var PARAMS((char *, sh_var_value_func_t *, sh_var_assign_func_t *, int));
+static SHELL_VAR *init_dynamic_assoc_var PARAMS((char *, sh_var_value_func_t *, sh_var_assign_func_t *, int));
 #endif
 
-static SHELL_VAR *assign_seconds __P((SHELL_VAR *, char *, arrayind_t, char *));
-static SHELL_VAR *get_seconds __P((SHELL_VAR *));
-static SHELL_VAR *init_seconds_var __P((void));
+static SHELL_VAR *assign_seconds PARAMS((SHELL_VAR *, char *, arrayind_t, char *));
+static SHELL_VAR *get_seconds PARAMS((SHELL_VAR *));
+static SHELL_VAR *init_seconds_var PARAMS((void));
 
-static u_bits32_t intrand32 __P((u_bits32_t));
-static u_bits32_t genseed __P((void));
+static u_bits32_t intrand32 PARAMS((u_bits32_t));
+static u_bits32_t genseed PARAMS((void));
 
-static int brand __P((void));
-static void sbrand __P((unsigned long));		/* set bash random number generator. */
-static void seedrand __P((void));			/* seed generator randomly */
+static int brand PARAMS((void));
+static void sbrand PARAMS((unsigned long));		/* set bash random number generator. */
+static void seedrand PARAMS((void));			/* seed generator randomly */
 
-static u_bits32_t brand32 __P((void));
-static void sbrand32 __P((u_bits32_t));
-static void seedrand32 __P((void));
-static void perturb_rand32 __P((void));
-static u_bits32_t get_urandom32 __P((void));
+static u_bits32_t brand32 PARAMS((void));
+static void sbrand32 PARAMS((u_bits32_t));
+static void seedrand32 PARAMS((void));
+static void perturb_rand32 PARAMS((void));
+static u_bits32_t get_urandom32 PARAMS((void));
 
-static SHELL_VAR *assign_random __P((SHELL_VAR *, char *, arrayind_t, char *));
-static SHELL_VAR *get_random __P((SHELL_VAR *));
+static SHELL_VAR *assign_random PARAMS((SHELL_VAR *, char *, arrayind_t, char *));
+static SHELL_VAR *get_random PARAMS((SHELL_VAR *));
 
-static SHELL_VAR *get_urandom __P((SHELL_VAR *));
+static SHELL_VAR *get_urandom PARAMS((SHELL_VAR *));
 
-static SHELL_VAR *assign_lineno __P((SHELL_VAR *, char *, arrayind_t, char *));
-static SHELL_VAR *get_lineno __P((SHELL_VAR *));
+static SHELL_VAR *assign_lineno PARAMS((SHELL_VAR *, char *, arrayind_t, char *));
+static SHELL_VAR *get_lineno PARAMS((SHELL_VAR *));
 
-static SHELL_VAR *assign_subshell __P((SHELL_VAR *, char *, arrayind_t, char *));
-static SHELL_VAR *get_subshell __P((SHELL_VAR *));
+static SHELL_VAR *assign_subshell PARAMS((SHELL_VAR *, char *, arrayind_t, char *));
+static SHELL_VAR *get_subshell PARAMS((SHELL_VAR *));
 
-static SHELL_VAR *get_epochseconds __P((SHELL_VAR *));
-static SHELL_VAR *get_epochrealtime __P((SHELL_VAR *));
+static SHELL_VAR *get_epochseconds PARAMS((SHELL_VAR *));
+static SHELL_VAR *get_epochrealtime PARAMS((SHELL_VAR *));
 
-static SHELL_VAR *get_bashpid __P((SHELL_VAR *));
+static SHELL_VAR *get_bashpid PARAMS((SHELL_VAR *));
 
-static SHELL_VAR *get_bash_argv0 __P((SHELL_VAR *));
-static SHELL_VAR *assign_bash_argv0 __P((SHELL_VAR *, char *, arrayind_t, char *));
-static void set_argv0 __P((void));
+static SHELL_VAR *get_bash_argv0 PARAMS((SHELL_VAR *));
+static SHELL_VAR *assign_bash_argv0 PARAMS((SHELL_VAR *, char *, arrayind_t, char *));
+static void set_argv0 PARAMS((void));
 
 #if defined (HISTORY)
-static SHELL_VAR *get_histcmd __P((SHELL_VAR *));
+static SHELL_VAR *get_histcmd PARAMS((SHELL_VAR *));
 #endif
 
 #if defined (READLINE)
-static SHELL_VAR *get_comp_wordbreaks __P((SHELL_VAR *));
-static SHELL_VAR *assign_comp_wordbreaks __P((SHELL_VAR *, char *, arrayind_t, char *));
+static SHELL_VAR *get_comp_wordbreaks PARAMS((SHELL_VAR *));
+static SHELL_VAR *assign_comp_wordbreaks PARAMS((SHELL_VAR *, char *, arrayind_t, char *));
 #endif
 
 #if defined (PUSHD_AND_POPD) && defined (ARRAY_VARS)
-static SHELL_VAR *assign_dirstack __P((SHELL_VAR *, char *, arrayind_t, char *));
-static SHELL_VAR *get_dirstack __P((SHELL_VAR *));
+static SHELL_VAR *assign_dirstack PARAMS((SHELL_VAR *, char *, arrayind_t, char *));
+static SHELL_VAR *get_dirstack PARAMS((SHELL_VAR *));
 #endif
 
 #if defined (ARRAY_VARS)
-static SHELL_VAR *get_groupset __P((SHELL_VAR *));
+static SHELL_VAR *get_groupset PARAMS((SHELL_VAR *));
 #  if defined (DEBUGGER)
-static SHELL_VAR *get_bashargcv __P((SHELL_VAR *));
+static SHELL_VAR *get_bashargcv PARAMS((SHELL_VAR *));
 #  endif
-static SHELL_VAR *build_hashcmd __P((SHELL_VAR *));
-static SHELL_VAR *get_hashcmd __P((SHELL_VAR *));
-static SHELL_VAR *assign_hashcmd __P((SHELL_VAR *,  char *, arrayind_t, char *));
+static SHELL_VAR *build_hashcmd PARAMS((SHELL_VAR *));
+static SHELL_VAR *get_hashcmd PARAMS((SHELL_VAR *));
+static SHELL_VAR *assign_hashcmd PARAMS((SHELL_VAR *,  char *, arrayind_t, char *));
 #  if defined (ALIAS)
-static SHELL_VAR *build_aliasvar __P((SHELL_VAR *));
-static SHELL_VAR *get_aliasvar __P((SHELL_VAR *));
-static SHELL_VAR *assign_aliasvar __P((SHELL_VAR *,  char *, arrayind_t, char *));
+static SHELL_VAR *build_aliasvar PARAMS((SHELL_VAR *));
+static SHELL_VAR *get_aliasvar PARAMS((SHELL_VAR *));
+static SHELL_VAR *assign_aliasvar PARAMS((SHELL_VAR *,  char *, arrayind_t, char *));
 #  endif
 #endif
 
-static SHELL_VAR *get_funcname __P((SHELL_VAR *));
-static SHELL_VAR *init_funcname_var __P((void));
+static SHELL_VAR *get_funcname PARAMS((SHELL_VAR *));
+static SHELL_VAR *init_funcname_var PARAMS((void));
 
-static void initialize_dynamic_variables __P((void));
+static void initialize_dynamic_variables PARAMS((void));
 
-static SHELL_VAR *bind_invalid_envvar __P((const char *, char *, int));
+static SHELL_VAR *bind_invalid_envvar PARAMS((const char *, char *, int));
 
-static int var_sametype __P((SHELL_VAR *, SHELL_VAR *));
+static int var_sametype PARAMS((SHELL_VAR *, SHELL_VAR *));
 
-static SHELL_VAR *hash_lookup __P((const char *, HASH_TABLE *));
-static SHELL_VAR *new_shell_variable __P((const char *));
-static SHELL_VAR *make_new_variable __P((const char *, HASH_TABLE *));
-static SHELL_VAR *bind_variable_internal __P((const char *, char *, HASH_TABLE *, int, int));
+static SHELL_VAR *hash_lookup PARAMS((const char *, HASH_TABLE *));
+static SHELL_VAR *new_shell_variable PARAMS((const char *));
+static SHELL_VAR *make_new_variable PARAMS((const char *, HASH_TABLE *));
+static SHELL_VAR *bind_variable_internal PARAMS((const char *, char *, HASH_TABLE *, int, int));
 
-static void dispose_variable_value __P((SHELL_VAR *));
-static void free_variable_hash_data __P((PTR_T));
+static void dispose_variable_value PARAMS((SHELL_VAR *));
+static void free_variable_hash_data PARAMS((PTR_T));
 
-static VARLIST *vlist_alloc __P((int));
-static VARLIST *vlist_realloc __P((VARLIST *, int));
-static void vlist_add __P((VARLIST *, SHELL_VAR *, int));
+static VARLIST *vlist_alloc PARAMS((int));
+static VARLIST *vlist_realloc PARAMS((VARLIST *, int));
+static void vlist_add PARAMS((VARLIST *, SHELL_VAR *, int));
 
-static void flatten __P((HASH_TABLE *, sh_var_map_func_t *, VARLIST *, int));
+static void flatten PARAMS((HASH_TABLE *, sh_var_map_func_t *, VARLIST *, int));
 
-static int qsort_var_comp __P((SHELL_VAR **, SHELL_VAR **));
+static int qsort_var_comp PARAMS((SHELL_VAR **, SHELL_VAR **));
 
-static SHELL_VAR **vapply __P((sh_var_map_func_t *));
-static SHELL_VAR **fapply __P((sh_var_map_func_t *));
+static SHELL_VAR **vapply PARAMS((sh_var_map_func_t *));
+static SHELL_VAR **fapply PARAMS((sh_var_map_func_t *));
 
-static int visible_var __P((SHELL_VAR *));
-static int visible_and_exported __P((SHELL_VAR *));
-static int export_environment_candidate __P((SHELL_VAR *));
-static int local_and_exported __P((SHELL_VAR *));
-static int variable_in_context __P((SHELL_VAR *));
+static int visible_var PARAMS((SHELL_VAR *));
+static int visible_and_exported PARAMS((SHELL_VAR *));
+static int export_environment_candidate PARAMS((SHELL_VAR *));
+static int local_and_exported PARAMS((SHELL_VAR *));
+static int variable_in_context PARAMS((SHELL_VAR *));
 #if defined (ARRAY_VARS)
-static int visible_array_vars __P((SHELL_VAR *));
+static int visible_array_vars PARAMS((SHELL_VAR *));
 #endif
 
-static SHELL_VAR *find_variable_internal __P((const char *, int));
+static SHELL_VAR *find_variable_internal PARAMS((const char *, int));
 
-static SHELL_VAR *find_nameref_at_context __P((SHELL_VAR *, VAR_CONTEXT *));
-static SHELL_VAR *find_variable_nameref_context __P((SHELL_VAR *, VAR_CONTEXT *, VAR_CONTEXT **));
-static SHELL_VAR *find_variable_last_nameref_context __P((SHELL_VAR *, VAR_CONTEXT *, VAR_CONTEXT **));
+static SHELL_VAR *find_nameref_at_context PARAMS((SHELL_VAR *, VAR_CONTEXT *));
+static SHELL_VAR *find_variable_nameref_context PARAMS((SHELL_VAR *, VAR_CONTEXT *, VAR_CONTEXT **));
+static SHELL_VAR *find_variable_last_nameref_context PARAMS((SHELL_VAR *, VAR_CONTEXT *, VAR_CONTEXT **));
 
-static SHELL_VAR *bind_tempenv_variable __P((const char *, char *));
-static void push_posix_temp_var __P((PTR_T));
-static void push_temp_var __P((PTR_T));
-static void propagate_temp_var __P((PTR_T));
-static void dispose_temporary_env __P((sh_free_func_t *));     
+static SHELL_VAR *bind_tempenv_variable PARAMS((const char *, char *));
+static void push_posix_temp_var PARAMS((PTR_T));
+static void push_temp_var PARAMS((PTR_T));
+static void propagate_temp_var PARAMS((PTR_T));
+static void dispose_temporary_env PARAMS((sh_free_func_t *));     
 
-static inline char *mk_env_string __P((const char *, const char *, int));
-static char **make_env_array_from_var_list __P((SHELL_VAR **));
-static char **make_var_export_array __P((VAR_CONTEXT *));
-static char **make_func_export_array __P((void));
-static void add_temp_array_to_env __P((char **, int, int));
+static inline char *mk_env_string PARAMS((const char *, const char *, int));
+static char **make_env_array_from_var_list PARAMS((SHELL_VAR **));
+static char **make_var_export_array PARAMS((VAR_CONTEXT *));
+static char **make_func_export_array PARAMS((void));
+static void add_temp_array_to_env PARAMS((char **, int, int));
 
-static int n_shell_variables __P((void));
-static int set_context __P((SHELL_VAR *));
+static int n_shell_variables PARAMS((void));
+static int set_context PARAMS((SHELL_VAR *));
 
-static void push_func_var __P((PTR_T));
-static void push_builtin_var __P((PTR_T));
-static void push_exported_var __P((PTR_T));
+static void push_func_var PARAMS((PTR_T));
+static void push_builtin_var PARAMS((PTR_T));
+static void push_exported_var PARAMS((PTR_T));
 
 /* This needs to be looked at again. */
-static inline void push_posix_tempvar_internal __P((SHELL_VAR *, int));
+static inline void push_posix_tempvar_internal PARAMS((SHELL_VAR *, int));
 
-static inline int find_special_var __P((const char *));
+static inline int find_special_var PARAMS((const char *));
 
 static void
 create_variable_tables ()
@@ -5561,6 +5562,7 @@ pop_scope (is_special)
 struct saved_dollar_vars {
   char **first_ten;
   WORD_LIST *rest;
+  int count;
 };
 
 static struct saved_dollar_vars *dollar_arg_stack = (struct saved_dollar_vars *)NULL;
@@ -5616,6 +5618,17 @@ free_saved_dollar_vars (args)
     FREE (args[i]);
 }
 
+/* Do what remember_args (xxx, 1) would have done. */
+void
+clear_dollar_vars ()
+{
+  free_dollar_vars ();
+  dispose_words (rest_of_args);
+
+  rest_of_args = (WORD_LIST *)NULL;
+  posparam_count = 0;
+}
+
 /* XXX - should always be followed by remember_args () */
 void
 push_context (name, is_subshell, tempvars)
@@ -5651,10 +5664,12 @@ push_dollar_vars ()
 	xrealloc (dollar_arg_stack, (dollar_arg_stack_slots += 10)
 		  * sizeof (struct saved_dollar_vars));
     }
-  
+
+  dollar_arg_stack[dollar_arg_stack_index].count = posparam_count;
   dollar_arg_stack[dollar_arg_stack_index].first_ten = save_dollar_vars ();
   dollar_arg_stack[dollar_arg_stack_index++].rest = rest_of_args;
   rest_of_args = (WORD_LIST *)NULL;
+  posparam_count = 0;
   
   dollar_arg_stack[dollar_arg_stack_index].first_ten = (char **)NULL;
   dollar_arg_stack[dollar_arg_stack_index].rest = (WORD_LIST *)NULL;  
@@ -5667,17 +5682,18 @@ pop_dollar_vars ()
   if (dollar_arg_stack == 0 || dollar_arg_stack_index == 0)
     return;
 
-  /* Do what remember_args (xxx, 1) would have done. */
-  free_dollar_vars ();
-  dispose_words (rest_of_args);
-  
+  /* Wipe out current values */
+  clear_dollar_vars ();
+
   rest_of_args = dollar_arg_stack[--dollar_arg_stack_index].rest;
   restore_dollar_vars (dollar_arg_stack[dollar_arg_stack_index].first_ten);
   free (dollar_arg_stack[dollar_arg_stack_index].first_ten);
+  posparam_count = dollar_arg_stack[dollar_arg_stack_index].count;
 
   dollar_arg_stack[dollar_arg_stack_index].first_ten = (char **)NULL;
   dollar_arg_stack[dollar_arg_stack_index].rest = (WORD_LIST *)NULL;
-  
+  dollar_arg_stack[dollar_arg_stack_index].count = 0;
+
   set_dollar_vars_unchanged ();
   invalidate_cached_quoted_dollar_at ();
 }
@@ -5694,6 +5710,7 @@ dispose_saved_dollar_vars ()
 
   dollar_arg_stack[dollar_arg_stack_index].first_ten = (char **)NULL;  
   dollar_arg_stack[dollar_arg_stack_index].rest = (WORD_LIST *)NULL;
+  dollar_arg_stack[dollar_arg_stack_index].count = 0;
 }
 
 /* Initialize BASH_ARGV and BASH_ARGC after turning on extdebug after the

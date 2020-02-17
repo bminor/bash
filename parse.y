@@ -1314,6 +1314,8 @@ timespec:	TIME
 			{ $$ = CMD_TIME_PIPELINE; }
 	|	TIME TIMEOPT
 			{ $$ = CMD_TIME_PIPELINE|CMD_TIME_POSIX; }
+	|	TIME TIMEIGN
+			{ $$ = CMD_TIME_PIPELINE|CMD_TIME_POSIX; }
 	|	TIME TIMEOPT TIMEIGN
 			{ $$ = CMD_TIME_PIPELINE|CMD_TIME_POSIX; }
 	;
@@ -3052,7 +3054,7 @@ time_command_acceptable ()
 	`}' is recognized if there is an unclosed `{' present.
 
 	`-p' is returned as TIMEOPT if the last read token was TIME.
-	`--' is returned as TIMEIGN if the last read token was TIMEOPT.
+	`--' is returned as TIMEIGN if the last read token was TIME or TIMEOPT.
 
 	']]' is returned as COND_END if the parser is currently parsing
 	a conditional expression ((parser_state & PST_CONDEXPR) != 0)
@@ -3168,6 +3170,9 @@ special_case_tokens (tokstr)
   /* Handle -p after `time'. */
   if (last_read_token == TIME && tokstr[0] == '-' && tokstr[1] == 'p' && !tokstr[2])
     return (TIMEOPT);
+  /* Handle -- after `time'. */
+  if (last_read_token == TIME && tokstr[0] == '-' && tokstr[1] == '-' && !tokstr[2])
+    return (TIMEIGN);
   /* Handle -- after `time -p'. */
   if (last_read_token == TIMEOPT && tokstr[0] == '-' && tokstr[1] == '-' && !tokstr[2])
     return (TIMEIGN);
