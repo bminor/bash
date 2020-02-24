@@ -187,8 +187,10 @@ extern int describe_command PARAMS((char *, int));
 /* Functions from setattr.def */
 extern int set_or_show_attributes PARAMS((WORD_LIST *, int, int));
 extern int show_all_var_attributes PARAMS((int, int));
+extern int show_local_var_attributes PARAMS((int, int));
 extern int show_var_attributes PARAMS((SHELL_VAR *, int, int));
 extern int show_name_attributes PARAMS((char *, int));
+extern int show_localname_attributes PARAMS((char *, int));
 extern int show_func_attributes PARAMS((char *, int));
 extern void set_var_attribute PARAMS((char *, int, int));
 extern int var_attribute_string PARAMS((SHELL_VAR *, int, char *));

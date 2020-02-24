@@ -4120,10 +4120,8 @@ fix_assignment_words (words)
 	   an existing local variable, if there is one. */
 	if (b && ((b->flags & (ASSIGNMENT_BUILTIN|LOCALVAR_BUILTIN)) == ASSIGNMENT_BUILTIN))
 	  w->word->flags |= W_ASSNGLOBAL|W_CHKLOCAL;
-#if 0
-	else if (b && (b->flags & ASSIGNMENT_BUILTIN) && (b->flags & LOCALVAR_BUILTIN))
-	  w->word->flags |= W_CHKLOCAL;
-#endif
+	else if (b && (b->flags & ASSIGNMENT_BUILTIN) && (b->flags & LOCALVAR_BUILTIN) && variable_context)
+	  w->word->flags |= W_FORCELOCAL;
       }
 #if defined (ARRAY_VARS)
     /* Note that we saw an associative array option to a builtin that takes

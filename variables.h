@@ -300,7 +300,7 @@ extern SHELL_VAR **all_visible_variables PARAMS((void));
 extern SHELL_VAR **all_visible_functions PARAMS((void));
 extern SHELL_VAR **all_exported_variables PARAMS((void));
 extern SHELL_VAR **local_exported_variables PARAMS((void));
-extern SHELL_VAR **all_local_variables PARAMS((void));
+extern SHELL_VAR **all_local_variables PARAMS((int));
 #if defined (ARRAY_VARS)
 extern SHELL_VAR **all_array_variables PARAMS((void));
 #endif

@@ -176,6 +176,21 @@ wait_builtin (list)
       WAIT_RETURN (status);
     }
 
+  opt = first_pending_trap ();
+#if defined (SIGCHLD)
+  /* We special case SIGCHLD when not in posix mode because we don't break
+     out of the wait even when the signal is trapped; we run the trap after
+     the wait completes. See how it's handled in jobs.c:waitchld(). */
+  if (opt == SIGCHLD && posixly_correct == 0)
+    opt = next_pending_trap (opt+1);
+#endif
+  if (opt != -1)
+    {
+      last_command_exit_signal = wait_signal_received = opt;
+      status = opt + 128;
+      WAIT_RETURN (status);
+    }
+
   /* We support jobs or pids.
      wait <pid-or-job> [pid-or-job ...] */
 

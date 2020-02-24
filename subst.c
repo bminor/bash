@@ -285,7 +285,7 @@ static char *variable_remove_pattern PARAMS((char *, char *, int, int));
 static char *list_remove_pattern PARAMS((WORD_LIST *, char *, int, int, int));
 static char *parameter_list_remove_pattern PARAMS((int, char *, int, int));
 #ifdef ARRAY_VARS
-static char *array_remove_pattern PARAMS((SHELL_VAR *, char *, int, char *, int));
+static char *array_remove_pattern PARAMS((SHELL_VAR *, char *, int, int, int));
 #endif
 static char *parameter_brace_remove_pattern PARAMS((char *, char *, int, char *, int, int, int));
 
@@ -298,7 +298,7 @@ static char *string_transform PARAMS((int, SHELL_VAR *, char *));
 static char *list_transform PARAMS((int, SHELL_VAR *, WORD_LIST *, int, int));
 static char *parameter_list_transform PARAMS((int, int, int));
 #if defined ARRAY_VARS
-static char *array_transform PARAMS((int, SHELL_VAR *, char *, int));
+static char *array_transform PARAMS((int, SHELL_VAR *, int, int));
 #endif
 static char *parameter_brace_transform PARAMS((char *, char *, int, char *, int, int, int, int));
 
@@ -523,7 +523,12 @@ dump_word_flags (flags)
       f &= ~W_CHKLOCAL;
       fprintf (stderr, "W_CHKLOCAL%s", f ? "|" : "");
     }
-  
+  if (f & W_FORCELOCAL)
+    {
+      f &= ~W_FORCELOCAL;
+      fprintf (stderr, "W_FORCELOCAL%s", f ? "|" : "");
+    }
+
   fprintf (stderr, "\n");
   fflush (stderr);
 }
@@ -5224,11 +5229,11 @@ parameter_list_remove_pattern (itype, pattern, patspec, quoted)
 
 #if defined (ARRAY_VARS)
 static char *
-array_remove_pattern (var, pattern, patspec, varname, quoted)
+array_remove_pattern (var, pattern, patspec, starsub, quoted)
      SHELL_VAR *var;
      char *pattern;
      int patspec;
-     char *varname;	/* so we can figure out how it's indexed */
+     int starsub;	/* so we can figure out how it's indexed */
      int quoted;
 {
   ARRAY *a;
@@ -5238,14 +5243,9 @@ array_remove_pattern (var, pattern, patspec, varname, quoted)
   WORD_LIST *list;
   SHELL_VAR *v;
 
-  /* compute itype from varname here */
-  v = array_variable_part (varname, 0, &ret, 0);
+  v = var;		/* XXX - for now */
 
-  /* XXX */
-  if (v && invisible_p (v))
-    return ((char *)NULL);
-
-  itype = ret[0];
+  itype = starsub ? '*' : '@';
 
   a = (v && array_p (v)) ? array_cell (v) : 0;
   h = (v && assoc_p (v)) ? assoc_cell (v) : 0;
@@ -5316,7 +5316,7 @@ parameter_brace_remove_pattern (varname, value, ind, patstr, rtype, quoted, flag
       break;
 #if defined (ARRAY_VARS)
     case VT_ARRAYVAR:
-      temp1 = array_remove_pattern (v, pattern, patspec, varname, quoted);
+      temp1 = array_remove_pattern (v, pattern, patspec, starsub, quoted);
       if (temp1 && ((quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) == 0))
 	{
 	  val = quote_escapes (temp1);
@@ -7560,7 +7560,7 @@ get_var_and_type (varname, value, ind, quoted, flags, varp, valp)
 	  vtype = VT_VARIABLE;
 	  *varp = v;
 	  if (quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT))
-	    *valp = value ? dequote_string (value) : savestring ("");
+	    *valp = value ? dequote_string (value) : (char *)NULL;
 	  else
 	    *valp = value ? dequote_escapes (value) : (char *)NULL;
 	}
@@ -7612,10 +7612,15 @@ string_var_assignment (v, s)
   char flags[MAX_ATTRIBUTES], *ret, *val;
   int i;
 
-  val = sh_quote_reusable (s, 0);
+  val = (v && (invisible_p (v) || var_isset (v) == 0)) ? (char *)NULL : sh_quote_reusable (s, 0);
   i = var_attribute_string (v, 0, flags);
-  ret = (char *)xmalloc (i + strlen (val) + strlen (v->name) + 16 + MAX_ATTRIBUTES);
-  if (i > 0)
+  if (i == 0 && val == 0)
+    return (char *)NULL;
+
+  ret = (char *)xmalloc (i + STRLEN (val) + strlen (v->name) + 16 + MAX_ATTRIBUTES);
+  if (i > 0 && val == 0)
+    sprintf (ret, "declare -%s %s", flags, v->name);
+  else if (i > 0)
     sprintf (ret, "declare -%s %s=%s", flags, v->name, val);
   else
     sprintf (ret, "%s=%s", v->name, val);
@@ -7636,7 +7641,10 @@ array_var_assignment (v, itype, quoted)
     return (char *)NULL;
   val = array_p (v) ? array_to_assign (array_cell (v), 0)
 		    : assoc_to_assign (assoc_cell (v), 0);
-  if (val == 0)
+
+  if (val == 0 && (invisible_p (v) || var_isset (v) == 0))
+    ;	/* placeholder */
+  else if (val == 0)
     {
       val = (char *)xmalloc (3);
       val[0] = LPAREN;
@@ -7650,8 +7658,11 @@ array_var_assignment (v, itype, quoted)
       val = ret;
     }
   i = var_attribute_string (v, 0, flags);
-  ret = (char *)xmalloc (i + strlen (val) + strlen (v->name) + 16);
-  sprintf (ret, "declare -%s %s=%s", flags, v->name, val);
+  ret = (char *)xmalloc (i + STRLEN (val) + strlen (v->name) + 16);
+  if (val)
+    sprintf (ret, "declare -%s %s=%s", flags, v->name, val);
+  else
+    sprintf (ret, "declare -%s %s", flags, v->name);
   free (val);
   return ret;
 }
@@ -7683,7 +7694,9 @@ string_transform (xc, v, s)
   char *ret, flags[MAX_ATTRIBUTES], *t;
   int i;
 
-  if (((xc == 'A' || xc == 'a') && v == 0) || (xc != 'a' && s == 0))
+  if (((xc == 'A' || xc == 'a') && v == 0))
+    return (char *)NULL;
+  else if (xc != 'a' && xc != 'A' && s == 0)
     return (char *)NULL;
 
   switch (xc)
@@ -7770,10 +7783,10 @@ parameter_list_transform (xc, itype, quoted)
 
 #if defined (ARRAY_VARS)
 static char *
-array_transform (xc, var, varname, quoted)
+array_transform (xc, var, starsub, quoted)
      int xc;
      SHELL_VAR *var;
-     char *varname;	/* so we can figure out how it's indexed */
+     int starsub;	/* so we can figure out how it's indexed */
      int quoted;
 {
   ARRAY *a;
@@ -7783,21 +7796,26 @@ array_transform (xc, var, varname, quoted)
   WORD_LIST *list;
   SHELL_VAR *v;
 
-  /* compute itype from varname here */
-  v = array_variable_part (varname, 0, &ret, 0);
+  v = var;	/* XXX - for now */
 
-  /* XXX */
-  if (v && invisible_p (v))
-    return ((char *)NULL);
-
-  itype = ret[0];
+  itype = starsub ? '*' : '@';
 
   if (xc == 'A')
     return (array_var_assignment (v, itype, quoted));
 
+  /* special case for unset arrays and attributes */
+  if (xc == 'a' && (invisible_p (v) || var_isset (v) == 0))
+    {
+      char flags[MAX_ATTRIBUTES];
+      int i;
+
+      i = var_attribute_string (v, 0, flags);
+      return ((i > 0) ? savestring (flags) : (char *)NULL);
+    }
+
   a = (v && array_p (v)) ? array_cell (v) : 0;
   h = (v && assoc_p (v)) ? assoc_cell (v) : 0;
-  
+
   list = a ? array_to_word_list (a) : (h ? assoc_to_word_list (h) : 0);
   if (list == 0)
    return ((char *)NULL);
@@ -7815,7 +7833,7 @@ parameter_brace_transform (varname, value, ind, xform, rtype, quoted, pflags, fl
      char *xform;
      int rtype, quoted, pflags, flags;
 {
-  int vtype, xc;
+  int vtype, xc, starsub;
   char *temp1, *val, *oname;
   SHELL_VAR *v;
 
@@ -7847,13 +7865,16 @@ parameter_brace_transform (varname, value, ind, xform, rtype, quoted, pflags, fl
       return &expand_param_error;
     }
 
+  starsub = vtype & VT_STARSUB;
+  vtype &= ~VT_STARSUB;
+
   /* If we are asked to display the attributes of an unset variable, V will
      be NULL after the call to get_var_and_type. Double-check here. */
-  if (xc == 'a' && vtype == VT_VARIABLE && varname && v == 0)
+  if ((xc == 'a' || xc == 'A') && vtype == VT_VARIABLE && varname && v == 0)
     v = find_variable (varname);
 
   temp1 = (char *)NULL;		/* shut up gcc */
-  switch (vtype & ~VT_STARSUB)
+  switch (vtype)
     {
     case VT_VARIABLE:
     case VT_ARRAYMEMBER:
@@ -7871,7 +7892,7 @@ parameter_brace_transform (varname, value, ind, xform, rtype, quoted, pflags, fl
       break;
 #if defined (ARRAY_VARS)
     case VT_ARRAYVAR:
-      temp1 = array_transform (xc, v, varname, quoted);
+      temp1 = array_transform (xc, v, starsub, quoted);
       if (temp1 && quoted == 0 && ifs_is_null)
 	{
 		/* Posix interp 888 */
@@ -11479,7 +11500,7 @@ shell_expand_word_list (tlist, eflags)
 	{
 	  int t;
 	  char opts[16];
-	  int opti;
+	  int opti, skip;
 
 	  opti = 0;
 	  if (tlist->word->flags & (W_ASSIGNASSOC|W_ASSNGLOBAL|W_CHKLOCAL|W_ASSIGNARRAY))
@@ -11544,21 +11565,28 @@ shell_expand_word_list (tlist, eflags)
 	    }
 
 	  opts[opti] = '\0';
+	  skip = 0;
 	  if (opti > 0)
 	    {
 	      t = make_internal_declare (tlist->word->word, opts, wcmd ? wcmd->word->word : (char *)0);
 	      if (t != EXECUTION_SUCCESS)
 		{
 		  last_command_exit_value = t;
-		  exp_jump_to_top_level (DISCARD);
+		  if (tlist->word->flags & W_FORCELOCAL)	/* non-fatal error */
+		    skip = 1;
+		  else
+		    exp_jump_to_top_level (DISCARD);
 		}
 	    }
 
-	  t = do_word_assignment (tlist->word, 0);
-	  if (t == 0)
+	  if (skip == 0)
 	    {
-	      last_command_exit_value = EXECUTION_FAILURE;
-	      exp_jump_to_top_level (DISCARD);
+	      t = do_word_assignment (tlist->word, 0);
+	      if (t == 0)
+		{
+		  last_command_exit_value = EXECUTION_FAILURE;
+		  exp_jump_to_top_level (DISCARD);
+		}
 	    }
 
 	  /* Now transform the word as ksh93 appears to do and go on */

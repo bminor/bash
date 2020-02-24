@@ -202,7 +202,7 @@ declare_internal (list, local_var)
 	  return (EX_USAGE);
 #endif
 	case 'p':
-	  if (local_var == 0)
+/*	  if (local_var == 0) */
 	    pflag++;
 	  break;
         case 'F':
@@ -271,20 +271,7 @@ declare_internal (list, local_var)
       /* Show local variables defined at this context level if this is
 	 the `local' builtin. */
       if (local_var)
-	{
-	  register SHELL_VAR **vlist;
-	  register int i;
-
-	  vlist = all_local_variables ();
-
-	  if (vlist)
-	    {
-	      for (i = 0; vlist[i]; i++)
-		print_assignment (vlist[i]);
-
-	      free (vlist);
-	    }
-	}
+	show_local_var_attributes (0, nodefs);	/* XXX - fix up args later */
       else if (pflag && (flags_on == 0 || flags_on == att_function))
 	show_all_var_attributes (flags_on == 0, nodefs);
       else if (flags_on == 0)
@@ -301,6 +288,8 @@ declare_internal (list, local_var)
 	{
 	  if (flags_on & att_function)
 	    pflag = show_func_attributes (list->word->word, nodefs);
+	  else if (local_var)
+	    pflag = show_localname_attributes (list->word->word, nodefs);
 	  else
 	    pflag = show_name_attributes (list->word->word, nodefs);
 	  if (pflag)

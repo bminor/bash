@@ -7384,3 +7384,109 @@ execute_cmd.c
 
 parse.y
 	- special_case_tokens: allow `time -- command'
+
+				   2/21
+				   ----
+subst.c
+	- get_var_and_type: if an unset variable (not an array) is supplied
+	  with the `[@]' subscript, don't return "". Fix to bug reported by
+	  Arfrever Frehtes Taifersar Arahesis <arfrever.fta@gmail.com>;
+	  original bug introduced 7/29/2018
+	- array_transform: take a STARSUB argument instead of VARNAME, since
+	  we've already computed what kind of index the array reference uses
+	  in get_var_and_type, and passing VARNAME to figure out the index
+	  type doesn't do the right thing when we're using indirect variable
+	  expansion. Fixes bug reported by 
+	  Arfrever Frehtes Taifersar Arahesis <arfrever.fta@gmail.com>
+	- array_remove_pattern: take the same new STARSUB argument for the
+	  same reason
+	- parameter_brace_transform,parameter_brace_remove_pattern: change
+	  callers to pass STARSUB instead of VARNAME
+
+				   2/22
+				   ----
+execute_cmd.c
+	- fix_assignment_words: if an assignment is supplied to a builtin that
+	  creates or modifies local variables while a function is executing,
+	  set the W_FORCELOCAL flag for that word in addition to any of the
+	  various assignment flags
+
+subst.c
+	- shell_expand_word_list: while processing a list of assignments that
+	  are arguments to a builtin that creates or modifies local variables,
+	  if make_internal_declare fails while attempting to create the local
+	  variable (or give it attributes), skip attempting the assignment but
+	  otherwise do not make this a fatal error. This results in two error
+	  messages: one to create the variable or modify its attributes, and
+	  one while attempting to assign the value, but the errors to not
+	  cause the function to return immediately. Fixes inconsistency
+	  reported by Arfrever Frehtes Taifersar Arahesis <arfrever.fta@gmail.com>
+	  
+
+				   2/23
+				   ----
+trap.c
+	- first_pending_trap: generalize into first_pending_trap and
+	  next_pending_trap
+
+wait.def
+	- wait_builtin: close up the trapped-signal-arrives hole a little more
+	  by looking for a signal that arrived between the last check for
+	  pending traps and setting wait_intr_flag and behaving as if it
+	  arrived while wait was executing. Use first_pending_trap and
+	  next_pending_trap to find a pending trap that is not SIGCHLD
+
+trap.c
+	- trap_handler: longjmp to wait_intr_buf unconditionally if
+	  wait_intr_flag is set; don't bother with interrupt_immediately any
+	  more
+
+variables.c
+	- all_local_variables: now takes an arg saying whether to restrict
+	  return value to visible variables or return all local variables,
+	  even those that are unset (the new default)
+	- visible_variable_in_context: new function, restricts return values
+	  to set local variables in the current context; variable_in_context
+	  now returns all local variables in the current context, even the
+	  unset ones
+
+variables.h
+	- all_local_variables: change extern function declaration
+
+builtins/setattr.def
+	- show_local_var_attributes: show all local variables at the current
+	  variable context, including unset ones, and their attributes
+	- show_localname_attributes: show attributes for NAME as long as NAME
+	  resolves to a local variable at the current variable context, even
+	  if NAME is unset
+
+builtins/common.h
+	- show_local_var_attributes, show_localname_attributes: new extern
+	  declarations
+
+builtins/declare.def
+	- declare_internal: allow `-p' option for `local' builtin
+	- declare_internal: if `local' is supplied without options, or with
+	  the `-p' option, but no variable name arguments, display all local
+	  variables at the current variable context by calling
+	  show_local_var_attributes
+	- declare_internal: if `local -p' is supplied with variable name
+	  arguments, call show_localname_attributes to display the attributes
+	  for that name if it resolves to a local variable at the current
+	  variable context. Fixes issue reported by
+	  pepa65 <solusos@passchier.net>
+
+subst.c
+	- array_var_assignment: if VAR is unset, print the declare command
+	  without the assignment statement, just with the attributes
+	- array_transform: special-case the 'a' attribute and return the
+	  attribute string even if the array variable is unset.  Feature request
+	  from Arfrever Frehtes Taifersar Arahesis <arfrever.fta@gmail.com>
+	- parameter_brace_transform: if asked to display the attributes and
+	  value ('A') of an unset variable, make sure we pass the variable, if
+	  it exists with attributes but without a value, to string_transform
+	- string_transform: if we don't have a value but the operator is 'A',
+	  pass the variable through to string_var_assignment
+	- string_var_assignment: if we have an unset variable with attributes,
+	  return a declare command that just sets the attributes. Feature request
+	  from Arfrever Frehtes Taifersar Arahesis <arfrever.fta@gmail.com>

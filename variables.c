@@ -295,6 +295,7 @@ static int visible_var PARAMS((SHELL_VAR *));
 static int visible_and_exported PARAMS((SHELL_VAR *));
 static int export_environment_candidate PARAMS((SHELL_VAR *));
 static int local_and_exported PARAMS((SHELL_VAR *));
+static int visible_variable_in_context PARAMS((SHELL_VAR *));
 static int variable_in_context PARAMS((SHELL_VAR *));
 #if defined (ARRAY_VARS)
 static int visible_array_vars PARAMS((SHELL_VAR *));
@@ -4489,11 +4490,19 @@ static int
 variable_in_context (var)
      SHELL_VAR *var;
 {
+  return (local_p (var) && var->context == variable_context);
+}
+
+static int
+visible_variable_in_context (var)
+     SHELL_VAR *var;
+{
   return (invisible_p (var) == 0 && local_p (var) && var->context == variable_context);
 }
 
 SHELL_VAR **
-all_local_variables ()
+all_local_variables (visible_only)
+     int visible_only;
 {
   VARLIST *vlist;
   SHELL_VAR **ret;
@@ -4514,7 +4523,10 @@ all_local_variables ()
     
   vlist = vlist_alloc (HASH_ENTRIES (vc->table));
 
-  flatten (vc->table, variable_in_context, vlist, 0);
+  if (visible_only)
+    flatten (vc->table, visible_variable_in_context, vlist, 0);
+  else
+    flatten (vc->table, variable_in_context, vlist, 0);
 
   ret = vlist->list;
   free (vlist);

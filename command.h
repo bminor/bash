@@ -73,36 +73,37 @@ enum command_type { cm_for, cm_case, cm_while, cm_if, cm_simple, cm_select,
 		    cm_arith, cm_cond, cm_arith_for, cm_subshell, cm_coproc };
 
 /* Possible values for the `flags' field of a WORD_DESC. */
-#define W_HASDOLLAR	0x000001	/* Dollar sign present. */
-#define W_QUOTED	0x000002	/* Some form of quote character is present. */
-#define W_ASSIGNMENT	0x000004	/* This word is a variable assignment. */
-#define W_SPLITSPACE	0x000008	/* Split this word on " " regardless of IFS */
-#define W_NOSPLIT	0x000010	/* Do not perform word splitting on this word because ifs is empty string. */
-#define W_NOGLOB	0x000020	/* Do not perform globbing on this word. */
-#define W_NOSPLIT2	0x000040	/* Don't split word except for $@ expansion (using spaces) because context does not allow it. */
-#define W_TILDEEXP	0x000080	/* Tilde expand this assignment word */
-#define W_DOLLARAT	0x000100	/* $@ and its special handling */
-#define W_DOLLARSTAR	0x000200	/* $* and its special handling */
-#define W_NOCOMSUB	0x000400	/* Don't perform command substitution on this word */
-#define W_ASSIGNRHS	0x000800	/* Word is rhs of an assignment statement */
-#define W_NOTILDE	0x001000	/* Don't perform tilde expansion on this word */
-#define W_ITILDE	0x002000	/* Internal flag for word expansion */
-#define W_EXPANDRHS	0x004000	/* Expanding word in ${paramOPword} */
-#define W_COMPASSIGN	0x008000	/* Compound assignment */
-#define W_ASSNBLTIN	0x010000	/* word is a builtin command that takes assignments */
-#define W_ASSIGNARG	0x020000	/* word is assignment argument to command */
-#define W_HASQUOTEDNULL	0x040000	/* word contains a quoted null character */
-#define W_DQUOTE	0x080000	/* word should be treated as if double-quoted */
-#define W_NOPROCSUB	0x100000	/* don't perform process substitution */
-#define W_SAWQUOTEDNULL	0x200000	/* word contained a quoted null that was removed */
-#define W_ASSIGNASSOC	0x400000	/* word looks like associative array assignment */
-#define W_ASSIGNARRAY	0x800000	/* word looks like a compound indexed array assignment */
-#define W_ARRAYIND	0x1000000	/* word is an array index being expanded */
-#define W_ASSNGLOBAL	0x2000000	/* word is a global assignment to declare (declare/typeset -g) */
-#define W_NOBRACE	0x4000000	/* Don't perform brace expansion */
-#define W_COMPLETE	0x8000000	/* word is being expanded for completion */
-#define W_CHKLOCAL	0x10000000	/* check for local vars on assignment */
-#define W_NOASSNTILDE	0x20000000	/* don't do tilde expansion like an assignment statement */
+#define W_HASDOLLAR	(1 << 0)	/* Dollar sign present. */
+#define W_QUOTED	(1 << 1)	/* Some form of quote character is present. */
+#define W_ASSIGNMENT	(1 << 2)	/* This word is a variable assignment. */
+#define W_SPLITSPACE	(1 << 3)	/* Split this word on " " regardless of IFS */
+#define W_NOSPLIT	(1 << 4)	/* Do not perform word splitting on this word because ifs is empty string. */
+#define W_NOGLOB	(1 << 5)	/* Do not perform globbing on this word. */
+#define W_NOSPLIT2	(1 << 6)	/* Don't split word except for $@ expansion (using spaces) because context does not allow it. */
+#define W_TILDEEXP	(1 << 7)	/* Tilde expand this assignment word */
+#define W_DOLLARAT	(1 << 8)	/* $@ and its special handling -- UNUSED */
+#define W_DOLLARSTAR	(1 << 9)	/* $* and its special handling -- UNUSED */
+#define W_NOCOMSUB	(1 << 10)	/* Don't perform command substitution on this word */
+#define W_ASSIGNRHS	(1 << 11)	/* Word is rhs of an assignment statement */
+#define W_NOTILDE	(1 << 12)	/* Don't perform tilde expansion on this word */
+#define W_ITILDE	(1 << 13)	/* Internal flag for word expansion */
+#define W_EXPANDRHS	(1 << 14)	/* Expanding word in ${paramOPword} */
+#define W_COMPASSIGN	(1 << 15)	/* Compound assignment */
+#define W_ASSNBLTIN	(1 << 16)	/* word is a builtin command that takes assignments */
+#define W_ASSIGNARG	(1 << 17)	/* word is assignment argument to command */
+#define W_HASQUOTEDNULL	(1 << 18)	/* word contains a quoted null character */
+#define W_DQUOTE	(1 << 19)	/* word should be treated as if double-quoted */
+#define W_NOPROCSUB	(1 << 20)	/* don't perform process substitution */
+#define W_SAWQUOTEDNULL	(1 << 21)	/* word contained a quoted null that was removed */
+#define W_ASSIGNASSOC	(1 << 22)	/* word looks like associative array assignment */
+#define W_ASSIGNARRAY	(1 << 23)	/* word looks like a compound indexed array assignment */
+#define W_ARRAYIND	(1 << 24)	/* word is an array index being expanded */
+#define W_ASSNGLOBAL	(1 << 25)	/* word is a global assignment to declare (declare/typeset -g) */
+#define W_NOBRACE	(1 << 26)	/* Don't perform brace expansion */
+#define W_COMPLETE	(1 << 27)	/* word is being expanded for completion */
+#define W_CHKLOCAL	(1 << 28)	/* check for local vars on assignment */
+#define W_NOASSNTILDE	(1 << 29)	/* don't do tilde expansion like an assignment statement */
+#define W_FORCELOCAL	(1 << 30)	/* force assignments to be to local variables, non-fatal on assignment errors */
 
 /* Flags for the `pflags' argument to param_expand() and various
    parameter_brace_expand_xxx functions; also used for string_list_dollar_at */

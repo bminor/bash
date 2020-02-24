@@ -22,8 +22,8 @@ AVAR
 AVAR
 42
 /bin:/usr/bin:/usr/local/bin:.
-avar=([0]="/bin:/usr/bin:/usr/local/bin:.")
-z=yy
+declare -a avar=([0]="/bin:/usr/bin:/usr/local/bin:.")
+declare -- z="yy"
 42
 declare -i ivar="10"
 unset
@@ -61,6 +61,7 @@ g: v = , w =
 f: v = , w =
 FIN: v = two, w = one
 ./varenv4.sub: line 67: bbb: unique: cannot convert indexed to associative array
+./varenv4.sub: line 67: declare: unique: cannot convert indexed to associative array
 after bbb: 1
 declare -Ar FOOBAR=([foo]="bar" )
 declare -Ar FOOBAR=([foo]="bar" )
@@ -182,6 +183,8 @@ declare -a var=()
 ./varenv14.sub: line 25: warning: var: cannot inherit value from incompatible type
 declare -a var=()
 ./varenv14.sub: line 31: f: var: cannot convert indexed to associative array
+./varenv14.sub: line 31: declare: var: cannot convert indexed to associative array
+declare -a var=([0]="12")
 declare -a a=([0]="X")
 declare -a s=([0]="X")
 declare -a a=([0]="X" [1]="Y")

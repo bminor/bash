@@ -2739,8 +2739,7 @@ wait_sigint_handler (sig)
   if (interrupt_immediately ||
       (this_shell_builtin && this_shell_builtin == wait_builtin))
     {
-      last_command_exit_value = 128+SIGINT;
-      set_pipestatus_from_exit (last_command_exit_value);
+      set_exit_status (128+SIGINT);
       restore_sigint_handler ();
       /* If we got a SIGINT while in `wait', and SIGINT is trapped, do
 	 what POSIX.2 says (see builtins/wait.def for more info). */
@@ -2774,8 +2773,7 @@ wait_sigint_handler (sig)
     wait_sigint_received = 1;
   else
     {
-      last_command_exit_value = 128+SIGINT;
-      set_pipestatus_from_exit (last_command_exit_value);
+      set_exit_status (128+SIGINT);
       restore_sigint_handler ();
       kill (getpid (), SIGINT);
     }

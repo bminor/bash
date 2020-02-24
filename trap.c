@@ -487,7 +487,7 @@ trap_handler (sig)
       if (this_shell_builtin && (this_shell_builtin == wait_builtin))
 	{
 	  wait_signal_received = sig;
-	  if (interrupt_immediately && wait_intr_flag)
+	  if (/* interrupt_immediately && */wait_intr_flag)
 	    sh_longjmp (wait_intr_buf, 1);
 	}
 
@@ -509,14 +509,20 @@ trap_handler (sig)
 }
 
 int
-first_pending_trap ()
+next_pending_trap (start)
 {
   register int i;
 
-  for (i = 1; i < NSIG; i++)
+  for (i = start; i < NSIG; i++)
     if (pending_traps[i])
       return i;
   return -1;
+}
+
+int
+first_pending_trap ()
+{
+  return (next_pending_trap (1));
 }
 
 /* Return > 0 if any of the "real" signals (not fake signals like EXIT) are
