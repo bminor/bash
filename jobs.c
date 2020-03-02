@@ -3,7 +3,7 @@
 /* This file works with both POSIX and BSD systems.  It implements job
    control. */
 
-/* Copyright (C) 1989-2019 Free Software Foundation, Inc.
+/* Copyright (C) 1989-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -2628,6 +2628,9 @@ wait_for_single_pid (pid, flags)
       bgp_delete (pid);
     }
 
+  /* Check for a trapped signal interrupting the wait builtin and jump out */
+  CHECK_WAIT_INTR;
+
   return r;
 }
 
@@ -2706,7 +2709,8 @@ static SigHandler *old_sigint_handler = INVALID_SIGNAL_HANDLER;
 
 static int wait_sigint_received;
 static int child_caught_sigint;
-static int waiting_for_child;
+
+int waiting_for_child;
 
 /* Clean up state after longjmp to wait_intr_buf */
 void
@@ -2964,39 +2968,20 @@ wait_for (pid)
 
       if (pid == ANY_PID || PRUNNING(child) || (job != NO_JOB && RUNNING (job)))
 	{
-#if defined (WAITPID_BROKEN)    /* SCOv4 */
-	  sigset_t suspend_set;
-	  sigemptyset (&suspend_set);
-	  sigsuspend (&suspend_set);
-#else /* !WAITPID_BROKEN */
-#  if defined (MUST_UNBLOCK_CHLD)
-	  struct sigaction act, oact;
-	  sigset_t nullset, chldset;
+	  int old_waiting;
 
 	  queue_sigchld = 1;
-	  sigemptyset (&nullset);
-	  sigemptyset (&chldset);
-	  sigprocmask (SIG_SETMASK, &nullset, &chldset);
-	  act.sa_handler = SIG_DFL;
-	  sigemptyset (&act.sa_mask);
-	  sigemptyset (&oact.sa_mask);
-	  act.sa_flags = 0;
-#  if defined (SA_RESTART)
-	  act.sa_flags |= SA_RESTART;
-#  endif
-	  sigaction (SIGCHLD, &act, &oact);
-#  endif /* MUST_UNBLOCK_CHLD */
-	  queue_sigchld = 1;
-	  waiting_for_child++;
+	  old_waiting = waiting_for_child;
+	  waiting_for_child = 1;
+	  /* XXX - probably not strictly necessary but we want to catch
+	     everything that happened before we switch the behavior of
+	     trap_handler to longjmp on a trapped signal (waiting_for_child) */
+	  CHECK_WAIT_INTR;
 	  r = waitchld (pid, 1);	/* XXX */
-	  waiting_for_child--;
+	  waiting_for_child = old_waiting;
 #if 0
 itrace("wait_for: blocking wait for %d returns %d child = %p", (int)pid, r, child);
 #endif
-#  if defined (MUST_UNBLOCK_CHLD)
-	  sigaction (SIGCHLD, &oact, (struct sigaction *)NULL);
-	  sigprocmask (SIG_SETMASK, &chldset, (sigset_t *)NULL);
-#  endif
 	  queue_sigchld = 0;
 	  if (r == -1 && errno == ECHILD && this_shell_builtin == wait_builtin)
 	    {
@@ -3030,7 +3015,6 @@ itrace("wait_for: blocking wait for %d returns %d child = %p", (int)pid, r, chil
 		  break;
 		}
 	    }
-#endif /* WAITPID_BROKEN */
 	}
 
       /* If the shell is interactive, and job control is disabled, see
@@ -3248,6 +3232,8 @@ wait_for_job (job, flags, ps)
       r = wait_for (pid);
       if (r == -1 && errno == ECHILD)
 	mark_all_jobs_as_dead ();
+
+      CHECK_WAIT_INTR;
 
       if ((flags & JWAIT_FORCE) == 0)
 	break;
@@ -4222,9 +4208,6 @@ run_sigchld_trap (nchild)
   jobs_list_frozen = 1;
   for (i = 0; i < nchild; i++)
     {
-#if 0
-      interrupt_immediately = 1;
-#endif
       parse_and_execute (savestring (trap_command), "trap", SEVAL_NOHIST|SEVAL_RESETLINE);
     }
 

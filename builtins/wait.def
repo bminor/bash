@@ -78,6 +78,7 @@ $END
 #include "../shell.h"
 #include "../execute_cmd.h"
 #include "../jobs.h"
+#include "../trap.h"
 #include "common.h"
 #include "bashgetopt.h"
 
@@ -275,6 +276,16 @@ wait_builtin (list)
 	  pstat.status = 127;
 	  status = EXECUTION_FAILURE;
 	}
+
+      /* Don't waste time with a longjmp. */
+      if (wait_signal_received)
+	{
+	  last_command_exit_signal = wait_signal_received;
+	  status = 128 + wait_signal_received;
+	  wait_sigint_cleanup ();
+	  WAIT_RETURN (status);
+	}
+
       list = list->next;
     }
 

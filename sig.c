@@ -670,8 +670,7 @@ sigint_sighandler (sig)
   if (interrupt_immediately)
     {
       interrupt_immediately = 0;
-      last_command_exit_value = 128 + sig;
-      set_pipestatus_from_exit (last_command_exit_value);
+      set_exit_status (128 + sig);
       throw_to_top_level ();
     }
 #if defined (READLINE)

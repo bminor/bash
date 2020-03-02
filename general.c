@@ -1188,20 +1188,8 @@ bash_tilde_expand (s, assign_p)
      const char *s;
      int assign_p;
 {
-  int old_immed, old_term, r;
+  int r;
   char *ret;
-
-#if 0
-  old_immed = interrupt_immediately;
-  old_term = terminate_immediately;
-  /* We want to be able to interrupt tilde expansion. Ordinarily, we can just
-     jump to top_level, but we don't want to run any trap commands in a signal
-     handler context.  We might be able to get away with just checking for
-     things like SIGINT and SIGQUIT. */
-  if (any_signals_trapped () < 0)
-    interrupt_immediately = 1;
-  terminate_immediately = 1;
-#endif
 
   tilde_additional_prefixes = assign_p == 0 ? (char **)0
   					    : (assign_p == 2 ? bash_tilde_prefixes2 : bash_tilde_prefixes);
@@ -1210,11 +1198,6 @@ bash_tilde_expand (s, assign_p)
 
   r = (*s == '~') ? unquoted_tilde_word (s) : 1;
   ret = r ? tilde_expand (s) : savestring (s);
-
-#if 0
-  interrupt_immediately = old_immed;
-  terminate_immediately = old_term;
-#endif
 
   QUIT;
 

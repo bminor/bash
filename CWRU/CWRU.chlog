@@ -7490,3 +7490,17 @@ subst.c
 	- string_var_assignment: if we have an unset variable with attributes,
 	  return a declare command that just sets the attributes. Feature request
 	  from Arfrever Frehtes Taifersar Arahesis <arfrever.fta@gmail.com>
+
+				   2/24
+				   ----
+locale.c
+	- mblen: don't try to use unless HANDLE_MULITBYTE is defined. From
+	  https://savannah.gnu.org/support/?110200
+	- set_default_locale: if HAVE_SETLOCALE isn't defined, set the default
+	  locale to "C"
+
+				   2/25
+				   ----
+general.c
+	- interrupt_immediately: remove all references to this that are
+	  already commented out

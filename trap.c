@@ -90,6 +90,7 @@ static void trap_if_untrapped (int, char *);
 extern procenv_t alrmbuf;
 
 extern volatile int from_return_trap;
+extern int waiting_for_child;
 
 extern WORD_LIST *subst_assign_varlist;
 
@@ -487,7 +488,7 @@ trap_handler (sig)
       if (this_shell_builtin && (this_shell_builtin == wait_builtin))
 	{
 	  wait_signal_received = sig;
-	  if (/* interrupt_immediately && */wait_intr_flag)
+	  if (waiting_for_child && wait_intr_flag)
 	    sh_longjmp (wait_intr_buf, 1);
 	}
 

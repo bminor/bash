@@ -79,7 +79,8 @@ extern void set_original_signal __P((int, SigHandler *));
 volatile pid_t last_made_pid = NO_PID;
 volatile pid_t last_asynchronous_pid = NO_PID;
 
-static int queue_sigchld, waiting_for_child;	/* dummy declarations */
+static int queue_sigchld;		/* dummy declaration */
+int waiting_for_child;
 
 /* Call this when you start making children. */
 int already_making_children = 0;
@@ -685,6 +686,7 @@ wait_for_single_pid (pid, flags)
 
   siginterrupt (SIGINT, 0);
   QUIT;
+  CHECK_WAIT_INTR;
 
   return (got_pid > 0 ? process_exit_status (status) : -1);
 }
@@ -706,15 +708,20 @@ wait_for_background_pids (ps)
   siginterrupt (SIGINT, 1);
 
   /* Wait for ECHILD */
+  waiting_for_child = 1;
   while ((got_pid = WAITPID (-1, &status, 0)) != -1)
     {
+      waiting_for_child = 0;
       set_pid_status (got_pid, status);
       if (ps)
 	{
 	  ps->pid = got_pid;
 	  ps->status = process_exit_status (status);
 	}
+      waiting_for_child = 1;
+      CHECK_WAIT_INTR;
     }
+  waiting_for_child = 0;
 
   if (errno != EINTR && errno != ECHILD)
     {
@@ -724,6 +731,7 @@ wait_for_background_pids (ps)
 
   siginterrupt (SIGINT, 0);
   QUIT;
+  CHECK_WAIT_INTR;
 
   mark_dead_jobs_as_notified (1);
   cleanup_dead_jobs ();
@@ -828,8 +836,11 @@ wait_for (pid)
   if (interactive_shell == 0)
     old_sigint_handler = set_signal_handler (SIGINT, wait_sigint_handler);
 
+  waiting_for_child = 1;  
+  CHECK_WAIT_INTR;
   while ((got_pid = WAITPID (-1, &status, 0)) != pid) /* XXX was pid now -1 */
     {
+      waiting_for_child = 0;
       CHECK_TERMSIG;
       CHECK_WAIT_INTR;
       if (got_pid < 0 && errno == ECHILD)
@@ -845,7 +856,9 @@ wait_for (pid)
 	programming_error ("wait_for(%ld): %s", (long)pid, strerror(errno));
       else if (got_pid > 0)
 	set_pid_status (got_pid, status);
+      waiting_for_child = 1;
     }
+  waiting_for_child = 0;
 
   if (got_pid > 0)
     set_pid_status (got_pid, status);
