@@ -153,17 +153,17 @@ outside: declare -- var="outside"
 outside 1.0: var=one
 outside 1.1: var=one
 inside func: var=two
-outside 2.0: var=two
+outside 2.0: var=<unset>
 inside func: var=two
-outside 2.1: var=two
+outside 2.1: var=global
 inside func1: var=value
 outside 3.0: var=value
 inside func2: var=global
 outside 4.0: var=outside
 foo: hello world
-after foo: var=outside
+after foo: var=global
 bar: hello world
-after bar: var=bar: hello world
+after bar: var=global
 ./varenv13.sub: line 16: `var[0]': not a valid identifier
 ./varenv13.sub: line 16: `var[@]': not a valid identifier
 ./varenv13.sub: line 14: declare: var: not found
@@ -231,12 +231,12 @@ foo=showfoo environment foo=showfoo
 outside 1.0: foo=<unset>
 foo=showfoo environment foo=showfoo
 foo=showfoo environment foo=showfoo
-outside 1.1: foo=foo
+outside 1.1: foo=<unset>
 foo=<unset> environment foo=
 outside 2.0: foo=<unset>
 foo=foo environment foo=foo
-foo=foo environment foo=foo
-outside 2.1: foo=foo
+foo=<unset> environment foo=
+outside 2.1: foo=<unset>
 a=z
 a=b
 a=z

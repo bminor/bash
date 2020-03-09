@@ -4643,13 +4643,19 @@ push_posix_temp_var (data)
   binding_table = v->context ? shell_variables->table : global_variables->table;
 
   /* global variables are no longer temporary and don't need propagating. */
-  if (binding_table == global_variables->table)
+  if (v->context == 0)
     var->attributes &= ~(att_tempvar|att_propagate);
 
   if (v)
     {
-      v->attributes |= var->attributes;
-      v->attributes &= ~att_tempvar;	/* not a temp var now */
+      v->attributes |= var->attributes;		/* preserve tempvar attribute if appropriate */
+      /* If we don't bind a local variable, propagate the value. If we bind a
+	 local variable (the "current execution environment"), keep it as local
+	 and don't propagate it to the calling environment. */
+      if (v->context > 0 && local_p (v) == 0)
+	v->attributes |= att_propagate;
+      else
+	v->attributes &= ~att_propagate;
     }
 
   if (find_special_var (var->name) >= 0)
@@ -5299,11 +5305,7 @@ push_var_context (name, flags, tempvars)
      functions no longer behave like assignment statements preceding
      special builtins, and do not persist in the current shell environment.
      This is austin group interp #654, though nobody implements it yet. */
-#if 0	/* XXX - TAG: bash-5.1 */
   posix_func_behavior = 0;
-#else
-  posix_func_behavior = posixly_correct;
-#endif
 
   vc = new_var_context (name, flags);
   /* Posix interp 1009, temporary assignments preceding function calls modify
@@ -5349,17 +5351,11 @@ push_posix_tempvar_internal (var, isbltin)
      functions no longer behave like assignment statements preceding
      special builtins, and do not persist in the current shell environment.
      This is austin group interp #654, though nobody implements it yet. */
-#if 0	/* XXX - TAG: bash-5.1 */
   posix_var_behavior = posixly_correct && isbltin;
-#else
-  posix_var_behavior = posixly_correct;
-#endif
-
   v = 0;
 
   if (local_p (var) && STREQ (var->name, "-"))
     set_current_options (value_cell (var));
-#if 0	/* TAG: bash-5.1 */
   /* This takes variable assignments preceding special builtins that can execute
      multiple commands (source, eval, etc.) and performs the equivalent of
      an assignment statement to modify the closest enclosing variable (the
@@ -5375,12 +5371,10 @@ push_posix_tempvar_internal (var, isbltin)
 	  v->attributes |= var->attributes;
 	  if (v->context == 0)
 	    v->attributes &= ~(att_tempvar|att_propagate);
+	  /* XXX - set att_propagate here if v->context > 0? */
 	}
     }
   else if (tempvar_p (var) && propagate_p (var))
-#else
-  else if (tempvar_p (var) && (posix_var_behavior || (var->attributes & att_propagate)))
-#endif
     {
       /* Make sure we have a hash table to store the variable in while it is
 	 being propagated down to the global variables table.  Create one if

@@ -7504,3 +7504,30 @@ locale.c
 general.c
 	- interrupt_immediately: remove all references to this that are
 	  already commented out
+
+				    3/2
+				    ---
+variables.c
+	- push_var_context,push_posix_tempvar_internal: assignment statements
+	  preceding shell functions no longer persist after the function
+	  completes in posix mode. POSIX interp #654, was in P1003.1-2017
+	- push_posix_temp_var: variable assignments preceding special builtins
+	  now act as if an assignment statement had been executed in posix mode
+	  (the Posix `current execution environment') instead of unconditionally
+	  creating a global variable
+
+trap.c
+	- clear_pending_traps: new function, just clears the pending traps flag
+	  for all signals
+
+				    3/6
+				    ---
+execute_cmd.c
+	- execute_in_subshell: check for interrupts and terminating signals
+	  before resetting the terminating signal handlers, and clear all
+	  pending traps -- they're not pending for us and we should not run a
+	  trap handler for them
+	- execute_in_subshell: enable bash-5.1 change from 11/29/2018 that
+	  resets the signal-in-progress flag if we're running a command in
+	  a subshell, since we're not running the trap command (we are the
+	  trap command)

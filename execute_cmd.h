@@ -69,55 +69,55 @@ extern SHELL_VAR *this_shell_function;
 
 /* Functions declared in execute_cmd.c, used by many other files */
 
-extern struct fd_bitmap *new_fd_bitmap __P((int));
-extern void dispose_fd_bitmap __P((struct fd_bitmap *));
-extern void close_fd_bitmap __P((struct fd_bitmap *));
-extern int executing_line_number __P((void));
-extern int execute_command __P((COMMAND *));
-extern int execute_command_internal __P((COMMAND *, int, int, int, struct fd_bitmap *));
-extern int shell_execve __P((char *, char **, char **));
-extern void setup_async_signals __P((void));
-extern void async_redirect_stdin __P((void));
+extern struct fd_bitmap *new_fd_bitmap PARAMS((int));
+extern void dispose_fd_bitmap PARAMS((struct fd_bitmap *));
+extern void close_fd_bitmap PARAMS((struct fd_bitmap *));
+extern int executing_line_number PARAMS((void));
+extern int execute_command PARAMS((COMMAND *));
+extern int execute_command_internal PARAMS((COMMAND *, int, int, int, struct fd_bitmap *));
+extern int shell_execve PARAMS((char *, char **, char **));
+extern void setup_async_signals PARAMS((void));
+extern void async_redirect_stdin PARAMS((void));
 
-extern void undo_partial_redirects __P((void));
-extern void dispose_partial_redirects __P((void));
-extern void dispose_exec_redirects __P((void));
+extern void undo_partial_redirects PARAMS((void));
+extern void dispose_partial_redirects PARAMS((void));
+extern void dispose_exec_redirects PARAMS((void));
 
-extern int execute_shell_function __P((SHELL_VAR *, WORD_LIST *));
+extern int execute_shell_function PARAMS((SHELL_VAR *, WORD_LIST *));
 
-extern struct coproc *getcoprocbypid __P((pid_t));
-extern struct coproc *getcoprocbyname __P((const char *));
+extern struct coproc *getcoprocbypid PARAMS((pid_t));
+extern struct coproc *getcoprocbyname PARAMS((const char *));
 
-extern void coproc_init __P((struct coproc *));
-extern struct coproc *coproc_alloc __P((char *, pid_t));
-extern void coproc_dispose __P((struct coproc *));
-extern void coproc_flush __P((void));
-extern void coproc_close __P((struct coproc *));
-extern void coproc_closeall __P((void));
-extern void coproc_reap __P((void));
-extern pid_t coproc_active __P((void));
+extern void coproc_init PARAMS((struct coproc *));
+extern struct coproc *coproc_alloc PARAMS((char *, pid_t));
+extern void coproc_dispose PARAMS((struct coproc *));
+extern void coproc_flush PARAMS((void));
+extern void coproc_close PARAMS((struct coproc *));
+extern void coproc_closeall PARAMS((void));
+extern void coproc_reap PARAMS((void));
+extern pid_t coproc_active PARAMS((void));
 
-extern void coproc_rclose __P((struct coproc *, int));
-extern void coproc_wclose __P((struct coproc *, int));
-extern void coproc_fdclose __P((struct coproc *, int));
+extern void coproc_rclose PARAMS((struct coproc *, int));
+extern void coproc_wclose PARAMS((struct coproc *, int));
+extern void coproc_fdclose PARAMS((struct coproc *, int));
 
-extern void coproc_checkfd __P((struct coproc *, int));
-extern void coproc_fdchk __P((int));
+extern void coproc_checkfd PARAMS((struct coproc *, int));
+extern void coproc_fdchk PARAMS((int));
 
-extern void coproc_pidchk __P((pid_t, int));
+extern void coproc_pidchk PARAMS((pid_t, int));
 
-extern void coproc_fdsave __P((struct coproc *));
-extern void coproc_fdrestore __P((struct coproc *));
+extern void coproc_fdsave PARAMS((struct coproc *));
+extern void coproc_fdrestore PARAMS((struct coproc *));
 
-extern void coproc_setvars __P((struct coproc *));
-extern void coproc_unsetvars __P((struct coproc *));
+extern void coproc_setvars PARAMS((struct coproc *));
+extern void coproc_unsetvars PARAMS((struct coproc *));
 
 #if defined (PROCESS_SUBSTITUTION)
-extern void close_all_files __P((void));
+extern void close_all_files PARAMS((void));
 #endif
 
 #if defined (ARRAY_VARS)
-extern void restore_funcarray_state __P((struct func_array_state *));
+extern void restore_funcarray_state PARAMS((struct func_array_state *));
 #endif
 
 #endif /* _EXECUTE_CMD_H_ */

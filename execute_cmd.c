@@ -1,6 +1,6 @@
 /* execute_cmd.c -- Execute a COMMAND structure. */
 
-/* Copyright (C) 1987-2019 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -1530,22 +1530,25 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 	subshell_environment |= SUBSHELL_COPROC;
     }
 
+  QUIT;
+  CHECK_TERMSIG;
+
   reset_terminating_signals ();		/* in sig.c */
   /* Cancel traps, in trap.c. */
   /* Reset the signal handlers in the child, but don't free the
      trap strings.  Set a flag noting that we have to free the
      trap strings if we run trap to change a signal disposition. */
+  clear_pending_traps ();
   reset_signal_handlers ();
   subshell_environment |= SUBSHELL_RESETTRAP;
-#if 0	/* TAG:bash-5.1 */
+
   /* We are in a subshell, so forget that we are running a trap handler or
      that the signal handler has changed (we haven't changed it!) */
   if (running_trap > 0)
     {
       run_trap_cleanup (running_trap - 1);
-      running_trap = 0;
+      running_trap = 0;		/* XXX - maybe leave this */
     }
-#endif
 
   /* Make sure restore_original_signals doesn't undo the work done by
      make_child to ensure that asynchronous children are immune to SIGINT

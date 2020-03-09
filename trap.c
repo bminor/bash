@@ -540,6 +540,15 @@ any_signals_trapped ()
 }
 
 void
+clear_pending_traps ()
+{
+  register int i;
+
+  for (i = 1; i < NSIG; i++)
+    pending_traps[i] = 0;
+}
+
+void
 check_signals ()
 {
   CHECK_ALRM;		/* set by the read builtin */
