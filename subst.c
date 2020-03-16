@@ -7175,6 +7175,11 @@ parameter_brace_expand_rhs (name, value, op, quoted, pflags, qdollaratp, hasdoll
     w->flags &= ~W_SAWQUOTEDNULL;
   free (t1);
 
+  /* If we convert a null string into a quoted null, make sure the caller
+     knows it. */
+  if ((quoted & (Q_DOUBLE_QUOTES|Q_HERE_DOCUMENT)) && QUOTED_NULL (w->word))
+    w->flags |= W_HASQUOTEDNULL;
+
   return w;
 }
 

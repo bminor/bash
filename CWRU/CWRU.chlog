@@ -7531,3 +7531,12 @@ execute_cmd.c
 	  resets the signal-in-progress flag if we're running a command in
 	  a subshell, since we're not running the trap command (we are the
 	  trap command)
+
+				   3/10
+				   ----
+subst.c
+	- parameter_brace_expand: if we assign the empty string to a variable
+	  using the [:]= expansion in a quoted expansion, make sure we note
+	  we are returning a quoted null string to the caller by setting
+	  W_HASQUOTEDNULL. Fixes bug reported by Martin Castillo
+	  <castilma@uni-bremen.de>
