@@ -83,6 +83,7 @@ int unbound_vars_is_error = 0;
 int echo_input_at_read = 0;
 int verbose_flag = 0;
 
+
 /* Non-zero means type out the command definition after reading, but
    before executing. */
 int echo_command_at_execute = 0;
@@ -210,6 +211,7 @@ const struct flags_alist shell_flags[] = {
 #define NUM_SHELL_FLAGS (sizeof (shell_flags) / sizeof (struct flags_alist))
 
 char optflags[NUM_SHELL_FLAGS+4] = { '+' };
+char * verbose_fmt="%s";
 
 int *
 find_flag (name)

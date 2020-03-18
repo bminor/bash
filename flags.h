@@ -49,6 +49,7 @@ extern int
   hashing_enabled, forced_interactive, privileged_mode, jobs_m_flag,
   asynchronous_notification, interactive_comments, no_symbolic_links,
   function_trace_mode, error_trace_mode, pipefail_opt;
+extern char * verbose_fmt;
 
 /* -c, -s invocation options -- not really flags, but they show up in $- */
 extern int want_pending_command, read_from_stdin;

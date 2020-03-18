@@ -262,6 +262,7 @@ static const struct {
 #if defined (RESTRICTED_SHELL)
   { "restricted", Int, &restricted, (char **)0x0 },
 #endif
+  { "verbose-fmt", Charp, (int *)0x0, &verbose_fmt},
   { "verbose", Int, &verbose_flag, (char **)0x0 },
   { "version", Int, &do_version, (char **)0x0 },
 #if defined (WORDEXP_OPTION)

@@ -2491,7 +2491,11 @@ shell_getc (remove_quoted_newline)
 	  if (echo_input_at_read && (shell_input_line[0] ||
 				       shell_input_line_terminator != EOF) &&
 				     shell_eof_token == 0)
-	    fprintf (stderr, "%s\n", shell_input_line);
+	    // [verbose!]
+	    // fprintf (stderr, "%s\n", shell_input_line);
+	    // fprintf (stderr, "[bash.verbose]%s\n", shell_input_line);
+	    fprintf (stderr, verbose_fmt, shell_input_line);
+	    fprintf (stderr, "\n");
 	}
       else
 	{
