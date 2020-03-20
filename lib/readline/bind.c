@@ -262,6 +262,13 @@ rl_unbind_function_in_map (rl_command_func_t *func, Keymap map)
 	  map[i].function = (rl_command_func_t *)NULL;
 	  rval = 1;
 	}
+      else if (map[i].type == ISKMAP)		/* TAG:readline-8.1 */
+	{
+	  int r;
+	  r = rl_unbind_function_in_map (func, FUNCTION_TO_KEYMAP (map, i));
+	  if (r == 1)
+	    rval = 1;
+	}
     }
   return rval;
 }

@@ -507,6 +507,12 @@ histfile_restore (const char *backup, const char *orig)
   return (history_rename (backup, orig));
 }
 
+/* Should we call chown, based on whether finfo and nfinfo describe different
+   files with different owners? */
+
+#define SHOULD_CHOWN(finfo, nfinfo) \
+  (finfo.st_uid != nfinfo.st_uid || finfo.st_gid != nfinfo.st_gid)
+  
 /* Truncate the history file FNAME, leaving only LINES trailing lines.
    If FNAME is NULL, then use ~/.history.  Writes a new file and renames
    it to the original name.  Returns 0 on success, errno on failure. */
@@ -515,7 +521,7 @@ history_truncate_file (const char *fname, int lines)
 {
   char *buffer, *filename, *tempname, *bp, *bp1;		/* bp1 == bp+1 */
   int file, chars_read, rv, orig_lines, exists, r;
-  struct stat finfo;
+  struct stat finfo, nfinfo;
   size_t file_size;
 
   history_lines_written_to_file = 0;
@@ -535,6 +541,9 @@ history_truncate_file (const char *fname, int lines)
       goto truncate_exit;
     }
   exists = 1;
+
+  nfinfo.st_uid = finfo.st_uid;
+  nfinfo.st_gid = finfo.st_gid;
 
   if (S_ISREG (finfo.st_mode) == 0)
     {
@@ -624,6 +633,9 @@ history_truncate_file (const char *fname, int lines)
       if (write (file, bp, chars_read - (bp - buffer)) < 0)
 	rv = errno;
 
+      if (fstat (file, &nfinfo) < 0 && rv == 0)
+	rv = errno;
+
       if (close (file) < 0 && rv == 0)
 	rv = errno;
     }
@@ -651,7 +663,7 @@ history_truncate_file (const char *fname, int lines)
      user is running this, it's a no-op.  If the shell is running after sudo
      with a shared history file, we don't want to leave the history file
      owned by root. */
-  if (rv == 0 && exists)
+  if (rv == 0 && exists && SHOULD_CHOWN (finfo, nfinfo))
     r = chown (filename, finfo.st_uid, finfo.st_gid);
 #endif
 
@@ -670,7 +682,7 @@ history_do_write (const char *filename, int nelements, int overwrite)
   register int i;
   char *output, *tempname, *histname;
   int file, mode, rv, exists;
-  struct stat finfo;
+  struct stat finfo, nfinfo;
 #ifdef HISTORY_USE_MMAP
   size_t cursize;
 
@@ -715,15 +727,11 @@ history_do_write (const char *filename, int nelements, int overwrite)
     the_history = history_list ();
     /* Calculate the total number of bytes to write. */
     for (buffer_size = 0, i = history_length - nelements; i < history_length; i++)
-#if 0
-      buffer_size += 2 + HISTENT_BYTES (the_history[i]);
-#else
       {
 	if (history_write_timestamps && the_history[i]->timestamp && the_history[i]->timestamp[0])
 	  buffer_size += strlen (the_history[i]->timestamp) + 1;
 	buffer_size += strlen (the_history[i]->line) + 1;
       }
-#endif
 
     /* Allocate the buffer, and fill it. */
 #ifdef HISTORY_USE_MMAP

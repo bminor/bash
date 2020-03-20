@@ -4142,7 +4142,7 @@ zero if @var{command} is found, and non-zero if not.
 @item declare
 @btindex declare
 @example
-declare [-aAfFgilnrtux] [-p] [@var{name}[=@var{value}] @dots{}]
+declare [-aAfFgiIlnrtux] [-p] [@var{name}[=@var{value}] @dots{}]
 @end example
 
 Declare variables and give them attributes.  If no @var{name}s
@@ -4170,6 +4170,12 @@ each @var{name} is defined are displayed as well.
 The @option{-g} option forces variables to be created or modified at
 the global scope, even when @code{declare} is executed in a shell function.
 It is ignored in all other cases.
+
+The @option{-I} option causes local variables to inherit the attributes
+(except the @var{nameref} attribute)
+and value of any existing variable with the same
+@var{name} at a surrounding scope.
+If there is no existing variable, the local variable is initially unset.
 
 The following options can be used to restrict output to variables with
 the specified attributes or to give variables attributes:

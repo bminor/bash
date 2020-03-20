@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Wed Jan 29 14:00:16 EST 2020
+.\"	Last Change: Tue Mar 17 18:27:36 EDT 2020
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2020 January 29" "GNU Bash 5.0"
+.TH BASH 1 "2020 March 17" "GNU Bash 5.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -8023,10 +8023,10 @@ is greater than the number of enclosing loops, the last enclosing loop
 (the ``top-level'' loop) is resumed.
 The return value is 0 unless \fIn\fP is not greater than or equal to 1.
 .TP
-\fBdeclare\fP [\fB\-aAfFgilnrtux\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP] ...]
+\fBdeclare\fP [\fB\-aAfFgiIlnrtux\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP] ...]
 .PD 0
 .TP
-\fBtypeset\fP [\fB\-aAfFgilnrtux\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP] ...]
+\fBtypeset\fP [\fB\-aAfFgiIlnrtux\fP] [\fB\-p\fP] [\fIname\fP[=\fIvalue\fP] ...]
 .PD
 Declare variables and/or give them attributes.
 If no \fIname\fPs are given then display the values of variables.
@@ -8061,6 +8061,13 @@ The
 option forces variables to be created or modified at the global scope,
 even when \fBdeclare\fP is executed in a shell function.
 It is ignored in all other cases.
+The
+.B \-I
+option causes local variables to inherit the attributes
+(except the \fInameref\fP attribute) 
+and value of any existing variable with the same
+\fIname\fP at a surrounding scope.
+If there is no existing variable, the local variable is initially unset.
 The following options can
 be used to restrict output to variables with the specified attribute or
 to give variables attributes:

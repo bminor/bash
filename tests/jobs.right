@@ -40,33 +40,35 @@ async list wait-for-background-pids
 async list wait for child
 forked
 wait-when-no-children
+posix jobs output
+[1]+  Done                    sleep 1
 wait-for-job
-./jobs.tests: line 79: wait: %2: no such job
+./jobs.tests: line 82: wait: %2: no such job
 127
 async list wait-for-job
 forked
 fg-bg 1
-sleep 5
+sleep 2
 fg-bg 2
-sleep 5
+sleep 2
 fg-bg 3
-sleep 5
+sleep 2
 fg-bg 4
-sleep 5
+sleep 2
 fg-bg 5
-./jobs.tests: line 106: fg: %2: no such job
-./jobs.tests: line 107: bg: job 1 already in background
+./jobs.tests: line 109: fg: %2: no such job
+./jobs.tests: line 110: bg: job 1 already in background
 fg-bg 6
-./jobs.tests: line 114: fg: -s: invalid option
+./jobs.tests: line 117: fg: -s: invalid option
 fg: usage: fg [job_spec]
-./jobs.tests: line 115: bg: -s: invalid option
+./jobs.tests: line 118: bg: -s: invalid option
 bg: usage: bg [job_spec ...]
-./jobs.tests: line 120: disown: -s: invalid option
+./jobs.tests: line 123: disown: -s: invalid option
 disown: usage: disown [-h] [-ar] [jobspec ... | pid ...]
-./jobs.tests: line 124: disown: %1: no such job
-./jobs.tests: line 127: disown: %2: no such job
+./jobs.tests: line 127: disown: %1: no such job
+./jobs.tests: line 130: disown: %2: no such job
 wait-for-non-child
-./jobs.tests: line 130: wait: pid 1 is not a child of this shell
+./jobs.tests: line 133: wait: pid 1 is not a child of this shell
 127
 3 -- 1 2 3 -- 1 - 2 - 3
 [1]   Running                 sleep 300 &
@@ -76,8 +78,8 @@ running jobs:
 [1]   Running                 sleep 300 &
 [2]-  Running                 sleep 350 &
 [3]+  Running                 sleep 400 &
-./jobs.tests: line 147: kill: %4: no such job
-./jobs.tests: line 149: jobs: %4: no such job
+./jobs.tests: line 150: kill: %4: no such job
+./jobs.tests: line 152: jobs: %4: no such job
 current job:
 [3]+  Running                 sleep 400 &
 previous job:
@@ -105,5 +107,5 @@ after kill -STOP, backgrounding %3:
 killing...
 done
 after KILL -STOP, foregrounding %1
-sleep 10
+sleep 4
 done

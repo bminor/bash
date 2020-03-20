@@ -7448,8 +7448,7 @@ verify_substring_values (v, value, substr, vtype, e1p, e2p)
 	 from end of positional parameters? */
 #if 1
       if ((vtype == VT_ARRAYVAR || vtype == VT_POSPARMS) && *e2p < 0)
-#else
-      /* XXX - TAG: bash-5.1 */
+#else /* XXX - TAG: bash-5.1 */
       if (vtype == VT_ARRAYVAR && *e2p < 0)
 #endif
 	{
@@ -11517,14 +11516,20 @@ shell_expand_word_list (tlist, eflags)
 	      opts[opti++] = 'A';
 	    }
 	  else if (tlist->word->flags & W_ASSIGNASSOC)
-	    opts[opti++] = 'A';
+	    {
+	      opts[opti++] = 'A';
+	      opts[opti++] = 'I';
+	    }
 	  else if ((tlist->word->flags & (W_ASSIGNARRAY|W_ASSNGLOBAL)) == (W_ASSIGNARRAY|W_ASSNGLOBAL))
 	    {
 	      opts[opti++] = 'g';
 	      opts[opti++] = 'a';
 	    }
 	  else if (tlist->word->flags & W_ASSIGNARRAY)
-	    opts[opti++] = 'a';
+	    {
+	      opts[opti++] = 'a';
+	      opts[opti++] = 'I';
+	    }
 	  else if (tlist->word->flags & W_ASSNGLOBAL)
 	    opts[opti++] = 'g';
 

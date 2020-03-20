@@ -1606,8 +1606,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   if (should_redir_stdin && stdin_redir == 0)
     async_redirect_stdin ();
 
-#if 0
-  /* XXX - TAG:bash-5.1 */
+#if 0 /* XXX - TAG:bash-5.1 */
   if (user_subshell && command->type == cm_subshell)
     optimize_subshell_command (command->value.Subshell->command);
 #endif

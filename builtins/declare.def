@@ -34,6 +34,8 @@ Options:
 		source file when debugging)
   -g	create global variables when used in a shell function; otherwise
 		ignored
+  -I	if creating a local variable, inherit the attributes and value
+		of a variable with the same name at a previous scope
   -p	display the attributes and value of each NAME
 
 Options which set attributes:
@@ -135,9 +137,9 @@ local_builtin (list)
 }
 
 #if defined (ARRAY_VARS)
-#  define DECLARE_OPTS	"+acfgilnprtuxAFG"
+#  define DECLARE_OPTS	"+acfgilnprtuxAFGI"
 #else
-#  define DECLARE_OPTS	"+cfgilnprtuxFG"
+#  define DECLARE_OPTS	"+cfgilnprtuxFGI"
 #endif
 
 static SHELL_VAR *
@@ -168,13 +170,13 @@ declare_internal (list, local_var)
 {
   int flags_on, flags_off, *flags;
   int any_failed, assign_error, pflag, nodefs, opt, onref, offref;
-  int mkglobal, chklocal;
+  int mkglobal, chklocal, inherit_flag;
   char *t, *subscript_start;
   SHELL_VAR *var, *refvar, *v;
   FUNCTION_DEF *shell_fn;
 
   flags_on = flags_off = any_failed = assign_error = pflag = nodefs = 0;
-  mkglobal = chklocal = 0;
+  mkglobal = chklocal = inherit_flag = 0;
   refvar = (SHELL_VAR *)NULL;
   reset_internal_getopt ();
   while ((opt = internal_getopt (list, DECLARE_OPTS)) != -1)
@@ -255,6 +257,9 @@ declare_internal (list, local_var)
 	    flags_off |= att_capcase|att_lowercase;
 	  break;
 #endif /* CASEMOD_ATTRS */
+	case 'I':
+	  inherit_flag = MKLOC_INHERIT;
+	  break;
 	CASE_HELPOPT;
 	default:
 	  builtin_usage ();
@@ -452,9 +457,9 @@ restart_new_var_name:
 	     return an existing {array,assoc} variable to be flagged as an
 	     error below. */
 	  if (flags_on & att_assoc)
-	    var = make_local_assoc_variable (newname, 1);
+	    var = make_local_assoc_variable (newname, MKLOC_ARRAYOK|inherit_flag);
 	  else if ((flags_on & att_array) || making_array_special)
-	    var = make_local_array_variable (newname, 1);
+	    var = make_local_array_variable (newname, MKLOC_ASSOCOK|inherit_flag);
 	  else
 #endif
 	  if (offset == 0 && (flags_on & att_nameref))
@@ -468,18 +473,18 @@ restart_new_var_name:
 	      if (refvar && refvar->context != variable_context)
 		{
 		  refvar = 0;
-		  var = make_local_variable (name, 0);
+		  var = make_local_variable (name, inherit_flag);
 		}
 	      else if (refvar && refvar->context == variable_context)
 		var = refvar;
 	      /* Maybe we just want to create a new local variable */
 	      else if (var == 0 || var->context != variable_context)
-		var = make_local_variable (name, 0);
+		var = make_local_variable (name, inherit_flag);
 	      /* otherwise we have a var at the right context */
 	    }
 	  else
 	    /* XXX - check name for validity here with valid_nameref_value */
-	    var = make_local_variable ((flags_on & att_nameref) ? name : newname, 0);	/* sets att_invisible for new vars */
+	    var = make_local_variable ((flags_on & att_nameref) ? name : newname, inherit_flag);	/* sets att_invisible for new vars */
 
 	  if (var == 0)
 	    {

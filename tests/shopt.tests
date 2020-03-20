@@ -107,3 +107,7 @@ shopt -p xyz1
 shopt -o -p xyz1
 
 ${THIS_SH} ./shopt1.sub
+
+# test whether or not temporary variable assignments that manipulate posix
+# mode restore the previous state or the default non-posix state
+${THIS_SH} -c 'shopt -s expand_aliases ; shopt expand_aliases ; POSIXLY_CORRECT=y true ; shopt expand_aliases'

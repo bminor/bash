@@ -4265,14 +4265,9 @@ notify_of_job_status ()
 	     substitution, so don't print anything.
 	     Otherwise, if the shell is not interactive, POSIX says that `jobs'
 	     is the only way to notify of job status. */
-#if 1
-	  if ((job_control == 0 && interactive_shell) ||
-	      (startup_state == 2 && (subshell_environment & SUBSHELL_COMSUB)))
-#else	/* TAG:bash-5.1 */
 	  if ((job_control == 0 && interactive_shell) ||
 	      (startup_state == 2 && (subshell_environment & SUBSHELL_COMSUB)) ||
 	      (startup_state == 2 && posixly_correct && (subshell_environment & SUBSHELL_COMSUB) == 0))
-#endif
 	    {
 	      /* POSIX.2 compatibility:  if the shell is not interactive,
 		 hang onto the job corresponding to the last asynchronous

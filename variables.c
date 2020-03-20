@@ -2951,14 +2951,17 @@ make_new_array_variable (name)
 }
 
 SHELL_VAR *
-make_local_array_variable (name, assoc_ok)
+make_local_array_variable (name, flags)
      char *name;
-     int assoc_ok;
+     int flags;
 {
   SHELL_VAR *var;
   ARRAY *array;
+  int assoc_ok;
 
-  var = make_local_variable (name, 0);	/* XXX for now */
+  assoc_ok = flags & MKLOC_ASSOCOK;
+
+  var = make_local_variable (name, flags & MKLOC_INHERIT);	/* XXX for now */
   /* If ASSOC_OK is non-zero, assume that we are ok with letting an assoc
      variable return to the caller without converting it. The caller will
      either flag an error or do the conversion itself. */
@@ -3004,14 +3007,17 @@ make_new_assoc_variable (name)
 }
 
 SHELL_VAR *
-make_local_assoc_variable (name, array_ok)
+make_local_assoc_variable (name, flags)
      char *name;
-     int array_ok;
+     int flags;
 {
   SHELL_VAR *var;
   HASH_TABLE *hash;
+  int array_ok;
 
-  var = make_local_variable (name, 0);	/* XXX for now */
+  array_ok = flags & MKLOC_ARRAYOK;
+
+  var = make_local_variable (name, flags & MKLOC_INHERIT);	/* XXX for now */
   /* If ARRAY_OK is non-zero, assume that we are ok with letting an array
      variable return to the caller without converting it. The caller will
      either flag an error or do the conversion itself. */
@@ -3791,10 +3797,8 @@ assign_in_env (word, flags)
 
   if (flags)
     {
-#if 0 /* TAG:bash-5.1 from Martijn Dekker */
       if (STREQ (newname, "POSIXLY_CORRECT") || STREQ (newname, "POSIX_PEDANDTIC"))
 	save_posix_options ();		/* XXX one level of saving right now */
-#endif
       stupidly_hack_special_variables (newname);
     }
 

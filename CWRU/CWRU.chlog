@@ -7339,7 +7339,7 @@ expr.c
 test.c
 	- unary_test: allow -v N to test whether or not positional parameter
 	  N is set. Most recently suggested by Peng Yu <pengyu.ut@gmail.com>
-	  and Martijn Dekker <martijn@inlv.org>	  
+	  and Martijn Dekker <martijn@inlv.org>
 
 builtins/getopts.def
 	- dogetopts: use number_of_args() to compute the number of positional
@@ -7540,3 +7540,63 @@ subst.c
 	  we are returning a quoted null string to the caller by setting
 	  W_HASQUOTEDNULL. Fixes bug reported by Martin Castillo
 	  <castilma@uni-bremen.de>
+
+				   3/17
+				   ----
+lib/readline/histfile.c
+	- history_truncate_file: only chown the file if we really need to. From
+	  alex@lisas.de via https://savannah.gnu.org/support/?110207
+
+lib/readline/bind.c
+	- rl_unbind_function_in_map: since we are looking for functions, not
+	  key sequences, descend into keymaps attached to the keymap passed
+	  as an argument. From a report from lockywolf@gmail.com back on 2/27,
+	  TENTATIVE CHANGE
+
+variables.h
+	- MKLOC_ARRAYOK,MKLOC_ASSOCOK: new flags values for
+	  make_local_{array,assoc}_variable so we can avoid hard-coded values
+	  of 1 and make it possible to eventually pass in additional flags
+
+builtins/declare.def
+	- declare_internal: make_local_array_variable: pass MKLOC_ASSOCOK
+	- declare_internal: make_local_assoc_variable: pass MKLOC_ARRAYOK
+
+variables.c
+	- make_local_{array,assoc}_variable: understand new flags, pass
+	  MKLOC_INHERIT to make_local_variable if it appears in the flags
+	  argument
+
+builtins/declare.def
+	- declare_internal: add a new -I option for local and declare that
+	  inherits attributes and value from a variable with the same name
+	  at a previous scope. Inspired by netbsd sh
+	- if -I option is supplied, pass MKLOC_INHERIT to make_local_variable
+	  and its array counterparts make_local_{array,assoc}_variable
+
+subst.c
+	- shell_expand_word_list: pass -I to declare if constructing a declare
+	  command with make_local_declare, meaning we have an array or assoc
+	  compound assignment. (Slighty unsatisfactory, but ok for now) Fix
+	  for bug report from Kevin Locke <kevin@kevinlocke.name>,
+	   https://savannah.gnu.org/support/index.php?109669
+
+				   3/18
+				   ----
+examples/loadables/basename.c
+	- basename_builtin: handle -- option without crashing. Report by Peng Yu
+	  <pengyu.ut@gmail.com>
+
+jobs.c
+	- notify_of_job_status: if in posix-mode shell is started with -c,
+	  jobs should print the status of completed jobs. From a report by
+	  Robert Elz <kre@munnari.oz.au> back in 12/18
+
+				   3/19
+				   ----
+variables.c
+	- assign_in_env: if we're assigning POSIXLY_CORRECT or POSIX_PEDANTIC
+	  in the temporary environment, save the values of the options
+	  affected by posix mode so we can restore them when we restore the
+	  old value of the variable after the command executes. Suggested by
+	  Martijn Dekker <martijn@inlv.org>

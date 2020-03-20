@@ -34,6 +34,7 @@
 #include "builtins.h"
 #include "shell.h"
 #include "common.h"
+#include "bashgetopt.h"
 
 int
 strftime_builtin (list)
@@ -46,14 +47,15 @@ strftime_builtin (list)
   int n;
   intmax_t i;
 
+  if (no_options (list))
+    return (EX_USAGE);
+  list = loptend;
+
   if (list == 0)
     {
       builtin_usage ();
       return (EX_USAGE);
     }
-
-  if (no_options (list))
-    return (EX_USAGE);
 
   format = list->word->word;
   if (format == 0 || *format == 0)

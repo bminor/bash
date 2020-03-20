@@ -85,7 +85,7 @@ accept_builtin (list)
   if (tmoutarg)
     {
       long ival, uval;
-      opt = uconvert (tmoutarg, &ival, &uval);
+      opt = uconvert (tmoutarg, &ival, &uval, (char **)0);
       if (opt == 0 || ival < 0 || uval < 0)
 	{
 	  builtin_error ("%s: invalid timeout specification", tmoutarg);
