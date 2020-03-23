@@ -11,31 +11,33 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-: ${TMPDIR:=/var/tmp}
 
-FN=$TMPDIR/bash-glob.$$
-mkdir $FN || { echo "glob4.sub: cannot mkdir $FN" >&2 ; exit 1; }
-builtin cd $FN || { echo "glob4.sub: cannot change directory to $FN" >&2 ; exit 1; }
-rm -f *
+# this uses value inheritance internally so that the self-reference in the
+# local variable declaration works right
 
-touch 'a?' aa
+arr=(zero one two)
+four=four
 
-set -- a \?; IFS=\\; var=$*;
-recho "$var"
-unset IFS; printf "%s\n" ${var}
+f()
+{
+	local -a arr=( "${arr[@]}" )
+	declare -p arr
+}
 
-var='a\?'
-recho "$var"
-printf "%s\n" ${var}
+f
 
-var='a\a'
-printf "%s\n" ${var}
+f1()
+{
+	local -a arr=(three $four five)
+	declare -p arr
+}
+f1
 
-# shell's idea of a glob pattern and libglob's idea of a glob pattern have to
-# be identical
-PRE='\/'
-printf '<%s>\n' 'define'${PRE}'\
-/'
-
-builtin cd $OLDPWD
-rm -rf $FN
+set -u
+name='arr[@]'
+f2()
+{
+	local -a arr=("${!name}")
+	declare -p arr
+}
+f2

@@ -14,9 +14,9 @@
 ORIGD=$PWD
 : ${TMPDIR:=/var/tmp}
 
-SD=$TMPDIR/scratch-$$
+SD=$TMPDIR/bash-glob-$$
 [ -d $SD ] || mkdir $SD
-cd $SD
+builtin cd $SD || { echo "glob5.sub: cannot change directory to $SD" >&2 ; exit 1; }
 mkdir tmp
 
 D=./tmp/a

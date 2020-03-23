@@ -7600,3 +7600,22 @@ variables.c
 	  affected by posix mode so we can restore them when we restore the
 	  old value of the variable after the command executes. Suggested by
 	  Martijn Dekker <martijn@inlv.org>
+
+				   3/20
+				   ----
+syntax.h
+	- slashify_in_here_document: add `"' to this list, since POSIX says
+	  that backslashes in here documents behave like backslashes in
+	  double quotes, and backslash can quote a double quote in a double-
+	  quoted string. This means that given P=A,
+
+		cat <<EOF
+		${P+\"$P\"}
+		EOF
+
+		and
+
+		echo "${P+\"$P\"}"
+
+	  should output the same thing. From a report from Dan Jacobson
+	  <jidanni@jidanni.org> back in 1/2019.

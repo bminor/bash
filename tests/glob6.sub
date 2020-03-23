@@ -17,7 +17,8 @@
 
 ORIG=$PWD
 GLOBDIR=$TMPDIR/bash-glob-$$
-mkdir $GLOBDIR && cd $GLOBDIR
+mkdir $GLOBDIR || { echo "glob6.sub: cannot make directory $GLOBDIR" >&2 ; exit 1; }
+builtin cd $GLOBDIR || { echo "glob6.sub: cannot change directory to $GLOBDIR" >&2 ; exit 1; }
 
 # does the pattern matcher allow backslashes as escape characters and remove
 # them as part of matching?
