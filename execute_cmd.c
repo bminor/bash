@@ -562,7 +562,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
   volatile int save_line_number;
 #if defined (PROCESS_SUBSTITUTION)
   volatile int ofifo, nfifo, osize, saved_fifo;
-  volatile char *ofifo_list;
+  volatile void *ofifo_list;
 #endif
 
   if (breaking || continuing)
@@ -751,12 +751,14 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
   reap_procsubs ();
 #  endif
 
-  if (variable_context != 0 || executing_list)	/* XXX - also if sourcelevel != 0? */
+  /* XXX - also if sourcelevel != 0? */
+  if (variable_context != 0 || executing_list)
     {
       ofifo = num_fifos ();
       ofifo_list = copy_fifo_list ((int *)&osize);
       begin_unwind_frame ("internal_fifos");
-      add_unwind_protect (xfree, ofifo_list);
+      if (ofifo_list)
+	add_unwind_protect (xfree, ofifo_list);
       saved_fifo = 1;
     }
   else
@@ -1067,26 +1069,10 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
     {
       nfifo = num_fifos ();
       if (nfifo > ofifo)
-	close_new_fifos ((char *)ofifo_list, osize);
+	close_new_fifos ((void *)ofifo_list, osize);
       free ((void *)ofifo_list);
       discard_unwind_frame ("internal_fifos");
     }
-# if defined (HAVE_DEV_FD)
-  /* Reap process substitutions at the end of loops */
-  switch (command->type)
-    {
-    case cm_while:
-    case cm_until:
-    case cm_for:
-    case cm_group:
-#    if defined (ARITH_FOR_COMMAND)
-    case cm_arith_for:
-#    endif
-      reap_procsubs ();
-    default:
-      break;
-    }
-#  endif /* HAVE_DEV_FD */
 #endif
 
   /* Invert the return value if we have to */
@@ -5182,7 +5168,7 @@ execute_builtin_or_function (words, builtin, var, redirects,
   REDIRECT *saved_undo_list;
 #if defined (PROCESS_SUBSTITUTION)
   int ofifo, nfifo, osize;
-  char *ofifo_list;
+  void *ofifo_list;
 #endif
 
 #if defined (PROCESS_SUBSTITUTION)

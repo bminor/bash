@@ -187,3 +187,7 @@
    interactive shells; define to 1 for the historical behavior of enabling
    when the shell is interactive. */
 #define HISTEXPAND_DEFAULT	1
+
+/* Undefine or define to 0 if you don't want to allow associative array
+   assignment using a compound list of key-value pairs. */
+#define ASSOC_KVPAIR_ASSIGNMENT 1

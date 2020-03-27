@@ -274,7 +274,7 @@ extern void _rl_restore_prompt PARAMS((void));
 extern char *_rl_make_prompt_for_search PARAMS((int));
 extern void _rl_erase_at_end_of_line PARAMS((int));
 extern void _rl_clear_to_eol PARAMS((int));
-extern void _rl_clear_screen PARAMS((void));
+extern void _rl_clear_screen PARAMS((int));
 extern void _rl_update_final PARAMS((void));
 extern void _rl_optimize_redisplay PARAMS((void));
 extern void _rl_redisplay_after_sigwinch PARAMS((void));
@@ -378,6 +378,7 @@ extern void _rl_output_character_function PARAMS((int));
 #else
 extern int _rl_output_character_function PARAMS((int));
 #endif
+extern void _rl_cr PARAMS((void));
 extern void _rl_output_some_chars PARAMS((const char *, int));
 extern int _rl_backspace PARAMS((int));
 extern void _rl_enable_meta_key PARAMS((void));
@@ -565,6 +566,7 @@ extern int _rl_term_autowrap;
 
 /* text.c */
 extern int _rl_optimize_typeahead;
+extern int _rl_keep_mark_active;
 
 /* undo.c */
 extern int _rl_doing_an_undo;

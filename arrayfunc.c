@@ -1,6 +1,6 @@
 /* arrayfunc.c -- High-level array functions used by other parts of the shell. */
 
-/* Copyright (C) 2001-2016 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -47,12 +47,14 @@ int assoc_expand_once = 0;
 /* Ditto for indexed array subscripts -- currently unused */
 int array_expand_once = 0;
 
-static SHELL_VAR *bind_array_var_internal __P((SHELL_VAR *, arrayind_t, char *, char *, int));
-static SHELL_VAR *assign_array_element_internal __P((SHELL_VAR *, char *, char *, char *, int, char *, int));
+static SHELL_VAR *bind_array_var_internal PARAMS((SHELL_VAR *, arrayind_t, char *, char *, int));
+static SHELL_VAR *assign_array_element_internal PARAMS((SHELL_VAR *, char *, char *, char *, int, char *, int));
 
-static char *quote_assign __P((const char *));
-static void quote_array_assignment_chars __P((WORD_LIST *));
-static char *array_value_internal __P((const char *, int, int, int *, arrayind_t *));
+static void assign_assoc_from_kvlist PARAMS((SHELL_VAR *, WORD_LIST *, HASH_TABLE *, int));
+
+static char *quote_assign PARAMS((const char *));
+static void quote_array_assignment_chars PARAMS((WORD_LIST *));
+static char *array_value_internal PARAMS((const char *, int, int, int *, arrayind_t *));
 
 /* Standard error message to use when encountering an invalid array subscript */
 const char * const bash_badsub_errmsg = N_("bad array subscript");
@@ -544,6 +546,51 @@ expand_compound_array_assignment (var, value, flags)
   return nlist;
 }
 
+#if ASSOC_KVPAIR_ASSIGNMENT
+static void
+assign_assoc_from_kvlist (var, nlist, h, flags)
+     SHELL_VAR *var;
+     WORD_LIST *nlist;
+     HASH_TABLE *h;
+     int flags;
+{
+  WORD_LIST *list;
+  char *akey, *aval, *k, *v;
+  int free_aval;
+
+  for (list = nlist; list; list = list->next)
+    {
+      free_aval = 0;
+
+      k = list->word->word;
+      v = list->next ? list->next->word->word : 0;
+
+      if (list->next)
+        list = list->next;
+
+      akey = expand_assignment_string_to_string (k, 0);
+      aval = expand_assignment_string_to_string (v, 0);
+
+      if (akey == 0 || *akey == 0)
+	{
+	  err_badarraysub (k);
+	  FREE (akey);
+	  continue;
+	}	      
+      if (aval == 0)
+	{
+	  aval = (char *)xmalloc (1);
+	  aval[0] = '\0';	/* like do_assignment_internal */
+	  free_aval = 1;
+	}
+
+      bind_assoc_var_internal (var, h, akey, aval, flags);
+      if (free_aval)
+	free (aval);
+    }
+}
+#endif
+     
 /* Callers ensure that VAR is not NULL. Associative array assignments have not
    been expanded when this is called, so we don't have to scan through the
    expanded subscript to find the ending bracket; indexed array assignments
@@ -581,6 +628,21 @@ assign_compound_array_list (var, nlist, flags)
     }
 
   last_ind = (a && (flags & ASS_APPEND)) ? array_max_index (a) + 1 : 0;
+
+#if ASSOC_KVPAIR_ASSIGNMENT
+  if (assoc_p (var) && nlist && (nlist->word->flags & W_ASSIGNMENT) == 0 && nlist->word->word[0] != '[')		/*]*/
+    {
+      iflags = flags & ~ASS_APPEND;
+      assign_assoc_from_kvlist (var, nlist, nhash, iflags);
+      if (nhash && nhash != h)
+	{
+	  h = assoc_cell (var);
+	  var_setassoc (var, nhash);
+	  assoc_dispose (h);
+	}
+      return;
+    }
+#endif
 
   for (list = nlist; list; list = list->next)
     {

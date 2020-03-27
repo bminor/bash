@@ -2311,6 +2311,15 @@ or information about @var{parameter} itself, depending on the value of
 @var{operator}.  Each @var{operator} is a single letter:
 
 @table @code
+@item U
+The expansion is a string that is the value of @var{parameter} with lowercase
+alphabetic characters converted to uppercase.
+@item u
+The expansion is a string that is the value of @var{parameter} with the first
+character converted to uppercase, if it is alphabetic.
+@item L
+The expansion is a string that is the value of @var{parameter} with uppercase
+alphabetic characters converted to lowercase.
 @item Q
 The expansion is a string that is the value of @var{parameter} quoted in a
 format that can be reused as input.
@@ -2324,6 +2333,11 @@ The expansion is a string that is the result of expanding the value of
 The expansion is a string in the form of
 an assignment statement or @code{declare} command that, if
 evaluated, will recreate @var{parameter} with its attributes and value.
+@item K
+Produces a possibly-quoted version of the value of @var{parameter},
+except that it prints the values of
+indexed and associative arrays as a sequence of quoted key-value pairs
+(@pxref{Arrays}).
 @item a
 The expansion is a string consisting of flag values representing
 @var{parameter}'s attributes.
@@ -4763,6 +4777,9 @@ The maximum number of file locks.
 @item -P
 The maximum number of pseudoterminals.
 
+@item -R
+The maximum time a real-time process can run before blocking, in microseconds.
+
 @item -T
 The maximum number of threads.
 @end table
@@ -4779,8 +4796,10 @@ is printed, unless the @option{-H} option is supplied.
 When setting new limits, if neither @option{-H} nor @option{-S} is supplied,
 both the hard and soft limits are set.
 If no option is given, then @option{-f} is assumed.  Values are in 1024-byte
-increments, except for @option{-t}, which is in seconds; @option{-p},
-which is in units of 512-byte blocks;
+increments, except for
+@option{-t}, which is in seconds;
+@option{-R}, which is in microseconds;
+@option{-p}, which is in units of 512-byte blocks;
 @option{-P},
 @option{-T},
 @option{-b},
@@ -6272,9 +6291,13 @@ not already set.
 The process @sc{id} of the shell's parent process.  This variable
 is readonly.
 
-@item PROMPT_COMMAND
-If set, the value is interpreted as a command to execute
-before the printing of each primary prompt (@env{$PS1}).
+@item PROMPT_COMMANDS
+If this array variable is set,
+the value of each set element is interpreted as a command to execute
+before printing the primary prompt (@env{$PS1}).
+If this is not set, but
+@env{PROMPT_COMMAND}
+is set to a value, its value is used as a command to execute instead.
 
 @item PROMPT_DIRTRIM
 If set to a number greater than zero, the value is used as the number of
@@ -6283,7 +6306,7 @@ trailing directory components to retain when expanding the @code{\w} and
 Characters removed are replaced with an ellipsis.
 
 @item PS0
-The value of this parameter is expanded like @var{PS1}
+The value of this parameter is expanded like @env{PS1}
 and displayed by interactive shells after reading a command
 and before the command is executed.
 
@@ -6820,8 +6843,8 @@ See @ref{Controlling the Prompt}, for a complete list of prompt
 string escape sequences.
 
 @item
-Bash executes the value of the @env{PROMPT_COMMAND} variable as a command
-before printing the primary prompt, @env{$PS1}
+Bash executes the values of the set elements of the @env{PROMPT_COMMANDS}
+array variable as commands before printing the primary prompt, @env{$PS1}
 (@pxref{Bash Variables}).
 
 @item
@@ -7281,14 +7304,24 @@ Arrays are assigned to using compound assignments of the form
 @end example
 @noindent
 where each
-@var{value} is of the form @code{[@var{subscript}]=}@var{string}.
+@var{value} may be of the form @code{[@var{subscript}]=}@var{string}.
 Indexed array assignments do not require anything but @var{string}.
 When assigning to indexed arrays, if
 the optional subscript is supplied, that index is assigned to;
 otherwise the index of the element assigned is the last index assigned
 to by the statement plus one.  Indexing starts at zero.
 
-When assigning to an associative array, the subscript is required.
+When assigning to an associative array, the words in a compound assignment
+may be either assignment statements, for which the subscript is required,
+or a list of words that is interpreted as a sequence of alternating keys
+and values:
+@var{name}=(@var{key1} @var{value1} @var{key2} @var{value2} @dots{} ).
+These are treated identically to
+@var{name}=( [@var{key1}]=@var{value1} [@var{key2}]=@var{value2} @dots{} ).
+The first word in the list determines how the remaining words
+are interpreted; all assignments in a list must be of the same type.
+When using key/value pairs, the keys may not be missing or empty;
+a final missing value is treated like the empty string.
 
 This syntax is also accepted by the @code{declare}
 builtin.  Individual array elements may be assigned to using the
@@ -7485,10 +7518,11 @@ to the @code{cd} builtin.
 @section Controlling the Prompt
 @cindex prompting
 
-The value of the variable @env{PROMPT_COMMAND} is examined just before
-Bash prints each primary prompt.  If @env{PROMPT_COMMAND} is set and
-has a non-null value, then the
-value is executed just as if it had been typed on the command line.
+Bash examines the value of the array variable @env{PROMPT_COMMANDS} just before
+printing each primary prompt.
+If any elements in  @env{PROMPT_COMMANDS} are set and non-null, Bash
+executes each value, in numeric order,
+just as if it had been typed on the command line.
 
 In addition, the following table describes the special characters which
 can appear in the prompt variables @env{PS0}, @env{PS1}, @env{PS2}, and

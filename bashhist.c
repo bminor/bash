@@ -805,7 +805,9 @@ check_add_history (line, force)
 }
 
 #if defined (SYSLOG_HISTORY)
-#define SYSLOG_MAXLEN 600
+#define SYSLOG_MAXMSG	1024
+#define SYSLOG_MAXLEN	SYSLOG_MAXMSG
+#define SYSLOG_MAXHDR	256
 
 #ifndef OPENLOG_OPTS
 #define OPENLOG_OPTS 0
@@ -821,7 +823,10 @@ void
 bash_syslog_history (line)
      const char *line;
 {
-  char trunc[SYSLOG_MAXLEN];
+  char trunc[SYSLOG_MAXLEN], *msg;
+  char loghdr[SYSLOG_MAXHDR];
+  char seqbuf[32], *seqnum;
+  int hdrlen, msglen, seqlen, chunks, i;
   static int first = 1;
 
   if (first)
@@ -830,13 +835,25 @@ bash_syslog_history (line)
       first = 0;
     }
 
-  if (strlen(line) < SYSLOG_MAXLEN)
-    syslog (SYSLOG_FACILITY|SYSLOG_LEVEL, "HISTORY: PID=%d UID=%d %s", getpid(), current_user.uid, line);
+  hdrlen = snprintf (loghdr, sizeof(loghdr), "HISTORY: PID=%d UID=%d", getpid(), current_user.uid);
+  msglen = strlen (line);
+
+  if ((msglen + hdrlen + 1) < SYSLOG_MAXLEN)
+    syslog (SYSLOG_FACILITY|SYSLOG_LEVEL, "%s %s", loghdr, line);
   else
     {
-      strncpy (trunc, line, SYSLOG_MAXLEN);
-      trunc[SYSLOG_MAXLEN - 1] = '\0';
-      syslog (SYSLOG_FACILITY|SYSLOG_LEVEL, "HISTORY (TRUNCATED): PID=%d UID=%d %s", getpid(), current_user.uid, trunc);
+      chunks = ((msglen + hdrlen) / SYSLOG_MAXLEN) + 1;
+      for (msg = line, i = 0; i < chunks; i++)
+	{
+	  seqnum = inttostr (i + 1, seqbuf, sizeof (seqbuf));
+	  seqlen = STRLEN (seqnum);
+
+	  /* 7 == "(seq=) " */
+	  strncpy (trunc, msg, SYSLOG_MAXLEN - hdrlen - seqlen - 7 - 1);
+	  trunc[SYSLOG_MAXLEN - 1] = '\0';
+	  syslog (SYSLOG_FACILITY|SYSLOG_LEVEL, "%s (seq=%s) %s", loghdr, seqnum, trunc);
+	  msg += SYSLOG_MAXLEN - hdrlen - seqlen - 8;
+	}
     }
 }
 #endif

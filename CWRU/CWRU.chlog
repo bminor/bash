@@ -7619,3 +7619,172 @@ syntax.h
 
 	  should output the same thing. From a report from Dan Jacobson
 	  <jidanni@jidanni.org> back in 1/2019.
+
+				   3/23
+				   ----
+subst.c
+	- string_transform: add `U' (convert to uppercase), `u' (convert
+	  first character to uppercase), and `L' (convert to lowercase)
+	  transformations. Inspired by a discussion with Phil Smith
+	  <phil@philsmith.com> back in May, 2019
+	- parameter_brace_transform: make sure `u', `U', and `L' are valid
+	  transform operators
+
+doc/{bash.1,bashref.texi}
+	- parameter transformation: document new `U', `u', and `L' operators
+
+eval.c
+	- execute_prompt_command: if an array variable PROMPT_COMMANDS exists,
+	  prefer it to PROMPT_COMMAND and execute all of the commands contained
+	  as array elements in index order. From a proposal by Daniel
+	  Colascione <dancol@google.com> back in 1/2018
+	- execute_array_command: function for array_walk to use when executing
+	  commands in PROMPT_COMMANDS
+
+doc/{bash.1,bashref.texi}
+	- PROMPT_COMMANDS: new array variable
+
+				   3/24
+				   ----
+builtins/ulimit.def
+	- new -R option, for RLIMIT_RTTIME (max time a real-time process can
+	  run without blocking). Patch from Maciej Wolny
+	  <maciekwolny123@gmail.com> back in 7/2017
+
+doc/{bash.1,bashref.texi}
+	- ulimit: document new -R option
+
+lib/readline/{display.c,rlprivate.h}
+	- _rl_clear_screen: now takes an argument saying whether to attempt to
+	  clear the terminal scrollback buffer if the right termcap capability
+	  exists
+
+lib/readline/{text.c,readline.h}
+	- rl_clear_display: new bindable command that clears the screen and
+	  scrollback buffer
+
+lib/readline/funmap.c
+	- clear-display: new bindable command name
+
+lib/readline/emacs_keymap.c
+	- emacs mode M-C-l now bound to clear-display
+
+doc/bash.1,lib/readline/doc/{readline.3,rluser.texi}
+	- clear-display: document new function and default emacs mode binding
+
+arrayfunc.c
+	- assign_assoc_from_kvlist: allow compound assignments to associative
+	  arrays that do not contain words of the form `[key]=value', assume
+	  such lists are of the form (key1 value1 key2 value2). A missing or
+	  empty key is an error; a missing value is treated as NULL. You
+	  cannot mix the two forms. Inspired by a suggestion from Sebastian
+	  Gniazdowski <sgniazdowski@gmail.com> back in 7/2019
+
+doc/{bash.1,bashref.texi}
+	- documented new associative array assignment syntax
+
+assoc.[ch]
+	- assoc_to_kvpair: new function that returns a string with quoted
+	  key/value pairs from given associative array
+
+array.[ch]
+	- array_to_kvpair: new function that returns a string with quoted
+	  key/value pairs from given indexed array (for completeness)
+
+subst.c
+	- parameter_brace_transform: new operator `K': produces the (possibly
+	  quoted) value of a variable, except for arrays, where it expands to
+	  indexed or associative array assignments in key/value pair form
+	- string_transform,parameter_list_transform: expand `K' to (possibly
+	  quoted) values
+	- array_var_assignment: take a new fourth argument saying which kind
+	  of assoc assignment statement to produce; calls array_to_kvpair or
+	  assoc_to_kvpair as appropriate and just returns that value if
+	  necessary without creating a declare command
+	- array_transform: if the operator is `K', call array_var_assignment
+	  with new argument that will produce a list of key/value pairs
+
+doc/{bash.1,bashref.texi}
+	- document new 'K' parameter transformation operator
+
+				   3/25
+				   ----
+doc/bash.1,lib/readline/doc/{history.3,readline.3}
+	- some text and formatting cleanups from Bjarni Ingi Gislason
+	  <bjarniig@rhi.hi.is>
+
+bashhist.c
+	- SYSLOG_MAXLEN: increase to 1024, since that seems to be what most
+	  syslog daemons handle
+	- bash_syslog_history: if the line is longer than SYSLOG_MAXLEN minus
+	  the header length, log it in multiple message with a sequence number
+	  instead of truncating. Inspired by a report from
+	  <sunhuilin@unionpay.com> back in 7/2018
+
+lib/readline/text.c
+	- rl_activate_mark,rl_deactivate_mark,rl_mark_is_active_p,
+	  rl_keep_mark_active: new functions to manage an active region. We
+	  don't do anything with an active region yet. Part of a large patch
+	  for active regions from Daniel Colascione <dancol@google.com>
+	  originally back in 3/2018
+	- rl_clear_screen: call rl_keep_mark_active to keep the region active
+	  across the screen refresh
+	- rl_newline: make sure to deactivate the region even though we don't
+	  do any redisplay with it yet
+
+lib/readline/readline.h
+	- rl_activate_mark,rl_deactivate_mark,rl_mark_is_active_p,
+	  rl_keep_mark_active: new extern function declarations. They are
+	  public functions for now
+
+lib/readline/readline.c
+	- readline_internal_setup: make sure the region starts out as not
+	  active
+	- readline_internal_charloop: make sure to deactivate the mark after
+	  a command, unless the command calls rl_keep_mark_active keep it
+	  active
+
+lib/readline/kill.c
+	- rl_bracketed_paste_begin: set rl_mark before inserting the pasted
+	  text, so the pasted text defines the region
+	- rl_bracketed_paste_begin: set the region as active after inserting
+	  the pasted text
+
+lib/readline/util.c
+	- _rl_abort_internal: make sure we deactivate the region
+
+lib/readline/{terminal.c,rlprivate.h}
+	- _rl_cr: new function to just output the term_cr (or '\r'). Part of
+	  the active region patch
+
+lib/readline/display.c
+	- _rl_cr: use where appropriate to replace MSDOS-dependent code and
+	  calls to tputs
+
+lib/readline/terminal.c
+	- get and store the terminal sequences to enter and exit standout
+	  (usually some background color) mode
+
+				   3/26
+				   ----
+subst.[ch]
+	- copy_fifo_list: now returns void *
+	- close_new_fifos: now takes a void * as the first argument, since it's
+	  usually the return value from copy_fifo_list
+	- close_new_fifos: (named pipes): cast first argument to a char *,
+	  since copy_fifo_list will (someday) return a bitmap
+	- close_new_fifos: (HAVE_DEV_FD): cast first argument to a pid_t *,
+	  since it takes a copy of dev_fd_list; use that in the loop to
+	  determine whether or not to close file descriptors. First half of
+	  fix for bug reported by Valentin Lab <valentin.lab@kalysto.org>
+	- unlink_fifo_list: (named pipes): when compacting the list, make sure
+	  to avoid the copy if i == j, and, after copying fifo_list[i] to
+	  fifo_list[j], null out fifo_list[i] so we don't try to access it
+	  later
+
+execute_cmd.c
+	- execute_command_internal: don't call reap_procsubs after executing
+	  the command. Rest of fix for bug reported by Valentin Lab
+	  <valentin.lab@kalysto.org>
+	- execute_command_internal,execute_builtin_or_function: ofifo_list is
+	  now a void * instead of a char *

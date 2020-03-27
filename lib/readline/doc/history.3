@@ -40,8 +40,8 @@
 .SH NAME
 history \- GNU History Library
 .SH COPYRIGHT
-.if t The GNU History Library is Copyright \(co 1989-2017 by the Free Software Foundation, Inc.
-.if n The GNU History Library is Copyright (C) 1989-2017 by the Free Software Foundation, Inc.
+.if t The GNU History Library is Copyright \(co 1989-2020 by the Free Software Foundation, Inc.
+.if n The GNU History Library is Copyright (C) 1989-2020 by the Free Software Foundation, Inc.
 .SH DESCRIPTION
 Many programs read input from the user a line at a time.  The GNU
 History library is able to keep track of those lines, associate arbitrary
@@ -49,7 +49,6 @@ data with each line, and utilize information from previous lines in
 composing new ones. 
 .PP
 .SH "HISTORY EXPANSION"
-.PP
 The history library supports a history expansion feature that
 is identical to the history expansion in
 .BR bash.
@@ -80,7 +79,6 @@ history expansion character, which is \^\fB!\fP\^ by default.
 Only backslash (\^\fB\e\fP\^) and single quotes can quote
 the history expansion character.
 .SS Event Designators
-.PP
 An event designator is a reference to a command line entry in the
 history list.
 Unless the reference is absolute, events are relative to the current
@@ -134,7 +132,6 @@ Equivalent to
 The entire command line typed so far.
 .PD
 .SS Word Designators
-.PP
 Word designators are used to select desired words from the event.
 A
 .B :
@@ -191,7 +188,6 @@ If \fBx\fP is missing, it defaults to 0.
 If a word designator is supplied without an event specification, the
 previous command is used as the event.
 .SS Modifiers
-.PP
 After the optional word designator, there may appear a sequence of
 one or more of the following modifiers, each preceded by a `:'.
 These modify, or edit, the word or words selected from the history event.
@@ -280,7 +276,6 @@ in the event line.
 .SH "PROGRAMMING WITH HISTORY FUNCTIONS"
 This section describes how to use the History library in other programs.
 .SS Introduction to History
-.PP
 The programmer using the History library has available functions
 for remembering lines on a history list, associating arbitrary data
 with a line, removing lines from the list, searching through the list
@@ -308,9 +303,7 @@ in any file that uses the
 History library's features.  It supplies extern declarations for all
 of the library's public functions and variables, and declares all of
 the public data structures.
-
 .SS History Storage
-.PP
 The history list is an array of history entries.  A history entry is
 declared as follows:
 .PP
@@ -346,7 +339,6 @@ typedef struct _hist_state {
 If the flags member includes \fBHS_STIFLED\fP, the history has been
 stifled.
 .SH "History Functions"
-.PP
 This section describes the calling sequence for the various functions
 exported by the GNU History library.
 .SS Initializing History and State Management
@@ -365,7 +357,6 @@ Return a structure describing the current state of the input history.
 Set the state of the history list according to \fIstate\fP.
 
 .SS History List Management
-
 These functions manage individual entries on the history list, or set
 parameters managing the list itself.
 

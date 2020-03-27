@@ -417,6 +417,8 @@ readline_internal_setup (void)
   if (rl_startup_hook)
     (*rl_startup_hook) ();
 
+  rl_deactivate_mark ();
+
 #if defined (VI_MODE)
   if (rl_editing_mode == vi_mode)
     rl_vi_insertion_mode (1, 'i');	/* don't want to reset last */
@@ -637,6 +639,11 @@ readline_internal_charloop (void)
 	 a prefix command, so nothing has changed yet. */
       if (rl_pending_input == 0 && lk == _rl_last_command_was_kill)
 	_rl_last_command_was_kill = 0;
+
+      if (_rl_keep_mark_active)
+        _rl_keep_mark_active = 0;
+      else if (rl_mark_active_p ())
+        rl_deactivate_mark ();
 
       _rl_internal_char_cleanup ();
 
@@ -1457,6 +1464,8 @@ rl_restore_state (struct readline_state *sp)
   rl_ignore_some_completions_function = sp->ignorefunc;
   rl_attempted_completion_function = sp->attemptfunc;
   rl_completer_word_break_characters = sp->wordbreakchars;
+
+  rl_deactivate_mark ();
 
   return (0);
 }

@@ -327,7 +327,7 @@ KEYMAP_ENTRY_ARRAY emacs_meta_keymap = {
   { ISFUNC, rl_tab_insert },		/* Meta-Control-i */
   { ISFUNC, rl_vi_editing_mode },	/* Meta-Control-j */
   { ISFUNC, (rl_command_func_t *)0x0 },	/* Meta-Control-k */
-  { ISFUNC, (rl_command_func_t *)0x0 },	/* Meta-Control-l */
+  { ISFUNC, rl_clear_display },		/* Meta-Control-l */
   { ISFUNC, rl_vi_editing_mode }, 	/* Meta-Control-m */
   { ISFUNC, (rl_command_func_t *)0x0 },	/* Meta-Control-n */
   { ISFUNC, (rl_command_func_t *)0x0 },	/* Meta-Control-o */

@@ -291,7 +291,7 @@ static char *parameter_brace_remove_pattern PARAMS((char *, char *, int, char *,
 
 static char *string_var_assignment PARAMS((SHELL_VAR *, char *));
 #if defined (ARRAY_VARS)
-static char *array_var_assignment PARAMS((SHELL_VAR *, int, int));
+static char *array_var_assignment PARAMS((SHELL_VAR *, int, int, int));
 #endif
 static char *pos_params_assignment PARAMS((WORD_LIST *, int, int));
 static char *string_transform PARAMS((int, SHELL_VAR *, char *));
@@ -5389,13 +5389,13 @@ clear_fifo_list ()
   nfifo = 0;
 }
 
-char *
+void *
 copy_fifo_list (sizep)
      int *sizep;
 {
   if (sizep)
     *sizep = 0;
-  return (char *)NULL;
+  return (void *)NULL;
 }
 
 static void
@@ -5461,8 +5461,13 @@ unlink_fifo_list ()
       for (i = j = 0; i < nfifo; i++)
 	if (fifo_list[i].file)
 	  {
-	    fifo_list[j].file = fifo_list[i].file;
-	    fifo_list[j].proc = fifo_list[i].proc;
+	    if (i != j)
+	      {
+		fifo_list[j].file = fifo_list[i].file;
+		fifo_list[j].proc = fifo_list[i].proc;
+		fifo_list[i].file = (char *)NULL;
+		fifo_list[i].proc = 0;
+	      }
 	    j++;
 	  }
       nfifo = j;
@@ -5478,10 +5483,11 @@ unlink_fifo_list ()
    case it's larger than fifo_list_size (size of fifo_list). */
 void
 close_new_fifos (list, lsize)
-     char *list;
+     void *list;
      int lsize;
 {
   int i;
+  char *plist;
 
   if (list == 0)
     {
@@ -5489,8 +5495,8 @@ close_new_fifos (list, lsize)
       return;
     }
 
-  for (i = 0; i < lsize; i++)
-    if (list[i] == 0 && i < fifo_list_size && fifo_list[i].proc != -1)
+  for (plist = (char *)list, i = 0; i < lsize; i++)
+    if (plist[i] == 0 && i < fifo_list_size && fifo_list[i].proc != -1)
       unlink_fifo (i);
 
   for (i = lsize; i < fifo_list_size; i++)
@@ -5623,22 +5629,22 @@ clear_fifo_list ()
   nfds = 0;
 }
 
-char *
+void *
 copy_fifo_list (sizep)
      int *sizep;
 {
-  char *ret;
+  void *ret;
 
   if (nfds == 0 || totfds == 0)
     {
       if (sizep)
 	*sizep = 0;
-      return (char *)NULL;
+      return (void *)NULL;
     }
 
   if (sizep)
     *sizep = totfds;
-  ret = (char *)xmalloc (totfds * sizeof (pid_t));
+  ret = xmalloc (totfds * sizeof (pid_t));
   return (memcpy (ret, dev_fd_list, totfds * sizeof (pid_t)));
 }
 
@@ -5711,10 +5717,11 @@ unlink_fifo_list ()
    totfds (size of dev_fd_list). */
 void
 close_new_fifos (list, lsize)
-     char *list;
+     void *list;
      int lsize;
 {
   int i;
+  pid_t *plist;
 
   if (list == 0)
     {
@@ -5722,8 +5729,8 @@ close_new_fifos (list, lsize)
       return;
     }
 
-  for (i = 0; i < lsize; i++)
-    if (list[i] == 0 && i < totfds && dev_fd_list[i])
+  for (plist = (pid_t *)list, i = 0; i < lsize; i++)
+    if (plist[i] == 0 && i < totfds && dev_fd_list[i])
       unlink_fifo (i);
 
   for (i = lsize; i < totfds; i++)
@@ -7634,17 +7641,21 @@ string_var_assignment (v, s)
 
 #if defined (ARRAY_VARS)
 static char *
-array_var_assignment (v, itype, quoted)
+array_var_assignment (v, itype, quoted, atype)
      SHELL_VAR *v;
-     int itype, quoted;
+     int itype, quoted, atype;
 {
   char *ret, *val, flags[MAX_ATTRIBUTES];
   int i;
 
   if (v == 0)
     return (char *)NULL;
-  val = array_p (v) ? array_to_assign (array_cell (v), 0)
-		    : assoc_to_assign (assoc_cell (v), 0);
+  if (atype == 2)
+    val = array_p (v) ? array_to_kvpair (array_cell (v), 0)
+		      : assoc_to_kvpair (assoc_cell (v), 0);
+  else
+    val = array_p (v) ? array_to_assign (array_cell (v), 0)
+		      : assoc_to_assign (assoc_cell (v), 0);
 
   if (val == 0 && (invisible_p (v) || var_isset (v) == 0))
     ;	/* placeholder */
@@ -7661,6 +7672,10 @@ array_var_assignment (v, itype, quoted)
       free (val);
       val = ret;
     }
+
+  if (atype == 2)
+    return val;
+
   i = var_attribute_string (v, 0, flags);
   ret = (char *)xmalloc (i + STRLEN (val) + strlen (v->name) + 16);
   if (val)
@@ -7713,6 +7728,9 @@ string_transform (xc, v, s)
       case 'A':
 	ret = string_var_assignment (v, s);
 	break;
+      case 'K':
+	ret = sh_quote_reusable (s, 0);
+	break;
       /* Transformations that modify the variable's value */
       case 'E':
 	t = ansiexpand (s, 0, strlen (s), (int *)0);
@@ -7725,6 +7743,15 @@ string_transform (xc, v, s)
       case 'Q':
 	ret = sh_quote_reusable (s, 0);
 	break;
+      case 'U':
+	ret = sh_modcase (s, 0, CASE_UPPER);
+	break;
+      case 'u':
+	ret = sh_modcase (s, 0, CASE_UPFIRST);	/* capitalize */
+ 	break;
+      case 'L':
+ 	ret = sh_modcase (s, 0, CASE_LOWER);
+ 	break;
       default:
 	ret = (char *)NULL;
 	break;
@@ -7805,7 +7832,9 @@ array_transform (xc, var, starsub, quoted)
   itype = starsub ? '*' : '@';
 
   if (xc == 'A')
-    return (array_var_assignment (v, itype, quoted));
+    return (array_var_assignment (v, itype, quoted, 1));
+  else if (xc == 'K')
+    return (array_var_assignment (v, itype, quoted, 2));
 
   /* special case for unset arrays and attributes */
   if (xc == 'a' && (invisible_p (v) || var_isset (v) == 0))
@@ -7860,9 +7889,13 @@ parameter_brace_transform (varname, value, ind, xform, rtype, quoted, pflags, fl
     {
     case 'a':		/* expand to a string with just attributes */
     case 'A':		/* expand as an assignment statement with attributes */
+    case 'K':		/* expand assoc array to list of key/value pairs */
     case 'E':		/* expand like $'...' */
     case 'P':		/* expand like prompt string */
     case 'Q':		/* quote reusably */
+    case 'U':		/* transform to uppercase */
+    case 'u':		/* tranform by capitalizing */
+    case 'L':		/* transform to lowercase */
       break;
     default:
       this_command_name = oname;
@@ -8108,7 +8141,7 @@ pat_subst (string, pat, rep, mflags)
 
   mtype = mflags & MATCH_TYPEMASK;
 
-#if 0	/* bash-4.2 ? */
+#if 0	/* TAG: bash-5.2? */
   rxpand = (rep && *rep) ? shouldexp_replacement (rep) : 0;
 #else
   rxpand = 0;

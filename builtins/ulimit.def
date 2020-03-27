@@ -52,6 +52,7 @@ Options:
   -v	the size of virtual memory
   -x	the maximum number of file locks
   -P	the maximum number of pseudoterminals
+  -R	the maximum time a real-time process can run before blocking
   -T	the maximum number of threads
 
 Not all options are available on all platforms.
@@ -232,8 +233,11 @@ static RESOURCE_LIMITS limits[] = {
 #ifdef RLIMIT_NPTS
   { 'P',	RLIMIT_NPTS,  1,	"number of pseudoterminals",	(char *)NULL },
 #endif
+#ifdef RLIMIT_RTTIME
+  { 'R',	RLIMIT_RTTIME,  1,	"real-time non-blocking time",	"microseconds" },
+#endif
 #ifdef RLIMIT_PTHREAD
-  { 'T',	RLIMIT_PTHREAD,  1,	"number of threads",	(char *)NULL },
+  { 'T',	RLIMIT_PTHREAD, 1,	"number of threads",	(char *)NULL },
 #endif
 #ifdef RLIMIT_SBSIZE
   { 'b',	RLIMIT_SBSIZE,  1,	"socket buffer size",	"bytes" },
@@ -741,7 +745,7 @@ printone (limind, curlim, pdesc)
       else
         sprintf (unitstr, "(-%c) ", limits[limind].option);
 
-      printf ("%-20s %16s", limits[limind].description, unitstr);
+      printf ("%-20s %20s", limits[limind].description, unitstr);
     }
   if (curlim == RLIM_INFINITY)
     puts ("unlimited");

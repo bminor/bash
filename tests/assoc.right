@@ -231,3 +231,21 @@ f: declare -a a
 main: declare -- a="7"
 f: declare -A a
 main: declare -- a="42"
+declare -A a=([3]="" [1]="2" )
+declare -A foo=([d]="4" [c]="3" [b]="2" [a]="1" )
+foo=( d "4" c "3" b "2" a "1" )
+declare -A foo=(["spa ces"]="2" ["\\"]="5" ["@"]="3" ["holy hell this works"]="4" ["a b"]="1" )
+foo=( echo "spa ces" "2" "\\" "5" "@" "3" "holy hell this works" "4" "a b" "1" )
+./assoc11.sub: line 34: "": bad array subscript
+declare -A foo=(["foo[bar"]="bleh" [";"]="semicolon" ["]"]="def" [a=b]="assignment" ["a]a"]="abc" )
+foo=( "foo[bar" "bleh" ";" "semicolon" "]" "def" a=b "assignment" "a]a" "abc" )
+declare -A foo=(["'"]="squote" ["\""]="dquote" ["\\"]="bslash" ["\`"]="backquote" )
+foo=( "'" "squote" "\"" "dquote" "\\" "bslash" "\`" "backquote" )
+declare -A foo=(["bar]bie"]="doll" ["a]=test1;#a"]="123" ["bar\"bie"]="doll" )
+foo=( "bar]bie" "doll" "a]=test1;#a" "123" "bar\"bie" "doll" )
+declare -A inside=([c]="3" [b]="2" [a]="1" )
+inside=( c "3" b "2" a "1" )
+declare -A dict=(["?"]="quest" ["*"]="star" ["'"]="squote" ["\$"]="dol" ["\""]="dquote" ["\\"]="bslash" ["@"]="at" ["}"]="rbrace" ["{"]="lbrace" ["\`"]="bquote" )
+dict=( "?" "quest" "*" "star" "'" "squote" "\$" "dol" "\"" "dquote" "\\" "bslash" "@" "at" "}" "rbrace" "{" "lbrace" "\`" "bquote" )
+declare -A foo=([two]="" [one]="1" )
+foo=( two "" one "1" )

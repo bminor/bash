@@ -86,6 +86,7 @@ extern ARRAY *array_assign_list __P((ARRAY *, WORD_LIST *));
 
 extern char **array_to_argv __P((ARRAY *));
 
+extern char *array_to_kvpair __P((ARRAY *, int));
 extern char *array_to_assign __P((ARRAY *, int));
 extern char *array_to_string __P((ARRAY *, char *, int));
 extern ARRAY *array_from_string __P((char *, char *));

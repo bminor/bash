@@ -9,7 +9,7 @@ use these features.  There is a document entitled "readline.texinfo"
 which contains both end-user and programmer documentation for the
 GNU Readline Library.
 
-Copyright (C) 1988--2016 Free Software Foundation, Inc.
+Copyright (C) 1988--2020 Free Software Foundation, Inc.
 
 Authored by Brian Fox and Chet Ramey.
 
@@ -1201,8 +1201,14 @@ Readline line does not take up more than one physical line or if the length
 of the current Readline line is not greater than the length of the prompt
 plus the screen width.
 
+@item clear-display (M-C-l)
+Clear the screen and, if possible, the terminal's scrollback buffer,
+then redraw the current line,
+leaving the current line at the top of the screen.
+
 @item clear-screen (C-l)
-Clear the screen and redraw the current line,
+Clear the screen,
+then redraw the current line,
 leaving the current line at the top of the screen.
 
 @item redraw-current-line ()

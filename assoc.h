@@ -53,6 +53,7 @@ extern HASH_TABLE *assoc_dequote __P((HASH_TABLE *));
 extern HASH_TABLE *assoc_dequote_escapes __P((HASH_TABLE *));
 extern HASH_TABLE *assoc_remove_quoted_nulls __P((HASH_TABLE *));
 
+extern char *assoc_to_kvpair __P((HASH_TABLE *, int));
 extern char *assoc_to_assign __P((HASH_TABLE *, int));
 
 extern WORD_LIST *assoc_to_word_list __P((HASH_TABLE *));

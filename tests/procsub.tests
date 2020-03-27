@@ -102,6 +102,7 @@ echo extern
 FN=$TMPDIR/bashtest-$$
 cat >$FN << \EOF
 wc -l < $1
+case $1 in *sh-np*) [ -e $1 ] || { echo 0; echo 0; echo 0; echo 0; return; } ;; esac
 wc -l < $1
 wc -l < $1
 true | wc -l < $1
@@ -117,3 +118,4 @@ moo() { ls -al "$1" >/dev/null; (true); ls -al "$1" >/dev/null; }; moo >(true)
 unset -f moo
 
 ${THIS_SH} ./procsub1.sub
+${THIS_SH} ./procsub2.sub

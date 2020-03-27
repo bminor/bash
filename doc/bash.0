@@ -1309,9 +1309,11 @@ PPAARRAAMMEETTEERRSS
               while the shell is running, bbaasshh enables _p_o_s_i_x _m_o_d_e, as  if  the
               command  _s_e_t  _-_o _p_o_s_i_x had been executed.  When the shell enters
               _p_o_s_i_x _m_o_d_e, it sets this variable if it was not already set.
-       PPRROOMMPPTT__CCOOMMMMAANNDD
-              If set, the value is executed as a command prior to issuing each
-              primary prompt.
+       PPRROOMMPPTT__CCOOMMMMAANNDDSS
+              If this array variable is set, the value of each set element  is
+              executed  as a command prior to issuing each primary prompt.  If
+              this is not set, but PPRROOMMPPTT__CCOOMMMMAANNDD is set to a value, its value
+              is used as a command to execute instead.
        PPRROOMMPPTT__DDIIRRTTRRIIMM
               If  set  to a number greater than zero, the value is used as the
               number of trailing directory components to retain when expanding
@@ -1427,14 +1429,22 @@ PPAARRAAMMEETTEERRSS
        rreeaaddoonnllyy builtins.  Each attribute applies to all members of an array.
 
        Arrays  are  assigned  to  using  compound  assignments  of  the   form
-       _n_a_m_e=((value_1  ...  value_n)),  where  each  _v_a_l_u_e  is  of  the form [_s_u_b_-
+       _n_a_m_e=((value_1  ...  value_n)),  where  each _v_a_l_u_e may be of the form [_s_u_b_-
        _s_c_r_i_p_t]=_s_t_r_i_n_g.  Indexed array assignments do not require anything  but
        _s_t_r_i_n_g.  When assigning to indexed arrays, if the optional brackets and
        subscript are supplied, that index is assigned to; otherwise the  index
        of  the element assigned is the last index assigned to by the statement
        plus one.  Indexing starts at zero.
 
-       When assigning to an associative array, the subscript is required.
+       When assigning to an associative array, the words in a compound assign-
+       ment  may  be  either assignment statements, for which the subscript is
+       required, or a list of words that is interpreted as a sequence  of  al-
+       ternating  keys and values: _n_a_m_e=(( _k_e_y_1 _v_a_l_u_e_1 _k_e_y_2 _v_a_l_u_e_2 ...)).  These
+       are treated identically to  _n_a_m_e=((  [_k_e_y_1]=_v_a_l_u_e_1  [_k_e_y_2]=_v_a_l_u_e_2  ...)).
+       The  first  word in the list determines how the remaining words are in-
+       terpreted; all assignments in a list must be of the  same  type.   When
+       using  key/value  pairs,  the keys may not be missing or empty; a final
+       missing value is treated like the empty string.
 
        This syntax is also accepted by the ddeeccllaarree builtin.  Individual  array
        elements  may be assigned to using the _n_a_m_e[_s_u_b_s_c_r_i_p_t]=_v_a_l_u_e syntax in-
@@ -1825,6 +1835,15 @@ EEXXPPAANNSSIIOONN
               itself, depending on the value of _o_p_e_r_a_t_o_r.  Each _o_p_e_r_a_t_o_r is  a
               single letter:
 
+              UU      The  expansion is a string that is the value of _p_a_r_a_m_e_t_e_r
+                     with lowercase alphabetic characters converted to  upper-
+                     case.
+              uu      The  expansion is a string that is the value of _p_a_r_a_m_e_t_e_r
+                     with the first character converted to uppercase, if it is
+                     alphabetic.
+              LL      The  expansion is a string that is the value of _p_a_r_a_m_e_t_e_r
+                     with uppercase alphabetic characters converted to  lower-
+                     case.
               QQ      The  expansion is a string that is the value of _p_a_r_a_m_e_t_e_r
                      quoted in a format that can be reused as input.
               EE      The expansion is a string that is the value of  _p_a_r_a_m_e_t_e_r
@@ -1836,6 +1855,9 @@ EEXXPPAANNSSIIOONN
               AA      The expansion is a string in the form  of  an  assignment
                      statement  or  ddeeccllaarree  command  that, if evaluated, will
                      recreate _p_a_r_a_m_e_t_e_r with its attributes and value.
+              KK      Identical to AA, except that it prints compound assignment
+                     statements that recreate associative arrays as a sequence
+                     of key-value pairs (see AArrrraayyss above).
               aa      The expansion is a string consisting of flag values  rep-
                      resenting _p_a_r_a_m_e_t_e_r's attributes.
 
@@ -3511,10 +3533,14 @@ RREEAADDLLIINNEE
               if  the  current  Readline  line  does not take up more than one
               physical line or if the length of the current Readline  line  is
               not greater than the length of the prompt plus the screen width.
+       cclleeaarr--ddiissppllaayy ((MM--CC--ll))
+              Clear  the  screen  and,  if possible, the terminal's scrollback
+              buffer, then redraw the current line, leaving the  current  line
+              at the top of the screen.
        cclleeaarr--ssccrreeeenn ((CC--ll))
-              Clear  the  screen  leaving  the  current line at the top of the
-              screen.  With an argument,  refresh  the  current  line  without
-              clearing the screen.
+              Clear the screen, then redraw the current line, leaving the cur-
+              rent line at the top of the screen.  With an  argument,  refresh
+              the current line without clearing the screen.
        rreeddrraaww--ccuurrrreenntt--lliinnee
               Refresh the current line.
 
@@ -4617,8 +4643,8 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               is  resumed.  The return value is 0 unless _n is not greater than
               or equal to 1.
 
-       ddeeccllaarree [--aaAAffFFggiillnnrrttuuxx] [--pp] [_n_a_m_e[=_v_a_l_u_e] ...]
-       ttyyppeesseett [--aaAAffFFggiillnnrrttuuxx] [--pp] [_n_a_m_e[=_v_a_l_u_e] ...]
+       ddeeccllaarree [--aaAAffFFggiiIIllnnrrttuuxx] [--pp] [_n_a_m_e[=_v_a_l_u_e] ...]
+       ttyyppeesseett [--aaAAffFFggiiIIllnnrrttuuxx] [--pp] [_n_a_m_e[=_v_a_l_u_e] ...]
               Declare variables and/or give them attributes.  If no _n_a_m_es  are
               given  then display the values of variables.  The --pp option will
               display the attributes and values of each _n_a_m_e.  When --pp is used
@@ -4635,9 +4661,13 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               _n_a_m_e  is  defined  are displayed as well.  The --FF option implies
               --ff.  The --gg option forces variables to be created or modified at
               the global scope, even when ddeeccllaarree is executed in a shell func-
-              tion.  It is ignored in all other cases.  The following  options
-              can  be  used to restrict output to variables with the specified
-              attribute or to give variables attributes:
+              tion.  It is ignored in all other cases.  The --II  option  causes
+              local  variables  to  inherit the attributes (except the _n_a_m_e_r_e_f
+              attribute) and value of any existing variable with the same _n_a_m_e
+              at  a  surrounding scope.  If there is no existing variable, the
+              local variable is initially unset.  The following options can be
+              used  to  restrict output to variables with the specified attri-
+              bute or to give variables attributes:
               --aa     Each _n_a_m_e  is  an  indexed  array  variable  (see  AArrrraayyss
                      above).
               --AA     Each  _n_a_m_e  is  an associative array variable (see AArrrraayyss
@@ -5970,7 +6000,7 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               function lookup, as with the ccoommmmaanndd builtin.  ttyyppee returns true
               if all of the arguments are found, false if any are not found.
 
-       uulliimmiitt [--HHSSaabbccddeeffiikkllmmnnppqqrrssttuuvvxxPPTT [_l_i_m_i_t]]
+       uulliimmiitt [--HHSSaabbccddeeffiikkllmmnnppqqrrssttuuvvxxPPRRTT [_l_i_m_i_t]]
               Provides  control  over the resources available to the shell and
               to processes started by it, on systems that allow such  control.
               The --HH and --SS options specify that the hard or soft limit is set
@@ -6011,16 +6041,19 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
                      shell and, on some systems, to its children
               --xx     The maximum number of file locks
               --PP     The maximum number of pseudoterminals
+              --RR     The maximum time  a  real-time  process  can  run  before
+                     blocking, in microseconds
               --TT     The maximum number of threads
 
-              If _l_i_m_i_t is given, and the --aa option is not used, _l_i_m_i_t  is  the
-              new  value  of  the  specified resource.  If no option is given,
-              then --ff is assumed.  Values are in 1024-byte increments,  except
-              for  --tt,  which is in seconds; --pp, which is in units of 512-byte
-              blocks; --PP, --TT, --bb, --kk, --nn, and --uu, which are  unscaled  values;
-              and, when in posix mode, --cc and --ff, which are in 512-byte incre-
-              ments.  The return status is 0 unless an invalid option or argu-
-              ment is supplied, or an error occurs while setting a new limit.
+              If  _l_i_m_i_t  is given, and the --aa option is not used, _l_i_m_i_t is the
+              new value of the specified resource.  If  no  option  is  given,
+              then  --ff is assumed.  Values are in 1024-byte increments, except
+              for --tt, which is in seconds; --RR, which is in  microseconds;  --pp,
+              which  is  in  units of 512-byte blocks; --PP, --TT, --bb, --kk, --nn, and
+              --uu, which are unscaled values; and, when in posix mode,  --cc  and
+              --ff,  which  are  in 512-byte increments.  The return status is 0
+              unless an invalid option or argument is supplied,  or  an  error
+              occurs while setting a new limit.
 
        uummaasskk [--pp] [--SS] [_m_o_d_e]
               The user file-creation mask is set to _m_o_d_e.  If _m_o_d_e begins with
@@ -6209,4 +6242,4 @@ BBUUGGSS
 
 
 
-GNU Bash 5.0                    2020 January 29                        BASH(1)
+GNU Bash 5.0                     2020 March 24                         BASH(1)

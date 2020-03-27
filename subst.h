@@ -272,9 +272,8 @@ extern int num_fifos PARAMS((void));
 extern void unlink_fifo_list PARAMS((void));
 extern void unlink_fifo PARAMS((int));
 
-extern char *copy_fifo_list PARAMS((int *));
-extern void unlink_new_fifos PARAMS((char *, int));
-extern void close_new_fifos PARAMS((char *, int));
+extern void *copy_fifo_list PARAMS((int *));
+extern void close_new_fifos PARAMS((void *, int));
 
 extern void clear_fifo_list PARAMS((void));
 

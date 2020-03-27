@@ -73,6 +73,7 @@ static const FUNMAP default_funmap[] = {
   { "capitalize-word", rl_capitalize_word },
   { "character-search", rl_char_search },
   { "character-search-backward", rl_backward_char_search },
+  { "clear-display", rl_clear_display },
   { "clear-screen", rl_clear_screen },
   { "complete", rl_complete },
   { "copy-backward-word", rl_copy_backward_word },

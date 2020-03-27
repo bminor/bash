@@ -7,7 +7,7 @@
  * chet@ins.cwru.edu
  */
 
-/* Copyright (C) 2008,2009,2011 Free Software Foundation, Inc.
+/* Copyright (C) 2008,2009,2011-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -369,6 +369,76 @@ assoc_modcase (h, pat, modop, mflags)
 }
 
 char *
+assoc_to_kvpair (hash, quoted)
+     HASH_TABLE *hash;
+     int quoted;
+{
+  char *ret;
+  char *istr, *vstr;
+  int i, rsize, rlen, elen;
+  BUCKET_CONTENTS *tlist;
+
+  if (hash == 0 || assoc_empty (hash))
+    return (char *)0;
+
+  ret = xmalloc (rsize = 128);
+  ret[rlen = 0] = '\0';
+
+  for (i = 0; i < hash->nbuckets; i++)
+    for (tlist = hash_items (i, hash); tlist; tlist = tlist->next)
+      {
+	if (ansic_shouldquote (tlist->key))
+	  istr = ansic_quote (tlist->key, 0, (int *)0);
+	else if (sh_contains_shell_metas (tlist->key))
+	  istr = sh_double_quote (tlist->key);
+	else if (ALL_ELEMENT_SUB (tlist->key[0]) && tlist->key[1] == '\0')
+	  istr = sh_double_quote (tlist->key);	
+	else
+	  istr = tlist->key;	
+
+	vstr = tlist->data ? (ansic_shouldquote ((char *)tlist->data) ?
+				ansic_quote ((char *)tlist->data, 0, (int *)0) :
+				sh_double_quote ((char *)tlist->data))
+			   : (char *)0;
+
+	elen = STRLEN (istr) + 4 + STRLEN (vstr);
+	RESIZE_MALLOCED_BUFFER (ret, rlen, (elen+1), rsize, rsize);
+
+	strcpy (ret+rlen, istr);
+	rlen += STRLEN (istr);
+	ret[rlen++] = ' ';
+	if (vstr)
+	  {
+	    strcpy (ret + rlen, vstr);
+	    rlen += STRLEN (vstr);
+	  }
+	else
+	  {
+	    strcpy (ret + rlen, "\"\"");
+	    rlen += 2;
+	  }
+	ret[rlen++] = ' ';
+
+	if (istr != tlist->key)
+	  FREE (istr);
+
+	FREE (vstr);
+    }
+
+  RESIZE_MALLOCED_BUFFER (ret, rlen, 1, rsize, 8);
+  ret[rlen] = '\0';
+
+  if (quoted)
+    {
+      vstr = sh_single_quote (ret);
+      free (ret);
+      ret = vstr;
+    }
+
+  return ret;
+}
+
+char *
 assoc_to_assign (hash, quoted)
      HASH_TABLE *hash;
      int quoted;
@@ -416,7 +486,6 @@ assoc_to_assign (hash, quoted)
 	    rlen += STRLEN (vstr);
 	  }
 	ret[rlen++] = ' ';
-
 
 	if (istr != tlist->key)
 	  FREE (istr);

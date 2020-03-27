@@ -259,13 +259,39 @@ send_pwd_to_eterm ()
   free (f);
 }
 
+#if defined (ARRAY_VARS)
+void
+execute_array_command (ae, v)
+     ARRAY_ELEMENT *ae;
+     void *v;
+{
+  char *tag, *command;
+
+  tag = (char *)v;
+  command = element_value (ae);
+  if (command && *command)
+    execute_variable_command (command, tag);
+}
+#endif
+  
 static void
 execute_prompt_command ()
 {
   char *command_to_execute;
+#if defined (ARRAY_VARS)
+  SHELL_VAR *pcv;
+  ARRAY *pcmds;
+
+  GET_ARRAY_FROM_VAR ("PROMPT_COMMANDS", pcv, pcmds);
+  if (pcv && var_isset (pcv) && pcmds && array_num_elements (pcmds) > 0)
+    {
+      array_walk (pcmds, execute_array_command, "PROMPT_COMMANDS");
+      return;
+    }
+#endif
 
   command_to_execute = get_string_value ("PROMPT_COMMAND");
-  if (command_to_execute)
+  if (command_to_execute && *command_to_execute)
     execute_variable_command (command_to_execute, "PROMPT_COMMAND");
 }
 /* Call the YACC-generated parser and return the status of the parse.

@@ -1323,12 +1323,7 @@ rl_redisplay (void)
 	      _rl_last_c_pos < PROMPT_ENDING_INDEX && local_prompt)
 #endif
 	    {
-#if defined (__MSDOS__)
-	      putc ('\r', rl_outstream);
-#else
-	      if (_rl_term_cr)
-		tputs (_rl_term_cr, 1, _rl_output_character_function);
-#endif
+	      _rl_cr ();
 	      if (modmark)
 		_rl_output_some_chars ("*", 1);
 
@@ -1962,11 +1957,7 @@ update_line (char *old, char *new, int current_line, int omax, int nmax, int inv
       (((od > 0 || nd > 0) && (od <= prompt_last_invisible || nd <= prompt_last_invisible)) ||
 		((od >= lendiff) && _rl_last_c_pos < PROMPT_ENDING_INDEX)))
     {
-#if defined (__MSDOS__)
-      putc ('\r', rl_outstream);
-#else
-      tputs (_rl_term_cr, 1, _rl_output_character_function);
-#endif
+      _rl_cr ();
       if (modmark)
 	_rl_output_some_chars ("*", 1);
       _rl_output_some_chars (local_prompt, lendiff);
@@ -2420,11 +2411,7 @@ rl_clear_visible_line (void)
   int curr_line;
 
   /* Make sure we move to column 0 so we clear the entire line */
-#if defined (__MSDOS__)
-  putc ('\r', rl_outstream);
-#else
-  tputs (_rl_term_cr, 1, _rl_output_character_function);
-#endif
+  _rl_cr ();
   _rl_last_c_pos = 0;
 
   /* Move to the last screen line of the current visible line */
@@ -2635,11 +2622,7 @@ _rl_move_cursor_relative (int new, const char *data)
   if (dpos == 0 || CR_FASTER (dpos, _rl_last_c_pos) ||
       (_rl_term_autowrap && i == _rl_screenwidth))
     {
-#if defined (__MSDOS__)
-      putc ('\r', rl_outstream);
-#else
-      tputs (_rl_term_cr, 1, _rl_output_character_function);
-#endif /* !__MSDOS__ */
+      _rl_cr ();
       cpos = _rl_last_c_pos = 0;
     }
 
@@ -2671,7 +2654,7 @@ _rl_move_cursor_relative (int new, const char *data)
 	    }
 	  else
 	    {
-	      tputs (_rl_term_cr, 1, _rl_output_character_function);
+	      _rl_cr ();
 	      for (i = 0; i < new; i++)
 		putc (data[i], rl_outstream);
 	    }
@@ -2706,11 +2689,7 @@ _rl_move_vert (int to)
     {
       for (i = 0; i < delta; i++)
 	putc ('\n', rl_outstream);
-#if defined (__MSDOS__)
-      putc ('\r', rl_outstream);
-#else
-      tputs (_rl_term_cr, 1, _rl_output_character_function);
-#endif
+      _rl_cr ();
       _rl_last_c_pos = 0;
     }
   else
@@ -3051,14 +3030,18 @@ space_to_eol (int count)
 }
 
 void
-_rl_clear_screen (void)
+_rl_clear_screen (int clrscr)
 {
 #if defined (__DJGPP__)
   ScreenClear ();
   ScreenSetCursor (0, 0);
 #else
   if (_rl_term_clrpag)
-    tputs (_rl_term_clrpag, 1, _rl_output_character_function);
+    {
+      tputs (_rl_term_clrpag, 1, _rl_output_character_function);
+      if (clrscr && _rl_term_clrscroll)
+	tputs (_rl_term_clrscroll, 1, _rl_output_character_function);
+    }
   else
     rl_crlf ();
 #endif /* __DJGPP__ */
@@ -3177,15 +3160,8 @@ _rl_update_final (void)
 static void
 cr (void)
 {
-  if (_rl_term_cr)
-    {
-#if defined (__MSDOS__)
-      putc ('\r', rl_outstream);
-#else
-      tputs (_rl_term_cr, 1, _rl_output_character_function);
-#endif
-      _rl_last_c_pos = 0;
-    }
+  _rl_cr ();
+  _rl_last_c_pos = 0;
 }
 
 /* Redraw the last line of a multi-line prompt that may possibly contain
@@ -3228,24 +3204,19 @@ _rl_redisplay_after_sigwinch (void)
     {
       _rl_move_vert (_rl_vis_botlin);
 
-#if defined (__MSDOS__)
-      putc ('\r', rl_outstream);
-#else
-      tputs (_rl_term_cr, 1, _rl_output_character_function);
-#endif
+      _rl_cr ();
       _rl_last_c_pos = 0;
-#if defined (__MSDOS__)
-      space_to_eol (_rl_screenwidth);
-      putc ('\r', rl_outstream);
-#else
+
+#if !defined (__MSDOS__)
       if (_rl_term_clreol)
 	tputs (_rl_term_clreol, 1, _rl_output_character_function);
       else
+#endif
 	{
 	  space_to_eol (_rl_screenwidth);
-	  tputs (_rl_term_cr, 1, _rl_output_character_function);
+	  _rl_cr ();
 	}
-#endif
+
       if (_rl_last_v_pos > 0)
 	_rl_move_vert (0);
     }
