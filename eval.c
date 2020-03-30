@@ -260,7 +260,7 @@ send_pwd_to_eterm ()
 }
 
 #if defined (ARRAY_VARS)
-void
+int
 execute_array_command (ae, v)
      ARRAY_ELEMENT *ae;
      void *v;
@@ -271,6 +271,7 @@ execute_array_command (ae, v)
   command = element_value (ae);
   if (command && *command)
     execute_variable_command (command, tag);
+  return 0;
 }
 #endif
   
@@ -294,6 +295,7 @@ execute_prompt_command ()
   if (command_to_execute && *command_to_execute)
     execute_variable_command (command_to_execute, "PROMPT_COMMAND");
 }
+
 /* Call the YACC-generated parser and return the status of the parse.
    Input is read from the current input stream (bash_input).  yyparse
    leaves the parsed command in the global variable GLOBAL_COMMAND.

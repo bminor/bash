@@ -121,4 +121,7 @@ extern ARRAY *array_from_string __P((char *, char *));
 
 #define ALL_ELEMENT_SUB(c)	((c) == '@' || (c) == '*')
 
+/* In eval.c, but uses ARRAY_ELEMENT * */
+extern int execute_array_command PARAMS((ARRAY_ELEMENT *, void *));
+
 #endif /* _ARRAY_H_ */
