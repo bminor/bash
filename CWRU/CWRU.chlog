@@ -7788,3 +7788,77 @@ execute_cmd.c
 	  <valentin.lab@kalysto.org>
 	- execute_command_internal,execute_builtin_or_function: ofifo_list is
 	  now a void * instead of a char *
+
+				   3/30
+				   ----
+lib/readline/{terminal.c,rlprivate.h}
+	- _rl_standout_{on,off}: new functions, to enter and exit terminal
+	  standout mode
+
+lib/readline/rlprivate.h
+	- _rl_refresh_line: new extern declaration
+
+lib/readline/display.c
+	- visible and invisible lines: added members to deal with tracking the
+	  `current face'
+	- realloc_line: broke code to manage visible_line and invisible_line
+	  allocation out of init_line_structures, added code to manage arrays
+	  of visible and invisible line face info per character
+	- invis_{addc,adds,nul}: new functions to add characters to the
+	  invisible line and keep the invisible face data updated with whatever
+	  the current face is
+	- set_active_region: keep track of the display region that should be
+	  in standout mode
+	- rl_redisplay: use invis_addc/adds/nul to update the invisible line
+	  buffer instead of modifying invisible_line directly
+	- _rl_refresh_line: moved body of function here from text.c
+
+lib/readline/text.c
+	- rl_refresh_line: now just calls _rl_refresh_line and marks the display
+	  as fixed
+
+				   3/31
+				   ----
+variables.c
+	- bind_variable_internal: dynamic variables with assignment functions
+	  now honor the readonly attribute by giving an error. Fixes issue
+	  reported by Rob Landley <rob@landley.net>
+	- assign_seconds: allow seconds to be assigned using an arithmetic
+	  expression
+	- assign_random: allow RANDOM to be assigned using an arithmetic
+	  expression
+
+doc/{bash.1,bashref.texi}
+	- HISTCMD: note that assignments to HISTCMD have no effect
+
+				    4/2
+				    ---
+execute_cmd.c
+	- execute_in_subshell: make sure we note that we're not reading our
+	  command input from a buffered stream any more, so we don't
+	  sync the buffered stream backwards in subsequent commands this
+	  subshell runs. Fixes bug reported by OÄuz <oguzismailuysal@gmail.com>
+
+				    4/3
+				    ---
+builtins/read.def
+	- read_builtin: if a read in posix mode is interrupted by a signal,
+	  make sure to preserve the value of errno around calls to
+	  check_signals and run_pending_traps so any error message isn't quite
+	  as confusing. Issue reported by Stan Marsh <gazelle@xmission.com>
+
+lib/sh/zread.c
+	- zread: preserve value of errno (always EINTR) around calls to
+	  check_signals or check_signals_and_traps
+
+trap.c
+	- run_debug_trap: allow suppress_debug_trap_verbose being set to
+	  turn off `set -v' temporarily while executing the DEBUG trap (if
+	  it's set)
+
+builtins/fc.def
+	- set suppress_debug_trap_verbose so set -v won't be in effect while
+	  the DEBUG trap runs. Most recently reported by Ami Fischman
+	  <ami@fischman.org>; originally raised by Boruch Baum
+	  <boruch_baum@gmx.com> back in 10/2017
+

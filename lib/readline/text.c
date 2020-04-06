@@ -580,18 +580,8 @@ rl_backward_word (int count, int key)
 int
 rl_refresh_line (int ignore1, int ignore2)
 {
-  int curr_line;
-
-  curr_line = _rl_current_display_line ();
-
-  _rl_move_vert (curr_line);
-  _rl_move_cursor_relative (0, rl_line_buffer);   /* XXX is this right */
-
-  _rl_clear_to_eol (0);		/* arg of 0 means to not use spaces */
-
-  rl_redraw_prompt_last_line ();
+  _rl_refresh_line ();
   rl_display_fixed = 1;
-
   return 0;
 }
 

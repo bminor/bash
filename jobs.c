@@ -4100,9 +4100,9 @@ set_job_status_and_cleanup (job)
 
 	  /* If the signal is trapped, let the trap handler get it no matter
 	     what and simply return if the trap handler returns.
-	    maybe_call_trap_handler() may cause dead jobs to be removed from
-	    the job table because of a call to execute_command.  We work
-	    around this by setting JOBS_LIST_FROZEN. */
+	     maybe_call_trap_handler() may cause dead jobs to be removed from
+	     the job table because of a call to execute_command.  We work
+	     around this by setting JOBS_LIST_FROZEN. */
 	  old_frozen = jobs_list_frozen;
 	  jobs_list_frozen = 1;
 	  tstatus = maybe_call_trap_handler (SIGINT);

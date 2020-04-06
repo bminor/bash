@@ -741,6 +741,30 @@ rl_ding (void)
 
 /* **************************************************************** */
 /*								    */
+/*		Entering and leaving terminal standout mode	    */
+/*								    */
+/* **************************************************************** */
+
+void
+_rl_standout_on (void)
+{
+#ifndef __MSDOS__
+  if (_rl_term_so && _rl_term_se)
+    tputs (_rl_term_so, 1, _rl_output_character_function);
+#endif
+}
+
+void
+_rl_standout_off (void)
+{
+#ifndef __MSDOS__
+  if (_rl_term_so && _rl_term_se)
+    tputs (_rl_term_se, 1, _rl_output_character_function);
+#endif
+}
+
+/* **************************************************************** */
+/*								    */
 /*	 	Controlling the Meta Key and Keypad		    */
 /*								    */
 /* **************************************************************** */

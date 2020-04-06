@@ -1,7 +1,7 @@
 /* rlprivate.h -- functions and variables global to the readline library,
 		  but not intended for use by applications. */
 
-/* Copyright (C) 1999-2019 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2020 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -267,7 +267,6 @@ extern void _rl_free_match_list PARAMS((char **));
 /* display.c */
 extern char *_rl_strip_prompt PARAMS((char *));
 extern void _rl_reset_prompt PARAMS((void));
-extern void _rl_move_cursor_relative PARAMS((int, const char *));
 extern void _rl_move_vert PARAMS((int));
 extern void _rl_save_prompt PARAMS((void));
 extern void _rl_restore_prompt PARAMS((void));
@@ -281,6 +280,7 @@ extern void _rl_redisplay_after_sigwinch PARAMS((void));
 extern void _rl_clean_up_for_exit PARAMS((void));
 extern void _rl_erase_entire_line PARAMS((void));
 extern int _rl_current_display_line PARAMS((void));
+extern void _rl_refresh_line PARAMS((void));
 
 /* input.c */
 extern int _rl_any_typein PARAMS((void));
@@ -385,6 +385,8 @@ extern void _rl_enable_meta_key PARAMS((void));
 extern void _rl_disable_meta_key PARAMS((void));
 extern void _rl_control_keypad PARAMS((int));
 extern void _rl_set_cursor PARAMS((int, int));
+extern void _rl_standout_on PARAMS((void));
+extern void _rl_standout_off PARAMS((void));
 
 /* text.c */
 extern void _rl_fix_point PARAMS((int));

@@ -1,6 +1,6 @@
 /* variables.c -- Functions for hacking shell variables. */
 
-/* Copyright (C) 1987-2019 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -94,6 +94,7 @@
 
 #define FV_FORCETEMPENV		0x01
 #define FV_SKIPINVISIBLE	0x02
+#define FV_NODYNAMIC		0x04
 
 extern char **environ;
 
@@ -1297,8 +1298,14 @@ assign_seconds (self, value, unused, key)
      char *key;
 {
   struct timeval tv;
-  if (legal_number (value, &seconds_value_assigned) == 0)
-    seconds_value_assigned = 0;
+  intmax_t nval;
+  int expok;
+
+  if (integer_p (self))
+    nval = evalexp (value, 0, &expok);
+  else
+    expok = legal_number (value, &nval);
+  seconds_value_assigned = expok ? nval : 0;
   gettimeofday (&tv, NULL);
   shell_start_time = tv.tv_sec;
   return (self);
@@ -1503,7 +1510,16 @@ assign_random (self, value, unused, key)
      arrayind_t unused;
      char *key;
 {
-  sbrand (strtoul (value, (char **)NULL, 10));
+  intmax_t seedval;
+  int expok;
+
+  if (integer_p (self))
+    seedval = evalexp (value, 0, &expok);
+  else
+    expok = legal_number (value, &seedval);
+  if (expok == 0)
+    return (self);
+  sbrand (seedval);
   if (subshell_environment)
     seeded_subshell = getpid ();
   return (self);
@@ -3280,6 +3296,13 @@ bind_variable_internal (name, value, table, hflags, aflags)
     }
   else if (entry->assign_func)	/* array vars have assign functions now */
     {
+      if ((readonly_p (entry) && (aflags & ASS_FORCE) == 0) || noassign_p (entry))
+	{
+	  if (readonly_p (entry))
+	    err_readonly (name_cell (entry));
+	  return (entry);
+	}
+
       INVALIDATE_EXPORTSTR (entry);
       newval = (aflags & ASS_APPEND) ? make_variable_value (entry, value, aflags) : value;
       if (assoc_p (entry))

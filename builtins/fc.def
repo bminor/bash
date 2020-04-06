@@ -1,7 +1,7 @@
 This file is fc.def, from which is created fc.c.
 It implements the builtin "fc" in Bash.
 
-Copyright (C) 1987-2015 Free Software Foundation, Inc.
+Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -86,9 +86,11 @@ $END
 extern int errno;
 #endif /* !errno */
 
-extern int unlink __P((const char *));
+extern int unlink PARAMS((const char *));
 
-extern FILE *sh_mktmpfp __P((char *, int, char **));
+extern FILE *sh_mktmpfp PARAMS((char *, int, char **));
+
+extern int suppress_debug_trap_verbose;
 
 /* **************************************************************** */
 /*								    */
@@ -144,14 +146,14 @@ typedef struct repl {
 		} \
 	} while (0)
 
-static char *fc_dosubs __P((char *, REPL *));
-static char *fc_gethist __P((char *, HIST_ENTRY **));
-static int fc_gethnum __P((char *, HIST_ENTRY **));
-static int fc_number __P((WORD_LIST *));
-static void fc_replhist __P((char *));
+static char *fc_dosubs PARAMS((char *, REPL *));
+static char *fc_gethist PARAMS((char *, HIST_ENTRY **));
+static int fc_gethnum PARAMS((char *, HIST_ENTRY **));
+static int fc_number PARAMS((WORD_LIST *));
+static void fc_replhist PARAMS((char *));
 #ifdef INCLUDE_UNUSED
-static char *fc_readline __P((FILE *));
-static void fc_addhist __P((char *));
+static char *fc_readline PARAMS((FILE *));
+static void fc_addhist PARAMS((char *));
 #endif
 
 static void
@@ -470,7 +472,9 @@ fc_builtin (list)
   add_unwind_protect (xfree, fn);
   add_unwind_protect (unlink, fn);
   add_unwind_protect (set_verbose_flag, (char *)NULL);
+  unwind_protect_int (suppress_debug_trap_verbose);
   echo_input_at_read = 1;
+  suppress_debug_trap_verbose = 1;
 
   retval = fc_execute_file (fn);
   run_unwind_frame ("fc builtin");

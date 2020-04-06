@@ -121,6 +121,9 @@ int wait_signal_received;
 
 int trapped_signal_received;
 
+/* Set to 1 to suppress the effect of `set v' in the DEBUG trap. */
+int suppress_debug_trap_verbose = 0;
+
 #define GETORIGSIG(sig) \
   do { \
     original_signals[sig] = (SigHandler *)set_signal_handler (sig, SIG_DFL); \
@@ -1137,9 +1140,7 @@ run_debug_trap ()
 #endif
 
       old_verbose = echo_input_at_read;
-#if 0	/* not yet */
-      echo_input_at_read = 0;
-#endif
+      echo_input_at_read = suppress_debug_trap_verbose ? 0 : echo_input_at_read;
 
       trap_exit_value = _run_trap_internal (DEBUG_TRAP, "debug trap");
 

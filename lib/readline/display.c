@@ -1,6 +1,6 @@
 /* display.c -- readline redisplay facility. */
 
-/* Copyright (C) 1987-2019 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library    
    for reading lines of text with interactive input and history editing.
@@ -70,6 +70,7 @@ static void insert_some_chars PARAMS((char *, int, int));
 static void open_some_spaces PARAMS((int));
 static void cr PARAMS((void));
 static void redraw_prompt PARAMS((char *));
+static void _rl_move_cursor_relative PARAMS((int, const char *));
 
 /* Values for FLAGS */
 #define PMT_MULTILINE	0x01
@@ -82,6 +83,7 @@ static char *expand_prompt PARAMS((char *, int, int *, int *, int *, int *));
 struct line_state
   {
     char *line;
+    char *lface;
     int *lbreaks;
     int lbsize;
 #if defined (HANDLE_MULTIBYTE)
@@ -104,7 +106,9 @@ static int line_structures_initialized = 0;
 #define vis_lbsize	(line_state_visible->lbsize)
 
 #define visible_line	(line_state_visible->line)
+#define vis_face	(line_state_visible->lface)
 #define invisible_line	(line_state_invisible->line)
+#define inv_face	(line_state_invisible->lface)
 
 #if defined (HANDLE_MULTIBYTE)
 static int _rl_col_width PARAMS((const char *, int, int, int));
@@ -125,6 +129,10 @@ static int _rl_col_width PARAMS((const char *, int, int, int));
    to use prompt_last_invisible directly. */
 #define PROMPT_ENDING_INDEX \
   ((MB_CUR_MAX > 1 && rl_byte_oriented == 0) ? prompt_physical_chars : prompt_last_invisible+1)
+
+#define FACE_NORMAL	'0'
+#define FACE_STANDOUT	'1'
+#define FACE_INVALID	((char)1)
   
 /* **************************************************************** */
 /*								    */
@@ -223,7 +231,7 @@ static int msg_bufsiz = 0;
 static int forced_display;
 
 /* Default and initial buffer size.  Can grow. */
-static int line_size  = DEFAULT_LINE_BUFFER_SIZE;
+static int line_size  = 0;
 
 /* Set to a non-zero value if horizontal scrolling has been enabled
    automatically because the terminal was resized to height 1. */
@@ -602,6 +610,42 @@ rl_expand_prompt (char *prompt)
     }
 }
 
+/* Allocate the various line structures, making sure they can hold MINSIZE
+   bytes. If the existing line size can accommodate MINSIZE bytes, don't do
+   anything. */
+static void
+realloc_line (int minsize)
+{
+  int minimum_size;
+  int newsize, delta;
+
+  minimum_size = DEFAULT_LINE_BUFFER_SIZE;
+  if (minsize < minimum_size)
+    minsize = minimum_size;
+  if (minsize <= _rl_screenwidth)	/* XXX - for gdb */
+    minsize = _rl_screenwidth + 1;
+  if (line_size >= minsize)
+    return;
+
+  newsize = minimum_size;
+  while (newsize < minsize)
+    newsize *= 2;
+
+  visible_line = (char *)xrealloc (visible_line, newsize);
+  vis_face = (char *)xrealloc (vis_face, newsize);
+
+  invisible_line = (char *)xrealloc (invisible_line, newsize);
+  inv_face = (char *)xrealloc (inv_face, newsize);
+
+  delta = newsize - line_size;  
+  memset (visible_line + line_size, 0, delta);
+  memset (vis_face + line_size, FACE_NORMAL, delta);
+  memset (invisible_line + line_size, 1, delta);
+  memset (inv_face + line_size, FACE_INVALID, delta);
+
+  line_size = newsize;
+}
+
 /* Initialize the VISIBLE_LINE and INVISIBLE_LINE arrays, and their associated
    arrays of line break markers.  MINSIZE is the minimum size of VISIBLE_LINE
    and INVISIBLE_LINE; if it is greater than LINE_SIZE, LINE_SIZE is
@@ -610,34 +654,12 @@ rl_expand_prompt (char *prompt)
 static void
 init_line_structures (int minsize)
 {
-  register int n;
-  int osize;
-
-  osize = minsize;
-  if (minsize <= _rl_screenwidth)	/* XXX - for gdb */
-    minsize = _rl_screenwidth + 1;
-
   if (invisible_line == 0)	/* initialize it */
     {
-      if (line_size < minsize)
-	line_size = minsize;
-      visible_line = (char *)xmalloc (line_size);
-      invisible_line = (char *)xmalloc (line_size);
+      if (line_size > minsize)
+	minsize = line_size;
     }
-  else if (line_size < minsize)	/* ensure it can hold MINSIZE chars */
-    {
-      line_size *= 2;
-      if (line_size < minsize)
-	line_size = minsize;
-      visible_line = (char *)xrealloc (visible_line, line_size);
-      invisible_line = (char *)xrealloc (invisible_line, line_size);
-    }
-
-  for (n = osize; n < line_size; n++)
-    {
-      visible_line[n] = 0;
-      invisible_line[n] = 1;
-    }
+   realloc_line (minsize); 
 
   if (vis_lbreaks == 0)
     {
@@ -660,6 +682,43 @@ init_line_structures (int minsize)
   line_structures_initialized = 1;
 }
 
+/* Convenience functions to add chars to the invisible line that update the
+   face information at the same time. */
+static void		/* XXX - change this */
+invis_addc (int *outp, char c, char face)
+{
+  realloc_line (*outp + 1);
+  invisible_line[*outp] = c;
+  inv_face[*outp] = face;
+  *outp += 1;
+}
+
+static void
+invis_adds (int *outp, const char *str, int n, char face)
+{
+  int i;
+
+  for (i = 0; i < n; i++)
+    invis_addc (outp, str[i], face);
+}
+
+static void
+invis_nul (int *outp)
+{
+  invis_addc (outp, '\0', 0);
+  *outp -= 1;
+}
+
+static void
+set_active_region (int *beg, int *end)
+{
+  if (rl_point >= 0 && rl_point <= rl_end && rl_mark >= 0 && rl_mark <= rl_end)
+    {
+      *beg = (rl_mark < rl_point) ? rl_mark : rl_point;
+      *end = (rl_mark < rl_point) ? rl_point : rl_mark;
+    }
+}
+
 /* Do whatever tests are necessary and tell update_line that it can do a
    quick, dumb redisplay on the assumption that there are so many
    differences between the old and new lines that it would be a waste to
@@ -678,11 +737,12 @@ _rl_optimize_redisplay (void)
 void
 rl_redisplay (void)
 {
-  register int in, out, c, linenum, cursor_linenum;
-  register char *line;
+  int in, out, c, linenum, cursor_linenum;
   int inv_botlin, lb_botlin, lb_linenum, o_cpos;
   int newlines, lpos, temp, n0, num, prompt_lines_estimate;
   char *prompt_this_line;
+  char cur_face;
+  int hl_begin, hl_end;
   int mb_cur_max = MB_CUR_MAX;
 #if defined (HANDLE_MULTIBYTE)
   wchar_t wc;
@@ -699,6 +759,14 @@ rl_redisplay (void)
      data structures. */
   _rl_block_sigint ();  
   RL_SETSTATE (RL_STATE_REDISPLAYING);
+
+  cur_face = FACE_NORMAL;
+  /* Can turn this into an array for multiple highlighted objects in addition
+     to the region */
+  hl_begin = hl_end = -1;
+
+  if (rl_mark_active_p ())
+    set_active_region (&hl_begin, &hl_end);
 
   if (!rl_display_prompt)
     rl_display_prompt = "";
@@ -728,7 +796,6 @@ rl_redisplay (void)
 
   prompt_multibyte_chars = prompt_visible_length - prompt_physical_chars;
 
-  line = invisible_line;
   out = inv_botlin = 0;
 
   /* Mark the line as modified or not.  We only do this for history
@@ -736,8 +803,8 @@ rl_redisplay (void)
   modmark = 0;
   if (_rl_mark_modified_lines && current_history () && rl_undo_list)
     {
-      line[out++] = '*';
-      line[out] = '\0';
+      invis_addc (&out, '*', cur_face);
+      invis_nul (&out);
       modmark = 1;
     }
 
@@ -762,17 +829,9 @@ rl_redisplay (void)
 
       if (local_prompt_len > 0)
 	{
-	  temp = local_prompt_len + out + 2;
-	  if (temp >= line_size)
-	    {
-	      line_size = (temp + 1024) - (temp % 1024);
-	      visible_line = (char *)xrealloc (visible_line, line_size);
-	      line = invisible_line = (char *)xrealloc (invisible_line, line_size);
-	    }
-	  strncpy (line + out, local_prompt, local_prompt_len);
-	  out += local_prompt_len;
+	  invis_adds (&out, local_prompt, local_prompt_len, cur_face);
+	  invis_nul (&out);
 	}
-      line[out] = '\0';
       wrap_offset = local_prompt_len - prompt_visible_length;
     }
   else
@@ -796,16 +855,8 @@ rl_redisplay (void)
 	}
 
       prompt_physical_chars = pmtlen = strlen (prompt_this_line);	/* XXX */
-      temp = pmtlen + out + 2;
-      if (temp >= line_size)
-	{
-	  line_size = (temp + 1024) - (temp % 1024);
-	  visible_line = (char *)xrealloc (visible_line, line_size);
-	  line = invisible_line = (char *)xrealloc (invisible_line, line_size);
-	}
-      strncpy (line + out,  prompt_this_line, pmtlen);
-      out += pmtlen;
-      line[out] = '\0';
+      invis_adds (&out, prompt_this_line, pmtlen, cur_face);
+      invis_nul (&out);
       wrap_offset = prompt_invis_chars_first_line = 0;
     }
 
@@ -967,14 +1018,6 @@ rl_redisplay (void)
 	}
 #endif
 
-      if (out + 8 >= line_size)		/* XXX - 8 for \t */
-	{
-	  line_size *= 2;
-	  visible_line = (char *)xrealloc (visible_line, line_size);
-	  invisible_line = (char *)xrealloc (invisible_line, line_size);
-	  line = invisible_line;
-	}
-
       if (in == rl_point)
 	{
 	  cpos_buffer_position = out;
@@ -989,9 +1032,12 @@ rl_redisplay (void)
 	{
 	  if (_rl_output_meta_chars == 0)
 	    {
-	      sprintf (line + out, "\\%o", c);
+	      char obuf[5];
+	      int olen;
 
-	      if (lpos + 4 >= _rl_screenwidth)
+	      olen = sprintf (obuf, "\\%o", c);
+	  
+	      if (lpos + olen >= _rl_screenwidth)
 		{
 		  temp = _rl_screenwidth - lpos;
 		  CHECK_INV_LBREAKS ();
@@ -999,16 +1045,20 @@ rl_redisplay (void)
 #if defined (HANDLE_MULTIBYTE)
 		  line_state_invisible->wrapped_line[newlines] = _rl_wrapped_multicolumn;
 #endif
-		  lpos = 4 - temp;
+		  lpos = olen - temp;
 		}
 	      else
-		lpos += 4;
+		lpos += olen;
 
-	      out += 4;
+	      for (temp = 0; temp < olen; temp++)
+		{
+		  invis_addc (&out, obuf[temp], cur_face);
+		  CHECK_LPOS ();
+		}
 	    }
 	  else
 	    {
-	      line[out++] = c;
+	      invis_addc (&out, c, cur_face);
 	      CHECK_LPOS();
 	    }
 	}
@@ -1030,19 +1080,19 @@ rl_redisplay (void)
 #endif
 	      lpos = temp - temp2;
 	      while (out < newout)
-		line[out++] = ' ';
+		invis_addc (&out, ' ', cur_face);
 	    }
 	  else
 	    {
 	      while (out < newout)
-		line[out++] = ' ';
+		invis_addc (&out, ' ', cur_face);
 	      lpos += temp;
 	    }
 	}
 #endif
       else if (c == '\n' && _rl_horizontal_scroll_mode == 0 && _rl_term_up && *_rl_term_up)
 	{
-	  line[out++] = '\0';	/* XXX - sentinel */
+	  invis_addc (&out, '\0', cur_face);
 	  CHECK_INV_LBREAKS ();
 	  inv_lbreaks[++newlines] = out;
 #if defined (HANDLE_MULTIBYTE)
@@ -1052,9 +1102,9 @@ rl_redisplay (void)
 	}
       else if (CTRL_CHAR (c) || c == RUBOUT)
 	{
-	  line[out++] = '^';
+	  invis_addc (&out, '^', cur_face);
 	  CHECK_LPOS();
-	  line[out++] = CTRL_CHAR (c) ? UNCTRL (c) : '?';
+	  invis_addc (&out, CTRL_CHAR (c) ? UNCTRL (c) : '?', cur_face);
 	  CHECK_LPOS();
 	}
       else
@@ -1070,7 +1120,7 @@ rl_redisplay (void)
 		for (i = lpos; i < _rl_screenwidth; i++)
 		  {
 		    /* The space will be removed in update_line() */
-		    line[out++] = ' ';
+		    invis_addc (&out, ' ', cur_face);
 		    _rl_wrapped_multicolumn++;
 		    CHECK_LPOS();
 		  }
@@ -1080,17 +1130,17 @@ rl_redisplay (void)
 		  lb_linenum = newlines;
 		}
 	      for (i = in; i < in+wc_bytes; i++)
-		line[out++] = rl_line_buffer[i];
+		invis_addc (&out, rl_line_buffer[i], cur_face);
 	      for (i = 0; i < wc_width; i++)
 		CHECK_LPOS();
 	    }
 	  else
 	    {
-	      line[out++] = c;
+	      invis_addc (&out, c, cur_face);
 	      CHECK_LPOS();
 	    }
 #else
-	  line[out++] = c;
+	  invis_addc (&out, c, cur_face);
 	  CHECK_LPOS();
 #endif
 	}
@@ -1112,7 +1162,7 @@ rl_redisplay (void)
         in++;
 #endif
     }
-  line[out] = '\0';
+  invis_nul (&out);
   line_totbytes = out;
   if (cpos_buffer_position < 0)
     {
@@ -1161,7 +1211,7 @@ rl_redisplay (void)
 	    {
 #if defined (HANDLE_MULTIBYTE)
 	      if (mb_cur_max > 1 && rl_byte_oriented == 0)
-		out = _rl_find_prev_mbchar (line, _rl_screenchars, MB_FIND_ANY);
+		out = _rl_find_prev_mbchar (invisible_line, _rl_screenchars, MB_FIND_ANY);
 	      else
 #endif
 		out = _rl_screenchars - 1;
@@ -1179,8 +1229,11 @@ rl_redisplay (void)
 #define VIS_LLEN(l)	((l) > _rl_vis_botlin ? 0 : (vis_lbreaks[l+1] - vis_lbreaks[l]))
 #define INV_LLEN(l)	(inv_lbreaks[l+1] - inv_lbreaks[l])
 #define VIS_CHARS(line) (visible_line + vis_lbreaks[line])
+#define VIS_FACE(line) (visible_face + vis_lbreaks[line]);
 #define VIS_LINE(line) ((line) > _rl_vis_botlin) ? "" : VIS_CHARS(line)
+#define VIS_LINE_FACE(line) ((line) > _rl_vis_botlin) ? "" : VIS_FACE(line)
 #define INV_LINE(line) (invisible_line + inv_lbreaks[line])
+#define INV_LINE_FACE(line) (invisible_face + inv_lbreaks[line])
 
 #define OLD_CPOS_IN_PROMPT() (cpos_adjusted == 0 && \
 			_rl_last_c_pos != o_cpos && \
@@ -1427,7 +1480,7 @@ rl_redisplay (void)
       /* If the first character on the screen isn't the first character
 	 in the display line, indicate this with a special character. */
       if (lmargin > 0)
-	line[lmargin] = '<';
+	invisible_line[lmargin] = '<';
 
       /* If SCREENWIDTH characters starting at LMARGIN do not encompass
 	 the whole line, indicate that with a special character at the
@@ -1435,7 +1488,7 @@ rl_redisplay (void)
 	 wrap offset into account. */
       t = lmargin + M_OFFSET (lmargin, wrap_offset) + _rl_screenwidth;
       if (t > 0 && t < out)
-	line[t - 1] = '>';
+	invisible_line[t - 1] = '>';
 
       if (rl_display_fixed == 0 || forced_display || lmargin != last_lmargin)
 	{
@@ -2524,7 +2577,7 @@ rl_redraw_prompt_last_line (void)
    DATA is the contents of the screen line of interest; i.e., where
    the movement is being done.
    DATA is always the visible line or the invisible line */
-void
+static void
 _rl_move_cursor_relative (int new, const char *data)
 {
   register int i;
@@ -3279,6 +3332,14 @@ _rl_current_display_line (void)
     ret = 0;
 
   return ret;
+}
+
+void
+_rl_refresh_line (void)
+{
+  rl_clear_visible_line ();
+  rl_redraw_prompt_last_line ();
+  rl_keep_mark_active ();
 }
 
 #if defined (HANDLE_MULTIBYTE)

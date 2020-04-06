@@ -1518,6 +1518,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 
   QUIT;
   CHECK_TERMSIG;
+  CHECK_SIGTERM;			/* after RESET_SIGTERM in make_child */
 
   reset_terminating_signals ();		/* in sig.c */
   /* Cancel traps, in trap.c. */
@@ -1591,6 +1592,11 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
      any specific redirection involving stdin. */
   if (should_redir_stdin && stdin_redir == 0)
     async_redirect_stdin ();
+
+#if defined (BUFFERED_INPUT)
+  /* In any case, we are not reading our command input from stdin. */
+  default_buffered_input = -1;
+#endif
 
 #if 0 /* XXX - TAG:bash-5.1 */
   if (user_subshell && command->type == cm_subshell)
@@ -4359,7 +4365,12 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 
   /* In POSIX mode, assignment errors in the temporary environment cause a
      non-interactive shell to exit. */
+#if 1
   if (posixly_correct && builtin_is_special && interactive_shell == 0 && tempenv_assign_error)
+#else
+  /* This is for strict posix conformance. */
+  if (posixly_correct && interactive_shell == 0 && tempenv_assign_error)
+#endif
     {
       last_command_exit_value = EXECUTION_FAILURE;
       jump_to_top_level (ERREXIT);

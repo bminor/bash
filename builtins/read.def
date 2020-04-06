@@ -604,6 +604,7 @@ read_builtin (list)
 
       reading = 1;
       CHECK_ALRM;
+      errno = 0;
       if (unbuffered_read == 2)
 	retval = posixly_correct ? zreadintr (fd, &c, 1) : zreadn (fd, &c, nchars - nr);
       else if (unbuffered_read)
@@ -614,6 +615,9 @@ read_builtin (list)
 
       if (retval <= 0)
 	{
+	  int t;
+
+	  t = errno;
 	  if (retval < 0 && errno == EINTR)
 	    {
 	      check_signals ();		/* in case we didn't call zread via zreadc */
@@ -628,6 +632,7 @@ read_builtin (list)
 	    ttyrestore (&termsave);	/* fix terminal before exiting */
 	  CHECK_TERMSIG;
 	  eof = 1;
+	  errno = t;	/* preserve it for the error message below */
 	  break;
 	}
 
