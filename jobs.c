@@ -2123,16 +2123,27 @@ make_child (command, async_p)
      int async_p;
 {
   int forksleep;
-  sigset_t set, oset;
+  sigset_t set, oset, termset, chldset, oset_copy;
   pid_t pid;
+  SigHandler *oterm;
 
-  /* XXX - block SIGTERM here and unblock in child after fork resets the
-     set of pending signals? */
+  sigemptyset (&oset_copy);
+  sigprocmask (SIG_BLOCK, (sigset_t *)NULL, &oset_copy);
+  sigaddset (&oset_copy, SIGTERM);
+
+  /* Block SIGTERM here and unblock in child after fork resets the
+     set of pending signals. */
   sigemptyset (&set);
   sigaddset (&set, SIGCHLD);
   sigaddset (&set, SIGINT);
+  sigaddset (&set, SIGTERM);
+
   sigemptyset (&oset);
   sigprocmask (SIG_BLOCK, &set, &oset);
+
+  /* Blocked in the parent, child will receive it after unblocking SIGTERM */
+  if (interactive_shell)
+    oterm = set_signal_handler (SIGTERM, SIG_DFL);
 
   making_children ();
 
@@ -2148,19 +2159,17 @@ make_child (command, async_p)
     sync_buffered_stream (default_buffered_input);
 #endif /* BUFFERED_INPUT */
 
-  RESET_SIGTERM;
-
   /* Create the child, handle severe errors.  Retry on EAGAIN. */
   while ((pid = fork ()) < 0 && errno == EAGAIN && forksleep < FORKSLEEP_MAX)
     {
       /* bash-4.2 */
-      sigprocmask (SIG_SETMASK, &oset, (sigset_t *)NULL);
+      /* keep SIGTERM blocked until we reset the handler to SIG_IGN */
+      sigprocmask (SIG_SETMASK, &oset_copy, (sigset_t *)NULL);
       /* If we can't create any children, try to reap some dead ones. */
       waitchld (-1, 0);
 
       errno = EAGAIN;		/* restore errno */
       sys_error ("fork: retry");
-      RESET_SIGTERM;
 
       if (sleep (forksleep) != 0)
 	break;
@@ -2172,7 +2181,8 @@ make_child (command, async_p)
     }
 
   if (pid != 0)
-    RESET_SIGTERM;
+    if (interactive_shell)
+      set_signal_handler (SIGTERM, oterm);
 
   if (pid < 0)
     {
@@ -2208,7 +2218,7 @@ make_child (command, async_p)
 
       CLRINTERRUPT;	/* XXX - children have their own interrupt state */
 
-      /* Restore top-level signal mask. */
+      /* Restore top-level signal mask, including unblocking SIGTERM */
       restore_sigmask ();
   
       if (job_control)
@@ -2271,12 +2281,8 @@ make_child (command, async_p)
       sh_closepipe (pgrp_pipe);
 #endif /* PGRP_PIPE */
 
-#if 0
       /* Don't set last_asynchronous_pid in the child */
-      if (async_p)
-	last_asynchronous_pid = mypid;		/* XXX */
-      else
-#endif
+
 #if defined (RECYCLES_PIDS)
       if (last_asynchronous_pid == mypid)
 	/* Avoid pid aliasing.  1 seems like a safe, unusual pid value. */
@@ -2335,9 +2341,9 @@ make_child (command, async_p)
       js.c_totforked++;
       js.c_living++;
 
-      /* Unblock SIGINT and SIGCHLD unless creating a pipeline, in which case
-	 SIGCHLD remains blocked until all commands in the pipeline have been
-	 created. */
+      /* Unblock SIGTERM, SIGINT, and SIGCHLD unless creating a pipeline, in
+	 which case SIGCHLD remains blocked until all commands in the pipeline
+	 have been created (execute_cmd.c:execute_pipeline()). */
       sigprocmask (SIG_SETMASK, &oset, (sigset_t *)NULL);
     }
 

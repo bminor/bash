@@ -7862,3 +7862,62 @@ builtins/fc.def
 	  <ami@fischman.org>; originally raised by Boruch Baum
 	  <boruch_baum@gmx.com> back in 10/2017
 
+				    4/6
+				    ---
+lib/readline/display.c
+	- puts_face,putc_face: new functions to write strings or characters to
+	  the display while handling standout mode
+	- update_line,_rl_move_cursor_relative: take additional argument(s)
+	  describing the visible and invisible faces corresponding to the
+	  visible and invisible lines, respectively
+
+lib/readline/readline.c
+	- _rl_enable_bracketed_paste: for the time being, initialize to 1 (on
+	  by default)
+
+trap.c
+	- run_interrupt_trap: set pending_sigs[SIGINT] and catch_flag to 0
+	  since run_pending_trap usually does these things
+
+sig.c
+	- throw_to_top_level: only call the SIGINT trap if there is a SIGINT
+	  trap pending (shouldn't matter, just a check)
+
+bashline.c
+	- bash_event_hook: try to identify the signal of interest we've
+	  received
+	- bash_event_hook: if in posix mode running the read builtin, and we
+	  get a (trappped) SIGINT, throw to top level so we can interrupt
+	  the read. From a report by Robert Elz <kre@munnari.oz.au>
+
+				    4/7
+				    ---
+lib/readline/display.c
+	- update_line: make sure to update and compare face data at the same
+	  time as comparing old and new line data: the lines are only the same
+	  if the face information and character information are identical
+	  (ofd, ols, etc.)
+	- update_line: make sure to copy face data along with line data
+	- update_line: use puts_face in place of _rl_output_some_chars to
+	  output face data along with line data
+	- _rl_move_cursor_relative: when we write characters, make sure to take
+	  the face data into account using puts_face
+	  [END OF INTEGRATION OF ACTIVE MARK AND FACE PATCHES from
+	  Daniel Colascione <dancol@google.com>]
+
+{jobs,nojobs}.c
+	- make_child: to avoid installing a handler for SIGTERM in interactive
+	  shells, and avoid race conditions with child processes resetting the
+	  SIGTERM signal handler to the default, block SIGTERM and then
+	  reset the SIGTERM handler to SIG_DFL before fork, then reset the
+	  handler to SIG_IGN and unblock it in the parent after fork() returns.
+	  Fix for readline and SIGTERM handling reported by Chris Down
+	  <chris@chrisdown.name> (original change was back in 2/2013) that
+	  allows a bash waiting in readline() for input to be killed with a
+	  SIGTERM sent by another process
+	- take out calls to RESET_SIGTERM, no longer needed
+
+execute_cmd.c
+	- execute_in_subshell,execute_simple_command,execute_disk_command:
+	  remove calls to CHECK_SIGTERM, since we don't install a handler
+	  any more

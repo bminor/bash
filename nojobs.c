@@ -496,6 +496,7 @@ make_child (command, async_p)
 {
   pid_t pid;
   int forksleep;
+  sigset_t set, oset;
 
   /* Discard saved memory. */
   if (command)
@@ -512,16 +513,22 @@ make_child (command, async_p)
     sync_buffered_stream (default_buffered_input);
 #endif /* BUFFERED_INPUT */
 
-  /* XXX - block SIGTERM here and unblock in child after fork resets the
-     set of pending signals? */
-  RESET_SIGTERM;
+  /* Block SIGTERM here and unblock in child after fork resets the
+     set of pending signals */
+  if (interactive_shell)
+    {
+      sigemptyset (&set);
+      sigaddset (&set, SIGTERM);
+      sigemptyset (&oset);
+      sigprocmask (SIG_BLOCK, &set, &oset);
+      set_signal_handler (SIGTERM, SIG_DFL);
+    }
 
   /* Create the child, handle severe errors.  Retry on EAGAIN. */
   forksleep = 1;
   while ((pid = fork ()) < 0 && errno == EAGAIN && forksleep < FORKSLEEP_MAX)
     {
       sys_error ("fork: retry");
-      RESET_SIGTERM;
 
 #if defined (HAVE_WAITPID)
       /* Posix systems with a non-blocking waitpid () system call available
@@ -537,7 +544,11 @@ make_child (command, async_p)
     }
 
   if (pid != 0)
-    RESET_SIGTERM;
+    if (interactive_shell)
+      {
+	set_signal_handler (SIGTERM, SIG_IGN);
+	sigprocmask (SIG_SETMASK, &oset, (sigset_t *)NULL);
+      }
 
   if (pid < 0)
     {

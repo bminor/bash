@@ -62,6 +62,7 @@
 #endif
 
 #include "builtins/common.h"
+#include "builtins/builtext.h"		/* for read_builtin */
 
 #include <readline/rlconf.h>
 #include <readline/readline.h>
@@ -4657,6 +4658,8 @@ bash_dequote_text (text)
 static int
 bash_event_hook ()
 {
+  int sig;
+
   /* XXX - see if we need to do anything here if sigterm_received == 1,
      we probably don't want to reset the event hook since we will not be
      jumping to the top level */
@@ -4666,6 +4669,16 @@ bash_event_hook ()
       return 0;
     }
 
+  sig = 0;
+  if (terminating_signal)
+    sig = terminating_signal;
+  else if (interrupt_state)
+    sig = SIGINT;
+  else if (sigalrm_seen)
+    sig = SIGALRM;
+  else
+    sig = first_pending_trap ();
+
   /* If we're going to longjmp to top_level, make sure we clean up readline.
      check_signals will call QUIT, which will eventually longjmp to top_level,
      calling run_interrupt_trap along the way.  The check for sigalrm_seen is
@@ -4673,6 +4686,14 @@ bash_event_hook ()
   if (terminating_signal || interrupt_state || sigalrm_seen)
     rl_cleanup_after_signal ();
   bashline_reset_event_hook ();
+
+  /* posix mode SIGINT during read -e. We only get here if SIGINT is trapped. */
+  if (posixly_correct && this_shell_builtin == read_builtin && sig == 2)
+    {
+      last_command_exit_value = 128|SIGINT;
+      throw_to_top_level ();
+    }
+
   check_signals_and_traps ();	/* XXX */
   return 0;
 }

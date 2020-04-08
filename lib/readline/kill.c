@@ -718,7 +718,7 @@ _rl_bracketed_text (size_t *lenp)
 /* Having read the special escape sequence denoting the beginning of a
    `bracketed paste' sequence, read the rest of the pasted input until the
    closing sequence and insert the pasted text as a single unit without
-   interpretation. */
+   interpretation. Temporarily highlight the inserted text. */
 int
 rl_bracketed_paste_begin (int count, int key)
 {

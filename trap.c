@@ -1205,6 +1205,8 @@ run_interrupt_trap (will_throw)
 {
   if (will_throw && running_trap > 0)
     run_trap_cleanup (running_trap - 1);
+  pending_traps[SIGINT] = 0;	/* run_pending_traps does this */
+  catch_flag = 0;
   _run_trap_internal (SIGINT, "interrupt trap");
 }
 

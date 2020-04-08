@@ -1,6 +1,6 @@
 /* sig.c - interface for shell signal handlers and signal initialization. */
 
-/* Copyright (C) 1994-2019 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -324,8 +324,7 @@ initialize_shell_signals ()
     {
       set_signal_handler (SIGINT, sigint_sighandler);
       get_original_signal (SIGTERM);
-      if (signal_is_hard_ignored (SIGTERM) == 0)
-	set_signal_handler (SIGTERM, sigterm_sighandler);
+      set_signal_handler (SIGTERM, SIG_IGN);
       set_sigwinch_handler ();
     }
 }
@@ -412,7 +411,7 @@ throw_to_top_level ()
   set_pipestatus_from_exit (last_command_exit_value);
 
   /* Run any traps set on SIGINT, mostly for interactive shells */
-  if (signal_is_trapped (SIGINT))
+  if (signal_is_trapped (SIGINT) && signal_is_pending (SIGINT))
     run_interrupt_trap (1);
 
   /* Clean up string parser environment. */

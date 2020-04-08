@@ -1518,7 +1518,6 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 
   QUIT;
   CHECK_TERMSIG;
-  CHECK_SIGTERM;			/* after RESET_SIGTERM in make_child */
 
   reset_terminating_signals ();		/* in sig.c */
   /* Cancel traps, in trap.c. */
@@ -4274,8 +4273,6 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 
 	  last_asynchronous_pid = old_last_async_pid;
 
-	  CHECK_SIGTERM;
-
 	  if (async)
 	    subshell_level++;		/* not for pipes yet */
 
@@ -5393,8 +5390,6 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
       /* Cancel traps, in trap.c. */
       restore_original_signals ();
 
-      CHECK_SIGTERM;
-
 #if defined (JOB_CONTROL)
       FREE (p);
 #endif
@@ -5467,8 +5462,6 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
 	  wl = make_word_list (make_word (NOTFOUND_HOOK), words);
 	  exit (execute_shell_function (hookf, wl));
 	}
-
-      CHECK_SIGTERM;
 
       /* Execve expects the command name to be in args[0].  So we
 	 leave it there, in the same format that the user used to
