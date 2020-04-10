@@ -3286,6 +3286,8 @@ wait_for_any_job (flags, ps)
   BLOCK_CHILD (set, oset);
   for (i = 0; i < js.j_jobslots; i++)
     {
+      if ((flags & JWAIT_WAITING) && jobs[i] && IS_WAITING (i) == 0)
+	continue;		/* if we don't want it, skip it */
       if (jobs[i] && DEADJOB (i) && IS_NOTIFIED (i) == 0)
 	{
 return_job:
@@ -3336,8 +3338,12 @@ return_job:
       /* Now we see if we have any dead jobs and return the first one */
       BLOCK_CHILD (set, oset);
       for (i = 0; i < js.j_jobslots; i++)
-	if (jobs[i] && DEADJOB (i))
-	  goto return_job;
+	{
+	  if ((flags & JWAIT_WAITING) && jobs[i] && IS_WAITING (i) == 0)
+	    continue;		/* if we don't want it, skip it */
+	  if (jobs[i] && DEADJOB (i))
+	    goto return_job;
+	}
       UNBLOCK_CHILD (oset);
     }
 

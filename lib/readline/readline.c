@@ -1375,9 +1375,12 @@ bind_bracketed_paste_prefix (void)
 
   _rl_keymap = emacs_standard_keymap;
   rl_bind_keyseq_if_unbound (BRACK_PASTE_PREF, rl_bracketed_paste_begin);
-  
+
+#if defined (VI_MODE)
   _rl_keymap = vi_insertion_keymap;
   rl_bind_keyseq_if_unbound (BRACK_PASTE_PREF, rl_bracketed_paste_begin);
+  /* XXX - is there a reason to do this in the vi command keymap? */
+#endif
 
   _rl_keymap = xkeymap;
 }

@@ -7921,3 +7921,30 @@ execute_cmd.c
 	- execute_in_subshell,execute_simple_command,execute_disk_command:
 	  remove calls to CHECK_SIGTERM, since we don't install a handler
 	  any more
+
+lib/readline/readline.c
+	- _rl_enable_bracketed_paste: enabled by default for the time being
+
+				    4/9
+				    ---
+jobs.h
+	- JWAIT_WAITING: new flag for wait functions; means only wait for jobs
+	  with the J_WAITING flag set
+	- J_WAITING: new job flag, part of arg list to `wait -n'
+	- IS_WAITING(i): job i has the J_WAITING flag set
+
+jobs.c
+	- wait_for_any_job: if the flags includes JWAIT_WAITING, we only return
+	  jobs with the J_WAITING flag already set; otherwise we skip them.
+	  For `wait -n args' support
+
+builtins/wait.def
+	- set_waitlist: take a list of jobspecs and set the J_WAITING flag in
+	  each valid job from the list
+	- unset_waitlist: turn off the J_WAITING flag for all jobs where it's
+	  set
+	- wait_builtin: if -n is supplied with a list of arguments, set the
+	  J_WAITING flag in each job in the list, call wait_for_any_job with
+	  the JWAIT_WAITING flag, and clean up by calling unset_waitlist().
+	  From a suggestion from Robert Elz <kre@munnari.oz.au> back in 3/2019
+	  (originally in 10/2017)

@@ -4161,7 +4161,7 @@ set_filename_bstab (string)
 
   memset (filename_bstab, 0, sizeof (filename_bstab));
   for (s = string; s && *s; s++)
-    filename_bstab[*s] = 1;
+    filename_bstab[(unsigned char)*s] = 1;
 }
 
 /* Quote a filename using double quotes, single quotes, or backslashes

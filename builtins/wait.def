@@ -1,7 +1,7 @@
 This file is wait.def, from which is created wait.c.
 It implements the builtin "wait" in Bash.
 
-Copyright (C) 1987-2019 Free Software Foundation, Inc.
+Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -31,8 +31,9 @@ given, waits for all currently active child processes, and the return
 status is zero.  If ID is a job specification, waits for all processes
 in that job's pipeline.
 
-If the -n option is supplied, waits for the next job to terminate and
-returns its exit status.
+If the -n option is supplied, waits for a single job from the list of IDs,
+or, if no IDs are supplied, for the next job to complete and returns its
+exit status.
 
 If the -p option is supplied, the process or job identifier of the job
 for which the exit status is returned is assigned to the variable VAR
@@ -44,7 +45,8 @@ specified ID to terminate, instead of waiting for it to change status.
 
 Exit Status:
 Returns the status of the last ID; fails if ID is invalid or an invalid
-option is given.
+option is given, or if -n is supplied and the shell has no unwaited-for
+children.
 $END
 
 $BUILTIN wait
@@ -79,6 +81,7 @@ $END
 #include "../execute_cmd.h"
 #include "../jobs.h"
 #include "../trap.h"
+#include "../sig.h"
 #include "common.h"
 #include "bashgetopt.h"
 
@@ -86,6 +89,9 @@ extern int wait_signal_received;
 
 procenv_t wait_intr_buf;
 int wait_intr_flag;
+
+static int set_waitlist PARAMS((WORD_LIST *));
+static void unset_waitlist PARAMS((void));
 
 /* Wait for the pid in LIST to stop or die.  If no arguments are given, then
    wait for all of the active background processes of the shell and return
@@ -198,11 +204,22 @@ wait_builtin (list)
 #if defined (JOB_CONTROL)
   if (nflag)
     {
+      if (list)
+	{
+	  opt = set_waitlist (list);
+	  if (opt == 0)
+	    WAIT_RETURN (127);
+	  wflags |= JWAIT_WAITING;
+	}
+
       status = wait_for_any_job (wflags, &pstat);
       if (status < 0)
 	status = 127;
+
       if (vname && status >= 0)
 	bind_var_to_int (vname, pstat.pid);
+      if (list)
+	unset_waitlist ();
       WAIT_RETURN (status);
     }
 #endif
@@ -291,3 +308,57 @@ wait_builtin (list)
 
   WAIT_RETURN (status);
 }
+
+#if defined (JOB_CONTROL)
+/* Take each valid pid or jobspec in LIST and mark the corresponding job as
+   J_WAITING, so wait -n knows which jobs to wait for. Return the number of
+   jobs we found. */
+static int
+set_waitlist (list)
+     WORD_LIST *list;
+{
+  sigset_t set, oset;
+  int job, r, njob;
+  intmax_t pid;
+  WORD_LIST *l;
+
+  BLOCK_CHILD (set, oset);
+  njob = 0;
+  for (l = list; l; l = l->next)
+    {
+      job = NO_JOB;
+      job = (l && legal_number (l->word->word, &pid) && pid == (pid_t) pid)
+		? get_job_by_pid ((pid_t) pid, 0, 0)
+		: get_job_spec (l);
+      if (job == NO_JOB || jobs == 0 || INVALID_JOB (job))
+	{
+	  sh_badjob (l->word->word);
+	  continue;
+	}
+      /* We don't check yet to see if one of the desired jobs has already
+	 terminated, but we could. We wait until wait_for_any_job(). This
+	 has the advantage of validating all the arguments. */
+      if ((jobs[job]->flags & J_WAITING) == 0)
+	{
+	  njob++;
+	  jobs[job]->flags |= J_WAITING;
+	}
+    }
+  UNBLOCK_CHILD (oset);
+  return (njob);
+}
+
+/* Clean up after a call to wait -n jobs */
+static void
+unset_waitlist ()
+{
+  int i;
+  sigset_t set, oset;
+
+  BLOCK_CHILD (set, oset);
+  for (i = 0; i < js.j_jobslots; i++)
+    if (jobs[i] && (jobs[i]->flags & J_WAITING))
+      jobs[i]->flags &= ~J_WAITING;
+  UNBLOCK_CHILD (oset);
+}
+#endif

@@ -42,6 +42,7 @@
 #define JWAIT_PERROR		0x01
 #define JWAIT_FORCE		0x02 
 #define JWAIT_NOWAIT		0x04	/* don't waitpid(), just return status if already exited */
+#define JWAIT_WAITING		0x08	/* wait for jobs marked J_WAITING only */
 
 /* The max time to sleep while retrying fork() on EAGAIN failure */
 #define FORKSLEEP_MAX	16
@@ -105,11 +106,13 @@ typedef enum { JNONE = -1, JRUNNING = 1, JSTOPPED = 2, JDEAD = 4, JMIXED = 8 } J
 #define J_STATSAVED  0x10 /* A process in this job had status saved via $! */
 #define J_ASYNC	     0x20 /* Job was started asynchronously */
 #define J_PIPEFAIL   0x40 /* pipefail set when job was started */
+#define J_WAITING    0x80 /* one of a list of jobs for which we are waiting */
 
 #define IS_FOREGROUND(j)	((jobs[j]->flags & J_FOREGROUND) != 0)
 #define IS_NOTIFIED(j)		((jobs[j]->flags & J_NOTIFIED) != 0)
 #define IS_JOBCONTROL(j)	((jobs[j]->flags & J_JOBCONTROL) != 0)
 #define IS_ASYNC(j)		((jobs[j]->flags & J_ASYNC) != 0)
+#define IS_WAITING(j)		((jobs[j]->flags & J_WAITING) != 0)
 
 typedef struct job {
   char *wd;	   /* The working directory at time of invocation. */

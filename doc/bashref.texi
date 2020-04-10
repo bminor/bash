@@ -8227,7 +8227,12 @@ the last-executed process substitution, if its process id is the same as
 @var{$!},
 and the return status is zero.
 If the @option{-n} option is supplied, @code{wait} waits for a single job
-to terminate and returns its exit status.
+from the list of @var{pids} or @var{jobspecs} or, if no arguments are
+supplied, any job, 
+to complete and returns its exit status.
+If none of the supplied arguments is a child of the shell, or if no arguments
+are supplied and the shell has no unwaited-for children, the exit status
+is 127.
 If the @option{-p} option is supplied, the process or job identifier of the job
 for which the exit status is returned is assigned to the variable
 @var{varname} named by the option argument.
