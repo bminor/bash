@@ -65,6 +65,7 @@ extern char *strchr (), *strrchr ();
 
 static void putc_face PARAMS((int, int, char *));
 static void puts_face PARAMS((const char *, const char *, int));
+static void norm_face PARAMS((char *, int));
 
 static void update_line PARAMS((char *, char *, char *, char *, int, int, int, int));
 static void space_to_eol PARAMS((int));
@@ -1246,6 +1247,21 @@ rl_redisplay (void)
 			_rl_last_c_pos > wrap_offset && \
 			o_cpos < prompt_last_invisible)
 
+
+	  /* We don't want to highlight anything that's going to be off the top
+	     of the display; if the current line takes up more than an entire
+	    screen, just mark the lines that won't be displayed as having a
+	    `normal' face.
+	    It's imperfect, but better than display corruption. */
+	  if (rl_mark_active_p () && inv_botlin > _rl_screenheight)
+	    {
+	      int extra;
+
+	      extra = inv_botlin - _rl_screenheight;
+	      for (linenum = 0; linenum <= extra; linenum++)
+		norm_face (INV_LINE_FACE(linenum), INV_LLEN (linenum));
+	    }
+
 	  /* For each line in the buffer, do the updating display. */
 	  for (linenum = 0; linenum <= inv_botlin; linenum++)
 	    {
@@ -1586,6 +1602,12 @@ puts_face (const char *str, const char *face, int n)
   putc_face (EOF, FACE_NORMAL, &cur_face);
 }
 
+static void
+norm_face (char *face, int n)
+{
+  memset (face, FACE_NORMAL, n);
+}
+
 #define ADJUST_CPOS(x) do { _rl_last_c_pos -= (x) ; cpos_adjusted = 1; } while (0)
 
 /* PWP: update_line() is based on finding the middle difference of each
@@ -1758,6 +1780,9 @@ update_line (char *old, char *old_face, char *new, char *new_face, int current_l
 		  ne = new + nmax;
 		  nd = newbytes;
 		  nfd = new + nd;
+		  ofdf = old_face + oldbytes;
+		  nfdf = new_face + newbytes;
+
 		  goto dumb_update;
 		}
 	      if (oldbytes != 0 && newbytes != 0)

@@ -7948,3 +7948,31 @@ builtins/wait.def
 	  the JWAIT_WAITING flag, and clean up by calling unset_waitlist().
 	  From a suggestion from Robert Elz <kre@munnari.oz.au> back in 3/2019
 	  (originally in 10/2017)
+
+				   4/11
+				   ----
+lib/readline/display.c
+	- update_line: in step 5b of the line wrapping prompt code, make sure
+	  OFDF and NFDF are set before performing a dumb update
+
+				   4/12
+				   ----
+sig.c
+	- termsig_handler: make sure to restore TOP_LEVEL_SIGMASK before
+	  resending a terminating signal to ourselves, in the event that this
+	  is called in a signal handler context with the terminating signal
+	  blocked. Inspired by a report from <gentoo_eshoes@tutanota.com>
+
+				   4/13
+				   ----
+
+lib/readline/text.c
+	- rl_newline: if the region is active, call rl_redisplay to clear
+	  standout mode before returning
+
+lib/readline/display.c
+	- norm_face: new function to mark a portion of the invisible face
+	  buffer as normal text (no standout)
+	- rl_redisplay: if the line consumes more than a screen's worth of
+	  lines, mark the lines that are off the top of the display as having
+	  a `normal' face

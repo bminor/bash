@@ -1095,10 +1095,8 @@ rl_newline (int count, int key)
   if (rl_mark_active_p ())
     {
       rl_deactivate_mark ();
-#if 0	/* Not yet */
       (*rl_redisplay_function) ();
       _rl_want_redisplay = 0;
-#endif
     }
 
   rl_done = 1;

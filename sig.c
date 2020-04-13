@@ -608,7 +608,11 @@ termsig_handler (sig)
 
   /* We don't change the set of blocked signals. If a user starts the shell
      with a terminating signal blocked, we won't get here (and if by some
-     magic chance we do, we'll exit below). */
+     magic chance we do, we'll exit below). What we do is to restore the
+     top-level signal mask, in case this is called from a terminating signal
+     handler context, in which case the signal is blocked. */
+  restore_sigmask ();
+
   set_signal_handler (sig, SIG_DFL);
 
   kill (getpid (), sig);
