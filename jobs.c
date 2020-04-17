@@ -2118,11 +2118,10 @@ list_all_jobs (format)
    anything else with it.  ASYNC_P says what to do with the tty.  If
    non-zero, then don't give it away. */
 pid_t
-make_child (command, async_p)
+make_child (command, flags)
      char *command;
-     int async_p;
 {
-  int forksleep;
+  int async_p, forksleep;
   sigset_t set, oset, termset, chldset, oset_copy;
   pid_t pid;
   SigHandler *oterm;
@@ -2147,6 +2146,7 @@ make_child (command, async_p)
 
   making_children ();
 
+  async_p = (flags & FORK_ASYNC);
   forksleep = 1;
 
 #if defined (BUFFERED_INPUT)

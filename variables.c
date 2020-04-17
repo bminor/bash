@@ -2076,7 +2076,7 @@ initialize_dynamic_variables ()
   INIT_DYNAMIC_VAR ("SRANDOM", (char *)NULL, get_urandom, (sh_var_assign_func_t *)NULL);
   VSETATTR (v, att_integer);  
   INIT_DYNAMIC_VAR ("LINENO", (char *)NULL, get_lineno, assign_lineno);
-  VSETATTR (v, att_integer|att_regenerate);
+  VSETATTR (v, att_regenerate);
 
   INIT_DYNAMIC_VAR ("BASHPID", (char *)NULL, get_bashpid, null_assign);
   VSETATTR (v, att_integer);

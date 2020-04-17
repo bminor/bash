@@ -7976,3 +7976,36 @@ lib/readline/display.c
 	- rl_redisplay: if the line consumes more than a screen's worth of
 	  lines, mark the lines that are off the top of the display as having
 	  a `normal' face
+
+				   4/14
+				   ----
+variables.c
+	- LINENO: no longer has the integer attribute, since it does not take
+	  arithmetic expressions on assignment (use $((expr)) instead)
+
+lib/readline/mbutil.c
+	- _rl_find_prev_utf8char: new function, uses the structure of UTF-8
+	  characters to find the start of the previous one no matter where we
+	  start: at the beginning of the next character, at the end of a
+	  multibyte character, or in the middle of a multibyte character.
+	  EXPERIMENTAL
+	- _rl_find_prev_mbchar_internal: for now, call _rl_find_prev_utf8char
+	  if we are in a UTF-8 locale. EXPERIMENTAL
+				   
+				   4/15
+				   ----
+lib/readline/mbutil.c
+	- _rl_utf8_mblen: changes to handle invalid multibyte sequences better,
+	  even when N means that the sequence would be too short anyway
+
+examples/loadables/csv.c
+	- csv: new loadable builtin to parse a line of csv data and store it
+	  into an array supplied as an argument
+
+				   4/16
+				   ----
+examples/loadables/cut.c
+	- cut: new loadable builtin
+	- lcut: new builtin that does what cut does but on a string supplied
+	  as an argument (only one string for now)
+

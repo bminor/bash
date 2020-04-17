@@ -490,18 +490,19 @@ siginterrupt (sig, flag)
    anything else with it.  ASYNC_P says what to do with the tty.  If
    non-zero, then don't give it away. */
 pid_t
-make_child (command, async_p)
+make_child (command, flags)
      char *command;
-     int async_p;
+     int flags;
 {
   pid_t pid;
-  int forksleep;
+  int async_p, forksleep;
   sigset_t set, oset;
 
   /* Discard saved memory. */
   if (command)
     free (command);
 
+  async_p = (flags & FORK_ASYNC);
   start_pipeline ();
 
 #if defined (BUFFERED_INPUT)

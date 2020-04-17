@@ -196,6 +196,11 @@ struct procchain {
 
 #define ANY_PID (pid_t)-1
 
+/* flags for make_child () */
+#define FORK_SYNC	0
+#define FORK_ASYNC	1
+#define FORK_NOJOB	2
+
 /* System calls. */
 #if !defined (HAVE_UNISTD_H)
 extern pid_t fork (), getpid (), getpgrp ();
