@@ -5555,7 +5555,7 @@ wait_procsubs ()
     {
       if (fifo_list[i].proc != (pid_t)-1 && fifo_list[i].proc > 0)
 	{
-	  r = wait_for (fifo_list[i].proc);
+	  r = wait_for (fifo_list[i].proc, 0);
 	  save_proc_status (fifo_list[i].proc, r);
 	  fifo_list[i].proc = (pid_t)-1;
 	}
@@ -5793,7 +5793,7 @@ wait_procsubs ()
     {
       if (dev_fd_list[i] != (pid_t)-1 && dev_fd_list[i] > 0)
 	{
-	  r = wait_for (dev_fd_list[i]);
+	  r = wait_for (dev_fd_list[i], 0);
 	  save_proc_status (dev_fd_list[i], r);
 	  dev_fd_list[i] = (pid_t)-1;
 	}
@@ -5901,7 +5901,7 @@ process_substitute (string, open_for_read_in_child)
   save_pipeline (1);
 #endif /* JOB_CONTROL */
 
-  pid = make_child ((char *)NULL, 1);
+  pid = make_child ((char *)NULL, FORK_ASYNC);
   if (pid == 0)
     {
 interactive = 0;
@@ -6141,8 +6141,7 @@ read_comsub (fd, quoted, flags, rflag)
   mb_cur_max = MB_CUR_MAX;
   nullbyte = 0;
 
-  /* Read the output of the command through the pipe.  This may need to be
-     changed to understand multibyte characters in the future. */
+  /* Read the output of the command through the pipe. */
   while (1)
     {
       if (fd < 0)
@@ -6206,16 +6205,6 @@ read_comsub (fd, quoted, flags, rflag)
 #endif
 
       istring[istring_index++] = c;
-
-#if 0
-#if defined (__CYGWIN__)
-      if (c == '\n' && istring_index > 1 && istring[istring_index - 2] == '\r')
-	{
-	  istring_index--;
-	  istring[istring_index - 1] = '\n';
-	}
-#endif
-#endif
     }
 
   if (istring)
@@ -6267,8 +6256,9 @@ command_substitute (string, quoted, flags)
 {
   pid_t pid, old_pid, old_pipeline_pgrp, old_async_pid;
   char *istring, *s;
-  int result, fildes[2], function_value, pflags, rc, tflag;
+  int result, fildes[2], function_value, pflags, rc, tflag, fork_flags;
   WORD_DESC *ret;
+  sigset_t set, oset;
 
   istring = (char *)NULL;
 
@@ -6323,7 +6313,8 @@ command_substitute (string, quoted, flags)
 #endif /* JOB_CONTROL */
 
   old_async_pid = last_asynchronous_pid;
-  pid = make_child ((char *)NULL, subshell_environment&SUBSHELL_ASYNC);
+  fork_flags = (subshell_environment&SUBSHELL_ASYNC) ? FORK_ASYNC : 0;
+  pid = make_child ((char *)NULL, fork_flags);
   last_asynchronous_pid = old_async_pid;
 
   if (pid == 0)
@@ -6486,14 +6477,19 @@ command_substitute (string, quoted, flags)
       dummyfd = fildes[0];
       add_unwind_protect (close, dummyfd);
 
+      /* Block SIGINT while we're reading from the pipe. If the child
+	 process gets a SIGINT, it will either handle it or die, and the
+	 read will return. */
+      BLOCK_SIGNAL (SIGINT, set, oset);
       tflag = 0;
       istring = read_comsub (fildes[0], quoted, flags, &tflag);
 
       close (fildes[0]);
       discard_unwind_frame ("read-comsub");
+      UNBLOCK_SIGNAL (oset);
 
       current_command_subst_pid = pid;
-      last_command_exit_value = wait_for (pid);
+      last_command_exit_value = wait_for (pid, 0);
       last_command_subst_pid = pid;
       last_made_pid = old_pid;
 

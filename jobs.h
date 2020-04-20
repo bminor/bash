@@ -38,11 +38,14 @@
 /* I looked it up.  For pretty_print_job ().  The real answer is 24. */
 #define LONGEST_SIGNAL_DESC 24
 
-/* Defines for the wait_for functions and for the wait builtin to use */
-#define JWAIT_PERROR		0x01
-#define JWAIT_FORCE		0x02 
-#define JWAIT_NOWAIT		0x04	/* don't waitpid(), just return status if already exited */
-#define JWAIT_WAITING		0x08	/* wait for jobs marked J_WAITING only */
+/* Defines for the wait_for_* functions and for the wait builtin to use */
+#define JWAIT_PERROR		(1 << 0)
+#define JWAIT_FORCE		(1 << 1)
+#define JWAIT_NOWAIT		(1 << 2) /* don't waitpid(), just return status if already exited */
+#define JWAIT_WAITING		(1 << 3) /* wait for jobs marked J_WAITING only */
+
+/* flags for wait_for */
+#define JWAIT_NOTERM		(1 << 8) /* wait_for doesn't give terminal away */
 
 /* The max time to sleep while retrying fork() on EAGAIN failure */
 #define FORKSLEEP_MAX	16
@@ -197,9 +200,10 @@ struct procchain {
 #define ANY_PID (pid_t)-1
 
 /* flags for make_child () */
-#define FORK_SYNC	0
-#define FORK_ASYNC	1
-#define FORK_NOJOB	2
+#define FORK_SYNC	0		/* normal synchronous process */
+#define FORK_ASYNC	1		/* background process */
+#define FORK_NOJOB	2		/* don't put process in separate pgrp */
+#define FORK_NOTERM	4		/* don't give terminal to any pgrp */
 
 /* System calls. */
 #if !defined (HAVE_UNISTD_H)
@@ -276,7 +280,7 @@ extern int job_exit_signal PARAMS((int));
 
 extern int wait_for_single_pid PARAMS((pid_t, int));
 extern void wait_for_background_pids PARAMS((struct procstat *));
-extern int wait_for PARAMS((pid_t));
+extern int wait_for PARAMS((pid_t, int));
 extern int wait_for_job PARAMS((int, int, struct procstat *));
 extern int wait_for_any_job PARAMS((int, struct procstat *));
 

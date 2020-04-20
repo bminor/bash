@@ -8009,3 +8009,70 @@ examples/loadables/cut.c
 	- lcut: new builtin that does what cut does but on a string supplied
 	  as an argument (only one string for now)
 
+				   4/17
+				   ----
+jobs.h
+	- FORK_SYNC,FORK_ASYNC,FORK_NOJOB: new flag values for the second
+	  argument to make_child
+
+jobs.c
+	- make_child: now takes a set of flags as the second argument
+
+execute_cmd.c
+	- make_child: change callers to pass FORK_ASYNC instead of a non-zero
+	  value as the second argument
+
+subst.c
+	- make_child: change callers to pass FORK_ASYNC instead of a non-zero
+	  value as the second argument
+
+doc/{bash.1,bashref.texi}
+	- document that the words in a compound array assignment undergo all
+	  the shell word expansions, including filename generation and word
+	  splitting. From a report from E. Choroba <choroba@matfyz.cz>
+
+				   4/18
+				   ----
+subst.c
+	- command_substitute: use JOB_CONTROL instead of INTERACTIVE in the
+	  test to determine whether or not to give the terminal back to
+	  pipeline_pgrp
+
+jobs.c
+	- make_child: if FORK_NOTERM is set in the flags argument, don't call
+	  give_terminal_to
+
+{jobs,nojobs}.c,jobs.h
+	- wait_for: now takes a second argument, a flags word
+
+{execute_cmd,subst}.c
+	- wait_for: change all callers to add second argument to wait_for
+
+jobs.c
+	- wait_for: if JWAIT_NOTERM is set in the flags argument, don't call
+	  give_terminal_to
+
+				   4/19
+				   ----
+subst.c
+	- command_substitute: block SIGINT around call to read_comsub, so we
+	  let any interrupts affect the command substitution. Fixes issue
+	  reported by DALECKI Léo <leo.dalecki@ntymail.com>
+
+hashcmd.h
+	- FILENAME_HASH_BUCKETS: increase to 256
+
+assoc.h
+	- ASSOC_HASH_BUCKETS: new define, set to 1024
+
+variables.c
+	- make_new_assoc_variable,make_local_assoc_variable: call assoc_create
+	  with ASSOC_HASH_BUCKETS as argument. This changes the hash function
+	  and how the array keys are ordered (which is not guaranteed)
+
+builtins/read.def
+	- read_builtin: in posix mode, or if the read call returns -1/EINTR,
+	  don't call run_pending_traps until the read command returns. This
+	  allows a trap action to see the same exit status that the read
+	  builtin would return when it exits on a signal (e.g., SIGINT == 130).
+	  From a suggestion by <gentoo_eshoes@tutanota.com>

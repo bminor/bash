@@ -3015,7 +3015,7 @@ make_new_assoc_variable (name)
   HASH_TABLE *hash;
 
   entry = make_new_variable (name, global_variables->table);
-  hash = assoc_create (0);
+  hash = assoc_create (ASSOC_HASH_BUCKETS);
 
   var_setassoc (entry, hash);
   VSETATTR (entry, att_assoc);
@@ -3047,7 +3047,7 @@ make_local_assoc_variable (name, flags)
       internal_warning ("%s: cannot inherit value from incompatible type", name);
       VUNSETATTR (var, att_array);
       dispose_variable_value (var);
-      hash = assoc_create (0);
+      hash = assoc_create (ASSOC_HASH_BUCKETS);
       var_setassoc (var, hash);
     }
   else if (localvar_inherit)
@@ -3055,7 +3055,7 @@ make_local_assoc_variable (name, flags)
   else
     {
       dispose_variable_value (var);
-      hash = assoc_create (0);
+      hash = assoc_create (ASSOC_HASH_BUCKETS);
       var_setassoc (var, hash);
     }
 

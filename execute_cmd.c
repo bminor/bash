@@ -556,7 +556,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
      int pipe_in, pipe_out;
      struct fd_bitmap *fds_to_close;
 {
-  int exec_result, user_subshell, invert, ignore_return, was_error_trap;
+  int exec_result, user_subshell, invert, ignore_return, was_error_trap, fork_flags;
   REDIRECT *my_undo_list, *exec_undo_list;
   char *tcmd;
   volatile int save_line_number;
@@ -627,7 +627,8 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	line_number_for_err_trap = line_number = command->value.Subshell->line;	/* XXX - save value? */
 	/* Otherwise we defer setting line_number */
       tcmd = make_command_string (command);
-      paren_pid = make_child (p = savestring (tcmd), asynchronous);
+      fork_flags = asynchronous ? FORK_ASYNC : 0;
+      paren_pid = make_child (p = savestring (tcmd), fork_flags);
 
       if (user_subshell && signal_is_trapped (ERROR_TRAP) && 
 	  signal_in_progress (DEBUG_TRAP) == 0 && running_trap == 0)
@@ -684,7 +685,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	      invert = (command->flags & CMD_INVERT_RETURN) != 0;
 	      ignore_return = (command->flags & CMD_IGNORE_RETURN) != 0;
 
-	      exec_result = wait_for (paren_pid);
+	      exec_result = wait_for (paren_pid, 0);
 
 	      /* If we have to, invert the return value. */
 	      if (invert)
@@ -865,7 +866,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	       the function to be waited for twice.  This also causes
 	       subshells forked to execute builtin commands (e.g., in
 	       pipelines) to be waited for twice. */
-	      exec_result = wait_for (last_made_pid);
+	      exec_result = wait_for (last_made_pid, 0);
 	  }
       }
 
@@ -1103,10 +1104,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
   last_command_exit_value = exec_result;
   run_pending_traps ();
-#if 0
-  if (running_trap == 0)
-#endif
-    currently_executing_command = (COMMAND *)NULL;
+  currently_executing_command = (COMMAND *)NULL;
 
   return (last_command_exit_value);
 }
@@ -2367,7 +2365,7 @@ execute_coproc (command, pipe_in, pipe_out, fds_to_close)
 
   BLOCK_SIGNAL (SIGCHLD, set, oset);
 
-  coproc_pid = make_child (p = savestring (tcmd), 1);
+  coproc_pid = make_child (p = savestring (tcmd), FORK_ASYNC);
 
   if (coproc_pid == 0)
     {
@@ -2590,12 +2588,12 @@ execute_pipeline (command, asynchronous, pipe_in, pipe_out, fds_to_close)
       if (INVALID_JOB (lastpipe_jid) == 0)
         {
           append_process (savestring (the_printed_command_except_trap), dollar_dollar_pid, exec_result, lastpipe_jid);
-          lstdin = wait_for (lastpid);
+          lstdin = wait_for (lastpid, 0);
         }
       else
         lstdin = wait_for_single_pid (lastpid, 0);		/* checks bgpids list */
 #else
-      lstdin = wait_for (lastpid);
+      lstdin = wait_for (lastpid, 0);
 #endif
 
 #if defined (JOB_CONTROL)
@@ -3986,7 +3984,7 @@ execute_null_command (redirects, pipe_in, pipe_out, async)
      int pipe_in, pipe_out, async;
 {
   int r;
-  int forcefork;
+  int forcefork, fork_flags;
   REDIRECT *rd;
 
   for (forcefork = 0, rd = redirects; rd; rd = rd->next)
@@ -4000,7 +3998,8 @@ execute_null_command (redirects, pipe_in, pipe_out, async)
     {
       /* We have a null command, but we really want a subshell to take
 	 care of it.  Just fork, do piping and redirections, and exit. */
-      if (make_child ((char *)NULL, async) == 0)
+      fork_flags = async ? FORK_ASYNC : 0;
+      if (make_child ((char *)NULL, fork_flags) == 0)
 	{
 	  /* Cancel traps, in trap.c. */
 	  restore_original_signals ();		/* XXX */
@@ -4168,6 +4167,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
   WORD_LIST *words, *lastword;
   char *command_line, *lastarg, *temp;
   int first_word_quoted, result, builtin_is_special, already_forked, dofork;
+  int fork_flags;
   pid_t old_last_async_pid;
   sh_builtin_func_t *builtin;
   SHELL_VAR *func;
@@ -4244,7 +4244,8 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 
       /* Don't let a DEBUG trap overwrite the command string to be saved with
 	 the process/job associated with this child. */
-      if (make_child (p = savestring (the_printed_command_except_trap), async) == 0)
+      fork_flags = async ? FORK_ASYNC : 0;
+      if (make_child (p = savestring (the_printed_command_except_trap), fork_flags) == 0)
 	{
 	  already_forked = 1;
 	  simple_command->flags |= CMD_NO_FORK;
@@ -5331,7 +5332,7 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
      int cmdflags;
 {
   char *pathname, *command, **args, *p;
-  int nofork, stdpath, result;
+  int nofork, stdpath, result, fork_flags;
   pid_t pid;
   SHELL_VAR *hookf;
   WORD_LIST *wl;
@@ -5380,7 +5381,10 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
   if (nofork && pipe_in == NO_PIPE && pipe_out == NO_PIPE)
     pid = 0;
   else
-    pid = make_child (p = savestring (command_line), async);
+    {
+      fork_flags = async ? FORK_ASYNC : 0;
+      pid = make_child (p = savestring (command_line), fork_flags);
+    }
 
   if (pid == 0)
     {

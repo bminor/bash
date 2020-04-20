@@ -823,8 +823,9 @@ j_strsignal (s)
 /* Wait for pid (one of our children) to terminate.  This is called only
    by the execution code in execute_cmd.c. */
 int
-wait_for (pid)
+wait_for (pid, flags)
      pid_t pid;
+     int flags;
 {
   int return_val, pstatus;
   pid_t got_pid;

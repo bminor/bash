@@ -1079,7 +1079,7 @@ procsub_waitpid (pid)
     return -1;
   if (p->running == PS_DONE)
     return (p->status);
-  r = wait_for (p->pid);
+  r = wait_for (p->pid, 0);
   return (r);			/* defer removing until later */
 }
 
@@ -1093,7 +1093,7 @@ procsub_waitall ()
     {
       if (p->running == PS_DONE)
 	continue;
-      r = wait_for (p->pid);
+      r = wait_for (p->pid, 0);
     }
 }
 
@@ -2252,7 +2252,7 @@ make_child (command, flags)
 	     In this case, we don't want to give the terminal to the
 	     shell's process group (we could be in the middle of a
 	     pipeline, for example). */
-	  if (async_p == 0 && pipeline_pgrp != shell_pgrp && ((subshell_environment&(SUBSHELL_ASYNC|SUBSHELL_PIPE)) == 0) && running_in_background == 0)
+	  if ((flags & FORK_NOTERM) == 0 && async_p == 0 && pipeline_pgrp != shell_pgrp && ((subshell_environment&(SUBSHELL_ASYNC|SUBSHELL_PIPE)) == 0) && running_in_background == 0)
 	    give_terminal_to (pipeline_pgrp, 0);
 
 #if defined (PGRP_PIPE)
@@ -2609,7 +2609,7 @@ wait_for_single_pid (pid, flags)
   alive = 0;
   do
     {
-      r = wait_for (pid);
+      r = wait_for (pid, 0);
       if ((flags & JWAIT_FORCE) == 0)
 	break;
 
@@ -2899,8 +2899,9 @@ job_exit_signal (job)
    the jobs table.  Returns -1 if waitchld() returns -1, indicating
    that there are no unwaited-for child processes. */
 int
-wait_for (pid)
+wait_for (pid, flags)
      pid_t pid;
+     int flags;
 {
   int job, termination_state, r;
   WAIT s;
@@ -3235,7 +3236,7 @@ wait_for_job (job, flags, ps)
 
   do
     {
-      r = wait_for (pid);
+      r = wait_for (pid, 0);
       if (r == -1 && errno == ECHILD)
 	mark_all_jobs_as_dead ();
 
@@ -3331,7 +3332,7 @@ return_job:
       CHECK_WAIT_INTR;
 
       errno = 0;
-      r = wait_for (ANY_PID);	/* special sentinel value for wait_for */
+      r = wait_for (ANY_PID, 0);	/* special sentinel value for wait_for */
       if (r == -1 && errno == ECHILD)
 	mark_all_jobs_as_dead ();
 	
@@ -3642,7 +3643,7 @@ start_job (job, foreground)
 
       pid = find_last_pid (job, 0);
       UNBLOCK_CHILD (oset);
-      st = wait_for (pid);
+      st = wait_for (pid, 0);
       shell_tty_info = save_stty;
       set_tty_state ();
       return (st);

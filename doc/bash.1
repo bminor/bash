@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Apr  9 11:50:30 EDT 2020
+.\"	Last Change: Fri Apr 17 16:30:01 EDT 2020
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2020 April 9" "GNU Bash 5.0"
+.TH BASH 1 "2020 April 17" "GNU Bash 5.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2682,6 +2682,10 @@ Arrays are assigned to using compound assignments of the form
 \fIname\fP=\fB(\fPvalue\fI1\fP ... value\fIn\fP\fB)\fP, where each
 \fIvalue\fP may be of the form [\fIsubscript\fP]=\fIstring\fP.
 Indexed array assignments do not require anything but \fIstring\fP.
+Each \fIvalue\fP in the list is expanded using all the shell expansions
+described below under
+.SM
+.BR EXPANSION .
 When assigning to indexed arrays, if the optional brackets and subscript
 are supplied, that index is assigned to;
 otherwise the index of the element assigned is the last index assigned

@@ -624,7 +624,9 @@ read_builtin (list)
 	      lastsig = LASTSIG();
 	      if (lastsig == 0)
 		lastsig = trapped_signal_received;
+#if 0
 	      run_pending_traps ();	/* because interrupt_immediately is not set */
+#endif
 	    }
 	  else
 	    lastsig = 0;
