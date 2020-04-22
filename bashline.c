@@ -922,27 +922,22 @@ hostnames_matching (text)
 
 /* The equivalent of the Korn shell C-o operate-and-get-next-history-line
    editing command. */
-static int saved_history_line_to_use = -1;
-static int last_saved_history_line = -1;
+static int saved_history_logical_offset = -1;
 
 #define HISTORY_FULL() (history_is_stifled () && history_length >= history_max_entries)
 
 static int
 set_saved_history ()
 {
-  /* XXX - compensate for assumption that history was `shuffled' if it was
-     actually not. */
-  if (HISTORY_FULL () &&
-      hist_last_line_added == 0 &&
-      saved_history_line_to_use < history_length - 1)
-    saved_history_line_to_use++;
+  int absolute_offset, count;
 
-  if (saved_history_line_to_use >= 0)
+  if (saved_history_logical_offset >= 0)
     {
-     rl_get_previous_history (history_length - saved_history_line_to_use, 0);
-     last_saved_history_line = saved_history_line_to_use;
+      absolute_offset = saved_history_logical_offset - history_base;
+      count = where_history () - absolute_offset;
+      rl_get_previous_history (count, 0);
     }
-  saved_history_line_to_use = -1;
+  saved_history_logical_offset = -1;
   rl_startup_hook = old_rl_startup_hook;
   return (0);
 }
@@ -951,18 +946,10 @@ static int
 operate_and_get_next (count, c)
      int count, c;
 {
-  int where;
-
   /* Accept the current line. */
   rl_newline (1, c);
 
-  /* Find the current line, and find the next line to use. */
-  where = rl_explicit_arg ? count : where_history ();
-
-  if (HISTORY_FULL () || (where >= history_length - 1) || rl_explicit_arg)
-    saved_history_line_to_use = where;
-  else
-    saved_history_line_to_use = where + 1;
+  saved_history_logical_offset = rl_explicit_arg ? count : where_history () + history_base + 1;
 
   old_rl_startup_hook = rl_startup_hook;
   rl_startup_hook = set_saved_history;

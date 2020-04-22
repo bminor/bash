@@ -1,6 +1,6 @@
 /* hashlib.h -- the data structures used in hashing in Bash. */
 
-/* Copyright (C) 1993-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -45,26 +45,26 @@ typedef struct hash_table {
   int nentries;			/* How many entries does this table have. */
 } HASH_TABLE;
 
-typedef int hash_wfunc __P((BUCKET_CONTENTS *));
+typedef int hash_wfunc PARAMS((BUCKET_CONTENTS *));
 
 /* Operations on tables as a whole */
-extern HASH_TABLE *hash_create __P((int));
-extern HASH_TABLE *hash_copy __P((HASH_TABLE *, sh_string_func_t *));
-extern void hash_flush __P((HASH_TABLE *, sh_free_func_t *));
-extern void hash_dispose __P((HASH_TABLE *));
-extern void hash_walk __P((HASH_TABLE *, hash_wfunc *));
+extern HASH_TABLE *hash_create PARAMS((int));
+extern HASH_TABLE *hash_copy PARAMS((HASH_TABLE *, sh_string_func_t *));
+extern void hash_flush PARAMS((HASH_TABLE *, sh_free_func_t *));
+extern void hash_dispose PARAMS((HASH_TABLE *));
+extern void hash_walk PARAMS((HASH_TABLE *, hash_wfunc *));
 
 /* Operations to extract information from or pieces of tables */
-extern int hash_bucket __P((const char *, HASH_TABLE *));
-extern int hash_size __P((HASH_TABLE *));
+extern int hash_bucket PARAMS((const char *, HASH_TABLE *));
+extern int hash_size PARAMS((HASH_TABLE *));
 
 /* Operations on hash table entries */
-extern BUCKET_CONTENTS *hash_search __P((const char *, HASH_TABLE *, int));
-extern BUCKET_CONTENTS *hash_insert __P((char *, HASH_TABLE *, int));
-extern BUCKET_CONTENTS *hash_remove __P((const char *, HASH_TABLE *, int));
+extern BUCKET_CONTENTS *hash_search PARAMS((const char *, HASH_TABLE *, int));
+extern BUCKET_CONTENTS *hash_insert PARAMS((char *, HASH_TABLE *, int));
+extern BUCKET_CONTENTS *hash_remove PARAMS((const char *, HASH_TABLE *, int));
 
 /* Miscellaneous */
-extern unsigned int hash_string __P((const char *));
+extern unsigned int hash_string PARAMS((const char *));
 
 /* Redefine the function as a macro for speed. */
 #define hash_items(bucket, table) \

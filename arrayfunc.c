@@ -91,7 +91,8 @@ convert_var_to_array (var)
     array_needs_making++;
 
   VSETATTR (var, att_array);
-  VUNSETATTR (var, att_invisible);
+  if (oldval)
+    VUNSETATTR (var, att_invisible);
 
   /* Make sure it's not marked as an associative array any more */
   VUNSETATTR (var, att_assoc);
@@ -128,7 +129,8 @@ convert_var_to_assoc (var)
     array_needs_making++;
 
   VSETATTR (var, att_assoc);
-  VUNSETATTR (var, att_invisible);
+  if (oldval)
+    VUNSETATTR (var, att_invisible);
 
   /* Make sure it's not marked as an indexed array any more */
   VUNSETATTR (var, att_array);

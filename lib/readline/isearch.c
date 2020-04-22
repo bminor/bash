@@ -6,7 +6,7 @@
 /*								    */
 /* **************************************************************** */
 
-/* Copyright (C) 1987-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -257,6 +257,9 @@ _rl_isearch_init (int direction)
 
   _rl_iscxt = cxt;		/* save globally */
 
+  /* experimental right now */
+  _rl_init_executing_keyseq ();
+
   return cxt;
 }
 
@@ -289,12 +292,16 @@ _rl_isearch_fini (_rl_search_cxt *cxt)
       else
 	cxt->sline_index = strlen (rl_line_buffer);
       rl_mark = cxt->save_mark;
+      rl_deactivate_mark ();
     }
 
   rl_point = cxt->sline_index;
   /* Don't worry about where to put the mark here; rl_get_previous_history
-     and rl_get_next_history take care of it. */
+     and rl_get_next_history take care of it.
+     If we want to highlight the search string, this is where to set the
+     point and mark to do it. */
   _rl_fix_point (0);
+  rl_deactivate_mark ();
 
 /*  _rl_optimize_redisplay (); */
   rl_clear_message ();
@@ -346,6 +353,8 @@ _rl_isearch_dispatch (_rl_search_cxt *cxt, int c)
       return -1;
     }
 
+  _rl_add_executing_keyseq (c);
+
   /* If we are moving into a new keymap, modify cxt->keymap and go on.
      This can be a problem if c == ESC and we want to terminate the
      incremental search, so we check */
@@ -396,7 +405,11 @@ add_character:
       if (cxt->mb[1])
 	f = rl_function_of_keyseq (cxt->mb, cxt->keymap, (int *)NULL);
       else
-	f = cxt->keymap[c].function;
+	{
+	  f = cxt->keymap[c].function;
+	  if (f == rl_do_lowercase_version)
+	    f = cxt->keymap[_rl_to_lower (c)].function;
+	}
 
       if (f == rl_reverse_search_history)
 	cxt->lastc = (cxt->sflags & SF_REVERSE) ? -1 : -2;
@@ -463,9 +476,14 @@ add_character:
 	}
       else if (cxt->lastc > 0 && cxt->prevc > 0 && f && f != rl_insert)
 	{
-	  rl_stuff_char (cxt->lastc);
-	  rl_execute_next (cxt->prevc);
-	  /* XXX - do we insert everything in cxt->pmb? */
+	  _rl_term_executing_keyseq ();		/* should this go in the caller? */
+
+	  _rl_pending_command.map = cxt->keymap;
+	  _rl_pending_command.count = 1;	/* XXX */
+	  _rl_pending_command.key = cxt->lastc;
+	  _rl_pending_command.func = f;
+	  _rl_command_to_execute = &_rl_pending_command;
+
 	  return (0);
 	}
     }
@@ -511,6 +529,8 @@ add_character:
 	return (0);
       }
 
+  _rl_init_executing_keyseq ();
+
   /* Now dispatch on the character.  `Opcodes' affect the search string or
      state.  Other characters are added to the string.  */
   switch (cxt->lastc)
@@ -528,6 +548,7 @@ add_character:
 	      rl_display_search (cxt->search_string, cxt->sflags, -1);
 	      break;
 	    }
+	  /* XXX - restore keymap here? */
 	  return (1);
 	}
       else if ((cxt->sflags & SF_REVERSE) && cxt->sline_index >= 0)
@@ -575,6 +596,7 @@ add_character:
       rl_replace_line (cxt->lines[cxt->save_line], 0);
       rl_point = cxt->save_point;
       rl_mark = cxt->save_mark;
+      rl_deactivate_mark ();
       rl_restore_prompt();
       rl_clear_message ();
 
@@ -641,6 +663,7 @@ add_character:
 	  free (paste);
 	  break;
 	}
+      rl_activate_mark ();
       if (cxt->search_string_index + pastelen + 1 >= cxt->search_string_size)
 	{
 	  cxt->search_string_size += pastelen + 2;
@@ -745,11 +768,15 @@ add_character:
       cxt->sline_index = (cxt->sflags & SF_REVERSE) ? cxt->sline_len - cxt->search_string_index : 0;
     }
 
+  /* reset the keymaps for the next time through the loop */
+  cxt->keymap = cxt->okeymap = _rl_keymap;
+
   if (cxt->sflags & SF_FAILED)
     {
       /* We cannot find the search string.  Ding the bell. */
       rl_ding ();
       cxt->history_pos = cxt->last_found_line;
+      rl_deactivate_mark ();
       rl_display_search (cxt->search_string, cxt->sflags, (cxt->history_pos == cxt->save_line) ? -1 : cxt->history_pos);
       return 1;
     }
@@ -761,7 +788,10 @@ add_character:
     {
       cxt->prev_line_found = cxt->lines[cxt->history_pos];
       rl_replace_line (cxt->lines[cxt->history_pos], 0);
+      rl_activate_mark ();	
       rl_point = cxt->sline_index;
+      if (rl_mark_active_p () && cxt->search_string_index > 0)
+	rl_mark = rl_point + cxt->search_string_index;
       cxt->last_found_line = cxt->history_pos;
       rl_display_search (cxt->search_string, cxt->sflags, (cxt->history_pos == cxt->save_line) ? -1 : cxt->history_pos);
     }

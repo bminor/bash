@@ -1,5 +1,5 @@
-/* lcut - extract specified fields from a line and assign them to an array or
-	  print them to the standard output */
+/* cut,lcut - extract specified fields from a line and assign them to an array
+	      or print them to the standard output */
 
 /*
    Copyright (C) 2020 Free Software Foundation, Inc.
@@ -571,22 +571,6 @@ cut_builtin (list)
      WORD_LIST *list;
 {
   return (cut_internal (1, list));
-}
-
-/* Called when builtin is enabled and loaded from the shared object.  If this
-   function returns 0, the load fails. */
-int
-lcut_builtin_load (name)
-     char *name;
-{
-  return (1);
-}
-
-/* Called when builtin is disabled. */
-void
-lcut_builtin_unload (name)
-     char *name;
-{
 }
 
 char *lcut_doc[] = {

@@ -8076,3 +8076,68 @@ builtins/read.def
 	  allows a trap action to see the same exit status that the read
 	  builtin would return when it exits on a signal (e.g., SIGINT == 130).
 	  From a suggestion by <gentoo_eshoes@tutanota.com>
+
+				   4/20
+				   ----
+hashlib.c 
+	- hash_rehash: function to rehash a table, after increasing or decreasing
+	  the number of buckets. From patches from Thomas Kremer
+	  (https://savannah.gnu.org/patch/?9850) and Koichi Murase
+	  <myoga.murase@gmail.com>
+	- hash_grow,hash_shrink: grow or shrink a hash table by a factor of
+	  HASH_REHASH_MULTIPLIER (4)
+	- hash_insert,hash_search: call hash_grow if necessary
+
+arrayfunc.c
+	- convert_var_to_{array,assoc}: if the original variable had no value
+	  (it was unset), the array variable should be unset as well. Reported
+	  by andrej@podzimek.org
+
+				   4/21
+				   ----
+bashline.c
+	- set_saved_history: change logic used to decide where in the history
+	  operate_and_get_next should start by using a logical offset into the
+	  history list that is an offset from history_base. This avoids having
+	  to take whether or not the history is stifled and full into account.
+	  Report and fix from Greg Price <gnprice@gmail.com>
+	- operate_and_get_next: just calculate the logical offset of where we
+	  should be in the history instead of an absolute offset
+
+lib/readline/input.c
+	- _rl_nchars_available: new function, returns the number of characters
+	  available to be read if FIONREAD is available
+
+				   4/22
+				   ----
+lib/readline/{readline.c,rlprivate.h}
+	- _rl_pending_command: new struct to hold information about a pending
+	  command for readline to execute when the current command completes.
+	  A command can set this up so that it gets executed like a
+	  continuation before redisplay
+
+lib/readline/readline.c
+	- readline_internal_charloop: after _rl_dispatch returns, check
+	  _rl_command_to_execute, and, if it's non-zero, redisplay and then
+	  execute it as a command
+	- added a small set of library-private functions for managing the
+	  executing key sequence (not used yet)
+
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: if we have found an opcode or have added a
+	  character to the search string and searched for it, reset the keymap
+	  and okeymap members of the search context in preparation for reading
+	  another key sequence/opcode
+	- _rl_isearch_dispatch: if we read a key sequence bound to an editing
+	  command that is not an `opcode', set up _rl_command_to_execute to
+	  execute it after the searching returns and arrange to break out of
+	  the search
+	- _rl_isearch_dispatch: if we paste in text from bracketed paste, set
+	  the mark as active so we can highlight it when we display the search
+	  string
+	- _rl_isearch_dispatch: if we've found the search string, activate the
+	  mark and set rl_point and rl_mark so the search string is highlighted
+	  when we display the search results
+	- _rl_isearch_dispatch: do translation for keys that map to
+	  rl_do_lowercase_version like we do when dispatching while reading a
+	  key sequence

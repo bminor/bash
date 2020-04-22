@@ -4,7 +4,7 @@
  */
 
 /*
-   Copyright (C) 1999-2009 Free Software Foundation, Inc.
+   Copyright (C) 1999-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -92,7 +92,7 @@ push_builtin (list)
   else
     {
       stop_pipeline (0, (COMMAND *)NULL);
-      xstatus = wait_for (pid);
+      xstatus = wait_for (pid, 0);
       return (xstatus);
     }   
 }

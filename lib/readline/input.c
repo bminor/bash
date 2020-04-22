@@ -349,8 +349,7 @@ _rl_input_available (void)
   FD_ZERO (&exceptfds);
   FD_SET (tty, &readfds);
   FD_SET (tty, &exceptfds);
-  timeout.tv_sec = 0;
-  timeout.tv_usec = _keyboard_input_timeout;
+  USEC_TO_TIMEVAL (_keyboard_input_timeout, timeout);
   return (select (tty + 1, &readfds, (fd_set *)NULL, &exceptfds, &timeout) > 0);
 #else
 
@@ -367,6 +366,24 @@ _rl_input_available (void)
 #endif
 
   return 0;
+}
+
+int
+_rl_nchars_available ()
+{
+  int chars_avail, fd, result;
+  
+  chars_avail = 0;
+     
+#if defined (FIONREAD)
+  fd = fileno (rl_instream);
+  errno = 0;    
+  result = ioctl (fd, FIONREAD, &chars_avail);    
+  if (result == -1 && errno == EIO)    
+    return -1;    
+#endif
+
+  return chars_avail;
 }
 
 int

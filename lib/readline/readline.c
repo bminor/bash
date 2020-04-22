@@ -73,11 +73,11 @@ extern int errno;
 #include "xmalloc.h"
 
 #ifndef RL_LIBRARY_VERSION
-#  define RL_LIBRARY_VERSION "5.1"
+#  define RL_LIBRARY_VERSION "8.0"
 #endif
 
 #ifndef RL_READLINE_VERSION
-#  define RL_READLINE_VERSION	0x0501
+#  define RL_READLINE_VERSION	0x0800
 #endif
 
 extern void _rl_free_history_entry PARAMS((HIST_ENTRY *));
@@ -257,6 +257,9 @@ _rl_keyseq_cxt *_rl_kscxt = 0;
 int rl_executing_key;
 char *rl_executing_keyseq = 0;
 int _rl_executing_keyseq_size = 0;
+
+struct _rl_cmd _rl_pending_command;
+struct _rl_cmd *_rl_command_to_execute = (struct _rl_cmd *)NULL;
 
 /* Timeout (specified in milliseconds) when reading characters making up an
    ambiguous multiple-key sequence */
@@ -633,6 +636,23 @@ readline_internal_charloop (void)
       lastc = c;
       r = _rl_dispatch ((unsigned char)c, _rl_keymap);
       RL_CHECK_SIGNALS ();
+
+      if (_rl_command_to_execute)
+	{
+	  (*rl_redisplay_function) ();
+
+	  rl_executing_keymap = _rl_command_to_execute->map;
+	  rl_executing_key = _rl_command_to_execute->key;
+
+	  rl_dispatching = 1;
+	  RL_SETSTATE(RL_STATE_DISPATCHING);
+	  r = (*(_rl_command_to_execute->func)) (_rl_command_to_execute->count, _rl_command_to_execute->key);
+	  _rl_command_to_execute = 0;
+	  RL_UNSETSTATE(RL_STATE_DISPATCHING);
+	  rl_dispatching = 0;
+
+	  RL_CHECK_SIGNALS ();
+	}
 
       /* If there was no change in _rl_last_command_was_kill, then no kill
 	 has taken place.  Note that if input is pending we are reading
@@ -1260,7 +1280,7 @@ readline_initialize_everything (void)
 
   rl_executing_keyseq = malloc (_rl_executing_keyseq_size = 16);
   if (rl_executing_keyseq)
-    rl_executing_keyseq[0] = '\0';
+    rl_executing_keyseq[rl_key_sequence_length = 0] = '\0';
 }
 
 /* If this system allows us to look at the values of the regular
@@ -1471,4 +1491,32 @@ rl_restore_state (struct readline_state *sp)
   rl_deactivate_mark ();
 
   return (0);
+}
+
+/* Functions to manage the string that is the current key sequence. */
+
+void
+_rl_init_executing_keyseq (void)
+{
+  rl_executing_keyseq[rl_key_sequence_length = 0] = '\0';
+}
+
+void
+_rl_term_executing_keyseq (void)
+{
+  rl_executing_keyseq[rl_key_sequence_length] = '\0';
+}
+
+void
+_rl_end_executing_keyseq (void)
+{
+  if (rl_key_sequence_length > 0)
+    rl_executing_keyseq[--rl_key_sequence_length] = '\0';
+}
+
+void
+_rl_add_executing_keyseq (int key)
+{
+  RESIZE_KEYSEQ_BUFFER ();
+ rl_executing_keyseq[rl_key_sequence_length++] = key;
 }

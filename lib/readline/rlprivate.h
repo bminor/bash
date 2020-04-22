@@ -109,6 +109,15 @@ typedef struct  __rl_search_context
   char  *search_terminators;
 } _rl_search_cxt;
 
+struct _rl_cmd {
+  Keymap map;
+  int count;
+  int key;
+  rl_command_func_t *func;
+};
+extern struct _rl_cmd _rl_pending_command;
+extern struct _rl_cmd *_rl_command_to_execute;
+
 /* Callback data for reading numeric arguments */
 #define NUM_SAWMINUS	0x01
 #define NUM_SAWDIGITS	0x02
@@ -285,6 +294,7 @@ extern void _rl_refresh_line PARAMS((void));
 /* input.c */
 extern int _rl_any_typein PARAMS((void));
 extern int _rl_input_available PARAMS((void));
+extern int _rl_nchars_available PARAMS((void));
 extern int _rl_input_queued PARAMS((int));
 extern void _rl_insert_typein PARAMS((int));
 extern int _rl_unget_char PARAMS((int));
@@ -352,6 +362,11 @@ extern void _rl_set_the_line PARAMS((void));
 extern int _rl_dispatch PARAMS((int, Keymap));
 extern int _rl_dispatch_subseq PARAMS((int, Keymap, int));
 extern void _rl_internal_char_cleanup PARAMS((void));
+
+extern void _rl_init_executing_keyseq PARAMS((void));
+extern void _rl_term_executing_keyseq PARAMS((void));
+extern void _rl_end_executing_keyseq PARAMS((void));
+extern void _rl_add_executing_keyseq PARAMS((int)); 
 
 /* rltty.c */
 extern int _rl_disable_tty_signals PARAMS((void));

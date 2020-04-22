@@ -34,11 +34,27 @@
 #include "shell.h"
 #include "hashlib.h"
 
+/* tunable constants for rehashing */
+#define HASH_REHASH_MULTIPLIER	4
+#define HASH_REHASH_FACTOR	2
+
+#define HASH_SHOULDGROW(table) \
+  ((table)->nentries >= (table)->nbuckets * HASH_REHASH_FACTOR)
+
+/* an initial approximation */
+#define HASH_SHOULDSHRINK(table) \
+  (((table)->nbuckets > DEFAULT_HASH_BUCKETS) && \
+   ((table)->nentries < (table)->nbuckets / HASH_REHASH_MULTIPLIER))
+
 /* Rely on properties of unsigned division (unsigned/int -> unsigned) and
    don't discard the upper 32 bits of the value, if present. */
 #define HASH_BUCKET(s, t, h) (((h) = hash_string (s)) & ((t)->nbuckets - 1))
 
-static BUCKET_CONTENTS *copy_bucket_array __P((BUCKET_CONTENTS *, sh_string_func_t *));
+static BUCKET_CONTENTS *copy_bucket_array PARAMS((BUCKET_CONTENTS *, sh_string_func_t *));
+
+static void hash_rehash PARAMS((HASH_TABLE *, int));
+static void hash_grow PARAMS((HASH_TABLE *));
+static void hash_shrink PARAMS((HASH_TABLE *));
 
 /* Make a new hash table with BUCKETS number of buckets.  Initialize
    each slot in the table to NULL. */
@@ -105,6 +121,60 @@ copy_bucket_array (ba, cpdata)
   return new_bucket;  
 }
 
+static void
+hash_rehash (table, nsize)
+     HASH_TABLE *table;
+     int nsize;
+{
+  int osize, i, j;
+  BUCKET_CONTENTS **old_bucket_array, *item, *next;
+
+  if (table == NULL || nsize == table->nbuckets)
+    return;
+
+  osize = table->nbuckets;
+  old_bucket_array = table->bucket_array;
+
+  table->nbuckets = nsize;
+  table->bucket_array = (BUCKET_CONTENTS **)xmalloc (table->nbuckets * sizeof (BUCKET_CONTENTS *));
+  for (i = 0; i < table->nbuckets; i++)
+    table->bucket_array[i] = (BUCKET_CONTENTS *)NULL;
+
+  for (j = 0; j < osize; j++)
+    {
+      for (item = old_bucket_array[j]; item; item = next)
+	{
+	  next = item->next;
+	  i = item->khash & (table->nbuckets - 1);
+	  item->next = table->bucket_array[i];
+	  table->bucket_array[i] = item;
+	}
+    }
+
+  free (old_bucket_array);
+}
+
+static void
+hash_grow (table)
+     HASH_TABLE *table;
+{
+  int nsize;
+
+  nsize = table->nbuckets * HASH_REHASH_MULTIPLIER;
+  if (nsize > 0)		/* overflow */
+    hash_rehash (table, nsize);
+}
+
+static void
+hash_shrink (table)
+     HASH_TABLE *table;
+{
+  int nsize;
+
+  nsize = table->nbuckets / HASH_REHASH_MULTIPLIER;
+  hash_rehash (table, nsize);
+}
+
 HASH_TABLE *
 hash_copy (table, cpdata)
      HASH_TABLE *table;
@@ -136,7 +206,7 @@ hash_copy (table, cpdata)
 
 /* If you want to use 64 bits, use
 FNV_OFFSET	14695981039346656037
-FNV_PRIMT	1099511628211
+FNV_PRIME	1099511628211
 */
 
 /* The `khash' check below requires that strings that compare equally with
@@ -198,6 +268,12 @@ hash_search (string, table, flags)
 
   if (flags & HASH_CREATE)
     {
+      if (HASH_SHOULDGROW (table))
+	{
+	  hash_grow (table);
+	  bucket = HASH_BUCKET (string, table, hv);
+	}
+
       list = (BUCKET_CONTENTS *)xmalloc (sizeof (BUCKET_CONTENTS));
       list->next = table->bucket_array[bucket];
       table->bucket_array[bucket] = list;
@@ -269,6 +345,9 @@ hash_insert (string, table, flags)
 
   if (item == 0)
     {
+      if (HASH_SHOULDGROW (table))
+	hash_grow (table);
+
       bucket = HASH_BUCKET (string, table, hv);
 
       item = (BUCKET_CONTENTS *)xmalloc (sizeof (BUCKET_CONTENTS));
