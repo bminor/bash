@@ -519,7 +519,12 @@ start_pipeline ()
   if (the_pipeline)
     {
       cleanup_the_pipeline ();
-      pipeline_pgrp = 0;
+      /* If job_control == 0, pipeline_pgrp will always be equal to shell_pgrp;
+	 if job_control != 0, pipeline_pgrp == shell_pgrp for command and
+	 process substitution, in which case we want it to be the same as
+	 shell_pgrp for the lifetime of this shell instance. */
+      if (pipeline_pgrp != shell_pgrp)
+	pipeline_pgrp = 0;
 #if defined (PGRP_PIPE)
       sh_closepipe (pgrp_pipe);
 #endif
@@ -632,7 +637,8 @@ stop_pipeline (async, deferred)
 
       the_pipeline = (PROCESS *)NULL;
       newjob->pgrp = pipeline_pgrp;
-      pipeline_pgrp = 0;
+      if (pipeline_pgrp != shell_pgrp)
+	pipeline_pgrp = 0;
 
       newjob->flags = 0;
       if (pipefail_opt)

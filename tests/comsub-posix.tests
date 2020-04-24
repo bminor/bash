@@ -27,6 +27,7 @@ echo $(
 )
 echo $()
 echo ab$()cd
+echo ab$(  )cd
 
 echo $(case a in (a) echo sh_352.26ax; esac )
 echo $(case a in (a) echo sh_352.26ay; esac)
@@ -181,6 +182,10 @@ echo $(
 )
 
 echo $(
+  case x in  x) echo x;; esac # followed by a comment
+)
+
+echo $(
   case x in (x) echo x;; esac
 )
 
@@ -199,6 +204,12 @@ eof
 )
 
 echo $(
+    cat <<\eof
+    here-doc with \()
+eof
+)
+
+echo $(
 cat <<\)
 	here-doc terminated with a parenthesis
 )
@@ -208,6 +219,10 @@ echo $(
 cat <<\eof
 	'   # or a single back- or doublequote
 eof
+)
+
+echo $(
+	echo line terminated with a backslash # \
 )
 
 ${THIS_SH} ./comsub-posix1.sub

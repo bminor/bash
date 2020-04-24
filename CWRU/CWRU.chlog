@@ -8141,3 +8141,47 @@ lib/readline/isearch.c
 	- _rl_isearch_dispatch: do translation for keys that map to
 	  rl_do_lowercase_version like we do when dispatching while reading a
 	  key sequence
+
+				   4/23
+				   ----
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: if bracketed paste mode is enabled and there are
+	  enough characters waiting in the terminal's input queue, try to read
+	  the bracketed paste prefix and jump straight to the opcode execution
+	  if we read it. Otherwise, just go on with the ESC. Inspired by report
+	  from <gentoo_eshoes@tutanota.com>
+
+parse.y
+	- parse_comsub: posix-mode shells don't allow a closing right paren to
+	  delimit a pending here-document -- it requires the newline
+
+doc/bashref.texi
+	- POSIX mode: updated posix mode description with the new here-document
+	  delimiter requirement
+
+lib/readline/search.c
+	- _rl_nsearch_dispatch: if bracketed paste mode is enabled, and we read
+	  an ESC, try to see if we have a bracketed paste op and insert the
+	  pasted next. If we don't, go on with the ESC
+	- _rl_nsearch_dosearch: experimental code to highlight the search string
+	  when displaying the line found in the history. Only done when we are
+	  not searching for a pattern, since we don't have information on the
+	  end of the matching portion of the line. Experimental because it
+	  changes where we put point and mark if searching is successful
+
+expr.c
+	- expr_streval: if find_variable for the case where the string is not
+	  an array reference doesn't find anything, see if we can find
+	  something by using find_variable_last_nameref and use the value
+	  from there in the call to expr_streval, kind of using the expression
+	  recursion to complement the nameref recursion. Report from
+	  Daniel Molina <lluvia@autistici.org>
+
+				   4/24
+				   ----
+jobs.c
+	- {start,stop}_pipeline: don't reset pipeline_pgrp to 0 if it's already
+	  the same as shell_pgrp, since we don't want to reset it in the middle
+	  of a shell started to run a command or process substitution (after
+	  forking a child to run one command, but before forking another, for
+	  instance). Reported by Rob Landley <rob@landley.net>

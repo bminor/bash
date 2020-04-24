@@ -3987,8 +3987,9 @@ eof_error:
       if (ch == '\n' && SHOULD_PROMPT ())
 	prompt_again ();
 
-      /* XXX -- possibly allow here doc to be delimited by ending right
-	 paren. */
+      /* XXX -- we currently allow here doc to be delimited by ending right
+	 paren in default mode and posix mode. To change posix mode, change
+	 the #if 1 to #if 0 below */
       if ((tflags & LEX_INHEREDOC) && ch == close && count == 1)
 	{
 	  int tind;
@@ -3996,7 +3997,14 @@ eof_error:
 	  tind = lex_firstind;
 	  while ((tflags & LEX_STRIPDOC) && ret[tind] == '\t')
 	    tind++;
-	  if (retind-tind == hdlen && STREQN (ret + tind, heredelim, hdlen))
+#if 1
+  	  if (retind-tind == hdlen && STREQN (ret + tind, heredelim, hdlen))
+#else
+	  /* Posix-mode shells require the newline after the here-document
+	     delimiter. */
+	  if (retind-tind == hdlen && STREQN (ret + tind, heredelim, hdlen) &&
+	      posixly_correct == 0)
+#endif
 	    {
 	      tflags &= ~(LEX_STRIPDOC|LEX_INHEREDOC|LEX_QUOTEDDOC);
 /*itrace("parse_comsub:%d: found here doc end `%*s'", line_number, hdlen, ret + tind);*/

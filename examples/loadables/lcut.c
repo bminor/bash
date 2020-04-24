@@ -454,7 +454,7 @@ cut_internal (which, list)
       return (EXECUTION_FAILURE);
     }
 
-  if (list == 0)
+  if (list == 0 && which == 0)
     {
       builtin_error ("string argument required");
       return (EX_USAGE);
@@ -505,9 +505,6 @@ cut_internal (which, list)
   op.npos = npos;
   op.poslist = poslist;
 
-  /* we can eventually implement cut as a builtin with a cutfile() function
-     that opens cutstring as a filename (or `-' for stdin) and runs cutline
-     on every line in the file. */
   if (which == 0)
     rval = cutline (v, cutstring, &op);
 
@@ -519,22 +516,6 @@ lcut_builtin (list)
      WORD_LIST *list;
 {
   return (cut_internal (0, list));
-}
-
-/* Called when builtin is enabled and loaded from the shared object.  If this
-   function returns 0, the load fails. */
-int
-lcut_builtin_load (name)
-     char *name;
-{
-  return (1);
-}
-
-/* Called when builtin is disabled. */
-void
-lcut_builtin_unload (name)
-     char *name;
-{
 }
 
 char *lcut_doc[] = {

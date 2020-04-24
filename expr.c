@@ -1168,6 +1168,8 @@ expr_streval (tok, e, lvalue)
 #else
   v = find_variable (tok);
 #endif
+  if (v == 0 && e != ']')
+    v = find_variable_last_nameref (tok, 0);  
 
   if ((v == 0 || invisible_p (v)) && unbound_vars_is_error)
     {

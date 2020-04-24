@@ -7786,6 +7786,13 @@ not have to appear as matched pairs.
 The parser does not recognize @code{time} as a reserved word if the next
 token begins with a @samp{-}.
 
+@ignore
+@item
+When parsing @code{$()} command substitutions containing here-documents,
+the parser does not allow a here-document to be delimited by the closing
+right parenthesis. The newline after the here-document delimiter is required.
+@end ignore
+
 @item
 The @samp{!} character does not introduce history expansion within a
 double-quoted string, even if the @code{histexpand} option is enabled.

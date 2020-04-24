@@ -355,6 +355,22 @@ _rl_isearch_dispatch (_rl_search_cxt *cxt, int c)
 
   _rl_add_executing_keyseq (c);
 
+  /* XXX - experimental code to allow users to bracketed-paste into the search
+     string even when ESC is one of the isearch-terminators. Not perfect yet. */
+  if (_rl_enable_bracketed_paste && c == ESC && strchr (cxt->search_terminators, c) && (n = _rl_nchars_available ()) > (2*BRACK_PASTE_SLEN-1))
+    {
+      j = _rl_read_bracketed_paste_prefix (c);
+      if (j == 1)
+	{
+	  cxt->lastc = -7;		/* bracketed paste, see below */
+	  goto opcode_dispatch;	
+        }
+      else if (_rl_pushed_input_available ())	/* eat extra char we pushed back */
+	c = cxt->lastc = rl_read_key ();
+      else
+	c = cxt->lastc;			/* last ditch */
+    }
+
   /* If we are moving into a new keymap, modify cxt->keymap and go on.
      This can be a problem if c == ESC and we want to terminate the
      incremental search, so we check */
@@ -531,6 +547,7 @@ add_character:
 
   _rl_init_executing_keyseq ();
 
+opcode_dispatch:
   /* Now dispatch on the character.  `Opcodes' affect the search string or
      state.  Other characters are added to the string.  */
   switch (cxt->lastc)
