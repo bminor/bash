@@ -273,9 +273,8 @@ extern int num_fifos __P((void));
 extern void unlink_fifo_list __P((void));
 extern void unlink_fifo __P((int));
 
-extern char *copy_fifo_list __P((int *));
-extern void unlink_new_fifos __P((char *, int));
-extern void close_new_fifos __P((char *, int));
+extern void *copy_fifo_list __P((int *));
+extern void close_new_fifos __P((void *, int));
 
 extern void clear_fifo_list __P((void));
 

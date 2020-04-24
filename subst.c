@@ -5336,13 +5336,13 @@ clear_fifo_list ()
 {
 }
 
-char *
+void *
 copy_fifo_list (sizep)
      int *sizep;
 {
   if (sizep)
     *sizep = 0;
-  return (char *)NULL;
+  return (void *)NULL;
 }
 
 static void
@@ -5408,8 +5408,13 @@ unlink_fifo_list ()
       for (i = j = 0; i < nfifo; i++)
 	if (fifo_list[i].file)
 	  {
-	    fifo_list[j].file = fifo_list[i].file;
-	    fifo_list[j].proc = fifo_list[i].proc;
+	    if (i != j)
+	      {
+		fifo_list[j].file = fifo_list[i].file;
+		fifo_list[j].proc = fifo_list[i].proc;
+		fifo_list[i].file = (char *)NULL;
+		fifo_list[i].proc = 0;
+	      }
 	    j++;
 	  }
       nfifo = j;
@@ -5425,10 +5430,11 @@ unlink_fifo_list ()
    case it's larger than fifo_list_size (size of fifo_list). */
 void
 close_new_fifos (list, lsize)
-     char *list;
+     void *list;
      int lsize;
 {
   int i;
+  char *plist;
 
   if (list == 0)
     {
@@ -5436,8 +5442,8 @@ close_new_fifos (list, lsize)
       return;
     }
 
-  for (i = 0; i < lsize; i++)
-    if (list[i] == 0 && i < fifo_list_size && fifo_list[i].proc != -1)
+  for (plist = (char *)list, i = 0; i < lsize; i++)
+    if (plist[i] == 0 && i < fifo_list_size && fifo_list[i].proc != -1)
       unlink_fifo (i);
 
   for (i = lsize; i < fifo_list_size; i++)
@@ -5559,22 +5565,22 @@ clear_fifo_list ()
   nfds = 0;
 }
 
-char *
+void *
 copy_fifo_list (sizep)
      int *sizep;
 {
-  char *ret;
+  void *ret;
 
   if (nfds == 0 || totfds == 0)
     {
       if (sizep)
 	*sizep = 0;
-      return (char *)NULL;
+      return (void *)NULL;
     }
 
   if (sizep)
     *sizep = totfds;
-  ret = (char *)xmalloc (totfds * sizeof (pid_t));
+  ret = xmalloc (totfds * sizeof (pid_t));
   return (memcpy (ret, dev_fd_list, totfds * sizeof (pid_t)));
 }
 
@@ -5647,10 +5653,11 @@ unlink_fifo_list ()
    totfds (size of dev_fd_list). */
 void
 close_new_fifos (list, lsize)
-     char *list;
+     void *list;
      int lsize;
 {
   int i;
+  pid_t *plist;
 
   if (list == 0)
     {
@@ -5658,8 +5665,8 @@ close_new_fifos (list, lsize)
       return;
     }
 
-  for (i = 0; i < lsize; i++)
-    if (list[i] == 0 && i < totfds && dev_fd_list[i])
+  for (plist = (pid_t *)list, i = 0; i < lsize; i++)
+    if (plist[i] == 0 && i < totfds && dev_fd_list[i])
       unlink_fifo (i);
 
   for (i = lsize; i < totfds; i++)
