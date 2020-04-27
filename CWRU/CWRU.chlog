@@ -7579,7 +7579,7 @@ subst.c
 	  command with make_local_declare, meaning we have an array or assoc
 	  compound assignment. (Slighty unsatisfactory, but ok for now) Fix
 	  for bug report from Kevin Locke <kevin@kevinlocke.name>,
-	   https://savannah.gnu.org/support/index.php?109669
+	  https://savannah.gnu.org/support/index.php?109669
 
 				   3/18
 				   ----
@@ -8185,3 +8185,29 @@ jobs.c
 	  of a shell started to run a command or process substitution (after
 	  forking a child to run one command, but before forking another, for
 	  instance). Reported by Rob Landley <rob@landley.net>
+
+				   4/27
+				   ----
+parse.y
+	- function_def: break the productions starting with `function' without
+	  `()' into two productions to avoid a shift-reduce conflict. Report
+	  and patch from Dale R. Worley <worley@alum.mit.edu>
+
+variables.h
+	- localvar_inherit: add extern declaration here
+
+subst.c
+	- shell_expand_word_list: take out change from 3/17 to pass -I to
+	  make_internal_declare; it generates errors the user will find
+	  confusing if there is a variable with the same name but a different
+	  type at a previous scope
+	- shell_expand_word_list: check for and note whether or not -I is
+	  supplied to the declaration command, since it changes the default
+	  behavior of a compound assignment without -a or -A
+	- shell_expand_word_list: if we have a compound assignment that is an
+	  argument to a declaration command, but there are no options supplied
+	  to the command that determine the type of the array, make sure we
+	  call make_internal_declare with either -a (no localvar_inherit or -I)
+	  or at least -- (if we are inheriting), because  we don't want the
+	  declare to get skipped before we perform the word assignment. Fixes
+	  bug reported by Ross Goldberg <ross.goldberg@gmail.com>

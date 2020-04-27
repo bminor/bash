@@ -11472,8 +11472,10 @@ brace_expand_word_list (tlist, eflags)
 #endif
 
 #if defined (ARRAY_VARS)
-/* Take WORD, a compound associative array assignment, and internally run
-   'declare -A w', where W is the variable name portion of WORD. */
+/* Take WORD, a compound array assignment, and internally run (for example),
+   'declare -A w', where W is the variable name portion of WORD. OPTION is
+   the list of options to supply to `declare'. CMD is the declaration command
+   we are expanding right now; it's unused currently. */
 static int
 make_internal_declare (word, option, cmd)
      char *word;
@@ -11533,8 +11535,9 @@ shell_expand_word_list (tlist, eflags)
 	{
 	  int t;
 	  char opts[16];
-	  int opti, skip;
+	  int opti, skip, inheriting, array;
 
+	  inheriting = localvar_inherit;
 	  opti = 0;
 	  if (tlist->word->flags & (W_ASSIGNASSOC|W_ASSNGLOBAL|W_CHKLOCAL|W_ASSIGNARRAY))
 	    opts[opti++] = '-';
@@ -11547,7 +11550,10 @@ shell_expand_word_list (tlist, eflags)
 	  else if (tlist->word->flags & W_ASSIGNASSOC)
 	    {
 	      opts[opti++] = 'A';
-	      opts[opti++] = 'I';
+	      /* This doesn't work right if a variable with the same name but
+		 a different type exists at a previous scope; it generates
+		 errors that a user would find confusing. */
+/*	      opts[opti++] = 'I'; */
 	    }
 	  else if ((tlist->word->flags & (W_ASSIGNARRAY|W_ASSNGLOBAL)) == (W_ASSIGNARRAY|W_ASSNGLOBAL))
 	    {
@@ -11557,7 +11563,7 @@ shell_expand_word_list (tlist, eflags)
 	  else if (tlist->word->flags & W_ASSIGNARRAY)
 	    {
 	      opts[opti++] = 'a';
-	      opts[opti++] = 'I';
+/*	      opts[opti++] = 'I'; */
 	    }
 	  else if (tlist->word->flags & W_ASSNGLOBAL)
 	    opts[opti++] = 'g';
@@ -11585,6 +11591,8 @@ shell_expand_word_list (tlist, eflags)
 		  for (oind = 1; l->word->word[oind]; oind++)
 		    switch (l->word->word[oind])
 		      {
+			case 'I':
+			  inheriting = 1;
 			case 'i':
 			case 'l':
 			case 'u':
@@ -11601,6 +11609,26 @@ shell_expand_word_list (tlist, eflags)
 	      for (oind = 0; oind < sizeof (omap); oind++)
 		if (omap[oind])
 		  opts[opti++] = oind;
+	    }
+
+	  /* If there are no -a/-A options, but we have a compound assignment,
+	     we have a choice: we can set opts[0]='-', opt[1]='a', since the
+	     default is to create an indexed array, and call
+	     make_internal_declare, or we can just skip it and let
+	     declare_builtin deal with it.  Once we're here, we're better set
+	     up for the former. We don't do this if we're inheriting local
+	     variables' attributes and values here, since that makes `-a' no
+	     longer the default; we pass `--' instead if we don't have any
+	     options at all, and just leave off the -a if we have some. */
+	  if ((tlist->word->flags & (W_ASSIGNASSOC|W_ASSIGNARRAY)) == 0)
+	    {
+	      if (opti == 0)
+		{
+		  opts[opti++] = '-';
+	          opts[opti++] = inheriting ? '-' : 'a';
+		}
+	      else if (inheriting == 0)
+		opts[opti++] = 'a';
 	    }
 
 	  opts[opti] = '\0';

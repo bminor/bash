@@ -253,6 +253,8 @@ extern WORD_LIST *rest_of_args;
 extern int posparam_count;
 extern pid_t dollar_dollar_pid;
 
+extern int localvar_inherit;		/* declared in variables.c */
+
 extern void initialize_shell_variables PARAMS((char **, int));
 
 extern int validate_inherited_value PARAMS((SHELL_VAR *, int));
