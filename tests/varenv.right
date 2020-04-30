@@ -246,9 +246,16 @@ declare -- var
 declare -- var="local"
 declare -- var="f1"
 declare -- var="local"
-declare -a arr=()
+declare -a arr=([0]="zero" [1]="one" [2]="two" [3]="three" [4]="four" [5]="five")
+declare -a arr=([0]="zero" [1]="one" [2]="two")
 declare -a arr=([0]="three" [1]="four" [2]="five")
-./varenv18.sub: line 39: !name: unbound variable
+declare -a arr=([0]="zero" [1]="one" [2]="two")
+ddd 0
+aaa 1 2 3
+bbb 4 5 6
+ccc 7 8 9
+declare -a x=([0]="one" [1]="two" [2]="three")
+./varenv19.sub: line 51: declare: x: not found
 a=z
 a=b
 a=z

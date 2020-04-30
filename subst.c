@@ -354,6 +354,8 @@ static WORD_LIST *brace_expand_word_list PARAMS((WORD_LIST *, int));
 #endif
 #if defined (ARRAY_VARS)
 static int make_internal_declare PARAMS((char *, char *, char *));
+static void expand_compound_assignment_word PARAMS((WORD_LIST *, int));
+static WORD_LIST *expand_declaration_argument PARAMS((WORD_LIST *, WORD_LIST *));
 #endif
 static WORD_LIST *shell_expand_word_list PARAMS((WORD_LIST *, int));
 static WORD_LIST *expand_word_list_internal PARAMS((WORD_LIST *, int));
@@ -11504,7 +11506,260 @@ make_internal_declare (word, option, cmd)
   dispose_words (wl);
   return r;
 }  
-#endif
+
+/* Expand VALUE in NAME[+]=( VALUE ) to a list of words. FLAGS is 1 if NAME
+   is an associative array.
+
+   If we are  processing an indexed array, expand_compound_array_assignment
+   will expand all the individual words and quote_compound_array_list will
+   single-quote them. If we are processing an associative array, we use
+   parse_string_to_word_list to split VALUE into a list of words instead of
+   faking up a shell variable and calling expand_compound_array_assignment.
+   expand_and_quote_assoc_word expands and single-quotes each word in VALUE
+   together so we don't have problems finding the end of the subscript when
+   quoting it.
+
+   Words in VALUE can be individual words, which are expanded and single-quoted,
+   or words of the form [IND]=VALUE, which end up as explained below, as
+   ['expanded-ind']='expanded-value'. */
+
+static WORD_LIST *
+expand_oneword (value, flags)
+     char *value;
+     int flags;
+{
+  WORD_LIST *l, *nl;
+  char *t;
+  
+  if (flags == 0)
+    {
+      /* Indexed array */
+      l = expand_compound_array_assignment ((SHELL_VAR *)NULL, value, flags);
+      /* Now we quote the results of the expansion above to prevent double
+	 expansion. */
+      quote_compound_array_list (l, flags);
+      return l;
+    }
+  else
+    {
+      /* Associative array */
+      l = parse_string_to_word_list (value, 1, "array assign");
+      /* For associative arrays, with their arbitrary subscripts, we have to
+	 expand and quote in one step so we don't have to search for the
+	 closing right bracket more than once. */
+      for (nl = l; nl; nl = nl->next)
+	{
+	  if ((nl->word->flags & W_ASSIGNMENT) == 0)
+	    t = sh_single_quote (nl->word->word ? nl->word->word : "");
+	  else
+	    t = expand_and_quote_assoc_word (nl->word->word, flags);
+	  free (nl->word->word);
+	  nl->word->word = t;
+	}
+      return l;
+    }
+}
+
+/* Expand a single compound assignment argument to a declaration builtin.
+   This word takes the form NAME[+]=( VALUE ). The NAME[+]= is passed through
+   unchanged. The VALUE is expanded and each word in the result is single-
+   quoted. Words of the form [key]=value end up as
+   ['expanded-key']='expanded-value'. Associative arrays have special
+   handling, see expand_oneword() above. The return value is
+   NAME[+]=( expanded-and-quoted-VALUE ). */
+static void
+expand_compound_assignment_word (tlist, flags)
+     WORD_LIST *tlist;
+     int flags;
+{
+  WORD_LIST *l;
+  int wlen, oind, t;
+  char *value, *temp;
+
+/*itrace("expand_compound_assignment_word: original word = -%s-", tlist->word->word);*/
+  wlen = strlen (tlist->word->word);
+  t = assignment (tlist->word->word, 0);
+
+  /* value doesn't have the open and close parens */
+  oind = 1;
+  value = extract_array_assignment_list (tlist->word->word + t + 1, &oind);
+  /* This performs one round of expansion on the index/key and value and
+     single-quotes each word in the result. */
+  l = expand_oneword (value, flags);
+  free (value);
+
+  value = string_list (l);
+  wlen = STRLEN (value);
+
+  /* Now, let's rebuild the string */
+  temp = xmalloc (t + 3 + wlen + 1);	/* name[+]=(value) */
+  memcpy (temp, tlist->word->word, ++t);
+  temp[t++] = '(';
+  if (value)
+    memcpy (temp + t, value, wlen);
+  t += wlen;
+  temp[t++] = ')';
+  temp[t] = '\0';
+/*itrace("expand_compound_assignment_word: reconstructed word = -%s-", temp);*/
+
+  free (tlist->word->word);
+  tlist->word->word = temp;
+
+  free (value);
+}
+
+/* Expand and process an argument to a declaration command. We have already
+   set flags in TLIST->word->flags depending on the declaration command
+   (declare, local, etc.) and the options supplied to it (-a, -A, etc.).
+   TLIST->word->word is of the form NAME[+]=( VALUE ).   
+
+   This does several things, all using pieces of other functions to get the
+   evaluation sequence right. It's called for compound array assignments with
+   the W_ASSIGNMENT flag set (basically, valid identifier names on the lhs).
+   It parses out which flags need to be set for declare to create the variable
+   correctly, then calls declare internally (make_internal_declare) to make
+   sure the variable exists with the correct attributes. Before the variable
+   is created, it calls expand_compound_assignment_word to expand VALUE to a
+   list of words, appropriately quoted for further evaluation. This preserves
+   the semantics of word-expansion-before-calling-builtins. Finally, it calls
+   do_word_assignment to perform the expansion and assignment with the same
+   expansion semantics as a standalone assignment statement (no word splitting,
+   etc.) even though the word is single-quoted so all that needs to happen is
+   quote removal. */
+static WORD_LIST *
+expand_declaration_argument (tlist, wcmd)
+     WORD_LIST *tlist, *wcmd;
+{
+  char opts[16], omap[128];
+  int t, opti, oind, skip, inheriting;
+  WORD_LIST *l;
+
+  inheriting = localvar_inherit;
+  opti = 0;
+  if (tlist->word->flags & (W_ASSIGNASSOC|W_ASSNGLOBAL|W_CHKLOCAL|W_ASSIGNARRAY))
+    opts[opti++] = '-';
+
+  if ((tlist->word->flags & (W_ASSIGNASSOC|W_ASSNGLOBAL)) == (W_ASSIGNASSOC|W_ASSNGLOBAL))
+    {
+      opts[opti++] = 'g';
+      opts[opti++] = 'A';
+    }
+  else if (tlist->word->flags & W_ASSIGNASSOC)
+    {
+      opts[opti++] = 'A';
+    }
+  else if ((tlist->word->flags & (W_ASSIGNARRAY|W_ASSNGLOBAL)) == (W_ASSIGNARRAY|W_ASSNGLOBAL))
+    {
+      opts[opti++] = 'g';
+      opts[opti++] = 'a';
+    }
+  else if (tlist->word->flags & W_ASSIGNARRAY)
+    {
+      opts[opti++] = 'a';
+    }
+  else if (tlist->word->flags & W_ASSNGLOBAL)
+    opts[opti++] = 'g';
+
+  if (tlist->word->flags & W_CHKLOCAL)
+    opts[opti++] = 'G';
+
+  /* If we have special handling note the integer attribute and others
+     that transform the value upon assignment.  What we do is take all
+     of the option arguments and scan through them looking for options
+     that cause such transformations, and add them to the `opts' array. */
+
+  memset (omap, '\0', sizeof (omap));
+  for (l = wcmd->next; l != tlist; l = l->next)
+    {
+      if (l->word->word[0] != '-')
+	break;	/* non-option argument */
+      if (l->word->word[0] == '-' && l->word->word[1] == '-' && l->word->word[2] == 0)
+	break;	/* -- signals end of options */
+      for (oind = 1; l->word->word[oind]; oind++)
+	switch (l->word->word[oind])
+	  {
+	    case 'I':
+	      inheriting = 1;
+	    case 'i':
+	    case 'l':
+	    case 'u':
+	    case 'c':
+	      omap[l->word->word[oind]] = 1;
+	      if (opti == 0)
+		opts[opti++] = '-';
+	      break;
+	    default:
+	      break;
+	  }
+    }
+
+  for (oind = 0; oind < sizeof (omap); oind++)
+    if (omap[oind])
+      opts[opti++] = oind;
+
+  /* If there are no -a/-A options, but we have a compound assignment,
+     we have a choice: we can set opts[0]='-', opts[1]='a', since the
+     default is to create an indexed array, and call
+     make_internal_declare with that, or we can just skip the -a and let
+     declare_builtin deal with it.  Once we're here, we're better set
+     up for the latter, since we don't want to deal with looking up
+     any existing variable here -- better to let declare_builtin do it.
+     We need the variable created, though, especially if it's local, so
+     we get the scoping right before we call do_word_assignment.
+     To ensure that make_local_declare gets called, we add `--' if there
+     aren't any options. */
+  if ((tlist->word->flags & (W_ASSIGNASSOC|W_ASSIGNARRAY)) == 0)
+    {
+      if (opti == 0)
+	{
+	  opts[opti++] = '-';
+          opts[opti++] = '-';
+	}
+    }
+  opts[opti] = '\0';
+
+  /* This isn't perfect, but it's a start. Improvements later. We expand
+     tlist->word->word and single-quote the results to avoid multiple
+     expansions by, say, do_assignment_internal(). We have to weigh the
+     cost of reconstructing the compound assignment string with its single
+     quoting and letting the declare builtin handle it. The single quotes
+     will prevent any unwanted additional expansion or word splitting. */
+  expand_compound_assignment_word (tlist, (tlist->word->flags & W_ASSIGNASSOC) ? 1 : 0);
+
+  skip = 0;
+  if (opti > 0)
+    {
+      t = make_internal_declare (tlist->word->word, opts, wcmd ? wcmd->word->word : (char *)0);
+      if (t != EXECUTION_SUCCESS)
+	{
+	  last_command_exit_value = t;
+	  if (tlist->word->flags & W_FORCELOCAL)	/* non-fatal error */
+	    skip = 1;
+	  else
+	    exp_jump_to_top_level (DISCARD);
+	}
+    }
+
+  if (skip == 0)
+    {
+      t = do_word_assignment (tlist->word, 0);
+      if (t == 0)
+	{
+	  last_command_exit_value = EXECUTION_FAILURE;
+	  exp_jump_to_top_level (DISCARD);
+	}
+    }
+
+  /* Now transform the word as ksh93 appears to do and go on */
+  t = assignment (tlist->word->word, 0);
+  tlist->word->word[t] = '\0';
+  if (tlist->word->word[t - 1] == '+')
+    tlist->word->word[t - 1] = '\0';	/* cut off append op */
+  tlist->word->flags &= ~(W_ASSIGNMENT|W_NOSPLIT|W_COMPASSIGN|W_ASSIGNARG|W_ASSIGNASSOC|W_ASSIGNARRAY);
+
+  return (tlist);
+}
+#endif /* ARRAY_VARS */
 
 static WORD_LIST *
 shell_expand_word_list (tlist, eflags)
@@ -11515,13 +11770,13 @@ shell_expand_word_list (tlist, eflags)
   int expanded_something, has_dollar_at;
 
   /* We do tilde expansion all the time.  This is what 1003.2 says. */
-  new_list = (WORD_LIST *)NULL;
-  for (wcmd = tlist; wcmd; wcmd = wcmd->next)
-    if (wcmd->word->flags & W_ASSNBLTIN)
-      break;
+  wcmd = new_list = (WORD_LIST *)NULL;
 
   for (orig_list = tlist; tlist; tlist = next)
     {
+      if (wcmd == 0 && (tlist->word->flags & W_ASSNBLTIN))
+	wcmd = tlist;
+	
       next = tlist->next;
 
 #if defined (ARRAY_VARS)
@@ -11532,137 +11787,7 @@ shell_expand_word_list (tlist, eflags)
          because `declare' does some evaluation of compound assignments on
          its own. */
       if ((tlist->word->flags & (W_COMPASSIGN|W_ASSIGNARG)) == (W_COMPASSIGN|W_ASSIGNARG))
-	{
-	  int t;
-	  char opts[16];
-	  int opti, skip, inheriting, array;
-
-	  inheriting = localvar_inherit;
-	  opti = 0;
-	  if (tlist->word->flags & (W_ASSIGNASSOC|W_ASSNGLOBAL|W_CHKLOCAL|W_ASSIGNARRAY))
-	    opts[opti++] = '-';
-
-	  if ((tlist->word->flags & (W_ASSIGNASSOC|W_ASSNGLOBAL)) == (W_ASSIGNASSOC|W_ASSNGLOBAL))
-	    {
-	      opts[opti++] = 'g';
-	      opts[opti++] = 'A';
-	    }
-	  else if (tlist->word->flags & W_ASSIGNASSOC)
-	    {
-	      opts[opti++] = 'A';
-	      /* This doesn't work right if a variable with the same name but
-		 a different type exists at a previous scope; it generates
-		 errors that a user would find confusing. */
-/*	      opts[opti++] = 'I'; */
-	    }
-	  else if ((tlist->word->flags & (W_ASSIGNARRAY|W_ASSNGLOBAL)) == (W_ASSIGNARRAY|W_ASSNGLOBAL))
-	    {
-	      opts[opti++] = 'g';
-	      opts[opti++] = 'a';
-	    }
-	  else if (tlist->word->flags & W_ASSIGNARRAY)
-	    {
-	      opts[opti++] = 'a';
-/*	      opts[opti++] = 'I'; */
-	    }
-	  else if (tlist->word->flags & W_ASSNGLOBAL)
-	    opts[opti++] = 'g';
-
-	  if (tlist->word->flags & W_CHKLOCAL)
-	    opts[opti++] = 'G';
-
-	  /* If we have special handling note the integer attribute and others
-	     that transform the value upon assignment.  What we do is take all
-	     of the option arguments and scan through them looking for options
-	     that cause such transformations, and add them to the `opts' array. */
-/*	  if (opti > 0) */
-	    {
-	      char omap[128];
-	      int oind;
-	      WORD_LIST *l;
-
-	      memset (omap, '\0', sizeof (omap));
-	      for (l = orig_list->next; l != tlist; l = l->next)
-		{
-		  if (l->word->word[0] != '-')
-		    break;	/* non-option argument */
-		  if (l->word->word[0] == '-' && l->word->word[1] == '-' && l->word->word[2] == 0)
-		    break;	/* -- signals end of options */
-		  for (oind = 1; l->word->word[oind]; oind++)
-		    switch (l->word->word[oind])
-		      {
-			case 'I':
-			  inheriting = 1;
-			case 'i':
-			case 'l':
-			case 'u':
-			case 'c':
-			  omap[l->word->word[oind]] = 1;
-			  if (opti == 0)
-			    opts[opti++] = '-';
-			  break;
-			default:
-			  break;
-		      }
-		}
-
-	      for (oind = 0; oind < sizeof (omap); oind++)
-		if (omap[oind])
-		  opts[opti++] = oind;
-	    }
-
-	  /* If there are no -a/-A options, but we have a compound assignment,
-	     we have a choice: we can set opts[0]='-', opt[1]='a', since the
-	     default is to create an indexed array, and call
-	     make_internal_declare, or we can just skip it and let
-	     declare_builtin deal with it.  Once we're here, we're better set
-	     up for the former. We don't do this if we're inheriting local
-	     variables' attributes and values here, since that makes `-a' no
-	     longer the default; we pass `--' instead if we don't have any
-	     options at all, and just leave off the -a if we have some. */
-	  if ((tlist->word->flags & (W_ASSIGNASSOC|W_ASSIGNARRAY)) == 0)
-	    {
-	      if (opti == 0)
-		{
-		  opts[opti++] = '-';
-	          opts[opti++] = inheriting ? '-' : 'a';
-		}
-	      else if (inheriting == 0)
-		opts[opti++] = 'a';
-	    }
-
-	  opts[opti] = '\0';
-	  skip = 0;
-	  if (opti > 0)
-	    {
-	      t = make_internal_declare (tlist->word->word, opts, wcmd ? wcmd->word->word : (char *)0);
-	      if (t != EXECUTION_SUCCESS)
-		{
-		  last_command_exit_value = t;
-		  if (tlist->word->flags & W_FORCELOCAL)	/* non-fatal error */
-		    skip = 1;
-		  else
-		    exp_jump_to_top_level (DISCARD);
-		}
-	    }
-
-	  if (skip == 0)
-	    {
-	      t = do_word_assignment (tlist->word, 0);
-	      if (t == 0)
-		{
-		  last_command_exit_value = EXECUTION_FAILURE;
-		  exp_jump_to_top_level (DISCARD);
-		}
-	    }
-
-	  /* Now transform the word as ksh93 appears to do and go on */
-	  t = assignment (tlist->word->word, 0);
-	  tlist->word->word[t] = '\0';
-	  if (tlist->word->word[t - 1] == '+')
-	    tlist->word->word[t - 1] = '\0';	/* cut off append op */
-	  tlist->word->flags &= ~(W_ASSIGNMENT|W_NOSPLIT|W_COMPASSIGN|W_ASSIGNARG|W_ASSIGNASSOC|W_ASSIGNARRAY);
-	}
+	expand_declaration_argument (tlist, wcmd);
 #endif
 
       expanded_something = 0;

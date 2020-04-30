@@ -40,6 +40,11 @@
 
 #include "builtins/common.h"
 
+#ifndef LBRACK
+#  define LBRACK '['
+#  define RBRACK ']'
+#endif
+
 /* This variable means to not expand associative array subscripts more than
    once, when performing variable expansion. */
 int assoc_expand_once = 0;
@@ -54,6 +59,7 @@ static void assign_assoc_from_kvlist PARAMS((SHELL_VAR *, WORD_LIST *, HASH_TABL
 
 static char *quote_assign PARAMS((const char *));
 static void quote_array_assignment_chars PARAMS((WORD_LIST *));
+static char *quote_compound_array_word PARAMS((char *, int));
 static char *array_value_internal PARAMS((const char *, int, int, int *, arrayind_t *));
 
 /* Standard error message to use when encountering an invalid array subscript */
@@ -594,9 +600,11 @@ assign_assoc_from_kvlist (var, nlist, h, flags)
 #endif
      
 /* Callers ensure that VAR is not NULL. Associative array assignments have not
-   been expanded when this is called, so we don't have to scan through the
-   expanded subscript to find the ending bracket; indexed array assignments
-   have been expanded.
+   been expanded when this is called, or have been expanded once and single-
+   quoted, so we don't have to scan through an unquoted expanded subscript to
+   find the ending bracket; indexed array assignments have been expanded and
+   possibly single-quoted to prevent further expansion.
+
    If this is an associative array, we perform the assignments into NHASH and
    set NHASH to be the value of VAR after processing the assignments in NLIST */
 void
@@ -632,7 +640,7 @@ assign_compound_array_list (var, nlist, flags)
   last_ind = (a && (flags & ASS_APPEND)) ? array_max_index (a) + 1 : 0;
 
 #if ASSOC_KVPAIR_ASSIGNMENT
-  if (assoc_p (var) && nlist && (nlist->word->flags & W_ASSIGNMENT) == 0 && nlist->word->word[0] != '[')		/*]*/
+  if (assoc_p (var) && nlist && (nlist->word->flags & W_ASSIGNMENT) == 0 && nlist->word->word[0] != '[')	/*]*/
     {
       iflags = flags & ~ASS_APPEND;
       assign_assoc_from_kvlist (var, nlist, nhash, iflags);
@@ -849,6 +857,118 @@ quote_assign (string)
     }
   *t = '\0';
   return temp;
+}
+
+/* Take a word W of the form [IND]=VALUE and transform it to ['IND]='VALUE'
+   to prevent further expansion. This is called for compound assignments to
+   indexed arrays. W has already undergone word expansions. If W has no [IND]=,
+   just single-quote and return it. */
+static char *
+quote_compound_array_word (w, type)
+     char *w;
+     int type;
+{
+  char *nword, *sub, *value, *t;
+  int ind, wlen, i;
+
+  if (w[0] != LBRACK)
+    return (sh_single_quote (w));
+  ind = skipsubscript (w, 0, 0);
+  if (w[ind] != RBRACK)
+    return (sh_single_quote (w));
+
+  wlen = strlen (w);
+  w[ind] = '\0';
+  sub = sh_single_quote (w+1);
+  w[ind] = RBRACK;
+
+  nword = xmalloc (wlen * 4 + 5);	/* wlen*4 is max single quoted length */
+  nword[0] = LBRACK;
+  i = STRLEN (sub);
+  memcpy (nword+1, sub, i);
+  i++;				/* accommodate the opening LBRACK */
+  nword[i++] = w[ind++];	/* RBRACK */
+  if (w[ind] == '+')
+    nword[i++] = w[ind++];
+  nword[i++] = w[ind++];
+  value = sh_single_quote (w + ind);
+  strcpy (nword + i, value);
+
+  return nword;
+}
+
+/* Expand the key and value in W, which is of the form [KEY]=VALUE, and
+   reconstruct W with the expanded and single-quoted version:
+   ['expanded-key']='expanded-value'. If there is no [KEY]=, single-quote the
+   word and return it. Very similar to previous function, but does not assume
+   W has already been expanded, and expands the KEY and VALUE separately.
+   Used for compound assignments to associative arrays that are arguments to
+   declaration builtins (declare -A a=( list )). */
+char *
+expand_and_quote_assoc_word (w, type)
+     char *w;
+     int type;
+{
+  char *nword, *key, *value, *t;
+  int ind, wlen, i;
+
+  if (w[0] != LBRACK)
+    return (sh_single_quote (w));     
+  ind = skipsubscript (w, 0, 0);
+  if (w[ind] != RBRACK)
+    return (sh_single_quote (w));
+
+  w[ind] = '\0';
+  t = expand_assignment_string_to_string (w+1, 0);
+  w[ind] = RBRACK;
+  key = sh_single_quote (t ? t : "");
+  free (t);
+
+  wlen = STRLEN (key);
+  nword = xmalloc (wlen + 5);
+  nword[0] = LBRACK;
+  memcpy (nword+1, key, wlen);
+  i = wlen + 1;			/* accommodate the opening LBRACK */
+
+  nword[i++] = w[ind++];	/* RBRACK */
+  if (w[ind] == '+')
+    nword[i++] = w[ind++];
+  nword[i++] = w[ind++];
+
+  t = expand_assignment_string_to_string (w+ind, 0);
+  value = sh_single_quote (t ? t : "");
+  free (t);
+  nword = xrealloc (nword, wlen + 5 + STRLEN (value));
+  strcpy (nword + i, value);
+
+  free (key);
+  free (value);
+
+  return nword;
+}
+
+/* For each word in a compound array assignment, if the word looks like
+   [ind]=value, single-quote ind and value, but leave the brackets and
+   the = sign (and any `+') alone. This is used for indexed arrays. */
+void
+quote_compound_array_list (list, type)
+     WORD_LIST *list;
+     int type;
+{
+  char *t;
+  WORD_LIST *l;
+
+  for (l = list; l; l = l->next)
+    {
+      if (l->word == 0 || l->word->word == 0 || l->word->word[0] == '\0')
+	continue;	/* should not happen, but just in case... */
+      if ((l->word->flags & W_ASSIGNMENT) == 0)
+	t = sh_single_quote (l->word->word);
+      else 
+	t = quote_compound_array_word (l->word->word, type);
+      free (l->word->word);
+      l->word->word = t;
+    }
 }
 
 /* For each word in a compound array assignment, if the word looks like

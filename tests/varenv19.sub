@@ -12,30 +12,40 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-arr=(zero one two)
-four=four
+# variable attribute inheritance problems without specifying -a or -A
+
+function aaa() {
+        local x='1 2 3'
+        echo "aaa ${x}"
+}
+
+function bbb {
+        local x
+        x=(4 5 6)
+        echo "bbb ${x[*]}"
+}
+
+ccc()
+{
+        local x=(7 8 9)
+        echo "ccc ${x[*]}"
+}
+
+function ddd
+{
+        local -r x='0'
+        echo "ddd ${x}"
+        aaa
+        bbb
+        ccc
+}
+
+ddd
 
 f()
 {
-	local -a arr=( "${arr[@]}" )
-	arr+=(three four five)
-	declare -p arr
+	local x=(one two three)
+	declare -p x
 }
 f
-declare -p arr
-
-f1()
-{
-	local -a arr=(three $four five)
-	declare -p arr
-}
-f1
-
-set -u
-name='arr[@]'
-f2()
-{
-	local -a arr=("${!name}")
-	declare -p arr
-}
-f2
+declare -p x

@@ -68,3 +68,23 @@ loaddict
 foo=(one 1 two)
 declare -p foo
 echo foo=\( ${foo[@]@K} \)
+
+typeset -A a=( [\\]=bs [\"]=dquote [\)]=rparen [\]]=rbrace )
+echo ${a[@]}
+declare -p a
+
+echo ${a[@]@K}
+echo ${a[@]@A}
+
+eval "${a[@]@A}"
+declare -p a
+
+eval "a=( ${a[@]@K} )"
+declare -p a
+
+unset a foo
+readonly -A foo=( one 1 two 2 three 3 )
+
+export foo
+declare -p foo
+declare foo+=( seven 7 eight 8 )

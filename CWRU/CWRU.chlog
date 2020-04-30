@@ -8211,3 +8211,46 @@ subst.c
 	  or at least -- (if we are inheriting), because  we don't want the
 	  declare to get skipped before we perform the word assignment. Fixes
 	  bug reported by Ross Goldberg <ross.goldberg@gmail.com>
+
+				   4/28
+				   ----
+subst.c
+	- expand_declaration_argument: new function, broke code that handles
+	  compound assignments that are arguments to declaration commands out
+	  of shell_expand_word_list into this function. No functional change
+	  yet
+
+				   4/29
+				   ----
+subst.c
+	- expand_compound_assignment_word: helper function for
+	  expand_declaration_argument: takes NAME[+]=( VALUE ), converts VALUE
+	  to a list of words, then single-quotes each word and reconstructs
+	  the original word. This assumes the result will go to
+	  do_word_assignment, which will remove the single quotes
+	- expand_oneword: helper function for expand_compound_assignment_word,
+	  takes VALUE and performs the splitting into words, and then the
+	  expansion and single-quoting of each individual word. Indexed and
+	  associative arrays take different code paths, because they undergo
+	  different expansions and associative arrays need special handling to
+	  avoid having to scan for the end of the subscript multiple times
+	- expand_declaration_argument: call expand_compound_assignment_word to
+	  get the expansion-before-calling-builtins word expansion sequence
+	  correct. Better fix for for bug report from Kevin Locke
+	  <kevin@kevinlocke.name>,
+	  https://savannah.gnu.org/support/index.php?109669
+
+arrayfunc.c
+	- quote_array_compound_word: take [IND]=VALUE and convert it to
+	  ['IND']='VALUE'. Called by quote_compound_array_list for each word
+	  in the list
+	- expand_and_quote_assoc_qword: take [KEY]=VALUE and convert it to
+	  ['expanded-key']='expanded-value' (or VALUE to 'expanded-value').
+	  Called by subst.c:expand_oneword() for each word in the list
+	- quote_compound_array_list: take a list of words and convert each
+	  [IND]=VALUE to ['IND']='VALUE' (or just 'VALUE' if there is no
+	  [IND]=). Used for indexed arrays
+
+arrayfunc.h
+	- expand_and_quote_assoc_word,quote_compound_array_list: new extern
+	  declarations
