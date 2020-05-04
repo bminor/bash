@@ -859,7 +859,7 @@ quote_assign (string)
   return temp;
 }
 
-/* Take a word W of the form [IND]=VALUE and transform it to ['IND]='VALUE'
+/* Take a word W of the form [IND]=VALUE and transform it to ['IND']='VALUE'
    to prevent further expansion. This is called for compound assignments to
    indexed arrays. W has already undergone word expansions. If W has no [IND]=,
    just single-quote and return it. */

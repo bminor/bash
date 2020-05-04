@@ -1269,6 +1269,7 @@ maybe_make_restricted (name)
       set_var_read_only ("SHELL");
       set_var_read_only ("ENV");
       set_var_read_only ("BASH_ENV");
+      set_var_read_only ("HISTFILE");
       restricted = 1;
     }
   return (restricted);

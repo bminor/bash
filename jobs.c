@@ -3092,7 +3092,8 @@ if (job == NO_JOB)
 	 conditions to determine whether or not it should undo this and
 	 give the terminal to pipeline_pgrp. */
       
-      if (running_in_background == 0 && (subshell_environment&(SUBSHELL_ASYNC|SUBSHELL_PIPE)) == 0)
+      if ((flags & JWAIT_NOTERM) == 0 && running_in_background == 0 &&
+	  (subshell_environment & (SUBSHELL_ASYNC|SUBSHELL_PIPE)) == 0)
 	give_terminal_to (shell_pgrp, 0);
     }
 

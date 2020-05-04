@@ -580,6 +580,7 @@ becomes the input of a second, in a loop or conditional construct, or in
 some other grouping.
 
 @menu
+* Reserved Words::		Words that have special meaning to the shell.
 * Simple Commands::		The most common type of command.
 * Pipelines::			Connecting the input and output of several
 				commands.
@@ -588,6 +589,32 @@ some other grouping.
 * Coprocesses::			Two-way communication between commands.
 * GNU Parallel::		Running commands in parallel.
 @end menu
+
+@node Reserved Words
+@subsection Reserved Words
+@cindex reserved words
+
+Reserved words are words that have special meaning to the shell.
+They are used to begin and end the shell's compound commands.
+
+The following words are recognized as reserved when unquoted and 
+the first word of a command (see below for exceptions):
+
+@multitable @columnfractions .1 .1 .1 .1 .12 .1
+@item @code{if} @tab @code{then} @tab @code{elif}
+@tab @code{else} @tab @code{fi} @tab @code{time}
+@item @code{for} @tab @code{in} @tab @code{until}
+@tab @code{while} @tab @code{do} @tab @code{done}
+@item @code{case} @tab @code{esac} @tab @code{coproc}
+@tab @code{select} @tab @code{function}
+@item @code{@{} @tab @code{@}} @tab @code{[[} @tab @code{]]} @tab @code{!}
+@end multitable
+
+@noindent
+@code{in} is recognized as a reserved word if it is the third word of a
+@code{case} or @code{select} command.
+@code{in} and @code{do} are recognized as reserved
+words if they are the third word in a @code{for} command.
 
 @node Simple Commands
 @subsection Simple Commands
@@ -7628,11 +7655,15 @@ with the exception that the following are disallowed or not performed:
 Changing directories with the @code{cd} builtin.
 @item
 Setting or unsetting the values of the @env{SHELL}, @env{PATH},
+@env{HISTFILE},
 @env{ENV}, or @env{BASH_ENV} variables.
 @item
 Specifying command names containing slashes.
 @item
 Specifying a filename containing a slash as an argument to the @code{.}
+builtin command.
+@item
+Specifying a filename containing a slash as an argument to the @code{history}
 builtin command.
 @item
 Specifying a filename containing a slash as an argument to the @option{-p}

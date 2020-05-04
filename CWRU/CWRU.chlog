@@ -8254,3 +8254,37 @@ arrayfunc.c
 arrayfunc.h
 	- expand_and_quote_assoc_word,quote_compound_array_list: new extern
 	  declarations
+
+				   4/30
+				   ----
+doc/{bashref.texi,bash.1}
+	- rework description of reserved words a little; add a reserved words
+	  node to bashref.texi. Based on a report from Dale R. Worley
+	  <worley@alum.mit.edu>
+
+builtins/history.def
+	- history_builtin: if the shell is restricted, don't allow pathnames
+	  with slashes to be read or written. From a report from
+	  Diffie <nano@mm.st>
+
+shell.c
+	- maybe_make_restricted: add HISTFILE to the list of readonly variables
+
+doc/{bashref.texi,bash.1}
+	- document new restricted shell restrictions
+
+				    5/1
+				    ---
+jobs.c
+	- wait_for: don't try to give the terminal to shell_pgrp if JWAIT_NOTERM
+	  is set in the flags argument
+
+subst.c
+	- command_substitute: call make_child with FORK_NOTERM flag so it
+	  doesn't try to set the terminal's process group
+	- command_substitute: call wait_for with JWAIT_NOTERM so it doesn't
+	  try to set the terminal's process group
+	- command_substitute: now that wait_for doesn't try to reset the
+	  terminal's process group, remove the code that tries to clean up
+	  after that
+

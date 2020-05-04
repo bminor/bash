@@ -75,6 +75,7 @@ $END
 #include "../bashintl.h"
 
 #include "../shell.h"
+#include "../flags.h"
 #include "../parser.h"
 #include "../bashhist.h"
 #include <readline/history.h>
@@ -268,6 +269,14 @@ range_error:
 
   filename = list ? list->word->word : get_string_value ("HISTFILE");
   result = EXECUTION_SUCCESS;
+
+#if defined (RESTRICTED_SHELL)
+  if (restricted && strchr (filename, '/'))
+    {
+      sh_restricted (filename);
+      return (EXECUTION_FAILURE);
+    }
+#endif
 
   if (flags & AFLAG)		/* Append session's history to file. */
     result = maybe_append_history (filename);

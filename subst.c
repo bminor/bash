@@ -5906,7 +5906,9 @@ process_substitute (string, open_for_read_in_child)
   pid = make_child ((char *)NULL, FORK_ASYNC);
   if (pid == 0)
     {
-interactive = 0;
+      /* The currently-executing shell is not interactive */
+      interactive = 0;
+
       reset_terminating_signals ();	/* XXX */
       free_pushed_string_input ();
       /* Cancel traps, in trap.c. */
@@ -6316,7 +6318,7 @@ command_substitute (string, quoted, flags)
 
   old_async_pid = last_asynchronous_pid;
   fork_flags = (subshell_environment&SUBSHELL_ASYNC) ? FORK_ASYNC : 0;
-  pid = make_child ((char *)NULL, fork_flags);
+  pid = make_child ((char *)NULL, fork_flags|FORK_NOTERM);
   last_asynchronous_pid = old_async_pid;
 
   if (pid == 0)
@@ -6491,7 +6493,7 @@ command_substitute (string, quoted, flags)
       UNBLOCK_SIGNAL (oset);
 
       current_command_subst_pid = pid;
-      last_command_exit_value = wait_for (pid, 0);
+      last_command_exit_value = wait_for (pid, JWAIT_NOTERM);
       last_command_subst_pid = pid;
       last_made_pid = old_pid;
 
@@ -6501,20 +6503,6 @@ command_substitute (string, quoted, flags)
 	 SIGINT to ourselves.  This will break out of loops, for instance. */
       if (last_command_exit_value == (128 + SIGINT) && last_command_exit_signal == SIGINT)
 	kill (getpid (), SIGINT);
-
-      /* wait_for gives the terminal back to shell_pgrp.  If some other
-	 process group should have it, give it away to that group here.
-	 pipeline_pgrp is non-zero only while we are constructing a
-	 pipeline, so what we are concerned about is whether or not that
-	 pipeline was started in the background.  A pipeline started in
-	 the background should never get the tty back here.  We duplicate
-	 the conditions that wait_for tests to make sure we only give
-	 the terminal back to pipeline_pgrp under the conditions that wait_for
-	 gave it to shell_pgrp.  If wait_for doesn't mess with the terminal
-	 pgrp, we should not either. */
-      if (interactive && pipeline_pgrp != (pid_t)0 && running_in_background == 0 &&
-	   (subshell_environment & (SUBSHELL_ASYNC|SUBSHELL_PIPE)) == 0)
-	give_terminal_to (pipeline_pgrp, 0);
 #endif /* JOB_CONTROL */
 
       ret = alloc_word_desc ();
@@ -11577,7 +11565,6 @@ expand_compound_assignment_word (tlist, flags)
   char *value, *temp;
 
 /*itrace("expand_compound_assignment_word: original word = -%s-", tlist->word->word);*/
-  wlen = strlen (tlist->word->word);
   t = assignment (tlist->word->word, 0);
 
   /* value doesn't have the open and close parens */

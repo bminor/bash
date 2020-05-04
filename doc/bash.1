@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Apr 17 16:30:01 EDT 2020
+.\"	Last Change: Thu Apr 30 18:20:53 EDT 2020
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2020 April 17" "GNU Bash 5.0"
+.TH BASH 1 "2020 April 30" "GNU Bash 5.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -493,14 +493,17 @@ symbols:
 .SH "RESERVED WORDS"
 \fIReserved words\fP are words that have a special meaning to the shell.
 The following words are recognized as reserved when unquoted and either
-the first word of a simple command (see
+the first word of a command (see
 .SM
 .B SHELL GRAMMAR
-below) or the third word of a
+below), the third word of a
 .B case
 or
+.B select
+command
+(only \fBin\fP is valid), or the third word of a
 .B for
-command:
+command (only \fBin\fP and \fBdo\fP are valid):
 .if t .RS
 .PP
 .B
@@ -10915,6 +10918,8 @@ setting or unsetting the values of
 .SM
 .BR PATH ,
 .SM
+.BR HISTFILE ,
+.SM
 .BR ENV ,
 or
 .SM
@@ -10927,6 +10932,10 @@ specifying a filename containing a
 .B /
 as an argument to the
 .B .
+builtin command
+.IP \(bu
+specifying a filename containing a slash as an argument to the
+.B history
 builtin command
 .IP \(bu
 specifying a filename containing a slash as an argument to the
