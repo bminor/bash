@@ -545,6 +545,8 @@ extern int _rl_keyseq_timeout;
 
 extern int _rl_executing_keyseq_size;
 
+extern rl_hook_func_t *_rl_internal_startup_hook;
+
 /* search.c */
 extern _rl_search_cxt *_rl_nscxt;
 

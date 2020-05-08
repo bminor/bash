@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Thu Apr 30 18:20:53 EDT 2020
+.\"	Last Change: Tue May  5 16:20:48 EDT 2020
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2020 April 30" "GNU Bash 5.0"
+.TH BASH 1 "2020 May 5" "GNU Bash 5.0"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -1439,7 +1439,7 @@ The following variables are set by the shell:
 .PD 0
 .TP
 .B _
-At shell startup, set to the absolute pathname used to invoke the
+At shell startup, set to the pathname used to invoke the
 shell or shell script being executed as passed in the environment
 or argument list.
 Subsequently, expands to the last argument to the previous simple
@@ -5495,6 +5495,8 @@ The name of this file is taken from the value of the
 .B INPUTRC
 variable.  If that variable is unset, the default is
 .IR ~/.inputrc .
+If that file  does not exist or cannot be read, the ultimate default is
+.IR /etc/inputrc .
 When a program which uses the readline library starts up, the
 initialization file is read, and the key bindings and variables
 are set.
@@ -8450,7 +8452,12 @@ and
 may be specified as a string (to locate the last command beginning
 with that string) or as a number (an index into the history list,
 where a negative number is used as an offset from the current
-command number).  If
+command number).
+When listing, a \fIfirst\fP or \fIlast\fP of
+0 is equivalent to \-1 and \-0 is equivalent to the current
+command (usually the \fBfc\fP command); otherwise 0 is equivalent to \-1
+and \-0 is invalid.
+If
 .I last
 is not specified, it is set to
 the current command for listing (so that
@@ -9120,6 +9127,11 @@ time, and \-2 represents the time the shell was invoked.
 If no argument is specified, conversion behaves as if \-1 had been given.
 This is an exception to the usual \fBprintf\fP behavior.
 .PD
+.PP
+The %b, %q, and %T directives all use the field width and precision
+arguments from the format specification and write that many bytes from
+(or use that wide a field for) the expanded argument, which usually
+contains more characters than the original.
 .PP
 Arguments to non-string format specifiers are treated as C constants,
 except that a leading plus or minus sign is allowed, and if the leading

@@ -147,8 +147,8 @@ typedef struct repl {
 	} while (0)
 
 static char *fc_dosubs PARAMS((char *, REPL *));
-static char *fc_gethist PARAMS((char *, HIST_ENTRY **));
-static int fc_gethnum PARAMS((char *, HIST_ENTRY **));
+static char *fc_gethist PARAMS((char *, HIST_ENTRY **, int));
+static int fc_gethnum PARAMS((char *, HIST_ENTRY **, int));
 static int fc_number PARAMS((WORD_LIST *));
 static void fc_replhist PARAMS((char *));
 #ifdef INCLUDE_UNUSED
@@ -260,7 +260,7 @@ fc_builtin (list)
 
       /* If we still have something in list, it is a command spec.
 	 Otherwise, we use the most recent command in time. */
-      command = fc_gethist (list ? list->word->word : (char *)NULL, hlist);
+      command = fc_gethist (list ? list->word->word : (char *)NULL, hlist, 0);
 
       if (command == NULL)
 	{
@@ -328,11 +328,11 @@ fc_builtin (list)
 
   if (list)
     {
-      histbeg = fc_gethnum (list->word->word, hlist);
+      histbeg = fc_gethnum (list->word->word, hlist, listing);
       list = list->next;
 
       if (list)
-	histend = fc_gethnum (list->word->word, hlist);
+	histend = fc_gethnum (list->word->word, hlist, listing);
       else if (histbeg == real_last)
 	histend = listing ? real_last : histbeg;
       else
@@ -351,6 +351,13 @@ fc_builtin (list)
       else
 	/* For editing, it is the last history command. */
 	histbeg = histend = last_hist;
+    }
+
+  /* We print error messages for line specifications out of range. */
+  if ((histbeg < 0) || (histend < 0))
+    {
+      sh_erange ((char *)NULL, _("history specification"));
+      return (EXECUTION_FAILURE);
     }
 
   /* "When not listing, the fc command that caused the editing shall not be
@@ -499,11 +506,13 @@ fc_number (list)
 
 /* Return an absolute index into HLIST which corresponds to COMMAND.  If
    COMMAND is a number, then it was specified in relative terms.  If it
-   is a string, then it is the start of a command line present in HLIST. */
+   is a string, then it is the start of a command line present in HLIST.
+   MODE is 1 if we are listing commands, 0 if we are executing them. */
 static int
-fc_gethnum (command, hlist)
+fc_gethnum (command, hlist, mode)
      char *command;
      HIST_ENTRY **hlist;
+     int mode;
 {
   int sign, n, clen, rh;
   register int i, j, last_hist, real_last;
@@ -569,7 +578,7 @@ fc_gethnum (command, hlist)
 	  return (n < 0 ? 0 : n);
 	}
       else if (n == 0)
-	return ((sign == -1) ? real_last : i);
+	return ((sign == -1) ? (mode ? real_last : -1) : i);
       else
 	{
 	  n -= history_base;
@@ -587,18 +596,20 @@ fc_gethnum (command, hlist)
 }
 
 /* Locate the most recent history line which begins with
-   COMMAND in HLIST, and return a malloc()'ed copy of it. */
+   COMMAND in HLIST, and return a malloc()'ed copy of it.
+   MODE is 1 if we are listing commands, 0 if we are executing them. */
 static char *
-fc_gethist (command, hlist)
+fc_gethist (command, hlist, mode)
      char *command;
      HIST_ENTRY **hlist;
+     int mode;
 {
   int i;
 
   if (hlist == 0)
     return ((char *)NULL);
 
-  i = fc_gethnum (command, hlist);
+  i = fc_gethnum (command, hlist, mode);
 
   if (i >= 0)
     return (savestring (histline (i)));

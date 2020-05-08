@@ -637,6 +637,48 @@ rl_get_previous_history (int count, int key)
   return 0;
 }
 
+/* The equivalent of the Korn shell C-o operate-and-get-next-history-line
+   editing command. */
+
+/* This could stand to be global to the readline library */
+static rl_hook_func_t *_rl_saved_internal_startup_hook = 0;
+static int saved_history_logical_offset = -1;
+
+#define HISTORY_FULL() (history_is_stifled () && history_length >= history_max_entries)
+
+static int
+set_saved_history ()
+{
+  int absolute_offset, count;
+
+  if (saved_history_logical_offset >= 0)
+    {
+      absolute_offset = saved_history_logical_offset - history_base;
+      count = where_history () - absolute_offset;
+      rl_get_previous_history (count, 0);
+    }
+  saved_history_logical_offset = -1;
+  _rl_internal_startup_hook = _rl_saved_internal_startup_hook;
+
+  return (0);
+}
+
+int
+rl_operate_and_get_next (count, c)
+     int count, c;
+{
+  /* Accept the current line. */
+  rl_newline (1, c);
+
+  saved_history_logical_offset = rl_explicit_arg ? count : where_history () + history_base + 1;
+
+
+  _rl_saved_internal_startup_hook = _rl_internal_startup_hook;
+  _rl_internal_startup_hook = set_saved_history;
+
+  return 0;
+}
+
 /* **************************************************************** */
 /*								    */
 /*			    Editing Modes			    */

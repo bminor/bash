@@ -199,6 +199,10 @@ int rl_key_sequence_length = 0;
    before readline_internal_setup () prints the first prompt. */
 rl_hook_func_t *rl_startup_hook = (rl_hook_func_t *)NULL;
 
+/* Any readline function can set this and have it run just before the user's
+   rl_startup_hook. */
+rl_hook_func_t *_rl_internal_startup_hook = (rl_hook_func_t *)NULL;
+
 /* If non-zero, this is the address of a function to call just before
    readline_internal_setup () returns and readline_internal starts
    reading input characters. */
@@ -419,6 +423,9 @@ readline_internal_setup (void)
 
   if (rl_startup_hook)
     (*rl_startup_hook) ();
+
+  if (_rl_internal_startup_hook)
+    (*_rl_internal_startup_hook) ();
 
   rl_deactivate_mark ();
 

@@ -5,7 +5,7 @@ dnl report bugs to chet@po.cwru.edu
 dnl
 dnl Process this file with autoconf to produce a configure script.
 
-# Copyright (C) 1987-2019 Free Software Foundation, Inc.
+# Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.0, version 5.014])dnl
+AC_REVISION([for Bash 5.0, version 5.015])dnl
 
 define(bashvers, 5.0)
 define(relstatus, maint)
@@ -88,6 +88,7 @@ sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
 *-qnx*)		opt_bash_malloc=no ;;	# QNX 4.2, QNX [67].x
 *-nsk*)		opt_bash_malloc=no ;;	# HP NonStop
 *-haiku*)	opt_bash_malloc=no ;;	# Haiku OS
+*-genode*)	opt_bash_malloc=no ;;	# Genode has no sbrk
 # Deprecated -- bash malloc is suitable
 #sparc-netbsd*)	opt_bash_malloc=no ;;	# needs 8-byte alignment
 #mips-irix6*)	opt_bash_malloc=no ;;	# needs 8-byte alignment

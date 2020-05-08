@@ -1434,7 +1434,7 @@ run_one_command (command)
 	  command_error ("run_one_command", CMDERR_BADJUMP, code, 0);
 	}
     }
-   return (parse_and_execute (savestring (command), "-c", SEVAL_NOHIST));
+   return (parse_and_execute (savestring (command), "-c", SEVAL_NOHIST|SEVAL_RESETLINE));
 }
 #endif /* ONESHOT */
 

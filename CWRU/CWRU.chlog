@@ -8288,3 +8288,62 @@ subst.c
 	  terminal's process group, remove the code that tries to clean up
 	  after that
 
+				    5/4
+				    ---
+doc/bash.1
+	- make sure to mention /etc/inputrc as the ultimate default readline
+	  init file, like other documentation does. Update from
+	  Greg Price <gnprice@gmail.com>
+
+lib/readline/readline.c
+	- if the private startup hook function variable _rl_internal_startup_hook
+	  is set, execute that after any user-specified startup hook
+
+lib/readline/rlprivate.h
+	- _rl_internal_startup_hook: new extern declaration
+
+bashline.c,lib/readline/{misc.c,readline.h}
+	- operate_and_get_next: moved to rl_operate_and_get_next so it's
+	  available to all readline programs, uses _rl_internal_startup_hook.
+	  Based on patch from Greg Price <gnprice@gmail.com>
+
+lib/readline/funmap.c
+	- "operate-and-get-next": now a bindable readline command
+
+lib/readline/emacs_keymap.c
+	- rl_operate_and_get_next: bound to ^O in emacs mode by default
+
+doc/bash.1,lib/readline/{readline.3,rluser.texi}
+	- operate-and-get-next: move to readline section of the manuals, out of
+	  bash-specific functions section
+
+				    5/5
+				    ---
+hashlib.c
+	- hash_string: use a series of shifts and adds to avoid a multiply by
+	  FNV_PRIME. From Landon Curt Noll's FNV web page
+
+builtins/fc.def
+	- fc_gethist,fc_gethnum: now take an additional argument indicating the
+	  operating mode: if the arg is 1, fc is listing commands; if it is 0,
+	  fc is executing commands. Affects how -0 is handled (fc_gethnum
+	  returns -1). Changed callers to handle the return value appropriately.
+	  Report from Jason Franklin <jason.franklin@quoininc.com> about
+	  seg fault and core dump
+	- fc_builtin: if fc_gethnum returns < 0 when setting histbeg or histend,
+	  report a range error
+
+doc/bash.1,lib/readline/doc/hsuser.texi
+	- fc: document how 0 and -0 are treated for listing and executing
+
+shell.c
+	- run_one_command: call parse_and_execute with SEVAL_RESETLINE so the
+	  line number gets set to 1. Reported by Rob Landley <rob@landley.net>
+
+				    5/8
+				    ---
+support/config.{guess,sub}
+	- update to latest versions
+
+configure.ac
+	- add support for `genode' from Emery Hemingway <ehmry@posteo.net>

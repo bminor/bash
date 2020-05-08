@@ -4289,9 +4289,6 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 	    result = last_command_exit_value;
 	  close_pipes (pipe_in, pipe_out);
 	  command_line = (char *)NULL;      /* don't free this. */
-#if 0
-	  bind_lastarg ((char *)NULL);
-#endif
 	  return (result);
 	}
     }

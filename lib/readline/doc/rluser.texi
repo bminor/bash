@@ -1322,6 +1322,14 @@ the direction through the history (back or forward).
 The history expansion facilities are used to extract the last argument,
 as if the @samp{!$} history expansion had been specified.
 
+@item operate-and-get-next (C-o)
+Accept the current line for return to the calling application as if a
+newline had been entered,
+and fetch the next line relative to the current line from the history
+for editing.
+A numeric argument, if supplied, specifies the history entry to use instead
+of the current line.
+
 @end ftable
 
 @node Commands For Text
@@ -1793,12 +1801,6 @@ Perform history and alias expansion on the current line.
 
 @item insert-last-argument (M-. or M-_)
 A synonym for @code{yank-last-arg}.
-
-@item operate-and-get-next (C-o)
-Accept the current line for execution and fetch the next line
-relative to the current line from the history for editing.
-A numeric argument, if supplied, specifies the history entry to use instead
-of the current line.
 
 @item edit-and-execute-command (C-x C-e)
 Invoke an editor on the current command line, and execute the result as shell

@@ -219,7 +219,10 @@ hash_string (s)
 
   for (i = FNV_OFFSET; *s; s++)
     {
-      i *= FNV_PRIME;
+      /* FNV-1a has the XOR first, traditional FNV-1 has the multiply first */
+
+      /* was i *= FNV_PRIME */
+      i += (i<<1) + (i<<4) + (i<<7) + (i<<8) + (i<<24);
       i ^= *s;
     }
 

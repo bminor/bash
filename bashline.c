@@ -118,7 +118,6 @@ extern int tputs PARAMS((const char *string, int nlines, int (*outx)(int)));
 /* Functions bound to keys in Readline for Bash users. */
 static int shell_expand_line PARAMS((int, int));
 static int display_shell_version PARAMS((int, int));
-static int operate_and_get_next PARAMS((int, int));
 
 static int bash_ignore_filenames PARAMS((char **));
 static int bash_ignore_everything PARAMS((char **));
@@ -479,7 +478,6 @@ initialize_readline ()
   /* Backwards compatibility. */
   rl_add_defun ("insert-last-argument", rl_yank_last_arg, -1);
 
-  rl_add_defun ("operate-and-get-next", operate_and_get_next, -1);
   rl_add_defun ("display-shell-version", display_shell_version, -1);
   rl_add_defun ("edit-and-execute-command", emacs_edit_and_execute_command, -1);
 
@@ -517,7 +515,6 @@ initialize_readline ()
   rl_bind_key_if_unbound_in_map ('^', history_expand_line, emacs_meta_keymap);
 #endif
 
-  rl_bind_key_if_unbound_in_map (CTRL ('O'), operate_and_get_next, emacs_standard_keymap);
   rl_bind_key_if_unbound_in_map (CTRL ('V'), display_shell_version, emacs_ctlx_keymap);
 
   /* In Bash, the user can switch editing modes with "set -o [vi emacs]",
@@ -918,43 +915,6 @@ hostnames_matching (text)
   if (nmatch)
     result[nmatch] = (char *)NULL;
   return (result);
-}
-
-/* The equivalent of the Korn shell C-o operate-and-get-next-history-line
-   editing command. */
-static int saved_history_logical_offset = -1;
-
-#define HISTORY_FULL() (history_is_stifled () && history_length >= history_max_entries)
-
-static int
-set_saved_history ()
-{
-  int absolute_offset, count;
-
-  if (saved_history_logical_offset >= 0)
-    {
-      absolute_offset = saved_history_logical_offset - history_base;
-      count = where_history () - absolute_offset;
-      rl_get_previous_history (count, 0);
-    }
-  saved_history_logical_offset = -1;
-  rl_startup_hook = old_rl_startup_hook;
-  return (0);
-}
-
-static int
-operate_and_get_next (count, c)
-     int count, c;
-{
-  /* Accept the current line. */
-  rl_newline (1, c);
-
-  saved_history_logical_offset = rl_explicit_arg ? count : where_history () + history_base + 1;
-
-  old_rl_startup_hook = rl_startup_hook;
-  rl_startup_hook = set_saved_history;
-
-  return 0;
 }
 
 /* This vi mode command causes VI_EDIT_COMMAND to be run on the current

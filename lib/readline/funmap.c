@@ -117,6 +117,7 @@ static const FUNMAP default_funmap[] = {
   { "non-incremental-forward-search-history-again", rl_noninc_forward_search_again },
   { "non-incremental-reverse-search-history-again", rl_noninc_reverse_search_again },
   { "old-menu-complete", rl_old_menu_complete },
+  { "operate-and-get-next", rl_operate_and_get_next },
   { "overwrite-mode", rl_overwrite_mode },
 #if defined (_WIN32)
   { "paste-from-clipboard", rl_paste_from_clipboard },

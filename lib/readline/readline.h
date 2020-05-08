@@ -133,6 +133,7 @@ extern int rl_beginning_of_history PARAMS((int, int));
 extern int rl_end_of_history PARAMS((int, int));
 extern int rl_get_next_history PARAMS((int, int));
 extern int rl_get_previous_history PARAMS((int, int));
+extern int rl_operate_and_get_next PARAMS((int, int));
 
 /* Bindable commands for managing the mark and region. */
 extern int rl_set_mark PARAMS((int, int));

@@ -4540,6 +4540,11 @@ This is an exception to the usual @code{printf} behavior.
 @end table
 
 @noindent
+The %b, %q, and %T directives all use the field width and precision
+arguments from the format specification and write that many bytes from    
+(or use that wide a field for) the expanded argument, which usually
+contains more characters than the original.
+
 Arguments to non-string format specifiers are treated as C language constants,
 except that a leading plus or minus sign is allowed, and if the leading
 character is a single or double quote, the value is the ASCII value of
@@ -5695,7 +5700,7 @@ variables for controlling the job control facilities
 @item _
 @vindex $_
 ($_, an underscore.)
-At shell startup, set to the absolute pathname used to invoke the
+At shell startup, set to the pathname used to invoke the
 shell or shell script being executed as passed in the environment
 or argument list.
 Subsequently, expands to the last argument to the previous simple
