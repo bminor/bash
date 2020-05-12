@@ -2126,6 +2126,7 @@ list_all_jobs (format)
 pid_t
 make_child (command, flags)
      char *command;
+     int flags;
 {
   int async_p, forksleep;
   sigset_t set, oset, termset, chldset, oset_copy;

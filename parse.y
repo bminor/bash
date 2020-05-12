@@ -2325,7 +2325,7 @@ shell_getc (remove_quoted_newline)
       i = truncating = 0;
       shell_input_line_terminator = 0;
 
-      /* If the shell is interatctive, but not currently printing a prompt
+      /* If the shell is interactive, but not currently printing a prompt
          (interactive_shell && interactive == 0), we don't want to print
          notifies or cleanup the jobs -- we want to defer it until we do
          print the next prompt. */
@@ -2620,6 +2620,7 @@ pop_alias:
 	if (SHOULD_PROMPT ())
 	  prompt_again ();
 	line_number++;
+
 	/* What do we do here if we're expanding an alias whose definition
 	   includes an escaped newline?  If that's the last character in the
 	   alias expansion, we just pop the pushed string list (recall that
