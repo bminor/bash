@@ -273,14 +273,11 @@ term ()
   if ((pos + 3 <= argc) && test_binop (argv[pos + 1]))
     value = binary_operator ();
 
-  /* Might be a switch type argument */
-  else if (argv[pos][0] == '-' && argv[pos][1] &&  argv[pos][2] == '\0')
-    {
-      if (test_unop (argv[pos]))
-	value = unary_operator ();
-      else
-	test_syntax_error (_("%s: unary operator expected"), argv[pos]);
-    }
+  /* Might be a switch type argument -- make sure we have enough arguments for
+     the unary operator and argument */
+  else if ((pos + 2) <= argc && test_unop (argv[pos]))
+    value = unary_operator ();
+
   else
     {
       value = argv[pos][0] != '\0';
@@ -894,7 +891,12 @@ test_command (margc, margv)
   value = posixtest ();
 
   if (pos != argc)
-    test_syntax_error (_("too many arguments"), (char *)NULL);
+    {
+      if (pos < argc && argv[pos][0] == '-')
+	test_syntax_error (_("syntax error: `%s' unexpected"), argv[pos]);
+      else
+	test_syntax_error (_("too many arguments"), (char *)NULL);
+    }
 
   test_exit (SHELL_BOOLEAN (value));
 }

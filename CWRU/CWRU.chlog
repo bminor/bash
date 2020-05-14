@@ -8347,3 +8347,16 @@ support/config.{guess,sub}
 
 configure.ac
 	- add support for `genode' from Emery Hemingway <ehmry@posteo.net>
+
+				   5/14
+				   ----
+test.c
+	- term: fix case where an argument that looks like a unary operator,
+	  but doesn't have enough tokens left to have an argument to that
+	  operator, was not being treated as a one-argument test. Affects
+	  only uses of test with four and greater arguments, which posix says
+	  are unspecified. This is a bug, or at least an incompatibility, at
+	  least 30 years old.
+	- test_command: if there are unconsumed arguments, call test_syntax_error
+	  with a `syntax error' argument if the first remaining argument starts
+	  with a `-'. Better than a generic `too many arguments' error
