@@ -535,6 +535,10 @@ been present.
 
 A double-quoted string preceded by a dollar sign (@samp{$})
 will cause the string to be translated according to the current locale.
+The @var{gettext} infrastructure performs the message catalog lookup and 
+translation, using the @code{LC_MESSAGES} and @code{TEXTDOMAIN} shell
+variables, as explained below. See the gettext documentation for additional
+details.
 If the current locale is @code{C} or @code{POSIX},
 or if there are no translations available,
 the dollar sign is ignored.

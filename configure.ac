@@ -1,5 +1,5 @@
 dnl
-dnl Configure script for bash-5.0
+dnl Configure script for bash-5.1
 dnl
 dnl report bugs to chet@po.cwru.edu
 dnl
@@ -21,10 +21,10 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.0, version 5.015])dnl
+AC_REVISION([for Bash 5.1, version 5.017])dnl
 
-define(bashvers, 5.0)
-define(relstatus, maint)
+define(bashvers, 5.1)
+define(relstatus, alpha)
 
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
 
@@ -753,7 +753,7 @@ AC_CHECK_HEADERS(unistd.h stdlib.h stdarg.h varargs.h limits.h string.h \
 		 stdbool.h stddef.h stdint.h netdb.h pwd.h grp.h strings.h \
 		 regex.h syslog.h ulimit.h)
 AC_CHECK_HEADERS(sys/pte.h sys/stream.h sys/select.h sys/file.h sys/ioctl.h \
-		 sys/mman.h sys/param.h sys/socket.h sys/stat.h \
+		 sys/mman.h sys/param.h sys/random.h sys/socket.h sys/stat.h \
 		 sys/time.h sys/times.h sys/types.h sys/wait.h)
 AC_CHECK_HEADERS(netinet/in.h arpa/inet.h)
 
@@ -819,10 +819,10 @@ dnl checks for missing libc functions
 AC_CHECK_FUNC(mkfifo,AC_DEFINE(HAVE_MKFIFO),AC_DEFINE(MKFIFO_MISSING))
 
 dnl checks for system calls
-AC_CHECK_FUNCS(dup2 eaccess fcntl getdtablesize getgroups gethostname \
-		getpagesize getpeername getrlimit getrusage gettimeofday \
-		kill killpg lstat pselect readlink select setdtablesize \
-		setitimer tcgetpgrp uname ulimit waitpid)
+AC_CHECK_FUNCS(dup2 eaccess fcntl getdtablesize getentropy getgroups \
+		gethostname getpagesize getpeername getrandom getrlimit \
+		getrusage gettimeofday kill killpg lstat pselect readlink \
+		select setdtablesize setitimer tcgetpgrp uname ulimit waitpid)
 AC_REPLACE_FUNCS(rename)
 
 dnl checks for c library functions

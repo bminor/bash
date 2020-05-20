@@ -1,6 +1,6 @@
 /* general.h -- defines that everybody likes to use. */
 
-/* Copyright (C) 1993-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2016 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -62,7 +62,7 @@ extern char *strchr (), *strrchr ();
 #endif
 
 #if !defined (strcpy) && (defined (HAVE_DECL_STRCPY) && !HAVE_DECL_STRCPY)
-extern char *strcpy PARAMS((char *, const char *));
+extern char *strcpy __P((char *, const char *));
 #endif
 
 #if !defined (savestring)
@@ -205,43 +205,43 @@ typedef char **CPPFunction ();		/* no longer used */
 /* Shell function typedefs with prototypes */
 /* `Generic' function pointer typedefs */
 
-typedef int sh_intfunc_t PARAMS((int));
-typedef int sh_ivoidfunc_t PARAMS((void));
-typedef int sh_icpfunc_t PARAMS((char *));
-typedef int sh_icppfunc_t PARAMS((char **));
-typedef int sh_iptrfunc_t PARAMS((PTR_T));
+typedef int sh_intfunc_t __P((int));
+typedef int sh_ivoidfunc_t __P((void));
+typedef int sh_icpfunc_t __P((char *));
+typedef int sh_icppfunc_t __P((char **));
+typedef int sh_iptrfunc_t __P((PTR_T));
 
-typedef void sh_voidfunc_t PARAMS((void));
-typedef void sh_vintfunc_t PARAMS((int));
-typedef void sh_vcpfunc_t PARAMS((char *));
-typedef void sh_vcppfunc_t PARAMS((char **));
-typedef void sh_vptrfunc_t PARAMS((PTR_T));
+typedef void sh_voidfunc_t __P((void));
+typedef void sh_vintfunc_t __P((int));
+typedef void sh_vcpfunc_t __P((char *));
+typedef void sh_vcppfunc_t __P((char **));
+typedef void sh_vptrfunc_t __P((PTR_T));
 
-typedef int sh_wdesc_func_t PARAMS((WORD_DESC *));
-typedef int sh_wlist_func_t PARAMS((WORD_LIST *));
+typedef int sh_wdesc_func_t __P((WORD_DESC *));
+typedef int sh_wlist_func_t __P((WORD_LIST *));
 
-typedef int sh_glist_func_t PARAMS((GENERIC_LIST *));
+typedef int sh_glist_func_t __P((GENERIC_LIST *));
 
-typedef char *sh_string_func_t PARAMS((char *));	/* like savestring, et al. */
+typedef char *sh_string_func_t __P((char *));	/* like savestring, et al. */
 
-typedef int sh_msg_func_t PARAMS((const char *, ...));	/* printf(3)-like */
-typedef void sh_vmsg_func_t PARAMS((const char *, ...));	/* printf(3)-like */
+typedef int sh_msg_func_t __P((const char *, ...));	/* printf(3)-like */
+typedef void sh_vmsg_func_t __P((const char *, ...));	/* printf(3)-like */
 
 /* Specific function pointer typedefs.  Most of these could be done
    with #defines. */
-typedef void sh_sv_func_t PARAMS((char *));	/* sh_vcpfunc_t */
-typedef void sh_free_func_t PARAMS((PTR_T));	/* sh_vptrfunc_t */
-typedef void sh_resetsig_func_t PARAMS((int));	/* sh_vintfunc_t */
+typedef void sh_sv_func_t __P((char *));	/* sh_vcpfunc_t */
+typedef void sh_free_func_t __P((PTR_T));	/* sh_vptrfunc_t */
+typedef void sh_resetsig_func_t __P((int));	/* sh_vintfunc_t */
 
-typedef int sh_ignore_func_t PARAMS((const char *));	/* sh_icpfunc_t */
+typedef int sh_ignore_func_t __P((const char *));	/* sh_icpfunc_t */
 
-typedef int sh_assign_func_t PARAMS((const char *));
-typedef int sh_wassign_func_t PARAMS((WORD_DESC *, int));
+typedef int sh_assign_func_t __P((const char *));
+typedef int sh_wassign_func_t __P((WORD_DESC *, int));
 
-typedef int sh_load_func_t PARAMS((char *));
-typedef void sh_unload_func_t PARAMS((char *));
+typedef int sh_load_func_t __P((char *));
+typedef void sh_unload_func_t __P((char *));
 
-typedef int sh_builtin_func_t PARAMS((WORD_LIST *)); /* sh_wlist_func_t */
+typedef int sh_builtin_func_t __P((WORD_LIST *)); /* sh_wlist_func_t */
 
 #endif /* SH_FUNCTION_TYPEDEF */
 
@@ -295,77 +295,77 @@ typedef int QSFUNC ();
 
 #if 0
 /* Declarations for functions defined in xmalloc.c */
-extern PTR_T xmalloc PARAMS((size_t));
-extern PTR_T xrealloc PARAMS((void *, size_t));
-extern void xfree PARAMS((void *));
+extern PTR_T xmalloc __P((size_t));
+extern PTR_T xrealloc __P((void *, size_t));
+extern void xfree __P((void *));
 #endif
 
 /* Declarations for functions defined in general.c */
-extern void posix_initialize PARAMS((int));
+extern void posix_initialize __P((int));
 
-extern int num_posix_options PARAMS((void));
-extern char *get_posix_options PARAMS((char *));
-extern void set_posix_options PARAMS((const char *));
+extern int num_posix_options __P((void));
+extern char *get_posix_options __P((char *));
+extern void set_posix_options __P((const char *));
 
-extern void save_posix_options PARAMS((void));
+extern void save_posix_options __P((void));
 
 #if defined (RLIMTYPE)
-extern RLIMTYPE string_to_rlimtype PARAMS((char *));
-extern void print_rlimtype PARAMS((RLIMTYPE, int));
+extern RLIMTYPE string_to_rlimtype __P((char *));
+extern void print_rlimtype __P((RLIMTYPE, int));
 #endif
 
-extern int all_digits PARAMS((const char *));
-extern int legal_number PARAMS((const char *, intmax_t *));
-extern int legal_identifier PARAMS((const char *));
-extern int importable_function_name PARAMS((const char *, size_t));
-extern int exportable_function_name PARAMS((const char *));
-extern int check_identifier PARAMS((WORD_DESC *, int));
-extern int valid_nameref_value PARAMS((const char *, int));
-extern int check_selfref PARAMS((const char *, char *, int));
-extern int legal_alias_name PARAMS((const char *, int));
-extern int line_isblank PARAMS((const char *));
-extern int assignment PARAMS((const char *, int));
+extern int all_digits __P((const char *));
+extern int legal_number __P((const char *, intmax_t *));
+extern int legal_identifier __P((const char *));
+extern int importable_function_name __P((const char *, size_t));
+extern int exportable_function_name __P((const char *));
+extern int check_identifier __P((WORD_DESC *, int));
+extern int valid_nameref_value __P((const char *, int));
+extern int check_selfref __P((const char *, char *, int));
+extern int legal_alias_name __P((const char *, int));
+extern int line_isblank __P((const char *));
+extern int assignment __P((const char *, int));
 
-extern int sh_unset_nodelay_mode PARAMS((int));
-extern int sh_setclexec PARAMS((int));
-extern int sh_validfd PARAMS((int));
-extern int fd_ispipe PARAMS((int));
-extern void check_dev_tty PARAMS((void));
-extern int move_to_high_fd PARAMS((int, int, int));
-extern int check_binary_file PARAMS((const char *, int));
+extern int sh_unset_nodelay_mode __P((int));
+extern int sh_setclexec __P((int));
+extern int sh_validfd __P((int));
+extern int fd_ispipe __P((int));
+extern void check_dev_tty __P((void));
+extern int move_to_high_fd __P((int, int, int));
+extern int check_binary_file __P((const char *, int));
 
 #ifdef _POSIXSTAT_H_
-extern int same_file PARAMS((const char *, const char *, struct stat *, struct stat *));
+extern int same_file __P((const char *, const char *, struct stat *, struct stat *));
 #endif
 
-extern int sh_openpipe PARAMS((int *));
-extern int sh_closepipe PARAMS((int *));
+extern int sh_openpipe __P((int *));
+extern int sh_closepipe __P((int *));
 
-extern int file_exists PARAMS((const char *));
-extern int file_isdir PARAMS((const char  *));
-extern int file_iswdir PARAMS((const char  *));
-extern int path_dot_or_dotdot PARAMS((const char *));
-extern int absolute_pathname PARAMS((const char *));
-extern int absolute_program PARAMS((const char *));
+extern int file_exists __P((const char *));
+extern int file_isdir __P((const char  *));
+extern int file_iswdir __P((const char  *));
+extern int path_dot_or_dotdot __P((const char *));
+extern int absolute_pathname __P((const char *));
+extern int absolute_program __P((const char *));
 
-extern char *make_absolute PARAMS((const char *, const char *));
-extern char *base_pathname PARAMS((char *));
-extern char *full_pathname PARAMS((char *));
-extern char *polite_directory_format PARAMS((char *));
-extern char *trim_pathname PARAMS((char *, int));
-extern char *printable_filename PARAMS((char *, int));
+extern char *make_absolute __P((const char *, const char *));
+extern char *base_pathname __P((char *));
+extern char *full_pathname __P((char *));
+extern char *polite_directory_format __P((char *));
+extern char *trim_pathname __P((char *, int));
+extern char *printable_filename __P((char *, int));
 
-extern char *extract_colon_unit PARAMS((char *, int *));
+extern char *extract_colon_unit __P((char *, int *));
 
-extern void tilde_initialize PARAMS((void));
-extern char *bash_tilde_find_word PARAMS((const char *, int, int *));
-extern char *bash_tilde_expand PARAMS((const char *, int));
+extern void tilde_initialize __P((void));
+extern char *bash_tilde_find_word __P((const char *, int, int *));
+extern char *bash_tilde_expand __P((const char *, int));
 
-extern int group_member PARAMS((gid_t));
-extern char **get_group_list PARAMS((int *));
-extern int *get_group_array PARAMS((int *));
+extern int group_member __P((gid_t));
+extern char **get_group_list __P((int *));
+extern int *get_group_array __P((int *));
 
-extern char *conf_standard_path PARAMS((void));
-extern int default_columns PARAMS((void));
+extern char *conf_standard_path __P((void));
+extern int default_columns __P((void));
 
 #endif	/* _GENERAL_H_ */

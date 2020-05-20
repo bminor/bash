@@ -32,6 +32,10 @@
 #  endif /* !__QNXNTO__ */
 #endif /* __QNX__ */
 
+#if defined (HAVE_SYS_RANDOM_H)
+#  include <sys/random.h>
+#endif
+
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif
@@ -1474,23 +1478,56 @@ urandom_close ()
   urandfd = -1;
 }
 
+#if !defined (HAVE_GETRANDOM)
+/* Imperfect emulation of getrandom(2). */
+#ifndef GRND_NONBLOCK
+#  define GRND_NONBLOCK 1
+#  define GRND_RANDOM 2
+#endif
+
+static ssize_t
+getrandom (buf, len, flags)
+     void *buf;
+     size_t len;
+     unsigned int flags;
+{
+  int oflags;
+  ssize_t r;
+  static int urand_unavail = 0;
+
+#if HAVE_GETENTROPY
+  r = getentropy (buf, len);
+  return (r == 0) ? len : -1;
+#endif
+
+  if (urandfd == -1 && urand_unavail == 0)
+    {
+      oflags = O_RDONLY;
+      if (flags & GRND_NONBLOCK)
+	oflags |= O_NONBLOCK;
+      urandfd = open ("/dev/urandom", oflags, 0);
+      if (urandfd >= 0)
+	SET_CLOSE_ON_EXEC (urandfd);
+      else
+	{
+	  urand_unavail = 1;
+	  return -1;
+	}
+    }
+  if (urandfd >= 0 && (r = read (urandfd, buf, len)) == len)
+    return (r);
+  return -1;
+}
+#endif
+      
 static u_bits32_t
 get_urandom32 ()
 {
   u_bits32_t ret;
-  int n;
-  static int urand_unavail = 0;
 
-  if (urandfd == -1 && urand_unavail == 0)
-    {
-      urandfd = open ("/dev/urandom", O_RDONLY, 0);
-      if (urandfd >= 0)
-	SET_CLOSE_ON_EXEC (urandfd);
-      else
-	urand_unavail = 1;
-    }
-  if (urandfd >= 0 && (n = read (urandfd, (char *)&ret, sizeof (ret))) == sizeof (ret))
+  if (getrandom ((void *)&ret, sizeof (ret), GRND_NONBLOCK) == sizeof (ret))
     return (last_rand32 = ret);
+
 #if defined (HAVE_ARC4RANDOM)
   ret = arc4random ();
 #else

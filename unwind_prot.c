@@ -3,7 +3,7 @@
 /* I can't stand it anymore!  Please can't we just write the
    whole Unix system in lisp or something? */
 
-/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2009 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -76,15 +76,15 @@ typedef union uwp {
   } sv;
 } UNWIND_ELT;
 
-static void without_interrupts PARAMS((VFunction *, char *, char *));
-static void unwind_frame_discard_internal PARAMS((char *, char *));
-static void unwind_frame_run_internal PARAMS((char *, char *));
-static void add_unwind_protect_internal PARAMS((Function *, char *));
-static void remove_unwind_protect_internal PARAMS((char *, char *));
-static void run_unwind_protects_internal PARAMS((char *, char *));
-static void clear_unwind_protects_internal PARAMS((char *, char *));
-static inline void restore_variable PARAMS((SAVED_VAR *));
-static void unwind_protect_mem_internal PARAMS((char *, char *));
+static void without_interrupts __P((VFunction *, char *, char *));
+static void unwind_frame_discard_internal __P((char *, char *));
+static void unwind_frame_run_internal __P((char *, char *));
+static void add_unwind_protect_internal __P((Function *, char *));
+static void remove_unwind_protect_internal __P((char *, char *));
+static void run_unwind_protects_internal __P((char *, char *));
+static void clear_unwind_protects_internal __P((char *, char *));
+static inline void restore_variable __P((SAVED_VAR *));
+static void unwind_protect_mem_internal __P((char *, char *));
 
 static UNWIND_ELT *unwind_protect_list = (UNWIND_ELT *)NULL;
 

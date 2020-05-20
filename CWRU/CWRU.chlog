@@ -8360,3 +8360,23 @@ test.c
 	- test_command: if there are unconsumed arguments, call test_syntax_error
 	  with a `syntax error' argument if the first remaining argument starts
 	  with a `-'. Better than a generic `too many arguments' error
+
+				   5/19
+				   ----
+configure.ac,config.h.in
+	- getrandom: add test, define HAVE_GETRANDOM
+	- getentropy: add test, define HAVE_GETENTROPY
+
+variables.c
+	- get_urand32: use getrandom; provide imperfect emulation that uses
+	  getentropy if available, and falls back to reading /dev/urandom if
+	  that's not available. The idea is to use /dev/urandom as little as
+	  possible
+
+				   5/20
+				   ----
+configure.ac
+	- updated version to 5.1-alpha
+
+lib/readline/readline.h
+	- updated defines to readline version 8.1
