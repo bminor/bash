@@ -1408,7 +1408,10 @@ brand ()
   unsigned int ret;
 
   rseed = intrand32 (rseed);
-  ret = (rseed >> 16) ^ (rseed & 65535);
+  if (shell_compatibility_level > 50)
+    ret = (rseed >> 16) ^ (rseed & 65535);
+  else
+    ret = rseed;
   return (ret & BASH_RAND_MAX);
 }
 

@@ -8,11 +8,13 @@ the standard shell.  A restricted shell behaves identically to 'bash'
 with the exception that the following are disallowed or not performed:
 
    * Changing directories with the 'cd' builtin.
-   * Setting or unsetting the values of the 'SHELL', 'PATH', 'ENV', or
-     'BASH_ENV' variables.
+   * Setting or unsetting the values of the 'SHELL', 'PATH', 'HISTFILE',
+     'ENV', or 'BASH_ENV' variables.
    * Specifying command names containing slashes.
    * Specifying a filename containing a slash as an argument to the '.'
      builtin command.
+   * Specifying a filename containing a slash as an argument to the
+     'history' builtin command.
    * Specifying a filename containing a slash as an argument to the '-p'
      option to the 'hash' builtin command.
    * Importing function definitions from the shell environment at

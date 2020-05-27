@@ -100,7 +100,8 @@ ee. Fixed a bug that could result in `history -n' adding spurious line feeds to
     commands in the history list.
 
 ff. The $RANDOM random number generator now XORs the top and bottom halves of
-    the internal 32-bit value to introduce more randomness.
+    the internal 32-bit value to introduce more randomness. Setting the shell
+    compatibility level to 50 or lower undoes this.
 
 gg. Fixed several problems caused by running the DEBUG trap on simple commands
     executed as part of a pipeline.
@@ -234,6 +235,9 @@ yyy. When `test' is supplied four or more arguments, treat an argument that
      is valid, as a string, as it would be when using the POSIX rules, instead
      of an operator with a missing argument.
 
+zzz. There is no `compat50' shopt option. Changes to the shell compatibility
+     level should use the BASH_COMPAT variable.
+
 2. Changes to Readline
 
 a. There are a number of fixes that were found as the result of fuzzing with
@@ -314,7 +318,9 @@ h. The `select' builtin now runs traps if its internal call to the read builtin
    is interrupted by a signal.
 
 i. SRANDOM: a new variable that expands to a 32-bit random number that is not
-   produced by an LCRNG, and uses /dev/urandom or arc4random if available.
+   produced by an LCRNG, and uses getrandom/getentropy, falling back to
+   /dev/urandom or arc4random if available. There is a fallback generator if
+   none of these are available.
 
 j. shell-transpose-words: a new bindable readline command that uses the same
    definition of word as shell-forward-word, etc.
@@ -343,7 +349,7 @@ q. wait: has a new -p VARNAME option, which stores the PID returned by `wait -n'
 
 r. Sorting the results of pathname expansion now uses byte-by-byte comparisons
    if two strings collate equally to impose a total order; the result of a
-   POSIX interpretation.
+   POSIX interpretation (#963 and #1070).
 
 s. Bash now allows SIGINT trap handlers to execute recursively.
 
@@ -407,10 +413,7 @@ ll. `wait -n' now accepts a list of job specifications as arguments and will
 mm. The associative array implementation can now dynamically increase the
     size of the hash table based on insertion patterns.
 
-nn. Posix-mode shells no longer allow the closing right paren in a command
-    substitution to delimit a pending here-document -- the newline is required.
-
-oo. HISTFILE is now readonly in a restricted shell.
+nn. HISTFILE is now readonly in a restricted shell.
 
 4. New Features in Readline
 

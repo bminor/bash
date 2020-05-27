@@ -8380,3 +8380,30 @@ configure.ac
 
 lib/readline/readline.h
 	- updated defines to readline version 8.1
+
+variables.c
+	- brand: if shell_compatibility_level is 50 or below, don't xor the
+	  top and bottom halves of the 32-bit random number together, since
+	  previous versions did not
+
+				   5/21
+				   ----
+COMPAT
+	- overhauled and updated the descriptions of the various shopt compatNN
+	  options
+
+doc/bashref.texi
+	- Shell Compatibility Mode: new section, describes compatibility levels,
+	  BASH_COMPAT, and the various compatNN shopt options
+
+				   5/23
+				   ----
+doc/bash.1
+	- added Shell Compatibility mode section
+
+doc/{bash.1,bashref.texi}
+	- changed shopt section to list the compatibility options and refer
+	  to Shell Compatibility Mode section
+	- BASH_COMPAT: overhauled the text, refers to Shell Compatibility Mode
+	  section
+
