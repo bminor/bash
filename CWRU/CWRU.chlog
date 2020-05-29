@@ -8407,3 +8407,52 @@ doc/{bash.1,bashref.texi}
 	- BASH_COMPAT: overhauled the text, refers to Shell Compatibility Mode
 	  section
 
+				   5/27
+				   ----
+variables.c,/lib/sh/random.c
+	- moved functions that manage 16-bit and 32-bit random values to
+	  lib/sh/random.c
+
+alias.c
+	- add_alias: don't bother checking null alias values for ending in
+	  space or tab
+
+braces.c,include/typemax.h
+	- move sh_imaxabs and overflow and underflow detection to typemax.h
+	  so the expression evaluation code can use it in the future
+
+				   5/28
+				   ----
+lib/readline/kill.c
+	- _rl_bracketed_read_mbstring: make sure to fill in mb[0] even if
+	  the locale says MB_CUR_MAX == 1 in case a caller uses it. Partial
+	  fix for bug reported by Phi Debian <phi.debian@gmail.com>
+
+lib/readline/vi_mode.c
+	- _rl_vi_change_char: make sure _rl_vi_last_replacement gets filled in
+	  in the case where MB_CUR_MAX == 1. Rest of fix for bug reported by
+	  Phi Debian <phi.debian@gmail.com>
+	- rl_vi_change_char: same fix for _rl_vi_last_replacement
+
+				   5/29
+				   ----
+lib/malloc/malloc.c
+	- __P -> PARAMS
+	- union mhead: now 16 bytes to force 16-byte alignment; extra 8 bytes
+	  at the end of struct minfo to use for guard bytes. Enabled if
+	  pointers are 64 bits (SIZEOF_CHAR_P == 8)
+	- if we have 64-bit pointers, prepopulate the 64-byte bin first instead
+	  of the 32-byte bin (pointers and WORD_DESCs still fit into 32 bytes,
+	  but WORD_LISTs are now 36 bytes with malloc overhead). We can still
+	  split 64-byte blocks to satisfy 32-byte requests
+	- internal_malloc: fill in the new 8 mh_magic8 bytes with MAGIC1 guard
+	  bytes
+	- internal_malloc: print a warning message if the returned pointer is
+	  not aligned according to MALIGN_MASK
+	- internal_free: detect underflow by checking that mh_magic8 is full
+	  of MAGIC1 bytes
+	- internal_realloc: detect underflow by checking that mh_magic8 is full
+	  of MAGIC1 bytes
+
+lib/malloc/stats.c
+	- _print_malloc_stats: slight adjustment for better column alignment

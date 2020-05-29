@@ -1,7 +1,7 @@
 /* externs.h -- extern function declarations which do not appear in their
    own header file. */
 
-/* Copyright (C) 1993-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -307,6 +307,13 @@ extern char *sh_canonpath PARAMS((char *, int));
 /* declarations for functions defined in lib/sh/pathphys.c */
 extern char *sh_physpath PARAMS((char *, int));
 extern char *sh_realpath PARAMS((const char *, char *));
+
+/* declarations for functions defined in lib/sh/random.c */
+extern int brand PARAMS((void));
+extern void sbrand PARAMS((unsigned long));		/* set bash random number generator. */
+extern void seedrand PARAMS((void));			/* seed generator randomly */
+extern void seedrand32 PARAMS((void));
+extern u_bits32_t get_urandom32 PARAMS((void));
 
 /* declarations for functions defined in lib/sh/setlinebuf.c */
 #ifdef NEED_SH_SETLINEBUF_DECL

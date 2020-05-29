@@ -110,7 +110,7 @@ _print_malloc_stats (s, fp)
       if (i == malloc_mmap_threshold+1)
 	fprintf (fp, "--------\n");
       if (v.nmal > 0)
-	fprintf (fp, "%8lu\t%4d\t%6d\t%5d\t%8d\t%8d %5d %8d\n", (unsigned long)v.blocksize, v.nfree, v.nused, v.nmal, v.nmorecore, v.nlesscore, v.nsplit, v.ncoalesce);
+	fprintf (fp, "%8lu\t%4d\t%6d\t%5d%8d\t%8d %5d %8d\n", (unsigned long)v.blocksize, v.nfree, v.nused, v.nmal, v.nmorecore, v.nlesscore, v.nsplit, v.ncoalesce);
       totfree += v.nfree * v.blocksize;
       totused += v.nused * v.blocksize;
     }

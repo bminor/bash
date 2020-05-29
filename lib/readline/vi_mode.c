@@ -2014,10 +2014,11 @@ _rl_vi_callback_change_char (_rl_callback_generic_arg *data)
 
   c = _rl_vi_callback_getchar (mb, MB_LEN_MAX);
 #if defined (HANDLE_MULTIBYTE)
-  strncpy (_rl_vi_last_replacement, mb, MB_LEN_MAX);
-#else
-  _rl_vi_last_replacement[0] = c;
+  if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+    strncpy (_rl_vi_last_replacement, mb, MB_LEN_MAX);
+  else
 #endif
+    _rl_vi_last_replacement[0] = c;
   _rl_vi_last_replacement[MB_LEN_MAX] = '\0';	/* XXX */
 
   if (c < 0)
@@ -2054,10 +2055,11 @@ rl_vi_change_char (int count, int key)
     {
       c = _rl_vi_callback_getchar (mb, MB_LEN_MAX);
 #ifdef HANDLE_MULTIBYTE
-      strncpy (_rl_vi_last_replacement, mb, MB_LEN_MAX);
-#else
-      _rl_vi_last_replacement[0] = c;
+      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
+	strncpy (_rl_vi_last_replacement, mb, MB_LEN_MAX);
+      else
 #endif
+	_rl_vi_last_replacement[0] = c;
       _rl_vi_last_replacement[MB_LEN_MAX] = '\0';	/* just in case */      
     }
 

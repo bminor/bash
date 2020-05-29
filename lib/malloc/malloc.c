@@ -1,6 +1,6 @@
 /* malloc.c - dynamic memory allocation for bash. */
 
-/*  Copyright (C) 1985-2005 Free Software Foundation, Inc.
+/*  Copyright (C) 1985-2020 Free Software Foundation, Inc.
 
     This file is part of GNU Bash, the Bourne-Again SHell.
     
@@ -24,6 +24,8 @@
  *	U of M Modified: 20 Jun 1983 ACT: strange hacks for Emacs
  *
  *	Nov 1983, Mike@BRL, Added support for 4.1C/4.2 BSD.
+ *
+ * [VERY] old explanation:
  *
  * This is a very fast storage allocator.  It allocates blocks of a small 
  * number of different sizes, and keeps free lists of each size.  Blocks
@@ -138,22 +140,35 @@
    enough room in the block for the new size.  Range checking is always
    done. */
 union mhead {
+#if SIZEOF_CHAR_P == 8
+  bits64_t mh_align[2];						/* 16 */
+#else
   bits64_t mh_align;						/* 8 */
+#endif
   struct {
     char mi_alloc; 		/* ISALLOC or ISFREE */		/* 1 */
     char mi_index;		/* index in nextf[] */		/* 1 */
     /* Remainder are valid only when block is allocated */
     u_bits16_t mi_magic2;	/* should be == MAGIC2 */	/* 2 */
     u_bits32_t mi_nbytes;	/* # of bytes allocated */	/* 4 */
+#if SIZEOF_CHAR_P == 8
+    char mi_magic8[8];		/* MAGIC1 guard bytes */	/* 8 */
+#endif
   } minfo;
 };
 #define mh_alloc	minfo.mi_alloc
 #define mh_index	minfo.mi_index
 #define mh_nbytes	minfo.mi_nbytes
 #define mh_magic2	minfo.mi_magic2
+#define mh_magic8	minfo.mi_magic8
 
 #define MOVERHEAD	sizeof(union mhead)
+
+#if SIZEOF_CHAR_P == 8
+#define MALIGN_MASK	15
+#else
 #define MALIGN_MASK	7	/* one less than desired alignment */
+#endif
 
 typedef union _malloc_guard {
   char s[4];
@@ -167,6 +182,8 @@ typedef union _malloc_guard {
    to describe the overhead for when the block is in use,
    and we do not want the free-list pointer to count in that.  */
 
+/* If SIZEOF_CHAR_P == 8, this goes into the mh_magic8 buffer at the end of
+   the rest of the struct. This may need adjusting. */
 #define CHAIN(a) \
   (*(union mhead **) (sizeof (char *) + (char *) (a)))
 
@@ -174,13 +191,14 @@ typedef union _malloc_guard {
    and end of each allocated block, and make sure they are undisturbed
    whenever a free or a realloc occurs. */
 
-/* Written in the 2 bytes before the block's real space (-4 bytes) */
+/* Written in the bytes before the block's real space (-SIZEOF_CHAR_P bytes) */
+#define MAGIC1 0x55
 #define MAGIC2 0x5555
 #define MSLOP  4		/* 4 bytes extra for u_bits32_t size */
 
 /* How many bytes are actually allocated for a request of size N --
-   rounded up to nearest multiple of 8 after accounting for malloc
-   overhead. */
+   rounded up to nearest multiple of 2*SIZEOF_CHAR_P after accounting for
+   malloc overhead. */
 #define ALLOCATED_BYTES(n) \
 	(((n) + MOVERHEAD + MSLOP + MALIGN_MASK) & ~MALIGN_MASK)
 
@@ -277,24 +295,24 @@ extern int errno;
 #endif
 
 /* Declarations for internal functions */
-static PTR_T internal_malloc __P((size_t, const char *, int, int));
-static PTR_T internal_realloc __P((PTR_T, size_t, const char *, int, int));
-static void internal_free __P((PTR_T, const char *, int, int));
-static PTR_T internal_memalign __P((size_t, size_t, const char *, int, int));
+static PTR_T internal_malloc PARAMS((size_t, const char *, int, int));
+static PTR_T internal_realloc PARAMS((PTR_T, size_t, const char *, int, int));
+static void internal_free PARAMS((PTR_T, const char *, int, int));
+static PTR_T internal_memalign PARAMS((size_t, size_t, const char *, int, int));
 #ifndef NO_CALLOC
-static PTR_T internal_calloc __P((size_t, size_t, const char *, int, int));
-static void internal_cfree __P((PTR_T, const char *, int, int));
+static PTR_T internal_calloc PARAMS((size_t, size_t, const char *, int, int));
+static void internal_cfree PARAMS((PTR_T, const char *, int, int));
 #endif
 #ifndef NO_VALLOC
-static PTR_T internal_valloc __P((size_t, const char *, int, int));
+static PTR_T internal_valloc PARAMS((size_t, const char *, int, int));
 #endif
 
 #if defined (botch)
 extern void botch ();
 #else
-static void botch __P((const char *, const char *, int));
+static void botch PARAMS((const char *, const char *, int));
 #endif
-static void xbotch __P((PTR_T, int, const char *, const char *, int));
+static void xbotch PARAMS((PTR_T, int, const char *, const char *, int));
 
 #if !HAVE_DECL_SBRK
 extern char *sbrk ();
@@ -302,7 +320,7 @@ extern char *sbrk ();
 
 #ifdef SHELL
 extern int interrupt_immediately, running_trap;
-extern int signal_is_trapped __P((int));
+extern int signal_is_trapped PARAMS((int));
 #endif
 
 #ifdef MALLOC_STATS
@@ -321,8 +339,8 @@ int malloc_mmap_threshold = MMAP_THRESHOLD;
 char _malloc_trace_buckets[NBUCKETS];
 
 /* These should really go into a header file. */
-extern void mtrace_alloc __P((const char *, PTR_T, size_t, const char *, int));
-extern void mtrace_free __P((PTR_T, int, const char *, int));
+extern void mtrace_alloc PARAMS((const char *, PTR_T, size_t, const char *, int));
+extern void mtrace_free PARAMS((PTR_T, int, const char *, int));
 #endif
 
 #if !defined (botch)
@@ -693,7 +711,7 @@ morecore (nu)
 
   memtop += sbrk_amt;
 
-  /* shouldn't happen, but just in case -- require 8-byte alignment */
+  /* shouldn't happen, but just in case -- require 8- or 16-byte alignment */
   if ((long)mp & MALIGN_MASK)
     {
       mp = (union mhead *) (((long)mp + MALIGN_MASK) & ~MALIGN_MASK);
@@ -723,8 +741,13 @@ malloc_debug_dummy ()
   write (1, "malloc_debug_dummy\n", 19);
 }
 
+#if SIZEOF_CHAR_P == 8
+#define PREPOP_BIN	3
+#define PREPOP_SIZE	64
+#else
 #define PREPOP_BIN	2
 #define PREPOP_SIZE	32
+#endif
 
 static int
 pagealign ()
@@ -760,8 +783,8 @@ pagealign ()
       memtop += sbrk_needed;
 
       /* Take the memory which would otherwise be wasted and populate the most
-	 popular bin (2 == 32 bytes) with it.  Add whatever we need to curbrk
-	 to make things 32-byte aligned, compute how many 32-byte chunks we're
+	 popular bin (3 == 64 bytes) with it.  Add whatever we need to curbrk
+	 to make things 64-byte aligned, compute how many 64-byte chunks we're
 	 going to get, and set up the bin. */
       curbrk += sbrk_needed & (PREPOP_SIZE - 1);
       sbrk_needed -= sbrk_needed & (PREPOP_SIZE - 1);
@@ -822,7 +845,7 @@ internal_malloc (n, file, line, flags)		/* get a block */
     if (nbytes <= binsize(nunits))
       break;
 
-  /* Silently reject too-large requests. */
+  /* Silently reject too-large requests. XXX - can increase this if HAVE_MMAP */
   if (nunits >= NBUCKETS)
     return ((PTR_T) NULL);
 
@@ -863,6 +886,11 @@ internal_malloc (n, file, line, flags)		/* get a block */
   p->mh_magic2 = MAGIC2;
   p->mh_nbytes = n;
 
+#if SIZEOF_CHAR_P == 8
+  /* Begin guard */
+  MALLOC_MEMSET ((char *)p->mh_magic8, MAGIC1, 8);
+#endif
+
   /* End guard */
   mg.i = n;
   z = mg.s;
@@ -895,6 +923,14 @@ internal_malloc (n, file, line, flags)		/* get a block */
 #ifdef MALLOC_WATCH
   if (_malloc_nwatch > 0)
     _malloc_ckwatch (p + 1, file, line, W_ALLOC, n);
+#endif
+
+#if defined (MALLOC_DEBUG)
+  z = (char *) (p + 1);
+  /* Check alignment of returned pointer */
+  if ((unsigned long)z & MALIGN_MASK)
+    fprintf (stderr, "malloc: %s:%d: warning: request for %ld bytes not aligned on %d byte boundary\r\n",
+	file ? file : _("unknown"), line, p->mh_nbytes, MALIGN_MASK+1);
 #endif
 
   return (PTR_T) (p + 1);
@@ -956,6 +992,15 @@ internal_free (mem, file, line, flags)
   if (IN_BUCKET(nbytes, nunits) == 0)
     xbotch (mem, ERR_UNDERFLOW,
 	    _("free: underflow detected; mh_nbytes out of range"), file, line);
+#if SIZEOF_CHAR_P == 8
+  {
+    int i;
+    for (i = 0, z = p->mh_magic8; i < 8; i++)
+      if (*z++ != MAGIC1)
+	xbotch (mem, ERR_UNDERFLOW,
+		_("free: underflow detected; magic8 corrupted"), file, line);
+  }
+#endif
 
   ap += p->mh_nbytes;
   z = mg.s;
@@ -1087,6 +1132,16 @@ internal_realloc (mem, n, file, line, flags)
   if (IN_BUCKET(nbytes, nunits) == 0)
     xbotch (mem, ERR_UNDERFLOW,
 	    _("realloc: underflow detected; mh_nbytes out of range"), file, line);
+#if SIZEOF_CHAR_P == 8
+  {
+    int i;
+    for (i = 0, z = p->mh_magic8; i < 8; i++)
+      if (*z++ != MAGIC1)
+	xbotch (mem, ERR_UNDERFLOW,
+		_("realloc: underflow detected; magic8 corrupted"), file, line);
+
+  }
+#endif
 
   m = (char *)mem + (tocopy = p->mh_nbytes);
   z = mg.s;

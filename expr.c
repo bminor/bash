@@ -549,6 +549,7 @@ expassign ()
 	  switch (op)
 	    {
 	    case MUL:
+	      /* Handle INTMAX_MIN and INTMAX_MAX * -1 specially here? */
 	      lvalue *= value;
 	      break;
 	    case DIV:

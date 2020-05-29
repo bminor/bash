@@ -2,7 +2,7 @@
 # Makefile for the Bash library
 #
 #
-# Copyright (C) 1998-2010 Free Software Foundation, Inc.
+# Copyright (C) 1998-2020 Free Software Foundation, Inc.
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   wcsdup.c fpurge.c zgetline.c mbscmp.c uconvert.c ufuncs.c \
 	   casemod.c dprintf.c input_avail.c mbscasecmp.c fnxform.c \
 	   strchrnul.c unicode.c wcswidth.c wcsnwidth.c shmbchar.c strdup.c \
-	   utf8.c
+	   utf8.c random.c
 
 # The header files for this library.
 HSOURCES = 
@@ -108,7 +108,7 @@ OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o strnlen.o \
 	  fmtullong.o fmtumax.o zcatfd.o zmapfd.o winsize.o wcsdup.o \
 	  fpurge.o zgetline.o mbscmp.o uconvert.o ufuncs.o casemod.o \
 	  input_avail.o mbscasecmp.o fnxform.o unicode.o shmbchar.o \
-	  utf8.o wcsnwidth.o ${LIBOBJS}
+	  utf8.o random.o wcsnwidth.o ${LIBOBJS}
 
 SUPPORT = Makefile
 
@@ -170,6 +170,7 @@ netopen.o: netopen.c
 oslib.o: oslib.c
 pathcanon.o: pathcanon.c
 pathphys.o: pathphys.c
+random.o: random.c
 rename.o: rename.c
 setlinebuf.o: setlinebuf.c
 shmatch.o: shmatch.c
@@ -248,6 +249,7 @@ netopen.o: ${BUILD_DIR}/config.h
 oslib.o: ${BUILD_DIR}/config.h
 pathcanon.o: ${BUILD_DIR}/config.h
 pathphys.o: ${BUILD_DIR}/config.h
+random.o: ${BUILD_DIR}/config.h
 rename.o: ${BUILD_DIR}/config.h
 setlinebuf.o: ${BUILD_DIR}/config.h
 shmatch.o: ${BUILD_DIR}/config.h
@@ -379,6 +381,10 @@ pathphys.o: ${BUILD_DIR}/pathnames.h ${topdir}/externs.h
 pathphys.o: ${BASHINCDIR}/posixstat.h ${BASHINCDIR}/filecntl.h
 pathphys.o: ${BASHINCDIR}/ansi_stdlib.h ${BASHINCDIR}/chartypes.h
 #pathphys.o: ${BUILD_DIR}/version.h
+
+random.o: ${topdir}/bashtypes.h ${BASHINCDIR}/stdc.h
+random.o: ${topdir}/bashansi.h ${BASHINCDIR}/ansi_stdlib.h
+random.o: ${BASHINCDIR}/filecntl.h
 
 rename.o: ${topdir}/bashtypes.h ${BASHINCDIR}/stdc.h
 rename.o: ${BASHINCDIR}/posixstat.h

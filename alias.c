@@ -127,9 +127,12 @@ add_alias (name, value)
       free (temp->value);
       temp->value = savestring (value);
       temp->flags &= ~AL_EXPANDNEXT;
-      n = value[strlen (value) - 1];
-      if (n == ' ' || n == '\t')
-	temp->flags |= AL_EXPANDNEXT;
+      if (value[0])
+	{
+	  n = value[strlen (value) - 1];
+	  if (n == ' ' || n == '\t')
+	    temp->flags |= AL_EXPANDNEXT;
+	}
     }
   else
     {
@@ -138,9 +141,12 @@ add_alias (name, value)
       temp->value = savestring (value);
       temp->flags = 0;
 
-      n = value[strlen (value) - 1];
-      if (n == ' ' || n == '\t')
-	temp->flags |= AL_EXPANDNEXT;
+      if (value[0])
+	{
+	  n = value[strlen (value) - 1];
+	  if (n == ' ' || n == '\t')
+	    temp->flags |= AL_EXPANDNEXT;
+	}
 
       elt = hash_insert (savestring (name), aliases, HASH_NOSRCH);
       elt->data = temp;

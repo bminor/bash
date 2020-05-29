@@ -820,7 +820,10 @@ _rl_bracketed_read_mbstring (char *mb, int mlen)
 #if defined (HANDLE_MULTIBYTE)
   if (MB_CUR_MAX > 1 && rl_byte_oriented == 0)
     c = _rl_read_mbstring (c, mb, mlen);
+  else
 #endif
+    mb[0] = c;
+  mb[mlen] = '\0';		/* just in case */
 
   return c;
 }
