@@ -28,7 +28,7 @@ if [ -x /usr/bin/false ]; then
 elif [ -x /bin/false ]; then
 	binfalse=/bin/false
 else
-	binfalse=true
+	binfalse=false
 fi
 
 shopt -s lastpipe
@@ -71,4 +71,3 @@ ${THIS_SH} ./lastpipe1.sub
 echo lastpipe1.sub returns $?
 
 ${THIS_SH} ./lastpipe2.sub
-

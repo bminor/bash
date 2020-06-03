@@ -656,7 +656,7 @@ cat_file (r)
 
   if (fn == 0)
     {
-      redirection_error (r, AMBIGUOUS_REDIRECT);
+      redirection_error (r, AMBIGUOUS_REDIRECT, fn);
       return -1;
     }
 

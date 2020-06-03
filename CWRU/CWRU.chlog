@@ -8456,3 +8456,29 @@ lib/malloc/malloc.c
 
 lib/malloc/stats.c
 	- _print_malloc_stats: slight adjustment for better column alignment
+
+				    6/1
+				    ---
+execute_cmd.c
+	- execute_command_internal: treat a redirection failure with errexit
+	  set as a command failure that exits the shell. Bug report from
+	  Hyunho Cho <mug896@naver.com>
+
+				    6/3
+				    ---
+redir.c
+	- redirection_error: takes a new argument, FN, which if non-NULL is
+	  the filename to be used in the error message.
+
+redir.[ch],builtins/evalstring.c
+	- redirection_error: changed extern declaration and callers
+
+redir.c
+	- do_redirection_internal: takes a new third parameter, FNP, a char **
+	  to use (*FNP, if non-NULL) to store and return the expanded filename
+	  for those redirections that take one
+	- do_redirections: pass a char ** (&fn) to do_redirection_internal to
+	  get a pointer to the expanded filename; pass it to redirection_error
+	  if appropriate. Free FN in any case, since do_redirection_internal
+	  won't. Fix for double expansion of filename in certain redirections
+	  reported by OÄuz <oguzismailuysal@gmail.com>

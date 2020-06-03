@@ -768,6 +768,9 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
   /* Handle WHILE FOR CASE etc. with redirections.  (Also '&' input
      redirection.)  */
+  was_error_trap = signal_is_trapped (ERROR_TRAP) && signal_is_ignored (ERROR_TRAP) == 0;
+  ignore_return = (command->flags & CMD_IGNORE_RETURN) != 0;
+
   if (do_redirections (command->redirects, RX_ACTIVE|RX_UNDOABLE) != 0)
     {
       undo_partial_redirects ();
@@ -779,7 +782,25 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
           discard_unwind_frame ("internal_fifos");
 	}
 #endif
-      return (last_command_exit_value = EXECUTION_FAILURE);
+
+      /* Handle redirection error as command failure if errexit set. */
+      last_command_exit_value = EXECUTION_FAILURE;
+      if (ignore_return == 0 && invert == 0 && pipe_in == NO_PIPE && pipe_out == NO_PIPE)
+	{
+	  if (was_error_trap)
+	    {
+	      save_line_number = line_number;
+	      line_number = line_number_for_err_trap;
+	      run_error_trap ();
+	      line_number = save_line_number;
+	    }
+	  if (exit_immediately_on_error)
+	    {	  
+	      run_pending_traps ();
+	      jump_to_top_level (ERREXIT);
+	    }
+	}
+      return (last_command_exit_value);
     }
 
   my_undo_list = redirection_undo_list;
@@ -796,8 +817,6 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 
   if (exec_undo_list)
     add_unwind_protect ((Function *)dispose_redirects, exec_undo_list);
-
-  ignore_return = (command->flags & CMD_IGNORE_RETURN) != 0;
 
   QUIT;
 

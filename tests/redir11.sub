@@ -65,3 +65,12 @@ a=2
 a=9 eval echo foo >&$(echo $a)
 a=2
 a=9 eval echo foo '2>&1 >&$(echo $a)' | { grep -q 'Bad file' || echo 'redir11 bad 9'; }
+
+# double expansion of filenames when used in redirection error messages
+# present in bash versions back to at least bash-1.13
+# this is executed in the tests subdirectory of the source directory, so there
+# definitely should not be a file named `42'
+
+unset foo
+: <$((foo+=42))
+echo $foo

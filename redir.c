@@ -1,6 +1,6 @@
 /* redir.c -- Functions to perform input and output redirection. */
 
-/* Copyright (C) 1997-2019 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -87,24 +87,24 @@ extern REDIRECT *redirection_undo_list;
 extern REDIRECT *exec_redirection_undo_list;
 
 /* Static functions defined and used in this file. */
-static void add_exec_redirect __P((REDIRECT *));
-static int add_undo_redirect __P((int, enum r_instruction, int));
-static int add_undo_close_redirect __P((int));
-static int expandable_redirection_filename __P((REDIRECT *));
-static int stdin_redirection __P((enum r_instruction, int));
-static int undoablefd __P((int));
-static int do_redirection_internal __P((REDIRECT *, int));
+static void add_exec_redirect PARAMS((REDIRECT *));
+static int add_undo_redirect PARAMS((int, enum r_instruction, int));
+static int add_undo_close_redirect PARAMS((int));
+static int expandable_redirection_filename PARAMS((REDIRECT *));
+static int stdin_redirection PARAMS((enum r_instruction, int));
+static int undoablefd PARAMS((int));
+static int do_redirection_internal PARAMS((REDIRECT *, int, char **));
 
-static char *heredoc_expand __P((WORD_DESC *, enum r_instruction, size_t *));
-static int heredoc_write __P((int, char *, size_t));
-static int here_document_to_fd __P((WORD_DESC *, enum r_instruction));
+static char *heredoc_expand PARAMS((WORD_DESC *, enum r_instruction, size_t *));
+static int heredoc_write PARAMS((int, char *, size_t));
+static int here_document_to_fd PARAMS((WORD_DESC *, enum r_instruction));
 
-static int redir_special_open __P((int, char *, int, int, enum r_instruction));
-static int noclobber_open __P((char *, int, int, enum r_instruction));
-static int redir_open __P((char *, int, int, enum r_instruction));
+static int redir_special_open PARAMS((int, char *, int, int, enum r_instruction));
+static int noclobber_open PARAMS((char *, int, int, enum r_instruction));
+static int redir_open PARAMS((char *, int, int, enum r_instruction));
 
-static int redir_varassign __P((REDIRECT *, int));
-static int redir_varvalue __P((REDIRECT *));
+static int redir_varassign PARAMS((REDIRECT *, int));
+static int redir_varvalue PARAMS((REDIRECT *));
 
 /* Spare redirector used when translating [N]>&WORD[-] or [N]<&WORD[-] to
    a new redirection and when creating the redirection undo list. */
@@ -126,9 +126,10 @@ do { \
 } while (0)
 
 void
-redirection_error (temp, error)
+redirection_error (temp, error, fn)
      REDIRECT *temp;
      int error;
+     char *fn;		/* already-expanded filename */
 {
   char *filename, *allocname;
   int oflags;
@@ -173,6 +174,8 @@ redirection_error (temp, error)
         }
     }
 #endif
+  else if (fn)
+    filename = fn;
   else if (expandable_redirection_filename (temp))
     {
       oflags = temp->redirectee.filename->flags;
@@ -234,6 +237,7 @@ do_redirections (list, flags)
 {
   int error;
   REDIRECT *temp;
+  char *fn;
 
   if (flags & RX_UNDOABLE)
     {
@@ -248,12 +252,15 @@ do_redirections (list, flags)
 
   for (temp = list; temp; temp = temp->next)
     {
-      error = do_redirection_internal (temp, flags);
+      fn = 0;
+      error = do_redirection_internal (temp, flags, &fn);
       if (error)
 	{
-	  redirection_error (temp, error);
+	  redirection_error (temp, error, fn);
+	  FREE (fn);
 	  return (error);
 	}
+      FREE (fn);
     }
   return (0);
 }
@@ -763,11 +770,13 @@ undoablefd (fd)
    produce the appropriate side effects.   flags & RX_UNDOABLE, if non-zero,
    says to remember how to undo each redirection.  If flags & RX_CLEXEC is
    non-zero, then we set all file descriptors > 2 that we open to be
-   close-on-exec.  */
+   close-on-exec. FNP, if non-null is a pointer to a location where the
+   expanded filename is stored. The caller will free it. */
 static int
-do_redirection_internal (redirect, flags)
+do_redirection_internal (redirect, flags, fnp)
      REDIRECT *redirect;
      int flags;
+     char **fnp;
 {
   WORD_DESC *redirectee;
   int redir_fd, fd, redirector, r, oflags;
@@ -902,7 +911,10 @@ do_redirection_internal (redirect, flags)
 #endif /* RESTRICTED_SHELL */
 
       fd = redir_open (redirectee_word, redirect->flags, 0666, ri);
-      free (redirectee_word);
+      if (fnp)
+	*fnp = redirectee_word;
+      else
+	free (redirectee_word);
 
       if (fd == NOCLOBBER_REDIRECT || fd == RESTRICTED_REDIRECT)
 	return (fd);
