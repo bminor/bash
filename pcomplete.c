@@ -37,7 +37,7 @@
 #  include <varargs.h>
 #endif
 
-#include <sys/time.h>
+#include "posixtime.h"
 
 #include <stdio.h>
 #include "bashansi.h"

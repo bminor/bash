@@ -109,6 +109,9 @@ extern int errno;
 extern int command_string_index;
 extern char *the_printed_command;
 extern time_t shell_start_time;
+#if defined (HAVE_GETTIMEOFDAY)
+extern struct timeval shellstart;
+#endif
 #if 0
 extern char *glob_argv_flags;
 #endif
@@ -1356,8 +1359,7 @@ time_command (command, asynchronous, pipe_in, pipe_out, fds_to_close)
 #if defined (HAVE_GETRUSAGE)
       selfb.ru_utime.tv_sec = kidsb.ru_utime.tv_sec = selfb.ru_stime.tv_sec = kidsb.ru_stime.tv_sec = 0;
       selfb.ru_utime.tv_usec = kidsb.ru_utime.tv_usec = selfb.ru_stime.tv_usec = kidsb.ru_stime.tv_usec = 0;
-      before.tv_sec = shell_start_time;
-      before.tv_usec = 0;
+      before = shellstart;
 #else
       before.tms_utime = before.tms_stime = before.tms_cutime = before.tms_cstime = 0;
       tbefore = shell_start_time;

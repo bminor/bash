@@ -8482,3 +8482,38 @@ redir.c
 	  if appropriate. Free FN in any case, since do_redirection_internal
 	  won't. Fix for double expansion of filename in certain redirections
 	  reported by OÄuz <oguzismailuysal@gmail.com>
+
+				    6/4
+				    ---
+parse.y
+	- parse_comsub: while we're reading a here-document, don't perform any
+	  history expansion (set history_expansion_inhibited). Fixes issue
+	  reported by "ladyrick" <ladyrick@qq.com>
+
+general.h,parse.y
+	- __P -> PARAMS
+
+shell.c
+	- shellstart: struct timeval used to initialize shell starting time;
+	  shell_start_time now initialized from shellstart.tv_sec
+
+variables.c
+	- assign_seconds: reset shellstart to set shell starting time
+
+pcomplete.c
+	- include posixtime.h instead of <sys/time.h>
+
+lib/sh/{ufuncs,uconvert}.c
+	- include posixtime.h instead of the inline conditional includes
+
+aclocal.m4
+	- BASH_STRUCT_TIMEVAL: convert to use AC_COMPILE_IFELSE instead of the
+	  deprecated AC_HEADER_EGREP
+
+posixtime.h
+	- struct timeval: if HAVE_TIMEVAL is not defined, provide a replacement
+	  definition
+
+lib/sh/gettimeofday.c
+	- gettimeofday: replacement function, so we don't have to use
+	  HAVE_GETTIMEOFDAY in the rest of the code

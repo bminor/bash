@@ -1,6 +1,6 @@
 /* ufuncs - sleep and alarm functions that understand fractional values */
 
-/* Copyright (C) 2008,2009 Free Software Foundation, Inc.
+/* Copyright (C) 2008,2009-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -22,16 +22,7 @@
 
 #include "bashtypes.h"
 
-#if defined (TIME_WITH_SYS_TIME)
-#  include <sys/time.h>
-#  include <time.h>
-#else
-#  if defined (HAVE_SYS_TIME_H)
-#    include <sys/time.h>
-#  else
-#    include <time.h>
-#  endif
-#endif
+#include "posixtime.h"
 
 #if defined (HAVE_UNISTD_H)
 #include <unistd.h>

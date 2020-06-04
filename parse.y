@@ -71,7 +71,7 @@
 #if defined (JOB_CONTROL)
 #  include "jobs.h"
 #else
-extern int cleanup_dead_jobs __P((void));
+extern int cleanup_dead_jobs PARAMS((void));
 #endif /* JOB_CONTROL */
 
 #if defined (ALIAS)
@@ -131,90 +131,90 @@ extern int errno;
 /* **************************************************************** */
 
 #ifdef DEBUG
-static void debug_parser __P((int));
+static void debug_parser PARAMS((int));
 #endif
 
-static int yy_getc __P((void));
-static int yy_ungetc __P((int));
+static int yy_getc PARAMS((void));
+static int yy_ungetc PARAMS((int));
 
 #if defined (READLINE)
-static int yy_readline_get __P((void));
-static int yy_readline_unget __P((int));
+static int yy_readline_get PARAMS((void));
+static int yy_readline_unget PARAMS((int));
 #endif
 
-static int yy_string_get __P((void));
-static int yy_string_unget __P((int));
-static void rewind_input_string __P((void));
-static int yy_stream_get __P((void));
-static int yy_stream_unget __P((int));
+static int yy_string_get PARAMS((void));
+static int yy_string_unget PARAMS((int));
+static void rewind_input_string PARAMS((void));
+static int yy_stream_get PARAMS((void));
+static int yy_stream_unget PARAMS((int));
 
-static int shell_getc __P((int));
-static void shell_ungetc __P((int));
-static void discard_until __P((int));
+static int shell_getc PARAMS((int));
+static void shell_ungetc PARAMS((int));
+static void discard_until PARAMS((int));
 
 #if defined (ALIAS) || defined (DPAREN_ARITHMETIC)
-static void push_string __P((char *, int, alias_t *));
-static void pop_string __P((void));
-static void free_string_list __P((void));
+static void push_string PARAMS((char *, int, alias_t *));
+static void pop_string PARAMS((void));
+static void free_string_list PARAMS((void));
 #endif
 
-static char *read_a_line __P((int));
+static char *read_a_line PARAMS((int));
 
-static int reserved_word_acceptable __P((int));
-static int yylex __P((void));
+static int reserved_word_acceptable PARAMS((int));
+static int yylex PARAMS((void));
 
-static void push_heredoc __P((REDIRECT *));
-static char *mk_alexpansion __P((char *));
-static int alias_expand_token __P((char *));
-static int time_command_acceptable __P((void));
-static int special_case_tokens __P((char *));
-static int read_token __P((int));
-static char *parse_matched_pair __P((int, int, int, int *, int));
-static char *parse_comsub __P((int, int, int, int *, int));
+static void push_heredoc PARAMS((REDIRECT *));
+static char *mk_alexpansion PARAMS((char *));
+static int alias_expand_token PARAMS((char *));
+static int time_command_acceptable PARAMS((void));
+static int special_case_tokens PARAMS((char *));
+static int read_token PARAMS((int));
+static char *parse_matched_pair PARAMS((int, int, int, int *, int));
+static char *parse_comsub PARAMS((int, int, int, int *, int));
 #if defined (ARRAY_VARS)
-static char *parse_compound_assignment __P((int *));
+static char *parse_compound_assignment PARAMS((int *));
 #endif
 #if defined (DPAREN_ARITHMETIC) || defined (ARITH_FOR_COMMAND)
-static int parse_dparen __P((int));
-static int parse_arith_cmd __P((char **, int));
+static int parse_dparen PARAMS((int));
+static int parse_arith_cmd PARAMS((char **, int));
 #endif
 #if defined (COND_COMMAND)
-static void cond_error __P((void));
-static COND_COM *cond_expr __P((void));
-static COND_COM *cond_or __P((void));
-static COND_COM *cond_and __P((void));
-static COND_COM *cond_term __P((void));
-static int cond_skip_newlines __P((void));
-static COMMAND *parse_cond_command __P((void));
+static void cond_error PARAMS((void));
+static COND_COM *cond_expr PARAMS((void));
+static COND_COM *cond_or PARAMS((void));
+static COND_COM *cond_and PARAMS((void));
+static COND_COM *cond_term PARAMS((void));
+static int cond_skip_newlines PARAMS((void));
+static COMMAND *parse_cond_command PARAMS((void));
 #endif
 #if defined (ARRAY_VARS)
-static int token_is_assignment __P((char *, int));
-static int token_is_ident __P((char *, int));
+static int token_is_assignment PARAMS((char *, int));
+static int token_is_ident PARAMS((char *, int));
 #endif
-static int read_token_word __P((int));
-static void discard_parser_constructs __P((int));
+static int read_token_word PARAMS((int));
+static void discard_parser_constructs PARAMS((int));
 
-static char *error_token_from_token __P((int));
-static char *error_token_from_text __P((void));
-static void print_offending_line __P((void));
-static void report_syntax_error __P((char *));
+static char *error_token_from_token PARAMS((int));
+static char *error_token_from_text PARAMS((void));
+static void print_offending_line PARAMS((void));
+static void report_syntax_error PARAMS((char *));
 
-static void handle_eof_input_unit __P((void));
-static void prompt_again __P((void));
+static void handle_eof_input_unit PARAMS((void));
+static void prompt_again PARAMS((void));
 #if 0
-static void reset_readline_prompt __P((void));
+static void reset_readline_prompt PARAMS((void));
 #endif
-static void print_prompt __P((void));
+static void print_prompt PARAMS((void));
 
 #if defined (HANDLE_MULTIBYTE)
-static void set_line_mbstate __P((void));
+static void set_line_mbstate PARAMS((void));
 static char *shell_input_line_property = NULL;
 static size_t shell_input_line_propsize = 0;
 #else
 #  define set_line_mbstate()
 #endif
 
-extern int yyerror __P((const char *));
+extern int yyerror PARAMS((const char *));
 
 #ifdef DEBUG
 extern int yydebug;
@@ -3905,7 +3905,7 @@ parse_comsub (qc, open, close, lenp, flags)
      int *lenp, flags;
 {
   int count, ch, peekc, tflags, lex_rwlen, lex_wlen, lex_firstind;
-  int nestlen, ttranslen, start_lineno;
+  int nestlen, ttranslen, start_lineno, orig_histexp;
   char *ret, *nestret, *ttrans, *heredelim;
   int retind, retsize, rflags, hdlen;
 
@@ -3919,6 +3919,9 @@ parse_comsub (qc, open, close, lenp, flags)
 /*itrace("parse_comsub: qc = `%c' open = %c close = %c", qc, open, close);*/
   count = 1;
   tflags = LEX_RESWDOK;
+#if defined (BANG_HISTORY)
+  orig_histexp = history_expansion_inhibited;
+#endif
 
   if ((flags & P_COMMAND) && qc != '\'' && qc != '"' && (flags & P_DQUOTE) == 0)
     tflags |= LEX_CKCASE;
@@ -3945,6 +3948,9 @@ comsub_readchar:
       if (ch == EOF)
 	{
 eof_error:
+#if defined (BANG_HISTORY)
+	  history_expansion_inhibited = orig_histexp;
+#endif
 	  free (ret);
 	  FREE (heredelim);
 	  parser_error (start_lineno, _("unexpected EOF while looking for matching `%c'"), close);
@@ -3963,6 +3969,9 @@ eof_error:
 	    {
 	      tflags &= ~LEX_HEREDELIM;
 	      tflags |= LEX_INHEREDOC;
+#if defined (BANG_HISTORY)
+	      history_expansion_inhibited = 1;
+#endif
 	      lex_firstind = retind + 1;
 	    }
 	  else if (tflags & LEX_INHEREDOC)
@@ -3978,6 +3987,9 @@ eof_error:
 		  free (heredelim);
 		  heredelim = 0;
 		  lex_firstind = -1;
+#if defined (BANG_HISTORY)
+		  history_expansion_inhibited = orig_histexp;
+#endif
 		}
 	      else
 		lex_firstind = retind + 1;
@@ -4012,6 +4024,9 @@ eof_error:
 	      free (heredelim);
 	      heredelim = 0;
 	      lex_firstind = -1;
+#if defined (BANG_HISTORY)
+	      history_expansion_inhibited = orig_histexp;
+#endif
 	    }
 	}
 
@@ -4122,6 +4137,9 @@ eof_error:
 	      tflags |= LEX_INHEREDOC;
 	      tflags &= ~LEX_HEREDELIM;
 	      lex_firstind = retind + 1;
+#if defined (BANG_HISTORY)
+	      history_expansion_inhibited = 1;
+#endif
 	    }
 #endif
 	  else if (lex_firstind >= 0 && (tflags & LEX_PASSNEXT) == 0 && shellbreak (ch))
@@ -4141,6 +4159,9 @@ eof_error:
 		  tflags |= LEX_INHEREDOC;
 		  tflags &= ~LEX_HEREDELIM;
 		  lex_firstind = retind + 1;
+#if defined (BANG_HISTORY)
+		  history_expansion_inhibited = 1;
+#endif
 		}
 	      else
 		lex_firstind = -1;
@@ -4411,6 +4432,9 @@ eof_error:
 	tflags &= ~LEX_WASDOL;
     }
 
+#if defined (BANG_HISTORY)
+  history_expansion_inhibited = orig_histexp;
+#endif
   FREE (heredelim);
   ret[retind] = '\0';
   if (lenp)

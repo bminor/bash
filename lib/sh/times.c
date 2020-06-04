@@ -58,7 +58,7 @@ times(tms)
 	tms->tms_cutime = CONVTCK(ru.ru_utime);
 	tms->tms_cstime = CONVTCK(ru.ru_stime);
 
-	if (gettimeofday(&tv, (struct timezone *) 0) < 0)
+	if (gettimeofday(&tv, NULL) < 0)
 		return ((clock_t)-1);
 	rv = (clock_t)(CONVTCK(tv));
 #else /* !HAVE_GETRUSAGE */

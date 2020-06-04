@@ -238,6 +238,15 @@ yyy. When `test' is supplied four or more arguments, treat an argument that
 zzz. There is no `compat50' shopt option. Changes to the shell compatibility
      level should use the BASH_COMPAT variable.
 
+aaaa. Redirection failures with compound commands are now treated as errors
+      that cause the shell to exit if `errexit' is enabled.
+
+bbbb. Redirection failure error messages no longer expand the word in the
+      redirection again.
+
+cccc. History expansion is no longer performed while parsing a here-document
+      inside a command substitution.
+
 2. Changes to Readline
 
 a. There are a number of fixes that were found as the result of fuzzing with
@@ -291,6 +300,9 @@ p. Readline only calls chown(2) on a newly-written history file if it really
 
 q. Readline now behaves better when operate-and-get-next is used when the
    history list is `full': when there are already $HISTSIZE entries.
+
+r. Fixed a bug that could cause vi redo (`.') of a replace command not to work
+   correctly in the C or POSIX locale.
 
 3. New Features in Bash
 
@@ -414,6 +426,9 @@ mm. The associative array implementation can now dynamically increase the
     size of the hash table based on insertion patterns.
 
 nn. HISTFILE is now readonly in a restricted shell.
+
+oo. The bash malloc now returns memory that is 16-byte aligned on 64-bit
+    systems.
 
 4. New Features in Readline
 

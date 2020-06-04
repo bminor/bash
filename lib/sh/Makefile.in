@@ -93,7 +93,7 @@ CSOURCES = clktck.c clock.c getcwd.c getenv.c oslib.c setlinebuf.c \
 	   wcsdup.c fpurge.c zgetline.c mbscmp.c uconvert.c ufuncs.c \
 	   casemod.c dprintf.c input_avail.c mbscasecmp.c fnxform.c \
 	   strchrnul.c unicode.c wcswidth.c wcsnwidth.c shmbchar.c strdup.c \
-	   utf8.c random.c
+	   utf8.c random.c gettimeofday.c
 
 # The header files for this library.
 HSOURCES = 
@@ -108,7 +108,7 @@ OBJECTS = clktck.o clock.o getenv.o oslib.o setlinebuf.o strnlen.o \
 	  fmtullong.o fmtumax.o zcatfd.o zmapfd.o winsize.o wcsdup.o \
 	  fpurge.o zgetline.o mbscmp.o uconvert.o ufuncs.o casemod.o \
 	  input_avail.o mbscasecmp.o fnxform.o unicode.o shmbchar.o \
-	  utf8.o random.o wcsnwidth.o ${LIBOBJS}
+	  utf8.o random.o gettimeofday.o wcsnwidth.o ${LIBOBJS}
 
 SUPPORT = Makefile
 
@@ -155,6 +155,7 @@ fnxform.o: fnxform.c
 fpurge.o: fpurge.c
 getcwd.o: getcwd.c
 getenv.o: getenv.c
+gettimeofday.o: gettimeofday.c
 inet_aton.o: inet_aton.c
 input_avail.o: input_avail.c
 itos.o: itos.c
@@ -234,6 +235,7 @@ fnxform.o: ${BUILD_DIR}/config.h
 fpurge.o: ${BUILD_DIR}/config.h
 getcwd.o: ${BUILD_DIR}/config.h
 getenv.o: ${BUILD_DIR}/config.h
+gettimeofday.o: ${BUILD_DIR}/config.h
 inet_aton.o: ${BUILD_DIR}/config.h
 input_avail.o: ${BUILD_DIR}/config.h
 itos.o: ${BUILD_DIR}/config.h
@@ -511,6 +513,7 @@ times.o: ${BASHINCDIR}/systimes.h
 times.o: ${BASHINCDIR}/posixtime.h
 
 timeval.o: ${BASHINCDIR}/posixtime.h
+gettimeofday.o: ${BASHINCDIR}/posixtime.h
 
 tmpfile.o: ${topdir}/bashtypes.h
 tmpfile.o: ${BASHINCDIR}/chartypes.h

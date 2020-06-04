@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.1, version 5.017])dnl
+AC_REVISION([for Bash 5.1, version 5.018])dnl
 
 define(bashvers, 5.1)
 define(relstatus, alpha)

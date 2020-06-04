@@ -100,6 +100,7 @@ extern char **environ;
 
 /* Variables used here and defined in other files. */
 extern time_t shell_start_time;
+extern struct timeval shellstart;
 
 /* The list of shell variables that the user has created at the global
    scope, or that came from the environment. */
@@ -1284,7 +1285,6 @@ assign_seconds (self, value, unused, key)
      arrayind_t unused;
      char *key;
 {
-  struct timeval tv;
   intmax_t nval;
   int expok;
 
@@ -1293,8 +1293,8 @@ assign_seconds (self, value, unused, key)
   else
     expok = legal_number (value, &nval);
   seconds_value_assigned = expok ? nval : 0;
-  gettimeofday (&tv, NULL);
-  shell_start_time = tv.tv_sec;
+  gettimeofday (&shellstart, NULL);
+  shell_start_time = shellstart.tv_sec;
   return (self);
 }
 

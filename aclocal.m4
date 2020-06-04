@@ -1179,12 +1179,17 @@ fi
 AC_DEFUN(BASH_STRUCT_TIMEVAL,
 [AC_MSG_CHECKING(for struct timeval in sys/time.h and time.h)
 AC_CACHE_VAL(bash_cv_struct_timeval,
-[
-AC_EGREP_HEADER(struct timeval, sys/time.h,
-		bash_cv_struct_timeval=yes,
-		AC_EGREP_HEADER(struct timeval, time.h,
-			bash_cv_struct_timeval=yes,
-			bash_cv_struct_timeval=no))
+[AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM(
+		[[#if HAVE_SYS_TIME_H
+		  #include <sys/time.h>
+		  #endif
+		  #include <time.h>
+		]],
+		[[static struct timeval x; x.tv_sec = x.tv_usec;]]
+	)],
+	bash_cv_struct_timeval=yes,
+	bash_cv_struct_timeval=no)
 ])
 AC_MSG_RESULT($bash_cv_struct_timeval)
 if test $bash_cv_struct_timeval = yes; then

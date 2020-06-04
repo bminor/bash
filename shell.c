@@ -179,6 +179,7 @@ char *shell_name = (char *)NULL;
 
 /* time in seconds when the shell was started */
 time_t shell_start_time;
+struct timeval shellstart;
 
 /* Are we running in an emacs shell window? */
 int running_under_emacs;
@@ -458,7 +459,9 @@ main (argc, argv, env)
 
   shell_environment = env;
   set_shell_name (argv[0]);
-  shell_start_time = NOW;	/* NOW now defined in general.h */
+
+  gettimeofday (&shellstart, 0);
+  shell_start_time = shellstart.tv_sec;
 
   /* Parse argument flags from the input line. */
 

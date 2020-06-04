@@ -46,4 +46,16 @@
 #  endif /* !CLK_TCK */
 #endif /* !HAVE_SYSCONF && !_SC_CLK_TCK */
 
+#if !HAVE_TIMEVAL
+struct timeval
+{
+  time_t tv_sec;
+  long int tv_usec;
+};
+#endif
+
+#if !HAVE_GETTIMEOFDAY
+extern int gettimeofday PARAMS((struct timeval *, void *));
+#endif
+
 #endif /* _POSIXTIME_H_ */
