@@ -1,6 +1,6 @@
 /* shquote - functions to quote and dequote strings */
 
-/* Copyright (C) 1999-2019 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -36,8 +36,8 @@
 #include "shmbchar.h"
 #include "shmbutil.h"
 
-extern char *ansic_quote __P((char *, int, int *));
-extern int ansic_shouldquote __P((const char *));
+extern char *ansic_quote PARAMS((char *, int, int *));
+extern int ansic_shouldquote PARAMS((const char *));
 
 /* Default set of characters that should be backslash-quoted in strings */
 static const char bstab[256] =

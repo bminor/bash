@@ -1,7 +1,7 @@
 This file is set.def, from which is created set.c.
 It implements the "set" and "unset" builtins in Bash.
 
-Copyright (C) 1987-2018 Free Software Foundation, Inc.
+Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -151,24 +151,24 @@ Exit Status:
 Returns success unless an invalid option is given.
 $END
 
-typedef int setopt_set_func_t __P((int, char *));
-typedef int setopt_get_func_t __P((char *));
+typedef int setopt_set_func_t PARAMS((int, char *));
+typedef int setopt_get_func_t PARAMS((char *));
 
-static int find_minus_o_option __P((char *));
+static int find_minus_o_option PARAMS((char *));
 
-static void print_minus_o_option __P((char *, int, int));
-static void print_all_shell_variables __P((void));
+static void print_minus_o_option PARAMS((char *, int, int));
+static void print_all_shell_variables PARAMS((void));
 
-static int set_ignoreeof __P((int, char *));
-static int set_posix_mode __P((int, char *));
+static int set_ignoreeof PARAMS((int, char *));
+static int set_posix_mode PARAMS((int, char *));
 
 #if defined (READLINE)
-static int set_edit_mode __P((int, char *));
-static int get_edit_mode __P((char *));
+static int set_edit_mode PARAMS((int, char *));
+static int get_edit_mode PARAMS((char *));
 #endif
 
 #if defined (HISTORY)
-static int bash_set_history __P((int, char *));
+static int bash_set_history PARAMS((int, char *));
 #endif
 
 static const char * const on = "on";

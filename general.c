@@ -1,6 +1,6 @@
 /* general.c -- Stuff that is used by all files. */
 
-/* Copyright (C) 1987-2019 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -62,9 +62,9 @@ extern int errno;
 #  include <sys/cygwin.h>
 #endif
 
-static char *bash_special_tilde_expansions __P((char *));
-static int unquoted_tilde_word __P((const char *));
-static void initialize_group_array __P((void));
+static char *bash_special_tilde_expansions PARAMS((char *));
+static int unquoted_tilde_word PARAMS((const char *));
+static void initialize_group_array PARAMS((void));
 
 /* A standard error message to use when getcwd() returns NULL. */
 const char * const bash_getcwd_errstr = N_("getcwd: cannot access parent directories");
@@ -1039,7 +1039,7 @@ extract_colon_unit (string, p_index)
 /* **************************************************************** */
 
 #if defined (PUSHD_AND_POPD)
-extern char *get_dirstack_from_string __P((char *));
+extern char *get_dirstack_from_string PARAMS((char *));
 #endif
 
 static char **bash_tilde_prefixes;

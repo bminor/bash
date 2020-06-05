@@ -1,7 +1,7 @@
 /* command.h -- The structures used internally to represent commands, and
    the extern declarations of the functions used to create them. */
 
-/* Copyright (C) 1993-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -395,13 +395,13 @@ extern Coproc sh_coproc;
 
 /* Forward declarations of functions declared in copy_cmd.c. */
 
-extern FUNCTION_DEF *copy_function_def_contents __P((FUNCTION_DEF *, FUNCTION_DEF *));
-extern FUNCTION_DEF *copy_function_def __P((FUNCTION_DEF *));
+extern FUNCTION_DEF *copy_function_def_contents PARAMS((FUNCTION_DEF *, FUNCTION_DEF *));
+extern FUNCTION_DEF *copy_function_def PARAMS((FUNCTION_DEF *));
 
-extern WORD_DESC *copy_word __P((WORD_DESC *));
-extern WORD_LIST *copy_word_list __P((WORD_LIST *));
-extern REDIRECT *copy_redirect __P((REDIRECT *));
-extern REDIRECT *copy_redirects __P((REDIRECT *));
-extern COMMAND *copy_command __P((COMMAND *));
+extern WORD_DESC *copy_word PARAMS((WORD_DESC *));
+extern WORD_LIST *copy_word_list PARAMS((WORD_LIST *));
+extern REDIRECT *copy_redirect PARAMS((REDIRECT *));
+extern REDIRECT *copy_redirects PARAMS((REDIRECT *));
+extern COMMAND *copy_command PARAMS((COMMAND *));
 
 #endif /* _COMMAND_H_ */

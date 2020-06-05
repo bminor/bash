@@ -1,6 +1,6 @@
 /* shell.h -- The data structures used by the shell */
 
-/* Copyright (C) 1993-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -220,10 +220,10 @@ typedef struct _sh_input_line_state_t {
 } sh_input_line_state_t;
 
 /* Let's try declaring these here. */
-extern char *parser_remaining_input __P((void));
+extern char *parser_remaining_input PARAMS((void));
 
-extern sh_parser_state_t *save_parser_state __P((sh_parser_state_t *));
-extern void restore_parser_state __P((sh_parser_state_t *));
+extern sh_parser_state_t *save_parser_state PARAMS((sh_parser_state_t *));
+extern void restore_parser_state PARAMS((sh_parser_state_t *));
 
-extern sh_input_line_state_t *save_input_line_state __P((sh_input_line_state_t *));
-extern void restore_input_line_state __P((sh_input_line_state_t *));
+extern sh_input_line_state_t *save_input_line_state PARAMS((sh_input_line_state_t *));
+extern void restore_input_line_state PARAMS((sh_input_line_state_t *));

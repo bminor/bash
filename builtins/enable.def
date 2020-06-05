@@ -1,7 +1,7 @@
 This file is enable.def, from which is created enable.c.
 It implements the builtin "enable" in Bash.
 
-Copyright (C) 1987-2016 Free Software Foundation, Inc.
+Copyright (C) 1987-2020 Free Software Foundation, Inc. 
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -84,13 +84,13 @@ $END
 #define SFLAG	0x20
 
 #if defined (HAVE_DLOPEN) && defined (HAVE_DLSYM)
-static int dyn_load_builtin __P((WORD_LIST *, int, char *));
+static int dyn_load_builtin PARAMS((WORD_LIST *, int, char *));
 #endif
 
 #if defined (HAVE_DLCLOSE)
-static int dyn_unload_builtin __P((char *));
-static void delete_builtin __P((struct builtin *));
-static int local_dlclose __P((void *));
+static int dyn_unload_builtin PARAMS((char *));
+static void delete_builtin PARAMS((struct builtin *));
+static int local_dlclose PARAMS((void *));
 #endif
 
 #define STRUCT_SUFFIX	"_struct"
@@ -98,8 +98,8 @@ static int local_dlclose __P((void *));
 #define LOAD_SUFFIX	"_builtin_load"
 #define UNLOAD_SUFFIX	"_builtin_unload"
 
-static void list_some_builtins __P((int));
-static int enable_shell_command __P((char *, int));
+static void list_some_builtins PARAMS((int));
+static int enable_shell_command PARAMS((char *, int));
 
 /* Enable/disable shell commands present in LIST.  If list is not specified,
    then print out a list of shell commands showing which are enabled and

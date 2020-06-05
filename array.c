@@ -61,7 +61,7 @@
 		ae->next = new; \
 	} while (0)
 
-static char *array_to_string_internal __P((ARRAY_ELEMENT *, ARRAY_ELEMENT *, char *, int));
+static char *array_to_string_internal PARAMS((ARRAY_ELEMENT *, ARRAY_ELEMENT *, char *, int));
 
 static char *spacesep = " ";
 

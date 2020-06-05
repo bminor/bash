@@ -1,7 +1,7 @@
 This file is help.def, from which is created help.c.
 It implements the builtin "help" in Bash.
 
-Copyright (C) 1987-2019 Free Software Foundation, Inc.
+Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -79,11 +79,11 @@ extern int errno;
 extern const char * const bash_copyright;
 extern const char * const bash_license;
 
-static void show_builtin_command_help __P((void));
-static int open_helpfile __P((char *));
-static void show_desc __P((char *, int));
-static void show_manpage __P((char *, int));
-static void show_longdoc __P((int));
+static void show_builtin_command_help PARAMS((void));
+static int open_helpfile PARAMS((char *));
+static void show_desc PARAMS((char *, int));
+static void show_manpage PARAMS((char *, int));
+static void show_longdoc PARAMS((int));
 
 /* Print out a list of the known functions in the shell, and what they do.
    If LIST is supplied, print out the list which matches for each pattern

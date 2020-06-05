@@ -1,7 +1,7 @@
 This file is source.def, from which is created source.c.
 It implements the builtins "." and  "source" in Bash.
 
-Copyright (C) 1987-2015 Free Software Foundation, Inc.
+Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -80,7 +80,7 @@ $END
 extern int errno;
 #endif /* !errno */
 
-static void maybe_pop_dollar_vars __P((void));
+static void maybe_pop_dollar_vars PARAMS((void));
 
 /* If non-zero, `.' uses $PATH to look up the script to be sourced. */
 int source_uses_path = 1;

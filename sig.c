@@ -58,7 +58,7 @@
 extern void initialize_siglist ();
 
 #if !defined (JOB_CONTROL)
-extern void initialize_job_signals __P((void));
+extern void initialize_job_signals PARAMS((void));
 #endif
 
 /* Non-zero after SIGINT. */
@@ -92,7 +92,7 @@ int terminate_immediately = 0;
 static SigHandler *old_winch = (SigHandler *)SIG_DFL;
 #endif
 
-static void initialize_shell_signals __P((void));
+static void initialize_shell_signals PARAMS((void));
 
 void
 initialize_signals (reinit)

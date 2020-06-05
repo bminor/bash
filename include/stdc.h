@@ -26,18 +26,8 @@
 
 /* A function can be defined using prototypes and compile on both ANSI C
    and traditional C compilers with something like this:
-	extern char *func __P((char *, char *, int)); */
+	extern char *func PARAMS((char *, char *, int)); */
 
-#if !defined (__P)
-#  if defined (__STDC__) || defined (__GNUC__) || defined (__cplusplus) || defined (PROTOTYPES)
-#    define __P(protos) protos
-#  else 
-#    define __P(protos) ()
-#  endif
-#endif
-
-/* New definition to use, moving away from __P since it's part of a reserved
-   namespace */
 #if !defined (PARAMS)
 #  if defined (__STDC__) || defined (__GNUC__) || defined (__cplusplus) || defined (PROTOTYPES)
 #    define PARAMS(protos) protos

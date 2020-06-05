@@ -1,6 +1,6 @@
 /* unwind_prot.h - Macros and functions for hacking unwind protection. */
 
-/* Copyright (C) 1993-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -21,26 +21,26 @@
 #if !defined (_UNWIND_PROT_H)
 #define _UNWIND_PROT_H
 
-extern void uwp_init __P((void));
+extern void uwp_init PARAMS((void));
 
 /* Run a function without interrupts. */
-extern void begin_unwind_frame __P((char *));
-extern void discard_unwind_frame __P((char *));
-extern void run_unwind_frame __P((char *));
+extern void begin_unwind_frame PARAMS((char *));
+extern void discard_unwind_frame PARAMS((char *));
+extern void run_unwind_frame PARAMS((char *));
 extern void add_unwind_protect (); /* Not portable to arbitrary C99 hosts.  */
-extern void remove_unwind_protect __P((void));
-extern void run_unwind_protects __P((void));
-extern void clear_unwind_protect_list __P((int));
-extern int have_unwind_protects __P((void));
-extern int unwind_protect_tag_on_stack __P((const char *));
-extern void uwp_init __P((void));
+extern void remove_unwind_protect PARAMS((void));
+extern void run_unwind_protects PARAMS((void));
+extern void clear_unwind_protect_list PARAMS((int));
+extern int have_unwind_protects PARAMS((void));
+extern int unwind_protect_tag_on_stack PARAMS((const char *));
+extern void uwp_init PARAMS((void));
 
 /* Define for people who like their code to look a certain way. */
 #define end_unwind_frame()
 
 /* How to protect a variable.  */
 #define unwind_protect_var(X) unwind_protect_mem ((char *)&(X), sizeof (X))
-extern void unwind_protect_mem __P((char *, int));
+extern void unwind_protect_mem PARAMS((char *, int));
 
 /* Backwards compatibility */
 #define unwind_protect_int	unwind_protect_var

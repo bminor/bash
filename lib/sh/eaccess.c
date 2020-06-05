@@ -1,6 +1,6 @@
 /* eaccess.c - eaccess replacement for the shell, plus other access functions. */
 
-/* Copyright (C) 2006-2010 Free Software Foundation, Inc.
+/* Copyright (C) 2006-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -52,10 +52,10 @@ extern int errno;
 #define F_OK 0
 #endif /* R_OK */
 
-static int path_is_devfd __P((const char *));
-static int sh_stataccess __P((const char *, int));
+static int path_is_devfd PARAMS((const char *));
+static int sh_stataccess PARAMS((const char *, int));
 #if HAVE_DECL_SETREGID
-static int sh_euidaccess __P((const char *, int));
+static int sh_euidaccess PARAMS((const char *, int));
 #endif
 
 static int

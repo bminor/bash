@@ -1,7 +1,7 @@
 This file is jobs.def, from which is created jobs.c.
 It implements the builtins "jobs" and "disown" in Bash.
 
-Copyright (C) 1987-2015 Free Software Foundation, Inc.
+Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -68,7 +68,7 @@ $END
 #define JSTATE_RUNNING	0x1
 #define JSTATE_STOPPED	0x2
 
-static int execute_list_with_replacements __P((WORD_LIST *));
+static int execute_list_with_replacements PARAMS((WORD_LIST *));
 
 /* The `jobs' command.  Prints outs a list of active jobs.  If the
    argument `-l' is given, then the process id's are printed also.

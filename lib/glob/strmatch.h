@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2004 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne-Again SHell.
 
@@ -55,10 +55,10 @@
 
 /* Match STRING against the filename pattern PATTERN,
    returning zero if it matches, FNM_NOMATCH if not.  */
-extern int strmatch __P((char *, char *, int));
+extern int strmatch PARAMS((char *, char *, int));
 
 #if HANDLE_MULTIBYTE
-extern int wcsmatch __P((wchar_t *, wchar_t *, int));
+extern int wcsmatch PARAMS((wchar_t *, wchar_t *, int));
 #endif
 
 #endif /* _STRMATCH_H */

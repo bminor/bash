@@ -1,6 +1,6 @@
 /* eval.c -- reading and evaluating commands. */
 
-/* Copyright (C) 1996-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -48,8 +48,8 @@
 #  include "bashhist.h"
 #endif
 
-static void send_pwd_to_eterm __P((void));
-static sighandler alrm_catcher __P((int));
+static void send_pwd_to_eterm PARAMS((void));
+static sighandler alrm_catcher PARAMS((int));
 
 /* Read and execute commands until EOF is reached.  This assumes that
    the input source has already been initialized. */

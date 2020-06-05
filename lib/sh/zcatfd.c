@@ -1,6 +1,6 @@
 /* zcatfd - copy contents of file descriptor to another */
 
-/* Copyright (C) 2002 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -34,8 +34,8 @@
 extern int errno;
 #endif
 
-extern ssize_t zread __P((int, char *, size_t));
-extern int zwrite __P((int, char *, ssize_t));
+extern ssize_t zread PARAMS((int, char *, size_t));
+extern int zwrite PARAMS((int, char *, ssize_t));
 
 /* Dump contents of file descriptor FD to OFD.  FN is the filename for
    error messages (not used right now). */

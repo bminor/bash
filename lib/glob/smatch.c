@@ -1,7 +1,7 @@
 /* strmatch.c -- ksh-like extended pattern matching for the shell and filename
 		globbing. */
 
-/* Copyright (C) 1991-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -287,7 +287,7 @@ is_cclass (c, name)
 #  define STREQ(s1, s2) ((wcscmp (s1, s2) == 0))
 #  define STREQN(a, b, n) ((a)[0] == (b)[0] && wcsncmp(a, b, n) == 0)
 
-extern char *mbsmbchar __P((const char *));
+extern char *mbsmbchar PARAMS((const char *));
 
 #if FNMATCH_EQUIV_FALLBACK
 /* We don't include <fnmatch.h> in order to avoid namespace collisions; the

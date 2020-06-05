@@ -1,6 +1,6 @@
 /* pcomplib.c - library functions for programmable completion. */
 
-/* Copyright (C) 1999-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -43,7 +43,7 @@
 
 HASH_TABLE *prog_completes = (HASH_TABLE *)NULL;
 
-static void free_progcomp __P((PTR_T));
+static void free_progcomp PARAMS((PTR_T));
 
 COMPSPEC *
 compspec_create ()

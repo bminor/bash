@@ -2,7 +2,7 @@
  * tmpfile.c - functions to create and safely open temp files for the shell.
  */
 
-/* Copyright (C) 2000-2019 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -54,8 +54,8 @@ extern int errno;
 
 extern pid_t dollar_dollar_pid;
 
-static char *get_sys_tmpdir __P((void));
-static char *get_tmpdir __P((int));
+static char *get_sys_tmpdir PARAMS((void));
+static char *get_tmpdir PARAMS((int));
 
 static char *sys_tmpdir = (char *)NULL;
 static int ntmpfiles;

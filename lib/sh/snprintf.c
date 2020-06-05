@@ -9,7 +9,7 @@
    Unix snprintf implementation.
    derived from inetutils/libinetutils/snprintf.c Version 1.1
 
-   Copyright (C) 2001,2006,2010,2012 Free Software Foundation, Inc.
+   Copyright (C) 2001-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -129,8 +129,8 @@
 #  define FL_ADDBASE    0x02    /* add base# prefix to converted value */
 #  define FL_HEXUPPER   0x04    /* use uppercase when converting to hex */
 #  define FL_UNSIGNED   0x08    /* don't add any sign */
-extern char *fmtulong __P((unsigned long int, int, char *, size_t, int));
-extern char *fmtullong __P((unsigned long long int, int, char *, size_t, int));
+extern char *fmtulong PARAMS((unsigned long int, int, char *, size_t, int));
+extern char *fmtullong PARAMS((unsigned long long int, int, char *, size_t, int));
 #endif
 
 #ifndef FREE
@@ -271,38 +271,38 @@ struct DATA
 
 /* the floating point stuff */
 #ifdef FLOATING_POINT
-static double pow_10 __P((int));
-static int log_10 __P((double));
-static double integral __P((double, double *));
-static char *numtoa __P((double, int, int, char **));
+static double pow_10 PARAMS((int));
+static int log_10 PARAMS((double));
+static double integral PARAMS((double, double *));
+static char *numtoa PARAMS((double, int, int, char **));
 #endif
 
-static void init_data __P((struct DATA *, char *, size_t, const char *, int));
-static void init_conv_flag __P((struct DATA *));
+static void init_data PARAMS((struct DATA *, char *, size_t, const char *, int));
+static void init_conv_flag PARAMS((struct DATA *));
 
 /* for the format */
 #ifdef FLOATING_POINT
-static void floating __P((struct DATA *, double));
-static void exponent __P((struct DATA *, double));
+static void floating PARAMS((struct DATA *, double));
+static void exponent PARAMS((struct DATA *, double));
 #endif
-static void number __P((struct DATA *, unsigned long, int));
+static void number PARAMS((struct DATA *, unsigned long, int));
 #ifdef HAVE_LONG_LONG
-static void lnumber __P((struct DATA *, unsigned long long, int));
+static void lnumber PARAMS((struct DATA *, unsigned long long, int));
 #endif
-static void pointer __P((struct DATA *, unsigned long));
-static void strings __P((struct DATA *, char *));
+static void pointer PARAMS((struct DATA *, unsigned long));
+static void strings PARAMS((struct DATA *, char *));
 
 #ifdef FLOATING_POINT
 #  define FALLBACK_FMTSIZE	32
 #  define FALLBACK_BASE		4096
 #  define LFALLBACK_BASE	5120
 #  ifdef HAVE_LONG_DOUBLE
-static void ldfallback __P((struct DATA *, const char *, const char *, long double));
+static void ldfallback PARAMS((struct DATA *, const char *, const char *, long double));
 #  endif
-static void dfallback __P((struct DATA *, const char *, const char *, double));
+static void dfallback PARAMS((struct DATA *, const char *, const char *, double));
 #endif
 
-static char *groupnum __P((char *));
+static char *groupnum PARAMS((char *));
 
 #if defined (HAVE_LONG_DOUBLE)
 #  define LONGDOUBLE long double
@@ -332,9 +332,9 @@ static char *groupnum __P((char *));
 
 #ifdef DRIVER
 static void memory_error_and_abort ();
-static void *xmalloc __P((size_t));
-static void *xrealloc __P((void *, size_t));
-static void xfree __P((void *));
+static void *xmalloc PARAMS((size_t));
+static void *xrealloc PARAMS((void *, size_t));
+static void xfree PARAMS((void *));
 #else
 #  include <xmalloc.h>
 #endif

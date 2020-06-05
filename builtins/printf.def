@@ -1,7 +1,7 @@
 This file is printf.def, from which is created printf.c.
 It implements the builtin "printf" in Bash.
 
-Copyright (C) 1997-2017 Free Software Foundation, Inc.
+Copyright (C) 1997-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -187,25 +187,25 @@ extern int errno;
 extern time_t shell_start_time;
 
 #if !HAVE_ASPRINTF
-extern int asprintf __P((char **, const char *, ...)) __attribute__((__format__ (printf, 2, 3)));
+extern int asprintf PARAMS((char **, const char *, ...)) __attribute__((__format__ (printf, 2, 3)));
 #endif
 
 #if !HAVE_VSNPRINTF
-extern int vsnprintf __P((char *, size_t, const char *, va_list)) __attribute__((__format__ (printf, 3, 0)));
+extern int vsnprintf PARAMS((char *, size_t, const char *, va_list)) __attribute__((__format__ (printf, 3, 0)));
 #endif
 
-static void printf_erange __P((char *));
-static int printstr __P((char *, char *, int, int, int));
-static int tescape __P((char *, char *, int *, int *));
-static char *bexpand __P((char *, int, int *, int *));
-static char *vbadd __P((char *, int));
-static int vbprintf __P((const char *, ...)) __attribute__((__format__ (printf, 1, 2)));
-static char *mklong __P((char *, char *, size_t));
-static int getchr __P((void));
-static char *getstr __P((void));
-static int  getint __P((void));
-static intmax_t getintmax __P((void));
-static uintmax_t getuintmax __P((void));
+static void printf_erange PARAMS((char *));
+static int printstr PARAMS((char *, char *, int, int, int));
+static int tescape PARAMS((char *, char *, int *, int *));
+static char *bexpand PARAMS((char *, int, int *, int *));
+static char *vbadd PARAMS((char *, int));
+static int vbprintf PARAMS((const char *, ...)) __attribute__((__format__ (printf, 1, 2)));
+static char *mklong PARAMS((char *, char *, size_t));
+static int getchr PARAMS((void));
+static char *getstr PARAMS((void));
+static int  getint PARAMS((void));
+static intmax_t getintmax PARAMS((void));
+static uintmax_t getuintmax PARAMS((void));
 
 #if defined (HAVE_LONG_DOUBLE) && HAVE_DECL_STRTOLD && !defined(STRTOLD_BROKEN)
 typedef long double floatmax_t;
@@ -216,9 +216,9 @@ typedef double floatmax_t;
 #  define FLOATMAX_CONV	""
 #  define strtofltmax	strtod
 #endif
-static floatmax_t getfloatmax __P((void));
+static floatmax_t getfloatmax PARAMS((void));
 
-static intmax_t asciicode __P((void));
+static intmax_t asciicode PARAMS((void));
 
 static WORD_LIST *garglist, *orig_arglist;
 static int retval;

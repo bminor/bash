@@ -3,7 +3,7 @@
 /* See Makefile for compilation details. */
 
 /*
-   Copyright (C) 1999-2009 Free Software Foundation, Inc.
+   Copyright (C) 1999-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -42,7 +42,7 @@
 extern int errno;
 #endif
 
-typedef int unix_link_syscall_t __P((const char *, const char *));
+typedef int unix_link_syscall_t PARAMS((const char *, const char *));
 
 #define LN_SYMLINK 0x01
 #define LN_UNLINK  0x02

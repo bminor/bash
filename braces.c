@@ -1,6 +1,6 @@
 /* braces.c -- code for doing word expansion in curly braces. */
 
-/* Copyright (C) 1987-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -59,7 +59,7 @@ extern int errno;
 
 #define BRACE_SEQ_SPECIFIER	".."
 
-extern int asprintf __P((char **, const char *, ...)) __attribute__((__format__ (printf, 2, 3)));
+extern int asprintf PARAMS((char **, const char *, ...)) __attribute__((__format__ (printf, 2, 3)));
 
 /* Basic idea:
 
@@ -73,12 +73,12 @@ extern int asprintf __P((char **, const char *, ...)) __attribute__((__format__ 
 /* The character which is used to separate arguments. */
 static const int brace_arg_separator = ',';
 
-#if defined (__P)
-static int brace_gobbler __P((char *, size_t, int *, int));
-static char **expand_amble __P((char *, size_t, int));
-static char **expand_seqterm __P((char *, size_t));
-static char **mkseq __P((intmax_t, intmax_t, intmax_t, int, int));
-static char **array_concat __P((char **, char **));
+#if defined (PARAMS)
+static int brace_gobbler PARAMS((char *, size_t, int *, int));
+static char **expand_amble PARAMS((char *, size_t, int));
+static char **expand_seqterm PARAMS((char *, size_t));
+static char **mkseq PARAMS((intmax_t, intmax_t, intmax_t, int, int));
+static char **array_concat PARAMS((char **, char **));
 #else
 static int brace_gobbler ();
 static char **expand_amble ();

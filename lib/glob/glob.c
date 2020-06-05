@@ -1,6 +1,6 @@
 /* glob.c -- file-name wildcard pattern matching for Bash.
 
-   Copyright (C) 1985-2019 Free Software Foundation, Inc.
+   Copyright (C) 1985-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne-Again SHell.
    
@@ -84,11 +84,11 @@ struct globval
     char *name;
   };
 
-extern void throw_to_top_level __P((void));
-extern int sh_eaccess __P((const char *, int));
-extern char *sh_makepath __P((const char *, const char *, int));
-extern int signal_is_pending __P((int));
-extern void run_pending_traps __P((void));
+extern void throw_to_top_level PARAMS((void));
+extern int sh_eaccess PARAMS((const char *, int));
+extern char *sh_makepath PARAMS((const char *, const char *, int));
+extern int signal_is_pending PARAMS((int));
+extern void run_pending_traps PARAMS((void));
 
 extern int extended_glob;
 
@@ -111,29 +111,29 @@ char *glob_error_return;
 static struct globval finddirs_error_return;
 
 /* Some forward declarations. */
-static int skipname __P((char *, char *, int));
+static int skipname PARAMS((char *, char *, int));
 #if HANDLE_MULTIBYTE
-static int mbskipname __P((char *, char *, int));
+static int mbskipname PARAMS((char *, char *, int));
 #endif
-void udequote_pathname __P((char *));
+void udequote_pathname PARAMS((char *));
 #if HANDLE_MULTIBYTE
-void wcdequote_pathname __P((wchar_t *));
-static void wdequote_pathname __P((char *));
+void wcdequote_pathname PARAMS((wchar_t *));
+static void wdequote_pathname PARAMS((char *));
 #else
 #  define dequote_pathname udequote_pathname
 #endif
-static void dequote_pathname __P((char *));
-static int glob_testdir __P((char *, int));
-static char **glob_dir_to_array __P((char *, char **, int));
+static void dequote_pathname PARAMS((char *));
+static int glob_testdir PARAMS((char *, int));
+static char **glob_dir_to_array PARAMS((char *, char **, int));
 
 /* Make sure these names continue to agree with what's in smatch.c */
-extern char *glob_patscan __P((char *, char *, int));
-extern wchar_t *glob_patscan_wc __P((wchar_t *, wchar_t *, int));
+extern char *glob_patscan PARAMS((char *, char *, int));
+extern wchar_t *glob_patscan_wc PARAMS((wchar_t *, wchar_t *, int));
 
 /* And this from gmisc.c/gm_loop.c */
-extern int wextglob_pattern_p __P((wchar_t *));
+extern int wextglob_pattern_p PARAMS((wchar_t *));
 
-extern char *glob_dirscan __P((char *, int));
+extern char *glob_dirscan PARAMS((char *, int));
 
 /* Compile `glob_loop.c' for single-byte characters. */
 #define GCHAR	unsigned char

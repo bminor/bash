@@ -1,6 +1,6 @@
 /* imalloc.h -- internal malloc definitions shared by source files. */
 
-/* Copyright (C) 2001-2003 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -67,11 +67,11 @@
 #  endif /* HAVE_BCOPY */
 #endif /* !__GNUC__ */
 
-#if !defined (__P)
+#if !defined (PARAMS)
 #  if defined (__STDC__) || defined (__GNUC__) || defined (__cplusplus) || defined (PROTOTYPES)
-#    define __P(protos) protos
+#    define PARAMS(protos) protos
 #  else 
-#    define __P(protos) ()
+#    define PARAMS(protos) ()
 #  endif
 #endif
 
@@ -167,7 +167,7 @@ do {									\
 
 #include <signal.h>
 
-extern void _malloc_block_signals __P((sigset_t *, sigset_t *));
-extern void _malloc_unblock_signals __P((sigset_t *, sigset_t *));
+extern void _malloc_block_signals PARAMS((sigset_t *, sigset_t *));
+extern void _malloc_unblock_signals PARAMS((sigset_t *, sigset_t *));
 
 #endif /* _IMALLOC_H */

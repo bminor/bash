@@ -1,6 +1,6 @@
 /* stats.c - malloc statistics */
 
-/*  Copyright (C) 2001-2003 Free Software Foundation, Inc.
+/*  Copyright (C) 2001-2020 Free Software Foundation, Inc.
 
     This file is part of GNU Bash, the Bourne-Again SHell.
 
@@ -34,13 +34,13 @@
 
 #include "mstats.h"
 
-extern int malloc_free_blocks __P((int));
+extern int malloc_free_blocks PARAMS((int));
 
 extern int malloc_mmap_threshold;
 
 extern struct _malstats _mstats;
 
-extern FILE *_imalloc_fopen __P((char *, char *, char *, char *, size_t));
+extern FILE *_imalloc_fopen PARAMS((char *, char *, char *, char *, size_t));
 
 struct bucket_stats
 malloc_bucket_stats (size)

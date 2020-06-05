@@ -1,7 +1,7 @@
 This file is pushd.def, from which is created pushd.c.  It implements the
 builtins "pushd", "popd", and "dirs" in Bash.
 
-Copyright (C) 1987-2015 Free Software Foundation, Inc.
+Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -157,12 +157,12 @@ static int directory_list_size;
 /* Offset to the end of the list. */
 static int directory_list_offset;
 
-static void pushd_error __P((int, char *));
-static void clear_directory_stack __P((void));
-static int cd_to_string __P((char *));
-static int change_to_temp __P((char *));
-static void add_dirstack_element __P((char *));
-static int get_dirstack_index __P((intmax_t, int, int *));
+static void pushd_error PARAMS((int, char *));
+static void clear_directory_stack PARAMS((void));
+static int cd_to_string PARAMS((char *));
+static int change_to_temp PARAMS((char *));
+static void add_dirstack_element PARAMS((char *));
+static int get_dirstack_index PARAMS((intmax_t, int, int *));
 
 #define NOCD		0x01
 #define ROTATE		0x02

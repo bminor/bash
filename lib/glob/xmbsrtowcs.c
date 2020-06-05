@@ -1,6 +1,6 @@
 /* xmbsrtowcs.c -- replacement function for mbsrtowcs */
 
-/* Copyright (C) 2002-2019 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -47,7 +47,7 @@ extern int errno;
 #endif
 
 #if ! HAVE_STRCHRNUL
-extern char *strchrnul __P((const char *, int));
+extern char *strchrnul PARAMS((const char *, int));
 #endif
 
 /* On some locales (ex. ja_JP.sjis), mbsrtowc doesn't convert 0x5c to U<0x5c>.

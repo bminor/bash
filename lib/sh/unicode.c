@@ -1,6 +1,6 @@
 /* unicode.c - functions to convert unicode characters */
 
-/* Copyright (C) 2010-2019 Free Software Foundation, Inc.
+/* Copyright (C) 2010-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -50,9 +50,9 @@
 #endif /* !STREQ */
 
 #if defined (HAVE_LOCALE_CHARSET)
-extern const char *locale_charset __P((void));
+extern const char *locale_charset PARAMS((void));
 #else
-extern char *get_locale_var __P((char *));
+extern char *get_locale_var PARAMS((char *));
 #endif
 
 extern int locale_utf8locale;

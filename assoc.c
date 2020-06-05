@@ -44,7 +44,7 @@
 #include "assoc.h"
 #include "builtins/common.h"
 
-static WORD_LIST *assoc_to_word_list_internal __P((HASH_TABLE *, int));
+static WORD_LIST *assoc_to_word_list_internal PARAMS((HASH_TABLE *, int));
 
 /* assoc_create == hash_create */
 

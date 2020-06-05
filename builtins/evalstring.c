@@ -1,6 +1,6 @@
 /* evalstring.c - evaluate a string as one or more shell commands. */
 
-/* Copyright (C) 1996-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -63,7 +63,7 @@ extern int errno;
 
 int parse_and_execute_level = 0;
 
-static int cat_file __P((REDIRECT *));
+static int cat_file PARAMS((REDIRECT *));
 
 #define PE_TAG "parse_and_execute top"
 #define PS_TAG "parse_string top"

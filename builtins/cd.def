@@ -1,7 +1,7 @@
 This file is cd.def, from which is created cd.c.  It implements the
 builtins "cd" and "pwd" in Bash.
 
-Copyright (C) 1987-2016 Free Software Foundation, Inc.
+Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -56,13 +56,13 @@ extern int errno;
 
 extern const char * const bash_getcwd_errstr;
 
-static int bindpwd __P((int));
-static int setpwd __P((char *));
-static char *resetpwd __P((char *));
-static int change_to_directory __P((char *, int, int));
+static int bindpwd PARAMS((int));
+static int setpwd PARAMS((char *));
+static char *resetpwd PARAMS((char *));
+static int change_to_directory PARAMS((char *, int, int));
 
-static int cdxattr __P((char *, char **));
-static void resetxattr __P((void));
+static int cdxattr PARAMS((char *, char **));
+static void resetxattr PARAMS((void));
 
 /* Change this to 1 to get cd spelling correction by default. */
 int cdspelling = 0;

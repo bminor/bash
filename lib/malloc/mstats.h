@@ -1,6 +1,6 @@
 /* mstats.h - definitions for malloc statistics */
 
-/*  Copyright (C) 2001-2003 Free Software Foundation, Inc.
+/*  Copyright (C) 2001-2020 Free Software Foundation, Inc.
 
     This file is part of GNU Bash, the Bourne-Again SHell.
 
@@ -104,10 +104,10 @@ struct bucket_stats {
   int nmmap;		/* currently unused */
 };
 
-extern struct bucket_stats malloc_bucket_stats __P((int));
-extern struct _malstats malloc_stats __P((void));
-extern void print_malloc_stats __P((char *));
-extern void trace_malloc_stats __P((char *, char *));
+extern struct bucket_stats malloc_bucket_stats PARAMS((int));
+extern struct _malstats malloc_stats PARAMS((void));
+extern void print_malloc_stats PARAMS((char *));
+extern void trace_malloc_stats PARAMS((char *, char *));
 
 #endif /* MALLOC_STATS */
 

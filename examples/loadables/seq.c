@@ -1,5 +1,5 @@
 /* seq - print sequence of numbers to standard output.
-   Copyright (C) 2018 Free Software Foundation, Inc.
+   Copyright (C) 2018-2020 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -49,8 +49,8 @@ typedef double floatmax_t;
 #  define FLOATMAX_FMT "%g"
 #  define FLOATMAX_WFMT "%0.f"
 #endif
-static floatmax_t getfloatmax __P((const char *));
-static char *genformat __P((floatmax_t, floatmax_t, floatmax_t));
+static floatmax_t getfloatmax PARAMS((const char *));
+static char *genformat PARAMS((floatmax_t, floatmax_t, floatmax_t));
 
 #define MAX(a, b) (((a) < (b))? (b) : (a))
 

@@ -1,6 +1,6 @@
 /* pathphys.c -- return pathname with all symlinks expanded. */
 
-/* Copyright (C) 2000 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -46,7 +46,7 @@
 extern int errno;
 #endif /* !errno */
 
-extern char *get_working_directory __P((char *));
+extern char *get_working_directory PARAMS((char *));
 
 static int
 _path_readlink (path, buf, bufsiz)

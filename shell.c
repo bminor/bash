@@ -62,8 +62,8 @@
 #include "jobs.h"
 #else
 extern int running_in_background;
-extern int initialize_job_control __P((int));
-extern int get_tty_state __P((void));
+extern int initialize_job_control PARAMS((int));
+extern int get_tty_state PARAMS((void));
 #endif /* JOB_CONTROL */
 
 #include "input.h"

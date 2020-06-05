@@ -1,7 +1,7 @@
 This file is read.def, from which is created read.c.
 It implements the builtin "read" in Bash.
 
-Copyright (C) 1987-2019 Free Software Foundation, Inc.
+Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -119,20 +119,20 @@ struct ttsave
 };
 
 #if defined (READLINE)
-static void reset_attempted_completion_function __P((char *));
-static int set_itext __P((void));
-static char *edit_line __P((char *, char *));
-static void set_eol_delim __P((int));
-static void reset_eol_delim __P((char *));
+static void reset_attempted_completion_function PARAMS((char *));
+static int set_itext PARAMS((void));
+static char *edit_line PARAMS((char *, char *));
+static void set_eol_delim PARAMS((int));
+static void reset_eol_delim PARAMS((char *));
 #endif
-static SHELL_VAR *bind_read_variable __P((char *, char *));
+static SHELL_VAR *bind_read_variable PARAMS((char *, char *));
 #if defined (HANDLE_MULTIBYTE)
-static int read_mbchar __P((int, char *, int, int, int));
+static int read_mbchar PARAMS((int, char *, int, int, int));
 #endif
-static void ttyrestore __P((struct ttsave *));
+static void ttyrestore PARAMS((struct ttsave *));
 
-static sighandler sigalrm __P((int));
-static void reset_alarm __P((void));
+static sighandler sigalrm PARAMS((int));
+static void reset_alarm PARAMS((void));
 
 /* Try this to see what the rest of the shell can do with the information. */
 procenv_t alrmbuf;

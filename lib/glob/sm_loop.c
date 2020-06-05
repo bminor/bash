@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -22,16 +22,16 @@ struct STRUCT
   CHAR *string;
 };
 
-int FCT __P((CHAR *, CHAR *, int));
+int FCT PARAMS((CHAR *, CHAR *, int));
 
-static int GMATCH __P((CHAR *, CHAR *, CHAR *, CHAR *, struct STRUCT *, int));
-static CHAR *PARSE_COLLSYM __P((CHAR *, INT *));
-static CHAR *BRACKMATCH __P((CHAR *, U_CHAR, int));
-static int EXTMATCH __P((INT, CHAR *, CHAR *, CHAR *, CHAR *, int));
+static int GMATCH PARAMS((CHAR *, CHAR *, CHAR *, CHAR *, struct STRUCT *, int));
+static CHAR *PARSE_COLLSYM PARAMS((CHAR *, INT *));
+static CHAR *BRACKMATCH PARAMS((CHAR *, U_CHAR, int));
+static int EXTMATCH PARAMS((INT, CHAR *, CHAR *, CHAR *, CHAR *, int));
 
-extern void DEQUOTE_PATHNAME __P((CHAR *));
+extern void DEQUOTE_PATHNAME PARAMS((CHAR *));
 
-/*static*/ CHAR *PATSCAN __P((CHAR *, CHAR *, INT));
+/*static*/ CHAR *PATSCAN PARAMS((CHAR *, CHAR *, INT));
 
 int
 FCT (pattern, string, flags)

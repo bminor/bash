@@ -1,6 +1,6 @@
 /* gen-helpfiles - create files containing builtin help text */
 
-/* Copyright (C) 2012 Free Software Foundation, Inc.
+/* Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -98,7 +98,7 @@ char *helpfile_directory;
 
 /* Forward declarations. */
 
-int write_helpfiles __P((struct builtin *));
+int write_helpfiles PARAMS((struct builtin *));
 
 /* For each file mentioned on the command line, process it and
    write the information to STRUCTFILE and EXTERNFILE, while

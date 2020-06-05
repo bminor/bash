@@ -52,13 +52,13 @@ extern int errno;
 #endif
 
 /* Static functions defined and used in this file. */
-static char *_find_user_command_internal __P((const char *, int));
-static char *find_user_command_internal __P((const char *, int));
-static char *find_user_command_in_path __P((const char *, char *, int));
-static char *find_in_path_element __P((const char *, char *, int, int, struct stat *));
-static char *find_absolute_program __P((const char *, int));
+static char *_find_user_command_internal PARAMS((const char *, int));
+static char *find_user_command_internal PARAMS((const char *, int));
+static char *find_user_command_in_path PARAMS((const char *, char *, int));
+static char *find_in_path_element PARAMS((const char *, char *, int, int, struct stat *));
+static char *find_absolute_program PARAMS((const char *, int));
 
-static char *get_next_path_element __P((char *, int *));
+static char *get_next_path_element PARAMS((char *, int *));
 
 /* The file name which we would try to execute, except that it isn't
    possible to execute it.  This is the first file that matches the
