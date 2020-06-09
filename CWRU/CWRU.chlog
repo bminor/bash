@@ -8528,3 +8528,27 @@ lib/sh/{lots of files}.c
 include/{lots of files}.h
 examples/loadables/{lots of files}.c
 	- __P -> PARAMS
+
+doc/{bash.1,bashref.texi}
+	- SECONDS: clarify that the number of seconds is always determined by
+	  querying the system clock
+
+				    6/8
+				    ---
+configure.ac
+	- if CFLAGS is not supplied in the environment or on the command line,
+	  add the gcc options that suppress warnings about parens and print
+	  formats in a slightly different way, that will avoid some collisions
+
+lib/readline/readline.c
+	- _rl_dispatch_subseq: don't set rl_last_func to rl_vi_arg_digit, just
+	  the same as if it were rl_digit_argument. This allows functions like
+	  rl_yank_last_arg, which behave differently when called multiple times
+	  in a row, to work closer to what is expected. This allows what
+	  Leo Alekseyev <dnquark@gmail.com> reported to work, with caveats
+
+lib/readline/vi_mode.c
+	- rl_vi_yank_arg: make sure to pass `key' to rl_yank_nth_arg, in case
+	  it needs to use it later
+	- rl_vi_redo: suppress attempts to redo `.' when the current keymap is
+	  vi_movement_keymap, since that will recursively call vi_redo

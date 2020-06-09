@@ -890,7 +890,11 @@ _rl_dispatch_subseq (register int key, Keymap map, int got_subseq)
 	  /* If we have input pending, then the last command was a prefix
 	     command.  Don't change the state of rl_last_func.  Otherwise,
 	     remember the last command executed in this variable. */
+#if defined (VI_MODE)
+	  if (rl_pending_input == 0 && map[key].function != rl_digit_argument && map[key].function != rl_vi_arg_digit)
+#else
 	  if (rl_pending_input == 0 && map[key].function != rl_digit_argument)
+#endif
 	    rl_last_func = map[key].function;
 
 	  RL_CHECK_SIGNALS ();

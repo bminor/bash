@@ -606,7 +606,7 @@ rl_yank_nth_arg_internal (int count, int key, int history_skip)
 #if defined (VI_MODE)
   /* Vi mode always inserts a space before yanking the argument, and it
      inserts it right *after* rl_point. */
-  if (rl_editing_mode == vi_mode)
+  if (rl_editing_mode == vi_mode && _rl_keymap == vi_movement_keymap)
     {
       rl_vi_append_mode (1, key);
       rl_insert_text (" ");

@@ -298,6 +298,11 @@ rl_vi_redo (int count, int c)
       if (rl_point > 0)
 	_rl_vi_backup ();
     }
+  else if (_rl_vi_last_command == '.' && _rl_keymap == vi_movement_keymap)
+    {
+      rl_ding ();
+      r = 0;
+    }
   else
     r = _rl_dispatch (_rl_vi_last_command, _rl_keymap);
 
@@ -320,9 +325,9 @@ rl_vi_yank_arg (int count, int key)
   /* Readline thinks that the first word on a line is the 0th, while vi
      thinks the first word on a line is the 1st.  Compensate. */
   if (rl_explicit_arg)
-    rl_yank_nth_arg (count - 1, 0);
+    rl_yank_nth_arg (count - 1, key);
   else
-    rl_yank_nth_arg ('$', 0);
+    rl_yank_nth_arg ('$', key);
 
   return (0);
 }
