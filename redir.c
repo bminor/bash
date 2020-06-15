@@ -60,6 +60,12 @@ extern int errno;
 
 #include "builtins/pipesize.h"
 
+/* FreeBSD 13 can reliably handle atomic writes at this capacity without
+   hanging. */
+#if __FreeBSD__ && !defined (HEREDOC_PIPESIZE)
+#  define HEREDOC_PIPESIZE 4096
+#endif
+
 /* Normally set by a build process command that computes pipe capacity */
 #ifndef PIPESIZE
 #  ifdef PIPE_BUF

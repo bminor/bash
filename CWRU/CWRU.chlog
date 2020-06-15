@@ -8538,7 +8538,7 @@ doc/{bash.1,bashref.texi}
 configure.ac
 	- if CFLAGS is not supplied in the environment or on the command line,
 	  add the gcc options that suppress warnings about parens and print
-	  formats in a slightly different way, that will avoid some collisions
+	  formats in a slightly different way that will avoid some collisions
 
 lib/readline/readline.c
 	- _rl_dispatch_subseq: don't set rl_last_func to rl_vi_arg_digit, just
@@ -8552,3 +8552,17 @@ lib/readline/vi_mode.c
 	  it needs to use it later
 	- rl_vi_redo: suppress attempts to redo `.' when the current keymap is
 	  vi_movement_keymap, since that will recursively call vi_redo
+
+				   6/11
+				   ----
+redir.c
+	- limit HEREDOC_PIPESIZE to 4096 on FreeBSD; that is where it can
+	  handle atomic writes without hanging. Tested on FreeBSD 13
+
+				   6/15
+				   ----
+subst.c
+	- do_assignment_internal: call stupidly_hack_special_variables on the
+	  name returned from the variable assignment, in case there was a
+	  nameref expansion, and on the original name only if the assignment
+	  returned NULL. Fixes bug reported by James D. Lin <jamesdlin@gmail.com>

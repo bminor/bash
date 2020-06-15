@@ -60,7 +60,7 @@ mailstat(path, st)
   struct stat st_ret, st_tmp;
   DIR *dd;
   struct dirent *fn;
-  char dir[PATH_MAX * 2], file[PATH_MAX * 2];
+  char dir[PATH_MAX * 2], file[PATH_MAX * 2 + 1];
   int i, l;
   time_t atime, mtime;
 

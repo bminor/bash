@@ -226,12 +226,12 @@ typedef union _malloc_guard {
 
 /* Should we use mmap for large allocations? */
 #if defined (HAVE_MMAP)
-#  if !defined (MAP_ANON) && defined (MAP_ANONYMOUS)
-#    define MAP_ANON MAP_ANONYMOUS
+#  if defined (MAP_ANON) && !defined (MAP_ANONYMOUS)
+#    define MAP_ANONYMOUS MAP_ANON
 #  endif
 #endif
 
-#if defined (HAVE_MMAP) && defined (MAP_ANON)
+#if defined (HAVE_MMAP) && defined (MAP_ANONYMOUS)
 #  define USE_MMAP
 #endif
 
@@ -929,7 +929,7 @@ internal_malloc (n, file, line, flags)		/* get a block */
   z = (char *) (p + 1);
   /* Check alignment of returned pointer */
   if ((unsigned long)z & MALIGN_MASK)
-    fprintf (stderr, "malloc: %s:%d: warning: request for %ld bytes not aligned on %d byte boundary\r\n",
+    fprintf (stderr, "malloc: %s:%d: warning: request for %d bytes not aligned on %d byte boundary\r\n",
 	file ? file : _("unknown"), line, p->mh_nbytes, MALIGN_MASK+1);
 #endif
 

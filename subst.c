@@ -3300,7 +3300,10 @@ do_assignment_internal (word, expand)
 #endif /* ARRAY_VARS */
   entry = bind_variable (name, value, aflags);
 
-  stupidly_hack_special_variables (name);
+  if (entry)
+    stupidly_hack_special_variables (entry->name);	/* might be a nameref */
+  else
+    stupidly_hack_special_variables (name);
 
   /* Return 1 if the assignment seems to have been performed correctly. */
   if (entry == 0 || readonly_p (entry))

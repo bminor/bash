@@ -514,6 +514,7 @@ trap_handler (sig)
 
 int
 next_pending_trap (start)
+     int start;
 {
   register int i;
 
