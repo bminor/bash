@@ -8,90 +8,95 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU bash 4.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-19 15:52-0500\n"
+"POT-Creation-Date: 2020-05-20 11:28-0400\n"
 "PO-Revision-Date: 2017-07-02 01:46+0100\n"
 "Last-Translator: Yasuaki Taniguchi <yasuakit@gmail.com>\n"
 "Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
+"Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: ja\n"
 "X-Bugs: Report translation errors to the Language-Team address.\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Poedit 2.0.2\n"
 
-#: arrayfunc.c:58
+#: arrayfunc.c:66
 msgid "bad array subscript"
 msgstr "誤った配列の添字"
 
-#: arrayfunc.c:377 builtins/declare.def:638 variables.c:2254 variables.c:2280
-#: variables.c:3108
+#: arrayfunc.c:421 builtins/declare.def:638 variables.c:2452 variables.c:2478
+#: variables.c:3311
 #, c-format
 msgid "%s: removing nameref attribute"
 msgstr ""
 
-#: arrayfunc.c:402 builtins/declare.def:851
+#: arrayfunc.c:446 builtins/declare.def:851
 #, c-format
 msgid "%s: cannot convert indexed to associative array"
 msgstr "%s: インデックス配列から連想配列に変換することはできません"
 
-#: arrayfunc.c:586
+#: arrayfunc.c:700
 #, c-format
 msgid "%s: invalid associative array key"
 msgstr "%s: 無効な連想配列のキーです"
 
-#: arrayfunc.c:588
+#: arrayfunc.c:702
 #, c-format
 msgid "%s: cannot assign to non-numeric index"
 msgstr "%s: 配列の添字に非数字を設定できません"
 
-#: arrayfunc.c:633
+#: arrayfunc.c:747
 #, c-format
 msgid "%s: %s: must use subscript when assigning associative array"
 msgstr "%s: %s: 連想配列を設定するときには添字をつけなければいけません"
 
-#: bashhist.c:451
+#: bashhist.c:452
 #, c-format
 msgid "%s: cannot create: %s"
 msgstr "%s: %s を作成できません"
 
-#: bashline.c:4144
+#: bashline.c:4308
 msgid "bash_execute_unix_command: cannot find keymap for command"
 msgstr "bash_execute_unix_command: コマンドのキーマップがありません"
 
-#: bashline.c:4254
+#: bashline.c:4455
 #, c-format
 msgid "%s: first non-whitespace character is not `\"'"
 msgstr "%s: 最初の非空白類文字が `\"' ではありません"
 
-#: bashline.c:4283
+#: bashline.c:4484
 #, c-format
 msgid "no closing `%c' in %s"
 msgstr "閉じる `%c' が %s にありません"
 
-#: bashline.c:4317
+#: bashline.c:4515
 #, c-format
 msgid "%s: missing colon separator"
 msgstr "%s: 区切り文字コロン(:)がありません"
 
-#: braces.c:331
+#: bashline.c:4551
+#, fuzzy, c-format
+msgid "`%s': cannot unbind in command keymap"
+msgstr "`%s': 割り当て解除できません"
+
+#: braces.c:327
 #, c-format
 msgid "brace expansion: cannot allocate memory for %s"
 msgstr "中括弧展開: %s へメモリを割り当てられません"
 
-#: braces.c:429
+#: braces.c:425
 #, fuzzy, c-format
 msgid "brace expansion: failed to allocate memory for %u elements"
 msgstr ""
 "中括弧展開: failed to allocate memory for %d 要素のメモリの割り当てに失敗しま"
 "した"
 
-#: braces.c:474
+#: braces.c:470
 #, c-format
 msgid "brace expansion: failed to allocate memory for `%s'"
 msgstr "中括弧展開: `%s' へのメモリ割り当てに失敗しました"
 
-#: builtins/alias.def:131 variables.c:1842
+#: builtins/alias.def:131 variables.c:2038
 #, c-format
 msgid "`%s': invalid alias name"
 msgstr "`%s': 無効なエイリアス名です"
@@ -110,22 +115,22 @@ msgstr "`%s': 無効なキーマップ名です"
 msgid "%s: cannot read: %s"
 msgstr "%s: %s を読み込めません"
 
-#: builtins/bind.def:304 builtins/bind.def:334
+#: builtins/bind.def:328 builtins/bind.def:358
 #, c-format
 msgid "`%s': unknown function name"
 msgstr "`%s': 不明な関数名です"
 
-#: builtins/bind.def:312
+#: builtins/bind.def:336
 #, c-format
 msgid "%s is not bound to any keys.\n"
 msgstr "%s はどのキーにも割り当てられていません。\n"
 
-#: builtins/bind.def:316
+#: builtins/bind.def:340
 #, c-format
 msgid "%s can be invoked via "
 msgstr "%s は次を通して起動します "
 
-#: builtins/bind.def:353 builtins/bind.def:368
+#: builtins/bind.def:378 builtins/bind.def:395
 #, c-format
 msgid "`%s': cannot unbind"
 msgstr "`%s': 割り当て解除できません"
@@ -139,29 +144,44 @@ msgid "only meaningful in a `for', `while', or `until' loop"
 msgstr "`for'、`while' または `until' ループでのみ意味があります"
 
 #: builtins/caller.def:136
+#, fuzzy
 msgid ""
 "Returns the context of the current subroutine call.\n"
 "    \n"
-"    Without EXPR, returns "
+"    Without EXPR, returns \"$line $filename\".  With EXPR, returns\n"
+"    \"$line $subroutine $filename\"; this extra information can be used to\n"
+"    provide a stack trace.\n"
+"    \n"
+"    The value of EXPR indicates how many call frames to go back before the\n"
+"    current one; the top frame is frame 0."
 msgstr ""
 "現在のサブルーチン呼び出しのコンテキストを返します。\n"
 "    \n"
-"    EXPR が無い場合、次を返します "
+"    EXPR が無い場合 \"$line $filename\" を返します。  EXPR がある場合、\n"
+"    \"$line $subroutine $filename\" を返します。この追加の情報はスタックト"
+"レース\n"
+"    を提供する時に利用します。\n"
+"    \n"
+"    EXPR の値は現在のフレームに戻るまでに何回フレームが呼び出されているかを\n"
+"    意味します。最上位のフレームは 0 です。\n"
+"    \n"
+"    終了ステータス:\n"
+"    シェルが関数を実行できないか式 EXPR が無効な場合を除き 0 を返します。"
 
-#: builtins/cd.def:326
+#: builtins/cd.def:327
 msgid "HOME not set"
 msgstr "HOME が設定されていません"
 
-#: builtins/cd.def:334 builtins/common.c:161 test.c:891
+#: builtins/cd.def:335 builtins/common.c:161 test.c:898
 msgid "too many arguments"
 msgstr "引数が多すぎます"
 
-#: builtins/cd.def:341
+#: builtins/cd.def:342
 #, fuzzy
 msgid "null directory"
 msgstr "他のディレクトリはありません"
 
-#: builtins/cd.def:352
+#: builtins/cd.def:353
 msgid "OLDPWD not set"
 msgstr "OLDPWD が設定されていません"
 
@@ -180,7 +200,7 @@ msgstr "警告: "
 msgid "%s: usage: "
 msgstr "%s: 使用法: "
 
-#: builtins/common.c:193 shell.c:510 shell.c:838
+#: builtins/common.c:193 shell.c:513 shell.c:841
 #, c-format
 msgid "%s: option requires an argument"
 msgstr "%s: オプションには引数が必要です"
@@ -195,7 +215,7 @@ msgstr "%s: 数字の引数が必要です"
 msgid "%s: not found"
 msgstr "%s: 見つかりません"
 
-#: builtins/common.c:216 shell.c:851
+#: builtins/common.c:216 shell.c:854
 #, c-format
 msgid "%s: invalid option"
 msgstr "%s: 無効なオプションです"
@@ -205,7 +225,7 @@ msgstr "%s: 無効なオプションです"
 msgid "%s: invalid option name"
 msgstr "%s: 無効なオプション名です"
 
-#: builtins/common.c:230 execute_cmd.c:2372 general.c:352 general.c:357
+#: builtins/common.c:230 execute_cmd.c:2351 general.c:368 general.c:373
 #, c-format
 msgid "`%s': not a valid identifier"
 msgstr "`%s': 有効な識別子ではありません"
@@ -218,7 +238,7 @@ msgstr "無効な八進数です"
 msgid "invalid hex number"
 msgstr "無効な十六進数です"
 
-#: builtins/common.c:244 expr.c:1564
+#: builtins/common.c:244 expr.c:1568
 msgid "invalid number"
 msgstr "無効な数字です"
 
@@ -294,73 +314,83 @@ msgstr "ターミナル属性の設定時にエラーが発生しました : %s"
 msgid "error getting terminal attributes: %s"
 msgstr "ターミナル属性の取得時にエラーが発生しました : %s"
 
-#: builtins/common.c:579
+#: builtins/common.c:635
 #, c-format
 msgid "%s: error retrieving current directory: %s: %s\n"
 msgstr "%s: カレントディレクトリの取得時にエラーが発生しました : %s: %s\n"
 
-#: builtins/common.c:645 builtins/common.c:647
+#: builtins/common.c:701 builtins/common.c:703
 #, c-format
 msgid "%s: ambiguous job spec"
 msgstr "%s: 曖昧なジョブ指定です"
 
-#: builtins/common.c:908
+#: builtins/common.c:964
 msgid "help not available in this version"
 msgstr "このバージョンではヘルプが利用できません"
 
-#: builtins/complete.def:281
+#: builtins/common.c:1008 builtins/set.def:941 variables.c:4017
+#, c-format
+msgid "%s: cannot unset: readonly %s"
+msgstr "%s: 消去できません: %s は読み取り専用です"
+
+#: builtins/common.c:1013 builtins/set.def:920 variables.c:4022
+#, c-format
+msgid "%s: cannot unset"
+msgstr "%s: 消去できません"
+
+#: builtins/complete.def:282
 #, c-format
 msgid "%s: invalid action name"
 msgstr "%s: 無効なアクション名です"
 
-#: builtins/complete.def:474 builtins/complete.def:679
-#: builtins/complete.def:910
+#: builtins/complete.def:481 builtins/complete.def:686
+#: builtins/complete.def:917
 #, c-format
 msgid "%s: no completion specification"
 msgstr "%s: 補完指定がありません"
 
-#: builtins/complete.def:733
+#: builtins/complete.def:740
 msgid "warning: -F option may not work as you expect"
 msgstr "警告: -F オプションは期待通りに動作しないかもしれません"
 
-#: builtins/complete.def:735
+#: builtins/complete.def:742
 msgid "warning: -C option may not work as you expect"
 msgstr "警告: -C オプションは期待通りに動作しないかもしれません"
 
-#: builtins/complete.def:883
+#: builtins/complete.def:890
 msgid "not currently executing completion function"
 msgstr "補完機能は現在実行されていません"
 
-#: builtins/declare.def:132
+#: builtins/declare.def:134
 msgid "can only be used in a function"
 msgstr "関数の中でのみ使用できます"
 
-#: builtins/declare.def:369 builtins/declare.def:756
+#: builtins/declare.def:363 builtins/declare.def:756
 #, c-format
 msgid "%s: reference variable cannot be an array"
 msgstr "%s: 参照変数は配列であってはいけません"
 
-#: builtins/declare.def:380 variables.c:3363
+#: builtins/declare.def:374 variables.c:3563
 #, c-format
 msgid "%s: nameref variable self references not allowed"
 msgstr "%s: 自身を参照する名前参照変数は許可されていません"
 
-#: builtins/declare.def:385 variables.c:2084 variables.c:3272 variables.c:3285
-#: variables.c:3360
+#: builtins/declare.def:379 variables.c:2282 variables.c:3482 variables.c:3490
+#: variables.c:3560
 #, c-format
 msgid "%s: circular name reference"
 msgstr "%s: 循環名前参照です"
 
-#: builtins/declare.def:390 builtins/declare.def:762 builtins/declare.def:773
+#: builtins/declare.def:384 builtins/declare.def:762 builtins/declare.def:773
 #, c-format
 msgid "`%s': invalid variable name for name reference"
 msgstr "`%s': 名前参照として無効な変数です"
 
-#: builtins/declare.def:520
+#: builtins/declare.def:514
 msgid "cannot use `-f' to make functions"
 msgstr "関数作成時に `-f' を使用できません"
 
-#: builtins/declare.def:532 execute_cmd.c:5852
+#: builtins/declare.def:526 execute_cmd.c:5862
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: 読み取り専用関数です"
@@ -375,7 +405,7 @@ msgstr ""
 msgid "%s: cannot destroy array variables in this way"
 msgstr "%s: この方法で配列変数を消去することはできません"
 
-#: builtins/declare.def:845 builtins/read.def:788
+#: builtins/declare.def:845 builtins/read.def:815
 #, c-format
 msgid "%s: cannot convert associative to indexed array"
 msgstr "%s: 連想配列からインデックス配列に変換することはできません"
@@ -389,27 +419,32 @@ msgstr "動的ロードは利用できません"
 msgid "cannot open shared object %s: %s"
 msgstr "共有オブジェクト %s を開くことができません : %s"
 
-#: builtins/enable.def:369
+#: builtins/enable.def:371
 #, c-format
 msgid "cannot find %s in shared object %s: %s"
 msgstr "%s が共有オブジェクト %s に存在しません: %s"
 
-#: builtins/enable.def:387
+#: builtins/enable.def:388
+#, fuzzy, c-format
+msgid "%s: dynamic builtin already loaded"
+msgstr "%s: 動的にロードされていません"
+
+#: builtins/enable.def:392
 #, c-format
 msgid "load function for %s returns failure (%d): not loaded"
 msgstr "関数 %s のロードが失敗を返しました(%d): ロードされませんでした"
 
-#: builtins/enable.def:512
+#: builtins/enable.def:517
 #, c-format
 msgid "%s: not dynamically loaded"
 msgstr "%s: 動的にロードされていません"
 
-#: builtins/enable.def:538
+#: builtins/enable.def:543
 #, c-format
 msgid "%s: cannot delete: %s"
 msgstr "%s: 削除できません: %s"
 
-#: builtins/evalfile.c:138 builtins/hash.def:184 execute_cmd.c:5684
+#: builtins/evalfile.c:138 builtins/hash.def:184 execute_cmd.c:5694
 #, c-format
 msgid "%s: is a directory"
 msgstr "%s: ディレクトリです"
@@ -424,12 +459,12 @@ msgstr "%s: 通常ファイルではありません"
 msgid "%s: file is too large"
 msgstr "%s: ファイルが大きすぎます"
 
-#: builtins/evalfile.c:188 builtins/evalfile.c:206 shell.c:1623
+#: builtins/evalfile.c:188 builtins/evalfile.c:206 shell.c:1644
 #, c-format
 msgid "%s: cannot execute binary file"
 msgstr "%s: バイナリファイルを実行できません"
 
-#: builtins/exec.def:156 builtins/exec.def:158 builtins/exec.def:243
+#: builtins/exec.def:158 builtins/exec.def:160 builtins/exec.def:246
 #, c-format
 msgid "%s: cannot execute: %s"
 msgstr "%s: 実行できません: %s"
@@ -453,15 +488,15 @@ msgstr "停止しているジョブがあります。\n"
 msgid "There are running jobs.\n"
 msgstr "動作中のジョブがあります。\n"
 
-#: builtins/fc.def:265
+#: builtins/fc.def:267
 msgid "no command found"
 msgstr "コマンドが見つかりません"
 
-#: builtins/fc.def:323 builtins/fc.def:372
+#: builtins/fc.def:325 builtins/fc.def:359 builtins/fc.def:388
 msgid "history specification"
 msgstr "ヒストリ指定"
 
-#: builtins/fc.def:393
+#: builtins/fc.def:409
 #, c-format
 msgid "%s: cannot open temp file: %s"
 msgstr "%s: 一時ファイルを開くことができません: %s"
@@ -504,6 +539,12 @@ msgid "Shell commands matching keyword `"
 msgid_plural "Shell commands matching keywords `"
 msgstr[0] "キーワードに一致したシェルコマンド `"
 
+#: builtins/help.def:135
+msgid ""
+"'\n"
+"\n"
+msgstr ""
+
 #: builtins/help.def:185
 #, c-format
 msgid ""
@@ -539,21 +580,21 @@ msgstr ""
 "味します。\n"
 "\n"
 
-#: builtins/history.def:154
+#: builtins/history.def:155
 msgid "cannot use more than one of -anrw"
 msgstr "-anrw を2つ以上一緒に使用することはできません"
 
-#: builtins/history.def:187 builtins/history.def:197 builtins/history.def:212
-#: builtins/history.def:229 builtins/history.def:241 builtins/history.def:248
+#: builtins/history.def:188 builtins/history.def:198 builtins/history.def:213
+#: builtins/history.def:230 builtins/history.def:242 builtins/history.def:249
 msgid "history position"
 msgstr "ヒストリ位置"
 
-#: builtins/history.def:331
+#: builtins/history.def:340
 #, c-format
 msgid "%s: invalid timestamp"
 msgstr "%s: 無効なタイムスタンプです"
 
-#: builtins/history.def:442
+#: builtins/history.def:451
 #, c-format
 msgid "%s: history expansion failed"
 msgstr "%s: ヒストリの展開に失敗しました"
@@ -585,12 +626,12 @@ msgstr "式が予期されます"
 msgid "%s: not an indexed array"
 msgstr "%s: インデックス配列ではありません"
 
-#: builtins/mapfile.def:271 builtins/read.def:307
+#: builtins/mapfile.def:271 builtins/read.def:308
 #, c-format
 msgid "%s: invalid file descriptor specification"
 msgstr "%s: 無効なファイル記述子指定です"
 
-#: builtins/mapfile.def:279 builtins/read.def:314
+#: builtins/mapfile.def:279 builtins/read.def:315
 #, c-format
 msgid "%d: invalid file descriptor: %s"
 msgstr "%d: 無効なファイル記述子: %s"
@@ -618,36 +659,36 @@ msgstr "空の配列変数名です"
 msgid "array variable support required"
 msgstr "配列変数のサポートが必要です"
 
-#: builtins/printf.def:420
+#: builtins/printf.def:419
 #, c-format
 msgid "`%s': missing format character"
 msgstr "`%s': 書式指定文字がありません"
 
-#: builtins/printf.def:475
+#: builtins/printf.def:474
 #, c-format
 msgid "`%c': invalid time format specification"
 msgstr "`%c': 無効な時間書式指定です"
 
-#: builtins/printf.def:677
+#: builtins/printf.def:676
 #, c-format
 msgid "`%c': invalid format character"
 msgstr "`%c': 無効な書式指定文字です"
 
-#: builtins/printf.def:703
+#: builtins/printf.def:702
 #, c-format
 msgid "warning: %s: %s"
 msgstr "警告: %s: %s"
 
-#: builtins/printf.def:789
+#: builtins/printf.def:788
 #, c-format
 msgid "format parsing problem: %s"
 msgstr "書式解析問題です: %s"
 
-#: builtins/printf.def:886
+#: builtins/printf.def:885
 msgid "missing hex digit for \\x"
 msgstr "\\x 用の十六進数字がありません"
 
-#: builtins/printf.def:901
+#: builtins/printf.def:900
 #, c-format
 msgid "missing unicode digit for \\%c"
 msgstr "\\%c 用のユニコード数値がありません"
@@ -797,12 +838,12 @@ msgstr ""
 "    \n"
 "    `dirs' ビルトインコマンドでディレクトリスタックを表示します。"
 
-#: builtins/read.def:279
+#: builtins/read.def:280
 #, c-format
 msgid "%s: invalid timeout specification"
 msgstr "%s: 無効なタイムアウト指定です"
 
-#: builtins/read.def:733
+#: builtins/read.def:755
 #, c-format
 msgid "read error: %d: %s"
 msgstr "読み込みエラー: %d: %s"
@@ -811,21 +852,11 @@ msgstr "読み込みエラー: %d: %s"
 msgid "can only `return' from a function or sourced script"
 msgstr "`return' は関数または source されたスクリプト内のみで利用できます"
 
-#: builtins/set.def:852
+#: builtins/set.def:857
 msgid "cannot simultaneously unset a function and a variable"
 msgstr "変数と関数を同時に消去することはできません"
 
-#: builtins/set.def:904
-#, c-format
-msgid "%s: cannot unset"
-msgstr "%s: 消去できません"
-
-#: builtins/set.def:925 variables.c:3813
-#, c-format
-msgid "%s: cannot unset: readonly %s"
-msgstr "%s: 消去できません: %s は読み取り専用です"
-
-#: builtins/set.def:938
+#: builtins/set.def:954
 #, c-format
 msgid "%s: not an array variable"
 msgstr "%s: 配列変数ではありません"
@@ -840,7 +871,7 @@ msgstr "%s: 関数ではありません"
 msgid "%s: cannot export"
 msgstr "%s: export できません"
 
-#: builtins/shift.def:73 builtins/shift.def:79
+#: builtins/shift.def:72 builtins/shift.def:79
 msgid "shift count"
 msgstr "シフト回数"
 
@@ -848,7 +879,7 @@ msgstr "シフト回数"
 msgid "cannot set and unset shell options simultaneously"
 msgstr "シェルオプションを同時に有効かつ無効にできません"
 
-#: builtins/shopt.def:420
+#: builtins/shopt.def:428
 #, c-format
 msgid "%s: invalid shell option name"
 msgstr "%s: 無効なシェルオプション名です"
@@ -905,26 +936,26 @@ msgstr "%s は %s です\n"
 msgid "%s is hashed (%s)\n"
 msgstr "%s はハッシュされています (%s)\n"
 
-#: builtins/ulimit.def:396
+#: builtins/ulimit.def:400
 #, c-format
 msgid "%s: invalid limit argument"
 msgstr "%s: limit の無効な引数です"
 
-#: builtins/ulimit.def:422
+#: builtins/ulimit.def:426
 #, c-format
 msgid "`%c': bad command"
 msgstr "`%c': 誤ったコマンドです"
 
-#: builtins/ulimit.def:451
+#: builtins/ulimit.def:455
 #, c-format
 msgid "%s: cannot get limit: %s"
 msgstr "%s: limit を取得できません: %s"
 
-#: builtins/ulimit.def:477
+#: builtins/ulimit.def:481
 msgid "limit"
 msgstr "limit"
 
-#: builtins/ulimit.def:489 builtins/ulimit.def:789
+#: builtins/ulimit.def:493 builtins/ulimit.def:793
 #, c-format
 msgid "%s: cannot modify limit: %s"
 msgstr "%s: limit を変更できません : %s"
@@ -984,76 +1015,76 @@ msgstr "誤ったジャンプです"
 msgid "%s: unbound variable"
 msgstr "%s: 未割り当ての変数です"
 
-#: eval.c:245
+#: eval.c:240
 #, c-format
 msgid "\atimed out waiting for input: auto-logout\n"
 msgstr "\a入力待ちがタイムアウトしました: 自動ログアウト\n"
 
-#: execute_cmd.c:536
+#: execute_cmd.c:534
 #, c-format
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr "/dev/null から標準入力に対してリダイレクトできません: %s"
 
-#: execute_cmd.c:1306
+#: execute_cmd.c:1274
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "TIMEFORMAT: `%c': 無効な書式文字です"
 
-#: execute_cmd.c:2361
+#: execute_cmd.c:2340
 #, c-format
 msgid "execute_coproc: coproc [%d:%s] still exists"
 msgstr ""
 
-#: execute_cmd.c:2485
+#: execute_cmd.c:2464
 msgid "pipe error"
 msgstr "パイプエラー"
 
-#: execute_cmd.c:4671
+#: execute_cmd.c:4678
 #, c-format
 msgid "eval: maximum eval nesting level exceeded (%d)"
 msgstr "eval: eval の入れ子レベルの最大値を超えています (%d)"
 
-#: execute_cmd.c:4683
+#: execute_cmd.c:4690
 #, c-format
 msgid "%s: maximum source nesting level exceeded (%d)"
 msgstr "%s: source の入れ子レベルの最大値を超えています (%d)"
 
-#: execute_cmd.c:4791
+#: execute_cmd.c:4798
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
 msgstr "%s: 関数の入れ子レベルの最大値を超えています (%d)"
 
-#: execute_cmd.c:5340
+#: execute_cmd.c:5347
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: 制限されています:  `/' をコマンド名の中に指定できません"
 
-#: execute_cmd.c:5438
+#: execute_cmd.c:5450
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: コマンドが見つかりません"
 
-#: execute_cmd.c:5682
+#: execute_cmd.c:5692
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: execute_cmd.c:5720
+#: execute_cmd.c:5730
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: 誤ったインタプリタです"
 
-#: execute_cmd.c:5757
+#: execute_cmd.c:5767
 #, c-format
 msgid "%s: cannot execute binary file: %s"
 msgstr "%s: バイナリファイルを実行できません: %s"
 
-#: execute_cmd.c:5843
+#: execute_cmd.c:5853
 #, c-format
 msgid "`%s': is a special builtin"
 msgstr "`%s': 特殊シェル組み込み関数です"
 
-#: execute_cmd.c:5895
+#: execute_cmd.c:5905
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "fd %d を fd %d に複製できません"
@@ -1103,37 +1134,42 @@ msgstr "識別子は前置インクリメントまたは前置デクリメント
 msgid "missing `)'"
 msgstr "`)' がありません"
 
-#: expr.c:1106 expr.c:1484
+#: expr.c:1106 expr.c:1486
 msgid "syntax error: operand expected"
 msgstr "構文エラー: オペランドが予期されます"
 
-#: expr.c:1486
+#: expr.c:1488
 msgid "syntax error: invalid arithmetic operator"
 msgstr "構文エラー: 無効な計算演算子です"
 
-#: expr.c:1510
+#: expr.c:1512
 #, c-format
 msgid "%s%s%s: %s (error token is \"%s\")"
 msgstr "%s%s%s: %s (エラーのあるトークンは \"%s\")"
 
-#: expr.c:1568
+#: expr.c:1572
 msgid "invalid arithmetic base"
 msgstr "無効な基底の数値です"
 
-#: expr.c:1588
+#: expr.c:1581
+#, fuzzy
+msgid "invalid integer constant"
+msgstr "%s: 無効な行数です"
+
+#: expr.c:1597
 msgid "value too great for base"
 msgstr "基底の値が大きすぎます"
 
-#: expr.c:1637
+#: expr.c:1646
 #, c-format
 msgid "%s: expression error\n"
 msgstr "%s: 式のエラー\n"
 
-#: general.c:69
+#: general.c:70
 msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: 親ディレクトリにアクセスできません"
 
-#: input.c:99 subst.c:5930
+#: input.c:99 subst.c:6028
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "ファイル記述子(fd) %d を無遅延モードに再設定できません"
@@ -1148,162 +1184,167 @@ msgstr "新規ファイル記述子(fd) %d を bash の入力として割り当�
 msgid "save_bash_input: buffer already exists for new fd %d"
 msgstr "save_bash_input: 新規 fd %d のバッファはすでに存在します"
 
-#: jobs.c:529
+#: jobs.c:537
 msgid "start_pipeline: pgrp pipe"
 msgstr "start_pipeline: pgrp pipe"
 
-#: jobs.c:1084
+#: jobs.c:900
+#, c-format
+msgid "bgp_delete: LOOP: psi (%d) == storage[psi].bucket_next"
+msgstr ""
+
+#: jobs.c:953
+#, c-format
+msgid "bgp_search: LOOP: psi (%d) == storage[psi].bucket_next"
+msgstr ""
+
+#: jobs.c:1277
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr "実行中のジョブ %2$d で fork した pid %1$d が出現しました"
 
-#: jobs.c:1203
+#: jobs.c:1396
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "プロセスグループ %2$ld のジョブ %1$d を削除しています"
 
-#: jobs.c:1307
-#, c-format
-msgid "add_process: process %5ld (%s) in the_pipeline"
-msgstr "add_process: プロセス %5ld (%s) が the_pipeline にあります"
-
-#: jobs.c:1310
+#: jobs.c:1505
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr "add_process: pid %5ld (%s) はまだ存在しているとマークされています"
 
-#: jobs.c:1639
+#: jobs.c:1844
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "describe_pid: %ld: そのような pid は存在しません"
 
-#: jobs.c:1654
+#: jobs.c:1859
 #, c-format
 msgid "Signal %d"
 msgstr "シグナル %d"
 
-#: jobs.c:1668 jobs.c:1694
+#: jobs.c:1873 jobs.c:1899
 msgid "Done"
 msgstr "終了"
 
-#: jobs.c:1673 siglist.c:123
+#: jobs.c:1878 siglist.c:122
 msgid "Stopped"
 msgstr "停止"
 
-#: jobs.c:1677
+#: jobs.c:1882
 #, c-format
 msgid "Stopped(%s)"
 msgstr "停止 (%s)"
 
-#: jobs.c:1681
+#: jobs.c:1886
 msgid "Running"
 msgstr "実行中"
 
-#: jobs.c:1698
+#: jobs.c:1903
 #, c-format
 msgid "Done(%d)"
 msgstr "終了(%d)"
 
-#: jobs.c:1700
+#: jobs.c:1905
 #, c-format
 msgid "Exit %d"
 msgstr "終了 %d"
 
-#: jobs.c:1703
+#: jobs.c:1908
 msgid "Unknown status"
 msgstr "不明なステータス"
 
-#: jobs.c:1790
+#: jobs.c:1995
 #, c-format
 msgid "(core dumped) "
 msgstr "(コアダンプ) "
 
-#: jobs.c:1809
+#: jobs.c:2014
 #, c-format
 msgid "  (wd: %s)"
 msgstr "  (wd: %s)"
 
-#: jobs.c:2037
+#: jobs.c:2254
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr "子プロセス setpgid (%ld から %ld)"
 
-#: jobs.c:2399 nojobs.c:657
+#: jobs.c:2612 nojobs.c:664
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: pid %ld はこのシェルの子プロセスではありません"
 
-#: jobs.c:2695
+#: jobs.c:2897
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr "wait_for: プロセス %ld の記録がありません"
 
-#: jobs.c:3055
+#: jobs.c:3240
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: ジョブ %d は停止しています"
 
-#: jobs.c:3362
+#: jobs.c:3568
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: ジョブは終了しました"
 
-#: jobs.c:3371
+#: jobs.c:3577
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: ジョブ %d はすでにバックグラウンドで動作しています"
 
-#: jobs.c:3597
+#: jobs.c:3803
 msgid "waitchld: turning on WNOHANG to avoid indefinite block"
 msgstr "waitchld: 不定のブロックを避けるために WNOHANG をオンにしました。"
 
-#: jobs.c:4120
+#: jobs.c:4319
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s: %d 行: "
 
-#: jobs.c:4134 nojobs.c:900
+#: jobs.c:4333 nojobs.c:928
 #, c-format
 msgid " (core dumped)"
 msgstr " (コアダンプ)"
 
-#: jobs.c:4146 jobs.c:4159
+#: jobs.c:4345 jobs.c:4358
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(wd now: %s)\n"
 
-#: jobs.c:4191
+#: jobs.c:4390
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: getpgrp が失敗しました"
 
-#: jobs.c:4247
+#: jobs.c:4446
 #, fuzzy
 msgid "initialize_job_control: no job control in background"
 msgstr "initialize_job_control: line discipline"
 
-#: jobs.c:4263
+#: jobs.c:4462
 msgid "initialize_job_control: line discipline"
 msgstr "initialize_job_control: line discipline"
 
-#: jobs.c:4273
+#: jobs.c:4472
 msgid "initialize_job_control: setpgid"
 msgstr "initialize_job_control: setpgid"
 
-#: jobs.c:4294 jobs.c:4303
+#: jobs.c:4493 jobs.c:4502
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "端末プロセスグループを設定できません (%d)"
 
-#: jobs.c:4308
+#: jobs.c:4507
 msgid "no job control in this shell"
 msgstr "このシェルではジョブ制御が無効になっています"
 
-#: lib/malloc/malloc.c:331
+#: lib/malloc/malloc.c:335
 #, c-format
 msgid "malloc: failed assertion: %s\n"
 msgstr "malloc: 失敗したアサーション: %s\n"
 
-#: lib/malloc/malloc.c:347
+#: lib/malloc/malloc.c:351
 #, c-format
 msgid ""
 "\r\n"
@@ -1312,39 +1353,39 @@ msgstr ""
 "\r\n"
 "malloc: %s:%d: アサーション失敗\r\n"
 
-#: lib/malloc/malloc.c:348
+#: lib/malloc/malloc.c:352
 msgid "unknown"
 msgstr "不明"
 
-#: lib/malloc/malloc.c:855
+#: lib/malloc/malloc.c:859
 msgid "malloc: block on free list clobbered"
 msgstr "malloc: free ブロックリストが壊れています"
 
-#: lib/malloc/malloc.c:932
+#: lib/malloc/malloc.c:936
 msgid "free: called with already freed block argument"
 msgstr "free: 既に free されたブロックを引数として呼び出されました"
 
-#: lib/malloc/malloc.c:935
+#: lib/malloc/malloc.c:939
 msgid "free: called with unallocated block argument"
 msgstr "free: 未割当のブロックを引数として呼び出されました"
 
-#: lib/malloc/malloc.c:954
+#: lib/malloc/malloc.c:958
 msgid "free: underflow detected; mh_nbytes out of range"
 msgstr "free: アンダーフローを検出しました。 mh_nbytes が範囲外です"
 
-#: lib/malloc/malloc.c:960
+#: lib/malloc/malloc.c:964
 msgid "free: start and end chunk sizes differ"
 msgstr "free: 開始と終了の塊の大きさが異なっています"
 
-#: lib/malloc/malloc.c:1070
+#: lib/malloc/malloc.c:1074
 msgid "realloc: called with unallocated block argument"
 msgstr "realloc: 未割当のブロックを引数として呼び出されました"
 
-#: lib/malloc/malloc.c:1085
+#: lib/malloc/malloc.c:1089
 msgid "realloc: underflow detected; mh_nbytes out of range"
 msgstr "realloc: アンダーフローを検出しました。 mh_nbytes が範囲外です"
 
-#: lib/malloc/malloc.c:1091
+#: lib/malloc/malloc.c:1095
 msgid "realloc: start and end chunk sizes differ"
 msgstr "realloc: 開始と終了の塊の大きさが異なっています"
 
@@ -1386,22 +1427,22 @@ msgstr "%s: ネットワークパス指定に誤りがあります"
 msgid "network operations not supported"
 msgstr "ネットワーク操作はサポートされていません"
 
-#: locale.c:205
+#: locale.c:217
 #, c-format
 msgid "setlocale: LC_ALL: cannot change locale (%s)"
 msgstr "setlocale: LC_ALL: ロケールを変更できません (%s)"
 
-#: locale.c:207
+#: locale.c:219
 #, c-format
 msgid "setlocale: LC_ALL: cannot change locale (%s): %s"
 msgstr "setlocale: LC_ALL: ロケールを変更できません (%s): %s"
 
-#: locale.c:272
+#: locale.c:292
 #, c-format
 msgid "setlocale: %s: cannot change locale (%s)"
 msgstr "setlocale: %s: ロケールを変更できません (%s)"
 
-#: locale.c:274
+#: locale.c:294
 #, c-format
 msgid "setlocale: %s: cannot change locale (%s): %s"
 msgstr "setlocale: %s: ロケールを変更できません (%s): %s"
@@ -1448,110 +1489,110 @@ msgstr ""
 msgid "make_redirection: redirection instruction `%d' out of range"
 msgstr "make_redirection: リダイレクト指定 `%d' は範囲外です"
 
-#: parse.y:2380
+#: parse.y:2392
 #, c-format
 msgid ""
 "shell_getc: shell_input_line_size (%zu) exceeds SIZE_MAX (%lu): line "
 "truncated"
 msgstr ""
 
-#: parse.y:2786
+#: parse.y:2825
 msgid "maximum here-document count exceeded"
 msgstr ""
 
-#: parse.y:3536 parse.y:3906
+#: parse.y:3580 parse.y:3950 parse.y:4529
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "対応する `%c' を探索中に予期しないファイル終了 (EOF) です"
 
-#: parse.y:4606
+#: parse.y:4669
 msgid "unexpected EOF while looking for `]]'"
 msgstr "`]]' を探索中に予期しないファイル終了 (EOF) です"
 
-#: parse.y:4611
+#: parse.y:4674
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr "条件式に構文エラー: 予期しないトークン `%s' です"
 
-#: parse.y:4615
+#: parse.y:4678
 msgid "syntax error in conditional expression"
 msgstr "条件式に構文エラーがあります"
 
-#: parse.y:4693
+#: parse.y:4756
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr "予期しないトークン `%s' です。`)' が予期されます"
 
-#: parse.y:4697
+#: parse.y:4760
 msgid "expected `)'"
 msgstr "`)' が予期されます"
 
-#: parse.y:4725
+#: parse.y:4788
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr "条件単項演算子に予期しない引数 `%s' です"
 
-#: parse.y:4729
+#: parse.y:4792
 msgid "unexpected argument to conditional unary operator"
 msgstr "条件単項演算子に予期しない引数です"
 
-#: parse.y:4775
+#: parse.y:4838
 #, c-format
 msgid "unexpected token `%s', conditional binary operator expected"
 msgstr "`%s` は予期しないトークンです。条件二項演算子が予期されます"
 
-#: parse.y:4779
+#: parse.y:4842
 msgid "conditional binary operator expected"
 msgstr "条件二項演算子が予期されます"
 
-#: parse.y:4801
+#: parse.y:4864
 #, c-format
 msgid "unexpected argument `%s' to conditional binary operator"
 msgstr "条件二項演算子に予期しない引数 `%s' です"
 
-#: parse.y:4805
+#: parse.y:4868
 msgid "unexpected argument to conditional binary operator"
 msgstr "条件二項演算子に予期しない引数です"
 
-#: parse.y:4816
+#: parse.y:4879
 #, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr "条件コマンドに予期しないトークン `%c' があります"
 
-#: parse.y:4819
+#: parse.y:4882
 #, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr "条件コマンドに予期しないトークン `%s' があります"
 
-#: parse.y:4823
+#: parse.y:4886
 #, c-format
 msgid "unexpected token %d in conditional command"
 msgstr "条件コマンドに予期しないトークン %d があります"
 
-#: parse.y:6245
+#: parse.y:6309
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "予期しないトークン `%s' 周辺に構文エラーがあります"
 
-#: parse.y:6263
+#: parse.y:6328
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "`%s' 周辺に構文エラーがあります"
 
-#: parse.y:6273
+#: parse.y:6338
 msgid "syntax error: unexpected end of file"
 msgstr "構文エラー: 予期しないファイル終了 (EOF) です"
 
-#: parse.y:6273
+#: parse.y:6338
 msgid "syntax error"
 msgstr "構文エラー"
 
-#: parse.y:6335
+#: parse.y:6401
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "シェルから脱出するには \"%s\" を使用してください。\n"
 
-#: parse.y:6497
+#: parse.y:6566
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "対応する `)' を探索中に予期しないファイル終了(EOF)です"
 
@@ -1594,89 +1635,89 @@ msgstr "xtrace fd (%d) != fileno xtrace fp (%d)"
 msgid "cprintf: `%c': invalid format character"
 msgstr "cprintf: `%c': 無効な書式文字です"
 
-#: redir.c:121 redir.c:167
+#: redir.c:142 redir.c:188
 msgid "file descriptor out of range"
 msgstr "ファイル記述子が範囲外です"
 
-#: redir.c:174
+#: redir.c:195
 #, c-format
 msgid "%s: ambiguous redirect"
 msgstr "%s: 曖昧なリダイレクトです"
 
-#: redir.c:178
+#: redir.c:199
 #, c-format
 msgid "%s: cannot overwrite existing file"
 msgstr "%s: 存在するファイルを上書きできません"
 
-#: redir.c:183
+#: redir.c:204
 #, c-format
 msgid "%s: restricted: cannot redirect output"
 msgstr "%s: 制限されています: 出力をリダイレクト出来ません"
 
-#: redir.c:188
+#: redir.c:209
 #, c-format
 msgid "cannot create temp file for here-document: %s"
 msgstr "ヒアドキュメント用一時ファイルを作成できません: %s"
 
-#: redir.c:192
+#: redir.c:213
 #, c-format
 msgid "%s: cannot assign fd to variable"
 msgstr "%s: ファイル記述子 (fd) を変数に設定することはできません"
 
-#: redir.c:591
+#: redir.c:636
 msgid "/dev/(tcp|udp)/host/port not supported without networking"
 msgstr "ネットワークが無効な場合 /dev/(tcp|udp)/host/port はサポートされません"
 
-#: redir.c:875 redir.c:990 redir.c:1051 redir.c:1221
+#: redir.c:920 redir.c:1035 redir.c:1096 redir.c:1266
 msgid "redirection error: cannot duplicate fd"
 msgstr "リダイレクトエラー: ファイル記述子を複製できません"
 
-#: shell.c:343
+#: shell.c:346
 msgid "could not find /tmp, please create!"
 msgstr "/tmp が見つかりません。作成してください!"
 
-#: shell.c:347
+#: shell.c:350
 msgid "/tmp must be a valid directory name"
 msgstr "/tmp は有効なディレクトリ名でなければいけません"
 
-#: shell.c:798
+#: shell.c:801
 msgid "pretty-printing mode ignored in interactive shells"
 msgstr ""
 
-#: shell.c:940
+#: shell.c:945
 #, c-format
 msgid "%c%c: invalid option"
 msgstr "%c%c: 無効なオプション"
 
-#: shell.c:1299
+#: shell.c:1316
 #, c-format
 msgid "cannot set uid to %d: effective uid %d"
 msgstr "uidを %d に設定できません: 実効uid %d"
 
-#: shell.c:1306
+#: shell.c:1327
 #, c-format
 msgid "cannot set gid to %d: effective gid %d"
 msgstr "gidを %d に設定できません: 実効gid %d"
 
-#: shell.c:1494
+#: shell.c:1515
 msgid "cannot start debugger; debugging mode disabled"
 msgstr "デバッガを開始できません。デバッガモードが無効になっています"
 
-#: shell.c:1608
+#: shell.c:1629
 #, c-format
 msgid "%s: Is a directory"
 msgstr "%s: ディレクトリです"
 
-#: shell.c:1826
+#: shell.c:1878
 msgid "I have no name!"
 msgstr "私は名前がありません!"
 
-#: shell.c:1980
+#: shell.c:2032
 #, c-format
 msgid "GNU bash, version %s-(%s)\n"
 msgstr "GNU bash, バージョン %s-(%s)\n"
 
-#: shell.c:1981
+#: shell.c:2033
 #, c-format
 msgid ""
 "Usage:\t%s [GNU long option] [option] ...\n"
@@ -1685,326 +1726,322 @@ msgstr ""
 "使用法:\t%s [GNU long option] [option] ...\n"
 "\t%s [GNU long option] [option] script-file ...\n"
 
-#: shell.c:1983
+#: shell.c:2035
 msgid "GNU long options:\n"
 msgstr "GNU 形式の長いオプション:\n"
 
-#: shell.c:1987
+#: shell.c:2039
 msgid "Shell options:\n"
 msgstr "シェルオプション:\n"
 
-#: shell.c:1988
+#: shell.c:2040
 msgid "\t-ilrsD or -c command or -O shopt_option\t\t(invocation only)\n"
 msgstr "\t-ilrsD, -c command または -O shopt_option\t\t(起動時のみ)\n"
 
-#: shell.c:2007
+#: shell.c:2059
 #, c-format
 msgid "\t-%s or -o option\n"
 msgstr "\t-%s または -o option\n"
 
-#: shell.c:2013
+#: shell.c:2065
 #, c-format
 msgid "Type `%s -c \"help set\"' for more information about shell options.\n"
 msgstr ""
 "シェルオプションの詳細については `%s -c \"help set\"'と入力してください。\n"
 
-#: shell.c:2014
+#: shell.c:2066
 #, c-format
 msgid "Type `%s -c help' for more information about shell builtin commands.\n"
 msgstr "シェル組み込みコマンドについては `%s -c help' と入力してください。\n"
 
-#: shell.c:2015
+#: shell.c:2067
 #, c-format
 msgid "Use the `bashbug' command to report bugs.\n"
 msgstr "バグ報告をする場合は `bashbug' コマンドを使用してください。\n"
 
-#: shell.c:2017
+#: shell.c:2069
 #, c-format
 msgid "bash home page: <http://www.gnu.org/software/bash>\n"
 msgstr "bashホームページ: <http://www.gnu.org/software/bash>\n"
 
-#: shell.c:2018
+#: shell.c:2070
 #, c-format
 msgid "General help using GNU software: <http://www.gnu.org/gethelp/>\n"
 msgstr ""
 "GNUソフトウェアを使用する時の一般的なヘルプ : <http://www.gnu.org/gethelp/>\n"
 
-#: sig.c:730
+#: sig.c:752
 #, c-format
 msgid "sigprocmask: %d: invalid operation"
 msgstr "sigprocmask: %d: 無効な操作です"
 
-#: siglist.c:48
+#: siglist.c:47
 msgid "Bogus signal"
 msgstr "悪いシグナル"
 
-#: siglist.c:51
+#: siglist.c:50
 msgid "Hangup"
 msgstr "停止"
 
-#: siglist.c:55
+#: siglist.c:54
 msgid "Interrupt"
 msgstr "割り込み"
 
-#: siglist.c:59
+#: siglist.c:58
 msgid "Quit"
 msgstr "終了"
 
-#: siglist.c:63
+#: siglist.c:62
 msgid "Illegal instruction"
 msgstr "不正な指定"
 
-#: siglist.c:67
+#: siglist.c:66
 msgid "BPT trace/trap"
 msgstr "BPT trace/trap"
 
-#: siglist.c:75
+#: siglist.c:74
 msgid "ABORT instruction"
 msgstr "ABORT 指定"
 
-#: siglist.c:79
+#: siglist.c:78
 msgid "EMT instruction"
 msgstr "EMT 指定"
 
-#: siglist.c:83
+#: siglist.c:82
 msgid "Floating point exception"
 msgstr "浮動小数点例外"
 
-#: siglist.c:87
+#: siglist.c:86
 msgid "Killed"
 msgstr "Killed"
 
-#: siglist.c:91
+#: siglist.c:90
 msgid "Bus error"
 msgstr "バスエラー"
 
-#: siglist.c:95
+#: siglist.c:94
 msgid "Segmentation fault"
 msgstr "セグメンテーションフォルト"
 
-#: siglist.c:99
+#: siglist.c:98
 msgid "Bad system call"
 msgstr "誤ったシステムコール"
 
-#: siglist.c:103
+#: siglist.c:102
 msgid "Broken pipe"
 msgstr "パイプが切れました"
 
-#: siglist.c:107
+#: siglist.c:106
 msgid "Alarm clock"
 msgstr "アラーム時計"
 
-#: siglist.c:111
+#: siglist.c:110
 msgid "Terminated"
 msgstr "Terminated"
 
-#: siglist.c:115
+#: siglist.c:114
 msgid "Urgent IO condition"
 msgstr "急ぎの IO 状態"
 
-#: siglist.c:119
+#: siglist.c:118
 msgid "Stopped (signal)"
 msgstr "停止 (シグナル)"
 
-#: siglist.c:127
+#: siglist.c:126
 msgid "Continue"
 msgstr "続行"
 
-#: siglist.c:135
+#: siglist.c:134
 msgid "Child death or stop"
 msgstr "子プロセスの死亡または停止 "
 
-#: siglist.c:139
+#: siglist.c:138
 msgid "Stopped (tty input)"
 msgstr "停止 (tty 入力)"
 
-#: siglist.c:143
+#: siglist.c:142
 msgid "Stopped (tty output)"
 msgstr "停止 (tty 出力)"
 
-#: siglist.c:147
+#: siglist.c:146
 msgid "I/O ready"
 msgstr "I/O 用意ができています"
 
-#: siglist.c:151
+#: siglist.c:150
 msgid "CPU limit"
 msgstr "CPU limit"
 
-#: siglist.c:155
+#: siglist.c:154
 msgid "File limit"
 msgstr "ファイル limit"
 
-#: siglist.c:159
+#: siglist.c:158
 msgid "Alarm (virtual)"
 msgstr "警報 (仮想)"
 
-#: siglist.c:163
+#: siglist.c:162
 msgid "Alarm (profile)"
 msgstr "警報 (プロファイル)"
 
-#: siglist.c:167
+#: siglist.c:166
 msgid "Window changed"
 msgstr "ウィンドウが変更されました"
 
-#: siglist.c:171
+#: siglist.c:170
 msgid "Record lock"
 msgstr "記録のロック"
 
-#: siglist.c:175
+#: siglist.c:174
 msgid "User signal 1"
 msgstr "ユーザシグナル 1"
 
-#: siglist.c:179
+#: siglist.c:178
 msgid "User signal 2"
 msgstr "ユーザシグナル 2"
 
-#: siglist.c:183
+#: siglist.c:182
 msgid "HFT input data pending"
 msgstr "HFT 未決の入力データ"
 
-#: siglist.c:187
+#: siglist.c:186
 msgid "power failure imminent"
 msgstr "電源故障の危険"
 
-#: siglist.c:191
+#: siglist.c:190
 msgid "system crash imminent"
 msgstr "システムクラッシュの危険"
 
-#: siglist.c:195
+#: siglist.c:194
 msgid "migrate process to another CPU"
 msgstr "プロセスを別のCPUに移動"
 
-#: siglist.c:199
+#: siglist.c:198
 msgid "programming error"
 msgstr "プログラミングエラー"
 
-#: siglist.c:203
+#: siglist.c:202
 msgid "HFT monitor mode granted"
 msgstr "HFT monitorモードが与えられました"
 
-#: siglist.c:207
+#: siglist.c:206
 msgid "HFT monitor mode retracted"
 msgstr "HFT monitorモードが奪われました"
 
-#: siglist.c:211
+#: siglist.c:210
 msgid "HFT sound sequence has completed"
 msgstr "HFT サウンドシーケンスが完了しました"
 
-#: siglist.c:215
+#: siglist.c:214
 msgid "Information request"
 msgstr "情報要求"
 
-#: siglist.c:223
-msgid "Unknown Signal #"
-msgstr "不明なシグナル番号"
-
-#: siglist.c:225
+#: siglist.c:222 siglist.c:224
 #, c-format
 msgid "Unknown Signal #%d"
 msgstr "不明なシグナル番号 %d"
 
-#: subst.c:1454 subst.c:1644
+#: subst.c:1475 subst.c:1665
 #, c-format
 msgid "bad substitution: no closing `%s' in %s"
 msgstr "誤った代入: 閉じる `%s' が %s に存在しません"
 
-#: subst.c:3231
+#: subst.c:3280
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr "%s: リストを配列要素に割り当てできません"
 
-#: subst.c:5789 subst.c:5805
+#: subst.c:5877 subst.c:5893
 msgid "cannot make pipe for process substitution"
 msgstr "プロセス代入ではパイプを作成できません"
 
-#: subst.c:5851
+#: subst.c:5944
 msgid "cannot make child for process substitution"
 msgstr "プロセス代入では子プロセスを作成できません"
 
-#: subst.c:5920
+#: subst.c:6018
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "名前付きパイプ %s を読み込み用に開けません"
 
-#: subst.c:5922
+#: subst.c:6020
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "名前付きパイプ %s を書き込み用に開けません"
 
-#: subst.c:5945
+#: subst.c:6043
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "名前付きパイプ %s をファイル記述子(fd) %d として複製できません"
 
-#: subst.c:6062
+#: subst.c:6167
 #, fuzzy
 msgid "command substitution: ignored null byte in input"
 msgstr "誤った代入: %s に閉じる \"`\" がありません"
 
-#: subst.c:6190
+#: subst.c:6307
 msgid "cannot make pipe for command substitution"
 msgstr "コマンド代入ではパイプを作成できません"
 
-#: subst.c:6233
+#: subst.c:6351
 msgid "cannot make child for command substitution"
 msgstr "コマンド代入では子プロセスを作成できません"
 
-#: subst.c:6259
+#: subst.c:6377
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr "command_substitute: パイプを fd 1 として複製できません"
 
-#: subst.c:6710 subst.c:9623
+#: subst.c:6828 subst.c:9870
 #, c-format
 msgid "%s: invalid variable name for name reference"
 msgstr "%s: 名前参照として無効な変数です"
 
-#: subst.c:6806 subst.c:6824 subst.c:6979
+#: subst.c:6924 subst.c:6942 subst.c:7114
 #, fuzzy, c-format
 msgid "%s: invalid indirect expansion"
 msgstr "%s: 無効な行数です"
 
-#: subst.c:6840 subst.c:6987
+#: subst.c:6958 subst.c:7122
 #, c-format
 msgid "%s: invalid variable name"
 msgstr "%s: 無効な変数名です"
 
-#: subst.c:7056
+#: subst.c:7201
 #, fuzzy, c-format
 msgid "%s: parameter not set"
 msgstr "%s: パラメータが null または設定されていません"
 
-#: subst.c:7058
+#: subst.c:7203
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: パラメータが null または設定されていません"
 
-#: subst.c:7295 subst.c:7310
+#: subst.c:7448 subst.c:7463
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: substring expression < 0"
 
-#: subst.c:8973 subst.c:8994
+#: subst.c:9199 subst.c:9220
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: 誤った代入です"
 
-#: subst.c:9082
+#: subst.c:9308
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: この方法で割当はできません"
 
-#: subst.c:9485
+#: subst.c:9732
 msgid ""
 "future versions of the shell will force evaluation as an arithmetic "
 "substitution"
 msgstr "将来のバージョンのシェルでは強制的に数値代入として評価されます"
 
-#: subst.c:10043
+#: subst.c:10288
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "誤った代入: %s に閉じる \"`\" がありません"
 
-#: subst.c:11070
+#: subst.c:11350
 #, c-format
 msgid "no match: %s"
 msgstr "一致しません: %s"
@@ -2027,35 +2064,40 @@ msgstr "`)' が予期されます"
 msgid "`)' expected, found %s"
 msgstr "`)' が予期されますが、見つかったのは %s です"
 
-#: test.c:282 test.c:750 test.c:753
-#, c-format
-msgid "%s: unary operator expected"
-msgstr "%s: 単項演算子が予期されます"
-
-#: test.c:469 test.c:793
+#: test.c:466 test.c:796
 #, c-format
 msgid "%s: binary operator expected"
 msgstr "%s: 二項演算子が予期されます"
 
-#: test.c:875
+#: test.c:753 test.c:756
+#, c-format
+msgid "%s: unary operator expected"
+msgstr "%s: 単項演算子が予期されます"
+
+#: test.c:878
 msgid "missing `]'"
 msgstr "`]'がありません"
 
-#: trap.c:216
+#: test.c:896
+#, fuzzy, c-format
+msgid "syntax error: `%s' unexpected"
+msgstr "構文エラー: 予期しない `;' です"
+
+#: trap.c:220
 msgid "invalid signal number"
 msgstr "無効なシグナル番号"
 
-#: trap.c:320
+#: trap.c:325
 #, fuzzy, c-format
 msgid "trap handler: maximum trap handler level exceeded (%d)"
 msgstr "eval: eval の入れ子レベルの最大値を超えています (%d)"
 
-#: trap.c:408
+#: trap.c:414
 #, c-format
 msgid "run_pending_traps: bad value in trap_list[%d]: %p"
 msgstr "run_pending_traps: trap_list[%d] に誤った値があります: %p"
 
-#: trap.c:412
+#: trap.c:418
 #, c-format
 msgid ""
 "run_pending_traps: signal handler is SIG_DFL, resending %d (%s) to myself"
@@ -2063,85 +2105,85 @@ msgstr ""
 "run_pending_traps: シグナルハンドラーは SIG_DFLです。, %d (%s) を自身に再送し"
 "ます。"
 
-#: trap.c:470
+#: trap.c:476
 #, c-format
 msgid "trap_handler: bad signal %d"
 msgstr "trap_handler: 誤ったシグナル %d"
 
-#: variables.c:412
+#: variables.c:437
 #, c-format
 msgid "error importing function definition for `%s'"
 msgstr "`%s' の関数定義をインポート中にエラーが発生しました"
 
-#: variables.c:821
+#: variables.c:849
 #, c-format
 msgid "shell level (%d) too high, resetting to 1"
 msgstr "シェルレベル (%d) は高すぎます。1に再設定されました"
 
-#: variables.c:2655
+#: variables.c:2852
 msgid "make_local_variable: no function context at current scope"
 msgstr "make_local_variable: 現在のスコープは関数コンテキストではありません"
 
-#: variables.c:2674
+#: variables.c:2871
 #, c-format
 msgid "%s: variable may not be assigned value"
 msgstr "%s: 変数が初期化されていないかもしれません"
 
-#: variables.c:3453
+#: variables.c:3653
 #, fuzzy, c-format
 msgid "%s: assigning integer to name reference"
 msgstr "%s: 名前参照として無効な変数です"
 
-#: variables.c:4365
+#: variables.c:4582
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: 現在のスコープは関数コンテキストではありません"
 
-#: variables.c:4698
+#: variables.c:4949
 #, c-format
 msgid "%s has null exportstr"
 msgstr "%s は null の exportstr を持っています"
 
-#: variables.c:4703 variables.c:4712
+#: variables.c:4954 variables.c:4963
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "%2$s に対する exportstr で %1$d は無効な文字です"
 
-#: variables.c:4718
+#: variables.c:4969
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "%s に対する exportstr に `=' がありません"
 
-#: variables.c:5243
+#: variables.c:5506
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr ""
 "pop_var_context: shell_variables の先頭です。関数コンテキストではありません"
 
-#: variables.c:5256
+#: variables.c:5519
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: global_variables コンテキストではありません"
 
-#: variables.c:5336
+#: variables.c:5599
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr "pop_scope: shell_variables の先頭です。一時環境スコープではありません"
 
-#: variables.c:6272
+#: variables.c:6562
 #, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: %s: ファイルとして開くことができません"
 
-#: variables.c:6277
+#: variables.c:6567
 #, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%s: %s: トレースファイル記述子として無効な値です"
 
-#: variables.c:6322
+#: variables.c:6612
 #, c-format
 msgid "%s: %s: compatibility value out of range"
 msgstr "%s: %s: 値の互換性が範囲外です"
 
 #: version.c:46 version2.c:46
 #, fuzzy
-msgid "Copyright (C) 2018 Free Software Foundation, Inc."
+msgid "Copyright (C) 2019 Free Software Foundation, Inc."
 msgstr "Copyright (C) 2016 Free Software Foundation, Inc."
 
 #: version.c:47 version2.c:47
@@ -2230,11 +2272,13 @@ msgid "command [-pVv] command [arg ...]"
 msgstr "command [-pVv] command [arg ...]"
 
 #: builtins.c:78
-msgid "declare [-aAfFgilnrtux] [-p] [name[=value] ...]"
+#, fuzzy
+msgid "declare [-aAfFgiIlnrtux] [-p] [name[=value] ...]"
 msgstr "declare [-aAfFgilnrtux] [-p] [name[=value] ...]"
 
 #: builtins.c:80
-msgid "typeset [-aAfFgilnrtux] [-p] name[=value] ..."
+#, fuzzy
+msgid "typeset [-aAfFgiIlnrtux] [-p] name[=value] ..."
 msgstr "typeset [-aAfFgilnrtux] [-p] name[=value] ..."
 
 #: builtins.c:82
@@ -2258,11 +2302,13 @@ msgid "eval [arg ...]"
 msgstr "eval [arg ...]"
 
 #: builtins.c:96
-msgid "getopts optstring name [arg]"
+#, fuzzy
+msgid "getopts optstring name [arg ...]"
 msgstr "getopts optstring name [arg]"
 
 #: builtins.c:98
-msgid "exec [-cl] [-a name] [command [arguments ...]] [redirection ...]"
+#, fuzzy
+msgid "exec [-cl] [-a name] [command [argument ...]] [redirection ...]"
 msgstr "exec [-cl] [-a name] [command [arguments ...]] [redirection ...]"
 
 #: builtins.c:100
@@ -2391,7 +2437,7 @@ msgstr "umask [-p] [-S] [mode]"
 
 #: builtins.c:177
 #, fuzzy
-msgid "wait [-fn] [id ...]"
+msgid "wait [-fn] [-p var] [id ...]"
 msgstr "wait [-n] [id ...]"
 
 #: builtins.c:181
@@ -2486,7 +2532,7 @@ msgstr "printf [-v var] format [arguments]"
 #, fuzzy
 msgid ""
 "complete [-abcdefgjksuv] [-pr] [-DEI] [-o option] [-A action] [-G globpat] [-"
-"W wordlist]  [-F function] [-C command] [-X filterpat] [-P prefix] [-S "
+"W wordlist] [-F function] [-C command] [-X filterpat] [-P prefix] [-S "
 "suffix] [name ...]"
 msgstr ""
 "complete [-abcdefgjksuv] [-pr] [-DE] [-o option] [-A action] [-G globpat] [-"
@@ -2494,9 +2540,10 @@ msgstr ""
 "suffix] [name ...]"
 
 #: builtins.c:235
+#, fuzzy
 msgid ""
-"compgen [-abcdefgjksuv] [-o option] [-A action] [-G globpat] [-W wordlist]  "
-"[-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]"
+"compgen [-abcdefgjksuv] [-o option] [-A action] [-G globpat] [-W wordlist] [-"
+"F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]"
 msgstr ""
 "compgen [-abcdefgjksuv] [-o option] [-A action] [-G globpat] [-W wordlist]  "
 "[-F function] [-C command] [-X filterpat] [-P prefix] [-S suffix] [word]"
@@ -2953,6 +3000,8 @@ msgid ""
 "    \t\tsource file when debugging)\n"
 "      -g\tcreate global variables when used in a shell function; otherwise\n"
 "    \t\tignored\n"
+"      -I\tif creating a local variable, inherit the attributes and value\n"
+"    \t\tof a variable with the same name at a previous scope\n"
 "      -p\tdisplay the attributes and value of each NAME\n"
 "    \n"
 "    Options which set attributes:\n"
@@ -3015,7 +3064,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    無効なオプションが与えられたかエラーが発生しない限り成功を返します。"
 
-#: builtins.c:530
+#: builtins.c:532
 #, fuzzy
 msgid ""
 "Set variable values and attributes.\n"
@@ -3026,7 +3075,7 @@ msgstr ""
 "    \n"
 "    旧式です。`help declare'を参照してください。"
 
-#: builtins.c:538
+#: builtins.c:540
 msgid ""
 "Define local variables.\n"
 "    \n"
@@ -3054,7 +3103,7 @@ msgstr ""
 "できない\n"
 "    場合を除き成功を返します。"
 
-#: builtins.c:555
+#: builtins.c:557
 #, fuzzy
 msgid ""
 "Write arguments to the standard output.\n"
@@ -3122,7 +3171,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    書き込みエラーが発生しない限り成功を返します。"
 
-#: builtins.c:595
+#: builtins.c:597
 msgid ""
 "Write arguments to the standard output.\n"
 "    \n"
@@ -3144,7 +3193,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    書き込みエラーが発生しない限り成功を返します。"
 
-#: builtins.c:610
+#: builtins.c:612
 msgid ""
 "Enable and disable shell builtins.\n"
 "    \n"
@@ -3196,7 +3245,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    NAME が組み込み関数ではないかエラーが発生しない限り成功を返します。"
 
-#: builtins.c:638
+#: builtins.c:640
 msgid ""
 "Execute arguments as a shell command.\n"
 "    \n"
@@ -3216,7 +3265,8 @@ msgstr ""
 "    コマンドの終了ステータスを返します。コマンドが null の場合は成功を\n"
 "    返します。"
 
-#: builtins.c:650
+#: builtins.c:652
+#, fuzzy
 msgid ""
 "Parse option arguments.\n"
 "    \n"
@@ -3249,8 +3299,8 @@ msgid ""
 "    printing of error messages, even if the first character of\n"
 "    OPTSTRING is not a colon.  OPTERR has the value 1 by default.\n"
 "    \n"
-"    Getopts normally parses the positional parameters ($0 - $9), but if\n"
-"    more arguments are given, they are parsed instead.\n"
+"    Getopts normally parses the positional parameters, but if arguments\n"
+"    are supplied as ARG values, they are parsed instead.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns success if an option is found; fails if the end of options is\n"
@@ -3293,7 +3343,7 @@ msgstr ""
 "    オプションが見つかった場合に成功を返します。オプションの終わり\n"
 "    に到達するかエラーが発生した時に失敗を返します。"
 
-#: builtins.c:692
+#: builtins.c:694
 #, fuzzy
 msgid ""
 "Replace the shell with the given command.\n"
@@ -3336,7 +3386,7 @@ msgstr ""
 "    COMMAND が見つからないかリダイレクトエラーが発生しない限り成功を返しま"
 "す。"
 
-#: builtins.c:713
+#: builtins.c:715
 msgid ""
 "Exit the shell.\n"
 "    \n"
@@ -3348,7 +3398,7 @@ msgstr ""
 "    終了ステータス N でシェルを終了します。 N を指定しない場合は\n"
 "    最後に実行したコマンドの終了ステータスになります。"
 
-#: builtins.c:722
+#: builtins.c:724
 msgid ""
 "Exit a login shell.\n"
 "    \n"
@@ -3362,7 +3412,7 @@ msgstr ""
 "ル\n"
 "    内で無い場合はエラーを返します。"
 
-#: builtins.c:732
+#: builtins.c:734
 msgid ""
 "Display or execute commands from the history list.\n"
 "    \n"
@@ -3422,7 +3472,7 @@ msgstr ""
 "0 \n"
 "    以外の値になります。"
 
-#: builtins.c:762
+#: builtins.c:764
 msgid ""
 "Move job to the foreground.\n"
 "    \n"
@@ -3447,7 +3497,7 @@ msgstr ""
 "が\n"
 "    発生した時に失敗を返します。"
 
-#: builtins.c:777
+#: builtins.c:779
 msgid ""
 "Move jobs to the background.\n"
 "    \n"
@@ -3471,7 +3521,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    ジョブ制御が有効になっていないかエラーが発生しない限り成功を返します。"
 
-#: builtins.c:791
+#: builtins.c:793
 #, fuzzy
 msgid ""
 "Remember or display program locations.\n"
@@ -3515,7 +3565,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    NAME が見つからないか、無効なオプションが与えられない限り成功を返します。"
 
-#: builtins.c:816
+#: builtins.c:818
 #, fuzzy
 msgid ""
 "Display information about builtin commands.\n"
@@ -3556,7 +3606,7 @@ msgstr ""
 "    PATTERN が見つからないか無効なオプションが与えられない限り成功を返しま"
 "す。"
 
-#: builtins.c:840
+#: builtins.c:842
 #, fuzzy
 msgid ""
 "Display or manipulate the history list.\n"
@@ -3624,7 +3674,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    無効なオプションが与えられるかエラーが発生しない限り成功を返します。"
 
-#: builtins.c:877
+#: builtins.c:879
 #, fuzzy
 msgid ""
 "Display status of jobs.\n"
@@ -3671,7 +3721,7 @@ msgstr ""
 "    無効なオプションが与えられるかエラーが発生しない限り成功を返します。\n"
 "    もし -x が使用された場合、COMMAND の終了ステータスを返します。"
 
-#: builtins.c:904
+#: builtins.c:906
 #, fuzzy
 msgid ""
 "Remove jobs from current shell.\n"
@@ -3704,7 +3754,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    無効なオプションか JOBSPEC が与えられない限り成功を返します。"
 
-#: builtins.c:923
+#: builtins.c:925
 #, fuzzy
 msgid ""
 "Send a signal to a job.\n"
@@ -3750,7 +3800,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    無効なオプションが与えられるかエラーが発生しない限り成功を返します。"
 
-#: builtins.c:947
+#: builtins.c:949
 msgid ""
 "Evaluate arithmetic expressions.\n"
 "    \n"
@@ -3835,7 +3885,7 @@ msgstr ""
 "    ARG の最終的な評価値が 0 の場合 let は 1 を返します。それ以外の場合は\n"
 "     let は 0 を返します。"
 
-#: builtins.c:992
+#: builtins.c:994
 #, fuzzy
 msgid ""
 "Read a line from the standard input and split it into fields.\n"
@@ -3934,7 +3984,7 @@ msgstr ""
 "エ\n"
 "    ラーが発生、 -u に無効なファイル記述子が与えられた場合を除き0を返します。"
 
-#: builtins.c:1039
+#: builtins.c:1041
 msgid ""
 "Return from a shell function.\n"
 "    \n"
@@ -3958,7 +4008,7 @@ msgstr ""
 "を\n"
 "    返します。"
 
-#: builtins.c:1052
+#: builtins.c:1054
 #, fuzzy
 msgid ""
 "Set or unset values of shell options and positional parameters.\n"
@@ -4124,7 +4174,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    無効なオプションが与えられない限り成功を返します。"
 
-#: builtins.c:1137
+#: builtins.c:1139
 #, fuzzy
 msgid ""
 "Unset values and attributes of shell variables and functions.\n"
@@ -4166,7 +4216,7 @@ msgstr ""
 "    無効なオプションが与えられるか NAME が読み取り専用の場合を除き成功を返し"
 "ます。"
 
-#: builtins.c:1159
+#: builtins.c:1161
 msgid ""
 "Set export attribute for shell variables.\n"
 "    \n"
@@ -4201,7 +4251,7 @@ msgstr ""
 "    無効なオプションが与えられるか、無効な NAME が与えられない限り成功\n"
 "    を返します。"
 
-#: builtins.c:1178
+#: builtins.c:1180
 #, fuzzy
 msgid ""
 "Mark shell variables as unchangeable.\n"
@@ -4241,7 +4291,7 @@ msgstr ""
 "    無効なオプションが与えられるか、与えられた NAME が無効な場合を除き成功\n"
 "    を返します。"
 
-#: builtins.c:1200
+#: builtins.c:1202
 msgid ""
 "Shift positional parameters.\n"
 "    \n"
@@ -4259,7 +4309,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    Nが負の値または $# より大きい場合を除き成功を返します。"
 
-#: builtins.c:1212 builtins.c:1227
+#: builtins.c:1214 builtins.c:1229
 msgid ""
 "Execute commands from a file in the current shell.\n"
 "    \n"
@@ -4283,7 +4333,7 @@ msgstr ""
 "    FILENAME で最後に実行したコマンドのステータスを返します。FILENAME が\n"
 "    読み込めなかった場合は失敗を返します。"
 
-#: builtins.c:1243
+#: builtins.c:1245
 msgid ""
 "Suspend shell execution.\n"
 "    \n"
@@ -4307,7 +4357,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    ジョブ制御が有効でないかエラーが発生しない限り成功を返します。"
 
-#: builtins.c:1259
+#: builtins.c:1261
 #, fuzzy
 msgid ""
 "Evaluate conditional expression.\n"
@@ -4469,7 +4519,7 @@ msgstr ""
 "または\n"
 "    引数が無効な場合に失敗を返します。"
 
-#: builtins.c:1341
+#: builtins.c:1343
 msgid ""
 "Evaluate conditional expression.\n"
 "    \n"
@@ -4482,7 +4532,7 @@ msgstr ""
 "致\n"
 "    するように文字`]'を与えなければいけません。"
 
-#: builtins.c:1350
+#: builtins.c:1352
 msgid ""
 "Display process times.\n"
 "    \n"
@@ -4502,7 +4552,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    常に成功を返します。"
 
-#: builtins.c:1362
+#: builtins.c:1364
 msgid ""
 "Trap signals and other events.\n"
 "    \n"
@@ -4584,7 +4634,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    SIGSPEC が無効か、無効なオプションを与えられない限り成功を返します。"
 
-#: builtins.c:1398
+#: builtins.c:1400
 #, fuzzy
 msgid ""
 "Display information about command type.\n"
@@ -4643,7 +4693,7 @@ msgstr ""
 "合\n"
 "    は失敗を返します。"
 
-#: builtins.c:1429
+#: builtins.c:1431
 #, fuzzy
 msgid ""
 "Modify shell resource limits.\n"
@@ -4675,6 +4725,7 @@ msgid ""
 "      -v\tthe size of virtual memory\n"
 "      -x\tthe maximum number of file locks\n"
 "      -P\tthe maximum number of pseudoterminals\n"
+"      -R\tthe maximum time a real-time process can run before blocking\n"
 "      -T\tthe maximum number of threads\n"
 "    \n"
 "    Not all options are available on all platforms.\n"
@@ -4736,7 +4787,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    無効なオプションを与えるか、エラーが発生しない限り、成功を返します。"
 
-#: builtins.c:1479
+#: builtins.c:1482
 msgid ""
 "Display or set file mode mask.\n"
 "    \n"
@@ -4770,7 +4821,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    MODE が無効か、無効なオプションが与えられない限り成功を返します。"
 
-#: builtins.c:1499
+#: builtins.c:1502
 #, fuzzy
 msgid ""
 "Wait for job completion and return exit status.\n"
@@ -4782,15 +4833,25 @@ msgid ""
 "    status is zero.  If ID is a job specification, waits for all processes\n"
 "    in that job's pipeline.\n"
 "    \n"
-"    If the -n option is supplied, waits for the next job to terminate and\n"
-"    returns its exit status.\n"
+"    If the -n option is supplied, waits for a single job from the list of "
+"IDs,\n"
+"    or, if no IDs are supplied, for the next job to complete and returns "
+"its\n"
+"    exit status.\n"
+"    \n"
+"    If the -p option is supplied, the process or job identifier of the job\n"
+"    for which the exit status is returned is assigned to the variable VAR\n"
+"    named by the option argument. The variable will be unset initially, "
+"before\n"
+"    any assignment. This is useful only when the -n option is supplied.\n"
 "    \n"
 "    If the -f option is supplied, and job control is enabled, waits for the\n"
 "    specified ID to terminate, instead of waiting for it to change status.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns the status of the last ID; fails if ID is invalid or an invalid\n"
-"    option is given."
+"    option is given, or if -n is supplied and the shell has no unwaited-for\n"
+"    children."
 msgstr ""
 "ジョブの実行完了を待ち、終了ステータスを返します。\n"
 "    \n"
@@ -4804,7 +4865,7 @@ msgstr ""
 "    最後の ID の終了ステータスを返します。IDが無効であるか、無効なオプ\n"
 "    ションが与えられた場合には失敗を返します。"
 
-#: builtins.c:1523
+#: builtins.c:1533
 msgid ""
 "Wait for process completion and return exit status.\n"
 "    \n"
@@ -4830,7 +4891,7 @@ msgstr ""
 "えられた\n"
 "    場合は失敗します。"
 
-#: builtins.c:1538
+#: builtins.c:1548
 msgid ""
 "Execute commands for each member in a list.\n"
 "    \n"
@@ -4851,7 +4912,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    最後に実行したコマンドのステータスを返します。"
 
-#: builtins.c:1552
+#: builtins.c:1562
 msgid ""
 "Arithmetic for loop.\n"
 "    \n"
@@ -4881,7 +4942,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    最後に実行したコマンドのステータスを返します。"
 
-#: builtins.c:1570
+#: builtins.c:1580
 msgid ""
 "Select words from a list and execute commands.\n"
 "    \n"
@@ -4916,7 +4977,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    最後に実行したコマンドのステータスを返します。"
 
-#: builtins.c:1591
+#: builtins.c:1601
 msgid ""
 "Report time consumed by pipeline's execution.\n"
 "    \n"
@@ -4944,7 +5005,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    PIPELINE の戻り値が終了ステータスとなります。"
 
-#: builtins.c:1608
+#: builtins.c:1618
 msgid ""
 "Execute commands based on pattern matching.\n"
 "    \n"
@@ -4963,7 +5024,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    最後に実行したコマンドのステータスを返します。"
 
-#: builtins.c:1620
+#: builtins.c:1630
 msgid ""
 "Execute commands based on conditional.\n"
 "    \n"
@@ -4997,7 +5058,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    最後に実行したコマンドの終了ステータスを返します。"
 
-#: builtins.c:1637
+#: builtins.c:1647
 msgid ""
 "Execute commands as long as a test succeeds.\n"
 "    \n"
@@ -5015,7 +5076,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    最後に実行したコマンドのステータスを返します。"
 
-#: builtins.c:1649
+#: builtins.c:1659
 msgid ""
 "Execute commands as long as a test does not succeed.\n"
 "    \n"
@@ -5033,7 +5094,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    最後に実行したコマンドのステータスを返します。"
 
-#: builtins.c:1661
+#: builtins.c:1671
 #, fuzzy
 msgid ""
 "Create a coprocess named NAME.\n"
@@ -5056,7 +5117,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    COMMAND の終了ステータスを返します。"
 
-#: builtins.c:1675
+#: builtins.c:1685
 msgid ""
 "Define shell function.\n"
 "    \n"
@@ -5081,7 +5142,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    NAME が読み取り専用でない限り成功を返します。"
 
-#: builtins.c:1689
+#: builtins.c:1699
 msgid ""
 "Group commands as a unit.\n"
 "    \n"
@@ -5099,7 +5160,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    最後に実行したコマンドのステータスを返します。"
 
-#: builtins.c:1701
+#: builtins.c:1711
 msgid ""
 "Resume job in foreground.\n"
 "    \n"
@@ -5122,12 +5183,13 @@ msgstr ""
 "    終了ステータス:\n"
 "    再開されたジョブの終了ステータスを返します。"
 
-#: builtins.c:1716
+#: builtins.c:1726
+#, fuzzy
 msgid ""
 "Evaluate arithmetic expression.\n"
 "    \n"
 "    The EXPRESSION is evaluated according to the rules for arithmetic\n"
-"    evaluation.  Equivalent to \"let EXPRESSION\".\n"
+"    evaluation.  Equivalent to `let \"EXPRESSION\"'.\n"
 "    \n"
 "    Exit Status:\n"
 "    Returns 1 if EXPRESSION evaluates to 0; returns 0 otherwise."
@@ -5140,7 +5202,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    EXPRESSION の評価値が 0 の場合は 1、それ以外は 0 を返します。"
 
-#: builtins.c:1728
+#: builtins.c:1738
 msgid ""
 "Execute conditional command.\n"
 "    \n"
@@ -5195,7 +5257,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    EXPRESSION の値に基づいて 0 または 1 を返します。"
 
-#: builtins.c:1754
+#: builtins.c:1764
 msgid ""
 "Common shell variable names and usage.\n"
 "    \n"
@@ -5296,7 +5358,7 @@ msgstr ""
 "    HISTIGNORE\tヒストリ一覧に保存されるコマンドを決める時に使用される\n"
 "    \t\tコロン (:) で区切られたパターンの一覧。\n"
 
-#: builtins.c:1811
+#: builtins.c:1821
 #, fuzzy
 msgid ""
 "Add directories to stack.\n"
@@ -5356,7 +5418,7 @@ msgstr ""
 "    無効な引数が与えられるかディレクトリ変更が失敗しない限り成功を\n"
 "    返します。"
 
-#: builtins.c:1845
+#: builtins.c:1855
 #, fuzzy
 msgid ""
 "Remove directories from stack.\n"
@@ -5408,7 +5470,7 @@ msgstr ""
 "    無効な引数が与えられるかディレクトリ変更が失敗しない限り成功を\n"
 "    返します。"
 
-#: builtins.c:1875
+#: builtins.c:1885
 #, fuzzy
 msgid ""
 "Display directory stack.\n"
@@ -5461,7 +5523,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    無効なオプションが与えられるかエラーが発生しない限り成功を返します。"
 
-#: builtins.c:1906
+#: builtins.c:1916
 #, fuzzy
 msgid ""
 "Set and unset shell options.\n"
@@ -5497,7 +5559,7 @@ msgstr ""
 "    OPTNAME が有効な場合は成功を返します。無効なオプションが与えられた場合\n"
 "    または OPTNAME が無効な場合は失敗を返します。"
 
-#: builtins.c:1927
+#: builtins.c:1937
 #, fuzzy
 msgid ""
 "Formats and prints ARGUMENTS under control of the FORMAT.\n"
@@ -5515,8 +5577,8 @@ msgid ""
 "successive\n"
 "    argument.\n"
 "    \n"
-"    In addition to the standard format specifications described in printf"
-"(1),\n"
+"    In addition to the standard format specifications described in "
+"printf(1),\n"
 "    printf interprets:\n"
 "    \n"
 "      %b\texpand backslash escape sequences in the corresponding argument\n"
@@ -5567,7 +5629,7 @@ msgstr ""
 "    無効な引数が与えられるか、書き込み、代入エラーが発生しない限り成功を返し"
 "ます。"
 
-#: builtins.c:1961
+#: builtins.c:1971
 #, fuzzy
 msgid ""
 "Specify how arguments are to be completed by Readline.\n"
@@ -5621,7 +5683,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    無効なオプションが与えられるかエラーが発生しない限り成功を返します。"
 
-#: builtins.c:1991
+#: builtins.c:2001
 msgid ""
 "Display possible completions depending on the options.\n"
 "    \n"
@@ -5643,7 +5705,7 @@ msgstr ""
 "    終了ステータス:\n"
 "    無効なオプションが与えられるかエラーが発生しない限り成功を返します。"
 
-#: builtins.c:2006
+#: builtins.c:2016
 #, fuzzy
 msgid ""
 "Modify or display completion options.\n"
@@ -5701,7 +5763,7 @@ msgstr ""
 "合\n"
 "    を除き、成功を返します。"
 
-#: builtins.c:2037
+#: builtins.c:2047
 #, fuzzy
 msgid ""
 "Read lines from the standard input into an indexed array variable.\n"
@@ -5778,7 +5840,7 @@ msgstr ""
 "列で無い\n"
 "    場合を除き成功を返します。"
 
-#: builtins.c:2073
+#: builtins.c:2083
 msgid ""
 "Read lines from a file into an array variable.\n"
 "    \n"
@@ -5787,6 +5849,21 @@ msgstr ""
 "ファイルから行を読み込み配列変数に代入します。\n"
 "    \n"
 "    `mapfile'の別名です。"
+
+#~ msgid ""
+#~ "Returns the context of the current subroutine call.\n"
+#~ "    \n"
+#~ "    Without EXPR, returns "
+#~ msgstr ""
+#~ "現在のサブルーチン呼び出しのコンテキストを返します。\n"
+#~ "    \n"
+#~ "    EXPR が無い場合、次を返します "
+
+#~ msgid "add_process: process %5ld (%s) in the_pipeline"
+#~ msgstr "add_process: プロセス %5ld (%s) が the_pipeline にあります"
+
+#~ msgid "Unknown Signal #"
+#~ msgstr "不明なシグナル番号"
 
 #~ msgid "Copyright (C) 2012 Free Software Foundation, Inc."
 #~ msgstr "Copyright (C) 2012 Free Software Foundation, Inc."

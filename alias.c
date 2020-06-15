@@ -1,7 +1,7 @@
 /* alias.c -- Not a full alias, but just the kind that we use in the
    shell.  Csh style alias is somewhere else (`over there, in a box'). */
 
-/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -48,17 +48,17 @@
 
 #define ALIAS_HASH_BUCKETS	64	/* must be power of two */
 
-typedef int sh_alias_map_func_t __P((alias_t *));
+typedef int sh_alias_map_func_t PARAMS((alias_t *));
 
-static void free_alias_data __P((PTR_T));
-static alias_t **map_over_aliases __P((sh_alias_map_func_t *));
-static void sort_aliases __P((alias_t **));
-static int qsort_alias_compare __P((alias_t **, alias_t **));
+static void free_alias_data PARAMS((PTR_T));
+static alias_t **map_over_aliases PARAMS((sh_alias_map_func_t *));
+static void sort_aliases PARAMS((alias_t **));
+static int qsort_alias_compare PARAMS((alias_t **, alias_t **));
 
 #if defined (READLINE)
-static int skipquotes __P((char *, int));
-static int skipws __P((char *, int));
-static int rd_token __P((char *, int));
+static int skipquotes PARAMS((char *, int));
+static int skipws PARAMS((char *, int));
+static int rd_token PARAMS((char *, int));
 #endif
 
 /* Non-zero means expand all words on the line.  Otherwise, expand
@@ -127,9 +127,12 @@ add_alias (name, value)
       free (temp->value);
       temp->value = savestring (value);
       temp->flags &= ~AL_EXPANDNEXT;
-      n = value[strlen (value) - 1];
-      if (n == ' ' || n == '\t')
-	temp->flags |= AL_EXPANDNEXT;
+      if (value[0])
+	{
+	  n = value[strlen (value) - 1];
+	  if (n == ' ' || n == '\t')
+	    temp->flags |= AL_EXPANDNEXT;
+	}
     }
   else
     {
@@ -138,9 +141,12 @@ add_alias (name, value)
       temp->value = savestring (value);
       temp->flags = 0;
 
-      n = value[strlen (value) - 1];
-      if (n == ' ' || n == '\t')
-	temp->flags |= AL_EXPANDNEXT;
+      if (value[0])
+	{
+	  n = value[strlen (value) - 1];
+	  if (n == ' ' || n == '\t')
+	    temp->flags |= AL_EXPANDNEXT;
+	}
 
       elt = hash_insert (savestring (name), aliases, HASH_NOSRCH);
       elt->data = temp;

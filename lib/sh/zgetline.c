@@ -1,7 +1,7 @@
 /* zgetline - read a line of input from a specified file descriptor and return
 	      a pointer to a newly-allocated buffer containing the data. */
 
-/* Copyright (C) 2008,2009 Free Software Foundation, Inc.
+/* Copyright (C) 2008-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -34,13 +34,13 @@
 extern int errno;
 #endif
 
-extern ssize_t zread __P((int, char *, size_t));
-extern ssize_t zreadc __P((int, char *));
-extern ssize_t zreadintr __P((int, char *, size_t));
-extern ssize_t zreadcintr __P((int, char *));
+extern ssize_t zread PARAMS((int, char *, size_t));
+extern ssize_t zreadc PARAMS((int, char *));
+extern ssize_t zreadintr PARAMS((int, char *, size_t));
+extern ssize_t zreadcintr PARAMS((int, char *));
 
-typedef ssize_t breadfunc_t __P((int, char *, size_t));
-typedef ssize_t creadfunc_t __P((int, char *));
+typedef ssize_t breadfunc_t PARAMS((int, char *, size_t));
+typedef ssize_t creadfunc_t PARAMS((int, char *));
 
 /* Initial memory allocation for automatic growing buffer in zreadlinec */
 #define GET_LINE_INITIAL_ALLOCATION 16

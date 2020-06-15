@@ -1,6 +1,6 @@
 /* hashcmd.h - Common defines for hashing filenames. */
 
-/* Copyright (C) 1993-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -21,7 +21,7 @@
 #include "stdc.h"
 #include "hashlib.h"
 
-#define FILENAME_HASH_BUCKETS 64	/* must be power of two */
+#define FILENAME_HASH_BUCKETS 256	/* must be power of two */
 
 extern HASH_TABLE *hashed_filenames;
 
@@ -35,9 +35,9 @@ typedef struct _pathdata {
 
 #define pathdata(x) ((PATH_DATA *)(x)->data)
 
-extern void phash_create __P((void));
-extern void phash_flush __P((void));
+extern void phash_create PARAMS((void));
+extern void phash_flush PARAMS((void));
 
-extern void phash_insert __P((char *, char *, int, int));
-extern int phash_remove __P((const char *));
-extern char *phash_search __P((const char *));
+extern void phash_insert PARAMS((char *, char *, int, int));
+extern int phash_remove PARAMS((const char *));
+extern char *phash_search PARAMS((const char *));

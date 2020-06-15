@@ -1,4 +1,4 @@
-/* Copyright (C) 1999 Free Software Foundation, Inc. */
+/* Copyright (C) 1999-2020 Free Software Foundation, Inc. */
 
 /* This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -67,24 +67,24 @@
 
 /* Get and set terminal attributes for the file descriptor passed as
    an argument. */
-extern int ttgetattr __P((int, TTYSTRUCT *));
-extern int ttsetattr __P((int, TTYSTRUCT *));
+extern int ttgetattr PARAMS((int, TTYSTRUCT *));
+extern int ttsetattr PARAMS((int, TTYSTRUCT *));
 
 /* Save and restore the terminal's attributes from static storage. */
-extern void ttsave __P((void));
-extern void ttrestore __P((void));
+extern void ttsave PARAMS((void));
+extern void ttrestore PARAMS((void));
 
 /* Return the attributes corresponding to the file descriptor (0 or 1)
    passed as an argument. */
-extern TTYSTRUCT *ttattr __P((int));
+extern TTYSTRUCT *ttattr PARAMS((int));
 
 /* These functions only operate on the passed TTYSTRUCT; they don't
    actually change anything with the kernel's current tty settings. */
-extern int tt_setonechar __P((TTYSTRUCT *));
-extern int tt_setnoecho __P((TTYSTRUCT *));
-extern int tt_seteightbit __P((TTYSTRUCT *));
-extern int tt_setnocanon __P((TTYSTRUCT *));
-extern int tt_setcbreak __P((TTYSTRUCT *));
+extern int tt_setonechar PARAMS((TTYSTRUCT *));
+extern int tt_setnoecho PARAMS((TTYSTRUCT *));
+extern int tt_seteightbit PARAMS((TTYSTRUCT *));
+extern int tt_setnocanon PARAMS((TTYSTRUCT *));
+extern int tt_setcbreak PARAMS((TTYSTRUCT *));
 
 /* These functions are all generally mutually exclusive.  If you call
    more than one (bracketed with calls to ttsave and ttrestore, of
@@ -94,19 +94,19 @@ extern int tt_setcbreak __P((TTYSTRUCT *));
 
 /* These functions work with a given file descriptor and set terminal
    attributes */
-extern int ttfd_onechar __P((int, TTYSTRUCT *));
-extern int ttfd_noecho __P((int, TTYSTRUCT *));
-extern int ttfd_eightbit __P((int, TTYSTRUCT *));
-extern int ttfd_nocanon __P((int, TTYSTRUCT *));
+extern int ttfd_onechar PARAMS((int, TTYSTRUCT *));
+extern int ttfd_noecho PARAMS((int, TTYSTRUCT *));
+extern int ttfd_eightbit PARAMS((int, TTYSTRUCT *));
+extern int ttfd_nocanon PARAMS((int, TTYSTRUCT *));
 
-extern int ttfd_cbreak __P((int, TTYSTRUCT *));
+extern int ttfd_cbreak PARAMS((int, TTYSTRUCT *));
 
 /* These functions work with fd 0 and the TTYSTRUCT saved with ttsave () */
-extern int ttonechar __P((void));
-extern int ttnoecho __P((void));
-extern int tteightbit __P((void));
-extern int ttnocanon __P((void));
+extern int ttonechar PARAMS((void));
+extern int ttnoecho PARAMS((void));
+extern int tteightbit PARAMS((void));
+extern int ttnocanon PARAMS((void));
 
-extern int ttcbreak __P((void));
+extern int ttcbreak PARAMS((void));
 
 #endif

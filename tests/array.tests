@@ -1,3 +1,16 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 # this is needed so that the bad assignments (b[]=bcde, for example) do not
 # cause fatal shell errors when in posix mode
 set +o posix
@@ -155,7 +168,7 @@ echo ${x[4]}
 echo efgh | ( read x[1] ; echo ${x[1]} )
 echo wxyz | ( declare -a x ; read x ; echo $x ; echo ${x[0]} )
 
-# Make sure that arrays can be used to save the positional paramters verbatim
+# Make sure that arrays can be used to save the positional parameters verbatim
 set -- a 'b c' d 'e f g' h
 
 ARGV=( [0]=$0 "$@" )
@@ -247,7 +260,7 @@ ${THIS_SH} ./array2.sub
 # some old bugs and ksh93 compatibility tests
 ${THIS_SH} ./array3.sub
 
-# some compound assingment parsing problems that showed up in bash-3.1-release
+# some compound assignment parsing problems that showed up in bash-3.1-release
 ${THIS_SH} ./array4.sub
 
 set +u

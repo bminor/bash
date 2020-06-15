@@ -49,8 +49,8 @@
  *  * Tables are converted but some features are not possible in html.
  *  * The tabbing environment is converted by counting characters and adding
  *    spaces. This might go wrong (outside <PRE>)
- *  * Some pages look beter if man2html works in troff mode, especially pages
- *    with tables. You can deside at compile time which made you want to use.
+ *  * Some pages look better if man2html works in troff mode, especially pages
+ *    with tables. You can decide at compile time which made you want to use.
  *
  *    -DNROFF=0     troff mode
  *    -DNROFF=1     nroff mode   (default)
@@ -3805,7 +3805,7 @@ scan_troff(char *c, int san, char **result)
 			   && *(h + 1) && islower(*(h + 1))
 			   && *(h + 2) && isspace(*(h + 2))) {
 			/*
-			 * BSD imbedded command eg ".It Fl Ar arg1 Fl Ar
+			 * BSD embedded command eg ".It Fl Ar arg1 Fl Ar
 			 * arg2"
 			 */
 			FLUSHIBP;

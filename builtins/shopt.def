@@ -1,7 +1,7 @@
 This file is shopt.def, from which is created shopt.c.
 It implements the Bash `shopt' builtin.
 
-Copyright (C) 1994-2018 Free Software Foundation, Inc.
+Copyright (C) 1994-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -105,7 +105,7 @@ extern int force_fignore;
 extern int dircomplete_spelling, dircomplete_expand;
 extern int complete_fullquote;
 
-extern int enable_hostname_completion __P((int));
+extern int enable_hostname_completion PARAMS((int));
 #endif
 
 #if defined (PROGRAMMABLE_COMPLETION)
@@ -126,21 +126,21 @@ extern int array_expand_once;
 extern int syslog_history;
 #endif
 
-static void shopt_error __P((char *));
+static void shopt_error PARAMS((char *));
 
-static int set_shellopts_after_change __P((char *, int));
-static int set_compatibility_level __P((char *, int));
+static int set_shellopts_after_change PARAMS((char *, int));
+static int set_compatibility_level PARAMS((char *, int));
 
 #if defined (RESTRICTED_SHELL)
-static int set_restricted_shell __P((char *, int));
+static int set_restricted_shell PARAMS((char *, int));
 #endif
 
 #if defined (READLINE)
-static int shopt_enable_hostname_completion __P((char *, int));
-static int shopt_set_complete_direxpand __P((char *, int));
+static int shopt_enable_hostname_completion PARAMS((char *, int));
+static int shopt_set_complete_direxpand PARAMS((char *, int));
 #endif
 
-static int shopt_set_debug_mode __P((char *, int));
+static int shopt_set_debug_mode PARAMS((char *, int));
 
 static int shopt_login_shell;
 static int shopt_compat31;
@@ -151,7 +151,7 @@ static int shopt_compat42;
 static int shopt_compat43;
 static int shopt_compat44;
 
-typedef int shopt_set_func_t __P((char *, int));
+typedef int shopt_set_func_t PARAMS((char *, int));
 
 /* If you add a new variable name here, make sure to set the default value
    appropriately in reset_shopt_options. */
@@ -255,14 +255,14 @@ static struct {
 static const char * const on = "on";
 static const char * const off = "off";
 
-static int find_shopt __P((char *));
-static int toggle_shopts __P((int, WORD_LIST *, int));
-static void print_shopt __P((char *, int, int));
-static int list_shopts __P((WORD_LIST *, int));
-static int list_some_shopts __P((int, int));
-static int list_shopt_o_options __P((WORD_LIST *, int));
-static int list_some_o_options __P((int, int));
-static int set_shopt_o_options __P((int, WORD_LIST *, int));
+static int find_shopt PARAMS((char *));
+static int toggle_shopts PARAMS((int, WORD_LIST *, int));
+static void print_shopt PARAMS((char *, int, int));
+static int list_shopts PARAMS((WORD_LIST *, int));
+static int list_some_shopts PARAMS((int, int));
+static int list_shopt_o_options PARAMS((WORD_LIST *, int));
+static int list_some_o_options PARAMS((int, int));
+static int set_shopt_o_options PARAMS((int, WORD_LIST *, int));
 
 #define SFLAG	0x01
 #define UFLAG	0x02
@@ -347,6 +347,7 @@ reset_shopt_options ()
   inherit_errexit = 0;
   interactive_comments = 1;
   lastpipe_opt = 0;
+  localvar_inherit = localvar_unset = 0;
   mail_warning = 0;
   glob_ignore_case = match_ignore_case = 0;
   print_shift_error = 0;
@@ -358,6 +359,10 @@ reset_shopt_options ()
 
 #if defined (EXTENDED_GLOB)
   extended_glob = EXTGLOB_DEFAULT;
+#endif
+
+#if defined (ARRAY_VARS)
+  assoc_expand_once = 0;
 #endif
 
 #if defined (HISTORY)
@@ -390,6 +395,9 @@ reset_shopt_options ()
 
 #if defined (PROGRAMMABLE_COMPLETION)
   prog_completion_enabled = 1;
+#  if defined (ALIAS)
+  progcomp_alias = 0;
+#  endif
 #endif
 
 #if defined (DEFAULT_ECHO_TO_XPG) || defined (STRICT_POSIX)

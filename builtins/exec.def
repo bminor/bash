@@ -1,7 +1,7 @@
 This file is exec.def, from which is created exec.c.
 It implements the builtin "exec" in Bash.
 
-Copyright (C) 1987-2015 Free Software Foundation, Inc.
+Copyright (C) 1987-2019 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -22,7 +22,7 @@ $PRODUCES exec.c
 
 $BUILTIN exec
 $FUNCTION exec_builtin
-$SHORT_DOC exec [-cl] [-a name] [command [arguments ...]] [redirection ...]
+$SHORT_DOC exec [-cl] [-a name] [command [argument ...]] [redirection ...]
 Replace the shell with the given command.
 
 Execute COMMAND, replacing this shell with the specified program.
@@ -51,6 +51,8 @@ $END
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif
+
+#include <stdio.h>
 
 #include "../bashansi.h"
 #include "../bashintl.h"
@@ -99,7 +101,7 @@ exec_builtin (list)
      WORD_LIST *list;
 {
   int exit_value = EXECUTION_FAILURE;
-  int cleanenv, login, opt;
+  int cleanenv, login, opt, orig_job_control;
   char *argv0, *command, **args, **env, *newname, *com2;
 
   cleanenv = login = 0;
@@ -216,6 +218,7 @@ exec_builtin (list)
   restore_original_signals ();
 
 #if defined (JOB_CONTROL)
+  orig_job_control = job_control;	/* XXX - was also interactive_shell */
   if (subshell_environment == 0)
     end_job_control ();
   if (interactive || job_control)
@@ -262,7 +265,7 @@ failed_exec:
   initialize_signals (1);
 
 #if defined (JOB_CONTROL)
-  if (interactive_shell || job_control)
+  if (orig_job_control)
     restart_job_control ();
 #endif /* JOB_CONTROL */
 

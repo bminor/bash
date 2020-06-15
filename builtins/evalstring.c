@@ -1,6 +1,6 @@
 /* evalstring.c - evaluate a string as one or more shell commands. */
 
-/* Copyright (C) 1996-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -63,7 +63,7 @@ extern int errno;
 
 int parse_and_execute_level = 0;
 
-static int cat_file __P((REDIRECT *));
+static int cat_file PARAMS((REDIRECT *));
 
 #define PE_TAG "parse_and_execute top"
 #define PS_TAG "parse_string top"
@@ -339,6 +339,7 @@ parse_and_execute (string, from_file, flags)
 	      if (command)
 		run_unwind_frame ("pe_dispose");
 	      last_result = last_command_exit_value = EXECUTION_FAILURE; /* XXX */
+	      set_pipestatus_from_exit (last_command_exit_value);
 	      if (subshell_environment)
 		{
 		  should_jump_to_top_level = 1;
@@ -389,6 +390,7 @@ parse_and_execute (string, from_file, flags)
 		      internal_warning (_("%s: ignoring function definition attempt"), from_file);
 		      should_jump_to_top_level = 0;
 		      last_result = last_command_exit_value = EX_BADUSAGE;
+		      set_pipestatus_from_exit (last_command_exit_value);
 		      reset_parser ();
 		      break;
 		    }
@@ -609,7 +611,7 @@ itrace("parse_string: longjmp executed: code = %d", code);
 	  break;
     }
 
- out:
+out:
 
   global_command = oglobal;
   nc = bash_input.location.string - ostring;
@@ -654,7 +656,7 @@ cat_file (r)
 
   if (fn == 0)
     {
-      redirection_error (r, AMBIGUOUS_REDIRECT);
+      redirection_error (r, AMBIGUOUS_REDIRECT, fn);
       return -1;
     }
 

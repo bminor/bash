@@ -1,6 +1,6 @@
 /* watch.h - definitions for tables for keeping track of allocated memory */
 
-/*  Copyright (C) 2001-2003 Free Software Foundation, Inc.
+/*  Copyright (C) 2001-2020 Free Software Foundation, Inc.
 
     This file is part of GNU Bash, the Bourne-Again SHell.
 
@@ -34,7 +34,7 @@
 
 extern int _malloc_nwatch;
 
-extern void _malloc_ckwatch __P((PTR_T, const char *, int, int, unsigned long));
+extern void _malloc_ckwatch PARAMS((PTR_T, const char *, int, int, unsigned long));
                     
 #endif /* MALLOC_WATCH */
 

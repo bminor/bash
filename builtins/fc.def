@@ -1,7 +1,7 @@
 This file is fc.def, from which is created fc.c.
 It implements the builtin "fc" in Bash.
 
-Copyright (C) 1987-2015 Free Software Foundation, Inc.
+Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -86,9 +86,11 @@ $END
 extern int errno;
 #endif /* !errno */
 
-extern int unlink __P((const char *));
+extern int unlink PARAMS((const char *));
 
-extern FILE *sh_mktmpfp __P((char *, int, char **));
+extern FILE *sh_mktmpfp PARAMS((char *, int, char **));
+
+extern int suppress_debug_trap_verbose;
 
 /* **************************************************************** */
 /*								    */
@@ -144,14 +146,14 @@ typedef struct repl {
 		} \
 	} while (0)
 
-static char *fc_dosubs __P((char *, REPL *));
-static char *fc_gethist __P((char *, HIST_ENTRY **));
-static int fc_gethnum __P((char *, HIST_ENTRY **));
-static int fc_number __P((WORD_LIST *));
-static void fc_replhist __P((char *));
+static char *fc_dosubs PARAMS((char *, REPL *));
+static char *fc_gethist PARAMS((char *, HIST_ENTRY **, int));
+static int fc_gethnum PARAMS((char *, HIST_ENTRY **, int));
+static int fc_number PARAMS((WORD_LIST *));
+static void fc_replhist PARAMS((char *));
 #ifdef INCLUDE_UNUSED
-static char *fc_readline __P((FILE *));
-static void fc_addhist __P((char *));
+static char *fc_readline PARAMS((FILE *));
+static void fc_addhist PARAMS((char *));
 #endif
 
 static void
@@ -258,7 +260,7 @@ fc_builtin (list)
 
       /* If we still have something in list, it is a command spec.
 	 Otherwise, we use the most recent command in time. */
-      command = fc_gethist (list ? list->word->word : (char *)NULL, hlist);
+      command = fc_gethist (list ? list->word->word : (char *)NULL, hlist, 0);
 
       if (command == NULL)
 	{
@@ -326,11 +328,11 @@ fc_builtin (list)
 
   if (list)
     {
-      histbeg = fc_gethnum (list->word->word, hlist);
+      histbeg = fc_gethnum (list->word->word, hlist, listing);
       list = list->next;
 
       if (list)
-	histend = fc_gethnum (list->word->word, hlist);
+	histend = fc_gethnum (list->word->word, hlist, listing);
       else if (histbeg == real_last)
 	histend = listing ? real_last : histbeg;
       else
@@ -351,6 +353,13 @@ fc_builtin (list)
 	histbeg = histend = last_hist;
     }
 
+  /* We print error messages for line specifications out of range. */
+  if ((histbeg < 0) || (histend < 0))
+    {
+      sh_erange ((char *)NULL, _("history specification"));
+      return (EXECUTION_FAILURE);
+    }
+
   /* "When not listing, the fc command that caused the editing shall not be
      entered into the history list." */
   if (listing == 0 && hist_last_line_added)
@@ -364,6 +373,13 @@ fc_builtin (list)
 	 in parse_and_execute(). */
       if (histbeg == histend && histend == last_hist && hlist[last_hist] == 0)
 	last_hist = histbeg = --histend;
+
+      if (hlist[last_hist] == 0)
+	last_hist--;
+      if (histend >= last_hist)
+	histend = last_hist;
+      else if (histbeg >= last_hist)
+	histbeg = last_hist;
     }
 
   /* We print error messages for line specifications out of range. */
@@ -445,7 +461,7 @@ fc_builtin (list)
     }
 
 #if defined (READLINE)
-  /* If we're executing as part of a dispatched readline commnand like
+  /* If we're executing as part of a dispatched readline command like
      {emacs,vi}_edit_and_execute_command, the readline state will indicate it.
      We could remove the partial command from the history, but ksh93 doesn't
      so we stay compatible. */
@@ -463,7 +479,9 @@ fc_builtin (list)
   add_unwind_protect (xfree, fn);
   add_unwind_protect (unlink, fn);
   add_unwind_protect (set_verbose_flag, (char *)NULL);
+  unwind_protect_int (suppress_debug_trap_verbose);
   echo_input_at_read = 1;
+  suppress_debug_trap_verbose = 1;
 
   retval = fc_execute_file (fn);
   run_unwind_frame ("fc builtin");
@@ -488,11 +506,13 @@ fc_number (list)
 
 /* Return an absolute index into HLIST which corresponds to COMMAND.  If
    COMMAND is a number, then it was specified in relative terms.  If it
-   is a string, then it is the start of a command line present in HLIST. */
+   is a string, then it is the start of a command line present in HLIST.
+   MODE is 1 if we are listing commands, 0 if we are executing them. */
 static int
-fc_gethnum (command, hlist)
+fc_gethnum (command, hlist, mode)
      char *command;
      HIST_ENTRY **hlist;
+     int mode;
 {
   int sign, n, clen, rh;
   register int i, j, last_hist, real_last;
@@ -558,7 +578,7 @@ fc_gethnum (command, hlist)
 	  return (n < 0 ? 0 : n);
 	}
       else if (n == 0)
-	return ((sign == -1) ? real_last : i);
+	return ((sign == -1) ? (mode ? real_last : -1) : i);
       else
 	{
 	  n -= history_base;
@@ -576,18 +596,20 @@ fc_gethnum (command, hlist)
 }
 
 /* Locate the most recent history line which begins with
-   COMMAND in HLIST, and return a malloc()'ed copy of it. */
+   COMMAND in HLIST, and return a malloc()'ed copy of it.
+   MODE is 1 if we are listing commands, 0 if we are executing them. */
 static char *
-fc_gethist (command, hlist)
+fc_gethist (command, hlist, mode)
      char *command;
      HIST_ENTRY **hlist;
+     int mode;
 {
   int i;
 
   if (hlist == 0)
     return ((char *)NULL);
 
-  i = fc_gethnum (command, hlist);
+  i = fc_gethnum (command, hlist, mode);
 
   if (i >= 0)
     return (savestring (histline (i)));

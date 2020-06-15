@@ -1,6 +1,6 @@
 /* winsize.c - handle window size changes and information. */
 
-/* Copyright (C) 2005-2015 Free Software Foundation, Inc.
+/* Copyright (C) 2005-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -68,9 +68,9 @@ extern int errno;
 extern int shell_tty;
 
 #if defined (READLINE)
-extern void rl_set_screen_size __P((int, int));
+extern void rl_set_screen_size PARAMS((int, int));
 #endif
-extern void sh_set_lines_and_columns __P((int, int));
+extern void sh_set_lines_and_columns PARAMS((int, int));
 
 void
 get_new_window_size (from_sig, rp, cp)

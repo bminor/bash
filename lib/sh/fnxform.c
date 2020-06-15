@@ -1,6 +1,6 @@
 /* fnxform - use iconv(3) to transform strings to and from "filename" format */
 
-/* Copyright (C) 2009-2010 Free Software Foundation, Inc.
+/* Copyright (C) 2009-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -35,9 +35,9 @@
 #endif
 
 #if defined (HAVE_LOCALE_CHARSET)
-extern const char *locale_charset __P((void));
+extern const char *locale_charset PARAMS((void));
 #else
-extern char *get_locale_var __P((char *));
+extern char *get_locale_var PARAMS((char *));
 #endif
 
 #if defined (HAVE_ICONV)
@@ -49,9 +49,9 @@ static iconv_t conv_tofs = (iconv_t)-1;
 static char *outbuf = 0;
 static size_t outlen = 0;
 
-static char *curencoding __P((void));
-static void init_tofs __P((void));
-static void init_fromfs __P((void));
+static char *curencoding PARAMS((void));
+static void init_tofs PARAMS((void));
+static void init_fromfs PARAMS((void));
 
 static char *
 curencoding ()

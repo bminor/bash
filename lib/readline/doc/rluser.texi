@@ -9,7 +9,7 @@ use these features.  There is a document entitled "readline.texinfo"
 which contains both end-user and programmer documentation for the
 GNU Readline Library.
 
-Copyright (C) 1988--2016 Free Software Foundation, Inc.
+Copyright (C) 1988--2020 Free Software Foundation, Inc.
 
 Authored by Brian Fox and Chet Ramey.
 
@@ -350,6 +350,11 @@ file is taken from the value of the environment variable @env{INPUTRC}.  If
 that variable is unset, the default is @file{~/.inputrc}.  If that
 file does not exist or cannot be read, the ultimate default is
 @file{/etc/inputrc}.
+@ifset BashFeatures
+The @w{@code{bind}} builtin command can also be used to set Readline
+keybindings and variables.
+@xref{Bash Builtins}.
+@end ifset
 
 When a program which uses the Readline library starts up, the
 init file is read, and the key bindings are set.
@@ -583,8 +588,9 @@ the maximum number of history entries will be set to 500.
 This variable can be set to either @samp{on} or @samp{off}.  Setting it
 to @samp{on} means that the text of the lines being edited will scroll
 horizontally on a single screen line when they are longer than the width
-of the screen, instead of wrapping onto a new screen line.  By default,
-this variable is set to @samp{off}.
+of the screen, instead of wrapping onto a new screen line.
+This variable is automatically set to @samp{on} for terminals of height 1.
+By default, this variable is set to @samp{off}.
 
 @item input-meta
 @vindex input-meta
@@ -1173,11 +1179,11 @@ Move back to the start of the current or previous word.
 Words are composed of letters and digits.
 
 @ifset BashFeatures
-@item shell-forward-word ()
+@item shell-forward-word (M-C-f)
 Move forward to the end of the next word.
 Words are delimited by non-quoted shell metacharacters.
 
-@item shell-backward-word ()
+@item shell-backward-word (M-C-b)
 Move back to the start of the current or previous word.
 Words are delimited by non-quoted shell metacharacters.
 @end ifset
@@ -1195,8 +1201,14 @@ Readline line does not take up more than one physical line or if the length
 of the current Readline line is not greater than the length of the prompt
 plus the screen width.
 
+@item clear-display (M-C-l)
+Clear the screen and, if possible, the terminal's scrollback buffer,
+then redraw the current line,
+leaving the current line at the top of the screen.
+
 @item clear-screen (C-l)
-Clear the screen and redraw the current line,
+Clear the screen,
+then redraw the current line,
 leaving the current line at the top of the screen.
 
 @item redraw-current-line ()
@@ -1309,6 +1321,14 @@ the direction to move through the history.  A negative argument switches
 the direction through the history (back or forward).
 The history expansion facilities are used to extract the last argument,
 as if the @samp{!$} history expansion had been specified.
+
+@item operate-and-get-next (C-o)
+Accept the current line for return to the calling application as if a
+newline had been entered,
+and fetch the next line relative to the current line from the history
+for editing.
+A numeric argument, if supplied, specifies the history entry to use instead
+of the current line.
 
 @end ftable
 
@@ -1427,7 +1447,7 @@ Kill the word behind point.
 Word boundaries are the same as @code{backward-word}.
 
 @ifset BashFeatures
-@item shell-kill-word ()
+@item shell-kill-word (M-C-d)
 Kill from point to the end of the current word, or if between
 words, to the end of the next word.
 Word boundaries are the same as @code{shell-forward-word}.
@@ -1436,6 +1456,14 @@ Word boundaries are the same as @code{shell-forward-word}.
 Kill the word behind point.
 Word boundaries are the same as @code{shell-backward-word}.
 @end ifset
+
+@item shell-transpose-words (M-C-t)
+Drag the word before point past the word after point,
+moving point past that word as well.
+If the insertion point is at the end of the line, this transposes
+the last two words on the line.
+Word boundaries are the same as @code{shell-forward-word} and
+@code{shell-backward-word}.
 
 @item unix-word-rubout (C-w)
 Kill the word behind point, using white space as a word boundary.
@@ -1774,12 +1802,6 @@ Perform history and alias expansion on the current line.
 @item insert-last-argument (M-. or M-_)
 A synonym for @code{yank-last-arg}.
 
-@item operate-and-get-next (C-o)
-Accept the current line for execution and fetch the next line
-relative to the current line from the history for editing.
-A numeric argument, if supplied, specifies the history entry to use instead
-of the current line.
-
 @item edit-and-execute-command (C-x C-e)
 Invoke an editor on the current command line, and execute the result as shell
 commands.
@@ -2044,7 +2066,7 @@ The @option{-E} option indicates that other supplied options and actions should
 apply to ``empty'' command completion; that is, completion attempted on a 
 blank line.
 The @option{-I} option indicates that other supplied options and actions should
-apply to completion on the inital non-assignment word on the line, or after a
+apply to completion on the initial non-assignment word on the line, or after a
 command delimiter such as @samp{;} or @samp{|}, which is usually command
 name completion.
 If multiple options are supplied, the @option{-D} option takes precedence
@@ -2255,7 +2277,7 @@ The @option{-E} option indicates that other supplied options should
 apply to ``empty'' command completion; that is, completion attempted on a 
 blank line.
 The @option{-I} option indicates that other supplied options should
-apply to completion on the inital non-assignment word on the line, or after a
+apply to completion on the initial non-assignment word on the line, or after a
 command delimiter such as @samp{;} or @samp{|}, which is usually command
 name completion.
 
@@ -2370,7 +2392,7 @@ character to the directory name, in case we want to append to it.
 The @option{-o bashdefault} option brings in the rest of the "Bash default"
 completions -- possible completion that Bash adds to the default Readline
 set.  These include things like command name completion, variable completion
-for words beginning with @samp{@{}, completions containing pathname
+for words beginning with @samp{$} or @samp{$@{}, completions containing pathname
 expansion patterns (@pxref{Filename Expansion}), and so on.
 
 Once installed using @code{complete}, @code{_comp_cd} will be called every
@@ -2380,7 +2402,7 @@ Many more examples -- an extensive collection of completions for most of
 the common GNU, Unix, and Linux commands -- are available as part of the
 bash_completion project.  This is installed by default on many GNU/Linux
 distributions.  Originally written by Ian Macdonald, the project now lives
-at @url{http://bash-completion.alioth.debian.org/}.  There are ports for
+at @url{https://github.com/scop/bash-completion/}.  There are ports for
 other systems such as Solaris and Mac OS X.
 
 An older version of the bash_completion package is distributed with bash

@@ -1,6 +1,6 @@
 /* bashversion.c -- Display bash version information. */
 
-/* Copyright (C) 2001 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -47,8 +47,8 @@ extern char *optarg;
 extern char *dist_version;
 extern int patch_level;
 
-extern char *shell_version_string __P((void));
-extern void show_shell_version __P((int));
+extern char *shell_version_string PARAMS((void));
+extern void show_shell_version PARAMS((int));
 
 char *shell_name = "bash";
 char *progname;

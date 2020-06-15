@@ -1,6 +1,6 @@
 /* Functions (currently) for use by the shell to do malloc debugging and
    tracking. */
-/* Copyright (C) 2001-2003 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne-Again SHell.
 
@@ -21,11 +21,11 @@
 #ifndef _SH_MALLOC_H
 #define _SH_MALLOC_H
 
-#ifndef __P
+#ifndef PARAMS
 #  if defined (__STDC__) || defined (__GNUC__) || defined (__cplusplus)
-#    define __P(protos) protos
+#    define PARAMS(protos) protos
 #  else
-#    define __P(protos) ()
+#    define PARAMS(protos) ()
 #  endif
 #endif
 
@@ -41,30 +41,30 @@
 #endif /* PTR_T */
 
 
-extern PTR_T sh_malloc __P((size_t, const char *, int));
-extern PTR_T sh_realloc __P((PTR_T, size_t, const char *, int));
-extern void sh_free __P((PTR_T, const char *, int));
+extern PTR_T sh_malloc PARAMS((size_t, const char *, int));
+extern PTR_T sh_realloc PARAMS((PTR_T, size_t, const char *, int));
+extern void sh_free PARAMS((PTR_T, const char *, int));
 
-extern PTR_T sh_memalign __P((size_t, size_t, const char *, int));
+extern PTR_T sh_memalign PARAMS((size_t, size_t, const char *, int));
 
-extern PTR_T sh_calloc __P((size_t, size_t, const char *, int));
-extern void sh_cfree __P((PTR_T, const char *, int));
+extern PTR_T sh_calloc PARAMS((size_t, size_t, const char *, int));
+extern void sh_cfree PARAMS((PTR_T, const char *, int));
 
-extern PTR_T sh_valloc __P((size_t, const char *, int));
+extern PTR_T sh_valloc PARAMS((size_t, const char *, int));
 
 /* trace.c */
-extern int malloc_set_trace __P((int));
+extern int malloc_set_trace PARAMS((int));
 extern void malloc_set_tracefp ();	/* full prototype requires stdio.h */
-extern void malloc_set_tracefn __P((char *, char *));
+extern void malloc_set_tracefn PARAMS((char *, char *));
 
 /* table.c */
-extern void mregister_dump_table __P((void));
-extern void mregister_table_init __P((void));
-extern int malloc_set_register __P((int));
+extern void mregister_dump_table PARAMS((void));
+extern void mregister_table_init PARAMS((void));
+extern int malloc_set_register PARAMS((int));
 
 /* stats.c */
-extern void print_malloc_stats __P((char *));
+extern void print_malloc_stats PARAMS((char *));
 extern void fprint_malloc_stats ();	/* full prototype requires stdio.h */
-extern void trace_malloc_stats __P((char *, char *));
+extern void trace_malloc_stats PARAMS((char *, char *));
 
 #endif

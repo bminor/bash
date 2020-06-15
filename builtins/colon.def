@@ -1,7 +1,7 @@
 This file is colon.def, from which is created colon.c.
 It implements the builtin ":" in Bash.
 
-Copyright (C) 1987-2009 Free Software Foundation, Inc.
+Copyright (C) 1987-2019 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -50,10 +50,19 @@ Exit Status:
 Always fails.
 $END
 
+#include <config.h>
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
+
+#include "../bashansi.h"
+#include "../shell.h"
+
 /* Return a successful result. */
 int
 colon_builtin (ignore)
-     char *ignore;
+     WORD_LIST *ignore;
 {
   return (0);
 }
@@ -61,7 +70,7 @@ colon_builtin (ignore)
 /* Return an unsuccessful result. */
 int
 false_builtin (ignore)
-     char *ignore;
+     WORD_LIST *ignore;
 {
   return (1);
 }

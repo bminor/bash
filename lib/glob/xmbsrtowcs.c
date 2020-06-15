@@ -1,6 +1,6 @@
 /* xmbsrtowcs.c -- replacement function for mbsrtowcs */
 
-/* Copyright (C) 2002-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2002-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -35,6 +35,11 @@
 
 #if HANDLE_MULTIBYTE
 
+#include <errno.h>
+#if !defined (errno)
+extern int errno;
+#endif
+
 #define WSBUF_INC 32
 
 #ifndef FREE
@@ -42,7 +47,7 @@
 #endif
 
 #if ! HAVE_STRCHRNUL
-extern char *strchrnul __P((const char *, int));
+extern char *strchrnul PARAMS((const char *, int));
 #endif
 
 /* On some locales (ex. ja_JP.sjis), mbsrtowc doesn't convert 0x5c to U<0x5c>.
@@ -404,6 +409,115 @@ xdupmbstowcs (destp, indicesp, src)
     *indicesp = indices;
 
   return (wcnum - 1);
+}
+
+/* Convert wide character string to multibyte character string. Treat invalid
+   wide characters as bytes.  Used only in unusual circumstances.
+
+   Written by Bruno Haible <bruno@clisp.org>, 2008, adapted by Chet Ramey
+   for use in Bash. */
+
+/* Convert wide character string *SRCP to a multibyte character string and
+   store the result in DEST. Store at most LEN bytes in DEST. */
+size_t
+xwcsrtombs (char *dest, const wchar_t **srcp, size_t len, mbstate_t *ps)
+{
+  const wchar_t *src;
+  size_t cur_max;			/* XXX - locale_cur_max */
+  char buf[64], *destptr, *tmp_dest;
+  unsigned char uc;
+  mbstate_t prev_state;
+
+  cur_max = MB_CUR_MAX;
+  if (cur_max > sizeof (buf))		/* Holy cow. */
+    return (size_t)-1;
+
+  src = *srcp;
+
+  if (dest != NULL)
+    {
+      destptr = dest;
+
+      for (; len > 0; src++)
+	{
+	  wchar_t wc;
+	  size_t ret;
+
+	  wc = *src;
+	  /* If we have room, store directly into DEST. */
+	  tmp_dest = destptr;
+	  ret = wcrtomb (len >= cur_max ? destptr : buf, wc, ps);
+
+	  if (ret == (size_t)(-1))		/* XXX */
+	    {
+	      /* Since this is used for globbing and other uses of filenames,
+		 treat invalid wide character sequences as bytes.  This is
+		 intended to be symmetric with xdupmbstowcs2. */
+handle_byte:
+	      destptr = tmp_dest;	/* in case wcrtomb modified it */
+	      uc = wc;
+	      ret = 1;
+	      if (len >= cur_max)
+		*destptr = uc;
+	      else
+		buf[0] = uc;
+	      if (ps)
+		memset (ps, 0, sizeof (mbstate_t));
+	    }
+
+	  if (ret > cur_max)		/* Holy cow */
+	    goto bad_input;
+
+	  if (len < ret)
+	    break;
+
+	  if (len < cur_max)
+	    memcpy (destptr, buf, ret);
+
+	  if (wc == 0)
+	    {
+	      src = NULL;
+	      /* Here mbsinit (ps).  */
+	      break;
+	    }
+	  destptr += ret;
+	  len -= ret;
+	}
+      *srcp = src;
+      return destptr - dest;
+    }
+  else
+    {
+      /* Ignore dest and len, don't store *srcp at the end, and
+	 don't clobber *ps.  */
+      mbstate_t state = *ps;
+      size_t totalcount = 0;
+
+      for (;; src++)
+	{
+	  wchar_t wc;
+	  size_t ret;
+
+	  wc = *src;
+	  ret = wcrtomb (buf, wc, &state);
+
+	  if (ret == (size_t)(-1))
+	    goto bad_input2;
+	  if (wc == 0)
+	    {
+	      /* Here mbsinit (&state).  */
+	      break;
+	    }
+	  totalcount += ret;
+	}
+      return totalcount;
+    }
+
+bad_input:
+  *srcp = src;
+bad_input2:
+  errno = EILSEQ;
+  return (size_t)(-1);
 }
 
 #endif /* HANDLE_MULTIBYTE */

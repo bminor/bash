@@ -1,6 +1,6 @@
 /* syntax.h -- Syntax definitions for the shell */
 
-/* Copyright (C) 2000, 2001, 2005, 2008,2009 Free Software Foundation, Inc.
+/* Copyright (C) 2000, 2001, 2005, 2008, 2009-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -24,7 +24,7 @@
 /* Defines for use by mksyntax.c */
 
 #define slashify_in_quotes "\\`$\"\n"
-#define slashify_in_here_document "\\`$"
+#define slashify_in_here_document "\\`$\""
 
 #define shell_meta_chars   "()<>;&|"
 #define shell_break_chars  "()<>;&| \t\n"

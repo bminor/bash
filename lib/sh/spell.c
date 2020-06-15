@@ -1,6 +1,6 @@
 /* spell.c -- spelling correction for pathnames. */
 
-/* Copyright (C) 2000 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -40,8 +40,8 @@
 #include <maxpath.h>
 #include <stdc.h>
 
-static int mindist __P((char *, char *, char *));
-static int spdist __P((char *, char *));
+static int mindist PARAMS((char *, char *, char *));
+static int spdist PARAMS((char *, char *));
 
 /*
  * `spname' and its helpers are inspired by the code in "The UNIX

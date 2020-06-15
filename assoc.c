@@ -7,7 +7,7 @@
  * chet@ins.cwru.edu
  */
 
-/* Copyright (C) 2008,2009,2011 Free Software Foundation, Inc.
+/* Copyright (C) 2008,2009,2011-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -44,7 +44,7 @@
 #include "assoc.h"
 #include "builtins/common.h"
 
-static WORD_LIST *assoc_to_word_list_internal __P((HASH_TABLE *, int));
+static WORD_LIST *assoc_to_word_list_internal PARAMS((HASH_TABLE *, int));
 
 /* assoc_create == hash_create */
 
@@ -258,10 +258,10 @@ assoc_remove_quoted_nulls (h)
  * the STARTth element and spanning NELEM members.  Null elements are counted.
  */
 char *
-assoc_subrange (hash, start, nelem, starsub, quoted)
-HASH_TABLE *hash;
-arrayind_t start, nelem;
-int starsub, quoted;
+assoc_subrange (hash, start, nelem, starsub, quoted, pflags)
+     HASH_TABLE *hash;
+     arrayind_t start, nelem;
+     int starsub, quoted, pflags;
 {
   WORD_LIST *l, *save, *h, *t;
   int i, j;
@@ -289,7 +289,7 @@ int starsub, quoted;
 
   t->next = (WORD_LIST *)NULL;
 
-  ret = string_list_pos_params (starsub ? '*' : '@', h, quoted);
+  ret = string_list_pos_params (starsub ? '*' : '@', h, quoted, pflags);
 
   if (t != l)
     t->next = l;
@@ -306,7 +306,7 @@ assoc_patsub (h, pat, rep, mflags)
      int mflags;
 {
   char	*t;
-  int pchar, qflags;
+  int pchar, qflags, pflags;
   WORD_LIST *wl, *save;
 
   if (h == 0 || assoc_empty (h))
@@ -325,8 +325,9 @@ assoc_patsub (h, pat, rep, mflags)
 
   pchar = (mflags & MATCH_STARSUB) == MATCH_STARSUB ? '*' : '@';
   qflags = (mflags & MATCH_QUOTED) == MATCH_QUOTED ? Q_DOUBLE_QUOTES : 0;
+  pflags = (mflags & MATCH_ASSIGNRHS) == MATCH_ASSIGNRHS ? PF_ASSIGNRHS : 0;
 
-  t = string_list_pos_params (pchar, save, qflags);
+  t = string_list_pos_params (pchar, save, qflags, pflags);
   dispose_words (save);
 
   return t;
@@ -340,7 +341,7 @@ assoc_modcase (h, pat, modop, mflags)
      int mflags;
 {
   char	*t;
-  int pchar, qflags;
+  int pchar, qflags, pflags;
   WORD_LIST *wl, *save;
 
   if (h == 0 || assoc_empty (h))
@@ -359,11 +360,82 @@ assoc_modcase (h, pat, modop, mflags)
 
   pchar = (mflags & MATCH_STARSUB) == MATCH_STARSUB ? '*' : '@';
   qflags = (mflags & MATCH_QUOTED) == MATCH_QUOTED ? Q_DOUBLE_QUOTES : 0;
+  pflags = (mflags & MATCH_ASSIGNRHS) == MATCH_ASSIGNRHS ? PF_ASSIGNRHS : 0;
 
-  t = string_list_pos_params (pchar, save, qflags);
+  t = string_list_pos_params (pchar, save, qflags, pflags);
   dispose_words (save);
 
   return t;
+}
+
+char *
+assoc_to_kvpair (hash, quoted)
+     HASH_TABLE *hash;
+     int quoted;
+{
+  char *ret;
+  char *istr, *vstr;
+  int i, rsize, rlen, elen;
+  BUCKET_CONTENTS *tlist;
+
+  if (hash == 0 || assoc_empty (hash))
+    return (char *)0;
+
+  ret = xmalloc (rsize = 128);
+  ret[rlen = 0] = '\0';
+
+  for (i = 0; i < hash->nbuckets; i++)
+    for (tlist = hash_items (i, hash); tlist; tlist = tlist->next)
+      {
+	if (ansic_shouldquote (tlist->key))
+	  istr = ansic_quote (tlist->key, 0, (int *)0);
+	else if (sh_contains_shell_metas (tlist->key))
+	  istr = sh_double_quote (tlist->key);
+	else if (ALL_ELEMENT_SUB (tlist->key[0]) && tlist->key[1] == '\0')
+	  istr = sh_double_quote (tlist->key);	
+	else
+	  istr = tlist->key;	
+
+	vstr = tlist->data ? (ansic_shouldquote ((char *)tlist->data) ?
+				ansic_quote ((char *)tlist->data, 0, (int *)0) :
+				sh_double_quote ((char *)tlist->data))
+			   : (char *)0;
+
+	elen = STRLEN (istr) + 4 + STRLEN (vstr);
+	RESIZE_MALLOCED_BUFFER (ret, rlen, (elen+1), rsize, rsize);
+
+	strcpy (ret+rlen, istr);
+	rlen += STRLEN (istr);
+	ret[rlen++] = ' ';
+	if (vstr)
+	  {
+	    strcpy (ret + rlen, vstr);
+	    rlen += STRLEN (vstr);
+	  }
+	else
+	  {
+	    strcpy (ret + rlen, "\"\"");
+	    rlen += 2;
+	  }
+	ret[rlen++] = ' ';
+
+	if (istr != tlist->key)
+	  FREE (istr);
+
+	FREE (vstr);
+    }
+
+  RESIZE_MALLOCED_BUFFER (ret, rlen, 1, rsize, 8);
+  ret[rlen] = '\0';
+
+  if (quoted)
+    {
+      vstr = sh_single_quote (ret);
+      free (ret);
+      ret = vstr;
+    }
+
+  return ret;
 }
 
 char *
@@ -414,7 +486,6 @@ assoc_to_assign (hash, quoted)
 	    rlen += STRLEN (vstr);
 	  }
 	ret[rlen++] = ' ';
-
 
 	if (istr != tlist->key)
 	  FREE (istr);

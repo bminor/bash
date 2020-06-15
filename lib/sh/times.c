@@ -1,6 +1,6 @@
 /* times.c - times(3) library function */
 
-/* Copyright (C) 1999 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -30,7 +30,7 @@
 #  include <sys/resource.h>
 #endif /* HAVE_SYS_RESOURCE_H && HAVE_GETRUSAGE */
 
-extern long	get_clk_tck __P((void));
+extern long	get_clk_tck PARAMS((void));
 
 #define CONVTCK(r)      (r.tv_sec * clk_tck + r.tv_usec / (1000000 / clk_tck))
 
@@ -58,7 +58,7 @@ times(tms)
 	tms->tms_cutime = CONVTCK(ru.ru_utime);
 	tms->tms_cstime = CONVTCK(ru.ru_stime);
 
-	if (gettimeofday(&tv, (struct timezone *) 0) < 0)
+	if (gettimeofday(&tv, NULL) < 0)
 		return ((clock_t)-1);
 	rv = (clock_t)(CONVTCK(tv));
 #else /* !HAVE_GETRUSAGE */

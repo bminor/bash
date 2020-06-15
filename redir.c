@@ -1,6 +1,6 @@
 /* redir.c -- Functions to perform input and output redirection. */
 
-/* Copyright (C) 1997-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -58,6 +58,33 @@ extern int errno;
 #  include "input.h"
 #endif
 
+#include "builtins/pipesize.h"
+
+/* FreeBSD 13 can reliably handle atomic writes at this capacity without
+   hanging. */
+#if __FreeBSD__ && !defined (HEREDOC_PIPESIZE)
+#  define HEREDOC_PIPESIZE 4096
+#endif
+
+/* Normally set by a build process command that computes pipe capacity */
+#ifndef PIPESIZE
+#  ifdef PIPE_BUF
+#    define PIPESIZE PIPE_BUF
+#  else
+#    define PIPESIZE 4096
+#  endif
+#endif
+
+#ifndef HEREDOC_PIPESIZE
+#  define HEREDOC_PIPESIZE PIPESIZE
+#endif
+
+#if defined (HEREDOC_PIPEMAX)
+#  if HEREDOC_PIPESIZE > HEREDOC_PIPEMAX
+#    define HEREDOC_PIPESIZE HEREDOC_PIPEMAX
+#  endif
+#endif
+
 #define SHELL_FD_BASE	10
 
 int expanding_redir;
@@ -66,24 +93,24 @@ extern REDIRECT *redirection_undo_list;
 extern REDIRECT *exec_redirection_undo_list;
 
 /* Static functions defined and used in this file. */
-static void add_exec_redirect __P((REDIRECT *));
-static int add_undo_redirect __P((int, enum r_instruction, int));
-static int add_undo_close_redirect __P((int));
-static int expandable_redirection_filename __P((REDIRECT *));
-static int stdin_redirection __P((enum r_instruction, int));
-static int undoablefd __P((int));
-static int do_redirection_internal __P((REDIRECT *, int));
+static void add_exec_redirect PARAMS((REDIRECT *));
+static int add_undo_redirect PARAMS((int, enum r_instruction, int));
+static int add_undo_close_redirect PARAMS((int));
+static int expandable_redirection_filename PARAMS((REDIRECT *));
+static int stdin_redirection PARAMS((enum r_instruction, int));
+static int undoablefd PARAMS((int));
+static int do_redirection_internal PARAMS((REDIRECT *, int, char **));
 
-static int write_here_document __P((int, WORD_DESC *));
-static int write_here_string __P((int, WORD_DESC *));
-static int here_document_to_fd __P((WORD_DESC *, enum r_instruction));
+static char *heredoc_expand PARAMS((WORD_DESC *, enum r_instruction, size_t *));
+static int heredoc_write PARAMS((int, char *, size_t));
+static int here_document_to_fd PARAMS((WORD_DESC *, enum r_instruction));
 
-static int redir_special_open __P((int, char *, int, int, enum r_instruction));
-static int noclobber_open __P((char *, int, int, enum r_instruction));
-static int redir_open __P((char *, int, int, enum r_instruction));
+static int redir_special_open PARAMS((int, char *, int, int, enum r_instruction));
+static int noclobber_open PARAMS((char *, int, int, enum r_instruction));
+static int redir_open PARAMS((char *, int, int, enum r_instruction));
 
-static int redir_varassign __P((REDIRECT *, int));
-static int redir_varvalue __P((REDIRECT *));
+static int redir_varassign PARAMS((REDIRECT *, int));
+static int redir_varvalue PARAMS((REDIRECT *));
 
 /* Spare redirector used when translating [N]>&WORD[-] or [N]<&WORD[-] to
    a new redirection and when creating the redirection undo list. */
@@ -99,15 +126,16 @@ do { \
     { \
       if (fd >= 0) \
 	close (fd); \
-      last_command_exit_value = EXECUTION_FAILURE;\
+      set_exit_status (EXECUTION_FAILURE);\
       return ((e) == 0 ? EINVAL : (e));\
     } \
 } while (0)
 
 void
-redirection_error (temp, error)
+redirection_error (temp, error, fn)
      REDIRECT *temp;
      int error;
+     char *fn;		/* already-expanded filename */
 {
   char *filename, *allocname;
   int oflags;
@@ -152,6 +180,8 @@ redirection_error (temp, error)
         }
     }
 #endif
+  else if (fn)
+    filename = fn;
   else if (expandable_redirection_filename (temp))
     {
       oflags = temp->redirectee.filename->flags;
@@ -213,6 +243,7 @@ do_redirections (list, flags)
 {
   int error;
   REDIRECT *temp;
+  char *fn;
 
   if (flags & RX_UNDOABLE)
     {
@@ -227,12 +258,15 @@ do_redirections (list, flags)
 
   for (temp = list; temp; temp = temp->next)
     {
-      error = do_redirection_internal (temp, flags);
+      fn = 0;
+      error = do_redirection_internal (temp, flags, &fn);
       if (error)
 	{
-	  redirection_error (temp, error);
+	  redirection_error (temp, error, fn);
+	  FREE (fn);
 	  return (error);
 	}
+      FREE (fn);
     }
   return (0);
 }
@@ -309,19 +343,45 @@ redirection_expand (word)
   return (result);
 }
 
-static int
-write_here_string (fd, redirectee)
-     int fd;
-     WORD_DESC *redirectee;
-{
-  char *herestr;
-  int herelen, n, e, old;
+/* Expand a here-document or here-string (determined by RI) contained in
+   REDIRECTEE and return the expanded document. If LENP is non-zero, put
+   the length of the returned string into *LENP.
 
+   This captures everything about expanding here-documents and here-strings:
+   the returned document should be written directly to whatever file
+   descriptor is specified. In particular, it adds a newline to the end of
+   a here-string to preserve previous semantics. */
+static char *
+heredoc_expand (redirectee, ri, lenp)
+     WORD_DESC *redirectee;
+     enum r_instruction ri;
+     size_t *lenp;
+{
+  char *document;
+  size_t dlen;
+  int old;
+
+  if (redirectee->word == 0 || redirectee->word[0] == '\0')
+    {
+      if (lenp)
+        *lenp = 0;
+      return (redirectee->word);
+    }
+
+  /* Quoted here documents are not expanded */
+  if (ri != r_reading_string && (redirectee->flags & W_QUOTED))
+    {
+      if (lenp)
+        *lenp = STRLEN (redirectee->word);
+      return (redirectee->word);
+    }
+  
   expanding_redir = 1;
   /* Now that we've changed the variable search order to ignore the temp
      environment, see if we need to change the cached IFS values. */
   sv_ifs ("IFS");
-  herestr = expand_string_unsplit_to_string (redirectee->word, 0);
+  document = (ri == r_reading_string) ? expand_assignment_string_to_string (redirectee->word, 0)
+  				      : expand_string_to_string (redirectee->word, Q_HERE_DOCUMENT);
   expanding_redir = 0;
   /* Now we need to change the variable search order back to include the temp
      environment.  We force the temp environment search by forcing
@@ -332,136 +392,119 @@ write_here_string (fd, redirectee)
   sv_ifs ("IFS");
   executing_builtin = old;
 
-  herelen = STRLEN (herestr);
-
-  n = write (fd, herestr, herelen);
-  if (n == herelen)
+  dlen = STRLEN (document);
+  /* XXX - Add trailing newline to here-string */
+  if (ri == r_reading_string)
     {
-      n = write (fd, "\n", 1);
-      herelen = 1;
+      document = xrealloc (document, dlen + 2);
+      document[dlen++] = '\n';
+      document[dlen] = '\0';
     }
+  if (lenp)
+    *lenp = dlen;    
+
+  return document;
+}
+
+/* Write HEREDOC (of length HDLEN) to FD, returning 0 on success and ERRNO on
+   error. Don't handle interrupts. */
+static int
+heredoc_write (fd, heredoc, herelen)
+     int fd;
+     char *heredoc;
+     size_t herelen;
+{
+  ssize_t nw;
+  int e;
+
+  errno = 0;
+  nw = write (fd, heredoc, herelen);
   e = errno;
-  FREE (herestr);
-  if (n != herelen)
+  if (nw != herelen)
     {
       if (e == 0)
 	e = ENOSPC;
       return e;
     }
   return 0;
-}  
-
-/* Write the text of the here document pointed to by REDIRECTEE to the file
-   descriptor FD, which is already open to a temp file.  Return 0 if the
-   write is successful, otherwise return errno. */
-static int
-write_here_document (fd, redirectee)
-     int fd;
-     WORD_DESC *redirectee;
-{
-  char *document;
-  int document_len, fd2, old;
-  FILE *fp;
-  register WORD_LIST *t, *tlist;
-
-  /* Expand the text if the word that was specified had
-     no quoting.  The text that we expand is treated
-     exactly as if it were surrounded by double quotes. */
-
-  if (redirectee->flags & W_QUOTED)
-    {
-      document = redirectee->word;
-      document_len = strlen (document);
-      /* Set errno to something reasonable if the write fails. */
-      if (write (fd, document, document_len) < document_len)
-	{
-	  if (errno == 0)
-	    errno = ENOSPC;
-	  return (errno);
-	}
-      else
-	return 0;
-    }
-
-  expanding_redir = 1;
-  /* Now that we've changed the variable search order to ignore the temp
-     environment, see if we need to change the cached IFS values. */
-  sv_ifs ("IFS");
-  tlist = expand_string (redirectee->word, Q_HERE_DOCUMENT);
-  expanding_redir = 0;
-  /* Now we need to change the variable search order back to include the temp
-     environment.  We force the temp environment search by forcing
-     executing_builtin to 1.  This is what makes `read' get the right values
-     for the IFS-related cached variables, for example. */
-  old = executing_builtin;
-  executing_builtin = 1;
-  sv_ifs ("IFS");
-  executing_builtin = old;
-
-  if (tlist)
-    {
-      /* Try using buffered I/O (stdio) and writing a word
-	 at a time, letting stdio do the work of buffering
-	 for us rather than managing our own strings.  Most
-	 stdios are not particularly fast, however -- this
-	 may need to be reconsidered later. */
-      if ((fd2 = dup (fd)) < 0 || (fp = fdopen (fd2, "w")) == NULL)
-	{
-	  old = errno;
-	  if (fd2 >= 0)
-	    close (fd2);
-	  dispose_words (tlist);
-	  errno = old;
-	  return (errno);
-	}
-      errno = 0;
-      for (t = tlist; t; t = t->next)
-	{
-	  /* This is essentially the body of
-	     string_list_internal expanded inline. */
-	  document = t->word->word;
-	  document_len = strlen (document);
-	  if (t != tlist)
-	    putc (' ', fp);	/* separator */
-	  fwrite (document, document_len, 1, fp);
-	  if (ferror (fp))
-	    {
-	      if (errno == 0)
-		errno = ENOSPC;
-	      fd2 = errno;
-	      fclose(fp);
-	      dispose_words (tlist);
-	      return (fd2);
-	    }
-	}
-      dispose_words (tlist);
-      if (fclose (fp) != 0)
-	{
-	  if (errno == 0)
-	    errno = ENOSPC;
-	  return (errno);
-	}
-    }
-  return 0;
 }
 
-/* Create a temporary file holding the text of the here document pointed to
-   by REDIRECTEE, and return a file descriptor open for reading to the temp
-   file.  Return -1 on any error, and make sure errno is set appropriately. */
+/* Create a temporary file or pipe holding the text of the here document
+   pointed to by REDIRECTEE, and return a file descriptor open for reading
+   to it. Return -1 on any error, and make sure errno is set appropriately. */
 static int
 here_document_to_fd (redirectee, ri)
      WORD_DESC *redirectee;
      enum r_instruction ri;
 {
   char *filename;
-  int r, fd, fd2;
+  int r, fd, fd2, herepipe[2];
+  char *document;
+  size_t document_len;
+#if HEREDOC_PARANOID
+  struct stat st1, st2;
+#endif
+
+  /* Expand the here-document/here-string first and then decide what to do. */
+  document = heredoc_expand (redirectee, ri, &document_len);
+
+  /* If we have a zero-length document, don't mess with a temp file */
+  if (document_len == 0)
+    {
+      fd = open ("/dev/null", O_RDONLY);
+      r = errno;
+      if (document != redirectee->word)
+	FREE (document);
+      errno = r;
+      return fd;
+    }
+
+#if defined (HEREDOC_PIPESIZE)
+  /* Try to use a pipe internal to this process if the document is shorter
+     than the system's pipe capacity (computed at build time). We want to
+     write the entire document without write blocking. */
+  if (document_len <= HEREDOC_PIPESIZE)
+    {
+      if (pipe (herepipe) < 0)
+	{
+	  r = errno;
+	  if (document != redirectee->word)
+	    free (document);
+	  errno = r;
+	  return (-1);
+	}
+
+#if defined (F_GETPIPE_SZ)
+      if (fcntl (herepipe[1], F_GETPIPE_SZ, 0) < document_len)
+	goto use_tempfile;
+#endif
+
+      r = heredoc_write (herepipe[1], document, document_len);
+      if (document != redirectee->word)
+	free (document);
+      close (herepipe[1]);
+      if (r)			/* write error */
+	{
+	  close (herepipe[0]);
+	  errno = r;
+	  return (-1);
+	}
+      return (herepipe[0]);
+    }
+#endif
+
+use_tempfile:
 
   fd = sh_mktmpfd ("sh-thd", MT_USERANDOM|MT_USETMPDIR, &filename);
 
   /* If we failed for some reason other than the file existing, abort */
   if (fd < 0)
     {
+      r = errno;
       FREE (filename);
+      if (document != redirectee->word)
+	FREE (document);
+      errno = r;
       return (fd);
     }
 
@@ -469,10 +512,9 @@ here_document_to_fd (redirectee, ri)
   SET_CLOSE_ON_EXEC (fd);
 
   errno = r = 0;		/* XXX */
-  /* write_here_document returns 0 on success, errno on failure. */
-  if (redirectee->word)
-    r = (ri != r_reading_string) ? write_here_document (fd, redirectee)
-				 : write_here_string (fd, redirectee);
+  r = heredoc_write (fd, document, document_len);
+  if (document != redirectee->word)
+    FREE (document);
 
   if (r)
     {
@@ -497,6 +539,22 @@ here_document_to_fd (redirectee, ri)
       errno = r;
       return -1;
     }
+
+#if HEREDOC_PARANOID
+  /* We can use same_file here to check whether or not fd and fd2 refer to
+     the same file, but we don't do that unless HEREDOC_PARANOID is defined. */
+  if (fstat (fd, &st1) < 0 || S_ISREG (st1.st_mode) == 0 ||
+      fstat (fd2, &st2) < 0 || S_ISREG (st2.st_mode) == 0 ||
+      same_file (filename, filename, &st1, &st2) == 0)
+    {
+      unlink (filename);
+      free (filename);
+      close (fd);
+      close (fd2);
+      errno = EEXIST;
+      return -1;
+    }
+#endif
 
   close (fd);
   if (unlink (filename) < 0)
@@ -718,11 +776,13 @@ undoablefd (fd)
    produce the appropriate side effects.   flags & RX_UNDOABLE, if non-zero,
    says to remember how to undo each redirection.  If flags & RX_CLEXEC is
    non-zero, then we set all file descriptors > 2 that we open to be
-   close-on-exec.  */
+   close-on-exec. FNP, if non-null is a pointer to a location where the
+   expanded filename is stored. The caller will free it. */
 static int
-do_redirection_internal (redirect, flags)
+do_redirection_internal (redirect, flags, fnp)
      REDIRECT *redirect;
      int flags;
+     char **fnp;
 {
   WORD_DESC *redirectee;
   int redir_fd, fd, redirector, r, oflags;
@@ -857,7 +917,10 @@ do_redirection_internal (redirect, flags)
 #endif /* RESTRICTED_SHELL */
 
       fd = redir_open (redirectee_word, redirect->flags, 0666, ri);
-      free (redirectee_word);
+      if (fnp)
+	*fnp = redirectee_word;
+      else
+	free (redirectee_word);
 
       if (fd == NOCLOBBER_REDIRECT || fd == RESTRICTED_REDIRECT)
 	return (fd);

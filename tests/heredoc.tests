@@ -1,5 +1,46 @@
-# check order and content of multiple here docs
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# basics
+cat <<EOF
+a
+b
+c
+EOF
+read x <<EOF
+a
+b
+c
+EOF
+echo "$x"
+read x y <<\EOF
+$PS4
+EOF
+echo "$x"
 
+# empty here-documents
+read x <<EOF
+EOF
+echo "$x"
+read x <<\EOF
+EOF
+echo "$x"
+read x <<EOF
+$empty
+EOF
+echo "$x"
+
+# check order and content of multiple here docs
 cat << EOF1 << EOF2 
 hi
 EOF1
@@ -92,6 +133,9 @@ ${THIS_SH} ./heredoc1.sub
 ${THIS_SH} ./heredoc2.sub
 ${THIS_SH} ./heredoc3.sub
 ${THIS_SH} ./heredoc4.sub
+
+# heredoc tests that use different size documents to test pipe implementation
+${THIS_SH} ./heredoc5.sub
 
 echo $(
 	cat <<< "comsub here-string"

@@ -5,7 +5,7 @@
  */
 
 /*
-   Copyright (C) 1999-2009 Free Software Foundation, Inc.
+   Copyright (C) 1999-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -53,6 +53,9 @@ sleep_builtin (list)
 WORD_LIST	*list;
 {
 	long	sec, usec;
+	char	*ep;
+	int	r, mul;
+	time_t	t;
 
 	if (list == 0) {
 		builtin_usage();
@@ -68,8 +71,12 @@ WORD_LIST	*list;
 		return (EX_USAGE);
 	}
 
-    	if (uconvert(list->word->word, &sec, &usec)) {
+    	r = uconvert(list->word->word, &sec, &usec, &ep);
+	/* Maybe postprocess conversion failures here based on EP */
+    		
+    	if (r) {
 		fsleep(sec, usec);
+		QUIT;
 		return(EXECUTION_SUCCESS);
     	}
 

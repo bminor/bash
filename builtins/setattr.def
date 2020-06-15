@@ -1,7 +1,7 @@
 This file is setattr.def, from which is created setattr.c.
 It implements the builtins "export" and "readonly", in Bash.
 
-Copyright (C) 1987-2015 Free Software Foundation, Inc.
+Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -42,7 +42,7 @@ $PRODUCES setattr.c
 extern sh_builtin_func_t *this_shell_builtin;
 
 #ifdef ARRAY_VARS
-extern int declare_builtin __P((WORD_LIST *));
+extern int declare_builtin PARAMS((WORD_LIST *));
 #endif
 
 #define READONLY_OR_EXPORT \
@@ -371,6 +371,30 @@ show_all_var_attributes (v, nodefs)
   return (any_failed == 0 ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
 }
 
+/* Show all local variable variables with their attributes. This shows unset
+   local variables (all_local_variables called with 0 argment). */
+int
+show_local_var_attributes (v, nodefs)
+     int v, nodefs;
+{
+  SHELL_VAR **variable_list, *var;
+  int any_failed;
+  register int i;
+
+  variable_list = all_local_variables (0);
+  if (variable_list == 0)  
+    return (EXECUTION_SUCCESS);
+
+  for (i = any_failed = 0; var = variable_list[i]; i++)
+    {
+      show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
+      if (any_failed = sh_chkwrite (any_failed))
+        break;
+    }
+  free (variable_list);
+  return (any_failed == 0 ? EXECUTION_SUCCESS : EXECUTION_FAILURE);
+}
+
 int
 var_attribute_string (var, pattr, flags)
      SHELL_VAR *var;
@@ -504,13 +528,27 @@ show_name_attributes (name, nodefs)
 {
   SHELL_VAR *var;
 
-#if 0
-  var = find_variable_tempenv (name);
-#else
   var = find_variable_noref (name);
-#endif
 
-  if (var /* && invisible_p (var) == 0 */)
+  if (var)	/* show every variable with attributes, even unset ones */
+    {
+      show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
+      return (0);
+    }
+  else
+    return (1);
+}
+
+int
+show_localname_attributes (name, nodefs)
+     char *name;
+     int nodefs;
+{
+  SHELL_VAR *var;
+
+  var = find_variable_noref (name);
+
+  if (var && local_p (var) && var->context == variable_context)	/* show every variable with attributes, even unset ones */
     {
       show_var_attributes (var, READONLY_OR_EXPORT, nodefs);
       return (0);

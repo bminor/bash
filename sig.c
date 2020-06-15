@@ -1,6 +1,6 @@
 /* sig.c - interface for shell signal handlers and signal initialization. */
 
-/* Copyright (C) 1994-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1994-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -58,7 +58,7 @@
 extern void initialize_siglist ();
 
 #if !defined (JOB_CONTROL)
-extern void initialize_job_signals __P((void));
+extern void initialize_job_signals PARAMS((void));
 #endif
 
 /* Non-zero after SIGINT. */
@@ -92,7 +92,7 @@ int terminate_immediately = 0;
 static SigHandler *old_winch = (SigHandler *)SIG_DFL;
 #endif
 
-static void initialize_shell_signals __P((void));
+static void initialize_shell_signals PARAMS((void));
 
 void
 initialize_signals (reinit)
@@ -309,7 +309,11 @@ initialize_shell_signals ()
   sigemptyset (&top_level_mask);
   sigprocmask (SIG_BLOCK, (sigset_t *)NULL, &top_level_mask);
 #  if defined (SIGCHLD)
-  sigdelset (&top_level_mask, SIGCHLD);
+  if (sigismember (&top_level_mask, SIGCHLD))
+    {
+      sigdelset (&top_level_mask, SIGCHLD);
+      sigprocmask (SIG_SETMASK, &top_level_mask, (sigset_t *)NULL);
+    }
 #  endif
 #endif /* JOB_CONTROL || HAVE_POSIX_SIGNALS */
 
@@ -320,8 +324,7 @@ initialize_shell_signals ()
     {
       set_signal_handler (SIGINT, sigint_sighandler);
       get_original_signal (SIGTERM);
-      if (signal_is_hard_ignored (SIGTERM) == 0)
-	set_signal_handler (SIGTERM, sigterm_sighandler);
+      set_signal_handler (SIGTERM, SIG_IGN);
       set_sigwinch_handler ();
     }
 }
@@ -394,6 +397,7 @@ throw_to_top_level ()
     {
       if (last_command_exit_value < 128)
 	last_command_exit_value = 128 + SIGINT;
+      set_pipestatus_from_exit (last_command_exit_value);
       print_newline = 1;
       DELINTERRUPT;
     }
@@ -404,9 +408,10 @@ throw_to_top_level ()
   last_command_exit_signal = (last_command_exit_value > 128) ?
 				(last_command_exit_value - 128) : 0;
   last_command_exit_value |= 128;
+  set_pipestatus_from_exit (last_command_exit_value);
 
   /* Run any traps set on SIGINT, mostly for interactive shells */
-  if (signal_is_trapped (SIGINT))
+  if (signal_is_trapped (SIGINT) && signal_is_pending (SIGINT))
     run_interrupt_trap (1);
 
   /* Clean up string parser environment. */
@@ -414,17 +419,18 @@ throw_to_top_level ()
     parse_and_execute_cleanup (-1);
 
   if (running_trap > 0)
-    run_trap_cleanup (running_trap - 1);
+    {
+      run_trap_cleanup (running_trap - 1);
+      running_trap = 0;
+    }
 
 #if defined (JOB_CONTROL)
   give_terminal_to (shell_pgrp, 0);
 #endif /* JOB_CONTROL */
 
-#if defined (JOB_CONTROL) || defined (HAVE_POSIX_SIGNALS)
   /* This needs to stay because jobs.c:make_child() uses it without resetting
      the signal mask. */
-  sigprocmask (SIG_SETMASK, &top_level_mask, (sigset_t *)NULL);
-#endif
+  restore_sigmask ();  
 
   reset_parser ();
 
@@ -462,6 +468,14 @@ jump_to_top_level (value)
      int value;
 {
   sh_longjmp (top_level, value);
+}
+
+void
+restore_sigmask ()
+{
+#if defined (JOB_CONTROL) || defined (HAVE_POSIX_SIGNALS)
+  sigprocmask (SIG_SETMASK, &top_level_mask, (sigset_t *)NULL);
+#endif
 }
 
 sighandler
@@ -581,6 +595,9 @@ termsig_handler (sig)
 
 #if defined (PROCESS_SUBSTITUTION)
   unlink_fifo_list ();
+#  if defined (JOB_CONTROL)
+  procsub_clear ();
+#  endif
 #endif /* PROCESS_SUBSTITUTION */
 
   /* Reset execution context */
@@ -591,7 +608,11 @@ termsig_handler (sig)
 
   /* We don't change the set of blocked signals. If a user starts the shell
      with a terminating signal blocked, we won't get here (and if by some
-     magic chance we do, we'll exit below). */
+     magic chance we do, we'll exit below). What we do is to restore the
+     top-level signal mask, in case this is called from a terminating signal
+     handler context, in which case the signal is blocked. */
+  restore_sigmask ();
+
   set_signal_handler (sig, SIG_DFL);
 
   kill (getpid (), sig);
@@ -644,6 +665,7 @@ sigint_sighandler (sig)
   if (wait_intr_flag)
     {
       last_command_exit_value = 128 + sig;
+      set_pipestatus_from_exit (last_command_exit_value);
       wait_signal_received = sig;
       SIGRETURN (0);
     }
@@ -651,7 +673,7 @@ sigint_sighandler (sig)
   if (interrupt_immediately)
     {
       interrupt_immediately = 0;
-      last_command_exit_value = 128 + sig;
+      set_exit_status (128 + sig);
       throw_to_top_level ();
     }
 #if defined (READLINE)

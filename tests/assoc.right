@@ -6,18 +6,18 @@ declare -A BASH_CMDS=()
 declare -A fluff=([foo]="one" [bar]="two" )
 declare -A fluff=([foo]="one" [bar]="two" )
 declare -A fluff=([bar]="two" )
-declare -A fluff=([bar]="newval" [qux]="assigned" )
-./assoc.tests: line 26: chaff: four: must use subscript when assigning associative array
+declare -A fluff=([qux]="assigned" [bar]="newval" )
+./assoc.tests: line 39: chaff: four: must use subscript when assigning associative array
 declare -A BASH_ALIASES=()
 declare -A BASH_CMDS=()
-declare -Ai chaff=([zero]="5" [one]="10" )
-declare -Ar waste=([lineno]="28" [source]="./assoc.tests" [version]="4.0-devel" [pid]="42134" )
-declare -A wheat=([two]="b" [three]="c" [zero]="0" [one]="a" )
-declare -A chaff=(["hello world"]="flip" [zero]="5" [one]="10" )
-./assoc.tests: line 38: waste: readonly variable
-./assoc.tests: line 39: unset: waste: cannot unset: readonly variable
-./assoc.tests: line 40: chaff[*]: bad array subscript
-./assoc.tests: line 41: [*]=12: invalid associative array key
+declare -Ai chaff=([one]="10" [zero]="5" )
+declare -Ar waste=([pid]="42134" [lineno]="41" [source]="./assoc.tests" [version]="4.0-devel" )
+declare -A wheat=([two]="b" [three]="c" [one]="a" [zero]="0" )
+declare -A chaff=(["hello world"]="flip" [one]="10" [zero]="5" )
+./assoc.tests: line 51: waste: readonly variable
+./assoc.tests: line 52: unset: waste: cannot unset: readonly variable
+./assoc.tests: line 53: chaff[*]: bad array subscript
+./assoc.tests: line 54: [*]=12: invalid associative array key
 declare -A chaff=(["hello world"]="flip" [one]="a" )
 flip
 argv[1] = <multiple>
@@ -32,14 +32,14 @@ argv[2] = <words>
 argv[3] = <flip>
 argv[4] = <a>
 argv[1] = <multiple words flip a>
-./assoc.tests: line 58: declare: chaff: cannot destroy array variables in this way
-./assoc.tests: line 60: chaff[*]: bad array subscript
-./assoc.tests: line 61: [*]=12: invalid associative array key
-declare -A wheat=(["foo bar"]="qux qix" [six]="6" )
+./assoc.tests: line 71: declare: chaff: cannot destroy array variables in this way
+./assoc.tests: line 73: chaff[*]: bad array subscript
+./assoc.tests: line 74: [*]=12: invalid associative array key
+declare -A wheat=([six]="6" ["foo bar"]="qux qix" )
 argv[1] = <qux>
 argv[2] = <qix>
 argv[1] = <qux qix>
-declare -A wheat=(["foo bar"]="qux qix" [six]="6" )
+declare -A wheat=([six]="6" ["foo bar"]="qux qix" )
 argv[1] = <2>
 argv[1] = <7>
 argv[1] = <qux>
@@ -48,16 +48,16 @@ argv[3] = <blat>
 argv[1] = <qux qix blat>
 argv[1] = <16>
 argv[1] = <16>
-argv[1] = <flix>
-argv[2] = <6>
-argv[1] = <foo>
-argv[2] = <bar>
-argv[3] = <six>
-argv[1] = <foo bar>
-argv[2] = <six>
+argv[1] = <6>
+argv[2] = <flix>
+argv[1] = <six>
+argv[2] = <foo>
+argv[3] = <bar>
+argv[1] = <six>
+argv[2] = <foo bar>
 8
-/sbin /usr/bin /bin /usr/ucb /usr/local/bin . /usr/sbin /bin
-sbin bin bin ucb bin . sbin bin
+/usr/local/bin /bin . /usr/bin /usr/ucb /usr/sbin /bin /sbin
+bin bin . bin ucb sbin bin sbin
 bin
 / / / / / / /
 /
@@ -66,27 +66,27 @@ argv[1] = </>
 argv[1] = <sbin>
 argv[1] = </>
 8
-/sbin /usr/bin /bin /usr/ucb /usr/local/bin . /usr/sbin /bin
-sbin bin bin ucb bin . sbin bin
+/usr/local/bin /bin . /usr/bin /usr/ucb /usr/sbin /bin /sbin
+bin bin . bin ucb sbin bin sbin
 / / / / / / /
 8
 4 -- /bin
-^sbin ^usr^bin ^bin ^usr^ucb ^usr^local^bin . ^usr^sbin ^bin
-^sbin ^usr^bin ^bin ^usr^ucb ^usr^local^bin . ^usr^sbin ^bin
-\sbin \usr/bin \bin \usr/ucb \usr/local/bin . \usr/sbin \bin
-\sbin \usr\bin \bin \usr\ucb \usr\local\bin . \usr\sbin \bin
-\sbin \usr\bin \bin \usr\ucb \usr\local\bin . \usr\sbin \bin
+^usr^local^bin ^bin . ^usr^bin ^usr^ucb ^usr^sbin ^bin ^sbin
+^usr^local^bin ^bin . ^usr^bin ^usr^ucb ^usr^sbin ^bin ^sbin
+\usr/local/bin \bin . \usr/bin \usr/ucb \usr/sbin \bin \sbin
+\usr\local\bin \bin . \usr\bin \usr\ucb \usr\sbin \bin \sbin
+\usr\local\bin \bin . \usr\bin \usr\ucb \usr\sbin \bin \sbin
 ([a]=1)
 
 foo qux
 /usr/sbin/foo /usr/local/bin/qux
 hits	command
-   0	/sbin/blat
    0	/usr/sbin/foo
    0	/bin/sh
+   0	/sbin/blat
    0	/usr/local/bin/qux
-blat foo sh qux
-/sbin/blat /usr/sbin/foo /bin/sh /usr/local/bin/qux
+foo sh blat qux
+/usr/sbin/foo /bin/sh /sbin/blat /usr/local/bin/qux
 
 foo qux
 argv[1] = </usr/sbin/foo>
@@ -104,10 +104,10 @@ argv[4] = </usr/local/bin/qux -l>
 outside: outside
 declare -A BASH_ALIASES=()
 declare -A BASH_CMDS=()
-declare -A afoo=(["foo bar"]="foo quux" [six]="six" )
+declare -A afoo=([six]="six" ["foo bar"]="foo quux" )
 argv[1] = <inside:>
-argv[2] = <foo quux>
-argv[3] = <six>
+argv[2] = <six>
+argv[3] = <foo quux>
 outside 2: outside
 argv[1] = </barq//fooq>
 argv[1] = <>
@@ -137,12 +137,12 @@ argv[4] = <FOOQ>
 abc
 def
 def
-./assoc5.sub: line 13: declare: `myarray[foo[bar]=bleh': not a valid identifier
-bleh def abc
-myarray=([foo]="bleh" ["]"]="def" ["a]=test1;#a"]="123" ["a]a"]="abc" )
+./assoc5.sub: line 26: declare: `myarray[foo[bar]=bleh': not a valid identifier
+def bleh abc
+myarray=(["]"]="def" [foo]="bleh" ["a]a"]="abc" ["a]=test1;#a"]="123" )
 
 123
-myarray=([foo]="bleh" ["]"]="def" ["a]=test2;#a"]="def" ["a]=test1;#a"]="123" ["a]a"]="abc" )
+myarray=(["]"]="def" ["a]=test2;#a"]="def" [foo]="bleh" ["a]a"]="abc" ["a]=test1;#a"]="123" )
 bar"bie
 doll
 declare -A foo=(["bar\"bie"]="doll" )
@@ -195,13 +195,15 @@ declare -A assoc=([0]="assoc" )
 assoc
 declare -A assoc=([two]="twoless" [three]="three" [one]="onemore" )
 declare -Ar assoc=([two]="twoless" [three]="three" [one]="onemore" )
+declare -A hash=([key]="value1" )
+declare -A hash=([key]="value1 value2" )
 declare -A b=([")"]="" ["\""]="" ["]"]="" ["\\"]="" ["\`"]="" )
 declare -A b=(["]"]="" ["\`"]="" )
 declare -A dict=(["'"]="3" ["\""]="1" ["\\"]="4" ["\`"]="2" )
-./assoc9.sub: line 23: unset: `dict[']': not a valid identifier
-./assoc9.sub: line 23: unset: `dict["]': not a valid identifier
-./assoc9.sub: line 23: unset: `dict[\]': not a valid identifier
-./assoc9.sub: line 23: unset: `dict[`]': not a valid identifier
+./assoc9.sub: line 36: unset: `dict[']': not a valid identifier
+./assoc9.sub: line 36: unset: `dict["]': not a valid identifier
+./assoc9.sub: line 36: unset: `dict[\]': not a valid identifier
+./assoc9.sub: line 36: unset: `dict[`]': not a valid identifier
 declare -A dict=(["'"]="3" ["\""]="1" ["\\"]="4" ["\`"]="2" )
 declare -A dict=(["'"]="3" ["\""]="1" ["\\"]="4" ["\`"]="2" )
 declare -A dict=()
@@ -209,10 +211,10 @@ declare -A dict=()
 4
 a[$b]= 5
 declare -A a=(["80's"]="Depeche Mode" )
-./assoc9.sub: line 71: read: `a[80's]': not a valid identifier
+./assoc9.sub: line 84: read: `a[80's]': not a valid identifier
 declare -A a
 declare -A a=(["80's"]="Depeche Mode" )
-./assoc9.sub: line 83: printf: `a[80's]': not a valid identifier
+./assoc9.sub: line 96: printf: `a[80's]': not a valid identifier
 declare -A a
 declare -A a=(["80's"]="Depeche Mode" )
 6
@@ -220,12 +222,38 @@ declare -A a=(["80's"]="Depeche Mode" )
 1+5
 declare -A a=(["\$(date >&2)"]="5" )
 declare -A myarray=([foo]="bleh" ["foo[bar"]="bleh" )
-./assoc10.sub: line 1: declare: a: cannot convert indexed to associative array
+./assoc10.sub: line 14: declare: a: cannot convert indexed to associative array
 f: declare -a a
-./assoc10.sub: line 4: declare: a: cannot convert associative to indexed array
+./assoc10.sub: line 17: declare: a: cannot convert associative to indexed array
 f: declare -A a
 
 f: declare -a a
 main: declare -- a="7"
 f: declare -A a
 main: declare -- a="42"
+declare -A a=([3]="" [1]="2" )
+declare -A foo=([d]="4" [c]="3" [b]="2" [a]="1" )
+foo=( d "4" c "3" b "2" a "1" )
+declare -A foo=(["\\"]="5" ["@"]="3" ["holy hell this works"]="4" ["a b"]="1" ["spa ces"]="2" )
+foo=( echo "\\" "5" "@" "3" "holy hell this works" "4" "a b" "1" "spa ces" "2" )
+./assoc11.sub: line 34: "": bad array subscript
+declare -A foo=([";"]="semicolon" ["]"]="def" [a=b]="assignment" ["a]a"]="abc" ["foo[bar"]="bleh" )
+foo=( ";" "semicolon" "]" "def" a=b "assignment" "a]a" "abc" "foo[bar" "bleh" )
+declare -A foo=(["'"]="squote" ["\""]="dquote" ["\\"]="bslash" ["\`"]="backquote" )
+foo=( "'" "squote" "\"" "dquote" "\\" "bslash" "\`" "backquote" )
+declare -A foo=(["bar]bie"]="doll" ["a]=test1;#a"]="123" ["bar\"bie"]="doll" )
+foo=( "bar]bie" "doll" "a]=test1;#a" "123" "bar\"bie" "doll" )
+declare -A inside=([c]="3" [b]="2" [a]="1" )
+inside=( c "3" b "2" a "1" )
+declare -A dict=(["?"]="quest" ["*"]="star" ["'"]="squote" ["\$"]="dol" ["\""]="dquote" ["\\"]="bslash" ["@"]="at" ["}"]="rbrace" ["{"]="lbrace" ["\`"]="bquote" )
+dict=( "?" "quest" "*" "star" "'" "squote" "\$" "dol" "\"" "dquote" "\\" "bslash" "@" "at" "}" "rbrace" "{" "lbrace" "\`" "bquote" )
+declare -A foo=([two]="" [one]="1" )
+foo=( two "" one "1" )
+rparen dquote rbrace bs
+declare -A a=([")"]="rparen" ["\""]="dquote" ["]"]="rbrace" ["\\"]="bs" )
+")" "rparen" "\"" "dquote" "]" "rbrace" "\\" "bs"
+declare -A a=([")"]="rparen" ["\""]="dquote" ["]"]="rbrace" ["\\"]="bs" )
+declare -A a=([")"]="rparen" ["\""]="dquote" ["]"]="rbrace" ["\\"]="bs" )
+declare -A a=([")"]="rparen" ["\""]="dquote" ["]"]="rbrace" ["\\"]="bs" )
+declare -Arx foo=([two]="2" [three]="3" [one]="1" )
+./assoc11.sub: line 90: foo: readonly variable

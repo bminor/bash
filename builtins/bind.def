@@ -1,7 +1,7 @@
 This file is bind.def, from which is created bind.c.
 It implements the builtin "bind" in Bash.
 
-Copyright (C) 1987-2015 Free Software Foundation, Inc.
+Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -86,9 +86,9 @@ extern int errno;
 #include "bashgetopt.h"
 #include "common.h"
 
-static int query_bindings __P((char *));
-static int unbind_command __P((char *));
-static int unbind_keyseq __P((char *));
+static int query_bindings PARAMS((char *));
+static int unbind_command PARAMS((char *));
+static int unbind_keyseq PARAMS((char *));
 
 #define BIND_RETURN(x)  do { return_code = x; goto bind_exit; } while (0)
 
@@ -192,7 +192,7 @@ bind_builtin (list)
 	case 'X':
 	  flags |= XXFLAG;
 	  break;
-	CASE_HELPOPT;
+	case GETOPT_HELP:
 	default:
 	  builtin_usage ();
 	  BIND_RETURN (EX_USAGE);
@@ -277,7 +277,28 @@ bind_builtin (list)
   /* Process the rest of the arguments as binding specifications. */
   while (list)
     {
+      int olen, nlen, d, i;
+      char **obindings, **nbindings;
+
+      obindings = rl_invoking_keyseqs (bash_execute_unix_command);
+      olen = obindings ? strvec_len (obindings) : 0;
+
       rl_parse_and_bind (list->word->word);
+
+      nbindings = rl_invoking_keyseqs (bash_execute_unix_command);
+      nlen = nbindings ? strvec_len (nbindings) : 0;
+
+      if (nlen < olen)	/* fewer bind -x bindings */
+	for (d = olen - nlen, i = 0; i < olen && d > 0; i++)
+	  if (nlen == 0 || strvec_search (nbindings, obindings[i]) >= 0)
+	    {
+	      unbind_unix_command (obindings[i]);
+	      d--;
+	    }
+
+      strvec_dispose (obindings);
+      strvec_dispose (nbindings);
+
       list = list->next;
     }
 
@@ -286,6 +307,9 @@ bind_builtin (list)
     rl_set_keymap (saved_keymap);
 
   run_unwind_frame ("bind_builtin");
+
+  if (return_code < 0)
+    return_code = EXECUTION_FAILURE;
 
   return (sh_chkwrite (return_code));
 }
@@ -344,7 +368,8 @@ unbind_keyseq (seq)
      char *seq;
 {
   char *kseq;
-  int kslen;
+  int kslen, type;
+  rl_command_func_t *f;
 
   kseq = (char *)xmalloc ((2 * strlen (seq)) + 1);
   if (rl_translate_keyseq (seq, kseq, &kslen))
@@ -353,11 +378,13 @@ unbind_keyseq (seq)
       builtin_error (_("`%s': cannot unbind"), seq);
       return EXECUTION_FAILURE;
     }
-  if (rl_function_of_keyseq (kseq, (Keymap)0, (int *)0) == 0)
+  if ((f = rl_function_of_keyseq_len (kseq, kslen, (Keymap)0, &type)) == 0)
     {
       free (kseq);
       return (EXECUTION_SUCCESS);
     }
+  if (type == ISKMAP)
+    f = ((Keymap) f)[ANYOTHERKEY].function;
 
   /* I wish this didn't have to translate the key sequence again, but readline
      doesn't have a binding function that takes a translated key sequence as
@@ -368,6 +395,9 @@ unbind_keyseq (seq)
       builtin_error (_("`%s': cannot unbind"), seq);
       return (EXECUTION_FAILURE);
     }
+
+  if (f == bash_execute_unix_command)
+    unbind_unix_command (seq);
 
   free (kseq);
   return (EXECUTION_SUCCESS);

@@ -1,7 +1,7 @@
 /* strmatch.c -- ksh-like extended pattern matching for the shell and filename
 		globbing. */
 
-/* Copyright (C) 1991-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -260,6 +260,7 @@ is_cclass (c, name)
 #define PATSCAN			glob_patscan
 #define STRCOMPARE		strcompare
 #define EXTMATCH		extmatch
+#define DEQUOTE_PATHNAME	udequote_pathname
 #define STRUCT			smat_struct
 #define STRCHR(S, C)		strchr((S), (C))
 #define MEMCHR(S, C, N)		memchr((S), (C), (N))
@@ -286,7 +287,7 @@ is_cclass (c, name)
 #  define STREQ(s1, s2) ((wcscmp (s1, s2) == 0))
 #  define STREQN(a, b, n) ((a)[0] == (b)[0] && wcsncmp(a, b, n) == 0)
 
-extern char *mbsmbchar __P((const char *));
+extern char *mbsmbchar PARAMS((const char *));
 
 #if FNMATCH_EQUIV_FALLBACK
 /* We don't include <fnmatch.h> in order to avoid namespace collisions; the
@@ -500,6 +501,7 @@ posix_cclass_only (pattern)
 #define PATSCAN			glob_patscan_wc
 #define STRCOMPARE		wscompare
 #define EXTMATCH		extmatch_wc
+#define DEQUOTE_PATHNAME	wcdequote_pathname
 #define STRUCT			wcsmat_struct
 #define STRCHR(S, C)		wcschr((S), (C))
 #define MEMCHR(S, C, N)		wmemchr((S), (C), (N))
@@ -529,7 +531,7 @@ xstrmatch (pattern, string, flags)
   if (MB_CUR_MAX == 1)
     return (internal_strmatch ((unsigned char *)pattern, (unsigned char *)string, flags));
 
-  if (mbsmbchar (string) == 0 && mbsmbchar (pattern) == 0 && posix_cclass_only (pattern) )
+  if (mbsmbchar (string) == 0 && mbsmbchar (pattern) == 0 && posix_cclass_only (pattern))
     return (internal_strmatch ((unsigned char *)pattern, (unsigned char *)string, flags));
 
   n = xdupmbstowcs (&wpattern, NULL, pattern);

@@ -1,6 +1,6 @@
 /* eval.c -- reading and evaluating commands. */
 
-/* Copyright (C) 1996-2011 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -48,12 +48,8 @@
 #  include "bashhist.h"
 #endif
 
-#if defined (HAVE_POSIX_SIGNALS)
-extern sigset_t top_level_mask;
-#endif
-
-static void send_pwd_to_eterm __P((void));
-static sighandler alrm_catcher __P((int));
+static void send_pwd_to_eterm PARAMS((void));
+static sighandler alrm_catcher PARAMS((int));
 
 /* Read and execute commands until EOF is reached.  This assumes that
    the input source has already been initialized. */
@@ -108,7 +104,7 @@ reader_loop ()
 		 leave existing non-zero values (e.g., > 128 on signal)
 		 alone. */
 	      if (last_command_exit_value == 0)
-		last_command_exit_value = EXECUTION_FAILURE;
+		set_exit_status (EXECUTION_FAILURE);
 	      if (subshell_environment)
 		{
 		  current_command = (COMMAND *)NULL;
@@ -121,9 +117,8 @@ reader_loop ()
 		  dispose_command (current_command);
 		  current_command = (COMMAND *)NULL;
 		}
-#if defined (HAVE_POSIX_SIGNALS)
-	      sigprocmask (SIG_SETMASK, &top_level_mask, (sigset_t *)NULL);
-#endif
+
+	      restore_sigmask ();
 	      break;
 
 	    default:
@@ -144,7 +139,7 @@ reader_loop ()
 	{
 	  if (interactive_shell == 0 && read_but_dont_execute)
 	    {
-	      last_command_exit_value = EXECUTION_SUCCESS;
+	      set_exit_status (EXECUTION_SUCCESS);
 	      dispose_command (global_command);
 	      global_command = (COMMAND *)NULL;
 	    }
@@ -264,15 +259,43 @@ send_pwd_to_eterm ()
   free (f);
 }
 
+#if defined (ARRAY_VARS)
+int
+execute_array_command (ae, v)
+     ARRAY_ELEMENT *ae;
+     void *v;
+{
+  char *tag, *command;
+
+  tag = (char *)v;
+  command = element_value (ae);
+  if (command && *command)
+    execute_variable_command (command, tag);
+  return 0;
+}
+#endif
+  
 static void
 execute_prompt_command ()
 {
   char *command_to_execute;
+#if defined (ARRAY_VARS)
+  SHELL_VAR *pcv;
+  ARRAY *pcmds;
+
+  GET_ARRAY_FROM_VAR ("PROMPT_COMMANDS", pcv, pcmds);
+  if (pcv && var_isset (pcv) && pcmds && array_num_elements (pcmds) > 0)
+    {
+      array_walk (pcmds, execute_array_command, "PROMPT_COMMANDS");
+      return;
+    }
+#endif
 
   command_to_execute = get_string_value ("PROMPT_COMMAND");
-  if (command_to_execute)
+  if (command_to_execute && *command_to_execute)
     execute_variable_command (command_to_execute, "PROMPT_COMMAND");
 }
+
 /* Call the YACC-generated parser and return the status of the parse.
    Input is read from the current input stream (bash_input).  yyparse
    leaves the parsed command in the global variable GLOBAL_COMMAND.
@@ -293,7 +316,10 @@ parse_command ()
      actually printed. */
   if (interactive && bash_input.type != st_string && parser_expanding_alias() == 0)
     {
-      execute_prompt_command ();
+#if defined (READLINE)
+      if (no_line_editing || (bash_input.type == st_stdin && parser_will_prompt ()))
+#endif
+        execute_prompt_command ();
 
       if (running_under_emacs == 2)
 	send_pwd_to_eterm ();	/* Yuck */

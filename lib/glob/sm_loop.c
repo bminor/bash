@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
    
@@ -22,14 +22,16 @@ struct STRUCT
   CHAR *string;
 };
 
-int FCT __P((CHAR *, CHAR *, int));
+int FCT PARAMS((CHAR *, CHAR *, int));
 
-static int GMATCH __P((CHAR *, CHAR *, CHAR *, CHAR *, struct STRUCT *, int));
-static CHAR *PARSE_COLLSYM __P((CHAR *, INT *));
-static CHAR *BRACKMATCH __P((CHAR *, U_CHAR, int));
-static int EXTMATCH __P((INT, CHAR *, CHAR *, CHAR *, CHAR *, int));
+static int GMATCH PARAMS((CHAR *, CHAR *, CHAR *, CHAR *, struct STRUCT *, int));
+static CHAR *PARSE_COLLSYM PARAMS((CHAR *, INT *));
+static CHAR *BRACKMATCH PARAMS((CHAR *, U_CHAR, int));
+static int EXTMATCH PARAMS((INT, CHAR *, CHAR *, CHAR *, CHAR *, int));
 
-/*static*/ CHAR *PATSCAN __P((CHAR *, CHAR *, INT));
+extern void DEQUOTE_PATHNAME PARAMS((CHAR *));
+
+/*static*/ CHAR *PATSCAN PARAMS((CHAR *, CHAR *, INT));
 
 int
 FCT (pattern, string, flags)
@@ -384,9 +386,10 @@ BRACKMATCH (p, test, flags)
 {
   register CHAR cstart, cend, c;
   register int not;    /* Nonzero if the sense of the character class is inverted.  */
-  int brcnt, brchr, forcecoll, isrange;
+  int brcnt, forcecoll, isrange;
   INT pc;
   CHAR *savep;
+  CHAR *brchrp;
   U_CHAR orig_test;
 
   orig_test = test;
@@ -455,6 +458,9 @@ BRACKMATCH (p, test, flags)
 		{
 		  bcopy (p + 1, ccname, (close - p - 1) * sizeof (CHAR));
 		  *(ccname + (close - p - 1)) = L('\0');
+		  /* As a result of a POSIX discussion, char class names are
+		     allowed to be quoted (?) */
+		  DEQUOTE_PATHNAME (ccname);
 		  pc = IS_CCLASS (orig_test, (XCHAR *)ccname);
 		}
 	      if (pc == -1)
@@ -597,7 +603,7 @@ matched:
   /* Skip the rest of the [...] that already matched.  */
   c = *--p;
   brcnt = 1;
-  brchr = 0;
+  brchrp = 0;
   while (brcnt > 0)
     {
       int oc;
@@ -611,13 +617,26 @@ matched:
       if (c == L('[') && (*p == L('=') || *p == L(':') || *p == L('.')))
 	{
 	  brcnt++;
-	  brchr = *p;
+	  brchrp = p++;		/* skip over the char after the left bracket */
+	  if ((c = *p) == L('\0'))
+	    return ((test == L('[')) ? savep : (CHAR *)0);
+	  /* If *brchrp == ':' we should check that the rest of the characters
+	     form a valid character class name. We don't do that yet, but we
+	     keep BRCHRP in case we want to. */
 	}
-      /* we only want to check brchr if we set it above */
-      else if (c == L(']') && brcnt > 1 && brchr != 0 && oc == brchr)
-	brcnt--;
-      else if (c == L(']') && brcnt == 1)
-	brcnt--;
+      /* We only want to check brchrp if we set it above. */
+      else if (c == L(']') && brcnt > 1 && brchrp != 0 && oc == *brchrp)
+	{
+	  brcnt--;
+	  brchrp = 0;		/* just in case */
+	}
+      /* Left bracket loses its special meaning inside a bracket expression.
+         It is only valid when followed by a `.', `=', or `:', which we check
+         for above. Technically the right bracket can appear in a collating
+         symbol, so we check for that here. Otherwise, it terminates the
+         bracket expression. */
+      else if (c == L(']') && (brchrp == 0 || *brchrp != L('.')) && brcnt >= 1)
+	brcnt = 0;
       else if (!(flags & FNM_NOESCAPE) && c == L('\\'))
 	{
 	  if (*p == '\0')
@@ -915,6 +934,7 @@ fprintf(stderr, "extmatch: flags = %d\n", flags);
 #undef PATSCAN
 #undef STRCOMPARE
 #undef EXTMATCH
+#undef DEQUOTE_PATHNAME
 #undef STRUCT
 #undef BRACKMATCH
 #undef STRCHR

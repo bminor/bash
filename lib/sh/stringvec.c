@@ -122,7 +122,6 @@ strvec_remove (array, name)
   return 0;
 }
 
-#ifdef INCLUDE_UNUSED
 /* Find NAME in ARRAY.  Return the index of NAME, or -1 if not present.
    ARRAY should be NULL terminated. */
 int
@@ -137,7 +136,6 @@ strvec_search (array, name)
 
   return (-1);
 }
-#endif
 
 /* Allocate and return a new copy of ARRAY and its contents. */
 char **
@@ -156,6 +154,28 @@ strvec_copy (array)
   ret[i] = (char *)NULL;
 
   return (ret);
+}
+
+/* Comparison routine for use by qsort that conforms to the new Posix
+   requirements (http://austingroupbugs.net/view.php?id=1070).
+
+   Perform a bytewise comparison if *S1 and *S2 collate equally. */
+int
+strvec_posixcmp (s1, s2)
+     register char **s1, **s2;
+{
+  int result;
+
+#if defined (HAVE_STRCOLL)
+   result = strcoll (*s1, *s2);
+   if (result != 0)
+     return result;
+#endif
+
+  if ((result = **s1 - **s2) == 0)
+    result = strcmp (*s1, *s2);
+
+  return (result);
 }
 
 /* Comparison routine for use with qsort() on arrays of strings.  Uses
@@ -178,10 +198,14 @@ strvec_strcmp (s1, s2)
 
 /* Sort ARRAY, a null terminated array of pointers to strings. */
 void
-strvec_sort (array)
+strvec_sort (array, posix)
      char **array;
+     int posix;
 {
-  qsort (array, strvec_len (array), sizeof (char *), (QSFUNC *)strvec_strcmp);
+  if (posix)
+    qsort (array, strvec_len (array), sizeof (char *), (QSFUNC *)strvec_posixcmp);
+  else
+    qsort (array, strvec_len (array), sizeof (char *), (QSFUNC *)strvec_strcmp);
 }
 
 /* Cons up a new array of words.  The words are taken from LIST,

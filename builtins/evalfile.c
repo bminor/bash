@@ -123,7 +123,7 @@ file_error_and_exit:
 
       if (flags & FEVAL_LONGJMP)
 	{
-	  last_command_exit_value = 1;
+	  last_command_exit_value = EXECUTION_FAILURE;
 	  jump_to_top_level (EXITPROG);
 	}
 

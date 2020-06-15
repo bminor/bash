@@ -1,11 +1,11 @@
 dnl
-dnl Configure script for bash-5.0
+dnl Configure script for bash-5.1
 dnl
 dnl report bugs to chet@po.cwru.edu
 dnl
 dnl Process this file with autoconf to produce a configure script.
 
-# Copyright (C) 1987-2018 Free Software Foundation, Inc.
+# Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -21,10 +21,10 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.0, version 5.005])dnl
+AC_REVISION([for Bash 5.1, version 5.020])dnl
 
-define(bashvers, 5.0)
-define(relstatus, release)
+define(bashvers, 5.1)
+define(relstatus, alpha)
 
 AC_INIT([bash], bashvers-relstatus, [bug-bash@gnu.org])
 
@@ -88,6 +88,7 @@ sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
 *-qnx*)		opt_bash_malloc=no ;;	# QNX 4.2, QNX [67].x
 *-nsk*)		opt_bash_malloc=no ;;	# HP NonStop
 *-haiku*)	opt_bash_malloc=no ;;	# Haiku OS
+*-genode*)	opt_bash_malloc=no ;;	# Genode has no sbrk
 # Deprecated -- bash malloc is suitable
 #sparc-netbsd*)	opt_bash_malloc=no ;;	# needs 8-byte alignment
 #mips-irix6*)	opt_bash_malloc=no ;;	# needs 8-byte alignment
@@ -404,10 +405,7 @@ AC_SUBST(HELPSTRINGS)
 
 dnl We want these before the checks, so the checks can modify their values.
 if test -z "$CFLAGS"; then
-	AUTO_CFLAGS="-g ${GCC+-O2} ${GCC+-Wno-parentheses}"
-	AUTO_LDFLAGS="-g ${GCC+-O2}"
-else
-	AUTO_CFLAGS= AUTO_LDFLAGS=
+	want_auto_cflags=1
 fi
 
 echo ""
@@ -418,6 +416,14 @@ dnl compilation checks
 dnl AC_PROG_CC sets $cross_compiling to `yes' if cross-compiling for a
 dnl different environment
 AC_PROG_CC
+
+if test -n "$want_auto_cflags"; then
+	AUTO_CFLAGS="-g ${GCC+-O2}"
+	AUTO_LDFLAGS="-g ${GCC+-O2}"
+	STYLE_CFLAGS="${GCC+-Wno-parentheses} ${GCC+-Wno-format-security}"
+else
+	AUTO_CFLAGS= AUTO_LDFLAGS= STYLE_CFLAGS=
+fi
 
 dnl test for Unix variants
 AC_ISC_POSIX
@@ -513,7 +519,11 @@ if test "X$cross_compiling" = "Xno"; then
 		LDFLAGS_FOR_BUILD=${LDFLAGS_FOR_BUILD-'$(LDFLAGS)'}
 	fi
 	# CFLAGS set above to default value if not passed in environment
-	CFLAGS_FOR_BUILD=${CFLAGS-'$(CFLAGS)'}
+	if test -n "$want_auto_cflags" ; then
+		CFLAGS_FOR_BUILD="${CFLAGS} ${STYLE_CFLAGS}"
+	else
+		CFLAGS_FOR_BUILD=${CFLAGS-'$(CFLAGS)'}
+	fi
 	LIBS_FOR_BUILD=${LIBS_FOR_BUILD-'$(LIBS)'}
 else
 	CC_FOR_BUILD=${CC_FOR_BUILD-"gcc"}
@@ -685,6 +695,44 @@ AC_SUBST(SIZE)
 m4_include([m4/stat-time.m4])
 m4_include([m4/timespec.m4])
 
+dnl include files for gettext
+
+m4_include([m4/codeset.m4])
+m4_include([m4/extern-inline.m4])
+m4_include([m4/fcntl-o.m4])
+m4_include([m4/gettext.m4])
+m4_include([m4/glibc2.m4])
+m4_include([m4/glibc21.m4])
+m4_include([m4/host-cpu-c-abi.m4])
+m4_include([m4/iconv.m4])
+m4_include([m4/intdiv0.m4])
+m4_include([m4/intl.m4])
+m4_include([m4/intlmacosx.m4])
+m4_include([m4/intl-thread-locale.m4])
+m4_include([m4/intmax.m4])
+m4_include([m4/inttypes-pri.m4])
+m4_include([m4/inttypes.m4])
+m4_include([m4/inttypes_h.m4])
+m4_include([m4/lcmessage.m4])
+m4_include([m4/lib-ld.m4])
+m4_include([m4/lib-link.m4])
+m4_include([m4/lib-prefix.m4])
+m4_include([m4/lock.m4])
+m4_include([m4/nls.m4])
+m4_include([m4/po.m4])
+m4_include([m4/printf-posix.m4])
+m4_include([m4/progtest.m4])
+m4_include([m4/pthread_rwlock_rdlock.m4])
+m4_include([m4/size_max.m4])
+m4_include([m4/stdint_h.m4])
+m4_include([m4/threadlib.m4])
+m4_include([m4/uintmax_t.m4])
+m4_include([m4/ulonglong.m4])
+m4_include([m4/visibility.m4])
+m4_include([m4/wchar_t.m4])
+m4_include([m4/wint_t.m4])
+m4_include([m4/xsize.m4])
+
 dnl Turn on any extensions available in the GNU C library.
 AC_DEFINE(_GNU_SOURCE, 1)
 
@@ -705,6 +753,7 @@ AM_GNU_GETTEXT([no-libtool], [need-ngettext], [lib/intl])
 dnl header files
 AC_HEADER_DIRENT
 AC_HEADER_TIME
+AC_HEADER_MAJOR
 
 BASH_HEADER_INTTYPES
 
@@ -713,7 +762,7 @@ AC_CHECK_HEADERS(unistd.h stdlib.h stdarg.h varargs.h limits.h string.h \
 		 stdbool.h stddef.h stdint.h netdb.h pwd.h grp.h strings.h \
 		 regex.h syslog.h ulimit.h)
 AC_CHECK_HEADERS(sys/pte.h sys/stream.h sys/select.h sys/file.h sys/ioctl.h \
-		 sys/mman.h sys/param.h sys/socket.h sys/stat.h \
+		 sys/mman.h sys/param.h sys/random.h sys/socket.h sys/stat.h \
 		 sys/time.h sys/times.h sys/types.h sys/wait.h)
 AC_CHECK_HEADERS(netinet/in.h arpa/inet.h)
 
@@ -779,10 +828,10 @@ dnl checks for missing libc functions
 AC_CHECK_FUNC(mkfifo,AC_DEFINE(HAVE_MKFIFO),AC_DEFINE(MKFIFO_MISSING))
 
 dnl checks for system calls
-AC_CHECK_FUNCS(dup2 eaccess fcntl getdtablesize getgroups gethostname \
-		getpagesize getpeername getrlimit getrusage gettimeofday \
-		kill killpg lstat pselect readlink select setdtablesize \
-		setitimer tcgetpgrp uname ulimit waitpid)
+AC_CHECK_FUNCS(dup2 eaccess fcntl getdtablesize getentropy getgroups \
+		gethostname getpagesize getpeername getrandom getrlimit \
+		getrusage gettimeofday kill killpg lstat pselect readlink \
+		select setdtablesize setitimer tcgetpgrp uname ulimit waitpid)
 AC_REPLACE_FUNCS(rename)
 
 dnl checks for c library functions
@@ -795,7 +844,9 @@ AC_CHECK_FUNCS(bcopy bzero confstr faccessat fnmatch \
 AC_CHECK_FUNCS(vasprintf asprintf)
 AC_CHECK_FUNCS(isascii isblank isgraph isprint isspace isxdigit)
 AC_CHECK_FUNCS(getpwent getpwnam getpwuid)
-AC_CHECK_FUNCS(mkstemp)
+AC_CHECK_FUNCS(mkstemp mkdtemp)
+AC_CHECK_FUNCS(arc4random)
+
 AC_REPLACE_FUNCS(getcwd memset)
 AC_REPLACE_FUNCS(strcasecmp strcasestr strerror strftime strnlen strpbrk strstr)
 AC_REPLACE_FUNCS(strtod strtol strtoul strtoll strtoull strtoimax strtoumax)
@@ -810,8 +861,12 @@ AC_CHECK_DECLS([confstr])
 AC_CHECK_DECLS([printf])
 AC_CHECK_DECLS([sbrk])
 AC_CHECK_DECLS([setregid])
+dnl AC_CHECK_DECLS[(setresuid])
+dnl AC_CHECK_DECLS[(setresgid])
 AC_CHECK_DECLS([strcpy])
 AC_CHECK_DECLS([strsignal])
+
+AC_CHECK_FUNCS(setresuid setresgid)
 
 dnl Extra test to detect the horribly broken HP/UX 11.00 strtold(3)
 AC_CHECK_DECLS([strtold], [
@@ -1091,8 +1146,8 @@ sysv4.2*)	AC_DEFINE(SVR4_2)
 		AC_DEFINE(SVR4) ;;
 sysv4*)		AC_DEFINE(SVR4) ;;
 sysv5*)		AC_DEFINE(SVR5) ;;
-hpux9*)		LOCAL_CFLAGS="-DHPUX9 -DHPUX" ;;
-hpux*)		LOCAL_CFLAGS=-DHPUX ;;
+hpux9*)		LOCAL_CFLAGS="-DHPUX9 -DHPUX -DTGETENT_BROKEN -DTGETFLAG_BROKEN" ;;
+hpux*)		LOCAL_CFLAGS="-DHPUX -DTGETENT_BROKEN -DTGETFLAG_BROKEN" ;;
 dgux*)		LOCAL_CFLAGS=-D_DGUX_SOURCE; LOCAL_LIBS=-ldgc ;;
 isc*)		LOCAL_CFLAGS=-Disc386 ;;
 rhapsody*)	LOCAL_CFLAGS=-DRHAPSODY ;;
@@ -1154,14 +1209,7 @@ mips-pyramid-sysv4)	LOCAL_CFLAGS=-Xa ;;
 esac
 
 # turn off paren warnings in gcc
-if test "$GCC" = yes # && test -n "$DEBUG"
-then
-	CFLAGS="$CFLAGS -Wno-parentheses -Wno-format-security"
-#	if test -n "$DEBUG"
-#	then
-#		CFLAGS="$CFLAGS -Werror"
-#	fi
-fi
+CFLAGS="$CFLAGS ${STYLE_CFLAGS}"
 
 #
 # Shared object configuration section.  These values are generated by

@@ -1,7 +1,7 @@
 /* trap.c -- Not the trap command, but useful functions for manipulating
    those objects.  The trap command is in builtins/trap.def. */
 
-/* Copyright (C) 1987-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -90,6 +90,7 @@ static void trap_if_untrapped (int, char *);
 extern procenv_t alrmbuf;
 
 extern volatile int from_return_trap;
+extern int waiting_for_child;
 
 extern WORD_LIST *subst_assign_varlist;
 
@@ -119,6 +120,9 @@ int trap_saved_exit_value;
 int wait_signal_received;
 
 int trapped_signal_received;
+
+/* Set to 1 to suppress the effect of `set v' in the DEBUG trap. */
+int suppress_debug_trap_verbose = 0;
 
 #define GETORIGSIG(sig) \
   do { \
@@ -294,6 +298,7 @@ run_pending_traps ()
 {
   register int sig;
   int old_exit_value, x;
+  int old_running;
   WORD_LIST *save_subst_varlist;
   HASH_TABLE *save_tempenv;
   sh_parser_state_t pstate;
@@ -330,6 +335,7 @@ run_pending_traps ()
 #if defined (ARRAY_VARS)
   ps = save_pipestatus_array ();
 #endif
+  old_running = running_trap;
 
   for (sig = 1; sig < NSIG; sig++)
     {
@@ -440,7 +446,7 @@ run_pending_traps ()
 	    }
 
 	  pending_traps[sig] = 0;	/* XXX - move before evalstring? */
-	  running_trap = 0;
+	  running_trap = old_running;
 	}
     }
 
@@ -485,7 +491,7 @@ trap_handler (sig)
       if (this_shell_builtin && (this_shell_builtin == wait_builtin))
 	{
 	  wait_signal_received = sig;
-	  if (interrupt_immediately && wait_intr_flag)
+	  if (waiting_for_child && wait_intr_flag)
 	    sh_longjmp (wait_intr_buf, 1);
 	}
 
@@ -507,14 +513,20 @@ trap_handler (sig)
 }
 
 int
-first_pending_trap ()
+next_pending_trap (start)
 {
   register int i;
 
-  for (i = 1; i < NSIG; i++)
+  for (i = start; i < NSIG; i++)
     if (pending_traps[i])
       return i;
   return -1;
+}
+
+int
+first_pending_trap ()
+{
+  return (next_pending_trap (1));
 }
 
 /* Return > 0 if any of the "real" signals (not fake signals like EXIT) are
@@ -528,6 +540,15 @@ any_signals_trapped ()
     if (sigmodes[i] & SIG_TRAPPED)
       return i;
   return -1;
+}
+
+void
+clear_pending_traps ()
+{
+  register int i;
+
+  for (i = 1; i < NSIG; i++)
+    pending_traps[i] = 0;
 }
 
 void
@@ -952,6 +973,7 @@ void
 run_trap_cleanup (sig)
      int sig;
 {
+  /* XXX - should we clean up trap_list[sig] == IMPOSSIBLE_TRAP_HANDLER? */
   sigmodes[sig] &= ~(SIG_INPROGRESS|SIG_CHANGED);
 }
 
@@ -966,7 +988,8 @@ _run_trap_internal (sig, tag)
 {
   char *trap_command, *old_trap;
   int trap_exit_value;
-  volatile int save_return_catch_flag, function_code, old_int;
+  volatile int save_return_catch_flag, function_code;
+  int old_modes, old_running, old_int;
   int flags;
   procenv_t save_return_catch;
   WORD_LIST *save_subst_varlist;
@@ -976,13 +999,15 @@ _run_trap_internal (sig, tag)
   ARRAY *ps;
 #endif
 
+  old_modes = old_running = -1;
+
   trap_exit_value = function_code = 0;
   trap_saved_exit_value = last_command_exit_value;
   /* Run the trap only if SIG is trapped and not ignored, and we are not
      currently executing in the trap handler. */
   if ((sigmodes[sig] & SIG_TRAPPED) && ((sigmodes[sig] & SIG_IGNORED) == 0) &&
       (trap_list[sig] != (char *)IMPOSSIBLE_TRAP_HANDLER) &&
-#if 0
+#if 1
       /* Uncomment this to allow some special signals to recursively execute
 	 trap handlers. */
       (RECURSIVE_SIG (sig) || (sigmodes[sig] & SIG_INPROGRESS) == 0))
@@ -991,6 +1016,9 @@ _run_trap_internal (sig, tag)
 #endif
     {
       old_trap = trap_list[sig];
+      old_modes = sigmodes[sig];
+      old_running = running_trap;
+
       sigmodes[sig] |= SIG_INPROGRESS;
       sigmodes[sig] &= ~SIG_CHANGED;		/* just to be sure */
       trap_command =  savestring (old_trap);
@@ -1050,8 +1078,10 @@ _run_trap_internal (sig, tag)
 
       temporary_env = save_tempenv;
 
-      sigmodes[sig] &= ~SIG_INPROGRESS;
-      running_trap = 0;
+      if ((old_modes & SIG_INPROGRESS) == 0)
+	sigmodes[sig] &= ~SIG_INPROGRESS;
+
+      running_trap = old_running;
       interrupt_state = old_int;
 
       if (sigmodes[sig] & SIG_CHANGED)
@@ -1110,9 +1140,7 @@ run_debug_trap ()
 #endif
 
       old_verbose = echo_input_at_read;
-#if 0	/* not yet */
-      echo_input_at_read = 0;
-#endif
+      echo_input_at_read = suppress_debug_trap_verbose ? 0 : echo_input_at_read;
 
       trap_exit_value = _run_trap_internal (DEBUG_TRAP, "debug trap");
 
@@ -1177,6 +1205,8 @@ run_interrupt_trap (will_throw)
 {
   if (will_throw && running_trap > 0)
     run_trap_cleanup (running_trap - 1);
+  pending_traps[SIGINT] = 0;	/* run_pending_traps does this */
+  catch_flag = 0;
   _run_trap_internal (SIGINT, "interrupt trap");
 }
 

@@ -1,6 +1,6 @@
 /* unicode.c - functions to convert unicode characters */
 
-/* Copyright (C) 2010-2016 Free Software Foundation, Inc.
+/* Copyright (C) 2010-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -50,9 +50,9 @@
 #endif /* !STREQ */
 
 #if defined (HAVE_LOCALE_CHARSET)
-extern const char *locale_charset __P((void));
+extern const char *locale_charset PARAMS((void));
 #else
-extern char *get_locale_var __P((char *));
+extern char *get_locale_var PARAMS((char *));
 #endif
 
 extern int locale_utf8locale;
@@ -196,7 +196,7 @@ u32toutf8 (wc, s)
     }
   else if (wc < 0x080000000)
     {
-      s[0] = (wc >> 30) | 0xf8;
+      s[0] = (wc >> 30) | 0xfc;
       s[1] = ((wc >> 24) & 0x3f) | 0x80;
       s[2] = ((wc >> 18) & 0x3f) | 0x80;
       s[3] = ((wc >> 12) & 0x3f) | 0x80;
@@ -216,21 +216,21 @@ u32toutf8 (wc, s)
 int
 u32toutf16 (c, s)
      u_bits32_t c;
-     unsigned short *s;
+     wchar_t *s;
 {
   int l;
 
   l = 0;
   if (c < 0x0d800 || (c >= 0x0e000 && c <= 0x0ffff))
     {
-      s[0] = (unsigned short) (c & 0xFFFF);
+      s[0] = (wchar_t) (c & 0xFFFF);
       l = 1;
     }
   else if (c >= 0x10000 && c <= 0x010ffff)
     {
       c -= 0x010000;
-      s[0] = (unsigned short)((c >> 10) + 0xd800);
-      s[1] = (unsigned short)((c & 0x3ff) + 0xdc00);
+      s[0] = (wchar_t)((c >> 10) + 0xd800);
+      s[1] = (wchar_t)((c & 0x3ff) + 0xdc00);
       l = 2;
     }
   s[l] = 0;

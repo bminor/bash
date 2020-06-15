@@ -22,8 +22,8 @@ AVAR
 AVAR
 42
 /bin:/usr/bin:/usr/local/bin:.
-avar=([0]="/bin:/usr/bin:/usr/local/bin:.")
-z=yy
+declare -a avar=([0]="/bin:/usr/bin:/usr/local/bin:.")
+declare -- z="yy"
 42
 declare -i ivar="10"
 unset
@@ -60,7 +60,8 @@ FIN: asdf fdsa, asdf fdsa
 g: v = , w =
 f: v = , w =
 FIN: v = two, w = one
-./varenv4.sub: line 54: bbb: unique: cannot convert indexed to associative array
+./varenv4.sub: line 67: bbb: unique: cannot convert indexed to associative array
+./varenv4.sub: line 67: declare: unique: cannot convert indexed to associative array
 after bbb: 1
 declare -Ar FOOBAR=([foo]="bar" )
 declare -Ar FOOBAR=([foo]="bar" )
@@ -77,7 +78,7 @@ declare -ar myvar=([0]="0")
 declare -ir myvar="1"
 declare -rx tempvar1='foo'
 declare -rx tempvar2='qux'
-./varenv7.sub: line 44: local: var: readonly variable
+./varenv7.sub: line 57: local: var: readonly variable
 inside: outside
 outside: outside
 local: unset1 unset2
@@ -95,30 +96,30 @@ in o1 (readonly modifying local scalars):
 declare -r i1="a b c"
 declare -r j1="1 2 3"
 after o1:
-./varenv9.sub: line 15: declare: i1: not found
-./varenv9.sub: line 15: declare: j1: not found
+./varenv9.sub: line 28: declare: i1: not found
+./varenv9.sub: line 28: declare: j1: not found
 in o2 (readonly setting global scalars):
 declare -r i2="a b c"
 declare -r j2="1 2 3"
 after o2:
 declare -r i2="a b c"
 declare -r j2="1 2 3"
-./varenv9.sub: line 33: unset: i2: cannot unset: readonly variable
-./varenv9.sub: line 33: unset: j2: cannot unset: readonly variable
+./varenv9.sub: line 46: unset: i2: cannot unset: readonly variable
+./varenv9.sub: line 46: unset: j2: cannot unset: readonly variable
 in o3 (readonly modifying locals, converting to arrays):
 declare -ar i3=([0]="a" [1]="b" [2]="c")
 declare -ar j3=([0]="1" [1]="2" [2]="3")
 after o3:
-./varenv9.sub: line 48: declare: i3: not found
-./varenv9.sub: line 48: declare: j3: not found
+./varenv9.sub: line 61: declare: i3: not found
+./varenv9.sub: line 61: declare: j3: not found
 in o4 (readonly setting global array variables):
 declare -ar i4=([0]="a" [1]="b" [2]="c")
 declare -ar j4=([0]="1" [1]="2" [2]="3")
 after o4:
 declare -ar i4=([0]="a" [1]="b" [2]="c")
 declare -ar j4=([0]="1" [1]="2" [2]="3")
-./varenv9.sub: line 66: unset: i4: cannot unset: readonly variable
-./varenv9.sub: line 66: unset: j4: cannot unset: readonly variable
+./varenv9.sub: line 79: unset: i4: cannot unset: readonly variable
+./varenv9.sub: line 79: unset: j4: cannot unset: readonly variable
 main: unset
 inner: res unset
 outer: res: X Y
@@ -128,13 +129,14 @@ outer: res: X Y
 main: after second call: X
 func: null or unset
 after func: x = outside
-./varenv11.sub: line 4: local: qux: readonly variable
-./varenv11.sub: line 5: qux: readonly variable
+./varenv11.sub: line 17: local: qux: readonly variable
+./varenv11.sub: line 18: qux: readonly variable
+./varenv11.sub: line 18: local: qux: readonly variable
 declare -A foo=([zero]="zero" [one]="one" )
 declare -a bar=([0]="zero" [1]="one")
-declare -A foo=([zero]="zero" [one]="one" )
+declare -A foo=([one]="one" [zero]="zero" )
 declare -a bar=([0]="zero" [1]="one")
-./varenv11.sub: line 29: a: readonly variable
+./varenv11.sub: line 42: a: readonly variable
 foo=abc
 func1: var =
 
@@ -147,30 +149,38 @@ inside: declare -x var="value"
 outside: declare -- var="one"
 inside: declare -x var="value"
 outside: declare -- var="outside"
-inside: declare -x var="global"
+inside: declare -x var="inside"
 outside: declare -- var="outside"
-foo=<unset> environment foo=
-foo=foo environment foo=foo
-foo=foo environment foo=foo
-./varenv13.sub: line 3: `var[0]': not a valid identifier
-./varenv13.sub: line 3: `var[@]': not a valid identifier
-./varenv13.sub: line 1: declare: var: not found
-./varenv13.sub: line 12: var[@]: bad array subscript
+outside 1.0: var=one
+outside 1.1: var=one
+inside func: var=two
+outside 2.0: var=<unset>
+inside func: var=two
+outside 2.1: var=global
+inside func1: var=value
+outside 3.0: var=value
+inside func2: var=global
+outside 4.0: var=outside
+foo: hello world
+after foo: var=global
+bar: hello world
+after bar: var=global
+./varenv13.sub: line 16: `var[0]': not a valid identifier
+./varenv13.sub: line 16: `var[@]': not a valid identifier
+./varenv13.sub: line 14: declare: var: not found
+./varenv13.sub: line 25: var[@]: bad array subscript
 declare -A var=([0]="X" )
 help
-./varenv13.sub: line 21: `var[0]': not a valid identifier
+./varenv13.sub: line 34: `var[0]': not a valid identifier
 1
-./varenv14.sub: line 6: warning: var: cannot inherit value from incompatible type
-declare -a var=([0]="X")
-./varenv14.sub: line 9: warning: var: cannot inherit value from incompatible type
-declare -a var=([0]="Y")
-./varenv14.sub: line 10: warning: var: cannot inherit value from incompatible type
-declare -a var=([0]="Y")
-./varenv14.sub: line 11: warning: var: cannot inherit value from incompatible type
-declare -a var=()
-./varenv14.sub: line 12: warning: var: cannot inherit value from incompatible type
-declare -a var=()
-./varenv14.sub: line 18: f: var: cannot convert indexed to associative array
+declare -A var=([0]="X" )
+declare -A var=([Y]="Y" )
+declare -A var=([Y]="Y" )
+declare -A var=()
+declare -A var=()
+./varenv14.sub: line 31: f: var: cannot convert indexed to associative array
+./varenv14.sub: line 31: declare: var: cannot convert indexed to associative array
+declare -a var=([0]="12")
 declare -a a=([0]="X")
 declare -a s=([0]="X")
 declare -a a=([0]="X" [1]="Y")
@@ -207,6 +217,49 @@ after source 1: a b c d e f g h i j k l m n o p q r s t u v w x y z
 varenv15.in: before set: one two three four five six seven eight nine ten
 varenv15.in: after set: a b c d e f g h i j k l m n o p q r s t u v w x y z
 after source 2: a b c d e f g h i j k l m n o p q r s t u v w x y z
+foo=showfoo environment foo=showfoo
+foo=showfoo environment foo=showfoo
+foo=showfoo environment foo=showfoo
+outside: foo=<unset>
+
+posix mode
+foo=showfoo environment foo=showfoo
+outside 1.0: foo=<unset>
+foo=showfoo environment foo=showfoo
+foo=showfoo environment foo=showfoo
+outside 1.1: foo=<unset>
+foo=<unset> environment foo=
+outside 2.0: foo=<unset>
+foo=foo environment foo=foo
+foo=<unset> environment foo=
+outside 2.1: foo=<unset>
+declare -- var="global"
+declare -- var
+declare -- var="local"
+declare -- var="global"
+declare -- var="local"
+declare -- var
+declare -- var="local"
+declare -- var
+declare -- var="local"
+declare -- var
+declare -- var="local"
+declare -- var="f1"
+declare -- var="local"
+declare -a arr=([0]="zero" [1]="one" [2]="two" [3]="three" [4]="four" [5]="five")
+declare -a arr=([0]="zero" [1]="one" [2]="two")
+declare -a arr=([0]="three" [1]="four" [2]="five")
+declare -a arr=([0]="zero" [1]="one" [2]="two")
+ddd 0
+aaa 1 2 3
+bbb 4 5 6
+ccc 7 8 9
+declare -a x=([0]="one" [1]="two" [2]="three")
+./varenv19.sub: line 51: declare: x: not found
+declare -x v="x"
+declare -x v="t"
+declare -- v
+declare -x v
 a=z
 a=b
 a=z

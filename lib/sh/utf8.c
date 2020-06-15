@@ -76,13 +76,13 @@ utf8_mbsnlen(src, srclen, maxlen)
   return (count);
 }
 
-/* Adapted from GNU gnulib */
+/* Adapted from GNU gnulib. Handles UTF-8 characters up to 4 bytes long */
 int
 utf8_mblen (s, n)
      const char *s;
      size_t n;
 {
-  unsigned char c, c1;
+  unsigned char c, c1, c2, c3;
 
   if (s == 0)
     return (0);	/* no shift states */
@@ -97,25 +97,74 @@ utf8_mblen (s, n)
       c1 = (unsigned char)s[1];
       if (c < 0xe0)
 	{
-	  if (n >= 2 && (s[1] ^ 0x80) < 0x40)
+	  if (n == 1)
+	    return -2;
+
+	  /*
+	   *				c	c1
+	   *
+	   *    U+0080..U+07FF       C2..DF   80..BF
+	   */
+
+	  if (n >= 2 && (c1 ^ 0x80) < 0x40)		/* 0x80..0xbf */
 	    return 2;
 	}
       else if (c < 0xf0)
 	{
-	  if (n >= 3
-		&& (s[1] ^ 0x80) < 0x40 && (s[2] ^ 0x80) < 0x40
+	  if (n == 1)
+	    return -2;
+
+	  /*
+	   *				c	c1	c2
+	   *
+	   *    U+0800..U+0FFF       E0       A0..BF   80..BF
+	   *    U+1000..U+CFFF       E1..EC   80..BF   80..BF
+	   *    U+D000..U+D7FF       ED       80..9F   80..BF
+	   *    U+E000..U+FFFF       EE..EF   80..BF   80..BF
+	   */
+
+	  if ((c1 ^ 0x80) < 0x40
 		&& (c >= 0xe1 || c1 >= 0xa0)
 		&& (c != 0xed || c1 < 0xa0))
-	    return 3;
+	    {
+	      if (n == 2)
+		return -2;		/* incomplete */
+
+	      c2 = (unsigned char)s[2];
+	      if ((c2 ^ 0x80) < 0x40)
+		 return 3;
+	    }
 	}
-      else if (c < 0xf8)
+      else if (c <= 0xf4)
 	{
-	  if (n >= 4
-		&& (s[1] ^ 0x80) < 0x40 && (s[2] ^ 0x80) < 0x40
-	 	&& (s[3] ^ 0x80) < 0x40
+	  if (n == 1)
+	    return -2;
+	 
+	  /*
+	   *				c	c1	c2	c3
+	   *
+	   *    U+10000..U+3FFFF     F0       90..BF   80..BF   80..BF
+	   *    U+40000..U+FFFFF     F1..F3   80..BF   80..BF   80..BF
+	   *    U+100000..U+10FFFF   F4       80..8F   80..BF   80..BF
+	   */
+	  if (((c1 ^ 0x80) < 0x40) 
 		&& (c >= 0xf1 || c1 >= 0x90)
 		&& (c < 0xf4 || (c == 0xf4 && c1 < 0x90)))
-	    return 4;
+	    {
+	      if (n == 2)
+		return -2;		/* incomplete */
+
+	      c2 = (unsigned char)s[2];
+	      if ((c2 ^ 0x80) < 0x40)
+		{
+		  if (n == 3)
+		    return -2;
+
+		  c3 = (unsigned char)s[3];
+	 	  if ((c3 ^ 0x80) < 0x40)
+	  	    return 4;
+		}
+	    }
 	}
     }
   /* invalid or incomplete multibyte character */

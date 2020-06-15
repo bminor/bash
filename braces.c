@@ -1,6 +1,6 @@
 /* braces.c -- code for doing word expansion in curly braces. */
 
-/* Copyright (C) 1987-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -59,11 +59,7 @@ extern int errno;
 
 #define BRACE_SEQ_SPECIFIER	".."
 
-extern int asprintf __P((char **, const char *, ...)) __attribute__((__format__ (printf, 2, 3)));
-
-#if defined (NOTDEF)
-extern int last_command_exit_value;
-#endif
+extern int asprintf PARAMS((char **, const char *, ...)) __attribute__((__format__ (printf, 2, 3)));
 
 /* Basic idea:
 
@@ -77,12 +73,12 @@ extern int last_command_exit_value;
 /* The character which is used to separate arguments. */
 static const int brace_arg_separator = ',';
 
-#if defined (__P)
-static int brace_gobbler __P((char *, size_t, int *, int));
-static char **expand_amble __P((char *, size_t, int));
-static char **expand_seqterm __P((char *, size_t));
-static char **mkseq __P((intmax_t, intmax_t, intmax_t, int, int));
-static char **array_concat __P((char **, char **));
+#if defined (PARAMS)
+static int brace_gobbler PARAMS((char *, size_t, int *, int));
+static char **expand_amble PARAMS((char *, size_t, int));
+static char **expand_seqterm PARAMS((char *, size_t));
+static char **mkseq PARAMS((intmax_t, intmax_t, intmax_t, int, int));
+static char **array_concat PARAMS((char **, char **));
 #else
 static int brace_gobbler ();
 static char **expand_amble ();
@@ -190,7 +186,7 @@ brace_expand (text)
 	  if (text[j] == brace_arg_separator)
 	    {	/* { */
 	      strvec_dispose (result);
-	      last_command_exit_value = 1;
+	      set_exit_status (EXECUTION_FAILURE);
 	      report_error ("no closing `%c' in %s", '}', text);
 	      throw_to_top_level ();
 	    }
@@ -359,25 +355,6 @@ expand_amble (text, tlen, flags)
 #define ST_INT	1
 #define ST_CHAR	2
 #define ST_ZINT	3
-
-#ifndef sh_imaxabs
-#  define sh_imaxabs(x)	(((x) >= 0) ? (x) : -(x))
-#endif
-
-/* Handle signed arithmetic overflow and underflow.  Have to do it this way
-   to avoid compilers optimizing out simpler overflow checks. */
-
-/* Make sure that a+b does not exceed MAXV or is smaller than MINV (if b < 0).
-   Assumes that b > 0 if a > 0 and b < 0 if a < 0 */
-#define ADDOVERFLOW(a,b,minv,maxv) \
-	((((a) > 0) && ((b) > ((maxv) - (a)))) || \
-	 (((a) < 0) && ((b) < ((minv) - (a)))))
-
-/* Make sure that a-b is not smaller than MINV or exceeds MAXV (if b < 0).
-   Assumes that b > 0 if a > 0 and b < 0 if a < 0 */
-#define SUBOVERFLOW(a,b,minv,maxv) \
-	((((b) > 0) && ((a) < ((minv) + (b)))) || \
-	 (((b) < 0) && ((a) > ((maxv) + (b)))))
 
 static char **
 mkseq (start, end, incr, type, width)

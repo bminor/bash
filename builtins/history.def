@@ -1,7 +1,7 @@
 This file is history.def, from which is created history.c.
 It implements the builtin "history" in Bash.
 
-Copyright (C) 1987-2018 Free Software Foundation, Inc.
+Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -75,6 +75,7 @@ $END
 #include "../bashintl.h"
 
 #include "../shell.h"
+#include "../flags.h"
 #include "../parser.h"
 #include "../bashhist.h"
 #include <readline/history.h>
@@ -85,10 +86,10 @@ $END
 extern int errno;
 #endif
 
-static char *histtime __P((HIST_ENTRY *, const char *));
-static int display_history __P((WORD_LIST *));
-static void push_history __P((WORD_LIST *));
-static int expand_and_print_history __P((WORD_LIST *));
+static char *histtime PARAMS((HIST_ENTRY *, const char *));
+static int display_history PARAMS((WORD_LIST *));
+static void push_history PARAMS((WORD_LIST *));
+static int expand_and_print_history PARAMS((WORD_LIST *));
 
 #define AFLAG	0x01
 #define RFLAG	0x02
@@ -243,7 +244,7 @@ range_error:
 	    }
 	  opt = ind + history_base;	/* compensate for opt - history_base below */
 	}
-      else if ((delete_offset < history_base) || (delete_offset > (history_base + history_length)))
+      else if ((delete_offset < history_base) || (delete_offset >= (history_base + history_length)))
 	{
 	  sh_erange (delete_arg, _("history position"));
 	  return (EXECUTION_FAILURE);
@@ -268,6 +269,14 @@ range_error:
 
   filename = list ? list->word->word : get_string_value ("HISTFILE");
   result = EXECUTION_SUCCESS;
+
+#if defined (RESTRICTED_SHELL)
+  if (restricted && strchr (filename, '/'))
+    {
+      sh_restricted (filename);
+      return (EXECUTION_FAILURE);
+    }
+#endif
 
   if (flags & AFLAG)		/* Append session's history to file. */
     result = maybe_append_history (filename);

@@ -3,7 +3,7 @@
 /* See Makefile for compilation details. */
 
 /*
-   Copyright (C) 2017 Free Software Foundation, Inc.
+   Copyright (C) 2017,2018,2019 Free Software Foundation, Inc.
 
    This file is part of GNU Bash.
    Bash is free software: you can redistribute it and/or modify
@@ -32,6 +32,10 @@
 
 #include "loadables.h"
 
+#ifndef FD_CLOEXEC
+#  define FD_CLOEXEC 1
+#endif
+
 static const struct
 {
   const char *name;
@@ -40,37 +44,69 @@ static const struct
 {
 #ifdef O_APPEND
   { "append",	O_APPEND 	},
+#else
+#  define O_APPEND 0
 #endif
 #ifdef O_ASYNC
   { "async",	O_ASYNC		},
+#else
+#  define O_ASYNC 0
 #endif
 #ifdef O_SYNC
   { "sync",	O_SYNC		},
+#else
+#  define O_SYNC 0
 #endif
 #ifdef O_NONBLOCK
   { "nonblock",	O_NONBLOCK	},
+#else
+#  define O_NONBLOCK 0
 #endif
 #ifdef O_FSYNC
   { "fsync",	O_FSYNC		},
+#else
+#  define O_FSYNC 0
 #endif
 #ifdef O_DSYNC
   { "dsync",	O_DSYNC		},
+#else
+#  define O_DSYNC 0
 #endif
 #ifdef O_RSYNC
   { "rsync",	O_RSYNC		},
+#else
+#  define O_RSYNC 0
 #endif
 #ifdef O_ALT_IO
   { "altio",	O_ALT_IO	},
+#else
+#  define O_ALT_IO 0
 #endif
 #ifdef O_DIRECT
   { "direct",	O_DIRECT	},
+#else
+#  define O_DIRECT 0
 #endif
 #ifdef O_NOATIME
   { "noatime",	O_NOATIME	},
+#else
+#  define O_NOATIME 0
 #endif
 #ifdef O_NOSIGPIPE
   { "nosigpipe",	O_NOSIGPIPE	},
+#else
+#  define O_NOSIGPIPE 0
 #endif
+
+#ifndef O_CLOEXEC
+#  define ALLFLAGS (O_APPEND|O_ASYNC|O_SYNC|O_NONBLOCK|O_FSYNC|O_DSYNC|\
+	O_RSYNC|O_ALT_IO|O_DIRECT|O_NOATIME|O_NOSIGPIPE)
+
+/* An unsed bit in the file status flags word we can use to pass around the
+   state of close-on-exec. */
+# define O_CLOEXEC      ((~ALLFLAGS) ^ ((~ALLFLAGS) & ((~ALLFLAGS) - 1)))
+#endif
+
 #ifdef O_CLOEXEC
   { "cloexec",	O_CLOEXEC	},
 #endif
@@ -199,10 +235,12 @@ setone(int fd, char *v, int verbose)
   parseflags(v, &pos, &neg);
 
   cloexec = -1;
+
   if ((pos & O_CLOEXEC) && (f & O_CLOEXEC) == 0)
     cloexec = FD_CLOEXEC;
   if ((neg & O_CLOEXEC) && (f & O_CLOEXEC))
     cloexec = 0;
+
   if (cloexec != -1 && fcntl(fd, F_SETFD, cloexec) == -1)
     builtin_error("can't set status for fd %d: %s", fd, strerror(errno));
 

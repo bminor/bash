@@ -4,7 +4,7 @@
 
 /* Original version by tromey@cns.caltech.edu,  Fri Feb  7 1992. */
 
-/* Copyright (C) 1993-2009 Free Software Foundation, Inc.
+/* Copyright (C) 1993-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -41,7 +41,7 @@
 #include "shell.h"
 #include <readline/readline.h>
 
-static int _strcompare __P((char **, char **));
+static int _strcompare PARAMS((char **, char **));
 
 /* Find greatest common prefix of two strings. */
 static int

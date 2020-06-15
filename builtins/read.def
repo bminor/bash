@@ -1,7 +1,7 @@
 This file is read.def, from which is created read.c.
 It implements the builtin "read" in Bash.
 
-Copyright (C) 1987-2017 Free Software Foundation, Inc.
+Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -119,20 +119,20 @@ struct ttsave
 };
 
 #if defined (READLINE)
-static void reset_attempted_completion_function __P((char *));
-static int set_itext __P((void));
-static char *edit_line __P((char *, char *));
-static void set_eol_delim __P((int));
-static void reset_eol_delim __P((char *));
+static void reset_attempted_completion_function PARAMS((char *));
+static int set_itext PARAMS((void));
+static char *edit_line PARAMS((char *, char *));
+static void set_eol_delim PARAMS((int));
+static void reset_eol_delim PARAMS((char *));
 #endif
-static SHELL_VAR *bind_read_variable __P((char *, char *));
+static SHELL_VAR *bind_read_variable PARAMS((char *, char *));
 #if defined (HANDLE_MULTIBYTE)
-static int read_mbchar __P((int, char *, int, int, int));
+static int read_mbchar PARAMS((int, char *, int, int, int));
 #endif
-static void ttyrestore __P((struct ttsave *));
+static void ttyrestore PARAMS((struct ttsave *));
 
-static sighandler sigalrm __P((int));
-static void reset_alarm __P((void));
+static sighandler sigalrm PARAMS((int));
+static void reset_alarm PARAMS((void));
 
 /* Try this to see what the rest of the shell can do with the information. */
 procenv_t alrmbuf;
@@ -198,6 +198,7 @@ read_builtin (list)
 #if defined (READLINE)
   char *rlbuf, *itext;
   int rlind;
+  FILE *save_instream;
 #endif
 
   USE_VAR(size);
@@ -273,7 +274,7 @@ read_builtin (list)
 	  break;
 #endif
 	case 't':
-	  code = uconvert (list_optarg, &ival, &uval);
+	  code = uconvert (list_optarg, &ival, &uval, (char **)NULL);
 	  if (code == 0 || ival < 0 || uval < 0)
 	    {
 	      builtin_error (_("%s: invalid timeout specification"), list_optarg);
@@ -376,7 +377,7 @@ read_builtin (list)
   /* $TMOUT, if set, is the default timeout for read. */
   if (have_timeout == 0 && (e = get_string_value ("TMOUT")))
     {
-      code = uconvert (e, &ival, &uval);
+      code = uconvert (e, &ival, &uval, (char **)NULL);
       if (code == 0 || ival < 0 || uval < 0)
 	tmsec = tmusec = 0;
       else
@@ -527,6 +528,19 @@ read_builtin (list)
 	initialize_terminating_signals ();
     }
 
+#if defined (READLINE)
+  save_instream = 0;
+  if (edit && fd != 0)
+    {
+      if (bash_readline_initialized == 0)
+	initialize_readline ();
+
+      unwind_protect_var (rl_instream);
+      save_instream = rl_instream;
+      rl_instream = fdopen (fd, "r");	
+    }
+#endif
+
   /* This *must* be the top unwind-protect on the stack, so the manipulation
      of the unwind-protect stack after the realloc() works right. */
   add_unwind_protect (xfree, input_string);
@@ -555,7 +569,8 @@ read_builtin (list)
 #if defined (READLINE)
       if (edit)
 	{
-	  if (rlbuf && rlbuf[rlind] == '\0')
+	  /* If we have a null delimiter, don't treat NULL as ending the line */
+	  if (rlbuf && rlbuf[rlind] == '\0' && delim != '\0')
 	    {
 	      free (rlbuf);
 	      rlbuf = (char *)0;
@@ -589,6 +604,7 @@ read_builtin (list)
 
       reading = 1;
       CHECK_ALRM;
+      errno = 0;
       if (unbuffered_read == 2)
 	retval = posixly_correct ? zreadintr (fd, &c, 1) : zreadn (fd, &c, nchars - nr);
       else if (unbuffered_read)
@@ -599,13 +615,18 @@ read_builtin (list)
 
       if (retval <= 0)
 	{
+	  int t;
+
+	  t = errno;
 	  if (retval < 0 && errno == EINTR)
 	    {
 	      check_signals ();		/* in case we didn't call zread via zreadc */
 	      lastsig = LASTSIG();
 	      if (lastsig == 0)
 		lastsig = trapped_signal_received;
+#if 0
 	      run_pending_traps ();	/* because interrupt_immediately is not set */
+#endif
 	    }
 	  else
 	    lastsig = 0;
@@ -613,6 +634,7 @@ read_builtin (list)
 	    ttyrestore (&termsave);	/* fix terminal before exiting */
 	  CHECK_TERMSIG;
 	  eof = 1;
+	  errno = t;	/* preserve it for the error message below */
 	  break;
 	}
 
@@ -758,6 +780,11 @@ add_char:
 
   if (unbuffered_read == 0)
     zsyncfd (fd);
+
+#if defined (READLINE)
+  if (save_instream)
+    rl_instream = save_instream;	/* can't portably free it */
+#endif
 
   discard_unwind_frame ("read_builtin");
 
@@ -966,14 +993,7 @@ bind_read_variable (name, value)
 {
   SHELL_VAR *v;
 
-#if defined (ARRAY_VARS)
-  if (valid_array_reference (name, assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0) == 0)
-    v = bind_variable (name, value, 0);
-  else
-    v = assign_array_element (name, value, assoc_expand_once ? ASS_NOEXPAND : 0);
-#else /* !ARRAY_VARS */
-  v = bind_variable (name, value, 0);
-#endif /* !ARRAY_VARS */
+  v = builtin_bind_variable (name, value, 0);
   return (v == 0 ? v
 		 : ((readonly_p (v) || noassign_p (v)) ? (SHELL_VAR *)NULL : v));
 }
@@ -1136,15 +1156,17 @@ set_eol_delim (c)
     initialize_readline ();
   cmap = rl_get_keymap ();
 
-  /* Change newline to self-insert */
+  /* Save the old delimiter char binding */
   old_newline_ctype = cmap[RETURN].type;
   old_newline_func =  cmap[RETURN].function;
+  old_delim_ctype = cmap[c].type;
+  old_delim_func = cmap[c].function;
+
+  /* Change newline to self-insert */
   cmap[RETURN].type = ISFUNC;
   cmap[RETURN].function = rl_insert;
 
   /* Bind the delimiter character to accept-line. */
-  old_delim_ctype = cmap[c].type;
-  old_delim_func = cmap[c].function;
   cmap[c].type = ISFUNC;
   cmap[c].function = rl_newline;
 

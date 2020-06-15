@@ -1,7 +1,7 @@
 This file is printf.def, from which is created printf.c.
 It implements the builtin "printf" in Bash.
 
-Copyright (C) 1997-2017 Free Software Foundation, Inc.
+Copyright (C) 1997-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -149,7 +149,7 @@ extern int errno;
       if (vflag) \
 	{ \
 	  SHELL_VAR *v; \
-	  v = bind_printf_variable  (vname, vbuf, 0); \
+	  v = builtin_bind_variable  (vname, vbuf, 0); \
 	  stupidly_hack_special_variables (vname); \
 	  if (v == 0 || readonly_p (v) || noassign_p (v)) \
 	    return (EXECUTION_FAILURE); \
@@ -187,26 +187,25 @@ extern int errno;
 extern time_t shell_start_time;
 
 #if !HAVE_ASPRINTF
-extern int asprintf __P((char **, const char *, ...)) __attribute__((__format__ (printf, 2, 3)));
+extern int asprintf PARAMS((char **, const char *, ...)) __attribute__((__format__ (printf, 2, 3)));
 #endif
 
 #if !HAVE_VSNPRINTF
-extern int vsnprintf __P((char *, size_t, const char *, va_list)) __attribute__((__format__ (printf, 3, 0)));
+extern int vsnprintf PARAMS((char *, size_t, const char *, va_list)) __attribute__((__format__ (printf, 3, 0)));
 #endif
 
-static void printf_erange __P((char *));
-static int printstr __P((char *, char *, int, int, int));
-static int tescape __P((char *, char *, int *, int *));
-static char *bexpand __P((char *, int, int *, int *));
-static char *vbadd __P((char *, int));
-static int vbprintf __P((const char *, ...)) __attribute__((__format__ (printf, 1, 2)));
-static char *mklong __P((char *, char *, size_t));
-static int getchr __P((void));
-static char *getstr __P((void));
-static int  getint __P((void));
-static intmax_t getintmax __P((void));
-static uintmax_t getuintmax __P((void));
-static SHELL_VAR *bind_printf_variable __P((char *, char *, int));
+static void printf_erange PARAMS((char *));
+static int printstr PARAMS((char *, char *, int, int, int));
+static int tescape PARAMS((char *, char *, int *, int *));
+static char *bexpand PARAMS((char *, int, int *, int *));
+static char *vbadd PARAMS((char *, int));
+static int vbprintf PARAMS((const char *, ...)) __attribute__((__format__ (printf, 1, 2)));
+static char *mklong PARAMS((char *, char *, size_t));
+static int getchr PARAMS((void));
+static char *getstr PARAMS((void));
+static int  getint PARAMS((void));
+static intmax_t getintmax PARAMS((void));
+static uintmax_t getuintmax PARAMS((void));
 
 #if defined (HAVE_LONG_DOUBLE) && HAVE_DECL_STRTOLD && !defined(STRTOLD_BROKEN)
 typedef long double floatmax_t;
@@ -217,11 +216,11 @@ typedef double floatmax_t;
 #  define FLOATMAX_CONV	""
 #  define strtofltmax	strtod
 #endif
-static floatmax_t getfloatmax __P((void));
+static floatmax_t getfloatmax PARAMS((void));
 
-static intmax_t asciicode __P((void));
+static intmax_t asciicode PARAMS((void));
 
-static WORD_LIST *garglist;
+static WORD_LIST *garglist, *orig_arglist;
 static int retval;
 static int conversion_error;
 
@@ -301,7 +300,7 @@ printf_builtin (list)
   if (vflag && list->word->word && list->word->word[0] == '\0')
     {
       SHELL_VAR *v;
-      v = bind_printf_variable (vname, "", 0);
+      v = builtin_bind_variable (vname, "", 0);
       stupidly_hack_special_variables (vname);
       return ((v == 0 || readonly_p (v) || noassign_p (v)) ? EXECUTION_FAILURE : EXECUTION_SUCCESS);
     }
@@ -312,7 +311,7 @@ printf_builtin (list)
   format = list->word->word;
   tw = 0;
 
-  garglist = list->next;
+  garglist = orig_arglist = list->next;
 
   /* If the format string is empty after preprocessing, return immediately. */
   if (format == 0 || *format == 0)
@@ -1270,27 +1269,4 @@ asciicode ()
 
   garglist = garglist->next;
   return (ch);
-}
-
-static SHELL_VAR *
-bind_printf_variable (name, value, flags)
-     char *name;
-     char *value;
-     int flags;
-{
-  SHELL_VAR *v;
-
-#if defined (ARRAY_VARS)
-  if (valid_array_reference (name, assoc_expand_once ? (VA_NOEXPAND|VA_ONEWORD) : 0) == 0)
-    v = bind_variable (name, value, flags);
-  else
-    v = assign_array_element (name, value, flags | (assoc_expand_once ? ASS_NOEXPAND : 0));
-#else /* !ARRAY_VARS */
-  v = bind_variable (name, value, flags);
-#endif /* !ARRAY_VARS */
-
-  if (v && readonly_p (v) == 0 && noassign_p (v) == 0)
-    VUNSETATTR (v, att_invisible);
-
-  return v;
 }

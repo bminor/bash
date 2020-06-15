@@ -1,6 +1,6 @@
 /* stringlist.c - functions to handle a generic `list of strings' structure */
 
-/* Copyright (C) 2000-2002 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2019 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -255,7 +255,7 @@ strlist_sort (sl)
 {
   if (sl == 0 || sl->list_len == 0 || sl->list == 0)
     return;
-  strvec_sort (sl->list);
+  strvec_sort (sl->list, 0);
 }
 
 STRINGLIST *

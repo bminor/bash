@@ -1,7 +1,7 @@
 This file is suspend.def, from which is created suspend.c.
 It implements the builtin "suspend" in Bash.
 
-Copyright (C) 1987-2015 Free Software Foundation, Inc.
+Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
 This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -54,7 +54,7 @@ $END
 #include "common.h"
 #include "bashgetopt.h"
 
-static sighandler suspend_continue __P((int));
+static sighandler suspend_continue PARAMS((int));
 
 static SigHandler *old_cont;
 #if 0

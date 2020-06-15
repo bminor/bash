@@ -34,6 +34,7 @@
 #include "builtins.h"
 #include "shell.h"
 #include "common.h"
+#include "bashgetopt.h"
 
 int
 strftime_builtin (list)
@@ -46,14 +47,15 @@ strftime_builtin (list)
   int n;
   intmax_t i;
 
+  if (no_options (list))
+    return (EX_USAGE);
+  list = loptend;
+
   if (list == 0)
     {
       builtin_usage ();
       return (EX_USAGE);
     }
-
-  if (no_options (list))
-    return (EX_USAGE);
 
   format = list->word->word;
   if (format == 0 || *format == 0)
@@ -86,7 +88,7 @@ strftime_builtin (list)
   /* Now try to figure out how big the buffer should really be.  strftime(3)
      will return the number of bytes placed in the buffer unless it's greater
      than MAXSIZE, in which case it returns 0. */
-  for (n = 1; n < 4; n++)
+  for (n = 1; n <= 8; n++)
     {
       tbuf = xrealloc (tbuf, tbsize * n);
       tsize = strftime (tbuf, tbsize * n, format, t);
@@ -94,7 +96,8 @@ strftime_builtin (list)
         break;
     }
 
-  printf ("%s\n", tbuf);
+  if (tsize)
+    printf ("%s\n", tbuf);
   free (tbuf);
 
   return (EXECUTION_SUCCESS);

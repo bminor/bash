@@ -1,6 +1,6 @@
 /* findcmd.c -- Functions to search for commands by name. */
 
-/* Copyright (C) 1997-2017 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -52,13 +52,13 @@ extern int errno;
 #endif
 
 /* Static functions defined and used in this file. */
-static char *_find_user_command_internal __P((const char *, int));
-static char *find_user_command_internal __P((const char *, int));
-static char *find_user_command_in_path __P((const char *, char *, int));
-static char *find_in_path_element __P((const char *, char *, int, int, struct stat *));
-static char *find_absolute_program __P((const char *, int));
+static char *_find_user_command_internal PARAMS((const char *, int));
+static char *find_user_command_internal PARAMS((const char *, int));
+static char *find_user_command_in_path PARAMS((const char *, char *, int));
+static char *find_in_path_element PARAMS((const char *, char *, int, int, struct stat *));
+static char *find_absolute_program PARAMS((const char *, int));
 
-static char *get_next_path_element __P((char *, int *));
+static char *get_next_path_element PARAMS((char *, int *));
 
 /* The file name which we would try to execute, except that it isn't
    possible to execute it.  This is the first file that matches the
@@ -392,6 +392,14 @@ search_for_command (pathname, flags)
 	     command probably doesn't exist.  Don't put it into the hash
 	     table. */
 	  if (STREQ (command, pathname))
+	    {
+	      st = file_status (command);
+	      if (st & FS_EXECABLE)
+	        phash_insert ((char *)pathname, command, dot_found_in_search, 1);
+	    }
+	  /* If we're in posix mode, don't add files without the execute bit
+	     to the hash table. */
+	  else if (posixly_correct)
 	    {
 	      st = file_status (command);
 	      if (st & FS_EXECABLE)

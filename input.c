@@ -1,6 +1,6 @@
 /* input.c -- functions to perform buffered input with synchronization. */
 
-/* Copyright (C) 1992-2018 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -57,12 +57,12 @@ extern int errno;
 #  define X_EWOULDBLOCK -99
 #endif
 
-extern void termsig_handler __P((int));
+extern void termsig_handler PARAMS((int));
 
 /* Functions to handle reading input on systems that don't restart read(2)
    if a signal is received. */
 
-static char localbuf[128];
+static char localbuf[1024];
 static int local_index = 0, local_bufused = 0;
 
 /* Posix and USG systems do not guarantee to restart read () if it is

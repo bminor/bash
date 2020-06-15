@@ -1,6 +1,6 @@
 /* general.c -- Stuff that is used by all files. */
 
-/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of GNU Bash, the Bourne Again SHell.
 
@@ -44,6 +44,7 @@
 #include "findcmd.h"
 #include "test.h"
 #include "trap.h"
+#include "pathexp.h"
 
 #include "builtins/common.h"
 
@@ -61,9 +62,9 @@ extern int errno;
 #  include <sys/cygwin.h>
 #endif
 
-static char *bash_special_tilde_expansions __P((char *));
-static int unquoted_tilde_word __P((const char *));
-static void initialize_group_array __P((void));
+static char *bash_special_tilde_expansions PARAMS((char *));
+static int unquoted_tilde_word PARAMS((const char *));
+static void initialize_group_array PARAMS((void));
 
 /* A standard error message to use when getcwd() returns NULL. */
 const char * const bash_getcwd_errstr = N_("getcwd: cannot access parent directories");
@@ -75,6 +76,7 @@ const char * const bash_getcwd_errstr = N_("getcwd: cannot access parent directo
       expand_aliases
       inherit_errexit
       print_shift_error
+      posixglob
 
    and the following variables which cannot be user-modified:
 
@@ -95,6 +97,8 @@ static struct {
   0
 };
 
+static char *saved_posix_vars = 0;
+
 void
 posix_initialize (on)
      int on;
@@ -106,11 +110,16 @@ posix_initialize (on)
       inherit_errexit = 1;
       source_searches_cwd = 0;
       print_shift_error = 1;
-
     }
 
   /* Things that should be turned on when posix mode is disabled. */
-  if (on == 0)
+  else if (saved_posix_vars)		/* on == 0, restore saved settings */
+    {
+      set_posix_options (saved_posix_vars);
+      free (saved_posix_vars);
+      saved_posix_vars = 0;
+    }
+  else	/* on == 0, restore a default set of settings */
     {
       source_searches_cwd = 1;
       expand_aliases = interactive_shell;
@@ -135,6 +144,13 @@ get_posix_options (bitmap)
   for (i = 0; posix_vars[i].posix_mode_var; i++)
     bitmap[i] = *(posix_vars[i].posix_mode_var);
   return bitmap;
+}
+
+#undef save_posix_options
+void
+save_posix_options ()
+{
+  saved_posix_vars = get_posix_options (saved_posix_vars);
 }
 
 void
@@ -338,21 +354,21 @@ check_selfref (name, value, flags)
 }
 
 /* Make sure that WORD is a valid shell identifier, i.e.
-   does not contain a dollar sign, nor is quoted in any way.  Nor
-   does it consist of all digits.  If CHECK_WORD is non-zero,
+   does not contain a dollar sign, nor is quoted in any way.
+   If CHECK_WORD is non-zero,
    the word is checked to ensure that it consists of only letters,
-   digits, and underscores. */
+   digits, and underscores, and does not consist of all digits. */
 int
 check_identifier (word, check_word)
      WORD_DESC *word;
      int check_word;
 {
-  if ((word->flags & (W_HASDOLLAR|W_QUOTED)) || all_digits (word->word))
+  if (word->flags & (W_HASDOLLAR|W_QUOTED))	/* XXX - HASDOLLAR? */
     {
       internal_error (_("`%s': not a valid identifier"), word->word);
       return (0);
     }
-  else if (check_word && legal_identifier (word->word) == 0)
+  else if (check_word && (all_digits (word->word) || legal_identifier (word->word) == 0))
     {
       internal_error (_("`%s': not a valid identifier"), word->word);
       return (0);
@@ -1023,7 +1039,7 @@ extract_colon_unit (string, p_index)
 /* **************************************************************** */
 
 #if defined (PUSHD_AND_POPD)
-extern char *get_dirstack_from_string __P((char *));
+extern char *get_dirstack_from_string PARAMS((char *));
 #endif
 
 static char **bash_tilde_prefixes;
@@ -1172,20 +1188,8 @@ bash_tilde_expand (s, assign_p)
      const char *s;
      int assign_p;
 {
-  int old_immed, old_term, r;
+  int r;
   char *ret;
-
-#if 0
-  old_immed = interrupt_immediately;
-  old_term = terminate_immediately;
-  /* We want to be able to interrupt tilde expansion. Ordinarily, we can just
-     jump to top_level, but we don't want to run any trap commands in a signal
-     handler context.  We might be able to get away with just checking for
-     things like SIGINT and SIGQUIT. */
-  if (any_signals_trapped () < 0)
-    interrupt_immediately = 1;
-  terminate_immediately = 1;
-#endif
 
   tilde_additional_prefixes = assign_p == 0 ? (char **)0
   					    : (assign_p == 2 ? bash_tilde_prefixes2 : bash_tilde_prefixes);
@@ -1194,11 +1198,6 @@ bash_tilde_expand (s, assign_p)
 
   r = (*s == '~') ? unquoted_tilde_word (s) : 1;
   ret = r ? tilde_expand (s) : savestring (s);
-
-#if 0
-  interrupt_immediately = old_immed;
-  terminate_immediately = old_term;
-#endif
 
   QUIT;
 

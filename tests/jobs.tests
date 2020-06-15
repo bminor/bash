@@ -1,3 +1,16 @@
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 # test out %+, jobs -p, and $! agreement in a subshell first
 ${THIS_SH} ./jobs1.sub
 
@@ -36,7 +49,7 @@ wait    # make sure we reap the processes while stderr is still redirected
 exec 2>&5
 
 echo wait-for-pid
-sleep 10 &
+sleep 4 &
 wait $!
 
 echo wait-errors
@@ -44,52 +57,55 @@ wait 1-1
 wait -- -4
 
 echo wait-for-background-pids
-sleep 5 &
-sleep 8 &
+sleep 2 &
+sleep 4 &
 wait
 
 echo async list wait-for-background-pids
-sleep 5 & sleep 8 &
+sleep 2 & sleep 4 &
 wait
 
 echo async list wait for child
-sleep 5 & echo forked
+sleep 2 & echo forked
 wait
 
 echo wait-when-no-children
 wait
 
+echo posix jobs output
+${THIS_SH} -o posix -c 'sleep 1 & P=$! ; sleep 2; jobs; wait'
+
 set -m
 
 echo wait-for-job
-sleep 5 &
+sleep 3 &
 wait %2		# this should be a no-such-job error
 echo $?
 wait %1
 
 echo async list wait-for-job
-sleep 5 & echo forked
+sleep 2 & echo forked
 wait %1
 
 echo fg-bg 1
-sleep 5 &
+sleep 2 &
 %1
 
 echo fg-bg 2
-sleep 5 &
+sleep 2 &
 fg %%
 
 echo fg-bg 3
-sleep 5 &
+sleep 2 &
 fg %s
 
 echo fg-bg 4
-sleep 5 &
+sleep 2 &
 fg %?ee
 
 # these next two are error cases
 echo fg-bg 5
-sleep 15 &
+sleep 2 &
 fg %2		# this should be a no-such-job error
 bg %1		# this should be a `bg background job?' error
 wait
@@ -97,7 +113,7 @@ wait
 # these may someday mean to start the jobs, but not print the line
 # describing the status, but for now they are errors
 echo fg-bg 6
-sleep 5 &
+sleep 2 &
 fg -s %1
 bg -s %1
 wait
@@ -140,7 +156,7 @@ echo previous job:
 jobs %-
 
 kill -STOP %2
-sleep 5	# give time for the shell to get the stop notification
+sleep 3	# give time for the shell to get the stop notification
 echo after kill -STOP
 echo running jobs:
 jobs -r
@@ -164,7 +180,7 @@ echo stopped jobs:
 jobs -s
 
 kill -STOP %3
-sleep 5	# give time for the shell to get the stop notification
+sleep 3	# give time for the shell to get the stop notification
 echo after kill -STOP, backgrounding %3:
 bg %3
 
@@ -182,9 +198,9 @@ echo done
 
 exec 2>&5
 
-sleep 10 &
+sleep 4 &
 kill -STOP %1
-sleep 5	# give time for the shell to get the stop notification
+sleep 2	# give time for the shell to get the stop notification
 echo after KILL -STOP, foregrounding %1
 fg %1
 

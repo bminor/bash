@@ -1,6 +1,6 @@
 
-./array.tests: line 15: syntax error near unexpected token `&'
-./array.tests: line 15: `test=(first & second)'
+./array.tests: line 28: syntax error near unexpected token `&'
+./array.tests: line 28: `test=(first & second)'
 1
 abcde
 abcde
@@ -26,7 +26,7 @@ hello world
 11
 3
 bdef hello world test expression test 2
-./array.tests: line 79: readonly: `a[5]': not a valid identifier
+./array.tests: line 92: readonly: `a[5]': not a valid identifier
 declare -ar a=([1]="" [2]="bdef" [5]="hello world" [6]="test expression" [15]="test 2")
 declare -ar c
 declare -ar a=([1]="" [2]="bdef" [5]="hello world" [6]="test expression" [15]="test 2")
@@ -46,17 +46,17 @@ declare -ar c
 declare -a d=([1]="" [2]="bdef" [5]="hello world" [6]="test" [9]="ninth element")
 declare -a e=([0]="test")
 declare -a f=([0]="" [1]="bdef" [2]="hello world" [3]="test" [4]="ninth element")
-./array.tests: line 103: a: readonly variable
-./array.tests: line 105: b[]: bad array subscript
-./array.tests: line 106: b[*]: bad array subscript
+./array.tests: line 116: a: readonly variable
+./array.tests: line 118: b[]: bad array subscript
+./array.tests: line 119: b[*]: bad array subscript
 this
-./array.tests: line 109: c[-2]: bad array subscript
-./array.tests: line 110: c: bad array subscript
+./array.tests: line 122: c[-2]: bad array subscript
+./array.tests: line 123: c: bad array subscript
 
-./array.tests: line 112: d[7]: cannot assign list to array member
-./array.tests: line 114: []=abcde: bad array subscript
-./array.tests: line 114: [*]=last: cannot assign to non-numeric index
-./array.tests: line 114: [-65]=negative: bad array subscript
+./array.tests: line 125: d[7]: cannot assign list to array member
+./array.tests: line 127: []=abcde: bad array subscript
+./array.tests: line 127: [*]=last: cannot assign to non-numeric index
+./array.tests: line 127: [-65]=negative: bad array subscript
 declare -a BASH_ARGC=()
 declare -a BASH_ARGV=()
 declare -a BASH_LINENO=([0]="0")
@@ -68,8 +68,8 @@ declare -a b=([0]="this" [1]="is" [2]="a" [3]="test" [4]="" [5]="/etc/passwd")
 declare -ar c
 declare -a d=([1]="test test")
 declare -a f=([0]="" [1]="bdef" [2]="hello world" [3]="test" [4]="ninth element")
-./array.tests: line 122: unset: ps1: not an array variable
-./array.tests: line 126: declare: c: cannot destroy array variables in this way
+./array.tests: line 135: unset: ps1: not an array variable
+./array.tests: line 139: declare: c: cannot destroy array variables in this way
 this of
 this is a test of read using arrays
 this test
@@ -127,7 +127,7 @@ grep [ 123 ] *
 6 7 9 5
 length = 3
 value = new1 new2 new3
-./array.tests: line 242: narray: unbound variable
+./array.tests: line 255: narray: unbound variable
 ./array1.sub: line 1: syntax error near unexpected token `('
 ./array1.sub: line 1: `printf "%s\n" -a a=(a 'b  c')'
 ./array2.sub: line 1: declare: `[]=asdf': not a valid identifier
@@ -154,10 +154,10 @@ for case if then else
 12 14 16 18 20
 4414758999202
 aaa bbb
-./array.tests: line 292: syntax error near unexpected token `<>'
-./array.tests: line 292: `metas=( <> < > ! )'
-./array.tests: line 293: syntax error near unexpected token `<>'
-./array.tests: line 293: `metas=( [1]=<> [2]=< [3]=> [4]=! )'
+./array.tests: line 305: syntax error near unexpected token `<>'
+./array.tests: line 305: `metas=( <> < > ! )'
+./array.tests: line 306: syntax error near unexpected token `<>'
+./array.tests: line 306: `metas=( [1]=<> [2]=< [3]=> [4]=! )'
 abc 3
 case 4
 abc case if then else 5
@@ -349,10 +349,10 @@ version[agent]
 version.agent
 version[agent]
 version.agent
-version[agent] foo[bar]
-version.agent bowl
-foo foobar] foo[bar]
-bbb bleh bleh
+foo[bar] version[agent]
+bowl version.agent
+foobar] foo foo[bar]
+bleh bbb bleh
 ab]
 bar
 1
@@ -367,7 +367,7 @@ function function
 declare -a x=([0]="0" [1]="1" [2]="2" [3]="3" [4]="4" [5]="5")
 declare -a x=([0]="0" [1]="1" [2]="2" [3]="3" [4]="4")
 declare -a x=([0]="0" [1]="1" [2]="2" [4]="4")
-./array14.sub: line 11: unset: [-10]: bad array subscript
+./array14.sub: line 24: unset: [-10]: bad array subscript
 declare -a x=([0]="0" [1]="1" [2]="2" [3]="3" [4]="4")
 declare -a x=([0]="0" [1]="1" [2]="2" [3]="3" [4]="4" [5]="five")
 declare -a x=([0]="0" [1]="1" [2]="2" [3]="3" [4]="4" [5]="5")
@@ -395,7 +395,7 @@ qux: unset array element 0: ok
 0
 0
 1
-./array17.sub: line 30: ~: syntax error: operand expected (error token is "~")
+./array17.sub: line 43: ~: syntax error: operand expected (error token is "~")
 0
 0
 3
@@ -410,14 +410,15 @@ one
 one
 two
 two
-./array17.sub: line 76: ~ : syntax error: operand expected (error token is "~ ")
+./array17.sub: line 89: ~ : syntax error: operand expected (error token is "~ ")
 1
 argv[1] = <>
 argv[2] = <>
 argv[3] = <>
 argv[1] = <bar>
-argv[1] = <-->
-argv[1] = <>
+argv[1] = <->
+argv[2] = <->
+argv[1] = <  >
 argv[1] = <qux>
 argv[1] = <->
 argv[2] = <->
@@ -426,8 +427,9 @@ argv[1] = <>
 argv[2] = <>
 argv[3] = <>
 argv[1] = <bar>
-argv[1] = <-->
-argv[1] = <>
+argv[1] = <->
+argv[2] = <->
+argv[1] = <  >
 argv[1] = <qux>
 argv[1] = <->
 argv[2] = <->
@@ -440,17 +442,13 @@ declare -a foo=([0]="[0]=bar")
 declare -a foo=([0]="[0]=bar")
 declare -- a="(1 2 3)"
 declare -a a=([0]="1" [1]="2" [2]="3")
-./array19.sub: line 46: a: 1: must use subscript when assigning associative array
-./array19.sub: line 46: a: 2: must use subscript when assigning associative array
-./array19.sub: line 46: a: 3: must use subscript when assigning associative array
-declare -A a=()
 declare -- a="([0]=a [1]=b)"
 declare -a a=([0]="a" [1]="b")
 declare -A a=([1]="b" [0]="a" )
 declare -a var=([0]="[\$(echo" [1]="total" [2]="0)]=1" [3]="[2]=2]")
 declare -a var=([0]="[\$(echo total 0)]=1 [2]=2]")
 declare -a var=([0]="[\$(echo" [1]="total" [2]="0)]=1" [3]="[2]=2]")
-./array19.sub: line 81: total 0: syntax error in expression (error token is "0")
+./array19.sub: line 89: total 0: syntax error in expression (error token is "0")
 declare -a var=()
 declare -al foo=([0]="abcde" [1]="two" [2]="three")
 declare -al foo=([0]="abcde")
@@ -458,7 +456,7 @@ declare -al ar=([0]="one" [1]="two" [2]="three")
 declare -a a=([2]="foo")
 declare -a a=([2]="foo")
 declare -a a=([1]="(var)" [2]="foo")
-./array19.sub: line 120: warning: a[1]=(var): quoted compound array assignment deprecated
+./array19.sub: line 128: warning: a[1]=(var): quoted compound array assignment deprecated
 declare -a a=([1]="(var)")
 declare -a a=([0]="1" [1]="2" [2]="(1 2 3)")
 declare -a a=([0]="1" [1]="2" [2]="(1 2 3)")
@@ -475,15 +473,11 @@ declare -a b=([0]="/scratch/bash")
 declare -a c=([0]="1" [1]="2")
 declare -a d=([0]="a" [1]="b")
 declare -a e=([0]="Darwin")
-./array19.sub: line 166: c: 1: must use subscript when assigning associative array
-./array19.sub: line 166: c: 2: must use subscript when assigning associative array
-./array19.sub: line 166: d: $a: must use subscript when assigning associative array
-./array19.sub: line 166: e: $(echo Darwin): must use subscript when assigning associative array
 declare -A a=([0]="a b" )
 declare -A b=([0]="/scratch/bash" )
-declare -A c=()
-declare -A d=()
-declare -A e=()
+declare -A c=([1]="2" )
+declare -A d=(["a b"]="" )
+declare -A e=([Darwin]="" )
 a+b+c
 x+b+c
 a+b+c
@@ -497,8 +491,8 @@ x b c
 declare -a a=([1]="2" [2]="3" [3]="4")
 abcd
 unset
-./array21.sub: line 17: typeset: a: not found
-./array21.sub: line 20: typeset: A: not found
+./array21.sub: line 30: typeset: a: not found
+./array21.sub: line 33: typeset: A: not found
 declare -a a=()
 declare -A A=()
 declare -a foo=([0]="1" [1]="(4 5 6)" [2]="3")
@@ -523,16 +517,16 @@ p3
 argv[1] = <y>
 <X> <X> <X> <X>
 <X> <X> <X> <X>
-./array23.sub: line 9: $( echo >&2 foo ) : syntax error: operand expected (error token is "$( echo >&2 foo ) ")
-./array23.sub: line 10: $( echo >&2 foo ) : syntax error: operand expected (error token is "$( echo >&2 foo ) ")
+./array23.sub: line 22: $( echo >&2 foo ) : syntax error: operand expected (error token is "$( echo >&2 foo ) ")
+./array23.sub: line 23: $( echo >&2 foo ) : syntax error: operand expected (error token is "$( echo >&2 foo ) ")
 foo
 0
 foo
 foo
 foo
 6
-./array23.sub: line 21: $( echo >&2 foo ): syntax error: operand expected (error token is "$( echo >&2 foo )")
-./array23.sub: line 22: $( echo >&2 foo ): syntax error: operand expected (error token is "$( echo >&2 foo )")
+./array23.sub: line 34: $( echo >&2 foo ): syntax error: operand expected (error token is "$( echo >&2 foo )")
+./array23.sub: line 35: $( echo >&2 foo ): syntax error: operand expected (error token is "$( echo >&2 foo )")
 0
 0
 0
@@ -586,7 +580,7 @@ jkl
 1. indexed:
 reference:
 1. 0
-./array25.sub: line 11: ' ': syntax error: operand expected (error token is "' '")
+./array25.sub: line 24: ' ': syntax error: operand expected (error token is "' '")
 3. 0
 4. 0
 5. 0
@@ -748,17 +742,17 @@ argv[1] = <b>
 argv[2] = <a>
 argv[1] = <b+a>
 7
-./array27.sub: line 11: a[]]=7 : syntax error: invalid arithmetic operator (error token is "]=7 ")
+./array27.sub: line 24: a[]]=7 : syntax error: invalid arithmetic operator (error token is "]=7 ")
 declare -A A=([$'\t']="2" [" "]="2" )
-./array27.sub: line 23: ((: A[]]=2 : syntax error: invalid arithmetic operator (error token is "]=2 ")
+./array27.sub: line 36: ((: A[]]=2 : syntax error: invalid arithmetic operator (error token is "]=2 ")
 declare -A A=([$'\t']="2" ["*"]="2" [" "]="2" ["@"]="2" )
-./array27.sub: line 32: A[]]: bad array subscript
+./array27.sub: line 45: A[]]: bad array subscript
 declare -A A=([$'\t']="X" ["*"]="X" [" "]="X" ["@"]="X" )
-./array27.sub: line 40: A[]]: bad array subscript
+./array27.sub: line 53: A[]]: bad array subscript
 declare -A A=([$'\t']="X" ["*"]="X" [" "]="X" ["@"]="X" )
-./array27.sub: line 48: declare: `A[]]=X': not a valid identifier
+./array27.sub: line 61: declare: `A[]]=X': not a valid identifier
 declare -A A=(["*"]="X" ["@"]="X" )
-./array27.sub: line 56: declare: `A[]]=X': not a valid identifier
-./array27.sub: line 56: A[*]: bad array subscript
-./array27.sub: line 56: A[@]: bad array subscript
+./array27.sub: line 69: declare: `A[]]=X': not a valid identifier
+./array27.sub: line 69: A[*]: bad array subscript
+./array27.sub: line 69: A[@]: bad array subscript
 declare -A A

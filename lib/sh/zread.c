@@ -55,12 +55,17 @@ zread (fd, buf, len)
 
   check_signals ();	/* check for signals before a blocking read */
   while ((r = read (fd, buf, len)) < 0 && errno == EINTR)
-    /* XXX - bash-5.0 */
-    /* We check executing_builtin and run traps here for backwards compatibility */
-    if (executing_builtin)
-      check_signals_and_traps ();	/* XXX - should it be check_signals()? */
-    else
-      check_signals ();
+    {
+      int t;
+      t = errno;
+      /* XXX - bash-5.0 */
+      /* We check executing_builtin and run traps here for backwards compatibility */
+      if (executing_builtin)
+	check_signals_and_traps ();	/* XXX - should it be check_signals()? */
+      else
+	check_signals ();
+      errno = t;
+    }
 
   return r;
 }

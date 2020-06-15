@@ -99,7 +99,6 @@ int rl_catch_sigwinch = 0;	/* for the readline state struct in readline.c */
 #endif
 
 /* Private variables. */
-int _rl_interrupt_immediately = 0;
 int volatile _rl_caught_signal = 0;	/* should be sig_atomic_t, but that requires including <signal.h> everywhere */
 
 /* If non-zero, print characters corresponding to received signals as long as
@@ -145,6 +144,8 @@ _rl_signal_handler (int sig)
 #if defined (SIGWINCH)
   if (sig == SIGWINCH)
     {
+      RL_SETSTATE(RL_STATE_SIGHANDLER);
+
       rl_resize_terminal ();
       /* XXX - experimental for now */
       /* Call a signal hook because though we called the original signal handler
@@ -152,6 +153,8 @@ _rl_signal_handler (int sig)
 	 ourselves. */
       if (rl_signal_event_hook)
 	(*rl_signal_event_hook) ();
+
+      RL_UNSETSTATE(RL_STATE_SIGHANDLER);
     }
   else
 #endif
@@ -163,14 +166,7 @@ _rl_signal_handler (int sig)
 static RETSIGTYPE
 rl_signal_handler (int sig)
 {
-  if (_rl_interrupt_immediately)
-    {
-      _rl_interrupt_immediately = 0;
-      _rl_handle_signal (sig);
-    }
-  else
-    _rl_caught_signal = sig;
-
+  _rl_caught_signal = sig;
   SIGHANDLER_RETURN;
 }
 
@@ -228,7 +224,7 @@ _rl_handle_signal (int sig)
 	 sane without stopping on SIGTTOU if we have been placed into the
 	 background.  Even trying to get the current terminal pgrp with
 	 tcgetpgrp() will generate SIGTTOU, so we don't bother.  Don't bother
-	 doing this if we've been stopped on SIGTTOU; it's aready too late. */
+	 doing this if we've been stopped on SIGTTOU; it's already too late. */
       sigemptyset (&set);
       sigaddset (&set, SIGTTOU);
       sigprocmask (SIG_BLOCK, &set, (sigset_t *)NULL);
