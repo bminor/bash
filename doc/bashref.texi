@@ -8164,6 +8164,11 @@ more randomness. If the shell compatibility level is set to 50 or
 lower, it reverts to the method from bash-5.0 and previous versions,
 so seeding the random number generator by assigning a value to
 @env{RANDOM} will produce the same sequence as in bash-5.0
+@item
+If the command hash table is empty, Bash versions prior to bash-5.1
+printed an informational message to that effect, even when producing
+output that can be reused as input. Bash-5.1 suppresses that message
+when the @option{-l} option is supplied.
 @end itemize
 @end table
 

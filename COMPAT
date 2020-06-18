@@ -538,6 +538,10 @@ compat50 (set using BASH_COMPAT)
 	  lower, it reverts to the method from bash-5.0 and previous versions,
 	  so seeding the random number generator by assigning a value to
 	  RANDOM will produce the same sequence as in bash-5.0
+	- If the command hash table is empty, bash versions prior to bash-5.1
+	  printed an informational message to that effect even when writing
+	  output in a format that can be reused as input (-l). Bash-5.1
+	  suppresses that message if -l is supplied
 
 -------------------------------------------------------------------------------
 

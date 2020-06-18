@@ -528,10 +528,18 @@ glob_name_is_acceptable (name)
      const char *name;
 {
   struct ign *p;
+  char *n;
   int flags;
 
-  /* . and .. are never matched */
-  if (name[0] == '.' && (name[1] == '\0' || (name[1] == '.' && name[2] == '\0')))
+  /* . and .. are never matched. We extend this to the terminal component of a
+     pathname. */
+  n = strrchr (name, '/');
+  if (n == 0 || n[1] == 0)
+    n = (char *)name;
+  else
+    n++;
+
+  if (n[0] == '.' && (n[1] == '\0' || (n[1] == '.' && n[2] == '\0')))
     return (0);
 
   flags = FNM_PATHNAME | FNMATCH_EXTFLAG | FNMATCH_NOCASEGLOB;

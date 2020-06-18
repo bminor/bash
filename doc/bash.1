@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Fri Jun  5 14:46:57 EDT 2020
+.\"	Last Change: Tue Jun 16 16:24:30 EDT 2020
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2020 June 5" "GNU Bash 5.1"
+.TH BASH 1 "2020 June 16" "GNU Bash 5.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2037,7 +2037,8 @@ below.
 .B BASH_COMPAT
 The value is used to set the shell's compatibility level.
 See
-\fBSHELL COMPATIBILITY MODE\fP
+.SM
+.B SHELL COMPATIBILITY MODE
 below for a description of the various compatibility
 levels and their effects.
 The value may be a decimal number (e.g., 4.2) or an integer (e.g., 42)
@@ -2049,7 +2050,8 @@ compatibility levels, the shell prints an error message and sets the
 compatibility level to the default for the current version.
 The valid values correspond to the compatibility levels
 described below under
-\fBSHELL COMPATIBILITY MODE\fP.
+.SM
+.BR BSHELL COMPATIBILITY MODE .
 For example, 4.2 and 42 are valid values that correspond
 to the \fBcompat42\fP \fBshopt\fP option
 and set the compatibility level to 42.
@@ -11058,6 +11060,11 @@ so seeding the random number generator by assigning a value to
 .SM
 .B RANDOM
 will produce the same sequence as in bash-5.0
+.IP \(bu
+If the command hash table is empty, bash versions prior to bash-5.1
+printed an informational message to that effect, even when producing
+output that can be reused as input. Bash-5.1 suppresses that message
+when the \fB\-l\fP option is supplied.
 .RE
 .PD
 .\" bash_builtins

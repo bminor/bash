@@ -8559,6 +8559,8 @@ redir.c
 	- limit HEREDOC_PIPESIZE to 4096 on FreeBSD; that is where it can
 	  handle atomic writes without hanging. Tested on FreeBSD 13
 
+[bash-5.1-alpha frozen]
+
 				   6/15
 				   ----
 subst.c
@@ -8566,3 +8568,24 @@ subst.c
 	  name returned from the variable assignment, in case there was a
 	  nameref expansion, and on the original name only if the assignment
 	  returned NULL. Fixes bug reported by James D. Lin <jamesdlin@gmail.com>
+
+				   6/16
+				   ----
+builtins/hash.def
+	- hash_builtin: don't print anything if the hash table is empty when
+	  listing portably (-l) unless the shell compatibility level is <= 50
+	  Issue originally raised by <beluro@web.de>
+
+				   6/17
+				   ----
+pathexp.c
+	- glob_name_is_acceptable: extend GLOBIGNORE to ignore `.' and `..'
+	  as a terminal pathname component instead of just ignoring filenames
+	  that are `.' or `..'. From a suggestion by Ilkka Virta
+	  <itvirta@iki.fi>
+
+				   6/18
+				   ----
+po/Makefile.in.in
+	- MKINSTALLDIRS: deprecated, no longer in AM_INTL_SUBDIR, so we have
+	  to create the variable manually

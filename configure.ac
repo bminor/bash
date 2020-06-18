@@ -89,13 +89,6 @@ sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
 *-nsk*)		opt_bash_malloc=no ;;	# HP NonStop
 *-haiku*)	opt_bash_malloc=no ;;	# Haiku OS
 *-genode*)	opt_bash_malloc=no ;;	# Genode has no sbrk
-# Deprecated -- bash malloc is suitable
-#sparc-netbsd*)	opt_bash_malloc=no ;;	# needs 8-byte alignment
-#mips-irix6*)	opt_bash_malloc=no ;;	# needs 8-byte alignment
-#*-freebsd*-gnu)	opt_bash_malloc=no ;;	# there's some undetermined problem here
-#*-freebsd*)	opt_bash_malloc=no ;;	# they claim it's better; I disagree
-#*-openbsd*)	opt_bash_malloc=no ;;	# they claim it needs eight-bit alignment
-#*-mirbsd*)	opt_bash_malloc=no ;;	# they claim it needs eight-bit alignment
 esac
 
 # memory scrambling on free()
@@ -1139,7 +1132,7 @@ LOCAL_DEFS=-DSHELL
 dnl use this section to possibly define more cpp variables, specify local
 dnl libraries, and specify any additional local cc or ld flags
 dnl
-dnl this should really go away someday
+dnl most of these are really old; this should really go away someday
 
 case "${host_os}" in
 sysv4.2*)	AC_DEFINE(SVR4_2)
@@ -1168,6 +1161,7 @@ linux*)		LOCAL_LDFLAGS=-rdynamic		 # allow dynamic loading
 		*)	AC_DEFINE(PGRP_PIPE) ;;
 		esac ;;
 netbsd*|openbsd*)	LOCAL_CFLAGS="-DDEV_FD_STAT_BROKEN" ;;
+freebsd*)	LOCAL_CFLAGS='-DHEREDOC_PIPESIZE=4096' ;;
 *qnx[[67]]*)	LOCAL_LIBS="-lncurses" ;;
 *qnx*)		LOCAL_CFLAGS="-Dqnx -F -3s" LOCAL_LDFLAGS="-3s" LOCAL_LIBS="-lunix -lncurses" ;;
 powerux*)	LOCAL_LIBS="-lgen" ;;

@@ -1,11 +1,11 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.0, 29 January 2020).
+the Bash shell (version 5.1, 5 June 2020).
 
-This is Edition 5.0, last updated 29 January 2020,
+This is Edition 5.1, last updated 5 June 2020,
 of The GNU Bash Reference Manual,
-for Bash, Version 5.0.
+for Bash, Version 5.1.
 
 Copyright (C) 1988-2018 Free Software Foundation, Inc.
 
@@ -92,17 +92,18 @@ ul.no-bullet {list-style: none}
     </ul></li>
     <li><a id="toc-Shell-Commands-1" href="#Shell-Commands">3.2 Shell Commands</a>
     <ul class="no-bullet">
-      <li><a id="toc-Simple-Commands-1" href="#Simple-Commands">3.2.1 Simple Commands</a></li>
-      <li><a id="toc-Pipelines-1" href="#Pipelines">3.2.2 Pipelines</a></li>
-      <li><a id="toc-Lists-of-Commands" href="#Lists">3.2.3 Lists of Commands</a></li>
-      <li><a id="toc-Compound-Commands-1" href="#Compound-Commands">3.2.4 Compound Commands</a>
+      <li><a id="toc-Reserved-Words-1" href="#Reserved-Words">3.2.1 Reserved Words</a></li>
+      <li><a id="toc-Simple-Commands-1" href="#Simple-Commands">3.2.2 Simple Commands</a></li>
+      <li><a id="toc-Pipelines-1" href="#Pipelines">3.2.3 Pipelines</a></li>
+      <li><a id="toc-Lists-of-Commands" href="#Lists">3.2.4 Lists of Commands</a></li>
+      <li><a id="toc-Compound-Commands-1" href="#Compound-Commands">3.2.5 Compound Commands</a>
       <ul class="no-bullet">
-        <li><a id="toc-Looping-Constructs-1" href="#Looping-Constructs">3.2.4.1 Looping Constructs</a></li>
-        <li><a id="toc-Conditional-Constructs-1" href="#Conditional-Constructs">3.2.4.2 Conditional Constructs</a></li>
-        <li><a id="toc-Grouping-Commands" href="#Command-Grouping">3.2.4.3 Grouping Commands</a></li>
+        <li><a id="toc-Looping-Constructs-1" href="#Looping-Constructs">3.2.5.1 Looping Constructs</a></li>
+        <li><a id="toc-Conditional-Constructs-1" href="#Conditional-Constructs">3.2.5.2 Conditional Constructs</a></li>
+        <li><a id="toc-Grouping-Commands" href="#Command-Grouping">3.2.5.3 Grouping Commands</a></li>
       </ul></li>
-      <li><a id="toc-Coprocesses-1" href="#Coprocesses">3.2.5 Coprocesses</a></li>
-      <li><a id="toc-GNU-Parallel-1" href="#GNU-Parallel">3.2.6 GNU Parallel</a></li>
+      <li><a id="toc-Coprocesses-1" href="#Coprocesses">3.2.6 Coprocesses</a></li>
+      <li><a id="toc-GNU-Parallel-1" href="#GNU-Parallel">3.2.7 GNU Parallel</a></li>
     </ul></li>
     <li><a id="toc-Shell-Functions-1" href="#Shell-Functions">3.3 Shell Functions</a></li>
     <li><a id="toc-Shell-Parameters-1" href="#Shell-Parameters">3.4 Shell Parameters</a>
@@ -186,6 +187,7 @@ ul.no-bullet {list-style: none}
     <li><a id="toc-Controlling-the-Prompt-1" href="#Controlling-the-Prompt">6.9 Controlling the Prompt</a></li>
     <li><a id="toc-The-Restricted-Shell-1" href="#The-Restricted-Shell">6.10 The Restricted Shell</a></li>
     <li><a id="toc-Bash-POSIX-Mode-1" href="#Bash-POSIX-Mode">6.11 Bash POSIX Mode</a></li>
+    <li><a id="toc-Shell-Compatibility-Mode-1" href="#Shell-Compatibility-Mode">6.12 Shell Compatibility Mode</a></li>
   </ul></li>
   <li><a id="toc-Job-Control-1" href="#Job-Control">7 Job Control</a>
   <ul class="no-bullet">
@@ -273,12 +275,12 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.0, 29 January 2020).
+the Bash shell (version 5.1, 5 June 2020).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.0, last updated 29 January 2020,
+<p>This is Edition 5.1, last updated 5 June 2020,
 of <cite>The GNU Bash Reference Manual</cite>,
-for <code>Bash</code>, Version 5.0.
+for <code>Bash</code>, Version 5.1.
 </p>
 <p>Bash contains features that appear in other popular shells, and some
 features that only appear in Bash.  Some of the shells that Bash has
@@ -859,10 +861,15 @@ Previous: <a href="#ANSI_002dC-Quoting" accesskey="p" rel="prev">ANSI-C Quoting<
 <span id="index-native-languages"></span>
 <span id="index-translation_002c-native-languages"></span>
 
-<p>A double-quoted string preceded by a dollar sign (&lsquo;<samp>$</samp>&rsquo;) will cause
-the string to be translated according to the current locale.
-If the current locale is <code>C</code> or <code>POSIX</code>, the dollar sign
-is ignored.
+<p>A double-quoted string preceded by a dollar sign (&lsquo;<samp>$</samp>&rsquo;)
+will cause the string to be translated according to the current locale.
+The <var>gettext</var> infrastructure performs the message catalog lookup and 
+translation, using the <code>LC_MESSAGES</code> and <code>TEXTDOMAIN</code> shell
+variables, as explained below. See the gettext documentation for additional
+details.
+If the current locale is <code>C</code> or <code>POSIX</code>,
+or if there are no translations available,
+the dollar sign is ignored.
 If the string is translated and replaced, the replacement is
 double-quoted.
 </p>
@@ -914,27 +921,55 @@ becomes the input of a second, in a loop or conditional construct, or in
 some other grouping.
 </p>
 <table class="menu" border="0" cellspacing="0">
-<tr><td align="left" valign="top">&bull; <a href="#Simple-Commands" accesskey="1">Simple Commands</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">The most common type of command.
+<tr><td align="left" valign="top">&bull; <a href="#Reserved-Words" accesskey="1">Reserved Words</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Words that have special meaning to the shell.
 </td></tr>
-<tr><td align="left" valign="top">&bull; <a href="#Pipelines" accesskey="2">Pipelines</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Connecting the input and output of several
+<tr><td align="left" valign="top">&bull; <a href="#Simple-Commands" accesskey="2">Simple Commands</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">The most common type of command.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Pipelines" accesskey="3">Pipelines</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Connecting the input and output of several
 				commands.
 </td></tr>
-<tr><td align="left" valign="top">&bull; <a href="#Lists" accesskey="3">Lists</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">How to execute commands sequentially.
+<tr><td align="left" valign="top">&bull; <a href="#Lists" accesskey="4">Lists</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">How to execute commands sequentially.
 </td></tr>
-<tr><td align="left" valign="top">&bull; <a href="#Compound-Commands" accesskey="4">Compound Commands</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Shell commands for control flow.
+<tr><td align="left" valign="top">&bull; <a href="#Compound-Commands" accesskey="5">Compound Commands</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Shell commands for control flow.
 </td></tr>
-<tr><td align="left" valign="top">&bull; <a href="#Coprocesses" accesskey="5">Coprocesses</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Two-way communication between commands.
+<tr><td align="left" valign="top">&bull; <a href="#Coprocesses" accesskey="6">Coprocesses</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Two-way communication between commands.
 </td></tr>
-<tr><td align="left" valign="top">&bull; <a href="#GNU-Parallel" accesskey="6">GNU Parallel</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Running commands in parallel.
+<tr><td align="left" valign="top">&bull; <a href="#GNU-Parallel" accesskey="7">GNU Parallel</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Running commands in parallel.
 </td></tr>
 </table>
 
 <hr>
+<span id="Reserved-Words"></span><div class="header">
+<p>
+Next: <a href="#Simple-Commands" accesskey="n" rel="next">Simple Commands</a>, Up: <a href="#Shell-Commands" accesskey="u" rel="up">Shell Commands</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indexes" title="Index" rel="index">Index</a>]</p>
+</div>
+<span id="Reserved-Words-1"></span><h4 class="subsection">3.2.1 Reserved Words</h4>
+<span id="index-reserved-words"></span>
+
+<p>Reserved words are words that have special meaning to the shell.
+They are used to begin and end the shell&rsquo;s compound commands.
+</p>
+<p>The following words are recognized as reserved when unquoted and 
+the first word of a command (see below for exceptions):
+</p>
+<table>
+<tr><td width="10%"><code>if</code></td><td width="10%"><code>then</code></td><td width="10%"><code>elif</code></td><td width="10%"><code>else</code></td><td width="12%"><code>fi</code></td><td width="10%"><code>time</code></td></tr>
+<tr><td width="10%"><code>for</code></td><td width="10%"><code>in</code></td><td width="10%"><code>until</code></td><td width="10%"><code>while</code></td><td width="12%"><code>do</code></td><td width="10%"><code>done</code></td></tr>
+<tr><td width="10%"><code>case</code></td><td width="10%"><code>esac</code></td><td width="10%"><code>coproc</code></td><td width="10%"><code>select</code></td><td width="12%"><code>function</code></td></tr>
+<tr><td width="10%"><code>{</code></td><td width="10%"><code>}</code></td><td width="10%"><code>[[</code></td><td width="10%"><code>]]</code></td><td width="12%"><code>!</code></td></tr>
+</table>
+
+<p><code>in</code> is recognized as a reserved word if it is the third word of a
+<code>case</code> or <code>select</code> command.
+<code>in</code> and <code>do</code> are recognized as reserved
+words if they are the third word in a <code>for</code> command.
+</p>
+<hr>
 <span id="Simple-Commands"></span><div class="header">
 <p>
-Next: <a href="#Pipelines" accesskey="n" rel="next">Pipelines</a>, Up: <a href="#Shell-Commands" accesskey="u" rel="up">Shell Commands</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indexes" title="Index" rel="index">Index</a>]</p>
+Next: <a href="#Pipelines" accesskey="n" rel="next">Pipelines</a>, Previous: <a href="#Reserved-Words" accesskey="p" rel="prev">Reserved Words</a>, Up: <a href="#Shell-Commands" accesskey="u" rel="up">Shell Commands</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indexes" title="Index" rel="index">Index</a>]</p>
 </div>
-<span id="Simple-Commands-1"></span><h4 class="subsection">3.2.1 Simple Commands</h4>
+<span id="Simple-Commands-1"></span><h4 class="subsection">3.2.2 Simple Commands</h4>
 <span id="index-commands_002c-simple"></span>
 
 <p>A simple command is the kind of command encountered most often.
@@ -953,7 +988,7 @@ the command was terminated by signal <var>n</var>.
 <p>
 Next: <a href="#Lists" accesskey="n" rel="next">Lists</a>, Previous: <a href="#Simple-Commands" accesskey="p" rel="prev">Simple Commands</a>, Up: <a href="#Shell-Commands" accesskey="u" rel="up">Shell Commands</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indexes" title="Index" rel="index">Index</a>]</p>
 </div>
-<span id="Pipelines-1"></span><h4 class="subsection">3.2.2 Pipelines</h4>
+<span id="Pipelines-1"></span><h4 class="subsection">3.2.3 Pipelines</h4>
 <span id="index-pipeline"></span>
 <span id="index-commands_002c-pipelines"></span>
 
@@ -1030,7 +1065,7 @@ returning a value.
 <p>
 Next: <a href="#Compound-Commands" accesskey="n" rel="next">Compound Commands</a>, Previous: <a href="#Pipelines" accesskey="p" rel="prev">Pipelines</a>, Up: <a href="#Shell-Commands" accesskey="u" rel="up">Shell Commands</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indexes" title="Index" rel="index">Index</a>]</p>
 </div>
-<span id="Lists-of-Commands"></span><h4 class="subsection">3.2.3 Lists of Commands</h4>
+<span id="Lists-of-Commands"></span><h4 class="subsection">3.2.4 Lists of Commands</h4>
 <span id="index-commands_002c-lists"></span>
 
 <p>A <code>list</code> is a sequence of one or more pipelines separated by one
@@ -1089,7 +1124,7 @@ executed in the list.
 <p>
 Next: <a href="#Coprocesses" accesskey="n" rel="next">Coprocesses</a>, Previous: <a href="#Lists" accesskey="p" rel="prev">Lists</a>, Up: <a href="#Shell-Commands" accesskey="u" rel="up">Shell Commands</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indexes" title="Index" rel="index">Index</a>]</p>
 </div>
-<span id="Compound-Commands-1"></span><h4 class="subsection">3.2.4 Compound Commands</h4>
+<span id="Compound-Commands-1"></span><h4 class="subsection">3.2.5 Compound Commands</h4>
 <span id="index-commands_002c-compound"></span>
 
 <table class="menu" border="0" cellspacing="0">
@@ -1119,7 +1154,7 @@ to group commands and execute them as a unit.
 <p>
 Next: <a href="#Conditional-Constructs" accesskey="n" rel="next">Conditional Constructs</a>, Up: <a href="#Compound-Commands" accesskey="u" rel="up">Compound Commands</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indexes" title="Index" rel="index">Index</a>]</p>
 </div>
-<span id="Looping-Constructs-1"></span><h4 class="subsubsection">3.2.4.1 Looping Constructs</h4>
+<span id="Looping-Constructs-1"></span><h4 class="subsubsection">3.2.5.1 Looping Constructs</h4>
 <span id="index-commands_002c-looping"></span>
 
 <p>Bash supports the following looping constructs.
@@ -1204,7 +1239,7 @@ may be used to control loop execution.
 <p>
 Next: <a href="#Command-Grouping" accesskey="n" rel="next">Command Grouping</a>, Previous: <a href="#Looping-Constructs" accesskey="p" rel="prev">Looping Constructs</a>, Up: <a href="#Compound-Commands" accesskey="u" rel="up">Compound Commands</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indexes" title="Index" rel="index">Index</a>]</p>
 </div>
-<span id="Conditional-Constructs-1"></span><h4 class="subsubsection">3.2.4.2 Conditional Constructs</h4>
+<span id="Conditional-Constructs-1"></span><h4 class="subsubsection">3.2.5.2 Conditional Constructs</h4>
 <span id="index-commands_002c-conditional"></span>
 
 <dl compact="compact">
@@ -1517,7 +1552,7 @@ value of the entire conditional expression.
 <p>
 Previous: <a href="#Conditional-Constructs" accesskey="p" rel="prev">Conditional Constructs</a>, Up: <a href="#Compound-Commands" accesskey="u" rel="up">Compound Commands</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indexes" title="Index" rel="index">Index</a>]</p>
 </div>
-<span id="Grouping-Commands"></span><h4 class="subsubsection">3.2.4.3 Grouping Commands</h4>
+<span id="Grouping-Commands"></span><h4 class="subsubsection">3.2.5.3 Grouping Commands</h4>
 <span id="index-commands_002c-grouping"></span>
 
 <p>Bash provides two ways to group a list of commands to be executed
@@ -1567,7 +1602,7 @@ from the <var>list</var> by whitespace.
 <p>
 Next: <a href="#GNU-Parallel" accesskey="n" rel="next">GNU Parallel</a>, Previous: <a href="#Compound-Commands" accesskey="p" rel="prev">Compound Commands</a>, Up: <a href="#Shell-Commands" accesskey="u" rel="up">Shell Commands</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indexes" title="Index" rel="index">Index</a>]</p>
 </div>
-<span id="Coprocesses-1"></span><h4 class="subsection">3.2.5 Coprocesses</h4>
+<span id="Coprocesses-1"></span><h4 class="subsection">3.2.6 Coprocesses</h4>
 <span id="index-coprocess"></span>
 
 <p>A <code>coprocess</code> is a shell command preceded by the <code>coproc</code>
@@ -1617,7 +1652,7 @@ The return status of a coprocess is the exit status of <var>command</var>.
 <p>
 Previous: <a href="#Coprocesses" accesskey="p" rel="prev">Coprocesses</a>, Up: <a href="#Shell-Commands" accesskey="u" rel="up">Shell Commands</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indexes" title="Index" rel="index">Index</a>]</p>
 </div>
-<span id="GNU-Parallel-1"></span><h4 class="subsection">3.2.6 GNU Parallel</h4>
+<span id="GNU-Parallel-1"></span><h4 class="subsection">3.2.7 GNU Parallel</h4>
 
 <p>There are ways to run commands in parallel that are not built into Bash.
 GNU Parallel is a tool to do just that.
@@ -2630,7 +2665,7 @@ results.
 </p>
 <p>Substring indexing is zero-based unless the positional parameters
 are used, in which case the indexing starts at 1 by default.
-If <var>offset</var> is 0, and the positional parameters are used, <code>$@</code> is
+If <var>offset</var> is 0, and the positional parameters are used, <code>$0</code> is
 prefixed to the list.
 </p>
 </dd>
@@ -2764,6 +2799,18 @@ or information about <var>parameter</var> itself, depending on the value of
 <var>operator</var>.  Each <var>operator</var> is a single letter:
 </p>
 <dl compact="compact">
+<dt><code>U</code></dt>
+<dd><p>The expansion is a string that is the value of <var>parameter</var> with lowercase
+alphabetic characters converted to uppercase.
+</p></dd>
+<dt><code>u</code></dt>
+<dd><p>The expansion is a string that is the value of <var>parameter</var> with the first
+character converted to uppercase, if it is alphabetic.
+</p></dd>
+<dt><code>L</code></dt>
+<dd><p>The expansion is a string that is the value of <var>parameter</var> with uppercase
+alphabetic characters converted to lowercase.
+</p></dd>
 <dt><code>Q</code></dt>
 <dd><p>The expansion is a string that is the value of <var>parameter</var> quoted in a
 format that can be reused as input.
@@ -2780,6 +2827,12 @@ escape sequences expanded as with the <code>$'&hellip;'</code> quoting mechanism
 <dd><p>The expansion is a string in the form of
 an assignment statement or <code>declare</code> command that, if
 evaluated, will recreate <var>parameter</var> with its attributes and value.
+</p></dd>
+<dt><code>K</code></dt>
+<dd><p>Produces a possibly-quoted version of the value of <var>parameter</var>,
+except that it prints the values of
+indexed and associative arrays as a sequence of quoted key-value pairs
+(see <a href="#Arrays">Arrays</a>).
 </p></dd>
 <dt><code>a</code></dt>
 <dd><p>The expansion is a string consisting of flag values representing
@@ -4703,7 +4756,7 @@ zero if <var>command</var> is found, and non-zero if not.
 <dt><code>declare</code></dt>
 <dd><span id="index-declare"></span>
 <div class="example">
-<pre class="example">declare [-aAfFgilnrtux] [-p] [<var>name</var>[=<var>value</var>] &hellip;]
+<pre class="example">declare [-aAfFgiIlnrtux] [-p] [<var>name</var>[=<var>value</var>] &hellip;]
 </pre></div>
 
 <p>Declare variables and give them attributes.  If no <var>name</var>s
@@ -4731,6 +4784,12 @@ each <var>name</var> is defined are displayed as well.
 <p>The <samp>-g</samp> option forces variables to be created or modified at
 the global scope, even when <code>declare</code> is executed in a shell function.
 It is ignored in all other cases.
+</p>
+<p>The <samp>-I</samp> option causes local variables to inherit the attributes
+(except the <var>nameref</var> attribute)
+and value of any existing variable with the same
+<var>name</var> at a surrounding scope.
+If there is no existing variable, the local variable is initially unset.
 </p>
 <p>The following options can be used to restrict output to variables with
 the specified attributes or to give variables attributes:
@@ -5098,6 +5157,11 @@ This is an exception to the usual <code>printf</code> behavior.
 </p></dd>
 </dl>
 
+<p>The %b, %q, and %T directives all use the field width and precision
+arguments from the format specification and write that many bytes from    
+(or use that wide a field for) the expanded argument, which usually
+contains more characters than the original.
+</p>
 <p>Arguments to non-string format specifiers are treated as C language constants,
 except that a leading plus or minus sign is allowed, and if the leading
 character is a single or double quote, the value is the ASCII value of
@@ -5369,7 +5433,7 @@ allow this value to be set).
 </p>
 </dd>
 <dt><code>-q</code></dt>
-<dd><p>The maximum number of bytes in POSIX message queues.
+<dd><p>The maximum number of bytes in <small>POSIX</small> message queues.
 </p>
 </dd>
 <dt><code>-r</code></dt>
@@ -5401,6 +5465,10 @@ some systems, to its children.
 <dd><p>The maximum number of pseudoterminals.
 </p>
 </dd>
+<dt><code>-R</code></dt>
+<dd><p>The maximum time a real-time process can run before blocking, in microseconds.
+</p>
+</dd>
 <dt><code>-T</code></dt>
 <dd><p>The maximum number of threads.
 </p></dd>
@@ -5418,8 +5486,10 @@ is printed, unless the <samp>-H</samp> option is supplied.
 When setting new limits, if neither <samp>-H</samp> nor <samp>-S</samp> is supplied,
 both the hard and soft limits are set.
 If no option is given, then <samp>-f</samp> is assumed.  Values are in 1024-byte
-increments, except for <samp>-t</samp>, which is in seconds; <samp>-p</samp>,
-which is in units of 512-byte blocks;
+increments, except for
+<samp>-t</samp>, which is in seconds;
+<samp>-R</samp>, which is in microseconds;
+<samp>-p</samp>, which is in units of 512-byte blocks;
 <samp>-P</samp>,
 <samp>-T</samp>,
 <samp>-b</samp>,
@@ -5927,67 +5997,14 @@ history is enabled (see <a href="#Bash-History-Facilities">Bash History Faciliti
 </p>
 </dd>
 <dt><code>compat31</code></dt>
-<dd><p>If set, Bash
-changes its behavior to that of version 3.1 with respect to quoted
-arguments to the conditional command&rsquo;s &lsquo;<samp>=~</samp>&rsquo; operator
-and with respect to locale-specific
-string comparison when using the <code>[[</code>
-conditional command&rsquo;s &lsquo;<samp>&lt;</samp>&rsquo; and &lsquo;<samp>&gt;</samp>&rsquo; operators.
-Bash versions prior to bash-4.1 use ASCII collation and strcmp(3);
-bash-4.1 and later use the current locale&rsquo;s collation sequence and strcoll(3).
-</p>
-</dd>
 <dt><code>compat32</code></dt>
-<dd><p>If set, Bash
-changes its behavior to that of version 3.2 with respect to locale-specific
-string comparison when using the <code>[[</code>
-conditional command&rsquo;s &lsquo;<samp>&lt;</samp>&rsquo; and &lsquo;<samp>&gt;</samp>&rsquo; operators (see previous item)
-and the effect of interrupting a command list.
-Bash versions 3.2 and earlier continue with the next command in the list
-after one terminates due to an interrupt.
-</p>
-</dd>
 <dt><code>compat40</code></dt>
-<dd><p>If set, Bash
-changes its behavior to that of version 4.0 with respect to locale-specific
-string comparison when using the <code>[[</code>
-conditional command&rsquo;s &lsquo;<samp>&lt;</samp>&rsquo; and &lsquo;<samp>&gt;</samp>&rsquo; operators (see description
-of <code>compat31</code>)
-and the effect of interrupting a command list.
-Bash versions 4.0 and later interrupt the list as if the shell received the
-interrupt; previous versions continue with the next command in the list.
-</p>
-</dd>
 <dt><code>compat41</code></dt>
-<dd><p>If set, Bash, when in <small>POSIX</small> mode, treats a single quote in a double-quoted
-parameter expansion as a special character.  The single quotes must match
-(an even number) and the characters between the single quotes are considered
-quoted.  This is the behavior of <small>POSIX</small> mode through version 4.1.
-The default Bash behavior remains as in previous versions.
-</p>
-</dd>
 <dt><code>compat42</code></dt>
-<dd><p>If set, Bash
-does not process the replacement string in the pattern substitution word
-expansion using quote removal.
-</p>
-</dd>
 <dt><code>compat43</code></dt>
-<dd><p>If set, Bash
-does not print a warning message if an attempt is made to use a quoted compound
-array assignment as an argument to <code>declare</code>,
-makes word expansion errors
-non-fatal errors that cause the current command to fail (the default behavior is
-to make them fatal errors that cause the shell to exit),
-and does not reset the
-loop state when a shell function is executed (this allows <code>break</code> or
-<code>continue</code> in a shell function to affect loops in the caller&rsquo;s context).
-</p>
-</dd>
 <dt><code>compat44</code></dt>
-<dd><p>If set, Bash
-saves the positional parameters to BASH_ARGV and BASH_ARGC before they are
-used, regardless of whether or not extended debugging mode is enabled.
+<dd><p>These control aspects of the shell&rsquo;s compatibility mode
+(see <a href="#Shell-Compatibility-Mode">Shell Compatibility Mode</a>).
 </p>
 </dd>
 <dt><code>complete_fullquote</code></dt>
@@ -6446,7 +6463,7 @@ variables for controlling the job control facilities
 </dt>
 <dd><span id="index-_0024_005f"></span>
 <p>($_, an underscore.)
-At shell startup, set to the absolute pathname used to invoke the
+At shell startup, set to the pathname used to invoke the
 shell or shell script being executed as passed in the environment
 or argument list.
 Subsequently, expands to the last argument to the previous simple
@@ -6578,8 +6595,8 @@ subsequently reset.
 <span id="index-BASH_005fCOMPAT"></span>
 </dt>
 <dd><p>The value is used to set the shell&rsquo;s compatibility level.
-See <a href="#The-Shopt-Builtin">The Shopt Builtin</a>, for a description of the various compatibility
-levels and their effects.
+See <a href="#Shell-Compatibility-Mode">Shell Compatibility Mode</a>, for a description of the various
+compatibility levels and their effects.
 The value may be a decimal number (e.g., 4.2) or an integer (e.g., 42)
 corresponding to the desired compatibility level.
 If <code>BASH_COMPAT</code> is unset or set to the empty string, the compatibility
@@ -6587,9 +6604,11 @@ level is set to the default for the current version.
 If <code>BASH_COMPAT</code> is set to a value that is not one of the valid
 compatibility levels, the shell prints an error message and sets the
 compatibility level to the default for the current version.
-The valid compatibility levels correspond to the compatibility options
-accepted by the <code>shopt</code> builtin described above (for example,
-<var>compat42</var> means that 4.2 and 42 are valid values).
+The valid values correspond to the compatibility levels
+described below (see <a href="#Shell-Compatibility-Mode">Shell Compatibility Mode</a>).
+For example, 4.2 and 42 are valid values that correspond
+to the <code>compat42</code> <code>shopt</code> option
+and set the compatibility level to 42.
 The current version is also a valid value.
 </p>
 </dd>
@@ -7002,6 +7021,7 @@ parser to treat the rest of the line as a comment.
 </dt>
 <dd><p>The history number, or index in the history list, of the current
 command.
+Assignments to <code>HISTCMD</code> are ignored.
 If <code>HISTCMD</code>
 is unset, it loses its special properties,
 even if it is subsequently reset.
@@ -7302,11 +7322,15 @@ not already set.
 is readonly.
 </p>
 </dd>
-<dt><code>PROMPT_COMMAND</code>
-<span id="index-PROMPT_005fCOMMAND"></span>
+<dt><code>PROMPT_COMMANDS</code>
+<span id="index-PROMPT_005fCOMMANDS"></span>
 </dt>
-<dd><p>If set, the value is interpreted as a command to execute
-before the printing of each primary prompt (<code>$PS1</code>).
+<dd><p>If this array variable is set,
+the value of each set element is interpreted as a command to execute
+before printing the primary prompt (<code>$PS1</code>).
+If this is not set, but
+<code>PROMPT_COMMAND</code>
+is set to a value, its value is used as a command to execute instead.
 </p>
 </dd>
 <dt><code>PROMPT_DIRTRIM</code>
@@ -7321,7 +7345,7 @@ Characters removed are replaced with an ellipsis.
 <dt><code>PS0</code>
 <span id="index-PS0"></span>
 </dt>
-<dd><p>The value of this parameter is expanded like <var>PS1</var>
+<dd><p>The value of this parameter is expanded like <code>PS1</code>
 and displayed by interactive shells after reading a command
 and before the command is executed.
 </p>
@@ -7400,6 +7424,8 @@ shell was started.  Assignment to this variable resets
 the count to the value assigned, and the expanded value
 becomes the value assigned plus the number of seconds
 since the assignment.
+The number of seconds at shell invocation and the current time is always
+determined by querying the system clock.
 If <code>SECONDS</code>
 is unset, it loses its special properties,
 even if it is subsequently reset.
@@ -7566,6 +7592,9 @@ Next: <a href="#Job-Control" accesskey="n" rel="next">Job Control</a>, Previous:
 </td></tr>
 <tr><td align="left" valign="top">&bull; <a href="#Bash-POSIX-Mode">Bash POSIX Mode</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Making Bash behave more closely to what
 				the POSIX standard specifies.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Shell-Compatibility-Mode">Shell Compatibility Mode</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">How Bash supports behavior that was present
+				in earlier versions and has changed.
 </td></tr>
 </table>
 
@@ -7971,8 +8000,8 @@ executing it.
 See <a href="#Controlling-the-Prompt">Controlling the Prompt</a>, for a complete list of prompt
 string escape sequences.
 
-</li><li> Bash executes the value of the <code>PROMPT_COMMAND</code> variable as a command
-before printing the primary prompt, <code>$PS1</code>
+</li><li> Bash executes the values of the set elements of the <code>PROMPT_COMMANDS</code>
+array variable as commands before printing the primary prompt, <code>$PS1</code>
 (see <a href="#Bash-Variables">Bash Variables</a>).
 
 </li><li> Readline (see <a href="#Command-Line-Editing">Command Line Editing</a>) is used to read commands from
@@ -8477,14 +8506,27 @@ an array.
 <pre class="example"><var>name</var>=(<var>value1</var> <var>value2</var> &hellip; )
 </pre></div>
 <p>where each
-<var>value</var> is of the form <code>[<var>subscript</var>]=</code><var>string</var>.
+<var>value</var> may be of the form <code>[<var>subscript</var>]=</code><var>string</var>.
 Indexed array assignments do not require anything but <var>string</var>.
 When assigning to indexed arrays, if
 the optional subscript is supplied, that index is assigned to;
 otherwise the index of the element assigned is the last index assigned
 to by the statement plus one.  Indexing starts at zero.
 </p>
-<p>When assigning to an associative array, the subscript is required.
+<p>Each <var>value</var> in the list undergoes all the shell expansions
+described above (see <a href="#Shell-Expansions">Shell Expansions</a>).
+</p>
+<p>When assigning to an associative array, the words in a compound assignment
+may be either assignment statements, for which the subscript is required,
+or a list of words that is interpreted as a sequence of alternating keys
+and values:
+<var>name</var>=(<var>key1</var> <var>value1</var> <var>key2</var> <var>value2</var> &hellip; ).
+These are treated identically to
+<var>name</var>=( [<var>key1</var>]=<var>value1</var> [<var>key2</var>]=<var>value2</var> &hellip; ).
+The first word in the list determines how the remaining words
+are interpreted; all assignments in a list must be of the same type.
+When using key/value pairs, the keys may not be missing or empty;
+a final missing value is treated like the empty string.
 </p>
 <p>This syntax is also accepted by the <code>declare</code>
 builtin.  Individual array elements may be assigned to using the
@@ -8709,10 +8751,11 @@ Next: <a href="#The-Restricted-Shell" accesskey="n" rel="next">The Restricted Sh
 <span id="Controlling-the-Prompt-1"></span><h3 class="section">6.9 Controlling the Prompt</h3>
 <span id="index-prompting"></span>
 
-<p>The value of the variable <code>PROMPT_COMMAND</code> is examined just before
-Bash prints each primary prompt.  If <code>PROMPT_COMMAND</code> is set and
-has a non-null value, then the
-value is executed just as if it had been typed on the command line.
+<p>Bash examines the value of the array variable <code>PROMPT_COMMANDS</code> just before
+printing each primary prompt.
+If any elements in  <code>PROMPT_COMMANDS</code> are set and non-null, Bash
+executes each value, in numeric order,
+just as if it had been typed on the command line.
 </p>
 <p>In addition, the following table describes the special characters which
 can appear in the prompt variables <code>PS0</code>, <code>PS1</code>, <code>PS2</code>, and
@@ -8843,9 +8886,12 @@ with the exception that the following are disallowed or not performed:
 <ul>
 <li> Changing directories with the <code>cd</code> builtin.
 </li><li> Setting or unsetting the values of the <code>SHELL</code>, <code>PATH</code>,
+<code>HISTFILE</code>,
 <code>ENV</code>, or <code>BASH_ENV</code> variables.
 </li><li> Specifying command names containing slashes.
 </li><li> Specifying a filename containing a slash as an argument to the <code>.</code>
+builtin command.
+</li><li> Specifying a filename containing a slash as an argument to the <code>history</code>
 builtin command.
 </li><li> Specifying a filename containing a slash as an argument to the <samp>-p</samp>
 option to the <code>hash</code> builtin command.
@@ -8883,7 +8929,7 @@ such as <code>jails</code>, <code>zones</code>, or <code>containers</code>.
 <hr>
 <span id="Bash-POSIX-Mode"></span><div class="header">
 <p>
-Previous: <a href="#The-Restricted-Shell" accesskey="p" rel="prev">The Restricted Shell</a>, Up: <a href="#Bash-Features" accesskey="u" rel="up">Bash Features</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indexes" title="Index" rel="index">Index</a>]</p>
+Next: <a href="#Shell-Compatibility-Mode" accesskey="n" rel="next">Shell Compatibility Mode</a>, Previous: <a href="#The-Restricted-Shell" accesskey="p" rel="prev">The Restricted Shell</a>, Up: <a href="#Bash-Features" accesskey="u" rel="up">Bash Features</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indexes" title="Index" rel="index">Index</a>]</p>
 </div>
 <span id="Bash-POSIX-Mode-1"></span><h3 class="section">6.11 Bash POSIX Mode</h3>
 <span id="index-POSIX-Mode"></span>
@@ -8973,6 +9019,7 @@ not have to appear as matched pairs.
 </li><li> The parser does not recognize <code>time</code> as a reserved word if the next
 token begins with a &lsquo;<samp>-</samp>&rsquo;.
 
+
 </li><li> The &lsquo;<samp>!</samp>&rsquo; character does not introduce history expansion within a
 double-quoted string, even if the <code>histexpand</code> option is enabled.
 
@@ -9018,10 +9065,6 @@ double-quoted.
 </li><li> Assignment statements preceding <small>POSIX</small> special builtins
 persist in the shell environment after the builtin completes.
 
-</li><li> Assignment statements preceding shell function calls persist in the
-shell environment after the function returns, as if a <small>POSIX</small>
-special builtin command had been executed.
-
 </li><li> The <code>command</code> builtin does not prevent builtins that take assignment
 statements as arguments from expanding them as assignment statements;
 when not in <small>POSIX</small> mode, assignment builtins lose their assignment
@@ -9049,6 +9092,9 @@ disposition if it is, unless that argument consists solely of digits and
 is a valid signal number.  If users want to reset the handler for a given
 signal to the original disposition, they should use &lsquo;<samp>-</samp>&rsquo; as the
 first argument.
+
+</li><li> <code>trap -p</code> displays signals whose dispositions are set to SIG_DFL and
+those that were ignored when the shell started.
 
 </li><li> The <code>.</code> and <code>source</code> builtins do not search the current directory
 for the filename argument if it is not found by searching <code>PATH</code>.
@@ -9143,6 +9189,168 @@ the <code>echo</code> builtin to be fully conformant.
 the <samp>--enable-strict-posix-default</samp> to <code>configure</code> when building
 (see <a href="#Optional-Features">Optional Features</a>).
 </p>
+<hr>
+<span id="Shell-Compatibility-Mode"></span><div class="header">
+<p>
+Previous: <a href="#Bash-POSIX-Mode" accesskey="p" rel="prev">Bash POSIX Mode</a>, Up: <a href="#Bash-Features" accesskey="u" rel="up">Bash Features</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indexes" title="Index" rel="index">Index</a>]</p>
+</div>
+<span id="Shell-Compatibility-Mode-1"></span><h3 class="section">6.12 Shell Compatibility Mode</h3>
+<span id="index-Compatibility-Level"></span>
+<span id="index-Compatibility-Mode"></span>
+
+<p>Bash-4.0 introduced the concept of a &lsquo;shell compatibility level&rsquo;, specified
+as a set of options to the shopt builtin
+(<code>compat31</code>,
+<code>compat32</code>,
+<code>compat40</code>,
+<code>compat41</code>,
+and so on).
+There is only one current
+compatibility level &ndash; each option is mutually exclusive.
+The compatibility level is intended to allow users to select behavior
+from previous versions that is incompatible with newer versions
+while they migrate scripts to use current features and
+behavior. It&rsquo;s intended to be a temporary solution.
+</p>
+<p>This section does not mention behavior that is standard for a particular
+version (e.g., setting <code>compat32</code> means that quoting the rhs of the regexp
+matching operator quotes special regexp characters in the word, which is
+default behavior in bash-3.2 and above). 
+</p>
+<p>If a user enables, say, <code>compat32</code>, it may affect the behavior of other
+compatibility levels up to and including the current compatibility level.
+The idea is that each compatibility level controls behavior that changed
+in that version of Bash,
+but that behavior may have been present in earlier versions.
+For instance, the change to use locale-based comparisons with the <code>[[</code>
+command came in bash-4.1, and earlier versions used ASCII-based comparisons,
+so enabling <code>compat32</code> will enable ASCII-based comparisons as well.
+That granularity may not be sufficient for
+all uses, and as a result users should employ compatibility levels carefully.
+Read the documentation for a particular feature to find out the
+current behavior.
+</p>
+<p>Bash-4.3 introduced a new shell variable: <code>BASH_COMPAT</code>.
+The value assigned
+to this variable (a decimal version number like 4.2, or an integer
+corresponding to the <code>compat</code><var>NN</var> option, like 42) determines the
+compatibility level.
+</p>
+<p>Starting with bash-4.4, Bash has begun deprecating older compatibility
+levels.
+Eventually, the options will be removed in favor of <code>BASH_COMPAT</code>.
+</p>
+<p>Bash-5.0 is the final version for which there will be an individual shopt
+option for the previous version. Users should use <code>BASH_COMPAT</code>
+on bash-5.0 and later versions.
+</p>
+<p>The following table describes the behavior changes controlled by each
+compatibility level setting.
+The <code>compat</code><var>NN</var> tag is used as shorthand for setting the
+compatibility level
+to <var>NN</var> using one of the following mechanisms.
+For versions prior to bash-5.0, the compatibility level may be set using
+the corresponding <code>compat</code><var>NN</var> shopt option.
+For bash-4.3 and later versions, the <code>BASH_COMPAT</code> variable is preferred,
+and it is required for bash-5.1 and later versions.
+</p>
+<dl compact="compact">
+<dt><code>compat31</code></dt>
+<dd><ul>
+<li> quoting the rhs of the <code>[[</code> command&rsquo;s regexp matching operator (=~)
+has no special effect
+</li></ul>
+
+</dd>
+<dt><code>compat32</code></dt>
+<dd><ul>
+<li> interrupting a command list such as &quot;a ; b ; c&quot; causes the execution
+of the next command in the list (in bash-4.0 and later versions,
+the shell acts as if it received the interrupt, so
+interrupting one command in a list aborts the execution of the
+entire list)
+</li></ul>
+
+</dd>
+<dt><code>compat40</code></dt>
+<dd><ul>
+<li> the &lsquo;<samp>&lt;</samp>&rsquo; and &lsquo;<samp>&gt;</samp>&rsquo; operators to the <code>[[</code> command do not
+consider the current locale when comparing strings; they use ASCII
+ordering.
+Bash versions prior to bash-4.1 use ASCII collation and strcmp(3);
+bash-4.1 and later use the current locale&rsquo;s collation sequence and
+strcoll(3).
+</li></ul>
+
+</dd>
+<dt><code>compat41</code></dt>
+<dd><ul>
+<li> in posix mode, <code>time</code> may be followed by options and still be
+recognized as a reserved word (this is <small>POSIX</small> interpretation 267)
+</li><li> in posix mode, the parser requires that an even number of single
+quotes occur in the <var>word</var> portion of a double-quoted ${&hellip;}
+parameter expansion and treats them specially, so that characters within
+the single quotes are considered quoted
+(this is <small>POSIX</small> interpretation 221)
+</li></ul>
+
+</dd>
+<dt><code>compat42</code></dt>
+<dd><ul>
+<li> the replacement string in double-quoted pattern substitution does not
+undergo quote removal, as it does in versions after bash-4.2
+</li><li> in posix mode, single quotes are considered special when expanding
+the <var>word</var> portion of a double-quoted ${&hellip;} parameter expansion
+and can be used to quote a closing brace or other special character
+(this is part of <small>POSIX</small> interpretation 221);
+in later versions, single quotes
+are not special within double-quoted word expansions
+</li></ul>
+
+</dd>
+<dt><code>compat43</code></dt>
+<dd><ul>
+<li> the shell does not print a warning message if an attempt is made to
+use a quoted compound assignment as an argument to declare
+(declare -a foo=&rsquo;(1 2)&rsquo;). Later versions warn that this usage is
+deprecated
+</li><li> word expansion errors are considered non-fatal errors that cause the
+current command to fail, even in posix mode
+(the default behavior is to make them fatal errors that cause the shell
+to exit)
+</li><li> when executing a shell function, the loop state (while/until/etc.)
+is not reset, so <code>break</code> or <code>continue</code> in that function will break
+or continue loops in the calling context. Bash-4.4 and later reset
+the loop state to prevent this
+</li></ul>
+
+</dd>
+<dt><code>compat44</code></dt>
+<dd><ul>
+<li> the shell sets up the values used by <code>BASH_ARGV</code> and <code>BASH_ARGC</code>
+so they can expand to the shell&rsquo;s positional parameters even if extended
+debugging mode is not enabled
+</li><li> a subshell inherits loops from its parent context, so <code>break</code>
+or <code>continue</code> will cause the subshell to exit.
+Bash-5.0 and later reset the loop state to prevent the exit
+</li><li> variable assignments preceding builtins like <code>export</code> and <code>readonly</code>
+that set attributes continue to affect variables with the same
+name in the calling environment even if the shell is not in posix
+mode
+</li></ul>
+
+</dd>
+<dt><code>compat50 (set using BASH_COMPAT)</code></dt>
+<dd><ul>
+<li> Bash-5.1 changed the way <code>$RANDOM</code> is generated to introduce slightly
+more randomness. If the shell compatibility level is set to 50 or
+lower, it reverts to the method from bash-5.0 and previous versions,
+so seeding the random number generator by assigning a value to
+<code>RANDOM</code> will produce the same sequence as in bash-5.0
+</li></ul>
+</dd>
+</dl>
+
 <hr>
 <span id="Job-Control"></span><div class="header">
 <p>
@@ -9245,7 +9453,8 @@ previous job with a &lsquo;<samp>-</samp>&rsquo;.
 <p>A job may also be referred to
 using a prefix of the name used to start it, or using a substring
 that appears in its command line.  For example, &lsquo;<samp>%ce</samp>&rsquo; refers
-to a stopped <code>ce</code> job.  Using &lsquo;<samp>%?ce</samp>&rsquo;, on the
+to a stopped job whose command name begins with &lsquo;<samp>ce</samp>&rsquo;.
+Using &lsquo;<samp>%?ce</samp>&rsquo;, on the
 other hand, refers to any job containing the string &lsquo;<samp>ce</samp>&rsquo; in
 its command line.  If the prefix or substring matches more than one job,
 Bash reports an error.
@@ -9398,7 +9607,12 @@ the last-executed process substitution, if its process id is the same as
 <var>$!</var>,
 and the return status is zero.
 If the <samp>-n</samp> option is supplied, <code>wait</code> waits for a single job
-to terminate and returns its exit status.
+from the list of <var>pids</var> or <var>jobspecs</var> or, if no arguments are
+supplied, any job, 
+to complete and returns its exit status.
+If none of the supplied arguments is a child of the shell, or if no arguments
+are supplied and the shell has no unwaited-for children, the exit status
+is 127.
 If the <samp>-p</samp> option is supplied, the process or job identifier of the job
 for which the exit status is returned is assigned to the variable
 <var>varname</var> named by the option argument.
@@ -10821,10 +11035,19 @@ of the current Readline line is not greater than the length of the prompt
 plus the screen width.
 </p>
 </dd>
+<dt><code>clear-display (M-C-l)</code>
+<span id="index-clear_002ddisplay-_0028M_002dC_002dl_0029"></span>
+</dt>
+<dd><p>Clear the screen and, if possible, the terminal&rsquo;s scrollback buffer,
+then redraw the current line,
+leaving the current line at the top of the screen.
+</p>
+</dd>
 <dt><code>clear-screen (C-l)</code>
 <span id="index-clear_002dscreen-_0028C_002dl_0029"></span>
 </dt>
-<dd><p>Clear the screen and redraw the current line,
+<dd><p>Clear the screen,
+then redraw the current line,
 leaving the current line at the top of the screen.
 </p>
 </dd>
@@ -10979,6 +11202,17 @@ the direction to move through the history.  A negative argument switches
 the direction through the history (back or forward).
 The history expansion facilities are used to extract the last argument,
 as if the &lsquo;<samp>!$</samp>&rsquo; history expansion had been specified.
+</p>
+</dd>
+<dt><code>operate-and-get-next (C-o)</code>
+<span id="index-operate_002dand_002dget_002dnext-_0028C_002do_0029"></span>
+</dt>
+<dd><p>Accept the current line for return to the calling application as if a
+newline had been entered,
+and fetch the next line relative to the current line from the history
+for editing.
+A numeric argument, if supplied, specifies the history entry to use instead
+of the current line.
 </p>
 </dd>
 </dl>
@@ -11695,15 +11929,6 @@ word expansions (see <a href="#Shell-Expansions">Shell Expansions</a>).
 <span id="index-insert_002dlast_002dargument-_0028M_002d_002e-or-M_002d_005f_0029"></span>
 </dt>
 <dd><p>A synonym for <code>yank-last-arg</code>.
-</p>
-</dd>
-<dt><code>operate-and-get-next (C-o)</code>
-<span id="index-operate_002dand_002dget_002dnext-_0028C_002do_0029"></span>
-</dt>
-<dd><p>Accept the current line for execution and fetch the next line
-relative to the current line from the history for editing.
-A numeric argument, if supplied, specifies the history entry to use instead
-of the current line.
 </p>
 </dd>
 <dt><code>edit-and-execute-command (C-x C-e)</code>
@@ -12477,7 +12702,14 @@ Both <var>first</var> and
 <var>last</var> may be specified as a string (to locate the most recent
 command beginning with that string) or as a number (an index into the
 history list, where a negative number is used as an offset from the
-current command number).  If <var>last</var> is not specified, it is set to
+current command number).
+</p>
+<p>When listing, a <var>first</var> or <var>last</var> of 0 is equivalent to -1
+and -0 is equivalent to the current command (usually the <code>fc</code>
+command);
+otherwise 0 is equivalent to -1 and -0 is invalid.
+</p>
+<p>If <var>last</var> is not specified, it is set to
 <var>first</var>.  If <var>first</var> is not specified, it is set to the previous
 command for editing and -16 for listing.  If the <samp>-l</samp> flag is
 given, the commands are listed on standard output.  The <samp>-n</samp> flag
@@ -14998,7 +15230,7 @@ Next: <a href="#Function-Index" accesskey="n" rel="next">Function Index</a>, Pre
 <tr><td></td><td valign="top"><a href="#index-PIPESTATUS"><code>PIPESTATUS</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-POSIXLY_005fCORRECT"><code>POSIXLY_CORRECT</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-PPID"><code>PPID</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-PROMPT_005fCOMMAND"><code>PROMPT_COMMAND</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-PROMPT_005fCOMMANDS"><code>PROMPT_COMMANDS</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-PROMPT_005fDIRTRIM"><code>PROMPT_DIRTRIM</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-PS0"><code>PS0</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bash-Variables">Bash Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-PS1"><code>PS1</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Bourne-Shell-Variables">Bourne Shell Variables</a></td></tr>
@@ -15171,6 +15403,7 @@ Next: <a href="#Concept-Index" accesskey="n" rel="next">Concept Index</a>, Previ
 <tr><td></td><td valign="top"><a href="#index-capitalize_002dword-_0028M_002dc_0029"><code>capitalize-word (M-c)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Text">Commands For Text</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-character_002dsearch-_0028C_002d_005d_0029"><code>character-search (C-])</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Miscellaneous-Commands">Miscellaneous Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-character_002dsearch_002dbackward-_0028M_002dC_002d_005d_0029"><code>character-search-backward (M-C-])</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Miscellaneous-Commands">Miscellaneous Commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-clear_002ddisplay-_0028M_002dC_002dl_0029"><code>clear-display (M-C-l)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Moving">Commands For Moving</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-clear_002dscreen-_0028C_002dl_0029"><code>clear-screen (C-l)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Moving">Commands For Moving</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-complete-_0028TAB_0029"><code>complete (<span class="key">TAB</span>)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Completion">Commands For Completion</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-complete_002dcommand-_0028M_002d_0021_0029"><code>complete-command (M-!)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Completion">Commands For Completion</a></td></tr>
@@ -15247,7 +15480,7 @@ Next: <a href="#Concept-Index" accesskey="n" rel="next">Concept Index</a>, Previ
 <tr><td></td><td valign="top"><a href="#index-non_002dincremental_002dreverse_002dsearch_002dhistory-_0028M_002dp_0029"><code>non-incremental-reverse-search-history (M-p)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-History">Commands For History</a></td></tr>
 <tr><td colspan="4"> <hr></td></tr>
 <tr><th id="Function-Index_fn_letter-O">O</th><td></td><td></td></tr>
-<tr><td></td><td valign="top"><a href="#index-operate_002dand_002dget_002dnext-_0028C_002do_0029"><code>operate-and-get-next (C-o)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Miscellaneous-Commands">Miscellaneous Commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-operate_002dand_002dget_002dnext-_0028C_002do_0029"><code>operate-and-get-next (C-o)</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-History">Commands For History</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-overwrite_002dmode-_0028_0029"><code>overwrite-mode ()</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Commands-For-Text">Commands For Text</a></td></tr>
 <tr><td colspan="4"> <hr></td></tr>
 <tr><th id="Function-Index_fn_letter-P">P</th><td></td><td></td></tr>
@@ -15431,6 +15664,8 @@ Previous: <a href="#Function-Index" accesskey="p" rel="prev">Function Index</a>,
 <tr><td></td><td valign="top"><a href="#index-commands_002c-shell">commands, shell</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Shell-Commands">Shell Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-commands_002c-simple">commands, simple</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Simple-Commands">Simple Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-comments_002c-shell">comments, shell</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Comments">Comments</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Compatibility-Level">Compatibility Level</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Shell-Compatibility-Mode">Shell Compatibility Mode</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Compatibility-Mode">Compatibility Mode</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Shell-Compatibility-Mode">Shell Compatibility Mode</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-completion-builtins">completion builtins</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Programmable-Completion-Builtins">Programmable Completion Builtins</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-configuration">configuration</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Basic-Installation">Basic Installation</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-control-operator">control operator</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Definitions">Definitions</a></td></tr>
@@ -15529,6 +15764,7 @@ Previous: <a href="#Function-Index" accesskey="p" rel="prev">Function Index</a>,
 <tr><td></td><td valign="top"><a href="#index-Readline_002c-how-to-use">Readline, how to use</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Job-Control-Variables">Job Control Variables</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-redirection">redirection</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Redirections">Redirections</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-reserved-word">reserved word</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Definitions">Definitions</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-reserved-words">reserved words</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Reserved-Words">Reserved Words</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-restricted-shell">restricted shell</a>:</td><td>&nbsp;</td><td valign="top"><a href="#The-Restricted-Shell">The Restricted Shell</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-return-status">return status</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Definitions">Definitions</a></td></tr>
 <tr><td colspan="4"> <hr></td></tr>
