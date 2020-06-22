@@ -1342,6 +1342,29 @@ This differs from @code{clear_history} because it frees private data
 Readline saves in the history list.
 @end deftypefun
 
+@deftypefun {void} rl_activate_mark (void)
+Enable an @emph{active} mark.
+When this is enabled, the text between point and mark (the @var{region}) is
+displayed in the terminal's standout mode (a @var{face}).
+This is called by various readline functions that set the mark and insert
+text, and is available for applications to call.
+@end deftypefun
+
+@deftypefun {void} rl_deactivate_mark (void)
+Turn off the active mark.
+@end deftypefun
+
+@deftypefun {void} rl_keep_mark_active (void)
+Indicate that the mark should remain active when the current readline function
+completes and after redisplay occurs.
+In most cases, the mark remains active for only the duration of a single
+bindable readline function.
+@end deftypefun
+
+@deftypefun {int} rl_mark_active_p (void)
+Return a non-zero value if the mark is currently active; zero otherwise.
+@end deftypefun
+
 @node Alternate Interface
 @subsection Alternate Interface
 

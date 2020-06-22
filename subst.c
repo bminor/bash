@@ -301,6 +301,7 @@ static char *parameter_list_transform PARAMS((int, int, int));
 static char *array_transform PARAMS((int, SHELL_VAR *, int, int));
 #endif
 static char *parameter_brace_transform PARAMS((char *, char *, int, char *, int, int, int, int));
+static int valid_parameter_transform PARAMS((char *));
 
 static char *process_substitute PARAMS((char *, int));
 
@@ -7848,6 +7849,31 @@ array_transform (xc, var, starsub, quoted)
 }
 #endif /* ARRAY_VARS */
 
+static int
+valid_parameter_transform (xform)
+     char *xform;
+{
+  if (xform[1])
+    return 0;
+
+  /* check for valid values of xform[0] */
+  switch (xform[0])
+    {
+    case 'a':		/* expand to a string with just attributes */
+    case 'A':		/* expand as an assignment statement with attributes */
+    case 'K':		/* expand assoc array to list of key/value pairs */
+    case 'E':		/* expand like $'...' */
+    case 'P':		/* expand like prompt string */
+    case 'Q':		/* quote reusably */
+    case 'U':		/* transform to uppercase */
+    case 'u':		/* tranform by capitalizing */
+    case 'L':		/* transform to lowercase */
+      return 1;
+    default:
+      return 0;
+    }
+}
+      
 static char *
 parameter_brace_transform (varname, value, ind, xform, rtype, quoted, pflags, flags)
      char *varname, *value;
@@ -7873,20 +7899,8 @@ parameter_brace_transform (varname, value, ind, xform, rtype, quoted, pflags, fl
       return ((char *)NULL);
     }
 
-  /* check for valid values of xc */
-  switch (xc)
+  if (valid_parameter_transform (xform) == 0)
     {
-    case 'a':		/* expand to a string with just attributes */
-    case 'A':		/* expand as an assignment statement with attributes */
-    case 'K':		/* expand assoc array to list of key/value pairs */
-    case 'E':		/* expand like $'...' */
-    case 'P':		/* expand like prompt string */
-    case 'Q':		/* quote reusably */
-    case 'U':		/* transform to uppercase */
-    case 'u':		/* tranform by capitalizing */
-    case 'L':		/* transform to lowercase */
-      break;
-    default:
       this_command_name = oname;
       return &expand_param_error;
     }

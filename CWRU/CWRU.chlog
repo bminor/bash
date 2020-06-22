@@ -8589,3 +8589,12 @@ pathexp.c
 po/Makefile.in.in
 	- MKINSTALLDIRS: deprecated, no longer in AM_INTL_SUBDIR, so we have
 	  to create the variable manually
+
+lib/readline/doc/rltech.texi
+	- add descriptions of the active mark functions that are available to
+	  applications. I guess they will remain public
+
+subst.c
+	- valid_parameter_transform: new function, reject transformations
+	  longer than a single character or invalid transformation operators
+	- parameter_brace_transform: call valid_parameter_transform

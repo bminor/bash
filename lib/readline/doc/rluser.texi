@@ -1254,10 +1254,12 @@ being entered.
 @item reverse-search-history (C-r)
 Search backward starting at the current line and moving `up' through
 the history as necessary.  This is an incremental search.
+This command sets the region to the matched text and activates the mark.
 
 @item forward-search-history (C-s)
 Search forward starting at the current line and moving `down' through
 the history as necessary.  This is an incremental search.
+This command sets the region to the matched text and activates the mark.
 
 @item non-incremental-reverse-search-history (M-p)
 Search backward starting at the current line and moving `up'
@@ -1376,6 +1378,11 @@ It allows Readline to insert the pasted text as a single unit without treating
 each character as if it had been read from the keyboard.  The characters
 are inserted as if each one was bound to @code{self-insert} instead of
 executing any editing commands.
+
+Bracketed paste sets the region (the characters between point and the mark)
+to the inserted text. It uses the concept of an @emph{active mark}: when the
+mark is active, Readline redisplay uses the terminal's standout mode to
+denote the region.
 
 @item transpose-chars (C-t)
 Drag the character before the cursor forward over
