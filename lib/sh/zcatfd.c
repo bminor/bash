@@ -34,6 +34,10 @@
 extern int errno;
 #endif
 
+#ifndef ZBUFSIZ
+#  define ZBUFSIZ 4096
+#endif
+
 extern ssize_t zread PARAMS((int, char *, size_t));
 extern int zwrite PARAMS((int, char *, ssize_t));
 
@@ -46,7 +50,7 @@ zcatfd (fd, ofd, fn)
 {
   ssize_t nr;
   int rval;
-  char lbuf[1024];
+  char lbuf[ZBUFSIZ];
 
   rval = 0;
   while (1)
