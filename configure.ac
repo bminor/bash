@@ -21,7 +21,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_REVISION([for Bash 5.1, version 5.020])dnl
+AC_REVISION([for Bash 5.1, version 5.021])dnl
 
 define(bashvers, 5.1)
 define(relstatus, alpha)
@@ -77,6 +77,9 @@ m68k-sysv)	opt_bash_malloc=no ;;	# fixes file descriptor leak in closedir
 sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
 *-aix*)		opt_bash_malloc=no ;;	# AIX machines
 *-cygwin*)	opt_bash_malloc=no ;;	# Cygnus's CYGWIN environment
+# These lack a working sbrk(2)
+aarch64-freebsd*)	opt_bash_malloc=no ;;
+riscv*-freebsd*)	opt_bash_malloc=no ;;
 # Mach-derived systems have a ton of extra malloc functions and lack sbrk(2)
 *-nextstep*)	opt_bash_malloc=no ;;	# NeXT machines running NeXTstep
 *-openstep*)	opt_bash_malloc=no ;;	# i386/Sparc/HP machines running Openstep

@@ -2230,7 +2230,12 @@ AC_DEFINE_UNQUOTED([WEXITSTATUS_OFFSET], [$bash_cv_wexitstatus_offset], [Offset 
 
 AC_DEFUN([BASH_FUNC_SBRK],
 [
-  AC_CHECK_FUNCS_ONCE([sbrk])
+  AC_MSG_CHECKING([for sbrk])
+  AC_CACHE_VAL(ac_cv_func_sbrk,
+  [AC_TRY_LINK([#include <unistd.h>],
+  [ void *x = sbrk (4096); ],
+  ac_cv_func_sbrk=yes, ac_cv_func_sbrk=no)])
+  AC_MSG_RESULT($ac_cv_func_sbrk)
   if test X$ac_cv_func_sbrk = Xyes; then
     AC_CACHE_CHECK([for working sbrk], [bash_cv_func_sbrk],
       [AC_TRY_RUN([
@@ -2253,8 +2258,8 @@ main(int c, char **v)
       ac_cv_func_sbrk=no
     fi
   fi
-  if test $ac_cv_func_sbrk = no; then
-    AC_DEFINE(HAVE_SBRK, 0,
+  if test $ac_cv_func_sbrk = yes; then
+    AC_DEFINE(HAVE_SBRK, 1,
       [Define if you have a working sbrk function.])
   fi
 ])

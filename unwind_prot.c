@@ -349,6 +349,8 @@ unwind_protect_mem_internal (var, psize)
 
   size = *(int *) psize;
   allocated = size + offsetof (UNWIND_ELT, sv.v.desired_setting[0]);
+  if (allocated < sizeof (UNWIND_ELT))
+    allocated = sizeof (UNWIND_ELT);
   elt = (UNWIND_ELT *)xmalloc (allocated);
   elt->head.next = unwind_protect_list;
   elt->head.cleanup = (Function *) restore_variable;

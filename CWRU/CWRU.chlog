@@ -8610,3 +8610,22 @@ lib/sh/zcatfd.c
 
 lib/sh/zmapfd.c
 	- zmapfd: lbuf: bump size up to ZBUFSIZ (default 4096)
+
+				   6/29
+				   ----
+aclocal.m4
+	- BASH_FUNC_SBRK: changes for cross-compiling on FreeBSD variants,
+	  from Jessica Clarke <jrtc27@jrtc27.com>
+
+xmalloc.c
+	- HAVE_SBRK: use #if instead of #ifdef so we only use it if we think
+	  it works
+
+examples/loadables/finfo.c
+	- st_dev,st_nlink: cast to unsigned long, report from Jessica Clarke
+	  <jrtc27@jrtc27.com> 
+
+unwind_prot.c
+	- unwind_protect_mem_internal: make sure we allocate at least as many
+	  bytes for an entire UNWIND_ELT. Fix from Jessica Clarke
+	  <jrtc27@jrtc27.com>
