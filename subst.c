@@ -8764,7 +8764,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
   else
 #if defined (CASEMOD_EXPANSIONS)
     /* To enable case-toggling expansions using the `~' operator character
-       change the 1 to 0. */
+       define CASEMOD_CAPCASE in config-top.h */
 #  if defined (CASEMOD_CAPCASE)
     name = string_extract (string, &t_index, "#%^,~:-=?+/@}", SX_VARNAME);
 #  else

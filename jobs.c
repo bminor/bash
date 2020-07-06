@@ -319,11 +319,17 @@ static int queue_sigchld;
 
 #define QUEUE_SIGCHLD(os)	(os) = sigchld, queue_sigchld++
 
+/* We set queue_sigchld around the call to waitchld to protect data structures
+   from a SIGCHLD arriving while waitchld is executing. */
 #define UNQUEUE_SIGCHLD(os) \
 	do { \
 	  queue_sigchld--; \
 	  if (queue_sigchld == 0 && os != sigchld) \
-	    waitchld (-1, 0); \
+	    { \
+	      queue_sigchld = 1; \
+	      waitchld (-1, 0); \
+	      queue_sigchld = 0; \
+	    } \
 	} while (0)
 
 static SigHandler *old_tstp, *old_ttou, *old_ttin;
@@ -2022,9 +2028,8 @@ print_pipeline (p, job_index, format, stream)
 	     reported asynchronously, so just add the CR if the shell is
 	     currently interactive and asynchronous notification is enabled. */
 	  if (asynchronous_notification && interactive)
-	    fprintf (stream, "\r\n");
-	  else
-	    fprintf (stream, "\n");
+	    putc ('\r', stream);
+	  fprintf (stream, "\n");
 	}
 
       if (p == last)

@@ -875,7 +875,7 @@ _rl_vi_done_inserting (void)
 {
   if (_rl_vi_doing_insert)
     {
-      /* The `C', `s', and `S' commands set this. */
+      /* The `c', `s', and `S' commands set this. */
       rl_end_undo_group ();
       /* Now, the text between rl_undo_list->next->start and
 	 rl_undo_list->next->end is what was inserted while in insert
@@ -887,7 +887,6 @@ _rl_vi_done_inserting (void)
 	_rl_vi_save_replace ();		/* Half the battle */
       else
 	_rl_vi_save_insert (rl_undo_list->next);
-      vi_continued_command = 1;
     }
   else
     {
@@ -899,10 +898,10 @@ _rl_vi_done_inserting (void)
       /* XXX - Other keys probably need to be checked. */
       else if (_rl_vi_last_key_before_insert == 'C')
 	rl_end_undo_group ();
-      while (_rl_undo_group_level > 0)
-	rl_end_undo_group ();
-      vi_continued_command = 0;
     }
+
+  while (_rl_undo_group_level > 0)
+    rl_end_undo_group ();
 }
 
 int
@@ -1210,6 +1209,10 @@ _rl_vi_domove_motion_cleanup (int c, _rl_vimotion_cxt *m)
   /* No change in position means the command failed. */
   if (rl_mark == rl_point)
     {
+      /* 'c' and 'C' enter insert mode after the delete even if the motion
+	 didn't delete anything, as long as the motion command is valid. */
+      if (_rl_to_upper (m->key) == 'C' && _rl_vi_motion_command (c))
+	return (vidomove_dispatch (m));
       RL_UNSETSTATE (RL_STATE_VIMOTION);
       return (-1);
     }

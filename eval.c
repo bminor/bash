@@ -237,8 +237,11 @@ static sighandler
 alrm_catcher(i)
      int i;
 {
-  printf (_("\007timed out waiting for input: auto-logout\n"));
-  fflush (stdout);
+  char *msg;
+
+  msg = _("\007timed out waiting for input: auto-logout\n");
+  write (1, msg, strlen (msg));
+
   bash_logout ();	/* run ~/.bash_logout if this is a login shell */
   jump_to_top_level (EXITPROG);
   SIGRETURN (0);

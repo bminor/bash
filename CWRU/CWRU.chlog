@@ -8629,3 +8629,36 @@ unwind_prot.c
 	- unwind_protect_mem_internal: make sure we allocate at least as many
 	  bytes for an entire UNWIND_ELT. Fix from Jessica Clarke
 	  <jrtc27@jrtc27.com>
+
+				    7/1
+				    ---
+eval.c
+	- alrm_catcher: use write(2) instead of fprintf to print the
+	  auto-logout message to the terminal
+
+jobs.c
+	- UNQUEUE_SIGCHLD: set queue_sigchld to 1 around call to waitchld(),
+	  since it is not being called from a signal handler and so SIGCHLD is
+	  not blocked. Fixes report by Godmar Back <godmar@gmail.com>
+
+				    7/2
+				    ---
+doc/{bash.1,bashref.texi}
+	- read: clarify that without any name arguments, the line assigned to
+	  REPLY is not modified. From a question by M. Nejat AYDIN
+	  <mnaydin@yahoo.com> with input from Eli Schwartz
+	  <eschwartz@archlinux.org>
+
+				    7/5
+				    ---
+lib/readline/vi_mode.c
+	- _rl_vi_done_inserting: make sure to close out all undo groups when
+	  the insert performed by a `c' command finishes. Report and fix from
+	  David Fries <David@Fries.net>
+
+				    7/6
+				    ---
+lib/readline/vi_mode.c
+	- _rl_vi_domove_motion_cleanup: the `c' and `C' commands should enter
+	  insert mode even if the motion command doesn't delete any text. From
+	  a report by David Fries <David@Fries.net>
