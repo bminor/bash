@@ -875,8 +875,8 @@ _rl_vi_done_inserting (void)
 {
   if (_rl_vi_doing_insert)
     {
-      /* The `c', `s', and `S' commands set this. */
-      rl_end_undo_group ();
+      /* The `c', `s', `S', and `R' commands set this. */
+      rl_end_undo_group ();	/* for the group in rl_vi_start_inserting */
       /* Now, the text between rl_undo_list->next->start and
 	 rl_undo_list->next->end is what was inserted while in insert
 	 mode.  It gets copied to VI_INSERT_BUFFER because it depends
@@ -887,6 +887,9 @@ _rl_vi_done_inserting (void)
 	_rl_vi_save_replace ();		/* Half the battle */
       else
 	_rl_vi_save_insert (rl_undo_list->next);
+      /* sanity check, should always be >= 1 here */
+      if (_rl_undo_group_level > 0)
+	rl_end_undo_group ();	/* for the group in the command (change or replace) */
     }
   else
     {
@@ -900,6 +903,8 @@ _rl_vi_done_inserting (void)
 	rl_end_undo_group ();
     }
 
+  /* Sanity check, make sure all the undo groups are closed before we leave
+     insert mode */
   while (_rl_undo_group_level > 0)
     rl_end_undo_group ();
 }
@@ -1385,7 +1390,11 @@ rl_vi_delete_to (int count, int key)
 {
   int c, r;
 
-  _rl_vimvcxt = _rl_mvcxt_alloc (VIM_DELETE, key);
+  if (_rl_vimvcxt)
+    _rl_mvcxt_init (_rl_vimvcxt, VIM_DELETE, key);
+  else
+    _rl_vimvcxt = _rl_mvcxt_alloc (VIM_DELETE, key);
+
   _rl_vimvcxt->start = rl_point;
 
   rl_mark = rl_point;
@@ -1473,7 +1482,10 @@ rl_vi_change_to (int count, int key)
 {
   int c, r;
 
-  _rl_vimvcxt = _rl_mvcxt_alloc (VIM_CHANGE, key);
+  if (_rl_vimvcxt)
+    _rl_mvcxt_init (_rl_vimvcxt, VIM_CHANGE, key);
+  else
+    _rl_vimvcxt = _rl_mvcxt_alloc (VIM_CHANGE, key);
   _rl_vimvcxt->start = rl_point;
 
   rl_mark = rl_point;
@@ -1542,7 +1554,10 @@ rl_vi_yank_to (int count, int key)
 {
   int c, r;
 
-  _rl_vimvcxt = _rl_mvcxt_alloc (VIM_YANK, key);
+  if (_rl_vimvcxt)
+    _rl_mvcxt_init (_rl_vimvcxt, VIM_YANK, key);
+  else
+    _rl_vimvcxt = _rl_mvcxt_alloc (VIM_YANK, key);
   _rl_vimvcxt->start = rl_point;
 
   rl_mark = rl_point;
@@ -2250,7 +2265,7 @@ rl_vi_replace (int count, int key)
 
   rl_vi_start_inserting (key, 1, rl_arg_sign);
 
-  _rl_vi_last_key_before_insert = key;
+  _rl_vi_last_key_before_insert = 'R';	/* in case someone rebinds it */
   _rl_keymap = vi_replace_map;
 
   if (_rl_enable_bracketed_paste)

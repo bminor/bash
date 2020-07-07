@@ -8653,12 +8653,26 @@ doc/{bash.1,bashref.texi}
 				    ---
 lib/readline/vi_mode.c
 	- _rl_vi_done_inserting: make sure to close out all undo groups when
-	  the insert performed by a `c' command finishes. Report and fix from
-	  David Fries <David@Fries.net>
+	  leaving insert mode, so we don't have anything dangling.
+	  Report and fix from David Fries <David@Fries.net>
 
 				    7/6
 				    ---
 lib/readline/vi_mode.c
 	- _rl_vi_domove_motion_cleanup: the `c' and `C' commands should enter
-	  insert mode even if the motion command doesn't delete any text. From
-	  a report by David Fries <David@Fries.net>
+	  insert mode even if the motion command doesn't delete any text.
+	  From a report by David Fries <David@Fries.net>
+	- _rl_vi_done_inserting: add a missing rl_end_undo_group when
+	  _rl_vi_doing_insert is set: there should be one begun by
+	  rl_vi_start_inserting and one begun by the command (change or replace).
+	  From a report by David Fries <David@Fries.net>
+	- rl_vi_replace: set _rl_vi_last_key_before_insert to 'R' explicitly,
+	  since other code checks that and we want to allow users to rebind
+	  this function
+
+				    7/7
+				    ---
+lib/readline/vi_mode.c
+	- rl_vi_{delete,change,yank}_to: if we have a non-null _rl_vimvcxt,
+	  just reinitialize it so we don't have to allocate a new one. This is
+	  a change primarily for callback mode, and fixes a memory leak
