@@ -319,7 +319,7 @@ extern char *sbrk ();
 #endif /* !HAVE_DECL_SBRK */
 
 #ifdef SHELL
-extern int interrupt_immediately, running_trap;
+extern int running_trap;
 extern int signal_is_trapped PARAMS((int));
 #endif
 
@@ -620,9 +620,9 @@ morecore (nu)
   blocked_sigs = 0;
 #ifdef SHELL
 #  if defined (SIGCHLD)
-  if (interrupt_immediately || running_trap || signal_is_trapped (SIGINT) || signal_is_trapped (SIGCHLD))
+  if (running_trap || signal_is_trapped (SIGINT) || signal_is_trapped (SIGCHLD))
 #  else
-  if (interrupt_immediately || running_trap || signal_is_trapped (SIGINT))
+  if (running_trap || signal_is_trapped (SIGINT))
 #  endif
 #endif
     {

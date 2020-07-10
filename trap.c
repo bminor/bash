@@ -499,12 +499,9 @@ trap_handler (sig)
       /* Set the event hook so readline will call it after the signal handlers
 	 finish executing, so if this interrupted character input we can get
 	 quick response. */
-      if (RL_ISSTATE (RL_STATE_SIGHANDLER) && interrupt_immediately == 0)
+      if (RL_ISSTATE (RL_STATE_SIGHANDLER))
         bashline_set_event_hook ();
 #endif
-
-      if (interrupt_immediately)
-	run_pending_traps ();
 
       errno = oerrno;
     }

@@ -210,6 +210,7 @@ extern int should_suppress_fork PARAMS((COMMAND *));
 extern int can_optimize_connection PARAMS((COMMAND *));
 extern void optimize_fork PARAMS((COMMAND *));
 extern void optimize_subshell_command PARAMS((COMMAND *));
+extern void optimize_shell_function PARAMS((COMMAND *));
 
 /* Functions from evalfile.c */
 extern int maybe_execute_file PARAMS((const char *, int));

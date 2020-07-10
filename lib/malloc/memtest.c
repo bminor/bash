@@ -33,8 +33,6 @@
 
 #include "xmalloc.h"
 
-int interrupt_immediately = 0;
-
 static char	xp[64];
 
 main(int c, char **v)

@@ -219,17 +219,19 @@ _rl_handle_signal (int sig)
 #if defined (SIGTSTP)
     case SIGTSTP:
     case SIGTTIN:
+    case SIGTTOU:
 #  if defined (HAVE_POSIX_SIGNALS)
       /* Block SIGTTOU so we can restore the terminal settings to something
 	 sane without stopping on SIGTTOU if we have been placed into the
 	 background.  Even trying to get the current terminal pgrp with
-	 tcgetpgrp() will generate SIGTTOU, so we don't bother.  Don't bother
-	 doing this if we've been stopped on SIGTTOU; it's already too late. */
+	 tcgetpgrp() will generate SIGTTOU, so we don't bother.  We still do
+	 this even if we've been stopped on SIGTTOU, since we handle signals
+	 when we have returned from the signal handler and the signal is no
+	 longer blocked. */
       sigemptyset (&set);
       sigaddset (&set, SIGTTOU);
       sigprocmask (SIG_BLOCK, &set, (sigset_t *)NULL);
 #  endif
-    case SIGTTOU:
 #endif /* SIGTSTP */
     case SIGTERM:
 #if defined (SIGHUP)

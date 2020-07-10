@@ -1644,9 +1644,9 @@ rewind_input_string ()
 
 /* These two functions used to test the value of the HAVE_RESTARTABLE_SYSCALLS
    define, and just use getc/ungetc if it was defined, but since bash
-   installs its signal handlers without the SA_RESTART flag, some signals
-   (like SIGCHLD, SIGWINCH, etc.) received during a read(2) will not cause
-   the read to be restarted.  We need to restart it ourselves. */
+   installs most of its signal handlers without the SA_RESTART flag, some
+   signals received during a read(2) will not cause the read to be restarted.
+   We will need to restart it ourselves. */
 
 static int
 yy_stream_get ()

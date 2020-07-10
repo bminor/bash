@@ -526,7 +526,6 @@ termsig_sighandler (sig)
 
   terminating_signal = sig;
 
-  /* XXX - should this also trigger when interrupt_immediately is set? */
   if (terminate_immediately)
     {
 #if defined (HISTORY)
@@ -669,7 +668,8 @@ sigint_sighandler (sig)
       wait_signal_received = sig;
       SIGRETURN (0);
     }
-      
+
+  /* This is no longer used, but this code block remains as a reminder. */
   if (interrupt_immediately)
     {
       interrupt_immediately = 0;

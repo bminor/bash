@@ -2758,8 +2758,7 @@ wait_sigint_handler (sig)
 {
   SigHandler *sigint_handler;
 
-  if (interrupt_immediately ||
-      (this_shell_builtin && this_shell_builtin == wait_builtin))
+  if (this_shell_builtin && this_shell_builtin == wait_builtin)
     {
       set_exit_status (128+SIGINT);
       restore_sigint_handler ();
@@ -2771,19 +2770,11 @@ wait_sigint_handler (sig)
 	{
 	  trap_handler (SIGINT);	/* set pending_traps[SIGINT] */
 	  wait_signal_received = SIGINT;
-	  if (interrupt_immediately && wait_intr_flag)
-	    {
-	      interrupt_immediately = 0;
-	      sh_longjmp (wait_intr_buf, 1);
-	    }
+	  if (wait_intr_flag)
+	    sh_longjmp (wait_intr_buf, 1);
 	  else
 	    /* Let CHECK_WAIT_INTR handle it in wait_for/waitchld */
 	    SIGRETURN (0);
-	}
-      else if (interrupt_immediately)
-	{
-	  ADDINTERRUPT;
-	  QUIT;
 	}
       else /* wait_builtin but signal not trapped, treat as interrupt */
 	kill (getpid (), SIGINT);
@@ -3947,7 +3938,6 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
     {
       if (posixly_correct && this_shell_builtin && this_shell_builtin == wait_builtin)
 	{
-	  interrupt_immediately = 0;
 	  /* This was trap_handler (SIGCHLD) but that can lose traps if
 	     children_exited > 1 */
 	  queue_sigchld_trap (children_exited);
@@ -3978,7 +3968,7 @@ itrace("waitchld: waitpid returns %d block = %d children_exited = %d", pid, bloc
      that has just changed state.  If we notify asynchronously, and the job
      that this process belongs to is no longer running, then notify the user
      of that fact now. */
-  if (asynchronous_notification && interactive)
+  if (asynchronous_notification && interactive && executing_builtin == 0)
     notify_of_job_status ();
 
   return (children_exited);
@@ -4211,7 +4201,6 @@ run_sigchld_trap (nchild)
   unwind_protect_int (last_command_exit_value);
   unwind_protect_int (last_command_exit_signal);
   unwind_protect_var (last_made_pid);
-  unwind_protect_int (interrupt_immediately);
   unwind_protect_int (jobs_list_frozen);
   unwind_protect_pointer (the_pipeline);
   unwind_protect_pointer (subst_assign_varlist);

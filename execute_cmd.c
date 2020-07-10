@@ -4831,6 +4831,11 @@ execute_function (var, words, flags, fds_to_close, async, subshell)
   if (tc && (flags & CMD_IGNORE_RETURN))
     tc->flags |= CMD_IGNORE_RETURN;
 
+  /* A limited attempt at optimization: shell functions at the end of command
+     substitutions that are already marked NO_FORK. */
+  if (tc && (flags & CMD_NO_FORK) && (subshell_environment & SUBSHELL_COMSUB))
+    optimize_shell_function (tc);
+
   gs = sh_getopt_save_istate ();
   if (subshell == 0)
     {

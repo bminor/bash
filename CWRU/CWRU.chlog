@@ -8676,3 +8676,29 @@ lib/readline/vi_mode.c
 	- rl_vi_{delete,change,yank}_to: if we have a non-null _rl_vimvcxt,
 	  just reinitialize it so we don't have to allocate a new one. This is
 	  a change primarily for callback mode, and fixes a memory leak
+
+builtins/evalstring.c
+	- optimize_shell_function: try to optimize away the fork in the last
+	  command in a shell function body, under certain conditions
+
+execute_cmd.c
+	- execute_function: attempt to optimize away forks in a shell function
+	  that is already marked NO_FORK and being executed in a command
+	  substitution
+
+				    7/8
+				    ---
+{jobs,nojobs,trap,unwind_prot}.c,lib/malloc/{malloc,table}.c
+	- interrupt_immediately: remove, no longer used
+
+jobs.c
+	- waitchld: don't perform asynchronous notification if we are currently
+	  executing a builtin (executing_builtin != 0). Inspired by a report
+	  from Godmar Back <godmar@gmail.com>
+
+				    7/9
+				    ---
+lib/readline/signals.c
+	- _rl_handle_signal: block SIGTTOU while handling a SIGTTOU, since we
+	  no longer run this in a signal handling context where SIGTTOIU would
+	  be blocked
