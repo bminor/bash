@@ -5112,6 +5112,8 @@ getpattern (value, quoted, expandpat)
 				      (quoted & (Q_HERE_DOCUMENT|Q_DOUBLE_QUOTES)) ? Q_PATQUOTE : quoted,
 				      (int *)NULL, (int *)NULL)
 	     : (WORD_LIST *)0;
+  if (l)
+    word_list_remove_quoted_nulls (l);
   pat = string_list (l);
   dispose_words (l);
   if (pat)
