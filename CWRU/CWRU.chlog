@@ -8429,10 +8429,10 @@ lib/readline/kill.c
 	  fix for bug reported by Phi Debian <phi.debian@gmail.com>
 
 lib/readline/vi_mode.c
-	- _rl_vi_change_char: make sure _rl_vi_last_replacement gets filled in
+	- rl_vi_change_char: make sure _rl_vi_last_replacement gets filled in
 	  in the case where MB_CUR_MAX == 1. Rest of fix for bug reported by
 	  Phi Debian <phi.debian@gmail.com>
-	- rl_vi_change_char: same fix for _rl_vi_last_replacement
+	- _rl_vi_callback_change_char: same fix for _rl_vi_last_replacement
 
 				   5/29
 				   ----
@@ -8702,3 +8702,20 @@ lib/readline/signals.c
 	- _rl_handle_signal: block SIGTTOU while handling a SIGTTOU, since we
 	  no longer run this in a signal handling context where SIGTTOIU would
 	  be blocked
+
+				   7/14
+				   ----
+execute_cmd.c
+	- execute_simple_command: use new variable `cmdflags' instead of using
+	  simple_command->flags directly; initialize from simple_command->flags
+	- check_command_builtin: take a simple command list of words starting
+	  with `command' and including a command_word argument, and peel off
+	  the `command' and any instances of `-p' and `--' and return the
+	  updated list
+	- execute_simple_command: if the first word of the simple command is
+	  `command', call check_command_builtin to peel off any `command' and
+	  `-p' and `--' and go on to execute the rest of the words as a simple
+	  command. If we're in posix mode, we've got the special builtins
+	  handled before this runs. Fixes complaint about `command' in the
+	  background running an extra bash process from Dmitry Alexandrov
+	  <dag@gnui.org>

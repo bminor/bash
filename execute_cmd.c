@@ -896,6 +896,7 @@ execute_command_internal (command, asynchronous, pipe_in, pipe_out,
 	 only the failure of a simple command. We don't want to run the error
 	 trap if the command run by the `command' builtin fails; we want to
 	 defer that until the command builtin itself returns failure. */
+      /* 2020/07/14 -- this changes with how the command builtin is handled */ 
       if (was_error_trap && ignore_return == 0 && invert == 0 &&
 	    pipe_in == NO_PIPE && pipe_out == NO_PIPE &&
 	    (command->value.Simple->flags & CMD_COMMAND_BUILTIN) == 0 &&
@@ -4161,6 +4162,52 @@ fix_assignment_words (words)
       }
 }
 
+#ifndef ISOPTION
+#  define ISOPTION(s, c)  (s[0] == '-' && s[1] == c && s[2] == 0)
+#endif
+
+#define RETURN_NOT_COMMAND() \
+  do { if (typep) *typep = 0; return words; } while (0)
+
+/* Make sure we have `command [-p] command_name [args]', and handle skipping
+   over the usual `--' that ends the options.  Returns the updated WORDS with
+   the command and options stripped and sets *TYPEP to a non-zero value. If
+   any other options are supplied, or there is not a command_name, we punt
+   and return a zero value in *TYPEP without updating WORDS. */
+static WORD_LIST *
+check_command_builtin (words, typep)
+     WORD_LIST *words;
+     int *typep;
+{
+  int type;
+  WORD_LIST *w;
+
+  w = words->next;
+  type = 1;
+
+  if (w && ISOPTION (w->word->word, 'p'))	/* command -p */
+    {
+#if defined (RESTRICTED_SHELL)
+      if (restricted)
+        RETURN_NOT_COMMAND();
+#endif
+      w = w->next;
+      type = 2;
+    }
+
+  if (w && ISOPTION (w->word->word, '-'))	/* command [-p] -- */
+    w = w->next;
+  else if (w && w->word->word[0] == '-')	/* any other option */
+    RETURN_NOT_COMMAND();
+
+  if (w == 0 || w->word->word == 0)		/* must have a command_name */
+    RETURN_NOT_COMMAND();
+
+  if (typep)
+    *typep = type;
+  return w;
+}
+
 /* Return 1 if the file found by searching $PATH for PATHNAME, defaulting
    to PATHNAME, is a directory.  Used by the autocd code below. */
 static int
@@ -4188,7 +4235,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
   WORD_LIST *words, *lastword;
   char *command_line, *lastarg, *temp;
   int first_word_quoted, result, builtin_is_special, already_forked, dofork;
-  int fork_flags;
+  int fork_flags, cmdflags;
   pid_t old_last_async_pid;
   sh_builtin_func_t *builtin;
   SHELL_VAR *func;
@@ -4233,6 +4280,8 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
     return (EXECUTION_SUCCESS);
 #endif
 
+  cmdflags = simple_command->flags;
+
   first_word_quoted =
     simple_command->words ? (simple_command->words->word->flags & W_QUOTED) : 0;
 
@@ -4269,7 +4318,7 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
       if (make_child (p = savestring (the_printed_command_except_trap), fork_flags) == 0)
 	{
 	  already_forked = 1;
-	  simple_command->flags |= CMD_NO_FORK;
+	  cmdflags |= CMD_NO_FORK;
 
 	  subshell_environment = SUBSHELL_FORK;		/* XXX */
 	  if (pipe_in != NO_PIPE || pipe_out != NO_PIPE)
@@ -4318,15 +4367,15 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 
   /* If we are re-running this as the result of executing the `command'
      builtin, do not expand the command words a second time. */
-  if ((simple_command->flags & CMD_INHIBIT_EXPANSION) == 0)
+  if ((cmdflags & CMD_INHIBIT_EXPANSION) == 0)
     {
       current_fds_to_close = fds_to_close;
       fix_assignment_words (simple_command->words);
       /* Pass the ignore return flag down to command substitutions */
-      if (simple_command->flags & CMD_IGNORE_RETURN)	/* XXX */
+      if (cmdflags & CMD_IGNORE_RETURN)	/* XXX */
 	comsub_ignore_return++;
       words = expand_words (simple_command->words);
-      if (simple_command->flags & CMD_IGNORE_RETURN)
+      if (cmdflags & CMD_IGNORE_RETURN)
 	comsub_ignore_return--;
       current_fds_to_close = (struct fd_bitmap *)NULL;
     }
@@ -4356,12 +4405,16 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
 
   begin_unwind_frame ("simple-command");
 
-  if (echo_command_at_execute && (simple_command->flags & CMD_COMMAND_BUILTIN) == 0)
+  if (echo_command_at_execute && (cmdflags & CMD_COMMAND_BUILTIN) == 0)
     xtrace_print_word_list (words, 1);
 
   builtin = (sh_builtin_func_t *)NULL;
   func = (SHELL_VAR *)NULL;
-  if ((simple_command->flags & CMD_NO_FUNCTIONS) == 0)
+
+  /* This test is still here in case we want to change the command builtin
+     handler code below to recursively call execute_simple_command (after
+     modifying the simple_command struct). */
+  if ((cmdflags & CMD_NO_FUNCTIONS) == 0)
     {
       /* Posix.2 says special builtins are found before functions.  We
 	 don't set builtin_is_special anywhere other than here, because
@@ -4392,6 +4445,41 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
       jump_to_top_level (ERREXIT);
     }
   tempenv_assign_error = 0;	/* don't care about this any more */
+
+  old_command_builtin = -1;
+  if (builtin == 0 && func == 0)
+    {
+      WORD_LIST *disposer, *l;
+      int cmdtype;
+
+      builtin = find_shell_builtin (words->word->word);
+      while (builtin == command_builtin)
+	{
+	  disposer = words;
+	  cmdtype = 0;
+	  words = check_command_builtin (words, &cmdtype);
+	  if (cmdtype > 0)	/* command -p [--] words */
+	    {
+	      for (l = disposer; l->next != words; l = l->next)
+		;
+	      l->next = 0;
+	      dispose_words (disposer);
+	      cmdflags |= CMD_COMMAND_BUILTIN | CMD_NO_FUNCTIONS;
+	      if (cmdtype == 2)
+		cmdflags |= CMD_STDPATH;
+	      builtin = find_shell_builtin (words->word->word);
+	    }
+	  else
+	    break;
+	}
+      if (cmdflags & CMD_COMMAND_BUILTIN)
+	{
+	  old_command_builtin = executing_command_builtin;
+	  unwind_protect_int (executing_command_builtin);
+	  executing_command_builtin |= 1;
+	}        
+      builtin = 0;
+    }
 
   add_unwind_protect (dispose_words, words);
   QUIT;
@@ -4469,9 +4557,12 @@ run_builtin:
       if (builtin)
         {
 	  old_builtin = executing_builtin;
-	  old_command_builtin = executing_command_builtin;
 	  unwind_protect_int (executing_builtin);	/* modified in execute_builtin */
-	  unwind_protect_int (executing_command_builtin);	/* ditto */
+	  if (old_command_builtin == -1)	/* sentinel, can be set above */
+	    {
+	      old_command_builtin = executing_command_builtin;
+	      unwind_protect_int (executing_command_builtin);	/* ditto and set above */
+	    }
         }
       if (already_forked)
 	{
@@ -4484,7 +4575,7 @@ run_builtin:
 
 	  if (async)
 	    {
-	      if ((simple_command->flags & CMD_STDIN_REDIR) &&
+	      if ((cmdflags & CMD_STDIN_REDIR) &&
 		    pipe_in == NO_PIPE &&
 		    (stdin_redirects (simple_command->redirects) == 0))
 		async_redirect_stdin ();
@@ -4496,14 +4587,14 @@ run_builtin:
 	  execute_subshell_builtin_or_function
 	    (words, simple_command->redirects, builtin, func,
 	     pipe_in, pipe_out, async, fds_to_close,
-	     simple_command->flags);
+	     cmdflags);
 	  subshell_level--;
 	}
       else
 	{
 	  result = execute_builtin_or_function
 	    (words, builtin, func, simple_command->redirects, fds_to_close,
-	     simple_command->flags);
+	     cmdflags);
 	  if (builtin)
 	    {
 	      if (result > EX_SHERRBASE)
@@ -4569,12 +4660,12 @@ execute_from_filesystem:
   /* The old code did not test already_forked and only did this if
      subshell_environment&SUBSHELL_COMSUB != 0 (comsubs and procsubs). Other
      uses of the no-fork optimization left FIFOs in $TMPDIR */
-  if (already_forked == 0 && (simple_command->flags & CMD_NO_FORK) && fifos_pending() > 0)
-    simple_command->flags &= ~CMD_NO_FORK;
+  if (already_forked == 0 && (cmdflags & CMD_NO_FORK) && fifos_pending() > 0)
+    cmdflags &= ~CMD_NO_FORK;
 #endif
   result = execute_disk_command (words, simple_command->redirects, command_line,
 			pipe_in, pipe_out, async, fds_to_close,
-			simple_command->flags);
+			cmdflags);
 
  return_result:
   bind_lastarg (lastarg);
@@ -4637,7 +4728,7 @@ execute_builtin (builtin, words, flags, subshell)
      the ERR trap, then restore them when the command completes.  This is
      also a problem (as below) for the command and source/. builtins. */
   if (subshell == 0 && (flags & CMD_IGNORE_RETURN) &&
-	(builtin == eval_builtin || builtin == command_builtin || builtin == source_builtin))
+	(builtin == eval_builtin || (flags & CMD_COMMAND_BUILTIN) || builtin == source_builtin))
     {
       begin_unwind_frame ("eval_builtin");
       unwind_protect_int (exit_immediately_on_error);
