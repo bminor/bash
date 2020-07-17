@@ -4446,6 +4446,8 @@ execute_simple_command (simple_command, pipe_in, pipe_out, async, fds_to_close)
     }
   tempenv_assign_error = 0;	/* don't care about this any more */
 
+  /* This is where we handle the command builtin as a pseudo-reserved word
+     prefix. This allows us to optimize away forks if we can. */
   old_command_builtin = -1;
   if (builtin == 0 && func == 0)
     {

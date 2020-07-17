@@ -493,9 +493,9 @@ replaced with an ellipsis when displaying possible completions.
 @vindex completion-query-items
 The number of possible completions that determines when the user is
 asked whether the list of possibilities should be displayed.
-If the number of possible completions is greater than this value,
-Readline will ask the user whether or not he wishes to view
-them; otherwise, they are simply listed.
+If the number of possible completions is greater than or equal to this value,
+Readline will ask whether or not the user wishes to view them;
+otherwise, they are simply listed.
 This variable must be set to an integer value greater than or equal to 0.
 A negative value means Readline should never ask.
 The default limit is @code{100}.
@@ -1115,8 +1115,8 @@ set convert-meta off
 # rather than as meta-prefixed characters
 set output-meta on
 
-# if there are more than 150 possible completions for
-# a word, ask the user if he wants to see all of them
+# if there are 150 or more possible completions for a word,
+# ask whether or not the user wants to see all of them
 set completion-query-items 150
 
 # For FTP
