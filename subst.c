@@ -10146,20 +10146,16 @@ add_string:
 		goto add_character;
 	    }
 	  /* If we're not in posix mode or forcing assignment-statement tilde
-	     expansion, note where the `=' appears in the word and prepare to
-	     do tilde expansion following the first `='. */
+	     expansion, note where the first `=' appears in the word and prepare
+	     to do tilde expansion following the first `='. We have to keep
+	     track of the first `=' (using assignoff) to avoid being confused
+	     by an `=' in the rhs of the assignment statement. */
 	  if ((word->flags & W_ASSIGNMENT) &&
 	      (posixly_correct == 0 || (word->flags & W_TILDEEXP)) &&
 	      assignoff == -1 && sindex > 0)
 	    assignoff = sindex;
 	  if (sindex == assignoff && string[sindex+1] == '~')	/* XXX */
 	    word->flags |= W_ITILDE;
-#if 0
-	  else if ((word->flags & W_ASSIGNMENT) &&
-		   (posixly_correct == 0 || (word->flags & W_TILDEEXP)) &&
-		   string[sindex+1] == '~')
-	    word->flags |= W_ITILDE;
-#endif
 
 	  if (word->flags & W_ASSIGNARG)
 	    word->flags |= W_ASSIGNRHS;		/* affects $@ */
@@ -10181,7 +10177,8 @@ add_string:
 		goto add_character;
 	    }
 
-	  if ((word->flags & (W_ASSIGNMENT|W_ASSIGNRHS|W_TILDEEXP)) &&
+	  if ((word->flags & (W_ASSIGNMENT|W_ASSIGNRHS)) &&
+	      (posixly_correct == 0 || (word->flags & W_TILDEEXP)) &&
 	      string[sindex+1] == '~')
 	    word->flags |= W_ITILDE;
 

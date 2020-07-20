@@ -8726,3 +8726,20 @@ doc/bash.1
 lib/readline/doc/{rltech,hstech,rluser}.texi
 lib/readline/doc/{readline,history}.3
 	- a few small tweaks to make the language gender-neutral
+
+				   7/18
+				   ----
+subst.c
+	- expand_word_internal: case `:' make sure the shell is either not in
+	  posix mode or W_TILDEEXP is set before turning on W_ITILDE. The old
+	  code would turn it on unconditionally if the W_ASSIGNMENT flag was
+	  set. Fixes bug reported by OÄuz <oguzismailuysal@gmail.com>
+
+				   7/20
+				   ----
+builtins/complete.def
+	- replace macros used to print compspec actions, options, and other
+	  info with a small set of functions that traverse the structs used
+	  to hold that information and print everything instead of eumerating
+	  each option and action separately. From a patch submitted by
+	  Martin Kealey <martin@kurahaupo.gen.nz>
