@@ -364,11 +364,7 @@ reset_shell_flags ()
 #endif
 
 #if defined (BANG_HISTORY)
-#  if defined (STRICT_POSIX)
-  history_expansion = 0;
-#  else
-  history_expansion = 1;
-#  endif /* STRICT_POSIX */
+  histexp_flag = 0;
 #endif
 
 #if defined (BRACE_EXPANSION)

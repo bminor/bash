@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.1, 5 June 2020).
+the Bash shell (version 5.1, 2 July 2020).
 
-This is Edition 5.1, last updated 5 June 2020,
+This is Edition 5.1, last updated 2 July 2020,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.1.
 
@@ -275,10 +275,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.1, 5 June 2020).
+the Bash shell (version 5.1, 2 July 2020).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.1, last updated 5 June 2020,
+<p>This is Edition 5.1, last updated 2 July 2020,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.1.
 </p>
@@ -3229,7 +3229,7 @@ by {<var>varname</var>}, the value of <var>varname</var> defines the file
 descriptor to close.
 If {<var>varname</var>} is supplied, the redirection persists beyond
 the scope of the command, allowing the shell programmer to manage
-the file descriptor himself.
+the file descriptor&rsquo;s lifetime manually.
 </p>
 <p>In the following descriptions, if the file descriptor number is
 omitted, and the first character of the redirection operator is
@@ -4322,7 +4322,7 @@ and not during the execution of a script by <code>.</code> or <code>source</code
 <p>Shift the positional parameters to the left by <var>n</var>.
 The positional parameters from <var>n</var>+1 &hellip; <code>$#</code> are
 renamed to <code>$1</code> &hellip; <code>$#</code>-<var>n</var>.
-Parameters represented by the numbers <code>$#</code> to <code>$#</code>-<var>n</var>+1
+Parameters represented by the numbers <code>$#</code> down to <code>$#</code>-<var>n</var>+1
 are unset.
 <var>n</var> must be a non-negative number less than or equal to <code>$#</code>.
 If <var>n</var> is zero or greater than <code>$#</code>, the positional parameters
@@ -5197,12 +5197,6 @@ are used to split the line into words using the same rules the shell
 uses for expansion (described above in <a href="#Word-Splitting">Word Splitting</a>).
 The backslash character &lsquo;<samp>\</samp>&rsquo; may be used to remove any special
 meaning for the next character read and for line continuation.
-If no names are supplied, the line read is assigned to the
-variable <code>REPLY</code>.
-The exit status is zero, unless end-of-file is encountered, <code>read</code>
-times out (in which case the status is greater than 128),
-a variable assignment error (such as assigning to a readonly variable) occurs,
-or an invalid file descriptor is supplied as the argument to <samp>-u</samp>.
 </p>
 <p>Options, if supplied, have the following meanings:
 </p>
@@ -5290,6 +5284,15 @@ The exit status is greater than 128 if the timeout is exceeded.
 </p></dd>
 </dl>
 
+<p>If no <var>name</var>s are supplied, the line read,
+without the ending delimiter but otherwise unmodified,
+is assigned to the
+variable <code>REPLY</code>.
+The exit status is zero, unless end-of-file is encountered, <code>read</code>
+times out (in which case the status is greater than 128),
+a variable assignment error (such as assigning to a readonly variable) occurs,
+or an invalid file descriptor is supplied as the argument to <samp>-u</samp>.
+</p>
 </dd>
 <dt><code>readarray</code></dt>
 <dd><span id="index-readarray"></span>
@@ -6289,12 +6292,7 @@ by default.
 </p>
 </dd>
 </dl>
-
-<p>The return status when listing options is zero if all <var>optnames</var>
-are enabled, non-zero otherwise.
-When setting or unsetting options, the return status is zero unless an
-<var>optname</var> is not a valid shell option.
-</p></dd>
+</dd>
 </dl>
 
 <hr>
@@ -9347,6 +9345,10 @@ more randomness. If the shell compatibility level is set to 50 or
 lower, it reverts to the method from bash-5.0 and previous versions,
 so seeding the random number generator by assigning a value to
 <code>RANDOM</code> will produce the same sequence as in bash-5.0
+</li><li> If the command hash table is empty, Bash versions prior to bash-5.1
+printed an informational message to that effect, even when producing
+output that can be reused as input. Bash-5.1 suppresses that message
+when the <samp>-l</samp> option is supplied.
 </li></ul>
 </dd>
 </dl>
@@ -10218,9 +10220,9 @@ replaced with an ellipsis when displaying possible completions.
 <dd><span id="index-completion_002dquery_002ditems"></span>
 <p>The number of possible completions that determines when the user is
 asked whether the list of possibilities should be displayed.
-If the number of possible completions is greater than this value,
-Readline will ask the user whether or not he wishes to view
-them; otherwise, they are simply listed.
+If the number of possible completions is greater than or equal to this value,
+Readline will ask whether or not the user wishes to view them;
+otherwise, they are simply listed.
 This variable must be set to an integer value greater than or equal to 0.
 A negative value means Readline should never ask.
 The default limit is <code>100</code>.
@@ -10907,8 +10909,8 @@ set convert-meta off
 # rather than as meta-prefixed characters
 set output-meta on
 
-# if there are more than 150 possible completions for
-# a word, ask the user if he wants to see all of them
+# if there are 150 or more possible completions for a word,
+# ask whether or not the user wants to see all of them
 set completion-query-items 150
 
 # For FTP
@@ -11108,6 +11110,7 @@ being entered.
 </dt>
 <dd><p>Search backward starting at the current line and moving &lsquo;up&rsquo; through
 the history as necessary.  This is an incremental search.
+This command sets the region to the matched text and activates the mark.
 </p>
 </dd>
 <dt><code>forward-search-history (C-s)</code>
@@ -11115,6 +11118,7 @@ the history as necessary.  This is an incremental search.
 </dt>
 <dd><p>Search forward starting at the current line and moving &lsquo;down&rsquo; through
 the history as necessary.  This is an incremental search.
+This command sets the region to the matched text and activates the mark.
 </p>
 </dd>
 <dt><code>non-incremental-reverse-search-history (M-p)</code>
@@ -11280,6 +11284,11 @@ It allows Readline to insert the pasted text as a single unit without treating
 each character as if it had been read from the keyboard.  The characters
 are inserted as if each one was bound to <code>self-insert</code> instead of
 executing any editing commands.
+</p>
+<p>Bracketed paste sets the region (the characters between point and the mark)
+to the inserted text. It uses the concept of an <em>active mark</em>: when the
+mark is active, Readline redisplay uses the terminal&rsquo;s standout mode to
+denote the region.
 </p>
 </dd>
 <dt><code>transpose-chars (C-t)</code>

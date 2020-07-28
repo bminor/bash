@@ -5216,7 +5216,10 @@ push_posix_tempvar_internal (var, isbltin)
   v = 0;
 
   if (local_p (var) && STREQ (var->name, "-"))
-    set_current_options (value_cell (var));
+    {
+      set_current_options (value_cell (var));
+      set_shellopts ();
+    }
   /* This takes variable assignments preceding special builtins that can execute
      multiple commands (source, eval, etc.) and performs the equivalent of
      an assignment statement to modify the closest enclosing variable (the

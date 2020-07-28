@@ -425,7 +425,8 @@ legal_alias_name (string, flags)
 
 /* Returns non-zero if STRING is an assignment statement.  The returned value
    is the index of the `=' sign.  If FLAGS&1 we are expecting a compound assignment
-   and don't want an array subscript before the `='. */
+   and require an array subscript before the `=' to denote an assignment
+   statement. */
 int
 assignment (string, flags)
      const char *string;
@@ -437,7 +438,17 @@ assignment (string, flags)
   c = string[indx = 0];
 
 #if defined (ARRAY_VARS)
-  if ((legal_variable_starter (c) == 0) && ((flags&1) == 0 || c != '[')) /* ] */
+  /* If parser_state includes PST_COMPASSIGN, FLAGS will include 1, so we are
+     parsing the contents of a compound assignment. If parser_state includes
+     PST_REPARSE, we are in the middle of an assignment statement and breaking
+     the words between the parens into words and assignment statements, but
+     we don't need to check for that right now. Within a compound assignment,
+     the subscript is required to make the word an assignment statement. If
+     we don't have a subscript, even if the word is a valid assignment
+     statement otherwise, we don't want to treat it as one. */
+  if ((flags & 1) && c != '[')		/* ] */
+    return (0);
+  else if ((flags & 1) == 0 && legal_variable_starter (c) == 0)
 #else
   if (legal_variable_starter (c) == 0)
 #endif

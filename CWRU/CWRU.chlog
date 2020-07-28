@@ -8743,3 +8743,24 @@ builtins/complete.def
 	  to hold that information and print everything instead of eumerating
 	  each option and action separately. From a patch submitted by
 	  Martin Kealey <martin@kurahaupo.gen.nz>
+
+				   7/27
+				   ----
+variables.c
+	- push_posix_tempvar_internal: restore $SHELLOPTS after restoring the
+	  values of shell options saved by `local -' by calling set_shellopts().
+	  Report from Grisha Levit <grishalevit@gmail.com>
+
+flags.c
+	- reset_shell_flags: set histexp_flag to 0 and let bash_history_reinit
+	  take care of setting history_expansion appropriately. Report and fix
+	  from Grisha Levit <grishalevit@gmail.com>
+
+				   7/28
+				   ----
+general.c
+	- assignment: if (FLAGS & 1), we are parsing the contents of a compound
+	  assignment, and a word must begin with a `[' and have a valid
+	  subscript terminated by `]' before the `=' to be considered an
+	  assignment statemen and subsequently expanded like one. Report from 
+	  Alexey Izbyshev <izbyshev@ispras.ru>
