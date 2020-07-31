@@ -8764,3 +8764,30 @@ general.c
 	  subscript terminated by `]' before the `=' to be considered an
 	  assignment statemen and subsequently expanded like one. Report from 
 	  Alexey Izbyshev <izbyshev@ispras.ru>
+
+				   7/30
+				   ----
+lib/glob/sm_loop.c
+	- BRACKMATCH: if the bracket expression is matching simple characters
+	  and not a range, compare the character from the string and the
+	  pattern directly, as required by Posix interp 948
+
+lib/glob/smatch.c
+	- charcmp_wc: split off code that calls wcscoll from rangecmp_wc,
+	  just return the results of wcscoll
+	- rangecmp_wc: call charcmp_wc and impose a total ordering
+	  by performing a byte comparison (or wint_t comparison) of C1 and C2
+	  as required by Posix interp 948 (charcmp_wc takes care of the
+	  behavior of FORCECOLL)
+	- collequiv_wc: call charcmp_wc instead of rangecmp_wc
+	- charcmp: character comparison code from rangecmp
+	- rangecmp: call charcmp and impose total ordering as required by
+	  Posix interp 948
+	- collequiv: call charcmp instead of rangecmp
+	- _fnmatch_fallback: ASCII version of fallback for equivalence classes
+	  when there are no multibyte characters in the pattern; just calls
+	  fnmatch with a reconstructed equivalence class pattern
+	- collequiv: call _fnmatch_fallback if charcmp returns non-zero and
+	  the configure check indicates fnmatch has character class support.
+	  Fixes issue reported by Harald van Dijk <harald@gigawatt.nl>
+

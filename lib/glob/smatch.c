@@ -36,6 +36,12 @@
 extern int errno;
 #endif
 
+#if FNMATCH_EQUIV_FALLBACK
+/* We don't include <fnmatch.h> in order to avoid namespace collisions; the
+   internal strmatch still uses the FNM_ constants. */
+extern int fnmatch (const char *, const char *, int);
+#endif
+
 /* First, compile `sm_loop.c' for single-byte characters. */
 #define CHAR	unsigned char
 #define U_CHAR	unsigned char
@@ -55,6 +61,32 @@ extern int errno;
 
 int glob_asciirange = GLOBASCII_DEFAULT;
 
+#if FNMATCH_EQUIV_FALLBACK
+/* Construct a string w1 = "c1" and a pattern w2 = "[[=c2=]]" and pass them
+   to fnmatch to see if wide characters c1 and c2 collate as members of the
+   same equivalence class. We can't really do this portably any other way */
+static int
+_fnmatch_fallback (s, p)
+     int s, p;			/* string char, patchar */
+{
+  char s1[2];			/* string */
+  char s2[8];			/* constructed pattern */
+
+  s1[0] = (unsigned char)s;
+  s1[1] = '\0';
+
+  /* reconstruct the pattern */
+  s2[0] = s2[1] = '[';
+  s2[2] = '=';
+  s2[3] = (unsigned char)p;
+  s2[4] = '=';
+  s2[5] = s2[6] = ']';
+  s2[7] = '\0';
+
+  return (fnmatch ((const char *)s2, (const char *)s1, 0));
+}
+#endif
+
 /* We use strcoll(3) for range comparisons in bracket expressions,
    even though it can have unwanted side effects in locales
    other than POSIX or US.  For instance, in the de locale, [A-Z] matches
@@ -63,9 +95,11 @@ int glob_asciirange = GLOBASCII_DEFAULT;
    straight ordering as if in the C locale. */
 
 #if defined (HAVE_STRCOLL)
-/* Helper function for collating symbol equivalence. */
+/* Helper functions for collating symbol equivalence. */
+
+/* Return 0 if C1 == C2 or collates equally if FORCECOLL is non-zero. */
 static int
-rangecmp (c1, c2, forcecoll)
+charcmp (c1, c2, forcecoll)
      int c1, c2;
      int forcecoll;
 {
@@ -86,8 +120,21 @@ rangecmp (c1, c2, forcecoll)
   s1[0] = c1;
   s2[0] = c2;
 
-  if ((ret = strcoll (s1, s2)) != 0)
-    return ret;
+  return (strcoll (s1, s2));
+}
+
+static int
+rangecmp (c1, c2, forcecoll)
+     int c1, c2;
+     int forcecoll;
+{
+  int r;
+
+  r = charcmp (c1, c2, forcecoll);
+
+  /* We impose a total ordering here by returning c1-c2 if charcmp returns 0 */
+  if (r != 0)
+    return r;
   return (c1 - c2);		/* impose total ordering */
 }
 #else /* !HAVE_STRCOLL */
@@ -95,14 +142,23 @@ rangecmp (c1, c2, forcecoll)
 #endif /* !HAVE_STRCOLL */
 
 #if defined (HAVE_STRCOLL)
+/* Returns 1 if chars C and EQUIV collate equally in the current locale. */
 static int
-collequiv (c1, c2)
-     int c1, c2;
+collequiv (c, equiv)
+     int c, equiv;
 {
-  return (rangecmp (c1, c2, 1) == 0);
+  if (charcmp (c, equiv, 1) == 0)
+    return 1;
+
+#if FNMATCH_EQUIV_FALLBACK
+  return (_fnmatch_fallback (c, equiv) == 0);
+#else
+  return 0;
+#endif
+  
 }
 #else
-#  define collequiv(c1, c2)	((c1) == (c2))
+#  define collequiv(c, equiv)	((c) == (equiv))
 #endif
 
 #define _COLLSYM	_collsym
@@ -290,10 +346,6 @@ is_cclass (c, name)
 extern char *mbsmbchar PARAMS((const char *));
 
 #if FNMATCH_EQUIV_FALLBACK
-/* We don't include <fnmatch.h> in order to avoid namespace collisions; the
-   internal strmatch still uses the FNM_ constants. */
-extern int fnmatch (const char *, const char *, int);
-
 /* Construct a string w1 = "c1" and a pattern w2 = "[[=c2=]]" and pass them
    to fnmatch to see if wide characters c1 and c2 collate as members of the
    same equivalence class. We can't really do this portably any other way */
@@ -325,13 +377,13 @@ _fnmatch_fallback_wc (c1, c2)
 #endif
 
 static int
-rangecmp_wc (c1, c2, forcecoll)
+charcmp_wc (c1, c2, forcecoll)
      wint_t c1, c2;
      int forcecoll;
 {
   static wchar_t s1[2] = { L' ', L'\0' };
   static wchar_t s2[2] = { L' ', L'\0' };
-  int r, oerrno;
+  int r;
 
   if (c1 == c2)
     return 0;
@@ -342,27 +394,35 @@ rangecmp_wc (c1, c2, forcecoll)
   s1[0] = c1;
   s2[0] = c2;
 
-#if 0	/* TAG:bash-5.1 */
-  /* We impose a total ordering here by returning c1-c2 if wcscoll returns 0,
-     as we do above in the single-byte case.  If we do this, we can no longer
-     use this code in collequiv_wc */
-  if ((r = wcscoll (s1, s2)) != 0)
-    return r;
-  return ((int)(c1 - c2));		/* impose total ordering */
-#else
   return (wcscoll (s1, s2));
-#endif
 }
 
-/* Returns non-zero on success */
+static int
+rangecmp_wc (c1, c2, forcecoll)
+     wint_t c1, c2;
+     int forcecoll;
+{
+  int r;
+
+  r = charcmp_wc (c1, c2, forcecoll);
+
+  /* We impose a total ordering here by returning c1-c2 if charcmp returns 0,
+     as we do above in the single-byte case. */
+  if (r != 0 || forcecoll)
+    return r;
+  return ((int)(c1 - c2));		/* impose total ordering */
+}
+
+/* Returns 1 if wide chars C and EQUIV collate equally in the current locale. */
 static int
 collequiv_wc (c, equiv)
      wint_t c, equiv;
 {
   wchar_t s, p;
 
-  if (rangecmp_wc (c, equiv, 1) == 0)
+  if (charcmp_wc (c, equiv, 1) == 0)
     return 1;
+
 #if FNMATCH_EQUIV_FALLBACK
 /* We check explicitly for success (fnmatch returns 0) to avoid problems if
    our local definition of FNM_NOMATCH (strmatch.h) doesn't match the
