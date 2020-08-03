@@ -3559,6 +3559,13 @@ start_job (job, foreground)
 
   BLOCK_CHILD (set, oset);
 
+  if ((subshell_environment & SUBSHELL_COMSUB) && (pipeline_pgrp == shell_pgrp))
+    {
+      internal_error (_("%s: no current jobs"), this_command_name);
+      UNBLOCK_CHILD (oset);
+      return (-1);
+    }
+
   if (DEADJOB (job))
     {
       internal_error (_("%s: job has terminated"), this_command_name);

@@ -8791,3 +8791,24 @@ lib/glob/smatch.c
 	  the configure check indicates fnmatch has character class support.
 	  Fixes issue reported by Harald van Dijk <harald@gigawatt.nl>
 
+				    8/2
+				    ---
+lib/readline/signals.c
+	- _rl_handle_signal: since we're not called in a signal handler context
+	  any more, we don't need to explicitly unblock the signal we received
+	  so the application's signal handler will get it when we resend the
+	  signal to ourselves. It doesn't hurt anything to do it, but we don't
+	  have to
+	- _rl_handle_signal: Set up a framework for any signals that need to
+	  be blocked during cleanup: add the signal to SET (initialized to the
+	  existing set of blocked signals) and set BLOCK_SIG to 1. We block
+	  that set around the call to rl_cleanup_after_signal().
+	- _rl_handle_signal: on AIX, if the signal is SIGHUP, make sure we
+	  block SIGHUP while running rl_cleanup_after_signal()
+
+				    8/3
+				    ---
+jobs.c
+	- start_job: don't allow `fg' or `bg' in a command substitution to
+	  attempt to start a parent's jobs. Suggested by  OÄuz 
+	  <oguzismailuysal@gmail.com>

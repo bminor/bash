@@ -591,6 +591,7 @@ readline_internal_charloop (void)
 	 handler. */
       if (c == READERR)
 	{
+fprintf(stderr, "rl_read_key returns READERR\r\n");
 #if defined (READLINE_CALLBACKS)
 	  RL_SETSTATE(RL_STATE_DONE);
 	  return (rl_done = 1);
