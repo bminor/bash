@@ -8812,3 +8812,44 @@ jobs.c
 	- start_job: don't allow `fg' or `bg' in a command substitution to
 	  attempt to start a parent's jobs. Suggested by  OÄuz 
 	  <oguzismailuysal@gmail.com>
+
+builtins/set.def
+	- set_current_options: only call change_flag or SET_BINARY_O_OPTION_VALUE
+	  if the value has changed from what is stored in the bitmap, to avoid
+	  any side effects from setting the options and save time on any
+	  unnecessary function calls. Inspired by report from Grisha Levit
+	  <grishalevit@gmail.com>
+
+parse.y
+	- xparse_dolparen: before we jump to top level, check whether we are
+	  still reading from the string (we might have run all the unwind-
+	  protects) and turn off PST_CMDSUBST if we are not. Fixes fuzzing
+	  bug reported by Jakub Wilk <jwilk@jwilk.net>
+
+				    8/4
+				    ---
+subst.c
+	- process_substitute: set subshell_environment to include SUBSHELL_ASYNC
+	  in the child process, since we passed FORK_ASYNC to make_child. Fixes
+	  DEBUG trap problem reported by Jonathan Rascher <jon@bcat.name>
+
+subst.c
+	- unlink_all_fifos: new function, just unconditionally closes and
+	  unlinks (if using FIFOs) each pipe used for process substitution.
+	  There is an open to unblock any child processes sleeping on the
+	  FIFO first. Inspired by a suggestion from "CHIGOT, CLEMENT"
+	  <clement.chigot@atos.net>
+
+shell.c
+	- exit_shell: call unlink_all_fifos() instead of unlink_fifo_list()
+
+sig.c
+	- termsig_handler: call unlink_all_fifos() instead of
+	  unlink_fifo_list()
+
+				    8/5
+				    ---
+arrayfunc.c
+	- quote_compound_array_list: turn empty strings into '' instead of
+	  leaving them unmodified. Fixes bug in changes from 4/29 reported
+	  by andy_bash <andy_bash@objectmail.com>

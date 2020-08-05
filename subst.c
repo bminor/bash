@@ -5365,8 +5365,11 @@ static void reap_some_procsubs PARAMS((int));
 #if !defined (HAVE_DEV_FD)
 /* Named pipes must be removed explicitly with `unlink'.  This keeps a list
    of FIFOs the shell has open.  unlink_fifo_list will walk the list and
-   unlink all of them. add_fifo_list adds the name of an open FIFO to the
-   list.  NFIFO is a count of the number of FIFOs in the list. */
+   unlink the ones that don't have a living process on the other end.
+   unlink_all_fifos will walk the list and unconditionally unlink them, trying
+   to open and close the FIFO first to release any child processes sleeping on
+   the FIFO. add_fifo_list adds the name of an open FIFO to the list. 
+   NFIFO is a count of the number of FIFOs in the list. */
 #define FIFO_INCR 20
 
 /* PROC value of -1 means the process has been reaped and the FIFO needs to
@@ -5480,6 +5483,26 @@ unlink_fifo_list ()
     }
   else
     nfifo = 0;
+}
+
+void
+unlink_all_fifos ()
+{
+  int i, fd;
+
+  if (nfifo == 0)
+    return;
+
+  for (i = 0; i < nfifo; i++)
+    {
+      fifo_list[i].proc = (pid_t)-1;
+      fd = open (fifo_list[i].file, O_RDWR|O_NONBLOCK);
+      unlink_fifo (i);
+      if (fd >= 0)
+	close (fd);
+    }
+
+  nfifo = 0;
 }
 
 /* Take LIST, which is a bitmap denoting active FIFOs in fifo_list
@@ -5716,6 +5739,12 @@ unlink_fifo_list ()
   nfds = 0;
 }
 
+void
+unlink_all_fifos ()
+{
+  unlink_fifo_list ();
+}
+
 /* Take LIST, which is a snapshot copy of dev_fd_list from some point in
    the past, and close all open fds in dev_fd_list that are not marked
    as open in LIST.  If LIST is NULL, close everything in dev_fd_list.
@@ -5921,7 +5950,7 @@ process_substitute (string, open_for_read_in_child)
       setup_async_signals ();
       if (open_for_read_in_child == 0)
 	async_redirect_stdin ();
-      subshell_environment |= SUBSHELL_COMSUB|SUBSHELL_PROCSUB;
+      subshell_environment |= SUBSHELL_COMSUB|SUBSHELL_PROCSUB|SUBSHELL_ASYNC;
 
       /* We don't inherit the verbose option for command substitutions now, so
 	 let's try it for process substitutions. */

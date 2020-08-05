@@ -593,7 +593,7 @@ termsig_handler (sig)
 #endif /* JOB_CONTROL */
 
 #if defined (PROCESS_SUBSTITUTION)
-  unlink_fifo_list ();
+  unlink_all_fifos ();
 #  if defined (JOB_CONTROL)
   procsub_clear ();
 #  endif

@@ -11,37 +11,38 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-HISTFILE=$TMPDIR/newhistory-$$
-export HISTFILE
+# test behavior of `local -' inside shell functions
 
-trap 'rm -f $HISTFILE' EXIT
+IGNOREEOF=0
+shopt -o ignoreeof
 
-HISTSIZE=32
-HISTFILESIZE=32
-echo
-set -o history
-history -c
-echo 0
-echo 1
-echo 2
-echo "(left
-mid
-right)"
-echo A
-echo B
-history -w
-set +o history
+f()
+{
+	local -
+	set +o ignoreeof
+	shopt -o ignoreeof
+}
 
-echo
-printf $'HISTFILE=\n\cRleft\cO\cO\cO\cO\n' | HISTSIZE= ${THIS_SH} --norc -i 2>/dev/null
-echo
-printf $'HISTFILE=\n\cRleft\cO\cO\cO\cO\n' | HISTSIZE=8 ${THIS_SH} --norc -i 2>/dev/null
+f
+shopt -o ignoreeof
+echo $IGNOREEOF
 
-input="$(cat $HISTFILE)
-"$'\cP\cP\cP\cO\cO
-'
+unset -f f
 
-echo
-printf "$input" | HISTSIZE= HISTFILE= ${THIS_SH} --norc -i 2>/dev/null
-echo
-printf "$input" | HISTSIZE=6 HISTFILE= ${THIS_SH} --norc -i 2>/dev/null
+f()
+{
+	local -
+	set -m -H +B
+	set -u
+}
+
+before="$-|$SHELLOPTS"
+f
+after="$-|$SHELLOPTS"
+
+case "$after" in
+$before)	echo match 1 ;;
+*)		echo bad 1 ;;
+esac
+
+unset -f f

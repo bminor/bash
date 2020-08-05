@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Tue Jun 16 16:24:30 EDT 2020
+.\"	Last Change: Mon Aug  3 14:10:13 EDT 2020
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2020 June 16" "GNU Bash 5.1"
+.TH BASH 1 "2020 August 3" "GNU Bash 5.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -8962,6 +8962,8 @@ If \fIname\fP is \-, the set of shell options is made local to the function
 in which \fBlocal\fP is invoked: shell options changed using the
 \fBset\fP builtin inside the function are restored to their original values
 when the function returns.
+The restore is effected as if a series of \fBset\fP commands were executed
+to restore the values that were in place before the function.
 With no operands,
 .B local
 writes a list of local variables to the standard output.  It is

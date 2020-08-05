@@ -4518,6 +4518,8 @@ xparse_dolparen (base, string, indp, flags)
   if (nc < 0)
     {
       clear_shell_input_line ();	/* XXX */
+      if (bash_input.type != st_string)	/* paranoia */
+	parser_state &= ~(PST_CMDSUBST|PST_EOFTOKEN);
       jump_to_top_level (-nc);	/* XXX */
     }
 
