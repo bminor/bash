@@ -215,7 +215,7 @@ _rl_handle_signal (int sig)
      the duration of the cleanup functions, make sure to add it to SET and
      set block_sig = 1 (see the SIGHUP case below). */
   block_sig = 0;	/* sentinel to block signals with sigprocmask */
-  sigemptyset (&sig);
+  sigemptyset (&set);
   sigprocmask (SIG_BLOCK, (sigset_t *)NULL, &set);
 #endif
 
@@ -284,7 +284,7 @@ _rl_handle_signal (int sig)
       /* We don't have to bother unblocking the signal because we are not
 	 running in a signal handler context. */
 #if 0
-#if define (HAVE_POSIX_SIGNALS)
+#if defined (HAVE_POSIX_SIGNALS)
       /* Make sure this signal is not blocked when we resend it to the
 	 calling application. */
       sigemptyset (&set);
