@@ -968,6 +968,7 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
   
   if (rl_deprep_term_function)
     (*rl_deprep_term_function) ();
+  rl_clear_signals ();
   save_parser_state (&ps);
   r = parse_and_execute (command, (editing_mode == VI_EDITING_MODE) ? "v" : "C-xC-e", SEVAL_NOHIST);
   restore_parser_state (&ps);
@@ -977,6 +978,7 @@ edit_and_execute_command (count, c, editing_mode, edit_command)
 
   if (rl_prep_term_function)
     (*rl_prep_term_function) (metaflag);
+  rl_set_signals ();
 
   current_command_line_count = saved_command_line_count;
 
@@ -4337,7 +4339,9 @@ bash_execute_unix_command (count, key)
   array_needs_making = 1;
 
   save_parser_state (&ps);
+  rl_clear_signals ();
   r = parse_and_execute (savestring (cmd), "bash_execute_unix_command", SEVAL_NOHIST|SEVAL_NOFREE);
+  rl_set_signals ();
   restore_parser_state (&ps);
 
   v = find_variable ("READLINE_LINE");

@@ -1,3 +1,83 @@
+This document details the changes between this version, bash-5.1-beta, and
+the previous version, bash-5.1-alpha.
+
+1. Changes to Bash
+
+a. Fixed a bug that caused name references to variables to not update the
+   referenced variable's assignment side effects.
+
+b. Tightened up the parameter transformation error checking for invalid
+   transformation operators.
+
+c. System-specific changes for: FreeBSD
+
+d. A few minor changes to move potential uses of stdio functions out of signal
+   handling paths.
+
+e. Make sure SIGCHLD is blocked in all cases where waitchld() is not called
+   from a signal handler.
+
+f. Changed `command' builtin processing so it no longer starts an extra process
+   when run asynchronously (command x &).
+
+g. Avoid performing tilde expansion after `:' in words that look like assignment
+   statements when in posix mode.
+
+h. Slight changes to how the `complete' builtin prints out options and actions
+   for completion specifications.
+
+i. Several changes to how `local -' restores the values of options and
+   $SHELLOPTS.
+
+j. Don't treat a word in a compound assignment as an assignment statement
+   unless it has a valid subscript before the `='.
+
+k. Fixed a bug with the DEBUG trap and process substitution that caused the
+   terminal's process group to be set incorrectly.
+
+l. Fixed a bug that left readline's signal handlers installed while running a
+   shell command from a bindable readline command.
+
+m. Fixed the `fc' builtin to clamp out of range history specifications at the
+   boundaries of the history list for POSIX conformance.
+
+2. New Features in Bash
+
+a. If the hash builtin is listing hashed filenames portably, don't print
+   anything if the table is empty.
+
+b. GLOBIGNORE now ignores `.' and `..' as a terminal pathname component.
+
+c. Bash attempts to optimize away forks in the last command in a function body
+   under appropriate circumstances.
+
+d. The globbing code now uses fnmatch(3) to check collation elements (if
+   available) even in cases without multibyte characters.
+
+e. The `fg' and `bg' builtins now return an error in a command substitution
+   when asked to restart a job inherited from the parent shell.
+
+f. The shell now attempts to unlink all FIFOs on exit, whether a consuming
+   process has finished with them or not.
+
+3. Changes to Readline
+
+a. Make sure that all undo groups are closed when leaving vi insertion mode.
+
+b. Make sure that the vi-mode `C' and `c' commands enter insert mode even if
+   the motion command doesn't have any effect.
+
+c. Fixed several potential memory leaks in the callback mode context handling.
+
+d. If readline is handling a SIGTTOU, make sure SIGTTOU is blocked while
+   executing the terminal cleanup code, since it's no longer run in a signal
+   handling context.
+
+4. New Features in Readline
+
+a. The signal cleanup code now blocks SIGINT while processing after a SIGINT.
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-5.1-alpha, and
 the previous version, bash-5.0-release.
 

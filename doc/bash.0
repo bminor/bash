@@ -5090,11 +5090,13 @@ SSHHEELLLL BBUUIILLTTIINN CCOOMMMMAANNDDSS
               is  made  local to the function in which llooccaall is invoked: shell
               options changed using the sseett builtin inside  the  function  are
               restored  to  their  original  values when the function returns.
-              With no operands, llooccaall writes a list of local variables to  the
-              standard  output.  It is an error to use llooccaall when not within a
-              function.  The return status is 0 unless llooccaall is used outside a
-              function,  an  invalid  _n_a_m_e  is supplied, or _n_a_m_e is a readonly
-              variable.
+              The restore is effected as if a series of sseett commands were exe-
+              cuted  to restore the values that were in place before the func-
+              tion.  With no operands, llooccaall writes a list of local  variables
+              to  the  standard  output.  It is an error to use llooccaall when not
+              within a function.  The return status is 0 unless llooccaall is  used
+              outside  a  function,  an invalid _n_a_m_e is supplied, or _n_a_m_e is a
+              readonly variable.
 
        llooggoouutt Exit a login shell.
 
@@ -6399,4 +6401,4 @@ BBUUGGSS
 
 
 
-GNU Bash 5.1                     2020 June 16                          BASH(1)
+GNU Bash 5.1                     2020 August 3                         BASH(1)

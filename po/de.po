@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bash 5.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-20 11:28-0400\n"
+"POT-Creation-Date: 2020-08-07 12:00-0400\n"
 "PO-Revision-Date: 2019-10-21 20:58+0200\n"
 "Last-Translator: Nils Naumann <nau@gmx.net>\n"
 "Language-Team: German <translation-team-de@lists.sourceforge.net>\n"
@@ -22,8 +22,8 @@ msgstr ""
 msgid "bad array subscript"
 msgstr "Falscher Feldindex."
 
-#: arrayfunc.c:421 builtins/declare.def:638 variables.c:2452 variables.c:2478
-#: variables.c:3311
+#: arrayfunc.c:421 builtins/declare.def:638 variables.c:2249 variables.c:2275
+#: variables.c:3108
 #, c-format
 msgid "%s: removing nameref attribute"
 msgstr "%s: Entferne das Nameref Attribut."
@@ -86,17 +86,17 @@ msgstr "»%s«: Bindung kann nicht gelöst werden."
 msgid "brace expansion: cannot allocate memory for %s"
 msgstr "Klammererweiterung: Konnte keinen Speicher für %s zuweisen."
 
-#: braces.c:425
+#: braces.c:406
 #, c-format
 msgid "brace expansion: failed to allocate memory for %u elements"
 msgstr "Klammererweiterung: Konnte keinen Speicher für %u Elemente zuweisen."
 
-#: braces.c:470
+#: braces.c:451
 #, c-format
 msgid "brace expansion: failed to allocate memory for `%s'"
 msgstr "Klammererweiterung: Konnte keinen Speicher für »%s« zuweisen."
 
-#: builtins/alias.def:131 variables.c:2038
+#: builtins/alias.def:131 variables.c:1835
 #, c-format
 msgid "`%s': invalid alias name"
 msgstr "»%s«: Ungültiger Aliasname."
@@ -202,7 +202,7 @@ msgstr "Warnung: "
 msgid "%s: usage: "
 msgstr "%s: Aufruf: "
 
-#: builtins/common.c:193 shell.c:513 shell.c:841
+#: builtins/common.c:193 shell.c:516 shell.c:844
 #, c-format
 msgid "%s: option requires an argument"
 msgstr "%s: Die Option erfordert ein Argument."
@@ -217,7 +217,7 @@ msgstr "%s: Ein numerischer Parameter ist erforderlich."
 msgid "%s: not found"
 msgstr "%s: Nicht gefunden."
 
-#: builtins/common.c:216 shell.c:854
+#: builtins/common.c:216 shell.c:857
 #, c-format
 msgid "%s: invalid option"
 msgstr "%s: Ungültige Option."
@@ -227,7 +227,7 @@ msgstr "%s: Ungültige Option."
 msgid "%s: invalid option name"
 msgstr "%s: Ungültiger Optionsname."
 
-#: builtins/common.c:230 execute_cmd.c:2351 general.c:368 general.c:373
+#: builtins/common.c:230 execute_cmd.c:2373 general.c:368 general.c:373
 #, c-format
 msgid "`%s': not a valid identifier"
 msgstr "»%s«: Ist kein gültiger Bezeichner."
@@ -240,7 +240,7 @@ msgstr "Ungültige Oktalzahl."
 msgid "invalid hex number"
 msgstr "Ungültige hexadezimale Zahl."
 
-#: builtins/common.c:244 expr.c:1568
+#: builtins/common.c:244 expr.c:1569
 msgid "invalid number"
 msgstr "Ungültige Zahl."
 
@@ -330,36 +330,36 @@ msgstr "%s: Mehrdeutige Jobbezeichnung."
 msgid "help not available in this version"
 msgstr "In dieser Version ist keine Hilfe verfügbar."
 
-#: builtins/common.c:1008 builtins/set.def:941 variables.c:4017
+#: builtins/common.c:1008 builtins/set.def:953 variables.c:3814
 #, c-format
 msgid "%s: cannot unset: readonly %s"
 msgstr "%s: »unset« nicht möglich: %s ist schreibgeschützt"
 
-#: builtins/common.c:1013 builtins/set.def:920 variables.c:4022
+#: builtins/common.c:1013 builtins/set.def:932 variables.c:3819
 #, c-format
 msgid "%s: cannot unset"
 msgstr "%s: »unset« nicht möglich."
 
-#: builtins/complete.def:282
+#: builtins/complete.def:287
 #, c-format
 msgid "%s: invalid action name"
 msgstr "%s: Ungültiger Aktionsname."
 
-#: builtins/complete.def:481 builtins/complete.def:686
-#: builtins/complete.def:917
+#: builtins/complete.def:486 builtins/complete.def:634
+#: builtins/complete.def:865
 #, c-format
 msgid "%s: no completion specification"
 msgstr "%s: Keine Komplettierung angegeben."
 
-#: builtins/complete.def:740
+#: builtins/complete.def:688
 msgid "warning: -F option may not work as you expect"
 msgstr "Warnung: Die Option -F könnte unerwartete Ergebnisse liefern."
 
-#: builtins/complete.def:742
+#: builtins/complete.def:690
 msgid "warning: -C option may not work as you expect"
 msgstr "Warnung: Die Option -C könnte unerwartete Ergebnisse liefern."
 
-#: builtins/complete.def:890
+#: builtins/complete.def:838
 msgid "not currently executing completion function"
 msgstr "Gegenwärtig wird keine Komplettierungsfunktion ausgeführt."
 
@@ -372,13 +372,13 @@ msgstr "Kann nur innerhalb einer Funktion benutzt werden."
 msgid "%s: reference variable cannot be an array"
 msgstr ""
 
-#: builtins/declare.def:374 variables.c:3563
+#: builtins/declare.def:374 variables.c:3360
 #, c-format
 msgid "%s: nameref variable self references not allowed"
 msgstr ""
 
-#: builtins/declare.def:379 variables.c:2282 variables.c:3482 variables.c:3490
-#: variables.c:3560
+#: builtins/declare.def:379 variables.c:2079 variables.c:3279 variables.c:3287
+#: variables.c:3357
 #, c-format
 msgid "%s: circular name reference"
 msgstr "%s: Zirkularbezug auf indirekte Variable."
@@ -392,7 +392,7 @@ msgstr "»%s«: Ungültiger Name für indirekte Variablenreferenz."
 msgid "cannot use `-f' to make functions"
 msgstr "Mit »-f« können keine Funktionen erzeugt werden."
 
-#: builtins/declare.def:526 execute_cmd.c:5862
+#: builtins/declare.def:526 execute_cmd.c:5981
 #, c-format
 msgid "%s: readonly function"
 msgstr "%s: Schreibgeschützte Funktion."
@@ -448,7 +448,7 @@ msgstr "%s: Ist nicht dynamisch geladen."
 msgid "%s: cannot delete: %s"
 msgstr "%s: Kann nicht löschen: %s"
 
-#: builtins/evalfile.c:138 builtins/hash.def:184 execute_cmd.c:5694
+#: builtins/evalfile.c:138 builtins/hash.def:185 execute_cmd.c:5813
 #, c-format
 msgid "%s: is a directory"
 msgstr "%s: ist ein Verzeichnis."
@@ -463,7 +463,7 @@ msgstr "%s: Ist keine normale Datei."
 msgid "%s: file is too large"
 msgstr "%s: Die Datei ist zu groß."
 
-#: builtins/evalfile.c:188 builtins/evalfile.c:206 shell.c:1644
+#: builtins/evalfile.c:188 builtins/evalfile.c:206 shell.c:1647
 #, c-format
 msgid "%s: cannot execute binary file"
 msgstr "%s: Kann die Datei nicht ausführen."
@@ -528,12 +528,12 @@ msgstr "%s: Diese Option erfordert ein Argument -- %c\n"
 msgid "hashing disabled"
 msgstr "Hashing deaktiviert."
 
-#: builtins/hash.def:138
+#: builtins/hash.def:139
 #, c-format
 msgid "%s: hash table empty\n"
 msgstr "%s: Die Hashtabelle ist leer.\n"
 
-#: builtins/hash.def:266
+#: builtins/hash.def:267
 #, c-format
 msgid "hits\tcommand\n"
 msgstr "Treffer\tBefehl\n"
@@ -623,7 +623,7 @@ msgstr "%s: Die Argumente müssen Prozess- oder Job-IDs sein."
 msgid "Unknown error"
 msgstr "Unbekannter Fehler."
 
-#: builtins/let.def:97 builtins/let.def:122 expr.c:638 expr.c:656
+#: builtins/let.def:97 builtins/let.def:122 expr.c:639 expr.c:657
 msgid "expression expected"
 msgstr "Ausdruck erwartet."
 
@@ -866,12 +866,12 @@ msgstr ""
 "»Return« ist nur aus einer Funktion oder einem mit »source« ausgeführten "
 "Skript möglich."
 
-#: builtins/set.def:857
+#: builtins/set.def:869
 msgid "cannot simultaneously unset a function and a variable"
 msgstr ""
 "Gleichzeitiges »unset« einer Funktion und einer Variable ist nicht möglich."
 
-#: builtins/set.def:954
+#: builtins/set.def:966
 #, c-format
 msgid "%s: not an array variable"
 msgstr "%s: Ist keine Feldvariable."
@@ -1032,76 +1032,75 @@ msgstr "Falscher Sprung"
 msgid "%s: unbound variable"
 msgstr "%s ist nicht gesetzt."
 
-#: eval.c:240
-#, c-format
+#: eval.c:242
 msgid "\atimed out waiting for input: auto-logout\n"
 msgstr "\aZu lange keine Eingabe: Automatisch ausgeloggt.\n"
 
-#: execute_cmd.c:534
+#: execute_cmd.c:537
 #, c-format
 msgid "cannot redirect standard input from /dev/null: %s"
 msgstr "Kann nicht die Standardeingabe von /dev/null umleiten: %s"
 
-#: execute_cmd.c:1274
+#: execute_cmd.c:1297
 #, c-format
 msgid "TIMEFORMAT: `%c': invalid format character"
 msgstr "TIMEFORMAT: »%c«: Ungültiges Formatzeichen."
 
-#: execute_cmd.c:2340
+#: execute_cmd.c:2362
 #, c-format
 msgid "execute_coproc: coproc [%d:%s] still exists"
 msgstr ""
 
-#: execute_cmd.c:2464
+#: execute_cmd.c:2486
 msgid "pipe error"
 msgstr "Pipe-Fehler"
 
-#: execute_cmd.c:4678
+#: execute_cmd.c:4792
 #, c-format
 msgid "eval: maximum eval nesting level exceeded (%d)"
 msgstr "eval: Maximale Schachtelungstiefe überschritten (%d)"
 
-#: execute_cmd.c:4690
+#: execute_cmd.c:4804
 #, c-format
 msgid "%s: maximum source nesting level exceeded (%d)"
 msgstr "%s: Maximale Quellcode-Schachtelungstiefe überschritten (%d)"
 
-#: execute_cmd.c:4798
+#: execute_cmd.c:4912
 #, c-format
 msgid "%s: maximum function nesting level exceeded (%d)"
 msgstr "%s: maximale Schachtelungstiefe für Funktionen überschritten (%d)"
 
-#: execute_cmd.c:5347
+#: execute_cmd.c:5466
 #, c-format
 msgid "%s: restricted: cannot specify `/' in command names"
 msgstr "%s: eingeschränkt: `/' ist in Kommandonamen unzulässig."
 
-#: execute_cmd.c:5450
+#: execute_cmd.c:5569
 #, c-format
 msgid "%s: command not found"
 msgstr "%s: Kommando nicht gefunden."
 
-#: execute_cmd.c:5692
+#: execute_cmd.c:5811
 #, c-format
 msgid "%s: %s"
 msgstr "%s: %s"
 
-#: execute_cmd.c:5730
+#: execute_cmd.c:5849
 #, c-format
 msgid "%s: %s: bad interpreter"
 msgstr "%s: %s: Defekter Interpreter"
 
-#: execute_cmd.c:5767
+#: execute_cmd.c:5886
 #, c-format
 msgid "%s: cannot execute binary file: %s"
 msgstr "%s: Kann die Binärdatei nicht ausführen: %s"
 
-#: execute_cmd.c:5853
+#: execute_cmd.c:5972
 #, c-format
 msgid "`%s': is a special builtin"
 msgstr "»%s« ist eine spezielle eingebaute Funktion."
 
-#: execute_cmd.c:5905
+#: execute_cmd.c:6024
 #, c-format
 msgid "cannot duplicate fd %d to fd %d"
 msgstr "Kann fd %d nicht auf fd %d verdoppeln."
@@ -1126,58 +1125,58 @@ msgstr "Versuchte Zuweisung zu etwas, das keine Variable ist."
 msgid "syntax error in variable assignment"
 msgstr "Syntaxfehler in der Variablenzuweisung."
 
-#: expr.c:544 expr.c:910
+#: expr.c:544 expr.c:911
 msgid "division by 0"
 msgstr "Division durch 0."
 
-#: expr.c:591
+#: expr.c:592
 msgid "bug: bad expassign token"
 msgstr "Fehler: Falscher Zuweisungsoperator."
 
-#: expr.c:645
+#: expr.c:646
 msgid "`:' expected for conditional expression"
 msgstr "»:« für ein bedingten Ausdruck erwartet."
 
-#: expr.c:971
+#: expr.c:972
 msgid "exponent less than 0"
 msgstr "Der Exponent ist kleiner als 0."
 
-#: expr.c:1028
+#: expr.c:1029
 msgid "identifier expected after pre-increment or pre-decrement"
 msgstr ""
 "Nach einem Präinkrement oder Prädekrement wird ein Bezeichner erwartet."
 
-#: expr.c:1055
+#: expr.c:1056
 msgid "missing `)'"
 msgstr "Fehlende »)«"
 
-#: expr.c:1106 expr.c:1486
+#: expr.c:1107 expr.c:1487
 msgid "syntax error: operand expected"
 msgstr "Syntaxfehler: Operator erwartet."
 
-#: expr.c:1488
+#: expr.c:1489
 msgid "syntax error: invalid arithmetic operator"
 msgstr "Syntaxfehler: Ungültiger arithmetischer Operator."
 
-#: expr.c:1512
+#: expr.c:1513
 #, c-format
 msgid "%s%s%s: %s (error token is \"%s\")"
 msgstr "%s%s%s: %s (Fehlerverursachendes Zeichen ist \"%s\")."
 
-#: expr.c:1572
+#: expr.c:1573
 msgid "invalid arithmetic base"
 msgstr "Ungültige Basis."
 
-#: expr.c:1581
+#: expr.c:1582
 #, fuzzy
 msgid "invalid integer constant"
 msgstr "%s: Ungültige Zeilenanzahlangabe."
 
-#: expr.c:1597
+#: expr.c:1598
 msgid "value too great for base"
 msgstr "Der Wert ist für die aktuelle Basis zu groß."
 
-#: expr.c:1646
+#: expr.c:1647
 #, c-format
 msgid "%s: expression error\n"
 msgstr "%s: Fehler im Ausdruck.\n"
@@ -1186,7 +1185,7 @@ msgstr "%s: Fehler im Ausdruck.\n"
 msgid "getcwd: cannot access parent directories"
 msgstr "getcwd: Kann auf die übergeordneten Verzeichnisse nicht zugreifen."
 
-#: input.c:99 subst.c:6028
+#: input.c:99 subst.c:6061
 #, c-format
 msgid "cannot reset nodelay mode for fd %d"
 msgstr "Konnte den No-Delay-Modus für fd %d nicht wiederherstellen."
@@ -1202,174 +1201,179 @@ msgstr "Kann keinen neuen Dateideskriptor für die Eingabe von fd %d zuweisen."
 msgid "save_bash_input: buffer already exists for new fd %d"
 msgstr "save_bash_input: Es existiert bereits ein Puffer für den neuen fd %d."
 
-#: jobs.c:537
+#: jobs.c:543
 msgid "start_pipeline: pgrp pipe"
 msgstr "start_pipeline: pgrp pipe"
 
-#: jobs.c:900
+#: jobs.c:906
 #, c-format
 msgid "bgp_delete: LOOP: psi (%d) == storage[psi].bucket_next"
 msgstr ""
 
-#: jobs.c:953
+#: jobs.c:959
 #, c-format
 msgid "bgp_search: LOOP: psi (%d) == storage[psi].bucket_next"
 msgstr ""
 
-#: jobs.c:1277
+#: jobs.c:1283
 #, c-format
 msgid "forked pid %d appears in running job %d"
 msgstr "Die geforkte PID %d erscheint im laufenden Prozess %d."
 
-#: jobs.c:1396
+#: jobs.c:1402
 #, c-format
 msgid "deleting stopped job %d with process group %ld"
 msgstr "Lösche den gestoppten Prozess %d der Prozessgruppe %ld."
 
 # https://lists.gnu.org/archive/html/bug-bash/2019-09/msg00024.html
-#: jobs.c:1505
+#: jobs.c:1511
 #, c-format
 msgid "add_process: pid %5ld (%s) marked as still alive"
 msgstr ""
 
 # Programmierfehler
-#: jobs.c:1844
+#: jobs.c:1850
 #, c-format
 msgid "describe_pid: %ld: no such pid"
 msgstr "describe_pid: %ld: Prozessnummer existiert nicht."
 
-#: jobs.c:1859
+#: jobs.c:1865
 #, c-format
 msgid "Signal %d"
 msgstr "Signal %d"
 
-#: jobs.c:1873 jobs.c:1899
+#: jobs.c:1879 jobs.c:1905
 msgid "Done"
 msgstr "Fertig"
 
-#: jobs.c:1878 siglist.c:122
+#: jobs.c:1884 siglist.c:122
 msgid "Stopped"
 msgstr "Angehalten"
 
-#: jobs.c:1882
+#: jobs.c:1888
 #, c-format
 msgid "Stopped(%s)"
 msgstr "Angehalten(%s)"
 
-#: jobs.c:1886
+#: jobs.c:1892
 msgid "Running"
 msgstr "Läuft"
 
-#: jobs.c:1903
+#: jobs.c:1909
 #, c-format
 msgid "Done(%d)"
 msgstr "Fertig(%d)"
 
-#: jobs.c:1905
+#: jobs.c:1911
 #, c-format
 msgid "Exit %d"
 msgstr "Exit %d"
 
-#: jobs.c:1908
+#: jobs.c:1914
 msgid "Unknown status"
 msgstr "Unbekannter Status"
 
-#: jobs.c:1995
+#: jobs.c:2001
 #, c-format
 msgid "(core dumped) "
 msgstr "(Speicherabzug geschrieben) "
 
-#: jobs.c:2014
+#: jobs.c:2020
 #, c-format
 msgid "  (wd: %s)"
 msgstr "  (Verz.: %s)"
 
 # interner Fehler
-#: jobs.c:2254
+#: jobs.c:2259
 #, c-format
 msgid "child setpgid (%ld to %ld)"
 msgstr ""
 
-#: jobs.c:2612 nojobs.c:664
+#: jobs.c:2617 nojobs.c:664
 #, c-format
 msgid "wait: pid %ld is not a child of this shell"
 msgstr "wait: Prozess %ld wurde nicht von dieser Shell gestartet."
 
-#: jobs.c:2897
+#: jobs.c:2893
 #, c-format
 msgid "wait_for: No record of process %ld"
 msgstr ""
 
-#: jobs.c:3240
+#: jobs.c:3236
 #, c-format
 msgid "wait_for_job: job %d is stopped"
 msgstr "wait_for_job: Der Job %d ist gestoppt."
 
-#: jobs.c:3568
+#: jobs.c:3564
+#, fuzzy, c-format
+msgid "%s: no current jobs"
+msgstr "%s: Kein solcher Job."
+
+#: jobs.c:3571
 #, c-format
 msgid "%s: job has terminated"
 msgstr "%s: Der Job ist beendet."
 
-#: jobs.c:3577
+#: jobs.c:3580
 #, c-format
 msgid "%s: job %d already in background"
 msgstr "%s: Der Job %d läuft bereits im Hintergrund."
 
-#: jobs.c:3803
+#: jobs.c:3806
 msgid "waitchld: turning on WNOHANG to avoid indefinite block"
 msgstr ""
 
 # Debug Ausgabe
-#: jobs.c:4319
+#: jobs.c:4320
 #, c-format
 msgid "%s: line %d: "
 msgstr "%s: Zeile %d: "
 
-#: jobs.c:4333 nojobs.c:928
+#: jobs.c:4334 nojobs.c:919
 #, c-format
 msgid " (core dumped)"
 msgstr " (Speicherabzug geschrieben)"
 
-#: jobs.c:4345 jobs.c:4358
+#: jobs.c:4346 jobs.c:4359
 #, c-format
 msgid "(wd now: %s)\n"
 msgstr "(gegenwärtiges Arbeitsverzeichnis ist: %s)\n"
 
 # interner Fehler
-#: jobs.c:4390
+#: jobs.c:4391
 msgid "initialize_job_control: getpgrp failed"
 msgstr "initialize_job_control: getpgrp war nicht erfolgreich."
 
 # interner Fehler
-#: jobs.c:4446
+#: jobs.c:4447
 msgid "initialize_job_control: no job control in background"
 msgstr "initialize_job_control: Keine Jobsteuerung im Hintergrund."
 
 # interner Fehler
-#: jobs.c:4462
+#: jobs.c:4463
 msgid "initialize_job_control: line discipline"
 msgstr "initialize_job_control: line discipline"
 
 # interner Fehler
-#: jobs.c:4472
+#: jobs.c:4473
 msgid "initialize_job_control: setpgid"
 msgstr "initialize_job_control: setpgid"
 
-#: jobs.c:4493 jobs.c:4502
+#: jobs.c:4494 jobs.c:4503
 #, c-format
 msgid "cannot set terminal process group (%d)"
 msgstr "Kann die Prozessgruppe des Terminals nicht setzen (%d)."
 
-#: jobs.c:4507
+#: jobs.c:4508
 msgid "no job control in this shell"
 msgstr "Keine Jobsteuerung in dieser Shell."
 
-#: lib/malloc/malloc.c:335
+#: lib/malloc/malloc.c:353
 #, c-format
 msgid "malloc: failed assertion: %s\n"
 msgstr "malloc: Zusicherung gescheitert: %s.\n"
 
-#: lib/malloc/malloc.c:351
+#: lib/malloc/malloc.c:369
 #, c-format
 msgid ""
 "\r\n"
@@ -1378,40 +1382,51 @@ msgstr ""
 "\r\n"
 "malloc: %s:%d: Zusicherung verpfuscht\\r\n"
 
-#: lib/malloc/malloc.c:352
+#: lib/malloc/malloc.c:370 lib/malloc/malloc.c:933
 msgid "unknown"
 msgstr "Unbekannt"
 
-#: lib/malloc/malloc.c:859
+#: lib/malloc/malloc.c:882
 msgid "malloc: block on free list clobbered"
 msgstr "Malloc: Ein internet Speicherbereich (free list) wurde überschrieben."
 
-#: lib/malloc/malloc.c:936
+#: lib/malloc/malloc.c:972
 msgid "free: called with already freed block argument"
 msgstr "free: Wurde für bereits freigegebenen Speicherbereich aufgerufen."
 
-#: lib/malloc/malloc.c:939
+#: lib/malloc/malloc.c:975
 msgid "free: called with unallocated block argument"
 msgstr "free: Wurde für nicht zugeordneten Speicherbereich aufgerufen."
 
-#: lib/malloc/malloc.c:958
+#: lib/malloc/malloc.c:994
 msgid "free: underflow detected; mh_nbytes out of range"
 msgstr "free: Underflow erkannt; mh_nbytes außerhalb des Gültigkeitsbereichs."
 
-#: lib/malloc/malloc.c:964
+#: lib/malloc/malloc.c:1001
+#, fuzzy
+msgid "free: underflow detected; magic8 corrupted"
+msgstr "free: Underflow erkannt; mh_nbytes außerhalb des Gültigkeitsbereichs."
+
+#: lib/malloc/malloc.c:1009
 msgid "free: start and end chunk sizes differ"
 msgstr "free: Beginn und Ende Segmentgrößen sind unterschiedlich."
 
-#: lib/malloc/malloc.c:1074
+#: lib/malloc/malloc.c:1119
 msgid "realloc: called with unallocated block argument"
 msgstr "realloc: Mit nicht zugewiesenen Argument aufgerufen."
 
-#: lib/malloc/malloc.c:1089
+#: lib/malloc/malloc.c:1134
 msgid "realloc: underflow detected; mh_nbytes out of range"
 msgstr ""
 "realloc: Underflow erkannt; mh_nbytes außerhalb des Gültigkeitsbereichs."
 
-#: lib/malloc/malloc.c:1095
+#: lib/malloc/malloc.c:1141
+#, fuzzy
+msgid "realloc: underflow detected; magic8 corrupted"
+msgstr ""
+"realloc: Underflow erkannt; mh_nbytes außerhalb des Gültigkeitsbereichs."
+
+#: lib/malloc/malloc.c:1150
 msgid "realloc: start and end chunk sizes differ"
 msgstr "realloc: Beginn und Ende Segmentgrößen sind unterschiedlich.<"
 
@@ -1534,100 +1549,100 @@ msgstr ""
 msgid "maximum here-document count exceeded"
 msgstr ""
 
-#: parse.y:3580 parse.y:3950 parse.y:4529
+#: parse.y:3580 parse.y:3956 parse.y:4555
 #, c-format
 msgid "unexpected EOF while looking for matching `%c'"
 msgstr "Dateiende beim Suchen nach »%c« erreicht."
 
-#: parse.y:4669
+#: parse.y:4695
 msgid "unexpected EOF while looking for `]]'"
 msgstr "Dateiende beim Suchen nach »]]« erreicht."
 
-#: parse.y:4674
+#: parse.y:4700
 #, c-format
 msgid "syntax error in conditional expression: unexpected token `%s'"
 msgstr "Syntaxfehler im bedingten Ausdruck: Unerwartetes Symbol »%s«."
 
-#: parse.y:4678
+#: parse.y:4704
 msgid "syntax error in conditional expression"
 msgstr "Syntaxfehler im bedingten Ausdruck."
 
-#: parse.y:4756
+#: parse.y:4782
 #, c-format
 msgid "unexpected token `%s', expected `)'"
 msgstr "Unerwartetes Zeichen: »%s« anstatt von »)«"
 
-#: parse.y:4760
+#: parse.y:4786
 msgid "expected `)'"
 msgstr "»)« erwartet."
 
-#: parse.y:4788
+#: parse.y:4814
 #, c-format
 msgid "unexpected argument `%s' to conditional unary operator"
 msgstr ""
 
-#: parse.y:4792
+#: parse.y:4818
 msgid "unexpected argument to conditional unary operator"
-msgstr ""
-
-#: parse.y:4838
-#, c-format
-msgid "unexpected token `%s', conditional binary operator expected"
-msgstr ""
-
-#: parse.y:4842
-msgid "conditional binary operator expected"
 msgstr ""
 
 #: parse.y:4864
 #, c-format
-msgid "unexpected argument `%s' to conditional binary operator"
+msgid "unexpected token `%s', conditional binary operator expected"
 msgstr ""
 
 #: parse.y:4868
+msgid "conditional binary operator expected"
+msgstr ""
+
+#: parse.y:4890
+#, c-format
+msgid "unexpected argument `%s' to conditional binary operator"
+msgstr ""
+
+#: parse.y:4894
 msgid "unexpected argument to conditional binary operator"
 msgstr ""
 
-#: parse.y:4879
+#: parse.y:4905
 #, c-format
 msgid "unexpected token `%c' in conditional command"
 msgstr ""
 
-#: parse.y:4882
+#: parse.y:4908
 #, c-format
 msgid "unexpected token `%s' in conditional command"
 msgstr ""
 
-#: parse.y:4886
+#: parse.y:4912
 #, c-format
 msgid "unexpected token %d in conditional command"
 msgstr ""
 
-#: parse.y:6309
+#: parse.y:6335
 #, c-format
 msgid "syntax error near unexpected token `%s'"
 msgstr "Syntaxfehler beim unerwarteten Symbol »%s«"
 
-#: parse.y:6328
+#: parse.y:6354
 #, c-format
 msgid "syntax error near `%s'"
 msgstr "Syntaxfehler bei »%s«"
 
-#: parse.y:6338
+#: parse.y:6364
 msgid "syntax error: unexpected end of file"
 msgstr "Syntaxfehler: Unerwartetes Dateiende."
 
-#: parse.y:6338
+#: parse.y:6364
 msgid "syntax error"
 msgstr "Syntaxfehler"
 
 # Du oder Sie?
-#: parse.y:6401
+#: parse.y:6427
 #, c-format
 msgid "Use \"%s\" to leave the shell.\n"
 msgstr "Verwenden Sie »%s«, um die Shell zu verlassen.\n"
 
-#: parse.y:6566
+#: parse.y:6592
 msgid "unexpected EOF while looking for matching `)'"
 msgstr "Dateiende beim Suchen nach zugehöriger »)« erreicht."
 
@@ -1670,91 +1685,91 @@ msgstr ""
 msgid "cprintf: `%c': invalid format character"
 msgstr "cprintf: »%c«: Ungültiges Formatsymbol."
 
-#: redir.c:142 redir.c:188
+#: redir.c:149 redir.c:197
 msgid "file descriptor out of range"
 msgstr "Dateideskriptor außerhalb des gültigen Bereichs."
 
-#: redir.c:195
+#: redir.c:204
 #, c-format
 msgid "%s: ambiguous redirect"
 msgstr "%s: Mehrdeutige Umlenkung."
 
-#: redir.c:199
+#: redir.c:208
 #, c-format
 msgid "%s: cannot overwrite existing file"
 msgstr "%s: Kann existierende Datei nicht überschreiben."
 
-#: redir.c:204
+#: redir.c:213
 #, c-format
 msgid "%s: restricted: cannot redirect output"
 msgstr "%s: eingeschränkt: Die Ausgabe darf nicht umgeleitet werden."
 
-#: redir.c:209
+#: redir.c:218
 #, c-format
 msgid "cannot create temp file for here-document: %s"
 msgstr "Kann die temporäre Datei für das Hier-Dokument nicht anlegen: %s"
 
-#: redir.c:213
+#: redir.c:222
 #, c-format
 msgid "%s: cannot assign fd to variable"
 msgstr "%s: Kann fd keiner Variable zuweisen."
 
-#: redir.c:636
+#: redir.c:649
 msgid "/dev/(tcp|udp)/host/port not supported without networking"
 msgstr ""
 "Dateinamen der Form /dev/(tcp|udp)/host/port werden ohne Netzwerk nicht "
 "unterstützt"
 
-#: redir.c:920 redir.c:1035 redir.c:1096 redir.c:1266
+#: redir.c:938 redir.c:1053 redir.c:1114 redir.c:1284
 msgid "redirection error: cannot duplicate fd"
 msgstr "Umleitungsfehler: Verdoppeln des Dateibezeichners nicht möglich."
 
-#: shell.c:346
+#: shell.c:347
 msgid "could not find /tmp, please create!"
 msgstr "Konnte das Verzeichnis »/tmp« nicht finden, bitte anlegen."
 
-#: shell.c:350
+#: shell.c:351
 msgid "/tmp must be a valid directory name"
 msgstr "/tmp muss ein Verzeichnis sein."
 
-#: shell.c:801
+#: shell.c:804
 msgid "pretty-printing mode ignored in interactive shells"
 msgstr "Der hübsche Druckmodus wird in interaktiven Schells ignoriert."
 
-#: shell.c:945
+#: shell.c:948
 #, c-format
 msgid "%c%c: invalid option"
 msgstr "%c%c: Ungültige Option"
 
-#: shell.c:1316
+#: shell.c:1319
 #, c-format
 msgid "cannot set uid to %d: effective uid %d"
 msgstr "Konnte die UID nicht in %d ändern: Die effektive UID ist %d"
 
-#: shell.c:1327
+#: shell.c:1330
 #, c-format
 msgid "cannot set gid to %d: effective gid %d"
 msgstr "Konnte die GID nicht in %d ändern: Die effektive GID ist %d"
 
-#: shell.c:1515
+#: shell.c:1518
 msgid "cannot start debugger; debugging mode disabled"
 msgstr "Kann keinen Debugger starten. Der Debugmodus ist gesperrt."
 
-#: shell.c:1629
+#: shell.c:1632
 #, c-format
 msgid "%s: Is a directory"
 msgstr "%s: Ist ein Verzeichnis."
 
-#: shell.c:1878
+#: shell.c:1881
 msgid "I have no name!"
 msgstr "Ich habe keinen Benutzernamen!"
 
-#: shell.c:2032
+#: shell.c:2035
 #, c-format
 msgid "GNU bash, version %s-(%s)\n"
 msgstr "GNU bash, Version %s-(%s)\n"
 
-#: shell.c:2033
+#: shell.c:2036
 #, c-format
 msgid ""
 "Usage:\t%s [GNU long option] [option] ...\n"
@@ -1763,48 +1778,48 @@ msgstr ""
 "Aufruf:\t%s [Lange GNU-Option] [Option] ...\n"
 "\t%s [Lange GNU-Option] [Option] Script-Datei ...\n"
 
-#: shell.c:2035
+#: shell.c:2038
 msgid "GNU long options:\n"
 msgstr "Lange GNU-Optionen:\n"
 
-#: shell.c:2039
+#: shell.c:2042
 msgid "Shell options:\n"
 msgstr "Shell-Optionen:\n"
 
-#: shell.c:2040
+#: shell.c:2043
 msgid "\t-ilrsD or -c command or -O shopt_option\t\t(invocation only)\n"
 msgstr "\t-ilrsD oder -c Kommando oder -O shopt_option\t\t(Nur Aufruf)\n"
 
-#: shell.c:2059
+#: shell.c:2062
 #, c-format
 msgid "\t-%s or -o option\n"
 msgstr "\t-%s oder Option -o\n"
 
-#: shell.c:2065
+#: shell.c:2068
 #, c-format
 msgid "Type `%s -c \"help set\"' for more information about shell options.\n"
 msgstr ""
 "Geben Sie »%s -c \"help set\"« ein, um mehr über Shell-Optionen zu "
 "erfahren.\n"
 
-#: shell.c:2066
+#: shell.c:2069
 #, c-format
 msgid "Type `%s -c help' for more information about shell builtin commands.\n"
 msgstr ""
 "Geben Sie »%s -c help« ein, um mehr über eingebaute Shellkommandos zu "
 "erfahren.\n"
 
-#: shell.c:2067
+#: shell.c:2070
 #, c-format
 msgid "Use the `bashbug' command to report bugs.\n"
 msgstr "Mit dem Kommando »bashbug« Kommando können Sie Fehler melden.\n"
 
-#: shell.c:2069
+#: shell.c:2072
 #, c-format
 msgid "bash home page: <http://www.gnu.org/software/bash>\n"
 msgstr "Bash-Homepage: <https://www.gnu.org/software/bash>\n"
 
-#: shell.c:2070
+#: shell.c:2073
 #, c-format
 msgid "General help using GNU software: <http://www.gnu.org/gethelp/>\n"
 msgstr "Allgemeine Hilfe für GNU-Software: <https://www.gnu.org/gethelp/>\n"
@@ -1980,98 +1995,98 @@ msgstr "Informationsanforderung"
 msgid "Unknown Signal #%d"
 msgstr "Unbekanntes Signal Nr.: %d."
 
-#: subst.c:1475 subst.c:1665
+#: subst.c:1476 subst.c:1666
 #, c-format
 msgid "bad substitution: no closing `%s' in %s"
 msgstr "Falsche Ersetzung: Kein schließendes »%s« in »%s« enthalten."
 
-#: subst.c:3280
+#: subst.c:3281
 #, c-format
 msgid "%s: cannot assign list to array member"
 msgstr "%s: Kann einem Feldelement keine Liste zuweisen."
 
-#: subst.c:5877 subst.c:5893
+#: subst.c:5910 subst.c:5926
 msgid "cannot make pipe for process substitution"
 msgstr "Kann keine Pipe für die Prozessersetzung erzeugen."
 
-#: subst.c:5944
+#: subst.c:5977
 msgid "cannot make child for process substitution"
 msgstr "Kann den Kindsprozess für die Prozessersetzung nicht erzeugen."
 
-#: subst.c:6018
+#: subst.c:6051
 #, c-format
 msgid "cannot open named pipe %s for reading"
 msgstr "Kann nicht die benannte Pipe %s zum Lesen öffnen."
 
-#: subst.c:6020
+#: subst.c:6053
 #, c-format
 msgid "cannot open named pipe %s for writing"
 msgstr "Kann nicht die benannte Pipe %s zum Schreiben öffnen."
 
-#: subst.c:6043
+#: subst.c:6076
 #, c-format
 msgid "cannot duplicate named pipe %s as fd %d"
 msgstr "Kann die benannte Pipe %s nicht auf fd %d duplizieren."
 
-#: subst.c:6167
+#: subst.c:6200
 msgid "command substitution: ignored null byte in input"
 msgstr "Kommandoersetzung: NULL-Byte in der Eingabe ignoriert."
 
-#: subst.c:6307
+#: subst.c:6340
 msgid "cannot make pipe for command substitution"
 msgstr "Kann keine Pipes für Kommandoersetzung erzeugen."
 
-#: subst.c:6351
+#: subst.c:6384
 msgid "cannot make child for command substitution"
 msgstr "Kann keinen Unterprozess für die Kommandoersetzung erzeugen."
 
 # interner Fehler
-#: subst.c:6377
+#: subst.c:6410
 msgid "command_substitute: cannot duplicate pipe as fd 1"
 msgstr "command_substitute: Kann Pipe nicht als Dateideskriptor 1 duplizieren."
 
-#: subst.c:6828 subst.c:9870
+#: subst.c:6861 subst.c:9916
 #, c-format
 msgid "%s: invalid variable name for name reference"
 msgstr "%s: Ungültiger Variablenname für Namensreferenz."
 
-#: subst.c:6924 subst.c:6942 subst.c:7114
+#: subst.c:6957 subst.c:6975 subst.c:7147
 #, c-format
 msgid "%s: invalid indirect expansion"
 msgstr "%s: Ungültige indirekte Expansion."
 
-#: subst.c:6958 subst.c:7122
+#: subst.c:6991 subst.c:7155
 #, c-format
 msgid "%s: invalid variable name"
 msgstr "%s: Ungültiger Variablenname."
 
-#: subst.c:7201
+#: subst.c:7234
 #, c-format
 msgid "%s: parameter not set"
 msgstr "%s: Der Parameter ist nicht gesetzt."
 
-#: subst.c:7203
+#: subst.c:7236
 #, c-format
 msgid "%s: parameter null or not set"
 msgstr "%s: Parameter ist leer oder nicht gesetzt."
 
 # interner Fehler
-#: subst.c:7448 subst.c:7463
+#: subst.c:7481 subst.c:7496
 #, c-format
 msgid "%s: substring expression < 0"
 msgstr "%s: Teilstring-Ausdruck < 0."
 
-#: subst.c:9199 subst.c:9220
+#: subst.c:9245 subst.c:9266
 #, c-format
 msgid "%s: bad substitution"
 msgstr "%s: Falsche Substitution."
 
-#: subst.c:9308
+#: subst.c:9354
 #, c-format
 msgid "$%s: cannot assign in this way"
 msgstr "$%s: Kann so nicht zuweisen."
 
-#: subst.c:9732
+#: subst.c:9778
 msgid ""
 "future versions of the shell will force evaluation as an arithmetic "
 "substitution"
@@ -2079,12 +2094,12 @@ msgstr ""
 "Zukünftige Versionen dieser Shell werden das Auswerten arithmetischer "
 "Ersetzungen erzwingen."
 
-#: subst.c:10288
+#: subst.c:10331
 #, c-format
 msgid "bad substitution: no closing \"`\" in %s"
 msgstr "Falsche Ersetzung: Kein schließendes »`« in %s."
 
-#: subst.c:11350
+#: subst.c:11393
 #, c-format
 msgid "no match: %s"
 msgstr "Keine Entsprechung: %s"
@@ -2152,90 +2167,90 @@ msgstr ""
 msgid "trap_handler: bad signal %d"
 msgstr "trap_handler: Falsches Signal %d."
 
-#: variables.c:437
+#: variables.c:421
 #, c-format
 msgid "error importing function definition for `%s'"
 msgstr "Fehler beim Importieren der Funktionsdefinition für »%s«."
 
-#: variables.c:849
+#: variables.c:833
 #, c-format
 msgid "shell level (%d) too high, resetting to 1"
 msgstr "Der Shell-Level (%d) ist zu hoch und wird auf 1 zurückgesetzt."
 
-#: variables.c:2852
+#: variables.c:2649
 msgid "make_local_variable: no function context at current scope"
 msgstr "make_local_variable: no function context at current scope"
 
-#: variables.c:2871
+#: variables.c:2668
 #, c-format
 msgid "%s: variable may not be assigned value"
 msgstr "%s: Der Variable darf kein Wert zugewiesen werden."
 
 # Interner Fehler
-#: variables.c:3653
+#: variables.c:3450
 #, c-format
 msgid "%s: assigning integer to name reference"
 msgstr "%s: assigning integer to name reference"
 
 # Interner Fehler
-#: variables.c:4582
+#: variables.c:4379
 msgid "all_local_variables: no function context at current scope"
 msgstr "all_local_variables: no function context at current scope"
 
 # Interner Fehler
-#: variables.c:4949
+#: variables.c:4746
 #, c-format
 msgid "%s has null exportstr"
 msgstr "%s has null exportstr"
 
 # Interner Fehler
-#: variables.c:4954 variables.c:4963
+#: variables.c:4751 variables.c:4760
 #, c-format
 msgid "invalid character %d in exportstr for %s"
 msgstr "invalid character %d in exportstr for %s"
 
 # Interner Fehler
-#: variables.c:4969
+#: variables.c:4766
 #, c-format
 msgid "no `=' in exportstr for %s"
 msgstr "no `=' in exportstr for %s"
 
 # Interner Fehler
-#: variables.c:5506
+#: variables.c:5306
 msgid "pop_var_context: head of shell_variables not a function context"
 msgstr "pop_var_context: head of shell_variables not a function context"
 
 # Interner Fehler
-#: variables.c:5519
+#: variables.c:5319
 msgid "pop_var_context: no global_variables context"
 msgstr "pop_var_context: no global_variables context"
 
 # Interner Fehler
-#: variables.c:5599
+#: variables.c:5399
 msgid "pop_scope: head of shell_variables not a temporary environment scope"
 msgstr "pop_scope: head of shell_variables not a temporary environment scope"
 
 # Interner Fehler
-#: variables.c:6562
+#: variables.c:6362
 #, c-format
 msgid "%s: %s: cannot open as FILE"
 msgstr "%s: %s: cannot open as FILE"
 
 # Interner Fehler
-#: variables.c:6567
+#: variables.c:6367
 #, c-format
 msgid "%s: %s: invalid value for trace file descriptor"
 msgstr "%s: %s: invalid value for trace file descriptor"
 
 # Interner Fehler
-#: variables.c:6612
+#: variables.c:6412
 #, c-format
 msgid "%s: %s: compatibility value out of range"
 msgstr "%s: %s: compatibility value out of range"
 
 #: version.c:46 version2.c:46
 #, fuzzy
-msgid "Copyright (C) 2019 Free Software Foundation, Inc."
+msgid "Copyright (C) 2020 Free Software Foundation, Inc."
 msgstr "Copyright (C) 2018 Free Software Foundation, Inc."
 
 #: version.c:47 version2.c:47
@@ -5018,7 +5033,7 @@ msgid ""
 "    \t\tcommand) word\n"
 "    \n"
 "    When completion is attempted, the actions are applied in the order the\n"
-"    uppercase-letter options are listed above.  If multiple options are "
+"    uppercase-letter options are listed above. If multiple options are "
 "supplied,\n"
 "    the -D option takes precedence over -E, and both take precedence over -"
 "I.\n"

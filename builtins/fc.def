@@ -86,6 +86,9 @@ $END
 extern int errno;
 #endif /* !errno */
 
+#define HIST_INVALID INT_MIN
+#define HIST_ERANGE  INT_MIN+1
+
 extern int unlink PARAMS((const char *));
 
 extern FILE *sh_mktmpfp PARAMS((char *, int, char **));
@@ -321,10 +324,7 @@ fc_builtin (list)
     while (last_hist >= 0 && hlist[last_hist] == 0)
       last_hist--;
   if (last_hist < 0)
-    {
-      sh_erange ((char *)NULL, _("history specification"));
-      return (EXECUTION_FAILURE);
-    }
+    last_hist = 0;		/* per POSIX */
 
   if (list)
     {
@@ -353,12 +353,17 @@ fc_builtin (list)
 	histbeg = histend = last_hist;
     }
 
-  /* We print error messages for line specifications out of range. */
-  if ((histbeg < 0) || (histend < 0))
+  if (histbeg == HIST_INVALID || histend == HIST_INVALID)
     {
-      sh_erange ((char *)NULL, _("history specification"));
+      sh_erange ((char *)NULL, _("history specification")); 
       return (EXECUTION_FAILURE);
     }
+
+  /* We don't throw an error for line specifications out of range, per POSIX */
+  if (histbeg < 0)
+    histbeg = 0;
+  if (histend < 0)
+    histend = 0;
 
   /* "When not listing, the fc command that caused the editing shall not be
      entered into the history list." */
@@ -382,12 +387,17 @@ fc_builtin (list)
 	histbeg = last_hist;
     }
 
-  /* We print error messages for line specifications out of range. */
-  if ((histbeg < 0) || (histend < 0))
+  if (histbeg == HIST_INVALID || histend == HIST_INVALID)
     {
-      sh_erange ((char *)NULL, _("history specification"));
+      sh_erange ((char *)NULL, _("history specification")); 
       return (EXECUTION_FAILURE);
     }
+
+  /* We don't throw an error for line specifications out of range, per POSIX */
+  if (histbeg < 0)
+    histbeg = 0;
+  if (histend < 0)
+    histend = 0;
 
   if (histend < histbeg)
     {
@@ -578,7 +588,7 @@ fc_gethnum (command, hlist, mode)
 	  return (n < 0 ? 0 : n);
 	}
       else if (n == 0)
-	return ((sign == -1) ? (mode ? real_last : -1) : i);
+	return ((sign == -1) ? (mode ? real_last : HIST_INVALID) : i);
       else
 	{
 	  n -= history_base;

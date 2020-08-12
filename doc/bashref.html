@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- This text is a brief description of the features that are present in
-the Bash shell (version 5.1, 2 July 2020).
+the Bash shell (version 5.1, 3 August 2020).
 
-This is Edition 5.1, last updated 2 July 2020,
+This is Edition 5.1, last updated 3 August 2020,
 of The GNU Bash Reference Manual,
 for Bash, Version 5.1.
 
@@ -53,6 +53,7 @@ ul.no-bullet {list-style: none}
 
 <body lang="en">
 <h1 class="settitle" align="center">Bash Reference Manual</h1>
+
 
 
 
@@ -275,10 +276,10 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previou
 <span id="Bash-Features-1"></span><h1 class="top">Bash Features</h1>
 
 <p>This text is a brief description of the features that are present in
-the Bash shell (version 5.1, 2 July 2020).
+the Bash shell (version 5.1, 3 August 2020).
 The Bash home page is <a href="http://www.gnu.org/software/bash/">http://www.gnu.org/software/bash/</a>.
 </p>
-<p>This is Edition 5.1, last updated 2 July 2020,
+<p>This is Edition 5.1, last updated 3 August 2020,
 of <cite>The GNU Bash Reference Manual</cite>,
 for <code>Bash</code>, Version 5.1.
 </p>
@@ -5040,6 +5041,8 @@ If <var>name</var> is &lsquo;<samp>-</samp>&rsquo;, the set of shell options is 
 function in which <code>local</code> is invoked: shell options changed using
 the <code>set</code> builtin inside the function are restored to their original
 values when the function returns.
+The restore is effected as if a series of <code>set</code> commands were executed
+to restore the values that were in place before the function.
 The return status is zero unless <code>local</code> is used outside
 a function, an invalid <var>name</var> is supplied, or <var>name</var> is a
 readonly variable.
@@ -11363,12 +11366,16 @@ Next: <a href="#Numeric-Arguments" accesskey="n" rel="next">Numeric Arguments</a
 <span id="index-kill_002dline-_0028C_002dk_0029"></span>
 </dt>
 <dd><p>Kill the text from point to the end of the line.
+With a negative numeric argument, kill backward from the cursor to the
+beginning of the current line.
 </p>
 </dd>
 <dt><code>backward-kill-line (C-x Rubout)</code>
 <span id="index-backward_002dkill_002dline-_0028C_002dx-Rubout_0029"></span>
 </dt>
 <dd><p>Kill backward from the cursor to the beginning of the current line.
+With a negative numeric argument, kill forward from the cursor to the
+end of the current line.
 </p>
 </dd>
 <dt><code>unix-line-discard (C-u)</code>

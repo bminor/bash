@@ -2,9 +2,9 @@ This is bash.info, produced by makeinfo version 6.7 from
 bashref.texi.
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.1, 2 July 2020).
+Bash shell (version 5.1, 3 August 2020).
 
-   This is Edition 5.1, last updated 2 July 2020, of 'The GNU Bash
+   This is Edition 5.1, last updated 3 August 2020, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.1.
 
    Copyright (C) 1988-2018 Free Software Foundation, Inc.
@@ -27,10 +27,10 @@ Bash Features
 *************
 
 This text is a brief description of the features that are present in the
-Bash shell (version 5.1, 2 July 2020).  The Bash home page is
+Bash shell (version 5.1, 3 August 2020).  The Bash home page is
 <http://www.gnu.org/software/bash/>.
 
-   This is Edition 5.1, last updated 2 July 2020, of 'The GNU Bash
+   This is Edition 5.1, last updated 3 August 2020, of 'The GNU Bash
 Reference Manual', for 'Bash', Version 5.1.
 
    Bash contains features that appear in other popular shells, and some
@@ -3746,9 +3746,11 @@ standard.
      and its children.  If NAME is '-', the set of shell options is made
      local to the function in which 'local' is invoked: shell options
      changed using the 'set' builtin inside the function are restored to
-     their original values when the function returns.  The return status
-     is zero unless 'local' is used outside a function, an invalid NAME
-     is supplied, or NAME is a readonly variable.
+     their original values when the function returns.  The restore is
+     effected as if a series of 'set' commands were executed to restore
+     the values that were in place before the function.  The return
+     status is zero unless 'local' is used outside a function, an
+     invalid NAME is supplied, or NAME is a readonly variable.
 
 'logout'
           logout [N]
@@ -8523,10 +8525,14 @@ File: bash.info,  Node: Commands For Killing,  Next: Numeric Arguments,  Prev: C
 -------------------------
 
 'kill-line (C-k)'
-     Kill the text from point to the end of the line.
+     Kill the text from point to the end of the line.  With a negative
+     numeric argument, kill backward from the cursor to the beginning of
+     the current line.
 
 'backward-kill-line (C-x Rubout)'
      Kill backward from the cursor to the beginning of the current line.
+     With a negative numeric argument, kill forward from the cursor to
+     the end of the current line.
 
 'unix-line-discard (C-u)'
      Kill backward from the cursor to the beginning of the current line.
@@ -11294,17 +11300,17 @@ D.1 Index of Shell Builtin Commands
                                                               (line  58)
 * let:                                   Bash Builtins.       (line 350)
 * local:                                 Bash Builtins.       (line 358)
-* logout:                                Bash Builtins.       (line 372)
-* mapfile:                               Bash Builtins.       (line 377)
+* logout:                                Bash Builtins.       (line 374)
+* mapfile:                               Bash Builtins.       (line 379)
 * popd:                                  Directory Stack Builtins.
                                                               (line  35)
-* printf:                                Bash Builtins.       (line 423)
+* printf:                                Bash Builtins.       (line 425)
 * pushd:                                 Directory Stack Builtins.
                                                               (line  53)
 * pwd:                                   Bourne Shell Builtins.
                                                               (line 207)
-* read:                                  Bash Builtins.       (line 472)
-* readarray:                             Bash Builtins.       (line 568)
+* read:                                  Bash Builtins.       (line 474)
+* readarray:                             Bash Builtins.       (line 570)
 * readonly:                              Bourne Shell Builtins.
                                                               (line 217)
 * return:                                Bourne Shell Builtins.
@@ -11313,7 +11319,7 @@ D.1 Index of Shell Builtin Commands
 * shift:                                 Bourne Shell Builtins.
                                                               (line 257)
 * shopt:                                 The Shopt Builtin.   (line   9)
-* source:                                Bash Builtins.       (line 577)
+* source:                                Bash Builtins.       (line 579)
 * suspend:                               Job Control Builtins.
                                                               (line 113)
 * test:                                  Bourne Shell Builtins.
@@ -11322,12 +11328,12 @@ D.1 Index of Shell Builtin Commands
                                                               (line 349)
 * trap:                                  Bourne Shell Builtins.
                                                               (line 355)
-* type:                                  Bash Builtins.       (line 582)
-* typeset:                               Bash Builtins.       (line 614)
-* ulimit:                                Bash Builtins.       (line 620)
+* type:                                  Bash Builtins.       (line 584)
+* typeset:                               Bash Builtins.       (line 616)
+* ulimit:                                Bash Builtins.       (line 622)
 * umask:                                 Bourne Shell Builtins.
                                                               (line 404)
-* unalias:                               Bash Builtins.       (line 723)
+* unalias:                               Bash Builtins.       (line 725)
 * unset:                                 Bourne Shell Builtins.
                                                               (line 422)
 * wait:                                  Job Control Builtins.
@@ -11622,9 +11628,9 @@ D.4 Function Index
 * backward-char (C-b):                   Commands For Moving. (line  15)
 * backward-delete-char (Rubout):         Commands For Text.   (line  17)
 * backward-kill-line (C-x Rubout):       Commands For Killing.
-                                                              (line   9)
+                                                              (line  11)
 * backward-kill-word (M-<DEL>):          Commands For Killing.
-                                                              (line  24)
+                                                              (line  28)
 * backward-word (M-b):                   Commands For Moving. (line  22)
 * beginning-of-history (M-<):            Commands For History.
                                                               (line  20)
@@ -11653,18 +11659,18 @@ D.4 Function Index
 * complete-variable (M-$):               Commands For Completion.
                                                               (line  64)
 * copy-backward-word ():                 Commands For Killing.
-                                                              (line  65)
+                                                              (line  69)
 * copy-forward-word ():                  Commands For Killing.
-                                                              (line  70)
+                                                              (line  74)
 * copy-region-as-kill ():                Commands For Killing.
-                                                              (line  61)
+                                                              (line  65)
 * dabbrev-expand ():                     Commands For Completion.
                                                               (line  95)
 * delete-char (C-d):                     Commands For Text.   (line  12)
 * delete-char-or-list ():                Commands For Completion.
                                                               (line  43)
 * delete-horizontal-space ():            Commands For Killing.
-                                                              (line  53)
+                                                              (line  57)
 * digit-argument (M-0, M-1, ... M--):    Numeric Arguments.   (line   6)
 * display-shell-version (C-x C-v):       Miscellaneous Commands.
                                                               (line 110)
@@ -11720,11 +11726,11 @@ D.4 Function Index
 * kill-line (C-k):                       Commands For Killing.
                                                               (line   6)
 * kill-region ():                        Commands For Killing.
-                                                              (line  57)
+                                                              (line  61)
 * kill-whole-line ():                    Commands For Killing.
-                                                              (line  15)
-* kill-word (M-d):                       Commands For Killing.
                                                               (line  19)
+* kill-word (M-d):                       Commands For Killing.
+                                                              (line  23)
 * magic-space ():                        Miscellaneous Commands.
                                                               (line 121)
 * menu-complete ():                      Commands For Completion.
@@ -11771,15 +11777,15 @@ D.4 Function Index
 * set-mark (C-@):                        Miscellaneous Commands.
                                                               (line  33)
 * shell-backward-kill-word ():           Commands For Killing.
-                                                              (line  33)
+                                                              (line  37)
 * shell-backward-word (M-C-b):           Commands For Moving. (line  30)
 * shell-expand-line (M-C-e):             Miscellaneous Commands.
                                                               (line 113)
 * shell-forward-word (M-C-f):            Commands For Moving. (line  26)
 * shell-kill-word (M-C-d):               Commands For Killing.
-                                                              (line  28)
+                                                              (line  32)
 * shell-transpose-words (M-C-t):         Commands For Killing.
-                                                              (line  37)
+                                                              (line  41)
 * skip-csi-sequence ():                  Miscellaneous Commands.
                                                               (line  52)
 * start-kbd-macro (C-x ():               Keyboard Macros.     (line   6)
@@ -11791,20 +11797,20 @@ D.4 Function Index
                                                               (line  23)
 * universal-argument ():                 Numeric Arguments.   (line  10)
 * unix-filename-rubout ():               Commands For Killing.
-                                                              (line  48)
+                                                              (line  52)
 * unix-line-discard (C-u):               Commands For Killing.
-                                                              (line  12)
+                                                              (line  16)
 * unix-word-rubout (C-w):                Commands For Killing.
-                                                              (line  44)
+                                                              (line  48)
 * upcase-word (M-u):                     Commands For Text.   (line  58)
 * yank (C-y):                            Commands For Killing.
-                                                              (line  75)
+                                                              (line  79)
 * yank-last-arg (M-. or M-_):            Commands For History.
                                                               (line  84)
 * yank-nth-arg (M-C-y):                  Commands For History.
                                                               (line  75)
 * yank-pop (M-y):                        Commands For Killing.
-                                                              (line  78)
+                                                              (line  82)
 
 
 File: bash.info,  Node: Concept Index,  Prev: Function Index,  Up: Indexes
@@ -11973,137 +11979,137 @@ D.5 Concept Index
 
 
 Tag Table:
-Node: Top887
-Node: Introduction2797
-Node: What is Bash?3013
-Node: What is a shell?4127
-Node: Definitions6665
-Node: Basic Shell Features9616
-Node: Shell Syntax10835
-Node: Shell Operation11861
-Node: Quoting13154
-Node: Escape Character14454
-Node: Single Quotes14939
-Node: Double Quotes15287
-Node: ANSI-C Quoting16565
-Node: Locale Translation17824
-Node: Comments18977
-Node: Shell Commands19595
-Node: Reserved Words20533
-Node: Simple Commands21289
-Node: Pipelines21943
-Node: Lists24875
-Node: Compound Commands26666
-Node: Looping Constructs27678
-Node: Conditional Constructs30173
-Node: Command Grouping41744
-Node: Coprocesses43223
-Node: GNU Parallel45126
-Node: Shell Functions49427
-Node: Shell Parameters56634
-Node: Positional Parameters61047
-Node: Special Parameters61947
-Node: Shell Expansions65171
-Node: Brace Expansion67294
-Node: Tilde Expansion70017
-Node: Shell Parameter Expansion72634
-Node: Command Substitution87763
-Node: Arithmetic Expansion89118
-Node: Process Substitution90050
-Node: Word Splitting91170
-Node: Filename Expansion93114
-Node: Pattern Matching95663
-Node: Quote Removal99649
-Node: Redirections99944
-Node: Executing Commands109514
-Node: Simple Command Expansion110184
-Node: Command Search and Execution112138
-Node: Command Execution Environment114514
-Node: Environment117498
-Node: Exit Status119157
-Node: Signals120827
-Node: Shell Scripts122794
-Node: Shell Builtin Commands125806
-Node: Bourne Shell Builtins127844
-Node: Bash Builtins148773
-Node: Modifying Shell Behavior178564
-Node: The Set Builtin178909
-Node: The Shopt Builtin189322
-Node: Special Builtins204232
-Node: Shell Variables205211
-Node: Bourne Shell Variables205648
-Node: Bash Variables207752
-Node: Bash Features240330
-Node: Invoking Bash241343
-Node: Bash Startup Files247356
-Node: Interactive Shells252459
-Node: What is an Interactive Shell?252869
-Node: Is this Shell Interactive?253518
-Node: Interactive Shell Behavior254333
-Node: Bash Conditional Expressions257847
-Node: Shell Arithmetic262424
-Node: Aliases265364
-Node: Arrays267984
-Node: The Directory Stack273993
-Node: Directory Stack Builtins274777
-Node: Controlling the Prompt277745
-Node: The Restricted Shell280695
-Node: Bash POSIX Mode283289
-Node: Shell Compatibility Mode294325
-Node: Job Control300981
-Node: Job Control Basics301441
-Node: Job Control Builtins306437
-Node: Job Control Variables311837
-Node: Command Line Editing312993
-Node: Introduction and Notation314664
-Node: Readline Interaction316287
-Node: Readline Bare Essentials317478
-Node: Readline Movement Commands319261
-Node: Readline Killing Commands320221
-Node: Readline Arguments322139
-Node: Searching323183
-Node: Readline Init File325369
-Node: Readline Init File Syntax326628
-Node: Conditional Init Constructs347167
-Node: Sample Init File351363
-Node: Bindable Readline Commands354487
-Node: Commands For Moving355691
-Node: Commands For History357742
-Node: Commands For Text362535
-Node: Commands For Killing366184
-Node: Numeric Arguments368999
-Node: Commands For Completion370138
-Node: Keyboard Macros374329
-Node: Miscellaneous Commands375016
-Node: Readline vi Mode380700
-Node: Programmable Completion381607
-Node: Programmable Completion Builtins389387
-Node: A Programmable Completion Example400082
-Node: Using History Interactively405329
-Node: Bash History Facilities406013
-Node: Bash History Builtins409018
-Node: History Interaction413747
-Node: Event Designators417367
-Node: Word Designators418721
-Node: Modifiers420481
-Node: Installing Bash422292
-Node: Basic Installation423429
-Node: Compilers and Options426687
-Node: Compiling For Multiple Architectures427428
-Node: Installation Names429121
-Node: Specifying the System Type429939
-Node: Sharing Defaults430655
-Node: Operation Controls431328
-Node: Optional Features432286
-Node: Reporting Bugs442804
-Node: Major Differences From The Bourne Shell443998
-Node: GNU Free Documentation License460850
-Node: Indexes486027
-Node: Builtin Index486481
-Node: Reserved Word Index493308
-Node: Variable Index495756
-Node: Function Index511653
-Node: Concept Index525163
+Node: Top891
+Node: Introduction2805
+Node: What is Bash?3021
+Node: What is a shell?4135
+Node: Definitions6673
+Node: Basic Shell Features9624
+Node: Shell Syntax10843
+Node: Shell Operation11869
+Node: Quoting13162
+Node: Escape Character14462
+Node: Single Quotes14947
+Node: Double Quotes15295
+Node: ANSI-C Quoting16573
+Node: Locale Translation17832
+Node: Comments18985
+Node: Shell Commands19603
+Node: Reserved Words20541
+Node: Simple Commands21297
+Node: Pipelines21951
+Node: Lists24883
+Node: Compound Commands26674
+Node: Looping Constructs27686
+Node: Conditional Constructs30181
+Node: Command Grouping41752
+Node: Coprocesses43231
+Node: GNU Parallel45134
+Node: Shell Functions49435
+Node: Shell Parameters56642
+Node: Positional Parameters61055
+Node: Special Parameters61955
+Node: Shell Expansions65179
+Node: Brace Expansion67302
+Node: Tilde Expansion70025
+Node: Shell Parameter Expansion72642
+Node: Command Substitution87771
+Node: Arithmetic Expansion89126
+Node: Process Substitution90058
+Node: Word Splitting91178
+Node: Filename Expansion93122
+Node: Pattern Matching95671
+Node: Quote Removal99657
+Node: Redirections99952
+Node: Executing Commands109522
+Node: Simple Command Expansion110192
+Node: Command Search and Execution112146
+Node: Command Execution Environment114522
+Node: Environment117506
+Node: Exit Status119165
+Node: Signals120835
+Node: Shell Scripts122802
+Node: Shell Builtin Commands125814
+Node: Bourne Shell Builtins127852
+Node: Bash Builtins148781
+Node: Modifying Shell Behavior178716
+Node: The Set Builtin179061
+Node: The Shopt Builtin189474
+Node: Special Builtins204384
+Node: Shell Variables205363
+Node: Bourne Shell Variables205800
+Node: Bash Variables207904
+Node: Bash Features240482
+Node: Invoking Bash241495
+Node: Bash Startup Files247508
+Node: Interactive Shells252611
+Node: What is an Interactive Shell?253021
+Node: Is this Shell Interactive?253670
+Node: Interactive Shell Behavior254485
+Node: Bash Conditional Expressions257999
+Node: Shell Arithmetic262576
+Node: Aliases265516
+Node: Arrays268136
+Node: The Directory Stack274145
+Node: Directory Stack Builtins274929
+Node: Controlling the Prompt277897
+Node: The Restricted Shell280847
+Node: Bash POSIX Mode283441
+Node: Shell Compatibility Mode294477
+Node: Job Control301133
+Node: Job Control Basics301593
+Node: Job Control Builtins306589
+Node: Job Control Variables311989
+Node: Command Line Editing313145
+Node: Introduction and Notation314816
+Node: Readline Interaction316439
+Node: Readline Bare Essentials317630
+Node: Readline Movement Commands319413
+Node: Readline Killing Commands320373
+Node: Readline Arguments322291
+Node: Searching323335
+Node: Readline Init File325521
+Node: Readline Init File Syntax326780
+Node: Conditional Init Constructs347319
+Node: Sample Init File351515
+Node: Bindable Readline Commands354639
+Node: Commands For Moving355843
+Node: Commands For History357894
+Node: Commands For Text362687
+Node: Commands For Killing366336
+Node: Numeric Arguments369369
+Node: Commands For Completion370508
+Node: Keyboard Macros374699
+Node: Miscellaneous Commands375386
+Node: Readline vi Mode381070
+Node: Programmable Completion381977
+Node: Programmable Completion Builtins389757
+Node: A Programmable Completion Example400452
+Node: Using History Interactively405699
+Node: Bash History Facilities406383
+Node: Bash History Builtins409388
+Node: History Interaction414117
+Node: Event Designators417737
+Node: Word Designators419091
+Node: Modifiers420851
+Node: Installing Bash422662
+Node: Basic Installation423799
+Node: Compilers and Options427057
+Node: Compiling For Multiple Architectures427798
+Node: Installation Names429491
+Node: Specifying the System Type430309
+Node: Sharing Defaults431025
+Node: Operation Controls431698
+Node: Optional Features432656
+Node: Reporting Bugs443174
+Node: Major Differences From The Bourne Shell444368
+Node: GNU Free Documentation License461220
+Node: Indexes486397
+Node: Builtin Index486851
+Node: Reserved Word Index493678
+Node: Variable Index496126
+Node: Function Index512023
+Node: Concept Index525533
 
 End Tag Table
 

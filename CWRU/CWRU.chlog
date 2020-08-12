@@ -8853,3 +8853,23 @@ arrayfunc.c
 	- quote_compound_array_list: turn empty strings into '' instead of
 	  leaving them unmodified. Fixes bug in changes from 4/29 reported
 	  by andy_bash <andy_bash@objectmail.com>
+
+				   8/10
+				   ----
+bashline.c
+	- edit_and_execute_command,bash_execute_unix_command: restore the bash
+	  signal handlers before running parse_and_execute() so bash will catch
+	  and handle signals, instead of letting readline catch them without
+	  any opportunity to run _rl_handle_signal(). Fixes bug reported by
+	  Stan Marsh <gazelle@xmission.com>
+
+				   8/11
+				   ----
+builtins/fc.def
+	- fc_gethnum: return HIST_INVALID for -0 if not in listing mode
+	- fc_builtin: throw an out-of-range error if histbeg or histend gets
+	  set to HIST_INVALID
+	- fc_builtin: don't throw errors for other out-of-range history
+	  specifications, clamp them at the beginning or end of the history
+	  list, as appropriate, per POSIX. Report and fix from Martijn Dekker
+	  <martijn@inlv.org>

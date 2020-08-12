@@ -128,6 +128,23 @@ nn. HISTFILE is now readonly in a restricted shell.
 oo. The bash malloc now returns memory that is 16-byte aligned on 64-bit
     systems.
 
+pp. If the hash builtin is listing hashed filenames portably, don't print
+   anything if the table is empty.
+
+qq. GLOBIGNORE now ignores `.' and `..' as a terminal pathname component.
+
+rr. Bash attempts to optimize away forks in the last command in a function body
+    under appropriate circumstances.
+
+ss. The globbing code now uses fnmatch(3) to check collation elements (if
+    available) even in cases without multibyte characters.
+
+tt. The `fg' and `bg' builtins now return an error in a command substitution
+    when asked to restart a job inherited from the parent shell.
+
+uu. The shell now attempts to unlink all FIFOs on exit, whether a consuming
+    process has finished with them or not.
+
 2. New Features in Readline
 
 a. If a second consecutive completion attempt produces matches where the first
@@ -160,6 +177,8 @@ i. Readline tries to take advantage of the more regular structure of UTF-8
 
 j. The bindable operate-and-get-next command (and its default bindings) are
    now part of readline instead of a bash-specific addition.
+
+k. The signal cleanup code now blocks SIGINT while processing after a SIGINT.
 
 -------------------------------------------------------------------------------
 This is a terse description of the new features added to bash-5.0 since
