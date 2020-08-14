@@ -8873,3 +8873,19 @@ builtins/fc.def
 	  specifications, clamp them at the beginning or end of the history
 	  list, as appropriate, per POSIX. Report and fix from Martijn Dekker
 	  <martijn@inlv.org>
+
+				   8/12
+				   ----
+builtins/fc.def
+	- fc_gethnum: return HIST_NOTFOUND (new error) if the string is not a
+	  number and doesn't correspond to any command in the history list
+	- fc_builtin: print a "no command found" error message if fc_gethnum
+	  returns HIST_NOTFOUND
+
+				   8/14
+				   ----
+flags.c
+	- no_invisible_vars: removed undocumented `-I' flag
+
+{flags,variables}.c,flags.h,builtins/{declare,setattr.def}
+	- no_invisible_vars: remove all references

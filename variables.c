@@ -1958,6 +1958,22 @@ initialize_dynamic_variables ()
 /*								    */
 /* **************************************************************** */
 
+#if 0	/* not yet */
+int
+var_isset (var)
+     SHELL_VAR *var;
+{
+  return (var->value != 0);
+}
+
+int
+var_isunset (var)
+     SHELL_VAR *var;
+{
+  return (var->value == 0);
+}
+#endif
+
 /* How to get a pointer to the shell variable or function named NAME.
    HASHED_VARS is a pointer to the hash table containing the list
    of interest (either variables or functions). */
@@ -2731,7 +2747,7 @@ set_local_var_flags:
 
   /* value_cell will be 0 if localvar_inherit == 0 or there was no old variable
      with the same name or the old variable was invisible */
-  if (was_tmpvar == 0 && no_invisible_vars == 0 && value_cell (new_var) == 0)
+  if (was_tmpvar == 0 && value_cell (new_var) == 0)
     VSETATTR (new_var, att_invisible);	/* XXX */
   return (new_var);
 }
@@ -4032,7 +4048,7 @@ delete_all_variables (hashed_vars)
       if (!entry) \
 	{ \
 	  entry = bind_variable (name, "", 0); \
-	  if (!no_invisible_vars && entry) entry->attributes |= att_invisible; \
+	  if (entry) entry->attributes |= att_invisible; \
 	} \
     } \
   while (0)

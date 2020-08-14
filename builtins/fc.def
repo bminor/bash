@@ -88,6 +88,7 @@ extern int errno;
 
 #define HIST_INVALID INT_MIN
 #define HIST_ERANGE  INT_MIN+1
+#define HIST_NOTFOUND INT_MIN+2
 
 extern int unlink PARAMS((const char *));
 
@@ -358,6 +359,16 @@ fc_builtin (list)
       sh_erange ((char *)NULL, _("history specification")); 
       return (EXECUTION_FAILURE);
     }
+  else if (histbeg == HIST_ERANGE || histend == HIST_ERANGE)
+    {
+      sh_erange ((char *)NULL, _("history specification"));
+      return (EXECUTION_FAILURE);
+    }
+  else if (histbeg == HIST_NOTFOUND || histend == HIST_NOTFOUND)
+    {
+      builtin_error (_("no command found"));
+      return (EXECUTION_FAILURE);
+    }
 
   /* We don't throw an error for line specifications out of range, per POSIX */
   if (histbeg < 0)
@@ -390,6 +401,16 @@ fc_builtin (list)
   if (histbeg == HIST_INVALID || histend == HIST_INVALID)
     {
       sh_erange ((char *)NULL, _("history specification")); 
+      return (EXECUTION_FAILURE);
+    }
+  else if (histbeg == HIST_ERANGE || histend == HIST_ERANGE)
+    {
+      sh_erange ((char *)NULL, _("history specification"));
+      return (EXECUTION_FAILURE);
+    }
+  else if (histbeg == HIST_NOTFOUND || histend == HIST_NOTFOUND)
+    {
+      builtin_error (_("no command found"));
       return (EXECUTION_FAILURE);
     }
 
@@ -602,7 +623,7 @@ fc_gethnum (command, hlist, mode)
       if (STREQN (command, histline (j), clen))
 	return (j);
     }
-  return (-1);
+  return (HIST_NOTFOUND);
 }
 
 /* Locate the most recent history line which begins with
