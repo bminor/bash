@@ -8889,3 +8889,27 @@ flags.c
 
 {flags,variables}.c,flags.h,builtins/{declare,setattr.def}
 	- no_invisible_vars: remove all references
+
+command.h
+	- PF_ALLINDS: new flag, means to expand an array variable name without
+	  a subscript as if it were subscripted by `@' instead of `0'
+
+subst.c
+	- parameter_brace_expand_word: if PFLAGS contains PF_ALLINDS, expand
+	  an array variable name as if it were subscripted by "@" instead of
+	  0/"0": a string with the element values separated by " ". Little
+	  nuance; we're just interested in whether or not there are any
+	  values at all
+	- parameter_brace_expand: if we are expanding something like ${foo@a},
+	  pass PF_ALLINDS to parameter_brace_expand_word and
+	  parameter_brace_expand_indir so we don't get tripped up on `nounset'
+	  if foo has an assigned subscript other than 0/"0". Inspired by a
+	  report from Andrew Neff <andrew.neff@visionsystemsinc.com>
+
+				   8/17
+				   ----
+bashhist.c
+	- bash_add_history,maybe_add_history: don't need to call shell_comment
+	  if we are in the middle of adding a here-document, since it may
+	  call the parser recursively on data that is not guaranteed to be
+	  valid input. From a report by Hyunho Cho <mug896@gmail.com>

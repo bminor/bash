@@ -6823,7 +6823,15 @@ expand_arrayref:
       if (var_isset (var) && invisible_p (var) == 0)
 	{
 #if defined (ARRAY_VARS)
-	  if (assoc_p (var))
+	  /* We avoid a memory leak by saving TT as the memory allocated by
+	     assoc_to_string or array_to_string and leaving it 0 otherwise,
+	     then freeing TT after quoting temp. */
+	  tt = (char *)NULL;
+	  if ((pflags & PF_ALLINDS) && assoc_p (var))
+	    tt = temp = assoc_empty (assoc_cell (var)) ? (char *)NULL : assoc_to_string (assoc_cell (var), " ", quoted);
+	  else if ((pflags & PF_ALLINDS) && array_p (var))
+	    tt = temp = array_empty (array_cell (var)) ? (char *)NULL : array_to_string (array_cell (var), " ", quoted);
+	  else if (assoc_p (var))
 	    temp = assoc_reference (assoc_cell (var), "0");
 	  else if (array_p (var))
 	    temp = array_reference (array_cell (var), 0);
@@ -6838,6 +6846,7 @@ expand_arrayref:
 		      ? quote_string (temp)
 		      : ((pflags & PF_ASSIGNRHS) ? quote_rhs (temp)
 						 : quote_escapes (temp));
+	  FREE (tt);
 	}
       else
 	temp = (char *)NULL;
@@ -8772,17 +8781,18 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
      int *indexp, quoted, pflags, *quoted_dollar_atp, *contains_dollar_at;
 {
   int check_nullness, var_is_set, var_is_null, var_is_special;
-  int want_substring, want_indir, want_patsub, want_casemod;
+  int want_substring, want_indir, want_patsub, want_casemod, want_attributes;
   char *name, *value, *temp, *temp1;
   WORD_DESC *tdesc, *ret;
-  int t_index, sindex, c, tflag, modspec, all_element_arrayref;
+  int t_index, sindex, c, tflag, modspec, local_pflags, all_element_arrayref;
   intmax_t number;
   arrayind_t ind;
 
   temp = temp1 = value = (char *)NULL;
   var_is_set = var_is_null = var_is_special = check_nullness = 0;
-  want_substring = want_indir = want_patsub = want_casemod = 0;
+  want_substring = want_indir = want_patsub = want_casemod = want_attributes = 0;
 
+  local_pflags = 0;
   all_element_arrayref = 0;
 
   sindex = *indexp;
@@ -8876,6 +8886,12 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
       want_casemod = 1;
     }
 #endif
+  else if (c == '@' && (string[sindex] == 'a' || string[sindex] == 'A') && string[sindex+1] == RBRACE)
+    {
+      /* special case because we do not want to shortcut foo as foo[0] here */
+      want_attributes = 1;
+      local_pflags |= PF_ALLINDS;
+    }
 
   /* Catch the valid and invalid brace expressions that made it through the
      tests above. */
@@ -9043,7 +9059,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 
   if (want_indir)
     {
-      tdesc = parameter_brace_expand_indir (name + 1, var_is_special, quoted, pflags, quoted_dollar_atp, contains_dollar_at);
+      tdesc = parameter_brace_expand_indir (name + 1, var_is_special, quoted, pflags|local_pflags, quoted_dollar_atp, contains_dollar_at);
       if (tdesc == &expand_wdesc_error || tdesc == &expand_wdesc_fatal)
 	{
 	  temp = (char *)NULL;
@@ -9056,7 +9072,10 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 	tdesc->flags &= ~W_ARRAYIND;
     }
   else
-    tdesc = parameter_brace_expand_word (name, var_is_special, quoted, PF_IGNUNBOUND|(pflags&(PF_NOSPLIT2|PF_ASSIGNRHS)), &ind);
+    {
+      local_pflags |= PF_IGNUNBOUND|(pflags&(PF_NOSPLIT2|PF_ASSIGNRHS));
+      tdesc = parameter_brace_expand_word (name, var_is_special, quoted, local_pflags, &ind);
+    }
 
   if (tdesc == &expand_wdesc_error || tdesc == &expand_wdesc_fatal)
     {
