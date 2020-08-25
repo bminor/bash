@@ -5,12 +5,12 @@
 .\"	Case Western Reserve University
 .\"	chet.ramey@case.edu
 .\"
-.\"	Last Change: Mon Aug  3 14:10:13 EDT 2020
+.\"	Last Change: Tue Aug 25 09:58:55 EDT 2020
 .\"
 .\" bash_builtins, strip all but Built-Ins section
 .if \n(zZ=1 .ig zZ
 .if \n(zY=1 .ig zY
-.TH BASH 1 "2020 August 3" "GNU Bash 5.1"
+.TH BASH 1 "2020 August 25" "GNU Bash 5.1"
 .\"
 .\" There's some problem with having a `@'
 .\" in a tagged paragraph with the BSD man macros.
@@ -2475,13 +2475,12 @@ had been executed.
 When the shell enters \fIposix mode\fP, it sets this variable if it was
 not already set.
 .TP
-.B PROMPT_COMMANDS
-If this array variable is set,
+.B PROMPT_COMMAND
+If this variable is set, and is an array,
 the value of each set element is executed as a command
 prior to issuing each primary prompt.
-If this is not set, but
-.B PROMPT_COMMAND
-is set to a value, its value is used as a command to execute instead.
+If this is set but not an array variable, 
+its value is used as a command to execute instead.
 .TP
 .B PROMPT_DIRTRIM
 If set to a number greater than zero, the value is used as the number of

@@ -6283,13 +6283,12 @@ not already set.
 The process @sc{id} of the shell's parent process.  This variable
 is readonly.
 
-@item PROMPT_COMMANDS
-If this array variable is set,
+@item PROMPT_COMMAND
+If this variable is set, and is an array,
 the value of each set element is interpreted as a command to execute
 before printing the primary prompt (@env{$PS1}).
-If this is not set, but
-@env{PROMPT_COMMAND}
-is set to a value, its value is used as a command to execute instead.
+If this is set but not an array variable,
+its value is used as a command to execute instead.
 
 @item PROMPT_DIRTRIM
 If set to a number greater than zero, the value is used as the number of

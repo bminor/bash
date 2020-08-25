@@ -8913,3 +8913,21 @@ bashhist.c
 	  if we are in the middle of adding a here-document, since it may
 	  call the parser recursively on data that is not guaranteed to be
 	  valid input. From a report by Hyunho Cho <mug896@gmail.com>
+
+				   8/24
+				   ----
+lib/readline/complete.c
+	- compare_match: compare TEXT from the line buffer and MATCH, a
+	  possible completion for TEXT, after dequoting TEXT if necessary
+	- rl_complete_internal,rl_menu_complete : if show-all-if-unmodified is
+	  set, use compare_match instead of a straight strcmp to determine if
+	  the match has changed the text to complete, so we can use it for
+	  filenames that require quoting. Report and pointer to fix from
+	  Abon B <gnuabonbon@gmail.com>
+
+				   8/25
+				   ----
+eval.c
+	- execute_prompt_command: PROMPT_COMMAND can now be an array, subsuming
+	  PROMPT_COMMANDS, which bash no longer looks for. Prompted by a
+	  suggestion from Martijn Dekker <martijn@inlv.org>

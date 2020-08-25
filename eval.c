@@ -282,19 +282,26 @@ static void
 execute_prompt_command ()
 {
   char *command_to_execute;
-#if defined (ARRAY_VARS)
   SHELL_VAR *pcv;
+#if defined (ARRAY_VARS)
   ARRAY *pcmds;
-
-  GET_ARRAY_FROM_VAR ("PROMPT_COMMANDS", pcv, pcmds);
-  if (pcv && var_isset (pcv) && pcmds && array_num_elements (pcmds) > 0)
-    {
-      array_walk (pcmds, execute_array_command, "PROMPT_COMMANDS");
-      return;
-    }
 #endif
 
-  command_to_execute = get_string_value ("PROMPT_COMMAND");
+  pcv = find_variable ("PROMPT_COMMAND");
+  if (pcv  == 0 || var_isset (pcv) == 0 || invisible_p (pcv))
+    return;
+#if defined (ARRAY_VARS)
+  if (array_p (pcv))
+    {
+      if ((pcmds = array_cell (pcv)) && array_num_elements (pcmds) > 0)
+	array_walk (pcmds, execute_array_command, "PROMPT_COMMAND");
+      return;
+    }
+  else if (assoc_p (pcv))
+    return;
+#endif
+
+  command_to_execute = value_cell (pcv);
   if (command_to_execute && *command_to_execute)
     execute_variable_command (command_to_execute, "PROMPT_COMMAND");
 }
@@ -313,7 +320,7 @@ parse_command ()
 
   /* Allow the execution of a random command just before the printing
      of each primary prompt.  If the shell variable PROMPT_COMMAND
-     is set then the value of it is the command to execute. */
+     is set then its value (array or string) is the command(s) to execute. */
   /* The tests are a combination of SHOULD_PROMPT() and prompt_again() 
      from parse.y, which are the conditions under which the prompt is
      actually printed. */

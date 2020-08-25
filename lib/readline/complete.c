@@ -1,6 +1,6 @@
 /* complete.c -- filename completion for readline. */
 
-/* Copyright (C) 1987-2019 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2020 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.
@@ -148,6 +148,7 @@ static int complete_fncmp PARAMS((const char *, int, const char *, int));
 static void display_matches PARAMS((char **));
 static int compute_lcd_of_matches PARAMS((char **, int, const char *));
 static int postprocess_matches PARAMS((char ***, int));
+static int compare_match PARAMS((const char *, const char *));
 static int complete_get_screenwidth PARAMS((void));
 
 static char *make_quoted_replacement PARAMS((char *, int, char *));
@@ -1964,6 +1965,26 @@ _rl_free_match_list (char **matches)
   xfree (matches);
 }
 
+/* Compare a possibly-quoted filename TEXT from the line buffer and a possible
+   MATCH that is the product of filename completion, which acts on the dequoted
+   text. */
+static int
+compare_match (const char *text, const char *match)
+{
+  char *temp;
+  int r;
+
+  if (rl_filename_completion_desired && rl_filename_quoting_desired && 
+      rl_completion_found_quote && rl_filename_dequoting_function)
+    {
+      temp = (*rl_filename_dequoting_function) (text, rl_completion_quote_character);
+      r = strcmp (temp, match);
+      free (temp);
+      return r;
+    }      
+  return (strcmp (text, match));
+}
+
 /* Complete the word at or before point.
    WHAT_TO_DO says what to do with the completion.
    `?' means list the possible completions.
@@ -2010,7 +2031,7 @@ rl_complete_internal (int what_to_do)
   matches = gen_completion_matches (text, start, end, our_func, found_quote, quote_char);
   /* nontrivial_lcd is set if the common prefix adds something to the word
      being completed. */
-  nontrivial_lcd = matches && strcmp (text, matches[0]) != 0;
+  nontrivial_lcd = matches && compare_match (text, matches[0]) != 0;
   if (what_to_do == '!' || what_to_do == '@')
     tlen = strlen (text);
   xfree (text);
@@ -2772,7 +2793,7 @@ rl_old_menu_complete (int count, int invoking_key)
     {
       insert_match (matches[match_list_index], orig_start, SINGLE_MATCH, &quote_char);
       append_to_match (matches[match_list_index], delimiter, quote_char,
-		       strcmp (orig_text, matches[match_list_index]));
+		       compare_match (orig_text, matches[match_list_index]));
     }
 
   completion_changed_buffer = 1;
@@ -2846,7 +2867,7 @@ rl_menu_complete (int count, int ignore)
       matches = gen_completion_matches (orig_text, orig_start, orig_end,
 					our_func, found_quote, quote_char);
 
-      nontrivial_lcd = matches && strcmp (orig_text, matches[0]) != 0;
+      nontrivial_lcd = matches && compare_match (orig_text, matches[0]) != 0;
 
       /* If we are matching filenames, the attempted completion function will
 	 have set rl_filename_completion_desired to a non-zero value.  The basic
@@ -2953,7 +2974,7 @@ rl_menu_complete (int count, int ignore)
     {
       insert_match (matches[match_list_index], orig_start, SINGLE_MATCH, &quote_char);
       append_to_match (matches[match_list_index], delimiter, quote_char,
-		       strcmp (orig_text, matches[match_list_index]));
+		       compare_match (orig_text, matches[match_list_index]));
     }
 
   completion_changed_buffer = 1;
