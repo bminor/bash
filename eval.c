@@ -263,17 +263,25 @@ send_pwd_to_eterm ()
 }
 
 #if defined (ARRAY_VARS)
+/* Caller ensures that A has a non-zero number of elements */
 int
-execute_array_command (ae, v)
-     ARRAY_ELEMENT *ae;
+execute_array_command (a, v)
+     ARRAY *a;
      void *v;
 {
-  char *tag, *command;
+  char *tag;
+  char **argv;
+  int argc, i;
 
   tag = (char *)v;
-  command = element_value (ae);
-  if (command && *command)
-    execute_variable_command (command, tag);
+  argc = 0;
+  argv = array_to_argv (a, &argc);
+  for (i = 0; i < argc; i++)
+    {
+      if (argv[i] && argv[i][0])
+	execute_variable_command (argv[i], tag);
+    }
+  strvec_dispose (argv);
   return 0;
 }
 #endif
@@ -294,11 +302,11 @@ execute_prompt_command ()
   if (array_p (pcv))
     {
       if ((pcmds = array_cell (pcv)) && array_num_elements (pcmds) > 0)
-	array_walk (pcmds, execute_array_command, "PROMPT_COMMAND");
+	execute_array_command (pcmds, "PROMPT_COMMAND");
       return;
     }
   else if (assoc_p (pcv))
-    return;
+    return;	/* currently don't allow associative arrays here */
 #endif
 
   command_to_execute = value_cell (pcv);

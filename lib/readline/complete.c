@@ -148,7 +148,7 @@ static int complete_fncmp PARAMS((const char *, int, const char *, int));
 static void display_matches PARAMS((char **));
 static int compute_lcd_of_matches PARAMS((char **, int, const char *));
 static int postprocess_matches PARAMS((char ***, int));
-static int compare_match PARAMS((const char *, const char *));
+static int compare_match PARAMS((char *, const char *));
 static int complete_get_screenwidth PARAMS((void));
 
 static char *make_quoted_replacement PARAMS((char *, int, char *));
@@ -1969,7 +1969,7 @@ _rl_free_match_list (char **matches)
    MATCH that is the product of filename completion, which acts on the dequoted
    text. */
 static int
-compare_match (const char *text, const char *match)
+compare_match (char *text, const char *match)
 {
   char *temp;
   int r;

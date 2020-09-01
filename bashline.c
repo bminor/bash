@@ -4340,7 +4340,7 @@ bash_execute_unix_command (count, key)
 
   save_parser_state (&ps);
   rl_clear_signals ();
-  r = parse_and_execute (savestring (cmd), "bash_execute_unix_command", SEVAL_NOHIST|SEVAL_NOFREE);
+  r = parse_and_execute (savestring (cmd), "bash_execute_unix_command", SEVAL_NOHIST);
   rl_set_signals ();
   restore_parser_state (&ps);
 

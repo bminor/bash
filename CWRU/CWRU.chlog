@@ -8931,3 +8931,49 @@ eval.c
 	- execute_prompt_command: PROMPT_COMMAND can now be an array, subsuming
 	  PROMPT_COMMANDS, which bash no longer looks for. Prompted by a
 	  suggestion from Martijn Dekker <martijn@inlv.org>
+
+				   8/26
+				   ----
+builtins/fc.def
+	- fc_gethnum: now takes a flags word as the third argument, with two
+	  current flag values: HN_LISTING, which means we are listing history
+	  entries, and HN_FIRST, which means we are parsing the first in a
+	  first,last range of history entries
+	- fc_gethnum: if we have a number >= 0, and it's out of range, return
+	  different values (0 or last history) depending on whether we are
+	  parsing the first or last in a range argument. Based on a report from
+	  Martijn Dekker <martijn@inlv.org>
+
+				   8/31
+				   ----
+parse.y
+	- grammar: call handle_eof_input_unit from the eof-after-error
+	  production only from interactive top-level shells, so a syntax error
+	  in `eval' doesn't exit an interactive shell. Report and fix from
+	  Koichi Murase <myoga.murase@gmail.com>
+
+bashline.c
+	- bash_execute_unix_command: if we call parse_and_execute with allocated
+	  memory, make sure not to include SEVAL_NOFREE in the flags so it will
+	  free that command string before returning. Report and fix from
+	  Koichi Murase <myoga.murase@gmail.com>
+
+array.[ch]
+	- array_to_argv: now takes a second argument: COUNTP; returns the number
+	  of elements stored in the strvec
+	- array_to_argv: don't store array elements with null values; it makes
+	  it hard for callers to walk the whole array reliably
+
+pcomplete.c
+	- gen_shell_function_matches: change call to array_to_argv
+
+array.h
+	- execute_array_command: now takes the entire ARRAY * as the first
+	  parameter
+
+eval.c
+	- execute_array_command: now takes the entire array, puts the elements
+	  into a strvec, and executes each element of the strvevc as a command.
+	  This protects against a command from PROMPT_COMMAND[n] unsetting the
+	  corresponding element of PROMPT_COMMAND.
+	  From a report from Koichi Murase <myoga.murase@gmail.com>

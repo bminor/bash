@@ -14,7 +14,7 @@
 
 trap 'rm -f $HISTFILE' 0 1 2 3 6 15
 
-HISTFILE=$TMPDIR/foohist-$$
+HISTFILE=$TMPDIR/fchist-$$
 unset HISTIGNORE HISTCONTROL
 set -o history
 
@@ -33,6 +33,23 @@ fc -l -0
 echo d
 fc -s 0
 
-# other out-of-range behavior for future work
-fc -l 498 502
+HISTSIZE=4
+history -c
+
+echo a
+echo b
+echo c
+echo d
+echo e
+echo f
+fc -l
+
+echo out of range 1
 fc -l 502 498
+echo out of range 2
+fc -l 498 502
+echo out of range 3
+fc -l 1 99
+# other out-of-range behavior for future work
+echo out of range 4
+fc -l -20 -40

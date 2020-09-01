@@ -420,9 +420,9 @@ inputunit:	simple_list simple_list_terminator
 			  global_command = (COMMAND *)NULL;
 			  if (last_command_exit_value == 0)
 			    last_command_exit_value = EX_BADUSAGE;	/* force error return */
-			  handle_eof_input_unit ();
 			  if (interactive && parse_and_execute_level == 0)
 			    {
+			      handle_eof_input_unit ();
 			      YYACCEPT;
 			    }
 			  else
