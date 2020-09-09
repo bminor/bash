@@ -563,6 +563,8 @@ recho "${*:1:0}"
 # this is an error -- negative expression
 set a
 recho ${@:1:$(($# - 2))}
+set a b c d e
+recho ${@: -3:-2}
 
 XPATH=/bin:/usr/bin:/usr/ucb:/usr/local/bin:.:/sbin:/usr/sbin
 set $( IFS=: ; echo $XPATH ) 
@@ -625,6 +627,9 @@ ${THIS_SH} ./new-exp13.sub
 
 # new K parameter transformation operator
 ${THIS_SH} ./new-exp14.sub
+
+# ongoing work with a/A parameter transformations and `nounset'
+${THIS_SH} ./new-exp15.sub
 
 # problems with stray CTLNUL in bash-4.0-alpha
 unset a

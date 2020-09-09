@@ -358,17 +358,29 @@ void
 set_current_options (bitmap)
      const char *bitmap;
 {
-  int i;
+  int i, v, cv, *on_or_off;
 
   if (bitmap == 0)
     return;
 
   for (i = 0; o_options[i].name; i++)
     {
+      v = bitmap[i] ? FLAG_ON : FLAG_OFF;
       if (o_options[i].letter)
-	change_flag (o_options[i].letter, bitmap[i] ? FLAG_ON : FLAG_OFF);
+	{
+	  /* We should not get FLAG_UNKNOWN here */
+	  on_or_off = find_flag (o_options[i].letter);
+	  cv = *on_or_off ? FLAG_ON : FLAG_OFF;
+	  if (v != cv)
+	    change_flag (o_options[i].letter, v);
+	}
       else
-	SET_BINARY_O_OPTION_VALUE (i, bitmap[i] ? FLAG_ON : FLAG_OFF, o_options[i].name);
+	{
+	  cv = GET_BINARY_O_OPTION_VALUE (i, o_options[i].name);
+	  cv = cv ? FLAG_ON : FLAG_OFF;
+	  if (v != cv)
+	    SET_BINARY_O_OPTION_VALUE (i, v, o_options[i].name);
+	}
     }
 
   /* Now reset the variables changed by posix mode */

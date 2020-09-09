@@ -392,6 +392,11 @@ declare -a x=($0)
 declare -a x=(\$0)
 echo "${x[@]}"
 
+unset A Z
+Z='a b'
+A=( X=$Z )
+declare -p A
+
 # tests for bash-3.1 problems
 ${THIS_SH} ./array5.sub
 
@@ -419,3 +424,4 @@ ${THIS_SH} ./array24.sub
 ${THIS_SH} ./array25.sub
 ${THIS_SH} ./array26.sub
 ${THIS_SH} ./array27.sub
+${THIS_SH} ./array28.sub

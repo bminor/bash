@@ -583,15 +583,10 @@ BRACKMATCH (p, test, flags)
 	  isrange = 1;
 	}
 
-#if 0		/* TAG: bash-5.1 */
       if (isrange == 0 && test == cstart)
         goto matched;
       if (isrange && RANGECMP (test, cstart, forcecoll) >= 0 && RANGECMP (test, cend, forcecoll) <= 0)
 	goto matched;
-#else
-      if (RANGECMP (test, cstart, forcecoll) >= 0 && RANGECMP (test, cend, forcecoll) <= 0)
-	goto matched;
-#endif
 
       if (c == L(']'))
 	break;

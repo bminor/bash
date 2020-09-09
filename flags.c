@@ -112,9 +112,6 @@ int no_symbolic_links = 0;
 int lexical_scoping = 0;
 #endif
 
-/* Non-zero means no such thing as invisible variables. */
-int no_invisible_vars = 0;
-
 /* Non-zero means look up and remember command names in a hash table, */
 int hashing_enabled = 1;
 
@@ -201,7 +198,6 @@ const struct flags_alist shell_flags[] = {
 #if defined (BANG_HISTORY)
   { 'H', &histexp_flag },
 #endif /* BANG_HISTORY */
-  { 'I', &no_invisible_vars },
   { 'P', &no_symbolic_links },
   { 'T', &function_trace_mode },
   {0, (int *)NULL}
@@ -349,7 +345,7 @@ reset_shell_flags ()
   place_keywords_in_env = read_but_dont_execute = just_one_command = 0;
   noclobber = unbound_vars_is_error = 0;
   echo_command_at_execute = jobs_m_flag = forced_interactive = 0;
-  no_symbolic_links = no_invisible_vars = 0;
+  no_symbolic_links = 0;
   privileged_mode = pipefail_opt = 0;
 
   error_trace_mode = function_trace_mode = 0;
@@ -364,11 +360,7 @@ reset_shell_flags ()
 #endif
 
 #if defined (BANG_HISTORY)
-#  if defined (STRICT_POSIX)
-  history_expansion = 0;
-#  else
-  history_expansion = 1;
-#  endif /* STRICT_POSIX */
+  histexp_flag = 0;
 #endif
 
 #if defined (BRACE_EXPANSION)

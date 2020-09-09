@@ -785,18 +785,9 @@ wait_sigint_handler (sig)
     {
       last_command_exit_value = 128+SIGINT;
       restore_sigint_handler ();
-      interrupt_immediately = 0;
       trap_handler (SIGINT);	/* set pending_traps[SIGINT] */
       wait_signal_received = SIGINT;
       SIGRETURN (0);
-    }
-
-  if (interrupt_immediately)
-    {
-      last_command_exit_value = EXECUTION_FAILURE;
-      restore_sigint_handler ();
-      ADDINTERRUPT;
-      QUIT;
     }
 
   wait_sigint_received = 1;

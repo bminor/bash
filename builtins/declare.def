@@ -727,20 +727,20 @@ restart_new_var_name:
 	      if (flags_on & att_assoc)
 		{
 		  var = make_new_assoc_variable (name);
-		  if (var && offset == 0 && no_invisible_vars == 0)
+		  if (var && offset == 0)
 		    VSETATTR (var, att_invisible);
 		}
 	      else if ((flags_on & att_array) || making_array_special)
 		{
 		  var = make_new_array_variable (name);
-		  if (var && offset == 0 && no_invisible_vars == 0)
+		  if (var && offset == 0)
 		    VSETATTR (var, att_invisible);
 		}
 	      else
 #endif
 		{
 		  var = mkglobal ? bind_global_variable (name, (char *)NULL, ASS_FORCE) : bind_variable (name, (char *)NULL, ASS_FORCE);
-		  if (var && offset == 0 && no_invisible_vars == 0)
+		  if (var && offset == 0)
 		    VSETATTR (var, att_invisible);
 		}
 	      if (var == 0)

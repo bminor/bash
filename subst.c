@@ -301,6 +301,7 @@ static char *parameter_list_transform PARAMS((int, int, int));
 static char *array_transform PARAMS((int, SHELL_VAR *, int, int));
 #endif
 static char *parameter_brace_transform PARAMS((char *, char *, int, char *, int, int, int, int));
+static int valid_parameter_transform PARAMS((char *));
 
 static char *process_substitute PARAMS((char *, int));
 
@@ -3300,7 +3301,10 @@ do_assignment_internal (word, expand)
 #endif /* ARRAY_VARS */
   entry = bind_variable (name, value, aflags);
 
-  stupidly_hack_special_variables (name);
+  if (entry)
+    stupidly_hack_special_variables (entry->name);	/* might be a nameref */
+  else
+    stupidly_hack_special_variables (name);
 
   /* Return 1 if the assignment seems to have been performed correctly. */
   if (entry == 0 || readonly_p (entry))
@@ -5361,8 +5365,11 @@ static void reap_some_procsubs PARAMS((int));
 #if !defined (HAVE_DEV_FD)
 /* Named pipes must be removed explicitly with `unlink'.  This keeps a list
    of FIFOs the shell has open.  unlink_fifo_list will walk the list and
-   unlink all of them. add_fifo_list adds the name of an open FIFO to the
-   list.  NFIFO is a count of the number of FIFOs in the list. */
+   unlink the ones that don't have a living process on the other end.
+   unlink_all_fifos will walk the list and unconditionally unlink them, trying
+   to open and close the FIFO first to release any child processes sleeping on
+   the FIFO. add_fifo_list adds the name of an open FIFO to the list. 
+   NFIFO is a count of the number of FIFOs in the list. */
 #define FIFO_INCR 20
 
 /* PROC value of -1 means the process has been reaped and the FIFO needs to
@@ -5476,6 +5483,26 @@ unlink_fifo_list ()
     }
   else
     nfifo = 0;
+}
+
+void
+unlink_all_fifos ()
+{
+  int i, fd;
+
+  if (nfifo == 0)
+    return;
+
+  for (i = 0; i < nfifo; i++)
+    {
+      fifo_list[i].proc = (pid_t)-1;
+      fd = open (fifo_list[i].file, O_RDWR|O_NONBLOCK);
+      unlink_fifo (i);
+      if (fd >= 0)
+	close (fd);
+    }
+
+  nfifo = 0;
 }
 
 /* Take LIST, which is a bitmap denoting active FIFOs in fifo_list
@@ -5712,6 +5739,12 @@ unlink_fifo_list ()
   nfds = 0;
 }
 
+void
+unlink_all_fifos ()
+{
+  unlink_fifo_list ();
+}
+
 /* Take LIST, which is a snapshot copy of dev_fd_list from some point in
    the past, and close all open fds in dev_fd_list that are not marked
    as open in LIST.  If LIST is NULL, close everything in dev_fd_list.
@@ -5917,7 +5950,7 @@ process_substitute (string, open_for_read_in_child)
       setup_async_signals ();
       if (open_for_read_in_child == 0)
 	async_redirect_stdin ();
-      subshell_environment |= SUBSHELL_COMSUB|SUBSHELL_PROCSUB;
+      subshell_environment |= SUBSHELL_COMSUB|SUBSHELL_PROCSUB|SUBSHELL_ASYNC;
 
       /* We don't inherit the verbose option for command substitutions now, so
 	 let's try it for process substitutions. */
@@ -6790,7 +6823,15 @@ expand_arrayref:
       if (var_isset (var) && invisible_p (var) == 0)
 	{
 #if defined (ARRAY_VARS)
-	  if (assoc_p (var))
+	  /* We avoid a memory leak by saving TT as the memory allocated by
+	     assoc_to_string or array_to_string and leaving it 0 otherwise,
+	     then freeing TT after quoting temp. */
+	  tt = (char *)NULL;
+	  if ((pflags & PF_ALLINDS) && assoc_p (var))
+	    tt = temp = assoc_empty (assoc_cell (var)) ? (char *)NULL : assoc_to_string (assoc_cell (var), " ", quoted);
+	  else if ((pflags & PF_ALLINDS) && array_p (var))
+	    tt = temp = array_empty (array_cell (var)) ? (char *)NULL : array_to_string (array_cell (var), " ", quoted);
+	  else if (assoc_p (var))
 	    temp = assoc_reference (assoc_cell (var), "0");
 	  else if (array_p (var))
 	    temp = array_reference (array_cell (var), 0);
@@ -6805,6 +6846,7 @@ expand_arrayref:
 		      ? quote_string (temp)
 		      : ((pflags & PF_ASSIGNRHS) ? quote_rhs (temp)
 						 : quote_escapes (temp));
+	  FREE (tt);
 	}
       else
 	temp = (char *)NULL;
@@ -7845,6 +7887,31 @@ array_transform (xc, var, starsub, quoted)
 }
 #endif /* ARRAY_VARS */
 
+static int
+valid_parameter_transform (xform)
+     char *xform;
+{
+  if (xform[1])
+    return 0;
+
+  /* check for valid values of xform[0] */
+  switch (xform[0])
+    {
+    case 'a':		/* expand to a string with just attributes */
+    case 'A':		/* expand as an assignment statement with attributes */
+    case 'K':		/* expand assoc array to list of key/value pairs */
+    case 'E':		/* expand like $'...' */
+    case 'P':		/* expand like prompt string */
+    case 'Q':		/* quote reusably */
+    case 'U':		/* transform to uppercase */
+    case 'u':		/* tranform by capitalizing */
+    case 'L':		/* transform to lowercase */
+      return 1;
+    default:
+      return 0;
+    }
+}
+      
 static char *
 parameter_brace_transform (varname, value, ind, xform, rtype, quoted, pflags, flags)
      char *varname, *value;
@@ -7870,20 +7937,8 @@ parameter_brace_transform (varname, value, ind, xform, rtype, quoted, pflags, fl
       return ((char *)NULL);
     }
 
-  /* check for valid values of xc */
-  switch (xc)
+  if (valid_parameter_transform (xform) == 0)
     {
-    case 'a':		/* expand to a string with just attributes */
-    case 'A':		/* expand as an assignment statement with attributes */
-    case 'K':		/* expand assoc array to list of key/value pairs */
-    case 'E':		/* expand like $'...' */
-    case 'P':		/* expand like prompt string */
-    case 'Q':		/* quote reusably */
-    case 'U':		/* transform to uppercase */
-    case 'u':		/* tranform by capitalizing */
-    case 'L':		/* transform to lowercase */
-      break;
-    default:
       this_command_name = oname;
       return &expand_param_error;
     }
@@ -8726,17 +8781,18 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
      int *indexp, quoted, pflags, *quoted_dollar_atp, *contains_dollar_at;
 {
   int check_nullness, var_is_set, var_is_null, var_is_special;
-  int want_substring, want_indir, want_patsub, want_casemod;
+  int want_substring, want_indir, want_patsub, want_casemod, want_attributes;
   char *name, *value, *temp, *temp1;
   WORD_DESC *tdesc, *ret;
-  int t_index, sindex, c, tflag, modspec, all_element_arrayref;
+  int t_index, sindex, c, tflag, modspec, local_pflags, all_element_arrayref;
   intmax_t number;
   arrayind_t ind;
 
   temp = temp1 = value = (char *)NULL;
   var_is_set = var_is_null = var_is_special = check_nullness = 0;
-  want_substring = want_indir = want_patsub = want_casemod = 0;
+  want_substring = want_indir = want_patsub = want_casemod = want_attributes = 0;
 
+  local_pflags = 0;
   all_element_arrayref = 0;
 
   sindex = *indexp;
@@ -8747,7 +8803,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
   else
 #if defined (CASEMOD_EXPANSIONS)
     /* To enable case-toggling expansions using the `~' operator character
-       change the 1 to 0. */
+       define CASEMOD_CAPCASE in config-top.h */
 #  if defined (CASEMOD_CAPCASE)
     name = string_extract (string, &t_index, "#%^,~:-=?+/@}", SX_VARNAME);
 #  else
@@ -8830,6 +8886,12 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
       want_casemod = 1;
     }
 #endif
+  else if (c == '@' && (string[sindex] == 'a' || string[sindex] == 'A') && string[sindex+1] == RBRACE)
+    {
+      /* special case because we do not want to shortcut foo as foo[0] here */
+      want_attributes = 1;
+      local_pflags |= PF_ALLINDS;
+    }
 
   /* Catch the valid and invalid brace expressions that made it through the
      tests above. */
@@ -8997,7 +9059,7 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 
   if (want_indir)
     {
-      tdesc = parameter_brace_expand_indir (name + 1, var_is_special, quoted, pflags, quoted_dollar_atp, contains_dollar_at);
+      tdesc = parameter_brace_expand_indir (name + 1, var_is_special, quoted, pflags|local_pflags, quoted_dollar_atp, contains_dollar_at);
       if (tdesc == &expand_wdesc_error || tdesc == &expand_wdesc_fatal)
 	{
 	  temp = (char *)NULL;
@@ -9010,7 +9072,10 @@ parameter_brace_expand (string, indexp, quoted, pflags, quoted_dollar_atp, conta
 	tdesc->flags &= ~W_ARRAYIND;
     }
   else
-    tdesc = parameter_brace_expand_word (name, var_is_special, quoted, PF_IGNUNBOUND|(pflags&(PF_NOSPLIT2|PF_ASSIGNRHS)), &ind);
+    {
+      local_pflags |= PF_IGNUNBOUND|(pflags&(PF_NOSPLIT2|PF_ASSIGNRHS));
+      tdesc = parameter_brace_expand_word (name, var_is_special, quoted, local_pflags, &ind);
+    }
 
   if (tdesc == &expand_wdesc_error || tdesc == &expand_wdesc_fatal)
     {
@@ -10129,20 +10194,16 @@ add_string:
 		goto add_character;
 	    }
 	  /* If we're not in posix mode or forcing assignment-statement tilde
-	     expansion, note where the `=' appears in the word and prepare to
-	     do tilde expansion following the first `='. */
+	     expansion, note where the first `=' appears in the word and prepare
+	     to do tilde expansion following the first `='. We have to keep
+	     track of the first `=' (using assignoff) to avoid being confused
+	     by an `=' in the rhs of the assignment statement. */
 	  if ((word->flags & W_ASSIGNMENT) &&
 	      (posixly_correct == 0 || (word->flags & W_TILDEEXP)) &&
 	      assignoff == -1 && sindex > 0)
 	    assignoff = sindex;
 	  if (sindex == assignoff && string[sindex+1] == '~')	/* XXX */
 	    word->flags |= W_ITILDE;
-#if 0
-	  else if ((word->flags & W_ASSIGNMENT) &&
-		   (posixly_correct == 0 || (word->flags & W_TILDEEXP)) &&
-		   string[sindex+1] == '~')
-	    word->flags |= W_ITILDE;
-#endif
 
 	  if (word->flags & W_ASSIGNARG)
 	    word->flags |= W_ASSIGNRHS;		/* affects $@ */
@@ -10164,7 +10225,8 @@ add_string:
 		goto add_character;
 	    }
 
-	  if ((word->flags & (W_ASSIGNMENT|W_ASSIGNRHS|W_TILDEEXP)) &&
+	  if ((word->flags & (W_ASSIGNMENT|W_ASSIGNRHS)) &&
+	      (posixly_correct == 0 || (word->flags & W_TILDEEXP)) &&
 	      string[sindex+1] == '~')
 	    word->flags |= W_ITILDE;
 

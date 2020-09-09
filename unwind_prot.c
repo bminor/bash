@@ -108,21 +108,13 @@ uwp_init ()
 }
 
 /* Run a function without interrupts.  This relies on the fact that the
-   FUNCTION cannot change the value of interrupt_immediately.  (I.e., does
-   not call QUIT (). */
+   FUNCTION cannot call QUIT (). */
 static void
 without_interrupts (function, arg1, arg2)
      VFunction *function;
      char *arg1, *arg2;
 {
-  int old_interrupt_immediately;
-
-  old_interrupt_immediately = interrupt_immediately;
-  interrupt_immediately = 0;
-
   (*function)(arg1, arg2);
-
-  interrupt_immediately = old_interrupt_immediately;
 }
 
 /* Start the beginning of a region. */
@@ -349,6 +341,8 @@ unwind_protect_mem_internal (var, psize)
 
   size = *(int *) psize;
   allocated = size + offsetof (UNWIND_ELT, sv.v.desired_setting[0]);
+  if (allocated < sizeof (UNWIND_ELT))
+    allocated = sizeof (UNWIND_ELT);
   elt = (UNWIND_ELT *)xmalloc (allocated);
   elt->head.next = unwind_protect_list;
   elt->head.cleanup = (Function *) restore_variable;

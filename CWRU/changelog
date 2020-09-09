@@ -8429,10 +8429,10 @@ lib/readline/kill.c
 	  fix for bug reported by Phi Debian <phi.debian@gmail.com>
 
 lib/readline/vi_mode.c
-	- _rl_vi_change_char: make sure _rl_vi_last_replacement gets filled in
+	- rl_vi_change_char: make sure _rl_vi_last_replacement gets filled in
 	  in the case where MB_CUR_MAX == 1. Rest of fix for bug reported by
 	  Phi Debian <phi.debian@gmail.com>
-	- rl_vi_change_char: same fix for _rl_vi_last_replacement
+	- _rl_vi_callback_change_char: same fix for _rl_vi_last_replacement
 
 				   5/29
 				   ----
@@ -8538,7 +8538,7 @@ doc/{bash.1,bashref.texi}
 configure.ac
 	- if CFLAGS is not supplied in the environment or on the command line,
 	  add the gcc options that suppress warnings about parens and print
-	  formats in a slightly different way, that will avoid some collisions
+	  formats in a slightly different way that will avoid some collisions
 
 lib/readline/readline.c
 	- _rl_dispatch_subseq: don't set rl_last_func to rl_vi_arg_digit, just
@@ -8552,3 +8552,428 @@ lib/readline/vi_mode.c
 	  it needs to use it later
 	- rl_vi_redo: suppress attempts to redo `.' when the current keymap is
 	  vi_movement_keymap, since that will recursively call vi_redo
+
+				   6/11
+				   ----
+redir.c
+	- limit HEREDOC_PIPESIZE to 4096 on FreeBSD; that is where it can
+	  handle atomic writes without hanging. Tested on FreeBSD 13
+
+[bash-5.1-alpha frozen]
+
+				   6/15
+				   ----
+subst.c
+	- do_assignment_internal: call stupidly_hack_special_variables on the
+	  name returned from the variable assignment, in case there was a
+	  nameref expansion, and on the original name only if the assignment
+	  returned NULL. Fixes bug reported by James D. Lin <jamesdlin@gmail.com>
+
+				   6/16
+				   ----
+builtins/hash.def
+	- hash_builtin: don't print anything if the hash table is empty when
+	  listing portably (-l) unless the shell compatibility level is <= 50
+	  Issue originally raised by <beluro@web.de>
+
+				   6/17
+				   ----
+pathexp.c
+	- glob_name_is_acceptable: extend GLOBIGNORE to ignore `.' and `..'
+	  as a terminal pathname component instead of just ignoring filenames
+	  that are `.' or `..'. From a suggestion by Ilkka Virta
+	  <itvirta@iki.fi>
+
+				   6/18
+				   ----
+po/Makefile.in.in
+	- MKINSTALLDIRS: deprecated, no longer in AM_INTL_SUBDIR, so we have
+	  to create the variable manually
+
+lib/readline/doc/rltech.texi
+	- add descriptions of the active mark functions that are available to
+	  applications. I guess they will remain public
+
+subst.c
+	- valid_parameter_transform: new function, reject transformations
+	  longer than a single character or invalid transformation operators
+	- parameter_brace_transform: call valid_parameter_transform
+
+				   6/22
+				   ----
+lib/sh/zread.c
+	- lbuf: bump size up to ZBUFSIZ (default 4096). From a report by
+	  Jason A. Donenfeld <Jason@zx2c4.com>
+
+lib/sh/zcatfd.c
+	- zcatfd: lbuf: bump size up to ZBUFSIZ (default 4096)
+
+lib/sh/zmapfd.c
+	- zmapfd: lbuf: bump size up to ZBUFSIZ (default 4096)
+
+				   6/29
+				   ----
+aclocal.m4
+	- BASH_FUNC_SBRK: changes for cross-compiling on FreeBSD variants,
+	  from Jessica Clarke <jrtc27@jrtc27.com>
+
+xmalloc.c
+	- HAVE_SBRK: use #if instead of #ifdef so we only use it if we think
+	  it works
+
+examples/loadables/finfo.c
+	- st_dev,st_nlink: cast to unsigned long, report from Jessica Clarke
+	  <jrtc27@jrtc27.com> 
+
+unwind_prot.c
+	- unwind_protect_mem_internal: make sure we allocate at least as many
+	  bytes for an entire UNWIND_ELT. Fix from Jessica Clarke
+	  <jrtc27@jrtc27.com>
+
+				    7/1
+				    ---
+eval.c
+	- alrm_catcher: use write(2) instead of fprintf to print the
+	  auto-logout message to the terminal
+
+jobs.c
+	- UNQUEUE_SIGCHLD: set queue_sigchld to 1 around call to waitchld(),
+	  since it is not being called from a signal handler and so SIGCHLD is
+	  not blocked. Fixes report by Godmar Back <godmar@gmail.com>
+
+				    7/2
+				    ---
+doc/{bash.1,bashref.texi}
+	- read: clarify that without any name arguments, the line assigned to
+	  REPLY is not modified. From a question by M. Nejat AYDIN
+	  <mnaydin@yahoo.com> with input from Eli Schwartz
+	  <eschwartz@archlinux.org>
+
+				    7/5
+				    ---
+lib/readline/vi_mode.c
+	- _rl_vi_done_inserting: make sure to close out all undo groups when
+	  leaving insert mode, so we don't have anything dangling.
+	  Report and fix from David Fries <David@Fries.net>
+
+				    7/6
+				    ---
+lib/readline/vi_mode.c
+	- _rl_vi_domove_motion_cleanup: the `c' and `C' commands should enter
+	  insert mode even if the motion command doesn't delete any text.
+	  From a report by David Fries <David@Fries.net>
+	- _rl_vi_done_inserting: add a missing rl_end_undo_group when
+	  _rl_vi_doing_insert is set: there should be one begun by
+	  rl_vi_start_inserting and one begun by the command (change or replace).
+	  From a report by David Fries <David@Fries.net>
+	- rl_vi_replace: set _rl_vi_last_key_before_insert to 'R' explicitly,
+	  since other code checks that and we want to allow users to rebind
+	  this function
+
+				    7/7
+				    ---
+lib/readline/vi_mode.c
+	- rl_vi_{delete,change,yank}_to: if we have a non-null _rl_vimvcxt,
+	  just reinitialize it so we don't have to allocate a new one. This is
+	  a change primarily for callback mode, and fixes a memory leak
+
+builtins/evalstring.c
+	- optimize_shell_function: try to optimize away the fork in the last
+	  command in a shell function body, under certain conditions
+
+execute_cmd.c
+	- execute_function: attempt to optimize away forks in a shell function
+	  that is already marked NO_FORK and being executed in a command
+	  substitution
+
+				    7/8
+				    ---
+{jobs,nojobs,trap,unwind_prot}.c,lib/malloc/{malloc,table}.c
+	- interrupt_immediately: remove, no longer used
+
+jobs.c
+	- waitchld: don't perform asynchronous notification if we are currently
+	  executing a builtin (executing_builtin != 0). Inspired by a report
+	  from Godmar Back <godmar@gmail.com>
+
+				    7/9
+				    ---
+lib/readline/signals.c
+	- _rl_handle_signal: block SIGTTOU while handling a SIGTTOU, since we
+	  no longer run this in a signal handling context where SIGTTOIU would
+	  be blocked
+
+				   7/14
+				   ----
+execute_cmd.c
+	- execute_simple_command: use new variable `cmdflags' instead of using
+	  simple_command->flags directly; initialize from simple_command->flags
+	- check_command_builtin: take a simple command list of words starting
+	  with `command' and including a command_word argument, and peel off
+	  the `command' and any instances of `-p' and `--' and return the
+	  updated list
+	- execute_simple_command: if the first word of the simple command is
+	  `command', call check_command_builtin to peel off any `command' and
+	  `-p' and `--' and go on to execute the rest of the words as a simple
+	  command. If we're in posix mode, we've got the special builtins
+	  handled before this runs. Fixes complaint about `command' in the
+	  background running an extra bash process from Dmitry Alexandrov
+	  <dag@gnui.org>
+
+				   7/17
+				   ----
+doc/bash.1
+lib/readline/doc/{rltech,hstech,rluser}.texi
+lib/readline/doc/{readline,history}.3
+	- a few small tweaks to make the language gender-neutral
+
+				   7/18
+				   ----
+subst.c
+	- expand_word_internal: case `:' make sure the shell is either not in
+	  posix mode or W_TILDEEXP is set before turning on W_ITILDE. The old
+	  code would turn it on unconditionally if the W_ASSIGNMENT flag was
+	  set. Fixes bug reported by OÄuz <oguzismailuysal@gmail.com>
+
+				   7/20
+				   ----
+builtins/complete.def
+	- replace macros used to print compspec actions, options, and other
+	  info with a small set of functions that traverse the structs used
+	  to hold that information and print everything instead of eumerating
+	  each option and action separately. From a patch submitted by
+	  Martin Kealey <martin@kurahaupo.gen.nz>
+
+				   7/27
+				   ----
+variables.c
+	- push_posix_tempvar_internal: restore $SHELLOPTS after restoring the
+	  values of shell options saved by `local -' by calling set_shellopts().
+	  Report from Grisha Levit <grishalevit@gmail.com>
+
+flags.c
+	- reset_shell_flags: set histexp_flag to 0 and let bash_history_reinit
+	  take care of setting history_expansion appropriately. Report and fix
+	  from Grisha Levit <grishalevit@gmail.com>
+
+				   7/28
+				   ----
+general.c
+	- assignment: if (FLAGS & 1), we are parsing the contents of a compound
+	  assignment, and a word must begin with a `[' and have a valid
+	  subscript terminated by `]' before the `=' to be considered an
+	  assignment statemen and subsequently expanded like one. Report from 
+	  Alexey Izbyshev <izbyshev@ispras.ru>
+
+				   7/30
+				   ----
+lib/glob/sm_loop.c
+	- BRACKMATCH: if the bracket expression is matching simple characters
+	  and not a range, compare the character from the string and the
+	  pattern directly, as required by Posix interp 948
+
+lib/glob/smatch.c
+	- charcmp_wc: split off code that calls wcscoll from rangecmp_wc,
+	  just return the results of wcscoll
+	- rangecmp_wc: call charcmp_wc and impose a total ordering
+	  by performing a byte comparison (or wint_t comparison) of C1 and C2
+	  as required by Posix interp 948 (charcmp_wc takes care of the
+	  behavior of FORCECOLL)
+	- collequiv_wc: call charcmp_wc instead of rangecmp_wc
+	- charcmp: character comparison code from rangecmp
+	- rangecmp: call charcmp and impose total ordering as required by
+	  Posix interp 948
+	- collequiv: call charcmp instead of rangecmp
+	- _fnmatch_fallback: ASCII version of fallback for equivalence classes
+	  when there are no multibyte characters in the pattern; just calls
+	  fnmatch with a reconstructed equivalence class pattern
+	- collequiv: call _fnmatch_fallback if charcmp returns non-zero and
+	  the configure check indicates fnmatch has character class support.
+	  Fixes issue reported by Harald van Dijk <harald@gigawatt.nl>
+
+				    8/2
+				    ---
+lib/readline/signals.c
+	- _rl_handle_signal: since we're not called in a signal handler context
+	  any more, we don't need to explicitly unblock the signal we received
+	  so the application's signal handler will get it when we resend the
+	  signal to ourselves. It doesn't hurt anything to do it, but we don't
+	  have to
+	- _rl_handle_signal: Set up a framework for any signals that need to
+	  be blocked during cleanup: add the signal to SET (initialized to the
+	  existing set of blocked signals) and set BLOCK_SIG to 1. We block
+	  that set around the call to rl_cleanup_after_signal().
+	- _rl_handle_signal: on AIX, if the signal is SIGHUP, make sure we
+	  block SIGHUP while running rl_cleanup_after_signal()
+
+				    8/3
+				    ---
+jobs.c
+	- start_job: don't allow `fg' or `bg' in a command substitution to
+	  attempt to start a parent's jobs. Suggested by  OÄuz 
+	  <oguzismailuysal@gmail.com>
+
+builtins/set.def
+	- set_current_options: only call change_flag or SET_BINARY_O_OPTION_VALUE
+	  if the value has changed from what is stored in the bitmap, to avoid
+	  any side effects from setting the options and save time on any
+	  unnecessary function calls. Inspired by report from Grisha Levit
+	  <grishalevit@gmail.com>
+
+parse.y
+	- xparse_dolparen: before we jump to top level, check whether we are
+	  still reading from the string (we might have run all the unwind-
+	  protects) and turn off PST_CMDSUBST if we are not. Fixes fuzzing
+	  bug reported by Jakub Wilk <jwilk@jwilk.net>
+
+				    8/4
+				    ---
+subst.c
+	- process_substitute: set subshell_environment to include SUBSHELL_ASYNC
+	  in the child process, since we passed FORK_ASYNC to make_child. Fixes
+	  DEBUG trap problem reported by Jonathan Rascher <jon@bcat.name>
+
+subst.c
+	- unlink_all_fifos: new function, just unconditionally closes and
+	  unlinks (if using FIFOs) each pipe used for process substitution.
+	  There is an open to unblock any child processes sleeping on the
+	  FIFO first. Inspired by a suggestion from "CHIGOT, CLEMENT"
+	  <clement.chigot@atos.net>
+
+shell.c
+	- exit_shell: call unlink_all_fifos() instead of unlink_fifo_list()
+
+sig.c
+	- termsig_handler: call unlink_all_fifos() instead of
+	  unlink_fifo_list()
+
+				    8/5
+				    ---
+arrayfunc.c
+	- quote_compound_array_list: turn empty strings into '' instead of
+	  leaving them unmodified. Fixes bug in changes from 4/29 reported
+	  by andy_bash <andy_bash@objectmail.com>
+
+				   8/10
+				   ----
+bashline.c
+	- edit_and_execute_command,bash_execute_unix_command: restore the bash
+	  signal handlers before running parse_and_execute() so bash will catch
+	  and handle signals, instead of letting readline catch them without
+	  any opportunity to run _rl_handle_signal(). Fixes bug reported by
+	  Stan Marsh <gazelle@xmission.com>
+
+				   8/11
+				   ----
+builtins/fc.def
+	- fc_gethnum: return HIST_INVALID for -0 if not in listing mode
+	- fc_builtin: throw an out-of-range error if histbeg or histend gets
+	  set to HIST_INVALID
+	- fc_builtin: don't throw errors for other out-of-range history
+	  specifications, clamp them at the beginning or end of the history
+	  list, as appropriate, per POSIX. Report and fix from Martijn Dekker
+	  <martijn@inlv.org>
+
+				   8/12
+				   ----
+builtins/fc.def
+	- fc_gethnum: return HIST_NOTFOUND (new error) if the string is not a
+	  number and doesn't correspond to any command in the history list
+	- fc_builtin: print a "no command found" error message if fc_gethnum
+	  returns HIST_NOTFOUND
+
+				   8/14
+				   ----
+flags.c
+	- no_invisible_vars: removed undocumented `-I' flag
+
+{flags,variables}.c,flags.h,builtins/{declare,setattr.def}
+	- no_invisible_vars: remove all references
+
+command.h
+	- PF_ALLINDS: new flag, means to expand an array variable name without
+	  a subscript as if it were subscripted by `@' instead of `0'
+
+subst.c
+	- parameter_brace_expand_word: if PFLAGS contains PF_ALLINDS, expand
+	  an array variable name as if it were subscripted by "@" instead of
+	  0/"0": a string with the element values separated by " ". Little
+	  nuance; we're just interested in whether or not there are any
+	  values at all
+	- parameter_brace_expand: if we are expanding something like ${foo@a},
+	  pass PF_ALLINDS to parameter_brace_expand_word and
+	  parameter_brace_expand_indir so we don't get tripped up on `nounset'
+	  if foo has an assigned subscript other than 0/"0". Inspired by a
+	  report from Andrew Neff <andrew.neff@visionsystemsinc.com>
+
+				   8/17
+				   ----
+bashhist.c
+	- bash_add_history,maybe_add_history: don't need to call shell_comment
+	  if we are in the middle of adding a here-document, since it may
+	  call the parser recursively on data that is not guaranteed to be
+	  valid input. From a report by Hyunho Cho <mug896@gmail.com>
+
+				   8/24
+				   ----
+lib/readline/complete.c
+	- compare_match: compare TEXT from the line buffer and MATCH, a
+	  possible completion for TEXT, after dequoting TEXT if necessary
+	- rl_complete_internal,rl_menu_complete : if show-all-if-unmodified is
+	  set, use compare_match instead of a straight strcmp to determine if
+	  the match has changed the text to complete, so we can use it for
+	  filenames that require quoting. Report and pointer to fix from
+	  Abon B <gnuabonbon@gmail.com>
+
+				   8/25
+				   ----
+eval.c
+	- execute_prompt_command: PROMPT_COMMAND can now be an array, subsuming
+	  PROMPT_COMMANDS, which bash no longer looks for. Prompted by a
+	  suggestion from Martijn Dekker <martijn@inlv.org>
+
+				   8/26
+				   ----
+builtins/fc.def
+	- fc_gethnum: now takes a flags word as the third argument, with two
+	  current flag values: HN_LISTING, which means we are listing history
+	  entries, and HN_FIRST, which means we are parsing the first in a
+	  first,last range of history entries
+	- fc_gethnum: if we have a number >= 0, and it's out of range, return
+	  different values (0 or last history) depending on whether we are
+	  parsing the first or last in a range argument. Based on a report from
+	  Martijn Dekker <martijn@inlv.org>
+
+				   8/31
+				   ----
+parse.y
+	- grammar: call handle_eof_input_unit from the eof-after-error
+	  production only from interactive top-level shells, so a syntax error
+	  in `eval' doesn't exit an interactive shell. Report and fix from
+	  Koichi Murase <myoga.murase@gmail.com>
+
+bashline.c
+	- bash_execute_unix_command: if we call parse_and_execute with allocated
+	  memory, make sure not to include SEVAL_NOFREE in the flags so it will
+	  free that command string before returning. Report and fix from
+	  Koichi Murase <myoga.murase@gmail.com>
+
+array.[ch]
+	- array_to_argv: now takes a second argument: COUNTP; returns the number
+	  of elements stored in the strvec
+	- array_to_argv: don't store array elements with null values; it makes
+	  it hard for callers to walk the whole array reliably
+
+pcomplete.c
+	- gen_shell_function_matches: change call to array_to_argv
+
+array.h
+	- execute_array_command: now takes the entire ARRAY * as the first
+	  parameter
+
+eval.c
+	- execute_array_command: now takes the entire array, puts the elements
+	  into a strvec, and executes each element of the strvevc as a command.
+	  This protects against a command from PROMPT_COMMAND[n] unsetting the
+	  corresponding element of PROMPT_COMMAND.
+	  From a report from Koichi Murase <myoga.murase@gmail.com>

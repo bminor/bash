@@ -482,6 +482,7 @@ argv[1] = <a>
 argv[2] = <b>
 argv[1] = <>
 ./new-exp.tests: line 565: $(($# - 2)): substring expression < 0
+./new-exp.tests: line 567: -2: substring expression < 0
 argv[1] = <bin>
 argv[2] = <bin>
 argv[3] = <ucb>
@@ -707,6 +708,17 @@ aaa bb
 'a b' 'c d' 'e f'
 0 "zero" 1 "one" 2 "two" 3 "three"
 0 "zero z" 1 "one o" 2 "two t" 3 "three t"
+declare -a foo=()
+ai
+declare -ai foo
+bash: line 1: foo: unbound variable
+ai
+declare -ai foo
+bash: line 1: !bar: unbound variable
+a
+a
+a
+a
 argv[1] = </>
 argv[1] = </>
 

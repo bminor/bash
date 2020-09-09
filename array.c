@@ -810,22 +810,29 @@ WORD_LIST	*list;
 }
 
 char **
-array_to_argv (a)
+array_to_argv (a, countp)
 ARRAY	*a;
+int	*countp;
 {
 	char		**ret, *t;
 	int		i;
 	ARRAY_ELEMENT	*ae;
 
-	if (a == 0 || array_empty(a))
+	if (a == 0 || array_empty(a)) {
+		if (countp)
+			*countp = 0;
 		return ((char **)NULL);
+	}
 	ret = strvec_create (array_num_elements (a) + 1);
 	i = 0;
 	for (ae = element_forw(a->head); ae != a->head; ae = element_forw(ae)) {
 		t = element_value (ae);
-		ret[i++] = t ? savestring (t) : (char *)NULL;
+		if (t)
+			ret[i++] = savestring (t);
 	}
 	ret[i] = (char *)NULL;
+	if (countp)
+		*countp = i;
 	return (ret);
 }
 	

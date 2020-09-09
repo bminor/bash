@@ -84,7 +84,7 @@ extern WORD_LIST *array_keys_to_word_list PARAMS((ARRAY *));
 
 extern ARRAY *array_assign_list PARAMS((ARRAY *, WORD_LIST *));
 
-extern char **array_to_argv PARAMS((ARRAY *));
+extern char **array_to_argv PARAMS((ARRAY *, int *));
 
 extern char *array_to_kvpair PARAMS((ARRAY *, int));
 extern char *array_to_assign PARAMS((ARRAY *, int));
@@ -121,7 +121,7 @@ extern ARRAY *array_from_string PARAMS((char *, char *));
 
 #define ALL_ELEMENT_SUB(c)	((c) == '@' || (c) == '*')
 
-/* In eval.c, but uses ARRAY_ELEMENT * */
-extern int execute_array_command PARAMS((ARRAY_ELEMENT *, void *));
+/* In eval.c, but uses ARRAY * */
+extern int execute_array_command PARAMS((ARRAY *, void *));
 
 #endif /* _ARRAY_H_ */

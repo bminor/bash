@@ -7,7 +7,7 @@
 # chet@cwru.edu and, optionally, to bash-testers@cwru.edu.
 # Other versions send mail to bug-bash@gnu.org.
 #
-# Copyright (C) 1996-2004 Free Software Foundation, Inc.
+# Copyright (C) 1996-2020 Free Software Foundation, Inc.
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -132,6 +132,8 @@ if [ -z "$DEFEDITOR" ] && [ -z "$EDITOR" ]; then
 		DEFEDITOR=emacs
 	elif [ -x /usr/bin/xemacs ]; then
 		DEFEDITOR=xemacs
+	elif [ -x /usr/bin/nano ]; then
+		DEFEDITOR=nano
 	elif [ -x /usr/contrib/bin/jove ]; then
 		DEFEDITOR=jove
 	elif [ -x /usr/local/bin/jove ]; then

@@ -270,6 +270,7 @@ extern char *pat_subst PARAMS((char *, char *, char *, int));
 extern int fifos_pending PARAMS((void));
 extern int num_fifos PARAMS((void));
 extern void unlink_fifo_list PARAMS((void));
+extern void unlink_all_fifos PARAMS((void));
 extern void unlink_fifo PARAMS((int));
 
 extern void *copy_fifo_list PARAMS((int *));

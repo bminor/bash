@@ -949,7 +949,8 @@ expand_and_quote_assoc_word (w, type)
 
 /* For each word in a compound array assignment, if the word looks like
    [ind]=value, single-quote ind and value, but leave the brackets and
-   the = sign (and any `+') alone. This is used for indexed arrays. */
+   the = sign (and any `+') alone. If it's not an assignment, just single-
+   quote the word. This is used for indexed arrays. */
 void
 quote_compound_array_list (list, type)
      WORD_LIST *list;
@@ -960,7 +961,7 @@ quote_compound_array_list (list, type)
 
   for (l = list; l; l = l->next)
     {
-      if (l->word == 0 || l->word->word == 0 || l->word->word[0] == '\0')
+      if (l->word == 0 || l->word->word == 0)
 	continue;	/* should not happen, but just in case... */
       if ((l->word->flags & W_ASSIGNMENT) == 0)
 	t = sh_single_quote (l->word->word);

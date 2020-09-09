@@ -134,7 +134,8 @@ hash_builtin (list)
   if (list == 0 && expunge_hash_table == 0)
     {
       opt = print_hashed_commands (list_portably);
-      if (opt == 0 && posixly_correct == 0)
+      if (opt == 0 && posixly_correct == 0 &&
+	    (list_portably == 0 || shell_compatibility_level <= 50))
 	printf (_("%s: hash table empty\n"), this_command_name);
 
       return (EXECUTION_SUCCESS);

@@ -237,8 +237,11 @@ static sighandler
 alrm_catcher(i)
      int i;
 {
-  printf (_("\007timed out waiting for input: auto-logout\n"));
-  fflush (stdout);
+  char *msg;
+
+  msg = _("\007timed out waiting for input: auto-logout\n");
+  write (1, msg, strlen (msg));
+
   bash_logout ();	/* run ~/.bash_logout if this is a login shell */
   jump_to_top_level (EXITPROG);
   SIGRETURN (0);
@@ -260,17 +263,25 @@ send_pwd_to_eterm ()
 }
 
 #if defined (ARRAY_VARS)
+/* Caller ensures that A has a non-zero number of elements */
 int
-execute_array_command (ae, v)
-     ARRAY_ELEMENT *ae;
+execute_array_command (a, v)
+     ARRAY *a;
      void *v;
 {
-  char *tag, *command;
+  char *tag;
+  char **argv;
+  int argc, i;
 
   tag = (char *)v;
-  command = element_value (ae);
-  if (command && *command)
-    execute_variable_command (command, tag);
+  argc = 0;
+  argv = array_to_argv (a, &argc);
+  for (i = 0; i < argc; i++)
+    {
+      if (argv[i] && argv[i][0])
+	execute_variable_command (argv[i], tag);
+    }
+  strvec_dispose (argv);
   return 0;
 }
 #endif
@@ -279,19 +290,26 @@ static void
 execute_prompt_command ()
 {
   char *command_to_execute;
-#if defined (ARRAY_VARS)
   SHELL_VAR *pcv;
+#if defined (ARRAY_VARS)
   ARRAY *pcmds;
-
-  GET_ARRAY_FROM_VAR ("PROMPT_COMMANDS", pcv, pcmds);
-  if (pcv && var_isset (pcv) && pcmds && array_num_elements (pcmds) > 0)
-    {
-      array_walk (pcmds, execute_array_command, "PROMPT_COMMANDS");
-      return;
-    }
 #endif
 
-  command_to_execute = get_string_value ("PROMPT_COMMAND");
+  pcv = find_variable ("PROMPT_COMMAND");
+  if (pcv  == 0 || var_isset (pcv) == 0 || invisible_p (pcv))
+    return;
+#if defined (ARRAY_VARS)
+  if (array_p (pcv))
+    {
+      if ((pcmds = array_cell (pcv)) && array_num_elements (pcmds) > 0)
+	execute_array_command (pcmds, "PROMPT_COMMAND");
+      return;
+    }
+  else if (assoc_p (pcv))
+    return;	/* currently don't allow associative arrays here */
+#endif
+
+  command_to_execute = value_cell (pcv);
   if (command_to_execute && *command_to_execute)
     execute_variable_command (command_to_execute, "PROMPT_COMMAND");
 }
@@ -310,7 +328,7 @@ parse_command ()
 
   /* Allow the execution of a random command just before the printing
      of each primary prompt.  If the shell variable PROMPT_COMMAND
-     is set then the value of it is the command to execute. */
+     is set then its value (array or string) is the command(s) to execute. */
   /* The tests are a combination of SHOULD_PROMPT() and prompt_again() 
      from parse.y, which are the conditions under which the prompt is
      actually printed. */

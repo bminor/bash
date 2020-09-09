@@ -86,6 +86,14 @@ $END
 extern int errno;
 #endif /* !errno */
 
+#define HIST_INVALID INT_MIN
+#define HIST_ERANGE  INT_MIN+1
+#define HIST_NOTFOUND INT_MIN+2
+
+/* Values for the flags argument to fc_gethnum */
+#define HN_LISTING	0x01
+#define HN_FIRST	0x02
+
 extern int unlink PARAMS((const char *));
 
 extern FILE *sh_mktmpfp PARAMS((char *, int, char **));
@@ -201,7 +209,7 @@ fc_builtin (list)
 	  break;
 
 	case 'l':
-	  listing = 1;
+	  listing = HN_LISTING;		/* for fc_gethnum */
 	  break;
 
 	case 'r':
@@ -321,14 +329,11 @@ fc_builtin (list)
     while (last_hist >= 0 && hlist[last_hist] == 0)
       last_hist--;
   if (last_hist < 0)
-    {
-      sh_erange ((char *)NULL, _("history specification"));
-      return (EXECUTION_FAILURE);
-    }
+    last_hist = 0;		/* per POSIX */
 
   if (list)
     {
-      histbeg = fc_gethnum (list->word->word, hlist, listing);
+      histbeg = fc_gethnum (list->word->word, hlist, listing|HN_FIRST);
       list = list->next;
 
       if (list)
@@ -353,12 +358,27 @@ fc_builtin (list)
 	histbeg = histend = last_hist;
     }
 
-  /* We print error messages for line specifications out of range. */
-  if ((histbeg < 0) || (histend < 0))
+  if (histbeg == HIST_INVALID || histend == HIST_INVALID)
+    {
+      sh_erange ((char *)NULL, _("history specification")); 
+      return (EXECUTION_FAILURE);
+    }
+  else if (histbeg == HIST_ERANGE || histend == HIST_ERANGE)
     {
       sh_erange ((char *)NULL, _("history specification"));
       return (EXECUTION_FAILURE);
     }
+  else if (histbeg == HIST_NOTFOUND || histend == HIST_NOTFOUND)
+    {
+      builtin_error (_("no command found"));
+      return (EXECUTION_FAILURE);
+    }
+
+  /* We don't throw an error for line specifications out of range, per POSIX */
+  if (histbeg < 0)
+    histbeg = 0;
+  if (histend < 0)
+    histend = 0;
 
   /* "When not listing, the fc command that caused the editing shall not be
      entered into the history list." */
@@ -382,12 +402,27 @@ fc_builtin (list)
 	histbeg = last_hist;
     }
 
-  /* We print error messages for line specifications out of range. */
-  if ((histbeg < 0) || (histend < 0))
+  if (histbeg == HIST_INVALID || histend == HIST_INVALID)
+    {
+      sh_erange ((char *)NULL, _("history specification")); 
+      return (EXECUTION_FAILURE);
+    }
+  else if (histbeg == HIST_ERANGE || histend == HIST_ERANGE)
     {
       sh_erange ((char *)NULL, _("history specification"));
       return (EXECUTION_FAILURE);
     }
+  else if (histbeg == HIST_NOTFOUND || histend == HIST_NOTFOUND)
+    {
+      builtin_error (_("no command found"));
+      return (EXECUTION_FAILURE);
+    }
+
+  /* We don't throw an error for line specifications out of range, per POSIX */
+  if (histbeg < 0)
+    histbeg = 0;
+  if (histend < 0)
+    histend = 0;
 
   if (histend < histbeg)
     {
@@ -507,7 +542,9 @@ fc_number (list)
 /* Return an absolute index into HLIST which corresponds to COMMAND.  If
    COMMAND is a number, then it was specified in relative terms.  If it
    is a string, then it is the start of a command line present in HLIST.
-   MODE is 1 if we are listing commands, 0 if we are executing them. */
+   MODE includes HN_LISTING if we are listing commands, and does not if we
+   are executing them. If MODE includes HN_FIRST we are looking for the
+   first history number specification. */
 static int
 fc_gethnum (command, hlist, mode)
      char *command;
@@ -515,9 +552,10 @@ fc_gethnum (command, hlist, mode)
      int mode;
 {
   int sign, n, clen, rh;
-  register int i, j, last_hist, real_last;
+  register int i, j, last_hist, real_last, listing;
   register char *s;
 
+  listing = mode & HN_LISTING;
   sign = 1;
   /* Count history elements. */
   for (i = 0; hlist[i]; i++);
@@ -570,19 +608,33 @@ fc_gethnum (command, hlist, mode)
       n = atoi (s);
       n *= sign;
 
+      /* We want to return something that is an offset to HISTORY_BASE. */
+
       /* If the value is negative or zero, then it is an offset from
 	 the current history item. */
+      /* We don't use HN_FIRST here, so we don't return different values
+	 depending on whether we're looking for the first or last in a
+	 pair of range arguments, but nobody else does, either. */
       if (n < 0)
 	{
 	  n += i + 1;
 	  return (n < 0 ? 0 : n);
 	}
       else if (n == 0)
-	return ((sign == -1) ? (mode ? real_last : -1) : i);
+	return ((sign == -1) ? (listing ? real_last : HIST_INVALID) : i);
       else
 	{
+	  /* If we're out of range (greater than I (last history entry) or
+	     less than HISTORY_BASE, we want to return different values
+	     based on whether or not we are looking for the first or last
+	     value in a desired range of history entries. */
 	  n -= history_base;
-	  return (i < n ? i : n);
+	  if (n < 0)
+	    return (mode & HN_FIRST ? 0 : i);
+	  else if (n >= i)
+	    return (mode & HN_FIRST ? 0 : i);
+	  else
+	    return n;
 	}
     }
 
@@ -592,7 +644,7 @@ fc_gethnum (command, hlist, mode)
       if (STREQN (command, histline (j), clen))
 	return (j);
     }
-  return (-1);
+  return (HIST_NOTFOUND);
 }
 
 /* Locate the most recent history line which begins with

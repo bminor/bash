@@ -97,17 +97,17 @@ line 2 for history
 6	 HISTFILE=$TMPDIR/newhistory
 7	 echo displaying \$HISTFILE after history -a
 8	 cat $HISTFILE
-./history.tests: line 89: fc: history specification out of range
-   14  set -H
+./history.tests: line 90: fc: no command found
    15  echo line 2 for history
    16  unset HISTSIZE
    17  unset HISTFILE
+   18  # now an out-of-range error because of the one=two not found in history
 aa ab ac
 echo xx xb xc
 xx xb xc
 echo 44 48 4c
 44 48 4c
-./history.tests: line 104: fc: no command found
+./history.tests: line 105: fc: no command found
 aa
 bb
 cc
@@ -241,3 +241,26 @@ c
 d
 echo d
 d
+a
+b
+c
+d
+e
+f
+4	 echo d
+5	 echo e
+6	 echo f
+out of range 1
+6	 echo f
+7	 fc -l
+8	 echo out of range 1
+out of range 2
+8	 echo out of range 1
+9	 fc -l 502 498
+10	 echo out of range 2
+out of range 3
+10	 echo out of range 2
+11	 fc -l 498 502
+12	 echo out of range 3
+out of range 4
+13	 fc -l 1 99

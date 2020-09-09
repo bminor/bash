@@ -981,7 +981,7 @@ exit_shell (s)
     s = run_exit_trap ();
 
 #if defined (PROCESS_SUBSTITUTION)
-  unlink_fifo_list ();
+  unlink_all_fifos ();
 #endif /* PROCESS_SUBSTITUTION */
 
 #if defined (HISTORY)

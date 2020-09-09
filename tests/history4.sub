@@ -14,6 +14,8 @@
 HISTFILE=$TMPDIR/newhistory-$$
 export HISTFILE
 
+trap 'rm -f $HISTFILE' EXIT
+
 HISTSIZE=32
 HISTFILESIZE=32
 echo
@@ -43,4 +45,3 @@ echo
 printf "$input" | HISTSIZE= HISTFILE= ${THIS_SH} --norc -i 2>/dev/null
 echo
 printf "$input" | HISTSIZE=6 HISTFILE= ${THIS_SH} --norc -i 2>/dev/null
-

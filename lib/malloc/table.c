@@ -29,7 +29,7 @@
 #include "table.h"
 
 #ifdef SHELL
-extern int interrupt_immediately, running_trap;
+extern int running_trap;
 extern int signal_is_trapped PARAMS((int));
 #endif
 
@@ -174,7 +174,7 @@ mregister_alloc (tag, mem, size, file, line)
   /* Block all signals in case we are executed from a signal handler. */
   blocked_sigs = 0;
 #ifdef SHELL
-  if (interrupt_immediately || running_trap || signal_is_trapped (SIGINT) || signal_is_trapped (SIGCHLD))
+  if (running_trap || signal_is_trapped (SIGINT) || signal_is_trapped (SIGCHLD))
 #endif
     {
       _malloc_block_signals (&set, &oset);
@@ -229,7 +229,7 @@ mregister_free (mem, size, file, line)
   /* Block all signals in case we are executed from a signal handler. */
   blocked_sigs = 0;
 #ifdef SHELL
-  if (interrupt_immediately || running_trap || signal_is_trapped (SIGINT) || signal_is_trapped (SIGCHLD))
+  if (running_trap || signal_is_trapped (SIGINT) || signal_is_trapped (SIGCHLD))
 #endif
     {
       _malloc_block_signals (&set, &oset);

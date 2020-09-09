@@ -47,11 +47,11 @@
 #  endif /* !__STDC__ */
 #endif /* !PTR_T */
 
-#if defined (HAVE_SBRK) && !HAVE_DECL_SBRK
+#if HAVE_SBRK && !HAVE_DECL_SBRK
 extern char *sbrk();
 #endif
 
-#if defined (HAVE_SBRK) && defined (USING_BASH_MALLOC)
+#if HAVE_SBRK && defined (USING_BASH_MALLOC)
 static PTR_T lbreak;
 static int brkfound;
 static size_t allocated;
@@ -63,7 +63,7 @@ static size_t allocated;
 /*								    */
 /* **************************************************************** */
 
-#if defined (HAVE_SBRK) && defined (USING_BASH_MALLOC)
+#if HAVE_SBRK && defined (USING_BASH_MALLOC)
 #define FINDBRK() \
 do { \
   if (brkfound == 0) \
@@ -88,7 +88,7 @@ allocerr (func, bytes)
      const char *func;
      size_t bytes;
 {
-#if defined (HAVE_SBRK) && defined (USING_BASH_MALLOC)
+#if HAVE_SBRK && defined (USING_BASH_MALLOC)
       allocated = findbrk ();
       fatal_error (_("%s: cannot allocate %lu bytes (%lu bytes allocated)"), func, (unsigned long)bytes, (unsigned long)allocated);
 #else
@@ -160,7 +160,7 @@ sh_allocerr (func, bytes, file, line)
      char *file;
      int line;
 {
-#if defined (HAVE_SBRK)
+#if HAVE_SBRK
       allocated = findbrk ();
       fatal_error (_("%s: %s:%d: cannot allocate %lu bytes (%lu bytes allocated)"), func, file, line, (unsigned long)bytes, (unsigned long)allocated);
 #else

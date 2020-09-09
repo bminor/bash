@@ -493,9 +493,9 @@ replaced with an ellipsis when displaying possible completions.
 @vindex completion-query-items
 The number of possible completions that determines when the user is
 asked whether the list of possibilities should be displayed.
-If the number of possible completions is greater than this value,
-Readline will ask the user whether or not he wishes to view
-them; otherwise, they are simply listed.
+If the number of possible completions is greater than or equal to this value,
+Readline will ask whether or not the user wishes to view them;
+otherwise, they are simply listed.
 This variable must be set to an integer value greater than or equal to 0.
 A negative value means Readline should never ask.
 The default limit is @code{100}.
@@ -1115,8 +1115,8 @@ set convert-meta off
 # rather than as meta-prefixed characters
 set output-meta on
 
-# if there are more than 150 possible completions for
-# a word, ask the user if he wants to see all of them
+# if there are 150 or more possible completions for a word,
+# ask whether or not the user wants to see all of them
 set completion-query-items 150
 
 # For FTP
@@ -1254,10 +1254,12 @@ being entered.
 @item reverse-search-history (C-r)
 Search backward starting at the current line and moving `up' through
 the history as necessary.  This is an incremental search.
+This command sets the region to the matched text and activates the mark.
 
 @item forward-search-history (C-s)
 Search forward starting at the current line and moving `down' through
 the history as necessary.  This is an incremental search.
+This command sets the region to the matched text and activates the mark.
 
 @item non-incremental-reverse-search-history (M-p)
 Search backward starting at the current line and moving `up'
@@ -1377,6 +1379,11 @@ each character as if it had been read from the keyboard.  The characters
 are inserted as if each one was bound to @code{self-insert} instead of
 executing any editing commands.
 
+Bracketed paste sets the region (the characters between point and the mark)
+to the inserted text. It uses the concept of an @emph{active mark}: when the
+mark is active, Readline redisplay uses the terminal's standout mode to
+denote the region.
+
 @item transpose-chars (C-t)
 Drag the character before the cursor forward over
 the character at the cursor, moving the
@@ -1426,9 +1433,13 @@ By default, this command is unbound.
 
 @item kill-line (C-k)
 Kill the text from point to the end of the line.
+With a negative numeric argument, kill backward from the cursor to the
+beginning of the current line.
 
 @item backward-kill-line (C-x Rubout)
 Kill backward from the cursor to the beginning of the current line.
+With a negative numeric argument, kill forward from the cursor to the
+end of the current line.
 
 @item unix-line-discard (C-u)
 Kill backward from the cursor to the beginning of the current line.

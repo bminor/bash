@@ -203,6 +203,7 @@ e
 'b
 b  c
 $0
+declare -a A=([0]="X=a" [1]="b")
 t
 [3]=abcde r s t u v
 e
@@ -756,3 +757,9 @@ declare -A A=(["*"]="X" ["@"]="X" )
 ./array27.sub: line 69: A[*]: bad array subscript
 ./array27.sub: line 69: A[@]: bad array subscript
 declare -A A
+declare -a bug4=([0]="" [1]="5" [2]="" [3]="1" [4]="")
+declare -a bug=([0]="" [1]="5" [2]="" [3]="1" [4]="")
+declare -a bug2=([0]="")
+declare -a bug3=([0]="" [1]="5" [2]="" [3]="1" [4]="")
+declare -a not_bug=([0]="no" [1]="nulls")
+declare -a workaround=([0]="")

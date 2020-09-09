@@ -62,6 +62,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <time.h>
+#include <errno.h>
 
 #if defined(TM_IN_SYS_TIME)
 #include <sys/types.h>
@@ -79,6 +80,10 @@
 #define POSIX_2008	1	/* flag and fw for C, F, G, Y formats */
 
 #undef strchr	/* avoid AIX weirdness */
+
+#if !defined (errno)
+extern int errno;
+#endif
 
 #if defined (SHELL)
 extern char *get_string_value (const char *);
@@ -172,7 +177,7 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 	char *start = s;
 	auto char tbuf[100];
 	long off;
-	int i, w;
+	int i, w, oerrno;
 	long y;
 	static short first = 1;
 #ifdef POSIX_SEMANTICS
@@ -216,6 +221,8 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 		"October", "November", "December",
 	};
 	static const char *ampm[] = { "AM", "PM", };
+
+	oerrno = errno;
 
 	if (s == NULL || format == NULL || timeptr == NULL || maxsize == 0)
 		return 0;
@@ -716,6 +723,8 @@ strftime(char *s, size_t maxsize, const char *format, const struct tm *timeptr)
 out:
 	if (s < endp && *format == '\0') {
 		*s = '\0';
+		if (s == start)
+			errno = oerrno;
 		return (s - start);
 	} else
 		return 0;

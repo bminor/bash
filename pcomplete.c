@@ -1184,7 +1184,7 @@ gen_shell_function_matches (cs, cmd, text, line, ind, lwords, nw, cw, foundp)
       /* XXX - should we filter the list of completions so only those matching
 	 TEXT are returned?  Right now, we do not. */
       sl = strlist_create (0);
-      sl->list = array_to_argv (a);
+      sl->list = array_to_argv (a, 0);
       sl->list_len = sl->list_size = array_num_elements (a);
     }
 

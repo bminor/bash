@@ -36,6 +36,10 @@
 extern int errno;
 #endif
 
+#ifndef ZBUFSIZ
+#  define ZBUFSIZ 4096
+#endif
+
 extern ssize_t zread PARAMS((int, char *, size_t));
 
 /* Dump contents of file descriptor FD to *OSTR.  FN is the filename for
@@ -48,12 +52,12 @@ zmapfd (fd, ostr, fn)
 {
   ssize_t nr;
   int rval;
-  char lbuf[512];
+  char lbuf[ZBUFSIZ];
   char *result;
   int rsize, rind;
 
   rval = 0;
-  result = (char *)xmalloc (rsize = 512);
+  result = (char *)xmalloc (rsize = ZBUFSIZ);
   rind = 0;
 
   while (1)
@@ -72,7 +76,7 @@ zmapfd (fd, ostr, fn)
 	  return -1;
 	}
 
-      RESIZE_MALLOCED_BUFFER (result, rind, nr, rsize, 512);
+      RESIZE_MALLOCED_BUFFER (result, rind, nr, rsize, ZBUFSIZ);
       memcpy (result+rind, lbuf, nr);
       rind += nr;
     }

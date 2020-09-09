@@ -145,7 +145,27 @@ optimize_subshell_command (command)
 	   (command->value.Connection->connector == AND_AND || command->value.Connection->connector == OR_OR))
     optimize_subshell_command (command->value.Connection->second);
 }
-     
+
+void
+optimize_shell_function (command)
+     COMMAND *command;
+{
+  COMMAND *fc;
+
+  fc = (command->type == cm_group) ? command->value.Group->command : command;
+
+  if (fc->type == cm_simple && should_suppress_fork (fc))
+    {
+      fc->flags |= CMD_NO_FORK;
+      fc->value.Simple->flags |= CMD_NO_FORK;
+    }
+  else if (fc->type == cm_connection && can_optimize_connection (fc) && should_suppress_fork (fc->value.Connection->second))
+    {
+      fc->value.Connection->second->flags |= CMD_NO_FORK;
+      fc->value.Connection->second->value.Simple->flags |= CMD_NO_FORK;
+    }  
+}
+
 /* How to force parse_and_execute () to clean up after itself. */
 void
 parse_and_execute_cleanup (old_running_trap)

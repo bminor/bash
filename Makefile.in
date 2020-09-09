@@ -760,7 +760,7 @@ Makefile makefile:	config.status $(srcdir)/Makefile.in
 
 Makefiles makefiles:	config.status $(srcdir)/Makefile.in
 	@for mf in $(CREATED_MAKEFILES); do \
-		CONFIG_FILES=$$mf CONFIG_HEADERS= $(SHELL) ./config.status ; \
+		CONFIG_FILES=$$mf CONFIG_HEADERS= $(SHELL) ./config.status || exit 1; \
 	done
 
 config.h:	stamp-h 
@@ -846,16 +846,16 @@ install-headers-dirs:
 
 install-headers: install-headers-dirs
 	@for hf in $(INSTALLED_HEADERS) ; do \
-		${INSTALL_DATA} $(srcdir)/"$$hf" $(DESTDIR)$(headersdir)/$$hf; \
+		${INSTALL_DATA} $(srcdir)/"$$hf" $(DESTDIR)$(headersdir)/$$hf || exit 1; \
 	done
 	@for hf in $(INSTALLED_INCFILES) ; do \
-		${INSTALL_DATA} $(BASHINCDIR)/"$$hf" $(DESTDIR)$(headersdir)/include/$$hf; \
+		${INSTALL_DATA} $(BASHINCDIR)/"$$hf" $(DESTDIR)$(headersdir)/include/$$hf || exit 1; \
 	done
 	@for hf in $(INSTALLED_BUILTINS_HEADERS) ; do \
-		${INSTALL_DATA} $(BUILTIN_SRCDIR)/"$$hf" $(DESTDIR)$(headersdir)/builtins/$$hf; \
+		${INSTALL_DATA} $(BUILTIN_SRCDIR)/"$$hf" $(DESTDIR)$(headersdir)/builtins/$$hf || exit 1; \
 	done
 	@for hf in $(CREATED_HEADERS) ; do \
-		${INSTALL_DATA} $(BUILD_DIR)/"$$hf" $(DESTDIR)$(headersdir)/$$hf; \
+		${INSTALL_DATA} $(BUILD_DIR)/"$$hf" $(DESTDIR)$(headersdir)/$$hf || exit 1; \
 	done
 	-$(INSTALL_DATA) $(SDIR)/bash.pc $(DESTDIR)$(pkgconfigdir)/bash.pc
 

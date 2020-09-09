@@ -420,9 +420,9 @@ inputunit:	simple_list simple_list_terminator
 			  global_command = (COMMAND *)NULL;
 			  if (last_command_exit_value == 0)
 			    last_command_exit_value = EX_BADUSAGE;	/* force error return */
-			  handle_eof_input_unit ();
 			  if (interactive && parse_and_execute_level == 0)
 			    {
+			      handle_eof_input_unit ();
 			      YYACCEPT;
 			    }
 			  else
@@ -1644,9 +1644,9 @@ rewind_input_string ()
 
 /* These two functions used to test the value of the HAVE_RESTARTABLE_SYSCALLS
    define, and just use getc/ungetc if it was defined, but since bash
-   installs its signal handlers without the SA_RESTART flag, some signals
-   (like SIGCHLD, SIGWINCH, etc.) received during a read(2) will not cause
-   the read to be restarted.  We need to restart it ourselves. */
+   installs most of its signal handlers without the SA_RESTART flag, some
+   signals received during a read(2) will not cause the read to be restarted.
+   We will need to restart it ourselves. */
 
 static int
 yy_stream_get ()
@@ -4518,6 +4518,8 @@ xparse_dolparen (base, string, indp, flags)
   if (nc < 0)
     {
       clear_shell_input_line ();	/* XXX */
+      if (bash_input.type != st_string)	/* paranoia */
+	parser_state &= ~(PST_CMDSUBST|PST_EOFTOKEN);
       jump_to_top_level (-nc);	/* XXX */
     }
 

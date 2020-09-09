@@ -42,7 +42,7 @@ Options:
 		command) word
 
 When completion is attempted, the actions are applied in the order the
-uppercase-letter options are listed above.  If multiple options are supplied,
+uppercase-letter options are listed above. If multiple options are supplied,
 the -D option takes precedence over -E, and both take precedence over -I.
 
 Exit Status:
@@ -97,11 +97,16 @@ static void print_compopts PARAMS((const char *, COMPSPEC *, int));
 static void print_all_completions PARAMS((void));
 static int print_cmd_completions PARAMS((WORD_LIST *));
 
+static void print_compoptions PARAMS((unsigned long, int));
+static void print_compactions PARAMS((unsigned long));
+static void print_arg PARAMS((const char *, const char *, int));
+static void print_cmd_name PARAMS((const char *));
+
 static char *Garg, *Warg, *Parg, *Sarg, *Xarg, *Farg, *Carg;
 
 static const struct _compacts {
   const char * const actname;
-  int actflag;
+  unsigned long actflag;
   int actopt;
 } compacts[] = {
   { "alias",     CA_ALIAS,     'a' },
@@ -134,7 +139,7 @@ static const struct _compacts {
 /* This should be a STRING_INT_ALIST */
 static const struct _compopt {
   const char * const optname;
-  int optflag;
+  unsigned long optflag;
 } compopts[] = {
   { "bashdefault", COPT_BASHDEFAULT },
   { "default",	COPT_DEFAULT },
@@ -485,122 +490,95 @@ remove_cmd_completions (list)
   return ret;
 }
 
-#define SQPRINTARG(a, f) \
-  do { \
-    if (a) \
-      { \
-      	x = sh_single_quote (a); \
-	printf ("%s %s ", f, x); \
-	free (x); \
-      } \
-  } while (0)
+static void
+print_compoptions (copts, full)
+     unsigned long copts;
+     int full;
+{
+  const struct _compopt *co;
 
-#define PRINTARG(a, f) \
-  do { \
-    if (a) \
-      printf ("%s %s ", f, a); \
-  } while (0)
+  for (co = compopts; co->optname; co++)
+    if (copts & co->optflag)
+      printf ("-o %s ", co->optname);
+    else if (full)
+      printf ("+o %s ", co->optname);
+}
 
-#define PRINTOPT(a, f) \
-  do { \
-    if (acts & a) \
-      printf ("%s ", f); \
-  } while (0)
+static void
+print_compactions (acts)
+     unsigned long acts;
+{
+  const struct _compacts *ca;
 
-#define PRINTACT(a, f) \
-  do { \
-    if (acts & a) \
-      printf ("-A %s ", f); \
-  } while (0)
+  /* simple flags first */
+  for (ca = compacts; ca->actname; ca++)
+    if (ca->actopt && (acts & ca->actflag))
+      printf ("-%c ", ca->actopt);
 
-#define PRINTCOMPOPT(a, f) \
-  do { \
-    if (copts & a) \
-      printf ("-o %s ", f); \
-  } while (0)
+  /* then the rest of the actions */
+  for (ca = compacts; ca->actname; ca++)
+    if (ca->actopt == 0 && (acts & ca->actflag))
+      printf ("-A %s ", ca->actname);
+}
 
-#define XPRINTCOMPOPT(a, f) \
-  do { \
-    if (copts & a) \
-      printf ("-o %s ", f); \
-    else \
-      printf ("+o %s ", f); \
-  } while (0)
+static void
+print_arg (arg, flag, quote)
+     const char *arg, *flag;
+     int quote;
+{
+  char *x;
+
+  if (arg)
+    {
+      x = quote ? sh_single_quote (arg) : (char *)arg;
+      printf ("%s %s ", flag, x);
+      if (x != arg)
+	free (x);
+    }
+}
+
+static void
+print_cmd_name (cmd)
+     const char *cmd;
+{
+  if (STREQ (cmd, DEFAULTCMD))
+    printf ("-D");
+  else if (STREQ (cmd, EMPTYCMD))
+    printf ("-E");
+  else if (STREQ (cmd, INITIALWORD))
+    printf ("-I");
+  else if (*cmd == 0)		/* XXX - can this happen? */
+    printf ("''");
+  else
+    printf ("%s", cmd);
+}
 
 static int
 print_one_completion (cmd, cs)
      char *cmd;
      COMPSPEC *cs;
 {
-  unsigned long acts, copts;
-  char *x;
-
   printf ("complete ");
 
-  copts = cs->options;
-
-  /* First, print the -o options. */
-  PRINTCOMPOPT (COPT_BASHDEFAULT, "bashdefault");
-  PRINTCOMPOPT (COPT_DEFAULT, "default");
-  PRINTCOMPOPT (COPT_DIRNAMES, "dirnames");
-  PRINTCOMPOPT (COPT_FILENAMES, "filenames");
-  PRINTCOMPOPT (COPT_NOQUOTE, "noquote");
-  PRINTCOMPOPT (COPT_NOSORT, "nosort");
-  PRINTCOMPOPT (COPT_NOSPACE, "nospace");
-  PRINTCOMPOPT (COPT_PLUSDIRS, "plusdirs");
-
-  acts = cs->actions;
-
-  /* simple flags next */
-  PRINTOPT (CA_ALIAS, "-a");
-  PRINTOPT (CA_BUILTIN, "-b");
-  PRINTOPT (CA_COMMAND, "-c");
-  PRINTOPT (CA_DIRECTORY, "-d");
-  PRINTOPT (CA_EXPORT, "-e");
-  PRINTOPT (CA_FILE, "-f");
-  PRINTOPT (CA_GROUP, "-g");
-  PRINTOPT (CA_JOB, "-j");
-  PRINTOPT (CA_KEYWORD, "-k");
-  PRINTOPT (CA_SERVICE, "-s");
-  PRINTOPT (CA_USER, "-u");
-  PRINTOPT (CA_VARIABLE, "-v");
-
-  /* now the rest of the actions */
-  PRINTACT (CA_ARRAYVAR, "arrayvar");
-  PRINTACT (CA_BINDING, "binding");
-  PRINTACT (CA_DISABLED, "disabled");
-  PRINTACT (CA_ENABLED, "enabled");
-  PRINTACT (CA_FUNCTION, "function");
-  PRINTACT (CA_HELPTOPIC, "helptopic");
-  PRINTACT (CA_HOSTNAME, "hostname");
-  PRINTACT (CA_RUNNING, "running");
-  PRINTACT (CA_SETOPT, "setopt");
-  PRINTACT (CA_SHOPT, "shopt");
-  PRINTACT (CA_SIGNAL, "signal");
-  PRINTACT (CA_STOPPED, "stopped");
+  print_compoptions (cs->options, 0);
+  print_compactions (cs->actions);
 
   /* now the rest of the arguments */
 
   /* arguments that require quoting */
-  SQPRINTARG (cs->globpat, "-G");
-  SQPRINTARG (cs->words, "-W");
-  SQPRINTARG (cs->prefix, "-P");
-  SQPRINTARG (cs->suffix, "-S");
-  SQPRINTARG (cs->filterpat, "-X");
+  print_arg (cs->globpat, "-G", 1);
+  print_arg (cs->words, "-W", 1);
+  print_arg (cs->prefix, "-P", 1);
+  print_arg (cs->suffix, "-S", 1);
+  print_arg (cs->filterpat, "-X", 1);
 
-  SQPRINTARG (cs->command, "-C");
+  print_arg (cs->command, "-C", 1);
 
   /* simple arguments that don't require quoting */
-  PRINTARG (cs->funcname, "-F");
+  print_arg (cs->funcname, "-F", 0);
 
-  if (STREQ (cmd, DEFAULTCMD))
-    printf ("-D\n");
-  else if (STREQ (cmd, EMPTYCMD))
-    printf ("-E\n");
-  else if (STREQ (cmd, INITIALWORD))
-    printf ("-I\n");
-  else
-    printf ("%s\n", cmd);
+  print_cmd_name (cmd);
+  printf ("\n");
 
   return (0);
 }
@@ -611,42 +589,12 @@ print_compopts (cmd, cs, full)
      COMPSPEC *cs;
      int full;
 {
-  int copts;
-
   printf ("compopt ");
-  copts = cs->options;
 
-  if (full)
-    {
-      XPRINTCOMPOPT (COPT_BASHDEFAULT, "bashdefault");
-      XPRINTCOMPOPT (COPT_DEFAULT, "default");
-      XPRINTCOMPOPT (COPT_DIRNAMES, "dirnames");
-      XPRINTCOMPOPT (COPT_FILENAMES, "filenames");
-      XPRINTCOMPOPT (COPT_NOQUOTE, "noquote");
-      XPRINTCOMPOPT (COPT_NOSORT, "nosort");
-      XPRINTCOMPOPT (COPT_NOSPACE, "nospace");
-      XPRINTCOMPOPT (COPT_PLUSDIRS, "plusdirs");
-    }
-  else
-    {
-      PRINTCOMPOPT (COPT_BASHDEFAULT, "bashdefault");
-      PRINTCOMPOPT (COPT_DEFAULT, "default");
-      PRINTCOMPOPT (COPT_DIRNAMES, "dirnames");
-      PRINTCOMPOPT (COPT_FILENAMES, "filenames");
-      PRINTCOMPOPT (COPT_NOQUOTE, "noquote");
-      PRINTCOMPOPT (COPT_NOSORT, "nosort");
-      PRINTCOMPOPT (COPT_NOSPACE, "nospace");
-      PRINTCOMPOPT (COPT_PLUSDIRS, "plusdirs");
-    }
+  print_compoptions (cs->options, full);
+  print_cmd_name (cmd);
 
-  if (STREQ (cmd, DEFAULTCMD))
-    printf ("-D\n");
-  else if (STREQ (cmd, EMPTYCMD))
-    printf ("-E\n");
-  else if (STREQ (cmd, INITIALWORD))
-    printf ("-I\n");
-  else
-    printf ("%s\n", cmd);
+  printf ("\n");
 }
 
 static int

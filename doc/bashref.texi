@@ -2727,7 +2727,7 @@ by @{@var{varname}@}, the value of @var{varname} defines the file
 descriptor to close.
 If @{@var{varname}@} is supplied, the redirection persists beyond
 the scope of the command, allowing the shell programmer to manage
-the file descriptor himself.
+the file descriptor's lifetime manually.
 
 In the following descriptions, if the file descriptor number is
 omitted, and the first character of the redirection operator is
@@ -3787,7 +3787,7 @@ shift [@var{n}]
 Shift the positional parameters to the left by @var{n}.
 The positional parameters from @var{n}+1 @dots{} @code{$#} are
 renamed to @code{$1} @dots{} @code{$#}-@var{n}.
-Parameters represented by the numbers @code{$#} to @code{$#}-@var{n}+1
+Parameters represented by the numbers @code{$#} down to @code{$#}-@var{n}+1
 are unset.
 @var{n} must be a non-negative number less than or equal to @code{$#}.
 If @var{n} is zero or greater than @code{$#}, the positional parameters
@@ -4440,6 +4440,8 @@ If @var{name} is @samp{-}, the set of shell options is made local to the
 function in which @code{local} is invoked: shell options changed using
 the @code{set} builtin inside the function are restored to their original
 values when the function returns.
+The restore is effected as if a series of @code{set} commands were executed
+to restore the values that were in place before the function.
 The return status is zero unless @code{local} is used outside
 a function, an invalid @var{name} is supplied, or @var{name} is a
 readonly variable.
@@ -4584,12 +4586,6 @@ are used to split the line into words using the same rules the shell
 uses for expansion (described above in @ref{Word Splitting}).
 The backslash character @samp{\} may be used to remove any special
 meaning for the next character read and for line continuation.
-If no names are supplied, the line read is assigned to the
-variable @env{REPLY}.
-The exit status is zero, unless end-of-file is encountered, @code{read}
-times out (in which case the status is greater than 128),
-a variable assignment error (such as assigning to a readonly variable) occurs,
-or an invalid file descriptor is supplied as the argument to @option{-u}.
 
 Options, if supplied, have the following meanings:
 
@@ -4665,6 +4661,15 @@ The exit status is greater than 128 if the timeout is exceeded.
 @item -u @var{fd}
 Read input from file descriptor @var{fd}.
 @end table
+
+If no @var{name}s are supplied, the line read,
+without the ending delimiter but otherwise unmodified,
+is assigned to the
+variable @env{REPLY}.
+The exit status is zero, unless end-of-file is encountered, @code{read}
+times out (in which case the status is greater than 128),
+a variable assignment error (such as assigning to a readonly variable) occurs,
+or an invalid file descriptor is supplied as the argument to @option{-u}.
 
 @item readarray
 @btindex readarray
@@ -5529,12 +5534,6 @@ If set, the @code{echo} builtin expands backslash-escape sequences
 by default.
 
 @end table
-
-@noindent
-The return status when listing options is zero if all @var{optnames}
-are enabled, non-zero otherwise.
-When setting or unsetting options, the return status is zero unless an
-@var{optname} is not a valid shell option.
 @end table
 
 @node Special Builtins
@@ -6284,13 +6283,12 @@ not already set.
 The process @sc{id} of the shell's parent process.  This variable
 is readonly.
 
-@item PROMPT_COMMANDS
-If this array variable is set,
+@item PROMPT_COMMAND
+If this variable is set, and is an array,
 the value of each set element is interpreted as a command to execute
 before printing the primary prompt (@env{$PS1}).
-If this is not set, but
-@env{PROMPT_COMMAND}
-is set to a value, its value is used as a command to execute instead.
+If this is set but not an array variable,
+its value is used as a command to execute instead.
 
 @item PROMPT_DIRTRIM
 If set to a number greater than zero, the value is used as the number of
@@ -8164,6 +8162,11 @@ more randomness. If the shell compatibility level is set to 50 or
 lower, it reverts to the method from bash-5.0 and previous versions,
 so seeding the random number generator by assigning a value to
 @env{RANDOM} will produce the same sequence as in bash-5.0
+@item
+If the command hash table is empty, Bash versions prior to bash-5.1
+printed an informational message to that effect, even when producing
+output that can be reused as input. Bash-5.1 suppresses that message
+when the @option{-l} option is supplied.
 @end itemize
 @end table
 
