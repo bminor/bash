@@ -10383,7 +10383,12 @@ add_string:
 
 	  c = string[++sindex];
 
-	  if (quoted & Q_HERE_DOCUMENT)
+	  /* "However, the double-quote character ( '"' ) shall not be treated
+	     specially within a here-document, except when the double-quote
+	     appears within "$()", "``", or "${}"." */
+	  if ((quoted & Q_HERE_DOCUMENT) && (quoted & Q_DOLBRACE) && c == '"')
+	    tflag = CBSDQUOTE;		/* special case */
+	  else if (quoted & Q_HERE_DOCUMENT)
 	    tflag = CBSHDOC;
 	  else if (quoted & Q_DOUBLE_QUOTES)
 	    tflag = CBSDQUOTE;

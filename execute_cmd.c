@@ -4636,7 +4636,7 @@ run_builtin:
 	      if (result == EX_USAGE)
 		result = EX_BADUSAGE;
 	      else if (result > EX_SHERRBASE)
-		result = EXECUTION_FAILURE;
+		result = builtin_status (result);
 	    }
 
 	  set_pipestatus_from_exit (result);
@@ -4694,16 +4694,17 @@ builtin_status (result)
   switch (result)
     {
     case EX_USAGE:
+    case EX_BADSYNTAX:
       r = EX_BADUSAGE;
       break;
     case EX_REDIRFAIL:
-    case EX_BADSYNTAX:
     case EX_BADASSIGN:
     case EX_EXPFAIL:
       r = EXECUTION_FAILURE;
       break;
     default:
-      r = EXECUTION_SUCCESS;
+      /* other special exit statuses not yet defined */
+      r = (result > EX_SHERRBASE) ? EXECUTION_FAILURE : EXECUTION_SUCCESS;
       break;
     }
   return (r);

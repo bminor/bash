@@ -24,7 +24,7 @@
 /* Defines for use by mksyntax.c */
 
 #define slashify_in_quotes "\\`$\"\n"
-#define slashify_in_here_document "\\`$\""
+#define slashify_in_here_document "\\`$"
 
 #define shell_meta_chars   "()<>;&|"
 #define shell_break_chars  "()<>;&| \t\n"

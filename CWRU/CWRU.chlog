@@ -8999,3 +8999,33 @@ variables.c
 aclocal.m4
 	- BASH_STRUCT_WEXITSTATUS_OFFSET: fix typo in loop condition reported
 	  by Andreas K. Hüttel <dilfridge@gentoo.org>
+
+syntax.h
+	- slashify_in_here_document: restore previous value that doesn't
+	  include double quote, since it's only special in certain cases
+
+subst.c
+	- expand_word_internal: when processing backslash-double quote inside
+	  a ${...} construct inside a here documemt, treat it the same as if
+	  it were double-quoted, as posix says. Fixes report from
+	  Andreas Schwab <schwab@linux-m68k.org>
+
+				   9/15
+				   ----
+support/signames.c
+	- added a number of more esoteric signal names from AIX and Solaris
+
+parse.y
+	- report_syntax_error: make sure that the exit status is only set to
+	  one of the special builtin exit statuses if we are really executing
+	  a builtin here, not just if parse_and_execute_level > 0. Reported by
+	  Rob Landley <rob@landley.net>
+
+execute_cmd.c
+	- EX_BADSYNTAX: make sure that gets translated into EX_BADUSAGE (2)
+	- execute_simple_command: if a function returns a value greater than
+	  EX_SHERRBASE, use builtin_status to translate it, as if a builtin
+	  were being executed
+	- builtin_status: make sure a status > EX_SHERRBASE gets translated to
+	  EXECUTION_FAILURE
+
