@@ -8977,3 +8977,25 @@ eval.c
 	  This protects against a command from PROMPT_COMMAND[n] unsetting the
 	  corresponding element of PROMPT_COMMAND.
 	  From a report from Koichi Murase <myoga.murase@gmail.com>
+
+				    9/7
+				    ---
+[bash-5.1-beta frozen]
+
+				    9/8
+				    ---
+lib/readline/display.c
+	- _rl_update_final: don't bother doing anything if the line structures
+	  have not been initialized. Report and fix from gary@catalyst.net.nz
+
+variables.c
+	- get_histcmd: perform the same adjustment as in prompt_history_number;
+	  make sure to subtract one if we're doing this while executing a
+	  command that has already been saved to the history list. Inspired
+	  by a report from L A Walsh <bash@tlinx.org>
+
+				   9/14
+				   ----
+aclocal.m4
+	- BASH_STRUCT_WEXITSTATUS_OFFSET: fix typo in loop condition reported
+	  by Andreas K. Hüttel <dilfridge@gentoo.org>

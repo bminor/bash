@@ -3271,6 +3271,9 @@ _rl_update_final (void)
 {
   int full_lines, woff, botline_length;
 
+  if (line_structures_initialized == 0)
+    return;
+
   full_lines = 0;
   /* If the cursor is the only thing on an otherwise-blank last line,
      compensate so we don't print an extra CRLF. */
