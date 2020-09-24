@@ -104,7 +104,7 @@ ALLPROG = print truefalse sleep finfo logname basename dirname fdflags \
 	  tty pathchk tee head mkdir rmdir mkfifo mktemp printenv id whoami \
 	  uname sync push ln unlink realpath strftime mypid setpgid seq rm \
 	  accept csv cut
-OTHERPROG = necho hello cat pushd stat
+OTHERPROG = necho hello cat pushd stat asort
 
 all:	$(SHOBJ_STATUS)
 
@@ -233,6 +233,9 @@ setpgid:	setpgid.o
 stat:	stat.o
 	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ stat.o $(SHOBJ_LIBS)
 
+asort:	asort.o
+	$(SHOBJ_LD) $(SHOBJ_LDFLAGS) $(SHOBJ_XLDFLAGS) -o $@ asort.o $(SHOBJ_LIBS)
+
 # pushd is a special case.  We use the same source that the builtin version
 # uses, with special compilation options.
 #
@@ -318,3 +321,4 @@ setpgid.o: setpgid.c
 stat.o: stat.c
 fdflags.o: fdflags.c
 seq.o: seq.c
+asort.o: asort.c

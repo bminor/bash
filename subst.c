@@ -5939,6 +5939,9 @@ process_substitute (string, open_for_read_in_child)
   pid = make_child ((char *)NULL, FORK_ASYNC);
   if (pid == 0)
     {
+      int old_interactive;
+
+      old_interactive = interactive;
       /* The currently-executing shell is not interactive */
       interactive = 0;
 
@@ -5948,7 +5951,7 @@ process_substitute (string, open_for_read_in_child)
       restore_original_signals ();	/* XXX - what about special builtins? bash-4.2 */
       QUIT;	/* catch any interrupts we got post-fork */
       setup_async_signals ();
-      if (open_for_read_in_child == 0)
+      if (open_for_read_in_child == 0 && old_interactive && (bash_input.type == st_stdin || bash_input.type == st_stream))
 	async_redirect_stdin ();
       subshell_environment |= SUBSHELL_COMSUB|SUBSHELL_PROCSUB|SUBSHELL_ASYNC;
 

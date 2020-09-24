@@ -9029,3 +9029,22 @@ execute_cmd.c
 	- builtin_status: make sure a status > EX_SHERRBASE gets translated to
 	  EXECUTION_FAILURE
 
+				   9/21
+				   ----
+subst.c
+	- process_substitute: set up input from /dev/null (standard for an
+	  asynchronous process) only if the shell is interactive and reading
+	  input from the terminal. This allows scripts to use process
+	  substitution to filter stdin. From a report from
+	  Andreas Schwab <schwab@linux-m68k.org>
+
+				   9/23
+				   ----
+doc/{bash.1,bashref.texi}
+	- ENV: a couple of changes clarifying that it's only used when an
+	  interactive shell is started in posix mode. Report from
+	  Reuben Thomas <rrt@sc3d.org>
+
+examples/loadables/asort.c
+	- asort: loadable builtin to sort an array. Contributed by
+	  Geir Hauge <geir.hauge@gmail.com>
