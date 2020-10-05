@@ -1592,8 +1592,17 @@ get_histcmd (var)
      SHELL_VAR *var;
 {
   char *p;
+  int n;
 
-  p = itos (history_number ());
+  /* Do the same adjustment here we do in parse.y:prompt_history_number,
+     assuming that we are in one of two states: decoding this as part of
+     the prompt string, in which case we do not want to assume that the
+     command has been saved to the history and the history number incremented,
+     or the expansion is part of the current command being executed and has
+     already been saved to history and the history number incremented.
+     Right now we use EXECUTING as the determinant. */
+  n = history_number () - executing;
+  p = itos (n);
   FREE (value_cell (var));
   var_setvalue (var, p);
   return (var);

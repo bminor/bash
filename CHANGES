@@ -1,3 +1,33 @@
+This document details the changes between this version, bash-5.1-rc1, and
+the previous version, bash-5.1-beta.
+
+1. Changes to Bash
+
+a. Fixed an inconsistency in the way HISTCMD is calculated when it's expanded
+   during a multi-line command.
+
+b. Modified the change to here-document expansion containing backslash-quoted
+   double quotes.
+
+c. Fixed a case where the shells's exit status could be greater than 255.
+
+d. Modified changed to process substitution so the executed command has its
+   stdin redirected from /dev/null if it was previously interactive and
+   reading commands from the terminal.
+
+2. New Features in Bash
+
+a. There is a new contributed loadable builtin: asort.
+
+3. Changes to Readline
+
+a. Fixed a bug that could cause an application with an application-specific
+   redisplay function to crash if the line data structures had not been
+   initialized.
+
+4. New Features in Readline
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-5.1-beta, and
 the previous version, bash-5.1-alpha.
 
