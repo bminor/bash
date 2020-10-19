@@ -456,7 +456,7 @@ _rl_init_terminal_io (const char *terminal_name)
 {
   const char *term;
   char *buffer;
-  int tty, tgetent_ret;
+  int tty, tgetent_ret, dumbterm;
 
   term = terminal_name ? terminal_name : sh_get_env_value ("TERM");
   _rl_term_clrpag = _rl_term_cr = _rl_term_clreol = _rl_term_clrscroll = (char *)NULL;
@@ -464,6 +464,8 @@ _rl_init_terminal_io (const char *terminal_name)
 
   if (term == 0)
     term = "dumb";
+
+  dumbterm = STREQ (term, "dumb");
 
 #ifdef __MSDOS__
   _rl_term_im = _rl_term_ei = _rl_term_ic = _rl_term_IC = (char *)NULL;
@@ -544,6 +546,10 @@ _rl_init_terminal_io (const char *terminal_name)
       _rl_term_so = _rl_term_se = (char *)NULL;
       _rl_terminal_can_insert = term_has_meta = 0;
 
+      /* Assume generic unknown terminal can't handle the enable/disable
+	 escape sequences */
+      _rl_enable_bracketed_paste = 0;
+
       /* Reasonable defaults for tgoto().  Readline currently only uses
          tgoto if _rl_term_IC or _rl_term_DC is defined, but just in case we
          change that later... */
@@ -595,6 +601,11 @@ _rl_init_terminal_io (const char *terminal_name)
   bind_termcap_arrow_keys (vi_insertion_keymap);
 #endif /* VI_MODE */
 
+  /* There's no way to determine whether or not a given terminal supports
+     bracketed paste mode, so we assume a terminal named "dumb" does not. */
+  if (dumbterm)
+    _rl_enable_bracketed_paste = 0;
+    
   return 0;
 }
 

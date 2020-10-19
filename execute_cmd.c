@@ -1617,7 +1617,7 @@ execute_in_subshell (command, asynchronous, pipe_in, pipe_out, fds_to_close)
   default_buffered_input = -1;
 #endif
 
-#if 0 /* XXX - TAG:bash-5.1 */
+#if 0 /* TAG: bash-5.2 */
   if (user_subshell && command->type == cm_subshell)
     optimize_subshell_command (command->value.Subshell->command);
 #endif
@@ -5484,7 +5484,11 @@ execute_disk_command (words, redirects, command_line, pipe_in, pipe_out,
     {
       /* If we're optimizing out the fork (implicit `exec'), decrement the
 	 shell level like `exec' would do. */
+#if 0 /* TAG: bash-5.2 psmith 10/11/2020 */
+      if (nofork && pipe_in == NO_PIPE && pipe_out == NO_PIPE && (subshell_environment & SUBSHELL_PIPE) == 0)
+#else
       if (nofork && pipe_in == NO_PIPE && pipe_out == NO_PIPE)
+#endif
 	adjust_shell_level (-1);
 
       maybe_make_export_env ();
