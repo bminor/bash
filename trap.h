@@ -116,6 +116,8 @@ extern void set_signal_hard_ignored PARAMS((int));
 extern void set_signal_ignored PARAMS((int));
 extern int signal_in_progress PARAMS((int));
 
+extern void set_trap_state PARAMS((int));
+
 extern int next_pending_trap PARAMS((int));
 extern int first_pending_trap PARAMS((void));
 extern void clear_pending_traps PARAMS((void));

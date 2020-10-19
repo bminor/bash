@@ -9073,3 +9073,25 @@ lib/readline/terminal.c
 	- _rl_init_terminal_io: if the terminal name is "dumb", disable
 	  bracketed paste mode. Suggested by
 	  Andreas Schwab <schwab@linux-m68k.org>
+
+				   10/13
+				   -----
+trap.[ch]
+	- set_trap_state: new function to allow other signal handlers to set
+	  the internal state that trap_handler would set to note that the
+	  shell received a trapped signal. Used by sigint_sighandler().
+
+sig.c
+	- sigint_sighandler: call set_trap_state to set the pending trap state
+	  for SIGINT if trap_handler is not called. Needed because
+	  throw_to_top_level now checks whether a signal is pending before
+	  running the trap (change from 4/2020)
+
+builtins/trap.def
+	- trap_builtin: if the shell is interactive (interactive_shell != 0)
+	  but running something like PROMPT_COMMAND that sets
+	  parse_and_execute_level > 0 but interactive == 0, make sure to set
+	  the signal handler to the default interactive shell SIGINT handler
+	  (sigint_sighandler) instead of the default non-interactive one.
+	  Fixes bug reported by Daniel Farina <daniel@fdr.io> with a hint
+	  from felix <felix@f-hauri.ch>

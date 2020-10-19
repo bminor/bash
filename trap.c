@@ -456,6 +456,17 @@ run_pending_traps ()
   last_command_exit_value = old_exit_value;
 }
 
+/* Set the private state variables noting that we received a signal SIG
+   for which we have a trap set. */
+void
+set_trap_state (sig)
+     int sig;
+{
+  catch_flag = 1;
+  pending_traps[sig]++;
+  trapped_signal_received = sig;
+}
+    
 sighandler
 trap_handler (sig)
      int sig;
@@ -484,9 +495,7 @@ trap_handler (sig)
       set_signal_handler (sig, trap_handler);
 #endif /* MUST_REINSTALL_SIGHANDLERS */
 
-      catch_flag = 1;
-      pending_traps[sig]++;
-      trapped_signal_received = sig;
+      set_trap_state (sig);
 
       if (this_shell_builtin && (this_shell_builtin == wait_builtin))
 	{

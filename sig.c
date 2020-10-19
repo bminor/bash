@@ -669,6 +669,11 @@ sigint_sighandler (sig)
       SIGRETURN (0);
     }
 
+  /* In interactive shells, we will get here instead of trap_handler() so
+     note that we have a trap pending. */
+  if (signal_is_trapped (sig))
+    set_trap_state (sig);
+
   /* This is no longer used, but this code block remains as a reminder. */
   if (interrupt_immediately)
     {
