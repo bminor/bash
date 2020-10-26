@@ -1812,7 +1812,7 @@ static const struct {
   { "convert-meta",		&_rl_convert_meta_chars_to_ascii, 0 },
   { "disable-completion",	&rl_inhibit_completion,		0 },
   { "echo-control-characters",	&_rl_echo_control_chars,	0 },
-  { "enable-bracketed-paste",	&_rl_enable_bracketed_paste,	0 },
+  { "enable-bracketed-paste",	&_rl_enable_bracketed_paste,	V_SPECIAL },
   { "enable-keypad",		&_rl_enable_keypad,		0 },
   { "enable-meta-key",		&_rl_enable_meta,		0 },
   { "expand-tilde",		&rl_complete_with_tilde_expansion, 0 },
@@ -1878,6 +1878,8 @@ hack_special_boolean_var (int i)
     }
   else if (_rl_stricmp (name, "show-mode-in-prompt") == 0)
     _rl_reset_prompt ();
+  else if (_rl_stricmp (name, "enable-bracketed-paste") == 0)
+    _rl_enable_active_region = _rl_enable_bracketed_paste;
 }
 
 typedef int _rl_sv_func_t PARAMS((const char *));

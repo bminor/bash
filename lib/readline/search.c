@@ -192,7 +192,7 @@ noninc_dosearch (char *string, int dir, int flags)
 
   make_history_line_current (entry);
 
-  if (_rl_enable_bracketed_paste && ((flags & SF_PATTERN) == 0) && ind > 0 && ind < rl_end)
+  if (_rl_enable_active_region && ((flags & SF_PATTERN) == 0) && ind > 0 && ind < rl_end)
     {
       rl_point = ind;
       rl_mark = ind + strlen (string);

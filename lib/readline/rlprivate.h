@@ -312,6 +312,8 @@ extern int _rl_isearch_cleanup PARAMS((_rl_search_cxt *, int));
 extern int _rl_search_getchar PARAMS((_rl_search_cxt *));
 
 /* kill.c */
+#define BRACKETED_PASTE_DEFAULT	1
+
 #define BRACK_PASTE_PREF	"\033[200~"
 #define BRACK_PASTE_SUFF	"\033[201~"
 
@@ -532,6 +534,7 @@ extern int _rl_revert_all_at_newline;
 extern int _rl_echo_control_chars;
 extern int _rl_show_mode_in_prompt;
 extern int _rl_enable_bracketed_paste;
+extern int _rl_enable_active_region;
 extern char *_rl_comment_begin;
 extern unsigned char _rl_parsing_conditionalized_out;
 extern Keymap _rl_keymap;

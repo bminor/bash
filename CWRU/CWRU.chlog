@@ -9095,3 +9095,35 @@ builtins/trap.def
 	  (sigint_sighandler) instead of the default non-interactive one.
 	  Fixes bug reported by Daniel Farina <daniel@fdr.io> with a hint
 	  from felix <felix@f-hauri.ch>
+
+				   10/26
+				   -----
+
+lib/readline/{readline.c,rlprivate.h}
+	- _rl_enable_active_region: new variable, mirrors value of
+	  _rl_enable_bracketed_paste
+	- BRACKETED_PASTE_DEFAULT: new define, default initial value of
+	  _rl_enable_bracketed_paste and _rl_enable_active_region
+
+lib/readline/bind.c
+	- hack_special_boolean_var: make sure that _rl_enable_active_region
+	  is set appropriately when "enable-bracketed-paste" is modified
+
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: make sure that we activate the mark on finding
+	  the search string only if _rl_enable_active_region is non-zero, even
+	  if bracketed paste is enabled
+
+lib/readline/search.c
+	- noninc_dosearch: make sure that we activate the mark on finding
+	  the search string only if _rl_enable_active_region is non-zero, even
+	  if bracketed paste is enabled
+
+lib/readline/kill.c
+	- rl_bracketed_paste_begin: make sure we activate the mark only if
+	  _rl_enable_active_region is enabled
+
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: the requirement for number of available unread
+	  characters (bytes) to trigger the bracketed paste test is now
+	  BRACK_PASTE_SLEN-1, like for non-incremental searches

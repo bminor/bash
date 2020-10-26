@@ -729,7 +729,8 @@ rl_bracketed_paste_begin (int count, int key)
   buf = _rl_bracketed_text (&len);
   rl_mark = rl_point;
   retval = rl_insert_text (buf) == len ? 0 : 1;
-  rl_activate_mark ();
+  if (_rl_enable_active_region)
+    rl_activate_mark ();
 
   xfree (buf);
   return (retval);
