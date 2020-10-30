@@ -1,3 +1,27 @@
+This document details the changes between this version, bash-5.1-rc2, and
+the previous version, bash-5.1-beta.
+
+1. Changes to Bash
+
+a. Process substitutions started from an interactive shell no longer have their
+   standard input implicitly redirected from /dev/null.
+
+b. Fixed an issue with setting the SIGINT trap handler in an interactive shell
+   when temporarily running $PROMPT_COMMAND non-interactively.
+
+2. Changes to Readline
+
+a. Terminals that are named "dumb" or unknown do not enable bracketed paste
+   by default.
+
+b. Ensure that disabling bracketed paste turns off highlighting the incremental
+   search string when the search is successful.
+
+3. New Features in Bash
+
+4. New Features in Readline
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-5.1-rc1, and
 the previous version, bash-5.1-beta.
 
@@ -579,7 +603,7 @@ f. New active mark and face feature: when enabled, it will highlight the text
 
 g. Readline sets the mark in several additional commands.
 
-h. Bracketed paste mode is enabled by default (for now).
+h. Bracketed paste mode is enabled by default.
 
 i. Readline tries to take advantage of the more regular structure of UTF-8
    characters to identify the beginning and end of characters when moving

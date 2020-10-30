@@ -312,7 +312,9 @@ extern int _rl_isearch_cleanup PARAMS((_rl_search_cxt *, int));
 extern int _rl_search_getchar PARAMS((_rl_search_cxt *));
 
 /* kill.c */
-#define BRACKETED_PASTE_DEFAULT	1
+#ifndef BRACKETED_PASTE_DEFAULT
+#  define BRACKETED_PASTE_DEFAULT	1	/* XXX - for now */
+#endif
 
 #define BRACK_PASTE_PREF	"\033[200~"
 #define BRACK_PASTE_SUFF	"\033[201~"
