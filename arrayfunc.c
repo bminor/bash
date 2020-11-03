@@ -1191,7 +1191,7 @@ array_expand_index (var, s, len, flags)
   exp = (char *)xmalloc (len);
   strncpy (exp, s, len - 1);
   exp[len - 1] = '\0';
-#if 0	/* TAG: maybe bash-5.1 */
+#if 0	/* TAG: maybe bash-5.2 */
   if ((flags & AV_NOEXPAND) == 0)
     t = expand_arith_string (exp, Q_DOUBLE_QUOTES|Q_ARITH|Q_ARRAYSUB);	/* XXX - Q_ARRAYSUB for future use */
   else

@@ -357,7 +357,7 @@ _rl_isearch_dispatch (_rl_search_cxt *cxt, int c)
 
   /* XXX - experimental code to allow users to bracketed-paste into the search
      string even when ESC is one of the isearch-terminators. Not perfect yet. */
-  if (_rl_enable_bracketed_paste && c == ESC && strchr (cxt->search_terminators, c) && (n = _rl_nchars_available ()) > (2*BRACK_PASTE_SLEN-1))
+  if (_rl_enable_bracketed_paste && c == ESC && strchr (cxt->search_terminators, c) && (n = _rl_nchars_available ()) > (BRACK_PASTE_SLEN-1))
     {
       j = _rl_read_bracketed_paste_prefix (c);
       if (j == 1)
@@ -418,9 +418,11 @@ add_character:
     {
       /* If we have a multibyte character, see if it's bound to something that
 	 affects the search. */
-      if (cxt->mb[1])
+#if defined (HANDLE_MULTIBYTE)
+      if (MB_CUR_MAX > 1 && rl_byte_oriented == 0 && cxt->mb[1])
 	f = rl_function_of_keyseq (cxt->mb, cxt->keymap, (int *)NULL);
       else
+#endif
 	{
 	  f = cxt->keymap[c].function;
 	  if (f == rl_do_lowercase_version)
@@ -680,7 +682,8 @@ opcode_dispatch:
 	  free (paste);
 	  break;
 	}
-      rl_activate_mark ();
+      if (_rl_enable_active_region)
+	rl_activate_mark ();
       if (cxt->search_string_index + pastelen + 1 >= cxt->search_string_size)
 	{
 	  cxt->search_string_size += pastelen + 2;
@@ -805,7 +808,8 @@ opcode_dispatch:
     {
       cxt->prev_line_found = cxt->lines[cxt->history_pos];
       rl_replace_line (cxt->lines[cxt->history_pos], 0);
-      rl_activate_mark ();	
+      if (_rl_enable_active_region)
+	rl_activate_mark ();	
       rl_point = cxt->sline_index;
       if (rl_mark_active_p () && cxt->search_string_index > 0)
 	rl_mark = rl_point + cxt->search_string_index;

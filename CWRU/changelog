@@ -9052,4 +9052,104 @@ examples/loadables/asort.c
 				   10/1
 				   ----
 
-[bash-5.1-beta frozen]
+[bash-5.1-rc1 frozen]
+
+				   10/7
+				   ----
+subst.c
+	- process_substitute: try it without setting the stdin for a process
+	  substitution started from an interactive shell to /dev/null. We will
+	  have to see if this causes problems like those reported back in
+	  9/2019 by Grisha Levit. From a report by Hyunho Cho <mug896@gmail.com>
+
+lib/readline/terminal.c
+	- _rl_init_terminal_io: if the terminal is unknown, disable bracketed
+	  paste on the assumption it can't handle the enable/disable escape
+	  sequences
+
+				   10/8
+				   ----
+lib/readline/terminal.c
+	- _rl_init_terminal_io: if the terminal name is "dumb", disable
+	  bracketed paste mode. Suggested by
+	  Andreas Schwab <schwab@linux-m68k.org>
+
+				   10/13
+				   -----
+trap.[ch]
+	- set_trap_state: new function to allow other signal handlers to set
+	  the internal state that trap_handler would set to note that the
+	  shell received a trapped signal. Used by sigint_sighandler().
+
+sig.c
+	- sigint_sighandler: call set_trap_state to set the pending trap state
+	  for SIGINT if trap_handler is not called. Needed because
+	  throw_to_top_level now checks whether a signal is pending before
+	  running the trap (change from 4/2020)
+
+builtins/trap.def
+	- trap_builtin: if the shell is interactive (interactive_shell != 0)
+	  but running something like PROMPT_COMMAND that sets
+	  parse_and_execute_level > 0 but interactive == 0, make sure to set
+	  the signal handler to the default interactive shell SIGINT handler
+	  (sigint_sighandler) instead of the default non-interactive one.
+	  Fixes bug reported by Daniel Farina <daniel@fdr.io> with a hint
+	  from felix <felix@f-hauri.ch>
+
+				   10/26
+				   -----
+
+lib/readline/{readline.c,rlprivate.h}
+	- _rl_enable_active_region: new variable, mirrors value of
+	  _rl_enable_bracketed_paste
+	- BRACKETED_PASTE_DEFAULT: new define, default initial value of
+	  _rl_enable_bracketed_paste and _rl_enable_active_region
+
+lib/readline/bind.c
+	- hack_special_boolean_var: make sure that _rl_enable_active_region
+	  is set appropriately when "enable-bracketed-paste" is modified
+
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: make sure that we activate the mark on finding
+	  the search string only if _rl_enable_active_region is non-zero, even
+	  if bracketed paste is enabled
+
+lib/readline/search.c
+	- noninc_dosearch: make sure that we activate the mark on finding
+	  the search string only if _rl_enable_active_region is non-zero, even
+	  if bracketed paste is enabled
+
+lib/readline/kill.c
+	- rl_bracketed_paste_begin: make sure we activate the mark only if
+	  _rl_enable_active_region is enabled
+
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: the requirement for number of available unread
+	  characters (bytes) to trigger the bracketed paste test is now
+	  BRACK_PASTE_SLEN-1, like for non-incremental searches
+
+				   10/29
+				   -----
+
+doc/bash.1,lib/readline/rluser.texi
+	- enable-bracketed-paste: change to note the the current default is `On'
+
+				   10/30
+				   -----
+lib/glob/glob.c
+	- wdequote_pathname: if wcsrtombs fails, make sure to check whether it
+	  leaves wpathname set to a non-NULL value before checking whether or
+	  not *wpathname is a null character (indicating an incomplete
+	  conversion). Fixes https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=972286
+	  with an assist from Bernhard Übelacker <bernhardu@mailbox.org>
+
+				   11/1
+				   ----
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: when checking whether the current character is
+	  one of the isearch `opcodes', only check the multibyte character
+	  member of CXT if we're currently running in a multibyte locale. Don't
+	  assume that other parts of the code will set mb[0] = c and mb[1] = 0.
+	  Report from Detlef Vollmann <dv@vollmann.ch>
+
+[bash-5.1-rc2 frozen]

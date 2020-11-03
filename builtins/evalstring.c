@@ -88,6 +88,11 @@ int
 should_suppress_fork (command)
      COMMAND *command;
 {
+#if 0 /* TAG: bash-5.2 */
+  int subshell;
+
+  subshell = subshell_environment & SUBSHELL_PROCSUB;	/* salt to taste */
+#endif
   return (startup_state == 2 && parse_and_execute_level == 1 &&
 	  running_trap == 0 &&
 	  *bash_input.location.string == '\0' &&
@@ -96,7 +101,11 @@ should_suppress_fork (command)
 	  signal_is_trapped (EXIT_TRAP) == 0 &&
 	  signal_is_trapped (ERROR_TRAP) == 0 &&
 	  any_signals_trapped () < 0 &&
+#if 0 /* TAG: bash-5.2 */
+	  (subshell || (command->redirects == 0 && command->value.Simple->redirects == 0)) &&
+#else
 	  command->redirects == 0 && command->value.Simple->redirects == 0 &&
+#endif
 	  ((command->flags & CMD_TIME_PIPELINE) == 0) &&
 	  ((command->flags & CMD_INVERT_RETURN) == 0));
 }

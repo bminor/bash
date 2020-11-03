@@ -321,7 +321,8 @@ int _rl_show_mode_in_prompt = 0;
 /* Non-zero means to attempt to put the terminal in `bracketed paste mode',
    where it will prefix pasted text with an escape sequence and send
    another to mark the end of the paste. */
-int _rl_enable_bracketed_paste = 1;	/* XXX - for now */
+int _rl_enable_bracketed_paste = BRACKETED_PASTE_DEFAULT;
+int _rl_enable_active_region = BRACKETED_PASTE_DEFAULT;
 
 /* **************************************************************** */
 /*								    */

@@ -3605,7 +3605,7 @@ expand_arith_string (string, quoted)
       /* This is expanded version of expand_string_internal as it's called by
 	 expand_string_leave_quoted  */
       td.flags = W_NOPROCSUB|W_NOTILDE;	/* don't want process substitution or tilde expansion */
-#if 0	/* TAG:bash-5.1 */
+#if 0	/* TAG: bash-5.2 */
       if (quoted & Q_ARRAYSUB)
 	td.flags |= W_NOCOMSUB;
 #endif
@@ -5939,9 +5939,11 @@ process_substitute (string, open_for_read_in_child)
   pid = make_child ((char *)NULL, FORK_ASYNC);
   if (pid == 0)
     {
+#if 0
       int old_interactive;
 
       old_interactive = interactive;
+#endif
       /* The currently-executing shell is not interactive */
       interactive = 0;
 
@@ -5951,8 +5953,11 @@ process_substitute (string, open_for_read_in_child)
       restore_original_signals ();	/* XXX - what about special builtins? bash-4.2 */
       QUIT;	/* catch any interrupts we got post-fork */
       setup_async_signals ();
+#if 0
       if (open_for_read_in_child == 0 && old_interactive && (bash_input.type == st_stdin || bash_input.type == st_stream))
 	async_redirect_stdin ();
+#endif
+
       subshell_environment |= SUBSHELL_COMSUB|SUBSHELL_PROCSUB|SUBSHELL_ASYNC;
 
       /* We don't inherit the verbose option for command substitutions now, so
@@ -6108,6 +6113,11 @@ process_substitute (string, open_for_read_in_child)
   expanding_redir = 0;
 
   remove_quoted_escapes (string);
+
+#if 0 /* TAG: bash-5.2 */
+  startup_state = 2;	/* see if we can avoid a fork */
+  parse_and_execute_level = 0;
+#endif
 
   /* Give process substitution a place to jump back to on failure,
      so we don't go back up to main (). */
@@ -7486,7 +7496,7 @@ verify_substring_values (v, value, substr, vtype, e1p, e2p)
 	 from end of positional parameters? */
 #if 1
       if ((vtype == VT_ARRAYVAR || vtype == VT_POSPARMS) && *e2p < 0)
-#else /* XXX - TAG: bash-5.1 */
+#else /* TAG: bash-5.2 */
       if (vtype == VT_ARRAYVAR && *e2p < 0)
 #endif
 	{
@@ -7943,7 +7953,11 @@ parameter_brace_transform (varname, value, ind, xform, rtype, quoted, pflags, fl
   if (valid_parameter_transform (xform) == 0)
     {
       this_command_name = oname;
+#if 0 /* TAG: bash-5.2 Martin Schulte <gnu@schrader-schulte.de> 10/2020 */
+      return (interactive_shell ? &expand_param_error : &expand_param_fatal);
+#else
       return &expand_param_error;
+#endif
     }
 
   starsub = vtype & VT_STARSUB;

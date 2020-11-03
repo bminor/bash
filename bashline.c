@@ -268,7 +268,7 @@ static int bash_vi_complete PARAMS((int, int));
 #endif
 static int emacs_edit_and_execute_command PARAMS((int, int));
 
-/* Non-zero once initalize_readline () has been called. */
+/* Non-zero once initialize_readline () has been called. */
 int bash_readline_initialized = 0;
 
 /* If non-zero, we do hostname completion, breaking words at `@' and

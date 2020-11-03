@@ -484,7 +484,7 @@ wdequote_pathname (pathname)
   /* Convert the wide character string into unibyte character set. */
   memset (&ps, '\0', sizeof(mbstate_t));
   n = wcsrtombs(pathname, (const wchar_t **)&wpathname, len, &ps);
-  if (n == (size_t)-1 || *wpathname != 0)	/* what? now you tell me? */
+  if (n == (size_t)-1 || (wpathname && *wpathname != 0))	/* what? now you tell me? */
     {
       wpathname = orig_wpathname;
       memset (&ps, '\0', sizeof(mbstate_t));

@@ -211,7 +211,7 @@ trap_builtin (list)
 			if (interactive)
 			  set_signal_handler (SIGINT, sigint_sighandler);
 			/* special cases for interactive == 0 */
-			else if (interactive_shell && (sourcelevel||running_trap))
+			else if (interactive_shell && (sourcelevel||running_trap||parse_and_execute_level))
 			  set_signal_handler (SIGINT, sigint_sighandler);
 			else
 			  set_signal_handler (SIGINT, termsig_sighandler);
