@@ -9133,3 +9133,23 @@ lib/readline/isearch.c
 
 doc/bash.1,lib/readline/rluser.texi
 	- enable-bracketed-paste: change to note the the current default is `On'
+
+				   10/30
+				   -----
+lib/glob/glob.c
+	- wdequote_pathname: if wcsrtombs fails, make sure to check whether it
+	  leaves wpathname set to a non-NULL value before checking whether or
+	  not *wpathname is a null character (indicating an incomplete
+	  conversion). Fixes https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=972286
+	  with an assist from Bernhard Übelacker <bernhardu@mailbox.org>
+
+				   11/1
+				   ----
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: when checking whether the current character is
+	  one of the isearch `opcodes', only check the multibyte character
+	  member of CXT if we're currently running in a multibyte locale. Don't
+	  assume that other parts of the code will set mb[0] = c and mb[1] = 0.
+	  Report from Detlef Vollmann <dv@vollmann.ch>
+
+[bash-5.1-rc2 frozen]
