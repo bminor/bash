@@ -33,8 +33,8 @@ typedef struct array {
 	enum atype	type;
 	arrayind_t	max_index;
 	int		num_elements;
-	struct array_element *lastref;
 	struct array_element *head;
+	struct array_element *lastref;
 } ARRAY;
 
 typedef struct array_element {

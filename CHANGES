@@ -1,5 +1,23 @@
+This document details the changes between this version, bash-5.1-rc3, and
+the previous version, bash-5.1-rc2.
+
+1. Changes to Bash
+
+a. The `assoc_expand_once' option now affects the evaluation of the -v primary
+   to test and the [[ compound command.
+
+2. Changes to Readline
+
+a. Fixed a bug that could cause point to be set beyond the end of the line
+   buffer when aborting an incremental search.
+
+3. New Features in Bash
+
+4. New Features in Readline
+
+------------------------------------------------------------------------------
 This document details the changes between this version, bash-5.1-rc2, and
-the previous version, bash-5.1-beta.
+the previous version, bash-5.1-rc1.
 
 1. Changes to Bash
 
@@ -599,7 +617,8 @@ e. rl-clear-display: new bindable command that clears the screen and, if
 
 f. New active mark and face feature: when enabled, it will highlight the text
    inserted by a bracketed paste (the `active region') and the text found by
-   incremental and non-incremental history searches.
+   incremental and non-incremental history searches. This is tied to bracketed
+   paste and can be disabled by turning off bracketed paste.
 
 g. Readline sets the mark in several additional commands.
 

@@ -121,3 +121,10 @@ declare myarray["foo[bar"]=bleh
 myarray["foo"]=bleh
 
 declare -p myarray
+
+key='$(date >&2)'
+declare -A aa
+aa[$key]=foo
+echo "${aa[$key]}"
+
+[[ -v aa[$key] ]] || echo bad assoc expansion

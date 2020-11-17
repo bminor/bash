@@ -9153,3 +9153,19 @@ lib/readline/isearch.c
 	  Report from Detlef Vollmann <dv@vollmann.ch>
 
 [bash-5.1-rc2 frozen]
+
+				   11/10
+				   -----
+lib/readline/isearch.c
+	- _rl_isearch_dispatch: if we are aborting the search, make sure to
+	  call _rl_fix_point and to make sure the point and mark are less
+	  than the new rl_end, in case they got out of sync. Report and fix
+	  from Tillmann Osswald <tosswald@ernw.de>
+
+test.c
+	- unary_test: assume the argument has already been expanded (the code
+	  paths for [[ and [ expand it) and add AV_NOEXPAND to the flags passed
+	  to array_value if assoc_expand_once is enabled. Prompted by a report
+	  from Greg Wooledge <wooledg@eeg.ccf.org>
+
+[bash-5.1-rc3 frozen]

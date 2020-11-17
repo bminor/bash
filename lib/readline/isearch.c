@@ -619,6 +619,7 @@ opcode_dispatch:
       rl_restore_prompt();
       rl_clear_message ();
 
+      _rl_fix_point (1);	/* in case save_line and save_point are out of sync */
       return -1;
 
     case -5:	/* C-W */

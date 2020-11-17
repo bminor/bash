@@ -627,8 +627,11 @@ unary_test (op, arg)
       if (valid_array_reference (arg, 0))
 	{
 	  char *t;
-	  int rtype, ret;
-	  t = array_value (arg, 0, 0, &rtype, (arrayind_t *)0);
+	  int rtype, ret, flags;
+
+	  /* Let's assume that this has already been expanded once. */
+	  flags = assoc_expand_once ? AV_NOEXPAND : 0;
+	  t = array_value (arg, 0, flags, &rtype, (arrayind_t *)0);
 	  ret = t ? TRUE : FALSE;
 	  if (rtype > 0)	/* subscript is * or @ */
 	    free (t);
